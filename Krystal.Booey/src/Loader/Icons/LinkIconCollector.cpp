@@ -71,7 +71,7 @@ namespace krys::boo
       {
         continue;
       }
-      auto url = document.CompleteURL(*href);
+      auto url = document.CompleteUrl(*href);
       if (!url.ProtocolIsInHTTPFamily() && !url.ProtocolIsData())
       {
         continue;

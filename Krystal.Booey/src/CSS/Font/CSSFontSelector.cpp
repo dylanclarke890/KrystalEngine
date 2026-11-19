@@ -295,7 +295,7 @@ namespace krys::boo::css
     }
   }
 
-  void CSSFontSelector::OpportunisticallyStartFontDataURLLoading(const FontCascadeDescription &description,
+  void CSSFontSelector::OpportunisticallyStartFontDataUrlLoading(const FontCascadeDescription &description,
                                                                  const StringAtom &familyName) noexcept
   {
     auto *segmentedFontFace = _cssFontFaceSet->GetFontFace(description.GetFontSelectionRequest(), familyName);
@@ -311,7 +311,7 @@ namespace krys::boo::css
 
     for (auto &face : segmentedFontFace->ConstituentFaces())
     {
-      face->OpportunisticallyStartFontDataURLLoading();
+      face->OpportunisticallyStartFontDataUrlLoading();
     }
   }
 

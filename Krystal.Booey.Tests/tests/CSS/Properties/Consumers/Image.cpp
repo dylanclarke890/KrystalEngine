@@ -26,7 +26,7 @@ namespace krys::boo::css::parse_property::tests
 
     ParserContext Context()
     {
-      return ParserContext {ParserMode::HTMLStandard, net::URL(u8"https://example.com/dir/")};
+      return ParserContext {ParserMode::HTMLStandard, net::Url(u8"https://example.com/dir/")};
     }
   }
 
@@ -147,7 +147,7 @@ namespace krys::boo::css::parse_property::tests
     CHECK(ConsumeToText(u8"\"a.png\"", Image, context) == "<null>");
     CHECK(ConsumeToText(u8"none", Image, context) == "<null>");
     CHECK(ConsumeToText(u8"none", ImageOrNone, context) == "none");
-    CHECK(ConsumeToText(u8"\"a.png\"", ImageAllowing<AllowedImageType::RawStringAsURL>, context)
+    CHECK(ConsumeToText(u8"\"a.png\"", ImageAllowing<AllowedImageType::RawStringAsUrl>, context)
           == "url(\"a.png\")");
 
     CHECK(ConsumeToText(u8"image-set(\"a.png\" 1x, url(b.png) 2x)", Image, context)
@@ -168,7 +168,7 @@ namespace krys::boo::css::parse_property::tests
   TEST_CASE("parse_property(ConsumeImage allowed types)", "[CSS][Properties][Consumers]")
   {
     auto context = Context();
-    constexpr auto urlOnly = ImageAllowing<AllowedImageType::URLFunction>;
+    constexpr auto urlOnly = ImageAllowing<AllowedImageType::UrlFunction>;
 
     CHECK(ConsumeToText(u8"url(a.png)", urlOnly, context) == "url(\"a.png\")");
     CHECK(ConsumeToText(u8"linear-gradient(red, blue)", urlOnly, context) == "<null>");

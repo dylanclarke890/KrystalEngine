@@ -365,12 +365,12 @@ namespace krys::boo
     result.append(source.substr(positionAfterLastEntity));
   }
 
-  MarkupAccumulator::MarkupAccumulator(List<Ref<Node>> *nodes, ResolveURLs resolveURLs,
+  MarkupAccumulator::MarkupAccumulator(List<Ref<Node>> *nodes, ResolveUrls resolveUrls,
                                        SerializationSyntax serializationSyntax,
                                        SerializeShadowRoots serializeShadowRoots,
                                        List<Ref<ShadowRoot>> &&explicitShadowRoots,
                                        RequireWellFormed requireWellFormed) noexcept
-      : _nodes(nodes), _resolveURLs(resolveURLs), _serializationSyntax(serializationSyntax),
+      : _nodes(nodes), _resolveUrls(resolveUrls), _serializationSyntax(serializationSyntax),
         _serializeShadowRoots(serializeShadowRoots), _explicitShadowRoots(krys::move(explicitShadowRoots)),
         _requireWellFormed(requireWellFormed)
   {
@@ -579,11 +579,11 @@ namespace krys::boo
     } while (current != &targetNode);
   }
 
-  // FIXME: Resolving URL attributes against the document's base URL (ResolveURLs::Yes and its privacy
+  // FIXME: Resolving URL attributes against the document's base URL (ResolveUrls::Yes and its privacy
   // variants), with URL attributes.
-  utf8_string MarkupAccumulator::ResolveURLIfNeeded(const Element &, utf8_stringview urlString) const noexcept
+  utf8_string MarkupAccumulator::ResolveUrlIfNeeded(const Element &, utf8_stringview urlString) const noexcept
   {
-    (void)_resolveURLs;
+    (void)_resolveUrls;
     return utf8_string(urlString);
   }
 
@@ -930,7 +930,7 @@ namespace krys::boo
     return name;
   }
 
-  // FIXME: Resolving URL attributes (isURLAttribute) when ResolveURLs asks for it, with URL attributes.
+  // FIXME: Resolving URL attributes (isURLAttribute) when ResolveUrls asks for it, with URL attributes.
   bool MarkupAccumulator::AppendAttribute(utf8_string &result, const Element &element, const Attr &attribute,
                                           Namespaces *namespaces) noexcept
   {

@@ -387,8 +387,8 @@ namespace krys::boo::tests
     REQUIRE(fixture.Client->Starts == 1);
     CHECK(fixture.Client->LastItem->SourceAction == DragSourceAction::Link);
     CHECK(fixture.Client->LastItem->Url.String() == u8"https://example.com/x");
-    CHECK(fixture.Client->Data.HasURL());
-    CHECK(fixture.Client->Data.GetURL().String() == u8"https://example.com/x");
+    CHECK(fixture.Client->Data.HasUrl());
+    CHECK(fixture.Client->Data.GetUrl().String() == u8"https://example.com/x");
     CHECK(fixture.Client->Data.Markup() == u8"<a href=\"https://example.com/x\">example link</a>");
     CHECK(fixture.Client->SourceActions == List<DragSourceAction> {DragSourceAction::Link});
     fixture.End(5, 60, {});
@@ -598,7 +598,7 @@ namespace krys::boo::tests
                    "[Page][DragController]")
   {
     DragFixture fixture(u8"<div id=c>static</div><div id=e contenteditable>editable</div>");
-    fixture.Client->Data.SetURL(net::URL(u8"https://example.com/"), u8"Example");
+    fixture.Client->Data.SetUrl(net::Url(u8"https://example.com/"), u8"Example");
     fixture.Client->SourceMask = AnyDragOperation();
 
     // Over content that isn't editable, nothing takes it: Booey doesn't load what's dropped.

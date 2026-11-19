@@ -14,7 +14,7 @@ Status: reviewed (2026-11-01)
 #### [2.4.1 Terminology](https://html.spec.whatwg.org/#terminology-2)
 
 Status: reviewed (2026-11-01)
-> Matching about:blank and about:srcdoc is `net::URL::IsAboutBlank` and `IsAboutSrcDoc`. Fixed: `IsAboutSrcDoc` matched a URL with a query (DIFFERENCES.md, from upstream). The valid URL definitions are author conformance.
+> Matching about:blank and about:srcdoc is `net::Url::IsAboutBlank` and `IsAboutSrcDoc`. Fixed: `IsAboutSrcDoc` matched a URL with a query (DIFFERENCES.md, from upstream). The valid URL definitions are author conformance.
 <!-- definitions: about:legacy-compat about:html-kind about:srcdoc -->
 
 - [x] [valid non-empty URL](https://html.spec.whatwg.org/#valid-non-empty-url) — A string is a valid non-empty URL if it is a valid URL string but it is not the empty string.
@@ -33,7 +33,7 @@ Status: reviewed (2026-11-01)
 #### [2.4.2 Parsing URLs](https://html.spec.whatwg.org/#resolving-urls)
 
 Status: reviewed (2026-11-01)
-> `Document::CompleteURL`, which is both parsing and encoding-parsing a URL, since documents and the URL parser are UTF-8 only. Encoding-parsing and serialising is `CompleteURL(...).String()` at its callers, reviewed with them.
+> `Document::CompleteUrl`, which is both parsing and encoding-parsing a URL, since documents and the URL parser are UTF-8 only. Encoding-parsing and serialising is `CompleteUrl(...).String()` at its callers, reviewed with them.
 
 - [x] [parse a URL](https://html.spec.whatwg.org/#parse-a-url) — To parse a URL, given a string url, relative to a Document object or environment settings object environment, run these steps. They return failure or a URL.
   - 1. Let baseURL be environment's base URL, if environment is a Document object; otherwise environment's API base URL.
@@ -54,7 +54,7 @@ Status: reviewed (2026-11-01)
 #### [2.4.3 Document base URLs](https://html.spec.whatwg.org/#document-base-urls)
 
 Status: reviewed (2026-11-01)
-> `Document::UpdateBaseURL` keeps the document base URL and responds to base URL changes; `ProcessBaseElement` finds the first base element's frozen base URL (reviewed with 4.2.3); `FallbackBaseURL`; `SetURL`.
+> `Document::UpdateBaseUrl` keeps the document base URL and responds to base URL changes; `ProcessBaseElement` finds the first base element's frozen base URL (reviewed with 4.2.3); `FallbackBaseUrl`; `SetUrl`.
 > Documents have no base URL override or about base URL (DIFFERENCES.md); responding to base URL changes has nothing to update (no visited link store, speculation rules or URL user interface).
 
 - [x] [document base URL](https://html.spec.whatwg.org/#document-base-url) — The document base URL of a Document document is the URL record obtained by running these steps:

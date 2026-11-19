@@ -140,7 +140,7 @@ namespace krys::boo::html::tests
 
     // The area is the link, and the image the inner non-shared node.
     auto result = fixture.HitTest(10, 10);
-    CHECK(result.URLElement() == &fixture.ById(u8"rect"));
+    CHECK(result.UrlElement() == &fixture.ById(u8"rect"));
     CHECK(result.InnerNonSharedNode() == &image);
 
     SECTION("a default area takes what the others don't")

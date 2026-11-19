@@ -215,7 +215,7 @@ namespace krys::boo::dom::tests
       REQUIRE(Is<HTMLDocument>(documentCopy));
       CHECK(&documentCopy.NodeDocument() == &documentCopy);
       CHECK(documentCopy.ContentType() == source->ContentType());
-      CHECK(documentCopy.URL() == source->URL());
+      CHECK(documentCopy.Url() == source->Url());
       CHECK(documentCopy.CompatMode() == source->CompatMode());
       CHECK(documentCopy.IsEqualNode(source.get()));
       CHECK(&documentCopy.DocumentElement()->NodeDocument() == &documentCopy);

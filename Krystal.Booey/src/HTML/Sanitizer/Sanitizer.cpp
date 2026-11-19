@@ -513,20 +513,20 @@ namespace krys::boo::html
     return true;
   }
 
-  bool Sanitizer::SetJavascriptURLs(bool allow) noexcept
+  bool Sanitizer::SetJavascriptUrls(bool allow) noexcept
   {
     // 1. Let configuration be this's configuration.
     // 2. Assert: configuration is valid.
     krys_debug_assert(SanitizerAlgorithms::IsValid(_configuration));
 
     // 3. If configuration["javascriptURLs"] is allow, then return false.
-    if (_configuration.JavascriptURLs == allow)
+    if (_configuration.JavascriptUrls == allow)
     {
       return false;
     }
 
     // 4.-5. Set configuration["javascriptURLs"] to allow. Return true.
-    _configuration.JavascriptURLs = allow;
+    _configuration.JavascriptUrls = allow;
     return true;
   }
 

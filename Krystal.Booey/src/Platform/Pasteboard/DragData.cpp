@@ -86,25 +86,25 @@ namespace krys::boo
 
   bool DragData::ContainsCompatibleContent(DraggingPurpose) const noexcept
   {
-    return ContainsPlainText() || ContainsURL() || _platformDragData->HasMarkup() || ContainsColor()
+    return ContainsPlainText() || ContainsUrl() || _platformDragData->HasMarkup() || ContainsColor()
            || ContainsFiles();
   }
 
-  bool DragData::ContainsURL(FilenameConversionPolicy filenamePolicy) const noexcept
+  bool DragData::ContainsUrl(FilenameConversionPolicy filenamePolicy) const noexcept
   {
-    return !AsURL(filenamePolicy).empty();
+    return !AsUrl(filenamePolicy).empty();
   }
 
-  utf8_string DragData::AsURL(FilenameConversionPolicy filenamePolicy, utf8_string *title) const noexcept
+  utf8_string DragData::AsUrl(FilenameConversionPolicy filenamePolicy, utf8_string *title) const noexcept
   {
-    if (!_platformDragData->HasURL())
+    if (!_platformDragData->HasUrl())
     {
       return {};
     }
 
     if (filenamePolicy != ConvertFilenames)
     {
-      if (_platformDragData->GetURL().ProtocolIsFile())
+      if (_platformDragData->GetUrl().ProtocolIsFile())
       {
         return {};
       }
@@ -112,9 +112,9 @@ namespace krys::boo
 
     if (title)
     {
-      *title = _platformDragData->URLLabel();
+      *title = _platformDragData->UrlLabel();
     }
-    return utf8_string(_platformDragData->GetURL().String());
+    return utf8_string(_platformDragData->GetUrl().String());
   }
 
   bool DragData::ShouldMatchStyleOnDrop() noexcept

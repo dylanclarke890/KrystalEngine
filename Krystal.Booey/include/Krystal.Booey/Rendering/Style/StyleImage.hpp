@@ -101,7 +101,7 @@ namespace krys::boo
       return false;
     }
 
-    KRYS_NODISCARD virtual style::URL Url() const noexcept
+    KRYS_NODISCARD virtual style::Url Url() const noexcept
     {
       return {};
     }

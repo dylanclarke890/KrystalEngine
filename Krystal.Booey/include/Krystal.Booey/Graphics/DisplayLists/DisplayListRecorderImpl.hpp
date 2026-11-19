@@ -183,7 +183,7 @@ namespace krys::boo::display_list
 
     void EndPage() noexcept final;
 
-    void SetURLForRect(const net::URL &, const FloatRect &) noexcept final;
+    void SetUrlForRect(const net::Url &, const FloatRect &) noexcept final;
 
     // Appends a deferred placeholder command.
     // The function is called during the display list playback, drawDisplayList().

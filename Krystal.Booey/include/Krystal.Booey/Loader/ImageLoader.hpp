@@ -75,8 +75,8 @@ namespace krys::boo
     CachedResourceHandle<CachedImage> _image;
     Timer _derefElementTimer;
     RefPtr<boo::Element> _protectedElement;
-    DOMString _failedLoadURL;
-    DOMString _pendingURL;
+    DOMString _failedLoadUrl;
+    DOMString _pendingUrl;
     bool _hasPendingLoadEvent : 1 {false};
     bool _hasPendingErrorEvent : 1 {false};
     bool _imageComplete : 1 {true};
@@ -179,7 +179,7 @@ namespace krys::boo
 
     void ClearImageWithoutConsideringPendingLoadEvent() noexcept;
 
-    void ClearFailedLoadURL() noexcept;
+    void ClearFailedLoadUrl() noexcept;
 
     void TimerFired() noexcept;
 

@@ -18,7 +18,7 @@ namespace krys::boo::css::tests
 
     ParserContext ContextWithBase(utf8_stringview base)
     {
-      return ParserContext {ParserMode::HTMLStandard, net::URL {base}};
+      return ParserContext {ParserMode::HTMLStandard, net::Url {base}};
     }
   }
 
@@ -28,7 +28,7 @@ namespace krys::boo::css::tests
 
     SECTION("resolves against the base URL")
     {
-      auto url = CompleteURL(u8"../images/a.png", context);
+      auto url = CompleteUrl(u8"../images/a.png", context);
       REQUIRE(url);
       CHECK(S(url->Specified) == "../images/a.png");
       CHECK(S(url->Resolved.String()) == "https://example.com/images/a.png");
@@ -36,12 +36,12 @@ namespace krys::boo::css::tests
 
     SECTION("doesn't resolve empty or fragment-only URLs")
     {
-      auto empty = CompleteURL(u8"", context);
+      auto empty = CompleteUrl(u8"", context);
       REQUIRE(empty);
       CHECK_FALSE(empty->Resolved.IsNull());
       CHECK_FALSE(empty->Resolved.IsValid());
 
-      auto fragment = CompleteURL(u8"#target", context);
+      auto fragment = CompleteUrl(u8"#target", context);
       REQUIRE(fragment);
       CHECK(S(fragment->Resolved.String()) == "#target");
       CHECK_FALSE(fragment->Resolved.IsValid());
@@ -49,11 +49,11 @@ namespace krys::boo::css::tests
 
     SECTION("doesn't resolve against a null or about:blank base")
     {
-      auto withoutBase = CompleteURL(u8"a.png", ParserContext {ParserMode::HTMLStandard});
+      auto withoutBase = CompleteUrl(u8"a.png", ParserContext {ParserMode::HTMLStandard});
       REQUIRE(withoutBase);
       CHECK(withoutBase->Resolved.IsNull());
 
-      auto aboutBlank = CompleteURL(u8"a.png", ContextWithBase(u8"about:blank"));
+      auto aboutBlank = CompleteUrl(u8"a.png", ContextWithBase(u8"about:blank"));
       REQUIRE(aboutBlank);
       CHECK(aboutBlank->Resolved.IsNull());
     }
@@ -61,49 +61,49 @@ namespace krys::boo::css::tests
 
   TEST_CASE("CSSURL(None)", "[CSS][Primitives][URL]")
   {
-    CHECK(CSSURL::None().IsNone());
+    CHECK(CSSUrl::None().IsNone());
 
     // `url("")` isn't `none`.
-    auto empty = CompleteURL(u8"", ContextWithBase(u8"https://example.com/"));
+    auto empty = CompleteUrl(u8"", ContextWithBase(u8"https://example.com/"));
     REQUIRE(empty);
     CHECK_FALSE(empty->IsNone());
-    CHECK_FALSE(CompleteURL(u8"a.png", ParserContext {ParserMode::HTMLStandard}).value().IsNone());
+    CHECK_FALSE(CompleteUrl(u8"a.png", ParserContext {ParserMode::HTMLStandard}).value().IsNone());
   }
 
   TEST_CASE("CSSURL(Resolve)", "[CSS][Primitives][URL]")
   {
-    auto unresolved = *CompleteURL(u8"https://example.com/a.png", ParserContext {ParserMode::HTMLStandard});
+    auto unresolved = *CompleteUrl(u8"https://example.com/a.png", ParserContext {ParserMode::HTMLStandard});
     CHECK(unresolved.Resolved.IsNull());
     auto resolved = Resolve(krys::move(unresolved));
     CHECK(S(resolved.Resolved.String()) == "https://example.com/a.png");
 
     // Already resolved URLs are kept.
-    auto relative = *CompleteURL(u8"a.png", ContextWithBase(u8"https://example.com/dir/"));
+    auto relative = *CompleteUrl(u8"a.png", ContextWithBase(u8"https://example.com/dir/"));
     CHECK(S(Resolve(krys::move(relative)).Resolved.String()) == "https://example.com/dir/a.png");
   }
 
   TEST_CASE("CSSURL(MayDependOnBaseURL)", "[CSS][Primitives][URL]")
   {
     auto context = ContextWithBase(u8"https://example.com/");
-    CHECK(MayDependOnBaseURL(*CompleteURL(u8"a.png", context)));
-    CHECK_FALSE(MayDependOnBaseURL(*CompleteURL(u8"", context)));
-    CHECK_FALSE(MayDependOnBaseURL(*CompleteURL(u8"#target", context)));
-    CHECK_FALSE(MayDependOnBaseURL(*CompleteURL(u8"data:image/png;base64,AAAA", context)));
+    CHECK(MayDependOnBaseUrl(*CompleteUrl(u8"a.png", context)));
+    CHECK_FALSE(MayDependOnBaseUrl(*CompleteUrl(u8"", context)));
+    CHECK_FALSE(MayDependOnBaseUrl(*CompleteUrl(u8"#target", context)));
+    CHECK_FALSE(MayDependOnBaseUrl(*CompleteUrl(u8"data:image/png;base64,AAAA", context)));
   }
 
   TEST_CASE("CSSURL(Serialise)", "[CSS][Primitives][URL]")
   {
     const auto &context = DefaultSerialisationContext();
-    auto url = *CompleteURL(u8"images/a b.png", ContextWithBase(u8"https://example.com/"));
+    auto url = *CompleteUrl(u8"images/a b.png", ContextWithBase(u8"https://example.com/"));
 
     // The specified URL is serialised, as a string.
     CHECK(S(Serialise(context, url)) == "url(\"images/a b.png\")");
-    CHECK(S(Serialise(context, *CompleteURL(u8"say \"hi\"", ParserContext {ParserMode::HTMLStandard})))
+    CHECK(S(Serialise(context, *CompleteUrl(u8"say \"hi\"", ParserContext {ParserMode::HTMLStandard})))
           == "url(\"say \\\"hi\\\"\")");
 
-    url.Modifiers.CrossOrigin = URLCrossOriginFunction {.Parameters = {keywords::UseCredentials {}}};
-    url.Modifiers.Integrity = URLIntegrityFunction {.Parameters = u8"sha384-abc"};
-    url.Modifiers.ReferrerPolicy = URLReferrerPolicyFunction {.Parameters = {keywords::NoReferrer {}}};
+    url.Modifiers.CrossOrigin = UrlCrossOriginFunction {.Parameters = {keywords::UseCredentials {}}};
+    url.Modifiers.Integrity = UrlIntegrityFunction {.Parameters = u8"sha384-abc"};
+    url.Modifiers.ReferrerPolicy = UrlReferrerPolicyFunction {.Parameters = {keywords::NoReferrer {}}};
     CHECK(S(Serialise(context, url))
           == "url(\"images/a b.png\" cross-origin(use-credentials) integrity(\"sha384-abc\") "
              "referrer-policy(no-referrer))");
@@ -112,12 +112,12 @@ namespace krys::boo::css::tests
   TEST_CASE("CSSURL(equality, dependencies and visitation)", "[CSS][Primitives][URL]")
   {
     auto context = ContextWithBase(u8"https://example.com/");
-    auto a = *CompleteURL(u8"a.png", context);
-    CHECK(a == *CompleteURL(u8"a.png", context));
-    CHECK_FALSE(a == *CompleteURL(u8"b.png", context));
+    auto a = *CompleteUrl(u8"a.png", context);
+    CHECK(a == *CompleteUrl(u8"a.png", context));
+    CHECK_FALSE(a == *CompleteUrl(u8"b.png", context));
 
     auto withModifier = a;
-    withModifier.Modifiers.ReferrerPolicy = URLReferrerPolicyFunction {.Parameters = {keywords::Origin {}}};
+    withModifier.Modifiers.ReferrerPolicy = UrlReferrerPolicyFunction {.Parameters = {keywords::Origin {}}};
     CHECK_FALSE(a == withModifier);
 
     CHECK(CollectComputedStyleDependencies(a).Properties.empty());

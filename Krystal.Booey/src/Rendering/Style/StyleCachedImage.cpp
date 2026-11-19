@@ -34,13 +34,13 @@
 
 namespace krys::boo
 {
-  Ref<StyleCachedImage> StyleCachedImage::Create(style::URL &&url, Ref<css::ImageValue> &&cssValue,
+  Ref<StyleCachedImage> StyleCachedImage::Create(style::Url &&url, Ref<css::ImageValue> &&cssValue,
                                                  float scaleFactor) noexcept
   {
     return AdoptRef(*new StyleCachedImage(krys::move(url), krys::move(cssValue), scaleFactor));
   }
 
-  Ref<StyleCachedImage> StyleCachedImage::Create(const style::URL &url, const Ref<css::ImageValue> &cssValue,
+  Ref<StyleCachedImage> StyleCachedImage::Create(const style::Url &url, const Ref<css::ImageValue> &cssValue,
                                                  float scaleFactor) noexcept
   {
     return AdoptRef(*new StyleCachedImage(url, cssValue, scaleFactor));
@@ -56,7 +56,7 @@ namespace krys::boo
     return StyleCachedImage::Create(other._url, other._cssValue, scaleFactor);
   }
 
-  StyleCachedImage::StyleCachedImage(style::URL &&url, Ref<css::ImageValue> &&cssValue,
+  StyleCachedImage::StyleCachedImage(style::Url &&url, Ref<css::ImageValue> &&cssValue,
                                      float scaleFactor) noexcept
       : StyleImage {Type::CachedImage}, _url {krys::move(url)}, _cssValue {krys::move(cssValue)},
         _scaleFactor {scaleFactor}
@@ -68,7 +68,7 @@ namespace krys::boo
     }
   }
 
-  StyleCachedImage::StyleCachedImage(const style::URL &url, const Ref<css::ImageValue> &cssValue,
+  StyleCachedImage::StyleCachedImage(const style::Url &url, const Ref<css::ImageValue> &cssValue,
                                      float scaleFactor) noexcept
       : StyleImage {Type::CachedImage}, _url {url}, _cssValue {cssValue}, _scaleFactor {scaleFactor}
   {
@@ -108,7 +108,7 @@ namespace krys::boo
     return false;
   }
 
-  style::URL StyleCachedImage::Url() const noexcept
+  style::Url StyleCachedImage::Url() const noexcept
   {
     return _url;
   }

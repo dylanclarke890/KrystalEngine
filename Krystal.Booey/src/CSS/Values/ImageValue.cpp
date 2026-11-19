@@ -32,7 +32,7 @@ namespace krys::boo::css
   {
   }
 
-  ImageValue::ImageValue(CSSURL &&location, CSSOMStringAtom &&initiatorType) noexcept
+  ImageValue::ImageValue(CSSUrl &&location, CSSOMStringAtom &&initiatorType) noexcept
       : Value(ValueType::Image), _location(krys::move(location)), _initiatorType(krys::move(initiatorType))
   {
   }
@@ -44,27 +44,27 @@ namespace krys::boo::css
     return AdoptRef(*new ImageValue);
   }
 
-  Ref<ImageValue> ImageValue::Create(CSSURL location, CSSOMStringAtom initiatorType) noexcept
+  Ref<ImageValue> ImageValue::Create(CSSUrl location, CSSOMStringAtom initiatorType) noexcept
   {
     return AdoptRef(*new ImageValue(krys::move(location), krys::move(initiatorType)));
   }
 
-  Ref<ImageValue> ImageValue::Create(net::URL imageURL, CSSOMStringAtom initiatorType) noexcept
+  Ref<ImageValue> ImageValue::Create(net::Url imageUrl, CSSOMStringAtom initiatorType) noexcept
   {
-    CSSOMString specified {imageURL.String()};
+    CSSOMString specified {imageUrl.String()};
     return Create(
-      CSSURL {.Specified = krys::move(specified), .Resolved = krys::move(imageURL), .Modifiers = {}},
+      CSSUrl {.Specified = krys::move(specified), .Resolved = krys::move(imageUrl), .Modifiers = {}},
       krys::move(initiatorType));
   }
 
-  Ref<ImageValue> ImageValue::CopyForComputedStyle(const CSSURL &resolvedURL) const noexcept
+  Ref<ImageValue> ImageValue::CopyForComputedStyle(const CSSUrl &resolvedUrl) const noexcept
   {
-    if (resolvedURL == _location)
+    if (resolvedUrl == _location)
     {
       return ShareRef(const_cast<ImageValue &>(*this));
     }
 
-    auto result = Create(resolvedURL);
+    auto result = Create(resolvedUrl);
     result->_cachedImage = _cachedImage;
     result->_didRequestImage = _didRequestImage;
     result->_initiatorType = _initiatorType;
@@ -126,7 +126,7 @@ namespace krys::boo::css
 
   bool ImageValue::CustomMayDependOnBaseUrl() const noexcept
   {
-    return MayDependOnBaseURL(_location);
+    return css::MayDependOnBaseUrl(_location);
   }
 
   bool ImageValue::Equals(const ImageValue &other) const noexcept

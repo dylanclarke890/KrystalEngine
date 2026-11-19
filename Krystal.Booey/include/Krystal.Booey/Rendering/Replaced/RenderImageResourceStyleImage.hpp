@@ -52,7 +52,7 @@ namespace krys::boo
       return _styleImage->ErrorOccurred();
     }
 
-    void SetContainerContext(const IntSize &size, const net::URL &) noexcept override;
+    void SetContainerContext(const IntSize &size, const net::Url &) noexcept override;
 
     KRYS_NODISCARD bool ImageHasRelativeWidth() const noexcept override
     {

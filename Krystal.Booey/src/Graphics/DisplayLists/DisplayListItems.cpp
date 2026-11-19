@@ -446,12 +446,12 @@ namespace krys::boo::display_list
     context.EndPage();
   }
 
-  void SetURLForRect::Apply(GraphicsContext &context) const noexcept
+  void SetUrlForRect::Apply(GraphicsContext &context) const noexcept
   {
-    context.SetURLForRect(_link, _destRect);
+    context.SetUrlForRect(_link, _destRect);
   }
 
-  void SetURLForRect::Dump(TextStream &ts, EnumSet<AsTextFlag>) const noexcept
+  void SetUrlForRect::Dump(TextStream &ts, EnumSet<AsTextFlag>) const noexcept
   {
     ts.DumpProperty(u8"link", Link().String());
     ts.DumpProperty(u8"dest_rect", DestRect());

@@ -25,12 +25,12 @@
 
 #include "Krystal.Booey/DOM/Types/USVString.hpp"
 #include "Krystal.Booey/HTML/Elements/HTMLElement.hpp"
-#include "Krystal.Booey/HTML/Mixins/URLDecomposition.hpp"
+#include "Krystal.Booey/HTML/Mixins/UrlDecomposition.hpp"
 
 namespace krys::boo
 {
   /// @see https://html.spec.whatwg.org/#htmlanchorelement
-  class HTMLAnchorElement : public HTMLElement, public html::URLDecomposition
+  class HTMLAnchorElement : public HTMLElement, public html::UrlDecomposition
   {
     KRYS_OVERRIDE_DELETE_FOR_CHECKED_PTR(HTMLAnchorElement);
 
@@ -171,9 +171,9 @@ namespace krys::boo
                             Maybe<DOMStringView> value, const DOMStringAtom &namespaceURI) noexcept override;
 
   private:
-    KRYS_NODISCARD net::URL FullURL() const noexcept final;
+    KRYS_NODISCARD net::Url FullUrl() const noexcept final;
 
-    void SetFullURL(const net::URL &url) noexcept final;
+    void SetFullUrl(const net::Url &url) noexcept final;
   };
 }
 

@@ -49,7 +49,7 @@ namespace krys::boo::css::parse_property
 
     ValueListBuilder list;
     while (auto image =
-             ConsumeImage(tokens, state, AllowedImageType::URLFunction | AllowedImageType::ImageSet))
+             ConsumeImage(tokens, state, AllowedImageType::UrlFunction | AllowedImageType::ImageSet))
     {
       RefPtr<ValuePair> hotSpot;
       if (auto x = PrimitiveValueResolver<Number<>>::ConsumeAndResolve(tokens, state))

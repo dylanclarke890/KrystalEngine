@@ -74,12 +74,12 @@ namespace krys::boo
 
   dom::USVString HTMLVideoElement::Poster() const noexcept
   {
-    return html::ReflectURL<dom::USVString>(*this, u8"poster");
+    return html::ReflectUrl<dom::USVString>(*this, u8"poster");
   }
 
   void HTMLVideoElement::Poster(dom::USVString value) noexcept
   {
-    return html::ReflectURL<dom::USVString>(*this, u8"poster", krys::move(value));
+    return html::ReflectUrl<dom::USVString>(*this, u8"poster", krys::move(value));
   }
 
   bool HTMLVideoElement::PlaysInline() const noexcept

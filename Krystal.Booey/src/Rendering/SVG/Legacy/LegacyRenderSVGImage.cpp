@@ -144,7 +144,7 @@ namespace krys::boo
     _objectBoundingBox = CalculateObjectBoundingBox();
 
     bool updatedViewport = false;
-    auto imageSourceURL = GetDocument().CompleteURL(ImageElement().ImageSourceURL().value_or(DOMString {}));
+    auto imageSourceUrl = GetDocument().CompleteUrl(ImageElement().ImageSourceUrl().value_or(DOMString {}));
 
     // Images with preserveAspectRatio=none should force non-uniform scaling. This can be achieved
     // by setting the image's container size to its intrinsic size.
@@ -157,7 +157,7 @@ namespace krys::boo
         LayoutSize intrinsicSize = cachedImage->ImageSizeForRenderer(nullptr, Style().UsedZoom());
         if (intrinsicSize != ImageResource().ImageSize(Style().UsedZoom()))
         {
-          ImageResource().SetContainerContext(RoundedIntSize(intrinsicSize), imageSourceURL);
+          ImageResource().SetContainerContext(RoundedIntSize(intrinsicSize), imageSourceUrl);
           updatedViewport = true;
         }
       }
@@ -167,7 +167,7 @@ namespace krys::boo
     {
       if (!updatedViewport)
       {
-        ImageResource().SetContainerContext(EnclosingIntRect(_objectBoundingBox).Size(), imageSourceURL);
+        ImageResource().SetContainerContext(EnclosingIntRect(_objectBoundingBox).Size(), imageSourceUrl);
       }
       updatedViewport = true;
       _needsBoundariesUpdate = true;

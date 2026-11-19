@@ -670,7 +670,7 @@ namespace krys::boo::style
     return copy;
   }
 
-  KRYS_NODISCARD inline URL ForwardInheritedValue(const URL &value) noexcept
+  KRYS_NODISCARD inline Url ForwardInheritedValue(const Url &value) noexcept
   {
     auto copy = value;
     return copy;

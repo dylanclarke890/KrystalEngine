@@ -36,16 +36,16 @@
 namespace krys::boo::html
 {
   /// @brief The url input type.
-  class URLInputType final : public BaseTextInputType
+  class UrlInputType final : public BaseTextInputType
   {
   public:
-    explicit URLInputType(HTMLInputElement &element) noexcept : BaseTextInputType(Type::URL, element)
+    explicit UrlInputType(HTMLInputElement &element) noexcept : BaseTextInputType(Type::Url, element)
     {
     }
 
     KRYS_NODISCARD DOMStringView FormControlType() const noexcept final
     {
-      return input_type_names::URL;
+      return input_type_names::Url;
     }
 
     KRYS_NODISCARD bool TypeMismatchFor(DOMStringView value) const noexcept final;

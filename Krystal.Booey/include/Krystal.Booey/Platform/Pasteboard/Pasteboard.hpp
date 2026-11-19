@@ -38,16 +38,16 @@
 #include "Krystal.Core/Types/RefPtr.hpp"
 #include "Krystal.Core/Types/SharedBuffer.hpp"
 #include "Krystal.Core/Types/UniquePtr.hpp"
-#include "Krystal.Net/URL.hpp"
+#include "Krystal.Net/Url.hpp"
 
 namespace krys::boo
 {
   class DragData;
 
-  enum class PlainTextURLReadingPolicy : bool
+  enum class PlainTextUrlReadingPolicy : bool
   {
-    IgnoreURL,
-    AllowURL,
+    IgnoreUrl,
+    AllowUrl,
   };
 
   enum class WebContentReadingPolicy : bool
@@ -66,9 +66,9 @@ namespace krys::boo
     utf8_string Markup;
   };
 
-  struct PasteboardURL
+  struct PasteboardUrl
   {
-    net::URL Url;
+    net::Url Url;
     utf8_string Title;
     utf8_string Markup;
   };
@@ -76,7 +76,7 @@ namespace krys::boo
   // FIXME: The image itself (image), with images on the pasteboard.
   struct PasteboardImage
   {
-    PasteboardURL Url;
+    PasteboardUrl Url;
     utf8_string SuggestedName;
   };
 
@@ -98,7 +98,7 @@ namespace krys::boo
 
     virtual bool ReadHTML(utf8_stringview markup) noexcept = 0;
 
-    virtual bool ReadURL(const net::URL &url, utf8_stringview title) noexcept = 0;
+    virtual bool ReadUrl(const net::Url &url, utf8_stringview title) noexcept = 0;
 
     virtual bool ReadPlainText(utf8_stringview text) noexcept = 0;
 
@@ -185,7 +185,7 @@ namespace krys::boo
     KRYS_NODISCARD static bool IsSafeTypeForDOMToReadAndWrite(utf8_stringview type) noexcept;
 
     KRYS_NODISCARD static bool
-      CanExposeURLToDOMWhenPasteboardContainsFiles(utf8_stringview urlString) noexcept;
+      CanExposeUrlToDOMWhenPasteboardContainsFiles(utf8_stringview urlString) noexcept;
 
     KRYS_NODISCARD virtual bool IsStatic() const noexcept
     {
@@ -211,14 +211,14 @@ namespace krys::boo
     virtual void Clear(utf8_stringview type) noexcept;
 
     virtual void Read(PasteboardPlainText &text,
-                      PlainTextURLReadingPolicy policy = PlainTextURLReadingPolicy::AllowURL) noexcept;
+                      PlainTextUrlReadingPolicy policy = PlainTextUrlReadingPolicy::AllowUrl) noexcept;
 
     virtual void Read(PasteboardWebContentReader &reader,
                       WebContentReadingPolicy policy = WebContentReadingPolicy::AnyType) noexcept;
 
     virtual void Read(PasteboardFileReader &reader) noexcept;
 
-    virtual void Write(const PasteboardURL &pasteboardURL) noexcept;
+    virtual void Write(const PasteboardUrl &pasteboardUrl) noexcept;
 
     virtual void Write(const PasteboardImage &pasteboardImage) noexcept;
 

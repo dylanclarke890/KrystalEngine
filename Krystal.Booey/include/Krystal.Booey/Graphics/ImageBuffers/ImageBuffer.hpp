@@ -156,13 +156,13 @@ namespace krys::boo
 
     /// @brief What's been drawn, encoded as @p mimeType (PNG, JPEG or WebP; a JPEG is drawn over black) as a
     /// `data:` URL; `data:,` if it can't be.
-    KRYS_NODISCARD utf8_string ToDataURL(utf8_stringview mimeType, Maybe<double> quality = {}) const noexcept;
+    KRYS_NODISCARD utf8_string ToDataUrl(utf8_stringview mimeType, Maybe<double> quality = {}) const noexcept;
 
     /// @brief What's been drawn, encoded as @p mimeType (PNG, JPEG or WebP; a JPEG is drawn over black);
     /// empty if it can't be.
     KRYS_NODISCARD List<uint8> ToData(utf8_stringview mimeType, Maybe<double> quality = {}) const noexcept;
 
-    KRYS_NODISCARD static utf8_string ToDataURL(const Ref<ImageBuffer> &source, utf8_stringview mimeType,
+    KRYS_NODISCARD static utf8_string ToDataUrl(const Ref<ImageBuffer> &source, utf8_stringview mimeType,
                                                 Maybe<double> quality = {}) noexcept;
 
     KRYS_NODISCARD static List<uint8> ToData(const Ref<ImageBuffer> &source, utf8_stringview mimeType,

@@ -9,7 +9,7 @@
 
 namespace krys::net
 {
-  class URL;
+  class Url;
 }
 
 namespace krys::boo
@@ -74,6 +74,6 @@ namespace krys::boo::dom
     /// type for the rest (a text document's, whose parser the writer starts in plain text).
     // FIXME: Media documents, once there are media elements.
     KRYS_NODISCARD static Ref<Document> CreateDocument(utf8_stringview contentType,
-                                                       const net::URL &url) noexcept;
+                                                       const net::Url &url) noexcept;
   };
 }

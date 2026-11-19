@@ -203,7 +203,7 @@ namespace krys::boo
   DOMString ShadowRoot::GetHTML(dom::GetHTMLOptions options) const noexcept
   {
     return SerializeFragment(*this, SerializedNodes::SubtreesOfChildren, nullptr,
-                             ResolveURLs::NoExcludingURLsForPrivacy, SerializationSyntax::HTML,
+                             ResolveUrls::NoExcludingUrlsForPrivacy, SerializationSyntax::HTML,
                              options.SerializableShadowRoots ? SerializeShadowRoots::Serializable
                                                              : SerializeShadowRoots::Explicit,
                              krys::move(options.ShadowRoots));

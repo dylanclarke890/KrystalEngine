@@ -582,7 +582,7 @@ namespace krys::boo
     Invisible,
   };
 
-  static void OpportunisticallyStartFontDataURLLoading(const FontCascadeDescription &description,
+  static void OpportunisticallyStartFontDataUrlLoading(const FontCascadeDescription &description,
                                                        FontSelector *fontSelector) noexcept
   {
     // It is a somewhat common practice for a font foundry to break up a single font into two fonts, each
@@ -598,7 +598,7 @@ namespace krys::boo
     }
     for (uint32 i = 0; i < description.FamilyCount(); ++i)
     {
-      fontSelector->OpportunisticallyStartFontDataURLLoading(description, description.FamilyAt(i));
+      fontSelector->OpportunisticallyStartFontDataUrlLoading(description, description.FamilyAt(i));
     }
   }
 
@@ -610,7 +610,7 @@ namespace krys::boo
     FallbackVisibility fallbackVisibility = FallbackVisibility::Immaterial;
     ExternalResourceDownloadPolicy policy = ExternalResourceDownloadPolicy::Allow;
     GlyphData loadingResult;
-    OpportunisticallyStartFontDataURLLoading(description, fontSelector);
+    OpportunisticallyStartFontDataUrlLoading(description, fontSelector);
     for (;; ++fallbackIndex)
     {
       auto &fontRanges = RealizeFallbackRangesAt(description, fontSelector, fallbackIndex);

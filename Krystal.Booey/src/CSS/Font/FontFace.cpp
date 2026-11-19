@@ -512,13 +512,13 @@ namespace krys::boo::css
     FontLoadEventOccurred();
   }
 
-  void CSSFontFace::OpportunisticallyStartFontDataURLLoading() noexcept
+  void CSSFontFace::OpportunisticallyStartFontDataUrlLoading() noexcept
   {
     // We don't want to go crazy here and blow the cache. Usually these data URLs are the first item in the
     // src: list, so let's just check that one.
     if (!_sources.empty())
     {
-      _sources[0]->OpportunisticallyStartFontDataURLLoading();
+      _sources[0]->OpportunisticallyStartFontDataUrlLoading();
     }
   }
 

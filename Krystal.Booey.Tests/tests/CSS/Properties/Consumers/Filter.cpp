@@ -8,7 +8,7 @@ namespace krys::boo::css::parse_property::tests
 
   TEST_CASE("parse_property(ConsumeFilter)", "[CSS][Properties][Consumers]")
   {
-    ParserContext context {ParserMode::HTMLStandard, net::URL(u8"https://example.com/dir/")};
+    ParserContext context {ParserMode::HTMLStandard, net::Url(u8"https://example.com/dir/")};
 
     CHECK(ConsumeToText(u8"none", ConsumeFilter) == "none");
     CHECK(ConsumeToText(u8"blur()", ConsumeFilter) == "blur()");

@@ -93,7 +93,7 @@ namespace krys::boo
 
   CSSOMString CachedFont::CalculateItemInCollection() const noexcept
   {
-    return CSSOMString(URL().FragmentIdentifier());
+    return CSSOMString(Url().FragmentIdentifier());
   }
 
   bool CachedFont::EnsureCustomFontData(SharedBuffer *data) noexcept

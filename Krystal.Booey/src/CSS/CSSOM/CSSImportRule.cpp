@@ -86,7 +86,7 @@ namespace krys::boo
   CSSOMString CSSImportRule::CssTextInternal(const CSSOMString &urlString) const noexcept
   {
     StringBuilder builder;
-    builder.Append(u8"@import ", css::SerialiseURL(urlString));
+    builder.Append(u8"@import ", css::SerialiseUrl(urlString));
 
     if (auto layerName = LayerName())
     {

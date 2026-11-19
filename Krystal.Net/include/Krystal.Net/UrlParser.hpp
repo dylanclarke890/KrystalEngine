@@ -29,25 +29,25 @@
 #include "Krystal.Core/Types/Array.hpp"
 #include "Krystal.Core/Types/Expected.hpp"
 #include "Krystal.Core/Utils/Move.hpp"
-#include "Krystal.Net/URL.hpp"
+#include "Krystal.Net/Url.hpp"
 
 namespace krys::net
 {
   /// @brief The URL parser, https://url.spec.whatwg.org/#concept-basic-url-parser, plus the
   /// `application/x-www-form-urlencoded` parser and serialiser.
-  class URLParser
+  class UrlParser
   {
-    friend class URL;
+    friend class Url;
     using CodePointIterator = text::CodePointIterator;
 
   public:
     // Host names longer than this aren't IDN-encoded when a URL is made from its parts.
     constexpr static size_t HostnameBufferLength = 2'048;
 
-    using URLEncodedForm = List<KeyValuePair>;
+    using UrlEncodedForm = List<KeyValuePair>;
 
   private:
-    URL _url;
+    Url _url;
     utf8_string _asciiBuffer;
     bool _urlIsSpecial {false};
     bool _urlIsFile {false};
@@ -57,15 +57,15 @@ namespace krys::net
     const char8 *_inputBegin {nullptr};
 
   public:
-    KRYS_NODISCARD static bool AllValuesEqual(const URL &a, const URL &b) noexcept;
+    KRYS_NODISCARD static bool AllValuesEqual(const Url &a, const Url &b) noexcept;
 
-    KRYS_NODISCARD static bool InternalValuesConsistent(const URL &url) noexcept;
+    KRYS_NODISCARD static bool InternalValuesConsistent(const Url &url) noexcept;
 
-    KRYS_NODISCARD static URLEncodedForm ParseURLEncodedForm(utf8_stringview input) noexcept;
+    KRYS_NODISCARD static UrlEncodedForm ParseUrlEncodedForm(utf8_stringview input) noexcept;
 
     KRYS_NODISCARD static Maybe<KeyValuePair> ParseQueryNameAndValue(utf8_stringview bytes) noexcept;
 
-    KRYS_NODISCARD static utf8_string Serialise(const URLEncodedForm &tuples) noexcept;
+    KRYS_NODISCARD static utf8_string Serialise(const UrlEncodedForm &tuples) noexcept;
 
     KRYS_NODISCARD static bool IsSpecialScheme(utf8_stringview scheme) noexcept;
 
@@ -75,16 +75,16 @@ namespace krys::net
 
     KRYS_NODISCARD static Maybe<uint16> DefaultPortForProtocol(utf8_stringview scheme) noexcept;
 
-    KRYS_NODISCARD static Maybe<utf8_string> FormURLDecode(utf8_stringview input) noexcept;
+    KRYS_NODISCARD static Maybe<utf8_string> FormUrlDecode(utf8_stringview input) noexcept;
 
     /// @see https://url.spec.whatwg.org/#percent-decode
     KRYS_NODISCARD static utf8_string PercentDecode(utf8_stringview input) noexcept;
 
   private:
     /// @param input Null (`data() == nullptr`) gives `base` without its fragment.
-    URLParser(utf8_stringview input, const URL &base = {}, bool allowC0AtEnd = false) noexcept;
+    UrlParser(utf8_stringview input, const Url &base = {}, bool allowC0AtEnd = false) noexcept;
 
-    KRYS_NODISCARD URL Result() noexcept
+    KRYS_NODISCARD Url Result() noexcept
     {
       return krys::move(_url);
     }
@@ -110,12 +110,12 @@ namespace krys::net
 
     enum class IPv4ParsingError;
     enum class IPv4PieceParsingError;
-    enum class URLPart;
+    enum class UrlPart;
 
     using IPv4Address = uint32;
     using IPv6Address = Array<uint16, 8>;
 
-    void Parse(utf8_stringview input, const URL &base, bool allowC0AtEnd) noexcept;
+    void Parse(utf8_stringview input, const Url &base, bool allowC0AtEnd) noexcept;
 
     void ParseAuthority(CodePointIterator iterator) noexcept;
 
@@ -145,7 +145,7 @@ namespace krys::net
 
     KRYS_NODISCARD bool IsDoubleDotPathSegment(CodePointIterator iterator) noexcept;
 
-    KRYS_NODISCARD bool ShouldCopyFileURL(CodePointIterator iterator) noexcept;
+    KRYS_NODISCARD bool ShouldCopyFileUrl(CodePointIterator iterator) noexcept;
 
     KRYS_NODISCARD bool CheckLocalhostCodePoint(CodePointIterator &iterator, char32 codePoint) noexcept;
 
@@ -186,7 +186,7 @@ namespace krys::net
 
     void CopyASCIIStringUntil(const utf8_string &string, size_t length) noexcept;
 
-    KRYS_NODISCARD bool CopyBaseWindowsDriveLetter(const URL &base) noexcept;
+    KRYS_NODISCARD bool CopyBaseWindowsDriveLetter(const Url &base) noexcept;
 
     KRYS_NODISCARD utf8_stringview ParsedDataView(size_t start, size_t length) const noexcept
       KRYS_LIFETIME_BOUND;
@@ -220,13 +220,13 @@ namespace krys::net
 
     void SerialiseIPv6(IPv6Address address) noexcept;
 
-    void CopyURLPartsUntil(const URL &base, URLPart part, const CodePointIterator &iterator) noexcept;
+    void CopyUrlPartsUntil(const Url &base, UrlPart part, const CodePointIterator &iterator) noexcept;
 
     KRYS_NODISCARD bool IsForbiddenHostCodePoint(char32 c) const noexcept;
 
     KRYS_NODISCARD bool IsForbiddenDomainCodePoint(char32 c) const noexcept;
 
-    KRYS_NODISCARD static size_t URLLengthUntilPart(const URL &url, URLPart part) noexcept;
+    KRYS_NODISCARD static size_t UrlLengthUntilPart(const Url &url, UrlPart part) noexcept;
 
     void PopPath() noexcept;
 

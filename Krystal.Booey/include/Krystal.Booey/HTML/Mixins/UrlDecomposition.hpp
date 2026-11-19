@@ -31,7 +31,7 @@
 
 namespace krys::net
 {
-  class URL;
+  class Url;
 }
 
 namespace krys::boo::html
@@ -39,7 +39,7 @@ namespace krys::boo::html
   /// @brief The parts of a URL, read and written through an element's URL: the members of
   /// `HTMLHyperlinkElementUtils` other than `href`.
   /// @see https://html.spec.whatwg.org/#htmlhyperlinkelementutils
-  class URLDecomposition
+  class UrlDecomposition
   {
   public:
     /// @see https://html.spec.whatwg.org/#dom-hyperlink-origin
@@ -107,16 +107,16 @@ namespace krys::boo::html
 
     /// @brief The serialization of @p url's origin: `null` for an opaque origin.
     /// @see https://html.spec.whatwg.org/#ascii-serialisation-of-an-origin
-    KRYS_NODISCARD static dom::USVString SerializedOrigin(const net::URL &url) noexcept;
+    KRYS_NODISCARD static dom::USVString SerializedOrigin(const net::Url &url) noexcept;
 
   protected:
-    URLDecomposition() noexcept = default;
+    UrlDecomposition() noexcept = default;
 
-    virtual ~URLDecomposition() noexcept = default;
+    virtual ~UrlDecomposition() noexcept = default;
 
   private:
-    KRYS_NODISCARD virtual net::URL FullURL() const noexcept = 0;
+    KRYS_NODISCARD virtual net::Url FullUrl() const noexcept = 0;
 
-    virtual void SetFullURL(const net::URL &url) noexcept = 0;
+    virtual void SetFullUrl(const net::Url &url) noexcept = 0;
   };
 }

@@ -53,7 +53,7 @@ namespace krys::boo::css::tests
     CHECK(sheet->RuleCount() == 0);
     CHECK(sheet->GetParserContext().Mode == ParserMode::HTMLStandard);
     CHECK(sheet->DefaultNamespace() == dom::StarAtom());
-    CHECK(sheet->OriginalURL().empty());
+    CHECK(sheet->OriginalUrl().empty());
     CHECK(sheet->OwnerRule() == nullptr);
     CHECK(sheet->ParentStyleSheet() == nullptr);
     CHECK(sheet->RootStyleSheet() == sheet.get());
@@ -61,10 +61,10 @@ namespace krys::boo::css::tests
     CHECK_FALSE(sheet->LoadCompleted());
     CHECK_FALSE(sheet->IsLoading());
 
-    auto withURL =
+    auto withUrl =
       StyleSheetContents::Create(u8"https://example.com/a.css", ParserContext(ParserMode::HTMLQuirks));
-    CHECK(withURL->OriginalURL() == u8"https://example.com/a.css");
-    CHECK(withURL->GetParserContext().Mode == ParserMode::HTMLQuirks);
+    CHECK(withUrl->OriginalUrl() == u8"https://example.com/a.css");
+    CHECK(withUrl->GetParserContext().Mode == ParserMode::HTMLQuirks);
 
     // A sheet imported by a user sheet is a user sheet.
     sheet->SetIsUserStyleSheet(true);
@@ -288,10 +288,10 @@ namespace krys::boo::css::tests
 
     SECTION("MayDependOnBaseURL")
     {
-      CHECK(sheet->MayDependOnBaseURL());
+      CHECK(sheet->MayDependOnBaseUrl());
       auto plain = StyleSheetContents::Create();
       plain->ParserAppendRule(CreateStyleRule(u8".a", u8"color: red"));
-      CHECK_FALSE(plain->MayDependOnBaseURL());
+      CHECK_FALSE(plain->MayDependOnBaseUrl());
     }
 
     SECTION("TraverseSubresources")
@@ -313,7 +313,7 @@ namespace krys::boo::css::tests
       plain->CheckLoaded();
       CHECK(plain->LoadCompleted());
       CHECK(plain->IsCacheable());
-      CHECK(plain->IsCacheableWithNoBaseURLDependency());
+      CHECK(plain->IsCacheableWithNoBaseUrlDependency());
 
       plain->AddedToMemoryCache();
       CHECK(plain->IsInMemoryCache());
@@ -322,7 +322,7 @@ namespace krys::boo::css::tests
 
       plain->ParserAppendRule(CreateStyleRule(u8".b", u8"background-image: url(a.png)"));
       CHECK(plain->IsCacheable());
-      CHECK_FALSE(plain->IsCacheableWithNoBaseURLDependency());
+      CHECK_FALSE(plain->IsCacheableWithNoBaseUrlDependency());
 
       plain->SetMutable();
       CHECK_FALSE(plain->IsCacheable());

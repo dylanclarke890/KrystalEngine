@@ -525,7 +525,7 @@ namespace krys::boo
   }
 
   // https://html.spec.whatwg.org/#dom-canvas-todataurl
-  DOMString HTMLCanvasElement::ToDataURL(DOMStringView mimeType, Maybe<double> quality) noexcept
+  DOMString HTMLCanvasElement::ToDataUrl(DOMStringView mimeType, Maybe<double> quality) noexcept
   {
     // 1. (Skipped: a canvas is always origin-clean, as there are no origins; see DIFFERENCES.md.)
 
@@ -548,6 +548,6 @@ namespace krys::boo
     }
 
     // 5. Return a data: URL representing file.
-    return buffer->ToDataURL(encodingMIMEType, QualityInRange(quality));
+    return buffer->ToDataUrl(encodingMIMEType, QualityInRange(quality));
   }
 }

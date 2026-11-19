@@ -478,11 +478,11 @@ namespace krys::boo
     auto attributeValue = GetAttribute(u8"formaction");
     if (!attributeValue || attributeValue->empty())
     {
-      return dom::USVString(NodeDocument().GetURL().String());
+      return dom::USVString(NodeDocument().GetUrl().String());
     }
     // Let urlString be the result of encoding-parsing-and-serializing a URL given attributeValue, relative to
     // this's node document. If urlString is not failure, return urlString.
-    if (auto url = NodeDocument().CompleteURL(*attributeValue); url.IsValid())
+    if (auto url = NodeDocument().CompleteUrl(*attributeValue); url.IsValid())
     {
       return dom::USVString(url.String());
     }

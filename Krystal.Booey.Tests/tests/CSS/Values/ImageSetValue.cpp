@@ -13,8 +13,8 @@ namespace krys::boo::css::tests
     Ref<Value> Option(utf8_stringview url, double resolution)
     {
       return ImageSetOptionValue::Create(
-        ImageValue::Create(*CompleteURL(
-          CSSOMString {url}, ParserContext {ParserMode::HTMLStandard, net::URL {u8"https://example.com/"}})),
+        ImageValue::Create(*CompleteUrl(
+          CSSOMString {url}, ParserContext {ParserMode::HTMLStandard, net::Url {u8"https://example.com/"}})),
         PrimitiveValue::Create(resolution, UnitType::x));
     }
   }

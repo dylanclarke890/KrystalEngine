@@ -22,7 +22,7 @@
  * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-#include "Krystal.Booey/CSS/Properties/Consumers/URL.hpp"
+#include "Krystal.Booey/CSS/Properties/Consumers/Url.hpp"
 #include "Krystal.Booey/CSS/Parser/TokenRange.hpp"
 #include "Krystal.Booey/CSS/Parser/TokenRangeGuard.hpp"
 #include "Krystal.Booey/CSS/Properties/Consumers/KeywordDefinitions.hpp"
@@ -30,7 +30,7 @@
 #include "Krystal.Booey/CSS/Properties/Consumers/Primitives.hpp"
 #include "Krystal.Booey/CSS/Properties/Consumers/String.hpp"
 #include "Krystal.Booey/CSS/Properties/PropertyParserState.hpp"
-#include "Krystal.Booey/CSS/Values/Primitives/URL.hpp"
+#include "Krystal.Booey/CSS/Values/Primitives/Url.hpp"
 #include "Krystal.Booey/CSS/Values/PrimitiveValue.hpp"
 #include "Krystal.Booey/CSS/Values/UrlValue.hpp"
 
@@ -51,13 +51,13 @@ namespace krys::boo::css::parse_property
   // <referrer-policy-modifier> = referrer-policy( no-referrer | no-referrer-when-downgrade | same-origin |
   // origin | strict-origin | origin-when-cross-origin | strict-origin-when-cross-origin | unsafe-url)
 
-  Maybe<CSSURL> ConsumeURLRaw(TokenRange &tokens, PropertyParserState &state,
-                              AllowedURLModifiers allowedURLModifiers) noexcept
+  Maybe<CSSUrl> ConsumeUrlRaw(TokenRange &tokens, PropertyParserState &state,
+                              AllowedUrlModifiers allowedUrlModifiers) noexcept
   {
     auto &token = tokens.Peek();
     if (token.Type() == TokenType::Url)
     {
-      auto result = CompleteURL(CSSOMString(token.IdentCodePoints()), state.Context);
+      auto result = CompleteUrl(CSSOMString(token.IdentCodePoints()), state.Context);
       if (!result)
       {
         return {};
@@ -85,7 +85,7 @@ namespace krys::boo::css::parse_property
 
         auto string = ConsumeStringRaw(args);
 
-        auto result = CompleteURL(CSSOMString(string), state.Context);
+        auto result = CompleteUrl(CSSOMString(string), state.Context);
         if (!result)
         {
           return {};
@@ -97,7 +97,7 @@ namespace krys::boo::css::parse_property
           {
             case ValueId::CrossOrigin:
             {
-              if (!HasFlag(allowedURLModifiers, AllowedURLModifiers::CrossOrigin))
+              if (!HasFlag(allowedUrlModifiers, AllowedUrlModifiers::CrossOrigin))
               {
                 return {};
               }
@@ -116,12 +116,12 @@ namespace krys::boo::css::parse_property
                 return {};
               }
 
-              result->Modifiers.CrossOrigin = URLCrossOriginFunction {.Parameters = {*crossOriginValue}};
+              result->Modifiers.CrossOrigin = UrlCrossOriginFunction {.Parameters = {*crossOriginValue}};
               break;
             }
             case ValueId::Integrity:
             {
-              if (!HasFlag(allowedURLModifiers, AllowedURLModifiers::Integrity))
+              if (!HasFlag(allowedUrlModifiers, AllowedUrlModifiers::Integrity))
               {
                 return {};
               }
@@ -145,13 +145,13 @@ namespace krys::boo::css::parse_property
               }
 
               result->Modifiers.Integrity =
-                URLIntegrityFunction {.Parameters = {CSSOMString(integrityValue)}};
+                UrlIntegrityFunction {.Parameters = {CSSOMString(integrityValue)}};
 
               break;
             }
             case ValueId::ReferrerPolicy:
             {
-              if (!HasFlag(allowedURLModifiers, AllowedURLModifiers::ReferrerPolicy))
+              if (!HasFlag(allowedUrlModifiers, AllowedUrlModifiers::ReferrerPolicy))
               {
                 return {};
               }
@@ -174,7 +174,7 @@ namespace krys::boo::css::parse_property
               }
 
               result->Modifiers.ReferrerPolicy =
-                URLReferrerPolicyFunction {.Parameters = {*referrerPolicyValue}};
+                UrlReferrerPolicyFunction {.Parameters = {*referrerPolicyValue}};
 
               break;
             }
@@ -196,12 +196,12 @@ namespace krys::boo::css::parse_property
     return {};
   }
 
-  RefPtr<Value> ConsumeURL(TokenRange &tokens, PropertyParserState &state,
-                           AllowedURLModifiers allowedURLModifiers) noexcept
+  RefPtr<Value> ConsumeUrl(TokenRange &tokens, PropertyParserState &state,
+                           AllowedUrlModifiers allowedUrlModifiers) noexcept
   {
-    if (auto rawURL = ConsumeURLRaw(tokens, state, allowedURLModifiers))
+    if (auto rawUrl = ConsumeUrlRaw(tokens, state, allowedUrlModifiers))
     {
-      return UrlValue::Create(krys::move(*rawURL));
+      return UrlValue::Create(krys::move(*rawUrl));
     }
 
     return nullptr;

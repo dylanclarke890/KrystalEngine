@@ -66,7 +66,7 @@ namespace krys::boo::html::tests
       REQUIRE(config.RemoveProcessingInstructions);
       CHECK_FALSE(config.ProcessingInstructions);
       CHECK(config.Comments == true);
-      CHECK(config.JavascriptURLs == true);
+      CHECK(config.JavascriptUrls == true);
       CHECK_FALSE(config.DataAttributes);
     }
 
@@ -79,7 +79,7 @@ namespace krys::boo::html::tests
       CHECK(value.ProcessingInstructions);
       CHECK(value.Comments == false);
       CHECK(value.DataAttributes == false);
-      CHECK(value.JavascriptURLs == false);
+      CHECK(value.JavascriptUrls == false);
     }
 
     SECTION("strings take the default namespaces and an empty namespace is null")
@@ -175,7 +175,7 @@ namespace krys::boo::html::tests
     CHECK_FALSE(has(u8"use", SVG));
     CHECK(config.Comments == false);
     CHECK(config.DataAttributes == false);
-    CHECK(config.JavascriptURLs == false);
+    CHECK(config.JavascriptUrls == false);
 
     CHECK(Allows(config, u8"lang"));
     CHECK(Allows(config, u8"href", u8"https://example.com", u8"a"));
@@ -258,7 +258,7 @@ namespace krys::boo::html::tests
       CHECK_FALSE(sanitizer->SetDataAttributes(false));
       CHECK(sanitizer->SetDataAttributes(true));
       CHECK(Names(*sanitizer->Get().Attributes) == List<DOMString> {u8"id"});
-      CHECK(sanitizer->SetJavascriptURLs(false));
+      CHECK(sanitizer->SetJavascriptUrls(false));
       CHECK_FALSE(Make({})->SetDataAttributes(true));
     }
 
@@ -285,7 +285,7 @@ namespace krys::boo::html::tests
       auto removedAttributes = Names(*config.RemoveAttributes);
       CHECK(std::ranges::find(removedAttributes, u8"onclick") != removedAttributes.end());
       CHECK(std::ranges::find(removedAttributes, u8"onpointerdown") != removedAttributes.end());
-      CHECK(config.JavascriptURLs == false);
+      CHECK(config.JavascriptUrls == false);
       CHECK_FALSE(sanitizer->RemoveUnsafe());
     }
   }
@@ -295,8 +295,8 @@ namespace krys::boo::html::tests
             "html:sanitization-algorithms]")
   {
     auto config = Make({})->Get();
-    REQUIRE(config.JavascriptURLs == true);
-    config.JavascriptURLs = false;
+    REQUIRE(config.JavascriptUrls == true);
+    config.JavascriptUrls = false;
     CHECK_FALSE(Allows(config, u8"href", u8"  JavaScript:x", u8"a"));
     CHECK(Allows(config, u8"href", u8"javascript:x", u8"link"));
     CHECK_FALSE(Allows(config, u8"action", u8"javascript:x", u8"form"));

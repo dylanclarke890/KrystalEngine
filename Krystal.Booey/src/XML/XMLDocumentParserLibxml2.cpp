@@ -52,7 +52,7 @@
 #include "Krystal.Core/Strings/StringBuilder.hpp"
 #include "Krystal.Core/Types/Array.hpp"
 #include "Krystal.Core/Utils/Move.hpp"
-#include "Krystal.Net/URL.hpp"
+#include "Krystal.Net/Url.hpp"
 #include <algorithm>
 #include <cstdio>
 #include <cstring>
@@ -127,7 +127,7 @@ namespace krys::boo::xml
       xmlSwitchEncoding(ctxt, XML_CHAR_ENCODING_UTF8);
     }
 
-    KRYS_NODISCARD bool ShouldAllowExternalLoad(const net::URL &url) noexcept
+    KRYS_NODISCARD bool ShouldAllowExternalLoad(const net::Url &url) noexcept
     {
       utf8_stringview urlString = url.String();
 
@@ -204,7 +204,7 @@ namespace krys::boo::xml
   xmlParserInputPtr ExternalEntityLoader(const char *url, const char *id, xmlParserCtxtPtr context) noexcept
   {
     if (!ShouldAllowExternalLoad(
-          net::URL(DOMStringView(reinterpret_cast<const char8 *>(url), std::strlen(url)))))
+          net::Url(DOMStringView(reinterpret_cast<const char8 *>(url), std::strlen(url)))))
     {
       return nullptr;
     }

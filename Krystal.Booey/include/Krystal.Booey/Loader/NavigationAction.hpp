@@ -104,12 +104,12 @@ namespace krys::boo
 
     KRYS_NODISCARD bool IsEmpty() const noexcept
     {
-      return _originalRequest.URL().IsEmpty();
+      return _originalRequest.Url().IsEmpty();
     }
 
-    KRYS_NODISCARD const net::URL &URL() const noexcept
+    KRYS_NODISCARD const net::Url &Url() const noexcept
     {
-      return _originalRequest.URL();
+      return _originalRequest.Url();
     }
 
     KRYS_NODISCARD const ResourceRequest &OriginalRequest() const noexcept

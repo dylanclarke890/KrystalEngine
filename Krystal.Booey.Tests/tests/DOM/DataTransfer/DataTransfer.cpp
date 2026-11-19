@@ -281,12 +281,12 @@ namespace krys::boo::tests
   {
     SelectionData data;
     data.SetURIList(u8"# comment\r\nfile:///C:/files/a%20b.txt\r\nhttps://example.com/\r\n");
-    CHECK(data.GetURL().String() == u8"file:///C:/files/a%20b.txt");
+    CHECK(data.GetUrl().String() == u8"file:///C:/files/a%20b.txt");
     REQUIRE(data.Filenames().size() == 1);
     CHECK(Narrow(data.Filenames()[0]).ends_with("a b.txt"));
 
     SelectionData link;
-    link.SetURL(net::URL(u8"https://example.com/"), u8"<Example>");
+    link.SetUrl(net::Url(u8"https://example.com/"), u8"<Example>");
     CHECK(link.Text() == u8"https://example.com/");
     CHECK(link.URIList() == u8"https://example.com/");
     CHECK(link.Markup() == u8"<a href=\"https://example.com/\">&lt;Example&gt;</a>");

@@ -38,7 +38,7 @@ namespace krys::boo
 {
   // MARK: - ReferencePathOperation
 
-  Ref<ReferencePathOperation> ReferencePathOperation::Create(const style::URL &url,
+  Ref<ReferencePathOperation> ReferencePathOperation::Create(const style::Url &url,
                                                              const CSSOMStringAtom &fragment,
                                                              const boo::SVGElement *element) noexcept
   {
@@ -65,7 +65,7 @@ namespace krys::boo
     return _url == Downcast<ReferencePathOperation>(other)._url;
   }
 
-  ReferencePathOperation::ReferencePathOperation(style::URL url, CSSOMStringAtom fragment,
+  ReferencePathOperation::ReferencePathOperation(style::Url url, CSSOMStringAtom fragment,
                                                  const boo::SVGElement *element) noexcept
       : PathOperation(Type::Reference), _url(krys::move(url)), _fragment(krys::move(fragment))
   {

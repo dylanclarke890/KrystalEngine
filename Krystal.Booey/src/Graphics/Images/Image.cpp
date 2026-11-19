@@ -96,10 +96,10 @@ namespace krys::boo
     return DataChanged(allDataReceived);
   }
 
-  net::URL Image::SourceURL() const noexcept
+  net::Url Image::SourceUrl() const noexcept
   {
     auto observer = GetImageObserver();
-    return observer ? observer->SourceUrl() : net::URL();
+    return observer ? observer->SourceUrl() : net::Url();
   }
 
   utf8_string Image::MimeType() const noexcept

@@ -139,7 +139,7 @@ namespace krys::boo
     }
 
     result.SetInnerNode(this);
-    result.SetURLElement(this);
+    result.SetUrlElement(this);
     return true;
   }
 
@@ -416,12 +416,12 @@ namespace krys::boo
 
   dom::USVString HTMLAreaElement::Href() const noexcept
   {
-    return html::ReflectURL<dom::USVString>(*this, u8"href");
+    return html::ReflectUrl<dom::USVString>(*this, u8"href");
   }
 
   void HTMLAreaElement::Href(dom::USVString value) noexcept
   {
-    html::ReflectURL<dom::USVString>(*this, u8"href", krys::move(value));
+    html::ReflectUrl<dom::USVString>(*this, u8"href", krys::move(value));
   }
 
   dom::USVString HTMLAreaElement::ToString() const noexcept
@@ -429,12 +429,12 @@ namespace krys::boo
     return Href();
   }
 
-  net::URL HTMLAreaElement::FullURL() const noexcept
+  net::Url HTMLAreaElement::FullUrl() const noexcept
   {
     return html::HyperlinkAlgorithms::Href(*this);
   }
 
-  void HTMLAreaElement::SetFullURL(const net::URL &url) noexcept
+  void HTMLAreaElement::SetFullUrl(const net::Url &url) noexcept
   {
     html::CEReactionsScope ceReactions;
     html::HyperlinkAlgorithms::SetHref(*this, url);

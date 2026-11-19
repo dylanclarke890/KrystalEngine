@@ -44,15 +44,15 @@ namespace krys::boo::style::tests
     CHECK(Style.DisallowsFastPathInheritance());
 
     auto url = ConvertPaint(*this, u8"url(#gradient)");
-    CHECK(url.IsURL());
-    CHECK(url.HasURL());
+    CHECK(url.IsUrl());
+    CHECK(url.HasUrl());
     CHECK_FALSE(url.HasColor());
 
     auto urlNone = ConvertPaint(*this, u8"url(#gradient) none");
-    CHECK(urlNone.IsURLNone());
+    CHECK(urlNone.IsUrlNone());
 
     auto urlColor = ConvertPaint(*this, u8"url(#gradient) blue");
-    REQUIRE(urlColor.IsURLColor());
+    REQUIRE(urlColor.IsUrlColor());
     CHECK(Serialised(*urlColor.TryAnyColor()) == "rgb(0, 0, 255)");
 
     SECTION("blending")

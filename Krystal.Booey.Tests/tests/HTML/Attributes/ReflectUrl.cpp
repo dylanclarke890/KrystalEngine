@@ -21,7 +21,7 @@ namespace krys::boo::html::tests
       <img id=bad src="http://[bad"><link id=link href="style.css"><script id=script src="s.js"></script>
       <a id=a href="x" ping="https://p.test/ a.html">)");
 
-    // [ReflectURL] completes the URL against the document's base URL.
+    // [ReflectUrl] completes the URL against the document's base URL.
     CHECK(Str(fixture.Get<HTMLImageElement>(u8"img").Src()) == "https://example.com/dir/pic.png");
     CHECK(Str(fixture.Get<HTMLLinkElement>(u8"link").Href()) == "https://example.com/dir/style.css");
     CHECK(Str(fixture.Get<HTMLScriptElement>(u8"script").Src()) == "https://example.com/dir/s.js");

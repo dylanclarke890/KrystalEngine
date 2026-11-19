@@ -36,14 +36,14 @@ namespace krys::boo
   private:
     Ref<StyleImage> _image;
     Maybe<IntPoint> _hotSpot;
-    style::URL _originalURL;
+    style::Url _originalUrl;
 
   public:
     KRYS_NODISCARD static Ref<StyleCursorImage> Create(const Ref<StyleImage> &, Maybe<IntPoint>,
-                                                       const style::URL &) noexcept;
+                                                       const style::Url &) noexcept;
 
     KRYS_NODISCARD static Ref<StyleCursorImage> Create(Ref<StyleImage> &&, Maybe<IntPoint>,
-                                                       style::URL &&) noexcept;
+                                                       style::Url &&) noexcept;
 
     ~StyleCursorImage() noexcept override;
 
@@ -61,9 +61,9 @@ namespace krys::boo
     }
 
   private:
-    StyleCursorImage(const Ref<StyleImage> &, Maybe<IntPoint> hotSpot, const style::URL &) noexcept;
+    StyleCursorImage(const Ref<StyleImage> &, Maybe<IntPoint> hotSpot, const style::Url &) noexcept;
 
-    StyleCursorImage(Ref<StyleImage> &&, Maybe<IntPoint> hotSpot, style::URL &&) noexcept;
+    StyleCursorImage(Ref<StyleImage> &&, Maybe<IntPoint> hotSpot, style::Url &&) noexcept;
 
     KRYS_NODISCARD Ref<css::Value> ComputedStyleValue(const RenderStyle &) const noexcept final;
 

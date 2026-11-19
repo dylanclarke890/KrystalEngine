@@ -1,5 +1,5 @@
 ﻿/*
- * Copyright (C) 2024 Samuel Weinig <sam@webkit.org>
+ * Copyright (C) 2008-2019 Apple Inc. All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
  * modification, are permitted provided that the following conditions
@@ -16,6 +16,7 @@
  * PURPOSE ARE DISCLAIMED.  IN NO EVENT SHALL APPLE INC. OR
  * CONTRIBUTORS BE LIABLE FOR ANY DIRECT, INDIRECT, INCIDENTAL, SPECIAL,
  * EXEMPLARY, OR CONSEQUENTIAL DAMAGES (INCLUDING, BUT NOT LIMITED TO,
+ * PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES; LOSS OF USE, DATA, OR
  * PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND ON ANY THEORY
  * OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT
  * (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
@@ -24,40 +25,41 @@
 
 #pragma once
 
-#include "Krystal.Core/Enum.hpp"
-#include "Krystal.Core/Types/Maybe.hpp"
-#include "Krystal.Core/Types/RefPtr.hpp"
+#include "Krystal.Core/Hash.hpp"
+#include "Krystal.Core/Utils/ForbidHeapAllocation.hpp"
+#include "Krystal.Core/Utils/Tags.hpp"
+#include "Krystal.Net/Url.hpp"
+#include <memory>
 
-namespace krys::boo::css::parse_property
+namespace krys
 {
-  enum class AllowedURLModifiers
+  template <>
+  struct DefaultHash<net::Url>
   {
-    None = 0,
-    CrossOrigin = 1 << 0,
-    Integrity = 1 << 1,
-    ReferrerPolicy = 1 << 2,
+    constexpr static bool IsSafeToCompareToEmptyOrDeleted = false;
+
+    KRYS_NODISCARD static size_t Hash(const net::Url &key) noexcept
+    {
+      return std::hash<utf8_string> {}(key.String());
+    }
+
+    KRYS_NODISCARD static bool Equal(const net::Url &a, const net::Url &b) noexcept
+    {
+      return a.String() == b.String();
+    }
   };
-}
 
-KRYS_DEFINE_FLAGS_ENUM_TRAITS(krys::boo::css::parse_property::AllowedURLModifiers, 4uz)
-
-namespace krys::boo::css
-{
-  class TokenRange;
-  class Value;
-
-  struct CSSURL;
-  struct PropertyParserState;
-
-  namespace parse_property
+  template <>
+  struct HashTraits<net::Url> : public GenericHashTraits<net::Url>
   {
-    // MARK: <url>
-    // https://drafts.csswg.org/css-values/#urls
+    static void ConstructDeletedValue(net::Url &slot) noexcept
+    {
+      new (NotNullTag {}, std::addressof(slot)) net::Url(HashTableDeletedValueTag {});
+    }
 
-    KRYS_NODISCARD Maybe<CSSURL> ConsumeURLRaw(TokenRange &tokens, PropertyParserState &state,
-                                               AllowedURLModifiers allowed) noexcept;
-
-    KRYS_NODISCARD RefPtr<Value> ConsumeURL(TokenRange &tokens, PropertyParserState &state,
-                                            AllowedURLModifiers allowed) noexcept;
-  }
+    KRYS_NODISCARD static bool IsDeletedValue(const net::Url &value) noexcept
+    {
+      return value.IsHashTableDeletedValue();
+    }
+  };
 }

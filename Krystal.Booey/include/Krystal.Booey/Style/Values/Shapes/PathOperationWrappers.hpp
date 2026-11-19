@@ -100,7 +100,7 @@ namespace krys::boo::style
     {
     }
 
-    KRYS_NODISCARD KRYS_ALWAYS_INLINE const URL &Url() const noexcept
+    KRYS_NODISCARD KRYS_ALWAYS_INLINE const style::Url &Url() const noexcept
     {
       return _operation->Url();
     }

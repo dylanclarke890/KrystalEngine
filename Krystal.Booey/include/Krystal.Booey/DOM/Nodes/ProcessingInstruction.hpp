@@ -171,7 +171,7 @@ namespace krys::boo
     /// @see https://dom.spec.whatwg.org/#update-data-from-attributes
     void UpdateDataFromAttributes() noexcept;
 
-    void SetCSSStyleSheet(const utf8_string &href, const net::URL &baseURL, utf8_stringview charset,
+    void SetCSSStyleSheet(const utf8_string &href, const net::Url &baseUrl, utf8_stringview charset,
                           const CachedCSSStyleSheet *) noexcept override;
 
     KRYS_NODISCARD bool IsLoading() const noexcept;

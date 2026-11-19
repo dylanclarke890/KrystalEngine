@@ -91,7 +91,7 @@ namespace krys::boo::html
     Submit,
     Telephone,
     Time,
-    URL,
+    Url,
     Week,
     Text,
   };
@@ -227,9 +227,9 @@ namespace krys::boo::html
       return _type == Type::Time;
     }
 
-    KRYS_NODISCARD bool IsURLField() const noexcept
+    KRYS_NODISCARD bool IsUrlField() const noexcept
     {
-      return _type == Type::URL;
+      return _type == Type::Url;
     }
 
     KRYS_NODISCARD bool IsWeekField() const noexcept

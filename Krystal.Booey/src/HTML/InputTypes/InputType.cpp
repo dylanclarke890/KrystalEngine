@@ -55,7 +55,7 @@
 #include "Krystal.Booey/HTML/InputTypes/TelephoneInputType.hpp"
 #include "Krystal.Booey/HTML/InputTypes/TextInputType.hpp"
 #include "Krystal.Booey/HTML/InputTypes/TimeInputType.hpp"
-#include "Krystal.Booey/HTML/InputTypes/URLInputType.hpp"
+#include "Krystal.Booey/HTML/InputTypes/UrlInputType.hpp"
 #include "Krystal.Booey/HTML/InputTypes/WeekInputType.hpp"
 #include "Krystal.Booey/HTML/Parser/ParserIdioms.hpp"
 #include "Krystal.Booey/HTML/Shadow/TextControlInnerElements.hpp"
@@ -78,10 +78,10 @@ namespace krys::boo::html
     using Type = InputType::Type;
 
     constexpr EnumSet<Type> TextTypes {Type::Email,     Type::Password, Type::Search,
-                                       Type::Telephone, Type::Text,     Type::URL};
+                                       Type::Telephone, Type::Text,     Type::Url};
 
     constexpr EnumSet<Type> TextFieldTypes {Type::Email,     Type::Number, Type::Password, Type::Search,
-                                            Type::Telephone, Type::Text,   Type::URL};
+                                            Type::Telephone, Type::Text,   Type::Url};
 
     constexpr EnumSet<Type> TextButtonTypes {Type::Button, Type::Reset, Type::Submit};
 
@@ -132,7 +132,7 @@ namespace krys::boo::html
       {input_type_names::Telephone, &CreateInputType<TelephoneInputType>},
       {input_type_names::Text, &CreateInputType<TextInputType>},
       {input_type_names::Time, &CreateInputType<TimeInputType>},
-      {input_type_names::URL, &CreateInputType<URLInputType>},
+      {input_type_names::Url, &CreateInputType<UrlInputType>},
       {input_type_names::Week, &CreateInputType<WeekInputType>},
     }};
 

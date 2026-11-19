@@ -34,7 +34,7 @@
 
 namespace krys::net
 {
-  class URL;
+  class Url;
 }
 
 namespace krys::boo
@@ -61,7 +61,7 @@ namespace krys::boo
   public:
     ~FontLoadRequest() noexcept override = default;
 
-    KRYS_NODISCARD virtual const net::URL &URL() const noexcept = 0;
+    KRYS_NODISCARD virtual const net::Url &Url() const noexcept = 0;
 
     KRYS_NODISCARD virtual bool IsPending() const noexcept = 0;
 

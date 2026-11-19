@@ -316,7 +316,7 @@ namespace krys::boo
         krys_debug_assert(!_cachedSheet);
 
         // Style sheets are UTF-8 only, whatever the charset pseudo-attribute says (see DIFFERENCES.md).
-        CachedResourceRequest request(ResourceRequest(document->CompleteURL(href)),
+        CachedResourceRequest request(ResourceRequest(document->CompleteUrl(href)),
                                       CachedResourceLoader::DefaultCachedResourceOptions());
         request.SetCharset(get(u8"charset"));
 
@@ -360,7 +360,7 @@ namespace krys::boo
     return false;
   }
 
-  void ProcessingInstruction::SetCSSStyleSheet(const utf8_string &href, const net::URL &baseURL,
+  void ProcessingInstruction::SetCSSStyleSheet(const utf8_string &href, const net::Url &baseUrl,
                                                utf8_stringview charset,
                                                const CachedCSSStyleSheet *sheet) noexcept
   {
@@ -374,7 +374,7 @@ namespace krys::boo
 
     Ref<Document> document = ShareRef(NodeDocument());
     krys_debug_assert(_isCSS);
-    css::ParserContext parserContext(*document, baseURL, charset);
+    css::ParserContext parserContext(*document, baseUrl, charset);
 
     auto cssSheet =
       CSSStyleSheet::Create(css::StyleSheetContents::Create(CSSOMString(href), parserContext), *this, true);

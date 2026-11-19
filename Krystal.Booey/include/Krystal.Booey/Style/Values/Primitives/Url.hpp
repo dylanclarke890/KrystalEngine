@@ -24,7 +24,7 @@
 
 #pragma once
 
-#include "Krystal.Booey/CSS/Values/Primitives/URL.hpp"
+#include "Krystal.Booey/CSS/Values/Primitives/Url.hpp"
 #include "Krystal.Booey/Style/Values/Types.hpp"
 #include "Krystal.Core/Strings/StringBuilder.hpp"
 #include "Krystal.Core/Types/Markable.hpp"
@@ -37,16 +37,16 @@ namespace krys::boo
 namespace krys::boo::style
 {
   /// @brief A computed `<url>`: the resolved URL and its modifiers.
-  struct URL
+  struct Url
   {
-    net::URL Resolved;
-    css::URLModifiers Modifiers;
+    net::Url Resolved;
+    css::UrlModifiers Modifiers;
 
-    KRYS_NODISCARD bool operator==(const URL &) const noexcept = default;
+    KRYS_NODISCARD bool operator==(const Url &) const noexcept = default;
   };
 
   template <size_t I>
-  KRYS_NODISCARD const auto &get(const URL &value) noexcept
+  KRYS_NODISCARD const auto &get(const Url &value) noexcept
   {
     if constexpr (!I)
     {
@@ -61,58 +61,58 @@ namespace krys::boo::style
   // MARK: Conversion
 
   /// @brief Special conversion function for use by filters and font-face code.
-  KRYS_NODISCARD URL ToStyleWithScriptExecutionContext(const css::CSSURL &, const Document &) noexcept;
+  KRYS_NODISCARD Url ToStyleWithScriptExecutionContext(const css::CSSUrl &, const Document &) noexcept;
 
   template <>
-  struct ToCSS<URL>
+  struct ToCSS<Url>
   {
-    KRYS_NODISCARD css::CSSURL operator()(const URL &, const RenderStyle &) noexcept;
+    KRYS_NODISCARD css::CSSUrl operator()(const Url &, const RenderStyle &) noexcept;
   };
 
   template <>
-  struct ToStyle<css::CSSURL>
+  struct ToStyle<css::CSSUrl>
   {
-    KRYS_NODISCARD URL operator()(const css::CSSURL &, const BuilderState &) noexcept;
+    KRYS_NODISCARD Url operator()(const css::CSSUrl &, const BuilderState &) noexcept;
   };
 
-  // `URL` is special-cased to return a `css::UrlValue`.
+  // `Url` is special-cased to return a `css::UrlValue`.
   template <>
-  struct CSSValueCreation<URL>
+  struct CSSValueCreation<Url>
   {
-    KRYS_NODISCARD Ref<css::Value> operator()(css::ValuePool &, const RenderStyle &, const URL &) noexcept;
+    KRYS_NODISCARD Ref<css::Value> operator()(css::ValuePool &, const RenderStyle &, const Url &) noexcept;
   };
 
   template <>
-  struct CSSValueConversion<URL>
+  struct CSSValueConversion<Url>
   {
-    KRYS_NODISCARD URL operator()(BuilderState &, const css::Value &) noexcept;
+    KRYS_NODISCARD Url operator()(BuilderState &, const css::Value &) noexcept;
   };
 
   // MARK: Serialisation
 
   template <>
-  struct Serialiser<URL>
+  struct Serialiser<Url>
   {
     void operator()(StringBuilder &, const css::SerialisationContext &, const RenderStyle &,
-                    const URL &) noexcept;
+                    const Url &) noexcept;
   };
 }
 
 namespace krys
 {
   template <>
-  struct MarkableTraits<boo::style::URL>
+  struct MarkableTraits<boo::style::Url>
   {
-    KRYS_NODISCARD static bool IsEmptyValue(const boo::style::URL &value) noexcept
+    KRYS_NODISCARD static bool IsEmptyValue(const boo::style::Url &value) noexcept
     {
       return value.Resolved.IsNull();
     }
 
-    KRYS_NODISCARD static boo::style::URL EmptyValue() noexcept
+    KRYS_NODISCARD static boo::style::Url EmptyValue() noexcept
     {
       return {.Resolved = {}, .Modifiers = {}};
     }
   };
 }
 
-DEFINE_TUPLE_LIKE_CONFORMANCE(krys::boo::style::URL, 2)
+DEFINE_TUPLE_LIKE_CONFORMANCE(krys::boo::style::Url, 2)

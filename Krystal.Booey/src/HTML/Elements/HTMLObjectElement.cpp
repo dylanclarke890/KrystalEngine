@@ -93,12 +93,12 @@ namespace krys::boo
 
   dom::USVString HTMLObjectElement::Data() const noexcept
   {
-    return html::ReflectURL<dom::USVString>(*this, u8"data");
+    return html::ReflectUrl<dom::USVString>(*this, u8"data");
   }
 
   void HTMLObjectElement::Data(dom::USVString value) noexcept
   {
-    return html::ReflectURL<dom::USVString>(*this, u8"data", krys::move(value));
+    return html::ReflectUrl<dom::USVString>(*this, u8"data", krys::move(value));
   }
 
   DOMString HTMLObjectElement::Type() const noexcept

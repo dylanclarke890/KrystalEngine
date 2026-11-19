@@ -172,13 +172,13 @@ namespace krys::boo::tests
 
     SECTION("data URLs")
     {
-      CHECK(canvas.ToDataURL().starts_with(u8"data:image/png;base64,iVBORw0KGgo"));
-      CHECK(canvas.ToDataURL(u8"image/jpeg", 0.5).starts_with(u8"data:image/jpeg;base64,/9j/"));
-      CHECK(canvas.ToDataURL(u8"IMAGE/WEBP").starts_with(u8"data:image/webp;base64,UklGR"));
+      CHECK(canvas.ToDataUrl().starts_with(u8"data:image/png;base64,iVBORw0KGgo"));
+      CHECK(canvas.ToDataUrl(u8"image/jpeg", 0.5).starts_with(u8"data:image/jpeg;base64,/9j/"));
+      CHECK(canvas.ToDataUrl(u8"IMAGE/WEBP").starts_with(u8"data:image/webp;base64,UklGR"));
       // Types the encoders don't have are PNG.
-      CHECK(canvas.ToDataURL(u8"image/gif").starts_with(u8"data:image/png;base64,"));
+      CHECK(canvas.ToDataUrl(u8"image/gif").starts_with(u8"data:image/png;base64,"));
       // A canvas without pixels has none to encode.
-      CHECK(fixture.Canvas(u8"empty").ToDataURL() == u8"data:,");
+      CHECK(fixture.Canvas(u8"empty").ToDataUrl() == u8"data:,");
     }
   }
 }

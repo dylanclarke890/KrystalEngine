@@ -133,9 +133,9 @@ namespace krys::boo
       return _resourceRequest;
     }
 
-    KRYS_NODISCARD const net::URL &URL() const noexcept
+    KRYS_NODISCARD const net::Url &Url() const noexcept
     {
-      return _resourceRequest.URL();
+      return _resourceRequest.Url();
     }
 
     KRYS_NODISCARD Type GetType() const noexcept

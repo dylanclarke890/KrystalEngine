@@ -25,9 +25,9 @@
 namespace krys::boo
 {
   SVGImageForContainer::SVGImageForContainer(SVGImage *image, const FloatSize &containerSize,
-                                             float containerZoom, net::URL initialFragmentURL) noexcept
+                                             float containerZoom, net::Url initialFragmentUrl) noexcept
       : _image(CreateWeakPtr(image)), _containerSize(containerSize), _containerZoom(containerZoom),
-        _initialFragmentURL(krys::move(initialFragmentURL))
+        _initialFragmentUrl(krys::move(initialFragmentUrl))
   {
   }
 
@@ -42,7 +42,7 @@ namespace krys::boo
                                              const FloatRect &srcRect, ImagePaintingOptions options) noexcept
   {
     RefPtr<SVGImage> image = ShareRefPtr(_image.get());
-    return image->DrawForContainer(context, _containerSize, _containerZoom, _initialFragmentURL, dstRect,
+    return image->DrawForContainer(context, _containerSize, _containerZoom, _initialFragmentUrl, dstRect,
                                    srcRect, options);
   }
 
@@ -52,7 +52,7 @@ namespace krys::boo
                                          ImagePaintingOptions options) noexcept
   {
     RefPtr<SVGImage> image = ShareRefPtr(_image.get());
-    image->DrawPatternForContainer(context, _containerSize, _containerZoom, _initialFragmentURL, srcRect,
+    image->DrawPatternForContainer(context, _containerSize, _containerZoom, _initialFragmentUrl, srcRect,
                                    patternTransform, phase, spacing, dstRect, options);
   }
 

@@ -23,24 +23,24 @@
  * THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-#include "Krystal.Booey/HTML/Mixins/URLDecomposition.hpp"
+#include "Krystal.Booey/HTML/Mixins/UrlDecomposition.hpp"
 #include "Krystal.Core/Strings/ASCII.hpp"
-#include "Krystal.Net/URL.hpp"
+#include "Krystal.Net/Url.hpp"
 #include <limits>
 
 namespace krys::boo::html
 {
-  dom::USVString URLDecomposition::SerializedOrigin(const net::URL &url) noexcept
+  dom::USVString UrlDecomposition::SerializedOrigin(const net::Url &url) noexcept
   {
     // https://url.spec.whatwg.org/#concept-url-origin
     if (url.ProtocolIsBlob())
     {
       // Let pathURL be the result of parsing the result of URL path serializing url. If pathURL's scheme is
       // "http" or "https", return pathURL's origin.
-      net::URL pathURL(url.Path());
-      if (pathURL.IsValid() && (pathURL.ProtocolIs(u8"http") || pathURL.ProtocolIs(u8"https")))
+      net::Url pathUrl(url.Path());
+      if (pathUrl.IsValid() && (pathUrl.ProtocolIs(u8"http") || pathUrl.ProtocolIs(u8"https")))
       {
-        return SerializedOrigin(pathURL);
+        return SerializedOrigin(pathUrl);
       }
       return dom::USVString(u8"null");
     }
@@ -71,29 +71,29 @@ namespace krys::boo::html
     return dom::USVString(u8"null");
   }
 
-  // The steps are those of HTMLHyperlinkElementUtils, whose url is FullURL(): an invalid URL is a null one,
+  // The steps are those of HTMLHyperlinkElementUtils, whose url is FullUrl(): an invalid URL is a null one,
   // and reinitializing the url is computing it again.
 
-  dom::USVString URLDecomposition::Origin() const noexcept
+  dom::USVString UrlDecomposition::Origin() const noexcept
   {
     // 1. Reinitialize url.
-    auto fullURL = FullURL();
+    auto fullUrl = FullUrl();
 
     // 2. If this's url is null, return the empty string.
-    if (!fullURL.IsValid())
+    if (!fullUrl.IsValid())
     {
       return {};
     }
 
     // 3. Return the serialization of this's url's origin.
-    return SerializedOrigin(fullURL);
+    return SerializedOrigin(fullUrl);
   }
 
-  dom::USVString URLDecomposition::Protocol() const noexcept
+  dom::USVString UrlDecomposition::Protocol() const noexcept
   {
     // 1. Reinitialize url.
-    auto fullURL = FullURL();
-    if (net::ProtocolIsJavaScript(fullURL.String()))
+    auto fullUrl = FullUrl();
+    if (net::ProtocolIsJavaScript(fullUrl.String()))
     {
       return dom::USVString(u8"javascript:");
     }
@@ -101,15 +101,15 @@ namespace krys::boo::html
     // 2. If this's url is null, return ":".
     // 3. Return this's url's scheme, followed by ":".
     // (An invalid URL's scheme is empty.)
-    dom::USVString result(fullURL.Protocol());
+    dom::USVString result(fullUrl.Protocol());
     result += u8':';
     return result;
   }
 
-  void URLDecomposition::Protocol(DOMStringView value) noexcept
+  void UrlDecomposition::Protocol(DOMStringView value) noexcept
   {
     // 1. Reinitialize url.
-    auto copy = FullURL();
+    auto copy = FullUrl();
 
     // 2. If this's url is null, then return.
     if (!copy.IsValid())
@@ -122,143 +122,143 @@ namespace krys::boo::html
     copy.SetProtocol(value);
 
     // 4. Update href.
-    SetFullURL(copy);
+    SetFullUrl(copy);
   }
 
-  dom::USVString URLDecomposition::Username() const noexcept
+  dom::USVString UrlDecomposition::Username() const noexcept
   {
     // 1. Reinitialize url.
     // 2. If this's url is null, return the empty string.
     // 3. Return this's url's username.
-    return dom::USVString(FullURL().EncodedUser());
+    return dom::USVString(FullUrl().EncodedUser());
   }
 
-  void URLDecomposition::Username(DOMStringView user) noexcept
+  void UrlDecomposition::Username(DOMStringView user) noexcept
   {
     // 1. Reinitialize url.
     // 2. Let url be this's url.
-    auto fullURL = FullURL();
+    auto fullUrl = FullUrl();
 
     // 3. If url is null or url cannot have a username/password/port, then return.
-    if (!fullURL.IsValid() || fullURL.Host().empty() || fullURL.ProtocolIsFile())
+    if (!fullUrl.IsValid() || fullUrl.Host().empty() || fullUrl.ProtocolIsFile())
     {
       return;
     }
 
     // 4. Set the username, given url and the given value.
-    fullURL.SetUser(user);
+    fullUrl.SetUser(user);
 
     // 5. Update href.
-    SetFullURL(fullURL);
+    SetFullUrl(fullUrl);
   }
 
-  dom::USVString URLDecomposition::Password() const noexcept
+  dom::USVString UrlDecomposition::Password() const noexcept
   {
     // 1. Reinitialize url.
     // 2. Let url be this's url.
     // 3. If url is null, then return the empty string.
     // 4. Return url's password.
-    return dom::USVString(FullURL().EncodedPassword());
+    return dom::USVString(FullUrl().EncodedPassword());
   }
 
-  void URLDecomposition::Password(DOMStringView password) noexcept
+  void UrlDecomposition::Password(DOMStringView password) noexcept
   {
     // 1. Reinitialize url.
     // 2. Let url be this's url.
-    auto fullURL = FullURL();
+    auto fullUrl = FullUrl();
 
     // 3. If url is null or url cannot have a username/password/port, then return.
-    if (!fullURL.IsValid() || fullURL.Host().empty() || fullURL.ProtocolIsFile())
+    if (!fullUrl.IsValid() || fullUrl.Host().empty() || fullUrl.ProtocolIsFile())
     {
       return;
     }
 
     // 4. Set the password, given url and the given value.
-    fullURL.SetPassword(password);
+    fullUrl.SetPassword(password);
 
     // 5. Update href.
-    SetFullURL(fullURL);
+    SetFullUrl(fullUrl);
   }
 
-  dom::USVString URLDecomposition::Host() const noexcept
+  dom::USVString UrlDecomposition::Host() const noexcept
   {
     // 1. Reinitialize url.
     // 2. Let url be this's url.
     // 3. If url or url's host is null, return the empty string.
     // 4. If url's port is null, return url's host, serialized.
     // 5. Return url's host, serialized, followed by ":" and url's port, serialized.
-    return dom::USVString(FullURL().HostAndPort());
+    return dom::USVString(FullUrl().HostAndPort());
   }
 
-  void URLDecomposition::Host(DOMStringView value) noexcept
+  void UrlDecomposition::Host(DOMStringView value) noexcept
   {
     // 1. Reinitialize url.
     // 2. Let url be this's url.
-    auto fullURL = FullURL();
+    auto fullUrl = FullUrl();
 
     // 3. If url is null or url has an opaque path, then return.
-    if (!fullURL.IsValid() || fullURL.HasOpaquePath())
+    if (!fullUrl.IsValid() || fullUrl.HasOpaquePath())
     {
       return;
     }
 
     // 4. Basic URL parse the given value, with url as url and host state as state override.
     // (An empty host fails for a special URL other than a file URL.)
-    if (value.empty() && !fullURL.ProtocolIsFile() && fullURL.HasSpecialScheme())
+    if (value.empty() && !fullUrl.ProtocolIsFile() && fullUrl.HasSpecialScheme())
     {
       return;
     }
-    fullURL.SetHostAndPort(value);
+    fullUrl.SetHostAndPort(value);
 
     // 5. Update href.
-    if (fullURL.IsValid())
+    if (fullUrl.IsValid())
     {
-      SetFullURL(fullURL);
+      SetFullUrl(fullUrl);
     }
   }
 
-  dom::USVString URLDecomposition::Hostname() const noexcept
+  dom::USVString UrlDecomposition::Hostname() const noexcept
   {
     // 1. Reinitialize url.
     // 2. Let url be this's url.
     // 3. If url or url's host is null, return the empty string.
     // 4. Return url's host, serialized.
-    return dom::USVString(FullURL().Host());
+    return dom::USVString(FullUrl().Host());
   }
 
-  void URLDecomposition::Hostname(DOMStringView host) noexcept
+  void UrlDecomposition::Hostname(DOMStringView host) noexcept
   {
     // 1. Reinitialize url.
     // 2. Let url be this's url.
-    auto fullURL = FullURL();
+    auto fullUrl = FullUrl();
 
     // 3. If url is null or url has an opaque path, then return.
-    if (!fullURL.IsValid() || fullURL.HasOpaquePath())
+    if (!fullUrl.IsValid() || fullUrl.HasOpaquePath())
     {
       return;
     }
 
     // 4. Basic URL parse the given value, with url as url and hostname state as state override.
     // (An empty host fails for a special URL other than a file URL.)
-    if (host.empty() && !fullURL.ProtocolIsFile() && fullURL.HasSpecialScheme())
+    if (host.empty() && !fullUrl.ProtocolIsFile() && fullUrl.HasSpecialScheme())
     {
       return;
     }
-    fullURL.SetHost(host);
+    fullUrl.SetHost(host);
 
     // 5. Update href.
-    if (fullURL.IsValid())
+    if (fullUrl.IsValid())
     {
-      SetFullURL(fullURL);
+      SetFullUrl(fullUrl);
     }
   }
 
-  dom::USVString URLDecomposition::Port() const noexcept
+  dom::USVString UrlDecomposition::Port() const noexcept
   {
     // 1. Reinitialize url.
     // 2. Let url be this's url.
     // 3. If url or url's port is null, return the empty string.
-    auto port = FullURL().Port();
+    auto port = FullUrl().Port();
     if (!port)
     {
       return {};
@@ -268,7 +268,7 @@ namespace krys::boo::html
     return dom::USVString(utf8_string(reinterpret_cast<const char8_t *>(std::to_string(*port).c_str())));
   }
 
-  Maybe<Maybe<uint16>> URLDecomposition::ParsePort(DOMStringView string, DOMStringView protocol) noexcept
+  Maybe<Maybe<uint16>> UrlDecomposition::ParsePort(DOMStringView string, DOMStringView protocol) noexcept
   {
     // https://url.spec.whatwg.org/#port-state with state override given.
     uint32 port {0};
@@ -303,14 +303,14 @@ namespace krys::boo::html
     return Maybe<uint16>(static_cast<uint16>(port));
   }
 
-  void URLDecomposition::Port(DOMStringView value) noexcept
+  void UrlDecomposition::Port(DOMStringView value) noexcept
   {
     // 1. Reinitialize url.
     // 2. Let url be this's url.
-    auto fullURL = FullURL();
+    auto fullUrl = FullUrl();
 
     // 3. If url is null or url cannot have a username/password/port, then return.
-    if (!fullURL.IsValid() || fullURL.Host().empty() || fullURL.ProtocolIsFile())
+    if (!fullUrl.IsValid() || fullUrl.Host().empty() || fullUrl.ProtocolIsFile())
     {
       return;
     }
@@ -318,65 +318,65 @@ namespace krys::boo::html
     // 4. If the given value is the empty string, then set url's port to null.
     // 5. Otherwise, basic URL parse the given value, with url as url and port state as state override.
     // (ParsePort gives a null port for the empty string.)
-    auto port = ParsePort(value, fullURL.Protocol());
+    auto port = ParsePort(value, fullUrl.Protocol());
     if (!port)
     {
       return;
     }
-    fullURL.SetPort(*port);
+    fullUrl.SetPort(*port);
 
     // 6. Update href.
-    SetFullURL(fullURL);
+    SetFullUrl(fullUrl);
   }
 
-  dom::USVString URLDecomposition::Pathname() const noexcept
+  dom::USVString UrlDecomposition::Pathname() const noexcept
   {
     // 1. Reinitialize url.
     // 2. Let url be this's url.
     // 3. If url is null, then return the empty string.
     // 4. Return the result of URL path serializing url.
-    return dom::USVString(FullURL().Path());
+    return dom::USVString(FullUrl().Path());
   }
 
-  void URLDecomposition::Pathname(DOMStringView value) noexcept
+  void UrlDecomposition::Pathname(DOMStringView value) noexcept
   {
     // 1. Reinitialize url.
     // 2. Let url be this's url.
-    auto fullURL = FullURL();
+    auto fullUrl = FullUrl();
 
     // 3. If url is null or url has an opaque path, then return.
-    if (!fullURL.IsValid() || fullURL.HasOpaquePath())
+    if (!fullUrl.IsValid() || fullUrl.HasOpaquePath())
     {
       return;
     }
 
     // 4. Set url's path to the empty list.
     // 5. Basic URL parse the given value, with url as url and path start state as state override.
-    fullURL.SetPath(value);
+    fullUrl.SetPath(value);
 
     // 6. Update href.
-    SetFullURL(fullURL);
+    SetFullUrl(fullUrl);
   }
 
-  dom::USVString URLDecomposition::Search() const noexcept
+  dom::USVString UrlDecomposition::Search() const noexcept
   {
     // 1. Reinitialize url.
     // 2. Let url be this's url.
     // 3. If url is null, or url's query is either null or the empty string, return the empty string.
     // 4. Return "?", followed by url's query.
-    auto fullURL = FullURL();
-    return fullURL.Query().empty() ? dom::USVString()
-                                   : dom::USVString(fullURL.QueryWithLeadingQuestionMark());
+    auto fullUrl = FullUrl();
+    return fullUrl.Query().empty() ? dom::USVString()
+                                   : dom::USVString(fullUrl.QueryWithLeadingQuestionMark());
   }
 
-  void URLDecomposition::Search(DOMStringView value) noexcept
+  void UrlDecomposition::Search(DOMStringView value) noexcept
   {
     // 1. Reinitialize url.
     // 2. Let url be this's url.
-    auto fullURL = FullURL();
+    auto fullUrl = FullUrl();
 
     // 3. If url is null, terminate these steps.
-    if (!fullURL.IsValid())
+    if (!fullUrl.IsValid())
     {
       return;
     }
@@ -384,7 +384,7 @@ namespace krys::boo::html
     // 4. If the given value is the empty string, set url's query to null.
     if (value.empty())
     {
-      fullURL.SetQuery(utf8_stringview());
+      fullUrl.SetQuery(utf8_stringview());
     }
     // 5. Otherwise:
     // 5a. Let input be the given value with a single leading "?" removed, if any.
@@ -406,33 +406,33 @@ namespace krys::boo::html
           query += c;
         }
       }
-      fullURL.SetQuery(query);
+      fullUrl.SetQuery(query);
     }
 
     // 6. Update href.
-    SetFullURL(fullURL);
+    SetFullUrl(fullUrl);
   }
 
-  dom::USVString URLDecomposition::Hash() const noexcept
+  dom::USVString UrlDecomposition::Hash() const noexcept
   {
     // 1. Reinitialize url.
     // 2. Let url be this's url.
     // 3. If url is null, or url's fragment is either null or the empty string, return the empty string.
     // 4. Return "#", followed by url's fragment.
-    auto fullURL = FullURL();
-    return fullURL.FragmentIdentifier().empty()
+    auto fullUrl = FullUrl();
+    return fullUrl.FragmentIdentifier().empty()
              ? dom::USVString()
-             : dom::USVString(fullURL.FragmentIdentifierWithLeadingNumberSign());
+             : dom::USVString(fullUrl.FragmentIdentifierWithLeadingNumberSign());
   }
 
-  void URLDecomposition::Hash(DOMStringView value) noexcept
+  void UrlDecomposition::Hash(DOMStringView value) noexcept
   {
     // 1. Reinitialize url.
     // 2. Let url be this's url.
-    auto fullURL = FullURL();
+    auto fullUrl = FullUrl();
 
     // 3. If url is null, then return.
-    if (!fullURL.IsValid())
+    if (!fullUrl.IsValid())
     {
       return;
     }
@@ -440,7 +440,7 @@ namespace krys::boo::html
     // 4. If the given value is the empty string, set url's fragment to null.
     if (value.empty())
     {
-      fullURL.RemoveFragmentIdentifier();
+      fullUrl.RemoveFragmentIdentifier();
     }
     // 5. Otherwise:
     // 5a. Let input be the given value with a single leading "#" removed, if any.
@@ -448,10 +448,10 @@ namespace krys::boo::html
     // 5c. Basic URL parse input, with url as url and fragment state as state override.
     else
     {
-      fullURL.SetFragmentIdentifier(value.starts_with(u8'#') ? value.substr(1) : value);
+      fullUrl.SetFragmentIdentifier(value.starts_with(u8'#') ? value.substr(1) : value);
     }
 
     // 6. Update href.
-    SetFullURL(fullURL);
+    SetFullUrl(fullUrl);
   }
 }

@@ -128,14 +128,14 @@ namespace krys::boo
     }
 
     KRYS_NODISCARD bool
-      ContainsURL(FilenameConversionPolicy filenamePolicy = ConvertFilenames) const noexcept;
+      ContainsUrl(FilenameConversionPolicy filenamePolicy = ConvertFilenames) const noexcept;
 
     KRYS_NODISCARD bool ContainsPlainText() const noexcept;
 
     KRYS_NODISCARD bool
       ContainsCompatibleContent(DraggingPurpose purpose = DraggingPurpose::ForEditing) const noexcept;
 
-    KRYS_NODISCARD utf8_string AsURL(FilenameConversionPolicy filenamePolicy = ConvertFilenames,
+    KRYS_NODISCARD utf8_string AsUrl(FilenameConversionPolicy filenamePolicy = ConvertFilenames,
                                      utf8_string *title = nullptr) const noexcept;
 
     KRYS_NODISCARD utf8_string AsPlainText() const noexcept;

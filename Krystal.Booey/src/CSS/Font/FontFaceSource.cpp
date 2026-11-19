@@ -31,7 +31,7 @@
 #include "Krystal.Booey/Graphics/Fonts/FontCache.hpp"
 #include "Krystal.Booey/Graphics/Fonts/FontCascadeDescription.hpp"
 #include "Krystal.Booey/Graphics/Fonts/FontCreationContext.hpp"
-#include "Krystal.Net/URL.hpp"
+#include "Krystal.Net/Url.hpp"
 
 namespace krys::boo::css
 {
@@ -106,11 +106,11 @@ namespace krys::boo::css
     return _owningCSSFontFace.ShouldIgnoreFontLoadCompletions();
   }
 
-  void CSSFontFaceSource::OpportunisticallyStartFontDataURLLoading() noexcept
+  void CSSFontFaceSource::OpportunisticallyStartFontDataUrlLoading() noexcept
   {
     constexpr size_t MB = 1'024 * 1'024;
-    if (GetStatus() == Status::Pending && _fontRequest && _fontRequest->URL().ProtocolIsData()
-        && _fontRequest->URL().String().size() < MB)
+    if (GetStatus() == Status::Pending && _fontRequest && _fontRequest->Url().ProtocolIsData()
+        && _fontRequest->Url().String().size() < MB)
     {
       Load();
     }

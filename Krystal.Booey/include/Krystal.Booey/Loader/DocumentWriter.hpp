@@ -35,7 +35,7 @@
 #include "Krystal.Core/Types/RefPtr.hpp"
 #include "Krystal.Core/Types/Span.hpp"
 #include "Krystal.Core/Types/WeakPtr.hpp"
-#include "Krystal.Net/URL.hpp"
+#include "Krystal.Net/Url.hpp"
 
 namespace krys::boo
 {
@@ -99,7 +99,7 @@ namespace krys::boo
 
     /// @brief Makes a document at @p url and makes it the frame's, ready for its data.
     /// @return False if the frame lost its view while the old document unloaded.
-    bool Begin(const net::URL &url) noexcept;
+    bool Begin(const net::Url &url) noexcept;
 
     /// @brief Gives @p data, more of the document's bytes, to the parser.
     void AddData(Span<const uint8> data) noexcept;

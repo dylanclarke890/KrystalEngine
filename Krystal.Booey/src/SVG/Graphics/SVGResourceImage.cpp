@@ -34,14 +34,14 @@
 namespace krys::boo
 {
   Ref<SVGResourceImage> SVGResourceImage::Create(LegacyRenderSVGResourceContainer &renderResource,
-                                                 const style::URL &resourceURL) noexcept
+                                                 const style::Url &resourceUrl) noexcept
   {
-    return AdoptRef(*new SVGResourceImage(renderResource, resourceURL));
+    return AdoptRef(*new SVGResourceImage(renderResource, resourceUrl));
   }
 
   SVGResourceImage::SVGResourceImage(LegacyRenderSVGResourceContainer &renderResource,
-                                     style::URL resourceURL) noexcept
-      : _legacyRenderResource(CreateWeakPtr(&renderResource)), _resourceURL(krys::move(resourceURL))
+                                     style::Url resourceUrl) noexcept
+      : _legacyRenderResource(CreateWeakPtr(&renderResource)), _resourceUrl(krys::move(resourceUrl))
   {
   }
 
@@ -83,6 +83,6 @@ namespace krys::boo
   void SVGResourceImage::Dump(TextStream &ts) const noexcept
   {
     GeneratedImage::Dump(ts);
-    ts << _resourceURL.Resolved.String();
+    ts << _resourceUrl.Resolved.String();
   }
 }

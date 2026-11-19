@@ -38,7 +38,7 @@
 
 namespace krys::net
 {
-  class URL;
+  class Url;
 }
 
 namespace krys::boo
@@ -88,7 +88,7 @@ namespace krys::boo
                                                            bool forceBlackText = false) noexcept;
 
   /// @brief A label for a dragged link: its text in bold over its URL, or the URL alone if there's no text.
-  KRYS_NODISCARD DragImageData CreateDragImageForLink(boo::Element &element, net::URL &url,
+  KRYS_NODISCARD DragImageData CreateDragImageForLink(boo::Element &element, net::Url &url,
                                                       utf8_stringview label,
                                                       float deviceScaleFactor) noexcept;
 

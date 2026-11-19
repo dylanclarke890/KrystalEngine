@@ -21,11 +21,11 @@
 #pragma once
 
 #include "Krystal.Booey/CSS/Types/CSSOMString.hpp"
-#include "Krystal.Booey/CSS/Values/Primitives/URL.hpp"
+#include "Krystal.Booey/CSS/Values/Primitives/Url.hpp"
 #include "Krystal.Booey/CSS/Values/Value.hpp"
 #include "Krystal.Booey/Loader/Cache/CachedResourceHandle.hpp"
 #include "Krystal.Core/Types/RefPtr.hpp"
-#include "Krystal.Net/URL.hpp"
+#include "Krystal.Net/Url.hpp"
 
 namespace krys::boo
 {
@@ -47,7 +47,7 @@ namespace krys::boo::css
   class ImageValue final : public Value
   {
   private:
-    CSSURL _location;
+    CSSUrl _location;
     CachedResourceHandle<CachedImage> _cachedImage;
     // Set once the image is asked for, even if it couldn't be (a null handle).
     bool _didRequestImage {false};
@@ -57,20 +57,20 @@ namespace krys::boo::css
 
     ImageValue() noexcept;
 
-    ImageValue(CSSURL &&location, CSSOMStringAtom &&initiatorType) noexcept;
+    ImageValue(CSSUrl &&location, CSSOMStringAtom &&initiatorType) noexcept;
 
   public:
     ~ImageValue() noexcept;
 
     KRYS_NODISCARD static Ref<ImageValue> Create() noexcept;
 
-    KRYS_NODISCARD static Ref<ImageValue> Create(CSSURL location,
+    KRYS_NODISCARD static Ref<ImageValue> Create(CSSUrl location,
                                                  CSSOMStringAtom initiatorType = null) noexcept;
 
-    KRYS_NODISCARD static Ref<ImageValue> Create(net::URL imageURL,
+    KRYS_NODISCARD static Ref<ImageValue> Create(net::Url imageUrl,
                                                  CSSOMStringAtom initiatorType = null) noexcept;
 
-    KRYS_NODISCARD Ref<ImageValue> CopyForComputedStyle(const CSSURL &resolvedURL) const noexcept;
+    KRYS_NODISCARD Ref<ImageValue> CopyForComputedStyle(const CSSUrl &resolvedUrl) const noexcept;
 
     KRYS_NODISCARD bool IsPending() const noexcept;
 
@@ -80,7 +80,7 @@ namespace krys::boo::css
     KRYS_NODISCARD CachedImage *GetCachedImage() const noexcept;
 
     // Take care when using this, and read https://drafts.csswg.org/css-values/#relative-urls
-    KRYS_NODISCARD const CSSURL &URL() const noexcept
+    KRYS_NODISCARD const CSSUrl &Url() const noexcept
     {
       return _location;
     }

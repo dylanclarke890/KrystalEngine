@@ -219,7 +219,7 @@ namespace krys::boo::css
   private:
     void DispatchInvalidationCallbacks() noexcept;
 
-    void OpportunisticallyStartFontDataURLLoading(const FontCascadeDescription &description,
+    void OpportunisticallyStartFontDataUrlLoading(const FontCascadeDescription &description,
                                                   const StringAtom &family) noexcept final;
 
     KRYS_NODISCARD Maybe<StringAtom> ResolveGenericFamily(const FontDescription &description,

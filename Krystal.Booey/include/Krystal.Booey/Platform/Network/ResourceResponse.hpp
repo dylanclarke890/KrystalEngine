@@ -31,7 +31,7 @@
 #include "Krystal.Core/Strings/String.hpp"
 #include "Krystal.Core/Types/Maybe.hpp"
 #include "Krystal.Net/Http/HTTPHeaderMap.hpp"
-#include "Krystal.Net/URL.hpp"
+#include "Krystal.Net/Url.hpp"
 #include <chrono>
 
 namespace krys::boo
@@ -42,7 +42,7 @@ namespace krys::boo
   class ResourceResponse
   {
   private:
-    net::URL _url;
+    net::Url _url;
     utf8_string _mimeType;
     int64 _expectedContentLength {0};
     utf8_string _textEncodingName;
@@ -53,7 +53,7 @@ namespace krys::boo
   public:
     ResourceResponse() noexcept = default;
 
-    ResourceResponse(net::URL url, utf8_string mimeType, int64 expectedContentLength,
+    ResourceResponse(net::Url url, utf8_string mimeType, int64 expectedContentLength,
                      utf8_string textEncodingName = {}) noexcept
         : _url(krys::move(url)), _mimeType(krys::move(mimeType)),
           _expectedContentLength(expectedContentLength), _textEncodingName(krys::move(textEncodingName))
@@ -65,12 +65,12 @@ namespace krys::boo
       return _url.IsNull();
     }
 
-    KRYS_NODISCARD const net::URL &URL() const noexcept
+    KRYS_NODISCARD const net::Url &Url() const noexcept
     {
       return _url;
     }
 
-    void SetURL(net::URL url) noexcept
+    void SetUrl(net::Url url) noexcept
     {
       _url = krys::move(url);
     }

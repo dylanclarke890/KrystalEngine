@@ -68,7 +68,7 @@ namespace krys::boo::svg::tests
       Click(fixture.ById(u8"inner"));
       REQUIRE(fixture.Navigations().size() == 1);
       auto &navigation = fixture.Navigations()[0];
-      CHECK(navigation.URL == "https://example.com/dir/next.html");
+      CHECK(navigation.Url == "https://example.com/dir/next.html");
       CHECK_FALSE(navigation.IsNewWindow);
       CHECK(navigation.Action.Type() == NavigationType::LinkClicked);
       CHECK(navigation.Action.SourceElement() == &fixture.ById(u8"a"));
@@ -84,7 +84,7 @@ namespace krys::boo::svg::tests
     {
       Click(fixture.ById(u8"xlink"));
       REQUIRE(fixture.Navigations().size() == 1);
-      CHECK(fixture.Navigations()[0].URL == "https://example.com/dir/x.html");
+      CHECK(fixture.Navigations()[0].Url == "https://example.com/dir/x.html");
       CHECK(fixture.Navigations()[0].IsNewWindow);
       CHECK(fixture.Navigations()[0].NewWindowName == "_blank");
     }

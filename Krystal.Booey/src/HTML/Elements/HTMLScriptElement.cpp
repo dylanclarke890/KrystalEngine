@@ -49,12 +49,12 @@ namespace krys::boo
 
   dom::USVString HTMLScriptElement::Src() const noexcept
   {
-    return html::ReflectURL<dom::USVString>(*this, u8"src");
+    return html::ReflectUrl<dom::USVString>(*this, u8"src");
   }
 
   void HTMLScriptElement::Src(dom::USVString value) noexcept
   {
-    return html::ReflectURL<dom::USVString>(*this, u8"src", krys::move(value));
+    return html::ReflectUrl<dom::USVString>(*this, u8"src", krys::move(value));
   }
 
   bool HTMLScriptElement::NoModule() const noexcept

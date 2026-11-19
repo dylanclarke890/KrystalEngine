@@ -63,7 +63,7 @@ namespace krys::boo
 
       using Value =
         Variant<LengthPercentage<>, Length<>, Number<>, Percentage<>, Angle<>, Time<>, Resolution<>,
-                ImageWrapper, Color, URL, css::CustomIdentifier, CSSOMString, TransformFunction>;
+                ImageWrapper, Color, Url, css::CustomIdentifier, CSSOMString, TransformFunction>;
 
       struct ValueList
       {

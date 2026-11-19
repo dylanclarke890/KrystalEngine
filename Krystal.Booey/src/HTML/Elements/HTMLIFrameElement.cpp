@@ -38,12 +38,12 @@ namespace krys::boo
 
   dom::USVString HTMLIFrameElement::Src() const noexcept
   {
-    return html::ReflectURL<dom::USVString>(*this, u8"src");
+    return html::ReflectUrl<dom::USVString>(*this, u8"src");
   }
 
   void HTMLIFrameElement::Src(dom::USVString value) noexcept
   {
-    return html::ReflectURL<dom::USVString>(*this, u8"src", krys::move(value));
+    return html::ReflectUrl<dom::USVString>(*this, u8"src", krys::move(value));
   }
 
   DOMString HTMLIFrameElement::SrcDoc() const noexcept
@@ -172,12 +172,12 @@ namespace krys::boo
 
   dom::USVString HTMLIFrameElement::LongDesc() const noexcept
   {
-    return html::ReflectURL<dom::USVString>(*this, u8"longdesc");
+    return html::ReflectUrl<dom::USVString>(*this, u8"longdesc");
   }
 
   void HTMLIFrameElement::LongDesc(dom::USVString value) noexcept
   {
-    return html::ReflectURL<dom::USVString>(*this, u8"longdesc", krys::move(value));
+    return html::ReflectUrl<dom::USVString>(*this, u8"longdesc", krys::move(value));
   }
 
   DOMString HTMLIFrameElement::MarginWidth() const noexcept

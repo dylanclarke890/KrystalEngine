@@ -195,7 +195,7 @@ target_sources(Krystal.Booey.Tests
 		tests/CSS/Properties/Consumers/Transform.cpp
 		tests/CSS/Properties/Consumers/Transitions.cpp
 		tests/CSS/Properties/Consumers/UI.cpp
-		tests/CSS/Properties/Consumers/URL.cpp
+		tests/CSS/Properties/Consumers/Url.cpp
 		tests/CSS/Properties/Consumers/UnicodeRange.cpp
 		tests/CSS/Properties/Consumers/WillChange.cpp
 		tests/CSS/Properties/Property.cpp
@@ -235,7 +235,7 @@ target_sources(Krystal.Booey.Tests
 		tests/CSS/Values/Primitives/PrimitiveNumeric.cpp
 		tests/CSS/Values/Primitives/Position.cpp
 		tests/CSS/Values/Primitives/Ratio.cpp
-		tests/CSS/Values/Primitives/URL.cpp
+		tests/CSS/Values/Primitives/Url.cpp
 		tests/CSS/Values/Primitives/Units.cpp
 		tests/CSS/Values/PrimitiveValue.cpp
 		tests/CSS/Values/Quad.cpp
@@ -504,7 +504,7 @@ target_sources(Krystal.Booey.Tests
 		tests/Layout/FormattingContexts/Inline/Invalidation/InlineInvalidation.cpp
 		tests/Platform/DateComponents.cpp
 		tests/Platform/ImageDecoders/ScalableImageDecoder.cpp
-		tests/Platform/Network/DataURLDecoder.cpp
+		tests/Platform/Network/DataUrlDecoder.cpp
 		tests/Platform/Network/ResourceResponse.cpp
 		tests/Platform/Scrolling/ScrollAlignment.cpp
 		tests/Platform/Timer.cpp
@@ -756,7 +756,7 @@ target_sources(Krystal.Booey.Tests
 		tests/HTML/Algorithms/RenderBlocking.cpp
 		tests/HTML/Attributes/EnumeratedAttributes.cpp
 		tests/HTML/Attributes/ReflectAttribute.cpp
-		tests/HTML/Attributes/ReflectURL.cpp
+		tests/HTML/Attributes/ReflectUrl.cpp
 		tests/HTML/InputTypes/BaseDateAndTimeInputType.cpp
 		tests/HTML/InputTypes/ColorInputType.cpp
 		tests/HTML/InputTypes/FileInputType.cpp
@@ -772,7 +772,7 @@ target_sources(Krystal.Booey.Tests
 		tests/HTML/Collections/RadioNodeList.cpp
 		tests/HTML/Shadow/SliderThumbElement.cpp
 		tests/HTML/Shadow/SpinButtonElement.cpp
-		tests/HTML/Mixins/URLDecomposition.cpp
+		tests/HTML/Mixins/UrlDecomposition.cpp
 		tests/HTML/MicroParsers/Dimensions.cpp
 		tests/HTML/MicroParsers/Numbers.cpp
 		tests/HTML/Internals/PresentationalHints.cpp

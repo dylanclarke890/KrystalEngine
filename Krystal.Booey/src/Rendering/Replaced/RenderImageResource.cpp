@@ -120,7 +120,7 @@ namespace krys::boo
   }
 
   void RenderImageResource::SetContainerContext(const IntSize &imageContainerSize,
-                                                const net::URL &imageURL) noexcept
+                                                const net::Url &imageUrl) noexcept
   {
     if (!_cachedImage || !_renderer)
     {
@@ -128,7 +128,7 @@ namespace krys::boo
     }
     _cachedImage->SetContainerContextForClient(_renderer->GetCachedImageClient(),
                                                LayoutSize(imageContainerSize), _renderer->Style().UsedZoom(),
-                                               imageURL);
+                                               imageUrl);
   }
 
   LayoutSize RenderImageResource::ImageSize(float multiplier, CachedImage::SizeType type) const noexcept

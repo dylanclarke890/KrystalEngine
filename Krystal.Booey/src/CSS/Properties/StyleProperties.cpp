@@ -391,7 +391,7 @@ namespace krys::boo::css
     return false;
   }
 
-  bool StyleProperties::MayDependOnBaseURL() const noexcept
+  bool StyleProperties::MayDependOnBaseUrl() const noexcept
   {
     bool result = false;
     Func<IterationStatus(Value &)> func = [&](Value &value) -> IterationStatus

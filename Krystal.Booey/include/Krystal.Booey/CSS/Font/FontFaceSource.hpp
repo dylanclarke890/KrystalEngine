@@ -94,7 +94,7 @@ namespace krys::boo::css
       return _status;
     }
 
-    void OpportunisticallyStartFontDataURLLoading() noexcept;
+    void OpportunisticallyStartFontDataUrlLoading() noexcept;
 
     void Load(boo::Document *document = nullptr) noexcept;
 

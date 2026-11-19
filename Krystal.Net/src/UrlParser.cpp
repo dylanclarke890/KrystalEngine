@@ -23,7 +23,7 @@
  * THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-#include "Krystal.Net/URLParser.hpp"
+#include "Krystal.Net/UrlParser.hpp"
 #include "Krystal.Core/Assert.hpp"
 #include "Krystal.Core/Strings/ASCII.hpp"
 #include "Krystal.Core/Types/SmallList.hpp"
@@ -38,7 +38,7 @@ namespace krys::net
   {
     using text::CodePointIterator;
 
-    enum URLCharacterClass : uint8
+    enum UrlCharacterClass : uint8
     {
       UserInfoEncode = 0x1,
       PathEncode = 0x2,
@@ -343,7 +343,7 @@ namespace krys::net
       return result;
     }
 
-    void SerialiseURLEncodedForm(utf8_stringview input, utf8_string &output) noexcept
+    void SerialiseUrlEncodedForm(utf8_stringview input, utf8_string &output) noexcept
     {
       for (char8 byte : input)
       {
@@ -370,25 +370,25 @@ namespace krys::net
     return c <= 0x7F && CharacterClassTable[c] & ForbiddenHost;
   }
 
-  bool URLParser::IsForbiddenHostCodePoint(char32 c) const noexcept
+  bool UrlParser::IsForbiddenHostCodePoint(char32 c) const noexcept
   {
     krys_debug_assert(!_urlIsSpecial);
     return net::IsForbiddenHostCodePoint(c);
   }
 
-  bool URLParser::IsForbiddenDomainCodePoint(char32 c) const noexcept
+  bool UrlParser::IsForbiddenDomainCodePoint(char32 c) const noexcept
   {
     krys_debug_assert(_urlIsSpecial);
     return c <= 0x7F && CharacterClassTable[c] & ForbiddenDomain;
   }
 
-  bool URLParser::IsInUserInfoEncodeSet(char32 c) noexcept
+  bool UrlParser::IsInUserInfoEncodeSet(char32 c) noexcept
   {
     return net::IsInUserInfoEncodeSet(c);
   }
 
-  template <URLParser::ReportSyntaxViolation reportSyntaxViolation>
-  void URLParser::Advance(CodePointIterator &iterator,
+  template <UrlParser::ReportSyntaxViolation reportSyntaxViolation>
+  void UrlParser::Advance(CodePointIterator &iterator,
                           const CodePointIterator &iteratorForSyntaxViolationPosition) noexcept
   {
     ++iterator;
@@ -402,7 +402,7 @@ namespace krys::net
     }
   }
 
-  bool URLParser::TakesTwoAdvancesUntilEnd(CodePointIterator iterator) noexcept
+  bool UrlParser::TakesTwoAdvancesUntilEnd(CodePointIterator iterator) noexcept
   {
     if (iterator.AtEnd())
     {
@@ -417,7 +417,7 @@ namespace krys::net
     return iterator.AtEnd();
   }
 
-  bool URLParser::IsWindowsDriveLetter(CodePointIterator iterator) noexcept
+  bool UrlParser::IsWindowsDriveLetter(CodePointIterator iterator) noexcept
   {
     // https://url.spec.whatwg.org/#start-with-a-windows-drive-letter
     if (iterator.AtEnd() || !text::IsASCIIAlpha(*iterator))
@@ -437,7 +437,7 @@ namespace krys::net
     return iterator.AtEnd() || *iterator == '/' || *iterator == '\\' || *iterator == '?' || *iterator == '#';
   }
 
-  KRYS_ALWAYS_INLINE void URLParser::AppendToASCIIBuffer(char32 codePoint) noexcept
+  KRYS_ALWAYS_INLINE void UrlParser::AppendToASCIIBuffer(char32 codePoint) noexcept
   {
     krys_debug_assert(text::IsASCII(codePoint));
     if (_didSeeSyntaxViolation) KRYS_UNLIKELY
@@ -446,7 +446,7 @@ namespace krys::net
     }
   }
 
-  KRYS_ALWAYS_INLINE void URLParser::AppendToASCIIBuffer(utf8_stringview characters) noexcept
+  KRYS_ALWAYS_INLINE void UrlParser::AppendToASCIIBuffer(utf8_stringview characters) noexcept
   {
     if (_didSeeSyntaxViolation) KRYS_UNLIKELY
     {
@@ -454,7 +454,7 @@ namespace krys::net
     }
   }
 
-  void URLParser::AppendWindowsDriveLetter(CodePointIterator &iterator) noexcept
+  void UrlParser::AppendWindowsDriveLetter(CodePointIterator &iterator) noexcept
   {
     auto lengthWithOnlyOneSlashInPath = _url._hostEnd + _url._portLength + 1;
     if (_url._pathAfterLastSlash > lengthWithOnlyOneSlashInPath)
@@ -476,7 +476,7 @@ namespace krys::net
     Advance(iterator);
   }
 
-  bool URLParser::CopyBaseWindowsDriveLetter(const URL &base) noexcept
+  bool UrlParser::CopyBaseWindowsDriveLetter(const Url &base) noexcept
   {
     if (base.ProtocolIsFile())
     {
@@ -491,7 +491,7 @@ namespace krys::net
     return false;
   }
 
-  bool URLParser::ShouldCopyFileURL(CodePointIterator iterator) noexcept
+  bool UrlParser::ShouldCopyFileUrl(CodePointIterator iterator) noexcept
   {
     if (!IsWindowsDriveLetter(iterator))
     {
@@ -514,7 +514,7 @@ namespace krys::net
     return !IsSlashQuestionOrHash(*iterator);
   }
 
-  void URLParser::PercentEncodeByte(uint8 byte) noexcept
+  void UrlParser::PercentEncodeByte(uint8 byte) noexcept
   {
     krys_debug_assert(_didSeeSyntaxViolation);
     AppendToASCIIBuffer('%');
@@ -523,7 +523,7 @@ namespace krys::net
   }
 
   template <bool (*IsInCodeSet)(char32)>
-  KRYS_ALWAYS_INLINE void URLParser::UTF8PercentEncode(const CodePointIterator &iterator) noexcept
+  KRYS_ALWAYS_INLINE void UrlParser::UTF8PercentEncode(const CodePointIterator &iterator) noexcept
   {
     krys_debug_assert(!iterator.AtEnd());
     char32 codePoint = *iterator;
@@ -557,7 +557,7 @@ namespace krys::net
     }
   }
 
-  KRYS_ALWAYS_INLINE void URLParser::UTF8QueryEncode(const CodePointIterator &iterator) noexcept
+  KRYS_ALWAYS_INLINE void UrlParser::UTF8QueryEncode(const CodePointIterator &iterator) noexcept
   {
     krys_debug_assert(!iterator.AtEnd());
     char32 codePoint = *iterator;
@@ -598,7 +598,7 @@ namespace krys::net
     }
   }
 
-  Maybe<uint16> URLParser::DefaultPortForProtocol(utf8_stringview scheme) noexcept
+  Maybe<uint16> UrlParser::DefaultPortForProtocol(utf8_stringview scheme) noexcept
   {
     constexpr uint16 ftpPort = 21;
     constexpr uint16 httpPort = 80;
@@ -619,7 +619,7 @@ namespace krys::net
     return null;
   }
 
-  Maybe<utf8_string> URLParser::MaybeCanonicaliseScheme(utf8_stringview scheme) noexcept
+  Maybe<utf8_string> UrlParser::MaybeCanonicaliseScheme(utf8_stringview scheme) noexcept
   {
     if (scheme.empty())
     {
@@ -659,12 +659,12 @@ namespace krys::net
     return result;
   }
 
-  bool URLParser::IsSpecialScheme(utf8_stringview scheme) noexcept
+  bool UrlParser::IsSpecialScheme(utf8_stringview scheme) noexcept
   {
     return SchemeOf(scheme) != Scheme::NonSpecial;
   }
 
-  enum class URLParser::URLPart
+  enum class UrlParser::UrlPart
   {
     SchemeEnd,
     UserStart,
@@ -677,48 +677,48 @@ namespace krys::net
     QueryEnd,
   };
 
-  size_t URLParser::URLLengthUntilPart(const URL &url, URLPart part) noexcept
+  size_t UrlParser::UrlLengthUntilPart(const Url &url, UrlPart part) noexcept
   {
     switch (part)
     {
-      case URLPart::QueryEnd:           return url._queryEnd;
-      case URLPart::PathEnd:            return url._pathEnd;
-      case URLPart::PathAfterLastSlash: return url._pathAfterLastSlash;
-      case URLPart::PortEnd:            return url._hostEnd + url._portLength;
-      case URLPart::HostEnd:            return url._hostEnd;
-      case URLPart::PasswordEnd:        return url._passwordEnd;
-      case URLPart::UserEnd:            return url._userEnd;
-      case URLPart::UserStart:          return url._userStart;
-      case URLPart::SchemeEnd:          return url._schemeEnd;
+      case UrlPart::QueryEnd:           return url._queryEnd;
+      case UrlPart::PathEnd:            return url._pathEnd;
+      case UrlPart::PathAfterLastSlash: return url._pathAfterLastSlash;
+      case UrlPart::PortEnd:            return url._hostEnd + url._portLength;
+      case UrlPart::HostEnd:            return url._hostEnd;
+      case UrlPart::PasswordEnd:        return url._passwordEnd;
+      case UrlPart::UserEnd:            return url._userEnd;
+      case UrlPart::UserStart:          return url._userStart;
+      case UrlPart::SchemeEnd:          return url._schemeEnd;
     }
     krys_debug_assert_msg(false, "Unknown URL part.");
     return 0;
   }
 
-  void URLParser::CopyASCIIStringUntil(const utf8_string &string, size_t length) noexcept
+  void UrlParser::CopyASCIIStringUntil(const utf8_string &string, size_t length) noexcept
   {
     krys_assert(length <= string.size());
     krys_debug_assert(_asciiBuffer.empty());
     AppendToASCIIBuffer(utf8_stringview {string}.substr(0, length));
   }
 
-  void URLParser::CopyURLPartsUntil(const URL &base, URLPart part, const CodePointIterator &iterator) noexcept
+  void UrlParser::CopyUrlPartsUntil(const Url &base, UrlPart part, const CodePointIterator &iterator) noexcept
   {
     SyntaxViolation(iterator);
 
     _asciiBuffer.clear();
-    CopyASCIIStringUntil(base._string, URLLengthUntilPart(base, part));
+    CopyASCIIStringUntil(base._string, UrlLengthUntilPart(base, part));
     switch (part)
     {
-      case URLPart::QueryEnd:           _url._queryEnd = base._queryEnd; [[fallthrough]];
-      case URLPart::PathEnd:            _url._pathEnd = base._pathEnd; [[fallthrough]];
-      case URLPart::PathAfterLastSlash: _url._pathAfterLastSlash = base._pathAfterLastSlash; [[fallthrough]];
-      case URLPart::PortEnd:            _url._portLength = base._portLength; [[fallthrough]];
-      case URLPart::HostEnd:            _url._hostEnd = base._hostEnd; [[fallthrough]];
-      case URLPart::PasswordEnd:        _url._passwordEnd = base._passwordEnd; [[fallthrough]];
-      case URLPart::UserEnd:            _url._userEnd = base._userEnd; [[fallthrough]];
-      case URLPart::UserStart:          _url._userStart = base._userStart; [[fallthrough]];
-      case URLPart::SchemeEnd:
+      case UrlPart::QueryEnd:           _url._queryEnd = base._queryEnd; [[fallthrough]];
+      case UrlPart::PathEnd:            _url._pathEnd = base._pathEnd; [[fallthrough]];
+      case UrlPart::PathAfterLastSlash: _url._pathAfterLastSlash = base._pathAfterLastSlash; [[fallthrough]];
+      case UrlPart::PortEnd:            _url._portLength = base._portLength; [[fallthrough]];
+      case UrlPart::HostEnd:            _url._hostEnd = base._hostEnd; [[fallthrough]];
+      case UrlPart::PasswordEnd:        _url._passwordEnd = base._passwordEnd; [[fallthrough]];
+      case UrlPart::UserEnd:            _url._userEnd = base._userEnd; [[fallthrough]];
+      case UrlPart::UserStart:          _url._userStart = base._userStart; [[fallthrough]];
+      case UrlPart::SchemeEnd:
         _url._isValid = base._isValid;
         _url._protocolIsInHTTPFamily = base._protocolIsInHTTPFamily;
         _url._schemeEnd = base._schemeEnd;
@@ -747,7 +747,7 @@ namespace krys::net
     }
   }
 
-  KRYS_ALWAYS_INLINE bool URLParser::IsSingleDotPathSegment(CodePointIterator c) noexcept
+  KRYS_ALWAYS_INLINE bool UrlParser::IsSingleDotPathSegment(CodePointIterator c) noexcept
   {
     if (c.AtEnd())
     {
@@ -780,7 +780,7 @@ namespace krys::net
     return false;
   }
 
-  KRYS_ALWAYS_INLINE bool URLParser::IsDoubleDotPathSegment(CodePointIterator c) noexcept
+  KRYS_ALWAYS_INLINE bool UrlParser::IsDoubleDotPathSegment(CodePointIterator c) noexcept
   {
     if (c.AtEnd())
     {
@@ -813,7 +813,7 @@ namespace krys::net
     return false;
   }
 
-  void URLParser::ConsumeSingleDotPathSegment(CodePointIterator &c) noexcept
+  void UrlParser::ConsumeSingleDotPathSegment(CodePointIterator &c) noexcept
   {
     krys_debug_assert(IsSingleDotPathSegment(c));
     if (*c == '.')
@@ -853,7 +853,7 @@ namespace krys::net
     }
   }
 
-  void URLParser::ConsumeDoubleDotPathSegment(CodePointIterator &c) noexcept
+  void UrlParser::ConsumeDoubleDotPathSegment(CodePointIterator &c) noexcept
   {
     krys_debug_assert(IsDoubleDotPathSegment(c));
     if (*c == '.')
@@ -872,7 +872,7 @@ namespace krys::net
     ConsumeSingleDotPathSegment(c);
   }
 
-  bool URLParser::ShouldPopPath(uint32 newPathAfterLastSlash) noexcept
+  bool UrlParser::ShouldPopPath(uint32 newPathAfterLastSlash) noexcept
   {
     krys_debug_assert(_didSeeSyntaxViolation);
     if (!_urlIsFile)
@@ -890,7 +890,7 @@ namespace krys::net
     return true;
   }
 
-  void URLParser::PopPath() noexcept
+  void UrlParser::PopPath() noexcept
   {
     krys_debug_assert(_didSeeSyntaxViolation);
     if (_url._pathAfterLastSlash > _url._hostEnd + _url._portLength + 1)
@@ -914,7 +914,7 @@ namespace krys::net
     _asciiBuffer.resize(_url._pathAfterLastSlash);
   }
 
-  void URLParser::SyntaxViolation(const CodePointIterator &iterator) noexcept
+  void UrlParser::SyntaxViolation(const CodePointIterator &iterator) noexcept
   {
     if (_didSeeSyntaxViolation)
     {
@@ -928,14 +928,14 @@ namespace krys::net
     _asciiBuffer.append(_input.substr(0, codeUnitsToCopy));
   }
 
-  void URLParser::Failure() noexcept
+  void UrlParser::Failure() noexcept
   {
     _url.Invalidate();
     _url._string = utf8_string {_input};
     _url._isNull = false;
   }
 
-  bool URLParser::CheckLocalhostCodePoint(CodePointIterator &iterator, char32 codePoint) noexcept
+  bool UrlParser::CheckLocalhostCodePoint(CodePointIterator &iterator, char32 codePoint) noexcept
   {
     if (iterator.AtEnd() || text::ToASCIILower(*iterator) != codePoint)
     {
@@ -945,7 +945,7 @@ namespace krys::net
     return true;
   }
 
-  bool URLParser::IsAtLocalhost(CodePointIterator iterator) noexcept
+  bool UrlParser::IsAtLocalhost(CodePointIterator iterator) noexcept
   {
     for (char32 c : {U'l', U'o', U'c', U'a', U'l', U'h', U'o', U's', U't'})
     {
@@ -957,12 +957,12 @@ namespace krys::net
     return iterator.AtEnd();
   }
 
-  bool URLParser::IsLocalhost(utf8_stringview view) noexcept
+  bool UrlParser::IsLocalhost(utf8_stringview view) noexcept
   {
     return IsAtLocalhost(CodePointIterator {view});
   }
 
-  KRYS_ALWAYS_INLINE utf8_stringview URLParser::ParsedDataView(size_t start, size_t length) const noexcept
+  KRYS_ALWAYS_INLINE utf8_stringview UrlParser::ParsedDataView(size_t start, size_t length) const noexcept
   {
     if (_didSeeSyntaxViolation) KRYS_UNLIKELY
     {
@@ -973,7 +973,7 @@ namespace krys::net
     return _input.substr(start, length);
   }
 
-  KRYS_ALWAYS_INLINE char8 URLParser::ParsedDataView(size_t position) const noexcept
+  KRYS_ALWAYS_INLINE char8 UrlParser::ParsedDataView(size_t position) const noexcept
   {
     if (_didSeeSyntaxViolation) KRYS_UNLIKELY
     {
@@ -982,7 +982,7 @@ namespace krys::net
     return _input[position];
   }
 
-  KRYS_ALWAYS_INLINE size_t URLParser::CurrentPosition(const CodePointIterator &iterator) const noexcept
+  KRYS_ALWAYS_INLINE size_t UrlParser::CurrentPosition(const CodePointIterator &iterator) const noexcept
   {
     if (_didSeeSyntaxViolation) KRYS_UNLIKELY
     {
@@ -992,7 +992,7 @@ namespace krys::net
     return iterator.CodeUnitsSince(_inputBegin);
   }
 
-  URLParser::URLParser(utf8_stringview input, const URL &base, bool allowC0AtEnd) noexcept : _input(input)
+  UrlParser::UrlParser(utf8_stringview input, const Url &base, bool allowC0AtEnd) noexcept : _input(input)
   {
     if (!_input.data())
     {
@@ -1018,8 +1018,8 @@ namespace krys::net
       // Force a syntax violation at the beginning to make sure we get the same result.
       utf8_string withLeadingSpace {u8" "};
       withLeadingSpace.append(_input);
-      URLParser parser(withLeadingSpace, base, allowC0AtEnd);
-      URL parsed = parser.Result();
+      UrlParser parser(withLeadingSpace, base, allowC0AtEnd);
+      Url parsed = parser.Result();
       if (parsed.IsValid())
       {
         krys_debug_assert(AllValuesEqual(parsed, _url));
@@ -1033,7 +1033,7 @@ namespace krys::net
     }
   }
 
-  void URLParser::Parse(utf8_stringview input, const URL &base, bool allowC0AtEnd) noexcept
+  void UrlParser::Parse(utf8_stringview input, const Url &base, bool allowC0AtEnd) noexcept
   {
     _url = {};
     krys_debug_assert(_asciiBuffer.empty());
@@ -1128,7 +1128,7 @@ namespace krys::net
           else if (*c == ':')
           {
             size_t schemeEnd = CurrentPosition(c);
-            if (schemeEnd > URL::MaxSchemeLength)
+            if (schemeEnd > Url::MaxSchemeLength)
             {
               Failure();
               return;
@@ -1222,7 +1222,7 @@ namespace krys::net
           }
           if (base._hasOpaquePath && *c == '#')
           {
-            CopyURLPartsUntil(base, URLPart::QueryEnd, c);
+            CopyUrlPartsUntil(base, UrlPart::QueryEnd, c);
             state = State::Fragment;
             AppendToASCIIBuffer('#');
             ++c;
@@ -1291,19 +1291,19 @@ namespace krys::net
               ++c;
               break;
             case '?':
-              CopyURLPartsUntil(base, URLPart::PathEnd, c);
+              CopyUrlPartsUntil(base, UrlPart::PathEnd, c);
               AppendToASCIIBuffer('?');
               ++c;
               state = State::UTF8Query;
               break;
             case '#':
-              CopyURLPartsUntil(base, URLPart::QueryEnd, c);
+              CopyUrlPartsUntil(base, UrlPart::QueryEnd, c);
               AppendToASCIIBuffer('#');
               state = State::Fragment;
               ++c;
               break;
             default:
-              CopyURLPartsUntil(base, URLPart::PathAfterLastSlash, c);
+              CopyUrlPartsUntil(base, UrlPart::PathAfterLastSlash, c);
               if ((CurrentPosition(c) && ParsedDataView(CurrentPosition(c) - 1) != '/')
                   || (base.Host().empty() && base.Path().empty()))
               {
@@ -1318,7 +1318,7 @@ namespace krys::net
           if (*c == '/' || *c == '\\')
           {
             ++c;
-            CopyURLPartsUntil(base, URLPart::SchemeEnd, c);
+            CopyUrlPartsUntil(base, UrlPart::SchemeEnd, c);
             AppendToASCIIBuffer(u8"://");
             if (_urlIsSpecial)
             {
@@ -1333,7 +1333,7 @@ namespace krys::net
           }
           else
           {
-            CopyURLPartsUntil(base, URLPart::PortEnd, c);
+            CopyUrlPartsUntil(base, UrlPart::PortEnd, c);
             AppendToASCIIBuffer('/');
             _url._pathAfterLastSlash = base._hostEnd + base._portLength + 1;
             state = State::Path;
@@ -1497,7 +1497,7 @@ namespace krys::net
               SyntaxViolation(c);
               if (base.IsValid() && base.ProtocolIsFile())
               {
-                CopyURLPartsUntil(base, URLPart::PathEnd, c);
+                CopyUrlPartsUntil(base, UrlPart::PathEnd, c);
                 AppendToASCIIBuffer('?');
                 ++c;
               }
@@ -1519,7 +1519,7 @@ namespace krys::net
               SyntaxViolation(c);
               if (base.IsValid() && base.ProtocolIsFile())
               {
-                CopyURLPartsUntil(base, URLPart::QueryEnd, c);
+                CopyUrlPartsUntil(base, UrlPart::QueryEnd, c);
                 AppendToASCIIBuffer('#');
               }
               else
@@ -1539,9 +1539,9 @@ namespace krys::net
               break;
             default:
               SyntaxViolation(c);
-              if (base.IsValid() && base.ProtocolIsFile() && ShouldCopyFileURL(c))
+              if (base.IsValid() && base.ProtocolIsFile() && ShouldCopyFileUrl(c))
               {
-                CopyURLPartsUntil(base, URLPart::PathAfterLastSlash, c);
+                CopyUrlPartsUntil(base, UrlPart::PathAfterLastSlash, c);
               }
               else
               {
@@ -1550,12 +1550,12 @@ namespace krys::net
                 {
                   if (base.Host().empty())
                   {
-                    CopyURLPartsUntil(base, URLPart::SchemeEnd, c);
+                    CopyUrlPartsUntil(base, UrlPart::SchemeEnd, c);
                     AppendToASCIIBuffer(u8":///");
                   }
                   else
                   {
-                    CopyURLPartsUntil(base, URLPart::PortEnd, c);
+                    CopyUrlPartsUntil(base, UrlPart::PortEnd, c);
                     AppendToASCIIBuffer('/');
                     copiedHost = true;
                   }
@@ -1591,7 +1591,7 @@ namespace krys::net
             }
             if (base.IsValid() && base.ProtocolIsFile())
             {
-              CopyURLPartsUntil(base, URLPart::SchemeEnd, c);
+              CopyUrlPartsUntil(base, UrlPart::SchemeEnd, c);
               AppendToASCIIBuffer(u8":/");
             }
             AppendToASCIIBuffer('/');
@@ -1611,12 +1611,12 @@ namespace krys::net
             {
               if (base.Host().empty())
               {
-                CopyURLPartsUntil(base, URLPart::SchemeEnd, c);
+                CopyUrlPartsUntil(base, UrlPart::SchemeEnd, c);
                 AppendToASCIIBuffer(u8":///");
               }
               else
               {
-                CopyURLPartsUntil(base, URLPart::PortEnd, c);
+                CopyUrlPartsUntil(base, UrlPart::PortEnd, c);
                 AppendToASCIIBuffer('/');
                 copiedHost = true;
               }
@@ -1857,7 +1857,7 @@ namespace krys::net
         return;
       case State::Scheme:                     Failure(); return;
       case State::NoScheme:                   krys_unreachable();
-      case State::SpecialRelativeOrAuthority: CopyURLPartsUntil(base, URLPart::QueryEnd, c); break;
+      case State::SpecialRelativeOrAuthority: CopyUrlPartsUntil(base, UrlPart::QueryEnd, c); break;
       case State::PathOrAuthority:
         krys_debug_assert(_url._userStart);
         krys_debug_assert(_url._userStart == CurrentPosition(c));
@@ -1873,7 +1873,7 @@ namespace krys::net
         break;
       case State::Relative: krys_unreachable();
       case State::RelativeSlash:
-        CopyURLPartsUntil(base, URLPart::PortEnd, c);
+        CopyUrlPartsUntil(base, UrlPart::PortEnd, c);
         AppendToASCIIBuffer('/');
         _url._pathAfterLastSlash = _url._hostEnd + _url._portLength + 1;
         _url._pathEnd = _url._pathAfterLastSlash;
@@ -1935,7 +1935,7 @@ namespace krys::net
       case State::File:
         if (base.IsValid() && base.ProtocolIsFile())
         {
-          CopyURLPartsUntil(base, URLPart::QueryEnd, c);
+          CopyUrlPartsUntil(base, UrlPart::QueryEnd, c);
           break;
         }
         SyntaxViolation(c);
@@ -1957,12 +1957,12 @@ namespace krys::net
           {
             if (base.Host().empty())
             {
-              CopyURLPartsUntil(base, URLPart::SchemeEnd, c);
+              CopyUrlPartsUntil(base, UrlPart::SchemeEnd, c);
               AppendToASCIIBuffer(u8":/");
             }
             else
             {
-              CopyURLPartsUntil(base, URLPart::PortEnd, c);
+              CopyUrlPartsUntil(base, UrlPart::PortEnd, c);
               AppendToASCIIBuffer('/');
               copiedHost = true;
             }
@@ -2059,7 +2059,7 @@ namespace krys::net
     _url._isNull = false;
   }
 
-  void URLParser::ParseAuthority(CodePointIterator iterator) noexcept
+  void UrlParser::ParseAuthority(CodePointIterator iterator) noexcept
   {
     if (iterator.AtEnd()) KRYS_UNLIKELY
     {
@@ -2113,7 +2113,7 @@ namespace krys::net
   }
 
   template <typename TUnsigned>
-  void URLParser::AppendNumberToASCIIBuffer(TUnsigned number) noexcept
+  void UrlParser::AppendNumberToASCIIBuffer(TUnsigned number) noexcept
   {
     constexpr size_t bufferSize = sizeof(TUnsigned) * 3 + 1;
     Array<char8, bufferSize> buffer;
@@ -2126,7 +2126,7 @@ namespace krys::net
     AppendToASCIIBuffer(utf8_stringview {buffer.data() + index, bufferSize - index});
   }
 
-  void URLParser::SerialiseIPv4(IPv4Address address) noexcept
+  void UrlParser::SerialiseIPv4(IPv4Address address) noexcept
   {
     AppendNumberToASCIIBuffer<uint8>(static_cast<uint8>(address >> 24));
     AppendToASCIIBuffer('.');
@@ -2137,7 +2137,7 @@ namespace krys::net
     AppendNumberToASCIIBuffer<uint8>(static_cast<uint8>(address));
   }
 
-  void URLParser::SerialiseIPv6Piece(uint16 piece) noexcept
+  void UrlParser::SerialiseIPv6Piece(uint16 piece) noexcept
   {
     bool printed = false;
     if (auto nibble0 = piece >> 12)
@@ -2163,7 +2163,7 @@ namespace krys::net
       static_cast<char32>(text::LowerNibbleToLowercaseASCIIHexDigit(static_cast<uint8>(piece & 0xF))));
   }
 
-  void URLParser::SerialiseIPv6(IPv6Address address) noexcept
+  void UrlParser::SerialiseIPv6(IPv6Address address) noexcept
   {
     AppendToASCIIBuffer('[');
     auto compressPointer = FindLongestZeroSequence(address);
@@ -2198,14 +2198,14 @@ namespace krys::net
     AppendToASCIIBuffer(']');
   }
 
-  enum class URLParser::IPv4PieceParsingError
+  enum class UrlParser::IPv4PieceParsingError
   {
     Failure,
     Overflow,
   };
 
-  Expected<uint32, URLParser::IPv4PieceParsingError>
-    URLParser::ParseIPv4Piece(CodePointIterator &iterator, bool &didSeeSyntaxViolation) noexcept
+  Expected<uint32, UrlParser::IPv4PieceParsingError>
+    UrlParser::ParseIPv4Piece(CodePointIterator &iterator, bool &didSeeSyntaxViolation) noexcept
   {
     enum class State : uint8
     {
@@ -2300,14 +2300,14 @@ namespace krys::net
     return static_cast<uint32>(value);
   }
 
-  enum class URLParser::IPv4ParsingError
+  enum class UrlParser::IPv4ParsingError
   {
     Failure,
     NotIPv4,
   };
 
-  Expected<URLParser::IPv4Address, URLParser::IPv4ParsingError>
-    URLParser::ParseIPv4Host(const CodePointIterator &iteratorForSyntaxViolationPosition,
+  Expected<UrlParser::IPv4Address, UrlParser::IPv4ParsingError>
+    UrlParser::ParseIPv4Host(const CodePointIterator &iteratorForSyntaxViolationPosition,
                              CodePointIterator iterator) noexcept
   {
     SmallList<Expected<uint32, IPv4PieceParsingError>, 4> items;
@@ -2401,7 +2401,7 @@ namespace krys::net
     return ipv4;
   }
 
-  Maybe<uint32> URLParser::ParseIPv4PieceInsideIPv6(CodePointIterator &iterator) noexcept
+  Maybe<uint32> UrlParser::ParseIPv4PieceInsideIPv6(CodePointIterator &iterator) noexcept
   {
     if (iterator.AtEnd())
     {
@@ -2445,7 +2445,7 @@ namespace krys::net
     return piece;
   }
 
-  Maybe<URLParser::IPv4Address> URLParser::ParseIPv4AddressInsideIPv6(CodePointIterator iterator) noexcept
+  Maybe<UrlParser::IPv4Address> UrlParser::ParseIPv4AddressInsideIPv6(CodePointIterator iterator) noexcept
   {
     IPv4Address address = 0;
     for (size_t i = 0; i < 4; ++i)
@@ -2479,7 +2479,7 @@ namespace krys::net
     return address;
   }
 
-  Maybe<URLParser::IPv6Address> URLParser::ParseIPv6Host(CodePointIterator c) noexcept
+  Maybe<UrlParser::IPv6Address> UrlParser::ParseIPv6Host(CodePointIterator c) noexcept
   {
     krys_debug_assert(*c == '[');
     const auto hostBegin = c;
@@ -2631,7 +2631,7 @@ namespace krys::net
     return address;
   }
 
-  utf8_string URLParser::PercentDecode(utf8_stringview input,
+  utf8_string UrlParser::PercentDecode(utf8_stringview input,
                                        const CodePointIterator &iteratorForSyntaxViolationPosition) noexcept
   {
     utf8_string output;
@@ -2655,7 +2655,7 @@ namespace krys::net
     return output;
   }
 
-  utf8_string URLParser::PercentDecode(utf8_stringview input) noexcept
+  utf8_string UrlParser::PercentDecode(utf8_stringview input) noexcept
   {
     utf8_string output;
     output.reserve(input.size());
@@ -2677,14 +2677,14 @@ namespace krys::net
     return output;
   }
 
-  bool URLParser::NeedsNonSpecialDotSlash() const noexcept
+  bool UrlParser::NeedsNonSpecialDotSlash() const noexcept
   {
     auto pathStart = _url._hostEnd + _url._portLength;
     return !_urlIsSpecial && pathStart == _url._schemeEnd + 1u && pathStart + 1 < _url._string.size()
            && _url._string[pathStart] == '/' && _url._string[pathStart + 1] == '/';
   }
 
-  void URLParser::AddNonSpecialDotSlash() noexcept
+  void UrlParser::AddNonSpecialDotSlash() noexcept
   {
     auto oldPathStart = _url._hostEnd + _url._portLength;
     _url._string.insert(oldPathStart + 1, u8"./");
@@ -2694,7 +2694,7 @@ namespace krys::net
   }
 
   Maybe<utf8_string>
-    URLParser::DomainToASCII(utf8_stringview domain,
+    UrlParser::DomainToASCII(utf8_stringview domain,
                              const CodePointIterator &iteratorForSyntaxViolationPosition) noexcept
   {
     utf8_string ascii;
@@ -2729,7 +2729,7 @@ namespace krys::net
     return converted;
   }
 
-  bool URLParser::HasForbiddenHostCodePoint(utf8_stringview asciiDomain) noexcept
+  bool UrlParser::HasForbiddenHostCodePoint(utf8_stringview asciiDomain) noexcept
   {
     for (auto character : asciiDomain)
     {
@@ -2741,7 +2741,7 @@ namespace krys::net
     return false;
   }
 
-  bool URLParser::ParsePort(CodePointIterator &iterator) noexcept
+  bool UrlParser::ParsePort(CodePointIterator &iterator) noexcept
   {
     if (_urlIsFile) KRYS_UNLIKELY
     {
@@ -2755,7 +2755,7 @@ namespace krys::net
     if (iterator.AtEnd()) KRYS_UNLIKELY
     {
       size_t portLength = CurrentPosition(colonIterator) - _url._hostEnd;
-      krys_assert(portLength <= URL::MaxPortLength);
+      krys_assert(portLength <= Url::MaxPortLength);
       _url._portLength = static_cast<uint32>(portLength);
       SyntaxViolation(colonIterator);
       return true;
@@ -2810,12 +2810,12 @@ namespace krys::net
     }
 
     size_t portLength = CurrentPosition(iterator) - _url._hostEnd;
-    krys_assert(portLength <= URL::MaxPortLength);
+    krys_assert(portLength <= Url::MaxPortLength);
     _url._portLength = static_cast<uint32>(portLength);
     return true;
   }
 
-  bool URLParser::SubdomainStartsWithXNDashDash(CodePointIterator iterator) noexcept
+  bool UrlParser::SubdomainStartsWithXNDashDash(CodePointIterator iterator) noexcept
   {
     enum class State : uint8
     {
@@ -2880,12 +2880,12 @@ namespace krys::net
     return false;
   }
 
-  bool URLParser::SubdomainStartsWithXNDashDash(utf8_stringview host) noexcept
+  bool UrlParser::SubdomainStartsWithXNDashDash(utf8_stringview host) noexcept
   {
     return SubdomainStartsWithXNDashDash(CodePointIterator {host});
   }
 
-  URLParser::HostParsingResult URLParser::ParseHostAndPort(CodePointIterator iterator) noexcept
+  UrlParser::HostParsingResult UrlParser::ParseHostAndPort(CodePointIterator iterator) noexcept
   {
     if (iterator.AtEnd())
     {
@@ -3093,7 +3093,7 @@ namespace krys::net
     return HostParsingResult::DNSNameWithoutPort;
   }
 
-  Maybe<utf8_string> URLParser::FormURLDecode(utf8_stringview input) noexcept
+  Maybe<utf8_string> UrlParser::FormUrlDecode(utf8_stringview input) noexcept
   {
     if (!text::IsValidUTF8(input))
     {
@@ -3104,9 +3104,9 @@ namespace krys::net
   }
 
   // https://url.spec.whatwg.org/#concept-urlencoded-parser
-  URLParser::URLEncodedForm URLParser::ParseURLEncodedForm(utf8_stringview input) noexcept
+  UrlParser::UrlEncodedForm UrlParser::ParseUrlEncodedForm(utf8_stringview input) noexcept
   {
-    URLEncodedForm output;
+    UrlEncodedForm output;
     size_t start = 0;
     while (start <= input.size())
     {
@@ -3128,12 +3128,12 @@ namespace krys::net
     return output;
   }
 
-  Maybe<KeyValuePair> URLParser::ParseQueryNameAndValue(utf8_stringview bytes) noexcept
+  Maybe<KeyValuePair> UrlParser::ParseQueryNameAndValue(utf8_stringview bytes) noexcept
   {
     auto equalIndex = bytes.find(u8'=');
     if (equalIndex == utf8_stringview::npos)
     {
-      auto name = FormURLDecode(ReplaceAll(bytes, u8'+', u8' '));
+      auto name = FormUrlDecode(ReplaceAll(bytes, u8'+', u8' '));
       if (name)
       {
         return KeyValuePair {krys::move(*name), {}};
@@ -3141,8 +3141,8 @@ namespace krys::net
     }
     else
     {
-      auto name = FormURLDecode(ReplaceAll(bytes.substr(0, equalIndex), u8'+', u8' '));
-      auto value = FormURLDecode(ReplaceAll(bytes.substr(equalIndex + 1), u8'+', u8' '));
+      auto name = FormUrlDecode(ReplaceAll(bytes.substr(0, equalIndex), u8'+', u8' '));
+      auto value = FormUrlDecode(ReplaceAll(bytes.substr(equalIndex + 1), u8'+', u8' '));
       if (name && value)
       {
         return KeyValuePair {krys::move(*name), krys::move(*value)};
@@ -3151,7 +3151,7 @@ namespace krys::net
     return null;
   }
 
-  utf8_string URLParser::Serialise(const URLEncodedForm &tuples) noexcept
+  utf8_string UrlParser::Serialise(const UrlEncodedForm &tuples) noexcept
   {
     if (tuples.empty())
     {
@@ -3165,14 +3165,14 @@ namespace krys::net
       {
         output.push_back(u8'&');
       }
-      SerialiseURLEncodedForm(tuple.Key, output);
+      SerialiseUrlEncodedForm(tuple.Key, output);
       output.push_back(u8'=');
-      SerialiseURLEncodedForm(tuple.Value, output);
+      SerialiseUrlEncodedForm(tuple.Value, output);
     }
     return output;
   }
 
-  bool URLParser::AllValuesEqual(const URL &a, const URL &b) noexcept
+  bool UrlParser::AllValuesEqual(const Url &a, const Url &b) noexcept
   {
     return a._string == b._string && a._isValid == b._isValid && a._hasOpaquePath == b._hasOpaquePath
            && a._protocolIsInHTTPFamily == b._protocolIsInHTTPFamily && a._schemeEnd == b._schemeEnd
@@ -3182,7 +3182,7 @@ namespace krys::net
            && a._queryEnd == b._queryEnd;
   }
 
-  bool URLParser::InternalValuesConsistent(const URL &url) noexcept
+  bool UrlParser::InternalValuesConsistent(const Url &url) noexcept
   {
     return url._schemeEnd <= url._userStart && url._userStart <= url._userEnd
            && url._userEnd <= url._passwordEnd && url._passwordEnd <= url._hostEnd

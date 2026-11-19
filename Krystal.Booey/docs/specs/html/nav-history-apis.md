@@ -585,7 +585,7 @@ Status: n/a (no script engine: these are JavaScript object internals)
 #### [7.2.5 The History interface](https://html.spec.whatwg.org/#the-history-interface)
 
 Status: reviewed (2026-11-01)
-> Fixed: a document whose URL isn't HTTP(S) or `file:` can only have its fragment rewritten (`CanHaveURLRewritten`, shared with the Navigation API, which had compared origins and so allowed another username or password).
+> Fixed: a document whose URL isn't HTTP(S) or `file:` can only have its fragment rewritten (`CanHaveUrlRewritten`, shared with the Navigation API, which had compared origins and so allowed another username or password).
 > The state limits are upstream's exceptions (see `DIFFERENCES.md`).
 <!-- definitions: doc-history concept-history-state concept-history-length concept-history-index -->
 

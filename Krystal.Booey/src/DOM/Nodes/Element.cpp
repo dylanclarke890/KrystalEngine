@@ -816,12 +816,12 @@ namespace krys::boo
     }
   }
 
-  Maybe<DOMString> Element::ImageSourceURL() const noexcept
+  Maybe<DOMString> Element::ImageSourceUrl() const noexcept
   {
     return GetAttribute(u8"src");
   }
 
-  net::URL Element::AbsoluteLinkURL() const noexcept
+  net::Url Element::AbsoluteLinkUrl() const noexcept
   {
     if (!css::IsLink(*this))
     {
@@ -847,7 +847,7 @@ namespace krys::boo
       return {};
     }
 
-    return NodeDocument().CompleteURL(*linkAttribute);
+    return NodeDocument().CompleteUrl(*linkAttribute);
   }
 
   RenderElement *Element::Renderer() const noexcept
@@ -2675,7 +2675,7 @@ namespace krys::boo
   DOMString Element::GetHTML(dom::GetHTMLOptions options) const noexcept
   {
     return SerializeFragment(*this, SerializedNodes::SubtreesOfChildren, nullptr,
-                             ResolveURLs::NoExcludingURLsForPrivacy, SerializationSyntax::HTML,
+                             ResolveUrls::NoExcludingUrlsForPrivacy, SerializationSyntax::HTML,
                              options.SerializableShadowRoots ? SerializeShadowRoots::Serializable
                                                              : SerializeShadowRoots::Explicit,
                              krys::move(options.ShadowRoots));

@@ -35,7 +35,7 @@
 #include "Krystal.Core/Types/Maybe.hpp"
 #include "Krystal.Core/Types/RefPtr.hpp"
 #include "Krystal.Core/Types/UniquePtr.hpp"
-#include "Krystal.Net/URL.hpp"
+#include "Krystal.Net/Url.hpp"
 
 namespace krys::boo
 {
@@ -88,7 +88,7 @@ namespace krys::boo
     /// @brief Set in StartDrag when a drag starts from a mouse down within the page.
     EnumSet<DragOperation> _sourceDragOperationMask;
     IntPoint _dragOffset;
-    net::URL _draggingImageURL;
+    net::Url _draggingImageUrl;
     bool _isPerformingDrop {false};
 
   public:
@@ -133,9 +133,9 @@ namespace krys::boo
       return _sourceDragOperationMask;
     }
 
-    KRYS_NODISCARD const net::URL &DraggingImageURL() const noexcept
+    KRYS_NODISCARD const net::Url &DraggingImageUrl() const noexcept
     {
-      return _draggingImageURL;
+      return _draggingImageUrl;
     }
 
     void SetDragOffset(const IntPoint &offset) noexcept
@@ -243,7 +243,7 @@ namespace krys::boo
     }
 
     static void DeclareAndWriteDragImage(dom::DataTransfer &dataTransfer, Element &element,
-                                         const net::URL &url, utf8_stringview label) noexcept;
+                                         const net::Url &url, utf8_stringview label) noexcept;
   };
 
   /// @brief Whether @p element is a link a press may drag: an `a` with an `href` that isn't editable, or an

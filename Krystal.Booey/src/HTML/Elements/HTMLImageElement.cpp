@@ -131,12 +131,12 @@ namespace krys::boo
 
   dom::USVString HTMLImageElement::Src() const noexcept
   {
-    return html::ReflectURL<dom::USVString>(*this, u8"src");
+    return html::ReflectUrl<dom::USVString>(*this, u8"src");
   }
 
   void HTMLImageElement::Src(dom::USVString value) noexcept
   {
-    return html::ReflectURL<dom::USVString>(*this, u8"src", krys::move(value));
+    return html::ReflectUrl<dom::USVString>(*this, u8"src", krys::move(value));
   }
 
   dom::USVString HTMLImageElement::SrcSet() const noexcept
@@ -256,7 +256,7 @@ namespace krys::boo
       return false;
     }
 
-    return NodeDocument().CompleteURL(*usemap).IsEmpty();
+    return NodeDocument().CompleteUrl(*usemap).IsEmpty();
   }
 
   bool HTMLImageElement::Controls() const noexcept
@@ -382,7 +382,7 @@ namespace krys::boo
   dom::USVString HTMLImageElement::CurrentSrc() const noexcept
   {
     // The currentSrc IDL attribute must return the img element's current request's current URL.
-    return dom::USVString(CurrentURL().String());
+    return dom::USVString(CurrentUrl().String());
   }
 
   DOMString HTMLImageElement::ReferrerPolicy() const noexcept
@@ -460,12 +460,12 @@ namespace krys::boo
 
   dom::USVString HTMLImageElement::LowSrc() const noexcept
   {
-    return html::ReflectURL<dom::USVString>(*this, u8"lowsrc");
+    return html::ReflectUrl<dom::USVString>(*this, u8"lowsrc");
   }
 
   void HTMLImageElement::LowSrc(dom::USVString value) noexcept
   {
-    return html::ReflectURL<dom::USVString>(*this, u8"lowsrc", krys::move(value));
+    return html::ReflectUrl<dom::USVString>(*this, u8"lowsrc", krys::move(value));
   }
 
   DOMString HTMLImageElement::Align() const noexcept
@@ -500,12 +500,12 @@ namespace krys::boo
 
   dom::USVString HTMLImageElement::LongDesc() const noexcept
   {
-    return html::ReflectURL<dom::USVString>(*this, u8"longdesc");
+    return html::ReflectUrl<dom::USVString>(*this, u8"longdesc");
   }
 
   void HTMLImageElement::LongDesc(dom::USVString value) noexcept
   {
-    return html::ReflectURL<dom::USVString>(*this, u8"longdesc", krys::move(value));
+    return html::ReflectUrl<dom::USVString>(*this, u8"longdesc", krys::move(value));
   }
 
   DOMString HTMLImageElement::Border() const noexcept
@@ -527,13 +527,13 @@ namespace krys::boo
 
 #pragma region Loading
 
-  Maybe<DOMString> HTMLImageElement::ImageSourceURL() const noexcept
+  Maybe<DOMString> HTMLImageElement::ImageSourceUrl() const noexcept
   {
-    if (_bestFitImageURL.empty())
+    if (_bestFitImageUrl.empty())
     {
       return GetAttribute(u8"src");
     }
-    return _bestFitImageURL;
+    return _bestFitImageUrl;
   }
 
   Maybe<DOMString> HTMLImageElement::AltText() const noexcept
@@ -649,11 +649,11 @@ namespace krys::boo
     return _imageDevicePixelRatio;
   }
 
-  void HTMLImageElement::SetBestFitURLAndDPRFromImageCandidate(const html::ImageCandidate &candidate) noexcept
+  void HTMLImageElement::SetBestFitUrlAndDPRFromImageCandidate(const html::ImageCandidate &candidate) noexcept
   {
-    _bestFitImageURL = candidate.String;
-    auto source = ImageSourceURL();
-    _currentURL = source ? NodeDocument().CompleteURL(*source) : net::URL();
+    _bestFitImageUrl = candidate.String;
+    auto source = ImageSourceUrl();
+    _currentUrl = source ? NodeDocument().CompleteUrl(*source) : net::Url();
     if (candidate.Density >= 0)
     {
       _imageDevicePixelRatio = 1 / candidate.Density;
@@ -786,7 +786,7 @@ namespace krys::boo
     }
     // 2. If el's source set is empty, return null as the URL and undefined as the pixel density.
     // 3. Return the result of selecting an image from el's source set.
-    SetBestFitURLAndDPRFromImageCandidate(candidate);
+    SetBestFitUrlAndDPRFromImageCandidate(candidate);
 
     // Then update the image data.
     _imageLoader->UpdateFromElementIgnoringPreviousError(relevantMutation);

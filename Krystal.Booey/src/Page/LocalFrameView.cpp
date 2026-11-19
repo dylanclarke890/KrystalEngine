@@ -81,7 +81,7 @@
 #include "Krystal.Core/Strings/ASCII.hpp"
 #include "Krystal.Core/Threading/NeverDestroyed.hpp"
 #include "Krystal.Core/Utils/SetForScope.hpp"
-#include "Krystal.Net/URLParser.hpp"
+#include "Krystal.Net/UrlParser.hpp"
 
 namespace krys::boo
 {
@@ -3071,7 +3071,7 @@ namespace krys::boo
     }
   }
 
-  bool LocalFrameView::ScrollToFragment(const net::URL &url) noexcept
+  bool LocalFrameView::ScrollToFragment(const net::Url &url) noexcept
   {
     krys_assert(Frame().Document());
 
@@ -3095,7 +3095,7 @@ namespace krys::boo
     {
       // 6. Let fragmentBytes be the result of percent-decoding fragment.
       // 7. Let decodedFragment be the result of running UTF-8 decode without BOM on fragmentBytes.
-      auto decoded = net::URLParser::PercentDecode(fragmentIdentifier);
+      auto decoded = net::UrlParser::PercentDecode(fragmentIdentifier);
       // 8. Set potentialIndicatedElement to the result of finding a potential indicated element given
       // document
       //    and decodedFragment.

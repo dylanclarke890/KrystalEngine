@@ -41,7 +41,7 @@
 #include "Krystal.Booey/CSS/Properties/Consumers/PrimitiveValue.hpp"
 #include "Krystal.Booey/CSS/Properties/Consumers/ResolutionDefinitions.hpp"
 #include "Krystal.Booey/CSS/Properties/Consumers/String.hpp"
-#include "Krystal.Booey/CSS/Properties/Consumers/URL.hpp"
+#include "Krystal.Booey/CSS/Properties/Consumers/Url.hpp"
 #include "Krystal.Booey/CSS/Properties/PropertyParserState.hpp"
 #include "Krystal.Booey/CSS/Values/CrossFadeValue.hpp"
 #include "Krystal.Booey/CSS/Values/FilterEffects/Filter.hpp"
@@ -52,7 +52,7 @@
 #include "Krystal.Booey/CSS/Values/ImageSetValue.hpp"
 #include "Krystal.Booey/CSS/Values/ImageValue.hpp"
 #include "Krystal.Booey/CSS/Values/PaintImageValue.hpp"
-#include "Krystal.Booey/CSS/Values/Primitives/URL.hpp"
+#include "Krystal.Booey/CSS/Values/Primitives/Url.hpp"
 #include "Krystal.Booey/CSS/Values/PrimitiveValue.hpp"
 #include "Krystal.Booey/CSS/Values/ValueListBuilder.hpp"
 #include "Krystal.Booey/CSS/Values/VariableData.hpp"
@@ -1039,17 +1039,17 @@ namespace krys::boo::css
                                AllowedImageType allowedImageTypes) noexcept
     {
       if (tokens.Peek().Type() == TokenType::String
-          && HasFlag(allowedImageTypes, AllowedImageType::RawStringAsURL))
+          && HasFlag(allowedImageTypes, AllowedImageType::RawStringAsUrl))
       {
-        auto imageURL = CompleteURL(CSSOMString(tokens.Peek().IdentCodePoints()), state.Context);
-        if (!imageURL)
+        auto imageUrl = CompleteUrl(CSSOMString(tokens.Peek().IdentCodePoints()), state.Context);
+        if (!imageUrl)
         {
           return nullptr;
         }
 
         tokens.Discard();
         tokens.DiscardWhitespace();
-        return ImageValue::Create(krys::move(*imageURL));
+        return ImageValue::Create(krys::move(*imageUrl));
       }
 
       if (tokens.Peek().Type() == TokenType::Function)
@@ -1146,7 +1146,7 @@ namespace krys::boo::css
               [&](TokenRange &args)
               {
                 return ConsumeImageSet(args, state,
-                                       (allowedImageTypes | AllowedImageType::RawStringAsURL)
+                                       (allowedImageTypes | AllowedImageType::RawStringAsUrl)
                                          & ~AllowedImageType::ImageSet);
               });
           }
@@ -1157,12 +1157,12 @@ namespace krys::boo::css
         }
       }
 
-      if (HasFlag(allowedImageTypes, AllowedImageType::URLFunction))
+      if (HasFlag(allowedImageTypes, AllowedImageType::UrlFunction))
       {
-        if (auto imageURL = ConsumeURLRaw(
-              tokens, state, AllowedURLModifiers::CrossOrigin | AllowedURLModifiers::ReferrerPolicy))
+        if (auto imageUrl = ConsumeUrlRaw(
+              tokens, state, AllowedUrlModifiers::CrossOrigin | AllowedUrlModifiers::ReferrerPolicy))
         {
-          return ImageValue::Create(krys::move(*imageURL));
+          return ImageValue::Create(krys::move(*imageUrl));
         }
       }
 

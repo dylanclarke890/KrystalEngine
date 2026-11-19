@@ -48,7 +48,7 @@ namespace krys::boo::dom::tests
                             utf8_stringview url = u8"https://example.com/dir/page.html") noexcept
     {
       auto document = CreateRef<HTMLDocument>();
-      document->SetURL(net::URL(url));
+      document->SetUrl(net::Url(url));
       auto parser = CreateRef<html::DocumentParser>(*document);
       parser->InputStream().Append(krys::move(input), IsEOF::Yes);
       parser->PumpTokenizer();
@@ -76,17 +76,17 @@ namespace krys::boo::dom::tests
 
     SECTION("A new document's URL is about:blank")
     {
-      REQUIRE(document->URL() == u8"about:blank");
+      REQUIRE(document->Url() == u8"about:blank");
       REQUIRE(document->DocumentURI() == u8"about:blank");
-      REQUIRE(document->BaseURL() == net::AboutBlankURL());
+      REQUIRE(document->BaseUrl() == net::AboutBlankUrl());
       REQUIRE(document->BaseURI() == u8"about:blank");
     }
 
     SECTION("Setting the URL changes the base URL")
     {
-      document->SetURL(net::URL(u8"https://example.com/dir/page.html"));
-      REQUIRE(document->URL() == u8"https://example.com/dir/page.html");
-      REQUIRE(document->BaseURL() == u8"https://example.com/dir/page.html");
+      document->SetUrl(net::Url(u8"https://example.com/dir/page.html"));
+      REQUIRE(document->Url() == u8"https://example.com/dir/page.html");
+      REQUIRE(document->BaseUrl() == u8"https://example.com/dir/page.html");
 
       auto element = CreateRef<TestElement>(*document);
       REQUIRE(element->BaseURI() == u8"https://example.com/dir/page.html");
@@ -94,24 +94,24 @@ namespace krys::boo::dom::tests
 
     SECTION("An empty URL becomes about:blank")
     {
-      document->SetURL(net::URL(u8"https://example.com/"));
-      document->SetURL(net::URL());
-      REQUIRE(document->URL() == u8"about:blank");
+      document->SetUrl(net::Url(u8"https://example.com/"));
+      document->SetUrl(net::Url());
+      REQUIRE(document->Url() == u8"about:blank");
     }
 
     SECTION("CompleteURL resolves against the base URL")
     {
-      document->SetURL(net::URL(u8"https://example.com/dir/page.html"));
-      REQUIRE(document->CompleteURL(u8"a.css") == u8"https://example.com/dir/a.css");
-      REQUIRE(document->CompleteURL(u8"a.css", net::URL(u8"https://other.com/x/"))
+      document->SetUrl(net::Url(u8"https://example.com/dir/page.html"));
+      REQUIRE(document->CompleteUrl(u8"a.css") == u8"https://example.com/dir/a.css");
+      REQUIRE(document->CompleteUrl(u8"a.css", net::Url(u8"https://other.com/x/"))
               == u8"https://other.com/x/a.css");
     }
 
     SECTION("A cloned document keeps the URL")
     {
-      document->SetURL(net::URL(u8"https://example.com/"));
+      document->SetUrl(net::Url(u8"https://example.com/"));
       auto clone = document->CloneNode().ReleaseValue();
-      REQUIRE(Downcast<Document>(clone.get())->URL() == u8"https://example.com/");
+      REQUIRE(Downcast<Document>(clone.get())->Url() == u8"https://example.com/");
     }
   }
 
@@ -122,33 +122,33 @@ namespace krys::boo::dom::tests
     SECTION("The first base element with an href sets the base URL, relative to the document's URL")
     {
       auto document = Parse(u8"<base target=_top><base href=sub/><base href=https://other.com/>");
-      REQUIRE(document->BaseURL() == u8"https://example.com/dir/sub/");
-      REQUIRE(document->CompleteURL(u8"a.css") == u8"https://example.com/dir/sub/a.css");
+      REQUIRE(document->BaseUrl() == u8"https://example.com/dir/sub/");
+      REQUIRE(document->CompleteUrl(u8"a.css") == u8"https://example.com/dir/sub/a.css");
     }
 
     SECTION("data: and javascript: base URLs are ignored")
     {
-      REQUIRE(Parse(u8"<base href='data:text/plain,a'>")->BaseURL() == u8"https://example.com/dir/page.html");
-      REQUIRE(Parse(u8"<base href='javascript:void(0)'>")->BaseURL()
+      REQUIRE(Parse(u8"<base href='data:text/plain,a'>")->BaseUrl() == u8"https://example.com/dir/page.html");
+      REQUIRE(Parse(u8"<base href='javascript:void(0)'>")->BaseUrl()
               == u8"https://example.com/dir/page.html");
     }
 
     SECTION("An unparsable base URL is ignored")
     {
-      REQUIRE(Parse(u8"<base href='https://[invalid'>")->BaseURL() == u8"https://example.com/dir/page.html");
+      REQUIRE(Parse(u8"<base href='https://[invalid'>")->BaseUrl() == u8"https://example.com/dir/page.html");
     }
 
     SECTION("Changing or removing the href updates the base URL")
     {
       auto document = Parse(u8"<base href=a/>");
       auto base = HeadOf(*document)->FirstElementChild();
-      REQUIRE(document->BaseURL() == u8"https://example.com/dir/a/");
+      REQUIRE(document->BaseUrl() == u8"https://example.com/dir/a/");
 
       REQUIRE_FALSE(base->SetAttribute(u8"href", u8"b/").HasException());
-      REQUIRE(document->BaseURL() == u8"https://example.com/dir/b/");
+      REQUIRE(document->BaseUrl() == u8"https://example.com/dir/b/");
 
       base->RemoveAttribute(u8"href");
-      REQUIRE(document->BaseURL() == u8"https://example.com/dir/page.html");
+      REQUIRE(document->BaseUrl() == u8"https://example.com/dir/page.html");
     }
 
     SECTION("Inserting and removing base elements updates the base URL")
@@ -158,16 +158,16 @@ namespace krys::boo::dom::tests
       auto first = head->FirstElementChild();
 
       auto earlier = CreateBase(*document, u8"b/");
-      REQUIRE(document->BaseURL() == u8"https://example.com/dir/a/");
+      REQUIRE(document->BaseUrl() == u8"https://example.com/dir/a/");
 
       REQUIRE_FALSE(head->Prepend({Ref<Node>(earlier)}).HasException());
-      REQUIRE(document->BaseURL() == u8"https://example.com/dir/b/");
+      REQUIRE(document->BaseUrl() == u8"https://example.com/dir/b/");
 
       REQUIRE_FALSE(earlier->Remove().HasException());
-      REQUIRE(document->BaseURL() == u8"https://example.com/dir/a/");
+      REQUIRE(document->BaseUrl() == u8"https://example.com/dir/a/");
 
       REQUIRE_FALSE(first->Remove().HasException());
-      REQUIRE(document->BaseURL() == u8"https://example.com/dir/page.html");
+      REQUIRE(document->BaseUrl() == u8"https://example.com/dir/page.html");
     }
 
     SECTION("Base elements in shadow trees are ignored")
@@ -178,7 +178,7 @@ namespace krys::boo::dom::tests
 
       auto base = CreateBase(*document, u8"a/");
       REQUIRE_FALSE(shadow->Append({Ref<Node>(base)}).HasException());
-      REQUIRE(document->BaseURL() == u8"https://example.com/dir/page.html");
+      REQUIRE(document->BaseUrl() == u8"https://example.com/dir/page.html");
     }
   }
 
@@ -188,7 +188,7 @@ namespace krys::boo::dom::tests
     {
       auto document = Parse(u8"<base href=sub/>");
       auto &context = document->CssParserContext();
-      REQUIRE(context.BaseURL == u8"https://example.com/dir/sub/");
+      REQUIRE(context.BaseUrl == u8"https://example.com/dir/sub/");
       REQUIRE(context.Mode == css::ParserMode::HTMLQuirks);
       REQUIRE(context.IsHTMLDocument);
       REQUIRE(context.HasDocumentSecurityOrigin);
@@ -199,10 +199,10 @@ namespace krys::boo::dom::tests
     SECTION("Is recreated when the base URL changes")
     {
       auto document = Parse(u8"<!DOCTYPE html>");
-      REQUIRE(document->CssParserContext().BaseURL == u8"https://example.com/dir/page.html");
+      REQUIRE(document->CssParserContext().BaseUrl == u8"https://example.com/dir/page.html");
 
-      document->SetURL(net::URL(u8"https://other.com/"));
-      REQUIRE(document->CssParserContext().BaseURL == u8"https://other.com/");
+      document->SetUrl(net::Url(u8"https://other.com/"));
+      REQUIRE(document->CssParserContext().BaseUrl == u8"https://other.com/");
     }
 
     SECTION("Isn't an HTML document's context for other documents")
@@ -220,8 +220,8 @@ namespace krys::boo::dom::tests
       REQUIRE(css::SelectorParserContext(*document)
               == css::SelectorParserContext(document->CssParserContext()));
 
-      css::ParserContext sheetContext(*document, net::URL(u8"https://cdn.com/a.css"), u8"utf-8");
-      REQUIRE(sheetContext.BaseURL == u8"https://cdn.com/a.css");
+      css::ParserContext sheetContext(*document, net::Url(u8"https://cdn.com/a.css"), u8"utf-8");
+      REQUIRE(sheetContext.BaseUrl == u8"https://cdn.com/a.css");
       REQUIRE(sheetContext.Charset == u8"utf-8");
       REQUIRE(sheetContext.Mode == css::ParserMode::HTMLQuirks);
     }
@@ -373,7 +373,7 @@ namespace krys::boo::dom::tests
   {
     auto document = CreateRef<Document>();
     CHECK(&document->NodeDocument() == document.get());
-    CHECK(document->URL() == u8"about:blank");
+    CHECK(document->Url() == u8"about:blank");
     CHECK(document->ContentType() == u8"application/xml");
     CHECK(document->CharacterSet() == u8"UTF-8");
     CHECK(document->CompatMode() == u8"CSS1Compat");

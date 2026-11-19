@@ -543,7 +543,7 @@ namespace krys::ui::tests
     auto load = [&](const std::filesystem::path &file)
     {
       loader.LoadResource(view.Frame(),
-                          boo::ResourceRequest(net::URL::FileURLWithFileSystemPath(file.generic_u8string())),
+                          boo::ResourceRequest(net::Url::FileUrlWithFileSystemPath(file.generic_u8string())),
                           {}, [&](boo::LoadResult &&loaded) { result = krys::move(loaded); });
     };
 
@@ -2024,7 +2024,7 @@ namespace krys::ui::tests
     View view({200, 100});
     REQUIRE(view.LoadFile(directory / "page.html").has_value());
     WaitForCommit(view);
-    CHECK(view.Document().GetURL().ProtocolIsFile());
+    CHECK(view.Document().GetUrl().ProtocolIsFile());
     view.UpdateRendering();
     CHECK_FALSE(view.Record()->AsText({}).contains(u8"native-image"));
 
@@ -2108,7 +2108,7 @@ namespace krys::ui::tests
     CHECK(requests[0].IsFormSubmission);
     CHECK(requests[0].SourceElement.get() == view.Document().QuerySelector(u8"form").Value().get());
     CHECK(requests[0].Method == u8"POST");
-    CHECK(requests[0].URL == u8"https://example.com/order");
+    CHECK(requests[0].Url == u8"https://example.com/order");
     CHECK(requests[0].EncodingType == u8"application/x-www-form-urlencoded");
     REQUIRE(requests[0].Entries);
     List<utf8_string> entries;
@@ -2124,7 +2124,7 @@ namespace krys::ui::tests
     View view({400, 300});
     view.LoadHTML(u8"<!DOCTYPE html><style>body { margin: 0 } a { display: block; height: 40px }</style>"
                   u8"<a id=away href=\"https://example.com/away\">Away</a><a id=here href=\"#here\">Here</a>",
-                  net::URL(u8"https://example.com/page.html"));
+                  net::Url(u8"https://example.com/page.html"));
     WaitForLoad(view);
     view.UpdateRendering();
 
@@ -2135,7 +2135,7 @@ namespace krys::ui::tests
     view.MousePressed({10, 10}, pal::MouseButton::Left);
     view.MouseReleased({10, 10}, pal::MouseButton::Left);
     REQUIRE(requests.size() == 1);
-    CHECK(requests[0].URL == u8"https://example.com/away");
+    CHECK(requests[0].Url == u8"https://example.com/away");
     CHECK_FALSE(requests[0].IsFormSubmission);
     CHECK(requests[0].Button == boo::MouseButton::Left);
     CHECK(requests[0].SourceElement.get() == view.Document().GetElementById(u8"away").get());
@@ -2145,7 +2145,7 @@ namespace krys::ui::tests
     view.MousePressed({10, 50}, pal::MouseButton::Left);
     view.MouseReleased({10, 50}, pal::MouseButton::Left);
     CHECK(requests.size() == 1);
-    CHECK(view.Document().GetURL().String() == u8"https://example.com/page.html#here");
+    CHECK(view.Document().GetUrl().String() == u8"https://example.com/page.html#here");
   }
 
   TEST_CASE("View: a page opens at its URL's fragment", "[UI]")
@@ -2153,7 +2153,7 @@ namespace krys::ui::tests
     View view({400, 300});
     view.LoadHTML(u8"<!DOCTYPE html><style>body { margin: 0 } div { height: 2000px }</style><div></div>"
                   u8"<p id=far>Far</p><div></div>",
-                  net::URL(u8"https://example.com/page.html#far"));
+                  net::Url(u8"https://example.com/page.html#far"));
     WaitForLoad(view);
     view.UpdateRendering();
 
@@ -2782,7 +2782,7 @@ namespace krys::ui::tests
   {
     View view({400, 300});
     // A view starts with its initial empty document.
-    CHECK(view.Document().GetURL().String() == u8"about:blank");
+    CHECK(view.Document().GetUrl().String() == u8"about:blank");
     CHECK_FALSE(view.IsLoading());
 
     List<std::string> events;
@@ -2799,11 +2799,11 @@ namespace krys::ui::tests
       });
 
     view.LoadHTML(u8"<!DOCTYPE html><a id=next href=next.html>Next</a>",
-                  net::URL(u8"https://example.com/page.html"));
+                  net::Url(u8"https://example.com/page.html"));
     CHECK(view.IsLoading());
-    CHECK(view.Document().GetURL().String() == u8"about:blank");
+    CHECK(view.Document().GetUrl().String() == u8"about:blank");
     WaitForLoad(view);
-    CHECK(view.Document().GetURL().String() == u8"https://example.com/page.html");
+    CHECK(view.Document().GetUrl().String() == u8"https://example.com/page.html");
     CHECK(events == List<std::string> {"started", "committed", "finished"});
 
     SECTION("stopping keeps the page")
@@ -2812,7 +2812,7 @@ namespace krys::ui::tests
       view.LoadHTML(u8"<!DOCTYPE html><p>Other</p>");
       view.Stop();
       WaitForLoad(view);
-      CHECK(view.Document().GetURL().String() == u8"https://example.com/page.html");
+      CHECK(view.Document().GetUrl().String() == u8"https://example.com/page.html");
       CHECK(events == List<std::string> {"started", "failed"});
     }
 
@@ -2823,15 +2823,15 @@ namespace krys::ui::tests
       view.SetNavigationHandler(
         [&](const NavigationRequest &request)
         {
-          asked.emplace_back(request.URL.begin(), request.URL.end());
-          view.Load(net::URL(request.URL));
+          asked.emplace_back(request.Url.begin(), request.Url.end());
+          view.Load(net::Url(request.Url));
         });
       view.Document().GetElementById(u8"next")->DispatchSimulatedClick(nullptr);
       CHECK(asked == List<std::string> {"https://example.com/next.html"});
       // The file loader strategy can't load https: pages, so the load fails and the page stays.
       WaitForLoad(view);
       CHECK(events == List<std::string> {"started", "failed"});
-      CHECK(view.Document().GetURL().String() == u8"https://example.com/page.html");
+      CHECK(view.Document().GetUrl().String() == u8"https://example.com/page.html");
     }
   }
 
@@ -2873,14 +2873,14 @@ namespace krys::ui::tests
     view.SetIconHandler(
       [&](const PageIcon &icon)
       {
-        icons.push_back(std::string(icon.URL.begin(), icon.URL.end()) + " "
+        icons.push_back(std::string(icon.Url.begin(), icon.Url.end()) + " "
                         + std::to_string(icon.Size.value_or(0)) + " "
                         + std::string(icon.Data.begin(), icon.Data.end()));
       });
 
     // "UE5H" is "PNG".
     view.LoadHTML(u8"<!DOCTYPE html><link rel=icon sizes=16x16 href=\"data:image/png;base64,UE5H\">",
-                  net::URL(u8"https://example.com/page.html"));
+                  net::Url(u8"https://example.com/page.html"));
     WaitForLoad(view);
     auto &eventLoop = boo::html::EventLoop::Current();
     while (icons.empty() && eventLoop.RunNextTask())

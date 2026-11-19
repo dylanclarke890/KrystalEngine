@@ -46,7 +46,7 @@
 #include "Krystal.Booey/CSS/Properties/Consumers/PercentageDefinitions.hpp"
 #include "Krystal.Booey/CSS/Properties/Consumers/Primitives.hpp"
 #include "Krystal.Booey/CSS/Properties/Consumers/PrimitiveValue.hpp"
-#include "Krystal.Booey/CSS/Properties/Consumers/URL.hpp"
+#include "Krystal.Booey/CSS/Properties/Consumers/Url.hpp"
 #include "Krystal.Booey/CSS/Properties/PropertyParserState.hpp"
 #include "Krystal.Booey/CSS/Values/FontFaceSrcValue.hpp"
 #include "Krystal.Booey/CSS/Values/FontFeatureValue.hpp"
@@ -641,7 +641,7 @@ namespace krys::boo::css::parse_property
 
     // https://drafts.csswg.org/css-fonts-4/#typedef-font-src
 
-    auto location = ConsumeURLRaw(tokens, state, AllowedURLModifiers::None);
+    auto location = ConsumeUrlRaw(tokens, state, AllowedUrlModifiers::None);
     if (!location)
     {
       return nullptr;

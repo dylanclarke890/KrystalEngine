@@ -430,10 +430,10 @@ namespace krys::boo::display_list
     _items.emplace_back(display_list::EndPage());
   }
 
-  void RecorderImpl::SetURLForRect(const net::URL &link, const FloatRect &destRect) noexcept
+  void RecorderImpl::SetUrlForRect(const net::Url &link, const FloatRect &destRect) noexcept
   {
     AppendStateChangeItemIfNecessary();
-    _items.emplace_back(display_list::SetURLForRect(link, destRect));
+    _items.emplace_back(display_list::SetUrlForRect(link, destRect));
   }
 
   void RecorderImpl::AppendStateChangeItemIfNecessary() noexcept

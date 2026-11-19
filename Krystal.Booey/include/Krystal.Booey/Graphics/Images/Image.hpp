@@ -258,7 +258,7 @@ namespace krys::boo
 
     void SetImageObserver(RefPtr<ImageObserver>) noexcept;
 
-    KRYS_NODISCARD net::URL SourceURL() const noexcept;
+    KRYS_NODISCARD net::Url SourceUrl() const noexcept;
 
     KRYS_NODISCARD utf8_string MimeType() const noexcept;
 

@@ -230,7 +230,7 @@ namespace krys::boo::dom
       docCopy._contentType = doc._contentType;
       docCopy._encoding = doc._encoding;
       docCopy.SetQuirksMode(doc._quirksMode);
-      docCopy.SetURL(doc._url);
+      docCopy.SetUrl(doc._url);
       docCopy._allowDeclarativeShadowRoots = doc._allowDeclarativeShadowRoots;
       docCopy.SetSettings(ShareRef(doc.GetSettings()));
 

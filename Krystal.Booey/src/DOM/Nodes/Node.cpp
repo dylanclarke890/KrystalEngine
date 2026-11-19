@@ -244,7 +244,7 @@ namespace krys::boo
     // 2. If baseURL is null, then set baseURL to this's node document's URL.
     // (A document's base URL is never null: it falls back to its URL.)
     // 3. Return baseURL, serialized.
-    return NodeDocument().BaseURL().String();
+    return NodeDocument().BaseUrl().String();
   }
 
   Document *Node::OwnerDocument() const noexcept

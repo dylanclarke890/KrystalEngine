@@ -1,5 +1,5 @@
 ﻿#include "catch2/catch_test_macros.hpp"
-#include "Krystal.Net/URL.hpp"
+#include "Krystal.Net/Url.hpp"
 #include <algorithm>
 #include <cctype>
 #include <fstream>
@@ -7,7 +7,7 @@
 #include <sstream>
 #include <string>
 
-// Runs the web-platform-tests URL data (url/resources/*.json) against net::URL, mapping each expected field
+// Runs the web-platform-tests URL data (url/resources/*.json) against net::Url, mapping each expected field
 // to the URL getter the DOM's URL interface uses for it.
 
 namespace krys::net::tests
@@ -85,25 +85,25 @@ namespace krys::net::tests
       return std::string(test[member].GetString(), test[member].GetStringLength());
     }
 
-    // The DOM URL interface's getters (URLDecomposition upstream).
+    // The DOM URL interface's getters (UrlDecomposition upstream).
 
-    std::string Protocol(const URL &url)
+    std::string Protocol(const Url &url)
     {
       return S(url.Protocol()) + ":";
     }
 
-    std::string Port(const URL &url)
+    std::string Port(const Url &url)
     {
       auto port = url.Port();
       return port ? std::to_string(*port) : std::string();
     }
 
-    std::string Search(const URL &url)
+    std::string Search(const Url &url)
     {
       return url.Query().empty() ? std::string() : S(url.QueryWithLeadingQuestionMark());
     }
 
-    std::string Hash(const URL &url)
+    std::string Hash(const Url &url)
     {
       return url.FragmentIdentifier().empty() ? std::string()
                                               : S(url.FragmentIdentifierWithLeadingNumberSign());
@@ -111,7 +111,7 @@ namespace krys::net::tests
 
     // The DOM URL interface's host and hostname setters.
 
-    void SetHost(URL &url, utf8_stringview value)
+    void SetHost(Url &url, utf8_stringview value)
     {
       auto copy = url;
       if (value.empty() && !copy.ProtocolIsFile() && copy.HasSpecialScheme())
@@ -125,7 +125,7 @@ namespace krys::net::tests
       }
     }
 
-    void SetHostname(URL &url, utf8_stringview value)
+    void SetHostname(Url &url, utf8_stringview value)
     {
       auto copy = url;
       if (value.empty() && !copy.ProtocolIsFile() && copy.HasSpecialScheme())
@@ -139,7 +139,7 @@ namespace krys::net::tests
       }
     }
 
-    utf8_string HTTPSURL(utf8_stringview host)
+    utf8_string HTTPSUrl(utf8_stringview host)
     {
       utf8_string result {u8"https://"};
       result.append(host);
@@ -162,7 +162,7 @@ namespace krys::net::tests
 
       auto input = U8(test["input"]);
       bool hasBase = test.HasMember("base") && !test["base"].IsNull();
-      URL url = hasBase ? URL(URL(U8(test["base"])), input) : URL(input);
+      Url url = hasBase ? Url(Url(U8(test["base"])), input) : Url(input);
       INFO("input: <" << S(input) << "> base: <" << (hasBase ? test["base"].GetString() : "null") << ">");
       INFO("parsed: <" << S(url.String()) << ">");
 
@@ -201,7 +201,7 @@ namespace krys::net::tests
       INFO("input: <" << S(input) << ">");
       bool expectFailure = test["output"].IsNull();
 
-      URL url {HTTPSURL(input)};
+      Url url {HTTPSUrl(input)};
       if (expectFailure)
       {
         CHECK_FALSE(url.IsValid());
@@ -216,11 +216,11 @@ namespace krys::net::tests
         CHECK(S(url.String()) == "https://" + output + "/x");
       }
 
-      URL viaHost {u8"https://x/x"};
+      Url viaHost {u8"https://x/x"};
       SetHost(viaHost, input);
       CHECK(S(viaHost.HostAndPort()) == (expectFailure ? "x" : Expected(test, "output")));
 
-      URL viaHostname {u8"https://x/x"};
+      Url viaHostname {u8"https://x/x"};
       SetHostname(viaHostname, input);
       CHECK(S(viaHostname.Host()) == (expectFailure ? "x" : Expected(test, "output")));
     }
@@ -246,7 +246,7 @@ namespace krys::net::tests
       ++cases;
       INFO("input: <" << S(input) << ">");
 
-      URL url {HTTPSURL(input)};
+      Url url {HTTPSUrl(input)};
       if (test["output"].IsNull())
       {
         // These were generated before Unicode 17 assigned U+32931 and U+32B9A (CJK Extension J), so they

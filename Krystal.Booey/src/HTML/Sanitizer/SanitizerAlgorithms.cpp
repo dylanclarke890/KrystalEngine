@@ -4,7 +4,7 @@
 #include "Krystal.Booey/HTML/Sanitizer/SanitizerConstants.hpp"
 #include "Krystal.Booey/Infra/Namespaces.hpp"
 #include "Krystal.Booey/Infra/StringAlgorithms.hpp"
-#include "Krystal.Net/URL.hpp"
+#include "Krystal.Net/Url.hpp"
 #include <algorithm>
 
 namespace krys::boo::html
@@ -210,9 +210,9 @@ namespace krys::boo::html
     }
 
     // 13. If configuration["javascriptURLs"] does not exist, then set it to permissiveDefaults.
-    if (!configuration.JavascriptURLs)
+    if (!configuration.JavascriptUrls)
     {
-      configuration.JavascriptURLs = permissiveDefaults;
+      configuration.JavascriptUrls = permissiveDefaults;
     }
   }
 
@@ -616,10 +616,10 @@ namespace krys::boo::html
 
     // 6.-6b. If configuration["javascriptURLs"] is true: set result to true; set
     //        configuration["javascriptURLs"] to false.
-    if (*configuration.JavascriptURLs)
+    if (*configuration.JavascriptUrls)
     {
       result = true;
-      configuration.JavascriptURLs = false;
+      configuration.JavascriptUrls = false;
     }
 
     // 7. Return result.
@@ -680,10 +680,10 @@ namespace krys::boo::html
     return Maybe<SanitizerConfig> {krys::move(configuration)};
   }
 
-  bool SanitizerAlgorithms::ContainsJavaScriptURL(DOMStringView value) noexcept
+  bool SanitizerAlgorithms::ContainsJavaScriptUrl(DOMStringView value) noexcept
   {
     // 1. Let url be the result of running the basic URL parser on value.
-    net::URL url(value);
+    net::Url url(value);
 
     // 2. If url is failure, then return false.
     if (!url.IsValid())
@@ -823,14 +823,14 @@ namespace krys::boo::html
     }
 
     // 8. If configuration["javascriptURLs"] is true, then return true.
-    if (configuration.JavascriptURLs.value_or(false))
+    if (configuration.JavascriptUrls.value_or(false))
     {
       return true;
     }
 
     // 9. If the pair (elementName, attrName) matches an entry in the built-in navigating URL attributes
     //    list, and if value contains a javascript: URL, then return false.
-    if (SanitizerConstants::IsNavigatingURLAttribute(elementName, attrName) && ContainsJavaScriptURL(value))
+    if (SanitizerConstants::IsNavigatingUrlAttribute(elementName, attrName) && ContainsJavaScriptUrl(value))
     {
       return false;
     }
@@ -838,14 +838,14 @@ namespace krys::boo::html
     // 10. If elementNamespace is the MathML namespace, localName is "href", namespace is null or the XLink
     //     namespace, and value contains a javascript: URL, then return false.
     if (elementNamespace == infra::namespaces::MathML && localName == u8"href"
-        && (namespaceURI == null || namespaceURI == infra::namespaces::XLink) && ContainsJavaScriptURL(value))
+        && (namespaceURI == null || namespaceURI == infra::namespaces::XLink) && ContainsJavaScriptUrl(value))
     {
       return false;
     }
 
     // 11. If the built-in animating URL attributes list contains the pair (elementName, attrName), and
     //     value is "href" or "xlink:href", then return false.
-    if (SanitizerConstants::IsAnimatingURLAttribute(elementName, attrName)
+    if (SanitizerConstants::IsAnimatingUrlAttribute(elementName, attrName)
         && (value == u8"href" || value == u8"xlink:href"))
     {
       return false;

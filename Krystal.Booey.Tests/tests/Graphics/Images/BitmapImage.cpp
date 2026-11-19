@@ -23,7 +23,7 @@ namespace krys::boo::tests
       int64 DecodedSize {0};
       List<EncodedDataStatus> Statuses;
 
-      KRYS_NODISCARD net::URL SourceUrl() const noexcept override
+      KRYS_NODISCARD net::Url SourceUrl() const noexcept override
       {
         return {};
       }

@@ -36,7 +36,7 @@
 #include "Krystal.Core/Types/RefPtr.hpp"
 #include "Krystal.Core/Utils/Apply.hpp"
 #include "Krystal.Core/Visitor.hpp"
-#include "Krystal.Net/URL.hpp"
+#include "Krystal.Net/Url.hpp"
 
 namespace krys::boo::css
 {
@@ -489,11 +489,11 @@ namespace krys::boo::css
     }
   };
 
-  // Specialization for `net::URL`.
+  // Specialization for `net::Url`.
   template <>
-  struct ComputedStyleDependenciesCollector<net::URL>
+  struct ComputedStyleDependenciesCollector<net::Url>
   {
-    constexpr void operator()(ComputedStyleDependencies &, const net::URL &)
+    constexpr void operator()(ComputedStyleDependencies &, const net::Url &)
     {
       // Nothing to do.
     }
@@ -674,12 +674,12 @@ namespace krys::boo::css
     }
   };
 
-  // Specialization for `net::URL`.
+  // Specialization for `net::Url`.
   template <>
-  struct ValueChildrenVisitor<net::URL>
+  struct ValueChildrenVisitor<net::Url>
   {
     constexpr IterationStatus operator()(KRYS_NOESCAPE const Func<IterationStatus(Value &)> &,
-                                         const net::URL &)
+                                         const net::Url &)
     {
       return IterationStatus::Continue;
     }

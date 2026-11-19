@@ -27,7 +27,7 @@
 
 #include "Krystal.Core/Attributes.hpp"
 #include "Krystal.Core/Strings/String.hpp"
-#include "Krystal.Net/URL.hpp"
+#include "Krystal.Net/Url.hpp"
 
 namespace krys::boo
 {
@@ -38,15 +38,15 @@ namespace krys::boo
   private:
     utf8_string _content;
     utf8_string _mimeType {u8"text/html"};
-    net::URL _responseURL;
+    net::Url _responseUrl;
 
   public:
     SubstituteData() noexcept = default;
 
     /// @param responseURL The document's URL; the request's if null.
-    SubstituteData(utf8_string content, utf8_string mimeType, net::URL responseURL) noexcept
+    SubstituteData(utf8_string content, utf8_string mimeType, net::Url responseUrl) noexcept
         : _content(krys::move(content)), _mimeType(krys::move(mimeType)),
-          _responseURL(krys::move(responseURL))
+          _responseUrl(krys::move(responseUrl))
     {
     }
 
@@ -60,9 +60,9 @@ namespace krys::boo
       return _mimeType;
     }
 
-    KRYS_NODISCARD const net::URL &ResponseURL() const noexcept
+    KRYS_NODISCARD const net::Url &ResponseUrl() const noexcept
     {
-      return _responseURL;
+      return _responseUrl;
     }
   };
 }

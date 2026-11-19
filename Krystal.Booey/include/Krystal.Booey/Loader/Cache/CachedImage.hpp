@@ -74,7 +74,7 @@ namespace krys::boo
       explicit CachedImageObserver(CachedImage &) noexcept;
 
       // ImageObserver API
-      KRYS_NODISCARD net::URL SourceUrl() const noexcept override;
+      KRYS_NODISCARD net::Url SourceUrl() const noexcept override;
 
       KRYS_NODISCARD utf8_string MimeType() const noexcept override;
 
@@ -110,7 +110,7 @@ namespace krys::boo
     {
       LayoutSize ContainerSize;
       float ContainerZoom;
-      net::URL ImageURL;
+      net::Url ImageUrl;
     };
 
     RefPtr<CachedImageObserver> _imageObserver;
@@ -166,7 +166,7 @@ namespace krys::boo
     }
 
     void SetContainerContextForClient(const CachedImageClient &, const LayoutSize &, float,
-                                      const net::URL &) noexcept;
+                                      const net::Url &) noexcept;
 
     KRYS_NODISCARD bool IsClientWaitingForAsyncDecoding(const CachedImageClient &) const noexcept;
 

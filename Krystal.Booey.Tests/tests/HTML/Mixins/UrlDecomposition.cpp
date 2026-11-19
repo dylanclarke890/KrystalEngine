@@ -3,7 +3,7 @@
 #include "Krystal.Booey.Tests/Loader/NavigationTestUtils.hpp"
 #include "Krystal.Booey/HTML/Elements/HTMLAnchorElement.hpp"
 #include "Krystal.Booey/HTML/Elements/HTMLAreaElement.hpp"
-#include "Krystal.Net/URL.hpp"
+#include "Krystal.Net/Url.hpp"
 
 namespace krys::boo::html::tests
 {
@@ -225,7 +225,7 @@ namespace krys::boo::html::tests
   {
     auto origin = [](utf8_stringview url)
     {
-      return Str(URLDecomposition::SerializedOrigin(net::URL(url)));
+      return Str(UrlDecomposition::SerializedOrigin(net::Url(url)));
     };
     CHECK(origin(u8"https://example.com:8443/a?b#c") == "https://example.com:8443");
     CHECK(origin(u8"http://example.com:80/") == "http://example.com");
@@ -239,17 +239,17 @@ namespace krys::boo::html::tests
 
   TEST_CASE("URLDecomposition::ParsePort", "[HTML][URLDecomposition]")
   {
-    CHECK(URLDecomposition::ParsePort(u8"8080", u8"https") == Maybe<uint16>(8'080));
-    CHECK(URLDecomposition::ParsePort(u8"80abc", u8"https") == Maybe<uint16>(80));
-    CHECK(URLDecomposition::ParsePort(u8"8\t0", u8"https") == Maybe<uint16>(80));
+    CHECK(UrlDecomposition::ParsePort(u8"8080", u8"https") == Maybe<uint16>(8'080));
+    CHECK(UrlDecomposition::ParsePort(u8"80abc", u8"https") == Maybe<uint16>(80));
+    CHECK(UrlDecomposition::ParsePort(u8"8\t0", u8"https") == Maybe<uint16>(80));
     // The scheme's default port, and no digits at all, parse as no port.
-    auto defaultPort = URLDecomposition::ParsePort(u8"443", u8"https");
+    auto defaultPort = UrlDecomposition::ParsePort(u8"443", u8"https");
     REQUIRE(defaultPort.has_value());
     CHECK_FALSE(defaultPort->has_value());
-    auto empty = URLDecomposition::ParsePort(u8"", u8"https");
+    auto empty = UrlDecomposition::ParsePort(u8"", u8"https");
     REQUIRE(empty.has_value());
     CHECK_FALSE(empty->has_value());
-    CHECK_FALSE(URLDecomposition::ParsePort(u8"abc", u8"https").has_value());
-    CHECK_FALSE(URLDecomposition::ParsePort(u8"65536", u8"https").has_value());
+    CHECK_FALSE(UrlDecomposition::ParsePort(u8"abc", u8"https").has_value());
+    CHECK_FALSE(UrlDecomposition::ParsePort(u8"65536", u8"https").has_value());
   }
 }

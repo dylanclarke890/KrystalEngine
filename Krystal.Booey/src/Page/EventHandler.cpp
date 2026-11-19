@@ -2767,7 +2767,7 @@ namespace krys::boo
       return;
     }
 
-    RefPtr<Element> urlElement = ShareRefPtr(result.URLElement());
+    RefPtr<Element> urlElement = ShareRefPtr(result.UrlElement());
     if (!urlElement || !IsDraggableLink(*urlElement))
     {
       if (RefPtr<Node> targetNode = ShareRefPtr(result.TargetNode());

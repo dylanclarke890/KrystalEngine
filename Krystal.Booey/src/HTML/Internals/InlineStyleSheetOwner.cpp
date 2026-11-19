@@ -41,7 +41,7 @@ namespace krys::boo::html
     KRYS_NODISCARD css::ParserContext ParserContextForElement(const Element &element) noexcept
     {
       auto &document = element.NodeDocument();
-      return css::ParserContext(document, document.BaseURL(), u8"UTF-8");
+      return css::ParserContext(document, document.BaseUrl(), u8"UTF-8");
     }
 
     KRYS_NODISCARD DOMString Title(const Element &element) noexcept
@@ -214,7 +214,7 @@ namespace krys::boo::html
     style::StyleSheetContentsCache::Key cacheKey {text, ParserContextForElement(element)};
     if (auto cachedSheet = style::StyleSheetContentsCache::Singleton().Get(cacheKey))
     {
-      krys_debug_assert(cachedSheet->IsCacheableWithNoBaseURLDependency());
+      krys_debug_assert(cachedSheet->IsCacheableWithNoBaseUrlDependency());
       auto sheet = CSSStyleSheet::CreateInline(cachedSheet, element);
       _sheet = sheet;
       sheet->SetMediaQueries(krys::move(mediaQueries));
@@ -246,7 +246,7 @@ namespace krys::boo::html
 
     contents->CheckLoaded();
 
-    if (contents->IsCacheableWithNoBaseURLDependency())
+    if (contents->IsCacheableWithNoBaseUrlDependency())
     {
       style::StyleSheetContentsCache::Singleton().Add(krys::move(cacheKey), contents);
     }

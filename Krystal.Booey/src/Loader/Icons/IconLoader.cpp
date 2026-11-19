@@ -34,12 +34,12 @@
 
 namespace krys::boo
 {
-  Ref<IconLoader> IconLoader::Create(DocumentLoader &documentLoader, net::URL url) noexcept
+  Ref<IconLoader> IconLoader::Create(DocumentLoader &documentLoader, net::Url url) noexcept
   {
     return AdoptRef(*new IconLoader(documentLoader, krys::move(url)));
   }
 
-  IconLoader::IconLoader(DocumentLoader &documentLoader, net::URL url) noexcept
+  IconLoader::IconLoader(DocumentLoader &documentLoader, net::Url url) noexcept
       : _documentLoader(CreateWeakPtr(&documentLoader)), _url(krys::move(url))
   {
   }
@@ -64,7 +64,7 @@ namespace krys::boo
       return;
     }
 
-    CachedResourceRequest request(ResourceRequest(net::URL(_url)),
+    CachedResourceRequest request(ResourceRequest(net::Url(_url)),
                                   CachedResourceLoader::DefaultCachedResourceOptions());
     request.SetInitiatorType(CachedResourceRequestInitiatorTypes::Icon);
     // An icon doesn't hold up the document's load.

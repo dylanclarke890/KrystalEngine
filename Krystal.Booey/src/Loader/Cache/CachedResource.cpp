@@ -28,7 +28,7 @@
 #include "Krystal.Booey/Loader/Cache/CachedResourceLoader.hpp"
 #include "Krystal.Booey/Loader/Cache/CachedResourceRequest.hpp"
 #include "Krystal.Booey/Loader/Cache/MemoryCache.hpp"
-#include "Krystal.Booey/Platform/Network/DataURLDecoder.hpp"
+#include "Krystal.Booey/Platform/Network/DataUrlDecoder.hpp"
 #include "Krystal.Booey/Platform/PlatformStrategies.hpp"
 
 namespace krys::boo
@@ -97,18 +97,18 @@ namespace krys::boo
     };
 
     // Data URLs are decoded here, rather than by the host.
-    if (URL().ProtocolIsData())
+    if (Url().ProtocolIsData())
     {
-      auto decoded = data_url_decoder::Decode(URL());
+      auto decoded = data_url_decoder::Decode(Url());
       if (!decoded)
       {
         completeAsNetworkingTask(Unexpected<ResourceError>(
-          ResourceError(utf8_string(ErrorDomainBooeyInternal), 0, URL(), u8"Invalid data URL")));
+          ResourceError(utf8_string(ErrorDomainBooeyInternal), 0, Url(), u8"Invalid data URL")));
         return;
       }
       auto size = static_cast<int64>(decoded->Data.size());
       completeAsNetworkingTask(
-        LoadedResource {.Response = ResourceResponse(URL(), krys::move(decoded->MimeType), size,
+        LoadedResource {.Response = ResourceResponse(Url(), krys::move(decoded->MimeType), size,
                                                      krys::move(decoded->Charset)),
                         .Data = SharedBuffer::Create(krys::move(decoded->Data))});
       return;
@@ -118,7 +118,7 @@ namespace krys::boo
     if (!loaderStrategy)
     {
       SetResourceError(
-        ResourceError(utf8_string(ErrorDomainBooeyInternal), 0, URL(), u8"No loader strategy"));
+        ResourceError(utf8_string(ErrorDomainBooeyInternal), 0, Url(), u8"No loader strategy"));
       FailBeforeStarting();
       RequestDone();
       return;
@@ -370,7 +370,7 @@ namespace krys::boo
   {
     static const uint32 kAverageClientsHashMapSize = 384;
     return static_cast<uint32>(sizeof(CachedResource) + _response.MimeType().size()
-                               + kAverageClientsHashMapSize + _resourceRequest.URL().String().size() * 2);
+                               + kAverageClientsHashMapSize + _resourceRequest.Url().String().size() * 2);
   }
 
   void CachedResource::StopDecodedDataDeletionTimer() noexcept

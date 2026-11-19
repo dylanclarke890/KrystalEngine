@@ -28,7 +28,7 @@
 #include "Krystal.Core/Attributes.hpp"
 #include "Krystal.Core/Numeric.hpp"
 #include "Krystal.Core/Strings/String.hpp"
-#include "Krystal.Net/URL.hpp"
+#include "Krystal.Net/Url.hpp"
 
 namespace krys::boo
 {
@@ -48,16 +48,16 @@ namespace krys::boo
   private:
     utf8_string _domain;
     int32 _errorCode {0};
-    net::URL _failingURL;
+    net::Url _failingUrl;
     utf8_string _localizedDescription;
     Type _type {Type::Null};
 
   public:
     ResourceError() noexcept = default;
 
-    ResourceError(utf8_string domain, int32 errorCode, net::URL failingURL, utf8_string localizedDescription,
+    ResourceError(utf8_string domain, int32 errorCode, net::Url failingUrl, utf8_string localizedDescription,
                   Type type = Type::General) noexcept
-        : _domain(krys::move(domain)), _errorCode(errorCode), _failingURL(krys::move(failingURL)),
+        : _domain(krys::move(domain)), _errorCode(errorCode), _failingUrl(krys::move(failingUrl)),
           _localizedDescription(krys::move(localizedDescription)), _type(type)
     {
     }
@@ -97,9 +97,9 @@ namespace krys::boo
       return _errorCode;
     }
 
-    KRYS_NODISCARD const net::URL &FailingURL() const noexcept
+    KRYS_NODISCARD const net::Url &FailingUrl() const noexcept
     {
-      return _failingURL;
+      return _failingUrl;
     }
 
     KRYS_NODISCARD const utf8_string &LocalizedDescription() const noexcept

@@ -8,7 +8,7 @@ namespace krys::boo::html::tests
             "[HTML][HTMLQuoteElement][html:attr-blockquote-cite][html:attr-q-cite]")
   {
     auto document = CreateRef<HTMLDocument>();
-    document->SetURL(net::URL(u8"https://example.com/dir/page.html"));
+    document->SetUrl(net::Url(u8"https://example.com/dir/page.html"));
     for (auto localName : {u8"blockquote", u8"q"})
     {
       auto element = document->CreateElement(DOMStringAtom(localName)).ReleaseValue();

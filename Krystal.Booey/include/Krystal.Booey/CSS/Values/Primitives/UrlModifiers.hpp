@@ -35,37 +35,37 @@ namespace krys::boo::css
 {
   // <cross-origin-modifier> = cross-origin( anonymous | use-credentials )
   // https://drafts.csswg.org/css-values-5/#typedef-request-url-modifier-cross-origin-modifier
-  using URLCrossOriginParameters = Variant<keywords::Anonymous, keywords::UseCredentials>;
-  using URLCrossOriginFunction = FunctionNotation<ValueId::CrossOrigin, URLCrossOriginParameters>;
+  using UrlCrossOriginParameters = Variant<keywords::Anonymous, keywords::UseCredentials>;
+  using UrlCrossOriginFunction = FunctionNotation<ValueId::CrossOrigin, UrlCrossOriginParameters>;
 
   // <integrity-modifier> = integrity( <string> )
   // https://drafts.csswg.org/css-values-5/#typedef-request-url-modifier-integrity-modifier
-  using URLIntegrityParameters = CSSOMString;
-  using URLIntegrityFunction = FunctionNotation<ValueId::Integrity, URLIntegrityParameters>;
+  using UrlIntegrityParameters = CSSOMString;
+  using UrlIntegrityFunction = FunctionNotation<ValueId::Integrity, UrlIntegrityParameters>;
 
   // <referrer-policy-modifier> = referrer-policy( no-referrer | no-referrer-when-downgrade | same-origin |
   // origin | strict-origin | origin-when-cross-origin | strict-origin-when-cross-origin | unsafe-url )
   // https://drafts.csswg.org/css-values-5/#typedef-request-url-modifier-referrer-policy-modifier
-  using URLReferrerPolicyParameters =
+  using UrlReferrerPolicyParameters =
     Variant<keywords::NoReferrer, keywords::NoReferrerWhenDowngrade, keywords::SameOrigin, keywords::Origin,
             keywords::StrictOrigin, keywords::OriginWhenCrossOrigin, keywords::StrictOriginWhenCrossOrigin,
             keywords::UnsafeUrl>;
-  using URLReferrerPolicyFunction = FunctionNotation<ValueId::ReferrerPolicy, URLReferrerPolicyParameters>;
+  using UrlReferrerPolicyFunction = FunctionNotation<ValueId::ReferrerPolicy, UrlReferrerPolicyParameters>;
 
   /// @brief The request modifiers of a `<url>`.
   // https://drafts.csswg.org/css-values-5/#typedef-request-url-modifier
   // <request-url-modifier> = <cross-origin-modifier> | <integrity-modifier> | <referrer-policy-modifier>
-  struct URLModifiers
+  struct UrlModifiers
   {
-    Maybe<URLCrossOriginFunction> CrossOrigin;
-    Maybe<URLIntegrityFunction> Integrity;
-    Maybe<URLReferrerPolicyFunction> ReferrerPolicy;
+    Maybe<UrlCrossOriginFunction> CrossOrigin;
+    Maybe<UrlIntegrityFunction> Integrity;
+    Maybe<UrlReferrerPolicyFunction> ReferrerPolicy;
 
-    KRYS_NODISCARD bool operator==(const URLModifiers &) const noexcept = default;
+    KRYS_NODISCARD bool operator==(const UrlModifiers &) const noexcept = default;
   };
 
   template <size_t I>
-  KRYS_NODISCARD const auto &get(const URLModifiers &value) noexcept
+  KRYS_NODISCARD const auto &get(const UrlModifiers &value) noexcept
   {
     if constexpr (I == 0)
     {
@@ -82,8 +82,8 @@ namespace krys::boo::css
   }
 
   /// @brief Applies the URL request modifier steps of @p modifiers to @p loaderOptions.
-  void ApplyModifiersToLoaderOptions(const URLModifiers &modifiers,
+  void ApplyModifiersToLoaderOptions(const UrlModifiers &modifiers,
                                      ResourceLoaderOptions &loaderOptions) noexcept;
 }
 
-DEFINE_SPACE_SEPARATED_TUPLE_LIKE_CONFORMANCE(krys::boo::css::URLModifiers, 3uz)
+DEFINE_SPACE_SEPARATED_TUPLE_LIKE_CONFORMANCE(krys::boo::css::UrlModifiers, 3uz)

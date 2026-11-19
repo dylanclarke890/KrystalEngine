@@ -37,7 +37,7 @@
 #include "Krystal.Core/RefCounted.hpp"
 #include "Krystal.Core/Strings/String.hpp"
 #include "Krystal.Core/Types/RefPtr.hpp"
-#include "Krystal.Net/URL.hpp"
+#include "Krystal.Net/Url.hpp"
 
 namespace krys::boo
 {
@@ -136,7 +136,7 @@ namespace krys::boo
   private:
     Method _method;
     bool _wasCancelled {false};
-    net::URL _action;
+    net::Url _action;
     DOMString _target;
     DOMString _encodingType;
     RefPtr<html::DOMFormData> _entryList;
@@ -148,11 +148,11 @@ namespace krys::boo
 
   public:
     /// @brief A dialog's submission, with the submitter's result.
-    FormSubmission(Maybe<DOMString> returnValue, net::URL action, DOMStringView target,
+    FormSubmission(Maybe<DOMString> returnValue, net::Url action, DOMStringView target,
                    DOMStringView encodingType, boo::Event *event) noexcept;
 
     /// @brief A `GET` or `POST` submission of @p entryList.
-    FormSubmission(Method method, net::URL action, DOMStringView target, DOMStringView encodingType,
+    FormSubmission(Method method, net::Url action, DOMStringView target, DOMStringView encodingType,
                    Ref<html::DOMFormData> &&entryList, boo::Event *event) noexcept;
 
     ~FormSubmission() noexcept;
@@ -167,7 +167,7 @@ namespace krys::boo
       return _method;
     }
 
-    KRYS_NODISCARD const net::URL &Action() const noexcept
+    KRYS_NODISCARD const net::Url &Action() const noexcept
     {
       return _action;
     }

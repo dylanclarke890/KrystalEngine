@@ -43,7 +43,7 @@ namespace krys::boo::dom
 namespace krys::boo::style
 {
   struct SVGMarkerResource;
-  struct URL;
+  struct Url;
 }
 
 namespace krys::boo
@@ -69,7 +69,7 @@ namespace krys::boo
     KRYS_NODISCARD static DOMStringAtom FragmentIdentifierFromIRIString(DOMStringView url,
                                                                         const Document &document) noexcept;
 
-    KRYS_NODISCARD static DOMStringAtom FragmentIdentifierFromIRIString(const style::URL &url,
+    KRYS_NODISCARD static DOMStringAtom FragmentIdentifierFromIRIString(const style::Url &url,
                                                                         const Document &document) noexcept;
 
     KRYS_NODISCARD static DOMStringAtom
@@ -87,7 +87,7 @@ namespace krys::boo
                                  const RefPtr<Document> &externalDocument = nullptr) noexcept;
 
     KRYS_NODISCARD static TargetElementResult
-      TargetElementFromIRIString(const style::URL &iri, const dom::DocumentOrShadowRoot &treeScope,
+      TargetElementFromIRIString(const style::Url &iri, const dom::DocumentOrShadowRoot &treeScope,
                                  const RefPtr<Document> &externalDocument = nullptr) noexcept;
 
     KRYS_NODISCARD static bool IsExternalURIReference(DOMStringView uri, const Document &document) noexcept;

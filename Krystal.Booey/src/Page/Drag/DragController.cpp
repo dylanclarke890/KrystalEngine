@@ -107,10 +107,10 @@ namespace krys::boo
           return fragment;
         }
 
-        if (dragData.ContainsURL(DragData::DoNotConvertFilenames))
+        if (dragData.ContainsUrl(DragData::DoNotConvertFilenames))
         {
           utf8_string title;
-          utf8_string url = dragData.AsURL(DragData::DoNotConvertFilenames, &title);
+          utf8_string url = dragData.AsUrl(DragData::DoNotConvertFilenames, &title);
           if (!url.empty())
           {
             Ref<Document> document = ShareRef(context.Start.Container->NodeDocument());
@@ -959,17 +959,17 @@ namespace krys::boo
     }
 
     auto *image = GetImage(element);
-    auto imageURL = hitTestResult->AbsoluteImageURL();
-    if (actionMask.Contains(DragSourceAction::Image) && !imageURL.IsEmpty() && image && !image->IsNull())
+    auto imageUrl = hitTestResult->AbsoluteImageUrl();
+    if (actionMask.Contains(DragSourceAction::Image) && !imageUrl.IsEmpty() && image && !image->IsNull())
     {
-      editor.WriteImageToPasteboard(pasteboard, element, imageURL, {});
+      editor.WriteImageToPasteboard(pasteboard, element, imageUrl, {});
       return;
     }
 
-    auto linkURL = hitTestResult->AbsoluteLinkURL();
-    if (actionMask.Contains(DragSourceAction::Link) && !linkURL.IsEmpty())
+    auto linkUrl = hitTestResult->AbsoluteLinkUrl();
+    if (actionMask.Contains(DragSourceAction::Link) && !linkUrl.IsEmpty())
     {
-      editor.CopyURL(linkURL, SimplifyWhiteSpace(hitTestResult->TextContent()), pasteboard);
+      editor.CopyUrl(linkUrl, SimplifyWhiteSpace(hitTestResult->TextContent()), pasteboard);
     }
   }
 
@@ -1018,12 +1018,12 @@ namespace krys::boo
       return false;
     }
 
-    auto linkURL = hitTestResult->AbsoluteLinkURL();
-    auto imageURL = hitTestResult->AbsoluteImageURL();
+    auto linkUrl = hitTestResult->AbsoluteLinkUrl();
+    auto imageUrl = hitTestResult->AbsoluteImageUrl();
 
     IntPoint mouseDraggedPoint = src.View()->WindowToContents(FlooredIntPoint(dragEvent.Position()));
 
-    _draggingImageURL = net::URL();
+    _draggingImageUrl = net::Url();
     _sourceDragOperationMask = sourceOperationMask;
 
     DragImage dragImage;
@@ -1040,13 +1040,13 @@ namespace krys::boo
       // This is in the spirit of the IE API, which allows overriding of pasteboard data and DragOp.
       if (dragImage)
       {
-        dragLoc = DragLocForDHTMLDrag(mouseDraggedPoint, dragOrigin, dragImageOffset, !linkURL.IsEmpty());
+        dragLoc = DragLocForDHTMLDrag(mouseDraggedPoint, dragOrigin, dragImageOffset, !linkUrl.IsEmpty());
         _dragOffset = dragImageOffset;
       }
     }
 
-    if (state.Type == EnumSet<boo::DragSourceAction> {DragSourceAction::Selection} || !imageURL.IsEmpty()
-        || !linkURL.IsEmpty())
+    if (state.Type == EnumSet<boo::DragSourceAction> {DragSourceAction::Selection} || !imageUrl.IsEmpty()
+        || !linkUrl.IsEmpty())
     {
       // Selection, image, and link drags receive a default set of allowed drag operations.
       _sourceDragOperationMask.Add({DragOperation::Generic, DragOperation::Copy});
@@ -1099,17 +1099,17 @@ namespace krys::boo
       return true;
     }
 
-    if (!imageURL.IsEmpty() && image && !image->IsNull()
+    if (!imageUrl.IsEmpty() && image && !image->IsNull()
         && _dragSourceAction.Contains(DragSourceAction::Image))
     {
       if (hasData == HasNonDefaultPasteboardData::No)
       {
-        _draggingImageURL = imageURL;
+        _draggingImageUrl = imageUrl;
         if (element->IsContentRichlyEditable())
         {
           SelectElement(*element);
         }
-        DeclareAndWriteDragImage(*dataTransfer, *element, !linkURL.IsEmpty() ? linkURL : imageURL,
+        DeclareAndWriteDragImage(*dataTransfer, *element, !linkUrl.IsEmpty() ? linkUrl : imageUrl,
                                  hitTestResult->AltDisplayString());
       }
 
@@ -1128,7 +1128,7 @@ namespace krys::boo
       return true;
     }
 
-    if (!linkURL.IsEmpty() && _dragSourceAction.Contains(DragSourceAction::Link))
+    if (!linkUrl.IsEmpty() && _dragSourceAction.Contains(DragSourceAction::Link))
     {
       utf8_string textContentWithSimplifiedWhiteSpace = SimplifyWhiteSpace(hitTestResult->TextContent());
 
@@ -1136,7 +1136,7 @@ namespace krys::boo
       {
         // Simplify whitespace so the title put on the dataTransfer resembles what the user sees
         // on the web page. This includes replacing newlines with spaces.
-        editor.CopyURL(linkURL, textContentWithSimplifiedWhiteSpace, dataTransfer->GetPasteboard());
+        editor.CopyUrl(linkUrl, textContentWithSimplifiedWhiteSpace, dataTransfer->GetPasteboard());
       }
 
       const VisibleSelection &sourceSelection = selection.Selection();
@@ -1157,7 +1157,7 @@ namespace krys::boo
       {
         float deviceScaleFactor = src.Document()->DeviceScaleFactor();
         auto [dragImageRef] =
-          CreateDragImageForLink(*element, linkURL, textContentWithSimplifiedWhiteSpace, deviceScaleFactor);
+          CreateDragImageForLink(*element, linkUrl, textContentWithSimplifiedWhiteSpace, deviceScaleFactor);
         dragImage = DragImage {dragImageRef};
         if (dragImage)
         {
@@ -1299,7 +1299,7 @@ namespace krys::boo
         {
           item.Title = htmlLink->InnerText();
         }
-        item.Url = frame.Document()->CompleteURL(link->GetAttribute(u8"href").value_or(DOMString()));
+        item.Url = frame.Document()->CompleteUrl(link->GetAttribute(u8"href").value_or(DOMString()));
       }
     }
     Client().StartDrag(krys::move(item), *state.DataTransfer, *mainFrame);
@@ -1317,7 +1317,7 @@ namespace krys::boo
   }
 
   void DragController::DeclareAndWriteDragImage(dom::DataTransfer &dataTransfer, Element &element,
-                                                const net::URL &url, utf8_stringview label) noexcept
+                                                const net::Url &url, utf8_stringview label) noexcept
   {
     auto *frame = element.NodeDocument().Frame();
     krys_debug_assert(frame);

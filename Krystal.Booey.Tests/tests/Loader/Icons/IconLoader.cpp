@@ -23,12 +23,12 @@ namespace krys::boo::tests
       RunNetworkingTasks();
     }
 
-    KRYS_NODISCARD List<std::string> IconURLs(const List<Pair<LinkIcon, uint64>> &icons) noexcept
+    KRYS_NODISCARD List<std::string> IconUrls(const List<Pair<LinkIcon, uint64>> &icons) noexcept
     {
       List<std::string> urls;
       for (const auto &[icon, identifier] : icons)
       {
-        urls.push_back(Narrow(icon.URL.String()));
+        urls.push_back(Narrow(icon.Url.String()));
       }
       return urls;
     }
@@ -46,7 +46,7 @@ namespace krys::boo::tests
 
     REQUIRE(fixture.Client->IconDecisions.size() == 1);
     auto &icons = fixture.Client->IconDecisions[0];
-    CHECK(IconURLs(icons)
+    CHECK(IconUrls(icons)
           == List<std::string> {"https://example.com/large.png", "https://example.com/small.png",
                                 "https://example.com/unsized.ico"});
     CHECK(icons[0].first.Size == 32u);
@@ -94,7 +94,7 @@ namespace krys::boo::tests
     LoadFixture fixture;
     LoadPage(fixture, u8"<!DOCTYPE html><link rel=stylesheet href=a.css>");
     REQUIRE(fixture.Client->IconDecisions.size() == 1);
-    CHECK(IconURLs(fixture.Client->IconDecisions[0])
+    CHECK(IconUrls(fixture.Client->IconDecisions[0])
           == List<std::string> {"https://example.com/favicon.ico"});
   }
 
@@ -111,7 +111,7 @@ namespace krys::boo::tests
 
     (void)link.SetAttribute(u8"href", u8"b.png");
     REQUIRE(fixture.Client->IconDecisions.size() == 2);
-    CHECK(IconURLs(fixture.Client->IconDecisions[1]) == List<std::string> {"https://example.com/b.png"});
+    CHECK(IconUrls(fixture.Client->IconDecisions[1]) == List<std::string> {"https://example.com/b.png"});
 
     auto added = fixture.Document().CreateElement(u8"link").ReleaseValue();
     (void)added->SetAttribute(u8"rel", u8"icon");
@@ -119,14 +119,14 @@ namespace krys::boo::tests
     (void)added->SetAttribute(u8"sizes", u8"48x48");
     (void)fixture.Document().Head()->AppendChild(*added);
     REQUIRE(fixture.Client->IconDecisions.size() == 3);
-    CHECK(IconURLs(fixture.Client->IconDecisions[2])
+    CHECK(IconUrls(fixture.Client->IconDecisions[2])
           == List<std::string> {"https://example.com/c.png", "https://example.com/b.png"});
 
     // Without icon links, it's the default again.
     (void)link.SetAttribute(u8"rel", u8"stylesheet");
     added->Remove();
     REQUIRE(fixture.Client->IconDecisions.size() == 5);
-    CHECK(IconURLs(fixture.Client->IconDecisions[4])
+    CHECK(IconUrls(fixture.Client->IconDecisions[4])
           == List<std::string> {"https://example.com/favicon.ico"});
   }
 

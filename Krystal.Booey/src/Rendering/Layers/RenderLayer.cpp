@@ -6884,9 +6884,9 @@ namespace krys::boo
 
     // Now determine if the result is inside an anchor - if the urlElement isn't already set.
     auto *node = result.InnerNode();
-    if (node && !result.URLElement())
+    if (node && !result.UrlElement())
     {
-      result.SetURLElement(EnclosingLinkEventParentOrSelf(*node));
+      result.SetUrlElement(EnclosingLinkEventParentOrSelf(*node));
     }
 
     // Now return whether we were inside this layer (this will always be true for the root

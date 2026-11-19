@@ -118,21 +118,21 @@ namespace krys::boo
 
   ExceptionOr<Ref<CSSStyleSheet>> CSSStyleSheet::Create(Document &document, Init init) noexcept
   {
-    net::URL baseURL;
-    if (!init.BaseURL)
+    net::Url baseUrl;
+    if (!init.BaseUrl)
     {
-      baseURL = document.BaseURL();
+      baseUrl = document.BaseUrl();
     }
     else
     {
-      baseURL = document.CompleteURL(*init.BaseURL);
-      if (!baseURL.IsValid())
+      baseUrl = document.CompleteUrl(*init.BaseUrl);
+      if (!baseUrl.IsValid())
       {
         return Exception(ExceptionCode::NotAllowedError, u8"Base URL is invalid");
       }
     }
 
-    auto parserContext = css::ParserContext(document, baseURL, {});
+    auto parserContext = css::ParserContext(document, baseUrl, {});
     parserContext.shouldIgnoreImportRules = true;
     return AdoptRef(
       *new CSSStyleSheet(css::StyleSheetContents::Create(parserContext), document, krys::move(init)));
@@ -396,8 +396,8 @@ namespace krys::boo
       return *_isOriginClean;
     }
 
-    const auto &baseURL = _contents->BaseURL();
-    if (baseURL.IsEmpty())
+    const auto &baseUrl = _contents->BaseUrl();
+    if (baseUrl.IsEmpty())
     {
       return true;
     }
@@ -557,12 +557,12 @@ namespace krys::boo
 
   CSSOMString CSSStyleSheet::Href() const noexcept
   {
-    return _contents->OriginalURL();
+    return _contents->OriginalUrl();
   }
 
-  net::URL CSSStyleSheet::BaseURL() const noexcept
+  net::Url CSSStyleSheet::BaseUrl() const noexcept
   {
-    return _contents->BaseURL();
+    return _contents->BaseUrl();
   }
 
   bool CSSStyleSheet::IsLoading() const noexcept

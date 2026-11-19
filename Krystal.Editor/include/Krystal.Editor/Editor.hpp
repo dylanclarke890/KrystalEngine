@@ -578,8 +578,8 @@ namespace krys
           _cube = nullptr;
           _cube = CreateUnique<editor::PageCube>(document, *_context->Device);
           _canvas2D = CreateUnique<editor::PageCanvas2D>(document);
-          _context->Logger->Info("Loaded {}", Narrow(document.GetURL().String()));
-          ShowGuide(document.GetURL());
+          _context->Logger->Info("Loaded {}", Narrow(document.GetUrl().String()));
+          ShowGuide(document.GetUrl());
           break;
         case ui::LoadEventType::Failed:
           _loadEvents += u8", failed";
@@ -588,7 +588,7 @@ namespace krys
       }
       if (auto label = document.GetElementById(u8"load-events"))
       {
-        (void)label->TextContent(u8"Last load of " + utf8_string(document.GetURL().LastPathComponent())
+        (void)label->TextContent(u8"Last load of " + utf8_string(document.GetUrl().LastPathComponent())
                                  + u8": " + _loadEvents);
       }
     }
@@ -693,7 +693,7 @@ namespace krys
     }
 
     /// @brief The guide topic @p url names in its `guide` query parameter; empty if none.
-    KRYS_NODISCARD static utf8_string GuideTopic(const net::URL &url) noexcept
+    KRYS_NODISCARD static utf8_string GuideTopic(const net::Url &url) noexcept
     {
       constexpr utf8_stringview key = u8"guide=";
       auto query = url.Query();
@@ -711,7 +711,7 @@ namespace krys
     }
 
     /// @brief Shows the guide topic @p url names, and marks its link.
-    void ShowGuide(const net::URL &url) noexcept
+    void ShowGuide(const net::Url &url) noexcept
     {
       auto &document = _pageView->Document();
       auto view = document.GetElementById(u8"guide-view");
@@ -807,12 +807,12 @@ namespace krys
     /// the page's `#last-submission` element.
     void HandleNavigation(const ui::NavigationRequest &request) noexcept
     {
-      net::URL url(request.URL);
+      net::Url url(request.Url);
       if (!request.IsFormSubmission && !request.Download && !request.OpensNewWindow
           && url.ProtocolIs(u8"file"))
       {
         // A guide topic of this page is shown without a load.
-        if (url.Path() == _pageView->Document().GetURL().Path() && !GuideTopic(url).empty())
+        if (url.Path() == _pageView->Document().GetUrl().Path() && !GuideTopic(url).empty())
         {
           ShowGuide(url);
           return;
@@ -835,13 +835,13 @@ namespace krys
                                 : utf8_string());
         }
       }
-      _context->Logger->Info("Navigation: {} {} {}{}", Narrow(request.Method), Narrow(request.URL),
+      _context->Logger->Info("Navigation: {} {} {}{}", Narrow(request.Method), Narrow(request.Url),
                              Narrow(entries), request.OpensNewWindow ? " (new window)" : "");
       if (auto label = _pageView->Document().GetElementById(u8"last-submission"))
       {
-        utf8_string text = request.IsFormSubmission ? request.Method + u8" " + request.URL
-                           : request.Download       ? u8"Download " + request.URL
-                                                    : u8"Link to " + request.URL;
+        utf8_string text = request.IsFormSubmission ? request.Method + u8" " + request.Url
+                           : request.Download       ? u8"Download " + request.Url
+                                                    : u8"Link to " + request.Url;
         if (request.OpensNewWindow)
         {
           text += u8" (new window)";

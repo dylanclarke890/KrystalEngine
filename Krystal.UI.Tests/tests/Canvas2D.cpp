@@ -405,7 +405,7 @@ namespace krys::ui::tests
       return {pixels.begin(), pixels.end()};
     };
 
-    auto png = decode(fixture.Canvas().ToDataURL());
+    auto png = decode(fixture.Canvas().ToDataUrl());
     REQUIRE(png.size() == 100u * 50u);
     CHECK(png[25 * 100 + 25] == 0xFF'FF'00'00u);
     // Unpremultiplied, give or take rounding.
@@ -414,7 +414,7 @@ namespace krys::ui::tests
     CHECK((blue & 0xFFu) >= 254u);
 
     // JPEG is drawn over black: the half-transparent blue is half as bright.
-    auto jpeg = decode(fixture.Canvas().ToDataURL(u8"image/jpeg"));
+    auto jpeg = decode(fixture.Canvas().ToDataUrl(u8"image/jpeg"));
     REQUIRE(jpeg.size() == 100u * 50u);
     const auto darkBlue = jpeg[25 * 100 + 75];
     CHECK((darkBlue >> 24) == 255u);

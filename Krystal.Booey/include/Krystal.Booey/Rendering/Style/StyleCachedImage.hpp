@@ -40,7 +40,7 @@ namespace krys::boo
   class StyleCachedImage final : public StyleImage
   {
   private:
-    style::URL _url;
+    style::Url _url;
     const Ref<css::ImageValue> _cssValue;
     bool _isPending {true};
     mutable float _scaleFactor {1};
@@ -49,10 +49,10 @@ namespace krys::boo
     FloatSize _containerSize;
 
   public:
-    KRYS_NODISCARD static Ref<StyleCachedImage> Create(style::URL &&, Ref<css::ImageValue> &&,
+    KRYS_NODISCARD static Ref<StyleCachedImage> Create(style::Url &&, Ref<css::ImageValue> &&,
                                                        float scaleFactor = 1) noexcept;
 
-    KRYS_NODISCARD static Ref<StyleCachedImage> Create(const style::URL &, const Ref<css::ImageValue> &,
+    KRYS_NODISCARD static Ref<StyleCachedImage> Create(const style::Url &, const Ref<css::ImageValue> &,
                                                        float scaleFactor = 1) noexcept;
 
     KRYS_NODISCARD static Ref<StyleCachedImage> CopyOverridingScaleFactor(StyleCachedImage &,
@@ -110,10 +110,10 @@ namespace krys::boo
 
     KRYS_NODISCARD bool UsesDataProtocol() const noexcept final;
 
-    KRYS_NODISCARD style::URL Url() const noexcept final;
+    KRYS_NODISCARD style::Url Url() const noexcept final;
 
   private:
-    StyleCachedImage(style::URL &&, Ref<css::ImageValue> &&, float) noexcept;
+    StyleCachedImage(style::Url &&, Ref<css::ImageValue> &&, float) noexcept;
 
     KRYS_NODISCARD LegacyRenderSVGResourceContainer *
       UncheckedRenderSVGResource(dom::DocumentOrShadowRoot &, const DOMStringAtom &fragment) const noexcept;
@@ -126,7 +126,7 @@ namespace krys::boo
 
     KRYS_NODISCARD bool IsRenderSVGResource(const RenderElement *) const noexcept;
 
-    StyleCachedImage(const style::URL &, const Ref<css::ImageValue> &, float) noexcept;
+    StyleCachedImage(const style::Url &, const Ref<css::ImageValue> &, float) noexcept;
   };
 }
 

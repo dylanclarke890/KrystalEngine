@@ -272,11 +272,11 @@ namespace krys::boo
     auto attributeValue = GetAttribute(u8"formaction");
     if (!attributeValue || attributeValue->empty())
     {
-      return dom::USVString(NodeDocument().GetURL().String());
+      return dom::USVString(NodeDocument().GetUrl().String());
     }
     // Let urlString be the result of encoding-parsing-and-serializing a URL given attributeValue, relative to
     // this's node document. If urlString is not failure, return urlString.
-    if (auto url = NodeDocument().CompleteURL(*attributeValue); url.IsValid())
+    if (auto url = NodeDocument().CompleteUrl(*attributeValue); url.IsValid())
     {
       return dom::USVString(url.String());
     }
@@ -472,12 +472,12 @@ namespace krys::boo
 
   dom::USVString HTMLInputElement::Src() const noexcept
   {
-    return html::ReflectURL<dom::USVString>(*this, u8"src");
+    return html::ReflectUrl<dom::USVString>(*this, u8"src");
   }
 
   void HTMLInputElement::Src(dom::USVString value) noexcept
   {
-    return html::ReflectURL<dom::USVString>(*this, u8"src", krys::move(value));
+    return html::ReflectUrl<dom::USVString>(*this, u8"src", krys::move(value));
   }
 
   DOMString HTMLInputElement::Step() const noexcept
@@ -972,9 +972,9 @@ namespace krys::boo
     return _inputType->DirAutoUsesValue();
   }
 
-  bool HTMLInputElement::IsURLField() const noexcept
+  bool HTMLInputElement::IsUrlField() const noexcept
   {
-    return _inputType->IsURLField();
+    return _inputType->IsUrlField();
   }
 
   bool HTMLInputElement::IsDateField() const noexcept

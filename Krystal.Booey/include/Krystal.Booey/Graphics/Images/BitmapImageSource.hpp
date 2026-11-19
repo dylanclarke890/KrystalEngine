@@ -174,7 +174,7 @@ namespace krys::boo
 
     KRYS_NODISCARD DecodingStatus FrameDecodingStatusAtIndex(uint32 index) const noexcept final;
 
-    KRYS_NODISCARD net::URL SourceURL() const noexcept;
+    KRYS_NODISCARD net::Url SourceUrl() const noexcept;
 
   private:
     BitmapImageSource(BitmapImage &, AlphaOption, GammaAndColorProfileOption) noexcept;

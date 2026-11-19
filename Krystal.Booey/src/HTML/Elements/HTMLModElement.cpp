@@ -12,12 +12,12 @@ namespace krys::boo
 
   dom::USVString HTMLModElement::Cite() const noexcept
   {
-    return html::ReflectURL<dom::USVString>(*this, u8"cite");
+    return html::ReflectUrl<dom::USVString>(*this, u8"cite");
   }
 
   void HTMLModElement::Cite(dom::USVString value) noexcept
   {
-    return html::ReflectURL<dom::USVString>(*this, u8"cite", krys::move(value));
+    return html::ReflectUrl<dom::USVString>(*this, u8"cite", krys::move(value));
   }
 
   DOMString HTMLModElement::DateTime() const noexcept

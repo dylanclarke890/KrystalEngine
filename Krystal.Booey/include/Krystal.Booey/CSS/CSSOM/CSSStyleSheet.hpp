@@ -74,7 +74,7 @@ namespace krys::boo
     /// @see https://drafts.csswg.org/cssom/#dictdef-cssstylesheetinit
     struct Init
     {
-      Maybe<CSSOMString> BaseURL;
+      Maybe<CSSOMString> BaseUrl;
       css::MediaListOrDOMString Media {CSSOMString()};
       bool Disabled {false};
     };
@@ -229,7 +229,7 @@ namespace krys::boo
 
     KRYS_NODISCARD CSSImportRule *OwnerRule() const noexcept final;
 
-    KRYS_NODISCARD net::URL BaseURL() const noexcept final;
+    KRYS_NODISCARD net::Url BaseUrl() const noexcept final;
 
     KRYS_NODISCARD bool IsLoading() const noexcept final;
 

@@ -19,5 +19,5 @@ namespace krys::boo
                                         Maybe<double> quality = {}) noexcept;
 
   /// @brief @p data as a `data:` URL of type @p mimeType, in base 64; `data:,` if it's empty.
-  KRYS_NODISCARD utf8_string DataURL(Span<const uint8> data, utf8_stringview mimeType) noexcept;
+  KRYS_NODISCARD utf8_string DataUrl(Span<const uint8> data, utf8_stringview mimeType) noexcept;
 }

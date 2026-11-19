@@ -29,7 +29,7 @@
 #include "Krystal.Booey/Editing/Markup/Markup.hpp"
 #include "Krystal.Booey/Page/LocalFrame.hpp"
 #include "Krystal.Core/Utils/Move.hpp"
-#include "Krystal.Net/URL.hpp"
+#include "Krystal.Net/Url.hpp"
 
 namespace krys::boo
 {
@@ -97,7 +97,7 @@ namespace krys::boo
       return false;
     }
 
-    auto markup = URLToMarkup(net::URL::FileURLWithFileSystemPath(path).String(), path);
+    auto markup = UrlToMarkup(net::Url::FileUrlWithFileSystemPath(path).String(), path);
     AddFragment(CreateFragmentFromMarkup(*document, markup, u8"file://"));
 
     return true;
@@ -130,7 +130,7 @@ namespace krys::boo
     return true;
   }
 
-  bool WebContentReader::ReadURL(const net::URL &, utf8_stringview) noexcept
+  bool WebContentReader::ReadUrl(const net::Url &, utf8_stringview) noexcept
   {
     return false;
   }

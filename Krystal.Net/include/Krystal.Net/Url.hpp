@@ -36,7 +36,7 @@
 
 namespace krys::net
 {
-  class URLParser;
+  class UrlParser;
 
   /// @brief A decoded name/value pair from an `application/x-www-form-urlencoded` string.
   struct KeyValuePair
@@ -52,9 +52,9 @@ namespace krys::net
   /// return views into it. String views returned by the getters are null (`data() == nullptr`) when the
   /// component is absent, and non-null but empty when it's present and empty (e.g. `Query()` for
   /// `http://a/?`).
-  class URL
+  class Url
   {
-    friend class URLParser;
+    friend class UrlParser;
 
   private:
     utf8_string _string;
@@ -81,27 +81,27 @@ namespace krys::net
 
   public:
     /// @brief A null URL.
-    URL() noexcept = default;
+    Url() noexcept = default;
 
-    explicit URL(HashTableDeletedValueTag) noexcept;
+    explicit Url(HashTableDeletedValueTag) noexcept;
 
     /// @brief Resolves `relative` against `base`. `base` can be null or invalid, in which case `relative` is
     /// parsed as an absolute URL. A null `relative` (`data() == nullptr`) gives `base` without its fragment.
-    URL(const URL &base, utf8_stringview relative) noexcept;
+    Url(const Url &base, utf8_stringview relative) noexcept;
 
-    /// @brief Parses `absoluteURL` as an absolute URL. To parse a relative URL, use the constructor that
+    /// @brief Parses `absoluteUrl` as an absolute URL. To parse a relative URL, use the constructor that
     /// takes a base URL.
-    explicit URL(utf8_stringview absoluteURL) noexcept;
+    explicit Url(utf8_stringview absoluteUrl) noexcept;
 
-    URL(const URL &) = default;
+    Url(const Url &) = default;
 
-    URL &operator=(const URL &) = default;
+    Url &operator=(const Url &) = default;
 
-    URL(URL &&other) noexcept;
+    Url(Url &&other) noexcept;
 
-    URL &operator=(URL &&other) noexcept;
+    Url &operator=(Url &&other) noexcept;
 
-    KRYS_NODISCARD static URL FileURLWithFileSystemPath(utf8_stringview path) noexcept;
+    KRYS_NODISCARD static Url FileUrlWithFileSystemPath(utf8_stringview path) noexcept;
 
     struct StripResult
     {
@@ -189,7 +189,7 @@ namespace krys::net
     KRYS_NODISCARD utf8_string FileSystemPath() const noexcept;
 
     /// @brief The URL up to and including the last slash of its path.
-    KRYS_NODISCARD URL TruncatedForUseAsBase() const noexcept;
+    KRYS_NODISCARD Url TruncatedForUseAsBase() const noexcept;
 
     KRYS_NODISCARD bool HasQuery() const noexcept
     {
@@ -320,7 +320,7 @@ namespace krys::net
 
     KRYS_NODISCARD bool HasFetchScheme() const noexcept;
 
-    friend bool ProtocolHostAndPortAreEqual(const URL &a, const URL &b) noexcept;
+    friend bool ProtocolHostAndPortAreEqual(const Url &a, const Url &b) noexcept;
 
   private:
     void Invalidate() noexcept;
@@ -336,40 +336,40 @@ namespace krys::net
     void ParseAllowingC0AtEnd(utf8_stringview string) noexcept;
   };
 
-  KRYS_NODISCARD inline bool operator==(const URL &a, const URL &b) noexcept
+  KRYS_NODISCARD inline bool operator==(const Url &a, const Url &b) noexcept
   {
     return a.String() == b.String();
   }
 
-  KRYS_NODISCARD inline bool operator==(const URL &a, utf8_stringview b) noexcept
+  KRYS_NODISCARD inline bool operator==(const Url &a, utf8_stringview b) noexcept
   {
     return a.String() == b;
   }
 
-  KRYS_NODISCARD bool EqualIgnoringFragmentIdentifier(const URL &a, const URL &b) noexcept;
+  KRYS_NODISCARD bool EqualIgnoringFragmentIdentifier(const Url &a, const Url &b) noexcept;
 
-  KRYS_NODISCARD bool ProtocolHostAndPortAreEqual(const URL &a, const URL &b) noexcept;
+  KRYS_NODISCARD bool ProtocolHostAndPortAreEqual(const Url &a, const Url &b) noexcept;
 
-  KRYS_NODISCARD List<KeyValuePair> DifferingQueryParameters(const URL &firstURL,
-                                                             const URL &secondURL) noexcept;
+  KRYS_NODISCARD List<KeyValuePair> DifferingQueryParameters(const Url &firstUrl,
+                                                             const Url &secondUrl) noexcept;
 
-  KRYS_NODISCARD List<KeyValuePair> QueryParameters(const URL &url) noexcept;
+  KRYS_NODISCARD List<KeyValuePair> QueryParameters(const Url &url) noexcept;
 
-  KRYS_NODISCARD bool IsEqualIgnoringQueryAndFragments(const URL &a, const URL &b) noexcept;
+  KRYS_NODISCARD bool IsEqualIgnoringQueryAndFragments(const Url &a, const Url &b) noexcept;
 
   /// @return The parameters that were removed (including duplicates), in the order that they appear in the
   /// URL.
-  List<utf8_string> RemoveQueryParameters(URL &url, const HashSet<utf8_string> &keysToRemove) noexcept;
+  List<utf8_string> RemoveQueryParameters(Url &url, const HashSet<utf8_string> &keysToRemove) noexcept;
 
   /// @return The parameters that were removed (including duplicates), in the order that they appear in the
   /// URL.
   List<utf8_string> RemoveQueryParameters(
-    URL &url,
+    Url &url,
     KRYS_NOESCAPE const Func<bool(const utf8_string &, const utf8_string &)> &shouldRemove) noexcept;
 
-  KRYS_NODISCARD const URL &AboutBlankURL() noexcept;
+  KRYS_NODISCARD const Url &AboutBlankUrl() noexcept;
 
-  KRYS_NODISCARD const URL &AboutSrcDocURL() noexcept;
+  KRYS_NODISCARD const Url &AboutSrcDocUrl() noexcept;
 
   // Functions to do URL operations on strings.
   // These are operations that aren't faster on a parsed URL.
@@ -390,12 +390,12 @@ namespace krys::net
 
   /// @brief Disallows ports that should never be used for web resources.
   /// @see https://fetch.spec.whatwg.org/#port-blocking
-  KRYS_NODISCARD bool PortAllowed(const URL &url) noexcept;
+  KRYS_NODISCARD bool PortAllowed(const Url &url) noexcept;
 
   /// @param dataURL Must start with `data:`.
-  KRYS_NODISCARD utf8_string MimeTypeFromDataURL(utf8_stringview dataURL) noexcept;
+  KRYS_NODISCARD utf8_string MimeTypeFromDataUrl(utf8_stringview dataUrl) noexcept;
 
   // FIXME: This needs a new, more specific name. The general thing named here can't be implemented correctly,
   // since different parts of a URL need different escaping.
-  KRYS_NODISCARD utf8_string EncodeWithURLEscapeSequences(utf8_stringview input) noexcept;
+  KRYS_NODISCARD utf8_string EncodeWithUrlEscapeSequences(utf8_stringview input) noexcept;
 }

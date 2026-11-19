@@ -41,7 +41,7 @@
 #include "Krystal.Core/Strings/CodePointIterator.hpp"
 #include "Krystal.Core/Strings/StringBuilder.hpp"
 #include "Krystal.Core/Types/SharedBuffer.hpp"
-#include "Krystal.Net/URLParser.hpp"
+#include "Krystal.Net/UrlParser.hpp"
 #include <algorithm>
 
 namespace krys::boo
@@ -117,10 +117,10 @@ namespace krys::boo
       if (size.Width())
       {
         // The decoded file name, or the host if the path has none.
-        auto name = text::ReplaceInvalidUTF8(net::URLParser::PercentDecode(GetURL().LastPathComponent()));
+        auto name = text::ReplaceInvalidUTF8(net::UrlParser::PercentDecode(GetUrl().LastPathComponent()));
         if (name.empty())
         {
-          name = utf8_string(GetURL().Host());
+          name = utf8_string(GetUrl().Host());
         }
         StringBuilder title;
         title.Append(name, u8" (", size.Width(), u8"×", size.Height(), u8")");
@@ -160,12 +160,12 @@ namespace krys::boo
                                                   : u8"user-select: none; display: block");
     auto &imageLoader = imageElement->GetImageLoader();
     imageLoader.SetLoadManually(true);
-    (void)imageElement->SetAttribute(u8"src", DOMString(GetURL().String()));
+    (void)imageElement->SetAttribute(u8"src", DOMString(GetUrl().String()));
     (void)body->AppendChild(*imageElement);
     imageLoader.SetLoadManually(false);
     if (auto *cachedImage = imageElement->GetCachedImage())
     {
-      cachedImage->SetResponse(ResourceResponse(GetURL(), utf8_string(ContentType()), -1));
+      cachedImage->SetResponse(ResourceResponse(GetUrl(), utf8_string(ContentType()), -1));
     }
 
     if (_shouldShrinkImage)

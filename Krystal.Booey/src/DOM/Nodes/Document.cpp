@@ -268,7 +268,7 @@ namespace krys::boo
 
   Document::Document() noexcept
       : ContainerNode(*this, dom::NodeType::DOCUMENT_NODE, dom::NodeFlags::IsContainerNode),
-        DocumentOrShadowRoot(static_cast<ContainerNode &>(*this)), _url(net::AboutBlankURL()), _baseURL(_url),
+        DocumentOrShadowRoot(static_cast<ContainerNode &>(*this)), _url(net::AboutBlankUrl()), _baseUrl(_url),
         _settings(ShareRef(Settings::Default())),
         _userActionElements(CreateUnique<dom::UserActionElementSet>()),
         _styleRecalcTimer([this] { std::ignore = ShareRef(*this)->UpdateStyleIfNeeded(); }),
@@ -396,14 +396,14 @@ namespace krys::boo
     return *_implementation;
   }
 
-  DOMString Document::URL() const noexcept
+  DOMString Document::Url() const noexcept
   {
     return _url.String();
   }
 
   DOMString Document::DocumentURI() const noexcept
   {
-    return URL();
+    return Url();
   }
 
   DOMString Document::CompatMode() const noexcept
@@ -1438,25 +1438,25 @@ namespace krys::boo
 
 #pragma endregion
 
-#pragma region URLs
+#pragma region Urls
 
-  void Document::SetURL(net::URL url) noexcept
+  void Document::SetUrl(net::Url url) noexcept
   {
-    net::URL newURL = url.IsEmpty() ? net::AboutBlankURL() : krys::move(url);
+    net::Url newUrl = url.IsEmpty() ? net::AboutBlankUrl() : krys::move(url);
 
-    if (newURL == _url)
+    if (newUrl == _url)
     {
       return;
     }
 
     // 1. Set document's URL to url.
-    _url = krys::move(newURL);
+    _url = krys::move(newUrl);
 
     // 2. Respond to base URL changes given document.
-    UpdateBaseURL();
+    UpdateBaseUrl();
   }
 
-  const net::URL &Document::FallbackBaseURL() const noexcept
+  const net::Url &Document::FallbackBaseUrl() const noexcept
   {
     // 1. If document's URL matches about:blank or matches about:srcdoc, and document's about base URL is
     //    non-null, then return document's about base URL. (Skipped: documents have no about base URL.)
@@ -1464,7 +1464,7 @@ namespace krys::boo
     return _url;
   }
 
-  net::URL Document::CompleteURL(utf8_stringview url) const noexcept
+  net::Url Document::CompleteUrl(utf8_stringview url) const noexcept
   {
     // 1. Let encoding be UTF-8.
     // 2. If environment is a Document object, then set encoding to environment's character encoding.
@@ -1475,12 +1475,12 @@ namespace krys::boo
     // API
     //    base URL.
     // 5. Return the result of applying the URL parser to url, with baseURL and encoding.
-    return CompleteURL(url, _baseURL);
+    return CompleteUrl(url, _baseUrl);
   }
 
-  net::URL Document::CompleteURL(utf8_stringview url, const net::URL &baseURL) noexcept
+  net::Url Document::CompleteUrl(utf8_stringview url, const net::Url &baseUrl) noexcept
   {
-    return net::URL(baseURL, url);
+    return net::Url(baseUrl, url);
   }
 
   void Document::ProcessBaseElement() noexcept
@@ -1516,7 +1516,7 @@ namespace krys::boo
     _baseTarget = target.value_or(DOMString());
 
     // The frozen base URL of the first base element with an href; only that one's matters.
-    net::URL baseElementURL;
+    net::Url baseElementUrl;
     if (href.has_value())
     {
       // To set the frozen base URL for an element element:
@@ -1525,32 +1525,32 @@ namespace krys::boo
       // 2. Let urlRecord be the result of parsing the value of element's href content attribute with
       //    document's fallback base URL, and document's character encoding. (Thus, the base element isn't
       //    affected by itself.)
-      baseElementURL = CompleteURL(*href, FallbackBaseURL());
+      baseElementUrl = CompleteUrl(*href, FallbackBaseUrl());
 
       // 3. If any of the following are true: urlRecord is failure; urlRecord's scheme is "data" or
       //    "javascript"; or running Is base allowed for Document? on urlRecord and document returns
       //    "Blocked", then set element's frozen base URL to document's fallback base URL and return.
       // SPEC-VIOLATION(CSP): there's no content security policy, so every base is allowed.
       // 4. Set element's frozen base URL to urlRecord.
-      if (!baseElementURL.IsValid() || baseElementURL.ProtocolIsData()
-          || baseElementURL.ProtocolIsJavaScript())
+      if (!baseElementUrl.IsValid() || baseElementUrl.ProtocolIsData()
+          || baseElementUrl.ProtocolIsJavaScript())
       {
-        baseElementURL = FallbackBaseURL();
+        baseElementUrl = FallbackBaseUrl();
       }
     }
 
-    if (baseElementURL == _baseElementURL && baseElementURL.IsNull() == _baseElementURL.IsNull())
+    if (baseElementUrl == _baseElementUrl && baseElementUrl.IsNull() == _baseElementUrl.IsNull())
     {
       return;
     }
 
     // 5. Respond to base URL changes given document.
     // (Also when step 3 returns, which only matters while the fallback base URL is the base URL already.)
-    _baseElementURL = krys::move(baseElementURL);
-    UpdateBaseURL();
+    _baseElementUrl = krys::move(baseElementUrl);
+    UpdateBaseUrl();
   }
 
-  void Document::UpdateBaseURL() noexcept
+  void Document::UpdateBaseUrl() noexcept
   {
     // The document base URL, kept up to date:
     // https://html.spec.whatwg.org/#document-base-url
@@ -1560,7 +1560,7 @@ namespace krys::boo
     // 2. If document's base URL override is non-null, then return document's base URL override. (Skipped:
     //    documents have no base URL override.)
     // 3. Return document's fallback base URL.
-    _baseURL = _baseElementURL.IsNull() ? FallbackBaseURL() : _baseElementURL;
+    _baseUrl = _baseElementUrl.IsNull() ? FallbackBaseUrl() : _baseElementUrl;
 
     // Then respond to base URL changes given document:
     // https://html.spec.whatwg.org/#respond-to-base-url-changes
@@ -1582,7 +1582,7 @@ namespace krys::boo
   {
     if (_cachedCSSParserContext == nullptr)
     {
-      _cachedCSSParserContext = CreateUnique<css::ParserContext>(*this, net::URL {}, utf8_stringview {});
+      _cachedCSSParserContext = CreateUnique<css::ParserContext>(*this, net::Url {}, utf8_stringview {});
     }
 
     return *_cachedCSSParserContext;
@@ -4595,7 +4595,7 @@ namespace krys::boo
                                                        bool isInitiatingElementInUserAgentShadowTree) noexcept
   {
     CachedResourceHandle<CachedFont> cachedFont =
-      GetFontLoader().GetCachedFont(CompleteURL(url), isInitiatingElementInUserAgentShadowTree);
+      GetFontLoader().GetCachedFont(CompleteUrl(url), isInitiatingElementInUserAgentShadowTree);
     if (!cachedFont)
     {
       return nullptr;

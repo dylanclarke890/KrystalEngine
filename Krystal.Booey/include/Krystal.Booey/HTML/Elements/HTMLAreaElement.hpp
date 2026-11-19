@@ -27,7 +27,7 @@
 #include "Krystal.Booey/Graphics/Geometry/LayoutSize.hpp"
 #include "Krystal.Booey/Graphics/Paths/Path.hpp"
 #include "Krystal.Booey/HTML/Elements/HTMLElement.hpp"
-#include "Krystal.Booey/HTML/Mixins/URLDecomposition.hpp"
+#include "Krystal.Booey/HTML/Mixins/UrlDecomposition.hpp"
 #include "Krystal.Core/Types/List.hpp"
 #include "Krystal.Core/Types/Maybe.hpp"
 
@@ -37,7 +37,7 @@ namespace krys::boo
   class HitTestResult;
 
   /// @see https://html.spec.whatwg.org/#htmlareaelement
-  class HTMLAreaElement : public HTMLElement, public html::URLDecomposition
+  class HTMLAreaElement : public HTMLElement, public html::UrlDecomposition
   {
     KRYS_OVERRIDE_DELETE_FOR_CHECKED_PTR(HTMLAreaElement);
 
@@ -180,9 +180,9 @@ namespace krys::boo
                             Maybe<DOMStringView> value, const DOMStringAtom &namespaceURI) noexcept override;
 
   private:
-    KRYS_NODISCARD net::URL FullURL() const noexcept final;
+    KRYS_NODISCARD net::Url FullUrl() const noexcept final;
 
-    void SetFullURL(const net::URL &url) noexcept final;
+    void SetFullUrl(const net::Url &url) noexcept final;
 
     KRYS_NODISCARD Path GetRegion(const LayoutSize &size) const noexcept;
 

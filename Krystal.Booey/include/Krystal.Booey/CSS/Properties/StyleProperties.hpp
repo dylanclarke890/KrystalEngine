@@ -220,7 +220,7 @@ namespace krys::boo::css
     KRYS_NODISCARD bool
       TraverseSubresources(KRYS_NOESCAPE const Func<bool(const CachedResource &)> &handler) const noexcept;
 
-    KRYS_NODISCARD bool MayDependOnBaseURL() const noexcept;
+    KRYS_NODISCARD bool MayDependOnBaseUrl() const noexcept;
 
     KRYS_NODISCARD static size_t AverageSizeInBytes() noexcept;
 

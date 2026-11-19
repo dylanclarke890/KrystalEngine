@@ -1711,21 +1711,21 @@ namespace krys::boo::display_list
     }
   };
 
-  class SetURLForRect
+  class SetUrlForRect
   {
   private:
-    net::URL _link;
+    net::Url _link;
     FloatRect _destRect;
 
   public:
     constexpr static std::string_view Name = "set-URL-for-rect";
 
-    SetURLForRect(net::URL link, const FloatRect &destRect) noexcept
+    SetUrlForRect(net::Url link, const FloatRect &destRect) noexcept
         : _link(krys::move(link)), _destRect(destRect)
     {
     }
 
-    KRYS_NODISCARD const net::URL &Link() const noexcept
+    KRYS_NODISCARD const net::Url &Link() const noexcept
     {
       return _link;
     }

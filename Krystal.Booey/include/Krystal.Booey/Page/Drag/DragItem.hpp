@@ -32,7 +32,7 @@
 #include "Krystal.Booey/Platform/Pasteboard/DragImage.hpp"
 #include "Krystal.Core/Strings/String.hpp"
 #include "Krystal.Core/Types/Maybe.hpp"
-#include "Krystal.Net/URL.hpp"
+#include "Krystal.Net/Url.hpp"
 
 namespace krys::boo
 {
@@ -50,7 +50,7 @@ namespace krys::boo
     IntPoint DragLocationInContentCoordinates;
     IntPoint DragLocationInWindowCoordinates;
     utf8_string Title;
-    net::URL Url;
+    net::Url Url;
     IntRect DragPreviewFrameInRootViewCoordinates;
     bool ContainsSelection {false};
   };

@@ -111,9 +111,9 @@ namespace krys::boo::tests
 
     SECTION("data URLs")
     {
-      CHECK(DataURL({}, u8"image/png") == u8"data:,");
+      CHECK(DataUrl({}, u8"image/png") == u8"data:,");
       const uint8 bytes[] = {1, 2, 3};
-      CHECK(DataURL(bytes, u8"image/png") == u8"data:image/png;base64,AQID");
+      CHECK(DataUrl(bytes, u8"image/png") == u8"data:image/png;base64,AQID");
     }
   }
 }

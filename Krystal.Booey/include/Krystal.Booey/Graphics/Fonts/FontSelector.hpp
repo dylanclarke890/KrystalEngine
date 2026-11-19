@@ -64,7 +64,7 @@ namespace krys::boo
 
     KRYS_NODISCARD virtual size_t FallbackFontCount() noexcept = 0;
 
-    virtual void OpportunisticallyStartFontDataURLLoading(const FontCascadeDescription &description,
+    virtual void OpportunisticallyStartFontDataUrlLoading(const FontCascadeDescription &description,
                                                           const StringAtom &family) noexcept = 0;
 
     virtual void FontCacheInvalidated() noexcept

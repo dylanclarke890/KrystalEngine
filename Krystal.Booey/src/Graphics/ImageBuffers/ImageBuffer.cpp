@@ -213,9 +213,9 @@ namespace krys::boo
     return source->SinkIntoNativeImage();
   }
 
-  utf8_string ImageBuffer::ToDataURL(utf8_stringview mimeType, Maybe<double> quality) const noexcept
+  utf8_string ImageBuffer::ToDataUrl(utf8_stringview mimeType, Maybe<double> quality) const noexcept
   {
-    return ToDataURL(ShareRef(const_cast<ImageBuffer &>(*this)), mimeType, quality);
+    return ToDataUrl(ShareRef(const_cast<ImageBuffer &>(*this)), mimeType, quality);
   }
 
   List<uint8> ImageBuffer::ToData(utf8_stringview mimeType, Maybe<double> quality) const noexcept
@@ -223,11 +223,11 @@ namespace krys::boo
     return ToData(ShareRef(const_cast<ImageBuffer &>(*this)), mimeType, quality);
   }
 
-  utf8_string ImageBuffer::ToDataURL(const Ref<ImageBuffer> &source, utf8_stringview mimeType,
+  utf8_string ImageBuffer::ToDataUrl(const Ref<ImageBuffer> &source, utf8_stringview mimeType,
                                      Maybe<double> quality) noexcept
   {
     auto encodedData = ToData(source, mimeType, quality);
-    return DataURL(encodedData, mimeType);
+    return DataUrl(encodedData, mimeType);
   }
 
   List<uint8> ImageBuffer::ToData(const Ref<ImageBuffer> &source, utf8_stringview mimeType,

@@ -70,7 +70,7 @@
 #include "Krystal.Core/Types/UniquePtr.hpp"
 #include "Krystal.Core/Types/Variant.hpp"
 #include "Krystal.Core/Types/WeakPtr.hpp"
-#include "Krystal.Net/URL.hpp"
+#include "Krystal.Net/Url.hpp"
 
 namespace krys::text
 {
@@ -331,12 +331,12 @@ namespace krys::boo
     List<WeakRef<Element>> _renderBlockingElements;
 
     /// @see https://dom.spec.whatwg.org/#concept-document-url
-    net::URL _url;
+    net::Url _url;
     /// @see https://html.spec.whatwg.org/#document-base-url
-    net::URL _baseURL;
+    net::Url _baseUrl;
     /// @brief The frozen base URL of the first `base` element with an `href` in the document tree, or null.
     /// @see https://html.spec.whatwg.org/#frozen-base-url
-    net::URL _baseElementURL;
+    net::Url _baseElementUrl;
     /// @brief The target of the first `base` element with a `target` in the document tree.
     DOMString _baseTarget;
 
@@ -536,7 +536,7 @@ namespace krys::boo
     KRYS_NODISCARD dom::DOMImplementation &Implementation() noexcept;
 
     /// @see https://dom.spec.whatwg.org/#dom-document-url
-    KRYS_NODISCARD DOMString URL() const noexcept;
+    KRYS_NODISCARD DOMString Url() const noexcept;
 
     /// @see https://dom.spec.whatwg.org/#dom-document-documenturi
     KRYS_NODISCARD DOMString DocumentURI() const noexcept;
@@ -913,11 +913,11 @@ namespace krys::boo
 
 #pragma endregion
 
-#pragma region URLs - https://html.spec.whatwg.org/#document-base-url
+#pragma region Urls - https://html.spec.whatwg.org/#document-base-url
 
     /// @brief The document's URL; `about:blank` until the host sets one.
     /// @see https://dom.spec.whatwg.org/#concept-document-url
-    KRYS_NODISCARD const net::URL &GetURL() const noexcept
+    KRYS_NODISCARD const net::Url &GetUrl() const noexcept
     {
       return _url;
     }
@@ -925,7 +925,7 @@ namespace krys::boo
     /// @brief Sets the document's URL. An empty URL becomes `about:blank`, and its fragment directive is
     /// consumed.
     /// @see https://html.spec.whatwg.org/#set-the-url
-    void SetURL(net::URL url) noexcept;
+    void SetUrl(net::Url url) noexcept;
 
     /// @brief The target of the first `base` element with a `target` attribute, or the empty string.
     /// @see https://html.spec.whatwg.org/#get-an-element's-target
@@ -935,25 +935,25 @@ namespace krys::boo
     }
 
     /// @see https://html.spec.whatwg.org/#fallback-base-url
-    KRYS_NODISCARD const net::URL &FallbackBaseURL() const noexcept;
+    KRYS_NODISCARD const net::Url &FallbackBaseUrl() const noexcept;
 
     /// @brief The document base URL, which getting the base URL returns: there's no base URL override.
     /// @see https://html.spec.whatwg.org/#document-base-url
     /// @see https://dom.spec.whatwg.org/#get-the-base-url
-    KRYS_NODISCARD const net::URL &BaseURL() const noexcept
+    KRYS_NODISCARD const net::Url &BaseUrl() const noexcept
     {
-      return _baseURL;
+      return _baseUrl;
     }
 
     /// @brief Parses @p url relative to the document base URL. As documents are always UTF-8, this is
     /// both parsing and encoding-parsing a URL.
     /// @see https://html.spec.whatwg.org/#encoding-parsing-a-url
     /// @see https://html.spec.whatwg.org/#parse-a-url
-    KRYS_NODISCARD net::URL CompleteURL(utf8_stringview url) const noexcept;
+    KRYS_NODISCARD net::Url CompleteUrl(utf8_stringview url) const noexcept;
 
     /// @brief Parses @p url relative to @p baseURL.
     /// @see https://html.spec.whatwg.org/#encoding-parsing-a-url
-    KRYS_NODISCARD static net::URL CompleteURL(utf8_stringview url, const net::URL &baseURL) noexcept;
+    KRYS_NODISCARD static net::Url CompleteUrl(utf8_stringview url, const net::Url &baseUrl) noexcept;
 
 #pragma endregion
 
@@ -2264,7 +2264,7 @@ namespace krys::boo
     /// @brief Recomputes the document base URL and responds to base URL changes.
     /// @see https://html.spec.whatwg.org/#document-base-url
     /// @see https://html.spec.whatwg.org/#respond-to-base-url-changes
-    void UpdateBaseURL() noexcept;
+    void UpdateBaseUrl() noexcept;
 
     /// @see https://html.spec.whatwg.org/#the-document-object:get-the-parent
     KRYS_NODISCARD EventTarget *GetParent(Event &event) const noexcept override;

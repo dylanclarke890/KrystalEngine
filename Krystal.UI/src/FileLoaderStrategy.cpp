@@ -49,7 +49,7 @@ namespace krys::ui
 
     /// @brief What loading @p url, the file at @p path, gave: @p contents as a resource, or an error if the
     /// file couldn't be read.
-    KRYS_NODISCARD boo::LoadResult LoadResultFor(const net::URL &url, const std::filesystem::path &path,
+    KRYS_NODISCARD boo::LoadResult LoadResultFor(const net::Url &url, const std::filesystem::path &path,
                                                  Maybe<FileContents> contents) noexcept
     {
       if (!contents)
@@ -79,7 +79,7 @@ namespace krys::ui
                                         const boo::ResourceLoaderOptions &,
                                         Func<void(boo::LoadResult &&)> &&completionHandler) noexcept
   {
-    const auto &url = request.URL();
+    const auto &url = request.Url();
     if (!url.ProtocolIsFile())
     {
       completionHandler(Unexpected<boo::ResourceError>(
@@ -97,7 +97,7 @@ namespace krys::ui
     // Only the read leaves the main thread: the response is made from it back on the main thread, as
     // Booey's types are the main thread's.
     _readQueue->Dispatch([path] { return ReadFile(path); }, boo::html::EventLoop::Current().Inbox(),
-                         [url = net::URL(url), path, completionHandler = krys::move(completionHandler)](
+                         [url = net::Url(url), path, completionHandler = krys::move(completionHandler)](
                            Maybe<FileContents> contents) mutable
                          { completionHandler(LoadResultFor(url, path, krys::move(contents))); },
                          {.MayBlock = true});

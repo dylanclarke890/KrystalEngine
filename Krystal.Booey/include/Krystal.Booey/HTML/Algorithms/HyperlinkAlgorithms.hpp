@@ -14,7 +14,7 @@ namespace krys::boo
 
 namespace krys::net
 {
-  class URL;
+  class Url;
 }
 
 namespace krys::boo::html
@@ -26,10 +26,10 @@ namespace krys::boo::html
   public:
     /// @brief @p element's `href` attribute, completed against its node document's base URL; null if it has
     /// none.
-    KRYS_NODISCARD static net::URL Href(const HTMLElement &element) noexcept;
+    KRYS_NODISCARD static net::Url Href(const HTMLElement &element) noexcept;
 
     /// @brief Sets @p element's `href` attribute to @p url.
-    static void SetHref(HTMLElement &element, const net::URL &url) noexcept;
+    static void SetHref(HTMLElement &element, const net::Url &url) noexcept;
 
     /// @brief The browsing context @p element's link navigates: its `target`, or the document's base target,
     /// with `_blank` for a target with dangling markup.

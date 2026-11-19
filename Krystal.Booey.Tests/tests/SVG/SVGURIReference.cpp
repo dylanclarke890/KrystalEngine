@@ -11,17 +11,17 @@ namespace krys::boo::svg::tests
   TEST_CASE_METHOD(css::tests::ValueFixture, "SVGURIReference: references", "[SVG][SVGURIReference]")
   {
     auto document = ResolverFixture::Parse(u8"<svg><g id=target /></svg>");
-    auto documentURL = DOMString {document->GetURL().String()};
+    auto documentUrl = DOMString {document->GetUrl().String()};
 
     CHECK(SVGURIReference::FragmentIdentifierFromIRIString(u8"#target", *document) == u8"target");
-    CHECK(SVGURIReference::FragmentIdentifierFromIRIString(documentURL + u8"#target", *document)
+    CHECK(SVGURIReference::FragmentIdentifierFromIRIString(documentUrl + u8"#target", *document)
           == u8"target");
     CHECK(SVGURIReference::FragmentIdentifierFromIRIString(u8"target", *document) == u8"");
     CHECK(SVGURIReference::FragmentIdentifierFromIRIString(u8"https://example.com/a.svg#target", *document)
           == u8"");
 
     CHECK_FALSE(SVGURIReference::IsExternalURIReference(u8"#target", *document));
-    CHECK_FALSE(SVGURIReference::IsExternalURIReference(documentURL + u8"#target", *document));
+    CHECK_FALSE(SVGURIReference::IsExternalURIReference(documentUrl + u8"#target", *document));
     CHECK(SVGURIReference::IsExternalURIReference(u8"https://example.com/a.svg#target", *document));
 
     auto &scope = document->TreeScope();

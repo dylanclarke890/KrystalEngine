@@ -32,20 +32,20 @@ namespace krys::boo::css
   Ref<CursorImageValue> CursorImageValue::Create(Ref<Value> &&value, RefPtr<Value> &&hotSpot) noexcept
   {
     auto *imageValue = DynamicDowncast<ImageValue>(value.get());
-    auto originalURL = imageValue ? imageValue->URL() : CSSURL::None();
-    return AdoptRef(*new CursorImageValue(krys::move(value), krys::move(hotSpot), krys::move(originalURL)));
+    auto originalUrl = imageValue ? imageValue->Url() : CSSUrl::None();
+    return AdoptRef(*new CursorImageValue(krys::move(value), krys::move(hotSpot), krys::move(originalUrl)));
   }
 
   Ref<CursorImageValue> CursorImageValue::Create(Ref<Value> &&imageValue, RefPtr<Value> &&hotSpot,
-                                                 CSSURL &&originalURL) noexcept
+                                                 CSSUrl &&originalUrl) noexcept
   {
     return AdoptRef(
-      *new CursorImageValue(krys::move(imageValue), krys::move(hotSpot), krys::move(originalURL)));
+      *new CursorImageValue(krys::move(imageValue), krys::move(hotSpot), krys::move(originalUrl)));
   }
 
   CursorImageValue::CursorImageValue(Ref<Value> &&imageValue, RefPtr<Value> &&hotSpot,
-                                     CSSURL &&originalURL) noexcept
-      : Value(ValueType::CursorImage), _originalURL(krys::move(originalURL)),
+                                     CSSUrl &&originalUrl) noexcept
+      : Value(ValueType::CursorImage), _originalUrl(krys::move(originalUrl)),
         _imageValue(krys::move(imageValue)), _hotSpot(krys::move(hotSpot))
   {
   }
@@ -88,6 +88,6 @@ namespace krys::boo::css
           Downcast<PrimitiveValue>(_hotSpot->Second()).ResolveAsNumber(state.CssToLengthConversionData()))};
     }
     return StyleCursorImage::Create(krys::move(styleImage), hotSpot,
-                                    style::ConvertToStyle(_originalURL, state));
+                                    style::ConvertToStyle(_originalUrl, state));
   }
 }

@@ -39,7 +39,7 @@
 #include "Krystal.Booey/Style/Values/PointerEvents/TouchAction.hpp"
 #include "Krystal.Core/Types/SharedBuffer.hpp"
 #include "Krystal.Core/Utils/Move.hpp"
-#include "Krystal.Net/URL.hpp"
+#include "Krystal.Net/Url.hpp"
 #include "Krystal.UI/ColorChooserOverlay.hpp"
 #include "Krystal.UI/Compositing/GraphicsLayerTextureMapper.hpp"
 #include "Krystal.UI/DataListSuggestionsOverlay.hpp"
@@ -468,7 +468,7 @@ namespace krys::ui
           {
             if (data && _iconHandler)
             {
-              _iconHandler({icon.URL.String(), utf8_string(icon.MIMEType), icon.Size, data->GetSpan()});
+              _iconHandler({icon.Url.String(), utf8_string(icon.MIMEType), icon.Size, data->GetSpan()});
             }
           });
       }
@@ -517,7 +517,7 @@ namespace krys::ui
       }
 
       NavigationRequest navigation;
-      navigation.URL = request.URL().String();
+      navigation.Url = request.Url().String();
       navigation.OpensNewWindow = newWindowName.data() != nullptr;
       navigation.Target = utf8_string(newWindowName);
       navigation.SourceElement = ShareRefPtr(action.SourceElement());
@@ -655,12 +655,12 @@ namespace krys::ui
     return Downcast<boo::HTMLDocument>(*_frame->Document());
   }
 
-  void View::LoadHTML(utf8_string markup, net::URL &&url, boo::CachePolicy cachePolicy) noexcept
+  void View::LoadHTML(utf8_string markup, net::Url &&url, boo::CachePolicy cachePolicy) noexcept
   {
     _frame->SetSubresourceCachePolicy(cachePolicy);
-    auto requestURL = url.IsNull() ? net::URL(u8"about:blank") : url;
+    auto requestUrl = url.IsNull() ? net::Url(u8"about:blank") : url;
     boo::FrameLoadRequest request(ShareRef<boo::Document>(Document()),
-                                  boo::ResourceRequest(krys::move(requestURL)), null);
+                                  boo::ResourceRequest(krys::move(requestUrl)), null);
     request.SetSubstituteData(boo::SubstituteData(krys::move(markup), u8"text/html", krys::move(url)));
     _frame->Loader().Load(krys::move(request));
   }
@@ -673,11 +673,11 @@ namespace krys::ui
       return Unexpected<string>(std::format("Couldn't open {}", path.string()));
     }
     auto absolutePath = std::filesystem::absolute(path).generic_u8string();
-    Load(net::URL::FileURLWithFileSystemPath(absolutePath), cachePolicy);
+    Load(net::Url::FileUrlWithFileSystemPath(absolutePath), cachePolicy);
     return {};
   }
 
-  void View::Load(net::URL &&url, boo::CachePolicy cachePolicy) noexcept
+  void View::Load(net::Url &&url, boo::CachePolicy cachePolicy) noexcept
   {
     _frame->SetSubresourceCachePolicy(cachePolicy);
     boo::FrameLoadRequest request(ShareRef<boo::Document>(Document()), boo::ResourceRequest(krys::move(url)),
@@ -750,7 +750,7 @@ namespace krys::ui
     // inserted; it replaces the current one at once, without a load.
     boo::DocumentWriter writer;
     writer.SetFrame(*_frame);
-    if (!writer.Begin(net::URL(u8"about:blank")))
+    if (!writer.Begin(net::Url(u8"about:blank")))
     {
       return;
     }
@@ -2566,12 +2566,12 @@ namespace krys::ui
       {
         data.SetMarkup(*content.HTML);
       }
-      if (content.URL)
+      if (content.Url)
       {
-        net::URL url(*content.URL);
+        net::Url url(*content.Url);
         if (url.IsValid())
         {
-          data.SetURL(url, content.URLTitle);
+          data.SetUrl(url, content.UrlTitle);
         }
       }
       // Files come as a URI list of their file URLs.
@@ -2582,7 +2582,7 @@ namespace krys::ui
         {
           uriList += u8"\r\n";
         }
-        uriList += net::URL::FileURLWithFileSystemPath(path).String();
+        uriList += net::Url::FileUrlWithFileSystemPath(path).String();
       }
       if (!uriList.empty())
       {

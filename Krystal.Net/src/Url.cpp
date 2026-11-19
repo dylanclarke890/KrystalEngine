@@ -24,14 +24,14 @@
  * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-#include "Krystal.Net/URL.hpp"
+#include "Krystal.Net/Url.hpp"
 #include "Krystal.Core/Assert.hpp"
 #include "Krystal.Core/Detection/OS.hpp"
 #include "Krystal.Core/Strings/ASCII.hpp"
 #include "Krystal.Core/Strings/CodePointIterator.hpp"
 #include "Krystal.Core/Threading/NeverDestroyed.hpp"
 #include "Krystal.Core/Types/Array.hpp"
-#include "Krystal.Net/URLParser.hpp"
+#include "Krystal.Net/UrlParser.hpp"
 #include "Krystal.Text/IDNA.hpp"
 #include <algorithm>
 #include <charconv>
@@ -42,7 +42,7 @@ namespace krys::net
 {
   namespace
   {
-    bool ShouldTrimFromURL(char8 character) noexcept
+    bool ShouldTrimFromUrl(char8 character) noexcept
     {
       // Ignore leading/trailing whitespace and control characters.
       return character <= ' ';
@@ -101,7 +101,7 @@ namespace krys::net
       return static_cast<char8>(text::ToASCIIHexValue(digit1, digit2));
     }
 
-    utf8_string DecodeEscapeSequencesFromParsedURL(utf8_stringview input) noexcept
+    utf8_string DecodeEscapeSequencesFromParsedUrl(utf8_stringview input) noexcept
     {
       krys_debug_assert(text::IsASCII(input));
 
@@ -138,7 +138,7 @@ namespace krys::net
     {
       // hostnameBuffer needs to be big enough to hold an IDN-encoded name.
       // For host names bigger than this, we won't do IDN encoding, which is almost certainly OK.
-      if (string.size() > URLParser::HostnameBufferLength || text::IsASCII(string))
+      if (string.size() > UrlParser::HostnameBufferLength || text::IsASCII(string))
       {
         buffer.append(string);
         return true;
@@ -225,7 +225,7 @@ namespace krys::net
         if (isLeading)
         {
           // Skip leading whitespace and control characters.
-          if (ShouldTrimFromURL(codeUnit))
+          if (ShouldTrimFromUrl(codeUnit))
           {
             continue;
           }
@@ -306,7 +306,7 @@ namespace krys::net
       return count == 4;
     }
 
-    utf8_stringview SubstringIgnoringQueryAndFragments(const URL &url KRYS_LIFETIME_BOUND) noexcept
+    utf8_stringview SubstringIgnoringQueryAndFragments(const Url &url KRYS_LIFETIME_BOUND) noexcept
     {
       if (!url.IsValid())
       {
@@ -317,7 +317,7 @@ namespace krys::net
     }
   }
 
-  void URL::Invalidate() noexcept
+  void Url::Invalidate() noexcept
   {
     _isValid = false;
     _protocolIsInHTTPFamily = false;
@@ -333,21 +333,21 @@ namespace krys::net
     _queryEnd = 0;
   }
 
-  URL::URL(HashTableDeletedValueTag) noexcept : _isNull(false), _isHashTableDeletedValue(true)
+  Url::Url(HashTableDeletedValueTag) noexcept : _isNull(false), _isHashTableDeletedValue(true)
   {
   }
 
-  URL::URL(const URL &base, utf8_stringview relative) noexcept
+  Url::Url(const Url &base, utf8_stringview relative) noexcept
   {
-    *this = URLParser(relative, base).Result();
+    *this = UrlParser(relative, base).Result();
   }
 
-  URL::URL(utf8_stringview absoluteURL) noexcept
+  Url::Url(utf8_stringview absoluteUrl) noexcept
   {
-    *this = URLParser(absoluteURL).Result();
+    *this = UrlParser(absoluteUrl).Result();
   }
 
-  URL::URL(URL &&other) noexcept
+  Url::Url(Url &&other) noexcept
       : _string(krys::move(other._string)), _isValid(other._isValid),
         _protocolIsInHTTPFamily(other._protocolIsInHTTPFamily), _hasOpaquePath(other._hasOpaquePath),
         _isNull(other._isNull), _isHashTableDeletedValue(other._isHashTableDeletedValue),
@@ -358,7 +358,7 @@ namespace krys::net
     other._isValid = false;
   }
 
-  URL &URL::operator=(URL &&other) noexcept
+  Url &Url::operator=(Url &&other) noexcept
   {
     _string = krys::move(other._string);
     _isValid = other._isValid;
@@ -380,7 +380,7 @@ namespace krys::net
     return *this;
   }
 
-  utf8_stringview URL::LastPathComponent() const noexcept
+  utf8_stringview Url::LastPathComponent() const noexcept
   {
     if (!HasPath())
     {
@@ -403,33 +403,33 @@ namespace krys::net
     return utf8_stringview {_string}.substr(start, end - start + 1);
   }
 
-  bool URL::HasSpecialScheme() const noexcept
+  bool Url::HasSpecialScheme() const noexcept
   {
     // https://url.spec.whatwg.org/#special-scheme
     return ProtocolIs(u8"ftp") || ProtocolIsFile() || ProtocolIs(u8"http") || ProtocolIs(u8"https")
            || ProtocolIs(u8"ws") || ProtocolIs(u8"wss");
   }
 
-  bool URL::HasLocalScheme() const noexcept
+  bool Url::HasLocalScheme() const noexcept
   {
     // https://fetch.spec.whatwg.org/#local-scheme
     return ProtocolIsAbout() || ProtocolIsBlob() || ProtocolIsData();
   }
 
-  bool URL::HasFetchScheme() const noexcept
+  bool Url::HasFetchScheme() const noexcept
   {
     // https://fetch.spec.whatwg.org/#fetch-scheme
     return ProtocolIsInHTTPFamily() || ProtocolIsAbout() || ProtocolIsBlob() || ProtocolIsData()
            || ProtocolIsFile();
   }
 
-  bool URL::ProtocolIsSecure() const noexcept
+  bool Url::ProtocolIsSecure() const noexcept
   {
     // Note: FTPS is not considered secure.
     return ProtocolIs(u8"https") || ProtocolIs(u8"wss");
   }
 
-  uint32 URL::PathStart() const noexcept
+  uint32 Url::PathStart() const noexcept
   {
     uint32 start = _hostEnd + _portLength;
     if (start == _schemeEnd + 1u && start + 1 < _string.size() && _string[start] == '/'
@@ -440,7 +440,7 @@ namespace krys::net
     return start;
   }
 
-  utf8_stringview URL::Protocol() const noexcept
+  utf8_stringview Url::Protocol() const noexcept
   {
     if (!_isValid)
     {
@@ -450,7 +450,7 @@ namespace krys::net
     return utf8_stringview {_string}.substr(0, _schemeEnd);
   }
 
-  utf8_stringview URL::Host() const noexcept
+  utf8_stringview Url::Host() const noexcept
   {
     if (!_isValid)
     {
@@ -461,12 +461,12 @@ namespace krys::net
     return utf8_stringview {_string}.substr(start, _hostEnd - start);
   }
 
-  Maybe<uint16> URL::Port() const noexcept
+  Maybe<uint16> Url::Port() const noexcept
   {
     return _portLength ? ParseUInt16(utf8_stringview {_string}.substr(_hostEnd + 1, _portLength - 1)) : null;
   }
 
-  utf8_string URL::HostAndPort() const noexcept
+  utf8_string Url::HostAndPort() const noexcept
   {
     utf8_string result {Host()};
     if (auto port = Port())
@@ -477,7 +477,7 @@ namespace krys::net
     return result;
   }
 
-  utf8_string URL::ProtocolHostAndPort() const noexcept
+  utf8_string Url::ProtocolHostAndPort() const noexcept
   {
     if (!HasCredentials())
     {
@@ -488,22 +488,22 @@ namespace krys::net
                        utf8_stringview {_string}.substr(HostStart(), PathStart() - HostStart())});
   }
 
-  utf8_string URL::User() const noexcept
+  utf8_string Url::User() const noexcept
   {
-    return DecodeEscapeSequencesFromParsedURL(EncodedUser());
+    return DecodeEscapeSequencesFromParsedUrl(EncodedUser());
   }
 
-  utf8_string URL::Password() const noexcept
+  utf8_string Url::Password() const noexcept
   {
-    return DecodeEscapeSequencesFromParsedURL(EncodedPassword());
+    return DecodeEscapeSequencesFromParsedUrl(EncodedPassword());
   }
 
-  utf8_stringview URL::EncodedUser() const noexcept
+  utf8_stringview Url::EncodedUser() const noexcept
   {
     return utf8_stringview {_string}.substr(_userStart, _userEnd - _userStart);
   }
 
-  utf8_stringview URL::EncodedPassword() const noexcept
+  utf8_stringview Url::EncodedPassword() const noexcept
   {
     if (_passwordEnd == _userEnd)
     {
@@ -513,7 +513,7 @@ namespace krys::net
     return utf8_stringview {_string}.substr(_userEnd + 1, _passwordEnd - _userEnd - 1);
   }
 
-  utf8_stringview URL::FragmentIdentifier() const noexcept
+  utf8_stringview Url::FragmentIdentifier() const noexcept
   {
     if (!HasFragmentIdentifier())
     {
@@ -523,19 +523,19 @@ namespace krys::net
     return utf8_stringview {_string}.substr(_queryEnd + 1);
   }
 
-  URL URL::TruncatedForUseAsBase() const noexcept
+  Url Url::TruncatedForUseAsBase() const noexcept
   {
-    return URL(utf8_stringview {_string}.substr(0, _pathAfterLastSlash));
+    return Url(utf8_stringview {_string}.substr(0, _pathAfterLastSlash));
   }
 
-  utf8_string URL::FileSystemPath() const noexcept
+  utf8_string Url::FileSystemPath() const noexcept
   {
     if (!ProtocolIsFile())
     {
       return {};
     }
 
-    auto result = DecodeEscapeSequencesFromParsedURL(Path());
+    auto result = DecodeEscapeSequencesFromParsedUrl(Path());
 #if KRYS_OS(WINDOWS)
     if (!result.empty() && result.front() == '/')
     {
@@ -547,7 +547,7 @@ namespace krys::net
 
   Maybe<uint16> DefaultPortForProtocol(utf8_stringview protocol) noexcept
   {
-    return URLParser::DefaultPortForProtocol(protocol);
+    return UrlParser::DefaultPortForProtocol(protocol);
   }
 
   bool IsDefaultPortForProtocol(uint16 port, utf8_stringview protocol) noexcept
@@ -555,12 +555,12 @@ namespace krys::net
     return DefaultPortForProtocol(protocol) == port;
   }
 
-  bool URL::ProtocolIsJavaScript() const noexcept
+  bool Url::ProtocolIsJavaScript() const noexcept
   {
     return net::ProtocolIsJavaScript(String());
   }
 
-  bool URL::ProtocolIs(utf8_stringview protocol) const noexcept
+  bool Url::ProtocolIs(utf8_stringview protocol) const noexcept
   {
     krys_debug_assert(
       std::ranges::none_of(protocol, [](char8 c) { return text::IsASCIIUpper(c) || c <= ' '; }));
@@ -586,7 +586,7 @@ namespace krys::net
     return true;
   }
 
-  utf8_stringview URL::Query() const noexcept
+  utf8_stringview Url::Query() const noexcept
   {
     if (_queryEnd == _pathEnd)
     {
@@ -596,7 +596,7 @@ namespace krys::net
     return utf8_stringview {_string}.substr(_pathEnd + 1, _queryEnd - (_pathEnd + 1));
   }
 
-  utf8_stringview URL::Path() const noexcept
+  utf8_stringview Url::Path() const noexcept
   {
     if (!_isValid)
     {
@@ -606,10 +606,10 @@ namespace krys::net
     return utf8_stringview {_string}.substr(PathStart(), _pathEnd - PathStart());
   }
 
-  bool URL::SetProtocol(utf8_stringview newProtocol) noexcept
+  bool Url::SetProtocol(utf8_stringview newProtocol) noexcept
   {
     auto newProtocolPrefix = newProtocol.substr(0, newProtocol.find(u8':'));
-    auto newProtocolCanonicalised = URLParser::MaybeCanonicaliseScheme(newProtocolPrefix);
+    auto newProtocolCanonicalised = UrlParser::MaybeCanonicaliseScheme(newProtocolPrefix);
     if (!newProtocolCanonicalised)
     {
       return false;
@@ -621,7 +621,7 @@ namespace krys::net
       return true;
     }
 
-    if (URLParser::IsSpecialScheme(Protocol()) != URLParser::IsSpecialScheme(*newProtocolCanonicalised))
+    if (UrlParser::IsSpecialScheme(Protocol()) != UrlParser::IsSpecialScheme(*newProtocolCanonicalised))
     {
       return true;
     }
@@ -640,12 +640,12 @@ namespace krys::net
     return true;
   }
 
-  uint32 URL::HostStart() const noexcept
+  uint32 Url::HostStart() const noexcept
   {
     return (_passwordEnd == _userStart) ? _passwordEnd : _passwordEnd + 1;
   }
 
-  uint32 URL::CredentialsEnd() const noexcept
+  uint32 Url::CredentialsEnd() const noexcept
   {
     // Include '@' too if we have it.
     uint32 end = _passwordEnd;
@@ -656,7 +656,7 @@ namespace krys::net
     return end;
   }
 
-  bool URL::SetHost(utf8_stringview newHost) noexcept
+  bool Url::SetHost(utf8_stringview newHost) noexcept
   {
     if (!_isValid || HasOpaquePath())
     {
@@ -694,7 +694,7 @@ namespace krys::net
     return _isValid;
   }
 
-  void URL::SetPort(Maybe<uint16> port) noexcept
+  void Url::SetPort(Maybe<uint16> port) noexcept
   {
     if (!_isValid)
     {
@@ -713,7 +713,7 @@ namespace krys::net
                       utf8_stringview {_string}.substr(PathStart())}));
   }
 
-  void URL::SetHostAndPort(utf8_stringview hostAndPort) noexcept
+  void Url::SetHostAndPort(utf8_stringview hostAndPort) noexcept
   {
     if (!_isValid || HasOpaquePath())
     {
@@ -778,7 +778,7 @@ namespace krys::net
                       utf8_stringview {_string}.substr(PathStart())}));
   }
 
-  void URL::RemoveHostAndPort() noexcept
+  void Url::RemoveHostAndPort() noexcept
   {
     if (_isValid)
     {
@@ -786,17 +786,17 @@ namespace krys::net
     }
   }
 
-  void URL::Parse(utf8_stringview string) noexcept
+  void Url::Parse(utf8_stringview string) noexcept
   {
-    *this = URLParser(string).Result();
+    *this = UrlParser(string).Result();
   }
 
-  void URL::ParseAllowingC0AtEnd(utf8_stringview string) noexcept
+  void Url::ParseAllowingC0AtEnd(utf8_stringview string) noexcept
   {
-    *this = URLParser(string, {}, true).Result();
+    *this = UrlParser(string, {}, true).Result();
   }
 
-  void URL::Remove(uint32 start, uint32 length) noexcept
+  void Url::Remove(uint32 start, uint32 length) noexcept
   {
     if (!length)
     {
@@ -810,7 +810,7 @@ namespace krys::net
     Parse(stringAfterRemoval);
   }
 
-  void URL::SetUser(utf8_stringview newUser) noexcept
+  void Url::SetUser(utf8_stringview newUser) noexcept
   {
     if (!_isValid)
     {
@@ -823,7 +823,7 @@ namespace krys::net
       bool slashSlashNeeded = _userStart == _schemeEnd + 1u;
       bool needSeparator = end == _hostEnd || (end == _passwordEnd && _string[end] != '@');
       Parse(MakeString({utf8_stringview {_string}.substr(0, _userStart), slashSlashNeeded ? u8"//" : u8"",
-                        PercentEncodeCharacters(newUser, URLParser::IsInUserInfoEncodeSet),
+                        PercentEncodeCharacters(newUser, UrlParser::IsInUserInfoEncodeSet),
                         needSeparator ? u8"@" : u8"", utf8_stringview {_string}.substr(end)}));
     }
     else
@@ -837,7 +837,7 @@ namespace krys::net
     }
   }
 
-  void URL::SetPassword(utf8_stringview newPassword) noexcept
+  void Url::SetPassword(utf8_stringview newPassword) noexcept
   {
     if (!_isValid)
     {
@@ -848,7 +848,7 @@ namespace krys::net
     {
       bool needLeadingSlashes = _userEnd == _schemeEnd + 1u;
       Parse(MakeString({utf8_stringview {_string}.substr(0, _userEnd), needLeadingSlashes ? u8"//:" : u8":",
-                        PercentEncodeCharacters(newPassword, URLParser::IsInUserInfoEncodeSet), u8"@",
+                        PercentEncodeCharacters(newPassword, UrlParser::IsInUserInfoEncodeSet), u8"@",
                         utf8_stringview {_string}.substr(CredentialsEnd())}));
     }
     else
@@ -858,7 +858,7 @@ namespace krys::net
     }
   }
 
-  void URL::RemoveCredentials() noexcept
+  void Url::RemoveCredentials() noexcept
   {
     if (!_isValid)
     {
@@ -868,7 +868,7 @@ namespace krys::net
     Remove(_userStart, CredentialsEnd() - _userStart);
   }
 
-  void URL::SetFragmentIdentifier(utf8_stringview identifier) noexcept
+  void Url::SetFragmentIdentifier(utf8_stringview identifier) noexcept
   {
     if (!_isValid)
     {
@@ -878,7 +878,7 @@ namespace krys::net
     ParseAllowingC0AtEnd(MakeString({utf8_stringview {_string}.substr(0, _queryEnd), u8"#", identifier}));
   }
 
-  void URL::RemoveFragmentIdentifier() noexcept
+  void Url::RemoveFragmentIdentifier() noexcept
   {
     if (!_isValid)
     {
@@ -888,7 +888,7 @@ namespace krys::net
     _string.resize(_queryEnd);
   }
 
-  void URL::RemoveQueryAndFragmentIdentifier() noexcept
+  void Url::RemoveQueryAndFragmentIdentifier() noexcept
   {
     if (!_isValid)
     {
@@ -899,7 +899,7 @@ namespace krys::net
     _queryEnd = _pathEnd;
   }
 
-  void URL::SetQuery(utf8_stringview newQuery) noexcept
+  void Url::SetQuery(utf8_stringview newQuery) noexcept
   {
     // FIXME: Consider renaming this function to SetEncodedQuery and/or calling PercentEncodeCharacters the
     // way SetPath does.
@@ -914,7 +914,7 @@ namespace krys::net
                                      newQuery, utf8_stringview {_string}.substr(_queryEnd)}));
   }
 
-  void URL::SetPath(utf8_stringview path) noexcept
+  void Url::SetPath(utf8_stringview path) noexcept
   {
     if (!_isValid)
     {
@@ -932,7 +932,7 @@ namespace krys::net
                   utf8_stringview {_string}.substr(_pathEnd)}));
   }
 
-  utf8_stringview URL::ViewWithoutQueryOrFragmentIdentifier() const noexcept
+  utf8_stringview Url::ViewWithoutQueryOrFragmentIdentifier() const noexcept
   {
     if (!_isValid)
     {
@@ -942,7 +942,7 @@ namespace krys::net
     return utf8_stringview {_string}.substr(0, PathEnd());
   }
 
-  utf8_stringview URL::ViewWithoutFragmentIdentifier() const noexcept
+  utf8_stringview Url::ViewWithoutFragmentIdentifier() const noexcept
   {
     if (!_isValid)
     {
@@ -952,7 +952,7 @@ namespace krys::net
     return utf8_stringview {_string}.substr(0, _queryEnd);
   }
 
-  utf8_string URL::StringWithoutFragmentIdentifier() const noexcept
+  utf8_string Url::StringWithoutFragmentIdentifier() const noexcept
   {
     if (!_isValid)
     {
@@ -962,12 +962,12 @@ namespace krys::net
     return _string.substr(0, _queryEnd);
   }
 
-  bool EqualIgnoringFragmentIdentifier(const URL &a, const URL &b) noexcept
+  bool EqualIgnoringFragmentIdentifier(const Url &a, const Url &b) noexcept
   {
     return a.ViewWithoutFragmentIdentifier() == b.ViewWithoutFragmentIdentifier();
   }
 
-  bool ProtocolHostAndPortAreEqual(const URL &a, const URL &b) noexcept
+  bool ProtocolHostAndPortAreEqual(const Url &a, const Url &b) noexcept
   {
     if (a._schemeEnd != b._schemeEnd)
     {
@@ -1009,7 +1009,7 @@ namespace krys::net
     return true;
   }
 
-  bool URL::IsMatchingDomain(utf8_stringview domain) const noexcept
+  bool Url::IsMatchingDomain(utf8_stringview domain) const noexcept
   {
     if (IsNull())
     {
@@ -1036,9 +1036,9 @@ namespace krys::net
   }
 
   // FIXME: Rename this so it's clear that it does the appropriate escaping for URL query field values.
-  utf8_string EncodeWithURLEscapeSequences(utf8_stringview input) noexcept
+  utf8_string EncodeWithUrlEscapeSequences(utf8_stringview input) noexcept
   {
-    return PercentEncodeCharacters(input, URLParser::IsInUserInfoEncodeSet);
+    return PercentEncodeCharacters(input, UrlParser::IsInUserInfoEncodeSet);
   }
 
   bool ProtocolIs(utf8_stringview url, utf8_stringview protocol) noexcept
@@ -1046,7 +1046,7 @@ namespace krys::net
     return ProtocolIsInternal(url, protocol);
   }
 
-  URL::StripResult URL::StrippedForUseAsReferrer() const noexcept
+  Url::StripResult Url::StrippedForUseAsReferrer() const noexcept
   {
     if (!_isValid)
     {
@@ -1065,7 +1065,7 @@ namespace krys::net
             true};
   }
 
-  URL::StripResult URL::StrippedForUseAsReferrerWithExplicitPort() const noexcept
+  Url::StripResult Url::StrippedForUseAsReferrerWithExplicitPort() const noexcept
   {
     if (!_isValid)
     {
@@ -1100,7 +1100,7 @@ namespace krys::net
             true};
   }
 
-  utf8_string URL::StrippedForUseAsReport() const noexcept
+  utf8_string Url::StrippedForUseAsReport() const noexcept
   {
     if (!_isValid)
     {
@@ -1134,19 +1134,19 @@ namespace krys::net
                || (text::IsASCIIAlphaCaselessEqual(url[4], u8's') && length >= 6 && url[5] == ':'));
   }
 
-  const URL &AboutBlankURL() noexcept
+  const Url &AboutBlankUrl() noexcept
   {
-    static NeverDestroyed<URL> staticBlankURL {URL {u8"about:blank"}};
-    return staticBlankURL;
+    static NeverDestroyed<Url> staticBlankUrl {Url {u8"about:blank"}};
+    return staticBlankUrl;
   }
 
-  const URL &AboutSrcDocURL() noexcept
+  const Url &AboutSrcDocUrl() noexcept
   {
-    static NeverDestroyed<URL> staticSrcDocURL {URL {u8"about:srcdoc"}};
-    return staticSrcDocURL;
+    static NeverDestroyed<Url> staticSrcDocUrl {Url {u8"about:srcdoc"}};
+    return staticSrcDocUrl;
   }
 
-  bool PortAllowed(const URL &url) noexcept
+  bool PortAllowed(const Url &url) noexcept
   {
     Maybe<uint16> port = url.Port();
 
@@ -1266,16 +1266,16 @@ namespace krys::net
     return false;
   }
 
-  utf8_string MimeTypeFromDataURL(utf8_stringview dataURL) noexcept
+  utf8_string MimeTypeFromDataUrl(utf8_stringview dataUrl) noexcept
   {
-    krys_debug_assert(ProtocolIsInternal(dataURL, u8"data"));
+    krys_debug_assert(ProtocolIsInternal(dataUrl, u8"data"));
 
     // FIXME: What's the right behavior when the URL has a comma first, but a semicolon later?
     // Currently this code will break at the semicolon in that case; should add a test.
-    auto index = dataURL.find(u8';', 5);
+    auto index = dataUrl.find(u8';', 5);
     if (index == utf8_stringview::npos)
     {
-      index = dataURL.find(u8',', 5);
+      index = dataUrl.find(u8',', 5);
     }
     if (index == utf8_stringview::npos)
     {
@@ -1289,7 +1289,7 @@ namespace krys::net
       return u8"text/plain";
     }
     krys_debug_assert(index >= 5);
-    utf8_string result {dataURL.substr(5, index - 5)};
+    utf8_string result {dataUrl.substr(5, index - 5)};
     for (auto &c : result)
     {
       c = text::ToASCIILower(c);
@@ -1297,7 +1297,7 @@ namespace krys::net
     return result;
   }
 
-  utf8_string URL::StringCenterEllipsisedToLength(uint32 length) const noexcept
+  utf8_string Url::StringCenterEllipsisedToLength(uint32 length) const noexcept
   {
     if (_string.size() <= length)
     {
@@ -1308,13 +1308,13 @@ namespace krys::net
                        utf8_stringview {_string}.substr(_string.size() - (length / 2 - 2))});
   }
 
-  URL URL::FileURLWithFileSystemPath(utf8_stringview path) noexcept
+  Url Url::FileUrlWithFileSystemPath(utf8_stringview path) noexcept
   {
-    return URL(
+    return Url(
       MakeString({u8"file://", path.starts_with(u8'/') ? u8"" : u8"/", EscapePathWithoutCopying(path)}));
   }
 
-  utf8_stringview URL::QueryWithLeadingQuestionMark() const noexcept
+  utf8_stringview Url::QueryWithLeadingQuestionMark() const noexcept
   {
     if (_queryEnd <= _pathEnd)
     {
@@ -1324,7 +1324,7 @@ namespace krys::net
     return utf8_stringview {_string}.substr(_pathEnd, _queryEnd - _pathEnd);
   }
 
-  utf8_stringview URL::FragmentIdentifierWithLeadingNumberSign() const noexcept
+  utf8_stringview Url::FragmentIdentifierWithLeadingNumberSign() const noexcept
   {
     if (!_isValid || _string.size() <= _queryEnd)
     {
@@ -1334,17 +1334,17 @@ namespace krys::net
     return utf8_stringview {_string}.substr(_queryEnd);
   }
 
-  bool URL::IsAboutBlank() const noexcept
+  bool Url::IsAboutBlank() const noexcept
   {
     return ProtocolIsAbout() && Path() == u8"blank";
   }
 
-  bool URL::IsAboutSrcDoc() const noexcept
+  bool Url::IsAboutSrcDoc() const noexcept
   {
     return ProtocolIsAbout() && Path() == u8"srcdoc" && !HasQuery();
   }
 
-  bool URL::IsIPv6Address(utf8_stringview address) noexcept
+  bool Url::IsIPv6Address(utf8_stringview address) noexcept
   {
     enum SkipState
     {
@@ -1446,20 +1446,20 @@ namespace krys::net
     return (count == 8 && skipState == None) || skipState == Skipped || skipState == Final;
   }
 
-  bool URL::HostIsIPAddress(utf8_stringview host) noexcept
+  bool Url::HostIsIPAddress(utf8_stringview host) noexcept
   {
     return host.contains(u8':') ? IsIPv6Address(host) : IsIPv4Address(host);
   }
 
-  List<KeyValuePair> QueryParameters(const URL &url) noexcept
+  List<KeyValuePair> QueryParameters(const Url &url) noexcept
   {
-    return URLParser::ParseURLEncodedForm(url.Query());
+    return UrlParser::ParseUrlEncodedForm(url.Query());
   }
 
-  List<KeyValuePair> DifferingQueryParameters(const URL &firstURL, const URL &secondURL) noexcept
+  List<KeyValuePair> DifferingQueryParameters(const Url &firstUrl, const Url &secondUrl) noexcept
   {
-    auto firstQueryParameters = URLParser::ParseURLEncodedForm(firstURL.Query());
-    auto secondQueryParameters = URLParser::ParseURLEncodedForm(secondURL.Query());
+    auto firstQueryParameters = UrlParser::ParseUrlEncodedForm(firstUrl.Query());
+    auto secondQueryParameters = UrlParser::ParseUrlEncodedForm(secondUrl.Query());
 
     if (firstQueryParameters.empty())
     {
@@ -1529,12 +1529,12 @@ namespace krys::net
     return differingQueryParameters;
   }
 
-  bool IsEqualIgnoringQueryAndFragments(const URL &a, const URL &b) noexcept
+  bool IsEqualIgnoringQueryAndFragments(const Url &a, const Url &b) noexcept
   {
     return SubstringIgnoringQueryAndFragments(a) == SubstringIgnoringQueryAndFragments(b);
   }
 
-  List<utf8_string> RemoveQueryParameters(URL &url, const HashSet<utf8_string> &keysToRemove) noexcept
+  List<utf8_string> RemoveQueryParameters(Url &url, const HashSet<utf8_string> &keysToRemove) noexcept
   {
     if (keysToRemove.empty())
     {
@@ -1546,7 +1546,7 @@ namespace krys::net
   }
 
   List<utf8_string> RemoveQueryParameters(
-    URL &url, KRYS_NOESCAPE const Func<bool(const utf8_string &, const utf8_string &)> &shouldRemove) noexcept
+    Url &url, KRYS_NOESCAPE const Func<bool(const utf8_string &, const utf8_string &)> &shouldRemove) noexcept
   {
     if (!url.HasQuery())
     {
@@ -1571,7 +1571,7 @@ namespace krys::net
         continue;
       }
 
-      auto nameAndValue = URLParser::ParseQueryNameAndValue(bytes);
+      auto nameAndValue = UrlParser::ParseQueryNameAndValue(bytes);
       if (!nameAndValue)
       {
         continue;

@@ -30,7 +30,7 @@ namespace krys::boo::tests
                       utf8_stringview url = u8"https://example.com/document") noexcept
     {
       fixture.Strategy.AddText(url, markup, mimeType);
-      fixture.LoadURL(url);
+      fixture.LoadUrl(url);
       html::EventLoop::Current().RunUntilIdle();
     }
 
@@ -250,7 +250,7 @@ namespace krys::boo::tests
                              u8"<svg xmlns=\"http://www.w3.org/2000/svg\" viewBox=\"0 0 100 50\">"
                              u8"<view id=\"corner\" viewBox=\"0 0 10 5\"/></svg>",
                              u8"image/svg+xml");
-    fixture.LoadURL(u8"https://example.com/view.svg#corner");
+    fixture.LoadUrl(u8"https://example.com/view.svg#corner");
     html::EventLoop::Current().RunUntilIdle();
 
     auto root = fixture.Document().DocumentElement();

@@ -163,7 +163,7 @@ namespace krys::boo::css
     return krys::move(builder).ToString();
   }
 
-  CSSOMString SerialiseURL(const CSSOMString &value) noexcept
+  CSSOMString SerialiseUrl(const CSSOMString &value) noexcept
   {
     StringBuilder builder;
     builder.Append(u8"url(");

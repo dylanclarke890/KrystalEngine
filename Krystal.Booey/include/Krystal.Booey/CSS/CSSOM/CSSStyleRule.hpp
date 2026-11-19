@@ -109,7 +109,7 @@ namespace krys::boo
 
     void CssTextForRules(StringBuilder &rules) const noexcept;
 
-    void CssTextForRulesWithReplacementURLs(StringBuilder &rules,
+    void CssTextForRulesWithReplacementUrls(StringBuilder &rules,
                                             const css::SerialisationContext &context) const noexcept;
   };
 }

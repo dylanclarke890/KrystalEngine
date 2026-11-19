@@ -16,7 +16,7 @@ namespace krys::ui::tests
       {
         if (!request.IsFormSubmission && !request.OpensNewWindow)
         {
-          view.Load(net::URL(request.URL));
+          view.Load(net::Url(request.Url));
         }
       });
   }

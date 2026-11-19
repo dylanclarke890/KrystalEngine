@@ -68,7 +68,7 @@ namespace krys::boo
   {
     StringBuilder builder;
     builder.Append(u8"@media ", ConditionText());
-    AppendCSSTextWithReplacementURLsForItems(builder, context);
+    AppendCSSTextWithReplacementUrlsForItems(builder, context);
     return krys::move(builder).ToString();
   }
 

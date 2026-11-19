@@ -77,7 +77,7 @@ namespace krys::boo
 
   KRYS_NODISCARD utf8_string ValidationMessageTypeMismatchForMultipleEmailText() noexcept;
 
-  KRYS_NODISCARD utf8_string ValidationMessageTypeMismatchForURLText() noexcept;
+  KRYS_NODISCARD utf8_string ValidationMessageTypeMismatchForUrlText() noexcept;
 
   KRYS_NODISCARD utf8_string ValidationMessagePatternMismatchText() noexcept;
 

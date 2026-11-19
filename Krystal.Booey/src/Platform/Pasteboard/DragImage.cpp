@@ -39,7 +39,7 @@
 #include "Krystal.Booey/Page/LocalFrame.hpp"
 #include "Krystal.Booey/Page/Settings.hpp"
 #include "Krystal.Booey/Rendering/RenderElement.hpp"
-#include "Krystal.Net/URL.hpp"
+#include "Krystal.Net/Url.hpp"
 
 namespace krys::boo
 {
@@ -267,22 +267,22 @@ namespace krys::boo
     }
   }
 
-  DragImageData CreateDragImageForLink(boo::Element &element, net::URL &url, utf8_stringview inLabel,
+  DragImageData CreateDragImageForLink(boo::Element &element, net::Url &url, utf8_stringview inLabel,
                                        float) noexcept
   {
     const auto &settings = element.NodeDocument().GetSettings();
     const FontCascade labelFont = DragLabelFont(settings, DragLinkLabelFontsize, true);
     const FontCascade urlFont = DragLabelFont(settings, DragLinkUrlFontSize, false);
 
-    bool drawURLString = true;
-    bool clipURLString = false;
+    bool drawUrlString = true;
+    bool clipUrlString = false;
     bool clipLabelString = false;
 
     utf8_string urlString = url.String();
     utf8_string label(inLabel);
     if (label.empty())
     {
-      drawURLString = false;
+      drawUrlString = false;
       label = urlString;
     }
 
@@ -303,7 +303,7 @@ namespace krys::boo
     IntSize imageSize(static_cast<int32>(labelSize.Width() + DragLabelBorderX * 2),
                       static_cast<int32>(labelSize.Height() + DragLabelBorderY * 2));
 
-    if (drawURLString)
+    if (drawUrlString)
     {
       urlStringSize.SetWidth(static_cast<int32>(urlFont.Width(urlRun)));
       urlStringSize.SetHeight(urlFont.MetricsOfPrimaryFont().IntAscent()
@@ -312,7 +312,7 @@ namespace krys::boo
       if (urlStringSize.Width() > MaxDragLabelStringWidth)
       {
         imageSize.SetWidth(static_cast<int32>(MaxDragLabelWidth));
-        clipURLString = true;
+        clipUrlString = true;
       }
       else
       {
@@ -338,9 +338,9 @@ namespace krys::boo
     // Draw the text
     constexpr auto topColor = Color::black;                         // original alpha = 0.75
     constexpr auto bottomColor = SRGBA<uint8> {255, 255, 255, 127}; // original alpha = 0.5
-    if (drawURLString)
+    if (drawUrlString)
     {
-      if (clipURLString)
+      if (clipUrlString)
       {
         urlString =
           StringTruncator::RightTruncate(urlString, imageSize.Width() - (DragLabelBorderX * 2.0f), urlFont);

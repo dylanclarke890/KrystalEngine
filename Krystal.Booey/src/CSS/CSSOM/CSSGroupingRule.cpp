@@ -189,15 +189,15 @@ namespace krys::boo
     }
   }
 
-  void CSSGroupingRule::AppendCSSTextWithReplacementURLsForItems(
+  void CSSGroupingRule::AppendCSSTextWithReplacementUrlsForItems(
     StringBuilder &builder, const css::SerialisationContext &context) const noexcept
   {
     StringBuilder rules;
-    CssTextForRulesWithReplacementURLs(rules, context);
+    CssTextForRulesWithReplacementUrls(rules, context);
     AppendCSSTextForItemsInternal(builder, rules);
   }
 
-  void CSSGroupingRule::CssTextForRulesWithReplacementURLs(
+  void CSSGroupingRule::CssTextForRulesWithReplacementUrls(
     StringBuilder &rules, const css::SerialisationContext &context) const noexcept
   {
     const auto &childRules = _groupRule->ChildRules();

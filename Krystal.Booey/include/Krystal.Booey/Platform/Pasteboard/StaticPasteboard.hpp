@@ -76,7 +76,7 @@ namespace krys::boo
     void Clear(utf8_stringview type) noexcept final;
 
     void Read(PasteboardPlainText &,
-              PlainTextURLReadingPolicy = PlainTextURLReadingPolicy::AllowURL) noexcept final
+              PlainTextUrlReadingPolicy = PlainTextUrlReadingPolicy::AllowUrl) noexcept final
     {
     }
 
@@ -87,7 +87,7 @@ namespace krys::boo
 
     using Pasteboard::Read;
 
-    void Write(const PasteboardURL &url) noexcept final;
+    void Write(const PasteboardUrl &url) noexcept final;
 
     void Write(const PasteboardImage &image) noexcept final;
 

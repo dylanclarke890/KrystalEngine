@@ -36,7 +36,7 @@ namespace krys::boo::tests
     void DispatchNavigationRequested(const NavigationAction &, const ResourceRequest &request,
                                      const FormSubmission *) noexcept override
     {
-      Events.push_back("navigation to " + Narrow(request.URL().String()));
+      Events.push_back("navigation to " + Narrow(request.Url().String()));
     }
 
     void DispatchDidStartProvisionalLoad() noexcept override
@@ -124,15 +124,15 @@ namespace krys::boo::tests
     /// @brief Loads @p markup at @p url, as the host does.
     void LoadMarkup(utf8_string &&markup, utf8_stringview url) noexcept
     {
-      FrameLoadRequest request(ShareRef(Document()), ResourceRequest(net::URL(url)), null);
-      request.SetSubstituteData(SubstituteData(krys::move(markup), u8"text/html", net::URL(url)));
+      FrameLoadRequest request(ShareRef(Document()), ResourceRequest(net::Url(url)), null);
+      request.SetSubstituteData(SubstituteData(krys::move(markup), u8"text/html", net::Url(url)));
       Frame().Loader().Load(krys::move(request));
     }
 
     /// @brief Loads @p url through the strategy, as the host does.
-    void LoadURL(utf8_stringview url) noexcept
+    void LoadUrl(utf8_stringview url) noexcept
     {
-      Frame().Loader().Load(FrameLoadRequest(ShareRef(Document()), ResourceRequest(net::URL(url)), null));
+      Frame().Loader().Load(FrameLoadRequest(ShareRef(Document()), ResourceRequest(net::Url(url)), null));
     }
   };
 }

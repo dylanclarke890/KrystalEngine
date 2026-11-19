@@ -1352,7 +1352,7 @@ namespace krys::boo
           object->UpdateRole();
         }
       }
-      PostNotification(&element, AXNotification::URLChanged);
+      PostNotification(&element, AXNotification::UrlChanged);
     }
     else if (name == u8"accesskey")
     {

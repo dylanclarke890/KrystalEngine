@@ -23,7 +23,7 @@
  * THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-#include "Krystal.Booey/Platform/Network/DataURLDecoder.hpp"
+#include "Krystal.Booey/Platform/Network/DataUrlDecoder.hpp"
 #include "Krystal.Core/Strings/ASCII.hpp"
 #include "Krystal.Text/Base64.hpp"
 #include <algorithm>
@@ -75,7 +75,7 @@ namespace krys::boo::data_url_decoder
     }
 
     /// @brief The bytes of @p input with its `%XX` escape sequences decoded.
-    KRYS_NODISCARD List<uint8> DecodeURLEscapeSequencesAsData(utf8_stringview input) noexcept
+    KRYS_NODISCARD List<uint8> DecodeUrlEscapeSequencesAsData(utf8_stringview input) noexcept
     {
       List<uint8> result;
       result.reserve(input.size());
@@ -135,7 +135,7 @@ namespace krys::boo::data_url_decoder
     }
   }
 
-  Maybe<Result> Decode(const net::URL &url, ShouldValidatePadding shouldValidatePadding) noexcept
+  Maybe<Result> Decode(const net::Url &url, ShouldValidatePadding shouldValidatePadding) noexcept
   {
     krys_debug_assert(url.ProtocolIsData());
 
@@ -187,7 +187,7 @@ namespace krys::boo::data_url_decoder
 
     auto result = ParseMediaType(mediaType);
 
-    auto unescaped = DecodeURLEscapeSequencesAsData(encodedData);
+    auto unescaped = DecodeUrlEscapeSequencesAsData(encodedData);
     if (isBase64)
     {
       EnumSet<Base64DecodeOption> options {Base64DecodeOption::IgnoreWhitespace};

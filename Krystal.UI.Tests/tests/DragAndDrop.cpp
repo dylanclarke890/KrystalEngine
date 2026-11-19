@@ -284,8 +284,8 @@ namespace krys::ui::tests
       {
         pal::DragContent content;
         content.Text = u8"a link";
-        content.URL = u8"https://example.com/page";
-        content.URLTitle = u8"Example";
+        content.Url = u8"https://example.com/page";
+        content.UrlTitle = u8"Example";
         pal::DropOperations all {pal::DropOperation::Copy, pal::DropOperation::Move,
                                  pal::DropOperation::Link};
         auto input = entered(10, 50, krys::move(content), all);

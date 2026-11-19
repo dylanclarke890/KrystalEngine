@@ -137,7 +137,7 @@ namespace krys::boo
     return ValidationMessageTypeMismatchForEmailText();
   }
 
-  utf8_string ValidationMessageTypeMismatchForURLText() noexcept
+  utf8_string ValidationMessageTypeMismatchForUrlText() noexcept
   {
     return u8"Enter a URL";
   }

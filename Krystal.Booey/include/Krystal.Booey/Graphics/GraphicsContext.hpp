@@ -41,7 +41,7 @@
 #include "Krystal.Core/Strings/StringAtom.hpp"
 #include "Krystal.Core/Types/Maybe.hpp"
 #include "Krystal.Core/Types/SmallList.hpp"
-#include "Krystal.Net/URL.hpp"
+#include "Krystal.Net/Url.hpp"
 
 namespace krys::boo
 {
@@ -738,7 +738,7 @@ namespace krys::boo
 
     // Links
 
-    virtual void SetURLForRect(const net::URL &, const FloatRect &) noexcept
+    virtual void SetUrlForRect(const net::Url &, const FloatRect &) noexcept
     {
     }
 

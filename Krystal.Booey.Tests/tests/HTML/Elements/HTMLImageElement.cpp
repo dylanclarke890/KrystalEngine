@@ -97,7 +97,7 @@ namespace krys::boo::tests
     auto events = LoadEvents::ListenTo(image);
 
     REQUIRE(loader.Strategy.Requests == List<utf8_string> {u8"file:///a.png"});
-    CHECK(image.CurrentURL().String() == u8"file:///a.png");
+    CHECK(image.CurrentUrl().String() == u8"file:///a.png");
     CHECK_FALSE(image.Complete());
     CHECK(image.NaturalWidth() == 0u);
     CHECK(fixture.RendererSize(u8"img") == IntSize(0, 0));
@@ -258,12 +258,12 @@ namespace krys::boo::tests
       u8"<img id=widths srcset='file:///small.png 100w, file:///large.jpg 400w' sizes='200px'>");
     RunNetworkingTasks();
 
-    CHECK(fixture.Image(u8"density").CurrentURL().String() == u8"file:///one.png");
+    CHECK(fixture.Image(u8"density").CurrentUrl().String() == u8"file:///one.png");
     CHECK(fixture.Image(u8"density").UsesSrcsetOrPicture());
 
     // 400w at 200px is 2x: the 16x8 JPEG's natural size is halved.
     auto &widths = fixture.Image(u8"widths");
-    CHECK(widths.CurrentURL().String() == u8"file:///large.jpg");
+    CHECK(widths.CurrentUrl().String() == u8"file:///large.jpg");
     CHECK(widths.NaturalWidth() == 8u);
     CHECK(widths.NaturalHeight() == 4u);
     CHECK(fixture.RendererSize(u8"widths") == IntSize(8, 4));
@@ -272,9 +272,9 @@ namespace krys::boo::tests
 
     // sizes defaults to 100vw: 200px.
     REQUIRE_FALSE(widths.SetAttribute(u8"sizes", u8"").HasException());
-    CHECK(widths.CurrentURL().String() == u8"file:///large.jpg");
+    CHECK(widths.CurrentUrl().String() == u8"file:///large.jpg");
     REQUIRE_FALSE(widths.SetAttribute(u8"sizes", u8"50px").HasException());
-    CHECK(widths.CurrentURL().String() == u8"file:///small.png");
+    CHECK(widths.CurrentUrl().String() == u8"file:///small.png");
   }
 
   TEST_CASE(
@@ -296,7 +296,7 @@ namespace krys::boo::tests
     auto &image = fixture.Image(u8"img");
     RunNetworkingTasks();
 
-    CHECK(image.CurrentURL().String() == u8"file:///photo.jpg");
+    CHECK(image.CurrentUrl().String() == u8"file:///photo.jpg");
     CHECK(image.UsesSrcsetOrPicture());
     // The selected source's width and height are the image's.
     CHECK(fixture.RendererSize(u8"img") == IntSize(32, 16));
@@ -305,7 +305,7 @@ namespace krys::boo::tests
     REQUIRE_FALSE(fixture.ById(u8"jpeg").Remove().HasException());
     RunNetworkingTasks();
 
-    CHECK(image.CurrentURL().String() == u8"file:///fallback.png");
+    CHECK(image.CurrentUrl().String() == u8"file:///fallback.png");
     CHECK(events->Loads == 1);
     CHECK(fixture.RendererSize(u8"img") == IntSize(3, 2));
     CHECK(std::ranges::find(loader.Strategy.Requests, u8"file:///photo.avif")
@@ -327,7 +327,7 @@ namespace krys::boo::tests
                          u8"</picture>");
     auto &image = fixture.Image(u8"img");
     RunNetworkingTasks();
-    REQUIRE(image.CurrentURL().String() == u8"file:///photo.jpg");
+    REQUIRE(image.CurrentUrl().String() == u8"file:///photo.jpg");
 
     auto &outside = fixture.ById(u8"outside");
     auto &picture = fixture.ById(u8"picture");
@@ -335,22 +335,22 @@ namespace krys::boo::tests
     {
       REQUIRE_FALSE(outside.MoveBefore(fixture.ById(u8"jpeg"), nullptr).HasException());
       RunNetworkingTasks();
-      CHECK(image.CurrentURL().String() == u8"file:///fallback.png");
+      CHECK(image.CurrentUrl().String() == u8"file:///fallback.png");
 
       REQUIRE_FALSE(picture.MoveBefore(fixture.ById(u8"jpeg"), &image).HasException());
       RunNetworkingTasks();
-      CHECK(image.CurrentURL().String() == u8"file:///photo.jpg");
+      CHECK(image.CurrentUrl().String() == u8"file:///photo.jpg");
     }
 
     SECTION("the image")
     {
       REQUIRE_FALSE(outside.MoveBefore(image, nullptr).HasException());
       RunNetworkingTasks();
-      CHECK(image.CurrentURL().String() == u8"file:///fallback.png");
+      CHECK(image.CurrentUrl().String() == u8"file:///fallback.png");
 
       REQUIRE_FALSE(picture.MoveBefore(image, nullptr).HasException());
       RunNetworkingTasks();
-      CHECK(image.CurrentURL().String() == u8"file:///photo.jpg");
+      CHECK(image.CurrentUrl().String() == u8"file:///photo.jpg");
     }
   }
 
@@ -388,7 +388,7 @@ namespace krys::boo::tests
 
     CHECK(events->Loads == 2);
     CHECK(image.Complete());
-    CHECK(image.CurrentURL().String() == u8"file:///b.jpg");
+    CHECK(image.CurrentUrl().String() == u8"file:///b.jpg");
     CHECK(fixture.RendererSize(u8"img") == IntSize(16, 8));
 
     // Setting the same source again fires load again, from the memory cache.

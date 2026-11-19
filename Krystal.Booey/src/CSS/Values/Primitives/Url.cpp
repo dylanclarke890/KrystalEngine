@@ -22,7 +22,7 @@
  * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-#include "Krystal.Booey/CSS/Values/Primitives/URL.hpp"
+#include "Krystal.Booey/CSS/Values/Primitives/Url.hpp"
 #include "Krystal.Booey/CSS/Parser/ParserContext.hpp"
 #include "Krystal.Booey/CSS/Values/SerialisationContext.hpp"
 #include "Krystal.Booey/CSS/Values/ValueId.hpp"
@@ -32,8 +32,8 @@ namespace krys::boo::css
 {
   // MARK: - Serialisation
 
-  void Serialiser<CSSURL>::operator()(StringBuilder &builder, const SerialisationContext &context,
-                                      const CSSURL &value) noexcept
+  void Serialiser<CSSUrl>::operator()(StringBuilder &builder, const SerialisationContext &context,
+                                      const CSSUrl &value) noexcept
   {
     // https://drafts.csswg.org/cssom/#serialize-a-url
 
@@ -67,36 +67,36 @@ namespace krys::boo::css
 
   namespace
   {
-    CSSURL CompleteURL(const CSSOMString &string, const net::URL &baseURL) noexcept
+    CSSUrl CompleteUrl(const CSSOMString &string, const net::Url &baseUrl) noexcept
     {
       if (string.empty() || string.starts_with(u8'#'))
       {
-        return CSSURL {.Specified = string, .Resolved = net::URL {string}, .Modifiers = {}};
+        return CSSUrl {.Specified = string, .Resolved = net::Url {string}, .Modifiers = {}};
       }
-      if (baseURL.IsNull() || baseURL.IsAboutBlank())
+      if (baseUrl.IsNull() || baseUrl.IsAboutBlank())
       {
-        return CSSURL {.Specified = string, .Resolved = net::URL {}, .Modifiers = {}};
+        return CSSUrl {.Specified = string, .Resolved = net::Url {}, .Modifiers = {}};
       }
-      return CSSURL {.Specified = string, .Resolved = net::URL {baseURL, string}, .Modifiers = {}};
+      return CSSUrl {.Specified = string, .Resolved = net::Url {baseUrl, string}, .Modifiers = {}};
     }
   }
 
-  Maybe<CSSURL> CompleteURL(const CSSOMString &string, const ParserContext &context) noexcept
+  Maybe<CSSUrl> CompleteUrl(const CSSOMString &string, const ParserContext &context) noexcept
   {
     // Upstream also rejects non-`data:` URLs in WebVTT mode, which isn't supported.
-    return CompleteURL(string, context.BaseURL);
+    return CompleteUrl(string, context.BaseUrl);
   }
 
-  CSSURL Resolve(CSSURL &&url) noexcept
+  CSSUrl Resolve(CSSUrl &&url) noexcept
   {
     if (url.Resolved.IsNull())
     {
-      url.Resolved = net::URL {url.Specified};
+      url.Resolved = net::Url {url.Specified};
     }
     return krys::move(url);
   }
 
-  bool MayDependOnBaseURL(const CSSURL &url) noexcept
+  bool MayDependOnBaseUrl(const CSSUrl &url) noexcept
   {
     return !url.Specified.empty() && !url.Specified.starts_with(u8'#') && !url.Resolved.ProtocolIsData();
   }

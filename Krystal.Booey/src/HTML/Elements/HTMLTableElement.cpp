@@ -710,7 +710,7 @@ namespace krys::boo
       if (auto url = infra::StringAlgorithms::StripLeadingAndTrailingWhitespace(value); !url.empty())
       {
         style.SetProperty(css::PropertyId::BackgroundImage,
-                          css::ImageValue::Create(NodeDocument().CompleteURL(url)));
+                          css::ImageValue::Create(NodeDocument().CompleteUrl(url)));
       }
       return;
     }

@@ -27,7 +27,7 @@ namespace krys::boo::tests
   struct ReceivedNavigation
   {
     NavigationAction Action;
-    std::string URL;
+    std::string Url;
     std::string HTTPMethod;
     /// @brief The browsing context named, for a new window; empty otherwise.
     std::string NewWindowName;
@@ -71,7 +71,7 @@ namespace krys::boo::tests
         return std::string(reinterpret_cast<const char *>(text.data()), text.size());
       };
       ReceivedNavigation received {.Action = action,
-                                   .URL = narrow(request.URL().String()),
+                                   .Url = narrow(request.Url().String()),
                                    .HTTPMethod = narrow(request.HTTPMethod()),
                                    .NewWindowName = narrow(frameName),
                                    .IsNewWindow = isNewWindow,
@@ -100,7 +100,7 @@ namespace krys::boo::tests
       Frame = ShareRefPtr(&TestPage->MainFrame());
       Frame->CreateView({400, 300});
       Frame->SetDocument(ShareRefPtr<boo::Document>(Document.get()));
-      Document->SetURL(net::URL(u8"https://example.com/dir/page.html"));
+      Document->SetUrl(net::Url(u8"https://example.com/dir/page.html"));
     }
 
     template <typename T>
@@ -118,9 +118,9 @@ namespace krys::boo::tests
     }
 
     /// @brief The document's URL, as a `std::string`.
-    KRYS_NODISCARD std::string DocumentURL() const noexcept
+    KRYS_NODISCARD std::string DocumentUrl() const noexcept
     {
-      auto &url = Document->GetURL().String();
+      auto &url = Document->GetUrl().String();
       return std::string(reinterpret_cast<const char *>(url.data()), url.size());
     }
   };

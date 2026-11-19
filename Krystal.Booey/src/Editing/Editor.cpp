@@ -545,7 +545,7 @@ namespace krys::boo
     pasteboardContent.CanSmartCopyOrDelete = CanSmartCopyOrDelete();
     pasteboardContent.Text = SelectedTextForDataTransfer();
     pasteboardContent.Markup = SerializePreservingVisualAppearance(
-      _document.Selection().Selection(), ResolveURLs::YesExcludingURLsForPrivacy, SerializeComposedTree::Yes,
+      _document.Selection().Selection(), ResolveUrls::YesExcludingUrlsForPrivacy, SerializeComposedTree::Yes,
       IgnoreUserSelectNone::Yes);
     pasteboardContent.ContentOrigin = _document.OriginIdentifierForPasteboard();
     pasteboard.Write(pasteboardContent);
@@ -557,18 +557,18 @@ namespace krys::boo
   }
 
   // (No link decoration filtering (applyLinkDecorationFiltering): it's Cocoa's, not a standard feature.)
-  void Editor::CopyURL(const net::URL &url, utf8_stringview title, Pasteboard &pasteboard) noexcept
+  void Editor::CopyUrl(const net::Url &url, utf8_stringview title, Pasteboard &pasteboard) noexcept
   {
-    PasteboardURL pasteboardURL;
-    pasteboardURL.Url = url;
-    pasteboardURL.Title = utf8_string(title);
+    PasteboardUrl pasteboardUrl;
+    pasteboardUrl.Url = url;
+    pasteboardUrl.Title = utf8_string(title);
 
-    pasteboard.Write(pasteboardURL);
+    pasteboard.Write(pasteboardUrl);
   }
 
   namespace
   {
-    KRYS_NODISCARD DOMString ElementURL(Element &element) noexcept
+    KRYS_NODISCARD DOMString ElementUrl(Element &element) noexcept
     {
       if (Is<HTMLImageElement>(element) || Is<HTMLInputElement>(element))
       {
@@ -581,7 +581,7 @@ namespace krys::boo
       if (auto *htmlElement = DynamicDowncast<HTMLElement>(element);
           htmlElement && (Is<HTMLEmbedElement>(*htmlElement) || Is<HTMLObjectElement>(*htmlElement)))
       {
-        return element.ImageSourceURL().value_or(DOMString());
+        return element.ImageSourceUrl().value_or(DOMString());
       }
       return {};
     }
@@ -604,7 +604,7 @@ namespace krys::boo
     }
   }
 
-  void Editor::WriteImageToPasteboard(Pasteboard &pasteboard, Element &imageElement, const net::URL &,
+  void Editor::WriteImageToPasteboard(Pasteboard &pasteboard, Element &imageElement, const net::Url &,
                                       utf8_stringview title) noexcept
   {
     PasteboardImage pasteboardImage;
@@ -614,10 +614,10 @@ namespace krys::boo
       return;
     }
 
-    pasteboardImage.Url.Url = imageElement.NodeDocument().CompleteURL(ElementURL(imageElement));
+    pasteboardImage.Url.Url = imageElement.NodeDocument().CompleteUrl(ElementUrl(imageElement));
     pasteboardImage.Url.Title = utf8_string(title);
     pasteboardImage.Url.Markup =
-      SerializeFragment(imageElement, SerializedNodes::SubtreeIncludingNode, nullptr, ResolveURLs::Yes);
+      SerializeFragment(imageElement, SerializedNodes::SubtreeIncludingNode, nullptr, ResolveUrls::Yes);
     pasteboard.Write(pasteboardImage);
   }
 

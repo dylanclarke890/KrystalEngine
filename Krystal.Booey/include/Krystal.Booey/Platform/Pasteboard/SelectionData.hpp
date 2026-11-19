@@ -24,7 +24,7 @@
 #include "Krystal.Core/Types/List.hpp"
 #include "Krystal.Core/Types/RefPtr.hpp"
 #include "Krystal.Core/Types/SharedBuffer.hpp"
-#include "Krystal.Net/URL.hpp"
+#include "Krystal.Net/Url.hpp"
 
 namespace krys::boo
 {
@@ -36,7 +36,7 @@ namespace krys::boo
   private:
     utf8_string _text;
     utf8_string _markup;
-    net::URL _url;
+    net::Url _url;
     utf8_string _uriList;
     List<utf8_string> _filenames;
     bool _canSmartReplace {false};
@@ -46,7 +46,7 @@ namespace krys::boo
   public:
     SelectionData() noexcept = default;
 
-    SelectionData(utf8_stringview text, utf8_stringview markup, const net::URL &url, utf8_stringview uriList,
+    SelectionData(utf8_stringview text, utf8_stringview markup, const net::Url &url, utf8_stringview uriList,
                   RefPtr<SharedBuffer> &&customData, bool canSmartReplace) noexcept;
 
     /// @brief Sets the text, with no-break spaces made spaces.
@@ -88,21 +88,21 @@ namespace krys::boo
     }
 
     /// @brief Sets the URL, and the URI list, text and markup (a link labelled @p label) if they're empty.
-    void SetURL(const net::URL &url, utf8_stringview label) noexcept;
+    void SetUrl(const net::Url &url, utf8_stringview label) noexcept;
 
-    KRYS_NODISCARD const net::URL &GetURL() const noexcept
+    KRYS_NODISCARD const net::Url &GetUrl() const noexcept
     {
       return _url;
     }
 
-    KRYS_NODISCARD const utf8_string &URLLabel() const noexcept;
+    KRYS_NODISCARD const utf8_string &UrlLabel() const noexcept;
 
-    KRYS_NODISCARD bool HasURL() const noexcept
+    KRYS_NODISCARD bool HasUrl() const noexcept
     {
       return !_url.IsEmpty() && _url.IsValid();
     }
 
-    void ClearURL() noexcept
+    void ClearUrl() noexcept
     {
       _url = {};
     }

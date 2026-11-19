@@ -39,7 +39,7 @@
 #include "Krystal.Booey/Platform/Pasteboard/StaticPasteboard.hpp"
 #include "Krystal.Core/Strings/ASCII.hpp"
 #include "Krystal.Core/Types/HashSet.hpp"
-#include "Krystal.Net/URL.hpp"
+#include "Krystal.Net/Url.hpp"
 #include <algorithm>
 
 namespace krys::boo
@@ -134,13 +134,13 @@ namespace krys::boo::dom
     }
 
     template <typename TPredicate>
-    KRYS_NODISCARD DOMString ReadURLsFromPasteboardAsString(Pasteboard &pasteboard,
-                                                            TPredicate shouldIncludeURL) noexcept
+    KRYS_NODISCARD DOMString ReadUrlsFromPasteboardAsString(Pasteboard &pasteboard,
+                                                            TPredicate shouldIncludeUrl) noexcept
     {
       DOMString urlList;
       for (auto &urlString : pasteboard.ReadAllStrings(u8"text/uri-list"))
       {
-        if (!shouldIncludeURL(urlString))
+        if (!shouldIncludeUrl(urlString))
         {
           continue;
         }
@@ -331,9 +331,9 @@ namespace krys::boo::dom
     {
       if (lowercaseType == u8"text/uri-list")
       {
-        return ReadURLsFromPasteboardAsString(
+        return ReadUrlsFromPasteboardAsString(
           *_pasteboard, [](auto &urlString)
-          { return Pasteboard::CanExposeURLToDOMWhenPasteboardContainsFiles(urlString); });
+          { return Pasteboard::CanExposeUrlToDOMWhenPasteboardContainsFiles(urlString); });
       }
 
       if (lowercaseType == u8"text/html")
@@ -384,7 +384,7 @@ namespace krys::boo::dom
 
     if (!isStatic && lowercaseType == u8"text/uri-list")
     {
-      return ReadURLsFromPasteboardAsString(*_pasteboard, [](auto &) { return true; });
+      return ReadUrlsFromPasteboardAsString(*_pasteboard, [](auto &) { return true; });
     }
 
     return _pasteboard->ReadString(lowercaseType);
@@ -433,10 +433,10 @@ namespace krys::boo::dom
     }
     else if (type == u8"text/uri-list")
     {
-      net::URL parsedURL({}, data);
-      if (parsedURL.IsValid())
+      net::Url parsedUrl({}, data);
+      if (parsedUrl.IsValid())
       {
-        sanitizedData = parsedURL.String();
+        sanitizedData = parsedUrl.String();
       }
     }
     else if (type == u8"text/plain")

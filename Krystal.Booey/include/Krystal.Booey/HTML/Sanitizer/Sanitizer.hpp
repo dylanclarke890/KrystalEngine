@@ -68,7 +68,7 @@ namespace krys::boo::html
     bool SetDataAttributes(bool allow) noexcept;
 
     /// @see https://html.spec.whatwg.org/#dom-sanitizer-setjavascripturls
-    bool SetJavascriptURLs(bool allow) noexcept;
+    bool SetJavascriptUrls(bool allow) noexcept;
 
     /// @see https://html.spec.whatwg.org/#dom-sanitizer-removeunsafe
     bool RemoveUnsafe() noexcept;

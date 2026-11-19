@@ -29,7 +29,7 @@
 #include "Krystal.Core/Attributes.hpp"
 #include "Krystal.Core/Numeric.hpp"
 #include "Krystal.Core/Types/Maybe.hpp"
-#include "Krystal.Net/URL.hpp"
+#include "Krystal.Net/Url.hpp"
 
 namespace krys::boo
 {
@@ -38,7 +38,7 @@ namespace krys::boo
   /// @see https://html.spec.whatwg.org/#rel-icon
   struct LinkIcon
   {
-    net::URL URL;
+    net::Url Url;
     /// @brief Its `type` attribute, a hint of its MIME type; empty without one.
     DOMString MIMEType;
     /// @brief The width its `sizes` gives first (`60x70` is 60); none without one, or for `any`.

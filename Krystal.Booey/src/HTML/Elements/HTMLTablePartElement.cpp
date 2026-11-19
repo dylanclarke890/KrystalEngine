@@ -85,7 +85,7 @@ namespace krys::boo
       if (!infra::StringAlgorithms::StripLeadingAndTrailingWhitespace(value).empty())
       {
         style.SetProperty(css::PropertyId::BackgroundImage,
-                          css::ImageValue::Create(NodeDocument().CompleteURL(value)));
+                          css::ImageValue::Create(NodeDocument().CompleteUrl(value)));
       }
       return;
     }

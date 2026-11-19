@@ -87,7 +87,7 @@ namespace krys::boo
 
     void AppendCSSTextForItems(StringBuilder &builder) const noexcept;
 
-    void AppendCSSTextWithReplacementURLsForItems(StringBuilder &builder,
+    void AppendCSSTextWithReplacementUrlsForItems(StringBuilder &builder,
                                                   const css::SerialisationContext &context) const noexcept;
 
     KRYS_NODISCARD RefPtr<css::StyleRuleWithNesting>
@@ -103,7 +103,7 @@ namespace krys::boo
 
     void CssTextForRules(StringBuilder &rules) const noexcept;
 
-    void CssTextForRulesWithReplacementURLs(StringBuilder &rules,
+    void CssTextForRulesWithReplacementUrls(StringBuilder &rules,
                                             const css::SerialisationContext &context) const noexcept;
   };
 }

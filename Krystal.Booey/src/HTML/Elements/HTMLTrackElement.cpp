@@ -39,12 +39,12 @@ namespace krys::boo
 
   dom::USVString HTMLTrackElement::Src() const noexcept
   {
-    return html::ReflectURL<dom::USVString>(*this, u8"src");
+    return html::ReflectUrl<dom::USVString>(*this, u8"src");
   }
 
   void HTMLTrackElement::Src(dom::USVString value) noexcept
   {
-    return html::ReflectURL<dom::USVString>(*this, u8"src", krys::move(value));
+    return html::ReflectUrl<dom::USVString>(*this, u8"src", krys::move(value));
   }
 
   DOMString HTMLTrackElement::SrcLang() const noexcept

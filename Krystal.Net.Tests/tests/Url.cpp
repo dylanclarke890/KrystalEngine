@@ -1,7 +1,7 @@
 ﻿#include "Krystal.Net/URL.hpp"
 #include "catch2/catch_test_macros.hpp"
 #include "Krystal.Core/Utils/Move.hpp"
-#include "Krystal.Net/URLHash.hpp"
+#include "Krystal.Net/UrlHash.hpp"
 #include <string>
 
 namespace krys::net::tests
@@ -13,15 +13,15 @@ namespace krys::net::tests
       return std::string(reinterpret_cast<const char *>(value.data()), value.size());
     }
 
-    URL CreateURL(utf8_stringview string)
+    Url CreateUrl(utf8_stringview string)
     {
-      return URL(string);
+      return Url(string);
     }
   }
 
   TEST_CASE("URL(default)", "[URL]")
   {
-    URL url;
+    Url url;
 
     CHECK(url.IsEmpty());
     CHECK(url.IsNull());
@@ -30,7 +30,7 @@ namespace krys::net::tests
 
   TEST_CASE("URL(components)", "[URL]")
   {
-    URL url {u8"http://username:password@www.example.com:8080/index.html?var=val#fragment"};
+    Url url {u8"http://username:password@www.example.com:8080/index.html?var=val#fragment"};
 
     CHECK_FALSE(url.IsEmpty());
     CHECK_FALSE(url.IsNull());
@@ -76,17 +76,17 @@ namespace krys::net::tests
     for (const auto &test : cases)
     {
       INFO(S(test.Input));
-      CHECK(S(CreateURL(test.Input).ProtocolHostAndPort()) == test.Expected);
+      CHECK(S(CreateUrl(test.Input).ProtocolHostAndPort()) == test.Expected);
     }
   }
 
   TEST_CASE("URL(SetQuery)", "[URL]")
   {
-    URL url = CreateURL(u8"http://www.webkit.org/?test");
-    URL url1 = CreateURL(u8"http://www.webkit.org/");
-    URL url2 = CreateURL(u8"http://www.webkit.org/?");
-    URL url3 = CreateURL(u8"http://www.webkit.org/?test");
-    URL url4 = CreateURL(u8"http://www.webkit.org/?test1");
+    Url url = CreateUrl(u8"http://www.webkit.org/?test");
+    Url url1 = CreateUrl(u8"http://www.webkit.org/");
+    Url url2 = CreateUrl(u8"http://www.webkit.org/?");
+    Url url3 = CreateUrl(u8"http://www.webkit.org/?test");
+    Url url4 = CreateUrl(u8"http://www.webkit.org/?test1");
 
     url1.SetQuery(u8"test");
     url2.SetQuery(u8"test");
@@ -98,10 +98,10 @@ namespace krys::net::tests
     CHECK(S(url.String()) == S(url3.String()));
     CHECK(S(url.String()) == S(url4.String()));
 
-    URL urlWithFragmentIdentifier = CreateURL(u8"http://www.webkit.org/?test%C3%83%C2%A5#newFragment");
-    URL urlWithFragmentIdentifier1 = CreateURL(u8"http://www.webkit.org/#newFragment");
-    URL urlWithFragmentIdentifier2 = CreateURL(u8"http://www.webkit.org/?#newFragment");
-    URL urlWithFragmentIdentifier3 = CreateURL(u8"http://www.webkit.org/?test1#newFragment");
+    Url urlWithFragmentIdentifier = CreateUrl(u8"http://www.webkit.org/?test%C3%83%C2%A5#newFragment");
+    Url urlWithFragmentIdentifier1 = CreateUrl(u8"http://www.webkit.org/#newFragment");
+    Url urlWithFragmentIdentifier2 = CreateUrl(u8"http://www.webkit.org/?#newFragment");
+    Url urlWithFragmentIdentifier3 = CreateUrl(u8"http://www.webkit.org/?test1#newFragment");
 
     // Upstream's input is the Latin-1 string "test\xc3\xa5", i.e. U+00C3 U+00A5.
     urlWithFragmentIdentifier1.SetQuery(u8"testÃ¥");
@@ -113,7 +113,7 @@ namespace krys::net::tests
     CHECK(S(urlWithFragmentIdentifier.String()) == S(urlWithFragmentIdentifier3.String()));
 
     // A null query removes it.
-    URL withQuery = CreateURL(u8"http://www.webkit.org/?test#fragment");
+    Url withQuery = CreateUrl(u8"http://www.webkit.org/?test#fragment");
     withQuery.SetQuery({});
     CHECK(S(withQuery.String()) == "http://www.webkit.org/#fragment");
     CHECK_FALSE(withQuery.HasQuery());
@@ -121,10 +121,10 @@ namespace krys::net::tests
 
   TEST_CASE("URL(SetFragmentIdentifier)", "[URL]")
   {
-    URL url = CreateURL(u8"http://www.webkit.org/#newFragment%C3%83%C2%A5");
-    URL url1 = CreateURL(u8"http://www.webkit.org/");
-    URL url2 = CreateURL(u8"http://www.webkit.org/#test2");
-    URL url3 = CreateURL(u8"http://www.webkit.org/#");
+    Url url = CreateUrl(u8"http://www.webkit.org/#newFragment%C3%83%C2%A5");
+    Url url1 = CreateUrl(u8"http://www.webkit.org/");
+    Url url2 = CreateUrl(u8"http://www.webkit.org/#test2");
+    Url url3 = CreateUrl(u8"http://www.webkit.org/#");
 
     url1.SetFragmentIdentifier(u8"newFragmentÃ¥");
     url2.SetFragmentIdentifier(u8"newFragmentÃ¥");
@@ -134,10 +134,10 @@ namespace krys::net::tests
     CHECK(S(url.String()) == S(url2.String()));
     CHECK(S(url.String()) == S(url3.String()));
 
-    URL urlWithQuery = CreateURL(u8"http://www.webkit.org/?test1#newFragment");
-    URL urlWithQuery1 = CreateURL(u8"http://www.webkit.org/?test1");
-    URL urlWithQuery2 = CreateURL(u8"http://www.webkit.org/?test1#");
-    URL urlWithQuery3 = CreateURL(u8"http://www.webkit.org/?test1#test2");
+    Url urlWithQuery = CreateUrl(u8"http://www.webkit.org/?test1#newFragment");
+    Url urlWithQuery1 = CreateUrl(u8"http://www.webkit.org/?test1");
+    Url urlWithQuery2 = CreateUrl(u8"http://www.webkit.org/?test1#");
+    Url urlWithQuery3 = CreateUrl(u8"http://www.webkit.org/?test1#test2");
 
     urlWithQuery1.SetFragmentIdentifier(u8"newFragment");
     urlWithQuery2.SetFragmentIdentifier(u8"newFragment");
@@ -150,13 +150,13 @@ namespace krys::net::tests
 
   TEST_CASE("URL(RemoveQueryAndFragmentIdentifier)", "[URL]")
   {
-    URL url = CreateURL(u8"http://www.webkit.org/");
-    URL urls[] {
-      CreateURL(u8"http://www.webkit.org/?"),
-      CreateURL(u8"http://www.webkit.org/?test1"),
-      CreateURL(u8"http://www.webkit.org/?test1#test2"),
-      CreateURL(u8"http://www.webkit.org/#test2"),
-      CreateURL(u8"http://www.webkit.org/#"),
+    Url url = CreateUrl(u8"http://www.webkit.org/");
+    Url urls[] {
+      CreateUrl(u8"http://www.webkit.org/?"),
+      CreateUrl(u8"http://www.webkit.org/?test1"),
+      CreateUrl(u8"http://www.webkit.org/?test1#test2"),
+      CreateUrl(u8"http://www.webkit.org/#test2"),
+      CreateUrl(u8"http://www.webkit.org/#"),
     };
 
     url.RemoveQueryAndFragmentIdentifier();
@@ -218,7 +218,7 @@ namespace krys::net::tests
     for (const auto &test : cases)
     {
       INFO(S(test.Url1) << " vs. " << S(test.Url2));
-      CHECK(EqualIgnoringFragmentIdentifier(CreateURL(test.Url1), CreateURL(test.Url2)) == test.Expected);
+      CHECK(EqualIgnoringFragmentIdentifier(CreateUrl(test.Url1), CreateUrl(test.Url2)) == test.Expected);
     }
   }
 
@@ -242,44 +242,44 @@ namespace krys::net::tests
 
   TEST_CASE("URL(HostIsIPAddress)", "[URL]")
   {
-    CHECK_FALSE(URL::HostIsIPAddress({}));
-    CHECK_FALSE(URL::HostIsIPAddress(u8""));
-    CHECK_FALSE(URL::HostIsIPAddress(u8"localhost"));
-    CHECK_FALSE(URL::HostIsIPAddress(u8"127.localhost"));
-    CHECK_FALSE(URL::HostIsIPAddress(u8"localhost.127"));
-    CHECK_FALSE(URL::HostIsIPAddress(u8"127.0.0"));
-    CHECK_FALSE(URL::HostIsIPAddress(u8"127.0 .0.1"));
-    CHECK_FALSE(URL::HostIsIPAddress(u8" 127.0.0.1"));
-    CHECK_FALSE(URL::HostIsIPAddress(u8"127..0.0.1"));
-    CHECK_FALSE(URL::HostIsIPAddress(u8"127.0.0."));
-    CHECK_FALSE(URL::HostIsIPAddress(u8"256.0.0.1"));
-    CHECK_FALSE(URL::HostIsIPAddress(u8"0123:4567:89AB:cdef:3210:7654:ba98"));
-    CHECK_FALSE(URL::HostIsIPAddress(u8"012x:4567:89AB:cdef:3210:7654:ba98:FeDc"));
-    CHECK_FALSE(URL::HostIsIPAddress(u8"127.0.0.01"));
-    CHECK_FALSE(URL::HostIsIPAddress(u8"00123:4567:89AB:cdef:3210:7654:ba98:FeDc"));
-    CHECK_FALSE(URL::HostIsIPAddress(u8"0123:4567:89AB:cdef:3210:123.45.67.89"));
-    CHECK_FALSE(URL::HostIsIPAddress(u8":::"));
-    CHECK_FALSE(URL::HostIsIPAddress(u8"0123::89AB:cdef:3210:7654::FeDc"));
-    CHECK_FALSE(URL::HostIsIPAddress(u8"0123:4567:89AB:cdef:3210:7654:ba98:"));
-    CHECK_FALSE(URL::HostIsIPAddress(u8"0123:4567:89AB:cdef:3210:7654:ba98:FeDc:"));
-    CHECK_FALSE(URL::HostIsIPAddress(u8":4567:89AB:cdef:3210:7654:ba98:FeDc"));
-    CHECK_FALSE(URL::HostIsIPAddress(u8":0123:4567:89AB:cdef:3210:7654:ba98:FeDc"));
+    CHECK_FALSE(Url::HostIsIPAddress({}));
+    CHECK_FALSE(Url::HostIsIPAddress(u8""));
+    CHECK_FALSE(Url::HostIsIPAddress(u8"localhost"));
+    CHECK_FALSE(Url::HostIsIPAddress(u8"127.localhost"));
+    CHECK_FALSE(Url::HostIsIPAddress(u8"localhost.127"));
+    CHECK_FALSE(Url::HostIsIPAddress(u8"127.0.0"));
+    CHECK_FALSE(Url::HostIsIPAddress(u8"127.0 .0.1"));
+    CHECK_FALSE(Url::HostIsIPAddress(u8" 127.0.0.1"));
+    CHECK_FALSE(Url::HostIsIPAddress(u8"127..0.0.1"));
+    CHECK_FALSE(Url::HostIsIPAddress(u8"127.0.0."));
+    CHECK_FALSE(Url::HostIsIPAddress(u8"256.0.0.1"));
+    CHECK_FALSE(Url::HostIsIPAddress(u8"0123:4567:89AB:cdef:3210:7654:ba98"));
+    CHECK_FALSE(Url::HostIsIPAddress(u8"012x:4567:89AB:cdef:3210:7654:ba98:FeDc"));
+    CHECK_FALSE(Url::HostIsIPAddress(u8"127.0.0.01"));
+    CHECK_FALSE(Url::HostIsIPAddress(u8"00123:4567:89AB:cdef:3210:7654:ba98:FeDc"));
+    CHECK_FALSE(Url::HostIsIPAddress(u8"0123:4567:89AB:cdef:3210:123.45.67.89"));
+    CHECK_FALSE(Url::HostIsIPAddress(u8":::"));
+    CHECK_FALSE(Url::HostIsIPAddress(u8"0123::89AB:cdef:3210:7654::FeDc"));
+    CHECK_FALSE(Url::HostIsIPAddress(u8"0123:4567:89AB:cdef:3210:7654:ba98:"));
+    CHECK_FALSE(Url::HostIsIPAddress(u8"0123:4567:89AB:cdef:3210:7654:ba98:FeDc:"));
+    CHECK_FALSE(Url::HostIsIPAddress(u8":4567:89AB:cdef:3210:7654:ba98:FeDc"));
+    CHECK_FALSE(Url::HostIsIPAddress(u8":0123:4567:89AB:cdef:3210:7654:ba98:FeDc"));
 
-    CHECK(URL::HostIsIPAddress(u8"127.0.0.1"));
-    CHECK(URL::HostIsIPAddress(u8"255.1.10.100"));
-    CHECK(URL::HostIsIPAddress(u8"0.0.0.0"));
-    CHECK(URL::HostIsIPAddress(u8"::1"));
-    CHECK(URL::HostIsIPAddress(u8"::"));
-    CHECK(URL::HostIsIPAddress(u8"0123:4567:89AB:cdef:3210:7654:ba98:FeDc"));
-    CHECK(URL::HostIsIPAddress(u8"0123:4567:89AB:cdef:3210:7654:ba98::"));
-    CHECK(URL::HostIsIPAddress(u8"::4567:89AB:cdef:3210:7654:ba98:FeDc"));
-    CHECK(URL::HostIsIPAddress(u8"0123:4567:89AB:cdef:3210:7654:123.45.67.89"));
-    CHECK(URL::HostIsIPAddress(u8"::123.45.67.89"));
+    CHECK(Url::HostIsIPAddress(u8"127.0.0.1"));
+    CHECK(Url::HostIsIPAddress(u8"255.1.10.100"));
+    CHECK(Url::HostIsIPAddress(u8"0.0.0.0"));
+    CHECK(Url::HostIsIPAddress(u8"::1"));
+    CHECK(Url::HostIsIPAddress(u8"::"));
+    CHECK(Url::HostIsIPAddress(u8"0123:4567:89AB:cdef:3210:7654:ba98:FeDc"));
+    CHECK(Url::HostIsIPAddress(u8"0123:4567:89AB:cdef:3210:7654:ba98::"));
+    CHECK(Url::HostIsIPAddress(u8"::4567:89AB:cdef:3210:7654:ba98:FeDc"));
+    CHECK(Url::HostIsIPAddress(u8"0123:4567:89AB:cdef:3210:7654:123.45.67.89"));
+    CHECK(Url::HostIsIPAddress(u8"::123.45.67.89"));
   }
 
   TEST_CASE("URL(IsMatchingDomain)", "[URL]")
   {
-    URL url = CreateURL(u8"http://www.webkit.org");
+    Url url = CreateUrl(u8"http://www.webkit.org");
 
     CHECK(url.IsMatchingDomain({}));
     CHECK(url.IsMatchingDomain(u8""));
@@ -292,7 +292,7 @@ namespace krys::net::tests
     CHECK_FALSE(url.IsMatchingDomain(u8"ww.webkit.org"));
     CHECK_FALSE(url.IsMatchingDomain(u8"http://www.webkit.org"));
 
-    url = CreateURL(u8"file:///www.webkit.org");
+    url = CreateUrl(u8"file:///www.webkit.org");
 
     CHECK(url.IsMatchingDomain({}));
     CHECK(url.IsMatchingDomain(u8""));
@@ -300,9 +300,9 @@ namespace krys::net::tests
     CHECK_FALSE(url.IsMatchingDomain(u8"webkit.org"));
     CHECK_FALSE(url.IsMatchingDomain(u8"www.webkit.org"));
 
-    URL emptyURL;
-    CHECK_FALSE(emptyURL.IsMatchingDomain({}));
-    CHECK_FALSE(emptyURL.IsMatchingDomain(u8""));
+    Url emptyUrl;
+    CHECK_FALSE(emptyUrl.IsMatchingDomain({}));
+    CHECK_FALSE(emptyUrl.IsMatchingDomain(u8""));
   }
 
   TEST_CASE("URL(DifferingQueryParameters)", "[URL]")
@@ -311,65 +311,65 @@ namespace krys::net::tests
     const Parameters none {};
     const Parameters key1Val1 {{u8"key1", u8"val1"}};
 
-    CHECK(DifferingQueryParameters(CreateURL(u8"www.webkit.org/?"),
-                                   CreateURL(u8"http://www.webkit.org/?key1=val1"))
+    CHECK(DifferingQueryParameters(CreateUrl(u8"www.webkit.org/?"),
+                                   CreateUrl(u8"http://www.webkit.org/?key1=val1"))
           == key1Val1);
     CHECK(
-      DifferingQueryParameters(CreateURL(u8"http://www.webkit.org/?key1=val1"), CreateURL(u8"webkit.org/?"))
+      DifferingQueryParameters(CreateUrl(u8"http://www.webkit.org/?key1=val1"), CreateUrl(u8"webkit.org/?"))
       == key1Val1);
-    CHECK(DifferingQueryParameters(CreateURL(u8".org/path/?key1=val1"), CreateURL(u8"/path/?key1=val1"))
+    CHECK(DifferingQueryParameters(CreateUrl(u8".org/path/?key1=val1"), CreateUrl(u8"/path/?key1=val1"))
           == none);
 
-    URL url = CreateURL(u8"http://www.webkit.org/?key1=val1");
+    Url url = CreateUrl(u8"http://www.webkit.org/?key1=val1");
     CHECK(DifferingQueryParameters(url, url) == none);
-    CHECK(DifferingQueryParameters(CreateURL(u8"http://www.webkit.org/?key1=val1"),
-                                   CreateURL(u8"http://www.webkit.org/?key1=val1"))
+    CHECK(DifferingQueryParameters(CreateUrl(u8"http://www.webkit.org/?key1=val1"),
+                                   CreateUrl(u8"http://www.webkit.org/?key1=val1"))
           == none);
     CHECK(
-      DifferingQueryParameters(CreateURL(u8"http://www.webkit.org/?"), CreateURL(u8"http://www.webkit.org/?"))
+      DifferingQueryParameters(CreateUrl(u8"http://www.webkit.org/?"), CreateUrl(u8"http://www.webkit.org/?"))
       == none);
-    CHECK(DifferingQueryParameters(CreateURL(u8"http://www.webkit.org/?"),
-                                   CreateURL(u8"http://www.webkit.org/?key1=val1"))
+    CHECK(DifferingQueryParameters(CreateUrl(u8"http://www.webkit.org/?"),
+                                   CreateUrl(u8"http://www.webkit.org/?key1=val1"))
           == key1Val1);
-    CHECK(DifferingQueryParameters(CreateURL(u8"http://www.webkit.org/?key1=val1"),
-                                   CreateURL(u8"http://www.webkit.org/?"))
+    CHECK(DifferingQueryParameters(CreateUrl(u8"http://www.webkit.org/?key1=val1"),
+                                   CreateUrl(u8"http://www.webkit.org/?"))
           == key1Val1);
-    CHECK(DifferingQueryParameters(CreateURL(u8"http://www.webkit.org/?key1=val1&key2=val2"),
-                                   CreateURL(u8"http://www.webkit.org/?key1=val1&key1=val1"))
+    CHECK(DifferingQueryParameters(CreateUrl(u8"http://www.webkit.org/?key1=val1&key2=val2"),
+                                   CreateUrl(u8"http://www.webkit.org/?key1=val1&key1=val1"))
           == Parameters {{u8"key1", u8"val1"}, {u8"key2", u8"val2"}});
-    CHECK(DifferingQueryParameters(CreateURL(u8"http://www.webkit.org/?key1=val1"),
-                                   CreateURL(u8"http://www.webkit.org/?key2=val2"))
+    CHECK(DifferingQueryParameters(CreateUrl(u8"http://www.webkit.org/?key1=val1"),
+                                   CreateUrl(u8"http://www.webkit.org/?key2=val2"))
           == Parameters {{u8"key1", u8"val1"}, {u8"key2", u8"val2"}});
-    CHECK(DifferingQueryParameters(CreateURL(u8"http://www.webkit.org/?key2=val2&key1=val1"),
-                                   CreateURL(u8"http://www.webkit.org/?key3=val3&key1=val1"))
+    CHECK(DifferingQueryParameters(CreateUrl(u8"http://www.webkit.org/?key2=val2&key1=val1"),
+                                   CreateUrl(u8"http://www.webkit.org/?key3=val3&key1=val1"))
           == Parameters {{u8"key2", u8"val2"}, {u8"key3", u8"val3"}});
-    CHECK(DifferingQueryParameters(CreateURL(u8"http://www.webkit.org/?key1=val1&key2=val2"),
-                                   CreateURL(u8"http://www.webkit.org/?key1&key3=val3"))
+    CHECK(DifferingQueryParameters(CreateUrl(u8"http://www.webkit.org/?key1=val1&key2=val2"),
+                                   CreateUrl(u8"http://www.webkit.org/?key1&key3=val3"))
           == Parameters {{u8"key1", u8""}, {u8"key1", u8"val1"}, {u8"key2", u8"val2"}, {u8"key3", u8"val3"}});
-    CHECK(DifferingQueryParameters(CreateURL(u8"http://www.webkit.org/?key2=val2&key1=val1&key2=val2"),
-                                   CreateURL(u8"http://www.webkit.org/?key3=val3&key1"))
+    CHECK(DifferingQueryParameters(CreateUrl(u8"http://www.webkit.org/?key2=val2&key1=val1&key2=val2"),
+                                   CreateUrl(u8"http://www.webkit.org/?key3=val3&key1"))
           == Parameters {{u8"key1", u8""},
                          {u8"key1", u8"val1"},
                          {u8"key2", u8"val2"},
                          {u8"key2", u8"val2"},
                          {u8"key3", u8"val3"}});
-    CHECK(DifferingQueryParameters(CreateURL(u8"http://www.webkit.org/??"),
-                                   CreateURL(u8"http://www.webkit.org/?/?test=test"))
+    CHECK(DifferingQueryParameters(CreateUrl(u8"http://www.webkit.org/??"),
+                                   CreateUrl(u8"http://www.webkit.org/?/?test=test"))
           == Parameters {{u8"/?test", u8"test"}, {u8"?", u8""}});
-    CHECK(DifferingQueryParameters(CreateURL(u8"http://www.webkit.org/?=test"),
-                                   CreateURL(u8"http://www.webkit.org/?=="))
+    CHECK(DifferingQueryParameters(CreateUrl(u8"http://www.webkit.org/?=test"),
+                                   CreateUrl(u8"http://www.webkit.org/?=="))
           == Parameters {{u8"", u8"="}, {u8"", u8"test"}});
-    CHECK(DifferingQueryParameters(CreateURL(u8"http://www.webkit.org??"),
-                                   CreateURL(u8"http://www.webkit.org?/?test=test"))
+    CHECK(DifferingQueryParameters(CreateUrl(u8"http://www.webkit.org??"),
+                                   CreateUrl(u8"http://www.webkit.org?/?test=test"))
           == Parameters {{u8"/?test", u8"test"}, {u8"?", u8""}});
-    CHECK(DifferingQueryParameters(CreateURL(u8"http://www.webkit.org?=test"),
-                                   CreateURL(u8"http://www.webkit.org?=="))
+    CHECK(DifferingQueryParameters(CreateUrl(u8"http://www.webkit.org?=test"),
+                                   CreateUrl(u8"http://www.webkit.org?=="))
           == Parameters {{u8"", u8"="}, {u8"", u8"test"}});
-    CHECK(DifferingQueryParameters(CreateURL(u8"http://www.webkit.org?=?"),
-                                   CreateURL(u8"http://www.webkit.org=?"))
+    CHECK(DifferingQueryParameters(CreateUrl(u8"http://www.webkit.org?=?"),
+                                   CreateUrl(u8"http://www.webkit.org=?"))
           == Parameters {{u8"", u8"?"}});
-    CHECK(DifferingQueryParameters(CreateURL(u8"http://www.webkit.org/?=?"),
-                                   CreateURL(u8"http://www.webkit.org/=?"))
+    CHECK(DifferingQueryParameters(CreateUrl(u8"http://www.webkit.org/?=?"),
+                                   CreateUrl(u8"http://www.webkit.org/=?"))
           == Parameters {{u8"", u8"?"}});
   }
 
@@ -377,7 +377,7 @@ namespace krys::net::tests
   {
     auto equal = [](utf8_stringview a, utf8_stringview b)
     {
-      return IsEqualIgnoringQueryAndFragments(CreateURL(a), CreateURL(b));
+      return IsEqualIgnoringQueryAndFragments(CreateUrl(a), CreateUrl(b));
     };
 
     CHECK_FALSE(equal(u8"www.webkit.org/?", u8"http://www.webkit.org/?key1=val1"));
@@ -399,22 +399,22 @@ namespace krys::net::tests
 
   TEST_CASE("URL(RemoveQueryParameters)", "[URL]")
   {
-    const auto url = CreateURL(u8"http://www.webkit.org/?key=val");
-    auto url1 = CreateURL(u8"http://www.webkit.org/?key=val&key1=val1");
-    auto url2 = CreateURL(u8"http://www.webkit.org/?");
-    auto url3 = CreateURL(u8"http://www.webkit.org/?key=val#fragment");
-    auto url4 = CreateURL(u8"http://www.webkit.org/?key=val&key=val#fragment");
-    auto url5 = CreateURL(u8"http://www.webkit.org/?key&key=#fragment");
-    auto url6 = CreateURL(u8"http://www.webkit.org/#fragment");
-    auto url7 = CreateURL(u8"http://www.webkit.org/?key=val#fragment");
-    const auto url8 = CreateURL(u8"http://www.webkit.org/");
-    const auto url9 = CreateURL(u8"http://www.webkit.org/#fragment");
-    const auto url10 = CreateURL(u8"http://www.webkit.org/?key=val#fragment");
-    auto url11 = CreateURL(u8"http://www.webkit.org/?key=val&key1=val1#fragment");
-    auto url12 = CreateURL(u8"http://www.webkit.org/?key=val&key1=val1#fragment");
-    auto url13 = CreateURL(u8"http://www.webkit.org");
-    auto url14 = CreateURL(u8"http://www.webkit.org/?u+v=x+%20y&key1=foo");
-    auto url15 = CreateURL(u8"http://www.webkit.org/?u+v=x+%20y");
+    const auto url = CreateUrl(u8"http://www.webkit.org/?key=val");
+    auto url1 = CreateUrl(u8"http://www.webkit.org/?key=val&key1=val1");
+    auto url2 = CreateUrl(u8"http://www.webkit.org/?");
+    auto url3 = CreateUrl(u8"http://www.webkit.org/?key=val#fragment");
+    auto url4 = CreateUrl(u8"http://www.webkit.org/?key=val&key=val#fragment");
+    auto url5 = CreateUrl(u8"http://www.webkit.org/?key&key=#fragment");
+    auto url6 = CreateUrl(u8"http://www.webkit.org/#fragment");
+    auto url7 = CreateUrl(u8"http://www.webkit.org/?key=val#fragment");
+    const auto url8 = CreateUrl(u8"http://www.webkit.org/");
+    const auto url9 = CreateUrl(u8"http://www.webkit.org/#fragment");
+    const auto url10 = CreateUrl(u8"http://www.webkit.org/?key=val#fragment");
+    auto url11 = CreateUrl(u8"http://www.webkit.org/?key=val&key1=val1#fragment");
+    auto url12 = CreateUrl(u8"http://www.webkit.org/?key=val&key1=val1#fragment");
+    auto url13 = CreateUrl(u8"http://www.webkit.org");
+    auto url14 = CreateUrl(u8"http://www.webkit.org/?u+v=x+%20y&key1=foo");
+    auto url15 = CreateUrl(u8"http://www.webkit.org/?u+v=x+%20y");
 
     HashSet<utf8_string> keyRemovalSet1 {u8"key"};
     HashSet<utf8_string> keyRemovalSet2 {u8"key1"};
@@ -425,9 +425,9 @@ namespace krys::net::tests
     CHECK(RemoveQueryParameters(url1, keyRemovalSet2) == Removed {u8"key1"});
     CHECK(S(url1.String()) == S(url.String()));
 
-    const auto originalURL2 = url2;
+    const auto originalUrl2 = url2;
     CHECK(RemoveQueryParameters(url2, keyRemovalSet1).empty());
-    CHECK(S(url2.String()) == S(originalURL2.String()));
+    CHECK(S(url2.String()) == S(originalUrl2.String()));
 
     CHECK(RemoveQueryParameters(url3, keyRemovalSet1) == Removed {u8"key"});
     CHECK(S(url3.String()) == S(url6.String()));
@@ -462,35 +462,35 @@ namespace krys::net::tests
     const char *https = "https://example.com/api";
     const char *http = "http://example.com/api";
 
-    CHECK(S(CreateURL(u8"https://example.com/api").StrippedForUseAsReport()) == https);
-    CHECK(S(CreateURL(u8"https://example.com/api?key=value").StrippedForUseAsReport()) == https);
-    CHECK(S(CreateURL(u8"https://user:password@example.com/api").StrippedForUseAsReport()) == https);
+    CHECK(S(CreateUrl(u8"https://example.com/api").StrippedForUseAsReport()) == https);
+    CHECK(S(CreateUrl(u8"https://example.com/api?key=value").StrippedForUseAsReport()) == https);
+    CHECK(S(CreateUrl(u8"https://user:password@example.com/api").StrippedForUseAsReport()) == https);
     CHECK(
-      S(CreateURL(u8"https://user:password@example.com/api?key=value&key1=value1").StrippedForUseAsReport())
+      S(CreateUrl(u8"https://user:password@example.com/api?key=value&key1=value1").StrippedForUseAsReport())
       == https);
-    CHECK(S(CreateURL(u8"https://example.com/api#fragment").StrippedForUseAsReport()) == https);
-    CHECK(S(CreateURL(u8"https://user:password@example.com/api#fragment").StrippedForUseAsReport()) == https);
-    CHECK(S(CreateURL(u8"https://example.com/api?key=value&key1=value1#fragment").StrippedForUseAsReport())
+    CHECK(S(CreateUrl(u8"https://example.com/api#fragment").StrippedForUseAsReport()) == https);
+    CHECK(S(CreateUrl(u8"https://user:password@example.com/api#fragment").StrippedForUseAsReport()) == https);
+    CHECK(S(CreateUrl(u8"https://example.com/api?key=value&key1=value1#fragment").StrippedForUseAsReport())
           == https);
-    CHECK(S(CreateURL(u8"https://user:password@example.com/api?key=value#fragment").StrippedForUseAsReport())
+    CHECK(S(CreateUrl(u8"https://user:password@example.com/api?key=value#fragment").StrippedForUseAsReport())
           == https);
 
-    CHECK(S(CreateURL(u8"http://example.com/api#fragment").StrippedForUseAsReport()) == http);
-    CHECK(S(CreateURL(u8"http://example.com/api?key=value#fragment").StrippedForUseAsReport()) == http);
-    CHECK(S(CreateURL(u8"http://user:password@example.com/api#fragment").StrippedForUseAsReport()) == http);
-    CHECK(S(CreateURL(u8"http://user:password@example.com/api?key=value#fragment").StrippedForUseAsReport())
+    CHECK(S(CreateUrl(u8"http://example.com/api#fragment").StrippedForUseAsReport()) == http);
+    CHECK(S(CreateUrl(u8"http://example.com/api?key=value#fragment").StrippedForUseAsReport()) == http);
+    CHECK(S(CreateUrl(u8"http://user:password@example.com/api#fragment").StrippedForUseAsReport()) == http);
+    CHECK(S(CreateUrl(u8"http://user:password@example.com/api?key=value#fragment").StrippedForUseAsReport())
           == http);
   }
 
   TEST_CASE("URL(move invalidates)", "[URL]")
   {
-    URL url1 {u8"http://www.apple.com"};
+    Url url1 {u8"http://www.apple.com"};
     CHECK(url1.IsValid());
-    URL url2 {krys::move(url1)};
+    Url url2 {krys::move(url1)};
     CHECK(url2.IsValid());
     CHECK_FALSE(url1.IsValid()); // NOLINT(bugprone-use-after-move,clang-analyzer-cplusplus.Move)
 
-    URL url3 {u8"http://www.webkit.org"};
+    Url url3 {u8"http://www.webkit.org"};
     url3 = krys::move(url2);
     CHECK(url3.IsValid());
     CHECK_FALSE(url2.IsValid()); // NOLINT(bugprone-use-after-move,clang-analyzer-cplusplus.Move)
@@ -501,33 +501,33 @@ namespace krys::net::tests
 
   TEST_CASE("URL(ProtocolIsSecure)", "[URL]")
   {
-    CHECK(CreateURL(u8"https://example.com/api").ProtocolIsSecure());
-    CHECK_FALSE(CreateURL(u8"http://example.com/api").ProtocolIsSecure());
+    CHECK(CreateUrl(u8"https://example.com/api").ProtocolIsSecure());
+    CHECK_FALSE(CreateUrl(u8"http://example.com/api").ProtocolIsSecure());
     // Note: FTPS is not considered secure.
-    CHECK_FALSE(CreateURL(u8"ftps://example.com/api").ProtocolIsSecure());
-    CHECK_FALSE(CreateURL(u8"ftp://example.com/api").ProtocolIsSecure());
-    CHECK(CreateURL(u8"wss://example.com/api").ProtocolIsSecure());
-    CHECK_FALSE(CreateURL(u8"ws://example.com/api").ProtocolIsSecure());
-    CHECK_FALSE(CreateURL(u8"asdf:///a/b/c").ProtocolIsSecure());
-    CHECK_FALSE(CreateURL(u8"blob://apple.com").ProtocolIsSecure());
-    CHECK_FALSE(CreateURL(u8"about://example.com/").ProtocolIsSecure());
+    CHECK_FALSE(CreateUrl(u8"ftps://example.com/api").ProtocolIsSecure());
+    CHECK_FALSE(CreateUrl(u8"ftp://example.com/api").ProtocolIsSecure());
+    CHECK(CreateUrl(u8"wss://example.com/api").ProtocolIsSecure());
+    CHECK_FALSE(CreateUrl(u8"ws://example.com/api").ProtocolIsSecure());
+    CHECK_FALSE(CreateUrl(u8"asdf:///a/b/c").ProtocolIsSecure());
+    CHECK_FALSE(CreateUrl(u8"blob://apple.com").ProtocolIsSecure());
+    CHECK_FALSE(CreateUrl(u8"about://example.com/").ProtocolIsSecure());
   }
 
   TEST_CASE("URL(hash)", "[URL]")
   {
-    URL a {u8"http://example.com/"};
-    URL b {u8"HTTP://EXAMPLE.COM"};
-    CHECK(DefaultHash<URL>::Equal(a, b));
-    CHECK(DefaultHash<URL>::Hash(a) == DefaultHash<URL>::Hash(b));
+    Url a {u8"http://example.com/"};
+    Url b {u8"HTTP://EXAMPLE.COM"};
+    CHECK(DefaultHash<Url>::Equal(a, b));
+    CHECK(DefaultHash<Url>::Hash(a) == DefaultHash<Url>::Hash(b));
 
-    URL deleted {HashTableDeletedValueTag {}};
-    CHECK(HashTraits<URL>::IsDeletedValue(deleted));
-    CHECK_FALSE(HashTraits<URL>::IsDeletedValue(a));
+    Url deleted {HashTableDeletedValueTag {}};
+    CHECK(HashTraits<Url>::IsDeletedValue(deleted));
+    CHECK_FALSE(HashTraits<Url>::IsDeletedValue(a));
   }
 
   TEST_CASE("URL(setters)", "[URL]")
   {
-    URL url {u8"http://example.com/path?query#fragment"};
+    Url url {u8"http://example.com/path?query#fragment"};
 
     CHECK(url.SetProtocol(u8"https"));
     CHECK(S(url.String()) == "https://example.com/path?query#fragment");
@@ -573,25 +573,25 @@ namespace krys::net::tests
     CHECK_FALSE(ProtocolIsJavaScript(u8"javascripts:alert(1)"));
     CHECK(ProtocolIs(u8"DATA:text/plain,x", u8"data"));
 
-    CHECK(S(MimeTypeFromDataURL(u8"data:Text/HTML;charset=utf-8,x")) == "text/html");
-    CHECK(S(MimeTypeFromDataURL(u8"data:,x")) == "text/plain");
+    CHECK(S(MimeTypeFromDataUrl(u8"data:Text/HTML;charset=utf-8,x")) == "text/html");
+    CHECK(S(MimeTypeFromDataUrl(u8"data:,x")) == "text/plain");
 
     CHECK(DefaultPortForProtocol(u8"https") == 443);
     CHECK_FALSE(DefaultPortForProtocol(u8"file"));
-    CHECK(PortAllowed(URL {u8"http://example.com:8080/"}));
-    CHECK_FALSE(PortAllowed(URL {u8"http://example.com:25/"}));
-    CHECK(PortAllowed(URL {u8"ftp://example.com:21/"}));
+    CHECK(PortAllowed(Url {u8"http://example.com:8080/"}));
+    CHECK_FALSE(PortAllowed(Url {u8"http://example.com:25/"}));
+    CHECK(PortAllowed(Url {u8"ftp://example.com:21/"}));
 
-    CHECK(AboutBlankURL().IsAboutBlank());
-    CHECK(AboutSrcDocURL().IsAboutSrcDoc());
+    CHECK(AboutBlankUrl().IsAboutBlank());
+    CHECK(AboutSrcDocUrl().IsAboutSrcDoc());
 
-    CHECK(S(EncodeWithURLEscapeSequences(u8"a b/c")) == "a%20b%2Fc");
-    CHECK(S(URL::FileURLWithFileSystemPath(u8"/tmp/a b").String()) == "file:///tmp/a%20b");
+    CHECK(S(EncodeWithUrlEscapeSequences(u8"a b/c")) == "a%20b%2Fc");
+    CHECK(S(Url::FileUrlWithFileSystemPath(u8"/tmp/a b").String()) == "file:///tmp/a%20b");
 
-    URL base {u8"http://example.com/a/b/c?q#f"};
+    Url base {u8"http://example.com/a/b/c?q#f"};
     CHECK(S(base.TruncatedForUseAsBase().String()) == "http://example.com/a/b/");
-    CHECK(S(URL(base, u8"../d").String()) == "http://example.com/a/d");
-    CHECK(S(URL(base, {}).String()) == "http://example.com/a/b/c?q");
+    CHECK(S(Url(base, u8"../d").String()) == "http://example.com/a/d");
+    CHECK(S(Url(base, {}).String()) == "http://example.com/a/b/c?q");
   }
 
   TEST_CASE("URL::IsAboutBlank and IsAboutSrcDoc: about:blank with any query, about:srcdoc without one",
@@ -600,19 +600,19 @@ namespace krys::net::tests
     for (auto blank : {u8"about:blank", u8"about:blank?x", u8"about:blank#f", u8"ABOUT:blank"})
     {
       INFO(reinterpret_cast<const char *>(blank));
-      CHECK(URL {blank}.IsAboutBlank());
+      CHECK(Url {blank}.IsAboutBlank());
     }
     for (auto other :
          {u8"about:BLANK", u8"about:blank/", u8"about://host/blank", u8"about:srcdoc", u8"http://blank/"})
     {
       INFO(reinterpret_cast<const char *>(other));
-      CHECK_FALSE(URL {other}.IsAboutBlank());
+      CHECK_FALSE(Url {other}.IsAboutBlank());
     }
 
-    CHECK(URL {u8"about:srcdoc"}.IsAboutSrcDoc());
-    CHECK(URL {u8"about:srcdoc#f"}.IsAboutSrcDoc());
-    CHECK_FALSE(URL {u8"about:srcdoc?x"}.IsAboutSrcDoc());
-    CHECK_FALSE(URL {u8"about:srcdoc?"}.IsAboutSrcDoc());
-    CHECK_FALSE(URL {u8"about:blank"}.IsAboutSrcDoc());
+    CHECK(Url {u8"about:srcdoc"}.IsAboutSrcDoc());
+    CHECK(Url {u8"about:srcdoc#f"}.IsAboutSrcDoc());
+    CHECK_FALSE(Url {u8"about:srcdoc?x"}.IsAboutSrcDoc());
+    CHECK_FALSE(Url {u8"about:srcdoc?"}.IsAboutSrcDoc());
+    CHECK_FALSE(Url {u8"about:blank"}.IsAboutSrcDoc());
   }
 }

@@ -817,24 +817,24 @@ namespace krys::boo
 
   void SVGUseElement::UpdateExternalDocument() noexcept
   {
-    net::URL externalDocumentURL;
+    net::Url externalDocumentUrl;
     Ref<Document> document = ShareRef(NodeDocument());
     // FIXME: This early exit should be removed once the assert(!url.ProtocolIsData()) is removed from
     // IsExternalURIReference().
-    if (document->CompleteURL(Href()).ProtocolIsData())
+    if (document->CompleteUrl(Href()).ProtocolIsData())
     {
       return;
     }
     if (IsConnected() && IsExternalURIReference(Href(), *document))
     {
-      externalDocumentURL = document->CompleteURL(Href());
-      if (!externalDocumentURL.HasFragmentIdentifier())
+      externalDocumentUrl = document->CompleteUrl(Href());
+      if (!externalDocumentUrl.HasFragmentIdentifier())
       {
-        externalDocumentURL = net::URL();
+        externalDocumentUrl = net::Url();
       }
     }
 
-    if (externalDocumentURL == (_externalDocument ? _externalDocument->URL() : net::URL()))
+    if (externalDocumentUrl == (_externalDocument ? _externalDocument->Url() : net::Url()))
     {
       return;
     }
@@ -844,7 +844,7 @@ namespace krys::boo
       externalDocument->RemoveClient(*this);
     }
 
-    if (externalDocumentURL.IsNull())
+    if (externalDocumentUrl.IsNull())
     {
       _externalDocument = nullptr;
     }
@@ -852,7 +852,7 @@ namespace krys::boo
     {
       // Requests carry no fetch mode, destination or content sniffing policy: there are no origins or HTTP
       // semantics (see DIFFERENCES.md).
-      CachedResourceRequest request(ResourceRequest(krys::move(externalDocumentURL)),
+      CachedResourceRequest request(ResourceRequest(krys::move(externalDocumentUrl)),
                                     CachedResourceLoader::DefaultCachedResourceOptions());
       auto requested = document->GetCachedResourceLoader().RequestSVGDocument(krys::move(request));
       _externalDocument = requested ? *requested : CachedResourceHandle<CachedSVGDocument>();

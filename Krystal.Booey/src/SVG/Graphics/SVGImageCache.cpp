@@ -45,7 +45,7 @@ namespace krys::boo
 
   void SVGImageCache::SetContainerContextForClient(const CachedImageClient &client,
                                                    const LayoutSize &containerSize, float containerZoom,
-                                                   const net::URL &imageURL) noexcept
+                                                   const net::Url &imageUrl) noexcept
   {
     krys_debug_assert(!containerSize.IsEmpty());
     krys_debug_assert(containerZoom);
@@ -61,7 +61,7 @@ namespace krys::boo
 
     _imageForContainerMap.insert_or_assign(
       &client,
-      SVGImageForContainer::Create(_svgImage.get(), containerSizeWithoutZoom, containerZoom, imageURL));
+      SVGImageForContainer::Create(_svgImage.get(), containerSizeWithoutZoom, containerZoom, imageUrl));
   }
 
   Image *SVGImageCache::FindImageForRenderer(const RenderObject *renderer) const noexcept

@@ -47,17 +47,17 @@ namespace krys::boo::html
     }
   }
 
-  net::URL HyperlinkAlgorithms::Href(const HTMLElement &element) noexcept
+  net::Url HyperlinkAlgorithms::Href(const HTMLElement &element) noexcept
   {
     auto href = element.GetAttribute(u8"href");
     if (!href)
     {
       return {};
     }
-    return element.NodeDocument().CompleteURL(*href);
+    return element.NodeDocument().CompleteUrl(*href);
   }
 
-  void HyperlinkAlgorithms::SetHref(HTMLElement &element, const net::URL &url) noexcept
+  void HyperlinkAlgorithms::SetHref(HTMLElement &element, const net::Url &url) noexcept
   {
     (void)element.SetAttribute(u8"href", url.String());
   }
@@ -191,7 +191,7 @@ namespace krys::boo::html
     // 4. Let urlRecord be the result of encoding-parsing a URL given subject's href attribute value, relative
     //    to subject's node document.
     auto href = subject.GetAttribute(u8"href").value_or(DOMString());
-    auto urlRecord = document->CompleteURL(infra::StringAlgorithms::StripLeadingAndTrailingWhitespace(href));
+    auto urlRecord = document->CompleteUrl(infra::StringAlgorithms::StripLeadingAndTrailingWhitespace(href));
 
     // 5. If urlRecord is failure, then return.
     if (!urlRecord.IsValid())
@@ -212,7 +212,7 @@ namespace krys::boo::html
     {
       utf8_string urlString(urlRecord.String());
       urlString += *hyperlinkSuffix;
-      urlRecord = document->CompleteURL(urlString);
+      urlRecord = document->CompleteUrl(urlString);
     }
 
     // 11. Navigate targetNavigable to urlString using subject's node document, with referrerPolicy set to

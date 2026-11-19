@@ -183,7 +183,7 @@ namespace krys::boo::css
 
     KRYS_NODISCARD bool ComputeFailureState() const noexcept;
 
-    void OpportunisticallyStartFontDataURLLoading() noexcept;
+    void OpportunisticallyStartFontDataUrlLoading() noexcept;
 
     void AdoptSource(UniquePtr<CSSFontFaceSource> &&source) noexcept;
 

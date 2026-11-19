@@ -33,7 +33,7 @@
 
 namespace krys::net
 {
-  class URL;
+  class Url;
 }
 
 namespace krys::boo
@@ -65,7 +65,7 @@ namespace krys::boo
 
       /// @brief The cached font for the file at @p url, or null if it can't be requested. Its file doesn't
       /// load until `BeginLoadingFontSoon`.
-      KRYS_NODISCARD CachedFont *GetCachedFont(net::URL url,
+      KRYS_NODISCARD CachedFont *GetCachedFont(net::Url url,
                                                bool isInitiatingElementInUserAgentShadowTree) noexcept;
 
       void BeginLoadingFontSoon(CachedFont &font) noexcept;

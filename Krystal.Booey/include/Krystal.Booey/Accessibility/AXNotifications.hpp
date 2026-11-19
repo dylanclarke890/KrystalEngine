@@ -100,7 +100,7 @@
   macro(TextColorChanged) \
   macro(TextCompositionBegan) \
   macro(TextCompositionEnded) \
-  macro(URLChanged) \
+  macro(UrlChanged) \
   macro(ValueChanged) \
   macro(VisibilityChanged) \
   macro(VisitedStateChanged) \

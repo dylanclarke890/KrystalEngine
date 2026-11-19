@@ -51,7 +51,7 @@ namespace krys::boo
 
     KRYS_NODISCARD CachedImage *GetCachedImage() const noexcept;
 
-    KRYS_NODISCARD Maybe<DOMString> ImageSourceURL() const noexcept final;
+    KRYS_NODISCARD Maybe<DOMString> ImageSourceUrl() const noexcept final;
 
     KRYS_NODISCARD const SVGLengthValue &X() const noexcept
     {

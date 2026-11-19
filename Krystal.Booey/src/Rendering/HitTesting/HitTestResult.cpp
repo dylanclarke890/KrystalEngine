@@ -74,7 +74,7 @@ namespace krys::boo
       : _hitTestLocation(other._hitTestLocation), _innerNode(ShareRefPtr(other.InnerNode())),
         _innerNonSharedNode(ShareRefPtr(other.InnerNonSharedNode())),
         _doublePointInInnerNodeFrame(other._doublePointInInnerNodeFrame), _localPoint(other.LocalPoint()),
-        _innerURLElement(ShareRefPtr(other.URLElement())), _scrollbar(ShareRefPtr(other.GetScrollbar())),
+        _innerUrlElement(ShareRefPtr(other.UrlElement())), _scrollbar(ShareRefPtr(other.GetScrollbar())),
         _isOverWidget(other.IsOverWidget()), _pseudoElementIdentifier(other.GetPseudoElementIdentifier())
   {
     // Only copy the NodeSet in case of list hit test.
@@ -98,7 +98,7 @@ namespace krys::boo
     _innerNonSharedNode = other._innerNonSharedNode;
     _doublePointInInnerNodeFrame = other._doublePointInInnerNodeFrame;
     _localPoint = other.LocalPoint();
-    _innerURLElement = other._innerURLElement;
+    _innerUrlElement = other._innerUrlElement;
     _scrollbar = other._scrollbar;
     _isOverWidget = other.IsOverWidget();
     _pseudoElementIdentifier = other.GetPseudoElementIdentifier();
@@ -157,9 +157,9 @@ namespace krys::boo
       ShareRefPtr(pseudoElement ? static_cast<boo::Node *>(pseudoElement->HostElement()) : node);
   }
 
-  void HitTestResult::SetURLElement(boo::Element *element) noexcept
+  void HitTestResult::SetUrlElement(boo::Element *element) noexcept
   {
-    _innerURLElement = ShareRefPtr(element);
+    _innerUrlElement = ShareRefPtr(element);
   }
 
   LocalFrame *HitTestResult::InnerNodeFrame() const noexcept
@@ -192,7 +192,7 @@ namespace krys::boo
 
   bool HitTestResult::IsOverLink() const noexcept
   {
-    return _innerURLElement && css::IsLink(*_innerURLElement);
+    return _innerUrlElement && css::IsLink(*_innerUrlElement);
   }
 
   bool HitTestResult::IsSelected() const noexcept
@@ -262,7 +262,7 @@ namespace krys::boo
   }
 
   // (No link decoration filtering (applyLinkDecorationFiltering): it's Cocoa's, not a standard feature.)
-  net::URL HitTestResult::AbsoluteImageURL() const noexcept
+  net::Url HitTestResult::AbsoluteImageUrl() const noexcept
   {
     if (!_innerNonSharedNode)
     {
@@ -282,29 +282,29 @@ namespace krys::boo
              || Is<HTMLInputElement>(*htmlElement) || Is<HTMLObjectElement>(*htmlElement)))
         || Is<SVGImageElement>(DynamicDowncast<SVGElement>(element)))
     {
-      return _innerNonSharedNode->NodeDocument().CompleteURL(element->ImageSourceURL().value_or(DOMString()));
+      return _innerNonSharedNode->NodeDocument().CompleteUrl(element->ImageSourceUrl().value_or(DOMString()));
     }
 
     return {};
   }
 
-  net::URL HitTestResult::AbsoluteLinkURL() const noexcept
+  net::Url HitTestResult::AbsoluteLinkUrl() const noexcept
   {
-    if (!_innerURLElement)
+    if (!_innerUrlElement)
     {
       return {};
     }
 
-    return _innerURLElement->AbsoluteLinkURL();
+    return _innerUrlElement->AbsoluteLinkUrl();
   }
 
   utf8_string HitTestResult::TextContent() const noexcept
   {
-    if (!_innerURLElement)
+    if (!_innerUrlElement)
     {
       return {};
     }
-    return _innerURLElement->TextContent().value_or(DOMString());
+    return _innerUrlElement->TextContent().value_or(DOMString());
   }
 
   template <typename TRect>
@@ -374,7 +374,7 @@ namespace krys::boo
       _innerNonSharedNode = other._innerNonSharedNode;
       _localPoint = other.LocalPoint();
       _doublePointInInnerNodeFrame = other._doublePointInInnerNodeFrame;
-      _innerURLElement = other._innerURLElement;
+      _innerUrlElement = other._innerUrlElement;
       _scrollbar = other._scrollbar;
       _isOverWidget = other.IsOverWidget();
     }

@@ -80,7 +80,7 @@ namespace krys::boo
       return _cachedImage && _cachedImage->ErrorOccurred();
     }
 
-    virtual void SetContainerContext(const IntSize &, const net::URL &) noexcept;
+    virtual void SetContainerContext(const IntSize &, const net::Url &) noexcept;
 
     KRYS_NODISCARD virtual bool ImageHasRelativeWidth() const noexcept
     {

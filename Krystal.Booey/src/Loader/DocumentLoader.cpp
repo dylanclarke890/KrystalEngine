@@ -39,7 +39,7 @@
 #include "Krystal.Booey/Page/LocalFrame.hpp"
 #include "Krystal.Booey/Page/Page.hpp"
 #include "Krystal.Booey/Page/Settings.hpp"
-#include "Krystal.Booey/Platform/Network/DataURLDecoder.hpp"
+#include "Krystal.Booey/Platform/Network/DataUrlDecoder.hpp"
 #include "Krystal.Booey/Platform/PlatformStrategies.hpp"
 #include "Krystal.Core/Strings/ASCII.hpp"
 #include "Krystal.Core/Types/SharedBuffer.hpp"
@@ -88,15 +88,15 @@ namespace krys::boo
       return;
     }
 
-    if (document->GetURL().IsEmpty() || document->GetURL().ProtocolIsAbout())
+    if (document->GetUrl().IsEmpty() || document->GetUrl().ProtocolIsAbout())
     {
       return;
     }
 
     auto icons = CollectLinkIcons(*document);
-    if (icons.empty() && document->GetURL().ProtocolIsInHTTPFamily())
+    if (icons.empty() && document->GetUrl().ProtocolIsInHTTPFamily())
     {
-      icons.push_back({document->CompleteURL(u8"/favicon.ico"), {}, null});
+      icons.push_back({document->CompleteUrl(u8"/favicon.ico"), {}, null});
     }
     if (icons == _linkIcons)
     {
@@ -134,7 +134,7 @@ namespace krys::boo
     auto icon = krys::move(pending->second);
     _iconsPendingLoadDecision.erase(pending);
 
-    auto iconLoader = IconLoader::Create(*this, krys::move(icon.URL));
+    auto iconLoader = IconLoader::Create(*this, krys::move(icon.Url));
     _iconLoaders.emplace_back(iconLoader, krys::move(completionHandler));
     iconLoader->StartLoading();
   }
@@ -163,17 +163,17 @@ namespace krys::boo
     }
   }
 
-  const net::URL &DocumentLoader::DocumentURL() const noexcept
+  const net::Url &DocumentLoader::DocumentUrl() const noexcept
   {
-    if (_substituteData && !_substituteData->ResponseURL().IsNull())
+    if (_substituteData && !_substituteData->ResponseUrl().IsNull())
     {
-      return _substituteData->ResponseURL();
+      return _substituteData->ResponseUrl();
     }
     if (!_response.IsNull())
     {
-      return _response.URL();
+      return _response.Url();
     }
-    return _request.URL();
+    return _request.Url();
   }
 
   void DocumentLoader::StartLoadingMainResource() noexcept
@@ -214,13 +214,13 @@ namespace krys::boo
       auto &content = _substituteData->Content();
       auto data = SharedBuffer::Create(
         Span<const uint8>(reinterpret_cast<const uint8 *>(content.data()), content.size()));
-      finish(LoadedResource {.Response = ResourceResponse(DocumentURL(), _substituteData->MimeType(),
+      finish(LoadedResource {.Response = ResourceResponse(DocumentUrl(), _substituteData->MimeType(),
                                                           static_cast<int64>(content.size()), u8"UTF-8"),
                              .Data = krys::move(data)});
       return;
     }
 
-    auto &url = _request.URL();
+    auto &url = _request.Url();
 
     // about:blank, and the other about: URLs, are empty documents.
     if (url.ProtocolIsAbout())
@@ -271,7 +271,7 @@ namespace krys::boo
     _isLoadingMainResource = false;
     if (RefPtr<LocalFrame> frame = ShareRefPtr(_frame.get()))
     {
-      ResourceError cancelled(utf8_string(ErrorDomainBooeyInternal), 0, _request.URL(), u8"Cancelled",
+      ResourceError cancelled(utf8_string(ErrorDomainBooeyInternal), 0, _request.Url(), u8"Cancelled",
                               ResourceError::Type::Cancellation);
       _mainDocumentError = cancelled;
       Ref<DocumentLoader> protectedThis = ShareRef(*this);
@@ -316,7 +316,7 @@ namespace krys::boo
     _committed = true;
 
     _writer.SetMIMEType(_response.MimeType());
-    if (!_writer.Begin(DocumentURL()))
+    if (!_writer.Begin(DocumentUrl()))
     {
       _isLoadingMainResource = false;
       return;
@@ -352,9 +352,9 @@ namespace krys::boo
   void DocumentLoader::CommitInitialEmptyDocument() noexcept
   {
     _committed = true;
-    _response = ResourceResponse(net::URL(u8"about:blank"), u8"text/html", 0, u8"UTF-8");
+    _response = ResourceResponse(net::Url(u8"about:blank"), u8"text/html", 0, u8"UTF-8");
     _writer.SetMIMEType(u8"text/html");
-    if (!_writer.Begin(net::URL(u8"about:blank")))
+    if (!_writer.Begin(net::Url(u8"about:blank")))
     {
       return;
     }

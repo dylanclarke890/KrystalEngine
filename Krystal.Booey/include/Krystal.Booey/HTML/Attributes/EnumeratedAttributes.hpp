@@ -86,7 +86,7 @@ namespace krys::boo::html
     None,
     Text,
     Tel,
-    URL,
+    Url,
     Email,
     Numeric,
     Decimal,
@@ -125,7 +125,7 @@ namespace krys::boo::html
   /// @see https://html.spec.whatwg.org/#attr-fs-enctype
   enum class EnctypeAttributeState : uint8
   {
-    URLEncoded,
+    UrlEncoded,
     FormData,
     TextPlain,
   };
@@ -158,7 +158,7 @@ namespace krys::boo::html
     StrictOrigin,
     OriginWhenCrossOrigin,
     StrictOriginWhenCrossOrigin,
-    UnsafeURL,
+    UnsafeUrl,
   };
 
   /// @see https://html.spec.whatwg.org/#attr-dialog-closedby
@@ -538,7 +538,7 @@ namespace krys::boo::html
     using State = InputModeAttributeState;
     static inline const KeywordStateMapping<State> StateMappings[] = {
       {u8"none", State::None},       {u8"text", State::Text},     {u8"tel", State::Tel},
-      {u8"url", State::URL},         {u8"email", State::Email},   {u8"numeric", State::Numeric},
+      {u8"url", State::Url},         {u8"email", State::Email},   {u8"numeric", State::Numeric},
       {u8"decimal", State::Decimal}, {u8"search", State::Search},
     };
   };
@@ -591,12 +591,12 @@ namespace krys::boo::html
   {
     using State = EnctypeAttributeState;
     static inline const KeywordStateMapping<State> StateMappings[] = {
-      {u8"application/x-www-form-urlencoded", State::URLEncoded},
+      {u8"application/x-www-form-urlencoded", State::UrlEncoded},
       {u8"multipart/form-data", State::FormData},
       {u8"text/plain", State::TextPlain},
     };
 
-    constexpr static State InvalidValueDefault = State::URLEncoded;
+    constexpr static State InvalidValueDefault = State::UrlEncoded;
   };
 
   /// @see https://html.spec.whatwg.org/#fetch-priority-attribute
@@ -663,7 +663,7 @@ namespace krys::boo::html
       {u8"strict-origin", State::StrictOrigin},
       {u8"origin-when-cross-origin", State::OriginWhenCrossOrigin},
       {u8"strict-origin-when-cross-origin", State::StrictOriginWhenCrossOrigin},
-      {u8"unsafe-url", State::UnsafeURL},
+      {u8"unsafe-url", State::UnsafeUrl},
     };
 
     constexpr static State MissingValueDefault = State::Empty;

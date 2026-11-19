@@ -32,7 +32,7 @@
 #include "Krystal.Booey/Platform/Timer.hpp"
 #include "Krystal.Core/Attributes.hpp"
 #include "Krystal.Core/TypeCast.hpp"
-#include "Krystal.Net/URL.hpp"
+#include "Krystal.Net/Url.hpp"
 
 namespace krys::boo
 {
@@ -142,11 +142,11 @@ namespace krys::boo
                          ImagePaintingOptions = {}) noexcept final;
 
     ImageDrawResult DrawForContainer(GraphicsContext &, FloatSize containerSize, float containerZoom,
-                                     const net::URL &initialFragmentURL, const FloatRect &dstRect,
+                                     const net::Url &initialFragmentUrl, const FloatRect &dstRect,
                                      const FloatRect &srcRect, ImagePaintingOptions = {}) noexcept;
 
     void DrawPatternForContainer(GraphicsContext &, const FloatSize &containerSize, float containerZoom,
-                                 const net::URL &initialFragmentURL, const FloatRect &srcRect,
+                                 const net::Url &initialFragmentUrl, const FloatRect &srcRect,
                                  const AffineTransform &, const FloatPoint &phase, const FloatSize &spacing,
                                  const FloatRect &, ImagePaintingOptions = {}) noexcept;
   };

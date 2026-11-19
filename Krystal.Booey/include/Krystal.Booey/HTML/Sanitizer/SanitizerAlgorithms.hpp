@@ -66,7 +66,7 @@ namespace krys::boo::html
       GetSanitizerConfigFromOptions(const SanitizerInput *sanitizer, bool safe) noexcept;
 
     /// @see https://html.spec.whatwg.org/#contains-a-javascript:-url
-    KRYS_NODISCARD static bool ContainsJavaScriptURL(DOMStringView value) noexcept;
+    KRYS_NODISCARD static bool ContainsJavaScriptUrl(DOMStringView value) noexcept;
 
     /// @see https://html.spec.whatwg.org/#sanitizer-config-allows-comments
     KRYS_NODISCARD static bool AllowsComments(const SanitizerConfig &configuration) noexcept;

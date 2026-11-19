@@ -99,7 +99,7 @@ namespace krys::boo
       if (!uriResource)
       {
         // The fallback is 'none'. (SVG2 say 'none' is implied when no fallback is specified.)
-        if (paint.IsURLNone())
+        if (paint.IsUrlNone())
         {
           return nullptr;
         }

@@ -86,7 +86,7 @@ namespace krys::boo
                                       : ContentSecurityPolicyImposition::DoPolicyCheck;
 
     auto &document = NodeDocument();
-    CachedResourceRequest request(ResourceRequest(document.CompleteURL(Href())), options);
+    CachedResourceRequest request(ResourceRequest(document.CompleteUrl(Href())), options);
     request.SetInitiatorType(LocalName().View());
     auto requested = document.GetCachedResourceLoader().RequestImage(krys::move(request));
     _cachedImage = requested ? *requested : CachedResourceHandle<CachedImage>();

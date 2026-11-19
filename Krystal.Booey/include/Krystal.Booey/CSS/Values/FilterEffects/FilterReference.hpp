@@ -25,7 +25,7 @@
 #pragma once
 
 #include "Krystal.Booey/CSS/Values/Primitives/NumericTypes.hpp"
-#include "Krystal.Booey/CSS/Values/Primitives/URL.hpp"
+#include "Krystal.Booey/CSS/Values/Primitives/Url.hpp"
 #include "Krystal.Booey/CSS/Values/Types.hpp"
 
 namespace krys::boo::css
@@ -33,7 +33,7 @@ namespace krys::boo::css
   // https://drafts.fxtf.org/filter-effects/#typedef-filter-url
   struct FilterReference
   {
-    CSSURL Url;
+    CSSUrl Url;
 
     KRYS_NODISCARD bool operator==(const FilterReference &) const noexcept = default;
   };

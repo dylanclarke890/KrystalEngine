@@ -32,27 +32,27 @@
 namespace krys::boo
 {
   Ref<StyleCursorImage> StyleCursorImage::Create(const Ref<StyleImage> &image, Maybe<IntPoint> hotSpot,
-                                                 const style::URL &originalURL) noexcept
+                                                 const style::Url &originalUrl) noexcept
   {
-    return AdoptRef(*new StyleCursorImage(image, hotSpot, originalURL));
+    return AdoptRef(*new StyleCursorImage(image, hotSpot, originalUrl));
   }
 
   Ref<StyleCursorImage> StyleCursorImage::Create(Ref<StyleImage> &&image, Maybe<IntPoint> hotSpot,
-                                                 style::URL &&originalURL) noexcept
+                                                 style::Url &&originalUrl) noexcept
   {
-    return AdoptRef(*new StyleCursorImage(krys::move(image), hotSpot, krys::move(originalURL)));
+    return AdoptRef(*new StyleCursorImage(krys::move(image), hotSpot, krys::move(originalUrl)));
   }
 
   StyleCursorImage::StyleCursorImage(const Ref<StyleImage> &image, Maybe<IntPoint> hotSpot,
-                                     const style::URL &originalURL) noexcept
-      : StyleMultiImage {Type::CursorImage}, _image {image}, _hotSpot {hotSpot}, _originalURL {originalURL}
+                                     const style::Url &originalUrl) noexcept
+      : StyleMultiImage {Type::CursorImage}, _image {image}, _hotSpot {hotSpot}, _originalUrl {originalUrl}
   {
   }
 
   StyleCursorImage::StyleCursorImage(Ref<StyleImage> &&image, Maybe<IntPoint> hotSpot,
-                                     style::URL &&originalURL) noexcept
+                                     style::Url &&originalUrl) noexcept
       : StyleMultiImage {Type::CursorImage}, _image {krys::move(image)}, _hotSpot {hotSpot},
-        _originalURL {krys::move(originalURL)}
+        _originalUrl {krys::move(originalUrl)}
   {
   }
 
@@ -83,7 +83,7 @@ namespace krys::boo
                                                     css::PrimitiveValue::Create(_hotSpot->Y()));
     }
     return css::CursorImageValue::Create(_image->ComputedStyleValue(style), krys::move(hotSpot),
-                                         style::ConvertToCSS(_originalURL, style));
+                                         style::ConvertToCSS(_originalUrl, style));
   }
 
   ImageWithScale StyleCursorImage::SelectBestFitImage(const Document &document) noexcept
@@ -98,6 +98,6 @@ namespace krys::boo
 
   bool StyleCursorImage::UsesDataProtocol() const noexcept
   {
-    return _originalURL.Resolved.ProtocolIsData();
+    return _originalUrl.Resolved.ProtocolIsData();
   }
 }

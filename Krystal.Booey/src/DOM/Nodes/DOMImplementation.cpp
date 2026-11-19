@@ -15,7 +15,7 @@
 #include "Krystal.Booey/SVG/SVGDocument.hpp"
 #include "Krystal.Core/Strings/ASCII.hpp"
 #include "Krystal.Net/Http/MIMETypeRegistry.hpp"
-#include "Krystal.Net/URL.hpp"
+#include "Krystal.Net/Url.hpp"
 
 namespace krys::boo::dom
 {
@@ -184,7 +184,7 @@ namespace krys::boo::dom
     return AdoptRef<Document>(*document.release());
   }
 
-  Ref<Document> DOMImplementation::CreateDocument(utf8_stringview contentType, const net::URL &url) noexcept
+  Ref<Document> DOMImplementation::CreateDocument(utf8_stringview contentType, const net::Url &url) noexcept
   {
     auto create = [&]() -> Ref<Document>
     {
@@ -231,7 +231,7 @@ namespace krys::boo::dom
     auto document = create();
     if (!url.IsNull())
     {
-      document->SetURL(url);
+      document->SetUrl(url);
     }
     return document;
   }

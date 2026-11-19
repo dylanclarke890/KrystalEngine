@@ -297,7 +297,7 @@ namespace krys::boo::html
         // comments: false; dataAttributes: false; javascriptURLs: false.
         config.Comments = false;
         config.DataAttributes = false;
-        config.JavascriptURLs = false;
+        config.JavascriptUrls = false;
 
         // elements: all HTML elements normatively categorized as Default within their individual
         // definitions, alongside the MathML and SVG elements listed in the table below.
@@ -357,7 +357,7 @@ namespace krys::boo::html
     return elements.get();
   }
 
-  bool SanitizerConstants::IsNavigatingURLAttribute(const SanitizerElementNamespace &element,
+  bool SanitizerConstants::IsNavigatingUrlAttribute(const SanitizerElementNamespace &element,
                                                     const SanitizerAttributeNamespace &attribute) noexcept
   {
     DOMStringAtom none = null;
@@ -377,7 +377,7 @@ namespace krys::boo::html
            || IsSanitizerPair(element, attribute, u8"a", SVG, u8"href", xlink);
   }
 
-  bool SanitizerConstants::IsAnimatingURLAttribute(const SanitizerElementNamespace &element,
+  bool SanitizerConstants::IsAnimatingUrlAttribute(const SanitizerElementNamespace &element,
                                                    const SanitizerAttributeNamespace &attribute) noexcept
   {
     DOMStringAtom none = null;

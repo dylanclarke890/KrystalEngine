@@ -212,7 +212,7 @@ namespace krys::boo
     return output;
   }
 
-  utf8_string DataURL(Span<const uint8> data, utf8_stringview mimeType) noexcept
+  utf8_string DataUrl(Span<const uint8> data, utf8_stringview mimeType) noexcept
   {
     if (data.empty())
     {

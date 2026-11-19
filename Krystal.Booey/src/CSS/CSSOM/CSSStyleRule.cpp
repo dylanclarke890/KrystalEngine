@@ -213,12 +213,12 @@ namespace krys::boo
   {
     auto declarations = _styleRule->Properties().AsText(context);
     StringBuilder rules;
-    CssTextForRulesWithReplacementURLs(rules, context);
+    CssTextForRulesWithReplacementUrls(rules, context);
     return CssTextInternal(declarations, rules);
   }
 
   void
-    CSSStyleRule::CssTextForRulesWithReplacementURLs(StringBuilder &rules,
+    CSSStyleRule::CssTextForRulesWithReplacementUrls(StringBuilder &rules,
                                                      const css::SerialisationContext &context) const noexcept
   {
     for (uint32 index = 0; index < Length(); index++)

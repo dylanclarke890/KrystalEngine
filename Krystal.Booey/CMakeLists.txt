@@ -493,7 +493,7 @@ set(KRYSTAL_BOOEY_CSS_HEADERS
   include/Krystal.Booey/CSS/Properties/Consumers/Transitions.hpp
   include/Krystal.Booey/CSS/Properties/Consumers/UI.hpp
   include/Krystal.Booey/CSS/Properties/Consumers/UnicodeRange.hpp
-  include/Krystal.Booey/CSS/Properties/Consumers/URL.hpp
+  include/Krystal.Booey/CSS/Properties/Consumers/Url.hpp
   include/Krystal.Booey/CSS/Properties/Consumers/WillChange.hpp
   include/Krystal.Booey/CSS/Properties/FontVariantLigaturesParser.hpp
   include/Krystal.Booey/CSS/Properties/FontVariantNumericParser.hpp
@@ -711,8 +711,8 @@ set(KRYSTAL_BOOEY_CSS_HEADERS
   include/Krystal.Booey/CSS/Values/Primitives/Symbol.hpp
   include/Krystal.Booey/CSS/Values/Primitives/UnevaluatedCalc.hpp
   include/Krystal.Booey/CSS/Values/Primitives/Units.hpp
-  include/Krystal.Booey/CSS/Values/Primitives/URL.hpp
-  include/Krystal.Booey/CSS/Values/Primitives/URLModifiers.hpp
+  include/Krystal.Booey/CSS/Values/Primitives/Url.hpp
+  include/Krystal.Booey/CSS/Values/Primitives/UrlModifiers.hpp
   include/Krystal.Booey/CSS/Values/PrimitiveValue.hpp
   include/Krystal.Booey/CSS/Values/Quad.hpp
   include/Krystal.Booey/CSS/Values/QuadValue.hpp
@@ -872,7 +872,7 @@ set(KRYSTAL_BOOEY_CSS_SOURCES
   src/CSS/Properties/Consumers/Transitions.cpp
   src/CSS/Properties/Consumers/UI.cpp
   src/CSS/Properties/Consumers/UnicodeRange.cpp
-  src/CSS/Properties/Consumers/URL.cpp
+  src/CSS/Properties/Consumers/Url.cpp
   src/CSS/Properties/Consumers/WillChange.cpp
   src/CSS/Properties/ImmutableStyleProperties.cpp
   src/CSS/Properties/MutableStyleProperties.cpp
@@ -1020,8 +1020,8 @@ set(KRYSTAL_BOOEY_CSS_SOURCES
   src/CSS/Values/Primitives/UnevaluatedCalc.cpp
   src/CSS/Values/Primitives/UnevaluatedCalcEvaluation.cpp
   src/CSS/Values/Primitives/Units.cpp
-  src/CSS/Values/Primitives/URL.cpp
-  src/CSS/Values/Primitives/URLModifiers.cpp
+  src/CSS/Values/Primitives/Url.cpp
+  src/CSS/Values/Primitives/UrlModifiers.cpp
   src/CSS/Values/PrimitiveValue.cpp
   src/CSS/Values/QuadValue.cpp
   src/CSS/Values/RatioValue.cpp
@@ -2051,7 +2051,7 @@ set(KRYSTAL_BOOEY_HTML_HEADERS
   include/Krystal.Booey/HTML/InputTypes/TextFieldInputType.hpp
   include/Krystal.Booey/HTML/InputTypes/TextInputType.hpp
   include/Krystal.Booey/HTML/InputTypes/TimeInputType.hpp
-  include/Krystal.Booey/HTML/InputTypes/URLInputType.hpp
+  include/Krystal.Booey/HTML/InputTypes/UrlInputType.hpp
   include/Krystal.Booey/HTML/InputTypes/WeekInputType.hpp
   include/Krystal.Booey/HTML/Internals/HTMLElementFactory.hpp
   include/Krystal.Booey/HTML/Internals/InlineStyleSheetOwner.hpp
@@ -2061,7 +2061,7 @@ set(KRYSTAL_BOOEY_HTML_HEADERS
   include/Krystal.Booey/HTML/MicroParsers/MicroParserResult.hpp
   include/Krystal.Booey/HTML/MicroParsers/Numbers.hpp
   include/Krystal.Booey/HTML/Mixins/HTMLOrSVGOrMathMLElement.hpp
-  include/Krystal.Booey/HTML/Mixins/URLDecomposition.hpp
+  include/Krystal.Booey/HTML/Mixins/UrlDecomposition.hpp
   include/Krystal.Booey/HTML/Parser/CharacterReference.hpp
   include/Krystal.Booey/HTML/Parser/DocumentParser.hpp
   include/Krystal.Booey/HTML/Parser/FormattingElementList.hpp
@@ -2248,13 +2248,13 @@ set(KRYSTAL_BOOEY_HTML_SOURCES
   src/HTML/InputTypes/SubmitInputType.cpp
   src/HTML/InputTypes/TextFieldInputType.cpp
   src/HTML/InputTypes/TimeInputType.cpp
-  src/HTML/InputTypes/URLInputType.cpp
+  src/HTML/InputTypes/UrlInputType.cpp
   src/HTML/InputTypes/WeekInputType.cpp
   src/HTML/Internals/HTMLElementFactory.cpp
   src/HTML/Internals/InlineStyleSheetOwner.cpp
   src/HTML/MicroParsers/Numbers.cpp
   src/HTML/Mixins/HTMLOrSVGOrMathMLElement.cpp
-  src/HTML/Mixins/URLDecomposition.cpp
+  src/HTML/Mixins/UrlDecomposition.cpp
   src/HTML/Parser/DocumentParser.cpp
   src/HTML/Parser/FormattingElementList.cpp
   src/HTML/Parser/OpenElementStack.cpp
@@ -2660,7 +2660,7 @@ set(KRYSTAL_BOOEY_PLATFORM_HEADERS
   include/Krystal.Booey/Platform/Locale/PlatformLocale.hpp
   include/Krystal.Booey/Platform/MIMETypeRegistry.hpp
   include/Krystal.Booey/Platform/Network/BlobData.hpp
-  include/Krystal.Booey/Platform/Network/DataURLDecoder.hpp
+  include/Krystal.Booey/Platform/Network/DataUrlDecoder.hpp
   include/Krystal.Booey/Platform/Network/ResourceError.hpp
   include/Krystal.Booey/Platform/Network/ResourceRequest.hpp
   include/Krystal.Booey/Platform/Network/ResourceResponse.hpp
@@ -2713,7 +2713,7 @@ set(KRYSTAL_BOOEY_PLATFORM_SOURCES
   src/Platform/Locale/PlatformLocale.cpp
   src/Platform/MIMETypeRegistry.cpp
   src/Platform/Network/BlobData.cpp
-  src/Platform/Network/DataURLDecoder.cpp
+  src/Platform/Network/DataUrlDecoder.cpp
   src/Platform/Network/ResourceResponse.cpp
   src/Platform/Pasteboard/DragData.cpp
   src/Platform/Pasteboard/DragImage.cpp

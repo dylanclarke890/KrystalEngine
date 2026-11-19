@@ -99,7 +99,7 @@ namespace krys::boo
     _customData.WriteString(u8"text/plain", text);
   }
 
-  void StaticPasteboard::Write(const PasteboardURL &url) noexcept
+  void StaticPasteboard::Write(const PasteboardUrl &url) noexcept
   {
     _customData.WriteString(u8"text/uri-list", url.Url.String());
   }
@@ -112,7 +112,7 @@ namespace krys::boo
     // any non-default data was written by the page.
     _fileContentState = FileContentState::InMemoryImage;
 
-    if (CanExposeURLToDOMWhenPasteboardContainsFiles(image.Url.Url.String()))
+    if (CanExposeUrlToDOMWhenPasteboardContainsFiles(image.Url.Url.String()))
     {
       Write(image.Url);
     }

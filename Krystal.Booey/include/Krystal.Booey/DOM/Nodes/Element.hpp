@@ -81,7 +81,7 @@ namespace krys::boo
 
 namespace krys::net
 {
-  class URL;
+  class Url;
 }
 
 namespace krys::boo::css::calc
@@ -1128,10 +1128,10 @@ namespace krys::boo
       ResolveStyle(const style::ResolutionContext &resolutionContext) noexcept;
 
     /// @brief The URL of the image the element shows: its `src` attribute, or null if it has none.
-    KRYS_NODISCARD virtual Maybe<DOMString> ImageSourceURL() const noexcept;
+    KRYS_NODISCARD virtual Maybe<DOMString> ImageSourceUrl() const noexcept;
 
     /// @brief The URL the element links to, if it's a link, resolved against its document's base URL.
-    KRYS_NODISCARD net::URL AbsoluteLinkURL() const noexcept;
+    KRYS_NODISCARD net::Url AbsoluteLinkUrl() const noexcept;
 
     /// @brief Fires `focus` (then `focusin`) at the element as the focus update steps focus it; text controls
     /// update their placeholder and begin editing first.

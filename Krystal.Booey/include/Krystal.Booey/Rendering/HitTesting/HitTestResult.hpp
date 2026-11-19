@@ -32,7 +32,7 @@
 #include "Krystal.Core/Types/Maybe.hpp"
 #include "Krystal.Core/Types/RefPtr.hpp"
 #include "Krystal.Core/Types/UniquePtr.hpp"
-#include "Krystal.Net/URL.hpp"
+#include "Krystal.Net/Url.hpp"
 
 namespace krys::boo
 {
@@ -66,7 +66,7 @@ namespace krys::boo
     // A point in the local coordinate space of _innerNonSharedNode's renderer. Allows us to efficiently
     // determine where inside the renderer we hit on subsequent operations.
     LayoutPoint _localPoint;
-    RefPtr<boo::Element> _innerURLElement;
+    RefPtr<boo::Element> _innerUrlElement;
     RefPtr<Scrollbar> _scrollbar;
     // Returns true if we are over a widget (and not in the border/padding area of a RenderWidget for
     // example).
@@ -117,11 +117,11 @@ namespace krys::boo
 
     KRYS_NODISCARD boo::Element *InnerNonSharedElement() const noexcept;
 
-    void SetURLElement(boo::Element *element) noexcept;
+    void SetUrlElement(boo::Element *element) noexcept;
 
-    KRYS_NODISCARD boo::Element *URLElement() const noexcept
+    KRYS_NODISCARD boo::Element *UrlElement() const noexcept
     {
-      return _innerURLElement.get();
+      return _innerUrlElement.get();
     }
 
     KRYS_NODISCARD bool IsOverWidget() const noexcept
@@ -206,9 +206,9 @@ namespace krys::boo
     /// @brief The box of the image hit, in absolute coordinates.
     KRYS_NODISCARD IntRect ImageRect() const noexcept;
 
-    KRYS_NODISCARD net::URL AbsoluteImageURL() const noexcept;
+    KRYS_NODISCARD net::Url AbsoluteImageUrl() const noexcept;
 
-    KRYS_NODISCARD net::URL AbsoluteLinkURL() const noexcept;
+    KRYS_NODISCARD net::Url AbsoluteLinkUrl() const noexcept;
 
     /// @brief The text of the link hit.
     KRYS_NODISCARD utf8_string TextContent() const noexcept;

@@ -204,13 +204,13 @@ namespace krys::boo
 
     public:
       StyledMarkupAccumulator(const dom::Position &start, dom::Position end, List<Ref<Node>> *nodes,
-                              ResolveURLs resolveURLs, SerializeComposedTree serializeComposedTree,
+                              ResolveUrls resolveUrls, SerializeComposedTree serializeComposedTree,
                               IgnoreUserSelectNone ignoreUserSelectNone, AnnotateForInterchange annotate,
                               StandardFontFamilySerializationMode standardFontFamilySerializationMode,
                               MSOListMode msoListMode, bool needsPositionStyleConversion,
                               PreserveDirectionForInlineText preserveDirectionForInlineText,
                               Node *highestNodeToBeSerialized = nullptr) noexcept
-          : MarkupAccumulator(nodes, resolveURLs, GetSerializationSyntax(*start.GetDocument())),
+          : MarkupAccumulator(nodes, resolveUrls, GetSerializationSyntax(*start.GetDocument())),
             _start(start), _end(krys::move(end)), _annotate(annotate),
             _highestNodeToBeSerialized(ShareRefPtr(highestNodeToBeSerialized)),
             _useComposedTree(serializeComposedTree == SerializeComposedTree::Yes),
@@ -1135,7 +1135,7 @@ namespace krys::boo
 
     // FIXME: The document's first `base` element (firstBaseElement), with base URLs.
     KRYS_NODISCARD utf8_string SerializePreservingVisualAppearanceInternal(
-      const dom::Position &start, const dom::Position &end, List<Ref<Node>> *nodes, ResolveURLs resolveURLs,
+      const dom::Position &start, const dom::Position &end, List<Ref<Node>> *nodes, ResolveUrls resolveUrls,
       SerializeComposedTree serializeComposedTree, IgnoreUserSelectNone ignoreUserSelectNone,
       AnnotateForInterchange annotate, ConvertBlocksToInlines convertBlocksToInlines,
       StandardFontFamilySerializationMode standardFontFamilySerializationMode, MSOListMode msoListMode,
@@ -1175,7 +1175,7 @@ namespace krys::boo
 
       auto specialCommonAncestor = HighestAncestorToWrapMarkup(start, end, *commonAncestor, annotate);
 
-      StyledMarkupAccumulator accumulator(start, end, nodes, resolveURLs, serializeComposedTree,
+      StyledMarkupAccumulator accumulator(start, end, nodes, resolveUrls, serializeComposedTree,
                                           ignoreUserSelectNone, annotate, standardFontFamilySerializationMode,
                                           msoListMode, needsPositionStyleConversion,
                                           preserveDirectionForInlineText, specialCommonAncestor.get());
@@ -1522,22 +1522,22 @@ namespace krys::boo
   utf8_string SerializePreservingVisualAppearance(const dom::SimpleRange &range, List<Ref<Node>> *nodes,
                                                   AnnotateForInterchange annotate,
                                                   ConvertBlocksToInlines convertBlocksToInlines,
-                                                  ResolveURLs resolveURLs) noexcept
+                                                  ResolveUrls resolveUrls) noexcept
   {
     return SerializePreservingVisualAppearanceInternal(
       dom::MakeDeprecatedLegacyPosition(range.Start), dom::MakeDeprecatedLegacyPosition(range.End), nodes,
-      resolveURLs, SerializeComposedTree::No, IgnoreUserSelectNone::No, annotate, convertBlocksToInlines,
+      resolveUrls, SerializeComposedTree::No, IgnoreUserSelectNone::No, annotate, convertBlocksToInlines,
       StandardFontFamilySerializationMode::Keep, MSOListMode::DoNotPreserve, PreserveBaseElement::No,
       PreserveDirectionForInlineText::No);
   }
 
   utf8_string SerializePreservingVisualAppearance(
-    const VisibleSelection &selection, ResolveURLs resolveURLs, SerializeComposedTree serializeComposedTree,
+    const VisibleSelection &selection, ResolveUrls resolveUrls, SerializeComposedTree serializeComposedTree,
     IgnoreUserSelectNone ignoreUserSelectNone, PreserveBaseElement preserveBaseElement,
     PreserveDirectionForInlineText preserveDirectionForInlineText, List<Ref<Node>> *nodes) noexcept
   {
     return SerializePreservingVisualAppearanceInternal(
-      selection.Start(), selection.End(), nodes, resolveURLs, serializeComposedTree, ignoreUserSelectNone,
+      selection.Start(), selection.End(), nodes, resolveUrls, serializeComposedTree, ignoreUserSelectNone,
       AnnotateForInterchange::Yes, ConvertBlocksToInlines::No, StandardFontFamilySerializationMode::Keep,
       MSOListMode::DoNotPreserve, preserveBaseElement, preserveDirectionForInlineText);
   }
@@ -1624,7 +1624,7 @@ namespace krys::boo
     // SerializeComposedTree::No because there can't be a shadow tree in the pasted fragment.
     auto result = SerializePreservingVisualAppearanceInternal(
       dom::FirstPositionInNode(bodyElement.get()), dom::LastPositionInNode(bodyElement.get()), nullptr,
-      ResolveURLs::YesExcludingURLsForPrivacy, SerializeComposedTree::No, IgnoreUserSelectNone::No,
+      ResolveUrls::YesExcludingUrlsForPrivacy, SerializeComposedTree::No, IgnoreUserSelectNone::No,
       AnnotateForInterchange::Yes, ConvertBlocksToInlines::No, StandardFontFamilySerializationMode::Strip,
       msoListMode, PreserveBaseElement::No, PreserveDirectionForInlineText::No);
 
@@ -1643,16 +1643,16 @@ namespace krys::boo
   // FIXME: Completing relative URLs against baseURL (completeURLs), with URL attributes. (No attachment
   // elements' files to restore: `<attachment>` is WebKit's, not a standard element.)
   Ref<DocumentFragment> CreateFragmentFromMarkup(Document &document, utf8_stringview markup,
-                                                 utf8_stringview baseURL) noexcept
+                                                 utf8_stringview baseUrl) noexcept
   {
-    (void)baseURL;
+    (void)baseUrl;
     // We use a fake body element here to trick the HTML parser into using the InBody insertion mode.
     auto fakeBody = CreateHTMLElement(document, u8"body");
     return ParseHTMLIntoFragment(markup, *fakeBody);
   }
 
   utf8_string SerializeFragment(const Node &node, SerializedNodes root, List<Ref<Node>> *nodes,
-                                ResolveURLs resolveURLs, Maybe<SerializationSyntax> serializationSyntax,
+                                ResolveUrls resolveUrls, Maybe<SerializationSyntax> serializationSyntax,
                                 SerializeShadowRoots serializeShadowRoots,
                                 List<Ref<ShadowRoot>> &&explicitShadowRoots) noexcept
   {
@@ -1661,7 +1661,7 @@ namespace krys::boo
       serializationSyntax = MarkupAccumulator::GetSerializationSyntax(node.NodeDocument());
     }
 
-    MarkupAccumulator accumulator(nodes, resolveURLs, *serializationSyntax, serializeShadowRoots,
+    MarkupAccumulator accumulator(nodes, resolveUrls, *serializationSyntax, serializeShadowRoots,
                                   krys::move(explicitShadowRoots));
     return accumulator.SerializeNodes(const_cast<Node &>(node), root);
   }
@@ -1673,7 +1673,7 @@ namespace krys::boo
     // 2. If context document is an HTML document, then return the result of HTML fragment serialization
     //    algorithm with node, false, and « ».
     // 3. Return the XML serialization of node given require well-formed.
-    MarkupAccumulator accumulator(nullptr, ResolveURLs::NoExcludingURLsForPrivacy,
+    MarkupAccumulator accumulator(nullptr, ResolveUrls::NoExcludingUrlsForPrivacy,
                                   MarkupAccumulator::GetSerializationSyntax(node.NodeDocument()),
                                   SerializeShadowRoots::Explicit, {}, RequireWellFormed::Yes);
     auto markup = accumulator.SerializeNodes(const_cast<Node &>(node), root);
@@ -1815,7 +1815,7 @@ namespace krys::boo
     return SerializeFragment(*documentType, SerializedNodes::SubtreeIncludingNode);
   }
 
-  utf8_string URLToMarkup(utf8_stringview url, utf8_stringview title) noexcept
+  utf8_string UrlToMarkup(utf8_stringview url, utf8_stringview title) noexcept
   {
     utf8_string markup(u8"<a href=\"");
     markup.append(url);

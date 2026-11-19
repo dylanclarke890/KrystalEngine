@@ -36,7 +36,7 @@ namespace krys::boo::css
 
   KRYS_NODISCARD CSSOMString SerialiseString(const CSSOMString &value) noexcept;
 
-  KRYS_NODISCARD CSSOMString SerialiseURL(const CSSOMString &value) noexcept;
+  KRYS_NODISCARD CSSOMString SerialiseUrl(const CSSOMString &value) noexcept;
 
   KRYS_NODISCARD CSSOMString SerialiseFontFamily(const CSSOMString &value) noexcept;
 }

@@ -22,12 +22,12 @@
  * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-#include "Krystal.Booey/CSS/Values/Primitives/URLModifiers.hpp"
+#include "Krystal.Booey/CSS/Values/Primitives/UrlModifiers.hpp"
 #include "Krystal.Booey/Loader/ResourceLoaderOptions.hpp"
 
 namespace krys::boo::css
 {
-  void ApplyModifiersToLoaderOptions(const URLModifiers &modifiers,
+  void ApplyModifiersToLoaderOptions(const UrlModifiers &modifiers,
                                      ResourceLoaderOptions &loaderOptions) noexcept
   {
     // https://www.w3.org/TR/css-values-5/#typedef-request-url-modifier-cross-origin-modifier

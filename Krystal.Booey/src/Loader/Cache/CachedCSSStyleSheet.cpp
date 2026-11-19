@@ -79,8 +79,8 @@ namespace krys::boo
 
     if (!IsLoading())
     {
-      Downcast<CachedStyleSheetClient>(client).SetCSSStyleSheet(GetResourceRequest().URL().String(),
-                                                                Response().URL(), Encoding(), this);
+      Downcast<CachedStyleSheetClient>(client).SetCSSStyleSheet(GetResourceRequest().Url().String(),
+                                                                Response().Url(), Encoding(), this);
     }
   }
 
@@ -148,7 +148,7 @@ namespace krys::boo
     CachedResourceClientWalker<CachedStyleSheetClient> walker(*this);
     while (auto *client = walker.Next())
     {
-      client->SetCSSStyleSheet(GetResourceRequest().URL().String(), Response().URL(), Encoding(), this);
+      client->SetCSSStyleSheet(GetResourceRequest().Url().String(), Response().Url(), Encoding(), this);
     }
   }
 
@@ -175,7 +175,7 @@ namespace krys::boo
     // An unsuccessful HTTP response is no style sheet. (A host that gives no status, 0, isn't saying it
     // failed.)
     // https://html.spec.whatwg.org/#fetching-and-processing-a-resource-from-a-link-element:processresponseconsumebody
-    if (Response().URL().ProtocolIsInHTTPFamily() && Response().HTTPStatusCode()
+    if (Response().Url().ProtocolIsInHTTPFamily() && Response().HTTPStatusCode()
         && !Response().IsSuccessful())
     {
       if (hasHTTPStatusOK)

@@ -34,14 +34,14 @@ target_sources(Krystal.Net
       include/Krystal.Net/Http/HTTPHeaderMap.hpp
       include/Krystal.Net/Http/HTTPParsers.hpp
       include/Krystal.Net/Http/MIMETypeRegistry.hpp
-      include/Krystal.Net/URL.hpp
-      include/Krystal.Net/URLHash.hpp
-      include/Krystal.Net/URLParser.hpp
+      include/Krystal.Net/Url.hpp
+      include/Krystal.Net/UrlHash.hpp
+      include/Krystal.Net/UrlParser.hpp
 
   PRIVATE
     src/Http/HTTPHeaderMap.cpp
     src/Http/HTTPParsers.cpp
     src/Http/MIMETypeRegistry.cpp
-    src/URL.cpp
-    src/URLParser.cpp
+    src/Url.cpp
+    src/UrlParser.cpp
 )

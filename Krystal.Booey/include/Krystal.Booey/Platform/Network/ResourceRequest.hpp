@@ -27,7 +27,7 @@
 #pragma once
 
 #include "Krystal.Core/Attributes.hpp"
-#include "Krystal.Net/URL.hpp"
+#include "Krystal.Net/Url.hpp"
 
 namespace krys::boo
 {
@@ -35,22 +35,22 @@ namespace krys::boo
   class ResourceRequest
   {
   private:
-    net::URL _url;
+    net::Url _url;
     utf8_string _httpMethod {u8"GET"};
 
   public:
     ResourceRequest() noexcept = default;
 
-    explicit ResourceRequest(net::URL url) noexcept : _url(krys::move(url))
+    explicit ResourceRequest(net::Url url) noexcept : _url(krys::move(url))
     {
     }
 
-    KRYS_NODISCARD const net::URL &URL() const noexcept
+    KRYS_NODISCARD const net::Url &Url() const noexcept
     {
       return _url;
     }
 
-    void SetURL(net::URL url) noexcept
+    void SetUrl(net::Url url) noexcept
     {
       _url = krys::move(url);
     }

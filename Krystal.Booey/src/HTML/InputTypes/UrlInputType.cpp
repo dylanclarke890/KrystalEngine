@@ -29,31 +29,31 @@
  * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-#include "Krystal.Booey/HTML/InputTypes/URLInputType.hpp"
+#include "Krystal.Booey/HTML/InputTypes/UrlInputType.hpp"
 #include "Krystal.Booey/HTML/Elements/HTMLInputElement.hpp"
 #include "Krystal.Booey/Infra/StringAlgorithms.hpp"
 #include "Krystal.Booey/Platform/Locale/LocalizedStrings.hpp"
-#include "Krystal.Net/URL.hpp"
+#include "Krystal.Net/Url.hpp"
 
 namespace krys::boo::html
 {
-  bool URLInputType::TypeMismatchFor(DOMStringView value) const noexcept
+  bool UrlInputType::TypeMismatchFor(DOMStringView value) const noexcept
   {
-    return !value.empty() && !net::URL(value).IsValid();
+    return !value.empty() && !net::Url(value).IsValid();
   }
 
-  bool URLInputType::TypeMismatch() const noexcept
+  bool UrlInputType::TypeMismatch() const noexcept
   {
     krys_debug_assert(Element());
     return TypeMismatchFor(Element()->Value());
   }
 
-  DOMString URLInputType::TypeMismatchText() const noexcept
+  DOMString UrlInputType::TypeMismatchText() const noexcept
   {
-    return ValidationMessageTypeMismatchForURLText();
+    return ValidationMessageTypeMismatchForUrlText();
   }
 
-  DOMString URLInputType::SanitizeValue(DOMStringView proposedValue) const noexcept
+  DOMString UrlInputType::SanitizeValue(DOMStringView proposedValue) const noexcept
   {
     return DOMString(infra::StringAlgorithms::StripLeadingAndTrailingWhitespace(
       BaseTextInputType::SanitizeValue(proposedValue)));

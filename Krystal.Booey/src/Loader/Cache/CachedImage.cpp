@@ -61,7 +61,7 @@ namespace krys::boo
     {
       _settings = ShareRef(document->GetSettings());
     }
-    if (loader.ShouldPerformImageLoad(URL()))
+    if (loader.ShouldPerformImageLoad(Url()))
     {
       CachedResource::Load(loader);
     }
@@ -174,7 +174,7 @@ namespace krys::boo
 
   void CachedImage::SetContainerContextForClient(const CachedImageClient &client,
                                                  const LayoutSize &containerSize, float containerZoom,
-                                                 const net::URL &imageURL) noexcept
+                                                 const net::Url &imageUrl) noexcept
   {
     if (containerSize.IsEmpty())
     {
@@ -185,7 +185,7 @@ namespace krys::boo
     if (!image)
     {
       _pendingContainerContextRequests.insert_or_assign(
-        &client, ContainerContext {containerSize, containerZoom, imageURL});
+        &client, ContainerContext {containerSize, containerZoom, imageUrl});
       return;
     }
 
@@ -195,7 +195,7 @@ namespace krys::boo
       return;
     }
 
-    _svgImageCache->SetContainerContextForClient(client, containerSize, containerZoom, imageURL);
+    _svgImageCache->SetContainerContextForClient(client, containerSize, containerZoom, imageUrl);
   }
 
   FloatSize CachedImage::ImageSizeForRenderer(const RenderElement *renderer, SizeType sizeType) const noexcept
@@ -295,7 +295,7 @@ namespace krys::boo
         for (auto &[client, context] : _pendingContainerContextRequests)
         {
           SetContainerContextForClient(*client, context.ContainerSize, context.ContainerZoom,
-                                       context.ImageURL);
+                                       context.ImageUrl);
         }
       }
       _pendingContainerContextRequests.clear();
@@ -307,9 +307,9 @@ namespace krys::boo
     _cachedImages.insert(&image);
   }
 
-  net::URL CachedImage::CachedImageObserver::SourceUrl() const noexcept
+  net::Url CachedImage::CachedImageObserver::SourceUrl() const noexcept
   {
-    return !_cachedImages.empty() ? (*_cachedImages.begin())->URL() : net::URL();
+    return !_cachedImages.empty() ? (*_cachedImages.begin())->Url() : net::Url();
   }
 
   utf8_string CachedImage::CachedImageObserver::MimeType() const noexcept
@@ -539,7 +539,7 @@ namespace krys::boo
     }
 
     SetLoading(false);
-    SetAllowsOrientationOverride(!LoadFailedOrCanceled() || _image->SourceURL().ProtocolIsData());
+    SetAllowsOrientationOverride(!LoadFailedOrCanceled() || _image->SourceUrl().ProtocolIsData());
 
     NotifyObservers();
     CachedResource::FinishLoading(data);

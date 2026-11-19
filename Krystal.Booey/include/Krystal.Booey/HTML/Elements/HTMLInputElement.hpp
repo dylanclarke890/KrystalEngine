@@ -539,7 +539,7 @@ namespace krys::boo
 
     KRYS_NODISCARD bool IsTelephoneField() const noexcept;
 
-    KRYS_NODISCARD bool IsURLField() const noexcept;
+    KRYS_NODISCARD bool IsUrlField() const noexcept;
 
     KRYS_NODISCARD bool IsDateField() const noexcept;
 

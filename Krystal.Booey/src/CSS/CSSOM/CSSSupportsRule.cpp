@@ -56,7 +56,7 @@ namespace krys::boo
   {
     StringBuilder builder;
     builder.Append(u8"@supports ", ConditionText());
-    AppendCSSTextWithReplacementURLsForItems(builder, context);
+    AppendCSSTextWithReplacementUrlsForItems(builder, context);
     return krys::move(builder).ToString();
   }
 

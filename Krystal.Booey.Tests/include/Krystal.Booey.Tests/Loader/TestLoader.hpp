@@ -35,18 +35,18 @@ namespace krys::boo::tests
     HashMap<utf8_string, uint16> StatusCodes;
     List<utf8_string> Requests;
     bool Defer {false};
-    List<Pair<net::URL, Func<void(LoadResult &&)>>> Deferred;
+    List<Pair<net::Url, Func<void(LoadResult &&)>>> Deferred;
 
     void LoadResource(LocalFrame &, const ResourceRequest &request, const ResourceLoaderOptions &,
                       Func<void(LoadResult &&)> &&completionHandler) noexcept override
     {
-      Requests.push_back(request.URL().String());
+      Requests.push_back(request.Url().String());
       if (Defer)
       {
-        Deferred.emplace_back(request.URL(), krys::move(completionHandler));
+        Deferred.emplace_back(request.Url(), krys::move(completionHandler));
         return;
       }
-      Complete(request.URL(), completionHandler);
+      Complete(request.Url(), completionHandler);
     }
 
     /// @brief Serves @p text at @p url as @p mimeType.
@@ -80,7 +80,7 @@ namespace krys::boo::tests
     }
 
   private:
-    void Complete(const net::URL &url, const Func<void(LoadResult &&)> &completionHandler) noexcept
+    void Complete(const net::Url &url, const Func<void(LoadResult &&)> &completionHandler) noexcept
     {
       // As a network or file load would, the strategy ignores the URL's fragment.
       auto key = url.StringWithoutFragmentIdentifier();

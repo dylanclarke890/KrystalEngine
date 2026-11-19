@@ -39,16 +39,16 @@ namespace krys::boo
   {
   private:
     WeakPtr<LegacyRenderSVGResourceContainer> _legacyRenderResource;
-    style::URL _resourceURL;
+    style::Url _resourceUrl;
 
   public:
     KRYS_NODISCARD static Ref<SVGResourceImage> Create(LegacyRenderSVGResourceContainer &,
-                                                       const style::URL &) noexcept;
+                                                       const style::Url &) noexcept;
 
     ~SVGResourceImage() noexcept override;
 
   private:
-    SVGResourceImage(LegacyRenderSVGResourceContainer &, style::URL) noexcept;
+    SVGResourceImage(LegacyRenderSVGResourceContainer &, style::Url) noexcept;
 
     ImageDrawResult Draw(GraphicsContext &, const FloatRect &destinationRect, const FloatRect &sourceRect,
                          ImagePaintingOptions = {}) noexcept final;

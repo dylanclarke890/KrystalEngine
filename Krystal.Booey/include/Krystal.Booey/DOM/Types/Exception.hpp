@@ -45,7 +45,7 @@ namespace krys::boo
     SecurityError,
     NetworkError,
     AbortError,
-    URLMismatchError,
+    UrlMismatchError,
     QuotaExceededError,
     TimeoutError,
     InvalidNodeTypeError,

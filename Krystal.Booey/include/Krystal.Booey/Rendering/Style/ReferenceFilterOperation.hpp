@@ -26,7 +26,7 @@
 #pragma once
 
 #include "Krystal.Booey/Graphics/Filters/FilterOperation.hpp"
-#include "Krystal.Booey/Style/Values/Primitives/URL.hpp"
+#include "Krystal.Booey/Style/Values/Primitives/Url.hpp"
 #include "Krystal.Core/Attributes.hpp"
 #include "Krystal.Core/Strings/StringAtom.hpp"
 #include "Krystal.Core/Types/RefPtr.hpp"
@@ -39,11 +39,11 @@ namespace krys::boo::style
   class ReferenceFilterOperation final : public FilterOperation
   {
   private:
-    URL _url;
+    style::Url _url;
     StringAtom _fragment;
 
   public:
-    KRYS_NODISCARD static Ref<ReferenceFilterOperation> Create(URL url, StringAtom fragment) noexcept
+    KRYS_NODISCARD static Ref<ReferenceFilterOperation> Create(style::Url url, StringAtom fragment) noexcept
     {
       return AdoptRef(*new ReferenceFilterOperation(krys::move(url), krys::move(fragment)));
     }
@@ -73,7 +73,7 @@ namespace krys::boo::style
       return true;
     }
 
-    KRYS_NODISCARD const URL &Url() const noexcept
+    KRYS_NODISCARD const style::Url &Url() const noexcept
     {
       return _url;
     }
@@ -84,7 +84,7 @@ namespace krys::boo::style
     }
 
   private:
-    ReferenceFilterOperation(URL &&, StringAtom &&) noexcept;
+    ReferenceFilterOperation(style::Url &&, StringAtom &&) noexcept;
 
     KRYS_NODISCARD bool Equals(const FilterOperation &) const noexcept override;
 

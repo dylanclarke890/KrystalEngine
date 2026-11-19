@@ -8,20 +8,20 @@ namespace krys::boo::css::parse_property::tests
 
   namespace
   {
-    template <AllowedURLModifiers Allowed>
+    template <AllowedUrlModifiers Allowed>
     constexpr auto Consume = [](TokenRange &tokens, PropertyParserState &state)
     {
-      return ConsumeURL(tokens, state, Allowed);
+      return ConsumeUrl(tokens, state, Allowed);
     };
 
     constexpr auto AllModifiers =
-      AllowedURLModifiers::CrossOrigin | AllowedURLModifiers::Integrity | AllowedURLModifiers::ReferrerPolicy;
+      AllowedUrlModifiers::CrossOrigin | AllowedUrlModifiers::Integrity | AllowedUrlModifiers::ReferrerPolicy;
   }
 
   TEST_CASE("parse_property(ConsumeURL)", "[CSS][Properties][Consumers]")
   {
-    ParserContext context {ParserMode::HTMLStandard, net::URL(u8"https://example.com/dir/")};
-    auto consume = Consume<AllowedURLModifiers::None>;
+    ParserContext context {ParserMode::HTMLStandard, net::Url(u8"https://example.com/dir/")};
+    auto consume = Consume<AllowedUrlModifiers::None>;
 
     CHECK(ConsumeToText(u8"url(a.png)", consume, context) == "url(\"a.png\")");
     CHECK(ConsumeToText(u8"url(\"a.png\")", consume, context) == "url(\"a.png\")");
@@ -38,7 +38,7 @@ namespace krys::boo::css::parse_property::tests
 
   TEST_CASE("parse_property(ConsumeURL modifiers)", "[CSS][Properties][Consumers]")
   {
-    ParserContext context {ParserMode::HTMLStandard, net::URL(u8"https://example.com/")};
+    ParserContext context {ParserMode::HTMLStandard, net::Url(u8"https://example.com/")};
 
     CHECK(ConsumeToText(u8"url(\"a\" cross-origin(anonymous))", Consume<AllModifiers>, context)
           == "url(\"a\" cross-origin(anonymous))");
@@ -51,7 +51,7 @@ namespace krys::boo::css::parse_property::tests
                         context)
           == "<null>");
     CHECK(ConsumeToText(u8"url(\"a\" cross-origin(foo))", Consume<AllModifiers>, context) == "<null>");
-    CHECK(ConsumeToText(u8"url(\"a\" cross-origin(anonymous))", Consume<AllowedURLModifiers::ReferrerPolicy>,
+    CHECK(ConsumeToText(u8"url(\"a\" cross-origin(anonymous))", Consume<AllowedUrlModifiers::ReferrerPolicy>,
                         context)
           == "<null>");
     CHECK(ConsumeToText(u8"url(\"a\" foo(bar))", Consume<AllModifiers>, context) == "<null>");

@@ -111,7 +111,7 @@ Status: reviewed (2026-11-01)
 ##### [7.4.2.1 Supporting concepts](https://html.spec.whatwg.org/#navigation-supporting-concepts)
 
 Status: reviewed (2026-11-01)
-> There are no source or target snapshot params (see `KNOWN-ISSUES.md`); the navigation must be a replace for the initial about:blank document (`FrameLoader::UpdateURLAndHistory`, `Navigation::Navigate`). User involvement is `NavigationAction::IsRequestFromClientOrUserInput` and the window's transient activation.
+> There are no source or target snapshot params (see `KNOWN-ISSUES.md`); the navigation must be a replace for the initial about:blank document (`FrameLoader::UpdateUrlAndHistory`, `Navigation::Navigate`). User involvement is `NavigationAction::IsRequestFromClientOrUserInput` and the window's transient activation.
 <!-- definitions: source-snapshot-params source-snapshot-params-activation source-snapshot-params-sandbox source-snapshot-params-download source-snapshot-params-client source-snapshot-params-policy-container target-snapshot-params target-snapshot-params-sandbox target-snapshot-params-iframe-referrer-policy navigation-params navigation-params-id navigation-params-navigable navigation-params-request navigation-params-response navigation-params-fetch-controller navigation-params-commit-early-hints navigation-params-coop-enforcement-result navigation-params-reserved-environment navigation-params-origin navigation-params-policy-container navigation-params-sandboxing navigation-params-iframe-referrer-policy navigation-params-coop navigation-params-nav-timing-type navigation-params-about-base-url navigation-params-user-involvement navigation-id navigationhistorybehavior-push navigationhistorybehavior-replace navigationhistorybehavior-auto history-handling-behavior user-navigation-involvement uni-browser-ui uni-activation uni-none -->
 
 - [x] [snapshot source snapshot params](https://html.spec.whatwg.org/#snapshotting-source-snapshot-params) — To snapshot source snapshot params given a Document-or-null sourceDocument:
@@ -133,8 +133,8 @@ Status: reviewed (2026-11-01)
 ##### [7.4.2.2 Beginning navigation](https://html.spec.whatwg.org/#beginning-navigation)
 
 Status: reviewed (2026-11-01)
-> Fixed: a frame doesn't navigate while its document's beforeunload, pagehide or unload is dispatched (step 9: `FrameLoader::IsNavigationAllowed`, checked by `LoadURL`, `LoadPostRequest` and `NavigationScheduler`).
-> `FrameLoader::LoadURL` and `LoadPostRequest`: "auto" history handling is a replace for the document's own URL, and a URL that differs only in its fragment is a fragment navigation. Follows upstream's `FrameLoader` and `HistoryController` rather than these steps (see `DIFFERENCES.md`).
+> Fixed: a frame doesn't navigate while its document's beforeunload, pagehide or unload is dispatched (step 9: `FrameLoader::IsNavigationAllowed`, checked by `LoadUrl`, `LoadPostRequest` and `NavigationScheduler`).
+> `FrameLoader::LoadUrl` and `LoadPostRequest`: "auto" history handling is a replace for the document's own URL, and a URL that differs only in its fragment is a fragment navigation. Follows upstream's `FrameLoader` and `HistoryController` rather than these steps (see `DIFFERENCES.md`).
 <!-- definitions: navigation-resource navigation-response exceptions-enabled navigation-hh navigation-navigation-api-state navigation-form-data-entry-list navigation-referrer-policy navigation-user-involvement navigation-source-element navigation-initial-insertion navigation-api-method-tracker-2 -->
 
 - [x] [navigate](https://html.spec.whatwg.org/#navigate) — To navigate a navigable navigable to a URL url using an optional Document-or-null sourceDocument (default null), with an optional POST resource, string, or null documentResource (default null), an optional response-or-null response (default null), an optional boolean exceptionsEnabled (default fals…
@@ -460,7 +460,7 @@ Status: reviewed (2026-11-01)
 #### [7.4.4 Non-fragment synchronous "navigations"](https://html.spec.whatwg.org/#navigate-non-frag-sync)
 
 Status: reviewed (2026-11-01)
-> `FrameLoader::UpdateURLAndHistory`, with `HistoryController::PushState` and `ReplaceState`.
+> `FrameLoader::UpdateUrlAndHistory`, with `HistoryController::PushState` and `ReplaceState`.
 <!-- definitions: uhus-serializeddata uhus-historyhandling -->
 
 - [x] [URL and history update steps](https://html.spec.whatwg.org/#url-and-history-update-steps) — The URL and history update steps, given a Document document, a URL newURL, an optional serialized state-or-null serializedData (default null), and an optional history handling behavior historyHandling (default "replace"), are:
