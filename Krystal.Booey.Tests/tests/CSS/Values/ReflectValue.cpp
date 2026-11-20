@@ -5,14 +5,6 @@
 
 namespace krys::boo::css::tests
 {
-  namespace
-  {
-    KRYS_NODISCARD Ref<PrimitiveValue> Px(double value) noexcept
-    {
-      return PrimitiveValue::Create(value, UnitType::px);
-    }
-  }
-
   TEST_CASE_METHOD(ValueFixture, "ReflectValue::Create", "[CSS][Values][ReflectValue]")
   {
     SECTION("Without a mask")

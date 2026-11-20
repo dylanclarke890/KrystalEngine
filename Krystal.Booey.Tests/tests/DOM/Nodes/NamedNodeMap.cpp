@@ -1,5 +1,6 @@
 ﻿#include "Krystal.Booey/DOM/Nodes/NamedNodeMap.hpp"
 #include "catch2/catch_test_macros.hpp"
+#include "Krystal.Booey.Tests/DOM/TestElement.hpp"
 #include "Krystal.Booey/DOM/Nodes/Attr.hpp"
 #include "Krystal.Booey/DOM/Nodes/Element.hpp"
 #include "Krystal.Booey/DOM/Nodes/HTMLDocument.hpp"
@@ -10,14 +11,12 @@ namespace krys::boo::dom::tests
 {
   namespace
   {
-    constexpr const char8 *TestNamespace = u8"http://example.com/ns";
-
-    struct CommonTestData
+    struct NamedNodeMapTestData
     {
       Ref<Document> Document;
       Ref<Element> Node;
 
-      CommonTestData()
+      NamedNodeMapTestData()
           : Document(CreateRef<HTMLDocument>()), Node(Document->CreateElement(u8"test-element").Value())
       {
       }
@@ -47,7 +46,7 @@ namespace krys::boo::dom::tests
             "[DOM][NamedNodeMap][dom:interface-namednodemap][dom:dom-namednodemap-length]"
             "[dom:concept-namednodemap-element][dom:concept-namednodemap-attribute]")
   {
-    CommonTestData data;
+    NamedNodeMapTestData data;
     auto &attributes = data.Attributes();
     CHECK(attributes.Length() == 0uz);
 
@@ -62,7 +61,7 @@ namespace krys::boo::dom::tests
   TEST_CASE("NamedNodeMap.item(): the attribute at the index, or null past the end",
             "[DOM][NamedNodeMap][dom:dom-namednodemap-item]")
   {
-    CommonTestData data;
+    NamedNodeMapTestData data;
     CHECK(data.Attributes().Item(0) == nullptr);
 
     auto attr1 = data.NewAttribute(u8"test-attr1", u8"value1");
@@ -83,7 +82,7 @@ namespace krys::boo::dom::tests
   {
     SECTION("Names with uppercase letters are left out for an HTML element in an HTML document")
     {
-      CommonTestData data;
+      NamedNodeMapTestData data;
       REQUIRE_FALSE(data.Node->SetAttribute(u8"b", u8"").HasException());
       REQUIRE_FALSE(data.Node->SetAttributeNS(u8"urn:a", u8"x:y", u8"").HasException());
       REQUIRE_FALSE(data.Node->SetAttributeNS(null, u8"Upper", u8"").HasException());
@@ -109,7 +108,7 @@ namespace krys::boo::dom::tests
   TEST_CASE("NamedNodeMap.getNamedItem() and getNamedItemNS(): get an attribute by name, or by namespace",
             "[DOM][NamedNodeMap][dom:dom-namednodemap-getnameditem][dom:dom-namednodemap-getnameditemns]")
   {
-    CommonTestData data;
+    NamedNodeMapTestData data;
     CHECK(data.Attributes().GetNamedItem(u8"test-attr") == nullptr);
     CHECK(data.Attributes().GetNamedItemNS(TestNamespace, u8"test-attr") == nullptr);
 
@@ -128,7 +127,7 @@ namespace krys::boo::dom::tests
   TEST_CASE("NamedNodeMap.setNamedItem() and setNamedItemNS(): set an attribute, returning the one replaced",
             "[DOM][NamedNodeMap][dom:dom-namednodemap-setnameditem][dom:dom-namednodemap-setnameditemns]")
   {
-    CommonTestData data;
+    NamedNodeMapTestData data;
     using SetNamedItem = ExceptionOr<RefPtr<Attr>> (NamedNodeMap::*)(Attr &) noexcept;
     for (auto set : {SetNamedItem(&NamedNodeMap::SetNamedItem), SetNamedItem(&NamedNodeMap::SetNamedItemNS)})
     {
@@ -156,7 +155,7 @@ namespace krys::boo::dom::tests
     "NamedNodeMap.removeNamedItem() and removeNamedItemNS(): remove the attribute, or throw if none",
     "[DOM][NamedNodeMap][dom:dom-namednodemap-removenameditem][dom:dom-namednodemap-removenameditemns]")
   {
-    CommonTestData data;
+    NamedNodeMapTestData data;
     auto attr = data.NewAttribute(u8"test-attr", u8"value");
     auto nsAttr = data.NewAttributeNS(TestNamespace, u8"x:test-attr", u8"ns");
     REQUIRE_FALSE(data.Attributes().SetNamedItem(*attr).HasException());

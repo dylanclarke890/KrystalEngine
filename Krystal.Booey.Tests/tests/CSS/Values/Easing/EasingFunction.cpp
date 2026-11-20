@@ -1,5 +1,6 @@
 ﻿#include "Krystal.Booey/CSS/Values/Easing/EasingFunction.hpp"
 #include "catch2/catch_test_macros.hpp"
+#include "Krystal.Booey.Tests/CSS/ValueTestUtils.hpp"
 #include "Krystal.Booey/CSS/Values/Primitives/NumericTypesComputedStyleDependencies.hpp"
 #include "Krystal.Booey/CSS/Values/Primitives/NumericTypesSerialisation.hpp"
 #include "Krystal.Booey/CSS/Values/Primitives/NumericTypesValueVisitation.hpp"
@@ -9,11 +10,14 @@ namespace krys::boo::css::tests
 {
   namespace
   {
-    CSSOMString SerialiseForTest(const EasingFunction &value)
+    CSSOMString SerialiseEasing(const EasingFunction &value)
     {
       return Serialise(DefaultSerialisationContext(), value);
     }
+  }
 
+  namespace
+  {
     EasingFunction Steps(StepsEasingParameters parameters)
     {
       return EasingFunction {StepsEasingFunction {.Parameters = krys::move(parameters)}};
@@ -61,35 +65,35 @@ namespace krys::boo::css::tests
 
   TEST_CASE("EasingFunction(Serialise keywords)", "[CSS][Easing][EasingFunction]")
   {
-    CHECK(SerialiseForTest({keywords::Linear {}}) == u8"linear");
-    CHECK(SerialiseForTest({keywords::Ease {}}) == u8"ease");
-    CHECK(SerialiseForTest({keywords::EaseIn {}}) == u8"ease-in");
-    CHECK(SerialiseForTest({keywords::EaseOut {}}) == u8"ease-out");
-    CHECK(SerialiseForTest({keywords::EaseInOut {}}) == u8"ease-in-out");
-    CHECK(SerialiseForTest({keywords::StepStart {}}) == u8"step-start");
-    CHECK(SerialiseForTest({keywords::StepEnd {}}) == u8"step-end");
+    CHECK(SerialiseEasing({keywords::Linear {}}) == u8"linear");
+    CHECK(SerialiseEasing({keywords::Ease {}}) == u8"ease");
+    CHECK(SerialiseEasing({keywords::EaseIn {}}) == u8"ease-in");
+    CHECK(SerialiseEasing({keywords::EaseOut {}}) == u8"ease-out");
+    CHECK(SerialiseEasing({keywords::EaseInOut {}}) == u8"ease-in-out");
+    CHECK(SerialiseEasing({keywords::StepStart {}}) == u8"step-start");
+    CHECK(SerialiseEasing({keywords::StepEnd {}}) == u8"step-end");
   }
 
   TEST_CASE("EasingFunction(Serialise functions)", "[CSS][Easing][EasingFunction]")
   {
-    CHECK(SerialiseForTest(CubicBezier(0.25_css_number, 0.1_css_number, 0.25_css_number, 1_css_number))
+    CHECK(SerialiseEasing(CubicBezier(0.25_css_number, 0.1_css_number, 0.25_css_number, 1_css_number))
           == u8"cubic-bezier(0.25, 0.1, 0.25, 1)");
-    CHECK(SerialiseForTest(Linear()) == u8"linear(0, 0.5 50%, 1 80% 90%)");
-    CHECK(SerialiseForTest(Spring()) == u8"spring(1 100 10 0)");
+    CHECK(SerialiseEasing(Linear()) == u8"linear(0, 0.5 50%, 1 80% 90%)");
+    CHECK(SerialiseEasing(Spring()) == u8"spring(1 100 10 0)");
   }
 
   TEST_CASE("EasingFunction(Serialise steps)", "[CSS][Easing][EasingFunction]")
   {
     using P = StepsEasingParameters;
 
-    CHECK(SerialiseForTest(Steps({P::JumpStart {4_css_integer}})) == u8"steps(4, jump-start)");
-    CHECK(SerialiseForTest(Steps({P::JumpBoth {4_css_integer}})) == u8"steps(4, jump-both)");
-    CHECK(SerialiseForTest(Steps({P::Start {4_css_integer}})) == u8"steps(4, start)");
-    CHECK(SerialiseForTest(Steps({P::JumpNone {2_css_integer}})) == u8"steps(2, jump-none)");
+    CHECK(SerialiseEasing(Steps({P::JumpStart {4_css_integer}})) == u8"steps(4, jump-start)");
+    CHECK(SerialiseEasing(Steps({P::JumpBoth {4_css_integer}})) == u8"steps(4, jump-both)");
+    CHECK(SerialiseEasing(Steps({P::Start {4_css_integer}})) == u8"steps(4, start)");
+    CHECK(SerialiseEasing(Steps({P::JumpNone {2_css_integer}})) == u8"steps(2, jump-none)");
 
     // `jump-end` and `end` are the default, so the keyword is omitted.
-    CHECK(SerialiseForTest(Steps({P::JumpEnd {4_css_integer}})) == u8"steps(4)");
-    CHECK(SerialiseForTest(Steps({P::End {4_css_integer}})) == u8"steps(4)");
+    CHECK(SerialiseEasing(Steps({P::JumpEnd {4_css_integer}})) == u8"steps(4)");
+    CHECK(SerialiseEasing(Steps({P::End {4_css_integer}})) == u8"steps(4)");
   }
 
   TEST_CASE("EasingFunction(Equality)", "[CSS][Easing][EasingFunction]")

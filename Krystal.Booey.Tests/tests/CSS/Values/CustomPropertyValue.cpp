@@ -1,6 +1,7 @@
 ﻿#include "Krystal.Booey/CSS/Values/CustomPropertyValue.hpp"
 #include "catch2/catch_test_macros.hpp"
 #include "Krystal.Booey.Tests/CSS/ValueTestUtils.hpp"
+#include "Krystal.Booey.Tests/CSS/VariableTestUtils.hpp"
 #include "Krystal.Booey/CSS/Parser/InputStream.hpp"
 #include "Krystal.Booey/CSS/Parser/Tokenizer.hpp"
 
@@ -8,24 +9,6 @@ namespace krys::boo::css::tests
 {
   namespace
   {
-    Ref<VariableData> MakeData(utf8_stringview css)
-    {
-      if (css.empty())
-      {
-        return VariableData::Create(css::TokenRange(Span<const Token> {}));
-      }
-
-      InputStream input {CSSOMString(css)};
-      Tokenizer tokenizer {input};
-      REQUIRE(tokenizer.PumpTokenizer());
-      return VariableData::Create(tokenizer.Tokens());
-    }
-
-    Ref<VariableReferenceValue> MakeReference(utf8_stringview css)
-    {
-      return VariableReferenceValue::Create(MakeData(css));
-    }
-
     const CSSOMStringAtom &Name()
     {
       static const CSSOMStringAtom name {u8"--x"};
@@ -49,7 +32,7 @@ namespace krys::boo::css::tests
 
     SECTION("CreateUnresolved")
     {
-      auto reference = MakeReference(u8"var(--y)");
+      auto reference = MakeVariableReference(u8"var(--y)");
       auto *referencePointer = reference.get();
       auto value = CustomPropertyValue::CreateUnresolved(Name(), krys::move(reference));
       CHECK(value->IsVariableReference());
@@ -62,7 +45,7 @@ namespace krys::boo::css::tests
 
     SECTION("CreateSyntaxAll")
     {
-      auto data = MakeData(u8"1px solid");
+      auto data = MakeVariableData(u8"1px solid");
       auto *dataPointer = data.get();
       auto value = CustomPropertyValue::CreateSyntaxAll(Name(), krys::move(data));
       CHECK(value->IsVariableData());
@@ -86,8 +69,9 @@ namespace krys::boo::css::tests
   {
     // Only the value is serialised, not the name.
     CHECK(CssText(*CustomPropertyValue::CreateEmpty(Name())).empty());
-    CHECK(CssText(*CustomPropertyValue::CreateSyntaxAll(Name(), MakeData(u8"1px solid"))) == "1px solid");
-    CHECK(CssText(*CustomPropertyValue::CreateUnresolved(Name(), MakeReference(u8"var(--y, red)")))
+    CHECK(CssText(*CustomPropertyValue::CreateSyntaxAll(Name(), MakeVariableData(u8"1px solid")))
+          == "1px solid");
+    CHECK(CssText(*CustomPropertyValue::CreateUnresolved(Name(), MakeVariableReference(u8"var(--y, red)")))
           == "var(--y, red)");
 
     CHECK(CssText(*CustomPropertyValue::CreateWithGlobalKeyword(Name(), GlobalKeyword::Initial))
@@ -102,15 +86,17 @@ namespace krys::boo::css::tests
 
   TEST_CASE_METHOD(ValueFixture, "CustomPropertyValue::IsCurrentColor", "[CSS][Values][CustomPropertyValue]")
   {
-    CHECK(CustomPropertyValue::CreateSyntaxAll(Name(), MakeData(u8"currentcolor"))->IsCurrentColor());
-    CHECK(CustomPropertyValue::CreateSyntaxAll(Name(), MakeData(u8"currentcolor "))->IsCurrentColor());
-    CHECK_FALSE(CustomPropertyValue::CreateSyntaxAll(Name(), MakeData(u8"red"))->IsCurrentColor());
+    CHECK(CustomPropertyValue::CreateSyntaxAll(Name(), MakeVariableData(u8"currentcolor"))->IsCurrentColor());
+    CHECK(
+      CustomPropertyValue::CreateSyntaxAll(Name(), MakeVariableData(u8"currentcolor "))->IsCurrentColor());
+    CHECK_FALSE(CustomPropertyValue::CreateSyntaxAll(Name(), MakeVariableData(u8"red"))->IsCurrentColor());
     CHECK_FALSE(
-      CustomPropertyValue::CreateSyntaxAll(Name(), MakeData(u8"currentcolor red"))->IsCurrentColor());
+      CustomPropertyValue::CreateSyntaxAll(Name(), MakeVariableData(u8"currentcolor red"))->IsCurrentColor());
     CHECK_FALSE(CustomPropertyValue::CreateEmpty(Name())->IsCurrentColor());
     CHECK_FALSE(
       CustomPropertyValue::CreateWithGlobalKeyword(Name(), GlobalKeyword::Inherit)->IsCurrentColor());
-    CHECK_FALSE(CustomPropertyValue::CreateUnresolved(Name(), MakeReference(u8"var(--y)"))->IsCurrentColor());
+    CHECK_FALSE(
+      CustomPropertyValue::CreateUnresolved(Name(), MakeVariableReference(u8"var(--y)"))->IsCurrentColor());
   }
 
   TEST_CASE_METHOD(ValueFixture, "CustomPropertyValue equality and hashing",
@@ -118,18 +104,18 @@ namespace krys::boo::css::tests
   {
     SECTION("Data")
     {
-      auto a = CustomPropertyValue::CreateSyntaxAll(Name(), MakeData(u8"1px"));
-      CHECK(*a == *CustomPropertyValue::CreateSyntaxAll(Name(), MakeData(u8"1px")));
-      CHECK_FALSE(*a == *CustomPropertyValue::CreateSyntaxAll(Name(), MakeData(u8"2px")));
-      CHECK_FALSE(*a == *CustomPropertyValue::CreateSyntaxAll(u8"--other", MakeData(u8"1px")));
+      auto a = CustomPropertyValue::CreateSyntaxAll(Name(), MakeVariableData(u8"1px"));
+      CHECK(*a == *CustomPropertyValue::CreateSyntaxAll(Name(), MakeVariableData(u8"1px")));
+      CHECK_FALSE(*a == *CustomPropertyValue::CreateSyntaxAll(Name(), MakeVariableData(u8"2px")));
+      CHECK_FALSE(*a == *CustomPropertyValue::CreateSyntaxAll(u8"--other", MakeVariableData(u8"1px")));
       CHECK(*CustomPropertyValue::CreateEmpty(Name()) == *CustomPropertyValue::CreateEmpty(Name()));
     }
 
     SECTION("References")
     {
-      auto a = CustomPropertyValue::CreateUnresolved(Name(), MakeReference(u8"var(--y)"));
-      CHECK(*a == *CustomPropertyValue::CreateUnresolved(Name(), MakeReference(u8"var(--y)")));
-      CHECK_FALSE(*a == *CustomPropertyValue::CreateUnresolved(Name(), MakeReference(u8"var(--z)")));
+      auto a = CustomPropertyValue::CreateUnresolved(Name(), MakeVariableReference(u8"var(--y)"));
+      CHECK(*a == *CustomPropertyValue::CreateUnresolved(Name(), MakeVariableReference(u8"var(--y)")));
+      CHECK_FALSE(*a == *CustomPropertyValue::CreateUnresolved(Name(), MakeVariableReference(u8"var(--z)")));
     }
 
     SECTION("Keywords")
@@ -142,8 +128,8 @@ namespace krys::boo::css::tests
     SECTION("Different kinds are never equal")
     {
       // Same tokens, but data vs a reference.
-      auto data = CustomPropertyValue::CreateSyntaxAll(Name(), MakeData(u8"var(--y)"));
-      auto reference = CustomPropertyValue::CreateUnresolved(Name(), MakeReference(u8"var(--y)"));
+      auto data = CustomPropertyValue::CreateSyntaxAll(Name(), MakeVariableData(u8"var(--y)"));
+      auto reference = CustomPropertyValue::CreateUnresolved(Name(), MakeVariableReference(u8"var(--y)"));
       CHECK_FALSE(*data == *reference);
       CHECK_FALSE(*CustomPropertyValue::CreateEmpty(Name())
                   == *CustomPropertyValue::CreateWithGlobalKeyword(Name(), GlobalKeyword::Initial));
@@ -157,14 +143,14 @@ namespace krys::boo::css::tests
   TEST_CASE_METHOD(ValueFixture, "CustomPropertyValue visitation", "[CSS][Values][CustomPropertyValue]")
   {
     // Only a variable reference is a child value.
-    auto reference = MakeReference(u8"var(--y)");
+    auto reference = MakeVariableReference(u8"var(--y)");
     auto *referencePointer = reference.get();
     auto unresolved = CustomPropertyValue::CreateUnresolved(Name(), krys::move(reference));
     auto children = Children(*unresolved);
     REQUIRE(children.size() == 1uz);
     CHECK(children[0uz] == referencePointer);
 
-    CHECK(Children(*CustomPropertyValue::CreateSyntaxAll(Name(), MakeData(u8"1px"))).empty());
+    CHECK(Children(*CustomPropertyValue::CreateSyntaxAll(Name(), MakeVariableData(u8"1px"))).empty());
     CHECK(Children(*CustomPropertyValue::CreateWithGlobalKeyword(Name(), GlobalKeyword::Inherit)).empty());
   }
 }

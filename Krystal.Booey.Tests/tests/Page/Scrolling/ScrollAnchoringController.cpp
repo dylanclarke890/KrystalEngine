@@ -40,11 +40,6 @@ namespace krys::boo::tests
       return *fixture.TestFrame->View();
     }
 
-    KRYS_NODISCARD int32 ViewY(AnimationPageFixture &fixture) noexcept
-    {
-      return View(fixture).GetScrollPosition().Y();
-    }
-
     void ScrollViewTo(AnimationPageFixture &fixture, int32 y) noexcept
     {
       View(fixture).SetScrollPosition({0, y});

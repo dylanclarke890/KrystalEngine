@@ -21,7 +21,8 @@ namespace krys::boo::html::tests
   {
     /// @brief Dispatches a trusted-looking click of @p button at @p target, with Ctrl held if @p ctrlKey and
     /// Shift if @p shiftKey.
-    void Click(Element &target, int16 button = 0, bool ctrlKey = false, bool shiftKey = false) noexcept
+    void DispatchClick(Element &target, int16 button = 0, bool ctrlKey = false,
+                       bool shiftKey = false) noexcept
     {
       MouseEventInit init;
       init.Bubbles = true;
@@ -55,7 +56,7 @@ namespace krys::boo::html::tests
 
     SECTION("the host is asked, with the action")
     {
-      Click(fixture.ById(u8"inner"), 0, true);
+      DispatchClick(fixture.ById(u8"inner"), 0, true);
       REQUIRE(fixture.Navigations().size() == 1);
       auto &navigation = fixture.Navigations()[0];
       CHECK(navigation.Url == "https://example.com/dir/next.html");
@@ -74,7 +75,7 @@ namespace krys::boo::html::tests
 
     SECTION("a link without href isn't followed")
     {
-      Click(fixture.ById(u8"plain"));
+      DispatchClick(fixture.ById(u8"plain"));
       CHECK(fixture.Navigations().empty());
     }
 
@@ -82,25 +83,25 @@ namespace krys::boo::html::tests
     {
       auto handle =
         fixture.ById(u8"a").AddEventListener(u8"click", [](Event &event) { event.PreventDefault(); });
-      Click(fixture.ById(u8"inner"));
+      DispatchClick(fixture.ById(u8"inner"));
       CHECK(fixture.Navigations().empty());
     }
 
     SECTION("a target naming another browsing context asks for a new window")
     {
-      Click(fixture.ById(u8"blank"));
+      DispatchClick(fixture.ById(u8"blank"));
       REQUIRE(fixture.Navigations().size() == 1);
       CHECK(fixture.Navigations()[0].IsNewWindow);
       CHECK(fixture.Navigations()[0].NewWindowName == "_blank");
 
-      Click(fixture.ById(u8"named"));
+      DispatchClick(fixture.ById(u8"named"));
       REQUIRE(fixture.Navigations().size() == 2);
       CHECK(fixture.Navigations()[1].NewWindowName == "results");
     }
 
     SECTION("a download ignores the target")
     {
-      Click(fixture.ById(u8"dl"));
+      DispatchClick(fixture.ById(u8"dl"));
       REQUIRE(fixture.Navigations().size() == 1);
       CHECK_FALSE(fixture.Navigations()[0].IsNewWindow);
       CHECK(fixture.Navigations()[0].Action.DownloadAttribute() == u8"saved.zip");
@@ -111,18 +112,18 @@ namespace krys::boo::html::tests
       auto base = fixture.Document->CreateElement(u8"base").ReleaseValue();
       (void)base->SetAttribute(u8"target", u8"side");
       REQUIRE_FALSE(fixture.ById(u8"a").ParentNode()->AppendChild(*base).HasException());
-      Click(fixture.ById(u8"inner"));
+      DispatchClick(fixture.ById(u8"inner"));
       REQUIRE(fixture.Navigations().size() == 1);
       CHECK(fixture.Navigations()[0].NewWindowName == "side");
     }
 
     SECTION("the middle button follows it too, and the host sees which button")
     {
-      Click(fixture.ById(u8"inner"), 1);
+      DispatchClick(fixture.ById(u8"inner"), 1);
       REQUIRE(fixture.Navigations().size() == 1);
       CHECK(fixture.Navigations()[0].Action.GetMouseEventData().value().Button == MouseButton::Middle);
       // The right button doesn't.
-      Click(fixture.ById(u8"inner"), 2);
+      DispatchClick(fixture.ById(u8"inner"), 2);
       CHECK(fixture.Navigations().size() == 1);
     }
   }
@@ -137,8 +138,8 @@ namespace krys::boo::html::tests
 
     SECTION("by default, they never act as links")
     {
-      Click(a);
-      Click(a, 0, false, true);
+      DispatchClick(a);
+      DispatchClick(a, 0, false, true);
       CHECK(fixture.Navigations().empty());
       MouseDown(a, true);
       CHECK_FALSE(a.IsLiveLink());
@@ -148,7 +149,7 @@ namespace krys::boo::html::tests
     SECTION("always")
     {
       settings->EditableLinkBehavior = EditableLinkBehavior::AlwaysLive;
-      Click(a);
+      DispatchClick(a);
       CHECK(fixture.Navigations().size() == 1);
       MouseDown(a, false);
       CHECK(IsDraggableLink(a));
@@ -157,9 +158,9 @@ namespace krys::boo::html::tests
     SECTION("only with the shift key")
     {
       settings->EditableLinkBehavior = EditableLinkBehavior::OnlyLiveWithShiftKey;
-      Click(a);
+      DispatchClick(a);
       CHECK(fixture.Navigations().empty());
-      Click(a, 0, false, true);
+      DispatchClick(a, 0, false, true);
       CHECK(fixture.Navigations().size() == 1);
 
       // A drag takes the shift key from the press that starts it.
@@ -197,12 +198,12 @@ namespace krys::boo::html::tests
   {
     NavigationFixture fixture(
       u8R"(<map name=m><area id=area href="area.html" target=_self><area id=nohref></map>)");
-    Click(fixture.ById(u8"area"));
+    DispatchClick(fixture.ById(u8"area"));
     REQUIRE(fixture.Navigations().size() == 1);
     CHECK(fixture.Navigations()[0].Url == "https://example.com/dir/area.html");
     CHECK_FALSE(fixture.Navigations()[0].IsNewWindow);
 
-    Click(fixture.ById(u8"nohref"));
+    DispatchClick(fixture.ById(u8"nohref"));
     CHECK(fixture.Navigations().size() == 1);
   }
 
@@ -216,7 +217,7 @@ namespace krys::boo::html::tests
 
     SECTION("a URL that doesn't parse isn't followed")
     {
-      Click(fixture.ById(u8"bad"));
+      DispatchClick(fixture.ById(u8"bad"));
       CHECK(fixture.Navigations().empty());
     }
 
@@ -236,7 +237,7 @@ namespace krys::boo::html::tests
 
     SECTION("an untrusted click on a server-side image map adds 0,0")
     {
-      Click(fixture.ById(u8"image"));
+      DispatchClick(fixture.ById(u8"image"));
       REQUIRE(fixture.Navigations().size() == 1);
       CHECK(fixture.Navigations()[0].Url == "https://example.com/dir/map.html#f?0,0");
     }

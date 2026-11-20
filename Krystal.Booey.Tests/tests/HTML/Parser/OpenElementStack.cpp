@@ -1,5 +1,6 @@
 ﻿#include "Krystal.Booey/HTML/Parser/OpenElementStack.hpp"
 #include "catch2/catch_test_macros.hpp"
+#include "Krystal.Booey.Tests/DOM/DOMTestUtils.hpp"
 #include "Krystal.Booey.Tests/DOM/TestElement.hpp"
 #include "Krystal.Booey/DOM/Iterators/SubtreeRanges.hpp"
 #include "Krystal.Booey/DOM/Nodes/HTMLDocument.hpp"
@@ -7,17 +8,7 @@
 
 namespace krys::boo::html::tests
 {
-  namespace
-  {
-    Ref<HTMLDocument> Parse(utf8_string &&input) noexcept
-    {
-      auto document = CreateRef<HTMLDocument>();
-      auto parser = CreateRef<DocumentParser>(*document);
-      parser->InputStream().Append(krys::move(input), IsEOF::Yes);
-      parser->PumpTokenizer();
-      return document;
-    }
-  }
+  using boo::tests::ParseDocument;
 
   TEST_CASE("OpenElementStack parsing children", "[HTML][OpenElementStack][html:the-stack-of-open-elements]")
   {
@@ -60,7 +51,7 @@ namespace krys::boo::html::tests
   TEST_CASE("DocumentParser finishes every element",
             "[HTML][OpenElementStack][html:the-stack-of-open-elements]")
   {
-    auto document = Parse(u8"<style>p { color: red }</style><p>a<b>b");
+    auto document = ParseDocument(u8"<style>p { color: red }</style><p>a<b>b");
 
     for (auto &element : dom::InclusiveDescendantRange(*document))
     {
@@ -73,10 +64,10 @@ namespace krys::boo::html::tests
 
   TEST_CASE("Document quirks mode", "[HTML][Document][html:the-initial-insertion-mode]")
   {
-    REQUIRE(Parse(u8"<p>")->InQuirksMode());
-    REQUIRE(Parse(u8"<!DOCTYPE html><p>")->InNoQuirksMode());
-    REQUIRE(
-      Parse(u8"<!DOCTYPE html PUBLIC \"-//W3C//DTD XHTML 1.0 Transitional//EN\"><p>")->InLimitedQuirksMode());
+    REQUIRE(ParseDocument(u8"<p>")->InQuirksMode());
+    REQUIRE(ParseDocument(u8"<!DOCTYPE html><p>")->InNoQuirksMode());
+    REQUIRE(ParseDocument(u8"<!DOCTYPE html PUBLIC \"-//W3C//DTD XHTML 1.0 Transitional//EN\"><p>")
+              ->InLimitedQuirksMode());
     REQUIRE(CreateRef<HTMLDocument>()->InNoQuirksMode());
   }
 }

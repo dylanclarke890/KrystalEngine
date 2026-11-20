@@ -1,6 +1,8 @@
 ﻿#include "Krystal.Booey/Style/Invalidation/Invalidator.hpp"
 #include "catch2/catch_test_macros.hpp"
+#include "Krystal.Booey.Tests/DOM/DOMTestUtils.hpp"
 #include "Krystal.Booey.Tests/Style/ResolverTestUtils.hpp"
+#include "Krystal.Booey.Tests/Style/StyleTestUtils.hpp"
 #include "Krystal.Booey/CSS/Parser/ParserContext.hpp"
 #include "Krystal.Booey/CSS/StyleSheets/StyleSheetContents.hpp"
 #include "Krystal.Booey/DOM/Nodes/ShadowRoot.hpp"
@@ -9,38 +11,11 @@
 
 namespace krys::boo::style::tests
 {
+  using boo::tests::CreateElement;
+
   namespace
   {
-    const boo::Color Blue {boo::Color::blue};
     const boo::Color Red {boo::Color::red};
-
-    KRYS_NODISCARD Ref<Element> Create(Document &document, DOMStringAtom localName)
-    {
-      auto element = document.CreateElement(krys::move(localName));
-      REQUIRE_FALSE(element.HasException());
-      return element.ReleaseValue();
-    }
-
-    KRYS_NODISCARD const RenderStyle &Rendered(const Element &element)
-    {
-      auto *style = element.GetRenderStyle();
-      REQUIRE(style);
-      return *style;
-    }
-
-    KRYS_NODISCARD Ref<HTMLStyleElement> CreateStyle(Document &document, DOMString &&text)
-    {
-      auto style = CreateRef<HTMLStyleElement>(document);
-      REQUIRE_FALSE(style->TextContent(krys::move(text)).HasException());
-      return style;
-    }
-
-    KRYS_NODISCARD Ref<css::StyleSheetContents> ParseSheet(const utf8_string &text)
-    {
-      auto contents = css::StyleSheetContents::Create(css::ParserContext(css::ParserMode::HTMLStandard));
-      contents->ParseString(text);
-      return contents;
-    }
   }
 
   TEST_CASE_METHOD(css::tests::ValueFixture, "Invalidator: style sheet changes", "[Style][Invalidator]")
@@ -155,9 +130,9 @@ namespace krys::boo::style::tests
     auto &document = *fixture.Document;
     auto &host = fixture.ById(u8"host");
     auto shadow = host.AttachShadow({}).ReleaseValue();
-    auto inner = Create(document, u8"div");
+    auto inner = CreateElement(document, u8"div");
     REQUIRE_FALSE(inner->SetAttribute(u8"class", u8"i").HasException());
-    auto slot = Create(document, u8"slot");
+    auto slot = CreateElement(document, u8"slot");
     REQUIRE_FALSE(shadow->AppendChild(*inner).HasException());
     REQUIRE_FALSE(shadow->AppendChild(*slot).HasException());
     document.UpdateStyleIfNeeded();

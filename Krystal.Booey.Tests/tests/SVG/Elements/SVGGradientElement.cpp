@@ -1,6 +1,7 @@
 ﻿#include "Krystal.Booey/SVG/Elements/SVGGradientElement.hpp"
 #include "catch2/catch_test_macros.hpp"
 #include "Krystal.Booey.Tests/Style/ResolverTestUtils.hpp"
+#include "Krystal.Booey.Tests/SVG/SVGTestUtils.hpp"
 #include "Krystal.Booey/SVG/Elements/SVGLinearGradientElement.hpp"
 #include "Krystal.Booey/SVG/Elements/SVGPatternElement.hpp"
 #include "Krystal.Booey/SVG/Elements/SVGRadialGradientElement.hpp"
@@ -14,17 +15,6 @@ namespace krys::boo::svg::tests
 {
   using style::tests::ResolverFixture;
 
-  namespace
-  {
-    template <typename T>
-    KRYS_NODISCARD T &ElementById(Document &document, DOMStringView id) noexcept
-    {
-      auto element = document.GetElementById(id);
-      krys_assert(element);
-      return Downcast<T>(Downcast<SVGElement>(*element));
-    }
-  }
-
   TEST_CASE_METHOD(css::tests::ValueFixture, "SVGGradientElement: attributes", "[SVG][SVGGradientElement]")
   {
     ResolverFixture fixture {
@@ -36,14 +26,14 @@ namespace krys::boo::svg::tests
       u8R"html(</svg>)html"};
 
     // The initial values: bounding box units, padding, no transform, a line from (0%, 0%) to (100%, 0%).
-    auto &defaults = ElementById<SVGLinearGradientElement>(*fixture.Document, u8"defaults");
+    auto &defaults = ById<SVGLinearGradientElement>(*fixture.Document, u8"defaults");
     CHECK(defaults.GradientUnits() == SVGUnitTypes::SVG_UNIT_TYPE_OBJECTBOUNDINGBOX);
     CHECK(defaults.SpreadMethod() == SVGSpreadMethodPad);
     CHECK(defaults.GradientTransform().Concatenate().IsIdentity());
     CHECK(defaults.X1().ValueAsString() == u8"0%");
     CHECK(defaults.X2().ValueAsString() == u8"100%");
 
-    auto &l = ElementById<SVGLinearGradientElement>(*fixture.Document, u8"l");
+    auto &l = ById<SVGLinearGradientElement>(*fixture.Document, u8"l");
     CHECK(l.GradientUnits() == SVGUnitTypes::SVG_UNIT_TYPE_USERSPACEONUSE);
     CHECK(l.SpreadMethod() == SVGSpreadMethodReflect);
     CHECK(l.GradientTransform().Concatenate() == AffineTransform::CreateTranslation({1, 2}));
@@ -51,13 +41,13 @@ namespace krys::boo::svg::tests
     CHECK(l.SpreadMethodAnimated().BaseVal() == SVGGradientElement::SVG_SPREADMETHOD_REFLECT);
 
     // Invalid enumerations keep their initial values; an invalid length its fallback.
-    auto &invalid = ElementById<SVGLinearGradientElement>(*fixture.Document, u8"invalid");
+    auto &invalid = ById<SVGLinearGradientElement>(*fixture.Document, u8"invalid");
     CHECK(invalid.GradientUnits() == SVGUnitTypes::SVG_UNIT_TYPE_OBJECTBOUNDINGBOX);
     CHECK(invalid.SpreadMethod() == SVGSpreadMethodPad);
     CHECK(invalid.X2().ValueAsString() == u8"100%");
 
     // The focal radius can't be negative.
-    auto &r = ElementById<SVGRadialGradientElement>(*fixture.Document, u8"r");
+    auto &r = ById<SVGRadialGradientElement>(*fixture.Document, u8"r");
     CHECK(r.Cx().ValueAsString() == u8"1");
     CHECK(r.Fy().ValueAsString() == u8"5");
     CHECK(r.Fr().ValueAsString() == u8"0%");
@@ -76,19 +66,18 @@ namespace krys::boo::svg::tests
     (void)fixture.Document->UpdateLayout();
 
     // Offsets are numbers or percentages; anything else is 0.
-    CHECK(ElementById<SVGStopElement>(*fixture.Document, u8"a").Offset() == 0.5f);
-    CHECK(ElementById<SVGStopElement>(*fixture.Document, u8"b").Offset() == 0.25f);
-    CHECK(ElementById<SVGStopElement>(*fixture.Document, u8"c").Offset() == 0);
-    CHECK(ElementById<SVGStopElement>(*fixture.Document, u8"d").Offset() == 1.5f);
+    CHECK(ById<SVGStopElement>(*fixture.Document, u8"a").Offset() == 0.5f);
+    CHECK(ById<SVGStopElement>(*fixture.Document, u8"b").Offset() == 0.25f);
+    CHECK(ById<SVGStopElement>(*fixture.Document, u8"c").Offset() == 0);
+    CHECK(ById<SVGStopElement>(*fixture.Document, u8"d").Offset() == 1.5f);
 
     // The stop's colour includes its opacity, and resolves currentcolor.
-    CHECK(ElementById<SVGStopElement>(*fixture.Document, u8"a").StopColorIncludingOpacity()
+    CHECK(ById<SVGStopElement>(*fixture.Document, u8"a").StopColorIncludingOpacity()
           == Color(Color::red).ColorWithAlphaMultipliedBy(0.5f));
-    CHECK(ElementById<SVGStopElement>(*fixture.Document, u8"b").StopColorIncludingOpacity()
-          == Color(Color::blue));
+    CHECK(ById<SVGStopElement>(*fixture.Document, u8"b").StopColorIncludingOpacity() == Color(Color::blue));
 
     // The gradient's stops are its child stops, their offsets clamped to increase and to at most 1.
-    auto stops = ElementById<SVGLinearGradientElement>(*fixture.Document, u8"g").BuildStops();
+    auto stops = ById<SVGLinearGradientElement>(*fixture.Document, u8"g").BuildStops();
     REQUIRE(stops.Stops().size() == 4);
     CHECK(stops.Stops()[0].Offset == 0.5f);
     CHECK(stops.Stops()[1].Offset == 0.5f);
@@ -111,8 +100,7 @@ namespace krys::boo::svg::tests
     // its own kind: the linear one's x1 doesn't reach the radial one, and only the common ones cross. Its
     // own stops win over those it references, and the focal point defaults to the centre.
     RadialGradientAttributes radial;
-    CHECK(
-      ElementById<SVGRadialGradientElement>(*fixture.Document, u8"radial").CollectGradientAttributes(radial));
+    CHECK(ById<SVGRadialGradientElement>(*fixture.Document, u8"radial").CollectGradientAttributes(radial));
     CHECK(radial.SpreadMethod() == SVGSpreadMethodRepeat);
     CHECK(radial.Cx().ValueAsString() == u8"0.1");
     CHECK(radial.Cy().ValueAsString() == u8"0.4");
@@ -121,8 +109,7 @@ namespace krys::boo::svg::tests
     CHECK(radial.Stops().Stops().size() == 2);
 
     LinearGradientAttributes linear;
-    CHECK(
-      ElementById<SVGLinearGradientElement>(*fixture.Document, u8"linear").CollectGradientAttributes(linear));
+    CHECK(ById<SVGLinearGradientElement>(*fixture.Document, u8"linear").CollectGradientAttributes(linear));
     CHECK(linear.X1().ValueAsString() == u8"0.3");
     CHECK(linear.SpreadMethod() == SVGSpreadMethodRepeat);
     CHECK(linear.Stops().Stops().size() == 1);
@@ -136,11 +123,11 @@ namespace krys::boo::svg::tests
       u8R"html(<pattern id=p x=1 y=2 width=3 height=4 patternUnits=userSpaceOnUse patternContentUnits=objectBoundingBox patternTransform="scale(2)" viewBox="0 0 10 10" />)html"
       u8R"html(</svg>)html"};
 
-    auto &defaults = ElementById<SVGPatternElement>(*fixture.Document, u8"defaults");
+    auto &defaults = ById<SVGPatternElement>(*fixture.Document, u8"defaults");
     CHECK(defaults.PatternUnits() == SVGUnitTypes::SVG_UNIT_TYPE_OBJECTBOUNDINGBOX);
     CHECK(defaults.PatternContentUnits() == SVGUnitTypes::SVG_UNIT_TYPE_USERSPACEONUSE);
 
-    auto &p = ElementById<SVGPatternElement>(*fixture.Document, u8"p");
+    auto &p = ById<SVGPatternElement>(*fixture.Document, u8"p");
     CHECK(p.X().ValueAsString() == u8"1");
     CHECK(p.Height().ValueAsString() == u8"4");
     CHECK(p.PatternUnits() == SVGUnitTypes::SVG_UNIT_TYPE_USERSPACEONUSE);

@@ -1,6 +1,7 @@
 ﻿#include "Krystal.Booey/SVG/Elements/SVGViewElement.hpp"
 #include "catch2/catch_test_macros.hpp"
 #include "Krystal.Booey.Tests/Style/ResolverTestUtils.hpp"
+#include "Krystal.Booey.Tests/SVG/SVGTestUtils.hpp"
 #include "Krystal.Booey/DOM/Algorithms/TextAlgorithms.hpp"
 #include "Krystal.Booey/Infra/Namespaces.hpp"
 #include "Krystal.Booey/Rendering/SVG/Legacy/LegacyRenderSVGRoot.hpp"
@@ -16,14 +17,6 @@ namespace krys::boo::svg::tests
 
   namespace
   {
-    template <typename T>
-    KRYS_NODISCARD T &ById(Document &document, DOMStringView id) noexcept
-    {
-      auto element = document.GetElementById(id);
-      krys_assert(element);
-      return Downcast<T>(Downcast<SVGElement>(*element));
-    }
-
     // Makes an <svg> parsed from @p markup the document element, as in an SVG document.
     void MakeSVGTheDocumentElement(Document &document, DOMStringView id) noexcept
     {

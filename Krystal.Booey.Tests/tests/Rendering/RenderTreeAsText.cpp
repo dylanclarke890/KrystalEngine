@@ -8,7 +8,7 @@ namespace krys::boo::tests
 
   namespace
   {
-    constexpr const char8 *Markup = u8R"html(<!DOCTYPE html><style>
+    constexpr const char8 *TreeMarkup = u8R"html(<!DOCTYPE html><style>
       #a { color: red; background-color: blue; border: 2px solid green; border-left: 3px dashed green }
       #rel { position: relative; z-index: 2 }
       #neg { position: absolute; z-index: -1 }
@@ -30,7 +30,7 @@ namespace krys::boo::tests
   TEST_CASE_METHOD(css::tests::ValueFixture, "RenderTreeAsText: ExternalRepresentation",
                    "[Rendering][RenderTreeAsText]")
   {
-    ResolverFixture fixture {Markup};
+    ResolverFixture fixture {TreeMarkup};
 
     SECTION("The layers that paint")
     {

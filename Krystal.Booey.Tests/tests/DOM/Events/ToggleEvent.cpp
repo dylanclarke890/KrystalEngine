@@ -1,5 +1,6 @@
 ﻿#include "Krystal.Booey/DOM/Events/ToggleEvent.hpp"
 #include "catch2/catch_test_macros.hpp"
+#include "Krystal.Booey.Tests/StringTestUtils.hpp"
 #include "Krystal.Booey.Tests/Style/ResolverTestUtils.hpp"
 #include "Krystal.Booey/DOM/Events/CommandEvent.hpp"
 #include "Krystal.Booey/DOM/Events/EventListenerHandle.hpp"
@@ -10,15 +11,8 @@
 
 namespace krys::boo::dom::tests
 {
+  using boo::tests::Narrow;
   using style::tests::ResolverFixture;
-
-  namespace
-  {
-    KRYS_NODISCARD std::string Narrow(const DOMString &string)
-    {
-      return std::string(reinterpret_cast<const char *>(string.data()), string.size());
-    }
-  }
 
   TEST_CASE_METHOD(
     css::tests::ValueFixture, "ToggleEvent and CommandEvent",

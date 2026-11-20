@@ -2,6 +2,7 @@
 #include "catch2/catch_test_macros.hpp"
 #include "Krystal.Booey.Tests/CSS/RuleTestUtils.hpp"
 #include "Krystal.Booey.Tests/CSS/ValueTestUtils.hpp"
+#include "Krystal.Booey.Tests/Style/StyleTestUtils.hpp"
 #include "Krystal.Booey/DOM/Nodes/HTMLDocument.hpp"
 #include "Krystal.Booey/HTML/EventLoop/EventLoop.hpp"
 #include "Krystal.Booey/HTML/Parser/DocumentParser.hpp"
@@ -81,16 +82,6 @@ namespace krys::boo::style::tests
         return {};
       }
       return CssText(*cascade.GetCustomProperty(atom).CssValue);
-    }
-
-    KRYS_NODISCARD Ref<HTMLDocument> Parse(utf8_string &&input) noexcept
-    {
-      auto document = CreateRef<HTMLDocument>();
-      auto parser = CreateRef<html::DocumentParser>(*document);
-      parser->InputStream().Append(krys::move(input), IsEOF::Yes);
-      parser->PumpTokenizer();
-      document->StyleScope().FlushPendingUpdate();
-      return document;
     }
   }
 
@@ -505,7 +496,7 @@ namespace krys::boo::style::tests
                    "[Style][PropertyCascade]")
   {
     html::EventLoop::Current().RunUntilIdle();
-    auto document = Parse(u8R"(<!DOCTYPE html><style>
+    auto document = ParseWithStyleSheets(u8R"(<!DOCTYPE html><style>
       @layer base { p { color: red !important; margin-left: 1px; } }
       p { color: blue; display: inline; }
       #p { margin-inline-start: 2px; }

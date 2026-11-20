@@ -21,7 +21,7 @@ namespace krys::boo::tests
 
     /// @brief An entry as delivered: the target's ID, whether it intersects, the intersection ratio as a
     /// percentage, and the target's, the intersection's and the root's rects.
-    struct Observed
+    struct ObservedIntersection
     {
       std::string Id;
       bool IsIntersecting {false};
@@ -30,7 +30,7 @@ namespace krys::boo::tests
       Rect Intersection;
       Rect Root;
 
-      bool operator==(const Observed &) const = default;
+      bool operator==(const ObservedIntersection &) const = default;
     };
 
     KRYS_NODISCARD Rect ToRect(const dom::DOMRectReadOnly *rect)
@@ -39,7 +39,7 @@ namespace krys::boo::tests
       return {rect->X(), rect->Y(), rect->Width(), rect->Height()};
     }
 
-    KRYS_NODISCARD Observed ToObserved(const IntersectionObserverEntry &entry)
+    KRYS_NODISCARD ObservedIntersection ToObserved(const IntersectionObserverEntry &entry)
     {
       return {Str(entry.Target()->Id()),
               entry.IsIntersecting(),
@@ -50,12 +50,12 @@ namespace krys::boo::tests
     }
 
     /// @brief An observer that records what it's told, notification by notification.
-    struct Recorder
+    struct IntersectionRecorder
     {
-      List<List<Observed>> Notifications;
+      List<List<ObservedIntersection>> Notifications;
       RefPtr<IntersectionObserver> Observer;
 
-      explicit Recorder(Document &document, IntersectionObserver::Init &&init = {}) noexcept
+      explicit IntersectionRecorder(Document &document, IntersectionObserver::Init &&init = {}) noexcept
       {
         auto observer = IntersectionObserver::Create(
           document,
@@ -73,7 +73,7 @@ namespace krys::boo::tests
       }
 
       /// @brief The notifications delivered since the last call.
-      KRYS_NODISCARD List<List<Observed>> Take() noexcept
+      KRYS_NODISCARD List<List<ObservedIntersection>> Take() noexcept
       {
         return std::exchange(Notifications, {});
       }
@@ -98,7 +98,7 @@ namespace krys::boo::tests
 
     SECTION("The defaults")
     {
-      Recorder recorder(document);
+      IntersectionRecorder recorder(document);
       CHECK(recorder.Observer->Root() == nullptr);
       CHECK(Str(recorder.Observer->RootMargin()) == "0px 0px 0px 0px");
       CHECK(Str(recorder.Observer->ScrollMargin()) == "0px 0px 0px 0px");
@@ -107,11 +107,12 @@ namespace krys::boo::tests
 
     SECTION("Margins take one to four lengths in pixels or percentages")
     {
-      Recorder recorder(document, {.RootMargin = u8"10px 20%", .ScrollMargin = u8" 1px 2px 3px "});
+      IntersectionRecorder recorder(document,
+                                    {.RootMargin = u8"10px 20%", .ScrollMargin = u8" 1px 2px 3px "});
       CHECK(Str(recorder.Observer->RootMargin()) == "10px 20% 10px 20%");
       CHECK(Str(recorder.Observer->ScrollMargin()) == "1px 2px 3px 2px");
 
-      Recorder empty(document, {.RootMargin = u8"", .ScrollMargin = u8"-5px"});
+      IntersectionRecorder empty(document, {.RootMargin = u8"", .ScrollMargin = u8"-5px"});
       CHECK(Str(empty.Observer->RootMargin()) == "0px 0px 0px 0px");
       CHECK(Str(empty.Observer->ScrollMargin()) == "-5px -5px -5px -5px");
 
@@ -123,10 +124,10 @@ namespace krys::boo::tests
 
     SECTION("Thresholds are sorted, and must lie between 0 and 1")
     {
-      Recorder sorted(document, {.Threshold = List<double> {1, 0.5, 0}});
+      IntersectionRecorder sorted(document, {.Threshold = List<double> {1, 0.5, 0}});
       CHECK(sorted.Observer->Thresholds() == List<double> {0, 0.5, 1});
 
-      Recorder empty(document, {.Threshold = List<double> {}});
+      IntersectionRecorder empty(document, {.Threshold = List<double> {}});
       CHECK(empty.Observer->Thresholds() == List<double> {0});
 
       CHECK(CreateError(document, {.Threshold = 1.5}) == ExceptionCode::RangeError);
@@ -136,14 +137,14 @@ namespace krys::boo::tests
     SECTION("The root is an element or a document")
     {
       auto &a = fixture.ById(u8"a");
-      Recorder byElement(document, {.Root = &a});
+      IntersectionRecorder byElement(document, {.Root = &a});
       CHECK(byElement.Observer->Root() == &a);
       CHECK(byElement.Observer->TrackingDocument() == &document);
 
-      Recorder byDocument(document, {.Root = &document});
+      IntersectionRecorder byDocument(document, {.Root = &document});
       CHECK(byDocument.Observer->Root() == &document);
 
-      Recorder implicit(document);
+      IntersectionRecorder implicit(document);
       CHECK(implicit.Observer->TrackingDocument() == &document);
     }
   }
@@ -163,13 +164,13 @@ namespace krys::boo::tests
 
     SECTION("Each target is reported first, then when it crosses a threshold")
     {
-      Recorder recorder(*fixture.Document);
+      IntersectionRecorder recorder(*fixture.Document);
       recorder.Observer->Observe(a);
       recorder.Observer->Observe(b);
       CHECK(fixture.Document->NumberOfIntersectionObservers() == 1);
       update();
       CHECK(recorder.Take()
-            == List<List<Observed>> {{
+            == List<List<ObservedIntersection>> {{
               {"a", true, 100, {0, 0, 400, 100}, {0, 0, 400, 100}, Viewport},
               {"b", false, 0, {0, 500, 50, 100}, {}, Viewport},
             }});
@@ -180,7 +181,7 @@ namespace krys::boo::tests
       window.ScrollTo(0, 250);
       update();
       CHECK(recorder.Take()
-            == List<List<Observed>> {{
+            == List<List<ObservedIntersection>> {{
               {"a", false, 0, {0, -250, 400, 100}, {}, Viewport},
               {"b", true, 50, {0, 250, 50, 100}, {0, 250, 50, 50}, Viewport},
             }});
@@ -188,7 +189,7 @@ namespace krys::boo::tests
 
     SECTION("Thresholds split the ratio into ranges")
     {
-      Recorder recorder(*fixture.Document, {.Threshold = List<double> {0, 0.5, 1}});
+      IntersectionRecorder recorder(*fixture.Document, {.Threshold = List<double> {0, 0.5, 1}});
       recorder.Observer->Observe(b);
       update();
       CHECK(recorder.Take().size() == 1);
@@ -218,31 +219,31 @@ namespace krys::boo::tests
 
     SECTION("The root margin grows the root")
     {
-      Recorder pixels(*fixture.Document, {.RootMargin = u8"0px 0px 250px 0px"});
+      IntersectionRecorder pixels(*fixture.Document, {.RootMargin = u8"0px 0px 250px 0px"});
       pixels.Observer->Observe(b);
-      Recorder percent(*fixture.Document, {.RootMargin = u8"0px 0px 100%"});
+      IntersectionRecorder percent(*fixture.Document, {.RootMargin = u8"0px 0px 100%"});
       percent.Observer->Observe(b);
       update();
       CHECK(pixels.Take()
-            == List<List<Observed>> {{
+            == List<List<ObservedIntersection>> {{
               {"b", true, 50, {0, 500, 50, 100}, {0, 500, 50, 50}, {0, 0, 400, 550}},
             }});
       CHECK(percent.Take()
-            == List<List<Observed>> {{
+            == List<List<ObservedIntersection>> {{
               {"b", true, 100, {0, 500, 50, 100}, {0, 500, 50, 100}, {0, 0, 400, 600}},
             }});
     }
 
     SECTION("Records can be taken before they're delivered")
     {
-      Recorder recorder(*fixture.Document);
+      IntersectionRecorder recorder(*fixture.Document);
       recorder.Observer->Observe(a);
       (void)fixture.Document->UpdateLayout();
       CHECK(recorder.Observer->UpdateObservations(*fixture.Frame) == IntersectionObserver::NeedNotify::Yes);
       auto records = recorder.Observer->TakeRecords();
       REQUIRE(records.size() == 1);
       CHECK(ToObserved(*records[0])
-            == Observed {"a", true, 100, {0, 0, 400, 100}, {0, 0, 400, 100}, Viewport});
+            == ObservedIntersection {"a", true, 100, {0, 0, 400, 100}, {0, 0, 400, 100}, Viewport});
       CHECK(recorder.Observer->TakeRecords().empty());
 
       update();
@@ -251,7 +252,7 @@ namespace krys::boo::tests
 
     SECTION("Unobserving and disconnecting stop the reports")
     {
-      Recorder recorder(*fixture.Document);
+      IntersectionRecorder recorder(*fixture.Document);
       recorder.Observer->Observe(a);
       recorder.Observer->Observe(b);
       update();
@@ -289,46 +290,46 @@ namespace krys::boo::tests
 
     SECTION("An element root reports its scrolled contents")
     {
-      Recorder recorder(*fixture.Document, {.Root = &scroller});
+      IntersectionRecorder recorder(*fixture.Document, {.Root = &scroller});
       recorder.Observer->Observe(t);
       update();
       CHECK(recorder.Take()
-            == List<List<Observed>> {{
+            == List<List<ObservedIntersection>> {{
               {"t", false, 0, {0, 150, 200, 50}, {}, {0, 0, 200, 100}},
             }});
 
       scroller.SetScrollTop(100);
       update();
       CHECK(recorder.Take()
-            == List<List<Observed>> {{
+            == List<List<ObservedIntersection>> {{
               {"t", true, 100, {0, 50, 200, 50}, {0, 50, 200, 50}, {0, 0, 200, 100}},
             }});
     }
 
     SECTION("The implicit root sees through the scroller's clip, grown by the scroll margin")
     {
-      Recorder clipped(*fixture.Document);
+      IntersectionRecorder clipped(*fixture.Document);
       clipped.Observer->Observe(t);
-      Recorder margin(*fixture.Document, {.ScrollMargin = u8"60px"});
+      IntersectionRecorder margin(*fixture.Document, {.ScrollMargin = u8"60px"});
       margin.Observer->Observe(t);
       update();
       CHECK(clipped.Take()
-            == List<List<Observed>> {{
+            == List<List<ObservedIntersection>> {{
               {"t", false, 0, {0, 150, 200, 50}, {}, Viewport},
             }});
       // The scroll margin also grows the root.
       CHECK(margin.Take()
-            == List<List<Observed>> {{
+            == List<List<ObservedIntersection>> {{
               {"t", true, 20, {0, 150, 200, 50}, {0, 150, 200, 10}, {-60, -60, 520, 420}},
             }});
     }
 
     SECTION("A target outside the root is not intersecting")
     {
-      Recorder recorder(*fixture.Document, {.Root = &t});
+      IntersectionRecorder recorder(*fixture.Document, {.Root = &t});
       recorder.Observer->Observe(scroller);
       update();
-      CHECK(recorder.Take() == List<List<Observed>> {{{"scroller", false, 0, {}, {}, {}}}});
+      CHECK(recorder.Take() == List<List<ObservedIntersection>> {{{"scroller", false, 0, {}, {}, {}}}});
     }
   }
 
@@ -343,7 +344,7 @@ namespace krys::boo::tests
 
     SECTION("A removed target stops intersecting")
     {
-      Recorder recorder(*fixture.Document);
+      IntersectionRecorder recorder(*fixture.Document);
       recorder.Observer->Observe(a);
       update();
       CHECK(recorder.Take().size() == 1);
@@ -351,14 +352,14 @@ namespace krys::boo::tests
       Ref<Element> removed = ShareRef(a);
       removed->Remove();
       update();
-      CHECK(recorder.Take() == List<List<Observed>> {{{"a", false, 0, {}, {}, {}}}});
+      CHECK(recorder.Take() == List<List<ObservedIntersection>> {{{"a", false, 0, {}, {}, {}}}});
       update();
       CHECK(recorder.Take().empty());
     }
 
     SECTION("A destroyed target is forgotten")
     {
-      Recorder recorder(*fixture.Document);
+      IntersectionRecorder recorder(*fixture.Document);
       {
         auto element = fixture.Document->CreateElement(u8"div").ReleaseValue();
         recorder.Observer->Observe(*element);
@@ -373,7 +374,7 @@ namespace krys::boo::tests
     SECTION("A destroyed root disconnects its observers")
     {
       RefPtr<Element> root = fixture.Document->CreateElement(u8"div").ReleaseValue();
-      Recorder recorder(*fixture.Document, {.Root = root.get()});
+      IntersectionRecorder recorder(*fixture.Document, {.Root = root.get()});
       recorder.Observer->Observe(a);
       CHECK(recorder.Observer->HasObservationTargets());
       root = nullptr;
@@ -385,7 +386,7 @@ namespace krys::boo::tests
     SECTION("A destroyed observer leaves its targets and its root")
     {
       {
-        Recorder recorder(*fixture.Document, {.Root = fixture.Document.get()});
+        IntersectionRecorder recorder(*fixture.Document, {.Root = fixture.Document.get()});
         recorder.Observer->Observe(a);
         REQUIRE(a.IntersectionObserverDataIfExists());
         CHECK(a.IntersectionObserverDataIfExists()->Registrations.size() == 1);

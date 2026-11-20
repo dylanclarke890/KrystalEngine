@@ -1,6 +1,7 @@
 ﻿#include "Krystal.Booey/CSS/TypedOM/CSSNumericValue.hpp"
 #include "catch2/catch_approx.hpp"
 #include "catch2/catch_test_macros.hpp"
+#include "Krystal.Booey.Tests/CSS/TypedOMTestUtils.hpp"
 #include "Krystal.Booey.Tests/CSS/ValueTestUtils.hpp"
 #include "Krystal.Booey/CSS/TypedOM/CSSKeywordValue.hpp"
 #include "Krystal.Booey/CSS/TypedOM/CSSNumericFactory.hpp"
@@ -21,11 +22,6 @@ namespace krys::boo::css::tests
   {
     using Factory = CSSNumericFactory;
 
-    KRYS_NODISCARD std::string Text(const CSSStyleValue &value)
-    {
-      return ToNarrow(value.ToString());
-    }
-
     /// @brief The value as a numeric value, whose `Equals` overloads are public.
     KRYS_NODISCARD Ref<CSSNumericValue> Numeric(Ref<CSSUnitValue> value)
     {
@@ -43,13 +39,6 @@ namespace krys::boo::css::tests
     }
 
     template <typename T>
-    KRYS_NODISCARD Ref<T> Value(ExceptionOr<Ref<T>> result)
-    {
-      REQUIRE(result.HasValue());
-      return result.ReleaseValue();
-    }
-
-    template <typename T>
     KRYS_NODISCARD ExceptionCode Error(ExceptionOr<T> result)
     {
       REQUIRE(result.HasException());
@@ -59,18 +48,18 @@ namespace krys::boo::css::tests
 
   TEST_CASE_METHOD(ValueFixture, "CSSUnitValue: units, serialisation and conversion", "[CSS][TypedOM]")
   {
-    auto px = Value(CSSUnitValue::Create(1.5, u8"px"));
+    auto px = RequireValue(CSSUnitValue::Create(1.5, u8"px"));
     CHECK(px->Value() == 1.5);
     CHECK(ToNarrow(px->Unit()) == "px");
-    CHECK(Text(*px) == "1.5px");
+    CHECK(StyleValueText(*px) == "1.5px");
     CHECK(px->Type().Length == 1);
     CHECK(px->Type().Matches<CSSNumericBaseType::Length>());
 
     // `number` and `percent` name the unitless units.
-    CHECK(Text(*Value(CSSUnitValue::Create(2, u8"number"))) == "2");
-    auto percent = Value(CSSUnitValue::Create(50, u8"percent"));
+    CHECK(StyleValueText(*RequireValue(CSSUnitValue::Create(2, u8"number"))) == "2");
+    auto percent = RequireValue(CSSUnitValue::Create(50, u8"percent"));
     CHECK(ToNarrow(percent->Unit()) == "percent");
-    CHECK(Text(*percent) == "50%");
+    CHECK(StyleValueText(*percent) == "50%");
     CHECK(percent->Type().Percent == 1);
     CHECK(Factory::Number(3)->Type().MatchesNumber());
 
@@ -78,10 +67,10 @@ namespace krys::boo::css::tests
     CHECK(CSSUnitValue::ParseUnit(u8"lemon") == UnitType::Unknown);
 
     // Conversion within a category, and not across categories.
-    auto inches = Value(Factory::In(1)->To(u8"px"));
+    auto inches = RequireValue(Factory::In(1)->To(u8"px"));
     CHECK(inches->Value() == Catch::Approx(96));
     CHECK(ToNarrow(inches->Unit()) == "px");
-    CHECK(Value(Factory::S(1.5)->To(u8"ms"))->Value() == Catch::Approx(1'500));
+    CHECK(RequireValue(Factory::S(1.5)->To(u8"ms"))->Value() == Catch::Approx(1'500));
     CHECK(Error(Factory::Px(1)->To(u8"deg")) == ExceptionCode::TypeError);
     CHECK(Error(Factory::Px(1)->To(u8"lemon")) == ExceptionCode::SyntaxError);
     CHECK_FALSE(Factory::Em(1)->ConvertTo(UnitType::px));
@@ -98,37 +87,40 @@ namespace krys::boo::css::tests
   {
     SECTION("values of the same unit combine")
     {
-      auto sum = Value(Factory::Px(1)->Add({N(Factory::Px(2)), N(Factory::Px(3))}));
+      auto sum = RequireValue(Factory::Px(1)->Add({N(Factory::Px(2)), N(Factory::Px(3))}));
       REQUIRE(Is<CSSUnitValue>(*sum));
-      CHECK(Text(*sum) == "6px");
-      CHECK(Text(*Value(Factory::Px(5)->Sub({N(Factory::Px(2))}))) == "3px");
-      CHECK(Text(*Value(Factory::Px(5)->Mul({2.0, 3.0}))) == "30px");
-      CHECK(Text(*Value(Factory::Px(6)->Div({2.0}))) == "3px");
-      CHECK(Text(*Value(Factory::Px(6)->Min({N(Factory::Px(2)), N(Factory::Px(4))}))) == "2px");
-      CHECK(Text(*Value(Factory::Px(6)->Max({N(Factory::Px(2)), N(Factory::Px(9))}))) == "9px");
+      CHECK(StyleValueText(*sum) == "6px");
+      CHECK(StyleValueText(*RequireValue(Factory::Px(5)->Sub({N(Factory::Px(2))}))) == "3px");
+      CHECK(StyleValueText(*RequireValue(Factory::Px(5)->Mul({2.0, 3.0}))) == "30px");
+      CHECK(StyleValueText(*RequireValue(Factory::Px(6)->Div({2.0}))) == "3px");
+      CHECK(StyleValueText(*RequireValue(Factory::Px(6)->Min({N(Factory::Px(2)), N(Factory::Px(4))})))
+            == "2px");
+      CHECK(StyleValueText(*RequireValue(Factory::Px(6)->Max({N(Factory::Px(2)), N(Factory::Px(9))})))
+            == "9px");
     }
 
     SECTION("values of different units make math values")
     {
-      auto sum = Value(Factory::Px(1)->Add({N(Factory::Em(2))}));
+      auto sum = RequireValue(Factory::Px(1)->Add({N(Factory::Em(2))}));
       REQUIRE(Is<CSSMathSum>(*sum));
-      CHECK(Text(*sum) == "calc(1px + 2em)");
+      CHECK(StyleValueText(*sum) == "calc(1px + 2em)");
       CHECK(Downcast<CSSMathSum>(*sum).Values().Length() == 2);
       // Adding to a sum extends it.
-      CHECK(Text(*Value(sum->Add({N(Factory::Vw(3))}))) == "calc(1px + 2em + 3vw)");
+      CHECK(StyleValueText(*RequireValue(sum->Add({N(Factory::Vw(3))}))) == "calc(1px + 2em + 3vw)");
       // Subtracting a unit value negates its number; subtracting a math value negates it.
-      CHECK(Text(*Value(Factory::Px(1)->Sub({N(Factory::Em(2))}))) == "calc(1px + -2em)");
-      auto difference = Value(Factory::Px(1)->Sub({N(Value(Factory::Em(2)->Add({N(Factory::Vw(3))})))}));
-      CHECK(Text(*difference) == "calc(1px - (2em + 3vw))");
+      CHECK(StyleValueText(*RequireValue(Factory::Px(1)->Sub({N(Factory::Em(2))}))) == "calc(1px + -2em)");
+      auto difference =
+        RequireValue(Factory::Px(1)->Sub({N(RequireValue(Factory::Em(2)->Add({N(Factory::Vw(3))})))}));
+      CHECK(StyleValueText(*difference) == "calc(1px - (2em + 3vw))");
 
-      auto product = Value(Factory::Px(2)->Mul({N(Factory::Px(3))}));
+      auto product = RequireValue(Factory::Px(2)->Mul({N(Factory::Px(3))}));
       REQUIRE(Is<CSSMathProduct>(*product));
-      CHECK(Text(*product) == "calc(2px * 3px)");
+      CHECK(StyleValueText(*product) == "calc(2px * 3px)");
       CHECK(product->Type().Length == 2);
-      CHECK(Text(*Value(Factory::Px(1)->Div({N(Factory::Em(2))}))) == "calc(1px / 2em)");
+      CHECK(StyleValueText(*RequireValue(Factory::Px(1)->Div({N(Factory::Em(2))}))) == "calc(1px / 2em)");
 
-      CHECK(Text(*Value(Factory::Px(1)->Min({N(Factory::Em(2))}))) == "min(1px, 2em)");
-      CHECK(Text(*Value(Factory::Px(1)->Max({N(Factory::Em(2)), N(Factory::Vw(3))})))
+      CHECK(StyleValueText(*RequireValue(Factory::Px(1)->Min({N(Factory::Em(2))}))) == "min(1px, 2em)");
+      CHECK(StyleValueText(*RequireValue(Factory::Px(1)->Max({N(Factory::Em(2)), N(Factory::Vw(3))})))
             == "max(1px, 2em, 3vw)");
     }
 
@@ -141,7 +133,7 @@ namespace krys::boo::css::tests
 
     SECTION("a percentage added to a length takes a percent hint")
     {
-      auto sum = Value(Factory::Px(1)->Add({N(Factory::Percent(10))}));
+      auto sum = RequireValue(Factory::Px(1)->Add({N(Factory::Percent(10))}));
       CHECK(sum->Type().Length == 1);
       CHECK(sum->Type().PercentHint == CSSNumericBaseType::Length);
       // So it no longer matches <length> alone.
@@ -150,9 +142,9 @@ namespace krys::boo::css::tests
 
     SECTION("equality")
     {
-      auto a = Value(Factory::Px(1)->Add({N(Factory::Em(2))}));
-      auto b = Value(Factory::Px(1)->Add({N(Factory::Em(2))}));
-      auto c = Value(Factory::Px(1)->Add({N(Factory::Em(3))}));
+      auto a = RequireValue(Factory::Px(1)->Add({N(Factory::Em(2))}));
+      auto b = RequireValue(Factory::Px(1)->Add({N(Factory::Em(2))}));
+      auto c = RequireValue(Factory::Px(1)->Add({N(Factory::Em(3))}));
       CHECK(a->Equals(*b));
       CHECK_FALSE(a->Equals(*c));
       CHECK((Numeric(Factory::Px(1))->Equals(List<CSSNumberish> {N(Factory::Px(1)), N(Factory::Px(1))})));
@@ -164,45 +156,46 @@ namespace krys::boo::css::tests
   TEST_CASE_METHOD(ValueFixture, "CSSMathValue: negation, inversion and clamping", "[CSS][TypedOM]")
   {
     auto negate = CSSMathNegate::Create(N(Factory::Px(1)));
-    CHECK(Text(*negate) == "calc(-1px)");
+    CHECK(StyleValueText(*negate) == "calc(-1px)");
     CHECK(static_cast<const CSSMathValue &>(*negate).GetOperator() == CSSMathOperator::Negate);
     CHECK(negate->Type().Length == 1);
 
     auto invert = CSSMathInvert::Create(N(Factory::Px(2)));
-    CHECK(Text(*invert) == "calc(1 / 2px)");
+    CHECK(StyleValueText(*invert) == "calc(1 / 2px)");
     CHECK(invert->Type().Length == -1);
 
-    auto clamp = Value(CSSMathClamp::Create(N(Factory::Px(1)), N(Factory::Em(2)), N(Factory::Px(3))));
-    CHECK(Text(*clamp) == "clamp(1px, 2em, 3px)");
+    auto clamp = RequireValue(CSSMathClamp::Create(N(Factory::Px(1)), N(Factory::Em(2)), N(Factory::Px(3))));
+    CHECK(StyleValueText(*clamp) == "clamp(1px, 2em, 3px)");
     CHECK(Error(CSSMathClamp::Create(N(Factory::Px(1)), N(Factory::S(2)), N(Factory::Px(3))))
           == ExceptionCode::TypeError);
 
     // Of the same unit, a clamp resolves to its sum value.
-    auto resolved = Value(CSSMathClamp::Create(N(Factory::Px(1)), N(Factory::Px(5)), N(Factory::Px(3))));
-    CHECK(Text(*Value(resolved->To(UnitType::px))) == "3px");
+    auto resolved =
+      RequireValue(CSSMathClamp::Create(N(Factory::Px(1)), N(Factory::Px(5)), N(Factory::Px(3))));
+    CHECK(StyleValueText(*RequireValue(resolved->To(UnitType::px))) == "3px");
 
     CHECK(Error(CSSMathSum::Create(List<Ref<CSSNumericValue>> {})) == ExceptionCode::SyntaxError);
 
     // As CSS values: calc() expressions, serialised as calc() is (its terms sorted).
-    auto sum = Value(Factory::Px(1)->Add({N(Factory::Em(2))}));
+    auto sum = RequireValue(Factory::Px(1)->Add({N(Factory::Em(2))}));
     CHECK(CssText(*sum->ToCSSValue()) == "calc(2em + 1px)");
   }
 
   TEST_CASE_METHOD(ValueFixture, "CSSNumericValue: to() and toSum()", "[CSS][TypedOM]")
   {
-    auto sum = Value(Factory::Px(1)->Add({N(Factory::In(1)), N(Factory::Em(2))}));
+    auto sum = RequireValue(Factory::Px(1)->Add({N(Factory::In(1)), N(Factory::Em(2))}));
 
     // A sum of lengths of different kinds has more than one sum value item.
     CHECK(Error(sum->To(UnitType::px)) == ExceptionCode::TypeError);
 
-    auto split = Value(sum->ToSum({u8"px", u8"em"}));
+    auto split = RequireValue(sum->ToSum({u8"px", u8"em"}));
     REQUIRE(split->Values().Length() == 2);
     CHECK(Downcast<CSSUnitValue>(*split->Values().Array()[0]).Value() == Catch::Approx(97));
-    CHECK(Text(*split->Values().Array()[1]) == "2em");
+    CHECK(StyleValueText(*split->Values().Array()[1]) == "2em");
 
     // Without units, the canonical units sorted by name.
-    auto canonical = Value(sum->ToSum({}));
-    CHECK(Text(*canonical) == "calc(2em + 97px)");
+    auto canonical = RequireValue(sum->ToSum({}));
+    CHECK(StyleValueText(*canonical) == "calc(2em + 97px)");
 
     CHECK(Error(sum->ToSum({u8"px"})) == ExceptionCode::TypeError);
     CHECK(Error(sum->ToSum({u8"lemon"})) == ExceptionCode::SyntaxError);
@@ -212,16 +205,16 @@ namespace krys::boo::css::tests
   {
     auto document = CreateRef<Document>();
 
-    auto px = Value(CSSNumericValue::Parse(*document, u8"  10px "));
+    auto px = RequireValue(CSSNumericValue::Parse(*document, u8"  10px "));
     REQUIRE(Is<CSSUnitValue>(*px));
-    CHECK(Text(*px) == "10px");
-    CHECK(Text(*Value(CSSNumericValue::Parse(*document, u8"25%"))) == "25%");
-    CHECK(Text(*Value(CSSNumericValue::Parse(*document, u8"4"))) == "4");
+    CHECK(StyleValueText(*px) == "10px");
+    CHECK(StyleValueText(*RequireValue(CSSNumericValue::Parse(*document, u8"25%"))) == "25%");
+    CHECK(StyleValueText(*RequireValue(CSSNumericValue::Parse(*document, u8"4"))) == "4");
 
-    auto calc = Value(CSSNumericValue::Parse(*document, u8"calc(1px + 2em)"));
+    auto calc = RequireValue(CSSNumericValue::Parse(*document, u8"calc(1px + 2em)"));
     REQUIRE(Is<CSSMathSum>(*calc));
-    CHECK(Text(*calc) == "calc(1px + 2em)");
-    CHECK(Is<CSSMathMin>(*Value(CSSNumericValue::Parse(*document, u8"min(1px, 2em)"))));
+    CHECK(StyleValueText(*calc) == "calc(1px + 2em)");
+    CHECK(Is<CSSMathMin>(*RequireValue(CSSNumericValue::Parse(*document, u8"min(1px, 2em)"))));
 
     CHECK(Error(CSSNumericValue::Parse(*document, u8"")) == ExceptionCode::SyntaxError);
     CHECK(Error(CSSNumericValue::Parse(*document, u8"auto")) == ExceptionCode::SyntaxError);
@@ -232,9 +225,9 @@ namespace krys::boo::css::tests
 
   TEST_CASE_METHOD(ValueFixture, "CSSKeywordValue", "[CSS][TypedOM]")
   {
-    auto keyword = Value(CSSKeywordValue::Create(u8"auto"));
+    auto keyword = RequireValue(CSSKeywordValue::Create(u8"auto"));
     CHECK(ToNarrow(keyword->Value()) == "auto");
-    CHECK(Text(*keyword) == "auto");
+    CHECK(StyleValueText(*keyword) == "auto");
     CHECK(CssText(*keyword->ToCSSValue()) == "auto");
     CHECK(Error(CSSKeywordValue::Create(u8"")) == ExceptionCode::TypeError);
     CHECK(keyword->SetValue(u8"").HasException());

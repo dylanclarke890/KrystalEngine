@@ -1,6 +1,8 @@
 ﻿#include "Krystal.Booey/Rendering/SVG/Legacy/LegacyRenderSVGResourceMasker.hpp"
 #include "catch2/catch_test_macros.hpp"
 #include "Krystal.Booey.Tests/Rendering/PaintTestUtils.hpp"
+#include "Krystal.Booey.Tests/Rendering/SVG/LegacySVGTestUtils.hpp"
+#include "Krystal.Booey.Tests/StringTestUtils.hpp"
 #include "Krystal.Booey.Tests/Style/ResolverTestUtils.hpp"
 #include "Krystal.Booey/Rendering/RenderTreeAsText.hpp"
 #include "Krystal.Booey/Rendering/SVG/Legacy/SVGResources.hpp"
@@ -13,18 +15,6 @@ namespace krys::boo::tests
 
   namespace
   {
-    KRYS_NODISCARD Element &ElementById(Document &document, DOMStringView id) noexcept
-    {
-      auto element = document.GetElementById(id);
-      krys_assert(element);
-      return *element;
-    }
-
-    KRYS_NODISCARD bool Contains(utf8_stringview text, utf8_stringview part) noexcept
-    {
-      return text.contains(part);
-    }
-
     constexpr const char8_t *MaskedShape =
       u8R"html(<!DOCTYPE html><body style="margin: 0"><svg width=200 height=100>)html"
       u8R"html(<mask id=m><rect width=20 height=20 fill=white /></mask>)html"
@@ -50,11 +40,11 @@ layer at (0,0) size 800x104
           [masker="m"] RenderSVGResourceMasker {mask} at (0,0) size 20x20
 )");
 
-    auto *renderer = ElementById(*fixture.Document, u8"r").Renderer();
+    auto *renderer = ById(*fixture.Document, u8"r").Renderer();
     REQUIRE(renderer);
     auto *resources = SVGResourcesCache::CachedResourcesForRenderer(*renderer);
     REQUIRE(resources);
-    CHECK(resources->Masker() == ElementById(*fixture.Document, u8"m").Renderer());
+    CHECK(resources->Masker() == ById(*fixture.Document, u8"m").Renderer());
   }
 
   TEST_CASE_METHOD(css::tests::ValueFixture, "LegacyRenderSVGResourceMasker: painting",

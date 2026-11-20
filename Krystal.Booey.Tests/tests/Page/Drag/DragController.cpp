@@ -1,6 +1,7 @@
 ﻿#include "Krystal.Booey/Page/Drag/DragController.hpp"
 #include "catch2/catch_test_macros.hpp"
 #include "Krystal.Booey.Tests/CSS/ValueTestUtils.hpp"
+#include "Krystal.Booey.Tests/DOM/DOMTestUtils.hpp"
 #include "Krystal.Booey.Tests/Editing/EditorTestUtils.hpp"
 #include "Krystal.Booey/DOM/DataTransfer/DataTransfer.hpp"
 #include "Krystal.Booey/DOM/Events/DragEvent.hpp"
@@ -56,20 +57,6 @@ namespace krys::boo::tests
       void DragEnded() noexcept override
       {
         ++Ended;
-      }
-    };
-
-    struct FunctionListener final : EventListenerCallback
-    {
-      Func<void(Event &)> Function;
-
-      explicit FunctionListener(Func<void(Event &)> &&function) noexcept : Function(krys::move(function))
-      {
-      }
-
-      void HandleEvent(Event &event) noexcept override
-      {
-        Function(event);
       }
     };
 

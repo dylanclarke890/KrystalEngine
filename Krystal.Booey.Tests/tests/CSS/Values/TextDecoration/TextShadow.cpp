@@ -1,4 +1,5 @@
 ﻿#include "catch2/catch_test_macros.hpp"
+#include "Krystal.Booey.Tests/CSS/ValueTestUtils.hpp"
 #include "Krystal.Booey/CSS/Values/Primitives/NumericTypesComputedStyleDependencies.hpp"
 #include "Krystal.Booey/CSS/Values/Primitives/NumericTypesSerialisation.hpp"
 #include "Krystal.Booey/CSS/Values/Primitives/NumericTypesValueVisitation.hpp"
@@ -11,12 +12,6 @@ namespace krys::boo::css::tests
   {
     using L = Length<AllUnzoomed>;
     using NL = Length<NonNegativeUnzoomed>;
-
-    template <typename T>
-    CSSOMString SerialiseForTest(const T &value)
-    {
-      return Serialise(DefaultSerialisationContext(), value);
-    }
 
     TextShadow Full()
     {

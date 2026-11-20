@@ -1,6 +1,8 @@
 ﻿#include "Krystal.Booey/Rendering/SVG/Legacy/LegacyRenderSVGResourceGradient.hpp"
 #include "catch2/catch_test_macros.hpp"
 #include "Krystal.Booey.Tests/Rendering/PaintTestUtils.hpp"
+#include "Krystal.Booey.Tests/Rendering/SVG/LegacySVGTestUtils.hpp"
+#include "Krystal.Booey.Tests/StringTestUtils.hpp"
 #include "Krystal.Booey.Tests/Style/ResolverTestUtils.hpp"
 #include "Krystal.Booey/Rendering/RenderTreeAsText.hpp"
 #include "Krystal.Booey/Rendering/SVG/Legacy/SVGResources.hpp"
@@ -11,28 +13,6 @@
 namespace krys::boo::tests
 {
   using style::tests::ResolverFixture;
-
-  namespace
-  {
-    KRYS_NODISCARD Element &ElementById(Document &document, DOMStringView id) noexcept
-    {
-      auto element = document.GetElementById(id);
-      krys_assert(element);
-      return *element;
-    }
-
-    KRYS_NODISCARD SVGResources *ResourcesById(Document &document, DOMStringView id) noexcept
-    {
-      auto *renderer = ElementById(document, id).Renderer();
-      krys_assert(renderer);
-      return SVGResourcesCache::CachedResourcesForRenderer(*renderer);
-    }
-
-    KRYS_NODISCARD bool Contains(utf8_stringview text, utf8_stringview part) noexcept
-    {
-      return text.contains(part);
-    }
-  }
 
   TEST_CASE_METHOD(css::tests::ValueFixture, "LegacyRenderSVGResourceGradient: the render tree",
                    "[Rendering][SVG][LegacyRenderSVGResourceGradient]")
@@ -127,14 +107,14 @@ layer at (0,0) size 800x104
     // The rect's resources are the gradient it fills with; a gradient's resource is the gradient it links to.
     auto *resources = ResourcesById(*fixture.Document, u8"r");
     REQUIRE(resources);
-    CHECK(resources->Fill() == ElementById(*fixture.Document, u8"g").Renderer());
+    CHECK(resources->Fill() == ById(*fixture.Document, u8"g").Renderer());
     CHECK(resources->Stroke() == nullptr);
     auto *linkedResources = ResourcesById(*fixture.Document, u8"linked");
     REQUIRE(linkedResources);
-    CHECK(linkedResources->LinkedResource() == ElementById(*fixture.Document, u8"g").Renderer());
+    CHECK(linkedResources->LinkedResource() == ById(*fixture.Document, u8"g").Renderer());
 
     // A stop's colour changes the gradient.
-    (void)ElementById(*fixture.Document, u8"s").SetAttribute(u8"stop-color", u8"blue");
+    (void)ById(*fixture.Document, u8"s").SetAttribute(u8"stop-color", u8"blue");
     auto text = ExternalRepresentation(fixture.Frame.get());
     CHECK(Contains(text, u8"RenderSVGGradientStop {stop} [offset=0.00] [color=#0000FF]"));
 
@@ -142,14 +122,14 @@ layer at (0,0) size 800x104
     auto gradient = fixture.Document->CreateElementNS(infra::namespaces::SVG, u8"radialGradient");
     REQUIRE_FALSE(gradient.HasException());
     (void)gradient.Value()->SetAttribute(u8"id", u8"later");
-    (void)ElementById(*fixture.Document, u8"g").ParentNode()->AppendChild(*gradient.Value());
+    (void)ById(*fixture.Document, u8"g").ParentNode()->AppendChild(*gradient.Value());
     (void)fixture.Document->UpdateLayout();
     resources = ResourcesById(*fixture.Document, u8"r");
     REQUIRE(resources);
     CHECK(resources->Stroke() == gradient.Value()->Renderer());
 
     // Removing the gradient drops it from the rect's resources, and the rect waits for the id again.
-    (void)ElementById(*fixture.Document, u8"g").Remove();
+    (void)ById(*fixture.Document, u8"g").Remove();
     (void)fixture.Document->UpdateLayout();
     resources = ResourcesById(*fixture.Document, u8"r");
     CHECK((!resources || !resources->Fill()));

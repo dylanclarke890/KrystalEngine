@@ -18,11 +18,6 @@ namespace krys::boo::css::tests
     using mq::EvaluationResult;
     using mq::MediaQueryDynamicDependency;
 
-    KRYS_NODISCARD mq::MediaQueryList Parse(utf8_stringview text)
-    {
-      return mq::MediaQueryParser::Parse(text, StrictParserContext());
-    }
-
     KRYS_NODISCARD const CSSOMStringAtom &Screen()
     {
       static const CSSOMStringAtom screen {u8"screen"};
@@ -68,7 +63,7 @@ namespace krys::boo::css::tests
         auto &view = *Frame->View();
         view.Resize(ViewSize);
         view.SetMediaType(ViewMediaType);
-        return mq::MediaQueryEvaluator {mediaType, *Document, &RootStyle}.Evaluate(Parse(text));
+        return mq::MediaQueryEvaluator {mediaType, *Document, &RootStyle}.Evaluate(ParseMediaQueries(text));
       }
     };
   }
@@ -82,10 +77,10 @@ namespace krys::boo::css::tests
 
     for (auto media : {u8"", u8" \t\n\f\r"})
     {
-      CHECK(screen.Evaluate(Parse(media)));
-      CHECK(print.Evaluate(Parse(media)));
+      CHECK(screen.Evaluate(ParseMediaQueries(media)));
+      CHECK(print.Evaluate(ParseMediaQueries(media)));
     }
-    CHECK_FALSE(print.Evaluate(Parse(u8" screen ")));
+    CHECK_FALSE(print.Evaluate(ParseMediaQueries(u8" screen ")));
   }
 
   TEST_CASE("MediaQueryEvaluator: media types without a document", "[CSS][Queries][MediaQueryEvaluator]")
@@ -93,27 +88,27 @@ namespace krys::boo::css::tests
     ValueFixture fixture;
     mq::MediaQueryEvaluator screen {Screen()};
 
-    CHECK(screen.Evaluate(Parse(u8"")));
-    CHECK(screen.Evaluate(Parse(u8"screen")));
-    CHECK(screen.Evaluate(Parse(u8"all")));
-    CHECK(screen.Evaluate(Parse(u8"only screen")));
-    CHECK(screen.Evaluate(Parse(u8"SCREEN")));
-    CHECK_FALSE(screen.Evaluate(Parse(u8"print")));
-    CHECK_FALSE(screen.Evaluate(Parse(u8"not screen")));
-    CHECK(screen.Evaluate(Parse(u8"not print")));
-    CHECK(screen.Evaluate(Parse(u8"print, screen")));
-    CHECK_FALSE(screen.Evaluate(Parse(u8"print, tv")));
+    CHECK(screen.Evaluate(ParseMediaQueries(u8"")));
+    CHECK(screen.Evaluate(ParseMediaQueries(u8"screen")));
+    CHECK(screen.Evaluate(ParseMediaQueries(u8"all")));
+    CHECK(screen.Evaluate(ParseMediaQueries(u8"only screen")));
+    CHECK(screen.Evaluate(ParseMediaQueries(u8"SCREEN")));
+    CHECK_FALSE(screen.Evaluate(ParseMediaQueries(u8"print")));
+    CHECK_FALSE(screen.Evaluate(ParseMediaQueries(u8"not screen")));
+    CHECK(screen.Evaluate(ParseMediaQueries(u8"not print")));
+    CHECK(screen.Evaluate(ParseMediaQueries(u8"print, screen")));
+    CHECK_FALSE(screen.Evaluate(ParseMediaQueries(u8"print, tv")));
 
     // An invalid query is `not all`.
-    CHECK_FALSE(screen.Evaluate(Parse(u8"screen and")));
+    CHECK_FALSE(screen.Evaluate(ParseMediaQueries(u8"screen and")));
 
     CHECK_FALSE(screen.IsPrintMedia());
     CHECK(mq::MediaQueryEvaluator {Print()}.IsPrintMedia());
 
     // The null media type only matches queries without one (or `all`).
     mq::MediaQueryEvaluator none {};
-    CHECK(none.Evaluate(Parse(u8"all")));
-    CHECK_FALSE(none.Evaluate(Parse(u8"screen")));
+    CHECK(none.Evaluate(ParseMediaQueries(u8"all")));
+    CHECK_FALSE(none.Evaluate(ParseMediaQueries(u8"screen")));
   }
 
   TEST_CASE("MediaQueryEvaluator: conditions without a document use the static result",
@@ -124,24 +119,24 @@ namespace krys::boo::css::tests
     SECTION("False (the default)")
     {
       mq::MediaQueryEvaluator evaluator {Screen()};
-      CHECK_FALSE(evaluator.Evaluate(Parse(u8"(color)")));
-      CHECK(evaluator.Evaluate(Parse(u8"not all and (color)")));
-      CHECK(evaluator.Evaluate(Parse(u8"(color), screen")));
+      CHECK_FALSE(evaluator.Evaluate(ParseMediaQueries(u8"(color)")));
+      CHECK(evaluator.Evaluate(ParseMediaQueries(u8"not all and (color)")));
+      CHECK(evaluator.Evaluate(ParseMediaQueries(u8"(color), screen")));
     }
 
     SECTION("True")
     {
       mq::MediaQueryEvaluator evaluator {Screen(), EvaluationResult::True};
-      CHECK(evaluator.Evaluate(Parse(u8"screen and (color)")));
-      CHECK_FALSE(evaluator.Evaluate(Parse(u8"not screen and (color)")));
-      CHECK_FALSE(evaluator.Evaluate(Parse(u8"print and (color)")));
+      CHECK(evaluator.Evaluate(ParseMediaQueries(u8"screen and (color)")));
+      CHECK_FALSE(evaluator.Evaluate(ParseMediaQueries(u8"not screen and (color)")));
+      CHECK_FALSE(evaluator.Evaluate(ParseMediaQueries(u8"print and (color)")));
     }
 
     SECTION("Unknown never matches, negated or not")
     {
       mq::MediaQueryEvaluator evaluator {Screen(), EvaluationResult::Unknown};
-      CHECK_FALSE(evaluator.Evaluate(Parse(u8"(color)")));
-      CHECK_FALSE(evaluator.Evaluate(Parse(u8"not all and (color)")));
+      CHECK_FALSE(evaluator.Evaluate(ParseMediaQueries(u8"(color)")));
+      CHECK_FALSE(evaluator.Evaluate(ParseMediaQueries(u8"not all and (color)")));
     }
   }
 
@@ -150,21 +145,25 @@ namespace krys::boo::css::tests
     ValueFixture fixture;
     mq::MediaQueryEvaluator evaluator {Screen()};
 
-    CHECK(evaluator.CollectDynamicDependencies(Parse(u8"screen")) == MediaQueryDynamicDependency::None);
-    CHECK(evaluator.CollectDynamicDependencies(Parse(u8"(color)")) == MediaQueryDynamicDependency::None);
-    CHECK(evaluator.CollectDynamicDependencies(Parse(u8"(min-width: 10px)"))
+    CHECK(evaluator.CollectDynamicDependencies(ParseMediaQueries(u8"screen"))
+          == MediaQueryDynamicDependency::None);
+    CHECK(evaluator.CollectDynamicDependencies(ParseMediaQueries(u8"(color)"))
+          == MediaQueryDynamicDependency::None);
+    CHECK(evaluator.CollectDynamicDependencies(ParseMediaQueries(u8"(min-width: 10px)"))
           == MediaQueryDynamicDependency::Viewport);
-    CHECK(evaluator.CollectDynamicDependencies(Parse(u8"(orientation: portrait) or (prefers-reduced-motion)"))
+    CHECK(evaluator.CollectDynamicDependencies(
+            ParseMediaQueries(u8"(orientation: portrait) or (prefers-reduced-motion)"))
           == (MediaQueryDynamicDependency::Viewport | MediaQueryDynamicDependency::Accessibility));
-    CHECK(evaluator.CollectDynamicDependencies(Parse(u8"(width), (prefers-color-scheme: dark)"))
+    CHECK(evaluator.CollectDynamicDependencies(ParseMediaQueries(u8"(width), (prefers-color-scheme: dark)"))
           == (MediaQueryDynamicDependency::Viewport | MediaQueryDynamicDependency::Appearance));
 
     // Queries for another media type contribute nothing.
-    CHECK(evaluator.CollectDynamicDependencies(Parse(u8"print and (width)"))
+    CHECK(evaluator.CollectDynamicDependencies(ParseMediaQueries(u8"print and (width)"))
           == MediaQueryDynamicDependency::None);
 
     // Unknown features have no schema.
-    CHECK(evaluator.CollectDynamicDependencies(Parse(u8"(foo: bar)")) == MediaQueryDynamicDependency::None);
+    CHECK(evaluator.CollectDynamicDependencies(ParseMediaQueries(u8"(foo: bar)"))
+          == MediaQueryDynamicDependency::None);
   }
 
   TEST_CASE("MediaQueryEvaluator: a document needs a view and a root element",
@@ -177,9 +176,9 @@ namespace krys::boo::css::tests
     {
       fixture.Frame->SetView(nullptr);
       mq::MediaQueryEvaluator evaluator {Screen(), *fixture.Document, &fixture.RootStyle};
-      CHECK_FALSE(evaluator.Evaluate(Parse(u8"(width)")));
-      CHECK_FALSE(evaluator.Evaluate(Parse(u8"not all and (width)")));
-      CHECK(evaluator.Evaluate(Parse(u8"screen")));
+      CHECK_FALSE(evaluator.Evaluate(ParseMediaQueries(u8"(width)")));
+      CHECK_FALSE(evaluator.Evaluate(ParseMediaQueries(u8"not all and (width)")));
+      CHECK(evaluator.Evaluate(ParseMediaQueries(u8"screen")));
     }
 
     SECTION("No root element: the condition is unknown")
@@ -187,15 +186,15 @@ namespace krys::boo::css::tests
       auto document = CreateRef<Document>();
       auto frame = ShowInFrame(*document);
       mq::MediaQueryEvaluator evaluator {Screen(), *document, &fixture.RootStyle};
-      CHECK_FALSE(evaluator.Evaluate(Parse(u8"(width)")));
-      CHECK_FALSE(evaluator.Evaluate(Parse(u8"not all and (width)")));
+      CHECK_FALSE(evaluator.Evaluate(ParseMediaQueries(u8"(width)")));
+      CHECK_FALSE(evaluator.Evaluate(ParseMediaQueries(u8"not all and (width)")));
     }
 
     SECTION("No root style: unknown (the static result defaults to unknown)")
     {
       mq::MediaQueryEvaluator evaluator {Screen(), *fixture.Document, nullptr};
-      CHECK_FALSE(evaluator.Evaluate(Parse(u8"(width)")));
-      CHECK_FALSE(evaluator.Evaluate(Parse(u8"not all and (width)")));
+      CHECK_FALSE(evaluator.Evaluate(ParseMediaQueries(u8"(width)")));
+      CHECK_FALSE(evaluator.Evaluate(ParseMediaQueries(u8"not all and (width)")));
     }
   }
 

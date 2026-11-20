@@ -6,19 +6,6 @@
 
 namespace krys::boo::css::tests
 {
-  namespace
-  {
-    Ref<Value> Names(List<CSSOMString> names)
-    {
-      return GridLineNamesValue::Create(names);
-    }
-
-    Ref<Value> Px(double value)
-    {
-      return PrimitiveValue::Create(value, UnitType::px);
-    }
-  }
-
   TEST_CASE_METHOD(ValueFixture, "GridIntegerRepeatValue::Create", "[CSS][Values][GridIntegerRepeatValue]")
   {
     auto value = GridIntegerRepeatValue::Create(PrimitiveValue::CreateInteger(3.0), {Px(100.0), Px(200.0)});
@@ -35,19 +22,22 @@ namespace krys::boo::css::tests
   {
     CHECK(CssText(*GridIntegerRepeatValue::Create(PrimitiveValue::CreateInteger(2.0), {Px(100.0)}))
           == "repeat(2, 100px)");
-    CHECK(CssText(*GridIntegerRepeatValue::Create(PrimitiveValue::CreateInteger(4.0),
-                                                  {Names({u8"a"}), Px(100.0), Names({u8"b"}), Px(200.0)}))
-          == "repeat(4, [a] 100px [b] 200px)");
+    CHECK(
+      CssText(*GridIntegerRepeatValue::Create(PrimitiveValue::CreateInteger(4.0),
+                                              {LineNames({u8"a"}), Px(100.0), LineNames({u8"b"}), Px(200.0)}))
+      == "repeat(4, [a] 100px [b] 200px)");
   }
 
   TEST_CASE_METHOD(ValueFixture, "GridIntegerRepeatValue equality", "[CSS][Values][GridIntegerRepeatValue]")
   {
-    auto a = GridIntegerRepeatValue::Create(PrimitiveValue::CreateInteger(2.0), {Names({u8"a"}), Px(100.0)});
-    auto b = GridIntegerRepeatValue::Create(PrimitiveValue::CreateInteger(2.0), {Names({u8"a"}), Px(100.0)});
+    auto a =
+      GridIntegerRepeatValue::Create(PrimitiveValue::CreateInteger(2.0), {LineNames({u8"a"}), Px(100.0)});
+    auto b =
+      GridIntegerRepeatValue::Create(PrimitiveValue::CreateInteger(2.0), {LineNames({u8"a"}), Px(100.0)});
     auto otherCount =
-      GridIntegerRepeatValue::Create(PrimitiveValue::CreateInteger(3.0), {Names({u8"a"}), Px(100.0)});
+      GridIntegerRepeatValue::Create(PrimitiveValue::CreateInteger(3.0), {LineNames({u8"a"}), Px(100.0)});
     auto otherItems =
-      GridIntegerRepeatValue::Create(PrimitiveValue::CreateInteger(2.0), {Names({u8"b"}), Px(100.0)});
+      GridIntegerRepeatValue::Create(PrimitiveValue::CreateInteger(2.0), {LineNames({u8"b"}), Px(100.0)});
 
     CHECK(*a == *b);
     CHECK_FALSE(*a == *otherCount);
@@ -58,7 +48,7 @@ namespace krys::boo::css::tests
                    "[CSS][Values][GridIntegerRepeatValue]")
   {
     auto value =
-      GridIntegerRepeatValue::Create(PrimitiveValue::CreateInteger(2.0), {Names({u8"a"}), Px(100.0)});
+      GridIntegerRepeatValue::Create(PrimitiveValue::CreateInteger(2.0), {LineNames({u8"a"}), Px(100.0)});
     auto children = Children(*value);
     REQUIRE(children.size() == 3uz);
     CHECK(children[0uz] == value->Item(0u));

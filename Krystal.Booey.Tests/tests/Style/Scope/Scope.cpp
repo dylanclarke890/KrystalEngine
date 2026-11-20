@@ -1,6 +1,7 @@
 ﻿#include "Krystal.Booey/Style/Scope/Scope.hpp"
 #include "catch2/catch_test_macros.hpp"
 #include "Krystal.Booey.Tests/CSS/ValueTestUtils.hpp"
+#include "Krystal.Booey.Tests/DOM/DOMTestUtils.hpp"
 #include "Krystal.Booey.Tests/Style/ResolverTestUtils.hpp"
 #include "Krystal.Booey/CSS/CSSOM/CSSStyleSheet.hpp"
 #include "Krystal.Booey/DOM/Algorithms/TreeQueries.hpp"
@@ -16,22 +17,11 @@
 
 namespace krys::boo::style::tests
 {
+  using boo::tests::ParseDocument;
+  using boo::tests::RunTasks;
+
   namespace
   {
-    Ref<HTMLDocument> Parse(utf8_string &&input) noexcept
-    {
-      auto document = CreateRef<HTMLDocument>();
-      auto parser = CreateRef<html::DocumentParser>(*document);
-      parser->InputStream().Append(krys::move(input), IsEOF::Yes);
-      parser->PumpTokenizer();
-      return document;
-    }
-
-    void RunTasks() noexcept
-    {
-      html::EventLoop::Current().RunUntilIdle();
-    }
-
     Ref<HTMLLinkElement> AppendLink(Node &parent, DOMString &&rel) noexcept
     {
       auto link = CreateRef<HTMLLinkElement>(parent.NodeDocument());
@@ -80,7 +70,7 @@ namespace krys::boo::style::tests
 
   TEST_CASE("Scope: shadow trees follow their host's connection", "[Style][Scope][DOM]")
   {
-    auto document = Parse(u8"<div></div>");
+    auto document = ParseDocument(u8"<div></div>");
     RefPtr<Element> host = document->Body()->FirstElementChild();
     auto shadow = host->AttachShadow({}).ReleaseValue();
     auto inner = document->CreateElement(u8"span").ReleaseValue();
@@ -141,7 +131,7 @@ namespace krys::boo::style::tests
 
   TEST_CASE("Scope: the scope of a node", "[Style][Scope]")
   {
-    auto document = Parse(u8"<div></div>");
+    auto document = ParseDocument(u8"<div></div>");
     RefPtr<Element> host = document->Body()->FirstElementChild();
     auto shadow = host->AttachShadow({}).ReleaseValue();
     auto inner = document->CreateElement(u8"span").ReleaseValue();
@@ -172,7 +162,7 @@ namespace krys::boo::style::tests
 
     SECTION("Empty and disabled sheets are listed but not active")
     {
-      auto document = Parse(u8"<!DOCTYPE html><style>a {}</style><style></style><style>b {}</style>");
+      auto document = ParseDocument(u8"<!DOCTYPE html><style>a {}</style><style></style><style>b {}</style>");
       auto &scope = document->StyleScope();
       auto &sheets = scope.StyleSheetsForStyleSheetList();
       REQUIRE(sheets.size() == 3uz);
@@ -188,8 +178,8 @@ namespace krys::boo::style::tests
 
     SECTION("The first titled sheet sets the preferred set")
     {
-      auto document = Parse(u8"<!DOCTYPE html><style>a {}</style><style title=Default>b {}</style>"
-                            u8"<style title=Other>c {}</style><style title=Default>d {}</style>");
+      auto document = ParseDocument(u8"<!DOCTYPE html><style>a {}</style><style title=Default>b {}</style>"
+                                    u8"<style title=Other>c {}</style><style title=Default>d {}</style>");
       auto &scope = document->StyleScope();
       auto &sheets = scope.StyleSheetsForStyleSheetList();
       REQUIRE(sheets.size() == 4uz);
@@ -215,7 +205,7 @@ namespace krys::boo::style::tests
   TEST_CASE("Scope: updates", "[Style][Scope]")
   {
     RunTasks();
-    auto document = Parse(u8"<!DOCTYPE html><body>");
+    auto document = ParseDocument(u8"<!DOCTYPE html><body>");
     auto &scope = document->StyleScope();
     auto *body = document->Body().get();
 
@@ -350,7 +340,7 @@ namespace krys::boo::style::tests
 
     SECTION("leave the resolver to be built from the sheets when it's asked for")
     {
-      auto document = Parse(u8"<!DOCTYPE html><style>a{}</style><body>");
+      auto document = ParseDocument(u8"<!DOCTYPE html><style>a{}</style><body>");
       auto &scope = document->StyleScope();
       scope.FlushPendingUpdate();
       CHECK_FALSE(scope.ResolverIfExists());
@@ -361,7 +351,7 @@ namespace krys::boo::style::tests
   TEST_CASE("Scope: pending sheets", "[Style][Scope]")
   {
     RunTasks();
-    auto document = Parse(u8"<!DOCTYPE html><head><link></head><body><link>");
+    auto document = ParseDocument(u8"<!DOCTYPE html><head><link></head><body><link>");
     auto &scope = document->StyleScope();
     auto headLink = document->DocumentElement()->FirstElementChild()->FirstElementChild();
     auto bodyLink = document->Body()->FirstElementChild();

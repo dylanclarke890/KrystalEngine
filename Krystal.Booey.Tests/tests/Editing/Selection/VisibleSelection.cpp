@@ -1,5 +1,6 @@
 ﻿#include "Krystal.Booey/Editing/Selection/VisibleSelection.hpp"
 #include "catch2/catch_test_macros.hpp"
+#include "Krystal.Booey.Tests/DOM/DOMTestUtils.hpp"
 #include "Krystal.Booey.Tests/Rendering/PaintTestUtils.hpp"
 #include "Krystal.Booey/DOM/Nodes/Document.hpp"
 #include "Krystal.Booey/DOM/Nodes/Text.hpp"
@@ -23,11 +24,6 @@ namespace krys::boo::tests
         return Downcast<Text>(*ById(id).FirstChild());
       }
     };
-
-    KRYS_NODISCARD dom::Position At(Node &node, uint32 offset) noexcept
-    {
-      return dom::MakeContainerOffsetPosition(ShareRefPtr(&node), offset);
-    }
 
     KRYS_NODISCARD bool IsAt(const dom::Position &position, const Node &node, int32 offset) noexcept
     {

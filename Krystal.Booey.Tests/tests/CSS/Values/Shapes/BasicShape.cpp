@@ -1,5 +1,7 @@
 ﻿#include "Krystal.Booey/CSS/Values/Shapes/BasicShape.hpp"
 #include "catch2/catch_test_macros.hpp"
+#include "Krystal.Booey.Tests/CSS/PositionTestUtils.hpp"
+#include "Krystal.Booey.Tests/CSS/ValueTestUtils.hpp"
 #include "Krystal.Booey/CSS/Values/Primitives/NumericTypesComputedStyleDependencies.hpp"
 #include "Krystal.Booey/CSS/Values/Primitives/NumericTypesSerialisation.hpp"
 #include "Krystal.Booey/CSS/Values/Primitives/NumericTypesValueVisitation.hpp"
@@ -11,22 +13,6 @@ namespace krys::boo::css::tests
   {
     using LP = LengthPercentage<>;
     using NLP = LengthPercentage<NonNegative>;
-
-    template <typename T>
-    CSSOMString SerialiseForTest(const T &value)
-    {
-      return Serialise(DefaultSerialisationContext(), value);
-    }
-
-    Position At(TwoComponentPositionHorizontal x, TwoComponentPositionVertical y)
-    {
-      return Position {TwoComponentPositionHorizontalVertical {krys::move(x), krys::move(y)}};
-    }
-
-    Position Centre()
-    {
-      return At({keywords::Center {}}, {keywords::Center {}});
-    }
 
     BorderRadius Radii(NLP all)
     {
@@ -46,11 +32,12 @@ namespace krys::boo::css::tests
 
     // The position is always written when present, even at its default.
     CHECK(SerialiseForTest(CircleFunction {
-            Circle {.Radius = Circle::Extent {keywords::ClosestSide {}}, .Position = Centre()}})
+            Circle {.Radius = Circle::Extent {keywords::ClosestSide {}}, .Position = CentrePosition()}})
           == u8"circle(at center center)");
-    CHECK(SerialiseForTest(CircleFunction {Circle {
-            .Radius = NLP {10_css_px}, .Position = At({keywords::Left {}}, {LP {20_css_percentage}})}})
-          == u8"circle(10px at left 20%)");
+    CHECK(
+      SerialiseForTest(CircleFunction {Circle {
+        .Radius = NLP {10_css_px}, .Position = PositionAt({keywords::Left {}}, {LP {20_css_percentage}})}})
+      == u8"circle(10px at left 20%)");
   }
 
   TEST_CASE("EllipseFunction(Serialise)", "[CSS][Shapes][EllipseFunction]")
@@ -64,12 +51,12 @@ namespace krys::boo::css::tests
     CHECK(SerialiseForTest(
             EllipseFunction {Ellipse {.Radii = {closestSide, Ellipse::Extent {keywords::FarthestSide {}}}}})
           == u8"ellipse(closest-side farthest-side)");
-    CHECK(SerialiseForTest(
-            EllipseFunction {Ellipse {.Radii = {NLP {10_css_px}, NLP {20_css_px}}, .Position = Centre()}})
+    CHECK(SerialiseForTest(EllipseFunction {
+            Ellipse {.Radii = {NLP {10_css_px}, NLP {20_css_px}}, .Position = CentrePosition()}})
           == u8"ellipse(10px 20px at center center)");
-    CHECK(
-      SerialiseForTest(EllipseFunction {Ellipse {.Radii = {closestSide, closestSide}, .Position = Centre()}})
-      == u8"ellipse(at center center)");
+    CHECK(SerialiseForTest(
+            EllipseFunction {Ellipse {.Radii = {closestSide, closestSide}, .Position = CentrePosition()}})
+          == u8"ellipse(at center center)");
   }
 
   TEST_CASE("InsetFunction(Serialise)", "[CSS][Shapes][InsetFunction]")
@@ -151,14 +138,16 @@ namespace krys::boo::css::tests
 
   TEST_CASE("BasicShape(Equality)", "[CSS][Shapes][BasicShape]")
   {
-    BasicShape circle = CircleFunction {Circle {.Radius = NLP {1_css_px}, .Position = Centre()}};
+    BasicShape circle = CircleFunction {Circle {.Radius = NLP {1_css_px}, .Position = CentrePosition()}};
 
-    CHECK(circle == BasicShape {CircleFunction {Circle {.Radius = NLP {1_css_px}, .Position = Centre()}}});
-    CHECK(circle != BasicShape {CircleFunction {Circle {.Radius = NLP {1_css_px}}}});
-    CHECK(circle != BasicShape {CircleFunction {Circle {.Radius = NLP {2_css_px}, .Position = Centre()}}});
     CHECK(circle
-          != BasicShape {
-            EllipseFunction {Ellipse {.Radii = {NLP {1_css_px}, NLP {1_css_px}}, .Position = Centre()}}});
+          == BasicShape {CircleFunction {Circle {.Radius = NLP {1_css_px}, .Position = CentrePosition()}}});
+    CHECK(circle != BasicShape {CircleFunction {Circle {.Radius = NLP {1_css_px}}}});
+    CHECK(circle
+          != BasicShape {CircleFunction {Circle {.Radius = NLP {2_css_px}, .Position = CentrePosition()}}});
+    CHECK(circle
+          != BasicShape {EllipseFunction {
+            Ellipse {.Radii = {NLP {1_css_px}, NLP {1_css_px}}, .Position = CentrePosition()}}});
 
     // `inset(10px)` and `inset(10px round 0px)` are the same value.
     CHECK(Inset {.Insets = {LP {10_css_px}}, .Radii = BorderRadius::DefaultValue()}

@@ -1,6 +1,7 @@
 ﻿#include "Krystal.Booey/Rendering/FormControls/RenderMenuList.hpp"
 #include "catch2/catch_test_macros.hpp"
 #include "Krystal.Booey.Tests/Editing/EditorTestUtils.hpp"
+#include "Krystal.Booey.Tests/Input/InputTestUtils.hpp"
 #include "Krystal.Booey.Tests/Layout/LayoutTestUtils.hpp"
 #include "Krystal.Booey/DOM/Events/EventNames.hpp"
 #include "Krystal.Booey/HTML/Elements/HTMLSelectElement.hpp"
@@ -12,7 +13,9 @@
 
 namespace krys::boo::layout::tests
 {
+  using boo::tests::DragMouseEvent;
   using boo::tests::EditorFixture;
+  using boo::tests::PressKey;
 
   namespace
   {
@@ -75,21 +78,6 @@ namespace krys::boo::layout::tests
         return Popup;
       }
     };
-
-    KRYS_NODISCARD PlatformMouseEvent MouseEvent(PlatformEvent::Type type, PointI position) noexcept
-    {
-      PointD point(position.X(), position.Y());
-      int32 clickCount = type == PlatformEvent::Type::MousePressed ? 1 : 0;
-      return PlatformMouseEvent(point, point, MouseButton::Left, type, clickCount, {}, MonotonicTime::Now());
-    }
-
-    bool PressKey(EditorFixture &fixture, const utf8_string &key, utf8_string identifier,
-                  int32 keyCode) noexcept
-    {
-      return fixture.Frame->GetEventHandler().KeyEvent(
-        PlatformKeyboardEvent(PlatformEvent::Type::RawKeyDown, u8"", u8"", key, key, krys::move(identifier),
-                              keyCode, false, false, false, {}, {}));
-    }
   }
 
   TEST_CASE_METHOD(css::tests::ValueFixture, "RenderMenuList: the selected option's text",
@@ -143,14 +131,14 @@ layer at (0,0) size 400x23
     auto changes = fixture.Listen(event_names::Change);
 
     // Pressing the menu list shows the popup below it, at the selected item.
-    (void)handler.HandleMousePressEvent(MouseEvent(PlatformEvent::Type::MousePressed, {5, 5}));
+    (void)handler.HandleMousePressEvent(DragMouseEvent(PlatformEvent::Type::MousePressed, {5, 5}));
     REQUIRE(client.Popup);
     auto &popup = *client.Popup;
     CHECK(popup.Visible);
     CHECK(menuList.PopupIsVisible());
     CHECK(popup.ShownIndex == 0);
     CHECK(popup.ShownAt == RectI(0, 0, menuList.Width().ToInt(), menuList.Height().ToInt()));
-    (void)handler.HandleMouseReleaseEvent(MouseEvent(PlatformEvent::Type::MouseReleased, {5, 5}));
+    (void)handler.HandleMouseReleaseEvent(DragMouseEvent(PlatformEvent::Type::MouseReleased, {5, 5}));
 
     // The popup asks the menu list for its items.
     auto &popupClient = *popup.Client;

@@ -1,5 +1,6 @@
 ﻿#include "Krystal.Booey/CSS/Selectors/SelectorChecker.hpp"
 #include "catch2/catch_test_macros.hpp"
+#include "Krystal.Booey.Tests/DOM/DOMTestUtils.hpp"
 #include "Krystal.Booey/CSS/Selectors/SelectorParser.hpp"
 #include "Krystal.Booey/DOM/Nodes/HTMLDocument.hpp"
 #include "Krystal.Booey/DOM/Nodes/ShadowRoot.hpp"
@@ -10,24 +11,11 @@
 
 namespace krys::boo::css::tests
 {
+  using boo::tests::ById;
+  using boo::tests::ParseDocument;
+
   namespace
   {
-    KRYS_NODISCARD Ref<HTMLDocument> Parse(utf8_string &&input) noexcept
-    {
-      auto document = CreateRef<HTMLDocument>();
-      auto parser = CreateRef<html::DocumentParser>(*document);
-      parser->InputStream().Append(krys::move(input), IsEOF::Yes);
-      parser->PumpTokenizer();
-      return document;
-    }
-
-    KRYS_NODISCARD Element &ById(Document &document, DOMStringView id)
-    {
-      auto element = document.GetElementById(id);
-      REQUIRE(element);
-      return *element;
-    }
-
     KRYS_NODISCARD bool Matches(const Element &element, DOMStringView selector)
     {
       auto result = element.Matches(selector);
@@ -39,8 +27,8 @@ namespace krys::boo::css::tests
   TEST_CASE("SelectorChecker: simple selectors", "[CSS][Selectors][SelectorChecker]")
   {
     auto document =
-      Parse(u8"<!DOCTYPE html><div id=a class='x  Y' title=Hello lang=en-US data-v='foo bar-baz'>"
-            u8"<input id=b type=TEXT></div>");
+      ParseDocument(u8"<!DOCTYPE html><div id=a class='x  Y' title=Hello lang=en-US data-v='foo bar-baz'>"
+                    u8"<input id=b type=TEXT></div>");
     auto &a = ById(*document, u8"a");
     auto &b = ById(*document, u8"b");
 
@@ -108,7 +96,7 @@ namespace krys::boo::css::tests
 
   TEST_CASE("SelectorChecker: classes and IDs in quirks mode", "[CSS][Selectors][SelectorChecker]")
   {
-    auto document = Parse(u8"<div id=Quirky class='Foo'></div>");
+    auto document = ParseDocument(u8"<div id=Quirky class='Foo'></div>");
     REQUIRE(document->InQuirksMode());
     auto element = document->GetElementById(u8"Quirky");
     REQUIRE(element);
@@ -122,8 +110,8 @@ namespace krys::boo::css::tests
   TEST_CASE("SelectorChecker: combinators", "[CSS][Selectors][SelectorChecker]")
   {
     auto document =
-      Parse(u8"<!DOCTYPE html><section id=s><div id=d><p id=p1></p><p id=p2></p><span id=sp></span>"
-            u8"</div></section>");
+      ParseDocument(u8"<!DOCTYPE html><section id=s><div id=d><p id=p1></p><p id=p2></p><span id=sp></span>"
+                    u8"</div></section>");
     auto &p1 = ById(*document, u8"p1");
     auto &p2 = ById(*document, u8"p2");
     auto &sp = ById(*document, u8"sp");
@@ -144,8 +132,8 @@ namespace krys::boo::css::tests
   TEST_CASE("SelectorChecker: logical combinations", "[CSS][Selectors][SelectorChecker]")
   {
     auto document =
-      Parse(u8"<!DOCTYPE html><div id=d class=a><p id=p class=b><em id=e></em></p><span id=s></span>"
-            u8"<i id=i></i></div>");
+      ParseDocument(u8"<!DOCTYPE html><div id=d class=a><p id=p class=b><em id=e></em></p><span id=s></span>"
+                    u8"<i id=i></i></div>");
     auto &d = ById(*document, u8"d");
     auto &p = ById(*document, u8"p");
     auto &s = ById(*document, u8"s");
@@ -178,9 +166,10 @@ namespace krys::boo::css::tests
 
   TEST_CASE("SelectorChecker: tree-structural pseudo-classes", "[CSS][Selectors][SelectorChecker]")
   {
-    auto document = Parse(u8"<!DOCTYPE html><ul id=u><li id=l1 class=x></li><li id=l2></li><b id=b></b>"
-                          u8"<li id=l3 class=x></li><li id=l4><!-- comment --></li></ul><p id=empty></p>"
-                          u8"<p id=space> </p><div id=only><span id=o></span></div>");
+    auto document =
+      ParseDocument(u8"<!DOCTYPE html><ul id=u><li id=l1 class=x></li><li id=l2></li><b id=b></b>"
+                    u8"<li id=l3 class=x></li><li id=l4><!-- comment --></li></ul><p id=empty></p>"
+                    u8"<p id=space> </p><div id=only><span id=o></span></div>");
     auto &l1 = ById(*document, u8"l1");
     auto &l2 = ById(*document, u8"l2");
     auto &b = ById(*document, u8"b");
@@ -219,7 +208,7 @@ namespace krys::boo::css::tests
 
   TEST_CASE("SelectorChecker: :scope and :host", "[CSS][Selectors][SelectorChecker]")
   {
-    auto document = Parse(u8"<!DOCTYPE html><div id=host><p id=light></p></div>");
+    auto document = ParseDocument(u8"<!DOCTYPE html><div id=host><p id=light></p></div>");
     auto &host = ById(*document, u8"host");
 
     REQUIRE(Matches(host, u8":scope"));
@@ -239,7 +228,7 @@ namespace krys::boo::css::tests
 
   TEST_CASE("SelectorChecker: element state", "[CSS][Selectors][SelectorChecker]")
   {
-    auto document = Parse(
+    auto document = ParseDocument(
       u8"<!DOCTYPE html><a id=link href=x></a><a id=nolink></a>"
       u8"<form><input id=check type=checkbox checked><input id=text required placeholder=hint>"
       u8"<input id=ro readonly><textarea id=ta></textarea><button id=submit1></button>"
@@ -308,8 +297,9 @@ namespace krys::boo::css::tests
 
   TEST_CASE("SelectorChecker: :lang() and :dir()", "[CSS][Selectors][SelectorChecker]")
   {
-    auto document = Parse(u8"<!DOCTYPE html><html lang=en-US><body><p id=p></p><div lang=fr-Latn-CA dir=rtl>"
-                          u8"<span id=s></span><b id=b dir=ltr></b></div><i id=i lang=''></i></body></html>");
+    auto document =
+      ParseDocument(u8"<!DOCTYPE html><html lang=en-US><body><p id=p></p><div lang=fr-Latn-CA dir=rtl>"
+                    u8"<span id=s></span><b id=b dir=ltr></b></div><i id=i lang=''></i></body></html>");
     auto &p = ById(*document, u8"p");
     auto &s = ById(*document, u8"s");
 
@@ -331,8 +321,8 @@ namespace krys::boo::css::tests
 
   TEST_CASE("SelectorChecker: :heading and :heading()", "[CSS][Selectors][SelectorChecker]")
   {
-    auto document = Parse(u8"<!DOCTYPE html><h1 id=h1></h1><h3 id=h3></h3><section headingoffset=2>"
-                          u8"<h2 id=offset></h2></section><p id=p></p>");
+    auto document = ParseDocument(u8"<!DOCTYPE html><h1 id=h1></h1><h3 id=h3></h3><section headingoffset=2>"
+                                  u8"<h2 id=offset></h2></section><p id=p></p>");
     auto &h1 = ById(*document, u8"h1");
     auto &offset = ById(*document, u8"offset");
 
@@ -351,8 +341,8 @@ namespace krys::boo::css::tests
   TEST_CASE("SelectorChecker: :open", "[CSS][Selectors][SelectorChecker]")
   {
     auto document =
-      Parse(u8"<!DOCTYPE html><details id=open open></details><details id=closed></details>"
-            u8"<dialog id=dialog open></dialog><select id=select></select><div id=div open></div>");
+      ParseDocument(u8"<!DOCTYPE html><details id=open open></details><details id=closed></details>"
+                    u8"<dialog id=dialog open></dialog><select id=select></select><div id=div open></div>");
 
     REQUIRE(Matches(ById(*document, u8"open"), u8":open"));
     REQUIRE_FALSE(Matches(ById(*document, u8"closed"), u8":open"));

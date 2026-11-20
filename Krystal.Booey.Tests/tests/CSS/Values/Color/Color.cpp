@@ -1,5 +1,7 @@
 ﻿#include "Krystal.Booey/CSS/Values/Color/Color.hpp"
 #include "catch2/catch_test_macros.hpp"
+#include "Krystal.Booey.Tests/CSS/ColorTestUtils.hpp"
+#include "Krystal.Booey.Tests/CSS/ValueTestUtils.hpp"
 #include "Krystal.Booey/CSS/Calc/Value.hpp"
 #include "Krystal.Booey/CSS/Values/Color/AbsoluteColor.hpp"
 #include "Krystal.Booey/CSS/Values/Color/ColorLayers.hpp"
@@ -21,20 +23,9 @@ namespace krys::boo::css::tests
 {
   namespace
   {
-    template <typename T>
-    CSSOMString SerialiseForTest(const T &value)
-    {
-      return Serialise(DefaultSerialisationContext(), value);
-    }
-
     boo::Color Resolve(const Color &color, PlatformColorResolutionState state = {})
     {
       return CreateColor(color, state);
-    }
-
-    Color Keyword(ValueId id)
-    {
-      return Color {KeywordColor {id}};
     }
 
     Color Hex(uint8 r, uint8 g, uint8 b, uint8 a = 255)
@@ -121,27 +112,27 @@ namespace krys::boo::css::tests
 
     SECTION("Resolution through the state")
     {
-      CHECK(Resolve(Keyword(ValueId::Red)) == boo::Color::red);
-      CHECK(Resolve(Keyword(ValueId::Buttonface)) == boo::Color::lightGray);
+      CHECK(Resolve(ColorKeyword(ValueId::Red)) == boo::Color::red);
+      CHECK(Resolve(ColorKeyword(ValueId::Buttonface)) == boo::Color::lightGray);
 
       // No delegate and no stored colour: the invalid colour.
-      CHECK_FALSE(Resolve(Keyword(ValueId::Currentcolor)).IsValid());
+      CHECK_FALSE(Resolve(ColorKeyword(ValueId::Currentcolor)).IsValid());
 
       PlatformColorResolutionState state;
       state.ResolvedCurrentColor = boo::Color::blue;
       state.ResolvedWebkitLink = boo::Color::red;
-      CHECK(Resolve(Keyword(ValueId::Currentcolor), state) == boo::Color::blue);
-      CHECK(Resolve(Keyword(ValueId::WebkitLink), state) == boo::Color::red);
+      CHECK(Resolve(ColorKeyword(ValueId::Currentcolor), state) == boo::Color::blue);
+      CHECK(Resolve(ColorKeyword(ValueId::WebkitLink), state) == boo::Color::red);
 
       state.KeywordOptions = style::ColorOptions::UseDarkAppearance;
-      CHECK(Resolve(Keyword(ValueId::Linktext), state) == boo::Color {SRGBA<uint8> {158, 158, 255}});
+      CHECK(Resolve(ColorKeyword(ValueId::Linktext), state) == boo::Color {SRGBA<uint8> {158, 158, 255}});
     }
 
     SECTION("The delegate is asked once, then the result is cached")
     {
       TestDelegate delegate;
       PlatformColorResolutionState state {.Delegate = &delegate};
-      auto color = Keyword(ValueId::Currentcolor);
+      auto color = ColorKeyword(ValueId::Currentcolor);
       CHECK(CreateColor(color, state) == boo::Color::green);
       CHECK(CreateColor(color, state) == boo::Color::green);
       CHECK(delegate.Calls == 1);
@@ -151,17 +142,17 @@ namespace krys::boo::css::tests
       // The base delegate gives the invalid colour.
       PlatformColorResolutionDelegate base;
       PlatformColorResolutionState baseState {.Delegate = &base};
-      CHECK_FALSE(CreateColor(Keyword(ValueId::WebkitFocusRingColor), baseState).IsValid());
+      CHECK_FALSE(CreateColor(ColorKeyword(ValueId::WebkitFocusRingColor), baseState).IsValid());
     }
 
     SECTION("Serialisation and queries")
     {
-      CHECK(SerialiseForTest(Keyword(ValueId::Aliceblue)) == u8"aliceblue");
-      CHECK(SerialiseForTest(Keyword(ValueId::Currentcolor)) == u8"currentcolor");
-      CHECK(ContainsCurrentColor(Keyword(ValueId::Currentcolor)));
-      CHECK_FALSE(ContainsCurrentColor(Keyword(ValueId::Red)));
-      CHECK(ContainsColorSchemeDependentColor(Keyword(ValueId::Canvas)));
-      CHECK_FALSE(ContainsColorSchemeDependentColor(Keyword(ValueId::Red)));
+      CHECK(SerialiseForTest(ColorKeyword(ValueId::Aliceblue)) == u8"aliceblue");
+      CHECK(SerialiseForTest(ColorKeyword(ValueId::Currentcolor)) == u8"currentcolor");
+      CHECK(ContainsCurrentColor(ColorKeyword(ValueId::Currentcolor)));
+      CHECK_FALSE(ContainsCurrentColor(ColorKeyword(ValueId::Red)));
+      CHECK(ContainsColorSchemeDependentColor(ColorKeyword(ValueId::Canvas)));
+      CHECK_FALSE(ContainsColorSchemeDependentColor(ColorKeyword(ValueId::Red)));
     }
   }
 
@@ -183,7 +174,7 @@ namespace krys::boo::css::tests
   {
     SECTION("Accessors")
     {
-      auto keyword = Keyword(ValueId::Red);
+      auto keyword = ColorKeyword(ValueId::Red);
       CHECK(keyword.IsKeyword());
       CHECK_FALSE(keyword.IsHex());
       CHECK_FALSE(keyword.IsResolved());
@@ -202,24 +193,24 @@ namespace krys::boo::css::tests
 
     SECTION("Absolute colour")
     {
-      CHECK(Keyword(ValueId::Red).GetAbsoluteColor() == boo::Color::red);
-      CHECK_FALSE(Keyword(ValueId::Currentcolor).GetAbsoluteColor().IsValid());
-      CHECK_FALSE(Keyword(ValueId::Canvas).GetAbsoluteColor().IsValid());
+      CHECK(ColorKeyword(ValueId::Red).GetAbsoluteColor() == boo::Color::red);
+      CHECK_FALSE(ColorKeyword(ValueId::Currentcolor).GetAbsoluteColor().IsValid());
+      CHECK_FALSE(ColorKeyword(ValueId::Canvas).GetAbsoluteColor().IsValid());
       CHECK(Hex(1, 2, 3).GetAbsoluteColor() == boo::Color {SRGBA<uint8> {1, 2, 3}});
-      CHECK_FALSE(Color {ContrastColor {Keyword(ValueId::Red)}}.GetAbsoluteColor().IsValid());
+      CHECK_FALSE(Color {ContrastColor {ColorKeyword(ValueId::Red)}}.GetAbsoluteColor().IsValid());
     }
 
     SECTION("Copies, moves and equality, including indirect alternatives")
     {
       Color mix {ColorMix {.ColourInterpolationMethod = DefaultInterpolationMethodForColorMix,
-                           .MixComponents1 = {Keyword(ValueId::Red), null},
+                           .MixComponents1 = {ColorKeyword(ValueId::Red), null},
                            .MixComponents2 = {Hex(0, 0, 255), null}}};
       Color copy = mix;
       CHECK(copy == mix);
       CHECK(SerialiseForTest(copy) == SerialiseForTest(mix));
 
       Color other {ColorMix {.ColourInterpolationMethod = DefaultInterpolationMethodForColorMix,
-                             .MixComponents1 = {Keyword(ValueId::Red), null},
+                             .MixComponents1 = {ColorKeyword(ValueId::Red), null},
                              .MixComponents2 = {Hex(0, 0, 254), null}}};
       CHECK_FALSE(copy == other);
 
@@ -229,17 +220,17 @@ namespace krys::boo::css::tests
       Color moved = krys::move(copy);
       CHECK(moved == other);
 
-      CHECK_FALSE(Keyword(ValueId::Red) == Hex(255, 0, 0));
-      CHECK(Keyword(ValueId::Red) == Keyword(ValueId::Red));
+      CHECK_FALSE(ColorKeyword(ValueId::Red) == Hex(255, 0, 0));
+      CHECK(ColorKeyword(ValueId::Red) == ColorKeyword(ValueId::Red));
     }
 
     SECTION("Markable")
     {
       Markable<Color> empty;
       CHECK_FALSE(empty);
-      Markable<Color> red {Keyword(ValueId::Red)};
+      Markable<Color> red {ColorKeyword(ValueId::Red)};
       REQUIRE(red);
-      CHECK(*red == Keyword(ValueId::Red));
+      CHECK(*red == ColorKeyword(ValueId::Red));
     }
 
     SECTION("SwitchOn sees through the indirection")
@@ -326,7 +317,7 @@ namespace krys::boo::css::tests
     SECTION("Channel keywords take the origin's components")
     {
       Color color {
-        RelativeRGB {.Origin = Keyword(ValueId::Red),
+        RelativeRGB {.Origin = ColorKeyword(ValueId::Red),
                      .Components = {Symbol {SymbolRaw {ValueId::B}}, Symbol {SymbolRaw {ValueId::G}},
                                     Symbol {SymbolRaw {ValueId::R}}, null}}};
       // Relative colours keep the extended (float) colour type.
@@ -346,7 +337,7 @@ namespace krys::boo::css::tests
     SECTION("An invalid origin gives the invalid colour")
     {
       Color color {
-        RelativeRGB {.Origin = Keyword(ValueId::Currentcolor),
+        RelativeRGB {.Origin = ColorKeyword(ValueId::Currentcolor),
                      .Components = {Symbol {SymbolRaw {ValueId::R}}, Symbol {SymbolRaw {ValueId::G}},
                                     Symbol {SymbolRaw {ValueId::B}}, null}}};
       CHECK_FALSE(Resolve(color).IsValid());
@@ -359,7 +350,7 @@ namespace krys::boo::css::tests
     SECTION("color() serialises its colour space")
     {
       Color color {RelativeColor<ColorRGBFunction<ExtendedSRGBA<float>>> {
-        .Origin = Keyword(ValueId::Red),
+        .Origin = ColorKeyword(ValueId::Red),
         .Components = {Symbol {SymbolRaw {ValueId::R}}, Symbol {SymbolRaw {ValueId::G}}, Number<> {1.0},
                        null}}};
       CHECK(SerialiseForTest(color) == u8"color(from red srgb r g 1)");
@@ -369,14 +360,14 @@ namespace krys::boo::css::tests
     SECTION("Current colour checks the origin")
     {
       Color current {
-        RelativeRGB {.Origin = Keyword(ValueId::Currentcolor),
+        RelativeRGB {.Origin = ColorKeyword(ValueId::Currentcolor),
                      .Components = {Symbol {SymbolRaw {ValueId::R}}, Symbol {SymbolRaw {ValueId::G}},
                                     Symbol {SymbolRaw {ValueId::B}}, null}}};
       CHECK(ContainsCurrentColor(current));
       CHECK_FALSE(ContainsColorSchemeDependentColor(current));
 
       Color system {
-        RelativeRGB {.Origin = Keyword(ValueId::Canvas),
+        RelativeRGB {.Origin = ColorKeyword(ValueId::Canvas),
                      .Components = {Symbol {SymbolRaw {ValueId::R}}, Symbol {SymbolRaw {ValueId::G}},
                                     Symbol {SymbolRaw {ValueId::B}}, null}}};
       CHECK_FALSE(ContainsCurrentColor(system));
@@ -392,8 +383,8 @@ namespace krys::boo::css::tests
                   ColourInterpolationMethod method = DefaultInterpolationMethodForColorMix)
     {
       return Color {ColorMix {.ColourInterpolationMethod = method,
-                              .MixComponents1 = {Keyword(ValueId::Red), p1},
-                              .MixComponents2 = {Keyword(ValueId::Blue), p2}}};
+                              .MixComponents1 = {ColorKeyword(ValueId::Red), p1},
+                              .MixComponents2 = {ColorKeyword(ValueId::Blue), p2}}};
     };
 
     SECTION("Serialisation omits the defaults")
@@ -434,8 +425,8 @@ namespace krys::boo::css::tests
 
       // An invalid colour makes the mix invalid.
       Color withCurrent {ColorMix {.ColourInterpolationMethod = DefaultInterpolationMethodForColorMix,
-                                   .MixComponents1 = {Keyword(ValueId::Currentcolor), null},
-                                   .MixComponents2 = {Keyword(ValueId::Blue), null}}};
+                                   .MixComponents1 = {ColorKeyword(ValueId::Currentcolor), null},
+                                   .MixComponents2 = {ColorKeyword(ValueId::Blue), null}}};
       CHECK_FALSE(Resolve(withCurrent).IsValid());
       CHECK(ContainsCurrentColor(withCurrent));
     }
@@ -445,15 +436,15 @@ namespace krys::boo::css::tests
   {
     CHECK(Resolve(Color {ContrastColor {Hex(0, 0, 0)}}) == boo::Color::white);
     CHECK(Resolve(Color {ContrastColor {Hex(255, 255, 255)}}) == boo::Color::black);
-    CHECK(Resolve(Color {ContrastColor {Keyword(ValueId::Yellow)}}) == boo::Color::black);
-    CHECK(Resolve(Color {ContrastColor {Keyword(ValueId::Navy)}}) == boo::Color::white);
-    CHECK(SerialiseForTest(Color {ContrastColor {Keyword(ValueId::Red)}}) == u8"contrast-color(red)");
-    CHECK(ContainsCurrentColor(Color {ContrastColor {Keyword(ValueId::Currentcolor)}}));
+    CHECK(Resolve(Color {ContrastColor {ColorKeyword(ValueId::Yellow)}}) == boo::Color::black);
+    CHECK(Resolve(Color {ContrastColor {ColorKeyword(ValueId::Navy)}}) == boo::Color::white);
+    CHECK(SerialiseForTest(Color {ContrastColor {ColorKeyword(ValueId::Red)}}) == u8"contrast-color(red)");
+    CHECK(ContainsCurrentColor(Color {ContrastColor {ColorKeyword(ValueId::Currentcolor)}}));
   }
 
   TEST_CASE("light-dark()", "[CSS][Color][LightDarkColor]")
   {
-    Color color {LightDarkColor {Keyword(ValueId::White), Keyword(ValueId::Black)}};
+    Color color {LightDarkColor {ColorKeyword(ValueId::White), ColorKeyword(ValueId::Black)}};
 
     // No appearance: the invalid colour.
     CHECK_FALSE(Resolve(color).IsValid());
@@ -463,8 +454,8 @@ namespace krys::boo::css::tests
     CHECK(SerialiseForTest(color) == u8"light-dark(white, black)");
     CHECK(ContainsColorSchemeDependentColor(color));
     CHECK_FALSE(ContainsCurrentColor(color));
-    CHECK(
-      ContainsCurrentColor(Color {LightDarkColor {Keyword(ValueId::White), Keyword(ValueId::Currentcolor)}}));
+    CHECK(ContainsCurrentColor(
+      Color {LightDarkColor {ColorKeyword(ValueId::White), ColorKeyword(ValueId::Currentcolor)}}));
   }
 
   TEST_CASE("color-layers()", "[CSS][Color][ColorLayers]")
@@ -485,11 +476,11 @@ namespace krys::boo::css::tests
 
     SECTION("The blend mode is serialised unless it's normal")
     {
-      Color color {ColorLayers {.BlendMode = BlendMode::Multiply, .Colors = {Keyword(ValueId::Red)}}};
+      Color color {ColorLayers {.BlendMode = BlendMode::Multiply, .Colors = {ColorKeyword(ValueId::Red)}}};
       CHECK(SerialiseForTest(color) == u8"color-layers(multiply, red)");
       CHECK_FALSE(ContainsCurrentColor(color));
       CHECK(ContainsColorSchemeDependentColor(
-        Color {ColorLayers {.BlendMode = BlendMode::Normal, .Colors = {Keyword(ValueId::Canvas)}}}));
+        Color {ColorLayers {.BlendMode = BlendMode::Normal, .Colors = {ColorKeyword(ValueId::Canvas)}}}));
     }
   }
 
@@ -497,10 +488,10 @@ namespace krys::boo::css::tests
   {
     Color color {ModernRGB {{Number<> {CreateEmCalc()}, Number<> {0.0}, Number<> {0.0}, null}}};
     auto dependencies =
-      CollectComputedStyleDependencies(Color {LightDarkColor {color, Keyword(ValueId::Red)}});
+      CollectComputedStyleDependencies(Color {LightDarkColor {color, ColorKeyword(ValueId::Red)}});
     CHECK(std::ranges::find(dependencies.Properties, PropertyId::FontSize) != dependencies.Properties.end());
 
-    CHECK(CollectComputedStyleDependencies(Keyword(ValueId::Red)).IsComputationallyIndependent());
+    CHECK(CollectComputedStyleDependencies(ColorKeyword(ValueId::Red)).IsComputationallyIndependent());
 
     auto calls = 0;
     auto status = VisitValueChildren(

@@ -2,6 +2,7 @@
 
 #include "Krystal.Booey.Tests/CSS/ValueTestUtils.hpp"
 #include "Krystal.Booey.Tests/Loader/TestLoader.hpp"
+#include "Krystal.Booey.Tests/StringTestUtils.hpp"
 #include "Krystal.Booey/DOM/Nodes/Document.hpp"
 #include "Krystal.Booey/Loader/FrameLoader.hpp"
 #include "Krystal.Booey/Loader/FrameLoaderClient.hpp"
@@ -17,11 +18,6 @@
 
 namespace krys::boo::tests
 {
-  KRYS_NODISCARD inline std::string Narrow(utf8_stringview text) noexcept
-  {
-    return std::string(reinterpret_cast<const char *>(text.data()), text.size());
-  }
-
   /// @brief Records what the loader tells the host.
   class LoadRecordingClient final : public FrameLoaderClient
   {

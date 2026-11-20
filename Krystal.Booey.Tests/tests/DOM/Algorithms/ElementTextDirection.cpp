@@ -1,5 +1,6 @@
 ﻿#include "Krystal.Booey/DOM/Algorithms/ElementTextDirection.hpp"
 #include "catch2/catch_test_macros.hpp"
+#include "Krystal.Booey.Tests/DOM/DOMTestUtils.hpp"
 #include "Krystal.Booey.Tests/Style/ResolverTestUtils.hpp"
 #include "Krystal.Booey/DOM/Nodes/ShadowRoot.hpp"
 #include "Krystal.Booey/DOM/Nodes/Text.hpp"
@@ -10,6 +11,8 @@
 
 namespace krys::boo::dom::tests
 {
+  using boo::tests::ById;
+
   namespace
   {
     // Hebrew and Arabic words: right-to-left strong characters.
@@ -19,13 +22,6 @@ namespace krys::boo::dom::tests
     KRYS_NODISCARD Ref<HTMLDocument> Parse(utf8_string &&markup) noexcept
     {
       return style::tests::ResolverFixture::Parse(krys::move(markup));
-    }
-
-    KRYS_NODISCARD Element &ById(Document &document, DOMStringView id)
-    {
-      auto element = document.GetElementById(id);
-      REQUIRE(element);
-      return *element;
     }
 
     /// @brief @p element's directionality, checked against `:dir()`.

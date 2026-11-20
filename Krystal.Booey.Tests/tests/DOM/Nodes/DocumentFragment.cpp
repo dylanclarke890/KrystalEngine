@@ -14,16 +14,17 @@ namespace krys::boo::dom::tests
 {
   namespace
   {
-    struct CommonTestData
+    struct DocumentFragmentTestData
     {
       Ref<boo::Document> Document;
       Ref<DocumentFragment> Node;
 
-      CommonTestData() : Document(CreateRef<boo::Document>()), Node(CreateRef<DocumentFragment>(*Document))
+      DocumentFragmentTestData()
+          : Document(CreateRef<boo::Document>()), Node(CreateRef<DocumentFragment>(*Document))
       {
       }
 
-      ~CommonTestData()
+      ~DocumentFragmentTestData()
       {
         while (auto *firstChild = Node->FirstChild())
         {
@@ -37,7 +38,7 @@ namespace krys::boo::dom::tests
             "[DOM][DocumentFragment][dom:interface-documentfragment][dom:create-a-document-fragment]"
             "[dom:dom-documentfragment-documentfragment][dom:concept-documentfragment-host]")
   {
-    CommonTestData data;
+    DocumentFragmentTestData data;
     CHECK(&data.Node->NodeDocument() == data.Document.get());
     CHECK_FALSE(data.Node->HasChildNodes());
     CHECK(data.Node->Host() == nullptr);
@@ -55,14 +56,14 @@ namespace krys::boo::dom::tests
   TEST_CASE("Node.nodeType: a DocumentFragment is a DOCUMENT_FRAGMENT_NODE",
             "[DOM][DocumentFragment][dom:dom-node-nodetype][dom:dom-node-document_fragment_node]")
   {
-    CommonTestData data;
+    DocumentFragmentTestData data;
     REQUIRE(data.Node->NodeType() == NodeType::DOCUMENT_FRAGMENT_NODE);
   }
 
   TEST_CASE("Node.nodeName: a DocumentFragment's is #document-fragment",
             "[DOM][DocumentFragment][dom:dom-node-nodename]")
   {
-    CommonTestData data;
+    DocumentFragmentTestData data;
     REQUIRE(data.Node->NodeName() == u8"#document-fragment");
   }
 
@@ -70,7 +71,7 @@ namespace krys::boo::dom::tests
             "[DOM][DocumentFragment][dom:dom-node-textcontent][dom:get-text-content][dom:set-text-content]["
             "dom:string-replace-all]")
   {
-    CommonTestData data;
+    DocumentFragmentTestData data;
     auto textNode1 = CreateRef<Text>(*data.Document, u8"Hello");
     auto textNode2 = CreateRef<Text>(*data.Document, u8" world!");
 

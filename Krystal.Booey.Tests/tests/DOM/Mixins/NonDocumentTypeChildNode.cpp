@@ -12,7 +12,7 @@ namespace krys::boo::dom::tests
 {
   namespace
   {
-    struct CommonTestData
+    struct NonDocumentTypeChildNodeTestData
     {
       Ref<Document> Document;
       Ref<Element> Parent;
@@ -20,7 +20,7 @@ namespace krys::boo::dom::tests
       Ref<krys::boo::Text> Child2;
       Ref<Element> Child3;
 
-      CommonTestData()
+      NonDocumentTypeChildNodeTestData()
           : Document(CreateRef<HTMLDocument>()), Parent(Document->CreateElement(u8"div").Value()),
             Child1(Document->CreateElement(u8"p").Value()), Child2(Document->CreateTextNode(u8"Hello")),
             Child3(Document->CreateElement(u8"span").Value())
@@ -30,7 +30,7 @@ namespace krys::boo::dom::tests
         REQUIRE_FALSE(Parent->AppendChild(*Child3).HasException());
       }
 
-      ~CommonTestData() noexcept
+      ~NonDocumentTypeChildNodeTestData() noexcept
       {
         REQUIRE_FALSE(Parent->RemoveChild(*Child1).HasException());
         REQUIRE_FALSE(Parent->RemoveChild(*Child2).HasException());
@@ -43,7 +43,7 @@ namespace krys::boo::dom::tests
             "[DOM][NonDocumentTypeChildNode][dom:interface-nondocumenttypechildnode]"
             "[dom:dom-nondocumenttypechildnode-previouselementsibling]")
   {
-    CommonTestData data;
+    NonDocumentTypeChildNodeTestData data;
 
     // The nearest one, and none without a parent.
     auto nearest = data.Document->CreateElement(u8"b").Value();
@@ -60,7 +60,7 @@ namespace krys::boo::dom::tests
   TEST_CASE("nextElementSibling: the first following sibling that is an element; otherwise null",
             "[DOM][NonDocumentTypeChildNode][dom:dom-nondocumenttypechildnode-nextelementsibling]")
   {
-    CommonTestData data;
+    NonDocumentTypeChildNodeTestData data;
 
     // The nearest one, and none without a parent.
     auto nearest = data.Document->CreateElement(u8"b").Value();

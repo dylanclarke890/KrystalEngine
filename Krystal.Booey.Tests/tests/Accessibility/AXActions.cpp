@@ -1,5 +1,6 @@
 ﻿#include "catch2/catch_test_macros.hpp"
 #include "Krystal.Booey.Tests/Accessibility/AXTestUtils.hpp"
+#include "Krystal.Booey.Tests/DOM/DOMTestUtils.hpp"
 #include "Krystal.Booey/Accessibility/AXObjectCache.hpp"
 #include "Krystal.Booey/DOM/Events/EventListener.hpp"
 #include "Krystal.Booey/DOM/Events/KeyboardEvent.hpp"
@@ -9,23 +10,10 @@
 
 namespace krys::boo::ax::tests
 {
+  using boo::tests::FunctionListener;
+
   namespace
   {
-    /// @brief Calls a function with each event it handles.
-    struct FunctionListener final : EventListenerCallback
-    {
-      Func<void(Event &)> Function;
-
-      explicit FunctionListener(Func<void(Event &)> &&function) noexcept : Function(krys::move(function))
-      {
-      }
-
-      void HandleEvent(Event &event) noexcept override
-      {
-        Function(event);
-      }
-    };
-
     void ListenWith(Element &element, DOMStringAtom type, Func<void(Event &)> &&function) noexcept
     {
       element.AddEventListener(krys::move(type),

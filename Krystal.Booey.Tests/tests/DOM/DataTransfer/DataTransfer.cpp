@@ -18,7 +18,7 @@ namespace krys::boo::tests
     using dom::DataTransfer;
     using StoreMode = DataTransfer::StoreMode;
 
-    KRYS_NODISCARD List<utf8_string> Strings(std::initializer_list<utf8_stringview> strings) noexcept
+    KRYS_NODISCARD List<utf8_string> StringList(std::initializer_list<utf8_stringview> strings) noexcept
     {
       List<utf8_string> list;
       for (auto string : strings)
@@ -51,7 +51,7 @@ namespace krys::boo::tests
       dataTransfer->SetData(document, u8"text/html;charset=utf-8", u8"<b>bold</b>");
       dataTransfer->SetData(document, u8"Application/X-Custom", u8"custom");
       CHECK(dataTransfer->Types(document)
-            == Strings({u8"text/plain", u8"text/uri-list", u8"text/html", u8"application/x-custom"}));
+            == StringList({u8"text/plain", u8"text/uri-list", u8"text/html", u8"application/x-custom"}));
       CHECK(dataTransfer->GetData(document, u8"text/plain;charset=utf-8") == u8"plain");
       CHECK(dataTransfer->GetData(document, u8"url") == u8"https://example.com/a");
       CHECK(dataTransfer->GetData(document, u8"TEXT/HTML") == u8"<b>bold</b>");
@@ -65,7 +65,7 @@ namespace krys::boo::tests
 
       dataTransfer->ClearData(u8"URL");
       CHECK(dataTransfer->Types(document)
-            == Strings({u8"text/html", u8"application/x-custom", u8"text/plain"}));
+            == StringList({u8"text/html", u8"application/x-custom", u8"text/plain"}));
       dataTransfer->ClearData();
       CHECK(dataTransfer->Types(document).empty());
     }
@@ -109,7 +109,7 @@ namespace krys::boo::tests
       protectedPasteboard->WriteString(u8"text/plain", u8"text");
       auto protectedTransfer =
         DataTransfer::CreateForCopyAndPaste(document, StoreMode::Protected, krys::move(protectedPasteboard));
-      CHECK(protectedTransfer->Types(document) == Strings({u8"text/plain"}));
+      CHECK(protectedTransfer->Types(document) == StringList({u8"text/plain"}));
       CHECK(protectedTransfer->GetData(document, u8"text").empty());
 
       readOnly->MakeInvalidForSecurity();
@@ -131,7 +131,7 @@ namespace krys::boo::tests
     SECTION("An input event's data can be read, not written")
     {
       auto dataTransfer = DataTransfer::CreateForInputEvent(u8"text", u8"<i>text</i>");
-      CHECK(dataTransfer->Types(document) == Strings({u8"text/plain", u8"text/html"}));
+      CHECK(dataTransfer->Types(document) == StringList({u8"text/plain", u8"text/html"}));
       CHECK(dataTransfer->GetData(document, u8"text/html") == u8"<i>text</i>");
       CHECK_FALSE(dataTransfer->CanWriteData());
     }
@@ -194,7 +194,7 @@ namespace krys::boo::tests
       CHECK(item->Type() == u8"text/plain");
       CHECK(item->GetAsFile().get() == file.get());
       CHECK(files.Length() == 1);
-      CHECK(dataTransfer->Types(document) == Strings({u8"Files", u8"text/plain"}));
+      CHECK(dataTransfer->Types(document) == StringList({u8"Files", u8"text/plain"}));
 
       CHECK_FALSE(items.Remove(1).HasException());
       CHECK(files.Length() == 0);
@@ -241,7 +241,7 @@ namespace krys::boo::tests
     REQUIRE(files.Length() == 2);
     CHECK(files.Item(0)->Name() == u8"notes.txt");
     CHECK(files.Item(1)->Type() == u8"image/png");
-    CHECK(dataTransfer->Types(document) == Strings({u8"Files", u8"text/uri-list"}));
+    CHECK(dataTransfer->Types(document) == StringList({u8"Files", u8"text/uri-list"}));
     CHECK(dataTransfer->GetData(document, u8"text/plain").empty());
     CHECK(dataTransfer->HasFileOfType(u8"image/png"));
     CHECK_FALSE(dataTransfer->HasFileOfType(u8"image/gif"));
@@ -263,7 +263,7 @@ namespace krys::boo::tests
 
     auto read = PasteboardCustomData::FromSharedBuffer(*data.CreateSharedBuffer());
     CHECK(read.Origin() == u8"null:origin");
-    CHECK(read.OrderedTypes() == Strings({u8"text/plain", u8"application/x-a", u8"application/x-b"}));
+    CHECK(read.OrderedTypes() == StringList({u8"text/plain", u8"application/x-a", u8"application/x-b"}));
     CHECK_FALSE(read.ReadStringInCustomData(u8"text/plain"));
     CHECK(read.ReadStringInCustomData(u8"application/x-a") == u8"a");
     CHECK(read.ReadStringInCustomData(u8"application/x-b") == u8"");

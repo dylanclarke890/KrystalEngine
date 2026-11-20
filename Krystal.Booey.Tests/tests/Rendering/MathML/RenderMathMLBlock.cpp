@@ -1,6 +1,7 @@
 ﻿#include "Krystal.Booey/Rendering/MathML/RenderMathMLBlock.hpp"
 #include "catch2/catch_test_macros.hpp"
 #include "Krystal.Booey.Tests/Layout/LayoutTestUtils.hpp"
+#include "Krystal.Booey.Tests/Rendering/MathML/MathMLTestUtils.hpp"
 #include "Krystal.Booey/Graphics/Fonts/FontCascade.hpp"
 #include "Krystal.Booey/Graphics/Fonts/OpenTypeMathData.hpp"
 #include "Krystal.Booey/Rendering/MathML/RenderMathMLMath.hpp"
@@ -22,13 +23,6 @@ namespace krys::boo::tests
       ResolverFixture fixture {layout::tests::AhemDocument(style, body)};
       (void)fixture.Document->UpdateLayout();
       return fixture;
-    }
-
-    KRYS_NODISCARD RenderBox &BoxById(ResolverFixture &fixture, DOMStringView id) noexcept
-    {
-      auto *renderer = fixture.ById(id).Renderer();
-      REQUIRE(renderer);
-      return Downcast<RenderBox>(*renderer);
     }
   }
 

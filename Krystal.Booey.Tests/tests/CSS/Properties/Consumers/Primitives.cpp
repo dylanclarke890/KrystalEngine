@@ -1,5 +1,6 @@
 ﻿#include "Krystal.Booey/CSS/Properties/Consumers/Primitives.hpp"
 #include "catch2/catch_test_macros.hpp"
+#include "Krystal.Booey.Tests/CSS/ConsumerTestUtils.hpp"
 #include "Krystal.Booey/CSS/Parser/InputStream.hpp"
 #include "Krystal.Booey/CSS/Parser/Tokenizer.hpp"
 #include "Krystal.Booey/CSS/Parser/TokenRange.hpp"
@@ -8,19 +9,10 @@
 
 namespace krys::boo::css::parse_property::tests
 {
+  using css::tests::Tokens;
+
   namespace
   {
-    struct Tokens
-    {
-      InputStream Input;
-      Tokenizer Tokenizer;
-
-      explicit Tokens(utf8_stringview css) : Input(CSSOMString(css)), Tokenizer(Input)
-      {
-        REQUIRE(Tokenizer.PumpTokenizer());
-      }
-    };
-
     std::string Serialise(const TokenRange &range)
     {
       auto text = range.Serialise(TokenSerialisationMode::Normal);

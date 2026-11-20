@@ -13,12 +13,12 @@ namespace krys::boo::dom::tests
 {
   namespace
   {
-    struct CommonTestData
+    struct CDATASectionTestData
     {
       Ref<boo::Document> Document;
       Ref<CDATASection> Node;
 
-      CommonTestData(DOMString &&value)
+      CDATASectionTestData(DOMString &&value)
           : Document(CreateRef<boo::Document>()), Node(CreateRef<CDATASection>(*Document, krys::move(value)))
       {
       }
@@ -28,7 +28,7 @@ namespace krys::boo::dom::tests
   TEST_CASE("Create a CDATA section node: a Text node in the document with the data, that isn't exclusive",
             "[DOM][CDATASection][dom:interface-cdatasection][dom:create-a-cdata-section-node]")
   {
-    CommonTestData data(u8"Hello, world!");
+    CDATASectionTestData data(u8"Hello, world!");
     CHECK(data.Node->Data() == u8"Hello, world!");
     CHECK(&data.Node->NodeDocument() == data.Document.get());
     CHECK(data.Node->ParentNode() == nullptr);
@@ -41,14 +41,14 @@ namespace krys::boo::dom::tests
 
   TEST_CASE("Node.nodeName: a CDATASection's is #cdata-section", "[DOM][CDATASection][dom:dom-node-nodename]")
   {
-    CommonTestData data(u8"Hello, world!");
+    CDATASectionTestData data(u8"Hello, world!");
     REQUIRE(data.Node->NodeName() == u8"#cdata-section");
   }
 
   TEST_CASE("Node.nodeType: a CDATASection is a CDATA_SECTION_NODE",
             "[DOM][CDATASection][dom:dom-node-nodetype][dom:dom-node-cdata_section_node]")
   {
-    CommonTestData data(u8"Hello, world!");
+    CDATASectionTestData data(u8"Hello, world!");
     REQUIRE(data.Node->NodeType() == NodeType::CDATA_SECTION_NODE);
   }
 }

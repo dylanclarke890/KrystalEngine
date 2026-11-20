@@ -5,6 +5,7 @@
 namespace krys::boo::css::parse_property::tests
 {
   using css::tests::ConsumeToText;
+  using css::tests::ContextWithBaseUrl;
 
   namespace
   {
@@ -23,11 +24,6 @@ namespace krys::boo::css::parse_property::tests
     {
       return ConsumeImage(tokens, state, Allowed);
     };
-
-    ParserContext Context()
-    {
-      return ParserContext {ParserMode::HTMLStandard, net::Url(u8"https://example.com/dir/")};
-    }
   }
 
   TEST_CASE("parse_property(ConsumeImage linear-gradient)", "[CSS][Properties][Consumers]")
@@ -141,7 +137,7 @@ namespace krys::boo::css::parse_property::tests
 
   TEST_CASE("parse_property(ConsumeImage url and image-set)", "[CSS][Properties][Consumers]")
   {
-    auto context = Context();
+    auto context = ContextWithBaseUrl();
 
     CHECK(ConsumeToText(u8"url(a.png)", Image, context) == "url(\"a.png\")");
     CHECK(ConsumeToText(u8"\"a.png\"", Image, context) == "<null>");
@@ -167,7 +163,7 @@ namespace krys::boo::css::parse_property::tests
 
   TEST_CASE("parse_property(ConsumeImage allowed types)", "[CSS][Properties][Consumers]")
   {
-    auto context = Context();
+    auto context = ContextWithBaseUrl();
     constexpr auto urlOnly = ImageAllowing<AllowedImageType::UrlFunction>;
 
     CHECK(ConsumeToText(u8"url(a.png)", urlOnly, context) == "url(\"a.png\")");
@@ -179,7 +175,7 @@ namespace krys::boo::css::parse_property::tests
 
   TEST_CASE("parse_property(ConsumeImage generated images)", "[CSS][Properties][Consumers]")
   {
-    auto context = Context();
+    auto context = ContextWithBaseUrl();
 
     CHECK(ConsumeToText(u8"cross-fade(url(a.png), url(b.png), 50%)", Image, context)
           == "cross-fade(url(\"a.png\"), url(\"b.png\"), 0.5)");

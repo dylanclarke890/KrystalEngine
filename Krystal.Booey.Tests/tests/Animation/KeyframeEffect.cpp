@@ -3,6 +3,7 @@
 #include "catch2/catch_test_macros.hpp"
 #include "Krystal.Booey.Tests/Animation/AnimationTestUtils.hpp"
 #include "Krystal.Booey.Tests/CSS/ValueTestUtils.hpp"
+#include "Krystal.Booey.Tests/StringTestUtils.hpp"
 #include "Krystal.Booey/Animation/WebAnimation.hpp"
 #include "Krystal.Booey/CSS/Parser/CustomPropertySyntax.hpp"
 #include "Krystal.Booey/CSS/Properties/RegisteredCustomProperty.hpp"
@@ -18,11 +19,6 @@ namespace krys::boo::tests
   namespace
   {
     using namespace std::chrono_literals;
-
-    KRYS_NODISCARD std::string Narrow(const DOMString &string)
-    {
-      return std::string(string.begin(), string.end());
-    }
 
     KRYS_NODISCARD InputKeyframe Keyframe(KeyframeOffset offset, List<Pair<DOMString, DOMString>> properties,
                                           DOMString easing = u8"linear") noexcept

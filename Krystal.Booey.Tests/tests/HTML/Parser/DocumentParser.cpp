@@ -317,7 +317,7 @@ namespace krys::boo::html::tests
       CHECK(equal);
     }
 
-    static void RunTest(const string &filename) noexcept
+    static void RunTreeConstructionTest(const string &filename) noexcept
     {
       static string basedir = KRYS_BOOEY_TESTS_DATA_DIR "/html-tree-builder/";
 
@@ -778,7 +778,7 @@ namespace krys::boo::html::tests
 #define EXECUTE_HTML_PARSER_TEST_CASE(FileName, Tags)                                                        \
   TEST_CASE("DocumentParser(" FileName ")", "[HTML][DocumentParser]" Tags)                                   \
   {                                                                                                          \
-    krys::boo::html::tests::RunTest(FileName);                                                               \
+    krys::boo::html::tests::RunTreeConstructionTest(FileName);                                               \
   }
 
 EXECUTE_HTML_PARSER_TEST_CASE("adoption-01.dat", "[html:adoption-agency-algorithm]");

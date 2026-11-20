@@ -1,4 +1,5 @@
 ﻿#include "catch2/catch_test_macros.hpp"
+#include "Krystal.Booey.Tests/CSS/ValueTestUtils.hpp"
 #include "Krystal.Booey/CSS/Calc/SymbolTable.hpp"
 #include "Krystal.Booey/CSS/Calc/Value.hpp"
 #include "Krystal.Booey/CSS/Properties/PropertyId.hpp"
@@ -19,12 +20,6 @@ namespace krys::boo::css::tests
 {
   namespace
   {
-    template <typename T>
-    CSSOMString SerialiseForTest(const T &value)
-    {
-      return Serialise(DefaultSerialisationContext(), value);
-    }
-
     // calc(5em): a length that needs conversion data to resolve.
     Ref<calc::Value> CreateEmCalc()
     {

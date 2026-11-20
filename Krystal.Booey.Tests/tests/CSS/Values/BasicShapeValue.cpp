@@ -1,5 +1,6 @@
 ﻿#include "Krystal.Booey/CSS/Values/BasicShapeValue.hpp"
 #include "catch2/catch_test_macros.hpp"
+#include "Krystal.Booey.Tests/CSS/PositionTestUtils.hpp"
 #include "Krystal.Booey.Tests/CSS/ValueTestUtils.hpp"
 
 namespace krys::boo::css::tests
@@ -8,11 +9,6 @@ namespace krys::boo::css::tests
   {
     using LP = LengthPercentage<>;
     using NLP = LengthPercentage<NonNegative>;
-
-    Position Centre()
-    {
-      return Position {TwoComponentPositionHorizontalVertical {{keywords::Center {}}, {keywords::Center {}}}};
-    }
   }
 
   TEST_CASE_METHOD(ValueFixture, "BasicShapeValue::Create", "[CSS][Values][BasicShapeValue]")
@@ -28,7 +24,7 @@ namespace krys::boo::css::tests
     CHECK(CssText(*BasicShapeValue::Create(BasicShape {CircleFunction {Circle {.Radius = NLP {1_css_px}}}}))
           == "circle(1px)");
     CHECK(CssText(*BasicShapeValue::Create(BasicShape {CircleFunction {
-            Circle {.Radius = Circle::Extent {keywords::ClosestSide {}}, .Position = Centre()}}}))
+            Circle {.Radius = Circle::Extent {keywords::ClosestSide {}}, .Position = CentrePosition()}}}))
           == "circle(at center center)");
     CHECK(CssText(*BasicShapeValue::Create(BasicShape {
             InsetFunction {Inset {.Insets = {LP {1_css_px}}, .Radii = BorderRadius::DefaultValue()}}}))
@@ -58,7 +54,7 @@ namespace krys::boo::css::tests
   TEST_CASE_METHOD(ValueFixture, "BasicShapeValue visitation", "[CSS][Values][BasicShapeValue]")
   {
     auto value = BasicShapeValue::Create(
-      BasicShape {CircleFunction {Circle {.Radius = NLP {1_css_px}, .Position = Centre()}}});
+      BasicShape {CircleFunction {Circle {.Radius = NLP {1_css_px}, .Position = CentrePosition()}}});
     CHECK(Children(*value).empty());
     CHECK_FALSE(value->MayDependOnBaseUrl());
   }

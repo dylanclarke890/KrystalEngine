@@ -8,15 +8,11 @@
 namespace krys::boo::css::parse_property::tests
 {
   using css::tests::ConsumeToText;
+  using css::tests::ContextWithBaseUrl;
   using css::tests::Tokens;
 
   namespace
   {
-    ParserContext Context()
-    {
-      return ParserContext {ParserMode::HTMLStandard, net::Url(u8"https://example.com/dir/")};
-    }
-
     Maybe<UnresolvedFont> ConsumeFont(utf8_stringview css)
     {
       ParserContext context {ParserMode::HTMLStandard};
@@ -239,7 +235,7 @@ namespace krys::boo::css::parse_property::tests
 
   TEST_CASE("parse_property(ConsumeFontFaceSrc)", "[CSS][Properties][Consumers]")
   {
-    auto context = Context();
+    auto context = ContextWithBaseUrl();
 
     CHECK(ConsumeToText(u8"url(a.woff2)", FontFaceSrc, context) == "url(\"a.woff2\")");
     CHECK(ConsumeToText(u8"url(a.woff2) format(woff2)", FontFaceSrc, context)

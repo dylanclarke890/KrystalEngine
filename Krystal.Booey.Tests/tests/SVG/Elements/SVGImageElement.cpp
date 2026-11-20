@@ -2,6 +2,7 @@
 #include "catch2/catch_test_macros.hpp"
 #include "Krystal.Booey.Tests/Loader/PageInFrameFixture.hpp"
 #include "Krystal.Booey.Tests/Loader/TestLoader.hpp"
+#include "Krystal.Booey.Tests/StringTestUtils.hpp"
 #include "Krystal.Booey/Rendering/RenderTreeAsText.hpp"
 #include "Krystal.Booey/Rendering/Replaced/RenderImageResource.hpp"
 #include "Krystal.Booey/Rendering/SVG/Legacy/LegacyRenderSVGImage.hpp"
@@ -10,6 +11,7 @@
 
 namespace krys::boo::svg::tests
 {
+  using boo::tests::Contains;
   using boo::tests::LoaderFixture;
   using boo::tests::LoadEvents;
   using boo::tests::PageInFrameFixture;
@@ -17,14 +19,9 @@ namespace krys::boo::svg::tests
 
   namespace
   {
-    KRYS_NODISCARD SVGImageElement &ImageById(PageInFrameFixture &fixture, DOMStringView id) noexcept
+    KRYS_NODISCARD SVGImageElement &SVGImageById(PageInFrameFixture &fixture, DOMStringView id) noexcept
     {
       return Downcast<SVGImageElement>(Downcast<SVGElement>(fixture.ById(id)));
-    }
-
-    KRYS_NODISCARD bool Contains(const utf8_string &text, utf8_stringview part) noexcept
-    {
-      return text.contains(part);
     }
   }
 
@@ -39,7 +36,7 @@ namespace krys::boo::svg::tests
       u8R"html(<image id=fit href="file:///a.png" x=10 y=20 width=30 height=40 />)html"
       u8R"html(<image id=none href="file:///a.png" x=50 width=30 height=40 preserveAspectRatio=none />)html"
       u8R"html(<image id=auto href="file:///a.png" y=60 height=4 /></svg></body>)html");
-    auto &image = ImageById(fixture, u8"fit");
+    auto &image = SVGImageById(fixture, u8"fit");
     auto events = LoadEvents::ListenTo(image);
 
     // Each image loads its href.
@@ -90,7 +87,7 @@ layer at (0,0) size 200x100
   {
     LoaderFixture loader;
     PageInFrameFixture fixture(u8R"html(<svg><image id=i href="file:///missing.png" /></svg>)html");
-    auto &image = ImageById(fixture, u8"i");
+    auto &image = SVGImageById(fixture, u8"i");
     auto events = LoadEvents::ListenTo(image);
     RunNetworkingTasks();
 

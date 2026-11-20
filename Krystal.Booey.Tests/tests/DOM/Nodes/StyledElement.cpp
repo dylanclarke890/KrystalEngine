@@ -1,6 +1,7 @@
 ﻿#include "Krystal.Booey/DOM/Nodes/StyledElement.hpp"
 #include "catch2/catch_test_macros.hpp"
 #include "Krystal.Booey.Tests/CSS/ValueTestUtils.hpp"
+#include "Krystal.Booey.Tests/DOM/DOMTestUtils.hpp"
 #include "Krystal.Booey/CSS/CSSOM/CSSStyleProperties.hpp"
 #include "Krystal.Booey/CSS/Parser/Parser.hpp"
 #include "Krystal.Booey/CSS/Properties/ImmutableStyleProperties.hpp"
@@ -24,18 +25,11 @@
 
 namespace krys::boo::dom::tests
 {
+  using boo::tests::ParseDocument;
+
   namespace
   {
     using css::tests::ToNarrow;
-
-    Ref<HTMLDocument> Parse(utf8_string &&input) noexcept
-    {
-      auto document = CreateRef<HTMLDocument>();
-      auto parser = CreateRef<html::DocumentParser>(*document);
-      parser->InputStream().Append(krys::move(input), IsEOF::Yes);
-      parser->PumpTokenizer();
-      return document;
-    }
 
     Ref<StyledElement> AsStyled(Node &node) noexcept
     {
@@ -355,7 +349,7 @@ namespace krys::boo::dom::tests
   {
     SECTION("Quirks mode accepts unitless lengths on HTML elements")
     {
-      auto document = Parse(u8"<div style='width: 10'></div>");
+      auto document = ParseDocument(u8"<div style='width: 10'></div>");
       auto div = AsStyled(*document->Body()->FirstElementChild());
       REQUIRE(document->InQuirksMode());
       REQUIRE(PropertyValue(div->Style(), u8"width") == "10px");
@@ -366,7 +360,7 @@ namespace krys::boo::dom::tests
 
     SECTION("No-quirks mode doesn't")
     {
-      auto document = Parse(u8"<!DOCTYPE html><div style='width: 10'></div>");
+      auto document = ParseDocument(u8"<!DOCTYPE html><div style='width: 10'></div>");
       auto div = AsStyled(*document->Body()->FirstElementChild());
       REQUIRE_FALSE(document->InQuirksMode());
       REQUIRE(PropertyValue(div->Style(), u8"width").empty());

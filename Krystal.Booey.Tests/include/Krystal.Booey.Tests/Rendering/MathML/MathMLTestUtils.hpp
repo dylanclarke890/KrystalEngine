@@ -7,6 +7,7 @@
 #include "Krystal.Booey/Graphics/Fonts/FontDatabase.hpp"
 #include "Krystal.Booey/Graphics/Fonts/WOFFFileFormat.hpp"
 #include "Krystal.Booey/Page/FrameView.hpp"
+#include "Krystal.Booey/Rendering/RenderBox.hpp"
 #include "Krystal.Core/Types/SharedBuffer.hpp"
 #include <cmath>
 #include <cstring>
@@ -17,6 +18,14 @@
 
 namespace krys::boo::tests
 {
+  /// @brief The box of the element of @p fixture's document with the id @p id, which must have one.
+  KRYS_NODISCARD inline RenderBox &BoxById(style::tests::ResolverFixture &fixture, DOMStringView id) noexcept
+  {
+    auto *renderer = fixture.ById(id).Renderer();
+    REQUIRE(renderer);
+    return Downcast<RenderBox>(*renderer);
+  }
+
   /// @brief Registers the web-platform-tests math font @p name (in `data/fonts/math`), whose family is its
   /// name.
   inline void RegisterMathFont(const char *name) noexcept

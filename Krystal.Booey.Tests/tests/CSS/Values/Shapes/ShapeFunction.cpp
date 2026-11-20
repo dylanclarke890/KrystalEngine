@@ -1,5 +1,7 @@
 ﻿#include "Krystal.Booey/CSS/Values/Shapes/ShapeFunction.hpp"
 #include "catch2/catch_test_macros.hpp"
+#include "Krystal.Booey.Tests/CSS/PositionTestUtils.hpp"
+#include "Krystal.Booey.Tests/CSS/ValueTestUtils.hpp"
 #include "Krystal.Booey/CSS/Values/Primitives/NumericTypesComputedStyleDependencies.hpp"
 #include "Krystal.Booey/CSS/Values/Primitives/NumericTypesSerialisation.hpp"
 #include "Krystal.Booey/CSS/Values/Primitives/NumericTypesValueVisitation.hpp"
@@ -11,25 +13,9 @@ namespace krys::boo::css::tests
   {
     using LP = LengthPercentage<>;
 
-    template <typename T>
-    CSSOMString SerialiseForTest(const T &value)
-    {
-      return Serialise(DefaultSerialisationContext(), value);
-    }
-
-    Position At(TwoComponentPositionHorizontal x, TwoComponentPositionVertical y)
-    {
-      return Position {TwoComponentPositionHorizontalVertical {krys::move(x), krys::move(y)}};
-    }
-
     Position LeftTop()
     {
-      return At({keywords::Left {}}, {keywords::Top {}});
-    }
-
-    Position Centre()
-    {
-      return At({keywords::Center {}}, {keywords::Center {}});
+      return PositionAt({keywords::Left {}}, {keywords::Top {}});
     }
 
     CoordinatePair Coordinates(LP x, LP y)
@@ -57,7 +43,7 @@ namespace krys::boo::css::tests
 
   TEST_CASE("ShapeFunction(Serialise move and line)", "[CSS][Shapes][ShapeFunction]")
   {
-    CHECK(SerialiseForTest(MoveCommand {ToPosition {Centre()}}) == u8"move to center center");
+    CHECK(SerialiseForTest(MoveCommand {ToPosition {CentrePosition()}}) == u8"move to center center");
     CHECK(SerialiseForTest(MoveCommand {ByCoordinatePair {Coordinates(LP {1_css_px}, LP {2_css_percentage})}})
           == u8"move by 1px 2%");
     CHECK(SerialiseForTest(LineCommand {ToPosition {LeftTop()}}) == u8"line to left top");
@@ -82,12 +68,12 @@ namespace krys::boo::css::tests
   TEST_CASE("ShapeFunction(Serialise curve and smooth)", "[CSS][Shapes][ShapeFunction]")
   {
     CHECK(SerialiseForTest(CurveCommand {CurveCommand::To {
-            .Offset = Centre(), .ControlPoint1 = AbsoluteControlPoint {.Offset = LeftTop()}}})
+            .Offset = CentrePosition(), .ControlPoint1 = AbsoluteControlPoint {.Offset = LeftTop()}}})
           == u8"curve to center center with left top");
     CHECK(SerialiseForTest(CurveCommand {CurveCommand::To {
-            .Offset = Centre(),
+            .Offset = CentrePosition(),
             .ControlPoint1 = AbsoluteControlPoint {.Offset = LeftTop(), .Anchor = keywords::Start {}},
-            .ControlPoint2 = AbsoluteControlPoint {.Offset = Centre(), .Anchor = keywords::End {}}}})
+            .ControlPoint2 = AbsoluteControlPoint {.Offset = CentrePosition(), .Anchor = keywords::End {}}}})
           == u8"curve to center center with left top from start / center center from end");
     CHECK(SerialiseForTest(CurveCommand {CurveCommand::By {
             .Offset = Coordinates(LP {1_css_px}, LP {2_css_px}),
@@ -99,7 +85,7 @@ namespace krys::boo::css::tests
     CHECK(SerialiseForTest(SmoothCommand {SmoothCommand::To {.Offset = LeftTop()}})
           == u8"smooth to left top");
     CHECK(SerialiseForTest(SmoothCommand {SmoothCommand::To {
-            .Offset = LeftTop(), .ControlPoint = AbsoluteControlPoint {.Offset = Centre()}}})
+            .Offset = LeftTop(), .ControlPoint = AbsoluteControlPoint {.Offset = CentrePosition()}}})
           == u8"smooth to left top with center center");
     CHECK(SerialiseForTest(SmoothCommand {SmoothCommand::By {
             .Offset = Coordinates(LP {1_css_px}, LP {2_css_px}),
@@ -111,25 +97,25 @@ namespace krys::boo::css::tests
   TEST_CASE("ShapeFunction(Serialise arc)", "[CSS][Shapes][ShapeFunction]")
   {
     // `ccw`, `small` and a zero rotation are the defaults, so they're omitted.
-    CHECK(SerialiseForTest(Arc(ArcCommand::To {Centre()}, {LP {10_css_px}}))
+    CHECK(SerialiseForTest(Arc(ArcCommand::To {CentrePosition()}, {LP {10_css_px}}))
           == u8"arc to center center of 10px");
     // Equal radii are written once.
-    CHECK(SerialiseForTest(Arc(ArcCommand::To {Centre()}, {LP {10_css_px}, LP {10_css_px}}))
+    CHECK(SerialiseForTest(Arc(ArcCommand::To {CentrePosition()}, {LP {10_css_px}, LP {10_css_px}}))
           == u8"arc to center center of 10px");
     CHECK(SerialiseForTest(Arc(ArcCommand::By {Coordinates(LP {1_css_px}, LP {2_css_px})},
                                {LP {10_css_px}, LP {20_css_percentage}}))
           == u8"arc by 1px 2px of 10px 20%");
-    CHECK(SerialiseForTest(Arc(ArcCommand::To {Centre()}, {LP {10_css_px}}, keywords::Cw {},
+    CHECK(SerialiseForTest(Arc(ArcCommand::To {CentrePosition()}, {LP {10_css_px}}, keywords::Cw {},
                                keywords::Large {}, Angle<> {45_css_deg}))
           == u8"arc to center center of 10px cw large rotate 45deg");
-    CHECK(
-      SerialiseForTest(Arc(ArcCommand::To {Centre()}, {LP {10_css_px}}, keywords::Ccw {}, keywords::Large {}))
-      == u8"arc to center center of 10px large");
+    CHECK(SerialiseForTest(
+            Arc(ArcCommand::To {CentrePosition()}, {LP {10_css_px}}, keywords::Ccw {}, keywords::Large {}))
+          == u8"arc to center center of 10px large");
   }
 
   TEST_CASE("ShapeFunction(Serialise)", "[CSS][Shapes][ShapeFunction]")
   {
-    CHECK(SerialiseForTest(MakeShape({MoveCommand {ToPosition {Centre()}}}))
+    CHECK(SerialiseForTest(MakeShape({MoveCommand {ToPosition {CentrePosition()}}}))
           == u8"shape(from left top, move to center center)");
     CHECK(SerialiseForTest(
             MakeShape({LineCommand {ByCoordinatePair {Coordinates(LP {10_css_px}, LP {0_css_px})}},
@@ -149,20 +135,21 @@ namespace krys::boo::css::tests
   {
     CHECK(MakeShape({CloseCommand {}}) == MakeShape({CloseCommand {}}));
     CHECK(MakeShape({CloseCommand {}}) != MakeShape({CloseCommand {}}, FillRule {keywords::Nonzero {}}));
-    CHECK(MakeShape({MoveCommand {ToPosition {Centre()}}})
-          != MakeShape({LineCommand {ToPosition {Centre()}}}));
+    CHECK(MakeShape({MoveCommand {ToPosition {CentrePosition()}}})
+          != MakeShape({LineCommand {ToPosition {CentrePosition()}}}));
     // `to` and `by` are different commands, even if they reach the same point.
     CHECK(MakeShape({LineCommand {ToPosition {LeftTop()}}})
           != MakeShape({LineCommand {ByCoordinatePair {Coordinates(LP {0_css_px}, LP {0_css_px})}}}));
-    CHECK(Arc(ArcCommand::To {Centre()}, {LP {10_css_px}})
-          == Arc(ArcCommand::To {Centre()}, {LP {10_css_px}, LP {10_css_px}}));
-    CHECK(Arc(ArcCommand::To {Centre()}, {LP {10_css_px}})
-          != Arc(ArcCommand::To {Centre()}, {LP {10_css_px}}, keywords::Cw {}));
+    CHECK(Arc(ArcCommand::To {CentrePosition()}, {LP {10_css_px}})
+          == Arc(ArcCommand::To {CentrePosition()}, {LP {10_css_px}, LP {10_css_px}}));
+    CHECK(Arc(ArcCommand::To {CentrePosition()}, {LP {10_css_px}})
+          != Arc(ArcCommand::To {CentrePosition()}, {LP {10_css_px}}, keywords::Cw {}));
   }
 
   TEST_CASE("ShapeFunction(Dependencies and visitation)", "[CSS][Shapes][ShapeFunction]")
   {
-    CHECK(CollectComputedStyleDependencies(MakeShape({MoveCommand {ToPosition {Centre()}}, CloseCommand {}}))
+    CHECK(CollectComputedStyleDependencies(
+            MakeShape({MoveCommand {ToPosition {CentrePosition()}}, CloseCommand {}}))
             .Properties.empty());
     CHECK(CollectComputedStyleDependencies(
             MakeShape({SmoothCommand {SmoothCommand::By {
@@ -170,9 +157,10 @@ namespace krys::boo::css::tests
               .ControlPoint = RelativeControlPoint {.Offset = Coordinates(LP {3_css_em}, LP {4_css_px})}}}}))
             .Properties
           == List<PropertyId> {PropertyId::FontSize});
-    CHECK(CollectComputedStyleDependencies(MakeShape({Arc(ArcCommand::To {Centre()}, {LP {1_css_em}})}))
-            .Properties
-          == List<PropertyId> {PropertyId::FontSize});
+    CHECK(
+      CollectComputedStyleDependencies(MakeShape({Arc(ArcCommand::To {CentrePosition()}, {LP {1_css_em}})}))
+        .Properties
+      == List<PropertyId> {PropertyId::FontSize});
 
     size_t visited = 0;
     Func<IterationStatus(Value &)> visitor = [&](Value &)
@@ -180,8 +168,9 @@ namespace krys::boo::css::tests
       ++visited;
       return IterationStatus::Continue;
     };
-    CHECK(VisitValueChildren(visitor, MakeShape({MoveCommand {ToPosition {Centre()}}, CloseCommand {}}))
-          == IterationStatus::Continue);
+    CHECK(
+      VisitValueChildren(visitor, MakeShape({MoveCommand {ToPosition {CentrePosition()}}, CloseCommand {}}))
+      == IterationStatus::Continue);
     CHECK(visited == 0);
   }
 }

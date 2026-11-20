@@ -1,20 +1,14 @@
 ﻿#include "Krystal.Booey/HTML/Elements/HTMLTextAreaElement.hpp"
 #include "catch2/catch_test_macros.hpp"
 #include "Krystal.Booey.Tests/HTML/FormTestUtils.hpp"
+#include "Krystal.Booey.Tests/StringTestUtils.hpp"
 #include "Krystal.Booey/DOM/Nodes/Text.hpp"
 #include "Krystal.Booey/HTML/Elements/HTMLFormElement.hpp"
 
 namespace krys::boo::html::tests
 {
   using boo::tests::FormFixture;
-
-  namespace
-  {
-    KRYS_NODISCARD std::string Str(DOMStringView text) noexcept
-    {
-      return std::string(reinterpret_cast<const char *>(text.data()), text.size());
-    }
-  }
+  using boo::tests::Narrow;
 
   TEST_CASE("HTMLTextAreaElement: cols and rows are positive, with fallbacks of 20 and 2",
             "[HTML][Forms][HTMLTextAreaElement][html:attr-textarea-cols][html:attr-textarea-rows]"
@@ -28,7 +22,7 @@ namespace krys::boo::html::tests
     CHECK(textarea.Cols() == 7u);
     textarea.Rows(0u);
     CHECK(textarea.Rows() == 2u);
-    CHECK(Str(textarea.FormControlType()) == "textarea");
+    CHECK(Narrow(textarea.FormControlType()) == "textarea");
   }
 
   TEST_CASE(
@@ -39,37 +33,37 @@ namespace krys::boo::html::tests
     FormFixture fixture(u8"<form id=f><textarea id=t>a\r\nb</textarea></form>");
     auto &textarea = fixture.Get<HTMLTextAreaElement>(u8"t");
     // The parser normalizes the newlines.
-    CHECK(Str(textarea.Value()) == "a\nb");
+    CHECK(Narrow(textarea.Value()) == "a\nb");
     CHECK(textarea.TextLength() == 3u);
 
     // The default value is the child text content, not the descendant text content.
     auto span = fixture.Document->CreateElement(u8"span").ReleaseValue();
     REQUIRE_FALSE(span->AppendChild(*CreateRef<Text>(*fixture.Document, u8"x")).HasException());
     REQUIRE_FALSE(textarea.AppendChild(*span).HasException());
-    CHECK(Str(textarea.DefaultValue()) == "a\nb");
+    CHECK(Narrow(textarea.DefaultValue()) == "a\nb");
 
     textarea.DefaultValue(u8"c");
-    CHECK(Str(textarea.Value()) == "c");
+    CHECK(Narrow(textarea.Value()) == "c");
 
     // The API value has its newlines normalized.
     REQUIRE_FALSE(textarea.SetValue(u8"x\r\ny\rz").HasException());
-    CHECK(Str(textarea.Value()) == "x\ny\nz");
+    CHECK(Narrow(textarea.Value()) == "x\ny\nz");
 
     // The text length counts UTF-16 code units.
     REQUIRE_FALSE(textarea.SetValue(u8"\U0001F600").HasException());
     CHECK(textarea.TextLength() == 2u);
     textarea.DefaultValue(u8"d");
-    CHECK(Str(textarea.Value()) == "\U0001F600");
+    CHECK(Narrow(textarea.Value()) == "\U0001F600");
 
     // A clone takes the raw value and the dirty value flag.
     auto clone = textarea.CloneNode(true).ReleaseValue();
-    CHECK(Str(Downcast<HTMLTextAreaElement>(*clone).Value()) == "\U0001F600");
+    CHECK(Narrow(Downcast<HTMLTextAreaElement>(*clone).Value()) == "\U0001F600");
     Downcast<HTMLTextAreaElement>(*clone).DefaultValue(u8"e");
-    CHECK(Str(Downcast<HTMLTextAreaElement>(*clone).Value()) == "\U0001F600");
+    CHECK(Narrow(Downcast<HTMLTextAreaElement>(*clone).Value()) == "\U0001F600");
 
     // Resetting it cleans it.
     fixture.Get<HTMLFormElement>(u8"f").Reset();
-    CHECK(Str(textarea.Value()) == "d");
+    CHECK(Narrow(textarea.Value()) == "d");
   }
 
   TEST_CASE(

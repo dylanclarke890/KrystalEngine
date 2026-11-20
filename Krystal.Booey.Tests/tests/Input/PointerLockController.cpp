@@ -58,7 +58,7 @@ namespace krys::boo::tests
       }
     };
 
-    KRYS_NODISCARD std::string Name(const EventTarget *target)
+    KRYS_NODISCARD std::string TargetId(const EventTarget *target)
     {
       auto *node = DynamicDowncast<Node>(target);
       auto *element = node ? DynamicDowncast<Element>(*node) : nullptr;
@@ -72,11 +72,11 @@ namespace krys::boo::tests
 
     /// @brief Records the events it handles as `type:target`, with a mouse move's movement after its type
     /// (`mousemove(5,-3)`).
-    struct Recorder : public EventListenerCallback
+    struct PointerLockRecorder : public EventListenerCallback
     {
       List<std::string> &Records;
 
-      explicit Recorder(List<std::string> &records) noexcept : Records(records)
+      explicit PointerLockRecorder(List<std::string> &records) noexcept : Records(records)
       {
       }
 
@@ -89,7 +89,7 @@ namespace krys::boo::tests
           type += "(" + std::to_string(static_cast<int>(mouse.MovementX())) + ","
                   + std::to_string(static_cast<int>(mouse.MovementY())) + ")";
         }
-        Records.push_back(type + ":" + Name(event.Target().get()));
+        Records.push_back(type + ":" + TargetId(event.Target().get()));
       }
     };
 
@@ -113,7 +113,7 @@ namespace krys::boo::tests
         (void)Document->UpdateLayout();
 
         // Capturing at the document sees the events that don't bubble too.
-        Ref<EventListenerCallback> recorder = CreateRef<Recorder>(Records);
+        Ref<EventListenerCallback> recorder = CreateRef<PointerLockRecorder>(Records);
         for (auto type : {u8"pointerlockchange", u8"pointerlockerror", u8"pointerdown", u8"pointermove",
                           u8"pointerup", u8"mousedown", u8"mousemove", u8"mouseup", u8"click", u8"wheel",
                           u8"gotpointercapture", u8"lostpointercapture"})

@@ -1,5 +1,6 @@
 ﻿#include "Krystal.Booey/FileAPI/Blob.hpp"
 #include "catch2/catch_test_macros.hpp"
+#include "Krystal.Booey.Tests/StringTestUtils.hpp"
 #include "Krystal.Booey/FileAPI/File.hpp"
 #include "Krystal.Booey/FileAPI/FileList.hpp"
 #include <chrono>
@@ -11,12 +12,7 @@ namespace krys::boo::tests
 {
   namespace
   {
-    KRYS_NODISCARD std::string Narrow(utf8_stringview text) noexcept
-    {
-      return std::string(reinterpret_cast<const char *>(text.data()), text.size());
-    }
-
-    KRYS_NODISCARD std::string Text(const Blob &blob) noexcept
+    KRYS_NODISCARD std::string BlobText(const Blob &blob) noexcept
     {
       auto text = blob.Text();
       REQUIRE(text.HasValue());
@@ -61,7 +57,7 @@ namespace krys::boo::tests
       auto blob = Blob::Create();
       CHECK(blob->Size() == 0);
       CHECK(blob->Type().empty());
-      CHECK(Text(*blob).empty());
+      CHECK(BlobText(*blob).empty());
       CHECK_FALSE(blob->IsFile());
     }
 
@@ -74,7 +70,7 @@ namespace krys::boo::tests
       parts.emplace_back(RefPtr<Blob>(inner));
       parts.emplace_back(u8"é");
       auto blob = Blob::Create(krys::move(parts), {.Type = u8"Text/Plain;Charset=UTF-8"});
-      CHECK(Text(*blob) == "abcdinner\xC3\xA9");
+      CHECK(BlobText(*blob) == "abcdinner\xC3\xA9");
       CHECK(blob->Size() == 11);
       CHECK(blob->MemoryCost() == 11);
       // The neighbouring bytes and strings are one item; the blob's are its own.
@@ -97,11 +93,11 @@ namespace krys::boo::tests
       parts.emplace_back(Bytes("e\nf"));
       auto blob = Blob::Create(krys::move(parts), {.Endings = EndingType::Native});
       // On Windows, CRLF; bytes are left alone.
-      CHECK(Text(*blob) == "a\r\nb\r\nc\r\nde\nf");
+      CHECK(BlobText(*blob) == "a\r\nb\r\nc\r\nde\nf");
 
       List<BlobPartVariant> transparent;
       transparent.emplace_back(u8"a\nb");
-      CHECK(Text(*Blob::Create(krys::move(transparent), {})) == "a\nb");
+      CHECK(BlobText(*Blob::Create(krys::move(transparent), {})) == "a\nb");
     }
 
     SECTION("Slices")
@@ -114,22 +110,22 @@ namespace krys::boo::tests
 
       // Across items.
       auto middle = blob->Slice(2, 7, u8"TEXT/X");
-      CHECK(Text(*middle) == "23456");
+      CHECK(BlobText(*middle) == "23456");
       CHECK(middle->Size() == 5);
       CHECK(middle->Type() == u8"text/x");
       CHECK(middle->MemoryCost() == 5);
 
       // From the end.
-      CHECK(Text(*blob->Slice(-3, -1, {})) == "78");
-      CHECK(Text(*blob->Slice(-100, 2, {})) == "01");
+      CHECK(BlobText(*blob->Slice(-3, -1, {})) == "78");
+      CHECK(BlobText(*blob->Slice(-100, 2, {})) == "01");
 
       // Clamped.
-      CHECK(Text(*blob->Slice(8, 100, {})) == "89");
+      CHECK(BlobText(*blob->Slice(8, 100, {})) == "89");
       CHECK(blob->Slice(6, 3, {})->Size() == 0);
       CHECK(blob->Slice(10, 12, {})->Size() == 0);
 
       // A slice of a slice.
-      CHECK(Text(*middle->Slice(1, 3, {})) == "34");
+      CHECK(BlobText(*middle->Slice(1, 3, {})) == "34");
     }
 
     SECTION("Text decodes UTF-8")
@@ -139,7 +135,7 @@ namespace krys::boo::tests
                                      "a\xFF"
                                      "b"),
                                {});
-      CHECK(Text(*blob)
+      CHECK(BlobText(*blob)
             == "a\xEF\xBF\xBD"
                "b");
       auto bytes = blob->Bytes();
@@ -159,7 +155,7 @@ namespace krys::boo::tests
       CHECK(file->Path() == temporary.PathString());
       CHECK(file->Type() == u8"text/plain");
       CHECK(file->Size() == 11);
-      CHECK(Text(*file) == "hello, file");
+      CHECK(BlobText(*file) == "hello, file");
       CHECK_FALSE(file->IsDirectory());
 
       // Its modification time, in milliseconds since the epoch.
@@ -169,13 +165,13 @@ namespace krys::boo::tests
       CHECK(file->LastModified() > now - 60'000);
 
       // Slices read their range of the file.
-      CHECK(Text(*file->Slice(7, 11, {})) == "file");
+      CHECK(BlobText(*file->Slice(7, 11, {})) == "file");
 
       // A name of its own.
       auto renamed = File::Create(temporary.PathString(), u8"shown.PNG");
       CHECK(renamed->Name() == u8"shown.PNG");
       CHECK(renamed->Type() == u8"image/png");
-      CHECK(Text(*renamed) == "hello, file");
+      CHECK(BlobText(*renamed) == "hello, file");
     }
 
     SECTION("A file that's gone")
@@ -209,7 +205,7 @@ namespace krys::boo::tests
       CHECK(file->Path().empty());
       CHECK(file->Type() == u8"text/plain");
       CHECK(file->LastModified() == 1'234);
-      CHECK(Text(*file) == "made");
+      CHECK(BlobText(*file) == "made");
 
       // Without a time, it's now.
       List<BlobPartVariant> moreParts;
@@ -224,14 +220,14 @@ namespace krys::boo::tests
       auto file = File::Create(*blob, u8"named");
       CHECK(file->Name() == u8"named");
       CHECK(file->Type() == u8"application/x-test");
-      CHECK(Text(*file) == "data");
+      CHECK(BlobText(*file) == "data");
 
       auto copy = File::Create(*file, std::nullopt);
       CHECK(copy->Name() == u8"named");
       CHECK(copy->LastModifiedOverride() == file->LastModifiedOverride());
       auto renamed = File::Create(*file, Maybe<utf8_stringview>(u8"other"));
       CHECK(renamed->Name() == u8"other");
-      CHECK(Text(*renamed) == "data");
+      CHECK(BlobText(*renamed) == "data");
     }
 
     SECTION("Types by extension")

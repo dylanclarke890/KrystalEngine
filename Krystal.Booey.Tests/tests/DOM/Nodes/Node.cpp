@@ -21,12 +21,12 @@ namespace krys::boo::dom::tests
 {
   namespace
   {
-    struct CommonTestData
+    struct NodeTestData
     {
       Ref<Document> Document;
       Ref<TestElement> Node;
 
-      CommonTestData(bool appendChild = false)
+      NodeTestData(bool appendChild = false)
           : Document(CreateRef<boo::Document>()), Node(CreateRef<TestElement>(*Document))
       {
         if (appendChild)
@@ -35,7 +35,7 @@ namespace krys::boo::dom::tests
         }
       }
 
-      ~CommonTestData()
+      ~NodeTestData()
       {
         REQUIRE_FALSE(Node->Remove().HasException());
       }
@@ -128,7 +128,7 @@ namespace krys::boo::dom::tests
   {
     SECTION("A document and its descendants")
     {
-      CommonTestData data {};
+      NodeTestData data {};
 
       REQUIRE(data.Document->IsConnected());
       REQUIRE_FALSE(data.Node->IsConnected());
@@ -165,7 +165,7 @@ namespace krys::boo::dom::tests
   TEST_CASE("Node.ownerDocument: the node document, or null for a document",
             "[DOM][Node][dom:dom-node-ownerdocument]")
   {
-    CommonTestData data {};
+    NodeTestData data {};
 
     REQUIRE(data.Node->OwnerDocument() == data.Document.get());
     REQUIRE(data.Document->OwnerDocument() == nullptr);
@@ -174,7 +174,7 @@ namespace krys::boo::dom::tests
   TEST_CASE("Node.getRootNode(): the root, or the shadow-including root when composed",
             "[DOM][Node][dom:dom-node-getrootnode]")
   {
-    CommonTestData data {};
+    NodeTestData data {};
 
     REQUIRE(&data.Node->GetRootNode({.Composed = false}) == data.Node.get());
     REQUIRE(&data.Node->GetRootNode({.Composed = true}) == data.Node.get());
@@ -193,7 +193,7 @@ namespace krys::boo::dom::tests
 
   TEST_CASE("Node.parentNode: the parent", "[DOM][Node][dom:dom-node-parentnode]")
   {
-    CommonTestData data {};
+    NodeTestData data {};
 
     REQUIRE(data.Node->ParentNode() == nullptr);
 
@@ -210,7 +210,7 @@ namespace krys::boo::dom::tests
   TEST_CASE("Node.parentElement: the parent if it's an element",
             "[DOM][Node][dom:dom-node-parentelement][dom:parent-element]")
   {
-    CommonTestData data {};
+    NodeTestData data {};
     REQUIRE(data.Node->ParentElement() == nullptr);
 
     REQUIRE_FALSE(data.Document->AppendChild(*data.Node).HasException());
@@ -225,7 +225,7 @@ namespace krys::boo::dom::tests
 
   TEST_CASE("Node.hasChildNodes(): whether there are children", "[DOM][Node][dom:dom-node-haschildnodes]")
   {
-    CommonTestData data {true};
+    NodeTestData data {true};
     REQUIRE_FALSE(data.Node->HasChildNodes());
     REQUIRE(data.Document->HasChildNodes());
 
@@ -241,7 +241,7 @@ namespace krys::boo::dom::tests
   TEST_CASE("Node.childNodes: a live list of the children, the same each time",
             "[DOM][Node][dom:dom-node-childnodes]")
   {
-    CommonTestData data {true};
+    NodeTestData data {true};
     auto childA = CreateRef<TestElement>(*data.Document);
     auto childB = CreateRef<TestElement>(*data.Document);
     auto childC = CreateRef<TestElement>(*data.Document);
@@ -280,7 +280,7 @@ namespace krys::boo::dom::tests
   TEST_CASE("FirstChild: the first child, or null without children",
             "[DOM][Node][dom:concept-tree-first-child][dom:dom-node-firstchild]")
   {
-    CommonTestData data {true};
+    NodeTestData data {true};
     auto child1 = CreateRef<TestElement>(*data.Document);
     auto child2 = CreateRef<TestElement>(*data.Document);
 
@@ -300,7 +300,7 @@ namespace krys::boo::dom::tests
   TEST_CASE("LastChild: the last child, or null without children",
             "[DOM][Node][dom:concept-tree-last-child][dom:dom-node-lastchild]")
   {
-    CommonTestData data {true};
+    NodeTestData data {true};
     auto child1 = CreateRef<TestElement>(*data.Document);
     auto child2 = CreateRef<TestElement>(*data.Document);
 
@@ -321,7 +321,7 @@ namespace krys::boo::dom::tests
             "[DOM][Node][dom:concept-tree-next-sibling][dom:concept-tree-previous-sibling]"
             "[dom:dom-node-nextsibling][dom:dom-node-previoussibling]")
   {
-    CommonTestData data {true};
+    NodeTestData data {true};
     auto sibling1 = CreateRef<TestElement>(*data.Document);
     auto sibling2 = CreateRef<TestElement>(*data.Document);
     auto sibling3 = CreateRef<TestElement>(*data.Document);
@@ -374,7 +374,7 @@ namespace krys::boo::dom::tests
   TEST_CASE("Node.nodeValue: null for an element or fragment, and setting it does nothing",
             "[DOM][Node][dom:dom-node-nodevalue]")
   {
-    CommonTestData data {};
+    NodeTestData data {};
     auto fragment = data.Document->CreateDocumentFragment();
 
     for (Node *node : {static_cast<Node *>(data.Node.get()), static_cast<Node *>(fragment.get())})
@@ -389,7 +389,7 @@ namespace krys::boo::dom::tests
   TEST_CASE("Node.normalize(): empty exclusive Text nodes go, and contiguous ones merge into the first",
             "[DOM][Node][dom:dom-node-normalize]")
   {
-    CommonTestData data {};
+    NodeTestData data {};
     auto text = [&](DOMString &&value)
     {
       return CreateRef<Text>(*data.Document, krys::move(value));
@@ -514,7 +514,7 @@ namespace krys::boo::dom::tests
   TEST_CASE("Node.isEqualNode(): false for null, else whether the nodes are equal",
             "[DOM][Node][dom:dom-node-isequalnode]")
   {
-    CommonTestData data {};
+    NodeTestData data {};
     auto equalNode = CreateRef<TestElement>(*data.Document);
 
     REQUIRE_FALSE(data.Node->IsEqualNode(nullptr));
@@ -525,7 +525,7 @@ namespace krys::boo::dom::tests
 
   TEST_CASE("Node.isSameNode(): whether the other node is this one", "[DOM][Node][dom:dom-node-issamenode]")
   {
-    CommonTestData data {};
+    NodeTestData data {};
 
     REQUIRE_FALSE(data.Node->IsSameNode(nullptr));
     REQUIRE(data.Node->IsSameNode(data.Node.get()));
@@ -543,13 +543,13 @@ namespace krys::boo::dom::tests
 
     SECTION("same node returns equivalent")
     {
-      CommonTestData data {};
+      NodeTestData data {};
       REQUIRE(data.Node->CompareDocumentPosition(*data.Node) == DOCUMENT_POSITION_EQUIVALENT);
     }
 
     SECTION("disconnected node")
     {
-      CommonTestData data {true};
+      NodeTestData data {true};
 
       auto disconnectedNode = CreateRef<TestElement>(*data.Document);
       auto position = data.Node->CompareDocumentPosition(*disconnectedNode);
@@ -576,7 +576,7 @@ namespace krys::boo::dom::tests
 
     SECTION("nodes in same document")
     {
-      CommonTestData data {true};
+      NodeTestData data {true};
       auto sibling1 = CreateRef<TestElement>(*data.Document);
       auto sibling2 = CreateRef<TestElement>(*data.Document);
 
@@ -647,7 +647,7 @@ namespace krys::boo::dom::tests
   TEST_CASE("Node.contains(): whether the other node is an inclusive descendant",
             "[DOM][Node][dom:dom-node-contains]")
   {
-    CommonTestData data {};
+    NodeTestData data {};
     auto grandchild = CreateRef<TestElement>(*data.Document);
 
     REQUIRE_FALSE(data.Node->Contains(nullptr));
@@ -673,7 +673,7 @@ namespace krys::boo::dom::tests
   TEST_CASE("Node.lookupPrefix(): null for no namespace, else located from the relevant element",
             "[DOM][Node][dom:dom-node-lookupprefix]")
   {
-    CommonTestData data {};
+    NodeTestData data {};
 
     SECTION("a null or empty namespace has no prefix")
     {
@@ -772,7 +772,7 @@ namespace krys::boo::dom::tests
   TEST_CASE("Node.lookupNamespaceURI(): the empty prefix is null",
             "[DOM][Node][dom:dom-node-lookupnamespaceuri]")
   {
-    CommonTestData data {};
+    NodeTestData data {};
     auto element = CreateRef<NamespaceTestElement>(*data.Document, null);
     CHECK(element->LookupNamespaceURI(DOMStringAtom::Empty()) == u8"http://a");
     CHECK(element->LookupNamespaceURI(null) == u8"http://a");
@@ -783,7 +783,7 @@ namespace krys::boo::dom::tests
     "Node.isDefaultNamespace(): whether the namespace is the default one, the empty string being null",
     "[DOM][Node][dom:dom-node-isdefaultnamespace]")
   {
-    CommonTestData data {};
+    NodeTestData data {};
     auto element = CreateRef<NamespaceTestElement>(*data.Document, u8"testprefix");
     REQUIRE_FALSE(element->IsDefaultNamespace(u8"foo"));
     REQUIRE_FALSE(element->IsDefaultNamespace(u8"http://a"));
@@ -798,7 +798,7 @@ namespace krys::boo::dom::tests
   TEST_CASE("Node.insertBefore(): pre-inserts the node before the child",
             "[DOM][Node][dom:dom-node-insertbefore]")
   {
-    CommonTestData data {true};
+    NodeTestData data {true};
     auto child = CreateRef<TestElement>(*data.Document);
     auto first = CreateRef<TestElement>(*data.Document);
 
@@ -823,7 +823,7 @@ namespace krys::boo::dom::tests
 
   TEST_CASE("Node.appendChild(): appends the node", "[DOM][Node][dom:dom-node-appendchild]")
   {
-    CommonTestData data {true};
+    NodeTestData data {true};
     auto child = CreateRef<TestElement>(*data.Document);
 
     auto appendResult = data.Node->AppendChild(*child);
@@ -843,7 +843,7 @@ namespace krys::boo::dom::tests
   TEST_CASE("Node.replaceChild(): replaces the child with the node, returning the child",
             "[DOM][Node][dom:dom-node-replacechild]")
   {
-    CommonTestData data {true};
+    NodeTestData data {true};
     auto child1 = CreateRef<TestElement>(*data.Document);
     auto child2 = CreateRef<TestElement>(*data.Document);
 
@@ -865,7 +865,7 @@ namespace krys::boo::dom::tests
 
   TEST_CASE("Node.removeChild(): pre-removes the child", "[DOM][Node][dom:dom-node-removechild]")
   {
-    CommonTestData data {true};
+    NodeTestData data {true};
     auto child = CreateRef<TestElement>(*data.Document);
 
     REQUIRE_FALSE(data.Node->AppendChild(*child).HasException());

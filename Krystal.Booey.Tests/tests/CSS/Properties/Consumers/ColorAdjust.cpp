@@ -11,11 +11,12 @@
 
 namespace krys::boo::css::tests
 {
-  using namespace parse_property;
+  using parse_property::ConsumeColorScheme;
+  using parse_property::ParseUnresolvedColorScheme;
 
   namespace
   {
-    std::string Serialised(utf8_stringview css)
+    std::string SerialisedColorScheme(utf8_stringview css)
     {
       auto scheme = ParseUnresolvedColorScheme(css, ParserContext {ParserMode::HTMLStandard});
       if (!scheme)
@@ -42,21 +43,21 @@ namespace krys::boo::css::tests
     CHECK(schemes->Schemes.Value[1] == u8"dark");
     CHECK_FALSE(schemes->Only);
 
-    CHECK(Serialised(u8"normal") == "normal");
-    CHECK(Serialised(u8"light dark") == "light dark");
-    CHECK(Serialised(u8"only light") == "light only");
-    CHECK(Serialised(u8"dark only") == "dark only");
-    CHECK(Serialised(u8"my-scheme") == "my-scheme");
+    CHECK(SerialisedColorScheme(u8"normal") == "normal");
+    CHECK(SerialisedColorScheme(u8"light dark") == "light dark");
+    CHECK(SerialisedColorScheme(u8"only light") == "light only");
+    CHECK(SerialisedColorScheme(u8"dark only") == "dark only");
+    CHECK(SerialisedColorScheme(u8"my-scheme") == "my-scheme");
 
     // `normal` must be alone, `only` must be first or last and needs at least one scheme.
-    CHECK(Serialised(u8"normal light") == "<invalid>");
-    CHECK(Serialised(u8"light normal") == "<invalid>");
-    CHECK(Serialised(u8"only") == "<invalid>");
-    CHECK(Serialised(u8"only light only") == "<invalid>");
-    CHECK(Serialised(u8"light only dark") == "<invalid>");
-    CHECK(Serialised(u8"light, dark") == "<invalid>");
-    CHECK(Serialised(u8"light inherit") == "<invalid>");
-    CHECK(Serialised(u8"") == "<invalid>");
+    CHECK(SerialisedColorScheme(u8"normal light") == "<invalid>");
+    CHECK(SerialisedColorScheme(u8"light normal") == "<invalid>");
+    CHECK(SerialisedColorScheme(u8"only") == "<invalid>");
+    CHECK(SerialisedColorScheme(u8"only light only") == "<invalid>");
+    CHECK(SerialisedColorScheme(u8"light only dark") == "<invalid>");
+    CHECK(SerialisedColorScheme(u8"light, dark") == "<invalid>");
+    CHECK(SerialisedColorScheme(u8"light inherit") == "<invalid>");
+    CHECK(SerialisedColorScheme(u8"") == "<invalid>");
   }
 
   TEST_CASE("Colour scheme parsing(Value entry point)", "[CSS][Properties][Consumers][ColorScheme]")

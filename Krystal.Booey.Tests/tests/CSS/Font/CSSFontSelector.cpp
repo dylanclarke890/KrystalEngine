@@ -1,6 +1,7 @@
 ﻿#include "Krystal.Booey/CSS/Font/CSSFontSelector.hpp"
 #include "catch2/catch_approx.hpp"
 #include "catch2/catch_test_macros.hpp"
+#include "Krystal.Booey.Tests/Layout/LayoutTestUtils.hpp"
 #include "Krystal.Booey.Tests/Style/ResolverTestUtils.hpp"
 #include "Krystal.Booey/CSS/Font/GenericFontFamilyNames.hpp"
 #include "Krystal.Booey/Graphics/Fonts/FontCache.hpp"
@@ -11,16 +12,11 @@
 
 namespace krys::boo::css::tests
 {
+  using layout::tests::RegisterAhem;
   using style::tests::ResolverFixture;
 
   namespace
   {
-    void RegisterAhem()
-    {
-      (void)FontDatabase::Singleton().AddFontFile(std::filesystem::path {KRYS_BOOEY_TESTS_DATA_DIR} / "fonts"
-                                                  / "Ahem.ttf");
-    }
-
     KRYS_NODISCARD const RenderStyle &Rendered(ResolverFixture &fixture, DOMStringView id)
     {
       auto *style = fixture.ById(id).GetRenderStyle();

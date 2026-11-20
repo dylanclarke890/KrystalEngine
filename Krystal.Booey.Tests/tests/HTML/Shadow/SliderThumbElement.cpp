@@ -1,6 +1,7 @@
 ﻿#include "Krystal.Booey/HTML/Shadow/SliderThumbElement.hpp"
 #include "catch2/catch_test_macros.hpp"
 #include "Krystal.Booey.Tests/Editing/EditorTestUtils.hpp"
+#include "Krystal.Booey.Tests/Input/InputTestUtils.hpp"
 #include "Krystal.Booey/DOM/Events/EventNames.hpp"
 #include "Krystal.Booey/DOM/Nodes/Document.hpp"
 #include "Krystal.Booey/HTML/Elements/HTMLInputElement.hpp"
@@ -9,16 +10,6 @@
 
 namespace krys::boo::tests
 {
-  namespace
-  {
-    KRYS_NODISCARD PlatformMouseEvent MouseEvent(PlatformEvent::Type type, PointI position) noexcept
-    {
-      PointD point(position.X(), position.Y());
-      int32 clickCount = type == PlatformEvent::Type::MousePressed ? 1 : 0;
-      return PlatformMouseEvent(point, point, MouseButton::Left, type, clickCount, {}, MonotonicTime::Now());
-    }
-  }
-
   TEST_CASE_METHOD(css::tests::ValueFixture,
                    "SliderThumbElement: a drag releases the mouse when the slider's renderer goes",
                    "[HTML][SliderThumbElement]")
@@ -31,12 +22,12 @@ namespace krys::boo::tests
     fixture.ById(u8"other").AddEventListener(event_names::MouseMove, moves, false);
 
     // Pressing on the thumb starts a drag, which captures the mouse.
-    (void)handler.HandleMousePressEvent(MouseEvent(PlatformEvent::Type::MousePressed, {64, 10}));
+    (void)handler.HandleMousePressEvent(DragMouseEvent(PlatformEvent::Type::MousePressed, {64, 10}));
 
     // Hiding the slider mid-drag releases it, so moves go to what's under the mouse.
     input.SetAttribute(u8"style", u8"display:none");
     (void)fixture.Document->UpdateLayout();
-    (void)handler.MouseMoved(MouseEvent(PlatformEvent::Type::MouseMoved, {64, 10}));
+    (void)handler.MouseMoved(DragMouseEvent(PlatformEvent::Type::MouseMoved, {64, 10}));
     CHECK(moves->Count == 1);
   }
 }

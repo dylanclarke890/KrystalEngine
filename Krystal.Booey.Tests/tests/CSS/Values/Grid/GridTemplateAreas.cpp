@@ -1,5 +1,6 @@
 ﻿#include "Krystal.Booey/CSS/Values/Grid/GridTemplateAreas.hpp"
 #include "catch2/catch_test_macros.hpp"
+#include "Krystal.Booey.Tests/CSS/ValueTestUtils.hpp"
 #include "Krystal.Booey/CSS/Values/SerialisationContext.hpp"
 
 namespace krys::boo::css::tests
@@ -17,11 +18,6 @@ namespace krys::boo::css::tests
         }
       }
       return map;
-    }
-
-    CSSOMString SerialiseForTest(const auto &value)
-    {
-      return Serialise(DefaultSerialisationContext(), value);
     }
   }
 

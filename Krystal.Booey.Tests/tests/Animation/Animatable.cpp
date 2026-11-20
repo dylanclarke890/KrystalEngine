@@ -26,11 +26,6 @@ namespace krys::boo::tests
       return keyframe;
     }
 
-    KRYS_NODISCARD KeyframesInput Fade() noexcept
-    {
-      return List<InputKeyframe> {Opacity(nullptr, u8"0"), Opacity(nullptr, u8"1")};
-    }
-
     KRYS_NODISCARD Ref<WebAnimation>
       Animate(Element &element, KeyframesInput &&keyframes,
               Maybe<Variant<double, KeyframeAnimationOptions>> &&options = 1'000.0)
@@ -83,7 +78,7 @@ namespace krys::boo::tests
     KeyframeAnimationOptions options;
     options.Id = u8"fade";
     options.Duration = 1'000.0;
-    auto animation = Animate(box, Fade(), options);
+    auto animation = Animate(box, FadeKeyframes(), options);
     CHECK(animation->Id() == u8"fade");
     CHECK(animation->Timeline() == &fixture.Document->Timeline());
     CHECK(animation->GetPlayState() == WebAnimation::PlayState::Running);
@@ -100,7 +95,7 @@ namespace krys::boo::tests
     {
       KeyframeAnimationOptions noTimeline;
       noTimeline.Timeline = RefPtr<AnimationTimeline> {};
-      auto unattached = Animate(box, Fade(), noTimeline);
+      auto unattached = Animate(box, FadeKeyframes(), noTimeline);
       CHECK_FALSE(unattached->Timeline());
       unattached->Cancel(WebAnimation::Silently::Yes);
     }
@@ -122,8 +117,8 @@ namespace krys::boo::tests
       u8"</style><div id=outer><div id=inner></div></div><div id=host></div>"};
     auto &outer = fixture.ById(u8"outer");
     auto &inner = fixture.ById(u8"inner");
-    auto first = Animate(outer, Fade());
-    auto second = Animate(inner, Fade());
+    auto first = Animate(outer, FadeKeyframes());
+    auto second = Animate(inner, FadeKeyframes());
 
     // The CSS animation comes first in composite order, then the script animations in the order they were
     // made.
@@ -150,7 +145,7 @@ namespace krys::boo::tests
       REQUIRE(shadowRoot.HasValue());
       auto shadowChild = fixture.Document->CreateElement(u8"div").ReleaseValue();
       REQUIRE_FALSE(shadowRoot.Value()->AppendChild(*shadowChild).HasException());
-      auto inShadow = Animate(*shadowChild, Fade());
+      auto inShadow = Animate(*shadowChild, FadeKeyframes());
       auto shadowAnimations = shadowRoot.Value()->GetAnimations();
       REQUIRE(shadowAnimations.size() == 1);
       CHECK(shadowAnimations[0] == inShadow.get());
@@ -169,7 +164,7 @@ namespace krys::boo::tests
     KeyframeAnimationOptions options;
     options.Id = u8"a";
     options.Duration = 500.0;
-    auto animation = Animate(fixture.ById(u8"box"), Fade(), options);
+    auto animation = Animate(fixture.ById(u8"box"), FadeKeyframes(), options);
 
     AnimationWaitRecorder recorder;
     recorder.WhenReady(*animation);
@@ -203,7 +198,7 @@ namespace krys::boo::tests
                    "[Animation][Animatable]")
   {
     AnimationPageFixture fixture {u8"<!DOCTYPE html><div id=box></div>"};
-    auto animation = Animate(fixture.ById(u8"box"), Fade());
+    auto animation = Animate(fixture.ById(u8"box"), FadeKeyframes());
     fixture.StartAnimations();
 
     // A monotonic timeline takes times, not percentages.
@@ -225,7 +220,7 @@ namespace krys::boo::tests
     KeyframeAnimationOptions options;
     options.Duration = 1'000.0;
     options.Fill = FillMode::Forwards;
-    auto animation = Animate(box, Fade(), options);
+    auto animation = Animate(box, FadeKeyframes(), options);
     fixture.StartAnimations();
     REQUIRE_FALSE(animation->Finish().HasException());
     fixture.Frame();
@@ -244,7 +239,7 @@ namespace krys::boo::tests
     {
       KeyframeAnimationOptions pseudoOptions;
       pseudoOptions.PseudoElement = u8"::before";
-      auto onPseudo = Animate(box, Fade(), pseudoOptions);
+      auto onPseudo = Animate(box, FadeKeyframes(), pseudoOptions);
       CHECK(onPseudo->CommitStyles().GetException().Code() == ExceptionCode::NoModificationAllowedError);
       onPseudo->Cancel(WebAnimation::Silently::Yes);
     }

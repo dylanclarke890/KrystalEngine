@@ -11,12 +11,12 @@ namespace krys::boo::dom::tests
 {
   namespace
   {
-    struct CommonTestData
+    struct DocumentTypeTestData
     {
       Ref<boo::Document> Document;
       Ref<DocumentType> DocType;
 
-      CommonTestData(const DOMString &name, const DOMString &publicId, const DOMString &systemId)
+      DocumentTypeTestData(const DOMString &name, const DOMString &publicId, const DOMString &systemId)
           : Document(CreateRef<boo::Document>()),
             DocType(*Document->Implementation().CreateDocumentType(name, publicId, systemId))
       {
@@ -28,7 +28,8 @@ namespace krys::boo::dom::tests
             "[DOM][DocumentType][dom:interface-documenttype][dom:create-a-doctype][dom:concept-doctype]"
             "[dom:concept-doctype-name][dom:concept-doctype-publicid][dom:concept-doctype-systemid]")
   {
-    CommonTestData data(u8"html", u8"-//W3C//DTD HTML 4.01//EN", u8"http://www.w3.org/TR/html4/strict.dtd");
+    DocumentTypeTestData data(u8"html", u8"-//W3C//DTD HTML 4.01//EN",
+                              u8"http://www.w3.org/TR/html4/strict.dtd");
     CHECK(&data.DocType->NodeDocument() == data.Document.get());
     CHECK(data.DocType->ParentNode() == nullptr);
 
@@ -46,31 +47,36 @@ namespace krys::boo::dom::tests
   TEST_CASE("Node.nodeType: a DocumentType is a DOCUMENT_TYPE_NODE",
             "[DOM][DocumentType][dom:dom-node-nodetype][dom:dom-node-document_type_node]")
   {
-    CommonTestData data(u8"html", u8"-//W3C//DTD HTML 4.01//EN", u8"http://www.w3.org/TR/html4/strict.dtd");
+    DocumentTypeTestData data(u8"html", u8"-//W3C//DTD HTML 4.01//EN",
+                              u8"http://www.w3.org/TR/html4/strict.dtd");
     REQUIRE(data.DocType->NodeType() == NodeType::DOCUMENT_TYPE_NODE);
   }
 
   TEST_CASE("DocumentType.name: the name", "[DOM][DocumentType][dom:dom-documenttype-name]")
   {
-    CommonTestData data(u8"html", u8"-//W3C//DTD HTML 4.01//EN", u8"http://www.w3.org/TR/html4/strict.dtd");
+    DocumentTypeTestData data(u8"html", u8"-//W3C//DTD HTML 4.01//EN",
+                              u8"http://www.w3.org/TR/html4/strict.dtd");
     REQUIRE(data.DocType->Name() == u8"html");
   }
 
   TEST_CASE("DocumentType.publicId: the public ID", "[DOM][DocumentType][dom:dom-documenttype-publicid]")
   {
-    CommonTestData data(u8"html", u8"-//W3C//DTD HTML 4.01//EN", u8"http://www.w3.org/TR/html4/strict.dtd");
+    DocumentTypeTestData data(u8"html", u8"-//W3C//DTD HTML 4.01//EN",
+                              u8"http://www.w3.org/TR/html4/strict.dtd");
     REQUIRE(data.DocType->PublicId() == u8"-//W3C//DTD HTML 4.01//EN");
   }
 
   TEST_CASE("DocumentType.systemId: the system ID", "[DOM][DocumentType][dom:dom-documenttype-systemid]")
   {
-    CommonTestData data(u8"html", u8"-//W3C//DTD HTML 4.01//EN", u8"http://www.w3.org/TR/html4/strict.dtd");
+    DocumentTypeTestData data(u8"html", u8"-//W3C//DTD HTML 4.01//EN",
+                              u8"http://www.w3.org/TR/html4/strict.dtd");
     REQUIRE(data.DocType->SystemId() == u8"http://www.w3.org/TR/html4/strict.dtd");
   }
 
   TEST_CASE("Node.nodeName: a DocumentType's is its name", "[DOM][DocumentType][dom:dom-node-nodename]")
   {
-    CommonTestData data(u8"html", u8"-//W3C//DTD HTML 4.01//EN", u8"http://www.w3.org/TR/html4/strict.dtd");
+    DocumentTypeTestData data(u8"html", u8"-//W3C//DTD HTML 4.01//EN",
+                              u8"http://www.w3.org/TR/html4/strict.dtd");
     REQUIRE(data.DocType->NodeName() == u8"html");
   }
 }

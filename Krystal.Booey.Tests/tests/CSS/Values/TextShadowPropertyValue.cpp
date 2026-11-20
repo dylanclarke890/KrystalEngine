@@ -11,7 +11,7 @@ namespace krys::boo::css::tests
     using L = Length<AllUnzoomed>;
     using NL = Length<NonNegativeUnzoomed>;
 
-    KRYS_NODISCARD TextShadow FullShadow() noexcept
+    KRYS_NODISCARD TextShadow FullTextShadow() noexcept
     {
       return TextShadow {.Color = Color {KeywordColor {ValueId::Blue}},
                          .Location = {L {1_css_px}, L {-2_css_px}},
@@ -21,7 +21,7 @@ namespace krys::boo::css::tests
 
   TEST_CASE_METHOD(ValueFixture, "TextShadowPropertyValue::Create", "[CSS][Values][TextShadowPropertyValue]")
   {
-    TextShadowProperty shadow {TextShadowProperty::List {FullShadow()}};
+    TextShadowProperty shadow {TextShadowProperty::List {FullTextShadow()}};
     auto value = TextShadowPropertyValue::Create(shadow);
     CHECK(value->IsTextShadowPropertyValue());
     CHECK(value->Shadow() == shadow);
@@ -31,18 +31,20 @@ namespace krys::boo::css::tests
                    "[CSS][Values][TextShadowPropertyValue]")
   {
     CHECK(CssText(*TextShadowPropertyValue::Create(TextShadowProperty {keywords::None {}})) == "none");
-    CHECK(CssText(*TextShadowPropertyValue::Create(TextShadowProperty {
-            TextShadowProperty::List {FullShadow(), TextShadow {.Location = {L {0_css_px}, L {0_css_px}}}}}))
+    CHECK(CssText(*TextShadowPropertyValue::Create(TextShadowProperty {TextShadowProperty::List {
+            FullTextShadow(), TextShadow {.Location = {L {0_css_px}, L {0_css_px}}}}}))
           == "blue 1px -2px 3px, 0px 0px");
   }
 
   TEST_CASE_METHOD(ValueFixture, "TextShadowPropertyValue equality", "[CSS][Values][TextShadowPropertyValue]")
   {
-    auto a = TextShadowPropertyValue::Create(TextShadowProperty {TextShadowProperty::List {FullShadow()}});
-    CHECK(*a
-          == *TextShadowPropertyValue::Create(TextShadowProperty {TextShadowProperty::List {FullShadow()}}));
+    auto a =
+      TextShadowPropertyValue::Create(TextShadowProperty {TextShadowProperty::List {FullTextShadow()}});
+    CHECK(
+      *a
+      == *TextShadowPropertyValue::Create(TextShadowProperty {TextShadowProperty::List {FullTextShadow()}}));
 
-    auto noBlur = FullShadow();
+    auto noBlur = FullTextShadow();
     noBlur.Blur = {};
     CHECK_FALSE(*a
                 == *TextShadowPropertyValue::Create(TextShadowProperty {TextShadowProperty::List {noBlur}}));
@@ -52,8 +54,8 @@ namespace krys::boo::css::tests
   TEST_CASE_METHOD(ValueFixture, "TextShadowPropertyValue has no children",
                    "[CSS][Values][TextShadowPropertyValue]")
   {
-    CHECK(
-      Children(*TextShadowPropertyValue::Create(TextShadowProperty {TextShadowProperty::List {FullShadow()}}))
-        .empty());
+    CHECK(Children(*TextShadowPropertyValue::Create(
+                     TextShadowProperty {TextShadowProperty::List {FullTextShadow()}}))
+            .empty());
   }
 }

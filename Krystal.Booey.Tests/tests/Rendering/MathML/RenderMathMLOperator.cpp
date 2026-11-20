@@ -39,13 +39,6 @@ namespace krys::boo::tests
       return Downcast<RenderMathMLOperator>(*renderer);
     }
 
-    KRYS_NODISCARD RenderBox &BoxById(ResolverFixture &fixture, DOMStringView id) noexcept
-    {
-      auto *renderer = fixture.ById(id).Renderer();
-      REQUIRE(renderer);
-      return Downcast<RenderBox>(*renderer);
-    }
-
     /// @brief A document whose formulas are in 10px Ahem, with @p body as its body's content.
     KRYS_NODISCARD utf8_string AhemMath(utf8_stringview body) noexcept
     {

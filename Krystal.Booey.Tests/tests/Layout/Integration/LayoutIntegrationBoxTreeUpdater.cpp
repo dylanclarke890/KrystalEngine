@@ -1,6 +1,7 @@
 ﻿#include "Krystal.Booey/Layout/Integration/LayoutIntegrationBoxTreeUpdater.hpp"
 #include "catch2/catch_test_macros.hpp"
 #include "Krystal.Booey.Tests/Layout/LayoutTestUtils.hpp"
+#include "Krystal.Booey.Tests/Rendering/RenderTestUtils.hpp"
 #include "Krystal.Booey.Tests/Style/ResolverTestUtils.hpp"
 #include "Krystal.Booey/DOM/Nodes/Element.hpp"
 #include "Krystal.Booey/Layout/FormattingContexts/FormattingContext.hpp"
@@ -27,11 +28,6 @@ namespace krys::boo::tests
     KRYS_NODISCARD RenderBlockFlow &BlockOf(ResolverFixture &fixture, DOMStringView id) noexcept
     {
       return Downcast<RenderBlockFlow>(*fixture.ById(id).Renderer());
-    }
-
-    KRYS_NODISCARD RenderElement &RendererOf(ResolverFixture &fixture, DOMStringView id) noexcept
-    {
-      return *fixture.ById(id).Renderer();
     }
 
     KRYS_NODISCARD const layout::ElementBox &BoxOf(ResolverFixture &fixture, DOMStringView id) noexcept

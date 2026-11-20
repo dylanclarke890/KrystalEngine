@@ -2,7 +2,9 @@
 #include "catch2/catch_test_macros.hpp"
 #include "catch2/generators/catch_generators.hpp"
 #include "Krystal.Booey.Tests/CSS/ValueTestUtils.hpp"
+#include "Krystal.Booey.Tests/DOM/DOMTestUtils.hpp"
 #include "Krystal.Booey.Tests/Style/ResolverTestUtils.hpp"
+#include "Krystal.Booey.Tests/Style/StyleTestUtils.hpp"
 #include "Krystal.Booey/CSS/Parser/Parser.hpp"
 #include "Krystal.Booey/CSS/Properties/MutableStyleProperties.hpp"
 #include "Krystal.Booey/CSS/Rules/KeyframeRule.hpp"
@@ -25,46 +27,13 @@
 
 namespace krys::boo::style::tests
 {
+  using boo::tests::ById;
+  using boo::tests::CreateElement;
+  using boo::tests::RunTasks;
   using css::tests::ToNarrow;
 
   namespace
   {
-    KRYS_NODISCARD Ref<HTMLDocument> Parse(utf8_string &&input) noexcept
-    {
-      auto document = CreateRef<HTMLDocument>();
-      auto parser = CreateRef<html::DocumentParser>(*document);
-      parser->InputStream().Append(krys::move(input), IsEOF::Yes);
-      parser->PumpTokenizer();
-      document->StyleScope().FlushPendingUpdate();
-      return document;
-    }
-
-    void RunTasks() noexcept
-    {
-      html::EventLoop::Current().RunUntilIdle();
-    }
-
-    KRYS_NODISCARD boo::Element &ById(Document &document, DOMStringView id)
-    {
-      auto element = document.GetElementById(id);
-      REQUIRE(element);
-      return *element;
-    }
-
-    KRYS_NODISCARD Ref<boo::Element> Create(Document &document, DOMStringAtom localName)
-    {
-      auto element = document.CreateElement(krys::move(localName));
-      REQUIRE_FALSE(element.HasException());
-      return element.ReleaseValue();
-    }
-
-    KRYS_NODISCARD Ref<HTMLStyleElement> CreateStyle(Document &document, DOMString &&text)
-    {
-      auto style = CreateRef<HTMLStyleElement>(document);
-      REQUIRE_FALSE(style->TextContent(krys::move(text)).HasException());
-      return style;
-    }
-
     KRYS_NODISCARD Ref<ShadowRoot> AttachShadow(boo::Element &host, DOMString &&styleText,
                                                 dom::ShadowRootMode mode = dom::ShadowRootMode::Open)
     {
@@ -124,7 +93,7 @@ namespace krys::boo::style::tests
                    "[Style][ElementRuleCollector]")
   {
     RunTasks();
-    auto document = Parse(u8R"(<!DOCTYPE html><style>
+    auto document = ParseWithStyleSheets(u8R"(<!DOCTYPE html><style>
       #b { --n: id; }
       .a { --n: class; }
       p { --n: tag; }
@@ -176,12 +145,12 @@ namespace krys::boo::style::tests
       REQUIRE(collector.GetMatchResult().UserAgentDeclarations.empty());
       REQUIRE(Names(collector.GetMatchResult().AuthorDeclarations).size() == 7u);
 
-      auto div = Create(*document, u8"div");
+      auto div = CreateElement(*document, u8"div");
       REQUIRE_FALSE(document->Body()->AppendChild(*div).HasException());
       ElementRuleCollector divCollector(*div, RuleSetsFor(*div), nullptr);
       REQUIRE(divCollector.MatchesAnyAuthorRules());
 
-      auto span = Create(*document, u8"span");
+      auto span = CreateElement(*document, u8"span");
       REQUIRE_FALSE(document->Body()->AppendChild(*span).HasException());
       // The universal rule matches every element.
       ElementRuleCollector spanCollector(*span, RuleSetsFor(*span), nullptr);
@@ -210,7 +179,7 @@ namespace krys::boo::style::tests
                    "[Style][ElementRuleCollector]")
   {
     RunTasks();
-    auto document = Parse(u8R"(<!DOCTYPE html><style>
+    auto document = ParseWithStyleSheets(u8R"(<!DOCTYPE html><style>
       @layer one, two;
       #p { --n: unlayered; }
       @layer two { #p#p { --n: two; } }
@@ -252,8 +221,8 @@ namespace krys::boo::style::tests
 
     SECTION("Quirks mode adds the quirks sheet")
     {
-      auto standards = Parse(u8"<!DOCTYPE html><table id=t></table>");
-      auto quirks = Parse(u8"<table id=t></table>");
+      auto standards = ParseWithStyleSheets(u8"<!DOCTYPE html><table id=t></table>");
+      auto quirks = ParseWithStyleSheets(u8"<table id=t></table>");
       REQUIRE(quirks->InQuirksMode());
       auto standardsResult = MatchAll(ById(*standards, u8"t"));
       auto quirksResult = MatchAll(ById(*quirks, u8"t"));
@@ -262,8 +231,8 @@ namespace krys::boo::style::tests
 
     SECTION("Links")
     {
-      auto document =
-        Parse(u8"<!DOCTYPE html><style>:link { --n: link; }</style><a id=a href=x></a><a id=b></a>");
+      auto document = ParseWithStyleSheets(
+        u8"<!DOCTYPE html><style>:link { --n: link; }</style><a id=a href=x></a><a id=b></a>");
       auto link = MatchAll(ById(*document, u8"a"));
       REQUIRE(link->IsForLink);
       REQUIRE(Names(link->AuthorDeclarations) == Strings {"link"});
@@ -275,8 +244,8 @@ namespace krys::boo::style::tests
 
     SECTION("dir=auto adds a direction declaration")
     {
-      auto document =
-        Parse(u8"<!DOCTYPE html><style>p { --n: p; }</style><p id=auto dir=auto></p><p id=ltr dir=ltr></p>");
+      auto document = ParseWithStyleSheets(
+        u8"<!DOCTYPE html><style>p { --n: p; }</style><p id=auto dir=auto></p><p id=ltr dir=ltr></p>");
       auto autoResult = MatchAll(ById(*document, u8"auto"));
       // The presentational hint (unicode-bidi), then the direction, then the author rule.
       REQUIRE(autoResult->AuthorDeclarations.size() == 3u);
@@ -297,7 +266,7 @@ namespace krys::boo::style::tests
                    "[Style][ElementRuleCollector]")
   {
     RunTasks();
-    auto document = Parse(u8R"(<!DOCTYPE html><style>
+    auto document = ParseWithStyleSheets(u8R"(<!DOCTYPE html><style>
       #host { --n: document; }
       #host::part(inner) { --n: part; }
       #slotted { --n: light; }
@@ -313,8 +282,8 @@ namespace krys::boo::style::tests
     REQUIRE(shadow->Mode() == mode);
     // Closed shadow roots are hidden from the web-exposed getter but still style their host.
     REQUIRE(static_cast<bool>(host.ShadowRoot()) == (mode == dom::ShadowRootMode::Open));
-    auto slot = Create(*document, u8"slot");
-    auto inner = Create(*document, u8"span");
+    auto slot = CreateElement(*document, u8"slot");
+    auto inner = CreateElement(*document, u8"span");
     REQUIRE_FALSE(inner->SetAttribute(u8"part", u8"inner").HasException());
     REQUIRE_FALSE(shadow->AppendChild(*slot).HasException());
     REQUIRE_FALSE(shadow->AppendChild(*inner).HasException());
@@ -348,18 +317,18 @@ namespace krys::boo::style::tests
                    "[Style][ElementRuleCollector]")
   {
     RunTasks();
-    auto document = Parse(u8R"(<!DOCTYPE html><style>
+    auto document = ParseWithStyleSheets(u8R"(<!DOCTYPE html><style>
       #outer::part(exported) { --n: exported; }
       #outer::part(inner) { --n: unexported; }
     </style><div id=outer></div>)");
     auto &outer = ById(*document, u8"outer");
     auto outerShadow = AttachShadow(outer, u8"#mid::part(inner) { --n: mid; }");
-    auto mid = Create(*document, u8"div");
+    auto mid = CreateElement(*document, u8"div");
     REQUIRE_FALSE(mid->SetAttribute(u8"id", u8"mid").HasException());
     REQUIRE_FALSE(mid->SetAttribute(u8"exportparts", u8"inner : exported, other").HasException());
     REQUIRE_FALSE(outerShadow->AppendChild(*mid).HasException());
     auto midShadow = AttachShadow(*mid, u8"");
-    auto inner = Create(*document, u8"span");
+    auto inner = CreateElement(*document, u8"span");
     REQUIRE_FALSE(inner->SetAttribute(u8"part", u8"inner").HasException());
     REQUIRE_FALSE(midShadow->AppendChild(*inner).HasException());
 
@@ -392,7 +361,7 @@ namespace krys::boo::style::tests
   TEST_CASE_METHOD(css::tests::ValueFixture, "ElementRuleCollector: @scope", "[Style][ElementRuleCollector]")
   {
     RunTasks();
-    auto document = Parse(u8R"(<!DOCTYPE html><style>
+    auto document = ParseWithStyleSheets(u8R"(<!DOCTYPE html><style>
       @scope (.outer) { p { --n: outer; } }
       @scope (.inner) { p { --n: inner; } }
       @scope (.s) to (.e) { p { --n: donut; } }
@@ -444,7 +413,7 @@ namespace krys::boo::style::tests
                    "[Style][ElementRuleCollector]")
   {
     RunTasks();
-    auto document = Parse(u8R"(<!DOCTYPE html><style>
+    auto document = ParseWithStyleSheets(u8R"(<!DOCTYPE html><style>
       p { --n: element; }
       p::before { --n: before; }
       p::marker { --n: marker; }
@@ -496,7 +465,7 @@ namespace krys::boo::style::tests
                    "[Style][ElementRuleCollector]")
   {
     RunTasks();
-    auto document = Parse(u8R"(<!DOCTYPE html><style>
+    auto document = ParseWithStyleSheets(u8R"(<!DOCTYPE html><style>
       .x p { --n: descendant; }
       .y p { --n: rejected; }
       p:nth-child(2) { --n: second; }

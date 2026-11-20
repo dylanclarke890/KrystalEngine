@@ -1,5 +1,7 @@
 ﻿#include "Krystal.Booey/CSS/Values/Motion/RayFunction.hpp"
 #include "catch2/catch_test_macros.hpp"
+#include "Krystal.Booey.Tests/CSS/PositionTestUtils.hpp"
+#include "Krystal.Booey.Tests/CSS/ValueTestUtils.hpp"
 #include "Krystal.Booey/CSS/Values/Primitives/NumericTypesComputedStyleDependencies.hpp"
 #include "Krystal.Booey/CSS/Values/Primitives/NumericTypesSerialisation.hpp"
 #include "Krystal.Booey/CSS/Values/Primitives/NumericTypesValueVisitation.hpp"
@@ -10,17 +12,6 @@ namespace krys::boo::css::tests
   namespace
   {
     using LP = LengthPercentage<>;
-
-    template <typename T>
-    CSSOMString SerialiseForTest(const T &value)
-    {
-      return Serialise(DefaultSerialisationContext(), value);
-    }
-
-    Position At(TwoComponentPositionHorizontal x, TwoComponentPositionVertical y)
-    {
-      return Position {TwoComponentPositionHorizontalVertical {krys::move(x), krys::move(y)}};
-    }
 
     RayFunction MakeRay(Angle<> angle, RaySize size = keywords::ClosestSide {},
                         Maybe<keywords::Contain> contain = {}, Maybe<Position> position = {})
@@ -43,10 +34,10 @@ namespace krys::boo::css::tests
     CHECK(SerialiseForTest(MakeRay(45_css_deg, keywords::ClosestSide {}, keywords::Contain {}))
           == u8"ray(45deg contain)");
     CHECK(SerialiseForTest(MakeRay(45_css_deg, keywords::ClosestSide {}, {},
-                                   At({keywords::Left {}}, {LP {20_css_percentage}})))
+                                   PositionAt({keywords::Left {}}, {LP {20_css_percentage}})))
           == u8"ray(45deg at left 20%)");
     CHECK(SerialiseForTest(MakeRay(1_css_turn, keywords::Sides {}, keywords::Contain {},
-                                   At({keywords::Center {}}, {keywords::Center {}})))
+                                   PositionAt({keywords::Center {}}, {keywords::Center {}})))
           == u8"ray(1turn sides contain at center center)");
   }
 
@@ -56,16 +47,16 @@ namespace krys::boo::css::tests
     CHECK(MakeRay(45_css_deg) != MakeRay(90_css_deg));
     CHECK(MakeRay(45_css_deg) != MakeRay(45_css_deg, keywords::Sides {}));
     CHECK(MakeRay(45_css_deg) != MakeRay(45_css_deg, keywords::ClosestSide {}, keywords::Contain {}));
-    CHECK(
-      MakeRay(45_css_deg)
-      != MakeRay(45_css_deg, keywords::ClosestSide {}, {}, At({keywords::Center {}}, {keywords::Center {}})));
+    CHECK(MakeRay(45_css_deg)
+          != MakeRay(45_css_deg, keywords::ClosestSide {}, {},
+                     PositionAt({keywords::Center {}}, {keywords::Center {}})));
   }
 
   TEST_CASE("RayFunction(Dependencies and visitation)", "[CSS][Motion][RayFunction]")
   {
     CHECK(CollectComputedStyleDependencies(MakeRay(45_css_deg)).Properties.empty());
-    CHECK(CollectComputedStyleDependencies(
-            MakeRay(45_css_deg, keywords::ClosestSide {}, {}, At({LP {1_css_em}}, {keywords::Center {}})))
+    CHECK(CollectComputedStyleDependencies(MakeRay(45_css_deg, keywords::ClosestSide {}, {},
+                                                   PositionAt({LP {1_css_em}}, {keywords::Center {}})))
             .Properties
           == List<PropertyId> {PropertyId::FontSize});
 
@@ -76,7 +67,7 @@ namespace krys::boo::css::tests
       return IterationStatus::Continue;
     };
     CHECK(VisitValueChildren(visitor, MakeRay(45_css_deg, keywords::Sides {}, keywords::Contain {},
-                                              At({keywords::Center {}}, {keywords::Center {}})))
+                                              PositionAt({keywords::Center {}}, {keywords::Center {}})))
           == IterationStatus::Continue);
     CHECK(visited == 0);
   }

@@ -1,5 +1,7 @@
 ﻿#pragma once
 
+#include "Krystal.Booey/CSS/Parser/ParserContext.hpp"
+#include "Krystal.Booey/CSS/Queries/MediaQueryParser.hpp"
 #include "Krystal.Booey/DOM/Nodes/Document.hpp"
 #include "Krystal.Booey/Page/Clients/BooeyClient.hpp"
 #include "Krystal.Booey/Page/Frame.hpp"
@@ -121,4 +123,10 @@ namespace krys::boo::css::tests
       return boo::Frame::Create(krys::move(client));
     }
   };
+
+  /// @brief The media query list @p text parses to, in strict mode.
+  KRYS_NODISCARD inline mq::MediaQueryList ParseMediaQueries(utf8_stringview text)
+  {
+    return mq::MediaQueryParser::Parse(text, StrictParserContext());
+  }
 }

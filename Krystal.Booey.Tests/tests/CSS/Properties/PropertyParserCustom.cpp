@@ -48,7 +48,7 @@ namespace krys::boo::css::tests
     }
 
     /// @brief Parses `css` as the value of the longhand `property`.
-    KRYS_NODISCARD std::string LonghandToText(utf8_stringview css, PropertyId property)
+    KRYS_NODISCARD std::string ConsumeLonghandToText(utf8_stringview css, PropertyId property)
     {
       return ConsumeToText(css, [property](TokenRange &range, PropertyParserState &state)
                            { return PropertyParsing::ParseStylePropertyLonghand(range, property, state); });
@@ -57,23 +57,23 @@ namespace krys::boo::css::tests
 
   TEST_CASE_METHOD(ValueFixture, "PropertyParsing longhands", "[CSS][Properties][PropertyParsing]")
   {
-    CHECK(LonghandToText(u8"10px", PropertyId::Width) == "10px");
-    CHECK(LonghandToText(u8"red", PropertyId::Color) == "red");
-    CHECK(LonghandToText(u8"10px", PropertyId::Color) == "<null>");
+    CHECK(ConsumeLonghandToText(u8"10px", PropertyId::Width) == "10px");
+    CHECK(ConsumeLonghandToText(u8"red", PropertyId::Color) == "red");
+    CHECK(ConsumeLonghandToText(u8"10px", PropertyId::Color) == "<null>");
   }
 
   TEST_CASE_METHOD(ValueFixture, "PropertyParsing border-spacing", "[CSS][Properties][PropertyParsing]")
   {
     REQUIRE_FALSE(IsShorthand(PropertyId::BorderSpacing));
 
-    CHECK(LonghandToText(u8"1px", PropertyId::BorderSpacing) == "1px");
-    CHECK(LonghandToText(u8"1px 2px", PropertyId::BorderSpacing) == "1px 2px");
-    CHECK(LonghandToText(u8"1px 1px", PropertyId::BorderSpacing) == "1px");
-    CHECK(LonghandToText(u8"0 calc(1px + 1em)", PropertyId::BorderSpacing) == "0px calc(1em + 1px)");
-    CHECK(LonghandToText(u8"1px 2px 3px", PropertyId::BorderSpacing) == "<partial>");
-    CHECK(LonghandToText(u8"-1px", PropertyId::BorderSpacing) == "<null>");
-    CHECK(LonghandToText(u8"1px -2px", PropertyId::BorderSpacing) == "<partial>");
-    CHECK(LonghandToText(u8"10%", PropertyId::BorderSpacing) == "<null>");
+    CHECK(ConsumeLonghandToText(u8"1px", PropertyId::BorderSpacing) == "1px");
+    CHECK(ConsumeLonghandToText(u8"1px 2px", PropertyId::BorderSpacing) == "1px 2px");
+    CHECK(ConsumeLonghandToText(u8"1px 1px", PropertyId::BorderSpacing) == "1px");
+    CHECK(ConsumeLonghandToText(u8"0 calc(1px + 1em)", PropertyId::BorderSpacing) == "0px calc(1em + 1px)");
+    CHECK(ConsumeLonghandToText(u8"1px 2px 3px", PropertyId::BorderSpacing) == "<partial>");
+    CHECK(ConsumeLonghandToText(u8"-1px", PropertyId::BorderSpacing) == "<null>");
+    CHECK(ConsumeLonghandToText(u8"1px -2px", PropertyId::BorderSpacing) == "<partial>");
+    CHECK(ConsumeLonghandToText(u8"10%", PropertyId::BorderSpacing) == "<null>");
 
     // Unitless lengths are accepted only in quirks mode.
     auto parse = [](TokenRange &range, PropertyParserState &state)
@@ -89,16 +89,16 @@ namespace krys::boo::css::tests
   TEST_CASE_METHOD(ValueFixture, "PropertyParsing stroke-linejoin", "[CSS][Properties][PropertyParsing]")
   {
     // SVG 2's values.
-    CHECK(LonghandToText(u8"miter", PropertyId::StrokeLinejoin) == "miter");
-    CHECK(LonghandToText(u8"round", PropertyId::StrokeLinejoin) == "round");
-    CHECK(LonghandToText(u8"bevel", PropertyId::StrokeLinejoin) == "bevel");
+    CHECK(ConsumeLonghandToText(u8"miter", PropertyId::StrokeLinejoin) == "miter");
+    CHECK(ConsumeLonghandToText(u8"round", PropertyId::StrokeLinejoin) == "round");
+    CHECK(ConsumeLonghandToText(u8"bevel", PropertyId::StrokeLinejoin) == "bevel");
 
     // Fill and Stroke 3's other values and two-part form aren't supported.
-    CHECK(LonghandToText(u8"crop", PropertyId::StrokeLinejoin) == "<null>");
-    CHECK(LonghandToText(u8"arcs", PropertyId::StrokeLinejoin) == "<null>");
-    CHECK(LonghandToText(u8"fallback", PropertyId::StrokeLinejoin) == "<null>");
-    CHECK(LonghandToText(u8"miter-clip", PropertyId::StrokeLinejoin) == "<null>");
-    CHECK(LonghandToText(u8"miter bevel", PropertyId::StrokeLinejoin) == "<partial>");
+    CHECK(ConsumeLonghandToText(u8"crop", PropertyId::StrokeLinejoin) == "<null>");
+    CHECK(ConsumeLonghandToText(u8"arcs", PropertyId::StrokeLinejoin) == "<null>");
+    CHECK(ConsumeLonghandToText(u8"fallback", PropertyId::StrokeLinejoin) == "<null>");
+    CHECK(ConsumeLonghandToText(u8"miter-clip", PropertyId::StrokeLinejoin) == "<null>");
+    CHECK(ConsumeLonghandToText(u8"miter bevel", PropertyId::StrokeLinejoin) == "<partial>");
   }
 
   TEST_CASE_METHOD(ValueFixture, "PropertyParserCustom", "[CSS][Properties][PropertyParserCustom]")

@@ -1,5 +1,6 @@
 ﻿#include "Krystal.Booey/CSS/TypedOM/CSSStyleValue.hpp"
 #include "catch2/catch_test_macros.hpp"
+#include "Krystal.Booey.Tests/CSS/TypedOMTestUtils.hpp"
 #include "Krystal.Booey.Tests/CSS/ValueTestUtils.hpp"
 #include "Krystal.Booey/CSS/TypedOM/CSSImageValue.hpp"
 #include "Krystal.Booey/CSS/TypedOM/CSSKeywordValue.hpp"
@@ -13,11 +14,6 @@ namespace krys::boo::css::tests
 {
   namespace
   {
-    KRYS_NODISCARD std::string Text(const CSSStyleValue &value)
-    {
-      return ToNarrow(value.ToString());
-    }
-
     KRYS_NODISCARD Ref<CSSStyleValue> Parsed(Document &document, CSSOMStringView property,
                                              CSSOMStringView cssText)
     {
@@ -48,8 +44,8 @@ namespace krys::boo::css::tests
       CHECK(ToNarrow(CSSOMString(Downcast<CSSUnitValue>(*width).Unit())) == "px");
 
       // The property name is lowercased.
-      CHECK(Text(*Parsed(*document, u8"WIDTH", u8"50%")) == "50%");
-      CHECK(Text(*Parsed(*document, u8"opacity", u8"0.5")) == "0.5");
+      CHECK(StyleValueText(*Parsed(*document, u8"WIDTH", u8"50%")) == "50%");
+      CHECK(StyleValueText(*Parsed(*document, u8"opacity", u8"0.5")) == "0.5");
 
       auto sum = Parsed(*document, u8"width", u8"calc(10px + 1em)");
       CHECK(Is<CSSMathSum>(*sum));
@@ -62,8 +58,8 @@ namespace krys::boo::css::tests
       CHECK(ToNarrow(Downcast<CSSKeywordValue>(*display).Value()) == "block");
       CHECK(Is<CSSKeywordValue>(*Parsed(*document, u8"width", u8"inherit")));
       // `none` filters and shadows, and keyword easing functions, are keywords.
-      CHECK(Text(*Parsed(*document, u8"filter", u8"none")) == "none");
-      CHECK(Text(*Parsed(*document, u8"box-shadow", u8"none")) == "none");
+      CHECK(StyleValueText(*Parsed(*document, u8"filter", u8"none")) == "none");
+      CHECK(StyleValueText(*Parsed(*document, u8"box-shadow", u8"none")) == "none");
       CHECK(Is<CSSKeywordValue>(*Parsed(*document, u8"transition-timing-function", u8"ease-in")));
     }
 
@@ -71,11 +67,11 @@ namespace krys::boo::css::tests
     {
       auto custom = Parsed(*document, u8"--x", u8" foo(1) ");
       REQUIRE(Is<CSSUnparsedValue>(*custom));
-      CHECK(Text(*custom) == " foo(1) ");
+      CHECK(StyleValueText(*custom) == " foo(1) ");
 
       auto reference = Parsed(*document, u8"width", u8"var(--a)");
       REQUIRE(Is<CSSUnparsedValue>(*reference));
-      CHECK(Text(*reference) == "var(--a)");
+      CHECK(StyleValueText(*reference) == "var(--a)");
     }
 
     SECTION("images and transforms")
@@ -86,7 +82,7 @@ namespace krys::boo::css::tests
       auto transform = Parsed(*document, u8"transform", u8"translate(10px, 20px) rotate(45deg)");
       REQUIRE(Is<CSSTransformValue>(*transform));
       CHECK(Downcast<CSSTransformValue>(*transform).Length() == 2);
-      CHECK(Text(*transform) == "translate(10px, 20px) rotate(45deg)");
+      CHECK(StyleValueText(*transform) == "translate(10px, 20px) rotate(45deg)");
     }
 
     SECTION("other values")
@@ -94,10 +90,10 @@ namespace krys::boo::css::tests
       // Values the Typed OM has no class for, and shorthands, are generic style values.
       auto color = Parsed(*document, u8"color", u8"rgb(1, 2, 3)");
       CHECK(color->StyleValueType() == CSSStyleValueType::CSSStyleValue);
-      CHECK(Text(*color) == "rgb(1, 2, 3)");
+      CHECK(StyleValueText(*color) == "rgb(1, 2, 3)");
       // A named colour is a keyword.
       CHECK(Is<CSSKeywordValue>(*Parsed(*document, u8"color", u8"red")));
-      CHECK(Text(*Parsed(*document, u8"margin", u8"1px 2px")) == "1px 2px");
+      CHECK(StyleValueText(*Parsed(*document, u8"margin", u8"1px 2px")) == "1px 2px");
     }
 
     SECTION("errors")
@@ -117,9 +113,9 @@ namespace krys::boo::css::tests
     auto all = CSSStyleValue::ParseAll(*document, u8"transition-duration", u8"1s, 2s");
     REQUIRE(all.HasValue());
     REQUIRE(all.Value().size() == 2);
-    CHECK(Text(*all.Value()[0]) == "1s");
-    CHECK(Text(*all.Value()[1]) == "2s");
-    CHECK(Text(*Parsed(*document, u8"transition-duration", u8"1s, 2s")) == "1s");
+    CHECK(StyleValueText(*all.Value()[0]) == "1s");
+    CHECK(StyleValueText(*all.Value()[1]) == "2s");
+    CHECK(StyleValueText(*Parsed(*document, u8"transition-duration", u8"1s, 2s")) == "1s");
 
     auto single = CSSStyleValue::ParseAll(*document, u8"width", u8"1px");
     REQUIRE(single.HasValue());

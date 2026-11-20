@@ -6,19 +6,6 @@
 
 namespace krys::boo::css::tests
 {
-  namespace
-  {
-    Ref<Value> Names(List<CSSOMString> names)
-    {
-      return GridLineNamesValue::Create(names);
-    }
-
-    Ref<Value> Px(double value)
-    {
-      return PrimitiveValue::Create(value, UnitType::px);
-    }
-  }
-
   TEST_CASE_METHOD(ValueFixture, "GridAutoRepeatValue::Create", "[CSS][Values][GridAutoRepeatValue]")
   {
     auto fill = GridAutoRepeatValue::Create(ValueId::AutoFill, {Px(100.0)});
@@ -36,16 +23,17 @@ namespace krys::boo::css::tests
   {
     CHECK(CssText(*GridAutoRepeatValue::Create(ValueId::AutoFill, {Px(100.0)}))
           == "repeat(auto-fill, 100px)");
-    CHECK(CssText(*GridAutoRepeatValue::Create(ValueId::AutoFit, {Names({u8"a"}), Px(100.0), Names({u8"b"})}))
+    CHECK(CssText(*GridAutoRepeatValue::Create(ValueId::AutoFit,
+                                               {LineNames({u8"a"}), Px(100.0), LineNames({u8"b"})}))
           == "repeat(auto-fit, [a] 100px [b])");
   }
 
   TEST_CASE_METHOD(ValueFixture, "GridAutoRepeatValue equality", "[CSS][Values][GridAutoRepeatValue]")
   {
-    auto a = GridAutoRepeatValue::Create(ValueId::AutoFill, {Names({u8"a"}), Px(100.0)});
-    auto b = GridAutoRepeatValue::Create(ValueId::AutoFill, {Names({u8"a"}), Px(100.0)});
-    auto fit = GridAutoRepeatValue::Create(ValueId::AutoFit, {Names({u8"a"}), Px(100.0)});
-    auto otherItems = GridAutoRepeatValue::Create(ValueId::AutoFill, {Names({u8"a"}), Px(200.0)});
+    auto a = GridAutoRepeatValue::Create(ValueId::AutoFill, {LineNames({u8"a"}), Px(100.0)});
+    auto b = GridAutoRepeatValue::Create(ValueId::AutoFill, {LineNames({u8"a"}), Px(100.0)});
+    auto fit = GridAutoRepeatValue::Create(ValueId::AutoFit, {LineNames({u8"a"}), Px(100.0)});
+    auto otherItems = GridAutoRepeatValue::Create(ValueId::AutoFill, {LineNames({u8"a"}), Px(200.0)});
 
     CHECK(*a == *b);
     CHECK_FALSE(*a == *fit);
@@ -54,7 +42,7 @@ namespace krys::boo::css::tests
 
   TEST_CASE_METHOD(ValueFixture, "GridAutoRepeatValue visits its items", "[CSS][Values][GridAutoRepeatValue]")
   {
-    auto value = GridAutoRepeatValue::Create(ValueId::AutoFill, {Names({u8"a"}), Px(100.0)});
+    auto value = GridAutoRepeatValue::Create(ValueId::AutoFill, {LineNames({u8"a"}), Px(100.0)});
     auto children = Children(*value);
     REQUIRE(children.size() == 2uz);
     CHECK(children[0uz] == value->Item(0u));
