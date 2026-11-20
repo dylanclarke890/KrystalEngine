@@ -25,10 +25,10 @@
 
 #pragma once
 
+#include "Krystal.Booey/DOM/IntersectionObservers/IntersectionObserverCallback.hpp"
+#include "Krystal.Booey/DOM/IntersectionObservers/IntersectionObserverMarginBox.hpp"
 #include "Krystal.Booey/DOM/Types/DOMString.hpp"
 #include "Krystal.Booey/DOM/Types/ExceptionOr.hpp"
-#include "Krystal.Booey/Observers/IntersectionObserver/IntersectionObserverCallback.hpp"
-#include "Krystal.Booey/Observers/IntersectionObserver/IntersectionObserverMarginBox.hpp"
 #include "Krystal.Core/CanMakeWeakPtr.hpp"
 #include "Krystal.Core/Geometry/Rect.hpp"
 #include "Krystal.Core/Macros.hpp"

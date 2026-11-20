@@ -23,7 +23,7 @@
  * THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-#include "Krystal.Booey/Observers/ResizeObserver/ResizeObservation.hpp"
+#include "Krystal.Booey/DOM/ResizeObservers/ResizeObservation.hpp"
 #include "Krystal.Booey/DOM/Nodes/Document.hpp"
 #include "Krystal.Booey/DOM/Nodes/Element.hpp"
 #include "Krystal.Booey/Rendering/RenderBox.hpp"

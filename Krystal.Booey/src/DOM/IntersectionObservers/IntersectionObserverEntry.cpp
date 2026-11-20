@@ -23,7 +23,7 @@
  * THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-#include "Krystal.Booey/Observers/IntersectionObserver/IntersectionObserverEntry.hpp"
+#include "Krystal.Booey/DOM/IntersectionObservers/IntersectionObserverEntry.hpp"
 
 namespace krys::boo
 {

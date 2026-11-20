@@ -1137,6 +1137,10 @@ set(KRYSTAL_BOOEY_DOM_HEADERS
   include/Krystal.Booey/DOM/Internals/QualifiedNameCache.hpp
   include/Krystal.Booey/DOM/Internals/UserActionElementSet.hpp
   include/Krystal.Booey/DOM/Internals/VisibilityChangeClient.hpp
+  include/Krystal.Booey/DOM/IntersectionObservers/IntersectionObserver.hpp
+  include/Krystal.Booey/DOM/IntersectionObservers/IntersectionObserverCallback.hpp
+  include/Krystal.Booey/DOM/IntersectionObservers/IntersectionObserverEntry.hpp
+  include/Krystal.Booey/DOM/IntersectionObservers/IntersectionObserverMarginBox.hpp
   include/Krystal.Booey/DOM/Iterators/ComposedTreeAncestorIterator.hpp
   include/Krystal.Booey/DOM/Iterators/ComposedTreeIterator.hpp
   include/Krystal.Booey/DOM/Iterators/ElementAndTextDescendantIterator.hpp
@@ -1188,6 +1192,13 @@ set(KRYSTAL_BOOEY_DOM_HEADERS
   include/Krystal.Booey/DOM/Ranges/Range.hpp
   include/Krystal.Booey/DOM/Ranges/SimpleRange.hpp
   include/Krystal.Booey/DOM/Ranges/StaticRange.hpp
+  include/Krystal.Booey/DOM/ResizeObservers/ResizeObservation.hpp
+  include/Krystal.Booey/DOM/ResizeObservers/ResizeObserver.hpp
+  include/Krystal.Booey/DOM/ResizeObservers/ResizeObserverBoxOptions.hpp
+  include/Krystal.Booey/DOM/ResizeObservers/ResizeObserverCallback.hpp
+  include/Krystal.Booey/DOM/ResizeObservers/ResizeObserverEntry.hpp
+  include/Krystal.Booey/DOM/ResizeObservers/ResizeObserverOptions.hpp
+  include/Krystal.Booey/DOM/ResizeObservers/ResizeObserverSize.hpp
   include/Krystal.Booey/DOM/Scheduling/DocumentTimer.hpp
   include/Krystal.Booey/DOM/Scheduling/ScriptedAnimationController.hpp
   include/Krystal.Booey/DOM/Traversal/NodeFilter.hpp
@@ -1280,6 +1291,8 @@ set(KRYSTAL_BOOEY_DOM_SOURCES
   src/DOM/Internals/PopoverData.cpp
   src/DOM/Internals/QualifiedNameCache.cpp
   src/DOM/Internals/UserActionElementSet.cpp
+  src/DOM/IntersectionObservers/IntersectionObserver.cpp
+  src/DOM/IntersectionObservers/IntersectionObserverEntry.cpp
   src/DOM/Iterators/ComposedTreeIterator.cpp
   src/DOM/Mixins/ChildNode.cpp
   src/DOM/Mixins/DocumentOrShadowRoot.cpp
@@ -1318,6 +1331,8 @@ set(KRYSTAL_BOOEY_DOM_SOURCES
   src/DOM/Ranges/Range.cpp
   src/DOM/Ranges/SimpleRange.cpp
   src/DOM/Ranges/StaticRange.cpp
+  src/DOM/ResizeObservers/ResizeObservation.cpp
+  src/DOM/ResizeObservers/ResizeObserver.cpp
   src/DOM/Scheduling/DocumentTimer.cpp
   src/DOM/Scheduling/ScriptedAnimationController.cpp
   src/DOM/Traversal/NodeIterator.cpp
@@ -2524,27 +2539,6 @@ set(KRYSTAL_BOOEY_MATHML_SOURCES
   src/MathML/Elements/MathMLSpaceElement.cpp
   src/MathML/Elements/MathMLTokenElement.cpp
   src/MathML/Elements/MathMLUnderOverElement.cpp
-)
-
-set(KRYSTAL_BOOEY_OBSERVERS_HEADERS
-  include/Krystal.Booey/Observers/IntersectionObserver/IntersectionObserver.hpp
-  include/Krystal.Booey/Observers/IntersectionObserver/IntersectionObserverCallback.hpp
-  include/Krystal.Booey/Observers/IntersectionObserver/IntersectionObserverEntry.hpp
-  include/Krystal.Booey/Observers/IntersectionObserver/IntersectionObserverMarginBox.hpp
-  include/Krystal.Booey/Observers/ResizeObserver/ResizeObservation.hpp
-  include/Krystal.Booey/Observers/ResizeObserver/ResizeObserver.hpp
-  include/Krystal.Booey/Observers/ResizeObserver/ResizeObserverBoxOptions.hpp
-  include/Krystal.Booey/Observers/ResizeObserver/ResizeObserverCallback.hpp
-  include/Krystal.Booey/Observers/ResizeObserver/ResizeObserverEntry.hpp
-  include/Krystal.Booey/Observers/ResizeObserver/ResizeObserverOptions.hpp
-  include/Krystal.Booey/Observers/ResizeObserver/ResizeObserverSize.hpp
-)
-
-set(KRYSTAL_BOOEY_OBSERVERS_SOURCES
-  src/Observers/IntersectionObserver/IntersectionObserver.cpp
-  src/Observers/IntersectionObserver/IntersectionObserverEntry.cpp
-  src/Observers/ResizeObserver/ResizeObservation.cpp
-  src/Observers/ResizeObserver/ResizeObserver.cpp
 )
 
 set(KRYSTAL_BOOEY_PAGE_HEADERS
@@ -4282,7 +4276,6 @@ target_sources(Krystal.Booey
       ${KRYSTAL_BOOEY_LAYOUT_HEADERS}
       ${KRYSTAL_BOOEY_LOADER_HEADERS}
       ${KRYSTAL_BOOEY_MATHML_HEADERS}
-      ${KRYSTAL_BOOEY_OBSERVERS_HEADERS}
       ${KRYSTAL_BOOEY_PAGE_HEADERS}
       ${KRYSTAL_BOOEY_PLATFORM_HEADERS}
       ${KRYSTAL_BOOEY_RENDERING_HEADERS}
@@ -4307,7 +4300,6 @@ target_sources(Krystal.Booey
     ${KRYSTAL_BOOEY_LAYOUT_SOURCES}
     ${KRYSTAL_BOOEY_LOADER_SOURCES}
     ${KRYSTAL_BOOEY_MATHML_SOURCES}
-    ${KRYSTAL_BOOEY_OBSERVERS_SOURCES}
     ${KRYSTAL_BOOEY_PAGE_SOURCES}
     ${KRYSTAL_BOOEY_PLATFORM_SOURCES}
     ${KRYSTAL_BOOEY_RENDERING_SOURCES}

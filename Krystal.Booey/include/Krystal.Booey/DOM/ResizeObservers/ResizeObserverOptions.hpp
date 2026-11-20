@@ -1,6 +1,6 @@
 ﻿#pragma once
 
-#include "Krystal.Booey/Observers/ResizeObserver/ResizeObserverBoxOptions.hpp"
+#include "Krystal.Booey/DOM/ResizeObservers/ResizeObserverBoxOptions.hpp"
 
 namespace krys::boo
 {

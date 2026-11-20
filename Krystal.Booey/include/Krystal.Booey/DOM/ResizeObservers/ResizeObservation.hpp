@@ -25,9 +25,9 @@
 
 #pragma once
 
+#include "Krystal.Booey/DOM/ResizeObservers/ResizeObserverBoxOptions.hpp"
 #include "Krystal.Booey/Graphics/Geometry/LayoutPoint.hpp"
 #include "Krystal.Booey/Graphics/Geometry/LayoutSize.hpp"
-#include "Krystal.Booey/Observers/ResizeObserver/ResizeObserverBoxOptions.hpp"
 #include "Krystal.Core/Geometry/Rect.hpp"
 #include "Krystal.Core/Geometry/Size.hpp"
 #include "Krystal.Core/RefCounted.hpp"

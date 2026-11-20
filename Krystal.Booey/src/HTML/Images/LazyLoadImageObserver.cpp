@@ -24,9 +24,9 @@
  */
 
 #include "Krystal.Booey/HTML/Images/LazyLoadImageObserver.hpp"
+#include "Krystal.Booey/DOM/IntersectionObservers/IntersectionObserverEntry.hpp"
 #include "Krystal.Booey/DOM/Nodes/Document.hpp"
 #include "Krystal.Booey/HTML/Elements/HTMLImageElement.hpp"
-#include "Krystal.Booey/Observers/IntersectionObserver/IntersectionObserverEntry.hpp"
 
 namespace krys::boo::html
 {

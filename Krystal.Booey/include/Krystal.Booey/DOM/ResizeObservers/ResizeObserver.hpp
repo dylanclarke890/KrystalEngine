@@ -25,9 +25,9 @@
 
 #pragma once
 
-#include "Krystal.Booey/Observers/ResizeObserver/ResizeObservation.hpp"
-#include "Krystal.Booey/Observers/ResizeObserver/ResizeObserverCallback.hpp"
-#include "Krystal.Booey/Observers/ResizeObserver/ResizeObserverOptions.hpp"
+#include "Krystal.Booey/DOM/ResizeObservers/ResizeObservation.hpp"
+#include "Krystal.Booey/DOM/ResizeObservers/ResizeObserverCallback.hpp"
+#include "Krystal.Booey/DOM/ResizeObservers/ResizeObserverOptions.hpp"
 #include "Krystal.Core/CanMakeWeakPtr.hpp"
 #include "Krystal.Core/Macros.hpp"
 #include "Krystal.Core/RefCounted.hpp"

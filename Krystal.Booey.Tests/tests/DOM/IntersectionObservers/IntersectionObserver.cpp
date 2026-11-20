@@ -1,8 +1,8 @@
-﻿#include "Krystal.Booey/Observers/IntersectionObserver/IntersectionObserver.hpp"
+﻿#include "Krystal.Booey/DOM/IntersectionObservers/IntersectionObserver.hpp"
 #include "catch2/catch_test_macros.hpp"
 #include "Krystal.Booey.Tests/Loader/NavigationTestUtils.hpp"
+#include "Krystal.Booey/DOM/IntersectionObservers/IntersectionObserverEntry.hpp"
 #include "Krystal.Booey/DOM/Nodes/Document.hpp"
-#include "Krystal.Booey/Observers/IntersectionObserver/IntersectionObserverEntry.hpp"
 #include "Krystal.Booey/Page/LocalDOMWindow.hpp"
 #include "Krystal.Booey/Page/Page.hpp"
 #include <cmath>

@@ -24,10 +24,10 @@
  * THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-#include "Krystal.Booey/Observers/ResizeObserver/ResizeObserver.hpp"
+#include "Krystal.Booey/DOM/ResizeObservers/ResizeObserver.hpp"
 #include "Krystal.Booey/DOM/Nodes/Document.hpp"
 #include "Krystal.Booey/DOM/Nodes/Element.hpp"
-#include "Krystal.Booey/Observers/ResizeObserver/ResizeObserverEntry.hpp"
+#include "Krystal.Booey/DOM/ResizeObservers/ResizeObserverEntry.hpp"
 #include <algorithm>
 
 namespace krys::boo
