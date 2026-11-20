@@ -255,7 +255,7 @@ namespace krys::boo::style
     return GetFontDescription().GetTextSpacingTrim();
   }
 
-  inline WebkitLocale ComputedStyleProperties::GetLocale() const noexcept
+  inline WebkitLocale ComputedStyleProperties::Locale() const noexcept
   {
     return GetFontDescription().SpecifiedLocale();
   }
