@@ -37,10 +37,10 @@ namespace krys::boo
     auto currentTime = Now();
     auto caretBlinkInterval = RenderTheme::Singleton().CaretBlinkInterval();
 
-    auto suspended = !caretBlinkInterval.has_value();
-    SetBlinkingSuspended(suspended);
+    SetBlinkingSuspended(!caretBlinkInterval.has_value());
 
-    if (suspended)
+    // The frame preferring a caret that doesn't blink suspends it too, with the theme's interval.
+    if (!caretBlinkInterval.has_value() || IsBlinkingSuspended())
     {
       // Ensure the caret is always visible when blinking is suspended.
       if (_presentationProperties.Blink == PresentationProperties::BlinkState::Off)
