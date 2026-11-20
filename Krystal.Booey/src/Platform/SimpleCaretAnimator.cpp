@@ -37,9 +37,10 @@ namespace krys::boo
     auto currentTime = Now();
     auto caretBlinkInterval = RenderTheme::Singleton().CaretBlinkInterval();
 
-    SetBlinkingSuspended(!caretBlinkInterval);
+    auto suspended = !caretBlinkInterval.has_value();
+    SetBlinkingSuspended(suspended);
 
-    if (IsBlinkingSuspended())
+    if (suspended)
     {
       // Ensure the caret is always visible when blinking is suspended.
       if (_presentationProperties.Blink == PresentationProperties::BlinkState::Off)
@@ -47,11 +48,10 @@ namespace krys::boo
         SetBlinkState(PresentationProperties::BlinkState::On);
         _lastTimeCaretPaintWasToggled = currentTime;
       }
+
       _blinkTimer.StartOneShot(caretBlinkInterval.value_or(MonotonicTime::duration {}));
       return;
     }
-
-    krys_debug_assert(caretBlinkInterval.has_value());
 
     if (currentTime - _lastTimeCaretPaintWasToggled >= *caretBlinkInterval)
     {
