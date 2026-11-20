@@ -82,12 +82,12 @@ namespace krys::boo::tests
       }
     };
 
-    /// @brief A chrome client counting the reports of a focused select's options changing.
-    struct SelectChromeClient final : ChromeClient
+    /// @brief A Booey client counting the reports of a focused select's options changing.
+    struct SelectBooeyClient final : BooeyClient
     {
       int32 *OptionChanges {nullptr};
 
-      explicit SelectChromeClient(int32 &optionChanges) noexcept : OptionChanges(&optionChanges)
+      explicit SelectBooeyClient(int32 &optionChanges) noexcept : OptionChanges(&optionChanges)
       {
       }
 
@@ -103,12 +103,12 @@ namespace krys::boo::tests
   }
 
   TEST_CASE_METHOD(css::tests::ValueFixture,
-                   "HTMLSelectElement: the chrome client hears of a focused select's options changing",
+                   "HTMLSelectElement: the Booey client hears of a focused select's options changing",
                    "[HTML][HTMLSelectElement]")
   {
     int32 optionChanges = 0;
     EditorFixture fixture(u8"<select id=s><option>a</select><select id=other><option>b</select>",
-                          CreateUnique<SelectChromeClient>(optionChanges));
+                          CreateUnique<SelectBooeyClient>(optionChanges));
     auto &select = SelectById(fixture, u8"s");
     auto addOption = [&]
     {

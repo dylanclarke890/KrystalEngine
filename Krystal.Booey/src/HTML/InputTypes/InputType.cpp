@@ -61,7 +61,7 @@
 #include "Krystal.Booey/HTML/Shadow/TextControlInnerElements.hpp"
 #include "Krystal.Booey/HTML/Window.hpp"
 #include "Krystal.Booey/Infra/StringAlgorithms.hpp"
-#include "Krystal.Booey/Page/Clients/ChromeClient.hpp"
+#include "Krystal.Booey/Page/Clients/BooeyClient.hpp"
 #include "Krystal.Booey/Page/Frame.hpp"
 #include "Krystal.Booey/Platform/LocalizedStrings.hpp"
 #include "Krystal.Booey/Rendering/RenderElement.hpp"
@@ -873,14 +873,14 @@ namespace krys::boo::html
     return DOMString(proposedValue);
   }
 
-  ChromeClient *InputType::GetChromeClient() const noexcept
+  BooeyClient *InputType::GetBooeyClient() const noexcept
   {
     if (!Element())
     {
       return nullptr;
     }
     auto *frame = Element()->NodeDocument().Frame();
-    return frame ? &frame->GetChromeClient() : nullptr;
+    return frame ? &frame->GetBooeyClient() : nullptr;
   }
 
   bool InputType::HasTransientActivation() const noexcept

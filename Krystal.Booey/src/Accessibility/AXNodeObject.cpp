@@ -2304,7 +2304,7 @@ namespace krys::boo
     auto *element = DynamicDowncast<Element>(GetNode());
     auto *focusedElement = document->FocusedElement();
     // Focusing the focused element does nothing, so it's unfocused first (focus may have gone to the host's
-    // chrome and come back).
+    // UI and come back).
     if (focusedElement && (!focused || !element || focusedElement == element))
     {
       html::FocusAlgorithms::UnfocusingSteps(*focusedElement);

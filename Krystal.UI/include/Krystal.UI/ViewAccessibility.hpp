@@ -74,7 +74,7 @@ namespace krys::ui
       return _window;
     }
 
-    // The page's side, from the view's chrome client.
+    // The page's side, from the view's Booey client.
 
     void NotificationPosted(boo::AXObject &object, boo::AXNotification notification) noexcept;
 

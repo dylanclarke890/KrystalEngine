@@ -54,7 +54,7 @@
 #include "Krystal.Booey/Loader/Cache/CachePolicy.hpp"
 #include "Krystal.Booey/Loader/FrameLoader.hpp"
 #include "Krystal.Booey/Loader/FrameLoaderClient.hpp"
-#include "Krystal.Booey/Page/Clients/ChromeClient.hpp"
+#include "Krystal.Booey/Page/Clients/BooeyClient.hpp"
 #include "Krystal.Booey/Page/Clients/DragClient.hpp"
 #include "Krystal.Booey/Page/Clients/EditorClient.hpp"
 #include "Krystal.Booey/Page/FrameView.hpp"
@@ -103,14 +103,14 @@ namespace krys::boo
   /// environment. Something that changes what the frame shows schedules a rendering update; the host runs it
   /// at its next rendering opportunity.
   /// @note FIXME: Only what layout, style and navigation within a document need: no frame tree, scripting or
-  /// printing. The rest of WebKit's page: the focus controller, the rest of the chrome, page overlays.
+  /// printing. The rest of WebKit's page: the focus controller, the rest of WebKit's `Chrome`, page overlays.
   /// @see https://html.spec.whatwg.org/#update-the-rendering
   class Frame final : public RefCounted<Frame>, public CanMakeWeakPtr<Frame>
   {
     KRYS_NON_COPY_MOVABLE(Frame);
 
   private:
-    UniquePtr<ChromeClient> _chromeClient;
+    UniquePtr<BooeyClient> _booeyClient;
     UniquePtr<EditorClient> _editorClient;
     UniquePtr<PointerCaptureController> _pointerCaptureController;
     UniquePtr<PointerLockController> _pointerLockController;
@@ -147,19 +147,19 @@ namespace krys::boo
     CachePolicy _subresourceCachePolicy {CachePolicy::Use};
     bool _documentIsBeingReplaced {false};
 
-    Frame(UniquePtr<ChromeClient> chromeClient, UniquePtr<EditorClient> editorClient,
+    Frame(UniquePtr<BooeyClient> booeyClient, UniquePtr<EditorClient> editorClient,
           UniquePtr<FrameLoaderClient> loaderClient, UniquePtr<DragClient> dragClient) noexcept;
 
   public:
     ~Frame() noexcept;
 
     /// @brief A frame, which has no view or document yet.
-    /// @param chromeClient The host's side of the frame; without one, the frame has an empty chrome client.
+    /// @param booeyClient The host's side of the frame; without one, the frame has an empty Booey client.
     /// @param editorClient The host's side of the frame's editor; without one, the frame has an empty editor
     /// client.
     /// @param loaderClient The host's side of the frame's loader; without one, the frame ignores navigations.
     /// @param dragClient The host's side of drags in the frame; without one, no drag starts in the frame.
-    KRYS_NODISCARD static Ref<Frame> Create(UniquePtr<ChromeClient> chromeClient = nullptr,
+    KRYS_NODISCARD static Ref<Frame> Create(UniquePtr<BooeyClient> booeyClient = nullptr,
                                             UniquePtr<EditorClient> editorClient = nullptr,
                                             UniquePtr<FrameLoaderClient> loaderClient = nullptr,
                                             UniquePtr<DragClient> dragClient = nullptr) noexcept;
@@ -168,9 +168,9 @@ namespace krys::boo
     /// scrollbars' style).
     static void ForEachFrame(const Func<void(Frame &)> &function) noexcept;
 
-    KRYS_NODISCARD ChromeClient &GetChromeClient() const noexcept
+    KRYS_NODISCARD BooeyClient &GetBooeyClient() const noexcept
     {
-      return *_chromeClient;
+      return *_booeyClient;
     }
 
     /// @brief Tells @p observer before each popup the frame opens, until it unregisters.
@@ -387,7 +387,7 @@ namespace krys::boo
     /// and evaluates its media queries at the next rendering update.
     void UpdateStyleAfterChangeInEnvironment() noexcept;
 
-    /// @brief Restyles the frame's document after what the chrome client says of the screen (its colours,
+    /// @brief Restyles the frame's document after what the Booey client says of the screen (its colours,
     /// depth and the like) changed, so its media queries are evaluated again.
     void ScreenPropertiesDidChange() noexcept;
 

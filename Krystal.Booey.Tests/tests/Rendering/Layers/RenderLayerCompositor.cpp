@@ -10,7 +10,7 @@
 #include "Krystal.Booey/HTML/Canvas/EngineTextureRenderingContext.hpp"
 #include "Krystal.Booey/HTML/Elements/HTMLCanvasElement.hpp"
 #include "Krystal.Booey/HTML/EventLoop/EventLoop.hpp"
-#include "Krystal.Booey/Page/Clients/ChromeClient.hpp"
+#include "Krystal.Booey/Page/Clients/BooeyClient.hpp"
 #include "Krystal.Booey/Page/Frame.hpp"
 #include "Krystal.Booey/Page/FrameView.hpp"
 #include "Krystal.Booey/Page/Settings.hpp"
@@ -132,7 +132,7 @@ namespace krys::boo::tests
       }
     };
 
-    class CompositingChromeClient final : public ChromeClient
+    class CompositingBooeyClient final : public BooeyClient
     {
     public:
       CompositingTestFactory Factory;
@@ -152,15 +152,15 @@ namespace krys::boo::tests
     /// @brief A document in a 200x100 view of a page whose host composites it.
     struct CompositingFixture : style::tests::ResolverFixture
     {
-      CompositingChromeClient *Chrome {nullptr};
+      CompositingBooeyClient *Client {nullptr};
 
       explicit CompositingFixture(utf8_stringview markup) noexcept
           : ResolverFixture(u8"<!DOCTYPE html><style>body{margin:0}</style>" + utf8_string(markup),
                             style::tests::WithView::No)
       {
-        auto chrome = CreateUnique<CompositingChromeClient>();
-        Chrome = chrome.get();
-        Frame = boo::Frame::Create(krys::move(chrome));
+        auto client = CreateUnique<CompositingBooeyClient>();
+        Client = client.get();
+        Frame = boo::Frame::Create(krys::move(client));
         Frame->CreateView({200, 100});
         Frame->SetDocument(ShareRefPtr<boo::Document>(Document.get()));
         Frame->UpdateRendering();
@@ -242,7 +242,7 @@ namespace krys::boo::tests
   {
     CompositingFixture fixture(u8"<div style='width:50px;height:50px;background:green'></div>");
     CHECK(fixture.Compositor().UsesCompositing());
-    CHECK(fixture.Chrome->RootLayer);
+    CHECK(fixture.Client->RootLayer);
     CHECK(fixture.Frame->View()->GetRenderView()->Layer()->IsComposited());
     CHECK(fixture.LayerTree()
           == u8"(GraphicsLayer\n  (anchor 0.00 0.00)\n  (bounds 200.00 100.00)\n  (children 1\n    "

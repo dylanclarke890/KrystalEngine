@@ -138,16 +138,16 @@ namespace krys::ui
     KRYS_NON_COPY_MOVABLE(View);
 
   public:
-    class ChromeClient;
+    class BooeyClient;
     class DragClient;
     class FrameLoaderClient;
 
   private:
     /// @brief The page's editor client, which the page owns.
     EditorClient *_editorClient {nullptr};
-    /// @brief The page's chrome client, which the page owns: it hands Booey the graphics layers and keeps the
+    /// @brief The page's Booey client, which the page owns: it hands Booey the graphics layers and keeps the
     /// root of the page's layer tree.
-    ChromeClient *_chromeClient {nullptr};
+    BooeyClient *_booeyClient {nullptr};
     /// @brief The main frame's loader client, which the frame owns: it asks the navigation handler.
     FrameLoaderClient *_frameLoaderClient {nullptr};
     /// @brief The page's drag client, which the page owns: it starts the view's drag.

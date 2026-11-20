@@ -8,7 +8,7 @@
 #include "Krystal.Booey/HTML/Elements/HTMLInputElement.hpp"
 #include "Krystal.Booey/HTML/InputTypes/ColorInputType.hpp"
 #include "Krystal.Booey/HTML/Window.hpp"
-#include "Krystal.Booey/Page/Clients/ChromeClient.hpp"
+#include "Krystal.Booey/Page/Clients/BooeyClient.hpp"
 #include "Krystal.Booey/Platform/Choosers/ColorChooser.hpp"
 #include "Krystal.Booey/Platform/Choosers/ColorChooserClient.hpp"
 #include "Krystal.Core/Utils/Move.hpp"
@@ -70,8 +70,8 @@ namespace krys::boo::tests
       }
     };
 
-    /// @brief A chrome client whose colour choosers record what they're told.
-    struct ColorChromeClient final : ChromeClient
+    /// @brief A Booey client whose colour choosers record what they're told.
+    struct ColorBooeyClient final : BooeyClient
     {
       RefPtr<RecordingColorChooser> Chooser;
 
@@ -165,9 +165,9 @@ namespace krys::boo::tests
 
   TEST_CASE_METHOD(css::tests::ValueFixture, "ColorInputType: the colour chooser", "[HTML][ColorInputType]")
   {
-    auto chromeClient = CreateUnique<ColorChromeClient>();
-    auto *client = chromeClient.get();
-    EditorFixture fixture(u8"<input type=color id=c value=#336699>", krys::move(chromeClient));
+    auto booeyClient = CreateUnique<ColorBooeyClient>();
+    auto *client = booeyClient.get();
+    EditorFixture fixture(u8"<input type=color id=c value=#336699>", krys::move(booeyClient));
     auto &input = InputById(fixture, u8"c");
     auto inputs = fixture.Listen(u8"input");
     auto changes = fixture.Listen(u8"change");

@@ -137,7 +137,7 @@ namespace krys::boo
     enum RootLayerAttachment : uint8
     {
       RootLayerUnattached,
-      RootLayerAttachedViaChromeClient,
+      RootLayerAttachedViaBooeyClient,
     };
 
     class BackingSharingState;

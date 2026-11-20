@@ -56,7 +56,7 @@
 #include "Krystal.Booey/HTML/MicroParsers/Numbers.hpp"
 #include "Krystal.Booey/HTML/Window.hpp"
 #include "Krystal.Booey/Input/EventHandler.hpp"
-#include "Krystal.Booey/Page/Clients/ChromeClient.hpp"
+#include "Krystal.Booey/Page/Clients/BooeyClient.hpp"
 #include "Krystal.Booey/Page/Frame.hpp"
 #include "Krystal.Booey/Page/Settings.hpp"
 #include "Krystal.Booey/Rendering/FormControls/RenderListBox.hpp"
@@ -1404,7 +1404,7 @@ namespace krys::boo
     {
       if (auto *frame = document.Frame())
       {
-        frame->GetChromeClient().FocusedSelectElementDidChangeOptions(*this);
+        frame->GetBooeyClient().FocusedSelectElementDidChangeOptions(*this);
       }
     }
   }

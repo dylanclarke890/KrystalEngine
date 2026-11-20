@@ -996,7 +996,7 @@ namespace krys::boo
 
     KRYS_NODISCARD RectI ContentsToWindow(const RectI &rect) const noexcept;
 
-    /// @brief Where @p rect, in the contents' (absolute) coordinates, is on the screen, as the chrome client
+    /// @brief Where @p rect, in the contents' (absolute) coordinates, is on the screen, as the Booey client
     /// maps it; empty without a page.
     KRYS_NODISCARD RectI ContentsToScreen(const RectI &rect) const noexcept;
 

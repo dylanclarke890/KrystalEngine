@@ -65,7 +65,7 @@
 #include "Krystal.Booey/Loader/Cache/CachedImage.hpp"
 #include "Krystal.Booey/Loader/Cache/CachedResourceLoader.hpp"
 #include "Krystal.Booey/Loader/FrameLoader.hpp"
-#include "Krystal.Booey/Page/Clients/ChromeClient.hpp"
+#include "Krystal.Booey/Page/Clients/BooeyClient.hpp"
 #include "Krystal.Booey/Page/Drag/DragController.hpp"
 #include "Krystal.Booey/Page/FrameView.hpp"
 #include "Krystal.Booey/Page/PopupOpeningObserver.hpp"
@@ -127,9 +127,9 @@ namespace krys::boo
       RenderingUpdateStep::LayerFlush};
   }
 
-  Frame::Frame(UniquePtr<ChromeClient> chromeClient, UniquePtr<EditorClient> editorClient,
+  Frame::Frame(UniquePtr<BooeyClient> booeyClient, UniquePtr<EditorClient> editorClient,
                UniquePtr<FrameLoaderClient> loaderClient, UniquePtr<DragClient> dragClient) noexcept
-      : _chromeClient(krys::move(chromeClient)), _editorClient(krys::move(editorClient)),
+      : _booeyClient(krys::move(booeyClient)), _editorClient(krys::move(editorClient)),
         _pointerCaptureController(CreateUnique<PointerCaptureController>(*this)),
         _pointerLockController(CreateUnique<PointerLockController>(*this)),
         _scrollLatchingController(CreateUnique<ScrollLatchingController>()),
@@ -141,9 +141,9 @@ namespace krys::boo
         _eventHandler(CreateUnique<EventHandler>(*this)),
         _loader(CreateUnique<FrameLoader>(*this, krys::move(loaderClient)))
   {
-    if (!_chromeClient)
+    if (!_booeyClient)
     {
-      _chromeClient = CreateUnique<EmptyChromeClient>();
+      _booeyClient = CreateUnique<EmptyBooeyClient>();
     }
     if (!_editorClient)
     {
@@ -161,11 +161,11 @@ namespace krys::boo
     }
   }
 
-  Ref<Frame> Frame::Create(UniquePtr<ChromeClient> chromeClient, UniquePtr<EditorClient> editorClient,
+  Ref<Frame> Frame::Create(UniquePtr<BooeyClient> booeyClient, UniquePtr<EditorClient> editorClient,
                            UniquePtr<FrameLoaderClient> loaderClient,
                            UniquePtr<DragClient> dragClient) noexcept
   {
-    return AdoptRef(*new Frame(krys::move(chromeClient), krys::move(editorClient), krys::move(loaderClient),
+    return AdoptRef(*new Frame(krys::move(booeyClient), krys::move(editorClient), krys::move(loaderClient),
                                krys::move(dragClient)));
   }
 
@@ -399,7 +399,7 @@ namespace krys::boo
   {
     if (!_renderingUpdateDepth)
     {
-      if (_chromeClient->ScheduleRenderingUpdate())
+      if (_booeyClient->ScheduleRenderingUpdate())
       {
         return;
       }
@@ -666,7 +666,7 @@ namespace krys::boo
     if (!_unfulfilledRequestedSteps.IsEmpty() || _skippedRenderBlockedDocument)
     {
       _unfulfilledRequestedSteps = {};
-      // As any request between updates is, so the chrome client hears of it.
+      // As any request between updates is, so the Booey client hears of it.
       ScheduleRenderingUpdate();
     }
   }

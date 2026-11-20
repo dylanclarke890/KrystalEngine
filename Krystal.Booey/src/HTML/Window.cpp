@@ -37,7 +37,7 @@
 #include "Krystal.Booey/HTML/CustomElement/CustomElementRegistry.hpp"
 #include "Krystal.Booey/HTML/Elements/HTMLElement.hpp"
 #include "Krystal.Booey/HTML/EventLoop/EventLoop.hpp"
-#include "Krystal.Booey/Page/Clients/ChromeClient.hpp"
+#include "Krystal.Booey/Page/Clients/BooeyClient.hpp"
 #include "Krystal.Booey/Page/DOMSelection.hpp"
 #include "Krystal.Booey/Page/Frame.hpp"
 #include "Krystal.Booey/Page/FrameView.hpp"
@@ -138,7 +138,7 @@ namespace krys::boo
     // to indicate to the user that the page is attempting to gain focus: the host decides whether to bring
     // its window to the front. The focusing steps would focus the document's viewport, but the focused
     // element is kept, as browsers do.
-    frame->GetChromeClient().Focus();
+    frame->GetBooeyClient().Focus();
   }
 
   bool boo::Window::IsNamedObject(const Element &element, DOMStringView name) noexcept

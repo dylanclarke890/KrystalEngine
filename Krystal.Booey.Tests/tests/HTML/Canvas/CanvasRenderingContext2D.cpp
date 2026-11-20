@@ -580,8 +580,8 @@ namespace krys::boo::tests
     {
       style::tests::ResolverFixture fixture(u8"<!DOCTYPE html><canvas id=canvas width=20 height=10></canvas>",
                                             style::tests::WithView::No);
-      auto frame = boo::Frame::Create(CreateUnique<AcceleratingChromeClient>());
-      auto &client = static_cast<AcceleratingChromeClient &>(frame->GetChromeClient());
+      auto frame = boo::Frame::Create(CreateUnique<AcceleratingBooeyClient>());
+      auto &client = static_cast<AcceleratingBooeyClient &>(frame->GetBooeyClient());
       fixture.Frame = ShareRefPtr(&*frame);
       fixture.Frame->CreateView({200, 100});
       fixture.Frame->SetDocument(ShareRefPtr<boo::Document>(fixture.Document.get()));

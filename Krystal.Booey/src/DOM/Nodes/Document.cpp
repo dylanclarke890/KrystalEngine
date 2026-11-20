@@ -142,7 +142,7 @@
 #include "Krystal.Booey/Loader/Cache/CachedResourceLoader.hpp"
 #include "Krystal.Booey/Loader/DocumentLoader.hpp"
 #include "Krystal.Booey/Loader/FrameLoader.hpp"
-#include "Krystal.Booey/Page/Clients/ChromeClient.hpp"
+#include "Krystal.Booey/Page/Clients/BooeyClient.hpp"
 #include "Krystal.Booey/Page/Clients/EditorClient.hpp"
 #include "Krystal.Booey/Page/DOMSelection.hpp"
 #include "Krystal.Booey/Page/Frame.hpp"
@@ -2053,7 +2053,7 @@ namespace krys::boo
   GraphicsClient *Document::GetGraphicsClient() const noexcept
   {
     auto *frame = Frame();
-    return frame ? &frame->GetChromeClient() : nullptr;
+    return frame ? &frame->GetBooeyClient() : nullptr;
   }
 
   html::DocumentVisibilityState Document::VisibilityState() const noexcept

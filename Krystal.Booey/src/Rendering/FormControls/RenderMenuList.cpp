@@ -32,7 +32,7 @@
 #include "Krystal.Booey/HTML/Elements/HTMLSelectElement.hpp"
 #include "Krystal.Booey/Infra/StringAlgorithms.hpp"
 #include "Krystal.Booey/Layout/Integration/Inline/LayoutIntegrationLineLayout.hpp"
-#include "Krystal.Booey/Page/Clients/ChromeClient.hpp"
+#include "Krystal.Booey/Page/Clients/BooeyClient.hpp"
 #include "Krystal.Booey/Page/Frame.hpp"
 #include "Krystal.Booey/Platform/Choosers/PopupMenu.hpp"
 #include "Krystal.Booey/Rendering/RenderBlockFlow.hpp"
@@ -112,9 +112,9 @@ namespace krys::boo
     }
     innerStyle.SetPaddingBox(krys::move(paddingBox));
 
-    // A document without a page behaves as with the default chrome client.
+    // A document without a page behaves as with the default Booey client.
     auto *frame = GetDocument().Frame();
-    if (frame && frame->GetChromeClient().SelectItemWritingDirectionIsNatural())
+    if (frame && frame->GetBooeyClient().SelectItemWritingDirectionIsNatural())
     {
       // Items in the popup will not respect the CSS text-align and direction properties, so we must adjust
       // our own style to match.
@@ -127,7 +127,7 @@ namespace krys::boo
       (void)innerStyle.SetDirection(direction);
     }
     else if (_optionStyle
-             && (!frame || frame->GetChromeClient().SelectItemAlignmentFollowsMenuWritingDirection()))
+             && (!frame || frame->GetBooeyClient().SelectItemAlignmentFollowsMenuWritingDirection()))
     {
       if (_optionStyle->GetWritingMode().BidiDirection() != innerStyle.GetWritingMode().BidiDirection()
           || _optionStyle->GetUnicodeBidi() != innerStyle.GetUnicodeBidi())
@@ -391,7 +391,7 @@ namespace krys::boo
       if (auto *frame = GetDocument().Frame())
       {
         frame->NotifyPopupOpeningObservers();
-        _popup = frame->GetChromeClient().CreatePopupMenu(*this);
+        _popup = frame->GetBooeyClient().CreatePopupMenu(*this);
       }
     }
     if (!_popup)

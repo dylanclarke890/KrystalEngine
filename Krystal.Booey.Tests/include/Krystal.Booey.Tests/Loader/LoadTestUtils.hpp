@@ -8,7 +8,7 @@
 #include "Krystal.Booey/Loader/FrameLoadRequest.hpp"
 #include "Krystal.Booey/Loader/NavigationAction.hpp"
 #include "Krystal.Booey/Loader/SubstituteData.hpp"
-#include "Krystal.Booey/Page/Clients/ChromeClient.hpp"
+#include "Krystal.Booey/Page/Clients/BooeyClient.hpp"
 #include "Krystal.Booey/Page/Frame.hpp"
 #include "Krystal.Core/Types/Func.hpp"
 #include "Krystal.Core/Types/List.hpp"
@@ -107,7 +107,7 @@ namespace krys::boo::tests
     {
       auto client = CreateUnique<LoadRecordingClient>(Events);
       Client = client.get();
-      return boo::Frame::Create(CreateUnique<EmptyChromeClient>(), nullptr, krys::move(client));
+      return boo::Frame::Create(CreateUnique<EmptyBooeyClient>(), nullptr, krys::move(client));
     }
 
     KRYS_NODISCARD boo::Frame &Frame() const noexcept

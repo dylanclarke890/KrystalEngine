@@ -29,7 +29,7 @@
 #include "Krystal.Booey/Graphics/GraphicsContextStateSaver.hpp"
 #include "Krystal.Booey/Graphics/Images/Image.hpp"
 #include "Krystal.Booey/Loader/Cache/CachedImage.hpp"
-#include "Krystal.Booey/Page/Clients/ChromeClient.hpp"
+#include "Krystal.Booey/Page/Clients/BooeyClient.hpp"
 #include "Krystal.Booey/Page/Frame.hpp"
 #include "Krystal.Booey/Rendering/HitTesting/HitTestRequest.hpp"
 #include "Krystal.Booey/Rendering/HitTesting/HitTestResult.hpp"
@@ -71,7 +71,7 @@ namespace krys::boo
 
     if (auto *frame = ImageElement().NodeDocument().Frame())
     {
-      frame->GetChromeClient().DidFinishLoadingImageForSVGImage(ImageElement());
+      frame->GetBooeyClient().DidFinishLoadingImageForSVGImage(ImageElement());
     }
 
     LegacyRenderSVGModelObject::NotifyFinished(newImage);

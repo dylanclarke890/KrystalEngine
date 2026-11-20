@@ -152,7 +152,7 @@ namespace krys::boo
       }
       if (frame)
       {
-        // FIXME: Divided by the chrome client's base viewport layout size scale factor, once it has one.
+        // FIXME: Divided by the Booey client's base viewport layout size scale factor, once it has one.
         scale = frame->PageScaleFactor();
       }
     }

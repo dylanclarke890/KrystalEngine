@@ -10,7 +10,7 @@
 #include "Krystal.Booey/Input/EventHandler.hpp"
 #include "Krystal.Booey/Input/LegacyKeyCodes.hpp"
 #include "Krystal.Booey/Input/PlatformKeyboardEvent.hpp"
-#include "Krystal.Booey/Page/Clients/ChromeClient.hpp"
+#include "Krystal.Booey/Page/Clients/BooeyClient.hpp"
 #include "Krystal.Booey/Page/Settings.hpp"
 #include "Krystal.Booey/Platform/Choosers/DateTimeChooser.hpp"
 #include "Krystal.Booey/Platform/Choosers/DateTimeChooserClient.hpp"
@@ -69,8 +69,8 @@ namespace krys::boo::tests
       }
     };
 
-    /// @brief A chrome client whose date choosers record how they're shown.
-    struct DateChromeClient final : ChromeClient
+    /// @brief A Booey client whose date choosers record how they're shown.
+    struct DateBooeyClient final : BooeyClient
     {
       RefPtr<RecordingDateTimeChooser> Chooser;
 
@@ -90,8 +90,8 @@ namespace krys::boo::tests
     /// language.
     struct DateFixture : EditorFixture
     {
-      explicit DateFixture(UniquePtr<ChromeClient> chromeClient = nullptr) noexcept
-          : EditorFixture(u8"", krys::move(chromeClient))
+      explicit DateFixture(UniquePtr<BooeyClient> booeyClient = nullptr) noexcept
+          : EditorFixture(u8"", krys::move(booeyClient))
       {
         auto settings = Settings::Create();
         settings->LangAttributeAwareFormControlUIEnabled = true;
@@ -445,9 +445,9 @@ namespace krys::boo::tests
   TEST_CASE_METHOD(css::tests::ValueFixture, "BaseDateAndTimeInputType: the date chooser",
                    "[HTML][BaseDateAndTimeInputType]")
   {
-    auto chromeClient = CreateUnique<DateChromeClient>();
-    auto *client = chromeClient.get();
-    DateFixture fixture(krys::move(chromeClient));
+    auto booeyClient = CreateUnique<DateBooeyClient>();
+    auto *client = booeyClient.get();
+    DateFixture fixture(krys::move(booeyClient));
     auto &input =
       fixture.Input(u8"date", u8"en-US", {{u8"value", u8"2026-03-07"}, {u8"min", u8"2026-01-01"}});
     auto inputs = fixture.Listen(u8"input");

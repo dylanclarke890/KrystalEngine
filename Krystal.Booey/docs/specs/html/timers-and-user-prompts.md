@@ -88,7 +88,7 @@ Status: reviewed (2026-11-01)
 #### [8.9.1 Simple dialogs](https://html.spec.whatwg.org/#simple-dialogs)
 
 Status: reviewed (2026-11-01)
-> `Window::Alert`/`Confirm`/`Prompt` ask the host's `ChromeClient`, which may truncate; there's no WebDriver BiDi or sandboxed modals flag (FIXME).
+> `Window::Alert`/`Confirm`/`Prompt` ask the host's `BooeyClient`, which may truncate; there's no WebDriver BiDi or sandboxed modals flag (FIXME).
 <!-- definitions: dom-alert -->
 
 - [x] [Window.alert()](https://html.spec.whatwg.org/#dom-alert-noargs) — The alert() and alert(message) method steps are:

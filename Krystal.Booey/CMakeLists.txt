@@ -2544,7 +2544,7 @@ set(KRYSTAL_BOOEY_MATHML_SOURCES
 )
 
 set(KRYSTAL_BOOEY_PAGE_HEADERS
-  include/Krystal.Booey/Page/Clients/ChromeClient.hpp
+  include/Krystal.Booey/Page/Clients/BooeyClient.hpp
   include/Krystal.Booey/Page/Clients/DragClient.hpp
   include/Krystal.Booey/Page/Clients/EditorClient.hpp
   include/Krystal.Booey/Page/DOMSelection.hpp

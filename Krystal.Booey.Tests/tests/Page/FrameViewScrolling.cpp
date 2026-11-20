@@ -727,7 +727,7 @@ namespace krys::boo::tests
 
     SECTION("the host's preference wins over the page's background")
     {
-      class LightScrollbarsChromeClient final : public ChromeClient
+      class LightScrollbarsBooeyClient final : public BooeyClient
       {
       public:
         void AttachRootGraphicsLayer(boo::Frame &, GraphicsLayer *) noexcept override
@@ -740,8 +740,8 @@ namespace krys::boo::tests
         }
       };
 
-      auto chrome = CreateUnique<LightScrollbarsChromeClient>();
-      auto frame = boo::Frame::Create(krys::move(chrome));
+      auto client = CreateUnique<LightScrollbarsBooeyClient>();
+      auto frame = boo::Frame::Create(krys::move(client));
       PageInFrameFixture fixture(*frame, page(u8"white"));
       (void)fixture.Document->UpdateLayout();
       CHECK(fixture.Frame->View()->GetScrollbarOverlayStyle() == ScrollbarOverlayStyle::Light);

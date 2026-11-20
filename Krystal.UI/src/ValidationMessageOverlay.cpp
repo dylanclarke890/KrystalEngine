@@ -111,7 +111,7 @@ namespace krys::ui
       return;
     }
 
-    // The owner lets go of the bubble, which its chrome client still holds.
+    // The owner lets go of the bubble, which its Booey client still holds.
     Ref<ValidationMessageOverlay> protectedThis = ShareRef(*this);
     _visible = false;
     _anchor = nullptr;

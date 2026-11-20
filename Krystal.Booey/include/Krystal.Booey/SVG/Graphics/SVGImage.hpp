@@ -39,7 +39,7 @@ namespace krys::boo
   class Frame;
   class FrameView;
   class RenderBox;
-  class SVGImageChromeClient;
+  class SVGImageBooeyClient;
   class SVGImageForContainer;
   class SVGSvgElement;
 
@@ -47,7 +47,7 @@ namespace krys::boo
   /// size it's drawn at.
   class SVGImage final : public Image
   {
-    friend class SVGImageChromeClient;
+    friend class SVGImageBooeyClient;
     friend class SVGImageForContainer;
 
   private:

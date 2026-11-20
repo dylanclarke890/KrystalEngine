@@ -85,7 +85,7 @@ Status: reviewed (2026-11-01)
 ##### [8.10.1.4 Custom scheme handlers: the registerProtocolHandler() method](https://html.spec.whatwg.org/#custom-handlers)
 
 Status: reviewed (2026-11-01)
-> `Navigator::RegisterProtocolHandler`/`UnregisterProtocolHandler` pass the normalized parameters to the host's `ChromeClient`, which registers and uses handlers. Available outside secure contexts (see `DIFFERENCES.md`).
+> `Navigator::RegisterProtocolHandler`/`UnregisterProtocolHandler` pass the normalized parameters to the host's `BooeyClient`, which registers and uses handlers. Available outside secure contexts (see `DIFFERENCES.md`).
 <!-- definitions: protocol-handler-registration rph-automation-mode-none rph-automation-mode-auto-accept rph-automation-mode-auto-reject protocol-handler-invocation safelisted-scheme -->
 
 - [x] [NavigatorContentUtils.registerProtocolHandler(scheme, url)](https://html.spec.whatwg.org/#dom-navigator-registerprotocolhandler) — The registerProtocolHandler(scheme, url) method steps are:

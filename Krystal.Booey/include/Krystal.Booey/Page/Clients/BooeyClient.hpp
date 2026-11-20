@@ -55,17 +55,17 @@ namespace krys::boo
   class SVGImageElement;
 
   /// @brief What a page asks of its host: the window's side of the page, and its graphics.
-  // FIXME: The rest of the chrome client: tooltips, cursors, scrolling the host's view, search popups and the
+  // FIXME: The rest of the Booey client: tooltips, cursors, scrolling the host's view, search popups and the
   // other compositing hooks (layer flushes, compositing triggers, display refresh monitors), once there are
   // any.
-  class ChromeClient : public GraphicsClient
+  class BooeyClient : public GraphicsClient
   {
-    KRYS_NON_COPY_MOVABLE(ChromeClient);
+    KRYS_NON_COPY_MOVABLE(BooeyClient);
 
   public:
-    ChromeClient() noexcept = default;
+    BooeyClient() noexcept = default;
 
-    ~ChromeClient() noexcept override = default;
+    ~BooeyClient() noexcept override = default;
 
     /// @brief The page asks to be brought to the front (`window.focus()`); the host decides whether it is.
     virtual void Focus() noexcept
@@ -85,8 +85,8 @@ namespace krys::boo
       return false;
     }
 
-    /// @brief Whether this is the chrome client of an SVG image's page.
-    KRYS_NODISCARD virtual bool IsSVGImageChromeClient() const noexcept
+    /// @brief Whether this is the Booey client of an SVG image's page.
+    KRYS_NODISCARD virtual bool IsSVGImageBooeyClient() const noexcept
     {
       return false;
     }
@@ -376,8 +376,8 @@ namespace krys::boo
     }
   };
 
-  /// @brief The chrome client of a page that has no host.
-  class EmptyChromeClient final : public ChromeClient
+  /// @brief The Booey client of a page that has no host.
+  class EmptyBooeyClient final : public BooeyClient
   {
   public:
     void AttachRootGraphicsLayer(Frame &, GraphicsLayer *) noexcept final

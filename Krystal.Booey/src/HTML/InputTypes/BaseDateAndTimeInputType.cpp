@@ -39,7 +39,7 @@
 #include "Krystal.Booey/HTML/Elements/HTMLInputElement.hpp"
 #include "Krystal.Booey/HTML/Elements/HTMLOptionElement.hpp"
 #include "Krystal.Booey/HTML/InputTypes/BaseClickableWithKeyInputType.hpp"
-#include "Krystal.Booey/Page/Clients/ChromeClient.hpp"
+#include "Krystal.Booey/Page/Clients/BooeyClient.hpp"
 #include "Krystal.Booey/Page/Frame.hpp"
 #include "Krystal.Booey/Page/FrameView.hpp"
 #include "Krystal.Booey/Page/Settings.hpp"
@@ -323,8 +323,8 @@ namespace krys::boo::html
       return;
     }
 
-    auto *chromeClient = GetChromeClient();
-    if (!chromeClient)
+    auto *booeyClient = GetBooeyClient();
+    if (!booeyClient)
     {
       return;
     }
@@ -342,7 +342,7 @@ namespace krys::boo::html
     {
       style::PseudoClassChangeInvalidation styleInvalidation(*Element(), css::SelectorPseudoClass::Open,
                                                              true);
-      _dateTimeChooser = chromeClient->CreateDateTimeChooser(*this);
+      _dateTimeChooser = booeyClient->CreateDateTimeChooser(*this);
     }
     if (RefPtr<DateTimeChooser> dateTimeChooser = _dateTimeChooser)
     {

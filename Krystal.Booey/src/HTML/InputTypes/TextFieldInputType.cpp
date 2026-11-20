@@ -48,7 +48,7 @@
 #include "Krystal.Booey/HTML/Forms/DOMFormData.hpp"
 #include "Krystal.Booey/HTML/Parser/ParserIdioms.hpp"
 #include "Krystal.Booey/HTML/Shadow/TextControlInnerElements.hpp"
-#include "Krystal.Booey/Page/Clients/ChromeClient.hpp"
+#include "Krystal.Booey/Page/Clients/BooeyClient.hpp"
 #include "Krystal.Booey/Page/Frame.hpp"
 #include "Krystal.Booey/Page/FrameView.hpp"
 #include "Krystal.Booey/Rendering/FormControls/RenderTextControlSingleLine.hpp"
@@ -887,7 +887,7 @@ namespace krys::boo::html
     List<DataListSuggestion> suggestions;
     List<DataListSuggestion> matchesContainingValue;
     auto *frame = element->NodeDocument().Frame();
-    bool canShowLabels = frame && frame->GetChromeClient().CanShowDataListSuggestionLabels();
+    bool canShowLabels = frame && frame->GetBooeyClient().CanShowDataListSuggestionLabels();
     if (auto dataList = element->List())
     {
       for (auto &option : dataList->Suggestions())
@@ -973,7 +973,7 @@ namespace krys::boo::html
       // The field matches :open while its suggestions are shown.
       frame->NotifyPopupOpeningObservers();
       style::PseudoClassChangeInvalidation styleInvalidation(element, css::SelectorPseudoClass::Open, true);
-      _suggestionPicker = frame->GetChromeClient().CreateDataListSuggestionPicker(*this);
+      _suggestionPicker = frame->GetBooeyClient().CreateDataListSuggestionPicker(*this);
     }
     if (auto picker = _suggestionPicker)
     {

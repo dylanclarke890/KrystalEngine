@@ -5,7 +5,7 @@
 #include "Krystal.Booey/DOM/Events/EventNames.hpp"
 #include "Krystal.Booey/DOM/Events/MouseEvent.hpp"
 #include "Krystal.Booey/DOM/Nodes/Element.hpp"
-#include "Krystal.Booey/Page/Clients/ChromeClient.hpp"
+#include "Krystal.Booey/Page/Clients/BooeyClient.hpp"
 #include "Krystal.Booey/Page/Frame.hpp"
 
 namespace krys::boo::tests
@@ -13,7 +13,7 @@ namespace krys::boo::tests
   namespace
   {
     /// @brief Puts the root view 100 pixels right of and 200 below the screen's origin.
-    class OffsetChromeClient final : public ChromeClient
+    class OffsetBooeyClient final : public BooeyClient
     {
     public:
       void AttachRootGraphicsLayer(boo::Frame &, GraphicsLayer *) noexcept override
@@ -50,8 +50,8 @@ namespace krys::boo::tests
   TEST_CASE("SimulatedClick: the user agent's clicks are at the target's centre, on the screen too",
             "[DOM][SimulatedClick]")
   {
-    auto chrome = CreateUnique<OffsetChromeClient>();
-    auto frame = boo::Frame::Create(krys::move(chrome));
+    auto client = CreateUnique<OffsetBooeyClient>();
+    auto frame = boo::Frame::Create(krys::move(client));
     PageInFrameFixture fixture(*frame, u8"<style>body{margin:0}</style>"
                                        u8"<button id=button style='position:absolute;left:10px;top:20px;"
                                        u8"width:40px;height:10px'></button>");

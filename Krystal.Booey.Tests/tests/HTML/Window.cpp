@@ -31,11 +31,11 @@ namespace krys::boo::tests
   namespace
   {
     /// @brief Counts the page's requests to be brought to the front.
-    struct WindowChromeClient final : ChromeClient
+    struct WindowBooeyClient final : BooeyClient
     {
       uint32 &FocusRequests;
 
-      explicit WindowChromeClient(uint32 &focusRequests) noexcept : FocusRequests(focusRequests)
+      explicit WindowBooeyClient(uint32 &focusRequests) noexcept : FocusRequests(focusRequests)
       {
       }
 
@@ -71,7 +71,7 @@ namespace krys::boo::tests
 
       KRYS_NODISCARD Ref<boo::Frame> CreateFrame() noexcept
       {
-        return boo::Frame::Create(CreateUnique<WindowChromeClient>(FocusRequests), nullptr,
+        return boo::Frame::Create(CreateUnique<WindowBooeyClient>(FocusRequests), nullptr,
                                   CreateUnique<RecordingFrameLoaderClient>());
       }
 

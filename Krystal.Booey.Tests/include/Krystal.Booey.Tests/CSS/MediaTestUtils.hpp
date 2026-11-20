@@ -1,14 +1,14 @@
 ﻿#pragma once
 
 #include "Krystal.Booey/DOM/Nodes/Document.hpp"
-#include "Krystal.Booey/Page/Clients/ChromeClient.hpp"
+#include "Krystal.Booey/Page/Clients/BooeyClient.hpp"
 #include "Krystal.Booey/Page/Frame.hpp"
 #include "Krystal.Core/Types/UniquePtr.hpp"
 
 namespace krys::boo::css::tests
 {
-  /// @brief A chrome client whose answers to the media features are the test's.
-  struct MediaChromeClient final : ChromeClient
+  /// @brief A Booey client whose answers to the media features are the test's.
+  struct MediaBooeyClient final : BooeyClient
   {
     PointerCharacteristics Primary {PointerCharacteristics::Fine};
     bool PrimaryHovers {true};
@@ -94,14 +94,14 @@ namespace krys::boo::css::tests
     }
   };
 
-  /// @brief A frame whose chrome client is a `MediaChromeClient` (on a 1920x1080 screen), showing a document
+  /// @brief A frame whose Booey client is a `MediaBooeyClient` (on a 1920x1080 screen), showing a document
   /// in an 800x600 view.
   struct MediaFrame
   {
-    MediaChromeClient *Chrome {nullptr};
+    MediaBooeyClient *Client {nullptr};
     Ref<boo::Frame> TestFrame;
 
-    explicit MediaFrame(Document &document) noexcept : TestFrame(CreateFrame(Chrome))
+    explicit MediaFrame(Document &document) noexcept : TestFrame(CreateFrame(Client))
     {
       auto &frame = *TestFrame;
       frame.CreateView({800, 600});
@@ -114,10 +114,10 @@ namespace krys::boo::css::tests
     }
 
   private:
-    KRYS_NODISCARD static Ref<boo::Frame> CreateFrame(MediaChromeClient *&chrome) noexcept
+    KRYS_NODISCARD static Ref<boo::Frame> CreateFrame(MediaBooeyClient *&clientOut) noexcept
     {
-      auto client = CreateUnique<MediaChromeClient>();
-      chrome = client.get();
+      auto client = CreateUnique<MediaBooeyClient>();
+      clientOut = client.get();
       return boo::Frame::Create(krys::move(client));
     }
   };

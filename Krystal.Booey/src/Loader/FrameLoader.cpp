@@ -47,7 +47,7 @@
 #include "Krystal.Booey/Loader/FormSubmission.hpp"
 #include "Krystal.Booey/Loader/FrameLoadRequest.hpp"
 #include "Krystal.Booey/Loader/NavigationAction.hpp"
-#include "Krystal.Booey/Page/Clients/ChromeClient.hpp"
+#include "Krystal.Booey/Page/Clients/BooeyClient.hpp"
 #include "Krystal.Booey/Page/Frame.hpp"
 #include "Krystal.Booey/Page/FrameView.hpp"
 #include "Krystal.Core/Strings/ASCII.hpp"
@@ -198,7 +198,7 @@ namespace krys::boo
     }
 
     // The old document is unloaded, unless it's the document of an SVG image, which fires no events.
-    if (_documentLoader && !_frame.GetChromeClient().IsSVGImageChromeClient())
+    if (_documentLoader && !_frame.GetBooeyClient().IsSVGImageBooeyClient())
     {
       DispatchUnloadEvents();
     }

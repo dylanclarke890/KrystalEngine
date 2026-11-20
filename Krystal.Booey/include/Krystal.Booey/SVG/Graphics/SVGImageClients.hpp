@@ -29,27 +29,27 @@
 #pragma once
 
 #include "Krystal.Booey/Graphics/Images/ImageObserver.hpp"
-#include "Krystal.Booey/Page/Clients/ChromeClient.hpp"
+#include "Krystal.Booey/Page/Clients/BooeyClient.hpp"
 #include "Krystal.Booey/SVG/Graphics/SVGImage.hpp"
 #include "Krystal.Core/Types/WeakPtr.hpp"
 
 namespace krys::boo
 {
-  /// @brief The chrome client of an SVG image's page: the page's repaints and rendering updates go to the
+  /// @brief The Booey client of an SVG image's page: the page's repaints and rendering updates go to the
   /// image's observer.
-  class SVGImageChromeClient final : public ChromeClient
+  class SVGImageBooeyClient final : public BooeyClient
   {
-    KRYS_NON_COPY_MOVABLE(SVGImageChromeClient);
+    KRYS_NON_COPY_MOVABLE(SVGImageBooeyClient);
 
   private:
     WeakPtr<SVGImage> _image;
 
   public:
-    explicit SVGImageChromeClient(SVGImage *image) noexcept : _image(CreateWeakPtr(image))
+    explicit SVGImageBooeyClient(SVGImage *image) noexcept : _image(CreateWeakPtr(image))
     {
     }
 
-    KRYS_NODISCARD bool IsSVGImageChromeClient() const noexcept final
+    KRYS_NODISCARD bool IsSVGImageBooeyClient() const noexcept final
     {
       return true;
     }

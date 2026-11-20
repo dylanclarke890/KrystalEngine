@@ -64,7 +64,7 @@
 namespace krys::ui
 {
   /// @brief Hands Booey the graphics layers the view composites, and keeps the root of the page's layer tree.
-  class View::ChromeClient final : public boo::ChromeClient
+  class View::BooeyClient final : public boo::BooeyClient
   {
   private:
     View *_view {nullptr};
@@ -236,7 +236,7 @@ namespace krys::ui
     {
       if (!_view)
       {
-        return boo::ChromeClient::PrimaryPointingDevice();
+        return boo::BooeyClient::PrimaryPointingDevice();
       }
       auto &devices = _view->_pointingDevices;
       if (devices.Mouse || (!devices.Touch && devices.Pen))
@@ -255,7 +255,7 @@ namespace krys::ui
     {
       if (!_view)
       {
-        return boo::ChromeClient::AllAvailablePointingDevices();
+        return boo::BooeyClient::AllAvailablePointingDevices();
       }
       auto &devices = _view->_pointingDevices;
       auto characteristics = boo::PointerCharacteristics::None;
@@ -578,17 +578,17 @@ namespace krys::ui
       return client;
     }
 
-    /// @brief The page's chrome client, noted in @p chromeClient as it's handed to the page.
-    KRYS_NODISCARD UniquePtr<boo::ChromeClient> CreateChromeClient(View::ChromeClient *&chromeClient) noexcept
+    /// @brief The page's Booey client, noted in @p booeyClient as it's handed to the page.
+    KRYS_NODISCARD UniquePtr<boo::BooeyClient> CreateBooeyClient(View::BooeyClient *&booeyClient) noexcept
     {
-      auto client = CreateUnique<View::ChromeClient>();
-      chromeClient = client.get();
+      auto client = CreateUnique<View::BooeyClient>();
+      booeyClient = client.get();
       return client;
     }
   }
 
   View::View(const SizeI &viewportSize) noexcept
-      : _frame(boo::Frame::Create(CreateChromeClient(_chromeClient), CreateEditorClient(_editorClient),
+      : _frame(boo::Frame::Create(CreateBooeyClient(_booeyClient), CreateEditorClient(_editorClient),
                                   CreateFrameLoaderClient(_frameLoaderClient), CreateDragClient(_dragClient)))
   {
     static std::once_flag valuePool;
@@ -611,7 +611,7 @@ namespace krys::ui
       strategies.SetPathStrokeStrategy(&pathStroker);
     }
 
-    _chromeClient->SetView(this);
+    _booeyClient->SetView(this);
     _frameLoaderClient->SetView(this);
     _dragClient->SetView(this);
     _viewportPixels = viewportSize;
@@ -627,7 +627,7 @@ namespace krys::ui
       _overlay->Hide();
     }
     _accessibility.reset();
-    _chromeClient->SetView(nullptr);
+    _booeyClient->SetView(nullptr);
     _frameLoaderClient->SetView(nullptr);
     _dragClient->SetView(nullptr);
     // The layers go before the texture mapper that holds their textures.
@@ -1017,7 +1017,7 @@ namespace krys::ui
     (void)view->TakeDamage();
     _needsPaint = false;
 
-    auto *root = _chromeClient->RootLayer();
+    auto *root = _booeyClient->RootLayer();
     if (!root)
     {
       return;
@@ -1919,7 +1919,7 @@ namespace krys::ui
       return;
     }
 
-    // The chrome client answers the pointing device media features from these.
+    // The Booey client answers the pointing device media features from these.
     _pointingDevices = devices;
     _frame->UpdateStyleAfterChangeInEnvironment();
   }
@@ -2523,12 +2523,12 @@ namespace krys::ui
 
   void View::SetFocusRequestHandler(Func<void()> &&handler) noexcept
   {
-    _chromeClient->SetFocusRequestHandler(krys::move(handler));
+    _booeyClient->SetFocusRequestHandler(krys::move(handler));
   }
 
   void View::SetFileChooserHandler(Func<void(Ref<boo::FileChooser>)> &&handler) noexcept
   {
-    _chromeClient->SetFileChooserHandler(krys::move(handler));
+    _booeyClient->SetFileChooserHandler(krys::move(handler));
   }
 
   namespace

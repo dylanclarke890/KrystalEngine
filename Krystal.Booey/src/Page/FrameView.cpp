@@ -47,7 +47,7 @@
 #include "Krystal.Booey/HTML/Images/ImageDocument.hpp"
 #include "Krystal.Booey/HTML/Window.hpp"
 #include "Krystal.Booey/Input/EventHandler.hpp"
-#include "Krystal.Booey/Page/Clients/ChromeClient.hpp"
+#include "Krystal.Booey/Page/Clients/BooeyClient.hpp"
 #include "Krystal.Booey/Page/Frame.hpp"
 #include "Krystal.Booey/Page/Scrolling/ScrollAnchoringController.hpp"
 #include "Krystal.Booey/Page/Scrolling/ScrollBehavior.hpp"
@@ -201,7 +201,7 @@ namespace krys::boo
     // The host paints the damage in its next frame.
     if (auto *frame = _frame.get())
     {
-      frame->GetChromeClient().InvalidateContentsAndRootView(damage);
+      frame->GetBooeyClient().InvalidateContentsAndRootView(damage);
       if (auto *document = frame->Document())
       {
         document->ScheduleRenderingUpdate({});
@@ -1021,9 +1021,9 @@ namespace krys::boo
     {
       return;
     }
-    frame->GetChromeClient().InvalidateContentsAndRootView(RectI(iconPosition.X() - PanScrollIconSize / 2,
-                                                                 iconPosition.Y() - PanScrollIconSize / 2,
-                                                                 PanScrollIconSize, PanScrollIconSize));
+    frame->GetBooeyClient().InvalidateContentsAndRootView(RectI(iconPosition.X() - PanScrollIconSize / 2,
+                                                                iconPosition.Y() - PanScrollIconSize / 2,
+                                                                PanScrollIconSize, PanScrollIconSize));
     if (auto *document = frame->Document())
     {
       document->ScheduleRenderingUpdate({});
@@ -1380,7 +1380,7 @@ namespace krys::boo
     {
       if (auto *frame = &Frame())
       {
-        if (auto clientStyle = frame->GetChromeClient().PreferredScrollbarOverlayStyle())
+        if (auto clientStyle = frame->GetBooeyClient().PreferredScrollbarOverlayStyle())
         {
           return *clientStyle;
         }
@@ -3241,7 +3241,7 @@ namespace krys::boo
       return;
     }
 
-    if (Frame().GetChromeClient().IsSVGImageChromeClient())
+    if (Frame().GetBooeyClient().IsSVGImageBooeyClient())
     {
       return;
     }
@@ -3534,7 +3534,7 @@ namespace krys::boo
     {
       return {};
     }
-    return frame->GetChromeClient().RootViewToScreen(ContentsToWindow(rect));
+    return frame->GetBooeyClient().RootViewToScreen(ContentsToWindow(rect));
   }
 
   PointI FrameView::ScreenToContents(const PointI &point) const noexcept
@@ -3544,7 +3544,7 @@ namespace krys::boo
     {
       return {};
     }
-    return WindowToContents(frame->GetChromeClient().ScreenToRootView(point));
+    return WindowToContents(frame->GetBooeyClient().ScreenToRootView(point));
   }
 
   void FrameView::ResetScrollAnchor() noexcept

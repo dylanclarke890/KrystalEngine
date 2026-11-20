@@ -54,7 +54,7 @@ namespace krys::boo
 
   SVGImage::~SVGImage() noexcept
   {
-    // Clear _page, so that SVGImageChromeClient knows we're destructed.
+    // Clear _page, so that SVGImageBooeyClient knows we're destructed.
     _frame = nullptr;
   }
 
@@ -439,7 +439,7 @@ namespace krys::boo
       // This will become an issue when SVGImage will be able to load other
       // SVGImage objects, but we're safe now, because SVGImage can only be
       // loaded by a top-level document.
-      _frame = Frame::Create(CreateUnique<SVGImageChromeClient>(this));
+      _frame = Frame::Create(CreateUnique<SVGImageBooeyClient>(this));
 
       // The image's document takes the settings of the document that loaded it, and the appearance of what
       // shows it.
@@ -501,6 +501,6 @@ namespace krys::boo
       return false;
     }
 
-    return frame->GetChromeClient().IsSVGImageChromeClient();
+    return frame->GetBooeyClient().IsSVGImageBooeyClient();
   }
 }

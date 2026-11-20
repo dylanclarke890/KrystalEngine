@@ -33,7 +33,7 @@
 #include "Krystal.Booey/Input/PlatformMouseEvent.hpp"
 #include "Krystal.Booey/Input/PlatformWheelEvent.hpp"
 #include "Krystal.Booey/Input/PointerCaptureController.hpp"
-#include "Krystal.Booey/Page/Clients/ChromeClient.hpp"
+#include "Krystal.Booey/Page/Clients/BooeyClient.hpp"
 #include "Krystal.Booey/Page/Frame.hpp"
 #include <utility>
 
@@ -125,7 +125,7 @@ namespace krys::boo
       _options = krys::move(options);
       if (_lockPending)
       {
-        // _lockPending means an answer from the ChromeClient for a previous RequestPointerLock on the page is
+        // _lockPending means an answer from the BooeyClient for a previous RequestPointerLock on the page is
         // pending. It's currently unknown which way that will go, whether the request will be approved or
         // rejected. Therefore queue the promise for later when that's known and don't send out any
         // pointerlockchange event yet.
@@ -160,7 +160,7 @@ namespace krys::boo
     {
       return;
     }
-    frame->GetChromeClient().RequestPointerLock(
+    frame->GetBooeyClient().RequestPointerLock(
       [weakFrame = WeakPtr<Frame>(_frame), target = ShareRefPtr(target)](PointerLockRequestResult result)
       {
         auto *frame = weakFrame.get();
@@ -195,7 +195,7 @@ namespace krys::boo
     {
       return;
     }
-    frame->GetChromeClient().RequestPointerUnlock(
+    frame->GetBooeyClient().RequestPointerUnlock(
       [weakFrame = WeakPtr<Frame>(_frame)](bool result)
       {
         auto *frame = weakFrame.get();
@@ -288,7 +288,7 @@ namespace krys::boo
 
   void PointerLockController::DidNotAcquirePointerLock() noexcept
   {
-    // DidNotAcquirePointerLock is sent in response to ChromeClient::RequestPointerLock if the window does not
+    // DidNotAcquirePointerLock is sent in response to BooeyClient::RequestPointerLock if the window does not
     // have focus or the host is not allowing pointer lock. From the draft spec: If the this's
     // shadow-including root is the active document of a browsing context which is not (or has an ancestor
     // browsing context which is not) in focus by a window which is in focus by the operating system's window
@@ -401,6 +401,6 @@ namespace krys::boo
   bool PointerLockController::SupportsUnadjustedMovement() const noexcept
   {
     auto *frame = _frame.get();
-    return frame && frame->GetChromeClient().HasAccessoryMousePointingDevice();
+    return frame && frame->GetBooeyClient().HasAccessoryMousePointingDevice();
   }
 }

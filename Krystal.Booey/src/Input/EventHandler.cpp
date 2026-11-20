@@ -617,7 +617,7 @@ namespace krys::boo
     // The longest a move took to handle.
     auto start = MonotonicTime::Now();
 
-    // FIXME: Page overlays, and telling the chrome the mouse moved over an element.
+    // FIXME: Page overlays, and telling the Booey client the mouse moved over an element.
     HitTestResult hitTestResult;
     bool result = HandleMouseMoveEvent(event, &hitTestResult);
 
@@ -797,7 +797,7 @@ namespace krys::boo
                                       FireMouseOverOut::No);
     }
 
-    // FIXME: Telling the chrome client about the click (didDispatchClickEvent), once it wants to know.
+    // FIXME: Telling the Booey client about the click (didDispatchClickEvent), once it wants to know.
     return swallowed;
   }
 
@@ -1261,7 +1261,7 @@ namespace krys::boo
         _frame.GetPointerLockController().RequestPointerUnlockAndForceCursorVisible();
       }
       // Escape hides any validation message.
-      _frame.GetChromeClient().HideAnyValidationMessage();
+      _frame.GetBooeyClient().HideAnyValidationMessage();
     }
 
     // Check for cases where we are too early for events -- possible unmatched key up from pressing return in
@@ -1737,7 +1737,7 @@ namespace krys::boo
       return;
     }
 
-    // FIXME: Whether the chrome sets cursors (supportsSettingCursor).
+    // FIXME: Whether the Booey client sets cursors (supportsSettingCursor).
     _hasScheduledCursorUpdate = true;
     _frame.ScheduleRenderingUpdate({RenderingUpdateStep::CursorUpdate});
   }
@@ -1762,7 +1762,7 @@ namespace krys::boo
       return;
     }
 
-    // FIXME: Whether the chrome wants fake mouse moves (shouldDispatchFakeMouseMoveEvents).
+    // FIXME: Whether the Booey client wants fake mouse moves (shouldDispatchFakeMouseMoveEvents).
 
     // If the content has ever taken longer than fakeMouseMoveShortInterval we
     // reschedule the timer and use a longer time. This will cause the content
@@ -1884,7 +1884,7 @@ namespace krys::boo
 
   void EventHandler::UpdateCursor(FrameView &view, const HitTestResult &result, bool shiftKey) noexcept
   {
-    // FIXME: Telling the view, and through it the chrome, to set the cursor; until then the host reads
+    // FIXME: Telling the view, and through it the Booey client, to set the cursor; until then the host reads
     // CurrentMouseCursor().
     (void)view;
     if (auto optionalCursor = SelectCursor(result, shiftKey))
@@ -1969,7 +1969,7 @@ namespace krys::boo
         }
         auto size = image->Size();
         // Limit the size of cursors (in UI pixels) so that they cannot be used to cover UI elements in
-        // chrome.
+        // the host's UI.
         size.Scale(1 / scale);
         if (size.Width() > MaximumCursorSize || size.Height() > MaximumCursorSize)
         {
@@ -3309,7 +3309,7 @@ namespace krys::boo
     return UpdateSelectionForMouseDownDispatchingSelectStart(targetNode.get(), newSelection, granularity);
   }
 
-  // FIXME: The chrome client's shouldUseMouseEventForSelection and quirks, once there are any. (There's no
+  // FIXME: The Booey client's shouldUseMouseEventForSelection and quirks, once there are any. (There's no
   // image overlay text; see DIFFERENCES.md.)
   bool EventHandler::CanMouseDownStartSelect(const MouseEventWithHitTestResults &event) noexcept
   {

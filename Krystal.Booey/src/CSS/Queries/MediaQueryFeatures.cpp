@@ -25,7 +25,7 @@
 #include "Krystal.Booey/CSS/Queries/MediaQueryFeatures.hpp"
 #include "Krystal.Booey/CSS/Queries/GenericMediaQueryEvaluator.hpp"
 #include "Krystal.Booey/CSS/Queries/MediaQuery.hpp"
-#include "Krystal.Booey/Page/Clients/ChromeClient.hpp"
+#include "Krystal.Booey/Page/Clients/BooeyClient.hpp"
 #include "Krystal.Booey/Page/Frame.hpp"
 #include "Krystal.Booey/Page/FrameView.hpp"
 #include "Krystal.Booey/Rendering/RenderView.hpp"
@@ -192,16 +192,16 @@ namespace krys::boo::css::mq::features
     return context.Document->Frame();
   }
 
-  /// @brief The chrome client of the document's frame, which answers for the screen, the pointing devices
-  /// and the user's preferences; a document without a frame gets an empty chrome client's answers.
-  KRYS_NODISCARD static const ChromeClient &ChromeOf(const FeatureEvaluationContext &context) noexcept
+  /// @brief The Booey client of the document's frame, which answers for the screen, the pointing devices
+  /// and the user's preferences; a document without a frame gets an empty Booey client's answers.
+  KRYS_NODISCARD static const BooeyClient &BooeyClientOf(const FeatureEvaluationContext &context) noexcept
   {
     if (auto *frame = FrameOf(context))
     {
-      return frame->GetChromeClient();
+      return frame->GetBooeyClient();
     }
-    static MainThreadNeverDestroyed<EmptyChromeClient> emptyChromeClient;
-    return emptyChromeClient;
+    static MainThreadNeverDestroyed<EmptyBooeyClient> emptyBooeyClient;
+    return emptyBooeyClient;
   }
 
   KRYS_NODISCARD static const FrameView &ViewOf(const FeatureEvaluationContext &context) noexcept
@@ -256,7 +256,7 @@ namespace krys::boo::css::mq::features
     static MainThreadNeverDestroyed<IdentifierSchema> schema {
       u8"any-hover", FixedVector {ValueId::None, ValueId::Hover}, Dependency::None, [](auto &context)
       {
-        bool isSupported = ChromeOf(context).HoverSupportedByAnyAvailablePointingDevice();
+        bool isSupported = BooeyClientOf(context).HoverSupportedByAnyAvailablePointingDevice();
         return MatchingIdentifiers {isSupported ? ValueId::Hover : ValueId::None};
       }};
     return schema;
@@ -267,7 +267,7 @@ namespace krys::boo::css::mq::features
     static MainThreadNeverDestroyed<IdentifierSchema> schema {
       u8"any-pointer", FixedVector {ValueId::None, ValueId::Fine, ValueId::Coarse}, Dependency::None,
       [](auto &context)
-      { return IdentifiersForPointerCharacteristics(ChromeOf(context).AllAvailablePointingDevices()); }};
+      { return IdentifiersForPointerCharacteristics(BooeyClientOf(context).AllAvailablePointingDevices()); }};
     return schema;
   }
 
@@ -285,7 +285,8 @@ namespace krys::boo::css::mq::features
   KRYS_NODISCARD static const IntegerSchema &ColorFeatureSchema() noexcept
   {
     static MainThreadNeverDestroyed<IntegerSchema> schema {
-      u8"color", Dependency::None, [](auto &context) { return ChromeOf(context).ScreenDepthPerComponent(); }};
+      u8"color", Dependency::None,
+      [](auto &context) { return BooeyClientOf(context).ScreenDepthPerComponent(); }};
     return schema;
   }
 
@@ -296,11 +297,11 @@ namespace krys::boo::css::mq::features
       [](auto &context)
       {
         MatchingIdentifiers identifiers {ValueId::SRGB};
-        if (ChromeOf(context).ScreenSupportsExtendedColor())
+        if (BooeyClientOf(context).ScreenSupportsExtendedColor())
         {
           identifiers.push_back(ValueId::P3);
         }
-        if (ChromeOf(context).ScreenSupportsRec2020Color())
+        if (BooeyClientOf(context).ScreenSupportsRec2020Color())
         {
           identifiers.push_back(ValueId::Rec2020);
         }
@@ -320,7 +321,7 @@ namespace krys::boo::css::mq::features
   {
     static MainThreadNeverDestroyed<RatioSchema> schema {u8"device-aspect-ratio", Dependency::None,
                                                          [](auto &context)
-                                                         { return ChromeOf(context).ScreenSize(); }};
+                                                         { return BooeyClientOf(context).ScreenSize(); }};
     return schema;
   }
 
@@ -328,7 +329,7 @@ namespace krys::boo::css::mq::features
   {
     static MainThreadNeverDestroyed<LengthSchema> schema {
       u8"device-height", Dependency::None,
-      [](auto &context) { return LayoutUnit {ChromeOf(context).ScreenSize().Height()}; }};
+      [](auto &context) { return LayoutUnit {BooeyClientOf(context).ScreenSize().Height()}; }};
     return schema;
   }
 
@@ -336,7 +337,7 @@ namespace krys::boo::css::mq::features
   {
     static MainThreadNeverDestroyed<LengthSchema> schema {
       u8"device-width", Dependency::None,
-      [](auto &context) { return LayoutUnit {ChromeOf(context).ScreenSize().Width()}; }};
+      [](auto &context) { return LayoutUnit {BooeyClientOf(context).ScreenSize().Width()}; }};
     return schema;
   }
 
@@ -346,7 +347,7 @@ namespace krys::boo::css::mq::features
       u8"dynamic-range", FixedVector {ValueId::Standard, ValueId::High}, Dependency::None, [](auto &context)
       {
         MatchingIdentifiers identifiers {ValueId::Standard};
-        if (ChromeOf(context).ScreenSupportsHighDynamicRange())
+        if (BooeyClientOf(context).ScreenSupportsHighDynamicRange())
         {
           identifiers.push_back(ValueId::High);
         }
@@ -390,7 +391,7 @@ namespace krys::boo::css::mq::features
     static MainThreadNeverDestroyed<IdentifierSchema> schema {
       u8"hover", FixedVector {ValueId::None, ValueId::Hover}, Dependency::None, [](auto &context)
       {
-        bool isSupported = ChromeOf(context).HoverSupportedByPrimaryPointingDevice();
+        bool isSupported = BooeyClientOf(context).HoverSupportedByPrimaryPointingDevice();
         return MatchingIdentifiers {isSupported ? ValueId::Hover : ValueId::None};
       }};
     return schema;
@@ -402,7 +403,7 @@ namespace krys::boo::css::mq::features
       u8"inverted-colors", FixedVector {ValueId::None, ValueId::Inverted}, Dependency::Accessibility,
       [](auto &context)
       {
-        bool isInverted = ChromeOf(context).ColorsAreInverted();
+        bool isInverted = BooeyClientOf(context).ColorsAreInverted();
         return MatchingIdentifiers {isInverted ? ValueId::Inverted : ValueId::None};
       }};
     return schema;
@@ -413,8 +414,8 @@ namespace krys::boo::css::mq::features
     static MainThreadNeverDestroyed<IntegerSchema> schema {
       u8"monochrome", Dependency::Accessibility, [](auto &context)
       {
-        auto &chrome = ChromeOf(context);
-        return chrome.ScreenIsMonochrome() ? chrome.ScreenDepthPerComponent() : 0;
+        auto &client = BooeyClientOf(context);
+        return client.ScreenIsMonochrome() ? client.ScreenDepthPerComponent() : 0;
       }};
     return schema;
   }
@@ -438,7 +439,7 @@ namespace krys::boo::css::mq::features
     static MainThreadNeverDestroyed<IdentifierSchema> schema {
       u8"pointer", FixedVector {ValueId::None, ValueId::Fine, ValueId::Coarse}, Dependency::None,
       [](auto &context)
-      { return IdentifiersForPointerCharacteristics(ChromeOf(context).PrimaryPointingDevice()); }};
+      { return IdentifiersForPointerCharacteristics(BooeyClientOf(context).PrimaryPointingDevice()); }};
     return schema;
   }
 
@@ -449,7 +450,7 @@ namespace krys::boo::css::mq::features
       FixedVector {ValueId::NoPreference, ValueId::More, ValueId::Less, ValueId::Custom},
       Dependency::Accessibility, [](auto &context)
       {
-        bool userPrefersContrast = ChromeOf(context).UserPrefersContrast();
+        bool userPrefersContrast = BooeyClientOf(context).UserPrefersContrast();
         return MatchingIdentifiers {userPrefersContrast ? ValueId::More : ValueId::NoPreference};
       }};
     return schema;
@@ -461,7 +462,7 @@ namespace krys::boo::css::mq::features
       u8"prefers-reduced-motion", FixedVector {ValueId::NoPreference, ValueId::Reduce},
       Dependency::Accessibility, [](auto &context)
       {
-        bool userPrefersReducedMotion = ChromeOf(context).UserPrefersReducedMotion();
+        bool userPrefersReducedMotion = BooeyClientOf(context).UserPrefersReducedMotion();
         return MatchingIdentifiers {userPrefersReducedMotion ? ValueId::Reduce : ValueId::NoPreference};
       }};
     return schema;

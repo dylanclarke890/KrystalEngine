@@ -67,7 +67,7 @@
 #include "Krystal.Booey/HTML/Elements/HTMLTableSectionElement.hpp"
 #include "Krystal.Booey/Infra/StringAlgorithms.hpp"
 #include "Krystal.Booey/MathML/Elements/MathMLElement.hpp"
-#include "Krystal.Booey/Page/Clients/ChromeClient.hpp"
+#include "Krystal.Booey/Page/Clients/BooeyClient.hpp"
 #include "Krystal.Booey/Page/Frame.hpp"
 #include "Krystal.Booey/Page/FrameView.hpp"
 #include "Krystal.Booey/Rendering/FormControls/RenderMenuList.hpp"
@@ -2958,8 +2958,8 @@ namespace krys::boo
       {
         break;
       }
-      frame->GetChromeClient().PostAccessibilityTextChange(*textChange.Object, textChange.Change,
-                                                           textChange.Offset, textChange.Text);
+      frame->GetBooeyClient().PostAccessibilityTextChange(*textChange.Object, textChange.Change,
+                                                          textChange.Offset, textChange.Text);
     }
   }
 
@@ -3011,7 +3011,7 @@ namespace krys::boo
     // let go of what it made for it.
     if (auto *frame = _document.Frame())
     {
-      frame->GetChromeClient().AccessibilityObjectDetached(object, detachmentType);
+      frame->GetBooeyClient().AccessibilityObjectDetached(object, detachmentType);
     }
   }
 
@@ -3025,7 +3025,7 @@ namespace krys::boo
     {
       return;
     }
-    frame->GetChromeClient().PostAccessibilityNotification(object, notification);
+    frame->GetBooeyClient().PostAccessibilityNotification(object, notification);
   }
 
   utf8_stringview NotificationToString(AXNotification notification) noexcept

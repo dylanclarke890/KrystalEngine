@@ -6,13 +6,13 @@
 #include "Krystal.Booey/Accessibility/AXLogger.hpp"
 #include "Krystal.Booey/Accessibility/AXObject.hpp"
 #include "Krystal.Booey/Accessibility/AXObjectCache.hpp"
-#include "Krystal.Booey/Page/Clients/ChromeClient.hpp"
+#include "Krystal.Booey/Page/Clients/BooeyClient.hpp"
 #include <utility>
 
 namespace krys::boo::ax::tests
 {
-  /// @brief A chrome client that records the accessibility notifications posted to it.
-  class NotificationRecorder final : public ChromeClient
+  /// @brief A Booey client that records the accessibility notifications posted to it.
+  class NotificationRecorder final : public BooeyClient
   {
   public:
     List<Pair<Ref<AXObject>, AXNotification>> Notifications;
@@ -49,7 +49,7 @@ namespace krys::boo::ax::tests
     }
   };
 
-  /// @brief Records an `AXFixture`'s notifications: the chrome client of its frame, made before the frame.
+  /// @brief Records an `AXFixture`'s notifications: the Booey client of its frame, made before the frame.
   struct AXRecorder
   {
     NotificationRecorder *Recorder {nullptr};

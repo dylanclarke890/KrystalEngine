@@ -29,7 +29,7 @@
 #include "Krystal.Booey/Loader/Cache/CachedCSSStyleSheet.hpp"
 #include "Krystal.Booey/Loader/Cache/MemoryCache.hpp"
 #include "Krystal.Booey/Loader/LoaderStrategy.hpp"
-#include "Krystal.Booey/Page/Clients/ChromeClient.hpp"
+#include "Krystal.Booey/Page/Clients/BooeyClient.hpp"
 #include "Krystal.Booey/Page/Frame.hpp"
 #include "Krystal.Booey/Page/Settings.hpp"
 
@@ -206,7 +206,7 @@ namespace krys::boo
     if (type != CachedResource::Type::MainResource)
     {
       if (auto *frame = Frame();
-          frame && frame->GetChromeClient().IsSVGImageChromeClient() && !url.ProtocolIsData())
+          frame && frame->GetBooeyClient().IsSVGImageBooeyClient() && !url.ProtocolIsData())
       {
         return Unexpected<net::ResourceError>(net::ResourceError(utf8_string(ErrorDomainBooeyInternal), 0,
                                                                  url, u8"Not allowed to request resource",

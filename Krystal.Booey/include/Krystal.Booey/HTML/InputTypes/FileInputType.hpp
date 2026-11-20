@@ -39,7 +39,7 @@
 namespace krys::boo::html
 {
   /// @brief The file input type. A click (with the user's activation) or `showPicker()` asks the host to show
-  /// its file picker (`ChromeClient::RunOpenPanel`).
+  /// its file picker (`BooeyClient::RunOpenPanel`).
   class FileInputType final : public BaseClickableWithKeyInputType, private FileChooserClient
   {
   private:

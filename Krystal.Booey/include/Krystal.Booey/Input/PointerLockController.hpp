@@ -59,7 +59,7 @@ namespace krys::boo
   /// @brief A page's pointer lock: the element the mouse's events go to while it's locked
   /// (`requestPointerLock()`), with the cursor hidden and the mouse's movement as its moves' `movementX` and
   /// `movementY`, the `pointerlockchange` and `pointerlockerror` events, and unlocking (`exitPointerLock()`,
-  /// Escape, the element going away). The host locks and unlocks the pointer (the chrome client's
+  /// Escape, the element going away). The host locks and unlocks the pointer (the Booey client's
   /// `RequestPointerLock()` and `RequestPointerUnlock()`).
   /// @see https://w3c.github.io/pointerlock/
   class PointerLockController
