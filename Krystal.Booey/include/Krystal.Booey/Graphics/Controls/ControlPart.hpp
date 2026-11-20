@@ -30,6 +30,7 @@
 #include "Krystal.Booey/Style/StyleAppearance.hpp"
 #include "Krystal.Core/Assert.hpp"
 #include "Krystal.Core/Attributes.hpp"
+#include "Krystal.Core/Geometry/GeometryForward.hpp"
 #include "Krystal.Core/RefCounted.hpp"
 #include "Krystal.Core/TypeCast.hpp"
 #include "Krystal.Core/Types/RefPtr.hpp"
@@ -37,7 +38,6 @@
 
 namespace krys::boo
 {
-  class FloatRect;
   class FloatRoundedRect;
   class GraphicsContext;
 
@@ -67,9 +67,9 @@ namespace krys::boo
       _overrideControlFactory = krys::move(controlFactory);
     }
 
-    KRYS_NODISCARD FloatSize SizeForBounds(const FloatRect &bounds, const ControlStyle &) noexcept;
+    KRYS_NODISCARD SizeF SizeForBounds(const RectF &bounds, const ControlStyle &) noexcept;
 
-    KRYS_NODISCARD FloatRect RectForBounds(const FloatRect &bounds, const ControlStyle &) noexcept;
+    KRYS_NODISCARD RectF RectForBounds(const RectF &bounds, const ControlStyle &) noexcept;
 
     void Draw(GraphicsContext &, const FloatRoundedRect &borderRect, float deviceScaleFactor,
               const ControlStyle &) const noexcept;

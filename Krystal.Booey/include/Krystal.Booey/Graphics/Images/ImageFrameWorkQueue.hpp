@@ -40,10 +40,14 @@ namespace krys
   class WorkQueue;
 }
 
+namespace krys::img
+{
+  class ImageDecoder;
+}
+
 namespace krys::boo
 {
   class BitmapImageSource;
-  class ImageDecoder;
 
   /// @brief Decodes a bitmap image's frames off the main thread, on the host's work queue: requests run one
   /// at a time, in order, each with the queue's own decoder (never the source's, which the main thread uses)
@@ -70,7 +74,7 @@ namespace krys::boo
     /// @brief The requests not yet finished, oldest first; the first is being decoded.
     Deque<Request> _decodeQueue;
     /// @brief The queue's decoder, while no job has it.
-    RefPtr<ImageDecoder> _decoder;
+    RefPtr<img::ImageDecoder> _decoder;
     bool _decoding {false};
     /// @brief Counts the stops, so that a frame decoded before one is dropped.
     uint64 _generation {0};
@@ -113,7 +117,7 @@ namespace krys::boo
     void DecodeNext() noexcept;
 
     /// @brief The frame @p request asked for arrived, as @p image (null if it failed), with the decoder.
-    void DecodeFinished(uint64 generation, Ref<ImageDecoder> &&decoder, const Request &request,
+    void DecodeFinished(uint64 generation, Ref<img::ImageDecoder> &&decoder, const Request &request,
                         PlatformImagePtr &&image) noexcept;
   };
 }

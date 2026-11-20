@@ -16,14 +16,14 @@
 #include "Krystal.Booey/HTML/EventLoop/EventLoop.hpp"
 #include "Krystal.Booey/HTML/Parser/DocumentParser.hpp"
 #include "Krystal.Booey/Infra/Namespaces.hpp"
+#include "Krystal.Booey/Input/EventHandler.hpp"
+#include "Krystal.Booey/Input/PlatformKeyboardEvent.hpp"
+#include "Krystal.Booey/Input/PlatformMouseEvent.hpp"
 #include "Krystal.Booey/Page/DOMSelection.hpp"
-#include "Krystal.Booey/Page/EventHandler.hpp"
 #include "Krystal.Booey/Page/LocalFrame.hpp"
 #include "Krystal.Booey/Page/LocalFrameView.hpp"
 #include "Krystal.Booey/Page/Page.hpp"
 #include "Krystal.Booey/Page/VisualViewport.hpp"
-#include "Krystal.Booey/Platform/Events/PlatformKeyboardEvent.hpp"
-#include "Krystal.Booey/Platform/Events/PlatformMouseEvent.hpp"
 #include "Krystal.Booey/Style/Scope/Scope.hpp"
 #include "Krystal.Booey/SVG/Elements/SVGElement.hpp"
 
@@ -483,7 +483,7 @@ namespace krys::boo::tests
 
     SECTION("a press activates the window, transiently for 5s")
     {
-      PlatformMouseEvent press(DoublePoint(10, 10), DoublePoint(10, 10), MouseButton::Left,
+      PlatformMouseEvent press(PointD(10, 10), PointD(10, 10), MouseButton::Left,
                                PlatformEvent::Type::MousePressed, 1, {}, MonotonicTime::Now());
       (void)handler.HandleMousePressEvent(press);
       CHECK(window.HasStickyActivation());

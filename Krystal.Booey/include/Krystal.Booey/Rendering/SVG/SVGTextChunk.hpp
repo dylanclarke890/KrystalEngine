@@ -20,9 +20,9 @@
 
 #pragma once
 
-#include "Krystal.Booey/Graphics/Transforms/AffineTransform.hpp"
 #include "Krystal.Booey/Layout/Integration/Inline/InlineIteratorSVGTextBox.hpp"
 #include "Krystal.Booey/Rendering/SVG/SVGTextFragment.hpp"
+#include "Krystal.Core/Geometry/AffineTransform.hpp"
 #include "Krystal.Core/Types/HashMap.hpp"
 #include "Krystal.Core/Types/List.hpp"
 

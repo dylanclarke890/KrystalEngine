@@ -60,9 +60,8 @@ namespace krys::ui::tests
     /// @param scrollTo Where the page is scrolled to, after its first frames.
     /// @param scrollStep How far the page scrolls each measured frame, down and back up, as a wheel would.
     KRYS_NODISCARD FrameCosts Measure(const std::filesystem::path &path, uint32 width, uint32 height,
-                                      Painting painting = Painting::Damage,
-                                      Maybe<boo::IntPoint> scrollTo = null, int32 scrollStep = 0,
-                                      int32 frames = 60)
+                                      Painting painting = Painting::Damage, Maybe<PointI> scrollTo = null,
+                                      int32 scrollStep = 0, int32 frames = 60)
     {
       using namespace std::chrono;
       static const auto fonts = View::AddFontDirectory(std::filesystem::path {KRYS_UI_TESTS_FONTS_DIR});
@@ -160,7 +159,7 @@ namespace krys::ui::tests
     // The editor's page: cards, images, text, transitions on hover and animations that run every frame. At
     // its top, nothing on screen changes after it loads; at its bottom, its animations run.
     const auto editorPage = GoldenDirectory() / ".." / ".." / "Krystal.Editor" / "pages" / "index.html";
-    const auto bottom = boo::IntPoint(0, 100'000);
+    const auto bottom = PointI(0, 100'000);
     Report("editor page, top", Measure(editorPage, 1'280u, 800u));
     Report("editor page, animations", Measure(editorPage, 1'280u, 800u, Painting::Damage, bottom));
     Report("editor page, animations, all repainted",

@@ -31,7 +31,7 @@
 namespace krys::boo
 {
   UniquePtr<GraphicsContextSwitcher> GraphicsContextSwitcher::Create(GraphicsContext &destinationContext,
-                                                                     const FloatRect &sourceImageRect,
+                                                                     const RectF &sourceImageRect,
                                                                      RefPtr<Filter> &&filter,
                                                                      FilterResults *results) noexcept
   {

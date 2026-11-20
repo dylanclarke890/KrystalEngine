@@ -47,8 +47,8 @@ namespace krys::boo::css
     return strictContext;
   }
 
-  ParserContext::ParserContext(ParserMode mode, url::URL baseURL) noexcept
-      : BaseURL(krys::move(baseURL)), Mode(mode)
+  ParserContext::ParserContext(ParserMode mode, net::Url baseUrl) noexcept
+      : BaseUrl(krys::move(baseUrl)), Mode(mode)
   {
     if (IsUASheetBehavior(mode))
     {
@@ -62,11 +62,11 @@ namespace krys::boo::css
   {
   }
 
-  ParserContext::ParserContext(const Document &document, const url::URL &sheetBaseURL,
+  ParserContext::ParserContext(const Document &document, const net::Url &sheetBaseUrl,
                                utf8_stringview charset) noexcept
       : ParserContext(ParserMode::HTMLStandard)
   {
-    BaseURL = sheetBaseURL.IsNull() ? document.BaseURL() : sheetBaseURL;
+    BaseUrl = sheetBaseUrl.IsNull() ? document.BaseUrl() : sheetBaseUrl;
     Charset = charset;
     Mode = document.InQuirksMode() ? ParserMode::HTMLQuirks : ParserMode::HTMLStandard;
     IsHTMLDocument = Is<HTMLDocument>(document);
@@ -98,6 +98,6 @@ namespace krys::boo::css
       | static_cast<uint32>(colorLayersEnabled) << 6
       | static_cast<uint32>(cssInternalAutoBaseParsingEnabled) << 7
       | static_cast<uint32>(webkitMediaTextTrackDisplayQuirkEnabled) << 8;
-    return krys::Hash::Combine(BaseURL, Charset, PropertySettings, Mode, bits);
+    return krys::Hash::Combine(BaseUrl, Charset, PropertySettings, Mode, bits);
   }
 }

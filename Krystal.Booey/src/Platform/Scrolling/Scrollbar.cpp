@@ -57,7 +57,7 @@ namespace krys::boo
     // scrollbar thickness and use it when sizing scrollbars (rather than leaving one dimension of the
     // scrollbar alone when sizing).
     int32 thickness = Theme().ScrollbarThickness(widthStyle);
-    SetFrameRect(IntRect(0, 0, thickness, thickness));
+    SetFrameRect(RectI(0, 0, thickness, thickness));
 
     _currentPos = static_cast<float>(OffsetForOrientation(scrollableArea.GetScrollOffset(), _orientation));
   }
@@ -117,7 +117,7 @@ namespace krys::boo
     _pixelStep = 1.0f / static_cast<float>(pixelsPerStep);
   }
 
-  void Scrollbar::SetFrameRect(const IntRect &rect) noexcept
+  void Scrollbar::SetFrameRect(const RectI &rect) noexcept
   {
     _frameRect = rect;
     if (_scrollableArea)
@@ -153,7 +153,7 @@ namespace krys::boo
     Theme().InvalidateParts(*this, ForwardTrackPart | BackTrackPart | ThumbPart);
   }
 
-  void Scrollbar::Paint(GraphicsContext &context, const IntRect &damageRect) noexcept
+  void Scrollbar::Paint(GraphicsContext &context, const RectI &damageRect) noexcept
   {
     // FIXME: Invalidating control tints, once there are control tints.
     if (!_frameRect.Intersects(damageRect))
@@ -371,7 +371,7 @@ namespace krys::boo
 
   bool Scrollbar::MouseMoved(const PlatformMouseEvent &event) noexcept
   {
-    auto position = ConvertFromContainingWindow(FlooredIntPoint(event.Position()));
+    auto position = ConvertFromContainingWindow(FlooredPointI(event.Position()));
     if (_pressedPart == ThumbPart)
     {
       if (Theme().ShouldSnapBackToDragOrigin(*this, event))
@@ -392,7 +392,7 @@ namespace krys::boo
       _pressedPos = _orientation == ScrollbarOrientation::Horizontal ? position.X() : position.Y();
     }
 
-    ScrollbarPart part = Theme().HitTest(*this, FlooredIntPoint(event.Position()));
+    ScrollbarPart part = Theme().HitTest(*this, FlooredPointI(event.Position()));
     if (part != _hoveredPart)
     {
       if (_pressedPart != NoPart)
@@ -442,7 +442,7 @@ namespace krys::boo
 
     // _hoveredPart won't be updated until the next mouseMoved or mouseDown, so we have to hit test to really
     // know if the mouse has exited the scrollbar on a mouseUp.
-    ScrollbarPart part = Theme().HitTest(*this, FlooredIntPoint(event.Position()));
+    ScrollbarPart part = Theme().HitTest(*this, FlooredPointI(event.Position()));
     if (part == NoPart)
     {
       scrollableArea.MouseExitedScrollbar(this);
@@ -457,7 +457,7 @@ namespace krys::boo
 
   bool Scrollbar::MouseDown(const PlatformMouseEvent &event) noexcept
   {
-    ScrollbarPart pressedPart = Theme().HitTest(*this, FlooredIntPoint(event.Position()));
+    ScrollbarPart pressedPart = Theme().HitTest(*this, FlooredPointI(event.Position()));
     auto action = Theme().HandleMousePressEvent(*this, event, pressedPart);
     if (action == ScrollbarButtonPressAction::None)
     {
@@ -467,7 +467,7 @@ namespace krys::boo
     GetScrollableArea().MouseIsDownInScrollbar(this, true);
     SetPressedPart(pressedPart);
 
-    auto position = ConvertFromContainingWindow(FlooredIntPoint(event.Position()));
+    auto position = ConvertFromContainingWindow(FlooredPointI(event.Position()));
     int32 pressedPosition = _orientation == ScrollbarOrientation::Horizontal ? position.X() : position.Y();
     if (action == ScrollbarButtonPressAction::CenterOnThumb)
     {
@@ -497,12 +497,12 @@ namespace krys::boo
     return true;
   }
 
-  IntPoint Scrollbar::ConvertFromContainingWindow(const IntPoint &windowPoint) const noexcept
+  PointI Scrollbar::ConvertFromContainingWindow(const PointI &windowPoint) const noexcept
   {
     return GetScrollableArea().ConvertFromContainingViewToScrollbar(*this, windowPoint);
   }
 
-  void Scrollbar::InvalidateRect(const IntRect &rect) noexcept
+  void Scrollbar::InvalidateRect(const RectI &rect) noexcept
   {
     if (SuppressInvalidation())
     {
@@ -515,6 +515,6 @@ namespace krys::boo
   {
     _widthStyle = GetScrollableArea().ScrollbarWidthStyle();
     int32 thickness = ScrollbarTheme::Theme().ScrollbarThickness(WidthStyle());
-    SetFrameRect(IntRect(0, 0, thickness, thickness));
+    SetFrameRect(RectI(0, 0, thickness, thickness));
   }
 }

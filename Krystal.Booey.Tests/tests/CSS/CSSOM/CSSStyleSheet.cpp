@@ -194,7 +194,7 @@ namespace krys::boo::css::tests
             "[CSS][CSSOM][CSSStyleSheet]")
   {
     auto context = CSSOMTestContext();
-    context.BaseURL = url::URL(u8"https://example.com/a.css");
+    context.BaseUrl = net::Url(u8"https://example.com/a.css");
     auto contents = StyleSheetContents::Create(context);
     contents->ParseString(u8"a { }");
 
@@ -202,7 +202,7 @@ namespace krys::boo::css::tests
     {
       auto sheet = CSSStyleSheet::Create(Ref<StyleSheetContents>(contents));
       REQUIRE_FALSE(sheet->CanAccessRules());
-      REQUIRE(ToNarrow(sheet->BaseURL().String()) == "https://example.com/a.css");
+      REQUIRE(ToNarrow(sheet->BaseUrl().String()) == "https://example.com/a.css");
     }
 
     SECTION("an owner node")
@@ -251,16 +251,16 @@ namespace krys::boo::css::tests
       REQUIRE(sheet->CanAccessRules());
       REQUIRE(sheet->Length() == 0);
       REQUIRE(sheet->MediaQueries().empty());
-      REQUIRE(ToNarrow(sheet->BaseURL().String()) == "about:blank");
+      REQUIRE(ToNarrow(sheet->BaseUrl().String()) == "about:blank");
     }
 
     SECTION("options")
     {
       auto sheet = ConstructedSheet(
-        *document, {.BaseURL = u8"https://example.com/", .Media = CSSOMString(u8"screen"), .Disabled = true});
+        *document, {.BaseUrl = u8"https://example.com/", .Media = CSSOMString(u8"screen"), .Disabled = true});
       REQUIRE(sheet->Disabled());
       REQUIRE(ToNarrow(sheet->Media()->MediaText()) == "screen");
-      REQUIRE(ToNarrow(sheet->BaseURL().String()) == "https://example.com/");
+      REQUIRE(ToNarrow(sheet->BaseUrl().String()) == "https://example.com/");
 
       auto other = ConstructedSheet(*document, {.Media = ShareRefPtr(sheet->Media())});
       REQUIRE(ToNarrow(other->Media()->MediaText()) == "screen");
@@ -268,18 +268,18 @@ namespace krys::boo::css::tests
 
     SECTION("a relative base URL is resolved against the document base URL")
     {
-      document->SetURL(url::URL(u8"https://example.com/dir/page.html"));
+      document->SetUrl(net::Url(u8"https://example.com/dir/page.html"));
 
-      auto sheet = ConstructedSheet(*document, {.BaseURL = u8"sheets/"});
-      REQUIRE(ToNarrow(sheet->BaseURL().String()) == "https://example.com/dir/sheets/");
+      auto sheet = ConstructedSheet(*document, {.BaseUrl = u8"sheets/"});
+      REQUIRE(ToNarrow(sheet->BaseUrl().String()) == "https://example.com/dir/sheets/");
 
       auto defaultSheet = ConstructedSheet(*document);
-      REQUIRE(ToNarrow(defaultSheet->BaseURL().String()) == "https://example.com/dir/page.html");
+      REQUIRE(ToNarrow(defaultSheet->BaseUrl().String()) == "https://example.com/dir/page.html");
     }
 
     SECTION("an invalid base URL")
     {
-      auto sheet = CSSStyleSheet::Create(*document, {.BaseURL = u8"relative"});
+      auto sheet = CSSStyleSheet::Create(*document, {.BaseUrl = u8"relative"});
       REQUIRE(ExceptionCodeOf(sheet) == ExceptionCode::NotAllowedError);
     }
 

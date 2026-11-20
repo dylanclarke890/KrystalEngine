@@ -28,6 +28,11 @@
 #include "Krystal.Booey/Graphics/Geometry/FloatRoundedRect.hpp"
 #include "Krystal.Booey/Rendering/Style/RenderStyleConstants.hpp"
 
+namespace krys
+{
+  class TransformationMatrix;
+}
+
 namespace krys::boo
 {
   class BoxPathOperation;
@@ -35,7 +40,6 @@ namespace krys::boo
   class RayPathOperation;
   class RenderElement;
   class ShapePathOperation;
-  class TransformationMatrix;
   struct TransformOperationData;
 
   namespace style
@@ -47,8 +51,8 @@ namespace krys::boo
   struct MotionPathData
   {
     FloatRoundedRect ContainingBlockBoundingRect;
-    FloatPoint OffsetFromContainingBlock;
-    FloatPoint UsedStartingPosition;
+    PointF OffsetFromContainingBlock;
+    PointF UsedStartingPosition;
   };
 
   /// @brief Resolves `offset-path` operations into paths and applies motion path transforms.
@@ -63,9 +67,9 @@ namespace krys::boo
     KRYS_NODISCARD static bool NeedsUpdateAfterContainingBlockLayout(const style::OffsetPath &) noexcept;
 
     static void ApplyMotionPathTransform(TransformationMatrix &, const TransformOperationData &,
-                                         FloatPoint transformOrigin, TransformBox, const Path &,
-                                         Maybe<FloatPoint> offsetAnchor, float offsetDistance,
-                                         float offsetRotate, bool offsetRotateHasAuto) noexcept;
+                                         PointF transformOrigin, TransformBox, const Path &,
+                                         Maybe<PointF> offsetAnchor, float offsetDistance, float offsetRotate,
+                                         bool offsetRotateHasAuto) noexcept;
 
     KRYS_NODISCARD static Maybe<Path> ComputePathForBox(const BoxPathOperation &,
                                                         const TransformOperationData &) noexcept;

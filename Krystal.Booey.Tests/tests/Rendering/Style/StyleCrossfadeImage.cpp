@@ -2,11 +2,11 @@
 #include "catch2/catch_test_macros.hpp"
 #include "Krystal.Booey.Tests/Loader/PageInFrameFixture.hpp"
 #include "Krystal.Booey.Tests/Loader/TestLoader.hpp"
-#include "Krystal.Booey.Tests/Platform/ImageDecoders/TestImages.hpp"
 #include "Krystal.Booey/Graphics/Animation/AnimationUtilities.hpp"
 #include "Krystal.Booey/Rendering/GeneratedContent/RenderListItem.hpp"
 #include "Krystal.Booey/Rendering/GeneratedContent/RenderListMarker.hpp"
 #include "Krystal.Booey/Rendering/RenderElement.hpp"
+#include "Krystal.Image.Tests/TestImages.hpp"
 
 namespace krys::boo::tests
 {
@@ -14,8 +14,8 @@ namespace krys::boo::tests
             "[Rendering][StyleCrossfadeImage]")
   {
     LoaderFixture loader;
-    loader.Strategy.Resources[u8"file:///a.png"] = images::PNG;
-    loader.Strategy.Resources[u8"file:///b.jpg"] = images::JPEG;
+    loader.Strategy.Resources[u8"file:///a.png"] = img::tests::images::PNG;
+    loader.Strategy.Resources[u8"file:///b.jpg"] = img::tests::images::JPEG;
 
     PageInFrameFixture fixture(
       u8"<div id=mixed style='background-image: cross-fade(url(file:///a.png), url(file:///b.jpg), "
@@ -35,19 +35,19 @@ namespace krys::boo::tests
     };
 
     // A quarter of the way from the 3x2 PNG to the 16x8 JPEG.
-    CHECK(imageSize(u8"mixed") == FloatSize(6.25f, 3.5f));
+    CHECK(imageSize(u8"mixed") == SizeF(6.25f, 3.5f));
     // Images of the same size keep it exactly.
-    CHECK(imageSize(u8"same") == FloatSize(3, 2));
+    CHECK(imageSize(u8"same") == SizeF(3, 2));
     // Without both images, the size is empty.
-    CHECK(imageSize(u8"none") == FloatSize());
+    CHECK(imageSize(u8"none") == SizeF());
   }
 
   TEST_CASE("StyleCrossfadeImage::Blend: the percentages, once the input images have loaded",
             "[Rendering][StyleCrossfadeImage]")
   {
     LoaderFixture loader;
-    loader.Strategy.Resources[u8"file:///a.png"] = images::PNG;
-    loader.Strategy.Resources[u8"file:///b.jpg"] = images::JPEG;
+    loader.Strategy.Resources[u8"file:///a.png"] = img::tests::images::PNG;
+    loader.Strategy.Resources[u8"file:///b.jpg"] = img::tests::images::JPEG;
 
     PageInFrameFixture fixture(
       u8"<div id=from style='background-image: cross-fade(url(file:///a.png), url(file:///b.jpg), "
@@ -73,7 +73,7 @@ namespace krys::boo::tests
             "[Rendering][StyleCrossfadeImage]")
   {
     LoaderFixture loader;
-    loader.Strategy.Resources[u8"file:///b.jpg"] = images::JPEG;
+    loader.Strategy.Resources[u8"file:///b.jpg"] = img::tests::images::JPEG;
     loader.Strategy.Defer = true;
 
     PageInFrameFixture fixture(u8"<ul><li id=item style='list-style-image: cross-fade(url(file:///b.jpg), "
@@ -99,8 +99,8 @@ namespace krys::boo::tests
   TEST_CASE("StyleCrossfadeImage: draws both input images", "[Rendering][StyleCrossfadeImage]")
   {
     LoaderFixture loader;
-    loader.Strategy.Resources[u8"file:///a.png"] = images::PNG;
-    loader.Strategy.Resources[u8"file:///b.jpg"] = images::JPEG;
+    loader.Strategy.Resources[u8"file:///a.png"] = img::tests::images::PNG;
+    loader.Strategy.Resources[u8"file:///b.jpg"] = img::tests::images::JPEG;
 
     PageInFrameFixture fixture(
       u8"<style>body{margin:0}</style><div style='width:16px;height:8px;background-repeat:no-repeat;"

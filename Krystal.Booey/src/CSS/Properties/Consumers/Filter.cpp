@@ -34,7 +34,7 @@
 #include "Krystal.Booey/CSS/Properties/Consumers/NumberDefinitions.hpp"
 #include "Krystal.Booey/CSS/Properties/Consumers/PercentageDefinitions.hpp"
 #include "Krystal.Booey/CSS/Properties/Consumers/Primitives.hpp"
-#include "Krystal.Booey/CSS/Properties/Consumers/URL.hpp"
+#include "Krystal.Booey/CSS/Properties/Consumers/Url.hpp"
 #include "Krystal.Booey/CSS/Properties/PropertyParserState.hpp"
 #include "Krystal.Booey/CSS/Values/Color/Color.hpp"
 #include "Krystal.Booey/CSS/Values/FilterEffects/Filter.hpp"
@@ -350,7 +350,7 @@ namespace krys::boo::css::parse_property
 
     do
     {
-      if (auto url = ConsumeURLRaw(rangeCopy, state, {}))
+      if (auto url = ConsumeUrlRaw(rangeCopy, state, {}))
       {
         list.Value.push_back(FilterReference {krys::move(*url)});
         continue;

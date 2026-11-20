@@ -10,26 +10,26 @@ namespace krys::boo::style::tests
   {
     SECTION("An unresolved URL is completed against the document")
     {
-      Document->SetURL(url::URL {u8"https://example.com/dir/page.html"});
-      auto url = ConvertCSSValueToStyle<URL>(
+      Document->SetUrl(net::Url {u8"https://example.com/dir/page.html"});
+      auto url = ConvertCSSValueToStyle<Url>(
         *State,
-        *css::UrlValue::Create(css::CSSURL {.Specified = u8"image.png", .Resolved = {}, .Modifiers = {}}));
+        *css::UrlValue::Create(css::CSSUrl {.Specified = u8"image.png", .Resolved = {}, .Modifiers = {}}));
       CHECK(url.Resolved.String() == u8"https://example.com/dir/image.png");
       CHECK_FALSE(IsInvalid());
     }
 
     SECTION("A resolved URL is kept")
     {
-      auto resolved = url::URL {u8"https://example.org/sheet/image.png"};
-      auto url = ConvertCSSValueToStyle<URL>(
+      auto resolved = net::Url {u8"https://example.org/sheet/image.png"};
+      auto url = ConvertCSSValueToStyle<Url>(
         *State, *css::UrlValue::Create(
-                  css::CSSURL {.Specified = u8"image.png", .Resolved = resolved, .Modifiers = {}}));
+                  css::CSSUrl {.Specified = u8"image.png", .Resolved = resolved, .Modifiers = {}}));
       CHECK(url.Resolved == resolved);
     }
 
     SECTION("A non-URL value is invalid at computed-value time")
     {
-      auto url = ConvertCSSValueToStyle<URL>(*State, *css::PrimitiveValue::Create(css::ValueId::None));
+      auto url = ConvertCSSValueToStyle<Url>(*State, *css::PrimitiveValue::Create(css::ValueId::None));
       CHECK(IsInvalid());
       CHECK_FALSE(url.Resolved.IsNull());
       CHECK(url.Resolved.String().empty());
@@ -37,16 +37,16 @@ namespace krys::boo::style::tests
 
     SECTION("Creation and serialisation")
     {
-      URL url {.Resolved = url::URL {u8"https://example.com/a.png"}, .Modifiers = {}};
+      Url url {.Resolved = net::Url {u8"https://example.com/a.png"}, .Modifiers = {}};
       CHECK(Created(url) == "url(\"https://example.com/a.png\")");
       CHECK(Serialised(url) == "url(\"https://example.com/a.png\")");
     }
 
     SECTION("Markable")
     {
-      Markable<URL> url;
+      Markable<Url> url;
       CHECK_FALSE(url);
-      url = URL {.Resolved = url::URL {u8"https://example.com/"}, .Modifiers = {}};
+      url = Url {.Resolved = net::Url {u8"https://example.com/"}, .Modifiers = {}};
       CHECK(url);
     }
   }

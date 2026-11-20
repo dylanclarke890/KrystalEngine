@@ -64,22 +64,22 @@ namespace krys::boo::style::tests
     CHECK_FALSE(shape.HoldsAlternative<BoxPath>());
 
     // A basic shape without a motion path is resolved against the bounding box.
-    auto path = TryPath(shape, TransformOperationData {FloatRect {0, 0, 100, 100}});
+    auto path = TryPath(shape, TransformOperationData {RectF {0, 0, 100, 100}});
     REQUIRE(path);
-    CHECK(path->BoundingRect() == FloatRect {10, 20, 20, 20});
+    CHECK(path->BoundingRect() == RectF {10, 20, 20, 20});
 
     // `path()` is allowed here, unlike `shape-outside`.
     auto svgPath = Convert<ClipPath>(PropertyId::ClipPath, u8"path('M 10 10 h 30 v 40 Z')");
     REQUIRE(svgPath.IsBasicShape());
     CHECK(Serialised(svgPath) == "path(\"M 10 10 h 30 v 40 Z\")");
-    CHECK(TryPath(svgPath, TransformOperationData {FloatRect {0, 0, 100, 100}}).value().BoundingRect()
-          == FloatRect {10, 10, 30, 40});
+    CHECK(TryPath(svgPath, TransformOperationData {RectF {0, 0, 100, 100}}).value().BoundingRect()
+          == RectF {10, 10, 30, 40});
 
     auto reference = Convert<ClipPath>(PropertyId::ClipPath, u8"url(#clip)");
     REQUIRE(reference.IsReference());
     CHECK(reference.TryReference().value().Fragment().View() == u8"clip");
     // Without SVG geometry the reference has no path yet.
-    CHECK_FALSE(TryPath(reference, TransformOperationData {FloatRect {0, 0, 100, 100}}));
+    CHECK_FALSE(TryPath(reference, TransformOperationData {RectF {0, 0, 100, 100}}));
 
     // Copies share the operation; equality compares the operations.
     auto copy = shape;

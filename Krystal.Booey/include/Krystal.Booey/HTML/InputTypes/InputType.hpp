@@ -37,10 +37,10 @@
 #include "Krystal.Booey/HTML/Elements/HTMLTextFormControlElement.hpp"
 #include "Krystal.Booey/HTML/InputTypes/StepRange.hpp"
 #include "Krystal.Booey/Platform/DateComponents.hpp"
-#include "Krystal.Booey/Platform/Decimal.hpp"
 #include "Krystal.Booey/Rendering/RenderPtr.hpp"
 #include "Krystal.Core/Enum.hpp"
 #include "Krystal.Core/RefCounted.hpp"
+#include "Krystal.Core/Types/Decimal.hpp"
 #include "Krystal.Core/Types/RefPtr.hpp"
 
 namespace krys::boo
@@ -91,7 +91,7 @@ namespace krys::boo::html
     Submit,
     Telephone,
     Time,
-    URL,
+    Url,
     Week,
     Text,
   };
@@ -227,9 +227,9 @@ namespace krys::boo::html
       return _type == Type::Time;
     }
 
-    KRYS_NODISCARD bool IsURLField() const noexcept
+    KRYS_NODISCARD bool IsUrlField() const noexcept
     {
-      return _type == Type::URL;
+      return _type == Type::Url;
     }
 
     KRYS_NODISCARD bool IsWeekField() const noexcept

@@ -30,8 +30,8 @@
 #include "Krystal.Booey/Graphics/Fonts/FontCustomPlatformData.hpp"
 #include "Krystal.Booey/Loader/Cache/CachedFont.hpp"
 #include "Krystal.Booey/Loader/Cache/CachedFontLoadRequest.hpp"
-#include "Krystal.Core/Text/ASCII.hpp"
-#include "Krystal.Core/Text/StringBuilder.hpp"
+#include "Krystal.Core/Strings/ASCII.hpp"
+#include "Krystal.Core/Strings/StringBuilder.hpp"
 
 namespace krys::boo::css
 {
@@ -59,7 +59,7 @@ namespace krys::boo::css
     return _fontFaceName == other._fontFaceName;
   }
 
-  FontFaceSrcResourceValue::FontFaceSrcResourceValue(CSSURL &&location, CSSOMString &&format,
+  FontFaceSrcResourceValue::FontFaceSrcResourceValue(CSSUrl &&location, CSSOMString &&format,
                                                      List<FontTechnology> &&technologies) noexcept
       : Value(ValueType::FontFaceSrcResource), _location(Resolve(krys::move(location))),
         _format(krys::move(format)), _technologies(krys::move(technologies))
@@ -68,7 +68,7 @@ namespace krys::boo::css
 
   FontFaceSrcResourceValue::~FontFaceSrcResourceValue() noexcept = default;
 
-  Ref<FontFaceSrcResourceValue> FontFaceSrcResourceValue::Create(CSSURL location, CSSOMString format,
+  Ref<FontFaceSrcResourceValue> FontFaceSrcResourceValue::Create(CSSUrl location, CSSOMString format,
                                                                  List<FontTechnology> &&technologies) noexcept
   {
     return AdoptRef(
@@ -131,7 +131,7 @@ namespace krys::boo::css
 
   bool FontFaceSrcResourceValue::CustomMayDependOnBaseUrl() const noexcept
   {
-    return MayDependOnBaseURL(_location);
+    return css::MayDependOnBaseUrl(_location);
   }
 
   CSSOMString FontFaceSrcResourceValue::CustomCSSText(const SerialisationContext &context) const noexcept

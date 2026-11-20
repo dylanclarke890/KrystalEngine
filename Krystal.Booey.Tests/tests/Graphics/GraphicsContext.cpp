@@ -2,10 +2,10 @@
 #include "catch2/catch_approx.hpp"
 #include "catch2/catch_test_macros.hpp"
 #include "Krystal.Booey/Graphics/DisplayLists/DisplayListRecorderImpl.hpp"
-#include "Krystal.Booey/Graphics/Geometry/FloatSegment.hpp"
 #include "Krystal.Booey/Graphics/NullGraphicsContext.hpp"
 #include "Krystal.Core/Colour/ColourTextStream.hpp"
-#include "Krystal.Core/Text/TextStream.hpp"
+#include "Krystal.Core/Geometry/Segment.hpp"
+#include "Krystal.Core/Strings/TextStream.hpp"
 
 namespace krys::boo::tests
 {
@@ -15,7 +15,7 @@ namespace krys::boo::tests
     class LinesRecorder : public display_list::RecorderImpl
     {
     public:
-      LinesRecorder() noexcept : RecorderImpl(FloatSize {100, 100})
+      LinesRecorder() noexcept : RecorderImpl(SizeF {100, 100})
       {
       }
 
@@ -103,14 +103,14 @@ namespace krys::boo::tests
   TEST_CASE("GraphicsContext: splits text lines into rects", "[Graphics][GraphicsContext]")
   {
     LinesRecorder context;
-    const FloatSegment segment[] {{0, 10}};
+    const SegmentF segment[] {{0, 10}};
 
     SECTION("A solid line is a rect, its top rounded down to the next device pixel")
     {
       auto result = context.ComputeRectsAndStrokeColorForLinesForText({0, 10.3f}, 1, segment, false, false,
                                                                       StrokeStyle::SolidStroke);
       REQUIRE(result.Rects.size() == 1u);
-      CHECK(result.Rects[0] == FloatRect(0, 11, 10, 1));
+      CHECK(result.Rects[0] == RectF(0, 11, 10, 1));
       CHECK(result.StrokeColor == Color::black);
     }
 
@@ -119,9 +119,9 @@ namespace krys::boo::tests
       auto result = context.ComputeRectsAndStrokeColorForLinesForText({0, 10}, 1, segment, false, false,
                                                                       StrokeStyle::DashedStroke);
       REQUIRE(result.Rects.size() == 3u);
-      CHECK(result.Rects[0] == FloatRect(0, 10, 2, 1));
-      CHECK(result.Rects[1] == FloatRect(4, 10, 2, 1));
-      CHECK(result.Rects[2] == FloatRect(8, 10, 2, 1));
+      CHECK(result.Rects[0] == RectF(0, 10, 2, 1));
+      CHECK(result.Rects[1] == RectF(4, 10, 2, 1));
+      CHECK(result.Rects[2] == RectF(8, 10, 2, 1));
     }
 
     SECTION("A double line has a second line a line's height below")
@@ -129,7 +129,7 @@ namespace krys::boo::tests
       auto result = context.ComputeRectsAndStrokeColorForLinesForText({0, 10}, 2, segment, false, true,
                                                                       StrokeStyle::SolidStroke);
       REQUIRE(result.Rects.size() == 2u);
-      CHECK(result.Rects[1] == FloatRect(0, 14, 10, 2));
+      CHECK(result.Rects[1] == RectF(0, 14, 10, 2));
     }
 
     SECTION("Scaled down, the line fades")
@@ -180,14 +180,14 @@ namespace krys::boo::tests
     CHECK(static_cast<GraphicsContext &>(detecting).PerformingPaintInvalidation());
   }
 
-  TEST_CASE("FloatSegment: subtracts dilated segments", "[Graphics][GraphicsContext]")
+  TEST_CASE("SegmentF: subtracts dilated segments", "[Graphics][GraphicsContext]")
   {
     auto result = DifferenceWithDilation({0, 100}, {{50, 60}, {10, 20}}, 2);
-    CHECK(result == List<FloatSegment> {{0, 8}, {22, 48}, {62, 100}});
+    CHECK(result == List<SegmentF> {{0, 8}, {22, 48}, {62, 100}});
 
     // Gaps no longer than the dilation are dropped.
     result = DifferenceWithDilation({0, 100}, {{3, 50}}, 2);
-    CHECK(result == List<FloatSegment> {{52, 100}});
+    CHECK(result == List<SegmentF> {{52, 100}});
   }
 
   TEST_CASE("Graphics types: write themselves", "[Graphics][GraphicsContext]")

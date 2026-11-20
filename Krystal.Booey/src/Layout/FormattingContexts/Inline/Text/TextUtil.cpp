@@ -34,14 +34,15 @@
 #include "Krystal.Booey/Rendering/Line/BreakablePositions.hpp"
 #include "Krystal.Booey/Rendering/Style/RenderStyle+GettersInlines.hpp"
 #include "Krystal.Booey/Style/Values/Text/TabSize.hpp"
-#include "Krystal.Booey/Text/CharacterProperties.hpp"
 #include "Krystal.Booey/Text/UnicodeBidi.hpp"
-#include "Krystal.Booey/Text/UnicodeHelpers.hpp"
-#include "Krystal.Core/Text/CodePointIterator.hpp"
-#include "Krystal.Core/Text/Unicode.hpp"
+#include "Krystal.Core/Strings/CodePointIterator.hpp"
+#include "Krystal.Core/Strings/Unicode.hpp"
+#include "Krystal.Text/Bidi.hpp"
+#include "Krystal.Text/CaseMapping.hpp"
+#include "Krystal.Text/CharacterProperties.hpp"
+#include "Krystal.Text/UnicodeHelpers.hpp"
 #include <cmath>
 #include <numeric>
-#include <unicode/uchar.h>
 
 namespace krys::boo::layout
 {
@@ -75,17 +76,18 @@ namespace krys::boo::layout
         {
           if (isSmallCaps)
           {
-            character = static_cast<char32>(u_toupper(static_cast<UChar32>(character)));
+            character = text::SimpleUppercase(character);
           }
 
           auto glyphData = fontCascade.GlyphDataForCharacter(character, isRTL);
           if (glyphData.Glyph && glyphData.Font && glyphData.Font.get() != primaryFont.get())
           {
-            auto isNonSpacingMark = U_MASK(u_charType(static_cast<UChar32>(character))) & U_GC_MN_MASK;
+            auto isNonSpacingMark =
+              text::GetGeneralCategory(character) == text::GeneralCategory::NonspacingMark;
 
             // https://drafts.csswg.org/css-text-3/#white-space-processing
             // "Unsupported Default_ignorable characters must be ignored for text rendering."
-            auto isIgnored = IsDefaultIgnorableCodePoint(character);
+            auto isIgnored = text::IsDefaultIgnorableCodePoint(character);
 
             // If we include the synthetic bold expansion, then even zero-width glyphs will have their fonts
             // added.
@@ -117,7 +119,7 @@ namespace krys::boo::layout
         {
           if (isSmallCaps)
           {
-            character = static_cast<char32>(u_toupper(static_cast<UChar32>(character)));
+            character = text::SimpleUppercase(character);
           }
 
           auto glyphData = fontCascade.GlyphDataForCharacter(character, isRTL);
@@ -210,9 +212,10 @@ namespace krys::boo::layout
     {
       auto &style = inlineTextBox.Style();
       auto directionalOverride = IsOverride(style.GetUnicodeBidi());
-      auto run = TextRun(view, contentLogicalLeft, {}, ExpansionBehavior::DefaultBehavior(),
-                         directionalOverride ? style.GetWritingMode().BidiDirection() : TextDirection::LTR,
-                         directionalOverride);
+      auto run =
+        TextRun(view, contentLogicalLeft, {}, ExpansionBehavior::DefaultBehavior(),
+                directionalOverride ? style.GetWritingMode().BidiDirection() : text::TextDirection::LTR,
+                directionalOverride);
       if (!style.CollapseWhiteSpace() && !style.GetTabSize().IsZero())
       {
         run.SetTabSize(true, style::ToPlatform<style::TabSize> {}(style.GetTabSize()));
@@ -500,17 +503,17 @@ namespace krys::boo::layout
       return findBreakingPositionInSimpleText();
     }
 
-    auto graphemeClusterIterator = NonSharedCharacterBreakIterator {text.substr(startPosition, length)};
+    auto graphemeClusterIterator = text::NonSharedCharacterBreakIterator {text.substr(startPosition, length)};
     auto leftSide = TextUtil::WordBreakLeft {};
-    for (auto clusterStartPosition = ubrk_next(graphemeClusterIterator); clusterStartPosition != UBRK_DONE;
-         clusterStartPosition = ubrk_next(graphemeClusterIterator))
+    for (auto clusterStartPosition = graphemeClusterIterator.Next(); clusterStartPosition;
+         clusterStartPosition = graphemeClusterIterator.Next())
     {
-      auto clusterWidth = width(startPosition, startPosition + static_cast<size_t>(clusterStartPosition));
+      auto clusterWidth = width(startPosition, startPosition + *clusterStartPosition);
       if (clusterWidth > availableWidth)
       {
         return leftSide;
       }
-      leftSide = {static_cast<size_t>(clusterStartPosition), clusterWidth};
+      leftSide = {*clusterStartPosition, clusterWidth};
     }
     // This content is not supposed to fit availableWidth.
     krys_debug_assert(false);
@@ -533,9 +536,9 @@ namespace krys::boo::layout
     // previous text item ends with breaking opportunity. [ex-][ample] <- second to last[x] last[-] current[a]
     // We need at least 1 character in the current inline text item and 2 more from previous inline items.
     auto lineBreakIteratorFactory =
-      CachedLineBreakIteratorFactory {nextContent, nextContentStyle.ComputedLocale().GetPlatform(),
-                                      TextUtil::LineBreakIteratorMode(nextContentStyle.GetLineBreak()),
-                                      TextUtil::GetContentAnalysis(nextContentStyle.GetWordBreak())};
+      text::CachedLineBreakIteratorFactory {nextContent, nextContentStyle.ComputedLocale().GetPlatform(),
+                                            TextUtil::LineBreakIteratorMode(nextContentStyle.GetLineBreak()),
+                                            TextUtil::GetContentAnalysis(nextContentStyle.GetWordBreak())};
     // FIXME: We should look into the entire uncommitted content for more text context.
     char32 lastCharacter = 0;
     char32 secondToLastCharacter = 0;
@@ -561,7 +564,7 @@ namespace krys::boo::layout
     return !FindNextBreakablePosition(lineBreakIteratorFactory, 0, nextContentStyle);
   }
 
-  uint32 TextUtil::FindNextBreakablePosition(CachedLineBreakIteratorFactory &lineBreakIteratorFactory,
+  uint32 TextUtil::FindNextBreakablePosition(text::CachedLineBreakIteratorFactory &lineBreakIteratorFactory,
                                              uint32 startPosition, const RenderStyle &style) noexcept
   {
     using LineBreakRules = BreakablePositions::LineBreakRules;
@@ -582,7 +585,7 @@ namespace krys::boo::layout
                                       NoBreakSpaceBehavior::Normal>(lineBreakIteratorFactory, startPosition);
     }
 
-    if (lineBreakIteratorFactory.Mode() == TextBreakLineBehavior::Default)
+    if (lineBreakIteratorFactory.Mode() == text::TextBreakLineBehavior::Default)
     {
       return BreakablePositions::Next<LineBreakRules::Normal, WordBreakBehavior::Normal,
                                       NoBreakSpaceBehavior::Normal>(lineBreakIteratorFactory, startPosition);
@@ -622,32 +625,32 @@ namespace krys::boo::layout
            && style.GetTextWrapMode() != TextWrapMode::NoWrap;
   }
 
-  TextBreakLineBehavior TextUtil::LineBreakIteratorMode(LineBreak lineBreak) noexcept
+  text::TextBreakLineBehavior TextUtil::LineBreakIteratorMode(LineBreak lineBreak) noexcept
   {
     switch (lineBreak)
     {
       case LineBreak::Auto:
       case LineBreak::AfterWhiteSpace:
-      case LineBreak::Anywhere:        return TextBreakLineBehavior::Default;
-      case LineBreak::Loose:           return TextBreakLineBehavior::Loose;
-      case LineBreak::Normal:          return TextBreakLineBehavior::Normal;
-      case LineBreak::Strict:          return TextBreakLineBehavior::Strict;
+      case LineBreak::Anywhere:        return text::TextBreakLineBehavior::Default;
+      case LineBreak::Loose:           return text::TextBreakLineBehavior::Loose;
+      case LineBreak::Normal:          return text::TextBreakLineBehavior::Normal;
+      case LineBreak::Strict:          return text::TextBreakLineBehavior::Strict;
     }
     krys_debug_assert(false);
-    return TextBreakLineBehavior::Default;
+    return text::TextBreakLineBehavior::Default;
   }
 
-  TextBreakIterator::ContentAnalysis TextUtil::GetContentAnalysis(WordBreak wordBreak) noexcept
+  text::TextBreakIterator::ContentAnalysis TextUtil::GetContentAnalysis(WordBreak wordBreak) noexcept
   {
     switch (wordBreak)
     {
       case WordBreak::Normal:
       case WordBreak::BreakAll:
       case WordBreak::KeepAll:
-      case WordBreak::BreakWord:  return TextBreakIterator::ContentAnalysis::Mechanical;
-      case WordBreak::AutoPhrase: return TextBreakIterator::ContentAnalysis::Linguistic;
+      case WordBreak::BreakWord:  return text::TextBreakIterator::ContentAnalysis::Mechanical;
+      case WordBreak::AutoPhrase: return text::TextBreakIterator::ContentAnalysis::Linguistic;
     }
-    return TextBreakIterator::ContentAnalysis::Mechanical;
+    return text::TextBreakIterator::ContentAnalysis::Mechanical;
   }
 
   bool TextUtil::IsStrongDirectionalityCharacter(char32 character) noexcept
@@ -657,11 +660,13 @@ namespace krys::boo::layout
       return false;
     }
 
-    auto bidiCategory = u_charDirection(static_cast<UChar32>(character));
-    return bidiCategory == U_RIGHT_TO_LEFT || bidiCategory == U_RIGHT_TO_LEFT_ARABIC
-           || bidiCategory == U_RIGHT_TO_LEFT_EMBEDDING || bidiCategory == U_RIGHT_TO_LEFT_OVERRIDE
-           || bidiCategory == U_LEFT_TO_RIGHT_EMBEDDING || bidiCategory == U_LEFT_TO_RIGHT_OVERRIDE
-           || bidiCategory == U_POP_DIRECTIONAL_FORMAT;
+    auto bidiCategory = text::GetBidiClass(character);
+    return bidiCategory == text::BidiClass::RightToLeft || bidiCategory == text::BidiClass::RightToLeftArabic
+           || bidiCategory == text::BidiClass::RightToLeftEmbedding
+           || bidiCategory == text::BidiClass::RightToLeftOverride
+           || bidiCategory == text::BidiClass::LeftToRightEmbedding
+           || bidiCategory == text::BidiClass::LeftToRightOverride
+           || bidiCategory == text::BidiClass::PopDirectionalFormat;
   }
 
   bool TextUtil::ContainsStrongDirectionalityText(utf8_stringview text) noexcept
@@ -689,13 +694,13 @@ namespace krys::boo::layout
       krys_debug_assert(endOfCodePoint > startPosition);
       return endOfCodePoint - startPosition;
     }
-    auto graphemeClustersIterator = NonSharedCharacterBreakIterator {textContent};
-    auto nextPosition = ubrk_following(graphemeClustersIterator, static_cast<int32_t>(startPosition));
-    if (nextPosition == UBRK_DONE)
+    auto graphemeClustersIterator = text::NonSharedCharacterBreakIterator {textContent};
+    auto nextPosition = graphemeClustersIterator.Following(static_cast<uint32>(startPosition));
+    if (!nextPosition)
     {
       return length;
     }
-    return static_cast<size_t>(nextPosition) - startPosition;
+    return *nextPosition - startPosition;
   }
 
   size_t TextUtil::FirstUserPerceivedCharacterLength(const InlineTextItem &inlineTextItem) noexcept
@@ -705,9 +710,9 @@ namespace krys::boo::layout
     return std::min<size_t>(inlineTextItem.Length(), length);
   }
 
-  TextDirection TextUtil::DirectionForTextContent(utf8_stringview content) noexcept
+  text::TextDirection TextUtil::DirectionForTextContent(utf8_stringview content) noexcept
   {
-    return BaseTextDirection(content).value_or(TextDirection::LTR);
+    return text::BaseTextDirection(content).value_or(text::TextDirection::LTR);
   }
 
   const StringAtom &TextUtil::EllipsisTextInInlineDirection(bool isHorizontal) noexcept
@@ -735,8 +740,10 @@ namespace krys::boo::layout
       return false;
     }
     auto leadingCharacter = DecodeAt(inlineTextItem.Content(), 0).CodePoint;
-    return U_GET_GC_MASK(static_cast<UChar32>(leadingCharacter))
-           & (U_GC_PS_MASK | U_GC_PI_MASK | U_GC_PF_MASK);
+    return text::IsInGeneralCategory(leadingCharacter,
+                                     text::GeneralCategorySet {text::GeneralCategory::OpenPunctuation,
+                                                               text::GeneralCategory::InitialPunctuation,
+                                                               text::GeneralCategory::FinalPunctuation});
   }
 
   float TextUtil::HangablePunctuationStartWidth(const InlineTextItem &inlineTextItem,
@@ -764,8 +771,10 @@ namespace krys::boo::layout
     auto content = inlineTextItem.Content();
     auto trailingCharacter =
       DecodeAt(content, text::PreviousCodePointStart(content, content.size())).CodePoint;
-    return U_GET_GC_MASK(static_cast<UChar32>(trailingCharacter))
-           & (U_GC_PE_MASK | U_GC_PI_MASK | U_GC_PF_MASK);
+    return text::IsInGeneralCategory(trailingCharacter,
+                                     text::GeneralCategorySet {text::GeneralCategory::ClosePunctuation,
+                                                               text::GeneralCategory::InitialPunctuation,
+                                                               text::GeneralCategory::FinalPunctuation});
   }
 
   float TextUtil::HangablePunctuationEndWidth(const InlineTextItem &inlineTextItem,
@@ -875,7 +884,7 @@ namespace krys::boo::layout
     {
       position = text::PreviousCodePointStart(string, position);
       auto character = DecodeAt(string, position).CodePoint;
-      if (!IsCombiningMark(character))
+      if (!text::IsCombiningMark(character))
       {
         return character;
       }

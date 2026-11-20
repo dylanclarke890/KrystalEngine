@@ -23,7 +23,6 @@
 #pragma once
 
 #include "Krystal.Booey/Graphics/Color/Color.hpp"
-#include "Krystal.Booey/Graphics/Geometry/FloatPoint.hpp"
 #include "Krystal.Booey/Rendering/Painting/PaintPhase.hpp"
 #include "Krystal.Booey/Rendering/Style/RenderStyleConstants.hpp"
 #include "Krystal.Booey/Style/InlineTextBoxStyle.hpp"
@@ -31,6 +30,7 @@
 #include "Krystal.Booey/Style/Values/TextDecoration/TextShadow.hpp"
 #include "Krystal.Booey/Text/WritingMode.hpp"
 #include "Krystal.Core/Attributes.hpp"
+#include "Krystal.Core/Geometry/Point.hpp"
 #include "Krystal.Core/Types/EnumSet.hpp"
 
 namespace krys::boo
@@ -70,8 +70,8 @@ namespace krys::boo
 
     struct BackgroundDecorationGeometry
     {
-      FloatPoint TextOrigin;
-      FloatPoint BoxOrigin;
+      PointF TextOrigin;
+      PointF BoxOrigin;
       float TextBoxWidth {0.f};
       float TextDecorationThickness {0.f};
       float UnderlineOffset {0.f};
@@ -83,7 +83,7 @@ namespace krys::boo
 
     struct ForegroundDecorationGeometry
     {
-      FloatPoint BoxOrigin;
+      PointF BoxOrigin;
       float TextBoxWidth {0.f};
       float TextDecorationThickness {0.f};
       float LinethroughCenter {0.f};

@@ -35,7 +35,7 @@
 #include "Krystal.Booey/Graphics/Filters/Filter.hpp"
 #include "Krystal.Booey/Graphics/Filters/FilterImage.hpp"
 #include "Krystal.Core/Maths/Extras.hpp"
-#include "Krystal.Core/Text/TextStream.hpp"
+#include "Krystal.Core/Strings/TextStream.hpp"
 #include <algorithm>
 #include <cmath>
 
@@ -48,14 +48,14 @@ namespace krys::boo
     constexpr float AntialiasThreshold = 0.016f;
   }
 
-  Ref<SpotLightSource> SpotLightSource::Create(const FloatPoint3D &position, const FloatPoint3D &direction,
+  Ref<SpotLightSource> SpotLightSource::Create(const Point3F &position, const Point3F &direction,
                                                float specularExponent, float limitingConeAngle) noexcept
   {
     return AdoptRef(*new SpotLightSource(position, direction, specularExponent, limitingConeAngle));
   }
 
-  SpotLightSource::SpotLightSource(const FloatPoint3D &position, const FloatPoint3D &pointsAt,
-                                   float specularExponent, float limitingConeAngle) noexcept
+  SpotLightSource::SpotLightSource(const Point3F &position, const Point3F &pointsAt, float specularExponent,
+                                   float limitingConeAngle) noexcept
       : LightSource(LightType::LS_SPOT), _position(position), _pointsAt(pointsAt),
         _specularExponent(std::clamp(specularExponent, 1.0f, 128.0f)), _limitingConeAngle(limitingConeAngle)
   {
@@ -77,7 +77,7 @@ namespace krys::boo
     _bufferPosition.SetXY(result.MappedAbsolutePoint(absolutePosition));
 
     // To scale Z, map a point offset from position in the x direction by z.
-    auto absoluteMappedZ = filter.ScaledByFilterScale(FloatPoint {position.X() + position.Z(), position.Y()});
+    auto absoluteMappedZ = filter.ScaledByFilterScale(PointF {position.X() + position.Z(), position.Y()});
     _bufferPosition.SetZ(result.MappedAbsolutePoint(absoluteMappedZ).X() - _bufferPosition.X());
 
     paintingData.DirectionVector = pointsAt - position;
@@ -108,8 +108,8 @@ namespace krys::boo
     SpotLightSource::ComputePixelLightingData(const PaintingData &paintingData, int32 x, int32 y,
                                               float z) const noexcept
   {
-    FloatPoint3D lightVector = {_bufferPosition.X() - static_cast<float>(x),
-                                _bufferPosition.Y() - static_cast<float>(y), _bufferPosition.Z() - z};
+    Point3F lightVector = {_bufferPosition.X() - static_cast<float>(x),
+                           _bufferPosition.Y() - static_cast<float>(y), _bufferPosition.Z() - z};
     float lightVectorLength = lightVector.Length();
 
     float cosineOfAngle = (lightVector * paintingData.DirectionVector) / lightVectorLength;

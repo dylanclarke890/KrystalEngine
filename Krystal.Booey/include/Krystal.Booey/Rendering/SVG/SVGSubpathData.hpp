@@ -28,14 +28,14 @@ namespace krys::boo
   class SVGSubpathData
   {
   private:
-    List<FloatPoint> &_zeroLengthSubpathLocations;
-    FloatPoint _lastPoint;
-    FloatPoint _movePoint;
+    List<PointF> &_zeroLengthSubpathLocations;
+    PointF _lastPoint;
+    PointF _movePoint;
     bool _haveSeenMoveOnly {false};
     bool _pathIsZeroLength {false};
 
   public:
-    explicit SVGSubpathData(List<FloatPoint> &zeroLengthSubpathLocations) noexcept
+    explicit SVGSubpathData(List<PointF> &zeroLengthSubpathLocations) noexcept
         : _zeroLengthSubpathLocations(zeroLengthSubpathLocations)
     {
     }

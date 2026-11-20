@@ -30,7 +30,7 @@
 #include "Krystal.Booey/Layout/LayoutTree/LayoutBoxGeometry.hpp"
 #include "Krystal.Booey/Layout/LayoutTree/LayoutInlineTextBox.hpp"
 #include "Krystal.Booey/Rendering/Style/RenderStyle+GettersInlines.hpp"
-#include "Krystal.Core/Text/Unicode.hpp"
+#include "Krystal.Core/Strings/Unicode.hpp"
 
 #include <ranges>
 
@@ -131,7 +131,8 @@ namespace krys::boo::layout
           displayBox.SetIsFullyTruncated();
           return {};
         }
-        auto contentDirection = displayBox.BidiLevel() % 2 ? TextDirection::RTL : TextDirection::LTR;
+        auto contentDirection =
+          displayBox.BidiLevel() % 2 ? text::TextDirection::RTL : text::TextDirection::LTR;
         if (displayBox.LayoutBox().Parent().Style().GetWritingMode().BidiDirection() != contentDirection)
         {
           return TruncateTextContentWithMismatchingDirection(displayBox, contentWidth,
@@ -258,7 +259,7 @@ namespace krys::boo::layout
       return truncateLeft.value_or(left(boxes.front())) - ellipsisWidth;
     }
 
-    KRYS_NODISCARD Maybe<FloatRect> TrailingEllipsisVisualRectAfterTruncation(
+    KRYS_NODISCARD Maybe<RectF> TrailingEllipsisVisualRectAfterTruncation(
       LineEndingTruncationPolicy lineEndingTruncationPolicy, const StringAtom &ellipsisText,
       const inline_display::Line &displayLine, inline_display::Boxes &displayBoxes) noexcept
     {
@@ -336,9 +337,9 @@ namespace krys::boo::layout
 
       if (rootStyle.GetWritingMode().IsHorizontal())
       {
-        return FloatRect {ellipsisStart, rootInlineBox.Top(), ellipsisWidth, rootInlineBox.Height()};
+        return RectF {ellipsisStart, rootInlineBox.Top(), ellipsisWidth, rootInlineBox.Height()};
       }
-      return FloatRect {rootInlineBox.Left(), ellipsisStart, rootInlineBox.Width(), ellipsisWidth};
+      return RectF {rootInlineBox.Left(), ellipsisStart, rootInlineBox.Width(), ellipsisWidth};
     }
   }
 
@@ -459,7 +460,7 @@ namespace krys::boo::layout
   {
     auto &constraints = GetConstraints();
     auto isLeftToRightDirection =
-      lineLayoutResult.BidiDirectionality.InlineBaseDirection == TextDirection::LTR;
+      lineLayoutResult.BidiDirectionality.InlineBaseDirection == text::TextDirection::LTR;
 
     InlineRect lineBoxLogicalRect = lineBox.LogicalRect();
     auto lineBoxLineLeftEdge =

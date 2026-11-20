@@ -131,7 +131,7 @@ namespace krys::boo
       {
         style.SetProperty(
           css::PropertyId::BackgroundImage,
-          css::ImageValue::Create(NodeDocument().CompleteURL(url), CSSOMStringAtom(LocalName().View())));
+          css::ImageValue::Create(NodeDocument().CompleteUrl(url), CSSOMStringAtom(LocalName().View())));
       }
       return;
     }

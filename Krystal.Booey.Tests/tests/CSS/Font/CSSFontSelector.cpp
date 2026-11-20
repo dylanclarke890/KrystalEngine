@@ -7,6 +7,7 @@
 #include "Krystal.Booey/Graphics/Fonts/FontCascade.hpp"
 #include "Krystal.Booey/Graphics/Fonts/FontDatabase.hpp"
 #include "Krystal.Booey/Page/Settings.hpp"
+#include "Krystal.Text/Script.hpp"
 
 namespace krys::boo::css::tests
 {
@@ -58,8 +59,8 @@ namespace krys::boo::css::tests
     SECTION("Generic families resolve with the document's settings")
     {
       auto settings = Settings::Create();
-      settings->Values.FontGenericFamilies.SetSansSerifFontFamily(u8"Ahem", USCRIPT_COMMON);
-      settings->Values.FontGenericFamilies.SetFixedFontFamily(u8"No Such Family", USCRIPT_COMMON);
+      settings->Values.FontGenericFamilies.SetSansSerifFontFamily(u8"Ahem", text::Script::Common);
+      settings->Values.FontGenericFamilies.SetFixedFontFamily(u8"No Such Family", text::Script::Common);
       document.SetSettings(Ref<Settings>(settings));
       document.UpdateStyleIfNeeded();
 
@@ -75,16 +76,17 @@ namespace krys::boo::css::tests
     {
       FontGenericFamilies families;
       CHECK(families.SerifFontFamily().empty());
-      CHECK(families.SetSerifFontFamily(u8"Ahem", USCRIPT_COMMON));
-      CHECK_FALSE(families.SetSerifFontFamily(u8"Ahem", USCRIPT_COMMON));
-      CHECK(families.SetSerifFontFamily(u8"Liberation Sans", USCRIPT_ARABIC));
-      CHECK(families.SerifFontFamily(USCRIPT_ARABIC) == u8"Liberation Sans");
-      CHECK(families.SerifFontFamily(USCRIPT_LATIN) == u8"Ahem");
-      CHECK(*families.FontFamily(generic_font_family_names::FamilyNamesIndex::SerifFamily, USCRIPT_GREEK)
-            == u8"Ahem");
+      CHECK(families.SetSerifFontFamily(u8"Ahem", text::Script::Common));
+      CHECK_FALSE(families.SetSerifFontFamily(u8"Ahem", text::Script::Common));
+      CHECK(families.SetSerifFontFamily(u8"Liberation Sans", text::Script::Arabic));
+      CHECK(families.SerifFontFamily(text::Script::Arabic) == u8"Liberation Sans");
+      CHECK(families.SerifFontFamily(text::Script::Latin) == u8"Ahem");
+      CHECK(
+        *families.FontFamily(generic_font_family_names::FamilyNamesIndex::SerifFamily, text::Script::Greek)
+        == u8"Ahem");
       CHECK_FALSE(families.FontFamily(generic_font_family_names::FamilyNamesIndex::SystemUiFamily));
-      CHECK(families.SetSerifFontFamily(u8"", USCRIPT_COMMON));
-      CHECK(families.SerifFontFamily(USCRIPT_LATIN).empty());
+      CHECK(families.SetSerifFontFamily(u8"", text::Script::Common));
+      CHECK(families.SerifFontFamily(text::Script::Latin).empty());
     }
   }
 
@@ -168,7 +170,7 @@ namespace krys::boo::css::tests
     {
       auto settings = Settings::Create();
       settings->Values.FontFallbackPrefersPictographs = true;
-      settings->Values.FontGenericFamilies.SetPictographFontFamily(u8"Ahem", USCRIPT_COMMON);
+      settings->Values.FontGenericFamilies.SetPictographFontFamily(u8"Ahem", text::Script::Common);
       document.SetSettings(Ref<Settings>(settings));
       CHECK(selector.FallbackFontCount() == 1u);
       FontDescription description;

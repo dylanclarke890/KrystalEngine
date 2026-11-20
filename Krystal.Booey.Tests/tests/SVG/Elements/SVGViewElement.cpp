@@ -48,7 +48,7 @@ namespace krys::boo::svg::tests
     CHECK(svg.ScrollToFragment(u8"svgView(viewBox(0,0,50,25);preserveAspectRatio(none);zoomAndPan(disable);"
                                u8"transform(translate(5 5)))"));
     CHECK(svg.UseCurrentView());
-    CHECK(svg.CurrentViewBoxRect() == FloatRect(0, 0, 50, 25));
+    CHECK(svg.CurrentViewBoxRect() == RectF(0, 0, 50, 25));
     CHECK(svg.CurrentView().TransformString() == u8"translate(5 5)");
     (void)fixture.Document->UpdateLayout();
     CHECK(root.LocalToBorderBoxTransform() == AffineTransform(4, 0, 0, 4, 20, 20));
@@ -61,7 +61,7 @@ namespace krys::boo::svg::tests
     // A view specification that doesn't parse resets the view.
     CHECK_FALSE(svg.ScrollToFragment(u8"svgView(scale(2))"));
     CHECK_FALSE(svg.UseCurrentView());
-    CHECK(svg.CurrentViewBoxRect() == FloatRect(0, 0, 100, 50));
+    CHECK(svg.CurrentViewBoxRect() == RectF(0, 0, 100, 50));
     (void)fixture.Document->UpdateLayout();
     CHECK(root.LocalToBorderBoxTransform() == AffineTransform(2, 0, 0, 2, 0, 0));
 
@@ -82,26 +82,26 @@ namespace krys::boo::svg::tests
     // A <view> overrides the view attributes it has on the document's <svg>.
     CHECK(svg.ScrollToFragment(u8"v"));
     CHECK(svg.UseCurrentView());
-    CHECK(svg.CurrentViewBoxRect() == FloatRect(0, 0, 20, 10));
+    CHECK(svg.CurrentViewBoxRect() == RectF(0, 0, 20, 10));
     CHECK(svg.CurrentView().PreserveAspectRatio().Align()
           == SVGPreserveAspectRatioValue::SVG_PRESERVEASPECTRATIO_XMINYMIN);
     CHECK(view.TargetElement() == &svg);
 
     // Changes to the view's attributes follow.
     REQUIRE_FALSE(view.SetAttribute(u8"viewBox", u8"0 0 40 20").HasException());
-    CHECK(svg.CurrentViewBoxRect() == FloatRect(0, 0, 40, 20));
+    CHECK(svg.CurrentViewBoxRect() == RectF(0, 0, 40, 20));
 
     // Another view replaces it.
     auto &other = ById<SVGViewElement>(*document, u8"w");
     CHECK(svg.ScrollToFragment(u8"w"));
-    CHECK(svg.CurrentViewBoxRect() == FloatRect(0, 0, 100, 50));
+    CHECK(svg.CurrentViewBoxRect() == RectF(0, 0, 100, 50));
     CHECK(other.TargetElement() == &svg);
     CHECK(view.TargetElement() == nullptr);
 
     // Resetting the scroll anchor goes back to the <svg>'s own view.
     svg.ResetScrollAnchor();
     CHECK_FALSE(svg.UseCurrentView());
-    CHECK(svg.CurrentViewBoxRect() == FloatRect(0, 0, 100, 50));
+    CHECK(svg.CurrentViewBoxRect() == RectF(0, 0, 100, 50));
 
     // A <view> is never rendered.
     CHECK(view.Renderer() == nullptr);

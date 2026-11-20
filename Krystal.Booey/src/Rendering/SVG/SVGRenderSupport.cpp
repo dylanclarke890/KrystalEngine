@@ -28,8 +28,6 @@
 #include "Krystal.Booey/Rendering/SVG/SVGRenderSupport.hpp"
 #include "Krystal.Booey/Graphics/Geometry/FloatRoundedRect.hpp"
 #include "Krystal.Booey/Graphics/GraphicsContext.hpp"
-#include "Krystal.Booey/Graphics/Transforms/AffineTransform.hpp"
-#include "Krystal.Booey/Graphics/Transforms/TransformationMatrix.hpp"
 #include "Krystal.Booey/Graphics/Transforms/TransformState.hpp"
 #include "Krystal.Booey/Rendering/Iterators/RenderAncestorIterator.hpp"
 #include "Krystal.Booey/Rendering/Iterators/RenderChildIterator.hpp"
@@ -56,6 +54,8 @@
 #include "Krystal.Booey/SVG/Elements/SVGGeometryElement.hpp"
 #include "Krystal.Booey/SVG/Elements/SVGGraphicsElement.hpp"
 #include "Krystal.Booey/SVG/SVGLengthContext.hpp"
+#include "Krystal.Core/Geometry/AffineTransform.hpp"
+#include "Krystal.Core/Geometry/TransformationMatrix.hpp"
 
 namespace krys::boo
 {
@@ -71,24 +71,24 @@ namespace krys::boo
 
     // Pass our local paint rect to computeFloatVisibleRectInContainer() which will
     // map to parent coords and recurse up the parent chain.
-    return EnclosingLayoutRect(renderer.ComputeFloatRectForRepaint(
+    return EnclosingLayoutRect(renderer.ComputeRectFForRepaint(
       renderer.RepaintRectInLocalCoordinates(context.GetRepaintRectCalculation()), repaintContainer));
   }
 
-  Maybe<FloatRect>
-    SVGRenderSupport::ComputeFloatVisibleRectInContainer(const RenderElement &renderer, const FloatRect &rect,
-                                                         const RenderLayerModelObject *container,
-                                                         VisibleRectContext context) noexcept
+  Maybe<RectF> SVGRenderSupport::ComputeFloatVisibleRectInContainer(const RenderElement &renderer,
+                                                                    const RectF &rect,
+                                                                    const RenderLayerModelObject *container,
+                                                                    VisibleRectContext context) noexcept
   {
     // Ensure our parent is an SVG object.
     krys_debug_assert(renderer.Parent());
     auto &parent = *renderer.Parent();
     if (!Is<SVGElement>(parent.GetElement()))
     {
-      return FloatRect();
+      return RectF();
     }
 
-    FloatRect adjustedRect = rect;
+    RectF adjustedRect = rect;
     adjustedRect.Inflate(style::Evaluate<float>(renderer.Style().OutlineWidth(), style::ZoomNeeded {}));
 
     // Translate to coords in our parent renderer, and then call computeFloatVisibleRectInContainer() on our
@@ -257,10 +257,10 @@ namespace krys::boo
     return result;
   }
 
-  FloatRect SVGRenderSupport::ComputeContainerStrokeBoundingBox(const RenderElement &container) noexcept
+  RectF SVGRenderSupport::ComputeContainerStrokeBoundingBox(const RenderElement &container) noexcept
   {
     krys_debug_assert(container.IsLegacyRenderSVGRoot() || container.IsLegacyRenderSVGContainer());
-    FloatRect strokeBoundingBox;
+    RectF strokeBoundingBox;
 
     for (auto &current : ChildrenOfType<RenderObject>(container))
     {
@@ -275,7 +275,7 @@ namespace krys::boo
         continue;
       }
 
-      FloatRect childStrokeBoundingBox = current.StrokeBoundingBox();
+      RectF childStrokeBoundingBox = current.StrokeBoundingBox();
       krys_debug_assert(!childStrokeBoundingBox.IsNaN());
 
       if (auto *currentElement = DynamicDowncast<RenderElement>(current))
@@ -299,7 +299,7 @@ namespace krys::boo
     return strokeBoundingBox;
   }
 
-  bool SVGRenderSupport::PaintInfoIntersectsRepaintRect(const FloatRect &localRepaintRect,
+  bool SVGRenderSupport::PaintInfoIntersectsRepaintRect(const RectF &localRepaintRect,
                                                         const AffineTransform &localTransform,
                                                         const PaintInfo &paintInfo) noexcept
   {
@@ -484,8 +484,7 @@ namespace krys::boo
   }
 
   void SVGRenderSupport::IntersectRepaintRectWithResources(
-    const RenderElement &renderer, FloatRect &repaintRect,
-    RepaintRectCalculation repaintRectCalculation) noexcept
+    const RenderElement &renderer, RectF &repaintRect, RepaintRectCalculation repaintRectCalculation) noexcept
   {
     // Filter functions draw past the renderer by their outsets.
     if (auto outsets = SVGRenderingContext::CSSFilterOutsets(renderer); !outsets.IsZero())
@@ -537,9 +536,9 @@ namespace krys::boo
 
   namespace
   {
-    KRYS_NODISCARD FloatRect ClipPathReferenceBox(const RenderElement &renderer, CSSBoxType boxType) noexcept
+    KRYS_NODISCARD RectF ClipPathReferenceBox(const RenderElement &renderer, CSSBoxType boxType) noexcept
     {
-      FloatRect referenceBox;
+      RectF referenceBox;
       switch (boxType)
       {
         case CSSBoxType::BorderBox:
@@ -575,8 +574,7 @@ namespace krys::boo
       return referenceBox;
     }
 
-    KRYS_NODISCARD bool IsPointInCSSClippingArea(const RenderElement &renderer,
-                                                 const FloatPoint &point) noexcept
+    KRYS_NODISCARD bool IsPointInCSSClippingArea(const RenderElement &renderer, const PointF &point) noexcept
     {
       const auto &clipPath = renderer.Style().GetClipPath();
       if (auto basicShape = clipPath.TryBasicShape())
@@ -625,7 +623,7 @@ namespace krys::boo
     }
   }
 
-  bool SVGRenderSupport::PointInClippingArea(const RenderElement &renderer, const FloatPoint &point) noexcept
+  bool SVGRenderSupport::PointInClippingArea(const RenderElement &renderer, const PointF &point) noexcept
   {
     const auto &clipPath = renderer.Style().GetClipPath();
     if (clipPath.TryBasicShape() || clipPath.TryBox())
@@ -758,10 +756,10 @@ namespace krys::boo
     }
   }
 
-  FloatRect SVGRenderSupport::CalculateApproximateStrokeBoundingBox(const RenderElement &renderer) noexcept
+  RectF SVGRenderSupport::CalculateApproximateStrokeBoundingBox(const RenderElement &renderer) noexcept
   {
     auto calculateApproximateScalingStrokeBoundingBox = [&](const LegacyRenderSVGShape &shape,
-                                                            FloatRect fillBoundingBox) -> FloatRect
+                                                            RectF fillBoundingBox) -> RectF
     {
       // Implementation of
       // https://drafts.fxtf.org/css-masking/#compute-stroke-bounding-box
@@ -818,7 +816,7 @@ namespace krys::boo
     };
 
     auto calculateApproximateNonScalingStrokeBoundingBox = [&](const LegacyRenderSVGShape &shape,
-                                                               FloatRect fillBoundingBox) -> FloatRect
+                                                               RectF fillBoundingBox) -> RectF
     {
       krys_debug_assert(shape.HasPath());
       krys_debug_assert(shape.Style().HasStroke());

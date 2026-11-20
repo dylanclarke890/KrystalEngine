@@ -35,7 +35,7 @@
 #include "Krystal.Booey/DOM/Types/ExceptionOr.hpp"
 #include "Krystal.Booey/Style/Rules/RuleData.hpp"
 #include "Krystal.Core/Assert.hpp"
-#include "Krystal.Core/Text/StringBuilder.hpp"
+#include "Krystal.Core/Strings/StringBuilder.hpp"
 #include "Krystal.Core/Threading/NeverDestroyed.hpp"
 #include "Krystal.Core/Types/HashMap.hpp"
 
@@ -213,12 +213,12 @@ namespace krys::boo
   {
     auto declarations = _styleRule->Properties().AsText(context);
     StringBuilder rules;
-    CssTextForRulesWithReplacementURLs(rules, context);
+    CssTextForRulesWithReplacementUrls(rules, context);
     return CssTextInternal(declarations, rules);
   }
 
   void
-    CSSStyleRule::CssTextForRulesWithReplacementURLs(StringBuilder &rules,
+    CSSStyleRule::CssTextForRulesWithReplacementUrls(StringBuilder &rules,
                                                      const css::SerialisationContext &context) const noexcept
   {
     for (uint32 index = 0; index < Length(); index++)

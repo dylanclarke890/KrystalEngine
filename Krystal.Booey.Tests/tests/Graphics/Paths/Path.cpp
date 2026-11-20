@@ -5,7 +5,7 @@
 #include "Krystal.Booey/Graphics/Geometry/FloatRoundedRect.hpp"
 #include "Krystal.Booey/Graphics/GraphicsContext.hpp"
 #include "Krystal.Booey/Graphics/Paths/PathTraversalState.hpp"
-#include "Krystal.Booey/Graphics/Transforms/AffineTransform.hpp"
+#include "Krystal.Core/Geometry/AffineTransform.hpp"
 #include <cmath>
 #include <numbers>
 
@@ -28,8 +28,8 @@ namespace krys::boo::tests
   {
     Path empty;
     CHECK(empty.IsEmpty());
-    CHECK(empty.BoundingRect() == FloatRect {});
-    CHECK(empty.CurrentPoint() == FloatPoint {0, 0});
+    CHECK(empty.BoundingRect() == RectF {});
+    CHECK(empty.CurrentPoint() == PointF {0, 0});
     CHECK_FALSE(empty.IsClosed());
 
     SECTION("a single line")
@@ -40,13 +40,13 @@ namespace krys::boo::tests
       CHECK_FALSE(line.IsEmpty());
       CHECK(line.DefinitelySingleLine());
       REQUIRE(line.SingleDataLine());
-      CHECK(line.SingleDataLine()->Start() == FloatPoint {0, 0});
-      CHECK(line.SingleDataLine()->End() == FloatPoint {30, 40});
-      CHECK(line.CurrentPoint() == FloatPoint {30, 40});
+      CHECK(line.SingleDataLine()->Start() == PointF {0, 0});
+      CHECK(line.SingleDataLine()->End() == PointF {30, 40});
+      CHECK(line.CurrentPoint() == PointF {30, 40});
       CHECK(line.Length() == Approx(50));
       CHECK(line.PointAtLength(25).X() == Approx(15));
       CHECK(line.PointAtLength(25).Y() == Approx(20));
-      CHECK(line.BoundingRect() == FloatRect {0, 0, 30, 40});
+      CHECK(line.BoundingRect() == RectF {0, 0, 30, 40});
       CHECK(ElementTypes(line) == List<ElementType> {ElementType::MoveToPoint, ElementType::AddLineToPoint});
     }
 
@@ -59,8 +59,8 @@ namespace krys::boo::tests
       triangle.CloseSubpath();
       CHECK(triangle.IsClosed());
       CHECK_FALSE(triangle.DefinitelySingleLine());
-      CHECK(triangle.BoundingRect() == FloatRect {0, 0, 10, 10});
-      CHECK(triangle.FastBoundingRect() == FloatRect {0, 0, 10, 10});
+      CHECK(triangle.BoundingRect() == RectF {0, 0, 10, 10});
+      CHECK(triangle.FastBoundingRect() == RectF {0, 0, 10, 10});
       CHECK(ElementTypes(triangle)
             == List<ElementType> {ElementType::MoveToPoint, ElementType::AddLineToPoint,
                                   ElementType::AddLineToPoint, ElementType::CloseSubpath});
@@ -68,9 +68,9 @@ namespace krys::boo::tests
       CHECK(triangle.Length() == Approx(20 + std::sqrt(200.0)));
 
       // The same polygon from points.
-      Path polygon {List<FloatPoint> {{0, 0}, {10, 0}, {10, 10}}};
+      Path polygon {List<PointF> {{0, 0}, {10, 0}, {10, 10}}};
       CHECK(polygon.IsClosed());
-      CHECK(polygon.BoundingRect() == FloatRect {0, 0, 10, 10});
+      CHECK(polygon.BoundingRect() == RectF {0, 0, 10, 10});
       CHECK(polygon.DefinitelyEqual(triangle));
     }
 
@@ -96,22 +96,22 @@ namespace krys::boo::tests
     {
       Path rect;
       rect.AddRect({5, 5, 20, 10});
-      CHECK(rect.BoundingRect() == FloatRect {5, 5, 20, 10});
+      CHECK(rect.BoundingRect() == RectF {5, 5, 20, 10});
 
       Path ellipse;
       ellipse.AddEllipseInRect({0, 0, 20, 10});
-      CHECK(ellipse.BoundingRect() == FloatRect {0, 0, 20, 10});
+      CHECK(ellipse.BoundingRect() == RectF {0, 0, 20, 10});
 
       Path rounded;
-      rounded.AddRoundedRect(FloatRoundedRect {FloatRect {0, 0, 40, 20}, FloatRoundedRect::Radii {5}},
+      rounded.AddRoundedRect(FloatRoundedRect {RectF {0, 0, 40, 20}, FloatRoundedRect::Radii {5}},
                              PathRoundedRect::Strategy::PreferBezier);
-      CHECK(rounded.BoundingRect() == FloatRect {0, 0, 40, 20});
-      CHECK(FloatRoundedRect {FloatRect {0, 0, 40, 20}, FloatRoundedRect::Radii {5}}.GetPath().BoundingRect()
-            == FloatRect {0, 0, 40, 20});
+      CHECK(rounded.BoundingRect() == RectF {0, 0, 40, 20});
+      CHECK(FloatRoundedRect {RectF {0, 0, 40, 20}, FloatRoundedRect::Radii {5}}.GetPath().BoundingRect()
+            == RectF {0, 0, 40, 20});
 
       // Radii that don't fit make a plain rect.
       Path oversized;
-      oversized.AddRoundedRect(FloatRoundedRect {FloatRect {0, 0, 10, 10}, FloatRoundedRect::Radii {20}});
+      oversized.AddRoundedRect(FloatRoundedRect {RectF {0, 0, 10, 10}, FloatRoundedRect::Radii {20}});
       REQUIRE(oversized.SingleSegment());
       CHECK(std::holds_alternative<PathRect>(oversized.SingleSegment()->GetData()));
 
@@ -129,17 +129,17 @@ namespace krys::boo::tests
 
       auto copy = path;
       path.Translate({5, 5});
-      CHECK(path.BoundingRect() == FloatRect {5, 5, 20, 10});
+      CHECK(path.BoundingRect() == RectF {5, 5, 20, 10});
       // Copies don't see each other's changes.
-      CHECK(copy.BoundingRect() == FloatRect {0, 0, 20, 10});
+      CHECK(copy.BoundingRect() == RectF {0, 0, 20, 10});
 
       path.Transform(AffineTransform().Scale(2));
-      CHECK(path.BoundingRect() == FloatRect {10, 10, 40, 20});
+      CHECK(path.BoundingRect() == RectF {10, 10, 40, 20});
 
       Path combined;
       combined.AddRect({0, 0, 1, 1});
-      combined.AddPath(copy, AffineTransform::MakeTranslation({100, 0}));
-      CHECK(combined.BoundingRect() == FloatRect {0, 0, 120, 10});
+      combined.AddPath(copy, AffineTransform::CreateTranslation({100, 0}));
+      CHECK(combined.BoundingRect() == RectF {0, 0, 120, 10});
 
       combined.Clear();
       CHECK(combined.IsEmpty());
@@ -210,9 +210,9 @@ namespace krys::boo::tests
     SECTION("without the host's stroker, nothing is inside a stroke and its bounds are estimated")
     {
       CHECK_FALSE(line.StrokeContains({30, 10}, applier));
-      CHECK(line.StrokeBoundingRect(applier) == FloatRect(8, 8, 44, 4));
+      CHECK(line.StrokeBoundingRect(applier) == RectF(8, 8, 44, 4));
       // Without an applier, the stroke is a solid one 1 wide.
-      CHECK(line.StrokeBoundingRect() == FloatRect(9.5f, 9.5f, 41, 1));
+      CHECK(line.StrokeBoundingRect() == RectF(9.5f, 9.5f, 41, 1));
     }
 
     SECTION("the host's stroker is asked with the style the applier set")
@@ -228,12 +228,12 @@ namespace krys::boo::tests
       CHECK(style.Dashes == DashArray {3, 1});
       CHECK(style.DashOffset == 2);
 
-      CHECK(line.StrokeBoundingRect() == FloatRect(9.5f, 9.5f, 41, 1));
+      CHECK(line.StrokeBoundingRect() == RectF(9.5f, 9.5f, 41, 1));
       CHECK(scope.Strategy.LastStyle.Dashes.isEmpty());
 
       // An empty path has no stroke.
       CHECK_FALSE(Path().StrokeContains({0, 0}, applier));
-      CHECK(Path().StrokeBoundingRect(applier) == FloatRect());
+      CHECK(Path().StrokeBoundingRect(applier) == RectF());
     }
   }
 
@@ -243,7 +243,7 @@ namespace krys::boo::tests
     Path rect;
     rect.AddRect({10, 8, 20, 48});
     rect.Transform(AffineTransform().Scale(3, 1));
-    CHECK(rect.BoundingRect() == FloatRect(30, 8, 60, 48));
+    CHECK(rect.BoundingRect() == RectF(30, 8, 60, 48));
     CHECK(ElementTypes(rect)
           == List<ElementType> {ElementType::MoveToPoint, ElementType::AddLineToPoint,
                                 ElementType::AddLineToPoint, ElementType::AddLineToPoint,
@@ -252,8 +252,8 @@ namespace krys::boo::tests
     Path ellipse;
     ellipse.MoveTo({0, 0});
     ellipse.AddEllipseInRect({0, 0, 10, 10});
-    ellipse.Transform(AffineTransform::MakeTranslation({5, 5}));
-    CHECK(ellipse.BoundingRect() == FloatRect(5, 5, 10, 10));
+    ellipse.Transform(AffineTransform::CreateTranslation({5, 5}));
+    CHECK(ellipse.BoundingRect() == RectF(5, 5, 10, 10));
   }
 
   TEST_CASE("Path: arcs without a platform path", "[Graphics][Path]")
@@ -313,7 +313,7 @@ namespace krys::boo::tests
       Path straight;
       straight.MoveTo({0, 0});
       straight.AddArcTo({10, 0}, {20, 0}, 5);
-      CHECK(straight.CurrentPoint() == FloatPoint(10, 0));
+      CHECK(straight.CurrentPoint() == PointF(10, 0));
     }
 
     SECTION("rotated ellipses rotate about their centres, in radians")
@@ -330,7 +330,7 @@ namespace krys::boo::tests
     {
       Path circle;
       circle.AddArc({0, 0}, 10, 0, 2 * pi, RotationDirection::Clockwise);
-      circle.Transform(AffineTransform::MakeTranslation({100, 0}));
+      circle.Transform(AffineTransform::CreateTranslation({100, 0}));
       CHECK(circle.Contains({100, 0}));
       CHECK_FALSE(circle.Contains({0, 0}));
     }
@@ -340,8 +340,8 @@ namespace krys::boo::tests
       Path rect;
       rect.AddRect({0, 0, 10, 10});
       Path path;
-      path.AddPath(rect, AffineTransform::MakeTranslation({5, 0}));
-      CHECK(path.FastBoundingRect() == FloatRect(5, 0, 10, 10));
+      path.AddPath(rect, AffineTransform::CreateTranslation({5, 0}));
+      CHECK(path.FastBoundingRect() == RectF(5, 0, 10, 10));
     }
   }
 }

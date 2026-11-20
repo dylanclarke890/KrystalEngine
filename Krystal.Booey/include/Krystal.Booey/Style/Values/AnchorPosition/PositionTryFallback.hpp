@@ -30,7 +30,7 @@
 #include "Krystal.Booey/Style/Scope/ScopedName.hpp"
 #include "Krystal.Booey/Style/Values/AnchorPosition/PositionTryFallbackTactic.hpp"
 #include "Krystal.Booey/Style/Values/Types.hpp"
-#include "Krystal.Core/Text/StringBuilder.hpp"
+#include "Krystal.Core/Strings/StringBuilder.hpp"
 #include "Krystal.Core/Types/Markable.hpp"
 #include "Krystal.Core/Types/RefPtr.hpp"
 #include "Krystal.Core/Visitor.hpp"

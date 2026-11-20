@@ -28,7 +28,7 @@
 #include "Krystal.Core/Types/List.hpp"
 #include "Krystal.Core/Types/Pair.hpp"
 #include "Krystal.Core/Types/UniquePtr.hpp"
-#include <unicode/uchar.h>
+#include "Krystal.Text/Bidi.hpp"
 
 namespace krys::boo
 {
@@ -53,9 +53,9 @@ namespace krys::boo
     // Whether or not this line uses alphabetic or ideographic baselines by default.
     FontBaseline _baselineType {FontBaseline::Alphabetic};
 
-    UCharDirection _lineBreakBidiStatusEor {U_OTHER_NEUTRAL};
-    UCharDirection _lineBreakBidiStatusLastStrong {U_OTHER_NEUTRAL};
-    UCharDirection _lineBreakBidiStatusLast {U_OTHER_NEUTRAL};
+    text::BidiClass _lineBreakBidiStatusEor {text::BidiClass::OtherNeutral};
+    text::BidiClass _lineBreakBidiStatusLastStrong {text::BidiClass::OtherNeutral};
+    text::BidiClass _lineBreakBidiStatusLast {text::BidiClass::OtherNeutral};
 
     bool _hasSelfPaintInlineBox : 1 {false};
 
@@ -223,20 +223,20 @@ namespace krys::boo
 
     void SetVisualOverflow(const LayoutRect &, LayoutUnit lineTop, LayoutUnit lineBottom) noexcept;
 
-    KRYS_NODISCARD FloatRect FrameRectIncludingLineHeight(LayoutUnit lineTop,
-                                                          LayoutUnit lineBottom) const noexcept
+    KRYS_NODISCARD RectF FrameRectIncludingLineHeight(LayoutUnit lineTop,
+                                                      LayoutUnit lineBottom) const noexcept
     {
       if (IsHorizontal())
       {
-        return FloatRect(X(), lineTop.ToFloat(), Width(), (lineBottom - lineTop).ToFloat());
+        return RectF(X(), lineTop.ToFloat(), Width(), (lineBottom - lineTop).ToFloat());
       }
-      return FloatRect(lineTop.ToFloat(), Y(), (lineBottom - lineTop).ToFloat(), Height());
+      return RectF(lineTop.ToFloat(), Y(), (lineBottom - lineTop).ToFloat(), Height());
     }
 
-    KRYS_NODISCARD FloatRect LogicalFrameRectIncludingLineHeight(LayoutUnit lineTop,
-                                                                 LayoutUnit lineBottom) const noexcept
+    KRYS_NODISCARD RectF LogicalFrameRectIncludingLineHeight(LayoutUnit lineTop,
+                                                             LayoutUnit lineBottom) const noexcept
     {
-      return FloatRect(LogicalLeft(), lineTop.ToFloat(), LogicalWidth(), (lineBottom - lineTop).ToFloat());
+      return RectF(LogicalLeft(), lineTop.ToFloat(), LogicalWidth(), (lineBottom - lineTop).ToFloat());
     }
 
     KRYS_NODISCARD bool HasSelfPaintInlineBox() const noexcept

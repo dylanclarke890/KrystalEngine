@@ -30,7 +30,7 @@
 #include "Krystal.Booey/Graphics/Color/ColorInterpolationMethod.hpp"
 #include "Krystal.Booey/Style/Values/Color/Color.hpp"
 #include "Krystal.Booey/Style/Values/Primitives/NumericTypes.hpp"
-#include "Krystal.Core/Text/StringBuilder.hpp"
+#include "Krystal.Core/Strings/StringBuilder.hpp"
 #include "Krystal.Core/Types/Maybe.hpp"
 
 namespace krys::boo::style

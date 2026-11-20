@@ -14,7 +14,7 @@ namespace krys::boo::css::tests
     {
       ParserContext context {ParserMode::HTMLStandard};
       CHECK(context.Mode == ParserMode::HTMLStandard);
-      CHECK(context.BaseURL.IsEmpty());
+      CHECK(context.BaseUrl.IsEmpty());
       CHECK(context.Charset.empty());
       CHECK_FALSE(context.EnclosingRuleType);
       CHECK_FALSE(context.IsHTMLDocument);
@@ -26,9 +26,9 @@ namespace krys::boo::css::tests
 
     SECTION("Base URL")
     {
-      ParserContext context {ParserMode::HTMLQuirks, url::URL {u8"https://example.com/a.css"}};
+      ParserContext context {ParserMode::HTMLQuirks, net::Url {u8"https://example.com/a.css"}};
       CHECK(context.Mode == ParserMode::HTMLQuirks);
-      CHECK(context.BaseURL == url::URL {u8"https://example.com/a.css"});
+      CHECK(context.BaseUrl == net::Url {u8"https://example.com/a.css"});
     }
 
     SECTION("UA sheets enable the features they rely on")
@@ -77,7 +77,7 @@ namespace krys::boo::css::tests
 
     SECTION("Base URL")
     {
-      b.BaseURL = url::URL {u8"https://example.com/"};
+      b.BaseUrl = net::Url {u8"https://example.com/"};
       CHECK(a != b);
       CHECK(a.Hash() != b.Hash());
     }
@@ -111,7 +111,7 @@ namespace krys::boo::css::tests
     CHECK_FALSE(Traits::IsDeletedValue(Traits::EmptyValue()));
 
     auto deleted = Traits::EmptyValue();
-    deleted.BaseURL.~URL();
+    deleted.BaseUrl.~Url();
     Traits::ConstructDeletedValue(deleted);
     CHECK(Traits::IsDeletedValue(deleted));
   }

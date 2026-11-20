@@ -28,7 +28,6 @@
  */
 
 #include "Krystal.Booey/Rendering/Fragmentation/RenderFragmentedFlow.hpp"
-#include "Krystal.Booey/Graphics/Geometry/FloatQuad.hpp"
 #include "Krystal.Booey/Graphics/Transforms/TransformState.hpp"
 #include "Krystal.Booey/Page/LocalFrameView.hpp"
 #include "Krystal.Booey/Page/LocalFrameViewLayoutContext.hpp"
@@ -40,6 +39,7 @@
 #include "Krystal.Booey/Rendering/Style/RenderStyle+GettersInlines.hpp"
 #include "Krystal.Booey/Rendering/Tables/RenderTableCell.hpp"
 #include "Krystal.Booey/Rendering/Tables/RenderTableSection.hpp"
+#include "Krystal.Core/Geometry/Quad.hpp"
 #include <algorithm>
 
 namespace krys::boo
@@ -259,7 +259,7 @@ namespace krys::boo
     }
   }
 
-  bool RenderFragmentedFlow::AbsoluteQuadsForBox(List<FloatQuad> &quads, bool *wasFixed,
+  bool RenderFragmentedFlow::AbsoluteQuadsForBox(List<QuadF> &quads, bool *wasFixed,
                                                  const RenderBox &box) const noexcept
   {
     if (!HasValidFragmentInfo())
@@ -267,7 +267,7 @@ namespace krys::boo
       return false;
     }
 
-    auto boxRect = FloatRect {{}, box.Size()};
+    auto boxRect = RectF {{}, box.Size()};
     auto boxRectInFlowCoordinates = LayoutRect {box.LocalToContainerQuad(boxRect, this).BoundingBox()};
 
     RenderFragmentContainer *startFragment = nullptr;
@@ -282,7 +282,7 @@ namespace krys::boo
       for (auto rect : fragment->FragmentRectsForFlowContentRect(boxRectInFlowCoordinates))
       {
         quads.push_back(
-          fragment->LocalToAbsoluteQuad(FloatRect(rect), MapCoordinatesMode::UseTransforms, wasFixed));
+          fragment->LocalToAbsoluteQuad(RectF(rect), MapCoordinatesMode::UseTransforms, wasFixed));
       }
 
       if (fragment == endFragment)
@@ -298,7 +298,7 @@ namespace krys::boo
   {
     krys_debug_assert(HasValidFragmentInfo());
 
-    auto boxRect = FloatRect {{}, box.Size()};
+    auto boxRect = RectF {{}, box.Size()};
     auto boxRectInFlowCoordinates = LayoutRect {box.LocalToContainerQuad(boxRect, this).BoundingBox()};
 
     RenderFragmentContainer *startFragment = nullptr;
@@ -1144,10 +1144,10 @@ namespace krys::boo
       LayoutRect borderBox = block.BorderBoxRect();
       borderBox = fragment->RectFlowPortionForBox(block, borderBox);
 
-      FloatRect inflatedRect = borderBox;
+      RectF inflatedRect = borderBox;
       RenderTheme::Singleton().AdjustRepaintRect(block, inflatedRect);
 
-      fragment->AddVisualOverflowForBox(block, LayoutRect(SnappedIntRect(LayoutRect(inflatedRect))));
+      fragment->AddVisualOverflowForBox(block, LayoutRect(SnappedRectI(LayoutRect(inflatedRect))));
       if (fragment == endFragment)
       {
         break;

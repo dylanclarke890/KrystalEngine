@@ -25,7 +25,7 @@
 
 #include "Krystal.Booey/Rendering/Layers/LayerAncestorClippingStack.hpp"
 #include "Krystal.Booey/Rendering/Layers/RenderLayer.hpp"
-#include "Krystal.Core/Text/TextStream.hpp"
+#include "Krystal.Core/Strings/TextStream.hpp"
 
 namespace krys::boo
 {

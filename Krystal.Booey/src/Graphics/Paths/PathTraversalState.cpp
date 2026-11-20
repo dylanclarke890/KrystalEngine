@@ -20,7 +20,7 @@
 
 #include "Krystal.Booey/Graphics/Paths/PathTraversalState.hpp"
 
-#include "Krystal.Booey/Graphics/Geometry/GeometryUtilities.hpp"
+#include "Krystal.Core/Geometry/GeometryUtilities.hpp"
 #include "Krystal.Core/Maths/Extras.hpp"
 #include "Krystal.Core/Types/List.hpp"
 #include "Krystal.Core/Types/SmallList.hpp"
@@ -29,7 +29,7 @@ namespace krys::boo
 {
   static const float kPathSegmentLengthTolerance = 0.00001f;
 
-  KRYS_NODISCARD static inline float DistanceLine(const FloatPoint &start, const FloatPoint &end) noexcept
+  KRYS_NODISCARD static inline float DistanceLine(const PointF &start, const PointF &end) noexcept
   {
     return std::hypot(end.X() - start.X(), end.Y() - start.Y());
   }
@@ -38,8 +38,7 @@ namespace krys::boo
   {
     QuadraticBezier() noexcept = default;
 
-    QuadraticBezier(const FloatPoint &s, const FloatPoint &c, const FloatPoint &e) noexcept
-        : Start(s), Control(c), End(e)
+    QuadraticBezier(const PointF &s, const PointF &c, const PointF &e) noexcept : Start(s), Control(c), End(e)
     {
     }
 
@@ -55,7 +54,7 @@ namespace krys::boo
       left.Control = MidPoint(Start, Control);
       right.Control = MidPoint(Control, End);
 
-      FloatPoint leftControlToRightControl = MidPoint(left.Control, right.Control);
+      PointF leftControlToRightControl = MidPoint(left.Control, right.Control);
       left.End = leftControlToRightControl;
       right.Start = leftControlToRightControl;
 
@@ -65,16 +64,16 @@ namespace krys::boo
       return !(left == *this) && !(right == *this);
     }
 
-    FloatPoint Start;
-    FloatPoint Control;
-    FloatPoint End;
+    PointF Start;
+    PointF Control;
+    PointF End;
   };
 
   struct CubicBezier
   {
     CubicBezier() noexcept = default;
 
-    CubicBezier(const FloatPoint &s, const FloatPoint &c1, const FloatPoint &c2, const FloatPoint &e) noexcept
+    CubicBezier(const PointF &s, const PointF &c1, const PointF &c2, const PointF &e) noexcept
         : Start(s), Control1(c1), Control2(c2), End(e)
     {
     }
@@ -88,7 +87,7 @@ namespace krys::boo
 
     KRYS_NODISCARD bool Split(CubicBezier &left, CubicBezier &right) const noexcept
     {
-      FloatPoint startToControl1 = MidPoint(Control1, Control2);
+      PointF startToControl1 = MidPoint(Control1, Control2);
 
       left.Start = Start;
       left.Control1 = MidPoint(Start, Control1);
@@ -98,17 +97,17 @@ namespace krys::boo
       right.Control1 = MidPoint(right.Control2, startToControl1);
       right.End = End;
 
-      FloatPoint leftControl2ToRightControl1 = MidPoint(left.Control2, right.Control1);
+      PointF leftControl2ToRightControl1 = MidPoint(left.Control2, right.Control1);
       left.End = leftControl2ToRightControl1;
       right.Start = leftControl2ToRightControl1;
 
       return !(left == *this) && !(right == *this);
     }
 
-    FloatPoint Start;
-    FloatPoint Control1;
-    FloatPoint Control2;
-    FloatPoint End;
+    PointF Start;
+    PointF Control1;
+    PointF Control2;
+    PointF End;
   };
 
   // FIXME: This function is possibly very slow due to the ifs required for proper path measuring
@@ -119,8 +118,8 @@ namespace krys::boo
   // approximateDistance() + current total distance > desired distance
   template <class CurveType>
   KRYS_NODISCARD static float CurveLength(const PathTraversalState &traversalState,
-                                          const CurveType &originalCurve, FloatPoint &previous,
-                                          FloatPoint &current) noexcept
+                                          const CurveType &originalCurve, PointF &previous,
+                                          PointF &current) noexcept
   {
     static const unsigned curveStackDepthLimit = 20;
     CurveType curve = originalCurve;
@@ -184,25 +183,25 @@ namespace krys::boo
     _current = _start;
   }
 
-  void PathTraversalState::MoveTo(const FloatPoint &point) noexcept
+  void PathTraversalState::MoveTo(const PointF &point) noexcept
   {
     _previous = _current = _start = point;
   }
 
-  void PathTraversalState::LineTo(const FloatPoint &point) noexcept
+  void PathTraversalState::LineTo(const PointF &point) noexcept
   {
     _totalLength += DistanceLine(_current, point);
     _current = point;
   }
 
-  void PathTraversalState::QuadraticBezierTo(const FloatPoint &newControl, const FloatPoint &newEnd) noexcept
+  void PathTraversalState::QuadraticBezierTo(const PointF &newControl, const PointF &newEnd) noexcept
   {
     _totalLength +=
       CurveLength<QuadraticBezier>(*this, QuadraticBezier(_current, newControl, newEnd), _previous, _current);
   }
 
-  void PathTraversalState::CubicBezierTo(const FloatPoint &newControl1, const FloatPoint &newControl2,
-                                         const FloatPoint &newEnd) noexcept
+  void PathTraversalState::CubicBezierTo(const PointF &newControl1, const PointF &newControl2,
+                                         const PointF &newEnd) noexcept
   {
     _totalLength += CurveLength<CubicBezier>(*this, CubicBezier(_current, newControl1, newControl2, newEnd),
                                              _previous, _current);
@@ -228,7 +227,7 @@ namespace krys::boo
 
     if (_totalLength >= _desiredLength)
     {
-      float slope = FloatPoint(_current - _previous).SlopeAngleRadians();
+      float slope = PointF(_current - _previous).SlopeAngleRadians();
       float offset = _desiredLength - _totalLength;
       _current.Move(offset * std::cos(slope), offset * std::sin(slope));
 
@@ -247,8 +246,7 @@ namespace krys::boo
     return _success;
   }
 
-  bool PathTraversalState::AppendPathElement(PathElement::Type type,
-                                             std::span<const FloatPoint> points) noexcept
+  bool PathTraversalState::AppendPathElement(PathElement::Type type, std::span<const PointF> points) noexcept
   {
     switch (type)
     {
@@ -262,8 +260,7 @@ namespace krys::boo
     return FinalizeAppendPathElement();
   }
 
-  bool PathTraversalState::ProcessPathElement(PathElement::Type type,
-                                              std::span<const FloatPoint> points) noexcept
+  bool PathTraversalState::ProcessPathElement(PathElement::Type type, std::span<const PointF> points) noexcept
   {
     if (_success)
     {

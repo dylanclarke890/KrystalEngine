@@ -25,13 +25,14 @@
 
 #include "Krystal.Booey/Platform/Scrolling/ScrollbarThemeAdwaita.hpp"
 #include "Krystal.Booey/Graphics/Color/Color.hpp"
+#include "Krystal.Booey/Graphics/Color/ColorLuminance.hpp"
 #include "Krystal.Booey/Graphics/GraphicsContext.hpp"
 #include "Krystal.Booey/Graphics/GraphicsContextStateSaver.hpp"
 #include "Krystal.Booey/Graphics/Paths/Path.hpp"
+#include "Krystal.Booey/Input/PlatformMouseEvent.hpp"
 #include "Krystal.Booey/Page/LocalFrame.hpp"
 #include "Krystal.Booey/Page/LocalFrameView.hpp"
 #include "Krystal.Booey/Page/Page.hpp"
-#include "Krystal.Booey/Platform/Events/PlatformMouseEvent.hpp"
 #include "Krystal.Booey/Platform/Scrolling/ScrollableArea.hpp"
 #include "Krystal.Booey/Platform/Scrolling/Scrollbar.hpp"
 
@@ -135,23 +136,23 @@ namespace krys::boo
     return ThumbLength(scrollbar) > 0;
   }
 
-  IntRect ScrollbarThemeAdwaita::BackButtonRect(Scrollbar &, ScrollbarPart, bool) noexcept
+  RectI ScrollbarThemeAdwaita::BackButtonRect(Scrollbar &, ScrollbarPart, bool) noexcept
   {
     return {};
   }
 
-  IntRect ScrollbarThemeAdwaita::ForwardButtonRect(Scrollbar &, ScrollbarPart, bool) noexcept
+  RectI ScrollbarThemeAdwaita::ForwardButtonRect(Scrollbar &, ScrollbarPart, bool) noexcept
   {
     return {};
   }
 
-  IntRect ScrollbarThemeAdwaita::TrackRect(Scrollbar &scrollbar, bool) noexcept
+  RectI ScrollbarThemeAdwaita::TrackRect(Scrollbar &scrollbar, bool) noexcept
   {
     return scrollbar.FrameRect();
   }
 
   bool ScrollbarThemeAdwaita::Paint(Scrollbar &scrollbar, GraphicsContext &graphicsContext,
-                                    const IntRect &damageRect) noexcept
+                                    const RectI &damageRect) noexcept
   {
     // FIXME: Painting disabled contexts, once there are those.
     if (!scrollbar.Enabled() && UsesOverlayScrollbars())
@@ -159,7 +160,7 @@ namespace krys::boo
       return true;
     }
 
-    IntRect rect = scrollbar.FrameRect();
+    RectI rect = scrollbar.FrameRect();
     if (!rect.Intersects(damageRect))
     {
       return true;
@@ -202,7 +203,7 @@ namespace krys::boo
     if (scrollbarColor)
     {
       // Darker than mid grey.
-      bool darkThumb = scrollbarColor->ThumbColor.Luminance() < 0.2;
+      bool darkThumb = RelativeLuminance(scrollbarColor->ThumbColor) < 0.2;
       thumbColor = scrollbarColor->ThumbColor;
       thumbHoveredColor = ThumbStateColor(thumbColor, darkThumb);
       thumbPressedColor = ThumbStateColor(thumbHoveredColor, darkThumb);
@@ -211,7 +212,7 @@ namespace krys::boo
     GraphicsContextStateSaver stateSaver(graphicsContext);
     if (opacity != 1)
     {
-      graphicsContext.Clip(FloatRect(damageRect));
+      graphicsContext.Clip(RectF(damageRect));
       graphicsContext.BeginTransparencyLayer(static_cast<float>(opacity));
     }
 
@@ -223,16 +224,16 @@ namespace krys::boo
     // what's behind them (the box's background, or the page's) shows through.
     if (scrollbarColor && !UsesOverlayScrollbars())
     {
-      graphicsContext.FillRect(FloatRect(rect), scrollbarColor->TrackColor);
+      graphicsContext.FillRect(RectF(rect), scrollbarColor->TrackColor);
     }
     if (UsesOverlayScrollbars() && scrollbar.HoveredPart() != NoPart)
     {
       int32 thumbCornerSize = thumbSize / 2;
-      FloatSize corner(static_cast<float>(thumbCornerSize), static_cast<float>(thumbCornerSize));
-      FloatSize borderCorner(static_cast<float>(thumbCornerSize + ThumbBorderSize),
-                             static_cast<float>(thumbCornerSize + ThumbBorderSize));
+      SizeF corner(static_cast<float>(thumbCornerSize), static_cast<float>(thumbCornerSize));
+      SizeF borderCorner(static_cast<float>(thumbCornerSize + ThumbBorderSize),
+                         static_cast<float>(thumbCornerSize + ThumbBorderSize));
 
-      IntRect trough = rect;
+      RectI trough = rect;
       if (scrollbar.Orientation() == ScrollbarOrientation::Vertical)
       {
         if (onLeft)
@@ -254,18 +255,18 @@ namespace krys::boo
         trough.SetHeight(thumbSize);
       }
 
-      IntRect troughBorder(trough);
+      RectI troughBorder(trough);
       troughBorder.Inflate(ThumbBorderSize);
 
       Path path;
-      path.AddRoundedRect(FloatRect(trough), corner);
+      path.AddRoundedRect(RectF(trough), corner);
       graphicsContext.SetFillRule(WindRule::NonZero);
       graphicsContext.SetFillColor(overlayTroughColor);
       graphicsContext.FillPath(path);
       path.Clear();
 
-      path.AddRoundedRect(FloatRect(trough), corner);
-      path.AddRoundedRect(FloatRect(troughBorder), borderCorner);
+      path.AddRoundedRect(RectF(trough), corner);
+      path.AddRoundedRect(RectF(troughBorder), borderCorner);
       graphicsContext.SetFillRule(WindRule::EvenOdd);
       graphicsContext.SetFillColor(overlayTroughBorderColor);
       graphicsContext.FillPath(path);
@@ -274,7 +275,7 @@ namespace krys::boo
     int32 thumbCornerSize;
     int32 thumbPos = ThumbPosition(scrollbar);
     int32 thumbLen = ThumbLength(scrollbar);
-    IntRect thumb = rect;
+    RectI thumb = rect;
     if (scrollbar.HoveredPart() == NoPart && UsesOverlayScrollbars())
     {
       thumbCornerSize = OverlayThumbSize / 2;
@@ -327,13 +328,13 @@ namespace krys::boo
       }
     }
 
-    FloatSize corner(static_cast<float>(thumbCornerSize), static_cast<float>(thumbCornerSize));
-    FloatSize borderCorner(static_cast<float>(thumbCornerSize + ThumbBorderSize),
-                           static_cast<float>(thumbCornerSize + ThumbBorderSize));
+    SizeF corner(static_cast<float>(thumbCornerSize), static_cast<float>(thumbCornerSize));
+    SizeF borderCorner(static_cast<float>(thumbCornerSize + ThumbBorderSize),
+                       static_cast<float>(thumbCornerSize + ThumbBorderSize));
 
     Path path;
 
-    path.AddRoundedRect(FloatRect(thumb), corner);
+    path.AddRoundedRect(RectF(thumb), corner);
     graphicsContext.SetFillRule(WindRule::NonZero);
     if (scrollbar.PressedPart() == ThumbPart)
     {
@@ -352,11 +353,11 @@ namespace krys::boo
 
     if (UsesOverlayScrollbars())
     {
-      IntRect thumbBorder(thumb);
+      RectI thumbBorder(thumb);
       thumbBorder.Inflate(ThumbBorderSize);
 
-      path.AddRoundedRect(FloatRect(thumb), corner);
-      path.AddRoundedRect(FloatRect(thumbBorder), borderCorner);
+      path.AddRoundedRect(RectF(thumb), corner);
+      path.AddRoundedRect(RectF(thumbBorder), borderCorner);
       graphicsContext.SetFillRule(WindRule::EvenOdd);
       graphicsContext.SetFillColor(overlayThumbBorderColor);
       graphicsContext.FillPath(path);
@@ -371,13 +372,13 @@ namespace krys::boo
   }
 
   void ScrollbarThemeAdwaita::PaintScrollCorner(ScrollableArea &area, GraphicsContext &context,
-                                                const IntRect &cornerRect) noexcept
+                                                const RectI &cornerRect) noexcept
   {
     // The corner takes scrollbar-color's track colour. Without one, it's left unpainted, as the scrollbars'
     // tracks are: what's behind it shows through.
     if (auto scrollbarColor = area.ScrollbarColorStyle())
     {
-      context.FillRect(FloatRect(cornerRect), scrollbarColor->TrackColor);
+      context.FillRect(RectF(cornerRect), scrollbarColor->TrackColor);
     }
   }
 

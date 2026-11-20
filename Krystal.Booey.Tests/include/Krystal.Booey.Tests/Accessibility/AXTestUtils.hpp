@@ -6,7 +6,7 @@
 #include "Krystal.Booey/Accessibility/AXLogger.hpp"
 #include "Krystal.Booey/Accessibility/AXObject.hpp"
 #include "Krystal.Booey/Accessibility/AXObjectCache.hpp"
-#include "Krystal.Booey/Page/ChromeClient.hpp"
+#include "Krystal.Booey/Page/Clients/ChromeClient.hpp"
 #include <utility>
 
 namespace krys::boo::ax::tests
@@ -68,7 +68,7 @@ namespace krys::boo::ax::tests
   /// the host are recorded.
   struct AXFixture : AXPage, boo::tests::PageInFrameFixture
   {
-    explicit AXFixture(utf8_string &&markup, IntSize viewSize = {400, 300}) noexcept
+    explicit AXFixture(utf8_string &&markup, SizeI viewSize = {400, 300}) noexcept
         : PageInFrameFixture(*TestPage, krys::move(markup), viewSize)
     {
       AXObjectCache::EnableAccessibility();

@@ -27,7 +27,7 @@
 #pragma once
 
 #include "Krystal.Booey/Rendering/PathOperation.hpp"
-#include "Krystal.Core/Text/StringBuilder.hpp"
+#include "Krystal.Core/Strings/StringBuilder.hpp"
 #include "Krystal.Core/Utils/PointerComparison.hpp"
 
 namespace krys::boo::style
@@ -100,7 +100,7 @@ namespace krys::boo::style
     {
     }
 
-    KRYS_NODISCARD KRYS_ALWAYS_INLINE const URL &Url() const noexcept
+    KRYS_NODISCARD KRYS_ALWAYS_INLINE const style::Url &Url() const noexcept
     {
       return _operation->Url();
     }

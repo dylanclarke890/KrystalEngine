@@ -47,7 +47,7 @@ namespace krys::boo::style
     return AdoptRef(*new SkewTransformFunction(_angleX, _angleY, GetType()));
   }
 
-  Ref<TransformOperation> SkewTransformFunction::ToPlatform(const FloatSize &) const noexcept
+  Ref<TransformOperation> SkewTransformFunction::ToPlatform(const SizeF &) const noexcept
   {
     return SkewTransformOperation::Create(_angleX.Value, _angleY.Value, style::ConvertToPlatform(GetType()));
   }
@@ -63,7 +63,7 @@ namespace krys::boo::style
     return _angleX == otherSkew._angleX && _angleY == otherSkew._angleY;
   }
 
-  void SkewTransformFunction::Apply(TransformationMatrix &transform, const FloatSize &) const noexcept
+  void SkewTransformFunction::Apply(TransformationMatrix &transform, const SizeF &) const noexcept
   {
     transform.Skew(_angleX.Value, _angleY.Value);
   }

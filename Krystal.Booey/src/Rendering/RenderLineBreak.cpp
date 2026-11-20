@@ -22,10 +22,10 @@
 #include "Krystal.Booey/Rendering/RenderLineBreak.hpp"
 #include "Krystal.Booey/DOM/Ranges/Position.hpp"
 #include "Krystal.Booey/Editing/Selection/TextAffinity.hpp"
-#include "Krystal.Booey/Graphics/Geometry/FloatQuad.hpp"
 #include "Krystal.Booey/HTML/Elements/HTMLWBRElement.hpp"
 #include "Krystal.Booey/Layout/Integration/Inline/InlineIteratorBox.hpp"
 #include "Krystal.Booey/Layout/Integration/Inline/LayoutIntegrationLineLayout.hpp"
+#include "Krystal.Core/Geometry/Quad.hpp"
 
 namespace krys::boo
 {
@@ -55,7 +55,7 @@ namespace krys::boo
     return CreatePositionWithAffinity(0, Affinity::Downstream);
   }
 
-  IntRect RenderLineBreak::LinesBoundingBox() const noexcept
+  RectI RenderLineBreak::LinesBoundingBox() const noexcept
   {
     auto run = inline_iterator::BoxFor(*this);
     if (!run)
@@ -63,7 +63,7 @@ namespace krys::boo
       return {};
     }
 
-    return EnclosingIntRect(run->VisualRectIgnoringBlockDirection());
+    return EnclosingRectI(run->VisualRectIgnoringBlockDirection());
   }
 
   void RenderLineBreak::BoundingRects(List<LayoutRect> &rects,
@@ -80,7 +80,7 @@ namespace krys::boo
     rects.push_back(rect);
   }
 
-  void RenderLineBreak::AbsoluteQuads(List<FloatQuad> &quads, bool *wasFixed) const noexcept
+  void RenderLineBreak::AbsoluteQuads(List<QuadF> &quads, bool *wasFixed) const noexcept
   {
     auto box = inline_iterator::BoxFor(*this);
     if (!box)
@@ -89,7 +89,7 @@ namespace krys::boo
     }
 
     auto rect = box->VisualRectIgnoringBlockDirection();
-    quads.push_back(LocalToAbsoluteQuad(FloatRect(rect.Location(), rect.Size()),
-                                        MapCoordinatesMode::UseTransforms, wasFixed));
+    quads.push_back(
+      LocalToAbsoluteQuad(RectF(rect.Location(), rect.Size()), MapCoordinatesMode::UseTransforms, wasFixed));
   }
 }

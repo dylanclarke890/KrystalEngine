@@ -25,18 +25,17 @@
 #pragma once
 
 #include "Krystal.Booey/CSS/Values/Concepts.hpp"
-#include "Krystal.Booey/Graphics/Animation/CompositeOperation.hpp"
 #include "Krystal.Booey/Graphics/Fonts/FontSizeAdjust.hpp"
 #include "Krystal.Booey/Graphics/GraphicsTypes.hpp"
 #include "Krystal.Booey/Graphics/Paths/WindRule.hpp"
 #include "Krystal.Booey/Platform/Scrolling/ScrollTypes.hpp"
-#include "Krystal.Booey/Platform/ThemeTypes.hpp"
 #include "Krystal.Booey/Rendering/Style/RenderStyleConstants.hpp"
 #include "Krystal.Booey/Style/StyleAppearance.hpp"
 #include "Krystal.Booey/Text/TextFlags.hpp"
 #include "Krystal.Booey/Text/TextSpacing.hpp"
 #include "Krystal.Booey/Text/UnicodeBidi.hpp"
 #include "Krystal.Booey/Text/WritingMode.hpp"
+#include "Krystal.Core/Maths/CompositeOperation.hpp"
 
 // FIXME: Add specializations of ValueRepresentation for all enums listed in this file.
 
@@ -72,7 +71,8 @@ namespace krys::boo::css
   KRYS_DEFINE_ENUM_NEEDS_VALUE_REPRESENTATION_CONFORMANCE(StyleWritingMode)
   KRYS_DEFINE_ENUM_NEEDS_VALUE_REPRESENTATION_CONFORMANCE(StyleAppearance)
   KRYS_DEFINE_ENUM_NEEDS_VALUE_REPRESENTATION_CONFORMANCE(TextCombine)
-  KRYS_DEFINE_ENUM_NEEDS_VALUE_REPRESENTATION_CONFORMANCE(TextDirection)
+  template <> // Krystal.Text's, so not through the macro, which names Booey's types.
+  constexpr inline bool EnumHasValueRepresentation<text::TextDirection> = false;
   KRYS_DEFINE_ENUM_NEEDS_VALUE_REPRESENTATION_CONFORMANCE(TextEmphasisMark)
   KRYS_DEFINE_ENUM_NEEDS_VALUE_REPRESENTATION_CONFORMANCE(TextJustify)
   KRYS_DEFINE_ENUM_NEEDS_VALUE_REPRESENTATION_CONFORMANCE(TextWrapMode)

@@ -101,6 +101,6 @@ namespace krys::boo::html
       return _hasInvertibleTransform;
     }
 
-    void LineTo(FloatPoint) noexcept;
+    void LineTo(PointF) noexcept;
   };
 }

@@ -40,7 +40,7 @@
 #include "Krystal.Booey/HTML/Elements/HTMLLegendElement.hpp"
 #include "Krystal.Booey/HTML/Elements/HTMLSelectElement.hpp"
 #include "Krystal.Booey/HTML/Elements/HTMLTextAreaElement.hpp"
-#include "Krystal.Booey/Page/EventHandler.hpp"
+#include "Krystal.Booey/Input/EventHandler.hpp"
 #include "Krystal.Booey/Page/LocalFrame.hpp"
 #include "Krystal.Booey/Page/LocalFrameView.hpp"
 #include "Krystal.Booey/Page/LocalFrameViewLayoutContext.hpp"
@@ -894,7 +894,7 @@ namespace krys::boo
     // For objects with visible overflow, this matches IE.
     if (Style().GetWritingMode().IsLogicalLeftInlineStart())
     {
-      // FIXME: This should use snappedIntSize() instead with absolute coordinates.
+      // FIXME: This should use snappedSizeI() instead with absolute coordinates.
       return RoundToInt(std::max(ClientWidth(), LayoutOverflowRect().MaxX() - BorderLeft()));
     }
     return RoundToInt(ClientWidth() - std::min<LayoutUnit>(0_lu, LayoutOverflowRect().X() - BorderLeft()));
@@ -908,7 +908,7 @@ namespace krys::boo
     }
     // For objects with visible overflow, this matches IE.
     // FIXME: Need to work right with writing modes.
-    // FIXME: This should use snappedIntSize() instead with absolute coordinates.
+    // FIXME: This should use snappedSizeI() instead with absolute coordinates.
     return RoundToInt(std::max(ClientHeight(), LayoutOverflowRect().MaxY() - BorderTop()));
   }
 
@@ -985,7 +985,7 @@ namespace krys::boo
     rects.emplace_back(accumulatedOffset, Size());
   }
 
-  void RenderBox::AbsoluteQuads(List<FloatQuad> &quads, bool *wasFixed) const noexcept
+  void RenderBox::AbsoluteQuads(List<QuadF> &quads, bool *wasFixed) const noexcept
   {
     if (auto *fragmentedFlow = EnclosingFragmentedFlow();
         fragmentedFlow && fragmentedFlow->AbsoluteQuadsForBox(quads, wasFixed, *this))
@@ -993,14 +993,14 @@ namespace krys::boo
       return;
     }
 
-    auto localRect = FloatRect {0, 0, Width().ToFloat(), Height().ToFloat()};
+    auto localRect = RectF {0, 0, Width().ToFloat(), Height().ToFloat()};
     quads.push_back(LocalToAbsoluteQuad(localRect, MapCoordinatesMode::UseTransforms, wasFixed));
   }
 
-  FloatQuad RenderBox::AbsoluteContentQuad() const noexcept
+  QuadF RenderBox::AbsoluteContentQuad() const noexcept
   {
     auto rect = ContentBoxRect();
-    return LocalToAbsoluteQuad(FloatRect(rect));
+    return LocalToAbsoluteQuad(RectF(rect));
   }
 
   void RenderBox::MapLocalToContainer(const RenderLayerModelObject *ancestorContainer,
@@ -4154,7 +4154,7 @@ namespace krys::boo
     return false;
   }
 
-  void RenderBox::Autoscroll(const IntPoint &positionInWindow) noexcept
+  void RenderBox::Autoscroll(const PointI &positionInWindow) noexcept
   {
     if (Layer())
     {
@@ -4162,7 +4162,7 @@ namespace krys::boo
     }
   }
 
-  void RenderBox::PanScroll(const IntPoint &source, const IntPoint &mousePosition) noexcept
+  void RenderBox::PanScroll(const PointI &source, const PointI &mousePosition) noexcept
   {
     if (Layer())
     {
@@ -4186,16 +4186,16 @@ namespace krys::boo
     return false;
   }
 
-  IntSize RenderBox::CalculateAutoscrollDirection(const IntPoint &windowPoint) const noexcept
+  SizeI RenderBox::CalculateAutoscrollDirection(const PointI &windowPoint) const noexcept
   {
     // The band along the edges of a box that scrolls it.
     constexpr int32 autoscrollBeltSize = 20;
 
-    IntRect box(AbsoluteBoundingBoxRect());
+    RectI box(AbsoluteBoundingBoxRect());
     box.MoveBy(View().FrameView().GetScrollPosition());
-    IntRect windowBox = View().FrameView().ContentsToWindow(box);
+    RectI windowBox = View().FrameView().ContentsToWindow(box);
 
-    IntPoint windowAutoscrollPoint = windowPoint;
+    PointI windowAutoscrollPoint = windowPoint;
 
     if (windowAutoscrollPoint.X() < windowBox.X() + autoscrollBeltSize)
     {
@@ -4482,7 +4482,7 @@ namespace krys::boo
     if (repaintContainer != this)
     {
       // FIXME: The geometry map.
-      auto containerRelativeQuad = LocalToContainerQuad(FloatQuad(FloatRect(box)), repaintContainer);
+      auto containerRelativeQuad = LocalToContainerQuad(QuadF(RectF(box)), repaintContainer);
       box = LayoutRect(containerRelativeQuad.BoundingBox());
     }
 
@@ -4572,9 +4572,9 @@ namespace krys::boo
       {
         FlipForWritingMode(adjustedRects);
       }
-      if (context.DescendantNeedsEnclosingIntRect)
+      if (context.DescendantNeedsEnclosingRectI)
       {
-        adjustedRects.EncloseToIntRects();
+        adjustedRects.EncloseToRectsI();
       }
       return adjustedRects;
     }
@@ -4737,17 +4737,17 @@ namespace krys::boo
     LayoutRect clipRect(LayoutPoint(), CachedSizeForOverflowClip());
     if (EffectiveOverflowX() == Overflow::Visible)
     {
-      clipRect.ExpandToInfiniteX();
+      ExpandToInfiniteX(clipRect);
     }
     if (EffectiveOverflowY() == Overflow::Visible)
     {
-      clipRect.ExpandToInfiniteY();
+      ExpandToInfiniteY(clipRect);
     }
 
     if (context.ScrollMargin && (IsScrollContainerX() || IsScrollContainerY()))
     {
       auto borderWidths = BorderWidths();
-      clipRect.Contract(borderWidths);
+      Contract(clipRect, borderWidths);
       auto scrollMarginEdges = LayoutBoxExtent {
         style::Evaluate<LayoutUnit>(context.ScrollMargin->Top(), clipRect.Height(), style::ZoomNeeded {}),
         style::Evaluate<LayoutUnit>(context.ScrollMargin->Right(), clipRect.Width(), style::ZoomNeeded {}),
@@ -4755,7 +4755,7 @@ namespace krys::boo
         style::Evaluate<LayoutUnit>(context.ScrollMargin->Left(), clipRect.Width(), style::ZoomNeeded {}),
       };
 
-      clipRect.Expand(scrollMarginEdges);
+      Expand(clipRect, scrollMarginEdges);
     }
 
     bool intersects;
@@ -5411,7 +5411,7 @@ namespace krys::boo
     }
   }
 
-  void RenderBox::FlipForWritingMode(FloatRect &rect) const noexcept
+  void RenderBox::FlipForWritingMode(RectF &rect) const noexcept
   {
     if (!Style().GetWritingMode().IsBlockFlipped())
     {
@@ -5447,14 +5447,14 @@ namespace krys::boo
                                      : LayoutPoint(Width() - position.X(), position.Y());
   }
 
-  FloatPoint RenderBox::FlipForWritingMode(const FloatPoint &position) const noexcept
+  PointF RenderBox::FlipForWritingMode(const PointF &position) const noexcept
   {
     if (!Style().GetWritingMode().IsBlockFlipped())
     {
       return position;
     }
-    return IsHorizontalWritingMode() ? FloatPoint(position.X(), Height().ToFloat() - position.Y())
-                                     : FloatPoint(Width().ToFloat() - position.X(), position.Y());
+    return IsHorizontalWritingMode() ? PointF(position.X(), Height().ToFloat() - position.Y())
+                                     : PointF(Width().ToFloat() - position.X(), position.Y());
   }
 
   LayoutSize RenderBox::FlipForWritingMode(const LayoutSize &offset) const noexcept
@@ -6190,26 +6190,25 @@ namespace krys::boo
            || HasRunningAcceleratedAnimations();
   }
 
-  void RenderBox::ApplyTransform(TransformationMatrix &t, const RenderStyle &style,
-                                 const FloatRect &boundingBox,
+  void RenderBox::ApplyTransform(TransformationMatrix &t, const RenderStyle &style, const RectF &boundingBox,
                                  EnumSet<style::TransformResolverOption> options) const noexcept
   {
     style::TransformResolver::ApplyTransform(t, style, TransformOperationData(boundingBox, this), options);
   }
 
-  FloatRect RenderBox::ReferenceBoxRect(CSSBoxType boxType) const noexcept
+  RectF RenderBox::ReferenceBoxRect(CSSBoxType boxType) const noexcept
   {
     switch (boxType)
     {
       case CSSBoxType::ContentBox:
-      case CSSBoxType::FillBox:    return FloatRect(ContentBoxRect());
-      case CSSBoxType::PaddingBox: return FloatRect(PaddingBoxRect());
-      case CSSBoxType::MarginBox:  return FloatRect(MarginBoxRect());
+      case CSSBoxType::FillBox:    return RectF(ContentBoxRect());
+      case CSSBoxType::PaddingBox: return RectF(PaddingBoxRect());
+      case CSSBoxType::MarginBox:  return RectF(MarginBoxRect());
       // stroke-box, view-box compute to border-box for HTML elements.
       case CSSBoxType::StrokeBox:
       case CSSBoxType::ViewBox:
       case CSSBoxType::BorderBox:
-      case CSSBoxType::BoxMissing: return FloatRect(BorderBoxRect());
+      case CSSBoxType::BoxMissing: return RectF(BorderBoxRect());
     }
 
     krys_debug_assert(false);
@@ -6225,11 +6224,11 @@ namespace krys::boo
                      - LayoutSize(BorderLeft() + BorderRight(), BorderTop() + BorderBottom()));
     if (Style().OverflowX() == Overflow::Clip && Style().OverflowY() == Overflow::Visible)
     {
-      clipRect.ExpandToInfiniteY();
+      ExpandToInfiniteY(clipRect);
     }
     else if (Style().OverflowY() == Overflow::Clip && Style().OverflowX() == Overflow::Visible)
     {
-      clipRect.ExpandToInfiniteX();
+      ExpandToInfiniteX(clipRect);
     }
 
     // Subtract out scrollbars if we have them.
@@ -6312,9 +6311,9 @@ namespace krys::boo
     }
 
     AffineTransform ctm = context.GetCTM();
-    FloatSize contextScaling(static_cast<float>(ctm.XScale()), static_cast<float>(ctm.YScale()));
+    SizeF contextScaling(static_cast<float>(ctm.XScale()), static_cast<float>(ctm.YScale()));
 
-    // Because LayoutRoundedRect uses IntRect internally the inset applied by the
+    // Because LayoutRoundedRect uses RectI internally the inset applied by the
     // BleedAvoidance::ShrinkBackground strategy cannot be less than one integer
     // layout coordinate, even with subpixel layout enabled. To take that into
     // account, we clamp the contextScaling to 1.0 for the following test so
@@ -6541,7 +6540,7 @@ namespace krys::boo
       LayoutRect borderImageRect = BorderBoxRect();
 
       // Apply outsets to the border box.
-      borderImageRect.Expand(Style().MaskBorderOutsets());
+      Expand(borderImageRect, Style().MaskBorderOutsets());
       return borderImageRect;
     }
 
@@ -6612,7 +6611,7 @@ namespace krys::boo
 
     LayoutRect paintRect = LayoutRect(paintOffset, Size());
 
-    paintInfo.Context().FillRect(FloatRect(SnappedIntRect(paintRect)), Color::black);
+    paintInfo.Context().FillRect(RectF(SnappedRectI(paintRect)), Color::black);
   }
 
   void RenderBox::ClipToPaddingBoxShape(GraphicsContext &context, const LayoutPoint &accumulatedOffset,
@@ -6657,7 +6656,7 @@ namespace krys::boo
       paintInfo.Phase = PaintPhase::ChildBlockBackgrounds;
     }
     float deviceScaleFactor = GetDocument().DeviceScaleFactor();
-    FloatRect clipRect = SnapRectToDevicePixels(
+    RectF clipRect = SnapRectToDevicePixels(
       isControlClip
         ? ControlClipRect(accumulatedOffset)
         : OverflowClipRect(accumulatedOffset, OverlayScrollbarSizeRelevancy::IgnoreOverlayScrollbarSize,
@@ -6722,7 +6721,7 @@ namespace krys::boo
     {
       auto &shape = basicShape->GetShape();
       auto path = style::ComputePath(shape, ReferenceBoxRect(basicShape->ReferenceBox()));
-      return path.Contains(FloatPoint(hitTestLocationInLocalCoordinates), style::ComputeWindRule(shape));
+      return path.Contains(PointF(hitTestLocationInLocalCoordinates), style::ComputeWindRule(shape));
     }
     if (auto reference = clipPath.TryReference())
     {
@@ -6733,8 +6732,7 @@ namespace krys::boo
         return true;
       }
       auto &clipper = Downcast<LegacyRenderSVGResourceClipper>(*svgElement->Renderer());
-      return clipper.HitTestClipContent(FloatRect {BorderBoxRect()},
-                                        FloatPoint {hitTestLocationInLocalCoordinates});
+      return clipper.HitTestClipContent(RectF {BorderBoxRect()}, PointF {hitTestLocationInLocalCoordinates});
     }
     return true;
   }
@@ -6939,7 +6937,7 @@ namespace krys::boo
     return RenderBoxModelObject::NodeAtPoint(request, result, locationInContainer, accumulatedOffset, action);
   }
 
-  void RenderBox::ImageChanged(WrappedImagePtr image, const IntRect *) noexcept
+  void RenderBox::ImageChanged(WrappedImagePtr image, const RectI *) noexcept
   {
     if (auto source = Style().GetBorderImageSource().TryStyleImage(); source && source->Data() == image)
     {
@@ -7091,7 +7089,7 @@ namespace krys::boo
         if (drawingRootBackground && View().FrameView().HasExtendedBackgroundRectForPainting())
         {
           shouldClipToLayer = false;
-          IntRect extendedBackgroundRect = View().FrameView().ExtendedBackgroundRectForPainting();
+          RectI extendedBackgroundRect = View().FrameView().ExtendedBackgroundRectForPainting();
           if (rectToRepaint.Width() == rendererRect.Width())
           {
             rectToRepaint.Move(LayoutUnit {extendedBackgroundRect.X()}, 0_lu);

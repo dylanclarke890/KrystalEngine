@@ -25,10 +25,10 @@
 
 #include "Krystal.Booey/Graphics/Animation/TimingFunction.hpp"
 #include "Krystal.Booey/CSS/Values/NumberFormatting.hpp"
-#include "Krystal.Booey/Graphics/Animation/SpringSolver.hpp"
-#include "Krystal.Booey/Graphics/Animation/UnitBezier.hpp"
-#include "Krystal.Core/Text/StringBuilder.hpp"
-#include "Krystal.Core/Text/TextStream.hpp"
+#include "Krystal.Core/Maths/SpringSolver.hpp"
+#include "Krystal.Core/Maths/UnitBezier.hpp"
+#include "Krystal.Core/Strings/StringBuilder.hpp"
+#include "Krystal.Core/Strings/TextStream.hpp"
 #include <algorithm>
 #include <cmath>
 #include <limits>
@@ -135,49 +135,9 @@ namespace krys::boo
       }
       case Type::StepsFunction:
       {
-        // https://drafts.csswg.org/css-easing-1/#step-timing-functions
         const auto &function = Downcast<StepsTimingFunction>(*this);
-        double steps = function.NumberOfSteps();
-        auto stepPosition = function.GetStepPosition();
-        // 1. Calculate the current step as floor(input progress value × steps).
-        auto currentStep = std::floor(progress * steps);
-        // 2. If the step position property is start, increment current step by one.
-        if (stepPosition == StepsTimingFunction::StepPosition::JumpStart
-            || stepPosition == StepsTimingFunction::StepPosition::Start
-            || stepPosition == StepsTimingFunction::StepPosition::JumpBoth)
-        {
-          ++currentStep;
-        }
-        // 3. If both of the following conditions are true:
-        //    - the before flag is set, and
-        //    - input progress value × steps mod 1 equals zero (that is, if input progress value × steps is
-        //      integral), then
-        //    decrement current step by one.
-        if (before == Before::Yes && !std::fmod(progress * steps, 1))
-        {
-          currentStep--;
-        }
-        // 4. If input progress value ≥ 0 and current step < 0, let current step be zero.
-        if (progress >= 0 && currentStep < 0)
-        {
-          currentStep = 0;
-        }
-        // 5. Calculate jumps based on the step position.
-        if (stepPosition == StepsTimingFunction::StepPosition::JumpNone)
-        {
-          --steps;
-        }
-        else if (stepPosition == StepsTimingFunction::StepPosition::JumpBoth)
-        {
-          ++steps;
-        }
-        // 6. If input progress value ≤ 1 and current step > jumps, let current step be jumps.
-        if (progress <= 1 && currentStep > steps)
-        {
-          currentStep = steps;
-        }
-        // 7. The output progress value is current step / jumps.
-        return currentStep / steps;
+        return StepEasing(progress, function.NumberOfSteps(),
+                          function.GetStepPosition().value_or(StepPosition::End), before == Before::Yes);
       }
       case Type::SpringFunction:
       {
@@ -188,32 +148,7 @@ namespace krys::boo
       }
       case Type::LinearFunction:
       {
-        const auto &function = Downcast<LinearTimingFunction>(*this);
-
-        const auto &points = function.Points();
-        if (points.size() < 2)
-        {
-          return progress;
-        }
-
-        // The last point whose progress is at or before `progress` (the first point if there's none), so that
-        // `i + 1` is a point.
-        auto last = std::find_if(points.rbegin(), points.rend(),
-                                 [&](const auto &point) { return point.Progress <= progress; });
-        size_t i = last == points.rend() ? 0 : static_cast<size_t>(points.rend() - last) - 1;
-        if (i == points.size() - 1)
-        {
-          --i;
-        }
-
-        if (points[i].Progress == points[i + 1].Progress)
-        {
-          return points[i + 1].Value;
-        }
-
-        return points[i].Value
-               + ((progress - points[i].Progress) / (points[i + 1].Progress - points[i].Progress)
-                  * (points[i + 1].Value - points[i].Value));
+        return LinearEasing(Downcast<LinearTimingFunction>(*this).Points(), progress);
       }
     }
 

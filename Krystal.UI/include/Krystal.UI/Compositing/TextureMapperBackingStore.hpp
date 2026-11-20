@@ -10,18 +10,17 @@ namespace krys::ui
   public:
     ~TextureMapperBackingStore() noexcept override = default;
 
-    void PaintToTextureMapper(TextureMapper &textureMapper, const boo::FloatRect &targetRect,
-                              const boo::TransformationMatrix &modelViewMatrix,
+    void PaintToTextureMapper(TextureMapper &textureMapper, const RectF &targetRect,
+                              const TransformationMatrix &modelViewMatrix,
                               float opacity) noexcept override = 0;
 
-    virtual void DrawRepaintCounter(TextureMapper &, int32, const boo::Color &, const boo::FloatRect &,
-                                    const boo::TransformationMatrix &) noexcept
+    virtual void DrawRepaintCounter(TextureMapper &, int32, const boo::Color &, const RectF &,
+                                    const TransformationMatrix &) noexcept
     {
     }
 
   protected:
-    KRYS_NODISCARD static bool AllTileEdgesExposed(const boo::FloatRect &totalRect,
-                                                   const boo::FloatRect &tileRect) noexcept;
+    KRYS_NODISCARD static bool AllTileEdgesExposed(const RectF &totalRect, const RectF &tileRect) noexcept;
   };
 
   /// @brief A backing store of one colour.
@@ -36,7 +35,7 @@ namespace krys::ui
       _color = krys::move(color);
     }
 
-    void PaintToTextureMapper(TextureMapper &textureMapper, const boo::FloatRect &targetRect,
-                              const boo::TransformationMatrix &transform, float opacity) noexcept override;
+    void PaintToTextureMapper(TextureMapper &textureMapper, const RectF &targetRect,
+                              const TransformationMatrix &transform, float opacity) noexcept override;
   };
 }

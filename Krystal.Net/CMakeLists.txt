@@ -1,0 +1,55 @@
+﻿add_library(Krystal.Net STATIC)
+
+target_link_libraries(Krystal.Net
+  PUBLIC
+    Krystal.Core
+  PRIVATE
+    # IDNA for URL hosts
+    Krystal.Text
+)
+
+set_target_properties(Krystal.Net
+  PROPERTIES
+    CXX_STANDARD_REQUIRED ON
+    CXX_EXTENSIONS OFF
+    COMPILE_WARNING_AS_ERROR ON
+)
+
+target_compile_features(Krystal.Net
+  PUBLIC
+    cxx_std_23
+)
+
+target_compile_options(Krystal.Net
+  PRIVATE
+    $<$<CXX_COMPILER_ID:MSVC>:/W4 /MP /utf-8>
+)
+
+target_sources(Krystal.Net
+  PUBLIC
+    FILE_SET HEADERS
+    BASE_DIRS
+      include
+    FILES
+      include/Krystal.Net/BlobData.hpp
+      include/Krystal.Net/DataUrlDecoder.hpp
+      include/Krystal.Net/Http/HttpHeaderMap.hpp
+      include/Krystal.Net/Http/HttpParsers.hpp
+      include/Krystal.Net/MimeTypeRegistry.hpp
+      include/Krystal.Net/ResourceError.hpp
+      include/Krystal.Net/ResourceRequest.hpp
+      include/Krystal.Net/ResourceResponse.hpp
+      include/Krystal.Net/Url.hpp
+      include/Krystal.Net/UrlHash.hpp
+      include/Krystal.Net/UrlParser.hpp
+
+  PRIVATE
+    src/BlobData.cpp
+    src/DataUrlDecoder.cpp
+    src/Http/HttpHeaderMap.cpp
+    src/Http/HttpParsers.cpp
+    src/MimeTypeRegistry.cpp
+    src/ResourceResponse.cpp
+    src/Url.cpp
+    src/UrlParser.cpp
+)

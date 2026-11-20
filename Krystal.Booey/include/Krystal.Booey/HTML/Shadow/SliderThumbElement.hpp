@@ -31,8 +31,8 @@
 
 #pragma once
 
-#include "Krystal.Booey/Graphics/Geometry/DoublePoint.hpp"
 #include "Krystal.Booey/HTML/Elements/HTMLDivElement.hpp"
+#include "Krystal.Core/Geometry/Point.hpp"
 
 namespace krys::boo
 {
@@ -101,7 +101,7 @@ namespace krys::boo::html
     };
 
   private:
-    DoublePoint _touchStartPoint;
+    PointD _touchStartPoint;
     SlidingDirection _slidingDirection {SlidingDirection::NoMove};
     bool _touchStarted {false};
 

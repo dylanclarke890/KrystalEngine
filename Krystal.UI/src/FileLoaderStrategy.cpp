@@ -1,8 +1,8 @@
 ﻿#include "Krystal.UI/FileLoaderStrategy.hpp"
 #include "Krystal.Booey/HTML/EventLoop/EventLoop.hpp"
-#include "Krystal.Booey/Platform/MIMETypeRegistry.hpp"
-#include "Krystal.Core/Text/ASCII.hpp"
+#include "Krystal.Core/Strings/ASCII.hpp"
 #include "Krystal.Core/Threading/WorkQueue.hpp"
+#include "Krystal.Net/MimeTypeRegistry.hpp"
 #include <algorithm>
 #include <chrono>
 #include <filesystem>
@@ -49,41 +49,41 @@ namespace krys::ui
 
     /// @brief What loading @p url, the file at @p path, gave: @p contents as a resource, or an error if the
     /// file couldn't be read.
-    KRYS_NODISCARD boo::LoadResult LoadResultFor(const boo::url::URL &url, const std::filesystem::path &path,
+    KRYS_NODISCARD boo::LoadResult LoadResultFor(const net::Url &url, const std::filesystem::path &path,
                                                  Maybe<FileContents> contents) noexcept
     {
       if (!contents)
       {
-        return Unexpected<boo::ResourceError>(
-          boo::ResourceError(utf8_string(ErrorDomain), 0, url, u8"Couldn't open the file"));
+        return Unexpected<net::ResourceError>(
+          net::ResourceError(utf8_string(ErrorDomain), 0, url, u8"Couldn't open the file"));
       }
 
       // The type is the extension's, without its dot.
       const auto extension = path.extension().u8string();
       const auto size = static_cast<int64>(contents->Bytes.size());
-      boo::ResourceResponse response(url,
-                                     boo::MIMETypeRegistry::MIMETypeForExtension(
+      net::ResourceResponse response(url,
+                                     net::MimeTypeRegistry::MimeTypeForExtension(
                                        utf8_stringview(extension).substr(extension.empty() ? 0 : 1)),
                                      size);
       if (const auto &date = contents->LastModified)
       {
-        response.SetHTTPHeaderField(
+        response.SetHttpHeaderField(
           u8"Last-Modified", utf8_stringview(reinterpret_cast<const char8_t *>(date->data()), date->size()));
       }
       return boo::LoadedResource {.Response = krys::move(response),
-                                  .Data = boo::SharedBuffer::Create(krys::move(contents->Bytes))};
+                                  .Data = SharedBuffer::Create(krys::move(contents->Bytes))};
     }
   }
 
-  void FileLoaderStrategy::LoadResource(boo::LocalFrame &, const boo::ResourceRequest &request,
+  void FileLoaderStrategy::LoadResource(boo::LocalFrame &, const net::ResourceRequest &request,
                                         const boo::ResourceLoaderOptions &,
                                         Func<void(boo::LoadResult &&)> &&completionHandler) noexcept
   {
-    const auto &url = request.URL();
+    const auto &url = request.Url();
     if (!url.ProtocolIsFile())
     {
-      completionHandler(Unexpected<boo::ResourceError>(
-        boo::ResourceError(utf8_string(ErrorDomain), 0, url, u8"Only file URLs load")));
+      completionHandler(Unexpected<net::ResourceError>(
+        net::ResourceError(utf8_string(ErrorDomain), 0, url, u8"Only file URLs load")));
       return;
     }
 
@@ -97,7 +97,7 @@ namespace krys::ui
     // Only the read leaves the main thread: the response is made from it back on the main thread, as
     // Booey's types are the main thread's.
     _readQueue->Dispatch([path] { return ReadFile(path); }, boo::html::EventLoop::Current().Inbox(),
-                         [url = boo::url::URL(url), path, completionHandler = krys::move(completionHandler)](
+                         [url = net::Url(url), path, completionHandler = krys::move(completionHandler)](
                            Maybe<FileContents> contents) mutable
                          { completionHandler(LoadResultFor(url, path, krys::move(contents))); },
                          {.MayBlock = true});

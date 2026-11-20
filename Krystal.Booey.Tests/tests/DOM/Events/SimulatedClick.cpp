@@ -5,7 +5,7 @@
 #include "Krystal.Booey/DOM/Events/EventNames.hpp"
 #include "Krystal.Booey/DOM/Events/MouseEvent.hpp"
 #include "Krystal.Booey/DOM/Nodes/Element.hpp"
-#include "Krystal.Booey/Page/ChromeClient.hpp"
+#include "Krystal.Booey/Page/Clients/ChromeClient.hpp"
 #include "Krystal.Booey/Page/Page.hpp"
 
 namespace krys::boo::tests
@@ -20,14 +20,14 @@ namespace krys::boo::tests
       {
       }
 
-      KRYS_NODISCARD IntPoint RootViewToScreen(const IntPoint &point) const noexcept override
+      KRYS_NODISCARD PointI RootViewToScreen(const PointI &point) const noexcept override
       {
-        return point + IntSize(100, 200);
+        return point + SizeI(100, 200);
       }
 
-      KRYS_NODISCARD IntPoint ScreenToRootView(const IntPoint &point) const noexcept override
+      KRYS_NODISCARD PointI ScreenToRootView(const PointI &point) const noexcept override
       {
-        return point - IntSize(100, 200);
+        return point - SizeI(100, 200);
       }
     };
 
@@ -60,8 +60,8 @@ namespace krys::boo::tests
     button.AddEventListener(event_names::Click, recorder, false);
 
     (void)fixture.Document->UpdateLayout();
-    CHECK(button.ScreenRect() == IntRect(110, 220, 40, 10));
-    CHECK(fixture.Document->View()->ScreenToContents({130, 225}) == IntPoint(30, 25));
+    CHECK(button.ScreenRect() == RectI(110, 220, 40, 10));
+    CHECK(fixture.Document->View()->ScreenToContents({130, 225}) == PointI(30, 25));
 
     (void)button.DispatchSimulatedClick(nullptr);
     CHECK(recorder->ClientX == 30);

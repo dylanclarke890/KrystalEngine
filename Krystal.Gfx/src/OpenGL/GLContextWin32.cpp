@@ -9,8 +9,8 @@
 
 // The bootstrap calls the system WGL functions, so the hook header mustn't replace their names.
 #define KRYS_WGL_OVERRIDE_FUNCTIONS 0
+#include "Krystal.Core/Strings/String.hpp"
 #include "Krystal.Core/Types/Array.hpp"
-#include "Krystal.Core/Types/String.hpp"
 #include "Krystal.Gfx/OpenGL/GLContext.hpp"
 #include "Krystal.Gfx/OpenGL/Hooks/gl.hpp"
 #include "Krystal.Gfx/OpenGL/Hooks/wgl.hpp"

@@ -26,8 +26,8 @@
 #pragma once
 
 #include "Krystal.Booey/Graphics/Geometry/BoxExtents.hpp"
-#include "Krystal.Booey/Graphics/Geometry/FloatRect.hpp"
 #include "Krystal.Core/Attributes.hpp"
+#include "Krystal.Core/Geometry/Rect.hpp"
 #include "Krystal.Core/RefCounted.hpp"
 #include "Krystal.Core/Types/RefPtr.hpp"
 #include "Krystal.Core/Types/UniquePtr.hpp"
@@ -50,14 +50,14 @@ namespace krys::boo::html
   private:
     CanvasRenderingContext2DBase &_context;
     GraphicsContext *_effectiveDrawingContext;
-    FloatRect _bounds;
+    RectF _bounds;
     UniquePtr<GraphicsContextSwitcher> _targetSwitcher;
 
   public:
     /// @brief A switcher for drawing within @p bounds through @p filter; null if the context has nowhere to
     /// draw.
     KRYS_NODISCARD static RefPtr<CanvasLayerContextSwitcher>
-      Create(CanvasRenderingContext2DBase &, const FloatRect &bounds, RefPtr<Filter> &&) noexcept;
+      Create(CanvasRenderingContext2DBase &, const RectF &bounds, RefPtr<Filter> &&) noexcept;
 
     ~CanvasLayerContextSwitcher() noexcept;
 
@@ -65,13 +65,13 @@ namespace krys::boo::html
     KRYS_NODISCARD GraphicsContext *DrawingContext() const noexcept;
 
     /// @brief The bounds, with the filter's outsets.
-    KRYS_NODISCARD FloatRect ExpandedBounds() const noexcept
+    KRYS_NODISCARD RectF ExpandedBounds() const noexcept
     {
       return _bounds + Outsets();
     }
 
   private:
-    CanvasLayerContextSwitcher(CanvasRenderingContext2DBase &, const FloatRect &bounds,
+    CanvasLayerContextSwitcher(CanvasRenderingContext2DBase &, const RectF &bounds,
                                UniquePtr<GraphicsContextSwitcher> &&) noexcept;
 
     KRYS_NODISCARD FloatBoxExtent Outsets() const noexcept;

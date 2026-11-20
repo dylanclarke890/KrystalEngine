@@ -25,17 +25,17 @@
 #include "Krystal.Booey/Loader/Cache/CachedResourceHandle.hpp"
 #include "Krystal.Booey/Loader/LoaderStrategy.hpp"
 #include "Krystal.Booey/Loader/ResourceLoaderOptions.hpp"
-#include "Krystal.Booey/Platform/Network/ResourceError.hpp"
-#include "Krystal.Booey/Platform/Network/ResourceRequest.hpp"
-#include "Krystal.Booey/Platform/Network/ResourceResponse.hpp"
-#include "Krystal.Booey/Platform/SharedBuffer.hpp"
-#include "Krystal.Booey/Platform/Timer.hpp"
 #include "Krystal.Core/CanMakeWeakPtr.hpp"
 #include "Krystal.Core/RefCounted.hpp"
 #include "Krystal.Core/Time/MonotonicTime.hpp"
+#include "Krystal.Core/Time/Timer.hpp"
 #include "Krystal.Core/Types/Func.hpp"
 #include "Krystal.Core/Types/HashMap.hpp"
 #include "Krystal.Core/Types/List.hpp"
+#include "Krystal.Core/Types/SharedBuffer.hpp"
+#include "Krystal.Net/ResourceError.hpp"
+#include "Krystal.Net/ResourceRequest.hpp"
+#include "Krystal.Net/ResourceResponse.hpp"
 
 namespace krys::boo
 {
@@ -84,13 +84,13 @@ namespace krys::boo
 
   protected:
     ResourceLoaderOptions _options;
-    ResourceRequest _resourceRequest;
+    net::ResourceRequest _resourceRequest;
     HashMap<CachedResourceClient *, uint32> _clients;
     RefPtr<SharedBuffer> _data;
 
   private:
-    ResourceResponse _response;
-    ResourceError _error;
+    net::ResourceResponse _response;
+    net::ResourceError _error;
     uint32 _encodedSize {0};
     uint32 _decodedSize {0};
     Timer _decodedDataDeletionTimer;
@@ -118,24 +118,24 @@ namespace krys::boo
 
     virtual void Error(Status) noexcept;
 
-    void SetResourceError(const ResourceError &error) noexcept
+    void SetResourceError(const net::ResourceError &error) noexcept
     {
       _error = error;
     }
 
-    KRYS_NODISCARD const ResourceError &GetResourceError() const noexcept
+    KRYS_NODISCARD const net::ResourceError &GetResourceError() const noexcept
     {
       return _error;
     }
 
-    KRYS_NODISCARD const ResourceRequest &GetResourceRequest() const noexcept
+    KRYS_NODISCARD const net::ResourceRequest &GetResourceRequest() const noexcept
     {
       return _resourceRequest;
     }
 
-    KRYS_NODISCARD const url::URL &URL() const noexcept
+    KRYS_NODISCARD const net::Url &Url() const noexcept
     {
-      return _resourceRequest.URL();
+      return _resourceRequest.Url();
     }
 
     KRYS_NODISCARD Type GetType() const noexcept
@@ -267,11 +267,11 @@ namespace krys::boo
       return _data.get();
     }
 
-    virtual void ResponseReceived(ResourceResponse &&) noexcept;
+    virtual void ResponseReceived(net::ResourceResponse &&) noexcept;
 
-    void SetResponse(ResourceResponse &&) noexcept;
+    void SetResponse(net::ResourceResponse &&) noexcept;
 
-    KRYS_NODISCARD const ResourceResponse &Response() const noexcept
+    KRYS_NODISCARD const net::ResourceResponse &Response() const noexcept
     {
       return _response;
     }
@@ -318,7 +318,7 @@ namespace krys::boo
 
     void DidAccessDecodedData(MonotonicTime::duration timeStamp) noexcept;
 
-    ResourceResponse &MutableResponse() noexcept
+    net::ResourceResponse &MutableResponse() noexcept
     {
       return _response;
     }

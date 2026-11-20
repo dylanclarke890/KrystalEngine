@@ -132,7 +132,7 @@ namespace krys::boo
 
     void UpdateExternalDocument() noexcept;
 
-    KRYS_NODISCARD FloatRect GetBBox(StyleUpdateStrategy = AllowStyleUpdate) noexcept final;
+    KRYS_NODISCARD RectF GetBBox(StyleUpdateStrategy = AllowStyleUpdate) noexcept final;
 
     KRYS_NODISCARD RefPtr<SVGElement> FindTarget(DOMStringAtom *targetID = nullptr) const noexcept;
 

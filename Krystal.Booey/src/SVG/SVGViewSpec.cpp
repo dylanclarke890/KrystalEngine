@@ -24,7 +24,7 @@
 #include "Krystal.Booey/SVG/Properties/SVGPropertyOwnerRegistry.hpp"
 #include "Krystal.Booey/SVG/SVGNames.hpp"
 #include "Krystal.Booey/SVG/SVGTransformList.hpp"
-#include "Krystal.Core/Text/ParsingUtilities.hpp"
+#include "Krystal.Core/Strings/ParsingUtilities.hpp"
 
 namespace krys::boo
 {

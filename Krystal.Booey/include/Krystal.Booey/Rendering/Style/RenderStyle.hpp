@@ -30,6 +30,7 @@
 #include "Krystal.Booey/Rendering/Painting/PaintPhase.hpp"
 #include "Krystal.Booey/Rendering/Style/RenderStyleProperties.hpp"
 #include "Krystal.Booey/Style/Values/Color/ColorOptions.hpp"
+#include "Krystal.Core/Geometry/GeometryForward.hpp"
 
 namespace krys::boo::style
 {
@@ -38,7 +39,6 @@ namespace krys::boo::style
 
 namespace krys::boo
 {
-  class IntSize;
   class RenderElement;
 
   class RenderStyle final : public RenderStyleProperties
@@ -252,7 +252,7 @@ namespace krys::boo
 
     KRYS_NODISCARD const CSSOMStringAtom &HyphenString() const noexcept;
 
-    KRYS_NODISCARD float UsedStrokeWidth(const IntSize &viewportSize) const noexcept;
+    KRYS_NODISCARD float UsedStrokeWidth(const SizeI &viewportSize) const noexcept;
 
     KRYS_NODISCARD Color UsedStrokeColor() const noexcept;
 

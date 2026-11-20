@@ -1,5 +1,5 @@
 ﻿#include "Krystal.Booey/CSS/Parser/KeywordLookup.hpp"
-#include "Krystal.Core/Text/ASCII.hpp"
+#include "Krystal.Core/Strings/ASCII.hpp"
 #include "Krystal.Core/Types/Array.hpp"
 
 namespace krys::boo::css

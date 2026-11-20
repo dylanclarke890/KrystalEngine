@@ -347,7 +347,7 @@ namespace krys::boo
       [](const CSSOMStringAtom &string) -> const CSSOMStringAtom & { return string; });
   }
 
-  float RenderStyle::UsedStrokeWidth(const IntSize &viewportSize) const noexcept
+  float RenderStyle::UsedStrokeWidth(const SizeI &viewportSize) const noexcept
   {
     // Use the stroke-width and stroke-color value combination only if stroke-color has been explicitly
     // specified. Since there will be no visible stroke when stroke-color is not specified (transparent by

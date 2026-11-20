@@ -1,6 +1,6 @@
 ﻿#include "Krystal.Booey/DOM/Events/KeyboardEvent.hpp"
 #include "catch2/catch_test_macros.hpp"
-#include "Krystal.Booey/Platform/Events/WindowsKeyboardCodes.hpp"
+#include "Krystal.Booey/Input/LegacyKeyCodes.hpp"
 
 namespace krys::boo::dom::tests
 {
@@ -96,7 +96,7 @@ namespace krys::boo::dom::tests
       CHECK(down->Which() == vk::Shift);
       CHECK(down->CharCode() == 0);
       REQUIRE(down->UnderlyingPlatformEvent());
-      CHECK(down->UnderlyingPlatformEvent()->WindowsVirtualKeyCode() == vk::LShift);
+      CHECK(down->UnderlyingPlatformEvent()->LegacyKeyCode() == vk::LShift);
     }
 
     SECTION("keypress")
@@ -130,15 +130,15 @@ namespace krys::boo::dom::tests
       CHECK(rawKeyDown.Text().empty());
       CHECK(rawKeyDown.UnmodifiedText().empty());
       CHECK(rawKeyDown.KeyIdentifier() == u8"U+0041");
-      CHECK(rawKeyDown.WindowsVirtualKeyCode() == 'A');
+      CHECK(rawKeyDown.LegacyKeyCode() == 'A');
 
       auto keyPress = combined;
       keyPress.DisambiguateKeyDownEvent(PlatformEvent::Type::Char);
       CHECK(keyPress.Text() == u8"a");
       CHECK(keyPress.KeyIdentifier().empty());
       // A char has no key code, though the keypress's keydown does.
-      CHECK(keyPress.WindowsVirtualKeyCode() == 0);
-      CHECK(keyPress.WindowsVirtualKeyCodeWithoutKeyPressOverride() == 'A');
+      CHECK(keyPress.LegacyKeyCode() == 0);
+      CHECK(keyPress.LegacyKeyCodeWithoutKeyPressOverride() == 'A');
     }
   }
 }

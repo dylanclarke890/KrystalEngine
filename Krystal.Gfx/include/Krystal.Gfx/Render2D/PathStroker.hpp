@@ -6,9 +6,9 @@
 #include "Krystal.Core/Numeric.hpp"
 #include "Krystal.Core/Types/List.hpp"
 #include "Krystal.Core/Types/Span.hpp"
+#include "Krystal.Gfx/Render2D/AffineTransformFloats.hpp"
 #include "Krystal.Gfx/Render2D/Path2D.hpp"
 #include "Krystal.Gfx/Render2D/StrokeStyle.hpp"
-#include "Krystal.Gfx/Render2D/Transform2D.hpp"
 
 namespace krys::gfx
 {
@@ -55,7 +55,7 @@ namespace krys::gfx
     /// @brief The outline of `path` stroked with `style`, to fill under `FillRule::NonZero` with
     /// `transform`. Empty when nothing would show.
     KRYS_NODISCARD Path2D Stroke(const Path2D &path, const StrokeStyle &style,
-                                 const Transform2D &transform) noexcept;
+                                 const AffineTransform &transform) noexcept;
 
   private:
     /// @brief Adds a point to the contour, merging it with the last if they're the same.

@@ -22,7 +22,7 @@ namespace krys::boo::tests
                                  const PixelBufferFormat &to) noexcept
     {
       Pixel converted {};
-      ConvertImagePixels({from, 4u, {pixel.data(), 4u}}, {to, 4u, {converted.data(), 4u}}, IntSize(1, 1));
+      ConvertImagePixels({from, 4u, {pixel.data(), 4u}}, {to, 4u, {converted.data(), 4u}}, SizeI(1, 1));
       return converted;
     }
   }
@@ -49,15 +49,15 @@ namespace krys::boo::tests
   TEST_CASE("PixelBuffer: sizes, ranges and the byte array buffer", "[Graphics][PixelBuffer]")
   {
     CHECK(PixelBuffer::BytesPerPixel(PixelFormat::RGBA8) == 4u);
-    CHECK(PixelBuffer::ComputeBufferSize(PixelFormat::RGBA8, IntSize(3, 2)) == 24u);
-    CHECK(PixelBuffer::ComputePixelCount(IntSize(3, 2)) == 6u);
+    CHECK(PixelBuffer::ComputeBufferSize(PixelFormat::RGBA8, SizeI(3, 2)) == 24u);
+    CHECK(PixelBuffer::ComputePixelCount(SizeI(3, 2)) == 6u);
     // Sizes that don't fit in an int32 overflow.
-    CHECK_FALSE(PixelBuffer::ComputeBufferSize(PixelFormat::RGBA8, IntSize(40'000, 40'000)));
+    CHECK_FALSE(PixelBuffer::ComputeBufferSize(PixelFormat::RGBA8, SizeI(40'000, 40'000)));
     CHECK(PixelBuffer::SupportedPixelFormat(PixelFormat::BGRA8));
     CHECK_FALSE(PixelBuffer::SupportedPixelFormat(PixelFormat::BGRX8));
 
     const auto format = Format(AlphaPremultiplication::Unpremultiplied, PixelFormat::RGBA8);
-    auto buffer = ByteArrayPixelBuffer::TryCreate(format, IntSize(2, 1));
+    auto buffer = ByteArrayPixelBuffer::TryCreate(format, SizeI(2, 1));
     REQUIRE(buffer);
     CHECK(buffer->GetType() == PixelBuffer::Type::ByteArray);
     CHECK(buffer->Bytes().size() == 8u);
@@ -76,20 +76,20 @@ namespace krys::boo::tests
 
     // The bytes are shared with the array the buffer was made from.
     auto data = dom::Uint8ClampedArray::Create(8u);
-    auto shared = ByteArrayPixelBuffer::TryCreate(format, IntSize(2, 1), Ref<dom::Uint8ClampedArray>(data));
+    auto shared = ByteArrayPixelBuffer::TryCreate(format, SizeI(2, 1), Ref<dom::Uint8ClampedArray>(data));
     REQUIRE(shared);
     shared->Set(3, 7);
     CHECK(data->Item(3) == 7);
     CHECK(&shared->Data() == data.get());
-    CHECK_FALSE(ByteArrayPixelBuffer::TryCreate(format, IntSize(3, 1), Ref<dom::Uint8ClampedArray>(data)));
+    CHECK_FALSE(ByteArrayPixelBuffer::TryCreate(format, SizeI(3, 1), Ref<dom::Uint8ClampedArray>(data)));
 
     // A copy of the right length makes a buffer; the source view checks the length too.
-    auto copied = ByteArrayPixelBuffer::Create(format, IntSize(1, 1), Span<const uint8>(bytes));
+    auto copied = ByteArrayPixelBuffer::Create(format, SizeI(1, 1), Span<const uint8>(bytes));
     REQUIRE(copied);
     CHECK((*copied)->Item(2) == 3);
-    CHECK(PixelBufferSourceView::Create(format, IntSize(1, 1), bytes));
-    CHECK_FALSE(PixelBufferSourceView::Create(format, IntSize(2, 1), bytes));
-    CHECK(shared->CreateScratchPixelBuffer(IntSize(4, 4))->Size() == IntSize(4, 4));
+    CHECK(PixelBufferSourceView::Create(format, SizeI(1, 1), bytes));
+    CHECK_FALSE(PixelBufferSourceView::Create(format, SizeI(2, 1), bytes));
+    CHECK(shared->CreateScratchPixelBuffer(SizeI(4, 4))->Size() == SizeI(4, 4));
   }
 
   TEST_CASE("PixelBufferConversion: converting between colour spaces",
@@ -150,7 +150,7 @@ namespace krys::boo::tests
     const uint8 source[] {1, 2, 3, 4, 9, 9, 9, 9, 5, 6, 7, 8, 9, 9, 9, 9};
     uint8 destination[8] {};
     ConvertImagePixels({unpremultipliedRGBA, 8u, source}, {unpremultipliedRGBA, 4u, destination},
-                       IntSize(1, 2));
+                       SizeI(1, 2));
     CHECK(destination[0] == 1);
     CHECK(destination[4] == 5);
     CHECK(destination[7] == 8);

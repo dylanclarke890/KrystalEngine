@@ -37,11 +37,11 @@ namespace krys::boo::svg::tests
     CHECK(SVGPropertyTraits<std::pair<float, float>>::FromString(element, u8"4") == std::pair(4.f, 4.f));
     CHECK(SVGPropertyTraits<std::pair<float, float>>::FromString(element, u8"4, 5") == std::pair(4.f, 5.f));
 
-    CHECK(SVGPropertyTraits<FloatPoint>::FromString(element, u8"1,2") == FloatPoint(1, 2));
-    CHECK(SVGPropertyTraits<FloatPoint>::ToString(FloatPoint(1.5f, -2)) == u8"1.5 -2");
-    CHECK(SVGPropertyTraits<FloatRect>::FromString(element, u8"0 0 100 50") == FloatRect(0, 0, 100, 50));
-    CHECK(SVGPropertyTraits<FloatRect>::FromString(element, u8"0 0 100") == FloatRect());
-    CHECK(SVGPropertyTraits<FloatRect>::ToString(FloatRect(1, 2, 3, 4)) == u8"1 2 3 4");
+    CHECK(SVGPropertyTraits<PointF>::FromString(element, u8"1,2") == PointF(1, 2));
+    CHECK(SVGPropertyTraits<PointF>::ToString(PointF(1.5f, -2)) == u8"1.5 -2");
+    CHECK(SVGPropertyTraits<RectF>::FromString(element, u8"0 0 100 50") == RectF(0, 0, 100, 50));
+    CHECK(SVGPropertyTraits<RectF>::FromString(element, u8"0 0 100") == RectF());
+    CHECK(SVGPropertyTraits<RectF>::ToString(RectF(1, 2, 3, 4)) == u8"1 2 3 4");
     CHECK(SVGPropertyTraits<DOMString>::FromString(element, u8" a ") == u8" a ");
   }
 

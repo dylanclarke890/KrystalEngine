@@ -54,8 +54,8 @@
 #include "Krystal.Booey/HTML/Forms/Autofill.hpp"
 #include "Krystal.Booey/HTML/Forms/DOMFormData.hpp"
 #include "Krystal.Booey/HTML/MicroParsers/Numbers.hpp"
-#include "Krystal.Booey/Page/ChromeClient.hpp"
-#include "Krystal.Booey/Page/EventHandler.hpp"
+#include "Krystal.Booey/Input/EventHandler.hpp"
+#include "Krystal.Booey/Page/Clients/ChromeClient.hpp"
 #include "Krystal.Booey/Page/LocalDOMWindow.hpp"
 #include "Krystal.Booey/Page/LocalFrame.hpp"
 #include "Krystal.Booey/Page/Page.hpp"
@@ -64,8 +64,8 @@
 #include "Krystal.Booey/Rendering/FormControls/RenderMenuList.hpp"
 #include "Krystal.Booey/Rendering/RenderElement.hpp"
 #include "Krystal.Booey/Rendering/RenderTheme.hpp"
+#include "Krystal.Text/CharacterProperties.hpp"
 #include <climits>
-#include <unicode/uchar.h>
 
 namespace krys::boo
 {
@@ -2136,8 +2136,8 @@ namespace krys::boo
 
       // Convert to coords relative to the list box if needed.
       auto absoluteLocation = mouseEvent->AbsoluteLocation();
-      IntPoint localOffset = RoundedIntPoint(renderListBox->AbsoluteToLocal(
-        FloatPoint(static_cast<float>(absoluteLocation.X()), static_cast<float>(absoluteLocation.Y())),
+      PointI localOffset = RoundedPointI(renderListBox->AbsoluteToLocal(
+        PointF(static_cast<float>(absoluteLocation.X()), static_cast<float>(absoluteLocation.Y())),
         {MapCoordinatesMode::UseTransforms}));
       int32 listIndex = renderListBox->ListIndexAtOffset(LayoutSize(localOffset.X(), localOffset.Y()));
       if (listIndex >= 0)
@@ -2168,8 +2168,8 @@ namespace krys::boo
       }
 
       auto absoluteLocation = mouseEvent->AbsoluteLocation();
-      IntPoint localOffset = RoundedIntPoint(renderListBox.AbsoluteToLocal(
-        FloatPoint(static_cast<float>(absoluteLocation.X()), static_cast<float>(absoluteLocation.Y())),
+      PointI localOffset = RoundedPointI(renderListBox.AbsoluteToLocal(
+        PointF(static_cast<float>(absoluteLocation.X()), static_cast<float>(absoluteLocation.Y())),
         {MapCoordinatesMode::UseTransforms}));
       int32 listIndex = renderListBox.ListIndexAtOffset(LayoutSize(localOffset.X(), localOffset.Y()));
       if (listIndex >= 0)
@@ -2420,7 +2420,7 @@ namespace krys::boo
       if (auto *keyboardEvent = DynamicDowncast<KeyboardEvent>(event))
       {
         if (!keyboardEvent->CtrlKey() && !keyboardEvent->AltKey() && !keyboardEvent->MetaKey()
-            && u_isprint(static_cast<UChar32>(keyboardEvent->CharCode())))
+            && text::IsPrintable(static_cast<char32>(keyboardEvent->CharCode())))
         {
           TypeAheadFind(*keyboardEvent);
           event.SetDefaultHandled();

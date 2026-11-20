@@ -20,7 +20,7 @@ namespace krys::boo::tests
   struct ReceivedSubmission
   {
     FormSubmission::Method Method {FormSubmission::Method::Get};
-    std::string URL;
+    std::string Url;
     std::string Target;
     std::string EncodingType;
     /// @brief The entries, unencoded, as `name=value` joined by `&` (a file by its name).
@@ -37,7 +37,7 @@ namespace krys::boo::tests
     };
     ReceivedSubmission received;
     received.Method = submission.GetMethod();
-    received.URL = narrow(submission.Action().String());
+    received.Url = narrow(submission.Action().String());
     received.Target = narrow(submission.Target());
     received.EncodingType = narrow(submission.EncodingType());
     if (auto *entries = submission.EntryList())

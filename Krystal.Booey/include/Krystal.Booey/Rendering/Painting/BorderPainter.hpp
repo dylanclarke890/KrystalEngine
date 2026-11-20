@@ -74,8 +74,8 @@ namespace krys::boo
     bool PaintNinePieceImage(const LayoutRect &, const RenderStyle &, const style::MaskBorder &,
                              CompositeOperator = CompositeOperator::SourceOver) const noexcept;
 
-    static void DrawLineForBoxSide(GraphicsContext &, const boo::Document &, const FloatRect &, BoxSide,
-                                   Color, BorderStyle, float adjacentWidth1, float adjacentWidth2,
+    static void DrawLineForBoxSide(GraphicsContext &, const boo::Document &, const RectF &, BoxSide, Color,
+                                   BorderStyle, float adjacentWidth1, float adjacentWidth2,
                                    bool antialias = false) noexcept;
 
     KRYS_NODISCARD static Maybe<Path> PathForBorderArea(const LayoutRect &, const RenderStyle &,

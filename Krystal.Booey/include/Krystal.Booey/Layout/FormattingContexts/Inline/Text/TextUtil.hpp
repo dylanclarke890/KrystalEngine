@@ -27,15 +27,15 @@
 
 #include "Krystal.Booey/Layout/LayoutUnits.hpp"
 #include "Krystal.Booey/Rendering/Style/RenderStyleConstants.hpp"
-#include "Krystal.Booey/Text/TextBreakIterator.hpp"
 #include "Krystal.Booey/Text/TextSpacing.hpp"
 #include "Krystal.Booey/Text/WritingMode.hpp"
 #include "Krystal.Core/Attributes.hpp"
 #include "Krystal.Core/Numeric.hpp"
+#include "Krystal.Core/Strings/String.hpp"
+#include "Krystal.Core/Strings/StringAtom.hpp"
 #include "Krystal.Core/Types/HashSet.hpp"
 #include "Krystal.Core/Types/RefPtr.hpp"
-#include "Krystal.Core/Types/String.hpp"
-#include "Krystal.Core/Types/StringAtom.hpp"
+#include "Krystal.Text/TextBreakIterator.hpp"
 
 namespace krys::boo
 {
@@ -141,12 +141,13 @@ namespace krys::boo::layout
                                                  const RenderStyle &nextContentStyle) noexcept;
 
     KRYS_NODISCARD static uint32
-      FindNextBreakablePosition(CachedLineBreakIteratorFactory &lineBreakIteratorFactory,
+      FindNextBreakablePosition(text::CachedLineBreakIteratorFactory &lineBreakIteratorFactory,
                                 uint32 startPosition, const RenderStyle &style) noexcept;
 
-    KRYS_NODISCARD static TextBreakLineBehavior LineBreakIteratorMode(LineBreak lineBreak) noexcept;
+    KRYS_NODISCARD static text::TextBreakLineBehavior LineBreakIteratorMode(LineBreak lineBreak) noexcept;
 
-    KRYS_NODISCARD static TextBreakIterator::ContentAnalysis GetContentAnalysis(WordBreak wordBreak) noexcept;
+    KRYS_NODISCARD static text::TextBreakIterator::ContentAnalysis
+      GetContentAnalysis(WordBreak wordBreak) noexcept;
 
     KRYS_NODISCARD static bool ShouldPreserveSpacesAndTabs(const Box &layoutBox) noexcept;
 
@@ -171,7 +172,7 @@ namespace krys::boo::layout
                                                                    size_t startPosition,
                                                                    size_t length) noexcept;
 
-    KRYS_NODISCARD static TextDirection DirectionForTextContent(utf8_stringview content) noexcept;
+    KRYS_NODISCARD static text::TextDirection DirectionForTextContent(utf8_stringview content) noexcept;
 
     KRYS_NODISCARD static bool HasHangablePunctuationStart(const InlineTextItem &inlineTextItem,
                                                            const RenderStyle &style) noexcept;

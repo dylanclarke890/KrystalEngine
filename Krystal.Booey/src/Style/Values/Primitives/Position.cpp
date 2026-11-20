@@ -292,8 +292,8 @@ namespace krys::boo::style
 
   // MARK: - Evaluation
 
-  FloatPoint Evaluation<Position, FloatPoint>::operator()(const Position &position, FloatSize referenceBox,
-                                                          ZoomNeeded token) noexcept
+  PointF Evaluation<Position, PointF>::operator()(const Position &position, SizeF referenceBox,
+                                                  ZoomNeeded token) noexcept
   {
     return {Evaluate<float>(position.X, referenceBox.Width(), token),
             Evaluate<float>(position.Y, referenceBox.Height(), token)};

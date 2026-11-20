@@ -21,12 +21,12 @@
 
 #pragma once
 
-#include "Krystal.Booey/Graphics/Geometry/FloatPoint.hpp"
-#include "Krystal.Booey/Graphics/Geometry/FloatRect.hpp"
 #include "Krystal.Booey/Graphics/Geometry/LayoutRect.hpp"
 #include "Krystal.Booey/Rendering/RenderObject.hpp"
 #include "Krystal.Booey/Text/WritingMode.hpp"
 #include "Krystal.Core/Attributes.hpp"
+#include "Krystal.Core/Geometry/Point.hpp"
+#include "Krystal.Core/Geometry/Rect.hpp"
 #include "Krystal.Core/Macros.hpp"
 #include "Krystal.Core/TypeCast.hpp"
 #include "Krystal.Core/Types/WeakPtr.hpp"
@@ -58,7 +58,7 @@ namespace krys::boo
     WeakPtr<RenderObject> _renderer;
 
     float _logicalWidth {0};
-    FloatPoint _topLeft;
+    PointF _topLeft;
 
     // Some of these bits are actually for subclasses and moved here to compact the structures.
     // for this class
@@ -295,7 +295,7 @@ namespace krys::boo
       return _topLeft.Y();
     }
 
-    KRYS_NODISCARD const FloatPoint &TopLeft() const noexcept
+    KRYS_NODISCARD const PointF &TopLeft() const noexcept
     {
       return _topLeft;
     }
@@ -310,9 +310,9 @@ namespace krys::boo
       return IsHorizontal() ? LogicalHeight() : LogicalWidth();
     }
 
-    KRYS_NODISCARD FloatSize Size() const noexcept
+    KRYS_NODISCARD SizeF Size() const noexcept
     {
-      return FloatSize(Width(), Height());
+      return SizeF(Width(), Height());
     }
 
     KRYS_NODISCARD float Right() const noexcept
@@ -387,15 +387,15 @@ namespace krys::boo
     /// text.
     KRYS_NODISCARD float LogicalHeight() const noexcept;
 
-    KRYS_NODISCARD FloatRect LogicalFrameRect() const noexcept
+    KRYS_NODISCARD RectF LogicalFrameRect() const noexcept
     {
-      return IsHorizontal() ? FloatRect(_topLeft.X(), _topLeft.Y(), _logicalWidth, LogicalHeight())
-                            : FloatRect(_topLeft.Y(), _topLeft.X(), _logicalWidth, LogicalHeight());
+      return IsHorizontal() ? RectF(_topLeft.X(), _topLeft.Y(), _logicalWidth, LogicalHeight())
+                            : RectF(_topLeft.Y(), _topLeft.X(), _logicalWidth, LogicalHeight());
     }
 
-    KRYS_NODISCARD FloatRect FrameRect() const noexcept
+    KRYS_NODISCARD RectF FrameRect() const noexcept
     {
-      return FloatRect(TopLeft(), Size());
+      return RectF(TopLeft(), Size());
     }
 
     KRYS_NODISCARD virtual int32 CaretMinOffset() const noexcept;
@@ -412,14 +412,14 @@ namespace krys::boo
       _bidiEmbeddingLevel = level;
     }
 
-    KRYS_NODISCARD TextDirection Direction() const noexcept
+    KRYS_NODISCARD text::TextDirection Direction() const noexcept
     {
-      return BidiLevel() % 2 ? TextDirection::RTL : TextDirection::LTR;
+      return BidiLevel() % 2 ? text::TextDirection::RTL : text::TextDirection::LTR;
     }
 
     KRYS_NODISCARD bool IsLeftToRightDirection() const noexcept
     {
-      return Direction() == TextDirection::LTR;
+      return Direction() == text::TextDirection::LTR;
     }
 
     KRYS_NODISCARD int32 CaretLeftmostOffset() const noexcept
@@ -453,11 +453,11 @@ namespace krys::boo
     /// @brief Use with caution! The type is not checked!
     KRYS_NODISCARD RenderBoxModelObject *BoxModelObject() const noexcept;
 
-    KRYS_NODISCARD FloatPoint LocationIncludingFlipping() const noexcept;
+    KRYS_NODISCARD PointF LocationIncludingFlipping() const noexcept;
 
-    void FlipForWritingMode(FloatRect &) const noexcept;
+    void FlipForWritingMode(RectF &) const noexcept;
 
-    KRYS_NODISCARD FloatPoint FlipForWritingMode(const FloatPoint &) const noexcept;
+    KRYS_NODISCARD PointF FlipForWritingMode(const PointF &) const noexcept;
 
     void FlipForWritingMode(LayoutRect &) const noexcept;
 

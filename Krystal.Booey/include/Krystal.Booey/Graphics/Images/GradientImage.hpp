@@ -37,12 +37,12 @@ namespace krys::boo
   private:
     const Ref<boo::Gradient> _gradient;
     RefPtr<ImageBuffer> _cachedImage;
-    FloatSize _cachedAdjustedSize;
+    SizeF _cachedAdjustedSize;
     uint32 _cachedGeneratorHash {0};
-    FloatSize _cachedScaleFactor;
+    SizeF _cachedScaleFactor;
 
   public:
-    KRYS_NODISCARD static Ref<GradientImage> Create(boo::Gradient &generator, const FloatSize &size) noexcept
+    KRYS_NODISCARD static Ref<GradientImage> Create(boo::Gradient &generator, const SizeF &size) noexcept
     {
       return AdoptRef(*new GradientImage(generator, size));
     }
@@ -55,14 +55,14 @@ namespace krys::boo
     }
 
   private:
-    GradientImage(boo::Gradient &, const FloatSize &) noexcept;
+    GradientImage(boo::Gradient &, const SizeF &) noexcept;
 
-    ImageDrawResult Draw(GraphicsContext &, const FloatRect &destRect, const FloatRect &srcRect,
+    ImageDrawResult Draw(GraphicsContext &, const RectF &destRect, const RectF &srcRect,
                          ImagePaintingOptions = {}) noexcept override;
 
-    void DrawPattern(GraphicsContext &, const FloatRect &destRect, const FloatRect &srcRect,
-                     const AffineTransform &patternTransform, const FloatPoint &phase,
-                     const FloatSize &spacing, ImagePaintingOptions = {}) noexcept override;
+    void DrawPattern(GraphicsContext &, const RectF &destRect, const RectF &srcRect,
+                     const AffineTransform &patternTransform, const PointF &phase, const SizeF &spacing,
+                     ImagePaintingOptions = {}) noexcept override;
 
     KRYS_NODISCARD bool IsGradientImage() const noexcept override
     {

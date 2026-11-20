@@ -1,17 +1,17 @@
 ﻿#pragma once
 
 #include "Krystal.Core/Attributes.hpp"
+#include "Krystal.Core/Geometry/Rect.hpp"
 #include "Krystal.Core/Macros.hpp"
 #include "Krystal.Core/Numeric.hpp"
+#include "Krystal.Core/Strings/String.hpp"
 #include "Krystal.Core/Types/Func.hpp"
 #include "Krystal.Core/Types/List.hpp"
 #include "Krystal.Core/Types/Maybe.hpp"
 #include "Krystal.Core/Types/Span.hpp"
-#include "Krystal.Core/Types/String.hpp"
 #include "Krystal.Gfx/Device.hpp"
 #include "Krystal.Gfx/Formats.hpp"
 #include "Krystal.Gfx/Handles.hpp"
-#include "Krystal.Gfx/Render2D/Rect2D.hpp"
 
 namespace krys::gfx
 {
@@ -29,7 +29,7 @@ namespace krys::gfx
   struct AtlasSlot
   {
     uint32 Page {0u};
-    PixelRect2D Texels {};
+    RectI Texels {};
   };
 
   /// @brief Texture pages that rects are packed into in shelves, shared by the mask and glyph atlases.
@@ -102,6 +102,6 @@ namespace krys::gfx
     }
 
   private:
-    KRYS_NODISCARD Maybe<PixelRect2D> AllocateInPage(Page &page, uint32 width, uint32 height) const noexcept;
+    KRYS_NODISCARD Maybe<RectI> AllocateInPage(Page &page, uint32 width, uint32 height) const noexcept;
   };
 }

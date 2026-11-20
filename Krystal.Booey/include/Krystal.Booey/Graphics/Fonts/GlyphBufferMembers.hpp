@@ -30,19 +30,19 @@
 #pragma once
 
 #include "Krystal.Booey/Graphics/Fonts/Glyph.hpp"
-#include "Krystal.Booey/Graphics/Geometry/FloatPoint.hpp"
-#include "Krystal.Booey/Graphics/Geometry/FloatSize.hpp"
+#include "Krystal.Core/Geometry/Point.hpp"
+#include "Krystal.Core/Geometry/Size.hpp"
 
 namespace krys::boo
 {
   // When you write code that interacts with these types, use the functions below!
   using GlyphBufferGlyph = Glyph;
-  using GlyphBufferAdvance = FloatSize;
-  using GlyphBufferOrigin = FloatPoint;
+  using GlyphBufferAdvance = SizeF;
+  using GlyphBufferOrigin = PointF;
   /// @brief A byte offset into the run's UTF-8 text.
   using GlyphBufferStringOffset = uint32;
 
-  KRYS_NODISCARD constexpr GlyphBufferAdvance MakeGlyphBufferAdvance(const FloatSize &size) noexcept
+  KRYS_NODISCARD constexpr GlyphBufferAdvance MakeGlyphBufferAdvance(const SizeF &size) noexcept
   {
     return size;
   }
@@ -50,10 +50,10 @@ namespace krys::boo
   KRYS_NODISCARD constexpr GlyphBufferAdvance MakeGlyphBufferAdvance(float width = 0,
                                                                      float height = 0) noexcept
   {
-    return FloatSize(width, height);
+    return SizeF(width, height);
   }
 
-  KRYS_NODISCARD constexpr FloatSize Size(const GlyphBufferAdvance &advance) noexcept
+  KRYS_NODISCARD constexpr SizeF Size(const GlyphBufferAdvance &advance) noexcept
   {
     return advance;
   }
@@ -78,17 +78,17 @@ namespace krys::boo
     return advance.Height();
   }
 
-  KRYS_NODISCARD constexpr GlyphBufferOrigin MakeGlyphBufferOrigin(const FloatPoint &point) noexcept
+  KRYS_NODISCARD constexpr GlyphBufferOrigin MakeGlyphBufferOrigin(const PointF &point) noexcept
   {
     return point;
   }
 
   KRYS_NODISCARD constexpr GlyphBufferOrigin MakeGlyphBufferOrigin(float x = 0, float y = 0) noexcept
   {
-    return FloatPoint(x, y);
+    return PointF(x, y);
   }
 
-  KRYS_NODISCARD constexpr FloatPoint Point(const GlyphBufferOrigin &origin) noexcept
+  KRYS_NODISCARD constexpr PointF Point(const GlyphBufferOrigin &origin) noexcept
   {
     return origin;
   }

@@ -24,11 +24,11 @@
 
 #pragma once
 
-#include "Krystal.Booey/Graphics/Geometry/FloatQuad.hpp"
 #include "Krystal.Booey/Graphics/Geometry/LayoutRect.hpp"
 #include "Krystal.Booey/Rendering/Painting/GapRects.hpp"
 #include "Krystal.Booey/Rendering/RenderObject.hpp"
 #include "Krystal.Core/Attributes.hpp"
+#include "Krystal.Core/Geometry/Quad.hpp"
 #include "Krystal.Core/Macros.hpp"
 #include "Krystal.Core/Types/List.hpp"
 
@@ -71,15 +71,15 @@ namespace krys::boo
   class RenderSelectionGeometry : public RenderSelectionGeometryBase
   {
   private:
-    List<FloatQuad> _collectedSelectionQuads; // relative to repaint container
-    LayoutRect _rect;                         // relative to repaint container
+    List<QuadF> _collectedSelectionQuads; // relative to repaint container
+    LayoutRect _rect;                     // relative to repaint container
 
   public:
     RenderSelectionGeometry(RenderObject &renderer, bool clipToVisibleContent) noexcept;
 
     void Repaint() noexcept;
 
-    KRYS_NODISCARD const List<FloatQuad> &CollectedSelectionQuads() const noexcept
+    KRYS_NODISCARD const List<QuadF> &CollectedSelectionQuads() const noexcept
     {
       return _collectedSelectionQuads;
     }

@@ -25,12 +25,12 @@
 
 #pragma once
 
-#include "Krystal.Booey/Graphics/Geometry/FloatRect.hpp"
 #include "Krystal.Booey/Graphics/Geometry/LayoutRect.hpp"
 #include "Krystal.Booey/Layout/FormattingContexts/Inline/Display/InlineDisplayContent.hpp"
 #include "Krystal.Booey/Rendering/RenderBlockFlow.hpp"
 #include "Krystal.Booey/Rendering/SVG/SVGTextFragment.hpp"
 #include "Krystal.Core/Attributes.hpp"
+#include "Krystal.Core/Geometry/Rect.hpp"
 #include "Krystal.Core/Macros.hpp"
 #include "Krystal.Core/Types/CheckedPtr.hpp"
 #include "Krystal.Core/Types/HashMap.hpp"
@@ -67,8 +67,8 @@ namespace krys::boo::layout_integration
     inline_display::Content _displayContent;
     mutable UniquePtr<FirstBoxIndexCache> _firstBoxIndexCache;
     mutable UniquePtr<InlineBoxIndexCache> _inlineBoxIndexCache;
-    FloatRect _scrollableOverflow;
-    FloatRect _inkOverflow;
+    RectF _scrollableOverflow;
+    RectF _inkOverflow;
     float _clearGapBeforeFirstLine {0};
     float _clearGapAfterLastLine {0};
     Maybe<float> _firstLinePaginationOffset;
@@ -95,12 +95,12 @@ namespace krys::boo::layout_integration
 
     KRYS_NODISCARD bool HasContentfulInlineLevelBox() const noexcept;
 
-    KRYS_NODISCARD FloatRect ScrollableOverflow() const noexcept
+    KRYS_NODISCARD RectF ScrollableOverflow() const noexcept
     {
       return _scrollableOverflow;
     }
 
-    KRYS_NODISCARD FloatRect InkOverflow() const noexcept
+    KRYS_NODISCARD RectF InkOverflow() const noexcept
     {
       return _inkOverflow;
     }
@@ -186,12 +186,12 @@ namespace krys::boo::layout_integration
     void ReleaseCaches() noexcept;
 
   private:
-    void SetInkOverflow(const FloatRect &inkOverflow) noexcept
+    void SetInkOverflow(const RectF &inkOverflow) noexcept
     {
       _inkOverflow = inkOverflow;
     }
 
-    void SetScrollableOverflow(const FloatRect &scrollableOverflow) noexcept
+    void SetScrollableOverflow(const RectF &scrollableOverflow) noexcept
     {
       _scrollableOverflow = scrollableOverflow;
     }

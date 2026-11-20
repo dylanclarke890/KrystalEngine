@@ -19,23 +19,23 @@ namespace krys::boo::tests
   /// @brief A document parsed in a frame, as a navigation's is, so its images load as they're inserted.
   struct PageInFrameFixture : css::tests::ValueFixture
   {
-    IntSize ViewSize;
+    SizeI ViewSize;
     RefPtr<LocalFrame> Frame;
     Ref<HTMLDocument> Document;
 
-    explicit PageInFrameFixture(utf8_string markup, IntSize viewSize = {200, 100},
+    explicit PageInFrameFixture(utf8_string markup, SizeI viewSize = {200, 100},
                                 CachePolicy cachePolicy = CachePolicy::Use) noexcept
         : PageInFrameFixture(LocalFrame::Create(), krys::move(markup), viewSize, cachePolicy)
     {
     }
 
     /// @brief As above, in @p page's main frame.
-    PageInFrameFixture(Page &page, utf8_string markup, IntSize viewSize = {200, 100}) noexcept
+    PageInFrameFixture(Page &page, utf8_string markup, SizeI viewSize = {200, 100}) noexcept
         : PageInFrameFixture(ShareRef(page.MainFrame()), krys::move(markup), viewSize, CachePolicy::Use)
     {
     }
 
-    PageInFrameFixture(Ref<LocalFrame> frame, utf8_string markup, IntSize viewSize,
+    PageInFrameFixture(Ref<LocalFrame> frame, utf8_string markup, SizeI viewSize,
                        CachePolicy cachePolicy) noexcept
         : ViewSize(viewSize), Frame(krys::move(frame)), Document(CreateRef<HTMLDocument>())
     {
@@ -57,12 +57,12 @@ namespace krys::boo::tests
     }
 
     /// @brief The size of @p id's renderer, laid out.
-    KRYS_NODISCARD IntSize RendererSize(DOMStringView id) noexcept
+    KRYS_NODISCARD SizeI RendererSize(DOMStringView id) noexcept
     {
       (void)Document->UpdateLayout();
       auto *box = DynamicDowncast<RenderBox>(ById(id).Renderer());
       REQUIRE(box);
-      return IntSize(box->Width().ToInt(), box->Height().ToInt());
+      return SizeI(box->Width().ToInt(), box->Height().ToInt());
     }
 
     /// @brief The display list of the whole view, laid out, as text.
@@ -70,8 +70,8 @@ namespace krys::boo::tests
     {
       (void)Document->UpdateLayout();
       display_list::RecorderImpl recorder(
-        FloatSize(static_cast<float>(ViewSize.Width()), static_cast<float>(ViewSize.Height())));
-      Frame->View()->PaintContents(recorder, IntRect(IntPoint(), ViewSize));
+        SizeF(static_cast<float>(ViewSize.Width()), static_cast<float>(ViewSize.Height())));
+      Frame->View()->PaintContents(recorder, RectI(PointI(), ViewSize));
       return recorder.TakeDisplayList()->AsText({});
     }
   };

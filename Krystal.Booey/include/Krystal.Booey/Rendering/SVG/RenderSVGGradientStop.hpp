@@ -53,23 +53,23 @@ namespace krys::boo
       return {};
     }
 
-    KRYS_NODISCARD FloatRect ObjectBoundingBox() const noexcept override
+    KRYS_NODISCARD RectF ObjectBoundingBox() const noexcept override
     {
       return {};
     }
 
-    KRYS_NODISCARD FloatRect StrokeBoundingBox() const noexcept override
+    KRYS_NODISCARD RectF StrokeBoundingBox() const noexcept override
     {
       return {};
     }
 
-    KRYS_NODISCARD FloatRect RepaintRectInLocalCoordinates(RepaintRectCalculation) const noexcept override
+    KRYS_NODISCARD RectF RepaintRectInLocalCoordinates(RepaintRectCalculation) const noexcept override
     {
       return {};
     }
 
-    bool NodeAtFloatPoint(const HitTestRequest &, HitTestResult &, const FloatPoint &,
-                          HitTestAction) noexcept override
+    bool NodeAtPointF(const HitTestRequest &, HitTestResult &, const PointF &,
+                      HitTestAction) noexcept override
     {
       return false;
     }

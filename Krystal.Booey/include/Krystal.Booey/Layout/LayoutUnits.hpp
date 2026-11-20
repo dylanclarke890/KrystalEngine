@@ -25,15 +25,15 @@
 
 #pragma once
 
-#include "Krystal.Booey/Graphics/Geometry/FloatPoint.hpp"
-#include "Krystal.Booey/Graphics/Geometry/FloatRect.hpp"
-#include "Krystal.Booey/Graphics/Geometry/FloatSize.hpp"
 #include "Krystal.Booey/Graphics/Geometry/LayoutPoint.hpp"
 #include "Krystal.Booey/Graphics/Geometry/LayoutRect.hpp"
 #include "Krystal.Booey/Graphics/Geometry/LayoutSize.hpp"
 #include "Krystal.Booey/Graphics/Geometry/LayoutUnit.hpp"
 #include "Krystal.Booey/Layout/MarginTypes.hpp"
 #include "Krystal.Core/Attributes.hpp"
+#include "Krystal.Core/Geometry/Point.hpp"
+#include "Krystal.Core/Geometry/Rect.hpp"
+#include "Krystal.Core/Geometry/Size.hpp"
 #include "Krystal.Core/Maths/Extras.hpp"
 #include "Krystal.Core/Numeric.hpp"
 #include "Krystal.Core/Types/Maybe.hpp"
@@ -41,9 +41,9 @@
 namespace krys::boo::layout
 {
   using InlineLayoutUnit = float;
-  using InlineLayoutPoint = FloatPoint;
-  using InlineLayoutSize = FloatSize;
-  using InlineLayoutRect = FloatRect;
+  using InlineLayoutPoint = PointF;
+  using InlineLayoutSize = SizeF;
+  using InlineLayoutRect = RectF;
 
   // The conversions below would otherwise hide these.
   using boo::ToLayoutPoint;

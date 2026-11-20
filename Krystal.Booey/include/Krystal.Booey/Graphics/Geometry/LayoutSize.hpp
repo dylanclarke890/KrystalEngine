@@ -30,11 +30,10 @@
 
 #pragma once
 
-#include "Krystal.Booey/Graphics/Geometry/FloatSize.hpp"
-#include "Krystal.Booey/Graphics/Geometry/IntSize.hpp"
+#include "Krystal.Booey/Graphics/Geometry/LayoutGeometryForward.hpp"
 #include "Krystal.Booey/Graphics/Geometry/LayoutUnit.hpp"
 #include "Krystal.Core/Attributes.hpp"
-#include <algorithm>
+#include "Krystal.Core/Geometry/Size.hpp"
 
 namespace krys
 {
@@ -49,228 +48,54 @@ namespace krys::boo
     Grow,
   };
 
-  /// @brief A width and height in layout units.
-  class LayoutSize
+  /// @brief @p size fitted to @p aspectRatio: keeping its height if @p fit is `Shrink` and it's too wide or
+  /// `Grow` and it's too narrow, and its width otherwise.
+  KRYS_NODISCARD constexpr LayoutSize FitToAspectRatio(const LayoutSize &size, const LayoutSize &aspectRatio,
+                                                       AspectRatioFit fit) noexcept
   {
-  private:
-    LayoutUnit _width;
-    LayoutUnit _height;
+    float heightScale = size.Height().ToFloat() / aspectRatio.Height().ToFloat();
+    float widthScale = size.Width().ToFloat() / aspectRatio.Width().ToFloat();
 
-  public:
-    constexpr LayoutSize() noexcept = default;
-
-    constexpr LayoutSize(const IntSize &size) noexcept : _width(size.Width()), _height(size.Height())
+    if ((widthScale > heightScale) != (fit == AspectRatioFit::Grow))
     {
+      return {size.Height() * aspectRatio.Width() / aspectRatio.Height(), size.Height()};
     }
 
-    template <typename T, typename U>
-    constexpr LayoutSize(T width, U height) noexcept : _width(width), _height(height)
-    {
-    }
-
-    constexpr explicit LayoutSize(const FloatSize &size) noexcept
-        : _width(size.Width()), _height(size.Height())
-    {
-    }
-
-    KRYS_NODISCARD constexpr LayoutUnit Width() const noexcept
-    {
-      return _width;
-    }
-
-    KRYS_NODISCARD constexpr LayoutUnit Height() const noexcept
-    {
-      return _height;
-    }
-
-    KRYS_NODISCARD constexpr LayoutUnit MinDimension() const noexcept
-    {
-      return std::min(_width, _height);
-    }
-
-    KRYS_NODISCARD constexpr LayoutUnit MaxDimension() const noexcept
-    {
-      return std::max(_width, _height);
-    }
-
-    template <typename T>
-    constexpr void SetWidth(T width) noexcept
-    {
-      _width = width;
-    }
-
-    template <typename T>
-    constexpr void SetHeight(T height) noexcept
-    {
-      _height = height;
-    }
-
-    KRYS_NODISCARD constexpr bool IsEmpty() const noexcept
-    {
-      return _width.RawValue() <= 0 || _height.RawValue() <= 0;
-    }
-
-    KRYS_NODISCARD constexpr bool IsZero() const noexcept
-    {
-      return !_width && !_height;
-    }
-
-    KRYS_NODISCARD constexpr float AspectRatio() const noexcept
-    {
-      return static_cast<float>(_width) / static_cast<float>(_height);
-    }
-
-    template <typename T, typename U>
-    constexpr void Expand(T width, U height) noexcept
-    {
-      _width += width;
-      _height += height;
-    }
-
-    constexpr void Shrink(LayoutUnit width, LayoutUnit height) noexcept
-    {
-      _width -= width;
-      _height -= height;
-    }
-
-    constexpr void Scale(float scale) noexcept
-    {
-      _width *= scale;
-      _height *= scale;
-    }
-
-    constexpr void Scale(float widthScale, float heightScale) noexcept
-    {
-      _width *= widthScale;
-      _height *= heightScale;
-    }
-
-    KRYS_NODISCARD constexpr LayoutSize ConstrainedBetween(const LayoutSize &min,
-                                                           const LayoutSize &max) const noexcept
-    {
-      return {std::max(min.Width(), std::min(max.Width(), _width)),
-              std::max(min.Height(), std::min(max.Height(), _height))};
-    }
-
-    KRYS_NODISCARD constexpr LayoutSize ExpandedTo(const LayoutSize &other) const noexcept
-    {
-      return LayoutSize(_width > other._width ? _width : other._width,
-                        _height > other._height ? _height : other._height);
-    }
-
-    KRYS_NODISCARD constexpr LayoutSize ShrunkTo(const LayoutSize &other) const noexcept
-    {
-      return LayoutSize(_width < other._width ? _width : other._width,
-                        _height < other._height ? _height : other._height);
-    }
-
-    constexpr void ClampNegativeToZero() noexcept
-    {
-      *this = ExpandedTo(LayoutSize());
-    }
-
-    constexpr void ClampToMinimumSize(const LayoutSize &minimumSize) noexcept
-    {
-      if (_width < minimumSize.Width())
-      {
-        _width = minimumSize.Width();
-      }
-
-      if (_height < minimumSize.Height())
-      {
-        _height = minimumSize.Height();
-      }
-    }
-
-    KRYS_NODISCARD constexpr LayoutSize TransposedSize() const noexcept
-    {
-      return LayoutSize(_height, _width);
-    }
-
-    constexpr operator FloatSize() const noexcept
-    {
-      return FloatSize(_width, _height);
-    }
-
-    KRYS_NODISCARD constexpr LayoutSize FitToAspectRatio(const LayoutSize &aspectRatio,
-                                                         AspectRatioFit fit) const noexcept
-    {
-      float heightScale = Height().ToFloat() / aspectRatio.Height().ToFloat();
-      float widthScale = Width().ToFloat() / aspectRatio.Width().ToFloat();
-
-      if ((widthScale > heightScale) != (fit == AspectRatioFit::Grow))
-      {
-        return LayoutSize(Height() * aspectRatio.Width() / aspectRatio.Height(), Height());
-      }
-
-      return LayoutSize(Width(), Width() * aspectRatio.Height() / aspectRatio.Width());
-    }
-
-    KRYS_NODISCARD constexpr bool MightBeSaturated() const noexcept
-    {
-      return _width.MightBeSaturated() || _height.MightBeSaturated();
-    }
-
-    KRYS_NODISCARD friend constexpr bool operator==(const LayoutSize &,
-                                                    const LayoutSize &) noexcept = default;
-  };
-
-  constexpr LayoutSize &operator+=(LayoutSize &a, const LayoutSize &b) noexcept
-  {
-    a.SetWidth(a.Width() + b.Width());
-    a.SetHeight(a.Height() + b.Height());
-    return a;
+    return {size.Width(), size.Width() * aspectRatio.Height() / aspectRatio.Width()};
   }
 
-  constexpr LayoutSize &operator-=(LayoutSize &a, const LayoutSize &b) noexcept
+  KRYS_NODISCARD constexpr bool MightBeSaturated(const LayoutSize &size) noexcept
   {
-    a.SetWidth(a.Width() - b.Width());
-    a.SetHeight(a.Height() - b.Height());
-    return a;
+    return size.Width().MightBeSaturated() || size.Height().MightBeSaturated();
   }
 
-  KRYS_NODISCARD constexpr LayoutSize operator+(const LayoutSize &a, const LayoutSize &b) noexcept
+  KRYS_NODISCARD constexpr SizeI FlooredSizeI(const LayoutSize &s) noexcept
   {
-    return LayoutSize(a.Width() + b.Width(), a.Height() + b.Height());
+    return SizeI(s.Width().Floor(), s.Height().Floor());
   }
 
-  KRYS_NODISCARD constexpr LayoutSize operator-(const LayoutSize &a, const LayoutSize &b) noexcept
+  KRYS_NODISCARD constexpr SizeI CeiledSizeI(const LayoutSize &s) noexcept
   {
-    return LayoutSize(a.Width() - b.Width(), a.Height() - b.Height());
+    return SizeI(s.Width().Ceil(), s.Height().Ceil());
   }
 
-  KRYS_NODISCARD constexpr LayoutSize operator-(const LayoutSize &size) noexcept
+  KRYS_NODISCARD constexpr SizeI RoundedSizeI(const LayoutSize &s) noexcept
   {
-    return LayoutSize(-size.Width(), -size.Height());
+    return SizeI(s.Width().Round(), s.Height().Round());
   }
 
-  KRYS_NODISCARD constexpr IntSize FlooredIntSize(const LayoutSize &s) noexcept
+  KRYS_NODISCARD inline SizeF FloorSizeToDevicePixels(const LayoutSize &size,
+                                                      float pixelSnappingFactor) noexcept
   {
-    return IntSize(s.Width().Floor(), s.Height().Floor());
+    return SizeF(FloorToDevicePixel(size.Width(), pixelSnappingFactor),
+                 FloorToDevicePixel(size.Height(), pixelSnappingFactor));
   }
 
-  KRYS_NODISCARD constexpr IntSize CeiledIntSize(const LayoutSize &s) noexcept
+  KRYS_NODISCARD inline SizeF RoundSizeToDevicePixels(const LayoutSize &size,
+                                                      float pixelSnappingFactor) noexcept
   {
-    return IntSize(s.Width().Ceil(), s.Height().Ceil());
-  }
-
-  KRYS_NODISCARD constexpr IntSize RoundedIntSize(const LayoutSize &s) noexcept
-  {
-    return IntSize(s.Width().Round(), s.Height().Round());
-  }
-
-  KRYS_NODISCARD inline FloatSize FloorSizeToDevicePixels(const LayoutSize &size,
-                                                          float pixelSnappingFactor) noexcept
-  {
-    return FloatSize(FloorToDevicePixel(size.Width(), pixelSnappingFactor),
-                     FloorToDevicePixel(size.Height(), pixelSnappingFactor));
-  }
-
-  KRYS_NODISCARD inline FloatSize RoundSizeToDevicePixels(const LayoutSize &size,
-                                                          float pixelSnappingFactor) noexcept
-  {
-    return FloatSize(RoundToDevicePixel(size.Width(), pixelSnappingFactor),
-                     RoundToDevicePixel(size.Height(), pixelSnappingFactor));
+    return SizeF(RoundToDevicePixel(size.Width(), pixelSnappingFactor),
+                 RoundToDevicePixel(size.Height(), pixelSnappingFactor));
   }
 
   struct LayoutSizeLimits

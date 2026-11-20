@@ -32,9 +32,9 @@
 #include "Krystal.Booey/Graphics/Fonts/FontCache.hpp"
 #include "Krystal.Booey/Graphics/Fonts/FontCascade.hpp"
 #include "Krystal.Booey/Graphics/Fonts/FontSelector.hpp"
-#include "Krystal.Booey/Text/CharacterProperties.hpp"
 #include "Krystal.Core/Assert.hpp"
-#include <unicode/utf8.h>
+#include "Krystal.Core/Strings/Unicode.hpp"
+#include "Krystal.Text/CharacterProperties.hpp"
 
 namespace krys::boo
 {
@@ -523,9 +523,8 @@ namespace krys::boo
       font = ShareRefPtr(&RealizeFallbackRangesAt(description, fontSelector, 0).FontForFirstRange());
     }
 
-    char8 cluster[U8_MAX_LENGTH];
-    int32_t length = 0;
-    U8_APPEND_UNSAFE(cluster, length, character);
+    char8 cluster[text::MaxUTF8SequenceLength];
+    auto length = text::EncodeUTF8(character, cluster);
     auto systemFallbackFont = font->SystemFallbackFontForCharacterCluster(
       utf8_stringview {cluster, static_cast<size_t>(length)}, description, resolvedEmojiPolicy,
       _isForPlatformFont ? IsForPlatformFont::Yes : IsForPlatformFont::No);
@@ -583,7 +582,7 @@ namespace krys::boo
     Invisible,
   };
 
-  static void OpportunisticallyStartFontDataURLLoading(const FontCascadeDescription &description,
+  static void OpportunisticallyStartFontDataUrlLoading(const FontCascadeDescription &description,
                                                        FontSelector *fontSelector) noexcept
   {
     // It is a somewhat common practice for a font foundry to break up a single font into two fonts, each
@@ -599,7 +598,7 @@ namespace krys::boo
     }
     for (uint32 i = 0; i < description.FamilyCount(); ++i)
     {
-      fontSelector->OpportunisticallyStartFontDataURLLoading(description, description.FamilyAt(i));
+      fontSelector->OpportunisticallyStartFontDataUrlLoading(description, description.FamilyAt(i));
     }
   }
 
@@ -611,7 +610,7 @@ namespace krys::boo
     FallbackVisibility fallbackVisibility = FallbackVisibility::Immaterial;
     ExternalResourceDownloadPolicy policy = ExternalResourceDownloadPolicy::Allow;
     GlyphData loadingResult;
-    OpportunisticallyStartFontDataURLLoading(description, fontSelector);
+    OpportunisticallyStartFontDataUrlLoading(description, fontSelector);
     for (;; ++fallbackIndex)
     {
       auto &fontRanges = RealizeFallbackRangesAt(description, fontSelector, fallbackIndex);
@@ -692,7 +691,7 @@ namespace krys::boo
     // families named in the font-family list that are not generic families. If none of the families named in
     // the font-family list contain a glyph for that codepoint, user agents must display some form of missing
     // glyph symbol for that character rather than attempting installed font fallback for that codepoint."
-    if (IsPrivateUseAreaCharacter(character))
+    if (text::IsPrivateUseAreaCharacter(character))
     {
       return {0, &PrimaryFont(description, fontSelector)}; // 0 is the font's reserved .notdef glyph
     }

@@ -16,20 +16,20 @@ namespace krys::boo
   public:
     /// @brief @p image filtered by @p filter, whose filter region is the image's rect at @p size.
     KRYS_NODISCARD static Ref<FilterGeneratedImage> Create(Image &image, Filter &filter,
-                                                           const FloatSize &size) noexcept
+                                                           const SizeF &size) noexcept
     {
       return AdoptRef(*new FilterGeneratedImage(image, filter, size));
     }
 
   private:
-    FilterGeneratedImage(Image &, Filter &, const FloatSize &) noexcept;
+    FilterGeneratedImage(Image &, Filter &, const SizeF &) noexcept;
 
-    ImageDrawResult Draw(GraphicsContext &, const FloatRect &dstRect, const FloatRect &srcRect,
+    ImageDrawResult Draw(GraphicsContext &, const RectF &dstRect, const RectF &srcRect,
                          ImagePaintingOptions = {}) noexcept override;
 
-    void DrawPattern(GraphicsContext &, const FloatRect &dstRect, const FloatRect &srcRect,
-                     const AffineTransform &patternTransform, const FloatPoint &phase,
-                     const FloatSize &spacing, ImagePaintingOptions = {}) noexcept override;
+    void DrawPattern(GraphicsContext &, const RectF &dstRect, const RectF &srcRect,
+                     const AffineTransform &patternTransform, const PointF &phase, const SizeF &spacing,
+                     ImagePaintingOptions = {}) noexcept override;
 
     void DrawFiltered(GraphicsContext &) noexcept;
   };

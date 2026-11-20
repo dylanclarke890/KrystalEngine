@@ -91,16 +91,16 @@ namespace krys::boo
 
     void Load(CachedResourceLoader &, const ResourceLoaderOptions &) noexcept final;
 
-    KRYS_NODISCARD RefPtr<Image> GetImage(const RenderElement *, const FloatSize &,
+    KRYS_NODISCARD RefPtr<Image> GetImage(const RenderElement *, const SizeF &,
                                           const GraphicsContext &destinationContext,
                                           bool isForFirstLine) const noexcept final;
 
     KRYS_NODISCARD bool KnownToBeOpaque(const RenderElement &) const noexcept final;
 
-    KRYS_NODISCARD FloatSize FixedSize(const RenderElement &) const noexcept final;
+    KRYS_NODISCARD SizeF FixedSize(const RenderElement &) const noexcept final;
 
     // CachedImageClient.
-    void ImageChanged(CachedImage *, const IntRect *) noexcept final;
+    void ImageChanged(CachedImage *, const RectI *) noexcept final;
   };
 }
 

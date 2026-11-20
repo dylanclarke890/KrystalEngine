@@ -30,11 +30,11 @@
 
 #include "Krystal.Booey/CSS/Values/ToLengthConversionData.hpp"
 #include "Krystal.Booey/DOM/Nodes/Element.hpp"
-#include "Krystal.Booey/Graphics/Geometry/FloatSize.hpp"
 #include "Krystal.Booey/Rendering/RenderView.hpp"
 #include "Krystal.Booey/Rendering/Style/RenderStyle+GettersInlines.hpp"
 #include "Krystal.Booey/Rendering/Style/RenderStyle+SettersInlines.hpp"
 #include "Krystal.Booey/Style/Builder/BuilderState.hpp"
+#include "Krystal.Core/Geometry/Size.hpp"
 
 namespace krys::boo::css
 {
@@ -96,7 +96,7 @@ namespace krys::boo::css
     return _zoom.value_or(_style ? _style->UsedZoom() : 1.f);
   }
 
-  FloatSize ToLengthConversionData::DefaultViewportFactor() const noexcept
+  SizeF ToLengthConversionData::DefaultViewportFactor() const noexcept
   {
     if (_styleBuilderState)
     {
@@ -111,7 +111,7 @@ namespace krys::boo::css
     return _renderView->SizeForCSSDefaultViewportUnits() / 100.0f;
   }
 
-  FloatSize ToLengthConversionData::SmallViewportFactor() const noexcept
+  SizeF ToLengthConversionData::SmallViewportFactor() const noexcept
   {
     if (_styleBuilderState)
     {
@@ -126,7 +126,7 @@ namespace krys::boo::css
     return _renderView->SizeForCSSSmallViewportUnits() / 100.0f;
   }
 
-  FloatSize ToLengthConversionData::LargeViewportFactor() const noexcept
+  SizeF ToLengthConversionData::LargeViewportFactor() const noexcept
   {
     if (_styleBuilderState)
     {
@@ -141,7 +141,7 @@ namespace krys::boo::css
     return _renderView->SizeForCSSLargeViewportUnits() / 100.0f;
   }
 
-  FloatSize ToLengthConversionData::DynamicViewportFactor() const noexcept
+  SizeF ToLengthConversionData::DynamicViewportFactor() const noexcept
   {
     if (_styleBuilderState)
     {

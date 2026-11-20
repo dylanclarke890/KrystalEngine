@@ -19,8 +19,8 @@ namespace krys::ui
     {
     }
 
-    void PaintToTextureMapper(TextureMapper &textureMapper, const boo::FloatRect &targetRect,
-                              const boo::TransformationMatrix &modelViewMatrix = {},
+    void PaintToTextureMapper(TextureMapper &textureMapper, const RectF &targetRect,
+                              const TransformationMatrix &modelViewMatrix = {},
                               float opacity = 1.0) noexcept override;
   };
 

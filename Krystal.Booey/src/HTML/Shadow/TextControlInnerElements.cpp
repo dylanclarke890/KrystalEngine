@@ -33,7 +33,7 @@
 #include "Krystal.Booey/DOM/Nodes/Document.hpp"
 #include "Krystal.Booey/DOM/Nodes/ShadowRoot.hpp"
 #include "Krystal.Booey/HTML/Elements/HTMLInputElement.hpp"
-#include "Krystal.Booey/Platform/Locale/LocalizedStrings.hpp"
+#include "Krystal.Booey/Platform/LocalizedStrings.hpp"
 #include "Krystal.Booey/Rendering/FormControls/RenderTextControl.hpp"
 #include "Krystal.Booey/Rendering/FormControls/RenderTextControlSingleLine.hpp"
 #include "Krystal.Booey/Rendering/RenderTheme.hpp"
@@ -100,7 +100,7 @@ namespace krys::boo::html
     newStyle->SetLogicalMinWidth(style::MinimumSize::Fixed {0});
 
     newStyle->SetDisplay(DisplayType::Block);
-    newStyle->SetDirection(TextDirection::LTR);
+    newStyle->SetDirection(text::TextDirection::LTR);
     // We don't want the shadow DOM to be editable, so we set this block to read-only in case the input itself
     // is editable.
     newStyle->SetUserModify(UserModify::ReadOnly);

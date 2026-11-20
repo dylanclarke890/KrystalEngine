@@ -33,10 +33,10 @@
 #include "Krystal.Booey/Rendering/SVG/RenderSVGText.hpp"
 #include "Krystal.Booey/Style/Change.hpp"
 #include "Krystal.Booey/Style/PseudoElementIdentifier.hpp"
-#include "Krystal.Booey/Text/TextBreakIterator.hpp"
-#include "Krystal.Core/Text/CodePointIterator.hpp"
-#include "Krystal.Core/Text/Unicode.hpp"
-#include <unicode/uchar.h>
+#include "Krystal.Core/Strings/CodePointIterator.hpp"
+#include "Krystal.Core/Strings/Unicode.hpp"
+#include "Krystal.Text/CharacterProperties.hpp"
+#include "Krystal.Text/TextBreakIterator.hpp"
 
 namespace krys::boo
 {
@@ -125,8 +125,11 @@ namespace krys::boo
     // letter should be included"
     KRYS_NODISCARD bool IsPunctuationForFirstLetter(char32 c) noexcept
     {
-      return U_GET_GC_MASK(static_cast<UChar32>(c))
-             & (U_GC_PS_MASK | U_GC_PE_MASK | U_GC_PI_MASK | U_GC_PF_MASK | U_GC_PO_MASK);
+      return text::IsInGeneralCategory(c, text::GeneralCategorySet {text::GeneralCategory::OpenPunctuation,
+                                                                    text::GeneralCategory::ClosePunctuation,
+                                                                    text::GeneralCategory::InitialPunctuation,
+                                                                    text::GeneralCategory::FinalPunctuation,
+                                                                    text::GeneralCategory::OtherPunctuation});
     }
 
     KRYS_NODISCARD bool ShouldSkipForFirstLetter(char32 c) noexcept
@@ -323,11 +326,11 @@ namespace krys::boo
       // Account for leading spaces and punctuation.
       while (length < oldText.size() && ShouldSkipForFirstLetter(CharacterStartingAt(oldText, length)))
       {
-        length += NumCodeUnitsInGraphemeClusters(utf8_stringview(oldText).substr(length), 1);
+        length += text::NumCodeUnitsInGraphemeClusters(utf8_stringview(oldText).substr(length), 1);
       }
 
       // Account for first grapheme cluster.
-      length += NumCodeUnitsInGraphemeClusters(utf8_stringview(oldText).substr(length), 1);
+      length += text::NumCodeUnitsInGraphemeClusters(utf8_stringview(oldText).substr(length), 1);
 
       // Keep looking for whitespace and allowed punctuation, but avoid
       // accumulating just whitespace into the :first-letter.
@@ -341,7 +344,7 @@ namespace krys::boo
           break;
         }
 
-        numCodeUnits = NumCodeUnitsInGraphemeClusters(utf8_stringview(oldText).substr(scanLength), 1);
+        numCodeUnits = text::NumCodeUnitsInGraphemeClusters(utf8_stringview(oldText).substr(scanLength), 1);
 
         if (IsPunctuationForFirstLetter(c))
         {

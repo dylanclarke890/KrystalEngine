@@ -106,7 +106,7 @@ namespace krys::boo
     return !Dx() && !Dy();
   }
 
-  IntOutsets SVGFEOffsetElement::Outsets(const FloatRect &targetBoundingBox,
+  IntOutsets SVGFEOffsetElement::Outsets(const RectF &targetBoundingBox,
                                          SVGUnitTypes::SVGUnitType primitiveUnits) const noexcept
   {
     auto offset = SVGFilterRenderer::CalculateResolvedSize({Dx(), Dy()}, targetBoundingBox, primitiveUnits);

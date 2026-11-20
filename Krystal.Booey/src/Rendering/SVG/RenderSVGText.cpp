@@ -27,7 +27,6 @@
 #include "Krystal.Booey/Rendering/SVG/RenderSVGText.hpp"
 #include "Krystal.Booey/DOM/Nodes/Document.hpp"
 #include "Krystal.Booey/DOM/Ranges/Position.hpp"
-#include "Krystal.Booey/Graphics/Geometry/FloatQuad.hpp"
 #include "Krystal.Booey/Graphics/GraphicsContextStateSaver.hpp"
 #include "Krystal.Booey/Layout/Integration/Inline/InlineIteratorInlineBox.hpp"
 #include "Krystal.Booey/Layout/Integration/Inline/InlineIteratorLogicalOrderTraversal.hpp"
@@ -58,7 +57,8 @@
 #include "Krystal.Booey/SVG/Elements/SVGTextElement.hpp"
 #include "Krystal.Booey/SVG/Elements/SVGTextPathElement.hpp"
 #include "Krystal.Booey/SVG/SVGLengthContext.hpp"
-#include "Krystal.Core/Text/CodePointIterator.hpp"
+#include "Krystal.Core/Geometry/Quad.hpp"
+#include "Krystal.Core/Strings/CodePointIterator.hpp"
 #include <algorithm>
 #include <tuple>
 
@@ -579,14 +579,13 @@ namespace krys::boo
     }
   }
 
-  FloatRect RenderSVGText::LayoutChildBoxes(LegacyInlineFlowBox *start,
-                                            SVGTextFragmentMap &fragmentMap) noexcept
+  RectF RenderSVGText::LayoutChildBoxes(LegacyInlineFlowBox *start, SVGTextFragmentMap &fragmentMap) noexcept
   {
-    FloatRect childRect;
+    RectF childRect;
 
     for (auto *child = start->FirstChild(); child; child = child->NextOnLine())
     {
-      FloatRect boxRect;
+      RectF boxRect;
       if (auto *textBox = DynamicDowncast<SVGInlineTextBox>(*child))
       {
         krys_debug_assert(Is<RenderSVGInlineText>(textBox->Renderer()));
@@ -626,7 +625,7 @@ namespace krys::boo
     return childRect;
   }
 
-  void RenderSVGText::LayoutRootBox(const FloatRect &childRect) noexcept
+  void RenderSVGText::LayoutRootBox(const RectF &childRect) noexcept
   {
     // Finally, assign the root block position, now that all content is laid out.
     UpdatePositionAndOverflow(childRect);
@@ -762,8 +761,8 @@ namespace krys::boo
       lineBox, [&](auto span) { ReverseInlineBoxRangeAndValueListsIfNeeded(_layoutAttributes, span); });
   }
 
-  bool RenderSVGText::NodeAtFloatPoint(const HitTestRequest &request, HitTestResult &result,
-                                       const FloatPoint &pointInParent, HitTestAction hitTestAction) noexcept
+  bool RenderSVGText::NodeAtPointF(const HitTestRequest &request, HitTestResult &result,
+                                   const PointF &pointInParent, HitTestAction hitTestAction) noexcept
   {
     PointerEventsHitRules hitRules(PointerEventsHitRules::HitTestingTargetType::SVGText, request,
                                    Style().UsedPointerEvents());
@@ -782,14 +781,14 @@ namespace krys::boo
 
         SVGVisitedRendererTracking::Scope recursionScope(recursionTracking, *this);
 
-        FloatPoint localPoint =
+        PointF localPoint =
           LocalToParentTransform().Inverse().value_or(AffineTransform {}).MapPoint(pointInParent);
         if (!SVGRenderSupport::PointInClippingArea(*this, localPoint))
         {
           return false;
         }
 
-        HitTestLocation hitTestLocation(LayoutPoint(FlooredIntPoint(localPoint)));
+        HitTestLocation hitTestLocation(LayoutPoint(FlooredPointI(localPoint)));
         return RenderBlock::NodeAtPoint(request, result, hitTestLocation, LayoutPoint(), hitTestAction);
       }
     }
@@ -827,7 +826,7 @@ namespace krys::boo
           continue;
         }
 
-        FloatRect rect = textBox->LogicalRectIgnoringInlineDirection();
+        RectF rect = textBox->LogicalRectIgnoringInlineDirection();
         rect.MoveBy(accumulatedOffset);
         if (!locationInContainer.Intersects(rect))
         {
@@ -842,8 +841,7 @@ namespace krys::boo
         AffineTransform fragmentTransform;
         for (auto &fragment : textBox->TextFragments())
         {
-          FloatQuad fragmentQuad(
-            FloatRect(fragment.X, fragment.Y - baseline, fragment.Width, fragment.Height));
+          QuadF fragmentQuad(RectF(fragment.X, fragment.Y - baseline, fragment.Width, fragment.Height));
           fragment.BuildFragmentTransform(fragmentTransform);
           if (!fragmentTransform.IsIdentity())
           {
@@ -1038,9 +1036,9 @@ namespace krys::boo
     }
   }
 
-  FloatRect RenderSVGText::StrokeBoundingBox() const noexcept
+  RectF RenderSVGText::StrokeBoundingBox() const noexcept
   {
-    FloatRect strokeBoundaries = ObjectBoundingBox();
+    RectF strokeBoundaries = ObjectBoundingBox();
     if (!Style().HasStroke())
     {
       return strokeBoundaries;
@@ -1052,14 +1050,14 @@ namespace krys::boo
     return strokeBoundaries;
   }
 
-  FloatRect RenderSVGText::DecoratedBoundingBox() const noexcept
+  RectF RenderSVGText::DecoratedBoundingBox() const noexcept
   {
     // The area it may paint, as a mask's buffer must cover it: its fill, stroke and markers with its filter's
     // region, within its clip and mask.
     return RepaintRectInLocalCoordinates(RepaintRectCalculation::Accurate);
   }
 
-  FloatRect
+  RectF
     RenderSVGText::RepaintRectInLocalCoordinates(RepaintRectCalculation repaintRectCalculation) const noexcept
   {
     auto repaintRect = StrokeBoundingBox();
@@ -1073,7 +1071,7 @@ namespace krys::boo
     return repaintRect;
   }
 
-  void RenderSVGText::UpdatePositionAndOverflow(const FloatRect &boundaries) noexcept
+  void RenderSVGText::UpdatePositionAndOverflow(const RectF &boundaries) noexcept
   {
     auto boundingRect = EnclosingLayoutRect(boundaries);
     SetLocation(boundingRect.Location());

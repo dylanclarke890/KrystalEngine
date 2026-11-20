@@ -132,7 +132,7 @@ namespace krys::boo
     float _minGlyphBoundingBoxY {std::numeric_limits<float>::max()};
     float _firstGlyphOverflow {0};
     float _lastGlyphOverflow {0};
-    TextDirection _direction {TextDirection::LTR};
+    text::TextDirection _direction {text::TextDirection::LTR};
     bool _containsTabs {false};
     bool _isAfterExpansion {false};
     bool _accountForGlyphBounds {false};
@@ -173,19 +173,19 @@ namespace krys::boo
                               float leftExpansionAdditionalWidth,
                               float rightExpansionAdditionalWidth) noexcept;
 
-    KRYS_NODISCARD TextDirection Direction() const noexcept
+    KRYS_NODISCARD text::TextDirection Direction() const noexcept
     {
       return _direction;
     }
 
     KRYS_NODISCARD bool Rtl() const noexcept
     {
-      return _direction == TextDirection::RTL;
+      return _direction == text::TextDirection::RTL;
     }
 
     KRYS_NODISCARD bool Ltr() const noexcept
     {
-      return _direction == TextDirection::LTR;
+      return _direction == text::TextDirection::LTR;
     }
   };
 }

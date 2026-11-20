@@ -29,9 +29,10 @@
 #include "Krystal.Booey/Layout/LayoutTree/LayoutInlineTextBox.hpp"
 #include "Krystal.Booey/Text/WritingMode.hpp"
 #include "Krystal.Core/Attributes.hpp"
+#include "Krystal.Core/Strings/String.hpp"
 #include "Krystal.Core/TypeCast.hpp"
 #include "Krystal.Core/Types/Maybe.hpp"
-#include "Krystal.Core/Types/String.hpp"
+#include "Krystal.Text/Bidi.hpp"
 
 namespace krys::boo::layout
 {
@@ -47,7 +48,7 @@ namespace krys::boo::layout
   public:
     KRYS_NODISCARD static InlineTextItem CreateWhitespaceItem(const InlineTextBox &inlineTextBox,
                                                               uint32 start, uint32 length,
-                                                              UBiDiLevel bidiLevel, bool isWordSeparator,
+                                                              text::BidiLevel bidiLevel, bool isWordSeparator,
                                                               Maybe<InlineLayoutUnit> width) noexcept
     {
       return {inlineTextBox, start,           length, bidiLevel,
@@ -56,7 +57,7 @@ namespace krys::boo::layout
 
     KRYS_NODISCARD static InlineTextItem CreateNonWhitespaceItem(const InlineTextBox &inlineTextBox,
                                                                  uint32 start, uint32 length,
-                                                                 UBiDiLevel bidiLevel,
+                                                                 text::BidiLevel bidiLevel,
                                                                  bool hasTrailingSoftHyphen,
                                                                  Maybe<InlineLayoutUnit> width) noexcept
     {
@@ -128,9 +129,9 @@ namespace krys::boo::layout
       return utf8_stringview {GetInlineTextBox().Content()}.substr(Start(), Length());
     }
 
-    KRYS_NODISCARD TextDirection Direction() const noexcept
+    KRYS_NODISCARD text::TextDirection Direction() const noexcept
     {
-      return BidiLevel() % 2 ? TextDirection::RTL : TextDirection::LTR;
+      return BidiLevel() % 2 ? text::TextDirection::RTL : text::TextDirection::LTR;
     }
 
     KRYS_NODISCARD InlineTextItem Left(uint32 length) const noexcept;
@@ -140,7 +141,7 @@ namespace krys::boo::layout
     KRYS_NODISCARD static bool ShouldPreserveSpacesAndTabs(const InlineTextItem &inlineTextItem) noexcept;
 
   private:
-    InlineTextItem(const InlineTextBox &inlineTextBox, uint32 start, uint32 length, UBiDiLevel bidiLevel,
+    InlineTextItem(const InlineTextBox &inlineTextBox, uint32 start, uint32 length, text::BidiLevel bidiLevel,
                    bool hasTrailingSoftHyphen, bool isWordSeparator, Maybe<InlineLayoutUnit> width,
                    TextItemType textItemType) noexcept;
 

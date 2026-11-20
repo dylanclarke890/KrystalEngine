@@ -32,6 +32,7 @@
 #include "Krystal.Booey/Rendering/Selection/TextBoxSelectableRange.hpp"
 #include "Krystal.Core/Attributes.hpp"
 #include "Krystal.Core/Types/WeakPtr.hpp"
+#include "Krystal.Text/Bidi.hpp"
 
 namespace krys::boo
 {
@@ -98,7 +99,7 @@ namespace krys::boo::inline_iterator
       return GetBox().IsAtomicInlineBox();
     }
 
-    KRYS_NODISCARD FloatRect VisualRectIgnoringBlockDirection() const noexcept
+    KRYS_NODISCARD RectF VisualRectIgnoringBlockDirection() const noexcept
     {
       return GetBox().VisualRectIgnoringBlockDirection();
     }
@@ -128,7 +129,7 @@ namespace krys::boo::inline_iterator
       return IsText() ? End() : 1;
     }
 
-    KRYS_NODISCARD UBiDiLevel BidiLevel() const noexcept
+    KRYS_NODISCARD text::BidiLevel BidiLevel() const noexcept
     {
       return GetBox().BidiLevel();
     }
@@ -344,9 +345,9 @@ namespace krys::boo::inline_iterator
       return candidate;
     }
 
-    KRYS_NODISCARD TextDirection Direction() const noexcept
+    KRYS_NODISCARD text::TextDirection Direction() const noexcept
     {
-      return BidiLevel() % 2 ? TextDirection::RTL : TextDirection::LTR;
+      return BidiLevel() % 2 ? text::TextDirection::RTL : text::TextDirection::LTR;
     }
 
     KRYS_NODISCARD bool IsFirstFormattedLine() const noexcept

@@ -30,8 +30,7 @@ namespace krys::boo
   {
   }
 
-  void SVGPathBuilder::MoveTo(const FloatPoint &targetPoint, bool closed,
-                              svg::PathCoordinateMode mode) noexcept
+  void SVGPathBuilder::MoveTo(const PointF &targetPoint, bool closed, svg::PathCoordinateMode mode) noexcept
   {
     _current = mode == svg::PathCoordinateMode::AbsoluteCoordinates ? targetPoint : _current + targetPoint;
     if (closed && !_path.IsEmpty())
@@ -41,14 +40,14 @@ namespace krys::boo
     _path.MoveTo(_current);
   }
 
-  void SVGPathBuilder::LineTo(const FloatPoint &targetPoint, svg::PathCoordinateMode mode) noexcept
+  void SVGPathBuilder::LineTo(const PointF &targetPoint, svg::PathCoordinateMode mode) noexcept
   {
     _current = mode == svg::PathCoordinateMode::AbsoluteCoordinates ? targetPoint : _current + targetPoint;
     _path.AddLineTo(_current);
   }
 
-  void SVGPathBuilder::CurveToCubic(const FloatPoint &point1, const FloatPoint &point2,
-                                    const FloatPoint &targetPoint, svg::PathCoordinateMode mode) noexcept
+  void SVGPathBuilder::CurveToCubic(const PointF &point1, const PointF &point2, const PointF &targetPoint,
+                                    svg::PathCoordinateMode mode) noexcept
   {
     if (mode == svg::PathCoordinateMode::RelativeCoordinates)
     {

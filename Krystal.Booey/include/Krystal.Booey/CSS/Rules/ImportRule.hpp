@@ -53,10 +53,10 @@ namespace krys::boo::css
       {
       }
 
-      void SetCSSStyleSheet(const utf8_string &href, const url::URL &baseURL, utf8_stringview charset,
+      void SetCSSStyleSheet(const utf8_string &href, const net::Url &baseUrl, utf8_stringview charset,
                             const CachedCSSStyleSheet *sheet) noexcept final
       {
-        _ownerRule.SetCSSStyleSheet(href, baseURL, charset, sheet);
+        _ownerRule.SetCSSStyleSheet(href, baseUrl, charset, sheet);
       }
     };
     friend class ImportedStyleSheetClient;
@@ -76,7 +76,7 @@ namespace krys::boo::css
                Maybe<CascadeLayerName> &&cascadeLayerName,
                ImportRule::SupportsCondition &&supportsCondition) noexcept;
 
-    void SetCSSStyleSheet(const utf8_string &href, const url::URL &baseURL, utf8_stringview charset,
+    void SetCSSStyleSheet(const utf8_string &href, const net::Url &baseUrl, utf8_stringview charset,
                           const CachedCSSStyleSheet *cachedStyleSheet) noexcept;
 
   public:

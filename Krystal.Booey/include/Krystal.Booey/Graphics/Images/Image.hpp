@@ -27,28 +27,28 @@
 #pragma once
 
 #include "Krystal.Booey/Graphics/Color/Color.hpp"
-#include "Krystal.Booey/Graphics/Geometry/FloatRect.hpp"
-#include "Krystal.Booey/Graphics/Geometry/IntPoint.hpp"
 #include "Krystal.Booey/Graphics/Images/ImageObserver.hpp"
 #include "Krystal.Booey/Graphics/Images/ImagePaintingOptions.hpp"
-#include "Krystal.Booey/Graphics/Transforms/AffineTransform.hpp"
-#include "Krystal.Booey/Platform/SharedBuffer.hpp"
 #include "Krystal.Core/CanMakeWeakPtr.hpp"
+#include "Krystal.Core/Geometry/AffineTransform.hpp"
+#include "Krystal.Core/Geometry/Point.hpp"
+#include "Krystal.Core/Geometry/Rect.hpp"
 #include "Krystal.Core/RefCounted.hpp"
 #include "Krystal.Core/Types/Maybe.hpp"
+#include "Krystal.Core/Types/SharedBuffer.hpp"
 #include "Krystal.Core/Types/UniquePtr.hpp"
 #include "Krystal.Core/Types/WeakPtr.hpp"
 
 namespace krys
 {
   class TextStream;
+  class Timer;
 }
 
 namespace krys::boo
 {
   class GraphicsContext;
   class NativeImage;
-  class Timer;
 
   /// @brief Something drawable as an image: a bitmap image, an SVG image or a generated image (a gradient).
   class Image : public RefCounted<Image>, public CanMakeWeakPtr<Image>
@@ -139,7 +139,7 @@ namespace krys::boo
       return Size().IsEmpty();
     }
 
-    virtual void SetContainerSize(const FloatSize &) noexcept
+    virtual void SetContainerSize(const SizeF &) noexcept
     {
     }
 
@@ -159,22 +159,22 @@ namespace krys::boo
     }
 
     virtual void ComputeIntrinsicDimensions(float &intrinsicWidth, float &intrinsicHeight,
-                                            FloatSize &intrinsicRatio) noexcept;
+                                            SizeF &intrinsicRatio) noexcept;
 
-    KRYS_NODISCARD virtual FloatSize
-      Size(ImageOrientation = ImageOrientation::Orientation::FromImage) const noexcept = 0;
+    KRYS_NODISCARD virtual SizeF
+      Size(img::ImageOrientation = img::ImageOrientation::Orientation::FromImage) const noexcept = 0;
 
-    KRYS_NODISCARD virtual FloatSize
-      SourceSize(ImageOrientation = ImageOrientation::Orientation::FromImage) const noexcept;
+    KRYS_NODISCARD virtual SizeF
+      SourceSize(img::ImageOrientation = img::ImageOrientation::Orientation::FromImage) const noexcept;
 
     KRYS_NODISCARD virtual bool HasDensityCorrectedSize() const noexcept
     {
       return false;
     }
 
-    KRYS_NODISCARD FloatRect Rect() const noexcept
+    KRYS_NODISCARD RectF Rect() const noexcept
     {
-      return FloatRect(FloatPoint(), Size());
+      return RectF(PointF(), Size());
     }
 
     KRYS_NODISCARD float Width() const noexcept
@@ -187,22 +187,22 @@ namespace krys::boo
       return Size().Height();
     }
 
-    KRYS_NODISCARD virtual Maybe<IntPoint> HotSpot() const noexcept
+    KRYS_NODISCARD virtual Maybe<PointI> HotSpot() const noexcept
     {
       return null;
     }
 
-    KRYS_NODISCARD virtual ImageOrientation Orientation() const noexcept
+    KRYS_NODISCARD virtual img::ImageOrientation Orientation() const noexcept
     {
-      return ImageOrientation::Orientation::FromImage;
+      return img::ImageOrientation::Orientation::FromImage;
     }
 
     /// @brief Replaces the encoded data and tells the image it changed.
-    EncodedDataStatus SetData(RefPtr<SharedBuffer> &&data, bool allDataReceived) noexcept;
+    img::EncodedDataStatus SetData(RefPtr<SharedBuffer> &&data, bool allDataReceived) noexcept;
 
-    virtual EncodedDataStatus DataChanged(bool /*allDataReceived*/) noexcept
+    virtual img::EncodedDataStatus DataChanged(bool /*allDataReceived*/) noexcept
     {
-      return EncodedDataStatus::Unknown;
+      return img::EncodedDataStatus::Unknown;
     }
 
     /// @brief The file extension the data's format uses; empty if unknown.
@@ -258,7 +258,7 @@ namespace krys::boo
 
     void SetImageObserver(RefPtr<ImageObserver>) noexcept;
 
-    KRYS_NODISCARD url::URL SourceURL() const noexcept;
+    KRYS_NODISCARD net::Url SourceUrl() const noexcept;
 
     KRYS_NODISCARD utf8_string MimeType() const noexcept;
 
@@ -270,30 +270,30 @@ namespace krys::boo
 
     KRYS_NODISCARD virtual RefPtr<NativeImage> CurrentNativeImage() noexcept;
 
-    KRYS_NODISCARD virtual RefPtr<NativeImage>
-      CurrentPreTransformedNativeImage(ImageOrientation = ImageOrientation::Orientation::FromImage) noexcept;
+    KRYS_NODISCARD virtual RefPtr<NativeImage> CurrentPreTransformedNativeImage(
+      img::ImageOrientation = img::ImageOrientation::Orientation::FromImage) noexcept;
 
-    virtual void DrawPattern(GraphicsContext &, const FloatRect &destRect, const FloatRect &tileRect,
-                             const AffineTransform &patternTransform, const FloatPoint &phase,
-                             const FloatSize &spacing, ImagePaintingOptions = {}) noexcept;
+    virtual void DrawPattern(GraphicsContext &, const RectF &destRect, const RectF &tileRect,
+                             const AffineTransform &patternTransform, const PointF &phase,
+                             const SizeF &spacing, ImagePaintingOptions = {}) noexcept;
 
     virtual void Dump(TextStream &) const noexcept;
 
   protected:
     explicit Image(ImageObserver * = nullptr) noexcept;
 
-    static void FillWithSolidColor(GraphicsContext &, const FloatRect &dstRect, const Color &,
+    static void FillWithSolidColor(GraphicsContext &, const RectF &dstRect, const Color &,
                                    CompositeOperator) noexcept;
 
-    virtual ImageDrawResult Draw(GraphicsContext &, const FloatRect &dstRect, const FloatRect &srcRect,
+    virtual ImageDrawResult Draw(GraphicsContext &, const RectF &dstRect, const RectF &srcRect,
                                  ImagePaintingOptions = {}) noexcept = 0;
 
-    ImageDrawResult DrawTiled(GraphicsContext &, const FloatRect &destinationRect, const FloatPoint &srcPoint,
-                              const FloatSize &tileSize, const FloatSize &spacing,
+    ImageDrawResult DrawTiled(GraphicsContext &, const RectF &destinationRect, const PointF &srcPoint,
+                              const SizeF &tileSize, const SizeF &spacing,
                               ImagePaintingOptions = {}) noexcept;
 
-    ImageDrawResult DrawTiled(GraphicsContext &, const FloatRect &dstRect, const FloatRect &srcRect,
-                              const FloatSize &tileScaleFactor, TileRule hRule, TileRule vRule,
+    ImageDrawResult DrawTiled(GraphicsContext &, const RectF &dstRect, const RectF &srcRect,
+                              const SizeF &tileScaleFactor, TileRule hRule, TileRule vRule,
                               ImagePaintingOptions = {}) noexcept;
 
     // Supporting tiled drawing

@@ -52,7 +52,7 @@ namespace krys::boo::style
 
     KRYS_NODISCARD Ref<const TransformFunctionBase> Clone() const noexcept override;
 
-    KRYS_NODISCARD Ref<TransformOperation> ToPlatform(const FloatSize &) const noexcept override;
+    KRYS_NODISCARD Ref<TransformOperation> ToPlatform(const SizeF &) const noexcept override;
 
     KRYS_NODISCARD Number<> X() const noexcept
     {
@@ -96,7 +96,7 @@ namespace krys::boo::style
       return !IsIdentity();
     }
 
-    void Apply(TransformationMatrix &, const FloatSize &borderBoxSize) const noexcept override;
+    void Apply(TransformationMatrix &, const SizeF &borderBoxSize) const noexcept override;
 
     KRYS_NODISCARD Ref<const TransformFunctionBase>
       Blend(const TransformFunctionBase *from, const BlendingContext &,

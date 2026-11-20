@@ -26,7 +26,7 @@
 #include "Krystal.Booey/Graphics/Filters/FEMorphology.hpp"
 #include "Krystal.Booey/Graphics/Filters/Filter.hpp"
 #include "Krystal.Booey/Graphics/Filters/FilterImage.hpp"
-#include "Krystal.Core/Text/TextStream.hpp"
+#include "Krystal.Core/Strings/TextStream.hpp"
 #include <algorithm>
 
 namespace krys::boo
@@ -82,8 +82,8 @@ namespace krys::boo
     return true;
   }
 
-  FloatRect FEMorphology::CalculateImageRect(const Filter &filter, Span<const FloatRect> inputImageRects,
-                                             const FloatRect &primitiveSubregion) const noexcept
+  RectF FEMorphology::CalculateImageRect(const Filter &filter, Span<const RectF> inputImageRects,
+                                         const RectF &primitiveSubregion) const noexcept
   {
     auto imageRect = inputImageRects[0];
     imageRect.Inflate(filter.ResolvedSize({_radiusX, _radiusY}));

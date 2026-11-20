@@ -27,6 +27,7 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #include "Krystal.Booey/Rendering/Line/LegacyInlineIterator.hpp"
 
 #include "Krystal.Booey/Rendering/Line/LegacyLineLayout.hpp"
+#include "Krystal.Text/Bidi.hpp"
 #include <limits>
 
 namespace krys::boo
@@ -93,10 +94,16 @@ namespace krys::boo
     LegacyLineLayout::AppendRunsForObject(nullptr, static_cast<int32>(position), static_cast<int32>(end),
                                           object, resolver);
   }
+}
 
+// The resolver's hooks are specialised in its own namespace.
+namespace krys::text
+{
   template <>
-  void InlineBidiResolver::AppendRunInternal() noexcept
+  void boo::InlineBidiResolver::AppendRunInternal() noexcept
   {
+    using namespace boo;
+
     if (!_emptyRun && !_eor.AtEnd() && !_reachedEndOfLine)
     {
       // Keep track of when we enter/leave "unicode-bidi: isolate" inlines.
@@ -163,7 +170,7 @@ namespace krys::boo
       _sor = _eor;
     }
 
-    _direction = U_OTHER_NEUTRAL;
-    _status.Eor = U_OTHER_NEUTRAL;
+    _direction = text::BidiClass::OtherNeutral;
+    _status.Eor = text::BidiClass::OtherNeutral;
   }
 }

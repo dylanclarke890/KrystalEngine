@@ -25,7 +25,7 @@
 
 #include "Krystal.Booey/Graphics/Filters/FETurbulence.hpp"
 #include "Krystal.Booey/Graphics/Filters/Filter.hpp"
-#include "Krystal.Core/Text/TextStream.hpp"
+#include "Krystal.Core/Strings/TextStream.hpp"
 
 namespace krys::boo
 {
@@ -113,8 +113,8 @@ namespace krys::boo
     return true;
   }
 
-  FloatRect FETurbulence::CalculateImageRect(const Filter &filter, Span<const FloatRect>,
-                                             const FloatRect &primitiveSubregion) const noexcept
+  RectF FETurbulence::CalculateImageRect(const Filter &filter, Span<const RectF>,
+                                         const RectF &primitiveSubregion) const noexcept
   {
     return filter.MaxEffectRect(primitiveSubregion);
   }

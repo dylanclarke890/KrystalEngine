@@ -34,8 +34,8 @@ namespace krys::ui
     struct ImageClip
     {
       gfx::TextureHandle Texture;
-      gfx::Rect2D Destination;
-      gfx::Transform2D Transform;
+      RectF Destination;
+      AffineTransform Transform;
       uint32 StackSize {0};
     };
 
@@ -46,18 +46,18 @@ namespace krys::ui
     List<StrokeState> _strokeStack;
     List<LayerState> _layerStack;
     // Clip bounds in target pixels, for `ClipBounds`.
-    boo::FloatRect _clipBounds;
+    RectF _clipBounds;
     // The clip the context was made with, which resetting the clip brings back.
-    boo::FloatRect _initialClipBounds;
+    RectF _initialClipBounds;
     gfx::Renderer2D::ClipState _initialClip;
-    List<boo::FloatRect> _clipBoundsStack;
+    List<RectF> _clipBoundsStack;
     List<ImageClip> _imageClips;
 
   public:
     /// @param bounds The target's rect, in its pixels, the initial clip bounds.
     /// @param imageBuffers Renders the image buffers and uploads the native images drawn; without it, they
     /// draw nothing.
-    GraphicsContextRender2D(gfx::Renderer2D &renderer, FontFaceCache &fonts, const boo::FloatRect &bounds,
+    GraphicsContextRender2D(gfx::Renderer2D &renderer, FontFaceCache &fonts, const RectF &bounds,
                             ImageBufferTextures *imageBuffers = nullptr) noexcept;
 
     ~GraphicsContextRender2D() noexcept override;
@@ -81,31 +81,31 @@ namespace krys::ui
     void Restore(
       boo::GraphicsContextState::Purpose = boo::GraphicsContextState::Purpose::SaveRestore) noexcept override;
 
-    void DrawRect(const boo::FloatRect &, float borderThickness = 1) noexcept override;
+    void DrawRect(const RectF &, float borderThickness = 1) noexcept override;
 
-    void DrawLine(const boo::FloatPoint &, const boo::FloatPoint &) noexcept override;
+    void DrawLine(const PointF &, const PointF &) noexcept override;
 
-    void DrawEllipse(const boo::FloatRect &) noexcept override;
+    void DrawEllipse(const RectF &) noexcept override;
 
     void FillPath(const boo::Path &) noexcept override;
 
     void StrokePath(const boo::Path &) noexcept override;
 
-    void FillRect(const boo::FloatRect &, RequiresClipToRect = RequiresClipToRect::Yes) noexcept override;
+    void FillRect(const RectF &, RequiresClipToRect = RequiresClipToRect::Yes) noexcept override;
 
-    void FillRect(const boo::FloatRect &, const boo::Color &) noexcept override;
+    void FillRect(const RectF &, const boo::Color &) noexcept override;
 
-    void FillRect(const boo::FloatRect &, boo::Gradient &, const boo::AffineTransform &,
+    void FillRect(const RectF &, boo::Gradient &, const AffineTransform &,
                   RequiresClipToRect = RequiresClipToRect::Yes) noexcept override;
 
     void FillRoundedRectImpl(const boo::FloatRoundedRect &, const boo::Color &) noexcept override;
 
-    void FillRectWithRoundedHole(const boo::FloatRect &, const boo::FloatRoundedRect &roundedHoleRect,
+    void FillRectWithRoundedHole(const RectF &, const boo::FloatRoundedRect &roundedHoleRect,
                                  const boo::Color &) noexcept override;
 
-    void ClearRect(const boo::FloatRect &) noexcept override;
+    void ClearRect(const RectF &) noexcept override;
 
-    void StrokeRect(const boo::FloatRect &, float lineWidth) noexcept override;
+    void StrokeRect(const RectF &, float lineWidth) noexcept override;
 
     void SetLineCap(boo::LineCap) noexcept override;
 
@@ -117,11 +117,11 @@ namespace krys::ui
 
     void ResetClip() noexcept override;
 
-    void Clip(const boo::FloatRect &) noexcept override;
+    void Clip(const RectF &) noexcept override;
 
     void ClipRoundedRect(const boo::FloatRoundedRect &) noexcept override;
 
-    void ClipOut(const boo::FloatRect &) noexcept override;
+    void ClipOut(const RectF &) noexcept override;
 
     void ClipOut(const boo::Path &) noexcept override;
 
@@ -129,18 +129,17 @@ namespace krys::ui
 
     void ClipPath(const boo::Path &, boo::WindRule = boo::WindRule::EvenOdd) noexcept override;
 
-    KRYS_NODISCARD boo::IntRect ClipBounds() const noexcept override;
+    KRYS_NODISCARD RectI ClipBounds() const noexcept override;
 
-    void ClipToImageBuffer(boo::ImageBuffer &, const boo::FloatRect &) noexcept override;
+    void ClipToImageBuffer(boo::ImageBuffer &, const RectF &) noexcept override;
 
     void DrawGlyphs(const boo::Font &, Span<const boo::GlyphBufferGlyph>, Span<const boo::GlyphBufferAdvance>,
-                    const boo::FloatPoint &, boo::FontSmoothingMode) noexcept override;
+                    const PointF &, boo::FontSmoothingMode) noexcept override;
 
-    void DrawLinesForText(const boo::FloatPoint &origin, float thickness,
-                          Span<const boo::FloatSegment> lineSegments, bool isPrinting, bool doubleUnderlines,
-                          boo::StrokeStyle) noexcept override;
+    void DrawLinesForText(const PointF &origin, float thickness, Span<const SegmentF> lineSegments,
+                          bool isPrinting, bool doubleUnderlines, boo::StrokeStyle) noexcept override;
 
-    void DrawDotsForDocumentMarker(const boo::FloatRect &, boo::DocumentMarkerLineStyle) noexcept override;
+    void DrawDotsForDocumentMarker(const RectF &, boo::DocumentMarkerLineStyle) noexcept override;
 
     void BeginTransparencyLayer(float opacity) noexcept override;
 
@@ -148,42 +147,42 @@ namespace krys::ui
 
     void EndTransparencyLayer() noexcept override;
 
-    void DrawNativeImage(boo::NativeImage &, const boo::FloatRect &destRect, const boo::FloatRect &srcRect,
+    void DrawNativeImage(boo::NativeImage &, const RectF &destRect, const RectF &srcRect,
                          boo::ImagePaintingOptions = {}) noexcept override;
 
-    void DrawPattern(boo::NativeImage &, const boo::FloatRect &destRect, const boo::FloatRect &tileRect,
-                     const boo::AffineTransform &patternTransform, const boo::FloatPoint &phase,
-                     const boo::FloatSize &spacing, boo::ImagePaintingOptions = {}) noexcept override;
+    void DrawPattern(boo::NativeImage &, const RectF &destRect, const RectF &tileRect,
+                     const AffineTransform &patternTransform, const PointF &phase, const SizeF &spacing,
+                     boo::ImagePaintingOptions = {}) noexcept override;
 
-    void DrawImageBuffer(boo::ImageBuffer &, const boo::FloatRect &destination, const boo::FloatRect &source,
+    void DrawImageBuffer(boo::ImageBuffer &, const RectF &destination, const RectF &source,
                          boo::ImagePaintingOptions = {}) noexcept override;
 
-    void DrawPattern(boo::ImageBuffer &, const boo::FloatRect &destRect, const boo::FloatRect &tileRect,
-                     const boo::AffineTransform &patternTransform, const boo::FloatPoint &phase,
-                     const boo::FloatSize &spacing, boo::ImagePaintingOptions = {}) noexcept override;
+    void DrawPattern(boo::ImageBuffer &, const RectF &destRect, const RectF &tileRect,
+                     const AffineTransform &patternTransform, const PointF &phase, const SizeF &spacing,
+                     boo::ImagePaintingOptions = {}) noexcept override;
 
     /// @brief Applies @p filter on the GPU: its effects become a Render2D filter graph, evaluated into the
     /// replay's command buffer ahead of its passes.
-    void DrawFilteredImageBuffer(boo::ImageBuffer *sourceImage, const boo::FloatRect &sourceImageRect,
+    void DrawFilteredImageBuffer(boo::ImageBuffer *sourceImage, const RectF &sourceImageRect,
                                  boo::Filter &filter, boo::FilterResults &results) noexcept override;
 
     void DrawFocusRing(const boo::Path &, float outlineWidth, const boo::Color &) noexcept override;
 
-    void DrawFocusRing(const List<boo::FloatRect> &, float outlineOffset, float outlineWidth,
+    void DrawFocusRing(const List<RectF> &, float outlineOffset, float outlineWidth,
                        const boo::Color &) noexcept override;
 
-    void Scale(const boo::FloatSize &) noexcept override;
+    void Scale(const SizeF &) noexcept override;
 
     void Rotate(float angleInRadians) noexcept override;
 
     void Translate(float x, float y) noexcept override;
 
-    void ConcatCTM(const boo::AffineTransform &) noexcept override;
+    void ConcatCTM(const AffineTransform &) noexcept override;
 
-    void SetCTM(const boo::AffineTransform &) noexcept override;
+    void SetCTM(const AffineTransform &) noexcept override;
 
-    KRYS_NODISCARD boo::AffineTransform
-      GetCTM(IncludeDeviceScale = PossiblyIncludeDeviceScale) const noexcept override;
+    KRYS_NODISCARD
+    AffineTransform GetCTM(IncludeDeviceScale = PossiblyIncludeDeviceScale) const noexcept override;
 
   private:
     /// @brief A fill or stroke's paint, keeping the gradient it refers to alive.
@@ -191,7 +190,7 @@ namespace krys::ui
     {
       SRGBA<uint8> Colour {};
       Maybe<gfx::Gradient2D> Gradient;
-      gfx::Transform2D GradientSpace {};
+      AffineTransform GradientSpace {};
       Maybe<gfx::ImagePattern2D> Pattern;
 
       KRYS_NODISCARD gfx::Paint2D Paint() const noexcept
@@ -218,15 +217,14 @@ namespace krys::ui
     KRYS_NODISCARD gfx::SamplerFilter ImageFilter() const noexcept;
 
     /// @brief Draws @p source of @p texture into @p destination, as an image is drawn.
-    void DrawTexture(gfx::TextureHandle texture, const boo::FloatRect &source,
-                     const boo::FloatRect &destination, boo::ImagePaintingOptions options,
+    void DrawTexture(gfx::TextureHandle texture, const RectF &source, const RectF &destination,
+                     boo::ImagePaintingOptions options,
                      AlphaPremultiplication alpha = AlphaPremultiplication::Premultiplied) noexcept;
 
     /// @brief Fills @p destRect with @p tileRect of @p texture (of @p size), repeated, as an image pattern.
-    void DrawTexturePattern(gfx::TextureHandle texture, const boo::FloatSize &size,
-                            const boo::FloatRect &destRect, const boo::FloatRect &tileRect,
-                            const boo::AffineTransform &patternTransform, const boo::FloatPoint &phase,
-                            const boo::FloatSize &spacing, boo::ImagePaintingOptions options,
+    void DrawTexturePattern(gfx::TextureHandle texture, const SizeF &size, const RectF &destRect,
+                            const RectF &tileRect, const AffineTransform &patternTransform,
+                            const PointF &phase, const SizeF &spacing, boo::ImagePaintingOptions options,
                             gfx::CommandBuffer &commands) noexcept;
 
     /// @brief Brings the renderer's blend mode and drop shadow up to date with the context's state.
@@ -237,7 +235,7 @@ namespace krys::ui
 
     void FillShape(const gfx::Path2D &path, gfx::FillRule rule, const gfx::Paint2D &paint) noexcept;
 
-    void IntersectClipBounds(const boo::FloatRect &rect) noexcept;
+    void IntersectClipBounds(const RectF &rect) noexcept;
 
     void EndImageClips() noexcept;
   };

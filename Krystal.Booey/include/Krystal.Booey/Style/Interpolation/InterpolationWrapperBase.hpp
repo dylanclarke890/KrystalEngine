@@ -33,10 +33,15 @@
 #include "Krystal.Booey/CSS/Properties/PropertyId.hpp"
 #include "Krystal.Core/Attributes.hpp"
 #include "Krystal.Core/Macros.hpp"
+#include "Krystal.Core/Numeric.hpp"
+
+namespace krys
+{
+  enum class CompositeOperation : uint8;
+}
 
 namespace krys::boo
 {
-  enum class CompositeOperation : uint8;
   class RenderStyle;
 }
 

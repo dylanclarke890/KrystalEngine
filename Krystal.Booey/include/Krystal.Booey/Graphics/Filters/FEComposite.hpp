@@ -106,8 +106,8 @@ namespace krys::boo
       return 2u;
     }
 
-    KRYS_NODISCARD FloatRect CalculateImageRect(const Filter &filter, Span<const FloatRect> inputImageRects,
-                                                const FloatRect &primitiveSubregion) const noexcept override;
+    KRYS_NODISCARD RectF CalculateImageRect(const Filter &filter, Span<const RectF> inputImageRects,
+                                            const RectF &primitiveSubregion) const noexcept override;
 
     KRYS_NODISCARD bool ResultIsValidPremultiplied() const noexcept override
     {

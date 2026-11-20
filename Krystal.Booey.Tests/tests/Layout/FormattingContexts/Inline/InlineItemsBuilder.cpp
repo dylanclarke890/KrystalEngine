@@ -9,6 +9,7 @@
 #include "Krystal.Booey/Layout/LayoutTree/LayoutBoxInlines.hpp"
 #include "Krystal.Booey/Rendering/Style/RenderStyle+GettersInlines.hpp"
 #include "Krystal.Core/Types/List.hpp"
+#include "Krystal.Text/Bidi.hpp"
 
 namespace krys::boo::tests
 {
@@ -53,9 +54,9 @@ namespace krys::boo::tests
       return descriptions;
     }
 
-    KRYS_NODISCARD List<UBiDiLevel> BidiLevels(const layout::InlineItemList &items) noexcept
+    KRYS_NODISCARD List<text::BidiLevel> BidiLevels(const layout::InlineItemList &items) noexcept
     {
-      List<UBiDiLevel> levels;
+      List<text::BidiLevel> levels;
       for (auto &item : items)
       {
         levels.push_back(item.BidiLevel());
@@ -71,7 +72,7 @@ namespace krys::boo::tests
       return Downcast<layout::InlineTextItem>(items[index]);
     }
 
-    constexpr UBiDiLevel Opaque = layout::InlineItem::OpaqueBidiLevel;
+    constexpr text::BidiLevel Opaque = layout::InlineItem::OpaqueBidiLevel;
   }
 
   TEST_CASE_METHOD(css::tests::ValueFixture, "InlineItemsBuilder: items",
@@ -135,7 +136,7 @@ b	c  d</div>
 
       for (auto &item : items)
       {
-        CHECK(item.BidiLevel() == UBIDI_DEFAULT_LTR);
+        CHECK(item.BidiLevel() == text::DefaultLeftToRightBidiLevel);
       }
     }
 
@@ -247,8 +248,8 @@ b	c  d</div>
       auto &items = cache.GetInlineItems().Content();
       CHECK(Describe(items)
             == List<utf8_string> {u8"abc", u8" ", u8"\u05E9\u05DC\u05D5\u05DD", u8" ", u8"def"});
-      CHECK(BidiLevels(items) == List<UBiDiLevel> {0, 0, 1, 0, 0});
-      CHECK(TextItem(items, 2).Direction() == TextDirection::RTL);
+      CHECK(BidiLevels(items) == List<text::BidiLevel> {0, 0, 1, 0, 0});
+      CHECK(TextItem(items, 2).Direction() == text::TextDirection::RTL);
       CHECK(TextItem(items, 2).Start() == 4);
       CHECK(TextItem(items, 2).Length() == 8);
       CHECK(cache.GetInlineItems().RequiresVisualReordering());
@@ -260,7 +261,7 @@ b	c  d</div>
       build(u8"split", cache);
       auto &items = cache.GetInlineItems().Content();
       CHECK(Describe(items) == List<utf8_string> {u8"abc", u8"\u05E9\u05DC\u05D5\u05DD"});
-      CHECK(BidiLevels(items) == List<UBiDiLevel> {0, 1});
+      CHECK(BidiLevels(items) == List<text::BidiLevel> {0, 1});
       // The split items are measured on their own.
       CHECK(TextItem(items, 0).Width() == 30.f);
     }
@@ -269,7 +270,7 @@ b	c  d</div>
     {
       layout::InlineContentCache cache;
       build(u8"rtl", cache);
-      CHECK(BidiLevels(cache.GetInlineItems().Content()) == List<UBiDiLevel> {2, 1, 1});
+      CHECK(BidiLevels(cache.GetInlineItems().Content()) == List<text::BidiLevel> {2, 1, 1});
     }
 
     SECTION("Inline boxes with content are opaque")
@@ -279,7 +280,7 @@ b	c  d</div>
       auto &items = cache.GetInlineItems().Content();
       CHECK(Describe(items)
             == List<utf8_string> {u8"abc", u8"<start>", u8"\u05E9\u05DC\u05D5\u05DD", u8"<end>"});
-      CHECK(BidiLevels(items) == List<UBiDiLevel> {0, Opaque, 1, Opaque});
+      CHECK(BidiLevels(items) == List<text::BidiLevel> {0, Opaque, 1, Opaque});
     }
 
     SECTION("Embeddings")
@@ -291,7 +292,7 @@ b	c  d</div>
       // The embedding's control characters give its start and end a position in the paragraph: the start
       // takes the level of the embedding's content (left-to-right text in a right-to-left embedding is at the
       // next even level), the end the level after it.
-      CHECK(BidiLevels(items) == List<UBiDiLevel> {0, 2, 2, 0, 0});
+      CHECK(BidiLevels(items) == List<text::BidiLevel> {0, 2, 2, 0, 0});
     }
 
     SECTION("No content to reorder")
@@ -300,7 +301,8 @@ b	c  d</div>
       build(u8"empty", cache);
       auto &items = cache.GetInlineItems().Content();
       CHECK(Describe(items) == List<utf8_string> {u8"<start>", u8"<end>"});
-      CHECK(BidiLevels(items) == List<UBiDiLevel> {UBIDI_DEFAULT_LTR, UBIDI_DEFAULT_LTR});
+      CHECK(BidiLevels(items)
+            == List<text::BidiLevel> {text::DefaultLeftToRightBidiLevel, text::DefaultLeftToRightBidiLevel});
     }
 
     SECTION("Plaintext left-to-right content isn't reordered")
@@ -308,7 +310,8 @@ b	c  d</div>
       layout::InlineContentCache cache;
       build(u8"plaintext", cache);
       CHECK(BidiLevels(cache.GetInlineItems().Content())
-            == List<UBiDiLevel> {UBIDI_DEFAULT_LTR, UBIDI_DEFAULT_LTR, UBIDI_DEFAULT_LTR});
+            == List<text::BidiLevel> {text::DefaultLeftToRightBidiLevel, text::DefaultLeftToRightBidiLevel,
+                                      text::DefaultLeftToRightBidiLevel});
     }
   }
 

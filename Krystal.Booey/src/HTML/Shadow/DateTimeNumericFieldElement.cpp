@@ -27,15 +27,15 @@
 #include "Krystal.Booey/HTML/Shadow/DateTimeNumericFieldElement.hpp"
 #include "Krystal.Booey/DOM/Events/EventNames.hpp"
 #include "Krystal.Booey/DOM/Events/KeyboardEvent.hpp"
-#include "Krystal.Booey/Platform/Locale/PlatformLocale.hpp"
 #include "Krystal.Booey/Rendering/RenderBlock.hpp"
 #include "Krystal.Booey/Rendering/Style/RenderStyle+GettersInlines.hpp"
 #include "Krystal.Booey/Rendering/Style/RenderStyle+SettersInlines.hpp"
+#include "Krystal.Core/Strings/Unicode.hpp"
 #include "Krystal.Core/Time/MonotonicTime.hpp"
+#include "Krystal.I18n/Locale.hpp"
 #include <algorithm>
 #include <charconv>
 #include <format>
-#include <unicode/utf8.h>
 
 namespace krys::boo::html
 {
@@ -182,14 +182,13 @@ namespace krys::boo::html
       return;
     }
 
-    auto charCode = static_cast<UChar32>(keyboardEvent.CharCode());
-    if (charCode < 0 || charCode > 0x10FFFF)
+    auto charCode = keyboardEvent.CharCode();
+    char8 encoded[text::MaxUTF8SequenceLength];
+    auto encodedLength = charCode < 0 ? 0 : text::EncodeUTF8(static_cast<char32>(charCode), encoded);
+    if (!encodedLength)
     {
       return;
     }
-    char8 encoded[U8_MAX_LENGTH];
-    size_t encodedLength = 0;
-    U8_APPEND_UNSAFE(encoded, encodedLength, charCode);
     auto number = LocaleForOwner().ConvertFromLocalizedNumber(DOMStringView(encoded, encodedLength));
     int digit = number.empty() ? -1 : number[0] - '0';
     if (digit < 0 || digit > 9)

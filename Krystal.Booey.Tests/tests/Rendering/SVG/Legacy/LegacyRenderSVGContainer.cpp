@@ -62,7 +62,7 @@ namespace krys::boo::tests
 
     // An inner <svg> maps its view box into its viewport, at its x and y.
     auto &v = RendererById<LegacyRenderSVGViewportContainer>(*fixture.Document, u8"v");
-    CHECK(v.Viewport() == FloatRect(5, 6, 50, 40));
+    CHECK(v.Viewport() == RectF(5, 6, 50, 40));
     CHECK(AsObject(v).LocalToParentTransform() == AffineTransform(4, 0, 0, 4, 10, 6));
     auto &w = RendererById<LegacyRenderSVGViewportContainer>(*fixture.Document, u8"w");
     CHECK(AsObject(w).LocalToParentTransform() == AffineTransform(3, 0, 0, 1.5, 1, 2));
@@ -72,7 +72,7 @@ namespace krys::boo::tests
       ElementById(*fixture.Document, u8"g").SetAttribute(u8"transform", u8"rotate(90)").HasException());
     REQUIRE_FALSE(ElementById(*fixture.Document, u8"v").SetAttribute(u8"x", u8"15").HasException());
     (void)fixture.Document->UpdateLayout();
-    CHECK(g.LocalToParentTransform() == AffineTransform::MakeRotation(90));
+    CHECK(g.LocalToParentTransform() == AffineTransform::CreateRotation(90));
     CHECK(AsObject(v).LocalToParentTransform() == AffineTransform(4, 0, 0, 4, 20, 6));
   }
 
@@ -88,10 +88,10 @@ namespace krys::boo::tests
     // shapes are in LegacyRenderSVGShape's tests).
     auto &g = RendererById<LegacyRenderSVGContainer>(*fixture.Document, u8"g");
     CHECK_FALSE(g.IsObjectBoundingBoxValid());
-    CHECK(g.ObjectBoundingBox() == FloatRect());
-    CHECK(AsObject(g).StrokeBoundingBox() == FloatRect());
-    CHECK(AsObject(g).RepaintRectInLocalCoordinates() == FloatRect());
-    CHECK(AsObject(g).RepaintRectInLocalCoordinates(RepaintRectCalculation::Accurate) == FloatRect());
+    CHECK(g.ObjectBoundingBox() == RectF());
+    CHECK(AsObject(g).StrokeBoundingBox() == RectF());
+    CHECK(AsObject(g).RepaintRectInLocalCoordinates() == RectF());
+    CHECK(AsObject(g).RepaintRectInLocalCoordinates(RepaintRectCalculation::Accurate) == RectF());
 
     // Hidden containers take up no space.
     auto &defs = RendererById<LegacyRenderSVGHiddenContainer>(*fixture.Document, u8"defs");

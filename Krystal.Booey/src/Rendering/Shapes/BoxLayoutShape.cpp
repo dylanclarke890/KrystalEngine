@@ -117,7 +117,7 @@ namespace krys::boo
 
   LayoutRect BoxLayoutShape::ShapeMarginLogicalBoundingBox() const noexcept
   {
-    FloatRect marginBounds(_bounds.Rect());
+    RectF marginBounds(_bounds.Rect());
     if (ShapeMargin() > 0)
     {
       marginBounds.Inflate(ShapeMargin());
@@ -152,7 +152,7 @@ namespace krys::boo
 
     float y1 = logicalTop.ToFloat();
     float y2 = (logicalTop + logicalHeight).ToFloat();
-    const FloatRect &rect = marginBounds.Rect();
+    const RectF &rect = marginBounds.Rect();
 
     if (!marginBounds.IsRounded())
     {

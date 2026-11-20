@@ -225,7 +225,7 @@ namespace krys::boo::css::cq
         Evaluate(const mq::Feature &feature, const RenderBox &renderer,
                  const ToLengthConversionData &conversionData) const noexcept override
       {
-        return mq::EvaluateRatioFeature(feature, FloatSize(renderer.ContentBoxSize()), conversionData);
+        return mq::EvaluateRatioFeature(feature, SizeF(renderer.ContentBoxSize()), conversionData);
       }
     };
 

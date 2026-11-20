@@ -49,6 +49,6 @@ namespace krys::ui::tests
     CHECK_FALSE(strategy.StrokeContains(corner, {20, -2.5f}, cornerStyle));
 
     // An empty path has no stroke.
-    CHECK(strategy.StrokeBoundingRect(boo::Path(), style) == boo::FloatRect());
+    CHECK(strategy.StrokeBoundingRect(boo::Path(), style) == RectF());
   }
 }

@@ -194,9 +194,9 @@ namespace krys::boo::tests
     {
       auto next = [](utf8_stringview text, const RenderStyle &style)
       {
-        auto factory = CachedLineBreakIteratorFactory {text, style.ComputedLocale().GetPlatform(),
-                                                       TextUtil::LineBreakIteratorMode(style.GetLineBreak()),
-                                                       TextUtil::GetContentAnalysis(style.GetWordBreak())};
+        auto factory = text::CachedLineBreakIteratorFactory {
+          text, style.ComputedLocale().GetPlatform(), TextUtil::LineBreakIteratorMode(style.GetLineBreak()),
+          TextUtil::GetContentAnalysis(style.GetWordBreak())};
         return TextUtil::FindNextBreakablePosition(factory, 0, style);
       };
       CHECK(next(u8"\u65E5\u672C \u8A9E", normal) == 3);
@@ -206,15 +206,15 @@ namespace krys::boo::tests
 
     SECTION("Iterator modes")
     {
-      CHECK(TextUtil::LineBreakIteratorMode(LineBreak::Auto) == TextBreakLineBehavior::Default);
-      CHECK(TextUtil::LineBreakIteratorMode(LineBreak::Anywhere) == TextBreakLineBehavior::Default);
-      CHECK(TextUtil::LineBreakIteratorMode(LineBreak::Loose) == TextBreakLineBehavior::Loose);
-      CHECK(TextUtil::LineBreakIteratorMode(LineBreak::Normal) == TextBreakLineBehavior::Normal);
-      CHECK(TextUtil::LineBreakIteratorMode(LineBreak::Strict) == TextBreakLineBehavior::Strict);
+      CHECK(TextUtil::LineBreakIteratorMode(LineBreak::Auto) == text::TextBreakLineBehavior::Default);
+      CHECK(TextUtil::LineBreakIteratorMode(LineBreak::Anywhere) == text::TextBreakLineBehavior::Default);
+      CHECK(TextUtil::LineBreakIteratorMode(LineBreak::Loose) == text::TextBreakLineBehavior::Loose);
+      CHECK(TextUtil::LineBreakIteratorMode(LineBreak::Normal) == text::TextBreakLineBehavior::Normal);
+      CHECK(TextUtil::LineBreakIteratorMode(LineBreak::Strict) == text::TextBreakLineBehavior::Strict);
       CHECK(TextUtil::GetContentAnalysis(WordBreak::BreakAll)
-            == TextBreakIterator::ContentAnalysis::Mechanical);
+            == text::TextBreakIterator::ContentAnalysis::Mechanical);
       CHECK(TextUtil::GetContentAnalysis(WordBreak::AutoPhrase)
-            == TextBreakIterator::ContentAnalysis::Linguistic);
+            == text::TextBreakIterator::ContentAnalysis::Linguistic);
     }
   }
 
@@ -308,9 +308,9 @@ namespace krys::boo::tests
       CHECK(TextUtil::LastBaseCharacterFromText(u8"\u0301") == 0);
       CHECK(TextUtil::LastBaseCharacterFromText(u8"") == 0);
 
-      CHECK(TextUtil::DirectionForTextContent(u8"abc") == TextDirection::LTR);
-      CHECK(TextUtil::DirectionForTextContent(u8"123 \u05E9") == TextDirection::RTL);
-      CHECK(TextUtil::DirectionForTextContent(u8"123") == TextDirection::LTR);
+      CHECK(TextUtil::DirectionForTextContent(u8"abc") == text::TextDirection::LTR);
+      CHECK(TextUtil::DirectionForTextContent(u8"123 \u05E9") == text::TextDirection::RTL);
+      CHECK(TextUtil::DirectionForTextContent(u8"123") == text::TextDirection::LTR);
 
       CHECK(TextUtil::EllipsisTextInInlineDirection() == u8"\u2026");
       CHECK(TextUtil::EllipsisTextInInlineDirection(false) == u8"\u22EE");
@@ -347,7 +347,7 @@ namespace krys::boo::tests
       CHECK(right.Width() == 20.f);
       CHECK_FALSE(right.IsWhitespace());
       CHECK_FALSE(right.IsEmpty());
-      CHECK(right.Direction() == TextDirection::LTR);
+      CHECK(right.Direction() == text::TextDirection::LTR);
     }
 
     SECTION("Zero width spaces")

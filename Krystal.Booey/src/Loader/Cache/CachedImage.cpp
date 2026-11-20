@@ -38,7 +38,7 @@
 namespace krys::boo
 {
   VisibleInViewportState CachedImageClient::ImageFrameAvailable(CachedImage &image, ImageAnimatingState,
-                                                                const IntRect *changeRect) noexcept
+                                                                const RectI *changeRect) noexcept
   {
     ImageChanged(&image, changeRect);
     return VisibleInViewportState::No;
@@ -61,7 +61,7 @@ namespace krys::boo
     {
       _settings = ShareRef(document->GetSettings());
     }
-    if (loader.ShouldPerformImageLoad(URL()))
+    if (loader.ShouldPerformImageLoad(Url()))
     {
       CachedResource::Load(loader);
     }
@@ -174,7 +174,7 @@ namespace krys::boo
 
   void CachedImage::SetContainerContextForClient(const CachedImageClient &client,
                                                  const LayoutSize &containerSize, float containerZoom,
-                                                 const url::URL &imageURL) noexcept
+                                                 const net::Url &imageUrl) noexcept
   {
     if (containerSize.IsEmpty())
     {
@@ -185,20 +185,20 @@ namespace krys::boo
     if (!image)
     {
       _pendingContainerContextRequests.insert_or_assign(
-        &client, ContainerContext {containerSize, containerZoom, imageURL});
+        &client, ContainerContext {containerSize, containerZoom, imageUrl});
       return;
     }
 
     if (!image->DrawsSVGImage())
     {
-      image->SetContainerSize(FloatSize(containerSize));
+      image->SetContainerSize(SizeF(containerSize));
       return;
     }
 
-    _svgImageCache->SetContainerContextForClient(client, containerSize, containerZoom, imageURL);
+    _svgImageCache->SetContainerContextForClient(client, containerSize, containerZoom, imageUrl);
   }
 
-  FloatSize CachedImage::ImageSizeForRenderer(const RenderElement *renderer, SizeType sizeType) const noexcept
+  SizeF CachedImage::ImageSizeForRenderer(const RenderElement *renderer, SizeType sizeType) const noexcept
   {
     if (!_image)
     {
@@ -211,7 +211,7 @@ namespace krys::boo
     }
 
     return _image->Size(renderer ? renderer->GetImageOrientation()
-                                 : boo::ImageOrientation(boo::ImageOrientation::Orientation::FromImage));
+                                 : img::ImageOrientation(img::ImageOrientation::Orientation::FromImage));
   }
 
   LayoutSize CachedImage::UnclampedImageSizeForRenderer(const RenderElement *renderer, float multiplier,
@@ -246,7 +246,7 @@ namespace krys::boo
   }
 
   void CachedImage::ComputeIntrinsicDimensions(float &intrinsicWidth, float &intrinsicHeight,
-                                               FloatSize &intrinsicRatio) noexcept
+                                               SizeF &intrinsicRatio) noexcept
   {
     if (_image)
     {
@@ -254,7 +254,7 @@ namespace krys::boo
     }
   }
 
-  void CachedImage::NotifyObservers(const IntRect *changeRect) noexcept
+  void CachedImage::NotifyObservers(const RectI *changeRect) noexcept
   {
     CachedResourceClientWalker<CachedImageClient> walker(*this);
     while (auto *client = walker.Next())
@@ -295,7 +295,7 @@ namespace krys::boo
         for (auto &[client, context] : _pendingContainerContextRequests)
         {
           SetContainerContextForClient(*client, context.ContainerSize, context.ContainerZoom,
-                                       context.ImageURL);
+                                       context.ImageUrl);
         }
       }
       _pendingContainerContextRequests.clear();
@@ -307,9 +307,9 @@ namespace krys::boo
     _cachedImages.insert(&image);
   }
 
-  url::URL CachedImage::CachedImageObserver::SourceUrl() const noexcept
+  net::Url CachedImage::CachedImageObserver::SourceUrl() const noexcept
   {
-    return !_cachedImages.empty() ? (*_cachedImages.begin())->URL() : url::URL();
+    return !_cachedImages.empty() ? (*_cachedImages.begin())->Url() : net::Url();
   }
 
   utf8_string CachedImage::CachedImageObserver::MimeType() const noexcept
@@ -328,7 +328,7 @@ namespace krys::boo
   }
 
   void CachedImage::CachedImageObserver::EncodedDataStatusChanged(const Image &image,
-                                                                  EncodedDataStatus status) noexcept
+                                                                  img::EncodedDataStatus status) noexcept
   {
     for (auto *cachedImage : List<CachedImage *>(_cachedImages.begin(), _cachedImages.end()))
     {
@@ -373,8 +373,8 @@ namespace krys::boo
 
   void CachedImage::CachedImageObserver::ImageFrameAvailable(const Image &image,
                                                              ImageAnimatingState animatingState,
-                                                             const IntRect *changeRect,
-                                                             DecodingStatus decodingStatus) noexcept
+                                                             const RectI *changeRect,
+                                                             img::DecodingStatus decodingStatus) noexcept
   {
     for (auto *cachedImage : List<CachedImage *>(_cachedImages.begin(), _cachedImages.end()))
     {
@@ -383,7 +383,7 @@ namespace krys::boo
     }
   }
 
-  void CachedImage::CachedImageObserver::ChangedInRect(const Image &image, const IntRect *rect) noexcept
+  void CachedImage::CachedImageObserver::ChangedInRect(const Image &image, const RectI *rect) noexcept
   {
     for (auto *cachedImage : List<CachedImage *>(_cachedImages.begin(), _cachedImages.end()))
     {
@@ -479,14 +479,15 @@ namespace krys::boo
     // Have the image update its data from its internal buffer. Decoding the image data
     // will be delayed until info (like size or specific image frames) are queried which
     // usually happens when the observers are repainted.
-    EncodedDataStatus encodedDataStatus = UpdateImageData(false);
+    img::EncodedDataStatus encodedDataStatus = UpdateImageData(false);
 
-    if (encodedDataStatus > EncodedDataStatus::Error && encodedDataStatus < EncodedDataStatus::SizeAvailable)
+    if (encodedDataStatus > img::EncodedDataStatus::Error
+        && encodedDataStatus < img::EncodedDataStatus::SizeAvailable)
     {
       return;
     }
 
-    if (encodedDataStatus == EncodedDataStatus::Error || _image->IsNull())
+    if (encodedDataStatus == img::EncodedDataStatus::Error || _image->IsNull())
     {
       // Image decoding failed. Either we need more image data or the image data is malformed.
       Error(ErrorOccurred() ? GetStatus() : DecodeError);
@@ -501,11 +502,11 @@ namespace krys::boo
     NotifyObservers();
   }
 
-  EncodedDataStatus CachedImage::UpdateImageData(bool allDataReceived) noexcept
+  img::EncodedDataStatus CachedImage::UpdateImageData(bool allDataReceived) noexcept
   {
     if (!_image || !_data)
     {
-      return EncodedDataStatus::Error;
+      return img::EncodedDataStatus::Error;
     }
     return _image->SetData(RefPtr<SharedBuffer>(_data), allDataReceived);
   }
@@ -525,9 +526,9 @@ namespace krys::boo
       CreateImage();
     }
 
-    EncodedDataStatus encodedDataStatus = UpdateImageData(true);
+    img::EncodedDataStatus encodedDataStatus = UpdateImageData(true);
 
-    if (encodedDataStatus == EncodedDataStatus::Error || !_image || _image->IsNull())
+    if (encodedDataStatus == img::EncodedDataStatus::Error || !_image || _image->IsNull())
     {
       // Image decoding failed; the image data is malformed.
       Error(ErrorOccurred() ? GetStatus() : DecodeError);
@@ -539,7 +540,7 @@ namespace krys::boo
     }
 
     SetLoading(false);
-    SetAllowsOrientationOverride(!LoadFailedOrCanceled() || _image->SourceURL().ProtocolIsData());
+    SetAllowsOrientationOverride(!LoadFailedOrCanceled() || _image->SourceUrl().ProtocolIsData());
 
     NotifyObservers();
     CachedResource::FinishLoading(data);
@@ -552,7 +553,7 @@ namespace krys::boo
     NotifyObservers();
   }
 
-  void CachedImage::ResponseReceived(ResourceResponse &&newResponse) noexcept
+  void CachedImage::ResponseReceived(net::ResourceResponse &&newResponse) noexcept
   {
     if (!Response().IsNull())
     {
@@ -575,7 +576,7 @@ namespace krys::boo
     }
   }
 
-  void CachedImage::EncodedDataStatusChanged(const Image &image, EncodedDataStatus) noexcept
+  void CachedImage::EncodedDataStatusChanged(const Image &image, img::EncodedDataStatus) noexcept
   {
     if (&image != _image.get())
     {
@@ -658,7 +659,7 @@ namespace krys::boo
   }
 
   void CachedImage::ImageFrameAvailable(const Image &image, ImageAnimatingState animatingState,
-                                        const IntRect *changeRect, DecodingStatus decodingStatus) noexcept
+                                        const RectI *changeRect, img::DecodingStatus decodingStatus) noexcept
   {
     if (&image != _image.get())
     {
@@ -686,13 +687,13 @@ namespace krys::boo
       _image->StopAnimation();
     }
 
-    if (decodingStatus != DecodingStatus::Partial)
+    if (decodingStatus != img::DecodingStatus::Partial)
     {
       _clientsWaitingForAsyncDecoding.clear();
     }
   }
 
-  void CachedImage::ChangedInRect(const Image &image, const IntRect *rect) noexcept
+  void CachedImage::ChangedInRect(const Image &image, const RectI *rect) noexcept
   {
     if (&image != _image.get())
     {

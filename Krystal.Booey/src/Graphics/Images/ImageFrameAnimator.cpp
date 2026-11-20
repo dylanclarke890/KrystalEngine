@@ -26,8 +26,8 @@
 #include "Krystal.Booey/Graphics/Images/ImageFrameAnimator.hpp"
 #include "Krystal.Booey/Graphics/Images/BitmapImage.hpp"
 #include "Krystal.Booey/Graphics/Images/BitmapImageSource.hpp"
-#include "Krystal.Booey/Platform/ThreadTimers.hpp"
-#include "Krystal.Core/Text/TextStream.hpp"
+#include "Krystal.Core/Strings/TextStream.hpp"
+#include "Krystal.Core/Time/ThreadTimers.hpp"
 #include <algorithm>
 
 namespace krys::boo
@@ -46,7 +46,7 @@ namespace krys::boo
         _currentFrameIndex(source.PrimaryFrameIndex())
   {
     krys_debug_assert(_frameCount > 0);
-    krys_debug_assert(_repetitionCount != RepetitionCountNone);
+    krys_debug_assert(_repetitionCount != img::RepetitionCountNone);
     krys_debug_assert(_currentFrameIndex < _frameCount);
   }
 
@@ -98,7 +98,7 @@ namespace krys::boo
 
   bool ImageFrameAnimator::ImageFrameDecodeAtIndexHasFinished(uint32 index,
                                                               ImageAnimatingState animatingState,
-                                                              DecodingStatus decodingStatus) noexcept
+                                                              img::DecodingStatus decodingStatus) noexcept
   {
     if (animatingState != ImageAnimatingState::Yes)
     {
@@ -189,7 +189,7 @@ namespace krys::boo
     StopAnimation();
 
     _currentFrameIndex = _source.PrimaryFrameIndex();
-    _repetitionsComplete = RepetitionCountNone;
+    _repetitionsComplete = img::RepetitionCountNone;
     _desiredFrameStartTime = null;
 
     // For extremely large animations, when the animation is reset, we just throw everything away.
@@ -198,7 +198,7 @@ namespace krys::boo
 
   bool ImageFrameAnimator::IsAnimationAllowed() const noexcept
   {
-    return _repetitionCount == RepetitionCountInfinite || _repetitionsComplete < _repetitionCount;
+    return _repetitionCount == img::RepetitionCountInfinite || _repetitionsComplete < _repetitionCount;
   }
 
   void ImageFrameAnimator::Dump(TextStream &ts) const noexcept

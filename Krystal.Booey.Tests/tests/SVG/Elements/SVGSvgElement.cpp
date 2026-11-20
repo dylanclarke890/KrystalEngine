@@ -65,7 +65,7 @@ namespace krys::boo::svg::tests
       REQUIRE_FALSE(svg.SetAttribute(u8"viewBox", u8" 0,0 100 50 ").HasException());
       CHECK(svg.HasValidViewBox());
       CHECK_FALSE(svg.HasEmptyViewBox());
-      CHECK(svg.ViewBox() == FloatRect(0, 0, 100, 50));
+      CHECK(svg.ViewBox() == RectF(0, 0, 100, 50));
       CHECK(svg.ViewBoxString() == u8"0 0 100 50");
 
       // Errors leave no view box.
@@ -73,7 +73,7 @@ namespace krys::boo::svg::tests
       {
         REQUIRE_FALSE(svg.SetAttribute(u8"viewBox", value).HasException());
         CHECK_FALSE(svg.HasValidViewBox());
-        CHECK(svg.ViewBox() == FloatRect());
+        CHECK(svg.ViewBox() == RectF());
       }
 
       REQUIRE_FALSE(svg.SetAttribute(u8"viewBox", u8"0 0 0 0").HasException());
@@ -143,13 +143,13 @@ namespace krys::boo::svg::tests
     CHECK(a.HasIntrinsicWidth());
     CHECK(a.IntrinsicWidth() == 200);
     CHECK(a.IntrinsicHeight() == 100);
-    CHECK(a.CurrentViewportSizeExcludingZoom() == FloatSize(200, 100));
+    CHECK(a.CurrentViewportSizeExcludingZoom() == SizeF(200, 100));
     CHECK_FALSE(c.HasIntrinsicWidth());
     CHECK(c.IntrinsicWidth() == 0);
-    CHECK(c.CurrentViewportSizeExcludingZoom() == FloatSize());
+    CHECK(c.CurrentViewportSizeExcludingZoom() == SizeF());
 
-    CHECK(a.CurrentViewBoxRect() == FloatRect(0, 0, 400, 200));
-    CHECK(d.CurrentViewBoxRect() == FloatRect());
+    CHECK(a.CurrentViewBoxRect() == RectF(0, 0, 400, 200));
+    CHECK(d.CurrentViewBoxRect() == RectF());
     CHECK(a.ViewBoxToViewTransform(200, 100) == AffineTransform(0.5, 0, 0, 0.5, 0, 0));
     CHECK(d.ViewBoxToViewTransform(200, 100).IsIdentity());
 
@@ -218,9 +218,9 @@ namespace krys::boo::svg::tests
     CHECK(SVGSvgElement::CreateSVGNumber()->ValueForBindings() == 0);
     CHECK(SVGSvgElement::CreateSVGLength()->ValueAsString() == u8"0");
     CHECK(SVGSvgElement::CreateSVGAngle()->ValueAsString() == u8"0");
-    CHECK(SVGSvgElement::CreateSVGPoint()->Value() == FloatPoint());
+    CHECK(SVGSvgElement::CreateSVGPoint()->Value() == PointF());
     CHECK(SVGSvgElement::CreateSVGMatrix()->Value().IsIdentity());
-    CHECK(SVGSvgElement::CreateSVGRect()->Value() == FloatRect());
+    CHECK(SVGSvgElement::CreateSVGRect()->Value() == RectF());
     CHECK(SVGSvgElement::CreateSVGTransform()->Value().Type() == SVGTransformValue::SVG_TRANSFORM_MATRIX);
     auto fromMatrix = SVGSvgElement::CreateSVGTransformFromMatrix({.A = 2, .F = 3});
     CHECK(fromMatrix->Value().Matrix().Value() == AffineTransform(2, 0, 0, 1, 0, 3));
@@ -231,7 +231,7 @@ namespace krys::boo::svg::tests
     CHECK(svg.GetElementById(u8"") == nullptr);
 
     svg.SetCurrentTranslate({1, 2});
-    CHECK(svg.CurrentTranslateValue() == FloatPoint(1, 2));
+    CHECK(svg.CurrentTranslateValue() == PointF(1, 2));
     CHECK(svg.CurrentTranslate().X() == 1);
 
     // Only the document element is scaled.
@@ -285,8 +285,8 @@ namespace krys::boo::svg::tests
     auto &inner = SvgById(*fixture.Document, u8"inner");
 
     // The viewport is the root's content box, or an inner <svg>'s viewport.
-    CHECK(s.CurrentViewportSizeExcludingZoom() == FloatSize(200, 100));
-    CHECK(inner.CurrentViewportSizeExcludingZoom() == FloatSize(40, 30));
+    CHECK(s.CurrentViewportSizeExcludingZoom() == SizeF(200, 100));
+    CHECK(inner.CurrentViewportSizeExcludingZoom() == SizeF(40, 30));
 
     // The screen CTM of the outermost <svg> maps through its place on the page and its view box.
     CHECK(s.GetScreenCTM() == AffineTransform(2, 0, 0, 2, 5, 25));
@@ -297,20 +297,20 @@ namespace krys::boo::svg::tests
     // the transforms up to and including its nearest viewport element's: for the outermost <svg>, through its
     // place on the page (a at (25,45) size 40x40, b at (105,45)), and for the inner one, only by its x and y
     // (c at (60,0) size 5x5).
-    auto query = SVGRect::Create(FloatRect(0, 40, 70, 60));
+    auto query = SVGRect::Create(RectF(0, 40, 70, 60));
     auto intersecting = s.GetIntersectionList(*query, nullptr);
     REQUIRE(intersecting->Length() == 1);
     CHECK(intersecting->Item(0).get() == fixture.Document->GetElementById(u8"a").get());
-    auto wide = SVGRect::Create(FloatRect(20, 0, 140, 90));
+    auto wide = SVGRect::Create(RectF(20, 0, 140, 90));
     CHECK(s.GetIntersectionList(*wide, nullptr)->Length() == 3);
     CHECK(s.GetEnclosureList(*wide, nullptr)->Length() == 3);
-    auto narrow = SVGRect::Create(FloatRect(30, 0, 140, 90));
+    auto narrow = SVGRect::Create(RectF(30, 0, 140, 90));
     CHECK(s.GetEnclosureList(*narrow, nullptr)->Length() == 2);
     auto &g = Downcast<SVGElement>(*fixture.Document->GetElementById(u8"g"));
     CHECK(s.GetIntersectionList(*wide, &g)->Length() == 1);
     CHECK(SVGSvgElement::CheckEnclosure(
       ShareRef(Downcast<SVGElement>(*fixture.Document->GetElementById(u8"b"))), *wide));
-    auto far = SVGRect::Create(FloatRect(300, 300, 5, 5));
+    auto far = SVGRect::Create(RectF(300, 300, 5, 5));
     CHECK_FALSE(SVGSvgElement::CheckIntersection(
       ShareRef(Downcast<SVGElement>(*fixture.Document->GetElementById(u8"a"))), *far));
 

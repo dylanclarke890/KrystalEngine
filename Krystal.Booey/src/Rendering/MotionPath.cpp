@@ -24,10 +24,9 @@
  */
 
 #include "Krystal.Booey/Rendering/MotionPath.hpp"
-#include "Krystal.Booey/Graphics/Geometry/GeometryUtilities.hpp"
+#include "Krystal.Booey/Graphics/Geometry/RayIntersection.hpp"
 #include "Krystal.Booey/Graphics/Paths/Path.hpp"
 #include "Krystal.Booey/Graphics/Paths/PathTraversalState.hpp"
-#include "Krystal.Booey/Graphics/Transforms/TransformationMatrix.hpp"
 #include "Krystal.Booey/Rendering/Painting/BorderShape.hpp"
 #include "Krystal.Booey/Rendering/PathOperation.hpp"
 #include "Krystal.Booey/Rendering/RenderBlock.hpp"
@@ -36,6 +35,8 @@
 #include "Krystal.Booey/Style/Values/Motion/OffsetPath.hpp"
 #include "Krystal.Booey/Style/Values/Motion/OffsetPosition.hpp"
 #include "Krystal.Booey/Style/Values/Primitives/Position.hpp"
+#include "Krystal.Core/Geometry/GeometryUtilities.hpp"
+#include "Krystal.Core/Geometry/TransformationMatrix.hpp"
 #include "Krystal.Core/Maths/Extras.hpp"
 #include <algorithm>
 #include <cmath>
@@ -44,12 +45,12 @@ namespace krys::boo
 {
   namespace
   {
-    KRYS_NODISCARD FloatPoint MotionPathOffsetFromContainer(const RenderObject &renderer,
-                                                            const RenderBlock &container,
-                                                            const FloatRect &referenceRect) noexcept
+    KRYS_NODISCARD PointF MotionPathOffsetFromContainer(const RenderObject &renderer,
+                                                        const RenderBlock &container,
+                                                        const RectF &referenceRect) noexcept
     {
       auto offsetFromContainingBlock = renderer.OffsetFromContainer(container, LayoutPoint());
-      return FloatPoint(FloatPoint(offsetFromContainingBlock) - referenceRect.Location());
+      return PointF(PointF(offsetFromContainingBlock) - referenceRect.Location());
     }
 
     KRYS_NODISCARD FloatRoundedRect
@@ -70,8 +71,8 @@ namespace krys::boo
                                                               Downcast<RenderLayerModelObject>(renderer))};
     }
 
-    KRYS_NODISCARD FloatPoint NormalPositionForOffsetPath(const style::OffsetPath &offsetPath,
-                                                          const FloatRect &referenceRect) noexcept
+    KRYS_NODISCARD PointF NormalPositionForOffsetPath(const style::OffsetPath &offsetPath,
+                                                      const RectF &referenceRect) noexcept
     {
       if (offsetPath.IsRay() || offsetPath.IsBasicShape())
       {
@@ -106,7 +107,7 @@ namespace krys::boo
     }
 
     auto startingPositionForOffsetPosition = [&](const style::OffsetPosition &offsetPosition,
-                                                 const FloatRect &referenceRect) -> FloatPoint
+                                                 const RectF &referenceRect) -> PointF
     {
       // If offset-position is normal, the element doesn't have an offset starting position.
       if (offsetPosition.IsNormal())
@@ -118,8 +119,8 @@ namespace krys::boo
       {
         return MotionPathOffsetFromContainer(renderer, *container, referenceRect);
       }
-      return style::Evaluate<FloatPoint>(*offsetPosition.TryPosition(), referenceRect.Size(),
-                                         style::ZoomNeeded {});
+      return style::Evaluate<PointF>(*offsetPosition.TryPosition(), referenceRect.Size(),
+                                     style::ZoomNeeded {});
     };
 
     MotionPathData data;
@@ -137,7 +138,7 @@ namespace krys::boo
       const auto &startingPosition = ray->Ray()->Position;
       data.UsedStartingPosition =
         startingPosition
-          ? style::Evaluate<FloatPoint>(*startingPosition, referenceRect.Size(), style::ZoomNeeded {})
+          ? style::Evaluate<PointF>(*startingPosition, referenceRect.Size(), style::ZoomNeeded {})
           : startingPositionForOffsetPosition(offsetPosition, referenceRect);
     }
 
@@ -171,8 +172,8 @@ namespace krys::boo
 
   void MotionPath::ApplyMotionPathTransform(TransformationMatrix &matrix,
                                             const TransformOperationData &transformData,
-                                            FloatPoint transformOrigin, TransformBox transformBox,
-                                            const Path &offsetPath, Maybe<FloatPoint> offsetAnchor,
+                                            PointF transformOrigin, TransformBox transformBox,
+                                            const Path &offsetPath, Maybe<PointF> offsetAnchor,
                                             float offsetDistance, float offsetRotate,
                                             bool offsetRotateHasAuto) noexcept
   {
@@ -241,20 +242,20 @@ namespace krys::boo
       [&](css::keywords::Sides)
       {
         return LengthOfRayIntersectionWithBoundingBox(
-          boundingBox, std::pair<const FloatPoint &, float> {data.UsedStartingPosition,
-                                                             static_cast<float>(ray.Angle.Value)});
+          boundingBox,
+          std::pair<const PointF &, float> {data.UsedStartingPosition, static_cast<float>(ray.Angle.Value)});
       });
   }
 
-  KRYS_NODISCARD static double LengthForRayContainPath(const FloatRect &elementRect,
+  KRYS_NODISCARD static double LengthForRayContainPath(const RectF &elementRect,
                                                        double computedPathLength) noexcept
   {
     return std::max(0.0, computedPathLength - (std::max(elementRect.Width(), elementRect.Height()) / 2));
   }
 
-  KRYS_NODISCARD static FloatPoint CurrentOffsetForData(const MotionPathData &data) noexcept
+  KRYS_NODISCARD static PointF CurrentOffsetForData(const MotionPathData &data) noexcept
   {
-    return FloatPoint(data.UsedStartingPosition - data.OffsetFromContainingBlock);
+    return PointF(data.UsedStartingPosition - data.OffsetFromContainingBlock);
   }
 
   Maybe<Path> MotionPath::ComputePathForRay(const RayPathOperation &rayPathOperation,
@@ -275,8 +276,8 @@ namespace krys::boo
 
     auto radians = deg2rad(
       static_cast<double>(ToPositiveAngle(static_cast<float>(rayPathOperation.Ray()->Angle.Value))) - 90.0);
-    auto point = FloatSize(static_cast<float>(std::cos(radians) * length),
-                           static_cast<float>(std::sin(radians) * length));
+    auto point =
+      SizeF(static_cast<float>(std::cos(radians) * length), static_cast<float>(std::sin(radians) * length));
 
     Path path;
     path.MoveTo(CurrentOffsetForData(*motionPathData));

@@ -725,9 +725,9 @@ void main()
     constexpr int64 RandQ = 127'773;
     constexpr int64 RandR = 2'836;
 
-    KRYS_NODISCARD Array<int32, 4> ToArray(const PixelRect2D &rect) noexcept
+    KRYS_NODISCARD Array<int32, 4> ToArray(const RectI &rect) noexcept
     {
-      return {rect.X, rect.Y, static_cast<int32>(rect.Width), static_cast<int32>(rect.Height)};
+      return {rect.X(), rect.Y(), rect.Width(), rect.Height()};
     }
 
     /// @brief How an input in `from` is read by a node in `to`.
@@ -865,7 +865,7 @@ void main()
     struct NodeResult
     {
       TextureHandle Texture {};
-      PixelRect2D Region {};
+      RectI Region {};
       FilterColourSpace2D ColourSpace {FilterColourSpace2D::SRGB};
     };
 
@@ -875,7 +875,7 @@ void main()
     struct Read
     {
       TextureHandle Texture {};
-      PixelRect2D Region {};
+      RectI Region {};
       uint32 Flags {0u};
     };
 
@@ -942,7 +942,7 @@ void main()
       {
         continue;
       }
-      result.Texture = AcquireTexture(node.Region.Width, node.Region.Height);
+      result.Texture = AcquireTexture(node.Region.Width(), node.Region.Height());
       if (!result.Texture.IsValid())
       {
         continue;
@@ -1017,7 +1017,7 @@ void main()
         case FilterNode2D::Kind::Blur:
         {
           // Two passes, across into a scratch texture over the region, then down from it.
-          const auto scratch = AcquireTexture(node.Region.Width, node.Region.Height);
+          const auto scratch = AcquireTexture(node.Region.Width(), node.Region.Height());
           if (!scratch.IsValid())
           {
             continue;

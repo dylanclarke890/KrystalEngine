@@ -25,8 +25,8 @@
 
 #pragma once
 
-#include "Krystal.Booey/Graphics/Geometry/FloatRect.hpp"
 #include "Krystal.Booey/Graphics/GraphicsStyle.hpp"
+#include "Krystal.Core/Geometry/Rect.hpp"
 #include "Krystal.Core/Types/List.hpp"
 #include "Krystal.Core/Types/Maybe.hpp"
 
@@ -37,8 +37,8 @@ namespace krys::boo
   struct FilterStyle
   {
     Maybe<GraphicsStyle> Style;
-    FloatRect PrimitiveSubregion;
-    FloatRect ImageRect;
+    RectF PrimitiveSubregion;
+    RectF ImageRect;
   };
 
   using FilterStyleVector = List<FilterStyle>;

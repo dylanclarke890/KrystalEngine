@@ -29,7 +29,7 @@
 #include "Krystal.Booey/SVG/Properties/SVGPropertyOwnerRegistry.hpp"
 #include "Krystal.Booey/SVG/SVGAnimateElementBase.hpp"
 #include "Krystal.Booey/SVG/SVGNames.hpp"
-#include "Krystal.Core/Text/ASCII.hpp"
+#include "Krystal.Core/Strings/ASCII.hpp"
 #include <algorithm>
 #include <cmath>
 #include <numeric>

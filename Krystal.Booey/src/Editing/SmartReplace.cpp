@@ -28,80 +28,54 @@
  */
 
 #include "Krystal.Booey/Editing/SmartReplace.hpp"
-#include <unicode/uset.h>
+#include "Krystal.Text/CharacterProperties.hpp"
 
 namespace krys::boo
 {
   namespace
   {
-    void AddAllCodePoints(USet *smartSet, utf8_stringview string) noexcept
+    /// @brief Whether @p c is in one of the CJK ranges, as CoreFoundation's smart replace has them.
+    KRYS_NODISCARD constexpr bool IsSmartReplaceCJK(char32 c) noexcept
     {
-      for (auto c : string)
-      {
-        uset_add(smartSet, static_cast<UChar32>(c));
-      }
+      // FIXME: Looks like all these ranges include one extra character past the end.
+      return (c >= 0x1100 && c <= 0x1100 + 256)          // Hangul Jamo (0x1100 - 0x11FF)
+             || (c >= 0x2E80 && c <= 0x2E80 + 352)       // CJK & Kangxi Radicals (0x2E80 - 0x2FDF)
+             || (c >= 0x2FF0 && c <= 0x2FF0 + 464)       // Ideograph Descriptions, CJK Symbols, Hiragana,
+                                                         // Katakana, Bopomofo, Hangul Compatibility Jamo,
+                                                         // Kanbun, & Bopomofo Ext (0x2FF0 - 0x31BF)
+             || (c >= 0x3200 && c <= 0x3200 + 29'392)    // Enclosed CJK, CJK Ideographs (Uni Han & Ext A), &
+                                                         // Yi (0x3200 - 0xA4CF)
+             || (c >= 0xAC00 && c <= 0xAC00 + 11'183)    // Hangul Syllables (0xAC00 - 0xD7AF)
+             || (c >= 0xF900 && c <= 0xF900 + 352)       // CJK Compatibility Ideographs (0xF900 - 0xFA5F)
+             || (c >= 0xFE30 && c <= 0xFE30 + 32)        // CJK Compatibility From (0xFE30 - 0xFE4F)
+             || (c >= 0xFF00 && c <= 0xFF00 + 240)       // Half/Full Width Form (0xFF00 - 0xFFEF)
+             || (c >= 0x20000 && c <= 0x20000 + 0xA6D7)  // CJK Ideograph Exntension B
+             || (c >= 0x2F800 && c <= 0x2F800 + 0x021E); // CJK Compatibility Ideographs (0x2F800 - 0x2FA1D)
     }
 
-    USet *OpenPattern(const char16_t *pattern) noexcept
+    /// @brief Whether @p c is whitespace or a newline (kCFCharacterSetWhitespaceAndNewline).
+    KRYS_NODISCARD bool IsSmartReplaceWhitespace(char32 c) noexcept
     {
-      UErrorCode ec = U_ZERO_ERROR;
-      auto *set = uset_openPattern(reinterpret_cast<const UChar *>(pattern), -1, &ec);
-      krys_debug_assert(U_SUCCESS(ec));
-      return set;
-    }
-
-    // This is mostly a port of the CoreFoundation version except we use ICU instead of CoreFoundation
-    // character classes.
-    USet *GetSmartSet(bool isPreviousCharacter) noexcept
-    {
-      static USet *preSmartSet = nullptr;
-      static USet *postSmartSet = nullptr;
-      USet *smartSet = isPreviousCharacter ? preSmartSet : postSmartSet;
-      if (!smartSet)
-      {
-        // Whitespace and newline (kCFCharacterSetWhitespaceAndNewline)
-        smartSet = OpenPattern(u"[[:WSpace:] [\\u000A\\u000B\\u000C\\u000D\\u0085]]");
-
-        // CJK ranges
-        // FIXME: Looks like all these ranges include one extra character past the end.
-        uset_addRange(smartSet, 0x1100, 0x1100 + 256);    // Hangul Jamo (0x1100 - 0x11FF)
-        uset_addRange(smartSet, 0x2E80, 0x2E80 + 352);    // CJK & Kangxi Radicals (0x2E80 - 0x2FDF)
-        uset_addRange(smartSet, 0x2FF0, 0x2FF0 + 464);    // Ideograph Descriptions, CJK Symbols, Hiragana,
-                                                          // Katakana, Bopomofo, Hangul Compatibility Jamo,
-                                                          // Kanbun, & Bopomofo Ext (0x2FF0 - 0x31BF)
-        uset_addRange(smartSet, 0x3200, 0x3200 + 29'392); // Enclosed CJK, CJK Ideographs (Uni Han & Ext A), &
-                                                          // Yi (0x3200 - 0xA4CF)
-        uset_addRange(smartSet, 0xAC00, 0xAC00 + 11'183); // Hangul Syllables (0xAC00 - 0xD7AF)
-        uset_addRange(smartSet, 0xF900, 0xF900 + 352);    // CJK Compatibility Ideographs (0xF900 - 0xFA5F)
-        uset_addRange(smartSet, 0xFE30, 0xFE30 + 32);     // CJK Compatibility From (0xFE30 - 0xFE4F)
-        uset_addRange(smartSet, 0xFF00, 0xFF00 + 240);    // Half/Full Width Form (0xFF00 - 0xFFEF)
-        uset_addRange(smartSet, 0x20000, 0x20000 + 0xA6D7); // CJK Ideograph Exntension B
-        uset_addRange(smartSet, 0x2F800,
-                      0x2F800 + 0x021E); // CJK Compatibility Ideographs (0x2F800 - 0x2FA1D)
-
-        if (isPreviousCharacter)
-        {
-          AddAllCodePoints(smartSet, u8"([\"'#$/-`{");
-          preSmartSet = smartSet;
-        }
-        else
-        {
-          AddAllCodePoints(smartSet, u8")].,;:?'!\"%*-/}");
-
-          // Punctuation (kCFCharacterSetPunctuation)
-          auto *icuPunct = OpenPattern(u"[:P:]");
-          uset_addAll(smartSet, icuPunct);
-          uset_close(icuPunct);
-
-          postSmartSet = smartSet;
-        }
-      }
-      return smartSet;
+      return text::IsWhiteSpace(c) || c == 0x0A || c == 0x0B || c == 0x0C || c == 0x0D || c == 0x85;
     }
   }
 
+  // This is mostly a port of the CoreFoundation version, with Unicode properties for CoreFoundation's
+  // character classes.
   bool IsCharacterSmartReplaceExempt(char32 c, bool isPreviousCharacter) noexcept
   {
-    return uset_contains(GetSmartSet(isPreviousCharacter), static_cast<UChar32>(c));
+    if (IsSmartReplaceWhitespace(c) || IsSmartReplaceCJK(c))
+    {
+      return true;
+    }
+    if (isPreviousCharacter)
+    {
+      return c < 0x80
+             && utf8_stringview(u8"([\"'#$/-`{").find(static_cast<char8>(c)) != utf8_stringview::npos;
+    }
+    // Punctuation (kCFCharacterSetPunctuation).
+    return (c < 0x80
+            && utf8_stringview(u8")].,;:?'!\"%*-/}").find(static_cast<char8>(c)) != utf8_stringview::npos)
+           || text::IsPunctuation(c);
   }
 }

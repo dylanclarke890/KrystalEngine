@@ -2,8 +2,8 @@
 
 #include "Krystal.Core/Debug.hpp"
 #include "Krystal.Core/Macros.hpp"
+#include "Krystal.Core/Strings/String.hpp"
 #include "Krystal.Core/Time/MonotonicTime.hpp"
-#include "Krystal.Core/Types/String.hpp"
 
 namespace krys
 {

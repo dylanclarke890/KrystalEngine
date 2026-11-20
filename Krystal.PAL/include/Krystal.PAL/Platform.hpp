@@ -2,11 +2,11 @@
 
 #include "Krystal.Core/Attributes.hpp"
 #include "Krystal.Core/Numeric.hpp"
+#include "Krystal.Core/Strings/String.hpp"
 #include "Krystal.Core/Time/Duration.hpp"
 #include "Krystal.Core/Types/List.hpp"
 #include "Krystal.Core/Types/Maybe.hpp"
 #include "Krystal.Core/Types/Pair.hpp"
-#include "Krystal.Core/Types/String.hpp"
 #include "Krystal.Core/Utils/NativeHandle.hpp"
 #include "Krystal.PAL/Input/Pointer.hpp"
 

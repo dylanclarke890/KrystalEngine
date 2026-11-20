@@ -295,7 +295,7 @@ namespace krys::boo::style::interpolation
     {
       return std::visit(krys::CreateVisitor([]<Numeric T>(const T &) { return true; },
                                             [](const ImageWrapper &) { return false; }, [](const Color &)
-                                            { return true; }, [](const URL &) { return false; },
+                                            { return true; }, [](const Url &) { return false; },
                                             [](const css::CustomIdentifier &) { return false; },
                                             [](const CSSOMString &) { return false; },
                                             [](const TransformFunction &) { return true; }),

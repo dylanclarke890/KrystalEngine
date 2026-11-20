@@ -24,9 +24,9 @@
 #pragma once
 
 #include "Krystal.Booey/DOM/Events/UIEventWithKeyState.hpp"
-#include "Krystal.Booey/Graphics/Geometry/DoublePoint.hpp"
 #include "Krystal.Booey/Graphics/Geometry/LayoutPoint.hpp"
 #include "Krystal.Core/Attributes.hpp"
+#include "Krystal.Core/Geometry/Point.hpp"
 #include "Krystal.Core/Types/RefPtr.hpp"
 
 namespace krys::boo
@@ -49,13 +49,13 @@ namespace krys::boo
     RefPtr<LocalFrameView> _view;
     double _movementX {0};
     double _movementY {0};
-    DoublePoint _windowLocation;
-    DoublePoint _screenLocation;
-    DoublePoint _clientLocation;
-    DoublePoint _pageLocation;
-    DoublePoint _absoluteLocation;
+    PointD _windowLocation;
+    PointD _screenLocation;
+    PointD _clientLocation;
+    PointD _pageLocation;
+    PointD _absoluteLocation;
     mutable LayoutPoint _layerLocation;
-    mutable DoublePoint _offsetLocation;
+    mutable PointD _offsetLocation;
     /// @brief The target the relative position was computed for, if it's cached.
     mutable const EventTarget *_relativePositionTarget {nullptr};
     bool _isSimulated {false};
@@ -69,7 +69,7 @@ namespace krys::boo
     /// @see https://w3c.github.io/uievents/#dom-mouseevent-screeny
     KRYS_NODISCARD virtual double ScreenY() const noexcept;
 
-    KRYS_NODISCARD const DoublePoint &ScreenLocation() const noexcept
+    KRYS_NODISCARD const PointD &ScreenLocation() const noexcept
     {
       return _screenLocation;
     }
@@ -80,7 +80,7 @@ namespace krys::boo
     /// @see https://w3c.github.io/uievents/#dom-mouseevent-clienty
     KRYS_NODISCARD virtual double ClientY() const noexcept;
 
-    KRYS_NODISCARD const DoublePoint &ClientLocation() const noexcept
+    KRYS_NODISCARD const PointD &ClientLocation() const noexcept
     {
       return _clientLocation;
     }
@@ -97,7 +97,7 @@ namespace krys::boo
       return _movementY;
     }
 
-    KRYS_NODISCARD const DoublePoint &WindowLocation() const noexcept
+    KRYS_NODISCARD const PointD &WindowLocation() const noexcept
     {
       return _windowLocation;
     }
@@ -137,7 +137,7 @@ namespace krys::boo
       return ClientY();
     }
 
-    KRYS_NODISCARD const DoublePoint &AbsoluteLocation() const noexcept
+    KRYS_NODISCARD const PointD &AbsoluteLocation() const noexcept
     {
       return _absoluteLocation;
     }
@@ -147,17 +147,17 @@ namespace krys::boo
 
   protected:
     MouseRelatedEvent(DOMStringAtom type, const UIEventInit &eventInitDict, LocalFrameView *view,
-                      const DoublePoint &screenLocation, const DoublePoint &windowLocation, double movementX,
+                      const PointD &screenLocation, const PointD &windowLocation, double movementX,
                       double movementY, EnumSet<Modifier> modifiers, Simulated isSimulated) noexcept;
 
     MouseRelatedEvent(DOMStringAtom type, const MouseEventInit &initializer) noexcept;
 
-    void InitCoordinates(const DoublePoint &clientLocation) noexcept;
+    void InitCoordinates(const PointD &clientLocation) noexcept;
 
     /// @brief Makes the frame view the one of the event's view, after that changed.
     void UpdateFrameView() noexcept;
 
-    void SetScreenLocation(const DoublePoint &screenLocation) noexcept
+    void SetScreenLocation(const PointD &screenLocation) noexcept
     {
       _screenLocation = screenLocation;
     }
@@ -167,12 +167,12 @@ namespace krys::boo
       _isSimulated = value;
     }
 
-    KRYS_NODISCARD const DoublePoint &PageLocation() const noexcept
+    KRYS_NODISCARD const PointD &PageLocation() const noexcept
     {
       return _pageLocation;
     }
 
-    KRYS_NODISCARD const DoublePoint &OffsetLocation() const noexcept
+    KRYS_NODISCARD const PointD &OffsetLocation() const noexcept
     {
       return _offsetLocation;
     }
@@ -182,7 +182,7 @@ namespace krys::boo
     KRYS_NODISCARD bool HasCachedRelativePosition() const noexcept;
 
   private:
-    void Init(bool isSimulated, const DoublePoint &windowLocation) noexcept;
+    void Init(bool isSimulated, const PointD &windowLocation) noexcept;
 
     void InitCoordinates() noexcept;
 

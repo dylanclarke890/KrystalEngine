@@ -52,12 +52,13 @@ namespace krys::ui
       }
     };
 
-    KRYS_NODISCARD gfx::PixelRect2D ToPixelRect(const boo::IntRect &rect) noexcept
+    /// @brief @p rect with a negative width or height clamped to zero, as Render2D's regions are.
+    KRYS_NODISCARD RectI WithNonNegativeSize(RectI rect) noexcept
     {
-      return {.X = rect.X(),
-              .Y = rect.Y(),
-              .Width = static_cast<uint32>(std::max(rect.Width(), 0)),
-              .Height = static_cast<uint32>(std::max(rect.Height(), 0))};
+      auto size = rect.Size();
+      size.ClampNegativeToZero();
+      rect.SetSize(size);
+      return rect;
     }
 
     KRYS_NODISCARD gfx::FilterColourSpace2D
@@ -87,7 +88,7 @@ namespace krys::ui
                                              const boo::FilterImage &result) noexcept
     {
       return {.Type = kind,
-              .Region = ToPixelRect(result.AbsoluteImageRect()),
+              .Region = WithNonNegativeSize(result.AbsoluteImageRect()),
               .ColourSpace = ToColourSpace(result.ColorSpace())};
     }
 
@@ -201,7 +202,7 @@ namespace krys::ui
     }
     AddNode({.Type = gfx::FilterNode2D::Kind::Offset,
              .Inputs = {*input},
-             .Region = ToPixelRect(result.AbsoluteImageRect()),
+             .Region = WithNonNegativeSize(result.AbsoluteImageRect()),
              .ColourSpace = gfx::FilterColourSpace2D::SRGB});
     return true;
   }
@@ -214,13 +215,13 @@ namespace krys::ui
     }
     if (auto *buffer = image.GetImageBuffer())
     {
-      return SourceFor(*buffer, ToPixelRect(image.AbsoluteImageRect()));
+      return SourceFor(*buffer, WithNonNegativeSize(image.AbsoluteImageRect()));
     }
     return null;
   }
 
   Maybe<gfx::FilterInput2D> FilterGraph2DBuilder::SourceFor(boo::ImageBuffer &buffer,
-                                                            const gfx::PixelRect2D &region) noexcept
+                                                            const RectI &region) noexcept
   {
     const auto identifier = buffer.GetRenderingResourceIdentifier().ToUInt64();
     if (auto it = _sources.find(identifier); it != _sources.end())
@@ -507,7 +508,7 @@ namespace krys::ui
         auto tileRect = inputs[0]->MaxEffectRect(filter);
         tileRect.Scale(filter.FilterScale());
         node.Type = Kind::Tile;
-        node.TileRect = ToPixelRect(EnclosingIntRect(tileRect));
+        node.TileRect = WithNonNegativeSize(EnclosingRectI(tileRect));
         break;
       }
 
@@ -538,7 +539,7 @@ namespace krys::ui
         // The image drawn into a buffer over the result, as it's drawn in software.
         const auto &image = Downcast<boo::FEImage>(effect);
         const auto absoluteImageRect = result.AbsoluteImageRect();
-        auto buffer = boo::ImageBuffer::Create(boo::FloatSize(absoluteImageRect.Size()), 1);
+        auto buffer = boo::ImageBuffer::Create(SizeF(absoluteImageRect.Size()), 1);
         if (!buffer)
         {
           return false;
@@ -552,7 +553,7 @@ namespace krys::ui
           auto srcRect = image.SourceImageRect();
           image.PreserveAspectRatio().TransformRect(imageRect, srcRect);
           imageRect.Scale(filter.FilterScale());
-          imageRect = boo::FloatRect(boo::IntRect(imageRect) - absoluteImageRect.Location());
+          imageRect = RectF(RectI(imageRect) - absoluteImageRect.Location());
           context.DrawNativeImage(*nativeImage, imageRect, srcRect);
         }
         else if (auto *imageBuffer = sourceImage.ImageBufferIfExists())
@@ -560,7 +561,7 @@ namespace krys::ui
           auto imageRect = primitiveSubregion;
           imageRect.MoveBy(image.SourceImageRect().Location());
           imageRect.Scale(filter.FilterScale());
-          imageRect = boo::FloatRect(boo::IntRect(imageRect) - absoluteImageRect.Location());
+          imageRect = RectF(RectI(imageRect) - absoluteImageRect.Location());
           context.DrawImageBuffer(*imageBuffer, imageRect.Location());
         }
         else
@@ -569,7 +570,7 @@ namespace krys::ui
         }
 
         Ref<boo::ImageBuffer> drawn = ShareRef(*buffer);
-        auto source = SourceFor(*drawn, ToPixelRect(absoluteImageRect));
+        auto source = SourceFor(*drawn, WithNonNegativeSize(absoluteImageRect));
         _images.push_back(krys::move(drawn));
         if (!source)
         {

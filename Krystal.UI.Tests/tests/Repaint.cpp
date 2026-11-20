@@ -509,19 +509,19 @@ namespace krys::ui::tests
       }
 
       /// @brief The bounds of the view layer's repaints since the last reset, in the layer's coordinates.
-      KRYS_NODISCARD boo::FloatRect Bounds() const noexcept
+      KRYS_NODISCARD RectF Bounds() const noexcept
       {
         return Bounds(ViewLayer());
       }
 
       /// @brief The bounds of @p layer's repaints since the last reset, in its coordinates.
-      KRYS_NODISCARD static boo::FloatRect Bounds(boo::GraphicsLayer &layer) noexcept
+      KRYS_NODISCARD static RectF Bounds(boo::GraphicsLayer &layer) noexcept
       {
         auto text = layer.LayerTreeAsText({boo::LayerTreeAsTextOptions::IncludeRepaintRects,
                                            boo::LayerTreeAsTextOptions::IncludeRootLayerProperties});
         // Only the layer's own rects: its children's come after "(children".
         text = text.substr(0, text.find(u8"(children"));
-        boo::FloatRect bounds;
+        RectF bounds;
         for (size_t at = text.find(u8"(rect "); at != utf8_string::npos; at = text.find(u8"(rect ", at + 1))
         {
           float x = 0;
@@ -531,7 +531,7 @@ namespace krys::ui::tests
           std::istringstream rect(std::string(reinterpret_cast<const char *>(text.c_str()) + at + 6));
           rect >> x >> y >> width >> height;
           REQUIRE(rect);
-          bounds.Unite(boo::FloatRect(x, y, width, height));
+          bounds.Unite(RectF(x, y, width, height));
         }
         return bounds;
       }
@@ -648,14 +648,14 @@ namespace krys::ui::tests
       auto box = view.Document().GetElementById(u8"box");
       REQUIRE_FALSE(box->SetAttribute(u8"style", u8"background: green").HasException());
       CHECK(frame());
-      CHECK(repaints.Bounds() == boo::FloatRect(0, 0, 50, 50));
+      CHECK(repaints.Bounds() == RectF(0, 0, 50, 50));
     }
 
     SECTION("hovering")
     {
       view.MouseMoved({10, 10});
       CHECK(frame());
-      CHECK(repaints.Bounds() == boo::FloatRect(0, 0, 50, 50));
+      CHECK(repaints.Bounds() == RectF(0, 0, 50, 50));
     }
 
     SECTION("scrolling moves the layers and repaints nothing")
@@ -672,8 +672,8 @@ namespace krys::ui::tests
       CHECK(frame());
       auto bounds = repaints.Bounds();
       // The box before and after turning: about 28 pixels across, around its centre (110, 30).
-      CHECK(boo::FloatRect(94, 14, 32, 32).Contains(bounds));
-      CHECK(bounds.Contains(boo::FloatRect(100, 20, 20, 20)));
+      CHECK(RectF(94, 14, 32, 32).Contains(bounds));
+      CHECK(bounds.Contains(RectF(100, 20, 20, 20)));
     }
   }
 
@@ -1082,7 +1082,7 @@ namespace krys::ui::tests
     view.MousePressed({10, 14}, pal::MouseButton::Left);
     frame();
     // Down through the lines, then back up, each move repainting what the selection gained or lost.
-    const boo::IntPoint points[] = {{120, 14}, {60, 32}, {100, 60}, {40, 90}, {200, 90}, {80, 32}, {30, 14}};
+    const PointI points[] = {{120, 14}, {60, 32}, {100, 60}, {40, 90}, {200, 90}, {80, 32}, {30, 14}};
     int32 step = 0;
     for (const auto &point : points)
     {
@@ -1144,7 +1144,7 @@ namespace krys::ui::tests
     CheckNoStalePixels(fixture, view, "caret-placed");
 
     // Each blink repaints the caret's rect alone.
-    auto caret = boo::FloatRect(selection.AbsoluteCaretBounds());
+    auto caret = RectF(selection.AbsoluteCaretBounds());
     TrackedRepaints repaints(view);
     for (int32 blink = 1; blink <= 3; ++blink)
     {
@@ -1163,7 +1163,7 @@ namespace krys::ui::tests
     CHECK(view.KeyPressed(pal::Key::RightArrow, {}));
     frame(16ms);
     CHECK(repaints.Bounds().Width() > caret.Width() + 2);
-    CHECK(boo::FloatRect(selection.AbsoluteCaretBounds()).X() > caret.X());
+    CHECK(RectF(selection.AbsoluteCaretBounds()).X() > caret.X());
     CheckNoStalePixels(fixture, view, "caret-moved");
   }
 

@@ -25,7 +25,6 @@
 
 #pragma once
 
-#include "Krystal.Booey/Graphics/Geometry/IntSize.hpp"
 #include "Krystal.Booey/Layout/FormattingContexts/Inline/Display/InlineDisplayContent.hpp"
 #include "Krystal.Booey/Layout/FormattingContexts/Inline/InlineFormattingConstraints.hpp"
 #include "Krystal.Booey/Layout/FormattingContexts/Inline/InlineLineBox.hpp"
@@ -33,6 +32,7 @@
 #include "Krystal.Booey/Layout/FormattingContexts/Inline/LineLayoutResult.hpp"
 #include "Krystal.Booey/Text/WritingMode.hpp"
 #include "Krystal.Core/Attributes.hpp"
+#include "Krystal.Core/Geometry/Size.hpp"
 #include "Krystal.Core/Types/HashMap.hpp"
 #include "Krystal.Core/Types/List.hpp"
 
@@ -54,7 +54,7 @@ namespace krys::boo::layout
     const ConstraintsForInlineContent &_constraints;
     const LineBox &_lineBox;
     const inline_display::Line &_displayLine;
-    IntSize _initialContaingBlockSize;
+    SizeI _initialContaingBlockSize;
     // FIXME: This should take inline_display::Line::IsFullyTruncatedInBlockDirection() for non-prefixed
     // line-clamp.
     bool _lineIsFullyTruncatedInBlockDirection {false};

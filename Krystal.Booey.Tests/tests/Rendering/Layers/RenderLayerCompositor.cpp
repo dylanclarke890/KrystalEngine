@@ -10,7 +10,7 @@
 #include "Krystal.Booey/HTML/Canvas/EngineTextureRenderingContext.hpp"
 #include "Krystal.Booey/HTML/Elements/HTMLCanvasElement.hpp"
 #include "Krystal.Booey/HTML/EventLoop/EventLoop.hpp"
-#include "Krystal.Booey/Page/ChromeClient.hpp"
+#include "Krystal.Booey/Page/Clients/ChromeClient.hpp"
 #include "Krystal.Booey/Page/LocalFrame.hpp"
 #include "Krystal.Booey/Page/LocalFrameView.hpp"
 #include "Krystal.Booey/Page/Page.hpp"
@@ -39,8 +39,8 @@ namespace krys::boo::tests
     class CompositingTestLayer final : public GraphicsLayer
     {
     public:
-      List<FloatRect> NeedsDisplayRects;
-      List<FloatRect> ContentsNeedsDisplayRects;
+      List<RectF> NeedsDisplayRects;
+      List<RectF> ContentsNeedsDisplayRects;
       List<LayerAnimation> Animations;
       RefPtr<GraphicsLayerContentsDisplayDelegate> Delegate;
       ContentsLayerPurpose Purpose {ContentsLayerPurpose::None};
@@ -57,10 +57,10 @@ namespace krys::boo::tests
 
       void SetNeedsDisplay() noexcept final
       {
-        NeedsDisplayRects.emplace_back(FloatPoint(), Size());
+        NeedsDisplayRects.emplace_back(PointF(), Size());
       }
 
-      void SetNeedsDisplayInRect(const FloatRect &rect, ShouldClipToLayer) noexcept final
+      void SetNeedsDisplayInRect(const RectF &rect, ShouldClipToLayer) noexcept final
       {
         NeedsDisplayRects.push_back(rect);
       }
@@ -75,7 +75,7 @@ namespace krys::boo::tests
         ContentsNeedsDisplayRects.push_back(ContentsRect());
       }
 
-      void SetContentsNeedsDisplayInRect(const FloatRect &rect) noexcept final
+      void SetContentsNeedsDisplayInRect(const RectF &rect) noexcept final
       {
         ContentsNeedsDisplayRects.push_back(rect);
       }
@@ -401,7 +401,7 @@ namespace krys::boo::tests
     graphicsLayer.NeedsDisplayRects.clear();
     fixture.ById(u8"scroller").SetScrollTop(30);
     fixture.TestPage->UpdateRendering();
-    CHECK(backing.ScrollContainerLayer()->BoundsOrigin() == FloatPoint(0, 30));
+    CHECK(backing.ScrollContainerLayer()->BoundsOrigin() == PointF(0, 30));
     CHECK(contents.NeedsDisplayRects.empty());
     CHECK(graphicsLayer.NeedsDisplayRects.empty());
   }
@@ -478,7 +478,7 @@ namespace krys::boo::tests
       viewLayer.NeedsDisplayRects.clear();
       fixture.Frame->View()->SetScrollPosition({0, 50});
       fixture.TestPage->UpdateRendering();
-      CHECK(backing.ViewportAnchorLayer()->Position() == FloatPoint(0, 50));
+      CHECK(backing.ViewportAnchorLayer()->Position() == PointF(0, 50));
       CHECK(graphicsLayer.NeedsDisplayRects.empty());
       CHECK(viewLayer.NeedsDisplayRects.empty());
     }
@@ -575,7 +575,7 @@ namespace krys::boo::tests
     auto &graphicsLayer = fixture.GraphicsLayerOf(u8"canvas");
     CHECK(graphicsLayer.Delegate == texture->Delegate.get());
     CHECK(graphicsLayer.Purpose == GraphicsLayer::ContentsLayerPurpose::Canvas);
-    CHECK(graphicsLayer.ContentsRect() == FloatRect(0, 20, 80, 40));
+    CHECK(graphicsLayer.ContentsRect() == RectF(0, 20, 80, 40));
     CHECK_FALSE(graphicsLayer.DrawsContent());
     CHECK(graphicsLayer.ContentsMagnificationFilter() == GraphicsLayer::ScalingFilter::Linear);
 
@@ -583,7 +583,7 @@ namespace krys::boo::tests
     {
       graphicsLayer.NeedsDisplayRects.clear();
       graphicsLayer.ContentsNeedsDisplayRects.clear();
-      textureContext.TextureChanged(IntRect(10, 0, 20, 10));
+      textureContext.TextureChanged(RectI(10, 0, 20, 10));
       textureContext.TextureChanged();
       CHECK(graphicsLayer.ContentsNeedsDisplayRects.size() == 2);
       CHECK(graphicsLayer.NeedsDisplayRects.empty());
@@ -604,7 +604,7 @@ namespace krys::boo::tests
       REQUIRE_FALSE(canvas.SetAttribute(u8"style", u8"border:2px solid").HasException());
       fixture.TestPage->UpdateRendering();
       CHECK(fixture.GraphicsLayerOf(u8"canvas").DrawsContent());
-      CHECK(fixture.GraphicsLayerOf(u8"canvas").ContentsRect() == FloatRect(2, 2, 40, 20));
+      CHECK(fixture.GraphicsLayerOf(u8"canvas").ContentsRect() == RectF(2, 2, 40, 20));
     }
 
     SECTION("removing the texture removes the contents")

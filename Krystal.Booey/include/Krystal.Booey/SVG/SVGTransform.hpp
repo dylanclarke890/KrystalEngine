@@ -214,7 +214,7 @@ namespace krys::boo
 
   private:
     SVGTransform(SVGTransformValue::SVGTransformType type, const AffineTransform &transform = {},
-                 float angle = 0, const FloatPoint &rotationCenter = {}) noexcept
+                 float angle = 0, const PointF &rotationCenter = {}) noexcept
         : Base(SVGTransformValue(type, SVGMatrix::Create(this, SVGPropertyAccess::ReadWrite, transform),
                                  angle, rotationCenter))
     {

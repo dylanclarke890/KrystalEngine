@@ -198,18 +198,18 @@ namespace krys::boo::tests
 
     // The divisor defaults to the kernel's sum and the target to its centre.
     auto &sum = fixture.EffectAs<FEConvolveMatrix>(u8"sum");
-    CHECK(sum.KernelSize() == IntSize {3, 3});
+    CHECK(sum.KernelSize() == SizeI {3, 3});
     CHECK(sum.Divisor() == 16.f);
     CHECK(sum.Bias() == .5f);
-    CHECK(sum.TargetOffset() == IntPoint {1, 1});
+    CHECK(sum.TargetOffset() == PointI {1, 1});
     CHECK(sum.EdgeMode() == EdgeModeType::Duplicate);
-    CHECK(sum.KernelUnitLength() == FloatPoint {1, 1});
+    CHECK(sum.KernelUnitLength() == PointF {1, 1});
     CHECK(sum.PreserveAlpha());
 
     auto &sized = fixture.EffectAs<FEConvolveMatrix>(u8"sized");
-    CHECK(sized.KernelSize() == IntSize {2, 1});
+    CHECK(sized.KernelSize() == SizeI {2, 1});
     CHECK(sized.Divisor() == 2.f);
-    CHECK(sized.TargetOffset() == IntPoint {1, 0});
+    CHECK(sized.TargetOffset() == PointI {1, 0});
     CHECK(sized.EdgeMode() == EdgeModeType::None);
     CHECK(sized.Kernel() == List<float> {1, -1});
 
@@ -292,7 +292,7 @@ namespace krys::boo::tests
     CHECK(lit.DiffuseConstant() == 2.f);
     CHECK(lit.SurfaceScale() == 3.f);
     auto &spot = Downcast<SpotLightSource>(lit.GetLightSource());
-    CHECK(spot.Position() == FloatPoint3D {1, 2, 3});
+    CHECK(spot.Position() == Point3F {1, 2, 3});
     CHECK(spot.LimitingConeAngle() == 30.f);
 
     // Lighting needs a light source.

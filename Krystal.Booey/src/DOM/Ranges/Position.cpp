@@ -53,9 +53,9 @@
 #include "Krystal.Booey/Rendering/Style/RenderStyle+GettersInlines.hpp"
 #include "Krystal.Booey/SVG/Elements/SVGElement.hpp"
 #include "Krystal.Booey/SVG/Elements/SVGTextElement.hpp"
-#include "Krystal.Core/Text/ASCII.hpp"
+#include "Krystal.Core/Strings/ASCII.hpp"
+#include "Krystal.Core/Strings/CodePointIterator.hpp"
 #include <climits>
-#include <unicode/utf8.h>
 
 namespace krys::boo::dom
 {
@@ -123,11 +123,8 @@ namespace krys::boo::dom
       {
         return 0;
       }
-      int32 index = static_cast<int32>(offset);
-      UChar32 codePoint;
-      U8_NEXT(reinterpret_cast<const uint8_t *>(data.data()), index, static_cast<int32>(data.size()),
-              codePoint);
-      return codePoint < 0 ? 0 : static_cast<char32>(codePoint);
+      auto decoded = text::DecodeUTF8(Span<const char8>(data.data() + offset, data.size() - offset));
+      return decoded.IsValid ? decoded.CodePoint : 0;
     }
   }
 
@@ -1121,7 +1118,7 @@ namespace krys::boo::dom
         continue;
       }
 
-      auto boundingBoxLogicalHeight = [&](const IntRect &rect)
+      auto boundingBoxLogicalHeight = [&](const RectI &rect)
       {
         return isHorizontal ? rect.Height() : rect.Width();
       };
@@ -1541,7 +1538,7 @@ namespace krys::boo::dom
   }
 
   InlineBoxAndOffset Position::GetInlineBoxAndOffset(Affinity affinity,
-                                                     TextDirection primaryDirection) const noexcept
+                                                     text::TextDirection primaryDirection) const noexcept
   {
     auto caretOffset = static_cast<uint32>(DeprecatedEditingOffset());
 
@@ -1675,11 +1672,11 @@ namespace krys::boo::dom
     return {box, caretOffset};
   }
 
-  TextDirection Position::PrimaryDirection() const noexcept
+  text::TextDirection Position::PrimaryDirection() const noexcept
   {
     if (!_anchorNode || !_anchorNode->Renderer())
     {
-      return TextDirection::LTR;
+      return text::TextDirection::LTR;
     }
     for (auto *renderer = _anchorNode->Renderer(); renderer; renderer = renderer->Parent())
     {
@@ -1688,7 +1685,7 @@ namespace krys::boo::dom
         return blockFlow->Style().GetWritingMode().BidiDirection();
       }
     }
-    return TextDirection::LTR;
+    return text::TextDirection::LTR;
   }
 
   bool Position::Equals(const Position &other) const noexcept

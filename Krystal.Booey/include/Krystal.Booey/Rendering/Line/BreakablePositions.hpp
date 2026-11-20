@@ -21,16 +21,15 @@
 
 #pragma once
 
-#include "Krystal.Booey/Text/TextBreakIterator.hpp"
 #include "Krystal.Core/Attributes.hpp"
 #include "Krystal.Core/Numeric.hpp"
-#include "Krystal.Core/Text/ASCII.hpp"
-#include "Krystal.Core/Text/CodePointIterator.hpp"
-#include "Krystal.Core/Text/Unicode.hpp"
+#include "Krystal.Core/Strings/ASCII.hpp"
+#include "Krystal.Core/Strings/CodePointIterator.hpp"
+#include "Krystal.Core/Strings/String.hpp"
+#include "Krystal.Core/Strings/Unicode.hpp"
 #include "Krystal.Core/Types/Array.hpp"
 #include "Krystal.Core/Types/Maybe.hpp"
-#include "Krystal.Core/Types/String.hpp"
-#include <unicode/ubrk.h>
+#include "Krystal.Text/TextBreakIterator.hpp"
 
 namespace krys::boo
 {
@@ -62,25 +61,25 @@ namespace krys::boo
     BreakablePositions() = delete;
 
     template <LineBreakRules TRules, WordBreakBehavior TWords, NoBreakSpaceBehavior TSpaces>
-    KRYS_NODISCARD static inline uint32 Next(CachedLineBreakIteratorFactory &lineBreakIteratorFactory,
+    KRYS_NODISCARD static inline uint32 Next(text::CachedLineBreakIteratorFactory &lineBreakIteratorFactory,
                                              size_t startPosition) noexcept;
 
-    KRYS_NODISCARD static inline uint32 Next(CachedLineBreakIteratorFactory &iterator,
+    KRYS_NODISCARD static inline uint32 Next(text::CachedLineBreakIteratorFactory &iterator,
                                              size_t startPosition) noexcept
     {
       return Next<LineBreakRules::Normal, WordBreakBehavior::Normal, NoBreakSpaceBehavior::Normal>(
         iterator, startPosition);
     }
 
-    KRYS_NODISCARD static inline bool IsBreakable(CachedLineBreakIteratorFactory &lineBreakIteratorFactory,
-                                                  uint32 startPosition, Maybe<uint32> &nextBreakable,
-                                                  bool breakNBSP, bool canUseShortcut, bool keepAllWords,
-                                                  bool breakAnywhere) noexcept;
+    KRYS_NODISCARD static inline bool
+      IsBreakable(text::CachedLineBreakIteratorFactory &lineBreakIteratorFactory, uint32 startPosition,
+                  Maybe<uint32> &nextBreakable, bool breakNBSP, bool canUseShortcut, bool keepAllWords,
+                  bool breakAnywhere) noexcept;
 
   private:
     // Iterator implementations.
     template <LineBreakRules TRules, WordBreakBehavior TWords, NoBreakSpaceBehavior TSpaces>
-    KRYS_NODISCARD static inline size_t NextBreakablePosition(CachedLineBreakIteratorFactory &factory,
+    KRYS_NODISCARD static inline size_t NextBreakablePosition(text::CachedLineBreakIteratorFactory &factory,
                                                               utf8_stringview string,
                                                               size_t startPosition) noexcept;
 
@@ -89,7 +88,8 @@ namespace krys::boo
                                                            size_t startPosition) noexcept;
 
     KRYS_NODISCARD static inline uint32
-      NextCharacter(CachedLineBreakIteratorFactory &lineBreakIteratorFactory, uint32 startPosition) noexcept;
+      NextCharacter(text::CachedLineBreakIteratorFactory &lineBreakIteratorFactory,
+                    uint32 startPosition) noexcept;
 
     // Helper functions.
     enum BreakClass : uint16;
@@ -188,7 +188,7 @@ namespace krys::boo
 
   template <BreakablePositions::LineBreakRules TRules, BreakablePositions::WordBreakBehavior TWords,
             BreakablePositions::NoBreakSpaceBehavior TSpaces>
-  inline size_t BreakablePositions::NextBreakablePosition(CachedLineBreakIteratorFactory &factory,
+  inline size_t BreakablePositions::NextBreakablePosition(text::CachedLineBreakIteratorFactory &factory,
                                                           utf8_stringview string,
                                                           size_t startPosition) noexcept
   {
@@ -388,25 +388,22 @@ namespace krys::boo
     return string.size();
   }
 
-  inline uint32 BreakablePositions::NextCharacter(CachedLineBreakIteratorFactory &lineBreakIteratorFactory,
-                                                  uint32 startPosition) noexcept
+  inline uint32
+    BreakablePositions::NextCharacter(text::CachedLineBreakIteratorFactory &lineBreakIteratorFactory,
+                                      uint32 startPosition) noexcept
   {
     auto stringView = lineBreakIteratorFactory.StringView();
     krys_debug_assert(startPosition <= stringView.length());
     // FIXME: Can/Should we implement this using a Shared Iterator (performance issue)
     // https://bugs.webkit.org/show_bug.cgi?id=197876
-    NonSharedCharacterBreakIterator iterator(stringView);
-    auto next = ubrk_following(iterator, static_cast<int32_t>(startPosition));
-    if (next == UBRK_DONE)
-    {
-      return static_cast<uint32>(stringView.length());
-    }
-    return static_cast<uint32>(next);
+    text::NonSharedCharacterBreakIterator iterator(stringView);
+    return iterator.Following(static_cast<uint32>(startPosition))
+      .value_or(static_cast<uint32>(stringView.length()));
   }
 
   template <BreakablePositions::LineBreakRules TRules, BreakablePositions::WordBreakBehavior TWords,
             BreakablePositions::NoBreakSpaceBehavior TSpaces>
-  inline uint32 BreakablePositions::Next(CachedLineBreakIteratorFactory &lineBreakIteratorFactory,
+  inline uint32 BreakablePositions::Next(text::CachedLineBreakIteratorFactory &lineBreakIteratorFactory,
                                          size_t startPosition) noexcept
   {
     auto stringView = lineBreakIteratorFactory.StringView();
@@ -421,7 +418,7 @@ namespace krys::boo
     }
   }
 
-  inline bool BreakablePositions::IsBreakable(CachedLineBreakIteratorFactory &lineBreakIteratorFactory,
+  inline bool BreakablePositions::IsBreakable(text::CachedLineBreakIteratorFactory &lineBreakIteratorFactory,
                                               uint32 startPosition, Maybe<uint32> &nextBreakable,
                                               bool breakNBSP, bool canUseShortcut, bool keepAllWords,
                                               bool breakAnywhere) noexcept

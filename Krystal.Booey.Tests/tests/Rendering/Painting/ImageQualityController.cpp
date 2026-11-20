@@ -2,11 +2,11 @@
 #include "catch2/catch_test_macros.hpp"
 #include "Krystal.Booey.Tests/Loader/PageInFrameFixture.hpp"
 #include "Krystal.Booey.Tests/Loader/TestLoader.hpp"
-#include "Krystal.Booey.Tests/Platform/ImageDecoders/TestImages.hpp"
 #include "Krystal.Booey/Graphics/DisplayLists/DisplayListRecorderImpl.hpp"
 #include "Krystal.Booey/Loader/Cache/CachedImage.hpp"
 #include "Krystal.Booey/Rendering/Layers/RenderLayer.hpp"
 #include "Krystal.Booey/Rendering/Replaced/RenderImage.hpp"
+#include "Krystal.Image.Tests/TestImages.hpp"
 
 namespace krys::boo::tests
 {
@@ -27,7 +27,7 @@ namespace krys::boo::tests
   TEST_CASE("ImageQualityController: image-rendering chooses the interpolation", "[Rendering][ImageQuality]")
   {
     LoaderFixture loader;
-    loader.Strategy.Resources[u8"file:///a.png"] = images::PNG;
+    loader.Strategy.Resources[u8"file:///a.png"] = img::tests::images::PNG;
 
     PageInFrameFixture fixture(
       u8"<img id=auto src='file:///a.png'>"
@@ -38,7 +38,7 @@ namespace krys::boo::tests
     RunNetworkingTasks();
     (void)fixture.Document->UpdateLayout();
 
-    display_list::RecorderImpl recorder(FloatSize(200, 100));
+    display_list::RecorderImpl recorder(SizeF(200, 100));
     auto quality = [&](DOMStringView id)
     {
       auto *renderer = DynamicDowncast<RenderImage>(fixture.ById(id).Renderer());
@@ -67,7 +67,7 @@ namespace krys::boo::tests
   TEST_CASE("ImageQualityController: a bitmap image's opacity is an alpha", "[Rendering][ImageQuality]")
   {
     LoaderFixture loader;
-    loader.Strategy.Resources[u8"file:///a.png"] = images::PNG;
+    loader.Strategy.Resources[u8"file:///a.png"] = img::tests::images::PNG;
 
     PageInFrameFixture fixture(u8"<img id=faded src='file:///a.png' style='opacity:0.5'>"
                                u8"<img id=bordered src='file:///a.png' style='opacity:0.5;border:1px solid'>"

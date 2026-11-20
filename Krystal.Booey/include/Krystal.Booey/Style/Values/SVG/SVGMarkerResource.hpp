@@ -31,7 +31,7 @@ namespace krys::boo::style
   // <paint> = none | <url>
   // NOTE: `context-fill` and `context-stroke` are not implemented.
   // https://svgwg.org/svg2-draft/painting.html#SpecifyingPaint
-  struct SVGMarkerResource : css::ValueOrKeyword<URL, css::keywords::None>
+  struct SVGMarkerResource : css::ValueOrKeyword<Url, css::keywords::None>
   {
     using Base::Base;
 
@@ -40,12 +40,12 @@ namespace krys::boo::style
       return IsKeyword();
     }
 
-    KRYS_NODISCARD bool IsURL() const noexcept
+    KRYS_NODISCARD bool IsUrl() const noexcept
     {
       return IsValue();
     }
 
-    KRYS_NODISCARD Maybe<URL> TryURL() const noexcept
+    KRYS_NODISCARD Maybe<Url> TryUrl() const noexcept
     {
       return TryValue();
     }

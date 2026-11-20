@@ -49,16 +49,16 @@
 #include "Krystal.Booey/HTML/Elements/HTMLSummaryElement.hpp"
 #include "Krystal.Booey/HTML/MicroParsers/Numbers.hpp"
 #include "Krystal.Booey/Infra/Namespaces.hpp"
-#include "Krystal.Booey/Page/EditorClient.hpp"
-#include "Krystal.Booey/Page/EventHandler.hpp"
+#include "Krystal.Booey/Input/EventHandler.hpp"
+#include "Krystal.Booey/Input/SpatialNavigation.hpp"
+#include "Krystal.Booey/Page/Clients/EditorClient.hpp"
 #include "Krystal.Booey/Page/LocalDOMWindow.hpp"
 #include "Krystal.Booey/Page/LocalFrame.hpp"
 #include "Krystal.Booey/Page/LocalFrameView.hpp"
 #include "Krystal.Booey/Page/Page.hpp"
-#include "Krystal.Booey/Page/SpatialNavigation.hpp"
 #include "Krystal.Booey/Rendering/HitTesting/HitTestResult.hpp"
 #include "Krystal.Booey/Rendering/Style/RenderStyle+GettersInlines.hpp"
-#include "Krystal.Core/Text/ASCII.hpp"
+#include "Krystal.Core/Strings/ASCII.hpp"
 #include "Krystal.Core/Types/HashMap.hpp"
 #include <algorithm>
 #include <limits>
@@ -1301,7 +1301,7 @@ namespace krys::boo::html
       if (!intersectionRect.IsEmpty() && !AreElementsOnSameLine(closest, candidate))
       {
         // If 2 nodes are intersecting, do hit test to find which node in on top.
-        auto center = FlooredIntPoint(intersectionRect.Center()); // FIXME: Would roundedIntPoint be better?
+        auto center = FlooredPointI(intersectionRect.Center()); // FIXME: Would roundedPointI be better?
         constexpr EnumSet<HitTestRequest::Type> hitType {
           HitTestRequest::Type::ReadOnly, HitTestRequest::Type::Active, HitTestRequest::Type::IgnoreClipping,
           HitTestRequest::Type::DisallowUserAgentShadowContent, HitTestRequest::Type::AllowChildFrameContent};

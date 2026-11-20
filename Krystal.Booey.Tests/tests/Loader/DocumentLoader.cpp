@@ -36,7 +36,7 @@ namespace krys::boo::tests
     auto &loader = fixture.Frame().Loader();
 
     CHECK(loader.IsDisplayingInitialEmptyDocument());
-    CHECK(fixture.Document().GetURL().String() == u8"about:blank");
+    CHECK(fixture.Document().GetUrl().String() == u8"about:blank");
     CHECK(fixture.Document().Window() != nullptr);
     CHECK(fixture.Document().DocumentElement() != nullptr);
     // An HTML document in quirks mode, with a head and a body, that's completely loaded and fully active.
@@ -64,9 +64,9 @@ namespace krys::boo::tests
     html::EventLoop::Current().RunUntilIdle();
     RefPtr<LocalDOMWindow> firstWindow = ShareRefPtr(fixture.Document().Window());
 
-    fixture.LoadURL(u8"about:blank");
+    fixture.LoadUrl(u8"about:blank");
     html::EventLoop::Current().RunUntilIdle();
-    CHECK(fixture.Document().GetURL().String() == u8"about:blank");
+    CHECK(fixture.Document().GetUrl().String() == u8"about:blank");
     CHECK_FALSE(fixture.Frame().Loader().IsDisplayingInitialEmptyDocument());
     REQUIRE(fixture.Document().DocumentElement());
     CHECK(fixture.Document().Head());
@@ -83,7 +83,7 @@ namespace krys::boo::tests
                              u8"text/javascript");
     LoadFixture fixture;
     fixture.Strategy.AddText(u8"https://example.com/notes", u8"<b>bold</b>\n& more", mimeType);
-    fixture.LoadURL(u8"https://example.com/notes");
+    fixture.LoadUrl(u8"https://example.com/notes");
     html::EventLoop::Current().RunUntilIdle();
 
     auto body = fixture.Document().Body();
@@ -114,7 +114,7 @@ namespace krys::boo::tests
     html::EventLoop::Current().RunUntilIdle();
     CHECK_FALSE(loader.IsLoading());
     CHECK(&fixture.Document() != initial.get());
-    CHECK(fixture.Document().GetURL().String() == u8"https://example.com/page.html");
+    CHECK(fixture.Document().GetUrl().String() == u8"https://example.com/page.html");
     CHECK(fixture.Document().GetElementById(u8"text"));
     CHECK(fixture.Document().Window() != initialWindow);
     CHECK_FALSE(loader.IsDisplayingInitialEmptyDocument());
@@ -145,15 +145,15 @@ namespace krys::boo::tests
 
     SECTION("the strategy's")
     {
-      fixture.LoadURL(u8"https://example.com/served.html");
+      fixture.LoadUrl(u8"https://example.com/served.html");
       html::EventLoop::Current().RunUntilIdle();
       CHECK(fixture.Document().GetElementById(u8"served"));
-      CHECK(fixture.Document().GetURL().String() == u8"https://example.com/served.html");
+      CHECK(fixture.Document().GetUrl().String() == u8"https://example.com/served.html");
     }
 
     SECTION("a data: URL's")
     {
-      fixture.LoadURL(u8"data:text/html,<p id=data>Data</p>");
+      fixture.LoadUrl(u8"data:text/html,<p id=data>Data</p>");
       html::EventLoop::Current().RunUntilIdle();
       CHECK(fixture.Document().GetElementById(u8"data"));
     }
@@ -161,7 +161,7 @@ namespace krys::boo::tests
     SECTION("a failure keeps the old document")
     {
       RefPtr<boo::Document> before = ShareRefPtr(&fixture.Document());
-      fixture.LoadURL(u8"https://example.com/missing.html");
+      fixture.LoadUrl(u8"https://example.com/missing.html");
       html::EventLoop::Current().RunUntilIdle();
       CHECK(&fixture.Document() == before.get());
       CHECK_FALSE(fixture.Frame().Loader().IsLoading());
@@ -179,7 +179,7 @@ namespace krys::boo::tests
 
     SECTION("a stopped load's data is dropped")
     {
-      fixture.LoadURL(u8"https://example.com/a.html");
+      fixture.LoadUrl(u8"https://example.com/a.html");
       fixture.Frame().Loader().StopAllLoaders();
       CHECK_FALSE(fixture.Frame().Loader().IsLoading());
       fixture.Strategy.CompleteDeferred();
@@ -190,8 +190,8 @@ namespace krys::boo::tests
 
     SECTION("a new load replaces a provisional one")
     {
-      fixture.LoadURL(u8"https://example.com/a.html");
-      fixture.LoadURL(u8"https://example.com/b.html");
+      fixture.LoadUrl(u8"https://example.com/a.html");
+      fixture.LoadUrl(u8"https://example.com/b.html");
       fixture.Strategy.CompleteDeferred();
       html::EventLoop::Current().RunUntilIdle();
       CHECK(fixture.Document().GetElementById(u8"b"));
@@ -217,7 +217,7 @@ namespace krys::boo::tests
     CHECK_FALSE(fixture.Document().GetElementById(u8"next"));
     CHECK(fixture.Events == List<std::string> {"navigation to https://example.com/next.html"});
 
-    fixture.LoadURL(u8"https://example.com/next.html");
+    fixture.LoadUrl(u8"https://example.com/next.html");
     html::EventLoop::Current().RunUntilIdle();
     CHECK(fixture.Document().GetElementById(u8"next"));
   }
@@ -227,7 +227,7 @@ namespace krys::boo::tests
     LoadFixture fixture;
     DocumentWriter writer;
     writer.SetFrame(fixture.Frame());
-    REQUIRE(writer.Begin(url::URL(u8"about:blank")));
+    REQUIRE(writer.Begin(net::Url(u8"about:blank")));
 
     // A byte order mark, then é split between two chunks, then an invalid byte.
     const uint8 first[] = {0xEF, 0xBB, 0xBF, '<', 'p', ' ', 'i', 'd', '=', 't', '>', 0xC3};
@@ -249,7 +249,7 @@ namespace krys::boo::tests
     REQUIRE(view);
     DocumentWriter writer;
     writer.SetFrame(fixture.Frame());
-    REQUIRE(writer.Begin(url::URL(u8"about:blank")));
+    REQUIRE(writer.Begin(net::Url(u8"about:blank")));
     CHECK(view->ScrollbarsSuppressed());
 
     SECTION("a tall page is laid out with its vertical scrollbar from the start")
@@ -408,7 +408,7 @@ namespace krys::boo::tests
     // Navigating from the events does nothing.
     auto tryToNavigate = [&]
     {
-      fixture.Frame().Loader().ChangeLocation(url::URL(u8"https://example.com/elsewhere.html"),
+      fixture.Frame().Loader().ChangeLocation(net::Url(u8"https://example.com/elsewhere.html"),
                                               DOMStringAtom::Empty(), nullptr, ReferrerPolicy::EmptyString,
                                               null);
     };
@@ -447,7 +447,7 @@ namespace krys::boo::tests
     CHECK(events.empty());
     html::EventLoop::Current().RunUntilIdle();
     CHECK(events == List<std::string> {"pagehide", "visibilitychange", "unload"});
-    CHECK(fixture.Document().GetURL().String() == u8"https://example.com/second.html");
+    CHECK(fixture.Document().GetUrl().String() == u8"https://example.com/second.html");
     CHECK(first->VisibilityState() == html::DocumentVisibilityState::Hidden);
     CHECK(fixture.Document().VisibilityState() == html::DocumentVisibilityState::Visible);
 
@@ -518,14 +518,14 @@ namespace krys::boo::tests
       return utf8_string(text.begin(), text.end());
     };
 
-    fixture.LoadURL(u8"https://example.com/dated.html");
+    fixture.LoadUrl(u8"https://example.com/dated.html");
     RunNetworkingTasks();
     CHECK(fixture.Document().LastModified() == localText(sys_days(1'994y / November / 6) + 8h + 49min + 37s));
 
     // Without a valid date, it's the current time.
     for (auto url : {u8"https://example.com/undated.html", u8"https://example.com/misdated.html"})
     {
-      fixture.LoadURL(url);
+      fixture.LoadUrl(url);
       RunNetworkingTasks();
       auto before = floor<seconds>(system_clock::now());
       auto value = fixture.Document().LastModified();
@@ -543,7 +543,7 @@ namespace krys::boo::tests
       auto url = utf8_string(u8"https://example.com/") + utf8_string(name);
       fixture.Strategy.AddText(url, markup, u8"text/html");
       fixture.Strategy.Headers[url] = {{u8"Content-Language", utf8_string(header)}};
-      fixture.LoadURL(url);
+      fixture.LoadUrl(url);
       RunNetworkingTasks();
       return fixture.Document().GetElementById(u8"p");
     };

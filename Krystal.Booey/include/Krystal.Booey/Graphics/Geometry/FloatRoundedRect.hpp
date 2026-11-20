@@ -29,11 +29,11 @@
 
 #pragma once
 
-#include "Krystal.Booey/Graphics/Geometry/FloatRect.hpp"
-#include "Krystal.Booey/Graphics/Geometry/FloatSize.hpp"
 #include "Krystal.Booey/Graphics/Geometry/LayoutRoundedRect.hpp"
-#include "Krystal.Booey/Graphics/Geometry/Region.hpp"
 #include "Krystal.Core/Assert.hpp"
+#include "Krystal.Core/Geometry/Rect.hpp"
+#include "Krystal.Core/Geometry/Region.hpp"
+#include "Krystal.Core/Geometry/Size.hpp"
 #include <algorithm>
 
 namespace krys
@@ -53,16 +53,16 @@ namespace krys::boo
     class Radii
     {
     private:
-      FloatSize _topLeft;
-      FloatSize _topRight;
-      FloatSize _bottomLeft;
-      FloatSize _bottomRight;
+      SizeF _topLeft;
+      SizeF _topRight;
+      SizeF _bottomLeft;
+      SizeF _bottomRight;
 
     public:
       Radii() noexcept = default;
 
-      Radii(const FloatSize &topLeft, const FloatSize &topRight, const FloatSize &bottomLeft,
-            const FloatSize &bottomRight) noexcept
+      Radii(const SizeF &topLeft, const SizeF &topRight, const SizeF &bottomLeft,
+            const SizeF &bottomRight) noexcept
           : _topLeft(topLeft), _topRight(topRight), _bottomLeft(bottomLeft), _bottomRight(bottomRight)
       {
       }
@@ -87,42 +87,42 @@ namespace krys::boo
       {
       }
 
-      void SetTopLeft(const FloatSize &size) noexcept
+      void SetTopLeft(const SizeF &size) noexcept
       {
         _topLeft = size;
       }
 
-      void SetTopRight(const FloatSize &size) noexcept
+      void SetTopRight(const SizeF &size) noexcept
       {
         _topRight = size;
       }
 
-      void SetBottomLeft(const FloatSize &size) noexcept
+      void SetBottomLeft(const SizeF &size) noexcept
       {
         _bottomLeft = size;
       }
 
-      void SetBottomRight(const FloatSize &size) noexcept
+      void SetBottomRight(const SizeF &size) noexcept
       {
         _bottomRight = size;
       }
 
-      KRYS_NODISCARD const FloatSize &TopLeft() const noexcept
+      KRYS_NODISCARD const SizeF &TopLeft() const noexcept
       {
         return _topLeft;
       }
 
-      KRYS_NODISCARD const FloatSize &TopRight() const noexcept
+      KRYS_NODISCARD const SizeF &TopRight() const noexcept
       {
         return _topRight;
       }
 
-      KRYS_NODISCARD const FloatSize &BottomLeft() const noexcept
+      KRYS_NODISCARD const SizeF &BottomLeft() const noexcept
       {
         return _bottomLeft;
       }
 
-      KRYS_NODISCARD const FloatSize &BottomRight() const noexcept
+      KRYS_NODISCARD const SizeF &BottomRight() const noexcept
       {
         return _bottomRight;
       }
@@ -160,20 +160,20 @@ namespace krys::boo
     };
 
   private:
-    FloatRect _rect;
+    RectF _rect;
     Radii _radii;
 
   public:
-    explicit FloatRoundedRect(const FloatRect & = FloatRect(), const Radii & = Radii()) noexcept;
+    explicit FloatRoundedRect(const RectF & = RectF(), const Radii & = Radii()) noexcept;
 
-    FloatRoundedRect(const FloatRect &, const FloatSize &topLeft, const FloatSize &topRight,
-                     const FloatSize &bottomLeft, const FloatSize &bottomRight) noexcept;
+    FloatRoundedRect(const RectF &, const SizeF &topLeft, const SizeF &topRight, const SizeF &bottomLeft,
+                     const SizeF &bottomRight) noexcept;
 
     explicit FloatRoundedRect(const LayoutRoundedRect &) noexcept;
 
     FloatRoundedRect(float x, float y, float width, float height) noexcept;
 
-    KRYS_NODISCARD const FloatRect &Rect() const noexcept
+    KRYS_NODISCARD const RectF &Rect() const noexcept
     {
       return _rect;
     }
@@ -193,12 +193,12 @@ namespace krys::boo
       return _rect.IsEmpty();
     }
 
-    void SetRect(const FloatRect &rect) noexcept
+    void SetRect(const RectF &rect) noexcept
     {
       _rect = rect;
     }
 
-    void SetLocation(FloatPoint location) noexcept
+    void SetLocation(PointF location) noexcept
     {
       _rect.SetLocation(location);
     }
@@ -208,7 +208,7 @@ namespace krys::boo
       _radii = radii;
     }
 
-    void Move(const FloatSize &size) noexcept
+    void Move(const SizeF &size) noexcept
     {
       _rect.Move(size);
     }
@@ -232,35 +232,34 @@ namespace krys::boo
 
     void AdjustRadii() noexcept;
 
-    KRYS_NODISCARD FloatRect TopLeftCorner() const noexcept
+    KRYS_NODISCARD RectF TopLeftCorner() const noexcept
     {
-      return FloatRect(_rect.X(), _rect.Y(), _radii.TopLeft().Width(), _radii.TopLeft().Height());
+      return RectF(_rect.X(), _rect.Y(), _radii.TopLeft().Width(), _radii.TopLeft().Height());
     }
 
-    KRYS_NODISCARD FloatRect TopRightCorner() const noexcept
+    KRYS_NODISCARD RectF TopRightCorner() const noexcept
     {
-      return FloatRect(_rect.MaxX() - _radii.TopRight().Width(), _rect.Y(), _radii.TopRight().Width(),
-                       _radii.TopRight().Height());
+      return RectF(_rect.MaxX() - _radii.TopRight().Width(), _rect.Y(), _radii.TopRight().Width(),
+                   _radii.TopRight().Height());
     }
 
-    KRYS_NODISCARD FloatRect BottomLeftCorner() const noexcept
+    KRYS_NODISCARD RectF BottomLeftCorner() const noexcept
     {
-      return FloatRect(_rect.X(), _rect.MaxY() - _radii.BottomLeft().Height(), _radii.BottomLeft().Width(),
-                       _radii.BottomLeft().Height());
+      return RectF(_rect.X(), _rect.MaxY() - _radii.BottomLeft().Height(), _radii.BottomLeft().Width(),
+                   _radii.BottomLeft().Height());
     }
 
-    KRYS_NODISCARD FloatRect BottomRightCorner() const noexcept
+    KRYS_NODISCARD RectF BottomRightCorner() const noexcept
     {
-      return FloatRect(_rect.MaxX() - _radii.BottomRight().Width(),
-                       _rect.MaxY() - _radii.BottomRight().Height(), _radii.BottomRight().Width(),
-                       _radii.BottomRight().Height());
+      return RectF(_rect.MaxX() - _radii.BottomRight().Width(), _rect.MaxY() - _radii.BottomRight().Height(),
+                   _radii.BottomRight().Width(), _radii.BottomRight().Height());
     }
 
     KRYS_NODISCARD bool IsRenderable() const noexcept;
 
     KRYS_NODISCARD bool XInterceptsAtY(float y, float &minXIntercept, float &maxXIntercept) const noexcept;
 
-    KRYS_NODISCARD bool IntersectionIsRectangular(const FloatRect &) const noexcept;
+    KRYS_NODISCARD bool IntersectionIsRectangular(const RectF &) const noexcept;
 
     /// @brief The rounded rect as a path.
     KRYS_NODISCARD Path GetPath() const noexcept;
@@ -268,7 +267,7 @@ namespace krys::boo
     KRYS_NODISCARD bool operator==(const FloatRoundedRect &) const noexcept = default;
   };
 
-  KRYS_NODISCARD inline float CalcBorderRadiiConstraintScaleFor(const FloatRect &rect,
+  KRYS_NODISCARD inline float CalcBorderRadiiConstraintScaleFor(const RectF &rect,
                                                                 const FloatRoundedRect::Radii &radii) noexcept
   {
     // Constrain corner radii using CSS3 rules:

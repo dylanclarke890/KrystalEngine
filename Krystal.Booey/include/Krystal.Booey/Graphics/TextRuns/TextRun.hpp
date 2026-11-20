@@ -29,8 +29,8 @@
 #include "Krystal.Booey/Text/WritingMode.hpp"
 #include "Krystal.Core/Assert.hpp"
 #include "Krystal.Core/Attributes.hpp"
-#include "Krystal.Core/Text/CodePointIterator.hpp"
-#include "Krystal.Core/Types/String.hpp"
+#include "Krystal.Core/Strings/CodePointIterator.hpp"
+#include "Krystal.Core/Strings/String.hpp"
 
 namespace krys::boo
 {
@@ -52,7 +52,7 @@ namespace krys::boo
     ExpansionBehavior _expansionBehavior;
     text_spacing::SpacingState _textSpacingState;
     bool _allowTabs : 1 {false};
-    TextDirection _direction : 1 {TextDirection::LTR};
+    text::TextDirection _direction : 1 {text::TextDirection::LTR};
     bool _directionalOverride : 1 {false}; // Was this direction set by an override character.
     bool _characterScanForCodePath : 1 {true};
     bool _disableSpacing : 1 {false};
@@ -60,8 +60,8 @@ namespace krys::boo
   public:
     explicit TextRun(utf8_stringview text, float xpos = 0, float expansion = 0,
                      ExpansionBehavior expansionBehavior = ExpansionBehavior::DefaultBehavior(),
-                     TextDirection direction = TextDirection::LTR, bool directionalOverride = false,
-                     bool characterScanForCodePath = true) noexcept
+                     text::TextDirection direction = text::TextDirection::LTR,
+                     bool directionalOverride = false, bool characterScanForCodePath = true) noexcept
         : _text(text), _xpos(xpos), _expansion(expansion), _expansionBehavior(expansionBehavior),
           _direction(direction), _directionalOverride(directionalOverride),
           _characterScanForCodePath(characterScanForCodePath)
@@ -146,19 +146,19 @@ namespace krys::boo
       return _expansionBehavior;
     }
 
-    KRYS_NODISCARD TextDirection Direction() const noexcept
+    KRYS_NODISCARD text::TextDirection Direction() const noexcept
     {
       return _direction;
     }
 
     KRYS_NODISCARD bool Rtl() const noexcept
     {
-      return _direction == TextDirection::RTL;
+      return _direction == text::TextDirection::RTL;
     }
 
     KRYS_NODISCARD bool Ltr() const noexcept
     {
-      return _direction == TextDirection::LTR;
+      return _direction == text::TextDirection::LTR;
     }
 
     KRYS_NODISCARD bool DirectionalOverride() const noexcept
@@ -181,7 +181,7 @@ namespace krys::boo
       _disableSpacing = true;
     }
 
-    void SetDirection(TextDirection direction) noexcept
+    void SetDirection(text::TextDirection direction) noexcept
     {
       _direction = direction;
     }

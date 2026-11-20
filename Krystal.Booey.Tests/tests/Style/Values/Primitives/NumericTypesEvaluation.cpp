@@ -49,17 +49,17 @@ namespace krys::boo::style::tests
   {
     const LengthPercentageSpaceSeparatedPointAll point {LengthPercentage<> {Length<> {5.0f}},
                                                         LengthPercentage<> {PercentageFloat {50.0f}}};
-    CHECK(Evaluate<FloatPoint>(point, FloatSize {100.0f, 40.0f}, ZoomNeeded {}) == FloatPoint {5.0f, 20.0f});
+    CHECK(Evaluate<PointF>(point, SizeF {100.0f, 40.0f}, ZoomNeeded {}) == PointF {5.0f, 20.0f});
     CHECK(Evaluate<LayoutPoint>(point, LayoutSize {100, 40}, ZoomNeeded {}) == LayoutPoint {5, 20});
 
     const LengthPercentageSpaceSeparatedSizeAll size {LengthPercentage<> {PercentageFloat {25.0f}},
                                                       LengthPercentage<> {Length<> {3.0f}}};
-    CHECK(Evaluate<FloatSize>(size, FloatSize {100.0f, 40.0f}, ZoomNeeded {}) == FloatSize {25.0f, 3.0f});
+    CHECK(Evaluate<SizeF>(size, SizeF {100.0f, 40.0f}, ZoomNeeded {}) == SizeF {25.0f, 3.0f});
     CHECK(Evaluate<LayoutSize>(size, LayoutSize {100, 40}, ZoomNeeded {}) == LayoutSize {25, 3});
 
     const LengthPercentageMinimallySerialisingSpaceSeparatedSizeAll minimal {
       LengthPercentage<> {PercentageFloat {25.0f}}, LengthPercentage<> {PercentageFloat {25.0f}}};
-    CHECK(Evaluate<FloatSize>(minimal, FloatSize {100.0f, 40.0f}, ZoomNeeded {}) == FloatSize {25.0f, 10.0f});
+    CHECK(Evaluate<SizeF>(minimal, SizeF {100.0f, 40.0f}, ZoomNeeded {}) == SizeF {25.0f, 10.0f});
   }
 
   TEST_CASE("Style evaluation: reflection", "[Style][NumericTypesEvaluation]")

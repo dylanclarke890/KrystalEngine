@@ -20,7 +20,6 @@
  */
 
 #include "Krystal.Booey/SVG/Elements/SVGGraphicsElement.hpp"
-#include "Krystal.Booey/Graphics/Transforms/TransformationMatrix.hpp"
 #include "Krystal.Booey/Rendering/RenderElement.hpp"
 #include "Krystal.Booey/Rendering/Style/RenderStyle.hpp"
 #include "Krystal.Booey/Rendering/SVG/Legacy/LegacyRenderSVGPath.hpp"
@@ -31,6 +30,7 @@
 #include "Krystal.Booey/SVG/SVGMatrix.hpp"
 #include "Krystal.Booey/SVG/SVGNames.hpp"
 #include "Krystal.Booey/SVG/SVGRect.hpp"
+#include "Krystal.Core/Geometry/TransformationMatrix.hpp"
 
 namespace krys::boo
 {
@@ -165,7 +165,7 @@ namespace krys::boo
     return SVGRect::Create(GetBBox());
   }
 
-  FloatRect SVGGraphicsElement::GetBBox(StyleUpdateStrategy styleUpdateStrategy) noexcept
+  RectF SVGGraphicsElement::GetBBox(StyleUpdateStrategy styleUpdateStrategy) noexcept
   {
     return SVGTransformable::GetBBox(this, styleUpdateStrategy);
   }

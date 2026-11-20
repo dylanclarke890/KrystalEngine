@@ -89,9 +89,9 @@ namespace krys::boo::css
     return size;
   }
 
-  StyleSheetContents::StyleSheetContents(ImportRule *ownerRule, CSSOMString originalURL,
+  StyleSheetContents::StyleSheetContents(ImportRule *ownerRule, CSSOMString originalUrl,
                                          ParserContext context) noexcept
-      : _ownerRule(ownerRule), _originalURL(krys::move(originalURL)), _defaultNamespace(dom::StarAtom()),
+      : _ownerRule(ownerRule), _originalUrl(krys::move(originalUrl)), _defaultNamespace(dom::StarAtom()),
         _isUserStyleSheet(ownerRule && ownerRule->ParentStyleSheet()
                           && ownerRule->ParentStyleSheet()->IsUserStyleSheet()),
         _parserContext(krys::move(context))
@@ -100,7 +100,7 @@ namespace krys::boo::css
 
   // NOLINTNEXTLINE(bugprone-copy-constructor-init): a copy starts with its own reference and weak counts.
   StyleSheetContents::StyleSheetContents(const StyleSheetContents &other) noexcept
-      : _originalURL(other._originalURL), _encodingFromCharsetRule(other._encodingFromCharsetRule),
+      : _originalUrl(other._originalUrl), _encodingFromCharsetRule(other._encodingFromCharsetRule),
         _namespaces(other._namespaces), _defaultNamespace(other._defaultNamespace),
         _isUserStyleSheet(other._isUserStyleSheet), _loadCompleted(true),
         _hasSyntacticallyValidCSSHeader(other._hasSyntacticallyValidCSSHeader),
@@ -142,16 +142,16 @@ namespace krys::boo::css
     return AdoptRef(*new StyleSheetContents(nullptr, CSSOMString(), context));
   }
 
-  Ref<StyleSheetContents> StyleSheetContents::Create(const CSSOMString &originalURL,
+  Ref<StyleSheetContents> StyleSheetContents::Create(const CSSOMString &originalUrl,
                                                      const ParserContext &context) noexcept
   {
-    return AdoptRef(*new StyleSheetContents(nullptr, originalURL, context));
+    return AdoptRef(*new StyleSheetContents(nullptr, originalUrl, context));
   }
 
-  Ref<StyleSheetContents> StyleSheetContents::Create(ImportRule *ownerRule, const CSSOMString &originalURL,
+  Ref<StyleSheetContents> StyleSheetContents::Create(ImportRule *ownerRule, const CSSOMString &originalUrl,
                                                      const ParserContext &context) noexcept
   {
-    return AdoptRef(*new StyleSheetContents(ownerRule, originalURL, context));
+    return AdoptRef(*new StyleSheetContents(ownerRule, originalUrl, context));
   }
 
   Ref<StyleSheetContents> StyleSheetContents::Copy() const noexcept
@@ -197,13 +197,13 @@ namespace krys::boo::css
     return true;
   }
 
-  bool StyleSheetContents::IsCacheableWithNoBaseURLDependency() const noexcept
+  bool StyleSheetContents::IsCacheableWithNoBaseUrlDependency() const noexcept
   {
     if (!IsCacheable())
     {
       return false;
     }
-    if (MayDependOnBaseURL())
+    if (MayDependOnBaseUrl())
     {
       return false;
     }
@@ -529,17 +529,17 @@ namespace krys::boo::css
   bool StyleSheetContents::ParseAuthorStyleSheet(const CachedCSSStyleSheet *cachedStyleSheet) noexcept
   {
     // Always strict about the sheet's type, in quirks mode too (see DIFFERENCES.md).
-    auto mimeTypeCheckHint = CachedCSSStyleSheet::MIMETypeCheckHint::Strict;
-    bool hasValidMIMEType = true;
-    bool hasHTTPStatusOK = true;
-    auto sheetText = cachedStyleSheet->SheetText(mimeTypeCheckHint, &hasValidMIMEType, &hasHTTPStatusOK);
+    auto mimeTypeCheckHint = CachedCSSStyleSheet::MimeTypeCheckHint::Strict;
+    bool hasValidMimeType = true;
+    bool hasHttpStatusOK = true;
+    auto sheetText = cachedStyleSheet->SheetText(mimeTypeCheckHint, &hasValidMimeType, &hasHttpStatusOK);
 
-    if (!hasHTTPStatusOK)
+    if (!hasHttpStatusOK)
     {
       krys_debug_assert(!sheetText);
       return false;
     }
-    if (!hasValidMIMEType)
+    if (!hasValidMimeType)
     {
       krys_debug_assert(!sheetText);
       return false;
@@ -738,7 +738,7 @@ namespace krys::boo::css
       });
   }
 
-  bool StyleSheetContents::MayDependOnBaseURL() const noexcept
+  bool StyleSheetContents::MayDependOnBaseUrl() const noexcept
   {
     return TraverseRules(
       [&](const Rule &rule) -> bool
@@ -749,11 +749,11 @@ namespace krys::boo::css
           case RuleType::StyleWithNesting:
           case RuleType::NestedDeclarations:
           {
-            return Downcast<StyleRule>(rule).Properties().MayDependOnBaseURL();
+            return Downcast<StyleRule>(rule).Properties().MayDependOnBaseUrl();
           }
           case RuleType::FontFace:
           {
-            return Downcast<FontFaceRule>(rule).Properties().MayDependOnBaseURL();
+            return Downcast<FontFaceRule>(rule).Properties().MayDependOnBaseUrl();
           }
           case RuleType::Import:
           case RuleType::CounterStyle:

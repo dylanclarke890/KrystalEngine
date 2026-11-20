@@ -37,7 +37,7 @@ namespace krys::boo
 
   void RenderSelectionGeometryBase::RepaintRectangle(const LayoutRect &repaintRect) noexcept
   {
-    _renderer.RepaintUsingContainer(_repaintContainer, LayoutRect(EnclosingIntRect(repaintRect)));
+    _renderer.RepaintUsingContainer(_repaintContainer, LayoutRect(EnclosingRectI(repaintRect)));
   }
 
   RenderSelectionGeometry::RenderSelectionGeometry(RenderObject &renderer, bool clipToVisibleContent) noexcept

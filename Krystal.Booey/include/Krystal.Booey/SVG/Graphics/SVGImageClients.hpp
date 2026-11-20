@@ -29,7 +29,7 @@
 #pragma once
 
 #include "Krystal.Booey/Graphics/Images/ImageObserver.hpp"
-#include "Krystal.Booey/Page/ChromeClient.hpp"
+#include "Krystal.Booey/Page/Clients/ChromeClient.hpp"
 #include "Krystal.Booey/SVG/Graphics/SVGImage.hpp"
 #include "Krystal.Core/Types/WeakPtr.hpp"
 
@@ -89,7 +89,7 @@ namespace krys::boo
       }
     }
 
-    void InvalidateContentsAndRootView(const IntRect &rect) noexcept final
+    void InvalidateContentsAndRootView(const RectI &rect) noexcept final
     {
       RefPtr<SVGImage> image = ProtectedImage();
       if (!image)

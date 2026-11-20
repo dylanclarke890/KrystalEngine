@@ -136,7 +136,7 @@ namespace krys::boo
     return !StdDeviationX() && !StdDeviationY();
   }
 
-  IntOutsets SVGFEGaussianBlurElement::Outsets(const FloatRect &targetBoundingBox,
+  IntOutsets SVGFEGaussianBlurElement::Outsets(const RectF &targetBoundingBox,
                                                SVGUnitTypes::SVGUnitType primitiveUnits) const noexcept
   {
     auto stdDeviation = SVGFilterRenderer::CalculateResolvedSize({StdDeviationX(), StdDeviationY()},

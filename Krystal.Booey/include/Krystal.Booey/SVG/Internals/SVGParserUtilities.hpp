@@ -22,10 +22,10 @@
 #pragma once
 
 #include "Krystal.Booey/DOM/Types/DOMString.hpp"
-#include "Krystal.Booey/Graphics/Geometry/FloatPoint.hpp"
-#include "Krystal.Booey/Graphics/Geometry/FloatRect.hpp"
 #include "Krystal.Core/Attributes.hpp"
-#include "Krystal.Core/Text/ASCII.hpp"
+#include "Krystal.Core/Geometry/Point.hpp"
+#include "Krystal.Core/Geometry/Rect.hpp"
+#include "Krystal.Core/Strings/ASCII.hpp"
 #include "Krystal.Core/Types/Maybe.hpp"
 #include <utility>
 
@@ -58,11 +58,11 @@ namespace krys::boo::svg
 
   KRYS_NODISCARD Maybe<bool> ParseArcFlag(DOMStringView &buffer) noexcept;
 
-  KRYS_NODISCARD Maybe<FloatPoint> ParsePoint(DOMStringView string) noexcept;
+  KRYS_NODISCARD Maybe<PointF> ParsePoint(DOMStringView string) noexcept;
 
-  KRYS_NODISCARD Maybe<FloatRect> ParseRect(DOMStringView string) noexcept;
+  KRYS_NODISCARD Maybe<RectF> ParseRect(DOMStringView string) noexcept;
 
-  KRYS_NODISCARD Maybe<FloatPoint> ParseFloatPoint(DOMStringView &buffer) noexcept;
+  KRYS_NODISCARD Maybe<PointF> ParsePointF(DOMStringView &buffer) noexcept;
 
   template <typename TChar>
   KRYS_NODISCARD constexpr bool IsSVGSpaceOrComma(TChar c) noexcept

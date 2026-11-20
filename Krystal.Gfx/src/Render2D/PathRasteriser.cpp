@@ -13,8 +13,8 @@ namespace krys::gfx
     }
   }
 
-  CoverageMask PathRasteriser::Rasterise(const Path2D &path, const Transform2D &transform, FillRule rule,
-                                         const PixelRect2D &clip) noexcept
+  CoverageMask PathRasteriser::Rasterise(const Path2D &path, const AffineTransform &transform, FillRule rule,
+                                         const RectI &clip) noexcept
   {
     _edges.clear();
     if (clip.IsEmpty() || !BuildEdges(path, transform) || _edges.empty())
@@ -34,23 +34,18 @@ namespace krys::gfx
       minY = std::min(minY, edge.Y0);
       maxY = std::max(maxY, edge.Y1);
     }
-    const auto left = std::max(static_cast<int32>(std::floor(minX)), clip.X);
-    const auto top = std::max(static_cast<int32>(std::floor(minY)), clip.Y);
-    const auto right = std::min(static_cast<int32>(std::ceil(maxX)), clip.X + static_cast<int32>(clip.Width));
-    const auto bottom =
-      std::min(static_cast<int32>(std::ceil(maxY)), clip.Y + static_cast<int32>(clip.Height));
+    const auto left = std::max(static_cast<int32>(std::floor(minX)), clip.X());
+    const auto top = std::max(static_cast<int32>(std::floor(minY)), clip.Y());
+    const auto right = std::min(static_cast<int32>(std::ceil(maxX)), clip.MaxX());
+    const auto bottom = std::min(static_cast<int32>(std::ceil(maxY)), clip.MaxY());
     if (right <= left || bottom <= top)
     {
       return {};
     }
 
-    CoverageMask mask {.Bounds = {.X = left,
-                                  .Y = top,
-                                  .Width = static_cast<uint32>(right - left),
-                                  .Height = static_cast<uint32>(bottom - top)},
-                       .Coverage = {}};
-    mask.Coverage.assign(static_cast<size_t>(mask.Bounds.Width) * mask.Bounds.Height, uint8 {0});
-    _row.assign(mask.Bounds.Width, 0.f);
+    CoverageMask mask {.Bounds = {left, top, right - left, bottom - top}, .Coverage = {}};
+    mask.Coverage.assign(static_cast<size_t>(mask.Bounds.Width()) * mask.Bounds.Height(), uint8 {0});
+    _row.assign(mask.Bounds.Width(), 0.f);
 
     std::sort(_edges.begin(), _edges.end(), [](const Edge &a, const Edge &b) { return a.Y0 < b.Y0; });
     _active.clear();
@@ -107,8 +102,8 @@ namespace krys::gfx
         }
       }
 
-      auto *coverage = mask.Coverage.data() + static_cast<size_t>(y - top) * mask.Bounds.Width;
-      for (uint32 x = 0u; x < mask.Bounds.Width; ++x)
+      auto *coverage = mask.Coverage.data() + static_cast<size_t>(y - top) * mask.Bounds.Width();
+      for (uint32 x = 0u; x < static_cast<uint32>(mask.Bounds.Width()); ++x)
       {
         // NOLINTNEXTLINE(bugprone-incorrect-roundings): never negative.
         coverage[x] = static_cast<uint8>(std::clamp(_row[x], 0.f, 1.f) * 255.f + 0.5f);
@@ -118,7 +113,7 @@ namespace krys::gfx
     return mask;
   }
 
-  bool PathRasteriser::BuildEdges(const Path2D &path, const Transform2D &transform) noexcept
+  bool PathRasteriser::BuildEdges(const Path2D &path, const AffineTransform &transform) noexcept
   {
     const auto points = path.Points();
     size_t next = 0u;
@@ -142,7 +137,7 @@ namespace krys::gfx
         case PathVerb::MoveTo:
         {
           closeContour();
-          const auto point = transform.Apply(points[next++]);
+          const auto point = MapPoint(transform, points[next++]);
           if (!IsFinite(point))
           {
             return false;
@@ -154,7 +149,7 @@ namespace krys::gfx
         }
         case PathVerb::LineTo:
         {
-          const auto point = transform.Apply(points[next++]);
+          const auto point = MapPoint(transform, points[next++]);
           if (!IsFinite(point))
           {
             return false;
@@ -165,8 +160,8 @@ namespace krys::gfx
         }
         case PathVerb::QuadTo:
         {
-          const auto control = transform.Apply(points[next++]);
-          const auto end = transform.Apply(points[next++]);
+          const auto control = MapPoint(transform, points[next++]);
+          const auto end = MapPoint(transform, points[next++]);
           if (!IsFinite(control) || !IsFinite(end))
           {
             return false;
@@ -177,9 +172,9 @@ namespace krys::gfx
         }
         case PathVerb::CubicTo:
         {
-          const auto control1 = transform.Apply(points[next++]);
-          const auto control2 = transform.Apply(points[next++]);
-          const auto end = transform.Apply(points[next++]);
+          const auto control1 = MapPoint(transform, points[next++]);
+          const auto control2 = MapPoint(transform, points[next++]);
+          const auto end = MapPoint(transform, points[next++]);
           if (!IsFinite(control1) || !IsFinite(control2) || !IsFinite(end))
           {
             return false;

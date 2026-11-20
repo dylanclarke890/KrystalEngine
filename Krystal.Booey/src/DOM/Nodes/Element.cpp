@@ -55,6 +55,7 @@
 #include "Krystal.Booey/DOM/Internals/IdTargetObserverRegistry.hpp"
 #include "Krystal.Booey/DOM/Internals/PopoverData.hpp"
 #include "Krystal.Booey/DOM/Internals/UserActionElementSet.hpp"
+#include "Krystal.Booey/DOM/IntersectionObservers/IntersectionObserver.hpp"
 #include "Krystal.Booey/DOM/Iterators/ComposedTreeIterator.hpp"
 #include "Krystal.Booey/DOM/Mixins/ChildNode.hpp"
 #include "Krystal.Booey/DOM/Mixins/NonDocumentTypeChildNode.hpp"
@@ -69,10 +70,10 @@
 #include "Krystal.Booey/DOM/Nodes/StyledElement.hpp"
 #include "Krystal.Booey/DOM/Nodes/Text.hpp"
 #include "Krystal.Booey/DOM/Nodes/TextDirectionState.hpp"
+#include "Krystal.Booey/DOM/ResizeObservers/ResizeObserver.hpp"
 #include "Krystal.Booey/Editing/Editing.hpp"
 #include "Krystal.Booey/Editing/Markup/Markup.hpp"
 #include "Krystal.Booey/Editing/Selection/FrameSelection.hpp"
-#include "Krystal.Booey/Graphics/Geometry/FloatQuad.hpp"
 #include "Krystal.Booey/HTML/Algorithms/FocusAlgorithms.hpp"
 #include "Krystal.Booey/HTML/Algorithms/HTMLInsertionAlgorithms.hpp"
 #include "Krystal.Booey/HTML/CustomElement/CustomElement.hpp"
@@ -91,17 +92,15 @@
 #include "Krystal.Booey/HTML/EventLoop/EventLoop.hpp"
 #include "Krystal.Booey/Infra/Namespaces.hpp"
 #include "Krystal.Booey/Infra/StringAlgorithms.hpp"
-#include "Krystal.Booey/Page/EventHandler.hpp"
-#include "Krystal.Booey/Page/IntersectionObserver/IntersectionObserver.hpp"
+#include "Krystal.Booey/Input/EventHandler.hpp"
+#include "Krystal.Booey/Input/PlatformMouseEvent.hpp"
+#include "Krystal.Booey/Input/PointerCaptureController.hpp"
+#include "Krystal.Booey/Input/PointerLockController.hpp"
 #include "Krystal.Booey/Page/LocalDOMWindow.hpp"
 #include "Krystal.Booey/Page/LocalFrame.hpp"
 #include "Krystal.Booey/Page/LocalFrameView.hpp"
 #include "Krystal.Booey/Page/Page.hpp"
-#include "Krystal.Booey/Page/PointerCaptureController.hpp"
-#include "Krystal.Booey/Page/PointerLockController.hpp"
-#include "Krystal.Booey/Page/ResizeObserver/ResizeObserver.hpp"
-#include "Krystal.Booey/Page/ScrollBehavior.hpp"
-#include "Krystal.Booey/Platform/Events/PlatformMouseEvent.hpp"
+#include "Krystal.Booey/Page/Scrolling/ScrollBehavior.hpp"
 #include "Krystal.Booey/Platform/Scrolling/ScrollableArea.hpp"
 #include "Krystal.Booey/Platform/Scrolling/ScrollAlignment.hpp"
 #include "Krystal.Booey/Rendering/FormControls/RenderListBox.hpp"
@@ -125,7 +124,8 @@
 #include "Krystal.Booey/Style/TreeResolver.hpp"
 #include "Krystal.Booey/Style/Values/Primitives/NumericTypesEvaluation.hpp"
 #include "Krystal.Booey/SVG/Elements/SVGElement.hpp"
-#include "Krystal.Core/Text/ASCII.hpp"
+#include "Krystal.Core/Geometry/Quad.hpp"
+#include "Krystal.Core/Strings/ASCII.hpp"
 #include "Krystal.Core/Utils/Move.hpp"
 #include <ranges>
 
@@ -816,12 +816,12 @@ namespace krys::boo
     }
   }
 
-  Maybe<DOMString> Element::ImageSourceURL() const noexcept
+  Maybe<DOMString> Element::ImageSourceUrl() const noexcept
   {
     return GetAttribute(u8"src");
   }
 
-  url::URL Element::AbsoluteLinkURL() const noexcept
+  net::Url Element::AbsoluteLinkUrl() const noexcept
   {
     if (!css::IsLink(*this))
     {
@@ -847,7 +847,7 @@ namespace krys::boo
       return {};
     }
 
-    return NodeDocument().CompleteURL(*linkAttribute);
+    return NodeDocument().CompleteUrl(*linkAttribute);
   }
 
   RenderElement *Element::Renderer() const noexcept
@@ -884,12 +884,12 @@ namespace krys::boo
     return GetElementRareData() ? GetElementRareData()->AfterPseudoElement() : nullptr;
   }
 
-  IntPoint Element::SavedLayerScrollPosition() const noexcept
+  PointI Element::SavedLayerScrollPosition() const noexcept
   {
-    return GetElementRareData() ? GetElementRareData()->SavedLayerScrollPosition() : IntPoint();
+    return GetElementRareData() ? GetElementRareData()->SavedLayerScrollPosition() : PointI();
   }
 
-  void Element::SetSavedLayerScrollPosition(const IntPoint &position) noexcept
+  void Element::SetSavedLayerScrollPosition(const PointI &position) noexcept
   {
     if (position.IsZero() && !GetElementRareData())
     {
@@ -2333,7 +2333,7 @@ namespace krys::boo
     return ShareRef(attr);
   }
 
-  boo::Locale &Element::GetLocale() const noexcept
+  i18n::Locale &Element::GetLocale() const noexcept
   {
     return NodeDocument().GetCachedLocale(css::EffectiveLang(*this));
   }
@@ -2675,7 +2675,7 @@ namespace krys::boo
   DOMString Element::GetHTML(dom::GetHTMLOptions options) const noexcept
   {
     return SerializeFragment(*this, SerializedNodes::SubtreesOfChildren, nullptr,
-                             ResolveURLs::NoExcludingURLsForPrivacy, SerializationSyntax::HTML,
+                             ResolveUrls::NoExcludingUrlsForPrivacy, SerializationSyntax::HTML,
                              options.SerializableShadowRoots ? SerializeShadowRoots::Serializable
                                                              : SerializeShadowRoots::Explicit,
                              krys::move(options.ShadowRoots));
@@ -4069,7 +4069,7 @@ namespace krys::boo
 
     auto *renderer = Renderer();
 
-    List<FloatQuad> quads;
+    List<QuadF> quads;
 
     if (auto *svgElement = ElementWithSVGLayoutBox(*this))
     {
@@ -4081,7 +4081,7 @@ namespace krys::boo
     else if (auto listBoxItem = ListBoxElementBoundingBox(*this))
     {
       renderer = listBoxItem->first;
-      quads.push_back(renderer->LocalToAbsoluteQuad(FloatQuad(FloatRect(listBoxItem->second))));
+      quads.push_back(renderer->LocalToAbsoluteQuad(QuadF(RectF(listBoxItem->second))));
     }
     else if (ShouldObtainBoundsFromBoxModel(*this))
     {
@@ -4099,10 +4099,10 @@ namespace krys::boo
     return dom::DOMRectList::Create(quads);
   }
 
-  Maybe<Pair<RenderElement *, FloatRect>> Element::BoundingAbsoluteRectWithoutLayout() const noexcept
+  Maybe<Pair<RenderElement *, RectF>> Element::BoundingAbsoluteRectWithoutLayout() const noexcept
   {
     auto *renderer = Renderer();
-    List<FloatQuad> quads;
+    List<QuadF> quads;
     if (auto *svgElement = ElementWithSVGLayoutBox(*this))
     {
       if (auto localRect = svgElement->GetBoundingBox())
@@ -4113,7 +4113,7 @@ namespace krys::boo
     else if (auto listBoxItem = ListBoxElementBoundingBox(*this))
     {
       renderer = listBoxItem->first;
-      quads.push_back(renderer->LocalToAbsoluteQuad(FloatQuad(FloatRect(listBoxItem->second))));
+      quads.push_back(renderer->LocalToAbsoluteQuad(QuadF(RectF(listBoxItem->second))));
     }
     else if (ShouldObtainBoundsFromBoxModel(*this))
     {
@@ -4127,7 +4127,7 @@ namespace krys::boo
 
     // The union of the rects that have an area, or else the first.
     // https://drafts.csswg.org/cssom-view/#dom-element-getboundingclientrect
-    FloatRect bounds;
+    RectF bounds;
     bool hasArea = false;
     for (const auto &quad : quads)
     {
@@ -4146,10 +4146,10 @@ namespace krys::boo
         hasArea = true;
       }
     }
-    return Pair<RenderElement *, FloatRect> {renderer, hasArea ? bounds : quads.front().BoundingBox()};
+    return Pair<RenderElement *, RectF> {renderer, hasArea ? bounds : quads.front().BoundingBox()};
   }
 
-  FloatRect Element::BoundingClientRect() noexcept
+  RectF Element::BoundingClientRect() noexcept
   {
     auto &document = NodeDocument();
     document.UpdateLayoutIgnorePendingStylesheets({dom::LayoutOptions::TreatContentVisibilityHiddenAsVisible,
@@ -4166,7 +4166,7 @@ namespace krys::boo
     return result;
   }
 
-  IntRect Element::ScreenRect() const noexcept
+  RectI Element::ScreenRect() const noexcept
   {
     auto *renderer = Renderer();
     auto *view = NodeDocument().View();
@@ -4368,8 +4368,8 @@ namespace krys::boo
     auto scrollToOptions = NormalizeNonFiniteCoordinatesOrFallBackTo(
       options, AdjustForAbsoluteZoom(renderer->ScrollLeft(), renderer->Style()),
       AdjustForAbsoluteZoom(renderer->ScrollTop(), renderer->Style()));
-    IntPoint scrollPosition(ClampToInteger(*scrollToOptions.Left * renderer->Style().UsedZoom()),
-                            ClampToInteger(*scrollToOptions.Top * renderer->Style().UsedZoom()));
+    PointI scrollPosition(ClampToInteger(*scrollToOptions.Left * renderer->Style().UsedZoom()),
+                          ClampToInteger(*scrollToOptions.Top * renderer->Style().UsedZoom()));
 
     auto animated = UseSmoothScrolling(scrollToOptions.Behavior.value_or(ScrollBehavior::Auto), this)
                       ? ScrollIsAnimated::Yes
@@ -4710,8 +4710,8 @@ namespace krys::boo
     {
       if (auto *frame = DocumentFrameWithNonNullView(document))
       {
-        IntPoint position(static_cast<int32>(newLeft * frame->PageZoomFactor() * frame->FrameScaleFactor()),
-                          frame->View()->ScrollY());
+        PointI position(static_cast<int32>(newLeft * frame->PageZoomFactor() * frame->FrameScaleFactor()),
+                        frame->View()->ScrollY());
         frame->View()->SetScrollPosition(position, options);
       }
       return;
@@ -4742,8 +4742,8 @@ namespace krys::boo
     {
       if (auto *frame = DocumentFrameWithNonNullView(document))
       {
-        IntPoint position(frame->View()->ScrollX(),
-                          static_cast<int32>(newTop * frame->PageZoomFactor() * frame->FrameScaleFactor()));
+        PointI position(frame->View()->ScrollX(),
+                        static_cast<int32>(newTop * frame->PageZoomFactor() * frame->FrameScaleFactor()));
         frame->View()->SetScrollPosition(position, options);
       }
       return;

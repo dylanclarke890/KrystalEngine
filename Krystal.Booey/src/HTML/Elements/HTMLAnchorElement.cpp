@@ -35,7 +35,7 @@
 #include "Krystal.Booey/HTML/CustomElement/CustomElementReactionQueue.hpp"
 #include "Krystal.Booey/Page/Settings.hpp"
 
-#include "Krystal.Core/Text/ASCII.hpp"
+#include "Krystal.Core/Strings/ASCII.hpp"
 
 namespace krys::boo
 {
@@ -240,12 +240,12 @@ namespace krys::boo
 
   dom::USVString HTMLAnchorElement::Href() const noexcept
   {
-    return html::ReflectURL<dom::USVString>(*this, u8"href");
+    return html::ReflectUrl<dom::USVString>(*this, u8"href");
   }
 
   void HTMLAnchorElement::Href(dom::USVString value) noexcept
   {
-    html::ReflectURL<dom::USVString>(*this, u8"href", krys::move(value));
+    html::ReflectUrl<dom::USVString>(*this, u8"href", krys::move(value));
   }
 
   dom::USVString HTMLAnchorElement::ToString() const noexcept
@@ -253,12 +253,12 @@ namespace krys::boo
     return Href();
   }
 
-  url::URL HTMLAnchorElement::FullURL() const noexcept
+  net::Url HTMLAnchorElement::FullUrl() const noexcept
   {
     return html::HyperlinkAlgorithms::Href(*this);
   }
 
-  void HTMLAnchorElement::SetFullURL(const url::URL &url) noexcept
+  void HTMLAnchorElement::SetFullUrl(const net::Url &url) noexcept
   {
     html::CEReactionsScope ceReactions;
     html::HyperlinkAlgorithms::SetHref(*this, url);

@@ -65,7 +65,7 @@ namespace krys::boo
     if (defaultArea)
     {
       result.SetInnerNode(defaultArea);
-      result.SetURLElement(defaultArea);
+      result.SetUrlElement(defaultArea);
     }
     return defaultArea;
   }

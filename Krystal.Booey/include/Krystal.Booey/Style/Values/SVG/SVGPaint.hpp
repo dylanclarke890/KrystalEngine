@@ -34,20 +34,20 @@ namespace krys::boo::style
   // https://svgwg.org/svg2-draft/painting.html#SpecifyingPaint
   struct SVGPaint
   {
-    struct URLNone
+    struct UrlNone
     {
-      URL Url;
+      style::Url Url;
       css::keywords::None None;
 
-      KRYS_NODISCARD bool operator==(const URLNone &) const noexcept = default;
+      KRYS_NODISCARD bool operator==(const UrlNone &) const noexcept = default;
     };
 
-    struct URLColor
+    struct UrlColor
     {
-      URL Url;
+      style::Url Url;
       style::Color Color;
 
-      KRYS_NODISCARD bool operator==(const URLColor &) const noexcept = default;
+      KRYS_NODISCARD bool operator==(const UrlColor &) const noexcept = default;
     };
 
     SVGPaint(css::keywords::None) noexcept : _type {Type::None}
@@ -58,16 +58,16 @@ namespace krys::boo::style
     {
     }
 
-    SVGPaint(URL &&value) noexcept : _type {Type::URL}, _url {krys::move(value)}
+    SVGPaint(Url &&value) noexcept : _type {Type::Url}, _url {krys::move(value)}
     {
     }
 
-    SVGPaint(URLNone &&value) noexcept : _type {Type::URLNone}, _url {krys::move(value.Url)}
+    SVGPaint(UrlNone &&value) noexcept : _type {Type::UrlNone}, _url {krys::move(value.Url)}
     {
     }
 
-    SVGPaint(URLColor &&value) noexcept
-        : _type {Type::URLColor}, _url {krys::move(value.Url)}, _color {krys::move(value.Color)}
+    SVGPaint(UrlColor &&value) noexcept
+        : _type {Type::UrlColor}, _url {krys::move(value.Url)}, _color {krys::move(value.Color)}
     {
     }
 
@@ -98,29 +98,29 @@ namespace krys::boo::style
       return _type == Type::Color;
     }
 
-    KRYS_NODISCARD bool IsURL() const noexcept
+    KRYS_NODISCARD bool IsUrl() const noexcept
     {
-      return _type == Type::URL;
+      return _type == Type::Url;
     }
 
-    KRYS_NODISCARD bool IsURLNone() const noexcept
+    KRYS_NODISCARD bool IsUrlNone() const noexcept
     {
-      return _type == Type::URLNone;
+      return _type == Type::UrlNone;
     }
 
-    KRYS_NODISCARD bool IsURLColor() const noexcept
+    KRYS_NODISCARD bool IsUrlColor() const noexcept
     {
-      return _type == Type::URLColor;
+      return _type == Type::UrlColor;
     }
 
     KRYS_NODISCARD bool HasColor() const noexcept
     {
-      return IsColor() || IsURLColor();
+      return IsColor() || IsUrlColor();
     }
 
-    KRYS_NODISCARD bool HasURL() const noexcept
+    KRYS_NODISCARD bool HasUrl() const noexcept
     {
-      return IsURL() || IsURLNone() || IsURLColor();
+      return IsUrl() || IsUrlNone() || IsUrlColor();
     }
 
     KRYS_NODISCARD Maybe<Color> TryColor() const noexcept
@@ -128,19 +128,19 @@ namespace krys::boo::style
       return IsColor() ? Maybe(_color) : std::nullopt;
     }
 
-    KRYS_NODISCARD Maybe<URL> TryURL() const noexcept
+    KRYS_NODISCARD Maybe<Url> TryUrl() const noexcept
     {
-      return IsURL() ? Maybe(_url) : std::nullopt;
+      return IsUrl() ? Maybe(_url) : std::nullopt;
     }
 
-    KRYS_NODISCARD Maybe<URLNone> TryURLNone() const noexcept
+    KRYS_NODISCARD Maybe<UrlNone> TryUrlNone() const noexcept
     {
-      return IsURLNone() ? Maybe(URLNone {_url, css::keywords::None {}}) : std::nullopt;
+      return IsUrlNone() ? Maybe(UrlNone {_url, css::keywords::None {}}) : std::nullopt;
     }
 
-    KRYS_NODISCARD Maybe<URLColor> TryURLColor() const noexcept
+    KRYS_NODISCARD Maybe<UrlColor> TryUrlColor() const noexcept
     {
-      return IsURLColor() ? Maybe(URLColor {_url, _color}) : std::nullopt;
+      return IsUrlColor() ? Maybe(UrlColor {_url, _color}) : std::nullopt;
     }
 
     KRYS_NODISCARD Maybe<Color> TryAnyColor() const noexcept
@@ -148,9 +148,9 @@ namespace krys::boo::style
       return HasColor() ? Maybe(_color) : std::nullopt;
     }
 
-    KRYS_NODISCARD Maybe<URL> TryAnyURL() const noexcept
+    KRYS_NODISCARD Maybe<Url> TryAnyUrl() const noexcept
     {
-      return HasURL() ? Maybe(_url) : std::nullopt;
+      return HasUrl() ? Maybe(_url) : std::nullopt;
     }
 
     KRYS_NODISCARD const Color &ColorDisregardingType() const noexcept
@@ -158,7 +158,7 @@ namespace krys::boo::style
       return _color;
     }
 
-    KRYS_NODISCARD const URL &UrlDisregardingType() const noexcept
+    KRYS_NODISCARD const Url &UrlDisregardingType() const noexcept
     {
       return _url;
     }
@@ -172,9 +172,9 @@ namespace krys::boo::style
       {
         case Type::None:     return visitor(css::keywords::None {});
         case Type::Color:    return visitor(_color);
-        case Type::URL:      return visitor(_url);
-        case Type::URLNone:  return visitor(URLNone {_url, css::keywords::None {}});
-        case Type::URLColor: return visitor(URLColor {_url, _color});
+        case Type::Url:      return visitor(_url);
+        case Type::UrlNone:  return visitor(UrlNone {_url, css::keywords::None {}});
+        case Type::UrlColor: return visitor(UrlColor {_url, _color});
       }
       krys_unreachable();
     }
@@ -191,18 +191,18 @@ namespace krys::boo::style
     {
       None,
       Color,
-      URL,
-      URLNone,
-      URLColor,
+      Url,
+      UrlNone,
+      UrlColor,
     };
 
     Type _type;
-    URL _url {.Resolved = {}, .Modifiers = {}};
+    Url _url {.Resolved = {}, .Modifiers = {}};
     Color _color {boo::Color {}};
   };
 
   template <size_t I>
-  const auto &get(const SVGPaint::URLNone &value)
+  const auto &get(const SVGPaint::UrlNone &value)
   {
     if constexpr (!I)
     {
@@ -215,7 +215,7 @@ namespace krys::boo::style
   }
 
   template <size_t I>
-  const auto &get(const SVGPaint::URLColor &value)
+  const auto &get(const SVGPaint::UrlColor &value)
   {
     if constexpr (!I)
     {
@@ -252,6 +252,6 @@ namespace krys::boo::style
   };
 }
 
-DEFINE_SPACE_SEPARATED_TUPLE_LIKE_CONFORMANCE(krys::boo::style::SVGPaint::URLNone, 2)
-DEFINE_SPACE_SEPARATED_TUPLE_LIKE_CONFORMANCE(krys::boo::style::SVGPaint::URLColor, 2)
+DEFINE_SPACE_SEPARATED_TUPLE_LIKE_CONFORMANCE(krys::boo::style::SVGPaint::UrlNone, 2)
+DEFINE_SPACE_SEPARATED_TUPLE_LIKE_CONFORMANCE(krys::boo::style::SVGPaint::UrlColor, 2)
 DEFINE_VARIANT_LIKE_CONFORMANCE(krys::boo::style::SVGPaint)

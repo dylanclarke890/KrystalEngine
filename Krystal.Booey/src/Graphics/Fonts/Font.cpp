@@ -32,11 +32,11 @@
 #include "Krystal.Booey/Graphics/Fonts/FontDescription.hpp"
 #include "Krystal.Booey/Graphics/Fonts/SystemFallbackFontCache.hpp"
 #include "Krystal.Booey/Infra/StringAlgorithms.hpp"
-#include "Krystal.Booey/Text/CharacterProperties.hpp"
 #include "Krystal.Core/Assert.hpp"
-#include "Krystal.Core/Text/ASCII.hpp"
-#include "Krystal.Core/Text/CodePointIterator.hpp"
-#include "Krystal.Core/Text/Unicode.hpp"
+#include "Krystal.Core/Strings/ASCII.hpp"
+#include "Krystal.Core/Strings/CodePointIterator.hpp"
+#include "Krystal.Core/Strings/Unicode.hpp"
+#include "Krystal.Text/CharacterProperties.hpp"
 #include <cmath>
 #include <ft2build.h>
 #include FT_FREETYPE_H
@@ -322,7 +322,7 @@ namespace krys::boo
   }
 
   GlyphBufferAdvance Font::ApplyTransforms(GlyphBuffer &, uint32, uint32, bool, bool, const StringAtom &,
-                                           utf8_stringview, TextDirection) noexcept
+                                           utf8_stringview, text::TextDirection) noexcept
   {
     return MakeGlyphBufferAdvance();
   }
@@ -461,7 +461,7 @@ namespace krys::boo
       auto codePoint = *it;
       ++it;
 
-      if (!it.AtEnd() && IsVariationSelector(*it))
+      if (!it.AtEnd() && text::IsVariationSelector(*it))
       {
         if (!PlatformSupportsCodePoint(codePoint, *it))
         {
@@ -489,14 +489,14 @@ namespace krys::boo
     return ColorGlyphType::Outline;
   }
 
-  FloatRect Font::BoundsForGlyph(Glyph glyph) const noexcept
+  RectF Font::BoundsForGlyph(Glyph glyph) const noexcept
   {
     if (IsZeroWidthSpaceGlyph(glyph))
     {
-      return FloatRect();
+      return RectF();
     }
 
-    FloatRect bounds;
+    RectF bounds;
     if (_glyphToBoundsMap)
     {
       bounds = _glyphToBoundsMap->MetricsForGlyph(glyph);
@@ -509,16 +509,16 @@ namespace krys::boo
     bounds = PlatformBoundsForGlyph(glyph);
     if (!_glyphToBoundsMap)
     {
-      _glyphToBoundsMap = CreateUnique<GlyphMetricsMap<FloatRect>>();
+      _glyphToBoundsMap = CreateUnique<GlyphMetricsMap<RectF>>();
     }
     _glyphToBoundsMap->SetMetricsForGlyph(glyph, bounds);
     return bounds;
   }
 
-  SmallList<FloatRect, Font::InlineGlyphRunCapacity>
+  SmallList<RectF, Font::InlineGlyphRunCapacity>
     Font::BoundsForGlyphs(Span<const Glyph> glyphs) const noexcept
   {
-    SmallList<FloatRect, InlineGlyphRunCapacity> glyphBounds;
+    SmallList<RectF, InlineGlyphRunCapacity> glyphBounds;
     glyphBounds.reserve(glyphs.size());
     for (auto glyph : glyphs)
     {
@@ -562,8 +562,8 @@ namespace krys::boo
   }
 
   /// @brief The ink bounds of @p glyph in font units, with y pointing up, or null if FreeType can't load it.
-  KRYS_NODISCARD static Maybe<FloatRect> GlyphBoundsInFontUnits(FT_Face face, Glyph glyph,
-                                                                FontOrientation orientation) noexcept
+  KRYS_NODISCARD static Maybe<RectF> GlyphBoundsInFontUnits(FT_Face face, Glyph glyph,
+                                                            FontOrientation orientation) noexcept
   {
     FT_Int32 flags = FT_LOAD_NO_SCALE | FT_LOAD_NO_HINTING | FT_LOAD_NO_BITMAP;
     if (orientation == FontOrientation::Vertical)
@@ -575,8 +575,8 @@ namespace krys::boo
       return null;
     }
     auto &metrics = face->glyph->metrics;
-    return FloatRect(static_cast<float>(metrics.horiBearingX), static_cast<float>(metrics.horiBearingY),
-                     static_cast<float>(metrics.width), static_cast<float>(metrics.height));
+    return RectF(static_cast<float>(metrics.horiBearingX), static_cast<float>(metrics.horiBearingY),
+                 static_cast<float>(metrics.width), static_cast<float>(metrics.height));
   }
 
   void Font::PlatformInit() noexcept
@@ -729,17 +729,17 @@ namespace krys::boo
     return variation ? !!face->GlyphIndex(character, *variation) : !!face->GlyphIndex(character);
   }
 
-  FloatRect Font::PlatformBoundsForGlyph(Glyph glyph) const noexcept
+  RectF Font::PlatformBoundsForGlyph(Glyph glyph) const noexcept
   {
     if (!_platformData.Size() || !_platformData.Face())
     {
-      return FloatRect();
+      return RectF();
     }
 
     auto bounds = GlyphBoundsInFontUnits(_platformData.Face()->Face(), glyph, _platformData.Orientation());
     if (!bounds)
     {
-      return FloatRect();
+      return RectF();
     }
 
     // Font units have y pointing up; glyph bounds have it pointing down, from the baseline.
@@ -759,7 +759,7 @@ namespace krys::boo
       width += std::abs(shiftAtTop - shiftAtBottom);
     }
 
-    return FloatRect(left, top, width, height);
+    return RectF(left, top, width, height);
   }
 
   Path Font::PathForGlyph(Glyph glyph) const noexcept
@@ -818,7 +818,7 @@ namespace krys::boo
       float Skew;
       bool Open {false};
 
-      KRYS_NODISCARD FloatPoint Map(const FT_Vector *v) const noexcept
+      KRYS_NODISCARD PointF Map(const FT_Vector *v) const noexcept
       {
         float x = static_cast<float>(v->x) * Scale;
         float y = -static_cast<float>(v->y) * Scale;
@@ -915,7 +915,7 @@ namespace krys::boo
       auto glyph =
         static_cast<Glyph>(face->GlyphIndex(FontCascade::TreatAsSpace(character) ? text::Space : character));
       // If the font doesn't support a Default_Ignorable character, replace it with zero with space.
-      if (!glyph && (IsDefaultIgnorableCodePoint(character) || IsControlCharacter(character)))
+      if (!glyph && (text::IsDefaultIgnorableCodePoint(character) || text::IsControlCharacter(character)))
       {
         glyph = zeroWidthSpaceGlyph();
       }

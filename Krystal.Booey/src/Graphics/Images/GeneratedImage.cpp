@@ -33,9 +33,9 @@
 namespace krys::boo
 {
   void GeneratedImage::ComputeIntrinsicDimensions(float &intrinsicWidth, float &intrinsicHeight,
-                                                  FloatSize &intrinsicRatio) noexcept
+                                                  SizeF &intrinsicRatio) noexcept
   {
     Image::ComputeIntrinsicDimensions(intrinsicWidth, intrinsicHeight, intrinsicRatio);
-    intrinsicRatio = FloatSize();
+    intrinsicRatio = SizeF();
   }
 }

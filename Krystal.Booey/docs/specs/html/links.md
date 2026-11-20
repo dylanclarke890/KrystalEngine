@@ -41,7 +41,7 @@ Status: reviewed (2026-11-01)
 #### [4.6.3 API for hyperlink elements](https://html.spec.whatwg.org/#api-for-hyperlink-elements)
 
 Status: reviewed (2026-11-01)
-> `URLDecomposition`, shared with `Location`, computes the url again from `href` each time (`FullURL`), and updates `href` through `SetFullURL`. There are no origins to extract.
+> `UrlDecomposition`, shared with `Location`, computes the url again from `href` each time (`FullUrl`), and updates `href` through `SetFullUrl`. There are no origins to extract.
 > Fixed: the setters wrote an `href` from the document's URL for a link without one, where they should do nothing.
 <!-- definitions: hyperlink-element concept-hyperlink-url-set update-href attr-hyperlink-hreflang attr-hyperlink-type -->
 
@@ -53,7 +53,7 @@ Status: reviewed (2026-11-01)
 - [x] [reinitialize url](https://html.spec.whatwg.org/#reinitialise-url) — A hyperlink element has an associated reinitialize url algorithm, which runs these steps:
   - 1. If the element's url is non-null, its scheme is "blob", and it has an opaque path, then terminate these steps.
   - 2. Set the url.
-  > `FullURL` parses `href` each time; with no blob URL store, a blob URL needs nothing kept.
+  > `FullUrl` parses `href` each time; with no blob URL store, a blob URL needs nothing kept.
 
 - [x] [HyperlinkElementUtils.origin](https://html.spec.whatwg.org/#dom-hyperlink-origin) — The origin getter steps are:
   - 1. Reinitialize url.
@@ -188,7 +188,7 @@ Status: reviewed (2026-11-01)
 #### [4.6.4 API for a and area elements](https://html.spec.whatwg.org/#api-for-a-and-area-elements)
 
 Status: reviewed (2026-11-01)
-> `href` is reflected as a URL (`ReflectURL`), and the url is computed when it's needed. There are no speculative loads.
+> `href` is reflected as a URL (`ReflectUrl`), and the url is computed when it's needed. There are no speculative loads.
 
 - [x] [HTMLHyperlinkElementUtils.href](https://html.spec.whatwg.org/#dom-hyperlink-href) — The href getter steps are:
   - 1. Reinitialize url.

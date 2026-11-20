@@ -206,7 +206,7 @@ namespace krys::boo
     }
 
     void Add(Glyph glyph, const Font &font, GlyphBufferAdvance advance,
-             GlyphBufferStringOffset offsetInString, FloatPoint origin = {}) noexcept
+             GlyphBufferStringOffset offsetInString, PointF origin = {}) noexcept
     {
       _fonts.push_back(&font);
       _glyphs.push_back(glyph);

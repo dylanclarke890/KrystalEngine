@@ -90,7 +90,7 @@ namespace krys::boo::style
 
   // FIXME: Support writing mode properties.
 
-  inline TextDirection ComputedStyleProperties::ComputedDirection() const noexcept
+  inline text::TextDirection ComputedStyleProperties::ComputedDirection() const noexcept
   {
     return GetWritingMode().ComputedTextDirection();
   }

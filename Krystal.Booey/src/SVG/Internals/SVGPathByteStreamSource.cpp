@@ -41,22 +41,22 @@ namespace krys::boo
     return ReadSVGSegmentType();
   }
 
-  Maybe<SVGPathSource::MoveToSegment> SVGPathByteStreamSource::ParseMoveToSegment(FloatPoint) noexcept
+  Maybe<SVGPathSource::MoveToSegment> SVGPathByteStreamSource::ParseMoveToSegment(PointF) noexcept
   {
     MoveToSegment segment;
-    segment.TargetPoint = ReadFloatPoint();
+    segment.TargetPoint = ReadPointF();
     return segment;
   }
 
-  Maybe<SVGPathSource::LineToSegment> SVGPathByteStreamSource::ParseLineToSegment(FloatPoint) noexcept
+  Maybe<SVGPathSource::LineToSegment> SVGPathByteStreamSource::ParseLineToSegment(PointF) noexcept
   {
     LineToSegment segment;
-    segment.TargetPoint = ReadFloatPoint();
+    segment.TargetPoint = ReadPointF();
     return segment;
   }
 
   Maybe<SVGPathSource::LineToHorizontalSegment>
-    SVGPathByteStreamSource::ParseLineToHorizontalSegment(FloatPoint) noexcept
+    SVGPathByteStreamSource::ParseLineToHorizontalSegment(PointF) noexcept
   {
     LineToHorizontalSegment segment;
     segment.X = ReadFloat();
@@ -64,50 +64,49 @@ namespace krys::boo
   }
 
   Maybe<SVGPathSource::LineToVerticalSegment>
-    SVGPathByteStreamSource::ParseLineToVerticalSegment(FloatPoint) noexcept
+    SVGPathByteStreamSource::ParseLineToVerticalSegment(PointF) noexcept
   {
     LineToVerticalSegment segment;
     segment.Y = ReadFloat();
     return segment;
   }
 
-  Maybe<SVGPathSource::CurveToCubicSegment>
-    SVGPathByteStreamSource::ParseCurveToCubicSegment(FloatPoint) noexcept
+  Maybe<SVGPathSource::CurveToCubicSegment> SVGPathByteStreamSource::ParseCurveToCubicSegment(PointF) noexcept
   {
     CurveToCubicSegment segment;
-    segment.Point1 = ReadFloatPoint();
-    segment.Point2 = ReadFloatPoint();
-    segment.TargetPoint = ReadFloatPoint();
+    segment.Point1 = ReadPointF();
+    segment.Point2 = ReadPointF();
+    segment.TargetPoint = ReadPointF();
     return segment;
   }
 
   Maybe<SVGPathSource::CurveToCubicSmoothSegment>
-    SVGPathByteStreamSource::ParseCurveToCubicSmoothSegment(FloatPoint) noexcept
+    SVGPathByteStreamSource::ParseCurveToCubicSmoothSegment(PointF) noexcept
   {
     CurveToCubicSmoothSegment segment;
-    segment.Point2 = ReadFloatPoint();
-    segment.TargetPoint = ReadFloatPoint();
+    segment.Point2 = ReadPointF();
+    segment.TargetPoint = ReadPointF();
     return segment;
   }
 
   Maybe<SVGPathSource::CurveToQuadraticSegment>
-    SVGPathByteStreamSource::ParseCurveToQuadraticSegment(FloatPoint) noexcept
+    SVGPathByteStreamSource::ParseCurveToQuadraticSegment(PointF) noexcept
   {
     CurveToQuadraticSegment segment;
-    segment.Point1 = ReadFloatPoint();
-    segment.TargetPoint = ReadFloatPoint();
+    segment.Point1 = ReadPointF();
+    segment.TargetPoint = ReadPointF();
     return segment;
   }
 
   Maybe<SVGPathSource::CurveToQuadraticSmoothSegment>
-    SVGPathByteStreamSource::ParseCurveToQuadraticSmoothSegment(FloatPoint) noexcept
+    SVGPathByteStreamSource::ParseCurveToQuadraticSmoothSegment(PointF) noexcept
   {
     CurveToQuadraticSmoothSegment segment;
-    segment.TargetPoint = ReadFloatPoint();
+    segment.TargetPoint = ReadPointF();
     return segment;
   }
 
-  Maybe<SVGPathSource::ArcToSegment> SVGPathByteStreamSource::ParseArcToSegment(FloatPoint) noexcept
+  Maybe<SVGPathSource::ArcToSegment> SVGPathByteStreamSource::ParseArcToSegment(PointF) noexcept
   {
     ArcToSegment segment;
     segment.Rx = ReadFloat();
@@ -115,7 +114,7 @@ namespace krys::boo
     segment.Angle = ReadFloat();
     segment.LargeArc = ReadFlag();
     segment.Sweep = ReadFlag();
-    segment.TargetPoint = ReadFloatPoint();
+    segment.TargetPoint = ReadPointF();
     return segment;
   }
 }

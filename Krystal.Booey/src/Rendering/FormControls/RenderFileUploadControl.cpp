@@ -114,7 +114,7 @@ namespace krys::boo
     GraphicsContextStateSaver stateSaver(paintInfo.Context(), false);
     if (paintInfo.Phase == PaintPhase::Foreground || paintInfo.Phase == PaintPhase::ChildBlockBackgrounds)
     {
-      auto clipRect = EnclosingIntRect(LayoutRect(
+      auto clipRect = EnclosingRectI(LayoutRect(
         paintOffset.X() + BorderLeft(), paintOffset.Y() + BorderTop(), Width() - BorderLeft() - BorderRight(),
         Height() - BorderBottom() - BorderTop() + ButtonShadowHeight));
       if (clipRect.IsEmpty())
@@ -122,7 +122,7 @@ namespace krys::boo
         return;
       }
       stateSaver.Save();
-      paintInfo.Context().Clip(FloatRect(clipRect));
+      paintInfo.Context().Clip(RectF(clipRect));
     }
 
     auto writingMode = GetWritingMode();
@@ -221,12 +221,12 @@ namespace krys::boo
         textLogicalTop += font.MetricsOfPrimaryFont().IntAscent();
       }
 
-      auto textOrigin = IntPoint(RoundToInt(textLogicalLeft), RoundToInt(textLogicalTop));
+      auto textOrigin = PointI(RoundToInt(textLogicalLeft), RoundToInt(textLogicalTop));
       if (!isHorizontalWritingMode)
       {
         textOrigin = textOrigin.TransposedPoint();
 
-        paintInfo.Context().Translate(FloatPoint(textOrigin));
+        paintInfo.Context().Translate(PointF(textOrigin));
         if (writingMode.IsLineOverLeft())
         {
           paintInfo.Context().Rotate(-std::numbers::pi_v<float> / 2);
@@ -235,10 +235,10 @@ namespace krys::boo
         {
           paintInfo.Context().Rotate(std::numbers::pi_v<float> / 2);
         }
-        paintInfo.Context().Translate(-FloatPoint(textOrigin));
+        paintInfo.Context().Translate(-PointF(textOrigin));
       }
 
-      paintInfo.Context().DrawBidiText(font, textRun, FloatPoint(textOrigin));
+      paintInfo.Context().DrawBidiText(font, textRun, PointF(textOrigin));
     }
   }
 

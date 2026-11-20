@@ -150,9 +150,9 @@ namespace krys::boo
     return box;
   }
 
-  FloatRect RenderSVGInlineText::FloatLinesBoundingBox() const noexcept
+  RectF RenderSVGInlineText::FloatLinesBoundingBox() const noexcept
   {
-    FloatRect boundingBox;
+    RectF boundingBox;
     for (auto &box : inline_iterator::SVGTextBoxesFor(*this))
     {
       boundingBox.Unite(box.CalculateBoundariesIncludingSVGTransform());
@@ -161,9 +161,9 @@ namespace krys::boo
     return boundingBox;
   }
 
-  IntRect RenderSVGInlineText::LinesBoundingBox() const noexcept
+  RectI RenderSVGInlineText::LinesBoundingBox() const noexcept
   {
-    return EnclosingIntRect(FloatLinesBoundingBox());
+    return EnclosingRectI(FloatLinesBoundingBox());
   }
 
   bool RenderSVGInlineText::CharacterStartsNewTextChunk(int32 position) const noexcept
@@ -229,7 +229,7 @@ namespace krys::boo
 
     // Map local point to absolute point, as the character origins stored in the text fragments use absolute
     // coordinates.
-    FloatPoint absolutePoint(point);
+    PointF absolutePoint(point);
     absolutePoint.MoveBy(containingBlock->Location());
 
     float closestDistance = std::numeric_limits<float>::max();
@@ -244,7 +244,7 @@ namespace krys::boo
 
       for (auto &fragment : fragments)
       {
-        FloatRect fragmentRect(fragment.X, fragment.Y - baseline, fragment.Width, fragment.Height);
+        RectF fragmentRect(fragment.X, fragment.Y - baseline, fragment.Width, fragment.Height);
         fragment.BuildFragmentTransform(fragmentTransform);
         if (!fragmentTransform.IsIdentity())
         {

@@ -23,10 +23,10 @@
 #pragma once
 
 #include "Krystal.Booey/DOM/Types/DOMString.hpp"
-#include "Krystal.Booey/Graphics/Geometry/FloatPoint.hpp"
-#include "Krystal.Booey/Graphics/Geometry/FloatSize.hpp"
 #include "Krystal.Booey/SVG/SVGMatrix.hpp"
-#include "Krystal.Core/Text/StringBuilder.hpp"
+#include "Krystal.Core/Geometry/Point.hpp"
+#include "Krystal.Core/Geometry/Size.hpp"
+#include "Krystal.Core/Strings/StringBuilder.hpp"
 
 namespace krys::boo
 {
@@ -56,27 +56,26 @@ namespace krys::boo
     SVGTransformType _type {SVG_TRANSFORM_UNKNOWN};
     Ref<SVGMatrix> _matrix;
     float _angle {0};
-    FloatPoint _rotationCenter;
+    PointF _rotationCenter;
 
   public:
-    KRYS_NODISCARD static SVGTransformValue TranslateTransformValue(FloatSize delta) noexcept
+    KRYS_NODISCARD static SVGTransformValue TranslateTransformValue(SizeF delta) noexcept
     {
-      return SVGTransformValue(SVG_TRANSFORM_TRANSLATE, AffineTransform::MakeTranslation(delta));
+      return SVGTransformValue(SVG_TRANSFORM_TRANSLATE, AffineTransform::CreateTranslation(delta));
     }
 
-    KRYS_NODISCARD static SVGTransformValue RotateTransformValue(float angleInDegrees,
-                                                                 FloatPoint center) noexcept
+    KRYS_NODISCARD static SVGTransformValue RotateTransformValue(float angleInDegrees, PointF center) noexcept
     {
       auto result =
-        SVGTransformValue(SVG_TRANSFORM_ROTATE, AffineTransform::MakeRotation(angleInDegrees, center));
+        SVGTransformValue(SVG_TRANSFORM_ROTATE, AffineTransform::CreateRotation(angleInDegrees, center));
       result._angle = angleInDegrees;
       result._rotationCenter = center;
       return result;
     }
 
-    KRYS_NODISCARD static SVGTransformValue ScaleTransformValue(FloatSize scale) noexcept
+    KRYS_NODISCARD static SVGTransformValue ScaleTransformValue(SizeF scale) noexcept
     {
-      return SVGTransformValue(SVG_TRANSFORM_SCALE, AffineTransform::MakeScale(scale));
+      return SVGTransformValue(SVG_TRANSFORM_SCALE, AffineTransform::CreateScale(scale));
     }
 
     SVGTransformValue(SVGTransformType type = SVG_TRANSFORM_MATRIX,
@@ -92,7 +91,7 @@ namespace krys::boo
     }
 
     SVGTransformValue(SVGTransformType type, Ref<SVGMatrix> &&matrix, float angle,
-                      const FloatPoint &rotationCenter) noexcept
+                      const PointF &rotationCenter) noexcept
         : _type(type), _matrix(krys::move(matrix)), _angle(angle), _rotationCenter(rotationCenter)
     {
     }
@@ -132,7 +131,7 @@ namespace krys::boo
       return _angle;
     }
 
-    KRYS_NODISCARD FloatPoint RotationCenter() const noexcept
+    KRYS_NODISCARD PointF RotationCenter() const noexcept
     {
       return _rotationCenter;
     }
@@ -160,9 +159,9 @@ namespace krys::boo
       _rotationCenter = {};
     }
 
-    KRYS_NODISCARD FloatPoint Translate() const noexcept
+    KRYS_NODISCARD PointF Translate() const noexcept
     {
-      return FloatPoint::NarrowPrecision(_matrix->E(), _matrix->F());
+      return PointF::NarrowPrecision(_matrix->E(), _matrix->F());
     }
 
     void SetTranslate(float tx, float ty) noexcept
@@ -171,12 +170,12 @@ namespace krys::boo
       _angle = 0;
       _rotationCenter = {};
 
-      _matrix->Value() = AffineTransform::MakeTranslation({tx, ty});
+      _matrix->Value() = AffineTransform::CreateTranslation({tx, ty});
     }
 
-    KRYS_NODISCARD FloatSize Scale() const noexcept
+    KRYS_NODISCARD SizeF Scale() const noexcept
     {
-      return FloatSize::NarrowPrecision(_matrix->A(), _matrix->D());
+      return SizeF::NarrowPrecision(_matrix->A(), _matrix->D());
     }
 
     void SetScale(float sx, float sy) noexcept
@@ -185,7 +184,7 @@ namespace krys::boo
       _angle = 0;
       _rotationCenter = {};
 
-      _matrix->Value() = AffineTransform::MakeScale({sx, sy});
+      _matrix->Value() = AffineTransform::CreateScale({sx, sy});
     }
 
     void SetRotate(float angleInDegrees, float cx, float cy) noexcept
@@ -194,14 +193,14 @@ namespace krys::boo
       _angle = angleInDegrees;
       _rotationCenter = {cx, cy};
 
-      _matrix->Value() = AffineTransform::MakeRotation(angleInDegrees, {cx, cy});
+      _matrix->Value() = AffineTransform::CreateRotation(angleInDegrees, {cx, cy});
     }
 
     void SetSkewX(float angle) noexcept
     {
       _type = SVG_TRANSFORM_SKEWX;
       _angle = angle;
-      _rotationCenter = FloatPoint();
+      _rotationCenter = PointF();
 
       _matrix->Value().MakeIdentity();
       _matrix->Value().SkewX(angle);
@@ -211,7 +210,7 @@ namespace krys::boo
     {
       _type = SVG_TRANSFORM_SKEWY;
       _angle = angle;
-      _rotationCenter = FloatPoint();
+      _rotationCenter = PointF();
 
       _matrix->Value().MakeIdentity();
       _matrix->Value().SkewY(angle);

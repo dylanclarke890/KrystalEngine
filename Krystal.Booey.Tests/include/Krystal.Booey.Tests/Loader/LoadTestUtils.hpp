@@ -8,12 +8,12 @@
 #include "Krystal.Booey/Loader/LocalFrameLoaderClient.hpp"
 #include "Krystal.Booey/Loader/NavigationAction.hpp"
 #include "Krystal.Booey/Loader/SubstituteData.hpp"
-#include "Krystal.Booey/Page/ChromeClient.hpp"
+#include "Krystal.Booey/Page/Clients/ChromeClient.hpp"
 #include "Krystal.Booey/Page/LocalFrame.hpp"
 #include "Krystal.Booey/Page/Page.hpp"
-#include "Krystal.Booey/Platform/Network/ResourceError.hpp"
 #include "Krystal.Core/Types/Func.hpp"
 #include "Krystal.Core/Types/List.hpp"
+#include "Krystal.Net/ResourceError.hpp"
 #include <string>
 
 namespace krys::boo::tests
@@ -33,10 +33,10 @@ namespace krys::boo::tests
     {
     }
 
-    void DispatchNavigationRequested(const NavigationAction &, const ResourceRequest &request,
+    void DispatchNavigationRequested(const NavigationAction &, const net::ResourceRequest &request,
                                      const FormSubmission *) noexcept override
     {
-      Events.push_back("navigation to " + Narrow(request.URL().String()));
+      Events.push_back("navigation to " + Narrow(request.Url().String()));
     }
 
     void DispatchDidStartProvisionalLoad() noexcept override
@@ -44,7 +44,7 @@ namespace krys::boo::tests
       Events.emplace_back("start");
     }
 
-    void DispatchDidFailProvisionalLoad(const ResourceError &error) noexcept override
+    void DispatchDidFailProvisionalLoad(const net::ResourceError &error) noexcept override
     {
       Events.emplace_back(error.IsCancellation() ? "fail provisional (cancelled)" : "fail provisional");
     }
@@ -124,15 +124,16 @@ namespace krys::boo::tests
     /// @brief Loads @p markup at @p url, as the host does.
     void LoadMarkup(utf8_string &&markup, utf8_stringview url) noexcept
     {
-      FrameLoadRequest request(ShareRef(Document()), ResourceRequest(url::URL(url)), null);
-      request.SetSubstituteData(SubstituteData(krys::move(markup), u8"text/html", url::URL(url)));
+      FrameLoadRequest request(ShareRef(Document()), net::ResourceRequest(net::Url(url)), null);
+      request.SetSubstituteData(SubstituteData(krys::move(markup), u8"text/html", net::Url(url)));
       Frame().Loader().Load(krys::move(request));
     }
 
     /// @brief Loads @p url through the strategy, as the host does.
-    void LoadURL(utf8_stringview url) noexcept
+    void LoadUrl(utf8_stringview url) noexcept
     {
-      Frame().Loader().Load(FrameLoadRequest(ShareRef(Document()), ResourceRequest(url::URL(url)), null));
+      Frame().Loader().Load(
+        FrameLoadRequest(ShareRef(Document()), net::ResourceRequest(net::Url(url)), null));
     }
   };
 }

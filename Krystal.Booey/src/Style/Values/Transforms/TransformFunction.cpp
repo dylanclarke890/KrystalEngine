@@ -54,7 +54,7 @@
 #include "Krystal.Booey/Style/Values/Transforms/Functions/ScaleTransformFunction.hpp"
 #include "Krystal.Booey/Style/Values/Transforms/Functions/SkewTransformFunction.hpp"
 #include "Krystal.Booey/Style/Values/Transforms/Functions/TranslateTransformFunction.hpp"
-#include "Krystal.Core/Text/StringBuilder.hpp"
+#include "Krystal.Core/Strings/StringBuilder.hpp"
 
 namespace krys::boo::style
 {
@@ -1041,7 +1041,7 @@ namespace krys::boo::style
   // MARK: - Platform
 
   Ref<TransformOperation> ToPlatform<TransformFunction>::operator()(const TransformFunction &value,
-                                                                    const FloatSize &size) noexcept
+                                                                    const SizeF &size) noexcept
   {
     return value.Value->ToPlatform(size);
   }

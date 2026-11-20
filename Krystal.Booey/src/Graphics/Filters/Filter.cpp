@@ -40,30 +40,29 @@ namespace krys::boo
   {
   }
 
-  FloatPoint Filter::ScaledByFilterScale(const FloatPoint &point) const noexcept
+  PointF Filter::ScaledByFilterScale(const PointF &point) const noexcept
   {
     return point.Scaled(_geometry.Scale.Width(), _geometry.Scale.Height());
   }
 
-  FloatSize Filter::ScaledByFilterScale(const FloatSize &size) const noexcept
+  SizeF Filter::ScaledByFilterScale(const SizeF &size) const noexcept
   {
     return size * _geometry.Scale;
   }
 
-  FloatRect Filter::ScaledByFilterScale(const FloatRect &rect) const noexcept
+  RectF Filter::ScaledByFilterScale(const RectF &rect) const noexcept
   {
     auto scaledRect = rect;
     scaledRect.Scale(_geometry.Scale);
     return scaledRect;
   }
 
-  FloatRect Filter::MaxEffectRect(const FloatRect &primitiveSubregion) const noexcept
+  RectF Filter::MaxEffectRect(const RectF &primitiveSubregion) const noexcept
   {
     return Intersection(primitiveSubregion, _geometry.FilterRegion);
   }
 
-  FloatRect Filter::ClipToMaxEffectRect(const FloatRect &imageRect,
-                                        const FloatRect &primitiveSubregion) const noexcept
+  RectF Filter::ClipToMaxEffectRect(const RectF &imageRect, const RectF &primitiveSubregion) const noexcept
   {
     auto maxEffectRect = MaxEffectRect(primitiveSubregion);
     return Intersection(imageRect, maxEffectRect);
@@ -73,7 +72,7 @@ namespace krys::boo
   {
     auto scaledFilterRegion = ScaledByFilterScale(_geometry.FilterRegion);
 
-    FloatSize clampingScale(1, 1);
+    SizeF clampingScale(1, 1);
     if (!ImageBuffer::SizeNeedsClamping(scaledFilterRegion.Size(), clampingScale))
     {
       return false;
@@ -90,14 +89,14 @@ namespace krys::boo
     krys_debug_assert(!_filterRenderingModes.IsEmpty());
   }
 
-  RefPtr<FilterImage> Filter::Apply(ImageBuffer *sourceImage, const FloatRect &sourceImageRect,
+  RefPtr<FilterImage> Filter::Apply(ImageBuffer *sourceImage, const RectF &sourceImageRect,
                                     FilterResults &results) noexcept
   {
     RefPtr<FilterImage> input;
 
     if (sourceImage)
     {
-      auto absoluteSourceImageRect = EnclosingIntRect(ScaledByFilterScale(sourceImageRect));
+      auto absoluteSourceImageRect = EnclosingRectI(ScaledByFilterScale(sourceImageRect));
       input = FilterImage::Create(_geometry.FilterRegion, sourceImageRect, absoluteSourceImageRect,
                                   ShareRef(*sourceImage));
     }
@@ -118,7 +117,7 @@ namespace krys::boo
   }
 
   FilterStyleVector Filter::CreateFilterStyles(GraphicsContext &context,
-                                               const FloatRect &sourceImageRect) const noexcept
+                                               const RectF &sourceImageRect) const noexcept
   {
     auto input = FilterStyle {null, _geometry.FilterRegion, sourceImageRect};
     auto result = CreateFilterStyles(context, input);

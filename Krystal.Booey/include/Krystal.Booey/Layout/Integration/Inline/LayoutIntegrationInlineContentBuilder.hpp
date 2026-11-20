@@ -25,9 +25,9 @@
 
 #pragma once
 
-#include "Krystal.Booey/Graphics/Geometry/FloatRect.hpp"
 #include "Krystal.Booey/Layout/FormattingContexts/Inline/InlineFormattingContext.hpp"
 #include "Krystal.Core/Attributes.hpp"
+#include "Krystal.Core/Geometry/Rect.hpp"
 
 namespace krys::boo
 {
@@ -54,17 +54,17 @@ namespace krys::boo::layout_integration
     explicit InlineContentBuilder(const RenderBlockFlow &blockFlow) noexcept;
 
     /// @return The rect the content covered before and after, to repaint.
-    FloatRect Build(layout::InlineLayoutResult layoutResult, InlineContent &inlineContent,
-                    const layout::InlineDamage *lineDamage) const noexcept;
+    RectF Build(layout::InlineLayoutResult layoutResult, InlineContent &inlineContent,
+                const layout::InlineDamage *lineDamage) const noexcept;
 
     void UpdateLineOverflow(InlineContent &inlineContent) const noexcept;
 
   private:
     void AdjustDisplayLines(InlineContent &inlineContent, size_t startIndex) const noexcept;
 
-    FloatRect HandlePartialDisplayContentUpdate(layout::InlineLayoutResult layoutResult,
-                                                InlineContent &inlineContent,
-                                                const layout::InlineDamage *lineDamage) const noexcept;
+    RectF HandlePartialDisplayContentUpdate(layout::InlineLayoutResult layoutResult,
+                                            InlineContent &inlineContent,
+                                            const layout::InlineDamage *lineDamage) const noexcept;
 
     static void
       ComputeIsFirstIsLastBoxAndBidiReorderingForInlineContent(inline_display::Boxes &boxes) noexcept;

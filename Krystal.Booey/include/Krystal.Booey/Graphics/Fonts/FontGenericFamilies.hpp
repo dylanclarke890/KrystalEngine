@@ -28,9 +28,9 @@
 #include "Krystal.Booey/CSS/Font/GenericFontFamilyNames.hpp"
 #include "Krystal.Core/Attributes.hpp"
 #include "Krystal.Core/Numeric.hpp"
+#include "Krystal.Core/Strings/String.hpp"
 #include "Krystal.Core/Types/HashMap.hpp"
-#include "Krystal.Core/Types/String.hpp"
-#include <unicode/uscript.h>
+#include "Krystal.Text/Script.hpp"
 
 namespace krys::boo
 {
@@ -56,42 +56,49 @@ namespace krys::boo
     /// @brief Whether no generic family resolves to a family, for any script.
     KRYS_NODISCARD bool IsEmpty() const noexcept;
 
-    KRYS_NODISCARD const utf8_string &StandardFontFamily(UScriptCode script = USCRIPT_COMMON) const noexcept;
-
-    KRYS_NODISCARD const utf8_string &FixedFontFamily(UScriptCode script = USCRIPT_COMMON) const noexcept;
-
-    KRYS_NODISCARD const utf8_string &SerifFontFamily(UScriptCode script = USCRIPT_COMMON) const noexcept;
-
-    KRYS_NODISCARD const utf8_string &SansSerifFontFamily(UScriptCode script = USCRIPT_COMMON) const noexcept;
-
-    KRYS_NODISCARD const utf8_string &CursiveFontFamily(UScriptCode script = USCRIPT_COMMON) const noexcept;
-
-    KRYS_NODISCARD const utf8_string &FantasyFontFamily(UScriptCode script = USCRIPT_COMMON) const noexcept;
+    KRYS_NODISCARD const utf8_string &
+      StandardFontFamily(text::Script script = text::Script::Common) const noexcept;
 
     KRYS_NODISCARD const utf8_string &
-      PictographFontFamily(UScriptCode script = USCRIPT_COMMON) const noexcept;
+      FixedFontFamily(text::Script script = text::Script::Common) const noexcept;
 
-    KRYS_NODISCARD const utf8_string &MathFontFamily(UScriptCode script = USCRIPT_COMMON) const noexcept;
+    KRYS_NODISCARD const utf8_string &
+      SerifFontFamily(text::Script script = text::Script::Common) const noexcept;
+
+    KRYS_NODISCARD const utf8_string &
+      SansSerifFontFamily(text::Script script = text::Script::Common) const noexcept;
+
+    KRYS_NODISCARD const utf8_string &
+      CursiveFontFamily(text::Script script = text::Script::Common) const noexcept;
+
+    KRYS_NODISCARD const utf8_string &
+      FantasyFontFamily(text::Script script = text::Script::Common) const noexcept;
+
+    KRYS_NODISCARD const utf8_string &
+      PictographFontFamily(text::Script script = text::Script::Common) const noexcept;
+
+    KRYS_NODISCARD const utf8_string &
+      MathFontFamily(text::Script script = text::Script::Common) const noexcept;
 
     /// @brief The family the generic family @p family resolves to for @p script, or null for `system-ui`.
     KRYS_NODISCARD const utf8_string *FontFamily(css::generic_font_family_names::FamilyNamesIndex family,
-                                                 UScriptCode script = USCRIPT_COMMON) const noexcept;
+                                                 text::Script script = text::Script::Common) const noexcept;
 
     /// @return Whether the family changed.
-    bool SetStandardFontFamily(const utf8_string &family, UScriptCode script) noexcept;
+    bool SetStandardFontFamily(const utf8_string &family, text::Script script) noexcept;
 
-    bool SetFixedFontFamily(const utf8_string &family, UScriptCode script) noexcept;
+    bool SetFixedFontFamily(const utf8_string &family, text::Script script) noexcept;
 
-    bool SetSerifFontFamily(const utf8_string &family, UScriptCode script) noexcept;
+    bool SetSerifFontFamily(const utf8_string &family, text::Script script) noexcept;
 
-    bool SetSansSerifFontFamily(const utf8_string &family, UScriptCode script) noexcept;
+    bool SetSansSerifFontFamily(const utf8_string &family, text::Script script) noexcept;
 
-    bool SetCursiveFontFamily(const utf8_string &family, UScriptCode script) noexcept;
+    bool SetCursiveFontFamily(const utf8_string &family, text::Script script) noexcept;
 
-    bool SetFantasyFontFamily(const utf8_string &family, UScriptCode script) noexcept;
+    bool SetFantasyFontFamily(const utf8_string &family, text::Script script) noexcept;
 
-    bool SetPictographFontFamily(const utf8_string &family, UScriptCode script) noexcept;
+    bool SetPictographFontFamily(const utf8_string &family, text::Script script) noexcept;
 
-    bool SetMathFontFamily(const utf8_string &family, UScriptCode script) noexcept;
+    bool SetMathFontFamily(const utf8_string &family, text::Script script) noexcept;
   };
 }

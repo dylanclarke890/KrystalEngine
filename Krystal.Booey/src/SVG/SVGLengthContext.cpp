@@ -48,24 +48,24 @@
 
 namespace krys::boo
 {
-  SVGLengthContext::SVGLengthContext(const SVGElement *context, const Maybe<FloatSize> &viewportSize) noexcept
+  SVGLengthContext::SVGLengthContext(const SVGElement *context, const Maybe<SizeF> &viewportSize) noexcept
       : _context(CreateWeakPtr(const_cast<SVGElement *>(context))),
-        _viewportSize(!_context ? viewportSize : Maybe<FloatSize> {})
+        _viewportSize(!_context ? viewportSize : Maybe<SizeF> {})
   {
   }
 
   SVGLengthContext::~SVGLengthContext() noexcept = default;
 
-  FloatRect SVGLengthContext::ResolveRectangle(const SVGElement *context, SVGUnitTypes::SVGUnitType type,
-                                               const FloatRect &viewport, const SVGLengthValue &x,
-                                               const SVGLengthValue &y, const SVGLengthValue &width,
-                                               const SVGLengthValue &height) noexcept
+  RectF SVGLengthContext::ResolveRectangle(const SVGElement *context, SVGUnitTypes::SVGUnitType type,
+                                           const RectF &viewport, const SVGLengthValue &x,
+                                           const SVGLengthValue &y, const SVGLengthValue &width,
+                                           const SVGLengthValue &height) noexcept
   {
     krys_debug_assert(type != SVGUnitTypes::SVG_UNIT_TYPE_UNKNOWN);
     if (type != SVGUnitTypes::SVG_UNIT_TYPE_USERSPACEONUSE)
     {
       auto viewportSize = viewport.Size();
-      return FloatRect(
+      return RectF(
         ConvertValueFromPercentageToUserUnits(x.ValueAsPercentage(), x.LengthMode(), viewportSize)
           + viewport.X(),
         ConvertValueFromPercentageToUserUnits(y.ValueAsPercentage(), y.LengthMode(), viewportSize)
@@ -75,23 +75,23 @@ namespace krys::boo
     }
 
     SVGLengthContext lengthContext(context, viewport.Size());
-    return FloatRect(x.Value(lengthContext), y.Value(lengthContext), width.Value(lengthContext),
-                     height.Value(lengthContext));
+    return RectF(x.Value(lengthContext), y.Value(lengthContext), width.Value(lengthContext),
+                 height.Value(lengthContext));
   }
 
-  FloatPoint SVGLengthContext::ResolvePoint(const SVGElement *context, SVGUnitTypes::SVGUnitType type,
-                                            const SVGLengthValue &x, const SVGLengthValue &y) noexcept
+  PointF SVGLengthContext::ResolvePoint(const SVGElement *context, SVGUnitTypes::SVGUnitType type,
+                                        const SVGLengthValue &x, const SVGLengthValue &y) noexcept
   {
     krys_debug_assert(type != SVGUnitTypes::SVG_UNIT_TYPE_UNKNOWN);
     if (type == SVGUnitTypes::SVG_UNIT_TYPE_USERSPACEONUSE)
     {
       SVGLengthContext lengthContext(context);
-      return FloatPoint(x.Value(lengthContext), y.Value(lengthContext));
+      return PointF(x.Value(lengthContext), y.Value(lengthContext));
     }
 
     // FIXME: valueAsPercentage() won't be correct for eg. cm units. They need to be resolved in user space
     // and then be considered in objectBoundingBox space.
-    return FloatPoint(x.ValueAsPercentage(), y.ValueAsPercentage());
+    return PointF(x.ValueAsPercentage(), y.ValueAsPercentage());
   }
 
   float SVGLengthContext::ResolveLength(const SVGElement *context, SVGUnitTypes::SVGUnitType type,
@@ -111,7 +111,7 @@ namespace krys::boo
 
   namespace
   {
-    KRYS_NODISCARD float DimensionForLengthMode(SVGLengthMode mode, FloatSize viewportSize) noexcept
+    KRYS_NODISCARD float DimensionForLengthMode(SVGLengthMode mode, SizeF viewportSize) noexcept
     {
       switch (mode)
       {
@@ -152,7 +152,7 @@ namespace krys::boo
       },
       [&](const typename TSize::Calc &calc) -> float
       {
-        auto viewportSize = this->ViewportSize().value_or(FloatSize {});
+        auto viewportSize = this->ViewportSize().value_or(SizeF {});
         return style::Evaluate<float>(calc, DimensionForLengthMode(lengthMode, viewportSize), usedZoom);
       },
       [&](const auto &) -> float { return 0; });
@@ -175,7 +175,7 @@ namespace krys::boo
       },
       [&](const typename TSize::Calc &calc) -> float
       {
-        auto viewportSize = this->ViewportSize().value_or(FloatSize {});
+        auto viewportSize = this->ViewportSize().value_or(SizeF {});
         return style::Evaluate<float>(calc, DimensionForLengthMode(lengthMode, viewportSize), zoomNeeded);
       },
       [&](const auto &) -> float { return 0; });
@@ -398,7 +398,7 @@ namespace krys::boo
   }
 
   float SVGLengthContext::ConvertValueFromPercentageToUserUnits(float value, SVGLengthMode lengthMode,
-                                                                FloatSize viewportSize) noexcept
+                                                                SizeF viewportSize) noexcept
   {
     return value * DimensionForLengthMode(lengthMode, viewportSize);
   }
@@ -506,7 +506,7 @@ namespace krys::boo
     return value * std::ceil(style->MetricsOfPrimaryFont().XHeight().value_or(0));
   }
 
-  Maybe<FloatSize> SVGLengthContext::ViewportSize() const noexcept
+  Maybe<SizeF> SVGLengthContext::ViewportSize() const noexcept
   {
     if (!_context)
     {
@@ -521,7 +521,7 @@ namespace krys::boo
     return _viewportSize;
   }
 
-  Maybe<FloatSize> SVGLengthContext::ComputeViewportSize() const noexcept
+  Maybe<SizeF> SVGLengthContext::ComputeViewportSize() const noexcept
   {
     krys_debug_assert(_context);
 

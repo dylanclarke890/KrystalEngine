@@ -42,6 +42,6 @@ namespace krys::boo::html
   void GPUBasedCanvasRenderingContext::MarkCanvasChanged() noexcept
   {
     auto &canvas = GetCanvasBase();
-    canvas.DidDraw(FloatRect {{}, FloatSize(canvas.Size())});
+    canvas.DidDraw(RectF {{}, SizeF(canvas.Size())});
   }
 }

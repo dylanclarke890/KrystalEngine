@@ -28,7 +28,7 @@
 #include "Krystal.Booey/Style/Builder/BuilderState.hpp"
 #include "Krystal.Booey/Style/Values/Primitives/NumericTypesBlending.hpp"
 #include "Krystal.Booey/Style/Values/Primitives/NumericTypesConversions.hpp"
-#include "Krystal.Core/Text/StringBuilder.hpp"
+#include "Krystal.Core/Strings/StringBuilder.hpp"
 
 namespace krys::boo::style
 {
@@ -103,7 +103,7 @@ namespace krys::boo::style
 
   // MARK: - Path
 
-  boo::Path PathComputation<BasicShape>::operator()(const BasicShape &shape, const FloatRect &rect) noexcept
+  boo::Path PathComputation<BasicShape>::operator()(const BasicShape &shape, const RectF &rect) noexcept
   {
     return krys::SwitchOn(shape,
                           [&](const auto &shape) { return krys::boo::style::ComputePath(shape, rect); });

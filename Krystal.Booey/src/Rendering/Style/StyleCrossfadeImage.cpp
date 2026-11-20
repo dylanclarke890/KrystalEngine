@@ -155,7 +155,7 @@ namespace krys::boo
     _inputImagesAreReady = true;
   }
 
-  RefPtr<Image> StyleCrossfadeImage::GetImage(const RenderElement *renderer, const FloatSize &size,
+  RefPtr<Image> StyleCrossfadeImage::GetImage(const RenderElement *renderer, const SizeF &size,
                                               const GraphicsContext &destinationContext,
                                               bool isForFirstLine) const noexcept
   {
@@ -184,13 +184,13 @@ namespace krys::boo
 
     if (auto *fromSVGImage = DynamicDowncast<SVGImage>(fromImage.get()))
     {
-      auto fromURL = _cachedFromImage ? _cachedFromImage->URL() : url::URL();
-      fromImage = SVGImageForContainer::Create(fromSVGImage, size, 1, fromURL);
+      auto fromUrl = _cachedFromImage ? _cachedFromImage->Url() : net::Url();
+      fromImage = SVGImageForContainer::Create(fromSVGImage, size, 1, fromUrl);
     }
     if (auto *toSVGImage = DynamicDowncast<SVGImage>(toImage.get()))
     {
-      auto toURL = _cachedToImage ? _cachedToImage->URL() : url::URL();
-      toImage = SVGImageForContainer::Create(toSVGImage, size, 1, toURL);
+      auto toUrl = _cachedToImage ? _cachedToImage->Url() : net::Url();
+      toImage = SVGImageForContainer::Create(toSVGImage, size, 1, toUrl);
     }
 
     return CrossfadeGeneratedImage::Create(*fromImage, *toImage, static_cast<float>(_percentage),
@@ -210,7 +210,7 @@ namespace krys::boo
     return true;
   }
 
-  void StyleCrossfadeImage::ImageChanged(CachedImage *, const IntRect *) noexcept
+  void StyleCrossfadeImage::ImageChanged(CachedImage *, const RectI *) noexcept
   {
     if (!_inputImagesAreReady)
     {
@@ -237,7 +237,7 @@ namespace krys::boo
     return false;
   }
 
-  FloatSize StyleCrossfadeImage::FixedSize(const RenderElement &renderer) const noexcept
+  SizeF StyleCrossfadeImage::FixedSize(const RenderElement &renderer) const noexcept
   {
     if (!_from || !_to)
     {

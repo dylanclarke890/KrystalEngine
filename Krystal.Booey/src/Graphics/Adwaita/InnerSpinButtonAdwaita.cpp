@@ -67,8 +67,8 @@ namespace krys::boo
       spinButtonBackgroundPressedColor = SpinButtonBackgroundPressedColorLight;
     }
 
-    FloatRect fieldRect = borderRect.Rect();
-    FloatSize corner(2, 2);
+    RectF fieldRect = borderRect.Rect();
+    SizeF corner(2, 2);
     Path path;
     path.AddRoundedRect(fieldRect, corner);
     fieldRect.Inflate(-ButtonBorderSize);
@@ -85,7 +85,7 @@ namespace krys::boo
     graphicsContext.FillPath(path);
     path.Clear();
 
-    FloatRect buttonRect = fieldRect;
+    RectF buttonRect = fieldRect;
     buttonRect.SetHeight(fieldRect.Height() / 2.0f);
     {
       if (style.States.Contains(ControlStyle::State::SpinUp))

@@ -14,9 +14,9 @@
 #include "Krystal.Booey/Page/LocalDOMWindow.hpp"
 #include "Krystal.Booey/Platform/PlatformStrategies.hpp"
 #include "Krystal.Booey/Platform/Scrolling/ScrollbarThemeAdwaita.hpp"
-#include "Krystal.Booey/Platform/Timer.hpp"
 #include "Krystal.Core/Log/ILogger.hpp"
-#include "Krystal.Core/Text/CodePointIterator.hpp"
+#include "Krystal.Core/Strings/CodePointIterator.hpp"
+#include "Krystal.Core/Time/Timer.hpp"
 #include "Krystal.Core/Types/Array.hpp"
 #include "Krystal.Core/Utils/Move.hpp"
 #include "Krystal.Core/Utils/ScopedProfiler.hpp"
@@ -86,13 +86,13 @@ namespace krys
     /// @brief The page's time, which only moves while the editor runs (Booey's timers follow it).
     MonotonicTime::duration _pageTime {};
     /// @brief Counts the seconds the page has been open in its `#clock` element.
-    boo::Timer _clockTimer {[this] { TickClock(); }};
+    Timer _clockTimer {[this] { TickClock(); }};
     uint32 _secondsOpen {0};
     bool _focused {true};
     /// @brief Where the window's input method was last told the page's text input is, in the window.
-    Maybe<boo::IntRect> _textInputRect;
+    Maybe<RectI> _textInputRect;
     /// @brief The mouse in page view coordinates: below the header.
-    boo::IntPoint _pointer;
+    PointI _pointer;
 
   public:
     explicit Editor(int argc, char **argv, const ApplicationSettings &settings) noexcept
@@ -303,8 +303,8 @@ namespace krys
       _context->Events->On<MouseMoveEvent>(
         [&](const auto &event)
         {
-          _pointer = boo::IntPoint(static_cast<int32>(event.ClientX()),
-                                   static_cast<int32>(event.ClientY() - HeaderHeight));
+          _pointer =
+            PointI(static_cast<int32>(event.ClientX()), static_cast<int32>(event.ClientY() - HeaderHeight));
           if (_pageView)
           {
             if (_pointer.Y() < 0)
@@ -326,9 +326,8 @@ namespace krys
         {
           if (_pageView)
           {
-            _pageView->LockedMouseMoved(boo::DoublePoint(event.DeltaX(), event.DeltaY()),
-                                        boo::DoublePoint(event.RawDeltaX(), event.RawDeltaY()),
-                                        event.Modifiers());
+            _pageView->LockedMouseMoved(PointD(event.DeltaX(), event.DeltaY()),
+                                        PointD(event.RawDeltaX(), event.RawDeltaY()), event.Modifiers());
           }
           return true;
         });
@@ -362,7 +361,7 @@ namespace krys
             return true;
           }
           auto &input = event.Input();
-          boo::DoublePoint point(input.ClientX, input.ClientY - HeaderHeight);
+          PointD point(input.ClientX, input.ClientY - HeaderHeight);
           if (input.Type == pal::PointerType::Pen)
           {
             _pageView->PenInput(point, input);
@@ -383,8 +382,8 @@ namespace krys
           {
             return true;
           }
-          boo::IntPoint point(static_cast<int32>(event.ClientX()),
-                              static_cast<int32>(event.ClientY() - HeaderHeight));
+          PointI point(static_cast<int32>(event.ClientX()),
+                       static_cast<int32>(event.ClientY() - HeaderHeight));
           if (point.Y() >= 0)
           {
             (void)_pageView->MouseWheel(point, event.DeltaX(), event.DeltaY(), event.Modifiers());
@@ -402,8 +401,7 @@ namespace krys
             return true;
           }
           auto &input = event.Input();
-          boo::IntPoint point(static_cast<int32>(input.ClientX),
-                              static_cast<int32>(input.ClientY - HeaderHeight));
+          PointI point(static_cast<int32>(input.ClientX), static_cast<int32>(input.ClientY - HeaderHeight));
           bool moves = input.DeltaX || input.DeltaY;
           if (point.Y() >= 0 || !moves)
           {
@@ -422,8 +420,7 @@ namespace krys
             return true;
           }
           auto &input = event.Input();
-          boo::IntPoint point(static_cast<int32>(input.ClientX),
-                              static_cast<int32>(input.ClientY - HeaderHeight));
+          PointI point(static_cast<int32>(input.ClientX), static_cast<int32>(input.ClientY - HeaderHeight));
           _context->Window->SetDropOperation(_pageView->SystemDragInput(point, input));
           return true;
         });
@@ -453,7 +450,7 @@ namespace krys
         _pageView->SetDisplayColour(_context->Window->GetDisplayColour());
         // The page view sits below the header, wherever the window is on the screen.
         auto origin = _context->Window->ClientOriginOnScreen();
-        _pageView->SetScreenOrigin(boo::IntPoint(origin.X, origin.Y + static_cast<int32>(HeaderHeight)));
+        _pageView->SetScreenOrigin(PointI(origin.X, origin.Y + static_cast<int32>(HeaderHeight)));
         // The pads drive the page as the keyboard does, before its frame runs.
         _pageView->GamepadInput(_context->Input->GetGamepads(), _pageTime);
         if (_cube)
@@ -523,10 +520,10 @@ namespace krys
     }
 
     /// @brief The size of the page view: the window below the header.
-    KRYS_NODISCARD boo::IntSize PageSize() const noexcept
+    KRYS_NODISCARD SizeI PageSize() const noexcept
     {
       const auto height = std::max(static_cast<float>(_height) - HeaderHeight, 0.f);
-      return boo::IntSize(static_cast<int32>(_width), static_cast<int32>(height));
+      return SizeI(static_cast<int32>(_width), static_cast<int32>(height));
     }
 
     /// @brief Loads the page view's first page.
@@ -578,8 +575,8 @@ namespace krys
           _cube = nullptr;
           _cube = CreateUnique<editor::PageCube>(document, *_context->Device);
           _canvas2D = CreateUnique<editor::PageCanvas2D>(document);
-          _context->Logger->Info("Loaded {}", Narrow(document.GetURL().String()));
-          ShowGuide(document.GetURL());
+          _context->Logger->Info("Loaded {}", Narrow(document.GetUrl().String()));
+          ShowGuide(document.GetUrl());
           break;
         case ui::LoadEventType::Failed:
           _loadEvents += u8", failed";
@@ -588,7 +585,7 @@ namespace krys
       }
       if (auto label = document.GetElementById(u8"load-events"))
       {
-        (void)label->TextContent(u8"Last load of " + utf8_string(document.GetURL().LastPathComponent())
+        (void)label->TextContent(u8"Last load of " + utf8_string(document.GetUrl().LastPathComponent())
                                  + u8": " + _loadEvents);
       }
     }
@@ -693,7 +690,7 @@ namespace krys
     }
 
     /// @brief The guide topic @p url names in its `guide` query parameter; empty if none.
-    KRYS_NODISCARD static utf8_string GuideTopic(const boo::url::URL &url) noexcept
+    KRYS_NODISCARD static utf8_string GuideTopic(const net::Url &url) noexcept
     {
       constexpr utf8_stringview key = u8"guide=";
       auto query = url.Query();
@@ -711,7 +708,7 @@ namespace krys
     }
 
     /// @brief Shows the guide topic @p url names, and marks its link.
-    void ShowGuide(const boo::url::URL &url) noexcept
+    void ShowGuide(const net::Url &url) noexcept
     {
       auto &document = _pageView->Document();
       auto view = document.GetElementById(u8"guide-view");
@@ -807,12 +804,12 @@ namespace krys
     /// the page's `#last-submission` element.
     void HandleNavigation(const ui::NavigationRequest &request) noexcept
     {
-      boo::url::URL url(request.URL);
+      net::Url url(request.Url);
       if (!request.IsFormSubmission && !request.Download && !request.OpensNewWindow
           && url.ProtocolIs(u8"file"))
       {
         // A guide topic of this page is shown without a load.
-        if (url.Path() == _pageView->Document().GetURL().Path() && !GuideTopic(url).empty())
+        if (url.Path() == _pageView->Document().GetUrl().Path() && !GuideTopic(url).empty())
         {
           ShowGuide(url);
           return;
@@ -835,13 +832,13 @@ namespace krys
                                 : utf8_string());
         }
       }
-      _context->Logger->Info("Navigation: {} {} {}{}", Narrow(request.Method), Narrow(request.URL),
+      _context->Logger->Info("Navigation: {} {} {}{}", Narrow(request.Method), Narrow(request.Url),
                              Narrow(entries), request.OpensNewWindow ? " (new window)" : "");
       if (auto label = _pageView->Document().GetElementById(u8"last-submission"))
       {
-        utf8_string text = request.IsFormSubmission ? request.Method + u8" " + request.URL
-                           : request.Download       ? u8"Download " + request.URL
-                                                    : u8"Link to " + request.URL;
+        utf8_string text = request.IsFormSubmission ? request.Method + u8" " + request.Url
+                           : request.Download       ? u8"Download " + request.Url
+                                                    : u8"Link to " + request.Url;
         if (request.OpensNewWindow)
         {
           text += u8" (new window)";

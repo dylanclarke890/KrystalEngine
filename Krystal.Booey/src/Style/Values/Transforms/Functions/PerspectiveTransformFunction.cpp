@@ -50,7 +50,7 @@ namespace krys::boo::style
     return AdoptRef(*new PerspectiveTransformFunction(_p));
   }
 
-  Ref<TransformOperation> PerspectiveTransformFunction::ToPlatform(const FloatSize &) const noexcept
+  Ref<TransformOperation> PerspectiveTransformFunction::ToPlatform(const SizeF &) const noexcept
   {
     return krys::SwitchOn(
       _p, [](const css::keywords::None &) -> Ref<TransformOperation>
@@ -69,7 +69,7 @@ namespace krys::boo::style
     return _p == otherPerspective._p;
   }
 
-  void PerspectiveTransformFunction::Apply(TransformationMatrix &transform, const FloatSize &) const noexcept
+  void PerspectiveTransformFunction::Apply(TransformationMatrix &transform, const SizeF &) const noexcept
   {
     if (auto value = _p.TryValue())
     {

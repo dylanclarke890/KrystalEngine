@@ -25,9 +25,9 @@
 
 namespace krys::boo
 {
-  FloatRect SVGInlineFlowBox::CalculateBoundaries() const noexcept
+  RectF SVGInlineFlowBox::CalculateBoundaries() const noexcept
   {
-    FloatRect childRect;
+    RectF childRect;
     for (auto *child = FirstChild(); child; child = child->NextOnLine())
     {
       if (auto *textBox = DynamicDowncast<SVGInlineTextBox>(child))

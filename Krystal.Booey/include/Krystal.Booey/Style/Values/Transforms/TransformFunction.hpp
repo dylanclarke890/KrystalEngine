@@ -34,7 +34,7 @@
 #include "Krystal.Booey/Style/Values/Transforms/Functions/TransformFunctionBase.hpp"
 #include "Krystal.Booey/Style/Values/Transforms/Functions/TransformFunctionWrapper.hpp"
 #include "Krystal.Booey/Style/Values/Types.hpp"
-#include "Krystal.Core/Text/StringBuilder.hpp"
+#include "Krystal.Core/Strings/StringBuilder.hpp"
 
 namespace krys::boo::style
 {
@@ -97,6 +97,6 @@ namespace krys::boo::style
   template <>
   struct ToPlatform<TransformFunction>
   {
-    KRYS_NODISCARD Ref<TransformOperation> operator()(const TransformFunction &, const FloatSize &) noexcept;
+    KRYS_NODISCARD Ref<TransformOperation> operator()(const TransformFunction &, const SizeF &) noexcept;
   };
 }

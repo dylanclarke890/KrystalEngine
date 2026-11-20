@@ -33,12 +33,12 @@
  */
 
 #include "Krystal.Booey/HTML/Canvas/CanvasPath.hpp"
-#include "Krystal.Booey/Graphics/Geometry/FloatRect.hpp"
 #include "Krystal.Booey/Graphics/Geometry/FloatRoundedRect.hpp"
-#include "Krystal.Booey/Graphics/Geometry/FloatSize.hpp"
-#include "Krystal.Booey/Graphics/Transforms/AffineTransform.hpp"
+#include "Krystal.Core/Geometry/AffineTransform.hpp"
+#include "Krystal.Core/Geometry/Rect.hpp"
+#include "Krystal.Core/Geometry/Size.hpp"
 #include "Krystal.Core/Maths/Extras.hpp"
-#include "Krystal.Core/Text/StringBuilder.hpp"
+#include "Krystal.Core/Strings/StringBuilder.hpp"
 #include "Krystal.Core/Types/SmallList.hpp"
 #include "Krystal.Core/Visitor.hpp"
 #include <algorithm>
@@ -78,10 +78,10 @@ namespace krys::boo::html
     }
 
     // 2. Create a new subpath with the specified point as its first (and only) point.
-    _path.MoveTo(FloatPoint(x, y));
+    _path.MoveTo(PointF(x, y));
   }
 
-  void CanvasPath::LineTo(FloatPoint point) noexcept
+  void CanvasPath::LineTo(PointF point) noexcept
   {
     LineTo(point.X(), point.Y());
   }
@@ -100,7 +100,7 @@ namespace krys::boo::html
     }
 
     // 2. If the object's path has no subpaths, then ensure there is a subpath for (x, y).
-    FloatPoint p1 = FloatPoint(x, y);
+    PointF p1 = PointF(x, y);
     if (_path.IsEmpty())
     {
       _path.MoveTo(p1);
@@ -131,15 +131,15 @@ namespace krys::boo::html
     // 2. Ensure there is a subpath for (cpx, cpy).
     if (_path.IsEmpty())
     {
-      _path.MoveTo(FloatPoint(cpx, cpy));
+      _path.MoveTo(PointF(cpx, cpy));
     }
 
     // 3. Connect the last point in the subpath to the given point (x, y) using a quadratic Bézier curve with
     //    control point (cpx, cpy).
     // 4. Add the given point (x, y) to the subpath.
 
-    FloatPoint p1 = FloatPoint(x, y);
-    FloatPoint cp = FloatPoint(cpx, cpy);
+    PointF p1 = PointF(x, y);
+    PointF cp = PointF(cpx, cpy);
     if (p1 != _path.CurrentPoint() || p1 != cp)
     {
       _path.AddQuadCurveTo(cp, p1);
@@ -163,16 +163,16 @@ namespace krys::boo::html
     // 2. Ensure there is a subpath for (cp1x, cp1y).
     if (_path.IsEmpty())
     {
-      _path.MoveTo(FloatPoint(cp1x, cp1y));
+      _path.MoveTo(PointF(cp1x, cp1y));
     }
 
     // 3. Connect the last point in the subpath to the given point (x, y) using a cubic Bézier curve with
     //    control points (cp1x, cp1y) and (cp2x, cp2y).
     // 4. Add the point (x, y) to the subpath.
 
-    FloatPoint p1 = FloatPoint(x, y);
-    FloatPoint cp1 = FloatPoint(cp1x, cp1y);
-    FloatPoint cp2 = FloatPoint(cp2x, cp2y);
+    PointF p1 = PointF(x, y);
+    PointF cp1 = PointF(cp1x, cp1y);
+    PointF cp2 = PointF(cp2x, cp2y);
     if (p1 != _path.CurrentPoint() || p1 != cp1 || p1 != cp2)
     {
       _path.AddBezierCurveTo(cp1, cp2, p1);
@@ -201,8 +201,8 @@ namespace krys::boo::html
       return {};
     }
 
-    FloatPoint p1 = FloatPoint(x1, y1);
-    FloatPoint p2 = FloatPoint(x2, y2);
+    PointF p1 = PointF(x1, y1);
+    PointF p2 = PointF(x2, y2);
 
     // 2. Ensure there is a subpath for (x1, y1).
     // 4. Let the point (x0, y0) be the last point in the subpath, transformed by the inverse of the current
@@ -289,7 +289,7 @@ namespace krys::boo::html
       return {};
     }
 
-    _path.AddArc(FloatPoint(x, y), radius, startAngle, endAngle,
+    _path.AddArc(PointF(x, y), radius, startAngle, endAngle,
                  anticlockwise ? RotationDirection::Counterclockwise : RotationDirection::Clockwise);
     return {};
   }
@@ -321,7 +321,7 @@ namespace krys::boo::html
       AffineTransform transform;
       transform.Translate(x, y).RotateRadians(rotation);
 
-      LineTo(transform.MapPoint(FloatPoint(radiusX * std::cos(startAngle), radiusY * std::sin(startAngle))));
+      LineTo(transform.MapPoint(PointF(radiusX * std::cos(startAngle), radiusY * std::sin(startAngle))));
       return {};
     }
 
@@ -330,14 +330,14 @@ namespace krys::boo::html
       AffineTransform transform;
       transform.Translate(x, y).RotateRadians(rotation);
 
-      LineTo(transform.MapPoint(FloatPoint(radiusX * std::cos(startAngle), radiusY * std::sin(startAngle))));
+      LineTo(transform.MapPoint(PointF(radiusX * std::cos(startAngle), radiusY * std::sin(startAngle))));
 
       if (!anticlockwise)
       {
         for (float angle = startAngle - std::fmod(startAngle, piOverTwoFloat) + piOverTwoFloat;
              angle < endAngle; angle += piOverTwoFloat)
         {
-          LineTo(transform.MapPoint(FloatPoint(radiusX * std::cos(angle), radiusY * std::sin(angle))));
+          LineTo(transform.MapPoint(PointF(radiusX * std::cos(angle), radiusY * std::sin(angle))));
         }
       }
       else
@@ -345,15 +345,15 @@ namespace krys::boo::html
         for (float angle = startAngle - std::fmod(startAngle, piOverTwoFloat); angle > endAngle;
              angle -= piOverTwoFloat)
         {
-          LineTo(transform.MapPoint(FloatPoint(radiusX * std::cos(angle), radiusY * std::sin(angle))));
+          LineTo(transform.MapPoint(PointF(radiusX * std::cos(angle), radiusY * std::sin(angle))));
         }
       }
 
-      LineTo(transform.MapPoint(FloatPoint(radiusX * std::cos(endAngle), radiusY * std::sin(endAngle))));
+      LineTo(transform.MapPoint(PointF(radiusX * std::cos(endAngle), radiusY * std::sin(endAngle))));
       return {};
     }
 
-    _path.AddEllipse(FloatPoint(x, y), radiusX, radiusY, rotation, startAngle, endAngle,
+    _path.AddEllipse(PointF(x, y), radiusX, radiusY, rotation, startAngle, endAngle,
                      anticlockwise ? RotationDirection::Counterclockwise : RotationDirection::Clockwise);
     return {};
   }
@@ -375,7 +375,7 @@ namespace krys::boo::html
     // (A rectangle with no area is its new subpath, as stroking prunes the rest.)
     if (!width && !height)
     {
-      _path.MoveTo(FloatPoint(x, y));
+      _path.MoveTo(PointF(x, y));
       return;
     }
 
@@ -383,7 +383,7 @@ namespace krys::boo::html
     //    order, with those four points connected by straight lines.
     // 3. Mark the subpath as closed.
     // 4. Create a new subpath with the point (x, y) as the only point in the subpath.
-    _path.AddRect(FloatRect(x, y, width, height));
+    _path.AddRect(RectF(x, y, width, height));
   }
 
   ExceptionOr<void> CanvasPath::RoundRect(float x, float y, float width, float height,
@@ -415,7 +415,7 @@ namespace krys::boo::html
     }
 
     // 4. Let normalizedRadii be an empty list.
-    SmallList<FloatPoint, 4> normalizedRadii;
+    SmallList<PointF, 4> normalizedRadii;
 
     // 5. For each radius of radii:
     for (const auto &radius : radii)
@@ -478,7 +478,7 @@ namespace krys::boo::html
     }
 
     // 6. Let upperLeft, upperRight, lowerRight, and lowerLeft be null.
-    FloatPoint upperLeft, upperRight, lowerRight, lowerLeft;
+    PointF upperLeft, upperRight, lowerRight, lowerLeft;
 
     switch (normalizedRadii.size())
     {
@@ -570,7 +570,7 @@ namespace krys::boo::html
     if (clockwise)
     {
       _path.AddRoundedRect(FloatRoundedRect {
-        FloatRect(x, y, width, height),
+        RectF(x, y, width, height),
         {upperLeft.X(), upperLeft.Y()},
         {upperRight.X(), upperRight.Y()},
         {lowerLeft.X(), lowerLeft.Y()},

@@ -65,7 +65,7 @@ namespace krys::boo
       return textColor;
     }
 
-    if (textColor.Luminance() > 0.5)
+    if (RelativeLuminance(textColor) > 0.5)
     {
       return textColor.Darkened();
     }

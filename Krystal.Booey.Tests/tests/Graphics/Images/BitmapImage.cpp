@@ -1,14 +1,14 @@
 ﻿#include "Krystal.Booey/Graphics/Images/BitmapImage.hpp"
 #include "catch2/catch_test_macros.hpp"
-#include "Krystal.Booey.Tests/Platform/ImageDecoders/AnimatedImages.hpp"
-#include "Krystal.Booey.Tests/Platform/ImageDecoders/EXIFImages.hpp"
-#include "Krystal.Booey.Tests/Platform/ImageDecoders/TestImages.hpp"
 #include "Krystal.Booey/Graphics/DisplayLists/DisplayList.hpp"
 #include "Krystal.Booey/Graphics/DisplayLists/DisplayListItems.hpp"
 #include "Krystal.Booey/Graphics/DisplayLists/DisplayListRecorderImpl.hpp"
 #include "Krystal.Booey/Graphics/Images/ImageObserver.hpp"
 #include "Krystal.Booey/Graphics/Images/NativeImage.hpp"
 #include "Krystal.Booey/HTML/EventLoop/EventLoop.hpp"
+#include "Krystal.Image.Tests/AnimatedImages.hpp"
+#include "Krystal.Image.Tests/EXIFImages.hpp"
+#include "Krystal.Image.Tests/TestImages.hpp"
 
 namespace krys::boo::tests
 {
@@ -21,9 +21,9 @@ namespace krys::boo::tests
       int Draws {0};
       int FramesAvailable {0};
       int64 DecodedSize {0};
-      List<EncodedDataStatus> Statuses;
+      List<img::EncodedDataStatus> Statuses;
 
-      KRYS_NODISCARD url::URL SourceUrl() const noexcept override
+      KRYS_NODISCARD net::Url SourceUrl() const noexcept override
       {
         return {};
       }
@@ -38,7 +38,7 @@ namespace krys::boo::tests
         return 0;
       }
 
-      void EncodedDataStatusChanged(const Image &, EncodedDataStatus status) noexcept override
+      void EncodedDataStatusChanged(const Image &, img::EncodedDataStatus status) noexcept override
       {
         Statuses.push_back(status);
       }
@@ -53,8 +53,8 @@ namespace krys::boo::tests
         ++Draws;
       }
 
-      void ImageFrameAvailable(const Image &, ImageAnimatingState state, const IntRect *,
-                               DecodingStatus) noexcept override
+      void ImageFrameAvailable(const Image &, ImageAnimatingState state, const RectI *,
+                               img::DecodingStatus) noexcept override
       {
         if (state == ImageAnimatingState::Yes)
         {
@@ -62,7 +62,7 @@ namespace krys::boo::tests
         }
       }
 
-      void ChangedInRect(const Image &, const IntRect *) noexcept override
+      void ChangedInRect(const Image &, const RectI *) noexcept override
       {
       }
 
@@ -84,9 +84,9 @@ namespace krys::boo::tests
     }
 
     KRYS_NODISCARD Ref<const display_list::DisplayList> Record(Image &image,
-                                                               const FloatRect &destination) noexcept
+                                                               const RectF &destination) noexcept
     {
-      display_list::RecorderImpl recorder(FloatSize {100, 100});
+      display_list::RecorderImpl recorder(SizeF {100, 100});
       (void)recorder.DrawImage(image, destination);
       return recorder.TakeDisplayList();
     }
@@ -102,19 +102,20 @@ namespace krys::boo::tests
   {
     auto image = BitmapImage::Create();
     CHECK(image->IsNull());
-    CHECK(image->SetData(SharedBuffer::Create(images::PNG), true) == EncodedDataStatus::Complete);
+    CHECK(image->SetData(SharedBuffer::Create(img::tests::images::PNG), true)
+          == img::EncodedDataStatus::Complete);
 
     CHECK(Is<BitmapImage>(static_cast<Image &>(*image)));
-    CHECK(image->Size() == FloatSize(3, 2));
+    CHECK(image->Size() == SizeF(3, 2));
     CHECK(image->FrameCount() == 1u);
     CHECK_FALSE(image->IsAnimated());
     CHECK(image->FilenameExtension() == u8"png");
     CHECK_FALSE(image->CurrentFrameKnownToBeOpaque());
-    CHECK(image->Orientation() == ImageOrientation::Orientation::None);
+    CHECK(image->Orientation() == img::ImageOrientation::Orientation::None);
 
     auto nativeImage = image->GetNativeImage();
     REQUIRE(nativeImage);
-    CHECK(nativeImage->Size() == IntSize(3, 2));
+    CHECK(nativeImage->Size() == SizeI(3, 2));
     CHECK(PixelAt(*nativeImage, 2, 0) == 0xFF'00'00'FFu);
     // The frame is complete once it's decoded.
     CHECK(image->CurrentFrameIsComplete());
@@ -129,7 +130,8 @@ namespace krys::boo::tests
 
     const uint8 text[] = "definitely not an image";
     auto image = BitmapImage::Create();
-    CHECK(image->SetData(SharedBuffer::Create(Span<const uint8> {text}), true) == EncodedDataStatus::Unknown);
+    CHECK(image->SetData(SharedBuffer::Create(Span<const uint8> {text}), true)
+          == img::EncodedDataStatus::Unknown);
     CHECK(image->IsNull());
     CHECK_FALSE(image->GetNativeImage());
     CHECK(Record(*image, {0, 0, 10, 10})->Items().empty());
@@ -137,20 +139,20 @@ namespace krys::boo::tests
 
   TEST_CASE("BitmapImage: the EXIF orientation sizes and transforms the image", "[Graphics][BitmapImage]")
   {
-    auto image = ImageFrom(images::RotatedJPEG);
-    CHECK(image->Orientation() == ImageOrientation::Orientation::OriginRightTop);
-    CHECK(image->Size() == FloatSize(8, 16));
-    CHECK(image->Size(ImageOrientation::Orientation::None) == FloatSize(16, 8));
+    auto image = ImageFrom(img::tests::images::RotatedJPEG);
+    CHECK(image->Orientation() == img::ImageOrientation::Orientation::OriginRightTop);
+    CHECK(image->Size() == SizeF(8, 16));
+    CHECK(image->Size(img::ImageOrientation::Orientation::None) == SizeF(16, 8));
 
     SECTION("Drawing passes the orientation on")
     {
       auto displayList = Record(*image, {0, 0, 8, 16});
       REQUIRE(displayList->Items().size() == 1u);
       const auto &item = std::get<display_list::DrawNativeImage>(displayList->Items()[0]);
-      CHECK(item.Options().Orientation() == ImageOrientation::Orientation::OriginRightTop);
-      CHECK(item.DestinationRect() == FloatRect(0, 0, 8, 16));
-      CHECK(item.Source() == FloatRect(0, 0, 8, 16));
-      CHECK(item.GetNativeImage().Size() == IntSize(16, 8));
+      CHECK(item.Options().Orientation() == img::ImageOrientation::Orientation::OriginRightTop);
+      CHECK(item.DestinationRect() == RectF(0, 0, 8, 16));
+      CHECK(item.Source() == RectF(0, 0, 8, 16));
+      CHECK(item.GetNativeImage().Size() == SizeI(16, 8));
     }
 
     SECTION("The pre-transformed image is rotated")
@@ -158,7 +160,7 @@ namespace krys::boo::tests
       // Red on the left and blue on the right, turned clockwise: red on top and blue below.
       auto oriented = static_cast<Image &>(*image).CurrentPreTransformedNativeImage();
       REQUIRE(oriented);
-      CHECK(oriented->Size() == IntSize(8, 16));
+      CHECK(oriented->Size() == SizeI(8, 16));
       auto red = PixelAt(*oriented, 4, 2);
       auto blue = PixelAt(*oriented, 4, 13);
       CHECK(((red >> 16) & 0xFFu) > 0xE0u);
@@ -170,30 +172,30 @@ namespace krys::boo::tests
 
   TEST_CASE("BitmapImage: the density-corrected size sizes and scales the image", "[Graphics][BitmapImage]")
   {
-    auto image = ImageFrom(images::DensityJPEG);
+    auto image = ImageFrom(img::tests::images::DensityJPEG);
     CHECK(image->HasDensityCorrectedSize());
-    CHECK(image->Size() == FloatSize(8, 4));
-    CHECK(image->SourceSize() == FloatSize(16, 8));
+    CHECK(image->Size() == SizeF(8, 4));
+    CHECK(image->SourceSize() == SizeF(16, 8));
 
     SECTION("Drawing maps the source rectangle to the decoded pixels")
     {
       auto displayList = Record(*image, {0, 0, 8, 4});
       REQUIRE(displayList->Items().size() == 1u);
       const auto &item = std::get<display_list::DrawNativeImage>(displayList->Items()[0]);
-      CHECK(item.DestinationRect() == FloatRect(0, 0, 8, 4));
-      CHECK(item.Source() == FloatRect(0, 0, 16, 8));
+      CHECK(item.DestinationRect() == RectF(0, 0, 8, 4));
+      CHECK(item.Source() == RectF(0, 0, 16, 8));
     }
 
     SECTION("A pattern tiles the full-resolution pixels, scaled to it")
     {
-      display_list::RecorderImpl recorder(FloatSize {100, 100});
+      display_list::RecorderImpl recorder(SizeF {100, 100});
       static_cast<Image &>(*image).DrawPattern(recorder, {0, 0, 32, 8}, {0, 0, 8, 4}, AffineTransform(), {},
                                                {}, {});
       auto displayList = recorder.TakeDisplayList();
       REQUIRE(displayList->Items().size() == 1u);
       const auto &item = std::get<display_list::DrawPatternNativeImage>(displayList->Items()[0]);
-      CHECK(item.GetNativeImage().Size() == IntSize(16, 8));
-      CHECK(item.TileRect() == FloatRect(0, 0, 16, 8));
+      CHECK(item.GetNativeImage().Size() == SizeI(16, 8));
+      CHECK(item.TileRect() == RectF(0, 0, 16, 8));
       CHECK(item.PatternTransform() == AffineTransform().Scale(0.5, 0.5));
     }
 
@@ -202,7 +204,7 @@ namespace krys::boo::tests
       // Red on the left and blue on the right, each averaged down.
       auto scaled = static_cast<Image &>(*image).CurrentPreTransformedNativeImage();
       REQUIRE(scaled);
-      CHECK(scaled->Size() == IntSize(8, 4));
+      CHECK(scaled->Size() == SizeI(8, 4));
       auto red = PixelAt(*scaled, 1, 1);
       auto blue = PixelAt(*scaled, 6, 1);
       CHECK(((red >> 16) & 0xFFu) > 0xE0u);
@@ -214,32 +216,32 @@ namespace krys::boo::tests
 
   TEST_CASE("BitmapImage: drawing records native image draws", "[Graphics][BitmapImage]")
   {
-    auto image = ImageFrom(images::PNG);
+    auto image = ImageFrom(img::tests::images::PNG);
 
     SECTION("An image")
     {
       auto displayList = Record(*image, {10, 10, 30, 20});
       REQUIRE(displayList->Items().size() == 1u);
       const auto &item = std::get<display_list::DrawNativeImage>(displayList->Items()[0]);
-      CHECK(item.DestinationRect() == FloatRect(10, 10, 30, 20));
-      CHECK(item.Source() == FloatRect(0, 0, 3, 2));
+      CHECK(item.DestinationRect() == RectF(10, 10, 30, 20));
+      CHECK(item.Source() == RectF(0, 0, 3, 2));
       CHECK(&item.GetNativeImage() == image->GetNativeImage().get());
     }
 
     SECTION("A tiled image")
     {
-      display_list::RecorderImpl recorder(FloatSize {100, 100});
+      display_list::RecorderImpl recorder(SizeF {100, 100});
       (void)recorder.DrawTiledImage(*image, {0, 0, 30, 20}, {}, {3, 2}, {});
       auto displayList = recorder.TakeDisplayList();
       REQUIRE(displayList->Items().size() == 1u);
       const auto &item = std::get<display_list::DrawPatternNativeImage>(displayList->Items()[0]);
-      CHECK(item.DestRect() == FloatRect(0, 0, 30, 20));
-      CHECK(item.TileRect() == FloatRect(0, 0, 3, 2));
+      CHECK(item.DestRect() == RectF(0, 0, 30, 20));
+      CHECK(item.TileRect() == RectF(0, 0, 3, 2));
     }
 
     SECTION("A single pixel draws as its colour")
     {
-      auto solid = ImageFrom(images::SolidPNG);
+      auto solid = ImageFrom(img::tests::images::SolidPNG);
       auto displayList = Record(*solid, {0, 0, 10, 10});
       bool filled = false;
       for (const auto &item : displayList->Items())
@@ -254,9 +256,9 @@ namespace krys::boo::tests
   TEST_CASE("BitmapImage: tells its observer about data, decoding and drawing", "[Graphics][BitmapImage]")
   {
     auto observer = AdoptRef(*new CountingObserver());
-    auto image = ImageFrom(images::PNG, observer.get());
+    auto image = ImageFrom(img::tests::images::PNG, observer.get());
     REQUIRE_FALSE(observer->Statuses.empty());
-    CHECK(observer->Statuses.back() == EncodedDataStatus::Complete);
+    CHECK(observer->Statuses.back() == img::EncodedDataStatus::Complete);
     CHECK(image->MimeType() == u8"image/png");
 
     (void)Record(*image, {0, 0, 3, 2});
@@ -274,19 +276,19 @@ namespace krys::boo::tests
 
   TEST_CASE("BitmapImage: decoding calls back once the frame is decoded", "[Graphics][BitmapImage]")
   {
-    auto image = ImageFrom(images::GIF);
-    Maybe<DecodingStatus> status;
-    image->Decode([&](DecodingStatus decodingStatus) { status = decodingStatus; });
-    CHECK(status == DecodingStatus::Complete);
+    auto image = ImageFrom(img::tests::images::GIF);
+    Maybe<img::DecodingStatus> status;
+    image->Decode([&](img::DecodingStatus decodingStatus) { status = decodingStatus; });
+    CHECK(status == img::DecodingStatus::Complete);
   }
 
   TEST_CASE("BitmapImage: made from a native image", "[Graphics][BitmapImage]")
   {
-    auto pixels = AdoptRef(*new PixelData(List<uint32> {0xFF'FF'00'00u, 0xFF'00'FF'00u}));
-    PlatformImagePtr platformImage = AdoptRef(*new PlatformImage(IntSize(2, 1), krys::move(pixels), true));
+    auto pixels = AdoptRef(*new img::PixelData(List<uint32> {0xFF'FF'00'00u, 0xFF'00'FF'00u}));
+    PlatformImagePtr platformImage = AdoptRef(*new PlatformImage(SizeI(2, 1), krys::move(pixels), true));
     auto image = BitmapImage::Create(krys::move(platformImage));
     REQUIRE(image);
-    CHECK(image->Size() == FloatSize(2, 1));
+    CHECK(image->Size() == SizeF(2, 1));
     auto nativeImage = image->GetNativeImage();
     REQUIRE(nativeImage);
     CHECK(PixelAt(*nativeImage, 1, 0) == 0xFF'00'FF'00u);
@@ -300,7 +302,8 @@ namespace krys::boo::tests
     auto &loop = html::EventLoop::Current();
     loop.RunUntilIdle();
 
-    for (auto bytes : {images::AnimatedGIF, images::AnimatedPNG, images::AnimatedWebP})
+    for (auto bytes :
+         {img::tests::images::AnimatedGIF, img::tests::images::AnimatedPNG, img::tests::images::AnimatedWebP})
     {
       auto observer = AdoptRef(*new CountingObserver());
       auto image = ImageFrom(bytes, observer.get());
@@ -310,7 +313,7 @@ namespace krys::boo::tests
 
       // Drawing starts the animation: the first frame shows for its 100ms.
       auto start = loop.Now();
-      (void)Record(*image, FloatRect(0, 0, 2, 2));
+      (void)Record(*image, RectF(0, 0, 2, 2));
       CHECK(image->IsAnimating());
       loop.Run(start + 50ms);
       CHECK(image->CurrentFrameIndex() == 0u);
@@ -323,10 +326,10 @@ namespace krys::boo::tests
       CHECK(image->CurrentFrameIndex() == 1u);
 
       // Drawn late, the frame shows for what's left of its time (none, so it advances at once).
-      (void)Record(*image, FloatRect(0, 0, 2, 2));
+      (void)Record(*image, RectF(0, 0, 2, 2));
       loop.Run(start + 250ms);
       CHECK(image->CurrentFrameIndex() == 2u);
-      (void)Record(*image, FloatRect(0, 0, 2, 2));
+      (void)Record(*image, RectF(0, 0, 2, 2));
       loop.Run(start + 350ms);
       CHECK(image->CurrentFrameIndex() == 0u);
 
@@ -342,15 +345,15 @@ namespace krys::boo::tests
     auto &loop = html::EventLoop::Current();
     loop.RunUntilIdle();
 
-    auto image = ImageFrom(images::OnceGIF);
+    auto image = ImageFrom(img::tests::images::OnceGIF);
     REQUIRE(image->IsAnimated());
     auto start = loop.Now();
-    (void)Record(*image, FloatRect(0, 0, 2, 2));
+    (void)Record(*image, RectF(0, 0, 2, 2));
     loop.Run(start + 100ms);
     CHECK(image->CurrentFrameIndex() == 1u);
 
     // It played once, so it stays on its last frame.
-    (void)Record(*image, FloatRect(0, 0, 2, 2));
+    (void)Record(*image, RectF(0, 0, 2, 2));
     CHECK_FALSE(image->IsAnimating());
     loop.Run(start + 300ms);
     CHECK(image->CurrentFrameIndex() == 1u);

@@ -31,6 +31,7 @@
 
 #pragma once
 
+#include "Krystal.Booey/Graphics/Geometry/LayoutGeometryForward.hpp"
 #include "Krystal.Core/Attributes.hpp"
 #include "Krystal.Core/Hash.hpp"
 #include "Krystal.Core/Maths/Extras.hpp"
@@ -804,6 +805,18 @@ namespace krys::boo
 
 namespace krys
 {
+  // Slightly smaller than the true maximum, so that pixel snapping can round up to the nearest `RectI`
+  // without overflowing.
+  constexpr boo::LayoutUnit GeometryTraits<boo::LayoutUnit>::InfiniteRectMin() noexcept
+  {
+    return boo::LayoutUnit::NearlyMin() / 2;
+  }
+
+  constexpr boo::LayoutUnit GeometryTraits<boo::LayoutUnit>::InfiniteRectExtent() noexcept
+  {
+    return boo::LayoutUnit::NearlyMax();
+  }
+
   template <>
   struct DefaultHash<boo::LayoutUnit>
   {

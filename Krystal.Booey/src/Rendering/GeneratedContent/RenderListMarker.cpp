@@ -38,9 +38,9 @@
 #include "Krystal.Booey/Style/Scope/Scope.hpp"
 #include "Krystal.Booey/Style/Values/Lists/ListStyleType.hpp"
 #include "Krystal.Core/Maths/Extras.hpp"
-#include "Krystal.Core/Text/CodePointIterator.hpp"
-#include "Krystal.Core/Text/StringBuilder.hpp"
-#include <unicode/uchar.h>
+#include "Krystal.Core/Strings/CodePointIterator.hpp"
+#include "Krystal.Core/Strings/StringBuilder.hpp"
+#include "Krystal.Text/Bidi.hpp"
 
 namespace krys::boo
 {
@@ -62,21 +62,21 @@ namespace krys::boo
       return needsLayout ? style::Difference {style::DifferenceResult::Layout} : diff;
     }
 
-    KRYS_NODISCARD TextDirection ContentTextDirection(utf8_stringview content) noexcept
+    KRYS_NODISCARD text::TextDirection ContentTextDirection(utf8_stringview content) noexcept
     {
       if (content.empty())
       {
-        return TextDirection::LTR;
+        return text::TextDirection::LTR;
       }
       // FIXME: Depending on the string value, we may need the real bidi algorithm. (rdar://106139180)
       // Also we may need to start checking for the entire content for directionality (and whether we need to
-      // check for additional directionality characters like U_RIGHT_TO_LEFT_EMBEDDING).
-      auto bidiCategory = u_charDirection(static_cast<UChar32>(*text::CodePointIterator(content)));
-      if (bidiCategory != U_RIGHT_TO_LEFT && bidiCategory != U_RIGHT_TO_LEFT_ARABIC)
+      // check for additional directionality characters like text::BidiClass::RightToLeftEmbedding).
+      auto bidiCategory = text::GetBidiClass(*text::CodePointIterator(content));
+      if (bidiCategory != text::BidiClass::RightToLeft && bidiCategory != text::BidiClass::RightToLeftArabic)
       {
-        return TextDirection::LTR;
+        return text::TextDirection::LTR;
       }
-      return TextDirection::RTL;
+      return text::TextDirection::RTL;
     }
 
     enum class SnapDirection : uint8
@@ -119,10 +119,10 @@ namespace krys::boo
       krys_debug_assert(!textContent.IsEmpty());
 
       // Since the bidi algorithm doesn't run on this text, we instead reorder the characters here.
-      // We use u_charDirection to figure out if the marker text is RTL and assume the suffix matches the
+      // We use text::GetBidiClass to figure out if the marker text is RTL and assume the suffix matches the
       // surrounding direction.
       StringBuilder textForRun;
-      if (textContent.TextDirection == TextDirection::LTR)
+      if (textContent.TextDirection == text::TextDirection::LTR)
       {
         if (style.GetWritingMode().IsBidiLTR())
         {
@@ -243,7 +243,7 @@ namespace krys::boo
       {
         LayoutRect selectionRect = LocalSelectionRect();
         selectionRect.MoveBy(boxOrigin);
-        context.FillRect(FloatRect(SnappedIntRect(selectionRect)), _listItem->SelectionBackgroundColor());
+        context.FillRect(RectF(SnappedRectI(selectionRect)), _listItem->SelectionBackgroundColor());
       }
       return;
     }
@@ -252,7 +252,7 @@ namespace krys::boo
     {
       LayoutRect selectionRect = LocalSelectionRect();
       selectionRect.MoveBy(boxOrigin);
-      context.FillRect(FloatRect(SnappedIntRect(selectionRect)), _listItem->SelectionBackgroundColor());
+      context.FillRect(RectF(SnappedRectI(selectionRect)), _listItem->SelectionBackgroundColor());
     }
 
     auto color = Style().ColorResolvingCurrentColor(css::PropertyId::Color);
@@ -285,24 +285,23 @@ namespace krys::boo
     GraphicsContextStateSaver stateSaver(context, false);
     if (!GetWritingMode().IsHorizontal())
     {
-      markerRect.MoveBy(-FloatPoint(boxOrigin));
+      markerRect.MoveBy(-PointF(boxOrigin));
       markerRect = markerRect.TransposedRect();
-      markerRect.MoveBy(FloatPoint(box.X(), box.Y() - LogicalHeight()));
+      markerRect.MoveBy(PointF(box.X(), box.Y() - LogicalHeight()));
       stateSaver.Save();
       context.Translate(markerRect.X(), markerRect.MaxY());
       context.Rotate(deg2rad(90.f));
       context.Translate(-markerRect.X(), -markerRect.MaxY());
     }
 
-    auto textOrigin =
-      FloatPoint {markerRect.X(), markerRect.Y() + Snap(Style().MetricsOfPrimaryFont().Ascent())};
+    auto textOrigin = PointF {markerRect.X(), markerRect.Y() + Snap(Style().MetricsOfPrimaryFont().Ascent())};
     textOrigin = RoundPointToDevicePixels(LayoutPoint(textOrigin), GetDocument().DeviceScaleFactor(),
                                           GetWritingMode().IsLogicalLeftInlineStart());
     auto text = TextForRun(_textContent, Style());
     context.DrawText(Style().GetFontCascade(), RenderBlock::ConstructTextRun(text, Style()), textOrigin);
   }
 
-  FloatRect RenderListMarker::RelativeMarkerRect() noexcept
+  RectF RenderListMarker::RelativeMarkerRect() noexcept
   {
     if (IsImage())
     {
@@ -310,7 +309,7 @@ namespace krys::boo
       return {0.f, 0.f, imageSize.Width(), imageSize.Height()};
     }
 
-    FloatRect relativeRect;
+    RectF relativeRect;
     if (WidthUsesMetricsOfPrimaryFont())
     {
       auto &fontMetrics = Style().MetricsOfPrimaryFont();
@@ -420,11 +419,11 @@ namespace krys::boo
       LayoutSize defaultBulletSize(bulletWidth, bulletWidth);
       LayoutSize imageSize =
         CalculateImageIntrinsicDimensions(_image.get(), defaultBulletSize, ScaleByUsedZoom::No);
-      _image->SetContainerContextForRenderer(*this, FloatSize(imageSize), Style().UsedZoom());
+      _image->SetContainerContextForRenderer(*this, SizeF(imageSize), Style().UsedZoom());
       _textContent = {
         .TextWithSuffix = {},
         .TextWithoutSuffixLength = 0,
-        .TextDirection = TextDirection::LTR,
+        .TextDirection = text::TextDirection::LTR,
       };
       return;
     }
@@ -435,7 +434,7 @@ namespace krys::boo
         _textContent = {
           .TextWithSuffix = u8" ",
           .TextWithoutSuffixLength = 0,
-          .TextDirection = TextDirection::LTR,
+          .TextDirection = text::TextDirection::LTR,
         };
       },
       [&](const CSSOMStringAtom &identifier)
@@ -637,7 +636,7 @@ namespace krys::boo
             Snap(primaryFontAscentAndDescent.second + halfLeading, SnapDirection::Ceil)};
   }
 
-  void RenderListMarker::ImageChanged(WrappedImagePtr o, const IntRect *rect) noexcept
+  void RenderListMarker::ImageChanged(WrappedImagePtr o, const RectI *rect) noexcept
   {
     if (Parent())
     {

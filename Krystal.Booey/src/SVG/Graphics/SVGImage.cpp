@@ -28,7 +28,6 @@
 #include "Krystal.Booey/SVG/Graphics/SVGImage.hpp"
 #include "Krystal.Booey/DOM/Algorithms/TreeQueries.hpp"
 #include "Krystal.Booey/DOM/Nodes/Document.hpp"
-#include "Krystal.Booey/Graphics/Geometry/IntRect.hpp"
 #include "Krystal.Booey/Graphics/GraphicsContext.hpp"
 #include "Krystal.Booey/Graphics/ImageBuffers/ImageBuffer.hpp"
 #include "Krystal.Booey/Loader/DocumentLoader.hpp"
@@ -45,6 +44,7 @@
 #include "Krystal.Booey/SVG/Elements/SVGForeignObjectElement.hpp"
 #include "Krystal.Booey/SVG/Elements/SVGSvgElement.hpp"
 #include "Krystal.Booey/SVG/Graphics/SVGImageClients.hpp"
+#include "Krystal.Core/Geometry/Rect.hpp"
 
 namespace krys::boo
 {
@@ -100,7 +100,7 @@ namespace krys::boo
     return false;
   }
 
-  void SVGImage::SetContainerSize(const FloatSize &size) noexcept
+  void SVGImage::SetContainerSize(const SizeF &size) noexcept
   {
     RefPtr<SVGSvgElement> rootElement = RootElement();
     if (!rootElement || !rootElement->Renderer() || !rootElement->Renderer()->IsLegacyRenderSVGRoot())
@@ -111,10 +111,10 @@ namespace krys::boo
     RefPtr<LocalFrameView> view = ShareRefPtr(FrameView());
     view->Resize(ContainerSize());
 
-    Downcast<LegacyRenderSVGRoot>(*rootElement->Renderer()).SetContainerSize(IntSize(size));
+    Downcast<LegacyRenderSVGRoot>(*rootElement->Renderer()).SetContainerSize(SizeI(size));
   }
 
-  IntSize SVGImage::ContainerSize() const noexcept
+  SizeI SVGImage::ContainerSize() const noexcept
   {
     RefPtr<SVGSvgElement> rootElement = RootElement();
     if (!rootElement || !rootElement->Renderer() || !rootElement->Renderer()->IsLegacyRenderSVGRoot())
@@ -132,7 +132,7 @@ namespace krys::boo
     // Assure that a container size is always given for a non-identity zoom level.
     krys_debug_assert(rootElement->Renderer()->Style().UsedZoom() == 1);
 
-    FloatSize currentSize;
+    SizeF currentSize;
     if (rootElement->HasIntrinsicWidth() && rootElement->HasIntrinsicHeight())
     {
       currentSize = rootElement->CurrentViewportSizeExcludingZoom();
@@ -145,15 +145,15 @@ namespace krys::boo
     // Use the default CSS intrinsic size if the above failed.
     if (currentSize.IsEmpty())
     {
-      return IntSize(300, 150);
+      return SizeI(300, 150);
     }
 
-    return IntSize(currentSize);
+    return SizeI(currentSize);
   }
 
-  ImageDrawResult SVGImage::DrawForContainer(GraphicsContext &context, FloatSize containerSize,
-                                             float containerZoom, const url::URL &initialFragmentURL,
-                                             const FloatRect &dstRect, const FloatRect &srcRect,
+  ImageDrawResult SVGImage::DrawForContainer(GraphicsContext &context, SizeF containerSize,
+                                             float containerZoom, const net::Url &initialFragmentUrl,
+                                             const RectF &dstRect, const RectF &srcRect,
                                              ImagePaintingOptions options) noexcept
   {
     if (!_page)
@@ -167,20 +167,20 @@ namespace krys::boo
     // relayout.
     SetImageObserver(nullptr);
 
-    IntSize roundedContainerSize = RoundedIntSize(containerSize);
-    SetContainerSize(FloatSize(roundedContainerSize));
+    SizeI roundedContainerSize = RoundedSizeI(containerSize);
+    SetContainerSize(SizeF(roundedContainerSize));
 
-    FloatRect scaledSrc = srcRect;
+    RectF scaledSrc = srcRect;
     scaledSrc.Scale(1 / containerZoom);
 
     // Compensate for the container size rounding by adjusting the source rect.
-    FloatSize adjustedSrcSize = scaledSrc.Size();
+    SizeF adjustedSrcSize = scaledSrc.Size();
     adjustedSrcSize.Scale(static_cast<float>(roundedContainerSize.Width()) / containerSize.Width(),
                           static_cast<float>(roundedContainerSize.Height()) / containerSize.Height());
     scaledSrc.SetSize(adjustedSrcSize);
 
     RefPtr<LocalFrameView> view = ShareRefPtr(FrameView());
-    (void)view->ScrollToFragment(initialFragmentURL);
+    (void)view->ScrollToFragment(initialFragmentUrl);
 
     ImageDrawResult result = Draw(context, dstRect, scaledSrc, options);
 
@@ -188,33 +188,32 @@ namespace krys::boo
     return result;
   }
 
-  void SVGImage::DrawPatternForContainer(GraphicsContext &context, const FloatSize &containerSize,
-                                         float containerZoom, const url::URL &initialFragmentURL,
-                                         const FloatRect &srcRect, const AffineTransform &patternTransform,
-                                         const FloatPoint &phase, const FloatSize &spacing,
-                                         const FloatRect &dstRect, ImagePaintingOptions options) noexcept
+  void SVGImage::DrawPatternForContainer(GraphicsContext &context, const SizeF &containerSize,
+                                         float containerZoom, const net::Url &initialFragmentUrl,
+                                         const RectF &srcRect, const AffineTransform &patternTransform,
+                                         const PointF &phase, const SizeF &spacing, const RectF &dstRect,
+                                         ImagePaintingOptions options) noexcept
   {
-    FloatRect zoomedContainerRect = FloatRect(FloatPoint(), containerSize);
+    RectF zoomedContainerRect = RectF(PointF(), containerSize);
     zoomedContainerRect.Scale(containerZoom);
 
     // The ImageBuffer size needs to be scaled to match the final resolution.
     AffineTransform transform = context.GetCTM();
-    FloatSize imageBufferScale =
-      FloatSize(static_cast<float>(transform.XScale()), static_cast<float>(transform.YScale()));
+    SizeF imageBufferScale =
+      SizeF(static_cast<float>(transform.XScale()), static_cast<float>(transform.YScale()));
     krys_debug_assert(imageBufferScale.Width());
     krys_debug_assert(imageBufferScale.Height());
 
-    FloatRect imageBufferSize = zoomedContainerRect;
+    RectF imageBufferSize = zoomedContainerRect;
     imageBufferSize.Scale(imageBufferScale.Width(), imageBufferScale.Height());
 
-    RefPtr<ImageBuffer> buffer =
-      context.CreateImageBuffer(FloatSize(ExpandedIntSize(imageBufferSize.Size())));
+    RefPtr<ImageBuffer> buffer = context.CreateImageBuffer(SizeF(ExpandedSizeI(imageBufferSize.Size())));
     if (!buffer)
     {
       return;
     }
 
-    DrawForContainer(buffer->Context(), containerSize, containerZoom, initialFragmentURL, imageBufferSize,
+    DrawForContainer(buffer->Context(), containerSize, containerZoom, initialFragmentUrl, imageBufferSize,
                      zoomedContainerRect);
     if (context.DrawLuminanceMask())
     {
@@ -222,7 +221,7 @@ namespace krys::boo
     }
 
     // Adjust the source rect and transform due to the image buffer's scaling.
-    FloatRect scaledSrcRect = srcRect;
+    RectF scaledSrcRect = srcRect;
     scaledSrcRect.Scale(imageBufferScale.Width(), imageBufferScale.Height());
     AffineTransform unscaledPatternTransform(patternTransform);
     unscaledPatternTransform.Scale(1 / imageBufferScale.Width(), 1 / imageBufferScale.Height());
@@ -231,8 +230,8 @@ namespace krys::boo
     context.DrawPattern(*buffer, dstRect, scaledSrcRect, unscaledPatternTransform, phase, spacing, options);
   }
 
-  ImageDrawResult SVGImage::Draw(GraphicsContext &context, const FloatRect &destination,
-                                 const FloatRect &source, ImagePaintingOptions options) noexcept
+  ImageDrawResult SVGImage::Draw(GraphicsContext &context, const RectF &destination, const RectF &source,
+                                 ImagePaintingOptions options) noexcept
   {
     if (!_page)
     {
@@ -244,7 +243,7 @@ namespace krys::boo
 
     GraphicsContextStateSaver stateSaver(context);
     context.SetCompositeOperation(options.GetCompositeOperator(), options.GetBlendMode());
-    context.Clip(FloatRect(EnclosingIntRect(destination)));
+    context.Clip(RectF(EnclosingRectI(destination)));
 
     float alpha = context.Alpha();
     bool compositingRequiresTransparencyLayer =
@@ -258,27 +257,27 @@ namespace krys::boo
 
     auto orientation = options.Orientation();
     // SVG images don't have intrinsic orientation metadata like EXIF, so FromImage defaults to None.
-    if (orientation == ImageOrientation::Orientation::FromImage)
+    if (orientation == img::ImageOrientation::Orientation::FromImage)
     {
-      orientation = ImageOrientation::Orientation::None;
+      orientation = img::ImageOrientation::Orientation::None;
     }
 
-    FloatSize scale(destination.Width() / source.Width(), destination.Height() / source.Height());
+    SizeF scale(destination.Width() / source.Width(), destination.Height() / source.Height());
 
     // We can only draw the entire frame, clipped to the rect we want. So compute where the top left
     // of the image would be if we were drawing without clipping, and translate accordingly.
-    FloatSize topLeftOffset(source.Location().X() * scale.Width(), source.Location().Y() * scale.Height());
-    FloatPoint destOffset = destination.Location() - topLeftOffset;
+    SizeF topLeftOffset(source.Location().X() * scale.Width(), source.Location().Y() * scale.Height());
+    PointF destOffset = destination.Location() - topLeftOffset;
 
     context.Translate(destOffset);
     context.Scale(scale);
 
     // Apply orientation transformation if needed.
-    if (orientation != ImageOrientation::Orientation::None)
+    if (orientation != img::ImageOrientation::Orientation::None)
     {
       auto containerSizeForTransform = ContainerSize();
       auto orientationTransform =
-        ImageOrientation(orientation).TransformFromDefault(FloatSize(containerSizeForTransform));
+        img::ImageOrientation(orientation).TransformFromDefault(SizeF(containerSizeForTransform));
       context.ConcatCTM(orientationTransform);
     }
 
@@ -289,7 +288,7 @@ namespace krys::boo
       view->LayoutContext().Layout();
     }
 
-    view->Paint(context, Intersection(context.ClipBounds(), EnclosingIntRect(source)));
+    view->Paint(context, Intersection(context.ClipBounds(), EnclosingRectI(source)));
 
     if (compositingRequiresTransparencyLayer)
     {
@@ -339,7 +338,7 @@ namespace krys::boo
   }
 
   void SVGImage::ComputeIntrinsicDimensions(float &intrinsicWidth, float &intrinsicHeight,
-                                            FloatSize &intrinsicRatio) noexcept
+                                            SizeF &intrinsicRatio) noexcept
   {
     RefPtr<SVGSvgElement> rootElement = RootElement();
     if (!rootElement)
@@ -359,7 +358,7 @@ namespace krys::boo
     intrinsicRatio = rootElement->ViewBox().Size();
     if (intrinsicRatio.IsEmpty())
     {
-      intrinsicRatio = FloatSize {intrinsicWidth, intrinsicHeight};
+      intrinsicRatio = SizeF {intrinsicWidth, intrinsicHeight};
     }
   }
 
@@ -425,12 +424,12 @@ namespace krys::boo
     return rootElement->HasActiveAnimation();
   }
 
-  EncodedDataStatus SVGImage::DataChanged(bool allDataReceived) noexcept
+  img::EncodedDataStatus SVGImage::DataChanged(bool allDataReceived) noexcept
   {
     // Don't do anything; it is an empty image.
     if (!Data()->Size())
     {
-      return EncodedDataStatus::Complete;
+      return img::EncodedDataStatus::Complete;
     }
 
     if (allDataReceived)
@@ -464,8 +463,8 @@ namespace krys::boo
 
       RefPtr<DocumentLoader> activeDocumentLoader = ShareRefPtr(loader.GetDocumentLoader());
       krys_debug_assert(activeDocumentLoader); // The DocumentLoader should have been created by Init().
-      activeDocumentLoader->Writer().SetMIMEType(u8"image/svg+xml");
-      if (activeDocumentLoader->Writer().Begin(url::URL())) // create the empty document
+      activeDocumentLoader->Writer().SetMimeType(u8"image/svg+xml");
+      if (activeDocumentLoader->Writer().Begin(net::Url())) // create the empty document
       {
         if (auto *document = mainFrame.Document(); document && settings)
         {
@@ -482,10 +481,10 @@ namespace krys::boo
       }
 
       // Set the intrinsic size before a container size is available.
-      _intrinsicSize = FloatSize(ContainerSize());
+      _intrinsicSize = SizeF(ContainerSize());
     }
 
-    return _page ? EncodedDataStatus::Complete : EncodedDataStatus::Unknown;
+    return _page ? img::EncodedDataStatus::Complete : img::EncodedDataStatus::Unknown;
   }
 
   utf8_string SVGImage::FilenameExtension() const noexcept

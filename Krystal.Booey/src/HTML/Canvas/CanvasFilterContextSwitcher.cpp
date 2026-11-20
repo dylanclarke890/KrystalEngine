@@ -25,15 +25,14 @@
 
 #include "Krystal.Booey/HTML/Canvas/CanvasFilterContextSwitcher.hpp"
 #include "Krystal.Booey/Graphics/Filters/Filter.hpp"
-#include "Krystal.Booey/Graphics/Geometry/FloatRect.hpp"
 #include "Krystal.Booey/HTML/Canvas/CanvasLayerContextSwitcher.hpp"
 #include "Krystal.Booey/HTML/Canvas/CanvasRenderingContext2DBase.hpp"
+#include "Krystal.Core/Geometry/Rect.hpp"
 
 namespace krys::boo::html
 {
   UniquePtr<CanvasFilterContextSwitcher>
-    CanvasFilterContextSwitcher::Create(CanvasRenderingContext2DBase &context,
-                                        const FloatRect &bounds) noexcept
+    CanvasFilterContextSwitcher::Create(CanvasRenderingContext2DBase &context, const RectF &bounds) noexcept
   {
     if (context.GetState().Filter.IsNone())
     {
@@ -70,7 +69,7 @@ namespace krys::boo::html
     _context.Restore();
   }
 
-  FloatRect CanvasFilterContextSwitcher::ExpandedBounds() const noexcept
+  RectF CanvasFilterContextSwitcher::ExpandedBounds() const noexcept
   {
     return _context.GetState().TargetSwitcher->ExpandedBounds();
   }

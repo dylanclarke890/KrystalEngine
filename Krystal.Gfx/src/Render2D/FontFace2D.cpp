@@ -134,7 +134,7 @@ namespace krys::gfx
   }
 
   Maybe<GlyphBitmap> FontFace2D::Rasterise(uint32 glyph, float size, float subpixel,
-                                           const Transform2D &linear) const noexcept
+                                           const AffineTransform &linear) const noexcept
   {
     if (!(size > 0.f) || !std::isfinite(size) || !std::isfinite(subpixel) || !UseSize(size))
     {
@@ -143,12 +143,12 @@ namespace krys::gfx
     FT_Face face = _face->Face();
 
     // FreeType's y points up: the transform is flipped into it, and the slant applied before it.
-    const bool transformed = linear.A != 1.f || linear.B != 0.f || linear.C != 0.f || linear.D != 1.f;
+    const bool transformed = linear.A() != 1.f || linear.B() != 0.f || linear.C() != 0.f || linear.D() != 1.f;
     const float slant = _options.SyntheticOblique ? ObliqueSlant : 0.f;
-    FT_Matrix matrix {.xx = ToFixed(linear.A),
-                      .xy = ToFixed(-linear.C + linear.A * slant),
-                      .yx = ToFixed(-linear.B),
-                      .yy = ToFixed(linear.D - linear.B * slant)};
+    FT_Matrix matrix {.xx = ToFixed(static_cast<float>(linear.A())),
+                      .xy = ToFixed(static_cast<float>(-linear.C() + linear.A() * slant)),
+                      .yx = ToFixed(static_cast<float>(-linear.B())),
+                      .yy = ToFixed(static_cast<float>(linear.D() - linear.B() * slant))};
     FT_Vector delta {.x = static_cast<FT_Pos>(std::lround(static_cast<double>(subpixel) * 64.0)), .y = 0};
     FT_Set_Transform(face, transformed || slant != 0.f ? &matrix : nullptr, &delta);
 
@@ -186,10 +186,8 @@ namespace krys::gfx
     }
 
     const FT_Bitmap &bitmap = slot->bitmap;
-    GlyphBitmap result {.Bounds = {.X = slot->bitmap_left,
-                                   .Y = -slot->bitmap_top,
-                                   .Width = bitmap.width,
-                                   .Height = bitmap.rows},
+    GlyphBitmap result {.Bounds = {slot->bitmap_left, -slot->bitmap_top, static_cast<int32>(bitmap.width),
+                                   static_cast<int32>(bitmap.rows)},
                         .Pixels = {},
                         .Colour = bitmap.pixel_mode == FT_PIXEL_MODE_BGRA};
     if (result.Bounds.IsEmpty())

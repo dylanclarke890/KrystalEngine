@@ -73,9 +73,8 @@ namespace krys::ui
 
     /// @brief A texture of @p width by @p height holding @p source of @p texture, stretched to fill it; for
     /// pattern tiles that are part of an image.
-    KRYS_NODISCARD gfx::TextureHandle Copy(gfx::TextureHandle texture, const gfx::Rect2D &source,
-                                           uint32 width, uint32 height,
-                                           gfx::CommandBuffer &commands) noexcept;
+    KRYS_NODISCARD gfx::TextureHandle Copy(gfx::TextureHandle texture, const RectF &source, uint32 width,
+                                           uint32 height, gfx::CommandBuffer &commands) noexcept;
 
     /// @brief A texture holding @p image's pixels (premultiplied), uploaded on first use and kept until a
     /// replay ends after the image is gone; invalid if it can't be. An engine texture's image is its texture,

@@ -103,8 +103,8 @@ namespace krys::boo::tests
 
   TEST_CASE("Position try order axes", "[Rendering][Style]")
   {
-    WritingMode horizontal {StyleWritingMode::HorizontalTb, TextDirection::LTR, TextOrientation::Mixed};
-    WritingMode vertical {StyleWritingMode::VerticalLr, TextDirection::LTR, TextOrientation::Mixed};
+    WritingMode horizontal {StyleWritingMode::HorizontalTb, text::TextDirection::LTR, TextOrientation::Mixed};
+    WritingMode vertical {StyleWritingMode::VerticalLr, text::TextDirection::LTR, TextOrientation::Mixed};
 
     using style::PositionTryOrder;
     CHECK(style::BoxAxisForPositionTryOrder(PositionTryOrder::MostWidth, horizontal)

@@ -58,8 +58,8 @@ namespace krys::boo
   }
 
   MouseRelatedEvent::MouseRelatedEvent(DOMStringAtom type, const UIEventInit &eventInitDict,
-                                       LocalFrameView *view, const DoublePoint &screenLocation,
-                                       const DoublePoint &windowLocation, double movementX, double movementY,
+                                       LocalFrameView *view, const PointD &screenLocation,
+                                       const PointD &windowLocation, double movementX, double movementY,
                                        EnumSet<Modifier> modifiers, Simulated isSimulated) noexcept
       : UIEventWithKeyState(krys::move(type), eventInitDict, modifiers), _view(ShareRefPtr(view)),
         _movementX(movementX), _movementY(movementY), _windowLocation(windowLocation),
@@ -93,11 +93,11 @@ namespace krys::boo
     _view = ShareRefPtr(FrameViewOf(View()));
   }
 
-  void MouseRelatedEvent::Init(bool isSimulated, const DoublePoint &windowLocation) noexcept
+  void MouseRelatedEvent::Init(bool isSimulated, const PointD &windowLocation) noexcept
   {
     if (!isSimulated && _view)
     {
-      DoublePoint absolutePoint = _view->WindowToContents(windowLocation);
+      PointD absolutePoint = _view->WindowToContents(windowLocation);
       _pageLocation = _view->AbsoluteToDocumentPoint(absolutePoint);
       _clientLocation = _view->DocumentToClientPoint(_pageLocation);
     }
@@ -122,14 +122,14 @@ namespace krys::boo
     _relativePositionTarget = nullptr;
   }
 
-  void MouseRelatedEvent::InitCoordinates(const DoublePoint &clientLocation) noexcept
+  void MouseRelatedEvent::InitCoordinates(const PointD &clientLocation) noexcept
   {
     // Set up initial values for coordinates.
     // Correct values are computed lazily, see ComputeRelativePosition.
-    DoubleSize documentToClientOffset;
+    SizeD documentToClientOffset;
     if (_view)
     {
-      documentToClientOffset = DoubleSize(_view->DocumentToClientOffset());
+      documentToClientOffset = SizeD(_view->DocumentToClientOffset());
     }
 
     _clientLocation = clientLocation;
@@ -182,9 +182,9 @@ namespace krys::boo
     if (auto *renderer = targetNode->Renderer())
     {
       auto local = renderer->AbsoluteToLocal(
-        FloatPoint(static_cast<float>(_absoluteLocation.X()), static_cast<float>(_absoluteLocation.Y())),
+        PointF(static_cast<float>(_absoluteLocation.X()), static_cast<float>(_absoluteLocation.Y())),
         {MapCoordinatesMode::UseTransforms});
-      _offsetLocation = DoublePoint(local.X(), local.Y());
+      _offsetLocation = PointD(local.X(), local.Y());
       float scaleFactor = 1 / DocumentToAbsoluteScaleFactor();
       if (scaleFactor != 1.0f)
       {

@@ -82,7 +82,7 @@ namespace krys::boo
     }
   }
 
-  void LocalFrame::CreateView(const IntSize &viewportSize, const IntSize &fixedLayoutSize,
+  void LocalFrame::CreateView(const SizeI &viewportSize, const SizeI &fixedLayoutSize,
                               bool useFixedLayout) noexcept
   {
     SetView(nullptr);
@@ -94,7 +94,7 @@ namespace krys::boo
     SetView(krys::move(frameView));
   }
 
-  VisiblePosition LocalFrame::VisiblePositionForPoint(const IntPoint &framePoint) const noexcept
+  VisiblePosition LocalFrame::VisiblePositionForPoint(const PointI &framePoint) const noexcept
   {
     HitTestResult result = GetEventHandler().HitTestResultAtPoint(
       LayoutPoint(framePoint), {HitTestRequest::Type::ReadOnly, HitTestRequest::Type::Active,
@@ -117,14 +117,14 @@ namespace krys::boo
     return visiblePos;
   }
 
-  boo::Document *LocalFrame::DocumentAtPoint(const IntPoint &point) const noexcept
+  boo::Document *LocalFrame::DocumentAtPoint(const PointI &point) const noexcept
   {
     if (!View())
     {
       return nullptr;
     }
 
-    IntPoint pt = View()->WindowToContents(point);
+    PointI pt = View()->WindowToContents(point);
     HitTestResult result = HitTestResult(LayoutPoint(pt));
 
     if (Document() && Document()->GetRenderView())

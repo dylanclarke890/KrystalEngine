@@ -27,23 +27,21 @@
 #include "Krystal.Booey/CSS/Types/CSSOMString.hpp"
 #include "Krystal.Booey/Graphics/Color/Color.hpp"
 #include "Krystal.Booey/Graphics/Geometry/BoxSides.hpp"
-#include "Krystal.Booey/Graphics/Geometry/DoublePoint.hpp"
-#include "Krystal.Booey/Graphics/Geometry/FloatRect.hpp"
-#include "Krystal.Booey/Graphics/Geometry/FloatSize.hpp"
-#include "Krystal.Booey/Graphics/Geometry/IntRect.hpp"
-#include "Krystal.Booey/Graphics/Geometry/IntSize.hpp"
-#include "Krystal.Booey/Graphics/Geometry/Region.hpp"
 #include "Krystal.Booey/Page/LocalFrameViewLayoutContext.hpp"
 #include "Krystal.Booey/Platform/Scrolling/ScrollableArea.hpp"
 #include "Krystal.Booey/Platform/Scrolling/ScrollTypes.hpp"
-#include "Krystal.Booey/Platform/Timer.hpp"
 #include "Krystal.Booey/Rendering/Layers/RenderLayer.hpp"
 #include "Krystal.Booey/Rendering/Painting/PaintPhase.hpp"
 #include "Krystal.Core/Attributes.hpp"
 #include "Krystal.Core/CanMakeWeakPtr.hpp"
+#include "Krystal.Core/Geometry/Point.hpp"
+#include "Krystal.Core/Geometry/Rect.hpp"
+#include "Krystal.Core/Geometry/Region.hpp"
+#include "Krystal.Core/Geometry/Size.hpp"
 #include "Krystal.Core/Macros.hpp"
 #include "Krystal.Core/Numeric.hpp"
 #include "Krystal.Core/RefCounted.hpp"
+#include "Krystal.Core/Time/Timer.hpp"
 #include "Krystal.Core/Types/EnumSet.hpp"
 #include "Krystal.Core/Types/HashSet.hpp"
 #include "Krystal.Core/Types/Maybe.hpp"
@@ -85,8 +83,8 @@ namespace krys::boo
   /// and what moves out of it is gone.
   struct ScrolledContents
   {
-    IntSize Delta;
-    IntRect Rect;
+    SizeI Delta;
+    RectI Rect;
   };
 
   class LocalFrameView final : public RefCounted<LocalFrameView>,
@@ -115,8 +113,8 @@ namespace krys::boo
 
   private:
     WeakPtr<LocalFrame> _frame;
-    IntRect _frameRect;
-    IntSize _fixedLayoutSize;
+    RectI _frameRect;
+    SizeI _fixedLayoutSize;
     bool _useFixedLayout {false};
     bool _hasFlippedBlockRenderers {false};
     CSSOMStringAtom _mediaType;
@@ -131,13 +129,13 @@ namespace krys::boo
     bool _isTransparent {false};
     bool _contentIsOpaque {false};
     ScrollPosition _scrollPosition;
-    Maybe<IntPoint> _panScrollIconPosition;
+    Maybe<PointI> _panScrollIconPosition;
     /// @brief What needs painting again, in the view's coordinates, since the host last took it.
     Region _damage;
     /// @brief The painted contents the host moves before it paints the damage, as scrolling moved them.
     Maybe<ScrolledContents> _scrolledContents;
     // The root background's painting area while the view paints it under its scrollbars.
-    Maybe<IntRect> _extendedBackgroundRect;
+    Maybe<RectI> _extendedBackgroundRect;
     /// @brief Renderers that paint a background fixed to the viewport (`background-attachment: fixed`): the
     /// contents can't be moved when the view scrolls. Keyed by address; renderers remove themselves.
     HashSet<const RenderElement *> _slowRepaintObjects;
@@ -157,7 +155,7 @@ namespace krys::boo
     /// @brief How the user last scrolled the view, if they did.
     Maybe<UserScrollType> _lastUserScrollType;
     bool _wasEverScrolledExplicitlyByUser {false};
-    IntSize _contentsSize;
+    SizeI _contentsSize;
     bool _inUpdateScrollbars {false};
     uint32 _prohibitsScrollingWhenChangingContentSizeCount {0};
     // The scrollbars catch up after the next layout (a prohibiting scope ended while one was due).
@@ -178,9 +176,9 @@ namespace krys::boo
     bool _canHaveScrollbars {true};
     uint32 _updateScrollbarsPass {0};
     bool _selfVisible {false};
-    IntSize _lastUsedSizeForLayout;
+    SizeI _lastUsedSizeForLayout;
     /// @brief The viewport's size and zoom when `resize` was last scheduled, or at the first layout.
-    IntSize _lastViewportSize;
+    SizeI _lastViewportSize;
     float _lastUsedZoomFactor {1};
     float _lastFrameScaleFactor {1};
 
@@ -191,7 +189,7 @@ namespace krys::boo
 
     KRYS_NODISCARD static Ref<LocalFrameView> Create(LocalFrame &frame) noexcept;
 
-    KRYS_NODISCARD static Ref<LocalFrameView> Create(LocalFrame &frame, const IntSize &initialSize) noexcept;
+    KRYS_NODISCARD static Ref<LocalFrameView> Create(LocalFrame &frame, const SizeI &initialSize) noexcept;
 
     KRYS_NODISCARD LocalFrame &Frame() const noexcept;
 
@@ -233,14 +231,14 @@ namespace krys::boo
     }
 
     /// @brief The view's rect in its parent's coordinates (the host's, for a top-level view).
-    KRYS_NODISCARD const IntRect &FrameRect() const noexcept
+    KRYS_NODISCARD const RectI &FrameRect() const noexcept
     {
       return _frameRect;
     }
 
-    void SetFrameRect(const IntRect &newRect) noexcept;
+    void SetFrameRect(const RectI &newRect) noexcept;
 
-    KRYS_NODISCARD IntSize Size() const noexcept
+    KRYS_NODISCARD SizeI Size() const noexcept
     {
       return _frameRect.Size();
     }
@@ -255,11 +253,11 @@ namespace krys::boo
       return _frameRect.Height();
     }
 
-    void Resize(const IntSize &size) noexcept;
+    void Resize(const SizeI &size) noexcept;
 
     /// @brief The size content is laid out at: the fixed layout size if the view uses it, or else the visible
     /// content size.
-    KRYS_NODISCARD IntSize GetLayoutSize() const noexcept;
+    KRYS_NODISCARD SizeI GetLayoutSize() const noexcept;
 
     KRYS_NODISCARD int32 LayoutWidth() const noexcept
     {
@@ -271,12 +269,12 @@ namespace krys::boo
       return GetLayoutSize().Height();
     }
 
-    KRYS_NODISCARD IntSize FixedLayoutSize() const noexcept
+    KRYS_NODISCARD SizeI FixedLayoutSize() const noexcept
     {
       return _fixedLayoutSize;
     }
 
-    void SetFixedLayoutSize(const IntSize &newSize) noexcept;
+    void SetFixedLayoutSize(const SizeI &newSize) noexcept;
 
     KRYS_NODISCARD bool UseFixedLayout() const noexcept
     {
@@ -297,17 +295,17 @@ namespace krys::boo
 
     /// @brief The part of the visible content (`VisibleContentRect`, the view's size less its scrollbars at
     /// the scroll position) that isn't covered by the host's interface: all of it.
-    KRYS_NODISCARD IntRect UnobscuredContentRect(VisibleContentRectIncludesScrollbars scrollbarInclusion =
-                                                   VisibleContentRectIncludesScrollbars::No) const noexcept;
+    KRYS_NODISCARD RectI UnobscuredContentRect(VisibleContentRectIncludesScrollbars scrollbarInclusion =
+                                                 VisibleContentRectIncludesScrollbars::No) const noexcept;
 
     /// @brief The size of the visible content: the view's, less its scrollbars unless @p scrollbarInclusion
     /// says otherwise.
-    KRYS_NODISCARD IntSize SizeForVisibleContent(VisibleContentRectIncludesScrollbars scrollbarInclusion =
-                                                   VisibleContentRectIncludesScrollbars::No) const noexcept;
+    KRYS_NODISCARD SizeI SizeForVisibleContent(VisibleContentRectIncludesScrollbars scrollbarInclusion =
+                                                 VisibleContentRectIncludesScrollbars::No) const noexcept;
 
     /// @brief The document's scroll position relative to the view's origin: the scroll position (there are no
     /// headers, insets or left scrollbars).
-    KRYS_NODISCARD IntPoint DocumentScrollPositionRelativeToViewOrigin() const noexcept
+    KRYS_NODISCARD PointI DocumentScrollPositionRelativeToViewOrigin() const noexcept
     {
       return _scrollPosition;
     }
@@ -322,18 +320,18 @@ namespace krys::boo
       return _extendedBackgroundRect.has_value();
     }
 
-    KRYS_NODISCARD IntRect ExtendedBackgroundRectForPainting() const noexcept
+    KRYS_NODISCARD RectI ExtendedBackgroundRectForPainting() const noexcept
     {
-      return _extendedBackgroundRect.value_or(IntRect());
+      return _extendedBackgroundRect.value_or(RectI());
     }
 
 #pragma region Scrolling
 
-    void InvalidateScrollbar(Scrollbar &scrollbar, const IntRect &rect) noexcept override;
+    void InvalidateScrollbar(Scrollbar &scrollbar, const RectI &rect) noexcept override;
 
-    void InvalidateScrollCorner(const IntRect &rect) noexcept;
+    void InvalidateScrollCorner(const RectI &rect) noexcept;
 
-    void PaintScrollCorner(GraphicsContext &context, const IntRect &cornerRect) noexcept;
+    void PaintScrollCorner(GraphicsContext &context, const RectI &cornerRect) noexcept;
 
     KRYS_NODISCARD const HashSet<const RenderLayerModelObject *> &ViewportConstrainedObjects() const noexcept
     {
@@ -390,11 +388,11 @@ namespace krys::boo
     KRYS_NODISCARD int32 ScrollbarGutterWidth(bool isHorizontalWritingMode = true) const noexcept;
 
     /// @brief The space the scrollbars take from the content, with what a stable gutter keeps.
-    KRYS_NODISCARD IntSize TotalScrollbarSpace() const noexcept;
+    KRYS_NODISCARD SizeI TotalScrollbarSpace() const noexcept;
 
     KRYS_NODISCARD bool IsHorizontalWritingMode() const noexcept override;
 
-    KRYS_NODISCARD FloatPoint PositionForRootContentLayer() const noexcept;
+    KRYS_NODISCARD PointF PositionForRootContentLayer() const noexcept;
 
     KRYS_NODISCARD LayoutRect
       FixedScrollableAreaBoundsInflatedForScrolling(const LayoutRect &uninflatedBounds) const noexcept;
@@ -435,20 +433,20 @@ namespace krys::boo
     KRYS_NODISCARD ScrollPosition MaximumScrollPosition() const noexcept override;
 
     /// @brief The size of the visible content: the view's size (there are no scrollbars).
-    KRYS_NODISCARD IntSize VisibleSize() const noexcept override
+    KRYS_NODISCARD SizeI VisibleSize() const noexcept override
     {
       return SizeForVisibleContent();
     }
 
     /// @brief The size of the document, as of the last layout.
-    KRYS_NODISCARD IntSize ContentsSize() const noexcept override
+    KRYS_NODISCARD SizeI ContentsSize() const noexcept override
     {
       return _contentsSize;
     }
 
     /// @brief Sets the size of the document, and moves the scroll position back within it (unless scrolling
     /// is prohibited while the contents size changes).
-    void SetContentsSize(const IntSize &newSize) noexcept;
+    void SetContentsSize(const SizeI &newSize) noexcept;
 
     /// @brief Prohibits scrolling as the contents size changes until the result goes.
     KRYS_NODISCARD UniquePtr<boo::ProhibitScrollingWhenChangingContentSizeForScope>
@@ -474,7 +472,7 @@ namespace krys::boo
     }
 
     /// @brief Scrolls by @p delta, clamped to the scroll range.
-    void ScrollBy(const IntSize &delta) noexcept
+    void ScrollBy(const SizeI &delta) noexcept
     {
       SetScrollPosition(GetScrollPosition() + delta);
     }
@@ -524,7 +522,7 @@ namespace krys::boo
 
     /// @brief The corner between the scrollbars, in the view's coordinates (empty without both, or with
     /// overlay scrollbars).
-    KRYS_NODISCARD IntRect ScrollCornerRect() const noexcept override;
+    KRYS_NODISCARD RectI ScrollCornerRect() const noexcept override;
 
     KRYS_NODISCARD Scrollbar *HorizontalScrollbar() const noexcept override
     {
@@ -610,11 +608,11 @@ namespace krys::boo
     KRYS_NODISCARD bool ScrollAnimatorEnabled() const noexcept override;
 
     /// @brief The view's scrollbar at @p windowPoint, if any.
-    KRYS_NODISCARD Scrollbar *ScrollbarAtPoint(const IntPoint &windowPoint) const noexcept;
+    KRYS_NODISCARD Scrollbar *ScrollbarAtPoint(const PointI &windowPoint) const noexcept;
 
     /// @brief Whether @p windowPoint is in the corner past the end of a scrollbar, where a press does
     /// nothing.
-    KRYS_NODISCARD bool IsPointInScrollbarCorner(const IntPoint &windowPoint) const noexcept;
+    KRYS_NODISCARD bool IsPointInScrollbarCorner(const PointI &windowPoint) const noexcept;
 
     /// @brief Whether a scrollbar stops short of the view's edge, leaving a corner.
     KRYS_NODISCARD bool ScrollbarCornerPresent() const noexcept;
@@ -695,23 +693,23 @@ namespace krys::boo
     // FIXME: The visible viewport rect, once there's one.
     void ViewportContentsChanged() noexcept;
 
-    void ResumeVisibleImageAnimations(const IntRect &visibleRect) noexcept;
+    void ResumeVisibleImageAnimations(const RectI &visibleRect) noexcept;
 
     void ResumeVisibleImageAnimations() noexcept;
 
     // Conversions between the view's coordinates (its frame's, at the origin, as there's no widget tree) and
     // the contents'.
-    KRYS_NODISCARD IntPoint ViewToContents(const IntPoint &point) const noexcept;
+    KRYS_NODISCARD PointI ViewToContents(const PointI &point) const noexcept;
 
-    KRYS_NODISCARD IntPoint ContentsToView(const IntPoint &point) const noexcept;
+    KRYS_NODISCARD PointI ContentsToView(const PointI &point) const noexcept;
 
-    KRYS_NODISCARD FloatPoint ViewToContents(const FloatPoint &point) const noexcept;
+    KRYS_NODISCARD PointF ViewToContents(const PointF &point) const noexcept;
 
-    KRYS_NODISCARD FloatPoint ContentsToView(const FloatPoint &point) const noexcept;
+    KRYS_NODISCARD PointF ContentsToView(const PointF &point) const noexcept;
 
-    KRYS_NODISCARD IntRect ViewToContents(IntRect rect) const noexcept;
+    KRYS_NODISCARD RectI ViewToContents(RectI rect) const noexcept;
 
-    KRYS_NODISCARD IntRect ContentsToView(IntRect rect) const noexcept;
+    KRYS_NODISCARD RectI ContentsToView(RectI rect) const noexcept;
 
 #pragma endregion
 
@@ -719,23 +717,23 @@ namespace krys::boo
 
     /// @brief Paints the view's part of @p rect (in the view's coordinates): its visible contents, scrolled
     /// by the scroll position, its scrollbars and the pan scroll icon.
-    void Paint(GraphicsContext &context, const IntRect &rect) noexcept;
+    void Paint(GraphicsContext &context, const RectI &rect) noexcept;
 
     /// @brief How far (in pixels) the mouse can be from the start of pan scrolling without it scrolling.
     constexpr static int32 NoPanScrollRadius = 15;
 
     /// @brief Shows the icon marking the start of pan scrolling, centred on @p iconPosition (in the window).
-    void AddPanScrollIcon(const IntPoint &iconPosition) noexcept;
+    void AddPanScrollIcon(const PointI &iconPosition) noexcept;
 
     void RemovePanScrollIcon() noexcept;
 
     /// @brief Damages @p rect of the contents (in the contents' coordinates): the host paints it again.
     /// @see `ScrollView::repaintContentRectangle`, which tells the host window
     /// (`HostWindow::invalidateContentsAndRootView`).
-    void RepaintContentRectangle(const IntRect &rect) noexcept;
+    void RepaintContentRectangle(const RectI &rect) noexcept;
 
     /// @brief Damages @p rect of the view (in the view's coordinates).
-    void InvalidateRect(const IntRect &rect) noexcept;
+    void InvalidateRect(const RectI &rect) noexcept;
 
     /// @brief Damages the whole view.
     void RepaintEntireView() noexcept;
@@ -786,7 +784,7 @@ namespace krys::boo
 
     /// @brief Paints the document's render view over @p dirtyRect, in the contents' coordinates; only the
     /// node to draw and its descendants, if there's one. Overlay scrollbars paint last, over the content.
-    void PaintContents(GraphicsContext &, const IntRect &dirtyRect) noexcept;
+    void PaintContents(GraphicsContext &, const RectI &dirtyRect) noexcept;
 
     /// @brief Paints only @p node and its descendants from now on, or everything if it's null.
     // FIXME: change this to use the subtreePaint terminology.
@@ -806,7 +804,7 @@ namespace krys::boo
 
     /// @brief Paints @p imageRect for a snapshot, with the composited layers flattened into it: of the
     /// contents (in their coordinates), or of the view as it's scrolled.
-    void PaintContentsForSnapshot(GraphicsContext &context, const IntRect &imageRect,
+    void PaintContentsForSnapshot(GraphicsContext &context, const RectI &imageRect,
                                   SelectionInSnapshot shouldPaintSelection,
                                   CoordinateSpaceForSnapshot coordinateSpace) noexcept;
 
@@ -866,11 +864,11 @@ namespace krys::boo
       return _defaultViewportSizeOverride;
     }
 
-    void SetSizeForCSSDefaultViewportUnits(FloatSize size) noexcept;
+    void SetSizeForCSSDefaultViewportUnits(SizeF size) noexcept;
 
     void ClearSizeOverrideForCSSDefaultViewportUnits() noexcept;
 
-    KRYS_NODISCARD FloatSize SizeForCSSDefaultViewportUnits() const noexcept;
+    KRYS_NODISCARD SizeF SizeForCSSDefaultViewportUnits() const noexcept;
 
     void SetOverrideSizeForCSSSmallViewportUnits(OverrideViewportSize size) noexcept;
 
@@ -879,11 +877,11 @@ namespace krys::boo
       return _smallViewportSizeOverride;
     }
 
-    void SetSizeForCSSSmallViewportUnits(FloatSize size) noexcept;
+    void SetSizeForCSSSmallViewportUnits(SizeF size) noexcept;
 
     void ClearSizeOverrideForCSSSmallViewportUnits() noexcept;
 
-    KRYS_NODISCARD FloatSize SizeForCSSSmallViewportUnits() const noexcept;
+    KRYS_NODISCARD SizeF SizeForCSSSmallViewportUnits() const noexcept;
 
     void SetOverrideSizeForCSSLargeViewportUnits(OverrideViewportSize size) noexcept;
 
@@ -892,13 +890,13 @@ namespace krys::boo
       return _largeViewportSizeOverride;
     }
 
-    void SetSizeForCSSLargeViewportUnits(FloatSize size) noexcept;
+    void SetSizeForCSSLargeViewportUnits(SizeF size) noexcept;
 
     void ClearSizeOverrideForCSSLargeViewportUnits() noexcept;
 
-    KRYS_NODISCARD FloatSize SizeForCSSLargeViewportUnits() const noexcept;
+    KRYS_NODISCARD SizeF SizeForCSSLargeViewportUnits() const noexcept;
 
-    KRYS_NODISCARD FloatSize SizeForCSSDynamicViewportUnits() const noexcept;
+    KRYS_NODISCARD SizeF SizeForCSSDynamicViewportUnits() const noexcept;
 
     /// @brief Scrolls the layers that contain @p renderer so @p absoluteRect is visible as asked.
     /// @return Whether anything was asked to scroll.
@@ -934,7 +932,7 @@ namespace krys::boo
     /// scrolls it into view (the top of the document for `#top` or an empty fragment), and focuses it.
     /// @return Whether there was something to scroll to.
     /// @see https://html.spec.whatwg.org/#scroll-to-the-fragment-identifier
-    bool ScrollToFragment(const url::URL &url) noexcept;
+    bool ScrollToFragment(const net::Url &url) noexcept;
 
     /// @brief Scrolls to the element the fragment @p fragmentIdentifier indicates.
     /// @return Whether there was something to scroll to.
@@ -962,7 +960,7 @@ namespace krys::boo
     KRYS_NODISCARD LayoutUnit MapFromCSSToLayoutUnits(int32 value) const noexcept;
 
     /// @brief The viewport's size, with its scrollbars, as `resize` reports changes to it.
-    KRYS_NODISCARD IntSize SizeForResizeEvent() const noexcept;
+    KRYS_NODISCARD SizeI SizeForResizeEvent() const noexcept;
 
     /// @brief After a layout: has the next rendering update fire `resize` at the window if the viewport's
     /// size or zoom changed since the last time.
@@ -980,41 +978,38 @@ namespace krys::boo
 
     KRYS_NODISCARD float AbsoluteToDocumentScaleFactor(Maybe<float> usedZoom = null) const noexcept;
 
-    KRYS_NODISCARD FloatRect AbsoluteToDocumentRect(FloatRect rect,
-                                                    Maybe<float> usedZoom = null) const noexcept;
+    KRYS_NODISCARD RectF AbsoluteToDocumentRect(RectF rect, Maybe<float> usedZoom = null) const noexcept;
 
     /// @brief The offset from document coordinates to client (viewport) ones.
-    KRYS_NODISCARD FloatSize DocumentToClientOffset() const noexcept;
+    KRYS_NODISCARD SizeF DocumentToClientOffset() const noexcept;
 
-    KRYS_NODISCARD DoublePoint AbsoluteToDocumentPoint(DoublePoint point,
-                                                       Maybe<float> usedZoom = null) const noexcept;
+    KRYS_NODISCARD PointD AbsoluteToDocumentPoint(PointD point, Maybe<float> usedZoom = null) const noexcept;
 
-    KRYS_NODISCARD DoublePoint DocumentToClientPoint(DoublePoint point) const noexcept;
+    KRYS_NODISCARD PointD DocumentToClientPoint(PointD point) const noexcept;
 
     /// @brief Converts a point in the view's coordinates to the contents' (absolute) coordinates.
-    KRYS_NODISCARD DoublePoint WindowToContents(const DoublePoint &point) const noexcept;
+    KRYS_NODISCARD PointD WindowToContents(const PointD &point) const noexcept;
 
-    KRYS_NODISCARD IntPoint WindowToContents(const IntPoint &point) const noexcept;
+    KRYS_NODISCARD PointI WindowToContents(const PointI &point) const noexcept;
 
-    KRYS_NODISCARD IntPoint ContentsToWindow(const IntPoint &point) const noexcept;
+    KRYS_NODISCARD PointI ContentsToWindow(const PointI &point) const noexcept;
 
-    KRYS_NODISCARD IntRect ContentsToWindow(const IntRect &rect) const noexcept;
+    KRYS_NODISCARD RectI ContentsToWindow(const RectI &rect) const noexcept;
 
     /// @brief Where @p rect, in the contents' (absolute) coordinates, is on the screen, as the chrome client
     /// maps it; empty without a page.
-    KRYS_NODISCARD IntRect ContentsToScreen(const IntRect &rect) const noexcept;
+    KRYS_NODISCARD RectI ContentsToScreen(const RectI &rect) const noexcept;
 
     /// @brief Where @p point, on the screen, is in the contents' (absolute) coordinates; the origin without a
     /// page.
-    KRYS_NODISCARD IntPoint ScreenToContents(const IntPoint &point) const noexcept;
+    KRYS_NODISCARD PointI ScreenToContents(const PointI &point) const noexcept;
 
-    KRYS_NODISCARD FloatRect DocumentToClientRect(FloatRect rect) const noexcept;
+    KRYS_NODISCARD RectF DocumentToClientRect(RectF rect) const noexcept;
 
-    KRYS_NODISCARD FloatRect AbsoluteToClientRect(FloatRect rect,
-                                                  Maybe<float> usedZoom = null) const noexcept;
+    KRYS_NODISCARD RectF AbsoluteToClientRect(RectF rect, Maybe<float> usedZoom = null) const noexcept;
 
     /// @brief Converts an absolute rect to one relative to the layout viewport.
-    KRYS_NODISCARD FloatRect AbsoluteToLayoutViewportRect(FloatRect rect) const noexcept;
+    KRYS_NODISCARD RectF AbsoluteToLayoutViewportRect(RectF rect) const noexcept;
 
     void AvailableContentSizeChanged(AvailableSizeChangeReason reason) noexcept override;
 
@@ -1042,13 +1037,13 @@ namespace krys::boo
 
     void MarkRootOrBodyRendererDirty() const noexcept;
 
-    void PaintScrollbars(GraphicsContext &context, const IntRect &rect) noexcept;
+    void PaintScrollbars(GraphicsContext &context, const RectI &rect) noexcept;
 
     /// @brief Fills the scrollbars' area and the scroll corner with the root's background colour, over the
     /// base background colour, so the page's background runs on under the scrollbars, which have no track.
     void PaintScrollbarsBackground(GraphicsContext &context) noexcept;
 
-    KRYS_NODISCARD IntRect VisibleContentRectInternal(
+    KRYS_NODISCARD RectI VisibleContentRectInternal(
       VisibleContentRectIncludesScrollbars scrollbarInclusion) const noexcept override;
 
     void SetScrollOffset(const ScrollOffset &offset) noexcept override;
@@ -1061,24 +1056,24 @@ namespace krys::boo
 
     /// @brief Moves the painted contents by @p scrollDelta (the change in the scroll position), or repaints
     /// them.
-    void ScrollContents(const IntSize &scrollDelta) noexcept;
+    void ScrollContents(const SizeI &scrollDelta) noexcept;
 
     /// @brief Moves the painted contents of @p rectToScroll by @p scrollDelta (the contents' move, the
     /// opposite of the scroll position's), repainting the viewport-constrained objects; false when they can't
     /// be moved.
-    bool ScrollContentsFastPath(const IntSize &scrollDelta, const IntRect &rectToScroll) noexcept;
+    bool ScrollContentsFastPath(const SizeI &scrollDelta, const RectI &rectToScroll) noexcept;
 
-    void ScrollContentsSlowPath(const IntRect &updateRect) noexcept;
+    void ScrollContentsSlowPath(const RectI &updateRect) noexcept;
 
     void RepaintSlowRepaintObjects() noexcept;
 
     /// @brief The host window's half of the fast path: the contents of @p rectToScroll move by @p
     /// scrollDelta, with the damage, and what comes into view is damaged. Nothing, when the page composites.
-    void ScrollHostContents(const IntSize &scrollDelta, const IntRect &rectToScroll) noexcept;
+    void ScrollHostContents(const SizeI &scrollDelta, const RectI &rectToScroll) noexcept;
 
     /// @brief The part of the view whose painted contents move when it scrolls: the visible contents, without
     /// the scrollbars.
-    KRYS_NODISCARD IntRect RectToCopyOnScroll() const noexcept;
+    KRYS_NODISCARD RectI RectToCopyOnScroll() const noexcept;
 
     /// @brief Scrolls to @p desiredPosition, within the scroll range.
     void UpdateScrollbars(const ScrollPosition &desiredPosition) noexcept;
@@ -1115,13 +1110,13 @@ namespace krys::boo
                                                            const ScrollAlignment &alignX,
                                                            const ScrollAlignment &alignY) const noexcept;
 
-    KRYS_NODISCARD FloatSize
+    KRYS_NODISCARD SizeF
       CalculateSizeForCSSViewportUnitsOverride(Maybe<OverrideViewportSize> override) const noexcept;
 
   private:
     constexpr static int32 PanScrollIconSize = 16;
 
-    void InvalidatePanScrollIcon(const IntPoint &iconPosition) noexcept;
+    void InvalidatePanScrollIcon(const PointI &iconPosition) noexcept;
 
     void ScrollToFocusedElementTimerFired() noexcept;
 

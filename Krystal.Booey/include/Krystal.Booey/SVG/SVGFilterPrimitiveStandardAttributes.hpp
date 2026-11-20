@@ -117,7 +117,7 @@ namespace krys::boo
       return false;
     }
 
-    KRYS_NODISCARD virtual IntOutsets Outsets(const FloatRect &, SVGUnitTypes::SVGUnitType) const noexcept
+    KRYS_NODISCARD virtual IntOutsets Outsets(const RectF &, SVGUnitTypes::SVGUnitType) const noexcept
     {
       return {};
     }

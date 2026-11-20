@@ -44,7 +44,7 @@
 #include "Krystal.Booey/HTML/Elements/HTMLDivElement.hpp"
 #include "Krystal.Booey/HTML/Elements/HTMLInputElement.hpp"
 #include "Krystal.Booey/HTML/Elements/HTMLOptionElement.hpp"
-#include "Krystal.Booey/Page/ChromeClient.hpp"
+#include "Krystal.Booey/Page/Clients/ChromeClient.hpp"
 #include "Krystal.Booey/Page/LocalFrameView.hpp"
 #include "Krystal.Booey/Page/Page.hpp"
 #include "Krystal.Booey/Rendering/RenderElement.hpp"
@@ -354,7 +354,7 @@ namespace krys::boo::html
     return wrapper ? DynamicDowncast<HTMLElement>(wrapper->FirstChild()) : nullptr;
   }
 
-  IntRect ColorInputType::ElementRectRelativeToRootView() const noexcept
+  RectI ColorInputType::ElementRectRelativeToRootView() const noexcept
   {
     krys_debug_assert(Element());
     auto &element = *Element();
@@ -362,7 +362,7 @@ namespace krys::boo::html
     auto *view = element.NodeDocument().View();
     if (!renderer || !view)
     {
-      return IntRect();
+      return RectI();
     }
     return view->ContentsToView(renderer->AbsoluteBoundingBoxRect());
   }
@@ -371,7 +371,7 @@ namespace krys::boo::html
   {
     krys_debug_assert(Element());
     auto *renderer = Element()->Renderer();
-    return renderer && renderer->Style().GetWritingMode().ComputedTextDirection() == TextDirection::RTL;
+    return renderer && renderer->Style().GetWritingMode().ComputedTextDirection() == text::TextDirection::RTL;
   }
 
   bool ColorInputType::SupportsAlpha() const noexcept

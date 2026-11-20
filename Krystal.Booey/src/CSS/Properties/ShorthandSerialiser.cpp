@@ -46,7 +46,7 @@
 #include "Krystal.Booey/CSS/Values/VariableReferenceValue.hpp"
 #include "Krystal.Booey/Style/Extractor/Extractor.hpp"
 #include "Krystal.Booey/Style/Values/Animations/SingleAnimationRange.hpp"
-#include "Krystal.Core/Text/StringBuilder.hpp"
+#include "Krystal.Core/Strings/StringBuilder.hpp"
 #include "Krystal.Core/Types/Array.hpp"
 #include <algorithm>
 

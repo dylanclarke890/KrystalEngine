@@ -26,10 +26,10 @@
 
 #include "Krystal.Booey/CSS/CSSOM/Markup.hpp"
 #include "Krystal.Booey/CSS/Parser/ParserIdioms.hpp"
-#include "Krystal.Core/Text/CodePointIterator.hpp"
-#include "Krystal.Core/Text/HexNumber.hpp"
-#include "Krystal.Core/Text/StringBuilder.hpp"
-#include "Krystal.Core/Text/Unicode.hpp"
+#include "Krystal.Core/Strings/CodePointIterator.hpp"
+#include "Krystal.Core/Strings/HexNumber.hpp"
+#include "Krystal.Core/Strings/StringBuilder.hpp"
+#include "Krystal.Core/Strings/Unicode.hpp"
 
 namespace krys::boo::css
 {
@@ -163,7 +163,7 @@ namespace krys::boo::css
     return krys::move(builder).ToString();
   }
 
-  CSSOMString SerialiseURL(const CSSOMString &value) noexcept
+  CSSOMString SerialiseUrl(const CSSOMString &value) noexcept
   {
     StringBuilder builder;
     builder.Append(u8"url(");

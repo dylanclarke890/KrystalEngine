@@ -38,12 +38,11 @@
 #include "Krystal.Booey/DOM/Events/TouchEvent.hpp"
 #include "Krystal.Booey/DOM/Events/TouchList.hpp"
 #include "Krystal.Booey/DOM/Nodes/Document.hpp"
-#include "Krystal.Booey/Graphics/Geometry/FloatQuad.hpp"
 #include "Krystal.Booey/HTML/Elements/HTMLDataListElement.hpp"
 #include "Krystal.Booey/HTML/Elements/HTMLInputElement.hpp"
 #include "Krystal.Booey/HTML/InputTypes/StepRange.hpp"
 #include "Krystal.Booey/HTML/Parser/ParserIdioms.hpp"
-#include "Krystal.Booey/Page/EventHandler.hpp"
+#include "Krystal.Booey/Input/EventHandler.hpp"
 #include "Krystal.Booey/Page/LocalFrame.hpp"
 #include "Krystal.Booey/Rendering/FormControls/RenderSlider.hpp"
 #include "Krystal.Booey/Rendering/RenderFlexibleBox.hpp"
@@ -51,6 +50,7 @@
 #include "Krystal.Booey/Rendering/Style/RenderStyle+GettersInlines.hpp"
 #include "Krystal.Booey/Rendering/Style/RenderStyle+SettersInlines.hpp"
 #include "Krystal.Booey/Style/ResolvedStyle.hpp"
+#include "Krystal.Core/Geometry/Quad.hpp"
 
 namespace krys::boo::html
 {
@@ -120,7 +120,7 @@ namespace krys::boo::html
           // FIXME: Work around rounding issues in RTL vertical sliders. We want them to
           // render identically to LTR vertical sliders. We can remove this work around when
           // subpixel rendering is enabled on all ports.
-          mutableStyle.SetDirection(TextDirection::LTR);
+          mutableStyle.SetDirection(text::TextDirection::LTR);
         }
 
         auto *thumb = input.SliderThumbElement() ? input.SliderThumbElement()->GetRenderBox() : nullptr;
@@ -260,11 +260,9 @@ namespace krys::boo::html
     bool isInlineFlipped = thumbRenderer->GetWritingMode().IsInlineFlipped()
                            || (isVertical && thumbRenderer->GetWritingMode().IsHorizontal());
 
-    auto offset =
-      inputRenderer->AbsoluteToLocal(FloatPoint(absolutePoint), MapCoordinatesMode::UseTransforms);
+    auto offset = inputRenderer->AbsoluteToLocal(PointF(absolutePoint), MapCoordinatesMode::UseTransforms);
     auto trackBoundingBox =
-      trackRenderer
-        ->LocalToContainerQuad(FloatQuad(FloatRect({}, FloatSize(trackRenderer->Size()))), inputRenderer)
+      trackRenderer->LocalToContainerQuad(QuadF(RectF({}, SizeF(trackRenderer->Size()))), inputRenderer)
         .EnclosingBoundingBox();
 
     LayoutUnit trackLength;
@@ -404,7 +402,7 @@ namespace krys::boo::html
       {
         auto location = mouseEvent->AbsoluteLocation();
         SetPositionFromPoint(
-          LayoutPoint(FloatPoint(static_cast<float>(location.X()), static_cast<float>(location.Y()))));
+          LayoutPoint(PointF(static_cast<float>(location.X()), static_cast<float>(location.Y()))));
       }
       return;
     }
@@ -522,7 +520,7 @@ namespace krys::boo::html
     }
 
     auto point = touches->Item(0)->AbsoluteLocation();
-    auto layoutPoint = LayoutPoint(FloatPoint(static_cast<float>(point.X()), static_cast<float>(point.Y())));
+    auto layoutPoint = LayoutPoint(PointF(static_cast<float>(point.X()), static_cast<float>(point.Y())));
     if (type == event_names::TouchStart)
     {
       _touchStartPoint = point;

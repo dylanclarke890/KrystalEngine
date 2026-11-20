@@ -22,6 +22,7 @@
 #include "Krystal.Core/Types/Func.hpp"
 #include "Krystal.Gfx.Tests/TestDevice.hpp"
 #include "Krystal.Gfx/Render2D/Renderer2D.hpp"
+#include "Krystal.I18n/DefaultLocale.hpp"
 #include "Krystal.UI.Tests/ViewTestUtils.hpp"
 #include "Krystal.UI/EngineTexture.hpp"
 #include "Krystal.UI/View.hpp"
@@ -31,7 +32,6 @@
 #include <numbers>
 #include <sstream>
 #include <string>
-#include <unicode/uloc.h>
 
 namespace krys::ui::tests
 {
@@ -630,7 +630,7 @@ namespace krys::ui::tests
                 auto select = view.Document().GetElementById(u8"plain");
                 REQUIRE(select);
                 auto box = select->GetBoundingClientRect();
-                boo::IntPoint inside(static_cast<int32>(box->X()) + 5, static_cast<int32>(box->Y()) + 5);
+                PointI inside(static_cast<int32>(box->X()) + 5, static_cast<int32>(box->Y()) + 5);
                 view.MousePressed(inside, pal::MouseButton::Left);
                 view.MouseReleased(inside, pal::MouseButton::Left);
                 REQUIRE(Downcast<boo::HTMLSelectElement>(*select).IsPickerOpen());
@@ -647,7 +647,7 @@ namespace krys::ui::tests
                 auto select = view.Document().GetElementById(u8"fruit");
                 REQUIRE(select);
                 auto box = select->GetBoundingClientRect();
-                boo::IntPoint inside(static_cast<int32>(box->X()) + 5, static_cast<int32>(box->Y()) + 5);
+                PointI inside(static_cast<int32>(box->X()) + 5, static_cast<int32>(box->Y()) + 5);
                 view.MousePressed(inside, pal::MouseButton::Left);
                 view.MouseReleased(inside, pal::MouseButton::Left);
                 REQUIRE(view.ShownOverlay());
@@ -661,18 +661,16 @@ namespace krys::ui::tests
     /// every machine.
     struct USEnglishScope
     {
-      std::string Previous;
+      utf8_string Previous;
 
-      USEnglishScope() noexcept : Previous(uloc_getDefault())
+      USEnglishScope() noexcept : Previous(i18n::DefaultLocale())
       {
-        UErrorCode status = U_ZERO_ERROR;
-        uloc_setDefault("en_US", &status);
+        i18n::SetDefaultLocale(u8"en_US");
       }
 
       ~USEnglishScope() noexcept
       {
-        UErrorCode status = U_ZERO_ERROR;
-        uloc_setDefault(Previous.c_str(), &status);
+        i18n::SetDefaultLocale(Previous);
       }
     };
   }
@@ -727,7 +725,7 @@ namespace krys::ui::tests
                 auto select = view.Document().GetElementById(u8"fruit");
                 REQUIRE(select);
                 auto box = select->GetBoundingClientRect();
-                boo::IntPoint inside(static_cast<int32>(box->X()) + 5, static_cast<int32>(box->Y()) + 5);
+                PointI inside(static_cast<int32>(box->X()) + 5, static_cast<int32>(box->Y()) + 5);
                 view.MousePressed(inside, pal::MouseButton::Left);
                 view.MouseReleased(inside, pal::MouseButton::Left);
                 REQUIRE(view.ShownOverlay());
@@ -848,7 +846,7 @@ namespace krys::ui::tests
         auto select = view.Document().GetElementById(u8"fruit");
         REQUIRE(select);
         auto box = select->GetBoundingClientRect();
-        boo::IntPoint inside((static_cast<int32>(box->X()) + 5) * 2, (static_cast<int32>(box->Y()) + 5) * 2);
+        PointI inside((static_cast<int32>(box->X()) + 5) * 2, (static_cast<int32>(box->Y()) + 5) * 2);
         view.MousePressed(inside, pal::MouseButton::Left);
         view.MouseReleased(inside, pal::MouseButton::Left);
         REQUIRE(view.ShownOverlay());

@@ -68,7 +68,7 @@ namespace krys::boo::style
       return _value && _value->Is3DOperation();
     }
 
-    void Apply(TransformationMatrix &, const FloatSize &) const noexcept;
+    void Apply(TransformationMatrix &, const SizeF &) const noexcept;
 
     KRYS_NODISCARD bool IsNone() const noexcept
     {
@@ -175,7 +175,7 @@ namespace krys::boo::style
   template <>
   struct ToPlatform<Rotate>
   {
-    KRYS_NODISCARD RefPtr<TransformOperation> operator()(const Rotate &, const FloatSize &) noexcept;
+    KRYS_NODISCARD RefPtr<TransformOperation> operator()(const Rotate &, const SizeF &) noexcept;
   };
 }
 

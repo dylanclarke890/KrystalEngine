@@ -1,0 +1,18 @@
+﻿#pragma once
+
+#include "Krystal.Text/Encodings/ASCII.hpp"
+#include "Krystal.Text/Encodings/Atari.hpp"
+#include "Krystal.Text/Encodings/Big5-HKSCS.hpp"
+#include "Krystal.Text/Encodings/EUC-KR-UHC.hpp"
+#include "Krystal.Text/Encodings/GB18030.hpp"
+#include "Krystal.Text/Encodings/IBM.hpp"
+#include "Krystal.Text/Encodings/ISO-8859.hpp"
+#include "Krystal.Text/Encodings/Kamenicky.hpp"
+#include "Krystal.Text/Encodings/KOI8.hpp"
+#include "Krystal.Text/Encodings/KZ-1048.hpp"
+#include "Krystal.Text/Encodings/Macintosh.hpp"
+#include "Krystal.Text/Encodings/PETSCII.hpp"
+#include "Krystal.Text/Encodings/ShiftJIS.hpp"
+#include "Krystal.Text/Encodings/Tatar.hpp"
+#include "Krystal.Text/Encodings/UTF.hpp"
+#include "Krystal.Text/Encodings/Windows.hpp"

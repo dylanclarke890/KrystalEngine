@@ -51,15 +51,15 @@ namespace krys::boo
     // to avoid using garbage.
     ClearPath();
     _shapeType = ShapeType::Empty;
-    _fillBoundingBox = FloatRect();
+    _fillBoundingBox = RectF();
     _strokeBoundingBox = null;
     _approximateStrokeBoundingBox = null;
 
     SVGLengthContext lengthContext(&RectElement());
     const auto &style = Style();
     auto usedZoom = style.UsedZoomForLength();
-    FloatSize boundingBoxSize(lengthContext.ValueForLength(style.Width(), usedZoom, SVGLengthMode::Width),
-                              lengthContext.ValueForLength(style.Height(), usedZoom, SVGLengthMode::Height));
+    SizeF boundingBoxSize(lengthContext.ValueForLength(style.Width(), usedZoom, SVGLengthMode::Width),
+                          lengthContext.ValueForLength(style.Height(), usedZoom, SVGLengthMode::Height));
 
     // Spec: "A negative value is illegal. A value of zero disables rendering of the element."
     if (boundingBoxSize.IsEmpty())
@@ -84,10 +84,10 @@ namespace krys::boo
       return;
     }
 
-    _fillBoundingBox = FloatRect(
-      FloatPoint(lengthContext.ValueForLength(style.X(), style::ZoomNeeded {}, SVGLengthMode::Width),
-                 lengthContext.ValueForLength(style.Y(), style::ZoomNeeded {}, SVGLengthMode::Height)),
-      boundingBoxSize);
+    _fillBoundingBox =
+      RectF(PointF(lengthContext.ValueForLength(style.X(), style::ZoomNeeded {}, SVGLengthMode::Width),
+                   lengthContext.ValueForLength(style.Y(), style::ZoomNeeded {}, SVGLengthMode::Height)),
+            boundingBoxSize);
 
     auto strokeBoundingBox = _fillBoundingBox;
     if (style.HasStroke())
@@ -162,7 +162,7 @@ namespace krys::boo
            && Style().StrokeMiterLimit().Value.Value >= 1.5;
   }
 
-  bool LegacyRenderSVGRect::ShapeDependentStrokeContains(const FloatPoint &point,
+  bool LegacyRenderSVGRect::ShapeDependentStrokeContains(const PointF &point,
                                                          PointCoordinateSpace pointCoordinateSpace) noexcept
   {
     if (!CanUseStrokeHitTestFastPath())
@@ -175,8 +175,7 @@ namespace krys::boo
     auto halfWidth = _fillBoundingBox.Width() / 2;
     auto halfHeight = _fillBoundingBox.Height() / 2;
 
-    auto fillBoundingBoxCenter =
-      FloatPoint(_fillBoundingBox.X() + halfWidth, _fillBoundingBox.Y() + halfHeight);
+    auto fillBoundingBoxCenter = PointF(_fillBoundingBox.X() + halfWidth, _fillBoundingBox.Y() + halfHeight);
     auto absDeltaX = std::abs(point.X() - fillBoundingBoxCenter.X());
     auto absDeltaY = std::abs(point.Y() - fillBoundingBoxCenter.Y());
 
@@ -188,7 +187,7 @@ namespace krys::boo
     return (halfWidth - halfStrokeWidth <= absDeltaX) || (halfHeight - halfStrokeWidth <= absDeltaY);
   }
 
-  bool LegacyRenderSVGRect::ShapeDependentFillContains(const FloatPoint &point,
+  bool LegacyRenderSVGRect::ShapeDependentFillContains(const PointF &point,
                                                        const WindRule fillRule) const noexcept
   {
     if (_shapeType == ShapeType::Empty)

@@ -37,7 +37,7 @@
 #include "Krystal.Booey/Rendering/RenderText.hpp"
 #include "Krystal.Booey/Rendering/Style/RenderStyle+GettersInlines.hpp"
 #include "Krystal.Booey/Rendering/SVG/RenderSVGInlineText.hpp"
-#include "Krystal.Core/Text/CodePointIterator.hpp"
+#include "Krystal.Core/Strings/CodePointIterator.hpp"
 #include <algorithm>
 #include <cmath>
 
@@ -189,7 +189,7 @@ namespace krys::boo
         left = std::max(left, lineLeft);
       }
 
-      auto rect = IntRect(static_cast<int32>(left), top, CaretWidth(), height);
+      auto rect = RectI(static_cast<int32>(left), top, CaretWidth(), height);
 
       if (caretRectMode == CaretRectMode::ExpandToEndOfLine)
       {
@@ -263,7 +263,7 @@ namespace krys::boo
         auto selectableRange = textBox->SelectableRange();
         auto [startOffset, endOffset] = [&]
         {
-          if (textBox->Direction() == TextDirection::RTL)
+          if (textBox->Direction() == text::TextDirection::RTL)
           {
             return std::pair {selectableRange.Clamp(offset), textBox->Length()};
           }

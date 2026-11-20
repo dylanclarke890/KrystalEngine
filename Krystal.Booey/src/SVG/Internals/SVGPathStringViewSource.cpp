@@ -90,9 +90,9 @@ namespace krys::boo
     }
   }
 
-  Maybe<SVGPathSource::MoveToSegment> SVGPathStringViewSource::ParseMoveToSegment(FloatPoint) noexcept
+  Maybe<SVGPathSource::MoveToSegment> SVGPathStringViewSource::ParseMoveToSegment(PointF) noexcept
   {
-    auto targetPoint = svg::ParseFloatPoint(_buffer);
+    auto targetPoint = svg::ParsePointF(_buffer);
     if (!targetPoint)
     {
       return {};
@@ -103,9 +103,9 @@ namespace krys::boo
     return segment;
   }
 
-  Maybe<SVGPathSource::LineToSegment> SVGPathStringViewSource::ParseLineToSegment(FloatPoint) noexcept
+  Maybe<SVGPathSource::LineToSegment> SVGPathStringViewSource::ParseLineToSegment(PointF) noexcept
   {
-    auto targetPoint = svg::ParseFloatPoint(_buffer);
+    auto targetPoint = svg::ParsePointF(_buffer);
     if (!targetPoint)
     {
       return {};
@@ -117,7 +117,7 @@ namespace krys::boo
   }
 
   Maybe<SVGPathSource::LineToHorizontalSegment>
-    SVGPathStringViewSource::ParseLineToHorizontalSegment(FloatPoint) noexcept
+    SVGPathStringViewSource::ParseLineToHorizontalSegment(PointF) noexcept
   {
     auto x = svg::ParseNumber(_buffer);
     if (!x)
@@ -131,7 +131,7 @@ namespace krys::boo
   }
 
   Maybe<SVGPathSource::LineToVerticalSegment>
-    SVGPathStringViewSource::ParseLineToVerticalSegment(FloatPoint) noexcept
+    SVGPathStringViewSource::ParseLineToVerticalSegment(PointF) noexcept
   {
     auto y = svg::ParseNumber(_buffer);
     if (!y)
@@ -144,22 +144,21 @@ namespace krys::boo
     return segment;
   }
 
-  Maybe<SVGPathSource::CurveToCubicSegment>
-    SVGPathStringViewSource::ParseCurveToCubicSegment(FloatPoint) noexcept
+  Maybe<SVGPathSource::CurveToCubicSegment> SVGPathStringViewSource::ParseCurveToCubicSegment(PointF) noexcept
   {
-    auto point1 = svg::ParseFloatPoint(_buffer);
+    auto point1 = svg::ParsePointF(_buffer);
     if (!point1)
     {
       return {};
     }
 
-    auto point2 = svg::ParseFloatPoint(_buffer);
+    auto point2 = svg::ParsePointF(_buffer);
     if (!point2)
     {
       return {};
     }
 
-    auto targetPoint = svg::ParseFloatPoint(_buffer);
+    auto targetPoint = svg::ParsePointF(_buffer);
     if (!targetPoint)
     {
       return {};
@@ -173,15 +172,15 @@ namespace krys::boo
   }
 
   Maybe<SVGPathSource::CurveToCubicSmoothSegment>
-    SVGPathStringViewSource::ParseCurveToCubicSmoothSegment(FloatPoint) noexcept
+    SVGPathStringViewSource::ParseCurveToCubicSmoothSegment(PointF) noexcept
   {
-    auto point2 = svg::ParseFloatPoint(_buffer);
+    auto point2 = svg::ParsePointF(_buffer);
     if (!point2)
     {
       return {};
     }
 
-    auto targetPoint = svg::ParseFloatPoint(_buffer);
+    auto targetPoint = svg::ParsePointF(_buffer);
     if (!targetPoint)
     {
       return {};
@@ -194,15 +193,15 @@ namespace krys::boo
   }
 
   Maybe<SVGPathSource::CurveToQuadraticSegment>
-    SVGPathStringViewSource::ParseCurveToQuadraticSegment(FloatPoint) noexcept
+    SVGPathStringViewSource::ParseCurveToQuadraticSegment(PointF) noexcept
   {
-    auto point1 = svg::ParseFloatPoint(_buffer);
+    auto point1 = svg::ParsePointF(_buffer);
     if (!point1)
     {
       return {};
     }
 
-    auto targetPoint = svg::ParseFloatPoint(_buffer);
+    auto targetPoint = svg::ParsePointF(_buffer);
     if (!targetPoint)
     {
       return {};
@@ -215,9 +214,9 @@ namespace krys::boo
   }
 
   Maybe<SVGPathSource::CurveToQuadraticSmoothSegment>
-    SVGPathStringViewSource::ParseCurveToQuadraticSmoothSegment(FloatPoint) noexcept
+    SVGPathStringViewSource::ParseCurveToQuadraticSmoothSegment(PointF) noexcept
   {
-    auto targetPoint = svg::ParseFloatPoint(_buffer);
+    auto targetPoint = svg::ParsePointF(_buffer);
     if (!targetPoint)
     {
       return {};
@@ -228,7 +227,7 @@ namespace krys::boo
     return segment;
   }
 
-  Maybe<SVGPathSource::ArcToSegment> SVGPathStringViewSource::ParseArcToSegment(FloatPoint) noexcept
+  Maybe<SVGPathSource::ArcToSegment> SVGPathStringViewSource::ParseArcToSegment(PointF) noexcept
   {
     auto rx = svg::ParseNumber(_buffer);
     if (!rx)
@@ -255,7 +254,7 @@ namespace krys::boo
     {
       return {};
     }
-    auto targetPoint = svg::ParseFloatPoint(_buffer);
+    auto targetPoint = svg::ParsePointF(_buffer);
     if (!targetPoint)
     {
       return {};

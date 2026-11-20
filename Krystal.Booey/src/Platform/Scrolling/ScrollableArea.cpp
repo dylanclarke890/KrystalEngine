@@ -30,8 +30,8 @@
  */
 
 #include "Krystal.Booey/Platform/Scrolling/ScrollableArea.hpp"
+#include "Krystal.Booey/Input/PlatformWheelEvent.hpp"
 #include "Krystal.Booey/Page/Scrolling/ScrollAnchoringController.hpp"
-#include "Krystal.Booey/Platform/Events/PlatformWheelEvent.hpp"
 #include "Krystal.Booey/Platform/Scrolling/ScrollAnimator.hpp"
 #include "Krystal.Booey/Platform/Scrolling/Scrollbar.hpp"
 #include "Krystal.Booey/Platform/Scrolling/ScrollbarsController.hpp"
@@ -160,7 +160,7 @@ namespace krys::boo
                                                      const ScrollPositionChangeOptions &options) noexcept
   {
     bool wasAnimating = GetScrollAnimationStatus() == ScrollAnimationStatus::Animating;
-    if (GetScrollAnimator().ScrollToOffsetWithAnimation(FloatPoint(ScrollOffsetFromPosition(position)),
+    if (GetScrollAnimator().ScrollToOffsetWithAnimation(PointF(ScrollOffsetFromPosition(position)),
                                                         options.Type))
     {
       SetScrollAnimationStatus(ScrollAnimationStatus::Animating);
@@ -207,7 +207,7 @@ namespace krys::boo
     {
       return offset;
     }
-    return RoundedIntPoint(_scrollAnimator->ScrollOffsetAdjustedForSnapping(FloatPoint(offset), method));
+    return RoundedPointI(_scrollAnimator->ScrollOffsetAdjustedForSnapping(PointF(offset), method));
   }
 
   void ScrollableArea::ResnapAfterLayout() noexcept
@@ -266,7 +266,7 @@ namespace krys::boo
     }
   }
 
-  bool ScrollableArea::ScrollToPositionWithoutAnimation(const IntPoint &position,
+  bool ScrollableArea::ScrollToPositionWithoutAnimation(const PointI &position,
                                                         ScrollClamping clamping) noexcept
   {
     bool stoppedAnimation = StopAnimatedScroll();
@@ -296,10 +296,9 @@ namespace krys::boo
     return true;
   }
 
-  void ScrollableArea::ScrollToOffsetWithoutAnimation(const IntPoint &offset,
-                                                      ScrollClamping clamping) noexcept
+  void ScrollableArea::ScrollToOffsetWithoutAnimation(const PointI &offset, ScrollClamping clamping) noexcept
   {
-    auto position = ScrollPositionFromOffset(offset, ToIntSize(ScrollOrigin()));
+    auto position = ScrollPositionFromOffset(offset, ToSizeI(ScrollOrigin()));
     (void)ScrollToPositionWithoutAnimation(position, clamping);
   }
 
@@ -310,7 +309,7 @@ namespace krys::boo
 
   void ScrollableArea::ScrollPositionChanged(const ScrollPosition &position) noexcept
   {
-    IntPoint oldPosition = GetScrollPosition();
+    PointI oldPosition = GetScrollPosition();
     // Tell the derived class to scroll its contents.
     SetScrollOffset(ScrollOffsetFromPosition(position));
 
@@ -362,7 +361,7 @@ namespace krys::boo
     }
   }
 
-  void ScrollableArea::SetScrollOrigin(const IntPoint &origin) noexcept
+  void ScrollableArea::SetScrollOrigin(const PointI &origin) noexcept
   {
     if (_scrollOrigin != origin)
     {
@@ -404,7 +403,7 @@ namespace krys::boo
     return HorizontalScrollbar() ? HorizontalScrollbar()->OccupiedHeight() : 0;
   }
 
-  IntSize ScrollableArea::ScrollbarIntrusion() const noexcept
+  SizeI ScrollableArea::ScrollbarIntrusion() const noexcept
   {
     return {HorizontalScrollbarIntrusion(), VerticalScrollbarIntrusion()};
   }
@@ -431,12 +430,12 @@ namespace krys::boo
 
   ScrollPosition ScrollableArea::ScrollPositionFromOffset(ScrollOffset offset) const noexcept
   {
-    return ScrollPositionFromOffset(offset, ToIntSize(_scrollOrigin));
+    return ScrollPositionFromOffset(offset, ToSizeI(_scrollOrigin));
   }
 
   ScrollOffset ScrollableArea::ScrollOffsetFromPosition(ScrollPosition position) const noexcept
   {
-    return ScrollOffsetFromPosition(position, ToIntSize(_scrollOrigin));
+    return ScrollOffsetFromPosition(position, ToSizeI(_scrollOrigin));
   }
 
   bool ScrollableArea::ScrolledToTop() const noexcept
@@ -459,29 +458,29 @@ namespace krys::boo
     return GetScrollPosition().X() >= MaximumScrollPosition().X();
   }
 
-  IntSize ScrollableArea::TotalContentsSize() const noexcept
+  SizeI ScrollableArea::TotalContentsSize() const noexcept
   {
-    IntSize totalContentsSize = ContentsSize();
+    SizeI totalContentsSize = ContentsSize();
     totalContentsSize.SetHeight(totalContentsSize.Height() + HeaderHeight() + FooterHeight());
     return totalContentsSize;
   }
 
-  IntSize ScrollableArea::ReachableTotalContentsSize() const noexcept
+  SizeI ScrollableArea::ReachableTotalContentsSize() const noexcept
   {
     return TotalContentsSize();
   }
 
-  IntRect ScrollableArea::VisibleContentRect() const noexcept
+  RectI ScrollableArea::VisibleContentRect() const noexcept
   {
     return VisibleContentRectInternal(VisibleContentRectIncludesScrollbars::No);
   }
 
-  IntRect ScrollableArea::VisibleContentRectIncludingScrollbars() const noexcept
+  RectI ScrollableArea::VisibleContentRectIncludingScrollbars() const noexcept
   {
     return VisibleContentRectInternal(VisibleContentRectIncludesScrollbars::Yes);
   }
 
-  IntRect ScrollableArea::VisibleContentRectInternal(
+  RectI ScrollableArea::VisibleContentRectInternal(
     VisibleContentRectIncludesScrollbars scrollbarInclusion) const noexcept
   {
     int32 verticalScrollbarWidth = 0;
@@ -499,9 +498,9 @@ namespace krys::boo
       }
     }
 
-    return IntRect(GetScrollPosition().X(), GetScrollPosition().Y(),
-                   std::max(0, VisibleWidth() + verticalScrollbarWidth),
-                   std::max(0, VisibleHeight() + horizontalScrollbarHeight));
+    return RectI(GetScrollPosition().X(), GetScrollPosition().Y(),
+                 std::max(0, VisibleWidth() + verticalScrollbarWidth),
+                 std::max(0, VisibleHeight() + horizontalScrollbarHeight));
   }
 
   void ScrollableArea::ScrollToOffsetWithoutAnimation(ScrollbarOrientation orientation, float offset) noexcept
@@ -509,11 +508,11 @@ namespace krys::boo
     auto currentOffset = ScrollOffsetFromPosition(GetScrollPosition());
     if (orientation == ScrollbarOrientation::Horizontal)
     {
-      ScrollToOffsetWithoutAnimation(IntPoint(static_cast<int32>(offset), currentOffset.Y()));
+      ScrollToOffsetWithoutAnimation(PointI(static_cast<int32>(offset), currentOffset.Y()));
     }
     else
     {
-      ScrollToOffsetWithoutAnimation(IntPoint(currentOffset.X(), static_cast<int32>(offset)));
+      ScrollToOffsetWithoutAnimation(PointI(currentOffset.X(), static_cast<int32>(offset)));
     }
   }
 
@@ -556,14 +555,14 @@ namespace krys::boo
   {
     // Keys and wheel notches in quick succession add up, so each goes on from where the last is going.
     bool isAnimating = GetScrollAnimationStatus() == ScrollAnimationStatus::Animating;
-    auto baseOffset = isAnimating ? RoundedIntPoint(_scrollAnimator->DestinationOffset()) : GetScrollOffset();
+    auto baseOffset = isAnimating ? RoundedPointI(_scrollAnimator->DestinationOffset()) : GetScrollOffset();
     auto newOffset = baseOffset;
     bool isHorizontal = axis == ScrollEventAxis::Horizontal;
     int32 base = isHorizontal ? baseOffset.X() : baseOffset.Y();
     int32 destination = base + static_cast<int32>(delta);
     if (_scrollAnimator && _scrollAnimator->UsesScrollSnap())
     {
-      FloatPoint floatOffset(baseOffset);
+      PointF floatOffset(baseOffset);
       if (isHorizontal)
       {
         floatOffset.SetX(static_cast<float>(destination));
@@ -691,10 +690,10 @@ namespace krys::boo
     return true;
   }
 
-  IntPoint ScrollableArea::ConvertFromContainingViewToScrollbar(const Scrollbar &scrollbar,
-                                                                const IntPoint &parentPoint) const noexcept
+  PointI ScrollableArea::ConvertFromContainingViewToScrollbar(const Scrollbar &scrollbar,
+                                                              const PointI &parentPoint) const noexcept
   {
-    return parentPoint - ToIntSize(scrollbar.Location());
+    return parentPoint - ToSizeI(scrollbar.Location());
   }
 
   bool ScrollableArea::IsPinnedOnSide(BoxSide side) const noexcept
@@ -729,7 +728,7 @@ namespace krys::boo
     return false;
   }
 
-  Maybe<BoxSide> ScrollableArea::TargetSideForScrollDelta(FloatSize delta, ScrollEventAxis axis) noexcept
+  Maybe<BoxSide> ScrollableArea::TargetSideForScrollDelta(SizeF delta, ScrollEventAxis axis) noexcept
   {
     switch (axis)
     {
@@ -758,7 +757,7 @@ namespace krys::boo
     return null;
   }
 
-  FloatSize ScrollableArea::DeltaForPropagation(const FloatSize &biasedDelta) const noexcept
+  SizeF ScrollableArea::DeltaForPropagation(const SizeF &biasedDelta) const noexcept
   {
     auto filteredDelta = biasedDelta;
     if (HorizontalOverscrollBehaviorPreventsPropagation())
@@ -772,7 +771,7 @@ namespace krys::boo
     return filteredDelta;
   }
 
-  bool ScrollableArea::ShouldBlockScrollPropagation(const FloatSize &biasedDelta) const noexcept
+  bool ScrollableArea::ShouldBlockScrollPropagation(const SizeF &biasedDelta) const noexcept
   {
     bool preventsHorizontalPropagation = HorizontalOverscrollBehaviorPreventsPropagation();
     bool preventsVerticalPropagation = VerticalOverscrollBehaviorPreventsPropagation();

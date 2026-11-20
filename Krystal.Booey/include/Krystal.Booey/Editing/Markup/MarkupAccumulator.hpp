@@ -93,7 +93,7 @@ namespace krys::boo
 
   private:
     utf8_string _markup;
-    const ResolveURLs _resolveURLs;
+    const ResolveUrls _resolveUrls;
     const SerializationSyntax _serializationSyntax;
     uint32 _prefixLevel {0};
     SerializeShadowRoots _serializeShadowRoots;
@@ -102,7 +102,7 @@ namespace krys::boo
     bool _wellFormed {true};
 
   public:
-    MarkupAccumulator(List<Ref<Node>> *nodes, ResolveURLs resolveURLs,
+    MarkupAccumulator(List<Ref<Node>> *nodes, ResolveUrls resolveUrls,
                       SerializationSyntax serializationSyntax,
                       SerializeShadowRoots serializeShadowRoots = SerializeShadowRoots::Explicit,
                       List<Ref<ShadowRoot>> &&explicitShadowRoots = {},
@@ -172,7 +172,7 @@ namespace krys::boo
     void AppendNamespace(utf8_string &result, const DOMStringAtom &prefix, const DOMStringAtom &namespaceURI,
                          Namespaces &namespaces, bool allowEmptyDefaultNS = false) noexcept;
 
-    KRYS_NODISCARD utf8_string ResolveURLIfNeeded(const Element &element,
+    KRYS_NODISCARD utf8_string ResolveUrlIfNeeded(const Element &element,
                                                   utf8_stringview urlString) const noexcept;
 
     KRYS_NODISCARD bool ShouldIncludeShadowRoots() const noexcept;

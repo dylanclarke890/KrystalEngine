@@ -75,7 +75,7 @@ layer at (0,0) size 800x104
 
     // Its bounding box includes the translation.
     auto bbox = static_cast<SVGGraphicsElement &>(use).GetBBox();
-    CHECK(bbox == FloatRect(30, 40, 10, 20));
+    CHECK(bbox == RectF(30, 40, 10, 20));
 
     // The instances follow their original.
     (void)rect.SetAttribute(u8"width", u8"15");

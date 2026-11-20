@@ -22,7 +22,7 @@ namespace krys::boo
 
     // 3. Let urlRecord be the result of parsing url with document's fallback base URL, and document's
     //    character encoding. (Thus, the base element isn't affected by other base elements or itself.)
-    auto urlRecord = document.CompleteURL(url, document.FallbackBaseURL());
+    auto urlRecord = document.CompleteUrl(url, document.FallbackBaseUrl());
 
     // 4. If urlRecord is failure, return url.
     if (!urlRecord.IsValid())

@@ -48,7 +48,7 @@
 #include "Krystal.Booey/HTML/Forms/DOMFormData.hpp"
 #include "Krystal.Booey/HTML/Parser/ParserIdioms.hpp"
 #include "Krystal.Booey/HTML/Shadow/TextControlInnerElements.hpp"
-#include "Krystal.Booey/Page/ChromeClient.hpp"
+#include "Krystal.Booey/Page/Clients/ChromeClient.hpp"
 #include "Krystal.Booey/Page/LocalFrameView.hpp"
 #include "Krystal.Booey/Page/Page.hpp"
 #include "Krystal.Booey/Rendering/FormControls/RenderTextControlSingleLine.hpp"
@@ -854,7 +854,7 @@ namespace krys::boo::html
     }
   }
 
-  IntRect TextFieldInputType::ElementRectInRootViewCoordinates() const noexcept
+  RectI TextFieldInputType::ElementRectInRootViewCoordinates() const noexcept
   {
     auto &element = *Element();
     auto *renderer = element.Renderer();
@@ -869,7 +869,7 @@ namespace krys::boo::html
   bool TextFieldInputType::IsElementRTL() const noexcept
   {
     auto *renderer = Element()->Renderer();
-    return renderer && renderer->Style().GetWritingMode().ComputedTextDirection() == TextDirection::RTL;
+    return renderer && renderer->Style().GetWritingMode().ComputedTextDirection() == text::TextDirection::RTL;
   }
 
   List<DataListSuggestion> TextFieldInputType::Suggestions() noexcept

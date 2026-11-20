@@ -35,7 +35,7 @@ namespace krys::boo
     }
   }
 
-  Ref<ByteArrayPixelBuffer> ByteArrayPixelBuffer::Create(const PixelBufferFormat &format, const IntSize &size,
+  Ref<ByteArrayPixelBuffer> ByteArrayPixelBuffer::Create(const PixelBufferFormat &format, const SizeI &size,
                                                          dom::Uint8ClampedArray &data) noexcept
   {
     krys_assert(IsByteFormat(format.Format));
@@ -43,7 +43,7 @@ namespace krys::boo
   }
 
   Maybe<Ref<ByteArrayPixelBuffer>> ByteArrayPixelBuffer::Create(const PixelBufferFormat &format,
-                                                                const IntSize &size,
+                                                                const SizeI &size,
                                                                 Span<const uint8> data) noexcept
   {
     if (!IsByteFormat(format.Format))
@@ -67,7 +67,7 @@ namespace krys::boo
   }
 
   RefPtr<ByteArrayPixelBuffer> ByteArrayPixelBuffer::TryCreate(const PixelBufferFormat &format,
-                                                               const IntSize &size) noexcept
+                                                               const SizeI &size) noexcept
   {
     krys_debug_assert(SupportedPixelFormat(format.Format));
     if (!IsByteFormat(format.Format))
@@ -84,7 +84,7 @@ namespace krys::boo
   }
 
   RefPtr<ByteArrayPixelBuffer> ByteArrayPixelBuffer::TryCreate(const PixelBufferFormat &format,
-                                                               const IntSize &size,
+                                                               const SizeI &size,
                                                                Ref<dom::Uint8ClampedArray> &&data) noexcept
   {
     krys_debug_assert(SupportedPixelFormat(format.Format));
@@ -101,13 +101,13 @@ namespace krys::boo
     return AdoptRef(*new ByteArrayPixelBuffer(format, size, krys::move(data)));
   }
 
-  ByteArrayPixelBuffer::ByteArrayPixelBuffer(const PixelBufferFormat &format, const IntSize &size,
+  ByteArrayPixelBuffer::ByteArrayPixelBuffer(const PixelBufferFormat &format, const SizeI &size,
                                              Ref<dom::Uint8ClampedArray> &&data) noexcept
       : PixelBuffer(format, size, data->MutableSpan()), _data(krys::move(data))
   {
   }
 
-  RefPtr<PixelBuffer> ByteArrayPixelBuffer::CreateScratchPixelBuffer(const IntSize &size) const noexcept
+  RefPtr<PixelBuffer> ByteArrayPixelBuffer::CreateScratchPixelBuffer(const SizeI &size) const noexcept
   {
     return ByteArrayPixelBuffer::TryCreate(_format, size);
   }

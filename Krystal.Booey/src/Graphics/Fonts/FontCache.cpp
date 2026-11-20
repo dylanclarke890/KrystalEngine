@@ -32,12 +32,12 @@
 #include "Krystal.Booey/Graphics/Fonts/FontDatabase.hpp"
 #include "Krystal.Booey/Graphics/Fonts/FontDescription.hpp"
 #include "Krystal.Booey/Graphics/Fonts/FontSelector.hpp"
-#include "Krystal.Booey/Text/CharacterProperties.hpp"
 #include "Krystal.Core/Assert.hpp"
 #include "Krystal.Core/Hash.hpp"
-#include "Krystal.Core/Text/ASCII.hpp"
-#include "Krystal.Core/Text/CodePointIterator.hpp"
+#include "Krystal.Core/Strings/ASCII.hpp"
+#include "Krystal.Core/Strings/CodePointIterator.hpp"
 #include "Krystal.Core/Threading/NeverDestroyed.hpp"
+#include "Krystal.Text/CharacterProperties.hpp"
 
 namespace krys::boo
 {
@@ -380,7 +380,7 @@ namespace krys::boo
     for (text::CodePointIterator it {characters}; !it.AtEnd(); ++it)
     {
       // Variation selectors only select a presentation.
-      if (IsVariationSelector(*it))
+      if (text::IsVariationSelector(*it))
       {
         continue;
       }

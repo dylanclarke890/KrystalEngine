@@ -47,7 +47,7 @@
 #include "Krystal.Booey/Page/Page.hpp"
 #include "Krystal.Booey/Page/Settings.hpp"
 #include "Krystal.Booey/Style/Invalidation/PseudoClassChangeInvalidation.hpp"
-#include "Krystal.Core/Text/ASCII.hpp"
+#include "Krystal.Core/Strings/ASCII.hpp"
 #include <algorithm>
 #include <numeric>
 
@@ -86,13 +86,13 @@ namespace krys::boo
   {
     using State = html::EnctypeAttributeState;
     static inline const html::KeywordStateMapping<State> StateMappings[] = {
-      {u8"application/x-www-form-urlencoded", State::URLEncoded},
+      {u8"application/x-www-form-urlencoded", State::UrlEncoded},
       {u8"multipart/form-data", State::FormData},
       {u8"text/plain", State::TextPlain},
     };
 
-    constexpr static State MissingValueDefault = State::URLEncoded;
-    constexpr static State InvalidValueDefault = State::URLEncoded;
+    constexpr static State MissingValueDefault = State::UrlEncoded;
+    constexpr static State InvalidValueDefault = State::UrlEncoded;
   };
 
   namespace
@@ -160,11 +160,11 @@ namespace krys::boo
     auto attributeValue = GetAttribute(u8"action");
     if (!attributeValue || attributeValue->empty())
     {
-      return dom::USVString(NodeDocument().GetURL().String());
+      return dom::USVString(NodeDocument().GetUrl().String());
     }
     // Let urlString be the result of encoding-parsing-and-serializing a URL given attributeValue, relative to
     // this's node document. If urlString is not failure, return urlString.
-    if (auto url = NodeDocument().CompleteURL(*attributeValue); url.IsValid())
+    if (auto url = NodeDocument().CompleteUrl(*attributeValue); url.IsValid())
     {
       return dom::USVString(url.String());
     }

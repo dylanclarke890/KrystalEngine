@@ -21,9 +21,9 @@
 #pragma once
 
 #include "Krystal.Booey/DOM/Types/DOMString.hpp"
-#include "Krystal.Booey/Graphics/Geometry/FloatPoint.hpp"
 #include "Krystal.Booey/SVG/Internals/SVGPathConsumer.hpp"
 #include "Krystal.Core/Attributes.hpp"
+#include "Krystal.Core/Geometry/Point.hpp"
 #include "Krystal.Core/Types/Maybe.hpp"
 
 namespace krys::boo
@@ -65,6 +65,5 @@ namespace krys::boo::svg
   // SVGPathByteStream traversal
   KRYS_NODISCARD float GetTotalLengthOfSVGPathByteStream(const SVGPathByteStream &) noexcept;
 
-  KRYS_NODISCARD FloatPoint GetPointAtLengthOfSVGPathByteStream(const SVGPathByteStream &,
-                                                                float length) noexcept;
+  KRYS_NODISCARD PointF GetPointAtLengthOfSVGPathByteStream(const SVGPathByteStream &, float length) noexcept;
 }

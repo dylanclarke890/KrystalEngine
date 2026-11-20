@@ -26,25 +26,28 @@
 #pragma once
 
 #include "Krystal.Booey/Graphics/Color/Color.hpp"
-#include "Krystal.Booey/Graphics/Geometry/IntPoint.hpp"
-#include "Krystal.Booey/Graphics/Geometry/IntSize.hpp"
-#include "Krystal.Booey/Graphics/Images/ImageOrientation.hpp"
 #include "Krystal.Booey/Graphics/Images/ImageTypes.hpp"
 #include "Krystal.Core/Attributes.hpp"
+#include "Krystal.Core/Geometry/Point.hpp"
+#include "Krystal.Core/Geometry/Size.hpp"
+#include "Krystal.Core/Strings/String.hpp"
 #include "Krystal.Core/Types/Maybe.hpp"
-#include "Krystal.Core/Types/String.hpp"
+#include "Krystal.Image/ImageOrientation.hpp"
 
 namespace krys
 {
   class TextStream;
 }
 
+namespace krys::img
+{
+  class ImageDecoder;
+}
+
 namespace krys::boo
 {
   class BitmapImageSource;
-  class FloatSize;
   class GraphicsContext;
-  class ImageDecoder;
   class ImageFrame;
   class NativeImage;
 
@@ -72,17 +75,17 @@ namespace krys::boo
 
     mutable uint16 _cachedFlags {0};
 
-    mutable EncodedDataStatus _encodedDataStatus {EncodedDataStatus::Unknown};
-    mutable IntSize _size;
-    mutable Maybe<IntSize> _densityCorrectedSize;
-    mutable ImageOrientation _orientation;
+    mutable img::EncodedDataStatus _encodedDataStatus {img::EncodedDataStatus::Unknown};
+    mutable SizeI _size;
+    mutable Maybe<SizeI> _densityCorrectedSize;
+    mutable img::ImageOrientation _orientation;
     mutable size_t _primaryFrameIndex {0};
     mutable size_t _frameCount {0};
-    mutable RepetitionCount _repetitionCount {RepetitionCountNone};
+    mutable img::RepetitionCount _repetitionCount {img::RepetitionCountNone};
     mutable Maybe<Color> _singlePixelSolidColor;
     mutable utf8_string _filenameExtension;
     mutable utf8_string _accessibilityDescription;
-    mutable Maybe<IntPoint> _hotSpot;
+    mutable Maybe<PointI> _hotSpot;
     mutable SubsamplingLevel _maximumSubsamplingLevel {SubsamplingLevel::Default};
 
     BitmapImageSource &_source;
@@ -95,27 +98,28 @@ namespace krys::boo
       _cachedFlags = 0;
     }
 
-    KRYS_NODISCARD EncodedDataStatus GetEncodedDataStatus() const noexcept;
+    KRYS_NODISCARD img::EncodedDataStatus GetEncodedDataStatus() const noexcept;
 
     KRYS_NODISCARD bool IsSizeAvailable() const noexcept
     {
-      return GetEncodedDataStatus() >= EncodedDataStatus::SizeAvailable;
+      return GetEncodedDataStatus() >= img::EncodedDataStatus::SizeAvailable;
     }
 
-    KRYS_NODISCARD IntSize Size(ImageOrientation = ImageOrientation::Orientation::FromImage) const noexcept;
+    KRYS_NODISCARD
+    SizeI Size(img::ImageOrientation = img::ImageOrientation::Orientation::FromImage) const noexcept;
 
     KRYS_NODISCARD
-    IntSize SourceSize(ImageOrientation = ImageOrientation::Orientation::FromImage) const noexcept;
+    SizeI SourceSize(img::ImageOrientation = img::ImageOrientation::Orientation::FromImage) const noexcept;
 
-    KRYS_NODISCARD Maybe<IntSize> DensityCorrectedSize() const noexcept;
+    KRYS_NODISCARD Maybe<SizeI> DensityCorrectedSize() const noexcept;
 
-    KRYS_NODISCARD ImageOrientation Orientation() const noexcept;
+    KRYS_NODISCARD img::ImageOrientation Orientation() const noexcept;
 
     KRYS_NODISCARD uint32 PrimaryFrameIndex() const noexcept;
 
     KRYS_NODISCARD uint32 FrameCount() const noexcept;
 
-    KRYS_NODISCARD RepetitionCount GetRepetitionCount() const noexcept;
+    KRYS_NODISCARD img::RepetitionCount GetRepetitionCount() const noexcept;
 
     KRYS_NODISCARD Maybe<Color> SinglePixelSolidColor() const noexcept;
 
@@ -123,12 +127,12 @@ namespace krys::boo
 
     KRYS_NODISCARD utf8_string AccessibilityDescription() const noexcept;
 
-    KRYS_NODISCARD Maybe<IntPoint> HotSpot() const noexcept;
+    KRYS_NODISCARD Maybe<PointI> HotSpot() const noexcept;
 
     KRYS_NODISCARD SubsamplingLevel MaximumSubsamplingLevel() const noexcept;
 
     KRYS_NODISCARD static SubsamplingLevel SubsamplingLevelForScaleFactor(GraphicsContext &,
-                                                                          const FloatSize &scaleFactor,
+                                                                          const SizeF &scaleFactor,
                                                                           AllowImageSubsampling) noexcept;
 
     void Dump(TextStream &) const noexcept;
@@ -146,7 +150,7 @@ namespace krys::boo
 
     template <typename TMetadata>
     TMetadata ImageMetadata(TMetadata &cachedValue, const TMetadata &defaultValue, CachedFlag,
-                            TMetadata (ImageDecoder::*functor)() const noexcept) const noexcept;
+                            TMetadata (img::ImageDecoder::*functor)() const noexcept) const noexcept;
 
     template <typename TMetadata>
     TMetadata PrimaryImageFrameMetadata(TMetadata &cachedValue, CachedFlag,

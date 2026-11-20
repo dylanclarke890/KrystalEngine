@@ -67,8 +67,8 @@ namespace krys::boo
       progressBarBackgroundColor = ProgressBarBackgroundColorLight;
     }
 
-    FloatRect fieldRect = borderRect.Rect();
-    FloatSize corner(3, 3);
+    RectF fieldRect = borderRect.Rect();
+    SizeF corner(3, 3);
     Path path;
     path.AddRoundedRect(fieldRect, corner);
     graphicsContext.SetFillRule(WindRule::NonZero);

@@ -215,7 +215,7 @@ namespace krys::boo
       {
         auto startKeyframeCompositeOperation =
           startKeyframe.CompositeOperation().value_or(CompositeOperation());
-        if (startKeyframeCompositeOperation != boo::CompositeOperation::Replace)
+        if (startKeyframeCompositeOperation != krys::CompositeOperation::Replace)
         {
           compositionCallback(startKeyframe, startKeyframeCompositeOperation);
         }
@@ -227,7 +227,7 @@ namespace krys::boo
       if (endKeyframe.Offset() != 1 || !interval.HasImplicitOneKeyframe)
       {
         auto endKeyframeCompositeOperation = endKeyframe.CompositeOperation().value_or(CompositeOperation());
-        if (endKeyframeCompositeOperation != boo::CompositeOperation::Replace)
+        if (endKeyframeCompositeOperation != krys::CompositeOperation::Replace)
         {
           compositionCallback(endKeyframe, endKeyframeCompositeOperation);
         }

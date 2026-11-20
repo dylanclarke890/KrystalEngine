@@ -81,10 +81,10 @@ namespace krys::boo
              && ContentDistribution::Default == static_cast<ContentDistribution>(_distribution);
     }
 
-    KRYS_NODISCARD bool IsStartward(Maybe<TextDirection> leftRightAxisDirection = null,
+    KRYS_NODISCARD bool IsStartward(Maybe<text::TextDirection> leftRightAxisDirection = null,
                                     bool isFlexReverse = false) const noexcept;
 
-    KRYS_NODISCARD bool IsEndward(Maybe<TextDirection> leftRightAxisDirection = null,
+    KRYS_NODISCARD bool IsEndward(Maybe<text::TextDirection> leftRightAxisDirection = null,
                                   bool isFlexReverse = false) const noexcept;
 
     // leftRightAxisDirection is only needed for justify-content (invalid for align-content).

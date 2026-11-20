@@ -24,8 +24,8 @@
  */
 
 #include "Krystal.Booey/Graphics/Fonts/WOFFFileFormat.hpp"
-#include "Krystal.Booey/Platform/SharedBuffer.hpp"
 #include "Krystal.Core/Types/List.hpp"
+#include "Krystal.Core/Types/SharedBuffer.hpp"
 #include <cstring>
 #include <woff2/decode.h>
 #include <zlib.h>

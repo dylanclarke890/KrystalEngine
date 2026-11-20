@@ -69,11 +69,11 @@ namespace krys::boo
     childPaintInfo.ApplyTransform(LocalTransform());
     // NOTE: painted from the block's location, where the repaint rect (which opacity, blending and isolation
     // clip to) starts; the block, which paints itself at its location, is painted offset back by it.
-    childPaintInfo.ApplyTransform(AffineTransform::MakeTranslation(FloatSize(LocationOffset())));
+    childPaintInfo.ApplyTransform(AffineTransform::CreateTranslation(SizeF(LocationOffset())));
 
     if (SVGRenderSupport::IsOverflowHidden(*this))
     {
-      childPaintInfo.Context().Clip(FloatRect(FloatPoint(), _viewport.Size()));
+      childPaintInfo.Context().Clip(RectF(PointF(), _viewport.Size()));
     }
 
     SVGRenderingContext renderingContext;
@@ -151,15 +151,15 @@ namespace krys::boo
       updateCachedBoundariesInParents = true;
     }
 
-    FloatRect oldViewport = _viewport;
+    RectF oldViewport = _viewport;
 
     // Cache viewport boundaries
     auto &foreignObjectElement = ForeignObjectElement();
     SVGLengthContext lengthContext(&foreignObjectElement);
-    FloatPoint viewportLocation(foreignObjectElement.X().Value(lengthContext),
-                                foreignObjectElement.Y().Value(lengthContext));
-    _viewport = FloatRect(viewportLocation, FloatSize(foreignObjectElement.Width().Value(lengthContext),
-                                                      foreignObjectElement.Height().Value(lengthContext)));
+    PointF viewportLocation(foreignObjectElement.X().Value(lengthContext),
+                            foreignObjectElement.Y().Value(lengthContext));
+    _viewport = RectF(viewportLocation, SizeF(foreignObjectElement.Width().Value(lengthContext),
+                                              foreignObjectElement.Height().Value(lengthContext)));
     if (!updateCachedBoundariesInParents)
     {
       updateCachedBoundariesInParents = oldViewport != _viewport;
@@ -189,9 +189,9 @@ namespace krys::boo
     repainter.RepaintAfterLayout();
   }
 
-  bool LegacyRenderSVGForeignObject::NodeAtFloatPoint(const HitTestRequest &request, HitTestResult &result,
-                                                      const FloatPoint &pointInParent,
-                                                      HitTestAction hitTestAction) noexcept
+  bool LegacyRenderSVGForeignObject::NodeAtPointF(const HitTestRequest &request, HitTestResult &result,
+                                                  const PointF &pointInParent,
+                                                  HitTestAction hitTestAction) noexcept
   {
     // Embedded content is drawn in the foreground phase.
     if (hitTestAction != HitTestForeground)
@@ -199,7 +199,7 @@ namespace krys::boo
       return false;
     }
 
-    FloatPoint localPoint = LocalTransform().Inverse().value_or(AffineTransform {}).MapPoint(pointInParent);
+    PointF localPoint = LocalTransform().Inverse().value_or(AffineTransform {}).MapPoint(pointInParent);
 
     // Early exit if local point is not contained in clipped viewport area
     if (SVGRenderSupport::IsOverflowHidden(*this) && !_viewport.Contains(localPoint))

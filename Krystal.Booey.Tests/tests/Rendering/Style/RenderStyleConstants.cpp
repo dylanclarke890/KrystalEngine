@@ -62,7 +62,7 @@ namespace krys::boo::tests
 
   TEST_CASE("WritingMode: text orientation keeps the writing mode", "[Core][WritingMode]")
   {
-    WritingMode mode {StyleWritingMode::VerticalLr, TextDirection::LTR, TextOrientation::Mixed};
+    WritingMode mode {StyleWritingMode::VerticalLr, text::TextDirection::LTR, TextOrientation::Mixed};
     mode.SetTextOrientation(TextOrientation::Sideways);
     CHECK(mode.ComputedWritingMode() == StyleWritingMode::VerticalLr);
     CHECK(mode.ComputedTextOrientation() == TextOrientation::Sideways);

@@ -38,7 +38,7 @@
 #include "Krystal.Booey/Style/Values/Primitives/NumericTypesConversions.hpp"
 #include "Krystal.Booey/SVG/Elements/SVGElement.hpp"
 #include "Krystal.Booey/SVG/SVGURIReference.hpp"
-#include "Krystal.Core/Text/StringBuilder.hpp"
+#include "Krystal.Core/Strings/StringBuilder.hpp"
 #include "Krystal.Core/TypeCast.hpp"
 
 namespace krys::boo::style
@@ -57,13 +57,13 @@ namespace krys::boo::style
 
     if (const auto *url = DynamicDowncast<css::UrlValue>(value))
     {
-      auto styleURL = ToStyleWithScriptExecutionContext(url->URL(), state.GetDocument());
+      auto styleUrl = ToStyleWithScriptExecutionContext(url->Url(), state.GetDocument());
 
       // FIXME: ReferencePathOperation are not hooked up to support remote URLs yet, so only works with
       // document local references. To see an example of how this should work, see ReferenceFilterOperation
       // which supports both document local and remote URLs.
 
-      auto fragment = SVGURIReference::FragmentIdentifierFromIRIString(styleURL, state.GetDocument());
+      auto fragment = SVGURIReference::FragmentIdentifierFromIRIString(styleUrl, state.GetDocument());
 
       const auto &treeScope = [&]() -> const dom::DocumentOrShadowRoot &
       {
@@ -73,9 +73,9 @@ namespace krys::boo::style
         }
         return state.GetDocument();
       }();
-      auto target = SVGURIReference::TargetElementFromIRIString(styleURL, treeScope);
+      auto target = SVGURIReference::TargetElementFromIRIString(styleUrl, treeScope);
 
-      return ReferencePathOperation::Create(styleURL, fragment,
+      return ReferencePathOperation::Create(styleUrl, fragment,
                                             DynamicDowncast<SVGElement>(target.Element.get()));
     }
 

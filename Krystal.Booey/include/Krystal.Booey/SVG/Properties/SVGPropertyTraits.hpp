@@ -24,11 +24,11 @@
 #include "Krystal.Booey/DOM/Types/DOMString.hpp"
 #include "Krystal.Booey/DOM/Types/QualifiedName.hpp"
 #include "Krystal.Booey/Graphics/Color/Color.hpp"
-#include "Krystal.Booey/Graphics/Geometry/FloatPoint.hpp"
-#include "Krystal.Booey/Graphics/Geometry/FloatRect.hpp"
 #include "Krystal.Booey/SVG/Internals/SVGParserUtilities.hpp"
 #include "Krystal.Core/Attributes.hpp"
-#include "Krystal.Core/Text/StringBuilder.hpp"
+#include "Krystal.Core/Geometry/Point.hpp"
+#include "Krystal.Core/Geometry/Rect.hpp"
+#include "Krystal.Core/Strings/StringBuilder.hpp"
 #include "Krystal.Core/Types/Maybe.hpp"
 #include <cmath>
 #include <utility>
@@ -211,24 +211,24 @@ namespace krys::boo
   };
 
   template <>
-  struct SVGPropertyTraits<FloatPoint>
+  struct SVGPropertyTraits<PointF>
   {
-    KRYS_NODISCARD static FloatPoint InitialValue() noexcept
+    KRYS_NODISCARD static PointF InitialValue() noexcept
     {
-      return FloatPoint();
+      return PointF();
     }
 
-    KRYS_NODISCARD static FloatPoint FromString(SVGElement &, DOMStringView string) noexcept
+    KRYS_NODISCARD static PointF FromString(SVGElement &, DOMStringView string) noexcept
     {
-      return svg::ParsePoint(string).value_or(FloatPoint());
+      return svg::ParsePoint(string).value_or(PointF());
     }
 
-    KRYS_NODISCARD static Maybe<FloatPoint> Parse(const QualifiedName &, DOMStringView string) noexcept
+    KRYS_NODISCARD static Maybe<PointF> Parse(const QualifiedName &, DOMStringView string) noexcept
     {
       return svg::ParsePoint(string);
     }
 
-    KRYS_NODISCARD static DOMString ToString(const FloatPoint &type) noexcept
+    KRYS_NODISCARD static DOMString ToString(const PointF &type) noexcept
     {
       StringBuilder builder;
       builder.Append(type.X(), u8' ', type.Y());
@@ -237,24 +237,24 @@ namespace krys::boo
   };
 
   template <>
-  struct SVGPropertyTraits<FloatRect>
+  struct SVGPropertyTraits<RectF>
   {
-    KRYS_NODISCARD static FloatRect InitialValue() noexcept
+    KRYS_NODISCARD static RectF InitialValue() noexcept
     {
-      return FloatRect();
+      return RectF();
     }
 
-    KRYS_NODISCARD static FloatRect FromString(SVGElement &, DOMStringView string) noexcept
+    KRYS_NODISCARD static RectF FromString(SVGElement &, DOMStringView string) noexcept
     {
-      return svg::ParseRect(string).value_or(FloatRect());
+      return svg::ParseRect(string).value_or(RectF());
     }
 
-    KRYS_NODISCARD static Maybe<FloatRect> Parse(const QualifiedName &, DOMStringView string) noexcept
+    KRYS_NODISCARD static Maybe<RectF> Parse(const QualifiedName &, DOMStringView string) noexcept
     {
       return svg::ParseRect(string);
     }
 
-    KRYS_NODISCARD static DOMString ToString(const FloatRect &type) noexcept
+    KRYS_NODISCARD static DOMString ToString(const RectF &type) noexcept
     {
       StringBuilder builder;
       builder.Append(type.X(), u8' ', type.Y(), u8' ', type.Width(), u8' ', type.Height());

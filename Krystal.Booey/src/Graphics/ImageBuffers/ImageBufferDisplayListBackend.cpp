@@ -34,7 +34,7 @@ namespace krys::boo
   }
 
   ImageBufferDisplayListBackend::ImageBufferDisplayListBackend(const Parameters &parameters) noexcept
-      : ImageBufferBackend(parameters), _drawingContext(FloatSize(parameters.BackendSize))
+      : ImageBufferBackend(parameters), _drawingContext(SizeF(parameters.BackendSize))
   {
   }
 

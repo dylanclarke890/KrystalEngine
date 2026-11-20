@@ -60,16 +60,16 @@ namespace krys::boo::style
 
   DEFINE_TYPE_MAPPING(css::Ellipse, Ellipse)
 
-  KRYS_NODISCARD FloatPoint ResolvePosition(const Ellipse &value, FloatSize boxSize) noexcept;
+  KRYS_NODISCARD PointF ResolvePosition(const Ellipse &value, SizeF boxSize) noexcept;
 
-  KRYS_NODISCARD FloatSize ResolveRadii(const Ellipse &, FloatSize boxSize, FloatPoint center) noexcept;
+  KRYS_NODISCARD SizeF ResolveRadii(const Ellipse &, SizeF boxSize, PointF center) noexcept;
 
-  KRYS_NODISCARD boo::Path PathForCenterCoordinate(const Ellipse &, const FloatRect &, FloatPoint) noexcept;
+  KRYS_NODISCARD boo::Path PathForCenterCoordinate(const Ellipse &, const RectF &, PointF) noexcept;
 
   template <>
   struct PathComputation<Ellipse>
   {
-    KRYS_NODISCARD boo::Path operator()(const Ellipse &, const FloatRect &) noexcept;
+    KRYS_NODISCARD boo::Path operator()(const Ellipse &, const RectF &) noexcept;
   };
 
   template <>

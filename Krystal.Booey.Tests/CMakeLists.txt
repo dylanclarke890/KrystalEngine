@@ -1,7 +1,6 @@
 ﻿add_executable(Krystal.Booey.Tests)
 
-# Third-party - RapidJSON (WPT URL test data), magic_enum (tokenizer test state names)
-find_package(RapidJSON CONFIG REQUIRED)
+# Third-party - magic_enum (tokenizer test state names)
 find_package(magic_enum CONFIG REQUIRED)
 
 target_link_libraries(Krystal.Booey.Tests
@@ -9,7 +8,6 @@ target_link_libraries(Krystal.Booey.Tests
 	 	Krystal.Core
 		Krystal.Booey
    	Catch2::Catch2WithMain
-		rapidjson
 		magic_enum::magic_enum
 )
 
@@ -29,6 +27,9 @@ target_compile_options(Krystal.Booey.Tests
 	PRIVATE
 		$<$<CXX_COMPILER_ID:MSVC>:/W4 /MP /utf-8>
 )
+
+# The test images Krystal.Image.Tests keeps.
+target_include_directories(Krystal.Booey.Tests PRIVATE "${CMAKE_SOURCE_DIR}/Krystal.Image.Tests/include")
 
 target_compile_definitions(Krystal.Booey.Tests PRIVATE
     KRYS_BOOEY_TESTS_DATA_DIR="${CMAKE_CURRENT_SOURCE_DIR}/data")
@@ -92,9 +93,6 @@ target_sources(Krystal.Booey.Tests
 		include/Krystal.Booey.Tests/SVG/TestSVGElement.hpp
 		include/Krystal.Booey.Tests/CSS/ConsumerTestUtils.hpp
 		include/Krystal.Booey.Tests/CSS/MediaTestUtils.hpp
-		include/Krystal.Booey.Tests/Platform/ImageDecoders/EXIFImages.hpp
-		include/Krystal.Booey.Tests/Platform/ImageDecoders/ICCImages.hpp
-		include/Krystal.Booey.Tests/Platform/ImageDecoders/TestImages.hpp
 		include/Krystal.Booey.Tests/CSS/SelectorTestUtils.hpp
 		include/Krystal.Booey.Tests/Animation/AnimationTestUtils.hpp
 		include/Krystal.Booey.Tests/CSS/ValueTestUtils.hpp
@@ -197,7 +195,7 @@ target_sources(Krystal.Booey.Tests
 		tests/CSS/Properties/Consumers/Transform.cpp
 		tests/CSS/Properties/Consumers/Transitions.cpp
 		tests/CSS/Properties/Consumers/UI.cpp
-		tests/CSS/Properties/Consumers/URL.cpp
+		tests/CSS/Properties/Consumers/Url.cpp
 		tests/CSS/Properties/Consumers/UnicodeRange.cpp
 		tests/CSS/Properties/Consumers/WillChange.cpp
 		tests/CSS/Properties/Property.cpp
@@ -237,7 +235,7 @@ target_sources(Krystal.Booey.Tests
 		tests/CSS/Values/Primitives/PrimitiveNumeric.cpp
 		tests/CSS/Values/Primitives/Position.cpp
 		tests/CSS/Values/Primitives/Ratio.cpp
-		tests/CSS/Values/Primitives/URL.cpp
+		tests/CSS/Values/Primitives/Url.cpp
 		tests/CSS/Values/Primitives/Units.cpp
 		tests/CSS/Values/PrimitiveValue.cpp
 		tests/CSS/Values/Quad.cpp
@@ -316,16 +314,13 @@ target_sources(Krystal.Booey.Tests
 		tests/Graphics/Filters/FilterOperations.cpp
 		tests/Graphics/Fonts/FontCustomPlatformData.cpp
 		tests/Graphics/Fonts/FontFeatureValues.cpp
+		tests/Graphics/Fonts/FontGenericFamilies.cpp
 		tests/Graphics/Fonts/FontPaletteValues.cpp
 		tests/Graphics/Fonts/FontTaggedSettings.cpp
 		tests/Graphics/Fonts/WOFFFileFormat.cpp
-		tests/Graphics/Geometry/DoublePoint.cpp
-		tests/Graphics/Geometry/FloatPoint.cpp
-		tests/Graphics/Geometry/FloatPoint3D.cpp
-		tests/Graphics/Geometry/FloatQuad.cpp
-		tests/Graphics/Geometry/FloatRect.cpp
-		tests/Graphics/Geometry/FloatSize.cpp
+		tests/Graphics/Geometry/BoxExtents.cpp
 		tests/Graphics/Geometry/LayoutUnit.cpp
+		tests/Graphics/Geometry/RayIntersection.cpp
 		tests/Graphics/Geometry/RoundedRect.cpp
 		tests/Graphics/Gradient.cpp
 		tests/Graphics/GraphicsContext.cpp
@@ -358,23 +353,10 @@ target_sources(Krystal.Booey.Tests
 		tests/Graphics/Color/NamedColors.cpp
 		tests/Graphics/Fonts/FontDescription.cpp
 		tests/Graphics/Fonts/FontSelectionAlgorithm.cpp
-		tests/Graphics/Geometry/GeometryUtilities.cpp
-		tests/Graphics/Geometry/IntPoint.cpp
-		tests/Graphics/Geometry/IntRect.cpp
-		tests/Graphics/Geometry/IntSize.cpp
 		tests/Graphics/Geometry/LayoutPoint.cpp
 		tests/Graphics/Geometry/LayoutRect.cpp
 		tests/Graphics/Geometry/LayoutSize.cpp
-		tests/Graphics/Geometry/Region.cpp
-		tests/Graphics/Transforms/AffineTransform.cpp
-		tests/Graphics/Transforms/Quaternion.cpp
-		tests/Graphics/Transforms/TransformationMatrix.cpp
 		tests/Graphics/Transforms/TransformExtras.cpp
-		tests/Platform/Locale/DateTimeFormat.cpp
-		tests/Platform/Locale/Language.cpp
-		tests/Platform/Locale/LocaleICU.cpp
-		tests/Text/LocaleToScriptMapping.cpp
-		tests/Text/TextBreakIterator.cpp
 		tests/Text/TextFlags.cpp
 		tests/Text/TextSpacing.cpp
 		tests/Rendering/Style/GridSpan.cpp
@@ -384,7 +366,6 @@ target_sources(Krystal.Booey.Tests
 		tests/Graphics/Fonts/Font.cpp
 		tests/Graphics/Fonts/FontCache.cpp
 		tests/Graphics/Fonts/FontCascade.cpp
-		tests/Graphics/Geometry/FloatPointGraph.cpp
 		tests/Graphics/TextRuns/ComplexTextController.cpp
 		tests/Animation/Animatable.cpp
 		tests/Animation/AnimationEffect.cpp
@@ -437,21 +418,21 @@ target_sources(Krystal.Booey.Tests
 		tests/DOM/Events/WheelEvent.cpp
 		tests/DOM/Abort/AbortController.cpp
 		tests/DOM/Abort/AbortSignal.cpp
-		tests/Page/AccessKeys.cpp
-		tests/Page/EventHandler.cpp
-		tests/Page/PenAndTouch.cpp
-		tests/Page/PointerLockController.cpp
-		tests/Page/SpatialNavigation.cpp
+		tests/Input/AccessKeys.cpp
+		tests/Input/EventHandler.cpp
+		tests/Input/PenAndTouch.cpp
+		tests/Input/PointerLockController.cpp
+		tests/Input/SpatialNavigation.cpp
 		tests/FileAPI/Blob.cpp
 		tests/DOM/DataTransfer/DataTransfer.cpp
-		tests/Page/PointerCaptureController.cpp
+		tests/Input/PointerCaptureController.cpp
 		tests/Page/DOMSelection.cpp
-		tests/Page/MouseSelection.cpp
+		tests/Input/MouseSelection.cpp
 		tests/Page/Drag/DragController.cpp
 		tests/Graphics/TextRuns/StringTruncator.cpp
 		tests/Platform/Pasteboard/DragImage.cpp
-		tests/Page/IntersectionObserver/IntersectionObserver.cpp
-		tests/Page/ResizeObserver/ResizeObserver.cpp
+		tests/DOM/IntersectionObservers/IntersectionObserver.cpp
+		tests/DOM/ResizeObservers/ResizeObserver.cpp
 		tests/Page/Page.cpp
 		tests/Page/LocalDOMWindow.cpp
 		tests/Loader/DocumentLoader.cpp
@@ -507,13 +488,7 @@ target_sources(Krystal.Booey.Tests
 		tests/Layout/FormattingContexts/Inline/Ruby/RubyFormattingContext.cpp
 		tests/Layout/FormattingContexts/Inline/Invalidation/InlineInvalidation.cpp
 		tests/Platform/DateComponents.cpp
-		tests/Platform/Decimal.cpp
-		tests/Platform/MIMETypeRegistry.cpp
-		tests/Platform/ImageDecoders/ScalableImageDecoder.cpp
-		tests/Platform/Network/DataURLDecoder.cpp
-		tests/Platform/Network/HTTPParsers.cpp
 		tests/Platform/Scrolling/ScrollAlignment.cpp
-		tests/Platform/Timer.cpp
 		tests/Rendering/Grid/RenderGrid.cpp
 		tests/Rendering/RenderFlexibleBox.cpp
 		tests/Rendering/RenderObject.cpp
@@ -588,7 +563,7 @@ target_sources(Krystal.Booey.Tests
 		tests/Rendering/MultiColumn/RenderMultiColumnFlow.cpp
 		tests/Rendering/Updating/RenderTreeBuilderRuby.cpp
 		tests/Page/Settings.cpp
-		tests/Page/WheelEventDeltaFilter.cpp
+		tests/Input/WheelEventDeltaFilter.cpp
 		tests/Style/Adjuster.cpp
 		tests/Style/AnchorPositionEvaluator.cpp
 		tests/Style/Builder/Builder.cpp
@@ -762,7 +737,7 @@ target_sources(Krystal.Booey.Tests
 		tests/HTML/Algorithms/RenderBlocking.cpp
 		tests/HTML/Attributes/EnumeratedAttributes.cpp
 		tests/HTML/Attributes/ReflectAttribute.cpp
-		tests/HTML/Attributes/ReflectURL.cpp
+		tests/HTML/Attributes/ReflectUrl.cpp
 		tests/HTML/InputTypes/BaseDateAndTimeInputType.cpp
 		tests/HTML/InputTypes/ColorInputType.cpp
 		tests/HTML/InputTypes/FileInputType.cpp
@@ -778,7 +753,7 @@ target_sources(Krystal.Booey.Tests
 		tests/HTML/Collections/RadioNodeList.cpp
 		tests/HTML/Shadow/SliderThumbElement.cpp
 		tests/HTML/Shadow/SpinButtonElement.cpp
-		tests/HTML/Mixins/URLDecomposition.cpp
+		tests/HTML/Mixins/UrlDecomposition.cpp
 		tests/HTML/MicroParsers/Dimensions.cpp
 		tests/HTML/MicroParsers/Numbers.cpp
 		tests/HTML/Internals/PresentationalHints.cpp
@@ -846,8 +821,6 @@ target_sources(Krystal.Booey.Tests
 		tests/SVG/SVGFilterPrimitiveStandardAttributes.cpp
 		tests/SVG/Elements/SVGUseElement.cpp
 		tests/SVG/Elements/SVGGradientElement.cpp
-		tests/URL/URL.cpp
-		tests/URL/WPT.cpp
 		tests/XML/PseudoAttributes.cpp
 		tests/XML/XMLDocumentParser.cpp
 )

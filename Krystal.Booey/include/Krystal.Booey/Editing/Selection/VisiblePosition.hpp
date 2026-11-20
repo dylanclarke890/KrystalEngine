@@ -30,11 +30,10 @@
 #include "Krystal.Booey/Editing/Selection/EditingBoundary.hpp"
 #include "Krystal.Booey/Editing/Selection/InlineRunAndOffset.hpp"
 #include "Krystal.Booey/Editing/Selection/TextAffinity.hpp"
-#include "Krystal.Booey/Graphics/Geometry/FloatRect.hpp"
-#include "Krystal.Booey/Graphics/Geometry/IntRect.hpp"
 #include "Krystal.Booey/Graphics/Geometry/LayoutRect.hpp"
 #include "Krystal.Booey/Text/WritingMode.hpp"
 #include "Krystal.Core/Attributes.hpp"
+#include "Krystal.Core/Geometry/Rect.hpp"
 #include "Krystal.Core/Types/Maybe.hpp"
 #include <compare>
 
@@ -128,7 +127,8 @@ namespace krys::boo
 
     KRYS_NODISCARD InlineBoxAndOffset GetInlineBoxAndOffset() const noexcept;
 
-    KRYS_NODISCARD InlineBoxAndOffset GetInlineBoxAndOffset(TextDirection primaryDirection) const noexcept;
+    KRYS_NODISCARD InlineBoxAndOffset
+      GetInlineBoxAndOffset(text::TextDirection primaryDirection) const noexcept;
 
     struct LocalCaretRectResult
     {
@@ -139,13 +139,13 @@ namespace krys::boo
     KRYS_NODISCARD LocalCaretRectResult LocalCaretRect() const noexcept;
 
     // Bounds of (possibly transformed) caret in absolute coords.
-    KRYS_NODISCARD IntRect AbsoluteCaretBounds(bool *insideFixed = nullptr) const noexcept;
+    KRYS_NODISCARD RectI AbsoluteCaretBounds(bool *insideFixed = nullptr) const noexcept;
 
     // Abs x/y position of the caret ignoring transforms.
     // FIXME: navigation with transforms should be smarter.
     KRYS_NODISCARD int32 LineDirectionPointForBlockDirectionNavigation() const noexcept;
 
-    KRYS_NODISCARD FloatRect AbsoluteSelectionBoundsForLine() const noexcept;
+    KRYS_NODISCARD RectF AbsoluteSelectionBoundsForLine() const noexcept;
 
     // This is a tentative enhancement of operator== to account for affinity.
     // FIXME: Combine this function with operator==.

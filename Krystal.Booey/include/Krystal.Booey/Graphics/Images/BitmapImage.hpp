@@ -44,8 +44,8 @@ namespace krys::boo
 
   public:
     KRYS_NODISCARD static Ref<BitmapImage>
-      Create(ImageObserver * = nullptr, AlphaOption = AlphaOption::Premultiplied,
-             GammaAndColorProfileOption = GammaAndColorProfileOption::Applied) noexcept;
+      Create(ImageObserver * = nullptr, img::AlphaOption = img::AlphaOption::Premultiplied,
+             img::GammaAndColorProfileOption = img::GammaAndColorProfileOption::Applied) noexcept;
 
     KRYS_NODISCARD static Ref<BitmapImage> Create(Ref<NativeImage> &&) noexcept;
 
@@ -90,7 +90,7 @@ namespace krys::boo
       _source->StopDecodingWorkQueue();
     }
 
-    void Decode(Func<void(DecodingStatus)> &&decodeCallback) noexcept
+    void Decode(Func<void(img::DecodingStatus)> &&decodeCallback) noexcept
     {
       _source->Decode(krys::move(decodeCallback));
     }
@@ -106,7 +106,7 @@ namespace krys::boo
       return _source->CurrentImageFrame().HasAlpha();
     }
 
-    KRYS_NODISCARD ImageOrientation CurrentFrameOrientation() const noexcept
+    KRYS_NODISCARD img::ImageOrientation CurrentFrameOrientation() const noexcept
     {
       return _source->CurrentImageFrame().Orientation();
     }
@@ -133,19 +133,19 @@ namespace krys::boo
     }
 
     // Image Metadata
-    KRYS_NODISCARD FloatSize
-      Size(ImageOrientation orientation = ImageOrientation::Orientation::FromImage) const noexcept final
+    KRYS_NODISCARD SizeF Size(
+      img::ImageOrientation orientation = img::ImageOrientation::Orientation::FromImage) const noexcept final
     {
-      return FloatSize(_source->Size(orientation));
+      return SizeF(_source->Size(orientation));
     }
 
-    KRYS_NODISCARD FloatSize
-      SourceSize(ImageOrientation orientation = ImageOrientation::Orientation::FromImage) const noexcept final
+    KRYS_NODISCARD SizeF SourceSize(
+      img::ImageOrientation orientation = img::ImageOrientation::Orientation::FromImage) const noexcept final
     {
-      return FloatSize(_source->SourceSize(orientation));
+      return SizeF(_source->SourceSize(orientation));
     }
 
-    KRYS_NODISCARD ImageOrientation Orientation() const noexcept final
+    KRYS_NODISCARD img::ImageOrientation Orientation() const noexcept final
     {
       return _source->Orientation();
     }
@@ -168,7 +168,7 @@ namespace krys::boo
     }
 
     // Encoded and decoded data
-    EncodedDataStatus DataChanged(bool allDataReceived) noexcept final;
+    img::EncodedDataStatus DataChanged(bool allDataReceived) noexcept final;
 
     void DestroyDecodedData(bool destroyAll = true) noexcept final;
 
@@ -188,7 +188,7 @@ namespace krys::boo
       return _source->AccessibilityDescription();
     }
 
-    KRYS_NODISCARD Maybe<IntPoint> HotSpot() const noexcept final
+    KRYS_NODISCARD Maybe<PointI> HotSpot() const noexcept final
     {
       return _source->HotSpot();
     }
@@ -215,30 +215,29 @@ namespace krys::boo
       return _source->CurrentImageFrame().IsComplete();
     }
 
-    void DrawDensityCorrectedPattern(GraphicsContext &, const FloatRect &destinationRect,
-                                     const FloatRect &tileRect, const AffineTransform &,
-                                     const FloatPoint &phase, const FloatSize &spacing,
+    void DrawDensityCorrectedPattern(GraphicsContext &, const RectF &destinationRect, const RectF &tileRect,
+                                     const AffineTransform &, const PointF &phase, const SizeF &spacing,
                                      ImagePaintingOptions) noexcept;
 
-    void DrawPattern(GraphicsContext &, const FloatRect &destinationRect, const FloatRect &tileRect,
-                     const AffineTransform &patternTransform, const FloatPoint &phase,
-                     const FloatSize &spacing, ImagePaintingOptions = {}) noexcept final;
+    void DrawPattern(GraphicsContext &, const RectF &destinationRect, const RectF &tileRect,
+                     const AffineTransform &patternTransform, const PointF &phase, const SizeF &spacing,
+                     ImagePaintingOptions = {}) noexcept final;
 
     void Dump(TextStream &) const noexcept final;
 
   private:
-    BitmapImage(ImageObserver *, AlphaOption, GammaAndColorProfileOption) noexcept;
+    BitmapImage(ImageObserver *, img::AlphaOption, img::GammaAndColorProfileOption) noexcept;
 
     /// @brief Draws the pattern of the tile turned into a luminance mask.
-    void DrawLuminanceMaskPattern(GraphicsContext &, const FloatRect &destinationRect,
-                                  const FloatRect &tileRect, const AffineTransform &, const FloatPoint &phase,
-                                  const FloatSize &spacing, ImagePaintingOptions) noexcept;
+    void DrawLuminanceMaskPattern(GraphicsContext &, const RectF &destinationRect, const RectF &tileRect,
+                                  const AffineTransform &, const PointF &phase, const SizeF &spacing,
+                                  ImagePaintingOptions) noexcept;
 
     explicit BitmapImage(Ref<NativeImage> &&) noexcept;
 
     // Current NativeImage
     KRYS_NODISCARD RefPtr<NativeImage>
-      CurrentPreTransformedNativeImage(ImageOrientation orientation) noexcept final
+      CurrentPreTransformedNativeImage(img::ImageOrientation orientation) noexcept final
     {
       return _source->CurrentPreTransformedNativeImage(orientation);
     }
@@ -249,7 +248,7 @@ namespace krys::boo
       return _source->SinglePixelSolidColor();
     }
 
-    ImageDrawResult Draw(GraphicsContext &, const FloatRect &destinationRect, const FloatRect &sourceRect,
+    ImageDrawResult Draw(GraphicsContext &, const RectF &destinationRect, const RectF &sourceRect,
                          ImagePaintingOptions = {}) noexcept final;
   };
 }

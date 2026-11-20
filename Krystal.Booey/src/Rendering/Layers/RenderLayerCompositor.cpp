@@ -27,7 +27,7 @@
 #include "Krystal.Booey/Animation/KeyframeEffectStack.hpp"
 #include "Krystal.Booey/DOM/Nodes/Document.hpp"
 #include "Krystal.Booey/Graphics/GraphicsContext.hpp"
-#include "Krystal.Booey/Page/ChromeClient.hpp"
+#include "Krystal.Booey/Page/Clients/ChromeClient.hpp"
 #include "Krystal.Booey/Page/LocalFrame.hpp"
 #include "Krystal.Booey/Page/LocalFrameView.hpp"
 #include "Krystal.Booey/Page/Page.hpp"
@@ -46,7 +46,7 @@
 #include "Krystal.Booey/Style/Difference.hpp"
 #include "Krystal.Booey/Style/Styleable.hpp"
 #include "Krystal.Booey/Style/Values/Backgrounds/FillLayers.hpp"
-#include "Krystal.Core/Text/TextStream.hpp"
+#include "Krystal.Core/Strings/TextStream.hpp"
 #include "Krystal.Core/Types/HashMap.hpp"
 #include "Krystal.Core/Types/ListHashSet.hpp"
 #include "Krystal.Core/Utils/SetForScope.hpp"
@@ -677,7 +677,7 @@ namespace krys::boo
   {
     if (propertyName == u8"anchorPoint")
     {
-      return layer->AnchorPoint() != FloatPoint3D(0.5f, 0.5f, 0);
+      return layer->AnchorPoint() != Point3F(0.5f, 0.5f, 0);
     }
 
     return true;
@@ -708,14 +708,13 @@ namespace krys::boo
     }
   }
 
-  FloatRect RenderLayerCompositor::VisibleRectForLayerFlushing() const noexcept
+  RectF RenderLayerCompositor::VisibleRectForLayerFlushing() const noexcept
   {
     const auto &frameView = _renderView.FrameView();
 
     // Having a _scrolledContentsLayer indicates that we're doing scrolling via GraphicsLayers.
-    FloatRect visibleRect = _scrolledContentsLayer
-                              ? FloatRect({}, FloatSize(frameView.SizeForVisibleContent()))
-                              : FloatRect(frameView.VisibleContentRect());
+    RectF visibleRect = _scrolledContentsLayer ? RectF({}, SizeF(frameView.SizeForVisibleContent()))
+                                               : RectF(frameView.VisibleContentRect());
 
     // FIXME: The view's exposed rect (viewExposedRect), once hosts can expose part of the view.
     return visibleRect;
@@ -735,7 +734,7 @@ namespace krys::boo
 
       if (RefPtr rootLayer = ShareRefPtr(RootGraphicsLayer()))
       {
-        FloatRect visibleRect = VisibleRectForLayerFlushing();
+        RectF visibleRect = VisibleRectForLayerFlushing();
         rootLayer->FlushCompositingState(visibleRect);
       }
 
@@ -771,7 +770,7 @@ namespace krys::boo
       return;
     }
 
-    FloatRect visibleRect = VisibleRectForLayerFlushing();
+    RectF visibleRect = VisibleRectForLayerFlushing();
     bool requiresFlush = rootLayer->VisibleRectChangeRequiresFlush(visibleRect);
     if (requiresFlush)
     {
@@ -2381,7 +2380,7 @@ namespace krys::boo
 
     // In the animating transform case, we avoid double-accounting for the transform because we told
     // pushMappingsToAncestor() to ignore transforms earlier.
-    extent.Bounds = EnclosingLayoutRect(overlapMap.GeometryMap().AbsoluteRect(FloatRect(layerBounds)));
+    extent.Bounds = EnclosingLayoutRect(overlapMap.GeometryMap().AbsoluteRect(RectF(layerBounds)));
 
     // Empty rects never intersect, but we need them to for the purposes of overlap testing.
     if (extent.Bounds.IsEmpty())
@@ -2629,7 +2628,7 @@ namespace krys::boo
     return overlapMap.OverlapsLayers(layer, extent.Bounds, extent.ClippingScopes);
   }
 
-  void RenderLayerCompositor::FrameViewDidChangeLocation(FloatPoint contentsOffset) noexcept
+  void RenderLayerCompositor::FrameViewDidChangeLocation(PointF contentsOffset) noexcept
   {
     if (_overflowControlsHostLayer)
     {
@@ -2663,16 +2662,16 @@ namespace krys::boo
     krys_debug_assert(_scrolledContentsLayer);
 
     auto &frameView = _renderView.FrameView();
-    IntPoint scrollPosition = frameView.GetScrollPosition();
+    PointI scrollPosition = frameView.GetScrollPosition();
 
     // We use scroll position here because the root content layer is offset to account for scrollOrigin (see
     // LocalFrameView::positionForRootContentLayer).
     _scrolledContentsLayer->SetPosition(
-      FloatPoint(static_cast<float>(-scrollPosition.X()), static_cast<float>(-scrollPosition.Y())));
+      PointF(static_cast<float>(-scrollPosition.X()), static_cast<float>(-scrollPosition.Y())));
 
     if (auto *fixedBackgroundLayer = FixedRootBackgroundLayer())
     {
-      fixedBackgroundLayer->SetPosition(FloatPoint(frameView.ScrollPositionForFixedPosition()));
+      fixedBackgroundLayer->SetPosition(PointF(frameView.ScrollPositionForFixedPosition()));
     }
   }
 
@@ -2689,12 +2688,12 @@ namespace krys::boo
     layerForClipping->SetPosition(layerRect.Location());
   }
 
-  FloatRect RenderLayerCompositor::InsetClipLayerRect() const noexcept
+  RectF RenderLayerCompositor::InsetClipLayerRect() const noexcept
   {
     auto &frameView = _renderView.FrameView();
 
     // FIXME: Obscured content insets, once there are any.
-    FloatRect insetClipLayerRect({}, FloatSize(frameView.SizeForVisibleContent()));
+    RectF insetClipLayerRect({}, SizeF(frameView.SizeForVisibleContent()));
     insetClipLayerRect.Move(static_cast<float>(frameView.InsetForLeftScrollbarSpace()), 0);
     return insetClipLayerRect;
   }
@@ -2893,9 +2892,9 @@ namespace krys::boo
     if (_rootContentsLayer)
     {
       auto &frameView = _renderView.FrameView();
-      _rootContentsLayer->SetSize(FloatSize(frameView.ContentsSize()));
+      _rootContentsLayer->SetSize(SizeF(frameView.ContentsSize()));
       _rootContentsLayer->SetPosition(frameView.PositionForRootContentLayer());
-      _rootContentsLayer->SetAnchorPoint(FloatPoint3D());
+      _rootContentsLayer->SetAnchorPoint(Point3F());
     }
 
     UpdateScrollLayerClipping();
@@ -3812,9 +3811,9 @@ namespace krys::boo
        RenderLayer::UseFragmentBoxesExcludingCompositing, RenderLayer::ExcludeHiddenDescendants,
        RenderLayer::DontConstrainForMask, RenderLayer::IncludeCompositedDescendants});
     // Map to the render view to ignore page scale.
-    FloatRect absoluteBounds =
-      layer.Renderer().LocalToContainerQuad(FloatQuad(FloatRect(layerBounds)), &_renderView).BoundingBox();
-    return viewBounds.Intersects(LayoutRect(EnclosingIntRect(absoluteBounds)));
+    RectF absoluteBounds =
+      layer.Renderer().LocalToContainerQuad(QuadF(RectF(layerBounds)), &_renderView).BoundingBox();
+    return viewBounds.Intersects(LayoutRect(EnclosingRectI(absoluteBounds)));
   }
 
   bool RenderLayerCompositor::UseCoordinatedScrollingForLayer(const RenderLayer &layer) const noexcept
@@ -3956,7 +3955,7 @@ namespace krys::boo
     }
   }
 
-  void PaintScrollbar(Scrollbar *scrollbar, GraphicsContext &context, const IntRect &clip,
+  void PaintScrollbar(Scrollbar *scrollbar, GraphicsContext &context, const RectI &clip,
                       const Color &backgroundColor) noexcept
   {
     if (!scrollbar)
@@ -3965,24 +3964,22 @@ namespace krys::boo
     }
 
     context.Save();
-    const IntRect &scrollbarRect = scrollbar->FrameRect();
-    context.Translate(
-      -FloatSize(static_cast<float>(scrollbarRect.X()), static_cast<float>(scrollbarRect.Y())));
-    IntRect transformedClip = clip;
+    const RectI &scrollbarRect = scrollbar->FrameRect();
+    context.Translate(-SizeF(static_cast<float>(scrollbarRect.X()), static_cast<float>(scrollbarRect.Y())));
+    RectI transformedClip = clip;
     transformedClip.MoveBy(scrollbarRect.Location());
     if (!scrollbar->IsOverlayScrollbar() && backgroundColor.IsVisible())
     {
-      context.FillRect(FloatRect(transformedClip), backgroundColor);
+      context.FillRect(RectF(transformedClip), backgroundColor);
     }
     scrollbar->Paint(context, transformedClip);
     context.Restore();
   }
 
   void RenderLayerCompositor::PaintContents(const GraphicsLayer &graphicsLayer, GraphicsContext &context,
-                                            const FloatRect &clip,
-                                            EnumSet<GraphicsLayerPaintBehavior>) noexcept
+                                            const RectF &clip, EnumSet<GraphicsLayerPaintBehavior>) noexcept
   {
-    IntRect pixelSnappedRectForIntegralPositionedItems = SnappedIntRect(LayoutRect(clip));
+    RectI pixelSnappedRectForIntegralPositionedItems = SnappedRectI(LayoutRect(clip));
     auto &frameView = _renderView.FrameView();
     if (&graphicsLayer == LayerForHorizontalScrollbar())
     {
@@ -3996,16 +3993,15 @@ namespace krys::boo
     }
     else if (&graphicsLayer == LayerForScrollCorner())
     {
-      const IntRect &scrollCorner = frameView.ScrollCornerRect();
+      const RectI &scrollCorner = frameView.ScrollCornerRect();
       context.Save();
-      context.Translate(
-        -FloatSize(static_cast<float>(scrollCorner.X()), static_cast<float>(scrollCorner.Y())));
-      IntRect transformedClip = pixelSnappedRectForIntegralPositionedItems;
+      context.Translate(-SizeF(static_cast<float>(scrollCorner.X()), static_cast<float>(scrollCorner.Y())));
+      RectI transformedClip = pixelSnappedRectForIntegralPositionedItems;
       transformedClip.MoveBy(scrollCorner.Location());
       // The theme draws no corner, so the view's background shows there, as it does behind the scrollbars.
       if (_viewBackgroundColor.IsVisible())
       {
-        context.FillRect(FloatRect(transformedClip), _viewBackgroundColor);
+        context.FillRect(RectF(transformedClip), _viewBackgroundColor);
       }
       frameView.PaintScrollCorner(context, transformedClip);
       context.Restore();
@@ -4069,14 +4065,14 @@ namespace krys::boo
     return 0;
   }
 
-  FloatSize RenderLayerCompositor::EnclosingFrameViewVisibleSize() const noexcept
+  SizeF RenderLayerCompositor::EnclosingFrameViewVisibleSize() const noexcept
   {
     auto &frameView = _renderView.FrameView();
     if (_scrolledContentsLayer)
     {
-      return FloatSize(frameView.SizeForVisibleContent());
+      return SizeF(frameView.SizeForVisibleContent());
     }
-    return FloatSize(frameView.VisibleContentRect().Size());
+    return SizeF(frameView.VisibleContentRect().Size());
   }
 
   float RenderLayerCompositor::ContentsScaleMultiplierForNewTiles(const GraphicsLayer *) const noexcept
@@ -4298,10 +4294,10 @@ namespace krys::boo
     {
       _rootContentsLayer = GraphicsLayer::Create(GetGraphicsLayerFactory(), *this);
       _rootContentsLayer->SetName(u8"content root");
-      IntRect overflowRect = SnappedIntRect(_renderView.LayoutOverflowRect());
+      RectI overflowRect = SnappedRectI(_renderView.LayoutOverflowRect());
       _rootContentsLayer->SetSize(
-        FloatSize(static_cast<float>(overflowRect.MaxX()), static_cast<float>(overflowRect.MaxY())));
-      _rootContentsLayer->SetPosition(FloatPoint());
+        SizeF(static_cast<float>(overflowRect.MaxX()), static_cast<float>(overflowRect.MaxY())));
+      _rootContentsLayer->SetPosition(PointF());
 
       // Need to clip to prevent transformed content showing outside this frame
       UpdateRootContentLayerClipping();
@@ -4389,7 +4385,7 @@ namespace krys::boo
       if (auto *horizontalScrollbar = frameView.HorizontalScrollbar())
       {
         frameView.InvalidateScrollbar(*horizontalScrollbar,
-                                      IntRect(IntPoint(0, 0), horizontalScrollbar->FrameRect().Size()));
+                                      RectI(PointI(0, 0), horizontalScrollbar->FrameRect().Size()));
       }
     }
 
@@ -4399,7 +4395,7 @@ namespace krys::boo
       if (auto *verticalScrollbar = frameView.VerticalScrollbar())
       {
         frameView.InvalidateScrollbar(*verticalScrollbar,
-                                      IntRect(IntPoint(0, 0), verticalScrollbar->FrameRect().Size()));
+                                      RectI(PointI(0, 0), verticalScrollbar->FrameRect().Size()));
       }
     }
 

@@ -35,15 +35,15 @@ namespace krys::boo
     return AdoptRef(*new SliderTrackPart(type, {}, {}, {}, 0));
   }
 
-  Ref<SliderTrackPart> SliderTrackPart::Create(StyleAppearance type, const IntSize &thumbSize,
-                                               const IntRect &trackBounds, List<double> &&tickRatios,
+  Ref<SliderTrackPart> SliderTrackPart::Create(StyleAppearance type, const SizeI &thumbSize,
+                                               const RectI &trackBounds, List<double> &&tickRatios,
                                                double thumbPosition) noexcept
   {
     return AdoptRef(
       *new SliderTrackPart(type, thumbSize, trackBounds, krys::move(tickRatios), thumbPosition));
   }
 
-  SliderTrackPart::SliderTrackPart(StyleAppearance type, const IntSize &thumbSize, const IntRect &trackBounds,
+  SliderTrackPart::SliderTrackPart(StyleAppearance type, const SizeI &thumbSize, const RectI &trackBounds,
                                    List<double> &&tickRatios, double thumbPosition) noexcept
       : ControlPart(type), _thumbSize(thumbSize), _trackBounds(trackBounds),
         _tickRatios(krys::move(tickRatios)), _thumbPosition(thumbPosition)
@@ -51,7 +51,7 @@ namespace krys::boo
     krys_debug_assert(type == StyleAppearance::SliderHorizontal || type == StyleAppearance::SliderVertical);
   }
 
-  void SliderTrackPart::DrawTicks(GraphicsContext &context, const FloatRect &rect,
+  void SliderTrackPart::DrawTicks(GraphicsContext &context, const RectF &rect,
                                   const ControlStyle &style) const noexcept
   {
     if (_tickRatios.empty())
@@ -59,18 +59,18 @@ namespace krys::boo
       return;
     }
 
-    constexpr FloatSize sliderTickSize = {1, 3};
+    constexpr SizeF sliderTickSize = {1, 3};
     constexpr int32 sliderTickOffsetFromTrackCenter = -9;
 
     bool isHorizontal = GetType() == StyleAppearance::SliderHorizontal;
 
     auto trackBounds = _trackBounds;
-    trackBounds.MoveBy(IntPoint(rect.Location()));
+    trackBounds.MoveBy(PointI(rect.Location()));
 
     auto tickSize = isHorizontal ? sliderTickSize : sliderTickSize.TransposedSize();
     tickSize.Scale(style.ZoomFactor);
 
-    FloatPoint tickLocation;
+    PointF tickLocation;
     float tickRegionMargin = 0;
     float tickRegionWidth = 0;
 
@@ -89,7 +89,7 @@ namespace krys::boo
       tickRegionWidth = static_cast<float>(trackBounds.Height() - _thumbSize.Height());
     }
 
-    auto tickRect = FloatRect {tickLocation, tickSize};
+    auto tickRect = RectF {tickLocation, tickSize};
 
     GraphicsContextStateSaver stateSaver(context);
     context.SetFillColor(style.TextColor);

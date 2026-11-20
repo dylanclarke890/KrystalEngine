@@ -49,13 +49,13 @@
 #include "Krystal.Booey/CSS/Selectors/SelectorCheckerTestFunctions.hpp"
 #include "Krystal.Booey/DOM/Nodes/Document.hpp"
 #include "Krystal.Booey/DOM/Nodes/StyledElement.hpp"
-#include "Krystal.Booey/Graphics/Geometry/FloatQuad.hpp"
 #include "Krystal.Booey/Graphics/GraphicsContext.hpp"
 #include "Krystal.Booey/Graphics/Images/BitmapImage.hpp"
+#include "Krystal.Booey/Graphics/Transforms/LayoutTransforms.hpp"
 #include "Krystal.Booey/HTML/Elements/HTMLFormControlElement.hpp"
+#include "Krystal.Booey/Input/EventHandler.hpp"
 #include "Krystal.Booey/Layout/Integration/Inline/InlineIteratorTextBox.hpp"
 #include "Krystal.Booey/Loader/Cache/CachedImage.hpp"
-#include "Krystal.Booey/Page/EventHandler.hpp"
 #include "Krystal.Booey/Page/LocalFrame.hpp"
 #include "Krystal.Booey/Page/LocalFrameView.hpp"
 #include "Krystal.Booey/Platform/Scrolling/ScrollbarTheme.hpp"
@@ -87,9 +87,10 @@
 #include "Krystal.Booey/Style/TransformResolver.hpp"
 #include "Krystal.Booey/Style/Values/Masking/ClipPath.hpp"
 #include "Krystal.Booey/Style/Values/Shapes/BasicShape.hpp"
+#include "Krystal.Core/Geometry/Quad.hpp"
 #include "Krystal.Core/RefCounted.hpp"
-#include "Krystal.Core/Text/ASCII.hpp"
-#include "Krystal.Core/Text/TextStream.hpp"
+#include "Krystal.Core/Strings/ASCII.hpp"
+#include "Krystal.Core/Strings/TextStream.hpp"
 #include "Krystal.Core/Types/Array.hpp"
 #include "Krystal.Core/Types/HashSet.hpp"
 #include <algorithm>
@@ -237,7 +238,7 @@ namespace krys::boo
     return utf8_string {Renderer().RenderName()};
   }
 
-  void RenderLayer::ContentChanged(ContentChangeType changeType, const Maybe<FloatRect> &dirtyRect) noexcept
+  void RenderLayer::ContentChanged(ContentChangeType changeType, const Maybe<RectF> &dirtyRect) noexcept
   {
     if (changeType == ContentChangeType::Canvas || changeType == ContentChangeType::Video
         || changeType == ContentChangeType::FullScreen || changeType == ContentChangeType::Model
@@ -1693,7 +1694,7 @@ namespace krys::boo
       // FIXME: It looks suspicious to call convertToLayerCoords here
       // as canUseOffsetFromAncestor may be true for an ancestor layer.
       auto offsetFromRoot = OffsetFromAncestor(Root());
-      (void)_scrollableArea->PositionOverflowControls(RoundedIntSize(offsetFromRoot));
+      (void)_scrollableArea->PositionOverflowControls(RoundedSizeI(offsetFromRoot));
     }
 
     UpdateDescendantDependentFlags();
@@ -1825,7 +1826,7 @@ namespace krys::boo
     {
       const auto &frameRect = boxRenderer->FrameRect();
       return {boxRenderer->TopLeftLocation(),
-              LayoutSize(SnappedIntSize(frameRect.Size(), frameRect.Location()))};
+              LayoutSize(SnappedSizeI(frameRect.Size(), frameRect.Location()))};
     }
 
     krys_debug_assert(false);
@@ -1838,7 +1839,7 @@ namespace krys::boo
     auto localPoint = layerRect.Location();
 
     bool geometryChanged = false;
-    if (IntSize newSize(layerRect.Width().ToInt(), layerRect.Height().ToInt()); newSize != Size())
+    if (SizeI newSize(layerRect.Width().ToInt(), layerRect.Height().ToInt()); newSize != Size())
     {
       geometryChanged = true;
       SetSize(newSize);
@@ -1884,7 +1885,7 @@ namespace krys::boo
       {
         if (auto *positionedParentScrollableArea = positionedParent->GetScrollableArea())
         {
-          localPoint -= LayoutSize(ToIntSize(positionedParentScrollableArea->GetScrollPosition()));
+          localPoint -= LayoutSize(ToSizeI(positionedParentScrollableArea->GetScrollPosition()));
         }
       }
       if (positionedParent->Renderer().IsInFlowPositioned())
@@ -1902,7 +1903,7 @@ namespace krys::boo
       {
         if (auto *parentLayerScrollableArea = parentLayer->GetScrollableArea())
         {
-          localPoint -= LayoutSize(ToIntSize(parentLayerScrollableArea->GetScrollPosition()));
+          localPoint -= LayoutSize(ToSizeI(parentLayerScrollableArea->GetScrollPosition()));
         }
       }
     }
@@ -2223,12 +2224,12 @@ namespace krys::boo
 
   void RenderLayer::AddBlockSelectionGapsBounds(const LayoutRect &bounds) noexcept
   {
-    _blockSelectionGapsBounds.Unite(EnclosingIntRect(bounds));
+    _blockSelectionGapsBounds.Unite(EnclosingRectI(bounds));
   }
 
   void RenderLayer::ClearBlockSelectionGapsBounds() noexcept
   {
-    _blockSelectionGapsBounds = IntRect();
+    _blockSelectionGapsBounds = RectI();
     for (auto *child = FirstChild(); child; child = child->NextSibling())
     {
       child->ClearBlockSelectionGapsBounds();
@@ -3043,7 +3044,7 @@ namespace krys::boo
     return transform;
   }
 
-  FloatPoint3D RenderLayer::TransformOriginPixelSnappedIfNeeded() const noexcept
+  Point3F RenderLayer::TransformOriginPixelSnappedIfNeeded() const noexcept
   {
     if (!Renderer().HasTransformRelatedProperty())
     {
@@ -3059,7 +3060,7 @@ namespace krys::boo
     return origin;
   }
 
-  FloatPoint RenderLayer::PerspectiveOrigin() const noexcept
+  PointF RenderLayer::PerspectiveOrigin() const noexcept
   {
     if (!Renderer().HasTransformRelatedProperty())
     {
@@ -3285,7 +3286,7 @@ namespace krys::boo
   {
     if (_filters)
     {
-      return RenderLayerFilters::CalculateOutsets(Renderer(), FloatRect(LocalBoundingBox()));
+      return RenderLayerFilters::CalculateOutsets(Renderer(), RectF(LocalBoundingBox()));
     }
     return Renderer().Style().GetFilter().Outsets();
   }
@@ -3312,7 +3313,7 @@ namespace krys::boo
   {
     auto bounds = CalculateLayerBounds(
       this, {}, {UseLocalClipRectIfPossible, IncludeFilterOutsets, UseFragmentBoxesExcludingCompositing});
-    return LayoutRect(Renderer().LocalToAbsoluteQuad(FloatQuad(FloatRect(bounds))).EnclosingBoundingBox());
+    return LayoutRect(Renderer().LocalToAbsoluteQuad(QuadF(RectF(bounds))).EnclosingBoundingBox());
   }
 
   RenderLayer *RenderLayer::EnclosingFilterLayer(IncludeSelfOrNot includeSelf) const noexcept
@@ -3354,13 +3355,13 @@ namespace krys::boo
     }
 
     LayoutRect rectForRepaint = rect;
-    rectForRepaint.Expand(ToLayoutBoxExtent(FilterOutsets()));
+    Expand(rectForRepaint, ToLayoutBoxExtent(FilterOutsets()));
 
     _filters->ExpandDirtySourceRect(rectForRepaint);
 
     RenderLayer *parentLayer = EnclosingFilterRepaintLayer();
     krys_debug_assert(parentLayer);
-    FloatQuad repaintQuad(FloatRect {rectForRepaint});
+    QuadF repaintQuad(RectF {rectForRepaint});
     LayoutRect parentLayerRect = LayoutRect(
       Renderer().LocalToContainerQuad(repaintQuad, &parentLayer->Renderer()).EnclosingBoundingBox());
 
@@ -3657,12 +3658,12 @@ namespace krys::boo
 #pragma region Coordinates
 
   void RenderLayer::ConvertToPixelSnappedLayerCoords(const RenderLayer *ancestorLayer,
-                                                     IntPoint &roundedLocation,
+                                                     PointI &roundedLocation,
                                                      ColumnOffsetAdjustment adjustForColumns) const noexcept
   {
     LayoutPoint location =
       ConvertToLayerCoords(ancestorLayer, LayoutPoint(roundedLocation), adjustForColumns);
-    roundedLocation = RoundedIntPoint(location);
+    roundedLocation = RoundedPointI(location);
   }
 
   // Returns the layer reached on the walk up towards the ancestor.
@@ -4005,7 +4006,7 @@ namespace krys::boo
         if (needsTransform)
         {
           newOverflowClip = LayoutRect(Renderer()
-                                         .LocalToContainerQuad(FloatQuad(FloatRect(newOverflowClip.Rect())),
+                                         .LocalToContainerQuad(QuadF(RectF(newOverflowClip.Rect())),
                                                                &clipRectsContext.RootLayer->Renderer())
                                          .BoundingBox());
         }
@@ -4028,10 +4029,10 @@ namespace krys::boo
           LayoutRect newPosClip = box->ClipRect({});
           if (needsTransform)
           {
-            newPosClip = LayoutRect(Renderer()
-                                      .LocalToContainerQuad(FloatQuad(FloatRect(newPosClip)),
-                                                            &clipRectsContext.RootLayer->Renderer())
-                                      .BoundingBox());
+            newPosClip = LayoutRect(
+              Renderer()
+                .LocalToContainerQuad(QuadF(RectF(newPosClip)), &clipRectsContext.RootLayer->Renderer())
+                .BoundingBox());
           }
           newPosClip.MoveBy(offset);
           clipRects.SetPosClipRect(Intersection(newPosClip, clipRects.PosClipRect()));
@@ -4463,10 +4464,10 @@ namespace krys::boo
     return result;
   }
 
-  IntRect RenderLayer::AbsoluteBoundingBox() const noexcept
+  RectI RenderLayer::AbsoluteBoundingBox() const noexcept
   {
     const RenderLayer *rootLayer = Root();
-    return SnappedIntRect(BoundingBox(rootLayer, OffsetFromAncestor(rootLayer)));
+    return SnappedRectI(BoundingBox(rootLayer, OffsetFromAncestor(rootLayer)));
   }
 
   LayoutRect RenderLayer::CalculateLayerBounds(const RenderLayer *ancestorLayer,
@@ -4518,7 +4519,7 @@ namespace krys::boo
       {
         if (flags.Contains(IncludeSelfTransform) && PaintsWithTransform({}))
         {
-          localClipRect = Transform()->MapRect(localClipRect);
+          localClipRect = MapRect(*Transform(), localClipRect);
         }
 
         localClipRect.Move(OffsetFromAncestor(ancestorLayer));
@@ -4563,7 +4564,7 @@ namespace krys::boo
         childLayer.CalculateLayerBounds(this, childLayer.OffsetFromAncestor(this), descendantFlags);
       // Ignore child layer (and behave as if we had overflow: hidden) when it is positioned off the parent
       // layer so much that we hit the max LayoutUnit value.
-      (void)unionBounds.CheckedUnite(childBounds);
+      (void)CheckedUnite(unionBounds, childBounds);
     };
 
     for (auto *childLayer : NegativeZOrderLayers())
@@ -4587,14 +4588,14 @@ namespace krys::boo
                                         ? EnumSet<PaintBehavior> {PaintBehavior::FlattenCompositingLayers}
                                         : EnumSet<PaintBehavior> {})))
     {
-      unionBounds.Expand(ToLayoutBoxExtent(FilterOutsets()));
+      Expand(unionBounds, ToLayoutBoxExtent(FilterOutsets()));
     }
 
     if (flags.Contains(IncludeSelfTransform) && PaintsWithTransform({}))
     {
       TransformationMatrix *affineTrans = Transform();
-      boundingBoxRect = affineTrans->MapRect(boundingBoxRect);
-      unionBounds = affineTrans->MapRect(unionBounds);
+      boundingBoxRect = MapRect(*affineTrans, boundingBoxRect);
+      unionBounds = MapRect(*affineTrans, unionBounds);
     }
     unionBounds.Move(offsetFromRoot);
     return unionBounds;
@@ -4661,15 +4662,15 @@ namespace krys::boo
     // FIXME: Tell the inspector the scrollbars changed, once there's an inspector.
   }
 
-  IntSize RenderLayer::VisibleSize() const noexcept
+  SizeI RenderLayer::VisibleSize() const noexcept
   {
     RenderBox *box = GetRenderBox();
     if (!box)
     {
-      return IntSize();
+      return SizeI();
     }
 
-    return IntSize(RoundToInt(box->ClientWidth()), RoundToInt(box->ClientHeight()));
+    return SizeI(RoundToInt(box->ClientWidth()), RoundToInt(box->ClientHeight()));
   }
 
   int32 RenderLayer::ScrollWidth() const noexcept
@@ -4836,17 +4837,18 @@ namespace krys::boo
 
     float zoomFactor = renderer->Style().UsedZoom();
 
-    auto absolutePoint = document->View()->WindowToContents(FlooredIntPoint(event.Position()));
-    auto localPoint = RoundedIntPoint(AbsoluteToContents(LayoutPoint(absolutePoint)));
+    auto absolutePoint = document->View()->WindowToContents(FlooredPointI(event.Position()));
+    auto localPoint = RoundedPointI(AbsoluteToContents(LayoutPoint(absolutePoint)));
 
     LayoutSize newOffset = OffsetFromResizeCorner(localPoint);
-    newOffset.SetWidth(newOffset.Width() / zoomFactor);
-    newOffset.SetHeight(newOffset.Height() / zoomFactor);
+    newOffset.SetWidth(LayoutUnit(newOffset.Width() / zoomFactor));
+    newOffset.SetHeight(LayoutUnit(newOffset.Height() / zoomFactor));
 
-    LayoutSize currentSize = LayoutSize(renderer->Width() / zoomFactor, renderer->Height() / zoomFactor);
+    LayoutSize currentSize =
+      LayoutSize(LayoutUnit(renderer->Width() / zoomFactor), LayoutUnit(renderer->Height() / zoomFactor));
 
     LayoutSize adjustedOldOffset =
-      LayoutSize(oldOffset.Width() / zoomFactor, oldOffset.Height() / zoomFactor);
+      LayoutSize(LayoutUnit(oldOffset.Width() / zoomFactor), LayoutUnit(oldOffset.Height() / zoomFactor));
     if (renderer->Style().ShouldPlaceVerticalScrollbarOnLeft())
     {
       newOffset.SetWidth(-newOffset.Width());
@@ -4916,16 +4918,16 @@ namespace krys::boo
     // cursor in view.
   }
 
-  IntSize RenderLayer::OffsetFromResizeCorner(const IntPoint &localPoint) const noexcept
+  SizeI RenderLayer::OffsetFromResizeCorner(const PointI &localPoint) const noexcept
   {
     auto resizerRect = OverflowControlsRects().Resizer;
     auto resizeCorner = Renderer().Style().ShouldPlaceVerticalScrollbarOnLeft()
                           ? resizerRect.MinXMaxYCorner()
                           : resizerRect.MaxXMaxYCorner();
-    return IntSize(localPoint.X() - resizeCorner.X(), localPoint.Y() - resizeCorner.Y());
+    return SizeI(localPoint.X() - resizeCorner.X(), localPoint.Y() - resizeCorner.Y());
   }
 
-  bool RenderLayer::IsPointInResizeControl(IntPoint localPoint) const noexcept
+  bool RenderLayer::IsPointInResizeControl(PointI localPoint) const noexcept
   {
     if (!CanResize())
     {
@@ -4938,8 +4940,7 @@ namespace krys::boo
   LayoutPoint RenderLayer::AbsoluteToContents(const LayoutPoint &absolutePoint) const noexcept
   {
     // We don't use convertToLayerCoords because it doesn't know about transforms
-    return LayoutPoint(
-      Renderer().AbsoluteToLocal(FloatPoint(absolutePoint), MapCoordinatesMode::UseTransforms));
+    return LayoutPoint(Renderer().AbsoluteToLocal(PointF(absolutePoint), MapCoordinatesMode::UseTransforms));
   }
 
   RenderLayer::OverflowControlRects RenderLayer::OverflowControlsRects() const noexcept
@@ -4951,21 +4952,21 @@ namespace krys::boo
 
     const auto &renderBox = Downcast<RenderBox>(Renderer());
     // Scrollbars sit inside the border box.
-    auto overflowControlsPositioningRect = SnappedIntRect(renderBox.PaddingBoxRectIncludingScrollbar());
+    auto overflowControlsPositioningRect = SnappedRectI(renderBox.PaddingBoxRectIncludingScrollbar());
 
     bool placeVerticalScrollbarOnTheLeft = renderBox.Style().ShouldPlaceVerticalScrollbarOnLeft();
     bool haveResizer =
       Renderer().Style().GetResize() != style::Resize::None && !Renderer().Style().GetPseudoElementType();
 
     OverflowControlRects result;
-    auto cornerRect = [&](IntSize cornerSize)
+    auto cornerRect = [&](SizeI cornerSize)
     {
       if (placeVerticalScrollbarOnTheLeft)
       {
         auto bottomLeftCorner = overflowControlsPositioningRect.MinXMaxYCorner();
-        return IntRect {{bottomLeftCorner.X(), bottomLeftCorner.Y() - cornerSize.Height()}, cornerSize};
+        return RectI {{bottomLeftCorner.X(), bottomLeftCorner.Y() - cornerSize.Height()}, cornerSize};
       }
-      return IntRect {overflowControlsPositioningRect.MaxXMaxYCorner() - cornerSize, cornerSize};
+      return RectI {overflowControlsPositioningRect.MaxXMaxYCorner() - cornerSize, cornerSize};
     };
 
     if (haveResizer)
@@ -5166,8 +5167,8 @@ namespace krys::boo
         LayoutRect clipRect = layer.BoundingBox(&layer);
         ExpandClipRectForDescendantsAndReflection(clipRect, layer, &layer, transparencyBehavior,
                                                   paintBehavior, paintDirtyRect);
-        clipRect.Expand(ToLayoutBoxExtent(layer.FilterOutsets()));
-        LayoutRect result = transform.MapRect(clipRect);
+        Expand(clipRect, ToLayoutBoxExtent(layer.FilterOutsets()));
+        LayoutRect result = MapRect(transform, clipRect);
         if (!paginationLayer)
         {
           if (paintDirtyRect)
@@ -5198,7 +5199,7 @@ namespace krys::boo
       auto clipRect = layer.BoundingBox(rootLayer, layer.OffsetFromAncestor(rootLayer), flags);
       ExpandClipRectForDescendantsAndReflection(clipRect, layer, rootLayer, transparencyBehavior,
                                                 paintBehavior, paintDirtyRect);
-      clipRect.Expand(ToLayoutBoxExtent(layer.FilterOutsets()));
+      Expand(clipRect, ToLayoutBoxExtent(layer.FilterOutsets()));
 
       if (paintDirtyRect)
       {
@@ -5214,7 +5215,7 @@ namespace krys::boo
                           RenderObject *subtreePaintRoot, EnumSet<PaintLayerFlag> paintFlags) noexcept
   {
     // FIXME: Region contexts come with hit testing.
-    LayerPaintingInfo paintingInfo(this, LayoutRect(EnclosingIntRect(damageRect)), paintBehavior,
+    LayerPaintingInfo paintingInfo(this, LayoutRect(EnclosingRectI(damageRect)), paintBehavior,
                                    subpixelOffset, subtreePaintRoot);
     PaintLayer(context, paintingInfo, paintFlags);
   }
@@ -5295,8 +5296,8 @@ namespace krys::boo
            || paintFlags.Contains(PaintLayerFlag::CollectingEventRegion);
   }
 
-  FloatRect RenderLayer::ReferenceBoxRectForClipPath(CSSBoxType boxType, const LayoutSize &offsetFromRoot,
-                                                     const LayoutRect &rootRelativeBounds) const noexcept
+  RectF RenderLayer::ReferenceBoxRectForClipPath(CSSBoxType boxType, const LayoutSize &offsetFromRoot,
+                                                 const LayoutRect &rootRelativeBounds) const noexcept
   {
     bool isReferenceBox = Renderer().IsRenderBox();
 
@@ -5304,11 +5305,11 @@ namespace krys::boo
     // https://bugs.webkit.org/show_bug.cgi?id=129047
     if (!isReferenceBox)
     {
-      return FloatRect(rootRelativeBounds);
+      return RectF(rootRelativeBounds);
     }
 
     auto referenceBoxRect = Renderer().ReferenceBoxRect(boxType);
-    referenceBoxRect.Move(FloatSize(offsetFromRoot));
+    referenceBoxRect.Move(SizeF(offsetFromRoot));
     return referenceBoxRect;
   }
 
@@ -5631,7 +5632,7 @@ namespace krys::boo
       {
         auto shapeRect = ComputeRoundedRectForBoxShape(box->ReferenceBox(), *renderBox)
                            .PixelSnappedRoundedRectForPainting(Renderer().GetDocument().DeviceScaleFactor());
-        shapeRect.Move(FloatSize(offsetFromRoot));
+        shapeRect.Move(SizeF(offsetFromRoot));
         return {shapeRect.GetPath(), WindRule::NonZero};
       }
     }
@@ -5751,9 +5752,9 @@ namespace krys::boo
       CalculateLayerBounds(paintingInfo.RootLayer, offsetFromRoot, {RenderLayer::PreserveAncestorFlags});
 
     GraphicsContext *filterContext = paintingFilters->BeginFilterEffect(
-      Renderer(), destinationContext, LayoutRect(EnclosingIntRect(rootRelativeBounds)),
-      LayoutRect(EnclosingIntRect(paintingInfo.PaintDirtyRect)),
-      LayoutRect(EnclosingIntRect(filterRepaintRect)), backgroundRect.Rect());
+      Renderer(), destinationContext, LayoutRect(EnclosingRectI(rootRelativeBounds)),
+      LayoutRect(EnclosingRectI(paintingInfo.PaintDirtyRect)), LayoutRect(EnclosingRectI(filterRepaintRect)),
+      backgroundRect.Rect());
     if (!filterContext)
     {
       return nullptr;
@@ -6201,8 +6202,8 @@ namespace krys::boo
     // Add the subpixel accumulation to the current layer's offset so that we can always snap the
     // translateRight value to where the renderer() is supposed to be painting.
     LayoutSize offsetForThisLayer = offsetFromParent + paintingInfo.SubpixelOffset;
-    FloatSize alignedOffsetForThisLayer =
-      ToFloatSize(RoundPointToDevicePixels(ToLayoutPoint(offsetForThisLayer), deviceScaleFactor));
+    SizeF alignedOffsetForThisLayer =
+      ToSizeF(RoundPointToDevicePixels(ToLayoutPoint(offsetForThisLayer), deviceScaleFactor));
     // We handle accumulated subpixels through nested layers here. Since the context gets translated to device
     // pixels, all we need to do is add the delta to the accumulated pixels coming from ancestor layers.
     // Translate the graphics context to the snapping position to avoid off-device-pixel positing.
@@ -6220,7 +6221,7 @@ namespace krys::boo
     if (!transformedPaintingInfo.PaintDirtyRect.IsInfinite())
     {
       transformedPaintingInfo.PaintDirtyRect = LayoutRect(EncloseRectToDevicePixels(
-        transform.Inverse().value_or(TransformationMatrix()).MapRect(paintingInfo.PaintDirtyRect),
+        MapRect(transform.Inverse().value_or(TransformationMatrix()), paintingInfo.PaintDirtyRect),
         deviceScaleFactor));
     }
 
@@ -6237,7 +6238,7 @@ namespace krys::boo
   {
     UpdateLayerListsIfNeeded();
 
-    LayerPaintingInfo paintingInfo(this, LayoutRect(EnclosingIntRect(dirtyRect)), paintBehavior, LayoutSize(),
+    LayerPaintingInfo paintingInfo(this, LayoutRect(EnclosingRectI(dirtyRect)), paintBehavior, LayoutSize(),
                                    nullptr);
     if (above)
     {
@@ -6580,8 +6581,8 @@ namespace krys::boo
                  fragment.DirtyBackgroundRect());
       _scrollableArea->PaintOverflowControls(
         context, localPaintingInfo.PaintBehavior,
-        RoundedIntPoint(PaintOffsetForRenderer(fragment, localPaintingInfo)),
-        SnappedIntRect(fragment.DirtyBackgroundRect().Rect()), true);
+        RoundedPointI(PaintOffsetForRenderer(fragment, localPaintingInfo)),
+        SnappedRectI(fragment.DirtyBackgroundRect().Rect()), true);
     }
   }
 
@@ -6796,10 +6797,10 @@ namespace krys::boo
       }
 
       // Flatten the point into the target plane
-      FloatPoint targetPoint = transformState.MappedPoint();
+      PointF targetPoint = transformState.MappedPoint();
 
       // Now map the point back through the transform, which computes Z.
-      FloatPoint3D backmappedPoint = transformState.AccumulatedTransform.MapPoint(FloatPoint3D(targetPoint));
+      Point3F backmappedPoint = transformState.AccumulatedTransform.MapPoint(Point3F(targetPoint));
       return backmappedPoint.Z();
     }
 
@@ -6818,9 +6819,9 @@ namespace krys::boo
     }
   }
 
-  void RenderLayer::Autoscroll(const IntPoint &positionInWindow) noexcept
+  void RenderLayer::Autoscroll(const PointI &positionInWindow) noexcept
   {
-    IntPoint currentDocumentPosition = Renderer().View().FrameView().WindowToContents(positionInWindow);
+    PointI currentDocumentPosition = Renderer().View().FrameView().WindowToContents(positionInWindow);
     LocalFrameView::ScrollRectToVisible(
       LayoutRect(LayoutPoint(currentDocumentPosition), LayoutSize(1_lu, 1_lu)), Renderer(), false,
       {SelectionRevealMode::Reveal, ScrollAlignment::AlignToEdgeIfNeeded,
@@ -6884,9 +6885,9 @@ namespace krys::boo
 
     // Now determine if the result is inside an anchor - if the urlElement isn't already set.
     auto *node = result.InnerNode();
-    if (node && !result.URLElement())
+    if (node && !result.UrlElement())
     {
-      result.SetURLElement(EnclosingLinkEventParentOrSelf(*node));
+      result.SetUrlElement(EnclosingLinkEventParentOrSelf(*node));
     }
 
     // Now return whether we were inside this layer (this will always be true for the root
@@ -6979,7 +6980,7 @@ namespace krys::boo
       // If this is the first time we need to make transform state, then base it off of hitTestLocation,
       // which is relative to rootLayer.
       transformState = HitTestingTransformState::Create(
-        hitTestLocation.TransformedPoint(), hitTestLocation.TransformedRect(), FloatQuad(hitTestRect));
+        hitTestLocation.TransformedPoint(), hitTestLocation.TransformedRect(), QuadF(hitTestRect));
       offset = OffsetFromAncestor(rootLayer);
     }
     offset += translationOffset;
@@ -7392,7 +7393,7 @@ namespace krys::boo
       {
         return HitTestLocation(localPoint, newTransformState->MappedQuad());
       }
-      return HitTestLocation(localPoint, FloatQuad(FloatRect(newTransformState->BoundsOfMappedQuad())));
+      return HitTestLocation(localPoint, QuadF(RectF(newTransformState->BoundsOfMappedQuad())));
     }();
 
     // Now do a hit test with the root layer shifted to be us.

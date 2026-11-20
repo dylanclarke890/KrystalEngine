@@ -2,16 +2,16 @@
 #include "catch2/catch_test_macros.hpp"
 #include "Krystal.Booey.Tests/CSS/ValueTestUtils.hpp"
 #include "Krystal.Booey/CSS/Parser/ParserContext.hpp"
-#include "Krystal.Booey/CSS/Values/Primitives/URL.hpp"
+#include "Krystal.Booey/CSS/Values/Primitives/Url.hpp"
 
 namespace krys::boo::css::tests
 {
   namespace
   {
-    KRYS_NODISCARD CSSURL UrlFor(const CSSOMString &specified) noexcept
+    KRYS_NODISCARD CSSUrl UrlFor(const CSSOMString &specified) noexcept
     {
-      return *CompleteURL(specified,
-                          ParserContext {ParserMode::HTMLStandard, url::URL {u8"https://example.com/"}});
+      return *CompleteUrl(specified,
+                          ParserContext {ParserMode::HTMLStandard, net::Url {u8"https://example.com/"}});
     }
   }
 
@@ -20,9 +20,9 @@ namespace krys::boo::css::tests
     auto url = UrlFor(u8"images/a.png");
     auto value = UrlValue::Create(url);
     CHECK(value->IsUrlValue());
-    CHECK(value->URL() == url);
+    CHECK(value->Url() == url);
     CHECK(ToNarrow(value->StringValue()) == "images/a.png");
-    CHECK(ToNarrow(value->URL().Resolved.String()) == "https://example.com/images/a.png");
+    CHECK(ToNarrow(value->Url().Resolved.String()) == "https://example.com/images/a.png");
   }
 
   TEST_CASE_METHOD(ValueFixture, "UrlValue serialisation", "[CSS][Values][UrlValue]")
@@ -31,7 +31,7 @@ namespace krys::boo::css::tests
     CHECK(CssText(*UrlValue::Create(UrlFor(u8"images/a.png"))) == "url(\"images/a.png\")");
 
     auto url = UrlFor(u8"a.png");
-    url.Modifiers.ReferrerPolicy = URLReferrerPolicyFunction {.Parameters = {keywords::NoReferrer {}}};
+    url.Modifiers.ReferrerPolicy = UrlReferrerPolicyFunction {.Parameters = {keywords::NoReferrer {}}};
     CHECK(CssText(*UrlValue::Create(url)) == "url(\"a.png\" referrer-policy(no-referrer))");
   }
 
@@ -42,7 +42,7 @@ namespace krys::boo::css::tests
     CHECK_FALSE(*a == *UrlValue::Create(UrlFor(u8"b.png")));
 
     auto withModifier = UrlFor(u8"a.png");
-    withModifier.Modifiers.ReferrerPolicy = URLReferrerPolicyFunction {.Parameters = {keywords::Origin {}}};
+    withModifier.Modifiers.ReferrerPolicy = UrlReferrerPolicyFunction {.Parameters = {keywords::Origin {}}};
     CHECK_FALSE(*a == *UrlValue::Create(withModifier));
   }
 

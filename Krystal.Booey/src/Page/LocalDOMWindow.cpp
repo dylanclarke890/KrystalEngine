@@ -37,12 +37,12 @@
 #include "Krystal.Booey/HTML/CustomElement/CustomElementRegistry.hpp"
 #include "Krystal.Booey/HTML/Elements/HTMLElement.hpp"
 #include "Krystal.Booey/HTML/EventLoop/EventLoop.hpp"
-#include "Krystal.Booey/Page/ChromeClient.hpp"
+#include "Krystal.Booey/Page/Clients/ChromeClient.hpp"
 #include "Krystal.Booey/Page/DOMSelection.hpp"
 #include "Krystal.Booey/Page/LocalFrame.hpp"
 #include "Krystal.Booey/Page/LocalFrameView.hpp"
 #include "Krystal.Booey/Page/Page.hpp"
-#include "Krystal.Booey/Page/ScrollBehavior.hpp"
+#include "Krystal.Booey/Page/Scrolling/ScrollBehavior.hpp"
 #include "Krystal.Booey/Page/VisualViewport.hpp"
 #include <limits>
 
@@ -392,8 +392,8 @@ namespace krys::boo
     view->CancelScheduledScrolls();
     (void)Document()->UpdateLayoutIgnorePendingStylesheets();
 
-    IntPoint layoutPos(view->MapFromCSSToLayoutUnits(static_cast<int32>(*scrollToOptions.Left)),
-                       view->MapFromCSSToLayoutUnits(static_cast<int32>(*scrollToOptions.Top)));
+    PointI layoutPos(view->MapFromCSSToLayoutUnits(static_cast<int32>(*scrollToOptions.Left)),
+                     view->MapFromCSSToLayoutUnits(static_cast<int32>(*scrollToOptions.Top)));
 
     auto animated = UseSmoothScrolling(scrollToOptions.Behavior.value_or(ScrollBehavior::Auto),
                                        Document()->DocumentElement().get())

@@ -25,10 +25,10 @@
  */
 
 #include "Krystal.Booey/Graphics/Gradient.hpp"
-#include "Krystal.Booey/Graphics/Geometry/FloatRect.hpp"
 #include "Krystal.Core/Colour/ColourTextStream.hpp"
+#include "Krystal.Core/Geometry/Rect.hpp"
 #include "Krystal.Core/Hash.hpp"
-#include "Krystal.Core/Text/TextStream.hpp"
+#include "Krystal.Core/Strings/TextStream.hpp"
 #include "Krystal.Core/Visitor.hpp"
 
 namespace krys::boo
@@ -50,8 +50,7 @@ namespace krys::boo
 
   Gradient::~Gradient() noexcept = default;
 
-  void Gradient::AdjustParametersForTiledDrawing(FloatSize &size, FloatRect &srcRect,
-                                                 const FloatSize &spacing) noexcept
+  void Gradient::AdjustParametersForTiledDrawing(SizeF &size, RectF &srcRect, const SizeF &spacing) noexcept
   {
     if (srcRect.IsEmpty())
     {
@@ -113,7 +112,7 @@ namespace krys::boo
       {
         return UnsignedIntegerPairHash(hash, FloatingPointHash<float>::Hash(value));
       };
-      auto point = [&](size_t hash, const FloatPoint &value)
+      auto point = [&](size_t hash, const PointF &value)
       {
         return combine(combine(hash, value.X()), value.Y());
       };

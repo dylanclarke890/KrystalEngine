@@ -32,17 +32,21 @@
 #include "Krystal.Booey/DOM/Types/DOMString.hpp"
 #include "Krystal.Booey/Loader/FrameLoaderTypes.hpp"
 #include "Krystal.Booey/Loader/Icons/LinkIcon.hpp"
-#include "Krystal.Booey/URL/URL.hpp"
 #include "Krystal.Core/Attributes.hpp"
 #include "Krystal.Core/Macros.hpp"
 #include "Krystal.Core/Types/Span.hpp"
+#include "Krystal.Net/Url.hpp"
+
+namespace krys::net
+{
+  class ResourceError;
+  class ResourceRequest;
+}
 
 namespace krys::boo
 {
   class FormSubmission;
   class NavigationAction;
-  class ResourceError;
-  class ResourceRequest;
 
   /// @brief What a frame's loader tells its host: the navigations the page asks for, and what happened to
   /// the loads the host started.
@@ -59,7 +63,8 @@ namespace krys::boo
     /// @p action started. Booey doesn't load it: the host decides, and loads it with `FrameLoader::Load` if
     /// it wants.
     /// @param formSubmission The form submitted, for a form submission.
-    virtual void DispatchNavigationRequested(const NavigationAction &action, const ResourceRequest &request,
+    virtual void DispatchNavigationRequested(const NavigationAction &action,
+                                             const net::ResourceRequest &request,
                                              const FormSubmission *formSubmission) noexcept
     {
       (void)action;
@@ -69,7 +74,8 @@ namespace krys::boo
 
     /// @brief The page asks for a new browsing context named @p frameName (`_blank` or a name no frame has)
     /// to navigate to @p request; the host opens one if it wants.
-    virtual void DispatchNewWindowRequested(const NavigationAction &action, const ResourceRequest &request,
+    virtual void DispatchNewWindowRequested(const NavigationAction &action,
+                                            const net::ResourceRequest &request,
                                             const FormSubmission *formSubmission,
                                             DOMStringView frameName) noexcept
     {
@@ -85,7 +91,7 @@ namespace krys::boo
     }
 
     /// @brief The provisional load failed (or was stopped): the frame keeps its document.
-    virtual void DispatchDidFailProvisionalLoad(const ResourceError &error) noexcept
+    virtual void DispatchDidFailProvisionalLoad(const net::ResourceError &error) noexcept
     {
       (void)error;
     }
@@ -112,7 +118,7 @@ namespace krys::boo
     }
 
     /// @brief The frame's committed document failed to load.
-    virtual void DispatchDidFailLoad(const ResourceError &error) noexcept
+    virtual void DispatchDidFailLoad(const net::ResourceError &error) noexcept
     {
       (void)error;
     }

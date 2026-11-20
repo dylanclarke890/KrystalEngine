@@ -29,17 +29,17 @@
 #include "Krystal.Booey/Loader/Cache/CachedResourceRequest.hpp"
 #include "Krystal.Booey/Loader/DocumentLoader.hpp"
 #include "Krystal.Booey/Page/LocalFrame.hpp"
-#include "Krystal.Booey/Platform/SharedBuffer.hpp"
+#include "Krystal.Core/Types/SharedBuffer.hpp"
 #include <algorithm>
 
 namespace krys::boo
 {
-  Ref<IconLoader> IconLoader::Create(DocumentLoader &documentLoader, url::URL url) noexcept
+  Ref<IconLoader> IconLoader::Create(DocumentLoader &documentLoader, net::Url url) noexcept
   {
     return AdoptRef(*new IconLoader(documentLoader, krys::move(url)));
   }
 
-  IconLoader::IconLoader(DocumentLoader &documentLoader, url::URL url) noexcept
+  IconLoader::IconLoader(DocumentLoader &documentLoader, net::Url url) noexcept
       : _documentLoader(CreateWeakPtr(&documentLoader)), _url(krys::move(url))
   {
   }
@@ -64,7 +64,7 @@ namespace krys::boo
       return;
     }
 
-    CachedResourceRequest request(ResourceRequest(url::URL(_url)),
+    CachedResourceRequest request(net::ResourceRequest(net::Url(_url)),
                                   CachedResourceLoader::DefaultCachedResourceOptions());
     request.SetInitiatorType(CachedResourceRequestInitiatorTypes::Icon);
     // An icon doesn't hold up the document's load.
@@ -94,7 +94,7 @@ namespace krys::boo
     RefPtr<SharedBuffer> data =
       resource.LoadFailedOrCanceled() ? nullptr : ShareRefPtr(resource.ResourceBuffer());
     // An error page isn't an icon to decode.
-    if (resource.Response().HTTPStatusCode() && !resource.Response().IsSuccessful())
+    if (resource.Response().HttpStatusCode() && !resource.Response().IsSuccessful())
     {
       data = nullptr;
     }

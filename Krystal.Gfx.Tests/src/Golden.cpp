@@ -14,7 +14,7 @@ namespace krys::gfx::tests
 
   std::filesystem::path GoldenOutputDirectory()
   {
-    return std::filesystem::current_path() / "golden-output";
+    return KRYS_GFX_TESTS_GOLDEN_OUTPUT_DIR;
   }
 
   bool UpdatingGoldens()

@@ -27,28 +27,32 @@
 #include "Krystal.Booey/Graphics/Fonts/GlyphMetricsMap.hpp"
 #include "Krystal.Booey/Graphics/Fonts/GlyphPage.hpp"
 #include "Krystal.Booey/Graphics/Fonts/OpenTypeMathData.hpp"
-#include "Krystal.Booey/Graphics/Geometry/FloatRect.hpp"
 #include "Krystal.Booey/Graphics/Paths/Path.hpp"
 #include "Krystal.Booey/Text/TextFlags.hpp"
 #include "Krystal.Core/Attributes.hpp"
 #include "Krystal.Core/CanMakeWeakPtr.hpp"
+#include "Krystal.Core/Geometry/Rect.hpp"
 #include "Krystal.Core/Macros.hpp"
 #include "Krystal.Core/RefCounted.hpp"
+#include "Krystal.Core/Strings/String.hpp"
 #include "Krystal.Core/Types/HashMap.hpp"
 #include "Krystal.Core/Types/List.hpp"
 #include "Krystal.Core/Types/Maybe.hpp"
 #include "Krystal.Core/Types/RefPtr.hpp"
 #include "Krystal.Core/Types/SmallList.hpp"
 #include "Krystal.Core/Types/Span.hpp"
-#include "Krystal.Core/Types/String.hpp"
 #include "Krystal.Core/Types/UniquePtr.hpp"
 #include "Krystal.Text/HarfBuzz.hpp"
+
+namespace krys::text
+{
+  enum class TextDirection : bool;
+}
 
 namespace krys::boo
 {
   class FontDescription;
   class GlyphBuffer;
-  enum class TextDirection : bool;
 
   enum FontVariant : uint8
   {
@@ -153,7 +157,7 @@ namespace krys::boo
 
     mutable HashMap<uint32, RefPtr<GlyphPage>> _glyphPages;
     mutable GlyphMetricsMap<float> _glyphToWidthMap;
-    mutable UniquePtr<GlyphMetricsMap<FloatRect>> _glyphToBoundsMap;
+    mutable UniquePtr<GlyphMetricsMap<RectF>> _glyphToBoundsMap;
     mutable UniquePtr<GlyphMetricsMap<Maybe<Path>>> _glyphPathMap;
     // Two bits per code point of `CodePointSupportIndex`: whether it's been checked, and whether it's
     // supported.
@@ -287,12 +291,12 @@ namespace krys::boo
       _avgCharWidth = avgCharWidth;
     }
 
-    KRYS_NODISCARD FloatRect BoundsForGlyph(Glyph glyph) const noexcept;
+    KRYS_NODISCARD RectF BoundsForGlyph(Glyph glyph) const noexcept;
 
     /// @brief @p glyph's outline at the font's size, with its origin on the baseline and y pointing down.
     KRYS_NODISCARD Path PathForGlyph(Glyph glyph) const noexcept;
 
-    KRYS_NODISCARD SmallList<FloatRect, InlineGlyphRunCapacity>
+    KRYS_NODISCARD SmallList<RectF, InlineGlyphRunCapacity>
       BoundsForGlyphs(Span<const Glyph> glyphs) const noexcept;
 
     KRYS_NODISCARD float WidthForGlyph(Glyph glyph, SyntheticBoldInclusion syntheticBoldInclusion =
@@ -308,7 +312,7 @@ namespace krys::boo
     KRYS_NODISCARD static GlyphBufferAdvance
       ApplyTransforms(GlyphBuffer &glyphBuffer, uint32 beginningGlyphIndex, uint32 beginningStringIndex,
                       bool enableKerning, bool requiresShaping, const StringAtom &locale,
-                      utf8_stringview text, TextDirection textDirection) noexcept;
+                      utf8_stringview text, text::TextDirection textDirection) noexcept;
 
     KRYS_NODISCARD float SpaceWidth(
       SyntheticBoldInclusion syntheticBoldInclusion = SyntheticBoldInclusion::Incorporate) const noexcept
@@ -430,7 +434,7 @@ namespace krys::boo
 
     KRYS_NODISCARD DerivedFonts &EnsureDerivedFontData() const noexcept;
 
-    KRYS_NODISCARD FloatRect PlatformBoundsForGlyph(Glyph glyph) const noexcept;
+    KRYS_NODISCARD RectF PlatformBoundsForGlyph(Glyph glyph) const noexcept;
 
     KRYS_NODISCARD Path PlatformPathForGlyph(Glyph glyph) const noexcept;
 

@@ -25,11 +25,11 @@
 
 #pragma once
 
-#include "Krystal.Booey/Platform/Timer.hpp"
 #include "Krystal.Core/Attributes.hpp"
 #include "Krystal.Core/Macros.hpp"
+#include "Krystal.Core/Strings/StringAtom.hpp"
+#include "Krystal.Core/Time/Timer.hpp"
 #include "Krystal.Core/Types/List.hpp"
-#include "Krystal.Core/Types/StringAtom.hpp"
 #include <algorithm>
 #include <utility>
 

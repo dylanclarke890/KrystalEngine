@@ -34,12 +34,12 @@
 #include "Krystal.Booey/DOM/Collections/DatasetDOMStringMap.hpp"
 #include "Krystal.Booey/DOM/Collections/DOMTokenList.hpp"
 #include "Krystal.Booey/DOM/Internals/PopoverData.hpp"
+#include "Krystal.Booey/DOM/IntersectionObservers/IntersectionObserver.hpp"
 #include "Krystal.Booey/DOM/Nodes/PseudoElement.hpp"
+#include "Krystal.Booey/DOM/ResizeObservers/ResizeObserver.hpp"
 #include "Krystal.Booey/HTML/CustomElement/CustomElement.hpp"
 #include "Krystal.Booey/HTML/CustomElement/CustomElementReactionQueue.hpp"
 #include "Krystal.Booey/HTML/CustomElement/CustomStateSet.hpp"
-#include "Krystal.Booey/Page/IntersectionObserver/IntersectionObserver.hpp"
-#include "Krystal.Booey/Page/ResizeObserver/ResizeObserver.hpp"
 #include "Krystal.Booey/Rendering/Style/RenderStyle.hpp"
 
 namespace krys::boo::dom

@@ -31,9 +31,9 @@
 
 #include "Krystal.Core/Attributes.hpp"
 #include "Krystal.Core/RefCounted.hpp"
+#include "Krystal.Core/Strings/String.hpp"
 #include "Krystal.Core/Types/List.hpp"
 #include "Krystal.Core/Types/RefPtr.hpp"
-#include "Krystal.Core/Types/String.hpp"
 #include <utility>
 
 namespace krys::boo
@@ -44,7 +44,7 @@ namespace krys::boo
     /// @brief Whether more than one file can be chosen (`multiple`).
     bool AllowsMultipleFiles {false};
     /// @brief The MIME types `accept` names, lowercased, such as `image/png` or `image/*`.
-    List<utf8_string> AcceptMIMETypes;
+    List<utf8_string> AcceptMimeTypes;
     /// @brief The extensions `accept` names, lowercased with their dot, such as `.pdf`.
     List<utf8_string> AcceptFileExtensions;
     /// @brief The paths of the input's files.

@@ -25,9 +25,9 @@
 
 #pragma once
 
-#include "Krystal.Booey/Graphics/Geometry/IntPoint.hpp"
 #include "Krystal.Booey/Graphics/Images/Image.hpp"
 #include "Krystal.Core/Attributes.hpp"
+#include "Krystal.Core/Geometry/Point.hpp"
 #include "Krystal.Core/Numeric.hpp"
 #include "Krystal.Core/Types/RefPtr.hpp"
 
@@ -92,7 +92,7 @@ namespace krys::boo
   private:
     Type _type {Type::Invalid};
     RefPtr<Image> _image;
-    IntPoint _hotSpot;
+    PointI _hotSpot;
     float _imageScaleFactor {1};
 
   public:
@@ -105,7 +105,7 @@ namespace krys::boo
     /// @brief A cursor showing @p image, an image @p scale times its natural size in pixels (from an
     /// `image-set()`), with the hot spot at @p hotSpot (in the image's natural size) if that's in it, or at
     /// the image's own hot spot (a `.cur` file's), or else at its top left.
-    Cursor(Image &image, const IntPoint &hotSpot, float scale) noexcept;
+    Cursor(Image &image, const PointI &hotSpot, float scale) noexcept;
 
     KRYS_NODISCARD Type GetType() const noexcept
     {
@@ -119,7 +119,7 @@ namespace krys::boo
     }
 
     /// @brief Where a custom cursor points, in its image's natural size.
-    KRYS_NODISCARD const IntPoint &HotSpot() const noexcept
+    KRYS_NODISCARD const PointI &HotSpot() const noexcept
     {
       return _hotSpot;
     }

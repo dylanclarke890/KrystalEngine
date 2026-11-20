@@ -69,7 +69,6 @@
 #include "Krystal.Booey/Infra/StringAlgorithms.hpp"
 #include "Krystal.Booey/MathML/Elements/MathMLElement.hpp"
 #include "Krystal.Booey/Page/LocalDOMWindow.hpp"
-#include "Krystal.Booey/Platform/Locale/PlatformLocale.hpp"
 #include "Krystal.Booey/Rendering/FormControls/RenderListBox.hpp"
 #include "Krystal.Booey/Rendering/FormControls/RenderTextControl.hpp"
 #include "Krystal.Booey/Rendering/GeneratedContent/RenderListItem.hpp"
@@ -83,6 +82,7 @@
 #include "Krystal.Booey/SVG/SVGURIReference.hpp"
 #include "Krystal.Core/Types/HashSet.hpp"
 #include "Krystal.Core/Utils/SetForScope.hpp"
+#include "Krystal.I18n/Locale.hpp"
 #include <algorithm>
 #include <charconv>
 #include <limits>
@@ -537,7 +537,7 @@ namespace krys::boo
         auto language = css::EffectiveLang(element);
         if (language.empty())
         {
-          language = DOMString(DefaultLanguage());
+          language = DOMString(i18n::DefaultLanguage());
         }
         auto primary = [](DOMStringView tag)
         {

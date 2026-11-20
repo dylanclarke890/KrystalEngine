@@ -22,14 +22,18 @@
 #pragma once
 
 #include "Krystal.Booey/DOM/Types/QualifiedName.hpp"
-#include "Krystal.Booey/Graphics/Geometry/FloatRect.hpp"
 #include "Krystal.Booey/SVG/Properties/SVGAnimatedPropertyImpl.hpp"
 #include "Krystal.Booey/SVG/SVGPreserveAspectRatio.hpp"
+#include "Krystal.Core/Geometry/Rect.hpp"
 #include "Krystal.Core/Macros.hpp"
+
+namespace krys
+{
+  class AffineTransform;
+}
 
 namespace krys::boo
 {
-  class AffineTransform;
   template <typename TOwner, typename... TBaseTypes>
   class SVGPropertyOwnerRegistry;
 
@@ -47,13 +51,13 @@ namespace krys::boo
   public:
     virtual ~SVGFitToViewBox() noexcept = default;
 
-    KRYS_NODISCARD static AffineTransform ViewBoxToViewTransform(const FloatRect &viewBoxRect,
+    KRYS_NODISCARD static AffineTransform ViewBoxToViewTransform(const RectF &viewBoxRect,
                                                                  const SVGPreserveAspectRatioValue &,
                                                                  float viewWidth, float viewHeight) noexcept;
 
     using PropertyRegistry = SVGPropertyOwnerRegistry<SVGFitToViewBox>;
 
-    KRYS_NODISCARD const FloatRect &ViewBox() const noexcept
+    KRYS_NODISCARD const RectF &ViewBox() const noexcept
     {
       return _viewBox->CurrentValue();
     }
@@ -73,7 +77,7 @@ namespace krys::boo
       return *_preserveAspectRatio;
     }
 
-    void SetViewBox(const FloatRect &viewBox) noexcept;
+    void SetViewBox(const RectF &viewBox) noexcept;
 
     void ResetViewBox() noexcept;
 
@@ -114,8 +118,8 @@ namespace krys::boo
 
     bool ParseAttribute(const QualifiedName &name, Maybe<DOMStringView> value) noexcept;
 
-    KRYS_NODISCARD Maybe<FloatRect> ParseViewBox(DOMStringView value) noexcept;
+    KRYS_NODISCARD Maybe<RectF> ParseViewBox(DOMStringView value) noexcept;
 
-    KRYS_NODISCARD static Maybe<FloatRect> ParseViewBox(DOMStringView &buffer, bool validate) noexcept;
+    KRYS_NODISCARD static Maybe<RectF> ParseViewBox(DOMStringView &buffer, bool validate) noexcept;
   };
 }

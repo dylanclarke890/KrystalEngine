@@ -29,10 +29,14 @@
 #include "Krystal.Core/Attributes.hpp"
 #include "Krystal.Core/Types/Maybe.hpp"
 
+namespace krys::text
+{
+  enum class TextDirection : bool;
+}
+
 namespace krys::boo
 {
   class Element;
-  enum class TextDirection : bool;
 }
 
 namespace krys::boo::dom
@@ -40,10 +44,10 @@ namespace krys::boo::dom
   /// @brief @p element's auto directionality: from its value if it's a form control whose value decides it,
   /// otherwise from the first of its text with a strong character. Null if nothing decides it.
   /// @see https://html.spec.whatwg.org/#auto-directionality
-  KRYS_NODISCARD Maybe<TextDirection> ComputeAutoDirectionality(const Element &element) noexcept;
+  KRYS_NODISCARD Maybe<text::TextDirection> ComputeAutoDirectionality(const Element &element) noexcept;
 
   /// @brief @p element's directionality if it's its auto directionality; null otherwise.
-  KRYS_NODISCARD Maybe<TextDirection> ComputeTextDirectionIfDirIsAuto(const Element &element) noexcept;
+  KRYS_NODISCARD Maybe<text::TextDirection> ComputeTextDirectionIfDirIsAuto(const Element &element) noexcept;
 
   /// @brief Updates the directionality of @p element and of what it decides after its `dir` attribute
   /// changed to @p textDirectionState.
@@ -57,7 +61,7 @@ namespace krys::boo::dom
 
   /// @brief Gives @p direction to @p element's descendants (and their shadow trees) that take their
   /// directionality from it.
-  void UpdateEffectiveTextDirectionOfDescendants(Element &element, Maybe<TextDirection> direction,
+  void UpdateEffectiveTextDirectionOfDescendants(Element &element, Maybe<text::TextDirection> direction,
                                                  Element *initiator = nullptr) noexcept;
 
   /// @brief Updates the directionality of the nearest inclusive ancestor of @p element whose directionality

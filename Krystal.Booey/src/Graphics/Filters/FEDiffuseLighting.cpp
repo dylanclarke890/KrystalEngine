@@ -22,7 +22,7 @@
  */
 
 #include "Krystal.Booey/Graphics/Filters/FEDiffuseLighting.hpp"
-#include "Krystal.Core/Text/TextStream.hpp"
+#include "Krystal.Core/Strings/TextStream.hpp"
 #include <algorithm>
 
 namespace krys::boo

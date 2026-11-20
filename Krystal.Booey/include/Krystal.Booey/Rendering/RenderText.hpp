@@ -24,15 +24,15 @@
 #pragma once
 
 #include "Krystal.Booey/Graphics/Fonts/FontCascade.hpp"
-#include "Krystal.Booey/Graphics/Geometry/IntRect.hpp"
 #include "Krystal.Booey/Rendering/RenderObject.hpp"
 #include "Krystal.Booey/Style/Difference.hpp"
 #include "Krystal.Core/Attributes.hpp"
+#include "Krystal.Core/Geometry/Rect.hpp"
 #include "Krystal.Core/Macros.hpp"
+#include "Krystal.Core/Strings/String.hpp"
 #include "Krystal.Core/TypeCast.hpp"
 #include "Krystal.Core/Types/HashSet.hpp"
 #include "Krystal.Core/Types/Maybe.hpp"
-#include "Krystal.Core/Types/String.hpp"
 
 namespace krys::boo
 {
@@ -104,10 +104,10 @@ namespace krys::boo
     KRYS_NODISCARD const layout::InlineTextBox *LayoutBox() const noexcept;
 
     /// @brief The bounding box of the text's line boxes.
-    KRYS_NODISCARD virtual IntRect LinesBoundingBox() const noexcept;
+    KRYS_NODISCARD virtual RectI LinesBoundingBox() const noexcept;
 
     /// @brief The location of the text's first text box.
-    KRYS_NODISCARD IntPoint FirstRunLocation() const noexcept;
+    KRYS_NODISCARD PointI FirstRunLocation() const noexcept;
 
     /// @brief The preferred widths of the text, and how it can break, for the legacy inline preferred widths.
     struct Widths
@@ -233,13 +233,11 @@ namespace krys::boo
     /// @brief The selected part of the text's boxes (with their ellipses), in @p repaintContainer's
     /// coordinates, adding each box's quad to @p quads.
     LayoutRect CollectSelectionGeometriesForLineBoxes(const RenderLayerModelObject *repaintContainer,
-                                                      bool clipToVisibleContent,
-                                                      List<FloatQuad> &quads) noexcept;
+                                                      bool clipToVisibleContent, List<QuadF> &quads) noexcept;
 
   private:
     LayoutRect CollectSelectionGeometriesForLineBoxes(const RenderLayerModelObject *repaintContainer,
-                                                      bool clipToVisibleContent,
-                                                      List<FloatQuad> *quads) noexcept;
+                                                      bool clipToVisibleContent, List<QuadF> *quads) noexcept;
 
   public:
     KRYS_NODISCARD FontCascade::CodePath FontCodePath() const noexcept
@@ -323,13 +321,13 @@ namespace krys::boo
 
     void BoundingRects(List<LayoutRect> &rects, const LayoutPoint &accumulatedOffset) const noexcept override;
 
-    void AbsoluteQuads(List<FloatQuad> &quads, bool *wasFixed = nullptr) const noexcept override;
+    void AbsoluteQuads(List<QuadF> &quads, bool *wasFixed = nullptr) const noexcept override;
 
     /// @brief The quads, in absolute coordinates, of the text from @p start to @p end, one per text box (or
     /// one per character, with `ComputeIndividualCharacterRects`).
-    KRYS_NODISCARD List<FloatQuad> AbsoluteQuadsForRange(uint32 start, uint32 end,
-                                                         EnumSet<BoundingRectBehavior> behavior = {},
-                                                         bool *wasFixed = nullptr) const noexcept;
+    KRYS_NODISCARD List<QuadF> AbsoluteQuadsForRange(uint32 start, uint32 end,
+                                                     EnumSet<BoundingRectBehavior> behavior = {},
+                                                     bool *wasFixed = nullptr) const noexcept;
 
   protected:
     RenderText(Type type, Node &node, utf8_string text) noexcept;

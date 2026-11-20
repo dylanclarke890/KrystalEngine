@@ -2,18 +2,18 @@
 #include "catch2/catch_test_macros.hpp"
 #include "Krystal.Booey.Tests/Loader/PageInFrameFixture.hpp"
 #include "Krystal.Booey.Tests/Loader/TestLoader.hpp"
-#include "Krystal.Booey.Tests/Platform/ImageDecoders/TestImages.hpp"
 #include "Krystal.Booey/Page/Page.hpp"
 #include "Krystal.Booey/Rendering/GeneratedContent/RenderListItem.hpp"
 #include "Krystal.Booey/Rendering/GeneratedContent/RenderListMarker.hpp"
 #include "Krystal.Booey/Rendering/RenderElement.hpp"
+#include "Krystal.Image.Tests/TestImages.hpp"
 
 namespace krys::boo::tests
 {
   TEST_CASE("StyleFilterImage::FixedSize: the input image's size", "[Rendering][StyleFilterImage]")
   {
     LoaderFixture loader;
-    loader.Strategy.Resources[u8"file:///b.jpg"] = images::JPEG;
+    loader.Strategy.Resources[u8"file:///b.jpg"] = img::tests::images::JPEG;
 
     PageInFrameFixture fixture(
       u8"<div id=image style='background-image: filter(url(file:///b.jpg), sepia())'></div>"
@@ -29,15 +29,15 @@ namespace krys::boo::tests
       return image->ImageSize(&renderer, 1);
     };
 
-    CHECK(imageSize(u8"image") == FloatSize(16, 8));
-    CHECK(imageSize(u8"none") == FloatSize());
+    CHECK(imageSize(u8"image") == SizeF(16, 8));
+    CHECK(imageSize(u8"none") == SizeF());
   }
 
   TEST_CASE("StyleFilterImage: its renderers hear when the input image loads",
             "[Rendering][StyleFilterImage]")
   {
     LoaderFixture loader;
-    loader.Strategy.Resources[u8"file:///b.jpg"] = images::JPEG;
+    loader.Strategy.Resources[u8"file:///b.jpg"] = img::tests::images::JPEG;
     loader.Strategy.Defer = true;
 
     PageInFrameFixture fixture(
@@ -63,7 +63,7 @@ namespace krys::boo::tests
   TEST_CASE("StyleFilterImage: draws the input image through the filter", "[Rendering][StyleFilterImage]")
   {
     LoaderFixture loader;
-    loader.Strategy.Resources[u8"file:///b.jpg"] = images::JPEG;
+    loader.Strategy.Resources[u8"file:///b.jpg"] = img::tests::images::JPEG;
 
     // Filters need the page's rendering modes.
     auto page = Page::Create();

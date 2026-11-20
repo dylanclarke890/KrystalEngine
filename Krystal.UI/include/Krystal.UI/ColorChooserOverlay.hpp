@@ -28,7 +28,7 @@ namespace krys::ui
     View *_owner {nullptr};
     boo::ColorChooserClient *_client {nullptr};
     UniquePtr<View> _view;
-    boo::IntRect _rect;
+    RectI _rect;
     /// @brief The colours shown, in order.
     List<boo::Color> _colors;
     /// @brief The element of each colour, by its index.
@@ -77,7 +77,7 @@ namespace krys::ui
       return *_view;
     }
 
-    KRYS_NODISCARD const boo::IntRect &Rect() const noexcept final
+    KRYS_NODISCARD const RectI &Rect() const noexcept final
     {
       return _rect;
     }
@@ -85,12 +85,12 @@ namespace krys::ui
     void Hide() noexcept final;
 
     /// @brief Highlights the colour under @p point.
-    void MouseMoved(const boo::IntPoint &point) noexcept final;
+    void MouseMoved(const PointI &point) noexcept final;
 
     /// @brief Chooses the colour under @p point.
-    void MouseReleased(const boo::IntPoint &point) noexcept final;
+    void MouseReleased(const PointI &point) noexcept final;
 
-    bool MouseWheel(const boo::IntPoint &point, float notchesX, float notchesY) noexcept final;
+    bool MouseWheel(const PointI &point, float notchesX, float notchesY) noexcept final;
 
     /// @brief The arrow keys move the highlight; Enter and Space choose; Escape and Tab hide the picker.
     bool KeyPressed(pal::Key key, pal::KeyModifiers modifiers) noexcept final;

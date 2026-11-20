@@ -25,9 +25,10 @@
 
 #include "Krystal.Booey/Text/TextSpacing.hpp"
 #include "Krystal.Booey/Graphics/Fonts/Font.hpp"
-#include "Krystal.Booey/Text/CharacterProperties.hpp"
-#include "Krystal.Core/Text/ASCII.hpp"
-#include "Krystal.Core/Text/Unicode.hpp"
+#include "Krystal.Core/Strings/ASCII.hpp"
+#include "Krystal.Core/Strings/Unicode.hpp"
+#include "Krystal.Text/CharacterProperties.hpp"
+#include "Krystal.Text/Script.hpp"
 
 namespace krys::boo
 {
@@ -91,7 +92,7 @@ namespace krys::boo
       }
 
       // All characters in the range of U+3041 to U+30FF, except those that belong to Unicode Punctuation [P*]
-      if ((character >= 0x3041 && character <= 0x30FF) && !IsPunctuation(character))
+      if ((character >= 0x3041 && character <= 0x30FF) && !text::IsPunctuation(character))
       {
         return true;
       }
@@ -105,7 +106,7 @@ namespace krys::boo
       {
         return true;
       }
-      if (IsOfScriptType(character, UScriptCode::USCRIPT_HAN))
+      if (text::IsOfScriptType(character, text::Script::Han))
       {
         return true;
       }
@@ -114,11 +115,11 @@ namespace krys::boo
     }
 
     KRYS_NODISCARD static bool IsNonIdeographicNumeral(char32_t character,
-                                                       uint32 generalCategoryMask) noexcept
+                                                       text::GeneralCategory category) noexcept
     {
       // FIXME: Should also check that it is not: upright in vertical text flow using the text-orientation
       // property or the text-combine-upright property.
-      return (generalCategoryMask & U_GC_ND_MASK) && !IsEastAsianFullWidth(character);
+      return category == text::GeneralCategory::DecimalNumber && !text::IsEastAsianFullWidth(character);
     }
 
     CharacterClass GetCharacterClass(char32_t character) noexcept
@@ -133,7 +134,7 @@ namespace krys::boo
         return CharacterClass::NonIdeographNumeral;
       }
 
-      auto generalCategoryMask = static_cast<uint32>(U_GET_GC_MASK(static_cast<UChar32>(character)));
+      auto category = text::GetGeneralCategory(character);
       if (IsIdeograph(character))
       {
         return CharacterClass::Ideograph;
@@ -142,9 +143,9 @@ namespace krys::boo
       // We already know it is not an Ideograph from here
       // FIXME: Should also check that it is not: upright in vertical text flow using the text-orientation
       // property or the text-combine-upright property.
-      if (generalCategoryMask & (U_GC_M_MASK | U_GC_L_MASK))
+      if ((text::MarkCategories | text::LetterCategories).Contains(category))
       {
-        if (!IsEastAsianFullWidth(character))
+        if (!text::IsEastAsianFullWidth(character))
         {
           return CharacterClass::NonIdeographLetter;
         }
@@ -152,20 +153,20 @@ namespace krys::boo
         return CharacterClass::Undefined;
       }
 
-      if (IsNonIdeographicNumeral(character, generalCategoryMask))
+      if (IsNonIdeographicNumeral(character, category))
       {
         return CharacterClass::NonIdeographNumeral;
       }
 
-      if (generalCategoryMask & U_GC_P_MASK)
+      if (text::PunctuationCategories.Contains(category))
       {
-        if (IsCJKSymbolOrPunctuation(character) || IsEastAsianFullWidth(character))
+        if (text::IsCJKSymbolOrPunctuation(character) || text::IsEastAsianFullWidth(character))
         {
-          if (IsOpeningPunctuation(generalCategoryMask))
+          if (text::IsOpeningPunctuation(category))
           {
             return CharacterClass::FullWidthOpeningPunctuation;
           }
-          if (IsClosingPunctuation(generalCategoryMask))
+          if (text::IsClosingPunctuation(category))
           {
             return CharacterClass::FullWidthClosingPunctuation;
           }
@@ -180,7 +181,7 @@ namespace krys::boo
         }
       }
 
-      if (IsFullwidthMiddleDotPunctuation(character))
+      if (text::IsFullwidthMiddleDotPunctuation(character))
       {
         return CharacterClass::FullWidthMiddleDotPunctuation;
       }

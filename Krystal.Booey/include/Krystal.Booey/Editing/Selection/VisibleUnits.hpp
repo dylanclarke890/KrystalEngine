@@ -31,8 +31,8 @@
 #include "Krystal.Booey/Graphics/Geometry/LayoutUnit.hpp"
 #include "Krystal.Booey/Text/WritingMode.hpp"
 #include "Krystal.Core/Attributes.hpp"
+#include "Krystal.Core/Strings/String.hpp"
 #include "Krystal.Core/Types/RefPtr.hpp"
-#include "Krystal.Core/Types/String.hpp"
 
 namespace krys::boo
 {
@@ -105,10 +105,12 @@ namespace krys::boo
 
   KRYS_NODISCARD bool IsLogicalEndOfLine(const VisiblePosition &position) noexcept;
 
-  KRYS_NODISCARD VisiblePosition LeftBoundaryOfLine(const VisiblePosition &position, TextDirection direction,
+  KRYS_NODISCARD VisiblePosition LeftBoundaryOfLine(const VisiblePosition &position,
+                                                    text::TextDirection direction,
                                                     bool *reachedBoundary) noexcept;
 
-  KRYS_NODISCARD VisiblePosition RightBoundaryOfLine(const VisiblePosition &position, TextDirection direction,
+  KRYS_NODISCARD VisiblePosition RightBoundaryOfLine(const VisiblePosition &position,
+                                                     text::TextDirection direction,
                                                      bool *reachedBoundary) noexcept;
 
   // paragraphs (perhaps a misnomer, can be divided by line break elements)

@@ -46,13 +46,13 @@
 #include "Krystal.Booey/Infra/Namespaces.hpp"
 #include "Krystal.Booey/Loader/Cache/CachedResourceLoader.hpp"
 #include "Krystal.Booey/SVG/Elements/SVGElement.hpp"
-#include "Krystal.Booey/URL/URL.hpp"
 #include "Krystal.Booey/XML/XMLDocumentParser.hpp"
 #include "Krystal.Booey/XML/XMLDocumentParserScope.hpp"
-#include "Krystal.Core/Text/ASCII.hpp"
-#include "Krystal.Core/Text/StringBuilder.hpp"
+#include "Krystal.Core/Strings/ASCII.hpp"
+#include "Krystal.Core/Strings/StringBuilder.hpp"
 #include "Krystal.Core/Types/Array.hpp"
 #include "Krystal.Core/Utils/Move.hpp"
+#include "Krystal.Net/Url.hpp"
 #include <algorithm>
 #include <cstdio>
 #include <cstring>
@@ -127,7 +127,7 @@ namespace krys::boo::xml
       xmlSwitchEncoding(ctxt, XML_CHAR_ENCODING_UTF8);
     }
 
-    KRYS_NODISCARD bool ShouldAllowExternalLoad(const url::URL &url) noexcept
+    KRYS_NODISCARD bool ShouldAllowExternalLoad(const net::Url &url) noexcept
     {
       utf8_stringview urlString = url.String();
 
@@ -204,7 +204,7 @@ namespace krys::boo::xml
   xmlParserInputPtr ExternalEntityLoader(const char *url, const char *id, xmlParserCtxtPtr context) noexcept
   {
     if (!ShouldAllowExternalLoad(
-          url::URL(DOMStringView(reinterpret_cast<const char8 *>(url), std::strlen(url)))))
+          net::Url(DOMStringView(reinterpret_cast<const char8 *>(url), std::strlen(url)))))
     {
       return nullptr;
     }

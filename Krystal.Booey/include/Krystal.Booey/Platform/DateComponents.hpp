@@ -32,8 +32,9 @@
 
 #include "Krystal.Core/Attributes.hpp"
 #include "Krystal.Core/Numeric.hpp"
+#include "Krystal.Core/Strings/String.hpp"
 #include "Krystal.Core/Types/Maybe.hpp"
-#include "Krystal.Core/Types/String.hpp"
+#include "Krystal.I18n/DateTimeFields.hpp"
 #include <limits>
 
 namespace krys::boo
@@ -141,6 +142,9 @@ namespace krys::boo
     {
       return _type;
     }
+
+    /// @brief The fields a locale formats, or null if this is invalid.
+    KRYS_NODISCARD Maybe<i18n::DateTimeFields> ToDateTimeFields() const noexcept;
 
     /// @brief An ISO 8601 representation; @p format applies to the DateTimeLocal and Time types. With
     /// `SecondFormat::None`, a DateTimeLocal is a valid normalized local date and time string.

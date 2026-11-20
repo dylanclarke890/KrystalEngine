@@ -55,7 +55,7 @@
 
 #include "Krystal.Booey/Platform/Scrolling/ScrollbarsController.hpp"
 #include "Krystal.Booey/Platform/Scrolling/Scrollbar.hpp"
-#include "Krystal.Booey/Platform/ThreadTimers.hpp"
+#include "Krystal.Core/Time/ThreadTimers.hpp"
 #include <algorithm>
 #include <chrono>
 

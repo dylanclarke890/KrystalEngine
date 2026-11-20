@@ -167,7 +167,7 @@ namespace krys::boo::css
 
     /// @brief Empty URLs and fragment-only URLs should not be resolved relative to the base URL.
     /// @see https://www.w3.org/TR/css-values-4/#local-urls
-    KRYS_NODISCARD static bool IsCSSLocalURL(CSSOMStringView relativeURL) noexcept;
+    KRYS_NODISCARD static bool IsCSSLocalUrl(CSSOMStringView relativeUrl) noexcept;
 
     KRYS_NODISCARD static CSSOMStringView SeparatorCSSText(ValueSeparator separator) noexcept;
 

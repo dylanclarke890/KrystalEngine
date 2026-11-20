@@ -128,22 +128,24 @@ namespace krys::gfx::detail
       }
     }
 
-    const uint32 width = mask.Bounds.Width + 2u * extent;
-    const uint32 height = mask.Bounds.Height + 2u * extent;
+    const uint32 maskWidth = static_cast<uint32>(mask.Bounds.Width());
+    const uint32 maskHeight = static_cast<uint32>(mask.Bounds.Height());
+    const uint32 width = maskWidth + 2u * extent;
+    const uint32 height = maskHeight + 2u * extent;
     List<float> values(static_cast<size_t>(width) * height, 0.f);
-    for (uint32 y = 0u; y < mask.Bounds.Height; ++y)
+    for (uint32 y = 0u; y < maskHeight; ++y)
     {
-      for (uint32 x = 0u; x < mask.Bounds.Width; ++x)
+      for (uint32 x = 0u; x < maskWidth; ++x)
       {
         values[static_cast<size_t>(y + extent) * width + x + extent] =
-          static_cast<float>(mask.Coverage[static_cast<size_t>(y) * mask.Bounds.Width + x]) / 255.f;
+          static_cast<float>(mask.Coverage[static_cast<size_t>(y) * maskWidth + x]) / 255.f;
       }
     }
 
     // Rows, then columns: a Gaussian is separable, and so is each box.
     List<float> line;
     List<float> scratch;
-    for (uint32 y = extent; y < extent + mask.Bounds.Height; ++y)
+    for (uint32 y = extent; y < extent + maskHeight; ++y)
     {
       line.assign(values.begin() + static_cast<int64>(y) * width,
                   values.begin() + static_cast<int64>(y + 1u) * width);
@@ -164,10 +166,9 @@ namespace krys::gfx::detail
       }
     }
 
-    CoverageMask blurred {.Bounds = {.X = mask.Bounds.X - static_cast<int32>(extent),
-                                     .Y = mask.Bounds.Y - static_cast<int32>(extent),
-                                     .Width = width,
-                                     .Height = height},
+    CoverageMask blurred {.Bounds = {mask.Bounds.X() - static_cast<int32>(extent),
+                                     mask.Bounds.Y() - static_cast<int32>(extent), static_cast<int32>(width),
+                                     static_cast<int32>(height)},
                           .Coverage = {}};
     blurred.Coverage.resize(values.size());
     for (size_t i = 0u; i < values.size(); ++i)

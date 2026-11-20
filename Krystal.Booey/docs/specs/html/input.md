@@ -85,7 +85,7 @@ Status: reviewed (2026-11-01)
 ###### [4.10.5.1.4 URL state (type=url)](https://html.spec.whatwg.org/#url-state-%28type=url%29)
 
 Status: reviewed (2026-11-01)
-> `URLInputType`.
+> `UrlInputType`.
 
 ###### [4.10.5.1.5 Email state (type=email)](https://html.spec.whatwg.org/#email-state-%28type=email%29)
 

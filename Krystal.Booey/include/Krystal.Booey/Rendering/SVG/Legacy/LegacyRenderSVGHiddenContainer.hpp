@@ -47,10 +47,10 @@ namespace krys::boo
     KRYS_NODISCARD LayoutRect ClippedOverflowRect(const RenderLayerModelObject *,
                                                   VisibleRectContext) const noexcept final;
 
-    void AbsoluteQuads(List<FloatQuad> &, bool *wasFixed) const noexcept final;
+    void AbsoluteQuads(List<QuadF> &, bool *wasFixed) const noexcept final;
 
-    bool NodeAtFloatPoint(const HitTestRequest &, HitTestResult &, const FloatPoint &pointInParent,
-                          HitTestAction) noexcept final;
+    bool NodeAtPointF(const HitTestRequest &, HitTestResult &, const PointF &pointInParent,
+                      HitTestAction) noexcept final;
   };
 }
 

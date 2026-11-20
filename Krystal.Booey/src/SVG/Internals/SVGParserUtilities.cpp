@@ -312,7 +312,7 @@ namespace krys::boo::svg
     return std::make_pair(*x, *y);
   }
 
-  Maybe<FloatPoint> ParsePoint(DOMStringView string) noexcept
+  Maybe<PointF> ParsePoint(DOMStringView string) noexcept
   {
     if (string.empty())
     {
@@ -324,7 +324,7 @@ namespace krys::boo::svg
       return {};
     }
 
-    auto point = ParseFloatPoint(string);
+    auto point = ParsePointF(string);
     if (!point)
     {
       return {};
@@ -336,7 +336,7 @@ namespace krys::boo::svg
     return point;
   }
 
-  Maybe<FloatRect> ParseRect(DOMStringView string) noexcept
+  Maybe<RectF> ParseRect(DOMStringView string) noexcept
   {
     SkipOptionalSVGSpaces(string);
 
@@ -361,10 +361,10 @@ namespace krys::boo::svg
       return {};
     }
 
-    return FloatRect {*x, *y, *width, *height};
+    return RectF {*x, *y, *width, *height};
   }
 
-  Maybe<FloatPoint> ParseFloatPoint(DOMStringView &buffer) noexcept
+  Maybe<PointF> ParsePointF(DOMStringView &buffer) noexcept
   {
     auto x = ParseNumber(buffer);
     if (!x)
@@ -378,6 +378,6 @@ namespace krys::boo::svg
       return {};
     }
 
-    return FloatPoint {*x, *y};
+    return PointF {*x, *y};
   }
 }

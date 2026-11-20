@@ -25,13 +25,13 @@
 
 #pragma once
 
-#include "Krystal.Booey/Graphics/Geometry/IntRect.hpp"
-#include "Krystal.Booey/Platform/Events/PlatformMouseEvent.hpp"
+#include "Krystal.Booey/Input/PlatformMouseEvent.hpp"
 #include "Krystal.Booey/Platform/Scrolling/ScrollTypes.hpp"
-#include "Krystal.Booey/Platform/Timer.hpp"
 #include "Krystal.Core/Attributes.hpp"
+#include "Krystal.Core/Geometry/Rect.hpp"
 #include "Krystal.Core/Macros.hpp"
 #include "Krystal.Core/RefCounted.hpp"
+#include "Krystal.Core/Time/Timer.hpp"
 #include "Krystal.Core/Types/RefPtr.hpp"
 #include "Krystal.Core/Types/WeakPtr.hpp"
 #include <algorithm>
@@ -56,7 +56,7 @@ namespace krys::boo
     ScrollbarOrientation _orientation;
     ScrollbarWidth _widthStyle;
     ScrollbarTheme &_theme;
-    IntRect _frameRect;
+    RectI _frameRect;
 
     int32 _visibleSize {0};
     int32 _totalSize {0};
@@ -87,12 +87,12 @@ namespace krys::boo
     // Called by the ScrollableArea when the scroll offset changes.
     void OffsetDidChange() noexcept;
 
-    KRYS_NODISCARD const IntRect &FrameRect() const noexcept
+    KRYS_NODISCARD const RectI &FrameRect() const noexcept
     {
       return _frameRect;
     }
 
-    void SetFrameRect(const IntRect &rect) noexcept;
+    void SetFrameRect(const RectI &rect) noexcept;
 
     KRYS_NODISCARD int32 Width() const noexcept
     {
@@ -114,7 +114,7 @@ namespace krys::boo
       return _frameRect.Y();
     }
 
-    KRYS_NODISCARD IntPoint Location() const noexcept
+    KRYS_NODISCARD PointI Location() const noexcept
     {
       return _frameRect.Location();
     }
@@ -284,7 +284,7 @@ namespace krys::boo
     void SetPressedPart(ScrollbarPart part) noexcept;
 
     /// @brief Paints the scrollbar where it intersects @p damageRect, through its theme.
-    void Paint(GraphicsContext &context, const IntRect &damageRect) noexcept;
+    void Paint(GraphicsContext &context, const RectI &damageRect) noexcept;
 
     // These methods are used for platform scrollbars to give :hover feedback. They will not get called when
     // the mouse went down in a scrollbar, since it is assumed the scrollbar will start grabbing all events in
@@ -304,14 +304,14 @@ namespace krys::boo
     void MoveThumb(int32 pos, bool draggingDocument = false) noexcept;
 
     /// @brief Converts a point in the window (the root view's coordinates) to the scrollbar's.
-    KRYS_NODISCARD IntPoint ConvertFromContainingWindow(const IntPoint &windowPoint) const noexcept;
+    KRYS_NODISCARD PointI ConvertFromContainingWindow(const PointI &windowPoint) const noexcept;
 
     /// @brief Repaints the scrollbar's @p rect.
-    void InvalidateRect(const IntRect &rect) noexcept;
+    void InvalidateRect(const RectI &rect) noexcept;
 
     void Invalidate() noexcept
     {
-      InvalidateRect(IntRect(IntPoint(), _frameRect.Size()));
+      InvalidateRect(RectI(PointI(), _frameRect.Size()));
     }
 
     void UpdateScrollbarThickness() noexcept;

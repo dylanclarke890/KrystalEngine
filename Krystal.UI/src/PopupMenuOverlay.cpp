@@ -79,8 +79,7 @@ namespace krys::ui
 
   PopupMenuOverlay::~PopupMenuOverlay() noexcept = default;
 
-  void PopupMenuOverlay::Show(const boo::IntRect &rect, boo::LocalFrameView &view,
-                              int32 selectedIndex) noexcept
+  void PopupMenuOverlay::Show(const RectI &rect, boo::LocalFrameView &view, int32 selectedIndex) noexcept
   {
     if (!_client || !_owner)
     {
@@ -139,7 +138,7 @@ namespace krys::ui
     auto menuStyle = _client->MenuStyle();
     auto paddingLeft = _client->ClientPaddingLeft().ToInt();
     auto paddingRight = _client->ClientPaddingRight().ToInt();
-    _rightToLeft = menuStyle.GetTextDirection() == boo::TextDirection::RTL;
+    _rightToLeft = menuStyle.GetTextDirection() == text::TextDirection::RTL;
 
     // A right-to-left select's popup is mirrored: its items line up on the right.
     utf8_string html = _rightToLeft
@@ -202,8 +201,8 @@ namespace krys::ui
       // An item in the other direction runs and lines up its own way.
       if (itemStyle.GetTextDirection() != menuStyle.GetTextDirection())
       {
-        html += itemStyle.GetTextDirection() == boo::TextDirection::RTL ? u8"; direction: rtl"
-                                                                        : u8"; direction: ltr";
+        html += itemStyle.GetTextDirection() == text::TextDirection::RTL ? u8"; direction: rtl"
+                                                                         : u8"; direction: ltr";
       }
       html += u8"\"";
       auto toolTip = _client->ItemToolTip(index);
@@ -224,9 +223,9 @@ namespace krys::ui
     auto width = std::max(_controlRect.Width(), 1);
     if (!_view)
     {
-      _view = CreateUnique<View>(boo::IntSize(width, viewport.Height()));
+      _view = CreateUnique<View>(SizeI(width, viewport.Height()));
     }
-    SizeContentView(*_view, *_owner, boo::IntSize(width, viewport.Height()));
+    SizeContentView(*_view, *_owner, SizeI(width, viewport.Height()));
     ReplaceDocument(*_view, krys::move(html));
     (void)_view->Document().UpdateLayout();
 
@@ -247,13 +246,13 @@ namespace krys::ui
       node = boo::dom::TreeQueries::Next(*node);
     }
 
-    boo::IntSize contentSize(width, 0);
+    SizeI contentSize(width, 0);
     int32 itemHeight = 0;
     if (auto *root = _view->Document().DocumentElement().get())
     {
       if (auto *box = DynamicDowncast<boo::RenderBox>(root->Renderer()))
       {
-        contentSize = boo::IntSize(box->Width().ToInt(), box->Height().ToInt());
+        contentSize = SizeI(box->Width().ToInt(), box->Height().ToInt());
       }
     }
     for (auto &element : _itemElements)
@@ -284,7 +283,7 @@ namespace krys::ui
     }
     width = std::min(std::max(contentSize.Width(), width), std::max(viewport.Width(), 1));
     auto x = AlignedLeft(_controlRect, width, viewport.Width(), _rightToLeft);
-    _rect = boo::IntRect(x, y, width, std::max(height, 1));
+    _rect = RectI(x, y, width, std::max(height, 1));
     SizeContentView(*_view, *_owner, _rect.Size());
 
     auto highlighted = _highlightedIndex;
@@ -292,7 +291,7 @@ namespace krys::ui
     Highlight(highlighted);
   }
 
-  int32 PopupMenuOverlay::ItemAt(const boo::IntPoint &point) const noexcept
+  int32 PopupMenuOverlay::ItemAt(const PointI &point) const noexcept
   {
     if (!_view)
     {
@@ -312,7 +311,7 @@ namespace krys::ui
     return -1;
   }
 
-  void PopupMenuOverlay::MouseMoved(const boo::IntPoint &point) noexcept
+  void PopupMenuOverlay::MouseMoved(const PointI &point) noexcept
   {
     auto index = ItemAt(point);
     if (IsSelectable(index))
@@ -321,7 +320,7 @@ namespace krys::ui
     }
   }
 
-  void PopupMenuOverlay::MouseReleased(const boo::IntPoint &point) noexcept
+  void PopupMenuOverlay::MouseReleased(const PointI &point) noexcept
   {
     auto index = ItemAt(point);
     if (IsSelectable(index))
@@ -330,7 +329,7 @@ namespace krys::ui
     }
   }
 
-  bool PopupMenuOverlay::MouseWheel(const boo::IntPoint &point, float notchesX, float notchesY) noexcept
+  bool PopupMenuOverlay::MouseWheel(const PointI &point, float notchesX, float notchesY) noexcept
   {
     return _view && WheelView(*_view, point, notchesX, notchesY);
   }
@@ -403,11 +402,11 @@ namespace krys::ui
     auto visibleHeight = _rect.Height();
     if (itemRect.Y() < scroll.Y())
     {
-      _view->ScrollTo(boo::IntPoint(scroll.X(), itemRect.Y()));
+      _view->ScrollTo(PointI(scroll.X(), itemRect.Y()));
     }
     else if (itemRect.MaxY() > scroll.Y() + visibleHeight)
     {
-      _view->ScrollTo(boo::IntPoint(scroll.X(), itemRect.MaxY() - visibleHeight));
+      _view->ScrollTo(PointI(scroll.X(), itemRect.MaxY() - visibleHeight));
     }
   }
 

@@ -33,7 +33,6 @@
 #include "Krystal.Booey/Editing/Editing.hpp"
 #include "Krystal.Booey/Editing/Selection/VisibleUnits.hpp"
 #include "Krystal.Booey/Editing/TextIterator.hpp"
-#include "Krystal.Booey/Graphics/Geometry/FloatQuad.hpp"
 #include "Krystal.Booey/HTML/Elements/HTMLBodyElement.hpp"
 #include "Krystal.Booey/HTML/Elements/HTMLHtmlElement.hpp"
 #include "Krystal.Booey/Layout/Integration/Inline/InlineIteratorLineBox.hpp"
@@ -41,8 +40,9 @@
 #include "Krystal.Booey/Layout/Integration/Inline/LineSelection.hpp"
 #include "Krystal.Booey/Rendering/RenderBlockFlow.hpp"
 #include "Krystal.Booey/Rendering/Selection/CaretRectComputation.hpp"
+#include "Krystal.Core/Geometry/Quad.hpp"
+#include "Krystal.Core/Strings/CodePointIterator.hpp"
 #include <algorithm>
-#include <unicode/utf8.h>
 
 namespace krys::boo
 {
@@ -123,7 +123,7 @@ namespace krys::boo
     }
 
     dom::Position downstreamStart = p.Downstream();
-    TextDirection primaryDirection = p.PrimaryDirection();
+    text::TextDirection primaryDirection = p.PrimaryDirection();
 
     inline_iterator::LineLogicalOrderCache orderCache;
 
@@ -132,8 +132,8 @@ namespace krys::boo
       auto [box, offset] = p.GetInlineBoxAndOffset(_affinity, primaryDirection);
       if (!box)
       {
-        return primaryDirection == TextDirection::LTR ? PreviousVisuallyDistinctCandidate(_deepPosition)
-                                                      : NextVisuallyDistinctCandidate(_deepPosition);
+        return primaryDirection == text::TextDirection::LTR ? PreviousVisuallyDistinctCandidate(_deepPosition)
+                                                            : NextVisuallyDistinctCandidate(_deepPosition);
       }
 
       const RenderObject *renderer = &box->Renderer();
@@ -152,8 +152,9 @@ namespace krys::boo
           box.TraverseLineLeftwardOnLine();
           if (!box)
           {
-            return primaryDirection == TextDirection::LTR ? PreviousVisuallyDistinctCandidate(_deepPosition)
-                                                          : NextVisuallyDistinctCandidate(_deepPosition);
+            return primaryDirection == text::TextDirection::LTR
+                     ? PreviousVisuallyDistinctCandidate(_deepPosition)
+                     : NextVisuallyDistinctCandidate(_deepPosition);
           }
           renderer = &box->Renderer();
           offset = box->RightmostCaretOffset();
@@ -179,7 +180,7 @@ namespace krys::boo
           auto previousBox = box->NextLineLeftwardOnLineIgnoringLineBreak();
           if (!previousBox)
           {
-            dom::Position positionOnLeft = primaryDirection == TextDirection::LTR
+            dom::Position positionOnLeft = primaryDirection == text::TextDirection::LTR
                                              ? PreviousVisuallyDistinctCandidate(_deepPosition)
                                              : NextVisuallyDistinctCandidate(_deepPosition);
             auto boxOnLeft = positionOnLeft.GetInlineBoxAndOffset(_affinity, primaryDirection).Box;
@@ -206,15 +207,15 @@ namespace krys::boo
           if (!previousBox)
           {
             auto logicalStart =
-              primaryDirection == TextDirection::LTR
+              primaryDirection == text::TextDirection::LTR
                 ? inline_iterator::FirstLeafOnLineInLogicalOrderWithNode(box->GetLineBox(), orderCache)
                 : inline_iterator::LastLeafOnLineInLogicalOrderWithNode(box->GetLineBox(), orderCache);
             if (logicalStart)
             {
               box = logicalStart;
               renderer = &box->Renderer();
-              offset = primaryDirection == TextDirection::LTR ? box->MinimumCaretOffset()
-                                                              : box->MaximumCaretOffset();
+              offset = primaryDirection == text::TextDirection::LTR ? box->MinimumCaretOffset()
+                                                                    : box->MaximumCaretOffset();
             }
             break;
           }
@@ -302,8 +303,8 @@ namespace krys::boo
             level = box->BidiLevel();
           }
           renderer = &box->Renderer();
-          offset =
-            primaryDirection == TextDirection::LTR ? box->MinimumCaretOffset() : box->MaximumCaretOffset();
+          offset = primaryDirection == text::TextDirection::LTR ? box->MinimumCaretOffset()
+                                                                : box->MaximumCaretOffset();
         }
         break;
       }
@@ -344,7 +345,7 @@ namespace krys::boo
       return left;
     }
 
-    return DirectionOfEnclosingBlock(left.DeepEquivalent()) == TextDirection::LTR
+    return DirectionOfEnclosingBlock(left.DeepEquivalent()) == text::TextDirection::LTR
              ? HonorEditingBoundaryAtOrBefore(left, reachedBoundary)
              : HonorEditingBoundaryAtOrAfter(left, reachedBoundary);
   }
@@ -358,7 +359,7 @@ namespace krys::boo
     }
 
     dom::Position downstreamStart = p.Downstream();
-    TextDirection primaryDirection = p.PrimaryDirection();
+    text::TextDirection primaryDirection = p.PrimaryDirection();
 
     inline_iterator::LineLogicalOrderCache orderCache;
 
@@ -367,8 +368,9 @@ namespace krys::boo
       auto [box, offset] = p.GetInlineBoxAndOffset(_affinity, primaryDirection);
       if (!box)
       {
-        return primaryDirection == TextDirection::LTR ? NextVisuallyDistinctCandidate(_deepPosition)
-                                                      : PreviousVisuallyDistinctCandidate(_deepPosition);
+        return primaryDirection == text::TextDirection::LTR
+                 ? NextVisuallyDistinctCandidate(_deepPosition)
+                 : PreviousVisuallyDistinctCandidate(_deepPosition);
       }
 
       const RenderObject *renderer = &box->Renderer();
@@ -387,8 +389,9 @@ namespace krys::boo
           box.TraverseLineRightwardOnLine();
           if (!box)
           {
-            return primaryDirection == TextDirection::LTR ? NextVisuallyDistinctCandidate(_deepPosition)
-                                                          : PreviousVisuallyDistinctCandidate(_deepPosition);
+            return primaryDirection == text::TextDirection::LTR
+                     ? NextVisuallyDistinctCandidate(_deepPosition)
+                     : PreviousVisuallyDistinctCandidate(_deepPosition);
           }
           renderer = &box->Renderer();
           offset = box->LeftmostCaretOffset();
@@ -414,7 +417,7 @@ namespace krys::boo
           auto nextBox = box->NextLineRightwardOnLineIgnoringLineBreak();
           if (!nextBox)
           {
-            dom::Position positionOnRight = primaryDirection == TextDirection::LTR
+            dom::Position positionOnRight = primaryDirection == text::TextDirection::LTR
                                               ? NextVisuallyDistinctCandidate(_deepPosition)
                                               : PreviousVisuallyDistinctCandidate(_deepPosition);
             auto boxOnRight = positionOnRight.GetInlineBoxAndOffset(_affinity, primaryDirection).Box;
@@ -441,7 +444,7 @@ namespace krys::boo
           if (!nextBox)
           {
             auto logicalEnd =
-              primaryDirection == TextDirection::LTR
+              primaryDirection == text::TextDirection::LTR
                 ? inline_iterator::LastLeafOnLineInLogicalOrderWithNode(box->GetLineBox(), orderCache)
                 : inline_iterator::FirstLeafOnLineInLogicalOrderWithNode(box->GetLineBox(), orderCache);
 
@@ -449,8 +452,8 @@ namespace krys::boo
             {
               box = logicalEnd;
               renderer = &box->Renderer();
-              offset = primaryDirection == TextDirection::LTR ? box->MaximumCaretOffset()
-                                                              : box->MinimumCaretOffset();
+              offset = primaryDirection == text::TextDirection::LTR ? box->MaximumCaretOffset()
+                                                                    : box->MinimumCaretOffset();
             }
             break;
           }
@@ -541,8 +544,8 @@ namespace krys::boo
             level = box->BidiLevel();
           }
           renderer = &box->Renderer();
-          offset =
-            primaryDirection == TextDirection::LTR ? box->MaximumCaretOffset() : box->MinimumCaretOffset();
+          offset = primaryDirection == text::TextDirection::LTR ? box->MaximumCaretOffset()
+                                                                : box->MinimumCaretOffset();
         }
         break;
       }
@@ -583,7 +586,7 @@ namespace krys::boo
       return right;
     }
 
-    return DirectionOfEnclosingBlock(right.DeepEquivalent()) == TextDirection::LTR
+    return DirectionOfEnclosingBlock(right.DeepEquivalent()) == text::TextDirection::LTR
              ? HonorEditingBoundaryAtOrAfter(right, reachedBoundary)
              : HonorEditingBoundaryAtOrBefore(right, reachedBoundary);
   }
@@ -825,9 +828,9 @@ namespace krys::boo
       return 0;
     }
 
-    UChar32 ch;
-    U8_NEXT(reinterpret_cast<const uint8_t *>(data.data()), offset, length, ch);
-    return ch < 0 ? 0 : static_cast<char32>(ch);
+    auto decoded =
+      text::DecodeUTF8(Span<const char8>(data.data() + offset, static_cast<size_t>(length - offset)));
+    return decoded.IsValid ? decoded.CodePoint : 0;
   }
 
   InlineBoxAndOffset VisiblePosition::GetInlineBoxAndOffset() const noexcept
@@ -835,7 +838,8 @@ namespace krys::boo
     return _deepPosition.GetInlineBoxAndOffset(_affinity);
   }
 
-  InlineBoxAndOffset VisiblePosition::GetInlineBoxAndOffset(TextDirection primaryDirection) const noexcept
+  InlineBoxAndOffset
+    VisiblePosition::GetInlineBoxAndOffset(text::TextDirection primaryDirection) const noexcept
   {
     return _deepPosition.GetInlineBoxAndOffset(_affinity, primaryDirection);
   }
@@ -859,14 +863,14 @@ namespace krys::boo
     return {ComputeLocalCaretRect(*renderer, boxAndOffset), renderer};
   }
 
-  IntRect VisiblePosition::AbsoluteCaretBounds(bool *insideFixed) const noexcept
+  RectI VisiblePosition::AbsoluteCaretBounds(bool *insideFixed) const noexcept
   {
     RenderBlock *renderer = nullptr;
     LayoutRect localRect = LocalCaretRectInRendererForCaretPainting(*this, renderer);
     return AbsoluteBoundsForLocalCaretRect(renderer, localRect, insideFixed);
   }
 
-  FloatRect VisiblePosition::AbsoluteSelectionBoundsForLine() const noexcept
+  RectF VisiblePosition::AbsoluteSelectionBoundsForLine() const noexcept
   {
     auto box = GetInlineBoxAndOffset().Box;
     if (!box)
@@ -876,7 +880,7 @@ namespace krys::boo
 
     auto line = box->GetLineBox();
     return line->FormattingContextRoot()
-      .LocalToAbsoluteQuad(FloatQuad(LineSelection::PhysicalRect(*line)))
+      .LocalToAbsoluteQuad(QuadF(LineSelection::PhysicalRect(*line)))
       .BoundingBox();
   }
 
@@ -892,7 +896,7 @@ namespace krys::boo
     // without consulting transforms, so that 'up' in transformed text is 'up'
     // relative to the text, not absolute 'up'.
     auto *renderer = localRect.Renderer;
-    auto caretPoint = renderer->LocalToAbsolute(FloatPoint(localRect.Rect.Location()));
+    auto caretPoint = renderer->LocalToAbsolute(PointF(localRect.Rect.Location()));
     const RenderObject *containingBlock = renderer->ContainingBlock();
     if (!containingBlock)
     {

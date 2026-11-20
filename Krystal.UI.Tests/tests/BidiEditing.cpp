@@ -9,7 +9,7 @@
 #include "Krystal.Booey/Page/DOMSelection.hpp"
 #include "Krystal.Booey/Rendering/RenderBlock.hpp"
 #include "Krystal.Booey/Rendering/Style/RenderStyle.hpp"
-#include "Krystal.Core/Text/CodePointIterator.hpp"
+#include "Krystal.Core/Strings/CodePointIterator.hpp"
 #include "Krystal.Gfx.Tests/Golden.hpp"
 #include "Krystal.UI.Tests/ViewTestUtils.hpp"
 #include "Krystal.UI/View.hpp"
@@ -280,9 +280,9 @@ namespace krys::ui::tests
 
       auto point = [](const std::string &x, const std::string &y)
       {
-        return boo::IntPoint(static_cast<int32>(std::stod(x)), static_cast<int32>(std::stod(y)));
+        return PointI(static_cast<int32>(std::stod(x)), static_cast<int32>(std::stod(y)));
       };
-      auto click = [&](boo::IntPoint at, pal::KeyModifiers modifiers)
+      auto click = [&](PointI at, pal::KeyModifiers modifiers)
       {
         view.MouseMoved(at, modifiers);
         view.MousePressed(at, pal::MouseButton::Left, modifiers);
@@ -505,7 +505,7 @@ namespace krys::ui::tests
     view.UpdateRendering();
     auto &document = view.Document();
 
-    auto click = [&](boo::IntPoint at)
+    auto click = [&](PointI at)
     {
       view.MouseMoved(at);
       view.MousePressed(at, pal::MouseButton::Left);
@@ -532,7 +532,7 @@ namespace krys::ui::tests
     };
     auto isRightToLeft = [](const boo::Node &node)
     {
-      return node.Renderer()->Style().GetWritingMode().BidiDirection() == boo::TextDirection::RTL;
+      return node.Renderer()->Style().GetWritingMode().BidiDirection() == text::TextDirection::RTL;
     };
 
     SECTION("A text field's dir")

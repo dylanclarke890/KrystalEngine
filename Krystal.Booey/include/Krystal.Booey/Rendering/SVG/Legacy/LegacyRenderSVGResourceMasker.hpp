@@ -46,7 +46,7 @@ namespace krys::boo
     KRYS_OVERRIDE_DELETE_FOR_CHECKED_PTR(LegacyRenderSVGResourceMasker);
 
   private:
-    std::array<FloatRect, 2> _maskContentBoundaries;
+    std::array<RectF, 2> _maskContentBoundaries;
     HashMap<const RenderObject *, UniquePtr<MaskerData>> _masker;
 
   public:
@@ -63,13 +63,12 @@ namespace krys::boo
     EnumSet<ApplyResult> ApplyResource(RenderElement &, const RenderStyle &, GraphicsContext *&,
                                        EnumSet<RenderSVGResourceMode>) noexcept override;
 
-    bool DrawContentIntoContext(GraphicsContext &, const FloatRect &objectBoundingBox) noexcept;
+    bool DrawContentIntoContext(GraphicsContext &, const RectF &objectBoundingBox) noexcept;
 
-    bool DrawContentIntoContext(GraphicsContext &, const FloatRect &destinationRect,
-                                const FloatRect &sourceRect, ImagePaintingOptions) noexcept;
+    bool DrawContentIntoContext(GraphicsContext &, const RectF &destinationRect, const RectF &sourceRect,
+                                ImagePaintingOptions) noexcept;
 
-    KRYS_NODISCARD FloatRect ResourceBoundingBox(const RenderObject &,
-                                                 RepaintRectCalculation) noexcept override;
+    KRYS_NODISCARD RectF ResourceBoundingBox(const RenderObject &, RepaintRectCalculation) noexcept override;
 
     KRYS_NODISCARD SVGUnitTypes::SVGUnitType MaskUnits() const noexcept;
 

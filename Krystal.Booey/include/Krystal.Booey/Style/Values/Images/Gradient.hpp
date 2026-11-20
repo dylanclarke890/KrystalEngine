@@ -307,7 +307,7 @@ namespace krys::boo
       css::FunctionNotation<css::ValueId::RepeatingConicGradient, ConicGradient>>;
 
     // Creates a platform gradient from the style representation.
-    KRYS_NODISCARD Ref<boo::Gradient> CreatePlatformGradient(const Gradient &, const FloatSize &,
+    KRYS_NODISCARD Ref<boo::Gradient> CreatePlatformGradient(const Gradient &, const SizeF &,
                                                              const RenderStyle &) noexcept;
 
     // Returns whether it caching based on the gradient's stops is allowed.

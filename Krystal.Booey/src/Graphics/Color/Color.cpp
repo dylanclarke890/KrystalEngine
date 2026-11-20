@@ -26,7 +26,7 @@
 #include "Krystal.Booey/Graphics/Color/Color.hpp"
 #include "Krystal.Booey/Graphics/Color/ColorLuminance.hpp"
 #include "Krystal.Booey/Graphics/Color/ColorSerialisation.hpp"
-#include "Krystal.Core/Text/TextStream.hpp"
+#include "Krystal.Core/Strings/TextStream.hpp"
 #include <algorithm>
 
 namespace krys::boo
@@ -77,11 +77,6 @@ namespace krys::boo
     auto [r, g, b, a] = ToColorTypeLossy<SRGBA<float>>().Resolved();
     auto [min, max] = std::minmax({r, g, b});
     return 0.5 * (max + min);
-  }
-
-  double Color::Luminance() const noexcept
-  {
-    return RelativeLuminance(*this);
   }
 
   bool Color::AnyComponentIsNone() const noexcept
@@ -168,13 +163,13 @@ namespace krys::boo
     return {ColourSpace::SRGB, AsColourComponents(ConvertColour<SRGBA<float>>(AsInline()).Resolved())};
   }
 
-  bool Color::IsBlackColor(const Color &color) noexcept
+  bool IsBlack(const Color &color) noexcept
   {
     return color.CallOnUnderlyingType([](const auto &underlyingColor)
                                       { return krys::IsBlack(underlyingColor); });
   }
 
-  bool Color::IsWhiteColor(const Color &color) noexcept
+  bool IsWhite(const Color &color) noexcept
   {
     return color.CallOnUnderlyingType([](const auto &underlyingColor)
                                       { return krys::IsWhite(underlyingColor); });

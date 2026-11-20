@@ -20,7 +20,7 @@
 
 #include "Krystal.Core/Attributes.hpp"
 #include "Krystal.Core/Enum.hpp"
-#include "Krystal.Core/Types/String.hpp"
+#include "Krystal.Core/Strings/String.hpp"
 #include "Krystal.Core/Utils/Move.hpp"
 
 namespace krys::boo
@@ -45,7 +45,7 @@ namespace krys::boo
     SecurityError,
     NetworkError,
     AbortError,
-    URLMismatchError,
+    UrlMismatchError,
     QuotaExceededError,
     TimeoutError,
     InvalidNodeTypeError,

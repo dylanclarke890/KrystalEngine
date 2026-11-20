@@ -41,10 +41,10 @@
 #include "Krystal.Booey/HTML/Elements/HTMLBodyElement.hpp"
 #include "Krystal.Booey/HTML/Elements/HTMLMapElement.hpp"
 #include "Krystal.Booey/HTML/Forms/RadioButtonGroups.hpp"
+#include "Krystal.Booey/Input/PointerLockController.hpp"
 #include "Krystal.Booey/Page/LocalFrame.hpp"
 #include "Krystal.Booey/Page/LocalFrameView.hpp"
 #include "Krystal.Booey/Page/Page.hpp"
-#include "Krystal.Booey/Page/PointerLockController.hpp"
 #include "Krystal.Booey/Rendering/HitTesting/HitTestResult.hpp"
 #include "Krystal.Booey/Rendering/SVG/Legacy/LegacyRenderSVGResourceContainer.hpp"
 #include "Krystal.Booey/Style/Scope/Scope.hpp"
@@ -601,7 +601,7 @@ namespace krys::boo::dom
       return nullptr;
     }
 
-    auto node = NodeFromPoint(LayoutPoint(clientX, clientY), nullptr, source);
+    auto node = NodeFromPoint(LayoutPoint(PointD(clientX, clientY)), nullptr, source);
     if (!node)
     {
       return nullptr;
@@ -632,7 +632,7 @@ namespace krys::boo::dom
       return elements;
     }
 
-    auto absolutePoint = AbsolutePointIfNotClipped(*document, LayoutPoint(clientX, clientY));
+    auto absolutePoint = AbsolutePointIfNotClipped(*document, LayoutPoint(PointD(clientX, clientY)));
     if (!absolutePoint)
     {
       return elements;

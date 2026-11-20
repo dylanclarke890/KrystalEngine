@@ -31,7 +31,7 @@
 #include "Krystal.Booey/CSS/Properties/Consumers/Position.hpp"
 #include "Krystal.Booey/CSS/Properties/Consumers/Primitives.hpp"
 #include "Krystal.Booey/CSS/Properties/Consumers/Shapes.hpp"
-#include "Krystal.Booey/CSS/Properties/Consumers/URL.hpp"
+#include "Krystal.Booey/CSS/Properties/Consumers/Url.hpp"
 #include "Krystal.Booey/CSS/Properties/PropertyParserState.hpp"
 #include "Krystal.Booey/CSS/Properties/PropertyParsing.hpp"
 #include "Krystal.Booey/CSS/Values/Motion/RayFunction.hpp"
@@ -182,7 +182,7 @@ namespace krys::boo::css::parse_property
     }
 
     // FIXME: It should be possible to consume both a <url> and <coord-box>.
-    if (auto url = ConsumeURL(tokens, state, {}))
+    if (auto url = ConsumeUrl(tokens, state, {}))
     {
       return url;
     }

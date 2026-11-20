@@ -5,7 +5,6 @@
 #include "Krystal.Booey/Graphics/Animation/AnimationUtilities.hpp"
 #include "Krystal.Booey/Graphics/DisplayLists/DisplayListRecorderImpl.hpp"
 #include "Krystal.Booey/Graphics/Gradient.hpp"
-#include "Krystal.Booey/Graphics/Images/ImageOrientation.hpp"
 #include "Krystal.Booey/HTML/EventLoop/EventLoop.hpp"
 #include "Krystal.Booey/Rendering/RenderElement.hpp"
 #include "Krystal.Booey/Rendering/Style/StyleCachedImage.hpp"
@@ -22,6 +21,7 @@
 #include "Krystal.Booey/Style/Values/Primitives/KeywordCSSValueConversion.hpp"
 #include "Krystal.Booey/Style/Values/Primitives/KeywordCSSValueCreation.hpp"
 #include "Krystal.Booey/Style/Values/Primitives/KeywordSerialisation.hpp"
+#include "Krystal.Image/ImageOrientation.hpp"
 
 namespace krys::boo::style::tests
 {
@@ -172,8 +172,8 @@ namespace krys::boo::style::tests
 
       auto platform = CreatePlatformGradient(gradient, {100, 50}, Style);
       const auto &data = std::get<boo::Gradient::LinearData>(platform->GetData());
-      CHECK(data.Point0 == FloatPoint {0, 0});
-      CHECK(data.Point1 == FloatPoint {0, 50});
+      CHECK(data.Point0 == PointF {0, 0});
+      CHECK(data.Point1 == PointF {0, 50});
       REQUIRE(platform->Stops().size() == 2);
       CHECK(platform->Stops().Stops()[0].Offset == 0);
       CHECK(platform->Stops().Stops()[0].Color == styleRed);
@@ -230,8 +230,8 @@ namespace krys::boo::style::tests
     CHECK(Convert<ImageOrientation>(PropertyId::ImageOrientation, u8"from-image")
           == ImageOrientation::FromImage);
     CHECK(Serialised(ImageOrientation::FromImage) == "from-image");
-    CHECK(ConvertToPlatform(ImageOrientation::None) == boo::ImageOrientation::Orientation::None);
-    CHECK(ConvertToPlatform(ImageOrientation::FromImage) == boo::ImageOrientation::Orientation::FromImage);
+    CHECK(ConvertToPlatform(ImageOrientation::None) == img::ImageOrientation::Orientation::None);
+    CHECK(ConvertToPlatform(ImageOrientation::FromImage) == img::ImageOrientation::Orientation::FromImage);
   }
 
   TEST_CASE("Style images", "[Style][Values][Images]")
@@ -249,8 +249,8 @@ namespace krys::boo::style::tests
       <div id=fixed style="list-style-image: linear-gradient(red, blue)"></div>
       <div id=current style="color: green; list-style-image: linear-gradient(currentcolor, blue)"></div>)html"};
     fixture.Document->UpdateStyleIfNeeded();
-    display_list::RecorderImpl context(FloatSize(10, 10));
-    auto imageFor = [&](DOMStringView id, FloatSize size)
+    display_list::RecorderImpl context(SizeF(10, 10));
+    auto imageFor = [&](DOMStringView id, SizeF size)
     {
       auto *renderer = fixture.ById(id).Renderer();
       REQUIRE(renderer);
@@ -264,19 +264,19 @@ namespace krys::boo::style::tests
       loop.Run(loop.Now() + delta);
     };
 
-    auto first = imageFor(u8"fixed", FloatSize(20, 10));
-    CHECK(imageFor(u8"fixed", FloatSize(20, 10)) == first);
-    CHECK(imageFor(u8"fixed", FloatSize(30, 10)) != first);
+    auto first = imageFor(u8"fixed", SizeF(20, 10));
+    CHECK(imageFor(u8"fixed", SizeF(20, 10)) == first);
+    CHECK(imageFor(u8"fixed", SizeF(30, 10)) != first);
 
     // Each use keeps it for another three seconds.
     advance(2s);
-    CHECK(imageFor(u8"fixed", FloatSize(20, 10)) == first);
+    CHECK(imageFor(u8"fixed", SizeF(20, 10)) == first);
     advance(2s);
-    CHECK(imageFor(u8"fixed", FloatSize(20, 10)) == first);
+    CHECK(imageFor(u8"fixed", SizeF(20, 10)) == first);
     advance(3s);
-    CHECK(imageFor(u8"fixed", FloatSize(20, 10)) != first);
+    CHECK(imageFor(u8"fixed", SizeF(20, 10)) != first);
 
     // A stop that depends on the style isn't kept.
-    CHECK(imageFor(u8"current", FloatSize(20, 10)) != imageFor(u8"current", FloatSize(20, 10)));
+    CHECK(imageFor(u8"current", SizeF(20, 10)) != imageFor(u8"current", SizeF(20, 10)));
   }
 }

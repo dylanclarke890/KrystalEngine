@@ -15,14 +15,14 @@ namespace krys::boo::tests
   public:
     PathStrokeStyle LastStyle;
 
-    KRYS_NODISCARD bool StrokeContains(const Path &path, const FloatPoint &point,
+    KRYS_NODISCARD bool StrokeContains(const Path &path, const PointF &point,
                                        const PathStrokeStyle &style) noexcept override
     {
       LastStyle = style;
       float halfThickness = style.Thickness / 2;
       bool contains = false;
       ForEachLine(path,
-                  [&](FloatPoint from, FloatPoint to)
+                  [&](PointF from, PointF to)
                   {
                     if (DistanceToSegment(point, from, to) <= halfThickness)
                     {
@@ -32,8 +32,7 @@ namespace krys::boo::tests
       return contains;
     }
 
-    KRYS_NODISCARD FloatRect StrokeBoundingRect(const Path &path,
-                                                const PathStrokeStyle &style) noexcept override
+    KRYS_NODISCARD RectF StrokeBoundingRect(const Path &path, const PathStrokeStyle &style) noexcept override
     {
       LastStyle = style;
       auto rect = path.BoundingRect();
@@ -46,8 +45,8 @@ namespace krys::boo::tests
     static void ForEachLine(const Path &path, TFunction function) noexcept
     {
       constexpr int32 curveSteps = 16;
-      FloatPoint current;
-      FloatPoint subpathStart;
+      PointF current;
+      PointF subpathStart;
       path.ApplyElements(
         [&](const PathElement &element)
         {
@@ -66,8 +65,8 @@ namespace krys::boo::tests
               {
                 float t = static_cast<float>(step) / curveSteps;
                 float u = 1 - t;
-                FloatPoint next(u * u * current.X() + 2 * u * t * points[0].X() + t * t * points[1].X(),
-                                u * u * current.Y() + 2 * u * t * points[0].Y() + t * t * points[1].Y());
+                PointF next(u * u * current.X() + 2 * u * t * points[0].X() + t * t * points[1].X(),
+                            u * u * current.Y() + 2 * u * t * points[0].Y() + t * t * points[1].Y());
                 function(previous, next);
                 previous = next;
               }
@@ -81,10 +80,10 @@ namespace krys::boo::tests
               {
                 float t = static_cast<float>(step) / curveSteps;
                 float u = 1 - t;
-                FloatPoint next(u * u * u * current.X() + 3 * u * u * t * points[0].X()
-                                  + 3 * u * t * t * points[1].X() + t * t * t * points[2].X(),
-                                u * u * u * current.Y() + 3 * u * u * t * points[0].Y()
-                                  + 3 * u * t * t * points[1].Y() + t * t * t * points[2].Y());
+                PointF next(u * u * u * current.X() + 3 * u * u * t * points[0].X()
+                              + 3 * u * t * t * points[1].X() + t * t * t * points[2].X(),
+                            u * u * u * current.Y() + 3 * u * u * t * points[0].Y()
+                              + 3 * u * t * t * points[1].Y() + t * t * t * points[2].Y());
                 function(previous, next);
                 previous = next;
               }
@@ -99,7 +98,7 @@ namespace krys::boo::tests
         });
     }
 
-    KRYS_NODISCARD static float DistanceToSegment(FloatPoint point, FloatPoint from, FloatPoint to) noexcept
+    KRYS_NODISCARD static float DistanceToSegment(PointF point, PointF from, PointF to) noexcept
     {
       float dx = to.X() - from.X();
       float dy = to.Y() - from.Y();

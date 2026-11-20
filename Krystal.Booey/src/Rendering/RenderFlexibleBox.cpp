@@ -3653,7 +3653,8 @@ namespace krys::boo
     }
   }
 
-  Maybe<TextDirection> RenderFlexibleBox::LeftRightAxisDirectionFromStyle(const RenderStyle &style) noexcept
+  Maybe<text::TextDirection>
+    RenderFlexibleBox::LeftRightAxisDirectionFromStyle(const RenderStyle &style) noexcept
   {
     if (!style.IsColumnFlexDirection()) // Prioritize text direction.
     {
@@ -3662,7 +3663,8 @@ namespace krys::boo
 
     if (style.GetWritingMode().IsVertical()) // Fall back to block direction if possible.
     {
-      return style.GetWritingMode().IsBlockLeftToRight() ? TextDirection::LTR : TextDirection::RTL;
+      return style.GetWritingMode().IsBlockLeftToRight() ? text::TextDirection::LTR
+                                                         : text::TextDirection::RTL;
     }
 
     return null;

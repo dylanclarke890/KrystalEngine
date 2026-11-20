@@ -1,8 +1,8 @@
 ﻿#pragma once
 
-#include "Krystal.Booey/Platform/Timer.hpp"
 #include "Krystal.Core/RefCounted.hpp"
-#include "Krystal.Core/Types/String.hpp"
+#include "Krystal.Core/Strings/String.hpp"
+#include "Krystal.Core/Time/Timer.hpp"
 #include "Krystal.Core/Types/UniquePtr.hpp"
 #include "Krystal.Core/Types/WeakPtr.hpp"
 #include "Krystal.UI/Overlay.hpp"
@@ -21,8 +21,8 @@ namespace krys::ui
     UniquePtr<View> _view;
     WeakPtr<boo::Element> _anchor;
     utf8_string _message;
-    boo::IntRect _rect;
-    boo::Timer _hideTimer {*this, &ValidationMessageOverlay::Hide};
+    RectI _rect;
+    Timer _hideTimer {*this, &ValidationMessageOverlay::Hide};
     bool _visible {false};
 
   public:
@@ -74,7 +74,7 @@ namespace krys::ui
       return *_view;
     }
 
-    KRYS_NODISCARD const boo::IntRect &Rect() const noexcept final
+    KRYS_NODISCARD const RectI &Rect() const noexcept final
     {
       return _rect;
     }
@@ -86,14 +86,14 @@ namespace krys::ui
 
     void Hide() noexcept final;
 
-    void MouseMoved(const boo::IntPoint &) noexcept final
+    void MouseMoved(const PointI &) noexcept final
     {
     }
 
     /// @brief A press on the bubble hides it.
-    void MouseReleased(const boo::IntPoint &point) noexcept final;
+    void MouseReleased(const PointI &point) noexcept final;
 
-    bool MouseWheel(const boo::IntPoint &, float, float) noexcept final
+    bool MouseWheel(const PointI &, float, float) noexcept final
     {
       return false;
     }

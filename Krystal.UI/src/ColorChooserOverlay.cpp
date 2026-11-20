@@ -169,12 +169,12 @@ namespace krys::ui
       }
     }
 
-    boo::IntSize contentSize(1, 1);
+    SizeI contentSize(1, 1);
     if (auto *root = _view->Document().DocumentElement().get())
     {
       if (auto *box = DynamicDowncast<boo::RenderBox>(root->Renderer()))
       {
-        contentSize = boo::IntSize(box->Width().ToInt(), box->Height().ToInt());
+        contentSize = SizeI(box->Width().ToInt(), box->Height().ToInt());
       }
     }
     _rect = Place(_client->ElementRectRelativeToRootView(), contentSize, viewport, _rightToLeft);
@@ -219,7 +219,7 @@ namespace krys::ui
     }
   }
 
-  void ColorChooserOverlay::MouseMoved(const boo::IntPoint &point) noexcept
+  void ColorChooserOverlay::MouseMoved(const PointI &point) noexcept
   {
     if (!_view)
     {
@@ -238,7 +238,7 @@ namespace krys::ui
     }
   }
 
-  void ColorChooserOverlay::MouseReleased(const boo::IntPoint &point) noexcept
+  void ColorChooserOverlay::MouseReleased(const PointI &point) noexcept
   {
     if (!_view)
     {
@@ -257,7 +257,7 @@ namespace krys::ui
     }
   }
 
-  bool ColorChooserOverlay::MouseWheel(const boo::IntPoint &, float, float) noexcept
+  bool ColorChooserOverlay::MouseWheel(const PointI &, float, float) noexcept
   {
     return true;
   }

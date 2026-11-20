@@ -34,12 +34,11 @@
 #include "Krystal.Booey/Rendering/Style/RenderStyle+GettersInlines.hpp"
 #include "Krystal.Booey/Text/TextSpacing.hpp"
 #include "Krystal.Booey/Text/UnicodeBidi.hpp"
-#include "Krystal.Core/Text/CodePointIterator.hpp"
-#include "Krystal.Core/Text/StringBuilder.hpp"
-#include "Krystal.Core/Text/Unicode.hpp"
+#include "Krystal.Core/Strings/CodePointIterator.hpp"
+#include "Krystal.Core/Strings/StringBuilder.hpp"
+#include "Krystal.Core/Strings/Unicode.hpp"
 #include "Krystal.Core/Types/HashSet.hpp"
-#include <unicode/ubidi.h>
-#include <unicode/utf16.h>
+#include "Krystal.Text/Bidi.hpp"
 
 namespace krys::boo::layout
 {
@@ -87,7 +86,7 @@ namespace krys::boo::layout
     }
 
     KRYS_NODISCARD uint32 MoveToNextBreakablePosition(
-      uint32 startPosition, CachedLineBreakIteratorFactory &lineBreakIteratorFactory,
+      uint32 startPosition, text::CachedLineBreakIteratorFactory &lineBreakIteratorFactory,
       const RenderStyle &style) noexcept
     {
       auto textLength = static_cast<uint32>(lineBreakIteratorFactory.StringView().length());
@@ -501,38 +500,6 @@ namespace krys::boo::layout
         spacingState.LastCharacterClassFromPreviousRun = text_spacing::CharacterClass::Undefined;
       }
     }
-
-    /// @brief The UTF-16 form of UTF-8 text, for ICU's bidi algorithm, with the byte offset of each UTF-16
-    /// offset (and of the end).
-    struct UTF16Paragraph
-    {
-      List<UChar> Characters;
-      List<size_t> ByteOffsets;
-
-      explicit UTF16Paragraph(utf8_stringview text) noexcept
-      {
-        Characters.reserve(text.size());
-        ByteOffsets.reserve(text.size() + 1);
-        for (size_t position = 0; position < text.size();)
-        {
-          auto decoded = text::DecodeUTF8(Span<const char8>(text.data() + position, text.size() - position));
-          if (decoded.CodePoint <= 0xFFFF)
-          {
-            Characters.push_back(static_cast<UChar>(decoded.CodePoint));
-            ByteOffsets.push_back(position);
-          }
-          else
-          {
-            Characters.push_back(U16_LEAD(decoded.CodePoint));
-            Characters.push_back(U16_TRAIL(decoded.CodePoint));
-            ByteOffsets.push_back(position);
-            ByteOffsets.push_back(position);
-          }
-          position += decoded.Length;
-        }
-        ByteOffsets.push_back(text.size());
-      }
-    };
   }
 
   InlineItemsBuilder::InlineItemsBuilder(InlineContentCache &inlineContentCache,
@@ -885,43 +852,26 @@ namespace krys::boo::layout
     }
     auto mayNotUseBlockDirection = Root().Style().GetUnicodeBidi() == UnicodeBidi::Plaintext;
     if (!ContentRequiresVisualReordering() && mayNotUseBlockDirection
-        && TextUtil::DirectionForTextContent(paragraphContentBuilder.View()) == TextDirection::LTR)
+        && TextUtil::DirectionForTextContent(paragraphContentBuilder.View()) == text::TextDirection::LTR)
     {
       // UnicodeBidi::Plaintext makes directionality calculated without taking parent direction property into
       // account.
       return;
     }
     krys_debug_assert(inlineItemOffsets.size() == inlineItemList.size());
-    // 1. Setup the bidi boundary loop by calling ubidi_setPara with the paragraph text.
-    // 2. Call ubidi_getLogicalRun to advance to the next bidi boundary until we hit the end of the content.
-    // 3. Set the computed bidi level on the associated inline items. Split them as needed.
-    UBiDi *ubidi = ubidi_open();
-
-    struct CloseUBiDiOnExit
-    {
-      UBiDi *UBiDi;
-
-      ~CloseUBiDiOnExit() noexcept
-      {
-        ubidi_close(UBiDi);
-      }
-    } closeUBiDiOnExit {ubidi};
-
-    UBiDiLevel rootBidiLevel = UBIDI_DEFAULT_LTR;
+    // Resolve the paragraph's bidi level runs, then set each run's level on its inline items, splitting them
+    // at run boundaries as needed.
+    text::BidiLevel rootBidiLevel = text::DefaultLeftToRightBidiLevel;
     bool useHeuristicBaseDirection = Root().Style().GetUnicodeBidi() == UnicodeBidi::Plaintext;
     if (!useHeuristicBaseDirection)
     {
-      rootBidiLevel = static_cast<UBiDiLevel>(Root().GetWritingMode().IsBidiLTR() ? UBIDI_LTR : UBIDI_RTL);
+      rootBidiLevel = static_cast<text::BidiLevel>(
+        Root().GetWritingMode().IsBidiLTR() ? text::LeftToRightBidiLevel : text::RightToLeftBidiLevel);
     }
 
-    // ICU's bidi algorithm takes UTF-16: the runs it finds are mapped back to byte offsets.
-    auto bidiContent = UTF16Paragraph(paragraphContentBuilder.View());
-    auto bidiContentLength = static_cast<int32_t>(bidiContent.Characters.size());
-    UErrorCode error = U_ZERO_ERROR;
-    krys_debug_assert(bidiContentLength);
-    ubidi_setPara(ubidi, bidiContent.Characters.data(), bidiContentLength, rootBidiLevel, nullptr, &error);
-
-    if (U_FAILURE(error))
+    krys_debug_assert(!paragraphContentBuilder.View().empty());
+    auto bidiRuns = text::ResolveBidiLevelRuns(paragraphContentBuilder.View(), rootBidiLevel);
+    if (bidiRuns.empty())
     {
       krys_debug_assert(false);
       return;
@@ -929,13 +879,9 @@ namespace krys::boo::layout
 
     size_t inlineItemIndex = 0;
     auto hasSeenOpaqueItem = false;
-    for (int32_t currentPosition = 0; currentPosition < bidiContentLength;)
+    for (auto &bidiRun : bidiRuns)
     {
-      UBiDiLevel bidiLevel;
-      int32_t endPosition = currentPosition;
-      ubidi_getLogicalRun(ubidi, currentPosition, &endPosition, &bidiLevel);
-
-      auto setBidiLevelOnRange = [&](size_t bidiEnd, UBiDiLevel bidiLevelForRange)
+      auto setBidiLevelOnRange = [&](size_t bidiEnd, text::BidiLevel bidiLevelForRange)
       {
         // We should always have inline item(s) associated with a bidi range.
         krys_debug_assert(inlineItemIndex < inlineItemOffsets.size());
@@ -977,8 +923,7 @@ namespace krys::boo::layout
           }
         }
       };
-      setBidiLevelOnRange(bidiContent.ByteOffsets[static_cast<size_t>(endPosition)], bidiLevel);
-      currentPosition = endPosition;
+      setBidiLevelOnRange(bidiRun.End, bidiRun.Level);
     }
 
     auto setBidiLevelForOpaqueInlineItems = [&]
@@ -1207,14 +1152,14 @@ namespace krys::boo::layout
       {
         auto isWordSeparator = character != u8'\t' || !shouldPreserveSpacesAndTabs;
         inlineItemList.push_back(InlineTextItem::CreateWhitespaceItem(
-          inlineTextBox, start, length, UBIDI_DEFAULT_LTR, isWordSeparator, {}));
+          inlineTextBox, start, length, text::DefaultLeftToRightBidiLevel, isWordSeparator, {}));
         continue;
       }
 
       krys_debug_assert(endPosition);
       auto hasTrailingSoftHyphen = EndsWithSoftHyphen(text, endPosition);
       inlineItemList.push_back(InlineTextItem::CreateNonWhitespaceItem(
-        inlineTextBox, start, length, UBIDI_DEFAULT_LTR, hasTrailingSoftHyphen, {}));
+        inlineTextBox, start, length, text::DefaultLeftToRightBidiLevel, hasTrailingSoftHyphen, {}));
     }
     return true;
   }
@@ -1236,7 +1181,7 @@ namespace krys::boo::layout
     if (inlineTextBox.IsCombined())
     {
       return inlineItemList.push_back(InlineTextItem::CreateNonWhitespaceItem(
-        inlineTextBox, {}, static_cast<uint32>(contentLength), UBIDI_DEFAULT_LTR, false, {}));
+        inlineTextBox, {}, static_cast<uint32>(contentLength), text::DefaultLeftToRightBidiLevel, false, {}));
     }
 
     if (!partialContentOffset
@@ -1253,7 +1198,7 @@ namespace krys::boo::layout
     auto &style = inlineTextBox.Style();
     auto shouldPreserveSpacesAndTabs = TextUtil::ShouldPreserveSpacesAndTabs(inlineTextBox);
     auto shouldPreserveNewline = TextUtil::ShouldPreserveNewline(inlineTextBox);
-    auto lineBreakIteratorFactory = CachedLineBreakIteratorFactory {
+    auto lineBreakIteratorFactory = text::CachedLineBreakIteratorFactory {
       text, style.ComputedLocale().GetPlatform(), TextUtil::LineBreakIteratorMode(style.GetLineBreak()),
       TextUtil::GetContentAnalysis(style.GetWordBreak())};
     auto currentPosition = partialContentOffset.value_or(0);
@@ -1293,15 +1238,15 @@ namespace krys::boo::layout
         for (size_t offset = 0; offset < whitespaceContent->Length; ++offset)
         {
           inlineItemList.push_back(InlineTextItem::CreateWhitespaceItem(
-            inlineTextBox, static_cast<uint32>(currentPosition + offset), 1, UBIDI_DEFAULT_LTR,
-            whitespaceContent->IsWordSeparator, {}));
+            inlineTextBox, static_cast<uint32>(currentPosition + offset), 1,
+            text::DefaultLeftToRightBidiLevel, whitespaceContent->IsWordSeparator, {}));
         }
       }
       else
       {
         inlineItemList.push_back(InlineTextItem::CreateWhitespaceItem(
           inlineTextBox, static_cast<uint32>(currentPosition), static_cast<uint32>(whitespaceContent->Length),
-          UBIDI_DEFAULT_LTR, whitespaceContent->IsWordSeparator, {}));
+          text::DefaultLeftToRightBidiLevel, whitespaceContent->IsWordSeparator, {}));
       }
       currentPosition += whitespaceContent->Length;
       return true;
@@ -1327,9 +1272,9 @@ namespace krys::boo::layout
         hasTrailingSoftHyphen = EndsWithSoftHyphen(text, endPosition);
       }
       krys_debug_assert(style.GetHyphens() != Hyphens::None || !hasTrailingSoftHyphen);
-      inlineItemList.push_back(
-        InlineTextItem::CreateNonWhitespaceItem(inlineTextBox, startPosition, endPosition - startPosition,
-                                                UBIDI_DEFAULT_LTR, hasTrailingSoftHyphen, {}));
+      inlineItemList.push_back(InlineTextItem::CreateNonWhitespaceItem(
+        inlineTextBox, startPosition, endPosition - startPosition, text::DefaultLeftToRightBidiLevel,
+        hasTrailingSoftHyphen, {}));
       currentPosition = endPosition;
       return true;
     };

@@ -25,12 +25,12 @@
 
 #include "Krystal.Booey/CSS/Counter/CounterStyle.hpp"
 #include "Krystal.Booey/CSS/Counter/CounterStyleRegistry.hpp"
-#include "Krystal.Booey/Text/TextBreakIterator.hpp"
 #include "Krystal.Core/Assert.hpp"
-#include "Krystal.Core/Text/Encodings/UTF.hpp"
-#include "Krystal.Core/Text/Unicode.hpp"
+#include "Krystal.Core/Strings/Unicode.hpp"
 #include "Krystal.Core/Types/Array.hpp"
 #include "Krystal.Core/Utils/Move.hpp"
+#include "Krystal.Text/Encodings/UTF.hpp"
+#include "Krystal.Text/TextBreakIterator.hpp"
 #include <cmath>
 #include <cstdlib>
 #include <limits>
@@ -545,11 +545,11 @@ namespace krys::boo::css
     }
 
     auto numberOfSymbolsToAdd =
-      static_cast<int32>(Pad().PadMinimumLength) - static_cast<int32>(NumGraphemeClusters(text));
+      static_cast<int32>(Pad().PadMinimumLength) - static_cast<int32>(text::NumGraphemeClusters(text));
     if (ShouldApplyNegativeSymbols(value))
     {
-      numberOfSymbolsToAdd -= static_cast<int32>(NumGraphemeClusters(Negative().Prefix.Text)
-                                                 + NumGraphemeClusters(Negative().Suffix.Text));
+      numberOfSymbolsToAdd -= static_cast<int32>(text::NumGraphemeClusters(Negative().Prefix.Text)
+                                                 + text::NumGraphemeClusters(Negative().Suffix.Text));
     }
 
     CSSOMString padText;

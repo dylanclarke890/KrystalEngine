@@ -34,14 +34,14 @@
 #include "Krystal.Booey/Loader/Cache/CachedResourceRequest.hpp"
 #include "Krystal.Booey/Loader/Cache/CachedSVGDocument.hpp"
 #include "Krystal.Booey/Loader/Cache/CachePolicy.hpp"
-#include "Krystal.Booey/Platform/Network/ResourceError.hpp"
-#include "Krystal.Booey/Platform/Timer.hpp"
 #include "Krystal.Core/CanMakeWeakPtr.hpp"
 #include "Krystal.Core/RefCounted.hpp"
+#include "Krystal.Core/Time/Timer.hpp"
 #include "Krystal.Core/Types/Expected.hpp"
 #include "Krystal.Core/Types/HashMap.hpp"
 #include "Krystal.Core/Types/HashSet.hpp"
 #include "Krystal.Core/Types/WeakPtr.hpp"
+#include "Krystal.Net/ResourceError.hpp"
 
 namespace krys::boo
 {
@@ -49,7 +49,7 @@ namespace krys::boo
   class LocalFrame;
 
   template <typename T>
-  using ResourceErrorOr = Expected<T, ResourceError>;
+  using ResourceErrorOr = Expected<T, net::ResourceError>;
 
   enum class ImageLoading : uint8
   {
@@ -80,7 +80,7 @@ namespace krys::boo
 
     mutable DocumentResourceMap _documentResources;
     // The URLs the document has loaded or validated, which it doesn't load again whatever the cache policy.
-    HashSet<utf8_string> _validatedURLs;
+    HashSet<utf8_string> _validatedUrls;
     WeakPtr<boo::Document> _document;
     int32 _requestCount {0};
     Timer _garbageCollectDocumentResourcesTimer;
@@ -116,7 +116,7 @@ namespace krys::boo
 
     KRYS_NODISCARD boo::CachedResource *GetCachedResource(utf8_stringview url) const noexcept;
 
-    KRYS_NODISCARD boo::CachedResource *GetCachedResource(const url::URL &url) const noexcept;
+    KRYS_NODISCARD boo::CachedResource *GetCachedResource(const net::Url &url) const noexcept;
 
     KRYS_NODISCARD const DocumentResourceMap &AllCachedResources() const noexcept
     {
@@ -137,9 +137,9 @@ namespace krys::boo
 
     void SetImagesEnabled(bool) noexcept;
 
-    KRYS_NODISCARD bool ShouldDeferImageLoad(const url::URL &) const noexcept;
+    KRYS_NODISCARD bool ShouldDeferImageLoad(const net::Url &) const noexcept;
 
-    KRYS_NODISCARD bool ShouldPerformImageLoad(const url::URL &) const noexcept;
+    KRYS_NODISCARD bool ShouldPerformImageLoad(const net::Url &) const noexcept;
 
     KRYS_NODISCARD LocalFrame *Frame() const noexcept; // Can be null
 
@@ -183,7 +183,7 @@ namespace krys::boo
                                                                   boo::CachedResource *existingResource,
                                                                   ImageLoading) const noexcept;
 
-    KRYS_NODISCARD ImageLoading ClientDefersImage(const url::URL &) const noexcept;
+    KRYS_NODISCARD ImageLoading ClientDefersImage(const net::Url &) const noexcept;
 
     void ReloadImagesIfNotDeferred() noexcept;
   };

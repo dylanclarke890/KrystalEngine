@@ -26,13 +26,13 @@ namespace krys::boo::html
   concept ReflectTypeDOMString = OneOf<T, DOMString, Maybe<DOMString>>;
 
   template <typename T>
-  concept ReflectURLType = OneOf<T, dom::USVString>;
+  concept ReflectUrlType = OneOf<T, dom::USVString>;
 
   // NOTE: `Element?` and `FrozenArray<Element>?` attributes reflect through their target's
   // `ElementForAttributeInternal` and `ElementsForAttributeInternal`. DOMTokenList is also a possible type
   // for reflection but it just consists of returning a DOMTokenList, would be harder to handle here.
   template <typename T>
-  concept ReflectType = ReflectTypeDOMString<T> || ReflectURLType<T> || OneOf<T, bool, int32, uint32, double>;
+  concept ReflectType = ReflectTypeDOMString<T> || ReflectUrlType<T> || OneOf<T, bool, int32, uint32, double>;
 
   template <typename T>
   concept ReflectNonNegativeType = OneOf<T, int32>;
@@ -106,7 +106,7 @@ namespace krys::boo::html
       Yes,
     };
 
-    enum class TreatedAsURL : bool
+    enum class TreatedAsUrl : bool
     {
       No,
       Yes,
@@ -245,7 +245,7 @@ namespace krys::boo::html
     /// attribute's value, or the empty string if it's absent. A URL is completed against the node document's
     /// base URL, unless it doesn't parse.
     /// @see https://html.spec.whatwg.org/#treated-as-a-url
-    template <TreatedAsURL AsUrl, ReflectTarget Target>
+    template <TreatedAsUrl AsUrl, ReflectTarget Target>
     KRYS_NODISCARD dom::USVString ReflectUSVString(const Target &target, DOMStringAtom name) noexcept
     {
       // 1. Let element be the result of running this's get the element.
@@ -259,12 +259,12 @@ namespace krys::boo::html
       {
         return {};
       }
-      if constexpr (AsUrl == TreatedAsURL::Yes)
+      if constexpr (AsUrl == TreatedAsUrl::Yes)
       {
         // 3b. Let urlString be the result of encoding-parsing-and-serializing a URL given
         //     contentAttributeValue, relative to element's node document.
         // 3c. If urlString is not failure, then return urlString.
-        if (auto url = target.NodeDocument().CompleteURL(*contentAttributeValue); url.IsValid())
+        if (auto url = target.NodeDocument().CompleteUrl(*contentAttributeValue); url.IsValid())
         {
           return dom::USVString(url.String());
         }
@@ -276,7 +276,7 @@ namespace krys::boo::html
     }
 
     /// @brief Helper for setting reflected content attributes with 'dom::USVString' type.
-    template <TreatedAsURL AsUrl, ReflectTarget Target>
+    template <TreatedAsUrl AsUrl, ReflectTarget Target>
     void ReflectUSVString(Target &target, DOMStringAtom name, dom::USVString value) noexcept
     {
       // The setter steps are to run this's set the content attribute with the given value.
@@ -617,7 +617,7 @@ namespace krys::boo::html
     }
     else if constexpr (SameType<TValue, dom::USVString>)
     {
-      return detail::ReflectUSVString<detail::TreatedAsURL::No>(target, krys::move(name));
+      return detail::ReflectUSVString<detail::TreatedAsUrl::No>(target, krys::move(name));
     }
     else if constexpr (SameType<TValue, bool>)
     {
@@ -661,7 +661,7 @@ namespace krys::boo::html
     }
     else if constexpr (SameType<TValue, dom::USVString>)
     {
-      return detail::ReflectUSVString<detail::TreatedAsURL::No>(target, krys::move(name), krys::move(value));
+      return detail::ReflectUSVString<detail::TreatedAsUrl::No>(target, krys::move(name), krys::move(value));
     }
     else if constexpr (SameType<TValue, bool>)
     {
@@ -840,27 +840,27 @@ namespace krys::boo::html
 
 #pragma endregion
 
-#pragma region ReflectURL
+#pragma region ReflectUrl
 
-  /// @brief Represents the `[ReflectURL]` IDL attribute (getter).
+  /// @brief Represents the `[ReflectUrl]` IDL attribute (getter).
   /// @see https://html.spec.whatwg.org/#xattr-reflecturl
-  template <ReflectURLType TValue, ReflectTarget Target>
-  KRYS_NODISCARD detail::reflect_get_return_t<TValue> ReflectURL(const Target &target,
+  template <ReflectUrlType TValue, ReflectTarget Target>
+  KRYS_NODISCARD detail::reflect_get_return_t<TValue> ReflectUrl(const Target &target,
                                                                  DOMStringAtom name) noexcept
   {
-    return detail::ReflectUSVString<detail::TreatedAsURL::Yes>(target, krys::move(name));
+    return detail::ReflectUSVString<detail::TreatedAsUrl::Yes>(target, krys::move(name));
   }
 
-  /// @brief Represents the `[ReflectURL]` IDL attribute (setter).
+  /// @brief Represents the `[ReflectUrl]` IDL attribute (setter).
   /// @see https://html.spec.whatwg.org/#xattr-reflecturl
-  template <ReflectURLType TValue, ReflectTarget Target>
+  template <ReflectUrlType TValue, ReflectTarget Target>
   KRYS_NODISCARD
   detail::reflect_set_return_t<TValue, detail::OnlyNonNegativeNumbers::No, detail::OnlyPositiveNumbers::No>
-    ReflectURL(Target &target, DOMStringAtom name, TValue value) noexcept
+    ReflectUrl(Target &target, DOMStringAtom name, TValue value) noexcept
   {
     static_assert(!IsConst<Target>, "Target cannot be const for [ReflectURL] setter");
 
-    return detail::ReflectUSVString<detail::TreatedAsURL::Yes>(target, krys::move(name), krys::move(value));
+    return detail::ReflectUSVString<detail::TreatedAsUrl::Yes>(target, krys::move(name), krys::move(value));
   }
 
 #pragma endregion

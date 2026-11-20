@@ -77,8 +77,8 @@ namespace krys::boo
       graphicsContext.BeginTransparencyLayer(static_cast<float>(DisabledOpacity));
     }
 
-    FloatRect fieldRect = borderRect.Rect();
-    FloatSize corner(5, 5);
+    RectF fieldRect = borderRect.Rect();
+    SizeF corner(5, 5);
     Path path;
     path.AddRoundedRect(fieldRect, corner);
     fieldRect.Inflate(-ButtonBorderSize);

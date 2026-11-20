@@ -26,16 +26,16 @@
 #include "Krystal.Booey/Rendering/Style/RenderStyle+GettersInlines.hpp"
 
 #include "Krystal.Booey/CSS/Values/PathValue.hpp"
-#include "Krystal.Booey/Graphics/Geometry/FloatRect.hpp"
-#include "Krystal.Booey/Graphics/Geometry/GeometryUtilities.hpp"
 #include "Krystal.Booey/Graphics/Paths/Path.hpp"
-#include "Krystal.Booey/Graphics/Transforms/AffineTransform.hpp"
 #include "Krystal.Booey/Style/Builder/BuilderState.hpp"
 #include "Krystal.Booey/Style/Values/Primitives/NumericTypesBlending.hpp"
 #include "Krystal.Booey/Style/Values/Primitives/NumericTypesConversions.hpp"
 #include "Krystal.Booey/Style/Values/Primitives/NumericTypesEvaluation.hpp"
 #include "Krystal.Booey/SVG/Internals/SVGPathUtilities.hpp"
-#include "Krystal.Core/Text/StringBuilder.hpp"
+#include "Krystal.Core/Geometry/AffineTransform.hpp"
+#include "Krystal.Core/Geometry/GeometryUtilities.hpp"
+#include "Krystal.Core/Geometry/Rect.hpp"
+#include "Krystal.Core/Strings/StringBuilder.hpp"
 #include "Krystal.Core/Types/TinyLRUCache.hpp"
 
 namespace krys::boo::style
@@ -56,7 +56,7 @@ namespace krys::boo::style
       {
         path.Transform(AffineTransform().Scale(Zoom));
       }
-      path.Translate(ToFloatSize(Offset));
+      path.Translate(ToSizeF(Offset));
       return path;
     }
 
@@ -64,7 +64,7 @@ namespace krys::boo::style
 
     SVGPathByteStream RawStream;
     float Zoom;
-    FloatPoint Offset;
+    PointF Offset;
   };
 
   struct TransformedByteStreamPathPolicy : TinyLRUCachePolicy<SVGPathTransformedByteStream, boo::Path>
@@ -82,7 +82,7 @@ namespace krys::boo::style
 
   KRYS_NODISCARD static const boo::Path &CachedTransformedByteStreamPath(const SVGPathByteStream &stream,
                                                                          float zoom,
-                                                                         const FloatPoint &offset) noexcept
+                                                                         const PointF &offset) noexcept
   {
     static NeverDestroyed<
       TinyLRUCache<SVGPathTransformedByteStream, boo::Path, 4, TransformedByteStreamPathPolicy>>
@@ -151,7 +151,7 @@ namespace krys::boo::style
 
   // MARK: - Path
 
-  boo::Path PathComputation<Path>::operator()(const Path &value, const FloatRect &boundingBox) noexcept
+  boo::Path PathComputation<Path>::operator()(const Path &value, const RectF &boundingBox) noexcept
   {
     return CachedTransformedByteStreamPath(value.Data.ByteStream, value.Zoom, boundingBox.Location());
   }

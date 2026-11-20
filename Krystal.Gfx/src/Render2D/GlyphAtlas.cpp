@@ -38,7 +38,7 @@ namespace krys::gfx
   }
 
   Maybe<GlyphLocation> GlyphAtlas::GetGlyph(const FontFace2D &face, uint32 glyph, float size, uint32 subpixel,
-                                            const Transform2D &linear, float blur) noexcept
+                                            const AffineTransform &linear, float blur) noexcept
   {
     subpixel %= SubpixelPositions;
     blur = blur > 0.f && std::isfinite(blur) ? blur : 0.f;
@@ -46,7 +46,7 @@ namespace krys::gfx
                    .Glyph = glyph,
                    .Size = size,
                    .Subpixel = subpixel,
-                   .Linear = {linear.A, linear.B, linear.C, linear.D},
+                   .Linear = LinearPartF(linear),
                    .Blur = blur};
     auto locate = [&](const Entry &entry)
     {
@@ -69,7 +69,7 @@ namespace krys::gfx
     }
 
     auto bitmap = face.Rasterise(glyph, size, static_cast<float>(subpixel) / SubpixelPositions,
-                                 {.A = linear.A, .B = linear.B, .C = linear.C, .D = linear.D});
+                                 AffineTransform(linear.A(), linear.B(), linear.C(), linear.D(), 0, 0));
     if (!bitmap)
     {
       return {};
@@ -104,7 +104,7 @@ namespace krys::gfx
       auto &pages = bitmap->Colour ? _colour : _coverage;
       const bool colour = bitmap->Colour;
       const auto slot =
-        pages.Allocate(bitmap->Bounds.Width, bitmap->Bounds.Height,
+        pages.Allocate(bitmap->Bounds.Width(), bitmap->Bounds.Height(),
                        [&](uint32 page)
                        {
                          std::erase_if(_entries, [&](const auto &item)

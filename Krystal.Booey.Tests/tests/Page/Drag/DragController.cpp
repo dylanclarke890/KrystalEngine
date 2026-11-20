@@ -7,8 +7,8 @@
 #include "Krystal.Booey/DOM/Nodes/Element.hpp"
 #include "Krystal.Booey/FileAPI/FileList.hpp"
 #include "Krystal.Booey/HTML/Elements/HTMLInputElement.hpp"
-#include "Krystal.Booey/Page/Drag/DragClient.hpp"
-#include "Krystal.Booey/Page/EventHandler.hpp"
+#include "Krystal.Booey/Input/EventHandler.hpp"
+#include "Krystal.Booey/Page/Clients/DragClient.hpp"
 #include "Krystal.Booey/Page/LocalFrame.hpp"
 #include "Krystal.Booey/Platform/Pasteboard/DragData.hpp"
 #include <algorithm>
@@ -34,14 +34,13 @@ namespace krys::boo::tests
         DestinationActions.push_back(action);
       }
 
-      void WillPerformDragSourceAction(DragSourceAction action, const IntPoint &,
+      void WillPerformDragSourceAction(DragSourceAction action, const PointI &,
                                        dom::DataTransfer &) noexcept override
       {
         SourceActions.push_back(action);
       }
 
-      KRYS_NODISCARD EnumSet<DragSourceAction>
-        DragSourceActionMaskForPoint(const IntPoint &) noexcept override
+      KRYS_NODISCARD EnumSet<DragSourceAction> DragSourceActionMaskForPoint(const PointI &) noexcept override
       {
         return Mask;
       }
@@ -173,7 +172,7 @@ namespace krys::boo::tests
       KRYS_NODISCARD static PlatformMouseEvent Event(PlatformEvent::Type type, double x, double y,
                                                      MouseButton button, int32 clickCount) noexcept
       {
-        return PlatformMouseEvent(DoublePoint(x, y), DoublePoint(x, y), button, type, clickCount, {},
+        return PlatformMouseEvent(PointD(x, y), PointD(x, y), button, type, clickCount, {},
                                   MonotonicTime::Now());
       }
 
@@ -197,7 +196,7 @@ namespace krys::boo::tests
       KRYS_NODISCARD DragData Data(int32 x, int32 y, EnumSet<DragApplicationFlags> flags = {},
                                    EnumSet<PlatformEvent::Modifier> modifiers = {}) const noexcept
       {
-        return DragData(&Client->Data, IntPoint(x, y), IntPoint(x, y), Client->SourceMask, flags, modifiers);
+        return DragData(&Client->Data, PointI(x, y), PointI(x, y), Client->SourceMask, flags, modifiers);
       }
 
       /// @brief Moves the drag to (@p x, @p y), as the host does as the cursor moves.
@@ -387,8 +386,8 @@ namespace krys::boo::tests
     REQUIRE(fixture.Client->Starts == 1);
     CHECK(fixture.Client->LastItem->SourceAction == DragSourceAction::Link);
     CHECK(fixture.Client->LastItem->Url.String() == u8"https://example.com/x");
-    CHECK(fixture.Client->Data.HasURL());
-    CHECK(fixture.Client->Data.GetURL().String() == u8"https://example.com/x");
+    CHECK(fixture.Client->Data.HasUrl());
+    CHECK(fixture.Client->Data.GetUrl().String() == u8"https://example.com/x");
     CHECK(fixture.Client->Data.Markup() == u8"<a href=\"https://example.com/x\">example link</a>");
     CHECK(fixture.Client->SourceActions == List<DragSourceAction> {DragSourceAction::Link});
     fixture.End(5, 60, {});
@@ -598,7 +597,7 @@ namespace krys::boo::tests
                    "[Page][DragController]")
   {
     DragFixture fixture(u8"<div id=c>static</div><div id=e contenteditable>editable</div>");
-    fixture.Client->Data.SetURL(url::URL(u8"https://example.com/"), u8"Example");
+    fixture.Client->Data.SetUrl(net::Url(u8"https://example.com/"), u8"Example");
     fixture.Client->SourceMask = AnyDragOperation();
 
     // Over content that isn't editable, nothing takes it: Booey doesn't load what's dropped.
@@ -632,10 +631,10 @@ namespace krys::boo::tests
       REQUIRE(fixture.Client->LastItem);
       auto &item = *fixture.Client->LastItem;
       REQUIRE(item.Image);
-      CHECK(DragImageSize(item.Image.Get()) == IntSize(100, 40));
-      CHECK(item.EventPositionInContentCoordinates == IntPoint(10, 15));
-      CHECK(item.DragLocationInContentCoordinates == IntPoint(0, 0));
-      CHECK(item.DragPreviewFrameInRootViewCoordinates == IntRect(0, 0, 100, 40));
+      CHECK(DragImageSize(item.Image.Get()) == SizeI(100, 40));
+      CHECK(item.EventPositionInContentCoordinates == PointI(10, 15));
+      CHECK(item.DragLocationInContentCoordinates == PointI(0, 0));
+      CHECK(item.DragPreviewFrameInRootViewCoordinates == RectI(0, 0, 100, 40));
       fixture.End(10, 30, {});
     }
 
@@ -650,9 +649,9 @@ namespace krys::boo::tests
       REQUIRE(fixture.Client->LastItem);
       auto &item = *fixture.Client->LastItem;
       REQUIRE(item.Image);
-      CHECK(DragImageSize(item.Image.Get()) == IntSize(30, 20));
-      CHECK(item.DragLocationInContentCoordinates == IntPoint(5, 9));
-      CHECK(item.DragPreviewFrameInRootViewCoordinates.Size() == IntSize(30, 20));
+      CHECK(DragImageSize(item.Image.Get()) == SizeI(30, 20));
+      CHECK(item.DragLocationInContentCoordinates == PointI(5, 9));
+      CHECK(item.DragPreviewFrameInRootViewCoordinates.Size() == SizeI(30, 20));
       fixture.End(10, 30, {});
     }
 
@@ -666,7 +665,7 @@ namespace krys::boo::tests
       REQUIRE(item.Image);
       auto size = DragImageSize(item.Image.Get());
       CHECK(size.Width() <= 200);
-      CHECK(item.DragLocationInContentCoordinates == IntPoint(5 - size.Width() / 2, 8));
+      CHECK(item.DragLocationInContentCoordinates == PointI(5 - size.Width() / 2, 8));
       fixture.End(5, 60, {});
     }
 

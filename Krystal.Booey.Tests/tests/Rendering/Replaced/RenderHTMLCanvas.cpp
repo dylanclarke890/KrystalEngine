@@ -51,21 +51,21 @@ namespace krys::boo::tests
                           u8"<canvas id=both width=40 height=20 style='width:30px;height:30px'></canvas>"
                           u8"<canvas id=zoomed width=40 height=20 style='zoom:2'></canvas>");
 
-    CHECK(fixture.RendererSize(u8"plain") == IntSize(300, 150));
-    CHECK(fixture.RendererSize(u8"sized") == IntSize(40, 20));
+    CHECK(fixture.RendererSize(u8"plain") == SizeI(300, 150));
+    CHECK(fixture.RendererSize(u8"sized") == SizeI(40, 20));
     // Its natural aspect ratio sizes the other dimension.
-    CHECK(fixture.RendererSize(u8"wide") == IntSize(80, 40));
-    CHECK(fixture.RendererSize(u8"tall") == IntSize(120, 60));
-    CHECK(fixture.RendererSize(u8"both") == IntSize(30, 30));
-    CHECK(fixture.RendererSize(u8"zoomed") == IntSize(80, 40));
+    CHECK(fixture.RendererSize(u8"wide") == SizeI(80, 40));
+    CHECK(fixture.RendererSize(u8"tall") == SizeI(120, 60));
+    CHECK(fixture.RendererSize(u8"both") == SizeI(30, 30));
+    CHECK(fixture.RendererSize(u8"zoomed") == SizeI(80, 40));
     CHECK(fixture.Renderer(u8"sized").HasIntrinsicAspectRatio());
 
     SECTION("resizing the canvas lays it out again")
     {
       fixture.Canvas(u8"sized").Width(60);
-      CHECK(fixture.RendererSize(u8"sized") == IntSize(60, 20));
+      CHECK(fixture.RendererSize(u8"sized") == SizeI(60, 20));
       fixture.Canvas(u8"wide").Height(80);
-      CHECK(fixture.RendererSize(u8"wide") == IntSize(80, 160));
+      CHECK(fixture.RendererSize(u8"wide") == SizeI(80, 160));
     }
   }
 

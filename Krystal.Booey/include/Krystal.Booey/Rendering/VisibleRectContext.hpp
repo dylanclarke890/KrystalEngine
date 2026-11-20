@@ -24,7 +24,7 @@
 
 #pragma once
 
-#include "Krystal.Booey/Page/IntersectionObserver/IntersectionObserverMarginBox.hpp"
+#include "Krystal.Booey/DOM/IntersectionObservers/IntersectionObserverMarginBox.hpp"
 #include "Krystal.Booey/Rendering/RepaintRectCalculation.hpp"
 #include "Krystal.Core/Enum.hpp"
 #include "Krystal.Core/Types/EnumSet.hpp"
@@ -54,7 +54,7 @@ namespace krys::boo
 
     bool HasPositionFixedDescendant {false};
     bool DirtyRectIsFlipped {false};
-    bool DescendantNeedsEnclosingIntRect {false};
+    bool DescendantNeedsEnclosingRectI {false};
     EnumSet<Option> Options;
     /// @brief An intersection observer's scroll margin, which grows the clips of the scroll containers on the
     /// way.

@@ -36,12 +36,12 @@
 #include "Krystal.Booey/Loader/ImageLoader.hpp"
 #include "Krystal.Booey/Page/LocalFrame.hpp"
 #include "Krystal.Booey/Page/LocalFrameView.hpp"
-#include "Krystal.Booey/Platform/Network/ResourceResponse.hpp"
-#include "Krystal.Booey/Platform/SharedBuffer.hpp"
 #include "Krystal.Booey/Rendering/RenderElement.hpp"
-#include "Krystal.Booey/URL/URLParser.hpp"
-#include "Krystal.Core/Text/CodePointIterator.hpp"
-#include "Krystal.Core/Text/StringBuilder.hpp"
+#include "Krystal.Core/Strings/CodePointIterator.hpp"
+#include "Krystal.Core/Strings/StringBuilder.hpp"
+#include "Krystal.Core/Types/SharedBuffer.hpp"
+#include "Krystal.Net/ResourceResponse.hpp"
+#include "Krystal.Net/UrlParser.hpp"
 #include <algorithm>
 
 namespace krys::boo
@@ -112,15 +112,15 @@ namespace krys::boo
       // The title gives the image's natural size, whatever the zoom.
       UpdateStyleIfNeeded();
       auto *imageElement = ImageElement();
-      auto size = FlooredIntSize(
+      auto size = FlooredSizeI(
         cachedImage->ImageSizeForRenderer(imageElement ? imageElement->Renderer() : nullptr, 1.0f));
       if (size.Width())
       {
         // The decoded file name, or the host if the path has none.
-        auto name = text::ReplaceInvalidUTF8(url::URLParser::PercentDecode(GetURL().LastPathComponent()));
+        auto name = text::ReplaceInvalidUTF8(net::UrlParser::PercentDecode(GetUrl().LastPathComponent()));
         if (name.empty())
         {
-          name = utf8_string(GetURL().Host());
+          name = utf8_string(GetUrl().Host());
         }
         StringBuilder title;
         title.Append(name, u8" (", size.Width(), u8"×", size.Height(), u8")");
@@ -160,12 +160,12 @@ namespace krys::boo
                                                   : u8"user-select: none; display: block");
     auto &imageLoader = imageElement->GetImageLoader();
     imageLoader.SetLoadManually(true);
-    (void)imageElement->SetAttribute(u8"src", DOMString(GetURL().String()));
+    (void)imageElement->SetAttribute(u8"src", DOMString(GetUrl().String()));
     (void)body->AppendChild(*imageElement);
     imageLoader.SetLoadManually(false);
     if (auto *cachedImage = imageElement->GetCachedImage())
     {
-      cachedImage->SetResponse(ResourceResponse(GetURL(), utf8_string(ContentType()), -1));
+      cachedImage->SetResponse(net::ResourceResponse(GetUrl(), utf8_string(ContentType()), -1));
     }
 
     if (_shouldShrinkImage)
@@ -375,6 +375,6 @@ namespace krys::boo
       static_cast<int32>(static_cast<float>(x) / scale - static_cast<float>(viewportSize.Width()) / 2.0f);
     auto scrollY =
       static_cast<int32>(static_cast<float>(y) / scale - static_cast<float>(viewportSize.Height()) / 2.0f);
-    view->SetScrollPosition(IntPoint(scrollX, scrollY));
+    view->SetScrollPosition(PointI(scrollX, scrollY));
   }
 }

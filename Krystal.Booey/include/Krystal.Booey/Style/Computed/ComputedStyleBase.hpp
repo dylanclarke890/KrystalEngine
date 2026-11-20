@@ -29,6 +29,7 @@
 #include "Krystal.Booey/Animation/Timelines/ScrollAxis.hpp"
 #include "Krystal.Booey/CSS/Values/Aggregates.hpp"
 #include "Krystal.Booey/Graphics/Geometry/BoxExtents.hpp"
+#include "Krystal.Booey/Graphics/Geometry/LayoutGeometryForward.hpp"
 #include "Krystal.Booey/Graphics/GraphicsTypes.hpp"
 #include "Krystal.Booey/Graphics/Paths/WindRule.hpp"
 #include "Krystal.Booey/Platform/Scrolling/ScrollTypes.hpp"
@@ -40,27 +41,26 @@
 #include "Krystal.Booey/Text/TextFlags.hpp"
 #include "Krystal.Booey/Text/UnicodeBidi.hpp"
 #include "Krystal.Booey/Text/WritingMode.hpp"
+#include "Krystal.Core/Geometry/GeometryForward.hpp"
 #include "Krystal.Core/Types/DataRef.hpp"
 #include "Krystal.Core/Types/EnumSet.hpp"
 #include "Krystal.Core/Types/FixedVector.hpp"
 #include "Krystal.Core/Types/List.hpp"
 #include "Krystal.Core/Types/UniquePtr.hpp"
 
+namespace krys
+{
+  class TransformationMatrix;
+}
+
 namespace krys::boo
 {
   class Color;
   class Element;
-  class FloatPoint;
-  class FloatPoint3D;
-  class FloatRect;
-  class FloatSize;
   class FontCascade;
   class FontCascadeDescription;
   class FontMetrics;
   class FontSelectionValue;
-  class IntSize;
-  class LayoutRect;
-  class LayoutSize;
   class LayoutUnit;
   class RenderElement;
   class RenderStyle;
@@ -71,7 +71,6 @@ namespace krys::boo
   class StyleNonInheritedData;
   class StyleRareInheritedData;
   class SVGRenderStyle;
-  class TransformationMatrix;
   class ViewTimeline;
 
   struct BorderData;

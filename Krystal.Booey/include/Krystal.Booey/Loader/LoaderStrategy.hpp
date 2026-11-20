@@ -26,12 +26,12 @@
 #pragma once
 
 #include "Krystal.Booey/Loader/ResourceLoaderOptions.hpp"
-#include "Krystal.Booey/Platform/Network/ResourceError.hpp"
-#include "Krystal.Booey/Platform/Network/ResourceRequest.hpp"
-#include "Krystal.Booey/Platform/Network/ResourceResponse.hpp"
-#include "Krystal.Booey/Platform/SharedBuffer.hpp"
 #include "Krystal.Core/Types/Expected.hpp"
 #include "Krystal.Core/Types/Func.hpp"
+#include "Krystal.Core/Types/SharedBuffer.hpp"
+#include "Krystal.Net/ResourceError.hpp"
+#include "Krystal.Net/ResourceRequest.hpp"
+#include "Krystal.Net/ResourceResponse.hpp"
 
 namespace krys::boo
 {
@@ -40,11 +40,11 @@ namespace krys::boo
   /// @brief A resource the host loaded: its response and all of its bytes.
   struct LoadedResource
   {
-    ResourceResponse Response;
+    net::ResourceResponse Response;
     Ref<SharedBuffer> Data;
   };
 
-  using LoadResult = Expected<LoadedResource, ResourceError>;
+  using LoadResult = Expected<LoadedResource, net::ResourceError>;
 
   /// @brief How resources are loaded: the host implements it, Booey never reads files or the network itself.
   /// `data:` URLs are decoded by Booey and never reach the strategy.
@@ -58,8 +58,11 @@ namespace krys::boo
     /// or the reason it couldn't load.
     /// @note The handler may be called at any time on the main thread, even before this returns: Booey
     /// queues the completion as a networking task either way.
-    virtual void LoadResource(LocalFrame &frame, const ResourceRequest &request,
+    virtual void LoadResource(LocalFrame &frame, const net::ResourceRequest &request,
                               const ResourceLoaderOptions &options,
                               Func<void(LoadResult &&)> &&completionHandler) noexcept = 0;
   };
+
+  /// @brief The domain of load errors Booey raises itself, rather than the host's loader.
+  constexpr inline utf8_stringview ErrorDomainBooeyInternal = u8"BooeyInternal";
 }

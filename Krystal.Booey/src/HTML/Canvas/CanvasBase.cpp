@@ -47,7 +47,7 @@ namespace krys::boo::html
     }
   }
 
-  CanvasBase::CanvasBase(IntSize size) noexcept : _size(size)
+  CanvasBase::CanvasBase(SizeI size) noexcept : _size(size)
   {
   }
 
@@ -71,7 +71,7 @@ namespace krys::boo::html
     return ShareRefPtr(Buffer());
   }
 
-  void CanvasBase::DidDraw(const Maybe<FloatRect> &) noexcept
+  void CanvasBase::DidDraw(const Maybe<RectF> &) noexcept
   {
     AddCanvasNeedingPreparationForDisplayOrFlush();
   }
@@ -109,7 +109,7 @@ namespace krys::boo::html
     return area > 0;
   }
 
-  void CanvasBase::SetSize(const IntSize &size) noexcept
+  void CanvasBase::SetSize(const SizeI &size) noexcept
   {
     _size = size;
   }
@@ -152,7 +152,7 @@ namespace krys::boo::html
     auto colorSpace = context ? context->ColorSpace() : DestinationColorSpace::SRGB();
 
     auto *document = CanvasDocument();
-    return ImageBuffer::Create(FloatSize(_size), renderingMode, RenderingPurpose::Canvas, 1, colorSpace,
+    return ImageBuffer::Create(SizeF(_size), renderingMode, RenderingPurpose::Canvas, 1, colorSpace,
                                document ? document->GetGraphicsClient() : nullptr);
   }
 

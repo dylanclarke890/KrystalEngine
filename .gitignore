@@ -1,5 +1,8 @@
 ﻿build/
 
+# Golden test output (written under build/, but never tracked)
+golden-output/
+
 # Python
 *.pyc
 *__pycache__/

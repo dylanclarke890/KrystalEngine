@@ -64,7 +64,7 @@ namespace krys::boo
         if (currentTransition >= lineWhitespaceCollapsingState.NumTransitions())
         {
           // We don't have a transition for this box yet.
-          lineWhitespaceCollapsingState.EnsureLineBoxInsideIgnoredSpaces(_boxes[i]);
+          lineWhitespaceCollapsingState.EnsureLineBoxInsideIgnoredSpaces(_boxes[i].get());
         }
         else
         {
@@ -87,7 +87,7 @@ namespace krys::boo
       lineWhitespaceCollapsingState.StartIgnoringSpaces(endMid);
       for (size_t i = 0; i < _boxes.size(); ++i)
       {
-        lineWhitespaceCollapsingState.EnsureLineBoxInsideIgnoredSpaces(_boxes[i]);
+        lineWhitespaceCollapsingState.EnsureLineBoxInsideIgnoredSpaces(_boxes[i].get());
       }
     }
   }

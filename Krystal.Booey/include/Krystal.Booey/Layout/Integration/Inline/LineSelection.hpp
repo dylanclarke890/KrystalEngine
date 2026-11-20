@@ -25,10 +25,10 @@
 
 #pragma once
 
-#include "Krystal.Booey/Graphics/Geometry/FloatRect.hpp"
 #include "Krystal.Booey/Layout/Integration/Inline/InlineIteratorLineBox.hpp"
 #include "Krystal.Booey/Rendering/RenderBlockFlow.hpp"
 #include "Krystal.Core/Attributes.hpp"
+#include "Krystal.Core/Geometry/Rect.hpp"
 
 namespace krys::boo
 {
@@ -47,15 +47,14 @@ namespace krys::boo
       return lineBox.ContentLogicalBottomAdjustedForFollowingLineBox();
     }
 
-    KRYS_NODISCARD static FloatRect LogicalRect(const inline_iterator::LineBox &lineBox) noexcept
+    KRYS_NODISCARD static RectF LogicalRect(const inline_iterator::LineBox &lineBox) noexcept
     {
       return {
-        FloatPoint {lineBox.ContentLogicalLeft(), lineBox.ContentLogicalTopAdjustedForPrecedingLineBox()},
-        FloatPoint {lineBox.ContentLogicalRight(),
-                    lineBox.ContentLogicalBottomAdjustedForFollowingLineBox()}};
+        PointF {lineBox.ContentLogicalLeft(), lineBox.ContentLogicalTopAdjustedForPrecedingLineBox()},
+        PointF {lineBox.ContentLogicalRight(), lineBox.ContentLogicalBottomAdjustedForFollowingLineBox()}};
     }
 
-    KRYS_NODISCARD static FloatRect PhysicalRect(const inline_iterator::LineBox &lineBox) noexcept
+    KRYS_NODISCARD static RectF PhysicalRect(const inline_iterator::LineBox &lineBox) noexcept
     {
       auto physicalRect = LogicalRect(lineBox);
       if (!lineBox.IsHorizontal())

@@ -104,7 +104,7 @@ namespace krys::boo::inline_iterator
       return false;
     }
 
-    KRYS_NODISCARD static FloatRect EllipsisVisualRectIgnoringBlockDirection() noexcept
+    KRYS_NODISCARD static RectF EllipsisVisualRectIgnoringBlockDirection() noexcept
     {
       krys_debug_assert(false);
       return {};

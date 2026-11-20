@@ -20,9 +20,9 @@
 
 #pragma once
 
-#include "Krystal.Booey/Graphics/Geometry/FloatRect.hpp"
-#include "Krystal.Booey/Graphics/Transforms/AffineTransform.hpp"
 #include "Krystal.Booey/Rendering/SVG/RenderSVGBlock.hpp"
+#include "Krystal.Core/Geometry/AffineTransform.hpp"
+#include "Krystal.Core/Geometry/Rect.hpp"
 
 namespace krys::boo
 {
@@ -37,7 +37,7 @@ namespace krys::boo
   private:
     AffineTransform _localTransform;
     mutable AffineTransform _localToParentTransform;
-    FloatRect _viewport;
+    RectF _viewport;
     bool _needsTransformUpdate {true};
 
   public:
@@ -58,9 +58,9 @@ namespace krys::boo
 
     void Layout() noexcept override;
 
-    KRYS_NODISCARD FloatRect ObjectBoundingBox() const noexcept override
+    KRYS_NODISCARD RectF ObjectBoundingBox() const noexcept override
     {
-      return FloatRect(FloatPoint(), _viewport.Size());
+      return RectF(PointF(), _viewport.Size());
     }
 
     KRYS_NODISCARD bool IsObjectBoundingBoxValid() const noexcept
@@ -68,24 +68,24 @@ namespace krys::boo
       return !_viewport.IsEmpty();
     }
 
-    KRYS_NODISCARD FloatRect StrokeBoundingBox() const noexcept override
+    KRYS_NODISCARD RectF StrokeBoundingBox() const noexcept override
     {
-      return FloatRect(FloatPoint(), _viewport.Size());
+      return RectF(PointF(), _viewport.Size());
     }
 
-    KRYS_NODISCARD FloatRect RepaintRectInLocalCoordinates(
+    KRYS_NODISCARD RectF RepaintRectInLocalCoordinates(
       RepaintRectCalculation = RepaintRectCalculation::Fast) const noexcept override
     {
-      return FloatRect(FloatPoint(), _viewport.Size());
+      return RectF(PointF(), _viewport.Size());
     }
 
-    KRYS_NODISCARD FloatRect DecoratedBoundingBox() const noexcept override
+    KRYS_NODISCARD RectF DecoratedBoundingBox() const noexcept override
     {
-      return FloatRect(FloatPoint(), _viewport.Size());
+      return RectF(PointF(), _viewport.Size());
     }
 
-    bool NodeAtFloatPoint(const HitTestRequest &, HitTestResult &, const FloatPoint &pointInParent,
-                          HitTestAction) noexcept override;
+    bool NodeAtPointF(const HitTestRequest &, HitTestResult &, const PointF &pointInParent,
+                      HitTestAction) noexcept override;
 
     void SetNeedsTransformUpdate() noexcept override
     {

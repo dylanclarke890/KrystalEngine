@@ -17,7 +17,7 @@
  */
 
 #include "Krystal.Booey/Platform/Pasteboard/SelectionData.hpp"
-#include "Krystal.Core/Text/ASCII.hpp"
+#include "Krystal.Core/Strings/ASCII.hpp"
 
 namespace krys::boo
 {
@@ -78,7 +78,7 @@ namespace krys::boo
     }
   }
 
-  SelectionData::SelectionData(utf8_stringview text, utf8_stringview markup, const url::URL &url,
+  SelectionData::SelectionData(utf8_stringview text, utf8_stringview markup, const net::Url &url,
                                utf8_stringview uriList, RefPtr<SharedBuffer> &&customData,
                                bool canSmartReplace) noexcept
   {
@@ -92,7 +92,7 @@ namespace krys::boo
     }
     if (!url.IsEmpty())
     {
-      SetURL(url, {});
+      SetUrl(url, {});
     }
     if (!uriList.empty())
     {
@@ -122,7 +122,7 @@ namespace krys::boo
     // will get an empty string. This is in line with the HTML5 spec (see
     // "The DragEvent and DataTransfer interfaces"). Also extract all filenames
     // from the URI list.
-    bool setURL = HasURL();
+    bool setUrl = HasUrl();
     utf8_stringview rest = uriListString;
     while (!rest.empty())
     {
@@ -138,13 +138,13 @@ namespace krys::boo
         continue;
       }
 
-      url::URL url {line};
+      net::Url url {line};
       if (url.IsValid())
       {
-        if (!setURL)
+        if (!setUrl)
         {
           _url = url;
-          setURL = true;
+          setUrl = true;
         }
 
         if (url.ProtocolIsFile())
@@ -158,7 +158,7 @@ namespace krys::boo
     }
   }
 
-  void SelectionData::SetURL(const url::URL &url, utf8_stringview label) noexcept
+  void SelectionData::SetUrl(const net::Url &url, utf8_stringview label) noexcept
   {
     _url = url;
     if (_uriList.empty())
@@ -180,7 +180,7 @@ namespace krys::boo
     _markup = u8"<a href=\"" + url.String() + u8"\">" + EscapeMarkupText(actualLabel) + u8"</a>";
   }
 
-  const utf8_string &SelectionData::URLLabel() const noexcept
+  const utf8_string &SelectionData::UrlLabel() const noexcept
   {
     static const utf8_string emptyString;
     if (HasText())
@@ -188,7 +188,7 @@ namespace krys::boo
       return Text();
     }
 
-    if (HasURL())
+    if (HasUrl())
     {
       return _url.String();
     }
@@ -201,7 +201,7 @@ namespace krys::boo
     ClearText();
     ClearMarkup();
     ClearURIList();
-    ClearURL();
+    ClearUrl();
     ClearCustomData();
     ClearBuffers();
 

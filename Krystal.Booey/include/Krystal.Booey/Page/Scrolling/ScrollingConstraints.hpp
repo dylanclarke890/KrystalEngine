@@ -25,10 +25,10 @@
 
 #pragma once
 
-#include "Krystal.Booey/Graphics/Geometry/FloatPoint.hpp"
-#include "Krystal.Booey/Graphics/Geometry/FloatRect.hpp"
-#include "Krystal.Booey/Graphics/Geometry/FloatSize.hpp"
 #include "Krystal.Core/Attributes.hpp"
+#include "Krystal.Core/Geometry/Point.hpp"
+#include "Krystal.Core/Geometry/Rect.hpp"
+#include "Krystal.Core/Geometry/Size.hpp"
 #include "Krystal.Core/TypeCast.hpp"
 #include "Krystal.Core/Types/EnumSet.hpp"
 
@@ -56,10 +56,10 @@ namespace krys::boo
     };
 
   protected:
-    FloatSize _alignmentOffset;
+    SizeF _alignmentOffset;
     EnumSet<AnchorEdge> _anchorEdges;
-    FloatRect _viewportRectAtLastLayout;
-    FloatPoint _layerPositionAtLastLayout;
+    RectF _viewportRectAtLastLayout;
+    PointF _layerPositionAtLastLayout;
 
   public:
     virtual ~ViewportConstraints() noexcept = default;
@@ -86,35 +86,35 @@ namespace krys::boo
       _anchorEdges = edges;
     }
 
-    KRYS_NODISCARD FloatSize AlignmentOffset() const noexcept
+    KRYS_NODISCARD SizeF AlignmentOffset() const noexcept
     {
       return _alignmentOffset;
     }
 
-    void SetAlignmentOffset(FloatSize offset) noexcept
+    void SetAlignmentOffset(SizeF offset) noexcept
     {
       _alignmentOffset = offset;
     }
 
     /// @brief Where the layer goes in @p viewportRect: moved with the edges it's anchored to.
-    KRYS_NODISCARD FloatPoint ViewportRelativeLayerPosition(const FloatRect &viewportRect) const noexcept;
+    KRYS_NODISCARD PointF ViewportRelativeLayerPosition(const RectF &viewportRect) const noexcept;
 
-    KRYS_NODISCARD const FloatRect &ViewportRectAtLastLayout() const noexcept
+    KRYS_NODISCARD const RectF &ViewportRectAtLastLayout() const noexcept
     {
       return _viewportRectAtLastLayout;
     }
 
-    void SetViewportRectAtLastLayout(const FloatRect &rect) noexcept
+    void SetViewportRectAtLastLayout(const RectF &rect) noexcept
     {
       _viewportRectAtLastLayout = rect;
     }
 
-    KRYS_NODISCARD const FloatPoint &LayerPositionAtLastLayout() const noexcept
+    KRYS_NODISCARD const PointF &LayerPositionAtLastLayout() const noexcept
     {
       return _layerPositionAtLastLayout;
     }
 
-    void SetLayerPositionAtLastLayout(FloatPoint position) noexcept
+    void SetLayerPositionAtLastLayout(PointF position) noexcept
     {
       _layerPositionAtLastLayout = position;
     }
@@ -144,11 +144,11 @@ namespace krys::boo
     float _rightOffset {0};
     float _topOffset {0};
     float _bottomOffset {0};
-    FloatRect _constrainingRectAtLastLayout;
-    FloatRect _containingBlockRect;
-    FloatRect _stickyBoxRect;
-    FloatSize _stickyOffsetAtLastLayout;
-    FloatSize _anchorLayerOffsetAtLastLayout;
+    RectF _constrainingRectAtLastLayout;
+    RectF _containingBlockRect;
+    RectF _stickyBoxRect;
+    SizeF _stickyOffsetAtLastLayout;
+    SizeF _anchorLayerOffsetAtLastLayout;
 
   public:
     StickyPositionViewportConstraints() noexcept = default;
@@ -160,32 +160,32 @@ namespace krys::boo
 
     /// @brief How far the sticky box moves from where it's laid out to stay in @p constrainingRect, as far as
     /// its containing block lets it.
-    KRYS_NODISCARD FloatSize ComputeStickyOffset(const FloatRect &constrainingRect) const noexcept;
+    KRYS_NODISCARD SizeF ComputeStickyOffset(const RectF &constrainingRect) const noexcept;
 
-    KRYS_NODISCARD const FloatSize &AnchorLayerOffsetAtLastLayout() const noexcept
+    KRYS_NODISCARD const SizeF &AnchorLayerOffsetAtLastLayout() const noexcept
     {
       return _anchorLayerOffsetAtLastLayout;
     }
 
-    void SetAnchorLayerOffsetAtLastLayout(FloatSize offset) noexcept
+    void SetAnchorLayerOffsetAtLastLayout(SizeF offset) noexcept
     {
       _anchorLayerOffsetAtLastLayout = offset;
     }
 
-    KRYS_NODISCARD FloatSize StickyOffsetAtLastLayout() const noexcept
+    KRYS_NODISCARD SizeF StickyOffsetAtLastLayout() const noexcept
     {
       return _stickyOffsetAtLastLayout;
     }
 
-    void SetStickyOffsetAtLastLayout(FloatSize offset) noexcept
+    void SetStickyOffsetAtLastLayout(SizeF offset) noexcept
     {
       _stickyOffsetAtLastLayout = offset;
     }
 
-    KRYS_NODISCARD FloatPoint
-      AnchorLayerPositionForConstrainingRect(const FloatRect &constrainingRect) const noexcept;
+    KRYS_NODISCARD PointF
+      AnchorLayerPositionForConstrainingRect(const RectF &constrainingRect) const noexcept;
 
-    KRYS_NODISCARD FloatPoint AnchorLayerPositionAtLastLayout() const noexcept;
+    KRYS_NODISCARD PointF AnchorLayerPositionAtLastLayout() const noexcept;
 
     KRYS_NODISCARD float LeftOffset() const noexcept
     {
@@ -229,41 +229,41 @@ namespace krys::boo
 
     /// @brief The viewport rect if the box sticks to the viewport, and the overflow area's scrolled clip rect
     /// if it sticks inside an overflow area.
-    KRYS_NODISCARD FloatRect ConstrainingRectAtLastLayout() const noexcept
+    KRYS_NODISCARD RectF ConstrainingRectAtLastLayout() const noexcept
     {
       return _constrainingRectAtLastLayout;
     }
 
-    void SetConstrainingRectAtLastLayout(const FloatRect &rect) noexcept
+    void SetConstrainingRectAtLastLayout(const RectF &rect) noexcept
     {
       _constrainingRectAtLastLayout = rect;
     }
 
     /// @brief In the scrolling ancestor's coordinate space.
-    KRYS_NODISCARD FloatRect ContainingBlockRect() const noexcept
+    KRYS_NODISCARD RectF ContainingBlockRect() const noexcept
     {
       return _containingBlockRect;
     }
 
-    void SetContainingBlockRect(const FloatRect &rect) noexcept
+    void SetContainingBlockRect(const RectF &rect) noexcept
     {
       _containingBlockRect = rect;
     }
 
     /// @brief In the scrolling ancestor's coordinate space.
-    KRYS_NODISCARD FloatRect StickyBoxRect() const noexcept
+    KRYS_NODISCARD RectF StickyBoxRect() const noexcept
     {
       return _stickyBoxRect;
     }
 
-    void SetStickyBoxRect(const FloatRect &rect) noexcept
+    void SetStickyBoxRect(const RectF &rect) noexcept
     {
       _stickyBoxRect = rect;
     }
 
     /// @brief The smallest rectangle, in the scrolling ancestor's coordinate space, that encloses the sticky
     /// box at every permissible position during its sticky travel.
-    KRYS_NODISCARD FloatRect ComputeStickyExtent() const noexcept;
+    KRYS_NODISCARD RectF ComputeStickyExtent() const noexcept;
   };
 }
 

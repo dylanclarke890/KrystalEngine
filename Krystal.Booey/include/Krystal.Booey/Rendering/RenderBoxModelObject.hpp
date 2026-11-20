@@ -97,22 +97,21 @@ namespace krys::boo
 
     void SetSelectionState(HighlightState state) noexcept override;
 
-    void ApplyTransform(TransformationMatrix &transform, const RenderStyle &style,
-                        const FloatRect &boundingBox,
+    void ApplyTransform(TransformationMatrix &transform, const RenderStyle &style, const RectF &boundingBox,
                         EnumSet<style::TransformResolverOption> options) const noexcept override;
 
     using RenderLayerModelObject::ApplyTransform;
 
     KRYS_NODISCARD LayoutSize RelativePositionOffset() const noexcept;
 
-    void ContentChanged(ContentChangeType changeType, const Maybe<FloatRect> &dirtyRect = null) noexcept;
+    void ContentChanged(ContentChangeType changeType, const Maybe<RectF> &dirtyRect = null) noexcept;
 
     KRYS_NODISCARD bool HasAcceleratedCompositing() const noexcept;
 
     KRYS_NODISCARD bool HasRunningAcceleratedAnimations() const noexcept;
 
     /// @brief The rect a sticky box stays in: its scroller's scrolled clip rect, or the view's.
-    KRYS_NODISCARD FloatRect ConstrainingRectForStickyPosition() const noexcept;
+    KRYS_NODISCARD RectF ConstrainingRectForStickyPosition() const noexcept;
 
     /// @brief The box a sticky box scrolls with (its nearest overflow clip, or the view) and that box's
     /// layer, if it's a clip.
@@ -120,7 +119,7 @@ namespace krys::boo
       EnclosingClippingBoxForStickyPosition() const noexcept;
 
     void ComputeStickyPositionConstraints(StickyPositionViewportConstraints &constraints,
-                                          const FloatRect &constrainingRect) const noexcept;
+                                          const RectF &constrainingRect) const noexcept;
 
     /// @brief How far a sticky box moves from where it's laid out to stay in view.
     KRYS_NODISCARD LayoutSize StickyPositionOffset() const noexcept;
@@ -323,7 +322,7 @@ namespace krys::boo
     /// @brief How @p image is interpolated when drawn at @p size.
     /// @brief Paints the box's text in black into @p context, as the mask of `background-clip: text`: the
     /// text of @p inlineBox if it's an inline box's, otherwise all the box's text.
-    void PaintMaskForTextFillBox(GraphicsContext &context, const FloatRect &paintRect,
+    void PaintMaskForTextFillBox(GraphicsContext &context, const RectF &paintRect,
                                  const inline_iterator::InlineBoxIterator &inlineBox,
                                  const LayoutRect &scrolledPaintRect) noexcept;
 
@@ -333,7 +332,7 @@ namespace krys::boo
 
     /// @brief Whether every side of the border is opaque and at least two device pixels wide (at
     /// @p contextScale), so the background's edge needn't show beneath it.
-    KRYS_NODISCARD bool BorderObscuresBackgroundEdge(const FloatSize &contextScale) const noexcept;
+    KRYS_NODISCARD bool BorderObscuresBackgroundEdge(const SizeF &contextScale) const noexcept;
 
     /// @brief Whether every side of the border is opaque and solid, so the background needn't show beneath
     /// it.

@@ -24,10 +24,10 @@
 
 #include "Krystal.Booey/Style/Values/Shapes/InsetFunction.hpp"
 
-#include "Krystal.Booey/Graphics/Geometry/FloatRect.hpp"
-#include "Krystal.Booey/Graphics/Geometry/GeometryUtilities.hpp"
 #include "Krystal.Booey/Graphics/Paths/Path.hpp"
 #include "Krystal.Booey/Style/Values/Primitives/NumericTypesEvaluation.hpp"
+#include "Krystal.Core/Geometry/GeometryUtilities.hpp"
+#include "Krystal.Core/Geometry/Rect.hpp"
 #include "Krystal.Core/Types/TinyLRUCache.hpp"
 
 namespace krys::boo::style
@@ -58,13 +58,13 @@ namespace krys::boo::style
 
   // MARK: - Path
 
-  boo::Path PathComputation<Inset>::operator()(const Inset &value, const FloatRect &boundingBox) noexcept
+  boo::Path PathComputation<Inset>::operator()(const Inset &value, const RectF &boundingBox) noexcept
   {
     auto boundingSize = boundingBox.Size();
 
     auto left = Evaluate<float>(value.Insets.Left(), boundingSize.Width(), style::ZoomNeeded {});
     auto top = Evaluate<float>(value.Insets.Top(), boundingSize.Height(), style::ZoomNeeded {});
-    auto rect = FloatRect {
+    auto rect = RectF {
       left + boundingBox.X(), top + boundingBox.Y(),
       std::max<float>(boundingSize.Width() - left
                         - Evaluate<float>(value.Insets.Right(), boundingSize.Width(), style::ZoomNeeded {}),

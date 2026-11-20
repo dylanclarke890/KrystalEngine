@@ -64,13 +64,13 @@ namespace krys::boo
     }
 
     /// @brief The scroller's rect in absolute coordinates: the layout viewport for the frame view.
-    KRYS_NODISCARD IntRect BoundingRectForScrollableArea(ScrollableArea &scrollableArea)
+    KRYS_NODISCARD RectI BoundingRectForScrollableArea(ScrollableArea &scrollableArea)
     {
       if (auto *layerScrollableArea = DynamicDowncast<RenderLayerScrollableArea>(scrollableArea))
       {
         return layerScrollableArea->Layer().Renderer().AbsoluteBoundingBoxRect();
       }
-      return SnappedIntRect(Downcast<LocalFrameView>(scrollableArea).LayoutViewportRect());
+      return SnappedRectI(Downcast<LocalFrameView>(scrollableArea).LayoutViewportRect());
     }
 
     /// @brief The element itself or its closest ancestor that's a box: what a priority candidate anchors to.
@@ -186,11 +186,11 @@ namespace krys::boo
     FrameView().DequeueScrollableAreaForScrollAnchoringUpdate(_owningScrollableArea);
   }
 
-  FloatPoint
+  PointF
     ScrollAnchoringController::ComputeOffsetFromOwningScroller(const RenderObject &candidate) const noexcept
   {
-    return FloatPoint(candidate.AbsoluteBoundingBoxRect().Location()
-                      - BoundingRectForScrollableArea(_owningScrollableArea).Location());
+    return PointF(candidate.AbsoluteBoundingBoxRect().Location()
+                  - BoundingRectForScrollableArea(_owningScrollableArea).Location());
   }
 
   void ScrollAnchoringController::NotifyChildHadSuppressingStyleChange() noexcept
@@ -273,8 +273,8 @@ namespace krys::boo
     if (auto *box = scrollerElement ? scrollerElement->GetRenderBox() : nullptr)
     {
       LayoutRect paddedLayerBounds(containingRect);
-      paddedLayerBounds.Contract(box->ScrollPaddingForViewportRect(paddedLayerBounds));
-      containingRect = SnappedIntRect(paddedLayerBounds);
+      Contract(paddedLayerBounds, box->ScrollPaddingForViewportRect(paddedLayerBounds));
+      containingRect = SnappedRectI(paddedLayerBounds);
     }
 
     auto *renderer = element.Renderer();
@@ -421,7 +421,7 @@ namespace krys::boo
       UpdateAnchorElement();
       return;
     }
-    FloatSize adjustment = ComputeOffsetFromOwningScroller(*renderer) - _lastOffsetForAnchorElement;
+    SizeF adjustment = ComputeOffsetFromOwningScroller(*renderer) - _lastOffsetForAnchorElement;
     if (adjustment.IsZero())
     {
       return;
@@ -429,7 +429,7 @@ namespace krys::boo
     SetForScope midUpdatingScrollPositionForAnchorElement(_midUpdatingScrollPositionForAnchorElement, true);
     auto newScrollPosition =
       _owningScrollableArea.GetScrollPosition()
-      + IntSize(static_cast<int32>(adjustment.Width()), static_cast<int32>(adjustment.Height()));
+      + SizeI(static_cast<int32>(adjustment.Width()), static_cast<int32>(adjustment.Height()));
     auto oldScrollType = _owningScrollableArea.CurrentScrollType();
     _owningScrollableArea.SetCurrentScrollType(ScrollType::Programmatic);
     if (!_owningScrollableArea.RequestScrollToPosition(newScrollPosition,

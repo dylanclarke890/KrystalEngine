@@ -24,12 +24,12 @@
 
 #include "Krystal.Booey/Graphics/Images/ImageTypes.hpp"
 #include "Krystal.Booey/Loader/Cache/CachedResourceClient.hpp"
+#include "Krystal.Core/Geometry/GeometryForward.hpp"
 
 namespace krys::boo
 {
   class CachedImage;
   class Document;
-  class IntRect;
 
   enum class VisibleInViewportState : uint8
   {
@@ -55,8 +55,8 @@ namespace krys::boo
     }
 
     // Called whenever a frame of an image changes because we got more data from the network.
-    // If not null, the IntRect is the changed rect of the image.
-    virtual void ImageChanged(CachedImage *, const IntRect * = nullptr) noexcept
+    // If not null, the RectI is the changed rect of the image.
+    virtual void ImageChanged(CachedImage *, const RectI * = nullptr) noexcept
     {
     }
 
@@ -68,7 +68,7 @@ namespace krys::boo
     // Called when a new decoded frame for a large image is available or when an animated image is ready to
     // advance to the next frame.
     virtual VisibleInViewportState ImageFrameAvailable(CachedImage &, ImageAnimatingState,
-                                                       const IntRect *) noexcept;
+                                                       const RectI *) noexcept;
 
     KRYS_NODISCARD virtual VisibleInViewportState ImageVisibleInViewport(const boo::Document &) const noexcept
     {

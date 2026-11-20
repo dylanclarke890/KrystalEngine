@@ -22,10 +22,10 @@
 
 #pragma once
 
-#include "Krystal.Booey/Graphics/Transforms/TransformationMatrix.hpp"
 #include "Krystal.Booey/Rendering/Layers/RenderLayer.hpp"
 #include "Krystal.Booey/Rendering/RenderElement.hpp"
 #include "Krystal.Core/Attributes.hpp"
+#include "Krystal.Core/Geometry/TransformationMatrix.hpp"
 #include "Krystal.Core/Macros.hpp"
 #include "Krystal.Core/TypeCast.hpp"
 #include "Krystal.Core/Types/Maybe.hpp"
@@ -78,11 +78,11 @@ namespace krys::boo
     virtual void UpdateLayerTransform() noexcept;
 
     virtual void ApplyTransform(TransformationMatrix &transform, const RenderStyle &style,
-                                const FloatRect &boundingBox,
+                                const RectF &boundingBox,
                                 EnumSet<style::TransformResolverOption> options) const noexcept = 0;
 
     void ApplyTransform(TransformationMatrix &transform, const RenderStyle &style,
-                        const FloatRect &boundingBox) const noexcept;
+                        const RectF &boundingBox) const noexcept;
 
     /// @brief Clips @p rects (in this renderer's coordinates, its contents scrolled) to its overflow clip, as
     /// @p context says, for mapping them up to @p container; returns whether anything's left.
@@ -115,11 +115,11 @@ namespace krys::boo
   };
 
   /// @brief Snaps @p rect to device pixels, as every renderer is (there are no layer-aware SVG renderers).
-  KRYS_NODISCARD FloatRect SnapRectToDevicePixelsIfNeeded(const LayoutRect &rect,
-                                                          const RenderLayerModelObject &renderer) noexcept;
+  KRYS_NODISCARD RectF SnapRectToDevicePixelsIfNeeded(const LayoutRect &rect,
+                                                      const RenderLayerModelObject &renderer) noexcept;
 
-  KRYS_NODISCARD FloatRect SnapRectToDevicePixelsIfNeeded(const FloatRect &rect,
-                                                          const RenderLayerModelObject &renderer) noexcept;
+  KRYS_NODISCARD RectF SnapRectToDevicePixelsIfNeeded(const RectF &rect,
+                                                      const RenderLayerModelObject &renderer) noexcept;
 }
 
 KRYS_SPECIALIZE_TYPE_CAST_TRAITS_BEGIN(krys::boo::RenderLayerModelObject)

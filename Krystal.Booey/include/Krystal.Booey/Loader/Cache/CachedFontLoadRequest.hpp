@@ -84,9 +84,9 @@ namespace krys::boo
     {
     }
 
-    KRYS_NODISCARD const url::URL &URL() const noexcept final
+    KRYS_NODISCARD const net::Url &Url() const noexcept final
     {
-      return _font->URL();
+      return _font->Url();
     }
 
     KRYS_NODISCARD bool IsPending() const noexcept final

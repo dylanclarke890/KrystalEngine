@@ -27,9 +27,9 @@
 
 #include "Krystal.Booey/Animation/Timing/WebAnimationTime.hpp"
 #include "Krystal.Booey/Animation/WebAnimationTypes.hpp"
-#include "Krystal.Booey/Graphics/Animation/CompositeOperation.hpp"
 #include "Krystal.Booey/Graphics/Animation/IterationCompositeOperation.hpp"
 #include "Krystal.Booey/Graphics/Animation/TimingFunction.hpp"
+#include "Krystal.Core/Maths/CompositeOperation.hpp"
 #include "Krystal.Core/TypeCast.hpp"
 #include "Krystal.Core/Types/Func.hpp"
 #include "Krystal.Core/Types/List.hpp"
@@ -58,7 +58,7 @@ namespace krys::boo
 
       KRYS_NODISCARD virtual double Offset() const noexcept = 0;
 
-      KRYS_NODISCARD virtual Maybe<boo::CompositeOperation> CompositeOperation() const noexcept = 0;
+      KRYS_NODISCARD virtual Maybe<krys::CompositeOperation> CompositeOperation() const noexcept = 0;
 
       KRYS_NODISCARD virtual bool AnimatesProperty(Property) const noexcept = 0;
 
@@ -80,7 +80,7 @@ namespace krys::boo
       bool HasImplicitOneKeyframe {false};
     };
 
-    using CompositionCallback = Func<void(const Keyframe &, boo::CompositeOperation)>;
+    using CompositionCallback = Func<void(const Keyframe &, krys::CompositeOperation)>;
     using AccumulationCallback = Func<void(const Keyframe &)>;
     using InterpolationCallback =
       Func<void(double intervalProgress, double currentIteration, boo::IterationCompositeOperation)>;
@@ -88,7 +88,7 @@ namespace krys::boo
 
     virtual ~KeyframeInterpolation() noexcept = default;
 
-    KRYS_NODISCARD virtual boo::CompositeOperation CompositeOperation() const noexcept = 0;
+    KRYS_NODISCARD virtual krys::CompositeOperation CompositeOperation() const noexcept = 0;
 
     KRYS_NODISCARD virtual bool IsPropertyAdditiveOrCumulative(Property) const noexcept = 0;
 

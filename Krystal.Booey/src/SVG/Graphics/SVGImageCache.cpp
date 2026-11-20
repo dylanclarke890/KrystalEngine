@@ -45,23 +45,23 @@ namespace krys::boo
 
   void SVGImageCache::SetContainerContextForClient(const CachedImageClient &client,
                                                    const LayoutSize &containerSize, float containerZoom,
-                                                   const url::URL &imageURL) noexcept
+                                                   const net::Url &imageUrl) noexcept
   {
     krys_debug_assert(!containerSize.IsEmpty());
     krys_debug_assert(containerZoom);
 
     // SVG container has width or height less than 1 pixel.
-    if (FlooredIntSize(containerSize).IsEmpty())
+    if (FlooredSizeI(containerSize).IsEmpty())
     {
       return;
     }
 
-    FloatSize containerSizeWithoutZoom(containerSize);
+    SizeF containerSizeWithoutZoom(containerSize);
     containerSizeWithoutZoom.Scale(1 / containerZoom);
 
     _imageForContainerMap.insert_or_assign(
       &client,
-      SVGImageForContainer::Create(_svgImage.get(), containerSizeWithoutZoom, containerZoom, imageURL));
+      SVGImageForContainer::Create(_svgImage.get(), containerSizeWithoutZoom, containerZoom, imageUrl));
   }
 
   Image *SVGImageCache::FindImageForRenderer(const RenderObject *renderer) const noexcept
@@ -74,7 +74,7 @@ namespace krys::boo
     return it != _imageForContainerMap.end() ? it->second.get() : nullptr;
   }
 
-  FloatSize SVGImageCache::ImageSizeForRenderer(const RenderObject *renderer) const noexcept
+  SizeF SVGImageCache::ImageSizeForRenderer(const RenderObject *renderer) const noexcept
   {
     auto *image = FindImageForRenderer(renderer);
     return image ? image->Size() : _svgImage->Size();

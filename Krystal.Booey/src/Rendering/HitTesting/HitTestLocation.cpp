@@ -25,11 +25,11 @@ namespace krys::boo
 {
   HitTestLocation::HitTestLocation(const LayoutPoint &point) noexcept
       : _point(point), _boundingBox(LayoutRect {point, LayoutSize {1, 1}}), _transformedPoint(point),
-        _transformedRect(FloatRect(_boundingBox))
+        _transformedRect(RectF(_boundingBox))
   {
   }
 
-  HitTestLocation::HitTestLocation(const FloatPoint &point, const FloatQuad &quad) noexcept
+  HitTestLocation::HitTestLocation(const PointF &point, const QuadF &quad) noexcept
       : _point {FlooredLayoutPoint(point)}, _boundingBox {quad.EnclosingBoundingBox()},
         _transformedPoint {point}, _transformedRect {quad}, _isRectBased {true},
         _isRectilinear {quad.IsRectilinear()}
@@ -39,7 +39,7 @@ namespace krys::boo
   HitTestLocation::HitTestLocation(const LayoutRect &rect) noexcept
       : _point {rect.Center()}, // Rounded to an integer point; it may not be the exact center.
         _boundingBox {rect}, _transformedPoint {rect.Center()},
-        _transformedRect {FloatQuad {FloatRect(_boundingBox)}}, _isRectBased {true}
+        _transformedRect {QuadF {RectF(_boundingBox)}}, _isRectBased {true}
   {
   }
 
@@ -84,7 +84,7 @@ namespace krys::boo
     }
 
     // Otherwise we need to do a slower quad based intersection test.
-    return _transformedRect.IntersectsRect(FloatRect(rect));
+    return _transformedRect.IntersectsRect(RectF(rect));
   }
 
   bool HitTestLocation::Intersects(const LayoutRect &rect) const noexcept
@@ -92,7 +92,7 @@ namespace krys::boo
     return IntersectsRect(rect);
   }
 
-  bool HitTestLocation::Intersects(const FloatRect &rect) const noexcept
+  bool HitTestLocation::Intersects(const RectF &rect) const noexcept
   {
     return IntersectsRect(rect);
   }

@@ -212,13 +212,13 @@ namespace krys::boo
       PaintingResourceFromSVGPaint(dom::DocumentOrShadowRoot &treeScope, const style::SVGPaint &paint,
                                    DOMStringAtom &id, bool &hasPendingResource) noexcept
     {
-      auto paintURL = paint.TryAnyURL();
-      if (!paintURL)
+      auto paintUrl = paint.TryAnyUrl();
+      if (!paintUrl)
       {
         return nullptr;
       }
 
-      id = SVGURIReference::FragmentIdentifierFromIRIString(*paintURL, treeScope.RootNode().NodeDocument());
+      id = SVGURIReference::FragmentIdentifierFromIRIString(*paintUrl, treeScope.RootNode().NodeDocument());
       auto *container = GetRenderSVGResourceContainerById(treeScope, id);
       if (!container)
       {

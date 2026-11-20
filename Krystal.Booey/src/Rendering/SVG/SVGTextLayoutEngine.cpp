@@ -30,7 +30,7 @@
 #include "Krystal.Booey/SVG/Elements/SVGGeometryElement.hpp"
 #include "Krystal.Booey/SVG/Elements/SVGTextContentElement.hpp"
 #include "Krystal.Booey/SVG/SVGLengthContext.hpp"
-#include "Krystal.Core/Text/CodePointIterator.hpp"
+#include "Krystal.Core/Strings/CodePointIterator.hpp"
 
 namespace krys::boo
 {
@@ -683,7 +683,7 @@ namespace krys::boo
         auto traversalState = _textPath.TraversalStateAtLength(textPathOffset);
         krys_debug_assert(traversalState.Success());
 
-        FloatPoint point = traversalState.Current();
+        PointF point = traversalState.Current();
         x = point.X();
         y = point.Y();
 

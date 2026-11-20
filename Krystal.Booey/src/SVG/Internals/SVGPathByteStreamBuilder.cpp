@@ -27,7 +27,7 @@ namespace krys::boo
   {
   }
 
-  void SVGPathByteStreamBuilder::MoveTo(const FloatPoint &targetPoint, bool,
+  void SVGPathByteStreamBuilder::MoveTo(const PointF &targetPoint, bool,
                                         svg::PathCoordinateMode mode) noexcept
   {
     WriteSegmentType(mode == svg::PathCoordinateMode::RelativeCoordinates ? SVGPathSegType::MoveToRel
@@ -35,7 +35,7 @@ namespace krys::boo
     WriteType(targetPoint);
   }
 
-  void SVGPathByteStreamBuilder::LineTo(const FloatPoint &targetPoint, svg::PathCoordinateMode mode) noexcept
+  void SVGPathByteStreamBuilder::LineTo(const PointF &targetPoint, svg::PathCoordinateMode mode) noexcept
   {
     WriteSegmentType(mode == svg::PathCoordinateMode::RelativeCoordinates ? SVGPathSegType::LineToRel
                                                                           : SVGPathSegType::LineToAbs);
@@ -58,8 +58,8 @@ namespace krys::boo
     WriteType(y);
   }
 
-  void SVGPathByteStreamBuilder::CurveToCubic(const FloatPoint &point1, const FloatPoint &point2,
-                                              const FloatPoint &targetPoint,
+  void SVGPathByteStreamBuilder::CurveToCubic(const PointF &point1, const PointF &point2,
+                                              const PointF &targetPoint,
                                               svg::PathCoordinateMode mode) noexcept
   {
     WriteSegmentType(mode == svg::PathCoordinateMode::RelativeCoordinates ? SVGPathSegType::CurveToCubicRel
@@ -69,7 +69,7 @@ namespace krys::boo
     WriteType(targetPoint);
   }
 
-  void SVGPathByteStreamBuilder::CurveToCubicSmooth(const FloatPoint &point2, const FloatPoint &targetPoint,
+  void SVGPathByteStreamBuilder::CurveToCubicSmooth(const PointF &point2, const PointF &targetPoint,
                                                     svg::PathCoordinateMode mode) noexcept
   {
     WriteSegmentType(mode == svg::PathCoordinateMode::RelativeCoordinates
@@ -79,7 +79,7 @@ namespace krys::boo
     WriteType(targetPoint);
   }
 
-  void SVGPathByteStreamBuilder::CurveToQuadratic(const FloatPoint &point1, const FloatPoint &targetPoint,
+  void SVGPathByteStreamBuilder::CurveToQuadratic(const PointF &point1, const PointF &targetPoint,
                                                   svg::PathCoordinateMode mode) noexcept
   {
     WriteSegmentType(mode == svg::PathCoordinateMode::RelativeCoordinates
@@ -89,7 +89,7 @@ namespace krys::boo
     WriteType(targetPoint);
   }
 
-  void SVGPathByteStreamBuilder::CurveToQuadraticSmooth(const FloatPoint &targetPoint,
+  void SVGPathByteStreamBuilder::CurveToQuadraticSmooth(const PointF &targetPoint,
                                                         svg::PathCoordinateMode mode) noexcept
   {
     WriteSegmentType(mode == svg::PathCoordinateMode::RelativeCoordinates
@@ -99,7 +99,7 @@ namespace krys::boo
   }
 
   void SVGPathByteStreamBuilder::ArcTo(float r1, float r2, float angle, bool largeArcFlag, bool sweepFlag,
-                                       const FloatPoint &targetPoint, svg::PathCoordinateMode mode) noexcept
+                                       const PointF &targetPoint, svg::PathCoordinateMode mode) noexcept
   {
     WriteSegmentType(mode == svg::PathCoordinateMode::RelativeCoordinates ? SVGPathSegType::ArcRel
                                                                           : SVGPathSegType::ArcAbs);

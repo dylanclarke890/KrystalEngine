@@ -1,8 +1,8 @@
 ﻿#pragma once
 
-#include "Krystal.Booey/Graphics/Geometry/IntRect.hpp"
 #include "Krystal.Booey/HTML/Canvas/EngineTexture.hpp"
 #include "Krystal.Booey/HTML/Canvas/GPUBasedCanvasRenderingContext.hpp"
+#include "Krystal.Core/Geometry/Rect.hpp"
 #include "Krystal.Core/Types/Maybe.hpp"
 
 namespace krys::boo::html
@@ -29,7 +29,7 @@ namespace krys::boo::html
     }
 
     /// @brief Tells the canvas the host drew into @p rect of the texture, or all of it.
-    void TextureChanged(const Maybe<IntRect> &rect = null) noexcept;
+    void TextureChanged(const Maybe<RectI> &rect = null) noexcept;
 
     void Reshape() noexcept override
     {

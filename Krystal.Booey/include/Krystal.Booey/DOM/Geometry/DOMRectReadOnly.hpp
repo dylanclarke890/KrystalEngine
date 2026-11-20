@@ -25,8 +25,8 @@
 
 #pragma once
 
-#include "Krystal.Booey/Graphics/Geometry/FloatRect.hpp"
 #include "Krystal.Core/Attributes.hpp"
+#include "Krystal.Core/Geometry/Rect.hpp"
 #include "Krystal.Core/RefCounted.hpp"
 #include "Krystal.Core/Types/RefPtr.hpp"
 #include <cmath>
@@ -113,10 +113,10 @@ namespace krys::boo::dom
       return NanPropagatingMin(_x, _x + _width);
     }
 
-    KRYS_NODISCARD FloatRect ToFloatRect() const noexcept
+    KRYS_NODISCARD RectF ToRectF() const noexcept
     {
-      return FloatRect(static_cast<float>(_x), static_cast<float>(_y), static_cast<float>(_width),
-                       static_cast<float>(_height));
+      return RectF(static_cast<float>(_x), static_cast<float>(_y), static_cast<float>(_width),
+                   static_cast<float>(_height));
     }
 
   private:

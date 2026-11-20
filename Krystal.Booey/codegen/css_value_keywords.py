@@ -329,7 +329,7 @@ class GenerationContext:
                 generator_name=GENERATOR_NAME,
                 headers=[
                     "Krystal.Core/Types/SmallList.hpp",
-                    "Krystal.Core/Types/String.hpp",
+                    "Krystal.Core/Strings/String.hpp",
                 ],
             )
 

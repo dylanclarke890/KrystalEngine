@@ -21,9 +21,9 @@
 
 #pragma once
 
-#include "Krystal.Booey/Graphics/Geometry/FloatSize.hpp"
-#include "Krystal.Booey/Graphics/Transforms/AffineTransform.hpp"
 #include "Krystal.Booey/Rendering/SVG/Legacy/LegacyRenderSVGContainer.hpp"
+#include "Krystal.Core/Geometry/AffineTransform.hpp"
+#include "Krystal.Core/Geometry/Size.hpp"
 
 namespace krys::boo
 {
@@ -38,8 +38,8 @@ namespace krys::boo
     bool _needsTransformUpdate : 1 {true};
     bool _didTransformToRootUpdate : 1 {false};
     AffineTransform _localTransform {};
-    FloatSize _additionalTranslation {};
-    FloatRect _lastTransformReferenceBoxRect {};
+    SizeF _additionalTranslation {};
+    RectF _lastTransformReferenceBoxRect {};
 
   public:
     LegacyRenderSVGTransformableContainer(SVGGraphicsElement &, RenderStyle &&) noexcept;
@@ -61,7 +61,7 @@ namespace krys::boo
       return _didTransformToRootUpdate;
     }
 
-    KRYS_NODISCARD const FloatSize &AdditionalTranslation() const noexcept
+    KRYS_NODISCARD const SizeF &AdditionalTranslation() const noexcept
     {
       return _additionalTranslation;
     }

@@ -36,7 +36,7 @@ namespace krys::boo::svg::tests
       auto document = ResolverFixture::Parse(u8R"html(<svg><path id=p d="M 10 10 h 20 v 20" /></svg>)html");
       auto &path = PathById(*document, u8"p");
       CHECK(AsString(path.PathByteStream()) == u8"M 10 10 h 20 v 20");
-      CHECK(path.GetPath().BoundingRect() == FloatRect(10, 10, 20, 20));
+      CHECK(path.GetPath().BoundingRect() == RectF(10, 10, 20, 20));
 
       // Path data up to an error is kept.
       REQUIRE_FALSE(path.SetAttribute(u8"d", u8"M 0 0 L 5 5 X 1").HasException());
@@ -60,11 +60,11 @@ namespace krys::boo::svg::tests
       // The property overrides it.
       auto &q = PathById(*fixture.Document, u8"q");
       CHECK(AsString(q.PathByteStream()) == u8"M 1 1 L 2 2");
-      CHECK(q.GetBBox() == FloatRect(1, 1, 1, 1));
+      CHECK(q.GetBBox() == RectF(1, 1, 1, 1));
 
       // Changing the attribute changes the shape.
       REQUIRE_FALSE(p.SetAttribute(u8"d", u8"M 0 0 L 40 30").HasException());
-      CHECK(p.GetBBox() == FloatRect(0, 0, 40, 30));
+      CHECK(p.GetBBox() == RectF(0, 0, 40, 30));
     }
   }
 
@@ -78,7 +78,7 @@ namespace krys::boo::svg::tests
     CHECK(path.GetTotalLength() == Approx(60));
     auto point = path.GetPointAtLength(55);
     REQUIRE_FALSE(point.HasException());
-    CHECK(point.Value()->Value() == FloatPoint(35, 40));
+    CHECK(point.Value()->Value() == PointF(35, 40));
 
     // An empty path has no length, and asking for a point throws.
     auto &empty = PathById(*document, u8"empty");

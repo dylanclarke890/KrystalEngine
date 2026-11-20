@@ -30,7 +30,7 @@
 #include "Krystal.Booey/Rendering/Style/StyleCachedImage.hpp"
 #include "Krystal.Booey/Rendering/Style/StyleCrossfadeImage.hpp"
 #include "Krystal.Booey/Rendering/Style/StyleFilterImage.hpp"
-#include "Krystal.Core/Text/StringBuilder.hpp"
+#include "Krystal.Core/Strings/StringBuilder.hpp"
 
 namespace krys::boo::style
 {

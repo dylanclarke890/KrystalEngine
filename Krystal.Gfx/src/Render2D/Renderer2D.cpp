@@ -750,20 +750,17 @@ void main()
     }
 
     /// @brief The rect grown by `amount` pixels on every side.
-    KRYS_NODISCARD PixelRect2D Inflate(const PixelRect2D &rect, int32 amount) noexcept
+    KRYS_NODISCARD RectI Inflate(const RectI &rect, int32 amount) noexcept
     {
       if (rect.IsEmpty())
       {
         return rect;
       }
-      return {.X = rect.X - amount,
-              .Y = rect.Y - amount,
-              .Width = rect.Width + 2u * static_cast<uint32>(amount),
-              .Height = rect.Height + 2u * static_cast<uint32>(amount)};
+      return {rect.X() - amount, rect.Y() - amount, rect.Width() + 2 * amount, rect.Height() + 2 * amount};
     }
 
     /// @brief Clamps negative radii to zero and scales radii that don't fit down together, as CSS does.
-    KRYS_NODISCARD CornerRadii2D ConstrainRadii(const Rect2D &rect, CornerRadii2D radii) noexcept
+    KRYS_NODISCARD CornerRadii2D ConstrainRadii(const RectF &rect, CornerRadii2D radii) noexcept
     {
       radii.TopLeft = std::max(radii.TopLeft, 0.f);
       radii.TopRight = std::max(radii.TopRight, 0.f);
@@ -778,10 +775,10 @@ void main()
           scale = std::min(scale, length / (a + b));
         }
       };
-      fit(rect.Width, radii.TopLeft, radii.TopRight);
-      fit(rect.Width, radii.BottomLeft, radii.BottomRight);
-      fit(rect.Height, radii.TopLeft, radii.BottomLeft);
-      fit(rect.Height, radii.TopRight, radii.BottomRight);
+      fit(rect.Width(), radii.TopLeft, radii.TopRight);
+      fit(rect.Width(), radii.BottomLeft, radii.BottomRight);
+      fit(rect.Height(), radii.TopLeft, radii.BottomLeft);
+      fit(rect.Height(), radii.TopRight, radii.BottomRight);
 
       if (scale < 1.f)
       {
@@ -942,7 +939,7 @@ void main()
     _commands = &commands;
     _target = target;
     _state = {.Transform = {},
-              .Clip = {.X = 0, .Y = 0, .Width = target.Width, .Height = target.Height},
+              .Clip = {0, 0, static_cast<int32>(target.Width), static_cast<int32>(target.Height)},
               .Chain = NoChain,
               .Blend = BlendMode::Normal};
     _backdropCopies = 0u;
@@ -1135,44 +1132,44 @@ void main()
     }
   }
 
-  void Renderer2D::ConcatTransform(const Transform2D &transform) noexcept
+  void Renderer2D::ConcatTransform(const AffineTransform &transform) noexcept
   {
     _state.Transform = _state.Transform * transform;
   }
 
   void Renderer2D::Translate(float x, float y) noexcept
   {
-    ConcatTransform(Transform2D::Translation(x, y));
+    ConcatTransform(AffineTransform::CreateTranslation(SizeF(x, y)));
   }
 
   void Renderer2D::Scale(float x, float y) noexcept
   {
-    ConcatTransform(Transform2D::Scale(x, y));
+    ConcatTransform(AffineTransform::CreateScale(SizeF(x, y)));
   }
 
   void Renderer2D::Rotate(float radians) noexcept
   {
-    ConcatTransform(Transform2D::Rotation(radians));
+    ConcatTransform(AffineTransform().RotateRadians(radians));
   }
 
-  void Renderer2D::SetTransform(const Transform2D &transform) noexcept
+  void Renderer2D::SetTransform(const AffineTransform &transform) noexcept
   {
     _state.Transform = transform;
   }
 
-  const Transform2D &Renderer2D::GetTransform() const noexcept
+  const AffineTransform &Renderer2D::GetTransform() const noexcept
   {
     return _state.Transform;
   }
 
-  void Renderer2D::ClipRect(const Rect2D &rect) noexcept
+  void Renderer2D::ClipRect(const RectF &rect) noexcept
   {
     // On whole pixels and axis-aligned, the scissor alone is the clip.
     const auto &transform = _state.Transform;
     if (transform.PreservesAxisAlignment())
     {
-      const auto a = transform.Apply({rect.X, rect.Y});
-      const auto b = transform.Apply({rect.X + rect.Width, rect.Y + rect.Height});
+      const auto a = MapPoint(transform, {rect.X(), rect.Y()});
+      const auto b = MapPoint(transform, {rect.X() + rect.Width(), rect.Y() + rect.Height()});
       const float left = std::min(a.x, b.x);
       const float top = std::min(a.y, b.y);
       const float right = std::max(a.x, b.x);
@@ -1180,7 +1177,7 @@ void main()
       if (left == std::floor(left) && top == std::floor(top) && right == std::floor(right)
           && bottom == std::floor(bottom))
       {
-        _state.Clip = Intersect(_state.Clip, ToPixelRect(left, top, right, bottom));
+        _state.Clip = Intersection(_state.Clip, ToPixelRect(left, top, right, bottom));
         return;
       }
     }
@@ -1209,7 +1206,7 @@ void main()
     AddClip(rect, false);
   }
 
-  void Renderer2D::ClipOutRect(const Rect2D &rect) noexcept
+  void Renderer2D::ClipOutRect(const RectF &rect) noexcept
   {
     AddClip({.Rect = rect, .Radii = {}}, true);
   }
@@ -1257,7 +1254,7 @@ void main()
       }
       if (!out)
       {
-        _state.Clip = Intersect(_state.Clip, mask.Bounds);
+        _state.Clip = Intersection(_state.Clip, mask.Bounds);
       }
       chain.Mask = mask;
       chain.MaskOut = out;
@@ -1266,23 +1263,22 @@ void main()
     {
       // Several path clips multiply into one mask over the clip's bounds, for this frame.
       const auto region = _state.Clip;
-      const size_t pixelCount = static_cast<size_t>(region.Width) * region.Height;
+      const size_t pixelCount = static_cast<size_t>(region.Width()) * region.Height();
       _combinedClip.assign(pixelCount, 1.f);
       for (const auto &clip : chain.Paths)
       {
         const auto coverage = _rasteriser.Rasterise(clip.Path, clip.Transform, clip.Rule, region);
-        for (uint32 y = 0u; y < region.Height; ++y)
+        for (uint32 y = 0u; y < static_cast<uint32>(region.Height()); ++y)
         {
-          for (uint32 x = 0u; x < region.Width; ++x)
+          for (uint32 x = 0u; x < static_cast<uint32>(region.Width()); ++x)
           {
-            const int32 pixelX = region.X + static_cast<int32>(x);
-            const int32 pixelY = region.Y + static_cast<int32>(y);
+            const int32 pixelX = region.X() + static_cast<int32>(x);
+            const int32 pixelY = region.Y() + static_cast<int32>(y);
             const auto &bounds = coverage.Bounds;
-            const bool covered = pixelX >= bounds.X && pixelY >= bounds.Y
-                                 && pixelX < bounds.X + static_cast<int32>(bounds.Width)
-                                 && pixelY < bounds.Y + static_cast<int32>(bounds.Height);
+            const bool covered = pixelX >= bounds.X() && pixelY >= bounds.Y() && pixelX < bounds.MaxX()
+                                 && pixelY < bounds.MaxY();
             const float inside = covered ? static_cast<float>(coverage.At(pixelX, pixelY)) / 255.f : 0.f;
-            _combinedClip[static_cast<size_t>(y) * region.Width + x] *= clip.Out ? 1.f - inside : inside;
+            _combinedClip[static_cast<size_t>(y) * region.Width() + x] *= clip.Out ? 1.f - inside : inside;
           }
         }
       }
@@ -1306,7 +1302,7 @@ void main()
   {
     // Clipping to nothing leaves nothing; clipping nothing out changes nothing.
     const auto inverse = _state.Transform.Inverse();
-    if (!inverse || shape.Rect.Width <= 0.f || shape.Rect.Height <= 0.f)
+    if (!inverse || shape.Rect.Width() <= 0.f || shape.Rect.Height() <= 0.f)
     {
       if (!out)
       {
@@ -1321,10 +1317,10 @@ void main()
       // The scissor covers every pixel the shape's antialiased edge reaches.
       const auto &transform = _state.Transform;
       const auto &rect = shape.Rect;
-      const Array<Vec2f, 4> corners {transform.Apply({rect.X, rect.Y}),
-                                     transform.Apply({rect.X + rect.Width, rect.Y}),
-                                     transform.Apply({rect.X, rect.Y + rect.Height}),
-                                     transform.Apply({rect.X + rect.Width, rect.Y + rect.Height})};
+      const Array<Vec2f, 4> corners {
+        MapPoint(transform, {rect.X(), rect.Y()}), MapPoint(transform, {rect.X() + rect.Width(), rect.Y()}),
+        MapPoint(transform, {rect.X(), rect.Y() + rect.Height()}),
+        MapPoint(transform, {rect.X() + rect.Width(), rect.Y() + rect.Height()})};
       float left = corners[0].x;
       float top = corners[0].y;
       float right = corners[0].x;
@@ -1340,10 +1336,7 @@ void main()
       const auto y0 = static_cast<int32>(std::floor(top));
       const auto x1 = static_cast<int32>(std::ceil(right));
       const auto y1 = static_cast<int32>(std::ceil(bottom));
-      _state.Clip = Intersect(_state.Clip, {.X = x0,
-                                            .Y = y0,
-                                            .Width = static_cast<uint32>(std::max(x1 - x0, 0)),
-                                            .Height = static_cast<uint32>(std::max(y1 - y0, 0))});
+      _state.Clip = Intersection(_state.Clip, {x0, y0, std::max(x1 - x0, 0), std::max(y1 - y0, 0)});
     }
 
     ClipChain chain = _state.Chain != NoChain ? _chains[_state.Chain] : ClipChain {};
@@ -1357,7 +1350,7 @@ void main()
     _state.Chain = static_cast<uint32>(_chains.size() - 1u);
   }
 
-  void Renderer2D::FillRect(const Rect2D &rect, const Paint2D &paint) noexcept
+  void Renderer2D::FillRect(const RectF &rect, const Paint2D &paint) noexcept
   {
     FillRoundedRect({.Rect = rect, .Radii = {}}, paint);
   }
@@ -1366,7 +1359,7 @@ void main()
   {
     krys_debug_assert_msg(_commands != nullptr, "FillRoundedRect outside Begin and End.");
     const auto &rect = roundedRect.Rect;
-    if (rect.Width <= 0.f || rect.Height <= 0.f || _state.Clip.IsEmpty())
+    if (rect.Width() <= 0.f || rect.Height() <= 0.f || _state.Clip.IsEmpty())
     {
       return;
     }
@@ -1378,15 +1371,15 @@ void main()
   }
 
   void Renderer2D::AddRoundedRect(const RoundedRect2D &roundedRect, const ResolvedPaint &paint,
-                                  const Transform2D &transform) noexcept
+                                  const AffineTransform &transform) noexcept
   {
     const auto &rect = roundedRect.Rect;
-    if (rect.Width <= 0.f || rect.Height <= 0.f)
+    if (rect.Width() <= 0.f || rect.Height() <= 0.f)
     {
       return;
     }
     const auto radii = ConstrainRadii(rect, roundedRect.Radii);
-    RectInstance instance {.Rect = {rect.X, rect.Y, rect.Width, rect.Height},
+    RectInstance instance {.Rect = {rect.X(), rect.Y(), rect.Width(), rect.Height()},
                            .Radii = {radii.TopLeft, radii.TopRight, radii.BottomRight, radii.BottomLeft},
                            .Linear = {},
                            .Translation = {},
@@ -1430,7 +1423,8 @@ void main()
 
     // A hairline is one target pixel wide, whatever the transform's scale.
     const float halfWidth =
-      style.Width > 0.f ? style.Width * 0.5f : 0.5f / std::sqrt(std::abs(_state.Transform.Determinant()));
+      style.Width > 0.f ? style.Width * 0.5f
+                        : 0.5f / std::sqrt(std::abs(static_cast<float>(_state.Transform.Determinant())));
     if (!(halfWidth > 0.f) || !std::isfinite(halfWidth))
     {
       return;
@@ -1442,8 +1436,7 @@ void main()
     const float length = std::sqrt(dx * dx + dy * dy);
     const Vec2f along = length > 0.f ? Vec2f {dx / length, dy / length} : Vec2f {1.f, 0.f};
     const auto transform =
-      _state.Transform
-      * Transform2D {.A = along.x, .B = along.y, .C = -along.y, .D = along.x, .E = from.x, .F = from.y};
+      _state.Transform * AffineTransform(along.x, along.y, -along.y, along.x, from.x, from.y);
 
     // Square and round caps reach half the width past each end; round ones are the rect's rounded ends.
     const float extension = style.Cap == LineCap::Butt ? 0.f : halfWidth;
@@ -1486,17 +1479,17 @@ void main()
     }
   }
 
-  void Renderer2D::FillRectWithRoundedHole(const Rect2D &rect, const RoundedRect2D &hole,
+  void Renderer2D::FillRectWithRoundedHole(const RectF &rect, const RoundedRect2D &hole,
                                            const Paint2D &paint) noexcept
   {
     krys_debug_assert_msg(_commands != nullptr, "FillRectWithRoundedHole outside Begin and End.");
     const auto &holeRect = hole.Rect;
-    if (holeRect.Width <= 0.f || holeRect.Height <= 0.f)
+    if (holeRect.Width() <= 0.f || holeRect.Height() <= 0.f)
     {
       FillRect(rect, paint);
       return;
     }
-    if (rect.Width <= 0.f || rect.Height <= 0.f || _state.Clip.IsEmpty())
+    if (rect.Width() <= 0.f || rect.Height() <= 0.f || _state.Clip.IsEmpty())
     {
       return;
     }
@@ -1508,12 +1501,12 @@ void main()
     }
 
     const auto radii = ConstrainRadii(holeRect, hole.Radii);
-    RectInstance instance {.Rect = {rect.X, rect.Y, rect.Width, rect.Height},
+    RectInstance instance {.Rect = {rect.X(), rect.Y(), rect.Width(), rect.Height()},
                            .Radii = {},
                            .Linear = {},
                            .Translation = {},
                            .UV = {},
-                           .HoleRect = {holeRect.X, holeRect.Y, holeRect.Width, holeRect.Height},
+                           .HoleRect = {holeRect.X(), holeRect.Y(), holeRect.Width(), holeRect.Height()},
                            .HoleRadii = {radii.TopLeft, radii.TopRight, radii.BottomRight, radii.BottomLeft},
                            .Colour = resolved->Colour,
                            .Flags = Hole};
@@ -1528,14 +1521,14 @@ void main()
     AddInstance(instance, _state.Transform, {}, {}, resolved->Gradient, resolved->Pattern);
   }
 
-  void Renderer2D::DrawImage(TextureHandle texture, const Rect2D &source, const Rect2D &destination,
+  void Renderer2D::DrawImage(TextureHandle texture, const RectF &source, const RectF &destination,
                              const ImageOptions &options) noexcept
   {
     krys_debug_assert_msg(_commands != nullptr, "DrawImage outside Begin and End.");
     const auto desc = _device->GetTextureDesc(texture);
     krys_debug_assert_msg(desc.has_value(), "Drawing a stale or invalid texture.");
-    if (!desc || source.Width <= 0.f || source.Height <= 0.f || destination.Width <= 0.f
-        || destination.Height <= 0.f)
+    if (!desc || source.Width() <= 0.f || source.Height() <= 0.f || destination.Width() <= 0.f
+        || destination.Height() <= 0.f)
     {
       return;
     }
@@ -1559,12 +1552,12 @@ void main()
       flags |= LinearTexels;
     }
 
-    AddInstance({.Rect = {destination.X, destination.Y, destination.Width, destination.Height},
+    AddInstance({.Rect = {destination.X(), destination.Y(), destination.Width(), destination.Height()},
                  .Radii = {},
                  .Linear = {},
                  .Translation = {},
-                 .UV = {source.X / width, source.Y / height, (source.X + source.Width) / width,
-                        (source.Y + source.Height) / height},
+                 .UV = {source.X() / width, source.Y() / height, (source.X() + source.Width()) / width,
+                        (source.Y() + source.Height()) / height},
                  .HoleRect = {},
                  .HoleRadii = {},
                  .Colour = {255u, 255u, 255u, alpha},
@@ -1590,7 +1583,7 @@ void main()
     FillPathMask(path, _state.Transform, rule, *resolved);
   }
 
-  void Renderer2D::FillPathMask(const Path2D &path, const Transform2D &geometry, FillRule rule,
+  void Renderer2D::FillPathMask(const Path2D &path, const AffineTransform &geometry, FillRule rule,
                                 const ResolvedPaint &paint) noexcept
   {
     // The shadow's mask is the path's, moved and blurred in target pixels. It can show where the path
@@ -1606,7 +1599,7 @@ void main()
   void Renderer2D::AddMask(const MaskLocation &mask, Array<uint8, 4> colour, uint32 gradient,
                            uint32 pattern) noexcept
   {
-    if (mask.Bounds.IsEmpty() || Intersect(mask.Bounds, _state.Clip).IsEmpty())
+    if (mask.Bounds.IsEmpty() || Intersection(mask.Bounds, _state.Clip).IsEmpty())
     {
       return;
     }
@@ -1621,19 +1614,19 @@ void main()
     const float height = static_cast<float>(desc->Height);
     const auto &bounds = mask.Bounds;
     const auto &texels = mask.Texels;
-    AddInstance({.Rect = {static_cast<float>(bounds.X), static_cast<float>(bounds.Y),
-                          static_cast<float>(bounds.Width), static_cast<float>(bounds.Height)},
-                 .Radii = {},
-                 .Linear = {},
-                 .Translation = {},
-                 .UV = {static_cast<float>(texels.X) / width, static_cast<float>(texels.Y) / height,
-                        static_cast<float>(texels.X + static_cast<int32>(texels.Width)) / width,
-                        static_cast<float>(texels.Y + static_cast<int32>(texels.Height)) / height},
-                 .HoleRect = {},
-                 .HoleRadii = {},
-                 .Colour = colour,
-                 .Flags = Textured | Mask},
-                Transform2D::Identity(), mask.Texture, _nearestSampler, gradient, pattern);
+    AddInstance(
+      {.Rect = {static_cast<float>(bounds.X()), static_cast<float>(bounds.Y()),
+                static_cast<float>(bounds.Width()), static_cast<float>(bounds.Height())},
+       .Radii = {},
+       .Linear = {},
+       .Translation = {},
+       .UV = {static_cast<float>(texels.X()) / width, static_cast<float>(texels.Y()) / height,
+              static_cast<float>(texels.MaxX()) / width, static_cast<float>(texels.MaxY()) / height},
+       .HoleRect = {},
+       .HoleRadii = {},
+       .Colour = colour,
+       .Flags = Textured | Mask},
+      AffineTransform(), mask.Texture, _nearestSampler, gradient, pattern);
   }
 
   void Renderer2D::DrawGlyphs(const FontFace2D &face, float size, Span<const uint32> glyphs,
@@ -1648,7 +1641,7 @@ void main()
     }
     const auto resolved = ResolvePaint(paint);
     const auto &transform = _state.Transform;
-    const float scale = std::sqrt(std::abs(transform.Determinant()));
+    const float scale = std::sqrt(std::abs(static_cast<float>(transform.Determinant())));
     if (!resolved || !(scale > 0.f) || !std::isfinite(scale))
     {
       return;
@@ -1666,7 +1659,8 @@ void main()
       if (!path.IsEmpty())
       {
         const auto at = pen(i);
-        FillPathMask(path, transform * Transform2D::Translation(at.x, at.y), FillRule::NonZero, *resolved);
+        FillPathMask(path, transform * AffineTransform::CreateTranslation(SizeF(at.x, at.y)),
+                     FillRule::NonZero, *resolved);
       }
     };
 
@@ -1683,11 +1677,11 @@ void main()
     // Under a uniform scale, glyphs are rasterised at the scaled size, so hinting still applies; under any
     // other transform, they're rasterised under it.
     const bool uniform =
-      transform.B == 0.f && transform.C == 0.f && transform.A == transform.D && transform.A > 0.f;
-    const float rasterSize = uniform ? size * transform.A : size;
-    const Transform2D linear =
-      uniform ? Transform2D {}
-              : Transform2D {.A = transform.A, .B = transform.B, .C = transform.C, .D = transform.D};
+      transform.B() == 0.f && transform.C() == 0.f && transform.A() == transform.D() && transform.A() > 0.f;
+    const float rasterSize = uniform ? size * static_cast<float>(transform.A()) : size;
+    const AffineTransform linear =
+      uniform ? AffineTransform()
+              : AffineTransform(transform.A(), transform.B(), transform.C(), transform.D(), 0, 0);
 
     // A glyph from the atlas, its pen in target pixels snapped to a quarter across and a whole pixel down;
     // false when the atlas has no room for it.
@@ -1710,11 +1704,12 @@ void main()
     // pixels, at its pen moved by the offset, in the shadow's colour.
     if (const auto shadow = PlaceShadow(transform, *resolved))
     {
-      const Vec2f offset {shadow->Transform.E - transform.E, shadow->Transform.F - transform.F};
+      const Vec2f offset {static_cast<float>(shadow->Transform.E() - transform.E()),
+                          static_cast<float>(shadow->Transform.F() - transform.F())};
       const ResolvedPaint shadowPaint {.Colour = shadow->Colour, .Gradient = NoGradient};
       for (size_t i = 0u; i < count; ++i)
       {
-        const auto at = transform.Apply(pen(i));
+        const auto at = MapPoint(transform, pen(i));
         if (!drawGlyph(glyphs[i], {at.x + offset.x, at.y + offset.y}, shadowPaint, shadow->PixelSigma, true))
         {
           // No room: the outline's shadow alone.
@@ -1722,8 +1717,9 @@ void main()
           const auto from = pen(i);
           if (!path.IsEmpty())
           {
-            AddMask(_masks.GetMask(path, shadow->Transform * Transform2D::Translation(from.x, from.y),
-                                   FillRule::NonZero, _state.Clip, shadow->PixelSigma),
+            AddMask(_masks.GetMask(
+                      path, shadow->Transform * AffineTransform::CreateTranslation(SizeF(from.x, from.y)),
+                      FillRule::NonZero, _state.Clip, shadow->PixelSigma),
                     shadow->Colour, NoGradient);
           }
         }
@@ -1732,15 +1728,15 @@ void main()
 
     for (size_t i = 0u; i < count; ++i)
     {
-      if (!drawGlyph(glyphs[i], transform.Apply(pen(i)), *resolved, 0.f, false))
+      if (!drawGlyph(glyphs[i], MapPoint(transform, pen(i)), *resolved, 0.f, false))
       {
         // No room in the atlas (or too large for a page): the glyph's outline instead.
         const auto path = face.GlyphPath(glyphs[i], size);
         const auto at = pen(i);
         if (!path.IsEmpty())
         {
-          AddMask(_masks.GetMask(path, transform * Transform2D::Translation(at.x, at.y), FillRule::NonZero,
-                                 _state.Clip),
+          AddMask(_masks.GetMask(path, transform * AffineTransform::CreateTranslation(SizeF(at.x, at.y)),
+                                 FillRule::NonZero, _state.Clip),
                   resolved->Colour, resolved->Gradient, resolved->Pattern);
         }
       }
@@ -1765,23 +1761,23 @@ void main()
     const bool image = glyph.Colour && !shadow;
     const uint32 mask = glyph.Colour ? AlphaMask : Mask;
     const uint8 alpha = paint.Gradient != NoGradient ? 255u : paint.Colour[3];
-    AddInstance({.Rect = {static_cast<float>(x + bounds.X), static_cast<float>(y + bounds.Y),
-                          static_cast<float>(bounds.Width), static_cast<float>(bounds.Height)},
-                 .Radii = {},
-                 .Linear = {},
-                 .Translation = {},
-                 .UV = {static_cast<float>(texels.X) / width, static_cast<float>(texels.Y) / height,
-                        static_cast<float>(texels.X + static_cast<int32>(texels.Width)) / width,
-                        static_cast<float>(texels.Y + static_cast<int32>(texels.Height)) / height},
-                 .HoleRect = {},
-                 .HoleRadii = {},
-                 .Colour = image ? Array<uint8, 4> {255u, 255u, 255u, alpha} : paint.Colour,
-                 .Flags = image ? Textured : Textured | mask},
-                Transform2D::Identity(), glyph.Texture, _nearestSampler, image ? NoGradient : paint.Gradient,
-                image ? NoPattern : paint.Pattern);
+    AddInstance(
+      {.Rect = {static_cast<float>(x + bounds.X()), static_cast<float>(y + bounds.Y()),
+                static_cast<float>(bounds.Width()), static_cast<float>(bounds.Height())},
+       .Radii = {},
+       .Linear = {},
+       .Translation = {},
+       .UV = {static_cast<float>(texels.X()) / width, static_cast<float>(texels.Y()) / height,
+              static_cast<float>(texels.MaxX()) / width, static_cast<float>(texels.MaxY()) / height},
+       .HoleRect = {},
+       .HoleRadii = {},
+       .Colour = image ? Array<uint8, 4> {255u, 255u, 255u, alpha} : paint.Colour,
+       .Flags = image ? Textured : Textured | mask},
+      AffineTransform(), glyph.Texture, _nearestSampler, image ? NoGradient : paint.Gradient,
+      image ? NoPattern : paint.Pattern);
   }
 
-  void Renderer2D::DrawImage(TextureHandle texture, const Rect2D &destination,
+  void Renderer2D::DrawImage(TextureHandle texture, const RectF &destination,
                              const ImageOptions &options) noexcept
   {
     const auto desc = _device->GetTextureDesc(texture);
@@ -1793,7 +1789,7 @@ void main()
     }
   }
 
-  void Renderer2D::AddInstance(RectInstance instance, const Transform2D &transform, TextureHandle texture,
+  void Renderer2D::AddInstance(RectInstance instance, const AffineTransform &transform, TextureHandle texture,
                                SamplerHandle sampler, uint32 gradient, uint32 pattern) noexcept
   {
     // Nothing shows through an empty clip or a transform that flattens everything.
@@ -1801,8 +1797,8 @@ void main()
     {
       return;
     }
-    instance.Linear = {transform.A, transform.B, transform.C, transform.D};
-    instance.Translation = {transform.E, transform.F};
+    instance.Linear = LinearPartF(transform);
+    instance.Translation = TranslationF(transform);
     instance.Flags |= static_cast<uint32>(_state.Blend) << BlendModeShift;
     if (gradient != NoGradient)
     {
@@ -1818,7 +1814,7 @@ void main()
     if (_currentLayer != NoLayer)
     {
       auto &layer = _layers[_currentLayer];
-      layer.Bounds = Union(layer.Bounds, reach);
+      layer.Bounds = UnionRect(layer.Bounds, reach);
     }
 
     // Untextured instances join any batch of their layer with the same scissor, chain and blend mode; a
@@ -1836,7 +1832,7 @@ void main()
              && (!textured || !batchTextured || (batch.Texture == texture && batch.Sampler == sampler))
              && (gradient == NoGradient || batch.Gradient == NoGradient || batch.Gradient == gradient)
              && (pattern == NoPattern || batch.Pattern == NoPattern || batch.Pattern == pattern)
-             && (!copies || (batch.Composite == NoLayer && Intersect(batch.Backdrop, reach).IsEmpty()));
+             && (!copies || (batch.Composite == NoLayer && Intersection(batch.Backdrop, reach).IsEmpty()));
     };
     if (_batches.empty() || !joins(_batches.back()))
     {
@@ -1869,13 +1865,13 @@ void main()
     }
     if (copies)
     {
-      batch.Backdrop = Union(batch.Backdrop, reach);
+      batch.Backdrop = UnionRect(batch.Backdrop, reach);
     }
     ++batch.InstanceCount;
     _rects.push_back(instance);
   }
 
-  Maybe<Renderer2D::ShadowPlacement> Renderer2D::PlaceShadow(const Transform2D &transform,
+  Maybe<Renderer2D::ShadowPlacement> Renderer2D::PlaceShadow(const AffineTransform &transform,
                                                              const ResolvedPaint &paint) const noexcept
   {
     if (!_state.DropShadow)
@@ -1898,8 +1894,8 @@ void main()
     // measured in the shape's own units for the shader, and in target pixels for masks (where a transform
     // that stretches unevenly is taken by its average scale).
     const auto &current = _state.Transform;
-    const float currentScale = std::sqrt(std::abs(current.Determinant()));
-    const float localScale = std::sqrt(std::abs(transform.Determinant()));
+    const float currentScale = std::sqrt(std::abs(static_cast<float>(current.Determinant())));
+    const float localScale = std::sqrt(std::abs(static_cast<float>(transform.Determinant())));
     if (!(currentScale > 0.f) || !(localScale > 0.f))
     {
       return {};
@@ -1907,10 +1903,12 @@ void main()
     float pixelSigma = radius * 0.5f;
     if (!_state.ShadowsIgnoreTransforms)
     {
-      offset = {current.A * offset.x + current.C * offset.y, current.B * offset.x + current.D * offset.y};
+      // The linear part only: the offset is a distance, not a position.
+      offset = MapPoint(AffineTransform(current.A(), current.B(), current.C(), current.D(), 0, 0), offset);
       pixelSigma *= currentScale;
     }
-    return ShadowPlacement {.Transform = Transform2D::Translation(offset.x, offset.y) * transform,
+    return ShadowPlacement {.Transform =
+                              AffineTransform::CreateTranslation(SizeF(offset.x, offset.y)) * transform,
                             .Sigma = pixelSigma / localScale,
                             .PixelSigma = pixelSigma,
                             .Colour = {colour.Red, colour.Green, colour.Blue, alpha}};
@@ -2020,7 +2018,7 @@ void main()
     // Each shape's own space, mapped into the gradient's: there, the shader's sums are short.
     constexpr float degenerateThreshold = 1.f / 32768.f;
     GradientData data {.Shape = LinearShape, .Spread = gradient->Spread};
-    Transform2D shape {};
+    AffineTransform shape {};
     bool degenerate = false;
     SwitchOn(
       gradient->Shape,
@@ -2030,14 +2028,14 @@ void main()
         const float dx = linear.Point1.x - linear.Point0.x;
         const float dy = linear.Point1.y - linear.Point0.y;
         degenerate = !(std::sqrt(dx * dx + dy * dy) > degenerateThreshold);
-        shape = {.A = dx, .B = dy, .C = -dy, .D = dx, .E = linear.Point0.x, .F = linear.Point0.y};
+        shape = AffineTransform(dx, dy, -dy, dx, linear.Point0.x, linear.Point0.y);
       },
       [&](const RadialGradient2D &radial)
       {
         // Elliptical gradients squash circles vertically about the first centre, which is the origin.
         const float aspectRatio = radial.AspectRatio;
-        shape = Transform2D::Translation(radial.Point0.x, radial.Point0.y)
-                * Transform2D::Scale(1.f, aspectRatio != 1.f ? 1.f / aspectRatio : 1.f);
+        shape = AffineTransform::CreateTranslation(SizeF(radial.Point0.x, radial.Point0.y))
+                * AffineTransform::CreateScale(SizeF(1.f, aspectRatio != 1.f ? 1.f / aspectRatio : 1.f));
         auto radius = [](float value)
         {
           return std::isfinite(value) ? std::max(value, 0.f) : 0.f;
@@ -2073,8 +2071,8 @@ void main()
       {
         // Upright at the start angle, then clockwise: from x in the shape's space.
         data.Shape = ConicShape;
-        shape = Transform2D::Translation(conic.Point0.x, conic.Point0.y)
-                * Transform2D::Rotation(conic.AngleRadians - 1.57079632679f);
+        shape = AffineTransform::CreateTranslation(SizeF(conic.Point0.x, conic.Point0.y))
+                * AffineTransform().RotateRadians(conic.AngleRadians - 1.57079632679f);
       });
 
     if (degenerate)
@@ -2110,7 +2108,7 @@ void main()
                           .Gradient = static_cast<uint32>(_gradients.size() - 1u)};
   }
 
-  PixelRect2D Renderer2D::Reach(const RectInstance &instance, const Transform2D &transform) const noexcept
+  RectI Renderer2D::Reach(const RectInstance &instance, const AffineTransform &transform) const noexcept
   {
     // A shadow reaches as far as its quad: three standard deviations past its shape.
     auto rect = instance.Rect;
@@ -2119,9 +2117,10 @@ void main()
       const float reach = 3.f * instance.UV[0];
       rect = {rect[0] - reach, rect[1] - reach, rect[2] + 2.f * reach, rect[3] + 2.f * reach};
     }
-    const Array<Vec2f, 4> corners {
-      transform.Apply({rect[0], rect[1]}), transform.Apply({rect[0] + rect[2], rect[1]}),
-      transform.Apply({rect[0], rect[1] + rect[3]}), transform.Apply({rect[0] + rect[2], rect[1] + rect[3]})};
+    const Array<Vec2f, 4> corners {MapPoint(transform, {rect[0], rect[1]}),
+                                   MapPoint(transform, {rect[0] + rect[2], rect[1]}),
+                                   MapPoint(transform, {rect[0], rect[1] + rect[3]}),
+                                   MapPoint(transform, {rect[0] + rect[2], rect[1] + rect[3]})};
     float left = corners[0].x;
     float top = corners[0].y;
     float right = corners[0].x;
@@ -2141,11 +2140,7 @@ void main()
     const auto y0 = static_cast<int32>(std::floor(top)) - 1;
     const auto x1 = static_cast<int32>(std::ceil(right)) + 1;
     const auto y1 = static_cast<int32>(std::ceil(bottom)) + 1;
-    return Intersect({.X = x0,
-                      .Y = y0,
-                      .Width = static_cast<uint32>(std::max(x1 - x0, 0)),
-                      .Height = static_cast<uint32>(std::max(y1 - y0, 0))},
-                     _state.Clip);
+    return Intersection({x0, y0, std::max(x1 - x0, 0), std::max(y1 - y0, 0)}, _state.Clip);
   }
 
   bool Renderer2D::CopiesBackdrop(BlendMode mode) noexcept
@@ -2238,16 +2233,17 @@ void main()
       const auto desc = _device->GetTextureDesc(offscreen);
       const float width = static_cast<float>(desc->Width);
       const float height = static_cast<float>(desc->Height);
-      _batches.push_back({.FirstInstance = static_cast<uint32>(_rects.size()),
-                          .InstanceCount = 1u,
-                          .Scissor = {.X = 0, .Y = 0, .Width = _target.Width, .Height = _target.Height},
-                          .Chain = NoChain,
-                          .Texture = offscreen,
-                          .Sampler = _nearestSampler,
-                          .Layer = WindowLayer,
-                          .Composite = NoLayer,
-                          .Blend = BlendMode::Normal,
-                          .Backdrop = {}});
+      _batches.push_back(
+        {.FirstInstance = static_cast<uint32>(_rects.size()),
+         .InstanceCount = 1u,
+         .Scissor = {0, 0, static_cast<int32>(_target.Width), static_cast<int32>(_target.Height)},
+         .Chain = NoChain,
+         .Texture = offscreen,
+         .Sampler = _nearestSampler,
+         .Layer = WindowLayer,
+         .Composite = NoLayer,
+         .Blend = BlendMode::Normal,
+         .Backdrop = {}});
       _rects.push_back(
         {.Rect = {0.f, 0.f, static_cast<float>(_target.Width), static_cast<float>(_target.Height)},
          .Radii = {},
@@ -2326,8 +2322,8 @@ void main()
         {.Attachment = {.Texture = layer.Texture, .Load = AttachmentLoadOp::Clear, .ClearColour = {}},
          .Width = desc->Width,
          .Height = desc->Height,
-         .OriginX = layer.Bounds.X,
-         .OriginY = layer.Bounds.Y,
+         .OriginX = layer.Bounds.X(),
+         .OriginY = layer.Bounds.Y(),
          .Layer = index},
         resources);
 
@@ -2338,7 +2334,7 @@ void main()
         const bool shadow = layer.Filter->Type == LayerFilter2D::Kind::DropShadow;
         const float sigma = (shadow ? layer.Filter->Shadow.BlurRadius : layer.Filter->BlurRadius) / 2.f;
         const auto destination = shadow ? layer.ShadowTexture : layer.Texture;
-        const PixelRect2D region {.X = 0, .Y = 0, .Width = layer.Bounds.Width, .Height = layer.Bounds.Height};
+        const RectI region {0, 0, layer.Bounds.Width(), layer.Bounds.Height()};
         if (!destination.IsValid())
         {
           continue;
@@ -2348,12 +2344,15 @@ void main()
           // A sharp shadow is the layer's alpha as it is.
           if (shadow)
           {
-            const TextureRegion copied {.X = 0u, .Y = 0u, .Width = region.Width, .Height = region.Height};
+            const TextureRegion copied {.X = 0u,
+                                        .Y = 0u,
+                                        .Width = static_cast<uint32>(region.Width()),
+                                        .Height = static_cast<uint32>(region.Height())};
             commands.BlitTexture(layer.Texture, copied, destination, copied, SamplerFilter::Nearest);
           }
           continue;
         }
-        const auto scratch = AcquireLayerTexture(region.Width, region.Height);
+        const auto scratch = AcquireLayerTexture(region.Width(), region.Height());
         if (!scratch.IsValid())
         {
           continue;
@@ -2448,12 +2447,12 @@ void main()
       // moved: its source reaches the clip moved back by the shadow's offset.
       const auto &offset = layer.Filter->Shadow.Offset;
       const auto &clip = layer.Clip;
-      reachable = Union(
-        clip, ToPixelRect(static_cast<float>(clip.X) - offset[0], static_cast<float>(clip.Y) - offset[1],
-                          static_cast<float>(clip.X + static_cast<int32>(clip.Width)) - offset[0],
-                          static_cast<float>(clip.Y + static_cast<int32>(clip.Height)) - offset[1]));
+      reachable = UnionRect(clip, ToPixelRect(static_cast<float>(clip.X()) - offset[0],
+                                              static_cast<float>(clip.Y()) - offset[1],
+                                              static_cast<float>(clip.MaxX()) - offset[0],
+                                              static_cast<float>(clip.MaxY()) - offset[1]));
     }
-    layer.Bounds = Intersect(Inflate(layer.Bounds, BlurReach(sigma)), reachable);
+    layer.Bounds = Intersection(Inflate(layer.Bounds, BlurReach(sigma)), reachable);
     // An operator that clears where the source is transparent covers all of the clip, drawn or not, as a
     // saved layer restored with it does.
     const bool clears = ClearsUncovered(layer.Operator);
@@ -2467,7 +2466,7 @@ void main()
       return;
     }
 
-    layer.Texture = AcquireLayerTexture(layer.Bounds.Width, layer.Bounds.Height);
+    layer.Texture = AcquireLayerTexture(layer.Bounds.Width(), layer.Bounds.Height());
     if (!layer.Texture.IsValid())
     {
       return;
@@ -2479,10 +2478,10 @@ void main()
 
     // The composite draws the layer's texels one to one, premultiplied, at the layer's opacity.
     auto &instance = _rects[layer.CompositeInstance];
-    instance.Rect = {static_cast<float>(bounds.X), static_cast<float>(bounds.Y),
-                     static_cast<float>(bounds.Width), static_cast<float>(bounds.Height)};
-    instance.UV = {0.f, 0.f, static_cast<float>(bounds.Width) / width,
-                   static_cast<float>(bounds.Height) / height};
+    instance.Rect = {static_cast<float>(bounds.X()), static_cast<float>(bounds.Y()),
+                     static_cast<float>(bounds.Width()), static_cast<float>(bounds.Height())};
+    instance.UV = {0.f, 0.f, static_cast<float>(bounds.Width()) / width,
+                   static_cast<float>(bounds.Height()) / height};
     // NOLINTNEXTLINE(bugprone-incorrect-roundings): never negative.
     instance.Colour = {255u, 255u, 255u, static_cast<uint8>(layer.Opacity * 255.f + 0.5f)};
     instance.Flags = Textured | static_cast<uint32>(layer.Blend) << BlendModeShift;
@@ -2491,7 +2490,7 @@ void main()
     batch.Sampler = _nearestSampler;
     if (CopiesBackdrop(layer.Blend))
     {
-      batch.Backdrop = Intersect(bounds, batch.Scissor);
+      batch.Backdrop = Intersection(bounds, batch.Scissor);
     }
     if (layer.Filter && layer.Filter->Type == LayerFilter2D::Kind::ColourMatrix)
     {
@@ -2523,7 +2522,7 @@ void main()
     if (layer.Filter && layer.Filter->Type == LayerFilter2D::Kind::DropShadow)
     {
       // The shadow is the layer's alpha, blurred, in the shadow's colour, moved by its offset.
-      layer.ShadowTexture = AcquireLayerTexture(bounds.Width, bounds.Height);
+      layer.ShadowTexture = AcquireLayerTexture(bounds.Width(), bounds.Height());
       if (layer.ShadowTexture.IsValid())
       {
         const auto &shadow = layer.Filter->Shadow;
@@ -2543,16 +2542,16 @@ void main()
                                        cast.Rect[1] + cast.Rect[3] + 1.f);
         if (CopiesBackdrop(layer.Blend))
         {
-          shadowBatch.Backdrop = Intersect(moved, shadowBatch.Scissor);
+          shadowBatch.Backdrop = Intersection(moved, shadowBatch.Scissor);
         }
-        composited = Union(composited, moved);
+        composited = UnionRect(composited, moved);
       }
     }
 
     if (layer.Parent != NoLayer)
     {
       auto &parent = _layers[layer.Parent];
-      parent.Bounds = Union(parent.Bounds, composited);
+      parent.Bounds = UnionRect(parent.Bounds, composited);
     }
   }
 
@@ -2664,7 +2663,7 @@ void main()
     };
     bindFrame();
 
-    const PixelRect2D viewport {.X = 0, .Y = 0, .Width = width, .Height = height};
+    const RectI viewport {0, 0, static_cast<int32>(width), static_cast<int32>(height)};
     for (const auto &batch : _batches)
     {
       if (batch.Layer != pass.Layer)
@@ -2672,11 +2671,9 @@ void main()
         continue;
       }
       // The scissor is in target pixels; the pass's pixels start at its origin.
-      const auto scissor = Intersect({.X = batch.Scissor.X - pass.OriginX,
-                                      .Y = batch.Scissor.Y - pass.OriginY,
-                                      .Width = batch.Scissor.Width,
-                                      .Height = batch.Scissor.Height},
-                                     viewport);
+      const auto scissor = Intersection({batch.Scissor.X() - pass.OriginX, batch.Scissor.Y() - pass.OriginY,
+                                         batch.Scissor.Width(), batch.Scissor.Height()},
+                                        viewport);
       if (scissor.IsEmpty())
       {
         continue;
@@ -2686,20 +2683,19 @@ void main()
       // into the backdrop at the same place, and the pass resumes with its contents kept.
       if (CopiesBackdrop(batch.Blend))
       {
-        const auto region = Intersect({.X = batch.Backdrop.X - pass.OriginX,
-                                       .Y = batch.Backdrop.Y - pass.OriginY,
-                                       .Width = batch.Backdrop.Width,
-                                       .Height = batch.Backdrop.Height},
-                                      scissor);
+        const auto region =
+          Intersection({batch.Backdrop.X() - pass.OriginX, batch.Backdrop.Y() - pass.OriginY,
+                        batch.Backdrop.Width(), batch.Backdrop.Height()},
+                       scissor);
         if (region.IsEmpty() || !resources.Backdrop.IsValid() || !pass.Attachment.Texture.IsValid())
         {
           continue;
         }
         commands.EndRenderPass();
-        const TextureRegion copied {.X = static_cast<uint32>(region.X),
-                                    .Y = static_cast<uint32>(region.Y),
-                                    .Width = region.Width,
-                                    .Height = region.Height};
+        const TextureRegion copied {.X = static_cast<uint32>(region.X()),
+                                    .Y = static_cast<uint32>(region.Y()),
+                                    .Width = static_cast<uint32>(region.Width()),
+                                    .Height = static_cast<uint32>(region.Height())};
         commands.BlitTexture(pass.Attachment.Texture, copied, resources.Backdrop, copied,
                              SamplerFilter::Nearest);
         ++_backdropCopies;
@@ -2733,9 +2729,8 @@ void main()
           {
             const auto &bounds = chain.Mask.Bounds;
             data.MaskMode = chain.MaskOut ? ClipOutMask : ClipToMask;
-            data.MaskBounds = {bounds.X, bounds.Y, static_cast<int32>(bounds.Width),
-                               static_cast<int32>(bounds.Height)};
-            data.MaskOrigin = {chain.Mask.Texels.X, chain.Mask.Texels.Y, 0, 0};
+            data.MaskBounds = {bounds.X(), bounds.Y(), bounds.Width(), bounds.Height()};
+            data.MaskOrigin = {chain.Mask.Texels.X(), chain.Mask.Texels.Y(), 0, 0};
             clipMask = chain.Mask.Texture;
           }
           const auto &shapes = chain.Shapes;
@@ -2746,10 +2741,12 @@ void main()
             const auto &rect = clip.Shape.Rect;
             const auto &radii = clip.Shape.Radii;
             const auto &inverse = clip.Inverse;
-            data.Clips[i] = {.Rect = {rect.X, rect.Y, rect.Width, rect.Height},
+            data.Clips[i] = {.Rect = {rect.X(), rect.Y(), rect.Width(), rect.Height()},
                              .Radii = {radii.TopLeft, radii.TopRight, radii.BottomRight, radii.BottomLeft},
-                             .InverseLinear = {inverse.A, inverse.B, inverse.C, inverse.D},
-                             .InverseTranslation = {inverse.E, inverse.F, clip.Out ? 1.f : 0.f, 0.f}};
+                             .InverseLinear = LinearPartF(inverse),
+                             .InverseTranslation = {static_cast<float>(inverse.E()),
+                                                    static_cast<float>(inverse.F()), clip.Out ? 1.f : 0.f,
+                                                    0.f}};
           }
         }
         std::memcpy(clips.Data.data(), &data, sizeof(data));
@@ -2773,8 +2770,9 @@ void main()
         data.Shape = gradient.Shape;
         data.Spread = static_cast<uint32>(gradient.Spread);
         data.StopCount = gradient.StopCount;
-        data.InverseLinear = {inverse.A, inverse.B, inverse.C, inverse.D};
-        data.InverseTranslation = {inverse.E, inverse.F, 0.f, 0.f};
+        data.InverseLinear = LinearPartF(inverse);
+        data.InverseTranslation = {static_cast<float>(inverse.E()), static_cast<float>(inverse.F()), 0.f,
+                                   0.f};
         data.Radial = gradient.Radial;
         for (uint32 i = 0u; i < gradient.StopCount; ++i)
         {
@@ -2797,10 +2795,11 @@ void main()
         }
         const auto &pattern = _patterns[batch.Pattern];
         const auto &inverse = pattern.Inverse;
-        const PatternUniforms data {.InverseLinear = {inverse.A, inverse.B, inverse.C, inverse.D},
-                                    .InverseTranslation = {inverse.E, inverse.F, 0.f, 0.f},
-                                    .TileAndSpacing = pattern.TileAndSpacing,
-                                    .Flags = {pattern.Flags, 0u, 0u, 0u}};
+        const PatternUniforms data {
+          .InverseLinear = LinearPartF(inverse),
+          .InverseTranslation = {static_cast<float>(inverse.E()), static_cast<float>(inverse.F()), 0.f, 0.f},
+          .TileAndSpacing = pattern.TileAndSpacing,
+          .Flags = {pattern.Flags, 0u, 0u, 0u}};
         std::memcpy(block.Data.data(), &data, sizeof(data));
         commands.BindUniformBuffer(3u, block.Buffer, block.Offset, sizeof(PatternUniforms));
         commands.BindTexture(3u, pattern.Texture, pattern.Sampler);
@@ -2833,7 +2832,7 @@ void main()
         boundTexture = texture;
         boundSampler = sampler;
       }
-      commands.SetScissor(scissor.X, scissor.Y, scissor.Width, scissor.Height);
+      commands.SetScissor(scissor.X(), scissor.Y(), scissor.Width(), scissor.Height());
       commands.Draw(4u, batch.InstanceCount, 0u, batch.FirstInstance);
     }
     commands.EndRenderPass();
@@ -2943,7 +2942,7 @@ void main()
   }
 
   void Renderer2D::RecordBlur(CommandBuffer &commands, const FrameResources &resources, TextureHandle source,
-                              TextureHandle destination, const PixelRect2D &region, Array<float, 2> direction,
+                              TextureHandle destination, const RectI &region, Array<float, 2> direction,
                               float sigma, EdgeMode2D edgeMode) noexcept
   {
     const auto desc = _device->GetTextureDesc(destination);
@@ -2957,8 +2956,8 @@ void main()
       return;
     }
     const BlurUniforms uniforms {
-      .Region = {static_cast<float>(region.X), static_cast<float>(region.Y), static_cast<float>(region.Width),
-                 static_cast<float>(region.Height)},
+      .Region = {static_cast<float>(region.X()), static_cast<float>(region.Y()),
+                 static_cast<float>(region.Width()), static_cast<float>(region.Height())},
       .TextureSize = {static_cast<float>(desc->Width), static_cast<float>(desc->Height)},
       .Direction = direction,
       .Sigma = sigma,
@@ -2977,44 +2976,12 @@ void main()
     commands.EndRenderPass();
   }
 
-  PixelRect2D Renderer2D::ToPixelRect(float left, float top, float right, float bottom) noexcept
+  RectI Renderer2D::ToPixelRect(float left, float top, float right, float bottom) noexcept
   {
     const auto x0 = static_cast<int32>(std::ceil(left - 0.5f));
     const auto y0 = static_cast<int32>(std::ceil(top - 0.5f));
     const auto x1 = static_cast<int32>(std::ceil(right - 0.5f));
     const auto y1 = static_cast<int32>(std::ceil(bottom - 0.5f));
-    return {.X = x0,
-            .Y = y0,
-            .Width = x1 > x0 ? static_cast<uint32>(x1 - x0) : 0u,
-            .Height = y1 > y0 ? static_cast<uint32>(y1 - y0) : 0u};
-  }
-
-  PixelRect2D Renderer2D::Union(const PixelRect2D &a, const PixelRect2D &b) noexcept
-  {
-    if (a.IsEmpty())
-    {
-      return b;
-    }
-    if (b.IsEmpty())
-    {
-      return a;
-    }
-    const int32 x0 = std::min(a.X, b.X);
-    const int32 y0 = std::min(a.Y, b.Y);
-    const int32 x1 = std::max(a.X + static_cast<int32>(a.Width), b.X + static_cast<int32>(b.Width));
-    const int32 y1 = std::max(a.Y + static_cast<int32>(a.Height), b.Y + static_cast<int32>(b.Height));
-    return {.X = x0, .Y = y0, .Width = static_cast<uint32>(x1 - x0), .Height = static_cast<uint32>(y1 - y0)};
-  }
-
-  PixelRect2D Renderer2D::Intersect(const PixelRect2D &a, const PixelRect2D &b) noexcept
-  {
-    const int32 x0 = std::max(a.X, b.X);
-    const int32 y0 = std::max(a.Y, b.Y);
-    const int32 x1 = std::min(a.X + static_cast<int32>(a.Width), b.X + static_cast<int32>(b.Width));
-    const int32 y1 = std::min(a.Y + static_cast<int32>(a.Height), b.Y + static_cast<int32>(b.Height));
-    return {.X = x0,
-            .Y = y0,
-            .Width = x1 > x0 ? static_cast<uint32>(x1 - x0) : 0u,
-            .Height = y1 > y0 ? static_cast<uint32>(y1 - y0) : 0u};
+    return {x0, y0, x1 > x0 ? x1 - x0 : 0, y1 > y0 ? y1 - y0 : 0};
   }
 }

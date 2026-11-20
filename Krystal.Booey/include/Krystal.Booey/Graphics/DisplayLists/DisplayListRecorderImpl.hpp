@@ -38,10 +38,9 @@ namespace krys::boo::display_list
     List<Item> _items;
 
   public:
-    RecorderImpl(const GraphicsContextState &, const FloatRect &initialClip,
-                 const AffineTransform &) noexcept;
+    RecorderImpl(const GraphicsContextState &, const RectF &initialClip, const AffineTransform &) noexcept;
 
-    explicit RecorderImpl(FloatSize initialClipSize) noexcept : RecorderImpl({}, {{}, initialClipSize}, {})
+    explicit RecorderImpl(SizeF initialClipSize) noexcept : RecorderImpl({}, {{}, initialClipSize}, {})
     {
     }
 
@@ -65,7 +64,7 @@ namespace krys::boo::display_list
 
     void Rotate(float angle) noexcept final;
 
-    void Scale(const FloatSize &) noexcept final;
+    void Scale(const SizeF &) noexcept final;
 
     void SetCTM(const AffineTransform &) noexcept final;
 
@@ -81,11 +80,11 @@ namespace krys::boo::display_list
 
     void ResetClip() noexcept final;
 
-    void Clip(const FloatRect &) noexcept final;
+    void Clip(const RectF &) noexcept final;
 
     void ClipRoundedRect(const FloatRoundedRect &) noexcept final;
 
-    void ClipOut(const FloatRect &) noexcept final;
+    void ClipOut(const RectF &) noexcept final;
 
     void ClipOut(const Path &) noexcept final;
 
@@ -93,7 +92,7 @@ namespace krys::boo::display_list
 
     void ClipPath(const Path &, WindRule = WindRule::EvenOdd) noexcept final;
 
-    void ClipToImageBuffer(ImageBuffer &, const FloatRect &) noexcept final;
+    void ClipToImageBuffer(ImageBuffer &, const RectF &) noexcept final;
 
     void BeginTransparencyLayer(float) noexcept final;
 
@@ -101,89 +100,87 @@ namespace krys::boo::display_list
 
     void EndTransparencyLayer() noexcept final;
 
-    void DrawRect(const FloatRect &, float = 1) noexcept final;
+    void DrawRect(const RectF &, float = 1) noexcept final;
 
-    void DrawLine(const FloatPoint &point1, const FloatPoint &point2) noexcept final;
+    void DrawLine(const PointF &point1, const PointF &point2) noexcept final;
 
-    void DrawLinesForText(const FloatPoint &, float thickness, Span<const FloatSegment>, bool isPrinting,
+    void DrawLinesForText(const PointF &, float thickness, Span<const SegmentF>, bool isPrinting,
                           bool doubleLines, boo::StrokeStyle) noexcept final;
 
-    void DrawDotsForDocumentMarker(const FloatRect &, DocumentMarkerLineStyle) noexcept final;
+    void DrawDotsForDocumentMarker(const RectF &, DocumentMarkerLineStyle) noexcept final;
 
-    void DrawEllipse(const FloatRect &) noexcept final;
+    void DrawEllipse(const RectF &) noexcept final;
 
     void DrawPath(const Path &) noexcept final;
 
     void DrawFocusRing(const Path &, float outlineWidth, const Color &) noexcept final;
 
-    void DrawFocusRing(const List<FloatRect> &, float outlineOffset, float outlineWidth,
+    void DrawFocusRing(const List<RectF> &, float outlineOffset, float outlineWidth,
                        const Color &) noexcept final;
 
-    void FillEllipse(const FloatRect &) noexcept final;
+    void FillEllipse(const RectF &) noexcept final;
 
     void FillPath(const Path &) noexcept final;
 
-    void FillRect(const FloatRect &, RequiresClipToRect = RequiresClipToRect::Yes) noexcept final;
+    void FillRect(const RectF &, RequiresClipToRect = RequiresClipToRect::Yes) noexcept final;
 
-    void FillRect(const FloatRect &, const Color &) noexcept final;
+    void FillRect(const RectF &, const Color &) noexcept final;
 
-    void FillRect(const FloatRect &, Gradient &) noexcept final;
+    void FillRect(const RectF &, Gradient &) noexcept final;
 
-    void FillRect(const FloatRect &, Gradient &, const AffineTransform &,
+    void FillRect(const RectF &, Gradient &, const AffineTransform &,
                   RequiresClipToRect = RequiresClipToRect::Yes) noexcept final;
 
-    void FillRect(const FloatRect &, const Color &, CompositeOperator,
+    void FillRect(const RectF &, const Color &, CompositeOperator,
                   boo::BlendMode = BlendMode::Normal) noexcept final;
 
     void FillRoundedRect(const FloatRoundedRect &, const Color &,
                          boo::BlendMode = BlendMode::Normal) noexcept final;
 
-    void FillRectWithRoundedHole(const FloatRect &, const FloatRoundedRect &, const Color &) noexcept final;
+    void FillRectWithRoundedHole(const RectF &, const FloatRoundedRect &, const Color &) noexcept final;
 
     void DrawGlyphs(const Font &, Span<const GlyphBufferGlyph>, Span<const GlyphBufferAdvance>,
-                    const FloatPoint &localAnchor, FontSmoothingMode) noexcept final;
+                    const PointF &localAnchor, FontSmoothingMode) noexcept final;
 
     void DrawGlyphsImmediate(const Font &, Span<const GlyphBufferGlyph>, Span<const GlyphBufferAdvance>,
-                             const FloatPoint &localAnchor, FontSmoothingMode) noexcept final;
+                             const PointF &localAnchor, FontSmoothingMode) noexcept final;
 
     void DrawDisplayList(const DisplayList &) noexcept final;
 
     void DrawControlPart(ControlPart &, const FloatRoundedRect &borderRect, float deviceScaleFactor,
                          const ControlStyle &) noexcept final;
 
-    void DrawNativeImage(NativeImage &, const FloatRect &destRect, const FloatRect &srcRect,
+    void DrawNativeImage(NativeImage &, const RectF &destRect, const RectF &srcRect,
                          ImagePaintingOptions) noexcept final;
 
-    void DrawPattern(NativeImage &, const FloatRect &destRect, const FloatRect &tileRect,
-                     const AffineTransform &, const FloatPoint &phase, const FloatSize &spacing,
-                     ImagePaintingOptions) noexcept final;
+    void DrawPattern(NativeImage &, const RectF &destRect, const RectF &tileRect, const AffineTransform &,
+                     const PointF &phase, const SizeF &spacing, ImagePaintingOptions) noexcept final;
 
-    void DrawFilteredImageBuffer(ImageBuffer *sourceImage, const FloatRect &sourceImageRect, Filter &,
+    void DrawFilteredImageBuffer(ImageBuffer *sourceImage, const RectF &sourceImageRect, Filter &,
                                  FilterResults &) noexcept override;
 
     /// @note Not final: an accelerated buffer's recorder draws a copy of an accelerated source.
-    void DrawImageBuffer(ImageBuffer &, const FloatRect &destRect, const FloatRect &srcRect,
+    void DrawImageBuffer(ImageBuffer &, const RectF &destRect, const RectF &srcRect,
                          ImagePaintingOptions) noexcept override;
 
-    void DrawPattern(ImageBuffer &, const FloatRect &destRect, const FloatRect &tileRect,
-                     const AffineTransform &, const FloatPoint &phase, const FloatSize &spacing,
-                     ImagePaintingOptions) noexcept final;
+    void DrawPattern(ImageBuffer &, const RectF &destRect, const RectF &tileRect, const AffineTransform &,
+                     const PointF &phase, const SizeF &spacing, ImagePaintingOptions) noexcept final;
 
-    void StrokeRect(const FloatRect &, float) noexcept final;
+    void StrokeRect(const RectF &, float) noexcept final;
 
-    void StrokeEllipse(const FloatRect &) noexcept final;
+    void StrokeEllipse(const RectF &) noexcept final;
 
     void StrokePath(const Path &) noexcept final;
 
-    void ClearRect(const FloatRect &) noexcept final;
+    void ClearRect(const RectF &) noexcept final;
 
     void ApplyDeviceScaleFactor(float) noexcept final;
 
-    void BeginPage(const FloatRect &) noexcept final;
+    void BeginPage(const RectF &) noexcept final;
 
     void EndPage() noexcept final;
 
-    void SetURLForRect(const url::URL &, const FloatRect &) noexcept final;
+    void SetUrlForRect(const net::Url &, const RectF &) noexcept final;
 
     // Appends a deferred placeholder command.
     // The function is called during the display list playback, drawDisplayList().

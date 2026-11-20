@@ -22,14 +22,14 @@ Record a difference here when you make one, and remove it when Booey comes back 
 - The no-op legacy members are left out: `captureEvents()`/`releaseEvents()` on the window and the document, `document.clear()`, `Range.detach()`, `NodeIterator.detach()` and `window.blur()`.
 - Nodes are equal when their node types match, where the specification asks for the same interfaces: an `HTMLDocument` equals an `XMLDocument` with equal children.
 - Documents have no origin and no base URL override, so cloning a document copies neither: the copy's base URL comes from its own URL and `<base>` element. `new Document()` skips setting its origin, and getting the base URL is the document base URL.
-- With no origins, there's no `document.domain` and nothing is refused as cross-origin: a linked style sheet's rules can always be read, a canvas and its patterns are always origin-clean (`getImageData()` and `toDataURL()` throw no `SecurityError`), `<use>` can load another file with no same-origin fetch mode, changing `crossorigin` reloads nothing, and a dragged image can always be dropped as a file (`EventHandler::CanDropCurrentlyDraggedImageAsFile`).
+- With no origins, there's no `document.domain` and nothing is refused as cross-origin: a linked style sheet's rules can always be read, a canvas and its patterns are always origin-clean (`getImageData()` and `toDataUrl()` throw no `SecurityError`), `<use>` can load another file with no same-origin fetch mode, changing `crossorigin` reloads nothing, and a dragged image can always be dropped as a file (`EventHandler::CanDropCurrentlyDraggedImageAsFile`).
 - Adopt sets the node document and registry of every node in the subtree first, then enqueues the `adoptedCallback` reactions, then runs the adopting steps, where the specification does all three for each node in turn; so a node's adopting steps see the whole subtree moved.
 - There are no global objects, so `DocumentFragment`, `Text` and `Comment` are constructed with a document, as is a `ProcessingInstruction` (`ProcessingInstruction::Create`). `new Range()` is `Document::CreateRange`.
 - There's no XPath (`XPathEvaluator`, `XPathExpression`, `XPathResult`, `Document.evaluate()` and `createExpression()`) and no XSLT (`XSLTProcessor`).
 - A `NodeFilter` is a C++ subclass overriding `AcceptNode` rather than a callback interface or function, and returns a `FilterResult`, so it can't return a value other than `FILTER_ACCEPT`, `FILTER_REJECT` and `FILTER_SKIP`.
 - Traversing a `NodeIterator` from inside its own filter throws an `InvalidStateError` before changing its candidate reference (`IteratorAlgorithms::Traverse`). The specification's traverse sets the candidate reference first, and when the filter throws, the inner traversal sets it to null, leaving the outer traversal with no candidate to continue from.
 - Cloning a `ProcessingInstruction` updates the copy's attributes from its data, so its attribute map matches its data; the specification's clone sets only the target and data, leaving the copy's attribute map empty. `Document()` takes no arguments.
-- The fallback base URL is always the document's URL: documents have no about base URL, which an iframe's `srcdoc` document or a document navigated to `about:blank` takes from its parent or initiator (skipped in `Document::FallbackBaseURL`).
+- The fallback base URL is always the document's URL: documents have no about base URL, which an iframe's `srcdoc` document or a document navigated to `about:blank` takes from its parent or initiator (skipped in `Document::FallbackBaseUrl`).
 - There's no Content Security Policy: every `<base>` is allowed, and inline `<style>` sheets and `style` attributes are parsed unchecked (`SPEC-VIOLATION(CSP)`).
 - Elements have no `nonce`: it serves only Content Security Policy, so there's no `[[CryptographicNonce]]`, no `nonce` IDL attribute, and the content attribute isn't hidden when an element is connected. The `nonce` attribute stays an ordinary attribute.
 - `data:` and `javascript:` base URLs are always refused.
@@ -235,7 +235,7 @@ Record a difference here when you make one, and remove it when Booey comes back 
 
 ### From Chrome
 
-- `hyphens: auto` never hyphenates, as there are no hyphenation dictionaries (`CanHyphenate` in `Text/Hyphenation.hpp` is false for every language), which css-text allows; Chrome hyphenates the languages it has downloaded dictionaries for.
+- `hyphens: auto` never hyphenates, as there are no hyphenation dictionaries (`text::CanHyphenate` in `Krystal.Text/Hyphenation.hpp` is false for every language), which css-text allows; Chrome hyphenates the languages it has downloaded dictionaries for.
 - `text-transform: full-width` is supported, as in Firefox and Safari: a character's full-width form is what its `<narrow>` decomposition maps it to, or the character whose `<wide>` decomposition maps to it. Chrome doesn't parse the value.
 - Hinting defaults to slight (`FontHinting::Slight`, vertical snapping only), and is off under a transform or synthetic oblique. Pens snap to a quarter pixel horizontally (four glyph variants, `GlyphAtlas::SubpixelPositions`) and to a whole pixel vertically. There's no LCD antialiasing. See *Painting* for how this compares with Chrome's text.
 - Chrome hints Ahem's boxes differently, leaving seams between them, so the `webfonts` and `textfields` goldens are report-only.
@@ -272,14 +272,14 @@ Record a difference here when you make one, and remove it when Booey comes back 
 
 ### From the specs
 
-- `toDataURL` encodes the pixels read back from the buffer (PNG, JPEG and WebP, with libpng, libjpeg-turbo and libwebp). A quality outside 0 to 1, or none, encodes at the encoders' best (100); Chrome's default JPEG quality is 0.92.
+- `toDataUrl` encodes the pixels read back from the buffer (PNG, JPEG and WebP, with libpng, libjpeg-turbo and libwebp). A quality outside 0 to 1, or none, encodes at the encoders' best (100); Chrome's default JPEG quality is 0.92.
 - A filter needs the canvas's computed style (`SetFilterStringWithoutUpdatingStyle`).
 - While the current transform can't be inverted, the transform methods, the path methods and drawing do nothing, as in Chrome; the specification multiplies the matrix and adds the points regardless, so `scale(0, 1)` then `scale(1, 2)` leaves the vertical scale at 1 here, where the specification's is 2.
 - `letterSpacing` and `wordSpacing` reject the units whose resolution the specification leaves undefined (`lh`, `rlh`, the viewport units and the container query units; whatwg/html#10893).
 - `letterSpacing` and `wordSpacing` reject `calc()` lengths (`calc(1em + 2px)`), as Chrome and WebKit do: the specification parses a CSS `<length>`, but only a number with a unit is converted to pixels against the canvas's font (`ParseSpacing`).
 - The text preparation algorithm replaces vertical tabs with spaces too; the specification replaces only ASCII whitespace.
 - `arcTo()` with a negative radius throws before it ensures there's a subpath, so the path is unchanged, and `createPattern()` checks its repetition before the image's usability, so an unusable image with a bad repetition throws rather than returning null.
-- There's no `toBlob()`: `toDataURL()` encodes the pixels synchronously.
+- There's no `toBlob()`: `toDataUrl()` encodes the pixels synchronously.
 - A canvas always gets a `RenderHTMLCanvas` and is always replaced, so its fallback content is never rendered; the specification renders the fallback content when scripting is disabled, which it always is here.
 - A `display-p3` canvas draws in sRGB, as painting has no wide gamut colours yet: colours outside sRGB are clipped as they're drawn, so its image data (converted to Display P3) never holds them. Image data is converted between sRGB and Display P3 when it's read and written, as the specification has it.
 
@@ -347,9 +347,9 @@ Record a difference here when you make one, and remove it when Booey comes back 
 - DOM timestamps are the host's time since the window's time origin, so they pause and scale with the engine.
 - There's no `requestIdleCallback()`: the host runs its own idle work between frames.
 - There are no text fragments: a URL's `:~:` is part of its fragment like any other text, so `#:~:text=` links don't find, highlight or scroll to text. `::target-text` styles the text the host marks in `Document::FragmentHighlightRegistry()`.
-- `url::URL` has no encoding override, so queries are always UTF-8 percent-encoded. IDNA uses `uidna_nameToASCII_UTF8` from vcpkg's ICU (Unicode 17), so `tests/URL/WPT.cpp` expects the `IdnaTestV2.json` cases with U+32931 and U+32B9A to be valid where the data expects a V7 failure, because Unicode 17 assigned those code points.
+- `net::Url` has no encoding override, so queries are always UTF-8 percent-encoded. URL lives in Krystal.Net, whose IDNA (`text::DomainToASCII`) uses vcpkg's ICU (Unicode 17), so `Krystal.Net.Tests/tests/WPT.cpp` expects the `IdnaTestV2.json` cases with U+32931 and U+32B9A to be valid where the data expects a V7 failure, because Unicode 17 assigned those code points.
 
 ### From Chrome
 
-- A file's type comes from its extension through a built-in table of common types (`MIMETypeRegistry::MIMETypeForExtension`, after Chrome's own mappings), for `File.type` and for files Krystal.UI loads. Chrome also asks the operating system (the registry's content types on Windows) for extensions its table lacks; Booey gives those no type.
+- A file's type comes from its extension through Krystal.Net's built-in table of common types (`net::MimeTypeRegistry::MimeTypeForExtension`, after Chrome's own mappings), for `File.type` and for files Krystal.UI loads. Chrome also asks the operating system (the registry's content types on Windows) for extensions its table lacks; Booey gives those no type.
 - Layout is scheduled as soon as the document has a body and the style sheets before it have loaded (`Document::ShouldScheduleLayout`). Browsers also hold scheduled layouts back until the page has enough text or image pixels to show (WebKit's visually non-empty state), so as not to paint a half-loaded page; the host pushes Booey its content, so that would only delay the first paint.

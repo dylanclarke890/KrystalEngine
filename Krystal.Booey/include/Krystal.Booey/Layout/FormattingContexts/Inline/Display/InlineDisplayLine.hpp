@@ -26,10 +26,10 @@
 #pragma once
 
 #include "Krystal.Booey/Graphics/Fonts/FontBaseline.hpp"
-#include "Krystal.Booey/Graphics/Geometry/FloatRect.hpp"
 #include "Krystal.Core/Attributes.hpp"
+#include "Krystal.Core/Geometry/Rect.hpp"
+#include "Krystal.Core/Strings/StringAtom.hpp"
 #include "Krystal.Core/Types/Maybe.hpp"
-#include "Krystal.Core/Types/StringAtom.hpp"
 
 namespace krys::boo::inline_display
 {
@@ -55,7 +55,7 @@ namespace krys::boo::inline_display
 
       Type EllipsisType {Type::Inline};
       // This is visual rect ignoring block direction.
-      FloatRect VisualRect;
+      RectF VisualRect;
       StringAtom Text {null};
     };
 
@@ -65,13 +65,13 @@ namespace krys::boo::inline_display
     size_t _boxCount {0};
 
     // This is line box geometry (see https://www.w3.org/TR/css-inline-3/#line-box).
-    FloatRect _lineBoxRect;
-    FloatRect _lineBoxLogicalRect;
-    FloatRect _scrollableOverflow;
+    RectF _lineBoxRect;
+    RectF _lineBoxLogicalRect;
+    RectF _scrollableOverflow;
     // FIXME: Merge this with scrollable overflow (see InlineContentBuilder::updateLineOverflow).
-    FloatRect _contentOverflow;
+    RectF _contentOverflow;
     // FIXME: This should be transitioned to spec aligned overflow value.
-    FloatRect _inkOverflow;
+    RectF _inkOverflow;
     // Enclosing top and bottom includes all inline level boxes (border box) vertically.
     // While the line box usually enclose them as well, its vertical geometry is based on
     // the layout bounds of the inline level boxes which may be different when line-height is present.
@@ -92,8 +92,8 @@ namespace krys::boo::inline_display
     Maybe<Ellipsis> _ellipsis;
 
   public:
-    Line(bool hasInflowBox, bool hasContentfulBox, bool hasBlockLevelBox, const FloatRect &lineBoxLogicalRect,
-         const FloatRect &lineBoxRect, const FloatRect &contentOverflow,
+    Line(bool hasInflowBox, bool hasContentfulBox, bool hasBlockLevelBox, const RectF &lineBoxLogicalRect,
+         const RectF &lineBoxRect, const RectF &contentOverflow,
          EnclosingTopAndBottom enclosingLogicalTopAndBottom, float alignmentBaseline,
          FontBaseline baselineType, float contentLogicalLeft, float contentLogicalLeftIgnoringInlineDirection,
          float contentLogicalWidth, bool isLeftToRightDirection, bool isHorizontal,
@@ -129,7 +129,7 @@ namespace krys::boo::inline_display
       return _lineBoxRect.MaxY();
     }
 
-    KRYS_NODISCARD FloatPoint TopLeft() const noexcept
+    KRYS_NODISCARD PointF TopLeft() const noexcept
     {
       return _lineBoxRect.Location();
     }
@@ -164,32 +164,32 @@ namespace krys::boo::inline_display
       return _lineBoxRect.Width();
     }
 
-    KRYS_NODISCARD const FloatRect &LineBoxRect() const noexcept
+    KRYS_NODISCARD const RectF &LineBoxRect() const noexcept
     {
       return _lineBoxRect;
     }
 
-    KRYS_NODISCARD const FloatRect &LineBoxLogicalRect() const noexcept
+    KRYS_NODISCARD const RectF &LineBoxLogicalRect() const noexcept
     {
       return _lineBoxLogicalRect;
     }
 
-    KRYS_NODISCARD const FloatRect &ScrollableOverflow() const noexcept
+    KRYS_NODISCARD const RectF &ScrollableOverflow() const noexcept
     {
       return _scrollableOverflow;
     }
 
-    KRYS_NODISCARD const FloatRect &ContentOverflow() const noexcept
+    KRYS_NODISCARD const RectF &ContentOverflow() const noexcept
     {
       return _contentOverflow;
     }
 
-    KRYS_NODISCARD const FloatRect &InkOverflow() const noexcept
+    KRYS_NODISCARD const RectF &InkOverflow() const noexcept
     {
       return _inkOverflow;
     }
 
-    KRYS_NODISCARD FloatRect VisibleRectIgnoringBlockDirection() const noexcept
+    KRYS_NODISCARD RectF VisibleRectIgnoringBlockDirection() const noexcept
     {
       if (_isFullyTruncatedInBlockDirection)
       {
@@ -202,11 +202,11 @@ namespace krys::boo::inline_display
       if (_isLeftToRightDirection)
       {
         auto visibleLineBoxRight = std::min(_lineBoxRect.MaxX(), _ellipsis->VisualRect.MaxX());
-        return {_lineBoxRect.Location(), FloatPoint {visibleLineBoxRight, _lineBoxRect.MaxY()}};
+        return {_lineBoxRect.Location(), PointF {visibleLineBoxRight, _lineBoxRect.MaxY()}};
       }
       auto visibleLineBoxLeft = std::max(_lineBoxRect.X(), _ellipsis->VisualRect.X());
-      return {FloatPoint {visibleLineBoxLeft, _lineBoxRect.Y()},
-              FloatPoint {_lineBoxRect.MaxX(), _lineBoxRect.MaxY()}};
+      return {PointF {visibleLineBoxLeft, _lineBoxRect.Y()},
+              PointF {_lineBoxRect.MaxX(), _lineBoxRect.MaxY()}};
     }
 
     KRYS_NODISCARD float EnclosingContentLogicalTop() const noexcept
@@ -282,7 +282,7 @@ namespace krys::boo::inline_display
       {
         return;
       }
-      auto physicalOffset = IsHorizontal() ? FloatSize {{}, offset} : FloatSize {offset, {}};
+      auto physicalOffset = IsHorizontal() ? SizeF {{}, offset} : SizeF {offset, {}};
       _lineBoxRect.Move(physicalOffset);
       _scrollableOverflow.Move(physicalOffset);
       _contentOverflow.Move(physicalOffset);
@@ -302,7 +302,7 @@ namespace krys::boo::inline_display
       {
         return;
       }
-      auto physicalDelta = IsHorizontal() ? FloatSize {{}, delta} : FloatSize {delta, {}};
+      auto physicalDelta = IsHorizontal() ? SizeF {{}, delta} : SizeF {delta, {}};
       _lineBoxRect.Contract(physicalDelta);
       _scrollableOverflow.Contract(physicalDelta);
       _contentOverflow.Contract(physicalDelta);
@@ -375,17 +375,17 @@ namespace krys::boo::inline_display
       _isFirstAfterPageBreak = true;
     }
 
-    void SetInkOverflow(const FloatRect &inkOverflowRect) noexcept
+    void SetInkOverflow(const RectF &inkOverflowRect) noexcept
     {
       _inkOverflow = inkOverflowRect;
     }
 
-    void SetScrollableOverflow(const FloatRect &scrollableOverflow) noexcept
+    void SetScrollableOverflow(const RectF &scrollableOverflow) noexcept
     {
       _scrollableOverflow = scrollableOverflow;
     }
 
-    void SetLineBoxRectForSVGText(const FloatRect &rect) noexcept
+    void SetLineBoxRectForSVGText(const RectF &rect) noexcept
     {
       _lineBoxRect = rect;
       _scrollableOverflow = rect;

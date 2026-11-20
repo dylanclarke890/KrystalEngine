@@ -32,7 +32,7 @@
 
 namespace krys::boo::display_list
 {
-  Recorder::Recorder(IsDeferred isDeferred, const GraphicsContextState &state, const FloatRect &initialClip,
+  Recorder::Recorder(IsDeferred isDeferred, const GraphicsContextState &state, const RectF &initialClip,
                      const AffineTransform &initialCTM) noexcept
       : GraphicsContext(isDeferred, state), _initialClip(initialCTM.MapRect(initialClip))
   {
@@ -117,9 +117,9 @@ namespace krys::boo::display_list
     return true;
   }
 
-  bool Recorder::UpdateStateForScale(const FloatSize &size) noexcept
+  bool Recorder::UpdateStateForScale(const SizeF &size) noexcept
   {
-    if (AreEssentiallyEqual(size, FloatSize {1.f, 1.f}))
+    if (AreEssentiallyEqual(size, SizeF {1.f, 1.f}))
     {
       return false;
     }
@@ -184,7 +184,7 @@ namespace krys::boo::display_list
     CurrentState().ClipBounds = _initialClip;
   }
 
-  FloatRect Recorder::InitialClip() const noexcept
+  RectF Recorder::InitialClip() const noexcept
   {
     if (auto inverse = Ctm().Inverse())
     {
@@ -193,7 +193,7 @@ namespace krys::boo::display_list
     return _initialClip;
   }
 
-  void Recorder::UpdateStateForClip(const FloatRect &rect) noexcept
+  void Recorder::UpdateStateForClip(const RectF &rect) noexcept
   {
     AppendStateChangeItemIfNecessary(); // Conservative: we do not know if the clip application might use
                                         // state such as antialiasing.
@@ -207,7 +207,7 @@ namespace krys::boo::display_list
     CurrentState().ClipBounds.Intersect(CurrentState().Ctm.MapRect(rect.Rect()));
   }
 
-  void Recorder::UpdateStateForClipOut(const FloatRect &) noexcept
+  void Recorder::UpdateStateForClipOut(const RectF &) noexcept
   {
     AppendStateChangeItemIfNecessary(); // Conservative: we do not know if the clip application might use
                                         // state such as antialiasing.
@@ -235,22 +235,22 @@ namespace krys::boo::display_list
     CurrentState().ClipBounds.Intersect(CurrentState().Ctm.MapRect(path.FastBoundingRect()));
   }
 
-  void Recorder::UpdateStateForClipToImageBuffer(const FloatRect &rect) noexcept
+  void Recorder::UpdateStateForClipToImageBuffer(const RectF &rect) noexcept
   {
     AppendStateChangeItemIfNecessary(); // Conservative: we do not know if the clip application might use
                                         // state such as antialiasing.
     CurrentState().ClipBounds.Intersect(CurrentState().Ctm.MapRect(rect));
   }
 
-  IntRect Recorder::ClipBounds() const noexcept
+  RectI Recorder::ClipBounds() const noexcept
   {
     if (auto inverse = CurrentState().Ctm.Inverse())
     {
-      return EnclosingIntRect(inverse->MapRect(CurrentState().ClipBounds));
+      return EnclosingRectI(inverse->MapRect(CurrentState().ClipBounds));
     }
     // If the CTM is not invertible, return the original rect.
     // This matches CGRectApplyInverseAffineTransform behavior.
-    return EnclosingIntRect(CurrentState().ClipBounds);
+    return EnclosingRectI(CurrentState().ClipBounds);
   }
 
   void Recorder::UpdateStateForApplyDeviceScaleFactor(float deviceScaleFactor) noexcept
@@ -277,7 +277,7 @@ namespace krys::boo::display_list
     Ctm.Rotate(rad2deg(static_cast<double>(angleInRadians)));
   }
 
-  void Recorder::ContextState::Scale(const FloatSize &size) noexcept
+  void Recorder::ContextState::Scale(const SizeF &size) noexcept
   {
     Ctm.Scale(size);
   }

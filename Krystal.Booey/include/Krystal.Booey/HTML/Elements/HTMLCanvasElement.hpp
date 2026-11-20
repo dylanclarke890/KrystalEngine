@@ -141,12 +141,12 @@ namespace krys::boo
     /// @brief The canvas's pixels as a `data:` URL of an image of @p mimeType (PNG, JPEG or WebP; PNG for any
     /// other), at @p quality (0 to 1) for JPEG and WebP; `data:,` if the canvas has no pixels.
     /// @see https://html.spec.whatwg.org/#dom-canvas-todataurl
-    KRYS_NODISCARD DOMString ToDataURL(DOMStringView mimeType = {}, Maybe<double> quality = {}) noexcept;
+    KRYS_NODISCARD DOMString ToDataUrl(DOMStringView mimeType = {}, Maybe<double> quality = {}) noexcept;
     // transferControlToOffscreen() isn't planned.
 
 #pragma endregion
 
-    void DidDraw(const Maybe<FloatRect> &rect) noexcept final;
+    void DidDraw(const Maybe<RectF> &rect) noexcept final;
 
     KRYS_NODISCARD const css::ParserContext &CssParserContext() const noexcept final;
 
@@ -205,8 +205,7 @@ namespace krys::boo
     /// @brief Whether the context's pixels are shown as the canvas's layer contents.
     KRYS_NODISCARD bool UsesContentsAsLayerContents() const noexcept;
 
-    KRYS_NODISCARD Maybe<FloatRect>
-      ComputeDirtyRectangleIfNeeded(const Maybe<FloatRect> &rect) const noexcept;
+    KRYS_NODISCARD Maybe<RectF> ComputeDirtyRectangleIfNeeded(const Maybe<RectF> &rect) const noexcept;
   };
 }
 

@@ -20,13 +20,13 @@
  */
 
 #include "Krystal.Booey/Rendering/SVG/RenderSVGBlock.hpp"
-#include "Krystal.Booey/Graphics/Geometry/FloatQuad.hpp"
-#include "Krystal.Booey/Graphics/Geometry/IntRect.hpp"
 #include "Krystal.Booey/Rendering/Style/RenderStyle+GettersInlines.hpp"
 #include "Krystal.Booey/Rendering/SVG/Legacy/SVGResourcesCache.hpp"
 #include "Krystal.Booey/Rendering/SVG/SVGRenderSupport.hpp"
 #include "Krystal.Booey/Style/Values/Borders/Shadow.hpp"
 #include "Krystal.Booey/SVG/Elements/SVGGraphicsElement.hpp"
+#include "Krystal.Core/Geometry/Quad.hpp"
+#include "Krystal.Core/Geometry/Rect.hpp"
 
 namespace krys::boo
 {
@@ -70,9 +70,9 @@ namespace krys::boo
     krys_debug_assert_msg(false, "SVG blocks are mapped with their transforms (AbsoluteQuads)");
   }
 
-  void RenderSVGBlock::AbsoluteQuads(List<FloatQuad> &quads, bool *wasFixed) const noexcept
+  void RenderSVGBlock::AbsoluteQuads(List<QuadF> &quads, bool *wasFixed) const noexcept
   {
-    quads.push_back(LocalToAbsoluteQuad(FloatRect {{}, Size()}, MapCoordinatesMode::UseTransforms, wasFixed));
+    quads.push_back(LocalToAbsoluteQuad(RectF {{}, Size()}, MapCoordinatesMode::UseTransforms, wasFixed));
   }
 
   void RenderSVGBlock::WillBeDestroyed() noexcept
@@ -104,7 +104,7 @@ namespace krys::boo
 
     auto borderRect = BorderBoxRect();
     style::AdjustRectForShadow(borderRect, textShadow, Style().UsedZoomForLength());
-    AddVisualOverflow(LayoutRect(SnappedIntRect(borderRect)));
+    AddVisualOverflow(LayoutRect(SnappedRectI(borderRect)));
   }
 
   LayoutRect RenderSVGBlock::ClippedOverflowRect(const RenderLayerModelObject *repaintContainer,
@@ -134,7 +134,7 @@ namespace krys::boo
   {
     // FIXME: computeFloatVisibleRectInContainer() needs to be merged with computeVisibleRectsInContainer().
     auto adjustedRect =
-      ComputeFloatVisibleRectInContainer(FloatRect(rects.ClippedOverflowRect), container, context);
+      ComputeFloatVisibleRectInContainer(RectF(rects.ClippedOverflowRect), container, context);
     if (adjustedRect)
     {
       return RepaintRects {EnclosingLayoutRect(*adjustedRect)};
@@ -143,8 +143,9 @@ namespace krys::boo
     return null;
   }
 
-  Maybe<FloatRect> RenderSVGBlock::ComputeFloatVisibleRectInContainer(
-    const FloatRect &rect, const RenderLayerModelObject *container, VisibleRectContext context) const noexcept
+  Maybe<RectF> RenderSVGBlock::ComputeFloatVisibleRectInContainer(const RectF &rect,
+                                                                  const RenderLayerModelObject *container,
+                                                                  VisibleRectContext context) const noexcept
   {
     return SVGRenderSupport::ComputeFloatVisibleRectInContainer(*this, rect, container, context);
   }

@@ -30,7 +30,7 @@
 
 #include "Krystal.Booey/CSS/CSSOM/CSSSupportsRule.hpp"
 #include "Krystal.Booey/CSS/Rules/Rule.hpp"
-#include "Krystal.Core/Text/StringBuilder.hpp"
+#include "Krystal.Core/Strings/StringBuilder.hpp"
 
 namespace krys::boo
 {
@@ -56,7 +56,7 @@ namespace krys::boo
   {
     StringBuilder builder;
     builder.Append(u8"@supports ", ConditionText());
-    AppendCSSTextWithReplacementURLsForItems(builder, context);
+    AppendCSSTextWithReplacementUrlsForItems(builder, context);
     return krys::move(builder).ToString();
   }
 

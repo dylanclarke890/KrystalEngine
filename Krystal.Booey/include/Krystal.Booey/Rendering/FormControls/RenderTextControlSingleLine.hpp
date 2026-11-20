@@ -87,7 +87,7 @@ namespace krys::boo
                      const HitTestLocation &locationInContainer, const LayoutPoint &accumulatedOffset,
                      HitTestAction hitTestAction) noexcept override;
 
-    void Autoscroll(const IntPoint &positionInWindow) noexcept override;
+    void Autoscroll(const PointI &positionInWindow) noexcept override;
 
     KRYS_NODISCARD float GetAverageCharWidth() noexcept override;
 

@@ -12,7 +12,7 @@ namespace krys::boo::svg::tests
     REQUIRE(list->NumberOfItems() == 6);
     CHECK(list->Items()[0]->Type() == SVGTransformValue::SVG_TRANSFORM_TRANSLATE);
     CHECK(list->Items()[2]->Angle() == 45);
-    CHECK(list->Items()[2]->Value().RotationCenter() == FloatPoint(1, 2));
+    CHECK(list->Items()[2]->Value().RotationCenter() == PointF(1, 2));
     CHECK(list->ValueAsString()
           == u8"translate(10 0) scale(2 3) rotate(45 1 2) skewX(30) skewY(-15) matrix(1 2 3 4 5 6)");
 
@@ -109,9 +109,9 @@ namespace krys::boo::svg::tests
     CHECK(transform->Angle() == 0);
 
     REQUIRE_FALSE(transform->SetTranslate(1, 2).HasException());
-    CHECK(transform->Value().Translate() == FloatPoint(1, 2));
+    CHECK(transform->Value().Translate() == PointF(1, 2));
     REQUIRE_FALSE(transform->SetScale(3, 4).HasException());
-    CHECK(transform->Value().Scale() == FloatSize(3, 4));
+    CHECK(transform->Value().Scale() == SizeF(3, 4));
     REQUIRE_FALSE(transform->SetSkewY(10).HasException());
     CHECK(transform->Value().ValueAsString() == u8"skewY(10)");
     REQUIRE_FALSE(transform->SetMatrix(css::DOMMatrix2DInit {.B = 1, .E = 2}).HasException());

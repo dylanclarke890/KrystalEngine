@@ -4,7 +4,7 @@
 #include "Krystal.Booey/CSS/Properties/PropertyId.hpp"
 #include "Krystal.Booey/CSS/Values/Primitives/Units.hpp"
 #include "Krystal.Booey/CSS/Values/ToLengthConversionData.hpp"
-#include "Krystal.Booey/Graphics/Geometry/FloatSize.hpp"
+#include "Krystal.Core/Geometry/Size.hpp"
 
 namespace krys::boo::style::tests
 {
@@ -71,10 +71,10 @@ namespace krys::boo::style::tests
     CHECK(conversionData.PropertyToCompute() == css::PropertyId::Invalid);
     CHECK_FALSE(conversionData.ComputingFontSize());
     CHECK_FALSE(conversionData.ComputingLineHeight());
-    CHECK(conversionData.DefaultViewportFactor() == FloatSize {});
-    CHECK(conversionData.SmallViewportFactor() == FloatSize {});
-    CHECK(conversionData.LargeViewportFactor() == FloatSize {});
-    CHECK(conversionData.DynamicViewportFactor() == FloatSize {});
+    CHECK(conversionData.DefaultViewportFactor() == SizeF {});
+    CHECK(conversionData.SmallViewportFactor() == SizeF {});
+    CHECK(conversionData.LargeViewportFactor() == SizeF {});
+    CHECK(conversionData.DynamicViewportFactor() == SizeF {});
     conversionData.SetUsesContainerUnits();
 
     auto fontSize = conversionData.CopyForFontSize();

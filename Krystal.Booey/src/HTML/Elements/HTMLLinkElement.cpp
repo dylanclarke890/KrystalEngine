@@ -43,7 +43,7 @@
 #include "Krystal.Booey/Page/LocalFrameView.hpp"
 #include "Krystal.Booey/Style/ResolveForDocument.hpp"
 #include "Krystal.Booey/Style/Scope/Scope.hpp"
-#include "Krystal.Core/Text/ASCII.hpp"
+#include "Krystal.Core/Strings/ASCII.hpp"
 #include "Krystal.Core/Threading/NeverDestroyed.hpp"
 
 namespace krys::boo
@@ -234,14 +234,14 @@ namespace krys::boo
     }
   }
 
-  url::URL HTMLLinkElement::NonEmptyHrefURL() const noexcept
+  net::Url HTMLLinkElement::NonEmptyHrefUrl() const noexcept
   {
     auto href = GetAttribute(u8"href");
     if (!href || infra::StringAlgorithms::StripLeadingAndTrailingWhitespace(*href).empty())
     {
       return {};
     }
-    return NodeDocument().CompleteURL(*href);
+    return NodeDocument().CompleteUrl(*href);
   }
 
   void HTMLLinkElement::OnAttributeChanged(const DOMStringAtom &localName, Maybe<DOMStringView> oldValue,
@@ -291,7 +291,7 @@ namespace krys::boo
     }
     else if (localName == u8"href")
     {
-      auto url = NonEmptyHrefURL();
+      auto url = NonEmptyHrefUrl();
       if (url == _url)
       {
         return;
@@ -421,7 +421,7 @@ namespace krys::boo
         UnblockRendering();
       }
 
-      CachedResourceRequest request(ResourceRequest(_url),
+      CachedResourceRequest request(net::ResourceRequest(_url),
                                     CachedResourceLoader::DefaultCachedResourceOptions());
       request.SetCharset(krys::move(charset));
       request.SetInitiatorType(LocalName().View());
@@ -506,7 +506,7 @@ namespace krys::boo
     _styleScope = CreateWeakPtr(&styleScope);
     styleScope.AddStyleSheetCandidateNode(*this, _createdByParser);
 
-    _url = NonEmptyHrefURL();
+    _url = NonEmptyHrefUrl();
     Process();
     if (_relIsIcon)
     {
@@ -574,7 +574,7 @@ namespace krys::boo
   // https://html.spec.whatwg.org/#link-type-stylesheet:process-the-linked-resource
   // (The load or error event is fired once the sheet's imports load, by
   // NotifyLoadedSheetAndAllCriticalSubresources.)
-  void HTMLLinkElement::SetCSSStyleSheet(const utf8_string &href, const url::URL &baseURL,
+  void HTMLLinkElement::SetCSSStyleSheet(const utf8_string &href, const net::Url &baseUrl,
                                          utf8_stringview charset,
                                          const CachedCSSStyleSheet *cachedStyleSheet) noexcept
   {
@@ -596,7 +596,7 @@ namespace krys::boo
 
     // FIXME: Integrity checks, once there's subresource integrity.
 
-    css::ParserContext parserContext(document, baseURL, charset);
+    css::ParserContext parserContext(document, baseUrl, charset);
 
     if (auto restoredSheet =
           const_cast<CachedCSSStyleSheet *>(cachedStyleSheet)->RestoreParsedStyleSheet(parserContext))
@@ -762,12 +762,12 @@ namespace krys::boo
 
   dom::USVString HTMLLinkElement::Href() const noexcept
   {
-    return html::ReflectURL<dom::USVString>(*this, u8"href");
+    return html::ReflectUrl<dom::USVString>(*this, u8"href");
   }
 
   void HTMLLinkElement::Href(dom::USVString value) noexcept
   {
-    return html::ReflectURL<dom::USVString>(*this, u8"href", krys::move(value));
+    return html::ReflectUrl<dom::USVString>(*this, u8"href", krys::move(value));
   }
 
   Maybe<DOMString> HTMLLinkElement::CrossOrigin() const noexcept

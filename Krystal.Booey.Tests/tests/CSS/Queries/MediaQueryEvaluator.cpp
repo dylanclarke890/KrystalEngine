@@ -36,7 +36,7 @@ namespace krys::boo::css::tests
     }
 
     /// @brief Shows @p document in a new frame with a view of @p viewSize.
-    KRYS_NODISCARD Ref<LocalFrame> ShowInFrame(Document &document, IntSize viewSize = {800, 600})
+    KRYS_NODISCARD Ref<LocalFrame> ShowInFrame(Document &document, SizeI viewSize = {800, 600})
     {
       auto frame = LocalFrame::Create();
       frame->CreateView(viewSize);
@@ -53,7 +53,7 @@ namespace krys::boo::css::tests
       Ref<LocalFrame> Frame {ShareRef(Media.Frame())};
       MediaChromeClient &Chrome {*Media.Chrome};
       RenderStyle RootStyle {RenderStyle::Create()};
-      IntSize ViewSize {800, 600};
+      SizeI ViewSize {800, 600};
       CSSOMStringAtom ViewMediaType {Screen()};
 
       EvaluationFixture()
@@ -243,7 +243,7 @@ namespace krys::boo::css::tests
       CHECK_FALSE(fixture.Matches(u8"(min-width: 1)"));
       CHECK_FALSE(fixture.Matches(u8"not all and (min-width: 1)"));
 
-      fixture.ViewSize = IntSize {0, 0};
+      fixture.ViewSize = SizeI {0, 0};
       CHECK_FALSE(fixture.Matches(u8"(width)"));
       CHECK(fixture.Matches(u8"(width: 0)"));
     }
@@ -269,11 +269,11 @@ namespace krys::boo::css::tests
       CHECK_FALSE(fixture.Matches(u8"(orientation: portrait)"));
       CHECK(fixture.Matches(u8"(orientation)"));
 
-      fixture.ViewSize = IntSize {600, 800};
+      fixture.ViewSize = SizeI {600, 800};
       CHECK(fixture.Matches(u8"(orientation: portrait)"));
 
       // A square viewport is portrait.
-      fixture.ViewSize = IntSize {500, 500};
+      fixture.ViewSize = SizeI {500, 500};
       CHECK(fixture.Matches(u8"(orientation: portrait)"));
     }
   }

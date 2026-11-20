@@ -72,7 +72,7 @@ namespace krys::boo::css::tests
              Case {u8"<time>", Type::Time},
              Case {u8"<transform-function>", Type::TransformFunction},
              Case {u8"<transform-list>", Type::TransformList},
-             Case {u8"<url>", Type::URL},
+             Case {u8"<url>", Type::Url},
              Case {u8"<foo>", Type::Unknown},
              // Type names are case-sensitive.
              Case {u8"<Length>", Type::Unknown},

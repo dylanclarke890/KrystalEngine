@@ -255,7 +255,7 @@ namespace krys::ui
     Detach();
   }
 
-  void ViewAccessibility::Attach(pal::IWindow &window, const boo::IntPoint &origin) noexcept
+  void ViewAccessibility::Attach(pal::IWindow &window, const PointI &origin) noexcept
   {
     Detach();
     _window = &window;
@@ -328,7 +328,7 @@ namespace krys::ui
     return ForeignNodeBit | (static_cast<pal::AccessibilityNodeId>(index + 1) << ForeignTagShift) | id;
   }
 
-  Pair<View *, boo::IntPoint> ViewAccessibility::ViewAndOrigin(const AXObject &object) const noexcept
+  Pair<View *, PointI> ViewAccessibility::ViewAndOrigin(const AXObject &object) const noexcept
   {
     // An object is in the overlay if its page, or the page of the image it's in, is the overlay's.
     auto *overlayCache = OverlayCache();
@@ -340,9 +340,8 @@ namespace krys::ui
         // The overlay is placed in the view's CSS pixels.
         auto location = _view.ShownOverlay()->Rect().Location();
         auto scale = _view.DeviceScaleFactor();
-        return {OverlayView(),
-                boo::IntPoint(_origin.X() + static_cast<int32>(std::lround(location.X() * scale)),
-                              _origin.Y() + static_cast<int32>(std::lround(location.Y() * scale)))};
+        return {OverlayView(), PointI(_origin.X() + static_cast<int32>(std::lround(location.X() * scale)),
+                                      _origin.Y() + static_cast<int32>(std::lround(location.Y() * scale)))};
       }
       if (ancestor->AxObjectCache() == cache)
       {
@@ -698,8 +697,8 @@ namespace krys::ui
     }
     // The window is in the view's pixels; the page, in CSS pixels.
     auto scale = _view.DeviceScaleFactor();
-    boo::IntPoint viewPoint(static_cast<int32>(std::floor((x - static_cast<float>(_origin.X())) / scale)),
-                            static_cast<int32>(std::floor((y - static_cast<float>(_origin.Y())) / scale)));
+    PointI viewPoint(static_cast<int32>(std::floor((x - static_cast<float>(_origin.X())) / scale)),
+                     static_cast<int32>(std::floor((y - static_cast<float>(_origin.Y())) / scale)));
     // The overlay is over the page.
     if (auto *overlay = _view.ShownOverlay(); overlay && overlay->Rect().Contains(viewPoint))
     {
@@ -707,14 +706,14 @@ namespace krys::ui
       {
         auto location = overlay->Rect().Location();
         return ID(HitTestIn(*overlayCache, overlay->ContentView(),
-                            boo::IntPoint(viewPoint.X() - location.X(), viewPoint.Y() - location.Y())));
+                            PointI(viewPoint.X() - location.X(), viewPoint.Y() - location.Y())));
       }
     }
     return ID(HitTestIn(*cache, _view, viewPoint));
   }
 
   AXObject *ViewAccessibility::HitTestIn(boo::AXObjectCache &cache, View &view,
-                                         const boo::IntPoint &viewPoint) noexcept
+                                         const PointI &viewPoint) noexcept
   {
     auto *root = cache.RootObject();
     if (!root)
@@ -735,8 +734,7 @@ namespace krys::ui
       return nullptr;
     }
     auto scroll = view.ScrollPosition();
-    auto *hit =
-      webArea->AccessibilityHitTest(boo::IntPoint(viewPoint.X() + scroll.X(), viewPoint.Y() + scroll.Y()));
+    auto *hit = webArea->AccessibilityHitTest(PointI(viewPoint.X() + scroll.X(), viewPoint.Y() + scroll.Y()));
     return hit ? hit : webArea;
   }
 

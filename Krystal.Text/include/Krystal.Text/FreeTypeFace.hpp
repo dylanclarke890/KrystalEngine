@@ -4,11 +4,11 @@
 #include "Krystal.Core/Macros.hpp"
 #include "Krystal.Core/Numeric.hpp"
 #include "Krystal.Core/RefCounted.hpp"
+#include "Krystal.Core/Strings/String.hpp"
 #include "Krystal.Core/Types/List.hpp"
 #include "Krystal.Core/Types/Maybe.hpp"
 #include "Krystal.Core/Types/RefPtr.hpp"
 #include "Krystal.Core/Types/Span.hpp"
-#include "Krystal.Core/Types/String.hpp"
 #include "Krystal.Text/HarfBuzz.hpp"
 
 // FreeType's own declarations of these handles.

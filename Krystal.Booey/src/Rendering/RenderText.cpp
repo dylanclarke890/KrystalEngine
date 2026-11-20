@@ -30,7 +30,6 @@
 #include "Krystal.Booey/DOM/Ranges/Position.hpp"
 #include "Krystal.Booey/Editing/Selection/VisiblePosition.hpp"
 #include "Krystal.Booey/Graphics/Fonts/Font.hpp"
-#include "Krystal.Booey/Graphics/Geometry/FloatQuad.hpp"
 #include "Krystal.Booey/Graphics/TextRuns/TextRun.hpp"
 #include "Krystal.Booey/Layout/FormattingContexts/Inline/Text/TextUtil.hpp"
 #include "Krystal.Booey/Layout/Integration/Inline/InlineIteratorLineBox.hpp"
@@ -54,22 +53,20 @@
 #include "Krystal.Booey/Rendering/Style/RenderStyle+GettersInlines.hpp"
 #include "Krystal.Booey/Rendering/SVG/RenderSVGInlineText.hpp"
 #include "Krystal.Booey/Style/Values/Text/TabSize.hpp"
-#include "Krystal.Booey/Text/Hyphenation.hpp"
-#include "Krystal.Booey/Text/TextBreakIterator.hpp"
-#include "Krystal.Core/Text/ASCII.hpp"
-#include "Krystal.Core/Text/CodePointIterator.hpp"
-#include "Krystal.Core/Text/StringBuilder.hpp"
-#include "Krystal.Core/Text/Unicode.hpp"
+#include "Krystal.Core/Geometry/Quad.hpp"
+#include "Krystal.Core/Strings/ASCII.hpp"
+#include "Krystal.Core/Strings/CodePointIterator.hpp"
+#include "Krystal.Core/Strings/StringBuilder.hpp"
+#include "Krystal.Core/Strings/Unicode.hpp"
+#include "Krystal.Text/CaseMapping.hpp"
+#include "Krystal.Text/CharacterProperties.hpp"
+#include "Krystal.Text/Hyphenation.hpp"
+#include "Krystal.Text/TextBreakIterator.hpp"
 #include <algorithm>
 #include <array>
 #include <bitset>
 #include <limits>
 #include <string>
-#include <unicode/ubrk.h>
-#include <unicode/ucasemap.h>
-#include <unicode/uchar.h>
-#include <unicode/unorm2.h>
-#include <unicode/ustring.h>
 
 namespace krys::boo
 {
@@ -84,24 +81,9 @@ namespace krys::boo
     /// @brief Appends @p codePoint, title-cased, to @p output.
     void AppendTitleCase(char32 codePoint, StringBuilder &output) noexcept
     {
-      std::array<UChar, 2> source {};
-      int32_t sourceLength = 0;
-      U16_APPEND_UNSAFE(source.data(), sourceLength, codePoint);
-
-      std::array<UChar, 8> destination {};
-      UErrorCode status = U_ZERO_ERROR;
-      auto length = u_strToTitle(destination.data(), static_cast<int32_t>(destination.size()), source.data(),
-                                 sourceLength, nullptr, "", &status);
-      if (U_FAILURE(status))
+      for (auto character : text::ToTitlecase(codePoint))
       {
-        output.Append(codePoint);
-        return;
-      }
-      for (int32_t i = 0; i < length;)
-      {
-        UChar32 titleCodePoint;
-        U16_NEXT(destination.data(), i, length, titleCodePoint);
-        output.Append(static_cast<char32>(titleCodePoint));
+        output.Append(character);
       }
     }
 
@@ -127,7 +109,7 @@ namespace krys::boo
         }
         if (character <= 'z')
         {
-          output.Append(static_cast<char32>(u_totitle(static_cast<UChar32>(character))));
+          output.Append(text::SimpleTitlecase(character));
           return 1;
         }
       }
@@ -136,119 +118,13 @@ namespace krys::boo
       return end - startOffset;
     }
 
-    KRYS_NODISCARD utf8_string ConvertCase(utf8_stringview text, const CSSOMStringAtom &locale,
-                                           bool toUpper) noexcept
-    {
-      std::string localeName;
-      for (auto character : locale.View())
-      {
-        localeName.push_back(static_cast<char>(character));
-      }
-
-      UErrorCode status = U_ZERO_ERROR;
-      auto *caseMap = ucasemap_open(localeName.c_str(), 0, &status);
-      if (U_FAILURE(status))
-      {
-        return utf8_string(text);
-      }
-
-      auto convert = [&](char *destination, int32_t capacity)
-      {
-        status = U_ZERO_ERROR;
-        auto *source = reinterpret_cast<const char *>(text.data());
-        auto sourceLength = static_cast<int32_t>(text.size());
-        return toUpper ? ucasemap_utf8ToUpper(caseMap, destination, capacity, source, sourceLength, &status)
-                       : ucasemap_utf8ToLower(caseMap, destination, capacity, source, sourceLength, &status);
-      };
-
-      auto length = convert(nullptr, 0);
-      utf8_string result(static_cast<size_t>(length), u8'\0');
-      if (status == U_BUFFER_OVERFLOW_ERROR || U_SUCCESS(status))
-      {
-        (void)convert(reinterpret_cast<char *>(result.data()), length);
-      }
-      ucasemap_close(caseMap);
-      if (U_FAILURE(status))
-      {
-        return utf8_string(text);
-      }
-      return result;
-    }
-
-    /// @brief The single code point @p character's compatibility decomposition maps it to, if it has one.
-    KRYS_NODISCARD Maybe<char32> SingleDecomposition(const UNormalizer2 *normalizer,
-                                                     char32 character) noexcept
-    {
-      std::array<UChar, 4> buffer {};
-      UErrorCode status = U_ZERO_ERROR;
-      int32_t length = unorm2_getRawDecomposition(normalizer, static_cast<UChar32>(character), buffer.data(),
-                                                  static_cast<int32_t>(buffer.size()), &status);
-      if (U_FAILURE(status) || length <= 0)
-      {
-        return {};
-      }
-      UChar32 decomposed = 0;
-      int32_t offset = 0;
-      U16_NEXT(buffer.data(), offset, length, decomposed);
-      if (offset != length)
-      {
-        return {};
-      }
-      return static_cast<char32>(decomposed);
-    }
-
-    /// @brief @p character's full-width form, or itself when it has none: what its `<narrow>` decomposition
-    /// maps it to, or the character whose `<wide>` decomposition maps to it (as in Firefox and Safari, and
-    /// the tests of CSS Text).
-    KRYS_NODISCARD char32 FullWidthForm(char32 character) noexcept
-    {
-      UErrorCode status = U_ZERO_ERROR;
-      const UNormalizer2 *normalizer = unorm2_getNFKDInstance(&status);
-      if (U_FAILURE(status))
-      {
-        return character;
-      }
-
-      auto type = u_getIntPropertyValue(static_cast<UChar32>(character), UCHAR_DECOMPOSITION_TYPE);
-      if (type == U_DT_NARROW)
-      {
-        return SingleDecomposition(normalizer, character).value_or(character);
-      }
-
-      // The wide characters are the ideographic space and the Halfwidth and Fullwidth Forms block's; their
-      // narrow counterparts are looked up, sorted, once.
-      static const auto wideForms = [normalizer]
-      {
-        List<std::pair<char32, char32>> forms;
-        auto add = [&](char32 wide)
-        {
-          if (u_getIntPropertyValue(static_cast<UChar32>(wide), UCHAR_DECOMPOSITION_TYPE) == U_DT_WIDE)
-          {
-            if (auto narrow = SingleDecomposition(normalizer, wide))
-            {
-              forms.emplace_back(*narrow, wide);
-            }
-          }
-        };
-        add(0x3000);
-        for (char32 wide = 0xFF00; wide <= 0xFFEF; ++wide)
-        {
-          add(wide);
-        }
-        std::ranges::sort(forms);
-        return forms;
-      }();
-      auto it = std::ranges::lower_bound(wideForms, character, {}, &std::pair<char32, char32>::first);
-      return it != wideForms.end() && it->first == character ? it->second : character;
-    }
-
     // https://www.w3.org/TR/css-text-3/#valdef-text-transform-full-width
     KRYS_NODISCARD utf8_string ConvertToFullWidth(utf8_stringview string) noexcept
     {
       StringBuilder result;
       for (text::CodePointIterator it(string); !it.AtEnd(); ++it)
       {
-        result.Append(FullWidthForm(*it));
+        result.Append(text::FullWidthForm(*it));
       }
       return krys::move(result).ToString();
     }
@@ -357,9 +233,9 @@ namespace krys::boo
     utf8_string stringWithPrevious;
     replaceNoBreakSpaces(previousCharacter, stringWithPrevious);
     replaceNoBreakSpaces(string, stringWithPrevious);
-    auto previousCharacterLength = static_cast<int32_t>(previousCharacter.size());
+    auto previousCharacterLength = static_cast<int32>(previousCharacter.size());
 
-    auto *breakIterator = WordBreakIterator(stringWithPrevious);
+    auto breakIterator = text::WordBreakIterator(stringWithPrevious);
     if (!breakIterator)
     {
       return utf8_string(string);
@@ -367,10 +243,11 @@ namespace krys::boo
 
     StringBuilder result;
 
-    int32_t startOfWord = ubrk_first(breakIterator);
-    for (int32_t endOfWord = ubrk_next(breakIterator); endOfWord != UBRK_DONE;
-         startOfWord = endOfWord, endOfWord = ubrk_next(breakIterator))
+    auto startOfWord = static_cast<int32>(breakIterator.First());
+    for (auto nextBoundary = breakIterator.Next(); nextBoundary;
+         startOfWord = static_cast<int32>(*nextBoundary), nextBoundary = breakIterator.Next())
     {
+      auto endOfWord = static_cast<int32>(*nextBoundary);
       // Do not try to titlecase the previous content.
       if (startOfWord >= previousCharacterLength)
       {
@@ -413,11 +290,11 @@ namespace krys::boo
     }
     else if (transform.Contains(style::TextTransformValue::Uppercase))
     {
-      modified = ConvertCase(modified, style.ComputedLocale().GetPlatform(), true);
+      modified = text::ToUppercase(modified, style.ComputedLocale().GetPlatform().View());
     }
     else if (transform.Contains(style::TextTransformValue::Lowercase))
     {
-      modified = ConvertCase(modified, style.ComputedLocale().GetPlatform(), false);
+      modified = text::ToLowercase(modified, style.ComputedLocale().GetPlatform().View());
     }
 
     if (transform.Contains(style::TextTransformValue::FullWidth))
@@ -840,12 +717,18 @@ namespace krys::boo
 
     KRYS_NODISCARD inline bool IsHangablePunctuationAtLineStart(char32 character) noexcept
     {
-      return U_GET_GC_MASK(static_cast<UChar32>(character)) & (U_GC_PS_MASK | U_GC_PI_MASK | U_GC_PF_MASK);
+      return text::IsInGeneralCategory(character,
+                                       text::GeneralCategorySet {text::GeneralCategory::OpenPunctuation,
+                                                                 text::GeneralCategory::InitialPunctuation,
+                                                                 text::GeneralCategory::FinalPunctuation});
     }
 
     KRYS_NODISCARD inline bool IsHangablePunctuationAtLineEnd(char32 character) noexcept
     {
-      return U_GET_GC_MASK(static_cast<UChar32>(character)) & (U_GC_PE_MASK | U_GC_PI_MASK | U_GC_PF_MASK);
+      return text::IsInGeneralCategory(character,
+                                       text::GeneralCategorySet {text::GeneralCategory::ClosePunctuation,
+                                                                 text::GeneralCategory::InitialPunctuation,
+                                                                 text::GeneralCategory::FinalPunctuation});
     }
 
     // -webkit-nbsp-mode was dropped, so only a space is a space.
@@ -1272,14 +1155,14 @@ namespace krys::boo
       return current - 1;
     }
 
-    CachedTextBreakIterator iterator(_text, {}, TextBreakIterator::CaretMode {}, null);
+    text::CachedTextBreakIterator iterator(_text, {}, text::TextBreakIterator::CaretMode {}, null);
     auto preceding = iterator.Preceding(static_cast<uint32>(current));
     return preceding ? static_cast<int32>(*preceding) : current - 1;
   }
 
   int32 RenderText::PreviousOffsetForBackwardDeletion(int32 current) const noexcept
   {
-    CachedTextBreakIterator iterator(_text, {}, TextBreakIterator::DeleteMode {}, null);
+    text::CachedTextBreakIterator iterator(_text, {}, text::TextBreakIterator::DeleteMode {}, null);
     auto preceding = iterator.Preceding(static_cast<uint32>(current));
     return preceding ? static_cast<int32>(*preceding) : 0;
   }
@@ -1291,12 +1174,12 @@ namespace krys::boo
       return current + 1;
     }
 
-    CachedTextBreakIterator iterator(_text, {}, TextBreakIterator::CaretMode {}, null);
+    text::CachedTextBreakIterator iterator(_text, {}, text::TextBreakIterator::CaretMode {}, null);
     auto following = iterator.Following(static_cast<uint32>(current));
     return following ? static_cast<int32>(*following) : current + 1;
   }
 
-  IntRect RenderText::LinesBoundingBox() const noexcept
+  RectI RenderText::LinesBoundingBox() const noexcept
   {
     auto firstTextBox = inline_iterator::LineLeftmostTextBoxFor(*this);
     if (!firstTextBox)
@@ -1310,17 +1193,17 @@ namespace krys::boo
       boundingBox.UniteEvenIfEmpty(textBox->VisualRectIgnoringBlockDirection());
     }
 
-    return EnclosingIntRect(boundingBox);
+    return EnclosingRectI(boundingBox);
   }
 
-  IntPoint RenderText::FirstRunLocation() const noexcept
+  PointI RenderText::FirstRunLocation() const noexcept
   {
     auto first = inline_iterator::LineLeftmostTextBoxFor(*this);
     if (!first)
     {
       return {};
     }
-    return IntPoint {first->VisualRectIgnoringBlockDirection().Location()};
+    return PointI {first->VisualRectIgnoringBlockDirection().Location()};
   }
 
   namespace
@@ -1618,7 +1501,7 @@ namespace krys::boo
     krys_debug_assert(word.size() >= minimumSuffixLength);
     auto hyphenLocation = word.size() - minimumSuffixLength;
     auto locale = style.ComputedLocale().GetPlatform();
-    while ((hyphenLocation = LastHyphenLocation(word, hyphenLocation, locale))
+    while ((hyphenLocation = text::LastHyphenLocation(word, hyphenLocation, locale))
            >= std::max<size_t>(minimumPrefixLength, 1))
     {
       hyphenLocations.push_back(hyphenLocation);
@@ -1694,8 +1577,8 @@ namespace krys::boo
     auto length = string.size();
     auto iteratorMode = layout::TextUtil::LineBreakIteratorMode(style.GetLineBreak());
     auto contentAnalysis = layout::TextUtil::GetContentAnalysis(style.GetWordBreak());
-    CachedLineBreakIteratorFactory lineBreakIteratorFactory(string, style.ComputedLocale().GetPlatform(),
-                                                            iteratorMode, contentAnalysis);
+    text::CachedLineBreakIteratorFactory lineBreakIteratorFactory(
+      string, style.ComputedLocale().GetPlatform(), iteratorMode, contentAnalysis);
     bool needsWordSpacing = false;
     bool ignoringSpaces = false;
     bool isSpace = false;
@@ -1710,7 +1593,7 @@ namespace krys::boo
     float maxWordWidth = std::numeric_limits<float>::max();
     size_t minimumPrefixLength = 0;
     size_t minimumSuffixLength = 0;
-    if (style.GetHyphens() == Hyphens::Auto && CanHyphenate(style.ComputedLocale().GetPlatform()))
+    if (style.GetHyphens() == Hyphens::Auto && text::CanHyphenate(style.ComputedLocale().GetPlatform()))
     {
       maxWordWidth = 0;
 
@@ -1735,8 +1618,8 @@ namespace krys::boo
        || style.GetOverflowWrap() == OverflowWrap::Anywhere)
       && style.AutoWrap();
     bool keepAllWords = style.GetWordBreak() == WordBreak::KeepAll;
-    bool canUseLineBreakShortcut = iteratorMode == TextBreakLineBehavior::Default
-                                   && contentAnalysis == TextBreakIterator::ContentAnalysis::Mechanical;
+    bool canUseLineBreakShortcut = iteratorMode == text::TextBreakLineBehavior::Default
+                                   && contentAnalysis == text::TextBreakIterator::ContentAnalysis::Mechanical;
 
     size_t i = 0;
     while (i < length)
@@ -2096,7 +1979,7 @@ namespace krys::boo
     }
   }
 
-  void RenderText::AbsoluteQuads(List<FloatQuad> &quads, bool *wasFixed) const noexcept
+  void RenderText::AbsoluteQuads(List<QuadF> &quads, bool *wasFixed) const noexcept
   {
     for (auto &textBox : inline_iterator::TextBoxesFor(*this))
     {
@@ -2173,8 +2056,8 @@ namespace krys::boo
                                   textBox.GetWritingMode());
     }
 
-    KRYS_NODISCARD Maybe<IntRect> EllipsisRectForTextBox(const inline_iterator::TextBox &textBox,
-                                                         uint32 start, uint32 end) noexcept
+    KRYS_NODISCARD Maybe<RectI> EllipsisRectForTextBox(const inline_iterator::TextBox &textBox, uint32 start,
+                                                       uint32 end) noexcept
     {
       auto lineBox = textBox.GetLineBox();
       if (!lineBox->HasEllipsis())
@@ -2200,12 +2083,11 @@ namespace krys::boo
         return {};
       }
 
-      return EnclosingIntRect(
-        lineBox->EllipsisVisualRect(inline_iterator::LineBox::AdjustedForSelection::Yes));
+      return EnclosingRectI(lineBox->EllipsisVisualRect(inline_iterator::LineBox::AdjustedForSelection::Yes));
     }
 
-    KRYS_NODISCARD FloatRect LocalQuadForTextBox(const inline_iterator::TextBox &textBox, uint32 start,
-                                                 uint32 end, bool useSelectionHeight) noexcept
+    KRYS_NODISCARD RectF LocalQuadForTextBox(const inline_iterator::TextBox &textBox, uint32 start,
+                                             uint32 end, bool useSelectionHeight) noexcept
     {
       LayoutRect boxSelectionRect = SelectionRectForTextBox(textBox, start, end);
       if (!boxSelectionRect.Height())
@@ -2274,9 +2156,9 @@ namespace krys::boo
     }
   }
 
-  List<FloatQuad> RenderText::AbsoluteQuadsForRange(uint32 start, uint32 end,
-                                                    EnumSet<BoundingRectBehavior> behavior,
-                                                    bool *wasFixed) const noexcept
+  List<QuadF> RenderText::AbsoluteQuadsForRange(uint32 start, uint32 end,
+                                                EnumSet<BoundingRectBehavior> behavior,
+                                                bool *wasFixed) const noexcept
   {
     bool useSelectionHeight = behavior.Contains(BoundingRectBehavior::UseSelectionHeight);
     bool ignoreEmptyTextSelections = behavior.Contains(BoundingRectBehavior::IgnoreEmptyTextSelections);
@@ -2295,7 +2177,7 @@ namespace krys::boo
     start = std::min(std::max(caretMinOffset, start), caretMaxOffset);
     end = std::min(std::max(caretMinOffset, end), caretMaxOffset);
 
-    List<FloatQuad> quads;
+    List<QuadF> quads;
     for (auto &textBox : inline_iterator::TextBoxesFor(*this))
     {
       if (ignoreEmptyTextSelections && !textBox.SelectableRange().Intersects(start, end))
@@ -2326,7 +2208,7 @@ namespace krys::boo
 
         for (auto &rect : rects)
         {
-          if (FloatRect localRect {rect}; !localRect.IsZero())
+          if (RectF localRect {rect}; !localRect.IsZero())
           {
             quads.push_back(LocalToAbsoluteQuad(localRect, MapCoordinatesMode::UseTransforms, wasFixed));
           }
@@ -2357,7 +2239,7 @@ namespace krys::boo
         quads.push_back(LocalToAbsoluteQuad(boundaries, MapCoordinatesMode::UseTransforms, wasFixed));
         continue;
       }
-      FloatRect rect = LocalQuadForTextBox(textBox, start, end, useSelectionHeight);
+      RectF rect = LocalQuadForTextBox(textBox, start, end, useSelectionHeight);
       if (!rect.IsZero())
       {
         quads.push_back(LocalToAbsoluteQuad(rect, MapCoordinatesMode::UseTransforms, wasFixed));
@@ -2425,16 +2307,14 @@ namespace krys::boo
 
   LayoutRect
     RenderText::CollectSelectionGeometriesForLineBoxes(const RenderLayerModelObject *repaintContainer,
-                                                       bool clipToVisibleContent,
-                                                       List<FloatQuad> &quads) noexcept
+                                                       bool clipToVisibleContent, List<QuadF> &quads) noexcept
   {
     return CollectSelectionGeometriesForLineBoxes(repaintContainer, clipToVisibleContent, &quads);
   }
 
   LayoutRect
     RenderText::CollectSelectionGeometriesForLineBoxes(const RenderLayerModelObject *repaintContainer,
-                                                       bool clipToVisibleContent,
-                                                       List<FloatQuad> *quads) noexcept
+                                                       bool clipToVisibleContent, List<QuadF> *quads) noexcept
   {
     krys_debug_assert(!NeedsLayout());
 
@@ -2482,7 +2362,7 @@ namespace krys::boo
     {
       LayoutRect rect;
       rect.Unite(SelectionRectForTextBox(textBox, startOffset, endOffset));
-      rect.Unite(LayoutRect(EllipsisRectForTextBox(textBox, startOffset, endOffset).value_or(IntRect {})));
+      rect.Unite(LayoutRect(EllipsisRectForTextBox(textBox, startOffset, endOffset).value_or(RectI {})));
       if (rect.IsEmpty())
       {
         continue;
@@ -2492,7 +2372,7 @@ namespace krys::boo
 
       if (quads)
       {
-        quads->push_back(LocalToContainerQuad(FloatQuad(FloatRect(rect)), repaintContainer));
+        quads->push_back(LocalToContainerQuad(QuadF(RectF(rect)), repaintContainer));
       }
     }
 
@@ -2501,7 +2381,7 @@ namespace krys::boo
       return ComputeRectForRepaint(resultRect, repaintContainer);
     }
     return LayoutRect(
-      LocalToContainerQuad(FloatQuad(FloatRect(resultRect)), repaintContainer).EnclosingBoundingBox());
+      LocalToContainerQuad(QuadF(RectF(resultRect)), repaintContainer).EnclosingBoundingBox());
   }
 
   LayoutRect RenderText::SelectionRectForRepaint(const RenderLayerModelObject *repaintContainer,

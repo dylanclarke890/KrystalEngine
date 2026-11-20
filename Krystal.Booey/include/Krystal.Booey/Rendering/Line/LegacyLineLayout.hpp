@@ -67,13 +67,13 @@ namespace krys::boo
 
     void ShiftLineBy(LayoutUnit shiftX, LayoutUnit shiftY) noexcept;
 
-    LegacyRootInlineBox *ConstructLine(BidiRunList<BidiRun> &, const LineInfo &) noexcept;
+    LegacyRootInlineBox *ConstructLine(text::BidiRunList<BidiRun> &, const LineInfo &) noexcept;
 
     void AddOverflowFromInlineChildren() noexcept;
 
     KRYS_NODISCARD size_t LineCount() const noexcept;
 
-    static void AppendRunsForObject(BidiRunList<BidiRun> *, int32 start, int32 end, RenderObject &,
+    static void AppendRunsForObject(text::BidiRunList<BidiRun> *, int32 start, int32 end, RenderObject &,
                                     InlineBidiResolver &) noexcept;
 
     KRYS_NODISCARD static bool ShouldSkipCreatingRunsForObject(RenderObject &) noexcept;
@@ -91,7 +91,7 @@ namespace krys::boo
 
     void RemoveEmptyTextBoxesAndUpdateVisualReordering(LegacyRootInlineBox *, BidiRun *firstRun) noexcept;
 
-    LegacyRootInlineBox *CreateLineBoxesFromBidiRuns(uint32 bidiLevel, BidiRunList<BidiRun> &bidiRuns,
+    LegacyRootInlineBox *CreateLineBoxesFromBidiRuns(uint32 bidiLevel, text::BidiRunList<BidiRun> &bidiRuns,
                                                      const LegacyInlineIterator &end, LineInfo &) noexcept;
 
     void LayoutRunsAndFloats(bool hasInlineChild) noexcept;

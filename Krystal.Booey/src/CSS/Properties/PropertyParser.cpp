@@ -52,7 +52,7 @@
 #include "Krystal.Booey/CSS/Properties/Consumers/ResolutionDefinitions.hpp"
 #include "Krystal.Booey/CSS/Properties/Consumers/String.hpp"
 #include "Krystal.Booey/CSS/Properties/Consumers/TimeDefinitions.hpp"
-#include "Krystal.Booey/CSS/Properties/Consumers/URL.hpp"
+#include "Krystal.Booey/CSS/Properties/Consumers/Url.hpp"
 #include "Krystal.Booey/CSS/Properties/ParsedPropertyList.hpp"
 #include "Krystal.Booey/CSS/Properties/Property.hpp"
 #include "Krystal.Booey/CSS/Properties/PropertyParserResult.hpp"
@@ -578,12 +578,12 @@ namespace krys::boo::css
         case CustomPropertySyntax::Type::Image:
         {
           return parse_property::ConsumeImage(range, state,
-                                              parse_property::AllowedImageType::URLFunction
+                                              parse_property::AllowedImageType::UrlFunction
                                                 | parse_property::AllowedImageType::GeneratedImage);
         }
-        case CustomPropertySyntax::Type::URL:
+        case CustomPropertySyntax::Type::Url:
         {
-          return parse_property::ConsumeURL(range, state, {});
+          return parse_property::ConsumeUrl(range, state, {});
         }
         case CustomPropertySyntax::Type::String:
         {
@@ -707,8 +707,8 @@ namespace krys::boo::css
           Ref<StyleImage> image = krys::move(styleImage);
           return style::ImageWrapper {krys::move(image)};
         }
-        case CustomPropertySyntax::Type::URL:
-          return style::ConvertToStyle(Downcast<UrlValue>(value).URL(), builderState);
+        case CustomPropertySyntax::Type::Url:
+          return style::ConvertToStyle(Downcast<UrlValue>(value).Url(), builderState);
         case CustomPropertySyntax::Type::CustomIdent:
           return CustomIdentifier {CSSOMStringAtom {Downcast<PrimitiveValue>(value).StringValue()}};
         case CustomPropertySyntax::Type::String: return Downcast<PrimitiveValue>(value).StringValue();

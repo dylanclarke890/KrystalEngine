@@ -4,7 +4,6 @@
 #include "Krystal.Booey.Tests/Style/ResolverTestUtils.hpp"
 #include "Krystal.Booey/Graphics/Animation/AnimationUtilities.hpp"
 #include "Krystal.Booey/Graphics/Paths/Path.hpp"
-#include "Krystal.Booey/Graphics/Transforms/TransformationMatrix.hpp"
 #include "Krystal.Booey/Rendering/MotionPath.hpp"
 #include "Krystal.Booey/Rendering/PathOperation.hpp"
 #include "Krystal.Booey/Rendering/TransformOperationData.hpp"
@@ -20,6 +19,7 @@
 #include "Krystal.Booey/Style/Values/Primitives/LengthWrapperCSSValueConversion.hpp"
 #include "Krystal.Booey/Style/Values/Primitives/NumericTypesCSSValueCreation.hpp"
 #include "Krystal.Booey/Style/Values/Primitives/NumericTypesSerialisation.hpp"
+#include "Krystal.Core/Geometry/TransformationMatrix.hpp"
 
 namespace krys::boo::style::tests
 {
@@ -32,10 +32,10 @@ namespace krys::boo::style::tests
     KRYS_NODISCARD TransformOperationData MotionData() noexcept
     {
       return TransformOperationData {
-        FloatRect {0, 0, 20, 20},
-        MotionPathData {.ContainingBlockBoundingRect = FloatRoundedRect {FloatRect {0, 0, 200, 100}},
-                        .OffsetFromContainingBlock = FloatPoint {0, 0},
-                        .UsedStartingPosition = FloatPoint {100, 50}}};
+        RectF {0, 0, 20, 20},
+        MotionPathData {.ContainingBlockBoundingRect = FloatRoundedRect {RectF {0, 0, 200, 100}},
+                        .OffsetFromContainingBlock = PointF {0, 0},
+                        .UsedStartingPosition = PointF {100, 50}}};
     }
   }
 
@@ -71,7 +71,7 @@ namespace krys::boo::style::tests
       CHECK(TryPath(corner, MotionData()).value().Length() == Approx(std::hypot(100.0, 50.0)));
 
       // A ray needs the containing block.
-      CHECK_FALSE(TryPath(ray, TransformOperationData {FloatRect {0, 0, 20, 20}}));
+      CHECK_FALSE(TryPath(ray, TransformOperationData {RectF {0, 0, 20, 20}}));
     }
 
     SECTION("basic shapes and boxes")
@@ -79,12 +79,12 @@ namespace krys::boo::style::tests
       auto circle = Convert<OffsetPath>(PropertyId::OffsetPath, u8"circle(10px)");
       REQUIRE(circle.IsBasicShape());
       // Without a position, the circle is centred on the starting position.
-      CHECK(TryPath(circle, MotionData()).value().BoundingRect() == FloatRect {90, 40, 20, 20});
+      CHECK(TryPath(circle, MotionData()).value().BoundingRect() == RectF {90, 40, 20, 20});
 
       auto box = Convert<OffsetPath>(PropertyId::OffsetPath, u8"border-box");
       REQUIRE(box.IsBox());
-      CHECK(TryPath(box, MotionData()).value().BoundingRect() == FloatRect {0, 0, 200, 100});
-      CHECK_FALSE(TryPath(box, TransformOperationData {FloatRect {0, 0, 20, 20}}));
+      CHECK(TryPath(box, MotionData()).value().BoundingRect() == RectF {0, 0, 200, 100});
+      CHECK_FALSE(TryPath(box, TransformOperationData {RectF {0, 0, 20, 20}}));
 
       auto reference = Convert<OffsetPath>(PropertyId::OffsetPath, u8"url(#path)");
       CHECK(reference.IsReference());
@@ -116,9 +116,9 @@ namespace krys::boo::style::tests
     };
     auto path = pathOf(u8"path");
     REQUIRE(path);
-    CHECK(path->BoundingRect() == FloatRect {10, 10, 50, 0});
+    CHECK(path->BoundingRect() == RectF {10, 10, 50, 0});
     REQUIRE(pathOf(u8"line"));
-    CHECK(pathOf(u8"line")->BoundingRect() == FloatRect {5, 0, 0, 20});
+    CHECK(pathOf(u8"line")->BoundingRect() == RectF {5, 0, 0, 20});
     CHECK_FALSE(pathOf(u8"group"));
     CHECK_FALSE(pathOf(u8"missing"));
   }
@@ -138,10 +138,9 @@ namespace krys::boo::style::tests
     square.AddRect({0, 0, 10, 10});
     auto reference = ReferencePathOperation::Create(Maybe<boo::Path> {square});
     REQUIRE(reference->GetPath());
-    CHECK(reference->GetPath(TransformOperationData {FloatRect {}})->BoundingRect()
-          == FloatRect {0, 0, 10, 10});
+    CHECK(reference->GetPath(TransformOperationData {RectF {}})->BoundingRect() == RectF {0, 0, 10, 10});
     CHECK(Downcast<ReferencePathOperation>(*reference->Clone()).GetPath().value().BoundingRect()
-          == FloatRect {0, 0, 10, 10});
+          == RectF {0, 0, 10, 10});
   }
 
   TEST_CASE("Motion path transform", "[Rendering][MotionPath]")
@@ -151,19 +150,18 @@ namespace krys::boo::style::tests
     line.AddLineTo({100, 0});
 
     TransformationMatrix matrix;
-    MotionPath::ApplyMotionPathTransform(matrix, TransformOperationData {FloatRect {0, 0, 10, 10}},
-                                         FloatPoint {5, 5}, TransformBox::BorderBox, line, std::nullopt, 40,
-                                         0, false);
+    MotionPath::ApplyMotionPathTransform(matrix, TransformOperationData {RectF {0, 0, 10, 10}}, PointF {5, 5},
+                                         TransformBox::BorderBox, line, std::nullopt, 40, 0, false);
     // The anchor (the transform origin) moves to 40px along the line.
-    CHECK(matrix.MapPoint(FloatPoint {5, 5}).X() == Approx(40));
-    CHECK(matrix.MapPoint(FloatPoint {5, 5}).Y() == Approx(0).margin(1e-4));
+    CHECK(matrix.MapPoint(PointF {5, 5}).X() == Approx(40));
+    CHECK(matrix.MapPoint(PointF {5, 5}).Y() == Approx(0).margin(1e-4));
 
     // Distances wrap around closed paths and clamp on open ones.
     TransformationMatrix clamped;
-    MotionPath::ApplyMotionPathTransform(clamped, TransformOperationData {FloatRect {0, 0, 10, 10}},
-                                         FloatPoint {5, 5}, TransformBox::BorderBox, line, std::nullopt, 400,
-                                         0, false);
-    CHECK(clamped.MapPoint(FloatPoint {5, 5}).X() == Approx(100));
+    MotionPath::ApplyMotionPathTransform(clamped, TransformOperationData {RectF {0, 0, 10, 10}},
+                                         PointF {5, 5}, TransformBox::BorderBox, line, std::nullopt, 400, 0,
+                                         false);
+    CHECK(clamped.MapPoint(PointF {5, 5}).X() == Approx(100));
   }
 
   TEST_CASE_METHOD(BuilderFixture, "Style offset values", "[Style][Values][Motion]")

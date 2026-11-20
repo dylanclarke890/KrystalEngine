@@ -24,8 +24,8 @@
  */
 
 #include "Krystal.Booey/Graphics/Fonts/FontRanges.hpp"
-#include "Krystal.Booey/Text/CharacterProperties.hpp"
 #include "Krystal.Core/Assert.hpp"
+#include "Krystal.Text/CharacterProperties.hpp"
 
 namespace krys::boo
 {
@@ -81,7 +81,7 @@ namespace krys::boo
                                               ExternalResourceDownloadPolicy policy) const noexcept
   {
     const Font *resultFont = nullptr;
-    if (IsGenericFontFamily() && IsPrivateUseAreaCharacter(character))
+    if (IsGenericFontFamily() && text::IsPrivateUseAreaCharacter(character))
     {
       return GlyphData();
     }

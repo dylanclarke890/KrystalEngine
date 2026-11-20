@@ -26,10 +26,10 @@
 #pragma once
 
 #include "Krystal.Booey/Loader/ResourceLoaderOptions.hpp"
-#include "Krystal.Booey/Platform/Network/ResourceRequest.hpp"
 #include "Krystal.Core/Attributes.hpp"
-#include "Krystal.Core/Types/String.hpp"
+#include "Krystal.Core/Strings/String.hpp"
 #include "Krystal.Core/Utils/Move.hpp"
+#include "Krystal.Net/ResourceRequest.hpp"
 
 namespace krys::boo
 {
@@ -38,36 +38,37 @@ namespace krys::boo
   {
     constexpr static utf8_stringview CSS = u8"css";
     constexpr static utf8_stringview Icon = u8"icon";
-    constexpr static utf8_stringview XMLHTTPRequest = u8"xmlhttprequest";
+    constexpr static utf8_stringview XMLHttpRequest = u8"xmlhttprequest";
   };
 
   /// @brief A request for a cached resource: the resource request, how to load it and who asked.
   class CachedResourceRequest
   {
   private:
-    ResourceRequest _resourceRequest;
+    net::ResourceRequest _resourceRequest;
     ResourceLoaderOptions _options;
     utf8_string _initiatorType;
     utf8_string _charset;
     bool _ignoreForRequestCount {false};
 
   public:
-    explicit CachedResourceRequest(ResourceRequest &&request, ResourceLoaderOptions options = {}) noexcept
+    explicit CachedResourceRequest(net::ResourceRequest &&request,
+                                   ResourceLoaderOptions options = {}) noexcept
         : _resourceRequest(krys::move(request)), _options(krys::move(options))
     {
     }
 
-    KRYS_NODISCARD const ResourceRequest &GetResourceRequest() const noexcept
+    KRYS_NODISCARD const net::ResourceRequest &GetResourceRequest() const noexcept
     {
       return _resourceRequest;
     }
 
-    KRYS_NODISCARD ResourceRequest &GetResourceRequest() noexcept
+    KRYS_NODISCARD net::ResourceRequest &GetResourceRequest() noexcept
     {
       return _resourceRequest;
     }
 
-    KRYS_NODISCARD ResourceRequest &&ReleaseResourceRequest() noexcept
+    KRYS_NODISCARD net::ResourceRequest &&ReleaseResourceRequest() noexcept
     {
       return krys::move(_resourceRequest);
     }

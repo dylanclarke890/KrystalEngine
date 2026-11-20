@@ -24,7 +24,7 @@
 #include "Krystal.Booey/Graphics/Filters/FEFlood.hpp"
 #include "Krystal.Booey/Graphics/Color/ColorSerialisation.hpp"
 #include "Krystal.Booey/Graphics/Filters/Filter.hpp"
-#include "Krystal.Core/Text/TextStream.hpp"
+#include "Krystal.Core/Strings/TextStream.hpp"
 #include "Krystal.Core/Utils/Move.hpp"
 
 namespace krys::boo
@@ -67,8 +67,8 @@ namespace krys::boo
     return true;
   }
 
-  FloatRect FEFlood::CalculateImageRect(const Filter &filter, Span<const FloatRect>,
-                                        const FloatRect &primitiveSubregion) const noexcept
+  RectF FEFlood::CalculateImageRect(const Filter &filter, Span<const RectF>,
+                                    const RectF &primitiveSubregion) const noexcept
   {
     return filter.MaxEffectRect(primitiveSubregion);
   }

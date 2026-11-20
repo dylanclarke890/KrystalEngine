@@ -29,8 +29,8 @@
  */
 
 #include "Krystal.Booey/Platform/DateComponents.hpp"
-#include "Krystal.Core/Text/ASCII.hpp"
-#include "Krystal.Core/Text/StringBuilder.hpp"
+#include "Krystal.Core/Strings/ASCII.hpp"
+#include "Krystal.Core/Strings/StringBuilder.hpp"
 #include "Krystal.Core/Utils/Move.hpp"
 #include <array>
 #include <charconv>
@@ -1306,5 +1306,28 @@ namespace krys::boo
       case DateComponentsType::Invalid: krys_debug_assert(false); return u8"(Invalid DateComponents)";
     }
     return krys::move(builder).ToString();
+  }
+
+  Maybe<i18n::DateTimeFields> DateComponents::ToDateTimeFields() const noexcept
+  {
+    i18n::DateTimeKind kind {};
+    switch (_type)
+    {
+      case DateComponentsType::Date:          kind = i18n::DateTimeKind::Date; break;
+      case DateComponentsType::Month:         kind = i18n::DateTimeKind::Month; break;
+      case DateComponentsType::Week:          kind = i18n::DateTimeKind::Week; break;
+      case DateComponentsType::Time:          kind = i18n::DateTimeKind::Time; break;
+      case DateComponentsType::DateTimeLocal: kind = i18n::DateTimeKind::DateTime; break;
+      case DateComponentsType::Invalid:       return null;
+    }
+    return i18n::DateTimeFields {.Kind = kind,
+                                 .Year = FullYear(),
+                                 .Month = Month(),
+                                 .Day = MonthDay(),
+                                 .Week = Week(),
+                                 .Hour = Hour(),
+                                 .Minute = Minute(),
+                                 .Second = Second(),
+                                 .Millisecond = Millisecond()};
   }
 }

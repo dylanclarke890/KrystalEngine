@@ -26,9 +26,9 @@
 
 #pragma once
 
-#include "Krystal.Booey/Graphics/Transforms/TransformationMatrix.hpp"
 #include "Krystal.Booey/Style/Values/Primitives/NumericTypes.hpp"
 #include "Krystal.Booey/Style/Values/Transforms/Functions/TransformFunctionBase.hpp"
+#include "Krystal.Core/Geometry/TransformationMatrix.hpp"
 
 namespace krys::boo::style
 {
@@ -42,7 +42,7 @@ namespace krys::boo::style
 
     KRYS_NODISCARD Ref<const TransformFunctionBase> Clone() const noexcept override;
 
-    KRYS_NODISCARD Ref<TransformOperation> ToPlatform(const FloatSize &) const noexcept override;
+    KRYS_NODISCARD Ref<TransformOperation> ToPlatform(const SizeF &) const noexcept override;
 
     KRYS_NODISCARD TransformationMatrix Matrix() const noexcept
     {
@@ -66,7 +66,7 @@ namespace krys::boo::style
 
     KRYS_NODISCARD bool Equals(const TransformFunctionBase &) const noexcept override;
 
-    void Apply(TransformationMatrix &, const FloatSize &borderBoxSize) const noexcept override;
+    void Apply(TransformationMatrix &, const SizeF &borderBoxSize) const noexcept override;
 
     KRYS_NODISCARD Ref<const TransformFunctionBase>
       Blend(const TransformFunctionBase *from, const BlendingContext &,

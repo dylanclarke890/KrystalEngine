@@ -29,9 +29,9 @@
 #include "Krystal.Booey/Graphics/Fonts/FontCascade.hpp"
 #include "Krystal.Booey/Graphics/Fonts/GlyphBufferMembers.hpp"
 #include "Krystal.Booey/Graphics/GraphicsContext.hpp"
-#include "Krystal.Booey/Graphics/Transforms/AffineTransform.hpp"
 #include "Krystal.Booey/Rendering/Painting/PaintInfo.hpp"
 #include "Krystal.Booey/Rendering/Style/RenderStyle+GettersInlines.hpp"
+#include "Krystal.Core/Geometry/AffineTransform.hpp"
 #include <algorithm>
 
 namespace krys::boo
@@ -41,9 +41,9 @@ namespace krys::boo
     constexpr char32 RadicalOperator = 0x221A;
     constexpr uint32 MaximumExtensionCount = 128;
 
-    KRYS_NODISCARD FloatRect BoundsForGlyph(const GlyphData &data) noexcept
+    KRYS_NODISCARD RectF BoundsForGlyph(const GlyphData &data) noexcept
     {
-      return data.Font ? data.Font->BoundsForGlyph(data.Glyph) : FloatRect();
+      return data.Font ? data.Font->BoundsForGlyph(data.Glyph) : RectF();
     }
 
     KRYS_NODISCARD float HeightForGlyph(const GlyphData &data) noexcept
@@ -53,7 +53,7 @@ namespace krys::boo
 
     void GetAscentAndDescentForGlyph(const GlyphData &data, LayoutUnit &ascent, LayoutUnit &descent) noexcept
     {
-      FloatRect bounds = BoundsForGlyph(data);
+      RectF bounds = BoundsForGlyph(data);
       ascent = LayoutUnit(-bounds.Y());
       descent = LayoutUnit(bounds.MaxY());
     }
@@ -580,16 +580,16 @@ namespace krys::boo
   LayoutRect MathOperator::PaintGlyph(const RenderStyle &style, PaintInfo &info, const GlyphData &data,
                                       const LayoutPoint &origin, GlyphPaintTrimming trim) noexcept
   {
-    FloatRect glyphBounds = BoundsForGlyph(data);
+    RectF glyphBounds = BoundsForGlyph(data);
 
     LayoutRect glyphPaintRect(origin,
-                              LayoutSize(glyphBounds.X() + glyphBounds.Width(), glyphBounds.Height()));
-    glyphPaintRect.SetY(origin.Y() + glyphBounds.Y());
+                              LayoutSize(SizeF(glyphBounds.X() + glyphBounds.Width(), glyphBounds.Height())));
+    glyphPaintRect.SetY(LayoutUnit(origin.Y() + glyphBounds.Y()));
 
     // In order to have glyphs fit snugly with one another we snap the connecting edges to pixel boundaries
     // and trim off one pixel. The pixel trim is to account for fonts that have edge pixels that have less
     // than full coverage. These edge pixels can introduce small seams between connected glyphs.
-    FloatRect clipBounds = info.Rect;
+    RectF clipBounds = info.Rect;
     switch (trim)
     {
       case GlyphPaintTrimming::TrimTop:
@@ -621,14 +621,14 @@ namespace krys::boo
         clipBounds.ShiftMaxXEdgeTo(glyphPaintRect.MaxX());
     }
 
-    // Clipping the enclosing IntRect avoids any potential issues at joined edges.
+    // Clipping the enclosing RectI avoids any potential issues at joined edges.
     GraphicsContextStateSaver stateSaver(info.Context());
     info.Context().Clip(clipBounds);
 
     // FIXME: If we're just drawing a single glyph, why do we need to compute an advance?
-    auto advance = MakeGlyphBufferAdvance(FloatSize(AdvanceWidthForGlyph(data), 0));
+    auto advance = MakeGlyphBufferAdvance(SizeF(AdvanceWidthForGlyph(data), 0));
     info.Context().DrawGlyphs(*data.Font, Span<const GlyphBufferGlyph>(&data.Glyph, 1),
-                              Span<const GlyphBufferAdvance>(&advance, 1), FloatPoint(origin),
+                              Span<const GlyphBufferAdvance>(&advance, 1), PointF(origin),
                               style.GetFontCascade().GetFontDescription().UsedFontSmoothing());
 
     return glyphPaintRect;
@@ -654,7 +654,7 @@ namespace krys::boo
 
     GraphicsContextStateSaver stateSaver(info.Context());
 
-    FloatRect glyphBounds = BoundsForGlyph(extension);
+    RectF glyphBounds = BoundsForGlyph(extension);
 
     // Clipping the extender region here allows us to draw the bottom extender glyph into the
     // regions of the bottom glyph without worrying about overdraw (hairy pixels) and simplifies later
@@ -662,20 +662,20 @@ namespace krys::boo
     LayoutRect clipBounds = info.Rect;
     clipBounds.ShiftYEdgeTo(from.Y());
     clipBounds.ShiftMaxYEdgeTo(to.Y());
-    info.Context().Clip(FloatRect(clipBounds));
+    info.Context().Clip(RectF(clipBounds));
 
     // Trimming may remove up to two pixels from the top of the extender glyph, so we move it up by two
     // pixels.
     float offsetToGlyphTop = glyphBounds.Y() + 2;
     LayoutPoint glyphOrigin {from.X(), LayoutUnit(from.Y() - offsetToGlyphTop)};
-    FloatRect lastPaintedGlyphRect {FloatPoint(from), FloatSize()};
+    RectF lastPaintedGlyphRect {PointF(from), SizeF()};
 
     // In practice, only small stretch sizes are requested but we limit the number of glyphs to avoid hangs.
     for (uint32 extensionCount = 0;
          lastPaintedGlyphRect.MaxY() < to.Y() && extensionCount < MaximumExtensionCount; extensionCount++)
     {
       lastPaintedGlyphRect =
-        FloatRect(PaintGlyph(style, info, extension, glyphOrigin, GlyphPaintTrimming::TrimTopAndBottom));
+        RectF(PaintGlyph(style, info, extension, glyphOrigin, GlyphPaintTrimming::TrimTopAndBottom));
       glyphOrigin.SetY(glyphOrigin.Y() + LayoutUnit(lastPaintedGlyphRect.Height()));
 
       // There's a chance that if the font size is small enough the glue glyph has been reduced to an empty
@@ -714,20 +714,20 @@ namespace krys::boo
     LayoutRect clipBounds = info.Rect;
     clipBounds.ShiftXEdgeTo(from.X());
     clipBounds.ShiftMaxXEdgeTo(to.X());
-    info.Context().Clip(FloatRect(clipBounds));
+    info.Context().Clip(RectF(clipBounds));
 
     // Trimming may remove up to two pixels from the left of the extender glyph, so we move it left by two
     // pixels.
     float offsetToGlyphLeft = -2;
     LayoutPoint glyphOrigin {LayoutUnit(from.X() + offsetToGlyphLeft), from.Y()};
-    FloatRect lastPaintedGlyphRect {FloatPoint(from), FloatSize()};
+    RectF lastPaintedGlyphRect {PointF(from), SizeF()};
 
     // In practice, only small stretch sizes are requested but we limit the number of glyphs to avoid hangs.
     for (uint32 extensionCount = 0;
          lastPaintedGlyphRect.MaxX() < to.X() && extensionCount < MaximumExtensionCount; extensionCount++)
     {
       lastPaintedGlyphRect =
-        FloatRect(PaintGlyph(style, info, extension, glyphOrigin, GlyphPaintTrimming::TrimLeftAndRight));
+        RectF(PaintGlyph(style, info, extension, glyphOrigin, GlyphPaintTrimming::TrimLeftAndRight));
       glyphOrigin.SetX(glyphOrigin.X() + LayoutUnit(lastPaintedGlyphRect.Width()));
 
       // There's a chance that if the font size is small enough the glue glyph has been reduced to an empty
@@ -759,12 +759,12 @@ namespace krys::boo
     // We are positioning the glyphs so that the edge of the tight glyph bounds line up exactly with the edges
     // of our paint box.
     LayoutPoint operatorTopLeft = paintOffset;
-    FloatRect topGlyphBounds = BoundsForGlyph(topOrRight);
+    RectF topGlyphBounds = BoundsForGlyph(topOrRight);
     LayoutPoint topGlyphOrigin {operatorTopLeft.X(), LayoutUnit(operatorTopLeft.Y() - topGlyphBounds.Y())};
     LayoutRect topGlyphPaintRect =
       PaintGlyph(style, info, topOrRight, topGlyphOrigin, GlyphPaintTrimming::TrimBottom);
 
-    FloatRect bottomGlyphBounds = BoundsForGlyph(bottomOrLeft);
+    RectF bottomGlyphBounds = BoundsForGlyph(bottomOrLeft);
     LayoutPoint bottomGlyphOrigin {
       operatorTopLeft.X(),
       LayoutUnit(operatorTopLeft.Y() + StretchSize() - (bottomGlyphBounds.Height() + bottomGlyphBounds.Y()))};
@@ -778,7 +778,7 @@ namespace krys::boo
 
       // Center the glyph origin between the start and end glyph paint extents. Then shift it half the paint
       // height toward the bottom glyph.
-      FloatRect middleGlyphBounds = BoundsForGlyph(middle);
+      RectF middleGlyphBounds = BoundsForGlyph(middle);
       LayoutPoint middleGlyphOrigin(operatorTopLeft.X(), topGlyphOrigin.Y());
       middleGlyphOrigin.MoveBy(LayoutPoint(0, (bottomGlyphPaintRect.Y() - topGlyphPaintRect.MaxY()) / 2));
       middleGlyphOrigin.MoveBy(LayoutPoint(0, LayoutUnit(middleGlyphBounds.Height() / 2)));
@@ -822,7 +822,7 @@ namespace krys::boo
     LayoutRect leftGlyphPaintRect =
       PaintGlyph(style, info, bottomOrLeft, leftGlyphOrigin, GlyphPaintTrimming::TrimRight);
 
-    FloatRect rightGlyphBounds = BoundsForGlyph(topOrRight);
+    RectF rightGlyphBounds = BoundsForGlyph(topOrRight);
     LayoutPoint rightGlyphOrigin {LayoutUnit(operatorTopLeft.X() + StretchSize() - rightGlyphBounds.Width()),
                                   baselineY};
     LayoutRect rightGlyphPaintRect =
@@ -873,9 +873,9 @@ namespace krys::boo
         LayoutPoint scaleOrigin = paintOffset;
         scaleOrigin.Move(_width / 2, 0_lu);
         paintInfo.ApplyTransform(AffineTransform()
-                                   .Translate(FloatPoint(scaleOrigin))
+                                   .Translate(PointF(scaleOrigin))
                                    .Scale(radicalHorizontalScale, _radicalVerticalScale)
-                                   .Translate(-FloatPoint(scaleOrigin)));
+                                   .Translate(-PointF(scaleOrigin)));
       }
     }
 
@@ -908,7 +908,7 @@ namespace krys::boo
     auto operatorOrigin =
       LayoutPoint {operatorTopLeft.X(), LayoutUnit(operatorTopLeft.Y() - glyphBounds.Y())};
 
-    FloatPoint origin(operatorOrigin);
+    PointF origin(operatorOrigin);
     if (style.GetWritingMode().IsHorizontal())
     {
       origin.SetY(RoundToDevicePixel(operatorOrigin.Y(), deviceScaleFactor));
@@ -919,7 +919,7 @@ namespace krys::boo
     }
 
     // FIXME: If we're just drawing a single glyph, why do we need to compute an advance?
-    auto advance = MakeGlyphBufferAdvance(FloatSize(AdvanceWidthForGlyph(glyphData), 0));
+    auto advance = MakeGlyphBufferAdvance(SizeF(AdvanceWidthForGlyph(glyphData), 0));
     paintInfo.Context().DrawGlyphs(*glyphData.Font, Span<const GlyphBufferGlyph>(&glyphData.Glyph, 1),
                                    Span<const GlyphBufferAdvance>(&advance, 1), origin,
                                    style.GetFontCascade().GetFontDescription().UsedFontSmoothing());

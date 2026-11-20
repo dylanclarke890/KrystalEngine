@@ -27,7 +27,7 @@
 #include "Krystal.Booey/Graphics/Filters/Filter.hpp"
 #include "Krystal.Core/Assert.hpp"
 #include "Krystal.Core/Maths/Extras.hpp"
-#include "Krystal.Core/Text/TextStream.hpp"
+#include "Krystal.Core/Strings/TextStream.hpp"
 #include <algorithm>
 #include <cmath>
 #include <numbers>
@@ -99,10 +99,10 @@ namespace krys::boo
     return true;
   }
 
-  IntSize FEGaussianBlur::CalculateUnscaledKernelSize(FloatSize stdDeviation) noexcept
+  SizeI FEGaussianBlur::CalculateUnscaledKernelSize(SizeF stdDeviation) noexcept
   {
     krys_debug_assert(stdDeviation.Width() >= 0 && stdDeviation.Height() >= 0);
-    IntSize kernelSize;
+    SizeI kernelSize;
 
     if (stdDeviation.Width())
     {
@@ -117,13 +117,13 @@ namespace krys::boo
     return kernelSize;
   }
 
-  IntSize FEGaussianBlur::CalculateKernelSize(const Filter &filter, FloatSize stdDeviation) noexcept
+  SizeI FEGaussianBlur::CalculateKernelSize(const Filter &filter, SizeF stdDeviation) noexcept
   {
     stdDeviation = filter.ResolvedSize(stdDeviation);
     return CalculateUnscaledKernelSize(filter.ScaledByFilterScale(stdDeviation));
   }
 
-  IntSize FEGaussianBlur::CalculateOutsetSize(FloatSize stdDeviation) noexcept
+  SizeI FEGaussianBlur::CalculateOutsetSize(SizeF stdDeviation) noexcept
   {
     auto kernelSize = CalculateUnscaledKernelSize(stdDeviation);
 
@@ -131,15 +131,15 @@ namespace krys::boo
     return {3 * kernelSize.Width() / 2, 3 * kernelSize.Height() / 2};
   }
 
-  FloatRect FEGaussianBlur::CalculateImageRect(const Filter &filter, Span<const FloatRect> inputImageRects,
-                                               const FloatRect &primitiveSubregion) const noexcept
+  RectF FEGaussianBlur::CalculateImageRect(const Filter &filter, Span<const RectF> inputImageRects,
+                                           const RectF &primitiveSubregion) const noexcept
   {
     auto imageRect = inputImageRects[0];
 
     // Edge modes other than 'none' do not inflate the affected paint rect.
     if (_edgeMode != EdgeModeType::None)
     {
-      return FloatRect(EnclosingIntRect(imageRect));
+      return RectF(EnclosingRectI(imageRect));
     }
 
     auto kernelSize = CalculateUnscaledKernelSize(filter.ResolvedSize({_stdX, _stdY}));
@@ -151,9 +151,9 @@ namespace krys::boo
     return filter.ClipToMaxEffectRect(imageRect, primitiveSubregion);
   }
 
-  IntOutsets FEGaussianBlur::CalculateOutsets(const FloatSize &stdDeviation) noexcept
+  IntOutsets FEGaussianBlur::CalculateOutsets(const SizeF &stdDeviation) noexcept
   {
-    IntSize outsetSize = CalculateOutsetSize(stdDeviation);
+    SizeI outsetSize = CalculateOutsetSize(stdDeviation);
     return {outsetSize.Height(), outsetSize.Width(), outsetSize.Height(), outsetSize.Width()};
   }
 

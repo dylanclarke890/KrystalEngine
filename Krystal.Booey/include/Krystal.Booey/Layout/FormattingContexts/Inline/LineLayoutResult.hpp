@@ -93,7 +93,7 @@ namespace krys::boo::layout
     struct Directionality
     {
       List<int32> VisualOrderList;
-      TextDirection InlineBaseDirection {TextDirection::LTR};
+      text::TextDirection InlineBaseDirection {text::TextDirection::LTR};
     };
 
     Directionality BidiDirectionality {};

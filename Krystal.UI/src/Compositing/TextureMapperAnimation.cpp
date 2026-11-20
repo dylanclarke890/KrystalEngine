@@ -153,11 +153,11 @@ namespace krys::ui
       return static_cast<float>(fromOpacity + progress * (toOpacity - fromOpacity));
     }
 
-    KRYS_NODISCARD boo::TransformationMatrix ApplyTransformAnimation(const boo::TransformOperations &from,
-                                                                     const boo::TransformOperations &to,
-                                                                     double progress) noexcept
+    KRYS_NODISCARD TransformationMatrix ApplyTransformAnimation(const boo::TransformOperations &from,
+                                                                const boo::TransformOperations &to,
+                                                                double progress) noexcept
     {
-      boo::TransformationMatrix matrix;
+      TransformationMatrix matrix;
 
       // First frame of an animation.
       if (!progress)
@@ -467,7 +467,7 @@ namespace krys::ui
     if (!translateAnimations.empty() || !rotateAnimations.empty() || !scaleAnimations.empty()
         || !transformAnimations.empty())
     {
-      applicationResults.Transform = boo::TransformationMatrix();
+      applicationResults.Transform = TransformationMatrix();
 
       if (translateAnimations.empty())
       {

@@ -26,8 +26,8 @@
 
 #include "Krystal.Booey/Rendering/Line/LegacyInlineIterator.hpp"
 #include "Krystal.Booey/Rendering/Line/LineInfo.hpp"
-#include "Krystal.Booey/Text/TextBreakIterator.hpp"
 #include "Krystal.Core/Types/CheckedPtr.hpp"
+#include "Krystal.Text/TextBreakIterator.hpp"
 
 namespace krys::boo
 {
@@ -37,7 +37,7 @@ namespace krys::boo
   struct RenderTextInfo
   {
     CheckedPtr<RenderText> Text;
-    CachedLineBreakIteratorFactory LineBreakIteratorFactory;
+    text::CachedLineBreakIteratorFactory LineBreakIteratorFactory;
     const FontCascade *Font {nullptr};
   };
 

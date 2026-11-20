@@ -63,7 +63,8 @@ namespace krys::gfx::tests
     // Each quarter of a pixel, size, transform and face is a glyph of its own.
     CHECK(atlas.GetGlyph(*face, a, 16.f, 1u).value().Texels != first->Texels);
     CHECK(atlas.GetGlyph(*face, a, 17.f, 0u).value().Texels != first->Texels);
-    CHECK(atlas.GetGlyph(*face, a, 16.f, 0u, Transform2D::Scale(2.f, 2.f)).value().Texels != first->Texels);
+    CHECK(atlas.GetGlyph(*face, a, 16.f, 0u, AffineTransform::CreateScale(SizeF(2.f, 2.f))).value().Texels
+          != first->Texels);
     auto other = LiberationSansFace();
     CHECK(atlas.GetGlyph(*other, a, 16.f, 0u).value().Texels != first->Texels);
     CHECK(atlas.Stats().Rasterised == 5u);
@@ -72,8 +73,8 @@ namespace krys::gfx::tests
     const auto blurred = atlas.GetGlyph(*face, a, 16.f, 0u, {}, 2.f);
     REQUIRE(blurred.has_value());
     CHECK_FALSE(blurred->Colour);
-    CHECK(blurred->Bounds.Width == first->Bounds.Width + 2u * detail::BlurExtent(2.f));
-    CHECK(blurred->Bounds.X == first->Bounds.X - static_cast<int32>(detail::BlurExtent(2.f)));
+    CHECK(blurred->Bounds.Width() == first->Bounds.Width() + 2 * static_cast<int32>(detail::BlurExtent(2.f)));
+    CHECK(blurred->Bounds.X() == first->Bounds.X() - static_cast<int32>(detail::BlurExtent(2.f)));
     CHECK(atlas.Stats().Rasterised == 6u);
 
     // A space has no pixels, so no texture.
@@ -97,12 +98,12 @@ namespace krys::gfx::tests
     REQUIRE(bitmap.has_value());
     CHECK(location->Bounds == bitmap->Bounds);
 
-    List<byte> texels(static_cast<size_t>(location->Texels.Width) * location->Texels.Height);
+    List<byte> texels(static_cast<size_t>(location->Texels.Width()) * location->Texels.Height());
     device->ReadTexture(location->Texture,
-                        {.X = static_cast<uint32>(location->Texels.X),
-                         .Y = static_cast<uint32>(location->Texels.Y),
-                         .Width = location->Texels.Width,
-                         .Height = location->Texels.Height},
+                        {.X = static_cast<uint32>(location->Texels.X()),
+                         .Y = static_cast<uint32>(location->Texels.Y()),
+                         .Width = static_cast<uint32>(location->Texels.Width()),
+                         .Height = static_cast<uint32>(location->Texels.Height())},
                         texels);
     CHECK(std::memcmp(texels.data(), bitmap->Pixels.data(), texels.size()) == 0);
     device->EndFrame();

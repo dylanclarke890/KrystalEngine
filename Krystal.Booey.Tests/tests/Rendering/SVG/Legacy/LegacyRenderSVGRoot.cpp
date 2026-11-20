@@ -110,7 +110,7 @@ layer at (0,0) size 800x104
     CHECK(a.LocalToBorderBoxTransform() == AffineTransform(4, 0, 0, 4, 0, 0));
 
     // So does panning.
-    SvgById(*fixture.Document, u8"b").SetCurrentTranslate(FloatPoint(7, 8));
+    SvgById(*fixture.Document, u8"b").SetCurrentTranslate(PointF(7, 8));
     (void)fixture.Document->UpdateLayout();
     CHECK(b.LocalToBorderBoxTransform() == AffineTransform(1, 0, 0, 1, 7, 8));
   }

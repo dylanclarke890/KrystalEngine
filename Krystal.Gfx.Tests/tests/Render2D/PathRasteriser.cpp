@@ -9,7 +9,7 @@ namespace krys::gfx::tests
 {
   namespace
   {
-    constexpr PixelRect2D Everywhere {.X = -1'000, .Y = -1'000, .Width = 2'000u, .Height = 2'000u};
+    constexpr RectI Everywhere {-1'000, -1'000, 2'000u, 2'000u};
     constexpr float Pi = std::numbers::pi_v<float>;
 
     /// @brief The area the mask covers, in square pixels.
@@ -38,8 +38,8 @@ namespace krys::gfx::tests
     }
 
     KRYS_NODISCARD CoverageMask Rasterise(const Path2D &path, FillRule rule = FillRule::NonZero,
-                                          const Transform2D &transform = {},
-                                          const PixelRect2D &clip = Everywhere)
+                                          const AffineTransform &transform = {},
+                                          const RectI &clip = Everywhere)
     {
       PathRasteriser rasteriser;
       return rasteriser.Rasterise(path, transform, rule, clip);
@@ -49,7 +49,7 @@ namespace krys::gfx::tests
   TEST_CASE("PathRasteriser: covers whole pixels exactly", "[Gfx][Render2D]")
   {
     auto mask = Rasterise(Rect(1.f, 1.f, 2.f, 3.f));
-    CHECK(mask.Bounds == PixelRect2D {.X = 1, .Y = 1, .Width = 2u, .Height = 3u});
+    CHECK(mask.Bounds == RectI {1, 1, 2u, 3u});
     for (const auto value : mask.Coverage)
     {
       CHECK(value == 255u);
@@ -61,7 +61,7 @@ namespace krys::gfx::tests
     SECTION("Exactly across a row")
     {
       auto mask = Rasterise(Rect(0.5f, 0.f, 2.f, 1.f));
-      CHECK(mask.Bounds == PixelRect2D {.X = 0, .Y = 0, .Width = 3u, .Height = 1u});
+      CHECK(mask.Bounds == RectI {0, 0, 3u, 1u});
       CHECK(mask.At(0, 0) == 128u);
       CHECK(mask.At(1, 0) == 255u);
       CHECK(mask.At(2, 0) == 128u);
@@ -160,19 +160,18 @@ namespace krys::gfx::tests
   TEST_CASE("PathRasteriser: maps the path into pixels and clips it", "[Gfx][Render2D]")
   {
     auto transformed = Rasterise(Rect(0.f, 0.f, 1.f, 1.f), FillRule::NonZero,
-                                 Transform2D::Translation(1.f, 1.f) * Transform2D::Scale(3.f, 2.f));
-    CHECK(transformed.Bounds == PixelRect2D {.X = 1, .Y = 1, .Width = 3u, .Height = 2u});
+                                 AffineTransform::CreateTranslation(SizeF(1.f, 1.f))
+                                   * AffineTransform::CreateScale(SizeF(3.f, 2.f)));
+    CHECK(transformed.Bounds == RectI {1, 1, 3u, 2u});
     CHECK(Area(transformed) == 6.f);
 
     // Edges outside the clip still decide what's inside it.
-    constexpr PixelRect2D clip {.X = 2, .Y = 2, .Width = 3u, .Height = 3u};
+    constexpr RectI clip {2, 2, 3u, 3u};
     auto clipped = Rasterise(Rect(0.f, 0.f, 8.f, 8.f), FillRule::NonZero, {}, clip);
     CHECK(clipped.Bounds == clip);
     CHECK(Area(clipped) == 9.f);
 
-    CHECK(
-      Rasterise(Rect(0.f, 0.f, 8.f, 8.f), FillRule::NonZero, {}, {.X = 20, .Y = 0, .Width = 4u, .Height = 4u})
-        .Bounds.IsEmpty());
+    CHECK(Rasterise(Rect(0.f, 0.f, 8.f, 8.f), FillRule::NonZero, {}, {20, 0, 4u, 4u}).Bounds.IsEmpty());
   }
 
   TEST_CASE("PathRasteriser: covers nothing for empty and invalid paths", "[Gfx][Render2D]")

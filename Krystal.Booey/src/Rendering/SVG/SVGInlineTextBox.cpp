@@ -80,9 +80,9 @@ namespace krys::boo
     return true;
   }
 
-  FloatRect SVGInlineTextBox::CalculateBoundaries() const noexcept
+  RectF SVGInlineTextBox::CalculateBoundaries() const noexcept
   {
-    FloatRect textRect;
+    RectF textRect;
 
     float scalingFactor = Renderer().ScalingFactor();
     krys_debug_assert(scalingFactor);
@@ -92,7 +92,7 @@ namespace krys::boo
     AffineTransform fragmentTransform;
     for (const auto &fragment : _textFragments)
     {
-      FloatRect fragmentRect(fragment.X, fragment.Y - baseline, fragment.Width, fragment.Height);
+      RectF fragmentRect(fragment.X, fragment.Y - baseline, fragment.Width, fragment.Height);
       fragment.BuildFragmentTransform(fragmentTransform);
       if (!fragmentTransform.IsIdentity())
       {

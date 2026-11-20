@@ -1733,7 +1733,7 @@ namespace krys::boo
     {
       return;
     }
-    BorderPainter::DrawLineForBoxSide(paintInfo.Context(), GetDocument(), FloatRect(rect), side,
+    BorderPainter::DrawLineForBoxSide(paintInfo.Context(), GetDocument(), RectF(rect), side,
                                       Style().ColorResolvingCurrentColor(borderColor), borderStyle, 0, 0,
                                       antialias);
   }
@@ -2232,7 +2232,7 @@ namespace krys::boo
     return false;
   }
 
-  void RenderTableSection::ImageChanged(WrappedImagePtr, const IntRect *) noexcept
+  void RenderTableSection::ImageChanged(WrappedImagePtr, const RectI *) noexcept
   {
     // FIXME: Examine cells and repaint only the rect the image paints in.
     if (!Parent())

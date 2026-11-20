@@ -12,7 +12,7 @@ namespace krys::boo::style::tests
     {
       STATIC_CHECK(ComputedStyle::InitialDisplay() == DisplayType::Inline);
       // Keywords whose enumerator is spelled differently from the keyword.
-      STATIC_CHECK(ComputedStyle::InitialDirection() == TextDirection::LTR);
+      STATIC_CHECK(ComputedStyle::InitialDirection() == text::TextDirection::LTR);
       STATIC_CHECK(ComputedStyle::InitialFillRule() == WindRule::NonZero);
       STATIC_CHECK(ComputedStyle::InitialFlexWrap() == FlexWrap::NoWrap);
     }

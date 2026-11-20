@@ -46,6 +46,6 @@ namespace krys::boo::html::input_type_names
   constexpr DOMStringView Telephone = u8"tel";
   constexpr DOMStringView Text = u8"text";
   constexpr DOMStringView Time = u8"time";
-  constexpr DOMStringView URL = u8"url";
+  constexpr DOMStringView Url = u8"url";
   constexpr DOMStringView Week = u8"week";
 }

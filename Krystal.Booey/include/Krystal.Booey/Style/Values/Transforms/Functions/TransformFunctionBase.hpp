@@ -25,10 +25,10 @@
 
 #pragma once
 
-#include "Krystal.Booey/Graphics/Geometry/FloatSize.hpp"
-#include "Krystal.Booey/Graphics/Transforms/TransformationMatrix.hpp"
 #include "Krystal.Booey/Graphics/Transforms/TransformOperation.hpp"
 #include "Krystal.Booey/Style/Values/Types.hpp"
+#include "Krystal.Core/Geometry/Size.hpp"
+#include "Krystal.Core/Geometry/TransformationMatrix.hpp"
 
 #include "Krystal.Core/RefCounted.hpp"
 
@@ -83,7 +83,7 @@ namespace krys::boo
       KRYS_NODISCARD virtual Ref<const TransformFunctionBase> Clone() const noexcept = 0;
 
       KRYS_NODISCARD virtual Ref<TransformOperation>
-        ToPlatform(const FloatSize &borderBoxSize) const noexcept = 0;
+        ToPlatform(const SizeF &borderBoxSize) const noexcept = 0;
 
       KRYS_NODISCARD bool operator==(const TransformFunctionBase &other) const noexcept
       {
@@ -92,7 +92,7 @@ namespace krys::boo
 
       KRYS_NODISCARD virtual bool Equals(const TransformFunctionBase &) const noexcept = 0;
 
-      virtual void Apply(TransformationMatrix &, const FloatSize &borderBoxSize) const noexcept = 0;
+      virtual void Apply(TransformationMatrix &, const SizeF &borderBoxSize) const noexcept = 0;
 
       KRYS_NODISCARD virtual Ref<const TransformFunctionBase>
         Blend(const TransformFunctionBase *from, const BlendingContext &,

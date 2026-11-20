@@ -19,11 +19,11 @@
 
 #pragma once
 
-#include "Krystal.Booey/Graphics/Geometry/FloatPoint.hpp"
-#include "Krystal.Booey/Graphics/Geometry/FloatPoint3D.hpp"
-#include "Krystal.Booey/Graphics/Geometry/FloatSize.hpp"
-#include "Krystal.Booey/Graphics/Transforms/TransformationMatrix.hpp"
 #include "Krystal.Core/Attributes.hpp"
+#include "Krystal.Core/Geometry/Point.hpp"
+#include "Krystal.Core/Geometry/Point3.hpp"
+#include "Krystal.Core/Geometry/Size.hpp"
+#include "Krystal.Core/Geometry/TransformationMatrix.hpp"
 
 namespace krys::boo
 {
@@ -31,9 +31,9 @@ namespace krys::boo
   class GraphicsLayerTransform
   {
   private:
-    FloatPoint3D _anchorPoint;
-    FloatPoint _position;
-    FloatSize _size;
+    Point3F _anchorPoint;
+    PointF _position;
+    SizeF _size;
     bool _flattening {true};
     bool _dirty {false};
     mutable bool _childrenDirty {false};
@@ -45,11 +45,11 @@ namespace krys::boo
   public:
     GraphicsLayerTransform() noexcept;
 
-    void SetPosition(const FloatPoint &position) noexcept;
+    void SetPosition(const PointF &position) noexcept;
 
-    void SetSize(const FloatSize &size) noexcept;
+    void SetSize(const SizeF &size) noexcept;
 
-    void SetAnchorPoint(const FloatPoint3D &anchorPoint) noexcept;
+    void SetAnchorPoint(const Point3F &anchorPoint) noexcept;
 
     void SetFlattening(bool flattening) noexcept;
 

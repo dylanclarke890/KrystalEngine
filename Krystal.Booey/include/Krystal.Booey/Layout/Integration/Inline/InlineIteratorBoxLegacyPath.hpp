@@ -33,6 +33,7 @@
 #include "Krystal.Booey/Rendering/SVG/RenderSVGInlineText.hpp"
 #include "Krystal.Booey/Rendering/SVG/SVGInlineTextBox.hpp"
 #include "Krystal.Core/Types/List.hpp"
+#include "Krystal.Text/Bidi.hpp"
 
 namespace krys::boo::inline_iterator
 {
@@ -72,7 +73,7 @@ namespace krys::boo::inline_iterator
       return Renderer().IsBlockLevelReplacedOrAtomicInline();
     }
 
-    KRYS_NODISCARD FloatRect VisualRectIgnoringBlockDirection() const noexcept
+    KRYS_NODISCARD RectF VisualRectIgnoringBlockDirection() const noexcept
     {
       return _inlineBox->FrameRect();
     }
@@ -97,7 +98,7 @@ namespace krys::boo::inline_iterator
       return static_cast<uint32>(_inlineBox->CaretMaxOffset());
     }
 
-    KRYS_NODISCARD UBiDiLevel BidiLevel() const noexcept
+    KRYS_NODISCARD text::BidiLevel BidiLevel() const noexcept
     {
       return _inlineBox->BidiLevel();
     }
@@ -213,9 +214,9 @@ namespace krys::boo::inline_iterator
       return BoxLegacyPath {_inlineBox->Parent()};
     }
 
-    KRYS_NODISCARD TextDirection Direction() const noexcept
+    KRYS_NODISCARD text::TextDirection Direction() const noexcept
     {
-      return BidiLevel() % 2 ? TextDirection::RTL : TextDirection::LTR;
+      return BidiLevel() % 2 ? text::TextDirection::RTL : text::TextDirection::LTR;
     }
 
     KRYS_NODISCARD bool IsFirstFormattedLine() const noexcept

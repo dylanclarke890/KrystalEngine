@@ -48,10 +48,9 @@
 #include "Krystal.Booey/Rendering/Tables/RenderTable.hpp"
 #include "Krystal.Booey/Rendering/Tables/RenderTableCell.hpp"
 #include "Krystal.Booey/Rendering/Tables/RenderTableRow.hpp"
-#include "Krystal.Core/Text/Unicode.hpp"
+#include "Krystal.Core/Strings/Unicode.hpp"
 #include <algorithm>
 #include <climits>
-#include <unicode/utf8.h>
 
 namespace krys::boo
 {
@@ -287,11 +286,7 @@ namespace krys::boo
 
   void TextIteratorCopyableText::Set(char32 singleCharacter) noexcept
   {
-    int32 length = 0;
-    UBool isError = false;
-    U8_APPEND(reinterpret_cast<uint8_t *>(_singleCharacter), length, 4, static_cast<UChar32>(singleCharacter),
-              isError);
-    _singleCharacterLength = static_cast<uint32>(length);
+    _singleCharacterLength = text::EncodeUTF8(singleCharacter, _singleCharacter);
     _string = utf8_string();
     _offset = 0;
     _length = 0;

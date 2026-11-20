@@ -1,7 +1,7 @@
 ﻿#include "Krystal.PAL/Platform.hpp"
 #include "Krystal.Core/Assert.hpp"
+#include "Krystal.Core/Strings/String.hpp"
 #include "Krystal.Core/Types/Maybe.hpp"
-#include "Krystal.Core/Types/String.hpp"
 #include "Krystal.Core/Utils/Move.hpp"
 #include <algorithm>
 #include <cstdio>
@@ -547,13 +547,13 @@ namespace krys::pal
       return format;
     }
 
-    KRYS_NODISCARD UINT URLWFormat() noexcept
+    KRYS_NODISCARD UINT UrlWFormat() noexcept
     {
       static const UINT format = ::RegisterClipboardFormatW(L"UniformResourceLocatorW");
       return format;
     }
 
-    KRYS_NODISCARD UINT URLFormat() noexcept
+    KRYS_NODISCARD UINT UrlFormat() noexcept
     {
       static const UINT format = ::RegisterClipboardFormatW(L"UniformResourceLocator");
       return format;
@@ -571,36 +571,36 @@ namespace krys::pal
       }
 
       // The longest URL Windows takes (`INTERNET_MAX_URL_LENGTH`).
-      constexpr DWORD maxURLLength = 2'048 + 32 + 4;
-      std::wstring url(maxURLLength, L'\0');
+      constexpr DWORD maxUrlLength = 2'048 + 32 + 4;
+      std::wstring url(maxUrlLength, L'\0');
       const DWORD length = ::GetPrivateProfileStringW(L"InternetShortcut", L"url", nullptr, url.data(),
-                                                      maxURLLength, widePath.c_str());
+                                                      maxUrlLength, widePath.c_str());
       if (!length)
       {
         return false;
       }
 
-      content.URL = FromWide(url.c_str(), static_cast<int>(length));
+      content.Url = FromWide(url.c_str(), static_cast<int>(length));
       std::wstring name(::PathFindFileNameW(widePath.c_str()));
       ::PathRemoveExtensionW(name.data());
-      content.URLTitle = FromWide(name.c_str(), static_cast<int>(::wcslen(name.c_str())));
+      content.UrlTitle = FromWide(name.c_str(), static_cast<int>(::wcslen(name.c_str())));
       return true;
     }
 
     /// @brief Sets @p content's URL and title from @p url, a URL and its title on the next line, if it has
     /// one; else the URL is its own title.
-    void SetURLAndTitle(utf8_string &&url, DragContent &content) noexcept
+    void SetUrlAndTitle(utf8_string &&url, DragContent &content) noexcept
     {
       auto split = url.find(u8'\n');
       if (split == utf8_string::npos)
       {
-        content.URLTitle = url;
-        content.URL = krys::move(url);
+        content.UrlTitle = url;
+        content.Url = krys::move(url);
         return;
       }
-      content.URLTitle = url.substr(split + 1);
+      content.UrlTitle = url.substr(split + 1);
       url.resize(split);
-      content.URL = krys::move(url);
+      content.Url = krys::move(url);
     }
   }
 
@@ -646,13 +646,13 @@ namespace krys::pal
       {
         return content;
       }
-      if (auto bytes = GetDragData(data, URLWFormat()))
+      if (auto bytes = GetDragData(data, UrlWFormat()))
       {
-        SetURLAndTitle(WideText(*bytes), content);
+        SetUrlAndTitle(WideText(*bytes), content);
       }
-      else if (auto ansiBytes = GetDragData(data, URLFormat()))
+      else if (auto ansiBytes = GetDragData(data, UrlFormat()))
       {
-        SetURLAndTitle(AnsiText(*ansiBytes), content);
+        SetUrlAndTitle(AnsiText(*ansiBytes), content);
       }
       return content;
     }

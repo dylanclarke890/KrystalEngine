@@ -27,24 +27,24 @@
 
 #include "Krystal.Booey/HTML/Elements/HTMLCanvasElement.hpp"
 #include "Krystal.Booey/DOM/Nodes/Document.hpp"
-#include "Krystal.Booey/Graphics/Geometry/GeometryUtilities.hpp"
 #include "Krystal.Booey/Graphics/GraphicsContext.hpp"
 #include "Krystal.Booey/Graphics/ImageBuffers/ImageBuffer.hpp"
+#include "Krystal.Booey/Graphics/ImageBuffers/ImageBufferUtilities.hpp"
 #include "Krystal.Booey/Graphics/Images/BitmapImage.hpp"
 #include "Krystal.Booey/Graphics/Images/NativeImage.hpp"
 #include "Krystal.Booey/HTML/Attributes/ReflectAttribute.hpp"
 #include "Krystal.Booey/HTML/Canvas/CanvasRenderingContext2D.hpp"
 #include "Krystal.Booey/HTML/Canvas/EngineTextureRenderingContext.hpp"
 #include "Krystal.Booey/HTML/Internals/PresentationalHints.hpp"
-#include "Krystal.Booey/Platform/MIMETypeRegistry.hpp"
 #include "Krystal.Booey/Rendering/Replaced/RenderHTMLCanvas.hpp"
-#include "Krystal.Core/Text/ASCII.hpp"
+#include "Krystal.Core/Geometry/GeometryUtilities.hpp"
+#include "Krystal.Core/Strings/ASCII.hpp"
 
 namespace krys::boo
 {
   HTMLCanvasElement::HTMLCanvasElement(Document &document) noexcept
       : HTMLElement(document, html::HTMLElementInterface::Canvas),
-        CanvasBase(IntSize(static_cast<int32>(DefaultWidth), static_cast<int32>(DefaultHeight)))
+        CanvasBase(SizeI(static_cast<int32>(DefaultWidth), static_cast<int32>(DefaultHeight)))
   {
   }
 
@@ -166,8 +166,7 @@ namespace krys::boo
 
 #pragma region Drawing
 
-  Maybe<FloatRect>
-    HTMLCanvasElement::ComputeDirtyRectangleIfNeeded(const Maybe<FloatRect> &rect) const noexcept
+  Maybe<RectF> HTMLCanvasElement::ComputeDirtyRectangleIfNeeded(const Maybe<RectF> &rect) const noexcept
   {
     if (!rect)
     {
@@ -179,18 +178,18 @@ namespace krys::boo
       return null;
     }
 
-    FloatRect destRect;
+    RectF destRect;
     auto *renderer = GetRenderBox();
     if (auto *renderReplaced = DynamicDowncast<RenderReplaced>(*renderer))
     {
-      destRect = FloatRect(renderReplaced->ReplacedContentRect());
+      destRect = RectF(renderReplaced->ReplacedContentRect());
     }
     else
     {
-      destRect = FloatRect(renderer->ContentBoxRect());
+      destRect = RectF(renderer->ContentBoxRect());
     }
 
-    FloatRect dirtyRect = MapRect(*rect, FloatRect {{}, FloatSize(Size())}, destRect);
+    RectF dirtyRect = MapRect(*rect, RectF {{}, SizeF(Size())}, destRect);
     dirtyRect.Intersect(destRect);
     if (dirtyRect.IsEmpty())
     {
@@ -199,7 +198,7 @@ namespace krys::boo
     return dirtyRect;
   }
 
-  void HTMLCanvasElement::DidDraw(const Maybe<FloatRect> &rect) noexcept
+  void HTMLCanvasElement::DidDraw(const Maybe<RectF> &rect) noexcept
   {
     ClearCopiedImage();
     if (auto *renderer = GetRenderBox())
@@ -211,7 +210,7 @@ namespace krys::boo
       }
       else if (dirtyRect)
       {
-        renderer->RepaintRectangle(LayoutRect(EnclosingIntRect(*dirtyRect)));
+        renderer->RepaintRectangle(LayoutRect(EnclosingRectI(*dirtyRect)));
       }
     }
 
@@ -242,8 +241,8 @@ namespace krys::boo
     //    height content attribute to the shortest possible string representing height as a valid non-negative
     //    integer.
     // (The new size is the attributes', so they don't differ.)
-    IntSize oldSize = Size();
-    IntSize newSize(static_cast<int32>(Width()), static_cast<int32>(Height()));
+    SizeI oldSize = Size();
+    SizeI newSize(static_cast<int32>(Width()), static_cast<int32>(Height()));
     // If the size of an existing buffer matches, we can just clear it instead of reallocating.
     // This optimization is only done for 2D canvases for now.
     if (HasCreatedImageBuffer() && oldSize == newSize && _context && _context->Is2d() && Buffer())
@@ -406,7 +405,7 @@ namespace krys::boo
         context.GetCompositeMode() == CompositeMode {CompositeOperator::SourceOver, BlendMode::Normal};
       if (!skipTransparentBlackDraw)
       {
-        context.FillRect(FloatRect(SnappedIntRect(rect)), Color::transparentBlack);
+        context.FillRect(RectF(SnappedRectI(rect)), Color::transparentBlack);
       }
       return;
     }
@@ -416,7 +415,7 @@ namespace krys::boo
       if (auto buffer =
             _context->SurfaceBufferToImageBuffer(html::CanvasRenderingContext::SurfaceBuffer::DisplayBuffer))
       {
-        context.DrawImageBuffer(*buffer, FloatRect(SnappedIntRect(rect)),
+        context.DrawImageBuffer(*buffer, RectF(SnappedRectI(rect)),
                                 ImagePaintingOptions(context.CompositeOperation()));
       }
       return;
@@ -425,8 +424,7 @@ namespace krys::boo
     if (auto image =
           _context->SurfaceBufferToNativeImage(html::CanvasRenderingContext::SurfaceBuffer::DisplayBuffer))
     {
-      context.DrawNativeImage(*image, FloatRect(SnappedIntRect(rect)),
-                              FloatRect({}, FloatSize(image->Size())),
+      context.DrawNativeImage(*image, RectF(SnappedRectI(rect)), RectF({}, SizeF(image->Size())),
                               ImagePaintingOptions(context.CompositeOperation()));
     }
   }
@@ -507,7 +505,7 @@ namespace krys::boo
 
   KRYS_NODISCARD static DOMString ToEncodingMimeType(DOMStringView mimeType) noexcept
   {
-    if (!MIMETypeRegistry::IsSupportedImageMIMETypeForEncoding(mimeType))
+    if (!SupportsEncodingMimeType(mimeType))
     {
       return u8"image/png";
     }
@@ -525,7 +523,7 @@ namespace krys::boo
   }
 
   // https://html.spec.whatwg.org/#dom-canvas-todataurl
-  DOMString HTMLCanvasElement::ToDataURL(DOMStringView mimeType, Maybe<double> quality) noexcept
+  DOMString HTMLCanvasElement::ToDataUrl(DOMStringView mimeType, Maybe<double> quality) noexcept
   {
     // 1. (Skipped: a canvas is always origin-clean, as there are no origins; see DIFFERENCES.md.)
 
@@ -538,7 +536,7 @@ namespace krys::boo
 
     // 3. Let file be a serialization of this canvas element's bitmap as a file, passing type and quality if
     //    given.
-    auto encodingMIMEType = ToEncodingMimeType(mimeType);
+    auto encodingMimeType = ToEncodingMimeType(mimeType);
     auto buffer = MakeRenderingResultsAvailable();
 
     // 4. If file is null, then return "data:,".
@@ -548,6 +546,6 @@ namespace krys::boo
     }
 
     // 5. Return a data: URL representing file.
-    return buffer->ToDataURL(encodingMIMEType, QualityInRange(quality));
+    return buffer->ToDataUrl(encodingMimeType, QualityInRange(quality));
   }
 }

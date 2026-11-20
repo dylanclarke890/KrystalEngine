@@ -27,18 +27,18 @@
 #pragma once
 
 #include "Krystal.Booey/Loader/Cache/CachedResourceHandle.hpp"
-#include "Krystal.Booey/Platform/Timer.hpp"
 #include "Krystal.Core/CanMakeWeakPtr.hpp"
+#include "Krystal.Core/Time/Timer.hpp"
 #include "Krystal.Core/Types/List.hpp"
+
+namespace krys::net
+{
+  class Url;
+}
 
 namespace krys::boo
 {
   class Document;
-
-  namespace url
-  {
-    class URL;
-  }
 
   class CachedFont;
 
@@ -65,7 +65,7 @@ namespace krys::boo
 
       /// @brief The cached font for the file at @p url, or null if it can't be requested. Its file doesn't
       /// load until `BeginLoadingFontSoon`.
-      KRYS_NODISCARD CachedFont *GetCachedFont(url::URL url,
+      KRYS_NODISCARD CachedFont *GetCachedFont(net::Url url,
                                                bool isInitiatingElementInUserAgentShadowTree) noexcept;
 
       void BeginLoadingFontSoon(CachedFont &font) noexcept;

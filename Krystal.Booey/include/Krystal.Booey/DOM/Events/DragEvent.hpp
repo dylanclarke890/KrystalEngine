@@ -34,9 +34,9 @@ namespace krys::boo
     KRYS_NODISCARD static Ref<DragEvent>
       Create(DOMStringAtom type, bool canBubble, bool isCancelable, bool isComposed,
              MonotonicTime::duration timestamp, LocalFrameView *view, int32 detail,
-             const DoublePoint &screenLocation, const DoublePoint &windowLocation, double movementX,
-             double movementY, EnumSet<Modifier> modifiers, MouseButton button, uint16 buttons,
-             EventTarget *relatedTarget, double force, SyntheticClickType syntheticClickType,
+             const PointD &screenLocation, const PointD &windowLocation, double movementX, double movementY,
+             EnumSet<Modifier> modifiers, MouseButton button, uint16 buttons, EventTarget *relatedTarget,
+             double force, SyntheticClickType syntheticClickType,
              dom::DataTransfer *dataTransfer = nullptr) noexcept;
 
     /// @see https://html.spec.whatwg.org/multipage/dnd.html#dom-dragevent-datatransfer
@@ -52,10 +52,9 @@ namespace krys::boo
 
   private:
     DragEvent(DOMStringAtom type, const UIEventInit &eventInitDict, LocalFrameView *view,
-              const DoublePoint &screenLocation, const DoublePoint &windowLocation, double movementX,
-              double movementY, EnumSet<Modifier> modifiers, MouseButton button, uint16 buttons,
-              EventTarget *relatedTarget, double force, SyntheticClickType syntheticClickType,
-              dom::DataTransfer *dataTransfer) noexcept;
+              const PointD &screenLocation, const PointD &windowLocation, double movementX, double movementY,
+              EnumSet<Modifier> modifiers, MouseButton button, uint16 buttons, EventTarget *relatedTarget,
+              double force, SyntheticClickType syntheticClickType, dom::DataTransfer *dataTransfer) noexcept;
   };
 }
 

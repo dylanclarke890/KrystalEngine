@@ -29,8 +29,8 @@
 #include "Krystal.Core/CanMakeWeakPtr.hpp"
 #include "Krystal.Core/Numeric.hpp"
 #include "Krystal.Core/RefCounted.hpp"
+#include "Krystal.Core/Strings/StringAtom.hpp"
 #include "Krystal.Core/Types/RefPtr.hpp"
-#include "Krystal.Core/Types/StringAtom.hpp"
 
 namespace krys::boo
 {
@@ -64,7 +64,7 @@ namespace krys::boo
 
     KRYS_NODISCARD virtual size_t FallbackFontCount() noexcept = 0;
 
-    virtual void OpportunisticallyStartFontDataURLLoading(const FontCascadeDescription &description,
+    virtual void OpportunisticallyStartFontDataUrlLoading(const FontCascadeDescription &description,
                                                           const StringAtom &family) noexcept = 0;
 
     virtual void FontCacheInvalidated() noexcept

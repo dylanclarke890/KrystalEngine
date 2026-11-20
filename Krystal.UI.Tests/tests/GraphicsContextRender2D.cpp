@@ -89,7 +89,7 @@ namespace krys::ui::tests
       template <typename TFunc>
       KRYS_NODISCARD List<Pixel> Replayed(TFunc record)
       {
-        boo::display_list::RecorderImpl recorder(boo::FloatSize {Width, Height});
+        boo::display_list::RecorderImpl recorder(SizeF {Width, Height});
         record(static_cast<boo::GraphicsContext &>(recorder));
         auto displayList = recorder.TakeDisplayList();
         auto pixels = Draw(
@@ -259,7 +259,7 @@ namespace krys::ui::tests
           context.Translate(10, 5);
           context.Rotate(0.2f);
           context.ClipRoundedRect(clip);
-          context.ClipOut(boo::FloatRect {10, 10, 5, 5});
+          context.ClipOut(RectF {10, 10, 5, 5});
           context.FillRect({0, 0, 40, 40}, boo::Color::blue);
           context.Restore();
           context.Clip({50, 0, 20, 20});
@@ -390,7 +390,7 @@ namespace krys::ui::tests
           GraphicsContextRender2D context(renderer, _fonts, {0, 0, Width, Height});
           context.Clip({10, 10, 40, 30});
           context.Translate(10, 10);
-          CHECK(context.ClipBounds() == boo::IntRect(0, 0, 40, 30));
+          CHECK(context.ClipBounds() == RectI(0, 0, 40, 30));
         });
     }
   }
@@ -442,7 +442,7 @@ namespace krys::ui::tests
         [](boo::GraphicsContext &context)
         {
           context.SetStrokeColor(boo::Color::red);
-          const boo::FloatSegment segments[] {{0, 30}};
+          const SegmentF segments[] {{0, 30}};
           context.DrawLinesForText({5, 10}, 2, segments, false, true, boo::StrokeStyle::SolidStroke);
         });
       auto direct = Draw(
@@ -537,15 +537,14 @@ namespace krys::ui::tests
   TEST_CASE_METHOD(ReplayFixture, "GraphicsContextRender2D: focus rings", "[UI][GPU]")
   {
     const boo::Color colour(SRGBA<uint8> {131, 56, 236, 204});
-    auto replayed =
-      Replayed([&](boo::GraphicsContext &context)
-               { context.DrawFocusRing(List<boo::FloatRect> {{10, 10, 30, 20}}, 0, 3, colour); });
+    auto replayed = Replayed([&](boo::GraphicsContext &context)
+                             { context.DrawFocusRing(List<RectF> {{10, 10, 30, 20}}, 0, 3, colour); });
     auto direct = Draw(
       [](gfx::Renderer2D &renderer)
       {
         // A ring two units wide outside the rect, its corners rounded by 2, at the colour's alpha.
         boo::Path ring;
-        ring.AddRoundedRect(boo::FloatRect {10, 10, 30, 20}, boo::FloatSize(2, 2));
+        ring.AddRoundedRect(RectF {10, 10, 30, 20}, SizeF(2, 2));
         const auto path = ToPath2D(ring);
         renderer.BeginLayer(0.8f);
         renderer.ClipOutPath(path, gfx::FillRule::NonZero);
@@ -584,7 +583,7 @@ namespace krys::ui::tests
                  [](boo::GraphicsContext &context, boo::ImageBuffer &buffer)
                  {
                    context.SetImageInterpolationQuality(boo::InterpolationQuality::DoNotInterpolate);
-                   context.DrawImageBuffer(buffer, boo::FloatRect {0, 0, 8, 4});
+                   context.DrawImageBuffer(buffer, RectF {0, 0, 8, 4});
                  });
         });
       CHECK(replayed[0] == red);
@@ -604,7 +603,7 @@ namespace krys::ui::tests
                  {
                    context.SetImageInterpolationQuality(boo::InterpolationQuality::DoNotInterpolate);
                    buffer.ConvertToLuminanceMask();
-                   context.DrawImageBuffer(buffer, boo::FloatRect {0, 0, 4, 2});
+                   context.DrawImageBuffer(buffer, RectF {0, 0, 4, 2});
                  });
         });
       // Red's and blue's luminance weights, in black.
@@ -639,9 +638,9 @@ namespace krys::ui::tests
   {
     constexpr uint32 argbRed = 0xFF'FF'00'00u;
     constexpr uint32 argbBlue = 0xFF'00'00'FFu;
-    auto makeImage = [](const boo::IntSize &size, List<uint32> &&pixels, bool premultiplied)
+    auto makeImage = [](const SizeI &size, List<uint32> &&pixels, bool premultiplied)
     {
-      auto data = AdoptRef(*new boo::PixelData(krys::move(pixels)));
+      auto data = AdoptRef(*new img::PixelData(krys::move(pixels)));
       auto image =
         boo::NativeImage::Create(AdoptRef(*new boo::PlatformImage(size, krys::move(data), premultiplied)));
       REQUIRE(image);
@@ -678,7 +677,7 @@ namespace krys::ui::tests
           context.SetImageInterpolationQuality(boo::InterpolationQuality::DoNotInterpolate);
           context.DrawNativeImage(
             *image, {0, 0, 4, 8}, {0, 0, 2, 4},
-            boo::ImagePaintingOptions {boo::ImageOrientation::Orientation::OriginRightTop});
+            boo::ImagePaintingOptions {img::ImageOrientation::Orientation::OriginRightTop});
         });
       CHECK(replayed[0] == red);
       CHECK(replayed[3 * Width + 3] == red);
@@ -727,7 +726,7 @@ namespace krys::ui::tests
     auto filtered = [&](List<Ref<boo::FilterFunction>> &&effects)
     {
       effects.insert(effects.begin(), boo::SourceGraphic::Create());
-      const boo::FloatRect region {0, 0, 32, 32};
+      const RectF region {0, 0, 32, 32};
       auto filter = boo::CSSFilterRenderer::Create(krys::move(effects), {region, region, {1, 1}},
                                                    boo::FilterRenderingMode::Accelerated);
       return Replayed(

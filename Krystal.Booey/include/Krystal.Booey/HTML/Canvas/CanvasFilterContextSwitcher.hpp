@@ -26,13 +26,9 @@
 #pragma once
 
 #include "Krystal.Core/Attributes.hpp"
+#include "Krystal.Core/Geometry/GeometryForward.hpp"
 #include "Krystal.Core/Macros.hpp"
 #include "Krystal.Core/Types/UniquePtr.hpp"
-
-namespace krys::boo
-{
-  class FloatRect;
-}
 
 namespace krys::boo::html
 {
@@ -51,13 +47,13 @@ namespace krys::boo::html
     /// @brief A switcher for drawing within @p bounds; null if the context has no filter, or it can't be
     /// applied.
     KRYS_NODISCARD static UniquePtr<CanvasFilterContextSwitcher> Create(CanvasRenderingContext2DBase &,
-                                                                        const FloatRect &bounds) noexcept;
+                                                                        const RectF &bounds) noexcept;
 
     explicit CanvasFilterContextSwitcher(CanvasRenderingContext2DBase &) noexcept;
 
     ~CanvasFilterContextSwitcher() noexcept;
 
     /// @brief The bounds drawn within, with the filter's outsets.
-    KRYS_NODISCARD FloatRect ExpandedBounds() const noexcept;
+    KRYS_NODISCARD RectF ExpandedBounds() const noexcept;
   };
 }

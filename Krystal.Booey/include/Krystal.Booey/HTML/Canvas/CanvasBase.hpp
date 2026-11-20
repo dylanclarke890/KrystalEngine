@@ -25,9 +25,9 @@
 
 #pragma once
 
-#include "Krystal.Booey/Graphics/Geometry/FloatRect.hpp"
-#include "Krystal.Booey/Graphics/Geometry/IntSize.hpp"
 #include "Krystal.Core/Attributes.hpp"
+#include "Krystal.Core/Geometry/Rect.hpp"
+#include "Krystal.Core/Geometry/Size.hpp"
 #include "Krystal.Core/RefCounted.hpp"
 #include "Krystal.Core/Types/Maybe.hpp"
 #include "Krystal.Core/Types/RefPtr.hpp"
@@ -55,7 +55,7 @@ namespace krys::boo::html
   class CanvasBase : public AbstractRefCounted
   {
   private:
-    mutable IntSize _size;
+    mutable SizeI _size;
     mutable RefPtr<ImageBuffer> _imageBuffer;
     mutable UniquePtr<GraphicsContextStateSaver> _contextStateSaver;
     // Whether the buffer was asked for, not whether it was made.
@@ -79,7 +79,7 @@ namespace krys::boo::html
       return static_cast<uint32>(_size.Height());
     }
 
-    KRYS_NODISCARD const IntSize &Size() const noexcept
+    KRYS_NODISCARD const SizeI &Size() const noexcept
     {
       return _size;
     }
@@ -115,12 +115,12 @@ namespace krys::boo::html
     /// @brief Called when the context has drawn into @p rect of the canvas.
     /// @param rect The area drawn, in the canvas's pixels, or nothing if the caller knows the whole canvas
     /// was invalidated already.
-    virtual void DidDraw(const Maybe<FloatRect> &rect) noexcept;
+    virtual void DidDraw(const Maybe<RectF> &rect) noexcept;
 
   protected:
-    explicit CanvasBase(IntSize size) noexcept;
+    explicit CanvasBase(SizeI size) noexcept;
 
-    void SetSize(const IntSize &size) noexcept;
+    void SetSize(const SizeI &size) noexcept;
 
     /// @brief Whether a buffer of @p area pixels is accelerated.
     KRYS_NODISCARD static bool ShouldAccelerate(uint64 area) noexcept;

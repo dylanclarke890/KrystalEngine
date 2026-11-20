@@ -26,7 +26,7 @@
 #pragma once
 
 #include "Krystal.Booey/DOM/Geometry/DOMRectReadOnly.hpp"
-#include "Krystal.Booey/Graphics/Geometry/IntRect.hpp"
+#include "Krystal.Core/Geometry/Rect.hpp"
 
 namespace krys::boo::dom
 {
@@ -51,12 +51,12 @@ namespace krys::boo::dom
       return AdoptRef(*new DOMRect(x, y, width, height));
     }
 
-    KRYS_NODISCARD static Ref<DOMRect> Create(const FloatRect &rect) noexcept
+    KRYS_NODISCARD static Ref<DOMRect> Create(const RectF &rect) noexcept
     {
       return AdoptRef(*new DOMRect(rect.X(), rect.Y(), rect.Width(), rect.Height()));
     }
 
-    KRYS_NODISCARD static Ref<DOMRect> Create(const IntRect &rect) noexcept
+    KRYS_NODISCARD static Ref<DOMRect> Create(const RectI &rect) noexcept
     {
       return AdoptRef(*new DOMRect(rect.X(), rect.Y(), rect.Width(), rect.Height()));
     }

@@ -104,7 +104,7 @@ namespace krys::boo::inline_iterator
       return GetLine().HasEllipsis();
     }
 
-    KRYS_NODISCARD FloatRect EllipsisVisualRectIgnoringBlockDirection() const noexcept
+    KRYS_NODISCARD RectF EllipsisVisualRectIgnoringBlockDirection() const noexcept
     {
       return GetLine().GetEllipsis()->VisualRect;
     }
@@ -324,7 +324,7 @@ namespace krys::boo::inline_iterator
     };
 
     /// @brief The ellipsis' rect; adjusted for selection, it spans the line's selection height.
-    KRYS_NODISCARD FloatRect
+    KRYS_NODISCARD RectF
       EllipsisVisualRect(AdjustedForSelection adjustedForSelection = AdjustedForSelection::No) const noexcept;
 
     /// @brief Whether the selection covers the ellipsis' truncation point.

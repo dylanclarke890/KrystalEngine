@@ -31,7 +31,7 @@
 #pragma once
 
 #include "Krystal.Booey/Style/Values/Shapes/PathFunction.hpp"
-#include "Krystal.Core/Text/StringBuilder.hpp"
+#include "Krystal.Core/Strings/StringBuilder.hpp"
 
 namespace krys::boo::style
 {

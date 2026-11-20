@@ -35,13 +35,13 @@
 #include "Krystal.Booey/HTML/Parser/DocumentParser.hpp"
 #include "Krystal.Booey/Loader/FrameLoader.hpp"
 #include "Krystal.Booey/Page/LocalFrame.hpp"
-#include "Krystal.Booey/Platform/SharedBuffer.hpp"
 #include "Krystal.Booey/Style/Scope/Scope.hpp"
 #include "Krystal.Booey/Text/EncodingRegistry.hpp"
 #include "Krystal.Booey/XML/XMLDocumentParser.hpp"
-#include "Krystal.Core/Text/ASCII.hpp"
-#include "Krystal.Core/Text/CodePointIterator.hpp"
-#include "Krystal.Core/Text/StringBuilder.hpp"
+#include "Krystal.Core/Strings/ASCII.hpp"
+#include "Krystal.Core/Strings/CodePointIterator.hpp"
+#include "Krystal.Core/Strings/StringBuilder.hpp"
+#include "Krystal.Core/Types/SharedBuffer.hpp"
 
 namespace krys::boo
 {
@@ -73,7 +73,7 @@ namespace krys::boo
     /// JavaScript MIME type, a JSON MIME type that isn't an XML MIME type, `text/css`, `text/plain` or
     /// `text/vtt`.
     /// @see https://html.spec.whatwg.org/#navigate-text
-    KRYS_NODISCARD bool IsTextDocumentMIMEType(utf8_stringview mimeType) noexcept
+    KRYS_NODISCARD bool IsTextDocumentMimeType(utf8_stringview mimeType) noexcept
     {
       // https://mimesniff.spec.whatwg.org/#javascript-mime-type
       constexpr static utf8_stringview TextTypes[] = {u8"application/ecmascript",
@@ -127,7 +127,7 @@ namespace krys::boo
     _frame = CreateWeakPtr(&frame);
   }
 
-  bool DocumentWriter::Begin(const url::URL &url) noexcept
+  bool DocumentWriter::Begin(const net::Url &url) noexcept
   {
     RefPtr<LocalFrame> frame = ShareRefPtr(_frame.get());
     if (!frame)
@@ -180,7 +180,7 @@ namespace krys::boo
     else if (auto *htmlDocument = DynamicDowncast<HTMLDocument>(document.get()))
     {
       _parser = CreateRef<html::DocumentParser>(*htmlDocument);
-      if (IsTextDocumentMIMEType(_mimeType))
+      if (IsTextDocumentMimeType(_mimeType))
       {
         _parser->StartPlainText();
       }

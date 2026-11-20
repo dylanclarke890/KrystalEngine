@@ -117,7 +117,7 @@ namespace krys::boo
     return SVGPoint::Create(svg::GetPointAtLengthOfSVGPathByteStream(PathByteStream(), distance));
   }
 
-  FloatRect SVGPathElement::GetBBox(StyleUpdateStrategy styleUpdateStrategy) noexcept
+  RectF SVGPathElement::GetBBox(StyleUpdateStrategy styleUpdateStrategy) noexcept
   {
     if (styleUpdateStrategy == AllowStyleUpdate)
     {
@@ -161,7 +161,7 @@ namespace krys::boo
     {
       if (const auto &pathFunction = renderer->Style().D().TryPath())
       {
-        return style::ComputePath(pathFunction->Parameters, FloatRect {});
+        return style::ComputePath(pathFunction->Parameters, RectF {});
       }
       return {};
     }

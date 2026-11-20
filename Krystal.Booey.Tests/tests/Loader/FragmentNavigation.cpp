@@ -7,7 +7,7 @@
 #include "Krystal.Booey/HTML/Parser/DocumentParser.hpp"
 #include "Krystal.Booey/Loader/FrameLoader.hpp"
 #include "Krystal.Booey/Page/LocalDOMWindow.hpp"
-#include "Krystal.Booey/URL/URL.hpp"
+#include "Krystal.Net/Url.hpp"
 
 namespace krys::boo::tests
 {
@@ -27,7 +27,7 @@ namespace krys::boo::tests
 
       void Navigate(utf8_stringview url) noexcept
       {
-        Frame->Loader().ChangeLocation(url::URL(Document->GetURL(), url), DOMStringAtom::Empty(), nullptr,
+        Frame->Loader().ChangeLocation(net::Url(Document->GetUrl(), url), DOMStringAtom::Empty(), nullptr,
                                        ReferrerPolicy::EmptyString, null);
         html::EventLoop::Current().RunUntilIdle();
       }
@@ -77,7 +77,7 @@ namespace krys::boo::tests
       fixture.ById(u8"link").DispatchSimulatedClick(nullptr);
       html::EventLoop::Current().RunUntilIdle();
 
-      CHECK(fixture.DocumentURL() == "https://example.com/dir/page.html#section");
+      CHECK(fixture.DocumentUrl() == "https://example.com/dir/page.html#section");
       CHECK(fixture.Target() == &fixture.ById(u8"section"));
       CHECK(fixture.Document->QuerySelector(u8":target").Value().get() == &fixture.ById(u8"section"));
       CHECK(fixture.ScrollY() > 0);
@@ -126,7 +126,7 @@ namespace krys::boo::tests
       fixture.Navigate(u8"#section");
       auto scrollY = fixture.ScrollY();
       fixture.Navigate(u8"#nothing");
-      CHECK(fixture.DocumentURL() == "https://example.com/dir/page.html#nothing");
+      CHECK(fixture.DocumentUrl() == "https://example.com/dir/page.html#nothing");
       CHECK(fixture.Target() == nullptr);
       CHECK(fixture.ScrollY() == scrollY);
     }
@@ -168,7 +168,7 @@ namespace krys::boo::tests
     auto &frame = page->MainFrame();
     frame.CreateView({400, 300});
     auto document = CreateRef<HTMLDocument>();
-    document->SetURL(url::URL(u8"https://example.com/page.html#section"));
+    document->SetUrl(net::Url(u8"https://example.com/page.html#section"));
     frame.SetDocument(ShareRefPtr<Document>(document.get()));
 
     auto parser = CreateRef<html::DocumentParser>(*document);

@@ -28,7 +28,7 @@
 #include "Krystal.Booey/Graphics/Color/Color.hpp"
 #include "Krystal.Booey/Graphics/Fonts/FontCascade.hpp"
 #include "Krystal.Booey/Text/WritingMode.hpp"
-#include "Krystal.Core/Types/String.hpp"
+#include "Krystal.Core/Strings/String.hpp"
 #include "Krystal.Core/Utils/Move.hpp"
 
 namespace krys::boo
@@ -65,7 +65,7 @@ namespace krys::boo
     bool _visible;
     bool _isDisplayNone;
     bool _hasDefaultAppearance;
-    TextDirection _textDirection;
+    text::TextDirection _textDirection;
     bool _hasTextDirectionOverride;
     BackgroundColorType _backgroundColorType;
     PopupMenuType _menuType;
@@ -73,8 +73,8 @@ namespace krys::boo
 
   public:
     PopupMenuStyle(Color foreground, Color background, const FontCascade &font, utf8_string language,
-                   bool visible, bool isDisplayNone, bool hasDefaultAppearance, TextDirection textDirection,
-                   bool hasTextDirectionOverride,
+                   bool visible, bool isDisplayNone, bool hasDefaultAppearance,
+                   text::TextDirection textDirection, bool hasTextDirectionOverride,
                    BackgroundColorType backgroundColorType = BackgroundColorType::DefaultBackgroundColor,
                    PopupMenuType menuType = PopupMenuType::SelectPopup, Size menuSize = Size::Normal) noexcept
         : _foregroundColor(krys::move(foreground)), _backgroundColor(krys::move(background)), _font(font),
@@ -120,7 +120,7 @@ namespace krys::boo
       return _hasDefaultAppearance;
     }
 
-    KRYS_NODISCARD TextDirection GetTextDirection() const noexcept
+    KRYS_NODISCARD text::TextDirection GetTextDirection() const noexcept
     {
       return _textDirection;
     }

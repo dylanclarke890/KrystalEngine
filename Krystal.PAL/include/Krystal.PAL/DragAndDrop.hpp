@@ -2,10 +2,10 @@
 
 #include "Krystal.Core/Enum.hpp"
 #include "Krystal.Core/Numeric.hpp"
+#include "Krystal.Core/Strings/String.hpp"
 #include "Krystal.Core/Types/EnumSet.hpp"
 #include "Krystal.Core/Types/List.hpp"
 #include "Krystal.Core/Types/Maybe.hpp"
-#include "Krystal.Core/Types/String.hpp"
 #include "Krystal.PAL/Input/KeyModifiers.hpp"
 
 namespace krys::pal
@@ -36,9 +36,9 @@ namespace krys::pal
     /// @brief UTF-8 markup: the fragment dragged.
     Maybe<utf8_string> HTML;
     /// @brief A URL (a link, a browser's address or an internet shortcut).
-    Maybe<utf8_string> URL;
+    Maybe<utf8_string> Url;
     /// @brief The URL's title, if the source gave one.
-    utf8_string URLTitle;
+    utf8_string UrlTitle;
     /// @brief The paths of the files dragged.
     List<utf8_string> Files;
   };

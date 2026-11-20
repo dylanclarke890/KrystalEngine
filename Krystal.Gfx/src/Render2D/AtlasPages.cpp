@@ -92,14 +92,14 @@ namespace krys::gfx
   void AtlasPages::Write(const AtlasSlot &slot, Span<const byte> texels) noexcept
   {
     _device->WriteTexture(_pages[slot.Page].Texture,
-                          {.X = static_cast<uint32>(slot.Texels.X),
-                           .Y = static_cast<uint32>(slot.Texels.Y),
-                           .Width = slot.Texels.Width,
-                           .Height = slot.Texels.Height},
+                          {.X = static_cast<uint32>(slot.Texels.X()),
+                           .Y = static_cast<uint32>(slot.Texels.Y()),
+                           .Width = static_cast<uint32>(slot.Texels.Width()),
+                           .Height = static_cast<uint32>(slot.Texels.Height())},
                           texels);
   }
 
-  Maybe<PixelRect2D> AtlasPages::AllocateInPage(Page &page, uint32 width, uint32 height) const noexcept
+  Maybe<RectI> AtlasPages::AllocateInPage(Page &page, uint32 width, uint32 height) const noexcept
   {
     const uint32 size = _desc.PageSize;
 
@@ -130,10 +130,8 @@ namespace krys::gfx
       }
     }
 
-    const PixelRect2D texels {.X = static_cast<int32>(best->NextX),
-                              .Y = static_cast<int32>(best->Y),
-                              .Width = width,
-                              .Height = height};
+    const RectI texels {static_cast<int32>(best->NextX), static_cast<int32>(best->Y),
+                        static_cast<int32>(width), static_cast<int32>(height)};
     best->NextX += width;
     return texels;
   }

@@ -28,7 +28,7 @@
 #include "Krystal.Booey/MathML/Elements/MathMLPresentationElement.hpp"
 #include "Krystal.Booey/Infra/StringAlgorithms.hpp"
 #include "Krystal.Booey/Rendering/MathML/RenderMathMLBlock.hpp"
-#include "Krystal.Core/Text/ASCII.hpp"
+#include "Krystal.Core/Strings/ASCII.hpp"
 #include <charconv>
 #include <cmath>
 

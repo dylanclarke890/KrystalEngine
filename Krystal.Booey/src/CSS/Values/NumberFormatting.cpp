@@ -1,6 +1,6 @@
 ﻿#include "Krystal.Booey/CSS/Values/NumberFormatting.hpp"
 #include "Krystal.Core/Assert.hpp"
-#include "Krystal.Core/Text/StringBuilder.hpp"
+#include "Krystal.Core/Strings/StringBuilder.hpp"
 #include "Krystal.Core/Types/Array.hpp"
 #include <charconv>
 #include <cmath>

@@ -29,9 +29,10 @@
  */
 
 #include "Krystal.Booey/Graphics/Fonts/FontDescription.hpp"
-#include "Krystal.Booey/Platform/Locale/Language.hpp"
-#include "Krystal.Booey/Text/LocaleToScriptMapping.hpp"
-#include "Krystal.Core/Text/ASCII.hpp"
+#include "Krystal.Core/Strings/ASCII.hpp"
+#include "Krystal.I18n/Language.hpp"
+#include "Krystal.I18n/LocaleToScriptMapping.hpp"
+#include "Krystal.Text/Script.hpp"
 
 namespace krys::boo
 {
@@ -39,7 +40,7 @@ namespace krys::boo
   {
     KRYS_NODISCARD StringAtom ComputeSpecializedChineseLocale() noexcept
     {
-      for (const auto &language : UserPreferredLanguages())
+      for (const auto &language : i18n::UserPreferredLanguages())
       {
         if (language.size() >= 3
             && text::IsASCIICaselessEqual(utf8_stringview(language).substr(0, 3), utf8_stringview(u8"zh-")))
@@ -55,10 +56,10 @@ namespace krys::boo
     {
       static StringAtom locale = null;
       static Maybe<uint32> generation;
-      if (generation != UserPreferredLanguagesGeneration())
+      if (generation != i18n::UserPreferredLanguagesGeneration())
       {
         locale = ComputeSpecializedChineseLocale();
-        generation = UserPreferredLanguagesGeneration();
+        generation = i18n::UserPreferredLanguagesGeneration();
       }
       return locale;
     }
@@ -67,11 +68,11 @@ namespace krys::boo
   void FontDescription::SetSpecifiedLocale(const StringAtom &locale) noexcept
   {
     _specifiedLocale = locale;
-    _script = static_cast<uint32>(LocaleToScriptCode(_specifiedLocale.View()));
-    _locale = _script == USCRIPT_HAN ? SpecializedChineseLocale() : _specifiedLocale;
+    _script = static_cast<uint32>(i18n::LocaleToScriptCode(_specifiedLocale.View()));
+    _locale = Script() == text::Script::Han ? SpecializedChineseLocale() : _specifiedLocale;
   }
 
-  StringAtom FontDescription::PlatformResolveGenericFamily(UScriptCode, const StringAtom &,
+  StringAtom FontDescription::PlatformResolveGenericFamily(text::Script, const StringAtom &,
                                                            const StringAtom &) noexcept
   {
     return null;

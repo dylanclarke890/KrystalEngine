@@ -34,7 +34,7 @@ namespace krys::boo::css::tests
   /// @brief An image value for `https://example.com/<name>.png`, for tests that need some image.
   KRYS_NODISCARD inline Ref<ImageValue> TestImage(utf8_stringview name) noexcept
   {
-    return ImageValue::Create(url::URL {u8"https://example.com/" + utf8_string {name} + u8".png"});
+    return ImageValue::Create(net::Url {u8"https://example.com/" + utf8_string {name} + u8".png"});
   }
 
   /// @brief Collects the values `VisitChildren` visits, in order.

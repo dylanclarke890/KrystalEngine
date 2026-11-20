@@ -165,7 +165,7 @@ namespace krys::boo::css::mq
   }
 
   KRYS_NODISCARD static EvaluationResult
-    EvaluateRatioComparison(FloatSize size, const Maybe<Comparison> &comparison, Side side,
+    EvaluateRatioComparison(SizeF size, const Maybe<Comparison> &comparison, Side side,
                             const ToLengthConversionData &conversionData) noexcept
   {
     if (!comparison)
@@ -193,7 +193,7 @@ namespace krys::boo::css::mq
     return ToEvaluationResult(Compare(comparison->Op, left, right));
   }
 
-  EvaluationResult EvaluateRatioFeature(const Feature &feature, FloatSize size,
+  EvaluationResult EvaluateRatioFeature(const Feature &feature, SizeF size,
                                         const ToLengthConversionData &conversionData) noexcept
   {
     if (!feature.LeftComparison && !feature.RightComparison)

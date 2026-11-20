@@ -45,16 +45,10 @@
 #pragma once
 
 #include "Krystal.Booey/Graphics/Geometry/BoxExtents.hpp"
-#include "Krystal.Booey/Graphics/Geometry/FloatPoint.hpp"
-#include "Krystal.Booey/Graphics/Geometry/FloatPoint3D.hpp"
-#include "Krystal.Booey/Graphics/Geometry/IntPoint.hpp"
-#include "Krystal.Booey/Graphics/Geometry/IntRect.hpp"
-#include "Krystal.Booey/Graphics/Geometry/IntSize.hpp"
 #include "Krystal.Booey/Graphics/Geometry/LayoutRect.hpp"
 #include "Krystal.Booey/Graphics/GraphicsTypes.hpp"
 #include "Krystal.Booey/Graphics/Layers/GraphicsLayerEnums.hpp"
-#include "Krystal.Booey/Graphics/Transforms/TransformationMatrix.hpp"
-#include "Krystal.Booey/Page/ScrollBehavior.hpp"
+#include "Krystal.Booey/Page/Scrolling/ScrollBehavior.hpp"
 #include "Krystal.Booey/Platform/Scrolling/ScrollAlignment.hpp"
 #include "Krystal.Booey/Platform/Scrolling/ScrollTypes.hpp"
 #include "Krystal.Booey/Rendering/Layers/ClipRect.hpp"
@@ -65,6 +59,11 @@
 #include "Krystal.Core/Attributes.hpp"
 #include "Krystal.Core/CanMakeCheckedPtr.hpp"
 #include "Krystal.Core/Debug.hpp"
+#include "Krystal.Core/Geometry/Point.hpp"
+#include "Krystal.Core/Geometry/Point3.hpp"
+#include "Krystal.Core/Geometry/Rect.hpp"
+#include "Krystal.Core/Geometry/Size.hpp"
+#include "Krystal.Core/Geometry/TransformationMatrix.hpp"
 #include "Krystal.Core/Macros.hpp"
 #include "Krystal.Core/Types/EnumSet.hpp"
 #include "Krystal.Core/Types/List.hpp"
@@ -204,12 +203,12 @@ namespace krys::boo
   public:
     struct OverflowControlRects
     {
-      IntRect HorizontalScrollbar;
-      IntRect VerticalScrollbar;
-      IntRect ScrollCorner;
-      IntRect Resizer;
+      RectI HorizontalScrollbar;
+      RectI VerticalScrollbar;
+      RectI ScrollCorner;
+      RectI Resizer;
 
-      KRYS_NODISCARD IntRect ScrollCornerOrResizerRect() const noexcept
+      KRYS_NODISCARD RectI ScrollCornerOrResizerRect() const noexcept
       {
         return !ScrollCorner.IsEmpty() ? ScrollCorner : Resizer;
       }
@@ -739,7 +738,7 @@ namespace krys::boo
     LayoutPoint _topLeft;
 
     // The layer's width/height
-    IntSize _layerSize;
+    SizeI _layerSize;
 
     UniquePtr<ClipRectsCache> _clipRectsCache;
 
@@ -754,7 +753,7 @@ namespace krys::boo
 
     RefPtr<RenderLayerFilters> _filters;
 
-    IntRect _blockSelectionGapsBounds;
+    RectI _blockSelectionGapsBounds;
 
     // Pointer to the enclosing RenderLayer that caused us to be paginated. It is 0 if we are not paginated.
     WeakPtr<RenderLayer> _enclosingPaginationLayer;
@@ -966,13 +965,13 @@ namespace krys::boo
       _topLeft = p;
     }
 
-    KRYS_NODISCARD const IntSize &Size() const noexcept
+    KRYS_NODISCARD const SizeI &Size() const noexcept
     {
       return _layerSize;
     }
 
     // Only public for RenderTreeAsText.
-    void SetSize(const IntSize &size) noexcept
+    void SetSize(const SizeI &size) noexcept
     {
       _layerSize = size;
     }
@@ -1123,7 +1122,7 @@ namespace krys::boo
     // FIXME: adjustForColumns allows us to position compositing layers in columns correctly, but eventually
     // they need to be split across columns too.
     void ConvertToPixelSnappedLayerCoords(
-      const RenderLayer *ancestorLayer, IntPoint &location,
+      const RenderLayer *ancestorLayer, PointI &location,
       ColumnOffsetAdjustment adjustForColumns = DontAdjustForColumns) const noexcept;
 
     KRYS_NODISCARD LayoutPoint
@@ -1166,7 +1165,7 @@ namespace krys::boo
     KRYS_NODISCARD LayoutRect LocalBoundingBox(EnumSet<CalculateLayerBoundsFlag> flags = {}) const noexcept;
 
     // Deprecated: Pixel snapped bounding box relative to the root.
-    KRYS_NODISCARD IntRect AbsoluteBoundingBox() const noexcept;
+    KRYS_NODISCARD RectI AbsoluteBoundingBox() const noexcept;
 
     // Bounds used for layer overlap testing in RenderLayerCompositor.
     KRYS_NODISCARD LayoutRect OverlapBounds() const noexcept;
@@ -1207,7 +1206,7 @@ namespace krys::boo
     bool HitTest(const HitTestRequest &request, HitTestResult &result) noexcept;
 
     /// @brief Scrolls to bring @p positionInWindow into view, as a mouse drag selects past the layer's edge.
-    void Autoscroll(const IntPoint &positionInWindow) noexcept;
+    void Autoscroll(const PointI &positionInWindow) noexcept;
 
     bool HitTest(const HitTestRequest &request, const HitTestLocation &hitTestLocation,
                  HitTestResult &result) noexcept;
@@ -1285,8 +1284,8 @@ namespace krys::boo
     KRYS_NODISCARD bool ShouldApplyClipPath(EnumSet<PaintBehavior>, EnumSet<PaintLayerFlag>) const noexcept;
 
     /// @brief The reference box a `clip-path` resolves against, relative to the painting root.
-    KRYS_NODISCARD FloatRect ReferenceBoxRectForClipPath(CSSBoxType boxType, const LayoutSize &offsetFromRoot,
-                                                         const LayoutRect &rootRelativeBounds) const noexcept;
+    KRYS_NODISCARD RectF ReferenceBoxRectForClipPath(CSSBoxType boxType, const LayoutSize &offsetFromRoot,
+                                                     const LayoutRect &rootRelativeBounds) const noexcept;
 
 #pragma endregion
 
@@ -1409,9 +1408,9 @@ namespace krys::boo
     // has the perspective-origin baked in.
     KRYS_NODISCARD TransformationMatrix PerspectiveTransform() const noexcept;
 
-    KRYS_NODISCARD FloatPoint PerspectiveOrigin() const noexcept;
+    KRYS_NODISCARD PointF PerspectiveOrigin() const noexcept;
 
-    KRYS_NODISCARD FloatPoint3D TransformOriginPixelSnappedIfNeeded() const noexcept;
+    KRYS_NODISCARD Point3F TransformOriginPixelSnappedIfNeeded() const noexcept;
 
     KRYS_NODISCARD bool Preserves3D() const noexcept;
 
@@ -1556,7 +1555,7 @@ namespace krys::boo
     /// @brief A name for the layer in layer tree dumps: its renderer's.
     KRYS_NODISCARD utf8_string Name() const noexcept;
 
-    void ContentChanged(ContentChangeType changeType, const Maybe<FloatRect> &dirtyRect = null) noexcept;
+    void ContentChanged(ContentChangeType changeType, const Maybe<RectF> &dirtyRect = null) noexcept;
 
     KRYS_NODISCARD bool IsComposited() const noexcept
     {
@@ -1685,7 +1684,7 @@ namespace krys::boo
 
     RenderLayerScrollableArea *EnsureLayerScrollableArea() noexcept;
 
-    KRYS_NODISCARD IntSize VisibleSize() const noexcept;
+    KRYS_NODISCARD SizeI VisibleSize() const noexcept;
 
     KRYS_NODISCARD int32 ScrollWidth() const noexcept;
 
@@ -1736,9 +1735,9 @@ namespace krys::boo
     }
 
     /// @brief Whether @p localPoint is over the box's resizer.
-    KRYS_NODISCARD bool IsPointInResizeControl(IntPoint localPoint) const noexcept;
+    KRYS_NODISCARD bool IsPointInResizeControl(PointI localPoint) const noexcept;
 
-    KRYS_NODISCARD IntSize OffsetFromResizeCorner(const IntPoint &localPoint) const noexcept;
+    KRYS_NODISCARD SizeI OffsetFromResizeCorner(const PointI &localPoint) const noexcept;
 
     KRYS_NODISCARD LayoutPoint AbsoluteToContents(const LayoutPoint &absolutePoint) const noexcept;
 

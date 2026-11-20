@@ -32,7 +32,7 @@
 #include "Krystal.Booey/CSS/Values/Types.hpp"
 #include "Krystal.Booey/Graphics/Color/ColorInterpolationMethod.hpp"
 #include "Krystal.Core/Colour/AlphaPremultiplication.hpp"
-#include "Krystal.Core/Text/StringBuilder.hpp"
+#include "Krystal.Core/Strings/StringBuilder.hpp"
 #include "Krystal.Core/Types/Markable.hpp"
 #include "Krystal.Core/Types/Maybe.hpp"
 #include "Krystal.Core/Types/Variant.hpp"

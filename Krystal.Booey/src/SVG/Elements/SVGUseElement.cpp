@@ -189,7 +189,7 @@ namespace krys::boo
     }
   }
 
-  FloatRect SVGUseElement::GetBBox(StyleUpdateStrategy styleUpdateStrategy) noexcept
+  RectF SVGUseElement::GetBBox(StyleUpdateStrategy styleUpdateStrategy) noexcept
   {
     auto bbox = SVGGraphicsElement::GetBBox(styleUpdateStrategy);
     if (bbox.IsEmpty())
@@ -436,7 +436,7 @@ namespace krys::boo
     Path path = targetClone->ToClipPath();
     SVGLengthContext lengthContext(this);
     // FIXME: Find a way to do this without manual resolution of x/y here. It's potentially incorrect.
-    path.Translate(FloatSize(X().Value(lengthContext), Y().Value(lengthContext)));
+    path.Translate(SizeF(X().Value(lengthContext), Y().Value(lengthContext)));
     path.Transform(AnimatedLocalTransform());
     return path;
   }
@@ -817,24 +817,24 @@ namespace krys::boo
 
   void SVGUseElement::UpdateExternalDocument() noexcept
   {
-    url::URL externalDocumentURL;
+    net::Url externalDocumentUrl;
     Ref<Document> document = ShareRef(NodeDocument());
     // FIXME: This early exit should be removed once the assert(!url.ProtocolIsData()) is removed from
     // IsExternalURIReference().
-    if (document->CompleteURL(Href()).ProtocolIsData())
+    if (document->CompleteUrl(Href()).ProtocolIsData())
     {
       return;
     }
     if (IsConnected() && IsExternalURIReference(Href(), *document))
     {
-      externalDocumentURL = document->CompleteURL(Href());
-      if (!externalDocumentURL.HasFragmentIdentifier())
+      externalDocumentUrl = document->CompleteUrl(Href());
+      if (!externalDocumentUrl.HasFragmentIdentifier())
       {
-        externalDocumentURL = url::URL();
+        externalDocumentUrl = net::Url();
       }
     }
 
-    if (externalDocumentURL == (_externalDocument ? _externalDocument->URL() : url::URL()))
+    if (externalDocumentUrl == (_externalDocument ? _externalDocument->Url() : net::Url()))
     {
       return;
     }
@@ -844,7 +844,7 @@ namespace krys::boo
       externalDocument->RemoveClient(*this);
     }
 
-    if (externalDocumentURL.IsNull())
+    if (externalDocumentUrl.IsNull())
     {
       _externalDocument = nullptr;
     }
@@ -852,7 +852,7 @@ namespace krys::boo
     {
       // Requests carry no fetch mode, destination or content sniffing policy: there are no origins or HTTP
       // semantics (see DIFFERENCES.md).
-      CachedResourceRequest request(ResourceRequest(krys::move(externalDocumentURL)),
+      CachedResourceRequest request(net::ResourceRequest(krys::move(externalDocumentUrl)),
                                     CachedResourceLoader::DefaultCachedResourceOptions());
       auto requested = document->GetCachedResourceLoader().RequestSVGDocument(krys::move(request));
       _externalDocument = requested ? *requested : CachedResourceHandle<CachedSVGDocument>();

@@ -193,7 +193,7 @@ namespace krys::boo
     }
   }
 
-  AXObject *AXRenderObject::ElementAccessibilityHitTest(const IntPoint &point) const noexcept
+  AXObject *AXRenderObject::ElementAccessibilityHitTest(const PointI &point) const noexcept
   {
     // An SVG image's document has no view of its own to hit test (it's drawn at each image's size), so its
     // objects are found by their bounds, which are where the image is: the last child containing the point,
@@ -1110,13 +1110,13 @@ namespace krys::boo
     {
       return true;
     }
-    auto contentRect = SnappedIntRect(renderer->AbsoluteClippedOverflowRectForSpatialNavigation());
+    auto contentRect = SnappedRectI(renderer->AbsoluteClippedOverflowRectForSpatialNavigation());
     auto viewRect = view->VisibleContentRect();
     viewRect.Intersect(contentRect);
     return viewRect.IsEmpty();
   }
 
-  AXObject *AXRenderObject::AccessibilityHitTest(const IntPoint &point) const noexcept
+  AXObject *AXRenderObject::AccessibilityHitTest(const PointI &point) const noexcept
   {
     auto *renderer = DynamicDowncast<RenderLayerModelObject>(_renderer.get());
     if (!renderer || !renderer->HasLayer())
@@ -1218,7 +1218,7 @@ namespace krys::boo
     {
       if (auto box = svgElement->GetBoundingBox())
       {
-        rect = LayoutRect(EnclosingIntRect(renderer->LocalToAbsoluteQuad(*box).BoundingBox()));
+        rect = LayoutRect(EnclosingRectI(renderer->LocalToAbsoluteQuad(*box).BoundingBox()));
       }
     }
     if (rect.IsEmpty() && !IsWebArea())

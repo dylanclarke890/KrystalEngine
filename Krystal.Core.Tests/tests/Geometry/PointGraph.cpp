@@ -1,0 +1,46 @@
+﻿#include "Krystal.Core/Geometry/PointGraph.hpp"
+#include "catch2/catch_test_macros.hpp"
+
+namespace krys::tests
+{
+  TEST_CASE("PointGraphF: unites rects into the polygons outlining them", "[Geometry][PointGraphF]")
+  {
+    SECTION("one rect")
+    {
+      auto [graph, polygons] = PointGraphF::PolygonsForRect({RectF(0, 0, 10, 10)});
+      REQUIRE(polygons.size() == 1u);
+      CHECK(polygons[0].size() == 4u);
+    }
+
+    SECTION("overlapping rects make one polygon round both")
+    {
+      // Two lines of an inline box, the second shorter and overlapping the first.
+      auto [graph, polygons] = PointGraphF::PolygonsForRect({RectF(0, 0, 30, 10), RectF(0, 8, 20, 10)});
+      REQUIRE(polygons.size() == 1u);
+      // Six corners, and the two points where one rect's corner lies on the other's left edge.
+      CHECK(polygons[0].size() == 8u);
+      for (auto &edge : polygons[0])
+      {
+        // The edges are axis-aligned and join end to start.
+        CHECK((edge.first->X() == edge.second->X() || edge.first->Y() == edge.second->Y()));
+      }
+      for (size_t i = 0; i < polygons[0].size(); ++i)
+      {
+        CHECK(polygons[0][i].second == polygons[0][(i + 1) % polygons[0].size()].first);
+      }
+    }
+
+    SECTION("disjoint rects stay apart")
+    {
+      auto [graph, polygons] = PointGraphF::PolygonsForRect({RectF(0, 0, 10, 10), RectF(20, 20, 10, 10)});
+      CHECK(polygons.size() == 2u);
+    }
+
+    SECTION("a rect inside another is dropped")
+    {
+      auto [graph, polygons] = PointGraphF::PolygonsForRect({RectF(0, 0, 30, 30), RectF(10, 10, 5, 5)});
+      REQUIRE(polygons.size() == 1u);
+      CHECK(polygons[0].size() == 4u);
+    }
+  }
+}

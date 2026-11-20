@@ -115,7 +115,7 @@ namespace krys::boo::svg::tests
   TEST_CASE_METHOD(css::tests::ValueFixture, "SVGLengthValue: user units", "[SVG][SVGLengthValue]")
   {
     // Without an element, percentages resolve against the given viewport, and absolute units by their ratios.
-    SVGLengthContext context(nullptr, FloatSize(200, 100));
+    SVGLengthContext context(nullptr, SizeF(200, 100));
     CHECK(SVGLengthValue(SVGLengthMode::Width, u8"50%").Value(context) == 100);
     CHECK(SVGLengthValue(SVGLengthMode::Height, u8"50%").Value(context) == 50);
     CHECK(SVGLengthValue(SVGLengthMode::Other, u8"50%").Value(context)
@@ -168,13 +168,13 @@ namespace krys::boo::svg::tests
       SVGLengthValue height(SVGLengthMode::Height, u8"5");
       // In the object bounding box, lengths are fractions of the box.
       CHECK(SVGLengthContext::ResolveRectangle(nullptr, SVGUnitTypes::SVG_UNIT_TYPE_OBJECTBOUNDINGBOX,
-                                               FloatRect(10, 10, 100, 40), x, y, width, height)
-            == FloatRect(20, 18, 50, 200));
+                                               RectF(10, 10, 100, 40), x, y, width, height)
+            == RectF(20, 18, 50, 200));
       CHECK(SVGLengthContext::ResolveRectangle(nullptr, SVGUnitTypes::SVG_UNIT_TYPE_USERSPACEONUSE,
-                                               FloatRect(10, 10, 100, 40), x, y, width, height)
-            == FloatRect(10, 8, 50, 5));
+                                               RectF(10, 10, 100, 40), x, y, width, height)
+            == RectF(10, 8, 50, 5));
       CHECK(SVGLengthContext::ResolvePoint(nullptr, SVGUnitTypes::SVG_UNIT_TYPE_OBJECTBOUNDINGBOX, x, y)
-            == FloatPoint(0.1f, 0.2f));
+            == PointF(0.1f, 0.2f));
       CHECK(SVGLengthContext::ResolveLength(nullptr, SVGUnitTypes::SVG_UNIT_TYPE_OBJECTBOUNDINGBOX, height)
             == 5);
     }

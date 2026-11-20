@@ -24,8 +24,8 @@
 
 #include "Krystal.Booey/Graphics/Filters/FilterEffect.hpp"
 #include "Krystal.Booey/Graphics/Geometry/BoxExtents.hpp"
-#include "Krystal.Booey/Graphics/Geometry/FloatSize.hpp"
 #include "Krystal.Core/Attributes.hpp"
+#include "Krystal.Core/Geometry/Size.hpp"
 #include "Krystal.Core/Types/RefPtr.hpp"
 
 namespace krys::boo
@@ -75,7 +75,7 @@ namespace krys::boo
 
     bool SetScale(float scale) noexcept;
 
-    KRYS_NODISCARD static IntOutsets CalculateOutsets(const FloatSize &maxDisplacement) noexcept;
+    KRYS_NODISCARD static IntOutsets CalculateOutsets(const SizeF &maxDisplacement) noexcept;
 
   private:
     FEDisplacementMap(ChannelSelectorType xChannelSelector, ChannelSelectorType yChannelSelector, float scale,
@@ -91,8 +91,8 @@ namespace krys::boo
       return 2u;
     }
 
-    KRYS_NODISCARD FloatRect CalculateImageRect(const Filter &filter, Span<const FloatRect> inputImageRects,
-                                                const FloatRect &primitiveSubregion) const noexcept override;
+    KRYS_NODISCARD RectF CalculateImageRect(const Filter &filter, Span<const RectF> inputImageRects,
+                                            const RectF &primitiveSubregion) const noexcept override;
 
     KRYS_NODISCARD const DestinationColorSpace &
       ResultColorSpace(Span<const Ref<FilterImage>> inputs) const noexcept override;

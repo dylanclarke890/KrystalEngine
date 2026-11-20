@@ -25,14 +25,13 @@
 
 #pragma once
 
-#include "Krystal.Booey/Graphics/Animation/CompositeOperation.hpp"
 #include "Krystal.Booey/Graphics/Animation/IterationCompositeOperation.hpp"
 #include "Krystal.Booey/Graphics/Color/Color.hpp"
-#include "Krystal.Booey/Graphics/Geometry/FloatPoint.hpp"
-#include "Krystal.Booey/Graphics/Geometry/IntPoint.hpp"
 #include "Krystal.Booey/Graphics/Geometry/LayoutPoint.hpp"
 #include "Krystal.Booey/Graphics/Geometry/LayoutUnit.hpp"
 #include "Krystal.Core/Attributes.hpp"
+#include "Krystal.Core/Geometry/Point.hpp"
+#include "Krystal.Core/Maths/CompositeOperation.hpp"
 #include "Krystal.Core/Maths/Extras.hpp"
 #include <cmath>
 
@@ -43,14 +42,14 @@ namespace krys::boo
   {
     double Progress {0};
     bool IsDiscrete {false};
-    boo::CompositeOperation CompositeOperation {boo::CompositeOperation::Replace};
+    krys::CompositeOperation CompositeOperation {krys::CompositeOperation::Replace};
     boo::IterationCompositeOperation IterationCompositeOperation {boo::IterationCompositeOperation::Replace};
     double CurrentIteration {0};
     Color FromCurrentColor {};
     Color ToCurrentColor {};
 
     BlendingContext(double progress = 0, bool isDiscrete = false,
-                    boo::CompositeOperation compositeOperation = boo::CompositeOperation::Replace,
+                    krys::CompositeOperation compositeOperation = krys::CompositeOperation::Replace,
                     boo::IterationCompositeOperation iterationCompositeOperation =
                       boo::IterationCompositeOperation::Replace,
                     double currentIteration = 0, Color fromCurrentColor = {},
@@ -63,7 +62,7 @@ namespace krys::boo
 
     KRYS_NODISCARD bool IsReplace() const noexcept
     {
-      return CompositeOperation == boo::CompositeOperation::Replace
+      return CompositeOperation == krys::CompositeOperation::Replace
              && IterationCompositeOperation == boo::IterationCompositeOperation::Replace;
     }
 
@@ -75,7 +74,7 @@ namespace krys::boo
       if (IsDiscrete)
       {
         Progress = Progress < 0.5 ? 0 : 1;
-        CompositeOperation = boo::CompositeOperation::Replace;
+        CompositeOperation = krys::CompositeOperation::Replace;
       }
     }
   };
@@ -162,16 +161,16 @@ namespace krys::boo
     return LayoutUnit(Blend(from.ToFloat(), to.ToFloat(), context));
   }
 
-  KRYS_NODISCARD inline IntPoint Blend(const IntPoint &from, const IntPoint &to,
-                                       const BlendingContext &context) noexcept
+  KRYS_NODISCARD inline PointI Blend(const PointI &from, const PointI &to,
+                                     const BlendingContext &context) noexcept
   {
-    return IntPoint(Blend(from.X(), to.X(), context), Blend(from.Y(), to.Y(), context));
+    return PointI(Blend(from.X(), to.X(), context), Blend(from.Y(), to.Y(), context));
   }
 
-  KRYS_NODISCARD inline FloatPoint Blend(const FloatPoint &from, const FloatPoint &to,
-                                         const BlendingContext &context) noexcept
+  KRYS_NODISCARD inline PointF Blend(const PointF &from, const PointF &to,
+                                     const BlendingContext &context) noexcept
   {
-    return FloatPoint(Blend(from.X(), to.X(), context), Blend(from.Y(), to.Y(), context));
+    return PointF(Blend(from.X(), to.X(), context), Blend(from.Y(), to.Y(), context));
   }
 
   KRYS_NODISCARD inline LayoutPoint Blend(const LayoutPoint &from, const LayoutPoint &to,

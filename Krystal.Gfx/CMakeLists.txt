@@ -6,7 +6,6 @@ target_link_libraries(Krystal.Gfx
     Krystal.Text
 
   PRIVATE
-    stb
     Freetype::Freetype
 )
 
@@ -63,6 +62,7 @@ target_sources(Krystal.Gfx
       include/Krystal.Gfx/OpenGL/Official/khrplatform.h
 
       # Render2D
+      include/Krystal.Gfx/Render2D/AffineTransformFloats.hpp
       include/Krystal.Gfx/Render2D/AtlasPages.hpp
       include/Krystal.Gfx/Render2D/CoverageBlur.hpp
       include/Krystal.Gfx/Render2D/Dashing.hpp
@@ -77,11 +77,9 @@ target_sources(Krystal.Gfx
       include/Krystal.Gfx/Render2D/Path2D.hpp
       include/Krystal.Gfx/Render2D/PathRasteriser.hpp
       include/Krystal.Gfx/Render2D/PathStroker.hpp
-      include/Krystal.Gfx/Render2D/Rect2D.hpp
       include/Krystal.Gfx/Render2D/Renderer2D.hpp
       include/Krystal.Gfx/Render2D/RoundedRect2D.hpp
       include/Krystal.Gfx/Render2D/StrokeStyle.hpp
-      include/Krystal.Gfx/Render2D/Transform2D.hpp
 
   PRIVATE
     src/CommandBuffer.cpp

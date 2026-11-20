@@ -29,13 +29,13 @@
 #include "Krystal.Booey/DOM/Types/DOMString.hpp"
 #include "Krystal.Booey/Editing/Selection/EditingBoundary.hpp"
 #include "Krystal.Booey/Editing/TextIteratorBehavior.hpp"
-#include "Krystal.Booey/Graphics/Geometry/IntRect.hpp"
 #include "Krystal.Booey/Graphics/Geometry/LayoutRect.hpp"
 #include "Krystal.Booey/HTML/Types/TagName.hpp"
 #include "Krystal.Booey/Text/WritingMode.hpp"
 #include "Krystal.Core/Attributes.hpp"
+#include "Krystal.Core/Geometry/Rect.hpp"
+#include "Krystal.Core/Strings/String.hpp"
 #include "Krystal.Core/Types/RefPtr.hpp"
-#include "Krystal.Core/Types/String.hpp"
 
 namespace krys::boo
 {
@@ -53,7 +53,6 @@ namespace krys::boo::dom
 namespace krys::boo
 {
   class HTMLElement;
-  class IntPoint;
   class RenderBlock;
   class RenderObject;
   class VisiblePosition;
@@ -215,7 +214,7 @@ namespace krys::boo
 
   void UpdatePositionForNodeRemoval(dom::Position &position, Node &node) noexcept;
 
-  KRYS_NODISCARD TextDirection DirectionOfEnclosingBlock(const dom::Position &position) noexcept;
+  KRYS_NODISCARD text::TextDirection DirectionOfEnclosingBlock(const dom::Position &position) noexcept;
 
   /// @brief The node, or the shadow host it's in (or that host's, and so on), that's in the tree whose root
   /// is
@@ -251,7 +250,7 @@ namespace krys::boo
                                                                                int32 index) noexcept;
 
   KRYS_NODISCARD VisiblePosition
-    ClosestEditablePositionInElementForAbsolutePoint(const Element &element, const IntPoint &point) noexcept;
+    ClosestEditablePositionInElementForAbsolutePoint(const Element &element, const PointI &point) noexcept;
 
 #pragma endregion
 
@@ -352,9 +351,9 @@ namespace krys::boo
                                                             RenderObject *renderer,
                                                             RenderBlock *&caretPainter) noexcept;
 
-  KRYS_NODISCARD IntRect AbsoluteBoundsForLocalCaretRect(RenderBlock *rendererForCaretPainting,
-                                                         const LayoutRect &rect,
-                                                         bool *insideFixed = nullptr) noexcept;
+  KRYS_NODISCARD RectI AbsoluteBoundsForLocalCaretRect(RenderBlock *rendererForCaretPainting,
+                                                       const LayoutRect &rect,
+                                                       bool *insideFixed = nullptr) noexcept;
 
 #pragma endregion
 }

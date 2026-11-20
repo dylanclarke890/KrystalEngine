@@ -19,7 +19,7 @@ Status: reviewed (2026-11-01)
 #### [7.1.1 Origins](https://html.spec.whatwg.org/#origin)
 
 Status: reviewed (2026-11-01)
-> Only the serialization of a URL's origin exists (`URLDecomposition::SerializedOrigin`, with a `file:` URL's origin `file://`); origins, their effective domains and the same origin checks don't (see `KNOWN-ISSUES.md`).
+> Only the serialization of a URL's origin exists (`UrlDecomposition::SerializedOrigin`, with a `file:` URL's origin `file://`); origins, their effective domains and the same origin checks don't (see `KNOWN-ISSUES.md`).
 <!-- definitions: concept-origin concept-origin-opaque concept-origin-tuple concept-origin-scheme concept-origin-host concept-origin-port concept-origin-domain -->
 
 - [x] [effective domain](https://html.spec.whatwg.org/#concept-origin-effective-domain) — The effective domain of an origin origin is computed as follows:

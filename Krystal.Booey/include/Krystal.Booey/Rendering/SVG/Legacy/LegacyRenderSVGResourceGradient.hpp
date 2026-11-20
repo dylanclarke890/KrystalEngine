@@ -37,7 +37,7 @@ namespace krys::boo
   {
     struct Inputs
     {
-      Maybe<FloatRect> ObjectBoundingBox;
+      Maybe<RectF> ObjectBoundingBox;
       float TextPaintingScale = 1;
 
       KRYS_NODISCARD friend bool operator==(const Inputs &, const Inputs &) noexcept = default;
@@ -108,9 +108,9 @@ namespace krys::boo
     void PostApplyResource(RenderElement &, GraphicsContext *&, EnumSet<RenderSVGResourceMode>, const Path *,
                            const RenderElement *) noexcept final;
 
-    KRYS_NODISCARD FloatRect ResourceBoundingBox(const RenderObject &, RepaintRectCalculation) noexcept final
+    KRYS_NODISCARD RectF ResourceBoundingBox(const RenderObject &, RepaintRectCalculation) noexcept final
     {
-      return FloatRect();
+      return RectF();
     }
 
     void GetElement() const = delete;

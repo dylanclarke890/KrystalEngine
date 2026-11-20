@@ -46,7 +46,7 @@ namespace krys::boo::svg::tests
     auto &l = ElementById<SVGLinearGradientElement>(*fixture.Document, u8"l");
     CHECK(l.GradientUnits() == SVGUnitTypes::SVG_UNIT_TYPE_USERSPACEONUSE);
     CHECK(l.SpreadMethod() == SVGSpreadMethodReflect);
-    CHECK(l.GradientTransform().Concatenate() == AffineTransform::MakeTranslation({1, 2}));
+    CHECK(l.GradientTransform().Concatenate() == AffineTransform::CreateTranslation({1, 2}));
     CHECK(l.Y2().ValueAsString() == u8"4");
     CHECK(l.SpreadMethodAnimated().BaseVal() == SVGGradientElement::SVG_SPREADMETHOD_REFLECT);
 
@@ -146,7 +146,7 @@ namespace krys::boo::svg::tests
     CHECK(p.PatternUnits() == SVGUnitTypes::SVG_UNIT_TYPE_USERSPACEONUSE);
     CHECK(p.PatternContentUnits() == SVGUnitTypes::SVG_UNIT_TYPE_OBJECTBOUNDINGBOX);
     CHECK(p.LocalCoordinateSpaceTransform(CTMScope::NearestViewportScope)
-          == AffineTransform::MakeScale({2, 2}));
-    CHECK(p.ViewBox() == FloatRect(0, 0, 10, 10));
+          == AffineTransform::CreateScale({2, 2}));
+    CHECK(p.ViewBox() == RectF(0, 0, 10, 10));
   }
 }

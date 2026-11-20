@@ -1,0 +1,189 @@
+﻿/*
+ * Copyright (C) 2006-2016 Apple Inc. All rights reserved.
+ * Copyright (C) 2009 Google Inc. All rights reserved.
+ *
+ * Redistribution and use in source and binary forms, with or without
+ * modification, are permitted provided that the following conditions
+ * are met:
+ * 1. Redistributions of source code must retain the above copyright
+ *    notice, this list of conditions and the following disclaimer.
+ * 2. Redistributions in binary form must reproduce the above copyright
+ *    notice, this list of conditions and the following disclaimer in the
+ *    documentation and/or other materials provided with the distribution.
+ *
+ * THIS SOFTWARE IS PROVIDED BY APPLE INC. ``AS IS'' AND ANY
+ * EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE
+ * IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR
+ * PURPOSE ARE DISCLAIMED.  IN NO EVENT SHALL APPLE INC. OR
+ * CONTRIBUTORS BE LIABLE FOR ANY DIRECT, INDIRECT, INCIDENTAL, SPECIAL,
+ * EXEMPLARY, OR CONSEQUENTIAL DAMAGES (INCLUDING, BUT NOT LIMITED TO,
+ * PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES; LOSS OF USE, DATA, OR
+ * PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND ON ANY THEORY
+ * OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT
+ * (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
+ * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
+ */
+
+#include "Krystal.Core/Time/ThreadTimers.hpp"
+#include "Krystal.Core/Assert.hpp"
+#include "Krystal.Core/Threading/NeverDestroyed.hpp"
+#include "Krystal.Core/Time/Timer.hpp"
+#include <utility>
+
+namespace krys
+{
+  ThreadTimers &ThreadTimers::Current() noexcept
+  {
+    // Never destroyed, so that a timer destroyed late in the main thread's shutdown can still stop.
+    thread_local NeverDestroyed<ThreadTimers> timers;
+    return timers;
+  }
+
+  void ThreadTimers::SetCurrentTime(MonotonicTime::duration now) noexcept
+  {
+    if (now > _currentTime)
+    {
+      _currentTime = now;
+    }
+  }
+
+  bool ThreadTimers::FireTimersDue() noexcept
+  {
+    // Do a re-entrancy check.
+    if (_firingTimers)
+    {
+      return false;
+    }
+
+    _firingTimers = true;
+    bool fired = false;
+
+    auto fireTime = _currentTime;
+    // Timers started from here on fire next time: the host's time doesn't move while they fire, so a timer
+    // restarted with no delay would otherwise be due again at once.
+    auto lastInsertionOrder = _currentHeapInsertionOrder;
+
+    while (!_timerHeap.empty())
+    {
+      TimerBase &timer = *_timerHeap.front();
+      if (timer._nextFireTime > fireTime || timer._heapInsertionOrder >= lastInsertionOrder)
+      {
+        break;
+      }
+
+      auto interval = timer._repeatInterval;
+      if (interval > MonotonicTime::duration::zero())
+      {
+        SetNextFireTime(timer, fireTime + interval, true);
+      }
+      else
+      {
+        SetNextFireTime(timer, {}, false);
+      }
+
+      // Once the timer has been fired, it may be deleted, so do nothing else with it after this point.
+      timer.Fired();
+      fired = true;
+    }
+
+    _firingTimers = false;
+    return fired;
+  }
+
+  Maybe<MonotonicTime::duration> ThreadTimers::NextFireTime() const noexcept
+  {
+    if (_timerHeap.empty())
+    {
+      return null;
+    }
+    return _timerHeap.front()->_nextFireTime;
+  }
+
+  void ThreadTimers::SetNextFireTime(TimerBase &timer, MonotonicTime::duration fireTime, bool active) noexcept
+  {
+    if (timer.IsActive())
+    {
+      HeapRemove(timer);
+    }
+    timer._nextFireTime = fireTime;
+    if (!active)
+    {
+      return;
+    }
+
+    timer._heapInsertionOrder = _currentHeapInsertionOrder++;
+    timer._heapIndex = _timerHeap.size();
+    _timerHeap.push_back(&timer);
+    HeapUp(timer._heapIndex);
+  }
+
+  bool ThreadTimers::FiresBefore(const TimerBase &a, const TimerBase &b) noexcept
+  {
+    if (a._nextFireTime != b._nextFireTime)
+    {
+      return a._nextFireTime < b._nextFireTime;
+    }
+    return a._heapInsertionOrder < b._heapInsertionOrder;
+  }
+
+  void ThreadTimers::HeapSwap(size_t a, size_t b) noexcept
+  {
+    std::swap(_timerHeap[a], _timerHeap[b]);
+    _timerHeap[a]->_heapIndex = a;
+    _timerHeap[b]->_heapIndex = b;
+  }
+
+  void ThreadTimers::HeapUp(size_t index) noexcept
+  {
+    while (index > 0)
+    {
+      size_t parent = (index - 1) / 2;
+      if (!FiresBefore(*_timerHeap[index], *_timerHeap[parent]))
+      {
+        return;
+      }
+      HeapSwap(index, parent);
+      index = parent;
+    }
+  }
+
+  void ThreadTimers::HeapDown(size_t index) noexcept
+  {
+    size_t size = _timerHeap.size();
+    while (true)
+    {
+      size_t first = index;
+      for (size_t child : {index * 2 + 1, index * 2 + 2})
+      {
+        if (child < size && FiresBefore(*_timerHeap[child], *_timerHeap[first]))
+        {
+          first = child;
+        }
+      }
+      if (first == index)
+      {
+        return;
+      }
+      HeapSwap(index, first);
+      index = first;
+    }
+  }
+
+  void ThreadTimers::HeapRemove(TimerBase &timer) noexcept
+  {
+    size_t index = timer._heapIndex;
+    krys_debug_assert(index < _timerHeap.size() && _timerHeap[index] == &timer);
+    size_t last = _timerHeap.size() - 1;
+    if (index != last)
+    {
+      HeapSwap(index, last);
+    }
+    _timerHeap.pop_back();
+    timer._heapIndex = TimerBase::NotInHeap;
+    if (index < _timerHeap.size())
+    {
+      HeapUp(index);
+      HeapDown(index);
+    }
+  }
+}

@@ -203,7 +203,7 @@ namespace krys::boo
     }
   }
 
-  FloatPoint LegacyInlineBox::LocationIncludingFlipping() const noexcept
+  PointF LegacyInlineBox::LocationIncludingFlipping() const noexcept
   {
     auto &rootContainer = Root().BlockFlow();
     auto writingMode = rootContainer.GetWritingMode();
@@ -218,7 +218,7 @@ namespace krys::boo
     return {rootContainer.Width().ToFloat() - Width() - X(), Y()};
   }
 
-  void LegacyInlineBox::FlipForWritingMode(FloatRect &rect) const noexcept
+  void LegacyInlineBox::FlipForWritingMode(RectF &rect) const noexcept
   {
     auto &rootContainer = Root().BlockFlow();
     auto writingMode = rootContainer.GetWritingMode();
@@ -229,7 +229,7 @@ namespace krys::boo
     rootContainer.FlipForWritingMode(rect);
   }
 
-  FloatPoint LegacyInlineBox::FlipForWritingMode(const FloatPoint &point) const noexcept
+  PointF LegacyInlineBox::FlipForWritingMode(const PointF &point) const noexcept
   {
     auto &rootContainer = Root().BlockFlow();
     auto writingMode = rootContainer.GetWritingMode();

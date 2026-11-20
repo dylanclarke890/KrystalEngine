@@ -3,6 +3,7 @@
 #include "Krystal.Booey/DOM/Nodes/Document.hpp"
 #include "Krystal.Core/Threading/JobSystem.hpp"
 #include "Krystal.Core/Threading/ManualWorkQueue.hpp"
+#include "Krystal.Core/Time/Timer.hpp"
 #include "Krystal.Core/Types/List.hpp"
 
 namespace krys::boo::html::tests
@@ -138,5 +139,63 @@ namespace krys::boo::html::tests
       loop.Run(loop.Now());
       CHECK(order == List<utf8_string> {u8"done", u8"done", u8"done"});
     }
+  }
+
+  namespace
+  {
+    using namespace std::chrono_literals;
+
+    /// @brief Runs the event loop @p delta of host time after the last run.
+    void AdvanceEventLoop(MonotonicTime::duration delta) noexcept
+    {
+      auto &loop = EventLoop::Current();
+      loop.Run(loop.Now() + delta);
+    }
+  }
+
+  TEST_CASE("EventLoop: running until idle fires the timers its timers start", "[HTML][EventLoop][Timer]")
+  {
+    auto &loop = EventLoop::Current();
+    int32 fired = 0;
+    Timer timer([&] { ++fired; });
+    Timer restarting([&] { timer.StartOneShot({}); });
+    restarting.StartOneShot({});
+    loop.RunUntilIdle();
+    CHECK(fired == 1);
+
+    timer.StartOneShot({});
+    Timer again([&] { timer.StartOneShot({}); });
+    again.StartOneShot({});
+    loop.Run(loop.Now());
+    CHECK(fired == 2);
+    CHECK(timer.IsActive());
+    loop.Run(loop.Now());
+    CHECK(fired == 3);
+  }
+
+  TEST_CASE("EventLoop: tasks after a timeout, the budget and the next wake time", "[HTML][EventLoop][Timer]")
+  {
+    auto &loop = EventLoop::Current();
+    loop.RunUntilIdle();
+    List<int32> order;
+
+    loop.ScheduleTask(50ms, html::TaskSource::Timer, [&] { order.push_back(1); });
+    REQUIRE(loop.NextWakeTime());
+    CHECK(*loop.NextWakeTime() <= loop.Now() + 50ms);
+    AdvanceEventLoop(49ms);
+    CHECK(order.empty());
+    AdvanceEventLoop(1ms);
+    CHECK(order == List<int32> {1});
+
+    // Queued tasks are work now.
+    loop.QueueTask(html::TaskSource::DOMManipulation, [&] { order.push_back(2); });
+    CHECK(loop.NextWakeTime() == loop.Now());
+
+    // A spent budget leaves tasks for the next run.
+    loop.QueueTask(html::TaskSource::DOMManipulation, [&] { order.push_back(3); });
+    loop.Run(loop.Now(), MonotonicTime::duration::zero());
+    CHECK(order == List<int32> {1});
+    loop.Run(loop.Now());
+    CHECK(order == List<int32> {1, 2, 3});
   }
 }

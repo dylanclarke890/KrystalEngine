@@ -57,8 +57,8 @@ namespace krys::boo
 
   private:
     UniquePtr<html::HTMLImageLoader> _imageLoader;
-    DOMString _bestFitImageURL;
-    url::URL _currentURL;
+    DOMString _bestFitImageUrl;
+    net::Url _currentUrl;
     float _imageDevicePixelRatio {1.0f};
     WeakPtr<HTMLPictureElement> _pictureElement;
     // The source element that was selected to provide the source URL.
@@ -256,9 +256,9 @@ namespace krys::boo
     KRYS_NODISCARD bool IsReplaced(const RenderStyle *style = nullptr) const noexcept override;
 
     /// @brief The URL of the selected source, resolved against the document.
-    KRYS_NODISCARD const url::URL &CurrentURL() const noexcept
+    KRYS_NODISCARD const net::Url &CurrentUrl() const noexcept
     {
-      return _currentURL;
+      return _currentUrl;
     }
 
     /// @brief The `alt` attribute, or else the `title` attribute, or null if it has neither.
@@ -285,7 +285,7 @@ namespace krys::boo
 
     /// @brief The selected source: the best fitting candidate of a `<picture>`'s sources, or else of `srcset`
     /// and `src`.
-    KRYS_NODISCARD Maybe<DOMString> ImageSourceURL() const noexcept override;
+    KRYS_NODISCARD Maybe<DOMString> ImageSourceUrl() const noexcept override;
 
     KRYS_NODISCARD HTMLPictureElement *PictureElement() const noexcept;
 
@@ -343,7 +343,7 @@ namespace krys::boo
 
     KRYS_NODISCARD html::ImageCandidate BestFitSourceFromPictureElement() noexcept;
 
-    void SetBestFitURLAndDPRFromImageCandidate(const html::ImageCandidate &candidate) noexcept;
+    void SetBestFitUrlAndDPRFromImageCandidate(const html::ImageCandidate &candidate) noexcept;
 
     KRYS_NODISCARD float EffectiveImageDevicePixelRatio() const noexcept;
 

@@ -1,0 +1,100 @@
+﻿/*
+ * Copyright (C) 2025 Apple Inc. All rights reserved.
+ *
+ * Redistribution and use in source and binary forms, with or without
+ * modification, are permitted provided that the following conditions
+ * are met:
+ * 1. Redistributions of source code must retain the above copyright
+ *    notice, this list of conditions and the following disclaimer.
+ * 2. Redistributions in binary form must reproduce the above copyright
+ *    notice, this list of conditions and the following disclaimer in the
+ *    documentation and/or other materials provided with the distribution.
+ *
+ * THIS SOFTWARE IS PROVIDED BY APPLE INC. ``AS IS'' AND ANY
+ * EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE
+ * IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR
+ * PURPOSE ARE DISCLAIMED.  IN NO EVENT SHALL APPLE INC. OR
+ * CONTRIBUTORS BE LIABLE FOR ANY DIRECT, INDIRECT, INCIDENTAL, SPECIAL,
+ * EXEMPLARY, OR CONSEQUENTIAL DAMAGES (INCLUDING, BUT NOT LIMITED TO,
+ * PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES; LOSS OF USE, DATA, OR
+ * PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND ON ANY THEORY
+ * OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT
+ * (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
+ * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
+ */
+
+#pragma once
+
+#include "Krystal.Core/Attributes.hpp"
+#include "Krystal.Core/Types/List.hpp"
+#include "Krystal.Core/Utils/Move.hpp"
+#include <algorithm>
+#include <ranges>
+
+namespace krys
+{
+  class TextStream;
+
+  /// @brief A span along a line, from `Begin` to `End`.
+  struct SegmentF
+  {
+    float Begin {0.f};
+    float End {0.f};
+
+    KRYS_NODISCARD constexpr bool operator==(const SegmentF &) const noexcept = default;
+
+    KRYS_NODISCARD constexpr float Length() const noexcept
+    {
+      return End - Begin;
+    }
+
+    KRYS_NODISCARD constexpr SegmentF Dilate(float length) const noexcept
+    {
+      return {Begin - length, End + length};
+    }
+  };
+
+  // Computes difference between a line segment `a` and list of line segments `bs` that are dilated by
+  // dilationAmount.
+  // The difference list is further filtered to only results > dilationAmount.
+  //
+  // List<SegmentF> intersections = ...;
+  // List<SegmentF> solidLine { { 0, totalWidth } };
+  // List<SegmentF> diff = difference(solidLine, dilate(intersections, dilationAmount));
+  // return filter(diff, [](auto&& s) { return s.length() > dilationAmount });
+  // <=>
+  // return DifferenceWithDilation({ 0, totalWidth }, intersections);
+  KRYS_NODISCARD inline List<SegmentF> DifferenceWithDilation(SegmentF a, List<SegmentF> &&bs,
+                                                              float dilationAmount) noexcept
+  {
+    std::ranges::sort(bs, {}, &SegmentF::Begin);
+    auto result = bs.begin();
+    for (auto b : bs)
+    {
+      if (a.Begin >= a.End)
+      {
+        break;
+      }
+      b = b.Dilate(dilationAmount);
+      if (b.Begin >= a.End)
+      {
+        break;
+      }
+      SegmentF candidate {a.Begin, b.Begin};
+      if (candidate.Length() > dilationAmount)
+      {
+        *result = candidate;
+        result = std::next(result);
+      }
+      a.Begin = std::max(a.Begin, b.End);
+    }
+    bs.erase(result, bs.end());
+    if (a.Length() > dilationAmount)
+    {
+      bs.push_back(a);
+    }
+    return krys::move(bs);
+  }
+
+  TextStream &operator<<(TextStream &ts, SegmentF floatSegment) noexcept;
+}

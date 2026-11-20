@@ -32,11 +32,11 @@
 
 #include "Krystal.Booey/Graphics/Filters/FilterRenderingMode.hpp"
 #include "Krystal.Booey/Graphics/Geometry/BoxExtents.hpp"
-#include "Krystal.Booey/Graphics/Geometry/FloatRect.hpp"
 #include "Krystal.Booey/Graphics/Geometry/LayoutRect.hpp"
 #include "Krystal.Booey/Graphics/GraphicsContextSwitcher.hpp"
 #include "Krystal.Booey/Rendering/Painting/CSSFilterRenderer.hpp"
 #include "Krystal.Core/Attributes.hpp"
+#include "Krystal.Core/Geometry/Rect.hpp"
 #include "Krystal.Core/RefCounted.hpp"
 #include "Krystal.Core/Types/List.hpp"
 #include "Krystal.Core/Types/RefPtr.hpp"
@@ -65,7 +65,7 @@ namespace krys::boo
     LayoutRect _dirtySourceRect;
     LayoutRect _repaintRect;
 
-    FloatSize _filterScale {1, 1};
+    SizeF _filterScale {1, 1};
 
     EnumSet<FilterRenderingMode> _preferredFilterRenderingModes {FilterRenderingMode::Software};
 
@@ -75,7 +75,7 @@ namespace krys::boo
     List<Ref<Element>> _internalSVGReferences;
 
   public:
-    KRYS_NODISCARD static Ref<RenderLayerFilters> Create(RenderLayer &layer, FloatSize scale) noexcept;
+    KRYS_NODISCARD static Ref<RenderLayerFilters> Create(RenderLayer &layer, SizeF scale) noexcept;
 
     ~RenderLayerFilters() noexcept;
 
@@ -114,7 +114,7 @@ namespace krys::boo
     KRYS_NODISCARD static bool IsIdentity(RenderElement &renderer) noexcept;
 
     KRYS_NODISCARD static IntOutsets CalculateOutsets(RenderElement &renderer,
-                                                      const FloatRect &targetBoundingBox) noexcept;
+                                                      const RectF &targetBoundingBox) noexcept;
 
     // Per render
     KRYS_NODISCARD LayoutRect RepaintRect() const noexcept
@@ -133,7 +133,7 @@ namespace krys::boo
     void ApplyFilterEffect(GraphicsContext &destinationContext) noexcept;
 
   private:
-    RenderLayerFilters(RenderLayer &layer, FloatSize scale) noexcept;
+    RenderLayerFilters(RenderLayer &layer, SizeF scale) noexcept;
 
     void ResetDirtySourceRect() noexcept
     {

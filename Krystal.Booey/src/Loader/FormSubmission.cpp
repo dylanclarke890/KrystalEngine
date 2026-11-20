@@ -37,7 +37,7 @@
 #include "Krystal.Booey/HTML/Forms/DOMFormData.hpp"
 #include "Krystal.Booey/Infra/StringAlgorithms.hpp"
 #include "Krystal.Booey/Loader/FrameLoadRequest.hpp"
-#include "Krystal.Core/Text/ASCII.hpp"
+#include "Krystal.Core/Strings/ASCII.hpp"
 #include "Krystal.Core/Utils/Move.hpp"
 
 namespace krys::boo
@@ -97,14 +97,14 @@ namespace krys::boo
     _method = ParseMethodType(type);
   }
 
-  FormSubmission::FormSubmission(Maybe<DOMString> returnValue, url::URL action, DOMStringView target,
+  FormSubmission::FormSubmission(Maybe<DOMString> returnValue, net::Url action, DOMStringView target,
                                  DOMStringView encodingType, boo::Event *event) noexcept
       : _method(Method::Dialog), _action(krys::move(action)), _target(target), _encodingType(encodingType),
         _event(ShareRefPtr(event)), _returnValue(krys::move(returnValue))
   {
   }
 
-  FormSubmission::FormSubmission(Method method, url::URL action, DOMStringView target,
+  FormSubmission::FormSubmission(Method method, net::Url action, DOMStringView target,
                                  DOMStringView encodingType, Ref<html::DOMFormData> &&entryList,
                                  boo::Event *event) noexcept
       : _method(method), _action(krys::move(action)), _target(target), _encodingType(encodingType),
@@ -144,7 +144,7 @@ namespace krys::boo
 
     Ref<Document> document = ShareRef(form.NodeDocument());
     DOMString encodingType = copiedAttributes.EncodingType();
-    auto actionURL = document->CompleteURL(copiedAttributes.Action().empty() ? document->GetURL().String()
+    auto actionUrl = document->CompleteUrl(copiedAttributes.Action().empty() ? document->GetUrl().String()
                                                                              : copiedAttributes.Action());
 
     Ref<FormSubmission> formSubmission = [&]
@@ -152,7 +152,7 @@ namespace krys::boo
       if (copiedAttributes.GetMethod() == Method::Dialog)
       {
         Maybe<DOMString> returnValue = submitter ? submitter->ResultForDialogSubmit() : null;
-        return CreateRef<FormSubmission>(returnValue, actionURL, form.EffectiveTarget(event, submitter.get()),
+        return CreateRef<FormSubmission>(returnValue, actionUrl, form.EffectiveTarget(event, submitter.get()),
                                          encodingType, event);
       }
 
@@ -165,7 +165,7 @@ namespace krys::boo
         form.ConstructEntryList(RefPtr(submitter), html::DOMFormData::Create(), nullptr);
       krys_assert(result);
       Ref<html::DOMFormData> entryList = result;
-      return CreateRef<FormSubmission>(copiedAttributes.GetMethod(), actionURL,
+      return CreateRef<FormSubmission>(copiedAttributes.GetMethod(), actionUrl,
                                        form.EffectiveTarget(event, submitter.get()), encodingType,
                                        krys::move(entryList), event);
     }();
@@ -202,9 +202,9 @@ namespace krys::boo
 
     if (_method == Method::Post)
     {
-      frameRequest.GetResourceRequest().SetHTTPMethod(u8"POST");
+      frameRequest.GetResourceRequest().SetHttpMethod(u8"POST");
     }
 
-    frameRequest.GetResourceRequest().SetURL(_action);
+    frameRequest.GetResourceRequest().SetUrl(_action);
   }
 }

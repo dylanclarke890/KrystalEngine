@@ -108,7 +108,7 @@ namespace krys::boo
     }
 
     // Compute all necessary transformations to build the tile image & the pattern.
-    FloatRect tileBoundaries;
+    RectF tileBoundaries;
     AffineTransform tileImageTransform;
     if (!BuildTileImageTransform(renderer, _attributes, PatternElement(), tileBoundaries, tileImageTransform))
     {
@@ -119,8 +119,8 @@ namespace krys::boo
       SVGRenderingContext::CalculateTransformationToOutermostCoordinateSystem(renderer);
 
     // Ignore 2D rotation, as it doesn't affect the size of the tile.
-    FloatSize tileScale(static_cast<float>(absoluteTransform.XScale()),
-                        static_cast<float>(absoluteTransform.YScale()));
+    SizeF tileScale(static_cast<float>(absoluteTransform.XScale()),
+                    static_cast<float>(absoluteTransform.YScale()));
 
     // Scale the tile size to match the scale level of the patternTransform.
     tileScale.Scale(static_cast<float>(_attributes.PatternTransform().XScale()),
@@ -196,7 +196,7 @@ namespace krys::boo
 
     // Spec: When the geometry of the applicable element has no width or height and objectBoundingBox is
     // specified, then the given effect (e.g. a gradient or a filter) will be ignored.
-    FloatRect objectBoundingBox = renderer.ObjectBoundingBox();
+    RectF objectBoundingBox = renderer.ObjectBoundingBox();
     if (_attributes.PatternUnits() == SVGUnitTypes::SVG_UNIT_TYPE_OBJECTBOUNDINGBOX
         && objectBoundingBox.IsEmpty())
     {
@@ -258,9 +258,9 @@ namespace krys::boo
 
   namespace
   {
-    KRYS_NODISCARD FloatRect CalculatePatternBoundaries(const svg::PatternAttributes &attributes,
-                                                        const FloatRect &objectBoundingBox,
-                                                        const SVGPatternElement &patternElement) noexcept
+    KRYS_NODISCARD RectF CalculatePatternBoundaries(const svg::PatternAttributes &attributes,
+                                                    const RectF &objectBoundingBox,
+                                                    const SVGPatternElement &patternElement) noexcept
     {
       return SVGLengthContext::ResolveRectangle(&patternElement, attributes.PatternUnits(), objectBoundingBox,
                                                 attributes.X(), attributes.Y(), attributes.Width(),
@@ -271,10 +271,10 @@ namespace krys::boo
   bool LegacyRenderSVGResourcePattern::BuildTileImageTransform(RenderElement &renderer,
                                                                const svg::PatternAttributes &attributes,
                                                                const SVGPatternElement &patternElement,
-                                                               FloatRect &patternBoundaries,
+                                                               RectF &patternBoundaries,
                                                                AffineTransform &tileImageTransform) noexcept
   {
-    FloatRect objectBoundingBox = renderer.ObjectBoundingBox();
+    RectF objectBoundingBox = renderer.ObjectBoundingBox();
     patternBoundaries = CalculatePatternBoundaries(attributes, objectBoundingBox, patternElement);
     if (patternBoundaries.Width() <= 0 || patternBoundaries.Height() <= 0)
     {
@@ -299,16 +299,16 @@ namespace krys::boo
   }
 
   RefPtr<ImageBuffer> LegacyRenderSVGResourcePattern::CreateTileImage(
-    GraphicsContext &context, const FloatSize &size, const FloatSize &scale,
+    GraphicsContext &context, const SizeF &size, const SizeF &scale,
     const AffineTransform &tileImageTransform, const svg::PatternAttributes &attributes) noexcept
   {
-    // This is equivalent to making createImageBuffer() use roundedIntSize().
-    auto roundedUnscaledImageBufferSize = [](const FloatSize &size, const FloatSize &scale) -> FloatSize
+    // This is equivalent to making createImageBuffer() use roundedSizeI().
+    auto roundedUnscaledImageBufferSize = [](const SizeF &size, const SizeF &scale) -> SizeF
     {
       auto scaledSize = size * scale;
       return size
-             - FloatSize(ExpandedIntSize(scaledSize) - RoundedIntSize(scaledSize))
-                 * (scaledSize - FloatSize(FlooredIntSize(scaledSize))) / scale;
+             - SizeF(ExpandedSizeI(scaledSize) - RoundedSizeI(scaledSize))
+                 * (scaledSize - SizeF(FlooredSizeI(scaledSize))) / scale;
     };
 
     auto tileSize = roundedUnscaledImageBufferSize(size, scale);

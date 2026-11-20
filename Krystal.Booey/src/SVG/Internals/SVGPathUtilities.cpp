@@ -175,7 +175,7 @@ namespace krys::boo::svg
     return builder.TotalLength();
   }
 
-  FloatPoint GetPointAtLengthOfSVGPathByteStream(const SVGPathByteStream &stream, float length) noexcept
+  PointF GetPointAtLengthOfSVGPathByteStream(const SVGPathByteStream &stream, float length) noexcept
   {
     if (stream.IsEmpty())
     {

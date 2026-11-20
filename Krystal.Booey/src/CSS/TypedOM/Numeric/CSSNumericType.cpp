@@ -26,7 +26,7 @@
 #include "Krystal.Booey/CSS/TypedOM/Numeric/CSSNumericType.hpp"
 #include "Krystal.Booey/CSS/TypedOM/CSSNumericValue.hpp"
 #include "Krystal.Booey/CSS/Values/Units.hpp"
-#include "Krystal.Core/Text/StringBuilder.hpp"
+#include "Krystal.Core/Strings/StringBuilder.hpp"
 #include <utility>
 
 namespace krys::boo

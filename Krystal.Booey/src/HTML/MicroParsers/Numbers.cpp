@@ -1,5 +1,5 @@
 ﻿#include "Krystal.Booey/HTML/MicroParsers/Numbers.hpp"
-#include "Krystal.Core/Text/ASCII.hpp"
+#include "Krystal.Core/Strings/ASCII.hpp"
 #include <algorithm>
 #include <charconv>
 #include <limits>

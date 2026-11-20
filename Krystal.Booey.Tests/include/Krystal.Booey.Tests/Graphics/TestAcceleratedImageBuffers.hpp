@@ -4,7 +4,7 @@
 #include "Krystal.Booey/Graphics/DisplayLists/DisplayListRecorderImpl.hpp"
 #include "Krystal.Booey/Graphics/ImageBuffers/ImageBuffer.hpp"
 #include "Krystal.Booey/Graphics/ImageBuffers/ImageBufferBackend.hpp"
-#include "Krystal.Booey/Page/ChromeClient.hpp"
+#include "Krystal.Booey/Page/Clients/ChromeClient.hpp"
 
 namespace krys::boo::tests
 {
@@ -27,7 +27,7 @@ namespace krys::boo::tests
     }
 
     explicit TestAcceleratedBackend(const Parameters &parameters) noexcept
-        : ImageBufferBackend(parameters), _recorder(FloatSize(parameters.BackendSize))
+        : ImageBufferBackend(parameters), _recorder(SizeF(parameters.BackendSize))
     {
     }
 
@@ -59,7 +59,7 @@ namespace krys::boo::tests
     }
 
     KRYS_NODISCARD RefPtr<ImageBuffer>
-      CreateImageBuffer(const FloatSize &size, RenderingMode mode, RenderingPurpose purpose,
+      CreateImageBuffer(const SizeF &size, RenderingMode mode, RenderingPurpose purpose,
                         float resolutionScale, const DestinationColorSpace &) const noexcept override
     {
       if (mode != RenderingMode::Accelerated)

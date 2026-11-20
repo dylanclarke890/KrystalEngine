@@ -27,7 +27,7 @@ namespace krys::boo::tests
     KRYS_NODISCARD CachedResourceHandle<CachedFont> RequestFont(Document &document,
                                                                 utf8_stringview url) noexcept
     {
-      CachedResourceRequest request(ResourceRequest(url::URL(url)),
+      CachedResourceRequest request(net::ResourceRequest(net::Url(url)),
                                     CachedResourceLoader::DefaultCachedResourceOptions());
       auto font = document.GetCachedResourceLoader().RequestFont(krys::move(request));
       REQUIRE(font);

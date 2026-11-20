@@ -1,13 +1,13 @@
 ﻿#include "catch2/catch_test_macros.hpp"
 #include "Krystal.Booey.Tests/Animation/AnimationTestUtils.hpp"
 #include "Krystal.Booey/HTML/Elements/HTMLElement.hpp"
-#include "Krystal.Booey/Page/EventHandler.hpp"
+#include "Krystal.Booey/Input/EventHandler.hpp"
+#include "Krystal.Booey/Input/LegacyKeyCodes.hpp"
+#include "Krystal.Booey/Input/PlatformKeyboardEvent.hpp"
+#include "Krystal.Booey/Input/PlatformWheelEvent.hpp"
 #include "Krystal.Booey/Page/LocalDOMWindow.hpp"
 #include "Krystal.Booey/Page/LocalFrameView.hpp"
-#include "Krystal.Booey/Page/ScrollOptions.hpp"
-#include "Krystal.Booey/Platform/Events/PlatformKeyboardEvent.hpp"
-#include "Krystal.Booey/Platform/Events/PlatformWheelEvent.hpp"
-#include "Krystal.Booey/Platform/Events/WindowsKeyboardCodes.hpp"
+#include "Krystal.Booey/Page/Scrolling/ScrollOptions.hpp"
 #include "Krystal.Booey/Rendering/Layers/RenderLayer.hpp"
 #include "Krystal.Booey/Rendering/Layers/RenderLayerScrollableArea.hpp"
 #include "Krystal.Booey/Rendering/RenderBox.hpp"
@@ -55,7 +55,7 @@ namespace krys::boo::tests
     bool Wheel(AnimationPageFixture &fixture, float deltaY) noexcept
     {
       return fixture.TestPage->MainFrame().GetEventHandler().HandleWheelEvent(
-        PlatformWheelEvent(IntPoint(10, 10), IntPoint(10, 10), 0, deltaY, 0, deltaY > 0 ? 1.f : -1.f,
+        PlatformWheelEvent(PointI(10, 10), PointI(10, 10), 0, deltaY, 0, deltaY > 0 ? 1.f : -1.f,
                            PlatformWheelEventGranularity::ScrollByPixelWheelEvent, {}, {}));
     }
 
@@ -63,7 +63,7 @@ namespace krys::boo::tests
                      PlatformWheelEventPhase momentumPhase, float deltaY) noexcept
     {
       return fixture.TestPage->MainFrame().GetEventHandler().HandleWheelEvent(
-        PlatformWheelEvent(IntPoint(10, 10), IntPoint(10, 10), 0, deltaY, 0, 0,
+        PlatformWheelEvent(PointI(10, 10), PointI(10, 10), 0, deltaY, 0, 0,
                            PlatformWheelEventGranularity::ScrollByPixelWheelEvent, {}, {})
           .CopyAsTouchpadPan(phase, momentumPhase));
     }
@@ -71,7 +71,7 @@ namespace krys::boo::tests
     bool TouchPan(AnimationPageFixture &fixture, float deltaY) noexcept
     {
       return fixture.TestPage->MainFrame().GetEventHandler().HandleTouchScroll(
-        PlatformWheelEvent(IntPoint(10, 10), IntPoint(10, 10), 0, deltaY, 0, 0,
+        PlatformWheelEvent(PointI(10, 10), PointI(10, 10), 0, deltaY, 0, 0,
                            PlatformWheelEventGranularity::ScrollByPixelWheelEvent, {}, {}));
     }
   }
@@ -193,7 +193,7 @@ namespace krys::boo::tests
       Downcast<RenderBox>(*scroller.Renderer())
         .Layer()
         ->GetScrollableArea()
-        ->ScrollByRecursively(IntSize(0, 5));
+        ->ScrollByRecursively(SizeI(0, 5));
       CHECK(scroller.ScrollTop() == 5);
     }
   }

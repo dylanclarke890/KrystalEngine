@@ -41,7 +41,7 @@ namespace krys::boo
     return _consumer.ContinueConsuming();
   }
 
-  void SVGPathAbsoluteConverter::MoveTo(const FloatPoint &targetPoint, bool closed,
+  void SVGPathAbsoluteConverter::MoveTo(const PointF &targetPoint, bool closed,
                                         svg::PathCoordinateMode mode) noexcept
   {
     if (mode == svg::PathCoordinateMode::AbsoluteCoordinates)
@@ -58,7 +58,7 @@ namespace krys::boo
     _subpathPoint = _currentPoint;
   }
 
-  void SVGPathAbsoluteConverter::LineTo(const FloatPoint &targetPoint, svg::PathCoordinateMode mode) noexcept
+  void SVGPathAbsoluteConverter::LineTo(const PointF &targetPoint, svg::PathCoordinateMode mode) noexcept
   {
     if (mode == svg::PathCoordinateMode::AbsoluteCoordinates)
     {
@@ -72,8 +72,8 @@ namespace krys::boo
     }
   }
 
-  void SVGPathAbsoluteConverter::CurveToCubic(const FloatPoint &point1, const FloatPoint &point2,
-                                              const FloatPoint &targetPoint,
+  void SVGPathAbsoluteConverter::CurveToCubic(const PointF &point1, const PointF &point2,
+                                              const PointF &targetPoint,
                                               svg::PathCoordinateMode mode) noexcept
   {
     if (mode == svg::PathCoordinateMode::AbsoluteCoordinates)
@@ -127,7 +127,7 @@ namespace krys::boo
     }
   }
 
-  void SVGPathAbsoluteConverter::CurveToCubicSmooth(const FloatPoint &point2, const FloatPoint &targetPoint,
+  void SVGPathAbsoluteConverter::CurveToCubicSmooth(const PointF &point2, const PointF &targetPoint,
                                                     svg::PathCoordinateMode mode) noexcept
   {
     if (mode == svg::PathCoordinateMode::AbsoluteCoordinates)
@@ -143,7 +143,7 @@ namespace krys::boo
     }
   }
 
-  void SVGPathAbsoluteConverter::CurveToQuadratic(const FloatPoint &point1, const FloatPoint &targetPoint,
+  void SVGPathAbsoluteConverter::CurveToQuadratic(const PointF &point1, const PointF &targetPoint,
                                                   svg::PathCoordinateMode mode) noexcept
   {
     if (mode == svg::PathCoordinateMode::AbsoluteCoordinates)
@@ -159,7 +159,7 @@ namespace krys::boo
     }
   }
 
-  void SVGPathAbsoluteConverter::CurveToQuadraticSmooth(const FloatPoint &targetPoint,
+  void SVGPathAbsoluteConverter::CurveToQuadraticSmooth(const PointF &targetPoint,
                                                         svg::PathCoordinateMode mode) noexcept
   {
     if (mode == svg::PathCoordinateMode::AbsoluteCoordinates)
@@ -176,7 +176,7 @@ namespace krys::boo
   }
 
   void SVGPathAbsoluteConverter::ArcTo(float r1, float r2, float angle, bool largeArcFlag, bool sweepFlag,
-                                       const FloatPoint &targetPoint, svg::PathCoordinateMode mode) noexcept
+                                       const PointF &targetPoint, svg::PathCoordinateMode mode) noexcept
   {
     if (mode == svg::PathCoordinateMode::AbsoluteCoordinates)
     {

@@ -31,8 +31,8 @@
 #include "Krystal.Booey/Editing/Selection/RenderedPosition.hpp"
 #include "Krystal.Booey/Editing/Selection/InlineRunAndOffset.hpp"
 #include "Krystal.Booey/Editing/Selection/VisiblePosition.hpp"
-#include "Krystal.Booey/Graphics/Geometry/FloatQuad.hpp"
 #include "Krystal.Booey/Rendering/RenderElement.hpp"
+#include "Krystal.Core/Geometry/Quad.hpp"
 #include "Krystal.Core/Utils/Move.hpp"
 
 namespace krys::boo
@@ -272,17 +272,17 @@ namespace krys::boo
                                              PreviousLeafOnLine()->RightmostCaretOffset());
   }
 
-  IntRect RenderedPosition::AbsoluteRect(CaretRectMode caretRectMode) const noexcept
+  RectI RenderedPosition::AbsoluteRect(CaretRectMode caretRectMode) const noexcept
   {
     if (IsNull())
     {
-      return IntRect();
+      return RectI();
     }
 
-    IntRect localRect = SnappedIntRect(ComputeLocalCaretRect(*_renderer, {_box, _offset}, caretRectMode));
-    return localRect == IntRect()
-             ? IntRect()
-             : _renderer->LocalToAbsoluteQuad(FloatQuad(FloatRect(localRect))).EnclosingBoundingBox();
+    RectI localRect = SnappedRectI(ComputeLocalCaretRect(*_renderer, {_box, _offset}, caretRectMode));
+    return localRect == RectI()
+             ? RectI()
+             : _renderer->LocalToAbsoluteQuad(QuadF(RectF(localRect))).EnclosingBoundingBox();
   }
 
   Maybe<dom::BoundaryPoint> RenderedPosition::BoundaryPoint() const noexcept

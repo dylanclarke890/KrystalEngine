@@ -91,8 +91,6 @@ namespace krys::boo
 
     KRYS_NODISCARD Color PlatformFocusRingColor(style::ColorOptions) const noexcept final;
 
-    void PlatformColorsDidChange() noexcept final;
-
     KRYS_NODISCARD Color SystemColor(css::ValueId, style::ColorOptions) const noexcept final;
 
     void AdjustTextFieldStyle(RenderStyle &, const boo::Element *) const noexcept final;
@@ -115,12 +113,11 @@ namespace krys::boo
     KRYS_NODISCARD MonotonicTime::duration
       AnimationRepeatIntervalForProgressBar(const RenderProgress &) const noexcept final;
 
-    KRYS_NODISCARD IntRect ProgressBarRectForBounds(const RenderProgress &,
-                                                    const IntRect &) const noexcept final;
+    KRYS_NODISCARD RectI ProgressBarRectForBounds(const RenderProgress &, const RectI &) const noexcept final;
 
     void AdjustSliderThumbSize(RenderStyle &, const boo::Element *) const noexcept final;
 
-    KRYS_NODISCARD IntSize SliderTickSize() const noexcept final;
+    KRYS_NODISCARD SizeI SliderTickSize() const noexcept final;
 
     KRYS_NODISCARD LayoutUnit SliderTickSnappingThreshold() const noexcept final;
 

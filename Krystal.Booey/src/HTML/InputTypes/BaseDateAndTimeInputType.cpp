@@ -39,14 +39,14 @@
 #include "Krystal.Booey/HTML/Elements/HTMLInputElement.hpp"
 #include "Krystal.Booey/HTML/Elements/HTMLOptionElement.hpp"
 #include "Krystal.Booey/HTML/InputTypes/BaseClickableWithKeyInputType.hpp"
-#include "Krystal.Booey/Page/ChromeClient.hpp"
+#include "Krystal.Booey/Page/Clients/ChromeClient.hpp"
 #include "Krystal.Booey/Page/LocalFrameView.hpp"
 #include "Krystal.Booey/Page/Page.hpp"
 #include "Krystal.Booey/Page/Settings.hpp"
 #include "Krystal.Booey/Platform/Choosers/DateTimeChooserParameters.hpp"
-#include "Krystal.Booey/Platform/Locale/PlatformLocale.hpp"
 #include "Krystal.Booey/Rendering/RenderElement.hpp"
 #include "Krystal.Booey/Style/Invalidation/PseudoClassChangeInvalidation.hpp"
+#include "Krystal.I18n/Locale.hpp"
 #include <charconv>
 #include <cmath>
 
@@ -58,10 +58,11 @@ namespace krys::boo::html
     constexpr int MsecPerSecond = 1'000;
   }
 
-  void BaseDateAndTimeInputType::DateTimeFormatValidator::VisitField(DateTimeFormat::FieldType fieldType,
-                                                                     int) noexcept
+  void
+    BaseDateAndTimeInputType::DateTimeFormatValidator::VisitField(i18n::DateTimeFormat::FieldType fieldType,
+                                                                  int) noexcept
   {
-    using FieldType = DateTimeFormat::FieldType;
+    using FieldType = i18n::DateTimeFormat::FieldType;
     switch (fieldType)
     {
       case FieldType::Year:            _results.Add(DateTimeFormatValidationResults::HasYear); break;
@@ -95,7 +96,7 @@ namespace krys::boo::html
   bool BaseDateAndTimeInputType::DateTimeFormatValidator::ValidateFormat(
     DOMStringView format, const BaseDateAndTimeInputType &inputType) noexcept
   {
-    if (!DateTimeFormat::Parse(format, *this))
+    if (!i18n::DateTimeFormat::Parse(format, *this))
     {
       return false;
     }
@@ -220,7 +221,8 @@ namespace krys::boo::html
     }
 
     krys_debug_assert(Element());
-    auto localized = Element()->GetLocale().FormatDateTime(*date);
+    auto fields = date->ToDateTimeFields();
+    auto localized = fields ? Element()->GetLocale().FormatDateTime(*fields) : utf8_string();
     return localized.empty() ? DOMString(proposedValue) : localized;
   }
 
@@ -615,12 +617,12 @@ namespace krys::boo::html
 
     if (!document.GetSettings().LangAttributeAwareFormControlUIEnabled)
     {
-      parameters.Locale = DefaultLanguage();
+      parameters.Locale = i18n::DefaultLanguage();
     }
     else
     {
       auto computedLocale = css::EffectiveLang(element);
-      parameters.Locale = computedLocale.empty() ? DefaultLanguage() : computedLocale;
+      parameters.Locale = computedLocale.empty() ? i18n::DefaultLanguage() : computedLocale;
     }
 
     auto stepRange = CreateStepRange(AnyStepHandling::Reject);
@@ -637,13 +639,13 @@ namespace krys::boo::html
 
     auto *renderer = element.Renderer();
     parameters.AnchorRectInRootView =
-      renderer ? view->ContentsToView(renderer->AbsoluteBoundingBoxRect()) : IntRect();
+      renderer ? view->ContentsToView(renderer->AbsoluteBoundingBoxRect()) : RectI();
     parameters.CurrentValue = element.Value();
 
     if (renderer)
     {
       parameters.IsAnchorElementRTL =
-        renderer->Style().GetWritingMode().ComputedTextDirection() == TextDirection::RTL;
+        renderer->Style().GetWritingMode().ComputedTextDirection() == text::TextDirection::RTL;
       parameters.UseDarkAppearance = renderer->UseDarkAppearance();
     }
     auto date = ParseToDateComponents(element.Value()).value_or(DateComponents());

@@ -26,7 +26,7 @@
 #pragma once
 
 #include "Krystal.Booey/Graphics/Controls/ControlPart.hpp"
-#include "Krystal.Booey/Graphics/Geometry/IntRect.hpp"
+#include "Krystal.Core/Geometry/Rect.hpp"
 #include "Krystal.Core/Types/List.hpp"
 
 namespace krys::boo
@@ -35,34 +35,34 @@ namespace krys::boo
   class SliderTrackPart : public ControlPart
   {
   private:
-    IntSize _thumbSize;
-    IntRect _trackBounds;
+    SizeI _thumbSize;
+    RectI _trackBounds;
     List<double> _tickRatios;
     double _thumbPosition;
 
   public:
     KRYS_NODISCARD static Ref<SliderTrackPart> Create(StyleAppearance) noexcept;
 
-    KRYS_NODISCARD static Ref<SliderTrackPart> Create(StyleAppearance, const IntSize &thumbSize,
-                                                      const IntRect &trackBounds, List<double> &&tickRatios,
+    KRYS_NODISCARD static Ref<SliderTrackPart> Create(StyleAppearance, const SizeI &thumbSize,
+                                                      const RectI &trackBounds, List<double> &&tickRatios,
                                                       double thumbPosition) noexcept;
 
-    KRYS_NODISCARD IntSize ThumbSize() const noexcept
+    KRYS_NODISCARD SizeI ThumbSize() const noexcept
     {
       return _thumbSize;
     }
 
-    void SetThumbSize(IntSize thumbSize) noexcept
+    void SetThumbSize(SizeI thumbSize) noexcept
     {
       _thumbSize = thumbSize;
     }
 
-    KRYS_NODISCARD IntRect TrackBounds() const noexcept
+    KRYS_NODISCARD RectI TrackBounds() const noexcept
     {
       return _trackBounds;
     }
 
-    void SetTrackBounds(IntRect trackBounds) noexcept
+    void SetTrackBounds(RectI trackBounds) noexcept
     {
       _trackBounds = trackBounds;
     }
@@ -87,10 +87,10 @@ namespace krys::boo
       _thumbPosition = thumbPosition;
     }
 
-    void DrawTicks(GraphicsContext &, const FloatRect &, const ControlStyle &) const noexcept;
+    void DrawTicks(GraphicsContext &, const RectF &, const ControlStyle &) const noexcept;
 
   private:
-    SliderTrackPart(StyleAppearance, const IntSize &thumbSize, const IntRect &trackBounds,
+    SliderTrackPart(StyleAppearance, const SizeI &thumbSize, const RectI &trackBounds,
                     List<double> &&tickRatios, double thumbPosition) noexcept;
 
     KRYS_NODISCARD UniquePtr<PlatformControl> CreatePlatformControl() noexcept override;

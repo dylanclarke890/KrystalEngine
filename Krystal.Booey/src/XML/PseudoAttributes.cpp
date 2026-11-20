@@ -1,7 +1,7 @@
 ﻿#include "Krystal.Booey/XML/PseudoAttributes.hpp"
 #include "Krystal.Booey/DOM/Algorithms/NameValidation.hpp"
-#include "Krystal.Core/Text/ASCII.hpp"
-#include "Krystal.Core/Text/Encodings/UTF.hpp"
+#include "Krystal.Core/Strings/ASCII.hpp"
+#include "Krystal.Text/Encodings/UTF.hpp"
 #include <algorithm>
 
 namespace krys::boo::xml

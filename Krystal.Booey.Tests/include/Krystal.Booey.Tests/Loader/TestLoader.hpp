@@ -4,15 +4,15 @@
 #include "Krystal.Booey/HTML/EventLoop/EventLoop.hpp"
 #include "Krystal.Booey/Loader/Cache/MemoryCache.hpp"
 #include "Krystal.Booey/Loader/LoaderStrategy.hpp"
-#include "Krystal.Booey/Platform/Network/ResourceError.hpp"
-#include "Krystal.Booey/Platform/Network/ResourceRequest.hpp"
-#include "Krystal.Booey/Platform/Network/ResourceResponse.hpp"
 #include "Krystal.Booey/Platform/PlatformStrategies.hpp"
-#include "Krystal.Booey/Platform/SharedBuffer.hpp"
 #include "Krystal.Core/Types/HashMap.hpp"
 #include "Krystal.Core/Types/List.hpp"
+#include "Krystal.Core/Types/SharedBuffer.hpp"
 #include "Krystal.Core/Types/Span.hpp"
 #include "Krystal.Core/Types/UniquePtr.hpp"
+#include "Krystal.Net/ResourceError.hpp"
+#include "Krystal.Net/ResourceRequest.hpp"
+#include "Krystal.Net/ResourceResponse.hpp"
 #include <filesystem>
 #include <fstream>
 #include <iterator>
@@ -35,18 +35,18 @@ namespace krys::boo::tests
     HashMap<utf8_string, uint16> StatusCodes;
     List<utf8_string> Requests;
     bool Defer {false};
-    List<Pair<url::URL, Func<void(LoadResult &&)>>> Deferred;
+    List<Pair<net::Url, Func<void(LoadResult &&)>>> Deferred;
 
-    void LoadResource(LocalFrame &, const ResourceRequest &request, const ResourceLoaderOptions &,
+    void LoadResource(LocalFrame &, const net::ResourceRequest &request, const ResourceLoaderOptions &,
                       Func<void(LoadResult &&)> &&completionHandler) noexcept override
     {
-      Requests.push_back(request.URL().String());
+      Requests.push_back(request.Url().String());
       if (Defer)
       {
-        Deferred.emplace_back(request.URL(), krys::move(completionHandler));
+        Deferred.emplace_back(request.Url(), krys::move(completionHandler));
         return;
       }
-      Complete(request.URL(), completionHandler);
+      Complete(request.Url(), completionHandler);
     }
 
     /// @brief Serves @p text at @p url as @p mimeType.
@@ -80,30 +80,31 @@ namespace krys::boo::tests
     }
 
   private:
-    void Complete(const url::URL &url, const Func<void(LoadResult &&)> &completionHandler) noexcept
+    void Complete(const net::Url &url, const Func<void(LoadResult &&)> &completionHandler) noexcept
     {
       // As a network or file load would, the strategy ignores the URL's fragment.
       auto key = url.StringWithoutFragmentIdentifier();
       auto found = Resources.find(key);
       if (found == Resources.end())
       {
-        completionHandler(Unexpected<ResourceError>(ResourceError(u8"Test", 404, url, u8"Not found")));
+        completionHandler(
+          Unexpected<net::ResourceError>(net::ResourceError(u8"Test", 404, url, u8"Not found")));
         return;
       }
       auto mimeType = MimeTypes.find(key);
-      ResourceResponse response(url,
-                                mimeType != MimeTypes.end() ? mimeType->second : utf8_string(u8"image/png"),
-                                static_cast<int64>(found->second.size()));
+      net::ResourceResponse response(
+        url, mimeType != MimeTypes.end() ? mimeType->second : utf8_string(u8"image/png"),
+        static_cast<int64>(found->second.size()));
       if (auto headers = Headers.find(key); headers != Headers.end())
       {
         for (const auto &[name, value] : headers->second)
         {
-          response.AddHTTPHeaderField(name, value);
+          response.AddHttpHeaderField(name, value);
         }
       }
       if (auto status = StatusCodes.find(key); status != StatusCodes.end())
       {
-        response.SetHTTPStatusCode(status->second);
+        response.SetHttpStatusCode(status->second);
       }
       completionHandler(
         LoadedResource {.Response = krys::move(response), .Data = SharedBuffer::Create(found->second)});

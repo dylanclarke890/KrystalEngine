@@ -18,7 +18,7 @@
 #include "Krystal.Booey/Graphics/Filters/SpotLightSource.hpp"
 #include "Krystal.Booey/Graphics/ImageBuffers/ImageBuffer.hpp"
 #include "Krystal.Booey/Rendering/Painting/CSSFilterRenderer.hpp"
-#include "Krystal.Core/Text/TextStream.hpp"
+#include "Krystal.Core/Strings/TextStream.hpp"
 
 namespace krys::boo::tests
 {
@@ -51,10 +51,9 @@ namespace krys::boo::tests
                            { return CreateUnique<CountingApplier>(count); });
     }
 
-    constexpr FloatRect FilterRegion {0, 0, 32, 32};
+    constexpr RectF FilterRegion {0, 0, 32, 32};
 
-    KRYS_NODISCARD Ref<Filter> FilterOf(List<Ref<FilterFunction>> &&functions,
-                                        FloatSize scale = {1, 1}) noexcept
+    KRYS_NODISCARD Ref<Filter> FilterOf(List<Ref<FilterFunction>> &&functions, SizeF scale = {1, 1}) noexcept
     {
       return CSSFilterRenderer::Create(krys::move(functions), {FilterRegion, FilterRegion, scale},
                                        FilterRenderingMode::Accelerated);
@@ -84,8 +83,8 @@ namespace krys::boo::tests
         auto filter = FilterOf({SourceGraphic::Create(), FEOffset::Create(4, 2)});
         auto result = filter->Apply(source.get(), {0, 0, 16, 16}, results);
         REQUIRE(result);
-        CHECK(result->ImageRect() == FloatRect {4, 2, 16, 16});
-        CHECK(result->AbsoluteImageRect() == IntRect {4, 2, 16, 16});
+        CHECK(result->ImageRect() == RectF {4, 2, 16, 16});
+        CHECK(result->AbsoluteImageRect() == RectI {4, 2, 16, 16});
         CHECK(result->PrimitiveSubregion() == FilterRegion);
         CHECK(result->AcceleratedImage() == 1u);
         CHECK(count == 2u);
@@ -97,7 +96,7 @@ namespace krys::boo::tests
           FilterOf({SourceGraphic::Create(), FEMorphology::Create(MorphologyOperatorType::Dilate, 2, 3)});
         auto result = filter->Apply(source.get(), {0, 0, 16, 16}, results);
         REQUIRE(result);
-        CHECK(result->ImageRect() == FloatRect {0, 0, 18, 19});
+        CHECK(result->ImageRect() == RectF {0, 0, 18, 19});
       }
 
       SECTION("The filter scale scales the absolute rect")
@@ -105,7 +104,7 @@ namespace krys::boo::tests
         auto filter = FilterOf({SourceGraphic::Create(), FEOffset::Create(4, 2)}, {2, 2});
         auto result = filter->Apply(source.get(), {0, 0, 16, 16}, results);
         REQUIRE(result);
-        CHECK(result->AbsoluteImageRect() == IntRect {8, 4, 32, 32});
+        CHECK(result->AbsoluteImageRect() == RectI {8, 4, 32, 32});
       }
     }
 
@@ -271,7 +270,7 @@ namespace krys::boo::tests
       auto light = PointLightSource::Create({15, 15, 5});
       light->InitPaintingData(*filter, *result, data);
       auto position = light->ComputePixelLightingData(data, 0, 0, 0).LightVector;
-      CHECK(position == FloatPoint3D {20, 10, 10});
+      CHECK(position == Point3F {20, 10, 10});
     }
 
     SECTION("A spot light's cone")
@@ -279,7 +278,7 @@ namespace krys::boo::tests
       SpotLightSource::Create({0, 0, 10}, {0, 0, 0}, 1, 30)->InitPaintingData(*filter, *result, data);
       CHECK(data.ConeCutOffLimit == Approx(-0.866f).margin(1e-3));
       CHECK(data.ConeFullLight == Approx(data.ConeCutOffLimit - 0.016f));
-      CHECK(data.DirectionVector == FloatPoint3D {0, 0, -1});
+      CHECK(data.DirectionVector == Point3F {0, 0, -1});
 
       SpotLightSource::Create({0, 0, 10}, {0, 0, 0}, 1, 0)->InitPaintingData(*filter, *result, data);
       CHECK(data.ConeCutOffLimit == 0.f);

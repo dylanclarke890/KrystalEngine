@@ -29,8 +29,8 @@
 
 #include "Krystal.Booey/CSS/Parser/Tokenizer.hpp"
 #include "Krystal.Core/Assert.hpp"
-#include "Krystal.Core/Text/ASCII.hpp"
-#include "Krystal.Core/Text/Unicode.hpp"
+#include "Krystal.Core/Strings/ASCII.hpp"
+#include "Krystal.Core/Strings/Unicode.hpp"
 #include <charconv>
 
 namespace krys::boo::css

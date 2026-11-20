@@ -53,16 +53,16 @@ namespace krys::boo
     KRYS_NODISCARD RepaintRects RectsForRepaintingAfterLayout(const RenderLayerModelObject *repaintContainer,
                                                               RepaintOutlineBounds) const noexcept override;
 
-    KRYS_NODISCARD Maybe<FloatRect>
-      ComputeFloatVisibleRectInContainer(const FloatRect &, const RenderLayerModelObject *container,
-                                         VisibleRectContext) const noexcept final;
+    KRYS_NODISCARD Maybe<RectF> ComputeFloatVisibleRectInContainer(const RectF &,
+                                                                   const RenderLayerModelObject *container,
+                                                                   VisibleRectContext) const noexcept final;
 
     KRYS_NODISCARD LayoutRect
       OutlineBoundsForRepaint(const RenderLayerModelObject *repaintContainer) const noexcept final;
 
     void BoundingRects(List<LayoutRect> &, const LayoutPoint &accumulatedOffset) const noexcept final;
 
-    void AbsoluteQuads(List<FloatQuad> &, bool *wasFixed) const noexcept override;
+    void AbsoluteQuads(List<QuadF> &, bool *wasFixed) const noexcept override;
 
     void MapLocalToContainer(const RenderLayerModelObject *ancestorContainer, TransformState &,
                              EnumSet<MapCoordinatesMode>, bool *wasFixed) const noexcept final;
@@ -72,9 +72,9 @@ namespace krys::boo
 
     void StyleDidChange(style::Difference, const RenderStyle *oldStyle) noexcept override;
 
-    KRYS_NODISCARD static bool CheckIntersection(RenderElement *, const FloatRect &) noexcept;
+    KRYS_NODISCARD static bool CheckIntersection(RenderElement *, const RectF &) noexcept;
 
-    KRYS_NODISCARD static bool CheckEnclosure(RenderElement *, const FloatRect &) noexcept;
+    KRYS_NODISCARD static bool CheckEnclosure(RenderElement *, const RectF &) noexcept;
 
     KRYS_NODISCARD SVGElement &GetElement() const noexcept;
 

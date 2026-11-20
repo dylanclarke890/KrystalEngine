@@ -27,8 +27,8 @@
 
 #include "Krystal.Booey/Graphics/Geometry/LayoutRect.hpp"
 #include "Krystal.Booey/Graphics/GraphicsContext.hpp"
-#include "Krystal.Booey/Graphics/Transforms/AffineTransform.hpp"
 #include "Krystal.Booey/Rendering/Painting/PaintPhase.hpp"
+#include "Krystal.Core/Geometry/AffineTransform.hpp"
 #include "Krystal.Core/Types/EnumSet.hpp"
 #include "Krystal.Core/Types/ListHashSet.hpp"
 
@@ -152,8 +152,8 @@ namespace krys::boo
         return;
       }
 
-      FloatRect transformedRect(
-        localToAncestorTransform.Inverse().value_or(AffineTransform {}).MapRect(FloatRect(Rect)));
+      RectF transformedRect(
+        localToAncestorTransform.Inverse().value_or(AffineTransform {}).MapRect(RectF(Rect)));
       Rect.SetLocation(LayoutPoint(transformedRect.Location()));
       Rect.SetSize(LayoutSize(transformedRect.Size()));
     }

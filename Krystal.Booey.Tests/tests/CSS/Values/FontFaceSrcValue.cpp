@@ -26,10 +26,10 @@ namespace krys::boo::css::tests
 {
   namespace
   {
-    CSSURL FontURL(utf8_stringview url)
+    CSSUrl FontUrl(utf8_stringview url)
     {
-      return *CompleteURL(CSSOMString {url},
-                          ParserContext {ParserMode::HTMLStandard, url::URL {u8"https://example.com/"}});
+      return *CompleteUrl(CSSOMString {url},
+                          ParserContext {ParserMode::HTMLStandard, net::Url {u8"https://example.com/"}});
     }
   }
 
@@ -61,7 +61,7 @@ namespace krys::boo::css::tests
     auto c = FontFaceSrcLocalValue::Create(u8"Times");
     CHECK(*a == *b);
     CHECK_FALSE(*a == *c);
-    CHECK_FALSE(*a == *FontFaceSrcResourceValue::Create(FontURL(u8"Arial"), {}, {}));
+    CHECK_FALSE(*a == *FontFaceSrcResourceValue::Create(FontUrl(u8"Arial"), {}, {}));
 
     // Not hashable: only values that define a derived hash are.
     size_t seed = 0uz;
@@ -76,23 +76,23 @@ namespace krys::boo::css::tests
                    "[CSS][Values][FontFaceSrcResourceValue]")
   {
     auto value =
-      FontFaceSrcResourceValue::Create(FontURL(u8"a.woff2"), u8"woff2", {FontTechnology::Variations});
+      FontFaceSrcResourceValue::Create(FontUrl(u8"a.woff2"), u8"woff2", {FontTechnology::Variations});
     CHECK(value->IsFontFaceSrcResourceValue());
     CHECK_FALSE(value->IsFontFaceSrcLocalValue());
     CHECK_FALSE(value->IsEmpty());
 
-    CHECK(FontFaceSrcResourceValue::Create(CSSURL::None(), {}, {})->IsEmpty());
+    CHECK(FontFaceSrcResourceValue::Create(CSSUrl::None(), {}, {})->IsEmpty());
   }
 
   TEST_CASE_METHOD(ValueFixture, "FontFaceSrcResourceValue serialisation",
                    "[CSS][Values][FontFaceSrcResourceValue]")
   {
-    CHECK(CssText(*FontFaceSrcResourceValue::Create(FontURL(u8"a.woff"), {}, {})) == "url(\"a.woff\")");
-    CHECK(CssText(*FontFaceSrcResourceValue::Create(FontURL(u8"a.woff2"), u8"woff2", {}))
+    CHECK(CssText(*FontFaceSrcResourceValue::Create(FontUrl(u8"a.woff"), {}, {})) == "url(\"a.woff\")");
+    CHECK(CssText(*FontFaceSrcResourceValue::Create(FontUrl(u8"a.woff2"), u8"woff2", {}))
           == "url(\"a.woff2\") format(\"woff2\")");
-    CHECK(CssText(*FontFaceSrcResourceValue::Create(FontURL(u8"a.ttf"), {}, {FontTechnology::Variations}))
+    CHECK(CssText(*FontFaceSrcResourceValue::Create(FontUrl(u8"a.ttf"), {}, {FontTechnology::Variations}))
           == "url(\"a.ttf\") tech(variations)");
-    CHECK(CssText(*FontFaceSrcResourceValue::Create(FontURL(u8"a.ttf"), u8"opentype",
+    CHECK(CssText(*FontFaceSrcResourceValue::Create(FontUrl(u8"a.ttf"), u8"opentype",
                                                     {FontTechnology::ColorColrv1, FontTechnology::Palettes}))
           == "url(\"a.ttf\") format(\"opentype\") tech(color-colrv1, palettes)");
   }
@@ -102,7 +102,7 @@ namespace krys::boo::css::tests
   {
     auto make = [](utf8_stringview url, CSSOMString format, List<FontTechnology> technologies)
     {
-      return FontFaceSrcResourceValue::Create(FontURL(url), krys::move(format), krys::move(technologies));
+      return FontFaceSrcResourceValue::Create(FontUrl(url), krys::move(format), krys::move(technologies));
     };
 
     auto a = make(u8"a.woff2", u8"woff2", {FontTechnology::Variations});
@@ -117,22 +117,22 @@ namespace krys::boo::css::tests
                    "[CSS][Values][FontFaceSrcResourceValue]")
   {
     // A URL parsed without a base is resolved on creation, so absolute URLs compare equal to resolved ones.
-    auto unresolved = *CompleteURL(u8"https://example.com/a.woff", ParserContext {ParserMode::HTMLStandard});
+    auto unresolved = *CompleteUrl(u8"https://example.com/a.woff", ParserContext {ParserMode::HTMLStandard});
     REQUIRE(unresolved.Resolved.IsNull());
     auto value = FontFaceSrcResourceValue::Create(krys::move(unresolved), {}, {});
-    CHECK(*value == *FontFaceSrcResourceValue::Create(FontURL(u8"https://example.com/a.woff"), {}, {}));
+    CHECK(*value == *FontFaceSrcResourceValue::Create(FontUrl(u8"https://example.com/a.woff"), {}, {}));
   }
 
   TEST_CASE_METHOD(ValueFixture, "FontFaceSrcResourceValue base URL, subresources and children",
                    "[CSS][Values][FontFaceSrcResourceValue]")
   {
-    CHECK(FontFaceSrcResourceValue::Create(FontURL(u8"a.woff"), {}, {})->MayDependOnBaseUrl());
-    CHECK_FALSE(FontFaceSrcResourceValue::Create(FontURL(u8"#font"), {}, {})->MayDependOnBaseUrl());
-    CHECK_FALSE(FontFaceSrcResourceValue::Create(FontURL(u8"data:font/woff2;base64,AAAA"), {}, {})
+    CHECK(FontFaceSrcResourceValue::Create(FontUrl(u8"a.woff"), {}, {})->MayDependOnBaseUrl());
+    CHECK_FALSE(FontFaceSrcResourceValue::Create(FontUrl(u8"#font"), {}, {})->MayDependOnBaseUrl());
+    CHECK_FALSE(FontFaceSrcResourceValue::Create(FontUrl(u8"data:font/woff2;base64,AAAA"), {}, {})
                   ->MayDependOnBaseUrl());
 
     // No font is loaded, so there are no subresources.
-    auto value = FontFaceSrcResourceValue::Create(FontURL(u8"a.woff"), {}, {});
+    auto value = FontFaceSrcResourceValue::Create(FontUrl(u8"a.woff"), {}, {});
     bool called = false;
     CHECK_FALSE(value->TraverseSubresources(
       [&](const CachedResource &)

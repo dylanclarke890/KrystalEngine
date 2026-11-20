@@ -43,7 +43,7 @@ namespace krys::boo
       return static_cast<RenderSVGInline &>(LegacyInlineFlowBox::Renderer());
     }
 
-    KRYS_NODISCARD FloatRect CalculateBoundaries() const noexcept;
+    KRYS_NODISCARD RectF CalculateBoundaries() const noexcept;
 
     void SetLogicalHeight(float h) noexcept
     {

@@ -26,16 +26,16 @@
 #pragma once
 
 #include "Krystal.Booey/Graphics/Images/ImageTypes.hpp"
-#include "Krystal.Booey/URL/URL.hpp"
 #include "Krystal.Core/Attributes.hpp"
 #include "Krystal.Core/CanMakeWeakPtr.hpp"
+#include "Krystal.Core/Geometry/GeometryForward.hpp"
 #include "Krystal.Core/RefCounted.hpp"
-#include "Krystal.Core/Types/String.hpp"
+#include "Krystal.Core/Strings/String.hpp"
+#include "Krystal.Net/Url.hpp"
 
 namespace krys::boo
 {
   class Image;
-  class IntRect;
   struct Settings;
 
   /// @brief Interface for notification about changes to an image, including decoding, drawing, and animating.
@@ -44,7 +44,7 @@ namespace krys::boo
   public:
     virtual ~ImageObserver() noexcept = default;
 
-    KRYS_NODISCARD virtual url::URL SourceUrl() const noexcept = 0;
+    KRYS_NODISCARD virtual net::Url SourceUrl() const noexcept = 0;
 
     KRYS_NODISCARD virtual utf8_string MimeType() const noexcept = 0;
 
@@ -55,7 +55,7 @@ namespace krys::boo
 
     KRYS_NODISCARD virtual int64 ExpectedContentLength() const noexcept = 0;
 
-    virtual void EncodedDataStatusChanged(const Image &, EncodedDataStatus) noexcept
+    virtual void EncodedDataStatusChanged(const Image &, img::EncodedDataStatus) noexcept
     {
     }
 
@@ -68,10 +68,10 @@ namespace krys::boo
       return true;
     }
 
-    virtual void ImageFrameAvailable(const Image &, ImageAnimatingState, const IntRect *changeRect = nullptr,
-                                     DecodingStatus = DecodingStatus::Invalid) noexcept = 0;
+    virtual void ImageFrameAvailable(const Image &, ImageAnimatingState, const RectI *changeRect = nullptr,
+                                     img::DecodingStatus = img::DecodingStatus::Invalid) noexcept = 0;
 
-    virtual void ChangedInRect(const Image &, const IntRect *changeRect = nullptr) noexcept = 0;
+    virtual void ChangedInRect(const Image &, const RectI *changeRect = nullptr) noexcept = 0;
 
     virtual void ImageContentChanged(const Image &) noexcept = 0;
 

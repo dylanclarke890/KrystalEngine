@@ -291,7 +291,7 @@ namespace krys::boo
     return RepaintRects {ClippedOverflowRect(repaintContainer, VisibleRectContextForRepaint())};
   }
 
-  void RenderTableCol::ImageChanged(WrappedImagePtr, const IntRect *) noexcept
+  void RenderTableCol::ImageChanged(WrappedImagePtr, const RectI *) noexcept
   {
     // FIXME: Repaint only the rect the image paints in.
     if (!Parent())

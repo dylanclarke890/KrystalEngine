@@ -33,7 +33,7 @@
 #include "Krystal.Booey/Loader/Cache/MemoryCache.hpp"
 #include "Krystal.Booey/Rendering/Replaced/RenderImage.hpp"
 #include "Krystal.Booey/Rendering/SVG/Legacy/LegacyRenderSVGImage.hpp"
-#include "Krystal.Core/Text/ASCII.hpp"
+#include "Krystal.Core/Strings/ASCII.hpp"
 #include "Krystal.Core/Threading/NeverDestroyed.hpp"
 #include <algorithm>
 
@@ -137,7 +137,7 @@ namespace krys::boo
 
   void ImageLoader::ClearImageWithoutConsideringPendingLoadEvent() noexcept
   {
-    krys_debug_assert(_failedLoadURL.empty());
+    krys_debug_assert(_failedLoadUrl.empty());
     if (CachedResourceHandle oldImage = _image)
     {
       _image = nullptr;
@@ -167,10 +167,10 @@ namespace krys::boo
       return;
     }
 
-    auto attr = element->ImageSourceURL();
+    auto attr = element->ImageSourceUrl();
 
     // Avoid loading a URL we already failed to load.
-    if (!_failedLoadURL.empty() && attr == _failedLoadURL)
+    if (!_failedLoadUrl.empty() && attr == _failedLoadUrl)
     {
       return;
     }
@@ -184,10 +184,10 @@ namespace krys::boo
       auto *imageElement = DynamicDowncast<HTMLImageElement>(element.get());
 
       // Use URL from original request for same URL loads in order to preserve the original base URL.
-      url::URL imageURL;
-      if (_image && *attr == _pendingURL)
+      net::Url imageUrl;
+      if (_image && *attr == _pendingUrl)
       {
-        imageURL = _image->URL();
+        imageUrl = _image->Url();
       }
       else
       {
@@ -195,8 +195,8 @@ namespace krys::boo
         {
           // The image's current URL is set by source selection, which runs when its src, srcset or sizes
           // attributes change; until it has run, behave as if src were absent.
-          imageURL = imageElement->CurrentURL();
-          if (imageURL.IsNull())
+          imageUrl = imageElement->CurrentUrl();
+          if (imageUrl.IsNull())
           {
             DidUpdateCachedImage(relevantMutation, krys::move(newImage));
             return;
@@ -204,12 +204,12 @@ namespace krys::boo
         }
         else
         {
-          imageURL = document->CompleteURL(*attr);
+          imageUrl = document->CompleteUrl(*attr);
         }
-        _pendingURL = *attr;
+        _pendingUrl = *attr;
       }
 
-      CachedResourceRequest request(ResourceRequest(krys::move(imageURL)), options);
+      CachedResourceRequest request(net::ResourceRequest(krys::move(imageUrl)), options);
       request.SetInitiatorType(element->LocalName().View());
 
       if (_loadManually)
@@ -240,13 +240,13 @@ namespace krys::boo
       // FIXME: Don't fire it while the page is being dismissed, once there's page dismissal.
       if (!newImage)
       {
-        _failedLoadURL = *attr;
+        _failedLoadUrl = *attr;
         _hasPendingErrorEvent = true;
         LoadEventSender().DispatchEventSoon(*this, ErrorEventName());
       }
       else
       {
-        ClearFailedLoadURL();
+        ClearFailedLoadUrl();
       }
     }
     // Fire an error event if the url is empty, or if an image that uses srcset or picture has no source (the
@@ -254,7 +254,7 @@ namespace krys::boo
     else if (auto *imageElement = DynamicDowncast<HTMLImageElement>(element.get());
              attr || (imageElement && imageElement->UsesSrcsetOrPicture()))
     {
-      _failedLoadURL = attr.value_or(DOMString());
+      _failedLoadUrl = attr.value_or(DOMString());
       _hasPendingErrorEvent = true;
       LoadEventSender().DispatchEventSoon(*this, ErrorEventName());
     }
@@ -336,18 +336,18 @@ namespace krys::boo
 
   void ImageLoader::UpdateFromElementIgnoringPreviousError(RelevantMutation relevantMutation) noexcept
   {
-    ClearFailedLoadURL();
+    ClearFailedLoadUrl();
     UpdateFromElement(relevantMutation);
   }
 
   void ImageLoader::UpdateFromElementIgnoringPreviousErrorToSameValue() noexcept
   {
-    if (!_image || !_image->AllowsCaching() || !_failedLoadURL.empty())
+    if (!_image || !_image->AllowsCaching() || !_failedLoadUrl.empty())
     {
       UpdateFromElementIgnoringPreviousError(RelevantMutation::Yes);
       return;
     }
-    if (_hasPendingLoadEvent || !_pendingURL.empty())
+    if (_hasPendingLoadEvent || !_pendingUrl.empty())
     {
       return;
     }
@@ -358,11 +358,11 @@ namespace krys::boo
 
   void ImageLoader::NotifyFinished(CachedResource &resource) noexcept
   {
-    krys_debug_assert(_failedLoadURL.empty());
+    krys_debug_assert(_failedLoadUrl.empty());
     krys_debug_assert(&resource == _image.get());
     (void)resource;
 
-    _pendingURL.clear();
+    _pendingUrl.clear();
 
     if (IsDeferred())
     {
@@ -440,7 +440,7 @@ namespace krys::boo
       return;
     }
 
-    auto source = _element.ImageSourceURL();
+    auto source = _element.ImageSourceUrl();
     if (!source || ContainsOnlyASCIIWhitespace(*source))
     {
       RejectDecodePromises(u8"Missing source URL.");
@@ -478,10 +478,10 @@ namespace krys::boo
     }
 
     bitmapImage->Decode(
-      [promises = std::exchange(_decodingPromises, {})](DecodingStatus decodingStatus) mutable
+      [promises = std::exchange(_decodingPromises, {})](img::DecodingStatus decodingStatus) mutable
       {
-        krys_debug_assert(decodingStatus != DecodingStatus::Decoding);
-        SettleDecodePromises(krys::move(promises), decodingStatus == DecodingStatus::Invalid
+        krys_debug_assert(decodingStatus != img::DecodingStatus::Decoding);
+        SettleDecodePromises(krys::move(promises), decodingStatus == img::DecodingStatus::Invalid
                                                      ? Maybe<utf8_stringview>(u8"Decoding error.")
                                                      : null);
       });
@@ -655,14 +655,14 @@ namespace krys::boo
 
   void ImageLoader::ElementDidMoveToNewDocument(boo::Document &oldDocument) noexcept
   {
-    ClearFailedLoadURL();
+    ClearFailedLoadUrl();
     ClearImage();
     ResetLazyImageLoading(oldDocument);
   }
 
-  void ImageLoader::ClearFailedLoadURL() noexcept
+  void ImageLoader::ClearFailedLoadUrl() noexcept
   {
-    _failedLoadURL.clear();
+    _failedLoadUrl.clear();
   }
 
   void ImageLoader::LoadDeferredImage() noexcept

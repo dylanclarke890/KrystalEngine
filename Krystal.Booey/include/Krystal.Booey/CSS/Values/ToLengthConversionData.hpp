@@ -32,6 +32,7 @@
 
 #include "Krystal.Booey/CSS/Properties/PropertyId.hpp"
 #include "Krystal.Booey/CSS/Values/Primitives/Range.hpp"
+#include "Krystal.Core/Geometry/GeometryForward.hpp"
 #include "Krystal.Core/Types/CheckedPtr.hpp"
 #include "Krystal.Core/Types/Maybe.hpp"
 #include "Krystal.Core/Types/RefPtr.hpp"
@@ -39,7 +40,6 @@
 namespace krys::boo
 {
   class Element;
-  class FloatSize;
   class FontCascade;
   class RenderStyle;
   class RenderView;
@@ -139,13 +139,13 @@ namespace krys::boo::css
 
     KRYS_NODISCARD float ComputedLineHeightForFontUnits() const noexcept;
 
-    KRYS_NODISCARD FloatSize DefaultViewportFactor() const noexcept;
+    KRYS_NODISCARD SizeF DefaultViewportFactor() const noexcept;
 
-    KRYS_NODISCARD FloatSize SmallViewportFactor() const noexcept;
+    KRYS_NODISCARD SizeF SmallViewportFactor() const noexcept;
 
-    KRYS_NODISCARD FloatSize LargeViewportFactor() const noexcept;
+    KRYS_NODISCARD SizeF LargeViewportFactor() const noexcept;
 
-    KRYS_NODISCARD FloatSize DynamicViewportFactor() const noexcept;
+    KRYS_NODISCARD SizeF DynamicViewportFactor() const noexcept;
 
     KRYS_NODISCARD ToLengthConversionData CopyForFontSize() const noexcept
     {

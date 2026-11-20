@@ -7,10 +7,10 @@
 #include "Krystal.Booey/HTML/Elements/HTMLImageElement.hpp"
 #include "Krystal.Booey/HTML/EventLoop/EventLoop.hpp"
 #include "Krystal.Booey/HTML/ImageData/ImageData.hpp"
-#include "Krystal.Booey/Platform/ImageDecoders/ScalableImageDecoder.hpp"
-#include "Krystal.Booey/Platform/SharedBuffer.hpp"
 #include "Krystal.Booey/SVG/Elements/SVGImageElement.hpp"
-#include "Krystal.Core/Text/Base64.hpp"
+#include "Krystal.Core/Types/SharedBuffer.hpp"
+#include "Krystal.Image/ImageDecoder.hpp"
+#include "Krystal.Text/Base64.hpp"
 #include "Krystal.UI.Tests/RepaintFixture.hpp"
 #include "Krystal.UI.Tests/ViewTestUtils.hpp"
 #include "Krystal.UI/View.hpp"
@@ -394,18 +394,17 @@ namespace krys::ui::tests
       auto bytes = Base64Decode(
         Span<const uint8>(reinterpret_cast<const uint8 *>(url.data()) + comma + 1, url.size() - comma - 1));
       REQUIRE(bytes);
-      auto data = boo::SharedBuffer::Create(Span<const uint8>(*bytes));
-      auto decoder = boo::ScalableImageDecoder::Create(*data, boo::AlphaOption::NotPremultiplied,
-                                                       boo::GammaAndColorProfileOption::Applied);
+      auto data = SharedBuffer::Create(Span<const uint8>(*bytes));
+      auto decoder = img::ImageDecoder::Create(*data, img::AlphaOption::NotPremultiplied,
+                                               img::GammaAndColorProfileOption::Applied);
       REQUIRE(decoder);
       decoder->SetData(*data, true);
       auto image = decoder->CreateFrameImageAtIndex(0);
       REQUIRE(image);
-      auto pixels = image->Pixels();
-      return {pixels.begin(), pixels.end()};
+      return image->Pixels->Pixels;
     };
 
-    auto png = decode(fixture.Canvas().ToDataURL());
+    auto png = decode(fixture.Canvas().ToDataUrl());
     REQUIRE(png.size() == 100u * 50u);
     CHECK(png[25 * 100 + 25] == 0xFF'FF'00'00u);
     // Unpremultiplied, give or take rounding.
@@ -414,7 +413,7 @@ namespace krys::ui::tests
     CHECK((blue & 0xFFu) >= 254u);
 
     // JPEG is drawn over black: the half-transparent blue is half as bright.
-    auto jpeg = decode(fixture.Canvas().ToDataURL(u8"image/jpeg"));
+    auto jpeg = decode(fixture.Canvas().ToDataUrl(u8"image/jpeg"));
     REQUIRE(jpeg.size() == 100u * 50u);
     const auto darkBlue = jpeg[25 * 100 + 75];
     CHECK((darkBlue >> 24) == 255u);

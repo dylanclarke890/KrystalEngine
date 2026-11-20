@@ -29,7 +29,7 @@
 #include "Krystal.Booey/Style/Values/Masking/MaskBorderSlice.hpp"
 #include "Krystal.Booey/Style/Values/Masking/MaskBorderSource.hpp"
 #include "Krystal.Booey/Style/Values/Masking/MaskBorderWidth.hpp"
-#include "Krystal.Core/Text/StringBuilder.hpp"
+#include "Krystal.Core/Strings/StringBuilder.hpp"
 
 namespace krys::boo::style
 {

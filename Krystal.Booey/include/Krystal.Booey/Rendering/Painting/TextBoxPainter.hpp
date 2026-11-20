@@ -24,7 +24,6 @@
 
 #pragma once
 
-#include "Krystal.Booey/Graphics/Geometry/FloatRect.hpp"
 #include "Krystal.Booey/Graphics/Geometry/LayoutPoint.hpp"
 #include "Krystal.Booey/Graphics/Geometry/LayoutRect.hpp"
 #include "Krystal.Booey/Graphics/TextRuns/TextRun.hpp"
@@ -36,6 +35,7 @@
 #include "Krystal.Booey/Rendering/Selection/TextBoxSelectableRange.hpp"
 #include "Krystal.Booey/Style/Values/Primitives/NumericTypes.hpp"
 #include "Krystal.Booey/Text/WritingMode.hpp"
+#include "Krystal.Core/Geometry/Rect.hpp"
 
 namespace krys::boo
 {
@@ -72,12 +72,12 @@ namespace krys::boo
     const RenderText &_renderer;
     const boo::Document &_document;
     const RenderStyle &_style;
-    const FloatRect _logicalRect;
+    const RectF _logicalRect;
     const TextRun _paintTextRun;
     PaintInfo &_paintInfo;
     const TextBoxSelectableRange _selectableRange;
     const LayoutPoint _paintOffset;
-    const FloatRect _paintRect;
+    const RectF _paintRect;
     const bool _isCombinedText;
     const bool _isFirstLine;
     const bool _isPrinting;
@@ -94,7 +94,7 @@ namespace krys::boo
     void Paint() noexcept;
 
     /// @brief A shadow's offset turned into the line's coordinates under @p writingMode.
-    KRYS_NODISCARD static FloatSize
+    KRYS_NODISCARD static SizeF
       RotateShadowOffset(const css::SpaceSeparatedPoint<style::Length<css::AllUnzoomed>> &offset,
                          WritingMode writingMode, const style::ZoomFactor &zoomFactor) noexcept;
 
@@ -138,23 +138,23 @@ namespace krys::boo
     KRYS_NODISCARD bool PaintForegroundForShapeRange(TextPainter &textPainter) noexcept;
 
     KRYS_NODISCARD TextDecorationPainter CreateDecorationPainter(const StyledMarkedText &markedText,
-                                                                 const FloatRect &clipOutRect) noexcept;
+                                                                 const RectF &clipOutRect) noexcept;
 
     void PaintBackgroundDecorations(TextDecorationPainter &decorationPainter,
                                     const StyledMarkedText &markedText,
-                                    const FloatRect &textBoxPaintRect) noexcept;
+                                    const RectF &textBoxPaintRect) noexcept;
 
     void PaintForegroundDecorations(TextDecorationPainter &decorationPainter,
                                     const StyledMarkedText &markedText,
-                                    const FloatRect &textBoxPaintRect) noexcept;
+                                    const RectF &textBoxPaintRect) noexcept;
 
-    KRYS_NODISCARD FloatRect ComputePaintRect(const LayoutPoint &paintOffset) const noexcept;
+    KRYS_NODISCARD RectF ComputePaintRect(const LayoutPoint &paintOffset) const noexcept;
 
     KRYS_NODISCARD const FontCascade &GetFontCascade() const noexcept;
 
     KRYS_NODISCARD WritingMode GetWritingMode() const noexcept;
 
-    KRYS_NODISCARD FloatPoint TextOriginFromPaintRect(const FloatRect &paintRect) const noexcept;
+    KRYS_NODISCARD PointF TextOriginFromPaintRect(const RectF &paintRect) const noexcept;
 
     KRYS_NODISCARD bool IsInsideShapedContent() const noexcept;
 
@@ -163,7 +163,7 @@ namespace krys::boo
       inline_iterator::InlineBoxIterator InlineBox;
       const RenderStyle &Style;
       TextDecorationPainter::Styles TextDecorationStyles;
-      FloatPoint Location;
+      PointF Location;
     };
 
     using DecoratingBoxList = List<DecoratingBox>;
@@ -172,6 +172,6 @@ namespace krys::boo
     /// that decorate it, innermost first.
     void CollectDecoratingBoxesForBackgroundPainting(
       DecoratingBoxList &decoratingBoxList, const inline_iterator::TextBoxIterator &textBox,
-      FloatPoint textBoxLocation, const TextDecorationPainter::Styles &overrideDecorationStyle) noexcept;
+      PointF textBoxLocation, const TextDecorationPainter::Styles &overrideDecorationStyle) noexcept;
   };
 }

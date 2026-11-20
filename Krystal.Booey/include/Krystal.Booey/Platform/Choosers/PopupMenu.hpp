@@ -20,7 +20,7 @@
 
 #pragma once
 
-#include "Krystal.Booey/Graphics/Geometry/IntRect.hpp"
+#include "Krystal.Core/Geometry/Rect.hpp"
 #include "Krystal.Core/RefCounted.hpp"
 
 namespace krys::boo
@@ -35,7 +35,7 @@ namespace krys::boo
 
     /// @brief Shows the menu for a control at @p rect, in the coordinates of @p view's contents, with the
     /// item at @p selectedIndex chosen.
-    virtual void Show(const IntRect &rect, LocalFrameView &view, int32 selectedIndex) noexcept = 0;
+    virtual void Show(const RectI &rect, LocalFrameView &view, int32 selectedIndex) noexcept = 0;
 
     virtual void Hide() noexcept = 0;
 

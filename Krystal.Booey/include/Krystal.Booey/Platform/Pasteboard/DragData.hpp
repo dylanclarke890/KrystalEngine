@@ -25,15 +25,15 @@
 
 #pragma once
 
-#include "Krystal.Booey/Graphics/Geometry/IntPoint.hpp"
+#include "Krystal.Booey/Input/PlatformEvent.hpp"
 #include "Krystal.Booey/Page/Drag/DragActions.hpp"
-#include "Krystal.Booey/Platform/Events/PlatformEvent.hpp"
 #include "Krystal.Core/Attributes.hpp"
 #include "Krystal.Core/Enum.hpp"
+#include "Krystal.Core/Geometry/Point.hpp"
 #include "Krystal.Core/Numeric.hpp"
+#include "Krystal.Core/Strings/String.hpp"
 #include "Krystal.Core/Types/EnumSet.hpp"
 #include "Krystal.Core/Types/List.hpp"
-#include "Krystal.Core/Types/String.hpp"
 
 namespace krys::boo
 {
@@ -74,8 +74,8 @@ namespace krys::boo
     };
 
   private:
-    IntPoint _clientPosition;
-    IntPoint _globalPosition;
+    PointI _clientPosition;
+    PointI _globalPosition;
     const SelectionData *_platformDragData {nullptr};
     EnumSet<DragOperation> _draggingSourceOperationMask;
     EnumSet<DragApplicationFlags> _applicationFlags;
@@ -87,22 +87,22 @@ namespace krys::boo
   public:
     /// @param clientPosition The position of the drag within the target window, with (0,0) at the top left.
     /// @param modifiers The modifier keys held, which the drag events report.
-    DragData(const SelectionData *data, const IntPoint &clientPosition, const IntPoint &globalPosition,
+    DragData(const SelectionData *data, const PointI &clientPosition, const PointI &globalPosition,
              EnumSet<DragOperation> sourceOperationMask, EnumSet<DragApplicationFlags> flags = {},
              EnumSet<PlatformEventModifier> modifiers = {},
              EnumSet<DragDestinationAction> destinationActionMask = AnyDragDestinationAction()) noexcept;
 
-    KRYS_NODISCARD const IntPoint &ClientPosition() const noexcept
+    KRYS_NODISCARD const PointI &ClientPosition() const noexcept
     {
       return _clientPosition;
     }
 
-    KRYS_NODISCARD const IntPoint &GlobalPosition() const noexcept
+    KRYS_NODISCARD const PointI &GlobalPosition() const noexcept
     {
       return _globalPosition;
     }
 
-    void SetClientPosition(const IntPoint &clientPosition) noexcept
+    void SetClientPosition(const PointI &clientPosition) noexcept
     {
       _clientPosition = clientPosition;
     }
@@ -128,14 +128,14 @@ namespace krys::boo
     }
 
     KRYS_NODISCARD bool
-      ContainsURL(FilenameConversionPolicy filenamePolicy = ConvertFilenames) const noexcept;
+      ContainsUrl(FilenameConversionPolicy filenamePolicy = ConvertFilenames) const noexcept;
 
     KRYS_NODISCARD bool ContainsPlainText() const noexcept;
 
     KRYS_NODISCARD bool
       ContainsCompatibleContent(DraggingPurpose purpose = DraggingPurpose::ForEditing) const noexcept;
 
-    KRYS_NODISCARD utf8_string AsURL(FilenameConversionPolicy filenamePolicy = ConvertFilenames,
+    KRYS_NODISCARD utf8_string AsUrl(FilenameConversionPolicy filenamePolicy = ConvertFilenames,
                                      utf8_string *title = nullptr) const noexcept;
 
     KRYS_NODISCARD utf8_string AsPlainText() const noexcept;

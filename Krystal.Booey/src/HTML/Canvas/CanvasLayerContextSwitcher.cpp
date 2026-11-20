@@ -31,7 +31,7 @@
 namespace krys::boo::html
 {
   RefPtr<CanvasLayerContextSwitcher> CanvasLayerContextSwitcher::Create(CanvasRenderingContext2DBase &context,
-                                                                        const FloatRect &bounds,
+                                                                        const RectF &bounds,
                                                                         RefPtr<Filter> &&filter) noexcept
   {
     krys_debug_assert(!bounds.IsEmpty());
@@ -52,7 +52,7 @@ namespace krys::boo::html
   }
 
   CanvasLayerContextSwitcher::CanvasLayerContextSwitcher(
-    CanvasRenderingContext2DBase &context, const FloatRect &bounds,
+    CanvasRenderingContext2DBase &context, const RectF &bounds,
     UniquePtr<GraphicsContextSwitcher> &&targetSwitcher) noexcept
       : _context(context), _effectiveDrawingContext(context.EffectiveDrawingContext()), _bounds(bounds),
         _targetSwitcher(krys::move(targetSwitcher))

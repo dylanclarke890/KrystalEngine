@@ -21,8 +21,8 @@
 #include "Krystal.Booey/Rendering/RenderCombineText.hpp"
 #include "Krystal.Booey/Graphics/Fonts/FontSelector.hpp"
 #include "Krystal.Booey/Rendering/Style/RenderStyle+GettersInlines.hpp"
-#include "Krystal.Core/Text/StringBuilder.hpp"
-#include "Krystal.Core/Text/Unicode.hpp"
+#include "Krystal.Core/Strings/StringBuilder.hpp"
+#include "Krystal.Core/Strings/Unicode.hpp"
 #include "Krystal.Core/Types/Array.hpp"
 
 namespace krys::boo
@@ -71,7 +71,7 @@ namespace krys::boo
     CombineTextIfNeeded();
   }
 
-  Maybe<FloatPoint> RenderCombineText::ComputeTextOrigin(const FloatRect &boxRect) const noexcept
+  Maybe<PointF> RenderCombineText::ComputeTextOrigin(const RectF &boxRect) const noexcept
   {
     if (!_isCombined)
     {
@@ -79,8 +79,8 @@ namespace krys::boo
     }
 
     // Visually centre the combined text's width, ascent and descent within the box.
-    FloatPoint result = boxRect.MinXMaxYCorner();
-    FloatSize combinedTextSize(_combinedTextWidth, _combinedTextAscent + _combinedTextDescent);
+    PointF result = boxRect.MinXMaxYCorner();
+    SizeF combinedTextSize(_combinedTextWidth, _combinedTextAscent + _combinedTextDescent);
     result.Move((boxRect.Size().TransposedSize() - combinedTextSize) / 2);
     result.Move(0, _combinedTextAscent);
     return result;

@@ -214,7 +214,7 @@ namespace krys::boo
     }
   }
 
-  void SVGSvgElement::SetCurrentTranslate(const FloatPoint &translation) noexcept
+  void SVGSvgElement::SetCurrentTranslate(const PointF &translation) noexcept
   {
     if (_currentTranslate->Value() == translation)
     {
@@ -461,7 +461,7 @@ namespace krys::boo
     AffineTransform viewBoxTransform;
     if (!HasEmptyViewBox())
     {
-      FloatSize size = CurrentViewportSizeExcludingZoom();
+      SizeF size = CurrentViewportSizeExcludingZoom();
       viewBoxTransform = ViewBoxToViewTransform(size.Width(), size.Height());
     }
 
@@ -475,7 +475,7 @@ namespace krys::boo
     {
       if (auto *renderer = Renderer())
       {
-        FloatPoint location;
+        PointF location;
         float zoomFactor = 1;
 
         // At the SVG/HTML boundary (aka LegacyRenderSVGRoot), we apply the localToBorderBoxTransform
@@ -535,7 +535,7 @@ namespace krys::boo
            || (HasAttributeNS(noNamespace, SVGNames::ViewBoxAttr().LocalName()) && !HasEmptyViewBox());
   }
 
-  FloatRect SVGSvgElement::CurrentViewBoxRect() const noexcept
+  RectF SVGSvgElement::CurrentViewBoxRect() const noexcept
   {
     if (_useCurrentView)
     {
@@ -583,15 +583,15 @@ namespace krys::boo
     return {0, 0, IntrinsicWidth(), IntrinsicHeight()};
   }
 
-  FloatSize SVGSvgElement::CurrentViewportSizeExcludingZoom() const noexcept
+  SizeF SVGSvgElement::CurrentViewportSizeExcludingZoom() const noexcept
   {
-    FloatSize viewportSize;
+    SizeF viewportSize;
 
     if (Renderer())
     {
       if (auto *svgRoot = DynamicDowncast<LegacyRenderSVGRoot>(Renderer()))
       {
-        viewportSize = svgRoot->ContentBoxRect().Size() / svgRoot->Style().UsedZoom();
+        viewportSize = SizeF(svgRoot->ContentBoxRect().Size()) / svgRoot->Style().UsedZoom();
       }
       else if (auto *svgViewportContainer = DynamicDowncast<LegacyRenderSVGViewportContainer>(Renderer()))
       {

@@ -62,8 +62,7 @@ namespace krys::boo::style
     return AdoptRef(*new TranslateTransformFunction(_x, _y, _z, GetType()));
   }
 
-  Ref<TransformOperation>
-    TranslateTransformFunction::ToPlatform(const FloatSize &borderBoxSize) const noexcept
+  Ref<TransformOperation> TranslateTransformFunction::ToPlatform(const SizeF &borderBoxSize) const noexcept
   {
     return TranslateTransformOperation::Create(Evaluate<float>(_x, borderBoxSize.Width(), ZoomNeeded {}),
                                                Evaluate<float>(_y, borderBoxSize.Height(), ZoomNeeded {}),
@@ -91,7 +90,7 @@ namespace krys::boo::style
   }
 
   void TranslateTransformFunction::Apply(TransformationMatrix &transform,
-                                         const FloatSize &borderBoxSize) const noexcept
+                                         const SizeF &borderBoxSize) const noexcept
   {
     transform.Translate3d(Evaluate<float>(_x, borderBoxSize.Width(), ZoomNeeded {}),
                           Evaluate<float>(_y, borderBoxSize.Height(), ZoomNeeded {}),

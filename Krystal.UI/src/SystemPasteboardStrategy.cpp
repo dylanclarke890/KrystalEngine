@@ -2,8 +2,8 @@
 #include "Krystal.Booey/Platform/Pasteboard/Pasteboard.hpp"
 #include "Krystal.Booey/Platform/Pasteboard/PasteboardCustomData.hpp"
 #include "Krystal.Booey/Platform/Pasteboard/SelectionData.hpp"
-#include "Krystal.Booey/URL/URL.hpp"
 #include "Krystal.Core/Types/ListHashSet.hpp"
+#include "Krystal.Net/Url.hpp"
 #include "Krystal.PAL/Platform.hpp"
 
 namespace krys::ui
@@ -50,7 +50,7 @@ namespace krys::ui
         {
           uriList += u8"\r\n";
         }
-        uriList += boo::url::URL::FileURLWithFileSystemPath(path).String();
+        uriList += net::Url::FileUrlWithFileSystemPath(path).String();
       }
       return uriList;
     }
@@ -62,7 +62,7 @@ namespace krys::ui
     return pal::GetClipboardFiles();
   }
 
-  RefPtr<boo::SharedBuffer>
+  RefPtr<SharedBuffer>
     SystemPasteboardStrategy::ReadBufferFromClipboard(utf8_stringview,
                                                       utf8_stringview pasteboardType) noexcept
   {
@@ -75,7 +75,7 @@ namespace krys::ui
     {
       return nullptr;
     }
-    return boo::SharedBuffer::Create(krys::move(*bytes));
+    return SharedBuffer::Create(krys::move(*bytes));
   }
 
   void SystemPasteboardStrategy::WriteToClipboard(utf8_stringview, boo::SelectionData selectionData) noexcept
@@ -163,7 +163,7 @@ namespace krys::ui
     customData.ForEachPlatformStringOrBuffer(
       [&selectionData](auto &type, auto &stringOrBuffer)
       {
-        if (auto *buffer = std::get_if<Ref<boo::SharedBuffer>>(&stringOrBuffer))
+        if (auto *buffer = std::get_if<Ref<SharedBuffer>>(&stringOrBuffer))
         {
           selectionData.AddBuffer(type, *buffer);
         }

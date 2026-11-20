@@ -24,6 +24,7 @@
  */
 
 #include "Krystal.Booey/Rendering/HitTesting/HitTestingTransformState.hpp"
+#include "Krystal.Booey/Graphics/Transforms/LayoutTransforms.hpp"
 
 namespace krys::boo
 {
@@ -42,7 +43,7 @@ namespace krys::boo
     AccumulatedTransform.Flatten();
   }
 
-  FloatPoint HitTestingTransformState::MappedPoint() const noexcept
+  PointF HitTestingTransformState::MappedPoint() const noexcept
   {
     if (auto inverse = AccumulatedTransform.Inverse())
     {
@@ -51,7 +52,7 @@ namespace krys::boo
     return LastPlanarPoint;
   }
 
-  FloatQuad HitTestingTransformState::MappedQuad() const noexcept
+  QuadF HitTestingTransformState::MappedQuad() const noexcept
   {
     if (auto inverse = AccumulatedTransform.Inverse())
     {
@@ -60,7 +61,7 @@ namespace krys::boo
     return LastPlanarQuad;
   }
 
-  FloatQuad HitTestingTransformState::MappedArea() const noexcept
+  QuadF HitTestingTransformState::MappedArea() const noexcept
   {
     if (auto inverse = AccumulatedTransform.Inverse())
     {
@@ -73,19 +74,19 @@ namespace krys::boo
   {
     if (auto inverse = AccumulatedTransform.Inverse())
     {
-      return inverse.value().ClampedBoundsOfProjectedQuad(LastPlanarArea);
+      return ClampedBoundsOfProjectedQuad(inverse.value(), LastPlanarArea);
     }
     TransformationMatrix identity;
-    return identity.ClampedBoundsOfProjectedQuad(LastPlanarArea);
+    return ClampedBoundsOfProjectedQuad(identity, LastPlanarArea);
   }
 
   LayoutRect HitTestingTransformState::BoundsOfMappedQuad() const noexcept
   {
     if (auto inverse = AccumulatedTransform.Inverse())
     {
-      return inverse.value().ClampedBoundsOfProjectedQuad(LastPlanarQuad);
+      return ClampedBoundsOfProjectedQuad(inverse.value(), LastPlanarQuad);
     }
     TransformationMatrix identity;
-    return identity.ClampedBoundsOfProjectedQuad(LastPlanarQuad);
+    return ClampedBoundsOfProjectedQuad(identity, LastPlanarQuad);
   }
 }

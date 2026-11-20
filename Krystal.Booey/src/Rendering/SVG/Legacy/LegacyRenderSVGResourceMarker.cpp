@@ -73,10 +73,10 @@ namespace krys::boo
     }
   }
 
-  FloatRect LegacyRenderSVGResourceMarker::MarkerBoundaries(
+  RectF LegacyRenderSVGResourceMarker::MarkerBoundaries(
     RepaintRectCalculation repaintRectCalculation, const AffineTransform &markerTransformation) const noexcept
   {
-    FloatRect coordinates = LegacyRenderSVGContainer::RepaintRectInLocalCoordinates(repaintRectCalculation);
+    RectF coordinates = LegacyRenderSVGContainer::RepaintRectInLocalCoordinates(repaintRectCalculation);
 
     // Map repaint rect into parent coordinate space, in which the marker boundaries have to be evaluated
     coordinates = LocalToParentTransform().MapRect(coordinates);
@@ -87,17 +87,17 @@ namespace krys::boo
   const AffineTransform &LegacyRenderSVGResourceMarker::LocalToParentTransform() const noexcept
   {
     _localToParentTransform =
-      AffineTransform::MakeTranslation(ToFloatSize(_viewport.Location())) * ViewportTransform();
+      AffineTransform::CreateTranslation(ToSizeF(_viewport.Location())) * ViewportTransform();
     return _localToParentTransform;
     // If this class were ever given a localTransform(), then the above would read:
     // return viewportTranslation * localTransform() * viewportTransform();
   }
 
-  FloatPoint LegacyRenderSVGResourceMarker::ReferencePoint() const noexcept
+  PointF LegacyRenderSVGResourceMarker::ReferencePoint() const noexcept
   {
     auto &markerElement = MarkerElement();
     SVGLengthContext lengthContext(&markerElement);
-    return FloatPoint(markerElement.RefX().Value(lengthContext), markerElement.RefY().Value(lengthContext));
+    return PointF(markerElement.RefX().Value(lengthContext), markerElement.RefY().Value(lengthContext));
   }
 
   Maybe<float> LegacyRenderSVGResourceMarker::Angle() const noexcept
@@ -110,8 +110,7 @@ namespace krys::boo
     return {};
   }
 
-  AffineTransform LegacyRenderSVGResourceMarker::MarkerTransformation(const FloatPoint &origin,
-                                                                      float autoAngle,
+  AffineTransform LegacyRenderSVGResourceMarker::MarkerTransformation(const PointF &origin, float autoAngle,
                                                                       float strokeWidth) const noexcept
   {
     bool useStrokeWidth = MarkerElement().MarkerUnits() == SVGMarkerUnitsType::StrokeWidth;
@@ -136,15 +135,15 @@ namespace krys::boo
     GraphicsContextStateSaver stateSaver(info.Context());
     info.ApplyTransform(transform);
     // NOLINTNEXTLINE(bugprone-parent-virtual-call): as WebKit.
-    LegacyRenderSVGContainer::Paint(info, IntPoint());
+    LegacyRenderSVGContainer::Paint(info, PointI());
   }
 
   AffineTransform LegacyRenderSVGResourceMarker::MarkerContentTransformation(
-    const AffineTransform &contentTransformation, const FloatPoint &origin, float strokeWidth) const noexcept
+    const AffineTransform &contentTransformation, const PointF &origin, float strokeWidth) const noexcept
   {
     // The 'origin' coordinate maps to SVGs refX/refY, given in coordinates relative to the viewport
     // established by the marker
-    FloatPoint mappedOrigin = ViewportTransform().MapPoint(origin);
+    PointF mappedOrigin = ViewportTransform().MapPoint(origin);
 
     AffineTransform transformation = contentTransformation;
     if (strokeWidth != -1)
@@ -172,6 +171,6 @@ namespace krys::boo
     SVGLengthContext lengthContext(&markerElement);
     float w = markerElement.MarkerWidth().Value(lengthContext);
     float h = markerElement.MarkerHeight().Value(lengthContext);
-    _viewport = FloatRect(0, 0, w, h);
+    _viewport = RectF(0, 0, w, h);
   }
 }

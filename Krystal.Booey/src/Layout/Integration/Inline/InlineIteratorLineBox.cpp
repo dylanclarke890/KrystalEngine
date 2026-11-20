@@ -98,7 +98,7 @@ namespace krys::boo::inline_iterator
     return IsFirst() ? FormattingContextRoot().FirstLineStyle() : FormattingContextRoot().Style();
   }
 
-  FloatRect LineBox::EllipsisVisualRect(AdjustedForSelection adjustedForSelection) const noexcept
+  RectF LineBox::EllipsisVisualRect(AdjustedForSelection adjustedForSelection) const noexcept
   {
     krys_debug_assert(HasEllipsis());
 

@@ -31,7 +31,7 @@
 #include "Krystal.Booey/CSS/Values/Primitives/NumericTypesValueVisitation.hpp"
 #include "Krystal.Booey/Rendering/Style/StyleFilterImage.hpp"
 #include "Krystal.Booey/Style/Builder/BuilderState.hpp"
-#include "Krystal.Core/Text/StringBuilder.hpp"
+#include "Krystal.Core/Strings/StringBuilder.hpp"
 
 namespace krys::boo::css
 {

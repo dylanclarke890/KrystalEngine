@@ -15,15 +15,15 @@
 #include "Krystal.Booey/HTML/Algorithms/FocusAlgorithms.hpp"
 #include "Krystal.Booey/HTML/Elements/HTMLElement.hpp"
 #include "Krystal.Booey/HTML/EventLoop/EventLoop.hpp"
-#include "Krystal.Booey/Page/EventHandler.hpp"
+#include "Krystal.Booey/Input/EventHandler.hpp"
+#include "Krystal.Booey/Input/LegacyKeyCodes.hpp"
+#include "Krystal.Booey/Input/PlatformKeyboardEvent.hpp"
+#include "Krystal.Booey/Input/PlatformWheelEvent.hpp"
 #include "Krystal.Booey/Page/LocalFrame.hpp"
 #include "Krystal.Booey/Page/LocalFrameView.hpp"
 #include "Krystal.Booey/Page/Page.hpp"
 #include "Krystal.Booey/Page/Settings.hpp"
 #include "Krystal.Booey/Platform/Cursor.hpp"
-#include "Krystal.Booey/Platform/Events/PlatformKeyboardEvent.hpp"
-#include "Krystal.Booey/Platform/Events/PlatformWheelEvent.hpp"
-#include "Krystal.Booey/Platform/Events/WindowsKeyboardCodes.hpp"
 #include "Krystal.Booey/Platform/Scrolling/Scrollbar.hpp"
 #include "Krystal.Booey/Platform/Scrolling/ScrollbarTheme.hpp"
 #include "Krystal.Booey/Platform/Scrolling/ScrollbarThemeAdwaita.hpp"
@@ -60,8 +60,8 @@ namespace krys::boo::tests
       {
         (void)Document->UpdateLayout();
         display_list::RecorderImpl recorder(
-          FloatSize(static_cast<float>(ViewSize.Width()), static_cast<float>(ViewSize.Height())));
-        View().Paint(recorder, IntRect(IntPoint(), ViewSize));
+          SizeF(static_cast<float>(ViewSize.Width()), static_cast<float>(ViewSize.Height())));
+        View().Paint(recorder, RectI(PointI(), ViewSize));
         return recorder.TakeDisplayList()->AsText({});
       }
     };
@@ -110,34 +110,34 @@ namespace krys::boo::tests
 
     using Strings = List<std::string>;
 
-    KRYS_NODISCARD PlatformMouseEvent MouseEvent(PlatformEvent::Type type, IntPoint position,
+    KRYS_NODISCARD PlatformMouseEvent MouseEvent(PlatformEvent::Type type, PointI position,
                                                  MouseButton button = MouseButton::Left) noexcept
     {
-      DoublePoint point(position.X(), position.Y());
+      PointD point(position.X(), position.Y());
       int32 clickCount = type == PlatformEvent::Type::MousePressed ? 1 : 0;
       return PlatformMouseEvent(point, point,
                                 type == PlatformEvent::Type::MouseMoved ? MouseButton::None : button, type,
                                 clickCount, {}, MonotonicTime::Now());
     }
 
-    void Move(EventHandler &handler, IntPoint position) noexcept
+    void Move(EventHandler &handler, PointI position) noexcept
     {
       (void)handler.MouseMoved(MouseEvent(PlatformEvent::Type::MouseMoved, position));
     }
 
-    void Press(EventHandler &handler, IntPoint position) noexcept
+    void Press(EventHandler &handler, PointI position) noexcept
     {
       (void)handler.HandleMousePressEvent(MouseEvent(PlatformEvent::Type::MousePressed, position));
     }
 
-    void Release(EventHandler &handler, IntPoint position) noexcept
+    void Release(EventHandler &handler, PointI position) noexcept
     {
       (void)handler.HandleMouseReleaseEvent(MouseEvent(PlatformEvent::Type::MouseReleased, position));
     }
 
     /// @brief A wheel event at @p position scrolling by @p delta pixels (the DOM's sense: positive is down
     /// and right).
-    KRYS_NODISCARD bool Wheel(EventHandler &handler, IntPoint position, FloatSize delta,
+    KRYS_NODISCARD bool Wheel(EventHandler &handler, PointI position, SizeF delta,
                               PlatformWheelEventGranularity granularity =
                                 PlatformWheelEventGranularity::ScrollByPixelWheelEvent) noexcept
     {
@@ -197,7 +197,7 @@ namespace krys::boo::tests
 
     // The contents are the document's size; the range is what doesn't fit in the view, less its scrollbars
     // (21 pixels each, as the document overflows both ways).
-    CHECK(view.ContentsSize() == IntSize(400, 600));
+    CHECK(view.ContentsSize() == SizeI(400, 600));
     REQUIRE(view.HorizontalScrollbar());
     REQUIRE(view.VerticalScrollbar());
     CHECK(view.MinimumScrollPosition() == ScrollPosition());
@@ -206,9 +206,9 @@ namespace krys::boo::tests
 
     view.SetScrollPosition({50, 120});
     CHECK(view.GetScrollPosition() == ScrollPosition(50, 120));
-    CHECK(view.VisibleContentRect() == IntRect(50, 120, 179, 79));
-    CHECK(view.WindowToContents(IntPoint(10, 10)) == IntPoint(60, 130));
-    CHECK(view.ContentsToWindow(IntPoint(60, 130)) == IntPoint(10, 10));
+    CHECK(view.VisibleContentRect() == RectI(50, 120, 179, 79));
+    CHECK(view.WindowToContents(PointI(10, 10)) == PointI(60, 130));
+    CHECK(view.ContentsToWindow(PointI(60, 130)) == PointI(10, 10));
 
     // Clamped to the range.
     view.SetScrollPosition({1'000, -10});
@@ -220,7 +220,7 @@ namespace krys::boo::tests
       REQUIRE_FALSE(fixture.ById(u8"target").SetAttribute(u8"style", u8"display:none").HasException());
       REQUIRE_FALSE(fixture.ById(u8"page").SetAttribute(u8"style", u8"height:150px").HasException());
       (void)fixture.Document->UpdateLayout();
-      CHECK(view.ContentsSize() == IntSize(400, 150));
+      CHECK(view.ContentsSize() == SizeI(400, 150));
       // The view still scrolls horizontally, so its horizontal scrollbar stays: 150 less 79.
       CHECK(view.GetScrollPosition() == ScrollPosition(0, 71));
     }
@@ -260,8 +260,8 @@ namespace krys::boo::tests
 
     // The mouse hits what's under it in the scrolled view.
     (void)fixture.Frame->GetEventHandler().MouseMoved(
-      PlatformMouseEvent(DoublePoint(10, 5), DoublePoint(10, 5), MouseButton::None,
-                         PlatformEvent::Type::MouseMoved, 0, {}, MonotonicTime::Now()));
+      PlatformMouseEvent(PointD(10, 5), PointD(10, 5), MouseButton::None, PlatformEvent::Type::MouseMoved, 0,
+                         {}, MonotonicTime::Now()));
     CHECK(fixture.Frame->GetEventHandler().ElementUnderMouse() == &target);
   }
 
@@ -547,7 +547,7 @@ namespace krys::boo::tests
     REQUIRE(view.VerticalScrollbar());
     auto &vBar = *view.VerticalScrollbar();
     // The vertical scrollbar runs down the right of the view, above the horizontal one.
-    CHECK(vBar.FrameRect() == IntRect(179, 0, 21, 79));
+    CHECK(vBar.FrameRect() == RectI(179, 0, 21, 79));
     CHECK(view.ScrollbarAtPoint({190, 10}) == &vBar);
     CHECK(view.ScrollbarAtPoint({170, 10}) == nullptr);
 
@@ -800,10 +800,10 @@ namespace krys::boo::tests
     auto &selection = fixture.Document->Selection();
     REQUIRE(fixture.View().IsPointInScrollbarCorner({190, 90}));
 
-    auto drag = [&](IntPoint from, IntPoint to)
+    auto drag = [&](PointI from, PointI to)
     {
       Press(handler, from);
-      DoublePoint point(to.X(), to.Y());
+      PointD point(to.X(), to.Y());
       (void)handler.MouseMoved(PlatformMouseEvent(
         point, point, MouseButton::Left, PlatformEvent::Type::MouseMoved, 0, {}, MonotonicTime::Now()));
       Release(handler, to);
@@ -948,7 +948,7 @@ namespace krys::boo::tests
     auto &view = fixture.View();
     auto &handler = fixture.Frame->GetEventHandler();
     auto &box = fixture.ById(u8"box");
-    auto pan = [&](IntPoint position, FloatSize delta)
+    auto pan = [&](PointI position, SizeF delta)
     {
       return handler.HandleTouchScroll(
         PlatformWheelEvent(position, position, -delta.Width(), -delta.Height(), 0, 0,

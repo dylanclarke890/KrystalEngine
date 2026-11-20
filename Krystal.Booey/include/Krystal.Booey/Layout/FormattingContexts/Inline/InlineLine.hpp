@@ -34,7 +34,7 @@
 #include "Krystal.Core/Types/List.hpp"
 #include "Krystal.Core/Types/Maybe.hpp"
 #include "Krystal.Core/Types/SmallList.hpp"
-#include <unicode/ubidi.h>
+#include "Krystal.Text/Bidi.hpp"
 
 namespace krys::boo::layout
 {
@@ -227,7 +227,7 @@ namespace krys::boo::layout
         return HasTrailingWhitespace() && _trailingWhitespace->Length == _textContent->Length;
       }
 
-      KRYS_NODISCARD TextDirection InlineDirection() const noexcept;
+      KRYS_NODISCARD text::TextDirection InlineDirection() const noexcept;
 
       KRYS_NODISCARD InlineLayoutUnit LetterSpacing() const noexcept;
 
@@ -238,7 +238,7 @@ namespace krys::boo::layout
         return _textSpacingAdjustment;
       }
 
-      KRYS_NODISCARD UBiDiLevel BidiLevel() const noexcept
+      KRYS_NODISCARD text::BidiLevel BidiLevel() const noexcept
       {
         return _bidiLevel;
       }
@@ -304,7 +304,7 @@ namespace krys::boo::layout
       InlineLayoutUnit _logicalLeft {0};
       InlineLayoutUnit _logicalWidth {0};
       inline_display::Box::Expansion _expansion;
-      UBiDiLevel _bidiLevel {UBIDI_DEFAULT_LTR};
+      text::BidiLevel _bidiLevel {text::DefaultLeftToRightBidiLevel};
       Maybe<TrailingWhitespace> _trailingWhitespace;
       Maybe<size_t> _lastNonWhitespaceContentStart;
       Maybe<Text> _textContent;
@@ -341,7 +341,7 @@ namespace krys::boo::layout
         _logicalWidth += hyphenLogicalWidth;
       }
 
-      void SetBidiLevel(UBiDiLevel bidiLevel) noexcept
+      void SetBidiLevel(text::BidiLevel bidiLevel) noexcept
       {
         _bidiLevel = bidiLevel;
       }
@@ -686,7 +686,7 @@ namespace krys::boo::layout
 
     const Box *RemoveOverflowingOutOfFlowContent() noexcept;
 
-    void ResetBidiLevelForTrailingWhitespace(UBiDiLevel rootBidiLevel) noexcept;
+    void ResetBidiLevelForTrailingWhitespace(text::BidiLevel rootBidiLevel) noexcept;
 
     KRYS_NODISCARD const RunList &Runs() const noexcept
     {

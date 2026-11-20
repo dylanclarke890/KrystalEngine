@@ -40,7 +40,7 @@
 #include "Krystal.Booey/SVG/Elements/SVGTextContentElement.hpp"
 #include "Krystal.Booey/SVG/Properties/SVGPropertyOwnerRegistry.hpp"
 #include "Krystal.Booey/SVG/SVGNames.hpp"
-#include "Krystal.Core/Text/ASCII.hpp"
+#include "Krystal.Core/Strings/ASCII.hpp"
 
 namespace krys::boo
 {
@@ -174,7 +174,7 @@ namespace krys::boo
     }
 
     Ref<Document> document = ShareRef(NodeDocument());
-    auto completedURL = document->CompleteURL(url);
+    auto completedUrl = document->CompleteUrl(url);
 
     auto target = Target();
     if (target.View().empty()
@@ -190,7 +190,7 @@ namespace krys::boo
 
     if (RefPtr<LocalFrame> frame = ShareRefPtr(document->Frame()))
     {
-      frame->Loader().ChangeLocation(completedURL, target, &event, referrerPolicy, null, this);
+      frame->Loader().ChangeLocation(completedUrl, target, &event, referrerPolicy, null, this);
     }
   }
 

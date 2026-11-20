@@ -116,19 +116,19 @@ namespace krys::boo
   class ReferencePathOperation final : public PathOperation
   {
   private:
-    style::URL _url;
+    style::Url _url;
     CSSOMStringAtom _fragment;
     Maybe<Path> _path;
 
   public:
     KRYS_NODISCARD static Ref<ReferencePathOperation>
-      Create(const style::URL &, const CSSOMStringAtom &fragment, const boo::SVGElement *) noexcept;
+      Create(const style::Url &, const CSSOMStringAtom &fragment, const boo::SVGElement *) noexcept;
 
     KRYS_NODISCARD static Ref<ReferencePathOperation> Create(Maybe<Path> &&) noexcept;
 
     KRYS_NODISCARD Ref<PathOperation> Clone() const noexcept override;
 
-    KRYS_NODISCARD const style::URL &Url() const noexcept
+    KRYS_NODISCARD const style::Url &Url() const noexcept
     {
       return _url;
     }
@@ -151,7 +151,7 @@ namespace krys::boo
     KRYS_NODISCARD bool Equals(const PathOperation &other) const noexcept override;
 
   private:
-    ReferencePathOperation(style::URL, CSSOMStringAtom fragment, const boo::SVGElement *) noexcept;
+    ReferencePathOperation(style::Url, CSSOMStringAtom fragment, const boo::SVGElement *) noexcept;
 
     explicit ReferencePathOperation(Maybe<Path> &&) noexcept;
   };
@@ -183,7 +183,7 @@ namespace krys::boo
       return style::ComputeWindRule(_shape);
     }
 
-    KRYS_NODISCARD Path PathForReferenceRect(const FloatRect &boundingRect) const noexcept
+    KRYS_NODISCARD Path PathForReferenceRect(const RectF &boundingRect) const noexcept
     {
       return style::ComputePath(_shape, boundingRect);
     }

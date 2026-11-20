@@ -28,14 +28,14 @@
 
 #pragma once
 
-#include "Krystal.Booey/URL/URL.hpp"
 #include "Krystal.Core/Attributes.hpp"
 #include "Krystal.Core/Macros.hpp"
+#include "Krystal.Core/Strings/String.hpp"
 #include "Krystal.Core/Types/List.hpp"
 #include "Krystal.Core/Types/RefPtr.hpp"
 #include "Krystal.Core/Types/Span.hpp"
-#include "Krystal.Core/Types/String.hpp"
 #include "Krystal.Core/Types/WeakPtr.hpp"
+#include "Krystal.Net/Url.hpp"
 
 namespace krys::boo
 {
@@ -92,14 +92,14 @@ namespace krys::boo
 
     void SetFrame(LocalFrame &frame) noexcept;
 
-    void SetMIMEType(utf8_string mimeType) noexcept
+    void SetMimeType(utf8_string mimeType) noexcept
     {
       _mimeType = krys::move(mimeType);
     }
 
     /// @brief Makes a document at @p url and makes it the frame's, ready for its data.
     /// @return False if the frame lost its view while the old document unloaded.
-    bool Begin(const url::URL &url) noexcept;
+    bool Begin(const net::Url &url) noexcept;
 
     /// @brief Gives @p data, more of the document's bytes, to the parser.
     void AddData(Span<const uint8> data) noexcept;

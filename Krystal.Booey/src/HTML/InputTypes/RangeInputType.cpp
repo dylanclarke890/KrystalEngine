@@ -43,7 +43,7 @@
 #include "Krystal.Booey/HTML/Shadow/SliderThumbElement.hpp"
 #include "Krystal.Booey/Rendering/FormControls/RenderSlider.hpp"
 #include "Krystal.Booey/Rendering/Style/RenderStyle+GettersInlines.hpp"
-#include "Krystal.Core/Text/ASCII.hpp"
+#include "Krystal.Core/Strings/ASCII.hpp"
 #include <algorithm>
 #include <cmath>
 
@@ -278,8 +278,7 @@ namespace krys::boo::html
     }
 
     auto location = event.AbsoluteLocation();
-    thumb.DragFrom(
-      LayoutPoint(FloatPoint(static_cast<float>(location.X()), static_cast<float>(location.Y()))));
+    thumb.DragFrom(LayoutPoint(PointF(static_cast<float>(location.X()), static_cast<float>(location.Y()))));
   }
 
   void RangeInputType::DisabledStateChanged() noexcept

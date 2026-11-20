@@ -45,36 +45,36 @@ namespace krys::boo::tests
     auto &plain = fixture.Canvas(u8"plain");
     CHECK(plain.Width() == 300u);
     CHECK(plain.Height() == 150u);
-    CHECK(plain.Size() == IntSize(300, 150));
+    CHECK(plain.Size() == SizeI(300, 150));
 
     auto &sized = fixture.Canvas(u8"sized");
     CHECK(sized.Width() == 40u);
     CHECK(sized.Height() == 20u);
-    CHECK(sized.Size() == IntSize(40, 20));
+    CHECK(sized.Size() == SizeI(40, 20));
 
     // Values that don't parse as non-negative integers are the defaults.
     auto &invalid = fixture.Canvas(u8"invalid");
     CHECK(invalid.Width() == 300u);
     CHECK(invalid.Height() == 150u);
-    CHECK(invalid.Size() == IntSize(300, 150));
+    CHECK(invalid.Size() == SizeI(300, 150));
 
     SECTION("setting the attributes resizes the canvas")
     {
       plain.Width(64);
       CHECK(plain.GetAttribute(u8"width") == u8"64");
-      CHECK(plain.Size() == IntSize(64, 150));
+      CHECK(plain.Size() == SizeI(64, 150));
       REQUIRE_FALSE(plain.SetAttribute(u8"height", u8"32").HasException());
       CHECK(plain.Height() == 32u);
-      CHECK(plain.Size() == IntSize(64, 32));
+      CHECK(plain.Size() == SizeI(64, 32));
       plain.RemoveAttribute(u8"width");
-      CHECK(plain.Size() == IntSize(300, 32));
+      CHECK(plain.Size() == SizeI(300, 32));
     }
 
     SECTION("values too large for a long are the defaults")
     {
       plain.Width(3'000'000'000u);
       CHECK(plain.Width() == 300u);
-      CHECK(plain.Size() == IntSize(300, 150));
+      CHECK(plain.Size() == SizeI(300, 150));
     }
   }
 
@@ -172,13 +172,13 @@ namespace krys::boo::tests
 
     SECTION("data URLs")
     {
-      CHECK(canvas.ToDataURL().starts_with(u8"data:image/png;base64,iVBORw0KGgo"));
-      CHECK(canvas.ToDataURL(u8"image/jpeg", 0.5).starts_with(u8"data:image/jpeg;base64,/9j/"));
-      CHECK(canvas.ToDataURL(u8"IMAGE/WEBP").starts_with(u8"data:image/webp;base64,UklGR"));
+      CHECK(canvas.ToDataUrl().starts_with(u8"data:image/png;base64,iVBORw0KGgo"));
+      CHECK(canvas.ToDataUrl(u8"image/jpeg", 0.5).starts_with(u8"data:image/jpeg;base64,/9j/"));
+      CHECK(canvas.ToDataUrl(u8"IMAGE/WEBP").starts_with(u8"data:image/webp;base64,UklGR"));
       // Types the encoders don't have are PNG.
-      CHECK(canvas.ToDataURL(u8"image/gif").starts_with(u8"data:image/png;base64,"));
+      CHECK(canvas.ToDataUrl(u8"image/gif").starts_with(u8"data:image/png;base64,"));
       // A canvas without pixels has none to encode.
-      CHECK(fixture.Canvas(u8"empty").ToDataURL() == u8"data:,");
+      CHECK(fixture.Canvas(u8"empty").ToDataUrl() == u8"data:,");
     }
   }
 }

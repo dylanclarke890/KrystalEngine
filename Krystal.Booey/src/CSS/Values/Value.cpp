@@ -80,7 +80,7 @@
 #include "Krystal.Booey/CSS/Values/TransformListValue.hpp"
 #include "Krystal.Booey/CSS/Values/Types.hpp"
 #include "Krystal.Booey/CSS/Values/UnicodeRangeValue.hpp"
-#include "Krystal.Booey/CSS/Values/URLValue.hpp"
+#include "Krystal.Booey/CSS/Values/UrlValue.hpp"
 #include "Krystal.Booey/CSS/Values/ValueList.hpp"
 #include "Krystal.Booey/CSS/Values/ValuePair.hpp"
 #include "Krystal.Booey/CSS/Values/VariableReferenceValue.hpp"
@@ -428,9 +428,9 @@ namespace krys::boo::css
     return false;
   }
 
-  bool Value::IsCSSLocalURL(CSSOMStringView relativeURL) noexcept
+  bool Value::IsCSSLocalUrl(CSSOMStringView relativeUrl) noexcept
   {
-    return relativeURL.empty() || relativeURL.starts_with(u8'#');
+    return relativeUrl.empty() || relativeUrl.starts_with(u8'#');
   }
 
   CSSOMStringView Value::SeparatorCSSText(ValueSeparator separator) noexcept

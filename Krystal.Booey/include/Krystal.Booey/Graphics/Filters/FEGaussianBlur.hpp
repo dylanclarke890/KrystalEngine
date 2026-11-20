@@ -25,9 +25,8 @@
 #include "Krystal.Booey/Graphics/Filters/FEConvolveMatrix.hpp"
 #include "Krystal.Booey/Graphics/Filters/FilterEffect.hpp"
 #include "Krystal.Booey/Graphics/Geometry/BoxExtents.hpp"
-#include "Krystal.Booey/Graphics/Geometry/FloatSize.hpp"
-#include "Krystal.Booey/Graphics/Geometry/IntSize.hpp"
 #include "Krystal.Core/Attributes.hpp"
+#include "Krystal.Core/Geometry/Size.hpp"
 #include "Krystal.Core/Types/RefPtr.hpp"
 
 namespace krys::boo
@@ -66,15 +65,15 @@ namespace krys::boo
 
     bool SetEdgeMode(EdgeModeType edgeMode) noexcept;
 
-    KRYS_NODISCARD static IntSize CalculateKernelSize(const Filter &filter, FloatSize stdDeviation) noexcept;
+    KRYS_NODISCARD static SizeI CalculateKernelSize(const Filter &filter, SizeF stdDeviation) noexcept;
 
     /// @brief The size of the box blur kernels that approximate a Gaussian blur of `stdDeviation`.
-    KRYS_NODISCARD static IntSize CalculateUnscaledKernelSize(FloatSize stdDeviation) noexcept;
+    KRYS_NODISCARD static SizeI CalculateUnscaledKernelSize(SizeF stdDeviation) noexcept;
 
     /// @brief How far a blur of `stdDeviation` spreads past each edge.
-    KRYS_NODISCARD static IntSize CalculateOutsetSize(FloatSize stdDeviation) noexcept;
+    KRYS_NODISCARD static SizeI CalculateOutsetSize(SizeF stdDeviation) noexcept;
 
-    KRYS_NODISCARD static IntOutsets CalculateOutsets(const FloatSize &stdDeviation) noexcept;
+    KRYS_NODISCARD static IntOutsets CalculateOutsets(const SizeF &stdDeviation) noexcept;
 
   private:
     FEGaussianBlur(float x, float y, EdgeModeType edgeMode) noexcept;
@@ -84,8 +83,8 @@ namespace krys::boo
       return AreEqual<FEGaussianBlur>(*this, other);
     }
 
-    KRYS_NODISCARD FloatRect CalculateImageRect(const Filter &filter, Span<const FloatRect> inputImageRects,
-                                                const FloatRect &primitiveSubregion) const noexcept override;
+    KRYS_NODISCARD RectF CalculateImageRect(const Filter &filter, Span<const RectF> inputImageRects,
+                                            const RectF &primitiveSubregion) const noexcept override;
 
     KRYS_NODISCARD bool ResultIsAlphaImage(Span<const Ref<FilterImage>> inputs) const noexcept override;
 

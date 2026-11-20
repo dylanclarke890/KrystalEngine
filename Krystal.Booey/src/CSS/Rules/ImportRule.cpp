@@ -58,7 +58,7 @@ namespace krys::boo::css
     }
   }
 
-  void ImportRule::SetCSSStyleSheet(const utf8_string &href, const url::URL &baseURL, utf8_stringview charset,
+  void ImportRule::SetCSSStyleSheet(const utf8_string &href, const net::Url &baseUrl, utf8_stringview charset,
                                     const CachedCSSStyleSheet *cachedStyleSheet) noexcept
   {
     if (_styleSheet)
@@ -69,9 +69,9 @@ namespace krys::boo::css
     ParserContext context =
       _parentStyleSheet ? _parentStyleSheet->GetParserContext() : ParserContext(ParserMode::HTMLStandard);
     context.Charset = charset;
-    if (!baseURL.IsNull())
+    if (!baseUrl.IsNull())
     {
-      context.BaseURL = baseURL;
+      context.BaseUrl = baseUrl;
     }
 
     _styleSheet = StyleSheetContents::Create(this, CSSOMString(href), context);
@@ -135,15 +135,15 @@ namespace krys::boo::css
       return;
     }
 
-    url::URL absURL;
-    if (!_parentStyleSheet->BaseURL().IsNull())
+    net::Url absUrl;
+    if (!_parentStyleSheet->BaseUrl().IsNull())
     {
       // use parent styleheet's URL as the base URL
-      absURL = url::URL(_parentStyleSheet->BaseURL(), _href);
+      absUrl = net::Url(_parentStyleSheet->BaseUrl(), _href);
     }
     else
     {
-      absURL = document->CompleteURL(_href);
+      absUrl = document->CompleteUrl(_href);
     }
 
     // Check for a cycle in our import chain. If we encounter a stylesheet
@@ -151,8 +151,8 @@ namespace krys::boo::css
     StyleSheetContents *rootSheet = _parentStyleSheet;
     for (auto *sheet = _parentStyleSheet; sheet; sheet = sheet->ParentStyleSheet())
     {
-      if (url::EqualIgnoringFragmentIdentifier(absURL, sheet->BaseURL())
-          || url::EqualIgnoringFragmentIdentifier(absURL, document->CompleteURL(sheet->OriginalURL())))
+      if (net::EqualIgnoringFragmentIdentifier(absUrl, sheet->BaseUrl())
+          || net::EqualIgnoringFragmentIdentifier(absUrl, document->CompleteUrl(sheet->OriginalUrl())))
       {
         return;
       }
@@ -160,7 +160,7 @@ namespace krys::boo::css
     }
 
     auto options = CachedResourceLoader::DefaultCachedResourceOptions();
-    CachedResourceRequest request(ResourceRequest(krys::move(absURL)), options);
+    CachedResourceRequest request(net::ResourceRequest(krys::move(absUrl)), options);
     request.SetCharset(utf8_string(_parentStyleSheet->Charset()));
     request.SetInitiatorType(CachedResourceRequestInitiatorTypes::CSS);
     if (_cachedSheet)

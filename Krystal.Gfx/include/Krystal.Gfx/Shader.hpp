@@ -1,7 +1,7 @@
 ﻿#pragma once
 
 #include "Krystal.Core/Numeric.hpp"
-#include "Krystal.Core/Types/String.hpp"
+#include "Krystal.Core/Strings/String.hpp"
 
 namespace krys::gfx
 {

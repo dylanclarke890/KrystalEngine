@@ -1,7 +1,7 @@
 ﻿#pragma once
 
-#include "Krystal.Booey/Graphics/Geometry/IntSize.hpp"
 #include "Krystal.Core/Attributes.hpp"
+#include "Krystal.Core/Geometry/Size.hpp"
 #include "Krystal.Core/RefCounted.hpp"
 #include "Krystal.Core/Types/EnumSet.hpp"
 #include "Krystal.Core/Types/RefPtr.hpp"
@@ -24,16 +24,16 @@ namespace krys::ui
   private:
     gfx::Device &_device;
     EnumSet<Flags> _flags;
-    boo::IntSize _size;
+    SizeI _size;
     gfx::TextureHandle _texture;
 
   public:
-    KRYS_NODISCARD static Ref<BitmapTexture> Create(gfx::Device &device, const boo::IntSize &size,
+    KRYS_NODISCARD static Ref<BitmapTexture> Create(gfx::Device &device, const SizeI &size,
                                                     EnumSet<Flags> flags = {}) noexcept;
 
     ~BitmapTexture() noexcept;
 
-    KRYS_NODISCARD const boo::IntSize &Size() const noexcept
+    KRYS_NODISCARD const SizeI &Size() const noexcept
     {
       return _size;
     }
@@ -54,7 +54,7 @@ namespace krys::ui
       return _texture;
     }
 
-    void Reset(const boo::IntSize &size, EnumSet<Flags> flags = {}) noexcept;
+    void Reset(const SizeI &size, EnumSet<Flags> flags = {}) noexcept;
 
     KRYS_NODISCARD int32 NumberOfBytes() const noexcept
     {
@@ -62,7 +62,7 @@ namespace krys::ui
     }
 
   private:
-    BitmapTexture(gfx::Device &device, const boo::IntSize &size, EnumSet<Flags> flags) noexcept;
+    BitmapTexture(gfx::Device &device, const SizeI &size, EnumSet<Flags> flags) noexcept;
 
     void CreateTexture() noexcept;
 

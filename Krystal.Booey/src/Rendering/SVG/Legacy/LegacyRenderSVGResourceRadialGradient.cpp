@@ -44,14 +44,14 @@ namespace krys::boo
     return RadialGradientElement().CollectGradientAttributes(_attributes);
   }
 
-  FloatPoint LegacyRenderSVGResourceRadialGradient::CenterPoint(
+  PointF LegacyRenderSVGResourceRadialGradient::CenterPoint(
     const svg::RadialGradientAttributes &attributes) const noexcept
   {
     return SVGLengthContext::ResolvePoint(&RadialGradientElement(), attributes.GradientUnits(),
                                           attributes.Cx(), attributes.Cy());
   }
 
-  FloatPoint LegacyRenderSVGResourceRadialGradient::FocalPoint(
+  PointF LegacyRenderSVGResourceRadialGradient::FocalPoint(
     const svg::RadialGradientAttributes &attributes) const noexcept
   {
     return SVGLengthContext::ResolvePoint(&RadialGradientElement(), attributes.GradientUnits(),

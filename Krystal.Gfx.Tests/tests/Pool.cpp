@@ -1,6 +1,6 @@
 ﻿#include "Krystal.Gfx/Pool.hpp"
 #include "catch2/catch_test_macros.hpp"
-#include "Krystal.Core/Types/String.hpp"
+#include "Krystal.Core/Strings/String.hpp"
 #include "Krystal.Gfx/Handles.hpp"
 
 namespace krys::gfx::tests

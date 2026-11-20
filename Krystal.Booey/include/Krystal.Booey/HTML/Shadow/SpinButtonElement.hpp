@@ -28,7 +28,7 @@
 
 #include "Krystal.Booey/HTML/Elements/HTMLDivElement.hpp"
 #include "Krystal.Booey/Page/PopupOpeningObserver.hpp"
-#include "Krystal.Booey/Platform/Timer.hpp"
+#include "Krystal.Core/Time/Timer.hpp"
 #include "Krystal.Core/Types/WeakPtr.hpp"
 
 namespace krys::boo

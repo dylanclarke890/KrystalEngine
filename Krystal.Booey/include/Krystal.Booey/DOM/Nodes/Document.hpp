@@ -45,22 +45,21 @@
 #include "Krystal.Booey/DOM/Types/USVString.hpp"
 #include "Krystal.Booey/Graphics/Color/Color.hpp"
 #include "Krystal.Booey/Graphics/Fonts/FontSelector.hpp"
-#include "Krystal.Booey/Graphics/Geometry/DoublePoint.hpp"
-#include "Krystal.Booey/Graphics/Geometry/FloatQuad.hpp"
-#include "Krystal.Booey/Graphics/Geometry/FloatRect.hpp"
 #include "Krystal.Booey/Graphics/GraphicsTypes.hpp"
 #include "Krystal.Booey/HTML/Attributes/EventHandlerAttributes.hpp"
 #include "Krystal.Booey/HTML/Sanitizer/SetHTMLOptions.hpp"
 #include "Krystal.Booey/HTML/Types/DocumentReadyState.hpp"
 #include "Krystal.Booey/HTML/Types/DocumentVisibilityState.hpp"
 #include "Krystal.Booey/Page/Page.hpp"
-#include "Krystal.Booey/Platform/Timer.hpp"
 #include "Krystal.Booey/Rendering/RenderPtr.hpp"
 #include "Krystal.Booey/Rendering/Style/RenderStyleConstants.hpp"
 #include "Krystal.Booey/Style/Values/Color/ColorOptions.hpp"
-#include "Krystal.Booey/URL/URL.hpp"
 #include "Krystal.Core/Enum.hpp"
+#include "Krystal.Core/Geometry/Point.hpp"
+#include "Krystal.Core/Geometry/Quad.hpp"
+#include "Krystal.Core/Geometry/Rect.hpp"
 #include "Krystal.Core/Numeric.hpp"
+#include "Krystal.Core/Time/Timer.hpp"
 #include "Krystal.Core/Types/Array.hpp"
 #include "Krystal.Core/Types/BoolOr.hpp"
 #include "Krystal.Core/Types/FixedVector.hpp"
@@ -71,10 +70,16 @@
 #include "Krystal.Core/Types/UniquePtr.hpp"
 #include "Krystal.Core/Types/Variant.hpp"
 #include "Krystal.Core/Types/WeakPtr.hpp"
+#include "Krystal.Net/Url.hpp"
 
 namespace krys::text
 {
   class ICodec;
+}
+
+namespace krys::i18n
+{
+  class Locale;
 }
 
 namespace krys::boo
@@ -109,7 +114,6 @@ namespace krys::boo
   class LocalDOMWindow;
   class LocalFrame;
   class LocalFrameView;
-  class Locale;
   class MediaQueryList;
   class MouseEvent;
   class MouseEventWithHitTestResults;
@@ -331,12 +335,12 @@ namespace krys::boo
     List<WeakRef<Element>> _renderBlockingElements;
 
     /// @see https://dom.spec.whatwg.org/#concept-document-url
-    url::URL _url;
+    net::Url _url;
     /// @see https://html.spec.whatwg.org/#document-base-url
-    url::URL _baseURL;
+    net::Url _baseUrl;
     /// @brief The frozen base URL of the first `base` element with an `href` in the document tree, or null.
     /// @see https://html.spec.whatwg.org/#frozen-base-url
-    url::URL _baseElementURL;
+    net::Url _baseElementUrl;
     /// @brief The target of the first `base` element with a `target` in the document tree.
     DOMString _baseTarget;
 
@@ -477,7 +481,7 @@ namespace krys::boo
     Timer _styleRecalcTimer;
     Timer _intersectionObserversInitialUpdateTimer;
     List<WeakPtr<Element>> _autofocusCandidates;
-    mutable HashMap<utf8_string, UniquePtr<Locale>> _localeCache;
+    mutable HashMap<utf8_string, UniquePtr<i18n::Locale>> _localeCache;
     // The inputs inserted without their user agent shadow tree, which the next style resolution creates.
     List<WeakPtr<Element>> _elementsWithPendingUserAgentShadowTreeUpdates;
     bool _autofocusProcessed {false};
@@ -536,7 +540,7 @@ namespace krys::boo
     KRYS_NODISCARD dom::DOMImplementation &Implementation() noexcept;
 
     /// @see https://dom.spec.whatwg.org/#dom-document-url
-    KRYS_NODISCARD DOMString URL() const noexcept;
+    KRYS_NODISCARD DOMString Url() const noexcept;
 
     /// @see https://dom.spec.whatwg.org/#dom-document-documenturi
     KRYS_NODISCARD DOMString DocumentURI() const noexcept;
@@ -913,11 +917,11 @@ namespace krys::boo
 
 #pragma endregion
 
-#pragma region URLs - https://html.spec.whatwg.org/#document-base-url
+#pragma region Urls - https://html.spec.whatwg.org/#document-base-url
 
     /// @brief The document's URL; `about:blank` until the host sets one.
     /// @see https://dom.spec.whatwg.org/#concept-document-url
-    KRYS_NODISCARD const url::URL &GetURL() const noexcept
+    KRYS_NODISCARD const net::Url &GetUrl() const noexcept
     {
       return _url;
     }
@@ -925,7 +929,7 @@ namespace krys::boo
     /// @brief Sets the document's URL. An empty URL becomes `about:blank`, and its fragment directive is
     /// consumed.
     /// @see https://html.spec.whatwg.org/#set-the-url
-    void SetURL(url::URL url) noexcept;
+    void SetUrl(net::Url url) noexcept;
 
     /// @brief The target of the first `base` element with a `target` attribute, or the empty string.
     /// @see https://html.spec.whatwg.org/#get-an-element's-target
@@ -935,25 +939,25 @@ namespace krys::boo
     }
 
     /// @see https://html.spec.whatwg.org/#fallback-base-url
-    KRYS_NODISCARD const url::URL &FallbackBaseURL() const noexcept;
+    KRYS_NODISCARD const net::Url &FallbackBaseUrl() const noexcept;
 
     /// @brief The document base URL, which getting the base URL returns: there's no base URL override.
     /// @see https://html.spec.whatwg.org/#document-base-url
     /// @see https://dom.spec.whatwg.org/#get-the-base-url
-    KRYS_NODISCARD const url::URL &BaseURL() const noexcept
+    KRYS_NODISCARD const net::Url &BaseUrl() const noexcept
     {
-      return _baseURL;
+      return _baseUrl;
     }
 
     /// @brief Parses @p url relative to the document base URL. As documents are always UTF-8, this is
     /// both parsing and encoding-parsing a URL.
     /// @see https://html.spec.whatwg.org/#encoding-parsing-a-url
     /// @see https://html.spec.whatwg.org/#parse-a-url
-    KRYS_NODISCARD url::URL CompleteURL(utf8_stringview url) const noexcept;
+    KRYS_NODISCARD net::Url CompleteUrl(utf8_stringview url) const noexcept;
 
     /// @brief Parses @p url relative to @p baseURL.
     /// @see https://html.spec.whatwg.org/#encoding-parsing-a-url
-    KRYS_NODISCARD static url::URL CompleteURL(utf8_stringview url, const url::URL &baseURL) noexcept;
+    KRYS_NODISCARD static net::Url CompleteUrl(utf8_stringview url, const net::Url &baseUrl) noexcept;
 
 #pragma endregion
 
@@ -976,7 +980,7 @@ namespace krys::boo
 
     /// @brief The locale form controls in @p locale (a language tag, from a `lang` attribute) use: the user
     /// interface's, unless @p locale is given and `Settings::LangAttributeAwareFormControlUIEnabled` is on.
-    KRYS_NODISCARD boo::Locale &GetCachedLocale(utf8_stringview locale) const noexcept;
+    KRYS_NODISCARD i18n::Locale &GetCachedLocale(utf8_stringview locale) const noexcept;
 
     void InvalidateCachedCSSParserContext() noexcept;
 
@@ -1040,7 +1044,7 @@ namespace krys::boo
     /// @brief Hit tests @p documentPoint for @p event and, unless the request is read-only, updates the hover
     /// and active state to match.
     KRYS_NODISCARD MouseEventWithHitTestResults PrepareMouseEvent(const HitTestRequest &request,
-                                                                  const DoublePoint &documentPoint,
+                                                                  const PointD &documentPoint,
                                                                   const PlatformMouseEvent &event) noexcept;
 
     void HoveredElementDidDetach(Element &element) noexcept;
@@ -1861,11 +1865,11 @@ namespace krys::boo
     KRYS_NODISCARD HTMLElement *BodyOrFrameset() const noexcept;
 
     /// @brief Converts absolute quads (or rects) to the client coordinates of the CSSOM View APIs.
-    void ConvertAbsoluteToClientQuads(List<FloatQuad> &quads, const RenderStyle &style) const noexcept;
+    void ConvertAbsoluteToClientQuads(List<QuadF> &quads, const RenderStyle &style) const noexcept;
 
-    void ConvertAbsoluteToClientRects(List<FloatRect> &rects, const RenderStyle &style) const noexcept;
+    void ConvertAbsoluteToClientRects(List<RectF> &rects, const RenderStyle &style) const noexcept;
 
-    void ConvertAbsoluteToClientRect(FloatRect &rect, const RenderStyle &style) const noexcept;
+    void ConvertAbsoluteToClientRect(RectF &rect, const RenderStyle &style) const noexcept;
 
 #pragma endregion
 
@@ -2264,7 +2268,7 @@ namespace krys::boo
     /// @brief Recomputes the document base URL and responds to base URL changes.
     /// @see https://html.spec.whatwg.org/#document-base-url
     /// @see https://html.spec.whatwg.org/#respond-to-base-url-changes
-    void UpdateBaseURL() noexcept;
+    void UpdateBaseUrl() noexcept;
 
     /// @see https://html.spec.whatwg.org/#the-document-object:get-the-parent
     KRYS_NODISCARD EventTarget *GetParent(Event &event) const noexcept override;

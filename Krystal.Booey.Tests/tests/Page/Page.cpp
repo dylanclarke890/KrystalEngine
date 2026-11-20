@@ -20,14 +20,14 @@
 #include "Krystal.Booey/HTML/EventLoop/EventLoop.hpp"
 #include "Krystal.Booey/HTML/Parser/DocumentParser.hpp"
 #include "Krystal.Booey/HTML/Types/DocumentVisibilityState.hpp"
-#include "Krystal.Booey/Page/EventHandler.hpp"
+#include "Krystal.Booey/Input/EventHandler.hpp"
+#include "Krystal.Booey/Input/PlatformKeyboardEvent.hpp"
+#include "Krystal.Booey/Input/PlatformMouseEvent.hpp"
 #include "Krystal.Booey/Page/LocalDOMWindow.hpp"
 #include "Krystal.Booey/Page/LocalFrame.hpp"
 #include "Krystal.Booey/Page/LocalFrameView.hpp"
 #include "Krystal.Booey/Page/Settings.hpp"
 #include "Krystal.Booey/Page/VisualViewport.hpp"
-#include "Krystal.Booey/Platform/Events/PlatformKeyboardEvent.hpp"
-#include "Krystal.Booey/Platform/Events/PlatformMouseEvent.hpp"
 #include "Krystal.Booey/Rendering/HitTesting/HitTestResult.hpp"
 #include "Krystal.Booey/Rendering/RenderText.hpp"
 #include "Krystal.Booey/Style/Scope/Scope.hpp"
@@ -84,7 +84,7 @@ namespace krys::boo::tests
 
       void MoveMouse(double x, double y) noexcept
       {
-        (void)Handler().MouseMoved(PlatformMouseEvent(DoublePoint(x, y), DoublePoint(x, y), MouseButton::None,
+        (void)Handler().MouseMoved(PlatformMouseEvent(PointD(x, y), PointD(x, y), MouseButton::None,
                                                       PlatformEvent::Type::MouseMoved, 0, {},
                                                       MonotonicTime::Now()));
       }
@@ -415,8 +415,8 @@ namespace krys::boo::tests
       auto cursor = cursorAt(fixture);
       REQUIRE(cursor.GetType() == Cursor::Type::Custom);
       REQUIRE(cursor.GetImage());
-      CHECK(cursor.GetImage()->Size() == FloatSize(4, 4));
-      CHECK(cursor.HotSpot() == IntPoint(3, 2));
+      CHECK(cursor.GetImage()->Size() == SizeF(4, 4));
+      CHECK(cursor.HotSpot() == PointI(3, 2));
       CHECK(cursor.ImageScaleFactor() == 1);
     }
 
@@ -425,7 +425,7 @@ namespace krys::boo::tests
       PageFixture fixture {page(u8"url(" + utf8_string(Small) + u8") 4 1, crosshair")};
       auto cursor = cursorAt(fixture);
       REQUIRE(cursor.GetType() == Cursor::Type::Custom);
-      CHECK(cursor.HotSpot() == IntPoint(0, 0));
+      CHECK(cursor.HotSpot() == PointI(0, 0));
     }
 
     SECTION("an image that fails or is too big is passed over")
@@ -434,7 +434,7 @@ namespace krys::boo::tests
                                 + utf8_string(Small) + u8"), crosshair")};
       auto cursor = cursorAt(fixture);
       REQUIRE(cursor.GetType() == Cursor::Type::Custom);
-      CHECK(cursor.GetImage()->Size() == FloatSize(4, 4));
+      CHECK(cursor.GetImage()->Size() == SizeF(4, 4));
     }
 
     SECTION("with no image to show, the predefined cursor")
@@ -449,7 +449,7 @@ namespace krys::boo::tests
       auto cursor = cursorAt(fixture);
       REQUIRE(cursor.GetType() == Cursor::Type::Custom);
       CHECK(cursor.ImageScaleFactor() == 2);
-      CHECK(cursor.HotSpot() == IntPoint(3, 3));
+      CHECK(cursor.HotSpot() == PointI(3, 3));
     }
   }
 
@@ -496,12 +496,12 @@ namespace krys::boo::tests
     auto &frame = fixture.TestPage->MainFrame();
     CHECK(fixture.TestPage->PageScaleFactor() == 1);
     // The view is 200x100, less the vertical scrollbar.
-    CHECK(view.ContentsSize() == IntSize(179, 400));
+    CHECK(view.ContentsSize() == SizeI(179, 400));
 
     auto hit = [&](int32 x, int32 y) -> std::string
     {
       auto result = fixture.Handler().HitTestResultAtPoint(
-        LayoutPoint(view.WindowToContents(IntPoint(x, y))),
+        LayoutPoint(view.WindowToContents(PointI(x, y))),
         {HitTestRequest::Type::ReadOnly, HitTestRequest::Type::Active});
       auto *element = result.TargetElement();
       auto id = element ? element->GetAttribute(u8"id").value_or(DOMString()) : DOMString();
@@ -510,12 +510,12 @@ namespace krys::boo::tests
     CHECK(hit(50, 75) == "b");
 
     // Scaled about the document's origin, the content is twice as big, and scrolls to the origin given.
-    fixture.TestPage->SetPageScaleFactor(2, IntPoint(100, 40));
+    fixture.TestPage->SetPageScaleFactor(2, PointI(100, 40));
     fixture.Frame();
     CHECK(fixture.TestPage->PageScaleFactor() == 2);
     CHECK(frame.FrameScaleFactor() == 2);
-    CHECK(view.ContentsSize() == IntSize(358, 800));
-    CHECK(view.GetScrollPosition() == IntPoint(100, 40));
+    CHECK(view.ContentsSize() == SizeI(358, 800));
+    CHECK(view.GetScrollPosition() == PointI(100, 40));
 
     // The viewport's (10, 70) is the content's (110, 110), the document's (55, 55); its (10, 35) the
     // document's (55, 37.5).
@@ -535,10 +535,10 @@ namespace krys::boo::tests
     CHECK(window.GetVisualViewport().PageLeft() == 50);
 
     // Back to no scale.
-    fixture.TestPage->SetPageScaleFactor(1, IntPoint());
+    fixture.TestPage->SetPageScaleFactor(1, PointI());
     fixture.Frame();
-    CHECK(view.ContentsSize() == IntSize(179, 400));
-    CHECK(view.GetScrollPosition() == IntPoint());
+    CHECK(view.ContentsSize() == SizeI(179, 400));
+    CHECK(view.GetScrollPosition() == PointI());
     CHECK(hit(50, 75) == "b");
   }
 
@@ -548,7 +548,7 @@ namespace krys::boo::tests
       u8"<!DOCTYPE html><style>body{margin:0}div{width:10px;height:10px;background:red}</style>"
       u8"<div></div>",
       {200, 100}, true);
-    fixture.TestPage->SetPageScaleFactor(2, IntPoint());
+    fixture.TestPage->SetPageScaleFactor(2, PointI());
     auto painted = fixture.Painted();
     // The view's content (half of it in view) is scaled about the origin.
     CHECK(painted.starts_with(u8"\n(concatenate-ctm\n  (ctm {m=((2.00,0.00)(0.00,2.00)) t=(0.00,0.00)}))"));

@@ -21,7 +21,7 @@
 #pragma once
 
 #include "Krystal.Booey/DOM/Types/DOMString.hpp"
-#include "Krystal.Booey/Platform/Decimal.hpp"
+#include "Krystal.Core/Types/Decimal.hpp"
 
 namespace krys::boo::html
 {

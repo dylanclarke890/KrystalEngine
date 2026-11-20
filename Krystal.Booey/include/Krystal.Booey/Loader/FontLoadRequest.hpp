@@ -32,13 +32,13 @@
 #include "Krystal.Core/TypeCast.hpp"
 #include "Krystal.Core/Types/RefPtr.hpp"
 
+namespace krys::net
+{
+  class Url;
+}
+
 namespace krys::boo
 {
-  namespace url
-  {
-    class URL;
-  }
-
   class Font;
   class FontCreationContext;
   class FontDescription;
@@ -61,7 +61,7 @@ namespace krys::boo
   public:
     ~FontLoadRequest() noexcept override = default;
 
-    KRYS_NODISCARD virtual const url::URL &URL() const noexcept = 0;
+    KRYS_NODISCARD virtual const net::Url &Url() const noexcept = 0;
 
     KRYS_NODISCARD virtual bool IsPending() const noexcept = 0;
 

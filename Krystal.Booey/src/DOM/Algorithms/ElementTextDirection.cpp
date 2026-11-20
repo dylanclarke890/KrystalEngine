@@ -36,8 +36,8 @@
 #include "Krystal.Booey/Infra/StringAlgorithms.hpp"
 #include "Krystal.Booey/Rendering/RenderObject.hpp"
 #include "Krystal.Booey/Style/Invalidation/PseudoClassChangeInvalidation.hpp"
-#include "Krystal.Booey/Text/UnicodeHelpers.hpp"
 #include "Krystal.Booey/Text/WritingMode.hpp"
+#include "Krystal.Text/UnicodeHelpers.hpp"
 
 namespace krys::boo::dom
 {
@@ -98,7 +98,7 @@ namespace krys::boo::dom
     }
 
     /// @see https://html.spec.whatwg.org/#text-node-directionality
-    KRYS_NODISCARD Maybe<TextDirection> ComputeTextDirectionFromText(DOMStringView text) noexcept
+    KRYS_NODISCARD Maybe<text::TextDirection> ComputeTextDirectionFromText(DOMStringView text) noexcept
     {
       // 1. If text's data does not contain a code point whose bidirectional character type is L, AL, or R,
       //    then return null.
@@ -106,29 +106,30 @@ namespace krys::boo::dom
       //    or R.
       // 3. If codePoint is of bidirectional character type AL or R, then return 'rtl'.
       // 4. If codePoint is of bidirectional character type L, then return 'ltr'.
-      return DefaultWritingDirection(text);
+      return text::DefaultWritingDirection(text);
     }
 
     /// @brief The directionality of @p element, whose `dir` attribute is in @p textDirectionState; null for
     /// an element without a parent whose directionality would be 'ltr'.
     /// @see https://html.spec.whatwg.org/#the-directionality
     /// @see https://html.spec.whatwg.org/#parent-directionality
-    KRYS_NODISCARD Maybe<TextDirection> ComputeTextDirection(const Element &element,
-                                                             TextDirectionState textDirectionState) noexcept
+    KRYS_NODISCARD Maybe<text::TextDirection>
+      ComputeTextDirection(const Element &element, TextDirectionState textDirectionState) noexcept
     {
       switch (textDirectionState)
       {
         // LTR: Return 'ltr'.
-        case TextDirectionState::LTR:  return TextDirection::LTR;
+        case TextDirectionState::LTR: return text::TextDirection::LTR;
 
         // RTL: Return 'rtl'.
-        case TextDirectionState::RTL:  return TextDirection::RTL;
+        case TextDirectionState::RTL: return text::TextDirection::RTL;
 
         // Auto:
         // 1. Let result be the auto directionality of element.
         // 2. If result is null, then return 'ltr'.
         // 3. Return result.
-        case TextDirectionState::Auto: return ComputeAutoDirectionality(element).value_or(TextDirection::LTR);
+        case TextDirectionState::Auto:
+          return ComputeAutoDirectionality(element).value_or(text::TextDirection::LTR);
 
         // Undefined:
         case TextDirectionState::Undefined:
@@ -139,13 +140,13 @@ namespace krys::boo::dom
           // 3. Return result.
           if (Is<HTMLBDIElement>(element))
           {
-            return ComputeAutoDirectionality(element).value_or(TextDirection::LTR);
+            return ComputeAutoDirectionality(element).value_or(text::TextDirection::LTR);
           }
 
           // If element is an input element whose type attribute is in the Telephone state: Return 'ltr'.
           if (auto *input = DynamicDowncast<HTMLInputElement>(element); input && input->IsTelephoneField())
           {
-            return TextDirection::LTR;
+            return text::TextDirection::LTR;
           }
 
           // Otherwise: Return the parent directionality of element.
@@ -180,8 +181,8 @@ namespace krys::boo::dom
     }
 
     /// @see https://html.spec.whatwg.org/#contained-text-auto-directionality
-    KRYS_NODISCARD Maybe<TextDirection> ComputeContainedTextAutoDirection(const Element &element,
-                                                                          bool canExcludeRoot) noexcept
+    KRYS_NODISCARD Maybe<text::TextDirection> ComputeContainedTextAutoDirection(const Element &element,
+                                                                                bool canExcludeRoot) noexcept
     {
       // (With canExcludeRoot, an excluded element skips every descendant.)
       if (canExcludeRoot && IsExcludedFromContainedTextAutoDirection(element))
@@ -230,7 +231,7 @@ namespace krys::boo::dom
     }
   }
 
-  Maybe<TextDirection> ComputeAutoDirectionality(const Element &element) noexcept
+  Maybe<text::TextDirection> ComputeAutoDirectionality(const Element &element) noexcept
   {
     // 1. If element is an auto-directionality form-associated element:
     if (auto *textFormControl = DynamicDowncast<HTMLTextFormControlElement>(element);
@@ -243,7 +244,7 @@ namespace krys::boo::dom
       // 1c. Return null.
       if (auto value = textFormControl->Value(); !value.empty())
       {
-        return ComputeTextDirectionFromText(value).value_or(TextDirection::LTR);
+        return ComputeTextDirectionFromText(value).value_or(text::TextDirection::LTR);
       }
       return null;
     }
@@ -257,7 +258,7 @@ namespace krys::boo::dom
         for (auto &child : *nodes)
         {
           // 2a.i. Let childDirection be null.
-          Maybe<TextDirection> childDirection;
+          Maybe<text::TextDirection> childDirection;
 
           // 2a.ii. If child is a Text node, then set childDirection to the text node directionality of child.
           if (auto *text = DynamicDowncast<Text>(*child))
@@ -289,7 +290,7 @@ namespace krys::boo::dom
     return ComputeContainedTextAutoDirection(element, false);
   }
 
-  Maybe<TextDirection> ComputeTextDirectionIfDirIsAuto(const Element &element) noexcept
+  Maybe<text::TextDirection> ComputeTextDirectionIfDirIsAuto(const Element &element) noexcept
   {
     if (!(element.SelfOrPrecedingNodesAffectDirAuto() && element.HasAutoTextDirectionState()))
     {
@@ -300,11 +301,12 @@ namespace krys::boo::dom
 
   namespace
   {
-    void UpdateEffectiveTextDirectionOfElementAndShadowTree(Element &element, Maybe<TextDirection> direction,
+    void UpdateEffectiveTextDirectionOfElementAndShadowTree(Element &element,
+                                                            Maybe<text::TextDirection> direction,
                                                             Element *initiator = nullptr) noexcept
     {
       bool usesEffectiveTextDirection = direction.has_value();
-      auto effectiveDirection = direction.value_or(TextDirection::LTR);
+      auto effectiveDirection = direction.value_or(text::TextDirection::LTR);
 
       style::PseudoClassChangeInvalidation styleInvalidation(element, css::SelectorPseudoClass::Dir,
                                                              style::PseudoClassChangeInvalidation::AnyValue);
@@ -333,7 +335,7 @@ namespace krys::boo::dom
       }
     }
 
-    Maybe<TextDirection> UpdateEffectiveTextDirectionOfElementAndDescendants(
+    Maybe<text::TextDirection> UpdateEffectiveTextDirectionOfElementAndDescendants(
       Element &element, TextDirectionState textDirectionState, Element *initiator = nullptr) noexcept
     {
       UpdateElementHasDirAutoFlag(element, textDirectionState);
@@ -388,7 +390,7 @@ namespace krys::boo::dom
     }
   }
 
-  void UpdateEffectiveTextDirectionOfDescendants(Element &element, Maybe<TextDirection> direction,
+  void UpdateEffectiveTextDirectionOfDescendants(Element &element, Maybe<text::TextDirection> direction,
                                                  Element *initiator) noexcept
   {
     for (auto *node = element.FirstChild(); node;)

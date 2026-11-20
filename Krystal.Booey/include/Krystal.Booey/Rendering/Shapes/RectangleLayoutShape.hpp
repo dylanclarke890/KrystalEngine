@@ -29,9 +29,9 @@
 
 #pragma once
 
-#include "Krystal.Booey/Graphics/Geometry/FloatRect.hpp"
-#include "Krystal.Booey/Graphics/Geometry/FloatSize.hpp"
 #include "Krystal.Booey/Rendering/Shapes/LayoutShape.hpp"
+#include "Krystal.Core/Geometry/Rect.hpp"
+#include "Krystal.Core/Geometry/Size.hpp"
 
 namespace krys::boo
 {
@@ -39,12 +39,12 @@ namespace krys::boo
   class RectangleLayoutShape final : public LayoutShape
   {
   private:
-    FloatRect _bounds;
-    FloatSize _radii;
+    RectF _bounds;
+    SizeF _radii;
     float _boxLogicalWidth {0.f};
 
   public:
-    RectangleLayoutShape(const FloatRect &bounds, const FloatSize &radii, float boxLogicalWidth) noexcept
+    RectangleLayoutShape(const RectF &bounds, const SizeF &radii, float boxLogicalWidth) noexcept
         : _bounds(bounds), _radii(radii), _boxLogicalWidth(boxLogicalWidth)
     {
     }
@@ -63,7 +63,7 @@ namespace krys::boo
                                                    LayoutUnit logicalHeight) const noexcept override;
 
   private:
-    KRYS_NODISCARD FloatRect ShapeMarginBounds() const noexcept;
+    KRYS_NODISCARD RectF ShapeMarginBounds() const noexcept;
 
     KRYS_NODISCARD float Rx() const noexcept
     {

@@ -46,7 +46,7 @@ namespace krys::boo::style
     template <TransformFunctionType operationType>
     KRYS_NODISCARD bool HasTransformOfType() const noexcept;
 
-    void Apply(TransformationMatrix &, const FloatSize &, size_t start = 0) const noexcept;
+    void Apply(TransformationMatrix &, const SizeF &, size_t start = 0) const noexcept;
 
     // Return true if any of the operation types are 3D operation types (even if the
     // values describe affine transforms)
@@ -77,8 +77,7 @@ namespace krys::boo::style
     return _value.template HasTransformOfType<operationType>();
   }
 
-  inline void Transform::Apply(TransformationMatrix &matrix, const FloatSize &size,
-                               size_t start) const noexcept
+  inline void Transform::Apply(TransformationMatrix &matrix, const SizeF &size, size_t start) const noexcept
   {
     _value.Apply(matrix, size, start);
   }
@@ -148,7 +147,7 @@ namespace krys::boo::style
   template <>
   struct ToPlatform<Transform>
   {
-    KRYS_NODISCARD TransformOperations operator()(const Transform &, const FloatSize &) noexcept;
+    KRYS_NODISCARD TransformOperations operator()(const Transform &, const SizeF &) noexcept;
   };
 }
 

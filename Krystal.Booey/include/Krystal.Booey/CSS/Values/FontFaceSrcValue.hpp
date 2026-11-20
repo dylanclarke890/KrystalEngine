@@ -26,7 +26,7 @@
 #pragma once
 
 #include "Krystal.Booey/CSS/Types/CSSOMString.hpp"
-#include "Krystal.Booey/CSS/Values/Primitives/URL.hpp"
+#include "Krystal.Booey/CSS/Values/Primitives/Url.hpp"
 #include "Krystal.Booey/CSS/Values/Value.hpp"
 #include "Krystal.Booey/Loader/Cache/CachedResourceHandle.hpp"
 #include "Krystal.Core/Types/List.hpp"
@@ -108,18 +108,18 @@ namespace krys::boo::css
   class FontFaceSrcResourceValue final : public Value
   {
   private:
-    CSSURL _location;
+    CSSUrl _location;
     CSSOMString _format;
     List<FontTechnology> _technologies;
     CachedResourceHandle<CachedFont> _cachedFont;
 
-    FontFaceSrcResourceValue(CSSURL &&location, CSSOMString &&format,
+    FontFaceSrcResourceValue(CSSUrl &&location, CSSOMString &&format,
                              List<FontTechnology> &&technologies) noexcept;
 
   public:
     ~FontFaceSrcResourceValue() noexcept;
 
-    KRYS_NODISCARD static Ref<FontFaceSrcResourceValue> Create(CSSURL location, CSSOMString format,
+    KRYS_NODISCARD static Ref<FontFaceSrcResourceValue> Create(CSSUrl location, CSSOMString format,
                                                                List<FontTechnology> &&technologies) noexcept;
 
     KRYS_NODISCARD bool IsEmpty() const noexcept

@@ -10,7 +10,7 @@
 #include "Krystal.Booey/HTML/Elements/HTMLAreaElement.hpp"
 #include "Krystal.Booey/HTML/Elements/HTMLImageElement.hpp"
 #include "Krystal.Booey/HTML/Parser/DocumentParser.hpp"
-#include "Krystal.Booey/Page/EventHandler.hpp"
+#include "Krystal.Booey/Input/EventHandler.hpp"
 #include "Krystal.Booey/Page/LocalFrame.hpp"
 #include "Krystal.Booey/Rendering/HitTesting/HitTestRequest.hpp"
 #include "Krystal.Booey/Rendering/HitTesting/HitTestResult.hpp"
@@ -66,14 +66,14 @@ namespace krys::boo::html::tests
 
       KRYS_NODISCARD HitTestResult HitTest(double x, double y) noexcept
       {
-        HitTestResult result(LayoutPoint(x, y));
+        HitTestResult result(LayoutPoint(PointD(x, y)));
         Document->HitTest(HitTestRequest(), result);
         return result;
       }
 
       KRYS_NODISCARD static PlatformMouseEvent Event(PlatformEvent::Type type, double x, double y) noexcept
       {
-        return PlatformMouseEvent(DoublePoint(x, y), DoublePoint(x, y), MouseButton::Left, type, 1, {},
+        return PlatformMouseEvent(PointD(x, y), PointD(x, y), MouseButton::Left, type, 1, {},
                                   MonotonicTime::Now());
       }
 
@@ -140,7 +140,7 @@ namespace krys::boo::html::tests
 
     // The area is the link, and the image the inner non-shared node.
     auto result = fixture.HitTest(10, 10);
-    CHECK(result.URLElement() == &fixture.ById(u8"rect"));
+    CHECK(result.UrlElement() == &fixture.ById(u8"rect"));
     CHECK(result.InnerNonSharedNode() == &image);
 
     SECTION("a default area takes what the others don't")

@@ -39,11 +39,11 @@
 #include "Krystal.Booey/Page/LocalFrame.hpp"
 #include "Krystal.Booey/Page/Settings.hpp"
 #include "Krystal.Booey/Rendering/RenderElement.hpp"
-#include "Krystal.Booey/URL/URL.hpp"
+#include "Krystal.Net/Url.hpp"
 
 namespace krys::boo
 {
-  IntSize DragImageSize(const DragImageRef &image) noexcept
+  SizeI DragImageSize(const DragImageRef &image) noexcept
   {
     if (image)
     {
@@ -52,13 +52,13 @@ namespace krys::boo
     return {0, 0};
   }
 
-  DragImageRef FitDragImageToMaxSize(DragImageRef image, const IntSize &layoutSize,
-                                     const IntSize &maxSize) noexcept
+  DragImageRef FitDragImageToMaxSize(DragImageRef image, const SizeI &layoutSize,
+                                     const SizeI &maxSize) noexcept
   {
     float heightResizeRatio = 0.0f;
     float widthResizeRatio = 0.0f;
     float resizeRatio = -1.0f;
-    IntSize originalSize = DragImageSize(image);
+    SizeI originalSize = DragImageSize(image);
 
     if (layoutSize.Width() > maxSize.Width())
     {
@@ -77,8 +77,7 @@ namespace krys::boo
 
     if (layoutSize == originalSize)
     {
-      return resizeRatio > 0.0f ? ScaleDragImage(krys::move(image), FloatSize(resizeRatio, resizeRatio))
-                                : image;
+      return resizeRatio > 0.0f ? ScaleDragImage(krys::move(image), SizeF(resizeRatio, resizeRatio)) : image;
     }
 
     // The image was scaled in the webpage so at minimum we must account for that scaling.
@@ -90,31 +89,31 @@ namespace krys::boo
       scaleY *= resizeRatio;
     }
 
-    return ScaleDragImage(krys::move(image), FloatSize(scaleX, scaleY));
+    return ScaleDragImage(krys::move(image), SizeF(scaleX, scaleY));
   }
 
   // Drag images record display lists, so scaling one redraws it at the new size rather than resampling it.
-  DragImageRef ScaleDragImage(DragImageRef image, FloatSize scale) noexcept
+  DragImageRef ScaleDragImage(DragImageRef image, SizeF scale) noexcept
   {
     if (!image)
     {
       return nullptr;
     }
 
-    IntSize imageSize = DragImageSize(image);
-    IntSize scaledSize(imageSize);
+    SizeI imageSize = DragImageSize(image);
+    SizeI scaledSize(imageSize);
     scaledSize.Scale(scale.Width(), scale.Height());
     if (imageSize == scaledSize)
     {
       return image;
     }
 
-    auto scaledImage = ImageBuffer::Create(FloatSize(scaledSize), 1);
+    auto scaledImage = ImageBuffer::Create(SizeF(scaledSize), 1);
     if (!scaledImage)
     {
       return nullptr;
     }
-    scaledImage->Context().DrawImageBuffer(*image, FloatRect(FloatPoint(), FloatSize(scaledSize)));
+    scaledImage->Context().DrawImageBuffer(*image, RectF(PointF(), SizeF(scaledSize)));
     return scaledImage;
   }
 
@@ -139,11 +138,11 @@ namespace krys::boo
     }
     auto &context = dissolvedImage->Context();
     context.SetAlpha(fraction);
-    context.DrawImageBuffer(*image, FloatRect(FloatPoint(), image->LogicalSize()));
+    context.DrawImageBuffer(*image, RectF(PointF(), image->LogicalSize()));
     return dissolvedImage;
   }
 
-  DragImageRef CreateDragImageFromImage(Image *image, ImageOrientation orientation) noexcept
+  DragImageRef CreateDragImageFromImage(Image *image, img::ImageOrientation orientation) noexcept
   {
     if (!image)
     {
@@ -156,7 +155,7 @@ namespace krys::boo
     {
       return nullptr;
     }
-    dragImage->Context().DrawImage(*image, FloatRect(FloatPoint(), size), ImagePaintingOptions {orientation});
+    dragImage->Context().DrawImage(*image, RectF(PointF(), size), ImagePaintingOptions {orientation});
     return dragImage;
   }
 
@@ -244,22 +243,22 @@ namespace krys::boo
       return result;
     }
 
-    void DrawTextAtPoint(GraphicsContext &context, utf8_stringview text, const IntPoint &point,
+    void DrawTextAtPoint(GraphicsContext &context, utf8_stringview text, const PointI &point,
                          const FontCascade &font, const Color &color) noexcept
     {
       TextRun run(text);
 
       context.SetFillColor(color);
-      context.DrawBidiText(font, run, FloatPoint(point));
+      context.DrawBidiText(font, run, PointF(point));
     }
 
-    void DrawDoubledTextAtPoint(GraphicsContext &context, utf8_stringview text, const IntPoint &point,
+    void DrawDoubledTextAtPoint(GraphicsContext &context, utf8_stringview text, const PointI &point,
                                 const FontCascade &font, const Color &topColor,
                                 const Color &bottomColor) noexcept
     {
       GraphicsContextStateSaver stateSaver(context);
 
-      IntPoint textPos = point;
+      PointI textPos = point;
 
       DrawTextAtPoint(context, text, textPos, font, bottomColor);
       textPos.Move(0, -1);
@@ -267,31 +266,31 @@ namespace krys::boo
     }
   }
 
-  DragImageData CreateDragImageForLink(boo::Element &element, url::URL &url, utf8_stringview inLabel,
+  DragImageData CreateDragImageForLink(boo::Element &element, net::Url &url, utf8_stringview inLabel,
                                        float) noexcept
   {
     const auto &settings = element.NodeDocument().GetSettings();
     const FontCascade labelFont = DragLabelFont(settings, DragLinkLabelFontsize, true);
     const FontCascade urlFont = DragLabelFont(settings, DragLinkUrlFontSize, false);
 
-    bool drawURLString = true;
-    bool clipURLString = false;
+    bool drawUrlString = true;
+    bool clipUrlString = false;
     bool clipLabelString = false;
 
     utf8_string urlString = url.String();
     utf8_string label(inLabel);
     if (label.empty())
     {
-      drawURLString = false;
+      drawUrlString = false;
       label = urlString;
     }
 
     // First step in drawing the link drag image width.
     TextRun labelRun(label);
     TextRun urlRun(urlString);
-    IntSize labelSize(static_cast<int32>(labelFont.Width(labelRun)),
-                      labelFont.MetricsOfPrimaryFont().IntAscent()
-                        + labelFont.MetricsOfPrimaryFont().IntDescent());
+    SizeI labelSize(static_cast<int32>(labelFont.Width(labelRun)),
+                    labelFont.MetricsOfPrimaryFont().IntAscent()
+                      + labelFont.MetricsOfPrimaryFont().IntDescent());
 
     if (labelSize.Width() > MaxDragLabelStringWidth)
     {
@@ -299,11 +298,11 @@ namespace krys::boo
       clipLabelString = true;
     }
 
-    IntSize urlStringSize;
-    IntSize imageSize(static_cast<int32>(labelSize.Width() + DragLabelBorderX * 2),
-                      static_cast<int32>(labelSize.Height() + DragLabelBorderY * 2));
+    SizeI urlStringSize;
+    SizeI imageSize(static_cast<int32>(labelSize.Width() + DragLabelBorderX * 2),
+                    static_cast<int32>(labelSize.Height() + DragLabelBorderY * 2));
 
-    if (drawURLString)
+    if (drawUrlString)
     {
       urlStringSize.SetWidth(static_cast<int32>(urlFont.Width(urlRun)));
       urlStringSize.SetHeight(urlFont.MetricsOfPrimaryFont().IntAscent()
@@ -312,7 +311,7 @@ namespace krys::boo
       if (urlStringSize.Width() > MaxDragLabelStringWidth)
       {
         imageSize.SetWidth(static_cast<int32>(MaxDragLabelWidth));
-        clipURLString = true;
+        clipUrlString = true;
       }
       else
       {
@@ -323,7 +322,7 @@ namespace krys::boo
 
     // We now know how big the image needs to be, so we create and
     // fill the background
-    auto image = ImageBuffer::Create(FloatSize(imageSize), 1);
+    auto image = ImageBuffer::Create(SizeF(imageSize), 1);
     if (!image)
     {
       return {nullptr};
@@ -331,21 +330,21 @@ namespace krys::boo
 
     auto &context = image->Context();
     constexpr auto backgroundColor = SRGBA<uint8> {140, 140, 140};
-    const FloatSize radii(DragLabelRadius, DragLabelRadius);
-    IntRect rect(0, 0, imageSize.Width(), imageSize.Height());
-    context.FillRoundedRect(FloatRoundedRect(FloatRect(rect), radii, radii, radii, radii), backgroundColor);
+    const SizeF radii(DragLabelRadius, DragLabelRadius);
+    RectI rect(0, 0, imageSize.Width(), imageSize.Height());
+    context.FillRoundedRect(FloatRoundedRect(RectF(rect), radii, radii, radii, radii), backgroundColor);
 
     // Draw the text
     constexpr auto topColor = Color::black;                         // original alpha = 0.75
     constexpr auto bottomColor = SRGBA<uint8> {255, 255, 255, 127}; // original alpha = 0.5
-    if (drawURLString)
+    if (drawUrlString)
     {
-      if (clipURLString)
+      if (clipUrlString)
       {
         urlString =
           StringTruncator::RightTruncate(urlString, imageSize.Width() - (DragLabelBorderX * 2.0f), urlFont);
       }
-      IntPoint textPos(
+      PointI textPos(
         static_cast<int32>(DragLabelBorderX),
         static_cast<int32>(imageSize.Height()
                            - (LabelBorderYOffset + urlFont.MetricsOfPrimaryFont().IntDescent())));
@@ -357,8 +356,8 @@ namespace krys::boo
       label = StringTruncator::RightTruncate(label, imageSize.Width() - (DragLabelBorderX * 2.0f), labelFont);
     }
 
-    IntPoint textPos(static_cast<int32>(DragLabelBorderX),
-                     static_cast<int32>(DragLabelBorderY + labelFont.Size()));
+    PointI textPos(static_cast<int32>(DragLabelBorderX),
+                   static_cast<int32>(DragLabelBorderY + labelFont.Size()));
     DrawDoubledTextAtPoint(context, label, textPos, labelFont, topColor, bottomColor);
 
     return {image};
@@ -369,15 +368,15 @@ namespace krys::boo
     constexpr int32 LinkDragBorderInset = 2;
   }
 
-  IntPoint DragOffsetForLinkDragImage(const DragImageRef &dragImage) noexcept
+  PointI DragOffsetForLinkDragImage(const DragImageRef &dragImage) noexcept
   {
-    IntSize size = DragImageSize(dragImage);
+    SizeI size = DragImageSize(dragImage);
     return {-size.Width() / 2, -LinkDragBorderInset};
   }
 
-  FloatPoint AnchorPointForLinkDragImage(const DragImageRef &dragImage) noexcept
+  PointF AnchorPointForLinkDragImage(const DragImageRef &dragImage) noexcept
   {
-    IntSize size = DragImageSize(dragImage);
+    SizeI size = DragImageSize(dragImage);
     if (!size.Height())
     {
       return {0.5, 0};

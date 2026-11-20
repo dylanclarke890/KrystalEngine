@@ -34,12 +34,10 @@
 #include "Krystal.Booey/CSS/Values/FontFaceSrcValue.hpp"
 #include "Krystal.Booey/CSS/Values/Value.hpp"
 #include "Krystal.Booey/CSS/Values/ValueId.hpp"
-#include "Krystal.Booey/Graphics/Animation/CompositeOperation.hpp"
 #include "Krystal.Booey/Graphics/Fonts/FontSizeAdjust.hpp"
 #include "Krystal.Booey/Graphics/GraphicsTypes.hpp"
 #include "Krystal.Booey/Graphics/Paths/WindRule.hpp"
 #include "Krystal.Booey/Platform/Scrolling/ScrollTypes.hpp"
-#include "Krystal.Booey/Platform/ThemeTypes.hpp"
 #include "Krystal.Booey/Rendering/Style/PositionTryOrder.hpp"
 #include "Krystal.Booey/Rendering/Style/RenderStyleConstants.hpp"
 #include "Krystal.Booey/Style/StyleAppearance.hpp"
@@ -69,6 +67,7 @@
 #include "Krystal.Booey/Text/WritingMode.hpp"
 #include "Krystal.Core/Assert.hpp"
 #include "Krystal.Core/Attributes.hpp"
+#include "Krystal.Core/Maths/CompositeOperation.hpp"
 #include "Krystal.Core/Visitor.hpp"
 
 // FIXME: The mapping of `style::PositionTryOrder` is added with its type.
@@ -912,28 +911,28 @@ namespace krys::boo
 #undef KRYS_MAPPING_TYPE
 #undef KRYS_MAPPING_FOR_EACH
 
-  KRYS_NODISCARD constexpr css::ValueId ToValueId(TextDirection e) noexcept
+  KRYS_NODISCARD constexpr css::ValueId ToValueId(text::TextDirection e) noexcept
   {
     switch (e)
     {
-      case TextDirection::LTR: return css::ValueId::Ltr;
-      case TextDirection::RTL: return css::ValueId::Rtl;
+      case text::TextDirection::LTR: return css::ValueId::Ltr;
+      case text::TextDirection::RTL: return css::ValueId::Rtl;
     }
     krys_debug_assert_msg(false, "Unexpected value");
     return css::ValueId::Invalid;
   }
 
   template <>
-  KRYS_NODISCARD constexpr TextDirection FromValueId(css::ValueId valueID) noexcept
+  KRYS_NODISCARD constexpr text::TextDirection FromValueId(css::ValueId valueID) noexcept
   {
     switch (valueID)
     {
-      case css::ValueId::Ltr: return TextDirection::LTR;
-      case css::ValueId::Rtl: return TextDirection::RTL;
+      case css::ValueId::Ltr: return text::TextDirection::LTR;
+      case css::ValueId::Rtl: return text::TextDirection::RTL;
       default:                break;
     }
     krys_debug_assert_msg(false, "Unexpected value");
-    return TextDirection::LTR;
+    return text::TextDirection::LTR;
   }
 
   KRYS_NODISCARD constexpr css::ValueId ToValueId(StyleWritingMode e) noexcept
@@ -1686,6 +1685,9 @@ namespace krys::boo
   KRYS_DEFINE_TO_FROM_VALUE_ID_FUNCTIONS
 #undef KRYS_MAPPING_TYPE
 #undef KRYS_MAPPING_FOR_EACH
+
+  // Krystal.Core's, named in Booey for the mapping's `boo::` qualification.
+  using krys::CompositeOperation;
 
 #define KRYS_MAPPING_TYPE CompositeOperation
 #define KRYS_MAPPING_FOR_EACH(CASE) CASE(Replace) CASE(Add) CASE(Accumulate)

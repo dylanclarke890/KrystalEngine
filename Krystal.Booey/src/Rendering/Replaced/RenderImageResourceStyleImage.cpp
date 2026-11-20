@@ -54,7 +54,7 @@ namespace krys::boo
     }
   }
 
-  RefPtr<Image> RenderImageResourceStyleImage::GetImage(const IntSize &size) const noexcept
+  RefPtr<Image> RenderImageResourceStyleImage::GetImage(const SizeI &size) const noexcept
   {
     // Generated content may trigger calls to image() while we're still pending, don't assert but gracefully
     // exit.
@@ -62,18 +62,18 @@ namespace krys::boo
     {
       return ShareRefPtr(&Image::NullImage());
     }
-    if (auto image = _styleImage->GetImage(Renderer(), FloatSize(size), NullGraphicsContext()))
+    if (auto image = _styleImage->GetImage(Renderer(), SizeF(size), NullGraphicsContext()))
     {
       return image;
     }
     return ShareRefPtr(&Image::NullImage());
   }
 
-  void RenderImageResourceStyleImage::SetContainerContext(const IntSize &size, const url::URL &) noexcept
+  void RenderImageResourceStyleImage::SetContainerContext(const SizeI &size, const net::Url &) noexcept
   {
     if (auto *renderer = Renderer())
     {
-      _styleImage->SetContainerContextForRenderer(*renderer, FloatSize(size), renderer->Style().UsedZoom());
+      _styleImage->SetContainerContextForRenderer(*renderer, SizeF(size), renderer->Style().UsedZoom());
     }
   }
 }

@@ -4,6 +4,7 @@
 #include "Krystal.Core/Colour/AlphaPremultiplication.hpp"
 #include "Krystal.Core/Colour/BlendMode.hpp"
 #include "Krystal.Core/Colour/ColourTypes.hpp"
+#include "Krystal.Core/Geometry/Rect.hpp"
 #include "Krystal.Core/Macros.hpp"
 #include "Krystal.Core/Numeric.hpp"
 #include "Krystal.Core/Types/Array.hpp"
@@ -16,6 +17,7 @@
 #include "Krystal.Gfx/Device.hpp"
 #include "Krystal.Gfx/Formats.hpp"
 #include "Krystal.Gfx/Handles.hpp"
+#include "Krystal.Gfx/Render2D/AffineTransformFloats.hpp"
 #include "Krystal.Gfx/Render2D/FilterGraph2D.hpp"
 #include "Krystal.Gfx/Render2D/FontFace2D.hpp"
 #include "Krystal.Gfx/Render2D/GlyphAtlas.hpp"
@@ -24,10 +26,8 @@
 #include "Krystal.Gfx/Render2D/Paint2D.hpp"
 #include "Krystal.Gfx/Render2D/Path2D.hpp"
 #include "Krystal.Gfx/Render2D/PathStroker.hpp"
-#include "Krystal.Gfx/Render2D/Rect2D.hpp"
 #include "Krystal.Gfx/Render2D/RoundedRect2D.hpp"
 #include "Krystal.Gfx/Render2D/StrokeStyle.hpp"
-#include "Krystal.Gfx/Render2D/Transform2D.hpp"
 #include "Krystal.Gfx/Sampler.hpp"
 
 namespace krys::gfx
@@ -295,9 +295,9 @@ namespace krys::gfx
 
     struct DrawState
     {
-      Transform2D Transform {};
+      AffineTransform Transform {};
       /// @brief The clip's bounds, in target pixels; draws outside them are discarded by the scissor.
-      PixelRect2D Clip {};
+      RectI Clip {};
       /// @brief The shape clips in effect, an index into the frame's chains, or `NoChain`.
       uint32 Chain {NoChain};
       BlendMode Blend {BlendMode::Normal};
@@ -312,7 +312,7 @@ namespace krys::gfx
     {
       RoundedRect2D Shape {};
       /// @brief Maps target pixels into the shape's coordinates.
-      Transform2D Inverse {};
+      AffineTransform Inverse {};
       bool Out {false};
     };
 
@@ -320,7 +320,7 @@ namespace krys::gfx
     struct PathClip
     {
       Path2D Path {};
-      Transform2D Transform {};
+      AffineTransform Transform {};
       FillRule Rule {FillRule::NonZero};
       bool Out {false};
     };
@@ -387,7 +387,7 @@ namespace krys::gfx
       /// @brief Maps target pixels into the shape's own space: along the line for a linear gradient (offset
       /// 0 to 1 along x), centred on the first circle for a radial one, centred and turned to start along x
       /// for a conic one.
-      Transform2D Inverse {};
+      AffineTransform Inverse {};
       /// @brief A radial gradient's second centre, relative to its first, then its start and end radii.
       Array<float, 4> Radial {};
       uint32 FirstStop {0u};
@@ -430,7 +430,7 @@ namespace krys::gfx
       TextureHandle Texture {};
       SamplerHandle Sampler {};
       /// @brief Maps target pixels into pattern space.
-      Transform2D Inverse {};
+      AffineTransform Inverse {};
       /// @brief The tile's size, then the spacing after it, in pattern space.
       Array<float, 4> TileAndSpacing {};
       /// @brief `PatternFlags`.
@@ -453,7 +453,7 @@ namespace krys::gfx
     /// @brief Where a shape's shadow goes: the shape's transform moved by the offset, and the blur.
     struct ShadowPlacement
     {
-      Transform2D Transform {};
+      AffineTransform Transform {};
       /// @brief The standard deviation in the shape's local units, and in target pixels.
       float Sigma {0.f};
       float PixelSigma {0.f};
@@ -475,7 +475,7 @@ namespace krys::gfx
     {
       uint32 FirstInstance {0u};
       uint32 InstanceCount {0u};
-      PixelRect2D Scissor {};
+      RectI Scissor {};
       uint32 Chain {NoChain};
       TextureHandle Texture {};
       SamplerHandle Sampler {};
@@ -487,7 +487,7 @@ namespace krys::gfx
       CompositeOperator2D Operator {CompositeOperator2D::SourceOver};
       /// @brief For a blend mode that reads what's beneath: the target pixels its instances reach, copied
       /// before it's drawn.
-      PixelRect2D Backdrop {};
+      RectI Backdrop {};
       /// @brief The gradient its gradient instances read, an index into the frame's gradients, or
       /// `NoGradient`.
       uint32 Gradient {NoGradient};
@@ -506,9 +506,9 @@ namespace krys::gfx
       BlendMode Blend {BlendMode::Normal};
       CompositeOperator2D Operator {CompositeOperator2D::SourceOver};
       /// @brief The clip when it began: nothing in it shows outside.
-      PixelRect2D Clip {};
+      RectI Clip {};
       /// @brief The target pixels its draws reach; at `End`, within the clip, its texture's extent.
-      PixelRect2D Bounds {};
+      RectI Bounds {};
       /// @brief How many states were saved when it began, after its own save.
       size_t SaveDepth {0u};
       /// @brief Its composite instance in the parent, and that instance's batch.
@@ -692,7 +692,7 @@ namespace krys::gfx
     void Restore() noexcept;
 
     /// @brief Applies `transform` before the current transform: later draws are in its coordinates.
-    void ConcatTransform(const Transform2D &transform) noexcept;
+    void ConcatTransform(const AffineTransform &transform) noexcept;
 
     void Translate(float x, float y) noexcept;
 
@@ -702,20 +702,20 @@ namespace krys::gfx
     void Rotate(float radians) noexcept;
 
     /// @brief Replaces the current transform, relative to the target's pixels.
-    void SetTransform(const Transform2D &transform) noexcept;
+    void SetTransform(const AffineTransform &transform) noexcept;
 
-    KRYS_NODISCARD const Transform2D &GetTransform() const noexcept;
+    KRYS_NODISCARD const AffineTransform &GetTransform() const noexcept;
 
     /// @brief Intersects the clip with a rect in the current coordinates. A rect whose edges land on whole
     /// target pixels, under a transform that keeps rects axis-aligned, is the scissor alone.
-    void ClipRect(const Rect2D &rect) noexcept;
+    void ClipRect(const RectF &rect) noexcept;
 
     /// @brief Intersects the clip with a rounded rect in the current coordinates, its radii constrained as
     /// `FillRoundedRect`'s are.
     void ClipRoundedRect(const RoundedRect2D &rect) noexcept;
 
     /// @brief Clips out a rect in the current coordinates: later draws skip it.
-    void ClipOutRect(const Rect2D &rect) noexcept;
+    void ClipOutRect(const RectF &rect) noexcept;
 
     /// @brief Clips out a rounded rect in the current coordinates.
     void ClipOutRoundedRect(const RoundedRect2D &rect) noexcept;
@@ -731,7 +731,7 @@ namespace krys::gfx
     /// @brief A clip as it was at some point in a frame: its bounds and its shape clips.
     struct ClipState
     {
-      PixelRect2D Bounds {};
+      RectI Bounds {};
       uint32 Chain {NoChain};
     };
 
@@ -742,7 +742,7 @@ namespace krys::gfx
     /// narrowing it; `Restore` brings back the clip saved before.
     void SetClip(const ClipState &clip) noexcept;
 
-    void FillRect(const Rect2D &rect, const Paint2D &paint) noexcept;
+    void FillRect(const RectF &rect, const Paint2D &paint) noexcept;
 
     /// @brief Fills a rounded rect. Negative radii are treated as zero, and radii that don't fit are scaled
     /// down together until they do, as CSS does for `border-radius`.
@@ -752,11 +752,10 @@ namespace krys::gfx
     /// constrained as `FillRoundedRect`'s are.
     /// @note Holes have circular corners. For elliptical ones, fill a path with the rect and the hole under
     /// `FillRule::EvenOdd`.
-    void FillRectWithRoundedHole(const Rect2D &rect, const RoundedRect2D &hole,
-                                 const Paint2D &paint) noexcept;
+    void FillRectWithRoundedHole(const RectF &rect, const RoundedRect2D &hole, const Paint2D &paint) noexcept;
 
     /// @brief Draws the `source` texels of a texture into `destination`, scaling to fit.
-    void DrawImage(TextureHandle texture, const Rect2D &source, const Rect2D &destination,
+    void DrawImage(TextureHandle texture, const RectF &source, const RectF &destination,
                    const ImageOptions &options = {}) noexcept;
 
     /// @brief Fills a path under the fill rule. The path is rasterised on the CPU into a coverage mask, which
@@ -783,7 +782,7 @@ namespace krys::gfx
                     Span<const Vec2f> positions, Vec2f origin, const Paint2D &paint) noexcept;
 
     /// @brief Draws the whole of a texture into `destination`.
-    void DrawImage(TextureHandle texture, const Rect2D &destination,
+    void DrawImage(TextureHandle texture, const RectF &destination,
                    const ImageOptions &options = {}) noexcept;
 
     /// @brief Sets the shadow later fills and strokes cast; images cast none. A shadow with no offset and no
@@ -855,16 +854,16 @@ namespace krys::gfx
     /// @brief Records one pass of a blur by `sigma` texels along `direction` (1, 0 or 0, 1), over `region` of
     /// `source` into the same texels of `destination`; nothing outside `region` is read.
     void RecordBlur(CommandBuffer &commands, const FrameResources &resources, TextureHandle source,
-                    TextureHandle destination, const PixelRect2D &region, Array<float, 2> direction,
-                    float sigma, EdgeMode2D edgeMode) noexcept;
+                    TextureHandle destination, const RectI &region, Array<float, 2> direction, float sigma,
+                    EdgeMode2D edgeMode) noexcept;
 
     /// @brief Adds a rounded rect in `transform`'s coordinates, its radii constrained.
     void AddRoundedRect(const RoundedRect2D &rect, const ResolvedPaint &paint,
-                        const Transform2D &transform) noexcept;
+                        const AffineTransform &transform) noexcept;
 
     /// @brief Fills in the instance's transform and adds it to the batch it can join, or a new one; skips it
     /// when nothing would show.
-    void AddInstance(RectInstance instance, const Transform2D &transform, TextureHandle texture,
+    void AddInstance(RectInstance instance, const AffineTransform &transform, TextureHandle texture,
                      SamplerHandle sampler, uint32 gradient = NoGradient,
                      uint32 pattern = NoPattern) noexcept;
 
@@ -877,7 +876,7 @@ namespace krys::gfx
 
     /// @brief Where the shadow of a shape drawn under `transform` with `paint` goes; nothing when there's no
     /// shadow to show.
-    KRYS_NODISCARD Maybe<ShadowPlacement> PlaceShadow(const Transform2D &transform,
+    KRYS_NODISCARD Maybe<ShadowPlacement> PlaceShadow(const AffineTransform &transform,
                                                       const ResolvedPaint &paint) const noexcept;
 
     /// @brief Adds a mask's instance, drawn on whole target pixels, unless it's empty or outside the clip.
@@ -892,7 +891,7 @@ namespace krys::gfx
     /// @brief Fills a path through its mask under `geometry` (which may differ from the current transform,
     /// as a glyph's outline is placed at its pen), with its shadow, the paint resolved in the current
     /// coordinates.
-    void FillPathMask(const Path2D &path, const Transform2D &geometry, FillRule rule,
+    void FillPathMask(const Path2D &path, const AffineTransform &geometry, FillRule rule,
                       const ResolvedPaint &paint) noexcept;
 
     /// @brief Whether a paint certainly shows nothing, before the work of resolving it.
@@ -916,18 +915,12 @@ namespace krys::gfx
 
     /// @brief The target pixels an instance's quad reaches under `transform` (grown by a pixel for its
     /// antialiased edge), within the clip.
-    KRYS_NODISCARD PixelRect2D Reach(const RectInstance &instance,
-                                     const Transform2D &transform) const noexcept;
+    KRYS_NODISCARD RectI Reach(const RectInstance &instance, const AffineTransform &transform) const noexcept;
 
     /// @brief Whether a blend mode reads what's beneath the draw, so it's copied first.
     KRYS_NODISCARD static bool CopiesBackdrop(BlendMode mode) noexcept;
 
     /// @brief The target pixels whose centres are inside the rect from (left, top) to (right, bottom).
-    KRYS_NODISCARD static PixelRect2D ToPixelRect(float left, float top, float right, float bottom) noexcept;
-
-    KRYS_NODISCARD static PixelRect2D Intersect(const PixelRect2D &a, const PixelRect2D &b) noexcept;
-
-    /// @brief The smallest rect holding both; an empty one adds nothing.
-    KRYS_NODISCARD static PixelRect2D Union(const PixelRect2D &a, const PixelRect2D &b) noexcept;
+    KRYS_NODISCARD static RectI ToPixelRect(float left, float top, float right, float bottom) noexcept;
   };
 }

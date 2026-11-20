@@ -29,16 +29,21 @@ target_compile_options(Krystal.Booey
     $<$<CXX_COMPILER_ID:MSVC>:/W4 /MP /utf-8 /bigobj>
 )
 
-# Third-party - brigand
+# Third-party - brigand (public: the CSS value headers use it)
 find_path(BRIGAND_INCLUDE_DIRS "brigand/adapted.hpp")
-target_include_directories(Krystal.Booey PRIVATE ${BRIGAND_INCLUDE_DIRS})
+target_include_directories(Krystal.Booey PUBLIC ${BRIGAND_INCLUDE_DIRS})
 
-# Third-party - ICU (IDNA for URL host parsing; script codes in the public font description; locale data for form controls)
-find_package(ICU REQUIRED COMPONENTS uc in dt)
-target_link_libraries(Krystal.Booey PUBLIC ICU::uc PRIVATE ICU::in ICU::dt)
+# Locales: date and number formatting, preferred languages
+target_link_libraries(Krystal.Booey PUBLIC Krystal.I18n)
+
+# URLs, HTTP header maps and parsers, and MIME types
+target_link_libraries(Krystal.Booey PUBLIC Krystal.Net)
 
 # Font faces, shared with Krystal.Gfx
 target_link_libraries(Krystal.Booey PUBLIC Krystal.Text)
+
+# Image decoders and encoders
+target_link_libraries(Krystal.Booey PUBLIC Krystal.Image)
 
 # Third-party - FreeType (metrics and glyphs)
 find_package(Freetype REQUIRED)
@@ -47,16 +52,6 @@ target_link_libraries(Krystal.Booey PRIVATE Freetype::Freetype)
 # Third-party - HarfBuzz (shaping)
 find_package(harfbuzz CONFIG REQUIRED)
 target_link_libraries(Krystal.Booey PRIVATE harfbuzz::harfbuzz)
-
-# Third-party - image decoders (PNG, JPEG and WebP; GIF, BMP and ICO are decoded in-tree)
-find_package(PNG REQUIRED)
-find_package(JPEG REQUIRED)
-find_package(WebP CONFIG REQUIRED)
-target_link_libraries(Krystal.Booey PRIVATE PNG::PNG JPEG::JPEG WebP::webp WebP::webpdemux)
-
-# Third-party - colour management (ICC profiles in images)
-find_package(lcms2 CONFIG REQUIRED)
-target_link_libraries(Krystal.Booey PRIVATE lcms2::lcms2)
 
 # XML documents and SVG images: libxml2, without encodings of its own (documents arrive decoded) or compression.
 find_package(LibXml2 REQUIRED)
@@ -490,7 +485,7 @@ set(KRYSTAL_BOOEY_CSS_HEADERS
   include/Krystal.Booey/CSS/Properties/Consumers/Transitions.hpp
   include/Krystal.Booey/CSS/Properties/Consumers/UI.hpp
   include/Krystal.Booey/CSS/Properties/Consumers/UnicodeRange.hpp
-  include/Krystal.Booey/CSS/Properties/Consumers/URL.hpp
+  include/Krystal.Booey/CSS/Properties/Consumers/Url.hpp
   include/Krystal.Booey/CSS/Properties/Consumers/WillChange.hpp
   include/Krystal.Booey/CSS/Properties/FontVariantLigaturesParser.hpp
   include/Krystal.Booey/CSS/Properties/FontVariantNumericParser.hpp
@@ -708,8 +703,8 @@ set(KRYSTAL_BOOEY_CSS_HEADERS
   include/Krystal.Booey/CSS/Values/Primitives/Symbol.hpp
   include/Krystal.Booey/CSS/Values/Primitives/UnevaluatedCalc.hpp
   include/Krystal.Booey/CSS/Values/Primitives/Units.hpp
-  include/Krystal.Booey/CSS/Values/Primitives/URL.hpp
-  include/Krystal.Booey/CSS/Values/Primitives/URLModifiers.hpp
+  include/Krystal.Booey/CSS/Values/Primitives/Url.hpp
+  include/Krystal.Booey/CSS/Values/Primitives/UrlModifiers.hpp
   include/Krystal.Booey/CSS/Values/PrimitiveValue.hpp
   include/Krystal.Booey/CSS/Values/Quad.hpp
   include/Krystal.Booey/CSS/Values/QuadValue.hpp
@@ -869,7 +864,7 @@ set(KRYSTAL_BOOEY_CSS_SOURCES
   src/CSS/Properties/Consumers/Transitions.cpp
   src/CSS/Properties/Consumers/UI.cpp
   src/CSS/Properties/Consumers/UnicodeRange.cpp
-  src/CSS/Properties/Consumers/URL.cpp
+  src/CSS/Properties/Consumers/Url.cpp
   src/CSS/Properties/Consumers/WillChange.cpp
   src/CSS/Properties/ImmutableStyleProperties.cpp
   src/CSS/Properties/MutableStyleProperties.cpp
@@ -1017,8 +1012,8 @@ set(KRYSTAL_BOOEY_CSS_SOURCES
   src/CSS/Values/Primitives/UnevaluatedCalc.cpp
   src/CSS/Values/Primitives/UnevaluatedCalcEvaluation.cpp
   src/CSS/Values/Primitives/Units.cpp
-  src/CSS/Values/Primitives/URL.cpp
-  src/CSS/Values/Primitives/URLModifiers.cpp
+  src/CSS/Values/Primitives/Url.cpp
+  src/CSS/Values/Primitives/UrlModifiers.cpp
   src/CSS/Values/PrimitiveValue.cpp
   src/CSS/Values/QuadValue.cpp
   src/CSS/Values/RatioValue.cpp
@@ -1142,6 +1137,10 @@ set(KRYSTAL_BOOEY_DOM_HEADERS
   include/Krystal.Booey/DOM/Internals/QualifiedNameCache.hpp
   include/Krystal.Booey/DOM/Internals/UserActionElementSet.hpp
   include/Krystal.Booey/DOM/Internals/VisibilityChangeClient.hpp
+  include/Krystal.Booey/DOM/IntersectionObservers/IntersectionObserver.hpp
+  include/Krystal.Booey/DOM/IntersectionObservers/IntersectionObserverCallback.hpp
+  include/Krystal.Booey/DOM/IntersectionObservers/IntersectionObserverEntry.hpp
+  include/Krystal.Booey/DOM/IntersectionObservers/IntersectionObserverMarginBox.hpp
   include/Krystal.Booey/DOM/Iterators/ComposedTreeAncestorIterator.hpp
   include/Krystal.Booey/DOM/Iterators/ComposedTreeIterator.hpp
   include/Krystal.Booey/DOM/Iterators/ElementAndTextDescendantIterator.hpp
@@ -1193,6 +1192,13 @@ set(KRYSTAL_BOOEY_DOM_HEADERS
   include/Krystal.Booey/DOM/Ranges/Range.hpp
   include/Krystal.Booey/DOM/Ranges/SimpleRange.hpp
   include/Krystal.Booey/DOM/Ranges/StaticRange.hpp
+  include/Krystal.Booey/DOM/ResizeObservers/ResizeObservation.hpp
+  include/Krystal.Booey/DOM/ResizeObservers/ResizeObserver.hpp
+  include/Krystal.Booey/DOM/ResizeObservers/ResizeObserverBoxOptions.hpp
+  include/Krystal.Booey/DOM/ResizeObservers/ResizeObserverCallback.hpp
+  include/Krystal.Booey/DOM/ResizeObservers/ResizeObserverEntry.hpp
+  include/Krystal.Booey/DOM/ResizeObservers/ResizeObserverOptions.hpp
+  include/Krystal.Booey/DOM/ResizeObservers/ResizeObserverSize.hpp
   include/Krystal.Booey/DOM/Scheduling/DocumentTimer.hpp
   include/Krystal.Booey/DOM/Scheduling/ScriptedAnimationController.hpp
   include/Krystal.Booey/DOM/Traversal/NodeFilter.hpp
@@ -1285,6 +1291,8 @@ set(KRYSTAL_BOOEY_DOM_SOURCES
   src/DOM/Internals/PopoverData.cpp
   src/DOM/Internals/QualifiedNameCache.cpp
   src/DOM/Internals/UserActionElementSet.cpp
+  src/DOM/IntersectionObservers/IntersectionObserver.cpp
+  src/DOM/IntersectionObservers/IntersectionObserverEntry.cpp
   src/DOM/Iterators/ComposedTreeIterator.cpp
   src/DOM/Mixins/ChildNode.cpp
   src/DOM/Mixins/DocumentOrShadowRoot.cpp
@@ -1323,6 +1331,8 @@ set(KRYSTAL_BOOEY_DOM_SOURCES
   src/DOM/Ranges/Range.cpp
   src/DOM/Ranges/SimpleRange.cpp
   src/DOM/Ranges/StaticRange.cpp
+  src/DOM/ResizeObservers/ResizeObservation.cpp
+  src/DOM/ResizeObservers/ResizeObserver.cpp
   src/DOM/Scheduling/DocumentTimer.cpp
   src/DOM/Scheduling/ScriptedAnimationController.cpp
   src/DOM/Traversal/NodeIterator.cpp
@@ -1457,11 +1467,8 @@ set(KRYSTAL_BOOEY_GRAPHICS_HEADERS
   include/Krystal.Booey/Graphics/Adwaita/TextFieldAdwaita.hpp
   include/Krystal.Booey/Graphics/Adwaita/ToggleButtonAdwaita.hpp
   include/Krystal.Booey/Graphics/Animation/AnimationUtilities.hpp
-  include/Krystal.Booey/Graphics/Animation/CompositeOperation.hpp
   include/Krystal.Booey/Graphics/Animation/IterationCompositeOperation.hpp
-  include/Krystal.Booey/Graphics/Animation/SpringSolver.hpp
   include/Krystal.Booey/Graphics/Animation/TimingFunction.hpp
-  include/Krystal.Booey/Graphics/Animation/UnitBezier.hpp
   include/Krystal.Booey/Graphics/Color/Color.hpp
   include/Krystal.Booey/Graphics/Color/ColorBlending.hpp
   include/Krystal.Booey/Graphics/Color/ColorFlags.hpp
@@ -1563,31 +1570,17 @@ set(KRYSTAL_BOOEY_GRAPHICS_HEADERS
   include/Krystal.Booey/Graphics/Fonts/WOFFFileFormat.hpp
   include/Krystal.Booey/Graphics/Geometry/BoxExtents.hpp
   include/Krystal.Booey/Graphics/Geometry/BoxSides.hpp
-  include/Krystal.Booey/Graphics/Geometry/DoublePoint.hpp
-  include/Krystal.Booey/Graphics/Geometry/DoubleSize.hpp
-  include/Krystal.Booey/Graphics/Geometry/FloatPoint.hpp
-  include/Krystal.Booey/Graphics/Geometry/FloatPoint3D.hpp
-  include/Krystal.Booey/Graphics/Geometry/FloatPointGraph.hpp
-  include/Krystal.Booey/Graphics/Geometry/FloatPolygon.hpp
-  include/Krystal.Booey/Graphics/Geometry/FloatQuad.hpp
-  include/Krystal.Booey/Graphics/Geometry/FloatRect.hpp
   include/Krystal.Booey/Graphics/Geometry/FloatRoundedRect.hpp
-  include/Krystal.Booey/Graphics/Geometry/FloatSegment.hpp
-  include/Krystal.Booey/Graphics/Geometry/FloatSize.hpp
-  include/Krystal.Booey/Graphics/Geometry/GeometryUtilities.hpp
-  include/Krystal.Booey/Graphics/Geometry/IntPoint.hpp
-  include/Krystal.Booey/Graphics/Geometry/IntRect.hpp
-  include/Krystal.Booey/Graphics/Geometry/IntRectHash.hpp
-  include/Krystal.Booey/Graphics/Geometry/IntSize.hpp
+  include/Krystal.Booey/Graphics/Geometry/LayoutGeometryForward.hpp
   include/Krystal.Booey/Graphics/Geometry/LayoutPoint.hpp
   include/Krystal.Booey/Graphics/Geometry/LayoutRange.hpp
   include/Krystal.Booey/Graphics/Geometry/LayoutRect.hpp
   include/Krystal.Booey/Graphics/Geometry/LayoutRoundedRect.hpp
   include/Krystal.Booey/Graphics/Geometry/LayoutSize.hpp
   include/Krystal.Booey/Graphics/Geometry/LayoutUnit.hpp
+  include/Krystal.Booey/Graphics/Geometry/RayIntersection.hpp
   include/Krystal.Booey/Graphics/Geometry/RectCorners.hpp
   include/Krystal.Booey/Graphics/Geometry/RectEdges.hpp
-  include/Krystal.Booey/Graphics/Geometry/Region.hpp
   include/Krystal.Booey/Graphics/Gradient.hpp
   include/Krystal.Booey/Graphics/GradientColorStop.hpp
   include/Krystal.Booey/Graphics/GradientColorStops.hpp
@@ -1617,13 +1610,10 @@ set(KRYSTAL_BOOEY_GRAPHICS_HEADERS
   include/Krystal.Booey/Graphics/Images/GeneratedImage.hpp
   include/Krystal.Booey/Graphics/Images/GradientImage.hpp
   include/Krystal.Booey/Graphics/Images/Image.hpp
-  include/Krystal.Booey/Graphics/Images/ImageBackingStore.hpp
-  include/Krystal.Booey/Graphics/Images/ImageDecoder.hpp
   include/Krystal.Booey/Graphics/Images/ImageFrame.hpp
   include/Krystal.Booey/Graphics/Images/ImageFrameAnimator.hpp
   include/Krystal.Booey/Graphics/Images/ImageFrameWorkQueue.hpp
   include/Krystal.Booey/Graphics/Images/ImageObserver.hpp
-  include/Krystal.Booey/Graphics/Images/ImageOrientation.hpp
   include/Krystal.Booey/Graphics/Images/ImagePaintingOptions.hpp
   include/Krystal.Booey/Graphics/Images/ImageSource.hpp
   include/Krystal.Booey/Graphics/Images/ImageTypes.hpp
@@ -1670,16 +1660,14 @@ set(KRYSTAL_BOOEY_GRAPHICS_HEADERS
   include/Krystal.Booey/Graphics/TextRuns/TextRunIterator.hpp
   include/Krystal.Booey/Graphics/TextRuns/WidthCache.hpp
   include/Krystal.Booey/Graphics/TextRuns/WidthIterator.hpp
-  include/Krystal.Booey/Graphics/Transforms/AffineTransform.hpp
   include/Krystal.Booey/Graphics/Transforms/IdentityTransformOperation.hpp
+  include/Krystal.Booey/Graphics/Transforms/LayoutTransforms.hpp
   include/Krystal.Booey/Graphics/Transforms/Matrix3DTransformOperation.hpp
   include/Krystal.Booey/Graphics/Transforms/MatrixTransformOperation.hpp
   include/Krystal.Booey/Graphics/Transforms/PerspectiveTransformOperation.hpp
-  include/Krystal.Booey/Graphics/Transforms/Quaternion.hpp
   include/Krystal.Booey/Graphics/Transforms/RotateTransformOperation.hpp
   include/Krystal.Booey/Graphics/Transforms/ScaleTransformOperation.hpp
   include/Krystal.Booey/Graphics/Transforms/SkewTransformOperation.hpp
-  include/Krystal.Booey/Graphics/Transforms/TransformationMatrix.hpp
   include/Krystal.Booey/Graphics/Transforms/TransformOperation.hpp
   include/Krystal.Booey/Graphics/Transforms/TransformOperations.hpp
   include/Krystal.Booey/Graphics/Transforms/TransformOperationsSharedPrimitivesPrefix.hpp
@@ -1768,27 +1756,14 @@ set(KRYSTAL_BOOEY_GRAPHICS_SOURCES
   src/Graphics/Fonts/OpenTypeMathData.cpp
   src/Graphics/Fonts/SystemFallbackFontCache.cpp
   src/Graphics/Fonts/WOFFFileFormat.cpp
-  src/Graphics/Geometry/DoubleSize.cpp
-  src/Graphics/Geometry/FloatPoint.cpp
-  src/Graphics/Geometry/FloatPoint3D.cpp
-  src/Graphics/Geometry/FloatPointGraph.cpp
-  src/Graphics/Geometry/FloatPolygon.cpp
-  src/Graphics/Geometry/FloatQuad.cpp
-  src/Graphics/Geometry/FloatRect.cpp
   src/Graphics/Geometry/FloatRoundedRect.cpp
-  src/Graphics/Geometry/FloatSegment.cpp
-  src/Graphics/Geometry/FloatSize.cpp
-  src/Graphics/Geometry/GeometryUtilities.cpp
-  src/Graphics/Geometry/IntPoint.cpp
-  src/Graphics/Geometry/IntRect.cpp
-  src/Graphics/Geometry/IntSize.cpp
   src/Graphics/Geometry/LayoutPoint.cpp
   src/Graphics/Geometry/LayoutRange.cpp
   src/Graphics/Geometry/LayoutRect.cpp
   src/Graphics/Geometry/LayoutRoundedRect.cpp
   src/Graphics/Geometry/LayoutSize.cpp
   src/Graphics/Geometry/LayoutUnit.cpp
-  src/Graphics/Geometry/Region.cpp
+  src/Graphics/Geometry/RayIntersection.cpp
   src/Graphics/Gradient.cpp
   src/Graphics/GradientColorStop.cpp
   src/Graphics/GradientColorStops.cpp
@@ -1816,7 +1791,6 @@ set(KRYSTAL_BOOEY_GRAPHICS_SOURCES
   src/Graphics/Images/GeneratedImage.cpp
   src/Graphics/Images/GradientImage.cpp
   src/Graphics/Images/Image.cpp
-  src/Graphics/Images/ImageDecoder.cpp
   src/Graphics/Images/ImageFrame.cpp
   src/Graphics/Images/ImageFrameAnimator.cpp
   src/Graphics/Images/ImageFrameWorkQueue.cpp
@@ -1844,16 +1818,14 @@ set(KRYSTAL_BOOEY_GRAPHICS_SOURCES
   src/Graphics/TextRuns/ComplexTextControllerHarfBuzz.cpp
   src/Graphics/TextRuns/StringTruncator.cpp
   src/Graphics/TextRuns/WidthIterator.cpp
-  src/Graphics/Transforms/AffineTransform.cpp
   src/Graphics/Transforms/IdentityTransformOperation.cpp
+  src/Graphics/Transforms/LayoutTransforms.cpp
   src/Graphics/Transforms/Matrix3DTransformOperation.cpp
   src/Graphics/Transforms/MatrixTransformOperation.cpp
   src/Graphics/Transforms/PerspectiveTransformOperation.cpp
-  src/Graphics/Transforms/Quaternion.cpp
   src/Graphics/Transforms/RotateTransformOperation.cpp
   src/Graphics/Transforms/ScaleTransformOperation.cpp
   src/Graphics/Transforms/SkewTransformOperation.cpp
-  src/Graphics/Transforms/TransformationMatrix.cpp
   src/Graphics/Transforms/TransformOperation.cpp
   src/Graphics/Transforms/TransformOperations.cpp
   src/Graphics/Transforms/TransformState.cpp
@@ -2048,7 +2020,7 @@ set(KRYSTAL_BOOEY_HTML_HEADERS
   include/Krystal.Booey/HTML/InputTypes/TextFieldInputType.hpp
   include/Krystal.Booey/HTML/InputTypes/TextInputType.hpp
   include/Krystal.Booey/HTML/InputTypes/TimeInputType.hpp
-  include/Krystal.Booey/HTML/InputTypes/URLInputType.hpp
+  include/Krystal.Booey/HTML/InputTypes/UrlInputType.hpp
   include/Krystal.Booey/HTML/InputTypes/WeekInputType.hpp
   include/Krystal.Booey/HTML/Internals/HTMLElementFactory.hpp
   include/Krystal.Booey/HTML/Internals/InlineStyleSheetOwner.hpp
@@ -2058,7 +2030,7 @@ set(KRYSTAL_BOOEY_HTML_HEADERS
   include/Krystal.Booey/HTML/MicroParsers/MicroParserResult.hpp
   include/Krystal.Booey/HTML/MicroParsers/Numbers.hpp
   include/Krystal.Booey/HTML/Mixins/HTMLOrSVGOrMathMLElement.hpp
-  include/Krystal.Booey/HTML/Mixins/URLDecomposition.hpp
+  include/Krystal.Booey/HTML/Mixins/UrlDecomposition.hpp
   include/Krystal.Booey/HTML/Parser/CharacterReference.hpp
   include/Krystal.Booey/HTML/Parser/DocumentParser.hpp
   include/Krystal.Booey/HTML/Parser/FormattingElementList.hpp
@@ -2245,13 +2217,13 @@ set(KRYSTAL_BOOEY_HTML_SOURCES
   src/HTML/InputTypes/SubmitInputType.cpp
   src/HTML/InputTypes/TextFieldInputType.cpp
   src/HTML/InputTypes/TimeInputType.cpp
-  src/HTML/InputTypes/URLInputType.cpp
+  src/HTML/InputTypes/UrlInputType.cpp
   src/HTML/InputTypes/WeekInputType.cpp
   src/HTML/Internals/HTMLElementFactory.cpp
   src/HTML/Internals/InlineStyleSheetOwner.cpp
   src/HTML/MicroParsers/Numbers.cpp
   src/HTML/Mixins/HTMLOrSVGOrMathMLElement.cpp
-  src/HTML/Mixins/URLDecomposition.cpp
+  src/HTML/Mixins/UrlDecomposition.cpp
   src/HTML/Parser/DocumentParser.cpp
   src/HTML/Parser/FormattingElementList.cpp
   src/HTML/Parser/OpenElementStack.cpp
@@ -2276,6 +2248,35 @@ set(KRYSTAL_BOOEY_HTML_SOURCES
 set(KRYSTAL_BOOEY_INFRA_HEADERS
   include/Krystal.Booey/Infra/Namespaces.hpp
   include/Krystal.Booey/Infra/StringAlgorithms.hpp
+)
+
+set(KRYSTAL_BOOEY_INPUT_HEADERS
+  include/Krystal.Booey/Input/AutoscrollController.hpp
+  include/Krystal.Booey/Input/EventHandler.hpp
+  include/Krystal.Booey/Input/LegacyKeyCodes.hpp
+  include/Krystal.Booey/Input/MouseEventTypes.hpp
+  include/Krystal.Booey/Input/MouseEventWithHitTestResults.hpp
+  include/Krystal.Booey/Input/PlatformEvent.hpp
+  include/Krystal.Booey/Input/PlatformKeyboardEvent.hpp
+  include/Krystal.Booey/Input/PlatformMouseEvent.hpp
+  include/Krystal.Booey/Input/PlatformTouchEvent.hpp
+  include/Krystal.Booey/Input/PlatformTouchPoint.hpp
+  include/Krystal.Booey/Input/PlatformWheelEvent.hpp
+  include/Krystal.Booey/Input/PointerCaptureController.hpp
+  include/Krystal.Booey/Input/PointerCharacteristics.hpp
+  include/Krystal.Booey/Input/PointerId.hpp
+  include/Krystal.Booey/Input/PointerLockController.hpp
+  include/Krystal.Booey/Input/SpatialNavigation.hpp
+  include/Krystal.Booey/Input/WheelEventDeltaFilter.hpp
+)
+
+set(KRYSTAL_BOOEY_INPUT_SOURCES
+  src/Input/AutoscrollController.cpp
+  src/Input/EventHandler.cpp
+  src/Input/PointerCaptureController.cpp
+  src/Input/PointerLockController.cpp
+  src/Input/SpatialNavigation.cpp
+  src/Input/WheelEventDeltaFilter.cpp
 )
 
 set(KRYSTAL_BOOEY_LAYOUT_HEADERS
@@ -2541,77 +2542,47 @@ set(KRYSTAL_BOOEY_MATHML_SOURCES
 )
 
 set(KRYSTAL_BOOEY_PAGE_HEADERS
-  include/Krystal.Booey/Page/AutoscrollController.hpp
-  include/Krystal.Booey/Page/ChromeClient.hpp
+  include/Krystal.Booey/Page/Clients/ChromeClient.hpp
+  include/Krystal.Booey/Page/Clients/DragClient.hpp
+  include/Krystal.Booey/Page/Clients/EditorClient.hpp
   include/Krystal.Booey/Page/DOMSelection.hpp
   include/Krystal.Booey/Page/Drag/DragActions.hpp
-  include/Krystal.Booey/Page/Drag/DragClient.hpp
   include/Krystal.Booey/Page/Drag/DragController.hpp
   include/Krystal.Booey/Page/Drag/DragItem.hpp
   include/Krystal.Booey/Page/Drag/DragState.hpp
-  include/Krystal.Booey/Page/EditorClient.hpp
-  include/Krystal.Booey/Page/EventHandler.hpp
   include/Krystal.Booey/Page/FrameSnapshotting.hpp
-  include/Krystal.Booey/Page/IntersectionObserver/IntersectionObserver.hpp
-  include/Krystal.Booey/Page/IntersectionObserver/IntersectionObserverCallback.hpp
-  include/Krystal.Booey/Page/IntersectionObserver/IntersectionObserverEntry.hpp
-  include/Krystal.Booey/Page/IntersectionObserver/IntersectionObserverMarginBox.hpp
   include/Krystal.Booey/Page/LocalDOMWindow.hpp
   include/Krystal.Booey/Page/LocalFrame.hpp
   include/Krystal.Booey/Page/LocalFrameView.hpp
   include/Krystal.Booey/Page/LocalFrameViewLayoutContext.hpp
-  include/Krystal.Booey/Page/MouseEventTypes.hpp
-  include/Krystal.Booey/Page/MouseEventWithHitTestResults.hpp
   include/Krystal.Booey/Page/Page.hpp
-  include/Krystal.Booey/Page/PointerCaptureController.hpp
-  include/Krystal.Booey/Page/PointerCharacteristics.hpp
-  include/Krystal.Booey/Page/PointerLockController.hpp
   include/Krystal.Booey/Page/PopupOpeningObserver.hpp
-  include/Krystal.Booey/Page/ResizeObserver/ResizeObservation.hpp
-  include/Krystal.Booey/Page/ResizeObserver/ResizeObserver.hpp
-  include/Krystal.Booey/Page/ResizeObserver/ResizeObserverBoxOptions.hpp
-  include/Krystal.Booey/Page/ResizeObserver/ResizeObserverCallback.hpp
-  include/Krystal.Booey/Page/ResizeObserver/ResizeObserverEntry.hpp
-  include/Krystal.Booey/Page/ResizeObserver/ResizeObserverOptions.hpp
-  include/Krystal.Booey/Page/ResizeObserver/ResizeObserverSize.hpp
-  include/Krystal.Booey/Page/ScrollBehavior.hpp
-  include/Krystal.Booey/Page/Scrolling/ScrollingConstraints.hpp
   include/Krystal.Booey/Page/Scrolling/ScrollAnchoringController.hpp
+  include/Krystal.Booey/Page/Scrolling/ScrollBehavior.hpp
+  include/Krystal.Booey/Page/Scrolling/ScrollingConstraints.hpp
   include/Krystal.Booey/Page/Scrolling/ScrollLatchingController.hpp
+  include/Krystal.Booey/Page/Scrolling/ScrollOptions.hpp
   include/Krystal.Booey/Page/Scrolling/ScrollSnapOffsetsInfo.hpp
-  include/Krystal.Booey/Page/ScrollOptions.hpp
   include/Krystal.Booey/Page/Settings.hpp
-  include/Krystal.Booey/Page/SpatialNavigation.hpp
   include/Krystal.Booey/Page/VisualViewport.hpp
-  include/Krystal.Booey/Page/WheelEventDeltaFilter.hpp
 )
 
 set(KRYSTAL_BOOEY_PAGE_SOURCES
-  src/Page/AutoscrollController.cpp
   src/Page/DOMSelection.cpp
   src/Page/Drag/DragController.cpp
-  src/Page/EventHandler.cpp
   src/Page/FrameSnapshotting.cpp
-  src/Page/IntersectionObserver/IntersectionObserver.cpp
-  src/Page/IntersectionObserver/IntersectionObserverEntry.cpp
   src/Page/LocalDOMWindow.cpp
   src/Page/LocalFrame.cpp
   src/Page/LocalFrameView.cpp
   src/Page/LocalFrameViewLayoutContext.cpp
   src/Page/Page.cpp
-  src/Page/PointerCaptureController.cpp
-  src/Page/PointerLockController.cpp
-  src/Page/ResizeObserver/ResizeObservation.cpp
-  src/Page/ResizeObserver/ResizeObserver.cpp
-  src/Page/ScrollBehavior.cpp
-  src/Page/Scrolling/ScrollingConstraints.cpp
   src/Page/Scrolling/ScrollAnchoringController.cpp
+  src/Page/Scrolling/ScrollBehavior.cpp
+  src/Page/Scrolling/ScrollingConstraints.cpp
   src/Page/Scrolling/ScrollLatchingController.cpp
   src/Page/Scrolling/ScrollSnapOffsetsInfo.cpp
   src/Page/Settings.cpp
-  src/Page/SpatialNavigation.cpp
   src/Page/VisualViewport.cpp
-  src/Page/WheelEventDeltaFilter.cpp
 )
 
 set(KRYSTAL_BOOEY_PLATFORM_HEADERS
@@ -2628,42 +2599,9 @@ set(KRYSTAL_BOOEY_PLATFORM_HEADERS
   include/Krystal.Booey/Platform/Choosers/PopupMenuClient.hpp
   include/Krystal.Booey/Platform/Choosers/PopupMenuStyle.hpp
   include/Krystal.Booey/Platform/Cursor.hpp
-  include/Krystal.Booey/Platform/DateComponents.hpp
-  include/Krystal.Booey/Platform/Decimal.hpp
-  include/Krystal.Booey/Platform/Events/PlatformEvent.hpp
-  include/Krystal.Booey/Platform/Events/PlatformKeyboardEvent.hpp
-  include/Krystal.Booey/Platform/Events/PlatformMouseEvent.hpp
-  include/Krystal.Booey/Platform/Events/PlatformTouchEvent.hpp
-  include/Krystal.Booey/Platform/Events/PlatformTouchPoint.hpp
-  include/Krystal.Booey/Platform/Events/PlatformWheelEvent.hpp
-  include/Krystal.Booey/Platform/Events/PointerId.hpp
-  include/Krystal.Booey/Platform/Events/WindowsKeyboardCodes.hpp
   include/Krystal.Booey/Platform/GraphicsClient.hpp
-  include/Krystal.Booey/Platform/ImageDecoders/BMPImageDecoder.hpp
-  include/Krystal.Booey/Platform/ImageDecoders/BMPImageReader.hpp
-  include/Krystal.Booey/Platform/ImageDecoders/EXIFMetadata.hpp
-  include/Krystal.Booey/Platform/ImageDecoders/GIFImageDecoder.hpp
-  include/Krystal.Booey/Platform/ImageDecoders/GIFImageReader.hpp
-  include/Krystal.Booey/Platform/ImageDecoders/ICCProfileTransform.hpp
-  include/Krystal.Booey/Platform/ImageDecoders/ICOImageDecoder.hpp
-  include/Krystal.Booey/Platform/ImageDecoders/JPEGImageDecoder.hpp
-  include/Krystal.Booey/Platform/ImageDecoders/PNGImageDecoder.hpp
-  include/Krystal.Booey/Platform/ImageDecoders/ScalableImageDecoder.hpp
-  include/Krystal.Booey/Platform/ImageDecoders/ScalableImageDecoderFrame.hpp
-  include/Krystal.Booey/Platform/ImageDecoders/WEBPImageDecoder.hpp
-  include/Krystal.Booey/Platform/Locale/DateTimeFormat.hpp
-  include/Krystal.Booey/Platform/Locale/Language.hpp
-  include/Krystal.Booey/Platform/Locale/LocaleICU.hpp
-  include/Krystal.Booey/Platform/Locale/LocalizedStrings.hpp
-  include/Krystal.Booey/Platform/Locale/PlatformLocale.hpp
-  include/Krystal.Booey/Platform/MIMETypeRegistry.hpp
-  include/Krystal.Booey/Platform/Network/BlobData.hpp
-  include/Krystal.Booey/Platform/Network/DataURLDecoder.hpp
-  include/Krystal.Booey/Platform/Network/HTTPHeaderMap.hpp
-  include/Krystal.Booey/Platform/Network/HTTPParsers.hpp
-  include/Krystal.Booey/Platform/Network/ResourceError.hpp
-  include/Krystal.Booey/Platform/Network/ResourceRequest.hpp
-  include/Krystal.Booey/Platform/Network/ResourceResponse.hpp
+  include/Krystal.Booey/Platform/DateComponents.hpp
+  include/Krystal.Booey/Platform/LocalizedStrings.hpp
   include/Krystal.Booey/Platform/Pasteboard/DragData.hpp
   include/Krystal.Booey/Platform/Pasteboard/DragImage.hpp
   include/Krystal.Booey/Platform/Pasteboard/Pasteboard.hpp
@@ -2682,43 +2620,14 @@ set(KRYSTAL_BOOEY_PLATFORM_HEADERS
   include/Krystal.Booey/Platform/Scrolling/ScrollbarThemeComposite.hpp
   include/Krystal.Booey/Platform/Scrolling/ScrollbarsController.hpp
   include/Krystal.Booey/Platform/Scrolling/ScrollTypes.hpp
-  include/Krystal.Booey/Platform/SharedBuffer.hpp
   include/Krystal.Booey/Platform/SimpleCaretAnimator.hpp
-  include/Krystal.Booey/Platform/Theme.hpp
-  include/Krystal.Booey/Platform/ThemeAdwaita.hpp
-  include/Krystal.Booey/Platform/ThemeTypes.hpp
-  include/Krystal.Booey/Platform/ThreadTimers.hpp
-  include/Krystal.Booey/Platform/Timer.hpp
 )
 
 set(KRYSTAL_BOOEY_PLATFORM_SOURCES
   src/Platform/CaretAnimator.cpp
   src/Platform/Cursor.cpp
   src/Platform/DateComponents.cpp
-  src/Platform/Decimal.cpp
-  src/Platform/ImageDecoders/BMPImageDecoder.cpp
-  src/Platform/ImageDecoders/BMPImageReader.cpp
-  src/Platform/ImageDecoders/EXIFMetadata.cpp
-  src/Platform/ImageDecoders/GIFImageDecoder.cpp
-  src/Platform/ImageDecoders/GIFImageReader.cpp
-  src/Platform/ImageDecoders/ICCProfileTransform.cpp
-  src/Platform/ImageDecoders/ICOImageDecoder.cpp
-  src/Platform/ImageDecoders/JPEGImageDecoder.cpp
-  src/Platform/ImageDecoders/PNGImageDecoder.cpp
-  src/Platform/ImageDecoders/ScalableImageDecoder.cpp
-  src/Platform/ImageDecoders/ScalableImageDecoderFrame.cpp
-  src/Platform/ImageDecoders/WEBPImageDecoder.cpp
-  src/Platform/Locale/DateTimeFormat.cpp
-  src/Platform/Locale/Language.cpp
-  src/Platform/Locale/LocaleICU.cpp
-  src/Platform/Locale/LocalizedStrings.cpp
-  src/Platform/Locale/PlatformLocale.cpp
-  src/Platform/MIMETypeRegistry.cpp
-  src/Platform/Network/BlobData.cpp
-  src/Platform/Network/DataURLDecoder.cpp
-  src/Platform/Network/HTTPHeaderMap.cpp
-  src/Platform/Network/HTTPParsers.cpp
-  src/Platform/Network/ResourceResponse.cpp
+  src/Platform/LocalizedStrings.cpp
   src/Platform/Pasteboard/DragData.cpp
   src/Platform/Pasteboard/DragImage.cpp
   src/Platform/Pasteboard/Pasteboard.cpp
@@ -2735,9 +2644,6 @@ set(KRYSTAL_BOOEY_PLATFORM_SOURCES
   src/Platform/Scrolling/ScrollbarThemeComposite.cpp
   src/Platform/Scrolling/ScrollbarsController.cpp
   src/Platform/SimpleCaretAnimator.cpp
-  src/Platform/ThemeAdwaita.cpp
-  src/Platform/ThreadTimers.cpp
-  src/Platform/Timer.cpp
 )
 
 set(KRYSTAL_BOOEY_RENDERING_HEADERS
@@ -4139,19 +4045,10 @@ set(KRYSTAL_BOOEY_SVG_HEADERS
 )
 
 set(KRYSTAL_BOOEY_TEXT_HEADERS
-  include/Krystal.Booey/Text/BidiContext.hpp
-  include/Krystal.Booey/Text/BidiResolver.hpp
-  include/Krystal.Booey/Text/BidiRunList.hpp
-  include/Krystal.Booey/Text/CharacterProperties.hpp
   include/Krystal.Booey/Text/EncodingRegistry.hpp
-  include/Krystal.Booey/Text/Hyphenation.hpp
-  include/Krystal.Booey/Text/LocaleToScriptMapping.hpp
-  include/Krystal.Booey/Text/TextBoundaries.hpp
-  include/Krystal.Booey/Text/TextBreakIterator.hpp
   include/Krystal.Booey/Text/TextFlags.hpp
   include/Krystal.Booey/Text/TextSpacing.hpp
   include/Krystal.Booey/Text/UnicodeBidi.hpp
-  include/Krystal.Booey/Text/UnicodeHelpers.hpp
   include/Krystal.Booey/Text/WritingMode.hpp
 )
 
@@ -4276,32 +4173,15 @@ set(KRYSTAL_BOOEY_SVG_SOURCES
 )
 
 set(KRYSTAL_BOOEY_TEXT_SOURCES
-  src/Text/BidiContext.cpp
   src/Text/EncodingRegistry.cpp
-  src/Text/Hyphenation.cpp
-  src/Text/LocaleToScriptMapping.cpp
-  src/Text/TextBoundaries.cpp
-  src/Text/TextBreakIterator.cpp
   src/Text/TextFlags.cpp
   src/Text/TextSpacing.cpp
-  src/Text/UnicodeHelpers.cpp
 )
 
 set(KRYSTAL_BOOEY_TYPES_HEADERS
   include/Krystal.Booey/Types/IsEOF.hpp
   include/Krystal.Booey/Types/NestingLevelIncrementer.hpp
   include/Krystal.Booey/Types/SourceLocation.hpp
-)
-
-set(KRYSTAL_BOOEY_URL_HEADERS
-  include/Krystal.Booey/URL/URL.hpp
-  include/Krystal.Booey/URL/URLHash.hpp
-  include/Krystal.Booey/URL/URLParser.hpp
-)
-
-set(KRYSTAL_BOOEY_URL_SOURCES
-  src/URL/URL.cpp
-  src/URL/URLParser.cpp
 )
 
 set(KRYSTAL_BOOEY_XML_HEADERS
@@ -4337,7 +4217,7 @@ target_precompile_headers(Krystal.Booey
     <variant>
     <vector>
 
-    <Krystal.Core/Text/Encodings/UTF.hpp>
+    <Krystal.Text/Encodings/UTF.hpp>
 
     include/Krystal.Booey/CSS/Calc/Tree.hpp
     include/Krystal.Booey/CSS/Calc/Value.hpp
@@ -4392,6 +4272,7 @@ target_sources(Krystal.Booey
       ${KRYSTAL_BOOEY_HISTORY_HEADERS}
       ${KRYSTAL_BOOEY_HTML_HEADERS}
       ${KRYSTAL_BOOEY_INFRA_HEADERS}
+      ${KRYSTAL_BOOEY_INPUT_HEADERS}
       ${KRYSTAL_BOOEY_LAYOUT_HEADERS}
       ${KRYSTAL_BOOEY_LOADER_HEADERS}
       ${KRYSTAL_BOOEY_MATHML_HEADERS}
@@ -4402,7 +4283,6 @@ target_sources(Krystal.Booey
       ${KRYSTAL_BOOEY_SVG_HEADERS}
       ${KRYSTAL_BOOEY_TEXT_HEADERS}
       ${KRYSTAL_BOOEY_TYPES_HEADERS}
-      ${KRYSTAL_BOOEY_URL_HEADERS}
       ${KRYSTAL_BOOEY_XML_HEADERS}
   PRIVATE
     ${KRYSTAL_BOOEY_GENERATED_SOURCES}
@@ -4416,6 +4296,7 @@ target_sources(Krystal.Booey
     ${KRYSTAL_BOOEY_GRAPHICS_SOURCES}
     ${KRYSTAL_BOOEY_HISTORY_SOURCES}
     ${KRYSTAL_BOOEY_HTML_SOURCES}
+    ${KRYSTAL_BOOEY_INPUT_SOURCES}
     ${KRYSTAL_BOOEY_LAYOUT_SOURCES}
     ${KRYSTAL_BOOEY_LOADER_SOURCES}
     ${KRYSTAL_BOOEY_MATHML_SOURCES}
@@ -4425,6 +4306,5 @@ target_sources(Krystal.Booey
     ${KRYSTAL_BOOEY_STYLE_SOURCES}
     ${KRYSTAL_BOOEY_SVG_SOURCES}
     ${KRYSTAL_BOOEY_TEXT_SOURCES}
-    ${KRYSTAL_BOOEY_URL_SOURCES}
     ${KRYSTAL_BOOEY_XML_SOURCES}
 )

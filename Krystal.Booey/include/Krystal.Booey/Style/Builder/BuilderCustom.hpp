@@ -670,7 +670,7 @@ namespace krys::boo::style
     return copy;
   }
 
-  KRYS_NODISCARD inline URL ForwardInheritedValue(const URL &value) noexcept
+  KRYS_NODISCARD inline Url ForwardInheritedValue(const Url &value) noexcept
   {
     auto copy = value;
     return copy;
@@ -917,7 +917,7 @@ namespace krys::boo::style
 
   inline void BuilderCustom::ApplyValueDirection(BuilderState &builderState, css::Value &value) noexcept
   {
-    builderState.Style().SetDirection(FromCSSValue<TextDirection>(value));
+    builderState.Style().SetDirection(FromCSSValue<text::TextDirection>(value));
     builderState.Style().SetHasExplicitlySetDirection(true);
   }
 

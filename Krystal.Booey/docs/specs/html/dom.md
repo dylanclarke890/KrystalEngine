@@ -14,7 +14,7 @@ Status: reviewed (2026-11-01)
 ### [3.1 Documents](https://html.spec.whatwg.org/#documents)
 
 Status: reviewed (2026-11-01)
-> A document's address is its URL (`Document::GetURL`, DOM). There are no origins (not planned), and no referrer until remote pages.
+> A document's address is its URL (`Document::GetUrl`, DOM). There are no origins (not planned), and no referrer until remote pages.
 <!-- definitions: the-document's-address concept-document-origin the-document's-referrer -->
 
 #### [3.1.1 The Document object](https://html.spec.whatwg.org/#the-document-object)

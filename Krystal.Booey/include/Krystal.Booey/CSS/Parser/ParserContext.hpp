@@ -28,12 +28,12 @@
 #include "Krystal.Booey/CSS/Parser/ParserMode.hpp"
 #include "Krystal.Booey/CSS/Properties/PropertyId.hpp"
 #include "Krystal.Booey/CSS/Rules/RuleType.hpp"
-#include "Krystal.Booey/URL/URL.hpp"
-#include "Krystal.Booey/URL/URLHash.hpp"
 #include "Krystal.Core/Attributes.hpp"
 #include "Krystal.Core/Hash.hpp"
 #include "Krystal.Core/Types/Maybe.hpp"
 #include "Krystal.Core/Utils/Tags.hpp"
+#include "Krystal.Net/Url.hpp"
+#include "Krystal.Net/UrlHash.hpp"
 #include <memory>
 
 namespace krys::boo
@@ -46,7 +46,7 @@ namespace krys::boo::css
   /// @brief The document state and settings that affect how CSS is parsed.
   struct ParserContext
   {
-    url::URL BaseURL;
+    net::Url BaseUrl;
     utf8_stringview Charset;
     ParserMode Mode {ParserMode::HTMLStandard};
     Maybe<RuleType> EnclosingRuleType;
@@ -73,14 +73,14 @@ namespace krys::boo::css
 
     /// @brief Creates a context for @p mode, with every setting at its default.
     /// @note Initialises the static value pool.
-    explicit ParserContext(ParserMode mode, url::URL baseURL = {}) noexcept;
+    explicit ParserContext(ParserMode mode, net::Url baseUrl = {}) noexcept;
 
     /// @brief The document's context (`Document::CssParserContext()`).
     explicit ParserContext(const Document &document) noexcept;
 
     /// @brief A context for a sheet in @p document: @p sheetBaseURL (or the document base URL if it's null),
     /// the document's mode and settings.
-    ParserContext(const Document &document, const url::URL &sheetBaseURL, utf8_stringview charset) noexcept;
+    ParserContext(const Document &document, const net::Url &sheetBaseUrl, utf8_stringview charset) noexcept;
 
     /// @brief Switches to the UA sheet mode and enables the features UA sheets rely on.
     void SetUASheetMode() noexcept;
@@ -101,12 +101,12 @@ namespace krys
   {
     static void ConstructDeletedValue(boo::css::ParserContext &slot) noexcept
     {
-      new (NotNullTag {}, std::addressof(slot.BaseURL)) boo::url::URL(HashTableDeletedValueTag {});
+      new (NotNullTag {}, std::addressof(slot.BaseUrl)) net::Url(HashTableDeletedValueTag {});
     }
 
     KRYS_NODISCARD static bool IsDeletedValue(const boo::css::ParserContext &value) noexcept
     {
-      return value.BaseURL.IsHashTableDeletedValue();
+      return value.BaseUrl.IsHashTableDeletedValue();
     }
 
     KRYS_NODISCARD static boo::css::ParserContext EmptyValue() noexcept

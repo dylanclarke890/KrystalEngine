@@ -24,8 +24,6 @@
 
 #include "Krystal.Booey/Style/Values/Shapes/ShapeFunction.hpp"
 
-#include "Krystal.Booey/Graphics/Geometry/FloatRect.hpp"
-#include "Krystal.Booey/Graphics/Geometry/GeometryUtilities.hpp"
 #include "Krystal.Booey/Graphics/Paths/Path.hpp"
 #include "Krystal.Booey/Style/Values/Primitives/LengthWrapperBlending.hpp"
 #include "Krystal.Booey/Style/Values/Primitives/NumericTypesBlending.hpp"
@@ -35,6 +33,8 @@
 #include "Krystal.Booey/SVG/Internals/SVGPathByteStreamSource.hpp"
 #include "Krystal.Booey/SVG/Internals/SVGPathParser.hpp"
 #include "Krystal.Booey/SVG/Internals/SVGPathSource.hpp"
+#include "Krystal.Core/Geometry/GeometryUtilities.hpp"
+#include "Krystal.Core/Geometry/Rect.hpp"
 #include "Krystal.Core/Utils/Move.hpp"
 
 namespace krys::boo::style
@@ -53,16 +53,16 @@ namespace krys::boo::style
   }
 
   template <typename ControlPoint>
-  KRYS_NODISCARD static FloatPoint EvaluateControlPointOffset(const ControlPoint &value,
-                                                              const FloatSize &boxSize) noexcept
+  KRYS_NODISCARD static PointF EvaluateControlPointOffset(const ControlPoint &value,
+                                                          const SizeF &boxSize) noexcept
   {
-    return Evaluate<FloatPoint>(value.Offset, boxSize, style::ZoomNeeded {});
+    return Evaluate<PointF>(value.Offset, boxSize, style::ZoomNeeded {});
   }
 
   template <typename ControlPoint>
-  KRYS_NODISCARD static FloatPoint
-    ResolveControlPoint(CommandAffinity affinity, FloatPoint currentPosition, FloatPoint segmentOffset,
-                        const ControlPoint &controlPoint, const FloatSize &boxSize) noexcept
+  KRYS_NODISCARD static PointF ResolveControlPoint(CommandAffinity affinity, PointF currentPosition,
+                                                   PointF segmentOffset, const ControlPoint &controlPoint,
+                                                   const SizeF &boxSize) noexcept
   {
     auto controlPointOffset = EvaluateControlPointOffset(controlPoint, boxSize);
 
@@ -81,7 +81,7 @@ namespace krys::boo::style
       [&](css::keywords::End)
       {
         auto absoluteEndPoint = (std::holds_alternative<css::keywords::By>(affinity))
-                                  ? currentPosition + ToFloatSize(segmentOffset)
+                                  ? currentPosition + ToSizeF(segmentOffset)
                                   : segmentOffset;
         return absoluteEndPoint + controlPointOffset;
       },
@@ -89,7 +89,7 @@ namespace krys::boo::style
 
     if (std::holds_alternative<css::keywords::By>(affinity))
     {
-      return absoluteControlPoint - ToFloatSize(currentPosition);
+      return absoluteControlPoint - ToSizeF(currentPosition);
     }
     return absoluteControlPoint;
   }
@@ -99,7 +99,7 @@ namespace krys::boo::style
   class ShapeSVGPathSource final : public SVGPathSource
   {
   public:
-    explicit ShapeSVGPathSource(Position startPoint, const Shape &shape, const FloatSize &boxSize) noexcept
+    explicit ShapeSVGPathSource(Position startPoint, const Shape &shape, const SizeF &boxSize) noexcept
         : _start(krys::move(startPoint)), _shape(shape), _boxSize(boxSize), _endIndex(shape.Commands.size())
     {
     }
@@ -129,26 +129,26 @@ namespace krys::boo::style
       return SVGPathSegType::MoveToAbs;
     }
 
-    KRYS_NODISCARD Maybe<MoveToSegment> ParseMoveToSegment(FloatPoint) noexcept override
+    KRYS_NODISCARD Maybe<MoveToSegment> ParseMoveToSegment(PointF) noexcept override
     {
       if (!_nextIndex)
       {
-        return MoveToSegment {Evaluate<FloatPoint>(_start, _boxSize, style::ZoomNeeded {})};
+        return MoveToSegment {Evaluate<PointF>(_start, _boxSize, style::ZoomNeeded {})};
       }
 
       auto &moveCommand = CurrentValue<MoveCommand>();
 
-      return MoveToSegment {Evaluate<FloatPoint>(moveCommand.ToBy, _boxSize, style::ZoomNeeded {})};
+      return MoveToSegment {Evaluate<PointF>(moveCommand.ToBy, _boxSize, style::ZoomNeeded {})};
     }
 
-    KRYS_NODISCARD Maybe<LineToSegment> ParseLineToSegment(FloatPoint) noexcept override
+    KRYS_NODISCARD Maybe<LineToSegment> ParseLineToSegment(PointF) noexcept override
     {
       auto &lineCommand = CurrentValue<LineCommand>();
 
-      return LineToSegment {Evaluate<FloatPoint>(lineCommand.ToBy, _boxSize, style::ZoomNeeded {})};
+      return LineToSegment {Evaluate<PointF>(lineCommand.ToBy, _boxSize, style::ZoomNeeded {})};
     }
 
-    KRYS_NODISCARD Maybe<LineToHorizontalSegment> ParseLineToHorizontalSegment(FloatPoint) noexcept override
+    KRYS_NODISCARD Maybe<LineToHorizontalSegment> ParseLineToHorizontalSegment(PointF) noexcept override
     {
       auto &lineCommand = CurrentValue<HLineCommand>();
 
@@ -156,7 +156,7 @@ namespace krys::boo::style
         Evaluate<float>(lineCommand.ToBy, _boxSize.Width(), style::ZoomNeeded {})};
     }
 
-    KRYS_NODISCARD Maybe<LineToVerticalSegment> ParseLineToVerticalSegment(FloatPoint) noexcept override
+    KRYS_NODISCARD Maybe<LineToVerticalSegment> ParseLineToVerticalSegment(PointF) noexcept override
     {
       auto &lineCommand = CurrentValue<VLineCommand>();
 
@@ -165,7 +165,7 @@ namespace krys::boo::style
     }
 
     KRYS_NODISCARD Maybe<CurveToCubicSegment>
-      ParseCurveToCubicSegment(FloatPoint currentPosition) noexcept override
+      ParseCurveToCubicSegment(PointF currentPosition) noexcept override
     {
       auto &curveCommand = CurrentValue<CurveCommand>();
 
@@ -173,7 +173,7 @@ namespace krys::boo::style
         curveCommand.ToBy,
         [&](const auto &value)
         {
-          auto offset = Evaluate<FloatPoint>(value.Offset, _boxSize, style::ZoomNeeded {});
+          auto offset = Evaluate<PointF>(value.Offset, _boxSize, style::ZoomNeeded {});
           return CurveToCubicSegment {
             ResolveControlPoint(value.Affinity, currentPosition, offset, value.ControlPoint1, _boxSize),
             ResolveControlPoint(value.Affinity, currentPosition, offset, value.ControlPoint2.value(),
@@ -183,7 +183,7 @@ namespace krys::boo::style
     }
 
     KRYS_NODISCARD Maybe<CurveToQuadraticSegment>
-      ParseCurveToQuadraticSegment(FloatPoint currentPosition) noexcept override
+      ParseCurveToQuadraticSegment(PointF currentPosition) noexcept override
     {
       auto &curveCommand = CurrentValue<CurveCommand>();
 
@@ -191,7 +191,7 @@ namespace krys::boo::style
         curveCommand.ToBy,
         [&](const auto &value)
         {
-          auto offset = Evaluate<FloatPoint>(value.Offset, _boxSize, style::ZoomNeeded {});
+          auto offset = Evaluate<PointF>(value.Offset, _boxSize, style::ZoomNeeded {});
           return CurveToQuadraticSegment {
             ResolveControlPoint(value.Affinity, currentPosition, offset, value.ControlPoint1, _boxSize),
             offset};
@@ -199,24 +199,24 @@ namespace krys::boo::style
     }
 
     KRYS_NODISCARD Maybe<CurveToCubicSmoothSegment>
-      ParseCurveToCubicSmoothSegment(FloatPoint currentPosition) noexcept override
+      ParseCurveToCubicSmoothSegment(PointF currentPosition) noexcept override
     {
       auto &smoothCommand = CurrentValue<SmoothCommand>();
 
-      return krys::SwitchOn(
-        smoothCommand.ToBy,
-        [&](const auto &value)
-        {
-          krys_debug_assert(value.ControlPoint);
-          auto offset = Evaluate<FloatPoint>(value.Offset, _boxSize, style::ZoomNeeded {});
-          return CurveToCubicSmoothSegment {ResolveControlPoint(value.Affinity, currentPosition, offset,
-                                                                value.ControlPoint.value(), _boxSize),
-                                            offset};
-        });
+      return krys::SwitchOn(smoothCommand.ToBy,
+                            [&](const auto &value)
+                            {
+                              krys_debug_assert(value.ControlPoint);
+                              auto offset = Evaluate<PointF>(value.Offset, _boxSize, style::ZoomNeeded {});
+                              return CurveToCubicSmoothSegment {
+                                ResolveControlPoint(value.Affinity, currentPosition, offset,
+                                                    value.ControlPoint.value(), _boxSize),
+                                offset};
+                            });
     }
 
     KRYS_NODISCARD Maybe<CurveToQuadraticSmoothSegment>
-      ParseCurveToQuadraticSmoothSegment(FloatPoint) noexcept override
+      ParseCurveToQuadraticSmoothSegment(PointF) noexcept override
     {
       auto &smoothCommand = CurrentValue<SmoothCommand>();
 
@@ -224,22 +224,21 @@ namespace krys::boo::style
                             [&](const auto &value)
                             {
                               return CurveToQuadraticSmoothSegment {
-                                Evaluate<FloatPoint>(value.Offset, _boxSize, style::ZoomNeeded {})};
+                                Evaluate<PointF>(value.Offset, _boxSize, style::ZoomNeeded {})};
                             });
     }
 
-    KRYS_NODISCARD Maybe<ArcToSegment> ParseArcToSegment(FloatPoint) noexcept override
+    KRYS_NODISCARD Maybe<ArcToSegment> ParseArcToSegment(PointF) noexcept override
     {
       auto &arcCommand = CurrentValue<ArcCommand>();
 
-      auto radius = Evaluate<FloatSize>(arcCommand.Size, _boxSize, style::ZoomNeeded {});
+      auto radius = Evaluate<SizeF>(arcCommand.Size, _boxSize, style::ZoomNeeded {});
       return ArcToSegment {.Rx = radius.Width(),
                            .Ry = radius.Height(),
                            .Angle = static_cast<float>(arcCommand.Rotation.Value),
                            .LargeArc = std::holds_alternative<css::keywords::Large>(arcCommand.ArcSize),
                            .Sweep = std::holds_alternative<css::keywords::Cw>(arcCommand.ArcSweep),
-                           .TargetPoint =
-                             Evaluate<FloatPoint>(arcCommand.ToBy, _boxSize, style::ZoomNeeded {})};
+                           .TargetPoint = Evaluate<PointF>(arcCommand.ToBy, _boxSize, style::ZoomNeeded {})};
     }
 
     KRYS_NODISCARD SVGPathSegType SegmentTypeAtIndex(size_t index) const noexcept
@@ -321,7 +320,7 @@ namespace krys::boo::style
 
     Position _start;
     const Shape &_shape;
-    FloatSize _boxSize;
+    SizeF _boxSize;
     size_t _endIndex {0};
     size_t _nextIndex {0};
   };
@@ -342,28 +341,28 @@ namespace krys::boo::style
     }
 
   private:
-    KRYS_NODISCARD static Position MakePosition(FloatPoint p) noexcept
+    KRYS_NODISCARD static Position MakePosition(PointF p) noexcept
     {
       return {p};
     }
 
-    KRYS_NODISCARD static CoordinatePair MakeCoordinatePair(FloatPoint p) noexcept
+    KRYS_NODISCARD static CoordinatePair MakeCoordinatePair(PointF p) noexcept
     {
       return {LengthPercentage<>::Dimension {p.X()}, LengthPercentage<>::Dimension {p.Y()}};
     }
 
-    KRYS_NODISCARD static Position AbsoluteOffsetPoint(FloatPoint p) noexcept
+    KRYS_NODISCARD static Position AbsoluteOffsetPoint(PointF p) noexcept
     {
       return MakePosition(p);
     }
 
-    KRYS_NODISCARD static CoordinatePair RelativeOffsetPoint(FloatPoint p) noexcept
+    KRYS_NODISCARD static CoordinatePair RelativeOffsetPoint(PointF p) noexcept
     {
       return MakeCoordinatePair(p);
     }
 
     KRYS_NODISCARD static Variant<ToPosition, ByCoordinatePair>
-      FromOffsetPoint(const FloatPoint &offsetPoint, svg::PathCoordinateMode mode) noexcept
+      FromOffsetPoint(const PointF &offsetPoint, svg::PathCoordinateMode mode) noexcept
     {
       switch (mode)
       {
@@ -390,13 +389,13 @@ namespace krys::boo::style
     }
 
     KRYS_NODISCARD static style::AbsoluteControlPoint
-      MakeAbsoluteControlPoint(const FloatPoint &controlPoint) noexcept
+      MakeAbsoluteControlPoint(const PointF &controlPoint) noexcept
     {
       return {MakePosition(controlPoint), std::nullopt};
     }
 
     KRYS_NODISCARD static style::RelativeControlPoint
-      MakeRelativeControlPoint(const FloatPoint &controlPoint) noexcept
+      MakeRelativeControlPoint(const PointF &controlPoint) noexcept
     {
       return {MakeCoordinatePair(controlPoint), std::nullopt};
     }
@@ -410,7 +409,7 @@ namespace krys::boo::style
       return true;
     }
 
-    void MoveTo(const FloatPoint &offsetPoint, bool, svg::PathCoordinateMode mode) noexcept override
+    void MoveTo(const PointF &offsetPoint, bool, svg::PathCoordinateMode mode) noexcept override
     {
       if (_commands.empty() && mode == svg::PathCoordinateMode::AbsoluteCoordinates && !_initialMove)
       {
@@ -421,7 +420,7 @@ namespace krys::boo::style
       _commands.push_back(MoveCommand {.ToBy = FromOffsetPoint(offsetPoint, mode)});
     }
 
-    void LineTo(const FloatPoint &offsetPoint, svg::PathCoordinateMode mode) noexcept override
+    void LineTo(const PointF &offsetPoint, svg::PathCoordinateMode mode) noexcept override
     {
       _commands.push_back(LineCommand {.ToBy = FromOffsetPoint(offsetPoint, mode)});
     }
@@ -436,8 +435,8 @@ namespace krys::boo::style
       _commands.push_back(VLineCommand {.ToBy = FromOffsetLength<VLineCommand>(length, mode)});
     }
 
-    void CurveToCubic(const FloatPoint &controlPoint1, const FloatPoint &controlPoint2,
-                      const FloatPoint &offsetPoint, svg::PathCoordinateMode mode) noexcept override
+    void CurveToCubic(const PointF &controlPoint1, const PointF &controlPoint2, const PointF &offsetPoint,
+                      svg::PathCoordinateMode mode) noexcept override
     {
       switch (mode)
       {
@@ -458,7 +457,7 @@ namespace krys::boo::style
       }
     }
 
-    void CurveToQuadratic(const FloatPoint &controlPoint, const FloatPoint &offsetPoint,
+    void CurveToQuadratic(const PointF &controlPoint, const PointF &offsetPoint,
                           svg::PathCoordinateMode mode) noexcept override
     {
       switch (mode)
@@ -480,7 +479,7 @@ namespace krys::boo::style
       }
     }
 
-    void CurveToCubicSmooth(const FloatPoint &controlPoint, const FloatPoint &offsetPoint,
+    void CurveToCubicSmooth(const PointF &controlPoint, const PointF &offsetPoint,
                             svg::PathCoordinateMode mode) noexcept override
     {
       switch (mode)
@@ -500,7 +499,7 @@ namespace krys::boo::style
       }
     }
 
-    void CurveToQuadraticSmooth(const FloatPoint &offsetPoint, svg::PathCoordinateMode mode) noexcept override
+    void CurveToQuadraticSmooth(const PointF &offsetPoint, svg::PathCoordinateMode mode) noexcept override
     {
       switch (mode)
       {
@@ -519,8 +518,8 @@ namespace krys::boo::style
       }
     }
 
-    void ArcTo(float r1, float r2, float angle, bool largeArcFlag, bool sweepFlag,
-               const FloatPoint &offsetPoint, svg::PathCoordinateMode mode) noexcept override
+    void ArcTo(float r1, float r2, float angle, bool largeArcFlag, bool sweepFlag, const PointF &offsetPoint,
+               svg::PathCoordinateMode mode) noexcept override
     {
       _commands.push_back(ArcCommand {
         .ToBy = FromOffsetPoint(offsetPoint, mode),
@@ -619,7 +618,7 @@ namespace krys::boo::style
 
   // MARK: - Shape (path conversion)
 
-  boo::Path PathComputation<Shape>::operator()(const Shape &value, const FloatRect &boundingBox) noexcept
+  boo::Path PathComputation<Shape>::operator()(const Shape &value, const RectF &boundingBox) noexcept
   {
     // FIXME: We should do some caching here.
     auto pathSource = ShapeSVGPathSource(value.StartingPoint, value, boundingBox.Size());
@@ -628,7 +627,7 @@ namespace krys::boo::style
     SVGPathBuilder builder(path);
     (void)SVGPathParser::Parse(pathSource, builder);
 
-    path.Translate(ToFloatSize(boundingBox.Location()));
+    path.Translate(ToSizeF(boundingBox.Location()));
 
     return path;
   }

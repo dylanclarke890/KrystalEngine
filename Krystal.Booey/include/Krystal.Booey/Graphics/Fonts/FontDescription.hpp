@@ -36,10 +36,10 @@
 #include "Krystal.Core/Enum.hpp"
 #include "Krystal.Core/Maths/Extras.hpp"
 #include "Krystal.Core/Numeric.hpp"
+#include "Krystal.Core/Strings/StringAtom.hpp"
 #include "Krystal.Core/Types/Maybe.hpp"
-#include "Krystal.Core/Types/StringAtom.hpp"
 #include "Krystal.Core/Utils/Move.hpp"
-#include <unicode/uscript.h>
+#include "Krystal.Text/Script.hpp"
 
 namespace krys::boo
 {
@@ -69,7 +69,8 @@ namespace krys::boo
     uint32 _nonCJKGlyphOrientation : 1 {ToUnderlying(boo::NonCJKGlyphOrientation::Mixed)};
     uint32 _widthVariant : 2 {ToUnderlying(FontWidthVariant::RegularWidth)};
     uint32 _textRendering : 2 {ToUnderlying(boo::TextRenderingMode::Auto)};
-    uint32 _script : 7 {USCRIPT_COMMON}; // Used to help choose an appropriate font for generic font families.
+    uint32 _script
+      : 7 {static_cast<uint32>(text::Script::Common)}; // Used to help choose an appropriate font for generic font families.
     uint32 _fontSynthesisWeight : 1 {ToUnderlying(FontSynthesisLonghandValue::Auto)};
     uint32 _fontSynthesisStyle : 1 {ToUnderlying(FontSynthesisLonghandValue::Auto)};
     uint32 _fontSynthesisCaps : 1 {ToUnderlying(FontSynthesisLonghandValue::Auto)};
@@ -162,9 +163,9 @@ namespace krys::boo
       return _textAutospace;
     }
 
-    KRYS_NODISCARD UScriptCode Script() const noexcept
+    KRYS_NODISCARD text::Script Script() const noexcept
     {
-      return static_cast<UScriptCode>(_script);
+      return static_cast<text::Script>(_script);
     }
 
     /// @brief What you should be using for things like text shaping and font fallback.
@@ -567,7 +568,7 @@ namespace krys::boo
       _evaluationTimeZoomEnabled = evaluationTimeZoomEnabled;
     }
 
-    KRYS_NODISCARD static StringAtom PlatformResolveGenericFamily(UScriptCode, const StringAtom &locale,
+    KRYS_NODISCARD static StringAtom PlatformResolveGenericFamily(text::Script, const StringAtom &locale,
                                                                   const StringAtom &familyName) noexcept;
   };
 }

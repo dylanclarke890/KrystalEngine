@@ -24,12 +24,12 @@
 #pragma once
 
 #include "Krystal.Booey/DOM/Types/DOMString.hpp"
-#include "Krystal.Booey/Graphics/Geometry/IntPoint.hpp"
 #include "Krystal.Booey/Loader/Cache/CachedResourceHandle.hpp"
 #include "Krystal.Booey/Page/Drag/DragActions.hpp"
 #include "Krystal.Booey/Platform/Pasteboard/DragImage.hpp"
 #include "Krystal.Core/Attributes.hpp"
 #include "Krystal.Core/CanMakeWeakPtr.hpp"
+#include "Krystal.Core/Geometry/Point.hpp"
 #include "Krystal.Core/Macros.hpp"
 #include "Krystal.Core/RefCounted.hpp"
 #include "Krystal.Core/Types/EnumSet.hpp"
@@ -90,7 +90,7 @@ namespace krys::boo::dom
     DOMString _dropEffect;
     DOMString _effectAllowed;
     bool _shouldUpdateDragImage {false};
-    IntPoint _dragLocation;
+    PointI _dragLocation;
     CachedResourceHandle<CachedImage> _dragImage;
     RefPtr<Element> _dragImageElement;
     RefPtr<DragImageLoader> _dragImageLoader;
@@ -157,7 +157,7 @@ namespace krys::boo::dom
     /// @brief Makes the drag image the page set, with where the cursor is in it in @p dragLocation; null if
     /// it set none.
     KRYS_NODISCARD DragImageRef CreateDragImage(const Document *document,
-                                                IntPoint &dragLocation) const noexcept;
+                                                PointI &dragLocation) const noexcept;
 
     /// @brief Gives the pasteboard the drag image the page set, once the drag has started.
     void UpdateDragImage(const Document *document) noexcept;

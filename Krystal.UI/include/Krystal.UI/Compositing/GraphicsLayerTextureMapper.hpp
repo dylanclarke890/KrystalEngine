@@ -1,10 +1,10 @@
 ﻿#pragma once
 
-#include "Krystal.Booey/Graphics/Geometry/IntRect.hpp"
 #include "Krystal.Booey/Graphics/Images/NativeImage.hpp"
 #include "Krystal.Booey/Graphics/Layers/GraphicsLayer.hpp"
 #include "Krystal.Booey/Graphics/Layers/GraphicsLayerFactory.hpp"
 #include "Krystal.Booey/Graphics/Layers/GraphicsLayerTransform.hpp"
+#include "Krystal.Core/Geometry/Rect.hpp"
 #include "Krystal.UI/Compositing/TextureMapperLayer.hpp"
 #include "Krystal.UI/Compositing/TextureMapperPlatformLayer.hpp"
 #include "Krystal.UI/Compositing/TextureMapperTiledBackingStore.hpp"
@@ -71,13 +71,13 @@ namespace krys::ui
     TextureMapperPlatformLayer *_contentsLayer {nullptr};
     // Keeps the platform layer it shows alive.
     RefPtr<boo::GraphicsLayerContentsDisplayDelegate> _contentsDisplayDelegate;
-    boo::FloatRect _needsDisplayRect;
+    RectF _needsDisplayRect;
     TextureMapperAnimations _animations;
     MonotonicTime::duration _animationStartTime {};
 
     // What's visible of the layer, in its coordinates, as of its last flush: its tiles cover it.
     boo::GraphicsLayerTransform _layerTransform;
-    boo::IntRect _visibleRect;
+    RectI _visibleRect;
 
   public:
     explicit GraphicsLayerTextureMapper(Type layerType, boo::GraphicsLayerClient &client) noexcept;
@@ -101,17 +101,17 @@ namespace krys::ui
 
     void SetReplicatedByLayer(RefPtr<GraphicsLayer> &&value) noexcept override;
 
-    void SetPosition(const boo::FloatPoint &value) noexcept override;
+    void SetPosition(const PointF &value) noexcept override;
 
-    void SetBoundsOrigin(const boo::FloatPoint &value) noexcept override;
+    void SetBoundsOrigin(const PointF &value) noexcept override;
 
-    void SetAnchorPoint(const boo::FloatPoint3D &value) noexcept override;
+    void SetAnchorPoint(const Point3F &value) noexcept override;
 
-    void SetSize(const boo::FloatSize &value) noexcept override;
+    void SetSize(const SizeF &value) noexcept override;
 
-    void SetTransform(const boo::TransformationMatrix &value) noexcept override;
+    void SetTransform(const TransformationMatrix &value) noexcept override;
 
-    void SetChildrenTransform(const boo::TransformationMatrix &value) noexcept override;
+    void SetChildrenTransform(const TransformationMatrix &value) noexcept override;
 
     void SetPreserves3D(bool value) noexcept override;
 
@@ -141,12 +141,12 @@ namespace krys::ui
 
     void SetNeedsDisplay() noexcept override;
 
-    void SetNeedsDisplayInRect(const boo::FloatRect &rect,
+    void SetNeedsDisplayInRect(const RectF &rect,
                                ShouldClipToLayer = ShouldClipToLayer::Clip) noexcept override;
 
     void SetContentsNeedsDisplay() noexcept override;
 
-    void SetContentsRect(const boo::FloatRect &value) noexcept override;
+    void SetContentsRect(const RectF &value) noexcept override;
 
     void SetContentsClippingRect(const boo::FloatRoundedRect &rect) noexcept override;
 
@@ -185,7 +185,7 @@ namespace krys::ui
 
     void SetShowRepaintCounter(bool show) noexcept override;
 
-    void FlushCompositingState(const boo::FloatRect &visibleRect) noexcept override;
+    void FlushCompositingState(const RectF &visibleRect) noexcept override;
 
     void FlushCompositingStateForThisLayerOnly() noexcept override;
 
@@ -207,7 +207,7 @@ namespace krys::ui
     }
 
     /// @brief What's visible of the layer, in its coordinates, as of its last flush.
-    KRYS_NODISCARD const boo::IntRect &VisibleRect() const noexcept
+    KRYS_NODISCARD const RectI &VisibleRect() const noexcept
     {
       return _visibleRect;
     }
@@ -246,7 +246,7 @@ namespace krys::ui
 
     KRYS_NODISCARD static bool FiltersCanBeComposited(const boo::FilterOperations &filters) noexcept;
 
-    void UpdateVisibleRects(const boo::FloatRect &visibleRect) noexcept;
+    void UpdateVisibleRects(const RectF &visibleRect) noexcept;
 
     void NotifyChange(ChangeMask changeMask) noexcept;
   };

@@ -45,8 +45,8 @@
 #include "Krystal.Booey/DOM/Nodes/Document.hpp"
 #include "Krystal.Booey/DOM/Nodes/Element.hpp"
 #include "Krystal.Booey/DOM/Nodes/StyledElement.hpp"
-#include "Krystal.Booey/Graphics/Geometry/GeometryUtilities.hpp"
 #include "Krystal.Booey/Graphics/Layers/GraphicsLayerAnimation.hpp"
+#include "Krystal.Booey/Graphics/Transforms/LayoutTransforms.hpp"
 #include "Krystal.Booey/Graphics/Transforms/TransformOperationsSharedPrimitivesPrefix.hpp"
 #include "Krystal.Booey/HTML/EventLoop/EventLoop.hpp"
 #include "Krystal.Booey/Page/LocalFrameView.hpp"
@@ -70,6 +70,7 @@
 #include "Krystal.Booey/Style/Values/FilterEffects/Filter.hpp"
 #include "Krystal.Booey/Style/Values/Transforms/Transform.hpp"
 #include "Krystal.Booey/Style/Values/WillChange/WillChange.hpp"
+#include "Krystal.Core/Geometry/GeometryUtilities.hpp"
 #include <algorithm>
 #include <charconv>
 #include <cmath>
@@ -1508,13 +1509,13 @@ namespace krys::boo
       switch (keyframe.Composite)
       {
         case CompositeOperationOrAuto::Replace:
-          blendingKeyframe.SetCompositeOperation(boo::CompositeOperation::Replace);
+          blendingKeyframe.SetCompositeOperation(krys::CompositeOperation::Replace);
           break;
         case CompositeOperationOrAuto::Add:
-          blendingKeyframe.SetCompositeOperation(boo::CompositeOperation::Add);
+          blendingKeyframe.SetCompositeOperation(krys::CompositeOperation::Add);
           break;
         case CompositeOperationOrAuto::Accumulate:
-          blendingKeyframe.SetCompositeOperation(boo::CompositeOperation::Accumulate);
+          blendingKeyframe.SetCompositeOperation(krys::CompositeOperation::Accumulate);
           break;
         case CompositeOperationOrAuto::Auto: break;
       }
@@ -2255,7 +2256,7 @@ namespace krys::boo
       auto endKeyframeStyle = RenderStyle::Clone(*endBlendingKeyframe->Style());
 
       KeyframeInterpolation::CompositionCallback composeProperty =
-        [&](const KeyframeInterpolation::Keyframe &keyframe, boo::CompositeOperation compositeOperation)
+        [&](const KeyframeInterpolation::Keyframe &keyframe, krys::CompositeOperation compositeOperation)
       {
         auto *blendingKeyframe = DynamicDowncast<BlendingKeyframe>(&keyframe);
         if (!blendingKeyframe)
@@ -2289,13 +2290,13 @@ namespace krys::boo
         if (blendingKeyframe->Offset() == startBlendingKeyframe->Offset())
         {
           style::interpolation::Interpolate(property, startKeyframeStyle, *endBlendingKeyframe->Style(),
-                                            startKeyframeStyle, 1, boo::CompositeOperation::Accumulate,
+                                            startKeyframeStyle, 1, krys::CompositeOperation::Accumulate,
                                             *this);
         }
         else
         {
           style::interpolation::Interpolate(property, endKeyframeStyle, *endBlendingKeyframe->Style(),
-                                            endKeyframeStyle, 1, boo::CompositeOperation::Accumulate, *this);
+                                            endKeyframeStyle, 1, krys::CompositeOperation::Accumulate, *this);
         }
       };
 
@@ -2304,7 +2305,7 @@ namespace krys::boo
             boo::IterationCompositeOperation iterationCompositeOperation)
       {
         style::interpolation::Interpolate(property, targetStyle, startKeyframeStyle, endKeyframeStyle,
-                                          intervalProgress, boo::CompositeOperation::Replace,
+                                          intervalProgress, krys::CompositeOperation::Replace,
                                           iterationCompositeOperation, currentIteration, *this);
       };
 
@@ -2422,7 +2423,7 @@ namespace krys::boo
       return false;
     }
 
-    if (_compositeOperation != boo::CompositeOperation::Replace)
+    if (_compositeOperation != krys::CompositeOperation::Replace)
     {
       return false;
     }
@@ -3089,10 +3090,10 @@ namespace krys::boo
       // in transforms with a 90deg angle.
       if (hasRotation)
       {
-        keyframeBounds = LayoutRect(BoundsOfRotatingRect(FloatRect(keyframeBounds)));
+        keyframeBounds = LayoutRect(BoundsOfRotatingRect(RectF(keyframeBounds)));
       }
 
-      cumulativeBounds.Unite(transform.MapRect(keyframeBounds));
+      cumulativeBounds.Unite(MapRect(transform, keyframeBounds));
       return true;
     };
 
@@ -3271,7 +3272,7 @@ namespace krys::boo
     Invalidate();
   }
 
-  boo::CompositeOperation KeyframeEffect::BindingsComposite() const noexcept
+  krys::CompositeOperation KeyframeEffect::BindingsComposite() const noexcept
   {
     if (RefPtr styleOriginatedAnimation = ShareRefPtr(DynamicDowncast<StyleOriginatedAnimation>(Animation())))
     {
@@ -3280,7 +3281,7 @@ namespace krys::boo
     return Composite();
   }
 
-  void KeyframeEffect::SetBindingsComposite(boo::CompositeOperation compositeOperation) noexcept
+  void KeyframeEffect::SetBindingsComposite(krys::CompositeOperation compositeOperation) noexcept
   {
     SetComposite(compositeOperation);
     if (RefPtr cssAnimation = ShareRefPtr(DynamicDowncast<CSSAnimation>(Animation())))
@@ -3289,7 +3290,7 @@ namespace krys::boo
     }
   }
 
-  void KeyframeEffect::SetComposite(boo::CompositeOperation compositeOperation) noexcept
+  void KeyframeEffect::SetComposite(krys::CompositeOperation compositeOperation) noexcept
   {
     if (_compositeOperation == compositeOperation)
     {
@@ -3456,7 +3457,7 @@ namespace krys::boo
           // of its properties is accelerated.
           if (auto keyframeComposite = keyframe.CompositeOperation())
           {
-            if (*keyframeComposite != boo::CompositeOperation::Replace)
+            if (*keyframeComposite != krys::CompositeOperation::Replace)
             {
               for (const auto &property : keyframe.Properties())
               {

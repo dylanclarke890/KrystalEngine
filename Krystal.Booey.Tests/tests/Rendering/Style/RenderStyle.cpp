@@ -80,7 +80,7 @@ namespace krys::boo::tests
     CHECK(style.MarginLeft() == style::MarginEdge {4_css_px});
     CHECK(style.MarginStart() == style::MarginEdge {4_css_px});
 
-    CHECK(style.SetDirection(TextDirection::RTL));
+    CHECK(style.SetDirection(text::TextDirection::RTL));
     style.SetMarginStart(style::MarginEdge {6_css_px});
     CHECK(style.MarginRight() == style::MarginEdge {6_css_px});
 
@@ -121,7 +121,7 @@ namespace krys::boo::tests
     auto parent = RenderStyle::Create();
     parent.SetColor(boo::Color {Red});
     parent.SetWidth(style::PreferredSize {10_css_px});
-    parent.SetDirection(TextDirection::RTL);
+    parent.SetDirection(text::TextDirection::RTL);
 
     auto child = RenderStyle::Create();
     child.InheritFrom(parent);
@@ -189,7 +189,7 @@ namespace krys::boo::tests
 
     // Without an explicit stroke colour the stroke uses `color`.
     CHECK(style.UsedStrokeColor() == Red);
-    CHECK(style.UsedStrokeWidth(IntSize {100, 100}) == 0);
+    CHECK(style.UsedStrokeWidth(SizeI {100, 100}) == 0);
 
     style.SetBorderTopColor(style::Color {boo::Color {Blue}});
     CHECK(style.ColorResolvingCurrentColor(css::PropertyId::BorderTopColor) == Blue);

@@ -24,8 +24,8 @@
 
 #include "Krystal.Booey/Graphics/Filters/FilterEffect.hpp"
 #include "Krystal.Booey/Graphics/Geometry/BoxExtents.hpp"
-#include "Krystal.Booey/Graphics/Geometry/FloatSize.hpp"
 #include "Krystal.Core/Attributes.hpp"
+#include "Krystal.Core/Geometry/Size.hpp"
 #include "Krystal.Core/Types/RefPtr.hpp"
 
 namespace krys::boo
@@ -58,7 +58,7 @@ namespace krys::boo
 
     bool SetDy(float dy) noexcept;
 
-    KRYS_NODISCARD static IntOutsets CalculateOutsets(const FloatSize &offset) noexcept;
+    KRYS_NODISCARD static IntOutsets CalculateOutsets(const SizeF &offset) noexcept;
 
   private:
     FEOffset(float dx, float dy, const DestinationColorSpace &colorSpace) noexcept;
@@ -68,8 +68,8 @@ namespace krys::boo
       return AreEqual<FEOffset>(*this, other);
     }
 
-    KRYS_NODISCARD FloatRect CalculateImageRect(const Filter &filter, Span<const FloatRect> inputImageRects,
-                                                const FloatRect &primitiveSubregion) const noexcept override;
+    KRYS_NODISCARD RectF CalculateImageRect(const Filter &filter, Span<const RectF> inputImageRects,
+                                            const RectF &primitiveSubregion) const noexcept override;
 
     KRYS_NODISCARD bool ResultIsAlphaImage(Span<const Ref<FilterImage>> inputs) const noexcept override;
 

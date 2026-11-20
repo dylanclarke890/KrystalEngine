@@ -66,10 +66,10 @@ namespace krys::boo::html
     {
       DOMString DateTimeFormat;
       DOMString FallbackDateTimeFormat;
-      boo::Locale &FormatLocale;
+      i18n::Locale &FormatLocale;
       bool ShouldHaveMillisecondField {false};
 
-      explicit LayoutParameters(boo::Locale &locale) noexcept : FormatLocale(locale)
+      explicit LayoutParameters(i18n::Locale &locale) noexcept : FormatLocale(locale)
       {
       }
     };

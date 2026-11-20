@@ -1,0 +1,146 @@
+﻿/*
+ * Copyright (C) 2006-2025 Apple Inc. All rights reserved.
+ * Copyright (C) 2009 Google Inc. All rights reserved.
+ *
+ * Redistribution and use in source and binary forms, with or without
+ * modification, are permitted provided that the following conditions
+ * are met:
+ * 1. Redistributions of source code must retain the above copyright
+ *    notice, this list of conditions and the following disclaimer.
+ * 2. Redistributions in binary form must reproduce the above copyright
+ *    notice, this list of conditions and the following disclaimer in the
+ *    documentation and/or other materials provided with the distribution.
+ *
+ * THIS SOFTWARE IS PROVIDED BY APPLE INC. ``AS IS'' AND ANY
+ * EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE
+ * IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR
+ * PURPOSE ARE DISCLAIMED.  IN NO EVENT SHALL APPLE INC. OR
+ * CONTRIBUTORS BE LIABLE FOR ANY DIRECT, INDIRECT, INCIDENTAL, SPECIAL,
+ * EXEMPLARY, OR CONSEQUENTIAL DAMAGES (INCLUDING, BUT NOT LIMITED TO,
+ * PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES; LOSS OF USE, DATA, OR
+ * PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND ON ANY THEORY
+ * OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT
+ * (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
+ * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
+ */
+
+#pragma once
+
+#include "Krystal.Core/Attributes.hpp"
+#include "Krystal.Core/Numeric.hpp"
+#include "Krystal.Core/Strings/String.hpp"
+#include "Krystal.Core/Types/Maybe.hpp"
+#include "Krystal.Core/Utils/Move.hpp"
+#include "Krystal.Net/Http/HttpHeaderMap.hpp"
+#include "Krystal.Net/Url.hpp"
+#include <chrono>
+
+namespace krys::net
+{
+  /// @brief What came back for a load: the URL it came from, its type and the length it said it had, and for
+  /// an HTTP load, its status and headers. The host's loader strategy fills them in; a file load may give a
+  /// `Last-Modified` header of the file's modification time.
+  class ResourceResponse
+  {
+  private:
+    net::Url _url;
+    utf8_string _mimeType;
+    int64 _expectedContentLength {0};
+    utf8_string _textEncodingName;
+    uint16 _httpStatusCode {0};
+    utf8_string _httpStatusText;
+    net::http::HttpHeaderMap _httpHeaderFields;
+
+  public:
+    ResourceResponse() noexcept = default;
+
+    ResourceResponse(net::Url url, utf8_string mimeType, int64 expectedContentLength,
+                     utf8_string textEncodingName = {}) noexcept
+        : _url(krys::move(url)), _mimeType(krys::move(mimeType)),
+          _expectedContentLength(expectedContentLength), _textEncodingName(krys::move(textEncodingName))
+    {
+    }
+
+    KRYS_NODISCARD bool IsNull() const noexcept
+    {
+      return _url.IsNull();
+    }
+
+    KRYS_NODISCARD const net::Url &Url() const noexcept
+    {
+      return _url;
+    }
+
+    void SetUrl(net::Url url) noexcept
+    {
+      _url = krys::move(url);
+    }
+
+    KRYS_NODISCARD const utf8_string &MimeType() const noexcept
+    {
+      return _mimeType;
+    }
+
+    KRYS_NODISCARD int64 ExpectedContentLength() const noexcept
+    {
+      return _expectedContentLength;
+    }
+
+    KRYS_NODISCARD const utf8_string &TextEncodingName() const noexcept
+    {
+      return _textEncodingName;
+    }
+
+    /// @brief The HTTP status code; 0 for a response that isn't HTTP's (a file's, a `data:` URL's).
+    KRYS_NODISCARD uint16 HttpStatusCode() const noexcept
+    {
+      return _httpStatusCode;
+    }
+
+    void SetHttpStatusCode(uint16 statusCode) noexcept
+    {
+      _httpStatusCode = statusCode;
+    }
+
+    KRYS_NODISCARD const utf8_string &HttpStatusText() const noexcept
+    {
+      return _httpStatusText;
+    }
+
+    void SetHttpStatusText(utf8_string statusText) noexcept
+    {
+      _httpStatusText = krys::move(statusText);
+    }
+
+    /// @brief Whether the status is a success, 200 to 299.
+    /// @see https://fetch.spec.whatwg.org/#ok-status
+    KRYS_NODISCARD bool IsSuccessful() const noexcept
+    {
+      return _httpStatusCode >= 200 && _httpStatusCode <= 299;
+    }
+
+    KRYS_NODISCARD const net::http::HttpHeaderMap &HttpHeaderFields() const noexcept
+    {
+      return _httpHeaderFields;
+    }
+
+    /// @brief The value of the header @p name; empty without one.
+    KRYS_NODISCARD utf8_stringview HttpHeaderField(utf8_stringview name) const noexcept
+    {
+      return _httpHeaderFields.Get(name).value_or(utf8_stringview());
+    }
+
+    void SetHttpHeaderField(utf8_stringview name, utf8_stringview value) noexcept
+    {
+      _httpHeaderFields.Set(name, value);
+    }
+
+    void AddHttpHeaderField(utf8_stringview name, utf8_stringview value) noexcept
+    {
+      _httpHeaderFields.Add(name, value);
+    }
+
+    /// @brief The time its `Last-Modified` header names, if it has a valid one.
+    KRYS_NODISCARD Maybe<std::chrono::sys_seconds> LastModified() const noexcept;
+  };
+}

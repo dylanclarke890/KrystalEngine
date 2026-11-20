@@ -71,7 +71,7 @@ namespace krys::boo
       return _functions;
     }
 
-    void SetFilterRegion(const FloatRect &filterRegion) noexcept;
+    void SetFilterRegion(const RectF &filterRegion) noexcept;
 
     KRYS_NODISCARD bool HasFilterThatMovesPixels() const noexcept
     {
@@ -96,11 +96,11 @@ namespace krys::boo
                                           const FilterOperations &operations) noexcept;
 
     KRYS_NODISCARD static IntOutsets CalculateOutsets(RenderElement &renderer, const style::Filter &filter,
-                                                      const FloatRect &targetBoundingBox) noexcept;
+                                                      const RectF &targetBoundingBox) noexcept;
 
     KRYS_NODISCARD static IntOutsets CalculateOutsets(RenderElement &renderer,
                                                       const FilterOperations &operations,
-                                                      const FloatRect &targetBoundingBox) noexcept;
+                                                      const RectF &targetBoundingBox) noexcept;
 
   private:
     template <typename TFilter>

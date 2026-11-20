@@ -6,7 +6,7 @@
 #include "Krystal.Core/Serialisation/Archives/BaseArchive.hpp"
 #include "Krystal.Core/Serialisation/Builtins.hpp"
 #include "Krystal.Core/Serialisation/Concepts.hpp"
-#include "Krystal.Core/Types/String.hpp"
+#include "Krystal.Core/Strings/String.hpp"
 #include <bit>
 #include <memory>
 

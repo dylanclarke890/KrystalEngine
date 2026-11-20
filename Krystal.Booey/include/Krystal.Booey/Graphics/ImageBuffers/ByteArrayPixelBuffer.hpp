@@ -38,20 +38,20 @@ namespace krys::boo
     Ref<dom::Uint8ClampedArray> _data;
 
   public:
-    KRYS_NODISCARD static Ref<ByteArrayPixelBuffer> Create(const PixelBufferFormat &, const IntSize &,
+    KRYS_NODISCARD static Ref<ByteArrayPixelBuffer> Create(const PixelBufferFormat &, const SizeI &,
                                                            dom::Uint8ClampedArray &) noexcept;
 
     /// @brief A buffer holding a copy of @p data; empty if it's not as long as @p size's pixels.
-    KRYS_NODISCARD static Maybe<Ref<ByteArrayPixelBuffer>> Create(const PixelBufferFormat &, const IntSize &,
+    KRYS_NODISCARD static Maybe<Ref<ByteArrayPixelBuffer>> Create(const PixelBufferFormat &, const SizeI &,
                                                                   Span<const uint8> data) noexcept;
 
     /// @brief A buffer of @p size, all zero; null if it's too big.
     KRYS_NODISCARD static RefPtr<ByteArrayPixelBuffer> TryCreate(const PixelBufferFormat &,
-                                                                 const IntSize &size) noexcept;
+                                                                 const SizeI &size) noexcept;
 
     /// @brief A buffer whose bytes are @p data; null if it's not as long as @p size's pixels.
-    KRYS_NODISCARD static RefPtr<ByteArrayPixelBuffer>
-      TryCreate(const PixelBufferFormat &, const IntSize &size, Ref<dom::Uint8ClampedArray> &&data) noexcept;
+    KRYS_NODISCARD static RefPtr<ByteArrayPixelBuffer> TryCreate(const PixelBufferFormat &, const SizeI &size,
+                                                                 Ref<dom::Uint8ClampedArray> &&data) noexcept;
 
     KRYS_NODISCARD dom::Uint8ClampedArray &Data() const noexcept
     {
@@ -74,10 +74,10 @@ namespace krys::boo
       return Type::ByteArray;
     }
 
-    KRYS_NODISCARD RefPtr<PixelBuffer> CreateScratchPixelBuffer(const IntSize &) const noexcept override;
+    KRYS_NODISCARD RefPtr<PixelBuffer> CreateScratchPixelBuffer(const SizeI &) const noexcept override;
 
   private:
-    ByteArrayPixelBuffer(const PixelBufferFormat &, const IntSize &, Ref<dom::Uint8ClampedArray> &&) noexcept;
+    ByteArrayPixelBuffer(const PixelBufferFormat &, const SizeI &, Ref<dom::Uint8ClampedArray> &&) noexcept;
   };
 }
 

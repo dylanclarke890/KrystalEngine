@@ -82,18 +82,17 @@ namespace krys::boo
     KRYS_NODISCARD float BlendAnimatedDimensonalFloat(float from, float to, svg::FloatBlendMode,
                                                       float progress) noexcept;
 
-    KRYS_NODISCARD FloatPoint BlendAnimatedFloatPoint(const FloatPoint &from, const FloatPoint &to,
-                                                      float progress) noexcept;
+    KRYS_NODISCARD PointF BlendAnimatedPointF(const PointF &from, const PointF &to, float progress) noexcept;
 
     SVGPathSource &_fromSource;
     SVGPathSource &_toSource;
     SVGPathConsumer *_consumer; // A null consumer indicates that we're just checking blendability.
 
-    FloatPoint _fromCurrentPoint;
-    FloatPoint _toCurrentPoint;
+    PointF _fromCurrentPoint;
+    PointF _toCurrentPoint;
 
-    FloatPoint _fromSubpathPoint;
-    FloatPoint _toSubpathPoint;
+    PointF _fromSubpathPoint;
+    PointF _toSubpathPoint;
 
     svg::PathCoordinateMode _fromMode {svg::PathCoordinateMode::AbsoluteCoordinates};
     svg::PathCoordinateMode _toMode {svg::PathCoordinateMode::AbsoluteCoordinates};

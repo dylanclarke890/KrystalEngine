@@ -10,7 +10,7 @@ namespace krys::gfx::tests
     /// @brief A square of full coverage, `size` pixels across, at the origin.
     KRYS_NODISCARD CoverageMask Square(uint32 size)
     {
-      return {.Bounds = {.X = 0, .Y = 0, .Width = size, .Height = size},
+      return {.Bounds = {0, 0, static_cast<int32>(size), static_cast<int32>(size)},
               .Coverage = List<uint8>(static_cast<size_t>(size) * size, 255u)};
     }
 
@@ -36,9 +36,9 @@ namespace krys::gfx::tests
     KRYS_NODISCARD double LargestError(const CoverageMask &blurred, double size, double sigma)
     {
       double error = 0.0;
-      for (int32 y = blurred.Bounds.Y; y < blurred.Bounds.Y + static_cast<int32>(blurred.Bounds.Height); ++y)
+      for (int32 y = blurred.Bounds.Y(); y < blurred.Bounds.MaxY(); ++y)
       {
-        for (int32 x = blurred.Bounds.X; x < blurred.Bounds.X + static_cast<int32>(blurred.Bounds.Width); ++x)
+        for (int32 x = blurred.Bounds.X(); x < blurred.Bounds.MaxX(); ++x)
         {
           const double expected =
             GaussianMass(0.0, size, x + 0.5, sigma) * GaussianMass(0.0, size, y + 0.5, sigma) * 255.0;
@@ -61,7 +61,7 @@ namespace krys::gfx::tests
     const auto square = Square(8u);
     CHECK(detail::BlurCoverage(square, 0.f).Bounds == square.Bounds);
     const auto blurred = detail::BlurCoverage(square, 4.f);
-    CHECK(blurred.Bounds == PixelRect2D {.X = -12, .Y = -12, .Width = 32u, .Height = 32u});
+    CHECK(blurred.Bounds == RectI {-12, -12, 32u, 32u});
     CHECK(blurred.Coverage.size() == 32u * 32u);
   }
 

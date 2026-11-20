@@ -87,11 +87,11 @@ namespace krys::boo::tests
 
   TEST_CASE("FEGaussianBlur", "[Graphics][Filters][FilterOperations]")
   {
-    CHECK(FEGaussianBlur::CalculateUnscaledKernelSize({4, 0}) == IntSize {8, 0});
+    CHECK(FEGaussianBlur::CalculateUnscaledKernelSize({4, 0}) == SizeI {8, 0});
     // Small deviations still use a kernel of at least two.
-    CHECK(FEGaussianBlur::CalculateUnscaledKernelSize({0.1f, 0.1f}) == IntSize {2, 2});
-    CHECK(FEGaussianBlur::CalculateUnscaledKernelSize({1'000, 1'000}) == IntSize {500, 500});
-    CHECK(FEGaussianBlur::CalculateOutsetSize({4, 4}) == IntSize {12, 12});
+    CHECK(FEGaussianBlur::CalculateUnscaledKernelSize({0.1f, 0.1f}) == SizeI {2, 2});
+    CHECK(FEGaussianBlur::CalculateUnscaledKernelSize({1'000, 1'000}) == SizeI {500, 500});
+    CHECK(FEGaussianBlur::CalculateOutsetSize({4, 4}) == SizeI {12, 12});
     CHECK(FEGaussianBlur::CalculateOutsets({4, 4}) == IntOutsets {12, 12, 12, 12});
   }
 

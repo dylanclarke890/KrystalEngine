@@ -34,9 +34,13 @@
 #include "Krystal.Core/Types/UniquePtr.hpp"
 #include "Krystal.Core/Types/WeakPtr.hpp"
 
-namespace krys::boo
+namespace krys
 {
   class AffineTransform;
+}
+
+namespace krys::boo
+{
   enum class ColorInterpolation : uint8;
 
   enum class SVGElementFlags : uint8
@@ -310,7 +314,7 @@ namespace krys::boo
     void UpdateSVGRendererForElementChange() noexcept;
 
     /// @brief The object bounding box of a rendered graphics element, in its renderer's local coordinates.
-    KRYS_NODISCARD Maybe<FloatRect> GetBoundingBox() const noexcept;
+    KRYS_NODISCARD Maybe<RectF> GetBoundingBox() const noexcept;
 
     /// @brief Whether the element's renderer is one inside an SVG renderer tree (not the outermost `<svg>`'s
     /// box), whose bounds come from SVG geometry rather than the box model.

@@ -66,7 +66,7 @@ namespace krys::boo
     KRYS_NODISCARD static bool IsIdentity(boo::SVGFilterElement &filterElement) noexcept;
 
     KRYS_NODISCARD static IntOutsets CalculateOutsets(boo::SVGFilterElement &filterElement,
-                                                      const FloatRect &targetBoundingBox) noexcept;
+                                                      const RectF &targetBoundingBox) noexcept;
 
     KRYS_NODISCARD SVGUnitTypes::SVGUnitType PrimitiveUnits() const noexcept
     {
@@ -96,9 +96,8 @@ namespace krys::boo
     KRYS_NODISCARD FilterStyleVector CreateFilterStyles(GraphicsContext &context,
                                                         const FilterStyle &sourceStyle) const noexcept final;
 
-    KRYS_NODISCARD static FloatSize CalculateResolvedSize(const FloatSize &size,
-                                                          const FloatRect &targetBoundingBox,
-                                                          SVGUnitTypes::SVGUnitType primitiveUnits) noexcept;
+    KRYS_NODISCARD static SizeF CalculateResolvedSize(const SizeF &size, const RectF &targetBoundingBox,
+                                                      SVGUnitTypes::SVGUnitType primitiveUnits) noexcept;
 
     TextStream &ExternalRepresentation(TextStream &ts,
                                        FilterRepresentation representation) const noexcept final;
@@ -132,9 +131,9 @@ namespace krys::boo
       _effects = krys::move(effects);
     }
 
-    KRYS_NODISCARD FloatSize ResolvedSize(const FloatSize &size) const noexcept final;
+    KRYS_NODISCARD SizeF ResolvedSize(const SizeF &size) const noexcept final;
 
-    KRYS_NODISCARD FloatPoint3D ResolvedPoint3D(const FloatPoint3D &point) const noexcept final;
+    KRYS_NODISCARD Point3F ResolvedPoint3D(const Point3F &point) const noexcept final;
 
     KRYS_NODISCARD EnumSet<FilterRenderingMode> SupportedFilterRenderingModes(
       EnumSet<FilterRenderingMode> preferredFilterRenderingModes) const noexcept final;

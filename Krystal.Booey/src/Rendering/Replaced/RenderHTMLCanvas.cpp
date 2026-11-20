@@ -81,7 +81,7 @@ namespace krys::boo
     GraphicsContextStateSaver stateSaver(context, clip);
     if (clip)
     {
-      context.Clip(FloatRect(SnappedIntRect(contentBoxRect)));
+      context.Clip(RectF(SnappedRectI(contentBoxRect)));
     }
 
     // FIXME: Recording repainted objects for paint milestones (addRelevantRepaintedObject), once there are
@@ -97,8 +97,9 @@ namespace krys::boo
 
   void RenderHTMLCanvas::CanvasSizeChanged() noexcept
   {
-    IntSize canvasSize = CanvasElement().Size();
-    LayoutSize zoomedSize(canvasSize.Width() * Style().UsedZoom(), canvasSize.Height() * Style().UsedZoom());
+    SizeI canvasSize = CanvasElement().Size();
+    LayoutSize zoomedSize(LayoutUnit(canvasSize.Width() * Style().UsedZoom()),
+                          LayoutUnit(canvasSize.Height() * Style().UsedZoom()));
 
     if (zoomedSize == IntrinsicSize())
     {

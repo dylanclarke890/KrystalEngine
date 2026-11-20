@@ -30,7 +30,7 @@
 
 #include "Krystal.Booey/CSS/Values/GridLineNamesValue.hpp"
 #include "Krystal.Booey/CSS/CSSOM/Markup.hpp"
-#include "Krystal.Core/Text/StringBuilder.hpp"
+#include "Krystal.Core/Strings/StringBuilder.hpp"
 #include <utility>
 
 namespace krys::boo::css

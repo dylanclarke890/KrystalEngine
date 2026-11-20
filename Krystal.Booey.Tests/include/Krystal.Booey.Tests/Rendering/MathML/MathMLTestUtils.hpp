@@ -7,7 +7,7 @@
 #include "Krystal.Booey/Graphics/Fonts/FontDatabase.hpp"
 #include "Krystal.Booey/Graphics/Fonts/WOFFFileFormat.hpp"
 #include "Krystal.Booey/Page/LocalFrameView.hpp"
-#include "Krystal.Booey/Platform/SharedBuffer.hpp"
+#include "Krystal.Core/Types/SharedBuffer.hpp"
 #include <cmath>
 #include <cstring>
 #include <filesystem>
@@ -63,7 +63,7 @@ namespace krys::boo::tests
   }
 
   /// @brief The border box of the element @p id in @p fixture, relative to the viewport.
-  KRYS_NODISCARD inline FloatRect BoxOf(style::tests::ResolverFixture &fixture, DOMStringView id) noexcept
+  KRYS_NODISCARD inline RectF BoxOf(style::tests::ResolverFixture &fixture, DOMStringView id) noexcept
   {
     (void)fixture.Document->UpdateLayout();
     return fixture.ById(id).BoundingClientRect();
@@ -74,8 +74,8 @@ namespace krys::boo::tests
   KRYS_NODISCARD List<TItem> PaintedItems(style::tests::ResolverFixture &fixture) noexcept
   {
     (void)fixture.Document->UpdateLayout();
-    display_list::RecorderImpl recorder(FloatSize(800, 600));
-    fixture.Frame->View()->Paint(recorder, IntRect(0, 0, 800, 600));
+    display_list::RecorderImpl recorder(SizeF(800, 600));
+    fixture.Frame->View()->Paint(recorder, RectI(0, 0, 800, 600));
     List<TItem> items;
     for (const auto &item : recorder.TakeDisplayList()->Items())
     {

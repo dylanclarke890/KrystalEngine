@@ -65,6 +65,6 @@ namespace krys::boo::style
                          : 0;
     auto color = filter.Color ? ToStyleColor(*filter.Color, state) : style::Color {CurrentColor {}};
 
-    return DropShadowFilterOperationWithStyleColor::Create(IntPoint {x, y}, stdDeviation, color);
+    return DropShadowFilterOperationWithStyleColor::Create(PointI {x, y}, stdDeviation, color);
   }
 }

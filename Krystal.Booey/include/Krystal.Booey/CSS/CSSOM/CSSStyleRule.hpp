@@ -23,7 +23,7 @@
 
 #include "Krystal.Booey/CSS/CSSOM/CSSRule.hpp"
 #include "Krystal.Core/Attributes.hpp"
-#include "Krystal.Core/Text/StringBuilder.hpp"
+#include "Krystal.Core/Strings/StringBuilder.hpp"
 #include "Krystal.Core/TypeCast.hpp"
 #include "Krystal.Core/Types/List.hpp"
 #include "Krystal.Core/Types/RefPtr.hpp"
@@ -109,7 +109,7 @@ namespace krys::boo
 
     void CssTextForRules(StringBuilder &rules) const noexcept;
 
-    void CssTextForRulesWithReplacementURLs(StringBuilder &rules,
+    void CssTextForRulesWithReplacementUrls(StringBuilder &rules,
                                             const css::SerialisationContext &context) const noexcept;
   };
 }

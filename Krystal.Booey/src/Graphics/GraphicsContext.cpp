@@ -34,8 +34,8 @@
 #include "Krystal.Booey/Graphics/Images/Image.hpp"
 #include "Krystal.Booey/Graphics/Paths/Path.hpp"
 #include "Krystal.Booey/Graphics/TextRuns/TextRunIterator.hpp"
-#include "Krystal.Booey/Text/BidiResolver.hpp"
 #include "Krystal.Core/Utils/Move.hpp"
+#include "Krystal.Text/BidiResolver.hpp"
 #include <cmath>
 
 namespace krys::boo
@@ -100,7 +100,7 @@ namespace krys::boo
     UnwindStateStack(StackSize());
   }
 
-  FloatSize GraphicsContext::PlatformShadowOffset(const FloatSize &shadowOffset) noexcept
+  SizeF GraphicsContext::PlatformShadowOffset(const SizeF &shadowOffset) noexcept
   {
     return shadowOffset;
   }
@@ -118,7 +118,7 @@ namespace krys::boo
     DidUpdateState(_state);
   }
 
-  void GraphicsContext::DrawRaisedEllipse(const FloatRect &rect, const Color &ellipseColor,
+  void GraphicsContext::DrawRaisedEllipse(const RectF &rect, const Color &ellipseColor,
                                           const Color &shadowColor) noexcept
   {
     Save();
@@ -126,7 +126,7 @@ namespace krys::boo
     SetStrokeColor(shadowColor);
     SetFillColor(shadowColor);
 
-    DrawEllipse(FloatRect(rect.X(), rect.Y() + 1, rect.Width(), rect.Height()));
+    DrawEllipse(RectF(rect.X(), rect.Y() + 1, rect.Width(), rect.Height()));
 
     SetStrokeColor(ellipseColor);
     SetFillColor(ellipseColor);
@@ -152,18 +152,18 @@ namespace krys::boo
     --_transparencyLayerCount;
   }
 
-  FloatSize GraphicsContext::DrawText(const FontCascade &font, const TextRun &run, const FloatPoint &point,
-                                      uint32 from, Maybe<uint32> to) noexcept
+  SizeF GraphicsContext::DrawText(const FontCascade &font, const TextRun &run, const PointF &point,
+                                  uint32 from, Maybe<uint32> to) noexcept
   {
     // Display list recording for text content is done at glyphs level. See GraphicsContext::drawGlyphs.
     return font.DrawText(*this, run, point, from, to);
   }
 
-  void GraphicsContext::DrawBidiText(const FontCascade &font, const TextRun &run, const FloatPoint &point,
+  void GraphicsContext::DrawBidiText(const FontCascade &font, const TextRun &run, const PointF &point,
                                      FontCascade::CustomFontNotReadyAction customFontNotReadyAction) noexcept
   {
-    BidiResolver<TextRunIterator, BidiCharacterRun> bidiResolver;
-    bidiResolver.SetStatus(BidiStatus(run.Direction(), run.DirectionalOverride()));
+    text::BidiResolver<TextRunIterator, text::BidiCharacterRun> bidiResolver;
+    bidiResolver.SetStatus(text::BidiStatus(run.Direction(), run.DirectionalOverride()));
     bidiResolver.SetPositionIgnoringNestedIsolates(TextRunIterator(&run, 0));
 
     // FIXME: This ownership should be reversed. We should pass BidiRunList
@@ -182,7 +182,7 @@ namespace krys::boo
     {
       auto subrun = run.SubRun(bidiRun->Start(), bidiRun->Stop() - bidiRun->Start());
       bool isRTL = bidiRun->Level() % 2;
-      subrun.SetDirection(isRTL ? TextDirection::RTL : TextDirection::LTR);
+      subrun.SetDirection(isRTL ? text::TextDirection::RTL : text::TextDirection::LTR);
       subrun.SetDirectionalOverride(bidiRun->DirOverride(false));
 
       std::ignore = font.DrawText(*this, subrun, currentPoint, 0, null, customFontNotReadyAction);
@@ -195,13 +195,13 @@ namespace krys::boo
   }
 
   void GraphicsContext::DrawEmphasisMarks(const FontCascade &font, const TextRun &run, const StringAtom &mark,
-                                          const FloatPoint &point, uint32 from, Maybe<uint32> to) noexcept
+                                          const PointF &point, uint32 from, Maybe<uint32> to) noexcept
   {
     font.DrawEmphasisMarks(*this, run, mark, point, from, to);
   }
 
   void GraphicsContext::DrawGlyphsImmediate(const Font &font, Span<const GlyphBufferGlyph> glyphs,
-                                            Span<const GlyphBufferAdvance> advances, const FloatPoint &point,
+                                            Span<const GlyphBufferAdvance> advances, const PointF &point,
                                             FontSmoothingMode fontSmoothingMode) noexcept
   {
     // Called by implementations that transform drawGlyphs into drawGlyphsImmediate, drawImageBuffer, etc
@@ -209,31 +209,30 @@ namespace krys::boo
     DrawGlyphs(font, glyphs, advances, point, fontSmoothingMode);
   }
 
-  ImageDrawResult GraphicsContext::DrawImage(Image &image, const FloatPoint &destination,
+  ImageDrawResult GraphicsContext::DrawImage(Image &image, const PointF &destination,
                                              ImagePaintingOptions imagePaintingOptions) noexcept
   {
-    return DrawImage(image, FloatRect(destination, image.Size()), FloatRect(FloatPoint(), image.Size()),
+    return DrawImage(image, RectF(destination, image.Size()), RectF(PointF(), image.Size()),
                      imagePaintingOptions);
   }
 
-  ImageDrawResult GraphicsContext::DrawImage(Image &image, const FloatRect &destination,
+  ImageDrawResult GraphicsContext::DrawImage(Image &image, const RectF &destination,
                                              ImagePaintingOptions imagePaintingOptions) noexcept
   {
-    FloatRect srcRect(FloatPoint(), image.Size(imagePaintingOptions.Orientation()));
+    RectF srcRect(PointF(), image.Size(imagePaintingOptions.Orientation()));
     return DrawImage(image, destination, srcRect, imagePaintingOptions);
   }
 
-  ImageDrawResult GraphicsContext::DrawImage(Image &image, const FloatRect &destination,
-                                             const FloatRect &source, ImagePaintingOptions options) noexcept
+  ImageDrawResult GraphicsContext::DrawImage(Image &image, const RectF &destination, const RectF &source,
+                                             ImagePaintingOptions options) noexcept
   {
     InterpolationQualityMaintainer interpolationQualityForThisScope(*this, options.GetInterpolationQuality());
     return image.Draw(*this, destination, source, options);
   }
 
-  ImageDrawResult GraphicsContext::DrawTiledImage(Image &image, const FloatRect &destination,
-                                                  const FloatPoint &source, const FloatSize &tileSize,
-                                                  const FloatSize &spacing,
-                                                  ImagePaintingOptions options) noexcept
+  ImageDrawResult GraphicsContext::DrawTiledImage(Image &image, const RectF &destination,
+                                                  const PointF &source, const SizeF &tileSize,
+                                                  const SizeF &spacing, ImagePaintingOptions options) noexcept
   {
     InterpolationQualityMaintainer interpolationQualityForThisScope(*this, options.GetInterpolationQuality());
     return image.DrawTiled(*this, destination, source, tileSize, spacing, options);
@@ -241,36 +240,36 @@ namespace krys::boo
 
   namespace
   {
-    KRYS_NODISCARD IntSize ScaledImageBufferSize(const FloatSize &size, const FloatSize &scale) noexcept
+    KRYS_NODISCARD SizeI ScaledImageBufferSize(const SizeF &size, const SizeF &scale) noexcept
     {
       // Enlarge the buffer size if the context's transform is scaling it so we need a higher
       // resolution than one pixel per unit.
-      return ExpandedIntSize(size * scale);
+      return ExpandedSizeI(size * scale);
     }
 
-    KRYS_NODISCARD IntRect ScaledImageBufferRect(const FloatRect &rect, const FloatSize &scale) noexcept
+    KRYS_NODISCARD RectI ScaledImageBufferRect(const RectF &rect, const SizeF &scale) noexcept
     {
       auto scaledRect = rect;
       scaledRect.Scale(scale);
-      return EnclosingIntRect(scaledRect);
+      return EnclosingRectI(scaledRect);
     }
 
-    KRYS_NODISCARD FloatSize ClampingScaleForImageBufferSize(const FloatSize &size) noexcept
+    KRYS_NODISCARD SizeF ClampingScaleForImageBufferSize(const SizeF &size) noexcept
     {
-      FloatSize clampingScale(1, 1);
+      SizeF clampingScale(1, 1);
       (void)ImageBuffer::SizeNeedsClamping(size, clampingScale);
       return clampingScale;
     }
   }
 
-  RefPtr<ImageBuffer> GraphicsContext::CreateImageBuffer(const FloatSize &size,
+  RefPtr<ImageBuffer> GraphicsContext::CreateImageBuffer(const SizeF &size,
                                                          float resolutionScale) const noexcept
   {
     return ImageBuffer::Create(size, resolutionScale);
   }
 
-  RefPtr<ImageBuffer> GraphicsContext::CreateScaledImageBuffer(const FloatSize &size,
-                                                               const FloatSize &scale) const noexcept
+  RefPtr<ImageBuffer> GraphicsContext::CreateScaledImageBuffer(const SizeF &size,
+                                                               const SizeF &scale) const noexcept
   {
     auto expandedScaledSize = ScaledImageBufferSize(size, scale);
     if (expandedScaledSize.IsEmpty())
@@ -278,9 +277,9 @@ namespace krys::boo
       return nullptr;
     }
 
-    auto clampingScale = ClampingScaleForImageBufferSize(FloatSize(expandedScaledSize));
+    auto clampingScale = ClampingScaleForImageBufferSize(SizeF(expandedScaledSize));
 
-    auto imageBuffer = CreateImageBuffer(FloatSize(expandedScaledSize) * clampingScale, 1);
+    auto imageBuffer = CreateImageBuffer(SizeF(expandedScaledSize) * clampingScale, 1);
     if (!imageBuffer)
     {
       return nullptr;
@@ -290,12 +289,12 @@ namespace krys::boo
 
     // 'expandedScaledSize' is mapped to 'size'. So use 'expandedScaledSize / size'
     // not 'scale' because they are not necessarily equal.
-    imageBuffer->Context().Scale(FloatSize(expandedScaledSize) / size);
+    imageBuffer->Context().Scale(SizeF(expandedScaledSize) / size);
     return imageBuffer;
   }
 
-  RefPtr<ImageBuffer> GraphicsContext::CreateScaledImageBuffer(const FloatRect &rect,
-                                                               const FloatSize &scale) const noexcept
+  RefPtr<ImageBuffer> GraphicsContext::CreateScaledImageBuffer(const RectF &rect,
+                                                               const SizeF &scale) const noexcept
   {
     auto expandedScaledRect = ScaledImageBufferRect(rect, scale);
     if (expandedScaledRect.IsEmpty())
@@ -303,9 +302,9 @@ namespace krys::boo
       return nullptr;
     }
 
-    auto clampingScale = ClampingScaleForImageBufferSize(FloatSize(expandedScaledRect.Size()));
+    auto clampingScale = ClampingScaleForImageBufferSize(SizeF(expandedScaledRect.Size()));
 
-    auto imageBuffer = CreateImageBuffer(FloatSize(expandedScaledRect.Size()) * clampingScale, 1);
+    auto imageBuffer = CreateImageBuffer(SizeF(expandedScaledRect.Size()) * clampingScale, 1);
     if (!imageBuffer)
     {
       return nullptr;
@@ -323,25 +322,25 @@ namespace krys::boo
     return imageBuffer;
   }
 
-  RefPtr<ImageBuffer> GraphicsContext::CreateAlignedImageBuffer(const FloatSize &size) const noexcept
+  RefPtr<ImageBuffer> GraphicsContext::CreateAlignedImageBuffer(const SizeF &size) const noexcept
   {
     return CreateScaledImageBuffer(size, ScaleFactor());
   }
 
-  void GraphicsContext::DrawImageBuffer(ImageBuffer &image, const FloatPoint &destination,
+  void GraphicsContext::DrawImageBuffer(ImageBuffer &image, const PointF &destination,
                                         ImagePaintingOptions imagePaintingOptions) noexcept
   {
-    DrawImageBuffer(image, FloatRect(destination, image.LogicalSize()), FloatRect({}, image.LogicalSize()),
+    DrawImageBuffer(image, RectF(destination, image.LogicalSize()), RectF({}, image.LogicalSize()),
                     imagePaintingOptions);
   }
 
-  void GraphicsContext::DrawImageBuffer(ImageBuffer &image, const FloatRect &destination,
+  void GraphicsContext::DrawImageBuffer(ImageBuffer &image, const RectF &destination,
                                         ImagePaintingOptions imagePaintingOptions) noexcept
   {
-    DrawImageBuffer(image, destination, FloatRect({}, image.LogicalSize()), imagePaintingOptions);
+    DrawImageBuffer(image, destination, RectF({}, image.LogicalSize()), imagePaintingOptions);
   }
 
-  void GraphicsContext::DrawFilteredImageBuffer(ImageBuffer *sourceImage, const FloatRect &sourceImageRect,
+  void GraphicsContext::DrawFilteredImageBuffer(ImageBuffer *sourceImage, const RectF &sourceImageRect,
                                                 Filter &filter, FilterResults &results) noexcept
   {
     auto result = filter.Apply(sourceImage, sourceImageRect, results);
@@ -357,26 +356,25 @@ namespace krys::boo
     }
 
     Scale({1 / filter.FilterScale().Width(), 1 / filter.FilterScale().Height()});
-    DrawImageBuffer(*imageBuffer, FloatRect(result->AbsoluteImageRect()));
+    DrawImageBuffer(*imageBuffer, RectF(result->AbsoluteImageRect()));
     Scale(filter.FilterScale());
   }
 
-  void GraphicsContext::DrawImageBuffer(ImageBuffer &, const FloatRect &, const FloatRect &,
+  void GraphicsContext::DrawImageBuffer(ImageBuffer &, const RectF &, const RectF &,
                                         ImagePaintingOptions) noexcept
   {
     // FIXME: Draw the buffer's native image (nativeImageForDrawing).
   }
 
-  void GraphicsContext::DrawPattern(ImageBuffer &, const FloatRect &, const FloatRect &,
-                                    const AffineTransform &, const FloatPoint &, const FloatSize &,
-                                    ImagePaintingOptions) noexcept
+  void GraphicsContext::DrawPattern(ImageBuffer &, const RectF &, const RectF &, const AffineTransform &,
+                                    const PointF &, const SizeF &, ImagePaintingOptions) noexcept
   {
     // FIXME: Draw the buffer's native image as a pattern (nativeImageForDrawing).
   }
 
-  ImageDrawResult GraphicsContext::DrawTiledImage(Image &image, const FloatRect &destination,
-                                                  const FloatRect &source, const FloatSize &tileScaleFactor,
-                                                  Image::TileRule hRule, Image::TileRule vRule,
+  ImageDrawResult GraphicsContext::DrawTiledImage(Image &image, const RectF &destination, const RectF &source,
+                                                  const SizeF &tileScaleFactor, Image::TileRule hRule,
+                                                  Image::TileRule vRule,
                                                   ImagePaintingOptions options) noexcept
   {
     if (hRule == Image::StretchTile && vRule == Image::StretchTile)
@@ -410,19 +408,19 @@ namespace krys::boo
     ClipOut(path);
   }
 
-  IntRect GraphicsContext::ClipBounds() const noexcept
+  RectI GraphicsContext::ClipBounds() const noexcept
   {
     krys_debug_assert(false);
-    return IntRect();
+    return RectI();
   }
 
-  void GraphicsContext::FillRect(const FloatRect &rect, Gradient &gradient) noexcept
+  void GraphicsContext::FillRect(const RectF &rect, Gradient &gradient) noexcept
   {
     // The platform fills a rect with a gradient in the fill's gradient space.
     FillRect(rect, gradient, FillGradientSpaceTransform());
   }
 
-  void GraphicsContext::FillRect(const FloatRect &rect, const Color &color, CompositeOperator op,
+  void GraphicsContext::FillRect(const RectF &rect, const Color &color, CompositeOperator op,
                                  boo::BlendMode blendMode) noexcept
   {
     CompositeOperator previousOperator = CompositeOperation();
@@ -446,8 +444,7 @@ namespace krys::boo
     }
   }
 
-  void GraphicsContext::FillRectWithRoundedHole(const FloatRect &rect,
-                                                const FloatRoundedRect &roundedHoleRect,
+  void GraphicsContext::FillRectWithRoundedHole(const RectF &rect, const FloatRoundedRect &roundedHoleRect,
                                                 const Color &color) noexcept
   {
     Path path;
@@ -474,14 +471,13 @@ namespace krys::boo
     SetFillColor(oldFillColor);
   }
 
-  FloatSize GraphicsContext::ScaleFactor() const noexcept
+  SizeF GraphicsContext::ScaleFactor() const noexcept
   {
     AffineTransform transform = GetCTM(GraphicsContext::DefinitelyIncludeDeviceScale);
-    return FloatSize(static_cast<float>(transform.XScale()), static_cast<float>(transform.YScale()));
+    return SizeF(static_cast<float>(transform.XScale()), static_cast<float>(transform.YScale()));
   }
 
-  FloatSize GraphicsContext::ScaleFactorForDrawing(const FloatRect &destRect,
-                                                   const FloatRect &srcRect) const noexcept
+  SizeF GraphicsContext::ScaleFactorForDrawing(const RectF &destRect, const RectF &srcRect) const noexcept
   {
     AffineTransform transform = GetCTM(GraphicsContext::DefinitelyIncludeDeviceScale);
     auto transformedDestRect = transform.MapRect(destRect);
@@ -494,24 +490,24 @@ namespace krys::boo
     StrokePath(path);
   }
 
-  void GraphicsContext::FillEllipseAsPath(const FloatRect &ellipse) noexcept
+  void GraphicsContext::FillEllipseAsPath(const RectF &ellipse) noexcept
   {
     Path path;
     path.AddEllipseInRect(ellipse);
     FillPath(path);
   }
 
-  void GraphicsContext::StrokeEllipseAsPath(const FloatRect &ellipse) noexcept
+  void GraphicsContext::StrokeEllipseAsPath(const RectF &ellipse) noexcept
   {
     Path path;
     path.AddEllipseInRect(ellipse);
     StrokePath(path);
   }
 
-  void GraphicsContext::DrawLineForText(const FloatRect &rect, bool isPrinting, bool doubleUnderlines,
+  void GraphicsContext::DrawLineForText(const RectF &rect, bool isPrinting, bool doubleUnderlines,
                                         boo::StrokeStyle style) noexcept
   {
-    FloatSegment line[1] {{0, rect.Width()}};
+    SegmentF line[1] {{0, rect.Width()}};
     DrawLinesForText(rect.Location(), rect.Height(), line, isPrinting, doubleUnderlines, style);
   }
 
@@ -529,20 +525,20 @@ namespace krys::boo
     }
   }
 
-  FloatRect GraphicsContext::ComputeUnderlineBoundsForText(const FloatRect &rect, bool printing) noexcept
+  RectF GraphicsContext::ComputeUnderlineBoundsForText(const RectF &rect, bool printing) noexcept
   {
     Color dummyColor;
     return ComputeLineBoundsAndAntialiasingModeForText(rect, printing, dummyColor);
   }
 
-  FloatRect GraphicsContext::ComputeLineBoundsAndAntialiasingModeForText(const FloatRect &rect, bool printing,
-                                                                         Color &color) const noexcept
+  RectF GraphicsContext::ComputeLineBoundsAndAntialiasingModeForText(const RectF &rect, bool printing,
+                                                                     Color &color) const noexcept
   {
-    FloatPoint origin = rect.Location();
+    PointF origin = rect.Location();
     float thickness = std::max(rect.Height(), 0.5f);
     if (printing)
     {
-      return FloatRect(origin, FloatSize(rect.Width(), thickness));
+      return RectF(origin, SizeF(rect.Width(), thickness));
     }
 
     AffineTransform transform = GetCTM(GraphicsContext::DefinitelyIncludeDeviceScale);
@@ -559,15 +555,15 @@ namespace krys::boo
       color = color.ColorWithAlphaMultipliedBy(shade);
     }
 
-    FloatPoint devicePoint = transform.MapPoint(rect.Location());
+    PointF devicePoint = transform.MapPoint(rect.Location());
     // Visual overflow might occur here due to integral roundf/ceilf. visualOverflowForDecorations adjusts the
     // overflow value for underline decoration.
-    FloatPoint deviceOrigin = FloatPoint(std::roundf(devicePoint.X()), std::ceilf(devicePoint.Y()));
+    PointF deviceOrigin = PointF(std::roundf(devicePoint.X()), std::ceilf(devicePoint.Y()));
     if (auto inverse = transform.Inverse())
     {
       origin = inverse.value().MapPoint(deviceOrigin);
     }
-    return FloatRect(origin, FloatSize(rect.Width(), thickness));
+    return RectF(origin, SizeF(rect.Width(), thickness));
   }
 
   auto GraphicsContext::DashPatternForStrokeLength(float length, float thickness, bool closedPath) noexcept
@@ -645,8 +641,8 @@ namespace krys::boo
     return patternOffset;
   }
 
-  List<FloatPoint> GraphicsContext::CenterLineAndCutOffCorners(bool isVerticalLine, float cornerWidth,
-                                                               FloatPoint point1, FloatPoint point2) noexcept
+  List<PointF> GraphicsContext::CenterLineAndCutOffCorners(bool isVerticalLine, float cornerWidth,
+                                                           PointF point1, PointF point2) noexcept
   {
     // Center line and cut off corners for pattern painting.
     if (isVerticalLine)
@@ -665,8 +661,8 @@ namespace krys::boo
     return {point1, point2};
   }
 
-  auto GraphicsContext::ComputeRectsAndStrokeColorForLinesForText(const FloatPoint &point, float thickness,
-                                                                  Span<const FloatSegment> lineSegments,
+  auto GraphicsContext::ComputeRectsAndStrokeColorForLinesForText(const PointF &point, float thickness,
+                                                                  Span<const SegmentF> lineSegments,
                                                                   bool isPrinting, bool doubleLines,
                                                                   boo::StrokeStyle strokeStyle) noexcept
     -> RectsAndStrokeColor
@@ -679,8 +675,8 @@ namespace krys::boo
       return result;
     }
     strokeColor = StrokeColor();
-    FloatRect bounds = ComputeLineBoundsAndAntialiasingModeForText(
-      FloatRect {point, FloatSize {lineSegments.back().End, thickness}}, isPrinting, strokeColor);
+    RectF bounds = ComputeLineBoundsAndAntialiasingModeForText(
+      RectF {point, SizeF {lineSegments.back().End, thickness}}, isPrinting, strokeColor);
     if (bounds.IsEmpty())
     {
       return result;
@@ -730,7 +726,7 @@ namespace krys::boo
             }
           }
 
-          rects.push_back(FloatRect(dashStart, bounds.Y(), actualDashWidth, bounds.Height()));
+          rects.push_back(RectF(dashStart, bounds.Y(), actualDashWidth, bounds.Height()));
         }
       }
     }
@@ -739,7 +735,7 @@ namespace krys::boo
       for (const auto &lineSegment : lineSegments)
       {
         rects.push_back(
-          FloatRect(bounds.X() + lineSegment.Begin, bounds.Y(), lineSegment.Length(), bounds.Height()));
+          RectF(bounds.X() + lineSegment.Begin, bounds.Y(), lineSegment.Length(), bounds.Height()));
       }
     }
     if (doubleLines)
@@ -748,7 +744,7 @@ namespace krys::boo
       float y = bounds.Y() + 2 * bounds.Height();
       for (const auto &lineSegment : lineSegments)
       {
-        rects.push_back(FloatRect(bounds.X() + lineSegment.Begin, y, lineSegment.Length(), bounds.Height()));
+        rects.push_back(RectF(bounds.X() + lineSegment.Begin, y, lineSegment.Length(), bounds.Height()));
       }
     }
     return result;

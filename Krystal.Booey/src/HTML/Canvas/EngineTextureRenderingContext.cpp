@@ -1,9 +1,9 @@
 ﻿#include "Krystal.Booey/HTML/Canvas/EngineTextureRenderingContext.hpp"
-#include "Krystal.Booey/Graphics/Geometry/GeometryUtilities.hpp"
 #include "Krystal.Booey/Graphics/Images/NativeImage.hpp"
 #include "Krystal.Booey/Graphics/Layers/GraphicsLayerContentsDisplayDelegate.hpp"
 #include "Krystal.Booey/HTML/Elements/HTMLCanvasElement.hpp"
 #include "Krystal.Booey/Rendering/RenderBox.hpp"
+#include "Krystal.Core/Geometry/GeometryUtilities.hpp"
 
 namespace krys::boo::html
 {
@@ -32,7 +32,7 @@ namespace krys::boo::html
     MarkCanvasChanged();
   }
 
-  void EngineTextureRenderingContext::TextureChanged(const Maybe<IntRect> &rect) noexcept
+  void EngineTextureRenderingContext::TextureChanged(const Maybe<RectI> &rect) noexcept
   {
     if (!_texture)
     {
@@ -40,7 +40,7 @@ namespace krys::boo::html
     }
 
     auto &canvas = GetCanvasBase();
-    FloatRect canvasRect {{}, FloatSize(canvas.Size())};
+    RectF canvasRect {{}, SizeF(canvas.Size())};
     if (!rect)
     {
       canvas.DidDraw(canvasRect);
@@ -48,12 +48,12 @@ namespace krys::boo::html
     }
 
     // The texture is scaled to the canvas.
-    FloatRect textureRect {{}, FloatSize(_texture->Size())};
+    RectF textureRect {{}, SizeF(_texture->Size())};
     if (textureRect.IsEmpty())
     {
       return;
     }
-    canvas.DidDraw(MapRect(FloatRect(*rect), textureRect, canvasRect));
+    canvas.DidDraw(MapRect(RectF(*rect), textureRect, canvasRect));
   }
 
   RefPtr<NativeImage> EngineTextureRenderingContext::SurfaceBufferToNativeImage(SurfaceBuffer) noexcept

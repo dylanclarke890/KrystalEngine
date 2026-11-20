@@ -42,9 +42,9 @@ namespace krys::boo
 
     KRYS_NODISCARD SVGLinearGradientElement &LinearGradientElement() const noexcept;
 
-    KRYS_NODISCARD FloatPoint StartPoint(const svg::LinearGradientAttributes &) const noexcept;
+    KRYS_NODISCARD PointF StartPoint(const svg::LinearGradientAttributes &) const noexcept;
 
-    KRYS_NODISCARD FloatPoint EndPoint(const svg::LinearGradientAttributes &) const noexcept;
+    KRYS_NODISCARD PointF EndPoint(const svg::LinearGradientAttributes &) const noexcept;
 
     void GradientElement() const = delete;
 

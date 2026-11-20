@@ -18,8 +18,8 @@
  */
 
 #include "Krystal.Booey/SVG/SVGTransformDistance.hpp"
-#include "Krystal.Booey/Graphics/Geometry/FloatPoint.hpp"
-#include "Krystal.Booey/Graphics/Geometry/FloatSize.hpp"
+#include "Krystal.Core/Geometry/Point.hpp"
+#include "Krystal.Core/Geometry/Size.hpp"
 #include <cmath>
 
 namespace krys::boo
@@ -44,7 +44,7 @@ namespace krys::boo
       case SVGTransformValue::SVG_TRANSFORM_UNKNOWN: break;
       case SVGTransformValue::SVG_TRANSFORM_ROTATE:
       {
-        FloatSize centerDistance = toTransform.RotationCenter() - fromTransform.RotationCenter();
+        SizeF centerDistance = toTransform.RotationCenter() - fromTransform.RotationCenter();
         _angle = toTransform.Angle() - fromTransform.Angle();
         _cx = centerDistance.Width();
         _cy = centerDistance.Height();
@@ -52,7 +52,7 @@ namespace krys::boo
       }
       case SVGTransformValue::SVG_TRANSFORM_TRANSLATE:
       {
-        FloatSize translationDistance = toTransform.Translate() - fromTransform.Translate();
+        SizeF translationDistance = toTransform.Translate() - fromTransform.Translate();
         _transform.Translate(translationDistance.Width(), translationDistance.Height());
         break;
       }
@@ -129,7 +129,7 @@ namespace krys::boo
       }
       case SVGTransformValue::SVG_TRANSFORM_SCALE:
       {
-        FloatSize scale = second.Scale();
+        SizeF scale = second.Scale();
         scale.Scale(repeat);
         scale += first.Scale();
         transform.SetScale(scale.Width(), scale.Height());
@@ -160,21 +160,21 @@ namespace krys::boo
       case SVGTransformValue::SVG_TRANSFORM_UNKNOWN: return {};
       case SVGTransformValue::SVG_TRANSFORM_TRANSLATE:
       {
-        FloatPoint translation = transform.Translate();
-        translation += FloatSize::NarrowPrecision(_transform.E(), _transform.F());
+        PointF translation = transform.Translate();
+        translation += SizeF::NarrowPrecision(_transform.E(), _transform.F());
         newTransform.SetTranslate(translation.X(), translation.Y());
         return newTransform;
       }
       case SVGTransformValue::SVG_TRANSFORM_SCALE:
       {
-        FloatSize scale = transform.Scale();
-        scale += FloatSize::NarrowPrecision(_transform.A(), _transform.D());
+        SizeF scale = transform.Scale();
+        scale += SizeF::NarrowPrecision(_transform.A(), _transform.D());
         newTransform.SetScale(scale.Width(), scale.Height());
         return newTransform;
       }
       case SVGTransformValue::SVG_TRANSFORM_ROTATE:
       {
-        FloatPoint center = transform.RotationCenter();
+        PointF center = transform.RotationCenter();
         newTransform.SetRotate(transform.Angle() + _angle, center.X() + _cx, center.Y() + _cy);
         return newTransform;
       }

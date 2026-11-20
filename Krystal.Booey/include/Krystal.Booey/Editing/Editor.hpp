@@ -31,18 +31,19 @@
 #include "Krystal.Booey/Editing/Selection/TemporarySelectionChange.hpp"
 #include "Krystal.Booey/Editing/TextIteratorBehavior.hpp"
 #include "Krystal.Core/Attributes.hpp"
+#include "Krystal.Core/Geometry/GeometryForward.hpp"
 #include "Krystal.Core/Macros.hpp"
+#include "Krystal.Core/Strings/String.hpp"
 #include "Krystal.Core/TriState.hpp"
 #include "Krystal.Core/Types/EnumSet.hpp"
 #include "Krystal.Core/Types/List.hpp"
 #include "Krystal.Core/Types/Maybe.hpp"
 #include "Krystal.Core/Types/RefPtr.hpp"
-#include "Krystal.Core/Types/String.hpp"
 #include "Krystal.Core/Types/UniquePtr.hpp"
 
-namespace krys::boo::url
+namespace krys::net
 {
-  class URL;
+  class Url;
 }
 
 namespace krys::boo
@@ -78,7 +79,6 @@ namespace krys::boo
   class EditorClient;
   class EditorInternalCommand;
   enum class FrameSelectionSetSelectionOption : uint8;
-  class IntRect;
   class LocalFrame;
   class Pasteboard;
   class ProhibitScrollingWhenChangingContentSizeForScope;
@@ -302,12 +302,12 @@ namespace krys::boo
     void WriteSelectionToPasteboard(Pasteboard &pasteboard) noexcept;
 
     /// @brief Writes @p url, titled @p title, to @p pasteboard.
-    static void CopyURL(const url::URL &url, utf8_stringview title, Pasteboard &pasteboard) noexcept;
+    static void CopyUrl(const net::Url &url, utf8_stringview title, Pasteboard &pasteboard) noexcept;
 
     /// @brief Writes the image @p imageElement shows to @p pasteboard: its URL, titled @p title, and its
     /// markup.
     // FIXME: The image itself, with images on the pasteboard.
-    static void WriteImageToPasteboard(Pasteboard &pasteboard, Element &imageElement, const url::URL &url,
+    static void WriteImageToPasteboard(Pasteboard &pasteboard, Element &imageElement, const net::Url &url,
                                        utf8_stringview title) noexcept;
 
     /// @brief The pasteboard's richest content as a fragment to paste at @p context.
@@ -552,7 +552,7 @@ namespace krys::boo
 
     /// @brief The first line's rect of @p range in absolute coordinates (the caret's, without its width, when
     /// it's collapsed), for placing an input method's windows.
-    KRYS_NODISCARD static IntRect FirstRectForRange(const dom::SimpleRange &range) noexcept;
+    KRYS_NODISCARD static RectI FirstRectForRange(const dom::SimpleRange &range) noexcept;
 
     void CloseTyping() noexcept;
 

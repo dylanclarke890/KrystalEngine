@@ -28,27 +28,27 @@
 #include "Krystal.Booey/Graphics/GraphicsContext.hpp"
 #include "Krystal.Booey/Graphics/ImageBuffers/ImageBuffer.hpp"
 #include "Krystal.Booey/Rendering/SVG/Legacy/LegacyRenderSVGResourceMasker.hpp"
-#include "Krystal.Core/Text/TextStream.hpp"
+#include "Krystal.Core/Strings/TextStream.hpp"
 #include "Krystal.Core/Utils/Move.hpp"
 
 namespace krys::boo
 {
   Ref<SVGResourceImage> SVGResourceImage::Create(LegacyRenderSVGResourceContainer &renderResource,
-                                                 const style::URL &resourceURL) noexcept
+                                                 const style::Url &resourceUrl) noexcept
   {
-    return AdoptRef(*new SVGResourceImage(renderResource, resourceURL));
+    return AdoptRef(*new SVGResourceImage(renderResource, resourceUrl));
   }
 
   SVGResourceImage::SVGResourceImage(LegacyRenderSVGResourceContainer &renderResource,
-                                     style::URL resourceURL) noexcept
-      : _legacyRenderResource(CreateWeakPtr(&renderResource)), _resourceURL(krys::move(resourceURL))
+                                     style::Url resourceUrl) noexcept
+      : _legacyRenderResource(CreateWeakPtr(&renderResource)), _resourceUrl(krys::move(resourceUrl))
   {
   }
 
   SVGResourceImage::~SVGResourceImage() noexcept = default;
 
-  ImageDrawResult SVGResourceImage::Draw(GraphicsContext &context, const FloatRect &destinationRect,
-                                         const FloatRect &sourceRect, ImagePaintingOptions options) noexcept
+  ImageDrawResult SVGResourceImage::Draw(GraphicsContext &context, const RectF &destinationRect,
+                                         const RectF &sourceRect, ImagePaintingOptions options) noexcept
   {
     if (auto *masker = DynamicDowncast<LegacyRenderSVGResourceMasker>(_legacyRenderResource.get()))
     {
@@ -61,9 +61,9 @@ namespace krys::boo
     return ImageDrawResult::DidNothing;
   }
 
-  void SVGResourceImage::DrawPattern(GraphicsContext &context, const FloatRect &destinationRect,
-                                     const FloatRect &sourceRect, const AffineTransform &patternTransform,
-                                     const FloatPoint &phase, const FloatSize &spacing,
+  void SVGResourceImage::DrawPattern(GraphicsContext &context, const RectF &destinationRect,
+                                     const RectF &sourceRect, const AffineTransform &patternTransform,
+                                     const PointF &phase, const SizeF &spacing,
                                      ImagePaintingOptions options) noexcept
   {
     auto imageBuffer = context.CreateImageBuffer(Size());
@@ -74,7 +74,7 @@ namespace krys::boo
 
     // Fill with the SVG resource.
     GraphicsContext &graphicsContext = imageBuffer->Context();
-    (void)graphicsContext.DrawImage(*this, FloatPoint());
+    (void)graphicsContext.DrawImage(*this, PointF());
 
     // Tile the image buffer into the context.
     context.DrawPattern(*imageBuffer, destinationRect, sourceRect, patternTransform, phase, spacing, options);
@@ -83,6 +83,6 @@ namespace krys::boo
   void SVGResourceImage::Dump(TextStream &ts) const noexcept
   {
     GeneratedImage::Dump(ts);
-    ts << _resourceURL.Resolved.String();
+    ts << _resourceUrl.Resolved.String();
   }
 }

@@ -3,12 +3,12 @@
 #include "Krystal.Booey.Tests/CSS/ValueTestUtils.hpp"
 #include "Krystal.Booey.Tests/Loader/PageInFrameFixture.hpp"
 #include "Krystal.Booey.Tests/Loader/TestLoader.hpp"
-#include "Krystal.Booey.Tests/Platform/ImageDecoders/TestImages.hpp"
 #include "Krystal.Booey/DOM/Nodes/HTMLDocument.hpp"
 #include "Krystal.Booey/HTML/Elements/HTMLImageElement.hpp"
 #include "Krystal.Booey/Page/LocalDOMWindow.hpp"
 #include "Krystal.Booey/Page/LocalFrame.hpp"
 #include "Krystal.Booey/Page/Page.hpp"
+#include "Krystal.Image.Tests/TestImages.hpp"
 
 namespace krys::boo::tests
 {
@@ -18,7 +18,7 @@ namespace krys::boo::tests
     /// images load as they're inserted.
     struct LazyImageFixture : css::tests::ValueFixture
     {
-      constexpr static IntSize ViewSize {200, 100};
+      constexpr static SizeI ViewSize {200, 100};
       Ref<Page> TestPage;
       Ref<HTMLDocument> Document;
 
@@ -62,8 +62,8 @@ namespace krys::boo::tests
       {
         (void)Document->UpdateLayout();
         display_list::RecorderImpl recorder(
-          FloatSize(static_cast<float>(ViewSize.Width()), static_cast<float>(ViewSize.Height())));
-        Frame().View()->PaintContents(recorder, IntRect(IntPoint(), ViewSize));
+          SizeF(static_cast<float>(ViewSize.Width()), static_cast<float>(ViewSize.Height())));
+        Frame().View()->PaintContents(recorder, RectI(PointI(), ViewSize));
         return recorder.TakeDisplayList()->AsText({}).contains(u8"draw-native-image");
       }
     };
@@ -86,8 +86,8 @@ namespace krys::boo::tests
             "[html:stop-intersection-observing-a-lazy-loading-element][html:lazy-load-intersection-observer]")
   {
     LoaderFixture loader;
-    loader.Strategy.Resources[u8"file:///a.png"] = images::PNG;
-    loader.Strategy.Resources[u8"file:///b.png"] = images::PNG;
+    loader.Strategy.Resources[u8"file:///a.png"] = img::tests::images::PNG;
+    loader.Strategy.Resources[u8"file:///b.png"] = img::tests::images::PNG;
 
     LazyImageFixture fixture(
       u8"<style>body { margin: 0 } img { display: block; width: 50px; height: 20px }</style>"
@@ -135,8 +135,8 @@ namespace krys::boo::tests
             "[HTML][LazyLoadImageObserver]")
   {
     LoaderFixture loader;
-    loader.Strategy.Resources[u8"file:///near.png"] = images::PNG;
-    loader.Strategy.Resources[u8"file:///far.png"] = images::PNG;
+    loader.Strategy.Resources[u8"file:///near.png"] = img::tests::images::PNG;
+    loader.Strategy.Resources[u8"file:///far.png"] = img::tests::images::PNG;
 
     LazyImageFixture fixture(
       u8"<style>body { margin: 0 } img { display: block; width: 50px; height: 20px }</style>"
@@ -159,8 +159,8 @@ namespace krys::boo::tests
             "[HTML][LazyLoadImageObserver][html:will-lazy-load-element-steps]")
   {
     LoaderFixture loader;
-    loader.Strategy.Resources[u8"file:///a.png"] = images::PNG;
-    loader.Strategy.Resources[u8"file:///b.png"] = images::PNG;
+    loader.Strategy.Resources[u8"file:///a.png"] = img::tests::images::PNG;
+    loader.Strategy.Resources[u8"file:///b.png"] = img::tests::images::PNG;
 
     LazyImageFixture fixture(
       u8"<style>body { margin: 0 } img { display: block; width: 50px; height: 20px }</style>"
@@ -208,7 +208,7 @@ namespace krys::boo::tests
             "[html:stop-intersection-observing-a-lazy-loading-element]")
   {
     LoaderFixture loader;
-    loader.Strategy.Resources[u8"file:///a.png"] = images::PNG;
+    loader.Strategy.Resources[u8"file:///a.png"] = img::tests::images::PNG;
 
     LazyImageFixture fixture(
       u8"<div style='height: 300px'></div><img id=a loading=lazy src='file:///a.png'>");

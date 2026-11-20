@@ -4,14 +4,14 @@
 #include "Krystal.Booey/DOM/Events/EventNames.hpp"
 #include "Krystal.Booey/HTML/Elements/HTMLElement.hpp"
 #include "Krystal.Booey/HTML/Elements/HTMLSelectElement.hpp"
-#include "Krystal.Booey/Page/EventHandler.hpp"
+#include "Krystal.Booey/Input/EventHandler.hpp"
+#include "Krystal.Booey/Input/LegacyKeyCodes.hpp"
+#include "Krystal.Booey/Input/PlatformKeyboardEvent.hpp"
+#include "Krystal.Booey/Input/PlatformWheelEvent.hpp"
 #include "Krystal.Booey/Page/LocalDOMWindow.hpp"
 #include "Krystal.Booey/Page/LocalFrameView.hpp"
-#include "Krystal.Booey/Page/ScrollOptions.hpp"
+#include "Krystal.Booey/Page/Scrolling/ScrollOptions.hpp"
 #include "Krystal.Booey/Page/Settings.hpp"
-#include "Krystal.Booey/Platform/Events/PlatformKeyboardEvent.hpp"
-#include "Krystal.Booey/Platform/Events/PlatformWheelEvent.hpp"
-#include "Krystal.Booey/Platform/Events/WindowsKeyboardCodes.hpp"
 #include "Krystal.Booey/Rendering/FormControls/RenderListBox.hpp"
 #include "Krystal.Booey/Rendering/Layers/RenderLayer.hpp"
 #include "Krystal.Booey/Rendering/Layers/RenderLayerScrollableArea.hpp"
@@ -347,7 +347,7 @@ namespace krys::boo::tests
     auto &scroller = fixture.ById(u8"s");
     auto &handler = fixture.TestPage->MainFrame().GetEventHandler();
     // A notch down (the content moves up), over the box.
-    auto notch = [&](IntPoint position = {10, 10})
+    auto notch = [&](PointI position = {10, 10})
     {
       return handler.HandleWheelEvent(PlatformWheelEvent(
         position, position, 0, -100, 0, -1, PlatformWheelEventGranularity::ScrollByPixelWheelEvent, {}, {}));
@@ -389,7 +389,7 @@ namespace krys::boo::tests
     SECTION("but not a touchpad's pan, which follows the fingers")
     {
       CHECK(handler.HandleWheelEvent(
-        PlatformWheelEvent(IntPoint(10, 10), IntPoint(10, 10), 0, -30, 0, 0,
+        PlatformWheelEvent(PointI(10, 10), PointI(10, 10), 0, -30, 0, 0,
                            PlatformWheelEventGranularity::ScrollByPixelWheelEvent, {}, {})
           .CopyAsTouchpadPan(PlatformWheelEventPhase::Changed, PlatformWheelEventPhase::None)));
       CHECK(scroller.ScrollTop() == 30);

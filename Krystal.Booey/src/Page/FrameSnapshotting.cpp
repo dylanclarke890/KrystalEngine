@@ -30,8 +30,6 @@
 #include "Krystal.Booey/Page/FrameSnapshotting.hpp"
 #include "Krystal.Booey/DOM/Nodes/Document.hpp"
 #include "Krystal.Booey/Editing/Selection/FrameSelection.hpp"
-#include "Krystal.Booey/Graphics/Geometry/FloatRect.hpp"
-#include "Krystal.Booey/Graphics/Geometry/IntRect.hpp"
 #include "Krystal.Booey/Graphics/Geometry/LayoutRect.hpp"
 #include "Krystal.Booey/Graphics/GraphicsContext.hpp"
 #include "Krystal.Booey/Graphics/ImageBuffers/ImageBuffer.hpp"
@@ -40,6 +38,7 @@
 #include "Krystal.Booey/Page/LocalFrameView.hpp"
 #include "Krystal.Booey/Page/Page.hpp"
 #include "Krystal.Booey/Rendering/RenderObject.hpp"
+#include "Krystal.Core/Geometry/Rect.hpp"
 
 namespace krys::boo
 {
@@ -70,16 +69,16 @@ namespace krys::boo
     };
   }
 
-  RefPtr<ImageBuffer> SnapshotFrameRect(LocalFrame &frame, const IntRect &imageRect,
+  RefPtr<ImageBuffer> SnapshotFrameRect(LocalFrame &frame, const RectI &imageRect,
                                         SnapshotOptions options) noexcept
   {
-    List<FloatRect> clipRects;
+    List<RectF> clipRects;
     return SnapshotFrameRectWithClip(frame, imageRect, clipRects, krys::move(options));
   }
 
   // FIXME: The page's scale when it delegates scaling to the host, once pages can.
-  RefPtr<ImageBuffer> SnapshotFrameRectWithClip(LocalFrame &frame, const IntRect &imageRect,
-                                                const List<FloatRect> &clipRects,
+  RefPtr<ImageBuffer> SnapshotFrameRectWithClip(LocalFrame &frame, const RectI &imageRect,
+                                                const List<RectF> &clipRects,
                                                 SnapshotOptions options) noexcept
   {
     if (!frame.GetPage())
@@ -152,13 +151,13 @@ namespace krys::boo
       scaleFactor = std::ceil(scaleFactor);
     }
 
-    auto buffer = ImageBuffer::Create(FloatSize(imageRect.Size()), scaleFactor);
+    auto buffer = ImageBuffer::Create(SizeF(imageRect.Size()), scaleFactor);
     if (!buffer)
     {
       return nullptr;
     }
 
-    buffer->Context().Translate(-FloatPoint(imageRect.Location()));
+    buffer->Context().Translate(-PointF(imageRect.Location()));
 
     if (!clipRects.empty())
     {
@@ -184,7 +183,7 @@ namespace krys::boo
       return nullptr;
     }
 
-    FloatRect selectionBounds = selection.SelectionBounds();
+    RectF selectionBounds = selection.SelectionBounds();
 
     // It is possible for the selection bounds to be empty; see https://bugs.webkit.org/show_bug.cgi?id=56645.
     if (selectionBounds.IsEmpty())
@@ -193,7 +192,7 @@ namespace krys::boo
     }
 
     options.Flags.Add(SnapshotFlags::PaintSelectionOnly);
-    return SnapshotFrameRect(frame, EnclosingIntRect(selectionBounds), krys::move(options));
+    return SnapshotFrameRect(frame, EnclosingRectI(selectionBounds), krys::move(options));
   }
 
   RefPtr<ImageBuffer> SnapshotNode(LocalFrame &frame, boo::Node &node, SnapshotOptions options) noexcept
@@ -209,7 +208,7 @@ namespace krys::boo
     frame.View()->SetNodeToDraw(&node);
 
     LayoutRect topLevelRect;
-    return SnapshotFrameRect(frame, SnappedIntRect(node.Renderer()->PaintingRootRect(topLevelRect)),
+    return SnapshotFrameRect(frame, SnappedRectI(node.Renderer()->PaintingRootRect(topLevelRect)),
                              krys::move(options));
   }
 }

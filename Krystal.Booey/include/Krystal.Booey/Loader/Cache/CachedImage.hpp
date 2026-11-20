@@ -26,6 +26,7 @@
 #include "Krystal.Booey/Graphics/Images/Image.hpp"
 #include "Krystal.Booey/Graphics/Images/ImageObserver.hpp"
 #include "Krystal.Booey/Loader/Cache/CachedResource.hpp"
+#include "Krystal.Core/Geometry/GeometryForward.hpp"
 #include "Krystal.Core/Types/HashMap.hpp"
 #include "Krystal.Core/Types/HashSet.hpp"
 #include "Krystal.Core/Types/Pair.hpp"
@@ -34,8 +35,6 @@
 namespace krys::boo
 {
   class CachedImageClient;
-  class FloatSize;
-  class IntRect;
   class RenderElement;
   class RenderObject;
   class SVGImageCache;
@@ -74,7 +73,7 @@ namespace krys::boo
       explicit CachedImageObserver(CachedImage &) noexcept;
 
       // ImageObserver API
-      KRYS_NODISCARD url::URL SourceUrl() const noexcept override;
+      KRYS_NODISCARD net::Url SourceUrl() const noexcept override;
 
       KRYS_NODISCARD utf8_string MimeType() const noexcept override;
 
@@ -82,7 +81,7 @@ namespace krys::boo
 
       KRYS_NODISCARD int64 ExpectedContentLength() const noexcept override;
 
-      void EncodedDataStatusChanged(const Image &, EncodedDataStatus) noexcept final;
+      void EncodedDataStatusChanged(const Image &, img::EncodedDataStatus) noexcept final;
 
       void DecodedSizeChanged(const Image &, int64 delta) noexcept final;
 
@@ -90,10 +89,10 @@ namespace krys::boo
 
       KRYS_NODISCARD bool CanDestroyDecodedData(const Image &) const noexcept final;
 
-      void ImageFrameAvailable(const Image &, ImageAnimatingState, const IntRect *changeRect = nullptr,
-                               DecodingStatus = DecodingStatus::Invalid) noexcept final;
+      void ImageFrameAvailable(const Image &, ImageAnimatingState, const RectI *changeRect = nullptr,
+                               img::DecodingStatus = img::DecodingStatus::Invalid) noexcept final;
 
-      void ChangedInRect(const Image &, const IntRect *) noexcept final;
+      void ChangedInRect(const Image &, const RectI *) noexcept final;
 
       void ImageContentChanged(const Image &) noexcept final;
 
@@ -110,7 +109,7 @@ namespace krys::boo
     {
       LayoutSize ContainerSize;
       float ContainerZoom;
-      url::URL ImageURL;
+      net::Url ImageUrl;
     };
 
     RefPtr<CachedImageObserver> _imageObserver;
@@ -166,7 +165,7 @@ namespace krys::boo
     }
 
     void SetContainerContextForClient(const CachedImageClient &, const LayoutSize &, float,
-                                      const url::URL &) noexcept;
+                                      const net::Url &) noexcept;
 
     KRYS_NODISCARD bool IsClientWaitingForAsyncDecoding(const CachedImageClient &) const noexcept;
 
@@ -198,8 +197,8 @@ namespace krys::boo
       IntrinsicSize,
     };
 
-    KRYS_NODISCARD FloatSize ImageSizeForRenderer(const RenderElement *renderer,
-                                                  SizeType = UsedSize) const noexcept;
+    KRYS_NODISCARD SizeF ImageSizeForRenderer(const RenderElement *renderer,
+                                              SizeType = UsedSize) const noexcept;
 
     // This method takes a zoom multiplier that can be used to increase the natural size of the image by the
     // zoom. It returns the size of the complete image.
@@ -210,7 +209,7 @@ namespace krys::boo
                                                             SizeType = UsedSize) const noexcept;
 
     void ComputeIntrinsicDimensions(float &intrinsicWidth, float &intrinsicHeight,
-                                    FloatSize &intrinsicRatio) noexcept;
+                                    SizeF &intrinsicRatio) noexcept;
 
     void Load(CachedResourceLoader &) noexcept override;
 
@@ -232,7 +231,7 @@ namespace krys::boo
     void ClearImage() noexcept;
 
     // If not null, changeRect is the changed part of the image.
-    void NotifyObservers(const IntRect *changeRect = nullptr) noexcept;
+    void NotifyObservers(const RectI *changeRect = nullptr) noexcept;
 
     void DidAddClient(CachedResourceClient &) noexcept final;
 
@@ -242,13 +241,13 @@ namespace krys::boo
 
     void DestroyDecodedData() noexcept override;
 
-    EncodedDataStatus UpdateImageData(bool allDataReceived) noexcept;
+    img::EncodedDataStatus UpdateImageData(bool allDataReceived) noexcept;
 
     void Error(CachedResource::Status) noexcept override;
 
-    void ResponseReceived(ResourceResponse &&) noexcept override;
+    void ResponseReceived(net::ResourceResponse &&) noexcept override;
 
-    void EncodedDataStatusChanged(const Image &, EncodedDataStatus) noexcept;
+    void EncodedDataStatusChanged(const Image &, img::EncodedDataStatus) noexcept;
 
     void DecodedSizeChanged(const Image &, int64 delta) noexcept;
 
@@ -256,10 +255,10 @@ namespace krys::boo
 
     KRYS_NODISCARD bool CanDestroyDecodedData(const Image &) const noexcept;
 
-    void ImageFrameAvailable(const Image &, ImageAnimatingState, const IntRect *changeRect = nullptr,
-                             DecodingStatus = DecodingStatus::Invalid) noexcept;
+    void ImageFrameAvailable(const Image &, ImageAnimatingState, const RectI *changeRect = nullptr,
+                             img::DecodingStatus = img::DecodingStatus::Invalid) noexcept;
 
-    void ChangedInRect(const Image &, const IntRect *) noexcept;
+    void ChangedInRect(const Image &, const RectI *) noexcept;
 
     void ImageContentChanged(const Image &) noexcept;
 

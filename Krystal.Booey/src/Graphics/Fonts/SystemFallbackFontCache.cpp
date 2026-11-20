@@ -33,9 +33,8 @@
 #include "Krystal.Booey/Graphics/Fonts/FontCascade.hpp"
 #include "Krystal.Booey/Graphics/Fonts/FontDescription.hpp"
 #include "Krystal.Core/Hash.hpp"
-#include "Krystal.Core/Text/CodePointIterator.hpp"
-#include "Krystal.Core/Text/Unicode.hpp"
-#include <unicode/utf8.h>
+#include "Krystal.Core/Strings/CodePointIterator.hpp"
+#include "Krystal.Core/Strings/Unicode.hpp"
 
 namespace krys::boo
 {
@@ -53,10 +52,8 @@ namespace krys::boo
 
   static void AppendCodePoint(utf8_string &string, char32 codePoint) noexcept
   {
-    char8 buffer[U8_MAX_LENGTH];
-    int32_t length = 0;
-    U8_APPEND_UNSAFE(buffer, length, codePoint);
-    string.append(buffer, static_cast<size_t>(length));
+    char8 buffer[text::MaxUTF8SequenceLength];
+    string.append(buffer, text::EncodeUTF8(codePoint, buffer));
   }
 
   RefPtr<Font> SystemFallbackFontCache::SystemFallbackFontForCharacterCluster(

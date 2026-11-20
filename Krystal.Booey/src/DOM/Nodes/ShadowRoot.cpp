@@ -45,7 +45,7 @@
 #include "Krystal.Booey/HTML/CustomElement/CustomElementRegistry.hpp"
 #include "Krystal.Booey/HTML/Elements/HTMLSlotElement.hpp"
 #include "Krystal.Booey/Style/Scope/Scope.hpp"
-#include "Krystal.Core/Text/ASCII.hpp"
+#include "Krystal.Core/Strings/ASCII.hpp"
 #include "Krystal.Core/TypeCast.hpp"
 
 namespace krys::boo
@@ -203,7 +203,7 @@ namespace krys::boo
   DOMString ShadowRoot::GetHTML(dom::GetHTMLOptions options) const noexcept
   {
     return SerializeFragment(*this, SerializedNodes::SubtreesOfChildren, nullptr,
-                             ResolveURLs::NoExcludingURLsForPrivacy, SerializationSyntax::HTML,
+                             ResolveUrls::NoExcludingUrlsForPrivacy, SerializationSyntax::HTML,
                              options.SerializableShadowRoots ? SerializeShadowRoots::Serializable
                                                              : SerializeShadowRoots::Explicit,
                              krys::move(options.ShadowRoots));

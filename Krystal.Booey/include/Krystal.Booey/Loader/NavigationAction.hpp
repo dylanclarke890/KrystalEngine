@@ -28,9 +28,9 @@
 
 #pragma once
 
-#include "Krystal.Booey/Graphics/Geometry/DoublePoint.hpp"
+#include "Krystal.Booey/Input/MouseEventTypes.hpp"
 #include "Krystal.Booey/Loader/FrameLoadRequest.hpp"
-#include "Krystal.Booey/Page/MouseEventTypes.hpp"
+#include "Krystal.Core/Geometry/Point.hpp"
 #include "Krystal.Core/Types/Maybe.hpp"
 
 namespace krys::boo
@@ -60,7 +60,7 @@ namespace krys::boo
     struct MouseEventData : UIEventWithKeyStateData
     {
       /// @brief Where it happened, in the frame's absolute coordinates.
-      DoublePoint AbsoluteLocation;
+      PointD AbsoluteLocation;
       MouseButton Button {MouseButton::None};
       bool ButtonDown {false};
 
@@ -68,7 +68,7 @@ namespace krys::boo
     };
 
   private:
-    ResourceRequest _originalRequest;
+    net::ResourceRequest _originalRequest;
     Maybe<UIEventWithKeyStateData> _keyStateEventData;
     Maybe<MouseEventData> _mouseEventData;
     NavigationType _type {NavigationType::Other};
@@ -76,7 +76,7 @@ namespace krys::boo
   public:
     NavigationAction() noexcept;
 
-    NavigationAction(ResourceRequest originalRequest, bool isFormSubmission, Event *event = nullptr,
+    NavigationAction(net::ResourceRequest originalRequest, bool isFormSubmission, Event *event = nullptr,
                      DOMStringAtom downloadAttribute = null, Element *sourceElement = nullptr) noexcept;
 
     ~NavigationAction() noexcept;
@@ -104,15 +104,15 @@ namespace krys::boo
 
     KRYS_NODISCARD bool IsEmpty() const noexcept
     {
-      return _originalRequest.URL().IsEmpty();
+      return _originalRequest.Url().IsEmpty();
     }
 
-    KRYS_NODISCARD const url::URL &URL() const noexcept
+    KRYS_NODISCARD const net::Url &Url() const noexcept
     {
-      return _originalRequest.URL();
+      return _originalRequest.Url();
     }
 
-    KRYS_NODISCARD const ResourceRequest &OriginalRequest() const noexcept
+    KRYS_NODISCARD const net::ResourceRequest &OriginalRequest() const noexcept
     {
       return _originalRequest;
     }

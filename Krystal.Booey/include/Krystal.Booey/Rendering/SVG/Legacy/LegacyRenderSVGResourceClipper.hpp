@@ -19,9 +19,9 @@
 
 #pragma once
 
-#include "Krystal.Booey/Graphics/Geometry/FloatSize.hpp"
 #include "Krystal.Booey/Rendering/SVG/Legacy/LegacyRenderSVGResourceContainer.hpp"
 #include "Krystal.Booey/SVG/SVGUnitTypes.hpp"
+#include "Krystal.Core/Geometry/Size.hpp"
 #include "Krystal.Core/Types/HashMap.hpp"
 #include "Krystal.Core/Types/RefPtr.hpp"
 #include "Krystal.Core/Types/UniquePtr.hpp"
@@ -39,9 +39,9 @@ namespace krys::boo
     {
       KRYS_NODISCARD bool operator==(const Inputs &other) const noexcept = default;
 
-      FloatRect ObjectBoundingBox;
-      FloatRect ClippedContentBounds;
-      FloatSize Scale;
+      RectF ObjectBoundingBox;
+      RectF ClippedContentBounds;
+      SizeF Scale;
       float UsedZoom = 1;
       bool PaintingDisabled {false};
     };
@@ -59,7 +59,7 @@ namespace krys::boo
     KRYS_OVERRIDE_DELETE_FOR_CHECKED_PTR(LegacyRenderSVGResourceClipper);
 
   private:
-    std::array<FloatRect, 2> _clipBoundaries;
+    std::array<RectF, 2> _clipBoundaries;
     HashMap<const RenderObject *, UniquePtr<ClipperData>> _clipperMap;
 
   public:
@@ -83,19 +83,18 @@ namespace krys::boo
     // objectBoundingBox ia used to compute clip path geometry when clipPathUnits="objectBoundingBox".
     // clippedContentBounds is the bounds of the content to which clipping is being applied.
     EnumSet<ApplyResult> ApplyClippingToContext(GraphicsContext &, RenderElement &,
-                                                const FloatRect &objectBoundingBox,
-                                                const FloatRect &clippedContentBounds,
+                                                const RectF &objectBoundingBox,
+                                                const RectF &clippedContentBounds,
                                                 float usedZoom = 1) noexcept;
 
-    KRYS_NODISCARD FloatRect ResourceBoundingBox(const RenderObject &,
-                                                 RepaintRectCalculation) noexcept override;
+    KRYS_NODISCARD RectF ResourceBoundingBox(const RenderObject &, RepaintRectCalculation) noexcept override;
 
     KRYS_NODISCARD RenderSVGResourceType ResourceType() const noexcept override
     {
       return RenderSVGResourceType::ClipperResourceType;
     }
 
-    KRYS_NODISCARD bool HitTestClipContent(const FloatRect &, const FloatPoint &) noexcept;
+    KRYS_NODISCARD bool HitTestClipContent(const RectF &, const PointF &) noexcept;
 
     KRYS_NODISCARD SVGUnitTypes::SVGUnitType ClipPathUnits() const noexcept;
 
@@ -113,15 +112,15 @@ namespace krys::boo
     }
 
     KRYS_NODISCARD static ClipperData::Inputs ComputeInputs(const GraphicsContext &, const RenderElement &,
-                                                            const FloatRect &objectBoundingBox,
-                                                            const FloatRect &clippedContentBounds,
+                                                            const RectF &objectBoundingBox,
+                                                            const RectF &clippedContentBounds,
                                                             float usedZoom) noexcept;
 
     KRYS_NODISCARD EnumSet<ApplyResult> PathOnlyClipping(GraphicsContext &, const RenderElement &,
-                                                         const AffineTransform &, const FloatRect &,
+                                                         const AffineTransform &, const RectF &,
                                                          float usedZoom) noexcept;
 
-    KRYS_NODISCARD bool DrawContentIntoMaskImage(ImageBuffer &, const FloatRect &objectBoundingBox,
+    KRYS_NODISCARD bool DrawContentIntoMaskImage(ImageBuffer &, const RectF &objectBoundingBox,
                                                  float usedZoom) noexcept;
 
     void CalculateClipContentRepaintRect(RepaintRectCalculation) noexcept;

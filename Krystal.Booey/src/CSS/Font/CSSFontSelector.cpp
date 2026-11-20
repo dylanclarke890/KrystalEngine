@@ -41,7 +41,7 @@
 #include "Krystal.Booey/Style/Scope/Scope.hpp"
 #include "Krystal.Core/Assert.hpp"
 #include "Krystal.Core/Hash.hpp"
-#include "Krystal.Core/Text/ASCII.hpp"
+#include "Krystal.Core/Strings/ASCII.hpp"
 #include "Krystal.Core/Threading/NeverDestroyed.hpp"
 #include "Krystal.Core/Types/Array.hpp"
 #include "Krystal.Core/Utils/SetForScope.hpp"
@@ -295,7 +295,7 @@ namespace krys::boo::css
     }
   }
 
-  void CSSFontSelector::OpportunisticallyStartFontDataURLLoading(const FontCascadeDescription &description,
+  void CSSFontSelector::OpportunisticallyStartFontDataUrlLoading(const FontCascadeDescription &description,
                                                                  const StringAtom &familyName) noexcept
   {
     auto *segmentedFontFace = _cssFontFaceSet->GetFontFace(description.GetFontSelectionRequest(), familyName);
@@ -311,7 +311,7 @@ namespace krys::boo::css
 
     for (auto &face : segmentedFontFace->ConstituentFaces())
     {
-      face->OpportunisticallyStartFontDataURLLoading();
+      face->OpportunisticallyStartFontDataUrlLoading();
     }
   }
 

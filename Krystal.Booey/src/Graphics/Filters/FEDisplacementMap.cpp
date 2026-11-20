@@ -25,7 +25,7 @@
 #include "Krystal.Booey/Graphics/Filters/FEDisplacementMap.hpp"
 #include "Krystal.Booey/Graphics/Filters/Filter.hpp"
 #include "Krystal.Booey/Graphics/Filters/FilterImage.hpp"
-#include "Krystal.Core/Text/TextStream.hpp"
+#include "Krystal.Core/Strings/TextStream.hpp"
 
 namespace krys::boo
 {
@@ -80,15 +80,15 @@ namespace krys::boo
     return true;
   }
 
-  FloatRect FEDisplacementMap::CalculateImageRect(const Filter &filter, Span<const FloatRect>,
-                                                  const FloatRect &primitiveSubregion) const noexcept
+  RectF FEDisplacementMap::CalculateImageRect(const Filter &filter, Span<const RectF>,
+                                              const RectF &primitiveSubregion) const noexcept
   {
     return filter.MaxEffectRect(primitiveSubregion);
   }
 
-  IntOutsets FEDisplacementMap::CalculateOutsets(const FloatSize &maxDisplacement) noexcept
+  IntOutsets FEDisplacementMap::CalculateOutsets(const SizeF &maxDisplacement) noexcept
   {
-    auto intDisplacement = ExpandedIntSize(maxDisplacement);
+    auto intDisplacement = ExpandedSizeI(maxDisplacement);
     return {intDisplacement.Height(), intDisplacement.Width(), intDisplacement.Height(),
             intDisplacement.Width()};
   }

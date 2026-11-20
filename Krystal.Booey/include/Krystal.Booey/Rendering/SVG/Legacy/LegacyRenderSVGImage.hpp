@@ -23,9 +23,9 @@
 
 #pragma once
 
-#include "Krystal.Booey/Graphics/Geometry/FloatRect.hpp"
-#include "Krystal.Booey/Graphics/Transforms/AffineTransform.hpp"
 #include "Krystal.Booey/Rendering/SVG/Legacy/LegacyRenderSVGModelObject.hpp"
+#include "Krystal.Core/Geometry/AffineTransform.hpp"
+#include "Krystal.Core/Geometry/Rect.hpp"
 #include "Krystal.Core/Types/UniquePtr.hpp"
 
 namespace krys::boo
@@ -42,8 +42,8 @@ namespace krys::boo
     bool _needsBoundariesUpdate : 1 {true};
     bool _needsTransformUpdate : 1 {true};
     AffineTransform _localTransform;
-    FloatRect _objectBoundingBox;
-    FloatRect _repaintBoundingBox;
+    RectF _objectBoundingBox;
+    RectF _repaintBoundingBox;
     const UniquePtr<RenderImageResource> _imageResource;
 
   public:
@@ -105,25 +105,25 @@ namespace krys::boo
 
     void NotifyFinished(CachedResource &newImage) noexcept override;
 
-    KRYS_NODISCARD FloatRect CalculateObjectBoundingBox() const noexcept;
+    KRYS_NODISCARD RectF CalculateObjectBoundingBox() const noexcept;
 
-    KRYS_NODISCARD FloatRect ObjectBoundingBox() const noexcept override
+    KRYS_NODISCARD RectF ObjectBoundingBox() const noexcept override
     {
       return _objectBoundingBox;
     }
 
-    KRYS_NODISCARD FloatRect StrokeBoundingBox() const noexcept override
+    KRYS_NODISCARD RectF StrokeBoundingBox() const noexcept override
     {
       return _objectBoundingBox;
     }
 
-    KRYS_NODISCARD FloatRect RepaintRectInLocalCoordinates(
+    KRYS_NODISCARD RectF RepaintRectInLocalCoordinates(
       RepaintRectCalculation = RepaintRectCalculation::Fast) const noexcept override
     {
       return _repaintBoundingBox;
     }
 
-    KRYS_NODISCARD FloatRect DecoratedBoundingBox() const noexcept override
+    KRYS_NODISCARD RectF DecoratedBoundingBox() const noexcept override
     {
       return _objectBoundingBox;
     }
@@ -131,14 +131,14 @@ namespace krys::boo
     void AddFocusRingRects(List<LayoutRect> &, const LayoutPoint &additionalOffset,
                            const RenderLayerModelObject *paintContainer = nullptr) const noexcept override;
 
-    void ImageChanged(WrappedImagePtr, const IntRect * = nullptr) noexcept override;
+    void ImageChanged(WrappedImagePtr, const RectI * = nullptr) noexcept override;
 
     void Layout() noexcept override;
 
     void Paint(PaintInfo &, const LayoutPoint &) noexcept override;
 
-    bool NodeAtFloatPoint(const HitTestRequest &, HitTestResult &, const FloatPoint &pointInParent,
-                          HitTestAction) noexcept override;
+    bool NodeAtPointF(const HitTestRequest &, HitTestResult &, const PointF &pointInParent,
+                      HitTestAction) noexcept override;
 
     KRYS_NODISCARD AffineTransform LocalTransform() const noexcept override
     {

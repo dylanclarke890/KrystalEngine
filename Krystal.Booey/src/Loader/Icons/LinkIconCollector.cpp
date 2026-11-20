@@ -28,8 +28,8 @@
 #include "Krystal.Booey/HTML/Elements/HTMLHeadElement.hpp"
 #include "Krystal.Booey/HTML/Elements/HTMLLinkElement.hpp"
 #include "Krystal.Booey/Infra/StringAlgorithms.hpp"
-#include "Krystal.Core/Text/ASCII.hpp"
-#include "Krystal.Core/Text/StringToIntegerConversion.hpp"
+#include "Krystal.Core/Strings/ASCII.hpp"
+#include "Krystal.Core/Strings/StringToIntegerConversion.hpp"
 #include <algorithm>
 
 namespace krys::boo
@@ -71,8 +71,8 @@ namespace krys::boo
       {
         continue;
       }
-      auto url = document.CompleteURL(*href);
-      if (!url.ProtocolIsInHTTPFamily() && !url.ProtocolIsData())
+      auto url = document.CompleteUrl(*href);
+      if (!url.ProtocolIsInHttpFamily() && !url.ProtocolIsData())
       {
         continue;
       }

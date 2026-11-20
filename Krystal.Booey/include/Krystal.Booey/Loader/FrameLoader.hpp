@@ -49,9 +49,11 @@ namespace krys::boo
   class Event;
 }
 
-namespace krys::boo::url
+namespace krys::net
 {
-  class URL;
+  class ResourceError;
+  class ResourceRequest;
+  class Url;
 }
 
 namespace krys::boo
@@ -61,8 +63,6 @@ namespace krys::boo
   class FrameLoadRequest;
   class LocalFrame;
   class NavigationAction;
-  class ResourceError;
-  class ResourceRequest;
 
   /// @brief Where a frame is in loading a document.
   enum class FrameState : uint8
@@ -178,7 +178,7 @@ namespace krys::boo
     /// @param triggeringEvent The event that started the navigation (a click), if any.
     /// @param downloadAttribute The link's `download` attribute; null if it has none.
     /// @param sourceElement The link, if any.
-    void ChangeLocation(const url::URL &url, DOMStringAtom passedTarget, Event *triggeringEvent,
+    void ChangeLocation(const net::Url &url, DOMStringAtom passedTarget, Event *triggeringEvent,
                         ReferrerPolicy referrerPolicy, DOMStringAtom downloadAttribute,
                         Element *sourceElement = nullptr) noexcept;
 
@@ -220,22 +220,22 @@ namespace krys::boo
     }
 
     /// @brief @p loader's main resource couldn't be loaded (or the load was stopped).
-    void ReceivedMainResourceError(DocumentLoader &loader, const ResourceError &error) noexcept;
+    void ReceivedMainResourceError(DocumentLoader &loader, const net::ResourceError &error) noexcept;
 
     /// @brief Whether navigating from @p currentURL to @p destinationURL loads a document, rather than
     /// navigating to a fragment: unless @p destinationURL has a fragment and is otherwise @p currentURL.
-    KRYS_NODISCARD static bool ShouldReload(const url::URL &currentURL,
-                                            const url::URL &destinationURL) noexcept;
+    KRYS_NODISCARD static bool ShouldReload(const net::Url &currentUrl,
+                                            const net::Url &destinationUrl) noexcept;
 
   private:
     /// @brief Loads @p request (or @p substituteData) as a new document. A reload of a document the host gave
     /// the markup of loads that markup again.
-    void LoadWithNavigationAction(const ResourceRequest &request, NavigationAction &&action,
+    void LoadWithNavigationAction(const net::ResourceRequest &request, NavigationAction &&action,
                                   FrameLoadType loadType, Maybe<SubstituteData> &&substituteData) noexcept;
 
     /// @brief Hands the navigation @p action started to the host, for the browsing context @p frameName
     /// names (a new one for `_blank` or a name no frame has).
-    void RequestNavigation(const NavigationAction &action, const ResourceRequest &request,
+    void RequestNavigation(const NavigationAction &action, const net::ResourceRequest &request,
                            const FormSubmission *formSubmission, DOMStringView frameName) noexcept;
 
     /// @brief The committed document gets a view of its own, as a new page's would: scrolled to its top, not
@@ -253,14 +253,14 @@ namespace krys::boo
     void DispatchUnloadEvents() noexcept;
 
     /// @brief Whether a navigation to @p url navigates within the document: to a fragment of its URL.
-    KRYS_NODISCARD bool ShouldPerformFragmentNavigation(const url::URL &url) const noexcept;
+    KRYS_NODISCARD bool ShouldPerformFragmentNavigation(const net::Url &url) const noexcept;
 
     /// @brief Navigates to @p url, which differs from the document's URL at most in its fragment: the
     /// document takes the URL and scrolls to its fragment.
-    void LoadInSameDocument(const url::URL &url) noexcept;
+    void LoadInSameDocument(const net::Url &url) noexcept;
 
     /// @brief Scrolls to @p url's fragment, once the document's style sheets have loaded.
     /// @see https://html.spec.whatwg.org/#try-to-scroll-to-the-fragment
-    void ScrollToFragment(const url::URL &url) noexcept;
+    void ScrollToFragment(const net::Url &url) noexcept;
   };
 }

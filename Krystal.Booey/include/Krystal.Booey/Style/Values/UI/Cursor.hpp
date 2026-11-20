@@ -25,11 +25,11 @@
 
 #pragma once
 
-#include "Krystal.Booey/Graphics/Geometry/IntPoint.hpp"
 #include "Krystal.Booey/Rendering/Style/RenderStyleConstants.hpp"
 #include "Krystal.Booey/Rendering/Style/StyleImage.hpp"
 #include "Krystal.Booey/Style/Values/Types.hpp"
-#include "Krystal.Core/Text/StringBuilder.hpp"
+#include "Krystal.Core/Geometry/Point.hpp"
+#include "Krystal.Core/Strings/StringBuilder.hpp"
 
 namespace krys::boo::style
 {
@@ -38,7 +38,7 @@ namespace krys::boo::style
   struct CursorImage
   {
     Ref<StyleImage> Image;
-    IntPoint HotSpot {-1, -1};
+    PointI HotSpot {-1, -1};
 
     KRYS_NODISCARD bool operator==(const CursorImage &) const noexcept = default;
   };

@@ -42,7 +42,7 @@ namespace krys::boo::display_list
     {
       GraphicsContextState State;
       AffineTransform Ctm;
-      FloatRect ClipBounds;
+      RectF ClipBounds;
       Maybe<GraphicsContextState> LastDrawingState {std::nullopt};
 
       KRYS_NODISCARD ContextState CloneForTransparencyLayer() const noexcept
@@ -60,7 +60,7 @@ namespace krys::boo::display_list
 
       void Rotate(float angleInRadians) noexcept;
 
-      void Scale(const FloatSize &) noexcept;
+      void Scale(const SizeF &) noexcept;
 
       void ConcatCTM(const AffineTransform &) noexcept;
 
@@ -69,10 +69,10 @@ namespace krys::boo::display_list
 
   private:
     SmallList<ContextState, 4> _stateStack;
-    const FloatRect _initialClip;
+    const RectF _initialClip;
 
   public:
-    Recorder(const GraphicsContextState &state, const FloatRect &initialClip,
+    Recorder(const GraphicsContextState &state, const RectF &initialClip,
              const AffineTransform &transform) noexcept
         : Recorder(IsDeferred::Yes, state, initialClip, transform)
     {
@@ -83,7 +83,7 @@ namespace krys::boo::display_list
     void AppendDisplayList(const DisplayList &) noexcept;
 
   protected:
-    Recorder(IsDeferred, const GraphicsContextState &, const FloatRect &initialClip,
+    Recorder(IsDeferred, const GraphicsContextState &, const RectF &initialClip,
              const AffineTransform &) noexcept;
 
     KRYS_NODISCARD const SmallList<ContextState, 4> &StateStack() const noexcept
@@ -103,7 +103,7 @@ namespace krys::boo::display_list
 
     KRYS_NODISCARD bool UpdateStateForRotate(float angleInRadians) noexcept;
 
-    KRYS_NODISCARD bool UpdateStateForScale(const FloatSize &) noexcept;
+    KRYS_NODISCARD bool UpdateStateForScale(const SizeF &) noexcept;
 
     KRYS_NODISCARD bool UpdateStateForConcatCTM(const AffineTransform &) noexcept;
 
@@ -117,15 +117,15 @@ namespace krys::boo::display_list
 
     void UpdateStateForResetClip() noexcept;
 
-    void UpdateStateForClip(const FloatRect &) noexcept;
+    void UpdateStateForClip(const RectF &) noexcept;
 
     void UpdateStateForClipRoundedRect(const FloatRoundedRect &) noexcept;
 
     void UpdateStateForClipPath(const Path &) noexcept;
 
-    void UpdateStateForClipToImageBuffer(const FloatRect &) noexcept;
+    void UpdateStateForClipToImageBuffer(const RectF &) noexcept;
 
-    void UpdateStateForClipOut(const FloatRect &) noexcept;
+    void UpdateStateForClipOut(const RectF &) noexcept;
 
     void UpdateStateForClipOut(const Path &) noexcept;
 
@@ -133,7 +133,7 @@ namespace krys::boo::display_list
 
     void UpdateStateForApplyDeviceScaleFactor(float) noexcept;
 
-    KRYS_NODISCARD FloatRect InitialClip() const noexcept;
+    KRYS_NODISCARD RectF InitialClip() const noexcept;
 
   private:
     void FillRoundedRectImpl(const FloatRoundedRect &, const Color &) noexcept final
@@ -150,7 +150,7 @@ namespace krys::boo::display_list
     KRYS_NODISCARD
     AffineTransform GetCTM(IncludeDeviceScale = PossiblyIncludeDeviceScale) const noexcept final;
 
-    KRYS_NODISCARD IntRect ClipBounds() const noexcept final;
+    KRYS_NODISCARD RectI ClipBounds() const noexcept final;
 
     virtual void AppendStateChangeItemIfNecessary() noexcept = 0;
 

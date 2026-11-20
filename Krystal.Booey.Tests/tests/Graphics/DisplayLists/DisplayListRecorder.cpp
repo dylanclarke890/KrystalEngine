@@ -188,26 +188,26 @@ namespace krys::boo::tests
   {
     RecorderImpl recorder({100, 100});
     GraphicsContext &context = recorder;
-    CHECK(context.ClipBounds() == IntRect(0, 0, 100, 100));
+    CHECK(context.ClipBounds() == RectI(0, 0, 100, 100));
 
     context.Clip({10, 10, 50, 50});
-    CHECK(context.ClipBounds() == IntRect(10, 10, 50, 50));
+    CHECK(context.ClipBounds() == RectI(10, 10, 50, 50));
 
     // Clip bounds are in the current coordinates.
     context.Translate(10, 10);
-    CHECK(context.ClipBounds() == IntRect(0, 0, 50, 50));
+    CHECK(context.ClipBounds() == RectI(0, 0, 50, 50));
 
     // Clipping out leaves the bounds as they were.
-    context.ClipOut(FloatRect {0, 0, 20, 20});
-    CHECK(context.ClipBounds() == IntRect(0, 0, 50, 50));
+    context.ClipOut(RectF {0, 0, 20, 20});
+    CHECK(context.ClipBounds() == RectI(0, 0, 50, 50));
 
     // A path clips to its bounding rect.
     context.ClipPath(Triangle());
-    CHECK(context.ClipBounds() == IntRect(0, 0, 10, 10));
+    CHECK(context.ClipBounds() == RectI(0, 0, 10, 10));
 
     // Resetting goes back to the initial clip, recorded as a clip to it.
     context.ResetClip();
-    CHECK(context.ClipBounds() == IntRect(-10, -10, 100, 100));
+    CHECK(context.ClipBounds() == RectI(-10, -10, 100, 100));
     CHECK(ItemNames(recorder)
           == List<std::string_view> {"clip", "translate", "clip-out", "clip-path", "reset-clip", "clip"});
   }
@@ -221,7 +221,7 @@ namespace krys::boo::tests
 
     // The clip bounds are the destination rect.
     context.ClipToImageBuffer(*buffer, {5, 5, 10, 10});
-    CHECK(context.ClipBounds() == IntRect(5, 5, 10, 10));
+    CHECK(context.ClipBounds() == RectI(5, 5, 10, 10));
     CHECK(AsText(recorder) == u8R"(
 (clip-to-image-buffer
   (dest-rect at (5,5) size 10x10)))");
@@ -306,7 +306,7 @@ namespace krys::boo::tests
     CHECK(item.GetFont().get() == font.get());
     CHECK(item.Glyphs() == List<GlyphBufferGlyph> {1, 2, 3});
     CHECK(item.Advances().size() == 3u);
-    CHECK(item.LocalAnchor() == FloatPoint(5, 20));
+    CHECK(item.LocalAnchor() == PointF(5, 20));
     CHECK(displayList->AsText({}) == u8R"(
 (draw-glyphs
   (local-anchor (5,20))
@@ -321,7 +321,7 @@ namespace krys::boo::tests
     source.FillRect({0, 0, 10, 10});
     source.Translate(5, 5);
     source.FillRoundedRect(FloatRoundedRect({0, 0, 20, 20}, {5, 5}, {5, 5}, {5, 5}, {5, 5}), Color::green);
-    source.FillRectWithRoundedHole({0, 0, 30, 30}, FloatRoundedRect(FloatRect {5, 5, 20, 20}), Color::blue);
+    source.FillRectWithRoundedHole({0, 0, 30, 30}, FloatRoundedRect(RectF {5, 5, 20, 20}), Color::blue);
     auto displayList = source.TakeDisplayList();
 
     SECTION("Drawing a display list into a recorder records it as one item")

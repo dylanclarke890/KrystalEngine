@@ -2,11 +2,11 @@
 
 #include "Krystal.Core/Attributes.hpp"
 #include "Krystal.Core/Colour/BlendMode.hpp"
+#include "Krystal.Core/Geometry/Rect.hpp"
 #include "Krystal.Core/Numeric.hpp"
 #include "Krystal.Core/Types/Array.hpp"
 #include "Krystal.Core/Types/List.hpp"
 #include "Krystal.Gfx/Handles.hpp"
-#include "Krystal.Gfx/Render2D/Rect2D.hpp"
 
 namespace krys::gfx
 {
@@ -80,7 +80,7 @@ namespace krys::gfx
   struct FilterSource2D
   {
     TextureHandle Texture {};
-    PixelRect2D Region {};
+    RectI Region {};
     FilterColourSpace2D ColourSpace {FilterColourSpace2D::SRGB};
     /// @brief Whether the texels' colours are multiplied by their alpha.
     bool Premultiplied {true};
@@ -150,7 +150,7 @@ namespace krys::gfx
     Kind Type {Kind::Offset};
     Array<FilterInput2D, 2> Inputs {};
     /// @brief The pixels the node writes, in the graph's pixels.
-    PixelRect2D Region {};
+    RectI Region {};
     FilterColourSpace2D ColourSpace {FilterColourSpace2D::SRGB};
 
     /// @brief `ColourMatrix`: four rows of five, each row's last value added, on colours from 0 to 1.
@@ -210,7 +210,7 @@ namespace krys::gfx
     Array<float, 2> Scale {1.f, 1.f};
 
     /// @brief `Tile`: the rect of the input that repeats, in the graph's pixels.
-    PixelRect2D TileRect {};
+    RectI TileRect {};
   };
 
   /// @brief A filter: nodes in the order they're evaluated, each reading sources or earlier nodes; the last
@@ -226,7 +226,7 @@ namespace krys::gfx
   struct FilterResult2D
   {
     TextureHandle Texture {};
-    PixelRect2D Region {};
+    RectI Region {};
     FilterColourSpace2D ColourSpace {FilterColourSpace2D::SRGB};
   };
 }

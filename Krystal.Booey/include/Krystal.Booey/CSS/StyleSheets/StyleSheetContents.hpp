@@ -23,7 +23,6 @@
 #include "Krystal.Booey/CSS/Parser/ParserContext.hpp"
 #include "Krystal.Booey/CSS/Types/CSSOMString.hpp"
 #include "Krystal.Booey/DOM/Types/DOMString.hpp"
-#include "Krystal.Booey/URL/URL.hpp"
 #include "Krystal.Core/Attributes.hpp"
 #include "Krystal.Core/CanMakeWeakPtr.hpp"
 #include "Krystal.Core/RefCounted.hpp"
@@ -32,6 +31,7 @@
 #include "Krystal.Core/Types/List.hpp"
 #include "Krystal.Core/Types/Maybe.hpp"
 #include "Krystal.Core/Types/RefPtr.hpp"
+#include "Krystal.Net/Url.hpp"
 
 namespace krys::boo
 {
@@ -60,7 +60,7 @@ namespace krys::boo::css
   private:
     ImportRule *_ownerRule {nullptr};
 
-    CSSOMString _originalURL;
+    CSSOMString _originalUrl;
 
     CSSOMString _encodingFromCharsetRule;
     List<Ref<LayerRule>> _layerRulesBeforeImportRules;
@@ -83,7 +83,7 @@ namespace krys::boo::css
 
     List<CSSStyleSheet *> _clients;
 
-    StyleSheetContents(ImportRule *ownerRule, CSSOMString originalURL, ParserContext context) noexcept;
+    StyleSheetContents(ImportRule *ownerRule, CSSOMString originalUrl, ParserContext context) noexcept;
 
     StyleSheetContents(const StyleSheetContents &other) noexcept;
 
@@ -94,11 +94,11 @@ namespace krys::boo::css
 
     KRYS_NODISCARD static Ref<StyleSheetContents> Create(const ParserContext &context) noexcept;
 
-    KRYS_NODISCARD static Ref<StyleSheetContents> Create(const CSSOMString &originalURL,
+    KRYS_NODISCARD static Ref<StyleSheetContents> Create(const CSSOMString &originalUrl,
                                                          const ParserContext &context) noexcept;
 
     KRYS_NODISCARD static Ref<StyleSheetContents>
-      Create(ImportRule *ownerRule, const CSSOMString &originalURL, const ParserContext &context) noexcept;
+      Create(ImportRule *ownerRule, const CSSOMString &originalUrl, const ParserContext &context) noexcept;
 
     KRYS_NODISCARD const ParserContext &GetParserContext() const noexcept
     {
@@ -128,7 +128,7 @@ namespace krys::boo::css
 
     KRYS_NODISCARD bool IsCacheable() const noexcept;
 
-    KRYS_NODISCARD bool IsCacheableWithNoBaseURLDependency() const noexcept;
+    KRYS_NODISCARD bool IsCacheableWithNoBaseUrlDependency() const noexcept;
 
     KRYS_NODISCARD bool IsLoading() const noexcept;
 
@@ -152,7 +152,7 @@ namespace krys::boo::css
       return _loadCompleted;
     }
 
-    KRYS_NODISCARD bool MayDependOnBaseURL() const noexcept;
+    KRYS_NODISCARD bool MayDependOnBaseUrl() const noexcept;
 
     /// @brief Calls @p handler on every rule (the imported sheets' too, after each import rule) until it
     /// returns true.
@@ -231,14 +231,14 @@ namespace krys::boo::css
     /// @note This is the URL that started the redirect chain that led to this style sheet. This property
     /// probably isn't useful for much except the JavaScript binding (which needs to use this value for
     /// security).
-    KRYS_NODISCARD CSSOMString OriginalURL() const noexcept
+    KRYS_NODISCARD CSSOMString OriginalUrl() const noexcept
     {
-      return _originalURL;
+      return _originalUrl;
     }
 
-    KRYS_NODISCARD const url::URL &BaseURL() const noexcept
+    KRYS_NODISCARD const net::Url &BaseUrl() const noexcept
     {
-      return _parserContext.BaseURL;
+      return _parserContext.BaseUrl;
     }
 
     KRYS_NODISCARD bool IsEmpty() const noexcept

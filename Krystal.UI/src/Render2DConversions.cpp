@@ -29,7 +29,7 @@ namespace krys::ui
     constexpr float circularCornerTolerance = 1.f / 16.f;
 
     const auto &radii = rect.GetRadii();
-    auto circular = [](const boo::FloatSize &radius)
+    auto circular = [](const SizeF &radius)
     {
       return std::abs(radius.Width() - radius.Height()) <= circularCornerTolerance;
     };
@@ -38,11 +38,11 @@ namespace krys::ui
     {
       return std::nullopt;
     }
-    auto radius = [](const boo::FloatSize &corner)
+    auto radius = [](const SizeF &corner)
     {
       return (corner.Width() + corner.Height()) / 2.f;
     };
-    return gfx::RoundedRect2D {.Rect = ToRect2D(rect.Rect()),
+    return gfx::RoundedRect2D {.Rect = rect.Rect(),
                                .Radii = {.TopLeft = radius(radii.TopLeft()),
                                          .TopRight = radius(radii.TopRight()),
                                          .BottomRight = radius(radii.BottomRight()),
@@ -52,12 +52,12 @@ namespace krys::ui
   void AddRoundedRect(gfx::Path2D &path, const boo::FloatRoundedRect &rect) noexcept
   {
     const auto &radii = rect.GetRadii();
-    auto toVec = [](const boo::FloatSize &size)
+    auto toVec = [](const SizeF &size)
     {
       return Vec2f {size.Width(), size.Height()};
     };
-    path.AddRoundedRect(ToRect2D(rect.Rect()), {toVec(radii.TopLeft()), toVec(radii.TopRight()),
-                                                toVec(radii.BottomRight()), toVec(radii.BottomLeft())});
+    path.AddRoundedRect(rect.Rect(), {toVec(radii.TopLeft()), toVec(radii.TopRight()),
+                                      toVec(radii.BottomRight()), toVec(radii.BottomLeft())});
   }
 
   namespace
@@ -67,8 +67,8 @@ namespace krys::ui
     {
     private:
       gfx::Path2D _path;
-      boo::FloatPoint _currentPoint;
-      boo::FloatPoint _lastMoveToPoint;
+      PointF _currentPoint;
+      PointF _lastMoveToPoint;
       bool _hasCurrentPoint {false};
 
     public:
@@ -136,7 +136,7 @@ namespace krys::ui
 
       void AddData(const boo::PathRect &data) noexcept
       {
-        _path.AddRect(ToRect2D(data.Rect));
+        _path.AddRect(data.Rect);
       }
 
       void AddData(const boo::PathRoundedRect &data) noexcept
@@ -148,7 +148,7 @@ namespace krys::ui
       {
         // Continuous rounded rects are unavailable. Paint a normal rounded rect instead.
         const Vec2f radius {data.CornerWidth, data.CornerHeight};
-        _path.AddRoundedRect(ToRect2D(data.Rect), {radius, radius, radius, radius});
+        _path.AddRoundedRect(data.Rect, {radius, radius, radius, radius});
       }
 
       void AddData(const boo::PathDataLine &data) noexcept
@@ -184,7 +184,7 @@ namespace krys::ui
 
       /// @brief An arc of @p radius tangent to the line from the current point to @p point1 and to the line
       /// from @p point1 to @p point2, joined to the current point by a line, as the canvas `arcTo` draws.
-      void AddArcTo(const boo::FloatPoint &point1, const boo::FloatPoint &point2, float radius) noexcept
+      void AddArcTo(const PointF &point1, const PointF &point2, float radius) noexcept
       {
         if (!_hasCurrentPoint)
         {
@@ -229,8 +229,8 @@ namespace krys::ui
 
       /// @brief An elliptical arc, rotated by @p rotation about its centre, joined to the current point by a
       /// line.
-      void AddEllipse(const boo::FloatPoint &centre, float radiusX, float radiusY, float rotation,
-                      float startAngle, float endAngle, boo::RotationDirection direction) noexcept
+      void AddEllipse(const PointF &centre, float radiusX, float radiusY, float rotation, float startAngle,
+                      float endAngle, boo::RotationDirection direction) noexcept
       {
         const bool anticlockwise = direction == boo::RotationDirection::Counterclockwise;
         if (!rotation)
@@ -242,8 +242,8 @@ namespace krys::ui
         // Made about the origin, then rotated and moved into place.
         gfx::Path2D arc;
         arc.AddArc({}, {radiusX, radiusY}, startAngle, endAngle, anticlockwise);
-        const auto transform =
-          gfx::Transform2D::Translation(centre.X(), centre.Y()) * gfx::Transform2D::Rotation(rotation);
+        const auto transform = AffineTransform::CreateTranslation(SizeF(centre.X(), centre.Y()))
+                               * AffineTransform().RotateRadians(rotation);
         auto points = arc.Points();
         size_t index = 0;
         for (const auto verb : arc.Verbs())
@@ -253,25 +253,27 @@ namespace krys::ui
             case gfx::PathVerb::MoveTo:
               if (_hasCurrentPoint)
               {
-                _path.LineTo(transform.Apply(points[index]));
+                _path.LineTo(gfx::MapPoint(transform, points[index]));
               }
               else
               {
-                _path.MoveTo(transform.Apply(points[index]));
+                _path.MoveTo(gfx::MapPoint(transform, points[index]));
               }
               index += 1;
               break;
             case gfx::PathVerb::LineTo:
-              _path.LineTo(transform.Apply(points[index]));
+              _path.LineTo(gfx::MapPoint(transform, points[index]));
               index += 1;
               break;
             case gfx::PathVerb::QuadTo:
-              _path.QuadTo(transform.Apply(points[index]), transform.Apply(points[index + 1]));
+              _path.QuadTo(gfx::MapPoint(transform, points[index]),
+                           gfx::MapPoint(transform, points[index + 1]));
               index += 2;
               break;
             case gfx::PathVerb::CubicTo:
-              _path.CubicTo(transform.Apply(points[index]), transform.Apply(points[index + 1]),
-                            transform.Apply(points[index + 2]));
+              _path.CubicTo(gfx::MapPoint(transform, points[index]),
+                            gfx::MapPoint(transform, points[index + 1]),
+                            gfx::MapPoint(transform, points[index + 2]));
               index += 3;
               break;
             case gfx::PathVerb::Close: _path.Close(); break;

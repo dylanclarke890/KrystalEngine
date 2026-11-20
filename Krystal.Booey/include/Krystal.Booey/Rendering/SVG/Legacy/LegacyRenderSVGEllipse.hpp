@@ -37,8 +37,8 @@ namespace krys::boo
     KRYS_OVERRIDE_DELETE_FOR_CHECKED_PTR(LegacyRenderSVGEllipse);
 
   private:
-    FloatPoint _center;
-    FloatSize _radii;
+    PointF _center;
+    SizeF _radii;
 
   public:
     LegacyRenderSVGEllipse(SVGGraphicsElement &, RenderStyle &&) noexcept;
@@ -65,11 +65,10 @@ namespace krys::boo
     void StrokeShape(GraphicsContext &) const noexcept override;
 
     KRYS_NODISCARD bool
-      ShapeDependentStrokeContains(const FloatPoint &,
+      ShapeDependentStrokeContains(const PointF &,
                                    PointCoordinateSpace = GlobalCoordinateSpace) noexcept override;
 
-    KRYS_NODISCARD bool ShapeDependentFillContains(const FloatPoint &,
-                                                   const WindRule) const noexcept override;
+    KRYS_NODISCARD bool ShapeDependentFillContains(const PointF &, const WindRule) const noexcept override;
 
     void CalculateRadiiAndCenter() noexcept;
 

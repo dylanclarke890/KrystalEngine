@@ -53,7 +53,7 @@ namespace krys::boo
   private:
     void BoundingRects(List<LayoutRect> &, const LayoutPoint &accumulatedOffset) const noexcept override;
 
-    void AbsoluteQuads(List<FloatQuad> &, bool *wasFixed) const noexcept override;
+    void AbsoluteQuads(List<QuadF> &, bool *wasFixed) const noexcept override;
 
     KRYS_NODISCARD LayoutRect ClippedOverflowRect(const RenderLayerModelObject *repaintContainer,
                                                   VisibleRectContext) const noexcept final;
@@ -61,9 +61,9 @@ namespace krys::boo
     KRYS_NODISCARD RepaintRects RectsForRepaintingAfterLayout(const RenderLayerModelObject *repaintContainer,
                                                               RepaintOutlineBounds) const noexcept final;
 
-    KRYS_NODISCARD Maybe<FloatRect>
-      ComputeFloatVisibleRectInContainer(const FloatRect &, const RenderLayerModelObject *container,
-                                         VisibleRectContext) const noexcept final;
+    KRYS_NODISCARD Maybe<RectF> ComputeFloatVisibleRectInContainer(const RectF &,
+                                                                   const RenderLayerModelObject *container,
+                                                                   VisibleRectContext) const noexcept final;
 
     KRYS_NODISCARD Maybe<RepaintRects>
       ComputeVisibleRectsInContainer(const RepaintRects &, const RenderLayerModelObject *container,

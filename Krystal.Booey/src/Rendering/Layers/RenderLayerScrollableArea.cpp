@@ -47,15 +47,14 @@
 #include "Krystal.Booey/Rendering/Layers/RenderLayerScrollableArea.hpp"
 #include "Krystal.Booey/DOM/Nodes/Element.hpp"
 #include "Krystal.Booey/Editing/Selection/FrameSelection.hpp"
-#include "Krystal.Booey/Graphics/Geometry/FloatQuad.hpp"
 #include "Krystal.Booey/HTML/Elements/HTMLBodyElement.hpp"
 #include "Krystal.Booey/HTML/Elements/HTMLHtmlElement.hpp"
-#include "Krystal.Booey/Page/EventHandler.hpp"
+#include "Krystal.Booey/Input/EventHandler.hpp"
 #include "Krystal.Booey/Page/LocalFrame.hpp"
 #include "Krystal.Booey/Page/LocalFrameView.hpp"
 #include "Krystal.Booey/Page/LocalFrameViewLayoutContext.hpp"
-#include "Krystal.Booey/Page/ScrollBehavior.hpp"
 #include "Krystal.Booey/Page/Scrolling/ScrollAnchoringController.hpp"
+#include "Krystal.Booey/Page/Scrolling/ScrollBehavior.hpp"
 #include "Krystal.Booey/Page/Scrolling/ScrollSnapOffsetsInfo.hpp"
 #include "Krystal.Booey/Page/Settings.hpp"
 #include "Krystal.Booey/Platform/Scrolling/ScrollAlignment.hpp"
@@ -74,6 +73,7 @@
 #include "Krystal.Booey/Rendering/Style/RenderStyle+GettersInlines.hpp"
 #include "Krystal.Booey/Style/AnchorPositionEvaluator.hpp"
 #include "Krystal.Booey/Style/Values/Scrollbars/ScrollbarWidth.hpp"
+#include "Krystal.Core/Geometry/Quad.hpp"
 #include "Krystal.Core/Utils/SetForScope.hpp"
 #include <algorithm>
 #include <cmath>
@@ -179,8 +179,8 @@ namespace krys::boo
     return scrollOffset.ConstrainedBetween(MinimumScrollOffset(), MaximumScrollOffset());
   }
 
-  void RenderLayerScrollableArea::PanScrollFromPoint(const IntPoint &sourcePoint,
-                                                     const IntPoint &mousePosition) noexcept
+  void RenderLayerScrollableArea::PanScrollFromPoint(const PointI &sourcePoint,
+                                                     const PointI &mousePosition) noexcept
   {
     // The speed grows faster than the distance, as in WebKit.
     auto adjustedDelta = [](int32 delta)
@@ -196,11 +196,11 @@ namespace krys::boo
                : adjusted;
     };
 
-    ScrollByRecursively(IntSize(adjustedDelta(mousePosition.X() - sourcePoint.X()),
-                                adjustedDelta(mousePosition.Y() - sourcePoint.Y())));
+    ScrollByRecursively(SizeI(adjustedDelta(mousePosition.X() - sourcePoint.X()),
+                              adjustedDelta(mousePosition.Y() - sourcePoint.Y())));
   }
 
-  void RenderLayerScrollableArea::ScrollByRecursively(const IntSize &delta,
+  void RenderLayerScrollableArea::ScrollByRecursively(const SizeI &delta,
                                                       ScrollableArea **scrolledArea) noexcept
   {
     if (delta.IsZero())
@@ -221,7 +221,7 @@ namespace krys::boo
       }
 
       // If this layer can't do the scroll we ask the next layer up that can scroll to try
-      IntSize remainingScrollOffset = newScrollOffset - GetScrollOffset();
+      SizeI remainingScrollOffset = newScrollOffset - GetScrollOffset();
       if (!remainingScrollOffset.IsZero() && renderer.Parent())
       {
         // FIXME: This skips scrollable frames.
@@ -375,7 +375,7 @@ namespace krys::boo
     auto cachedRect = _layer.CachedClippedOverflowRect();
     auto rectForRepaint = cachedRect ? *cachedRect : renderer.ClippedOverflowRectForRepaint(repaintContainer);
 
-    FloatQuad quadForFakeMouseMoveEvent = FloatQuad(FloatRect(rectForRepaint));
+    QuadF quadForFakeMouseMoveEvent = QuadF(RectF(rectForRepaint));
     if (repaintContainer)
     {
       quadForFakeMouseMoveEvent = repaintContainer->LocalToAbsoluteQuad(quadForFakeMouseMoveEvent);
@@ -460,7 +460,7 @@ namespace krys::boo
     }
   }
 
-  void RenderLayerScrollableArea::InvalidateScrollbar(Scrollbar &scrollbar, const IntRect &rect) noexcept
+  void RenderLayerScrollableArea::InvalidateScrollbar(Scrollbar &scrollbar, const RectI &rect) noexcept
   {
     if (!ShowsOverflowControls())
     {
@@ -471,7 +471,7 @@ namespace krys::boo
     {
       if (GraphicsLayer *layer = LayerForVerticalScrollbar())
       {
-        layer->SetNeedsDisplayInRect(FloatRect(rect));
+        layer->SetNeedsDisplayInRect(RectF(rect));
         return;
       }
     }
@@ -479,7 +479,7 @@ namespace krys::boo
     {
       if (GraphicsLayer *layer = LayerForHorizontalScrollbar())
       {
-        layer->SetNeedsDisplayInRect(FloatRect(rect));
+        layer->SetNeedsDisplayInRect(RectF(rect));
         return;
       }
     }
@@ -534,7 +534,7 @@ namespace krys::boo
     {
       const_cast<RenderLayerScrollableArea *>(this)->ComputeScrollDimensions();
     }
-    // FIXME: This should use snappedIntSize() instead with absolute coordinates.
+    // FIXME: This should use snappedSizeI() instead with absolute coordinates.
     return _scrollWidth;
   }
 
@@ -545,7 +545,7 @@ namespace krys::boo
     {
       const_cast<RenderLayerScrollableArea *>(this)->ComputeScrollDimensions();
     }
-    // FIXME: This should use snappedIntSize() instead with absolute coordinates.
+    // FIXME: This should use snappedSizeI() instead with absolute coordinates.
     return _scrollHeight;
   }
 
@@ -579,7 +579,7 @@ namespace krys::boo
     ScrollTo(ScrollPositionFromOffset(offset));
   }
 
-  IntRect RenderLayerScrollableArea::ScrollCornerRect() const noexcept
+  RectI RenderLayerScrollableArea::ScrollCornerRect() const noexcept
   {
     return OverflowControlsRects().ScrollCorner;
   }
@@ -590,19 +590,19 @@ namespace krys::boo
     return !ScrollCornerRect().IsEmpty();
   }
 
-  IntSize RenderLayerScrollableArea::VisibleSize() const noexcept
+  SizeI RenderLayerScrollableArea::VisibleSize() const noexcept
   {
     return _layer.VisibleSize();
   }
 
-  IntSize RenderLayerScrollableArea::ContentsSize() const noexcept
+  SizeI RenderLayerScrollableArea::ContentsSize() const noexcept
   {
-    return IntSize(ScrollWidth(), ScrollHeight());
+    return SizeI(ScrollWidth(), ScrollHeight());
   }
 
-  IntSize RenderLayerScrollableArea::ReachableTotalContentsSize() const noexcept
+  SizeI RenderLayerScrollableArea::ReachableTotalContentsSize() const noexcept
   {
-    IntSize contentsSize = this->ContentsSize();
+    SizeI contentsSize = this->ContentsSize();
 
     if (!HasScrollableHorizontalOverflow())
     {
@@ -636,7 +636,7 @@ namespace krys::boo
   {
     const auto &renderBox = Downcast<RenderBox>(_layer.Renderer());
     // Scrollbars sit inside the border box.
-    auto overflowControlsPositioningRect = SnappedIntRect(renderBox.PaddingBoxRectIncludingScrollbar());
+    auto overflowControlsPositioningRect = SnappedRectI(renderBox.PaddingBoxRectIncludingScrollbar());
 
     auto horizontalScrollbarHeight = _hBar ? _hBar->Height() : 0;
     auto verticalScrollbarWidth = _vBar ? _vBar->Width() : 0;
@@ -656,12 +656,12 @@ namespace krys::boo
        || (haveResizer && (haveNonOverlayHorizontalScrollbar || haveNonOverlayVerticalScrollbar)))
       && renderBox.Style().GetScrollbarWidth() != style::ScrollbarWidth::None;
 
-    IntSize cornerSize;
+    SizeI cornerSize;
     if (scrollbarsAvoidCorner)
     {
       // If only one scrollbar is present, the corner is square.
-      cornerSize = IntSize {verticalScrollbarWidth ? verticalScrollbarWidth : horizontalScrollbarHeight,
-                            horizontalScrollbarHeight ? horizontalScrollbarHeight : verticalScrollbarWidth};
+      cornerSize = SizeI {verticalScrollbarWidth ? verticalScrollbarWidth : horizontalScrollbarHeight,
+                          horizontalScrollbarHeight ? horizontalScrollbarHeight : verticalScrollbarWidth};
     }
 
     RenderLayer::OverflowControlRects result;
@@ -705,14 +705,14 @@ namespace krys::boo
       result.VerticalScrollbar = barRect;
     }
 
-    auto cornerRect = [&](IntSize cornerSize)
+    auto cornerRect = [&](SizeI cornerSize)
     {
       if (placeVerticalScrollbarOnTheLeft)
       {
         auto bottomLeftCorner = overflowControlsPositioningRect.MinXMaxYCorner();
-        return IntRect {{bottomLeftCorner.X(), bottomLeftCorner.Y() - cornerSize.Height()}, cornerSize};
+        return RectI {{bottomLeftCorner.X(), bottomLeftCorner.Y() - cornerSize.Height()}, cornerSize};
       }
-      return IntRect {overflowControlsPositioningRect.MaxXMaxYCorner() - cornerSize, cornerSize};
+      return RectI {overflowControlsPositioningRect.MaxXMaxYCorner() - cornerSize, cornerSize};
     };
 
     if (scrollbarsAvoidCorner)
@@ -736,18 +736,18 @@ namespace krys::boo
     return result;
   }
 
-  IntSize RenderLayerScrollableArea::ScrollbarOffset(const Scrollbar &scrollbar) const noexcept
+  SizeI RenderLayerScrollableArea::ScrollbarOffset(const Scrollbar &scrollbar) const noexcept
   {
     auto rects = OverflowControlsRects();
 
     if (&scrollbar == _vBar.get())
     {
-      return ToIntSize(rects.VerticalScrollbar.Location());
+      return ToSizeI(rects.VerticalScrollbar.Location());
     }
 
     if (&scrollbar == _hBar.get())
     {
-      return ToIntSize(rects.HorizontalScrollbar.Location());
+      return ToSizeI(rects.HorizontalScrollbar.Location());
     }
 
     krys_debug_assert(false);
@@ -926,7 +926,7 @@ namespace krys::boo
     return _hBar || _vBar || _layer.Renderer().Style().GetResize() != style::Resize::None;
   }
 
-  bool RenderLayerScrollableArea::PositionOverflowControls(const IntSize &offsetFromRoot) noexcept
+  bool RenderLayerScrollableArea::PositionOverflowControls(const SizeI &offsetFromRoot) noexcept
   {
     if (!_hBar && !_vBar && !_layer.CanResize())
     {
@@ -995,7 +995,7 @@ namespace krys::boo
     }
 
     int32 scrollableTopOverflow = RoundToInt(overflowRect.Y() - box->BorderTop());
-    SetScrollOrigin(IntPoint(-scrollableLeftOverflow, -scrollableTopOverflow));
+    SetScrollOrigin(PointI(-scrollableLeftOverflow, -scrollableTopOverflow));
 
     // Horizontal scrollbar offsets depend on the scroll origin when vertical
     // scrollbars are on the left.
@@ -1288,7 +1288,7 @@ namespace krys::boo
     krys_debug_assert(box);
 
     LayoutRect paddedLayerBounds(0_lu, 0_lu, box->ClientWidth(), box->ClientHeight());
-    paddedLayerBounds.Contract(box->ScrollPaddingForViewportRect(paddedLayerBounds));
+    Contract(paddedLayerBounds, box->ScrollPaddingForViewportRect(paddedLayerBounds));
 
     // Set up the  page step/line step.
     if (_hBar)
@@ -1340,7 +1340,7 @@ namespace krys::boo
 
     if (originalScrollPosition != GetScrollPosition())
     {
-      (void)ScrollToPositionWithoutAnimation(IntPoint(GetScrollPosition()));
+      (void)ScrollToPositionWithoutAnimation(PointI(GetScrollPosition()));
     }
 
     // The scrolled contents' layer follows the scroll dimensions, which may have changed.
@@ -1352,7 +1352,7 @@ namespace krys::boo
     ResnapAfterLayout();
   }
 
-  bool RenderLayerScrollableArea::OverflowControlsIntersectRect(const IntRect &localRect) const noexcept
+  bool RenderLayerScrollableArea::OverflowControlsIntersectRect(const RectI &localRect) const noexcept
   {
     auto rects = OverflowControlsRects();
 
@@ -1402,8 +1402,7 @@ namespace krys::boo
                                                  int32 verticalScrollbarWidth,
                                                  const LayoutRect &layerBounds) noexcept
     {
-      auto localExposeRect =
-        LayoutRect(box->AbsoluteToLocalQuad(FloatQuad(FloatRect(absoluteRect))).BoundingBox());
+      auto localExposeRect = LayoutRect(box->AbsoluteToLocalQuad(QuadF(RectF(absoluteRect))).BoundingBox());
 
       // localExposedRect is now the absolute rect in local coordinates, but relative to the
       // border edge. Make the rectangle relative to the scrollable area.
@@ -1420,7 +1419,7 @@ namespace krys::boo
       // scroll-padding applies to the scroll container, but expand the rectangle that we want to expose in
       // order simulate padding the scroll container. This rectangle is passed up the tree of scrolling
       // elements to ensure that the padding on this scroll container is maintained.
-      localExposeRect.Expand(box->ScrollPaddingForViewportRect(layerBounds));
+      Expand(localExposeRect, box->ScrollPaddingForViewportRect(layerBounds));
       return localExposeRect;
     }
   }
@@ -1471,7 +1470,7 @@ namespace krys::boo
     krys_debug_assert(box);
 
     auto clampedScrollOffset =
-      ClampScrollOffset(GetScrollOffset() + ToIntSize(RoundedIntRect(revealRect).Location()));
+      ClampScrollOffset(GetScrollOffset() + ToSizeI(RoundedRectI(revealRect).Location()));
     if (clampedScrollOffset == GetScrollOffset()
         && GetScrollAnimationStatus() == ScrollAnimationStatus::NotAnimating)
     {
@@ -1484,16 +1483,14 @@ namespace krys::boo
     auto scrollOffsetDifference = realScrollOffset - oldScrollOffset;
     auto localExposeRectScrolled = localExposeRect;
     localExposeRectScrolled.Move(-LayoutSize(scrollOffsetDifference));
-    return LayoutRect(box
-                        ->LocalToAbsoluteQuad(FloatQuad(FloatRect(localExposeRectScrolled)),
-                                              MapCoordinatesMode::UseTransforms)
-                        .BoundingBox());
+    return LayoutRect(
+      box->LocalToAbsoluteQuad(QuadF(RectF(localExposeRectScrolled)), MapCoordinatesMode::UseTransforms)
+        .BoundingBox());
   }
 
   void RenderLayerScrollableArea::PaintOverflowControls(GraphicsContext &context,
                                                         EnumSet<PaintBehavior> paintBehavior,
-                                                        const IntPoint &paintOffset,
-                                                        const IntRect &damageRect,
+                                                        const PointI &paintOffset, const RectI &damageRect,
                                                         bool paintingOverlayControls) noexcept
   {
     // Don't do anything if we have no overflow.
@@ -1523,7 +1520,7 @@ namespace krys::boo
       {
         return;
       }
-      IntRect localDamageRect = damageRect;
+      RectI localDamageRect = damageRect;
       localDamageRect.MoveBy(-paintOffset);
       if (!OverflowControlsIntersectRect(localDamageRect))
       {
@@ -1549,12 +1546,12 @@ namespace krys::boo
       return;
     }
 
-    IntPoint adjustedPaintOffset = paintingOverlayControls ? _cachedOverlayScrollbarOffset : paintOffset;
+    PointI adjustedPaintOffset = paintingOverlayControls ? _cachedOverlayScrollbarOffset : paintOffset;
 
     // Move the scrollbar widgets if necessary. We normally move and resize widgets during layout, but
     // sometimes widgets can move without layout occurring (most notably when you scroll a document that
     // contains fixed positioned elements).
-    (void)PositionOverflowControls(ToIntSize(adjustedPaintOffset));
+    (void)PositionOverflowControls(ToSizeI(adjustedPaintOffset));
 
     // Now that we're sure the scrollbars are in the right place, paint them.
     if (RefPtr<Scrollbar> hBar = _hBar;
@@ -1629,28 +1626,27 @@ namespace krys::boo
       return false;
     }
 
-    auto borderBoxRect = SnappedIntRect(Downcast<RenderBox>(renderer).BorderBoxRect());
+    auto borderBoxRect = SnappedRectI(Downcast<RenderBox>(renderer).BorderBoxRect());
     auto rects = OverflowControlsRects();
 
-    auto cornerRectInFragment = [&](const IntRect &fragmentBounds, const IntRect &resizerRect)
+    auto cornerRectInFragment = [&](const RectI &fragmentBounds, const RectI &resizerRect)
     {
       if (ShouldPlaceVerticalScrollbarOnLeft())
       {
-        IntSize offsetFromBottomLeft = borderBoxRect.MinXMaxYCorner() - resizerRect.MinXMaxYCorner();
-        return IntRect {fragmentBounds.MinXMaxYCorner() - offsetFromBottomLeft
-                          - IntSize {0, resizerRect.Height()},
-                        resizerRect.Size()};
-      }
-      IntSize offsetFromBottomRight = borderBoxRect.MaxXMaxYCorner() - resizerRect.MaxXMaxYCorner();
-      return IntRect {fragmentBounds.MaxXMaxYCorner() - offsetFromBottomRight - resizerRect.Size(),
+        SizeI offsetFromBottomLeft = borderBoxRect.MinXMaxYCorner() - resizerRect.MinXMaxYCorner();
+        return RectI {fragmentBounds.MinXMaxYCorner() - offsetFromBottomLeft
+                        - SizeI {0, resizerRect.Height()},
                       resizerRect.Size()};
+      }
+      SizeI offsetFromBottomRight = borderBoxRect.MaxXMaxYCorner() - resizerRect.MaxXMaxYCorner();
+      return RectI {fragmentBounds.MaxXMaxYCorner() - offsetFromBottomRight - resizerRect.Size(),
+                    resizerRect.Size()};
     };
 
     for (auto i = static_cast<int64>(layerFragments.size()) - 1; i >= 0; --i)
     {
       const LayerFragment &fragment = layerFragments[static_cast<size_t>(i)];
-      auto resizerRectInFragment =
-        cornerRectInFragment(SnappedIntRect(fragment.LayerBounds()), rects.Resizer);
+      auto resizerRectInFragment = cornerRectInFragment(SnappedRectI(fragment.LayerBounds()), rects.Resizer);
       if (fragment.DirtyBackgroundRect().Intersects(hitTestLocation)
           && resizerRectInFragment.Contains(hitTestLocation.RoundedPoint()))
       {
@@ -1662,10 +1658,10 @@ namespace krys::boo
     return false;
   }
 
-  void RenderLayerScrollableArea::PaintScrollCorner(GraphicsContext &context, const IntPoint &paintOffset,
-                                                    const IntRect &damageRect) noexcept
+  void RenderLayerScrollableArea::PaintScrollCorner(GraphicsContext &context, const PointI &paintOffset,
+                                                    const RectI &damageRect) noexcept
   {
-    IntRect absRect = ScrollCornerRect();
+    RectI absRect = ScrollCornerRect();
     absRect.MoveBy(paintOffset);
     if (!absRect.Intersects(damageRect))
     {
@@ -1689,7 +1685,7 @@ namespace krys::boo
       return;
     }
 
-    RenderLayer::LayerPaintingInfo paintingInfo(&_layer, LayoutRect(EnclosingIntRect(damageRect)),
+    RenderLayer::LayerPaintingInfo paintingInfo(&_layer, LayoutRect(EnclosingRectI(damageRect)),
                                                 paintBehavior, LayoutSize(), subtreePaintRoot);
     _layer.PaintLayer(context, paintingInfo, RenderLayer::PaintLayerFlag::PaintingOverlayScrollbars);
 
@@ -1697,7 +1693,7 @@ namespace krys::boo
   }
 
   bool RenderLayerScrollableArea::HitTestOverflowControls(HitTestResult &result,
-                                                          const IntPoint &localPoint) noexcept
+                                                          const PointI &localPoint) noexcept
   {
     if (!_hBar && !_vBar && !_layer.CanResize())
     {
@@ -1737,16 +1733,17 @@ namespace krys::boo
     return false;
   }
 
-  IntPoint RenderLayerScrollableArea::ConvertFromContainingViewToScrollbar(
-    const Scrollbar &scrollbar, const IntPoint &parentPoint) const noexcept
+  PointI
+    RenderLayerScrollableArea::ConvertFromContainingViewToScrollbar(const Scrollbar &scrollbar,
+                                                                    const PointI &parentPoint) const noexcept
   {
     auto &renderer = _layer.Renderer();
     // LocalFrameView::convertFromContainingViewToRenderer: from the view's coordinates into page ("absolute")
     // coordinates, then the renderer's.
     auto &view = renderer.View().FrameView();
-    IntPoint absolutePoint = parentPoint + IntSize(view.ScrollX(), view.ScrollY());
-    IntPoint point = RoundedIntPoint(
-      renderer.AbsoluteToLocal(FloatPoint(absolutePoint), {MapCoordinatesMode::UseTransforms}));
+    PointI absolutePoint = parentPoint + SizeI(view.ScrollX(), view.ScrollY());
+    PointI point =
+      RoundedPointI(renderer.AbsoluteToLocal(PointF(absolutePoint), {MapCoordinatesMode::UseTransforms}));
     point.Move(-ScrollbarOffset(scrollbar));
     return point;
   }

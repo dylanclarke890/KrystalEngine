@@ -29,8 +29,8 @@
 
 #include "Krystal.Booey/CSS/Parser/Token.hpp"
 #include "Krystal.Booey/CSS/CSSOM/Markup.hpp"
-#include "Krystal.Core/Text/HexNumber.hpp"
-#include "Krystal.Core/Text/StringBuilder.hpp"
+#include "Krystal.Core/Strings/HexNumber.hpp"
+#include "Krystal.Core/Strings/StringBuilder.hpp"
 #include "Krystal.Core/Types/Array.hpp"
 #include <algorithm>
 #include <charconv>

@@ -47,13 +47,13 @@ namespace krys::boo
     return {};
   }
 
-  void LegacyRenderSVGHiddenContainer::AbsoluteQuads(List<FloatQuad> &, bool *) const noexcept
+  void LegacyRenderSVGHiddenContainer::AbsoluteQuads(List<QuadF> &, bool *) const noexcept
   {
     // This subtree does not take up space or paint
   }
 
-  bool LegacyRenderSVGHiddenContainer::NodeAtFloatPoint(const HitTestRequest &, HitTestResult &,
-                                                        const FloatPoint &, HitTestAction) noexcept
+  bool LegacyRenderSVGHiddenContainer::NodeAtPointF(const HitTestRequest &, HitTestResult &, const PointF &,
+                                                    HitTestAction) noexcept
   {
     return false;
   }

@@ -27,23 +27,23 @@
 #pragma once
 
 #include "Krystal.Booey/DOM/Types/ExceptionOr.hpp"
-#include "Krystal.Booey/Graphics/Geometry/FloatPoint.hpp"
 #include "Krystal.Booey/SVG/Properties/SVGPropertyTraits.hpp"
 #include "Krystal.Booey/SVG/Properties/SVGValueProperty.hpp"
 #include "Krystal.Booey/SVG/SVGMatrix.hpp"
+#include "Krystal.Core/Geometry/Point.hpp"
 
 namespace krys::boo
 {
   /// @brief The deprecated alias of `DOMPoint` that SVG's interfaces still use.
   /// @see https://svgwg.org/svg2-draft/shapes.html#InterfaceSVGPointList
-  class SVGPoint : public SVGValueProperty<FloatPoint>
+  class SVGPoint : public SVGValueProperty<PointF>
   {
-    using Base = SVGValueProperty<FloatPoint>;
+    using Base = SVGValueProperty<PointF>;
     using Base::_value;
     using Base::Base;
 
   public:
-    KRYS_NODISCARD static Ref<SVGPoint> Create(const FloatPoint &value = {}) noexcept
+    KRYS_NODISCARD static Ref<SVGPoint> Create(const PointF &value = {}) noexcept
     {
       return AdoptRef(*new SVGPoint(value));
     }
@@ -99,14 +99,14 @@ namespace krys::boo
 
     KRYS_NODISCARD Ref<SVGPoint> MatrixTransform(SVGMatrix &matrix) const noexcept
     {
-      auto newPoint = _value.MatrixTransform(matrix.Value());
+      auto newPoint = krys::MatrixTransform(_value, matrix.Value());
       return AdoptRef(*new SVGPoint(newPoint));
     }
 
   private:
     KRYS_NODISCARD DOMString ValueAsString() const noexcept override
     {
-      return SVGPropertyTraits<FloatPoint>::ToString(_value);
+      return SVGPropertyTraits<PointF>::ToString(_value);
     }
   };
 }

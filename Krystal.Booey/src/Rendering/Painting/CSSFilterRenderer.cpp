@@ -41,7 +41,7 @@
 #include "Krystal.Booey/SVG/Graphics/Filters/SVGFilterRenderer.hpp"
 #include "Krystal.Booey/SVG/SVGLengthContext.hpp"
 #include "Krystal.Core/Colour/ColourMatrix.hpp"
-#include "Krystal.Core/Text/TextStream.hpp"
+#include "Krystal.Core/Strings/TextStream.hpp"
 
 namespace krys::boo
 {
@@ -235,7 +235,7 @@ namespace krys::boo
 
     KRYS_NODISCARD IntOutsets
       CalculateReferenceFilterOutsets(const style::ReferenceFilterOperation &filterOperation,
-                                      RenderElement &renderer, const FloatRect &targetBoundingBox) noexcept
+                                      RenderElement &renderer, const RectF &targetBoundingBox) noexcept
     {
       auto filterElement = ReferenceFilterElement(filterOperation, renderer);
       if (!filterElement)
@@ -512,7 +512,7 @@ namespace krys::boo
     return styles;
   }
 
-  void CSSFilterRenderer::SetFilterRegion(const FloatRect &filterRegion) noexcept
+  void CSSFilterRenderer::SetFilterRegion(const RectF &filterRegion) noexcept
   {
     Filter::SetFilterRegion(filterRegion);
     ClampFilterRegionIfNeeded();
@@ -574,7 +574,7 @@ namespace krys::boo
   }
 
   IntOutsets CSSFilterRenderer::CalculateOutsets(RenderElement &renderer, const style::Filter &filter,
-                                                 const FloatRect &targetBoundingBox) noexcept
+                                                 const RectF &targetBoundingBox) noexcept
   {
     IntOutsets outsets;
 
@@ -594,7 +594,7 @@ namespace krys::boo
   }
 
   IntOutsets CSSFilterRenderer::CalculateOutsets(RenderElement &renderer, const FilterOperations &operations,
-                                                 const FloatRect &targetBoundingBox) noexcept
+                                                 const RectF &targetBoundingBox) noexcept
   {
     IntOutsets outsets;
 

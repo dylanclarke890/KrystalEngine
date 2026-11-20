@@ -175,4 +175,32 @@ namespace krys::boo::tests
       DateComponents::FromMillisecondsSinceEpochForDate(DateComponents::MaximumDate() + 86400000.0));
     CHECK_FALSE(DateComponents::FromMillisecondsSinceEpochForDate(NAN));
   }
+
+  TEST_CASE("DateComponents::ToDateTimeFields", "[Platform][DateComponents]")
+  {
+    CHECK_FALSE(DateComponents().ToDateTimeFields());
+
+    auto date = DateComponents::FromParsingDate(u8"2026-03-07");
+    REQUIRE(date);
+    auto fields = date->ToDateTimeFields();
+    REQUIRE(fields);
+    CHECK(fields->Kind == i18n::DateTimeKind::Date);
+    CHECK(fields->Year == 2'026);
+    CHECK(fields->Month == 2);
+    CHECK(fields->Day == 7);
+
+    auto time = DateComponents::FromParsingTime(u8"00:05:09.250");
+    REQUIRE(time);
+    fields = time->ToDateTimeFields();
+    REQUIRE(fields);
+    CHECK(fields->Kind == i18n::DateTimeKind::Time);
+    CHECK(fields->Minute == 5);
+    CHECK(fields->Second == 9);
+    CHECK(fields->Millisecond == 250);
+
+    auto week = DateComponents::FromParsingWeek(u8"2026-W10");
+    REQUIRE(week);
+    CHECK(week->ToDateTimeFields()->Kind == i18n::DateTimeKind::Week);
+    CHECK(week->ToDateTimeFields()->Week == 10);
+  }
 }

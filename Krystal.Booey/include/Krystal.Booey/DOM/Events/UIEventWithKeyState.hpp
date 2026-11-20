@@ -24,7 +24,7 @@
 #pragma once
 
 #include "Krystal.Booey/DOM/Events/UIEvent.hpp"
-#include "Krystal.Booey/Platform/Events/PlatformEvent.hpp"
+#include "Krystal.Booey/Input/PlatformEvent.hpp"
 #include "Krystal.Core/Attributes.hpp"
 #include "Krystal.Core/Types/EnumSet.hpp"
 

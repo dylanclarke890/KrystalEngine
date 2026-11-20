@@ -37,7 +37,7 @@
 #include "Krystal.Booey/HTML/Elements/HTMLOptGroupElement.hpp"
 #include "Krystal.Booey/HTML/Elements/HTMLOptionElement.hpp"
 #include "Krystal.Booey/HTML/Elements/HTMLSelectElement.hpp"
-#include "Krystal.Booey/Page/EventHandler.hpp"
+#include "Krystal.Booey/Input/EventHandler.hpp"
 #include "Krystal.Booey/Page/LocalFrame.hpp"
 #include "Krystal.Booey/Page/LocalFrameView.hpp"
 #include "Krystal.Booey/Platform/Scrolling/ScrollAnimator.hpp"
@@ -229,10 +229,10 @@ namespace krys::boo
       _scrollbar->SetProportion(listHeight - maximumOffset, listHeight);
 
       // A flipped list starts at the far end, so its positions run from minus the maximum offset to 0.
-      IntPoint scrollOrigin;
+      PointI scrollOrigin;
       if (GetWritingMode().IsBlockFlipped())
       {
-        scrollOrigin = IntPoint(0, maximumOffset);
+        scrollOrigin = PointI(0, maximumOffset);
         if (_scrollbar->Orientation() == ScrollbarOrientation::Horizontal)
         {
           scrollOrigin = scrollOrigin.TransposedPoint();
@@ -549,8 +549,8 @@ namespace krys::boo
   {
     auto scrollRect = RectForScrollbar(scrollbar);
     scrollRect.MoveBy(paintOffset);
-    scrollbar.SetFrameRect(SnappedIntRect(scrollRect));
-    scrollbar.Paint(paintInfo.Context(), SnappedIntRect(paintInfo.Rect));
+    scrollbar.SetFrameRect(SnappedRectI(scrollRect));
+    scrollbar.Paint(paintInfo.Context(), SnappedRectI(paintInfo.Rect));
   }
 
   void RenderListBox::PaintItemForeground(PaintInfo &paintInfo, const LayoutPoint &paintOffset,
@@ -622,8 +622,8 @@ namespace krys::boo
     bool isHorizontalWritingMode = GetWritingMode().IsHorizontal();
     if (!isHorizontalWritingMode)
     {
-      auto rotationOrigin = RoundedIntPoint(r.MaxXMinYCorner());
-      context.Translate(FloatPoint(rotationOrigin));
+      auto rotationOrigin = RoundedPointI(r.MaxXMinYCorner());
+      context.Translate(PointF(rotationOrigin));
       if (GetWritingMode().IsLineOverLeft())
       {
         context.Rotate(-std::numbers::pi_v<float> / 2);
@@ -632,13 +632,12 @@ namespace krys::boo
       {
         context.Rotate(std::numbers::pi_v<float> / 2);
       }
-      context.Translate(-FloatPoint(rotationOrigin));
+      context.Translate(-PointF(rotationOrigin));
     }
 
     // Draw the item text
-    context.DrawBidiText(
-      itemFont, textRun,
-      FloatPoint(RoundedIntPoint(isHorizontalWritingMode ? r.Location() : r.MaxXMinYCorner())));
+    context.DrawBidiText(itemFont, textRun,
+                         PointF(RoundedPointI(isHorizontalWritingMode ? r.Location() : r.MaxXMinYCorner())));
   }
 
   void RenderListBox::PaintItemBackground(PaintInfo &paintInfo, const LayoutPoint &paintOffset,
@@ -679,7 +678,7 @@ namespace krys::boo
 
     LayoutRect itemRect = ItemBoundingBoxRect(paintOffset, listIndex);
     itemRect.Intersect(ControlClipRect(paintOffset));
-    paintInfo.Context().FillRect(FloatRect(SnappedIntRect(itemRect)), backColor);
+    paintInfo.Context().FillRect(RectF(SnappedRectI(itemRect)), backColor);
   }
 
   bool RenderListBox::IsPointInOverflowControl(HitTestResult &result, const LayoutPoint &locationInContainer,
@@ -756,11 +755,11 @@ namespace krys::boo
     return index >= 0 && index < NumItems() ? index : -1;
   }
 
-  int32 RenderListBox::ScrollToward(const IntPoint &destination) noexcept
+  int32 RenderListBox::ScrollToward(const PointI &destination) noexcept
   {
     // FIXME: This doesn't work correctly with transforms.
-    FloatPoint absPos = LocalToAbsolute();
-    IntSize positionOffset = RoundedIntSize(FloatPoint(destination) - absPos);
+    PointF absPos = LocalToAbsolute();
+    SizeI positionOffset = RoundedSizeI(PointF(destination) - absPos);
     int32 positionOffsetLogicalHeight =
       GetWritingMode().IsHorizontal() ? positionOffset.Height() : positionOffset.Width();
 
@@ -799,7 +798,7 @@ namespace krys::boo
     return ListIndexAtOffset(LayoutSize(positionOffset));
   }
 
-  void RenderListBox::PanScroll(const IntPoint &source, const IntPoint &mousePosition) noexcept
+  void RenderListBox::PanScroll(const PointI &source, const PointI &mousePosition) noexcept
   {
     // FIXME: This does not support vertical writing mode or flipped block directions.
     constexpr int32 maxSpeed = 20;
@@ -807,7 +806,7 @@ namespace krys::boo
     constexpr int32 speedReducer = 4;
 
     // FIXME: This doesn't work correctly with transforms.
-    FloatPoint absOffset = LocalToAbsolute();
+    PointF absOffset = LocalToAbsolute();
 
     // If the point is too far from the center we limit the speed.
     int32 yDelta = std::clamp(mousePosition.Y() - source.Y(), -maxSpeed, maxSpeed);
@@ -831,10 +830,10 @@ namespace krys::boo
     yDelta /= speedReducer;
 
     // Only scrolling, where WebKit also selects the option it reaches, which no press has asked for.
-    (void)ScrollToward(IntPoint(0, static_cast<int32>(absOffset.Y()) + yDelta));
+    (void)ScrollToward(PointI(0, static_cast<int32>(absOffset.Y()) + yDelta));
   }
 
-  void RenderListBox::Autoscroll(const IntPoint &) noexcept
+  void RenderListBox::Autoscroll(const PointI &) noexcept
   {
     auto *frame = GetDocument().Frame();
     if (!frame)
@@ -846,7 +845,7 @@ namespace krys::boo
     {
       return;
     }
-    IntPoint pos = FlooredIntPoint(View().FrameView().WindowToContents(*lastKnownMousePosition));
+    PointI pos = FlooredPointI(View().FrameView().WindowToContents(*lastKnownMousePosition));
 
     int32 endIndex = ScrollToward(pos);
     if (SelectElement().IsDisabledFormControl())
@@ -946,7 +945,7 @@ namespace krys::boo
       return LogicalScrollOffset();
     }
 
-    auto position = ScrollPositionFromOffset(RoundedIntPoint(animator->DestinationOffset()));
+    auto position = ScrollPositionFromOffset(RoundedPointI(animator->DestinationOffset()));
     return std::abs(GetWritingMode().IsHorizontal() ? position.Y() : position.X());
   }
 
@@ -1237,7 +1236,7 @@ namespace krys::boo
     View().FrameView().AddScrollableAreaForAnimatedScroll(*this);
   }
 
-  void RenderListBox::InvalidateScrollbar(Scrollbar &scrollbar, const IntRect &rect) noexcept
+  void RenderListBox::InvalidateScrollbar(Scrollbar &scrollbar, const RectI &rect) noexcept
   {
     auto scrollRect = rect;
     auto scrollbarLocation = RectForScrollbar(scrollbar).Location();
@@ -1245,20 +1244,19 @@ namespace krys::boo
     RepaintRectangle(LayoutRect(scrollRect));
   }
 
-  IntPoint RenderListBox::ConvertFromContainingViewToScrollbar(const Scrollbar &scrollbar,
-                                                               const IntPoint &parentPoint) const noexcept
+  PointI RenderListBox::ConvertFromContainingViewToScrollbar(const Scrollbar &scrollbar,
+                                                             const PointI &parentPoint) const noexcept
   {
     // From the view's coordinates into page ("absolute") coordinates, then the renderer's.
     auto &view = View().FrameView();
-    IntPoint absolutePoint = parentPoint + IntSize(view.ScrollX(), view.ScrollY());
-    IntPoint point =
-      RoundedIntPoint(AbsoluteToLocal(FloatPoint(absolutePoint), {MapCoordinatesMode::UseTransforms}));
+    PointI absolutePoint = parentPoint + SizeI(view.ScrollX(), view.ScrollY());
+    PointI point = RoundedPointI(AbsoluteToLocal(PointF(absolutePoint), {MapCoordinatesMode::UseTransforms}));
     auto scrollbarLocation = RectForScrollbar(scrollbar).Location();
     point.Move(-scrollbarLocation.X().ToInt(), -scrollbarLocation.Y().ToInt());
     return point;
   }
 
-  IntSize RenderListBox::ContentsSize() const noexcept
+  SizeI RenderListBox::ContentsSize() const noexcept
   {
     // What's in view and as much again as the list scrolls, so the scrollable area's maximum is the list
     // box's.

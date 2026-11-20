@@ -2211,7 +2211,7 @@ class PropertiesAndDescriptors:
 
 class Name(object):
     special_case_name_to_id = {
-        "url": "URL",
+        "url": "Url",
     }
 
     name: str
@@ -2691,14 +2691,14 @@ ALLOWED_COLOR_TYPES_MAPPINGS = {
     "system": "ColorType::System",
 }
 ALLOWED_IMAGE_TYPES_MAPPINGS = {
-    "url": "AllowedImageType::URLFunction",
+    "url": "AllowedImageType::UrlFunction",
     "image-set": "AllowedImageType::ImageSet",
     "generated": "AllowedImageType::GeneratedImage",
 }
 ALLOWED_URL_MODIFIER_MAPPINGS = {
-    "crossorigin": "AllowedURLModifiers::CrossOrigin",
-    "integrity": "AllowedURLModifiers::Integrity",
-    "referrerpolicy": "AllowedURLModifiers::ReferrerPolicy",
+    "crossorigin": "AllowedUrlModifiers::CrossOrigin",
+    "integrity": "AllowedUrlModifiers::Integrity",
+    "referrerpolicy": "AllowedUrlModifiers::ReferrerPolicy",
 }
 
 
@@ -4872,10 +4872,10 @@ class TermGeneratorReferenceTerm(TermGenerator):
                 if builtin.excluding:
                     return f"ConsumeCustomIdentExcluding({range_string}, {{{ ', '.join(ValueKeywordName(id).id for id in builtin.excluding)}}})"
                 return f"ConsumeCustomIdent({range_string})"
-            elif isinstance(builtin, BuiltinURLConsumer):  # type: ignore
+            elif isinstance(builtin, BuiltinUrlConsumer):  # type: ignore
                 if builtin.allowed_modifiers:
-                    return f"ConsumeURL({range_string}, {state_string}, {{{builtin.allowed_modifiers}}})"
-                return f"ConsumeURL({range_string}, {state_string}, {{}})"
+                    return f"ConsumeUrl({range_string}, {state_string}, {{{builtin.allowed_modifiers}}})"
+                return f"ConsumeUrl({range_string}, {state_string}, {{}})"
             elif self.requires_state:
                 return f"Consume{self.term.name.id_without_prefix}({range_string}, {state_string})"
             else:
@@ -4931,7 +4931,7 @@ class TermGeneratorReferenceTerm(TermGenerator):
                 return False
             elif isinstance(builtin, BuiltinDashedIdentConsumer):  # type: ignore
                 return False
-            elif isinstance(builtin, BuiltinURLConsumer):  # type: ignore
+            elif isinstance(builtin, BuiltinUrlConsumer):  # type: ignore
                 return True
             elif isinstance(builtin, BuiltinFeatureTagValueConsumer):  # type: ignore
                 return True
@@ -8021,9 +8021,9 @@ class GeneratePropertyId:
                     "Krystal.Booey/CSS/Properties/Property.hpp",
                     "Krystal.Booey/CSS/Values/ValueId.hpp",
                     "Krystal.Booey/Page/Settings.hpp",
-                    "Krystal.Core/Text/ASCII.hpp",
+                    "Krystal.Core/Strings/ASCII.hpp",
                     "Krystal.Core/Types/SmallList.hpp",
-                    "Krystal.Core/Types/String.hpp",
+                    "Krystal.Core/Strings/String.hpp",
                 ],
             )
 

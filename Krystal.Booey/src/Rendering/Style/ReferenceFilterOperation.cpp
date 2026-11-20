@@ -27,7 +27,7 @@
 
 namespace krys::boo::style
 {
-  ReferenceFilterOperation::ReferenceFilterOperation(URL &&url, StringAtom &&fragment) noexcept
+  ReferenceFilterOperation::ReferenceFilterOperation(style::Url &&url, StringAtom &&fragment) noexcept
       : FilterOperation(Type::Reference), _url(krys::move(url)), _fragment(krys::move(fragment))
   {
   }

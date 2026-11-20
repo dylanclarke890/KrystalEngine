@@ -29,7 +29,7 @@
 #include "Krystal.Booey/Rendering/Line/LineInfo.hpp"
 #include "Krystal.Booey/Rendering/RenderInline.hpp"
 #include "Krystal.Booey/Rendering/Style/RenderStyle+GettersInlines.hpp"
-#include "Krystal.Core/Text/Unicode.hpp"
+#include "Krystal.Core/Strings/Unicode.hpp"
 
 namespace krys::boo
 {

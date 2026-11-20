@@ -120,12 +120,11 @@ namespace krys::gfx::tests
         {
           for (int32 column = 0; column < static_cast<int32>(_width); ++column)
           {
-            const int32 u = column - x - bitmap.Bounds.X;
-            const int32 v = row - y - bitmap.Bounds.Y;
-            const bool inside = u >= 0 && v >= 0 && u < static_cast<int32>(bitmap.Bounds.Width)
-                                && v < static_cast<int32>(bitmap.Bounds.Height);
+            const int32 u = column - x - bitmap.Bounds.X();
+            const int32 v = row - y - bitmap.Bounds.Y();
+            const bool inside = u >= 0 && v >= 0 && u < bitmap.Bounds.Width() && v < bitmap.Bounds.Height();
             const uint8 coverage =
-              inside ? bitmap.Pixels[static_cast<size_t>(v) * bitmap.Bounds.Width + static_cast<size_t>(u)]
+              inside ? bitmap.Pixels[static_cast<size_t>(v) * bitmap.Bounds.Width() + static_cast<size_t>(u)]
                      : 0u;
             const auto &pixel = pixels[static_cast<size_t>(row) * _width + static_cast<size_t>(column)];
             if (pixel[0] != coverage || pixel[3] != coverage || pixel[1] != 0u || pixel[2] != 0u)
@@ -319,15 +318,15 @@ namespace krys::gfx::tests
       CHECK(Total(pixels, 2) > 0.0);
       // The shadow is the same glyph, in blue, 20 pixels along.
       bool same = true;
-      for (uint32 v = 0u; v < bitmap->Bounds.Height; ++v)
+      for (uint32 v = 0u; v < static_cast<uint32>(bitmap->Bounds.Height()); ++v)
       {
-        for (uint32 u = 0u; u < bitmap->Bounds.Width; ++u)
+        for (uint32 u = 0u; u < static_cast<uint32>(bitmap->Bounds.Width()); ++u)
         {
-          const int32 x = 24 + bitmap->Bounds.X + static_cast<int32>(u);
-          const int32 y = 32 + bitmap->Bounds.Y + static_cast<int32>(v);
+          const int32 x = 24 + bitmap->Bounds.X() + static_cast<int32>(u);
+          const int32 y = 32 + bitmap->Bounds.Y() + static_cast<int32>(v);
           same = same
                  && pixels[static_cast<size_t>(y) * 64u + static_cast<size_t>(x)][2]
-                      == bitmap->Pixels[v * bitmap->Bounds.Width + u];
+                      == bitmap->Pixels[v * bitmap->Bounds.Width() + u];
         }
       }
       CHECK(same);
@@ -360,13 +359,13 @@ namespace krys::gfx::tests
       {
         for (uint32 column = 0u; column < _width; ++column)
         {
-          const int32 u = static_cast<int32>(column) - 16 - blurred.Bounds.X;
-          const int32 v = static_cast<int32>(row) - 32 - blurred.Bounds.Y;
-          const bool inside = u >= 0 && v >= 0 && u < static_cast<int32>(blurred.Bounds.Width)
-                              && v < static_cast<int32>(blurred.Bounds.Height);
+          const int32 u = static_cast<int32>(column) - 16 - blurred.Bounds.X();
+          const int32 v = static_cast<int32>(row) - 32 - blurred.Bounds.Y();
+          const bool inside = u >= 0 && v >= 0 && u < blurred.Bounds.Width() && v < blurred.Bounds.Height();
           const uint8 expected =
-            inside ? blurred.Coverage[static_cast<size_t>(v) * blurred.Bounds.Width + static_cast<size_t>(u)]
-                   : 0u;
+            inside
+              ? blurred.Coverage[static_cast<size_t>(v) * blurred.Bounds.Width() + static_cast<size_t>(u)]
+              : 0u;
           same = same && pixels[row * _width + column][3] == expected;
         }
       }
@@ -447,14 +446,14 @@ namespace krys::gfx::tests
         });
       const auto pixels = Read();
       bool same = true;
-      for (uint32 v = 0u; v < bitmap->Bounds.Height; ++v)
+      for (uint32 v = 0u; v < static_cast<uint32>(bitmap->Bounds.Height()); ++v)
       {
-        for (uint32 u = 0u; u < bitmap->Bounds.Width; ++u)
+        for (uint32 u = 0u; u < static_cast<uint32>(bitmap->Bounds.Width()); ++u)
         {
-          const int32 x = 48 + bitmap->Bounds.X + static_cast<int32>(u);
-          const int32 y = 38 + bitmap->Bounds.Y + static_cast<int32>(v);
+          const int32 x = 48 + bitmap->Bounds.X() + static_cast<int32>(u);
+          const int32 y = 38 + bitmap->Bounds.Y() + static_cast<int32>(v);
           const auto &pixel = pixels[static_cast<size_t>(y) * 96u + static_cast<size_t>(x)];
-          const uint8 alpha = bitmap->Pixels[(v * bitmap->Bounds.Width + u) * 4u + 3u];
+          const uint8 alpha = bitmap->Pixels[(v * bitmap->Bounds.Width() + u) * 4u + 3u];
           same = same && pixel[0] == 0u && pixel[1] == 0u && pixel[2] == alpha && pixel[3] == alpha;
         }
       }

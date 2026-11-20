@@ -12,7 +12,7 @@ namespace krys::boo::tests
     TextRunIterator iterator(&run, 0);
     CHECK(iterator.Offset() == 0);
     CHECK(iterator.Current() == U'a');
-    CHECK(iterator.Direction() == U_LEFT_TO_RIGHT);
+    CHECK(iterator.Direction() == text::BidiClass::LeftToRight);
     CHECK(iterator.NextOffset() == 1);
 
     iterator.Increment();
@@ -22,7 +22,7 @@ namespace krys::boo::tests
 
     iterator.Increment();
     CHECK(iterator.Current() == U'א');
-    CHECK(iterator.Direction() == U_RIGHT_TO_LEFT);
+    CHECK(iterator.Direction() == text::BidiClass::RightToLeft);
     CHECK(iterator.NextOffset() == 5);
 
     iterator.Increment();
@@ -33,7 +33,7 @@ namespace krys::boo::tests
     iterator.Increment();
     CHECK(iterator.AtEnd());
     CHECK(iterator == TextRunIterator(&run, run.Length()));
-    CHECK(iterator.Direction() == U_OTHER_NEUTRAL);
+    CHECK(iterator.Direction() == text::BidiClass::OtherNeutral);
 
     // An iterator without a run is at its end.
     CHECK(TextRunIterator().AtEnd());

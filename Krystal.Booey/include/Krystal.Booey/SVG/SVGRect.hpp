@@ -21,28 +21,28 @@
 #pragma once
 
 #include "Krystal.Booey/DOM/Types/ExceptionOr.hpp"
-#include "Krystal.Booey/Graphics/Geometry/FloatRect.hpp"
 #include "Krystal.Booey/SVG/Properties/SVGPropertyTraits.hpp"
 #include "Krystal.Booey/SVG/Properties/SVGValueProperty.hpp"
+#include "Krystal.Core/Geometry/Rect.hpp"
 
 namespace krys::boo
 {
   /// @brief The deprecated alias of `DOMRect` that SVG's interfaces still use.
   /// @see https://svgwg.org/svg2-draft/types.html#InterfaceSVGAnimatedRect
-  class SVGRect : public SVGValueProperty<FloatRect>
+  class SVGRect : public SVGValueProperty<RectF>
   {
-    using Base = SVGValueProperty<FloatRect>;
+    using Base = SVGValueProperty<RectF>;
     using Base::_value;
     using Base::Base;
 
   public:
-    KRYS_NODISCARD static Ref<SVGRect> Create(const FloatRect &value = {}) noexcept
+    KRYS_NODISCARD static Ref<SVGRect> Create(const RectF &value = {}) noexcept
     {
       return AdoptRef(*new SVGRect(value));
     }
 
     KRYS_NODISCARD static Ref<SVGRect> Create(SVGPropertyOwner *owner, SVGPropertyAccess access,
-                                              const FloatRect &value = {}) noexcept
+                                              const RectF &value = {}) noexcept
     {
       return AdoptRef(*new SVGRect(owner, access, value));
     }
@@ -127,7 +127,7 @@ namespace krys::boo
 
     KRYS_NODISCARD DOMString ValueAsString() const noexcept override
     {
-      return SVGPropertyTraits<FloatRect>::ToString(_value);
+      return SVGPropertyTraits<RectF>::ToString(_value);
     }
   };
 }

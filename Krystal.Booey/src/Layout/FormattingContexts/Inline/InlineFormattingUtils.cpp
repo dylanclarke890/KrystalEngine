@@ -64,7 +64,7 @@ namespace krys::boo::layout
         // The bidi boundary may or may not be the reason for splitting the inline text box content.
         // FIXME: We could add a "reason flag" to InlineTextItem to tell why the split happened.
         auto &style = previousInlineTextItem.Style();
-        auto lineBreakIteratorFactory = CachedLineBreakIteratorFactory {
+        auto lineBreakIteratorFactory = text::CachedLineBreakIteratorFactory {
           previousInlineTextItem.GetInlineTextBox().Content(), style.ComputedLocale().GetPlatform(),
           TextUtil::LineBreakIteratorMode(style.GetLineBreak()),
           TextUtil::GetContentAnalysis(style.GetWordBreak())};
@@ -334,7 +334,7 @@ namespace krys::boo::layout
   InlineLayoutUnit InlineFormattingUtils::HorizontalAlignmentOffset(
     const RenderStyle &rootStyle, InlineLayoutUnit contentLogicalRight, InlineLayoutUnit lineLogicalWidth,
     InlineLayoutUnit hangingTrailingWidth, bool isLastLineOrLineEndsWithForcedLineBreak,
-    Maybe<TextDirection> inlineBaseDirectionOverride) noexcept
+    Maybe<text::TextDirection> inlineBaseDirectionOverride) noexcept
   {
     // Depending on the line's alignment/justification, the hanging glyph can be placed outside the line box.
     if (hangingTrailingWidth)
@@ -365,7 +365,8 @@ namespace krys::boo::layout
     }
 
     auto isLeftToRightDirection =
-      inlineBaseDirectionOverride.value_or(rootStyle.GetWritingMode().BidiDirection()) == TextDirection::LTR;
+      inlineBaseDirectionOverride.value_or(rootStyle.GetWritingMode().BidiDirection())
+      == text::TextDirection::LTR;
 
     auto computedHorizontalAlignment = [&]
     {

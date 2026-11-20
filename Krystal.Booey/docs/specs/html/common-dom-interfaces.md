@@ -183,7 +183,7 @@ Status: reviewed (2026-11-11)
 #### [2.6.2 Using reflect via IDL extended attributes](https://html.spec.whatwg.org/#using-reflect-via-idl-extended-attributes)
 
 Status: reviewed (2026-11-01)
-> `Reflect`, `ReflectSetter`, `ReflectURL`, `ReflectNonNegative`, `ReflectPositive`, `ReflectPositiveWithFallback`, and the `ReflectDefault`/`ReflectRange` template arguments.
+> `Reflect`, `ReflectSetter`, `ReflectUrl`, `ReflectNonNegative`, `ReflectPositive`, `ReflectPositiveWithFallback`, and the `ReflectDefault`/`ReflectRange` template arguments.
 <!-- definitions: xattr-reflect xattr-reflectsetter xattr-reflecturl xattr-reflectnonnegative xattr-reflectpositive xattr-reflectpositivewithfallback xattr-reflectrange xattr-reflectdefault -->
 
 #### [2.6.3 Using reflect in specifications](https://html.spec.whatwg.org/#using-reflect-in-specifications)

@@ -26,8 +26,8 @@
 #include "Krystal.Booey/Graphics/Filters/FilterEffectApplier.hpp"
 #include "Krystal.Booey/Graphics/Filters/FilterEffectGeometry.hpp"
 #include "Krystal.Booey/Graphics/Filters/FilterFunction.hpp"
-#include "Krystal.Booey/Graphics/Geometry/FloatRect.hpp"
 #include "Krystal.Booey/Graphics/GraphicsStyle.hpp"
+#include "Krystal.Core/Geometry/Rect.hpp"
 #include "Krystal.Core/Types/Maybe.hpp"
 #include "Krystal.Core/Types/Span.hpp"
 
@@ -93,13 +93,12 @@ namespace krys::boo
       return 1u;
     }
 
-    KRYS_NODISCARD FloatRect
-      CalculatePrimitiveSubregion(const Filter &filter, Span<const FloatRect> inputPrimitiveSubregions,
+    KRYS_NODISCARD RectF
+      CalculatePrimitiveSubregion(const Filter &filter, Span<const RectF> inputPrimitiveSubregions,
                                   const Maybe<FilterEffectGeometry> &geometry) const noexcept;
 
-    KRYS_NODISCARD virtual FloatRect CalculateImageRect(const Filter &filter,
-                                                        Span<const FloatRect> inputImageRects,
-                                                        const FloatRect &primitiveSubregion) const noexcept;
+    KRYS_NODISCARD virtual RectF CalculateImageRect(const Filter &filter, Span<const RectF> inputImageRects,
+                                                    const RectF &primitiveSubregion) const noexcept;
 
     // Solid black image with different alpha values.
     KRYS_NODISCARD virtual bool ResultIsAlphaImage(Span<const Ref<FilterImage>>) const noexcept

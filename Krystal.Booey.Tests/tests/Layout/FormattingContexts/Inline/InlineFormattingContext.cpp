@@ -114,7 +114,7 @@ namespace krys::boo::tests
     struct DisplayBox
     {
       utf8_string Text;
-      FloatRect Rect;
+      RectF Rect;
 
       KRYS_NODISCARD friend bool operator==(const DisplayBox &, const DisplayBox &) noexcept = default;
     };
@@ -153,9 +153,9 @@ namespace krys::boo::tests
       return descriptions;
     }
 
-    KRYS_NODISCARD List<FloatRect> LineBoxRects(const inline_display::Lines &lines) noexcept
+    KRYS_NODISCARD List<RectF> LineBoxRects(const inline_display::Lines &lines) noexcept
     {
-      List<FloatRect> rects;
+      List<RectF> rects;
       for (auto &line : lines)
       {
         rects.push_back(line.LineBoxRect());
@@ -223,7 +223,7 @@ namespace krys::boo::tests
       CHECK_FALSE(result.DidDiscardContent);
       REQUIRE(result.DisplayContent.LineList.size() == 1);
       auto &line = result.DisplayContent.LineList[0];
-      CHECK(line.LineBoxRect() == FloatRect {0, 0, 300, 10});
+      CHECK(line.LineBoxRect() == RectF {0, 0, 300, 10});
       CHECK(line.Baseline() == 8.f);
       CHECK(line.ContentLogicalWidth() == 50.f);
       CHECK(line.HasContentfulInFlowBox());
@@ -240,7 +240,7 @@ namespace krys::boo::tests
 
       CHECK(LineTexts(result.DisplayContent) == List<utf8_string> {u8"ab", u8"cd", u8"ef"});
       CHECK(LineBoxRects(result.DisplayContent.LineList)
-            == List<FloatRect> {{0, 0, 35, 10}, {0, 10, 35, 10}, {0, 20, 35, 10}});
+            == List<RectF> {{0, 0, 35, 10}, {0, 10, 35, 10}, {0, 20, 35, 10}});
       CHECK(layout.FormattingContext().GetLayoutState().LineCount() == 3);
     }
 
@@ -297,7 +297,7 @@ namespace krys::boo::tests
       // down.
       REQUIRE(result.DisplayContent.LineList.size() == 1);
       auto &line = result.DisplayContent.LineList[0];
-      CHECK(line.LineBoxRect() == FloatRect {0, 0, 300, 20});
+      CHECK(line.LineBoxRect() == RectF {0, 0, 300, 20});
       CHECK(line.Baseline() == 16.f);
       CHECK(Describe(result.DisplayContent.BoxList)
             == List<DisplayBox> {{u8"<root>", {0, 8, 60, 10}},
@@ -315,7 +315,7 @@ namespace krys::boo::tests
       // The inline-block's baseline is its bottom margin edge: 30px above the baseline and the root inline
       // box's 2px descent below it.
       REQUIRE(result.DisplayContent.LineList.size() == 1);
-      CHECK(result.DisplayContent.LineList[0].LineBoxRect() == FloatRect {0, 0, 300, 32});
+      CHECK(result.DisplayContent.LineList[0].LineBoxRect() == RectF {0, 0, 300, 32});
       CHECK(Describe(result.DisplayContent.BoxList)
             == List<DisplayBox> {
               {u8"<root>", {0, 22, 50, 10}}, {u8"ab", {0, 22, 20, 10}}, {u8"<atomic>", {20, 0, 30, 30}}});

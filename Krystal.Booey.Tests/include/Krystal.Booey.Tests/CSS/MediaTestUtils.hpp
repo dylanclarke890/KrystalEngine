@@ -1,7 +1,7 @@
 ﻿#pragma once
 
 #include "Krystal.Booey/DOM/Nodes/Document.hpp"
-#include "Krystal.Booey/Page/ChromeClient.hpp"
+#include "Krystal.Booey/Page/Clients/ChromeClient.hpp"
 #include "Krystal.Booey/Page/LocalFrame.hpp"
 #include "Krystal.Booey/Page/Page.hpp"
 #include "Krystal.Core/Types/UniquePtr.hpp"
@@ -15,7 +15,7 @@ namespace krys::boo::css::tests
     bool PrimaryHovers {true};
     PointerCharacteristics AllAvailable {PointerCharacteristics::Fine};
     bool AnyHovers {true};
-    FloatSize Screen {1'920, 1'080};
+    SizeF Screen {1'920, 1'080};
     int32 DepthPerComponent {8};
     bool Monochrome {false};
     bool ExtendedColor {false};
@@ -49,7 +49,7 @@ namespace krys::boo::css::tests
       return AnyHovers;
     }
 
-    KRYS_NODISCARD FloatSize ScreenSize() const noexcept override
+    KRYS_NODISCARD SizeF ScreenSize() const noexcept override
     {
       return Screen;
     }

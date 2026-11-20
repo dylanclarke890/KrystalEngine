@@ -5,7 +5,6 @@ target_link_libraries(Krystal.Core
     llvm
 
   PRIVATE
-    stb
     RapidJSON rapidjson
     spdlog::spdlog
     # we don't link RapidXML as a library since it's header-only
@@ -120,6 +119,22 @@ target_sources(Krystal.Core
       include/Krystal.Core/Events/Event.hpp
       include/Krystal.Core/Events/EventManager.hpp
 
+      # Geometry
+      include/Krystal.Core/Geometry/AffineTransform.hpp
+      include/Krystal.Core/Geometry/GeometryForward.hpp
+      include/Krystal.Core/Geometry/GeometryUtilities.hpp
+      include/Krystal.Core/Geometry/Point.hpp
+      include/Krystal.Core/Geometry/Point3.hpp
+      include/Krystal.Core/Geometry/PointGraph.hpp
+      include/Krystal.Core/Geometry/Polygon.hpp
+      include/Krystal.Core/Geometry/Quad.hpp
+      include/Krystal.Core/Geometry/Rect.hpp
+      include/Krystal.Core/Geometry/RectHash.hpp
+      include/Krystal.Core/Geometry/Region.hpp
+      include/Krystal.Core/Geometry/Segment.hpp
+      include/Krystal.Core/Geometry/Size.hpp
+      include/Krystal.Core/Geometry/TransformationMatrix.hpp
+
       # IO
       include/Krystal.Core/IO/Backends/NativeFileBackend.hpp
       include/Krystal.Core/IO/Streams/MemoryStream.hpp
@@ -128,8 +143,6 @@ target_sources(Krystal.Core
       include/Krystal.Core/IO/Streams/StreamUtils.hpp
       include/Krystal.Core/IO/Common.hpp
       include/Krystal.Core/IO/IFileBackend.hpp
-      include/Krystal.Core/IO/Image.hpp
-      include/Krystal.Core/IO/ImageLoader.hpp
       include/Krystal.Core/IO/Path.hpp
       include/Krystal.Core/IO/VirtualFileSystem.hpp
       
@@ -141,6 +154,7 @@ target_sources(Krystal.Core
       include/Krystal.Core/Maths/Clamp.hpp
       include/Krystal.Core/Maths/Clipspace.hpp
       include/Krystal.Core/Maths/Compare.hpp
+      include/Krystal.Core/Maths/CompositeOperation.hpp
       include/Krystal.Core/Maths/Conventions.hpp
       include/Krystal.Core/Maths/Convert.hpp
       include/Krystal.Core/Maths/Easing.hpp
@@ -158,9 +172,11 @@ target_sources(Krystal.Core
       include/Krystal.Core/Maths/Quaternion.hpp
       include/Krystal.Core/Maths/Random.hpp
       include/Krystal.Core/Maths/Round.hpp
+      include/Krystal.Core/Maths/SpringSolver.hpp
       include/Krystal.Core/Maths/Swizzle.hpp
       include/Krystal.Core/Maths/Traits.hpp
       include/Krystal.Core/Maths/Transform.hpp
+      include/Krystal.Core/Maths/UnitBezier.hpp
       include/Krystal.Core/Maths/Vector.hpp
 
       # Serialisation
@@ -180,39 +196,17 @@ target_sources(Krystal.Core
       include/Krystal.Core/Serialisation/Types/Quaternion.hpp
       include/Krystal.Core/Serialisation/Types/Vector.hpp
 
-      # Text
-      include/Krystal.Core/Text/Encodings/All.hpp
-      include/Krystal.Core/Text/Encodings/ASCII.hpp
-      include/Krystal.Core/Text/Encodings/Atari.hpp
-      include/Krystal.Core/Text/Encodings/Base.hpp
-      include/Krystal.Core/Text/Encodings/Big5-HKSCS.hpp
-      include/Krystal.Core/Text/Encodings/Decode.hpp
-      include/Krystal.Core/Text/Encodings/Encode.hpp
-      include/Krystal.Core/Text/Encodings/EncodingId.hpp
-      include/Krystal.Core/Text/Encodings/EUC-KR-UHC.hpp
-      include/Krystal.Core/Text/Encodings/GB18030.hpp
-      include/Krystal.Core/Text/Encodings/IBM.hpp
-      include/Krystal.Core/Text/Encodings/ISO-8859.hpp
-      include/Krystal.Core/Text/Encodings/Kamenicky.hpp
-      include/Krystal.Core/Text/Encodings/KOI8.hpp
-      include/Krystal.Core/Text/Encodings/KZ-1048.hpp
-      include/Krystal.Core/Text/Encodings/Macintosh.hpp
-      include/Krystal.Core/Text/Encodings/PETSCII.hpp
-      include/Krystal.Core/Text/Encodings/ShiftJIS.hpp
-      include/Krystal.Core/Text/Encodings/Tatar.hpp
-      include/Krystal.Core/Text/Encodings/UTF.hpp
-      include/Krystal.Core/Text/Encodings/Windows.hpp
-      include/Krystal.Core/Text/ASCII.hpp
-      include/Krystal.Core/Text/Base64.hpp
-      include/Krystal.Core/Text/CodePointIterator.hpp
-      include/Krystal.Core/Text/EncodingRegistry.hpp
-      include/Krystal.Core/Text/HexNumber.hpp
-      include/Krystal.Core/Text/ICodec.hpp
-      include/Krystal.Core/Text/ParsingUtilities.hpp
-      include/Krystal.Core/Text/StringBuilder.hpp
-      include/Krystal.Core/Text/StringToIntegerConversion.hpp
-      include/Krystal.Core/Text/TextStream.hpp
-      include/Krystal.Core/Text/Unicode.hpp
+      # Strings
+      include/Krystal.Core/Strings/ASCII.hpp
+      include/Krystal.Core/Strings/CodePointIterator.hpp
+      include/Krystal.Core/Strings/HexNumber.hpp
+      include/Krystal.Core/Strings/ParsingUtilities.hpp
+      include/Krystal.Core/Strings/String.hpp
+      include/Krystal.Core/Strings/StringAtom.hpp
+      include/Krystal.Core/Strings/StringBuilder.hpp
+      include/Krystal.Core/Strings/StringToIntegerConversion.hpp
+      include/Krystal.Core/Strings/TextStream.hpp
+      include/Krystal.Core/Strings/Unicode.hpp
 
       # Threading
       include/Krystal.Core/Threading/CancellationToken.hpp
@@ -228,6 +222,8 @@ target_sources(Krystal.Core
       # Time
       include/Krystal.Core/Time/Duration.hpp
       include/Krystal.Core/Time/MonotonicTime.hpp
+      include/Krystal.Core/Time/ThreadTimers.hpp
+      include/Krystal.Core/Time/Timer.hpp
 
       # Types
       include/Krystal.Core/Types/Any.hpp
@@ -240,6 +236,7 @@ target_sources(Krystal.Core
       include/Krystal.Core/Types/BloomFilter.hpp
       include/Krystal.Core/Types/CompactVariant.hpp
       include/Krystal.Core/Types/DataRef.hpp
+      include/Krystal.Core/Types/Decimal.hpp
       include/Krystal.Core/Types/Expected.hpp
       include/Krystal.Core/Types/FixedVector.hpp
       include/Krystal.Core/Types/Func.hpp
@@ -262,11 +259,10 @@ target_sources(Krystal.Core
       include/Krystal.Core/Types/Queue.hpp
       include/Krystal.Core/Types/RefCountedFixedVector.hpp
       include/Krystal.Core/Types/RefPtr.hpp
+      include/Krystal.Core/Types/SharedBuffer.hpp
       include/Krystal.Core/Types/SmallList.hpp
       include/Krystal.Core/Types/Span.hpp
       include/Krystal.Core/Types/Stack.hpp
-      include/Krystal.Core/Types/String.hpp
-      include/Krystal.Core/Types/StringAtom.hpp
       include/Krystal.Core/Types/TaggedPtr.hpp
       include/Krystal.Core/Types/TinyLRUCache.hpp
       include/Krystal.Core/Types/ThreadSafeWeakPtr.hpp
@@ -310,15 +306,31 @@ target_sources(Krystal.Core
     # Events
     src/Events/EventManager.cpp
     
+    # Geometry
+    src/Geometry/AffineTransform.cpp
+    src/Geometry/GeometryUtilities.cpp
+    src/Geometry/Point.cpp
+    src/Geometry/Point3.cpp
+    src/Geometry/PointGraph.cpp
+    src/Geometry/Polygon.cpp
+    src/Geometry/Quad.cpp
+    src/Geometry/Rect.cpp
+    src/Geometry/Region.cpp
+    src/Geometry/Segment.cpp
+    src/Geometry/Size.cpp
+    src/Geometry/TransformationMatrix.cpp
+    
     # IO
     src/IO/Backends/NativeFileBackend.cpp
     src/IO/Streams/NativeFileStream.cpp
-    src/IO/ImageLoader.cpp
     src/IO/Path.cpp
     src/IO/VirtualFileSystem.cpp
     
     # Log
     src/Log/SpdlogLogger.cpp
+    
+    # Maths
+    src/Maths/Easing.cpp
     
     # Threading
     src/Threading/JobSequence.cpp
@@ -328,11 +340,18 @@ target_sources(Krystal.Core
     src/Threading/TaskInbox.cpp
     src/Threading/Thread.cpp
 
+    # Time
+    src/Time/ThreadTimers.cpp
+    src/Time/Timer.cpp
+
+    # Types
+    src/Types/Decimal.cpp
+    src/Types/SharedBuffer.cpp
+
     # Utils
     src/Utils/ScopedProfiler.cpp
 
-    # Text
-    src/Text/StringBuilder.cpp
-    src/Text/Base64.cpp
-    src/Text/TextStream.cpp
+    # Strings
+    src/Strings/StringBuilder.cpp
+    src/Strings/TextStream.cpp
 )

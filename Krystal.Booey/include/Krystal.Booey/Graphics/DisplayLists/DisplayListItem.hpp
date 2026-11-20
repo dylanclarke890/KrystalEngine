@@ -95,7 +95,7 @@ namespace krys::boo::display_list
   class SetLineJoin;
   class SetMiterLimit;
   class SetState;
-  class SetURLForRect;
+  class SetUrlForRect;
   class StrokeEllipse;
   class StrokePath;
   class StrokeRect;
@@ -113,7 +113,7 @@ namespace krys::boo::display_list
             FillRectWithGradientAndSpaceTransform, FillRectWithRoundedHole, FillRoundedRect, ResetClip,
             Restore, Rotate, Save, Scale, SetCTM, SetInlineFillColor, SetInlineStroke, SetLineCap,
             SetLineDash, SetLineJoin, SetMiterLimit, SetState, StrokeEllipse, StrokePath, StrokeRect,
-            Translate, BeginPage, EndPage, SetURLForRect>;
+            Translate, BeginPage, EndPage, SetUrlForRect>;
 
   enum class AsTextFlag : uint8
   {

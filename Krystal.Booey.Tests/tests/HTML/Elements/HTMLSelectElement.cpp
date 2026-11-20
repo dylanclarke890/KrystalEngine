@@ -15,11 +15,11 @@
 #include "Krystal.Booey/HTML/Elements/HTMLOptGroupElement.hpp"
 #include "Krystal.Booey/HTML/Elements/HTMLOptionElement.hpp"
 #include "Krystal.Booey/HTML/EventLoop/EventLoop.hpp"
-#include "Krystal.Booey/Page/EventHandler.hpp"
+#include "Krystal.Booey/Input/EventHandler.hpp"
+#include "Krystal.Booey/Input/LegacyKeyCodes.hpp"
+#include "Krystal.Booey/Input/PlatformKeyboardEvent.hpp"
+#include "Krystal.Booey/Input/PlatformMouseEvent.hpp"
 #include "Krystal.Booey/Page/LocalDOMWindow.hpp"
-#include "Krystal.Booey/Platform/Events/PlatformKeyboardEvent.hpp"
-#include "Krystal.Booey/Platform/Events/PlatformMouseEvent.hpp"
-#include "Krystal.Booey/Platform/Events/WindowsKeyboardCodes.hpp"
 #include "Krystal.Booey/Rendering/FormControls/RenderListBox.hpp"
 #include "Krystal.Booey/Rendering/FormControls/RenderMenuList.hpp"
 #include "Krystal.Booey/Style/StyleAppearance.hpp"
@@ -559,7 +559,7 @@ namespace krys::boo::tests
     {
       (void)fixture.Document->UpdateLayout();
       auto rect = element.Renderer()->AbsoluteBoundingBoxRect();
-      auto position = DoublePoint(rect.X() + rect.Width() / 2.0, rect.Y() + rect.Height() / 2.0);
+      auto position = PointD(rect.X() + rect.Width() / 2.0, rect.Y() + rect.Height() / 2.0);
       auto &handler = fixture.Frame->GetEventHandler();
       auto event = [&](PlatformEvent::Type type)
       {
@@ -721,7 +721,7 @@ namespace krys::boo::tests
       SECTION("clicking outside closes it")
       {
         auto &handler = fixture.Frame->GetEventHandler();
-        auto position = DoublePoint(390, 290);
+        auto position = PointD(390, 290);
         auto event = [&](PlatformEvent::Type type)
         {
           return PlatformMouseEvent(position, position, MouseButton::Left, type, 1, {}, MonotonicTime::Now());

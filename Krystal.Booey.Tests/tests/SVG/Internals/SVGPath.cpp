@@ -102,17 +102,17 @@ namespace krys::boo::svg::tests
     CHECK_FALSE(ParseArcFlag(badFlag));
 
     DOMStringView points = u8"1,2 3 4";
-    CHECK(ParseFloatPoint(points) == FloatPoint(1, 2));
-    CHECK(ParseFloatPoint(points) == FloatPoint(3, 4));
-    CHECK_FALSE(ParseFloatPoint(points));
+    CHECK(ParsePointF(points) == PointF(1, 2));
+    CHECK(ParsePointF(points) == PointF(3, 4));
+    CHECK_FALSE(ParsePointF(points));
 
-    CHECK(ParsePoint(u8"  1, 2  ") == FloatPoint(1, 2));
+    CHECK(ParsePoint(u8"  1, 2  ") == PointF(1, 2));
     CHECK_FALSE(ParsePoint(u8""));
     CHECK_FALSE(ParsePoint(u8"   "));
     CHECK_FALSE(ParsePoint(u8"1"));
 
-    CHECK(ParseRect(u8" 1 2 3 4") == FloatRect(1, 2, 3, 4));
-    CHECK(ParseRect(u8"1,2,3,4") == FloatRect(1, 2, 3, 4));
+    CHECK(ParseRect(u8" 1 2 3 4") == RectF(1, 2, 3, 4));
+    CHECK(ParseRect(u8"1,2,3,4") == RectF(1, 2, 3, 4));
     CHECK_FALSE(ParseRect(u8"1 2 3"));
 
     CHECK(ParseNumberOptionalNumber(u8"5") == std::make_pair(5.0f, 5.0f));
@@ -288,7 +288,7 @@ namespace krys::boo::svg::tests
     CHECK_FALSE(copy.CachedPath());
     CHECK(original.CachedPath());
     CHECK(original == SVGPathByteStream(u8"M 1 2 L 3 4"));
-    CHECK(BuildPathFromByteStream(copy).BoundingRect() == FloatRect(1, 2, 4, 4));
+    CHECK(BuildPathFromByteStream(copy).BoundingRect() == RectF(1, 2, 4, 4));
 
     // A stream can be appended to itself.
     SVGPathByteStream doubled(u8"M 1 2");
@@ -309,9 +309,9 @@ namespace krys::boo::svg::tests
     {
       auto path = BuildPathFromString(u8"M 0 0 L 10 0 L 10 10 Z");
       CHECK(path.IsClosed());
-      CHECK(path.BoundingRect() == FloatRect {0, 0, 10, 10});
+      CHECK(path.BoundingRect() == RectF {0, 0, 10, 10});
       CHECK(BuildPathFromByteStream(SVGPathByteStream(u8"M 0 0 h 30 v 40")).BoundingRect()
-            == FloatRect {0, 0, 30, 40});
+            == RectF {0, 0, 30, 40});
       CHECK(BuildPathFromString(u8"").IsEmpty());
     }
 

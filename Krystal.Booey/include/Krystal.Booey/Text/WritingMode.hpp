@@ -32,6 +32,7 @@
 #pragma once
 
 #include "Krystal.Core/Enum.hpp"
+#include "Krystal.Text/TextDirection.hpp"
 
 namespace krys::boo
 {
@@ -65,12 +66,6 @@ namespace krys::boo
     VerticalLr = static_cast<uint8>(WritingModeFlags::IsVerticalText | WritingModeFlags::IsVerticalType),
     VerticalRl = static_cast<uint8>(WritingModeFlags::IsVerticalText | WritingModeFlags::IsVerticalType
                                     | WritingModeFlags::IsFlippedBlock),
-  };
-
-  enum class TextDirection : bool
-  {
-    LTR = false,
-    RTL = true,
   };
 
   enum class TextOrientation : uint8
@@ -113,10 +108,11 @@ namespace krys::boo
     Data _bits {0u};
 
   public:
-    constexpr WritingMode(StyleWritingMode writingMode, TextDirection bidiDirection,
+    constexpr WritingMode(StyleWritingMode writingMode, text::TextDirection bidiDirection,
                           TextOrientation verticalOrientation) noexcept
         : _bits(static_cast<Data>(writingMode)
-                | (bidiDirection == TextDirection::RTL ? WritingModeFlags::IsBidiRTL : WritingModeFlags::None)
+                | (bidiDirection == text::TextDirection::RTL ? WritingModeFlags::IsBidiRTL
+                                                             : WritingModeFlags::None)
                 | (static_cast<Data>(verticalOrientation)
                    << static_cast<Data>(WritingModeFlags::OrientationShift)))
     {
@@ -146,9 +142,9 @@ namespace krys::boo
                << static_cast<Data>(WritingModeFlags::OrientationShift);
     }
 
-    constexpr void SetTextDirection(TextDirection bidiDirection) noexcept
+    constexpr void SetTextDirection(text::TextDirection bidiDirection) noexcept
     {
-      if (bidiDirection == TextDirection::RTL)
+      if (bidiDirection == text::TextDirection::RTL)
       {
         _bits |= WritingModeFlags::IsBidiRTL;
       }
@@ -361,7 +357,7 @@ namespace krys::boo
       return static_cast<FlowDirection>(_bits & WritingModeFlags::BlockFlowMask);
     }
 
-    KRYS_NODISCARD constexpr TextDirection BidiDirection() const noexcept
+    KRYS_NODISCARD constexpr text::TextDirection BidiDirection() const noexcept
     {
       return ComputedTextDirection();
     }
@@ -397,9 +393,9 @@ namespace krys::boo
       return static_cast<StyleWritingMode>(_bits & WritingModeFlags::WritingModeMask);
     }
 
-    KRYS_NODISCARD constexpr TextDirection ComputedTextDirection() const noexcept
+    KRYS_NODISCARD constexpr text::TextDirection ComputedTextDirection() const noexcept
     {
-      return static_cast<TextDirection>(IsBidiRTL());
+      return static_cast<text::TextDirection>(IsBidiRTL());
     }
 
     KRYS_NODISCARD constexpr TextOrientation ComputedTextOrientation() const noexcept

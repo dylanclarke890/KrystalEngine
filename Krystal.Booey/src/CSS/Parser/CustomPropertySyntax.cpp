@@ -29,7 +29,7 @@
 #include "Krystal.Booey/CSS/Parser/Tokenizer.hpp"
 #include "Krystal.Booey/CSS/Parser/TokenRange.hpp"
 #include "Krystal.Booey/CSS/Properties/Consumers/Primitives.hpp"
-#include "Krystal.Core/Text/StringBuilder.hpp"
+#include "Krystal.Core/Strings/StringBuilder.hpp"
 
 namespace krys::boo::css
 {
@@ -72,7 +72,7 @@ namespace krys::boo::css
       {u8"time", CustomPropertySyntax::Type::Time},
       {u8"transform-function", CustomPropertySyntax::Type::TransformFunction},
       {u8"transform-list", CustomPropertySyntax::Type::TransformList},
-      {u8"url", CustomPropertySyntax::Type::URL},
+      {u8"url", CustomPropertySyntax::Type::Url},
     };
 
     /// @brief The part of `begin` that has been consumed to reach `buffer`.

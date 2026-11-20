@@ -7,7 +7,7 @@
 #include "Krystal.Booey/HTML/Elements/HTMLFormElement.hpp"
 #include "Krystal.Booey/HTML/Elements/HTMLInputElement.hpp"
 #include "Krystal.Booey/HTML/Forms/DOMFormData.hpp"
-#include "Krystal.Booey/Page/ChromeClient.hpp"
+#include "Krystal.Booey/Page/Clients/ChromeClient.hpp"
 #include "Krystal.Booey/Page/LocalDOMWindow.hpp"
 #include "Krystal.Booey/Platform/Choosers/FileChooser.hpp"
 
@@ -199,7 +199,7 @@ namespace krys::boo::html::tests
       REQUIRE(client->Choosers.size() == 1);
       auto &settings = client->Choosers[0]->Settings();
       CHECK(settings.AllowsMultipleFiles);
-      CHECK(settings.AcceptMIMETypes == List<utf8_string> {u8"image/*", u8"text/plain"});
+      CHECK(settings.AcceptMimeTypes == List<utf8_string> {u8"image/*", u8"text/plain"});
       CHECK(settings.AcceptFileExtensions == List<utf8_string> {u8".pdf"});
       CHECK(settings.SelectedFiles.empty());
 

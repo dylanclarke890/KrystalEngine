@@ -18,41 +18,40 @@
  */
 
 #include "Krystal.Booey/SVG/Graphics/SVGImageForContainer.hpp"
-#include "Krystal.Booey/Graphics/Geometry/IntSize.hpp"
 #include "Krystal.Booey/Graphics/Images/NativeImage.hpp"
+#include "Krystal.Core/Geometry/Size.hpp"
 #include "Krystal.Core/Utils/Move.hpp"
 
 namespace krys::boo
 {
-  SVGImageForContainer::SVGImageForContainer(SVGImage *image, const FloatSize &containerSize,
-                                             float containerZoom, url::URL initialFragmentURL) noexcept
+  SVGImageForContainer::SVGImageForContainer(SVGImage *image, const SizeF &containerSize, float containerZoom,
+                                             net::Url initialFragmentUrl) noexcept
       : _image(CreateWeakPtr(image)), _containerSize(containerSize), _containerZoom(containerZoom),
-        _initialFragmentURL(krys::move(initialFragmentURL))
+        _initialFragmentUrl(krys::move(initialFragmentUrl))
   {
   }
 
-  FloatSize SVGImageForContainer::Size(ImageOrientation) const noexcept
+  SizeF SVGImageForContainer::Size(img::ImageOrientation) const noexcept
   {
-    FloatSize scaledContainerSize(_containerSize);
+    SizeF scaledContainerSize(_containerSize);
     scaledContainerSize.Scale(_containerZoom);
-    return FloatSize(RoundedIntSize(scaledContainerSize));
+    return SizeF(RoundedSizeI(scaledContainerSize));
   }
 
-  ImageDrawResult SVGImageForContainer::Draw(GraphicsContext &context, const FloatRect &dstRect,
-                                             const FloatRect &srcRect, ImagePaintingOptions options) noexcept
+  ImageDrawResult SVGImageForContainer::Draw(GraphicsContext &context, const RectF &dstRect,
+                                             const RectF &srcRect, ImagePaintingOptions options) noexcept
   {
     RefPtr<SVGImage> image = ShareRefPtr(_image.get());
-    return image->DrawForContainer(context, _containerSize, _containerZoom, _initialFragmentURL, dstRect,
+    return image->DrawForContainer(context, _containerSize, _containerZoom, _initialFragmentUrl, dstRect,
                                    srcRect, options);
   }
 
-  void SVGImageForContainer::DrawPattern(GraphicsContext &context, const FloatRect &dstRect,
-                                         const FloatRect &srcRect, const AffineTransform &patternTransform,
-                                         const FloatPoint &phase, const FloatSize &spacing,
-                                         ImagePaintingOptions options) noexcept
+  void SVGImageForContainer::DrawPattern(GraphicsContext &context, const RectF &dstRect, const RectF &srcRect,
+                                         const AffineTransform &patternTransform, const PointF &phase,
+                                         const SizeF &spacing, ImagePaintingOptions options) noexcept
   {
     RefPtr<SVGImage> image = ShareRefPtr(_image.get());
-    image->DrawPatternForContainer(context, _containerSize, _containerZoom, _initialFragmentURL, srcRect,
+    image->DrawPatternForContainer(context, _containerSize, _containerZoom, _initialFragmentUrl, srcRect,
                                    patternTransform, phase, spacing, dstRect, options);
   }
 

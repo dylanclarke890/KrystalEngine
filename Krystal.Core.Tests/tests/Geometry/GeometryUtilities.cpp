@@ -1,0 +1,141 @@
+﻿#include "Krystal.Core/Geometry/GeometryUtilities.hpp"
+#include "catch2/catch_test_macros.hpp"
+#include "catch2/matchers/catch_matchers_floating_point.hpp"
+#include "Krystal.Core/Geometry/Quad.hpp"
+#include <numbers>
+
+namespace krys::tests
+{
+  using Catch::Matchers::WithinAbs;
+
+  TEST_CASE("GeometryUtilities: distances and intersections", "[Geometry][GeometryUtilities]")
+  {
+    CHECK(EuclidianDistance(SizeF(3, 4)) == 5);
+    CHECK(EuclidianDistance(PointF(1, 1), PointF(4, 5)) == 5);
+    CHECK(MidPoint(PointF(0, 0), PointF(4, -2)) == PointF(2, -1));
+
+    PointF intersection;
+    REQUIRE(FindIntersection(PointF(0, 0), PointF(10, 10), PointF(0, 10), PointF(10, 0), intersection));
+    CHECK(intersection == PointF(5, 5));
+    // Parallel lines don't intersect, and the out parameter is untouched.
+    CHECK_FALSE(FindIntersection(PointF(0, 0), PointF(10, 0), PointF(0, 1), PointF(10, 1), intersection));
+    CHECK(intersection == PointF(5, 5));
+
+    CHECK(DistanceToClosestSide(PointF(2, 5), SizeF(10, 20)) == 2);
+    CHECK(DistanceToFarthestSide(PointF(2, 5), SizeF(10, 20)) == 15);
+    CHECK(DistanceToClosestCorner(PointF(3, 4), SizeF(100, 100)) == 5);
+    CHECK_THAT(DistanceToFarthestCorner(PointF(0, 0), SizeF(3, 4)), WithinAbs(5, 1e-6));
+
+    auto vertices = VerticesForBox(RectF(0, 0, 10, 20), PointF(2, 5));
+    CHECK(vertices[0] == PointF(-2, -5));
+    CHECK(vertices[2] == PointF(8, 15));
+
+    CHECK(EllipseContainsPoint(PointF(10, 10), SizeF(4, 2), PointF(13, 10)));
+    CHECK(EllipseContainsPoint(PointF(10, 10), SizeF(4, 2), PointF(10, 12)));
+    CHECK_FALSE(EllipseContainsPoint(PointF(10, 10), SizeF(4, 2), PointF(13, 11.5f)));
+    CHECK_FALSE(EllipseContainsPoint(PointF(10, 10), SizeF(0, 2), PointF(10, 10)));
+  }
+
+  TEST_CASE("GeometryUtilities: rect helpers", "[Geometry][GeometryUtilities]")
+  {
+    RectI intRects[] = {RectI(0, 0, 10, 10), RectI(0, 0, 0, 5), RectI(20, 20, 5, 5)};
+    CHECK(UnionRect(Span<const RectI>(intRects)) == RectI(0, 0, 25, 25));
+    CHECK(UnionRectIgnoringZeroRects(Span<const RectI>(intRects)) == RectI(0, 0, 25, 25));
+    RectI withEmpty[] = {RectI(10, 10, 10, 10), RectI(0, 0, 0, 5)};
+    CHECK(UnionRect(Span<const RectI>(withEmpty)) == RectI(10, 10, 10, 10));
+    CHECK(UnionRectIgnoringZeroRects(Span<const RectI>(withEmpty)) == RectI(0, 0, 20, 20));
+
+    RectF floatRects[] = {RectF(10, 10, 10, 10), RectF(0, 0, 0, 5)};
+    CHECK(UnionRect(Span<const RectF>(floatRects)) == RectF(10, 10, 10, 10));
+    CHECK(UnionRectIgnoringZeroRects(Span<const RectF>(floatRects)) == RectF(0, 0, 20, 20));
+
+    RectF src(0, 0, 10, 20);
+    RectF dest(100, 100, 20, 10);
+    CHECK(MapPoint(PointF(5, 10), src, dest) == PointF(110, 105));
+    CHECK(MapPoint(PointF(5, 10), RectF(), dest) == PointF(5, 10));
+    CHECK(MapRect(RectF(0, 10, 10, 10), src, dest) == RectF(100, 105, 20, 5));
+    CHECK(MapRect(RectF(0, 10, 10, 10), RectF(), dest) == RectF());
+
+    CHECK(LargestRectWithAspectRatioInsideRect(2, RectF(0, 0, 100, 100)) == RectF(0, 25, 100, 50));
+    CHECK(LargestRectWithAspectRatioInsideRect(0.5f, RectF(0, 0, 100, 100)) == RectF(25, 0, 50, 100));
+    CHECK(SmallestRectWithAspectRatioAroundRect(2, RectF(0, 0, 100, 100)) == RectF(-50, 0, 200, 100));
+    CHECK(SmallestRectWithAspectRatioAroundRect(0.5f, RectF(0, 0, 100, 100)) == RectF(0, -50, 100, 200));
+    CHECK(SizeWithAreaAndAspectRatio(200, 2) == SizeF(20, 10));
+
+    CHECK(BoundsOfRotatingRect(RectF(3, 4, 0, 0)) == RectF(-5, -5, 10, 10));
+    CHECK(ScaledRectAtOrigin(RectF(10, 10, 10, 10), 2, PointF(5, 5)) == RectF(15, 15, 20, 20));
+  }
+
+  TEST_CASE("GeometryUtilities: angles and rays", "[Geometry][GeometryUtilities]")
+  {
+    CHECK(ToPositiveAngle(-90) == 270);
+    CHECK(ToPositiveAngle(450) == 90);
+    CHECK(ToRelatedAcuteAngle(45) == 45);
+    CHECK(ToRelatedAcuteAngle(135) == 45);
+    CHECK(ToRelatedAcuteAngle(-45) == 135); // webkit.org/b/298890: angles over 270 aren't handled.
+    CHECK_THAT(NormaliseAngleInRadians(-std::numbers::pi_v<float> / 2),
+               WithinAbs(3 * std::numbers::pi_v<float> / 2, 1e-5));
+    CHECK_THAT(NormaliseAngleInRadians(5 * std::numbers::pi_v<float>),
+               WithinAbs(std::numbers::pi_v<float>, 1e-5));
+  }
+
+  TEST_CASE("GeometryUtilities: min and max", "[Geometry][GeometryUtilities]")
+  {
+    STATIC_CHECK(Min3(3, 1, 2) == 1);
+    STATIC_CHECK(Max3(3, 1, 2) == 3);
+    STATIC_CHECK(Min4(3, 1, 2, 0) == 0);
+    STATIC_CHECK(Max4(3, 1, 4, 0) == 4);
+  }
+
+  static void ExpectRotatedRect(const PointF &center, const SizeF &size, float angle, const RotatedRect &info)
+  {
+    CHECK_THAT(info.AngleInRadians, WithinAbs(angle, 0.001));
+    CHECK_THAT(info.Center.X(), WithinAbs(center.X(), 0.001));
+    CHECK_THAT(info.Center.Y(), WithinAbs(center.Y(), 0.001));
+    CHECK_THAT(info.Size.Width(), WithinAbs(size.Width(), 0.001));
+    CHECK_THAT(info.Size.Height(), WithinAbs(size.Height(), 0.001));
+  }
+
+  TEST_CASE("GeometryUtilities: RotatedBoundingRectForPoint", "[Geometry][GeometryUtilities]")
+  {
+    ExpectRotatedRect({1, -5}, {0, 0}, 0,
+                      RotatedBoundingRectWithMinimumAngleOfRotation(
+                        {PointF(1, -5), PointF(1, -5), PointF(1, -5), PointF(1, -5)}));
+  }
+
+  TEST_CASE("GeometryUtilities: RotatedBoundingRectForLineSegment", "[Geometry][GeometryUtilities]")
+  {
+    ExpectRotatedRect({0, -5}, {20, 0}, 0,
+                      RotatedBoundingRectWithMinimumAngleOfRotation(
+                        {PointF(-10, -5), PointF(10, -5), PointF(10, -5), PointF(-10, -5)}));
+  }
+
+  TEST_CASE("GeometryUtilities: RotatedBoundingRectForTriangle", "[Geometry][GeometryUtilities]")
+  {
+    ExpectRotatedRect({10, 0}, {40, 20}, 0,
+                      RotatedBoundingRectWithMinimumAngleOfRotation(
+                        {PointF(-10, -10), PointF(30, 0), PointF(30, 0), PointF(-10, 10)}));
+  }
+
+  TEST_CASE("GeometryUtilities: RotatedBoundingRectForTrapezoid", "[Geometry][GeometryUtilities]")
+  {
+    ExpectRotatedRect({25, 15}, {28.284f, 14.142f}, 5.498f,
+                      RotatedBoundingRectWithMinimumAngleOfRotation(
+                        {PointF(10, 20), PointF(20, 10), PointF(40, 10), PointF(20, 30)}));
+
+    ExpectRotatedRect({20, 25}, {26.833f, 13.416f}, 1.107f,
+                      RotatedBoundingRectWithMinimumAngleOfRotation(
+                        {PointF(20, 10), PointF(30, 30), PointF(20, 40), PointF(10, 20)}));
+  }
+
+  TEST_CASE("GeometryUtilities: RotatedBoundingRectWithMinimumAngle", "[Geometry][GeometryUtilities]")
+  {
+    ExpectRotatedRect({20, -14.95f}, {20, 10.1f}, 0,
+                      RotatedBoundingRectWithMinimumAngleOfRotation(
+                        {PointF(10, -20), PointF(30, -19.9f), PointF(30, -9.9f), PointF(10, -10)}, 0.01f));
+
+    ExpectRotatedRect({20, -15.05f}, {20, 10.1f}, 0,
+                      RotatedBoundingRectWithMinimumAngleOfRotation(
+                        {PointF(10, -20), PointF(30, -20.1f), PointF(30, -10.1f), PointF(10, -10)}, 0.01f));
+  }
+}

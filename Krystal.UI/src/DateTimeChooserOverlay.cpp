@@ -4,8 +4,8 @@
 #include "Krystal.Booey/DOM/Nodes/Element.hpp"
 #include "Krystal.Booey/Platform/Choosers/DateTimeChooserClient.hpp"
 #include "Krystal.Booey/Platform/DateComponents.hpp"
-#include "Krystal.Booey/Platform/Locale/PlatformLocale.hpp"
 #include "Krystal.Booey/Rendering/RenderBox.hpp"
+#include "Krystal.I18n/Locale.hpp"
 #include "Krystal.UI/View.hpp"
 #include <algorithm>
 #include <charconv>
@@ -289,7 +289,7 @@ namespace krys::ui
   {
     krys_debug_assert(_owner);
 
-    auto locale = boo::Locale::Create(_parameters.Locale);
+    auto locale = i18n::Locale::Create(_parameters.Locale);
 
     // A right-to-left input's picker is mirrored: the week runs from the right, and the button for the
     // previous page is on the right (its arrow, a mirrored character, points right).
@@ -405,7 +405,10 @@ namespace krys::ui
         {
           month = *date;
         }
-        AppendEscaped(html, locale->FormatDateTime(month));
+        if (auto fields = month.ToDateTimeFields())
+        {
+          AppendEscaped(html, locale->FormatDateTime(*fields));
+        }
         html += nextButton;
         html += u8"<tr>";
 
@@ -482,12 +485,12 @@ namespace krys::ui
       }
     }
 
-    boo::IntSize contentSize(1, 1);
+    SizeI contentSize(1, 1);
     if (auto *root = _view->Document().DocumentElement().get())
     {
       if (auto *box = DynamicDowncast<boo::RenderBox>(root->Renderer()))
       {
-        contentSize = boo::IntSize(box->Width().ToInt(), box->Height().ToInt());
+        contentSize = SizeI(box->Width().ToInt(), box->Height().ToInt());
       }
     }
     _rect = Place(_parameters.AnchorRectInRootView, contentSize, viewport, rightToLeft);
@@ -582,7 +585,7 @@ namespace krys::ui
     }
   }
 
-  void DateTimeChooserOverlay::MouseMoved(const boo::IntPoint &point) noexcept
+  void DateTimeChooserOverlay::MouseMoved(const PointI &point) noexcept
   {
     if (!_view)
     {
@@ -599,7 +602,7 @@ namespace krys::ui
     }
   }
 
-  void DateTimeChooserOverlay::MouseReleased(const boo::IntPoint &point) noexcept
+  void DateTimeChooserOverlay::MouseReleased(const PointI &point) noexcept
   {
     if (!_view)
     {
@@ -622,7 +625,7 @@ namespace krys::ui
     }
   }
 
-  bool DateTimeChooserOverlay::MouseWheel(const boo::IntPoint &, float, float notchesY) noexcept
+  bool DateTimeChooserOverlay::MouseWheel(const PointI &, float, float notchesY) noexcept
   {
     // The wheel turns the page.
     if (notchesY)

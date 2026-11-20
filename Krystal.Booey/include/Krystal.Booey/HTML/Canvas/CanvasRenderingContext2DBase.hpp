@@ -32,11 +32,7 @@
 #include "Krystal.Booey/Graphics/Fonts/FontCascade.hpp"
 #include "Krystal.Booey/Graphics/Fonts/FontSelector.hpp"
 #include "Krystal.Booey/Graphics/Geometry/BoxExtents.hpp"
-#include "Krystal.Booey/Graphics/Geometry/FloatRect.hpp"
-#include "Krystal.Booey/Graphics/Geometry/FloatSize.hpp"
 #include "Krystal.Booey/Graphics/GraphicsTypes.hpp"
-#include "Krystal.Booey/Graphics/Images/ImageOrientation.hpp"
-#include "Krystal.Booey/Graphics/Transforms/AffineTransform.hpp"
 #include "Krystal.Booey/HTML/Canvas/CanvasDirection.hpp"
 #include "Krystal.Booey/HTML/Canvas/CanvasFillRule.hpp"
 #include "Krystal.Booey/HTML/Canvas/CanvasFontKerning.hpp"
@@ -54,12 +50,16 @@
 #include "Krystal.Booey/HTML/Canvas/CanvasTextRendering.hpp"
 #include "Krystal.Booey/HTML/Canvas/ImageSmoothingQuality.hpp"
 #include "Krystal.Booey/HTML/ImageData/ImageDataSettings.hpp"
-#include "Krystal.Booey/Platform/Timer.hpp"
 #include "Krystal.Booey/Style/Values/FilterEffects/Filter.hpp"
+#include "Krystal.Core/Geometry/AffineTransform.hpp"
+#include "Krystal.Core/Geometry/Rect.hpp"
+#include "Krystal.Core/Geometry/Size.hpp"
+#include "Krystal.Core/Time/Timer.hpp"
 #include "Krystal.Core/Types/EnumSet.hpp"
 #include "Krystal.Core/Types/List.hpp"
 #include "Krystal.Core/Types/SmallList.hpp"
 #include "Krystal.Core/Types/UniquePtr.hpp"
+#include "Krystal.Image/ImageOrientation.hpp"
 
 namespace krys::boo
 {
@@ -71,8 +71,6 @@ namespace krys::boo
   class HTMLCanvasElement;
   class HTMLImageElement;
   class ImageBuffer;
-  class IntPoint;
-  class IntRect;
   class Path;
   class RenderElement;
   class RenderObject;
@@ -146,7 +144,7 @@ namespace krys::boo::html
 
       KRYS_NODISCARD float Width(const TextRun &, GlyphOverflow * = nullptr) const noexcept;
 
-      void DrawBidiText(GraphicsContext &, const TextRun &, const FloatPoint &,
+      void DrawBidiText(GraphicsContext &, const TextRun &, const PointF &,
                         FontCascade::CustomFontNotReadyAction) const noexcept;
 
       KRYS_NODISCARD bool IsPopulated() const noexcept
@@ -197,7 +195,7 @@ namespace krys::boo::html
       boo::LineCap LineCap {boo::LineCap::Butt};
       boo::LineJoin LineJoin {boo::LineJoin::Miter};
       double MiterLimit {10};
-      FloatSize ShadowOffset;
+      SizeF ShadowOffset;
       float ShadowBlur {0};
       Color ShadowColor;
       double GlobalAlpha {1};
@@ -277,7 +275,7 @@ namespace krys::boo::html
     };
 
     SmallList<State, 1> _stateStack;
-    FloatRect _dirtyRect;
+    RectF _dirtyRect;
     uint32 _unrealizedSaveCount {0};
     bool _usesCSSCompatibilityParseMode;
     bool _hasDeferredOperations {false};
@@ -710,10 +708,10 @@ namespace krys::boo::html
     }
 
     /// @brief The filter that applies the state's filter to what's drawn within @p bounds; null if none can.
-    KRYS_NODISCARD virtual RefPtr<boo::Filter> CreateFilter(const FloatRect &) const noexcept;
+    KRYS_NODISCARD virtual RefPtr<boo::Filter> CreateFilter(const RectF &) const noexcept;
 
     /// @brief How far the state's filter reaches outside @p bounds.
-    KRYS_NODISCARD virtual IntOutsets CalculateFilterOutsets(const FloatRect &) const noexcept
+    KRYS_NODISCARD virtual IntOutsets CalculateFilterOutsets(const RectF &) const noexcept
     {
       return {};
     }
@@ -731,12 +729,11 @@ namespace krys::boo::html
       return {DidDrawOption::ApplyTransform, DidDrawOption::ApplyShadow, DidDrawOption::ApplyClip};
     }
 
-    void DidDraw(Maybe<FloatRect>, EnumSet<DidDrawOption> = DefaultDidDrawOptions()) noexcept;
+    void DidDraw(Maybe<RectF>, EnumSet<DidDrawOption> = DefaultDidDrawOptions()) noexcept;
 
     void DidDrawEntireCanvas(EnumSet<DidDrawOption> options = DefaultDidDrawOptions()) noexcept;
 
-    void DidDraw(bool entireCanvas, const FloatRect &,
-                 EnumSet<DidDrawOption> = DefaultDidDrawOptions()) noexcept;
+    void DidDraw(bool entireCanvas, const RectF &, EnumSet<DidDrawOption> = DefaultDidDrawOptions()) noexcept;
 
     template <typename TRectProvider>
     void DidDraw(bool entireCanvas, const TRectProvider &,
@@ -779,14 +776,14 @@ namespace krys::boo::html
     }
 
   private:
-    KRYS_NODISCARD FloatPoint TextOffset(float width, TextDirection) noexcept;
+    KRYS_NODISCARD PointF TextOffset(float width, text::TextDirection) noexcept;
 
     /// @brief Resolves the font again with the text drawing styles, if one is set.
     void UpdateFontForTextDrawingStyles() noexcept;
 
     void ApplyLineDash() const noexcept;
 
-    void SetShadow(const FloatSize &offset, float blur, const Color &) noexcept;
+    void SetShadow(const SizeF &offset, float blur, const Color &) noexcept;
 
     void ApplyShadow() noexcept;
 
@@ -794,9 +791,9 @@ namespace krys::boo::html
 
     KRYS_NODISCARD bool IsEntireBackingStoreDirty() const noexcept;
 
-    KRYS_NODISCARD FloatRect BackingStoreBounds() const noexcept
+    KRYS_NODISCARD RectF BackingStoreBounds() const noexcept
     {
-      return FloatRect {{}, FloatSize {GetCanvasBase().Size()}};
+      return RectF {{}, SizeF {GetCanvasBase().Size()}};
     }
 
     void UnwindStateStack() noexcept;
@@ -821,19 +818,18 @@ namespace krys::boo::html
 
     KRYS_NODISCARD bool IsPointInStrokeInternal(const Path &, double x, double y) noexcept;
 
-    KRYS_NODISCARD bool RectContainsCanvas(const FloatRect &) const noexcept;
+    KRYS_NODISCARD bool RectContainsCanvas(const RectF &) const noexcept;
 
     KRYS_NODISCARD Path TransformAreaToDevice(const Path &) const noexcept;
 
-    KRYS_NODISCARD Path TransformAreaToDevice(const FloatRect &) const noexcept;
+    KRYS_NODISCARD Path TransformAreaToDevice(const RectF &) const noexcept;
 
-    KRYS_NODISCARD IntRect CalculateCompositingBufferRect(const FloatRect &area,
-                                                          IntSize *croppedOffset) noexcept;
+    KRYS_NODISCARD RectI CalculateCompositingBufferRect(const RectF &area, SizeI *croppedOffset) noexcept;
 
-    void CompositeBuffer(ImageBuffer &, const IntRect &bufferRect, CompositeOperator) noexcept;
+    void CompositeBuffer(ImageBuffer &, const RectI &bufferRect, CompositeOperator) noexcept;
 
     template <typename T>
-    void FullCanvasCompositedDrawImage(T &image, const FloatRect &dest, const FloatRect &src,
+    void FullCanvasCompositedDrawImage(T &image, const RectF &dest, const RectF &src,
                                        CompositeOperator) noexcept;
 
     KRYS_NODISCARD static ExceptionOr<RefPtr<CanvasPattern>>
@@ -848,37 +844,34 @@ namespace krys::boo::html
     KRYS_NODISCARD static ExceptionOr<RefPtr<CanvasPattern>> CreatePattern(CanvasBase &, bool repeatX,
                                                                            bool repeatY) noexcept;
 
-    ExceptionOr<void> DrawImage(HTMLImageElement &, const FloatRect &srcRect,
-                                const FloatRect &dstRect) noexcept;
+    ExceptionOr<void> DrawImage(HTMLImageElement &, const RectF &srcRect, const RectF &dstRect) noexcept;
 
-    ExceptionOr<void> DrawImage(HTMLImageElement &, const FloatRect &srcRect, const FloatRect &dstRect,
+    ExceptionOr<void> DrawImage(HTMLImageElement &, const RectF &srcRect, const RectF &dstRect,
                                 const CompositeOperator &, const BlendMode &) noexcept;
 
-    ExceptionOr<void> DrawImage(SVGImageElement &, const FloatRect &srcRect,
-                                const FloatRect &dstRect) noexcept;
+    ExceptionOr<void> DrawImage(SVGImageElement &, const RectF &srcRect, const RectF &dstRect) noexcept;
 
-    ExceptionOr<void> DrawImage(SVGImageElement &, const FloatRect &srcRect, const FloatRect &dstRect,
+    ExceptionOr<void> DrawImage(SVGImageElement &, const RectF &srcRect, const RectF &dstRect,
                                 const CompositeOperator &, const BlendMode &) noexcept;
 
-    ExceptionOr<void> DrawImage(CanvasBase &, const FloatRect &srcRect, const FloatRect &dstRect) noexcept;
+    ExceptionOr<void> DrawImage(CanvasBase &, const RectF &srcRect, const RectF &dstRect) noexcept;
 
-    ExceptionOr<void> DrawImage(Document &, CachedImage &, const RenderObject *, const FloatRect &imageRect,
-                                const FloatRect &srcRect, const FloatRect &dstRect, const CompositeOperator &,
-                                const BlendMode &,
-                                ImageOrientation = ImageOrientation::Orientation::FromImage) noexcept;
+    ExceptionOr<void>
+      DrawImage(Document &, CachedImage &, const RenderObject *, const RectF &imageRect, const RectF &srcRect,
+                const RectF &dstRect, const CompositeOperator &, const BlendMode &,
+                img::ImageOrientation = img::ImageOrientation::Orientation::FromImage) noexcept;
 
     /// @brief Keeps @p imageData's pixels, premultiplied, when they're put over the whole canvas, so that
     /// reading them back soon after needn't read the buffer; null if they aren't.
-    RefPtr<ByteArrayPixelBuffer> CacheImageDataIfPossible(const ImageData &imageData,
-                                                          const IntRect &sourceRect,
-                                                          const IntPoint &destinationPosition) noexcept;
+    RefPtr<ByteArrayPixelBuffer> CacheImageDataIfPossible(const ImageData &imageData, const RectI &sourceRect,
+                                                          const PointI &destinationPosition) noexcept;
 
-    KRYS_NODISCARD RefPtr<ImageData> MakeImageDataIfContentsCached(const IntRect &sourceRect,
+    KRYS_NODISCARD RefPtr<ImageData> MakeImageDataIfContentsCached(const RectI &sourceRect,
                                                                    PredefinedColorSpace) const noexcept;
 
     void EvictCachedImageData() noexcept;
 
-    KRYS_NODISCARD FloatRect InflatedStrokeRect(const FloatRect &) const noexcept;
+    KRYS_NODISCARD RectF InflatedStrokeRect(const RectF &) const noexcept;
   };
 }
 

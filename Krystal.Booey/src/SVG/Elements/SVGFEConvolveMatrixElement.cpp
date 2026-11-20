@@ -19,11 +19,11 @@
  */
 
 #include "Krystal.Booey/SVG/Elements/SVGFEConvolveMatrixElement.hpp"
-#include "Krystal.Booey/Graphics/Geometry/IntRect.hpp"
 #include "Krystal.Booey/SVG/Internals/SVGParserUtilities.hpp"
 #include "Krystal.Booey/SVG/Properties/SVGPropertyOwnerRegistry.hpp"
 #include "Krystal.Booey/SVG/SVGNames.hpp"
-#include "Krystal.Core/Text/StringToIntegerConversion.hpp"
+#include "Krystal.Core/Geometry/Rect.hpp"
+#include "Krystal.Core/Strings/StringToIntegerConversion.hpp"
 #include <cmath>
 
 namespace krys::boo
@@ -167,11 +167,11 @@ namespace krys::boo
     }
     if (attributeName == SVGNames::TargetXAttr() || attributeName == SVGNames::TargetYAttr())
     {
-      return effect.SetTargetOffset(IntPoint(TargetX(), TargetY()));
+      return effect.SetTargetOffset(PointI(TargetX(), TargetY()));
     }
     if (attributeName == SVGNames::KernelUnitLengthAttr())
     {
-      return effect.SetKernelUnitLength(FloatPoint(KernelUnitLengthX(), KernelUnitLengthY()));
+      return effect.SetKernelUnitLength(PointF(KernelUnitLengthX(), KernelUnitLengthY()));
     }
     if (attributeName == SVGNames::PreserveAlphaAttr())
     {
@@ -258,7 +258,7 @@ namespace krys::boo
   {
     auto filterOrder = [&]()
     {
-      return IntSize(OrderX(), OrderY());
+      return SizeI(OrderX(), OrderY());
     };
 
     auto filterDivisor = [&](const SVGNumberList &kernelMatrix)
@@ -280,11 +280,11 @@ namespace krys::boo
       return filterDivisor ? filterDivisor : InitialDivisorValue;
     };
 
-    auto filterTarget = [&](const IntSize &order)
+    auto filterTarget = [&](const SizeI &order)
     {
       // The spec says the default value is: targetX = floor ( orderX / 2 ))
-      return IntPoint(HasAttribute(SVGNames::TargetXAttr().LocalName()) ? TargetX() : order.Width() / 2,
-                      HasAttribute(SVGNames::TargetYAttr().LocalName()) ? TargetY() : order.Height() / 2);
+      return PointI(HasAttribute(SVGNames::TargetXAttr().LocalName()) ? TargetX() : order.Width() / 2,
+                    HasAttribute(SVGNames::TargetYAttr().LocalName()) ? TargetY() : order.Height() / 2);
     };
 
     auto filterKernelUnitLength = [&]()
@@ -292,9 +292,9 @@ namespace krys::boo
       // Spec says default kernelUnitLength is 1.0.
       if (!HasAttribute(SVGNames::KernelUnitLengthAttr().LocalName()))
       {
-        return FloatSize(1, 1);
+        return SizeF(1, 1);
       }
-      return FloatSize(KernelUnitLengthX(), KernelUnitLengthY());
+      return SizeF(KernelUnitLengthX(), KernelUnitLengthY());
     };
 
     // Spec says order must be > 0. Bail if it is not.
@@ -320,7 +320,7 @@ namespace krys::boo
     }
 
     auto target = filterTarget(order);
-    if (!IntRect({}, order).Contains(target))
+    if (!RectI({}, order).Contains(target))
     {
       return nullptr;
     }
@@ -332,7 +332,7 @@ namespace krys::boo
       return nullptr;
     }
 
-    return FEConvolveMatrix::Create(order, divisor, Bias(), target, EdgeMode(), FloatPoint(kernelUnitLength),
+    return FEConvolveMatrix::Create(order, divisor, Bias(), target, EdgeMode(), PointF(kernelUnitLength),
                                     PreserveAlpha(), kernelMatrix);
   }
 }

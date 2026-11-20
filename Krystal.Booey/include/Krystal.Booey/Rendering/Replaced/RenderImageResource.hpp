@@ -25,12 +25,12 @@
 
 #pragma once
 
-#include "Krystal.Booey/Graphics/Geometry/IntSize.hpp"
 #include "Krystal.Booey/Graphics/Geometry/LayoutSize.hpp"
 #include "Krystal.Booey/Graphics/Images/ImageTypes.hpp"
 #include "Krystal.Booey/Loader/Cache/CachedImage.hpp"
 #include "Krystal.Booey/Loader/Cache/CachedResourceHandle.hpp"
 #include "Krystal.Core/Attributes.hpp"
+#include "Krystal.Core/Geometry/Size.hpp"
 #include "Krystal.Core/Macros.hpp"
 #include "Krystal.Core/Types/RefPtr.hpp"
 
@@ -71,7 +71,7 @@ namespace krys::boo
 
     void ResetAnimation() noexcept;
 
-    KRYS_NODISCARD virtual RefPtr<Image> GetImage(const IntSize &size = {}) const noexcept;
+    KRYS_NODISCARD virtual RefPtr<Image> GetImage(const SizeI &size = {}) const noexcept;
 
     KRYS_NODISCARD virtual bool CurrentFrameIsComplete() const noexcept;
 
@@ -80,7 +80,7 @@ namespace krys::boo
       return _cachedImage && _cachedImage->ErrorOccurred();
     }
 
-    virtual void SetContainerContext(const IntSize &, const url::URL &) noexcept;
+    virtual void SetContainerContext(const SizeI &, const net::Url &) noexcept;
 
     KRYS_NODISCARD virtual bool ImageHasRelativeWidth() const noexcept
     {

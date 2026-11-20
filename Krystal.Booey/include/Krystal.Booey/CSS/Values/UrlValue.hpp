@@ -29,7 +29,7 @@
 
 #pragma once
 
-#include "Krystal.Booey/CSS/Values/Primitives/URL.hpp"
+#include "Krystal.Booey/CSS/Values/Primitives/Url.hpp"
 #include "Krystal.Booey/CSS/Values/Value.hpp"
 #include "Krystal.Core/Types/RefPtr.hpp"
 
@@ -39,19 +39,19 @@ namespace krys::boo::css
   class UrlValue final : public Value
   {
   private:
-    CSSURL _url;
+    CSSUrl _url;
 
-    explicit UrlValue(CSSURL &&url) noexcept : Value(ValueType::Url), _url {krys::move(url)}
+    explicit UrlValue(CSSUrl &&url) noexcept : Value(ValueType::Url), _url {krys::move(url)}
     {
     }
 
   public:
-    KRYS_NODISCARD static Ref<UrlValue> Create(CSSURL url) noexcept
+    KRYS_NODISCARD static Ref<UrlValue> Create(CSSUrl url) noexcept
     {
       return AdoptRef(*new UrlValue(krys::move(url)));
     }
 
-    KRYS_NODISCARD const CSSURL &URL() const noexcept
+    KRYS_NODISCARD const CSSUrl &Url() const noexcept
     {
       return _url;
     }

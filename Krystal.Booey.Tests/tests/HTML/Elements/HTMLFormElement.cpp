@@ -144,7 +144,7 @@ namespace krys::boo::html::tests
     CHECK(fixture.Submissions()[0].Method == FormSubmission::Method::Get);
     CHECK(fixture.Submissions()[0].EncodingType == "multipart/form-data");
     // The entries are handed over unencoded, and the URL is the action.
-    CHECK(fixture.Submissions()[0].URL == "https://example.com/");
+    CHECK(fixture.Submissions()[0].Url == "https://example.com/");
     CHECK(fixture.Submissions()[0].Entries == "a=1 2");
   }
 
@@ -240,7 +240,7 @@ namespace krys::boo::html::tests
     CHECK(fixture.Submissions().empty());
     enter(u8"o1");
     REQUIRE(fixture.Submissions().size() == 1);
-    CHECK(fixture.Submissions()[0].URL == "https://example.com/o");
+    CHECK(fixture.Submissions()[0].Url == "https://example.com/o");
     CHECK(fixture.Submissions()[0].Entries == "o1=");
   }
 
@@ -265,7 +265,7 @@ line2</textarea><input id=disabled name=disabled disabled value=no><input value=
       REQUIRE(fixture.Submissions().size() == 1);
       auto &submission = fixture.Submissions()[0];
       CHECK(submission.Method == FormSubmission::Method::Get);
-      CHECK(submission.URL == "https://example.com/search");
+      CHECK(submission.Url == "https://example.com/search");
       CHECK(submission.Entries == "q=a b&c&n=3&on=on&r=y&s=two&t=line1\nline2&added=1");
       CHECK(submission.Target == "results");
       CHECK(events->Submitters.empty());
@@ -305,7 +305,7 @@ line2</textarea><input id=disabled name=disabled disabled value=no><input value=
       form.Submit();
       REQUIRE(fixture.Submissions().size() == 1);
       CHECK(fixture.Submissions()[0].Method == FormSubmission::Method::Post);
-      CHECK(fixture.Submissions()[0].URL == "https://example.com/search");
+      CHECK(fixture.Submissions()[0].Url == "https://example.com/search");
       CHECK(fixture.Submissions()[0].EncodingType == "application/x-www-form-urlencoded");
       CHECK(fixture.Submissions()[0].Entries.starts_with("q=a b&c&n=3"));
 

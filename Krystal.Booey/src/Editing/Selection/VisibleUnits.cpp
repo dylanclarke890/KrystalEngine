@@ -42,10 +42,9 @@
 #include "Krystal.Booey/Rendering/RenderBlockFlow.hpp"
 #include "Krystal.Booey/Rendering/RenderText.hpp"
 #include "Krystal.Booey/Rendering/Style/RenderStyle+GettersInlines.hpp"
-#include "Krystal.Booey/Text/TextBoundaries.hpp"
-#include "Krystal.Booey/Text/TextBreakIterator.hpp"
-#include <unicode/ubrk.h>
-#include <unicode/utf8.h>
+#include "Krystal.Core/Strings/CodePointIterator.hpp"
+#include "Krystal.Text/TextBoundaries.hpp"
+#include "Krystal.Text/TextBreakIterator.hpp"
 
 namespace krys::boo
 {
@@ -335,7 +334,7 @@ namespace krys::boo
       return {};
     }
 
-    KRYS_NODISCARD UBreakIterator *WordBreakIteratorForMinOffsetBoundary(
+    KRYS_NODISCARD text::BreakIteratorView WordBreakIteratorForMinOffsetBoundary(
       const VisiblePosition &visiblePosition, const inline_iterator::TextBoxIterator &textBox,
       uint32 &previousBoxLength, bool &previousBoxInDifferentLine, utf8_string &string) noexcept
     {
@@ -362,10 +361,10 @@ namespace krys::boo
       }
       string.append(textBox->OriginalText());
 
-      return WordBreakIterator(string);
+      return text::WordBreakIterator(string);
     }
 
-    KRYS_NODISCARD UBreakIterator *
+    KRYS_NODISCARD text::BreakIteratorView
       WordBreakIteratorForMaxOffsetBoundary(const VisiblePosition &visiblePosition,
                                             const inline_iterator::TextBoxIterator &textBox,
                                             bool &nextBoxInDifferentLine, utf8_string &string) noexcept
@@ -390,28 +389,29 @@ namespace krys::boo
         string.append(nextTextBox->OriginalText());
       }
 
-      return WordBreakIterator(string);
+      return text::WordBreakIterator(string);
     }
 
-    KRYS_NODISCARD bool IsLogicalStartOfWord(UBreakIterator *iter, int32 position,
+    KRYS_NODISCARD bool IsLogicalStartOfWord(text::BreakIteratorView iter, int32 position,
                                              bool hardLineBreak) noexcept
     {
-      bool boundary = hardLineBreak ? true : ubrk_isBoundary(iter, position);
+      bool boundary = hardLineBreak ? true : iter.IsBoundary(static_cast<uint32>(position));
       if (!boundary)
       {
         return false;
       }
 
-      ubrk_following(iter, position);
-      // isWordTextBreak returns true after moving across a word and false after moving across a
+      iter.Following(static_cast<uint32>(position));
+      // IsWordBreak returns true after moving across a word and false after moving across a
       // punctuation/space.
-      return IsWordTextBreak(iter);
+      return iter.IsWordBreak();
     }
 
-    KRYS_NODISCARD bool IslogicalEndOfWord(UBreakIterator *iter, int32 position, bool hardLineBreak) noexcept
+    KRYS_NODISCARD bool IslogicalEndOfWord(text::BreakIteratorView iter, int32 position,
+                                           bool hardLineBreak) noexcept
     {
-      bool boundary = ubrk_isBoundary(iter, position);
-      return (hardLineBreak || boundary) && IsWordTextBreak(iter);
+      bool boundary = iter.IsBoundary(static_cast<uint32>(position));
+      return (hardLineBreak || boundary) && iter.IsWordBreak();
     }
 
     enum class CursorMovementDirection : bool
@@ -431,11 +431,11 @@ namespace krys::boo
 
       visiblePosition.DeepEquivalent().GetDocument()->UpdateLayoutIgnorePendingStylesheets();
 
-      TextDirection blockDirection = DirectionOfEnclosingBlock(visiblePosition.DeepEquivalent());
+      text::TextDirection blockDirection = DirectionOfEnclosingBlock(visiblePosition.DeepEquivalent());
       inline_iterator::LeafBoxIterator previouslyVisitedBox;
       VisiblePosition current = visiblePosition;
       Maybe<VisiblePosition> previousPosition;
-      UBreakIterator *iter = nullptr;
+      text::BreakIteratorView iter;
 
       utf8_string string;
 
@@ -486,7 +486,7 @@ namespace krys::boo
         }
         else if (movingIntoNewBox)
         {
-          iter = WordBreakIterator(textBox->OriginalText());
+          iter = text::WordBreakIterator(textBox->OriginalText());
           previouslyVisitedBox = box;
         }
 
@@ -495,14 +495,15 @@ namespace krys::boo
           break;
         }
 
-        ubrk_first(iter);
+        iter.First();
         int32 offsetInIterator = static_cast<int32>(offsetInBox - textBox->Start() + previousBoxLength);
 
         bool isWordBreak;
         bool boxHasSameDirectionalityAsBlock = box->Direction() == blockDirection;
         bool movingBackward =
-          (direction == CursorMovementDirection::MoveLeft && box->Direction() == TextDirection::LTR)
-          || (direction == CursorMovementDirection::MoveRight && box->Direction() == TextDirection::RTL);
+          (direction == CursorMovementDirection::MoveLeft && box->Direction() == text::TextDirection::LTR)
+          || (direction == CursorMovementDirection::MoveRight
+              && box->Direction() == text::TextDirection::RTL);
         if ((skipsSpaceWhenMovingRight && boxHasSameDirectionalityAsBlock)
             || (!skipsSpaceWhenMovingRight && movingBackward))
         {
@@ -545,9 +546,9 @@ namespace krys::boo
     // FIXME: How should we handle a non-editable position?
     if (leftWordBreak.IsNull() && IsEditablePosition(visiblePosition.DeepEquivalent()))
     {
-      TextDirection blockDirection = DirectionOfEnclosingBlock(visiblePosition.DeepEquivalent());
-      leftWordBreak = blockDirection == TextDirection::LTR ? StartOfEditableContent(visiblePosition)
-                                                           : EndOfEditableContent(visiblePosition);
+      text::TextDirection blockDirection = DirectionOfEnclosingBlock(visiblePosition.DeepEquivalent());
+      leftWordBreak = blockDirection == text::TextDirection::LTR ? StartOfEditableContent(visiblePosition)
+                                                                 : EndOfEditableContent(visiblePosition);
     }
     return leftWordBreak;
   }
@@ -562,9 +563,9 @@ namespace krys::boo
     // FIXME: How should we handle a non-editable position?
     if (rightWordBreak.IsNull() && IsEditablePosition(visiblePosition.DeepEquivalent()))
     {
-      TextDirection blockDirection = DirectionOfEnclosingBlock(visiblePosition.DeepEquivalent());
-      rightWordBreak = blockDirection == TextDirection::LTR ? EndOfEditableContent(visiblePosition)
-                                                            : StartOfEditableContent(visiblePosition);
+      text::TextDirection blockDirection = DirectionOfEnclosingBlock(visiblePosition.DeepEquivalent());
+      rightWordBreak = blockDirection == text::TextDirection::LTR ? EndOfEditableContent(visiblePosition)
+                                                                  : StartOfEditableContent(visiblePosition);
     }
     return rightWordBreak;
   }
@@ -599,7 +600,7 @@ namespace krys::boo
     while (!forwardsIterator.AtEnd())
     {
       utf8_stringview text = forwardsIterator.Text();
-      uint32 i = EndOfFirstWordBoundaryContext(text);
+      uint32 i = text::EndOfFirstWordBoundaryContext(text);
       string.append(text.substr(0, i));
       suffixLength += i;
       if (i < text.size())
@@ -618,7 +619,7 @@ namespace krys::boo
     while (!backwardsIterator.AtEnd())
     {
       utf8_stringview text = backwardsIterator.Text();
-      uint32 i = StartOfLastWordBoundaryContext(text);
+      uint32 i = text::StartOfLastWordBoundaryContext(text);
       Prepend(string, text.substr(i));
       prefixLength += static_cast<uint32>(text.size()) - i;
       if (i > 0)
@@ -756,7 +757,7 @@ namespace krys::boo
         }
         suffixLength = static_cast<uint32>(string.size());
       }
-      else if (RequiresContextForWordBoundary(position.CharacterBefore()))
+      else if (text::RequiresContextForWordBoundary(position.CharacterBefore()))
       {
         auto forwardsScanRange =
           dom::MakeSimpleRange(searchRange->End, dom::MakeBoundaryPointAfterNodeContents(*boundary));
@@ -804,7 +805,7 @@ namespace krys::boo
       utf8_string string;
       uint32 prefixLength = 0;
 
-      if (RequiresContextForWordBoundary(c.CharacterAfter()))
+      if (text::RequiresContextForWordBoundary(c.CharacterAfter()))
       {
         auto backwardsScanRange =
           dom::MakeSimpleRange(dom::MakeBoundaryPointBeforeNodeContents(boundaryDocument), c);
@@ -867,7 +868,7 @@ namespace krys::boo
   {
     krys_debug_assert(offset);
     if (mayHaveMoreContext == BoundarySearchContextAvailability::MayHaveMoreContext
-        && !StartOfLastWordBoundaryContext(text.substr(0, offset)))
+        && !text::StartOfLastWordBoundaryContext(text.substr(0, offset)))
     {
       needMoreContext = true;
       return 0;
@@ -875,8 +876,8 @@ namespace krys::boo
     needMoreContext = false;
     int32 start, end;
     int32 position = static_cast<int32>(offset);
-    U8_BACK_1(reinterpret_cast<const uint8_t *>(text.data()), 0, position);
-    FindWordBoundary(text, position, &start, &end);
+    position = static_cast<int32>(text::PreviousCodePointStart(text, static_cast<size_t>(position)));
+    text::FindWordBoundary(text, position, &start, &end);
     return static_cast<uint32>(start);
   }
 
@@ -907,14 +908,14 @@ namespace krys::boo
   {
     krys_debug_assert(offset <= text.size());
     if (mayHaveMoreContext == BoundarySearchContextAvailability::MayHaveMoreContext
-        && EndOfFirstWordBoundaryContext(text.substr(offset)) == text.size() - offset)
+        && text::EndOfFirstWordBoundaryContext(text.substr(offset)) == text.size() - offset)
     {
       needMoreContext = true;
       return static_cast<uint32>(text.size());
     }
     needMoreContext = false;
     int32 end;
-    FindEndWordBoundary(text, static_cast<int32>(offset), &end);
+    text::FindEndWordBoundary(text, static_cast<int32>(offset), &end);
     return static_cast<uint32>(end);
   }
 
@@ -949,13 +950,13 @@ namespace krys::boo
                                                        bool &needMoreContext) noexcept
     {
       if (mayHaveMoreContext == BoundarySearchContextAvailability::MayHaveMoreContext
-          && !StartOfLastWordBoundaryContext(text.substr(0, offset)))
+          && !text::StartOfLastWordBoundaryContext(text.substr(0, offset)))
       {
         needMoreContext = true;
         return 0;
       }
       needMoreContext = false;
-      return static_cast<uint32>(FindNextWordFromIndex(text, static_cast<int32>(offset), false));
+      return static_cast<uint32>(text::FindNextWordFromIndex(text, static_cast<int32>(offset), false));
     }
 
     KRYS_NODISCARD uint32 NextWordPositionBoundary(utf8_stringview text, uint32 offset,
@@ -963,13 +964,13 @@ namespace krys::boo
                                                    bool &needMoreContext) noexcept
     {
       if (mayHaveMoreContext == BoundarySearchContextAvailability::MayHaveMoreContext
-          && EndOfFirstWordBoundaryContext(text.substr(offset)) == text.size() - offset)
+          && text::EndOfFirstWordBoundaryContext(text.substr(offset)) == text.size() - offset)
       {
         needMoreContext = true;
         return static_cast<uint32>(text.size());
       }
       needMoreContext = false;
-      return static_cast<uint32>(FindNextWordFromIndex(text, static_cast<int32>(offset), true));
+      return static_cast<uint32>(text::FindNextWordFromIndex(text, static_cast<int32>(offset), true));
     }
   }
 
@@ -1282,8 +1283,7 @@ namespace krys::boo
                                                     LayoutUnit lineDirectionPoint) noexcept
     {
       auto &root = lineBox->FormattingContextRoot();
-      auto absoluteBlockPoint =
-        root.LocalToAbsolute(FloatPoint()) - ToFloatSize(FloatPoint(root.GetScrollPosition()));
+      auto absoluteBlockPoint = root.LocalToAbsolute(PointF()) - ToSizeF(PointF(root.GetScrollPosition()));
 
       if (root.IsHorizontalWritingMode())
       {
@@ -1464,8 +1464,7 @@ namespace krys::boo
   uint32 StartSentenceBoundary(utf8_stringview text, uint32, BoundarySearchContextAvailability,
                                bool &) noexcept
   {
-    // FIXME: The following function can return -1; we don't handle that.
-    return static_cast<uint32>(ubrk_preceding(SentenceBreakIterator(text), static_cast<int32>(text.size())));
+    return text::SentenceBreakIterator(text).Preceding(static_cast<uint32>(text.size())).value_or(0);
   }
 
   VisiblePosition StartOfSentence(const VisiblePosition &position) noexcept
@@ -1475,7 +1474,7 @@ namespace krys::boo
 
   uint32 EndSentenceBoundary(utf8_stringview text, uint32, BoundarySearchContextAvailability, bool &) noexcept
   {
-    return static_cast<uint32>(ubrk_next(SentenceBreakIterator(text)));
+    return text::SentenceBreakIterator(text).Next().value_or(static_cast<uint32>(text.size()));
   }
 
   VisiblePosition EndOfSentence(const VisiblePosition &position) noexcept
@@ -1490,9 +1489,7 @@ namespace krys::boo
                                                            BoundarySearchContextAvailability, bool &) noexcept
     {
       // FIXME: This is identical to startSentenceBoundary. I'm pretty sure that's not right.
-      // FIXME: The following function can return -1; we don't handle that.
-      return static_cast<uint32>(
-        ubrk_preceding(SentenceBreakIterator(text), static_cast<int32>(text.size())));
+      return text::SentenceBreakIterator(text).Preceding(static_cast<uint32>(text.size())).value_or(0);
     }
 
     KRYS_NODISCARD uint32 NextSentencePositionBoundary(utf8_stringview text, uint32,
@@ -1500,7 +1497,7 @@ namespace krys::boo
     {
       // FIXME: This is identical to endSentenceBoundary.
       // That isn't right. This function needs to move to the equivalent position in the following sentence.
-      return static_cast<uint32>(ubrk_following(SentenceBreakIterator(text), 0));
+      return text::SentenceBreakIterator(text).Following(0).value_or(static_cast<uint32>(text.size()));
     }
   }
 
@@ -1951,17 +1948,17 @@ namespace krys::boo
     return p.IsNotNull() && p.Next().IsNull();
   }
 
-  VisiblePosition LeftBoundaryOfLine(const VisiblePosition &position, TextDirection direction,
+  VisiblePosition LeftBoundaryOfLine(const VisiblePosition &position, text::TextDirection direction,
                                      bool *reachedBoundary) noexcept
   {
-    return direction == TextDirection::LTR ? LogicalStartOfLine(position, reachedBoundary)
-                                           : LogicalEndOfLine(position, reachedBoundary);
+    return direction == text::TextDirection::LTR ? LogicalStartOfLine(position, reachedBoundary)
+                                                 : LogicalEndOfLine(position, reachedBoundary);
   }
 
-  VisiblePosition RightBoundaryOfLine(const VisiblePosition &position, TextDirection direction,
+  VisiblePosition RightBoundaryOfLine(const VisiblePosition &position, text::TextDirection direction,
                                       bool *reachedBoundary) noexcept
   {
-    return direction == TextDirection::LTR ? LogicalEndOfLine(position, reachedBoundary)
-                                           : LogicalStartOfLine(position, reachedBoundary);
+    return direction == text::TextDirection::LTR ? LogicalEndOfLine(position, reachedBoundary)
+                                                 : LogicalStartOfLine(position, reachedBoundary);
   }
 }

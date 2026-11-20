@@ -37,11 +37,11 @@
 #include "Krystal.Booey/CSS/Types/CSSOMString.hpp"
 #include "Krystal.Booey/CSS/Values/ValueId.hpp"
 #include "Krystal.Core/Assert.hpp"
-#include "Krystal.Core/Text/Encodings/Encode.hpp"
-#include "Krystal.Core/Text/Encodings/UTF.hpp"
-#include "Krystal.Core/Text/StringBuilder.hpp"
+#include "Krystal.Core/Strings/String.hpp"
+#include "Krystal.Core/Strings/StringBuilder.hpp"
 #include "Krystal.Core/Types/SmallList.hpp"
-#include "Krystal.Core/Types/String.hpp"
+#include "Krystal.Text/Encodings/Encode.hpp"
+#include "Krystal.Text/Encodings/UTF.hpp"
 
 namespace krys::boo::css
 {

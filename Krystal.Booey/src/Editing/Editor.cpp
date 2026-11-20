@@ -58,8 +58,6 @@
 #include "Krystal.Booey/Editing/Selection/VisibleUnits.hpp"
 #include "Krystal.Booey/Editing/TextIterator.hpp"
 #include "Krystal.Booey/Editing/WritingDirection.hpp"
-#include "Krystal.Booey/Graphics/Geometry/FloatQuad.hpp"
-#include "Krystal.Booey/Graphics/Geometry/IntRect.hpp"
 #include "Krystal.Booey/HTML/Elements/HTMLElement.hpp"
 #include "Krystal.Booey/HTML/Elements/HTMLEmbedElement.hpp"
 #include "Krystal.Booey/HTML/Elements/HTMLImageElement.hpp"
@@ -67,9 +65,9 @@
 #include "Krystal.Booey/HTML/Elements/HTMLObjectElement.hpp"
 #include "Krystal.Booey/HTML/Elements/HTMLTextFormControlElement.hpp"
 #include "Krystal.Booey/Infra/Namespaces.hpp"
+#include "Krystal.Booey/Input/EventHandler.hpp"
 #include "Krystal.Booey/Loader/Cache/CachedImage.hpp"
-#include "Krystal.Booey/Page/EditorClient.hpp"
-#include "Krystal.Booey/Page/EventHandler.hpp"
+#include "Krystal.Booey/Page/Clients/EditorClient.hpp"
 #include "Krystal.Booey/Page/LocalFrame.hpp"
 #include "Krystal.Booey/Page/LocalFrameView.hpp"
 #include "Krystal.Booey/Page/Page.hpp"
@@ -82,6 +80,8 @@
 #include "Krystal.Booey/Rendering/Replaced/RenderImage.hpp"
 #include "Krystal.Booey/Rendering/Selection/CaretRectComputation.hpp"
 #include "Krystal.Booey/SVG/Elements/SVGImageElement.hpp"
+#include "Krystal.Core/Geometry/Quad.hpp"
+#include "Krystal.Core/Geometry/Rect.hpp"
 
 namespace krys::boo
 {
@@ -545,7 +545,7 @@ namespace krys::boo
     pasteboardContent.CanSmartCopyOrDelete = CanSmartCopyOrDelete();
     pasteboardContent.Text = SelectedTextForDataTransfer();
     pasteboardContent.Markup = SerializePreservingVisualAppearance(
-      _document.Selection().Selection(), ResolveURLs::YesExcludingURLsForPrivacy, SerializeComposedTree::Yes,
+      _document.Selection().Selection(), ResolveUrls::YesExcludingUrlsForPrivacy, SerializeComposedTree::Yes,
       IgnoreUserSelectNone::Yes);
     pasteboardContent.ContentOrigin = _document.OriginIdentifierForPasteboard();
     pasteboard.Write(pasteboardContent);
@@ -557,18 +557,18 @@ namespace krys::boo
   }
 
   // (No link decoration filtering (applyLinkDecorationFiltering): it's Cocoa's, not a standard feature.)
-  void Editor::CopyURL(const url::URL &url, utf8_stringview title, Pasteboard &pasteboard) noexcept
+  void Editor::CopyUrl(const net::Url &url, utf8_stringview title, Pasteboard &pasteboard) noexcept
   {
-    PasteboardURL pasteboardURL;
-    pasteboardURL.Url = url;
-    pasteboardURL.Title = utf8_string(title);
+    PasteboardUrl pasteboardUrl;
+    pasteboardUrl.Url = url;
+    pasteboardUrl.Title = utf8_string(title);
 
-    pasteboard.Write(pasteboardURL);
+    pasteboard.Write(pasteboardUrl);
   }
 
   namespace
   {
-    KRYS_NODISCARD DOMString ElementURL(Element &element) noexcept
+    KRYS_NODISCARD DOMString ElementUrl(Element &element) noexcept
     {
       if (Is<HTMLImageElement>(element) || Is<HTMLInputElement>(element))
       {
@@ -581,7 +581,7 @@ namespace krys::boo
       if (auto *htmlElement = DynamicDowncast<HTMLElement>(element);
           htmlElement && (Is<HTMLEmbedElement>(*htmlElement) || Is<HTMLObjectElement>(*htmlElement)))
       {
-        return element.ImageSourceURL().value_or(DOMString());
+        return element.ImageSourceUrl().value_or(DOMString());
       }
       return {};
     }
@@ -604,7 +604,7 @@ namespace krys::boo
     }
   }
 
-  void Editor::WriteImageToPasteboard(Pasteboard &pasteboard, Element &imageElement, const url::URL &,
+  void Editor::WriteImageToPasteboard(Pasteboard &pasteboard, Element &imageElement, const net::Url &,
                                       utf8_stringview title) noexcept
   {
     PasteboardImage pasteboardImage;
@@ -614,10 +614,10 @@ namespace krys::boo
       return;
     }
 
-    pasteboardImage.Url.Url = imageElement.NodeDocument().CompleteURL(ElementURL(imageElement));
+    pasteboardImage.Url.Url = imageElement.NodeDocument().CompleteUrl(ElementUrl(imageElement));
     pasteboardImage.Url.Title = utf8_string(title);
     pasteboardImage.Url.Markup =
-      SerializeFragment(imageElement, SerializedNodes::SubtreeIncludingNode, nullptr, ResolveURLs::Yes);
+      SerializeFragment(imageElement, SerializedNodes::SubtreeIncludingNode, nullptr, ResolveUrls::Yes);
     pasteboard.Write(pasteboardImage);
   }
 
@@ -2033,7 +2033,7 @@ namespace krys::boo
 
   namespace
   {
-    void CollapseCaretWidth(IntRect &rect) noexcept
+    void CollapseCaretWidth(RectI &rect) noexcept
     {
       // FIXME: Width adjustment doesn't work for rotated text.
       if (rect.Width() == CaretWidth())
@@ -2047,7 +2047,7 @@ namespace krys::boo
     }
   }
 
-  IntRect Editor::FirstRectForRange(const dom::SimpleRange &range) noexcept
+  RectI Editor::FirstRectForRange(const dom::SimpleRange &range) noexcept
   {
     (void)range.Start.GetDocument().UpdateLayout();
 
@@ -2057,7 +2057,7 @@ namespace krys::boo
     {
       // FIXME: Getting caret rect and removing caret width is a very roundabout way to get collapsed range
       // location. In particular, width adjustment doesn't work for rotated text.
-      IntRect startCaretRect = RenderedPosition(start).AbsoluteRect();
+      RectI startCaretRect = RenderedPosition(start).AbsoluteRect();
       CollapseCaretWidth(startCaretRect);
       return startCaretRect;
     }
@@ -2066,7 +2066,7 @@ namespace krys::boo
 
     if (InSameLine(start, end))
     {
-      return EnclosingIntRect(UnitedBoundingBoxes(RenderObject::AbsoluteTextQuads(range)));
+      return EnclosingRectI(UnitedBoundingBoxes(RenderObject::AbsoluteTextQuads(range)));
     }
 
     return RenderedPosition(start).AbsoluteRect(CaretRectMode::ExpandToEndOfLine);

@@ -33,7 +33,7 @@
 #include "Krystal.Booey/Style/Values/Easing/SpringEasingFunction.hpp"
 #include "Krystal.Booey/Style/Values/Easing/StepsEasingFunction.hpp"
 #include "Krystal.Booey/Style/Values/Primitives/NumericTypesSerialisation.hpp"
-#include "Krystal.Core/Text/StringBuilder.hpp"
+#include "Krystal.Core/Strings/StringBuilder.hpp"
 
 namespace krys::boo::style
 {

@@ -29,9 +29,9 @@
 #include "Krystal.Booey/Graphics/Geometry/LayoutRoundedRect.hpp"
 #include "Krystal.Booey/Graphics/GraphicsContext.hpp"
 #include "Krystal.Booey/Graphics/Paths/Path.hpp"
-#include "Krystal.Booey/Graphics/Transforms/AffineTransform.hpp"
 #include "Krystal.Booey/Rendering/Painting/PaintInfo.hpp"
 #include "Krystal.Booey/Rendering/Style/RenderStyle+GettersInlines.hpp"
+#include "Krystal.Core/Geometry/AffineTransform.hpp"
 #include <algorithm>
 #include <numbers>
 
@@ -262,7 +262,7 @@ namespace krys::boo
     paintInfo.Context().SetStrokeStyle(StrokeStyle::SolidStroke);
     paintInfo.Context().SetStrokeColor(Style().ColorResolvingCurrentColor(css::PropertyId::Color));
     paintInfo.Context().SetFillColor(Color::transparentBlack);
-    paintInfo.ApplyTransform(AffineTransform().Translate(FloatPoint(paintOffset + Location())));
+    paintInfo.ApplyTransform(AffineTransform().Translate(PointF(paintOffset + Location())));
 
     // In the MathML in HTML5 implementation note, the "left" notation is described as follows:
     // - center of the left vertical bar is at 3\xi_8 padding + \xi_8 border/2 = 7\xi_8/2
@@ -389,8 +389,8 @@ namespace krys::boo
     if (HasNotation(Notation::Circle))
     {
       LayoutRect ellipseRect;
-      ellipseRect.SetWidth(_contentRect.Width() * std::numbers::sqrt2_v<float> + thickness);
-      ellipseRect.SetHeight(_contentRect.Height() * std::numbers::sqrt2_v<float> + thickness);
+      ellipseRect.SetWidth(LayoutUnit(_contentRect.Width() * std::numbers::sqrt2_v<float> + thickness));
+      ellipseRect.SetHeight(LayoutUnit(_contentRect.Height() * std::numbers::sqrt2_v<float> + thickness));
       ellipseRect.SetX(_contentRect.X() - (ellipseRect.Width() - _contentRect.Width()) / 2);
       ellipseRect.SetY(_contentRect.Y() - (ellipseRect.Height() - _contentRect.Height()) / 2);
       Path path;

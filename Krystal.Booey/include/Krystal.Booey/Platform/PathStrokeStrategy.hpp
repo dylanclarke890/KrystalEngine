@@ -1,10 +1,10 @@
 ﻿#pragma once
 
-#include "Krystal.Booey/Graphics/Geometry/FloatPoint.hpp"
-#include "Krystal.Booey/Graphics/Geometry/FloatRect.hpp"
 #include "Krystal.Booey/Graphics/GraphicsTypes.hpp"
 #include "Krystal.Booey/Graphics/Paths/DashArray.hpp"
 #include "Krystal.Core/Attributes.hpp"
+#include "Krystal.Core/Geometry/Point.hpp"
+#include "Krystal.Core/Geometry/Rect.hpp"
 
 namespace krys::boo
 {
@@ -29,11 +29,11 @@ namespace krys::boo
     virtual ~PathStrokeStrategy() noexcept = default;
 
     /// @brief Whether @p point is inside @p path stroked with @p style.
-    KRYS_NODISCARD virtual bool StrokeContains(const Path &path, const FloatPoint &point,
+    KRYS_NODISCARD virtual bool StrokeContains(const Path &path, const PointF &point,
                                                const PathStrokeStyle &style) noexcept = 0;
 
     /// @brief The bounds of @p path stroked with @p style.
-    KRYS_NODISCARD virtual FloatRect StrokeBoundingRect(const Path &path,
-                                                        const PathStrokeStyle &style) noexcept = 0;
+    KRYS_NODISCARD virtual RectF StrokeBoundingRect(const Path &path,
+                                                    const PathStrokeStyle &style) noexcept = 0;
   };
 }

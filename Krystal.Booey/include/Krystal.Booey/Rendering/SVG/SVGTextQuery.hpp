@@ -20,10 +20,10 @@
 
 #pragma once
 
-#include "Krystal.Booey/Graphics/Geometry/FloatRect.hpp"
 #include "Krystal.Booey/Layout/Integration/Inline/InlineIteratorInlineBox.hpp"
 #include "Krystal.Booey/Layout/Integration/Inline/InlineIteratorSVGTextBox.hpp"
 #include "Krystal.Booey/Rendering/SVG/SVGTextFragment.hpp"
+#include "Krystal.Core/Geometry/Rect.hpp"
 #include "Krystal.Core/Types/List.hpp"
 
 namespace krys::boo
@@ -55,15 +55,15 @@ namespace krys::boo
 
     KRYS_NODISCARD float SubStringLength(uint32 startPosition, uint32 length) const noexcept;
 
-    KRYS_NODISCARD FloatPoint StartPositionOfCharacter(uint32 position) const noexcept;
+    KRYS_NODISCARD PointF StartPositionOfCharacter(uint32 position) const noexcept;
 
-    KRYS_NODISCARD FloatPoint EndPositionOfCharacter(uint32 position) const noexcept;
+    KRYS_NODISCARD PointF EndPositionOfCharacter(uint32 position) const noexcept;
 
     KRYS_NODISCARD float RotationOfCharacter(uint32 position) const noexcept;
 
-    KRYS_NODISCARD FloatRect ExtentOfCharacter(uint32 position) const noexcept;
+    KRYS_NODISCARD RectF ExtentOfCharacter(uint32 position) const noexcept;
 
-    KRYS_NODISCARD int32 CharacterNumberAtPosition(const FloatPoint &) const noexcept;
+    KRYS_NODISCARD int32 CharacterNumberAtPosition(const PointF &) const noexcept;
 
   private:
     bool ExecuteQuery(Data *, ProcessTextFragmentCallback) const noexcept;

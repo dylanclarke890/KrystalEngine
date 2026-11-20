@@ -2,11 +2,11 @@
 #include "Krystal.Booey/Graphics/DisplayLists/DisplayListRecorderImpl.hpp"
 #include "Krystal.Booey/Graphics/Filters/FilterOperation.hpp"
 #include "Krystal.Booey/Graphics/Filters/FilterOperations.hpp"
-#include "Krystal.Booey/Graphics/Geometry/FloatQuad.hpp"
 #include "Krystal.Booey/Graphics/Images/Image.hpp"
 #include "Krystal.Booey/Graphics/Layers/GraphicsLayer.hpp"
 #include "Krystal.Booey/Graphics/Paths/Path.hpp"
 #include "Krystal.Core/Colour/ColourMatrix.hpp"
+#include "Krystal.Core/Geometry/Quad.hpp"
 #include "Krystal.Core/Types/Array.hpp"
 #include "Krystal.UI/GraphicsContextRender2D.hpp"
 #include "Krystal.UI/ImageBufferTextures.hpp"
@@ -18,12 +18,6 @@ namespace krys::ui
 {
   namespace
   {
-    KRYS_NODISCARD gfx::Transform2D ToTransform2D(const boo::TransformationMatrix &matrix) noexcept
-    {
-      // FIXME: Perspective, once there are 3D rendering contexts: a layer's 3D transform is flattened.
-      return ui::ToTransform2D(matrix.ToAffineTransform());
-    }
-
     /// @brief A matrix's rows as a layer filter's colour matrix.
     template <size_t ColumnCount, size_t RowCount>
     KRYS_NODISCARD Array<float, 20> RowsOf(const ColourMatrix<ColumnCount, RowCount> &matrix) noexcept
@@ -116,7 +110,7 @@ namespace krys::ui
 
   TextureMapper::~TextureMapper() noexcept = default;
 
-  void TextureMapper::BeginPainting(gfx::Renderer2D &renderer, const boo::IntRect &bounds) noexcept
+  void TextureMapper::BeginPainting(gfx::Renderer2D &renderer, const RectI &bounds) noexcept
   {
     krys_debug_assert(!_renderer);
     _renderer = &renderer;
@@ -146,13 +140,13 @@ namespace krys::ui
     return _imageBuffers->Render(backend, *commands);
   }
 
-  void TextureMapper::SetTransform(const boo::TransformationMatrix &matrix) noexcept
+  void TextureMapper::SetTransform(const TransformationMatrix &matrix) noexcept
   {
-    _renderer->SetTransform(_baseTransform * ToTransform2D(matrix));
+    _renderer->SetTransform(_baseTransform * matrix.ToAffineTransform());
   }
 
-  void TextureMapper::DrawBorder(const boo::Color &color, float width, const boo::FloatRect &targetRect,
-                                 const boo::TransformationMatrix &modelViewMatrix) noexcept
+  void TextureMapper::DrawBorder(const boo::Color &color, float width, const RectF &targetRect,
+                                 const TransformationMatrix &modelViewMatrix) noexcept
   {
     if (ClipBounds().IsEmpty())
     {
@@ -174,8 +168,8 @@ namespace krys::ui
     constexpr Array<uint8, 10> DigitSegments {0x3F, 0x06, 0x5B, 0x4F, 0x66, 0x6D, 0x7D, 0x07, 0x7F, 0x6F};
   }
 
-  void TextureMapper::DrawNumber(int32 number, const boo::Color &color, const boo::FloatPoint &targetPoint,
-                                 const boo::TransformationMatrix &modelViewMatrix) noexcept
+  void TextureMapper::DrawNumber(int32 number, const boo::Color &color, const PointF &targetPoint,
+                                 const TransformationMatrix &modelViewMatrix) noexcept
   {
     if (ClipBounds().IsEmpty())
     {
@@ -206,7 +200,7 @@ namespace krys::ui
     float y = targetPoint.Y() + Padding;
     for (char digit : digits)
     {
-      const Array<gfx::Rect2D, 7> segments {{
+      const Array<RectF, 7> segments {{
         {x, y, DigitWidth, Stroke},
         {x + DigitWidth - Stroke, y, Stroke, Half + Stroke},
         {x + DigitWidth - Stroke, y + Half, Stroke, Half + Stroke},
@@ -239,9 +233,8 @@ namespace krys::ui
     }
   }
 
-  gfx::SamplerFilter
-    TextureMapper::ScalingFilter(const boo::IntSize &textureSize, const boo::FloatRect &targetRect,
-                                 const boo::TransformationMatrix &modelViewMatrix) const noexcept
+  gfx::SamplerFilter TextureMapper::ScalingFilter(const SizeI &textureSize, const RectF &targetRect,
+                                                  const TransformationMatrix &modelViewMatrix) const noexcept
   {
     if (_minificationFilter == _magnificationFilter)
     {
@@ -253,8 +246,8 @@ namespace krys::ui
     return ToSamplerFilter(magnified ? _magnificationFilter : _minificationFilter);
   }
 
-  void TextureMapper::DrawTexture(const BitmapTexture &texture, const boo::FloatRect &targetRect,
-                                  const boo::TransformationMatrix &modelViewMatrix, float opacity,
+  void TextureMapper::DrawTexture(const BitmapTexture &texture, const RectF &targetRect,
+                                  const TransformationMatrix &modelViewMatrix, float opacity,
                                   AllEdgesExposed) noexcept
   {
     if (!texture.Handle().IsValid() || ClipBounds().IsEmpty())
@@ -266,15 +259,14 @@ namespace krys::ui
     _renderer->Save();
     SetTransform(modelViewMatrix);
     _renderer->DrawImage(
-      texture.Handle(), ToRect2D(targetRect),
+      texture.Handle(), targetRect,
       {.Filter = ScalingFilter(texture.Size(), targetRect, modelViewMatrix), .Opacity = opacity});
     _renderer->Restore();
   }
 
-  void TextureMapper::DrawTexture(gfx::TextureHandle texture, const boo::IntSize &textureSize,
-                                  const boo::FloatRect &targetRect,
-                                  const boo::TransformationMatrix &modelViewMatrix, float opacity,
-                                  AlphaPremultiplication alpha) noexcept
+  void TextureMapper::DrawTexture(gfx::TextureHandle texture, const SizeI &textureSize,
+                                  const RectF &targetRect, const TransformationMatrix &modelViewMatrix,
+                                  float opacity, AlphaPremultiplication alpha) noexcept
   {
     if (!texture.IsValid() || ClipBounds().IsEmpty())
     {
@@ -283,14 +275,14 @@ namespace krys::ui
 
     _renderer->Save();
     SetTransform(modelViewMatrix);
-    _renderer->DrawImage(texture, ToRect2D(targetRect),
+    _renderer->DrawImage(texture, targetRect,
                          {.Filter = ScalingFilter(textureSize, targetRect, modelViewMatrix),
                           .Alpha = alpha,
                           .Opacity = opacity});
     _renderer->Restore();
   }
 
-  void TextureMapper::DrawSolidColor(const boo::FloatRect &rect, const boo::TransformationMatrix &matrix,
+  void TextureMapper::DrawSolidColor(const RectF &rect, const TransformationMatrix &matrix,
                                      const boo::Color &color, bool) noexcept
   {
     if (ClipBounds().IsEmpty())
@@ -300,11 +292,11 @@ namespace krys::ui
 
     _renderer->Save();
     SetTransform(matrix);
-    _renderer->FillRect(ToRect2D(rect), gfx::Paint2D(ToColour(color)));
+    _renderer->FillRect(rect, gfx::Paint2D(ToColour(color)));
     _renderer->Restore();
   }
 
-  void TextureMapper::BeginClip(const boo::TransformationMatrix &modelViewMatrix,
+  void TextureMapper::BeginClip(const TransformationMatrix &modelViewMatrix,
                                 const boo::FloatRoundedRect &targetRect) noexcept
   {
     _renderer->Save();
@@ -313,17 +305,17 @@ namespace krys::ui
     {
       // A rectilinear clip is a scissor around the pixels it touches, so a clip at a fractional position
       // doesn't fade the edge it cuts.
-      auto quad = modelViewMatrix.ProjectQuad(boo::FloatQuad(targetRect.Rect()));
+      auto quad = modelViewMatrix.ProjectQuad(QuadF(targetRect.Rect()));
       auto rect = quad.EnclosingBoundingBox();
       if (modelViewMatrix.IsAffine() && quad.IsRectilinear() && !rect.IsEmpty())
       {
-        SetTransform(boo::TransformationMatrix());
-        _renderer->ClipRect(ToRect2D(boo::FloatRect(rect)));
+        SetTransform(TransformationMatrix());
+        _renderer->ClipRect(RectF(rect));
         SetTransform(modelViewMatrix);
       }
       else
       {
-        _renderer->ClipRect(ToRect2D(targetRect.Rect()));
+        _renderer->ClipRect(targetRect.Rect());
       }
     }
     else if (auto circular = ToCircularRoundedRect(targetRect))
@@ -337,8 +329,7 @@ namespace krys::ui
       _renderer->ClipPath(ToPath2D(path), gfx::FillRule::NonZero);
     }
 
-    auto bounds =
-      boo::EnclosingIntRect(modelViewMatrix.MapQuad(boo::FloatQuad(targetRect.Rect())).BoundingBox());
+    auto bounds = EnclosingRectI(modelViewMatrix.MapQuad(QuadF(targetRect.Rect())).BoundingBox());
     bounds.Intersect(ClipBounds());
     _clipBounds.push_back(bounds);
   }
@@ -350,9 +341,9 @@ namespace krys::ui
     _renderer->Restore();
   }
 
-  boo::IntRect TextureMapper::ClipBounds() const noexcept
+  RectI TextureMapper::ClipBounds() const noexcept
   {
-    return _clipBounds.empty() ? boo::IntRect() : _clipBounds.back();
+    return _clipBounds.empty() ? RectI() : _clipBounds.back();
   }
 
   void TextureMapper::SetMaskMode(bool maskMode) noexcept
@@ -369,7 +360,7 @@ namespace krys::ui
     _renderer->BeginLayer(opacity, blendMode);
     uint32 layers = 1u;
     // The filters' lengths are the layer's, which the transform scales (by the device and page scales).
-    float scale = std::sqrt(std::abs(_renderer->GetTransform().Determinant()));
+    float scale = std::sqrt(std::abs(static_cast<float>(_renderer->GetTransform().Determinant())));
     for (auto it = filters.rbegin(); it != filters.rend(); ++it)
     {
       if (auto filter = LayerFilterFor(**it, blurEdgeMode, scale))
@@ -391,21 +382,20 @@ namespace krys::ui
     _groupLayerCounts.pop_back();
   }
 
-  boo::IntSize TextureMapper::MaxTextureSize() const noexcept
+  SizeI TextureMapper::MaxTextureSize() const noexcept
   {
     auto size = static_cast<int32>(_device.Limits().MaxTextureSize);
     return {size, size};
   }
 
-  Ref<BitmapTexture> TextureMapper::AcquireTextureFromPool(const boo::IntSize &size,
+  Ref<BitmapTexture> TextureMapper::AcquireTextureFromPool(const SizeI &size,
                                                            EnumSet<BitmapTexture::Flags> flags) noexcept
   {
     return _texturePool.AcquireTexture(size, flags);
   }
 
   template <typename TPaint>
-  void TextureMapper::PaintIntoTexture(BitmapTexture &texture, const boo::IntRect &targetRect,
-                                       TPaint paint) noexcept
+  void TextureMapper::PaintIntoTexture(BitmapTexture &texture, const RectI &targetRect, TPaint paint) noexcept
   {
     auto *commands = _renderer ? _renderer->GetCommandBuffer() : nullptr;
     if (!commands || !texture.Handle().IsValid() || targetRect.IsEmpty())
@@ -415,7 +405,7 @@ namespace krys::ui
 
     // Part of a texture is painted into a surface of its own, cleared, and copied over that part: what was
     // there is replaced, as drawing over it would blend with it.
-    const bool wholeTexture = targetRect == boo::IntRect({}, texture.Size());
+    const bool wholeTexture = targetRect == RectI({}, texture.Size());
     RefPtr<BitmapTexture> surface;
     if (!wholeTexture)
     {
@@ -429,7 +419,7 @@ namespace krys::ui
 
     const auto size = targetRect.Size();
     boo::display_list::RecorderImpl recorder(
-      boo::FloatSize(static_cast<float>(size.Width()), static_cast<float>(size.Height())));
+      SizeF(static_cast<float>(size.Width()), static_cast<float>(size.Height())));
     paint(recorder);
     auto displayList = recorder.TakeDisplayList();
 
@@ -445,7 +435,7 @@ namespace krys::ui
     {
       GraphicsContextRender2D context(
         *_contentsRenderer, _fonts,
-        boo::FloatRect(0, 0, static_cast<float>(size.Width()), static_cast<float>(size.Height())),
+        RectF(0, 0, static_cast<float>(size.Width()), static_cast<float>(size.Height())),
         _imageBuffers.get());
       context.DrawDisplayList(*displayList);
     }
@@ -469,35 +459,32 @@ namespace krys::ui
   }
 
   void TextureMapper::UpdateContents(BitmapTexture &texture, const boo::GraphicsLayer &sourceLayer,
-                                     const boo::IntRect &targetRect, const boo::IntPoint &offset,
-                                     float scale) noexcept
+                                     const RectI &targetRect, const PointI &offset, float scale) noexcept
   {
     PaintIntoTexture(texture, targetRect,
                      [&](boo::GraphicsContext &context)
                      {
                        context.SetTextDrawingMode(boo::TextDrawingMode::Fill);
 
-                       boo::IntRect sourceRect(targetRect);
+                       RectI sourceRect(targetRect);
                        sourceRect.SetLocation(offset);
                        sourceRect.Scale(1 / scale);
                        context.ApplyDeviceScaleFactor(scale);
                        context.Translate(static_cast<float>(-sourceRect.X()),
                                          static_cast<float>(-sourceRect.Y()));
 
-                       sourceLayer.PaintGraphicsLayerContents(context, boo::FloatRect(sourceRect));
+                       sourceLayer.PaintGraphicsLayerContents(context, RectF(sourceRect));
                      });
   }
 
-  void TextureMapper::UpdateContents(BitmapTexture &texture, boo::Image &image,
-                                     const boo::IntRect &targetRect,
-                                     const boo::IntPoint &sourceOffset) noexcept
+  void TextureMapper::UpdateContents(BitmapTexture &texture, boo::Image &image, const RectI &targetRect,
+                                     const PointI &sourceOffset) noexcept
   {
     PaintIntoTexture(texture, targetRect,
                      [&](boo::GraphicsContext &context)
                      {
-                       auto size = boo::FloatSize(targetRect.Size());
-                       context.DrawImage(image, boo::FloatRect({}, size),
-                                         boo::FloatRect(boo::FloatPoint(sourceOffset), size));
+                       auto size = SizeF(targetRect.Size());
+                       context.DrawImage(image, RectF({}, size), RectF(PointF(sourceOffset), size));
                      });
   }
 }

@@ -3,9 +3,9 @@
 #include "Krystal.Booey/Graphics/Color/DestinationColorSpace.hpp"
 #include "Krystal.Booey/Graphics/ImageBuffers/ByteArrayPixelBuffer.hpp"
 #include "Krystal.Booey/Graphics/Images/ImageFrame.hpp"
-#include "Krystal.Booey/Platform/ImageDecoders/ScalableImageDecoder.hpp"
-#include "Krystal.Booey/Platform/SharedBuffer.hpp"
-#include "Krystal.Core/Text/Base64.hpp"
+#include "Krystal.Core/Types/SharedBuffer.hpp"
+#include "Krystal.Image/ImageDecoder.hpp"
+#include "Krystal.Text/Base64.hpp"
 #include <cstdlib>
 
 namespace krys::boo::tests
@@ -27,14 +27,13 @@ namespace krys::boo::tests
     KRYS_NODISCARD List<uint32> Decoded(const List<uint8> &encoded) noexcept
     {
       auto data = SharedBuffer::Create(Span<const uint8>(encoded));
-      auto decoder = ScalableImageDecoder::Create(*data, AlphaOption::NotPremultiplied,
-                                                  GammaAndColorProfileOption::Applied);
+      auto decoder = img::ImageDecoder::Create(*data, img::AlphaOption::NotPremultiplied,
+                                               img::GammaAndColorProfileOption::Applied);
       REQUIRE(decoder);
       decoder->SetData(*data, true);
       auto image = decoder->CreateFrameImageAtIndex(0);
       REQUIRE(image);
-      auto pixels = image->Pixels();
-      return {pixels.begin(), pixels.end()};
+      return image->Pixels->Pixels;
     }
 
     /// @brief Whether each channel of @p actual is within @p tolerance of @p expected (lossy formats).
@@ -111,9 +110,19 @@ namespace krys::boo::tests
 
     SECTION("data URLs")
     {
-      CHECK(DataURL({}, u8"image/png") == u8"data:,");
+      CHECK(DataUrl({}, u8"image/png") == u8"data:,");
       const uint8 bytes[] = {1, 2, 3};
-      CHECK(DataURL(bytes, u8"image/png") == u8"data:image/png;base64,AQID");
+      CHECK(DataUrl(bytes, u8"image/png") == u8"data:image/png;base64,AQID");
     }
+  }
+
+  TEST_CASE("SupportsEncodingMimeType: PNG, JPEG and WebP", "[Graphics][ImageBufferUtilities]")
+  {
+    CHECK(SupportsEncodingMimeType(u8"image/png"));
+    CHECK(SupportsEncodingMimeType(u8"IMAGE/JPEG"));
+    CHECK(SupportsEncodingMimeType(u8"image/webp"));
+    CHECK_FALSE(SupportsEncodingMimeType(u8"image/gif"));
+    CHECK_FALSE(SupportsEncodingMimeType(u8"image/svg+xml"));
+    CHECK_FALSE(SupportsEncodingMimeType(u8""));
   }
 }

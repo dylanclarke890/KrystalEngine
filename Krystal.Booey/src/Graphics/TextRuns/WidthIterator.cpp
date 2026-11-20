@@ -23,13 +23,13 @@
 #include "Krystal.Booey/Graphics/Fonts/Font.hpp"
 #include "Krystal.Booey/Graphics/Fonts/FontCascade.hpp"
 #include "Krystal.Booey/Graphics/TextRuns/TextRun.hpp"
-#include "Krystal.Booey/Text/CharacterProperties.hpp"
 #include "Krystal.Booey/Text/TextSpacing.hpp"
-#include "Krystal.Core/Text/CodePointIterator.hpp"
-#include "Krystal.Core/Text/Unicode.hpp"
+#include "Krystal.Core/Strings/CodePointIterator.hpp"
+#include "Krystal.Core/Strings/Unicode.hpp"
 #include "Krystal.Core/Types/List.hpp"
+#include "Krystal.Text/Bidi.hpp"
+#include "Krystal.Text/CharacterProperties.hpp"
 #include <algorithm>
-#include <unicode/uchar.h>
 #include <utility>
 
 namespace krys::boo
@@ -490,7 +490,7 @@ namespace krys::boo
   void WidthIterator::AdvanceInternal(Utf8TextIterator &textIterator, GlyphBuffer &glyphBuffer) noexcept
   {
     // The core logic here needs to match FontCascade::WidthForTextUsingSimplifiedMeasuring()
-    FloatRect bounds;
+    RectF bounds;
     auto &fontDescription = _fontCascade.GetFontDescription();
     Ref<const Font> primaryFont = _fontCascade.PrimaryFont();
     AdvanceInternalState advanceInternalState(glyphBuffer, *primaryFont, textIterator.CurrentIndex());
@@ -541,7 +541,7 @@ namespace krys::boo
       {
         _lastCharacterIndex = advanceInternalState.CurrentCharacterIndex;
       }
-      bool characterMustDrawSomething = !IsDefaultIgnorableCodePoint(character);
+      bool characterMustDrawSomething = !text::IsDefaultIgnorableCodePoint(character);
       capitalizedCharacter = Capitalized(character);
       char32 characterToWrite = character;
 
@@ -583,7 +583,7 @@ namespace krys::boo
 
       if (Rtl())
       {
-        characterToWrite = u_charMirror(characterToWrite);
+        characterToWrite = text::MirroredCharacter(characterToWrite);
       }
 
       Glyph glyph = glyphData.Glyph;
@@ -948,7 +948,7 @@ namespace krys::boo
       default:                               break;
     }
 
-    if (codePoint >= text::HiraganaLetterSmallA || IsControlCharacter(codePoint))
+    if (codePoint >= text::HiraganaLetterSmallA || text::IsControlCharacter(codePoint))
     {
       return false;
     }
@@ -1043,7 +1043,7 @@ namespace krys::boo
 
       // "Control characters (Unicode category Cc)—other than tabs (U+0009), line feeds (U+000A), carriage
       // returns (U+000D) and sequences that form a segment break—must be rendered as a visible glyph"
-      if (IsControlCharacter(characterResponsibleForThisGlyph))
+      if (text::IsControlCharacter(characterResponsibleForThisGlyph))
       {
         // Let's assume that .notdef is visible.
         GlyphBufferGlyph visibleGlyph = 0;

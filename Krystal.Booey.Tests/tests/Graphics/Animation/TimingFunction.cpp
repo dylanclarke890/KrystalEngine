@@ -1,7 +1,6 @@
 ﻿#include "Krystal.Booey/Graphics/Animation/TimingFunction.hpp"
 #include "catch2/catch_approx.hpp"
 #include "catch2/catch_test_macros.hpp"
-#include "Krystal.Booey/Graphics/Animation/UnitBezier.hpp"
 
 namespace krys::boo::tests
 {
@@ -15,18 +14,6 @@ namespace krys::boo::tests
       auto text = function.CssText();
       return std::string {text.begin(), text.end()};
     }
-  }
-
-  TEST_CASE("UnitBezier", "[Graphics][TimingFunction]")
-  {
-    UnitBezier ease {0.25, 0.1, 0.25, 1.0};
-    CHECK(ease.Solve(0.0, 1e-6) == Catch::Approx(0.0));
-    CHECK(ease.Solve(1.0, 1e-6) == Catch::Approx(1.0));
-    CHECK(ease.Solve(0.5, 1e-6) == Catch::Approx(0.8024033877).epsilon(1e-5));
-    // Outside [0, 1], the curve continues along its end-point gradients.
-    CHECK(ease.Solve(-0.5, 1e-6) == Catch::Approx(-0.2));
-    UnitBezier linear {0, 0, 1, 1};
-    CHECK(linear.Solve(0.3, 1e-6) == Catch::Approx(0.3));
   }
 
   TEST_CASE("TimingFunction", "[Graphics][TimingFunction]")

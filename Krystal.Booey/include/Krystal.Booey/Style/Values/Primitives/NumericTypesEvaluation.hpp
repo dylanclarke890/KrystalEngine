@@ -24,8 +24,6 @@
 
 #pragma once
 
-#include "Krystal.Booey/Graphics/Geometry/FloatPoint.hpp"
-#include "Krystal.Booey/Graphics/Geometry/FloatSize.hpp"
 #include "Krystal.Booey/Graphics/Geometry/LayoutPoint.hpp"
 #include "Krystal.Booey/Graphics/Geometry/LayoutSize.hpp"
 #include "Krystal.Booey/Graphics/Geometry/LayoutUnit.hpp"
@@ -35,6 +33,8 @@
 #include "Krystal.Booey/Style/Values/Primitives/NumericTypesCalc.hpp"
 #include "Krystal.Booey/Style/Values/Types.hpp"
 #include "Krystal.Core/Attributes.hpp"
+#include "Krystal.Core/Geometry/Point.hpp"
+#include "Krystal.Core/Geometry/Size.hpp"
 #include <algorithm>
 
 namespace krys::boo::style
@@ -209,26 +209,25 @@ namespace krys::boo::style
 #pragma region SpaceSeparatedPoint
 
   template <typename T>
-  struct Evaluation<css::SpaceSeparatedPoint<T>, FloatPoint>
+  struct Evaluation<css::SpaceSeparatedPoint<T>, PointF>
   {
-    KRYS_NODISCARD FloatPoint operator()(const css::SpaceSeparatedPoint<T> &value,
-                                         FloatSize referenceBox) noexcept
+    KRYS_NODISCARD PointF operator()(const css::SpaceSeparatedPoint<T> &value, SizeF referenceBox) noexcept
     requires HasTwoParameterEvaluate<T, float, float>
     {
       return {Evaluate<float>(value.x(), referenceBox.Width()),
               Evaluate<float>(value.y(), referenceBox.Height())};
     }
 
-    KRYS_NODISCARD FloatPoint operator()(const css::SpaceSeparatedPoint<T> &value, FloatSize referenceBox,
-                                         ZoomNeeded token) noexcept
+    KRYS_NODISCARD PointF operator()(const css::SpaceSeparatedPoint<T> &value, SizeF referenceBox,
+                                     ZoomNeeded token) noexcept
     requires HasThreeParameterEvaluate<T, float, float, ZoomNeeded>
     {
       return {Evaluate<float>(value.x(), referenceBox.Width(), token),
               Evaluate<float>(value.y(), referenceBox.Height(), token)};
     }
 
-    KRYS_NODISCARD FloatPoint operator()(const css::SpaceSeparatedPoint<T> &value, FloatSize referenceBox,
-                                         ZoomFactor zoom) noexcept
+    KRYS_NODISCARD PointF operator()(const css::SpaceSeparatedPoint<T> &value, SizeF referenceBox,
+                                     ZoomFactor zoom) noexcept
     requires HasThreeParameterEvaluate<T, float, float, ZoomFactor>
     {
       return {Evaluate<float>(value.x(), referenceBox.Width(), zoom),
@@ -269,26 +268,25 @@ namespace krys::boo::style
 #pragma region SpaceSeparatedSize
 
   template <typename T>
-  struct Evaluation<css::SpaceSeparatedSize<T>, FloatSize>
+  struct Evaluation<css::SpaceSeparatedSize<T>, SizeF>
   {
-    KRYS_NODISCARD FloatSize operator()(const css::SpaceSeparatedSize<T> &value,
-                                        FloatSize referenceBox) noexcept
+    KRYS_NODISCARD SizeF operator()(const css::SpaceSeparatedSize<T> &value, SizeF referenceBox) noexcept
     requires HasTwoParameterEvaluate<T, float, float>
     {
       return {Evaluate<float>(value.Width(), referenceBox.Width()),
               Evaluate<float>(value.Height(), referenceBox.Height())};
     }
 
-    KRYS_NODISCARD FloatSize operator()(const css::SpaceSeparatedSize<T> &value, FloatSize referenceBox,
-                                        ZoomNeeded token) noexcept
+    KRYS_NODISCARD SizeF operator()(const css::SpaceSeparatedSize<T> &value, SizeF referenceBox,
+                                    ZoomNeeded token) noexcept
     requires HasThreeParameterEvaluate<T, float, float, ZoomNeeded>
     {
       return {Evaluate<float>(value.Width(), referenceBox.Width(), token),
               Evaluate<float>(value.Height(), referenceBox.Height(), token)};
     }
 
-    KRYS_NODISCARD FloatSize operator()(const css::SpaceSeparatedSize<T> &value, FloatSize referenceBox,
-                                        ZoomFactor zoom) noexcept
+    KRYS_NODISCARD SizeF operator()(const css::SpaceSeparatedSize<T> &value, SizeF referenceBox,
+                                    ZoomFactor zoom) noexcept
     requires HasThreeParameterEvaluate<T, float, float, ZoomFactor>
     {
       return {Evaluate<float>(value.Width(), referenceBox.Width(), zoom),
@@ -329,26 +327,26 @@ namespace krys::boo::style
 #pragma region MinimallySerialisingSpaceSeparatedSize
 
   template <typename T>
-  struct Evaluation<css::MinimallySerialisingSpaceSeparatedSize<T>, FloatSize>
+  struct Evaluation<css::MinimallySerialisingSpaceSeparatedSize<T>, SizeF>
   {
-    KRYS_NODISCARD FloatSize operator()(const css::MinimallySerialisingSpaceSeparatedSize<T> &value,
-                                        FloatSize referenceBox) noexcept
+    KRYS_NODISCARD SizeF operator()(const css::MinimallySerialisingSpaceSeparatedSize<T> &value,
+                                    SizeF referenceBox) noexcept
     requires HasTwoParameterEvaluate<T, float, float>
     {
       return {Evaluate<float>(value.Width(), referenceBox.Width()),
               Evaluate<float>(value.Height(), referenceBox.Height())};
     }
 
-    KRYS_NODISCARD FloatSize operator()(const css::MinimallySerialisingSpaceSeparatedSize<T> &value,
-                                        FloatSize referenceBox, ZoomNeeded token) noexcept
+    KRYS_NODISCARD SizeF operator()(const css::MinimallySerialisingSpaceSeparatedSize<T> &value,
+                                    SizeF referenceBox, ZoomNeeded token) noexcept
     requires HasThreeParameterEvaluate<T, float, float, ZoomNeeded>
     {
       return {Evaluate<float>(value.Width(), referenceBox.Width(), token),
               Evaluate<float>(value.Height(), referenceBox.Height(), token)};
     }
 
-    KRYS_NODISCARD FloatSize operator()(const css::MinimallySerialisingSpaceSeparatedSize<T> &value,
-                                        FloatSize referenceBox, ZoomFactor zoom) noexcept
+    KRYS_NODISCARD SizeF operator()(const css::MinimallySerialisingSpaceSeparatedSize<T> &value,
+                                    SizeF referenceBox, ZoomFactor zoom) noexcept
     requires HasThreeParameterEvaluate<T, float, float, ZoomFactor>
     {
       return {Evaluate<float>(value.Width(), referenceBox.Width(), zoom),

@@ -6,7 +6,6 @@
 #include "Krystal.Booey.Tests/Layout/LayoutTestUtils.hpp"
 #include "Krystal.Booey.Tests/Loader/PageInFrameFixture.hpp"
 #include "Krystal.Booey.Tests/Loader/TestLoader.hpp"
-#include "Krystal.Booey.Tests/Platform/ImageDecoders/TestImages.hpp"
 #include "Krystal.Booey.Tests/Rendering/PaintTestUtils.hpp"
 #include "Krystal.Booey.Tests/Style/ResolverTestUtils.hpp"
 #include "Krystal.Booey/CSS/DOMMatrix/DOMMatrix.hpp"
@@ -24,6 +23,7 @@
 #include "Krystal.Booey/HTML/ImageData/ImageData.hpp"
 #include "Krystal.Booey/Page/Page.hpp"
 #include "Krystal.Booey/SVG/Elements/SVGImageElement.hpp"
+#include "Krystal.Image.Tests/TestImages.hpp"
 #include <cmath>
 #include <limits>
 #include <numbers>
@@ -302,7 +302,7 @@ namespace krys::boo::tests
       context.SetLineWidth(3);
       fixture.Canvas().Width(100);
       CHECK(context.LineWidth() == 1);
-      CHECK(fixture.Canvas().Size() == IntSize(100, 150));
+      CHECK(fixture.Canvas().Size() == SizeI(100, 150));
     }
   }
 
@@ -629,12 +629,12 @@ namespace krys::boo::tests
     {
       auto made = context.CreateImageData(-3, 2, {});
       REQUIRE_FALSE(made.HasException());
-      CHECK(made.Value()->Size() == IntSize(3, 2));
+      CHECK(made.Value()->Size() == SizeI(3, 2));
       CHECK(made.Value()->ColorSpace() == html::PredefinedColorSpace::SRGB);
       CHECK(context.CreateImageData(0, 2, {}).GetException().Code() == ExceptionCode::IndexSizeError);
 
       auto like = context.CreateImageData(*made.Value());
-      CHECK(like.Value()->Size() == IntSize(3, 2));
+      CHECK(like.Value()->Size() == SizeI(3, 2));
 
       // One made like another takes the context's colour space, not the other's.
       auto p3 = context.CreateImageData(
@@ -650,12 +650,12 @@ namespace krys::boo::tests
       context.FillRect(0, 0, 4, 4);
       auto read = context.GetImageData(1, 1, 2, 2, {});
       REQUIRE_FALSE(read.HasException());
-      CHECK(read.Value()->Size() == IntSize(2, 2));
+      CHECK(read.Value()->Size() == SizeI(2, 2));
       CHECK(read.Value()->Data().AsUint8ClampedArray()->Item(3) == 0);
 
       // Negative sizes read the other way; zero ones are errors.
       auto flipped = context.GetImageData(4, 4, -3, -1, {});
-      CHECK(flipped.Value()->Size() == IntSize(3, 1));
+      CHECK(flipped.Value()->Size() == SizeI(3, 1));
       CHECK(context.GetImageData(0, 0, 0, 1, {}).GetException().Code() == ExceptionCode::IndexSizeError);
     }
 
@@ -709,7 +709,7 @@ namespace krys::boo::tests
             "[html:check-the-usability-of-the-image-argument]")
   {
     LoaderFixture loader;
-    loader.Strategy.Resources[u8"file:///a.png"] = images::PNG;
+    loader.Strategy.Resources[u8"file:///a.png"] = img::tests::images::PNG;
     Canvas2DFixture fixture(
       u8"<canvas id=canvas width=10 height=10></canvas><canvas id=other width=4 height=4>"
       u8"</canvas><canvas id=empty width=0 height=4></canvas><img id=img src='file:///a.png'>"
@@ -803,12 +803,12 @@ namespace krys::boo::tests
   namespace
   {
     /// @brief The anchors of the glyph runs drawn into @p canvas's buffer, in order.
-    KRYS_NODISCARD List<FloatPoint> GlyphAnchors(HTMLCanvasElement &canvas) noexcept
+    KRYS_NODISCARD List<PointF> GlyphAnchors(HTMLCanvasElement &canvas) noexcept
     {
       auto *buffer = canvas.Buffer();
       REQUIRE(buffer);
       auto *backend = static_cast<ImageBufferDisplayListBackend *>(buffer->Backend());
-      List<FloatPoint> anchors;
+      List<PointF> anchors;
       for (const auto &item : backend->CopyDisplayList()->Items())
       {
         if (const auto *glyphs = std::get_if<display_list::DrawGlyphs>(&item))
@@ -1032,7 +1032,7 @@ namespace krys::boo::tests
       context.FillText(u8"abc", 10, 20);
       auto anchors = GlyphAnchors(canvas);
       REQUIRE(anchors.size() == 1);
-      CHECK(anchors[0] == FloatPoint(10, 20));
+      CHECK(anchors[0] == PointF(10, 20));
       CHECK(RecordedTextDrawingMode(canvas, TextDrawingMode::Fill));
     }
 
@@ -1049,7 +1049,7 @@ namespace krys::boo::tests
       context.FillText(u8"abc", 100, 20);
       auto anchors = GlyphAnchors(canvas);
       REQUIRE(anchors.size() == 1);
-      CHECK(anchors[0] == FloatPoint(70, 20));
+      CHECK(anchors[0] == PointF(70, 20));
     }
 
     SECTION("a maximum width narrower than the text scales it")
@@ -1069,7 +1069,7 @@ namespace krys::boo::tests
       context.FillText(u8"abאבcd", 10, 20);
       auto anchors = GlyphAnchors(canvas);
       REQUIRE(anchors.size() >= 3);
-      CHECK(anchors.front() == FloatPoint(10, 20));
+      CHECK(anchors.front() == PointF(10, 20));
       // Each run starts where the run before it ended.
       CHECK(anchors[1].X() == Catch::Approx(30));
       CHECK(anchors.back().X() > anchors[1].X());

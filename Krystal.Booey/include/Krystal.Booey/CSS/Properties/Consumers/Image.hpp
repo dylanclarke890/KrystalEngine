@@ -32,8 +32,8 @@ namespace krys::boo::css::parse_property
   enum class AllowedImageType
   {
     None = 0,
-    URLFunction = 1 << 0,
-    RawStringAsURL = 1 << 1,
+    UrlFunction = 1 << 0,
+    RawStringAsUrl = 1 << 1,
     ImageSet = 1 << 2,
     GeneratedImage = 1 << 3,
   };
@@ -54,13 +54,13 @@ namespace krys::boo::css
 
     KRYS_NODISCARD RefPtr<Value>
       ConsumeImage(TokenRange &tokens, PropertyParserState &state,
-                   AllowedImageType allowedImageTypes = AllowedImageType::URLFunction
+                   AllowedImageType allowedImageTypes = AllowedImageType::UrlFunction
                                                         | AllowedImageType::ImageSet
                                                         | AllowedImageType::GeneratedImage) noexcept;
 
     KRYS_NODISCARD RefPtr<Value>
       ConsumeImageOrNone(TokenRange &tokens, PropertyParserState &state,
-                         AllowedImageType allowedImageTypes = AllowedImageType::URLFunction
+                         AllowedImageType allowedImageTypes = AllowedImageType::UrlFunction
                                                               | AllowedImageType::ImageSet
                                                               | AllowedImageType::GeneratedImage) noexcept;
   }

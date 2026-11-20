@@ -25,8 +25,8 @@
 #pragma once
 
 #include "Krystal.Booey/Loader/Cache/CachedResource.hpp"
-#include "Krystal.Booey/Platform/Timer.hpp"
 #include "Krystal.Core/Threading/NeverDestroyed.hpp"
+#include "Krystal.Core/Time/Timer.hpp"
 #include "Krystal.Core/Types/HashMap.hpp"
 #include "Krystal.Core/Types/List.hpp"
 
@@ -74,15 +74,15 @@ namespace krys::boo
   public:
     KRYS_NODISCARD static MemoryCache &Singleton() noexcept;
 
-    KRYS_NODISCARD CachedResource *ResourceForRequest(const ResourceRequest &) noexcept;
+    KRYS_NODISCARD CachedResource *ResourceForRequest(const net::ResourceRequest &) noexcept;
 
     bool Add(CachedResource &) noexcept;
 
     void Remove(CachedResource &) noexcept;
 
-    KRYS_NODISCARD static bool ShouldRemoveFragmentIdentifier(const url::URL &) noexcept;
+    KRYS_NODISCARD static bool ShouldRemoveFragmentIdentifier(const net::Url &) noexcept;
 
-    KRYS_NODISCARD static url::URL RemoveFragmentIdentifierIfNeeded(const url::URL &) noexcept;
+    KRYS_NODISCARD static net::Url RemoveFragmentIdentifierIfNeeded(const net::Url &) noexcept;
 
     void ForEachResource(KRYS_NOESCAPE const Func<void(CachedResource &)> &) noexcept;
 

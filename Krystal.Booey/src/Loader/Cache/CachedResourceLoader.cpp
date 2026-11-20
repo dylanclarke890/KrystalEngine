@@ -28,7 +28,8 @@
 #include "Krystal.Booey/DOM/Nodes/Document.hpp"
 #include "Krystal.Booey/Loader/Cache/CachedCSSStyleSheet.hpp"
 #include "Krystal.Booey/Loader/Cache/MemoryCache.hpp"
-#include "Krystal.Booey/Page/ChromeClient.hpp"
+#include "Krystal.Booey/Loader/LoaderStrategy.hpp"
+#include "Krystal.Booey/Page/Clients/ChromeClient.hpp"
 #include "Krystal.Booey/Page/LocalFrame.hpp"
 #include "Krystal.Booey/Page/Page.hpp"
 #include "Krystal.Booey/Page/Settings.hpp"
@@ -84,16 +85,16 @@ namespace krys::boo
 
   CachedResourceLoader::~CachedResourceLoader() noexcept = default;
 
-  CachedResource *CachedResourceLoader::GetCachedResource(utf8_stringview resourceURL) const noexcept
+  CachedResource *CachedResourceLoader::GetCachedResource(utf8_stringview resourceUrl) const noexcept
   {
     auto *document = GetDocument();
     krys_debug_assert(document);
     return document ? GetCachedResource(
-                        MemoryCache::RemoveFragmentIdentifierIfNeeded(document->CompleteURL(resourceURL)))
+                        MemoryCache::RemoveFragmentIdentifierIfNeeded(document->CompleteUrl(resourceUrl)))
                     : nullptr;
   }
 
-  CachedResource *CachedResourceLoader::GetCachedResource(const url::URL &url) const noexcept
+  CachedResource *CachedResourceLoader::GetCachedResource(const net::Url &url) const noexcept
   {
     krys_debug_assert(!MemoryCache::ShouldRemoveFragmentIdentifier(url));
     auto found = _documentResources.find(url.String());
@@ -121,12 +122,12 @@ namespace krys::boo
   {
     if (imageLoading == ImageLoading::Immediate)
     {
-      imageLoading = ClientDefersImage(request.GetResourceRequest().URL());
+      imageLoading = ClientDefersImage(request.GetResourceRequest().Url());
     }
     auto resource = RequestResource(CachedResource::Type::ImageResource, krys::move(request), imageLoading);
     if (!resource)
     {
-      return Unexpected<ResourceError>(resource.error());
+      return Unexpected<net::ResourceError>(resource.error());
     }
     return CachedResourceHandle<CachedImage>(Downcast<CachedImage>(resource->get()));
   }
@@ -137,7 +138,7 @@ namespace krys::boo
     Ref<CachedImage> image = AdoptRef(*new CachedImage(krys::move(request)));
     image->SetStatus(CachedResource::Pending);
     image->SetLoading(true);
-    _documentResources[image->URL().String()] = CachedResourceHandle<CachedResource>(image.get());
+    _documentResources[image->Url().String()] = CachedResourceHandle<CachedResource>(image.get());
     return CachedResourceHandle<CachedImage>(image.get());
   }
 
@@ -147,7 +148,7 @@ namespace krys::boo
     auto resource = RequestResource(CachedResource::Type::CSSStyleSheet, krys::move(request));
     if (!resource)
     {
-      return Unexpected<ResourceError>(resource.error());
+      return Unexpected<net::ResourceError>(resource.error());
     }
     return CachedResourceHandle<CachedCSSStyleSheet>(Downcast<CachedCSSStyleSheet>(resource->get()));
   }
@@ -158,7 +159,7 @@ namespace krys::boo
     auto resource = RequestResource(CachedResource::Type::FontResource, krys::move(request));
     if (!resource)
     {
-      return Unexpected<ResourceError>(resource.error());
+      return Unexpected<net::ResourceError>(resource.error());
     }
     return CachedResourceHandle<CachedFont>(Downcast<CachedFont>(resource->get()));
   }
@@ -169,7 +170,7 @@ namespace krys::boo
     auto resource = RequestResource(CachedResource::Type::SVGDocumentResource, krys::move(request));
     if (!resource)
     {
-      return Unexpected<ResourceError>(resource.error());
+      return Unexpected<net::ResourceError>(resource.error());
     }
     return CachedResourceHandle<CachedSVGDocument>(Downcast<CachedSVGDocument>(resource->get()));
   }
@@ -180,7 +181,7 @@ namespace krys::boo
     auto resource = RequestResource(CachedResource::Type::Icon, krys::move(request));
     if (!resource)
     {
-      return Unexpected<ResourceError>(resource.error());
+      return Unexpected<net::ResourceError>(resource.error());
     }
     return CachedResourceHandle<CachedRawResource>(Downcast<CachedRawResource>(resource->get()));
   }
@@ -189,17 +190,17 @@ namespace krys::boo
     CachedResourceLoader::RequestResource(CachedResource::Type type, CachedResourceRequest &&request,
                                           ImageLoading imageLoading) noexcept
   {
-    url::URL url = request.GetResourceRequest().URL();
+    net::Url url = request.GetResourceRequest().Url();
     if (!Frame())
     {
-      return Unexpected<ResourceError>(
-        ResourceError(utf8_string(ErrorDomainBooeyInternal), 0, url, u8"Invalid loader state"));
+      return Unexpected<net::ResourceError>(
+        net::ResourceError(utf8_string(ErrorDomainBooeyInternal), 0, url, u8"Invalid loader state"));
     }
 
     if (!url.IsValid())
     {
-      return Unexpected<ResourceError>(
-        ResourceError(utf8_string(ErrorDomainBooeyInternal), 0, url, u8"URL is invalid"));
+      return Unexpected<net::ResourceError>(
+        net::ResourceError(utf8_string(ErrorDomainBooeyInternal), 0, url, u8"URL is invalid"));
     }
 
     // SVG Images have unique security rules that prevent all subresource requests except for data urls.
@@ -208,9 +209,9 @@ namespace krys::boo
       if (auto *page = Frame()->GetPage();
           page && page->GetChromeClient().IsSVGImageChromeClient() && !url.ProtocolIsData())
       {
-        return Unexpected<ResourceError>(ResourceError(utf8_string(ErrorDomainBooeyInternal), 0, url,
-                                                       u8"Not allowed to request resource",
-                                                       ResourceError::Type::AccessControl));
+        return Unexpected<net::ResourceError>(net::ResourceError(utf8_string(ErrorDomainBooeyInternal), 0,
+                                                                 url, u8"Not allowed to request resource",
+                                                                 net::ResourceError::Type::AccessControl));
       }
     }
 
@@ -255,23 +256,24 @@ namespace krys::boo
         // Synchronous cancellations are likely due to access control.
         if (resourceError.IsNull() || resourceError.IsCancellation())
         {
-          return Unexpected<ResourceError>(ResourceError({}, 0, url, {}, ResourceError::Type::AccessControl));
+          return Unexpected<net::ResourceError>(
+            net::ResourceError({}, 0, url, {}, net::ResourceError::Type::AccessControl));
         }
-        return Unexpected<ResourceError>(resourceError);
+        return Unexpected<net::ResourceError>(resourceError);
       }
     }
 
     if (!url.ProtocolIsData())
     {
-      _validatedURLs.insert(url.String());
+      _validatedUrls.insert(url.String());
     }
 
-    krys_debug_assert(resource->URL() == url);
+    krys_debug_assert(resource->Url() == url);
     if (!_garbageCollectDocumentResourcesTimer.IsActive())
     {
       _garbageCollectDocumentResourcesTimer.StartOneShot({});
     }
-    _documentResources[resource->URL().String()] = resource;
+    _documentResources[resource->Url().String()] = resource;
     return resource;
   }
 
@@ -321,7 +323,7 @@ namespace krys::boo
 
   void CachedResourceLoader::DocumentDidFinishLoadEvent() noexcept
   {
-    _validatedURLs.clear();
+    _validatedUrls.clear();
   }
 
   CachedResourceLoader::RevalidationPolicy CachedResourceLoader::DetermineRevalidationPolicy(
@@ -347,7 +349,7 @@ namespace krys::boo
 
     // Avoid loading the same resource multiple times for a single document, even if the cache policies would
     // tell us to.
-    if (_validatedURLs.contains(existingResource->URL().String()))
+    if (_validatedUrls.contains(existingResource->Url().String()))
     {
       return Use;
     }
@@ -429,17 +431,17 @@ namespace krys::boo
     ReloadImagesIfNotDeferred();
   }
 
-  ImageLoading CachedResourceLoader::ClientDefersImage(const url::URL &) const noexcept
+  ImageLoading CachedResourceLoader::ClientDefersImage(const net::Url &) const noexcept
   {
     return _imagesEnabled ? ImageLoading::Immediate : ImageLoading::DeferredUntilVisible;
   }
 
-  bool CachedResourceLoader::ShouldPerformImageLoad(const url::URL &url) const noexcept
+  bool CachedResourceLoader::ShouldPerformImageLoad(const net::Url &url) const noexcept
   {
     return _autoLoadImages || url.ProtocolIsData();
   }
 
-  bool CachedResourceLoader::ShouldDeferImageLoad(const url::URL &url) const noexcept
+  bool CachedResourceLoader::ShouldDeferImageLoad(const net::Url &url) const noexcept
   {
     return ClientDefersImage(url) == ImageLoading::DeferredUntilVisible || !ShouldPerformImageLoad(url);
   }
@@ -455,7 +457,7 @@ namespace krys::boo
     {
       auto *image = DynamicDowncast<CachedImage>(*resource);
       if (image && resource->StillNeedsLoad()
-          && ClientDefersImage(resource->URL()) == ImageLoading::Immediate)
+          && ClientDefersImage(resource->Url()) == ImageLoading::Immediate)
       {
         image->Load(*this);
       }

@@ -95,7 +95,7 @@ layer at (0,0) size 200x100
     auto &box = Downcast<RenderBox>(*fixture.ById(u8"abs").Renderer());
     CHECK(static_cast<RenderObject *>(box.ContainingBlock()) == fixture.ById(u8"fo").Renderer());
     CHECK(box.Location() == LayoutPoint(5, 7));
-    CHECK(box.LocalToAbsolute() == FloatPoint(55, 27));
+    CHECK(box.LocalToAbsolute() == PointF(55, 27));
   }
 
   TEST_CASE("SVGForeignObjectElement: positioned content paints and is hit in it",

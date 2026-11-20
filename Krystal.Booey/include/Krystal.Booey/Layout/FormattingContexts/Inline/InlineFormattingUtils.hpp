@@ -103,7 +103,7 @@ namespace krys::boo::layout
       HorizontalAlignmentOffset(const RenderStyle &rootStyle, InlineLayoutUnit contentLogicalRight,
                                 InlineLayoutUnit lineLogicalWidth, InlineLayoutUnit hangingTrailingWidth,
                                 bool isLastLineOrLineEndsWithForcedLineBreak,
-                                Maybe<TextDirection> inlineBaseDirectionOverride = null) noexcept;
+                                Maybe<text::TextDirection> inlineBaseDirectionOverride = null) noexcept;
 
     KRYS_NODISCARD static InlineItemPosition LeadingInlineItemPositionForNextLine(
       InlineItemPosition lineContentEnd, Maybe<InlineItemPosition> previousLineContentEnd,

@@ -23,9 +23,6 @@ target_compile_options(Krystal.Core.Tests
     $<$<CXX_COMPILER_ID:MSVC>:/W4 /MP /utf-8>
 )
 
-target_compile_definitions(Krystal.Core.Tests PRIVATE
-    KRYS_CORE_TESTS_DATA_DIR="${CMAKE_CURRENT_SOURCE_DIR}/data")
-
 catch_discover_tests(Krystal.Core.Tests)
 
 target_precompile_headers(Krystal.Core.Tests
@@ -59,30 +56,26 @@ target_sources(Krystal.Core.Tests
 	PRIVATE tests/Colour/ColourInterpolation.cpp
 	PRIVATE tests/Colour/ColourUtilities.cpp
 
-  # Text
-	PRIVATE tests/Text/ASCII.cpp
-	PRIVATE tests/Text/Base64.cpp
-	PRIVATE tests/Text/CodePointIterator.cpp
-	PRIVATE tests/Text/StringBuilder.cpp
-	PRIVATE tests/Text/StringToIntegerConversion.cpp
-	PRIVATE tests/Text/ParsingUtilities.cpp
-	PRIVATE tests/Text/TextStream.cpp
-	PRIVATE tests/Text/EncodingRegistry.cpp
-	PRIVATE tests/Text/Unicode.cpp
-	PRIVATE tests/Text/Encodings/ASCII.cpp
-	PRIVATE tests/Text/Encodings/Atari.cpp
-	PRIVATE tests/Text/Encodings/ISO-8859.cpp
-	PRIVATE tests/Text/Encodings/Windows.cpp
+  # Strings
+	PRIVATE tests/Strings/ASCII.cpp
+	PRIVATE tests/Strings/CodePointIterator.cpp
+	PRIVATE tests/Strings/StringAtom.cpp
+	PRIVATE tests/Strings/StringBuilder.cpp
+	PRIVATE tests/Strings/StringToIntegerConversion.cpp
+	PRIVATE tests/Strings/ParsingUtilities.cpp
+	PRIVATE tests/Strings/TextStream.cpp
+	PRIVATE tests/Strings/Unicode.cpp
 
   # Types
 	PRIVATE tests/Types/BloomFilter.cpp
 	PRIVATE tests/Types/CompactVariant.cpp
 	PRIVATE tests/Types/DataRef.cpp
+	PRIVATE tests/Types/Decimal.cpp
 	PRIVATE tests/Types/FixedVector.cpp
 	PRIVATE tests/Types/IntervalTree.cpp
 	PRIVATE tests/Types/ListHashSet.cpp
 	PRIVATE tests/Types/Packed.cpp
-	PRIVATE tests/Types/StringAtom.cpp
+	PRIVATE tests/Types/SharedBuffer.cpp
 	PRIVATE tests/Types/ThreadSafeWeakPtr.cpp
 
   # Threading
@@ -95,14 +88,30 @@ target_sources(Krystal.Core.Tests
 	PRIVATE tests/Threading/TaskInbox.cpp
 	PRIVATE tests/Threading/Thread.cpp
 
+  # Time
+	PRIVATE tests/Time/Timer.cpp
+
   # Commands
 	PRIVATE tests/Commands/Command.cpp
 	
+  # Geometry
+	PRIVATE tests/Geometry/AffineTransform.cpp
+	PRIVATE tests/Geometry/GeometryUtilities.cpp
+	PRIVATE tests/Geometry/Point.cpp
+	PRIVATE tests/Geometry/Point3.cpp
+	PRIVATE tests/Geometry/PointGraph.cpp
+	PRIVATE tests/Geometry/Polygon.cpp
+	PRIVATE tests/Geometry/Quad.cpp
+	PRIVATE tests/Geometry/Rect.cpp
+	PRIVATE tests/Geometry/Region.cpp
+	PRIVATE tests/Geometry/Segment.cpp
+	PRIVATE tests/Geometry/Size.cpp
+	PRIVATE tests/Geometry/TransformationMatrix.cpp
+
   # IO
   PRIVATE tests/IO/Backends/NativeFileBackend.cpp
 	PRIVATE tests/IO/Streams/NativeFileStream.cpp
 	PRIVATE tests/IO/Streams/MemoryStream.cpp
-	PRIVATE tests/IO/ImageLoader.cpp
 	PRIVATE tests/IO/Path.cpp
 	PRIVATE tests/IO/VirtualFileSystem.cpp
 
@@ -111,6 +120,7 @@ target_sources(Krystal.Core.Tests
 	PRIVATE tests/Maths/Clipspace.cpp
 	PRIVATE tests/Maths/Compare.cpp
 	PRIVATE tests/Maths/Convert.cpp
+	PRIVATE tests/Maths/Easing.cpp
 	PRIVATE tests/Maths/Interpolate.cpp
 	PRIVATE tests/Maths/Maths.cpp
 	PRIVATE tests/Maths/Matrix.cpp

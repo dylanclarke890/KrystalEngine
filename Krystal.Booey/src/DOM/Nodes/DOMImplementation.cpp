@@ -11,10 +11,11 @@
 #include "Krystal.Booey/HTML/Images/ImageDocument.hpp"
 #include "Krystal.Booey/Infra/Namespaces.hpp"
 #include "Krystal.Booey/Page/Settings.hpp"
-#include "Krystal.Booey/Platform/MIMETypeRegistry.hpp"
 #include "Krystal.Booey/SVG/SVGDocument.hpp"
-#include "Krystal.Booey/URL/URL.hpp"
-#include "Krystal.Core/Text/ASCII.hpp"
+#include "Krystal.Core/Strings/ASCII.hpp"
+#include "Krystal.Image/ImageDecoder.hpp"
+#include "Krystal.Net/MimeTypeRegistry.hpp"
+#include "Krystal.Net/Url.hpp"
 
 namespace krys::boo::dom
 {
@@ -183,7 +184,7 @@ namespace krys::boo::dom
     return AdoptRef<Document>(*document.release());
   }
 
-  Ref<Document> DOMImplementation::CreateDocument(utf8_stringview contentType, const url::URL &url) noexcept
+  Ref<Document> DOMImplementation::CreateDocument(utf8_stringview contentType, const net::Url &url) noexcept
   {
     auto create = [&]() -> Ref<Document>
     {
@@ -203,14 +204,14 @@ namespace krys::boo::dom
         document->_contentType = u8"image/svg+xml";
         return document;
       }
-      if (MIMETypeRegistry::IsXMLMIMEType(contentType))
+      if (net::MimeTypeRegistry::IsXMLMimeType(contentType))
       {
         auto document = CreateRef<XMLDocument>();
         document->_contentType = DOMString(contentType);
         return document;
       }
       // https://html.spec.whatwg.org/#navigate-media
-      if (MIMETypeRegistry::IsSupportedImageMIMEType(contentType))
+      if (img::ImageDecoder::SupportsMimeType(contentType))
       {
         Ref<Document> document = CreateRef<ImageDocument>();
         document->_contentType = DOMString(contentType);
@@ -230,7 +231,7 @@ namespace krys::boo::dom
     auto document = create();
     if (!url.IsNull())
     {
-      document->SetURL(url);
+      document->SetUrl(url);
     }
     return document;
   }

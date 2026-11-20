@@ -34,7 +34,7 @@ namespace krys::boo::style
 {
   using namespace css::literals;
 
-  void Scale::Apply(TransformationMatrix &transform, const FloatSize &size) const noexcept
+  void Scale::Apply(TransformationMatrix &transform, const SizeF &size) const noexcept
   {
     if (const auto &protectedValue = _value)
     {
@@ -126,7 +126,7 @@ namespace krys::boo::style
 
   // MARK: - Platform
 
-  RefPtr<TransformOperation> ToPlatform<Scale>::operator()(const Scale &value, const FloatSize &size) noexcept
+  RefPtr<TransformOperation> ToPlatform<Scale>::operator()(const Scale &value, const SizeF &size) noexcept
   {
     if (const auto &function = value._value)
     {

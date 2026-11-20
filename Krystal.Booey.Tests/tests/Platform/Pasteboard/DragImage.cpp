@@ -14,7 +14,7 @@
 #include "Krystal.Booey/Page/LocalFrame.hpp"
 #include "Krystal.Booey/Page/LocalFrameView.hpp"
 #include "Krystal.Booey/Page/Page.hpp"
-#include "Krystal.Booey/URL/URL.hpp"
+#include "Krystal.Net/Url.hpp"
 
 namespace krys::boo::tests
 {
@@ -60,7 +60,7 @@ namespace krys::boo::tests
     /// @brief An empty image of @p width by @p height.
     KRYS_NODISCARD DragImageRef ImageOfSize(int32 width, int32 height) noexcept
     {
-      return ImageBuffer::Create(FloatSize(static_cast<float>(width), static_cast<float>(height)), 1);
+      return ImageBuffer::Create(SizeF(static_cast<float>(width), static_cast<float>(height)), 1);
     }
   }
 
@@ -76,7 +76,7 @@ namespace krys::boo::tests
     {
       auto snapshot = SnapshotNode(frame, fixture.ById(u8"box"), {});
       REQUIRE(snapshot);
-      CHECK(snapshot->LogicalSize() == FloatSize(200, 40));
+      CHECK(snapshot->LogicalSize() == SizeF(200, 40));
       CHECK(Contains<display_list::FillCompositedRect>(snapshot));
       // The view's state is put back.
       CHECK(frame.View()->BaseBackgroundColor() == Color::white);
@@ -90,10 +90,10 @@ namespace krys::boo::tests
 
     SECTION("A rect of the frame")
     {
-      auto snapshot = SnapshotFrameRect(frame, IntRect(10, 10, 50, 20), {});
+      auto snapshot = SnapshotFrameRect(frame, RectI(10, 10, 50, 20), {});
       REQUIRE(snapshot);
-      CHECK(snapshot->LogicalSize() == FloatSize(50, 20));
-      CHECK(!SnapshotFrameRect(frame, IntRect(10, 10, 0, 20), {}));
+      CHECK(snapshot->LogicalSize() == SizeF(50, 20));
+      CHECK(!SnapshotFrameRect(frame, RectI(10, 10, 0, 20), {}));
     }
 
     SECTION("The selection, only when there's a range")
@@ -106,8 +106,8 @@ namespace krys::boo::tests
                                            Affinity::Downstream);
       auto snapshot = SnapshotSelection(frame, {});
       REQUIRE(snapshot);
-      auto bounds = EnclosingIntRect(fixture.Document->Selection().SelectionBounds());
-      CHECK(snapshot->LogicalSize() == FloatSize(bounds.Size()));
+      auto bounds = EnclosingRectI(fixture.Document->Selection().SelectionBounds());
+      CHECK(snapshot->LogicalSize() == SizeF(bounds.Size()));
       CHECK(Contains<display_list::DrawGlyphs>(snapshot));
     }
   }
@@ -119,7 +119,7 @@ namespace krys::boo::tests
       auto image = ImageOfSize(40, 20);
       auto scaled = ScaleDragImage(image, {2, 3});
       REQUIRE(scaled);
-      CHECK(DragImageSize(scaled) == IntSize(80, 60));
+      CHECK(DragImageSize(scaled) == SizeI(80, 60));
       CHECK(Contains<display_list::DrawImageBuffer>(scaled));
       // The same size is the same image.
       CHECK(ScaleDragImage(image, {1, 1}) == image);
@@ -131,7 +131,7 @@ namespace krys::boo::tests
       auto image = ImageOfSize(40, 20);
       auto dissolved = DissolveDragImageToFraction(image, 0.75f);
       REQUIRE(dissolved);
-      CHECK(DragImageSize(dissolved) == IntSize(40, 20));
+      CHECK(DragImageSize(dissolved) == SizeI(40, 20));
       auto displayList = DisplayListOf(dissolved);
       bool translucent = false;
       for (const auto &item : displayList->Items())
@@ -148,25 +148,25 @@ namespace krys::boo::tests
     SECTION("Fitting to a maximum size keeps the aspect ratio")
     {
       CHECK(DragImageSize(FitDragImageToMaxSize(ImageOfSize(400, 100), {400, 100}, {200, 200}))
-            == IntSize(200, 50));
+            == SizeI(200, 50));
       CHECK(DragImageSize(FitDragImageToMaxSize(ImageOfSize(100, 100), {100, 100}, {200, 200}))
-            == IntSize(100, 100));
+            == SizeI(100, 100));
       // An image laid out at another size is scaled to it first.
       CHECK(DragImageSize(FitDragImageToMaxSize(ImageOfSize(100, 100), {50, 20}, {200, 200}))
-            == IntSize(50, 20));
+            == SizeI(50, 20));
     }
 
     SECTION("The device scale factor scales the image")
     {
       CHECK(DragImageSize(PlatformAdjustDragImageForDeviceScaleFactor(ImageOfSize(40, 20), 2))
-            == IntSize(80, 40));
+            == SizeI(80, 40));
     }
 
     SECTION("No image")
     {
       CHECK(!CreateDragImageFromImage(nullptr, {}));
       CHECK(!CreateDragImageIconForCachedImageFilename(u8"image.png"));
-      CHECK(DragImageSize(nullptr) == IntSize());
+      CHECK(DragImageSize(nullptr) == SizeI());
     }
   }
 
@@ -181,7 +181,7 @@ namespace krys::boo::tests
     {
       auto image = CreateDragImageForNode(frame, fixture.ById(u8"box"));
       REQUIRE(image);
-      CHECK(DragImageSize(image) == IntSize(100, 40));
+      CHECK(DragImageSize(image) == SizeI(100, 40));
     }
 
     SECTION("The selection")
@@ -196,7 +196,7 @@ namespace krys::boo::tests
 
     SECTION("A link's label: its text over its URL, at most 200px wide")
     {
-      url::URL url(u8"https://example.com/");
+      net::Url url(u8"https://example.com/");
       auto labelled = CreateDragImageForLink(fixture.ById(u8"link"), url, u8"a link", 1).DragImage;
       auto unlabelled = CreateDragImageForLink(fixture.ById(u8"link"), url, u8"", 1).DragImage;
       REQUIRE(labelled);
@@ -218,7 +218,7 @@ namespace krys::boo::tests
       CHECK(DragImageSize(clipped).Width() <= 200);
 
       auto size = DragImageSize(labelled);
-      CHECK(DragOffsetForLinkDragImage(labelled) == IntPoint(-size.Width() / 2, -2));
+      CHECK(DragOffsetForLinkDragImage(labelled) == PointI(-size.Width() / 2, -2));
       auto anchor = AnchorPointForLinkDragImage(labelled);
       CHECK(anchor.X() == 0.5f);
       CHECK(anchor.Y() == Catch::Approx(static_cast<float>(size.Height() - 2) / size.Height()));

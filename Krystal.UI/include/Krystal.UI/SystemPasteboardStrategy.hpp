@@ -19,7 +19,7 @@ namespace krys::ui
     KRYS_NODISCARD List<utf8_string>
       ReadFilePathsFromClipboard(utf8_stringview pasteboardName) noexcept override;
 
-    KRYS_NODISCARD RefPtr<boo::SharedBuffer>
+    KRYS_NODISCARD RefPtr<SharedBuffer>
       ReadBufferFromClipboard(utf8_stringview pasteboardName,
                               utf8_stringview pasteboardType) noexcept override;
 

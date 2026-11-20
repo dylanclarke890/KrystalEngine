@@ -32,11 +32,11 @@
 #include "Krystal.Booey/Graphics/Geometry/LayoutRoundedRect.hpp"
 #include "Krystal.Booey/Graphics/Geometry/RectEdges.hpp"
 #include "Krystal.Core/Attributes.hpp"
+#include "Krystal.Core/Geometry/GeometryForward.hpp"
 
 namespace krys::boo
 {
   class Color;
-  class FloatRect;
   class FloatRoundedRect;
   class GraphicsContext;
   class Path;
@@ -133,9 +133,9 @@ namespace krys::boo
       return _innerEdgeRect.GetRadii();
     }
 
-    KRYS_NODISCARD FloatRect SnappedOuterRect(float deviceScaleFactor) const noexcept;
+    KRYS_NODISCARD RectF SnappedOuterRect(float deviceScaleFactor) const noexcept;
 
-    KRYS_NODISCARD FloatRect SnappedInnerRect(float deviceScaleFactor) const noexcept;
+    KRYS_NODISCARD RectF SnappedInnerRect(float deviceScaleFactor) const noexcept;
 
     KRYS_NODISCARD bool IsRounded() const noexcept
     {

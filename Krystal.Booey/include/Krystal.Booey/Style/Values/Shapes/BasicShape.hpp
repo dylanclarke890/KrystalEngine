@@ -35,7 +35,7 @@
 #include "Krystal.Booey/Style/Values/Shapes/ShapeFunction.hpp"
 #include "Krystal.Booey/Style/Values/Shapes/WindRuleComputation.hpp"
 #include "Krystal.Booey/Style/Values/Shapes/XywhFunction.hpp"
-#include "Krystal.Core/Text/StringBuilder.hpp"
+#include "Krystal.Core/Strings/StringBuilder.hpp"
 
 namespace krys::boo::style
 {
@@ -102,7 +102,7 @@ namespace krys::boo::style
   template <>
   struct PathComputation<BasicShape>
   {
-    KRYS_NODISCARD boo::Path operator()(const BasicShape &, const FloatRect &) noexcept;
+    KRYS_NODISCARD boo::Path operator()(const BasicShape &, const RectF &) noexcept;
   };
 
   // MARK: - Winding

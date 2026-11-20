@@ -101,7 +101,7 @@ namespace krys::boo
     }
   }
 
-  void CaretAnimator::Paint(GraphicsContext &context, const FloatRect &caret, const Color &color,
+  void CaretAnimator::Paint(GraphicsContext &context, const RectF &caret, const Color &color,
                             const LayoutPoint &) const noexcept
   {
     context.FillRect(caret, color);

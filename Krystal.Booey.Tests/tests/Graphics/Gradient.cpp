@@ -1,7 +1,7 @@
 ﻿#include "Krystal.Booey/Graphics/Gradient.hpp"
 #include "catch2/catch_test_macros.hpp"
-#include "Krystal.Booey/Graphics/Geometry/FloatRect.hpp"
-#include "Krystal.Booey/Graphics/Images/ImageOrientation.hpp"
+#include "Krystal.Core/Geometry/Rect.hpp"
+#include "Krystal.Image/ImageOrientation.hpp"
 
 namespace krys::boo::tests
 {
@@ -46,50 +46,50 @@ namespace krys::boo::tests
     SECTION("tiled drawing")
     {
       // A vertical gradient only needs a one pixel wide tile.
-      FloatSize size {100, 100};
-      FloatRect srcRect {10, 10, 50, 50};
+      SizeF size {100, 100};
+      RectF srcRect {10, 10, 50, 50};
       linear->AdjustParametersForTiledDrawing(size, srcRect, {});
-      CHECK(size == FloatSize {1, 100});
-      CHECK(srcRect == FloatRect {0, 10, 1, 50});
+      CHECK(size == SizeF {1, 100});
+      CHECK(srcRect == RectF {0, 10, 1, 50});
 
       // ... unless the tiles are spaced.
-      FloatSize spacedSize {100, 100};
-      FloatRect spacedRect {10, 10, 50, 50};
+      SizeF spacedSize {100, 100};
+      RectF spacedRect {10, 10, 50, 50};
       linear->AdjustParametersForTiledDrawing(spacedSize, spacedRect, {2, 2});
-      CHECK(spacedSize == FloatSize {100, 100});
+      CHECK(spacedSize == SizeF {100, 100});
 
       auto horizontal = Gradient::Create(Gradient::LinearData {{0, 0}, {100, 0}}, method);
-      FloatSize horizontalSize {100, 100};
-      FloatRect horizontalRect {10, 10, 50, 50};
+      SizeF horizontalSize {100, 100};
+      RectF horizontalRect {10, 10, 50, 50};
       horizontal->AdjustParametersForTiledDrawing(horizontalSize, horizontalRect, {});
-      CHECK(horizontalSize == FloatSize {100, 1});
-      CHECK(horizontalRect == FloatRect {10, 0, 50, 1});
+      CHECK(horizontalSize == SizeF {100, 1});
+      CHECK(horizontalRect == RectF {10, 0, 50, 1});
     }
   }
 
-  TEST_CASE("ImageOrientation", "[Graphics][ImageOrientation]")
+  TEST_CASE("ImageOrientation", "[Graphics][img::ImageOrientation]")
   {
-    using Orientation = ImageOrientation::Orientation;
+    using Orientation = img::ImageOrientation::Orientation;
 
-    CHECK(ImageOrientation {} == Orientation::None);
-    CHECK(ImageOrientation::FromEXIFValue(6) == Orientation::OriginRightTop);
-    CHECK(ImageOrientation::FromEXIFValue(0) == Orientation::None);
-    CHECK(ImageOrientation::FromEXIFValue(9) == Orientation::None);
+    CHECK(img::ImageOrientation {} == Orientation::None);
+    CHECK(img::ImageOrientation::FromEXIFValue(6) == Orientation::OriginRightTop);
+    CHECK(img::ImageOrientation::FromEXIFValue(0) == Orientation::None);
+    CHECK(img::ImageOrientation::FromEXIFValue(9) == Orientation::None);
 
-    CHECK(ImageOrientation {Orientation::OriginRightTop}.UsesWidthAsHeight());
-    CHECK_FALSE(ImageOrientation {Orientation::OriginBottomRight}.UsesWidthAsHeight());
+    CHECK(img::ImageOrientation {Orientation::OriginRightTop}.UsesWidthAsHeight());
+    CHECK_FALSE(img::ImageOrientation {Orientation::OriginBottomRight}.UsesWidthAsHeight());
 
-    CHECK(ImageOrientation {Orientation::OriginTopLeft}.WithFlippedY() == Orientation::OriginBottomLeft);
-    CHECK(ImageOrientation {Orientation::OriginLeftBottom}.WithFlippedY() == Orientation::OriginLeftTop);
+    CHECK(img::ImageOrientation {Orientation::OriginTopLeft}.WithFlippedY() == Orientation::OriginBottomLeft);
+    CHECK(img::ImageOrientation {Orientation::OriginLeftBottom}.WithFlippedY() == Orientation::OriginLeftTop);
 
     // 90 degrees clockwise: x' = -y + w, y' = x.
-    auto transform = ImageOrientation {Orientation::OriginRightTop}.TransformFromDefault({20, 10});
+    auto transform = img::ImageOrientation {Orientation::OriginRightTop}.TransformFromDefault({20, 10});
     CHECK(transform.A() == 0);
     CHECK(transform.B() == 1);
     CHECK(transform.C() == -1);
     CHECK(transform.D() == 0);
     CHECK(transform.E() == 20);
     CHECK(transform.F() == 0);
-    CHECK(ImageOrientation {Orientation::OriginTopLeft}.TransformFromDefault({20, 10}).IsIdentity());
+    CHECK(img::ImageOrientation {Orientation::OriginTopLeft}.TransformFromDefault({20, 10}).IsIdentity());
   }
 }

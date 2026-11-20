@@ -54,8 +54,8 @@
 #include "Krystal.Booey/Graphics/Fonts/FontDatabase.hpp"
 #include "Krystal.Booey/Graphics/Fonts/FontDescription.hpp"
 #include "Krystal.Booey/Graphics/Fonts/FontPlatformData.hpp"
-#include "Krystal.Booey/Platform/SharedBuffer.hpp"
-#include "Krystal.Core/Text/ASCII.hpp"
+#include "Krystal.Core/Strings/ASCII.hpp"
+#include "Krystal.Core/Types/SharedBuffer.hpp"
 
 namespace krys::boo
 {

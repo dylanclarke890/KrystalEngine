@@ -27,7 +27,7 @@
 
 namespace krys::boo
 {
-  bool StyleContentAlignmentData::IsStartward(Maybe<TextDirection> leftRightAxisDirection,
+  bool StyleContentAlignmentData::IsStartward(Maybe<text::TextDirection> leftRightAxisDirection,
                                               bool isFlexReverse) const noexcept
   {
     switch (static_cast<ContentPosition>(_position))
@@ -50,20 +50,20 @@ namespace krys::boo
       case ContentPosition::Left:
         if (leftRightAxisDirection)
         {
-          return leftRightAxisDirection == TextDirection::LTR;
+          return leftRightAxisDirection == text::TextDirection::LTR;
         }
         return true;
       case ContentPosition::Right:
         if (leftRightAxisDirection)
         {
-          return leftRightAxisDirection == TextDirection::RTL;
+          return leftRightAxisDirection == text::TextDirection::RTL;
         }
         return true;
       default: krys_debug_assert("Invalid ContentPosition"); return true;
     }
   }
 
-  bool StyleContentAlignmentData::IsEndward(Maybe<TextDirection> leftRightAxisDirection,
+  bool StyleContentAlignmentData::IsEndward(Maybe<text::TextDirection> leftRightAxisDirection,
                                             bool isFlexReverse) const noexcept
   {
     switch (static_cast<ContentPosition>(_position))
@@ -86,13 +86,13 @@ namespace krys::boo
       case ContentPosition::Left:
         if (leftRightAxisDirection)
         {
-          return leftRightAxisDirection == TextDirection::RTL;
+          return leftRightAxisDirection == text::TextDirection::RTL;
         }
         return false;
       case ContentPosition::Right:
         if (leftRightAxisDirection)
         {
-          return leftRightAxisDirection == TextDirection::LTR;
+          return leftRightAxisDirection == text::TextDirection::LTR;
         }
         return false;
       default: krys_debug_assert("Invalid ContentPosition"); return false;

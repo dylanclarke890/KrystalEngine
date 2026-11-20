@@ -26,7 +26,6 @@
 
 #include "Krystal.Booey/Page/Scrolling/ScrollSnapOffsetsInfo.hpp"
 #include "Krystal.Booey/DOM/Nodes/Element.hpp"
-#include "Krystal.Booey/Graphics/Geometry/FloatQuad.hpp"
 #include "Krystal.Booey/Platform/Scrolling/ScrollableArea.hpp"
 #include "Krystal.Booey/Platform/Scrolling/ScrollAnimator.hpp"
 #include "Krystal.Booey/Rendering/RenderBox.hpp"
@@ -35,6 +34,7 @@
 #include "Krystal.Booey/Rendering/Style/RenderStyle.hpp"
 #include "Krystal.Booey/Style/Values/ScrollSnap/ScrollMargin.hpp"
 #include "Krystal.Booey/Style/Values/ScrollSnap/ScrollPadding.hpp"
+#include "Krystal.Core/Geometry/Quad.hpp"
 #include <algorithm>
 #include <cmath>
 
@@ -457,8 +457,8 @@ namespace krys::boo
 
     // The scroll container's snapport, where the top left of its border box is the origin.
     auto scrollSnapPort = viewportRect;
-    scrollSnapPort.Contract(
-      style::ExtentForRect(style.GetScrollPaddingBox(), viewportRect, style::ZoomNeeded {}));
+    Contract(scrollSnapPort,
+             style::ExtentForRect(style.GetScrollPaddingBox(), viewportRect, style::ZoomNeeded {}));
 
     ScrollSnapOffsetsInfo info;
     info.Strictness = container->Strictness;
@@ -473,7 +473,7 @@ namespace krys::boo
       // The snap area is the bounding box of the element's border box, transformed.
       auto scrollSnapArea = LayoutRect(
         child
-          ->LocalToContainerQuad(FloatQuad(FloatRect(child->BorderBoundingBox())), &scrollingElementBox,
+          ->LocalToContainerQuad(QuadF(RectF(child->BorderBoundingBox())), &scrollingElementBox,
                                  {MapCoordinatesMode::UseTransforms, MapCoordinatesMode::IgnoreStickyOffsets})
           .BoundingBox());
 
@@ -483,7 +483,7 @@ namespace krys::boo
         scrollSnapArea.MoveBy(scrollPosition);
       }
 
-      scrollSnapArea.Expand(style::ExtentForRect(child->Style().GetScrollMarginBox(), scrollSnapArea));
+      Expand(scrollSnapArea, style::ExtentForRect(child->Style().GetScrollMarginBox(), scrollSnapArea));
       auto alignment = child->Style().GetScrollSnapAlign();
       auto stop = child->Style().GetScrollSnapStop();
 
@@ -512,7 +512,7 @@ namespace krys::boo
       // The snap area is defined by its scroll position, so make it relative to the scroll offsets.
       auto areaOriginRelativeToSnapPort = scrollSnapArea.Location() - scrollSnapPort.Location();
       LayoutRect areaAsOffsets(
-        LayoutPoint(scrollableArea.ScrollOffsetFromPosition(RoundedIntPoint(
+        LayoutPoint(scrollableArea.ScrollOffsetFromPosition(RoundedPointI(
           LayoutPoint(areaOriginRelativeToSnapPort.Width(), areaOriginRelativeToSnapPort.Height())))),
         scrollSnapArea.Size());
       info.SnapAreas.push_back(areaAsOffsets);
@@ -524,8 +524,8 @@ namespace krys::boo
         auto position =
           SnapAlignOffset(scrollSnapArea.X(), scrollSnapArea.MaxX(), xAlign, areaXAxisFlipped)
           - SnapAlignOffset(scrollSnapPort.X(), scrollSnapPort.MaxX(), xAlign, areaXAxisFlipped);
-        auto offset = std::clamp(scrollableArea.ScrollOffsetFromPosition(IntPoint(position.Round(), 0)).X(),
-                                 0, maxScrollOffset.X());
+        auto offset = std::clamp(scrollableArea.ScrollOffsetFromPosition(PointI(position.Round(), 0)).X(), 0,
+                                 maxScrollOffset.X());
         AddOrUpdateSnapOffset(info.HorizontalSnapOffsets, LayoutUnit(offset), stop,
                               areaAsOffsets.Width() > scrollSnapPort.Width(), areaIndex);
       }
@@ -534,8 +534,8 @@ namespace krys::boo
         auto position =
           SnapAlignOffset(scrollSnapArea.Y(), scrollSnapArea.MaxY(), yAlign, areaYAxisFlipped)
           - SnapAlignOffset(scrollSnapPort.Y(), scrollSnapPort.MaxY(), yAlign, areaYAxisFlipped);
-        auto offset = std::clamp(scrollableArea.ScrollOffsetFromPosition(IntPoint(0, position.Round())).Y(),
-                                 0, maxScrollOffset.Y());
+        auto offset = std::clamp(scrollableArea.ScrollOffsetFromPosition(PointI(0, position.Round())).Y(), 0,
+                                 maxScrollOffset.Y());
         AddOrUpdateSnapOffset(info.VerticalSnapOffsets, LayoutUnit(offset), stop,
                               areaAsOffsets.Height() > scrollSnapPort.Height(), areaIndex);
       }

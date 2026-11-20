@@ -36,12 +36,12 @@ namespace krys::boo
   {
   private:
     SourceImage _sourceImage;
-    FloatRect _sourceImageRect;
+    RectF _sourceImageRect;
     SVGPreserveAspectRatioValue _preserveAspectRatio;
 
   public:
     KRYS_NODISCARD static Ref<FEImage>
-      Create(SourceImage &&sourceImage, const FloatRect &sourceImageRect,
+      Create(SourceImage &&sourceImage, const RectF &sourceImageRect,
              const SVGPreserveAspectRatioValue &preserveAspectRatio) noexcept;
 
     KRYS_NODISCARD bool operator==(const FEImage &other) const noexcept;
@@ -56,7 +56,7 @@ namespace krys::boo
       _sourceImage = krys::move(sourceImage);
     }
 
-    KRYS_NODISCARD FloatRect SourceImageRect() const noexcept
+    KRYS_NODISCARD RectF SourceImageRect() const noexcept
     {
       return _sourceImageRect;
     }
@@ -67,7 +67,7 @@ namespace krys::boo
     }
 
   private:
-    FEImage(SourceImage &&sourceImage, const FloatRect &sourceImageRect,
+    FEImage(SourceImage &&sourceImage, const RectF &sourceImageRect,
             const SVGPreserveAspectRatioValue &preserveAspectRatio) noexcept;
 
     KRYS_NODISCARD bool operator==(const FilterEffect &other) const noexcept override
@@ -85,8 +85,8 @@ namespace krys::boo
     {
     }
 
-    KRYS_NODISCARD FloatRect CalculateImageRect(const Filter &filter, Span<const FloatRect> inputImageRects,
-                                                const FloatRect &primitiveSubregion) const noexcept override;
+    KRYS_NODISCARD RectF CalculateImageRect(const Filter &filter, Span<const RectF> inputImageRects,
+                                            const RectF &primitiveSubregion) const noexcept override;
 
     TextStream &ExternalRepresentation(TextStream &ts,
                                        FilterRepresentation representation) const noexcept final;

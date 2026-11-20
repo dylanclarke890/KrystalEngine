@@ -28,9 +28,9 @@
 #include "Krystal.Booey/Loader/Cache/CachedRawResource.hpp"
 #include "Krystal.Booey/Loader/Cache/CachedResourceClient.hpp"
 #include "Krystal.Booey/Loader/Cache/CachedResourceHandle.hpp"
-#include "Krystal.Booey/URL/URL.hpp"
 #include "Krystal.Core/RefCounted.hpp"
 #include "Krystal.Core/Types/WeakPtr.hpp"
+#include "Krystal.Net/Url.hpp"
 
 namespace krys::boo
 {
@@ -43,11 +43,11 @@ namespace krys::boo
 
   private:
     WeakPtr<DocumentLoader> _documentLoader;
-    url::URL _url;
+    net::Url _url;
     CachedResourceHandle<CachedRawResource> _resource;
 
   public:
-    KRYS_NODISCARD static Ref<IconLoader> Create(DocumentLoader &documentLoader, url::URL url) noexcept;
+    KRYS_NODISCARD static Ref<IconLoader> Create(DocumentLoader &documentLoader, net::Url url) noexcept;
 
     ~IconLoader() noexcept override;
 
@@ -56,7 +56,7 @@ namespace krys::boo
     void StopLoading() noexcept;
 
   private:
-    IconLoader(DocumentLoader &documentLoader, url::URL url) noexcept;
+    IconLoader(DocumentLoader &documentLoader, net::Url url) noexcept;
 
     void NotifyFinished(CachedResource &resource) noexcept override;
   };

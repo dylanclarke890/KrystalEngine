@@ -1,7 +1,7 @@
 ﻿#include "Krystal.UI/Input.hpp"
 #include "Krystal.Booey/HTML/EventLoop/EventLoop.hpp"
-#include "Krystal.Booey/Platform/Events/WindowsKeyboardCodes.hpp"
-#include "Krystal.Core/Text/CodePointIterator.hpp"
+#include "Krystal.Booey/Input/LegacyKeyCodes.hpp"
+#include "Krystal.Core/Strings/CodePointIterator.hpp"
 #include <format>
 
 namespace krys::ui::input
@@ -36,7 +36,7 @@ namespace krys::ui::input
       constexpr static utf8_stringview codes[] {u8"Digit0", u8"Digit1", u8"Digit2", u8"Digit3", u8"Digit4",
                                                 u8"Digit5", u8"Digit6", u8"Digit7", u8"Digit8", u8"Digit9"};
       auto index = static_cast<int32>(key) - static_cast<int32>(Key::Num0);
-      return {.Code = codes[index], .WindowsVirtualKeyCode = '0' + index};
+      return {.Code = codes[index], .LegacyKeyCode = '0' + index};
     }
     if (key >= Key::A && key <= Key::Z)
     {
@@ -45,7 +45,7 @@ namespace krys::ui::input
         u8"KeyJ", u8"KeyK", u8"KeyL", u8"KeyM", u8"KeyN", u8"KeyO", u8"KeyP", u8"KeyQ", u8"KeyR",
         u8"KeyS", u8"KeyT", u8"KeyU", u8"KeyV", u8"KeyW", u8"KeyX", u8"KeyY", u8"KeyZ"};
       auto index = static_cast<int32>(key) - static_cast<int32>(Key::A);
-      return {.Code = codes[index], .WindowsVirtualKeyCode = 'A' + index};
+      return {.Code = codes[index], .LegacyKeyCode = 'A' + index};
     }
     if (key >= Key::Keypad0 && key <= Key::Keypad9)
     {
@@ -53,7 +53,7 @@ namespace krys::ui::input
                                                 u8"Numpad4", u8"Numpad5", u8"Numpad6", u8"Numpad7",
                                                 u8"Numpad8", u8"Numpad9"};
       auto index = static_cast<int32>(key) - static_cast<int32>(Key::Keypad0);
-      return {.Code = codes[index], .WindowsVirtualKeyCode = boo::vk::Numpad0 + index, .IsKeypad = true};
+      return {.Code = codes[index], .LegacyKeyCode = boo::vk::Numpad0 + index, .IsKeypad = true};
     }
     if (key >= Key::F1 && key <= Key::F20)
     {
@@ -64,7 +64,7 @@ namespace krys::ui::input
       return {.Code = names[index],
               .NamedKey = names[index],
               .KeyIdentifier = names[index],
-              .WindowsVirtualKeyCode = boo::vk::F1 + index};
+              .LegacyKeyCode = boo::vk::F1 + index};
     }
 
     auto named = [](utf8_stringview code, utf8_stringview name, utf8_stringview identifier, int32 keyCode,
@@ -74,7 +74,7 @@ namespace krys::ui::input
     };
     auto typing = [](utf8_stringview code, int32 keyCode, bool isKeypad = false) -> KeyDescription
     {
-      return {.Code = code, .WindowsVirtualKeyCode = keyCode, .IsKeypad = isKeypad};
+      return {.Code = code, .LegacyKeyCode = keyCode, .IsKeypad = isKeypad};
     };
 
     switch (key)
@@ -256,7 +256,7 @@ namespace krys::ui::input
     bool isSystemKey = modifiers.Contains(pal::KeyModifier::Alt);
     return boo::PlatformKeyboardEvent(type, text.Text, text.UnmodifiedText, krys::move(keyValue),
                                       utf8_string(description.Code), krys::move(keyIdentifier),
-                                      description.WindowsVirtualKeyCode, isAutoRepeat, description.IsKeypad,
+                                      description.LegacyKeyCode, isAutoRepeat, description.IsKeypad,
                                       isSystemKey, ToBooey(modifiers), boo::html::EventLoop::Current().Now());
   }
 
@@ -368,8 +368,8 @@ namespace krys::ui::input
     }
   }
 
-  boo::PlatformWheelEvent WheelEvent(const boo::IntPoint &point, const boo::IntPoint &screenPoint,
-                                     float notchesX, float notchesY, pal::KeyModifiers palModifiers,
+  boo::PlatformWheelEvent WheelEvent(const PointI &point, const PointI &screenPoint, float notchesX,
+                                     float notchesY, pal::KeyModifiers palModifiers,
                                      const pal::WheelScrollSettings &settings) noexcept
   {
     // As a Windows wheel message: one wheel at a time, the horizontal one if it turned.
@@ -418,7 +418,7 @@ namespace krys::ui::input
                                    modifiers, boo::html::EventLoop::Current().Now());
   }
 
-  boo::PlatformWheelEvent TouchpadPanEvent(const boo::IntPoint &point, const boo::IntPoint &screenPoint,
+  boo::PlatformWheelEvent TouchpadPanEvent(const PointI &point, const PointI &screenPoint,
                                            const pal::TouchpadPanInput &input) noexcept
   {
     using Phase = boo::PlatformWheelEventPhase;

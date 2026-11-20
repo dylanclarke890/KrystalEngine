@@ -20,15 +20,15 @@ namespace krys::ui
     owner.OverlayHidden(overlay);
   }
 
-  int32 Overlay::AlignedLeft(const boo::IntRect &controlRect, int32 width, int32 viewportWidth,
+  int32 Overlay::AlignedLeft(const RectI &controlRect, int32 width, int32 viewportWidth,
                              bool rightToLeft) noexcept
   {
     auto x = rightToLeft ? controlRect.MaxX() - width : controlRect.X();
     return std::clamp(x, 0, std::max(0, viewportWidth - width));
   }
 
-  boo::IntRect Overlay::Place(const boo::IntRect &controlRect, const boo::IntSize &size,
-                              const boo::IntSize &viewportSize, bool rightToLeft) noexcept
+  RectI Overlay::Place(const RectI &controlRect, const SizeI &size, const SizeI &viewportSize,
+                       bool rightToLeft) noexcept
   {
     auto height = size.Height();
     auto spaceBelow = std::max(0, viewportSize.Height() - controlRect.MaxY());
@@ -45,26 +45,26 @@ namespace krys::ui
     }
     auto width = std::min(size.Width(), std::max(viewportSize.Width(), 1));
     auto x = AlignedLeft(controlRect, width, viewportSize.Width(), rightToLeft);
-    return boo::IntRect(x, y, std::max(width, 1), std::max(height, 1));
+    return RectI(x, y, std::max(width, 1), std::max(height, 1));
   }
 
-  void Overlay::SizeContentView(View &view, const View &owner, const boo::IntSize &size) noexcept
+  void Overlay::SizeContentView(View &view, const View &owner, const SizeI &size) noexcept
   {
     view.SetDeviceScaleFactor(owner.DeviceScaleFactor());
     view.ResizeToLayoutSize(size);
   }
 
-  boo::Element *Overlay::HitTest(View &view, const boo::IntPoint &point) noexcept
+  boo::Element *Overlay::HitTest(View &view, const PointI &point) noexcept
   {
     return view.HitTestInPage(point);
   }
 
-  bool Overlay::WheelView(View &view, const boo::IntPoint &point, float notchesX, float notchesY) noexcept
+  bool Overlay::WheelView(View &view, const PointI &point, float notchesX, float notchesY) noexcept
   {
     return view.MouseWheelInPage(point, notchesX, notchesY, {}, pal::GetWheelScrollSettings());
   }
 
-  boo::Element *Overlay::ElementWithAttributeAt(View &view, const boo::IntPoint &point,
+  boo::Element *Overlay::ElementWithAttributeAt(View &view, const PointI &point,
                                                 utf8_stringview name) noexcept
   {
     auto attribute = boo::DOMStringAtom(name);

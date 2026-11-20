@@ -207,7 +207,7 @@ namespace krys::boo::html
     }
   }
 
-  Locale &DateTimeFieldElement::LocaleForOwner() const noexcept
+  i18n::Locale &DateTimeFieldElement::LocaleForOwner() const noexcept
   {
     return NodeDocument().GetCachedLocale(LocaleIdentifier());
   }

@@ -16,7 +16,7 @@ namespace krys::boo::tests
         REQUIRE(buffer);
         CHECK(buffer->GetRenderingMode() == RenderingMode::DisplayList);
         CHECK(buffer->Purpose() == RenderingPurpose::Canvas);
-        CHECK(buffer->BackendSize() == IntSize(20, 40));
+        CHECK(buffer->BackendSize() == SizeI(20, 40));
         CHECK_FALSE(buffer->LayerContentsDisplayDelegate());
       }
       CHECK(ImageBuffer::Create({10, 20}, 1)->Purpose() == RenderingPurpose::Unspecified);

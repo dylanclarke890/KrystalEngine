@@ -20,10 +20,10 @@
  */
 
 #include "Krystal.Booey/SVG/SVGTransformable.hpp"
-#include "Krystal.Booey/Graphics/Transforms/AffineTransform.hpp"
 #include "Krystal.Booey/SVG/Internals/SVGParserUtilities.hpp"
 #include "Krystal.Booey/SVG/SVGTransform.hpp"
-#include "Krystal.Core/Text/ParsingUtilities.hpp"
+#include "Krystal.Core/Geometry/AffineTransform.hpp"
+#include "Krystal.Core/Strings/ParsingUtilities.hpp"
 #include "Krystal.Core/Types/Array.hpp"
 #include "Krystal.Core/Types/Span.hpp"
 

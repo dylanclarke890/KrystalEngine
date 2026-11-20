@@ -55,7 +55,7 @@ namespace krys::boo::style
         return css::keywords::None {};
       }
 
-      auto url = ConvertToStyle(urlValue->URL(), state);
+      auto url = ConvertToStyle(urlValue->Url(), state);
 
       if (list->size() == 1)
       {
@@ -67,22 +67,22 @@ namespace krys::boo::style
       {
         switch (primitiveValue->ValueId())
         {
-          case css::ValueId::None: return SVGPaint::URLNone {url, css::keywords::None {}};
+          case css::ValueId::None: return SVGPaint::UrlNone {url, css::keywords::None {}};
 
           case css::ValueId::Currentcolor:
             state.Style().SetDisallowsFastPathInheritance();
-            return SVGPaint::URLColor {url, Color::GetCurrentColor()};
+            return SVGPaint::UrlColor {url, Color::GetCurrentColor()};
 
           default: break;
         }
       }
 
-      return SVGPaint::URLColor {url, ConvertCSSValueToStyle<Color>(state, *list->Item(1))};
+      return SVGPaint::UrlColor {url, ConvertCSSValueToStyle<Color>(state, *list->Item(1))};
     }
 
     if (const auto *urlValue = DynamicDowncast<css::UrlValue>(value))
     {
-      return ConvertToStyle(urlValue->URL(), state);
+      return ConvertToStyle(urlValue->Url(), state);
     }
 
     if (const auto *primitiveValue = DynamicDowncast<css::PrimitiveValue>(value))

@@ -41,7 +41,7 @@ namespace krys::boo::style::tests
                        *State);
       CHECK(Serialised(horizontal) == "10px calc(100% - 5px)");
 
-      Style.SetDirection(TextDirection::RTL);
+      Style.SetDirection(text::TextDirection::RTL);
       auto rtl =
         ConvertToStyle(css::Position {css::ThreeComponentPositionHorizontalVerticalLengthFirst {
                          css::FourComponentPositionHorizontal {{css::keywords::XStart {}, 10_css_px}},
@@ -72,14 +72,14 @@ namespace krys::boo::style::tests
 
     SECTION("Evaluation")
     {
-      auto point = Evaluate<FloatPoint>(Position {PositionX {10_css_px}, PositionY {50_css_percentage}},
-                                        FloatSize {200, 100}, ZoomNeeded {});
-      CHECK(point == FloatPoint {10, 50});
+      auto point = Evaluate<PointF>(Position {PositionX {10_css_px}, PositionY {50_css_percentage}},
+                                    SizeF {200, 100}, ZoomNeeded {});
+      CHECK(point == PointF {10, 50});
     }
 
     SECTION("Construction from a point")
     {
-      CHECK(Position {FloatPoint {3, 4}} == Position {3_css_px, 4_css_px});
+      CHECK(Position {PointF {3, 4}} == Position {3_css_px, 4_css_px});
     }
   }
 }

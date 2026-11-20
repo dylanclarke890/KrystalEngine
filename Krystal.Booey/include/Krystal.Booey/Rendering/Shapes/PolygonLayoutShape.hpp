@@ -29,9 +29,9 @@
 
 #pragma once
 
-#include "Krystal.Booey/Graphics/Geometry/FloatPolygon.hpp"
 #include "Krystal.Booey/Rendering/Shapes/LayoutShape.hpp"
 #include "Krystal.Booey/Rendering/Shapes/ShapeInterval.hpp"
+#include "Krystal.Core/Geometry/Polygon.hpp"
 #include "Krystal.Core/Macros.hpp"
 
 namespace krys::boo
@@ -40,21 +40,21 @@ namespace krys::boo
   class OffsetPolygonEdge final : public VertexPair
   {
   private:
-    FloatPoint _vertex1;
-    FloatPoint _vertex2;
+    PointF _vertex1;
+    PointF _vertex2;
 
   public:
-    OffsetPolygonEdge(const FloatPolygonEdge &edge, const FloatSize &offset) noexcept
+    OffsetPolygonEdge(const PolygonEdgeF &edge, const SizeF &offset) noexcept
         : _vertex1(edge.Vertex1() + offset), _vertex2(edge.Vertex2() + offset)
     {
     }
 
-    KRYS_NODISCARD const FloatPoint &Vertex1() const noexcept override
+    KRYS_NODISCARD const PointF &Vertex1() const noexcept override
     {
       return _vertex1;
     }
 
-    KRYS_NODISCARD const FloatPoint &Vertex2() const noexcept override
+    KRYS_NODISCARD const PointF &Vertex2() const noexcept override
     {
       return _vertex2;
     }
@@ -80,11 +80,11 @@ namespace krys::boo
     KRYS_NON_COPY_MOVABLE(PolygonLayoutShape);
 
   private:
-    FloatPolygon _polygon;
+    PolygonF _polygon;
     float _boxLogicalWidth {0.f};
 
   public:
-    PolygonLayoutShape(List<FloatPoint> &&vertices, float boxLogicalWidth) noexcept
+    PolygonLayoutShape(List<PointF> &&vertices, float boxLogicalWidth) noexcept
         : _polygon(krys::move(vertices)), _boxLogicalWidth(boxLogicalWidth)
     {
     }

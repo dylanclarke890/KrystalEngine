@@ -50,7 +50,7 @@ namespace krys::boo::css
       Resolution,
       Color,
       Image,
-      URL,
+      Url,
       CustomIdent,
       String,
       TransformFunction,

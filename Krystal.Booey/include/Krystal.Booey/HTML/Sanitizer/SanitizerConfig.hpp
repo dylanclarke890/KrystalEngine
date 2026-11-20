@@ -107,7 +107,7 @@ namespace krys::boo::html
     Maybe<List<SanitizerAttributeNamespace>> RemoveAttributes;
     Maybe<bool> Comments;
     Maybe<bool> DataAttributes;
-    Maybe<bool> JavascriptURLs;
+    Maybe<bool> JavascriptUrls;
   };
 
   /// @see https://html.spec.whatwg.org/#sanitizerpresets

@@ -25,11 +25,13 @@
 
 #pragma once
 
+#include "Krystal.Booey/Graphics/Geometry/LayoutGeometryForward.hpp"
 #include "Krystal.Booey/Graphics/Geometry/LayoutRect.hpp"
-#include "Krystal.Booey/Platform/Timer.hpp"
 #include "Krystal.Core/Attributes.hpp"
+#include "Krystal.Core/Geometry/GeometryForward.hpp"
 #include "Krystal.Core/Macros.hpp"
 #include "Krystal.Core/Time/MonotonicTime.hpp"
+#include "Krystal.Core/Time/Timer.hpp"
 #include "Krystal.Core/Types/Maybe.hpp"
 
 namespace krys::boo
@@ -37,9 +39,7 @@ namespace krys::boo
   class CaretAnimator;
   class Color;
   class Document;
-  class FloatRect;
   class GraphicsContext;
-  class LayoutPoint;
   class Node;
   class Page;
 
@@ -123,7 +123,7 @@ namespace krys::boo
       return _presentationProperties;
     }
 
-    virtual void Paint(GraphicsContext &context, const FloatRect &caret, const Color &color,
+    virtual void Paint(GraphicsContext &context, const RectF &caret, const Color &color,
                        const LayoutPoint &paintOffset) const noexcept;
 
     KRYS_NODISCARD virtual LayoutRect CaretRepaintRectForLocalRect(LayoutRect rect) const noexcept;

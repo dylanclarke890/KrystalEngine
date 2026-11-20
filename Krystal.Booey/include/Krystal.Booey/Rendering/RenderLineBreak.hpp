@@ -21,9 +21,9 @@
 
 #pragma once
 
-#include "Krystal.Booey/Graphics/Geometry/IntRect.hpp"
 #include "Krystal.Booey/Rendering/RenderBoxModelObject.hpp"
 #include "Krystal.Core/Attributes.hpp"
+#include "Krystal.Core/Geometry/Rect.hpp"
 #include "Krystal.Core/Macros.hpp"
 #include "Krystal.Core/TypeCast.hpp"
 
@@ -67,7 +67,7 @@ namespace krys::boo
       return IsWBR();
     }
 
-    KRYS_NODISCARD IntRect LinesBoundingBox() const noexcept;
+    KRYS_NODISCARD RectI LinesBoundingBox() const noexcept;
 
     KRYS_NODISCARD int32 CaretMinOffset() const noexcept final
     {
@@ -85,7 +85,7 @@ namespace krys::boo
 
     void BoundingRects(List<LayoutRect> &rects, const LayoutPoint &accumulatedOffset) const noexcept override;
 
-    void AbsoluteQuads(List<FloatQuad> &quads, bool *wasFixed = nullptr) const noexcept override;
+    void AbsoluteQuads(List<QuadF> &quads, bool *wasFixed = nullptr) const noexcept override;
 
     KRYS_NODISCARD bool CanBeSelectionLeaf() const noexcept final;
 

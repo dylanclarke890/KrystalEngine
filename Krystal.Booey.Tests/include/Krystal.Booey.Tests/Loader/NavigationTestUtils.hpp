@@ -10,9 +10,9 @@
 #include "Krystal.Booey/Loader/NavigationAction.hpp"
 #include "Krystal.Booey/Page/LocalFrameView.hpp"
 #include "Krystal.Booey/Page/Page.hpp"
-#include "Krystal.Booey/Platform/Network/ResourceRequest.hpp"
 #include "Krystal.Core/Types/Func.hpp"
 #include "Krystal.Core/Types/List.hpp"
+#include "Krystal.Net/ResourceRequest.hpp"
 #include <string>
 
 namespace krys::boo::tests
@@ -27,8 +27,8 @@ namespace krys::boo::tests
   struct ReceivedNavigation
   {
     NavigationAction Action;
-    std::string URL;
-    std::string HTTPMethod;
+    std::string Url;
+    std::string HttpMethod;
     /// @brief The browsing context named, for a new window; empty otherwise.
     std::string NewWindowName;
     bool IsNewWindow {false};
@@ -44,13 +44,13 @@ namespace krys::boo::tests
     /// @brief Called with each navigation as it's recorded.
     Func<void(const ReceivedNavigation &)> OnRecord;
 
-    void DispatchNavigationRequested(const NavigationAction &action, const ResourceRequest &request,
+    void DispatchNavigationRequested(const NavigationAction &action, const net::ResourceRequest &request,
                                      const FormSubmission *formSubmission) noexcept final
     {
       Record(action, request, formSubmission, false, {});
     }
 
-    void DispatchNewWindowRequested(const NavigationAction &action, const ResourceRequest &request,
+    void DispatchNewWindowRequested(const NavigationAction &action, const net::ResourceRequest &request,
                                     const FormSubmission *formSubmission,
                                     DOMStringView frameName) noexcept final
     {
@@ -63,7 +63,7 @@ namespace krys::boo::tests
     }
 
   private:
-    void Record(const NavigationAction &action, const ResourceRequest &request,
+    void Record(const NavigationAction &action, const net::ResourceRequest &request,
                 const FormSubmission *formSubmission, bool isNewWindow, DOMStringView frameName) noexcept
     {
       auto narrow = [](utf8_stringview text)
@@ -71,8 +71,8 @@ namespace krys::boo::tests
         return std::string(reinterpret_cast<const char *>(text.data()), text.size());
       };
       ReceivedNavigation received {.Action = action,
-                                   .URL = narrow(request.URL().String()),
-                                   .HTTPMethod = narrow(request.HTTPMethod()),
+                                   .Url = narrow(request.Url().String()),
+                                   .HttpMethod = narrow(request.HttpMethod()),
                                    .NewWindowName = narrow(frameName),
                                    .IsNewWindow = isNewWindow,
                                    .Submission = ShareRefPtr(const_cast<FormSubmission *>(formSubmission))};
@@ -100,7 +100,7 @@ namespace krys::boo::tests
       Frame = ShareRefPtr(&TestPage->MainFrame());
       Frame->CreateView({400, 300});
       Frame->SetDocument(ShareRefPtr<boo::Document>(Document.get()));
-      Document->SetURL(url::URL(u8"https://example.com/dir/page.html"));
+      Document->SetUrl(net::Url(u8"https://example.com/dir/page.html"));
     }
 
     template <typename T>
@@ -118,9 +118,9 @@ namespace krys::boo::tests
     }
 
     /// @brief The document's URL, as a `std::string`.
-    KRYS_NODISCARD std::string DocumentURL() const noexcept
+    KRYS_NODISCARD std::string DocumentUrl() const noexcept
     {
-      auto &url = Document->GetURL().String();
+      auto &url = Document->GetUrl().String();
       return std::string(reinterpret_cast<const char *>(url.data()), url.size());
     }
   };

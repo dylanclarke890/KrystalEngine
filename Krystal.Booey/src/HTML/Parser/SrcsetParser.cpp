@@ -31,7 +31,7 @@
 
 #include "Krystal.Booey/HTML/Parser/SrcsetParser.hpp"
 #include "Krystal.Booey/HTML/MicroParsers/Numbers.hpp"
-#include "Krystal.Core/Text/ASCII.hpp"
+#include "Krystal.Core/Strings/ASCII.hpp"
 #include <algorithm>
 #include <limits>
 
@@ -306,25 +306,25 @@ namespace krys::boo::html
 
       // 6. Collect a sequence of code points that are not ASCII whitespace from input given position, and let
       //    url be the result.
-      auto imageURLStart = position;
+      auto imageUrlStart = position;
       while (position < attribute.size() && !text::IsASCIIWhitespace(attribute[position]))
       {
         ++position;
       }
-      auto imageURL = attribute.substr(imageURLStart, position - imageURLStart);
+      auto imageUrl = attribute.substr(imageUrlStart, position - imageUrlStart);
 
       // 7. Let descriptors be a new empty list.
       DescriptorParsingResult result;
 
       // 8. If url ends with U+002C (,), then:
-      if (imageURL.back() == u8',')
+      if (imageUrl.back() == u8',')
       {
         // 8a. Remove all trailing U+002C COMMA characters from url. If this removed more than one character,
         //     that is a parse error.
         // (The splitting loop skipped any leading commas, so url isn't only commas.)
-        while (!imageURL.empty() && imageURL.back() == u8',')
+        while (!imageUrl.empty() && imageUrl.back() == u8',')
         {
-          imageURL.remove_suffix(1);
+          imageUrl.remove_suffix(1);
         }
       }
       // Otherwise:
@@ -352,7 +352,7 @@ namespace krys::boo::html
         }
       }
 
-      imageCandidates.emplace_back(DOMString(imageURL), result, ImageCandidate::OriginAttribute::Srcset);
+      imageCandidates.emplace_back(DOMString(imageUrl), result, ImageCandidate::OriginAttribute::Srcset);
 
       // 16. Return to the step labeled splitting loop.
     }

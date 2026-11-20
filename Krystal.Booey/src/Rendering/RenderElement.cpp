@@ -343,7 +343,7 @@ namespace krys::boo
     return htmlElement && Is<HTMLMarqueeElement>(*htmlElement);
   }
 
-  boo::ImageOrientation RenderElement::GetImageOrientation() const noexcept
+  img::ImageOrientation RenderElement::GetImageOrientation() const noexcept
   {
     return style::ToPlatform<style::ImageOrientation> {}(Style().GetImageOrientation());
   }
@@ -2186,7 +2186,7 @@ namespace krys::boo
     return true;
   }
 
-  bool RenderElement::IsVisibleInDocumentRect(const IntRect &documentRect) const noexcept
+  bool RenderElement::IsVisibleInDocumentRect(const RectI &documentRect) const noexcept
   {
     if (!IsVisibleIgnoringGeometry())
     {
@@ -2220,7 +2220,7 @@ namespace krys::boo
     {
       backgroundPaintingRect = LayoutRect(AbsoluteBoundingBoxRect());
     }
-    return documentRect.Intersects(EnclosingIntRect(backgroundPaintingRect));
+    return documentRect.Intersects(EnclosingRectI(backgroundPaintingRect));
   }
 
   bool RenderElement::IsVisibleInViewport() const noexcept
@@ -2230,7 +2230,7 @@ namespace krys::boo
 
   VisibleInViewportState RenderElement::ImageFrameAvailable(CachedImage &image,
                                                             ImageAnimatingState animatingState,
-                                                            const IntRect *changeRect) noexcept
+                                                            const RectI *changeRect) noexcept
   {
     bool isVisible = IsVisibleInViewport();
 
@@ -2273,7 +2273,7 @@ namespace krys::boo
     }
   }
 
-  bool RenderElement::RepaintForPausedImageAnimationsIfNeeded(const IntRect &visibleRect,
+  bool RenderElement::RepaintForPausedImageAnimationsIfNeeded(const RectI &visibleRect,
                                                               CachedImage &cachedImage) noexcept
   {
     krys_debug_assert(_hasPausedImageAnimations);
@@ -2337,17 +2337,17 @@ namespace krys::boo
            || style.HasBackdropFilter() || style.HasBlendMode();
   }
 
-  FloatRect RenderElement::TransformReferenceBoxRect() const noexcept
+  RectF RenderElement::TransformReferenceBoxRect() const noexcept
   {
     return TransformReferenceBoxRect(Style());
   }
 
-  FloatRect RenderElement::TransformReferenceBoxRect(const RenderStyle &style) const noexcept
+  RectF RenderElement::TransformReferenceBoxRect(const RenderStyle &style) const noexcept
   {
     return ReferenceBoxRect(TransformBoxToCSSBoxType(style.GetTransformBox()));
   }
 
-  FloatRect RenderElement::ReferenceBoxRect(CSSBoxType boxType) const noexcept
+  RectF RenderElement::ReferenceBoxRect(CSSBoxType boxType) const noexcept
   {
     // CSS box model code is implemented in RenderBox::referenceBoxRect().
     if (GetElement() && !Is<SVGElement>(GetElement()))
@@ -2359,8 +2359,8 @@ namespace krys::boo
     {
       auto *viewportElement = Downcast<SVGElement>(GetElement());
       krys_assert(viewportElement);
-      auto viewportSize = SVGLengthContext(viewportElement).ViewportSize().value_or(FloatSize {});
-      return FloatRect {{}, viewportSize};
+      auto viewportSize = SVGLengthContext(viewportElement).ViewportSize().value_or(SizeF {});
+      return RectF {{}, viewportSize};
     };
 
     switch (boxType)
@@ -3027,7 +3027,7 @@ namespace krys::boo
 
   namespace
   {
-    KRYS_NODISCARD bool GetLeadingCorner(const RenderElement &renderer, FloatPoint &point,
+    KRYS_NODISCARD bool GetLeadingCorner(const RenderElement &renderer, PointF &point,
                                          bool &insideFixed) noexcept
     {
       if (renderer.IsSVGRenderer())
@@ -3040,7 +3040,7 @@ namespace krys::boo
 
       if (!renderer.IsInline() || renderer.IsBlockLevelReplacedOrAtomicInline())
       {
-        point = renderer.LocalToAbsolute(FloatPoint(), MapCoordinatesMode::UseTransforms, &insideFixed);
+        point = renderer.LocalToAbsolute(PointF(), MapCoordinatesMode::UseTransforms, &insideFixed);
         return true;
       }
 
@@ -3076,7 +3076,7 @@ namespace krys::boo
 
         if (!o->IsInline() || o->IsBlockLevelReplacedOrAtomicInline())
         {
-          point = o->LocalToAbsolute(FloatPoint(), MapCoordinatesMode::UseTransforms, &insideFixed);
+          point = o->LocalToAbsolute(PointF(), MapCoordinatesMode::UseTransforms, &insideFixed);
           return true;
         }
 
@@ -3088,7 +3088,7 @@ namespace krys::boo
         }
         else if (textRenderer || o->IsBlockLevelReplacedOrAtomicInline())
         {
-          point = FloatPoint();
+          point = PointF();
           if (textRenderer)
           {
             if (auto run = inline_iterator::LineLeftmostTextBoxFor(*textRenderer))
@@ -3099,7 +3099,7 @@ namespace krys::boo
           }
           else if (auto *box = DynamicDowncast<RenderBox>(*o))
           {
-            point.MoveBy(FloatPoint(box->Location()));
+            point.MoveBy(PointF(box->Location()));
           }
           point = o->Container()->LocalToAbsolute(point, MapCoordinatesMode::UseTransforms, &insideFixed);
           return true;
@@ -3111,13 +3111,13 @@ namespace krys::boo
       // FIXME: who said anything about scrolling?
       if (!o && renderer.GetDocument().View())
       {
-        point = FloatPoint(0, static_cast<float>(renderer.View().LayoutOverflowRect().MaxY().ToInt()));
+        point = PointF(0, static_cast<float>(renderer.View().LayoutOverflowRect().MaxY().ToInt()));
         return true;
       }
       return false;
     }
 
-    KRYS_NODISCARD bool GetTrailingCorner(const RenderElement &renderer, FloatPoint &point,
+    KRYS_NODISCARD bool GetTrailingCorner(const RenderElement &renderer, PointF &point,
                                           bool &insideFixed) noexcept
     {
       if (renderer.IsSVGRenderer())
@@ -3130,7 +3130,7 @@ namespace krys::boo
 
       if (!renderer.IsInline() || renderer.IsBlockLevelReplacedOrAtomicInline())
       {
-        point = renderer.LocalToAbsolute(FloatPoint(Downcast<RenderBox>(renderer).Size()),
+        point = renderer.LocalToAbsolute(PointF(Downcast<RenderBox>(renderer).Size()),
                                          MapCoordinatesMode::UseTransforms, &insideFixed);
         return true;
       }
@@ -3165,7 +3165,7 @@ namespace krys::boo
         if (auto *textRenderer = DynamicDowncast<RenderText>(*o);
             textRenderer || o->IsBlockLevelReplacedOrAtomicInline())
         {
-          point = FloatPoint();
+          point = PointF();
           if (textRenderer)
           {
             auto linesBox = LayoutRect(textRenderer->LinesBoundingBox());
@@ -3173,11 +3173,11 @@ namespace krys::boo
             {
               continue;
             }
-            point.MoveBy(FloatPoint(linesBox.MaxXMaxYCorner()));
+            point.MoveBy(PointF(linesBox.MaxXMaxYCorner()));
           }
           else
           {
-            point.MoveBy(FloatPoint(Downcast<RenderBox>(*o).FrameRect().MaxXMaxYCorner()));
+            point.MoveBy(PointF(Downcast<RenderBox>(*o).FrameRect().MaxXMaxYCorner()));
           }
           point = o->Container()->LocalToAbsolute(point, MapCoordinatesMode::UseTransforms, &insideFixed);
           return true;
@@ -3189,8 +3189,8 @@ namespace krys::boo
 
   LayoutRect RenderElement::AbsoluteAnchorRect(bool *insideFixed) const noexcept
   {
-    FloatPoint leading;
-    FloatPoint trailing;
+    PointF leading;
+    PointF trailing;
     bool leadingInFixed = false;
     bool trailingInFixed = false;
     (void)GetLeadingCorner(*this, leading, leadingInFixed);
@@ -3202,8 +3202,8 @@ namespace krys::boo
     // Vertical writing modes might mean the leading point is not in the top left
     if (!IsInline() || IsBlockLevelReplacedOrAtomicInline())
     {
-      upperLeft = FloatPoint(std::min(leading.X(), trailing.X()), std::min(leading.Y(), trailing.Y()));
-      lowerRight = FloatPoint(std::max(leading.X(), trailing.X()), std::max(leading.Y(), trailing.Y()));
+      upperLeft = PointF(std::min(leading.X(), trailing.X()), std::min(leading.Y(), trailing.Y()));
+      lowerRight = PointF(std::max(leading.X(), trailing.X()), std::max(leading.Y(), trailing.Y()));
     } // Otherwise, it's not obvious what to do.
 
     if (insideFixed)
@@ -3212,7 +3212,7 @@ namespace krys::boo
       *insideFixed = leadingInFixed;
     }
 
-    return EnclosingLayoutRect(FloatRect(upperLeft, lowerRight.ExpandedTo(upperLeft) - upperLeft));
+    return EnclosingLayoutRect(RectF(upperLeft, lowerRight.ExpandedTo(upperLeft) - upperLeft));
   }
 
   Pair<LayoutRect, LayoutRect>
@@ -3226,7 +3226,7 @@ namespace krys::boo
     // box of the transformed border box of the target element.
     // See https://www.w3.org/TR/css-scroll-snap-1/#scroll-margin.
     auto marginRect = anchorRect;
-    marginRect.Expand(style::ExtentForRect(scrollMarginBox, anchorRect));
+    Expand(marginRect, style::ExtentForRect(scrollMarginBox, anchorRect));
     return {marginRect, anchorRect};
   }
 

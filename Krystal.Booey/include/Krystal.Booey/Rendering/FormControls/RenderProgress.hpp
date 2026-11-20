@@ -20,8 +20,8 @@
 
 #pragma once
 
-#include "Krystal.Booey/Platform/Timer.hpp"
 #include "Krystal.Booey/Rendering/RenderBlockFlow.hpp"
+#include "Krystal.Core/Time/Timer.hpp"
 
 namespace krys::boo
 {

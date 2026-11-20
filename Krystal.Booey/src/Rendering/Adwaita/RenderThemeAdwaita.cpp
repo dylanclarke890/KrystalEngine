@@ -31,7 +31,6 @@
 #include "Krystal.Booey/Graphics/Fonts/FontCascade.hpp"
 #include "Krystal.Booey/HTML/Elements/HTMLInputElement.hpp"
 #include "Krystal.Booey/Page/Page.hpp"
-#include "Krystal.Booey/Platform/ThemeAdwaita.hpp"
 #include "Krystal.Booey/Rendering/FormControls/RenderProgress.hpp"
 #include "Krystal.Booey/Rendering/RenderElement.hpp"
 #include "Krystal.Booey/Rendering/Style/RenderStyle+GettersInlines.hpp"
@@ -170,12 +169,6 @@ namespace krys::boo
     return SystemFocusRingColor();
   }
 
-  void RenderThemeAdwaita::PlatformColorsDidChange() noexcept
-  {
-    static_cast<ThemeAdwaita &>(Theme::Singleton()).PlatformColorsDidChange();
-    RenderTheme::PlatformColorsDidChange();
-  }
-
   utf8_stringview RenderThemeAdwaita::ExtraDefaultStyleSheet() noexcept
   {
     return css::ThemeAdwaitaUserAgentStyleSheet;
@@ -309,8 +302,8 @@ namespace krys::boo
       std::chrono::duration<double>(1.0 / Page::FullSpeedFramesPerSecond));
   }
 
-  IntRect RenderThemeAdwaita::ProgressBarRectForBounds(const RenderProgress &,
-                                                       const IntRect &bounds) const noexcept
+  RectI RenderThemeAdwaita::ProgressBarRectForBounds(const RenderProgress &,
+                                                     const RectI &bounds) const noexcept
   {
     // FIXME: Vertical progress bars (the renderer's isHorizontalWritingMode), with RenderProgress (G14d2).
     bool isHorizontal = true;
@@ -337,7 +330,7 @@ namespace krys::boo
     return LayoutUnit(5);
   }
 
-  IntSize RenderThemeAdwaita::SliderTickSize() const noexcept
+  SizeI RenderThemeAdwaita::SliderTickSize() const noexcept
   {
     return {1, 7};
   }
@@ -449,7 +442,11 @@ namespace krys::boo
 
   void RenderThemeAdwaita::SetAccentColor(const Color &color) noexcept
   {
-    static_cast<ThemeAdwaita &>(Theme::Singleton()).SetAccentColor(color);
+    if (SystemAccentColor() == color)
+    {
+      return;
+    }
+    SetSystemAccentColor(color);
     PlatformColorsDidChange();
   }
 }

@@ -21,7 +21,6 @@
  */
 
 #include "Krystal.Booey/Rendering/SVG/RenderSVGInline.hpp"
-#include "Krystal.Booey/Graphics/Geometry/FloatQuad.hpp"
 #include "Krystal.Booey/Rendering/Line/LegacyInlineFlowBox.hpp"
 #include "Krystal.Booey/Rendering/Style/RenderStyle+GettersInlines.hpp"
 #include "Krystal.Booey/Rendering/SVG/Legacy/SVGResourcesCache.hpp"
@@ -30,6 +29,7 @@
 #include "Krystal.Booey/Rendering/SVG/SVGInlineFlowBox.hpp"
 #include "Krystal.Booey/Rendering/SVG/SVGRenderSupport.hpp"
 #include "Krystal.Booey/SVG/Elements/SVGGraphicsElement.hpp"
+#include "Krystal.Core/Geometry/Quad.hpp"
 
 namespace krys::boo
 {
@@ -69,27 +69,27 @@ namespace krys::boo
     return RenderElement::IsChildAllowed(child, style);
   }
 
-  FloatRect RenderSVGInline::ObjectBoundingBox() const noexcept
+  RectF RenderSVGInline::ObjectBoundingBox() const noexcept
   {
     if (auto *textAncestor = RenderSVGText::LocateRenderSVGTextAncestor(*this))
     {
       return textAncestor->ObjectBoundingBox();
     }
 
-    return FloatRect();
+    return RectF();
   }
 
-  FloatRect RenderSVGInline::StrokeBoundingBox() const noexcept
+  RectF RenderSVGInline::StrokeBoundingBox() const noexcept
   {
     if (auto *textAncestor = RenderSVGText::LocateRenderSVGTextAncestor(*this))
     {
       return textAncestor->StrokeBoundingBox();
     }
 
-    return FloatRect();
+    return RectF();
   }
 
-  FloatRect RenderSVGInline::RepaintRectInLocalCoordinates(
+  RectF RenderSVGInline::RepaintRectInLocalCoordinates(
     RepaintRectCalculation repaintRectCalculation) const noexcept
   {
     if (auto *textAncestor = RenderSVGText::LocateRenderSVGTextAncestor(*this))
@@ -97,10 +97,10 @@ namespace krys::boo
       return textAncestor->RepaintRectInLocalCoordinates(repaintRectCalculation);
     }
 
-    return FloatRect();
+    return RectF();
   }
 
-  FloatRect RenderSVGInline::DecoratedBoundingBox() const noexcept
+  RectF RenderSVGInline::DecoratedBoundingBox() const noexcept
   {
     if (auto *textAncestor = RenderSVGText::LocateRenderSVGTextAncestor(*this))
     {
@@ -131,8 +131,9 @@ namespace krys::boo
     return rects;
   }
 
-  Maybe<FloatRect> RenderSVGInline::ComputeFloatVisibleRectInContainer(
-    const FloatRect &rect, const RenderLayerModelObject *container, VisibleRectContext context) const noexcept
+  Maybe<RectF> RenderSVGInline::ComputeFloatVisibleRectInContainer(const RectF &rect,
+                                                                   const RenderLayerModelObject *container,
+                                                                   VisibleRectContext context) const noexcept
   {
     return SVGRenderSupport::ComputeFloatVisibleRectInContainer(*this, rect, container, context);
   }
@@ -150,7 +151,7 @@ namespace krys::boo
     return SVGRenderSupport::PushMappingToContainer(*this, ancestorToStopAt, geometryMap);
   }
 
-  void RenderSVGInline::AbsoluteQuads(List<FloatQuad> &quads, bool *wasFixed) const noexcept
+  void RenderSVGInline::AbsoluteQuads(List<QuadF> &quads, bool *wasFixed) const noexcept
   {
     auto *textAncestor = RenderSVGText::LocateRenderSVGTextAncestor(*this);
     if (!textAncestor)
@@ -158,12 +159,12 @@ namespace krys::boo
       return;
     }
 
-    FloatRect textBoundingBox = textAncestor->StrokeBoundingBox();
+    RectF textBoundingBox = textAncestor->StrokeBoundingBox();
     for (auto *box = FirstLegacyInlineBox(); box; box = box->NextLineBox())
     {
       quads.push_back(
-        LocalToAbsoluteQuad(FloatRect(textBoundingBox.X() + box->X(), textBoundingBox.Y() + box->Y(),
-                                      box->LogicalWidth(), box->LogicalHeight()),
+        LocalToAbsoluteQuad(RectF(textBoundingBox.X() + box->X(), textBoundingBox.Y() + box->Y(),
+                                  box->LogicalWidth(), box->LogicalHeight()),
                             MapCoordinatesMode::UseTransforms, wasFixed));
     }
   }

@@ -4,8 +4,8 @@
 #include "Krystal.Booey/DOM/Events/EventListener.hpp"
 #include "Krystal.Booey/DOM/Nodes/Document.hpp"
 #include "Krystal.Booey/DOM/Nodes/Element.hpp"
+#include "Krystal.Booey/Input/PlatformMouseEvent.hpp"
 #include "Krystal.Booey/Page/LocalFrame.hpp"
-#include "Krystal.Booey/Platform/Events/PlatformMouseEvent.hpp"
 
 namespace krys::boo::dom::tests
 {
@@ -123,9 +123,9 @@ namespace krys::boo::dom::tests
     (void)fixture.Document->UpdateLayout();
     auto &box = fixture.ById(u8"box");
 
-    PlatformMouseEvent platform(DoublePoint(32.6, 27.2), DoublePoint(132, 227), MouseButton::Left,
+    PlatformMouseEvent platform(PointD(32.6, 27.2), PointD(132, 227), MouseButton::Left,
                                 PlatformEvent::Type::MousePressed, 1, {PlatformEvent::Modifier::ShiftKey},
-                                MonotonicTime::Now(), 1, DoublePoint(3, 4));
+                                MonotonicTime::Now(), 1, PointD(3, 4));
 
     SECTION("enter and leave don't bubble")
     {

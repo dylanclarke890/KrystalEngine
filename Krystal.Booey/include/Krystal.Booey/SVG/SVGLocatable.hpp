@@ -21,9 +21,9 @@
 
 #pragma once
 
-#include "Krystal.Booey/Graphics/Geometry/FloatRect.hpp"
-#include "Krystal.Booey/Graphics/Transforms/AffineTransform.hpp"
 #include "Krystal.Core/Attributes.hpp"
+#include "Krystal.Core/Geometry/AffineTransform.hpp"
+#include "Krystal.Core/Geometry/Rect.hpp"
 
 namespace krys::boo
 {
@@ -59,7 +59,7 @@ namespace krys::boo
       DisallowStyleUpdate,
     };
 
-    KRYS_NODISCARD virtual FloatRect GetBBox(StyleUpdateStrategy) noexcept = 0;
+    KRYS_NODISCARD virtual RectF GetBBox(StyleUpdateStrategy) noexcept = 0;
 
     KRYS_NODISCARD virtual AffineTransform GetCTM(StyleUpdateStrategy) noexcept = 0;
 
@@ -75,7 +75,7 @@ namespace krys::boo
       return AffineTransform();
     }
 
-    KRYS_NODISCARD static FloatRect GetBBox(SVGElement *element, StyleUpdateStrategy) noexcept;
+    KRYS_NODISCARD static RectF GetBBox(SVGElement *element, StyleUpdateStrategy) noexcept;
 
     KRYS_NODISCARD static AffineTransform ComputeCTM(SVGElement *element, svg::CTMScope,
                                                      StyleUpdateStrategy) noexcept;

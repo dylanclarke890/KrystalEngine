@@ -84,9 +84,9 @@ namespace krys::boo
 
     KRYS_NODISCARD bool IsOffScreen() const noexcept override;
 
-    KRYS_NODISCARD AXObject *AccessibilityHitTest(const IntPoint &point) const noexcept override;
+    KRYS_NODISCARD AXObject *AccessibilityHitTest(const PointI &point) const noexcept override;
 
-    KRYS_NODISCARD AXObject *ElementAccessibilityHitTest(const IntPoint &point) const noexcept override;
+    KRYS_NODISCARD AXObject *ElementAccessibilityHitTest(const PointI &point) const noexcept override;
 
     /// @brief The object of the root of the SVG document this image shows, in that document's cache (made if
     /// @p create and it doesn't exist yet); null if it isn't showing an SVG image.

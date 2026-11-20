@@ -35,7 +35,7 @@
 #include "Krystal.Booey/CSS/Selectors/SelectorParserContext.hpp"
 #include "Krystal.Booey/CSS/Values/FontFaceSrcValue.hpp"
 #include "Krystal.Booey/Graphics/Fonts/FontCustomPlatformData.hpp"
-#include "Krystal.Core/Text/ASCII.hpp"
+#include "Krystal.Core/Strings/ASCII.hpp"
 
 namespace krys::boo::css
 {

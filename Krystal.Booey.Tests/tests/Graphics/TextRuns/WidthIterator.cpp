@@ -94,7 +94,7 @@ namespace krys::boo::tests
       // The space is the run's last character, so in RTL its expansion is on the run's left.
       TextRun run {u8"a ", 0, 10,
                    ExpansionBehavior {ExpansionBehavior::Behavior::Allow, ExpansionBehavior::Behavior::Allow},
-                   TextDirection::RTL};
+                   text::TextDirection::RTL};
       WidthIterator it {cascade, run};
       GlyphBuffer buffer;
       it.Advance(run.Length(), buffer);
@@ -188,7 +188,7 @@ namespace krys::boo::tests
       CHECK(buffer.IsEmpty());
       buffer.Add(1, font, 10, 0);
       buffer.Add(2, font, 20, 1);
-      buffer.Add(3, font, MakeGlyphBufferAdvance(30, 0), 2, FloatPoint {1, 2});
+      buffer.Add(3, font, MakeGlyphBufferAdvance(30, 0), 2, PointF {1, 2});
       CHECK(buffer.Size() == 3);
       CHECK(buffer.CheckedStringOffsetAt(2, 3) == 2u);
       CHECK_FALSE(buffer.CheckedStringOffsetAt(2, 2));
@@ -238,7 +238,7 @@ namespace krys::boo::tests
       sub.SetText(run.Text());
       CHECK(sub == run);
       CHECK(run.Ltr());
-      run.SetDirection(TextDirection::RTL);
+      run.SetDirection(text::TextDirection::RTL);
       CHECK(run.Rtl());
       CHECK(run.ExpansionBehavior() == ExpansionBehavior::DefaultBehavior());
       CHECK(run.HorizontalGlyphStretch() == 1);

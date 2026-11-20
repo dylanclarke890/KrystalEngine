@@ -24,8 +24,8 @@
 #include "Krystal.Booey/Rendering/Style/StyleGeneratedImage.hpp"
 #include "Krystal.Booey/DOM/Nodes/Document.hpp"
 #include "Krystal.Booey/Graphics/Images/GeneratedImage.hpp"
-#include "Krystal.Booey/Platform/Timer.hpp"
 #include "Krystal.Booey/Rendering/RenderElement.hpp"
+#include "Krystal.Core/Time/Timer.hpp"
 #include <algorithm>
 #include <chrono>
 
@@ -43,19 +43,19 @@ namespace krys::boo
 
   private:
     StyleGeneratedImage &_owner;
-    const FloatSize _size;
+    const SizeF _size;
     const Ref<GeneratedImage> _image;
     Timer _evictionTimer;
 
   public:
-    CachedGeneratedImage(StyleGeneratedImage &owner, FloatSize size, GeneratedImage &image) noexcept
+    CachedGeneratedImage(StyleGeneratedImage &owner, SizeF size, GeneratedImage &image) noexcept
         : _owner(owner), _size(size), _image(ShareRef(image)),
           _evictionTimer(*this, &CachedGeneratedImage::EvictionTimerFired)
     {
       PuntEvictionTimer();
     }
 
-    KRYS_NODISCARD FloatSize Size() const noexcept
+    KRYS_NODISCARD SizeF Size() const noexcept
     {
       return _size;
     }
@@ -78,7 +78,7 @@ namespace krys::boo
     }
   };
 
-  GeneratedImage *StyleGeneratedImage::CachedImageForSize(FloatSize size) noexcept
+  GeneratedImage *StyleGeneratedImage::CachedImageForSize(SizeF size) noexcept
   {
     if (size.IsEmpty())
     {
@@ -94,7 +94,7 @@ namespace krys::boo
     return &(*it)->Image();
   }
 
-  void StyleGeneratedImage::SaveCachedImageForSize(FloatSize size, GeneratedImage &image) noexcept
+  void StyleGeneratedImage::SaveCachedImageForSize(SizeF size, GeneratedImage &image) noexcept
   {
     krys_debug_assert(std::ranges::none_of(_images, [&](auto &entry) { return entry->Size() == size; }));
     _images.push_back(CreateUnique<CachedGeneratedImage>(*this, size, image));
@@ -144,7 +144,7 @@ namespace krys::boo
     return _clients.contains(&renderer);
   }
 
-  FloatSize StyleGeneratedImage::ImageSize(const RenderElement *renderer, float multiplier) const noexcept
+  SizeF StyleGeneratedImage::ImageSize(const RenderElement *renderer, float multiplier) const noexcept
   {
     if (!_fixedSize)
     {
@@ -156,7 +156,7 @@ namespace krys::boo
       return {};
     }
 
-    FloatSize fixedSize = FixedSize(*renderer);
+    SizeF fixedSize = FixedSize(*renderer);
     if (multiplier == 1.0f)
     {
       return fixedSize;
@@ -180,12 +180,11 @@ namespace krys::boo
   }
 
   void StyleGeneratedImage::ComputeIntrinsicDimensions(const RenderElement *renderer, float &intrinsicWidth,
-                                                       float &intrinsicHeight,
-                                                       FloatSize &intrinsicRatio) noexcept
+                                                       float &intrinsicHeight, SizeF &intrinsicRatio) noexcept
   {
     // At a zoom level of 1 the image is guaranteed to have a device pixel size.
-    FloatSize size = FloorSizeToDevicePixels(LayoutSize(ImageSize(renderer, 1)),
-                                             renderer ? renderer->GetDocument().DeviceScaleFactor() : 1);
+    SizeF size = FloorSizeToDevicePixels(LayoutSize(ImageSize(renderer, 1)),
+                                         renderer ? renderer->GetDocument().DeviceScaleFactor() : 1);
     intrinsicWidth = size.Width();
     intrinsicHeight = size.Height();
     intrinsicRatio = size;

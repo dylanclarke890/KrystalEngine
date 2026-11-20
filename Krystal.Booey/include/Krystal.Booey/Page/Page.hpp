@@ -24,9 +24,9 @@
 #include "Krystal.Booey/Graphics/Filters/FilterRenderingMode.hpp"
 #include "Krystal.Booey/HTML/Types/DocumentVisibilityState.hpp"
 #include "Krystal.Booey/Loader/LocalFrameLoaderClient.hpp"
-#include "Krystal.Booey/Page/ChromeClient.hpp"
-#include "Krystal.Booey/Page/Drag/DragClient.hpp"
-#include "Krystal.Booey/Page/EditorClient.hpp"
+#include "Krystal.Booey/Page/Clients/ChromeClient.hpp"
+#include "Krystal.Booey/Page/Clients/DragClient.hpp"
+#include "Krystal.Booey/Page/Clients/EditorClient.hpp"
 #include "Krystal.Core/Attributes.hpp"
 #include "Krystal.Core/CanMakeWeakPtr.hpp"
 #include "Krystal.Core/Enum.hpp"
@@ -281,7 +281,7 @@ namespace krys::boo
     /// @brief Scales the page by @p scale, and scrolls the main frame to @p origin (in the scaled content).
     // FIXME: Telling media elements in a stable state (inStableState, pageScaleFactorChanged), once there are
     // media elements.
-    void SetPageScaleFactor(float scale, const IntPoint &origin) noexcept;
+    void SetPageScaleFactor(float scale, const PointI &origin) noexcept;
 
     /// @brief Called when the main frame's document is replaced by @p newDocument.
     // FIXME: The rest of what the page resets (the sampled top color, element targeting and the like), once

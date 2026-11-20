@@ -25,7 +25,7 @@
 #include "Krystal.Booey/Graphics/TextRuns/TextRun.hpp"
 #include "Krystal.Booey/Rendering/Line/LegacyInlineBox.hpp"
 #include "Krystal.Booey/Rendering/Selection/TextBoxSelectableRange.hpp"
-#include "Krystal.Core/Types/String.hpp"
+#include "Krystal.Core/Strings/String.hpp"
 #include <utility>
 
 namespace krys::boo

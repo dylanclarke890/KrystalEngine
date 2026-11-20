@@ -25,12 +25,11 @@
 
 #include "Krystal.Booey/Rendering/SVG/Legacy/LegacyRenderSVGImage.hpp"
 #include "Krystal.Booey/DOM/Nodes/Document.hpp"
-#include "Krystal.Booey/Graphics/Geometry/IntRect.hpp"
 #include "Krystal.Booey/Graphics/GraphicsContext.hpp"
 #include "Krystal.Booey/Graphics/GraphicsContextStateSaver.hpp"
 #include "Krystal.Booey/Graphics/Images/Image.hpp"
 #include "Krystal.Booey/Loader/Cache/CachedImage.hpp"
-#include "Krystal.Booey/Page/ChromeClient.hpp"
+#include "Krystal.Booey/Page/Clients/ChromeClient.hpp"
 #include "Krystal.Booey/Page/Page.hpp"
 #include "Krystal.Booey/Rendering/HitTesting/HitTestRequest.hpp"
 #include "Krystal.Booey/Rendering/HitTesting/HitTestResult.hpp"
@@ -48,6 +47,7 @@
 #include "Krystal.Booey/Rendering/SVG/SVGVisitedRendererTracking.hpp"
 #include "Krystal.Booey/SVG/Elements/SVGImageElement.hpp"
 #include "Krystal.Booey/SVG/SVGLengthContext.hpp"
+#include "Krystal.Core/Geometry/Rect.hpp"
 
 namespace krys::boo
 {
@@ -88,7 +88,7 @@ namespace krys::boo
     return Downcast<SVGImageElement>(LegacyRenderSVGModelObject::GetElement());
   }
 
-  FloatRect LegacyRenderSVGImage::CalculateObjectBoundingBox() const noexcept
+  RectF LegacyRenderSVGImage::CalculateObjectBoundingBox() const noexcept
   {
     LayoutSize intrinsicSize;
     if (auto *cachedImage = ImageResource().GetCachedImage())
@@ -140,11 +140,11 @@ namespace krys::boo
 
   bool LegacyRenderSVGImage::UpdateImageViewport() noexcept
   {
-    FloatRect oldBoundaries = _objectBoundingBox;
+    RectF oldBoundaries = _objectBoundingBox;
     _objectBoundingBox = CalculateObjectBoundingBox();
 
     bool updatedViewport = false;
-    auto imageSourceURL = GetDocument().CompleteURL(ImageElement().ImageSourceURL().value_or(DOMString {}));
+    auto imageSourceUrl = GetDocument().CompleteUrl(ImageElement().ImageSourceUrl().value_or(DOMString {}));
 
     // Images with preserveAspectRatio=none should force non-uniform scaling. This can be achieved
     // by setting the image's container size to its intrinsic size.
@@ -157,7 +157,7 @@ namespace krys::boo
         LayoutSize intrinsicSize = cachedImage->ImageSizeForRenderer(nullptr, Style().UsedZoom());
         if (intrinsicSize != ImageResource().ImageSize(Style().UsedZoom()))
         {
-          ImageResource().SetContainerContext(RoundedIntSize(intrinsicSize), imageSourceURL);
+          ImageResource().SetContainerContext(RoundedSizeI(intrinsicSize), imageSourceUrl);
           updatedViewport = true;
         }
       }
@@ -167,7 +167,7 @@ namespace krys::boo
     {
       if (!updatedViewport)
       {
-        ImageResource().SetContainerContext(EnclosingIntRect(_objectBoundingBox).Size(), imageSourceURL);
+        ImageResource().SetContainerContext(EnclosingRectI(_objectBoundingBox).Size(), imageSourceUrl);
       }
       updatedViewport = true;
       _needsBoundariesUpdate = true;
@@ -224,7 +224,7 @@ namespace krys::boo
       return;
     }
 
-    FloatRect boundingBox = RepaintRectInLocalCoordinates();
+    RectF boundingBox = RepaintRectInLocalCoordinates();
     if (!SVGRenderSupport::PaintInfoIntersectsRepaintRect(boundingBox, _localTransform, paintInfo))
     {
       return;
@@ -246,7 +246,7 @@ namespace krys::boo
 
     if (style::Evaluate<float>(Style().OutlineWidth(), style::ZoomNeeded {}))
     {
-      PaintOutline(childPaintInfo, LayoutRect(IntRect(boundingBox)));
+      PaintOutline(childPaintInfo, LayoutRect(RectI(boundingBox)));
     }
   }
 
@@ -258,8 +258,8 @@ namespace krys::boo
       return;
     }
 
-    FloatRect destRect = _objectBoundingBox;
-    FloatRect srcRect(0, 0, image->Width(), image->Height());
+    RectF destRect = _objectBoundingBox;
+    RectF srcRect(0, 0, image->Width(), image->Height());
 
     ImageElement().PreserveAspectRatio().TransformRect(destRect, srcRect);
 
@@ -275,9 +275,8 @@ namespace krys::boo
     // once there's one.
   }
 
-  bool LegacyRenderSVGImage::NodeAtFloatPoint(const HitTestRequest &request, HitTestResult &result,
-                                              const FloatPoint &pointInParent,
-                                              HitTestAction hitTestAction) noexcept
+  bool LegacyRenderSVGImage::NodeAtPointF(const HitTestRequest &request, HitTestResult &result,
+                                          const PointF &pointInParent, HitTestAction hitTestAction) noexcept
   {
     // We only draw in the forground phase, so we only hit-test then.
     if (hitTestAction != HitTestForeground)
@@ -299,7 +298,7 @@ namespace krys::boo
 
       SVGVisitedRendererTracking::Scope recursionScope(recursionTracking, *this);
 
-      FloatPoint localPoint =
+      PointF localPoint =
         LocalToParentTransform().Inverse().value_or(AffineTransform {}).MapPoint(pointInParent);
 
       if (!SVGRenderSupport::PointInClippingArea(*this, localPoint))
@@ -325,7 +324,7 @@ namespace krys::boo
     return false;
   }
 
-  void LegacyRenderSVGImage::ImageChanged(WrappedImagePtr, const IntRect *) noexcept
+  void LegacyRenderSVGImage::ImageChanged(WrappedImagePtr, const RectI *) noexcept
   {
     if (!Parent())
     {
@@ -344,7 +343,7 @@ namespace krys::boo
 
     // Update the SVGImageCache sizeAndScales entry in case image loading finished after layout.
     // (https://bugs.webkit.org/show_bug.cgi?id=99489)
-    _objectBoundingBox = FloatRect();
+    _objectBoundingBox = RectF();
     if (UpdateImageViewport())
     {
       SetNeedsLayout();

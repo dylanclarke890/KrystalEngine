@@ -3,8 +3,8 @@
 #include "Krystal.Booey.Tests/Editing/EditorTestUtils.hpp"
 #include "Krystal.Booey.Tests/Rendering/PaintTestUtils.hpp"
 #include "Krystal.Booey.Tests/Style/ResolverTestUtils.hpp"
-#include "Krystal.Booey/Page/EventHandler.hpp"
-#include "Krystal.Booey/Platform/Events/PlatformMouseEvent.hpp"
+#include "Krystal.Booey/Input/EventHandler.hpp"
+#include "Krystal.Booey/Input/PlatformMouseEvent.hpp"
 #include "Krystal.Booey/Rendering/RenderBox.hpp"
 #include "Krystal.Booey/Rendering/RenderLayerModelObject.hpp"
 #include "Krystal.Booey/Rendering/RenderView.hpp"
@@ -539,9 +539,9 @@ namespace krys::boo::tests
       u8"<div id=editable style='overflow:hidden' contenteditable><p>text</p></div>"
       u8"<div id=auto style='overflow:auto'><p>text</p></div>");
     auto &handler = fixture.Frame->GetEventHandler();
-    auto mouse = [](PlatformEvent::Type type, IntPoint position)
+    auto mouse = [](PlatformEvent::Type type, PointI position)
     {
-      DoublePoint point(position.X(), position.Y());
+      PointD point(position.X(), position.Y());
       return PlatformMouseEvent(point, point, MouseButton::Left, type,
                                 type == PlatformEvent::Type::MousePressed ? 1 : 0, {}, MonotonicTime::Now());
     };

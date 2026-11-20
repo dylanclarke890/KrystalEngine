@@ -67,7 +67,7 @@
 #include "Krystal.Booey/HTML/Elements/HTMLTableSectionElement.hpp"
 #include "Krystal.Booey/Infra/StringAlgorithms.hpp"
 #include "Krystal.Booey/MathML/Elements/MathMLElement.hpp"
-#include "Krystal.Booey/Page/ChromeClient.hpp"
+#include "Krystal.Booey/Page/Clients/ChromeClient.hpp"
 #include "Krystal.Booey/Page/LocalFrame.hpp"
 #include "Krystal.Booey/Page/LocalFrameView.hpp"
 #include "Krystal.Booey/Page/Page.hpp"
@@ -1352,7 +1352,7 @@ namespace krys::boo
           object->UpdateRole();
         }
       }
-      PostNotification(&element, AXNotification::URLChanged);
+      PostNotification(&element, AXNotification::UrlChanged);
     }
     else if (name == u8"accesskey")
     {

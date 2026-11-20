@@ -22,10 +22,10 @@
 
 #pragma once
 
-#include "Krystal.Booey/Graphics/Geometry/IntRect.hpp"
 #include "Krystal.Booey/Rendering/Line/RenderLineBoxList.hpp"
 #include "Krystal.Booey/Rendering/RenderBoxModelObject.hpp"
 #include "Krystal.Core/Attributes.hpp"
+#include "Krystal.Core/Geometry/Rect.hpp"
 #include "Krystal.Core/Macros.hpp"
 #include "Krystal.Core/TypeCast.hpp"
 #include "Krystal.Core/Types/UniquePtr.hpp"
@@ -74,7 +74,7 @@ namespace krys::boo
     /// holds only a line break.
     KRYS_NODISCARD bool MayAffectLayout() const noexcept;
 
-    void ImageChanged(WrappedImagePtr, const IntRect * = nullptr) noexcept override;
+    void ImageChanged(WrappedImagePtr, const RectI * = nullptr) noexcept override;
 
     KRYS_NODISCARD LayoutUnit MarginLeft() const noexcept final;
 
@@ -112,7 +112,7 @@ namespace krys::boo
       return LayoutUnit(LinesBoundingBox().Height());
     }
 
-    KRYS_NODISCARD IntRect LinesBoundingBox() const noexcept;
+    KRYS_NODISCARD RectI LinesBoundingBox() const noexcept;
 
     /// @brief The top left of the inline's first inline box.
     KRYS_NODISCARD LayoutPoint FirstInlineBoxTopLeft() const noexcept;
@@ -147,7 +147,7 @@ namespace krys::boo
 
     void BoundingRects(List<LayoutRect> &rects, const LayoutPoint &accumulatedOffset) const noexcept override;
 
-    void AbsoluteQuads(List<FloatQuad> &quads, bool *wasFixed = nullptr) const noexcept override;
+    void AbsoluteQuads(List<QuadF> &quads, bool *wasFixed = nullptr) const noexcept override;
 
     KRYS_NODISCARD bool RequiresLayer() const noexcept override;
 

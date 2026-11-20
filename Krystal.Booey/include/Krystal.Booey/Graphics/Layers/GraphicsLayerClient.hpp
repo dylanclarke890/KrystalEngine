@@ -25,15 +25,15 @@
 
 #pragma once
 
-#include "Krystal.Booey/Graphics/Geometry/FloatSize.hpp"
 #include "Krystal.Booey/Graphics/Layers/ContentsFormat.hpp"
 #include "Krystal.Booey/Graphics/Layers/LayerTreeAsTextOptions.hpp"
-#include "Krystal.Booey/Graphics/Transforms/TransformationMatrix.hpp"
 #include "Krystal.Core/Attributes.hpp"
+#include "Krystal.Core/Geometry/Size.hpp"
+#include "Krystal.Core/Geometry/TransformationMatrix.hpp"
+#include "Krystal.Core/Strings/String.hpp"
 #include "Krystal.Core/Time/MonotonicTime.hpp"
 #include "Krystal.Core/Types/EnumSet.hpp"
 #include "Krystal.Core/Types/Maybe.hpp"
-#include "Krystal.Core/Types/String.hpp"
 
 namespace krys
 {
@@ -42,8 +42,6 @@ namespace krys
 
 namespace krys::boo
 {
-  class FloatPoint;
-  class FloatRect;
   class GraphicsContext;
   class GraphicsLayer;
 
@@ -117,7 +115,7 @@ namespace krys::boo
     {
     }
 
-    virtual void PaintContents(const GraphicsLayer &, GraphicsContext &, const FloatRect & /* inClip */,
+    virtual void PaintContents(const GraphicsLayer &, GraphicsContext &, const RectF & /* inClip */,
                                EnumSet<GraphicsLayerPaintBehavior>) noexcept
     {
     }
@@ -135,7 +133,7 @@ namespace krys::boo
 
     // Allows the client to modify a layer position used during the visibleRect calculation, for example to
     // ignore scroll overhang.
-    virtual void CustomPositionForVisibleRectComputation(const GraphicsLayer *, FloatPoint &) const noexcept
+    virtual void CustomPositionForVisibleRectComputation(const GraphicsLayer *, PointF &) const noexcept
     {
     }
 
@@ -156,7 +154,7 @@ namespace krys::boo
       return 0;
     }
 
-    KRYS_NODISCARD virtual FloatSize EnclosingFrameViewVisibleSize() const noexcept
+    KRYS_NODISCARD virtual SizeF EnclosingFrameViewVisibleSize() const noexcept
     {
       return {};
     }

@@ -68,7 +68,7 @@ namespace krys::boo
     {
     }
 
-    KRYS_NODISCARD FloatSize FixedSize(const RenderElement &) const noexcept final
+    KRYS_NODISCARD SizeF FixedSize(const RenderElement &) const noexcept final
     {
       return {};
     }

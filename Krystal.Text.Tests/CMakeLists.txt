@@ -38,5 +38,16 @@ catch_discover_tests(Krystal.Text.Tests)
 
 target_sources(Krystal.Text.Tests
   PRIVATE
+    tests/Base64.cpp
+    tests/Bidi.cpp
+    tests/CaseMapping.cpp
+    tests/CharacterProperties.cpp
+    tests/EncodingRegistry.cpp
+    tests/Encodings/ASCII.cpp
+    tests/Encodings/Atari.cpp
+    tests/Encodings/ISO-8859.cpp
+    tests/Encodings/Windows.cpp
     tests/FreeTypeFace.cpp
+    tests/Regex.cpp
+    tests/TextBreakIterator.cpp
 )

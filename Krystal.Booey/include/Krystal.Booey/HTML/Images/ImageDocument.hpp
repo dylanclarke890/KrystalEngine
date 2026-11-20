@@ -30,11 +30,15 @@
 #include "Krystal.Core/Attributes.hpp"
 #include "Krystal.Core/Types/WeakPtr.hpp"
 
+namespace krys
+{
+  class SharedBuffer;
+}
+
 namespace krys::boo
 {
   class CachedImage;
   class HTMLImageElement;
-  class SharedBuffer;
 
   /// @brief The document a load of an image shows: an `img` in an otherwise empty document, given the loaded
   /// bytes rather than fetching them. The image is shrunk to fit the view, and a click on it toggles between

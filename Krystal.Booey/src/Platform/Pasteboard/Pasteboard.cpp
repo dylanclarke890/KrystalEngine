@@ -24,11 +24,11 @@
  */
 
 #include "Krystal.Booey/Platform/Pasteboard/Pasteboard.hpp"
-#include "Krystal.Booey/Platform/MIMETypeRegistry.hpp"
 #include "Krystal.Booey/Platform/Pasteboard/DragData.hpp"
 #include "Krystal.Booey/Platform/Pasteboard/PasteboardStrategy.hpp"
 #include "Krystal.Booey/Platform/PlatformStrategies.hpp"
 #include "Krystal.Core/Types/ListHashSet.hpp"
+#include "Krystal.Image/ImageDecoder.hpp"
 #include <algorithm>
 #include <array>
 
@@ -41,7 +41,7 @@ namespace krys::boo
       ClipboardDataTypeText,
       ClipboardDataTypeMarkup,
       ClipboardDataTypeURIList,
-      ClipboardDataTypeURL,
+      ClipboardDataTypeUrl,
       ClipboardDataTypeImage,
       ClipboardDataTypeUnknown,
     };
@@ -146,10 +146,10 @@ namespace krys::boo
     return type == u8"text/plain" || type == u8"text/html" || type == u8"text/uri-list";
   }
 
-  bool Pasteboard::CanExposeURLToDOMWhenPasteboardContainsFiles(utf8_stringview urlString) noexcept
+  bool Pasteboard::CanExposeUrlToDOMWhenPasteboardContainsFiles(utf8_stringview urlString) noexcept
   {
-    url::URL url({}, urlString);
-    return url.ProtocolIsInHTTPFamily() || url.ProtocolIsBlob() || url.ProtocolIsData();
+    net::Url url({}, urlString);
+    return url.ProtocolIsInHttpFamily() || url.ProtocolIsBlob() || url.ProtocolIsData();
   }
 
   List<utf8_string> Pasteboard::ReadAllStrings(utf8_stringview type) noexcept
@@ -169,7 +169,7 @@ namespace krys::boo
     switch (SelectionDataTypeFromHTMLClipboardType(type))
     {
       case ClipboardDataTypeURIList:
-      case ClipboardDataTypeURL:     _selectionData->SetURIList(data); break;
+      case ClipboardDataTypeUrl:     _selectionData->SetURIList(data); break;
       case ClipboardDataTypeMarkup:  _selectionData->SetMarkup(data); break;
       case ClipboardDataTypeText:    _selectionData->SetText(data); break;
       case ClipboardDataTypeUnknown:
@@ -197,22 +197,22 @@ namespace krys::boo
     }
   }
 
-  void Pasteboard::SetDragImage(DragImage, const IntPoint &) noexcept
+  void Pasteboard::SetDragImage(DragImage, const PointI &) noexcept
   {
   }
 
-  void Pasteboard::Write(const PasteboardURL &pasteboardURL) noexcept
+  void Pasteboard::Write(const PasteboardUrl &pasteboardUrl) noexcept
   {
-    krys_debug_assert(!pasteboardURL.Url.IsEmpty());
+    krys_debug_assert(!pasteboardUrl.Url.IsEmpty());
     if (_selectionData)
     {
       _selectionData->ClearAll();
-      _selectionData->SetURL(pasteboardURL.Url, pasteboardURL.Title);
+      _selectionData->SetUrl(pasteboardUrl.Url, pasteboardUrl.Title);
     }
     else
     {
       SelectionData data;
-      data.SetURL(pasteboardURL.Url, pasteboardURL.Title);
+      data.SetUrl(pasteboardUrl.Url, pasteboardUrl.Title);
       if (auto *strategy = Strategy())
       {
         strategy->WriteToClipboard(_name, krys::move(data));
@@ -227,7 +227,7 @@ namespace krys::boo
       _selectionData->ClearAll();
       if (!pasteboardImage.Url.Url.IsEmpty())
       {
-        _selectionData->SetURL(pasteboardImage.Url.Url, pasteboardImage.Url.Title);
+        _selectionData->SetUrl(pasteboardImage.Url.Url, pasteboardImage.Url.Title);
         _selectionData->SetMarkup(pasteboardImage.Url.Markup);
       }
     }
@@ -236,7 +236,7 @@ namespace krys::boo
       SelectionData data;
       if (!pasteboardImage.Url.Url.IsEmpty())
       {
-        data.SetURL(pasteboardImage.Url.Url, pasteboardImage.Url.Title);
+        data.SetUrl(pasteboardImage.Url.Url, pasteboardImage.Url.Title);
         data.SetMarkup(pasteboardImage.Url.Markup);
       }
       if (auto *strategy = Strategy())
@@ -296,7 +296,7 @@ namespace krys::boo
     switch (SelectionDataTypeFromHTMLClipboardType(type))
     {
       case ClipboardDataTypeURIList:
-      case ClipboardDataTypeURL:     _selectionData->ClearURIList(); break;
+      case ClipboardDataTypeUrl:     _selectionData->ClearURIList(); break;
       case ClipboardDataTypeMarkup:  _selectionData->ClearMarkup(); break;
       case ClipboardDataTypeText:    _selectionData->ClearText(); break;
       case ClipboardDataTypeImage:   break;
@@ -304,7 +304,7 @@ namespace krys::boo
     }
   }
 
-  void Pasteboard::Read(PasteboardPlainText &text, PlainTextURLReadingPolicy) noexcept
+  void Pasteboard::Read(PasteboardPlainText &text, PlainTextUrlReadingPolicy) noexcept
   {
     if (auto *strategy = Strategy())
     {
@@ -515,7 +515,7 @@ namespace krys::boo
     switch (SelectionDataTypeFromHTMLClipboardType(type))
     {
       case ClipboardDataTypeURIList: return _selectionData->URIList();
-      case ClipboardDataTypeURL:     return _selectionData->GetURL().String();
+      case ClipboardDataTypeUrl:     return _selectionData->GetUrl().String();
       case ClipboardDataTypeMarkup:  return _selectionData->Markup();
       case ClipboardDataTypeText:    return _selectionData->Text();
       case ClipboardDataTypeUnknown:
@@ -571,7 +571,7 @@ namespace krys::boo
     }
 
     bool hasImage = std::ranges::any_of(types, [](const utf8_string &type)
-                                        { return MIMETypeRegistry::IsSupportedImageMIMEType(type); });
+                                        { return img::ImageDecoder::SupportsMimeType(type); });
     return hasImage ? FileContentState::MayContainFilePaths : FileContentState::NoFileOrImageData;
   }
 

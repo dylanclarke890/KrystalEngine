@@ -28,8 +28,7 @@
 
 namespace krys::boo
 {
-  TransformOperationData::TransformOperationData(FloatRect boundingBox,
-                                                 const RenderElement *renderer) noexcept
+  TransformOperationData::TransformOperationData(RectF boundingBox, const RenderElement *renderer) noexcept
       : BoundingBox(boundingBox)
   {
     if (renderer)

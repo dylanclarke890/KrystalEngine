@@ -44,7 +44,7 @@ namespace krys::boo
 
     KRYS_NODISCARD ExceptionOr<Ref<SVGPoint>> GetPointAtLength(float distance) const noexcept final;
 
-    KRYS_NODISCARD FloatRect GetBBox(StyleUpdateStrategy = AllowStyleUpdate) noexcept final;
+    KRYS_NODISCARD RectF GetBBox(StyleUpdateStrategy = AllowStyleUpdate) noexcept final;
 
     /// @brief The path data the element is drawn with: the `d` property's once it has a renderer, otherwise
     /// the `d` attribute's.

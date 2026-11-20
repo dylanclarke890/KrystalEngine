@@ -9,7 +9,7 @@ namespace krys::boo
   }
 
   DragEvent::DragEvent(DOMStringAtom type, const UIEventInit &eventInitDict, LocalFrameView *view,
-                       const DoublePoint &screenLocation, const DoublePoint &windowLocation, double movementX,
+                       const PointD &screenLocation, const PointD &windowLocation, double movementX,
                        double movementY, EnumSet<Modifier> modifiers, MouseButton button, uint16 buttons,
                        EventTarget *relatedTarget, double force, SyntheticClickType syntheticClickType,
                        dom::DataTransfer *dataTransfer) noexcept
@@ -24,7 +24,7 @@ namespace krys::boo
 
   Ref<DragEvent> DragEvent::Create(DOMStringAtom type, bool canBubble, bool isCancelable, bool isComposed,
                                    MonotonicTime::duration timestamp, LocalFrameView *view, int32 detail,
-                                   const DoublePoint &screenLocation, const DoublePoint &windowLocation,
+                                   const PointD &screenLocation, const PointD &windowLocation,
                                    double movementX, double movementY, EnumSet<Modifier> modifiers,
                                    MouseButton button, uint16 buttons, EventTarget *relatedTarget,
                                    double force, SyntheticClickType syntheticClickType,

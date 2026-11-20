@@ -90,8 +90,8 @@ namespace krys::boo
     }
   }
 
-  FloatRect LegacyRenderSVGPath::AdjustStrokeBoundingBoxForMarkersAndZeroLengthLinecaps(
-    RepaintRectCalculation repaintRectCalculation, FloatRect strokeBoundingBox) const noexcept
+  RectF LegacyRenderSVGPath::AdjustStrokeBoundingBoxForMarkersAndZeroLengthLinecaps(
+    RepaintRectCalculation repaintRectCalculation, RectF strokeBoundingBox) const noexcept
   {
     float strokeWidth = StrokeWidth();
 
@@ -156,7 +156,7 @@ namespace krys::boo
     StrokeZeroLengthSubpaths(context);
   }
 
-  bool LegacyRenderSVGPath::ShapeDependentStrokeContains(const FloatPoint &point,
+  bool LegacyRenderSVGPath::ShapeDependentStrokeContains(const PointF &point,
                                                          PointCoordinateSpace pointCoordinateSpace) noexcept
   {
     if (LegacyRenderSVGShape::ShapeDependentStrokeContains(point, pointCoordinateSpace))
@@ -178,7 +178,7 @@ namespace krys::boo
       else
       {
         krys_debug_assert(Style().CapStyle() == LineCap::Round);
-        FloatPoint radiusVector(point.X() - location.X(), point.Y() - location.Y());
+        PointF radiusVector(point.X() - location.X(), point.Y() - location.Y());
         if (radiusVector.LengthSquared() < strokeWidth * strokeWidth * .25f)
         {
           return true;
@@ -195,7 +195,7 @@ namespace krys::boo
     return Style().HasStroke() && Style().CapStyle() != LineCap::Butt;
   }
 
-  Path *LegacyRenderSVGPath::ZeroLengthLinecapPath(const FloatPoint &linecapPosition) const noexcept
+  Path *LegacyRenderSVGPath::ZeroLengthLinecapPath(const PointF &linecapPosition) const noexcept
   {
     static Path tempPath;
 
@@ -212,11 +212,10 @@ namespace krys::boo
     return &tempPath;
   }
 
-  FloatRect LegacyRenderSVGPath::ZeroLengthSubpathRect(const FloatPoint &linecapPosition,
-                                                       float strokeWidth) noexcept
+  RectF LegacyRenderSVGPath::ZeroLengthSubpathRect(const PointF &linecapPosition, float strokeWidth) noexcept
   {
-    return FloatRect(linecapPosition.X() - strokeWidth / 2, linecapPosition.Y() - strokeWidth / 2,
-                     strokeWidth, strokeWidth);
+    return RectF(linecapPosition.X() - strokeWidth / 2, linecapPosition.Y() - strokeWidth / 2, strokeWidth,
+                 strokeWidth);
   }
 
   void LegacyRenderSVGPath::UpdateZeroLengthSubpaths() noexcept
@@ -340,8 +339,8 @@ namespace krys::boo
     }
   }
 
-  FloatRect LegacyRenderSVGPath::MarkerRect(RepaintRectCalculation repaintRectCalculation,
-                                            float strokeWidth) const noexcept
+  RectF LegacyRenderSVGPath::MarkerRect(RepaintRectCalculation repaintRectCalculation,
+                                        float strokeWidth) const noexcept
   {
     krys_debug_assert(!_markerPositions.empty());
 
@@ -353,7 +352,7 @@ namespace krys::boo
     auto *markerEnd = resources->MarkerEnd();
     krys_debug_assert(markerStart || markerMid || markerEnd);
 
-    FloatRect boundaries;
+    RectF boundaries;
     for (const auto &position : _markerPositions)
     {
       if (auto *marker = MarkerForType(position.Type, markerStart, markerMid, markerEnd))

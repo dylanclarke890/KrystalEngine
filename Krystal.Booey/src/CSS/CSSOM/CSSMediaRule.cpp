@@ -24,7 +24,7 @@
 #include "Krystal.Booey/CSS/CSSOM/MediaList.hpp"
 #include "Krystal.Booey/CSS/Queries/MediaQueryParser.hpp"
 #include "Krystal.Booey/CSS/Rules/Rule.hpp"
-#include "Krystal.Core/Text/StringBuilder.hpp"
+#include "Krystal.Core/Strings/StringBuilder.hpp"
 
 namespace krys::boo
 {
@@ -68,7 +68,7 @@ namespace krys::boo
   {
     StringBuilder builder;
     builder.Append(u8"@media ", ConditionText());
-    AppendCSSTextWithReplacementURLsForItems(builder, context);
+    AppendCSSTextWithReplacementUrlsForItems(builder, context);
     return krys::move(builder).ToString();
   }
 

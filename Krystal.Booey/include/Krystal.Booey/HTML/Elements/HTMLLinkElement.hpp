@@ -83,7 +83,7 @@ namespace krys::boo
     RefPtr<CSSStyleSheet> _sheet;
     CachedResourceHandle<CachedCSSStyleSheet> _cachedSheet;
     WeakPtr<style::Scope> _styleScope;
-    url::URL _url;
+    net::Url _url;
     Maybe<DOMString> _type;
     DOMString _media;
     bool _relIsStyleSheet {false};
@@ -274,7 +274,7 @@ namespace krys::boo
     void StartLoadingDynamicSheet() noexcept override;
 
   private:
-    void SetCSSStyleSheet(const utf8_string &href, const url::URL &baseURL, utf8_stringview charset,
+    void SetCSSStyleSheet(const utf8_string &href, const net::Url &baseUrl, utf8_stringview charset,
                           const CachedCSSStyleSheet *cachedStyleSheet) noexcept override;
 
     void Process() noexcept;
@@ -288,7 +288,7 @@ namespace krys::boo
     /// @brief Tells the document its icons may have changed.
     void IconMayHaveChanged() noexcept;
 
-    KRYS_NODISCARD url::URL NonEmptyHrefURL() const noexcept;
+    KRYS_NODISCARD net::Url NonEmptyHrefUrl() const noexcept;
 
     /// @brief Whether the `media` attribute matches the environment (an empty list does).
     /// @see https://html.spec.whatwg.org/#matches-the-environment

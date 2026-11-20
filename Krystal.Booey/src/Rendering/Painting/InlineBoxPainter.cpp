@@ -346,7 +346,7 @@ namespace krys::boo
     {
       GraphicsContextStateSaver stateSaver(_paintInfo.Context());
       _paintInfo.Context().Clip(
-        {FloatPoint(rect.Location()), _inlineBox.VisualRectIgnoringBlockDirection().Size()});
+        {PointF(rect.Location()), _inlineBox.VisualRectIgnoringBlockDirection().Size()});
       backgroundPainter.PaintFillLayer(color, fillLayer, rect, BleedAvoidance::None, _inlineBox.Iterator(),
                                        {}, op);
       return;
@@ -392,7 +392,7 @@ namespace krys::boo
                      : totalLogicalWidth};
 
     GraphicsContextStateSaver stateSaver(_paintInfo.Context());
-    _paintInfo.Context().Clip(FloatRect {rect});
+    _paintInfo.Context().Clip(RectF {rect});
     backgroundPainter.PaintFillLayer(color, fillLayer, rect, BleedAvoidance::None, _inlineBox.Iterator(),
                                      backgroundImageStrip, op);
   }

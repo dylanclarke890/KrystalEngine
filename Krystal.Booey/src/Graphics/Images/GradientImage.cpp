@@ -30,7 +30,7 @@
 
 namespace krys::boo
 {
-  GradientImage::GradientImage(boo::Gradient &generator, const FloatSize &size) noexcept
+  GradientImage::GradientImage(boo::Gradient &generator, const SizeF &size) noexcept
       : _gradient(ShareRef(generator))
   {
     SetContainerSize(size);
@@ -38,8 +38,8 @@ namespace krys::boo
 
   GradientImage::~GradientImage() noexcept = default;
 
-  ImageDrawResult GradientImage::Draw(GraphicsContext &destContext, const FloatRect &destRect,
-                                      const FloatRect &srcRect, ImagePaintingOptions options) noexcept
+  ImageDrawResult GradientImage::Draw(GraphicsContext &destContext, const RectF &destRect,
+                                      const RectF &srcRect, ImagePaintingOptions options) noexcept
   {
     GraphicsContextStateSaver stateSaver(destContext);
     destContext.SetCompositeOperation(options.GetCompositeOperator(), options.GetBlendMode());
@@ -50,18 +50,17 @@ namespace krys::boo
       destContext.Scale(destRect.Size() / srcRect.Size());
     }
     destContext.Translate(-srcRect.Location());
-    destContext.FillRect(FloatRect(FloatPoint(), Size()), *_gradient);
+    destContext.FillRect(RectF(PointF(), Size()), *_gradient);
     return ImageDrawResult::DidDraw;
   }
 
-  void GradientImage::DrawPattern(GraphicsContext &destContext, const FloatRect &destRect,
-                                  const FloatRect &srcRect, const AffineTransform &patternTransform,
-                                  const FloatPoint &phase, const FloatSize &spacing,
-                                  ImagePaintingOptions options) noexcept
+  void GradientImage::DrawPattern(GraphicsContext &destContext, const RectF &destRect, const RectF &srcRect,
+                                  const AffineTransform &patternTransform, const PointF &phase,
+                                  const SizeF &spacing, ImagePaintingOptions options) noexcept
   {
     // Allow the generator to provide visually-equivalent tiling parameters for better performance.
-    FloatSize adjustedSize = Size();
-    FloatRect adjustedSrcRect = srcRect;
+    SizeF adjustedSize = Size();
+    RectF adjustedSrcRect = srcRect;
     _gradient->AdjustParametersForTiledDrawing(adjustedSize, adjustedSrcRect, spacing);
 
     // Factor in the destination context's scale to generate at the best resolution
@@ -84,7 +83,7 @@ namespace krys::boo
       }
 
       // Fill with the generated image.
-      imageBuffer->Context().FillRect(FloatRect(FloatPoint(), adjustedSize), *_gradient);
+      imageBuffer->Context().FillRect(RectF(PointF(), adjustedSize), *_gradient);
 
       _cachedGeneratorHash = generatorHash;
       _cachedAdjustedSize = adjustedSize;

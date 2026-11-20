@@ -25,12 +25,12 @@
 
 #pragma once
 
-#include "Krystal.Booey/Graphics/Geometry/FloatRect.hpp"
-#include "Krystal.Booey/Graphics/Geometry/FloatSize.hpp"
 #include "Krystal.Booey/Graphics/Images/Image.hpp"
 #include "Krystal.Booey/SVG/Graphics/SVGImage.hpp"
-#include "Krystal.Booey/URL/URL.hpp"
+#include "Krystal.Core/Geometry/Rect.hpp"
+#include "Krystal.Core/Geometry/Size.hpp"
 #include "Krystal.Core/Types/WeakPtr.hpp"
+#include "Krystal.Net/Url.hpp"
 
 namespace krys::boo
 {
@@ -40,16 +40,16 @@ namespace krys::boo
   {
   private:
     WeakPtr<SVGImage> _image;
-    const FloatSize _containerSize;
+    const SizeF _containerSize;
     const float _containerZoom;
-    const url::URL _initialFragmentURL;
+    const net::Url _initialFragmentUrl;
 
   public:
-    KRYS_NODISCARD static Ref<SVGImageForContainer> Create(SVGImage *image, const FloatSize &containerSize,
+    KRYS_NODISCARD static Ref<SVGImageForContainer> Create(SVGImage *image, const SizeF &containerSize,
                                                            float containerZoom,
-                                                           const url::URL &initialFragmentURL) noexcept
+                                                           const net::Url &initialFragmentUrl) noexcept
     {
-      return AdoptRef(*new SVGImageForContainer(image, containerSize, containerZoom, initialFragmentURL));
+      return AdoptRef(*new SVGImageForContainer(image, containerSize, containerZoom, initialFragmentUrl));
     }
 
     KRYS_NODISCARD bool IsSVGImageForContainer() const noexcept final
@@ -58,7 +58,7 @@ namespace krys::boo
     }
 
     KRYS_NODISCARD
-    FloatSize Size(ImageOrientation = ImageOrientation::Orientation::FromImage) const noexcept final;
+    SizeF Size(img::ImageOrientation = img::ImageOrientation::Orientation::FromImage) const noexcept final;
 
     KRYS_NODISCARD bool UsesContainerSize() const noexcept final
     {
@@ -76,17 +76,17 @@ namespace krys::boo
     }
 
     void ComputeIntrinsicDimensions(float &intrinsicWidth, float &intrinsicHeight,
-                                    FloatSize &intrinsicRatio) noexcept final
+                                    SizeF &intrinsicRatio) noexcept final
     {
       RefPtr<SVGImage> image = ShareRefPtr(_image.get());
       image->ComputeIntrinsicDimensions(intrinsicWidth, intrinsicHeight, intrinsicRatio);
     }
 
-    ImageDrawResult Draw(GraphicsContext &, const FloatRect &, const FloatRect &,
+    ImageDrawResult Draw(GraphicsContext &, const RectF &, const RectF &,
                          ImagePaintingOptions = {}) noexcept final;
 
-    void DrawPattern(GraphicsContext &, const FloatRect &, const FloatRect &, const AffineTransform &,
-                     const FloatPoint &, const FloatSize &, ImagePaintingOptions = {}) noexcept final;
+    void DrawPattern(GraphicsContext &, const RectF &, const RectF &, const AffineTransform &, const PointF &,
+                     const SizeF &, ImagePaintingOptions = {}) noexcept final;
 
     // FIXME: Implement this to be less conservative.
     KRYS_NODISCARD bool CurrentFrameKnownToBeOpaque() const noexcept final
@@ -102,8 +102,8 @@ namespace krys::boo
     KRYS_NODISCARD RefPtr<NativeImage> CurrentNativeImage() noexcept final;
 
   private:
-    SVGImageForContainer(SVGImage *, const FloatSize &containerSize, float containerZoom,
-                         url::URL initialFragmentURL) noexcept;
+    SVGImageForContainer(SVGImage *, const SizeF &containerSize, float containerZoom,
+                         net::Url initialFragmentUrl) noexcept;
   };
 }
 

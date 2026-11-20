@@ -182,7 +182,7 @@ namespace krys::boo
     }
   }
 
-  IntRect RenderSelection::CollectBounds(ClipToVisibleContent clipToVisibleContent) const noexcept
+  RectI RenderSelection::CollectBounds(ClipToVisibleContent clipToVisibleContent) const noexcept
   {
     SelectionContext::RendererMap renderers;
     auto *start = _renderRange.Start();
@@ -231,14 +231,14 @@ namespace krys::boo
 
       if (auto *repaintContainer = selectionGeometry->RepaintContainer())
       {
-        FloatRect localRect = currentRect;
-        FloatQuad absQuad = repaintContainer->LocalToAbsoluteQuad(localRect);
+        RectF localRect = currentRect;
+        QuadF absQuad = repaintContainer->LocalToAbsoluteQuad(localRect);
         currentRect = LayoutRect(absQuad.EnclosingBoundingBox());
       }
       selectionRect.Unite(currentRect);
     }
 
-    return SnappedIntRect(selectionRect);
+    return SnappedRectI(selectionRect);
   }
 
   void RenderSelection::Apply(const RenderRange &newSelection, RepaintMode blockRepaintMode) noexcept

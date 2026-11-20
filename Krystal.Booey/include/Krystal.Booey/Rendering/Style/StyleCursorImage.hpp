@@ -24,8 +24,8 @@
 
 #pragma once
 
-#include "Krystal.Booey/Graphics/Geometry/IntPoint.hpp"
 #include "Krystal.Booey/Rendering/Style/StyleMultiImage.hpp"
+#include "Krystal.Core/Geometry/Point.hpp"
 #include "Krystal.Core/Types/Maybe.hpp"
 
 namespace krys::boo
@@ -35,15 +35,15 @@ namespace krys::boo
   {
   private:
     Ref<StyleImage> _image;
-    Maybe<IntPoint> _hotSpot;
-    style::URL _originalURL;
+    Maybe<PointI> _hotSpot;
+    style::Url _originalUrl;
 
   public:
-    KRYS_NODISCARD static Ref<StyleCursorImage> Create(const Ref<StyleImage> &, Maybe<IntPoint>,
-                                                       const style::URL &) noexcept;
+    KRYS_NODISCARD static Ref<StyleCursorImage> Create(const Ref<StyleImage> &, Maybe<PointI>,
+                                                       const style::Url &) noexcept;
 
-    KRYS_NODISCARD static Ref<StyleCursorImage> Create(Ref<StyleImage> &&, Maybe<IntPoint>,
-                                                       style::URL &&) noexcept;
+    KRYS_NODISCARD static Ref<StyleCursorImage> Create(Ref<StyleImage> &&, Maybe<PointI>,
+                                                       style::Url &&) noexcept;
 
     ~StyleCursorImage() noexcept override;
 
@@ -55,15 +55,15 @@ namespace krys::boo
 
     KRYS_NODISCARD bool UsesDataProtocol() const noexcept final;
 
-    KRYS_NODISCARD Maybe<IntPoint> HotSpot() const noexcept
+    KRYS_NODISCARD Maybe<PointI> HotSpot() const noexcept
     {
       return _hotSpot;
     }
 
   private:
-    StyleCursorImage(const Ref<StyleImage> &, Maybe<IntPoint> hotSpot, const style::URL &) noexcept;
+    StyleCursorImage(const Ref<StyleImage> &, Maybe<PointI> hotSpot, const style::Url &) noexcept;
 
-    StyleCursorImage(Ref<StyleImage> &&, Maybe<IntPoint> hotSpot, style::URL &&) noexcept;
+    StyleCursorImage(Ref<StyleImage> &&, Maybe<PointI> hotSpot, style::Url &&) noexcept;
 
     KRYS_NODISCARD Ref<css::Value> ComputedStyleValue(const RenderStyle &) const noexcept final;
 

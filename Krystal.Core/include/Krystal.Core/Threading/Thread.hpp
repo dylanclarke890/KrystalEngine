@@ -2,8 +2,8 @@
 
 #include "Krystal.Core/Attributes.hpp"
 #include "Krystal.Core/Macros.hpp"
+#include "Krystal.Core/Strings/String.hpp"
 #include "Krystal.Core/Types/Func.hpp"
-#include "Krystal.Core/Types/String.hpp"
 #include <thread>
 
 namespace krys

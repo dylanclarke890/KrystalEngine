@@ -169,7 +169,7 @@ namespace krys::boo
     _imageLoader->UpdateFromElement();
   }
 
-  Maybe<DOMString> SVGImageElement::ImageSourceURL() const noexcept
+  Maybe<DOMString> SVGImageElement::ImageSourceUrl() const noexcept
   {
     if (auto href = GetAttribute(SVGNames::HrefAttr().LocalName()))
     {

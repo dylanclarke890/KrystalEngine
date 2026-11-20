@@ -186,10 +186,10 @@ namespace krys::boo::css::tests
 
   TEST_CASE_METHOD(ValueFixture, "StyleProperties::MayDependOnBaseURL", "[CSS][Properties][StyleProperties]")
   {
-    CHECK(ParseDeclarations(u8"background-image: url(a.png)")->MayDependOnBaseURL());
-    CHECK(ParseDeclarations(u8"color: red; background: blue url(a.png)")->MayDependOnBaseURL());
-    CHECK_FALSE(ParseDeclarations(u8"background-image: url(#a)")->MayDependOnBaseURL());
-    CHECK_FALSE(ParseDeclarations(u8"color: red; width: 1px")->MayDependOnBaseURL());
+    CHECK(ParseDeclarations(u8"background-image: url(a.png)")->MayDependOnBaseUrl());
+    CHECK(ParseDeclarations(u8"color: red; background: blue url(a.png)")->MayDependOnBaseUrl());
+    CHECK_FALSE(ParseDeclarations(u8"background-image: url(#a)")->MayDependOnBaseUrl());
+    CHECK_FALSE(ParseDeclarations(u8"color: red; width: 1px")->MayDependOnBaseUrl());
     CHECK_FALSE(ParseDeclarations(u8"color: red")->HasCSSOMWrapper());
   }
 

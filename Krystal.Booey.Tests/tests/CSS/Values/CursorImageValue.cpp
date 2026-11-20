@@ -11,10 +11,10 @@ namespace krys::boo::css::tests
 {
   namespace
   {
-    CSSURL CursorURL(utf8_stringview url)
+    CSSUrl CursorUrl(utf8_stringview url)
     {
-      return *CompleteURL(CSSOMString {url},
-                          ParserContext {ParserMode::HTMLStandard, url::URL {u8"https://example.com/"}});
+      return *CompleteUrl(CSSOMString {url},
+                          ParserContext {ParserMode::HTMLStandard, net::Url {u8"https://example.com/"}});
     }
 
     RefPtr<Value> HotSpot(double x, double y)
@@ -28,12 +28,12 @@ namespace krys::boo::css::tests
   {
     SECTION("The original URL is the image's URL")
     {
-      auto value = CursorImageValue::Create(ImageValue::Create(CursorURL(u8"a.cur")), nullptr);
+      auto value = CursorImageValue::Create(ImageValue::Create(CursorUrl(u8"a.cur")), nullptr);
       CHECK(value->IsCursorImageValue());
       // Cursor images aren't <image>s.
       CHECK_FALSE(value->IsImage());
       CHECK_FALSE(value->IsImageGeneratorValue());
-      CHECK(value->OriginalURL() == CursorURL(u8"a.cur"));
+      CHECK(value->OriginalUrl() == CursorUrl(u8"a.cur"));
     }
 
     SECTION("Values other than images have no original URL")
@@ -42,26 +42,26 @@ namespace krys::boo::css::tests
         CursorImageValue::Create(CrossFadeValue::Create(TestImage(u8"a"), TestImage(u8"b"),
                                                         PrimitiveValue::Create(0.5, UnitType::Number)),
                                  nullptr);
-      CHECK(value->OriginalURL().IsNone());
+      CHECK(value->OriginalUrl().IsNone());
     }
 
     SECTION("With an explicit original URL")
     {
       auto value =
-        CursorImageValue::Create(ImageValue::Create(CursorURL(u8"a.cur")), nullptr, CursorURL(u8"b.cur"));
-      CHECK(value->OriginalURL() == CursorURL(u8"b.cur"));
+        CursorImageValue::Create(ImageValue::Create(CursorUrl(u8"a.cur")), nullptr, CursorUrl(u8"b.cur"));
+      CHECK(value->OriginalUrl() == CursorUrl(u8"b.cur"));
     }
   }
 
   TEST_CASE_METHOD(ValueFixture, "CursorImageValue serialisation", "[CSS][Values][CursorImageValue]")
   {
-    CHECK(CssText(*CursorImageValue::Create(ImageValue::Create(CursorURL(u8"a.cur")), nullptr))
+    CHECK(CssText(*CursorImageValue::Create(ImageValue::Create(CursorUrl(u8"a.cur")), nullptr))
           == "url(\"a.cur\")");
-    CHECK(CssText(*CursorImageValue::Create(ImageValue::Create(CursorURL(u8"a.cur")), HotSpot(1.0, 2.0)))
+    CHECK(CssText(*CursorImageValue::Create(ImageValue::Create(CursorUrl(u8"a.cur")), HotSpot(1.0, 2.0)))
           == "url(\"a.cur\") 1 2");
 
     // Identical hot spot coordinates aren't coalesced.
-    CHECK(CssText(*CursorImageValue::Create(ImageValue::Create(CursorURL(u8"a.cur")), HotSpot(3.0, 3.0)))
+    CHECK(CssText(*CursorImageValue::Create(ImageValue::Create(CursorUrl(u8"a.cur")), HotSpot(3.0, 3.0)))
           == "url(\"a.cur\") 3 3");
   }
 
@@ -69,7 +69,7 @@ namespace krys::boo::css::tests
   {
     auto make = [](utf8_stringview url, RefPtr<Value> hotSpot)
     {
-      return CursorImageValue::Create(ImageValue::Create(CursorURL(url)), krys::move(hotSpot));
+      return CursorImageValue::Create(ImageValue::Create(CursorUrl(url)), krys::move(hotSpot));
     };
 
     auto a = make(u8"a.cur", HotSpot(1.0, 2.0));
@@ -82,7 +82,7 @@ namespace krys::boo::css::tests
     // The original URL isn't compared.
     CHECK(
       *make(u8"a.cur", nullptr)
-      == *CursorImageValue::Create(ImageValue::Create(CursorURL(u8"a.cur")), nullptr, CursorURL(u8"b.cur")));
+      == *CursorImageValue::Create(ImageValue::Create(CursorUrl(u8"a.cur")), nullptr, CursorUrl(u8"b.cur")));
 
     size_t seed = 0uz;
     CHECK_FALSE(a->AddHash(seed));
@@ -91,7 +91,7 @@ namespace krys::boo::css::tests
   TEST_CASE_METHOD(ValueFixture, "CursorImageValue children", "[CSS][Values][CursorImageValue]")
   {
     // Only the image is visited, not the hot spot.
-    auto value = CursorImageValue::Create(ImageValue::Create(CursorURL(u8"a.cur")), HotSpot(1.0, 2.0));
+    auto value = CursorImageValue::Create(ImageValue::Create(CursorUrl(u8"a.cur")), HotSpot(1.0, 2.0));
     auto children = Children(*value);
     REQUIRE(children.size() == 1uz);
     CHECK(children[0uz]->IsImageValue());

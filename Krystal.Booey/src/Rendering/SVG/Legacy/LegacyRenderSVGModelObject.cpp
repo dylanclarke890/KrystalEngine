@@ -30,8 +30,6 @@
 
 #include "Krystal.Booey/Rendering/SVG/Legacy/LegacyRenderSVGModelObject.hpp"
 #include "Krystal.Booey/DOM/Nodes/Document.hpp"
-#include "Krystal.Booey/Graphics/Geometry/FloatQuad.hpp"
-#include "Krystal.Booey/Graphics/Transforms/AffineTransform.hpp"
 #include "Krystal.Booey/Rendering/Style/RenderStyle+GettersInlines.hpp"
 #include "Krystal.Booey/Rendering/SVG/Legacy/SVGResourcesCache.hpp"
 #include "Krystal.Booey/Rendering/SVG/SVGRenderSupport.hpp"
@@ -39,6 +37,8 @@
 #include "Krystal.Booey/SVG/Elements/SVGElement.hpp"
 #include "Krystal.Booey/SVG/Elements/SVGUseElement.hpp"
 #include "Krystal.Booey/SVG/SVGLocatable.hpp"
+#include "Krystal.Core/Geometry/AffineTransform.hpp"
+#include "Krystal.Core/Geometry/Quad.hpp"
 
 namespace krys::boo
 {
@@ -72,8 +72,8 @@ namespace krys::boo
     return rects;
   }
 
-  Maybe<FloatRect> LegacyRenderSVGModelObject::ComputeFloatVisibleRectInContainer(
-    const FloatRect &rect, const RenderLayerModelObject *container, VisibleRectContext context) const noexcept
+  Maybe<RectF> LegacyRenderSVGModelObject::ComputeFloatVisibleRectInContainer(
+    const RectF &rect, const RenderLayerModelObject *container, VisibleRectContext context) const noexcept
   {
     return SVGRenderSupport::ComputeFloatVisibleRectInContainer(*this, rect, container, context);
   }
@@ -125,7 +125,7 @@ namespace krys::boo
     LayoutRect box = EnclosingLayoutRect(RepaintRectInLocalCoordinates());
     AdjustRectForOutlineAndShadow(*this, box, Style().UsedZoomForLength());
 
-    FloatQuad containerRelativeQuad = LocalToContainerQuad(FloatRect(box), repaintContainer);
+    QuadF containerRelativeQuad = LocalToContainerQuad(RectF(box), repaintContainer);
     return LayoutRect(SnapRectToDevicePixels(LayoutRect(containerRelativeQuad.BoundingBox()),
                                              GetDocument().DeviceScaleFactor()));
   }
@@ -138,7 +138,7 @@ namespace krys::boo
     rects.push_back(rect);
   }
 
-  void LegacyRenderSVGModelObject::AbsoluteQuads(List<FloatQuad> &quads, bool *wasFixed) const noexcept
+  void LegacyRenderSVGModelObject::AbsoluteQuads(List<QuadF> &quads, bool *wasFixed) const noexcept
   {
     quads.push_back(LocalToAbsoluteQuad(StrokeBoundingBox(), MapCoordinatesMode::UseTransforms, wasFixed));
   }
@@ -198,9 +198,9 @@ namespace krys::boo
       }
     }
 
-    // FloatRect::intersects does not consider horizontal or vertical lines (because of isEmpty()).
+    // RectF::intersects does not consider horizontal or vertical lines (because of isEmpty()).
     // So special-case handling of such lines.
-    KRYS_NODISCARD bool IntersectsAllowingEmpty(const FloatRect &r, const FloatRect &other) noexcept
+    KRYS_NODISCARD bool IntersectsAllowingEmpty(const RectF &r, const RectF &other) noexcept
     {
       if (r.IsEmpty() && other.IsEmpty())
       {
@@ -228,7 +228,7 @@ namespace krys::boo
     }
   }
 
-  bool LegacyRenderSVGModelObject::CheckIntersection(RenderElement *renderer, const FloatRect &rect) noexcept
+  bool LegacyRenderSVGModelObject::CheckIntersection(RenderElement *renderer, const RectF &rect) noexcept
   {
     if (!renderer || renderer->Style().UsedPointerEvents() == PointerEvents::None)
     {
@@ -248,7 +248,7 @@ namespace krys::boo
                                            RepaintRectCalculation::Accurate)));
   }
 
-  bool LegacyRenderSVGModelObject::CheckEnclosure(RenderElement *renderer, const FloatRect &rect) noexcept
+  bool LegacyRenderSVGModelObject::CheckEnclosure(RenderElement *renderer, const RectF &rect) noexcept
   {
     if (!renderer || renderer->Style().UsedPointerEvents() == PointerEvents::None)
     {

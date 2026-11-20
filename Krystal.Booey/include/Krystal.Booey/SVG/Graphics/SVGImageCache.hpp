@@ -19,17 +19,17 @@
 
 #pragma once
 
-#include "Krystal.Booey/Graphics/Geometry/FloatSize.hpp"
+#include "Krystal.Booey/Graphics/Geometry/LayoutGeometryForward.hpp"
 #include "Krystal.Booey/Graphics/Images/Image.hpp"
-#include "Krystal.Booey/URL/URL.hpp"
+#include "Krystal.Core/Geometry/Size.hpp"
 #include "Krystal.Core/Types/HashMap.hpp"
 #include "Krystal.Core/Types/RefPtr.hpp"
 #include "Krystal.Core/Types/WeakPtr.hpp"
+#include "Krystal.Net/Url.hpp"
 
 namespace krys::boo
 {
   class CachedImageClient;
-  class LayoutSize;
   class RenderObject;
   class SVGImage;
   class SVGImageForContainer;
@@ -51,9 +51,9 @@ namespace krys::boo
     void RemoveClientFromCache(const CachedImageClient *) noexcept;
 
     void SetContainerContextForClient(const CachedImageClient &, const LayoutSize &, float,
-                                      const url::URL &) noexcept;
+                                      const net::Url &) noexcept;
 
-    KRYS_NODISCARD FloatSize ImageSizeForRenderer(const RenderObject *) const noexcept;
+    KRYS_NODISCARD SizeF ImageSizeForRenderer(const RenderObject *) const noexcept;
 
     KRYS_NODISCARD Image *ImageForRenderer(const RenderObject *) const noexcept;
 

@@ -26,7 +26,7 @@ namespace krys::boo
   {
   }
 
-  void GraphicsLayerTransform::SetPosition(const FloatPoint &position) noexcept
+  void GraphicsLayerTransform::SetPosition(const PointF &position) noexcept
   {
     if (_position == position)
     {
@@ -36,7 +36,7 @@ namespace krys::boo
     _dirty = true;
   }
 
-  void GraphicsLayerTransform::SetSize(const FloatSize &size) noexcept
+  void GraphicsLayerTransform::SetSize(const SizeF &size) noexcept
   {
     if (_size == size)
     {
@@ -46,7 +46,7 @@ namespace krys::boo
     _dirty = true;
   }
 
-  void GraphicsLayerTransform::SetAnchorPoint(const FloatPoint3D &anchorPoint) noexcept
+  void GraphicsLayerTransform::SetAnchorPoint(const Point3F &anchorPoint) noexcept
   {
     if (_anchorPoint == anchorPoint)
     {

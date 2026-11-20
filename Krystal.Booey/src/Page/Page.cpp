@@ -26,21 +26,21 @@
 #include "Krystal.Booey/HTML/Algorithms/FocusAlgorithms.hpp"
 #include "Krystal.Booey/HTML/Algorithms/RenderBlocking.hpp"
 #include "Krystal.Booey/HTML/EventLoop/EventLoop.hpp"
+#include "Krystal.Booey/Input/EventHandler.hpp"
+#include "Krystal.Booey/Input/PointerCaptureController.hpp"
+#include "Krystal.Booey/Input/PointerLockController.hpp"
+#include "Krystal.Booey/Input/WheelEventDeltaFilter.hpp"
 #include "Krystal.Booey/Loader/Cache/CachedImage.hpp"
 #include "Krystal.Booey/Loader/Cache/CachedResourceLoader.hpp"
 #include "Krystal.Booey/Loader/FrameLoader.hpp"
-#include "Krystal.Booey/Page/ChromeClient.hpp"
+#include "Krystal.Booey/Page/Clients/ChromeClient.hpp"
 #include "Krystal.Booey/Page/Drag/DragController.hpp"
-#include "Krystal.Booey/Page/EventHandler.hpp"
 #include "Krystal.Booey/Page/LocalDOMWindow.hpp"
 #include "Krystal.Booey/Page/LocalFrame.hpp"
 #include "Krystal.Booey/Page/LocalFrameView.hpp"
-#include "Krystal.Booey/Page/PointerCaptureController.hpp"
-#include "Krystal.Booey/Page/PointerLockController.hpp"
 #include "Krystal.Booey/Page/PopupOpeningObserver.hpp"
 #include "Krystal.Booey/Page/Scrolling/ScrollLatchingController.hpp"
 #include "Krystal.Booey/Page/Settings.hpp"
-#include "Krystal.Booey/Page/WheelEventDeltaFilter.hpp"
 #include "Krystal.Booey/Rendering/RenderView.hpp"
 #include "Krystal.Booey/Style/AnchorPositionEvaluator.hpp"
 #include "Krystal.Booey/Style/Resolver.hpp"
@@ -130,7 +130,7 @@ namespace krys::boo
     }
   }
 
-  void Page::SetPageScaleFactor(float scale, const IntPoint &origin) noexcept
+  void Page::SetPageScaleFactor(float scale, const PointI &origin) noexcept
   {
     RefPtr<boo::Document> mainDocument = ShareRefPtr(_mainFrame->Document());
     RefPtr<LocalFrameView> mainFrameView = mainDocument ? ShareRefPtr(mainDocument->View()) : nullptr;
@@ -159,7 +159,7 @@ namespace krys::boo
         }
 
         // Transform change on RenderView doesn't trigger repaint on non-composited contents.
-        view->InvalidateRect(IntRect(LayoutRect::InfiniteRect()));
+        view->InvalidateRect(RectI(LayoutRect::InfiniteRect()));
 
         _mainFrame->DeviceOrPageScaleFactorChanged();
       }

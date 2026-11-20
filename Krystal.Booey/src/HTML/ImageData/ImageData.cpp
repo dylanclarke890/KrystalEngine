@@ -29,7 +29,7 @@
 
 #include "Krystal.Booey/HTML/ImageData/ImageData.hpp"
 #include "Krystal.Booey/Graphics/Color/DestinationColorSpace.hpp"
-#include "Krystal.Core/Text/TextStream.hpp"
+#include "Krystal.Core/Strings/TextStream.hpp"
 #include <cstring>
 #include <limits>
 
@@ -37,8 +37,7 @@ namespace krys::boo::html
 {
   namespace
   {
-    KRYS_NODISCARD Maybe<uint32> ComputeDataSize(const IntSize &size,
-                                                 ImageDataPixelFormat pixelFormat) noexcept
+    KRYS_NODISCARD Maybe<uint32> ComputeDataSize(const SizeI &size, ImageDataPixelFormat pixelFormat) noexcept
     {
       return PixelBuffer::ComputePixelComponentCount(ToPixelFormat(pixelFormat), size);
     }
@@ -100,7 +99,7 @@ namespace krys::boo::html
     return nullptr;
   }
 
-  RefPtr<ImageData> ImageData::Create(const IntSize &size, PredefinedColorSpace colorSpace,
+  RefPtr<ImageData> ImageData::Create(const SizeI &size, PredefinedColorSpace colorSpace,
                                       ImageDataPixelFormat imageDataPixelFormat) noexcept
   {
     auto dataSize = ComputeDataSize(size, ImageDataPixelFormat::RgbaUnorm8);
@@ -116,7 +115,7 @@ namespace krys::boo::html
     return AdoptRef(*new ImageData(size, krys::move(*array), colorSpace, imageDataPixelFormat));
   }
 
-  RefPtr<ImageData> ImageData::Create(const IntSize &size, ImageDataArray &&array,
+  RefPtr<ImageData> ImageData::Create(const SizeI &size, ImageDataArray &&array,
                                       PredefinedColorSpace colorSpace) noexcept
   {
     auto dataSize = ComputeDataSize(size, array.PixelFormat());
@@ -150,7 +149,7 @@ namespace krys::boo::html
     {
       return Exception {ExceptionCode::RangeError, u8"Cannot allocate a buffer of this size"};
     }
-    IntSize size(static_cast<int32>(sw), static_cast<int32>(sh));
+    SizeI size(static_cast<int32>(sw), static_cast<int32>(sh));
     auto pixelFormat = ComputePixelFormat(settings);
     auto dataSize = ComputeDataSize(size, pixelFormat);
     if (!dataSize)
@@ -219,7 +218,7 @@ namespace krys::boo::html
     //         then throw an "InvalidStateError" DOMException.
     // (There's no Float16Array, so a Uint8ClampedArray is taken for every format; see the FIXME on
     // ImageDataArray.)
-    IntSize size(static_cast<int32>(sw), static_cast<int32>(height));
+    SizeI size(static_cast<int32>(sw), static_cast<int32>(height));
     auto dataSize = ComputeDataSize(size, ComputePixelFormat(settings));
     if (!dataSize || *dataSize != length)
     {
@@ -230,12 +229,12 @@ namespace krys::boo::html
     return AdoptRef(*new ImageData(size, krys::move(array), colorSpace));
   }
 
-  ImageData::ImageData(const IntSize &size, ImageDataArray &&data, PredefinedColorSpace colorSpace) noexcept
+  ImageData::ImageData(const SizeI &size, ImageDataArray &&data, PredefinedColorSpace colorSpace) noexcept
       : _size(size), _data(krys::move(data)), _colorSpace(colorSpace)
   {
   }
 
-  ImageData::ImageData(const IntSize &size, ImageDataArray &&data, PredefinedColorSpace colorSpace,
+  ImageData::ImageData(const SizeI &size, ImageDataArray &&data, PredefinedColorSpace colorSpace,
                        Maybe<ImageDataPixelFormat> overridingPixelFormat) noexcept
       : _size(size), _data(krys::move(data), overridingPixelFormat), _colorSpace(colorSpace)
   {

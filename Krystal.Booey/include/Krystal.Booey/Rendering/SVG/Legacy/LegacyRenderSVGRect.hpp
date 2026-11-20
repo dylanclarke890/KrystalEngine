@@ -65,11 +65,10 @@ namespace krys::boo
     void StrokeShape(GraphicsContext &) const noexcept override;
 
     KRYS_NODISCARD bool
-      ShapeDependentStrokeContains(const FloatPoint &,
+      ShapeDependentStrokeContains(const PointF &,
                                    PointCoordinateSpace = GlobalCoordinateSpace) noexcept override;
 
-    KRYS_NODISCARD bool ShapeDependentFillContains(const FloatPoint &,
-                                                   const WindRule) const noexcept override;
+    KRYS_NODISCARD bool ShapeDependentFillContains(const PointF &, const WindRule) const noexcept override;
 
     KRYS_NODISCARD bool DefinitelyHasSimpleStroke() const noexcept;
 

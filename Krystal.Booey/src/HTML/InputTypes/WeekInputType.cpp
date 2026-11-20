@@ -31,8 +31,8 @@
 #include "Krystal.Booey/HTML/InputTypes/WeekInputType.hpp"
 #include "Krystal.Booey/HTML/Elements/HTMLInputElement.hpp"
 #include "Krystal.Booey/HTML/InputTypes/DateTimeFieldsState.hpp"
-#include "Krystal.Booey/Platform/Locale/LocalizedStrings.hpp"
-#include "Krystal.Booey/Platform/Locale/PlatformLocale.hpp"
+#include "Krystal.Booey/Platform/LocalizedStrings.hpp"
+#include "Krystal.I18n/Locale.hpp"
 #include <cmath>
 
 namespace krys::boo::html

@@ -27,12 +27,12 @@
 #include "Krystal.Booey/Loader/Cache/CachedResourceClientWalker.hpp"
 #include "Krystal.Booey/Loader/Cache/CachedResourceRequest.hpp"
 #include "Krystal.Booey/Loader/Cache/CachedStyleSheetClient.hpp"
-#include "Krystal.Booey/Platform/Network/HTTPParsers.hpp"
-#include "Krystal.Booey/Platform/SharedBuffer.hpp"
-#include "Krystal.Core/Text/ASCII.hpp"
-#include "Krystal.Core/Text/Encodings/Decode.hpp"
-#include "Krystal.Core/Text/Encodings/Encode.hpp"
-#include "Krystal.Core/Text/Encodings/UTF.hpp"
+#include "Krystal.Core/Strings/ASCII.hpp"
+#include "Krystal.Core/Types/SharedBuffer.hpp"
+#include "Krystal.Net/Http/HttpParsers.hpp"
+#include "Krystal.Text/Encodings/Decode.hpp"
+#include "Krystal.Text/Encodings/Encode.hpp"
+#include "Krystal.Text/Encodings/UTF.hpp"
 
 namespace krys::boo
 {
@@ -79,8 +79,8 @@ namespace krys::boo
 
     if (!IsLoading())
     {
-      Downcast<CachedStyleSheetClient>(client).SetCSSStyleSheet(GetResourceRequest().URL().String(),
-                                                                Response().URL(), Encoding(), this);
+      Downcast<CachedStyleSheetClient>(client).SetCSSStyleSheet(GetResourceRequest().Url().String(),
+                                                                Response().Url(), Encoding(), this);
     }
   }
 
@@ -90,14 +90,14 @@ namespace krys::boo
     return u8"UTF-8";
   }
 
-  Maybe<utf8_string> CachedCSSStyleSheet::SheetText(MIMETypeCheckHint mimeTypeCheckHint,
-                                                    bool *hasValidMIMEType,
-                                                    bool *hasHTTPStatusOK) const noexcept
+  Maybe<utf8_string> CachedCSSStyleSheet::SheetText(MimeTypeCheckHint mimeTypeCheckHint,
+                                                    bool *hasValidMimeType,
+                                                    bool *hasHttpStatusOK) const noexcept
   {
     // Ensure hasValidMIMEType and hasHTTPStatusOK always get set (even if the data is null or empty) — which
     // in turn ensures that if the MIME type isn't text/css or the HTTP status isn't an OK status, we never
     // load the resource. https://html.spec.whatwg.org/#link-type-stylesheet:process-the-linked-resource
-    if (!CanUseSheet(mimeTypeCheckHint, hasValidMIMEType, hasHTTPStatusOK))
+    if (!CanUseSheet(mimeTypeCheckHint, hasValidMimeType, hasHttpStatusOK))
     {
       return null;
     }
@@ -148,11 +148,11 @@ namespace krys::boo
     CachedResourceClientWalker<CachedStyleSheetClient> walker(*this);
     while (auto *client = walker.Next())
     {
-      client->SetCSSStyleSheet(GetResourceRequest().URL().String(), Response().URL(), Encoding(), this);
+      client->SetCSSStyleSheet(GetResourceRequest().Url().String(), Response().Url(), Encoding(), this);
     }
   }
 
-  utf8_string CachedCSSStyleSheet::ResponseMIMEType() const noexcept
+  utf8_string CachedCSSStyleSheet::ResponseMimeType() const noexcept
   {
     return Response().MimeType();
   }
@@ -160,12 +160,12 @@ namespace krys::boo
   bool CachedCSSStyleSheet::MimeTypeAllowedByNosniff() const noexcept
   {
     // A nosniff response is a style sheet only if it says it's one.
-    return !IsNosniffContentTypeOptions(Response().HTTPHeaderField(u8"X-Content-Type-Options"))
-           || text::IsASCIICaselessEqual(ResponseMIMEType(), u8"text/css");
+    return !net::http::IsNosniffContentTypeOptions(Response().HttpHeaderField(u8"X-Content-Type-Options"))
+           || text::IsASCIICaselessEqual(ResponseMimeType(), u8"text/css");
   }
 
-  bool CachedCSSStyleSheet::CanUseSheet(MIMETypeCheckHint mimeTypeCheckHint, bool *hasValidMIMEType,
-                                        bool *hasHTTPStatusOK) const noexcept
+  bool CachedCSSStyleSheet::CanUseSheet(MimeTypeCheckHint mimeTypeCheckHint, bool *hasValidMimeType,
+                                        bool *hasHttpStatusOK) const noexcept
   {
     if (ErrorOccurred())
     {
@@ -175,26 +175,26 @@ namespace krys::boo
     // An unsuccessful HTTP response is no style sheet. (A host that gives no status, 0, isn't saying it
     // failed.)
     // https://html.spec.whatwg.org/#fetching-and-processing-a-resource-from-a-link-element:processresponseconsumebody
-    if (Response().URL().ProtocolIsInHTTPFamily() && Response().HTTPStatusCode()
+    if (Response().Url().ProtocolIsInHttpFamily() && Response().HttpStatusCode()
         && !Response().IsSuccessful())
     {
-      if (hasHTTPStatusOK)
+      if (hasHttpStatusOK)
       {
-        *hasHTTPStatusOK = false;
+        *hasHttpStatusOK = false;
       }
       return false;
     }
 
     if (!MimeTypeAllowedByNosniff())
     {
-      if (hasValidMIMEType)
+      if (hasValidMimeType)
       {
-        *hasValidMIMEType = false;
+        *hasValidMimeType = false;
       }
       return false;
     }
 
-    if (mimeTypeCheckHint == MIMETypeCheckHint::Lax)
+    if (mimeTypeCheckHint == MimeTypeCheckHint::Lax)
     {
       return true;
     }
@@ -207,12 +207,12 @@ namespace krys::boo
     // for local HTML documents.
     // FIXME: Types that aren't valid content types (isValidContentType) are allowed too, once there's a
     // content type parser.
-    auto mimeType = ResponseMIMEType();
+    auto mimeType = ResponseMimeType();
     bool typeOK = mimeType.empty() || text::IsASCIICaselessEqual(mimeType, u8"text/css")
                   || text::IsASCIICaselessEqual(mimeType, u8"application/x-unknown-content-type");
-    if (hasValidMIMEType)
+    if (hasValidMimeType)
     {
-      *hasValidMIMEType = typeOK;
+      *hasValidMimeType = typeOK;
     }
     return typeOK;
   }

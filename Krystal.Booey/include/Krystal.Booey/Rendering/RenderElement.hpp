@@ -22,18 +22,18 @@
 
 #pragma once
 
-#include "Krystal.Booey/Graphics/Geometry/FloatRect.hpp"
-#include "Krystal.Booey/Graphics/Images/ImageOrientation.hpp"
 #include "Krystal.Booey/Rendering/RenderObject.hpp"
 #include "Krystal.Booey/Rendering/RenderPtr.hpp"
 #include "Krystal.Booey/Rendering/Style/RenderStyle.hpp"
 #include "Krystal.Booey/Style/Difference.hpp"
 #include "Krystal.Core/Attributes.hpp"
+#include "Krystal.Core/Geometry/Rect.hpp"
 #include "Krystal.Core/Macros.hpp"
 #include "Krystal.Core/Time/MonotonicTime.hpp"
 #include "Krystal.Core/TypeCast.hpp"
 #include "Krystal.Core/Types/Pair.hpp"
 #include "Krystal.Core/Types/UniquePtr.hpp"
+#include "Krystal.Image/ImageOrientation.hpp"
 
 namespace krys::boo
 {
@@ -240,13 +240,13 @@ namespace krys::boo
     /// @brief How images drawn for the renderer are oriented: its `image-orientation`.
     // FIXME: An image element that doesn't allow the orientation to be overridden draws its image's
     // (allowsOrientationOverride, G7c).
-    KRYS_NODISCARD boo::ImageOrientation GetImageOrientation() const noexcept;
+    KRYS_NODISCARD img::ImageOrientation GetImageOrientation() const noexcept;
 
     /// @brief Whether the renderer can be seen at all: it's visible and its document's frame is on screen.
     KRYS_NODISCARD bool IsVisibleIgnoringGeometry() const noexcept;
 
     /// @brief Whether the renderer can be seen in @p documentRect, in document coordinates.
-    KRYS_NODISCARD bool IsVisibleInDocumentRect(const IntRect &documentRect) const noexcept;
+    KRYS_NODISCARD bool IsVisibleInDocumentRect(const RectI &documentRect) const noexcept;
 
     /// @brief Whether the renderer can be seen in its frame's visible content.
     KRYS_NODISCARD bool IsVisibleInViewport() const noexcept;
@@ -284,8 +284,7 @@ namespace krys::boo
     /// @brief Repaints the renderer and starts its paused @p cachedImage's animation if it's now visible in
     /// @p visibleRect.
     /// @return Whether it resumed.
-    bool RepaintForPausedImageAnimationsIfNeeded(const IntRect &visibleRect,
-                                                 CachedImage &cachedImage) noexcept;
+    bool RepaintForPausedImageAnimationsIfNeeded(const RectI &visibleRect, CachedImage &cachedImage) noexcept;
 
     KRYS_NODISCARD bool HasPausedImageAnimations() const noexcept
     {
@@ -321,7 +320,7 @@ namespace krys::boo
     KRYS_NODISCARD bool IsInsideEntirelyHiddenLayer() const noexcept;
 
     VisibleInViewportState ImageFrameAvailable(CachedImage &, ImageAnimatingState,
-                                               const IntRect *) noexcept override;
+                                               const RectI *) noexcept override;
 
     KRYS_NODISCARD VisibleInViewportState ImageVisibleInViewport(const Document &) const noexcept override;
 
@@ -492,11 +491,11 @@ namespace krys::boo
       return CreatesGroupForStyle(Style());
     }
 
-    KRYS_NODISCARD FloatRect TransformReferenceBoxRect() const noexcept;
+    KRYS_NODISCARD RectF TransformReferenceBoxRect() const noexcept;
 
-    KRYS_NODISCARD FloatRect TransformReferenceBoxRect(const RenderStyle &style) const noexcept;
+    KRYS_NODISCARD RectF TransformReferenceBoxRect(const RenderStyle &style) const noexcept;
 
-    KRYS_NODISCARD virtual FloatRect ReferenceBoxRect(CSSBoxType boxType) const noexcept;
+    KRYS_NODISCARD virtual RectF ReferenceBoxRect(CSSBoxType boxType) const noexcept;
 
     KRYS_NODISCARD RenderLayer *LayerParent() const noexcept;
 

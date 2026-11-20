@@ -46,15 +46,15 @@ namespace krys::boo
     return sharedInstance;
   }
 
-  void ImageFrame::SetDecodingStatus(DecodingStatus decodingStatus) noexcept
+  void ImageFrame::SetDecodingStatus(img::DecodingStatus decodingStatus) noexcept
   {
-    krys_debug_assert(decodingStatus != DecodingStatus::Decoding);
+    krys_debug_assert(decodingStatus != img::DecodingStatus::Decoding);
     _decodingStatus = decodingStatus;
   }
 
-  DecodingStatus ImageFrame::GetDecodingStatus() const noexcept
+  img::DecodingStatus ImageFrame::GetDecodingStatus() const noexcept
   {
-    krys_debug_assert(_decodingStatus != DecodingStatus::Decoding);
+    krys_debug_assert(_decodingStatus != img::DecodingStatus::Decoding);
     return _decodingStatus;
   }
 

@@ -42,8 +42,6 @@
 #include "Krystal.Booey/Editing/Selection/VisibleSelection.hpp"
 #include "Krystal.Booey/Editing/Selection/VisibleUnits.hpp"
 #include "Krystal.Booey/Editing/TextIterator.hpp"
-#include "Krystal.Booey/Graphics/Geometry/FloatQuad.hpp"
-#include "Krystal.Booey/Graphics/Geometry/IntPoint.hpp"
 #include "Krystal.Booey/HTML/Elements/HTMLBodyElement.hpp"
 #include "Krystal.Booey/HTML/Elements/HTMLBRElement.hpp"
 #include "Krystal.Booey/HTML/Elements/HTMLDListElement.hpp"
@@ -61,8 +59,10 @@
 #include "Krystal.Booey/Rendering/Style/RenderStyle+GettersInlines.hpp"
 #include "Krystal.Booey/Rendering/Tables/RenderTable.hpp"
 #include "Krystal.Booey/Rendering/Tables/RenderTableCell.hpp"
-#include "Krystal.Core/Text/ASCII.hpp"
-#include <unicode/uchar.h>
+#include "Krystal.Core/Geometry/Point.hpp"
+#include "Krystal.Core/Geometry/Quad.hpp"
+#include "Krystal.Core/Strings/ASCII.hpp"
+#include "Krystal.Text/Bidi.hpp"
 
 namespace krys::boo
 {
@@ -443,17 +443,17 @@ namespace krys::boo
     return nullptr;
   }
 
-  TextDirection DirectionOfEnclosingBlock(const dom::Position &position) noexcept
+  text::TextDirection DirectionOfEnclosingBlock(const dom::Position &position) noexcept
   {
     auto block = EnclosingBlock(ShareRefPtr(position.GetContainerNode()));
     if (!block)
     {
-      return TextDirection::LTR;
+      return text::TextDirection::LTR;
     }
     auto *renderer = block->Renderer();
     if (!renderer)
     {
-      return TextDirection::LTR;
+      return text::TextDirection::LTR;
     }
     return renderer->GetWritingMode().BidiDirection();
   }
@@ -488,7 +488,7 @@ namespace krys::boo
     // Use IsUnicodeCompatibleASCIIWhitespace() for all Latin-1 characters, which is incorrect as it
     // excludes U+0085 and U+00A0.
     return character <= 0xFF ? text::IsUnicodeCompatibleASCIIWhitespace(character)
-                             : u_charDirection(static_cast<UChar32>(character)) == U_WHITE_SPACE_NEUTRAL;
+                             : text::GetBidiClass(character) == text::BidiClass::WhiteSpaceNeutral;
   }
 
   bool IsTableStructureNode(const Node &node) noexcept
@@ -556,7 +556,7 @@ namespace krys::boo
   }
 
   VisiblePosition ClosestEditablePositionInElementForAbsolutePoint(const Element &element,
-                                                                   const IntPoint &point) noexcept
+                                                                   const PointI &point) noexcept
   {
     // FIXME: The frame check (element.document().frame()), once documents know their frames.
     if (!element.IsConnected())
@@ -588,7 +588,7 @@ namespace krys::boo
     auto constrainedAbsolutePoint =
       point.ConstrainedBetween(absoluteBoundingBox.MinXMinYCorner(), absoluteBoundingBox.MaxXMaxYCorner());
     auto localPoint =
-      renderer->AbsoluteToLocal(FloatPoint(constrainedAbsolutePoint), MapCoordinatesMode::UseTransforms);
+      renderer->AbsoluteToLocal(PointF(constrainedAbsolutePoint), MapCoordinatesMode::UseTransforms);
     auto visiblePosition =
       renderer->VisiblePositionForPoint(FlooredLayoutPoint(localPoint), HitTestSource::User);
     return IsEditablePosition(visiblePosition.DeepEquivalent()) ? visiblePosition : VisiblePosition {};
@@ -1183,8 +1183,8 @@ namespace krys::boo
     return localRect;
   }
 
-  IntRect AbsoluteBoundsForLocalCaretRect(RenderBlock *rendererForCaretPainting, const LayoutRect &rect,
-                                          bool *insideFixed) noexcept
+  RectI AbsoluteBoundsForLocalCaretRect(RenderBlock *rendererForCaretPainting, const LayoutRect &rect,
+                                        bool *insideFixed) noexcept
   {
     if (insideFixed)
     {
@@ -1193,13 +1193,13 @@ namespace krys::boo
 
     if (!rendererForCaretPainting || rect.IsEmpty())
     {
-      return IntRect();
+      return RectI();
     }
 
     LayoutRect localRect(rect);
     rendererForCaretPainting->FlipForWritingMode(localRect);
     return rendererForCaretPainting
-      ->LocalToAbsoluteQuad(FloatQuad(FloatRect(localRect)), MapCoordinatesMode::UseTransforms, insideFixed)
+      ->LocalToAbsoluteQuad(QuadF(RectF(localRect)), MapCoordinatesMode::UseTransforms, insideFixed)
       .EnclosingBoundingBox();
   }
 

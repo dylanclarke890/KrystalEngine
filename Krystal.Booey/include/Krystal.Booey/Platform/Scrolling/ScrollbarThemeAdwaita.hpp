@@ -56,9 +56,9 @@ namespace krys::boo
       return UsesOverlayScrollbars();
     }
 
-    bool Paint(Scrollbar &, GraphicsContext &, const IntRect &) noexcept override;
+    bool Paint(Scrollbar &, GraphicsContext &, const RectI &) noexcept override;
 
-    void PaintScrollCorner(ScrollableArea &, GraphicsContext &, const IntRect &) noexcept override;
+    void PaintScrollCorner(ScrollableArea &, GraphicsContext &, const RectI &) noexcept override;
 
     KRYS_NODISCARD ScrollbarButtonPressAction HandleMousePressEvent(Scrollbar &, const PlatformMouseEvent &,
                                                                     ScrollbarPart) noexcept override;
@@ -73,12 +73,11 @@ namespace krys::boo
 
     KRYS_NODISCARD bool HasThumb(Scrollbar &) noexcept override;
 
-    KRYS_NODISCARD IntRect BackButtonRect(Scrollbar &, ScrollbarPart,
-                                          bool painting = false) noexcept override;
+    KRYS_NODISCARD RectI BackButtonRect(Scrollbar &, ScrollbarPart, bool painting = false) noexcept override;
 
-    KRYS_NODISCARD IntRect ForwardButtonRect(Scrollbar &, ScrollbarPart,
-                                             bool painting = false) noexcept override;
+    KRYS_NODISCARD RectI ForwardButtonRect(Scrollbar &, ScrollbarPart,
+                                           bool painting = false) noexcept override;
 
-    KRYS_NODISCARD IntRect TrackRect(Scrollbar &, bool painting = false) noexcept override;
+    KRYS_NODISCARD RectI TrackRect(Scrollbar &, bool painting = false) noexcept override;
   };
 }

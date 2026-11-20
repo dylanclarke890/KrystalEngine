@@ -107,7 +107,7 @@ namespace krys::boo
     return webArea && webArea->CanSetFocusAttribute();
   }
 
-  AXObject *AXScrollView::AccessibilityHitTest(const IntPoint &point) const noexcept
+  AXObject *AXScrollView::AccessibilityHitTest(const PointI &point) const noexcept
   {
     auto *webArea = WebAreaObject();
     if (!webArea)

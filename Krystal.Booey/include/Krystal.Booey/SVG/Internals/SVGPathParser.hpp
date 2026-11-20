@@ -38,9 +38,9 @@ namespace krys::boo
   private:
     SVGPathSource &_source;
     SVGPathConsumer &_consumer;
-    FloatPoint _controlPoint;
-    FloatPoint _currentPoint;
-    FloatPoint _subPathPoint;
+    PointF _controlPoint;
+    PointF _currentPoint;
+    PointF _subPathPoint;
     svg::PathCoordinateMode _mode {svg::PathCoordinateMode::AbsoluteCoordinates};
     const svg::PathParsingMode _pathParsingMode {svg::PathParsingMode::NormalisedParsing};
     SVGPathSegType _lastCommand {SVGPathSegType::Unknown};
@@ -67,9 +67,8 @@ namespace krys::boo
 
     KRYS_NODISCARD bool ParsePathData(bool checkForInitialMoveTo) noexcept;
 
-    KRYS_NODISCARD bool DecomposeArcToCubic(float angle, float rx, float ry, const FloatPoint &start,
-                                            const FloatPoint &end, bool largeArcFlag,
-                                            bool sweepFlag) noexcept;
+    KRYS_NODISCARD bool DecomposeArcToCubic(float angle, float rx, float ry, const PointF &start,
+                                            const PointF &end, bool largeArcFlag, bool sweepFlag) noexcept;
 
     void ParseClosePathSegment() noexcept;
 

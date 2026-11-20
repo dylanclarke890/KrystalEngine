@@ -94,27 +94,27 @@ layer at (0,0) size 800x104
     auto &rect = RendererById<LegacyRenderSVGRect>(*fixture.Document, u8"rect");
     CHECK(rect.GetShapeType() == LegacyRenderSVGShape::ShapeType::Rectangle);
     CHECK_FALSE(rect.HasPath());
-    CHECK(AsObject(rect).ObjectBoundingBox() == FloatRect(10, 20, 30, 40));
-    CHECK(AsObject(rect).StrokeBoundingBox() == FloatRect(8, 18, 34, 44));
-    CHECK(AsObject(rect).RepaintRectInLocalCoordinates() == FloatRect(8, 18, 34, 44));
+    CHECK(AsObject(rect).ObjectBoundingBox() == RectF(10, 20, 30, 40));
+    CHECK(AsObject(rect).StrokeBoundingBox() == RectF(8, 18, 34, 44));
+    CHECK(AsObject(rect).RepaintRectInLocalCoordinates() == RectF(8, 18, 34, 44));
 
     // A rounded rect is a path.
     auto &rounded = RendererById<LegacyRenderSVGRect>(*fixture.Document, u8"rounded");
     CHECK(rounded.GetShapeType() == LegacyRenderSVGShape::ShapeType::RoundedRectangle);
     CHECK(rounded.HasPath());
-    CHECK(AsObject(rounded).ObjectBoundingBox() == FloatRect(10, 20, 30, 40));
+    CHECK(AsObject(rounded).ObjectBoundingBox() == RectF(10, 20, 30, 40));
 
     auto &circle = RendererById<LegacyRenderSVGShape>(*fixture.Document, u8"circle");
     CHECK(circle.GetShapeType() == LegacyRenderSVGShape::ShapeType::Circle);
-    CHECK(AsObject(circle).ObjectBoundingBox() == FloatRect(40, 40, 20, 20));
-    CHECK(AsObject(circle).StrokeBoundingBox() == FloatRect(39, 39, 22, 22));
+    CHECK(AsObject(circle).ObjectBoundingBox() == RectF(40, 40, 20, 20));
+    CHECK(AsObject(circle).StrokeBoundingBox() == RectF(39, 39, 22, 22));
 
     // A path's approximate stroke box (its repaint rect) allows for miter joins (the miter limit, 4, times
     // half the stroke); a line's for square caps (half the stroke times the square root of 2).
     auto &path = RendererById<LegacyRenderSVGPath>(*fixture.Document, u8"path");
     CHECK(path.GetShapeType() == LegacyRenderSVGShape::ShapeType::Path);
-    CHECK(AsObject(path).ObjectBoundingBox() == FloatRect(0, 0, 20, 20));
-    CHECK(AsObject(path).RepaintRectInLocalCoordinates() == FloatRect(-4, -4, 28, 28));
+    CHECK(AsObject(path).ObjectBoundingBox() == RectF(0, 0, 20, 20));
+    CHECK(AsObject(path).RepaintRectInLocalCoordinates() == RectF(-4, -4, 28, 28));
     auto &line = RendererById<LegacyRenderSVGPath>(*fixture.Document, u8"line");
     CHECK(line.GetShapeType() == LegacyRenderSVGShape::ShapeType::Line);
     auto lineRepaintRect = AsObject(line).RepaintRectInLocalCoordinates();
@@ -127,22 +127,22 @@ layer at (0,0) size 800x104
       fixture.Document->GetElementById(u8"path")->Renderer()->SetNeedsBoundariesUpdate();
       fixture.Document->GetElementById(u8"path")->Renderer()->SetNeedsLayout();
       (void)fixture.Document->UpdateLayout();
-      CHECK(AsObject(path).StrokeBoundingBox() == FloatRect(-1, -1, 22, 22));
+      CHECK(AsObject(path).StrokeBoundingBox() == RectF(-1, -1, 22, 22));
       CHECK(scope.Strategy.LastStyle.Thickness == 2);
       CHECK(scope.Strategy.LastStyle.Cap == LineCap::Square);
     }
 
     // A zero length subpath with round caps is drawn as a dot, which counts in the stroke box.
     auto &dot = RendererById<LegacyRenderSVGPath>(*fixture.Document, u8"dot");
-    CHECK(AsObject(dot).ObjectBoundingBox() == FloatRect(70, 70, 0, 0));
-    CHECK(AsObject(dot).RepaintRectInLocalCoordinates().Contains(FloatRect(68, 68, 4, 4)));
+    CHECK(AsObject(dot).ObjectBoundingBox() == RectF(70, 70, 0, 0));
+    CHECK(AsObject(dot).RepaintRectInLocalCoordinates().Contains(RectF(68, 68, 4, 4)));
 
     // A shape with a zero width or height isn't rendered, and doesn't count in its container's boxes.
     auto &empty = RendererById<LegacyRenderSVGShape>(*fixture.Document, u8"empty");
     CHECK(empty.IsRenderingDisabled());
     auto &g = RendererById<LegacyRenderSVGContainer>(*fixture.Document, u8"g");
     CHECK(g.IsObjectBoundingBoxValid());
-    CHECK(g.ObjectBoundingBox() == FloatRect(0, 0, 70, 70));
+    CHECK(g.ObjectBoundingBox() == RectF(0, 0, 70, 70));
   }
 
   TEST_CASE_METHOD(css::tests::ValueFixture, "LegacyRenderSVGShape: hit testing",

@@ -28,7 +28,6 @@
 #pragma once
 
 #include "Krystal.Booey/DOM/Types/DOMString.hpp"
-#include "Krystal.Booey/Graphics/Geometry/IntSize.hpp"
 #include "Krystal.Booey/Graphics/Geometry/LayoutRect.hpp"
 #include "Krystal.Booey/Graphics/Geometry/LayoutSize.hpp"
 #include "Krystal.Booey/Style/AnchorPositionEvaluator.hpp"
@@ -38,6 +37,7 @@
 #include "Krystal.Core/Attributes.hpp"
 #include "Krystal.Core/CanMakeCheckedPtr.hpp"
 #include "Krystal.Core/CanMakeWeakPtr.hpp"
+#include "Krystal.Core/Geometry/Size.hpp"
 #include "Krystal.Core/Macros.hpp"
 #include "Krystal.Core/Types/HashMap.hpp"
 #include "Krystal.Core/Types/HashSet.hpp"
@@ -121,7 +121,7 @@ namespace krys::boo::style
     using ResolverSharingKey = std::tuple<List<RefPtr<css::StyleSheetContents>>, bool, bool>;
 
     // These things affect evaluation of viewport dependent media queries.
-    using MediaQueryViewportState = std::tuple<IntSize, float, bool>;
+    using MediaQueryViewportState = std::tuple<SizeI, float, bool>;
 
     using ResolverScopes = List<Pair<Ref<Resolver>, List<WeakPtr<Scope>>>>;
 

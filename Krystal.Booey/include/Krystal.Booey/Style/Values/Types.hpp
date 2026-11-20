@@ -27,17 +27,22 @@
 #include "Krystal.Booey/CSS/Calc/SymbolTable.hpp"
 #include "Krystal.Booey/CSS/Values/NoConversionDataRequiredTag.hpp"
 #include "Krystal.Booey/CSS/Values/Types.hpp"
-#include "Krystal.Core/Text/StringBuilder.hpp"
+#include "Krystal.Core/Numeric.hpp"
+#include "Krystal.Core/Strings/StringBuilder.hpp"
 #include "Krystal.Core/Types/Markable.hpp"
 #include "Krystal.Core/Types/Maybe.hpp"
 #include "Krystal.Core/Utils/ZipTuple.hpp"
 #include <tuple>
 #include <utility>
 
+namespace krys
+{
+  enum class CompositeOperation : uint8;
+}
+
 namespace krys::boo
 {
   struct BlendingContext;
-  enum class CompositeOperation : uint8;
   class Element;
   class RenderStyle;
 }
@@ -161,10 +166,10 @@ namespace krys::boo::style
   template <>
   constexpr inline bool TreatAsNonConverting<CSSOMString> = true;
 
-  // Specialize `TreatAsNonConverting` for `url::URL`, to indicate that its type does not change from the CSS
+  // Specialize `TreatAsNonConverting` for `net::Url`, to indicate that its type does not change from the CSS
   // representation.
   template <>
-  constexpr inline bool TreatAsNonConverting<url::URL> = true;
+  constexpr inline bool TreatAsNonConverting<net::Url> = true;
 
 #pragma endregion
 

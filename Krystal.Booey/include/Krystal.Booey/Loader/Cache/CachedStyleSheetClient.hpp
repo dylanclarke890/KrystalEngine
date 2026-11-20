@@ -26,8 +26,8 @@
 #pragma once
 
 #include "Krystal.Booey/Loader/Cache/CachedResourceClient.hpp"
-#include "Krystal.Booey/URL/URL.hpp"
-#include "Krystal.Core/Types/String.hpp"
+#include "Krystal.Core/Strings/String.hpp"
+#include "Krystal.Net/Url.hpp"
 
 namespace krys::boo
 {
@@ -49,7 +49,7 @@ namespace krys::boo
       return ExpectedType();
     }
 
-    virtual void SetCSSStyleSheet(const utf8_string & /* href */, const url::URL & /* baseURL */,
+    virtual void SetCSSStyleSheet(const utf8_string & /* href */, const net::Url & /* baseURL */,
                                   utf8_stringview /* charset */, const CachedCSSStyleSheet *) noexcept
     {
     }

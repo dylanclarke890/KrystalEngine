@@ -31,7 +31,7 @@
 #include "Krystal.Booey/SVG/Elements/SVGUseElement.hpp"
 #include "Krystal.Booey/SVG/Properties/SVGPropertyOwnerRegistry.hpp"
 #include "Krystal.Booey/SVG/SVGNames.hpp"
-#include "Krystal.Booey/URL/URL.hpp"
+#include "Krystal.Net/Url.hpp"
 
 namespace krys::boo
 {
@@ -94,10 +94,10 @@ namespace krys::boo
       return DOMStringAtom(url.substr(1));
     }
 
-    auto base = document.CompleteURL(url.substr(0, start), document.BaseURL());
+    auto base = document.CompleteUrl(url.substr(0, start), document.BaseUrl());
     auto fragmentIdentifier = url.substr(start);
-    auto urlWithFragment = document.CompleteURL(fragmentIdentifier, base);
-    if (url::EqualIgnoringFragmentIdentifier(urlWithFragment, document.GetURL()))
+    auto urlWithFragment = document.CompleteUrl(fragmentIdentifier, base);
+    if (net::EqualIgnoringFragmentIdentifier(urlWithFragment, document.GetUrl()))
     {
       return DOMStringAtom(fragmentIdentifier.substr(1));
     }
@@ -106,7 +106,7 @@ namespace krys::boo
     return DOMStringAtom::Empty();
   }
 
-  DOMStringAtom SVGURIReference::FragmentIdentifierFromIRIString(const style::URL &url,
+  DOMStringAtom SVGURIReference::FragmentIdentifierFromIRIString(const style::Url &url,
                                                                  const Document &document) noexcept
   {
     return FragmentIdentifierFromIRIString(url.Resolved.String(), document);
@@ -116,7 +116,7 @@ namespace krys::boo
     SVGURIReference::FragmentIdentifierFromIRIString(const style::SVGMarkerResource &markerResource,
                                                      const Document &document) noexcept
   {
-    if (auto url = markerResource.TryURL())
+    if (auto url = markerResource.TryUrl())
     {
       return FragmentIdentifierFromIRIString(*url, document);
     }
@@ -132,9 +132,9 @@ namespace krys::boo
     }
 
     // If the URI matches our documents URL, we're dealing with a local reference.
-    auto url = document.CompleteURL(uri);
+    auto url = document.CompleteUrl(uri);
     krys_assert(!url.ProtocolIsData());
-    return !url::EqualIgnoringFragmentIdentifier(url, document.GetURL());
+    return !net::EqualIgnoringFragmentIdentifier(url, document.GetUrl());
   }
 
   auto SVGURIReference::TargetElementFromIRIString(DOMStringView iri,
@@ -157,18 +157,18 @@ namespace krys::boo
     }
 
     auto &document = treeScope.RootNode().NodeDocument();
-    auto url = document.CompleteURL(iri);
+    auto url = document.CompleteUrl(iri);
     if (externalDocument)
     {
       // Enforce that the referenced url matches the url of the document that we've loaded for it!
-      krys_assert(url::EqualIgnoringFragmentIdentifier(url, externalDocument->GetURL()));
+      krys_assert(net::EqualIgnoringFragmentIdentifier(url, externalDocument->GetUrl()));
       return {externalDocument->GetElementById(id.View()), krys::move(id)};
     }
 
     if (url.ProtocolIsData())
     {
       // FIXME: We need to load the data url in a Document to be able to get the target element.
-      if (!url::EqualIgnoringFragmentIdentifier(url, document.GetURL()))
+      if (!net::EqualIgnoringFragmentIdentifier(url, document.GetUrl()))
       {
         return {nullptr, krys::move(id)};
       }
@@ -192,7 +192,7 @@ namespace krys::boo
             krys::move(id)};
   }
 
-  auto SVGURIReference::TargetElementFromIRIString(const style::URL &iri,
+  auto SVGURIReference::TargetElementFromIRIString(const style::Url &iri,
                                                    const dom::DocumentOrShadowRoot &treeScope,
                                                    const RefPtr<Document> &externalDocument) noexcept
     -> TargetElementResult
@@ -207,7 +207,7 @@ namespace krys::boo
       return true;
     }
     auto &document = ContextElement().NodeDocument();
-    if (document.CompleteURL(Href()).ProtocolIsData())
+    if (document.CompleteUrl(Href()).ProtocolIsData())
     {
       return true;
     }

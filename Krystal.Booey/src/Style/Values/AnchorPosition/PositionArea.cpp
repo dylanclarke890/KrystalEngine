@@ -33,7 +33,7 @@
 #include "Krystal.Booey/Style/Builder/BuilderState.hpp"
 #include "Krystal.Booey/Style/Values/AnchorPosition/PositionTryFallbackTactic.hpp"
 #include "Krystal.Booey/Text/WritingMode.hpp"
-#include "Krystal.Core/Text/StringBuilder.hpp"
+#include "Krystal.Core/Strings/StringBuilder.hpp"
 
 namespace krys::boo::style
 {

@@ -67,7 +67,7 @@ namespace krys::ui
 
     /// @brief A source holding @p buffer over @p region.
     KRYS_NODISCARD Maybe<gfx::FilterInput2D> SourceFor(boo::ImageBuffer &buffer,
-                                                       const gfx::PixelRect2D &region) noexcept;
+                                                       const RectI &region) noexcept;
 
     /// @brief Appends @p node, returning its index.
     uint32 AddNode(gfx::FilterNode2D &&node) noexcept;

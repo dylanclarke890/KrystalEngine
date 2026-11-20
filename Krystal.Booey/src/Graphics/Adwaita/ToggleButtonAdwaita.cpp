@@ -27,6 +27,7 @@
 
 #include "Krystal.Booey/Graphics/Adwaita/ToggleButtonAdwaita.hpp"
 #include "Krystal.Booey/Graphics/Color/ColorBlending.hpp"
+#include "Krystal.Booey/Graphics/Color/ColorLuminance.hpp"
 #include "Krystal.Booey/Graphics/Geometry/FloatRoundedRect.hpp"
 #include "Krystal.Booey/Graphics/GraphicsContext.hpp"
 #include "Krystal.Booey/Graphics/GraphicsContextStateSaver.hpp"
@@ -39,9 +40,9 @@ namespace krys::boo
   namespace
   {
     // A square as large as fits, centred in the control's rect.
-    KRYS_NODISCARD FloatRect ButtonRect(const FloatRoundedRect &borderRect) noexcept
+    KRYS_NODISCARD RectF ButtonRect(const FloatRoundedRect &borderRect) noexcept
     {
-      FloatRect fieldRect = borderRect.Rect();
+      RectF fieldRect = borderRect.Rect();
       if (fieldRect.Width() != fieldRect.Height())
       {
         auto buttonSize = std::min(fieldRect.Width(), fieldRect.Height());
@@ -82,7 +83,7 @@ namespace krys::boo
   {
     GraphicsContextStateSaver stateSaver(graphicsContext);
 
-    FloatRect fieldRect = ButtonRect(borderRect);
+    RectF fieldRect = ButtonRect(borderRect);
 
     SRGBA<uint8> toggleBorderColor;
     SRGBA<uint8> toggleBorderHoverColor;
@@ -99,7 +100,8 @@ namespace krys::boo
     }
 
     Color accentColor = AccentColor(style);
-    Color foregroundColor = accentColor.Luminance() > 0.5 ? Color(SRGBA<uint8> {0, 0, 0, 204}) : Color::white;
+    Color foregroundColor =
+      RelativeLuminance(accentColor) > 0.5 ? Color(SRGBA<uint8> {0, 0, 0, 204}) : Color::white;
     Color accentHoverColor = BlendSourceOver(accentColor, foregroundColor.ColorWithAlphaMultipliedBy(0.1f));
 
     if (!style.States.Contains(ControlStyle::State::Enabled))
@@ -107,7 +109,7 @@ namespace krys::boo
       graphicsContext.BeginTransparencyLayer(static_cast<float>(DisabledOpacity));
     }
 
-    FloatSize corner(2, 2);
+    SizeF corner(2, 2);
     Path path;
 
     if (style.States.ContainsAny({ControlStyle::State::Checked, ControlStyle::State::Indeterminate}))
@@ -128,11 +130,11 @@ namespace krys::boo
 
       GraphicsContextStateSaver checkedStateSaver(graphicsContext);
       graphicsContext.Translate(fieldRect.X(), fieldRect.Y());
-      graphicsContext.Scale(FloatSize(static_cast<float>(fieldRect.Width() / ToggleSize),
-                                      static_cast<float>(fieldRect.Height() / ToggleSize)));
+      graphicsContext.Scale(SizeF(static_cast<float>(fieldRect.Width() / ToggleSize),
+                                  static_cast<float>(fieldRect.Height() / ToggleSize)));
       if (style.States.Contains(ControlStyle::State::Indeterminate))
       {
-        path.AddRoundedRect(FloatRect(2, 5, 10, 4), corner);
+        path.AddRoundedRect(RectF(2, 5, 10, 4), corner);
       }
       else
       {
@@ -186,7 +188,7 @@ namespace krys::boo
   {
     GraphicsContextStateSaver stateSaver(graphicsContext);
 
-    FloatRect fieldRect = ButtonRect(borderRect);
+    RectF fieldRect = ButtonRect(borderRect);
 
     SRGBA<uint8> toggleBorderColor;
     SRGBA<uint8> toggleBorderHoverColor;
@@ -203,7 +205,8 @@ namespace krys::boo
     }
 
     Color accentColor = AccentColor(style);
-    Color foregroundColor = accentColor.Luminance() > 0.5 ? Color(SRGBA<uint8> {0, 0, 0, 204}) : Color::white;
+    Color foregroundColor =
+      RelativeLuminance(accentColor) > 0.5 ? Color(SRGBA<uint8> {0, 0, 0, 204}) : Color::white;
     Color accentHoverColor = BlendSourceOver(accentColor, foregroundColor.ColorWithAlphaMultipliedBy(0.1f));
 
     if (!style.States.Contains(ControlStyle::State::Enabled))

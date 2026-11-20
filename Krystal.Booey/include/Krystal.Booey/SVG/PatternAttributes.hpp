@@ -19,12 +19,12 @@
 
 #pragma once
 
-#include "Krystal.Booey/Graphics/Geometry/FloatRect.hpp"
-#include "Krystal.Booey/Graphics/Transforms/AffineTransform.hpp"
 #include "Krystal.Booey/SVG/Elements/SVGPatternElement.hpp"
 #include "Krystal.Booey/SVG/SVGLengthValue.hpp"
 #include "Krystal.Booey/SVG/SVGPreserveAspectRatioValue.hpp"
 #include "Krystal.Booey/SVG/SVGUnitTypes.hpp"
+#include "Krystal.Core/Geometry/AffineTransform.hpp"
+#include "Krystal.Core/Geometry/Rect.hpp"
 #include "Krystal.Core/Types/WeakPtr.hpp"
 
 namespace krys::boo::svg
@@ -38,7 +38,7 @@ namespace krys::boo::svg
     SVGLengthValue _y;
     SVGLengthValue _width;
     SVGLengthValue _height;
-    FloatRect _viewBox;
+    RectF _viewBox;
     SVGPreserveAspectRatioValue _preserveAspectRatio;
     SVGUnitTypes::SVGUnitType _patternUnits {SVGUnitTypes::SVG_UNIT_TYPE_OBJECTBOUNDINGBOX};
     SVGUnitTypes::SVGUnitType _patternContentUnits {SVGUnitTypes::SVG_UNIT_TYPE_USERSPACEONUSE};
@@ -78,7 +78,7 @@ namespace krys::boo::svg
       return _height;
     }
 
-    KRYS_NODISCARD FloatRect ViewBox() const noexcept
+    KRYS_NODISCARD RectF ViewBox() const noexcept
     {
       return _viewBox;
     }
@@ -132,7 +132,7 @@ namespace krys::boo::svg
       _heightSet = true;
     }
 
-    void SetViewBox(const FloatRect &value) noexcept
+    void SetViewBox(const RectF &value) noexcept
     {
       _viewBox = value;
       _viewBoxSet = true;

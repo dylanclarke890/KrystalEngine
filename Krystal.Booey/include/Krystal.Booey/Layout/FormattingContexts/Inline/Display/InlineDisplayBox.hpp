@@ -25,16 +25,16 @@
 
 #pragma once
 
-#include "Krystal.Booey/Graphics/Geometry/FloatRect.hpp"
 #include "Krystal.Booey/Layout/FormattingContexts/Inline/InlineRect.hpp"
 #include "Krystal.Booey/Layout/LayoutTree/LayoutBox.hpp"
 #include "Krystal.Booey/Text/TextFlags.hpp"
 #include "Krystal.Booey/Text/WritingMode.hpp"
 #include "Krystal.Core/Attributes.hpp"
+#include "Krystal.Core/Geometry/Rect.hpp"
+#include "Krystal.Core/Strings/String.hpp"
 #include "Krystal.Core/Types/EnumSet.hpp"
 #include "Krystal.Core/Types/Maybe.hpp"
-#include "Krystal.Core/Types/String.hpp"
-#include <unicode/ubidi.h>
+#include "Krystal.Text/Bidi.hpp"
 
 namespace krys::boo::inline_display
 {
@@ -180,13 +180,13 @@ namespace krys::boo::inline_display
 
   private:
     const layout::Box *_layoutBox;
-    FloatRect _unflippedVisualRect;
-    FloatRect _inkOverflow;
+    RectF _unflippedVisualRect;
+    RectF _inkOverflow;
     uint32 _lineIndex {0};
     float _horizontalExpansion {0};
 
     ExpansionBehavior _expansionBehavior {ExpansionBehavior::DefaultBehavior()};
-    UBiDiLevel _bidiLevel {UBIDI_DEFAULT_LTR};
+    text::BidiLevel _bidiLevel {text::DefaultLeftToRightBidiLevel};
     Type _type : 4 {Type::GenericInlineLevelBox};
     bool _hasContent : 1 {false};
     bool _isFirstForLayoutBox : 1 {false};
@@ -196,9 +196,9 @@ namespace krys::boo::inline_display
     Text _text;
 
   public:
-    Box(size_t lineIndex, Type type, const layout::Box &layoutBox, UBiDiLevel bidiLevel,
-        const FloatRect &physicalRect, const FloatRect &inkOverflow, bool isFirstFormattedLine,
-        Expansion expansion, Maybe<Text> text = null, bool hasContent = true, bool isFullyTruncated = false,
+    Box(size_t lineIndex, Type type, const layout::Box &layoutBox, text::BidiLevel bidiLevel,
+        const RectF &physicalRect, const RectF &inkOverflow, bool isFirstFormattedLine, Expansion expansion,
+        Maybe<Text> text = null, bool hasContent = true, bool isFullyTruncated = false,
         EnumSet<PositionWithinInlineLevelBox> positionWithinInlineLevelBox = {}) noexcept
         : _layoutBox(&layoutBox), _unflippedVisualRect(physicalRect), _inkOverflow(inkOverflow),
           _lineIndex(static_cast<uint32>(lineIndex)), _horizontalExpansion(expansion.HorizontalExpansion),
@@ -285,7 +285,7 @@ namespace krys::boo::inline_display
       return IsInlineLevelBox() && !IsRootInlineBox();
     }
 
-    KRYS_NODISCARD UBiDiLevel BidiLevel() const noexcept
+    KRYS_NODISCARD text::BidiLevel BidiLevel() const noexcept
     {
       return _bidiLevel;
     }
@@ -307,13 +307,13 @@ namespace krys::boo::inline_display
       return _isFullyTruncated;
     }
 
-    KRYS_NODISCARD const FloatRect &VisualRectIgnoringBlockDirection() const noexcept
+    KRYS_NODISCARD const RectF &VisualRectIgnoringBlockDirection() const noexcept
     {
       return _unflippedVisualRect;
     }
 
-    KRYS_NODISCARD static FloatRect
-      VisibleRectIgnoringBlockDirection(const Box &box, const FloatRect &visibleLineRect) noexcept
+    KRYS_NODISCARD static RectF VisibleRectIgnoringBlockDirection(const Box &box,
+                                                                  const RectF &visibleLineRect) noexcept
     {
       auto visualRectIgnoringBlockDirection = box.VisualRectIgnoringBlockDirection();
       auto visibleBoxLeft = std::max(visualRectIgnoringBlockDirection.X(), visibleLineRect.X());
@@ -323,7 +323,7 @@ namespace krys::boo::inline_display
       return visualRectIgnoringBlockDirection;
     }
 
-    KRYS_NODISCARD const FloatRect &InkOverflow() const noexcept
+    KRYS_NODISCARD const RectF &InkOverflow() const noexcept
     {
       return _inkOverflow;
     }
@@ -382,7 +382,7 @@ namespace krys::boo::inline_display
       _inkOverflow.Expand({delta, {}});
     }
 
-    void AdjustInkOverflow(const FloatRect &childBorderBox) noexcept
+    void AdjustInkOverflow(const RectF &childBorderBox) noexcept
     {
       _inkOverflow.UniteEvenIfEmpty(childBorderBox);
     }
@@ -415,7 +415,7 @@ namespace krys::boo::inline_display
       _inkOverflow.ShiftMaxYEdgeTo(_inkOverflow.MaxY() + offset);
     }
 
-    void SetRect(const FloatRect &rect, const FloatRect &inkOverflow) noexcept
+    void SetRect(const RectF &rect, const RectF &inkOverflow) noexcept
     {
       _unflippedVisualRect = rect;
       _inkOverflow = inkOverflow;

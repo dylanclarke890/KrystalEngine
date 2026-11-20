@@ -80,7 +80,7 @@ namespace krys::boo
     struct ImageBufferForEffect
     {
       RefPtr<ImageBuffer> Buffer;
-      FloatRect ImageRect;
+      RectF ImageRect;
     };
 
     KRYS_NODISCARD ImageBufferForEffect

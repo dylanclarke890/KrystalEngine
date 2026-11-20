@@ -209,12 +209,12 @@ namespace krys::boo
     return _innerEdgeRect.PixelSnappedRoundedRectForPainting(deviceScaleFactor);
   }
 
-  FloatRect BorderShape::SnappedOuterRect(float deviceScaleFactor) const noexcept
+  RectF BorderShape::SnappedOuterRect(float deviceScaleFactor) const noexcept
   {
     return SnapRectToDevicePixels(_borderRect.Rect(), deviceScaleFactor);
   }
 
-  FloatRect BorderShape::SnappedInnerRect(float deviceScaleFactor) const noexcept
+  RectF BorderShape::SnappedInnerRect(float deviceScaleFactor) const noexcept
   {
     return SnapRectToDevicePixels(InnerEdgeRect(), deviceScaleFactor);
   }

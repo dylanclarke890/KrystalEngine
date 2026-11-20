@@ -34,7 +34,7 @@
 #include "Krystal.Booey/Style/Values/Color/Color.hpp"
 #include "Krystal.Booey/Style/Values/Color/ColorResolutionState.hpp"
 #include "Krystal.Booey/Style/Values/Color/ResolvedColor.hpp"
-#include "Krystal.Core/Text/StringBuilder.hpp"
+#include "Krystal.Core/Strings/StringBuilder.hpp"
 
 namespace krys::boo::style
 {

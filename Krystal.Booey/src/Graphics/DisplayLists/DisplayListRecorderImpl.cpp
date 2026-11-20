@@ -28,7 +28,7 @@
 
 namespace krys::boo::display_list
 {
-  RecorderImpl::RecorderImpl(const GraphicsContextState &state, const FloatRect &initialClip,
+  RecorderImpl::RecorderImpl(const GraphicsContextState &state, const RectF &initialClip,
                              const AffineTransform &initialCTM) noexcept
       : Recorder(state, initialClip, initialCTM)
   {
@@ -90,7 +90,7 @@ namespace krys::boo::display_list
     _items.emplace_back(display_list::Rotate(angle));
   }
 
-  void RecorderImpl::Scale(const FloatSize &scale) noexcept
+  void RecorderImpl::Scale(const SizeF &scale) noexcept
   {
     if (!UpdateStateForScale(scale))
     {
@@ -141,7 +141,7 @@ namespace krys::boo::display_list
     Clip(InitialClip());
   }
 
-  void RecorderImpl::Clip(const FloatRect &clipRect) noexcept
+  void RecorderImpl::Clip(const RectF &clipRect) noexcept
   {
     UpdateStateForClip(clipRect);
     _items.emplace_back(display_list::Clip(clipRect));
@@ -153,7 +153,7 @@ namespace krys::boo::display_list
     _items.emplace_back(display_list::ClipRoundedRect(clipRect));
   }
 
-  void RecorderImpl::ClipOut(const FloatRect &clipRect) noexcept
+  void RecorderImpl::ClipOut(const RectF &clipRect) noexcept
   {
     UpdateStateForClipOut(clipRect);
     _items.emplace_back(display_list::ClipOut(clipRect));
@@ -177,22 +177,21 @@ namespace krys::boo::display_list
     _items.emplace_back(display_list::ClipPath(path, rule));
   }
 
-  void RecorderImpl::ClipToImageBuffer(ImageBuffer &imageBuffer, const FloatRect &destinationRect) noexcept
+  void RecorderImpl::ClipToImageBuffer(ImageBuffer &imageBuffer, const RectF &destinationRect) noexcept
   {
     UpdateStateForClipToImageBuffer(destinationRect);
     _items.emplace_back(display_list::ClipToImageBuffer(imageBuffer, destinationRect));
   }
 
   void RecorderImpl::DrawGlyphs(const Font &font, Span<const GlyphBufferGlyph> glyphs,
-                                Span<const GlyphBufferAdvance> advances, const FloatPoint &localAnchor,
+                                Span<const GlyphBufferAdvance> advances, const PointF &localAnchor,
                                 FontSmoothingMode smoothingMode) noexcept
   {
     DrawGlyphsImmediate(font, glyphs, advances, localAnchor, smoothingMode);
   }
 
   void RecorderImpl::DrawGlyphsImmediate(const Font &font, Span<const GlyphBufferGlyph> glyphs,
-                                         Span<const GlyphBufferAdvance> advances,
-                                         const FloatPoint &localAnchor,
+                                         Span<const GlyphBufferAdvance> advances, const PointF &localAnchor,
                                          FontSmoothingMode smoothingMode) noexcept
   {
     AppendStateChangeItemIfNecessary();
@@ -214,23 +213,23 @@ namespace krys::boo::display_list
     _items.emplace_back(display_list::DrawControlPart(part, borderRect, deviceScaleFactor, style));
   }
 
-  void RecorderImpl::DrawNativeImage(NativeImage &image, const FloatRect &destRect, const FloatRect &srcRect,
+  void RecorderImpl::DrawNativeImage(NativeImage &image, const RectF &destRect, const RectF &srcRect,
                                      ImagePaintingOptions options) noexcept
   {
     AppendStateChangeItemIfNecessary();
     _items.emplace_back(display_list::DrawNativeImage(image, destRect, srcRect, options));
   }
 
-  void RecorderImpl::DrawPattern(NativeImage &image, const FloatRect &destRect, const FloatRect &tileRect,
-                                 const AffineTransform &patternTransform, const FloatPoint &phase,
-                                 const FloatSize &spacing, ImagePaintingOptions options) noexcept
+  void RecorderImpl::DrawPattern(NativeImage &image, const RectF &destRect, const RectF &tileRect,
+                                 const AffineTransform &patternTransform, const PointF &phase,
+                                 const SizeF &spacing, ImagePaintingOptions options) noexcept
   {
     AppendStateChangeItemIfNecessary();
     _items.emplace_back(display_list::DrawPatternNativeImage(image, destRect, tileRect, patternTransform,
                                                              phase, spacing, options));
   }
 
-  void RecorderImpl::DrawFilteredImageBuffer(ImageBuffer *sourceImage, const FloatRect &sourceImageRect,
+  void RecorderImpl::DrawFilteredImageBuffer(ImageBuffer *sourceImage, const RectF &sourceImageRect,
                                              Filter &filter, FilterResults &) noexcept
   {
     AppendStateChangeItemIfNecessary();
@@ -238,17 +237,16 @@ namespace krys::boo::display_list
       display_list::DrawFilteredImageBuffer(ShareRefPtr(sourceImage), sourceImageRect, filter));
   }
 
-  void RecorderImpl::DrawImageBuffer(ImageBuffer &imageBuffer, const FloatRect &destRect,
-                                     const FloatRect &srcRect, ImagePaintingOptions options) noexcept
+  void RecorderImpl::DrawImageBuffer(ImageBuffer &imageBuffer, const RectF &destRect, const RectF &srcRect,
+                                     ImagePaintingOptions options) noexcept
   {
     AppendStateChangeItemIfNecessary();
     _items.emplace_back(display_list::DrawImageBuffer(imageBuffer, destRect, srcRect, options));
   }
 
-  void RecorderImpl::DrawPattern(ImageBuffer &imageBuffer, const FloatRect &destRect,
-                                 const FloatRect &tileRect, const AffineTransform &patternTransform,
-                                 const FloatPoint &phase, const FloatSize &spacing,
-                                 ImagePaintingOptions options) noexcept
+  void RecorderImpl::DrawPattern(ImageBuffer &imageBuffer, const RectF &destRect, const RectF &tileRect,
+                                 const AffineTransform &patternTransform, const PointF &phase,
+                                 const SizeF &spacing, ImagePaintingOptions options) noexcept
   {
     AppendStateChangeItemIfNecessary();
     _items.emplace_back(display_list::DrawPatternImageBuffer(imageBuffer, destRect, tileRect,
@@ -276,34 +274,33 @@ namespace krys::boo::display_list
     }
   }
 
-  void RecorderImpl::DrawRect(const FloatRect &rect, float lineWidth) noexcept
+  void RecorderImpl::DrawRect(const RectF &rect, float lineWidth) noexcept
   {
     AppendStateChangeItemIfNecessary();
     _items.emplace_back(display_list::DrawRect(rect, lineWidth));
   }
 
-  void RecorderImpl::DrawLine(const FloatPoint &point1, const FloatPoint &point2) noexcept
+  void RecorderImpl::DrawLine(const PointF &point1, const PointF &point2) noexcept
   {
     AppendStateChangeItemIfNecessary();
     _items.emplace_back(display_list::DrawLine(point1, point2));
   }
 
-  void RecorderImpl::DrawLinesForText(const FloatPoint &point, float thickness,
-                                      Span<const FloatSegment> lineSegments, bool printing, bool doubleLines,
-                                      boo::StrokeStyle style) noexcept
+  void RecorderImpl::DrawLinesForText(const PointF &point, float thickness, Span<const SegmentF> lineSegments,
+                                      bool printing, bool doubleLines, boo::StrokeStyle style) noexcept
   {
     AppendStateChangeItemIfNecessary();
     _items.emplace_back(
       display_list::DrawLinesForText(point, lineSegments, thickness, printing, doubleLines, style));
   }
 
-  void RecorderImpl::DrawDotsForDocumentMarker(const FloatRect &rect, DocumentMarkerLineStyle style) noexcept
+  void RecorderImpl::DrawDotsForDocumentMarker(const RectF &rect, DocumentMarkerLineStyle style) noexcept
   {
     AppendStateChangeItemIfNecessary();
     _items.emplace_back(display_list::DrawDotsForDocumentMarker(rect, style));
   }
 
-  void RecorderImpl::DrawEllipse(const FloatRect &rect) noexcept
+  void RecorderImpl::DrawEllipse(const RectF &rect) noexcept
   {
     AppendStateChangeItemIfNecessary();
     _items.emplace_back(display_list::DrawEllipse(rect));
@@ -321,32 +318,32 @@ namespace krys::boo::display_list
     _items.emplace_back(DrawFocusRingPath(path, outlineWidth, color));
   }
 
-  void RecorderImpl::DrawFocusRing(const List<FloatRect> &rects, float outlineOffset, float outlineWidth,
+  void RecorderImpl::DrawFocusRing(const List<RectF> &rects, float outlineOffset, float outlineWidth,
                                    const Color &color) noexcept
   {
     AppendStateChangeItemIfNecessary();
     _items.emplace_back(DrawFocusRingRects(rects, outlineOffset, outlineWidth, color));
   }
 
-  void RecorderImpl::FillRect(const FloatRect &rect, RequiresClipToRect requiresClipToRect) noexcept
+  void RecorderImpl::FillRect(const RectF &rect, RequiresClipToRect requiresClipToRect) noexcept
   {
     AppendStateChangeItemIfNecessary();
     _items.emplace_back(display_list::FillRect(rect, requiresClipToRect));
   }
 
-  void RecorderImpl::FillRect(const FloatRect &rect, const Color &color) noexcept
+  void RecorderImpl::FillRect(const RectF &rect, const Color &color) noexcept
   {
     AppendStateChangeItemIfNecessary();
     _items.emplace_back(FillRectWithColor(rect, color));
   }
 
-  void RecorderImpl::FillRect(const FloatRect &rect, Gradient &gradient) noexcept
+  void RecorderImpl::FillRect(const RectF &rect, Gradient &gradient) noexcept
   {
     AppendStateChangeItemIfNecessary();
     _items.emplace_back(FillRectWithGradient(rect, gradient));
   }
 
-  void RecorderImpl::FillRect(const FloatRect &rect, Gradient &gradient,
+  void RecorderImpl::FillRect(const RectF &rect, Gradient &gradient,
                               const AffineTransform &gradientSpaceTransform,
                               RequiresClipToRect requiresClipToRect) noexcept
   {
@@ -355,7 +352,7 @@ namespace krys::boo::display_list
       FillRectWithGradientAndSpaceTransform(rect, gradient, gradientSpaceTransform, requiresClipToRect));
   }
 
-  void RecorderImpl::FillRect(const FloatRect &rect, const Color &color, CompositeOperator op,
+  void RecorderImpl::FillRect(const RectF &rect, const Color &color, CompositeOperator op,
                               boo::BlendMode mode) noexcept
   {
     AppendStateChangeItemIfNecessary();
@@ -369,7 +366,7 @@ namespace krys::boo::display_list
     _items.emplace_back(display_list::FillRoundedRect(rect, color, mode));
   }
 
-  void RecorderImpl::FillRectWithRoundedHole(const FloatRect &rect, const FloatRoundedRect &roundedRect,
+  void RecorderImpl::FillRectWithRoundedHole(const RectF &rect, const FloatRoundedRect &roundedRect,
                                              const Color &color) noexcept
   {
     AppendStateChangeItemIfNecessary();
@@ -382,13 +379,13 @@ namespace krys::boo::display_list
     _items.emplace_back(display_list::FillPath(path));
   }
 
-  void RecorderImpl::FillEllipse(const FloatRect &rect) noexcept
+  void RecorderImpl::FillEllipse(const RectF &rect) noexcept
   {
     AppendStateChangeItemIfNecessary();
     _items.emplace_back(display_list::FillEllipse(rect));
   }
 
-  void RecorderImpl::StrokeRect(const FloatRect &rect, float width) noexcept
+  void RecorderImpl::StrokeRect(const RectF &rect, float width) noexcept
   {
     AppendStateChangeItemIfNecessary();
     _items.emplace_back(display_list::StrokeRect(rect, width));
@@ -400,13 +397,13 @@ namespace krys::boo::display_list
     _items.emplace_back(display_list::StrokePath(path));
   }
 
-  void RecorderImpl::StrokeEllipse(const FloatRect &rect) noexcept
+  void RecorderImpl::StrokeEllipse(const RectF &rect) noexcept
   {
     AppendStateChangeItemIfNecessary();
     _items.emplace_back(display_list::StrokeEllipse(rect));
   }
 
-  void RecorderImpl::ClearRect(const FloatRect &rect) noexcept
+  void RecorderImpl::ClearRect(const RectF &rect) noexcept
   {
     AppendStateChangeItemIfNecessary();
     _items.emplace_back(display_list::ClearRect(rect));
@@ -418,7 +415,7 @@ namespace krys::boo::display_list
     _items.emplace_back(display_list::ApplyDeviceScaleFactor(scaleFactor));
   }
 
-  void RecorderImpl::BeginPage(const FloatRect &pageRect) noexcept
+  void RecorderImpl::BeginPage(const RectF &pageRect) noexcept
   {
     AppendStateChangeItemIfNecessary();
     _items.emplace_back(display_list::BeginPage(pageRect));
@@ -430,10 +427,10 @@ namespace krys::boo::display_list
     _items.emplace_back(display_list::EndPage());
   }
 
-  void RecorderImpl::SetURLForRect(const url::URL &link, const FloatRect &destRect) noexcept
+  void RecorderImpl::SetUrlForRect(const net::Url &link, const RectF &destRect) noexcept
   {
     AppendStateChangeItemIfNecessary();
-    _items.emplace_back(display_list::SetURLForRect(link, destRect));
+    _items.emplace_back(display_list::SetUrlForRect(link, destRect));
   }
 
   void RecorderImpl::AppendStateChangeItemIfNecessary() noexcept

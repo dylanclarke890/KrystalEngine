@@ -33,7 +33,8 @@
 #include "Krystal.Booey/Rendering/RenderLayerModelObject.hpp"
 #include "Krystal.Booey/Rendering/RenderText.hpp"
 #include "Krystal.Booey/Rendering/Style/RenderStyle+GettersInlines.hpp"
-#include "Krystal.Core/Text/Unicode.hpp"
+#include "Krystal.Core/Strings/Unicode.hpp"
+#include "Krystal.Text/Bidi.hpp"
 
 namespace krys::boo::layout_integration
 {
@@ -59,7 +60,7 @@ namespace krys::boo::layout_integration
     KRYS_NODISCARD Pair<float, float> GlyphOverflowInInlineDirection(size_t firstTextBoxIndex,
                                                                      size_t lastTextBoxIndex,
                                                                      const inline_display::Boxes &boxes,
-                                                                     const FloatRect &inkOverflowRect,
+                                                                     const RectF &inkOverflowRect,
                                                                      bool isLeftToRightDirection) noexcept
     {
       // FIXME: This should be on the text box level and taking all characters into account (maybe consider
@@ -76,7 +77,7 @@ namespace krys::boo::layout_integration
         if (textContent.empty())
         {
           krys_debug_assert(false);
-          return FloatRect {};
+          return RectF {};
         }
         auto character = [&]
         {
@@ -138,11 +139,11 @@ namespace krys::boo::layout_integration
   {
   }
 
-  FloatRect InlineContentBuilder::Build(layout::InlineLayoutResult layoutResult, InlineContent &inlineContent,
-                                        const layout::InlineDamage *lineDamage) const noexcept
+  RectF InlineContentBuilder::Build(layout::InlineLayoutResult layoutResult, InlineContent &inlineContent,
+                                    const layout::InlineDamage *lineDamage) const noexcept
   {
     inlineContent.ReleaseCaches();
-    auto damageRect = FloatRect {};
+    auto damageRect = RectF {};
 
     if (layoutResult.ContentRange == layout::InlineLayoutResult::Range::Full)
     {
@@ -184,8 +185,8 @@ namespace krys::boo::layout_integration
     auto isLeftToRightInlineDirection = rootBoxStyle.IsLeftToRightDirection();
     auto isHorizontalWritingMode = rootBoxStyle.GetWritingMode().IsHorizontal();
 
-    auto blockScrollableOverflowRect = FloatRect {};
-    auto blockInkOverflowRect = FloatRect {};
+    auto blockScrollableOverflowRect = RectF {};
+    auto blockInkOverflowRect = RectF {};
 
     for (size_t lineIndex = 0; lineIndex < startIndex; ++lineIndex)
     {
@@ -283,14 +284,14 @@ namespace krys::boo::layout_integration
             auto childInkOverflow =
               renderer.LogicalVisualOverflowRectForPropagation(renderer.Parent()->GetWritingMode());
             childInkOverflow.Move(LayoutUnit {box.Left()}, LayoutUnit {box.Top()});
-            lineInkOverflowRect.Unite(FloatRect {childInkOverflow});
+            lineInkOverflowRect.Unite(RectF {childInkOverflow});
           }
           if (!renderer.HasControlClip())
           {
             auto childScrollableOverflow =
               renderer.LayoutOverflowRectForPropagation(renderer.Parent()->GetWritingMode());
             childScrollableOverflow.Move(LayoutUnit {box.Left()}, LayoutUnit {box.Top()});
-            lineScrollableOverflowRect.Unite(FloatRect {childScrollableOverflow});
+            lineScrollableOverflowRect.Unite(RectF {childScrollableOverflow});
           }
           continue;
         }
@@ -374,7 +375,7 @@ namespace krys::boo::layout_integration
         continue;
       }
       auto &layoutBox = displayBox.LayoutBox();
-      if (Is<layout::InlineTextBox>(layoutBox) && displayBox.BidiLevel() != UBIDI_DEFAULT_LTR)
+      if (Is<layout::InlineTextBox>(layoutBox) && displayBox.BidiLevel() != text::DefaultLeftToRightBidiLevel)
       {
         Downcast<RenderText>(*layoutBox.RendererForIntegration()).SetNeedsVisualReordering();
       }
@@ -392,7 +393,7 @@ namespace krys::boo::layout_integration
     boxes[lastRootInlineBoxIndex].SetIsLastForLayoutBox();
   }
 
-  FloatRect InlineContentBuilder::HandlePartialDisplayContentUpdate(
+  RectF InlineContentBuilder::HandlePartialDisplayContentUpdate(
     layout::InlineLayoutResult layoutResult, InlineContent &inlineContent,
     const layout::InlineDamage *lineDamage) const noexcept
   {
@@ -476,7 +477,7 @@ namespace krys::boo::layout_integration
     auto numberOfNewLines = layoutResult.DisplayContent.LineList.size();
     auto numberOfNewBoxes = layoutResult.DisplayContent.BoxList.size();
 
-    auto damagedRect = FloatRect {};
+    auto damagedRect = RectF {};
     auto adjustDamagedRectWithLineRange = [&](size_t firstLineIndex, size_t lineCount)
     {
       auto &lines = inlineContent.DisplayContent().LineList;

@@ -23,7 +23,7 @@
  */
 
 #include "Krystal.Booey/Graphics/Filters/FEComponentTransfer.hpp"
-#include "Krystal.Core/Text/TextStream.hpp"
+#include "Krystal.Core/Strings/TextStream.hpp"
 #include <algorithm>
 #include <cmath>
 

@@ -5,7 +5,7 @@
 #include "Krystal.Booey/Graphics/Filters/FilterOperations.hpp"
 #include "Krystal.Booey/Graphics/Layers/GraphicsLayerAnimation.hpp"
 #include "Krystal.Booey/Graphics/Layers/GraphicsLayerKeyframeValueList.hpp"
-#include "Krystal.Booey/Graphics/Transforms/TransformationMatrix.hpp"
+#include "Krystal.Core/Geometry/TransformationMatrix.hpp"
 #include "Krystal.Core/Time/MonotonicTime.hpp"
 
 namespace krys::boo
@@ -29,7 +29,7 @@ namespace krys::ui
     /// @brief The values a layer's animations produce at a time.
     struct ApplicationResult
     {
-      Maybe<boo::TransformationMatrix> Transform;
+      Maybe<TransformationMatrix> Transform;
       Maybe<double> Opacity;
       Maybe<boo::FilterOperations> Filters;
       bool HasRunningAnimations {false};
@@ -119,30 +119,30 @@ namespace krys::ui
   class TextureMapperAnimations
   {
   private:
-    boo::TransformationMatrix _translate;
-    boo::TransformationMatrix _rotate;
-    boo::TransformationMatrix _scale;
-    boo::TransformationMatrix _transform;
+    TransformationMatrix _translate;
+    TransformationMatrix _rotate;
+    TransformationMatrix _scale;
+    TransformationMatrix _transform;
 
     List<TextureMapperAnimation> _animations;
 
   public:
-    void SetTranslate(const boo::TransformationMatrix &transform) noexcept
+    void SetTranslate(const TransformationMatrix &transform) noexcept
     {
       _translate = transform;
     }
 
-    void SetRotate(const boo::TransformationMatrix &transform) noexcept
+    void SetRotate(const TransformationMatrix &transform) noexcept
     {
       _rotate = transform;
     }
 
-    void SetScale(const boo::TransformationMatrix &transform) noexcept
+    void SetScale(const TransformationMatrix &transform) noexcept
     {
       _scale = transform;
     }
 
-    void SetTransform(const boo::TransformationMatrix &transform) noexcept
+    void SetTransform(const TransformationMatrix &transform) noexcept
     {
       _transform = transform;
     }

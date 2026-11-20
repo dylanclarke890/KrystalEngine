@@ -20,8 +20,6 @@
 
 #include "Krystal.Booey/Rendering/RenderView.hpp"
 #include "Krystal.Booey/DOM/Nodes/Document.hpp"
-#include "Krystal.Booey/Graphics/Geometry/FloatQuad.hpp"
-#include "Krystal.Booey/Graphics/Geometry/Region.hpp"
 #include "Krystal.Booey/Graphics/GraphicsContext.hpp"
 #include "Krystal.Booey/Graphics/Transforms/TransformState.hpp"
 #include "Krystal.Booey/HTML/Elements/HTMLBodyElement.hpp"
@@ -44,6 +42,8 @@
 #include "Krystal.Booey/Style/Scope/Scope.hpp"
 #include "Krystal.Booey/Style/Styleable.hpp"
 #include "Krystal.Booey/Style/Values/Backgrounds/FillLayers.hpp"
+#include "Krystal.Core/Geometry/Quad.hpp"
+#include "Krystal.Core/Geometry/Region.hpp"
 
 namespace krys::boo
 {
@@ -89,22 +89,22 @@ namespace krys::boo
     return _frameView.Frame().PageZoomFactor();
   }
 
-  FloatSize RenderView::SizeForCSSSmallViewportUnits() const noexcept
+  SizeF RenderView::SizeForCSSSmallViewportUnits() const noexcept
   {
     return _frameView.SizeForCSSSmallViewportUnits();
   }
 
-  FloatSize RenderView::SizeForCSSLargeViewportUnits() const noexcept
+  SizeF RenderView::SizeForCSSLargeViewportUnits() const noexcept
   {
     return _frameView.SizeForCSSLargeViewportUnits();
   }
 
-  FloatSize RenderView::SizeForCSSDynamicViewportUnits() const noexcept
+  SizeF RenderView::SizeForCSSDynamicViewportUnits() const noexcept
   {
     return _frameView.SizeForCSSDynamicViewportUnits();
   }
 
-  FloatSize RenderView::SizeForCSSDefaultViewportUnits() const noexcept
+  SizeF RenderView::SizeForCSSDefaultViewportUnits() const noexcept
   {
     return _frameView.SizeForCSSDefaultViewportUnits();
   }
@@ -149,7 +149,7 @@ namespace krys::boo
     // If we ever require layout but receive a paint anyway, something has gone horribly wrong.
     krys_debug_assert(!NeedsLayout());
     // RenderViews should never be called to paint with an offset not on device pixels.
-    krys_debug_assert(LayoutPoint(IntPoint(paintOffset.X().ToInt(), paintOffset.Y().ToInt())) == paintOffset);
+    krys_debug_assert(LayoutPoint(PointI(paintOffset.X().ToInt(), paintOffset.Y().ToInt())) == paintOffset);
 
     PaintObject(paintInfo, paintOffset);
   }
@@ -288,31 +288,31 @@ namespace krys::boo
       {
         CompositeOperator previousOperator = paintInfo.Context().CompositeOperation();
         paintInfo.Context().SetCompositeOperation(CompositeOperator::Copy);
-        paintInfo.Context().FillRect(FloatRect(paintInfo.Rect), backgroundColor);
+        paintInfo.Context().FillRect(RectF(paintInfo.Rect), backgroundColor);
         paintInfo.Context().SetCompositeOperation(previousOperator);
       }
       else
       {
-        paintInfo.Context().ClearRect(FloatRect(paintInfo.Rect));
+        paintInfo.Context().ClearRect(RectF(paintInfo.Rect));
       }
     }
   }
 
-  IntRect RenderView::UnscaledDocumentRect() const noexcept
+  RectI RenderView::UnscaledDocumentRect() const noexcept
   {
     LayoutRect overflowRect(LayoutOverflowRect());
     FlipForWritingMode(overflowRect);
-    return SnappedIntRect(overflowRect);
+    return SnappedRectI(overflowRect);
   }
 
-  IntRect RenderView::DocumentRect() const noexcept
+  RectI RenderView::DocumentRect() const noexcept
   {
-    FloatRect overflowRect(UnscaledDocumentRect());
+    RectF overflowRect(UnscaledDocumentRect());
     if (HasTransformRelatedProperty())
     {
       overflowRect = Layer()->CurrentTransform().MapRect(overflowRect);
     }
-    return IntRect(overflowRect);
+    return RectI(overflowRect);
   }
 
   bool RenderView::ShouldPaintBaseBackground() const noexcept
@@ -541,13 +541,13 @@ namespace krys::boo
     rects.emplace_back(accumulatedOffset, LayoutSize(Layer()->Size()));
   }
 
-  void RenderView::AbsoluteQuads(List<FloatQuad> &quads, bool *wasFixed) const noexcept
+  void RenderView::AbsoluteQuads(List<QuadF> &quads, bool *wasFixed) const noexcept
   {
     if (wasFixed)
     {
       *wasFixed = false;
     }
-    quads.emplace_back(FloatRect(FloatPoint(), FloatSize(Layer()->Size())));
+    quads.emplace_back(RectF(PointF(), SizeF(Layer()->Size())));
   }
 
   Node *RenderView::NodeForHitTest() const noexcept
@@ -654,12 +654,12 @@ namespace krys::boo
 
     // FIXME: enclosingRect is needed as long as we integral snap ScrollView/FrameView/RenderWidget
     // size/position.
-    auto enclosingRect = EnclosingIntRect(repaintRect);
+    auto enclosingRect = EnclosingRectI(repaintRect);
     auto viewRect = ViewRect();
 
     if (_accumulatedRepaintRegion)
     {
-      AccumulateRepaintRect(enclosingRect, EnclosingIntRect(viewRect));
+      AccumulateRepaintRect(enclosingRect, EnclosingRectI(viewRect));
     }
     else
     {
@@ -667,7 +667,7 @@ namespace krys::boo
     }
   }
 
-  bool RenderView::AccumulateRepaintRect(IntRect rect, IntRect viewRect) noexcept
+  bool RenderView::AccumulateRepaintRect(RectI rect, RectI viewRect) noexcept
   {
     _accumulatedRepaintRegion->Unite(Region(rect));
 
@@ -822,7 +822,7 @@ namespace krys::boo
 
 #pragma endregion
 
-  void RenderView::ResumePausedImageAnimationsIfNeeded(const IntRect &visibleRect) noexcept
+  void RenderView::ResumePausedImageAnimationsIfNeeded(const RectI &visibleRect) noexcept
   {
     List<Pair<RenderElement *, CachedImage *>> toRemove;
     for (auto &[renderer, images] : _renderersWithPausedImageAnimation)

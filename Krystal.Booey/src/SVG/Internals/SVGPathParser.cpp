@@ -22,10 +22,10 @@
  */
 
 #include "Krystal.Booey/SVG/Internals/SVGPathParser.hpp"
-#include "Krystal.Booey/Graphics/Transforms/AffineTransform.hpp"
 #include "Krystal.Booey/SVG/Internals/SVGPathByteStreamBuilder.hpp"
 #include "Krystal.Booey/SVG/Internals/SVGPathSource.hpp"
 #include "Krystal.Booey/SVG/Internals/SVGPathStringBuilder.hpp"
+#include "Krystal.Core/Geometry/AffineTransform.hpp"
 #include "Krystal.Core/Maths/Extras.hpp"
 #include <cmath>
 #include <numbers>
@@ -36,8 +36,7 @@ namespace krys::boo
   {
     constexpr float OneOverThree = 1 / 3.f;
 
-    KRYS_NODISCARD constexpr FloatPoint ReflectedPoint(const FloatPoint &center,
-                                                       const FloatPoint &point) noexcept
+    KRYS_NODISCARD constexpr PointF ReflectedPoint(const PointF &center, const PointF &point) noexcept
     {
       // `center` is the middle point between `point` and `reflectedPoint`.
       return {2 * center.X() - point.X(), 2 * center.Y() - point.Y()};
@@ -243,7 +242,7 @@ namespace krys::boo
 
     if (_pathParsingMode == svg::PathParsingMode::NormalisedParsing)
     {
-      FloatPoint point1 = ReflectedPoint(_currentPoint, _controlPoint);
+      PointF point1 = ReflectedPoint(_currentPoint, _controlPoint);
       if (_mode == svg::PathCoordinateMode::RelativeCoordinates)
       {
         result->Point2 += _currentPoint;
@@ -275,10 +274,10 @@ namespace krys::boo
     {
       _controlPoint = result->Point1;
 
-      FloatPoint point1 = _currentPoint;
+      PointF point1 = _currentPoint;
       point1.Move(2 * _controlPoint.X(), 2 * _controlPoint.Y());
-      FloatPoint point2(result->TargetPoint.X() + 2 * _controlPoint.X(),
-                        result->TargetPoint.Y() + 2 * _controlPoint.Y());
+      PointF point2(result->TargetPoint.X() + 2 * _controlPoint.X(),
+                    result->TargetPoint.Y() + 2 * _controlPoint.Y());
       if (_mode == svg::PathCoordinateMode::RelativeCoordinates)
       {
         point1.Move(2 * _currentPoint.X(), 2 * _currentPoint.Y());
@@ -322,10 +321,10 @@ namespace krys::boo
 
     if (_pathParsingMode == svg::PathParsingMode::NormalisedParsing)
     {
-      FloatPoint cubicPoint = ReflectedPoint(_currentPoint, _controlPoint);
-      FloatPoint point1(_currentPoint.X() + 2 * cubicPoint.X(), _currentPoint.Y() + 2 * cubicPoint.Y());
-      FloatPoint point2(result->TargetPoint.X() + 2 * cubicPoint.X(),
-                        result->TargetPoint.Y() + 2 * cubicPoint.Y());
+      PointF cubicPoint = ReflectedPoint(_currentPoint, _controlPoint);
+      PointF point1(_currentPoint.X() + 2 * cubicPoint.X(), _currentPoint.Y() + 2 * cubicPoint.Y());
+      PointF point2(result->TargetPoint.X() + 2 * cubicPoint.X(),
+                    result->TargetPoint.Y() + 2 * cubicPoint.Y());
       if (_mode == svg::PathCoordinateMode::RelativeCoordinates)
       {
         point2 += _currentPoint;
@@ -366,7 +365,7 @@ namespace krys::boo
       result->Ry = std::abs(result->Ry);
       if (_mode == svg::PathCoordinateMode::RelativeCoordinates)
       {
-        arcIsZeroLength = result->TargetPoint == FloatPoint::Zero();
+        arcIsZeroLength = result->TargetPoint == PointF::Zero();
       }
       else
       {
@@ -396,7 +395,7 @@ namespace krys::boo
 
     if (_pathParsingMode == svg::PathParsingMode::NormalisedParsing)
     {
-      FloatPoint point1 = _currentPoint;
+      PointF point1 = _currentPoint;
       if (_mode == svg::PathCoordinateMode::RelativeCoordinates)
       {
         result->TargetPoint += _currentPoint;
@@ -552,17 +551,17 @@ namespace krys::boo
   // This works by converting the SVG arc to "simple" beziers.
   // Partly adapted from Niko's code in kdelibs/kdecore/svgicons.
   // See also SVG implementation notes: http://www.w3.org/TR/SVG/implnote.html#ArcConversionEndpointToCenter
-  bool SVGPathParser::DecomposeArcToCubic(float angle, float rx, float ry, const FloatPoint &start,
-                                          const FloatPoint &end, bool largeArcFlag, bool sweepFlag) noexcept
+  bool SVGPathParser::DecomposeArcToCubic(float angle, float rx, float ry, const PointF &start,
+                                          const PointF &end, bool largeArcFlag, bool sweepFlag) noexcept
   {
-    FloatSize midPointDistance = start - end;
+    SizeF midPointDistance = start - end;
     midPointDistance.Scale(0.5f);
 
     AffineTransform pointTransform;
     pointTransform.Rotate(-angle);
 
-    FloatPoint transformedMidPoint =
-      pointTransform.MapPoint(FloatPoint(midPointDistance.Width(), midPointDistance.Height()));
+    PointF transformedMidPoint =
+      pointTransform.MapPoint(PointF(midPointDistance.Width(), midPointDistance.Height()));
     float squareRx = rx * rx;
     float squareRy = ry * ry;
     float squareX = transformedMidPoint.X() * transformedMidPoint.X();
@@ -581,9 +580,9 @@ namespace krys::boo
     pointTransform.Scale(1 / rx, 1 / ry);
     pointTransform.Rotate(-angle);
 
-    FloatPoint point1 = pointTransform.MapPoint(start);
-    FloatPoint point2 = pointTransform.MapPoint(end);
-    FloatSize delta = point2 - point1;
+    PointF point1 = pointTransform.MapPoint(start);
+    PointF point2 = pointTransform.MapPoint(end);
+    SizeF delta = point2 - point1;
 
     float d = delta.Width() * delta.Width() + delta.Height() * delta.Height();
     float scaleFactorSquared = std::max(1 / d - 0.25f, 0.f);
@@ -595,12 +594,12 @@ namespace krys::boo
     }
 
     delta.Scale(scaleFactor);
-    FloatPoint centerPoint = point1 + point2;
+    PointF centerPoint = point1 + point2;
     centerPoint.Scale(0.5f);
     centerPoint.Move(-delta.Height(), delta.Width());
 
-    float theta1 = FloatPoint(point1 - centerPoint).SlopeAngleRadians();
-    float theta2 = FloatPoint(point2 - centerPoint).SlopeAngleRadians();
+    float theta1 = PointF(point1 - centerPoint).SlopeAngleRadians();
+    float theta2 = PointF(point2 - centerPoint).SlopeAngleRadians();
 
     float thetaArc = theta2 - theta1;
     if (thetaArc < 0 && sweepFlag)
@@ -634,9 +633,9 @@ namespace krys::boo
       float sinEndTheta = std::sin(endTheta);
       float cosEndTheta = std::cos(endTheta);
 
-      point1 = FloatPoint(cosStartTheta - t * sinStartTheta, sinStartTheta + t * cosStartTheta);
+      point1 = PointF(cosStartTheta - t * sinStartTheta, sinStartTheta + t * cosStartTheta);
       point1.Move(centerPoint.X(), centerPoint.Y());
-      FloatPoint targetPoint = FloatPoint(cosEndTheta, sinEndTheta);
+      PointF targetPoint = PointF(cosEndTheta, sinEndTheta);
       targetPoint.Move(centerPoint.X(), centerPoint.Y());
       point2 = targetPoint;
       point2.Move(t * sinEndTheta, -t * cosEndTheta);

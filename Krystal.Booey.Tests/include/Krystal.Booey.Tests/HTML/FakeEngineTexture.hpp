@@ -15,18 +15,18 @@ namespace krys::boo::tests
   class FakeEngineTexture final : public html::EngineTexture
   {
   public:
-    IntSize TextureSize;
+    SizeI TextureSize;
     Ref<FakeDisplayDelegate> Delegate {AdoptRef(*new FakeDisplayDelegate())};
     RefPtr<NativeImage> Image;
 
-    explicit FakeEngineTexture(IntSize size, uint32 argb = 0xFF'33'66'99u) noexcept : TextureSize(size)
+    explicit FakeEngineTexture(SizeI size, uint32 argb = 0xFF'33'66'99u) noexcept : TextureSize(size)
     {
-      auto pixels = CreateRef<PixelData>(static_cast<size_t>(size.UnclampedArea()));
+      auto pixels = CreateRef<img::PixelData>(static_cast<size_t>(size.UnclampedArea()));
       std::fill(pixels->Pixels.begin(), pixels->Pixels.end(), argb);
       Image = NativeImage::Create(CreateRefPtr<PlatformImage>(size, krys::move(pixels), true));
     }
 
-    KRYS_NODISCARD IntSize Size() const noexcept override
+    KRYS_NODISCARD SizeI Size() const noexcept override
     {
       return TextureSize;
     }

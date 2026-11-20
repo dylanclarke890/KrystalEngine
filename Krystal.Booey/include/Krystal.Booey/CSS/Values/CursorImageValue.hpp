@@ -20,7 +20,7 @@
 
 #pragma once
 
-#include "Krystal.Booey/CSS/Values/Primitives/URL.hpp"
+#include "Krystal.Booey/CSS/Values/Primitives/Url.hpp"
 #include "Krystal.Booey/CSS/Values/Value.hpp"
 #include "Krystal.Core/Types/RefPtr.hpp"
 
@@ -40,22 +40,22 @@ namespace krys::boo::css
   class CursorImageValue final : public Value
   {
   private:
-    CSSURL _originalURL;
+    CSSUrl _originalUrl;
     const Ref<Value> _imageValue;
     const RefPtr<Value> _hotSpot;
 
-    CursorImageValue(Ref<Value> &&imageValue, RefPtr<Value> &&hotSpot, CSSURL &&originalURL) noexcept;
+    CursorImageValue(Ref<Value> &&imageValue, RefPtr<Value> &&hotSpot, CSSUrl &&originalUrl) noexcept;
 
   public:
     KRYS_NODISCARD static Ref<CursorImageValue> Create(Ref<Value> &&imageValue,
                                                        RefPtr<Value> &&hotSpot) noexcept;
 
     KRYS_NODISCARD static Ref<CursorImageValue> Create(Ref<Value> &&imageValue, RefPtr<Value> &&hotSpot,
-                                                       CSSURL &&originalURL) noexcept;
+                                                       CSSUrl &&originalUrl) noexcept;
 
-    KRYS_NODISCARD const CSSURL &OriginalURL() const noexcept
+    KRYS_NODISCARD const CSSUrl &OriginalUrl() const noexcept
     {
-      return _originalURL;
+      return _originalUrl;
     }
 
     KRYS_NODISCARD CSSOMString CustomCSSText(const SerialisationContext &context) const noexcept;

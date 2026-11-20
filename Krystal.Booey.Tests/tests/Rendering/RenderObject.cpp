@@ -2,9 +2,9 @@
 #include "catch2/catch_test_macros.hpp"
 #include "Krystal.Booey.Tests/Layout/LayoutTestUtils.hpp"
 #include "Krystal.Booey.Tests/Style/ResolverTestUtils.hpp"
-#include "Krystal.Booey/Graphics/Geometry/FloatQuad.hpp"
 #include "Krystal.Booey/Rendering/RenderBox.hpp"
 #include "Krystal.Booey/Rendering/RenderInline.hpp"
+#include "Krystal.Core/Geometry/Quad.hpp"
 
 namespace krys::boo::tests
 {
@@ -36,38 +36,38 @@ namespace krys::boo::tests
     {
       // The outer box's border box starts at (20, 10); the inner box is inside its border.
       auto &inner = RendererOf(fixture, u8"inner");
-      CHECK(inner.LocalToAbsolute() == FloatPoint(30, 13));
-      CHECK(inner.LocalToAbsolute(FloatPoint(1, 2)) == FloatPoint(31, 15));
-      CHECK(inner.AbsoluteToLocal(FloatPoint(31, 15)) == FloatPoint(1, 2));
+      CHECK(inner.LocalToAbsolute() == PointF(30, 13));
+      CHECK(inner.LocalToAbsolute(PointF(1, 2)) == PointF(31, 15));
+      CHECK(inner.AbsoluteToLocal(PointF(31, 15)) == PointF(1, 2));
 
       // Relative positioning offsets the box.
       auto &rel = RendererOf(fixture, u8"rel");
-      CHECK(rel.LocalToAbsolute() == FloatPoint(28, 39));
+      CHECK(rel.LocalToAbsolute() == PointF(28, 39));
     }
 
     SECTION("Transforms")
     {
       auto &moved = RendererOf(fixture, u8"moved");
-      CHECK(moved.LocalToAbsolute(FloatPoint(), MapCoordinatesMode::UseTransforms) == FloatPoint(53, 83));
+      CHECK(moved.LocalToAbsolute(PointF(), MapCoordinatesMode::UseTransforms) == PointF(53, 83));
       // Without UseTransforms, the transform is ignored.
-      CHECK(moved.LocalToAbsolute() == FloatPoint(23, 43));
-      CHECK(moved.AbsoluteToLocal(FloatPoint(53, 83), MapCoordinatesMode::UseTransforms) == FloatPoint());
-      CHECK(moved.AbsoluteBoundingBoxRect() == IntRect(53, 83, 10, 10));
+      CHECK(moved.LocalToAbsolute() == PointF(23, 43));
+      CHECK(moved.AbsoluteToLocal(PointF(53, 83), MapCoordinatesMode::UseTransforms) == PointF());
+      CHECK(moved.AbsoluteBoundingBoxRect() == RectI(53, 83, 10, 10));
     }
 
     SECTION("Quads")
     {
-      List<FloatQuad> quads;
+      List<QuadF> quads;
       Downcast<RenderBox>(RendererOf(fixture, u8"outer")).AbsoluteQuads(quads);
       REQUIRE(quads.size() == 1);
-      CHECK(quads[0].BoundingBox() == FloatRect(20, 10, 206, 106));
+      CHECK(quads[0].BoundingBox() == RectF(20, 10, 206, 106));
 
       // An inline has a quad per line.
       quads.clear();
       Downcast<RenderInline>(RendererOf(fixture, u8"inl")).AbsoluteQuads(quads);
       REQUIRE(quads.size() == 2);
-      CHECK(quads[0].BoundingBox() == FloatRect(0, 116, 20, 10));
-      CHECK(quads[1].BoundingBox() == FloatRect(0, 126, 20, 10));
+      CHECK(quads[0].BoundingBox() == RectF(0, 116, 20, 10));
+      CHECK(quads[1].BoundingBox() == RectF(0, 126, 20, 10));
     }
   }
 }

@@ -19,11 +19,6 @@ namespace krys::ui
 {
   namespace
   {
-    KRYS_NODISCARD boo::AffineTransform ToAffineTransform(const gfx::Transform2D &transform) noexcept
-    {
-      return {transform.A, transform.B, transform.C, transform.D, transform.E, transform.F};
-    }
-
     /// @brief The operator Render2D draws @p op with, blending with @p blendMode as Skia does: a blend mode
     /// other than normal blends over. Plus darker and difference aren't Porter-Duff operators: they draw
     /// over.
@@ -72,7 +67,7 @@ namespace krys::ui
     // Creates a path comprising of two triangle waves separated by some empty space in Y axis.
     // The empty space can be filled, thus forming an elegant triangle wave.
     // Such triangle wave can be used e.g. as an error underline for text.
-    KRYS_NODISCARD gfx::Path2D CreateErrorUnderlinePath(const boo::FloatRect &boundaries) noexcept
+    KRYS_NODISCARD gfx::Path2D CreateErrorUnderlinePath(const RectF &boundaries) noexcept
     {
       const double y = boundaries.Y();
       double width = boundaries.Width();
@@ -147,7 +142,7 @@ namespace krys::ui
   }
 
   GraphicsContextRender2D::GraphicsContextRender2D(gfx::Renderer2D &renderer, FontFaceCache &fonts,
-                                                   const boo::FloatRect &bounds,
+                                                   const RectF &bounds,
                                                    ImageBufferTextures *imageBuffers) noexcept
       : _renderer(renderer), _fonts(fonts), _imageBuffers(imageBuffers), _clipBounds(bounds),
         _initialClipBounds(bounds), _initialClip(renderer.GetClip())
@@ -199,17 +194,17 @@ namespace krys::ui
   }
 
   // Draws a filled rectangle with a stroked border.
-  void GraphicsContextRender2D::DrawRect(const boo::FloatRect &rect, float borderThickness) noexcept
+  void GraphicsContextRender2D::DrawRect(const RectF &rect, float borderThickness) noexcept
   {
     krys_debug_assert(!rect.IsEmpty());
     PrepareDraw();
-    _renderer.FillRect(ToRect2D(rect), FillBrushPaint().Paint());
+    _renderer.FillRect(rect, FillBrushPaint().Paint());
     if (GetStrokeStyle() == boo::StrokeStyle::NoStroke)
     {
       return;
     }
 
-    const boo::FloatRect rects[4] = {
+    const RectF rects[4] = {
       {rect.X(), rect.Y(), rect.Width(), borderThickness},
       {rect.X(), rect.MaxY() - borderThickness, rect.Width(), borderThickness},
       {rect.X(), rect.Y() + borderThickness, borderThickness, rect.Height() - 2 * borderThickness},
@@ -218,13 +213,12 @@ namespace krys::ui
     const auto stroke = StrokeBrushPaint();
     for (const auto &side : rects)
     {
-      _renderer.FillRect(ToRect2D(side), stroke.Paint());
+      _renderer.FillRect(side, stroke.Paint());
     }
   }
 
   // This is only used to draw borders, so we should not draw shadows.
-  void GraphicsContextRender2D::DrawLine(const boo::FloatPoint &point1,
-                                         const boo::FloatPoint &point2) noexcept
+  void GraphicsContextRender2D::DrawLine(const PointF &point1, const PointF &point2) noexcept
   {
     if (GetStrokeStyle() == boo::StrokeStyle::NoStroke)
     {
@@ -257,15 +251,13 @@ namespace krys::ui
       cornerWidth = DashedLineCornerWidthForStrokeWidth(strokeWidth);
       if (isVertical)
       {
-        FillRect(boo::FloatRect(point1.X(), point1.Y(), StrokeThickness(), cornerWidth), StrokeColor());
-        FillRect(boo::FloatRect(point1.X(), point2.Y() - cornerWidth, StrokeThickness(), cornerWidth),
-                 StrokeColor());
+        FillRect(RectF(point1.X(), point1.Y(), StrokeThickness(), cornerWidth), StrokeColor());
+        FillRect(RectF(point1.X(), point2.Y() - cornerWidth, StrokeThickness(), cornerWidth), StrokeColor());
       }
       else
       {
-        FillRect(boo::FloatRect(point1.X(), point1.Y(), cornerWidth, StrokeThickness()), StrokeColor());
-        FillRect(boo::FloatRect(point2.X() - cornerWidth, point1.Y(), cornerWidth, StrokeThickness()),
-                 StrokeColor());
+        FillRect(RectF(point1.X(), point1.Y(), cornerWidth, StrokeThickness()), StrokeColor());
+        FillRect(RectF(point2.X() - cornerWidth, point1.Y(), cornerWidth, StrokeThickness()), StrokeColor());
       }
       strokeWidth -= 2 * cornerWidth;
       const float patternWidth = DashedLinePatternWidthForStrokeWidth(strokeWidth);
@@ -286,7 +278,7 @@ namespace krys::ui
   }
 
   // This method is only used to draw the little circles used in lists.
-  void GraphicsContextRender2D::DrawEllipse(const boo::FloatRect &boundaries) noexcept
+  void GraphicsContextRender2D::DrawEllipse(const RectF &boundaries) noexcept
   {
     gfx::Path2D path;
     path.AddEllipse(ToVec2f(boundaries.Center()), {boundaries.Width() / 2.f, boundaries.Height() / 2.f});
@@ -316,26 +308,25 @@ namespace krys::ui
     _renderer.StrokePath(ToPath2D(path), CurrentStrokeStyle(StrokeThickness()), StrokeBrushPaint().Paint());
   }
 
-  void GraphicsContextRender2D::FillRect(const boo::FloatRect &boundaries, RequiresClipToRect) noexcept
+  void GraphicsContextRender2D::FillRect(const RectF &boundaries, RequiresClipToRect) noexcept
   {
     PrepareDraw();
-    _renderer.FillRect(ToRect2D(boundaries), FillBrushPaint().Paint());
+    _renderer.FillRect(boundaries, FillBrushPaint().Paint());
   }
 
-  void GraphicsContextRender2D::FillRect(const boo::FloatRect &boundaries,
-                                         const boo::Color &fillColor) noexcept
+  void GraphicsContextRender2D::FillRect(const RectF &boundaries, const boo::Color &fillColor) noexcept
   {
     PrepareDraw();
-    _renderer.FillRect(ToRect2D(boundaries), ToColour(fillColor));
+    _renderer.FillRect(boundaries, ToColour(fillColor));
   }
 
-  void GraphicsContextRender2D::FillRect(const boo::FloatRect &boundaries, boo::Gradient &gradient,
-                                         const boo::AffineTransform &gradientSpaceTransform,
+  void GraphicsContextRender2D::FillRect(const RectF &boundaries, boo::Gradient &gradient,
+                                         const AffineTransform &gradientSpaceTransform,
                                          RequiresClipToRect) noexcept
   {
     PrepareDraw();
     const auto gradient2D = ToGradient2D(gradient, Alpha());
-    _renderer.FillRect(ToRect2D(boundaries), gfx::Paint2D(gradient2D, ToTransform2D(gradientSpaceTransform)));
+    _renderer.FillRect(boundaries, gfx::Paint2D(gradient2D, gradientSpaceTransform));
   }
 
   void GraphicsContextRender2D::FillRoundedRectImpl(const boo::FloatRoundedRect &rect,
@@ -353,7 +344,7 @@ namespace krys::ui
     _renderer.FillPath(path, gfx::FillRule::NonZero, ToColour(color));
   }
 
-  void GraphicsContextRender2D::FillRectWithRoundedHole(const boo::FloatRect &outerRect,
+  void GraphicsContextRender2D::FillRectWithRoundedHole(const RectF &outerRect,
                                                         const boo::FloatRoundedRect &roundedHoleRect,
                                                         const boo::Color &color) noexcept
   {
@@ -366,12 +357,12 @@ namespace krys::ui
     {
       if (auto circular = ToCircularRoundedRect(roundedHoleRect))
       {
-        _renderer.FillRectWithRoundedHole(ToRect2D(outerRect), *circular, ToColour(color));
+        _renderer.FillRectWithRoundedHole(outerRect, *circular, ToColour(color));
         return;
       }
 
       gfx::Path2D path;
-      path.AddRect(ToRect2D(outerRect));
+      path.AddRect(outerRect);
       AddRoundedRect(path, roundedHoleRect);
       _renderer.FillPath(path, gfx::FillRule::EvenOdd, ToColour(color));
     };
@@ -392,12 +383,12 @@ namespace krys::ui
     {
       shadow.Offset.SetWidth(shadow.Offset.Width() - away);
     }
-    else if (auto inverse = ToAffineTransform(transform).Inverse())
+    else if (auto inverse = transform.Inverse())
     {
-      shadow.Offset = shadow.Offset - inverse->MapSize(boo::FloatSize {away, 0});
+      shadow.Offset = shadow.Offset - inverse->MapSize(SizeF {away, 0});
     }
     _renderer.Save();
-    _renderer.SetTransform(gfx::Transform2D::Translation(away, 0.f) * transform);
+    _renderer.SetTransform(AffineTransform::CreateTranslation(SizeF(away, 0.f)) * transform);
     _renderer.SetDropShadow({.Offset = {shadow.Offset.Width(), shadow.Offset.Height()},
                              .BlurRadius = shadow.Radius,
                              .Colour = ToColour(shadow.Color)});
@@ -405,7 +396,7 @@ namespace krys::ui
     _renderer.Restore();
   }
 
-  void GraphicsContextRender2D::ClearRect(const boo::FloatRect &rect) noexcept
+  void GraphicsContextRender2D::ClearRect(const RectF &rect) noexcept
   {
     // As Skia clears: the rect, transformed and clipped, becomes transparent black, whatever the alpha,
     // shadow and compositing.
@@ -413,14 +404,14 @@ namespace krys::ui
     _renderer.ClearDropShadow();
     _renderer.SetBlendMode(BlendMode::Normal);
     _renderer.SetCompositeOperator(gfx::CompositeOperator2D::Clear);
-    _renderer.FillRect(ToRect2D(rect), SRGBA<uint8> {0, 0, 0, 255});
+    _renderer.FillRect(rect, SRGBA<uint8> {0, 0, 0, 255});
     _renderer.Restore();
   }
 
-  void GraphicsContextRender2D::StrokeRect(const boo::FloatRect &boundaries, float lineWidth) noexcept
+  void GraphicsContextRender2D::StrokeRect(const RectF &boundaries, float lineWidth) noexcept
   {
     gfx::Path2D path;
-    path.AddRect(ToRect2D(boundaries));
+    path.AddRect(boundaries);
     PrepareDraw();
     _renderer.StrokePath(path, CurrentStrokeStyle(lineWidth), StrokeBrushPaint().Paint());
   }
@@ -464,10 +455,10 @@ namespace krys::ui
     _renderer.SetClip(_initialClip);
   }
 
-  void GraphicsContextRender2D::Clip(const boo::FloatRect &rect) noexcept
+  void GraphicsContextRender2D::Clip(const RectF &rect) noexcept
   {
     IntersectClipBounds(rect);
-    _renderer.ClipRect(ToRect2D(rect));
+    _renderer.ClipRect(rect);
   }
 
   void GraphicsContextRender2D::ClipRoundedRect(const boo::FloatRoundedRect &rect) noexcept
@@ -484,9 +475,9 @@ namespace krys::ui
     _renderer.ClipPath(path, gfx::FillRule::NonZero);
   }
 
-  void GraphicsContextRender2D::ClipOut(const boo::FloatRect &rect) noexcept
+  void GraphicsContextRender2D::ClipOut(const RectF &rect) noexcept
   {
-    _renderer.ClipOutRect(ToRect2D(rect));
+    _renderer.ClipOutRect(rect);
   }
 
   void GraphicsContextRender2D::ClipOut(const boo::Path &path) noexcept
@@ -513,13 +504,12 @@ namespace krys::ui
     _renderer.ClipPath(ToPath2D(path), ToFillRule(clipRule));
   }
 
-  void GraphicsContextRender2D::ClipToImageBuffer(boo::ImageBuffer &image,
-                                                  const boo::FloatRect &destination) noexcept
+  void GraphicsContextRender2D::ClipToImageBuffer(boo::ImageBuffer &image, const RectF &destination) noexcept
   {
     // As Skia's clip shader, which leaves nothing outside the image. Render2D can't clip to a texture, so
     // what's drawn until this state ends goes into a layer, which the image's alpha masks as it ends.
     IntersectClipBounds(destination);
-    _renderer.ClipRect(ToRect2D(destination));
+    _renderer.ClipRect(destination);
 
     auto *commands = _renderer.GetCommandBuffer();
     const auto texture =
@@ -533,19 +523,19 @@ namespace krys::ui
 
     PrepareDraw(false);
     _imageClips.push_back({.Texture = texture,
-                           .Destination = ToRect2D({destination.Location(), image.LogicalSize()}),
+                           .Destination = RectF {destination.Location(), image.LogicalSize()},
                            .Transform = _renderer.GetTransform(),
                            .StackSize = StackSize()});
     _renderer.BeginLayer(1.f);
   }
 
-  boo::IntRect GraphicsContextRender2D::ClipBounds() const noexcept
+  RectI GraphicsContextRender2D::ClipBounds() const noexcept
   {
     if (auto inverse = GetCTM().Inverse())
     {
-      return boo::EnclosingIntRect(inverse->MapRect(_clipBounds));
+      return EnclosingRectI(inverse->MapRect(_clipBounds));
     }
-    return boo::EnclosingIntRect(_clipBounds);
+    return EnclosingRectI(_clipBounds);
   }
 
   /// @brief Appends @p path to @p into, moved by @p offset.
@@ -580,7 +570,7 @@ namespace krys::ui
 
   void GraphicsContextRender2D::DrawGlyphs(const boo::Font &font, Span<const boo::GlyphBufferGlyph> glyphs,
                                            Span<const boo::GlyphBufferAdvance> advances,
-                                           const boo::FloatPoint &position, boo::FontSmoothingMode) noexcept
+                                           const PointF &position, boo::FontSmoothingMode) noexcept
   {
     const auto mode = GetTextDrawingMode();
     const bool fill = mode.Contains(boo::TextDrawingMode::Fill);
@@ -646,8 +636,8 @@ namespace krys::ui
     }
   }
 
-  void GraphicsContextRender2D::DrawLinesForText(const boo::FloatPoint &origin, float thickness,
-                                                 Span<const boo::FloatSegment> lineSegments, bool printing,
+  void GraphicsContextRender2D::DrawLinesForText(const PointF &origin, float thickness,
+                                                 Span<const SegmentF> lineSegments, bool printing,
                                                  bool doubleUnderlines, boo::StrokeStyle strokeStyle) noexcept
   {
     auto [rects, strokeColor] = ComputeRectsAndStrokeColorForLinesForText(
@@ -658,7 +648,7 @@ namespace krys::ui
     }
   }
 
-  void GraphicsContextRender2D::DrawDotsForDocumentMarker(const boo::FloatRect &boundaries,
+  void GraphicsContextRender2D::DrawDotsForDocumentMarker(const RectF &boundaries,
                                                           boo::DocumentMarkerLineStyle style) noexcept
   {
     if (style.Mode != boo::DocumentMarkerLineStyleMode::Spelling
@@ -759,19 +749,19 @@ namespace krys::ui
     _renderer.EndLayer();
   }
 
-  void GraphicsContextRender2D::DrawFocusRing(const List<boo::FloatRect> &rects, float, float outlineWidth,
+  void GraphicsContextRender2D::DrawFocusRing(const List<RectF> &rects, float, float outlineWidth,
                                               const boo::Color &color) noexcept
   {
     // Adwaita rounds each rect's corners by 2.
     boo::Path path;
     for (const auto &rect : rects)
     {
-      path.AddRoundedRect(rect, boo::FloatSize(2, 2));
+      path.AddRoundedRect(rect, SizeF(2, 2));
     }
     DrawFocusRing(path, outlineWidth, color);
   }
 
-  void GraphicsContextRender2D::Scale(const boo::FloatSize &scale) noexcept
+  void GraphicsContextRender2D::Scale(const SizeF &scale) noexcept
   {
     _renderer.Scale(scale.Width(), scale.Height());
   }
@@ -786,19 +776,19 @@ namespace krys::ui
     _renderer.Translate(x, y);
   }
 
-  void GraphicsContextRender2D::ConcatCTM(const boo::AffineTransform &transform) noexcept
+  void GraphicsContextRender2D::ConcatCTM(const AffineTransform &transform) noexcept
   {
-    _renderer.ConcatTransform(ToTransform2D(transform));
+    _renderer.ConcatTransform(transform);
   }
 
-  void GraphicsContextRender2D::SetCTM(const boo::AffineTransform &transform) noexcept
+  void GraphicsContextRender2D::SetCTM(const AffineTransform &transform) noexcept
   {
-    _renderer.SetTransform(ToTransform2D(transform));
+    _renderer.SetTransform(transform);
   }
 
-  boo::AffineTransform GraphicsContextRender2D::GetCTM(IncludeDeviceScale) const noexcept
+  AffineTransform GraphicsContextRender2D::GetCTM(IncludeDeviceScale) const noexcept
   {
-    return ToAffineTransform(_renderer.GetTransform());
+    return _renderer.GetTransform();
   }
 
   GraphicsContextRender2D::Brush GraphicsContextRender2D::FillBrushPaint() const noexcept
@@ -810,8 +800,7 @@ namespace krys::ui
     }
     if (auto *gradient = brush.GetGradient())
     {
-      return {.Gradient = ToGradient2D(*gradient, Alpha()),
-              .GradientSpace = ToTransform2D(brush.GradientSpaceTransform())};
+      return {.Gradient = ToGradient2D(*gradient, Alpha()), .GradientSpace = brush.GradientSpaceTransform()};
     }
     return {.Colour = ToColour(brush.GetColor(), Alpha())};
   }
@@ -825,8 +814,7 @@ namespace krys::ui
     }
     if (auto *gradient = brush.GetGradient())
     {
-      return {.Gradient = ToGradient2D(*gradient, Alpha()),
-              .GradientSpace = ToTransform2D(brush.GradientSpaceTransform())};
+      return {.Gradient = ToGradient2D(*gradient, Alpha()), .GradientSpace = brush.GradientSpaceTransform()};
     }
     return {.Colour = ToColour(brush.GetColor(), Alpha())};
   }
@@ -856,7 +844,7 @@ namespace krys::ui
     const auto size = pattern.TileImage().Size();
     return {.Pattern = gfx::ImagePattern2D {
               .Texture = texture,
-              .PatternSpace = ToTransform2D(pattern.PatternSpaceTransform()),
+              .PatternSpace = pattern.PatternSpaceTransform(),
               .TileSize = {static_cast<float>(size.Width()), static_cast<float>(size.Height())},
               .Filter = ImageFilter(),
               .Opacity = Alpha(),
@@ -882,8 +870,8 @@ namespace krys::ui
              : gfx::SamplerFilter::Linear;
   }
 
-  void GraphicsContextRender2D::DrawNativeImage(boo::NativeImage &image, const boo::FloatRect &destRect,
-                                                const boo::FloatRect &srcRect,
+  void GraphicsContextRender2D::DrawNativeImage(boo::NativeImage &image, const RectF &destRect,
+                                                const RectF &srcRect,
                                                 boo::ImagePaintingOptions options) noexcept
   {
     auto *commands = _renderer.GetCommandBuffer();
@@ -893,13 +881,13 @@ namespace krys::ui
     }
 
     auto orientation = options.Orientation();
-    auto imageSize = boo::FloatSize(image.Size());
+    auto imageSize = SizeF(image.Size());
     if (orientation.UsesWidthAsHeight())
     {
       imageSize = imageSize.TransposedSize();
     }
-    auto normalizedSrcRect = boo::NormaliseRect(srcRect);
-    if (!boo::FloatRect({}, imageSize).Intersects(normalizedSrcRect))
+    auto normalizedSrcRect = NormaliseRect(srcRect);
+    if (!RectF({}, imageSize).Intersects(normalizedSrcRect))
     {
       return;
     }
@@ -914,13 +902,13 @@ namespace krys::ui
       return;
     }
 
-    auto normalizedDestRect = boo::NormaliseRect(destRect);
-    boo::GraphicsContextStateSaver stateSaver(*this, orientation != boo::ImageOrientation::Orientation::None);
-    if (orientation != boo::ImageOrientation::Orientation::None)
+    auto normalizedDestRect = NormaliseRect(destRect);
+    boo::GraphicsContextStateSaver stateSaver(*this, orientation != img::ImageOrientation::Orientation::None);
+    if (orientation != img::ImageOrientation::Orientation::None)
     {
       // ImageOrientation expects the origin to be at (0, 0).
       Translate(normalizedDestRect.X(), normalizedDestRect.Y());
-      normalizedDestRect.SetLocation(boo::FloatPoint());
+      normalizedDestRect.SetLocation(PointF());
       ConcatCTM(orientation.TransformFromDefault(normalizedDestRect.Size()));
 
       if (orientation.UsesWidthAsHeight())
@@ -938,10 +926,9 @@ namespace krys::ui
     DrawTexture(texture, normalizedSrcRect, normalizedDestRect, options, alpha);
   }
 
-  void GraphicsContextRender2D::DrawPattern(boo::NativeImage &image, const boo::FloatRect &destRect,
-                                            const boo::FloatRect &tileRect,
-                                            const boo::AffineTransform &patternTransform,
-                                            const boo::FloatPoint &phase, const boo::FloatSize &spacing,
+  void GraphicsContextRender2D::DrawPattern(boo::NativeImage &image, const RectF &destRect,
+                                            const RectF &tileRect, const AffineTransform &patternTransform,
+                                            const PointF &phase, const SizeF &spacing,
                                             boo::ImagePaintingOptions options) noexcept
   {
     auto *commands = _renderer.GetCommandBuffer();
@@ -954,12 +941,12 @@ namespace krys::ui
     {
       return;
     }
-    DrawTexturePattern(texture, boo::FloatSize(image.Size()), destRect, tileRect, patternTransform, phase,
-                       spacing, options, *commands);
+    DrawTexturePattern(texture, SizeF(image.Size()), destRect, tileRect, patternTransform, phase, spacing,
+                       options, *commands);
   }
 
-  void GraphicsContextRender2D::DrawImageBuffer(boo::ImageBuffer &image, const boo::FloatRect &destination,
-                                                const boo::FloatRect &source,
+  void GraphicsContextRender2D::DrawImageBuffer(boo::ImageBuffer &image, const RectF &destination,
+                                                const RectF &source,
                                                 boo::ImagePaintingOptions options) noexcept
   {
     auto *commands = _renderer.GetCommandBuffer();
@@ -973,14 +960,14 @@ namespace krys::ui
       return;
     }
 
-    boo::FloatRect sourceScaled = source;
+    RectF sourceScaled = source;
     sourceScaled.Scale(image.ResolutionScale());
     DrawTexture(texture, sourceScaled, destination, options);
   }
 
   void GraphicsContextRender2D::DrawFilteredImageBuffer(boo::ImageBuffer *sourceImage,
-                                                        const boo::FloatRect &sourceImageRect,
-                                                        boo::Filter &filter, boo::FilterResults &) noexcept
+                                                        const RectF &sourceImageRect, boo::Filter &filter,
+                                                        boo::FilterResults &) noexcept
   {
     auto *commands = _renderer.GetCommandBuffer();
     if (!_imageBuffers || !commands)
@@ -1010,17 +997,15 @@ namespace krys::ui
     }
 
     const auto &region = rendered->Region;
-    const boo::FloatRect source(0.f, 0.f, static_cast<float>(region.Width),
-                                static_cast<float>(region.Height));
+    const RectF source(0.f, 0.f, static_cast<float>(region.Width()), static_cast<float>(region.Height()));
     Scale({1 / filter.FilterScale().Width(), 1 / filter.FilterScale().Height()});
-    DrawTexture(rendered->Texture, source, boo::FloatRect(result->AbsoluteImageRect()), {});
+    DrawTexture(rendered->Texture, source, RectF(result->AbsoluteImageRect()), {});
     Scale(filter.FilterScale());
   }
 
-  void GraphicsContextRender2D::DrawPattern(boo::ImageBuffer &image, const boo::FloatRect &destRect,
-                                            const boo::FloatRect &tileRect,
-                                            const boo::AffineTransform &patternTransform,
-                                            const boo::FloatPoint &phase, const boo::FloatSize &spacing,
+  void GraphicsContextRender2D::DrawPattern(boo::ImageBuffer &image, const RectF &destRect,
+                                            const RectF &tileRect, const AffineTransform &patternTransform,
+                                            const PointF &phase, const SizeF &spacing,
                                             boo::ImagePaintingOptions options) noexcept
   {
     auto *commands = _renderer.GetCommandBuffer();
@@ -1033,13 +1018,12 @@ namespace krys::ui
     {
       return;
     }
-    DrawTexturePattern(texture, boo::FloatSize(image.BackendSize()), destRect, tileRect, patternTransform,
-                       phase, spacing, options, *commands);
+    DrawTexturePattern(texture, SizeF(image.BackendSize()), destRect, tileRect, patternTransform, phase,
+                       spacing, options, *commands);
   }
 
-  void GraphicsContextRender2D::DrawTexture(gfx::TextureHandle texture, const boo::FloatRect &source,
-                                            const boo::FloatRect &destination,
-                                            boo::ImagePaintingOptions options,
+  void GraphicsContextRender2D::DrawTexture(gfx::TextureHandle texture, const RectF &source,
+                                            const RectF &destination, boo::ImagePaintingOptions options,
                                             AlphaPremultiplication alpha) noexcept
   {
     boo::InterpolationQualityMaintainer interpolationQualityForThisScope(*this,
@@ -1047,25 +1031,26 @@ namespace krys::ui
     PrepareDraw();
     _renderer.Save();
     PrepareImageDraw(options);
-    _renderer.DrawImage(texture, ToRect2D(source), ToRect2D(destination),
+    _renderer.DrawImage(texture, source, destination,
                         {.Filter = ImageFilter(), .Alpha = alpha, .Opacity = Alpha()});
     _renderer.Restore();
   }
 
-  void GraphicsContextRender2D::DrawTexturePattern(
-    gfx::TextureHandle texture, const boo::FloatSize &size, const boo::FloatRect &destRect,
-    const boo::FloatRect &tileRect, const boo::AffineTransform &patternTransform,
-    const boo::FloatPoint &phase, const boo::FloatSize &spacing, boo::ImagePaintingOptions options,
-    gfx::CommandBuffer &commands) noexcept
+  void GraphicsContextRender2D::DrawTexturePattern(gfx::TextureHandle texture, const SizeF &size,
+                                                   const RectF &destRect, const RectF &tileRect,
+                                                   const AffineTransform &patternTransform,
+                                                   const PointF &phase, const SizeF &spacing,
+                                                   boo::ImagePaintingOptions options,
+                                                   gfx::CommandBuffer &commands) noexcept
   {
     // As Skia's: the shader places the tile at the phase, moved by the tile's place in the image under the
     // pattern transform's scale. The tile is the whole texture, so a tile that's part of the image (or has
     // spacing after it) is copied into a texture of its own, its size rounded out to whole texels.
-    boo::FloatPoint phaseOffset(tileRect.Location());
+    PointF phaseOffset(tileRect.Location());
     phaseOffset.Scale(static_cast<float>(patternTransform.A()), static_cast<float>(patternTransform.D()));
     phaseOffset.MoveBy(phase);
     const auto shaderMatrix =
-      gfx::Transform2D::Translation(phaseOffset.X(), phaseOffset.Y()) * ToTransform2D(patternTransform);
+      AffineTransform::CreateTranslation(SizeF(phaseOffset.X(), phaseOffset.Y())) * patternTransform;
 
     auto tileTexture = texture;
     bool repeatX = true;
@@ -1076,10 +1061,10 @@ namespace krys::ui
       // scaled to fit the destination exactly doesn't filter in the texels at its other end.
       if (const auto inverse = shaderMatrix.Inverse())
       {
-        const auto corners = {inverse->Apply({destRect.X(), destRect.Y()}),
-                              inverse->Apply({destRect.MaxX(), destRect.Y()}),
-                              inverse->Apply({destRect.X(), destRect.MaxY()}),
-                              inverse->Apply({destRect.MaxX(), destRect.MaxY()})};
+        const auto corners = {gfx::MapPoint(*inverse, {destRect.X(), destRect.Y()}),
+                              gfx::MapPoint(*inverse, {destRect.MaxX(), destRect.Y()}),
+                              gfx::MapPoint(*inverse, {destRect.X(), destRect.MaxY()}),
+                              gfx::MapPoint(*inverse, {destRect.MaxX(), destRect.MaxY()})};
         float left = std::numeric_limits<float>::max();
         float top = left;
         float right = std::numeric_limits<float>::lowest();
@@ -1097,8 +1082,8 @@ namespace krys::ui
     }
     else
     {
-      const auto enclosing = boo::EnclosingIntRect(tileRect);
-      tileTexture = _imageBuffers->Copy(texture, ToRect2D(tileRect), static_cast<uint32>(enclosing.Width()),
+      const auto enclosing = EnclosingRectI(tileRect);
+      tileTexture = _imageBuffers->Copy(texture, tileRect, static_cast<uint32>(enclosing.Width()),
                                         static_cast<uint32>(enclosing.Height()), commands);
       if (!tileTexture.IsValid())
       {
@@ -1123,7 +1108,7 @@ namespace krys::ui
     PrepareDraw();
     _renderer.Save();
     PrepareImageDraw(options);
-    _renderer.FillRect(ToRect2D(destRect), pattern);
+    _renderer.FillRect(destRect, pattern);
     _renderer.Restore();
   }
 
@@ -1158,7 +1143,7 @@ namespace krys::ui
     _renderer.FillPath(path, rule, paint);
   }
 
-  void GraphicsContextRender2D::IntersectClipBounds(const boo::FloatRect &rect) noexcept
+  void GraphicsContextRender2D::IntersectClipBounds(const RectF &rect) noexcept
   {
     _clipBounds.Intersect(GetCTM().MapRect(rect));
   }

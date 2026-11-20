@@ -27,6 +27,7 @@
 
 #include "Krystal.Booey/Graphics/Geometry/LayoutUnit.hpp"
 #include "Krystal.Booey/Graphics/Geometry/RectEdges.hpp"
+#include "Krystal.Core/Geometry/Rect.hpp"
 #include "Krystal.Core/Types/Maybe.hpp"
 
 namespace krys::boo
@@ -47,5 +48,38 @@ namespace krys::boo
   {
     return {static_cast<float>(extent.Top()), static_cast<float>(extent.Right()),
             static_cast<float>(extent.Bottom()), static_cast<float>(extent.Left())};
+  }
+
+  /// @brief Moves @p rect's edges out by @p box.
+  constexpr void Expand(RectF &rect, const FloatBoxExtent &box) noexcept
+  {
+    rect.Move(-box.Left(), -box.Top());
+    rect.Expand(box.Left() + box.Right(), box.Top() + box.Bottom());
+  }
+
+  /// @brief Moves @p rect's edges in by @p box.
+  constexpr void Contract(RectF &rect, const FloatBoxExtent &box) noexcept
+  {
+    rect.Move(box.Left(), box.Top());
+    rect.Expand(-(box.Left() + box.Right()), -(box.Top() + box.Bottom()));
+  }
+
+  constexpr void Expand(LayoutRect &rect, const LayoutBoxExtent &box) noexcept
+  {
+    rect.Move(-box.Left(), -box.Top());
+    rect.Expand(box.Left() + box.Right(), box.Top() + box.Bottom());
+  }
+
+  constexpr void Contract(LayoutRect &rect, const LayoutBoxExtent &box) noexcept
+  {
+    rect.Move(box.Left(), box.Top());
+    rect.Contract(box.Left() + box.Right(), box.Top() + box.Bottom());
+  }
+
+  KRYS_NODISCARD constexpr RectF operator+(const RectF &rect, const FloatBoxExtent &box) noexcept
+  {
+    RectF result = rect;
+    Expand(result, box);
+    return result;
   }
 }

@@ -112,7 +112,7 @@ namespace krys::boo
       return (IsAnonymous() || IsPseudoElement()) ? u8"RenderTableRow (anonymous)" : u8"RenderTableRow";
     }
 
-    void ImageChanged(WrappedImagePtr, const IntRect * = nullptr) noexcept override;
+    void ImageChanged(WrappedImagePtr, const RectI * = nullptr) noexcept override;
 
     KRYS_NODISCARD LayoutRect ClippedOverflowRect(const RenderLayerModelObject *repaintContainer,
                                                   VisibleRectContext context) const noexcept override;

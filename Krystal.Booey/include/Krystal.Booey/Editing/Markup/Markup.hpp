@@ -58,12 +58,12 @@ namespace krys::boo
   class Page;
   class VisibleSelection;
 
-  enum class ResolveURLs : uint8
+  enum class ResolveUrls : uint8
   {
     No,
-    NoExcludingURLsForPrivacy,
+    NoExcludingUrlsForPrivacy,
     Yes,
-    YesExcludingURLsForPrivacy,
+    YesExcludingUrlsForPrivacy,
   };
 
   /// @brief Whether nodes, and everything under them, are `user-select: none`, remembered as nodes are asked
@@ -106,7 +106,7 @@ namespace krys::boo
 
   /// @brief The markup, parsed as if it were in a `body`.
   KRYS_NODISCARD Ref<DocumentFragment> CreateFragmentFromMarkup(Document &document, utf8_stringview markup,
-                                                                utf8_stringview baseURL) noexcept;
+                                                                utf8_stringview baseUrl) noexcept;
 
   /// @brief The markup, parsed as the children of @p contextElement, for `innerHTML`, `outerHTML`,
   /// `insertAdjacentHTML()` and `setHTMLUnsafe()`: as HTML in an HTML document or when the policy says to,
@@ -162,10 +162,10 @@ namespace krys::boo
     const dom::SimpleRange &range, List<Ref<Node>> *nodes = nullptr,
     AnnotateForInterchange annotate = AnnotateForInterchange::No,
     ConvertBlocksToInlines convertBlocksToInlines = ConvertBlocksToInlines::No,
-    ResolveURLs resolveURLs = ResolveURLs::No) noexcept;
+    ResolveUrls resolveUrls = ResolveUrls::No) noexcept;
 
   KRYS_NODISCARD utf8_string SerializePreservingVisualAppearance(
-    const VisibleSelection &selection, ResolveURLs resolveURLs = ResolveURLs::No,
+    const VisibleSelection &selection, ResolveUrls resolveUrls = ResolveUrls::No,
     SerializeComposedTree serializeComposedTree = SerializeComposedTree::No,
     IgnoreUserSelectNone ignoreUserSelectNone = IgnoreUserSelectNone::Yes,
     PreserveBaseElement preserveBaseElement = PreserveBaseElement::No,
@@ -201,7 +201,7 @@ namespace krys::boo
   /// @see https://html.spec.whatwg.org/#serialising-html-fragments
   KRYS_NODISCARD utf8_string SerializeFragment(
     const Node &node, SerializedNodes root, List<Ref<Node>> *nodes = nullptr,
-    ResolveURLs resolveURLs = ResolveURLs::No, Maybe<SerializationSyntax> serializationSyntax = null,
+    ResolveUrls resolveUrls = ResolveUrls::No, Maybe<SerializationSyntax> serializationSyntax = null,
     SerializeShadowRoots serializeShadowRoots = SerializeShadowRoots::Explicit,
     List<Ref<ShadowRoot>> &&explicitShadowRoots = {}) noexcept;
 
@@ -212,7 +212,7 @@ namespace krys::boo
   KRYS_NODISCARD ExceptionOr<utf8_string> SerializeFragmentRequiringWellFormed(const Node &node,
                                                                                SerializedNodes root) noexcept;
 
-  KRYS_NODISCARD utf8_string URLToMarkup(utf8_stringview url, utf8_stringview title) noexcept;
+  KRYS_NODISCARD utf8_string UrlToMarkup(utf8_stringview url, utf8_stringview title) noexcept;
 
   /// @brief A page with empty clients, whose main frame shows an empty document, to parse markup in apart
   /// from @p destinationDocument.

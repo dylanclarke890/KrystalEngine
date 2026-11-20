@@ -57,7 +57,7 @@ namespace krys::boo::style
     return AdoptRef(*new RotateTransformFunction(_x, _y, _z, _angle, GetType()));
   }
 
-  Ref<TransformOperation> RotateTransformFunction::ToPlatform(const FloatSize &) const noexcept
+  Ref<TransformOperation> RotateTransformFunction::ToPlatform(const SizeF &) const noexcept
   {
     return RotateTransformOperation::Create(_x.Value, _y.Value, _z.Value, _angle.Value,
                                             style::ConvertToPlatform(GetType()));
@@ -75,7 +75,7 @@ namespace krys::boo::style
            && _z == otherRotate._z;
   }
 
-  void RotateTransformFunction::Apply(TransformationMatrix &transform, const FloatSize &) const noexcept
+  void RotateTransformFunction::Apply(TransformationMatrix &transform, const SizeF &) const noexcept
   {
     if (GetType() == TransformFunctionBase::Type::Rotate)
     {
@@ -119,7 +119,7 @@ namespace krys::boo::style
     // Interpolation of Matrices afterwards. Otherwise the rotation angle gets interpolated numerically and
     // the rotation vector of the non-zero angle is used or (0, 0, 1) if both angles are zero.
 
-    auto normalizedVector = [](const RotateTransformFunction &op) -> FloatPoint3D
+    auto normalizedVector = [](const RotateTransformFunction &op) -> Point3F
     {
       if (auto length = std::hypot(op._x.Value, op._y.Value, op._z.Value))
       {
@@ -131,7 +131,7 @@ namespace krys::boo::style
 
     auto fromAngle = fromOp ? fromOp->_angle : Angle<> {0};
     auto toAngle = toOp->_angle;
-    auto fromNormalizedVector = fromOp ? normalizedVector(*fromOp) : FloatPoint3D(0, 0, 1);
+    auto fromNormalizedVector = fromOp ? normalizedVector(*fromOp) : Point3F(0, 0, 1);
     auto toNormalizedVector = normalizedVector(*toOp);
     if (fromAngle.IsZero() || toAngle.IsZero() || fromNormalizedVector == toNormalizedVector)
     {
@@ -163,9 +163,9 @@ namespace krys::boo::style
     }
 
     // Convert that to Axis/Angle form
-    double x = decomposed.Quaternion.X;
-    double y = decomposed.Quaternion.Y;
-    double z = decomposed.Quaternion.Z;
+    double x = decomposed.Quaternion.x;
+    double y = decomposed.Quaternion.y;
+    double z = decomposed.Quaternion.z;
     double length = std::hypot(x, y, z);
     double angle = 0;
 
@@ -174,7 +174,7 @@ namespace krys::boo::style
       x /= length;
       y /= length;
       z /= length;
-      angle = rad2deg(std::acos(decomposed.Quaternion.W) * 2);
+      angle = rad2deg(std::acos(decomposed.Quaternion.w) * 2);
     }
     else
     {

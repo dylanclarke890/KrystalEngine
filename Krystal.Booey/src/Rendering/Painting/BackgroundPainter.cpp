@@ -227,8 +227,8 @@ namespace krys::boo
         }
 
         const auto &zoomFactor = style.UsedZoomForLength();
-        FloatSize shadowOffset(shadow.Location.x().ResolveZoom(zoomFactor),
-                               shadow.Location.y().ResolveZoom(zoomFactor));
+        SizeF shadowOffset(shadow.Location.x().ResolveZoom(zoomFactor),
+                           shadow.Location.y().ResolveZoom(zoomFactor));
         context.SetDropShadow({shadowOffset, shadow.Blur.ResolveZoom(zoomFactor),
                                style.ColorResolvingCurrentColor(shadow.Color), ShadowRadiusMode::Default});
         break;
@@ -302,7 +302,7 @@ namespace krys::boo
 
     bool colorVisible = bgColor.IsVisible();
     float deviceScaleFactor = Document().DeviceScaleFactor();
-    FloatRect pixelSnappedRect = SnapRectToDevicePixels(rect, deviceScaleFactor);
+    RectF pixelSnappedRect = SnapRectToDevicePixels(rect, deviceScaleFactor);
 
     auto borderShapeRespectingBleedAvoidance =
       [&](RectEdges<bool> closedEdges, bool shrinkForBleedAvoidance = true)
@@ -427,7 +427,7 @@ namespace krys::boo
     {
       // Clip to the overflow area.
       auto &renderBox = Downcast<RenderBox>(_renderer);
-      context.Clip(FloatRect(renderBox.OverflowClipRect(rect.Location())));
+      context.Clip(RectF(renderBox.OverflowClipRect(rect.Location())));
 
       // Adjust the paint rect to reflect a scrolled content box with borders at the ends.
       scrolledPaintRect.MoveBy(-renderBox.GetScrollPosition());
@@ -445,7 +445,7 @@ namespace krys::boo
     // drawn into a second one composited onto it with source-in.
     auto setupMaskingBackgroundClip =
       [&](const LayoutRect &borderRect,
-          const Func<void(GraphicsContext &, const LayoutRect &, const FloatRect &)> &paintFunction)
+          const Func<void(GraphicsContext &, const LayoutRect &, const RectF &)> &paintFunction)
     {
       auto transparencyLayerBounds = SnapRectToDevicePixels(rect, deviceScaleFactor);
       transparencyLayerBounds.Intersect(SnapRectToDevicePixels(_paintInfo.Rect, deviceScaleFactor));
@@ -479,7 +479,7 @@ namespace krys::boo
             scrolledPaintRect.Height() - _renderer.BorderTop() - _renderer.BorderBottom()
               - (includePadding ? _renderer.PaddingTop() + _renderer.PaddingBottom() : 0_lu));
           backgroundClipStateSaver.Save();
-          context.Clip(FloatRect(clipRect));
+          context.Clip(RectF(clipRect));
         }
         break;
       }
@@ -489,7 +489,7 @@ namespace krys::boo
         // background.
         setupMaskingBackgroundClip(
           rect,
-          [&](GraphicsContext &maskContext, const LayoutRect &, const FloatRect &paintRect)
+          [&](GraphicsContext &maskContext, const LayoutRect &, const RectF &paintRect)
           {
             _renderer.PaintMaskForTextFillBox(maskContext, paintRect, inlineBoxIterator, scrolledPaintRect);
           });
@@ -508,7 +508,7 @@ namespace krys::boo
         // Borders that can't be made into a path (dotted, dashed and the like) are drawn into a mask.
         setupMaskingBackgroundClip(
           rect,
-          [&](GraphicsContext &maskContext, const LayoutRect &borderRect, const FloatRect &paintRect)
+          [&](GraphicsContext &maskContext, const LayoutRect &borderRect, const RectF &paintRect)
           {
             PaintInfo borderPaintInfo(maskContext, LayoutRect(paintRect), PaintPhase::BlockBackground,
                                       {PaintBehavior::ForceBlackBorder});
@@ -566,7 +566,7 @@ namespace krys::boo
           ApplyBoxShadowForBackground(context, style);
         }
 
-        FloatRect backgroundRectForPainting = SnapRectToDevicePixels(backgroundRect, deviceScaleFactor);
+        RectF backgroundRectForPainting = SnapRectToDevicePixels(backgroundRect, deviceScaleFactor);
         if (baseColor.IsVisible())
         {
           if (!baseBgColorOnly && bgColor.IsVisible())
@@ -610,28 +610,27 @@ namespace krys::boo
 
       auto &clientForBackgroundImage =
         backgroundObject ? *backgroundObject : static_cast<RenderElement &>(_renderer);
-      bgImage->SetContainerContextForRenderer(clientForBackgroundImage,
-                                              FloatSize(geometry.TileSizeWithoutPixelSnapping),
-                                              _renderer.Style().UsedZoom());
+      bgImage->SetContainerContextForRenderer(
+        clientForBackgroundImage, SizeF(geometry.TileSizeWithoutPixelSnapping), _renderer.Style().UsedZoom());
 
       geometry.Clip(LayoutRect(pixelSnappedRect));
       RefPtr<Image> image;
       bool isFirstLine = inlineBoxIterator && inlineBoxIterator->GetLineBox()->IsFirst();
       if (!geometry.DestinationRect.IsEmpty()
           && (image = bgImage->GetImage(backgroundObject ? backgroundObject : &_renderer,
-                                        FloatSize(geometry.TileSize), context, isFirstLine)))
+                                        SizeF(geometry.TileSize), context, isFirstLine)))
       {
         context.SetDrawLuminanceMask(layer.Layer.GetMaskMode() == style::MaskMode::Luminance);
 
         ImagePaintingOptions options = {
           op == CompositeOperator::SourceOver ? layer.Layer.CompositeForPainting(layer.IsLast) : op,
           layer.Layer.GetBlendMode(), _renderer.DecodingModeForImageDraw(*image, _paintInfo),
-          ImageOrientation::Orientation::FromImage,
+          img::ImageOrientation::Orientation::FromImage,
           _renderer.ChooseInterpolationQuality(context, *image, &layer.Layer, geometry.TileSize)};
 
         auto drawResult = context.DrawTiledImage(
-          *image, FloatRect(geometry.DestinationRect), FloatPoint(ToLayoutPoint(geometry.RelativePhase())),
-          FloatSize(geometry.TileSize), FloatSize(geometry.SpaceSize), options);
+          *image, RectF(geometry.DestinationRect), PointF(ToLayoutPoint(geometry.RelativePhase())),
+          SizeF(geometry.TileSize), SizeF(geometry.SpaceSize), options);
         if (drawResult == ImageDrawResult::DidRequestDecoding)
         {
           krys_debug_assert(bgImage->HasCachedImage());
@@ -795,7 +794,7 @@ namespace krys::boo
 
       if (paintContainer)
       {
-        viewportRect.MoveBy(LayoutPoint(-paintContainer->LocalToAbsolute(FloatPoint())));
+        viewportRect.MoveBy(LayoutPoint(-paintContainer->LocalToAbsolute(PointF())));
       }
 
       destinationRect = viewportRect;
@@ -825,10 +824,10 @@ namespace krys::boo
       }
 
       tileSize.SetWidth(positioningAreaSize.Width() / numTiles);
-      phase.SetWidth(tileSize.Width()
-                       ? tileSize.Width()
-                           - std::fmodf((computedXPosition + left).ToFloat(), tileSize.Width().ToFloat())
-                       : 0);
+      phase.SetWidth(LayoutUnit(
+        tileSize.Width()
+          ? tileSize.Width() - std::fmodf((computedXPosition + left).ToFloat(), tileSize.Width().ToFloat())
+          : 0));
     }
 
     auto computedYPosition =
@@ -842,18 +841,18 @@ namespace krys::boo
       }
 
       tileSize.SetHeight(positioningAreaSize.Height() / numTiles);
-      phase.SetHeight(tileSize.Height()
-                        ? tileSize.Height()
-                            - std::fmodf((computedYPosition + top).ToFloat(), tileSize.Height().ToFloat())
-                        : 0);
+      phase.SetHeight(LayoutUnit(
+        tileSize.Height()
+          ? tileSize.Height() - std::fmodf((computedYPosition + top).ToFloat(), tileSize.Height().ToFloat())
+          : 0));
     }
 
     if (backgroundRepeatX == FillRepeat::Repeat)
     {
-      phase.SetWidth(tileSize.Width()
-                       ? tileSize.Width()
-                           - std::fmodf((computedXPosition + left).ToFloat(), tileSize.Width().ToFloat())
-                       : 0);
+      phase.SetWidth(LayoutUnit(
+        tileSize.Width()
+          ? tileSize.Width() - std::fmodf((computedXPosition + left).ToFloat(), tileSize.Width().ToFloat())
+          : 0));
       spaceSize.SetWidth(0);
     }
     else if (backgroundRepeatX == FillRepeat::Space && tileSize.Width() > 0)
@@ -864,9 +863,9 @@ namespace krys::boo
         computedXPosition = 0;
         spaceSize.SetWidth(*space);
         spaceSize.SetHeight(0);
-        phase.SetWidth(
+        phase.SetWidth(LayoutUnit(
           actualWidth ? actualWidth - std::fmodf((computedXPosition + left).ToFloat(), actualWidth.ToFloat())
-                      : 0);
+                      : 0));
       }
       else
       {
@@ -889,10 +888,10 @@ namespace krys::boo
 
     if (backgroundRepeatY == FillRepeat::Repeat)
     {
-      phase.SetHeight(tileSize.Height()
-                        ? tileSize.Height()
-                            - std::fmodf((computedYPosition + top).ToFloat(), tileSize.Height().ToFloat())
-                        : 0);
+      phase.SetHeight(LayoutUnit(
+        tileSize.Height()
+          ? tileSize.Height() - std::fmodf((computedYPosition + top).ToFloat(), tileSize.Height().ToFloat())
+          : 0));
       spaceSize.SetHeight(0);
     }
     else if (backgroundRepeatY == FillRepeat::Space && tileSize.Height() > 0)
@@ -902,10 +901,10 @@ namespace krys::boo
         LayoutUnit actualHeight = tileSize.Height() + *space;
         computedYPosition = 0;
         spaceSize.SetHeight(*space);
-        phase.SetHeight(actualHeight
-                          ? actualHeight
-                              - std::fmodf((computedYPosition + top).ToFloat(), actualHeight.ToFloat())
-                          : 0);
+        phase.SetHeight(LayoutUnit(
+          actualHeight
+            ? actualHeight - std::fmodf((computedYPosition + top).ToFloat(), actualHeight.ToFloat())
+            : 0));
       }
       else
       {
@@ -966,8 +965,8 @@ namespace krys::boo
     auto handleKeyword = [&](bool isContain) -> LayoutSize
     {
       // Scale computation needs higher precision than what LayoutUnit can offer.
-      FloatSize localImageIntrinsicSize = FloatSize(imageIntrinsicSize);
-      FloatSize localPositioningAreaSize = FloatSize(positioningAreaSize);
+      SizeF localImageIntrinsicSize = SizeF(imageIntrinsicSize);
+      SizeF localPositioningAreaSize = SizeF(positioningAreaSize);
 
       float horizontalScaleFactor = localImageIntrinsicSize.Width()
                                       ? (localPositioningAreaSize.Width() / localImageIntrinsicSize.Width())
@@ -984,7 +983,7 @@ namespace krys::boo
       }
 
       return LayoutSize(localImageIntrinsicSize.Scaled(scaleFactor)
-                          .ExpandedTo(FloatSize(devicePixelSize.ToFloat(), devicePixelSize.ToFloat())));
+                          .ExpandedTo(SizeF(devicePixelSize.ToFloat(), devicePixelSize.ToFloat())));
     };
 
     return fillLayer.GetSize().SwitchOn(
@@ -1074,8 +1073,8 @@ namespace krys::boo
         continue;
       }
 
-      LayoutSize shadowOffset(shadow.Location.x().ResolveZoom(zoomFactor),
-                              shadow.Location.y().ResolveZoom(zoomFactor));
+      LayoutSize shadowOffset(LayoutUnit(shadow.Location.x().ResolveZoom(zoomFactor)),
+                              LayoutUnit(shadow.Location.y().ResolveZoom(zoomFactor)));
       LayoutUnit shadowPaintingExtent = style::PaintingExtent(shadow, zoomFactor);
       LayoutUnit shadowSpread = LayoutUnit(shadow.Spread.ResolveZoom(zoomFactor));
       auto shadowRadius = shadow.Blur.ResolveZoom(zoomFactor);
@@ -1183,10 +1182,9 @@ namespace krys::boo
         auto pixelSnappedFillRect = shadowShape.SnappedOuterRect(deviceScaleFactor);
 
         LayoutPoint shadowRectOrigin = shadowShape.BorderRect().Location() + shadowOffset;
-        FloatPoint snappedShadowOrigin =
-          FloatPoint(RoundToDevicePixel(shadowRectOrigin.X(), deviceScaleFactor),
-                     RoundToDevicePixel(shadowRectOrigin.Y(), deviceScaleFactor));
-        FloatSize snappedShadowOffset = snappedShadowOrigin - pixelSnappedFillRect.Location();
+        PointF snappedShadowOrigin = PointF(RoundToDevicePixel(shadowRectOrigin.X(), deviceScaleFactor),
+                                            RoundToDevicePixel(shadowRectOrigin.Y(), deviceScaleFactor));
+        SizeF snappedShadowOffset = snappedShadowOrigin - pixelSnappedFillRect.Location();
 
         context.SetDropShadow({snappedShadowOffset, shadowRadius, shadowColor, ShadowRadiusMode::Default});
 
@@ -1280,7 +1278,7 @@ namespace krys::boo
                              + shadowPaintingExtent - 2 * shadowSpread + LayoutUnit(1);
         LayoutSize extraOffset(xOffset.Ceil(), 0);
 
-        context.Translate(FloatSize(extraOffset));
+        context.Translate(SizeF(extraOffset));
         shadowOffset -= extraOffset;
 
         auto snappedShadowOffset = RoundSizeToDevicePixels(shadowOffset, deviceScaleFactor);

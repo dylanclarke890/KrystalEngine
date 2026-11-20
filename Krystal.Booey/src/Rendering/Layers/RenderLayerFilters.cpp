@@ -45,12 +45,12 @@
 
 namespace krys::boo
 {
-  Ref<RenderLayerFilters> RenderLayerFilters::Create(RenderLayer &layer, FloatSize scale) noexcept
+  Ref<RenderLayerFilters> RenderLayerFilters::Create(RenderLayer &layer, SizeF scale) noexcept
   {
     return AdoptRef(*new RenderLayerFilters(layer, scale));
   }
 
-  RenderLayerFilters::RenderLayerFilters(RenderLayer &layer, FloatSize scale) noexcept
+  RenderLayerFilters::RenderLayerFilters(RenderLayer &layer, SizeF scale) noexcept
       : _layer(CreateWeakPtr(&layer)), _filterScale(scale)
   {
   }
@@ -140,7 +140,7 @@ namespace krys::boo
   }
 
   IntOutsets RenderLayerFilters::CalculateOutsets(RenderElement &renderer,
-                                                  const FloatRect &targetBoundingBox) noexcept
+                                                  const RectF &targetBoundingBox) noexcept
   {
     const auto &filter = renderer.Style().GetFilter();
 
@@ -164,7 +164,7 @@ namespace krys::boo
       return nullptr;
     }
     auto preferredFilterRenderingModes = page->PreferredFilterRenderingModes(context);
-    auto outsets = CalculateOutsets(renderer, FloatRect(filterBoxRect));
+    auto outsets = CalculateOutsets(renderer, RectF(filterBoxRect));
 
     auto dirtyFilterRegion = dirtyRect;
     auto filterRegion = dirtyRect;
@@ -174,7 +174,7 @@ namespace krys::boo
       // FIXME: This flipping was added for drop-shadow, but it's not obvious that it's correct.
       LayoutBoxExtent flippedOutsets {LayoutUnit {outsets.Bottom()}, LayoutUnit {outsets.Left()},
                                       LayoutUnit {outsets.Top()}, LayoutUnit {outsets.Right()}};
-      dirtyFilterRegion.Expand(flippedOutsets);
+      Expand(dirtyFilterRegion, flippedOutsets);
     }
 
     dirtyFilterRegion = Intersection(filterBoxRect, dirtyFilterRegion);
@@ -182,7 +182,7 @@ namespace krys::boo
 
     if (!outsets.IsZero())
     {
-      filterRegion.Expand(ToLayoutBoxExtent(outsets));
+      Expand(filterRegion, ToLayoutBoxExtent(outsets));
     }
 
     if (filterRegion.IsEmpty())
@@ -198,8 +198,8 @@ namespace krys::boo
     };
 
     auto geometry = FilterGeometry {
-      .ReferenceBox = FloatRect(filterBoxRect),
-      .FilterRegion = FloatRect(filterRegion),
+      .ReferenceBox = RectF(filterBoxRect),
+      .FilterRegion = RectF(filterRegion),
       .Scale = _filterScale,
     };
 
@@ -212,9 +212,9 @@ namespace krys::boo
                                           preferredFilterRenderingModes, context);
       hasUpdatedBackingStore = true;
     }
-    else if (FloatRect(filterRegion) != _filter->FilterRegion())
+    else if (RectF(filterRegion) != _filter->FilterRegion())
     {
-      _filter->SetFilterRegion(FloatRect(filterRegion));
+      _filter->SetFilterRegion(RectF(filterRegion));
       hasUpdatedBackingStore = true;
     }
 
@@ -245,7 +245,7 @@ namespace krys::boo
 
     if (!_targetSwitcher || hasUpdatedBackingStore)
     {
-      auto sourceImageRect = FloatRect(dirtyFilterRegion);
+      auto sourceImageRect = RectF(dirtyFilterRegion);
       _targetSwitcher = GraphicsContextSwitcher::Create(context, sourceImageRect, filter);
     }
 
@@ -254,7 +254,7 @@ namespace krys::boo
       return nullptr;
     }
 
-    _targetSwitcher->BeginClipAndDrawSourceImage(context, FloatRect(_repaintRect), FloatRect(clipRect));
+    _targetSwitcher->BeginClipAndDrawSourceImage(context, RectF(_repaintRect), RectF(clipRect));
 
     return _targetSwitcher->DrawingContext(context);
   }

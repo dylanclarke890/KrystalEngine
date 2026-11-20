@@ -44,11 +44,11 @@ namespace krys::boo
     KRYS_NODISCARD bool ContinueConsuming() noexcept final;
 
     // Used in PathParsingMode::UnalteredParsing/PathParsingMode::NormalizedParsing modes.
-    void MoveTo(const FloatPoint &targetPoint, bool closed, svg::PathCoordinateMode) noexcept final;
+    void MoveTo(const PointF &targetPoint, bool closed, svg::PathCoordinateMode) noexcept final;
 
-    void LineTo(const FloatPoint &targetPoint, svg::PathCoordinateMode) noexcept final;
+    void LineTo(const PointF &targetPoint, svg::PathCoordinateMode) noexcept final;
 
-    void CurveToCubic(const FloatPoint &point1, const FloatPoint &point2, const FloatPoint &targetPoint,
+    void CurveToCubic(const PointF &point1, const PointF &point2, const PointF &targetPoint,
                       svg::PathCoordinateMode) noexcept final;
 
     void ClosePath() noexcept final;
@@ -58,19 +58,19 @@ namespace krys::boo
 
     void LineToVertical(float targetY, svg::PathCoordinateMode) noexcept final;
 
-    void CurveToCubicSmooth(const FloatPoint &point2, const FloatPoint &targetPoint,
+    void CurveToCubicSmooth(const PointF &point2, const PointF &targetPoint,
                             svg::PathCoordinateMode) noexcept final;
 
-    void CurveToQuadratic(const FloatPoint &point1, const FloatPoint &targetPoint,
+    void CurveToQuadratic(const PointF &point1, const PointF &targetPoint,
                           svg::PathCoordinateMode) noexcept final;
 
-    void CurveToQuadraticSmooth(const FloatPoint &targetPoint, svg::PathCoordinateMode) noexcept final;
+    void CurveToQuadraticSmooth(const PointF &targetPoint, svg::PathCoordinateMode) noexcept final;
 
-    void ArcTo(float r1, float r2, float angle, bool largeArcFlag, bool sweepFlag,
-               const FloatPoint &targetPoint, svg::PathCoordinateMode) noexcept final;
+    void ArcTo(float r1, float r2, float angle, bool largeArcFlag, bool sweepFlag, const PointF &targetPoint,
+               svg::PathCoordinateMode) noexcept final;
 
     SVGPathConsumer &_consumer;
-    FloatPoint _currentPoint;
-    FloatPoint _subpathPoint;
+    PointF _currentPoint;
+    PointF _subpathPoint;
   };
 }

@@ -32,6 +32,7 @@
 #include "Krystal.Booey/Layout/LayoutTree/LayoutBoxGeometry.hpp"
 #include "Krystal.Booey/Layout/LayoutTree/LayoutBoxInlines.hpp"
 #include "Krystal.Booey/Rendering/Style/RenderStyle+GettersInlines.hpp"
+#include "Krystal.Text/Bidi.hpp"
 #include <ranges>
 
 namespace krys::boo::layout
@@ -270,7 +271,7 @@ namespace krys::boo::layout
     }
   }
 
-  void Line::ResetBidiLevelForTrailingWhitespace(UBiDiLevel rootBidiLevel) noexcept
+  void Line::ResetBidiLevelForTrailingWhitespace(text::BidiLevel rootBidiLevel) noexcept
   {
     krys_debug_assert(_trimmableTrailingContent.IsEmpty());
     if (!_hasNonDefaultBidiLevelRun)
@@ -480,7 +481,7 @@ namespace krys::boo::layout
       }
       if (style.GetFontCascade().WordSpacing()
           && (inlineTextItem.IsWordSeparator()
-              || (lastRun.IsWordSeparator() && lastRun.BidiLevel() != UBIDI_DEFAULT_LTR)))
+              || (lastRun.IsWordSeparator() && lastRun.BidiLevel() != text::DefaultLeftToRightBidiLevel)))
       {
         return true;
       }
@@ -1195,7 +1196,7 @@ namespace krys::boo::layout
     constexpr size_t trailingTrimmableContentLength = 1;
 
     auto trimmedWidth = _trailingWhitespace->Width;
-    if (_lastNonWhitespaceContentStart && InlineDirection() == TextDirection::RTL)
+    if (_lastNonWhitespaceContentStart && InlineDirection() == text::TextDirection::RTL)
     {
       // While LTR content could also suffer from slightly incorrect content width after trimming trailing
       // whitespace (see TextUtil::width) it hardly produces visually observable result.
@@ -1257,7 +1258,7 @@ namespace krys::boo::layout
     return false;
   }
 
-  TextDirection Line::Run::InlineDirection() const noexcept
+  text::TextDirection Line::Run::InlineDirection() const noexcept
   {
     return _style->GetWritingMode().BidiDirection();
   }

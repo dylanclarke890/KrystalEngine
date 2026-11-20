@@ -25,7 +25,7 @@
 
 #include "Krystal.Booey/Graphics/Filters/FEBlend.hpp"
 #include "Krystal.Booey/Graphics/GraphicsTypes.hpp"
-#include "Krystal.Core/Text/TextStream.hpp"
+#include "Krystal.Core/Strings/TextStream.hpp"
 
 namespace krys::boo
 {

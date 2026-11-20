@@ -24,7 +24,6 @@
  */
 
 #include "Krystal.Booey/Style/InlineTextBoxStyle.hpp"
-#include "Krystal.Booey/Graphics/Geometry/FloatRect.hpp"
 #include "Krystal.Booey/HTML/Elements/HTMLAnchorElement.hpp"
 #include "Krystal.Booey/HTML/Types/TagName.hpp"
 #include "Krystal.Booey/Layout/Integration/Inline/InlineIteratorInlineBox.hpp"
@@ -32,6 +31,7 @@
 #include "Krystal.Booey/Rendering/RenderInline.hpp"
 #include "Krystal.Booey/Rendering/RenderText.hpp"
 #include "Krystal.Booey/Rendering/Style/RenderStyle+GettersInlines.hpp"
+#include "Krystal.Core/Geometry/Rect.hpp"
 
 namespace krys::boo
 {
@@ -309,7 +309,7 @@ namespace krys::boo
       }
       if (decoration.HasOverline())
       {
-        FloatRect rect(FloatPoint(), FloatSize(1, strokeThickness));
+        RectF rect(PointF(), SizeF(1, strokeThickness));
         float autoTextDecorationThickness =
           style::TextDecorationThickness {css::keywords::Auto {}}.Resolve(lineStyle);
         rect.Move(0, autoTextDecorationThickness - strokeThickness - wavyOffset);
@@ -318,14 +318,14 @@ namespace krys::boo
           FloatBoxExtent wavyExpansion;
           wavyExpansion.SetTop(wavyStrokeParameters.ControlPointDistance);
           wavyExpansion.SetBottom(wavyStrokeParameters.ControlPointDistance);
-          rect.Expand(wavyExpansion);
+          Expand(rect, wavyExpansion);
         }
         overflowResult.ExtendTop(-rect.Y());
         overflowResult.ExtendBottom(rect.MaxY() - height);
       }
       if (decoration.HasLineThrough())
       {
-        FloatRect rect(FloatPoint(), FloatSize(1, strokeThickness));
+        RectF rect(PointF(), SizeF(1, strokeThickness));
         float autoTextDecorationThickness =
           style::TextDecorationThickness {css::keywords::Auto {}}.Resolve(lineStyle);
         auto center = 2 * lineStyle.MetricsOfPrimaryFont().Ascent() / 3 + autoTextDecorationThickness / 2;
@@ -335,7 +335,7 @@ namespace krys::boo
           FloatBoxExtent wavyExpansion;
           wavyExpansion.SetTop(wavyStrokeParameters.ControlPointDistance);
           wavyExpansion.SetBottom(wavyStrokeParameters.ControlPointDistance);
-          rect.Expand(wavyExpansion);
+          Expand(rect, wavyExpansion);
         }
         overflowResult.ExtendTop(-rect.Y());
         overflowResult.ExtendBottom(rect.MaxY() - height);

@@ -1,4 +1,5 @@
 ﻿#include "Krystal.Core/Detection/NumberOfCores.hpp"
+#include "Krystal.Core/Numeric.hpp"
 
 #if KRYS_OS(DARWIN)
   #include <sys/sysctl.h>
@@ -54,11 +55,11 @@ namespace krys
 #if KRYS_OS(DARWIN)
   int NumberOfPhysicalProcessorCores()
   {
-    static int32_t numCores = []
+    static int32 numCores = []
     {
-      constexpr int32_t Default = 1;
+      constexpr int32 Default = 1;
       size_t valueSize = sizeof(numCores);
-      int32_t numCores = 0;
+      int32 numCores = 0;
       int result = sysctlbyname("hw.physicalcpu_max", &numCores, &valueSize, nullptr, 0);
       if (result < 0)
       {

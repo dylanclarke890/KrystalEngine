@@ -451,7 +451,7 @@ namespace krys::boo
       // 1. If element is an input element whose type attribute is in one of the URL, Email, or Password
       //    states, then return Off.
       if (auto *input = DynamicDowncast<HTMLInputElement>(element);
-          input && (input->IsURLField() || input->IsEmailField() || input->IsPasswordField()))
+          input && (input->IsUrlField() || input->IsEmailField() || input->IsPasswordField()))
       {
         return html::AutocorrectAttributeState::Off;
       }

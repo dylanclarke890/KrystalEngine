@@ -7,8 +7,8 @@
 #include "Krystal.Booey/DOM/Nodes/Text.hpp"
 #include "Krystal.Booey/HTML/Elements/HTMLAreaElement.hpp"
 #include "Krystal.Booey/HTML/Elements/HTMLImageElement.hpp"
+#include "Krystal.Booey/Input/EventHandler.hpp"
 #include "Krystal.Booey/Page/Drag/DragController.hpp"
-#include "Krystal.Booey/Page/EventHandler.hpp"
 #include "Krystal.Booey/Page/LocalFrame.hpp"
 #include "Krystal.Booey/Page/Settings.hpp"
 
@@ -58,8 +58,8 @@ namespace krys::boo::html::tests
       Click(fixture.ById(u8"inner"), 0, true);
       REQUIRE(fixture.Navigations().size() == 1);
       auto &navigation = fixture.Navigations()[0];
-      CHECK(navigation.URL == "https://example.com/dir/next.html");
-      CHECK(navigation.HTTPMethod == "GET");
+      CHECK(navigation.Url == "https://example.com/dir/next.html");
+      CHECK(navigation.HttpMethod == "GET");
       CHECK_FALSE(navigation.IsNewWindow);
       CHECK(navigation.Action.Type() == NavigationType::LinkClicked);
       CHECK(navigation.Action.SourceElement() == &fixture.ById(u8"a"));
@@ -69,7 +69,7 @@ namespace krys::boo::html::tests
       CHECK(navigation.Action.KeyStateEventData()->CtrlKey);
       CHECK_FALSE(navigation.Action.KeyStateEventData()->ShiftKey);
       // Another document isn't loaded yet, so the page stays.
-      CHECK(fixture.DocumentURL() == "https://example.com/dir/page.html");
+      CHECK(fixture.DocumentUrl() == "https://example.com/dir/page.html");
     }
 
     SECTION("a link without href isn't followed")
@@ -187,7 +187,7 @@ namespace krys::boo::html::tests
 
     REQUIRE(fixture.Navigations().size() == 1);
     auto &navigation = fixture.Navigations()[0];
-    CHECK(navigation.URL == "https://example.com/dir/other.html");
+    CHECK(navigation.Url == "https://example.com/dir/other.html");
     // The simulated click's underlying key press has the modifiers.
     REQUIRE(navigation.Action.KeyStateEventData());
     CHECK(navigation.Action.KeyStateEventData()->ShiftKey);
@@ -199,7 +199,7 @@ namespace krys::boo::html::tests
       u8R"(<map name=m><area id=area href="area.html" target=_self><area id=nohref></map>)");
     Click(fixture.ById(u8"area"));
     REQUIRE(fixture.Navigations().size() == 1);
-    CHECK(fixture.Navigations()[0].URL == "https://example.com/dir/area.html");
+    CHECK(fixture.Navigations()[0].Url == "https://example.com/dir/area.html");
     CHECK_FALSE(fixture.Navigations()[0].IsNewWindow);
 
     Click(fixture.ById(u8"nohref"));
@@ -224,21 +224,21 @@ namespace krys::boo::html::tests
     {
       auto event = [](PlatformEvent::Type type)
       {
-        return PlatformMouseEvent(DoublePoint(30, 10), DoublePoint(30, 10), MouseButton::Left, type, 1, {},
+        return PlatformMouseEvent(PointD(30, 10), PointD(30, 10), MouseButton::Left, type, 1, {},
                                   MonotonicTime::Now());
       };
       auto &handler = fixture.Frame->GetEventHandler();
       (void)handler.HandleMousePressEvent(event(PlatformEvent::Type::MousePressed));
       (void)handler.HandleMouseReleaseEvent(event(PlatformEvent::Type::MouseReleased));
       REQUIRE(fixture.Navigations().size() == 1);
-      CHECK(fixture.Navigations()[0].URL == "https://example.com/dir/map.html#f?30,10");
+      CHECK(fixture.Navigations()[0].Url == "https://example.com/dir/map.html#f?30,10");
     }
 
     SECTION("an untrusted click on a server-side image map adds 0,0")
     {
       Click(fixture.ById(u8"image"));
       REQUIRE(fixture.Navigations().size() == 1);
-      CHECK(fixture.Navigations()[0].URL == "https://example.com/dir/map.html#f?0,0");
+      CHECK(fixture.Navigations()[0].Url == "https://example.com/dir/map.html#f?0,0");
     }
   }
 

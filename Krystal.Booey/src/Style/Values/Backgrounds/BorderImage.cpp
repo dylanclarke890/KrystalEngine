@@ -31,7 +31,7 @@
 #include "Krystal.Booey/Style/Values/Primitives/KeywordSerialisation.hpp"
 #include "Krystal.Booey/Style/Values/Primitives/NumericTypesCSSValueCreation.hpp"
 #include "Krystal.Booey/Style/Values/Primitives/NumericTypesSerialisation.hpp"
-#include "Krystal.Core/Text/StringBuilder.hpp"
+#include "Krystal.Core/Strings/StringBuilder.hpp"
 
 namespace krys::boo::style
 {

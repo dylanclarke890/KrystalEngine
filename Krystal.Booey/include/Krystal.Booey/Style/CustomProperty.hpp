@@ -35,7 +35,7 @@
 #include "Krystal.Booey/Style/Values/Primitives/Url.hpp"
 #include "Krystal.Booey/Style/Values/Transforms/TransformFunction.hpp"
 #include "Krystal.Core/RefCounted.hpp"
-#include "Krystal.Core/Text/StringBuilder.hpp"
+#include "Krystal.Core/Strings/StringBuilder.hpp"
 #include "Krystal.Core/Types/List.hpp"
 #include "Krystal.Core/Types/Variant.hpp"
 
@@ -63,7 +63,7 @@ namespace krys::boo
 
       using Value =
         Variant<LengthPercentage<>, Length<>, Number<>, Percentage<>, Angle<>, Time<>, Resolution<>,
-                ImageWrapper, Color, URL, css::CustomIdentifier, CSSOMString, TransformFunction>;
+                ImageWrapper, Color, Url, css::CustomIdentifier, CSSOMString, TransformFunction>;
 
       struct ValueList
       {

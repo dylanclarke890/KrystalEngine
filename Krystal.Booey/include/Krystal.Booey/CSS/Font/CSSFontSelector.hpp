@@ -31,12 +31,12 @@
 #include "Krystal.Core/Attributes.hpp"
 #include "Krystal.Core/Macros.hpp"
 #include "Krystal.Core/Numeric.hpp"
+#include "Krystal.Core/Strings/StringAtom.hpp"
 #include "Krystal.Core/Types/HashMap.hpp"
 #include "Krystal.Core/Types/HashSet.hpp"
 #include "Krystal.Core/Types/List.hpp"
 #include "Krystal.Core/Types/Maybe.hpp"
 #include "Krystal.Core/Types/RefPtr.hpp"
-#include "Krystal.Core/Types/StringAtom.hpp"
 #include "Krystal.Core/Types/WeakPtr.hpp"
 
 namespace krys::boo
@@ -219,7 +219,7 @@ namespace krys::boo::css
   private:
     void DispatchInvalidationCallbacks() noexcept;
 
-    void OpportunisticallyStartFontDataURLLoading(const FontCascadeDescription &description,
+    void OpportunisticallyStartFontDataUrlLoading(const FontCascadeDescription &description,
                                                   const StringAtom &family) noexcept final;
 
     KRYS_NODISCARD Maybe<StringAtom> ResolveGenericFamily(const FontDescription &description,

@@ -27,7 +27,7 @@
 
 namespace krys::boo
 {
-  void PathImpl::AddLinesForRect(const FloatRect &rect) noexcept
+  void PathImpl::AddLinesForRect(const RectF &rect) noexcept
   {
     Add(PathMoveTo {rect.MinXMinYCorner()});
     Add(PathLineTo {rect.MaxXMinYCorner()});
@@ -47,46 +47,45 @@ namespace krys::boo
     const auto &bottomRightRadius = radii.BottomRight();
 
     SmallList<PathSegment, 10> segments;
-    segments.push_back(PathSegment(PathMoveTo {FloatPoint(rect.X() + topLeftRadius.Width(), rect.Y())}));
+    segments.push_back(PathSegment(PathMoveTo {PointF(rect.X() + topLeftRadius.Width(), rect.Y())}));
 
-    segments.push_back(PathSegment(PathLineTo {FloatPoint(rect.MaxX() - topRightRadius.Width(), rect.Y())}));
+    segments.push_back(PathSegment(PathLineTo {PointF(rect.MaxX() - topRightRadius.Width(), rect.Y())}));
     if (topRightRadius.Width() > 0 || topRightRadius.Height() > 0)
     {
       segments.push_back(PathSegment(
-        PathBezierCurveTo {FloatPoint(rect.MaxX() - topRightRadius.Width() * CircleControlPoint(), rect.Y()),
-                           FloatPoint(rect.MaxX(), rect.Y() + topRightRadius.Height() * CircleControlPoint()),
-                           FloatPoint(rect.MaxX(), rect.Y() + topRightRadius.Height())}));
+        PathBezierCurveTo {PointF(rect.MaxX() - topRightRadius.Width() * CircleControlPoint(), rect.Y()),
+                           PointF(rect.MaxX(), rect.Y() + topRightRadius.Height() * CircleControlPoint()),
+                           PointF(rect.MaxX(), rect.Y() + topRightRadius.Height())}));
     }
 
     segments.push_back(
-      PathSegment(PathLineTo {FloatPoint(rect.MaxX(), rect.MaxY() - bottomRightRadius.Height())}));
+      PathSegment(PathLineTo {PointF(rect.MaxX(), rect.MaxY() - bottomRightRadius.Height())}));
 
     if (bottomRightRadius.Width() > 0 || bottomRightRadius.Height() > 0)
     {
       segments.push_back(PathSegment(PathBezierCurveTo {
-        FloatPoint(rect.MaxX(), rect.MaxY() - bottomRightRadius.Height() * CircleControlPoint()),
-        FloatPoint(rect.MaxX() - bottomRightRadius.Width() * CircleControlPoint(), rect.MaxY()),
-        FloatPoint(rect.MaxX() - bottomRightRadius.Width(), rect.MaxY())}));
+        PointF(rect.MaxX(), rect.MaxY() - bottomRightRadius.Height() * CircleControlPoint()),
+        PointF(rect.MaxX() - bottomRightRadius.Width() * CircleControlPoint(), rect.MaxY()),
+        PointF(rect.MaxX() - bottomRightRadius.Width(), rect.MaxY())}));
     }
 
-    segments.push_back(
-      PathSegment(PathLineTo {FloatPoint(rect.X() + bottomLeftRadius.Width(), rect.MaxY())}));
+    segments.push_back(PathSegment(PathLineTo {PointF(rect.X() + bottomLeftRadius.Width(), rect.MaxY())}));
     if (bottomLeftRadius.Width() > 0 || bottomLeftRadius.Height() > 0)
     {
-      segments.push_back(PathSegment(PathBezierCurveTo {
-        FloatPoint(rect.X() + bottomLeftRadius.Width() * CircleControlPoint(), rect.MaxY()),
-        FloatPoint(rect.X(), rect.MaxY() - bottomLeftRadius.Height() * CircleControlPoint()),
-        FloatPoint(rect.X(), rect.MaxY() - bottomLeftRadius.Height())}));
+      segments.push_back(PathSegment(
+        PathBezierCurveTo {PointF(rect.X() + bottomLeftRadius.Width() * CircleControlPoint(), rect.MaxY()),
+                           PointF(rect.X(), rect.MaxY() - bottomLeftRadius.Height() * CircleControlPoint()),
+                           PointF(rect.X(), rect.MaxY() - bottomLeftRadius.Height())}));
     }
 
-    segments.push_back(PathSegment(PathLineTo {FloatPoint(rect.X(), rect.Y() + topLeftRadius.Height())}));
+    segments.push_back(PathSegment(PathLineTo {PointF(rect.X(), rect.Y() + topLeftRadius.Height())}));
 
     if (topLeftRadius.Width() > 0 || topLeftRadius.Height() > 0)
     {
       segments.push_back(PathSegment(
-        PathBezierCurveTo {FloatPoint(rect.X(), rect.Y() + topLeftRadius.Height() * CircleControlPoint()),
-                           FloatPoint(rect.X() + topLeftRadius.Width() * CircleControlPoint(), rect.Y()),
-                           FloatPoint(rect.X() + topLeftRadius.Width(), rect.Y())}));
+        PathBezierCurveTo {PointF(rect.X(), rect.Y() + topLeftRadius.Height() * CircleControlPoint()),
+                           PointF(rect.X() + topLeftRadius.Width() * CircleControlPoint(), rect.Y()),
+                           PointF(rect.X() + topLeftRadius.Width(), rect.Y())}));
     }
 
     segments.push_back(PathSegment(PathCloseSubpath {}));

@@ -24,9 +24,9 @@
  */
 
 #include "Krystal.Booey/Graphics/ImageBuffers/PixelBufferConversion.hpp"
-#include "Krystal.Booey/Graphics/Geometry/IntSize.hpp"
 #include "Krystal.Core/Colour/ColourConversion.hpp"
 #include "Krystal.Core/Colour/ColourTypes.hpp"
+#include "Krystal.Core/Geometry/Size.hpp"
 #include "Krystal.Core/Types/Array.hpp"
 #include <algorithm>
 #include <cmath>
@@ -147,7 +147,7 @@ namespace krys::boo
     template <void (*TConvert)(SourcePixel, DestinationPixel) noexcept>
     void ConvertImagePixelsUnaccelerated(const ConstPixelBufferConversionView &source,
                                          const PixelBufferConversionView &destination,
-                                         const IntSize &destinationSize) noexcept
+                                         const SizeI &destinationSize) noexcept
     {
       size_t bytesPerRow = static_cast<size_t>(destinationSize.Width()) * 4;
       for (int32 y = 0; y < destinationSize.Height(); ++y)
@@ -204,7 +204,7 @@ namespace krys::boo
     /// premultiplied again if the destination is.
     void ConvertImagePixelsBetweenColorSpaces(const ConstPixelBufferConversionView &source,
                                               const PixelBufferConversionView &destination,
-                                              const IntSize &destinationSize) noexcept
+                                              const SizeI &destinationSize) noexcept
     {
       const bool sourceIsBGR = source.Format.Format != PixelFormat::RGBA8;
       const bool destinationIsBGR = destination.Format.Format != PixelFormat::RGBA8;
@@ -254,8 +254,7 @@ namespace krys::boo
     }
 
     void CopyImagePixels(const ConstPixelBufferConversionView &source,
-                         const PixelBufferConversionView &destination,
-                         const IntSize &destinationSize) noexcept
+                         const PixelBufferConversionView &destination, const SizeI &destinationSize) noexcept
     {
       size_t bytesPerRow = static_cast<size_t>(destinationSize.Width()) * 4;
       if (!bytesPerRow || destinationSize.Height() <= 0)
@@ -279,8 +278,7 @@ namespace krys::boo
   }
 
   void ConvertImagePixels(const ConstPixelBufferConversionView &source,
-                          const PixelBufferConversionView &destination,
-                          const IntSize &destinationSize) noexcept
+                          const PixelBufferConversionView &destination, const SizeI &destinationSize) noexcept
   {
     // We currently only support converting between RGBA8, BGRA8, and BGRX8.
     krys_debug_assert(source.Format.Format == PixelFormat::RGBA8 || source.Format.Format == PixelFormat::BGRA8

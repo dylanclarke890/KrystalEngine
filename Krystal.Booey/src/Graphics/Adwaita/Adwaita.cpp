@@ -29,22 +29,21 @@
 #include "Krystal.Booey/Graphics/GraphicsContext.hpp"
 #include "Krystal.Booey/Graphics/GraphicsContextStateSaver.hpp"
 #include "Krystal.Booey/Graphics/Paths/Path.hpp"
-#include "Krystal.Booey/Platform/ThemeAdwaita.hpp"
 
 namespace krys::boo::adwaita
 {
   namespace
   {
-    KRYS_NODISCARD float GetRectRadius(const FloatRect &rect, int32 offset) noexcept
+    KRYS_NODISCARD float GetRectRadius(const RectF &rect, int32 offset) noexcept
     {
       return (std::min(rect.Width(), rect.Height()) + offset) / 2;
     }
   }
 
-  void PaintFocus(GraphicsContext &graphicsContext, const FloatRect &rect, int32 offset, const Color &color,
+  void PaintFocus(GraphicsContext &graphicsContext, const RectF &rect, int32 offset, const Color &color,
                   PaintRounded rounded) noexcept
   {
-    FloatRect focusRect = rect;
+    RectF focusRect = rect;
     focusRect.Inflate(static_cast<float>(offset));
     float radius = (rounded == PaintRounded::Yes) ? GetRectRadius(rect, offset) : 2;
     Path path;
@@ -71,7 +70,7 @@ namespace krys::boo::adwaita
     graphicsContext.EndTransparencyLayer();
   }
 
-  void PaintFocus(GraphicsContext &graphicsContext, Span<const FloatRect> rects, const Color &color,
+  void PaintFocus(GraphicsContext &graphicsContext, Span<const RectF> rects, const Color &color,
                   PaintRounded rounded) noexcept
   {
     Path path;
@@ -83,7 +82,7 @@ namespace krys::boo::adwaita
     PaintFocus(graphicsContext, path, color);
   }
 
-  void PaintArrow(GraphicsContext &graphicsContext, const FloatRect &rect, ArrowDirection direction,
+  void PaintArrow(GraphicsContext &graphicsContext, const RectF &rect, ArrowDirection direction,
                   bool useDarkAppearance) noexcept
   {
     auto offset = rect.Location();
@@ -99,7 +98,7 @@ namespace krys::boo::adwaita
       offset.Move(0, (rect.Height() - size) / 2);
     }
     float zoomFactor = size / ArrowSize;
-    auto transform = [&](FloatPoint point)
+    auto transform = [&](PointF point)
     {
       point.Scale(zoomFactor);
       point.MoveBy(offset);
@@ -125,9 +124,23 @@ namespace krys::boo::adwaita
     graphicsContext.FillPath(path);
   }
 
+  namespace
+  {
+    KRYS_NODISCARD Color &AccentColorStorage() noexcept
+    {
+      static Color accentColor {SRGBA<uint8> {52, 132, 228}};
+      return accentColor;
+    }
+  }
+
   Color SystemAccentColor() noexcept
   {
-    return static_cast<ThemeAdwaita &>(Theme::Singleton()).AccentColor();
+    return AccentColorStorage();
+  }
+
+  void SetSystemAccentColor(const Color &color) noexcept
+  {
+    AccentColorStorage() = color;
   }
 
   Color SystemFocusRingColor() noexcept

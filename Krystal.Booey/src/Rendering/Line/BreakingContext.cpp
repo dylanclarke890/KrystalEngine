@@ -26,6 +26,7 @@
 
 #include "Krystal.Booey/DOM/Nodes/Document.hpp"
 #include "Krystal.Booey/Rendering/RenderBlockFlow.hpp"
+#include "Krystal.Text/CharacterProperties.hpp"
 
 namespace krys::boo
 {
@@ -324,8 +325,8 @@ namespace krys::boo
     bool keepAllWords = style.GetWordBreak() == WordBreak::KeepAll;
     auto iteratorMode = layout::TextUtil::LineBreakIteratorMode(_blockStyle.GetLineBreak());
     auto contentAnalysis = layout::TextUtil::GetContentAnalysis(_blockStyle.GetWordBreak());
-    bool canUseLineBreakShortcut = iteratorMode == TextBreakLineBehavior::Default
-                                   && contentAnalysis == TextBreakIterator::ContentAnalysis::Mechanical;
+    bool canUseLineBreakShortcut = iteratorMode == text::TextBreakLineBehavior::Default
+                                   && contentAnalysis == text::TextBreakIterator::ContentAnalysis::Mechanical;
 
     if (svgInlineTextRenderer)
     {
@@ -553,7 +554,7 @@ namespace krys::boo
           canBreakMidWord = breakAll;
         }
 
-        if (midWordBreak && !(U_GET_GC_MASK(static_cast<UChar32>(c)) & U_GC_M_MASK))
+        if (midWordBreak && !(text::IsInGeneralCategory(c, text::MarkCategories)))
         {
           // Remember this as a breakable position in case
           // adding the end width forces a break.

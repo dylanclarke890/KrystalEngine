@@ -49,29 +49,28 @@ namespace krys::boo
 
     KRYS_NODISCARD Maybe<SVGPathSegType> ParseSVGSegmentType() noexcept final;
 
-    KRYS_NODISCARD Maybe<MoveToSegment> ParseMoveToSegment(FloatPoint currentPoint) noexcept final;
+    KRYS_NODISCARD Maybe<MoveToSegment> ParseMoveToSegment(PointF currentPoint) noexcept final;
 
-    KRYS_NODISCARD Maybe<LineToSegment> ParseLineToSegment(FloatPoint currentPoint) noexcept final;
+    KRYS_NODISCARD Maybe<LineToSegment> ParseLineToSegment(PointF currentPoint) noexcept final;
 
     KRYS_NODISCARD Maybe<LineToHorizontalSegment>
-      ParseLineToHorizontalSegment(FloatPoint currentPoint) noexcept final;
+      ParseLineToHorizontalSegment(PointF currentPoint) noexcept final;
 
     KRYS_NODISCARD Maybe<LineToVerticalSegment>
-      ParseLineToVerticalSegment(FloatPoint currentPoint) noexcept final;
+      ParseLineToVerticalSegment(PointF currentPoint) noexcept final;
 
-    KRYS_NODISCARD Maybe<CurveToCubicSegment>
-      ParseCurveToCubicSegment(FloatPoint currentPoint) noexcept final;
+    KRYS_NODISCARD Maybe<CurveToCubicSegment> ParseCurveToCubicSegment(PointF currentPoint) noexcept final;
 
     KRYS_NODISCARD Maybe<CurveToCubicSmoothSegment>
-      ParseCurveToCubicSmoothSegment(FloatPoint currentPoint) noexcept final;
+      ParseCurveToCubicSmoothSegment(PointF currentPoint) noexcept final;
 
     KRYS_NODISCARD Maybe<CurveToQuadraticSegment>
-      ParseCurveToQuadraticSegment(FloatPoint currentPoint) noexcept final;
+      ParseCurveToQuadraticSegment(PointF currentPoint) noexcept final;
 
     KRYS_NODISCARD Maybe<CurveToQuadraticSmoothSegment>
-      ParseCurveToQuadraticSmoothSegment(FloatPoint currentPoint) noexcept final;
+      ParseCurveToQuadraticSmoothSegment(PointF currentPoint) noexcept final;
 
-    KRYS_NODISCARD Maybe<ArcToSegment> ParseArcToSegment(FloatPoint currentPoint) noexcept final;
+    KRYS_NODISCARD Maybe<ArcToSegment> ParseArcToSegment(PointF currentPoint) noexcept final;
 
     template <typename TData>
     KRYS_NODISCARD TData ReadType() noexcept
@@ -101,9 +100,9 @@ namespace krys::boo
       return static_cast<SVGPathSegType>(ReadType<uint8>());
     }
 
-    KRYS_NODISCARD FloatPoint ReadFloatPoint() noexcept
+    KRYS_NODISCARD PointF ReadPointF() noexcept
     {
-      return ReadType<FloatPoint>();
+      return ReadType<PointF>();
     }
   };
 }

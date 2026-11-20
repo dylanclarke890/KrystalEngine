@@ -14,16 +14,16 @@ namespace krys::boo
     /// @brief The one icon, shared by every broken image.
     KRYS_NODISCARD static BrokenImageIcon &Singleton() noexcept;
 
-    KRYS_NODISCARD FloatSize
-      Size(ImageOrientation = ImageOrientation::Orientation::FromImage) const noexcept override
+    KRYS_NODISCARD SizeF
+      Size(img::ImageOrientation = img::ImageOrientation::Orientation::FromImage) const noexcept override
     {
-      return FloatSize(IconSize, IconSize);
+      return SizeF(IconSize, IconSize);
     }
 
   private:
     BrokenImageIcon() noexcept = default;
 
-    ImageDrawResult Draw(GraphicsContext &, const FloatRect &dstRect, const FloatRect &srcRect,
+    ImageDrawResult Draw(GraphicsContext &, const RectF &dstRect, const RectF &srcRect,
                          ImagePaintingOptions = {}) noexcept override;
 
     KRYS_NODISCARD bool CurrentFrameKnownToBeOpaque() const noexcept override

@@ -54,8 +54,8 @@ namespace krys::boo
       MaxPiece,
     };
 
-    using PieceRects = Array<FloatRect, MaxPiece>;
-    using PieceScales = Array<FloatSize, MaxPiece>;
+    using PieceRects = Array<RectF, MaxPiece>;
+    using PieceScales = Array<SizeF, MaxPiece>;
 
     KRYS_NODISCARD bool IsCornerPiece(ImagePiece piece) noexcept
     {
@@ -146,10 +146,10 @@ namespace krys::boo
       return destinationRects[piece].IsEmpty() || sourceRects[piece].IsEmpty();
     }
 
-    KRYS_NODISCARD PieceRects ComputeNineRects(const FloatRect &outer, const LayoutBoxExtent &slices,
+    KRYS_NODISCARD PieceRects ComputeNineRects(const RectF &outer, const LayoutBoxExtent &slices,
                                                float deviceScaleFactor) noexcept
     {
-      FloatRect inner = outer;
+      RectF inner = outer;
       inner.Move(slices.Left().ToFloat(), slices.Top().ToFloat());
       inner.Contract((slices.Left() + slices.Right()).ToFloat(), (slices.Top() + slices.Bottom()).ToFloat());
       krys_debug_assert(outer.Contains(inner));
@@ -188,13 +188,13 @@ namespace krys::boo
       return rects;
     }
 
-    KRYS_NODISCARD FloatSize ComputeSideTileScale(ImagePiece piece, const PieceRects &destinationRects,
-                                                  const PieceRects &sourceRects) noexcept
+    KRYS_NODISCARD SizeF ComputeSideTileScale(ImagePiece piece, const PieceRects &destinationRects,
+                                              const PieceRects &sourceRects) noexcept
     {
       krys_debug_assert(!IsCornerPiece(piece) && piece != MiddlePiece);
       if (IsEmptyPieceRect(piece, destinationRects, sourceRects))
       {
-        return FloatSize(1, 1);
+        return SizeF(1, 1);
       }
 
       float scale;
@@ -207,15 +207,14 @@ namespace krys::boo
         scale = destinationRects[piece].Width() / sourceRects[piece].Width();
       }
 
-      return FloatSize(scale, scale);
+      return SizeF(scale, scale);
     }
 
-    KRYS_NODISCARD FloatSize ComputeMiddleTileScale(const PieceScales &scales,
-                                                    const PieceRects &destinationRects,
-                                                    const PieceRects &sourceRects, NinePieceImageRule hRule,
-                                                    NinePieceImageRule vRule) noexcept
+    KRYS_NODISCARD SizeF ComputeMiddleTileScale(const PieceScales &scales, const PieceRects &destinationRects,
+                                                const PieceRects &sourceRects, NinePieceImageRule hRule,
+                                                NinePieceImageRule vRule) noexcept
     {
-      FloatSize scale(1, 1);
+      SizeF scale(1, 1);
       if (IsEmptyPieceRect(MiddlePiece, destinationRects, sourceRects))
       {
         return scale;
@@ -257,7 +256,7 @@ namespace krys::boo
                                                  NinePieceImageRule vRule) noexcept
     {
       PieceScales scales;
-      scales.fill(FloatSize(1, 1));
+      scales.fill(SizeF(1, 1));
 
       scales[TopPiece] = ComputeSideTileScale(TopPiece, destinationRects, sourceRects);
       scales[RightPiece] = ComputeSideTileScale(RightPiece, destinationRects, sourceRects);
@@ -292,15 +291,14 @@ namespace krys::boo
 
       ScaleSlicesIfNeeded(destination.Size(), destinationSlices, deviceScaleFactor);
 
-      auto destinationRects = ComputeNineRects(FloatRect(destination), destinationSlices, deviceScaleFactor);
-      auto sourceRects =
-        ComputeNineRects(FloatRect(FloatPoint(), FloatSize(source)), sourceSlices, deviceScaleFactor);
+      auto destinationRects = ComputeNineRects(RectF(destination), destinationSlices, deviceScaleFactor);
+      auto sourceRects = ComputeNineRects(RectF(PointF(), SizeF(source)), sourceSlices, deviceScaleFactor);
 
       auto tileScales =
         ComputeTileScales(destinationRects, sourceRects, ninePieceImage.Repeat.HorizontalRule(),
                           ninePieceImage.Repeat.VerticalRule());
 
-      RefPtr image = styleImage->GetImage(renderer, FloatSize(source), graphicsContext);
+      RefPtr image = styleImage->GetImage(renderer, SizeF(source), graphicsContext);
       if (!image)
       {
         return;

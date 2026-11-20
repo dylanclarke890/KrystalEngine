@@ -2,8 +2,8 @@
 
 #include "Krystal.Booey/HTML/Sanitizer/SanitizerConfig.hpp"
 #include "Krystal.Core/Attributes.hpp"
+#include "Krystal.Core/Strings/String.hpp"
 #include "Krystal.Core/Types/Span.hpp"
-#include "Krystal.Core/Types/String.hpp"
 
 namespace krys::boo::html
 {
@@ -26,11 +26,11 @@ namespace krys::boo::html
 
     /// @see https://html.spec.whatwg.org/#built-in-navigating-url-attributes-list
     KRYS_NODISCARD static bool
-      IsNavigatingURLAttribute(const SanitizerElementNamespace &element,
+      IsNavigatingUrlAttribute(const SanitizerElementNamespace &element,
                                const SanitizerAttributeNamespace &attribute) noexcept;
 
     /// @see https://html.spec.whatwg.org/#built-in-animating-url-attributes-list
-    KRYS_NODISCARD static bool IsAnimatingURLAttribute(const SanitizerElementNamespace &element,
+    KRYS_NODISCARD static bool IsAnimatingUrlAttribute(const SanitizerElementNamespace &element,
                                                        const SanitizerAttributeNamespace &attribute) noexcept;
 
     /// @brief The names of the event handler content attributes, from every specification that defines one.

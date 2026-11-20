@@ -25,7 +25,6 @@
 #include "Krystal.Booey/DOM/Events/EventNames.hpp"
 #include "Krystal.Booey/DOM/Events/MouseEvent.hpp"
 #include "Krystal.Booey/DOM/Nodes/Document.hpp"
-#include "Krystal.Booey/Graphics/Transforms/AffineTransform.hpp"
 #include "Krystal.Booey/HTML/Algorithms/FocusAlgorithms.hpp"
 #include "Krystal.Booey/HTML/Algorithms/HyperlinkAlgorithms.hpp"
 #include "Krystal.Booey/HTML/Attributes/ReflectAttribute.hpp"
@@ -37,7 +36,8 @@
 #include "Krystal.Booey/Rendering/RenderText.hpp"
 #include "Krystal.Booey/Rendering/Replaced/RenderImage.hpp"
 #include "Krystal.Booey/Rendering/Style/RenderStyle+GettersInlines.hpp"
-#include "Krystal.Core/Text/ASCII.hpp"
+#include "Krystal.Core/Geometry/AffineTransform.hpp"
+#include "Krystal.Core/Strings/ASCII.hpp"
 #include <utility>
 
 namespace krys::boo
@@ -139,7 +139,7 @@ namespace krys::boo
     }
 
     result.SetInnerNode(this);
-    result.SetURLElement(this);
+    result.SetUrlElement(this);
     return true;
   }
 
@@ -151,7 +151,7 @@ namespace krys::boo
   Path HTMLAreaElement::ComputePath(const RenderElement &renderer) const noexcept
   {
     // FIXME: This doesn't work correctly with transforms.
-    FloatPoint absPos = renderer.LocalToAbsolute();
+    PointF absPos = renderer.LocalToAbsolute();
 
     // Default should default to the size of the containing object.
     LayoutSize size = _lastSize;
@@ -169,7 +169,7 @@ namespace krys::boo
       path.Transform(zoomTransform);
     }
 
-    path.Translate(ToFloatSize(absPos));
+    path.Translate(ToSizeF(absPos));
     return path;
   }
 
@@ -220,11 +220,11 @@ namespace krys::boo
         if (_coords.size() >= 6)
         {
           auto numPoints = _coords.size() / 2;
-          path.MoveTo(FloatPoint(static_cast<float>(_coords[0]), static_cast<float>(_coords[1])));
+          path.MoveTo(PointF(static_cast<float>(_coords[0]), static_cast<float>(_coords[1])));
           for (size_t i = 1; i < numPoints; ++i)
           {
             path.AddLineTo(
-              FloatPoint(static_cast<float>(_coords[i * 2]), static_cast<float>(_coords[i * 2 + 1])));
+              PointF(static_cast<float>(_coords[i * 2]), static_cast<float>(_coords[i * 2 + 1])));
           }
           path.CloseSubpath();
         }
@@ -238,8 +238,8 @@ namespace krys::boo
           auto radius = static_cast<float>(_coords[2]);
           if (radius > 0)
           {
-            path.AddEllipseInRect(FloatRect(static_cast<float>(_coords[0]) - radius,
-                                            static_cast<float>(_coords[1]) - radius, 2 * radius, 2 * radius));
+            path.AddEllipseInRect(RectF(static_cast<float>(_coords[0]) - radius,
+                                        static_cast<float>(_coords[1]) - radius, 2 * radius, 2 * radius));
           }
         }
         break;
@@ -264,10 +264,10 @@ namespace krys::boo
           {
             std::swap(y0, y1);
           }
-          path.AddRect(FloatRect(x0, y0, x1 - x0, y1 - y0));
+          path.AddRect(RectF(x0, y0, x1 - x0, y1 - y0));
         }
         break;
-      case AreaShape::Default: path.AddRect(FloatRect(FloatPoint(), FloatSize(size))); break;
+      case AreaShape::Default: path.AddRect(RectF(PointF(), SizeF(size))); break;
     }
     return path;
   }
@@ -416,12 +416,12 @@ namespace krys::boo
 
   dom::USVString HTMLAreaElement::Href() const noexcept
   {
-    return html::ReflectURL<dom::USVString>(*this, u8"href");
+    return html::ReflectUrl<dom::USVString>(*this, u8"href");
   }
 
   void HTMLAreaElement::Href(dom::USVString value) noexcept
   {
-    html::ReflectURL<dom::USVString>(*this, u8"href", krys::move(value));
+    html::ReflectUrl<dom::USVString>(*this, u8"href", krys::move(value));
   }
 
   dom::USVString HTMLAreaElement::ToString() const noexcept
@@ -429,12 +429,12 @@ namespace krys::boo
     return Href();
   }
 
-  url::URL HTMLAreaElement::FullURL() const noexcept
+  net::Url HTMLAreaElement::FullUrl() const noexcept
   {
     return html::HyperlinkAlgorithms::Href(*this);
   }
 
-  void HTMLAreaElement::SetFullURL(const url::URL &url) noexcept
+  void HTMLAreaElement::SetFullUrl(const net::Url &url) noexcept
   {
     html::CEReactionsScope ceReactions;
     html::HyperlinkAlgorithms::SetHref(*this, url);

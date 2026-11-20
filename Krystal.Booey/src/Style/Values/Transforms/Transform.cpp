@@ -105,8 +105,7 @@ namespace krys::boo::style
 
   // MARK: - Platform
 
-  TransformOperations ToPlatform<Transform>::operator()(const Transform &value,
-                                                        const FloatSize &size) noexcept
+  TransformOperations ToPlatform<Transform>::operator()(const Transform &value, const SizeF &size) noexcept
   {
     List<Ref<TransformOperation>> operations;
     for (const auto &transformFunction : value)

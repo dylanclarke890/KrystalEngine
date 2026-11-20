@@ -27,7 +27,7 @@
 #include "Krystal.Booey/DOM/Nodes/Document.hpp"
 #include "Krystal.Booey/Style/Builder/BuilderChecking.hpp"
 #include "Krystal.Booey/Style/Builder/BuilderState.hpp"
-#include "Krystal.Core/Text/StringBuilder.hpp"
+#include "Krystal.Core/Strings/StringBuilder.hpp"
 
 namespace krys::boo::style
 {
@@ -49,12 +49,12 @@ namespace krys::boo::style
   //      CSS:    [.specified = "foo/bar.png", .resolved = null-url]
   //      Style:  [.resolved = "foo/bar.png"]
 
-  URL ToStyleWithScriptExecutionContext(const css::CSSURL &url, const Document &context) noexcept
+  Url ToStyleWithScriptExecutionContext(const css::CSSUrl &url, const Document &context) noexcept
   {
     if (url.Resolved.IsNull())
     {
       return {
-        .Resolved = context.CompleteURL(url.Specified),
+        .Resolved = context.CompleteUrl(url.Specified),
         .Modifiers = url.Modifiers,
       };
     }
@@ -65,7 +65,7 @@ namespace krys::boo::style
     };
   }
 
-  css::CSSURL ToCSS<URL>::operator()(const URL &url, const RenderStyle &) noexcept
+  css::CSSUrl ToCSS<Url>::operator()(const Url &url, const RenderStyle &) noexcept
   {
     return {
       .Specified = url.Resolved.String(),
@@ -74,30 +74,30 @@ namespace krys::boo::style
     };
   }
 
-  URL ToStyle<css::CSSURL>::operator()(const css::CSSURL &url, const BuilderState &state) noexcept
+  Url ToStyle<css::CSSUrl>::operator()(const css::CSSUrl &url, const BuilderState &state) noexcept
   {
     return ToStyleWithScriptExecutionContext(url, state.GetDocument());
   }
 
-  Ref<css::Value> CSSValueCreation<URL>::operator()(css::ValuePool &, const RenderStyle &style,
-                                                    const URL &value) noexcept
+  Ref<css::Value> CSSValueCreation<Url>::operator()(css::ValuePool &, const RenderStyle &style,
+                                                    const Url &value) noexcept
   {
     return css::UrlValue::Create(ConvertToCSS(value, style));
   }
 
-  URL CSSValueConversion<URL>::operator()(BuilderState &state, const css::Value &value) noexcept
+  Url CSSValueConversion<Url>::operator()(BuilderState &state, const css::Value &value) noexcept
   {
     if (auto *url = RequiredDowncast<css::UrlValue>(state, value))
     {
-      return ConvertToStyle(url->URL(), state);
+      return ConvertToStyle(url->Url(), state);
     }
-    return {.Resolved = url::URL {u8""}, .Modifiers = {}};
+    return {.Resolved = net::Url {u8""}, .Modifiers = {}};
   }
 
   // MARK: - Serialisation
 
-  void Serialiser<URL>::operator()(StringBuilder &builder, const css::SerialisationContext &context,
-                                   const RenderStyle &style, const URL &value) noexcept
+  void Serialiser<Url>::operator()(StringBuilder &builder, const css::SerialisationContext &context,
+                                   const RenderStyle &style, const Url &value) noexcept
   {
     css::Serialise(builder, context, ConvertToCSS(value, style));
   }

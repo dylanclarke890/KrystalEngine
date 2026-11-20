@@ -371,7 +371,7 @@ namespace krys::gfx::tests
     }
 
     // Each frame starts untransformed.
-    Draw([](Renderer2D &renderer) { CHECK(renderer.GetTransform() == Transform2D::Identity()); },
+    Draw([](Renderer2D &renderer) { CHECK(renderer.GetTransform() == AffineTransform()); },
          Maybe<Array<float, 4>> {});
   }
 
@@ -659,8 +659,7 @@ namespace krys::gfx::tests
          { renderer.FillPath(triangle, FillRule::NonZero, SRGBA<uint8> {255, 0, 0}); });
 
     PathRasteriser rasteriser;
-    const auto expected =
-      rasteriser.Rasterise(triangle, {}, FillRule::NonZero, {.X = 0, .Y = 0, .Width = 8u, .Height = 8u});
+    const auto expected = rasteriser.Rasterise(triangle, {}, FillRule::NonZero, {0, 0, 8u, 8u});
     auto pixels = Read();
     for (int32 y = 0; y < 8; ++y)
     {
@@ -1210,7 +1209,7 @@ namespace krys::gfx::tests
   {
     UseTarget(8u, 8u);
     const SRGBA<uint8> red {255, 0, 0};
-    constexpr PixelRect2D target {.X = 0, .Y = 0, .Width = 8u, .Height = 8u};
+    constexpr RectI target {0, 0, 8u, 8u};
     PathRasteriser rasteriser;
 
     // A triangle and its mirror image, overlapping in the middle.
@@ -1225,8 +1224,7 @@ namespace krys::gfx::tests
     auto coverage = [](const CoverageMask &mask, int32 x, int32 y) -> int
     {
       const auto &bounds = mask.Bounds;
-      const bool inside = x >= bounds.X && y >= bounds.Y && x < bounds.X + static_cast<int32>(bounds.Width)
-                          && y < bounds.Y + static_cast<int32>(bounds.Height);
+      const bool inside = x >= bounds.X() && y >= bounds.Y() && x < bounds.MaxX() && y < bounds.MaxY();
       return inside ? mask.At(x, y) : 0;
     };
 
@@ -2206,15 +2204,20 @@ namespace krys::gfx::tests
       {
         renderer.Translate(2.f, 0.f);
         renderer.Scale(2.f, 1.f);
-        renderer.FillRect({-1.f, 0.f, 8.f, 2.f}, Paint2D {gradient, Transform2D::Translation(1.f, 0.f)});
+        renderer.FillRect({-1.f, 0.f, 8.f, 2.f},
+                          Paint2D {gradient, AffineTransform::CreateTranslation(SizeF(1.f, 0.f))});
       });
     CHECK(GreyMismatches(Read(), _width, GradientSpreadMethod::Pad,
                          [](double x, double) -> Maybe<double> { return ((x - 2.0) / 2.0 - 1.0) / 4.0; })
           == 0u);
 
     // A gradient space that flattens the plane shows nothing.
-    Draw([&](Renderer2D &renderer)
-         { renderer.FillRect({0.f, 0.f, 16.f, 2.f}, Paint2D {gradient, Transform2D::Scale(0.f, 1.f)}); });
+    Draw(
+      [&](Renderer2D &renderer)
+      {
+        renderer.FillRect({0.f, 0.f, 16.f, 2.f},
+                          Paint2D {gradient, AffineTransform::CreateScale(SizeF(0.f, 1.f))});
+      });
     CHECK(Read()[0] == Clear);
   }
 
@@ -2377,23 +2380,23 @@ namespace krys::gfx::tests
 
     /// @brief A rect with corners of radius `radius`, blurred, at (px, py): across each of many thin rows of
     /// the shape the blur is exact, and the rows are summed.
-    KRYS_NODISCARD double BlurredRoundedRect(double px, double py, const Rect2D &rect, double radius,
+    KRYS_NODISCARD double BlurredRoundedRect(double px, double py, const RectF &rect, double radius,
                                              double sigma)
     {
       constexpr int rows = 512;
-      const double height = rect.Height;
+      const double height = rect.Height();
       double total = 0.0;
       for (int i = 0; i < rows; ++i)
       {
-        const double y0 = rect.Y + height * i / rows;
-        const double y1 = rect.Y + height * (i + 1) / rows;
+        const double y0 = rect.Y() + height * i / rows;
+        const double y1 = rect.Y() + height * (i + 1) / rows;
         const double y = (y0 + y1) * 0.5;
-        const double fromEdge = std::min(y - rect.Y, rect.Y + height - y);
+        const double fromEdge = std::min(y - rect.Y(), rect.Y() + height - y);
         const double inset =
           fromEdge < radius ? radius - std::sqrt(radius * radius - (radius - fromEdge) * (radius - fromEdge))
                             : 0.0;
         total += GaussianMass(y0, y1, py, sigma)
-                 * GaussianMass(rect.X + inset, rect.X + rect.Width - inset, px, sigma);
+                 * GaussianMass(rect.X() + inset, rect.X() + rect.Width() - inset, px, sigma);
       }
       return total;
     }
@@ -2447,7 +2450,7 @@ namespace krys::gfx::tests
                    "[Gfx][Render2D][GPU]")
   {
     UseTarget(32u, 32u);
-    const Rect2D rect {8.f, 6.f, 16.f, 20.f};
+    const RectF rect {8.f, 6.f, 16.f, 20.f};
 
     SECTION("A rect is exact")
     {
@@ -2491,7 +2494,7 @@ namespace krys::gfx::tests
     // As `box-shadow: inset` draws them: a rect with the box as its hole, moved away, inside a clip to the
     // box. The shadow is the rect's blur less the hole's.
     UseTarget(32u, 32u);
-    const Rect2D box {6.f, 6.f, 20.f, 20.f};
+    const RectF box {6.f, 6.f, 20.f, 20.f};
     Draw(
       [&](Renderer2D &renderer)
       {
@@ -2511,7 +2514,7 @@ namespace krys::gfx::tests
                               return std::numeric_limits<double>::quiet_NaN();
                             }
                             // The hole as the shadow sees it: moved by the offset less the translation.
-                            const Rect2D hole {box.X + 3.f, box.Y + 3.f, box.Width, box.Height};
+                            const RectF hole {box.X() + 3.f, box.Y() + 3.f, box.Width(), box.Height()};
                             const double sigma = 3.0;
                             const double outer =
                               GaussianMass(-17.0, 55.0, x, sigma) * GaussianMass(-17.0, 55.0, y, sigma);
@@ -2614,7 +2617,7 @@ namespace krys::gfx::tests
                    "[Gfx][Render2D][GPU]")
   {
     UseTarget(32u, 32u);
-    const Rect2D rect {8.f, 6.f, 16.f, 20.f};
+    const RectF rect {8.f, 6.f, 16.f, 20.f};
     Path2D path;
     path.AddRect(rect);
 
@@ -2711,8 +2714,8 @@ namespace krys::gfx::tests
     SECTION("Pattern space moves and scales the tiles")
     {
       const ImagePattern2D pattern {.Texture = image,
-                                    .PatternSpace =
-                                      Transform2D::Translation(1.f, 0.f) * Transform2D::Scale(2.f, 2.f),
+                                    .PatternSpace = AffineTransform::CreateTranslation(SizeF(1.f, 0.f))
+                                                    * AffineTransform::CreateScale(SizeF(2.f, 2.f)),
                                     .TileSize = {2.f, 2.f},
                                     .Filter = SamplerFilter::Nearest};
       Draw([&](Renderer2D &renderer) { renderer.FillRect({0.f, 0.f, 8.f, 8.f}, pattern); });
@@ -2749,8 +2752,8 @@ namespace krys::gfx::tests
       constexpr Array<Pixel, 4> blue {Blue, Blue, Blue, Blue};
       auto uniform = Image(2u, 2u, blue);
       const ImagePattern2D pattern {.Texture = uniform,
-                                    .PatternSpace =
-                                      Transform2D::Translation(0.3f, 0.7f) * Transform2D::Scale(0.76f, 0.61f),
+                                    .PatternSpace = AffineTransform::CreateTranslation(SizeF(0.3f, 0.7f))
+                                                    * AffineTransform::CreateScale(SizeF(0.76f, 0.61f)),
                                     .TileSize = {2.f, 2.f}};
       Draw([&](Renderer2D &renderer) { renderer.FillRect({0.f, 0.f, 8.f, 8.f}, pattern); });
       for (const auto &pixel : Read())
@@ -2768,7 +2771,7 @@ namespace krys::gfx::tests
       auto first = [&](bool repeat)
       {
         const ImagePattern2D pattern {.Texture = row,
-                                      .PatternSpace = Transform2D::Scale(4.f, 8.f),
+                                      .PatternSpace = AffineTransform::CreateScale(SizeF(4.f, 8.f)),
                                       .TileSize = {2.f, 1.f},
                                       .RepeatX = repeat,
                                       .RepeatY = repeat};

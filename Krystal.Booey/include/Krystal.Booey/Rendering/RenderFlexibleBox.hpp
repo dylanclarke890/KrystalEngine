@@ -240,7 +240,7 @@ namespace krys::boo
       return _isComputingFlexBaseSizes;
     }
 
-    KRYS_NODISCARD static Maybe<TextDirection>
+    KRYS_NODISCARD static Maybe<text::TextDirection>
       LeftRightAxisDirectionFromStyle(const RenderStyle &style) noexcept;
 
     KRYS_NODISCARD bool HasModernLayout() const noexcept

@@ -25,8 +25,7 @@ namespace krys::boo::style::tests
 
   namespace
   {
-    KRYS_NODISCARD TransformationMatrix Applied(const Transform &transform,
-                                                FloatSize size = {100, 50}) noexcept
+    KRYS_NODISCARD TransformationMatrix Applied(const Transform &transform, SizeF size = {100, 50}) noexcept
     {
       TransformationMatrix matrix;
       transform.Apply(matrix, size);
@@ -54,7 +53,7 @@ namespace krys::boo::style::tests
     CHECK(matrix.E() == 10);
     CHECK(matrix.F() == 10);
 
-    auto platform = ConvertToPlatform(transform, FloatSize {100, 50});
+    auto platform = ConvertToPlatform(transform, SizeF {100, 50});
     REQUIRE(platform.size() == 3);
     CHECK(platform[0]->GetType() == TransformOperation::Type::Translate);
     TransformationMatrix platformMatrix;
@@ -140,7 +139,7 @@ namespace krys::boo::style::tests
       auto translate = Convert<Translate>(PropertyId::Translate, u8"10% 5px");
       CHECK(translate.ComputeSizeDependencies().IsWidthDependent);
       TransformationMatrix matrix;
-      translate.Apply(matrix, FloatSize {200, 100});
+      translate.Apply(matrix, SizeF {200, 100});
       CHECK(matrix.E() == 20);
       auto blended = Blending<Translate> {}.Blend(Convert<Translate>(PropertyId::Translate, u8"0px"),
                                                   Convert<Translate>(PropertyId::Translate, u8"10px 20px"),

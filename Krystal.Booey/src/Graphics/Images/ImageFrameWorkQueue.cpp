@@ -26,13 +26,13 @@
 #include "Krystal.Booey/Graphics/Images/ImageFrameWorkQueue.hpp"
 #include "Krystal.Booey/Graphics/Images/BitmapImage.hpp"
 #include "Krystal.Booey/Graphics/Images/BitmapImageSource.hpp"
-#include "Krystal.Booey/Graphics/Images/ImageDecoder.hpp"
 #include "Krystal.Booey/Graphics/Images/NativeImage.hpp"
 #include "Krystal.Booey/HTML/EventLoop/EventLoop.hpp"
 #include "Krystal.Booey/Platform/PlatformStrategies.hpp"
 #include "Krystal.Core/Assert.hpp"
 #include "Krystal.Core/Threading/MainThread.hpp"
 #include "Krystal.Core/Threading/WorkQueue.hpp"
+#include "Krystal.Image/ImageDecoder.hpp"
 #include <algorithm>
 
 namespace krys::boo
@@ -42,7 +42,7 @@ namespace krys::boo
     /// @brief What a decoding job gives back: its decoder, and the frame it decoded (null if it failed).
     struct DecodedFrame
     {
-      Ref<ImageDecoder> Decoder;
+      Ref<img::ImageDecoder> Decoder;
       PlatformImagePtr Image;
     };
   }
@@ -92,14 +92,13 @@ namespace krys::boo
 
     _decoding = true;
     auto request = _decodeQueue.front();
-    Ref<ImageDecoder> decoder = krys::move(_decoder);
+    Ref<img::ImageDecoder> decoder = krys::move(_decoder);
     _decoder = nullptr;
     workQueue->Dispatch(
       [decoder = krys::move(decoder), request]() mutable
       {
         // The job owns the decoder until it hands it back.
-        auto frame = decoder->CreateFrameImageAtIndex(request.Index, request.Level,
-                                                      DecodingOptions(DecodingMode::Synchronous));
+        auto frame = CreatePlatformImage(decoder->CreateFrameImageAtIndex(request.Index));
         // The frame's image keeps its pixels: the decoder keeps only what later frames are decoded from, so
         // an animation's frames aren't held twice.
         decoder->ClearFrameBufferCache(request.Index);
@@ -115,7 +114,7 @@ namespace krys::boo
       });
   }
 
-  void ImageFrameWorkQueue::DecodeFinished(uint64 generation, Ref<ImageDecoder> &&decoder,
+  void ImageFrameWorkQueue::DecodeFinished(uint64 generation, Ref<img::ImageDecoder> &&decoder,
                                            const Request &request, PlatformImagePtr &&image) noexcept
   {
     // A frame decoded before a stop is dropped, with the decoder: its requests are gone.

@@ -1,8 +1,8 @@
 ﻿#include "Krystal.Booey/SVG/SVGPreserveAspectRatioValue.hpp"
 #include "catch2/catch_test_macros.hpp"
 #include "Krystal.Booey/DOM/Types/ExceptionOr.hpp"
-#include "Krystal.Booey/Graphics/Geometry/FloatRect.hpp"
-#include "Krystal.Booey/Graphics/Transforms/AffineTransform.hpp"
+#include "Krystal.Core/Geometry/AffineTransform.hpp"
+#include "Krystal.Core/Geometry/Rect.hpp"
 
 namespace krys::boo::svg::tests
 {
@@ -68,15 +68,15 @@ namespace krys::boo::svg::tests
     CHECK(none == AffineTransform(2, 0, 0, 4, -20, 0));
 
     // Meet shrinks the destination around a square image; slice crops the source.
-    FloatRect dest(0, 0, 200, 100);
-    FloatRect source(0, 0, 50, 50);
+    RectF dest(0, 0, 200, 100);
+    RectF source(0, 0, 50, 50);
     Value().TransformRect(dest, source);
-    CHECK(dest == FloatRect(50, 0, 100, 100));
-    CHECK(source == FloatRect(0, 0, 50, 50));
+    CHECK(dest == RectF(50, 0, 100, 100));
+    CHECK(source == RectF(0, 0, 50, 50));
 
-    dest = FloatRect(0, 0, 200, 100);
+    dest = RectF(0, 0, 200, 100);
     Value(u8"xMidYMax slice").TransformRect(dest, source);
-    CHECK(dest == FloatRect(0, 0, 200, 100));
-    CHECK(source == FloatRect(0, 25, 50, 25));
+    CHECK(dest == RectF(0, 0, 200, 100));
+    CHECK(source == RectF(0, 25, 50, 25));
   }
 }

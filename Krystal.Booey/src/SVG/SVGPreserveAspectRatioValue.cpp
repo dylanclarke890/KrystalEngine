@@ -23,11 +23,11 @@
 
 #include "Krystal.Booey/SVG/SVGPreserveAspectRatioValue.hpp"
 #include "Krystal.Booey/DOM/Types/ExceptionOr.hpp"
-#include "Krystal.Booey/Graphics/Geometry/FloatRect.hpp"
-#include "Krystal.Booey/Graphics/Transforms/AffineTransform.hpp"
 #include "Krystal.Booey/SVG/Internals/SVGParserUtilities.hpp"
-#include "Krystal.Core/Text/ParsingUtilities.hpp"
-#include "Krystal.Core/Text/StringBuilder.hpp"
+#include "Krystal.Core/Geometry/AffineTransform.hpp"
+#include "Krystal.Core/Geometry/Rect.hpp"
+#include "Krystal.Core/Strings/ParsingUtilities.hpp"
+#include "Krystal.Core/Strings/StringBuilder.hpp"
 
 namespace krys::boo
 {
@@ -238,14 +238,14 @@ namespace krys::boo
     return true;
   }
 
-  void SVGPreserveAspectRatioValue::TransformRect(FloatRect &destRect, FloatRect &srcRect) const noexcept
+  void SVGPreserveAspectRatioValue::TransformRect(RectF &destRect, RectF &srcRect) const noexcept
   {
     if (_align == SVG_PRESERVEASPECTRATIO_NONE)
     {
       return;
     }
 
-    FloatSize imageSize = srcRect.Size();
+    SizeF imageSize = srcRect.Size();
     float origDestWidth = destRect.Width();
     float origDestHeight = destRect.Height();
     switch (_meetOrSlice)

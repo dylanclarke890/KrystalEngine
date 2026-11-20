@@ -83,7 +83,7 @@ namespace krys::boo
 
     virtual void Add(PathCloseSubpath) noexcept = 0;
 
-    void AddLinesForRect(const FloatRect &) noexcept;
+    void AddLinesForRect(const RectF &) noexcept;
 
     KRYS_NODISCARD static SmallList<PathSegment, 10> BeziersForRoundedRect(const FloatRoundedRect &) noexcept;
 
@@ -102,11 +102,11 @@ namespace krys::boo
 
     KRYS_NODISCARD virtual bool HasSubpaths() const noexcept;
 
-    KRYS_NODISCARD virtual FloatPoint CurrentPoint() const noexcept = 0;
+    KRYS_NODISCARD virtual PointF CurrentPoint() const noexcept = 0;
 
-    KRYS_NODISCARD virtual FloatRect FastBoundingRect() const noexcept = 0;
+    KRYS_NODISCARD virtual RectF FastBoundingRect() const noexcept = 0;
 
-    KRYS_NODISCARD virtual FloatRect BoundingRect() const noexcept = 0;
+    KRYS_NODISCARD virtual RectF BoundingRect() const noexcept = 0;
 
   protected:
     PathImpl() noexcept = default;

@@ -14,7 +14,7 @@ namespace krys::boo::css::parse_property::tests
   {
     ParserContext Context()
     {
-      return ParserContext {ParserMode::HTMLStandard, url::URL(u8"https://example.com/dir/")};
+      return ParserContext {ParserMode::HTMLStandard, net::Url(u8"https://example.com/dir/")};
     }
 
     Maybe<UnresolvedFont> ConsumeFont(utf8_stringview css)

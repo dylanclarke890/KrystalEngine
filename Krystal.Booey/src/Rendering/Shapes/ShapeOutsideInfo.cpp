@@ -54,9 +54,9 @@ namespace krys::boo
     return physicalBoundingBox;
   }
 
-  FloatPoint ShapeOutsideInfo::ShapeToRendererPoint(const FloatPoint &point) const noexcept
+  PointF ShapeOutsideInfo::ShapeToRendererPoint(const PointF &point) const noexcept
   {
-    FloatPoint result = point;
+    PointF result = point;
     if (_renderer.Style().GetWritingMode().IsBlockFlipped())
     {
       result.SetY(_renderer.LogicalHeight().ToFloat() - result.Y());
@@ -91,23 +91,23 @@ namespace krys::boo
         case CSSBoxType::PaddingBox:
           if (isHorizontalWritingMode)
           {
-            size.Shrink(renderer.HorizontalBorderExtent(), renderer.VerticalBorderExtent());
+            size.Contract(renderer.HorizontalBorderExtent(), renderer.VerticalBorderExtent());
           }
           else
           {
-            size.Shrink(renderer.VerticalBorderExtent(), renderer.HorizontalBorderExtent());
+            size.Contract(renderer.VerticalBorderExtent(), renderer.HorizontalBorderExtent());
           }
           break;
         case CSSBoxType::ContentBox:
           if (isHorizontalWritingMode)
           {
-            size.Shrink(renderer.HorizontalBorderAndPaddingExtent(),
-                        renderer.VerticalBorderAndPaddingExtent());
+            size.Contract(renderer.HorizontalBorderAndPaddingExtent(),
+                          renderer.VerticalBorderAndPaddingExtent());
           }
           else
           {
-            size.Shrink(renderer.VerticalBorderAndPaddingExtent(),
-                        renderer.HorizontalBorderAndPaddingExtent());
+            size.Contract(renderer.VerticalBorderAndPaddingExtent(),
+                          renderer.HorizontalBorderAndPaddingExtent());
           }
           break;
         case CSSBoxType::FillBox:

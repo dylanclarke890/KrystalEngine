@@ -25,7 +25,7 @@
 #include "Krystal.Booey/Graphics/Filters/Filter.hpp"
 #include "Krystal.Booey/Graphics/Filters/FilterResults.hpp"
 #include "Krystal.Booey/Graphics/ImageBuffers/ImageBuffer.hpp"
-#include "Krystal.Core/Text/TextStream.hpp"
+#include "Krystal.Core/Strings/TextStream.hpp"
 
 namespace krys::boo
 {
@@ -64,9 +64,9 @@ namespace krys::boo
 
   namespace
   {
-    KRYS_NODISCARD List<FloatRect> InputPrimitiveSubregions(Span<const Ref<FilterImage>> inputs) noexcept
+    KRYS_NODISCARD List<RectF> InputPrimitiveSubregions(Span<const Ref<FilterImage>> inputs) noexcept
     {
-      List<FloatRect> result;
+      List<RectF> result;
       result.reserve(inputs.size());
       for (const auto &input : inputs)
       {
@@ -75,9 +75,9 @@ namespace krys::boo
       return result;
     }
 
-    KRYS_NODISCARD List<FloatRect> InputImageRects(Span<const Ref<FilterImage>> inputs) noexcept
+    KRYS_NODISCARD List<RectF> InputImageRects(Span<const Ref<FilterImage>> inputs) noexcept
     {
-      List<FloatRect> result;
+      List<RectF> result;
       result.reserve(inputs.size());
       for (const auto &input : inputs)
       {
@@ -87,13 +87,12 @@ namespace krys::boo
     }
   }
 
-  FloatRect
-    FilterEffect::CalculatePrimitiveSubregion(const Filter &filter,
-                                              Span<const FloatRect> inputPrimitiveSubregions,
-                                              const Maybe<FilterEffectGeometry> &geometry) const noexcept
+  RectF FilterEffect::CalculatePrimitiveSubregion(const Filter &filter,
+                                                  Span<const RectF> inputPrimitiveSubregions,
+                                                  const Maybe<FilterEffectGeometry> &geometry) const noexcept
   {
     // This function implements https://www.w3.org/TR/filter-effects-1/#FilterPrimitiveSubRegion.
-    FloatRect primitiveSubregion;
+    RectF primitiveSubregion;
 
     // If there is no input effects, take the effect boundaries as unite rect. Don't use the input's subregion
     // for FETile.
@@ -133,15 +132,15 @@ namespace krys::boo
     return primitiveSubregion;
   }
 
-  FloatRect FilterEffect::CalculateImageRect(const Filter &filter, Span<const FloatRect> inputImageRects,
-                                             const FloatRect &primitiveSubregion) const noexcept
+  RectF FilterEffect::CalculateImageRect(const Filter &filter, Span<const RectF> inputImageRects,
+                                         const RectF &primitiveSubregion) const noexcept
   {
     if (inputImageRects.empty())
     {
       return filter.MaxEffectRect(primitiveSubregion);
     }
 
-    FloatRect imageRect;
+    RectF imageRect;
     for (const auto &inputImageRect : inputImageRects)
     {
       imageRect.Unite(inputImageRect);
@@ -192,9 +191,9 @@ namespace krys::boo
 
     auto primitiveSubregion = CalculatePrimitiveSubregion(filter, InputPrimitiveSubregions(inputs), geometry);
     auto imageRect = CalculateImageRect(filter, InputImageRects(inputs), primitiveSubregion);
-    auto absoluteImageRect = EnclosingIntRect(filter.ScaledByFilterScale(imageRect));
+    auto absoluteImageRect = EnclosingRectI(filter.ScaledByFilterScale(imageRect));
 
-    if (absoluteImageRect.IsEmpty() || ImageBuffer::SizeNeedsClamping(FloatSize(absoluteImageRect.Size())))
+    if (absoluteImageRect.IsEmpty() || ImageBuffer::SizeNeedsClamping(SizeF(absoluteImageRect.Size())))
     {
       return nullptr;
     }
@@ -236,9 +235,8 @@ namespace krys::boo
     krys_debug_assert(filter.FilterRenderingModes().Contains(FilterRenderingMode::GraphicsContext));
 
     auto primitiveSubregion =
-      CalculatePrimitiveSubregion(filter, Span<const FloatRect> {&input.PrimitiveSubregion, 1u}, geometry);
-    auto imageRect =
-      CalculateImageRect(filter, Span<const FloatRect> {&input.ImageRect, 1u}, primitiveSubregion);
+      CalculatePrimitiveSubregion(filter, Span<const RectF> {&input.PrimitiveSubregion, 1u}, geometry);
+    auto imageRect = CalculateImageRect(filter, Span<const RectF> {&input.ImageRect, 1u}, primitiveSubregion);
 
     auto style = CreateGraphicsStyle(context, filter);
     return FilterStyle {style, primitiveSubregion, imageRect};

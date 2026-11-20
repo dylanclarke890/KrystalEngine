@@ -6,11 +6,11 @@
 #include "Krystal.Booey/Graphics/Fonts/Font.hpp"
 #include "Krystal.Booey/Page/LocalFrameView.hpp"
 #include "Krystal.Booey/Page/Page.hpp"
-#include "Krystal.Core/Text/CodePointIterator.hpp"
+#include "Krystal.Core/Strings/CodePointIterator.hpp"
 
 namespace krys::boo::tests
 {
-  PaintFixture::PaintFixture(utf8_string &&markup, IntSize viewSize, bool inPage) noexcept
+  PaintFixture::PaintFixture(utf8_string &&markup, SizeI viewSize, bool inPage) noexcept
       : ResolverFixture(krys::move(markup), style::tests::WithView::No), ViewSize(viewSize)
   {
     if (inPage)
@@ -30,8 +30,8 @@ namespace krys::boo::tests
   {
     (void)Document->UpdateLayout();
     display_list::RecorderImpl recorder(
-      FloatSize(static_cast<float>(ViewSize.Width()), static_cast<float>(ViewSize.Height())));
-    Frame->View()->PaintContents(recorder, IntRect(IntPoint(), ViewSize));
+      SizeF(static_cast<float>(ViewSize.Width()), static_cast<float>(ViewSize.Height())));
+    Frame->View()->PaintContents(recorder, RectI(PointI(), ViewSize));
     return recorder.TakeDisplayList();
   }
 

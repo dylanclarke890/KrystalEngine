@@ -44,15 +44,15 @@ namespace krys::boo
   }
 
   bool ScrollbarThemeComposite::Paint(Scrollbar &scrollbar, GraphicsContext &graphicsContext,
-                                      const IntRect &damageRect) noexcept
+                                      const RectI &damageRect) noexcept
   {
     // Create the ScrollbarControlPartMask based on the damageRect
     ScrollbarControlPartMask scrollMask = NoPart;
 
-    IntRect backButtonStartPaintRect;
-    IntRect backButtonEndPaintRect;
-    IntRect forwardButtonStartPaintRect;
-    IntRect forwardButtonEndPaintRect;
+    RectI backButtonStartPaintRect;
+    RectI backButtonEndPaintRect;
+    RectI forwardButtonStartPaintRect;
+    RectI forwardButtonEndPaintRect;
     if (HasButtons(scrollbar))
     {
       backButtonStartPaintRect = BackButtonRect(scrollbar, BackButtonStartPart, true);
@@ -77,10 +77,10 @@ namespace krys::boo
       }
     }
 
-    IntRect startTrackRect;
-    IntRect thumbRect;
-    IntRect endTrackRect;
-    IntRect trackPaintRect = TrackRect(scrollbar, true);
+    RectI startTrackRect;
+    RectI thumbRect;
+    RectI endTrackRect;
+    RectI trackPaintRect = TrackRect(scrollbar, true);
     if (damageRect.Intersects(trackPaintRect))
     {
       scrollMask |= TrackBGPart;
@@ -88,7 +88,7 @@ namespace krys::boo
     bool thumbPresent = HasThumb(scrollbar);
     if (thumbPresent)
     {
-      IntRect track = TrackRect(scrollbar);
+      RectI track = TrackRect(scrollbar);
       SplitTrack(scrollbar, track, startTrackRect, thumbRect, endTrackRect);
       if (damageRect.Intersects(thumbRect))
       {
@@ -157,7 +157,7 @@ namespace krys::boo
     return true;
   }
 
-  ScrollbarPart ScrollbarThemeComposite::HitTest(Scrollbar &scrollbar, const IntPoint &position) noexcept
+  ScrollbarPart ScrollbarThemeComposite::HitTest(Scrollbar &scrollbar, const PointI &position) noexcept
   {
     ScrollbarPart result = NoPart;
     if (!scrollbar.Enabled())
@@ -165,7 +165,7 @@ namespace krys::boo
       return result;
     }
 
-    IntPoint testPosition = scrollbar.ConvertFromContainingWindow(position);
+    PointI testPosition = scrollbar.ConvertFromContainingWindow(position);
     testPosition.Move(scrollbar.X(), scrollbar.Y());
 
     if (!scrollbar.FrameRect().Contains(testPosition))
@@ -175,12 +175,12 @@ namespace krys::boo
 
     result = ScrollbarBGPart;
 
-    IntRect track = TrackRect(scrollbar);
+    RectI track = TrackRect(scrollbar);
     if (track.Contains(testPosition))
     {
-      IntRect beforeThumbRect;
-      IntRect thumbRect;
-      IntRect afterThumbRect;
+      RectI beforeThumbRect;
+      RectI thumbRect;
+      RectI afterThumbRect;
       SplitTrack(scrollbar, track, beforeThumbRect, thumbRect, afterThumbRect);
       if (thumbRect.Contains(testPosition))
       {
@@ -225,7 +225,7 @@ namespace krys::boo
       return;
     }
 
-    IntRect result;
+    RectI result;
     switch (part)
     {
       case BackButtonStartPart:    result = BackButtonRect(scrollbar, BackButtonStartPart, true); break;
@@ -236,7 +236,7 @@ namespace krys::boo
       case ScrollbarBGPart:        result = scrollbar.FrameRect(); break;
       default:
       {
-        IntRect beforeThumbRect, thumbRect, afterThumbRect;
+        RectI beforeThumbRect, thumbRect, afterThumbRect;
         SplitTrack(scrollbar, TrackRect(scrollbar), beforeThumbRect, thumbRect, afterThumbRect);
         if (part == BackTrackPart)
         {
@@ -256,33 +256,33 @@ namespace krys::boo
     scrollbar.InvalidateRect(result);
   }
 
-  void ScrollbarThemeComposite::SplitTrack(Scrollbar &scrollbar, const IntRect &unconstrainedTrackRect,
-                                           IntRect &beforeThumbRect, IntRect &thumbRect,
-                                           IntRect &afterThumbRect) noexcept
+  void ScrollbarThemeComposite::SplitTrack(Scrollbar &scrollbar, const RectI &unconstrainedTrackRect,
+                                           RectI &beforeThumbRect, RectI &thumbRect,
+                                           RectI &afterThumbRect) noexcept
   {
     // This function won't even get called unless we're big enough to have some combination of these three
     // rects where at least one of them is non-empty.
-    IntRect trackRect = ConstrainTrackRectToTrackPieces(scrollbar, unconstrainedTrackRect);
+    RectI trackRect = ConstrainTrackRectToTrackPieces(scrollbar, unconstrainedTrackRect);
     int32 thickness =
       scrollbar.Orientation() == ScrollbarOrientation::Horizontal ? scrollbar.Height() : scrollbar.Width();
     int32 thumbPos = ThumbPosition(scrollbar);
     if (scrollbar.Orientation() == ScrollbarOrientation::Horizontal)
     {
-      thumbRect = IntRect(trackRect.X() + thumbPos, trackRect.Y() + (trackRect.Height() - thickness) / 2,
-                          ThumbLength(scrollbar), thickness);
+      thumbRect = RectI(trackRect.X() + thumbPos, trackRect.Y() + (trackRect.Height() - thickness) / 2,
+                        ThumbLength(scrollbar), thickness);
       beforeThumbRect =
-        IntRect(trackRect.X(), trackRect.Y(), thumbPos + thumbRect.Width() / 2, trackRect.Height());
-      afterThumbRect = IntRect(trackRect.X() + beforeThumbRect.Width(), trackRect.Y(),
-                               trackRect.MaxX() - beforeThumbRect.MaxX(), trackRect.Height());
+        RectI(trackRect.X(), trackRect.Y(), thumbPos + thumbRect.Width() / 2, trackRect.Height());
+      afterThumbRect = RectI(trackRect.X() + beforeThumbRect.Width(), trackRect.Y(),
+                             trackRect.MaxX() - beforeThumbRect.MaxX(), trackRect.Height());
     }
     else
     {
-      thumbRect = IntRect(trackRect.X() + (trackRect.Width() - thickness) / 2, trackRect.Y() + thumbPos,
-                          thickness, ThumbLength(scrollbar));
+      thumbRect = RectI(trackRect.X() + (trackRect.Width() - thickness) / 2, trackRect.Y() + thumbPos,
+                        thickness, ThumbLength(scrollbar));
       beforeThumbRect =
-        IntRect(trackRect.X(), trackRect.Y(), trackRect.Width(), thumbPos + thumbRect.Height() / 2);
-      afterThumbRect = IntRect(trackRect.X(), trackRect.Y() + beforeThumbRect.Height(), trackRect.Width(),
-                               trackRect.MaxY() - beforeThumbRect.MaxY());
+        RectI(trackRect.X(), trackRect.Y(), trackRect.Width(), thumbPos + thumbRect.Height() / 2);
+      afterThumbRect = RectI(trackRect.X(), trackRect.Y() + beforeThumbRect.Height(), trackRect.Width(),
+                             trackRect.MaxY() - beforeThumbRect.MaxY());
     }
   }
 
@@ -329,7 +329,7 @@ namespace krys::boo
 
   int32 ScrollbarThemeComposite::TrackPosition(Scrollbar &scrollbar) noexcept
   {
-    IntRect constrainedTrackRect = ConstrainTrackRectToTrackPieces(scrollbar, TrackRect(scrollbar));
+    RectI constrainedTrackRect = ConstrainTrackRectToTrackPieces(scrollbar, TrackRect(scrollbar));
     return scrollbar.Orientation() == ScrollbarOrientation::Horizontal
              ? constrainedTrackRect.X() - scrollbar.X()
              : constrainedTrackRect.Y() - scrollbar.Y();
@@ -337,22 +337,22 @@ namespace krys::boo
 
   int32 ScrollbarThemeComposite::TrackLength(Scrollbar &scrollbar) noexcept
   {
-    IntRect constrainedTrackRect = ConstrainTrackRectToTrackPieces(scrollbar, TrackRect(scrollbar));
+    RectI constrainedTrackRect = ConstrainTrackRectToTrackPieces(scrollbar, TrackRect(scrollbar));
     return scrollbar.Orientation() == ScrollbarOrientation::Horizontal ? constrainedTrackRect.Width()
                                                                        : constrainedTrackRect.Height();
   }
 
-  IntRect ScrollbarThemeComposite::ThumbRect(Scrollbar &scrollbar) noexcept
+  RectI ScrollbarThemeComposite::ThumbRect(Scrollbar &scrollbar) noexcept
   {
     if (!HasThumb(scrollbar))
     {
-      return IntRect();
+      return RectI();
     }
 
-    IntRect track = TrackRect(scrollbar);
-    IntRect startTrackRect;
-    IntRect thumbRect;
-    IntRect endTrackRect;
+    RectI track = TrackRect(scrollbar);
+    RectI startTrackRect;
+    RectI thumbRect;
+    RectI endTrackRect;
     SplitTrack(scrollbar, track, startTrackRect, thumbRect, endTrackRect);
 
     return thumbRect;

@@ -9,7 +9,7 @@
 #include "Krystal.Booey/Loader/FrameLoader.hpp"
 #include "Krystal.Booey/Page/LocalFrame.hpp"
 #include "Krystal.Booey/Rendering/Replaced/RenderImage.hpp"
-#include "Krystal.Core/Text/ASCII.hpp"
+#include "Krystal.Core/Strings/ASCII.hpp"
 #include <cmath>
 #include <format>
 
@@ -18,8 +18,8 @@ namespace krys::boo::html
   namespace
   {
     /// @brief Where @p event clicked in @p image, in CSS pixels from its top left corner.
-    KRYS_NODISCARD Maybe<FloatPoint> ServerMapClickPosition(const HTMLImageElement &image,
-                                                            const Event &event) noexcept
+    KRYS_NODISCARD Maybe<PointF> ServerMapClickPosition(const HTMLImageElement &image,
+                                                        const Event &event) noexcept
     {
       auto *mouseEvent = DynamicDowncast<MouseEvent>(event);
       auto *renderer = DynamicDowncast<RenderImage>(image.Renderer());
@@ -30,7 +30,7 @@ namespace krys::boo::html
 
       // FIXME: This should probably pass UseTransforms in the EnumSet<MapCoordinatesMode>.
       return renderer->AbsoluteToLocal(
-        FloatPoint(static_cast<float>(mouseEvent->PageX()), static_cast<float>(mouseEvent->PageY())));
+        PointF(static_cast<float>(mouseEvent->PageX()), static_cast<float>(mouseEvent->PageY())));
     }
 
     /// @brief The target @p target, unless it has dangling markup (a newline and a `<`), which makes it
@@ -47,17 +47,17 @@ namespace krys::boo::html
     }
   }
 
-  url::URL HyperlinkAlgorithms::Href(const HTMLElement &element) noexcept
+  net::Url HyperlinkAlgorithms::Href(const HTMLElement &element) noexcept
   {
     auto href = element.GetAttribute(u8"href");
     if (!href)
     {
       return {};
     }
-    return element.NodeDocument().CompleteURL(*href);
+    return element.NodeDocument().CompleteUrl(*href);
   }
 
-  void HyperlinkAlgorithms::SetHref(HTMLElement &element, const url::URL &url) noexcept
+  void HyperlinkAlgorithms::SetHref(HTMLElement &element, const net::Url &url) noexcept
   {
     (void)element.SetAttribute(u8"href", url.String());
   }
@@ -191,7 +191,7 @@ namespace krys::boo::html
     // 4. Let urlRecord be the result of encoding-parsing a URL given subject's href attribute value, relative
     //    to subject's node document.
     auto href = subject.GetAttribute(u8"href").value_or(DOMString());
-    auto urlRecord = document->CompleteURL(infra::StringAlgorithms::StripLeadingAndTrailingWhitespace(href));
+    auto urlRecord = document->CompleteUrl(infra::StringAlgorithms::StripLeadingAndTrailingWhitespace(href));
 
     // 5. If urlRecord is failure, then return.
     if (!urlRecord.IsValid())
@@ -212,7 +212,7 @@ namespace krys::boo::html
     {
       utf8_string urlString(urlRecord.String());
       urlString += *hyperlinkSuffix;
-      urlRecord = document->CompleteURL(urlString);
+      urlRecord = document->CompleteUrl(urlString);
     }
 
     // 11. Navigate targetNavigable to urlString using subject's node document, with referrerPolicy set to

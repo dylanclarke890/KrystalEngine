@@ -54,25 +54,25 @@ namespace krys::boo
   {
   }
 
-  bool MemoryCache::ShouldRemoveFragmentIdentifier(const url::URL &originalURL) noexcept
+  bool MemoryCache::ShouldRemoveFragmentIdentifier(const net::Url &originalUrl) noexcept
   {
-    if (!originalURL.HasFragmentIdentifier())
+    if (!originalUrl.HasFragmentIdentifier())
     {
       return false;
     }
     // Strip away fragment identifier from HTTP URLs.
     // Data URLs must be unmodified. For file and custom URLs clients may expect resources
     // to be unique even when they differ by the fragment identifier only.
-    return originalURL.ProtocolIsInHTTPFamily();
+    return originalUrl.ProtocolIsInHttpFamily();
   }
 
-  url::URL MemoryCache::RemoveFragmentIdentifierIfNeeded(const url::URL &originalURL) noexcept
+  net::Url MemoryCache::RemoveFragmentIdentifierIfNeeded(const net::Url &originalUrl) noexcept
   {
-    if (!ShouldRemoveFragmentIdentifier(originalURL))
+    if (!ShouldRemoveFragmentIdentifier(originalUrl))
     {
-      return originalURL;
+      return originalUrl;
     }
-    url::URL url = originalURL;
+    net::Url url = originalUrl;
     url.RemoveFragmentIdentifier();
     return url;
   }
@@ -84,7 +84,7 @@ namespace krys::boo
       return false;
     }
 
-    const auto &key = resource.URL().String();
+    const auto &key = resource.Url().String();
     krys_assert(!_resources.contains(key));
     _resources.emplace(key, ShareRef(resource));
     resource.SetInCache(true);
@@ -94,9 +94,9 @@ namespace krys::boo
     return true;
   }
 
-  CachedResource *MemoryCache::ResourceForRequest(const ResourceRequest &request) noexcept
+  CachedResource *MemoryCache::ResourceForRequest(const net::ResourceRequest &request) noexcept
   {
-    url::URL url = RemoveFragmentIdentifierIfNeeded(request.URL());
+    net::Url url = RemoveFragmentIdentifierIfNeeded(request.Url());
     auto found = _resources.find(url.String());
     return found != _resources.end() ? found->second.get() : nullptr;
   }
@@ -296,7 +296,7 @@ namespace krys::boo
     }
 
     // Remove resource from the resource map.
-    _resources.erase(resource.URL().String());
+    _resources.erase(resource.Url().String());
     resource.SetInCache(false);
 
     // Remove from the LRU list.

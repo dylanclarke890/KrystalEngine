@@ -35,8 +35,8 @@
 #include "Krystal.Booey/HTML/Shadow/DateTimeEditElement.hpp"
 #include "Krystal.Booey/Platform/Choosers/DateTimeChooser.hpp"
 #include "Krystal.Booey/Platform/Choosers/DateTimeChooserClient.hpp"
-#include "Krystal.Booey/Platform/Locale/DateTimeFormat.hpp"
 #include "Krystal.Core/Types/EnumSet.hpp"
+#include "Krystal.I18n/DateTimeFormat.hpp"
 
 namespace krys::boo
 {
@@ -101,13 +101,13 @@ namespace krys::boo::html
     void ShowPicker() noexcept override;
 
   private:
-    class DateTimeFormatValidator final : public DateTimeFormat::TokenHandler
+    class DateTimeFormatValidator final : public i18n::DateTimeFormat::TokenHandler
     {
     private:
       EnumSet<DateTimeFormatValidationResults> _results;
 
     public:
-      void VisitField(DateTimeFormat::FieldType fieldType, int count) noexcept final;
+      void VisitField(i18n::DateTimeFormat::FieldType fieldType, int count) noexcept final;
 
       void VisitLiteral(utf8_stringview) noexcept final
       {

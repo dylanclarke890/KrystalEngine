@@ -24,8 +24,9 @@
  */
 
 #include "Krystal.Booey/Graphics/Fonts/FontGenericFamilies.hpp"
-#include "Krystal.Booey/Platform/Locale/Language.hpp"
 #include "Krystal.Core/Threading/NeverDestroyed.hpp"
+#include "Krystal.I18n/Language.hpp"
+#include "Krystal.Text/Script.hpp"
 
 namespace krys::boo
 {
@@ -38,7 +39,7 @@ namespace krys::boo
   }
 
   static bool SetGenericFontFamilyForScript(ScriptFontFamilyMap &fontMap, const utf8_string &family,
-                                            UScriptCode script) noexcept
+                                            text::Script script) noexcept
   {
     if (family.empty())
     {
@@ -54,27 +55,27 @@ namespace krys::boo
   }
 
   KRYS_NODISCARD static const utf8_string &GenericFontFamilyForScript(const ScriptFontFamilyMap &fontMap,
-                                                                      UScriptCode script) noexcept
+                                                                      text::Script script) noexcept
   {
     auto it = fontMap.find(static_cast<int32>(script));
     if (it != fontMap.end())
     {
       return it->second;
     }
-    // Content using USCRIPT_HAN doesn't tell us if we should be using Simplified Chinese or Traditional
+    // Content using text::Script::Han doesn't tell us if we should be using Simplified Chinese or Traditional
     // Chinese. In the absence of all other signals, we consult with the user's system preferences.
-    if (script == USCRIPT_HAN)
+    if (script == text::Script::Han)
     {
-      it = fontMap.find(static_cast<int32>(UserPrefersSimplifiedChinese() ? USCRIPT_SIMPLIFIED_HAN
-                                                                          : USCRIPT_TRADITIONAL_HAN));
+      it = fontMap.find(static_cast<int32>(
+        i18n::UserPrefersSimplifiedChinese() ? text::Script::SimplifiedHan : text::Script::TraditionalHan));
       if (it != fontMap.end())
       {
         return it->second;
       }
     }
-    if (script != USCRIPT_COMMON)
+    if (script != text::Script::Common)
     {
-      return GenericFontFamilyForScript(fontMap, USCRIPT_COMMON);
+      return GenericFontFamilyForScript(fontMap, text::Script::Common);
     }
     return EmptyFamily();
   }
@@ -88,48 +89,48 @@ namespace krys::boo
            && _fantasyFontFamilyMap.empty() && _pictographFontFamilyMap.empty() && _mathFontFamilyMap.empty();
   }
 
-  const utf8_string &FontGenericFamilies::StandardFontFamily(UScriptCode script) const noexcept
+  const utf8_string &FontGenericFamilies::StandardFontFamily(text::Script script) const noexcept
   {
     return GenericFontFamilyForScript(_standardFontFamilyMap, script);
   }
 
-  const utf8_string &FontGenericFamilies::FixedFontFamily(UScriptCode script) const noexcept
+  const utf8_string &FontGenericFamilies::FixedFontFamily(text::Script script) const noexcept
   {
     return GenericFontFamilyForScript(_fixedFontFamilyMap, script);
   }
 
-  const utf8_string &FontGenericFamilies::SerifFontFamily(UScriptCode script) const noexcept
+  const utf8_string &FontGenericFamilies::SerifFontFamily(text::Script script) const noexcept
   {
     return GenericFontFamilyForScript(_serifFontFamilyMap, script);
   }
 
-  const utf8_string &FontGenericFamilies::SansSerifFontFamily(UScriptCode script) const noexcept
+  const utf8_string &FontGenericFamilies::SansSerifFontFamily(text::Script script) const noexcept
   {
     return GenericFontFamilyForScript(_sansSerifFontFamilyMap, script);
   }
 
-  const utf8_string &FontGenericFamilies::CursiveFontFamily(UScriptCode script) const noexcept
+  const utf8_string &FontGenericFamilies::CursiveFontFamily(text::Script script) const noexcept
   {
     return GenericFontFamilyForScript(_cursiveFontFamilyMap, script);
   }
 
-  const utf8_string &FontGenericFamilies::FantasyFontFamily(UScriptCode script) const noexcept
+  const utf8_string &FontGenericFamilies::FantasyFontFamily(text::Script script) const noexcept
   {
     return GenericFontFamilyForScript(_fantasyFontFamilyMap, script);
   }
 
-  const utf8_string &FontGenericFamilies::PictographFontFamily(UScriptCode script) const noexcept
+  const utf8_string &FontGenericFamilies::PictographFontFamily(text::Script script) const noexcept
   {
     return GenericFontFamilyForScript(_pictographFontFamilyMap, script);
   }
 
-  const utf8_string &FontGenericFamilies::MathFontFamily(UScriptCode script) const noexcept
+  const utf8_string &FontGenericFamilies::MathFontFamily(text::Script script) const noexcept
   {
     return GenericFontFamilyForScript(_mathFontFamilyMap, script);
   }
 
   const utf8_string *FontGenericFamilies::FontFamily(FamilyNamesIndex family,
-                                                     UScriptCode script) const noexcept
+                                                     text::Script script) const noexcept
   {
     switch (family)
     {
@@ -146,42 +147,42 @@ namespace krys::boo
     krys_unreachable();
   }
 
-  bool FontGenericFamilies::SetStandardFontFamily(const utf8_string &family, UScriptCode script) noexcept
+  bool FontGenericFamilies::SetStandardFontFamily(const utf8_string &family, text::Script script) noexcept
   {
     return SetGenericFontFamilyForScript(_standardFontFamilyMap, family, script);
   }
 
-  bool FontGenericFamilies::SetFixedFontFamily(const utf8_string &family, UScriptCode script) noexcept
+  bool FontGenericFamilies::SetFixedFontFamily(const utf8_string &family, text::Script script) noexcept
   {
     return SetGenericFontFamilyForScript(_fixedFontFamilyMap, family, script);
   }
 
-  bool FontGenericFamilies::SetSerifFontFamily(const utf8_string &family, UScriptCode script) noexcept
+  bool FontGenericFamilies::SetSerifFontFamily(const utf8_string &family, text::Script script) noexcept
   {
     return SetGenericFontFamilyForScript(_serifFontFamilyMap, family, script);
   }
 
-  bool FontGenericFamilies::SetSansSerifFontFamily(const utf8_string &family, UScriptCode script) noexcept
+  bool FontGenericFamilies::SetSansSerifFontFamily(const utf8_string &family, text::Script script) noexcept
   {
     return SetGenericFontFamilyForScript(_sansSerifFontFamilyMap, family, script);
   }
 
-  bool FontGenericFamilies::SetCursiveFontFamily(const utf8_string &family, UScriptCode script) noexcept
+  bool FontGenericFamilies::SetCursiveFontFamily(const utf8_string &family, text::Script script) noexcept
   {
     return SetGenericFontFamilyForScript(_cursiveFontFamilyMap, family, script);
   }
 
-  bool FontGenericFamilies::SetFantasyFontFamily(const utf8_string &family, UScriptCode script) noexcept
+  bool FontGenericFamilies::SetFantasyFontFamily(const utf8_string &family, text::Script script) noexcept
   {
     return SetGenericFontFamilyForScript(_fantasyFontFamilyMap, family, script);
   }
 
-  bool FontGenericFamilies::SetPictographFontFamily(const utf8_string &family, UScriptCode script) noexcept
+  bool FontGenericFamilies::SetPictographFontFamily(const utf8_string &family, text::Script script) noexcept
   {
     return SetGenericFontFamilyForScript(_pictographFontFamilyMap, family, script);
   }
 
-  bool FontGenericFamilies::SetMathFontFamily(const utf8_string &family, UScriptCode script) noexcept
+  bool FontGenericFamilies::SetMathFontFamily(const utf8_string &family, text::Script script) noexcept
   {
     return SetGenericFontFamilyForScript(_mathFontFamilyMap, family, script);
   }

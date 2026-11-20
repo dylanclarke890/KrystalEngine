@@ -304,7 +304,7 @@ namespace krys::boo
                                         const RenderFragmentContainer *startFragment,
                                         const RenderFragmentContainer *endFragment) const noexcept;
 
-    bool AbsoluteQuadsForBox(List<FloatQuad> &quads, bool *wasFixed, const RenderBox &box) const noexcept;
+    bool AbsoluteQuadsForBox(List<QuadF> &quads, bool *wasFixed, const RenderBox &box) const noexcept;
 
     KRYS_NODISCARD bool BoxIsFragmented(const RenderBox &box) const noexcept;
 

@@ -25,12 +25,11 @@
 #include "Krystal.Booey/Graphics/TextRuns/ComplexTextController.hpp"
 #include "Krystal.Booey/Graphics/Fonts/FontCascade.hpp"
 #include "Krystal.Booey/Graphics/TextRuns/TextRun.hpp"
-#include "Krystal.Booey/Text/CharacterProperties.hpp"
-#include "Krystal.Booey/Text/TextBreakIterator.hpp"
-#include "Krystal.Core/Text/CodePointIterator.hpp"
-#include "Krystal.Core/Text/Unicode.hpp"
+#include "Krystal.Core/Strings/CodePointIterator.hpp"
+#include "Krystal.Core/Strings/Unicode.hpp"
+#include "Krystal.Text/CharacterProperties.hpp"
+#include "Krystal.Text/TextBreakIterator.hpp"
 #include <algorithm>
-#include <unicode/uchar.h>
 
 namespace krys::boo
 {
@@ -86,7 +85,8 @@ namespace krys::boo
     {
       uint32 expansionOpportunityCount =
         FontCascade::ExpansionOpportunityCount(
-          _run.Text(), _run.Ltr() ? TextDirection::LTR : TextDirection::RTL, _run.ExpansionBehavior())
+          _run.Text(), _run.Ltr() ? text::TextDirection::LTR : text::TextDirection::RTL,
+          _run.ExpansionBehavior())
           .first;
 
       if (!expansionOpportunityCount)
@@ -286,8 +286,8 @@ namespace krys::boo
           }
 
           uint32 stringLength = complexTextRun.StringLength();
-          CachedTextBreakIterator cursorPositionIterator(characters, {}, TextBreakIterator::CaretMode {},
-                                                         null);
+          text::CachedTextBreakIterator cursorPositionIterator(characters, {},
+                                                               text::TextBreakIterator::CaretMode {}, null);
           uint32 clusterStart;
           if (cursorPositionIterator.IsBoundary(hitIndex))
           {
@@ -362,7 +362,7 @@ namespace krys::boo
   }
 
   void ComplexTextController::AdvanceByCombiningCharacterSequence(
-    const CachedTextBreakIterator &graphemeClusterIterator, uint32 &currentIndex,
+    const text::CachedTextBreakIterator &graphemeClusterIterator, uint32 &currentIndex,
     char32 &baseCharacter) noexcept
   {
     uint32 remainingCharacters = _end - currentIndex;
@@ -417,8 +417,8 @@ namespace krys::boo
     RefPtr<const Font> smallSynthesizedFont;
     RefPtr<const Font> halfWidthFont;
 
-    CachedTextBreakIterator graphemeClusterIterator(baseOfString, {}, TextBreakIterator::CharacterMode {},
-                                                    fontDescription.ComputedLocale());
+    text::CachedTextBreakIterator graphemeClusterIterator(
+      baseOfString, {}, text::TextBreakIterator::CharacterMode {}, fontDescription.ComputedLocale());
 
     char32 baseCharacter;
     AdvanceByCombiningCharacterSequence(graphemeClusterIterator, currentIndex, baseCharacter);
@@ -744,7 +744,7 @@ namespace krys::boo
           glyphEndOffset = complexTextRun.EndOffsetAt(glyphIndexIntoCurrentRun);
         }
 
-        FloatSize adjustedBaseAdvance = _adjustedBaseAdvances[glyphIndexIntoComplexTextController];
+        SizeF adjustedBaseAdvance = _adjustedBaseAdvances[glyphIndexIntoComplexTextController];
 
         if (glyphStartOffset + complexTextRun.StringLocation() >= _currentCharacter)
         {
@@ -793,7 +793,7 @@ namespace krys::boo
           glyphBuffer->Add(_adjustedGlyphs[glyphIndexIntoComplexTextController], complexTextRun.GetFont(),
                            paintAdvance,
                            complexTextRun.IndexAt(glyphIndexIntoCurrentRun) + complexTextRun.StringLocation(),
-                           FloatPoint(textAutoSpaceSpacing, 0));
+                           PointF(textAutoSpaceSpacing, 0));
         }
 
         uint32 oldCharacterInCurrentGlyph = _characterInCurrentGlyph;
@@ -901,7 +901,7 @@ namespace krys::boo
       // it here.
       float spaceWidth = font.SpaceWidth(Font::SyntheticBoldInclusion::Exclude);
       auto charactersSpan = complexTextRun.Characters();
-      FloatPoint glyphOrigin;
+      PointF glyphOrigin;
       uint32 previousCharacterIndex =
         _run.Ltr() ? std::numeric_limits<uint32>::min() : std::numeric_limits<uint32>::max();
       bool isMonotonic = true;
@@ -927,8 +927,8 @@ namespace krys::boo
         char32 character = decoded.CodePoint;
         bool treatAsSpace = FontCascade::TreatAsSpace(character);
         Glyph glyph = glyphs[glyphIndex];
-        FloatSize advance =
-          treatAsSpace ? FloatSize(spaceWidth, advances[glyphIndex].Height()) : advances[glyphIndex];
+        SizeF advance =
+          treatAsSpace ? SizeF(spaceWidth, advances[glyphIndex].Height()) : advances[glyphIndex];
 
         if (character == text::TabCharacter && _run.AllowTabs())
         {
@@ -957,7 +957,7 @@ namespace krys::boo
         // for compat. See https://github.com/w3c/csswg-drafts/pull/6983.
         if (character != text::NewlineCharacter && character != text::CarriageReturn
             && character != text::NoBreakSpace && character != text::TabCharacter
-            && character != text::NullCharacter && IsControlCharacter(character))
+            && character != text::NullCharacter && text::IsControlCharacter(character))
         {
           // Let's assume that .notdef is visible.
           glyph = 0;
@@ -1065,7 +1065,7 @@ namespace krys::boo
         auto characterClass = text_spacing::CharacterClass::Undefined;
         // Since we are iterating through glyphs here we skip combining marks, since we just care about the
         // grapheme cluster base for text-autospace.
-        if (!textAutoSpace.IsNoAutospace() && !IsCombiningMark(character))
+        if (!textAutoSpace.IsNoAutospace() && !text::IsCombiningMark(character))
         {
           characterClass = text_spacing::GetCharacterClass(character);
           if (textAutoSpace.ShouldApplySpacing(previousCharacterClass, characterClass))
@@ -1086,7 +1086,7 @@ namespace krys::boo
         {
           // FIXME: Combining marks should receive a text emphasis mark if they are combine with a space.
           if (!FontCascade::CanReceiveTextEmphasis(character)
-              || (U_GET_GC_MASK(static_cast<UChar32>(character)) & U_GC_M_MASK))
+              || (text::IsInGeneralCategory(character, text::MarkCategories)))
           {
             glyph = DeletedGlyph;
           }
@@ -1097,7 +1097,7 @@ namespace krys::boo
         {
           krys_debug_assert(_glyphOrigins.size() < _adjustedBaseAdvances.size());
           _glyphOrigins.resize(_adjustedBaseAdvances.size());
-          _glyphOrigins.back() = origins[glyphIndex] + FloatSize(textAutoSpaceSpacing, 0);
+          _glyphOrigins.back() = origins[glyphIndex] + SizeF(textAutoSpaceSpacing, 0);
           krys_debug_assert(_glyphOrigins.size() == _adjustedBaseAdvances.size());
         }
         _adjustedGlyphs.push_back(glyph);
@@ -1151,13 +1151,15 @@ namespace krys::boo
     _glyphs.assign(_glyphCount, 0);
     // Synthetic bold will be handled later in AdjustGlyphsAndAdvances().
     _baseAdvances.assign(_glyphCount,
-                         FloatSize(_font->WidthForGlyph(0, Font::SyntheticBoldInclusion::Exclude), 0));
+                         SizeF(_font->WidthForGlyph(0, Font::SyntheticBoldInclusion::Exclude), 0));
   }
 
-  ComplexTextController::ComplexTextRun::ComplexTextRun(
-    Span<const FloatSize> advances, Span<const FloatPoint> origins, Span<const Glyph> glyphs,
-    Span<const uint32> stringIndices, FloatSize initialAdvance, const Font &font, utf8_stringview characters,
-    uint32 stringLocation, uint32 indexBegin, uint32 indexEnd, bool ltr) noexcept
+  ComplexTextController::ComplexTextRun::ComplexTextRun(Span<const SizeF> advances,
+                                                        Span<const PointF> origins, Span<const Glyph> glyphs,
+                                                        Span<const uint32> stringIndices,
+                                                        SizeF initialAdvance, const Font &font,
+                                                        utf8_stringview characters, uint32 stringLocation,
+                                                        uint32 indexBegin, uint32 indexEnd, bool ltr) noexcept
       : _baseAdvances(advances.begin(), advances.end()), _glyphOrigins(origins.begin(), origins.end()),
         _glyphs(glyphs.begin(), glyphs.end()), _coreTextIndices(stringIndices.begin(), stringIndices.end()),
         _initialAdvance(initialAdvance), _font(ShareRef(font)), _characters(characters),

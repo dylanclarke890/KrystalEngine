@@ -22,8 +22,8 @@
 #pragma once
 
 #include "Krystal.Core/Enum.hpp"
-#include "Krystal.Core/Text/ASCII.hpp"
-#include "Krystal.Core/Types/String.hpp"
+#include "Krystal.Core/Strings/ASCII.hpp"
+#include "Krystal.Core/Strings/String.hpp"
 
 namespace krys::boo::css
 {

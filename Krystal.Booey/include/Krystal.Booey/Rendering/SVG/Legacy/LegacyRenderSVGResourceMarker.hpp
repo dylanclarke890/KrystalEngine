@@ -34,7 +34,7 @@ namespace krys::boo
 
   private:
     mutable AffineTransform _localToParentTransform;
-    FloatRect _viewport;
+    RectF _viewport;
 
   public:
     LegacyRenderSVGResourceMarker(SVGMarkerElement &, RenderStyle &&) noexcept;
@@ -54,8 +54,8 @@ namespace krys::boo
     void Draw(PaintInfo &, const AffineTransform &) noexcept;
 
     // Calculates marker boundaries, mapped to the target element's coordinate space
-    KRYS_NODISCARD FloatRect MarkerBoundaries(RepaintRectCalculation,
-                                              const AffineTransform &markerTransformation) const noexcept;
+    KRYS_NODISCARD RectF MarkerBoundaries(RepaintRectCalculation,
+                                          const AffineTransform &markerTransformation) const noexcept;
 
     void ApplyViewportClip(PaintInfo &) noexcept override;
 
@@ -65,7 +65,7 @@ namespace krys::boo
 
     KRYS_NODISCARD const AffineTransform &LocalToParentTransform() const noexcept override;
 
-    KRYS_NODISCARD AffineTransform MarkerTransformation(const FloatPoint &origin, float angle,
+    KRYS_NODISCARD AffineTransform MarkerTransformation(const PointF &origin, float angle,
                                                         float strokeWidth) const noexcept;
 
     EnumSet<ApplyResult> ApplyResource(RenderElement &, const RenderStyle &, GraphicsContext *&,
@@ -74,13 +74,12 @@ namespace krys::boo
       return {};
     }
 
-    KRYS_NODISCARD FloatRect ResourceBoundingBox(const RenderObject &,
-                                                 RepaintRectCalculation) noexcept override
+    KRYS_NODISCARD RectF ResourceBoundingBox(const RenderObject &, RepaintRectCalculation) noexcept override
     {
-      return FloatRect();
+      return RectF();
     }
 
-    KRYS_NODISCARD FloatPoint ReferencePoint() const noexcept;
+    KRYS_NODISCARD PointF ReferencePoint() const noexcept;
 
     KRYS_NODISCARD Maybe<float> Angle() const noexcept;
 
@@ -102,7 +101,7 @@ namespace krys::boo
     // Generates a transformation matrix usable to render marker content. Handles scaling the marker content
     // acording to SVGs markerUnits="strokeWidth" concept, when a strokeWidth value != -1 is passed in.
     KRYS_NODISCARD AffineTransform MarkerContentTransformation(const AffineTransform &contentTransformation,
-                                                               const FloatPoint &origin,
+                                                               const PointF &origin,
                                                                float strokeWidth = -1) const noexcept;
 
     KRYS_NODISCARD AffineTransform ViewportTransform() const noexcept;

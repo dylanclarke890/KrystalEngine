@@ -10,7 +10,7 @@
 #include "Krystal.Booey/Graphics/Layers/GraphicsLayerTransformAnimationValue.hpp"
 #include "Krystal.Booey/Graphics/NullGraphicsContext.hpp"
 #include "Krystal.Booey/Graphics/Transforms/RotateTransformOperation.hpp"
-#include "Krystal.Core/Text/TextStream.hpp"
+#include "Krystal.Core/Strings/TextStream.hpp"
 
 namespace krys::boo::tests
 {
@@ -21,7 +21,7 @@ namespace krys::boo::tests
     {
     public:
       uint32 NeedsDisplayCount {0};
-      List<FloatRect> NeedsDisplayRects;
+      List<RectF> NeedsDisplayRects;
 
       TestGraphicsLayer(Type type, GraphicsLayerClient &client) noexcept : GraphicsLayer(type, client)
       {
@@ -37,7 +37,7 @@ namespace krys::boo::tests
         ++NeedsDisplayCount;
       }
 
-      void SetNeedsDisplayInRect(const FloatRect &rect, ShouldClipToLayer) noexcept final
+      void SetNeedsDisplayInRect(const RectF &rect, ShouldClipToLayer) noexcept final
       {
         NeedsDisplayRects.push_back(rect);
       }
@@ -64,9 +64,9 @@ namespace krys::boo::tests
     class TestClient final : public GraphicsLayerClient
     {
     public:
-      FloatRect PaintedClip;
+      RectF PaintedClip;
 
-      void PaintContents(const GraphicsLayer &, GraphicsContext &, const FloatRect &clip,
+      void PaintContents(const GraphicsLayer &, GraphicsContext &, const RectF &clip,
                          EnumSet<GraphicsLayerPaintBehavior>) noexcept final
       {
         PaintedClip = clip;
@@ -200,7 +200,7 @@ namespace krys::boo::tests
     NullGraphicsContext context;
     layer->PaintGraphicsLayerContents(context, {0, 0, 50, 40});
     // The clip moves by the offset from the renderer, less the scroll offset.
-    CHECK(client.PaintedClip == FloatRect {10, 15, 50, 40});
+    CHECK(client.PaintedClip == RectF {10, 15, 50, 40});
   }
 
   TEST_CASE("GraphicsLayer: layer tree as text", "[Graphics][GraphicsLayer]")
@@ -258,16 +258,15 @@ namespace krys::boo::tests
   TEST_CASE("GraphicsLayer: coverage grows in the direction it moves", "[Graphics][GraphicsLayer]")
   {
     // No previous visible rect: just the current one.
-    CHECK(GraphicsLayer::AdjustCoverageRectForMovement({}, {}, {0, 0, 100, 100})
-          == FloatRect {0, 0, 100, 100});
+    CHECK(GraphicsLayer::AdjustCoverageRectForMovement({}, {}, {0, 0, 100, 100}) == RectF {0, 0, 100, 100});
 
     // Moving down by 10 pads the bottom by twice that.
     CHECK(GraphicsLayer::AdjustCoverageRectForMovement({}, {0, 0, 100, 100}, {0, 10, 100, 100})
-          == FloatRect {0, 10, 100, 120});
+          == RectF {0, 10, 100, 120});
 
     // Moving left by 10 pads the left by twice that.
     CHECK(GraphicsLayer::AdjustCoverageRectForMovement({}, {50, 0, 100, 100}, {40, 0, 100, 100})
-          == FloatRect {20, 0, 120, 100});
+          == RectF {20, 0, 120, 100});
   }
 
   TEST_CASE("GraphicsLayer: animations", "[Graphics][GraphicsLayer]")
@@ -365,10 +364,10 @@ namespace krys::boo::tests
     transform.CombineTransforms({});
 
     // Scaled about the centre (50, 25), then moved to (10, 20).
-    CHECK(transform.Combined().MapPoint(FloatPoint {0, 0}) == FloatPoint {-40, -5});
-    CHECK(transform.Combined().MapPoint(FloatPoint {50, 25}) == FloatPoint {60, 45});
+    CHECK(transform.Combined().MapPoint(PointF {0, 0}) == PointF {-40, -5});
+    CHECK(transform.Combined().MapPoint(PointF {50, 25}) == PointF {60, 45});
 
     // Children are placed in the layer's coordinates, transformed with it.
-    CHECK(transform.CombinedForChildren().MapPoint(FloatPoint {0, 0}) == FloatPoint {-40, -5});
+    CHECK(transform.CombinedForChildren().MapPoint(PointF {0, 0}) == PointF {-40, -5});
   }
 }

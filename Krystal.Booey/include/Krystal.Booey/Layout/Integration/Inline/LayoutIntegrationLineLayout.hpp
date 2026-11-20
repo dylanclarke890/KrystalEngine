@@ -25,7 +25,6 @@
 
 #pragma once
 
-#include "Krystal.Booey/Graphics/Geometry/FloatRect.hpp"
 #include "Krystal.Booey/Graphics/Geometry/LayoutRect.hpp"
 #include "Krystal.Booey/Layout/FormattingContexts/Inline/InlineFormattingConstraints.hpp"
 #include "Krystal.Booey/Layout/FormattingContexts/Inline/InlineFormattingContext.hpp"
@@ -39,6 +38,7 @@
 #include "Krystal.Booey/Rendering/RenderBlockFlow.hpp"
 #include "Krystal.Booey/Rendering/SVG/SVGTextChunk.hpp"
 #include "Krystal.Core/Attributes.hpp"
+#include "Krystal.Core/Geometry/Rect.hpp"
 #include "Krystal.Core/Macros.hpp"
 #include "Krystal.Core/Types/CheckedPtr.hpp"
 #include "Krystal.Core/Types/List.hpp"
@@ -166,7 +166,7 @@ namespace krys::boo::layout_integration
 
     KRYS_NODISCARD LayoutRect InkOverflowBoundingBoxRectFor(const RenderInline &renderInline) const noexcept;
 
-    KRYS_NODISCARD List<FloatRect> CollectInlineBoxRects(const RenderInline &renderInline) const noexcept;
+    KRYS_NODISCARD List<RectF> CollectInlineBoxRects(const RenderInline &renderInline) const noexcept;
 
     KRYS_NODISCARD LayoutUnit ContentLogicalHeight() const noexcept;
 
@@ -233,7 +233,7 @@ namespace krys::boo::layout_integration
     /// @note This is temporary, required by partial bailout check.
     KRYS_NODISCARD bool ContentNeedsVisualReordering() const noexcept;
 
-    KRYS_NODISCARD FloatRect ApplySVGTextFragments(SVGTextFragmentMap fragmentMap) noexcept;
+    KRYS_NODISCARD RectF ApplySVGTextFragments(SVGTextFragmentMap fragmentMap) noexcept;
 
     KRYS_NODISCARD bool HasBlocks() const noexcept;
 
@@ -242,8 +242,8 @@ namespace krys::boo::layout_integration
 
     void PreparePlacedFloats() noexcept;
 
-    FloatRect ConstructContent(const layout::InlineLayoutState &inlineLayoutState,
-                               layout::InlineLayoutResult &&layoutResult) noexcept;
+    RectF ConstructContent(const layout::InlineLayoutState &inlineLayoutState,
+                           layout::InlineLayoutResult &&layoutResult) noexcept;
 
     void UpdateRenderTreePositions(const List<LineAdjustment> &lineAdjustments,
                                    const layout::InlineLayoutState &inlineLayoutState,

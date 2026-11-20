@@ -1,8 +1,8 @@
 ﻿#include "Krystal.UI/ImageBufferRender2DBackend.hpp"
-#include "Krystal.Booey/Graphics/Geometry/IntRect.hpp"
 #include "Krystal.Booey/Graphics/ImageBuffers/ImageBuffer.hpp"
 #include "Krystal.Booey/Graphics/ImageBuffers/PixelBuffer.hpp"
 #include "Krystal.Booey/Graphics/Images/NativeImage.hpp"
+#include "Krystal.Core/Geometry/Rect.hpp"
 #include "Krystal.Core/Maths/Extras.hpp"
 #include "Krystal.Gfx/CommandBuffer.hpp"
 #include "Krystal.Gfx/Device.hpp"
@@ -20,9 +20,8 @@ namespace krys::ui
   {
   }
 
-  void ImageBufferRender2DLayer::PaintToTextureMapper(TextureMapper &textureMapper,
-                                                      const boo::FloatRect &targetRect,
-                                                      const boo::TransformationMatrix &modelViewMatrix,
+  void ImageBufferRender2DLayer::PaintToTextureMapper(TextureMapper &textureMapper, const RectF &targetRect,
+                                                      const TransformationMatrix &modelViewMatrix,
                                                       float opacity) noexcept
   {
     auto *backend = _backend.get();
@@ -45,7 +44,7 @@ namespace krys::ui
 
   ImageBufferRender2DBackend::ImageBufferRender2DBackend(const Parameters &parameters,
                                                          AcceleratedImageBuffers &host) noexcept
-      : ImageBufferBackend(parameters), _drawingContext(boo::FloatSize(parameters.BackendSize), *this),
+      : ImageBufferBackend(parameters), _drawingContext(SizeF(parameters.BackendSize), *this),
         _host(CreateWeakPtr(&host)), _delegate(ImageBufferRender2DDisplayDelegate::Create(*this))
   {
     // The drawing starts in the recorder's initial state.
@@ -60,7 +59,7 @@ namespace krys::ui
   }
 
   RefPtr<boo::ImageBuffer>
-    ImageBufferRender2DBackend::Recorder::CreateImageBuffer(const boo::FloatSize &size,
+    ImageBufferRender2DBackend::Recorder::CreateImageBuffer(const SizeF &size,
                                                             float resolutionScale) const noexcept
   {
     if (auto *host = _backend._host.get())
@@ -70,9 +69,8 @@ namespace krys::ui
     return RecorderImpl::CreateImageBuffer(size, resolutionScale);
   }
 
-  void ImageBufferRender2DBackend::Recorder::DrawImageBuffer(boo::ImageBuffer &buffer,
-                                                             const boo::FloatRect &destRect,
-                                                             const boo::FloatRect &srcRect,
+  void ImageBufferRender2DBackend::Recorder::DrawImageBuffer(boo::ImageBuffer &buffer, const RectF &destRect,
+                                                             const RectF &srcRect,
                                                              boo::ImagePaintingOptions options) noexcept
   {
     // An accelerated buffer is drawn as it is now, not as it is when this is rendered: its later drawing,
@@ -123,7 +121,7 @@ namespace krys::ui
     return CopyNativeImage();
   }
 
-  void ImageBufferRender2DBackend::GetPixelBuffer(const boo::IntRect &sourceRect,
+  void ImageBufferRender2DBackend::GetPixelBuffer(const RectI &sourceRect,
                                                   boo::PixelBuffer &destination) noexcept
   {
     Flush();
@@ -333,7 +331,7 @@ namespace krys::ui
           }
           else if constexpr (SameType<T, dl::ApplyDeviceScaleFactor>)
           {
-            level.Ctm.Scale(boo::FloatSize(value.ScaleFactor(), value.ScaleFactor()));
+            level.Ctm.Scale(SizeF(value.ScaleFactor(), value.ScaleFactor()));
           }
           else if constexpr (SameType<T, dl::SetCTM>)
           {
@@ -519,7 +517,7 @@ namespace krys::ui
                               .Height = height,
                               .Format = gfx::TextureFormat::RGBA8Unorm,
                               .ClearColour = Array<float, 4> {0.f, 0.f, 0.f, 0.f}});
-    const gfx::Rect2D whole {0.f, 0.f, static_cast<float>(width), static_cast<float>(height)};
+    const RectF whole {0.f, 0.f, static_cast<float>(width), static_cast<float>(height)};
     _copier->DrawImage(source, whole, whole);
     _copier->End();
     _device->Submit(commands);
@@ -532,8 +530,7 @@ namespace krys::ui
       AdoptRef(*new boo::PlatformImage(size, Ref<boo::ExternalImage>(krys::move(snapshot)), true)));
   }
 
-  RefPtr<boo::ImageBuffer> AcceleratedImageBuffers::Create(const boo::FloatSize &size,
-                                                           boo::RenderingPurpose purpose,
+  RefPtr<boo::ImageBuffer> AcceleratedImageBuffers::Create(const SizeF &size, boo::RenderingPurpose purpose,
                                                            float resolutionScale) noexcept
   {
     return boo::ImageBuffer::Create<ImageBufferRender2DBackend>(size, resolutionScale, purpose, *this);

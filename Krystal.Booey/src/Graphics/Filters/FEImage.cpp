@@ -23,17 +23,17 @@
 
 #include "Krystal.Booey/Graphics/Filters/FEImage.hpp"
 #include "Krystal.Booey/Graphics/Filters/Filter.hpp"
-#include "Krystal.Core/Text/TextStream.hpp"
+#include "Krystal.Core/Strings/TextStream.hpp"
 
 namespace krys::boo
 {
-  Ref<FEImage> FEImage::Create(SourceImage &&sourceImage, const FloatRect &sourceImageRect,
+  Ref<FEImage> FEImage::Create(SourceImage &&sourceImage, const RectF &sourceImageRect,
                                const SVGPreserveAspectRatioValue &preserveAspectRatio) noexcept
   {
     return AdoptRef(*new FEImage(krys::move(sourceImage), sourceImageRect, preserveAspectRatio));
   }
 
-  FEImage::FEImage(SourceImage &&sourceImage, const FloatRect &sourceImageRect,
+  FEImage::FEImage(SourceImage &&sourceImage, const RectF &sourceImageRect,
                    const SVGPreserveAspectRatioValue &preserveAspectRatio) noexcept
       : FilterEffect(Type::FEImage), _sourceImage(krys::move(sourceImage)), _sourceImageRect(sourceImageRect),
         _preserveAspectRatio(preserveAspectRatio)
@@ -47,8 +47,8 @@ namespace krys::boo
            && _preserveAspectRatio == other._preserveAspectRatio;
   }
 
-  FloatRect FEImage::CalculateImageRect(const Filter &filter, Span<const FloatRect>,
-                                        const FloatRect &primitiveSubregion) const noexcept
+  RectF FEImage::CalculateImageRect(const Filter &filter, Span<const RectF>,
+                                    const RectF &primitiveSubregion) const noexcept
   {
     if (_sourceImage.NativeImageIfExists())
     {
@@ -64,7 +64,7 @@ namespace krys::boo
     }
 
     krys_debug_assert(false);
-    return FloatRect();
+    return RectF();
   }
 
   TextStream &FEImage::ExternalRepresentation(TextStream &ts,

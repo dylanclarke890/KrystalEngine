@@ -5,7 +5,7 @@
 #include "Krystal.Booey/Graphics/Fonts/FontCreationContext.hpp"
 #include "Krystal.Booey/Graphics/Fonts/FontCustomPlatformData.hpp"
 #include "Krystal.Booey/Graphics/Fonts/FontDatabase.hpp"
-#include "Krystal.Booey/Platform/SharedBuffer.hpp"
+#include "Krystal.Core/Types/SharedBuffer.hpp"
 #include <fstream>
 #include <iterator>
 

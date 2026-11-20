@@ -30,9 +30,7 @@
 #include "Krystal.Booey/Rendering/SVG/SVGRenderTreeAsText.hpp"
 #include "Krystal.Booey/DOM/Nodes/Document.hpp"
 #include "Krystal.Booey/Graphics/Color/ColorSerialisation.hpp"
-#include "Krystal.Booey/Graphics/Geometry/IntRect.hpp"
 #include "Krystal.Booey/Graphics/NullGraphicsContext.hpp"
-#include "Krystal.Booey/Graphics/Transforms/AffineTransform.hpp"
 #include "Krystal.Booey/Layout/Integration/Inline/InlineIteratorInlineBox.hpp"
 #include "Krystal.Booey/Layout/Integration/Inline/InlineIteratorSVGTextBox.hpp"
 #include "Krystal.Booey/Rendering/Iterators/RenderChildIterator.hpp"
@@ -71,7 +69,9 @@
 #include "Krystal.Booey/SVG/SVGMarkerTypes.hpp"
 #include "Krystal.Booey/SVG/SVGPointList.hpp"
 #include "Krystal.Booey/SVG/SVGURIReference.hpp"
-#include "Krystal.Core/Text/ASCII.hpp"
+#include "Krystal.Core/Geometry/AffineTransform.hpp"
+#include "Krystal.Core/Geometry/Rect.hpp"
+#include "Krystal.Core/Strings/ASCII.hpp"
 
 namespace krys::boo
 {
@@ -307,12 +307,12 @@ namespace krys::boo
       {
         if (auto *box = DynamicDowncast<RenderBox>(renderer))
         {
-          ts << ' ' << EnclosingIntRect(box->FrameRect());
+          ts << ' ' << EnclosingRectI(box->FrameRect());
         }
         ts << u8" clipped";
       }
 
-      ts << ' ' << EnclosingIntRect(renderer.AbsoluteClippedOverflowRectForRenderTreeAsText());
+      ts << ' ' << EnclosingRectI(renderer.AbsoluteClippedOverflowRectForRenderTreeAsText());
 
       WriteSVGPaintingFeatures(ts, renderer, behavior);
       return ts;
@@ -534,8 +534,8 @@ namespace krys::boo
       WriteCommonGradientProperties(ts, attributes.SpreadMethod(), attributes.GradientTransform(),
                                     attributes.GradientUnits());
 
-      FloatPoint focalPoint = radialGradient->FocalPoint(attributes);
-      FloatPoint centerPoint = radialGradient->CenterPoint(attributes);
+      PointF focalPoint = radialGradient->FocalPoint(attributes);
+      PointF centerPoint = radialGradient->CenterPoint(attributes);
       float radius = radialGradient->Radius(attributes);
       float focalRadius = radialGradient->FocalRadius(attributes);
 
@@ -584,8 +584,7 @@ namespace krys::boo
       }
 
       ts << ' '
-         << EnclosingIntRect(
-              FloatRect(FloatPoint(text.Location()), FloatSize(box->LogicalWidth(), box->LogicalHeight())));
+         << EnclosingRectI(RectF(PointF(text.Location()), SizeF(box->LogicalWidth(), box->LogicalHeight())));
 
       // FIXME: Remove this hack, once the new text layout engine is completly landed. We want to preserve the
       // old layout test results for now.
@@ -697,9 +696,7 @@ namespace krys::boo
                           EnumSet<RenderAsTextFlag> behavior) noexcept
   {
     WriteStandardPrefix(ts, text, behavior);
-    ts << ' '
-       << EnclosingIntRect(
-            FloatRect(FloatPoint(text.FirstRunLocation()), text.FloatLinesBoundingBox().Size()))
+    ts << ' ' << EnclosingRectI(RectF(PointF(text.FirstRunLocation()), text.FloatLinesBoundingBox().Size()))
        << '\n';
     WriteResources(ts, text, behavior);
     WriteSVGInlineTextBoxes(ts, text);

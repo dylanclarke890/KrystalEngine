@@ -50,7 +50,7 @@
 #include "Krystal.Booey/CSS/Values/ValuePool.hpp"
 #include "Krystal.Booey/Graphics/Color/NamedColors.hpp"
 #include "Krystal.Core/Colour/ColourUtilities.hpp"
-#include "Krystal.Core/Text/ASCII.hpp"
+#include "Krystal.Core/Strings/ASCII.hpp"
 #include <array>
 #include <charconv>
 #include <cmath>

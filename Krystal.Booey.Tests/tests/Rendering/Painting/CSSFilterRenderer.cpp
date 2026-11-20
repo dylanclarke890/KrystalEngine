@@ -71,7 +71,7 @@ namespace krys::boo::tests
         auto renderer = Renderer();
         REQUIRE(renderer);
         NullGraphicsContext context;
-        return static_cast<const Filter &>(*renderer).CreateFilterStyles(context, FloatRect {0, 0, 40, 30});
+        return static_cast<const Filter &>(*renderer).CreateFilterStyles(context, RectF {0, 0, 40, 30});
       }
     };
   }
@@ -110,13 +110,13 @@ namespace krys::boo::tests
 
       REQUIRE((styles[0].Style && HoldsAlternative<GraphicsDropShadow>(*styles[0].Style)));
       const auto &shadow = StyleOf<GraphicsDropShadow>(styles[0]);
-      CHECK(shadow.Offset == FloatSize {4, 5});
+      CHECK(shadow.Offset == SizeF {4, 5});
       // Shadows' blur radii are twice the standard deviation.
       CHECK(shadow.Radius == 4.f);
       CHECK(shadow.Color == Color {SRGBA<uint8> {0, 0, 255}});
 
       REQUIRE((styles[1].Style && HoldsAlternative<GraphicsGaussianBlur>(*styles[1].Style)));
-      CHECK(StyleOf<GraphicsGaussianBlur>(styles[1]).Radius == FloatSize {6, 6});
+      CHECK(StyleOf<GraphicsGaussianBlur>(styles[1]).Radius == SizeF {6, 6});
 
       REQUIRE((styles[2].Style && HoldsAlternative<GraphicsColorMatrix>(*styles[2].Style)));
       const auto &values = StyleOf<GraphicsColorMatrix>(styles[2]).Values;
@@ -153,7 +153,7 @@ namespace krys::boo::tests
       FilterFixture fixture(u8"blur(0) saturate(1) grayscale(1)");
       auto styles = fixture.Styles();
       REQUIRE(styles.size() == 3u);
-      CHECK(StyleOf<GraphicsGaussianBlur>(styles[2]).Radius == FloatSize {});
+      CHECK(StyleOf<GraphicsGaussianBlur>(styles[2]).Radius == SizeF {});
     }
   }
 
@@ -163,7 +163,7 @@ namespace krys::boo::tests
     {
       FilterFixture fixture(u8"blur(4px)");
       auto outsets = CSSFilterRenderer::CalculateOutsets(fixture.Box(), fixture.Box().Style().GetFilter(),
-                                                         FloatRect {0, 0, 40, 30});
+                                                         RectF {0, 0, 40, 30});
       // Three standard deviations.
       CHECK(outsets == IntOutsets {12, 12, 12, 12});
       CHECK(fixture.BoxLayer().HasFilterOutsets());
@@ -174,7 +174,7 @@ namespace krys::boo::tests
     {
       FilterFixture fixture(u8"drop-shadow(4px -6px 0 black)");
       auto outsets = CSSFilterRenderer::CalculateOutsets(fixture.Box(), fixture.Box().Style().GetFilter(),
-                                                         FloatRect {0, 0, 40, 30});
+                                                         RectF {0, 0, 40, 30});
       // Top, right, bottom, left: the offset moves the shadow up and right.
       CHECK(outsets == IntOutsets {6, 4, 0, 0});
       CHECK(fixture.BoxLayer().FilterMovesPixels());

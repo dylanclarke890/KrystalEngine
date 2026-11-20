@@ -26,18 +26,18 @@
 
 #include "Krystal.Booey/Style/Values/Images/ImageOrientation.hpp"
 
-#include "Krystal.Booey/Graphics/Images/ImageOrientation.hpp"
+#include "Krystal.Image/ImageOrientation.hpp"
 
 namespace krys::boo::style
 {
   // MARK: - Platform
 
-  boo::ImageOrientation ToPlatform<ImageOrientation>::operator()(ImageOrientation value) noexcept
+  img::ImageOrientation ToPlatform<ImageOrientation>::operator()(ImageOrientation value) noexcept
   {
     switch (value)
     {
-      case ImageOrientation::FromImage: return boo::ImageOrientation::Orientation::FromImage;
-      case ImageOrientation::None:      return boo::ImageOrientation::Orientation::None;
+      case ImageOrientation::FromImage: return img::ImageOrientation::Orientation::FromImage;
+      case ImageOrientation::None:      return img::ImageOrientation::Orientation::None;
     }
     krys_unreachable();
   }

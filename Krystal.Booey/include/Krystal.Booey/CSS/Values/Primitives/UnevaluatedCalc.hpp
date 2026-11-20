@@ -27,7 +27,7 @@
 #include "Krystal.Booey/CSS/Values/Primitives/Concepts.hpp"
 #include "Krystal.Booey/CSS/Values/Types.hpp"
 #include "Krystal.Core/Attributes.hpp"
-#include "Krystal.Core/Text/StringBuilder.hpp"
+#include "Krystal.Core/Strings/StringBuilder.hpp"
 #include "Krystal.Core/Types/Func.hpp"
 #include "Krystal.Core/Types/IterationStatus.hpp"
 #include "Krystal.Core/Types/Maybe.hpp"

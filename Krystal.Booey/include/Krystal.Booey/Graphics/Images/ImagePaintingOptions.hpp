@@ -27,9 +27,9 @@
 
 #include "Krystal.Booey/Graphics/GraphicsTypes.hpp"
 #include "Krystal.Booey/Graphics/Images/DecodingOptions.hpp"
-#include "Krystal.Booey/Graphics/Images/ImageOrientation.hpp"
 #include "Krystal.Booey/Graphics/Images/ImageTypes.hpp"
 #include "Krystal.Core/TypeTraits.hpp"
+#include "Krystal.Image/ImageOrientation.hpp"
 
 namespace krys::boo
 {
@@ -49,7 +49,8 @@ namespace krys::boo
     template <typename Type>
     constexpr static bool IsOptionType =
       std::is_same_v<Type, CompositeOperator> || std::is_same_v<Type, boo::BlendMode>
-      || std::is_same_v<Type, ImageOrientation> || std::is_same_v<Type, ImageOrientation::Orientation>
+      || std::is_same_v<Type, img::ImageOrientation>
+      || std::is_same_v<Type, img::ImageOrientation::Orientation>
       || std::is_same_v<Type, boo::InterpolationQuality> || std::is_same_v<Type, DecodingMode>
       || std::is_same_v<Type, AllowImageSubsampling> || std::is_same_v<Type, ShowDebugBackground>;
 
@@ -57,7 +58,7 @@ namespace krys::boo
     CompositeOperator _compositeOperator {CompositeOperator::SourceOver};
     boo::BlendMode _blendMode {boo::BlendMode::Normal};
     boo::DecodingMode _decodingMode {boo::DecodingMode::Synchronous};
-    ImageOrientation _orientation {ImageOrientation::Orientation::None};
+    img::ImageOrientation _orientation {img::ImageOrientation::Orientation::None};
     boo::InterpolationQuality _interpolationQuality {boo::InterpolationQuality::Default};
     boo::AllowImageSubsampling _allowImageSubsampling {boo::AllowImageSubsampling::No};
     boo::ShowDebugBackground _showDebugBackground {boo::ShowDebugBackground::No};
@@ -107,7 +108,7 @@ namespace krys::boo
       return _decodingMode;
     }
 
-    KRYS_NODISCARD ImageOrientation Orientation() const noexcept
+    KRYS_NODISCARD img::ImageOrientation Orientation() const noexcept
     {
       return _orientation;
     }
@@ -138,12 +139,12 @@ namespace krys::boo
       _blendMode = blendMode;
     }
 
-    void SetOption(ImageOrientation orientation) noexcept
+    void SetOption(img::ImageOrientation orientation) noexcept
     {
       _orientation = orientation;
     }
 
-    void SetOption(ImageOrientation::Orientation orientation) noexcept
+    void SetOption(img::ImageOrientation::Orientation orientation) noexcept
     {
       _orientation = orientation;
     }

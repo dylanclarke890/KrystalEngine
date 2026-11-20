@@ -14,7 +14,7 @@ namespace krys::boo::tests
               NoBreakSpaceBehavior TSpaces = NoBreakSpaceBehavior::Normal>
     KRYS_NODISCARD uint32 NextBreak(utf8_stringview text, size_t startPosition) noexcept
     {
-      auto factory = CachedLineBreakIteratorFactory {text};
+      auto factory = text::CachedLineBreakIteratorFactory {text};
       return BreakablePositions::Next<TRules, TWords, TSpaces>(factory, startPosition);
     }
 
@@ -25,7 +25,7 @@ namespace krys::boo::tests
     KRYS_NODISCARD List<uint32> AllBreaks(utf8_stringview text) noexcept
     {
       List<uint32> breaks;
-      auto factory = CachedLineBreakIteratorFactory {text};
+      auto factory = text::CachedLineBreakIteratorFactory {text};
       size_t position = 0;
       while (position < text.size())
       {
@@ -78,11 +78,11 @@ namespace krys::boo::tests
   {
     SECTION("The prior context allows a break before the first character")
     {
-      auto factory = CachedLineBreakIteratorFactory {u8"ample"};
+      auto factory = text::CachedLineBreakIteratorFactory {u8"ample"};
       factory.GetPriorContext().Set({u'x', u'-'});
       CHECK(BreakablePositions::Next(factory, 0) == 0);
 
-      auto unbreakable = CachedLineBreakIteratorFactory {u8"ample"};
+      auto unbreakable = text::CachedLineBreakIteratorFactory {u8"ample"};
       unbreakable.GetPriorContext().Set({u'e', u'x'});
       CHECK(BreakablePositions::Next(unbreakable, 0) == 5);
     }
@@ -90,12 +90,12 @@ namespace krys::boo::tests
     SECTION("The character before the one before the start comes from the prior context")
     {
       // "A-1": the hyphen follows a letter, so a line can break before the digit.
-      auto factory = CachedLineBreakIteratorFactory {u8"-1"};
+      auto factory = text::CachedLineBreakIteratorFactory {u8"-1"};
       factory.GetPriorContext().Set({u' ', u'A'});
       CHECK(BreakablePositions::Next(factory, 1) == 1);
 
       // " -1": the hyphen is a minus sign.
-      auto minus = CachedLineBreakIteratorFactory {u8"-1"};
+      auto minus = text::CachedLineBreakIteratorFactory {u8"-1"};
       minus.GetPriorContext().Set({u'A', u' '});
       CHECK(BreakablePositions::Next(minus, 1) == 2);
     }
@@ -149,7 +149,7 @@ namespace krys::boo::tests
 
   TEST_CASE("BreakablePositions: IsBreakable", "[Rendering][BreakablePositions]")
   {
-    auto factory = CachedLineBreakIteratorFactory {u8"hello world"};
+    auto factory = text::CachedLineBreakIteratorFactory {u8"hello world"};
 
     SECTION("Finds the next breakable position")
     {

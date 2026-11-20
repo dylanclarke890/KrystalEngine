@@ -1,11 +1,11 @@
 ﻿#pragma once
 
 #include "Krystal.Booey/Editing/CompositionUnderline.hpp"
+#include "Krystal.Booey/Input/MouseEventTypes.hpp"
+#include "Krystal.Booey/Input/PlatformKeyboardEvent.hpp"
+#include "Krystal.Booey/Input/PlatformWheelEvent.hpp"
 #include "Krystal.Booey/Page/Drag/DragActions.hpp"
-#include "Krystal.Booey/Page/MouseEventTypes.hpp"
 #include "Krystal.Booey/Platform/Cursor.hpp"
-#include "Krystal.Booey/Platform/Events/PlatformKeyboardEvent.hpp"
-#include "Krystal.Booey/Platform/Events/PlatformWheelEvent.hpp"
 #include "Krystal.Core/Attributes.hpp"
 #include "Krystal.Core/Types/List.hpp"
 #include "Krystal.Core/Types/Maybe.hpp"
@@ -36,7 +36,7 @@ namespace krys::ui::input
     /// identified by their text.
     utf8_stringview KeyIdentifier;
     /// @brief The Windows virtual key code, with the side for modifiers (`LShift`, `RControl`).
-    int32 WindowsVirtualKeyCode {0};
+    int32 LegacyKeyCode {0};
     bool IsKeypad {false};
   };
 
@@ -78,15 +78,14 @@ namespace krys::ui::input
   /// @brief A turn of the wheel at @p point by @p notchesX and @p notchesY (positive is away from the user,
   /// or to the right), scrolling @p settings' lines (or a page) per notch, at 100 pixels per three lines;
   /// with Shift, the vertical wheel scrolls sideways. @p screenPoint is where @p point is on the screen.
-  KRYS_NODISCARD boo::PlatformWheelEvent WheelEvent(const boo::IntPoint &point,
-                                                    const boo::IntPoint &screenPoint, float notchesX,
-                                                    float notchesY, pal::KeyModifiers modifiers,
+  KRYS_NODISCARD boo::PlatformWheelEvent WheelEvent(const PointI &point, const PointI &screenPoint,
+                                                    float notchesX, float notchesY,
+                                                    pal::KeyModifiers modifiers,
                                                     const pal::WheelScrollSettings &settings) noexcept;
 
   /// @brief A step of a touchpad's pan at @p point: deltas in the pixels the content follows, in the phase of
   /// the gesture or of the momentum after it. @p screenPoint is where @p point is on the screen.
-  KRYS_NODISCARD boo::PlatformWheelEvent TouchpadPanEvent(const boo::IntPoint &point,
-                                                          const boo::IntPoint &screenPoint,
+  KRYS_NODISCARD boo::PlatformWheelEvent TouchpadPanEvent(const PointI &point, const PointI &screenPoint,
                                                           const pal::TouchpadPanInput &input) noexcept;
 
   /// @brief The system cursor nearest to a Booey cursor.

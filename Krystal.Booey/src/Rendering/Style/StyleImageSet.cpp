@@ -27,8 +27,8 @@
 #include "Krystal.Booey/CSS/Values/ImageSetValue.hpp"
 #include "Krystal.Booey/CSS/Values/PrimitiveValue.hpp"
 #include "Krystal.Booey/CSS/Values/ValuePool.hpp"
-#include "Krystal.Booey/Platform/MIMETypeRegistry.hpp"
-#include "Krystal.Core/Text/ASCII.hpp"
+#include "Krystal.Core/Strings/ASCII.hpp"
+#include "Krystal.Image/ImageDecoder.hpp"
 
 namespace krys::boo
 {
@@ -97,7 +97,7 @@ namespace krys::boo
     for (auto index : _sortedIndices)
     {
       const auto &image = _images[index];
-      if (image.MimeType && !MIMETypeRegistry::IsSupportedImageMIMEType(*image.MimeType))
+      if (image.MimeType && !img::ImageDecoder::SupportsMimeType(*image.MimeType))
       {
         continue;
       }

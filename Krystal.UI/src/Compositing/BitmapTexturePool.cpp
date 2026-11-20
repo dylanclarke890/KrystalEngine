@@ -2,7 +2,7 @@
 
 namespace krys::ui
 {
-  Ref<BitmapTexture> BitmapTexturePool::AcquireTexture(const boo::IntSize &size,
+  Ref<BitmapTexture> BitmapTexturePool::AcquireTexture(const SizeI &size,
                                                        EnumSet<BitmapTexture::Flags> flags) noexcept
   {
     const uint64 frame = _device.FrameNumber();

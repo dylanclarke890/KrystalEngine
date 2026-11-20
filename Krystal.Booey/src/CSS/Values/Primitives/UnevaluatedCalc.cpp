@@ -24,7 +24,7 @@
 
 #include "Krystal.Booey/CSS/Values/Primitives/UnevaluatedCalc.hpp"
 #include "Krystal.Booey/CSS/Calc/Value.hpp"
-#include "Krystal.Core/Text/StringBuilder.hpp"
+#include "Krystal.Core/Strings/StringBuilder.hpp"
 
 namespace krys::boo::css
 {

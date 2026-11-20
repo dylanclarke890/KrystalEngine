@@ -29,9 +29,9 @@
 
 #pragma once
 
-#include "Krystal.Booey/Graphics/Geometry/IntRect.hpp"
 #include "Krystal.Booey/Rendering/Selection/RenderHighlight.hpp"
 #include "Krystal.Core/Attributes.hpp"
+#include "Krystal.Core/Geometry/Rect.hpp"
 
 namespace krys::boo
 {
@@ -69,18 +69,18 @@ namespace krys::boo
 
     void Repaint() const noexcept;
 
-    KRYS_NODISCARD IntRect Bounds() const noexcept
+    KRYS_NODISCARD RectI Bounds() const noexcept
     {
       return CollectBounds(ClipToVisibleContent::No);
     }
 
-    KRYS_NODISCARD IntRect BoundsClippedToVisibleContent() const noexcept
+    KRYS_NODISCARD RectI BoundsClippedToVisibleContent() const noexcept
     {
       return CollectBounds(ClipToVisibleContent::Yes);
     }
 
   private:
-    KRYS_NODISCARD IntRect CollectBounds(ClipToVisibleContent clipToVisibleContent) const noexcept;
+    KRYS_NODISCARD RectI CollectBounds(ClipToVisibleContent clipToVisibleContent) const noexcept;
 
     void Apply(const RenderRange &newSelection, RepaintMode blockRepaintMode) noexcept;
   };

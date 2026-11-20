@@ -30,7 +30,7 @@
 namespace krys::boo
 {
   TransparencyLayerContextSwitcher::TransparencyLayerContextSwitcher(GraphicsContext &destinationContext,
-                                                                     const FloatRect &sourceImageRect,
+                                                                     const RectF &sourceImageRect,
                                                                      RefPtr<Filter> &&filter) noexcept
       : GraphicsContextSwitcher(krys::move(filter))
   {
@@ -41,8 +41,8 @@ namespace krys::boo
   }
 
   void TransparencyLayerContextSwitcher::BeginClipAndDrawSourceImage(GraphicsContext &destinationContext,
-                                                                     const FloatRect &,
-                                                                     const FloatRect &clipRect) noexcept
+                                                                     const RectF &,
+                                                                     const RectF &clipRect) noexcept
   {
     destinationContext.Save();
     destinationContext.BeginTransparencyLayer(1);

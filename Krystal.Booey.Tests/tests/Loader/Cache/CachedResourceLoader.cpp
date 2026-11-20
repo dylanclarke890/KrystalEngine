@@ -2,7 +2,6 @@
 #include "catch2/catch_test_macros.hpp"
 #include "Krystal.Booey.Tests/Loader/PageInFrameFixture.hpp"
 #include "Krystal.Booey.Tests/Loader/TestLoader.hpp"
-#include "Krystal.Booey.Tests/Platform/ImageDecoders/TestImages.hpp"
 #include "Krystal.Booey.Tests/Rendering/PaintTestUtils.hpp"
 #include "Krystal.Booey/DOM/Nodes/Element.hpp"
 #include "Krystal.Booey/DOM/Nodes/HTMLDocument.hpp"
@@ -15,6 +14,7 @@
 #include "Krystal.Booey/Rendering/RenderElement.hpp"
 #include "Krystal.Booey/Rendering/Style/StyleImage.hpp"
 #include "Krystal.Booey/Style/Scope/Scope.hpp"
+#include "Krystal.Image.Tests/TestImages.hpp"
 
 namespace krys::boo::tests
 {
@@ -38,7 +38,7 @@ namespace krys::boo::tests
             "[Loader][CachedResourceLoader]")
   {
     LoaderFixture loader;
-    loader.Strategy.Resources[u8"file:///images/a.png"] = images::PNG;
+    loader.Strategy.Resources[u8"file:///images/a.png"] = img::tests::images::PNG;
     loader.Strategy.Defer = true;
 
     PaintFixture fixture(u8"<!DOCTYPE html><div id=box style='width: 30px; height: 20px; background: "
@@ -62,7 +62,7 @@ namespace krys::boo::tests
     CHECK_FALSE(image->GetCachedImage()->IsLoading());
     CHECK(image->GetCachedImage()->GetStatus() == CachedResource::Cached);
     CHECK(image->HasImage());
-    CHECK(image->ImageSize(box.Renderer(), 1) == FloatSize(3, 2));
+    CHECK(image->ImageSize(box.Renderer(), 1) == SizeF(3, 2));
     CHECK(Contains(fixture.Painted(), u8"draw-pattern-native-image"));
   }
 
@@ -70,7 +70,7 @@ namespace krys::boo::tests
             "[Loader][CachedResourceLoader]")
   {
     LoaderFixture loader;
-    loader.Strategy.Resources[u8"file:///images/shared.png"] = images::PNG;
+    loader.Strategy.Resources[u8"file:///images/shared.png"] = img::tests::images::PNG;
 
     PaintFixture fixture(
       u8"<!DOCTYPE html>"
@@ -86,9 +86,9 @@ namespace krys::boo::tests
     REQUIRE(b);
     CHECK(a->GetCachedImage() == b->GetCachedImage());
     CHECK(a->GetCachedImage()->NumberOfClients() == 2u);
-    CHECK(
-      MemoryCache::Singleton().ResourceForRequest(ResourceRequest(url::URL(u8"file:///images/shared.png")))
-      == a->GetCachedImage());
+    CHECK(MemoryCache::Singleton().ResourceForRequest(
+            net::ResourceRequest(net::Url(u8"file:///images/shared.png")))
+          == a->GetCachedImage());
   }
 
   TEST_CASE("CachedResourceLoader: failed loads and data that isn't an image",
@@ -140,12 +140,12 @@ namespace krys::boo::tests
     auto sheetText = [&](utf8_stringview url)
     {
       auto sheet = fixture.Document->GetCachedResourceLoader().RequestCSSStyleSheet(
-        CachedResourceRequest(ResourceRequest(url::URL(url))));
+        CachedResourceRequest(net::ResourceRequest(net::Url(url))));
       REQUIRE(sheet);
       RunNetworkingTasks();
-      bool hasValidMIMEType = true;
-      auto text = (*sheet)->SheetText(CachedCSSStyleSheet::MIMETypeCheckHint::Lax, &hasValidMIMEType);
-      return Pair<bool, bool>(text.has_value(), hasValidMIMEType);
+      bool hasValidMimeType = true;
+      auto text = (*sheet)->SheetText(CachedCSSStyleSheet::MimeTypeCheckHint::Lax, &hasValidMimeType);
+      return Pair<bool, bool>(text.has_value(), hasValidMimeType);
     };
 
     // A lax check takes any type, unless the response says not to sniff.
@@ -160,7 +160,7 @@ namespace krys::boo::tests
 
     PaintFixture fixture(
       u8"<!DOCTYPE html><div id=box style='width: 6px; height: 4px; background: url(data:image/png;base64,"
-      + utf8_string(images::PNGBase64) + u8")'>");
+      + utf8_string(img::tests::images::PNGBase64) + u8")'>");
     (void)fixture.Painted();
     RunNetworkingTasks();
 
@@ -191,7 +191,7 @@ namespace krys::boo::tests
   TEST_CASE("CachedResourceLoader: a load schedules a rendering update", "[Loader][CachedResourceLoader]")
   {
     LoaderFixture loader;
-    loader.Strategy.Resources[u8"file:///images/update.png"] = images::PNG;
+    loader.Strategy.Resources[u8"file:///images/update.png"] = img::tests::images::PNG;
 
     auto page = Page::Create();
     auto &frame = page->MainFrame();
@@ -214,13 +214,13 @@ namespace krys::boo::tests
   TEST_CASE("MemoryCache: prunes resources nothing uses when it's over capacity", "[Loader][MemoryCache]")
   {
     LoaderFixture loader;
-    loader.Strategy.Resources[u8"file:///images/dead.png"] = images::PNG;
+    loader.Strategy.Resources[u8"file:///images/dead.png"] = img::tests::images::PNG;
 
     PaintFixture fixture(u8"<!DOCTYPE html>");
     auto &resourceLoader = fixture.Document->GetCachedResourceLoader();
     {
       auto image = resourceLoader.RequestImage(
-        CachedResourceRequest(ResourceRequest(url::URL(u8"file:///images/dead.png")),
+        CachedResourceRequest(net::ResourceRequest(net::Url(u8"file:///images/dead.png")),
                               CachedResourceLoader::DefaultCachedResourceOptions()));
       REQUIRE(image);
       RunNetworkingTasks();
@@ -229,7 +229,7 @@ namespace krys::boo::tests
     resourceLoader.GarbageCollectDocumentResources();
 
     auto &memoryCache = MemoryCache::Singleton();
-    const ResourceRequest request(url::URL(u8"file:///images/dead.png"));
+    const net::ResourceRequest request(net::Url(u8"file:///images/dead.png"));
     REQUIRE(memoryCache.ResourceForRequest(request));
     CHECK(memoryCache.DeadSize() > 0u);
 
@@ -243,7 +243,7 @@ namespace krys::boo::tests
             "[Loader][CachedResourceLoader]")
   {
     LoaderFixture loader;
-    loader.Strategy.Resources[u8"file:///images/marker.png"] = images::PNG;
+    loader.Strategy.Resources[u8"file:///images/marker.png"] = img::tests::images::PNG;
 
     PaintFixture fixture(u8"<!DOCTYPE html><ul style='list-style: url(file:///images/marker.png) inside'><li "
                          u8"id=item style='height: "
@@ -268,7 +268,7 @@ namespace krys::boo::tests
     {
       PageInFrameFixture first {utf8_string(markup)};
       RunNetworkingTasks();
-      CHECK(first.RendererSize(u8"box") == IntSize(10, 0));
+      CHECK(first.RendererSize(u8"box") == SizeI(10, 0));
     }
     // A document uses what's in the memory cache.
     {
@@ -282,7 +282,7 @@ namespace krys::boo::tests
       PageInFrameFixture reloaded {utf8_string(markup), {200, 100}, CachePolicy::Reload};
       RunNetworkingTasks();
       CHECK(loader.Strategy.Requests.size() == 2u);
-      CHECK(reloaded.RendererSize(u8"box") == IntSize(20, 0));
+      CHECK(reloaded.RendererSize(u8"box") == SizeI(20, 0));
     }
   }
 }

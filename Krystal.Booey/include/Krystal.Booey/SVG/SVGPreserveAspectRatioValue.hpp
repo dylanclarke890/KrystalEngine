@@ -23,12 +23,15 @@
 #include "Krystal.Booey/DOM/Types/DOMString.hpp"
 #include "Krystal.Booey/SVG/Properties/SVGPropertyTraits.hpp"
 #include "Krystal.Core/Attributes.hpp"
+#include "Krystal.Core/Geometry/GeometryForward.hpp"
+
+namespace krys
+{
+  class AffineTransform;
+}
 
 namespace krys::boo
 {
-  class AffineTransform;
-  class FloatRect;
-
   template <typename T>
   class ExceptionOr;
 
@@ -84,7 +87,7 @@ namespace krys::boo
       return _meetOrSlice;
     }
 
-    void TransformRect(FloatRect &destRect, FloatRect &srcRect) const noexcept;
+    void TransformRect(RectF &destRect, RectF &srcRect) const noexcept;
 
     KRYS_NODISCARD AffineTransform GetCTM(float logicalX, float logicalY, float logicalWidth,
                                           float logicalHeight, float physicalWidth,

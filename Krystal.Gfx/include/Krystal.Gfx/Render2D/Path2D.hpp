@@ -1,12 +1,12 @@
 ﻿#pragma once
 
 #include "Krystal.Core/Attributes.hpp"
+#include "Krystal.Core/Geometry/Rect.hpp"
 #include "Krystal.Core/Maths/Vector.hpp"
 #include "Krystal.Core/Numeric.hpp"
 #include "Krystal.Core/Types/Array.hpp"
 #include "Krystal.Core/Types/List.hpp"
 #include "Krystal.Core/Types/Span.hpp"
-#include "Krystal.Gfx/Render2D/Rect2D.hpp"
 
 namespace krys::gfx
 {
@@ -58,13 +58,13 @@ namespace krys::gfx
     void Close() noexcept;
 
     /// @brief Adds a closed contour around a rect, clockwise on screen.
-    void AddRect(const Rect2D &rect) noexcept;
+    void AddRect(const RectF &rect) noexcept;
 
     /// @brief Adds a closed contour around a rect with elliptical corners, clockwise on screen.
     /// @param radii The x and y radius of the top-left, top-right, bottom-right and bottom-left corners.
     /// Negative radii are treated as zero, and radii that don't fit are scaled down together until they do,
     /// as CSS does for `border-radius`.
-    void AddRoundedRect(const Rect2D &rect, const Array<Vec2f, 4> &radii) noexcept;
+    void AddRoundedRect(const RectF &rect, const Array<Vec2f, 4> &radii) noexcept;
 
     /// @brief Adds a closed contour around an ellipse, clockwise on screen.
     void AddEllipse(Vec2f centre, Vec2f radii) noexcept;

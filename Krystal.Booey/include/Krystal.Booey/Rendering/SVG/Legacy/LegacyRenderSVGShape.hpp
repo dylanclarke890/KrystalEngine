@@ -25,11 +25,11 @@
 
 #pragma once
 
-#include "Krystal.Booey/Graphics/Geometry/FloatRect.hpp"
 #include "Krystal.Booey/Graphics/Paths/Path.hpp"
-#include "Krystal.Booey/Graphics/Transforms/AffineTransform.hpp"
 #include "Krystal.Booey/Rendering/SVG/Legacy/LegacyRenderSVGModelObject.hpp"
 #include "Krystal.Booey/Rendering/SVG/SVGRenderSupport.hpp"
+#include "Krystal.Core/Geometry/AffineTransform.hpp"
+#include "Krystal.Core/Geometry/Rect.hpp"
 #include "Krystal.Core/Types/Markable.hpp"
 #include "Krystal.Core/Types/UniquePtr.hpp"
 
@@ -54,7 +54,7 @@ namespace krys::boo
   {
     KRYS_OVERRIDE_DELETE_FOR_CHECKED_PTR(LegacyRenderSVGShape);
 
-    friend FloatRect SVGRenderSupport::CalculateApproximateStrokeBoundingBox(const RenderElement &) noexcept;
+    friend RectF SVGRenderSupport::CalculateApproximateStrokeBoundingBox(const RenderElement &) noexcept;
 
   public:
     using ShapeType = LegacyRenderSVGShapeType;
@@ -66,12 +66,12 @@ namespace krys::boo
     };
 
   protected:
-    FloatRect _fillBoundingBox;
-    mutable Markable<FloatRect> _strokeBoundingBox;
-    mutable Markable<FloatRect> _approximateStrokeBoundingBox;
+    RectF _fillBoundingBox;
+    mutable Markable<RectF> _strokeBoundingBox;
+    mutable Markable<RectF> _approximateStrokeBoundingBox;
 
   private:
-    FloatRect _repaintBoundingBox;
+    RectF _repaintBoundingBox;
 
     bool _needsBoundariesUpdate {false}; // Default is false, the cached rects are empty from the beginning.
     bool _needsShapeUpdate {true}; // Default is true, so we grab a Path object once from SVGGraphicsElement.
@@ -112,13 +112,13 @@ namespace krys::boo
 
     KRYS_NODISCARD virtual bool IsRenderingDisabled() const noexcept = 0;
 
-    KRYS_NODISCARD bool IsPointInFill(const FloatPoint &) noexcept;
+    KRYS_NODISCARD bool IsPointInFill(const PointF &) noexcept;
 
-    KRYS_NODISCARD bool IsPointInStroke(const FloatPoint &) noexcept;
+    KRYS_NODISCARD bool IsPointInStroke(const PointF &) noexcept;
 
     KRYS_NODISCARD float GetTotalLength() const noexcept;
 
-    KRYS_NODISCARD FloatPoint GetPointAtLength(float distance) const noexcept;
+    KRYS_NODISCARD PointF GetPointAtLength(float distance) const noexcept;
 
     KRYS_NODISCARD bool HasPath() const noexcept
     {
@@ -151,9 +151,9 @@ namespace krys::boo
     KRYS_NODISCARD virtual bool IsEmpty() const noexcept;
 
     KRYS_NODISCARD virtual bool
-      ShapeDependentStrokeContains(const FloatPoint &, PointCoordinateSpace = GlobalCoordinateSpace) noexcept;
+      ShapeDependentStrokeContains(const PointF &, PointCoordinateSpace = GlobalCoordinateSpace) noexcept;
 
-    KRYS_NODISCARD virtual bool ShapeDependentFillContains(const FloatPoint &, const WindRule) const noexcept;
+    KRYS_NODISCARD virtual bool ShapeDependentFillContains(const PointF &, const WindRule) const noexcept;
 
     KRYS_NODISCARD float StrokeWidth() const noexcept;
 
@@ -163,16 +163,16 @@ namespace krys::boo
 
     KRYS_NODISCARD static Path *NonScalingStrokePath(const Path *, const AffineTransform &) noexcept;
 
-    KRYS_NODISCARD virtual FloatRect
+    KRYS_NODISCARD virtual RectF
       AdjustStrokeBoundingBoxForMarkersAndZeroLengthLinecaps(RepaintRectCalculation,
-                                                             FloatRect strokeBoundingBox) const noexcept
+                                                             RectF strokeBoundingBox) const noexcept
     {
       return strokeBoundingBox;
     }
 
-    KRYS_NODISCARD FloatRect StrokeBoundingBox() const noexcept final;
+    KRYS_NODISCARD RectF StrokeBoundingBox() const noexcept final;
 
-    KRYS_NODISCARD FloatRect ApproximateStrokeBoundingBox() const noexcept;
+    KRYS_NODISCARD RectF ApproximateStrokeBoundingBox() const noexcept;
 
     KRYS_NODISCARD bool FillRequiresClip() const noexcept
     {
@@ -181,15 +181,15 @@ namespace krys::boo
 
   private:
     // Hit-detection separated for the fill and the stroke
-    KRYS_NODISCARD bool FillContains(const FloatPoint &, bool requiresFill = true,
+    KRYS_NODISCARD bool FillContains(const PointF &, bool requiresFill = true,
                                      const WindRule fillRule = WindRule::NonZero) noexcept;
 
-    KRYS_NODISCARD bool StrokeContains(const FloatPoint &, bool requiresStroke = true) noexcept;
+    KRYS_NODISCARD bool StrokeContains(const PointF &, bool requiresStroke = true) noexcept;
 
-    KRYS_NODISCARD FloatRect RepaintRectInLocalCoordinates(
+    KRYS_NODISCARD RectF RepaintRectInLocalCoordinates(
       RepaintRectCalculation = RepaintRectCalculation::Fast) const noexcept final;
 
-    KRYS_NODISCARD FloatRect DecoratedBoundingBox() const noexcept final;
+    KRYS_NODISCARD RectF DecoratedBoundingBox() const noexcept final;
 
     KRYS_NODISCARD const AffineTransform &LocalToParentTransform() const noexcept final
     {
@@ -218,22 +218,22 @@ namespace krys::boo
     void AddFocusRingRects(List<LayoutRect> &, const LayoutPoint &additionalOffset,
                            const RenderLayerModelObject *paintContainer = nullptr) const noexcept final;
 
-    bool NodeAtFloatPoint(const HitTestRequest &, HitTestResult &, const FloatPoint &pointInParent,
-                          HitTestAction) noexcept final;
+    bool NodeAtPointF(const HitTestRequest &, HitTestResult &, const PointF &pointInParent,
+                      HitTestAction) noexcept final;
 
-    KRYS_NODISCARD FloatRect ObjectBoundingBox() const noexcept final
+    KRYS_NODISCARD RectF ObjectBoundingBox() const noexcept final
     {
       return _fillBoundingBox;
     }
 
-    KRYS_NODISCARD FloatRect CalculateStrokeBoundingBox() const noexcept;
+    KRYS_NODISCARD RectF CalculateStrokeBoundingBox() const noexcept;
 
     void UpdateRepaintBoundingBox() noexcept;
 
     KRYS_NODISCARD static bool SetupNonScalingStrokeContext(AffineTransform &,
                                                             GraphicsContextStateSaver &) noexcept;
 
-    KRYS_NODISCARD FloatRect CalculateApproximateStrokeBoundingBox() const noexcept;
+    KRYS_NODISCARD RectF CalculateApproximateStrokeBoundingBox() const noexcept;
 
     KRYS_NODISCARD UniquePtr<Path> CreatePath() const noexcept;
 

@@ -27,7 +27,7 @@
 #include "Krystal.Booey/DOM/Events/EventTarget.hpp"
 #include "Krystal.Booey/DOM/Events/MouseRelatedEvent.hpp"
 #include "Krystal.Booey/DOM/Events/UIEvent.hpp"
-#include "Krystal.Booey/Page/MouseEventTypes.hpp"
+#include "Krystal.Booey/Input/MouseEventTypes.hpp"
 #include "Krystal.Core/Attributes.hpp"
 #include "Krystal.Core/Numeric.hpp"
 #include "Krystal.Core/Types/List.hpp"
@@ -202,9 +202,9 @@ namespace krys::boo
     }
 
     MouseEvent(DOMStringAtom type, const UIEventInit &eventInitDict, LocalFrameView *view,
-               const DoublePoint &screenLocation, const DoublePoint &windowLocation, double movementX,
-               double movementY, EnumSet<Modifier> modifiers, MouseButton button, uint16 buttons,
-               EventTarget *relatedTarget, double force, SyntheticClickType syntheticClickType,
+               const PointD &screenLocation, const PointD &windowLocation, double movementX, double movementY,
+               EnumSet<Modifier> modifiers, MouseButton button, uint16 buttons, EventTarget *relatedTarget,
+               double force, SyntheticClickType syntheticClickType,
                const List<Ref<MouseEvent>> &coalescedEvents, const List<Ref<MouseEvent>> &predictedEvents,
                Simulated isSimulated) noexcept;
   };

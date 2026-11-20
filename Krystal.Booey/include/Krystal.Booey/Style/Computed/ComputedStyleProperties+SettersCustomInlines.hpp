@@ -67,7 +67,7 @@ namespace krys::boo::style
   // FIXME: - Below are property setters that are not yet generated
 
   // FIXME: Support setters that need to return a `bool` value to indicate if the property changed.
-  inline bool ComputedStyleProperties::SetDirection(TextDirection bidiDirection) noexcept
+  inline bool ComputedStyleProperties::SetDirection(text::TextDirection bidiDirection) noexcept
   {
     if (GetWritingMode().ComputedTextDirection() == bidiDirection)
     {

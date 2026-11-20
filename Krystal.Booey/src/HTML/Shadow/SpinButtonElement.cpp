@@ -30,7 +30,7 @@
 #include "Krystal.Booey/DOM/Events/EventNames.hpp"
 #include "Krystal.Booey/DOM/Events/MouseEvent.hpp"
 #include "Krystal.Booey/DOM/Nodes/Document.hpp"
-#include "Krystal.Booey/Page/EventHandler.hpp"
+#include "Krystal.Booey/Input/EventHandler.hpp"
 #include "Krystal.Booey/Page/LocalFrame.hpp"
 #include "Krystal.Booey/Page/Page.hpp"
 #include "Krystal.Booey/Platform/Scrolling/ScrollbarTheme.hpp"
@@ -96,8 +96,8 @@ namespace krys::boo::html
     }
 
     auto absoluteLocation = mouseEvent->AbsoluteLocation();
-    IntPoint local = RoundedIntPoint(box->AbsoluteToLocal(
-      FloatPoint(static_cast<float>(absoluteLocation.X()), static_cast<float>(absoluteLocation.Y())),
+    PointI local = RoundedPointI(box->AbsoluteToLocal(
+      PointF(static_cast<float>(absoluteLocation.X()), static_cast<float>(absoluteLocation.Y())),
       MapCoordinatesMode::UseTransforms));
     auto type = mouseEvent->Type();
     if (type == event_names::MouseDown && mouseEvent->ButtonType() == MouseButton::Left)
