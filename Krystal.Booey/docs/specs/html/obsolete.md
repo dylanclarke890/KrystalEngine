@@ -84,7 +84,7 @@ Status: n/a (no frame tree; `<frame>` is an `HTMLUnknownElement`)
 #### [16.3.3 Other elements, attributes and APIs](https://html.spec.whatwg.org/#other-elements,-attributes-and-apis)
 
 Status: reviewed (2026-11-02)
-> `Document`'s obsolete members, `LocalDOMWindow::CaptureEvents`/`ReleaseEvents` and `External`. `document.all` is n/a, as `HTMLAllCollection` is (see 2.6.4.1).
+> `Document`'s obsolete members, `Window::CaptureEvents`/`ReleaseEvents` and `External`. `document.all` is n/a, as `HTMLAllCollection` is (see 2.6.4.1).
 > Fixed: `Document` had no `fgColor`, `linkColor`, `vlinkColor`, `alinkColor`, `bgColor`, `anchors`, `applets`, `clear()`, `captureEvents()` or `releaseEvents()`.
 <!-- definitions: dom-document-captureevents dom-document-releaseevents dom-window-releaseevents dom-external-issearchproviderinstalled -->
 

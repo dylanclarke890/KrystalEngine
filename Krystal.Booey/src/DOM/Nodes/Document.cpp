@@ -132,6 +132,7 @@
 #include "Krystal.Booey/HTML/Images/LazyLoadImageObserver.hpp"
 #include "Krystal.Booey/HTML/Parser/DocumentParser.hpp"
 #include "Krystal.Booey/HTML/Sanitizer/SanitizerAlgorithms.hpp"
+#include "Krystal.Booey/HTML/Window.hpp"
 #include "Krystal.Booey/Infra/Namespaces.hpp"
 #include "Krystal.Booey/Infra/StringAlgorithms.hpp"
 #include "Krystal.Booey/Input/MouseEventWithHitTestResults.hpp"
@@ -146,7 +147,6 @@
 #include "Krystal.Booey/Page/DOMSelection.hpp"
 #include "Krystal.Booey/Page/Frame.hpp"
 #include "Krystal.Booey/Page/FrameView.hpp"
-#include "Krystal.Booey/Page/LocalDOMWindow.hpp"
 #include "Krystal.Booey/Page/Settings.hpp"
 #include "Krystal.Booey/Page/VisualViewport.hpp"
 #include "Krystal.Booey/Platform/Scrolling/Scrollbar.hpp"
@@ -2591,7 +2591,7 @@ namespace krys::boo
     if (_needsVisualViewportScrollEvent)
     {
       _needsVisualViewportScrollEvent = false;
-      if (RefPtr<LocalDOMWindow> window = _domWindow)
+      if (RefPtr<boo::Window> window = _domWindow)
       {
         (void)dom::EventDispatcher::FireEvent(event_names::Scroll, window->GetVisualViewport());
       }
@@ -2631,7 +2631,7 @@ namespace krys::boo
     if (_needsDOMWindowResizeEvent)
     {
       _needsDOMWindowResizeEvent = false;
-      if (RefPtr<LocalDOMWindow> window = _domWindow)
+      if (RefPtr<boo::Window> window = _domWindow)
       {
         (void)dom::EventDispatcher::FireEvent(event_names::Resize, *window);
       }
@@ -2639,7 +2639,7 @@ namespace krys::boo
     if (_needsVisualViewportResizeEvent)
     {
       _needsVisualViewportResizeEvent = false;
-      if (RefPtr<LocalDOMWindow> window = _domWindow)
+      if (RefPtr<boo::Window> window = _domWindow)
       {
         (void)dom::EventDispatcher::FireEvent(event_names::Resize, window->GetVisualViewport());
       }
@@ -3214,7 +3214,7 @@ namespace krys::boo
                                          });
   }
 
-  LocalDOMWindow *Document::Window() const noexcept
+  boo::Window *Document::Window() const noexcept
   {
     return _domWindow.get();
   }
@@ -3475,7 +3475,7 @@ namespace krys::boo
     }
   }
 
-  LocalDOMWindow *Document::DefaultView() const noexcept
+  boo::Window *Document::DefaultView() const noexcept
   {
     // If this's browsing context is null, then return null; otherwise its WindowProxy.
     return Frame() ? _domWindow.get() : nullptr;
@@ -3483,7 +3483,7 @@ namespace krys::boo
 
   void Document::DispatchWindowEvent(Event &event) noexcept
   {
-    if (RefPtr<LocalDOMWindow> window = _domWindow)
+    if (RefPtr<boo::Window> window = _domWindow)
     {
       (void)dom::EventDispatcher::DispatchToTarget(event, window.get());
     }
@@ -3768,7 +3768,7 @@ namespace krys::boo
 
   void Document::DispatchWindowLoadEvent() noexcept
   {
-    RefPtr<LocalDOMWindow> window = _domWindow;
+    RefPtr<boo::Window> window = _domWindow;
     if (!window)
     {
       return;
@@ -3866,7 +3866,7 @@ namespace krys::boo
       return;
     }
     _pageShowing = false;
-    if (RefPtr<LocalDOMWindow> window = _domWindow)
+    if (RefPtr<boo::Window> window = _domWindow)
     {
       auto event = PageTransitionEvent::Create(event_names::PageHide, persisted);
       (void)dom::EventDispatcher::DispatchToTarget(*event, window.get(), true);
@@ -3882,7 +3882,7 @@ namespace krys::boo
       return;
     }
     _pageShowing = true;
-    if (RefPtr<LocalDOMWindow> window = _domWindow)
+    if (RefPtr<boo::Window> window = _domWindow)
     {
       auto event = PageTransitionEvent::Create(event_names::PageShow, persisted);
       (void)dom::EventDispatcher::DispatchToTarget(*event, window.get(), true);
@@ -4085,7 +4085,7 @@ namespace krys::boo
     krys_assert(Frame());
     krys_assert(!_domWindow);
 
-    _domWindow = LocalDOMWindow::Create(*this);
+    _domWindow = boo::Window::Create(*this);
     // A document in a browsing context has its window's custom element registry, which is created with it.
     (void)_domWindow->EnsureCustomElementRegistry();
   }

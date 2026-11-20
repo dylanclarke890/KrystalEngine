@@ -14,7 +14,7 @@ Status: reviewed (2026-11-01)
 #### [8.10.1 The Navigator object](https://html.spec.whatwg.org/#the-navigator-object)
 
 Status: reviewed (2026-11-01)
-> `Navigator`, made when `LocalDOMWindow::GetNavigator` is first called; `ClientInformation` is the same object.
+> `Navigator`, made when `Window::GetNavigator` is first called; `ClientInformation` is the same object.
 <!-- definitions: dom-clientinformation -->
 
 - [x] [associated Navigator](https://html.spec.whatwg.org/#associated-navigator) — Each Window has an associated Navigator, which is a Navigator object. Upon creation of the Window object, its associated Navigator must be set to a new Navigator object created in the Window object's relevant realm.

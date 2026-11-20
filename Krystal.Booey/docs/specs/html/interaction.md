@@ -122,7 +122,7 @@ Status: reviewed (2026-11-01)
 #### [6.4.1 Data model](https://html.spec.whatwg.org/#user-activation-data-model)
 
 Status: reviewed (2026-11-01)
-> `LocalDOMWindow`'s timestamps; the transient activation duration is 5 seconds.
+> `Window`'s timestamps; the transient activation duration is 5 seconds.
 <!-- definitions: last-activation-timestamp last-history-action-activation-timestamp transient-activation-duration sticky-activation transient-activation history-action-activation -->
 
 - [x] [expired](https://html.spec.whatwg.org/#activation-expiry) — The transient activation state is considered expired if it becomes false because the transient activation duration time has elapsed since the last user activation. Note that it can become false even before the expiry time through an activation consumption.
@@ -130,7 +130,7 @@ Status: reviewed (2026-11-01)
 #### [6.4.2 Processing model](https://html.spec.whatwg.org/#user-activation-processing-model)
 
 Status: reviewed (2026-11-01)
-> `LocalDOMWindow::NotifyActivated` from `EventHandler` (presses, key downs other than Escape, touch ends), and the consume steps; there are no other frames' windows.
+> `Window::NotifyActivated` from `EventHandler` (presses, key downs other than Escape, touch ends), and the consume steps; there are no other frames' windows.
 
 - [x] [activation notification](https://html.spec.whatwg.org/#activation-notification) — When a user interaction causes firing of an activation triggering input event in a Document document, the user agent must perform the following activation notification steps before dispatching the event:
   - 1. Assert: document is fully active.

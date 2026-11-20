@@ -32,7 +32,7 @@ namespace krys::boo
   class Element;
   class EventListener;
   class EventTarget;
-  class LocalDOMWindow;
+  class Window;
 }
 
 namespace krys::boo::dom
@@ -71,7 +71,7 @@ namespace krys::boo::dom
 
     /// @brief The window whose current event a listener on @p target sets: the target, if it's a window, or
     /// its node document's window.
-    KRYS_NODISCARD static LocalDOMWindow *RelevantWindow(EventTarget &target) noexcept;
+    KRYS_NODISCARD static Window *RelevantWindow(EventTarget &target) noexcept;
 
     /// @brief Fires a trusted @p TEvent named @p e at @p target.
     /// @param attributes The event's other IDL attributes, as the dictionary its constructor takes.

@@ -40,6 +40,7 @@
 #include "Krystal.Booey/DOM/Nodes/Element.hpp"
 #include "Krystal.Booey/HTML/Elements/HTMLFormElement.hpp"
 #include "Krystal.Booey/HTML/EventLoop/EventLoop.hpp"
+#include "Krystal.Booey/HTML/Window.hpp"
 #include "Krystal.Booey/Input/EventHandler.hpp"
 #include "Krystal.Booey/Loader/Cache/CachedResourceLoader.hpp"
 #include "Krystal.Booey/Loader/DocumentLoader.hpp"
@@ -49,7 +50,6 @@
 #include "Krystal.Booey/Page/Clients/ChromeClient.hpp"
 #include "Krystal.Booey/Page/Frame.hpp"
 #include "Krystal.Booey/Page/FrameView.hpp"
-#include "Krystal.Booey/Page/LocalDOMWindow.hpp"
 #include "Krystal.Core/Strings/ASCII.hpp"
 #include "Krystal.Core/Utils/SetForScope.hpp"
 
@@ -289,7 +289,7 @@ namespace krys::boo
 
       // 12. If oldDocument's salvageable state is false, then fire an event named unload at oldDocument's
       //     relevant global object, with legacy target override flag set.
-      if (RefPtr<LocalDOMWindow> window = ShareRefPtr(document->Window()))
+      if (RefPtr<Window> window = ShareRefPtr(document->Window()))
       {
         auto unloadEvent = Event::Create(event_names::Unload, false, false);
         (void)dom::EventDispatcher::DispatchToTarget(*unloadEvent, window.get(), true);

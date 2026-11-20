@@ -25,9 +25,9 @@
 #include "Krystal.Booey/DOM/Events/MouseEvent.hpp"
 #include "Krystal.Booey/DOM/Nodes/Document.hpp"
 #include "Krystal.Booey/DOM/Nodes/Node.hpp"
+#include "Krystal.Booey/HTML/Window.hpp"
 #include "Krystal.Booey/Page/Frame.hpp"
 #include "Krystal.Booey/Page/FrameView.hpp"
-#include "Krystal.Booey/Page/LocalDOMWindow.hpp"
 #include "Krystal.Booey/Rendering/Layers/RenderLayer.hpp"
 #include "Krystal.Booey/Rendering/RenderObject.hpp"
 #include <cmath>
@@ -50,7 +50,7 @@ namespace krys::boo
 
   namespace
   {
-    KRYS_NODISCARD boo::FrameView *FrameViewOf(const LocalDOMWindow *window) noexcept
+    KRYS_NODISCARD boo::FrameView *FrameViewOf(const Window *window) noexcept
     {
       auto *frame = window ? window->Frame() : nullptr;
       return frame ? frame->View() : nullptr;

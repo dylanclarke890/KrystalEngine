@@ -75,7 +75,7 @@ Status: reviewed (2026-11-01)
 #### [4.13.4 The CustomElementRegistry interface](https://html.spec.whatwg.org/#custom-elements-api)
 
 Status: reviewed (2026-11-01)
-> `CustomElementRegistry`; `define()` takes a factory rather than a constructor, and `whenDefined()` a callback rather than returning a promise. `Window.customElements` is `LocalDOMWindow::CustomElements`.
+> `CustomElementRegistry`; `define()` takes a factory rather than a constructor, and `whenDefined()` a callback rather than returning a promise. `Window.customElements` is `Window::CustomElements`.
 > Fixed: `upgrade()` upgraded elements of other registries.
 <!-- definitions: active-custom-element-constructor-map is-scoped scoped-document-set custom-element-definition-set element-definition-is-running when-defined-promise-map element-definition -->
 

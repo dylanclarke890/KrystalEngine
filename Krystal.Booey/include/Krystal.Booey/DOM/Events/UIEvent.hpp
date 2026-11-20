@@ -7,12 +7,12 @@
 
 namespace krys::boo
 {
-  class LocalDOMWindow;
+  class Window;
 
   /// @see https://w3c.github.io/uievents/#dictdef-uieventinit
   struct UIEventInit : EventInit
   {
-    LocalDOMWindow *View {nullptr};
+    Window *View {nullptr};
     int32 Detail {0};
   };
 
@@ -35,7 +35,7 @@ namespace krys::boo
   class UIEvent : public Event
   {
   private:
-    RefPtr<LocalDOMWindow> _view;
+    RefPtr<Window> _view;
     int32 _detail {0};
 
   public:
@@ -47,7 +47,7 @@ namespace krys::boo
     ~UIEvent() noexcept override;
 
     /// @see https://w3c.github.io/uievents/#dom-uievent-view
-    KRYS_NODISCARD LocalDOMWindow *View() const noexcept;
+    KRYS_NODISCARD Window *View() const noexcept;
 
     /// @see https://w3c.github.io/uievents/#dom-uievent-detail
     KRYS_NODISCARD int32 Detail() const noexcept
@@ -58,7 +58,7 @@ namespace krys::boo
     /// @note Legacy.
     /// @see https://w3c.github.io/uievents/#dom-uievent-inituievent
     void InitUIEvent(DOMStringAtom type, bool bubbles = false, bool cancelable = false,
-                     LocalDOMWindow *view = nullptr, int32 detail = 0) noexcept;
+                     Window *view = nullptr, int32 detail = 0) noexcept;
 
     KRYS_NODISCARD bool IsUIEvent() const noexcept final
     {
@@ -66,7 +66,7 @@ namespace krys::boo
     }
 
   protected:
-    void SetView(LocalDOMWindow *view) noexcept;
+    void SetView(Window *view) noexcept;
   };
 }
 

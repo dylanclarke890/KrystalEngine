@@ -75,10 +75,10 @@ namespace krys::boo
   /// (`load`, `resize` and the others) fire at, and which the document's events bubble to.
   /// @note The document makes its window as it becomes a frame's document, and keeps it.
   /// @see https://html.spec.whatwg.org/#the-window-object
-  class LocalDOMWindow final : public EventTarget
+  class Window final : public EventTarget
   {
     KRYS_TYPE_CAST_TRAITS_ACCESS();
-    KRYS_NON_COPY_MOVABLE(LocalDOMWindow);
+    KRYS_NON_COPY_MOVABLE(Window);
 
   private:
     WeakPtr<boo::Document> _document;
@@ -98,13 +98,13 @@ namespace krys::boo
     /// @see https://html.spec.whatwg.org/#last-history-action-activation-timestamp
     dom::DOMHighResTimeStamp _lastHistoryActionActivationTimestamp;
 
-    explicit LocalDOMWindow(boo::Document &document) noexcept;
+    explicit Window(boo::Document &document) noexcept;
 
   public:
-    ~LocalDOMWindow() noexcept override;
+    ~Window() noexcept override;
 
     /// @brief A window for @p document, which must be in a frame.
-    KRYS_NODISCARD static Ref<LocalDOMWindow> Create(boo::Document &document) noexcept;
+    KRYS_NODISCARD static Ref<boo::Window> Create(boo::Document &document) noexcept;
 
     /// @brief The window's document (its associated `Document`), unless it has been destroyed.
     /// @see https://html.spec.whatwg.org/#concept-document-window
@@ -268,7 +268,7 @@ namespace krys::boo
 #pragma endregion
 
     /// @brief Calls @p function with each window that exists.
-    static void ForEachWindow(const Func<void(LocalDOMWindow &)> &function) noexcept;
+    static void ForEachWindow(const Func<void(boo::Window &)> &function) noexcept;
 
     /// @see https://html.spec.whatwg.org/#dom-queuemicrotask
     static void QueueMicrotask(Func<void()> &&callback) noexcept;
@@ -322,7 +322,7 @@ namespace krys::boo
   };
 }
 
-KRYS_SPECIALIZE_TYPE_CAST_TRAITS_BEGIN(krys::boo::LocalDOMWindow)
+KRYS_SPECIALIZE_TYPE_CAST_TRAITS_BEGIN(krys::boo::Window)
   static bool IsType(const krys::boo::EventTarget &target) noexcept
   {
     return target.IsWindow();

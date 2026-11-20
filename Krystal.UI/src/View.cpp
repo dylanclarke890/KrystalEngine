@@ -17,6 +17,7 @@
 #include "Krystal.Booey/HTML/CustomElement/CustomElementRegistry.hpp"
 #include "Krystal.Booey/HTML/EventLoop/EventLoop.hpp"
 #include "Krystal.Booey/HTML/Parser/DocumentParser.hpp"
+#include "Krystal.Booey/HTML/Window.hpp"
 #include "Krystal.Booey/Input/PlatformWheelEvent.hpp"
 #include "Krystal.Booey/Input/PointerCaptureController.hpp"
 #include "Krystal.Booey/Input/PointerLockController.hpp"
@@ -29,7 +30,6 @@
 #include "Krystal.Booey/Loader/SubstituteData.hpp"
 #include "Krystal.Booey/Page/Drag/DragController.hpp"
 #include "Krystal.Booey/Page/FrameView.hpp"
-#include "Krystal.Booey/Page/LocalDOMWindow.hpp"
 #include "Krystal.Booey/Platform/Pasteboard/DragData.hpp"
 #include "Krystal.Booey/Platform/Pasteboard/Pasteboard.hpp"
 #include "Krystal.Booey/Platform/PlatformStrategies.hpp"
@@ -2307,7 +2307,7 @@ namespace krys::ui
     if (pressed(GamepadButton::East) && !GamepadOverlayKey(pal::Key::Escape))
     {
       GamepadInteraction(false);
-      if (RefPtr<boo::LocalDOMWindow> window = ShareRefPtr(Document().Window()))
+      if (RefPtr<boo::Window> window = ShareRefPtr(Document().Window()))
       {
         (void)window->GetCloseWatcherManager().ProcessCloseWatchers();
       }

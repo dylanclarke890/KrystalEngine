@@ -112,7 +112,7 @@ namespace krys::boo
   class HitTestResult;
   class IntersectionObserver;
   struct IntersectionObserverData;
-  class LocalDOMWindow;
+  class Window;
   class FrameView;
   class MediaQueryList;
   class MouseEvent;
@@ -421,7 +421,7 @@ namespace krys::boo
 
     WeakPtr<boo::Frame> _frame;
     // The document's window, made as the document becomes a frame's.
-    RefPtr<LocalDOMWindow> _domWindow;
+    RefPtr<boo::Window> _domWindow;
     bool _needsDOMWindowResizeEvent {false};
     bool _needsVisualViewportResizeEvent {false};
     bool _needsVisualViewportScrollEvent {false};
@@ -1521,12 +1521,12 @@ namespace krys::boo
 
     /// @brief The document's window (its relevant global object), if it has been in a frame; it keeps it
     /// after leaving the frame.
-    KRYS_NODISCARD LocalDOMWindow *Window() const noexcept;
+    KRYS_NODISCARD boo::Window *Window() const noexcept;
 
     /// @brief The document's window while it's in a frame (its browsing context's `WindowProxy`); null
     /// otherwise.
     /// @see https://html.spec.whatwg.org/#dom-document-defaultview
-    KRYS_NODISCARD LocalDOMWindow *DefaultView() const noexcept;
+    KRYS_NODISCARD boo::Window *DefaultView() const noexcept;
 
     /// @brief Fires @p event at the document's window, if it has one.
     void DispatchWindowEvent(Event &event) noexcept;

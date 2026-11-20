@@ -11,9 +11,9 @@
 #include "Krystal.Booey/Graphics/DisplayLists/DisplayListRecorderImpl.hpp"
 #include "Krystal.Booey/HTML/Algorithms/FocusAlgorithms.hpp"
 #include "Krystal.Booey/HTML/EventLoop/EventLoop.hpp"
+#include "Krystal.Booey/HTML/Window.hpp"
 #include "Krystal.Booey/Input/LegacyKeyCodes.hpp"
 #include "Krystal.Booey/Page/Frame.hpp"
-#include "Krystal.Booey/Page/LocalDOMWindow.hpp"
 #include "Krystal.Booey/Page/Settings.hpp"
 #include "Krystal.Booey/Rendering/RenderView.hpp"
 #include <string>
@@ -378,9 +378,9 @@ namespace krys::boo::tests
       struct WindowRecorder : EventListenerCallback
       {
         List<std::string> &Records;
-        LocalDOMWindow *Window;
+        boo::Window *Window;
 
-        WindowRecorder(List<std::string> &records, LocalDOMWindow *window) noexcept
+        WindowRecorder(List<std::string> &records, boo::Window *window) noexcept
             : Records(records), Window(window)
         {
         }

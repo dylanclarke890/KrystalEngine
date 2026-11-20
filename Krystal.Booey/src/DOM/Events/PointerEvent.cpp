@@ -179,7 +179,7 @@ namespace krys::boo
            || type == event_names::AuxClick || type == event_names::ContextMenu;
   }
 
-  Ref<PointerEvent> PointerEvent::CreateForPointerCapture(DOMStringAtom type, LocalDOMWindow *view,
+  Ref<PointerEvent> PointerEvent::CreateForPointerCapture(DOMStringAtom type, Window *view,
                                                           boo::PointerId pointerId, bool isPrimary,
                                                           const DOMString &pointerType) noexcept
   {
@@ -224,7 +224,7 @@ namespace krys::boo
                                       isCancelable, TypeIsComposed(type)));
   }
 
-  Ref<PointerEvent> PointerEvent::Create(DOMStringAtom type, LocalDOMWindow *view, boo::PointerId pointerId,
+  Ref<PointerEvent> PointerEvent::Create(DOMStringAtom type, Window *view, boo::PointerId pointerId,
                                          const DOMString &pointerType, IsPrimary isPrimary) noexcept
   {
     Ref<PointerEvent> event =

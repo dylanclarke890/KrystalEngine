@@ -7,7 +7,7 @@
 #include "Krystal.Booey/DOM/Nodes/Document.hpp"
 #include "Krystal.Booey/DOM/Nodes/Element.hpp"
 #include "Krystal.Booey/HTML/Elements/HTMLInputElement.hpp"
-#include "Krystal.Booey/Page/LocalDOMWindow.hpp"
+#include "Krystal.Booey/HTML/Window.hpp"
 #include "Krystal.Core/Macros.hpp"
 #include "Krystal.Core/Types/Array.hpp"
 #include "Krystal.Core/Types/WeakPtr.hpp"

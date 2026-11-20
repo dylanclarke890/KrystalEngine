@@ -89,7 +89,7 @@ namespace krys::boo
   class DragCaretController;
   class DragController;
   class GraphicsContext;
-  class LocalDOMWindow;
+  class Window;
   class PointerCaptureController;
   class PointerLockController;
   class PopupOpeningObserver;
@@ -211,7 +211,7 @@ namespace krys::boo
     }
 
     /// @brief The window of the frame's document, if any.
-    KRYS_NODISCARD LocalDOMWindow *Window() const noexcept;
+    KRYS_NODISCARD boo::Window *Window() const noexcept;
 
     /// @brief The view the frame's document is laid out in, if any.
     KRYS_NODISCARD FrameView *View() const noexcept

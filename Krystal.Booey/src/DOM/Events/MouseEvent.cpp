@@ -180,7 +180,7 @@ namespace krys::boo
     return mouseEvent;
   }
 
-  void MouseEvent::InitMouseEvent(DOMStringAtom type, bool canBubble, bool cancelable, LocalDOMWindow *view,
+  void MouseEvent::InitMouseEvent(DOMStringAtom type, bool canBubble, bool cancelable, Window *view,
                                   int32 detail, double screenX, double screenY, double clientX,
                                   double clientY, bool ctrlKey, bool altKey, bool shiftKey, bool metaKey,
                                   int16 button, EventTarget *relatedTarget) noexcept

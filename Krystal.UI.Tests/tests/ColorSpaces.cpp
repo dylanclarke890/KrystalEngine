@@ -2,7 +2,7 @@
 #include "Krystal.Booey/CSS/CSSOM/MediaQueryList.hpp"
 #include "Krystal.Booey/DOM/Nodes/HTMLDocument.hpp"
 #include "Krystal.Booey/HTML/EventLoop/EventLoop.hpp"
-#include "Krystal.Booey/Page/LocalDOMWindow.hpp"
+#include "Krystal.Booey/HTML/Window.hpp"
 #include "Krystal.Core/Types/Array.hpp"
 #include "Krystal.PAL/Display.hpp"
 #include "Krystal.PAL/Win32/DisplayColour.hpp"

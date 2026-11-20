@@ -9,7 +9,7 @@ Statuses: `unreviewed`, `in review`, `reviewed (<date>)`, `n/a (<reason>)`. An a
 ### [8.7 Timers](https://html.spec.whatwg.org/#timers)
 
 Status: reviewed (2026-11-01)
-> `LocalDOMWindow::SetTimeout`/`SetInterval`/`ClearTimeout`/`ClearInterval` and `DOMTimer` (the timer initialization steps); handlers are C++ functions. Clamping and repeating follow upstream (see `DIFFERENCES.md`).
+> `Window::SetTimeout`/`SetInterval`/`ClearTimeout`/`ClearInterval` and `DOMTimer` (the timer initialization steps); handlers are C++ functions. Clamping and repeating follow upstream (see `DIFFERENCES.md`).
 > `EventLoop::ScheduleTask` runs steps after a timeout, with no map of active timers.
 <!-- definitions: map-of-settimeout-and-setinterval-ids dom-clearinterval timer-nesting-level timer-task-source map-of-active-timers -->
 
@@ -76,7 +76,7 @@ Status: reviewed (2026-11-01)
 ### [8.8 Microtask queuing](https://html.spec.whatwg.org/#microtask-queuing)
 
 Status: reviewed (2026-11-01)
-> `LocalDOMWindow::QueueMicrotask`.
+> `Window::QueueMicrotask`.
 
 - [x] [WindowOrWorkerGlobalScope.queueMicrotask(callback)](https://html.spec.whatwg.org/#dom-queuemicrotask) — The queueMicrotask(callback) method must queue a microtask to invoke callback with « » and "report".
 
@@ -88,7 +88,7 @@ Status: reviewed (2026-11-01)
 #### [8.9.1 Simple dialogs](https://html.spec.whatwg.org/#simple-dialogs)
 
 Status: reviewed (2026-11-01)
-> `LocalDOMWindow::Alert`/`Confirm`/`Prompt` ask the host's `ChromeClient`, which may truncate; there's no WebDriver BiDi or sandboxed modals flag (FIXME).
+> `Window::Alert`/`Confirm`/`Prompt` ask the host's `ChromeClient`, which may truncate; there's no WebDriver BiDi or sandboxed modals flag (FIXME).
 <!-- definitions: dom-alert -->
 
 - [x] [Window.alert()](https://html.spec.whatwg.org/#dom-alert-noargs) — The alert() and alert(message) method steps are:
@@ -142,8 +142,8 @@ Status: reviewed (2026-11-01)
 #### [8.9.2 Printing](https://html.spec.whatwg.org/#printing)
 
 Status: reviewed (2026-11-01)
-> Fixed: `print()` while the document is loading prints once its load event has fired (`LocalDOMWindow::FinishedLoading`, from `Document::ImplicitClose`).
-> `LocalDOMWindow::Print` and `RunPrintingSteps`; there are no child navigables.
+> Fixed: `print()` while the document is loading prints once its load event has fired (`Window::FinishedLoading`, from `Document::ImplicitClose`).
+> `Window::Print` and `RunPrintingSteps`; there are no child navigables.
 <!-- definitions: print-when-loaded -->
 
 - [x] [Window.print()](https://html.spec.whatwg.org/#dom-print) — The print() method steps are:

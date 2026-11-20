@@ -1,5 +1,5 @@
 ﻿#include "Krystal.Booey/DOM/Events/UIEvent.hpp"
-#include "Krystal.Booey/Page/LocalDOMWindow.hpp"
+#include "Krystal.Booey/HTML/Window.hpp"
 
 namespace krys::boo
 {
@@ -11,12 +11,12 @@ namespace krys::boo
 
   UIEvent::~UIEvent() noexcept = default;
 
-  LocalDOMWindow *UIEvent::View() const noexcept
+  Window *UIEvent::View() const noexcept
   {
     return _view.get();
   }
 
-  void UIEvent::InitUIEvent(DOMStringAtom type, bool bubbles, bool cancelable, LocalDOMWindow *view,
+  void UIEvent::InitUIEvent(DOMStringAtom type, bool bubbles, bool cancelable, Window *view,
                             int32 detail) noexcept
   {
     if (_dispatched)
@@ -29,7 +29,7 @@ namespace krys::boo
     _detail = detail;
   }
 
-  void UIEvent::SetView(LocalDOMWindow *view) noexcept
+  void UIEvent::SetView(Window *view) noexcept
   {
     _view = ShareRefPtr(view);
   }

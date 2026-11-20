@@ -1,4 +1,4 @@
-﻿#include "Krystal.Booey/Page/LocalDOMWindow.hpp"
+﻿#include "Krystal.Booey/HTML/Window.hpp"
 #include "catch2/catch_test_macros.hpp"
 #include "Krystal.Booey.Tests/Loader/NavigationTestUtils.hpp"
 #include "Krystal.Booey/CSS/CSSOM/CSSStyleDeclaration.hpp"
@@ -75,7 +75,7 @@ namespace krys::boo::tests
                                   CreateUnique<RecordingFrameLoaderClient>());
       }
 
-      KRYS_NODISCARD LocalDOMWindow &Window() const noexcept
+      KRYS_NODISCARD boo::Window &Window() const noexcept
       {
         REQUIRE(Document->Window());
         return *Document->Window();
@@ -90,7 +90,7 @@ namespace krys::boo::tests
     };
   }
 
-  TEST_CASE("A document gets its window as it becomes a frame's document", "[Page][LocalDOMWindow]")
+  TEST_CASE("A document gets its window as it becomes a frame's document", "[Page][Window]")
   {
     auto document = CreateRef<HTMLDocument>();
     CHECK(document->Window() == nullptr);
@@ -107,8 +107,8 @@ namespace krys::boo::tests
     CHECK(window->Document() == document.get());
     CHECK(window->Frame() == frame.get());
     CHECK(window->IsCurrentlyDisplayedInFrame());
-    CHECK(Is<LocalDOMWindow>(static_cast<EventTarget &>(*window)));
-    CHECK_FALSE(Is<LocalDOMWindow>(static_cast<EventTarget &>(*document)));
+    CHECK(Is<boo::Window>(static_cast<EventTarget &>(*window)));
+    CHECK_FALSE(Is<boo::Window>(static_cast<EventTarget &>(*document)));
 
     // The window's custom element registry is the document's.
     CHECK(&window->CustomElements() == document->CustomElementRegistry().get());
@@ -120,7 +120,7 @@ namespace krys::boo::tests
     CHECK(window->Frame() == nullptr);
   }
 
-  TEST_CASE("Events bubble from the document to the window, except load", "[Page][LocalDOMWindow]")
+  TEST_CASE("Events bubble from the document to the window, except load", "[Page][Window]")
   {
     WindowFixture fixture(u8"<!DOCTYPE html><button id=button>Go</button>");
     auto &window = fixture.Window();
@@ -185,7 +185,7 @@ namespace krys::boo::tests
     }
   }
 
-  TEST_CASE("resize fires at the window when the viewport resizes", "[Page][LocalDOMWindow]")
+  TEST_CASE("resize fires at the window when the viewport resizes", "[Page][Window]")
   {
     WindowFixture fixture;
     auto &window = fixture.Window();
@@ -217,7 +217,7 @@ namespace krys::boo::tests
     CHECK(resizes == 2);
   }
 
-  TEST_CASE("A window asks its host to focus it", "[Page][LocalDOMWindow][html:dom-window-focus]")
+  TEST_CASE("A window asks its host to focus it", "[Page][Window][html:dom-window-focus]")
   {
     WindowFixture fixture;
     auto &window = fixture.Window();
@@ -227,7 +227,7 @@ namespace krys::boo::tests
   }
 
   TEST_CASE("A window's named objects",
-            "[Page][LocalDOMWindow][html:named-access-on-the-window-object][html:dom-window-nameditem-filter]"
+            "[Page][Window][html:named-access-on-the-window-object][html:dom-window-nameditem-filter]"
             "[html:document-tree-child-navigable-target-name-property-set]")
   {
     WindowFixture fixture(u8"<!DOCTYPE html>"
@@ -272,7 +272,7 @@ namespace krys::boo::tests
           == List<DOMString> {u8"picture", u8"twice", u8"order", u8"orderform"});
   }
 
-  TEST_CASE("A window's viewport, scrolling and zoom", "[Page][LocalDOMWindow]")
+  TEST_CASE("A window's viewport, scrolling and zoom", "[Page][Window]")
   {
     WindowFixture fixture(u8"<!DOCTYPE html><style>body { margin: 0 } div { width: 1000px; height: 1000px }"
                           u8"</style><div></div>");
@@ -322,7 +322,7 @@ namespace krys::boo::tests
     CHECK(window.DevicePixelRatio() == 3);
   }
 
-  TEST_CASE("A right-to-left window's scrolling", "[Page][LocalDOMWindow]")
+  TEST_CASE("A right-to-left window's scrolling", "[Page][Window]")
   {
     // As Chrome: the viewport starts at its right edge, which is 0, and scrolls left to negative positions;
     // its vertical scrollbar stays on the right.
@@ -354,7 +354,7 @@ namespace krys::boo::tests
     CHECK(window.ScrollX() == 0);
   }
 
-  TEST_CASE("A window's visual viewport is its layout viewport", "[Page][LocalDOMWindow]")
+  TEST_CASE("A window's visual viewport is its layout viewport", "[Page][Window]")
   {
     WindowFixture fixture(u8"<!DOCTYPE html><style>body { margin: 0 } div { width: 1000px; height: 1000px }"
                           u8"</style><div></div>");
@@ -386,7 +386,7 @@ namespace krys::boo::tests
     CHECK(scrolls == 0);
   }
 
-  TEST_CASE("A window's selection and computed styles", "[Page][LocalDOMWindow]")
+  TEST_CASE("A window's selection and computed styles", "[Page][Window]")
   {
     WindowFixture fixture(u8"<!DOCTYPE html><p id=text style='color: rgb(1, 2, 3)'>Text</p>");
     auto &window = fixture.Window();
@@ -414,7 +414,7 @@ namespace krys::boo::tests
   }
 
   TEST_CASE("A window's microtasks run before the next task",
-            "[Page][LocalDOMWindow][html:microtask-queuing][html:dom-queuemicrotask]")
+            "[Page][Window][html:microtask-queuing][html:dom-queuemicrotask]")
   {
     WindowFixture fixture;
     auto &window = fixture.Window();
@@ -427,10 +427,9 @@ namespace krys::boo::tests
     CHECK(order == List<std::string> {"microtask", "task"});
   }
 
-  TEST_CASE(
-    "A window's animation frame callbacks run in the rendering update",
-    "[Page][LocalDOMWindow][html:animation-frames][html:dom-animationframeprovider-requestanimationframe]"
-    "[html:animationframeprovider-cancelanimationframe][html:run-the-animation-frame-callbacks]")
+  TEST_CASE("A window's animation frame callbacks run in the rendering update",
+            "[Page][Window][html:animation-frames][html:dom-animationframeprovider-requestanimationframe]"
+            "[html:animationframeprovider-cancelanimationframe][html:run-the-animation-frame-callbacks]")
   {
     WindowFixture fixture;
     auto &window = fixture.Window();
@@ -467,7 +466,7 @@ namespace krys::boo::tests
   }
 
   TEST_CASE("A window's user activation",
-            "[Page][LocalDOMWindow][html:user-activation-data-model]"
+            "[Page][Window][html:user-activation-data-model]"
             "[html:activation-expiry][html:activation-notification]"
             "[html:activation-triggering-input-event][html:consume-user-activation]"
             "[html:consume-history-action-user-activation]")
@@ -524,7 +523,7 @@ namespace krys::boo::tests
   }
 
   TEST_CASE("Event handler attributes",
-            "[Page][LocalDOMWindow][EventHandlers][html:event-handler-attributes]"
+            "[Page][Window][EventHandlers][html:event-handler-attributes]"
             "[html:the-event-handler-processing-algorithm][html:event-handler-idl-attributes]"
             "[html:window-reflecting-body-element-event-handler-set]")
   {

@@ -6,7 +6,7 @@
 #include "Krystal.Booey/HTML/Elements/HTMLBodyElement.hpp"
 #include "Krystal.Booey/HTML/Elements/HTMLLinkElement.hpp"
 #include "Krystal.Booey/HTML/EventLoop/EventLoop.hpp"
-#include "Krystal.Booey/Page/LocalDOMWindow.hpp"
+#include "Krystal.Booey/HTML/Window.hpp"
 #include "Krystal.Booey/Style/Scope/Scope.hpp"
 
 namespace krys::boo::tests
@@ -30,7 +30,7 @@ namespace krys::boo::tests
         html::EventLoop::Current().RunUntilIdle();
       }
 
-      KRYS_NODISCARD LocalDOMWindow &Window() const noexcept
+      KRYS_NODISCARD boo::Window &Window() const noexcept
       {
         return *Document().Window();
       }

@@ -25,17 +25,17 @@
 
 #include "Krystal.Booey/Page/VisualViewport.hpp"
 #include "Krystal.Booey/DOM/Nodes/Document.hpp"
+#include "Krystal.Booey/HTML/Window.hpp"
 #include "Krystal.Booey/Page/Frame.hpp"
 #include "Krystal.Booey/Page/FrameView.hpp"
-#include "Krystal.Booey/Page/LocalDOMWindow.hpp"
 
 namespace krys::boo
 {
-  VisualViewport::VisualViewport(LocalDOMWindow &window) noexcept : _window(CreateWeakPtr(&window))
+  VisualViewport::VisualViewport(Window &window) noexcept : _window(CreateWeakPtr(&window))
   {
   }
 
-  Ref<VisualViewport> VisualViewport::Create(LocalDOMWindow &window) noexcept
+  Ref<VisualViewport> VisualViewport::Create(Window &window) noexcept
   {
     return AdoptRef(*new VisualViewport(window));
   }

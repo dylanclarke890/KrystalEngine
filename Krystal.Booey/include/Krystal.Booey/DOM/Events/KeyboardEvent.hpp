@@ -35,7 +35,7 @@
 
 namespace krys::boo
 {
-  class LocalDOMWindow;
+  class Window;
 
   /// @see https://w3c.github.io/uievents/#dictdef-keyboardeventinit
   struct KeyboardEventInit : EventModifierInit
@@ -92,11 +92,11 @@ namespace krys::boo
     /// @brief A trusted event from @p key, which must be a raw key down, a char or a key up (a combined key
     /// down is disambiguated first); it's composing if @p view's editor has a composition.
     KRYS_NODISCARD static Ref<KeyboardEvent> Create(const PlatformKeyboardEvent &key,
-                                                    LocalDOMWindow *view = nullptr) noexcept;
+                                                    Window *view = nullptr) noexcept;
 
     /// @note Legacy.
     /// @see https://w3c.github.io/uievents/#dom-keyboardevent-initkeyboardevent
-    void InitKeyboardEvent(DOMStringAtom type, bool canBubble, bool cancelable, LocalDOMWindow *view,
+    void InitKeyboardEvent(DOMStringAtom type, bool canBubble, bool cancelable, Window *view,
                            DOMStringView keyIdentifier, uint32 location, bool ctrlKey, bool altKey,
                            bool shiftKey, bool metaKey) noexcept;
 

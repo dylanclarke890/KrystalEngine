@@ -434,7 +434,6 @@ target_sources(Krystal.Booey.Tests
 		tests/DOM/IntersectionObservers/IntersectionObserver.cpp
 		tests/DOM/ResizeObservers/ResizeObserver.cpp
 		tests/Page/Frame.cpp
-		tests/Page/LocalDOMWindow.cpp
 		tests/Loader/DocumentLoader.cpp
 		tests/Loader/Icons/IconLoader.cpp
 		tests/HTML/Forms/Autofill.cpp
@@ -779,6 +778,7 @@ target_sources(Krystal.Booey.Tests
 		tests/HTML/Parser/OpenElementStack.cpp
 		tests/HTML/Parser/InputStream.cpp
 		tests/HTML/Parser/Tokenizer.cpp
+		tests/HTML/Window.cpp
 
 		# Infra
 		tests/Infra/ForgivingBase64.cpp
