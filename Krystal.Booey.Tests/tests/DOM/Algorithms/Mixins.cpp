@@ -7,7 +7,6 @@
 #include "Krystal.Booey/DOM/Nodes/Element.hpp"
 #include "Krystal.Booey/DOM/Nodes/ShadowRoot.hpp"
 #include "Krystal.Booey/DOM/Nodes/Text.hpp"
-#include "Krystal.Booey/HTML/CustomElement/CustomElementRegistry.hpp"
 #include "Krystal.Booey/HTML/Elements/HTMLSlotElement.hpp"
 #include "Krystal.Core/Types/SmallList.hpp"
 
@@ -27,7 +26,7 @@ namespace krys::boo::dom::tests
 
   template <typename T>
   concept DocumentOrShadowRootMixin = requires(T &node) {
-    { node.CustomElementRegistry() } -> SameType<RefPtr<html::CustomElementRegistry>>;
+    { node.CustomElementRegistry() } -> SameType<html::CustomElementRegistry *>;
   };
 
   TEST_CASE("Mixin::DocumentOrShadowRoot", "[HTML][Mixins][dom:mixin-documentorshadowroot]")

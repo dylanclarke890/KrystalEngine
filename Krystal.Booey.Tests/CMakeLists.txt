@@ -67,7 +67,6 @@ target_precompile_headers(Krystal.Booey.Tests
     <Krystal.Booey/DOM/Types/ExceptionOr.hpp>
     <Krystal.Booey/DOM/Types/USVString.hpp>
 
-    <Krystal.Booey/HTML/CustomElement/CustomElementRegistry.hpp>
     <Krystal.Booey/HTML/Elements/HTMLSlotElement.hpp>
     <Krystal.Booey/HTML/Parser/DocumentParser.hpp>
     <Krystal.Booey/HTML/Parser/CharacterReference.hpp>

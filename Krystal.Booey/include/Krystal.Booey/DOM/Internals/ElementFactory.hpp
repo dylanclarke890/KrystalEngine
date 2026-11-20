@@ -22,7 +22,9 @@ namespace krys::boo::html
 
 namespace krys::boo::dom
 {
-  using CustomElementRegistryOrDefault = Maybe<RefPtr<html::CustomElementRegistry>>;
+  /// @brief A registry (null for none), or "default" when empty. A plain pointer: creating an element only
+  /// reads it, and the element takes its own reference.
+  using CustomElementRegistryOrDefault = Maybe<html::CustomElementRegistry *>;
   constexpr auto DefaultCustomElementRegistry = null;
 
   class ElementFactory

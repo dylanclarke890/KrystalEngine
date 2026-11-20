@@ -514,7 +514,8 @@ namespace krys::boo::dom::tests
     CHECK(document->CreateElement(u8"div").ReleaseValue()->CustomElementRegistry() == global);
 
     auto scoped = html::CustomElementRegistry::CreateScoped();
-    auto element = document->CreateElement(u8"div", ElementCreationOptions {.CustomElementRegistry = scoped});
+    auto element =
+      document->CreateElement(u8"div", ElementCreationOptions {.CustomElementRegistry = scoped.get()});
     CHECK(element.ReleaseValue()->CustomElementRegistry() == scoped);
   }
 

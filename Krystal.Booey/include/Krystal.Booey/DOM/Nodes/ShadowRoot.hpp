@@ -157,7 +157,7 @@ namespace krys::boo
     mutable Maybe<PartMappings> _partMappings;
 
   public:
-    ShadowRoot(Document &document, RefPtr<html::CustomElementRegistry> &&registry = nullptr,
+    ShadowRoot(Document &document, html::CustomElementRegistry *registry = nullptr,
                dom::NodeFlags flags = dom::NodeFlags::None) noexcept;
 
     ~ShadowRoot() noexcept override;

@@ -9,7 +9,6 @@
 #include "Krystal.Booey/DOM/Nodes/Text.hpp"
 #include "Krystal.Booey/DOM/Nodes/XHTMLDocument.hpp"
 #include "Krystal.Booey/DOM/Nodes/XMLDocument.hpp"
-#include "Krystal.Booey/HTML/CustomElement/CustomElementRegistry.hpp"
 #include "Krystal.Booey/HTML/Elements/HTMLSlotElement.hpp"
 #include "Krystal.Booey/Infra/Namespaces.hpp"
 #include "Krystal.Booey/SVG/SVGDocument.hpp"

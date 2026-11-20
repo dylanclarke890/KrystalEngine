@@ -261,7 +261,9 @@ namespace krys::boo::dom
   /// @see https://dom.spec.whatwg.org/#dictdef-elementcreationoptions
   struct ElementCreationOptions
   {
-    RefPtr<html::CustomElementRegistry> CustomElementRegistry;
+    /// @note A plain pointer: the options are only read while the element is made, which takes its own
+    /// reference.
+    html::CustomElementRegistry *CustomElementRegistry {nullptr};
     DOMStringAtom Is {null};
   };
 
@@ -270,7 +272,8 @@ namespace krys::boo::dom
   /// @see https://dom.spec.whatwg.org/#dictdef-importnodeoptions
   struct ImportNodeOptions
   {
-    RefPtr<html::CustomElementRegistry> CustomElementRegistry;
+    /// @note A plain pointer: the options are only read while the node is imported.
+    html::CustomElementRegistry *CustomElementRegistry {nullptr};
     bool SelfOnly {false};
   };
 

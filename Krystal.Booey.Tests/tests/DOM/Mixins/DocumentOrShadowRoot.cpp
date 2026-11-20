@@ -14,7 +14,7 @@ namespace krys::boo::dom::tests
     SECTION("A document in a frame has its window's registry")
     {
       REQUIRE(Document->CustomElementRegistry());
-      CHECK(Document->CustomElementRegistry().get() == &Document->Window()->CustomElements());
+      CHECK(Document->CustomElementRegistry() == &Document->Window()->CustomElements());
     }
 
     SECTION("A document without a browsing context has none")

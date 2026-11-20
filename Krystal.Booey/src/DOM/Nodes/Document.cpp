@@ -585,7 +585,7 @@ namespace krys::boo
     bool subtree = false;
 
     // 3. Let registry be null.
-    RefPtr<html::CustomElementRegistry> registry = nullptr;
+    html::CustomElementRegistry *registry = nullptr;
 
     // 4. If options is a boolean, then set subtree to options.
     if (std::holds_alternative<bool>(options))
@@ -620,7 +620,7 @@ namespace krys::boo
     // 7. Return the result of cloning a node given node with document set to this, subtree set to subtree,
     // and
     //    fallbackRegistry set to registry.
-    return dom::NodeAlgorithms::CloneNode(node, this, subtree, nullptr, registry.get());
+    return dom::NodeAlgorithms::CloneNode(node, this, subtree, nullptr, registry);
   }
 
   ExceptionOr<Ref<Node>> Document::AdoptNode(Node &node) noexcept

@@ -57,7 +57,6 @@
 #include "Krystal.Booey/HTML/CloseWatcher/CloseWatcher.hpp"
 #include "Krystal.Booey/HTML/Collections/LabelsNodeList.hpp"
 #include "Krystal.Booey/HTML/CustomElement/CustomElementReactionQueue.hpp"
-#include "Krystal.Booey/HTML/CustomElement/CustomElementRegistry.hpp"
 #include "Krystal.Booey/HTML/CustomElement/ElementInternals.hpp"
 #include "Krystal.Booey/HTML/Elements/HTMLBRElement.hpp"
 #include "Krystal.Booey/HTML/Elements/HTMLButtonElement.hpp"

@@ -392,9 +392,9 @@ namespace krys::boo
     void SetUserAgentPart(const DOMStringAtom &part) noexcept;
 
     /// @see https://dom.spec.whatwg.org/#dom-element-customelementregistry
-    KRYS_NODISCARD RefPtr<html::CustomElementRegistry> CustomElementRegistry() const noexcept
+    KRYS_NODISCARD html::CustomElementRegistry *CustomElementRegistry() const noexcept
     {
-      return _customElementRegistry;
+      return _customElementRegistry.get();
     }
 
     /// @see https://dom.spec.whatwg.org/#dom-element-closest

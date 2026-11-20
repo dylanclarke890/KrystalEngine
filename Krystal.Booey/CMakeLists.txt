@@ -4233,7 +4233,6 @@ target_precompile_headers(Krystal.Booey
     include/Krystal.Booey/DOM/Types/DOMString.hpp
     include/Krystal.Booey/DOM/Types/ExceptionOr.hpp
     include/Krystal.Booey/DOM/Types/USVString.hpp
-    include/Krystal.Booey/HTML/CustomElement/CustomElementRegistry.hpp
     include/Krystal.Booey/HTML/Elements/HTMLSlotElement.hpp
     include/Krystal.Booey/HTML/Internals/PresentationalHints.hpp
 

@@ -41,7 +41,6 @@
 #include "Krystal.Booey/Editing/Markup/Markup.hpp"
 #include "Krystal.Booey/HTML/Algorithms/HTMLInsertionAlgorithms.hpp"
 #include "Krystal.Booey/HTML/CustomElement/CustomElementReactionQueue.hpp"
-#include "Krystal.Booey/HTML/CustomElement/CustomElementRegistry.hpp"
 #include "Krystal.Booey/HTML/Elements/HTMLSlotElement.hpp"
 #include "Krystal.Booey/Style/Scope/Scope.hpp"
 #include "Krystal.Core/Strings/ASCII.hpp"
@@ -49,10 +48,10 @@
 
 namespace krys::boo
 {
-  ShadowRoot::ShadowRoot(Document &document, RefPtr<html::CustomElementRegistry> &&registry,
+  ShadowRoot::ShadowRoot(Document &document, html::CustomElementRegistry *registry,
                          dom::NodeFlags flags) noexcept
       : DocumentFragment(document, flags | dom::NodeFlags::IsShadowRoot),
-        DocumentOrShadowRoot(*this, krys::move(registry))
+        DocumentOrShadowRoot(*this, registry)
   {
     SetNodeFlag(dom::NodeFlags::IsInShadowTree);
     _containingShadowRoot = this;

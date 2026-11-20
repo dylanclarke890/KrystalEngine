@@ -1,7 +1,6 @@
 ﻿#pragma once
 
 #include "Krystal.Booey/DOM/Nodes/XMLDocument.hpp"
-#include "Krystal.Booey/HTML/CustomElement/CustomElementRegistry.hpp"
 
 namespace krys::boo
 {

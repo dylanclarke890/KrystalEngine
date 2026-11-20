@@ -434,7 +434,7 @@ namespace krys::boo::dom
       // 3a. Let definition be the result of looking up a custom element definition given element's custom
       //     element registry, its namespace, its local name, and its is value.
       auto *definition = html::CustomElementAlgorithms::LookupCustomElementDefinition(
-        element.CustomElementRegistry().get(), element.NamespaceURI(), element.LocalName());
+        element.CustomElementRegistry(), element.NamespaceURI(), element.LocalName());
       // 3b. If definition is non-null and definition's disable shadow is true, then throw a
       //     "NotSupportedError" DOMException.
       if (definition != nullptr && definition->IsShadowDisabled())
@@ -475,7 +475,7 @@ namespace krys::boo::dom
     // 5. Let shadow be the result of creating a node that implements ShadowRoot, given element's node
     //    document.
     // 15. Set shadow's custom element registry to registry.
-    auto shadow = CreateRef<ShadowRoot>(element.NodeDocument(), ShareRefPtr(registry));
+    auto shadow = CreateRef<ShadowRoot>(element.NodeDocument(), registry);
     // 6. Set shadow's host to element.
     shadow->_host = CreateWeakPtr(&element);
     // 7. Set shadow's mode to mode.

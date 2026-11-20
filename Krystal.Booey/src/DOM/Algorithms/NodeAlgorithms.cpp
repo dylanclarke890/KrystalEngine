@@ -110,10 +110,9 @@ namespace krys::boo::dom
 
         // 6c. If shadowRootRegistry is a global custom element registry, then set shadowRootRegistry to
         //     document's custom element registry's effective global custom element registry.
-        if (html::CustomElementAlgorithms::IsGlobalCustomElementRegistry(shadowRootRegistry.get()))
+        if (html::CustomElementAlgorithms::IsGlobalCustomElementRegistry(shadowRootRegistry))
         {
-          shadowRootRegistry =
-            ShareRefPtr(html::CustomElementAlgorithms::EffectiveGlobalCustomElementRegistry(*document));
+          shadowRootRegistry = html::CustomElementAlgorithms::EffectiveGlobalCustomElementRegistry(*document);
         }
 
         // 6d. Attach a shadow root with copy, node's shadow root's mode, node's shadow root's delegates
@@ -122,7 +121,7 @@ namespace krys::boo::dom
         if (auto attach = ElementAlgorithms::AttachShadowRoot(
               *elementCopy, shadowRoot->Mode(), Clonable::Yes, Serialisable(shadowRoot->Serialisable()),
               DelegatesFocus(shadowRoot->DelegatesFocus()), shadowRoot->SlotAssignment(),
-              shadowRoot->ReferenceTarget(), shadowRootRegistry.get());
+              shadowRoot->ReferenceTarget(), shadowRootRegistry);
             attach.HasException())
         {
           return attach.ReleaseException();
@@ -167,14 +166,14 @@ namespace krys::boo::dom
       // 2b. If registry is null, then set registry to fallbackRegistry.
       if (registry == nullptr)
       {
-        registry = ShareRefPtr(fallbackRegistry);
+        registry = fallbackRegistry;
       }
 
       // 2c. If registry is a global custom element registry, then set registry to document's custom element
       //     registry's effective global custom element registry.
-      if (html::CustomElementAlgorithms::IsGlobalCustomElementRegistry(registry.get()))
+      if (html::CustomElementAlgorithms::IsGlobalCustomElementRegistry(registry))
       {
-        registry = ShareRefPtr(html::CustomElementAlgorithms::EffectiveGlobalCustomElementRegistry(document));
+        registry = html::CustomElementAlgorithms::EffectiveGlobalCustomElementRegistry(document);
       }
 
       // 2d. Set copy to the result of creating an element, given document, node's local name, node's

@@ -2343,7 +2343,7 @@ namespace krys::boo
     // 1. Let registry be this's node document's custom element registry.
     // 2. If init["customElementRegistry"] exists, then set registry to it.
     auto registry =
-      init.CustomElementRegistry ? init.CustomElementRegistry : NodeDocument().CustomElementRegistry().get();
+      init.CustomElementRegistry ? init.CustomElementRegistry : NodeDocument().CustomElementRegistry();
 
     // 3. If registry is non-null, registry's is scoped is false, and registry is not this's node document's
     //    custom element registry, then throw a "NotSupportedError" DOMException.

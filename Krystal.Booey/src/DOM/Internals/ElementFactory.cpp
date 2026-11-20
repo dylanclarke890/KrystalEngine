@@ -36,7 +36,7 @@ namespace krys::boo::dom
     //    localName, and is. (Customized built-in elements aren't supported, so it's looked up by the local
     //    name alone.)
     auto *definition = html::CustomElementAlgorithms::LookupCustomElementDefinition(
-      registry.value().get(), name.NamespaceURI(), name.LocalName());
+      registry.value(), name.NamespaceURI(), name.LocalName());
     // 4. (Skipped: customized built-in elements aren't supported, so definition's name is always its local
     //    name.)
     // 5. Otherwise, if definition is non-null:
@@ -117,7 +117,7 @@ namespace krys::boo::dom
     // Create an element internal's step 2, and steps 5a.iv.I-K: the element's namespace, prefix and local
     // name, custom element registry, and is value (null for a custom element).
     result->_qualifiedName = name;
-    result->_customElementRegistry = registry.value();
+    result->_customElementRegistry = ShareRefPtr(registry.value());
     if (registry.value() != nullptr && registry.value()->IsScoped())
     {
       registry.value()->AppendToScopedDocumentSet(document);
