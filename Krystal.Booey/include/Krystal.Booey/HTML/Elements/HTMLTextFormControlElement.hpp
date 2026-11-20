@@ -24,7 +24,6 @@
 
 #pragma once
 
-#include "Krystal.Booey/DOM/Ranges/SimpleRange.hpp"
 #include "Krystal.Booey/HTML/Elements/HTMLFormControlElement.hpp"
 #include "Krystal.Booey/Platform/Scrolling/ScrollTypes.hpp"
 
@@ -36,6 +35,7 @@ namespace krys::boo
 namespace krys::boo::dom
 {
   class Position;
+  struct SimpleRange;
 }
 
 namespace krys::boo::html

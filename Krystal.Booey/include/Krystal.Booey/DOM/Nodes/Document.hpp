@@ -27,10 +27,10 @@
 
 #pragma once
 
+#include "Krystal.Booey/CSS/Types/CSSOMString.hpp"
 #include "Krystal.Booey/DOM/Collections/LiveCollection.hpp"
 #include "Krystal.Booey/DOM/ContentVisibility/ContentRelevancy.hpp"
 #include "Krystal.Booey/DOM/Internals/LayoutOptions.hpp"
-#include "Krystal.Booey/DOM/Internals/VisibilityChangeClient.hpp"
 #include "Krystal.Booey/DOM/Mixins/DocumentOrShadowRoot.hpp"
 #include "Krystal.Booey/DOM/Nodes/ContainerNode.hpp"
 #include "Krystal.Booey/DOM/Nodes/DOMImplementation.hpp"
@@ -53,6 +53,7 @@
 #include "Krystal.Booey/Page/RenderingUpdateStep.hpp"
 #include "Krystal.Booey/Rendering/RenderPtr.hpp"
 #include "Krystal.Booey/Rendering/Style/RenderStyleConstants.hpp"
+#include "Krystal.Booey/Style/PseudoElementIdentifier.hpp"
 #include "Krystal.Booey/Style/Values/Color/ColorOptions.hpp"
 #include "Krystal.Core/Enum.hpp"
 #include "Krystal.Core/Geometry/Point.hpp"
@@ -98,6 +99,7 @@ namespace krys::boo
   class FontLoadRequest;
   class Frame;
   class FrameSelection;
+  class FrameView;
   class GraphicsClient;
   class HTMLBaseElement;
   class HTMLBodyElement;
@@ -112,9 +114,6 @@ namespace krys::boo
   class HitTestResult;
   class IntersectionObserver;
   struct IntersectionObserverData;
-  class WebAnimation;
-  class Window;
-  class FrameView;
   class MediaQueryList;
   class MouseEvent;
   class MouseEventWithHitTestResults;
@@ -133,6 +132,8 @@ namespace krys::boo
   class StyleOriginatedTimelinesController;
   class StyleSheetList;
   class Text;
+  class WebAnimation;
+  class Window;
 }
 
 namespace krys::boo::css
@@ -172,8 +173,9 @@ namespace krys::boo::html
 
 namespace krys::boo::dom
 {
-  enum class FireEvents : bool;
+  class VisibilityChangeClient;
   enum class FocusPreviousElement : bool;
+  enum class FireEvents : bool;
   enum class PopoverState : uint8;
 
   /// @brief Various flags used for optimizations in the Document class.

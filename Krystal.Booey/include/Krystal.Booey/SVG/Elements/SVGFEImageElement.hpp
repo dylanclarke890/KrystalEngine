@@ -24,7 +24,6 @@
 #include "Krystal.Booey/Loader/Cache/CachedImageClient.hpp"
 #include "Krystal.Booey/Loader/Cache/CachedResourceHandle.hpp"
 #include "Krystal.Booey/SVG/SVGFilterPrimitiveStandardAttributes.hpp"
-#include "Krystal.Booey/SVG/SVGPreserveAspectRatio.hpp"
 #include "Krystal.Booey/SVG/SVGURIReference.hpp"
 
 namespace krys::boo

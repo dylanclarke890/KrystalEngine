@@ -30,24 +30,19 @@
 #include "Krystal.Booey/DOM/ContentVisibility/ContentRelevancy.hpp"
 #include "Krystal.Booey/DOM/Events/SimulatedClick.hpp"
 #include "Krystal.Booey/DOM/Geometry/DOMRect.hpp"
-#include "Krystal.Booey/DOM/Geometry/DOMRectList.hpp"
 #include "Krystal.Booey/DOM/Mixins/ARIAMixin.hpp"
 #include "Krystal.Booey/DOM/Nodes/ContainerNode.hpp"
 #include "Krystal.Booey/DOM/Nodes/FocusOptions.hpp"
-#include "Krystal.Booey/DOM/Nodes/GetHTMLOptions.hpp"
 #include "Krystal.Booey/DOM/Nodes/NamedNodeMap.hpp"
 #include "Krystal.Booey/DOM/Nodes/PointerLockOptions.hpp"
-#include "Krystal.Booey/DOM/Parsing/ParserContentPolicy.hpp"
 #include "Krystal.Booey/DOM/Types/NodeOrString.hpp"
 #include "Krystal.Booey/DOM/Types/QualifiedName.hpp"
-#include "Krystal.Booey/Graphics/Geometry/LayoutUnit.hpp"
 #include "Krystal.Booey/HTML/Sanitizer/SetHTMLOptions.hpp"
 #include "Krystal.Booey/Input/PlatformWheelEvent.hpp"
 #include "Krystal.Booey/Page/Scrolling/ScrollOptions.hpp"
 #include "Krystal.Booey/Platform/Scrolling/ScrollTypes.hpp"
 #include "Krystal.Booey/Rendering/HitTesting/HitTestRequest.hpp"
 #include "Krystal.Booey/Rendering/RenderPtr.hpp"
-#include "Krystal.Booey/Style/Change.hpp"
 #include "Krystal.Core/Enum.hpp"
 #include "Krystal.Core/Geometry/Point.hpp"
 #include "Krystal.Core/Geometry/Rect.hpp"
@@ -69,10 +64,10 @@ namespace krys::boo
   class HTMLSlotElement;
   struct IntersectionObserverData;
   struct KeyframeAnimationOptions;
+  class LayoutUnit;
   class PlatformKeyboardEvent;
   class PlatformMouseEvent;
   class PseudoElement;
-  enum class PseudoElementType : uint8;
   class RenderElement;
   class RenderStyle;
   class RenderTreeUpdater;
@@ -80,6 +75,7 @@ namespace krys::boo
   class ShadowRoot;
   class StylePropertyMap;
   class StylePropertyMapReadOnly;
+  enum class PseudoElementType : uint8;
 }
 
 namespace krys::net
@@ -98,6 +94,7 @@ namespace krys::boo::style
   struct ResolutionContext;
   class Resolver;
   struct UnadjustedStyle;
+  enum class Change : uint8;
 }
 
 namespace krys::boo::html
@@ -118,7 +115,10 @@ namespace krys::boo::xml
 
 namespace krys::boo::dom
 {
+  class DOMRectList;
+  struct GetHTMLOptions;
   enum class PopoverState : uint8;
+  enum class ParserContentPolicy : uint8;
 
   /// @see https://dom.spec.whatwg.org/#concept-element-custom-element-state
   enum class CustomElementState : uint8

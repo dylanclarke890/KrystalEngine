@@ -65,6 +65,7 @@
 #include "Krystal.Booey/DOM/Mixins/Slottable.hpp"
 #include "Krystal.Booey/DOM/Nodes/Attr.hpp"
 #include "Krystal.Booey/DOM/Nodes/DocumentFragment.hpp"
+#include "Krystal.Booey/DOM/Nodes/GetHTMLOptions.hpp"
 #include "Krystal.Booey/DOM/Nodes/HTMLDocument.hpp"
 #include "Krystal.Booey/DOM/Nodes/NamedNodeMap.hpp"
 #include "Krystal.Booey/DOM/Nodes/PseudoElement.hpp"

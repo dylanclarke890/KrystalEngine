@@ -29,8 +29,6 @@
 
 #include "Krystal.Booey/DOM/Mixins/DocumentOrShadowRoot.hpp"
 #include "Krystal.Booey/DOM/Nodes/DocumentFragment.hpp"
-#include "Krystal.Booey/DOM/Nodes/GetHTMLOptions.hpp"
-#include "Krystal.Booey/DOM/Parsing/ParserContentPolicy.hpp"
 #include "Krystal.Booey/HTML/Attributes/EventHandlerAttributes.hpp"
 #include "Krystal.Booey/HTML/Sanitizer/SetHTMLOptions.hpp"
 #include "Krystal.Core/Enum.hpp"
@@ -78,7 +76,9 @@ namespace krys::boo::dom
 {
   class DocumentAlgorithms;
   class ElementAlgorithms;
+  struct GetHTMLOptions;
   class NodeAlgorithms;
+  enum class ParserContentPolicy : uint8;
 
   enum class DelegatesFocus : bool
   {

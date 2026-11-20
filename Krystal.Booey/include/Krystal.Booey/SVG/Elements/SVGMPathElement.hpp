@@ -21,8 +21,12 @@
 #pragma once
 
 #include "Krystal.Booey/SVG/Elements/SVGElement.hpp"
-#include "Krystal.Booey/SVG/Elements/SVGPathElement.hpp"
 #include "Krystal.Booey/SVG/SVGURIReference.hpp"
+
+namespace krys::boo
+{
+  class SVGPathElement;
+}
 
 namespace krys::boo
 {

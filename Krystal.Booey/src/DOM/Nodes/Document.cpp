@@ -76,6 +76,7 @@
 #include "Krystal.Booey/DOM/Internals/ElementFactory.hpp"
 #include "Krystal.Booey/DOM/Internals/PopoverData.hpp"
 #include "Krystal.Booey/DOM/Internals/UserActionElementSet.hpp"
+#include "Krystal.Booey/DOM/Internals/VisibilityChangeClient.hpp"
 #include "Krystal.Booey/DOM/IntersectionObservers/IntersectionObserver.hpp"
 #include "Krystal.Booey/DOM/Iterators/ComposedTreeIterator.hpp"
 #include "Krystal.Booey/DOM/Iterators/SubtreeRanges.hpp"

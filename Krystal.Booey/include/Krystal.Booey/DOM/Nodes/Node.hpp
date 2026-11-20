@@ -28,7 +28,6 @@
 #include "Krystal.Booey/DOM/Internals/NodeRareData.hpp"
 #include "Krystal.Booey/DOM/Types/DOMString.hpp"
 #include "Krystal.Booey/DOM/Types/ExceptionOr.hpp"
-#include "Krystal.Booey/Style/PseudoElementIdentifier.hpp"
 #include "Krystal.Booey/Style/Validity.hpp"
 #include "Krystal.Core/Assert.hpp"
 #include "Krystal.Core/Base.hpp"
@@ -39,6 +38,11 @@
 #include "Krystal.Core/Types/RefPtr.hpp"
 #include "Krystal.Core/Types/UniquePtr.hpp"
 #include <compare>
+
+namespace krys::boo::style
+{
+  struct PseudoElementIdentifier;
+}
 
 namespace krys::text
 {

@@ -25,9 +25,7 @@
 #include "Krystal.Booey/DOM/Nodes/StyledElement.hpp"
 #include "Krystal.Booey/HTML/Attributes/EventHandlerAttributes.hpp"
 #include "Krystal.Booey/HTML/Mixins/HTMLOrSVGOrMathMLElement.hpp"
-#include "Krystal.Booey/SVG/Properties/SVGAnimatedString.hpp"
 #include "Krystal.Booey/SVG/Properties/SVGPropertyOwner.hpp"
-#include "Krystal.Booey/SVG/Properties/SVGPropertyRegistry.hpp"
 #include "Krystal.Booey/SVG/SVGParsingError.hpp"
 #include "Krystal.Core/Enum.hpp"
 #include "Krystal.Core/Types/List.hpp"
@@ -41,6 +39,8 @@ namespace krys
 
 namespace krys::boo
 {
+  class SVGAnimatedString;
+  class SVGPropertyRegistry;
   enum class ColorInterpolation : uint8;
 
   enum class SVGElementFlags : uint8
