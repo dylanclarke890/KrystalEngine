@@ -43,7 +43,7 @@
 #include "Krystal.Booey/HTML/Canvas/Path2D.hpp"
 #include "Krystal.Booey/HTML/Canvas/TextMetrics.hpp"
 #include "Krystal.Booey/HTML/Elements/HTMLCanvasElement.hpp"
-#include "Krystal.Booey/Page/Page.hpp"
+#include "Krystal.Booey/Page/Frame.hpp"
 #include "Krystal.Booey/Rendering/Painting/CSSFilterRenderer.hpp"
 #include "Krystal.Booey/Rendering/RenderElement.hpp"
 #include "Krystal.Booey/Rendering/RenderTheme.hpp"
@@ -113,8 +113,8 @@ namespace krys::boo::html
       return nullptr;
     }
 
-    auto *page = Canvas().NodeDocument().GetPage();
-    if (!page)
+    auto *frame = Canvas().NodeDocument().Frame();
+    if (!frame)
     {
       return nullptr;
     }
@@ -122,7 +122,7 @@ namespace krys::boo::html
     auto outsets = CalculateFilterOutsets(bounds);
     auto filterRegion = bounds + ToFloatBoxExtent(outsets);
 
-    auto preferredFilterRenderingModes = page->PreferredFilterRenderingModes(*context);
+    auto preferredFilterRenderingModes = frame->PreferredFilterRenderingModes(*context);
     auto filter = CSSFilterRenderer::Create(*renderer, GetState().Filter,
                                             {
                                               .ReferenceBox = bounds,

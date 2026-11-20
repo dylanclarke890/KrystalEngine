@@ -39,9 +39,9 @@
 #include "Krystal.Booey/HTML/Elements/HTMLInputElement.hpp"
 #include "Krystal.Booey/HTML/Elements/HTMLOptionElement.hpp"
 #include "Krystal.Booey/HTML/InputTypes/BaseClickableWithKeyInputType.hpp"
-#include "Krystal.Booey/Page/Clients/ChromeClient.hpp"
-#include "Krystal.Booey/Page/LocalFrameView.hpp"
-#include "Krystal.Booey/Page/Page.hpp"
+#include "Krystal.Booey/Page/Clients/BooeyClient.hpp"
+#include "Krystal.Booey/Page/Frame.hpp"
+#include "Krystal.Booey/Page/FrameView.hpp"
 #include "Krystal.Booey/Page/Settings.hpp"
 #include "Krystal.Booey/Platform/Choosers/DateTimeChooserParameters.hpp"
 #include "Krystal.Booey/Rendering/RenderElement.hpp"
@@ -323,8 +323,8 @@ namespace krys::boo::html
       return;
     }
 
-    auto *chromeClient = GetChromeClient();
-    if (!chromeClient)
+    auto *booeyClient = GetBooeyClient();
+    if (!booeyClient)
     {
       return;
     }
@@ -335,14 +335,14 @@ namespace krys::boo::html
       return;
     }
 
-    if (auto *page = Element()->NodeDocument().GetPage())
+    if (auto *frame = Element()->NodeDocument().Frame())
     {
-      page->NotifyPopupOpeningObservers();
+      frame->NotifyPopupOpeningObservers();
     }
     {
       style::PseudoClassChangeInvalidation styleInvalidation(*Element(), css::SelectorPseudoClass::Open,
                                                              true);
-      _dateTimeChooser = chromeClient->CreateDateTimeChooser(*this);
+      _dateTimeChooser = booeyClient->CreateDateTimeChooser(*this);
     }
     if (RefPtr<DateTimeChooser> dateTimeChooser = _dateTimeChooser)
     {

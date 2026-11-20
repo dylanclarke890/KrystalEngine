@@ -40,8 +40,8 @@
 #include "Krystal.Booey/Layout/Integration/Inline/InlineIteratorTextBox.hpp"
 #include "Krystal.Booey/Layout/Integration/Inline/LayoutIntegrationLineLayout.hpp"
 #include "Krystal.Booey/Layout/LayoutTree/LayoutElementBox.hpp"
-#include "Krystal.Booey/Page/LocalFrame.hpp"
-#include "Krystal.Booey/Page/LocalFrameView.hpp"
+#include "Krystal.Booey/Page/Frame.hpp"
+#include "Krystal.Booey/Page/FrameView.hpp"
 #include "Krystal.Booey/Page/Scrolling/ScrollAnchoringController.hpp"
 #include "Krystal.Booey/Rendering/Fragmentation/RenderFragmentedFlow.hpp"
 #include "Krystal.Booey/Rendering/GeneratedContent/RenderCounter.hpp"
@@ -2261,8 +2261,8 @@ namespace krys::boo
 
   bool RenderElement::AllowsAnimation() const noexcept
   {
-    auto *page = GetDocument().GetPage();
-    return !page || page->ImageAnimationEnabled();
+    auto *frame = GetDocument().Frame();
+    return !frame || frame->ImageAnimationEnabled();
   }
 
   void RenderElement::DidRemoveCachedImageClient(CachedImage &cachedImage) noexcept

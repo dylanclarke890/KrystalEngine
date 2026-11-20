@@ -55,7 +55,7 @@ namespace krys::boo::dom
 
 namespace krys::boo
 {
-  class Page;
+  class Frame;
   class VisibleSelection;
 
   enum class ResolveUrls : uint8
@@ -216,7 +216,7 @@ namespace krys::boo
 
   /// @brief A page with empty clients, whose main frame shows an empty document, to parse markup in apart
   /// from @p destinationDocument.
-  KRYS_NODISCARD Ref<Page> CreatePageForSanitizingWebContent(Document *destinationDocument) noexcept;
+  KRYS_NODISCARD Ref<Frame> CreateFrameForSanitizingWebContent(Document *destinationDocument) noexcept;
 
   enum class MSOListQuirks : bool
   {

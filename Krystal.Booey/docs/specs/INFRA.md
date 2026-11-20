@@ -153,7 +153,7 @@ Status: n/a (unused)
   - 5. Return false.
 
 - [x] [isomorphic decode](https://infra.spec.whatwg.org/#isomorphic-decode) — To isomorphic decode a byte sequence input, return a string whose code point length is equal to input’s length and whose code points have the same values as the values of input’s bytes, in the same order.
-  > n/a: nothing uses it (`LocalDOMWindow::Atob` decodes inline).
+  > n/a: nothing uses it (`Window::Atob` decodes inline).
 
 ### [4.6. Code points](https://infra.spec.whatwg.org/#code-points)
 
@@ -218,7 +218,7 @@ Status: reviewed (2026-10-31)
   - 5. Return result.
 
 - [x] [isomorphic encode](https://infra.spec.whatwg.org/#isomorphic-encode) — To isomorphic encode an isomorphic string input: return a byte sequence whose length is equal to input’s code point length and whose bytes have the same values as the values of input’s code points, in the same order.
-  > n/a: done inline where it's used (`LocalDOMWindow::Btoa`).
+  > n/a: done inline where it's used (`Window::Btoa`).
 
 - [x] [ASCII lowercase](https://infra.spec.whatwg.org/#ascii-lowercase) — To ASCII lowercase a string, replace all ASCII upper alphas in the string with their corresponding code point in ASCII lower alpha.
 

@@ -1,4 +1,4 @@
-﻿#include "Krystal.Booey/Page/LocalDOMWindow.hpp"
+﻿#include "Krystal.Booey/HTML/Window.hpp"
 #include "catch2/catch_test_macros.hpp"
 #include "Krystal.Booey.Tests/Loader/NavigationTestUtils.hpp"
 #include "Krystal.Booey/CSS/CSSOM/CSSStyleDeclaration.hpp"
@@ -20,9 +20,8 @@
 #include "Krystal.Booey/Input/PlatformKeyboardEvent.hpp"
 #include "Krystal.Booey/Input/PlatformMouseEvent.hpp"
 #include "Krystal.Booey/Page/DOMSelection.hpp"
-#include "Krystal.Booey/Page/LocalFrame.hpp"
-#include "Krystal.Booey/Page/LocalFrameView.hpp"
-#include "Krystal.Booey/Page/Page.hpp"
+#include "Krystal.Booey/Page/Frame.hpp"
+#include "Krystal.Booey/Page/FrameView.hpp"
 #include "Krystal.Booey/Page/VisualViewport.hpp"
 #include "Krystal.Booey/Style/Scope/Scope.hpp"
 #include "Krystal.Booey/SVG/Elements/SVGElement.hpp"
@@ -32,15 +31,15 @@ namespace krys::boo::tests
   namespace
   {
     /// @brief Counts the page's requests to be brought to the front.
-    struct WindowChromeClient final : ChromeClient
+    struct WindowBooeyClient final : BooeyClient
     {
       uint32 &FocusRequests;
 
-      explicit WindowChromeClient(uint32 &focusRequests) noexcept : FocusRequests(focusRequests)
+      explicit WindowBooeyClient(uint32 &focusRequests) noexcept : FocusRequests(focusRequests)
       {
       }
 
-      void AttachRootGraphicsLayer(LocalFrame &, GraphicsLayer *) noexcept override
+      void AttachRootGraphicsLayer(boo::Frame &, GraphicsLayer *) noexcept override
       {
       }
 
@@ -54,12 +53,12 @@ namespace krys::boo::tests
     struct WindowFixture
     {
       uint32 FocusRequests {0};
-      Ref<Page> TestPage {CreatePage()};
+      Ref<boo::Frame> Frame {CreateFrame()};
       RefPtr<HTMLDocument> Document;
 
       explicit WindowFixture(utf8_string &&markup = u8"<!DOCTYPE html>") noexcept
       {
-        auto &frame = TestPage->MainFrame();
+        auto &frame = *Frame;
         frame.CreateView({200, 100});
         Document = CreateRef<HTMLDocument>();
         frame.SetDocument(ShareRefPtr<boo::Document>(Document.get()));
@@ -67,16 +66,16 @@ namespace krys::boo::tests
         parser->InputStream().Append(krys::move(markup), IsEOF::Yes);
         parser->PumpTokenizer();
         Document->StyleScope().FlushPendingUpdate();
-        TestPage->UpdateRendering();
+        Frame->UpdateRendering();
       }
 
-      KRYS_NODISCARD Ref<Page> CreatePage() noexcept
+      KRYS_NODISCARD Ref<boo::Frame> CreateFrame() noexcept
       {
-        return Page::Create(CreateUnique<WindowChromeClient>(FocusRequests), nullptr,
-                            CreateUnique<RecordingFrameLoaderClient>());
+        return boo::Frame::Create(CreateUnique<WindowBooeyClient>(FocusRequests), nullptr,
+                                  CreateUnique<RecordingFrameLoaderClient>());
       }
 
-      KRYS_NODISCARD LocalDOMWindow &Window() const noexcept
+      KRYS_NODISCARD boo::Window &Window() const noexcept
       {
         REQUIRE(Document->Window());
         return *Document->Window();
@@ -91,13 +90,13 @@ namespace krys::boo::tests
     };
   }
 
-  TEST_CASE("A document gets its window as it becomes a frame's document", "[Page][LocalDOMWindow]")
+  TEST_CASE("A document gets its window as it becomes a frame's document", "[Page][Window]")
   {
     auto document = CreateRef<HTMLDocument>();
     CHECK(document->Window() == nullptr);
     CHECK(document->DefaultView() == nullptr);
 
-    auto frame = LocalFrame::Create();
+    auto frame = boo::Frame::Create();
     frame->CreateView({200, 100});
     frame->SetDocument(ShareRefPtr<boo::Document>(document.get()));
 
@@ -108,8 +107,8 @@ namespace krys::boo::tests
     CHECK(window->Document() == document.get());
     CHECK(window->Frame() == frame.get());
     CHECK(window->IsCurrentlyDisplayedInFrame());
-    CHECK(Is<LocalDOMWindow>(static_cast<EventTarget &>(*window)));
-    CHECK_FALSE(Is<LocalDOMWindow>(static_cast<EventTarget &>(*document)));
+    CHECK(Is<boo::Window>(static_cast<EventTarget &>(*window)));
+    CHECK_FALSE(Is<boo::Window>(static_cast<EventTarget &>(*document)));
 
     // The window's custom element registry is the document's.
     CHECK(&window->CustomElements() == document->CustomElementRegistry().get());
@@ -121,7 +120,7 @@ namespace krys::boo::tests
     CHECK(window->Frame() == nullptr);
   }
 
-  TEST_CASE("Events bubble from the document to the window, except load", "[Page][LocalDOMWindow]")
+  TEST_CASE("Events bubble from the document to the window, except load", "[Page][Window]")
   {
     WindowFixture fixture(u8"<!DOCTYPE html><button id=button>Go</button>");
     auto &window = fixture.Window();
@@ -178,7 +177,7 @@ namespace krys::boo::tests
     SECTION("a document without a browsing context doesn't reach its window, nor run its own listeners")
     {
       // Its window's document isn't fully active, so inner invoke skips the listeners.
-      fixture.TestPage->MainFrame().SetDocument(nullptr);
+      fixture.Frame->SetDocument(nullptr);
       order.clear();
       auto event = Event::Create(event_names::Click, true, false);
       (void)dom::EventDispatcher::DispatchToTarget(*event, &button);
@@ -186,7 +185,7 @@ namespace krys::boo::tests
     }
   }
 
-  TEST_CASE("resize fires at the window when the viewport resizes", "[Page][LocalDOMWindow]")
+  TEST_CASE("resize fires at the window when the viewport resizes", "[Page][Window]")
   {
     WindowFixture fixture;
     auto &window = fixture.Window();
@@ -201,24 +200,24 @@ namespace krys::boo::tests
                                             });
 
     // A rendering update without a change fires nothing.
-    fixture.TestPage->UpdateRendering();
+    fixture.Frame->UpdateRendering();
     CHECK(resizes == 0);
 
-    fixture.TestPage->MainFrame().View()->Resize({300, 100});
-    fixture.TestPage->UpdateRendering();
+    fixture.Frame->View()->Resize({300, 100});
+    fixture.Frame->UpdateRendering();
     CHECK(resizes == 1);
 
     // Once per change.
-    fixture.TestPage->UpdateRendering();
+    fixture.Frame->UpdateRendering();
     CHECK(resizes == 1);
 
     // A zoom changes the viewport too.
-    fixture.TestPage->MainFrame().SetPageZoomFactor(2);
-    fixture.TestPage->UpdateRendering();
+    fixture.Frame->SetPageZoomFactor(2);
+    fixture.Frame->UpdateRendering();
     CHECK(resizes == 2);
   }
 
-  TEST_CASE("A window asks its host to focus it", "[Page][LocalDOMWindow][html:dom-window-focus]")
+  TEST_CASE("A window asks its host to focus it", "[Page][Window][html:dom-window-focus]")
   {
     WindowFixture fixture;
     auto &window = fixture.Window();
@@ -228,7 +227,7 @@ namespace krys::boo::tests
   }
 
   TEST_CASE("A window's named objects",
-            "[Page][LocalDOMWindow][html:named-access-on-the-window-object][html:dom-window-nameditem-filter]"
+            "[Page][Window][html:named-access-on-the-window-object][html:dom-window-nameditem-filter]"
             "[html:document-tree-child-navigable-target-name-property-set]")
   {
     WindowFixture fixture(u8"<!DOCTYPE html>"
@@ -273,12 +272,12 @@ namespace krys::boo::tests
           == List<DOMString> {u8"picture", u8"twice", u8"order", u8"orderform"});
   }
 
-  TEST_CASE("A window's viewport, scrolling and zoom", "[Page][LocalDOMWindow]")
+  TEST_CASE("A window's viewport, scrolling and zoom", "[Page][Window]")
   {
     WindowFixture fixture(u8"<!DOCTYPE html><style>body { margin: 0 } div { width: 1000px; height: 1000px }"
                           u8"</style><div></div>");
     auto &window = fixture.Window();
-    auto &view = *fixture.TestPage->MainFrame().View();
+    auto &view = *fixture.Frame->View();
 
     // The viewport with its scrollbars.
     CHECK(window.InnerWidth() == 200);
@@ -311,7 +310,7 @@ namespace krys::boo::tests
     CHECK(window.ScrollY() == 60);
 
     // Zoom maps CSS pixels to layout units.
-    fixture.TestPage->MainFrame().SetPageZoomFactor(2);
+    fixture.Frame->SetPageZoomFactor(2);
     (void)fixture.Document->UpdateLayoutIgnorePendingStylesheets();
     window.ScrollTo(0, 50);
     CHECK(view.ContentsScrollPosition().Y() == 100);
@@ -319,11 +318,11 @@ namespace krys::boo::tests
     CHECK(window.InnerWidth() == 100);
     CHECK(window.DevicePixelRatio() == 2);
 
-    fixture.TestPage->SetDeviceScaleFactor(1.5f);
+    fixture.Frame->SetDeviceScaleFactor(1.5f);
     CHECK(window.DevicePixelRatio() == 3);
   }
 
-  TEST_CASE("A right-to-left window's scrolling", "[Page][LocalDOMWindow]")
+  TEST_CASE("A right-to-left window's scrolling", "[Page][Window]")
   {
     // As Chrome: the viewport starts at its right edge, which is 0, and scrolls left to negative positions;
     // its vertical scrollbar stays on the right.
@@ -355,7 +354,7 @@ namespace krys::boo::tests
     CHECK(window.ScrollX() == 0);
   }
 
-  TEST_CASE("A window's visual viewport is its layout viewport", "[Page][LocalDOMWindow]")
+  TEST_CASE("A window's visual viewport is its layout viewport", "[Page][Window]")
   {
     WindowFixture fixture(u8"<!DOCTYPE html><style>body { margin: 0 } div { width: 1000px; height: 1000px }"
                           u8"</style><div></div>");
@@ -378,16 +377,16 @@ namespace krys::boo::tests
     auto resizeListener = visualViewport.AddEventListener(u8"resize", [&](Event &) { ++resizes; });
     auto scrollListener = visualViewport.AddEventListener(u8"scroll", [&](Event &) { ++scrolls; });
 
-    fixture.TestPage->MainFrame().View()->Resize({300, 150});
-    fixture.TestPage->UpdateRendering();
+    fixture.Frame->View()->Resize({300, 150});
+    fixture.Frame->UpdateRendering();
     CHECK(resizes == 1);
     // Scrolling moves the layout viewport, and the visual viewport with it.
     window.ScrollTo(0, 80);
-    fixture.TestPage->UpdateRendering();
+    fixture.Frame->UpdateRendering();
     CHECK(scrolls == 0);
   }
 
-  TEST_CASE("A window's selection and computed styles", "[Page][LocalDOMWindow]")
+  TEST_CASE("A window's selection and computed styles", "[Page][Window]")
   {
     WindowFixture fixture(u8"<!DOCTYPE html><p id=text style='color: rgb(1, 2, 3)'>Text</p>");
     auto &window = fixture.Window();
@@ -398,7 +397,7 @@ namespace krys::boo::tests
     auto style = window.GetComputedStyle(fixture.ById(u8"text"));
     CHECK(style->GetPropertyValue(u8"color") == u8"rgb(1, 2, 3)");
 
-    fixture.TestPage->MainFrame().SetDocument(nullptr);
+    fixture.Frame->SetDocument(nullptr);
     CHECK(window.GetSelection() == nullptr);
   }
 
@@ -415,7 +414,7 @@ namespace krys::boo::tests
   }
 
   TEST_CASE("A window's microtasks run before the next task",
-            "[Page][LocalDOMWindow][html:microtask-queuing][html:dom-queuemicrotask]")
+            "[Page][Window][html:microtask-queuing][html:dom-queuemicrotask]")
   {
     WindowFixture fixture;
     auto &window = fixture.Window();
@@ -428,14 +427,13 @@ namespace krys::boo::tests
     CHECK(order == List<std::string> {"microtask", "task"});
   }
 
-  TEST_CASE(
-    "A window's animation frame callbacks run in the rendering update",
-    "[Page][LocalDOMWindow][html:animation-frames][html:dom-animationframeprovider-requestanimationframe]"
-    "[html:animationframeprovider-cancelanimationframe][html:run-the-animation-frame-callbacks]")
+  TEST_CASE("A window's animation frame callbacks run in the rendering update",
+            "[Page][Window][html:animation-frames][html:dom-animationframeprovider-requestanimationframe]"
+            "[html:animationframeprovider-cancelanimationframe][html:run-the-animation-frame-callbacks]")
   {
     WindowFixture fixture;
     auto &window = fixture.Window();
-    auto &page = *fixture.TestPage;
+    auto &page = *fixture.Frame;
 
     List<double> timestamps;
     int32 nested = 0;
@@ -468,7 +466,7 @@ namespace krys::boo::tests
   }
 
   TEST_CASE("A window's user activation",
-            "[Page][LocalDOMWindow][html:user-activation-data-model]"
+            "[Page][Window][html:user-activation-data-model]"
             "[html:activation-expiry][html:activation-notification]"
             "[html:activation-triggering-input-event][html:consume-user-activation]"
             "[html:consume-history-action-user-activation]")
@@ -476,7 +474,7 @@ namespace krys::boo::tests
     WindowFixture fixture(
       u8"<!DOCTYPE html><style>body { margin: 0 } div { height: 50px }</style><div></div>");
     auto &window = fixture.Window();
-    auto &handler = fixture.TestPage->MainFrame().GetEventHandler();
+    auto &handler = fixture.Frame->GetEventHandler();
 
     CHECK_FALSE(window.HasStickyActivation());
     CHECK_FALSE(window.HasTransientActivation());
@@ -525,7 +523,7 @@ namespace krys::boo::tests
   }
 
   TEST_CASE("Event handler attributes",
-            "[Page][LocalDOMWindow][EventHandlers][html:event-handler-attributes]"
+            "[Page][Window][EventHandlers][html:event-handler-attributes]"
             "[html:the-event-handler-processing-algorithm][html:event-handler-idl-attributes]"
             "[html:window-reflecting-body-element-event-handler-set]")
   {
@@ -654,12 +652,12 @@ namespace krys::boo::tests
       body.SetOnClick([&](Event &) {});
       CHECK(window.OnClick() == nullptr);
 
-      fixture.TestPage->MainFrame().View()->Resize({300, 150});
-      fixture.TestPage->UpdateRendering();
+      fixture.Frame->View()->Resize({300, 150});
+      fixture.Frame->UpdateRendering();
       CHECK(order == List<std::string> {"resize"});
 
       // Without a browsing context, they're nowhere.
-      fixture.TestPage->MainFrame().SetDocument(nullptr);
+      fixture.Frame->SetDocument(nullptr);
       CHECK(body.OnResize() == nullptr);
       body.SetOnLoad([](Event &) {});
       CHECK(window.OnLoad() == nullptr);

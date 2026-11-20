@@ -54,8 +54,8 @@ namespace krys
 
 namespace krys::boo
 {
+  class Frame;
   class IconLoader;
-  class LocalFrame;
 
   /// @brief Loads one document into a frame: its main resource (from the host's loader strategy, a `data:`
   /// URL, or the host's substitute data), which, once it arrives, commits the load and is written into the
@@ -66,7 +66,7 @@ namespace krys::boo
     KRYS_NON_COPY_MOVABLE(DocumentLoader);
 
   private:
-    WeakPtr<LocalFrame> _frame;
+    WeakPtr<boo::Frame> _frame;
     net::ResourceRequest _request;
     Maybe<SubstituteData> _substituteData;
     NavigationAction _triggeringAction;
@@ -92,11 +92,11 @@ namespace krys::boo
                                                      Maybe<SubstituteData> &&substituteData = null) noexcept;
 
     /// @brief Attaches the loader to the frame it loads into.
-    void AttachToFrame(LocalFrame &frame) noexcept;
+    void AttachToFrame(boo::Frame &frame) noexcept;
 
     void DetachFromFrame() noexcept;
 
-    KRYS_NODISCARD LocalFrame *Frame() const noexcept
+    KRYS_NODISCARD boo::Frame *Frame() const noexcept
     {
       return _frame.get();
     }

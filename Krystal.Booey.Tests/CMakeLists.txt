@@ -384,8 +384,8 @@ target_sources(Krystal.Booey.Tests
 		tests/Graphics/Fonts/FontDatabase.cpp
 		tests/Graphics/TextRuns/TextRunIterator.cpp
 		tests/Graphics/TextRuns/WidthIterator.cpp
-		tests/Page/LocalFrameView.cpp
-		tests/Page/LocalFrameViewScrolling.cpp
+		tests/Page/FrameView.cpp
+		tests/Page/FrameViewScrolling.cpp
 		tests/Page/Scrolling/ScrollAnchoringController.cpp
 		tests/Page/Scrolling/ScrollLatchingController.cpp
 		tests/Page/Scrolling/ScrollSnapOffsetsInfo.cpp
@@ -433,8 +433,7 @@ target_sources(Krystal.Booey.Tests
 		tests/Platform/Pasteboard/DragImage.cpp
 		tests/DOM/IntersectionObservers/IntersectionObserver.cpp
 		tests/DOM/ResizeObservers/ResizeObserver.cpp
-		tests/Page/Page.cpp
-		tests/Page/LocalDOMWindow.cpp
+		tests/Page/Frame.cpp
 		tests/Loader/DocumentLoader.cpp
 		tests/Loader/Icons/IconLoader.cpp
 		tests/HTML/Forms/Autofill.cpp
@@ -779,6 +778,7 @@ target_sources(Krystal.Booey.Tests
 		tests/HTML/Parser/OpenElementStack.cpp
 		tests/HTML/Parser/InputStream.cpp
 		tests/HTML/Parser/Tokenizer.cpp
+		tests/HTML/Window.cpp
 
 		# Infra
 		tests/Infra/ForgivingBase64.cpp

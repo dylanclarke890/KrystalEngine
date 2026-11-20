@@ -42,7 +42,7 @@ namespace krys::boo
   class Element;
   class HTMLAreaElement;
   class HTMLInputElement;
-  class LocalFrameView;
+  class FrameView;
   class Node;
   class RenderElement;
   class RenderObject;
@@ -234,7 +234,7 @@ namespace krys::boo
     }
 
     /// @brief The object for the document's view (its scroll view), made if needed.
-    AXObject *GetOrCreate(LocalFrameView &view) noexcept;
+    AXObject *GetOrCreate(FrameView &view) noexcept;
 
     /// @brief A new object for one of the view's scroll bars; its maker sets its parent.
     AXObject *Create(Scrollbar &scrollbar) noexcept;

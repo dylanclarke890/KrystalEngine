@@ -27,13 +27,13 @@
 #include "Krystal.Booey/Accessibility/AXObjectCache.hpp"
 #include "Krystal.Booey/Accessibility/AXScrollbar.hpp"
 #include "Krystal.Booey/DOM/Nodes/Document.hpp"
-#include "Krystal.Booey/Page/LocalFrame.hpp"
-#include "Krystal.Booey/Page/LocalFrameView.hpp"
+#include "Krystal.Booey/Page/Frame.hpp"
+#include "Krystal.Booey/Page/FrameView.hpp"
 #include "Krystal.Booey/Platform/Scrolling/Scrollbar.hpp"
 
 namespace krys::boo
 {
-  AXScrollView::AXScrollView(AXId id, LocalFrameView &view, AXObjectCache &cache) noexcept
+  AXScrollView::AXScrollView(AXId id, FrameView &view, AXObjectCache &cache) noexcept
       : AXObject(id, cache), _scrollView(CreateWeakPtr<ScrollableArea>(&view))
   {
   }
@@ -43,7 +43,7 @@ namespace krys::boo
     krys_debug_assert(IsDetached());
   }
 
-  Ref<AXScrollView> AXScrollView::Create(AXId id, LocalFrameView &view, AXObjectCache &cache) noexcept
+  Ref<AXScrollView> AXScrollView::Create(AXId id, FrameView &view, AXObjectCache &cache) noexcept
   {
     return AdoptRef(*new AXScrollView(id, view, cache));
   }
@@ -53,9 +53,9 @@ namespace krys::boo
     return !_scrollView;
   }
 
-  LocalFrameView *AXScrollView::ScrollView() const noexcept
+  FrameView *AXScrollView::ScrollView() const noexcept
   {
-    return static_cast<LocalFrameView *>(_scrollView.get());
+    return static_cast<FrameView *>(_scrollView.get());
   }
 
   Document *AXScrollView::GetDocument() const noexcept

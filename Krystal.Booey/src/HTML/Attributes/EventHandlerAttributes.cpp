@@ -2,7 +2,7 @@
 #include "Krystal.Booey/DOM/Nodes/Document.hpp"
 #include "Krystal.Booey/HTML/Elements/HTMLBodyElement.hpp"
 #include "Krystal.Booey/HTML/Elements/HTMLFrameSetElement.hpp"
-#include "Krystal.Booey/Page/LocalDOMWindow.hpp"
+#include "Krystal.Booey/HTML/Window.hpp"
 #include <algorithm>
 #include <array>
 

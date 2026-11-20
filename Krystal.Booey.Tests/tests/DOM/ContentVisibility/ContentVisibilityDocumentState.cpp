@@ -8,11 +8,10 @@
 #include "Krystal.Booey/HTML/Elements/HTMLDialogElement.hpp"
 #include "Krystal.Booey/HTML/EventLoop/EventLoop.hpp"
 #include "Krystal.Booey/HTML/Parser/DocumentParser.hpp"
+#include "Krystal.Booey/HTML/Window.hpp"
 #include "Krystal.Booey/Page/DOMSelection.hpp"
-#include "Krystal.Booey/Page/LocalDOMWindow.hpp"
-#include "Krystal.Booey/Page/LocalFrame.hpp"
-#include "Krystal.Booey/Page/LocalFrameView.hpp"
-#include "Krystal.Booey/Page/Page.hpp"
+#include "Krystal.Booey/Page/Frame.hpp"
+#include "Krystal.Booey/Page/FrameView.hpp"
 #include "Krystal.Booey/Rendering/RenderBox.hpp"
 #include "Krystal.Booey/Style/Scope/Scope.hpp"
 
@@ -25,14 +24,14 @@ namespace krys::boo::tests
     struct ContentVisibilityFixture : css::tests::ValueFixture
     {
       constexpr static SizeI ViewSize {200, 100};
-      Ref<Page> TestPage;
+      Ref<boo::Frame> Frame;
       Ref<HTMLDocument> Document;
 
       explicit ContentVisibilityFixture(utf8_string &&markup) noexcept
-          : TestPage(Page::Create()), Document(CreateRef<HTMLDocument>())
+          : Frame(boo::Frame::Create()), Document(CreateRef<HTMLDocument>())
       {
         html::EventLoop::Current().RunUntilIdle();
-        auto &frame = TestPage->MainFrame();
+        auto &frame = *Frame;
         frame.CreateView(ViewSize);
         frame.SetDocument(ShareRefPtr<boo::Document>(Document.get()));
         auto parser = CreateRef<html::DocumentParser>(*Document);
@@ -51,7 +50,7 @@ namespace krys::boo::tests
       /// @brief Runs a rendering update, then the tasks it queued.
       void UpdateRendering() noexcept
       {
-        TestPage->UpdateRendering();
+        Frame->UpdateRendering();
         html::EventLoop::Current().RunUntilIdle();
       }
 
@@ -69,7 +68,7 @@ namespace krys::boo::tests
         (void)Document->UpdateLayout();
         display_list::RecorderImpl recorder(
           SizeF(static_cast<float>(ViewSize.Width()), static_cast<float>(ViewSize.Height())));
-        TestPage->MainFrame().View()->Paint(recorder, RectI(PointI(), ViewSize));
+        Frame->View()->Paint(recorder, RectI(PointI(), ViewSize));
         auto colourText = utf8_string(u8"(color ") + utf8_string(colour) + u8")";
         return recorder.TakeDisplayList()->AsText({}).contains(colourText);
       }

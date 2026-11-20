@@ -2063,6 +2063,7 @@ set(KRYSTAL_BOOEY_HTML_HEADERS
   include/Krystal.Booey/HTML/Types/DocumentVisibilityState.hpp
   include/Krystal.Booey/HTML/Types/Namespace.hpp
   include/Krystal.Booey/HTML/Types/TagName.hpp
+  include/Krystal.Booey/HTML/Window.hpp
 )
 
 set(KRYSTAL_BOOEY_HTML_SOURCES
@@ -2243,6 +2244,7 @@ set(KRYSTAL_BOOEY_HTML_SOURCES
   src/HTML/Shadow/SliderThumbElement.cpp
   src/HTML/Shadow/SpinButtonElement.cpp
   src/HTML/Shadow/TextControlInnerElements.cpp
+  src/HTML/Window.cpp
 )
 
 set(KRYSTAL_BOOEY_INFRA_HEADERS
@@ -2469,6 +2471,7 @@ set(KRYSTAL_BOOEY_LOADER_HEADERS
   include/Krystal.Booey/Loader/FontLoadRequest.hpp
   include/Krystal.Booey/Loader/FormSubmission.hpp
   include/Krystal.Booey/Loader/FrameLoader.hpp
+  include/Krystal.Booey/Loader/FrameLoaderClient.hpp
   include/Krystal.Booey/Loader/FrameLoaderTypes.hpp
   include/Krystal.Booey/Loader/FrameLoadRequest.hpp
   include/Krystal.Booey/Loader/Icons/IconLoader.hpp
@@ -2476,7 +2479,6 @@ set(KRYSTAL_BOOEY_LOADER_HEADERS
   include/Krystal.Booey/Loader/Icons/LinkIconCollector.hpp
   include/Krystal.Booey/Loader/ImageLoader.hpp
   include/Krystal.Booey/Loader/LoaderStrategy.hpp
-  include/Krystal.Booey/Loader/LocalFrameLoaderClient.hpp
   include/Krystal.Booey/Loader/NavigationAction.hpp
   include/Krystal.Booey/Loader/ResourceLoaderOptions.hpp
   include/Krystal.Booey/Loader/SubstituteData.hpp
@@ -2542,7 +2544,7 @@ set(KRYSTAL_BOOEY_MATHML_SOURCES
 )
 
 set(KRYSTAL_BOOEY_PAGE_HEADERS
-  include/Krystal.Booey/Page/Clients/ChromeClient.hpp
+  include/Krystal.Booey/Page/Clients/BooeyClient.hpp
   include/Krystal.Booey/Page/Clients/DragClient.hpp
   include/Krystal.Booey/Page/Clients/EditorClient.hpp
   include/Krystal.Booey/Page/DOMSelection.hpp
@@ -2550,13 +2552,12 @@ set(KRYSTAL_BOOEY_PAGE_HEADERS
   include/Krystal.Booey/Page/Drag/DragController.hpp
   include/Krystal.Booey/Page/Drag/DragItem.hpp
   include/Krystal.Booey/Page/Drag/DragState.hpp
+  include/Krystal.Booey/Page/Frame.hpp
   include/Krystal.Booey/Page/FrameSnapshotting.hpp
-  include/Krystal.Booey/Page/LocalDOMWindow.hpp
-  include/Krystal.Booey/Page/LocalFrame.hpp
-  include/Krystal.Booey/Page/LocalFrameView.hpp
-  include/Krystal.Booey/Page/LocalFrameViewLayoutContext.hpp
-  include/Krystal.Booey/Page/Page.hpp
+  include/Krystal.Booey/Page/FrameView.hpp
+  include/Krystal.Booey/Page/FrameViewLayoutContext.hpp
   include/Krystal.Booey/Page/PopupOpeningObserver.hpp
+  include/Krystal.Booey/Page/RenderingUpdateStep.hpp
   include/Krystal.Booey/Page/Scrolling/ScrollAnchoringController.hpp
   include/Krystal.Booey/Page/Scrolling/ScrollBehavior.hpp
   include/Krystal.Booey/Page/Scrolling/ScrollingConstraints.hpp
@@ -2570,12 +2571,10 @@ set(KRYSTAL_BOOEY_PAGE_HEADERS
 set(KRYSTAL_BOOEY_PAGE_SOURCES
   src/Page/DOMSelection.cpp
   src/Page/Drag/DragController.cpp
+  src/Page/Frame.cpp
   src/Page/FrameSnapshotting.cpp
-  src/Page/LocalDOMWindow.cpp
-  src/Page/LocalFrame.cpp
-  src/Page/LocalFrameView.cpp
-  src/Page/LocalFrameViewLayoutContext.cpp
-  src/Page/Page.cpp
+  src/Page/FrameView.cpp
+  src/Page/FrameViewLayoutContext.cpp
   src/Page/Scrolling/ScrollAnchoringController.cpp
   src/Page/Scrolling/ScrollBehavior.cpp
   src/Page/Scrolling/ScrollingConstraints.cpp

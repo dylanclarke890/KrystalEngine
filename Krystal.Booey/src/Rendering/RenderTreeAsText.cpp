@@ -30,7 +30,7 @@
 #include "Krystal.Booey/Graphics/Color/ColorSerialisation.hpp"
 #include "Krystal.Booey/Graphics/GraphicsTypes.hpp"
 #include "Krystal.Booey/Layout/Integration/Inline/InlineIteratorTextBox.hpp"
-#include "Krystal.Booey/Page/LocalFrame.hpp"
+#include "Krystal.Booey/Page/Frame.hpp"
 #include "Krystal.Booey/Rendering/FormControls/RenderFileUploadControl.hpp"
 #include "Krystal.Booey/Rendering/GeneratedContent/RenderCounter.hpp"
 #include "Krystal.Booey/Rendering/GeneratedContent/RenderListItem.hpp"
@@ -861,7 +861,7 @@ namespace krys::boo
     return CreateTextStream(view.GetDocument());
   }
 
-  utf8_string ExternalRepresentation(LocalFrame *frame, EnumSet<RenderAsTextFlag> behavior) noexcept
+  utf8_string ExternalRepresentation(Frame *frame, EnumSet<RenderAsTextFlag> behavior) noexcept
   {
     krys_debug_assert(frame);
     krys_debug_assert(frame->Document());
@@ -881,8 +881,8 @@ namespace krys::boo
     return ExternalRepresentation(*renderer, behavior);
   }
 
-  void ExternalRepresentationForLocalFrame(TextStream &ts, LocalFrame &frame,
-                                           EnumSet<RenderAsTextFlag> behavior) noexcept
+  void ExternalRepresentationForFrame(TextStream &ts, Frame &frame,
+                                      EnumSet<RenderAsTextFlag> behavior) noexcept
   {
     krys_debug_assert(frame.Document());
 

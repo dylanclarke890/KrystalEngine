@@ -9,7 +9,7 @@ namespace krys::boo
 
   CompositionEvent::~CompositionEvent() noexcept = default;
 
-  Ref<CompositionEvent> CompositionEvent::Create(const DOMStringAtom &type, LocalDOMWindow *view,
+  Ref<CompositionEvent> CompositionEvent::Create(const DOMStringAtom &type, Window *view,
                                                  DOMStringView data) noexcept
   {
     CompositionEventInit init;
@@ -24,7 +24,7 @@ namespace krys::boo
   }
 
   void CompositionEvent::InitCompositionEvent(DOMStringAtom type, bool canBubble, bool cancelable,
-                                              LocalDOMWindow *view, DOMStringView data) noexcept
+                                              Window *view, DOMStringView data) noexcept
   {
     if (IsBeingDispatched())
     {

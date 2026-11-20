@@ -35,8 +35,8 @@
 #include "Krystal.Booey/HTML/Elements/HTMLTemplateElement.hpp"
 #include "Krystal.Booey/HTML/EventLoop/EventLoop.hpp"
 #include "Krystal.Booey/HTML/Parser/DocumentParser.hpp"
+#include "Krystal.Booey/HTML/Window.hpp"
 #include "Krystal.Booey/Infra/Namespaces.hpp"
-#include "Krystal.Booey/Page/LocalDOMWindow.hpp"
 #include "Krystal.Text/Encodings/Windows.hpp"
 #include "Krystal.Text/ICodec.hpp"
 

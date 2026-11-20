@@ -24,7 +24,7 @@
  * Boston, MA 02110-1301, USA.
  */
 
-#include "Krystal.Booey/Page/LocalFrameView.hpp"
+#include "Krystal.Booey/Page/FrameView.hpp"
 #include "Krystal.Booey/Accessibility/AXObjectCache.hpp"
 #include "Krystal.Booey/CSS/Queries/MediaQuery.hpp"
 #include "Krystal.Booey/DOM/Algorithms/FindRevealAlgorithms.hpp"
@@ -45,11 +45,10 @@
 #include "Krystal.Booey/HTML/Elements/HTMLHtmlElement.hpp"
 #include "Krystal.Booey/HTML/EventLoop/EventLoop.hpp"
 #include "Krystal.Booey/HTML/Images/ImageDocument.hpp"
+#include "Krystal.Booey/HTML/Window.hpp"
 #include "Krystal.Booey/Input/EventHandler.hpp"
-#include "Krystal.Booey/Page/Clients/ChromeClient.hpp"
-#include "Krystal.Booey/Page/LocalDOMWindow.hpp"
-#include "Krystal.Booey/Page/LocalFrame.hpp"
-#include "Krystal.Booey/Page/Page.hpp"
+#include "Krystal.Booey/Page/Clients/BooeyClient.hpp"
+#include "Krystal.Booey/Page/Frame.hpp"
 #include "Krystal.Booey/Page/Scrolling/ScrollAnchoringController.hpp"
 #include "Krystal.Booey/Page/Scrolling/ScrollBehavior.hpp"
 #include "Krystal.Booey/Page/Scrolling/ScrollSnapOffsetsInfo.hpp"
@@ -85,29 +84,27 @@
 
 namespace krys::boo
 {
-  LocalFrameView::LocalFrameView(LocalFrame &frame) noexcept
+  FrameView::FrameView(boo::Frame &frame) noexcept
       : _frame(CreateWeakPtr(&frame)), _mediaType(css::mq::ScreenAtom()), _layoutContext(*this),
-        _delayedScrollToFocusedElementTimer(*this, &LocalFrameView::ScrollToFocusedElementTimerFired)
+        _delayedScrollToFocusedElementTimer(*this, &FrameView::ScrollToFocusedElementTimerFired)
   {
     _scrollAnchoringController = CreateUnique<ScrollAnchoringController>(*this);
   }
 
-  LocalFrameView::~LocalFrameView() noexcept = default;
+  FrameView::~FrameView() noexcept = default;
 
   namespace
   {
-    /// @brief Whether a new view for the frame starts shown: when its page is visible, or always for a frame
-    /// without a page, as nothing would show it.
-    KRYS_NODISCARD bool NewViewStartsShown(const LocalFrame &frame) noexcept
+    /// @brief Whether a new view for the frame starts shown: when the frame is visible.
+    KRYS_NODISCARD bool NewViewStartsShown(const boo::Frame &frame) noexcept
     {
-      auto *page = frame.GetPage();
-      return !page || page->IsVisible();
+      return frame.IsVisible();
     }
   }
 
-  Ref<LocalFrameView> LocalFrameView::Create(LocalFrame &frame) noexcept
+  Ref<FrameView> FrameView::Create(boo::Frame &frame) noexcept
   {
-    Ref<LocalFrameView> view = AdoptRef(*new LocalFrameView(frame));
+    Ref<FrameView> view = AdoptRef(*new FrameView(frame));
     if (NewViewStartsShown(frame))
     {
       view->Show();
@@ -115,9 +112,9 @@ namespace krys::boo
     return view;
   }
 
-  Ref<LocalFrameView> LocalFrameView::Create(LocalFrame &frame, const SizeI &initialSize) noexcept
+  Ref<FrameView> FrameView::Create(boo::Frame &frame, const SizeI &initialSize) noexcept
   {
-    Ref<LocalFrameView> view = AdoptRef(*new LocalFrameView(frame));
+    Ref<FrameView> view = AdoptRef(*new FrameView(frame));
     view->_frameRect = RectI(view->_frameRect.Location(), initialSize);
     if (NewViewStartsShown(frame))
     {
@@ -126,30 +123,30 @@ namespace krys::boo
     return view;
   }
 
-  void LocalFrameView::Show() noexcept
+  void FrameView::Show() noexcept
   {
     _selfVisible = true;
     // FIXME: Pausing speculative tiling for the main frame, once there's tiling.
   }
 
-  void LocalFrameView::Hide() noexcept
+  void FrameView::Hide() noexcept
   {
     _selfVisible = false;
   }
 
-  LocalFrame &LocalFrameView::Frame() const noexcept
+  boo::Frame &FrameView::Frame() const noexcept
   {
     krys_assert_msg(_frame, "a view doesn't outlive its frame");
     return *_frame;
   }
 
-  const RenderView *LocalFrameView::GetRenderView() const noexcept
+  const RenderView *FrameView::GetRenderView() const noexcept
   {
     auto *document = Frame().Document();
     return document ? document->GetRenderView() : nullptr;
   }
 
-  void LocalFrameView::SetFrameRect(const RectI &newRect) noexcept
+  void FrameView::SetFrameRect(const RectI &newRect) noexcept
   {
     Ref protectedThis = ShareRef(*this);
     RectI oldRect = FrameRect();
@@ -182,18 +179,18 @@ namespace krys::boo
     }
   }
 
-  void LocalFrameView::Resize(const SizeI &size) noexcept
+  void FrameView::Resize(const SizeI &size) noexcept
   {
     SetFrameRect(RectI(_frameRect.Location(), size));
   }
 
-  void LocalFrameView::RepaintContentRectangle(const RectI &rect) noexcept
+  void FrameView::RepaintContentRectangle(const RectI &rect) noexcept
   {
     // Damage is kept while the view is off screen, so the host paints it once the view is shown.
     InvalidateRect(ContentsToView(rect));
   }
 
-  void LocalFrameView::InvalidateRect(const RectI &rect) noexcept
+  void FrameView::InvalidateRect(const RectI &rect) noexcept
   {
     auto damage = Intersection(rect, RectI(PointI(), _frameRect.Size()));
     if (damage.IsEmpty())
@@ -204,10 +201,7 @@ namespace krys::boo
     // The host paints the damage in its next frame.
     if (auto *frame = _frame.get())
     {
-      if (auto *page = frame->GetPage())
-      {
-        page->GetChromeClient().InvalidateContentsAndRootView(damage);
-      }
+      frame->GetBooeyClient().InvalidateContentsAndRootView(damage);
       if (auto *document = frame->Document())
       {
         document->ScheduleRenderingUpdate({});
@@ -215,12 +209,12 @@ namespace krys::boo
     }
   }
 
-  void LocalFrameView::RepaintEntireView() noexcept
+  void FrameView::RepaintEntireView() noexcept
   {
     InvalidateRect(RectI(PointI(), _frameRect.Size()));
   }
 
-  void LocalFrameView::InvalidateScrollbar(Scrollbar &scrollbar, const RectI &rect) noexcept
+  void FrameView::InvalidateScrollbar(Scrollbar &scrollbar, const RectI &rect) noexcept
   {
     if (&scrollbar == _horizontalScrollbar.get())
     {
@@ -247,17 +241,17 @@ namespace krys::boo
     InvalidateRect(damage);
   }
 
-  Region LocalFrameView::TakeDamage() noexcept
+  Region FrameView::TakeDamage() noexcept
   {
     return std::exchange(_damage, Region {});
   }
 
-  Maybe<ScrolledContents> LocalFrameView::TakeScrolledContents() noexcept
+  Maybe<ScrolledContents> FrameView::TakeScrolledContents() noexcept
   {
     return std::exchange(_scrolledContents, null);
   }
 
-  void LocalFrameView::ScrollHostContents(const SizeI &scrollDelta, const RectI &rectToScroll) noexcept
+  void FrameView::ScrollHostContents(const SizeI &scrollDelta, const RectI &rectToScroll) noexcept
   {
     if (rectToScroll.IsEmpty())
     {
@@ -315,7 +309,7 @@ namespace krys::boo
     }
   }
 
-  RectI LocalFrameView::RectToCopyOnScroll() const noexcept
+  RectI FrameView::RectToCopyOnScroll() const noexcept
   {
     RectI scrollViewRect(0, 0, VisibleWidth(), VisibleHeight());
     if (ShouldPlaceVerticalScrollbarOnLeft() && _verticalScrollbar)
@@ -325,7 +319,7 @@ namespace krys::boo
     return scrollViewRect;
   }
 
-  void LocalFrameView::ScrollContents(const SizeI &scrollDelta) noexcept
+  void FrameView::ScrollContents(const SizeI &scrollDelta) noexcept
   {
     RectI clipRect(PointI(), _frameRect.Size());
     RectI scrollViewRect = RectToCopyOnScroll();
@@ -358,7 +352,7 @@ namespace krys::boo
     }
   }
 
-  bool LocalFrameView::ScrollContentsFastPath(const SizeI &scrollDelta, const RectI &rectToScroll) noexcept
+  bool FrameView::ScrollContentsFastPath(const SizeI &scrollDelta, const RectI &rectToScroll) noexcept
   {
     if (_viewportConstrainedObjects.empty())
     {
@@ -443,7 +437,7 @@ namespace krys::boo
 
 #pragma region Compositing
 
-  void LocalFrameView::WillRecalcStyle() noexcept
+  void FrameView::WillRecalcStyle() noexcept
   {
     auto *renderView = GetRenderViewForUpdate();
     if (!renderView)
@@ -454,7 +448,7 @@ namespace krys::boo
     renderView->Compositor().WillRecalcStyle();
   }
 
-  void LocalFrameView::SetIsInWindow(bool isInWindow) noexcept
+  void FrameView::SetIsInWindow(bool isInWindow) noexcept
   {
     // FIXME: Widgets (setParentVisible), once there are any.
     if (auto *renderView = GetRenderViewForUpdate())
@@ -463,7 +457,7 @@ namespace krys::boo
     }
   }
 
-  bool LocalFrameView::FlushCompositingState() noexcept
+  bool FrameView::FlushCompositingState() noexcept
   {
     auto *renderView = GetRenderViewForUpdate();
     if (!renderView)
@@ -483,7 +477,7 @@ namespace krys::boo
     return true;
   }
 
-  void LocalFrameView::EnterCompositingMode() noexcept
+  void FrameView::EnterCompositingMode() noexcept
   {
     if (auto *renderView = GetRenderViewForUpdate())
     {
@@ -495,7 +489,7 @@ namespace krys::boo
     }
   }
 
-  bool LocalFrameView::UsesCompositedScrolling() const noexcept
+  bool FrameView::UsesCompositedScrolling() const noexcept
   {
     auto *renderView = GetRenderViewForUpdate();
     if (renderView && renderView->IsComposited())
@@ -510,13 +504,13 @@ namespace krys::boo
     return false;
   }
 
-  bool LocalFrameView::IsEnclosedInCompositingLayer() noexcept
+  bool FrameView::IsEnclosedInCompositingLayer() noexcept
   {
     // FIXME: Frames inside frames (the owner renderer's repaint container), once there are any.
     return false;
   }
 
-  void LocalFrameView::SetNeedsCompositingConfigurationUpdate() noexcept
+  void FrameView::SetNeedsCompositingConfigurationUpdate() noexcept
   {
     auto *renderView = GetRenderViewForUpdate();
     if (renderView && renderView->UsesCompositing())
@@ -529,7 +523,7 @@ namespace krys::boo
     }
   }
 
-  void LocalFrameView::SetNeedsCompositingGeometryUpdate() noexcept
+  void FrameView::SetNeedsCompositingGeometryUpdate() noexcept
   {
     auto *renderView = GetRenderViewForUpdate();
     if (renderView && renderView->UsesCompositing())
@@ -542,7 +536,7 @@ namespace krys::boo
     }
   }
 
-  void LocalFrameView::SetDescendantsNeedUpdateBackingAndHierarchyTraversal() noexcept
+  void FrameView::SetDescendantsNeedUpdateBackingAndHierarchyTraversal() noexcept
   {
     auto *renderView = GetRenderViewForUpdate();
     if (renderView && renderView->UsesCompositing())
@@ -555,7 +549,7 @@ namespace krys::boo
     }
   }
 
-  GraphicsLayer *LocalFrameView::LayerForHorizontalScrollbar() const noexcept
+  GraphicsLayer *FrameView::LayerForHorizontalScrollbar() const noexcept
   {
     auto *renderView = GetRenderViewForUpdate();
     if (!renderView || !renderView->UsesCompositing())
@@ -565,7 +559,7 @@ namespace krys::boo
     return renderView->Compositor().LayerForHorizontalScrollbar();
   }
 
-  GraphicsLayer *LocalFrameView::LayerForVerticalScrollbar() const noexcept
+  GraphicsLayer *FrameView::LayerForVerticalScrollbar() const noexcept
   {
     auto *renderView = GetRenderViewForUpdate();
     if (!renderView || !renderView->UsesCompositing())
@@ -575,7 +569,7 @@ namespace krys::boo
     return renderView->Compositor().LayerForVerticalScrollbar();
   }
 
-  GraphicsLayer *LocalFrameView::LayerForScrollCorner() const noexcept
+  GraphicsLayer *FrameView::LayerForScrollCorner() const noexcept
   {
     auto *renderView = GetRenderViewForUpdate();
     if (!renderView || !renderView->UsesCompositing())
@@ -631,14 +625,14 @@ namespace krys::boo
     }
   }
 
-  void LocalFrameView::PositionScrollbarLayers() noexcept
+  void FrameView::PositionScrollbarLayers() noexcept
   {
     PositionScrollbarLayer(LayerForHorizontalScrollbar(), _horizontalScrollbar.get());
     PositionScrollbarLayer(LayerForVerticalScrollbar(), _verticalScrollbar.get());
     PositionScrollCornerLayer(LayerForScrollCorner(), ScrollCornerRect());
   }
 
-  void LocalFrameView::InvalidateScrollCorner(const RectI &rect) noexcept
+  void FrameView::InvalidateScrollCorner(const RectI &rect) noexcept
   {
     if (GraphicsLayer *graphicsLayer = LayerForScrollCorner())
     {
@@ -649,7 +643,7 @@ namespace krys::boo
     InvalidateRect(rect);
   }
 
-  boo::Color LocalFrameView::DocumentBackgroundColor() const noexcept
+  boo::Color FrameView::DocumentBackgroundColor() const noexcept
   {
     // <https://bugs.webkit.org/show_bug.cgi?id=59540> We blend the background color of the document and the
     // body against the base background color of the frame view. Background images are unfortunately
@@ -701,7 +695,7 @@ namespace krys::boo
     return BlendSourceOver(BlendSourceOver(BaseBackgroundColor(), htmlBackgroundColor), bodyBackgroundColor);
   }
 
-  style::ScrollbarGutter LocalFrameView::ScrollbarGutterStyle() const noexcept
+  style::ScrollbarGutter FrameView::ScrollbarGutterStyle() const noexcept
   {
     auto *document = Frame().Document();
     auto *documentElement = document ? dom::TreeQueries::DocumentElement(*document) : nullptr;
@@ -712,7 +706,7 @@ namespace krys::boo
     return css::keywords::Auto {};
   }
 
-  int32 LocalFrameView::ScrollbarGutterWidth(bool isHorizontalWritingMode) const noexcept
+  int32 FrameView::ScrollbarGutterWidth(bool isHorizontalWritingMode) const noexcept
   {
     if (_verticalScrollbar && _verticalScrollbar->IsOverlayScrollbar())
     {
@@ -735,7 +729,7 @@ namespace krys::boo
     return _verticalScrollbar->Width();
   }
 
-  SizeI LocalFrameView::TotalScrollbarSpace() const noexcept
+  SizeI FrameView::TotalScrollbarSpace() const noexcept
   {
     SizeI scrollbarGutter(HorizontalScrollbarIntrusion(), VerticalScrollbarIntrusion());
 
@@ -753,13 +747,13 @@ namespace krys::boo
     return scrollbarGutter;
   }
 
-  bool LocalFrameView::IsHorizontalWritingMode() const noexcept
+  bool FrameView::IsHorizontalWritingMode() const noexcept
   {
     auto *renderView = GetRenderView();
     return renderView && renderView->GetWritingMode().IsHorizontal();
   }
 
-  int32 LocalFrameView::InsetForLeftScrollbarSpace() const noexcept
+  int32 FrameView::InsetForLeftScrollbarSpace() const noexcept
   {
     if (ScrollbarGutterStyle().IsStableBothEdges())
     {
@@ -772,13 +766,13 @@ namespace krys::boo
     return 0;
   }
 
-  PointF LocalFrameView::PositionForRootContentLayer() const noexcept
+  PointF FrameView::PositionForRootContentLayer() const noexcept
   {
     // FIXME: Obscured content insets and header layers, once there are any.
     return PointF(static_cast<float>(-ScrollOrigin().X()), static_cast<float>(-ScrollOrigin().Y()));
   }
 
-  LayoutRect LocalFrameView::FixedScrollableAreaBoundsInflatedForScrolling(
+  LayoutRect FrameView::FixedScrollableAreaBoundsInflatedForScrolling(
     const LayoutRect &uninflatedBounds) const noexcept
   {
     // FIXME: Visual viewports (layoutViewportRect, unscaledMinimumScrollPosition), once there are any.
@@ -790,7 +784,7 @@ namespace krys::boo
                       uninflatedBounds.Size() + topLeftExpansion + bottomRightExpansion);
   }
 
-  void LocalFrameView::UpdateCompositingLayersAfterScrolling() noexcept
+  void FrameView::UpdateCompositingLayersAfterScrolling() noexcept
   {
     if (!_layoutContext.IsLayoutNested() && !_viewportConstrainedObjects.empty())
     {
@@ -801,7 +795,7 @@ namespace krys::boo
     }
   }
 
-  void LocalFrameView::AddedOrRemovedScrollbar() noexcept
+  void FrameView::AddedOrRemovedScrollbar() noexcept
   {
     if (auto *renderView = GetRenderViewForUpdate())
     {
@@ -816,14 +810,14 @@ namespace krys::boo
 
 #pragma endregion
 
-  void LocalFrameView::ScrollContentsSlowPath(const RectI &updateRect) noexcept
+  void FrameView::ScrollContentsSlowPath(const RectI &updateRect) noexcept
   {
     RepaintSlowRepaintObjects();
 
     InvalidateRect(updateRect);
   }
 
-  void LocalFrameView::RepaintSlowRepaintObjects() noexcept
+  void FrameView::RepaintSlowRepaintObjects() noexcept
   {
     // Renderers with fixed backgrounds may be in compositing layers, so we need to explicitly
     // repaint them after scrolling.
@@ -833,7 +827,7 @@ namespace krys::boo
     }
   }
 
-  bool LocalFrameView::UseSlowRepaints() const noexcept
+  bool FrameView::UseSlowRepaints() const noexcept
   {
     // The host moves the page's own pixels, so the contents needn't be opaque, and there's no window to blit
     // into (m_contentIsOpaque, m_cannotBlitToWindow, overlapping).
@@ -841,40 +835,40 @@ namespace krys::boo
     return HasSlowRepaintObjects();
   }
 
-  void LocalFrameView::AddSlowRepaintObject(const RenderElement &renderer) noexcept
+  void FrameView::AddSlowRepaintObject(const RenderElement &renderer) noexcept
   {
     // FIXME: The enclosing layer's scrolling tree update, once there's a scrolling tree.
     _slowRepaintObjects.insert(&renderer);
   }
 
-  void LocalFrameView::RemoveSlowRepaintObject(const RenderElement &renderer) noexcept
+  void FrameView::RemoveSlowRepaintObject(const RenderElement &renderer) noexcept
   {
     _slowRepaintObjects.erase(&renderer);
   }
 
-  bool LocalFrameView::HasSlowRepaintObject(const RenderElement &renderer) const noexcept
+  bool FrameView::HasSlowRepaintObject(const RenderElement &renderer) const noexcept
   {
     return _slowRepaintObjects.contains(&renderer);
   }
 
-  void LocalFrameView::AddViewportConstrainedObject(const RenderLayerModelObject &object) noexcept
+  void FrameView::AddViewportConstrainedObject(const RenderLayerModelObject &object) noexcept
   {
     // FIXME: The scrolling coordinator (and the anchor-positioned viewport-constrained objects it can't
     // scroll), once there's one.
     _viewportConstrainedObjects.insert(&object);
   }
 
-  void LocalFrameView::RemoveViewportConstrainedObject(const RenderLayerModelObject &object) noexcept
+  void FrameView::RemoveViewportConstrainedObject(const RenderLayerModelObject &object) noexcept
   {
     _viewportConstrainedObjects.erase(&object);
   }
 
-  SizeI LocalFrameView::GetLayoutSize() const noexcept
+  SizeI FrameView::GetLayoutSize() const noexcept
   {
     return _fixedLayoutSize.IsEmpty() || !_useFixedLayout ? UnobscuredContentRect().Size() : _fixedLayoutSize;
   }
 
-  void LocalFrameView::SetFixedLayoutSize(const SizeI &newSize) noexcept
+  void FrameView::SetFixedLayoutSize(const SizeI &newSize) noexcept
   {
     if (FixedLayoutSize() == newSize)
     {
@@ -888,7 +882,7 @@ namespace krys::boo
     }
   }
 
-  void LocalFrameView::SetUseFixedLayout(bool enable) noexcept
+  void FrameView::SetUseFixedLayout(bool enable) noexcept
   {
     if (UseFixedLayout() == enable)
     {
@@ -901,21 +895,21 @@ namespace krys::boo
     }
   }
 
-  RectI LocalFrameView::VisibleContentRectInternal(
+  RectI FrameView::VisibleContentRectInternal(
     VisibleContentRectIncludesScrollbars scrollbarInclusion) const noexcept
   {
     return UnobscuredContentRect(scrollbarInclusion);
   }
 
-  RectI LocalFrameView::UnobscuredContentRect(
-    VisibleContentRectIncludesScrollbars scrollbarInclusion) const noexcept
+  RectI
+    FrameView::UnobscuredContentRect(VisibleContentRectIncludesScrollbars scrollbarInclusion) const noexcept
   {
     // FIXME: Less the obscured content insets and the visible content scale, once there are those.
     return RectI(_scrollPosition, SizeForVisibleContent(scrollbarInclusion));
   }
 
-  SizeI LocalFrameView::SizeForVisibleContent(
-    VisibleContentRectIncludesScrollbars scrollbarInclusion) const noexcept
+  SizeI
+    FrameView::SizeForVisibleContent(VisibleContentRectIncludesScrollbars scrollbarInclusion) const noexcept
   {
     SizeI scrollbarSpace;
     if (!ScrollbarGutterStyle().IsAuto() && scrollbarInclusion == VisibleContentRectIncludesScrollbars::No)
@@ -930,7 +924,7 @@ namespace krys::boo
     return SizeI(Width() - scrollbarSpace.Width(), Height() - scrollbarSpace.Height()).ExpandedTo(SizeI());
   }
 
-  void LocalFrameView::SetTransparent(bool isTransparent) noexcept
+  void FrameView::SetTransparent(bool isTransparent) noexcept
   {
     if (_isTransparent == isTransparent)
     {
@@ -942,13 +936,13 @@ namespace krys::boo
     SetNeedsCompositingConfigurationUpdate();
   }
 
-  void LocalFrameView::SetBaseBackgroundColor(const boo::Color &backgroundColor) noexcept
+  void FrameView::SetBaseBackgroundColor(const boo::Color &backgroundColor) noexcept
   {
     _baseBackgroundColor = backgroundColor.IsValid() ? backgroundColor : boo::Color(boo::Color::white);
     RecalculateScrollbarOverlayStyle();
   }
 
-  void LocalFrameView::Paint(GraphicsContext &context, const RectI &rect) noexcept
+  void FrameView::Paint(GraphicsContext &context, const RectI &rect) noexcept
   {
     // FIXME: Painting disabled contexts and region contexts, once there are those.
     RectI documentDirtyRect = rect;
@@ -1006,13 +1000,13 @@ namespace krys::boo
     }
   }
 
-  void LocalFrameView::AddPanScrollIcon(const PointI &iconPosition) noexcept
+  void FrameView::AddPanScrollIcon(const PointI &iconPosition) noexcept
   {
     _panScrollIconPosition = iconPosition;
     InvalidatePanScrollIcon(iconPosition);
   }
 
-  void LocalFrameView::RemovePanScrollIcon() noexcept
+  void FrameView::RemovePanScrollIcon() noexcept
   {
     if (auto position = std::exchange(_panScrollIconPosition, null))
     {
@@ -1020,23 +1014,23 @@ namespace krys::boo
     }
   }
 
-  void LocalFrameView::InvalidatePanScrollIcon(const PointI &iconPosition) noexcept
+  void FrameView::InvalidatePanScrollIcon(const PointI &iconPosition) noexcept
   {
     auto *frame = _frame.get();
-    auto *page = frame ? frame->GetPage() : nullptr;
-    if (page)
+    if (!frame)
     {
-      page->GetChromeClient().InvalidateContentsAndRootView(RectI(iconPosition.X() - PanScrollIconSize / 2,
-                                                                  iconPosition.Y() - PanScrollIconSize / 2,
-                                                                  PanScrollIconSize, PanScrollIconSize));
+      return;
     }
-    if (auto *document = frame ? frame->Document() : nullptr)
+    frame->GetBooeyClient().InvalidateContentsAndRootView(RectI(iconPosition.X() - PanScrollIconSize / 2,
+                                                                iconPosition.Y() - PanScrollIconSize / 2,
+                                                                PanScrollIconSize, PanScrollIconSize));
+    if (auto *document = frame->Document())
     {
       document->ScheduleRenderingUpdate({});
     }
   }
 
-  void LocalFrameView::PaintScrollbars(GraphicsContext &context, const RectI &rect) noexcept
+  void FrameView::PaintScrollbars(GraphicsContext &context, const RectI &rect) noexcept
   {
     // Flattened paints (snapshots) paint the scrollbars into the contents, though they have layers.
     const bool flattening = _paintBehavior.Contains(PaintBehavior::FlattenCompositingLayers);
@@ -1055,7 +1049,7 @@ namespace krys::boo
     }
   }
 
-  void LocalFrameView::PaintScrollbarsBackground(GraphicsContext &context) noexcept
+  void FrameView::PaintScrollbarsBackground(GraphicsContext &context) noexcept
   {
     // Classic scrollbars have no track, so the canvas shows through: the root element paints its background
     // there too, as if the document extended under them.
@@ -1128,7 +1122,7 @@ namespace krys::boo
     }
   }
 
-  void LocalFrameView::PaintScrollCorner(GraphicsContext &context, const RectI &cornerRect) noexcept
+  void FrameView::PaintScrollCorner(GraphicsContext &context, const RectI &cornerRect) noexcept
   {
     if (cornerRect.IsEmpty())
     {
@@ -1137,7 +1131,7 @@ namespace krys::boo
     ScrollbarTheme::Theme().PaintScrollCorner(*this, context, cornerRect);
   }
 
-  RectI LocalFrameView::ScrollCornerRect() const noexcept
+  RectI FrameView::ScrollCornerRect() const noexcept
   {
     RectI cornerRect;
 
@@ -1166,7 +1160,7 @@ namespace krys::boo
     return cornerRect;
   }
 
-  bool LocalFrameView::IsPointInScrollbarCorner(const PointI &windowPoint) const noexcept
+  bool FrameView::IsPointInScrollbarCorner(const PointI &windowPoint) const noexcept
   {
     if (!ScrollbarCornerPresent())
     {
@@ -1186,13 +1180,13 @@ namespace krys::boo
     return viewPoint.X() > frame.X() && viewPoint.X() < frame.MaxX() && viewPoint.Y() > frame.MaxY();
   }
 
-  bool LocalFrameView::ScrollbarCornerPresent() const noexcept
+  bool FrameView::ScrollbarCornerPresent() const noexcept
   {
     return (_horizontalScrollbar && Width() - _horizontalScrollbar->Width() > 0)
            || (_verticalScrollbar && Height() - _verticalScrollbar->Height() > 0);
   }
 
-  Scrollbar *LocalFrameView::ScrollbarAtPoint(const PointI &windowPoint) const noexcept
+  Scrollbar *FrameView::ScrollbarAtPoint(const PointI &windowPoint) const noexcept
   {
     // The view is the root of its (absent) widget tree, so the window's coordinates are its own.
     if (_horizontalScrollbar && _horizontalScrollbar->ShouldParticipateInHitTesting()
@@ -1208,8 +1202,8 @@ namespace krys::boo
     return nullptr;
   }
 
-  void LocalFrameView::SetScrollbarModes(ScrollbarMode horizontalMode, ScrollbarMode verticalMode,
-                                         bool horizontalLock, bool verticalLock) noexcept
+  void FrameView::SetScrollbarModes(ScrollbarMode horizontalMode, ScrollbarMode verticalMode,
+                                    bool horizontalLock, bool verticalLock) noexcept
   {
     bool needsUpdate = false;
 
@@ -1243,20 +1237,20 @@ namespace krys::boo
     UpdateScrollbars(GetScrollPosition());
   }
 
-  bool LocalFrameView::SetHasHorizontalScrollbar(bool hasBar, bool *contentSizeAffected) noexcept
+  bool FrameView::SetHasHorizontalScrollbar(bool hasBar, bool *contentSizeAffected) noexcept
   {
     return SetHasScrollbarInternal(_horizontalScrollbar, ScrollbarOrientation::Horizontal, hasBar,
                                    contentSizeAffected);
   }
 
-  bool LocalFrameView::SetHasVerticalScrollbar(bool hasBar, bool *contentSizeAffected) noexcept
+  bool FrameView::SetHasVerticalScrollbar(bool hasBar, bool *contentSizeAffected) noexcept
   {
     return SetHasScrollbarInternal(_verticalScrollbar, ScrollbarOrientation::Vertical, hasBar,
                                    contentSizeAffected);
   }
 
-  bool LocalFrameView::SetHasScrollbarInternal(RefPtr<Scrollbar> &scrollbar, ScrollbarOrientation orientation,
-                                               bool hasBar, bool *contentSizeAffected) noexcept
+  bool FrameView::SetHasScrollbarInternal(RefPtr<Scrollbar> &scrollbar, ScrollbarOrientation orientation,
+                                          bool hasBar, bool *contentSizeAffected) noexcept
   {
     if (hasBar && !scrollbar)
     {
@@ -1285,12 +1279,12 @@ namespace krys::boo
     return false;
   }
 
-  Ref<Scrollbar> LocalFrameView::CreateScrollbar(ScrollbarOrientation orientation) noexcept
+  Ref<Scrollbar> FrameView::CreateScrollbar(ScrollbarOrientation orientation) noexcept
   {
     return Scrollbar::CreateNativeScrollbar(*this, orientation, ScrollbarWidthStyle());
   }
 
-  void LocalFrameView::UpdateScrollbarSteps() noexcept
+  void FrameView::UpdateScrollbarSteps() noexcept
   {
     // A page is what's in view less the root's scroll padding, which content scrolled to stays clear of.
     LayoutRect paddedViewRect(LayoutPoint(), LayoutSize(VisibleWidth(), VisibleHeight()));
@@ -1313,7 +1307,7 @@ namespace krys::boo
     }
   }
 
-  void LocalFrameView::UpdateContentsSize() noexcept
+  void FrameView::UpdateContentsSize() noexcept
   {
     // FIXME: Not with a custom fixed position layout rect (shouldLayoutAfterContentsResized), once there is
     // one.
@@ -1323,7 +1317,7 @@ namespace krys::boo
     }
   }
 
-  ScrollbarWidth LocalFrameView::ScrollbarWidthStyle() const noexcept
+  ScrollbarWidth FrameView::ScrollbarWidthStyle() const noexcept
   {
     auto *document = Frame().Document();
     auto *documentElement = document ? dom::TreeQueries::DocumentElement(*document) : nullptr;
@@ -1335,7 +1329,7 @@ namespace krys::boo
     return ScrollbarWidth::Auto;
   }
 
-  Maybe<ScrollbarColor> LocalFrameView::ScrollbarColorStyle() const noexcept
+  Maybe<ScrollbarColor> FrameView::ScrollbarColorStyle() const noexcept
   {
     // The root element's scrollbar-color is the viewport's.
     auto *document = Frame().Document();
@@ -1348,20 +1342,20 @@ namespace krys::boo
     return null;
   }
 
-  void LocalFrameView::ScrollbarAppearanceChanged() noexcept
+  void FrameView::ScrollbarAppearanceChanged() noexcept
   {
     ScrollableArea::ScrollbarAppearanceChanged();
     InvalidateScrollCorner(ScrollCornerRect());
   }
 
-  void LocalFrameView::ScrollbarStyleChanged() noexcept
+  void FrameView::ScrollbarStyleChanged() noexcept
   {
     ScrollableArea::ScrollbarStyleChanged();
     // Its scrollbars come and go with the space they take.
     UpdateScrollbars(GetScrollPosition());
   }
 
-  bool LocalFrameView::UseDarkAppearanceForScrollbars() const noexcept
+  bool FrameView::UseDarkAppearanceForScrollbars() const noexcept
   {
     auto *document = Frame().Document();
     auto *documentElement = document ? dom::TreeQueries::DocumentElement(*document) : nullptr;
@@ -1380,13 +1374,13 @@ namespace krys::boo
            && GetScrollbarOverlayStyle() == ScrollbarOverlayStyle::Light;
   }
 
-  void LocalFrameView::RecalculateScrollbarOverlayStyle() noexcept
+  void FrameView::RecalculateScrollbarOverlayStyle() noexcept
   {
     auto style = [this]
     {
-      if (auto *page = Frame().GetPage())
+      if (auto *frame = &Frame())
       {
-        if (auto clientStyle = page->GetChromeClient().PreferredScrollbarOverlayStyle())
+        if (auto clientStyle = frame->GetBooeyClient().PreferredScrollbarOverlayStyle())
         {
           return *clientStyle;
         }
@@ -1412,23 +1406,23 @@ namespace krys::boo
     }
   }
 
-  bool LocalFrameView::AddScrollableArea(ScrollableArea &scrollableArea) noexcept
+  bool FrameView::AddScrollableArea(ScrollableArea &scrollableArea) noexcept
   {
     // FIXME: Telling the scrolling coordinator (scrollableAreaSetChanged), once there's one.
     return _scrollableAreas.insert(&scrollableArea).second;
   }
 
-  bool LocalFrameView::RemoveScrollableArea(ScrollableArea &scrollableArea) noexcept
+  bool FrameView::RemoveScrollableArea(ScrollableArea &scrollableArea) noexcept
   {
     return _scrollableAreas.erase(&scrollableArea) != 0;
   }
 
-  bool LocalFrameView::ContainsScrollableArea(const ScrollableArea &scrollableArea) const noexcept
+  bool FrameView::ContainsScrollableArea(const ScrollableArea &scrollableArea) const noexcept
   {
     return _scrollableAreas.contains(const_cast<ScrollableArea *>(&scrollableArea));
   }
 
-  void LocalFrameView::ForEachScrollableArea(const Func<void(ScrollableArea &)> &function) noexcept
+  void FrameView::ForEachScrollableArea(const Func<void(ScrollableArea &)> &function) noexcept
   {
     function(*this);
     // The function may lay out, which adds and removes areas, or destroy one, so it goes over a copy that
@@ -1448,27 +1442,27 @@ namespace krys::boo
     }
   }
 
-  void LocalFrameView::InvalidateScrollbarsForAllScrollableAreas() noexcept
+  void FrameView::InvalidateScrollbarsForAllScrollableAreas() noexcept
   {
     ForEachScrollableArea([](ScrollableArea &area) { area.ScrollbarAppearanceChanged(); });
   }
 
-  void LocalFrameView::QueueScrollableAreaForScrollAnchoringUpdate(ScrollableArea &scrollableArea) noexcept
+  void FrameView::QueueScrollableAreaForScrollAnchoringUpdate(ScrollableArea &scrollableArea) noexcept
   {
     _scrollableAreasNeedingScrollAnchoringUpdate.insert(&scrollableArea);
   }
 
-  void LocalFrameView::DequeueScrollableAreaForScrollAnchoringUpdate(ScrollableArea &scrollableArea) noexcept
+  void FrameView::DequeueScrollableAreaForScrollAnchoringUpdate(ScrollableArea &scrollableArea) noexcept
   {
     _scrollableAreasNeedingScrollAnchoringUpdate.erase(&scrollableArea);
   }
 
-  void LocalFrameView::UpdateScrollAnchoringElementsForScrollableAreas() noexcept
+  void FrameView::UpdateScrollAnchoringElementsForScrollableAreas() noexcept
   {
     ForEachScrollableArea([](ScrollableArea &area) { area.UpdateScrollAnchoringElement(); });
   }
 
-  void LocalFrameView::UpdateScrollAnchoringPositionForScrollableAreas() noexcept
+  void FrameView::UpdateScrollAnchoringPositionForScrollableAreas() noexcept
   {
     // Adjusting queues the areas again, for the layout after this one.
     List<WeakPtr<ScrollableArea>> areas;
@@ -1486,7 +1480,7 @@ namespace krys::boo
     }
   }
 
-  OverscrollBehavior LocalFrameView::HorizontalOverscrollBehavior() const noexcept
+  OverscrollBehavior FrameView::HorizontalOverscrollBehavior() const noexcept
   {
     auto *document = Frame().Document();
     auto *documentElement = document ? dom::TreeQueries::DocumentElement(*document) : nullptr;
@@ -1498,7 +1492,7 @@ namespace krys::boo
     return OverscrollBehavior::Auto;
   }
 
-  OverscrollBehavior LocalFrameView::VerticalOverscrollBehavior() const noexcept
+  OverscrollBehavior FrameView::VerticalOverscrollBehavior() const noexcept
   {
     auto *document = Frame().Document();
     auto *documentElement = document ? dom::TreeQueries::DocumentElement(*document) : nullptr;
@@ -1510,8 +1504,8 @@ namespace krys::boo
     return OverscrollBehavior::Auto;
   }
 
-  void LocalFrameView::ApplyOverflowToViewport(const RenderElement &renderer, ScrollbarMode &hMode,
-                                               ScrollbarMode &vMode) const noexcept
+  void FrameView::ApplyOverflowToViewport(const RenderElement &renderer, ScrollbarMode &hMode,
+                                          ScrollbarMode &vMode) const noexcept
   {
     // Handle the overflow:hidden/scroll case for the body/html elements.  WinIE treats overflow:hidden and
     // overflow:scroll on <body> as applying to the document's scrollbars.  The CSS2.1 draft states that HTML
@@ -1545,8 +1539,8 @@ namespace krys::boo
     }
   }
 
-  void LocalFrameView::CalculateScrollbarModesForLayout(
-    ScrollbarMode &hMode, ScrollbarMode &vMode, ScrollbarModesCalculationStrategy strategy) const noexcept
+  void FrameView::CalculateScrollbarModesForLayout(ScrollbarMode &hMode, ScrollbarMode &vMode,
+                                                   ScrollbarModesCalculationStrategy strategy) const noexcept
   {
     // FIXME: The viewport renderer type.
     if (_canHaveScrollbars || strategy == ScrollbarModesCalculationStrategy::RulesFromWebContentOnly)
@@ -1606,7 +1600,7 @@ namespace krys::boo
     }
   }
 
-  void LocalFrameView::AdjustScrollbarsForLayout(bool isFirstLayout) noexcept
+  void FrameView::AdjustScrollbarsForLayout(bool isFirstLayout) noexcept
   {
     ScrollbarMode hMode;
     ScrollbarMode vMode;
@@ -1634,7 +1628,7 @@ namespace krys::boo
     }
   }
 
-  void LocalFrameView::SetScrollbarsSuppressed(bool suppressed, bool repaintOnUnsuppress) noexcept
+  void FrameView::SetScrollbarsSuppressed(bool suppressed, bool repaintOnUnsuppress) noexcept
   {
     if (suppressed == _scrollbarsSuppressed)
     {
@@ -1659,12 +1653,12 @@ namespace krys::boo
     }
   }
 
-  void LocalFrameView::RestoreScrollbar() noexcept
+  void FrameView::RestoreScrollbar() noexcept
   {
     SetScrollbarsSuppressed(false);
   }
 
-  void LocalFrameView::Clear() noexcept
+  void FrameView::Clear() noexcept
   {
     // reset(), of what the view keeps.
     _lastViewportSize = SizeI();
@@ -1675,7 +1669,7 @@ namespace krys::boo
     SetScrollbarsSuppressed(true);
   }
 
-  void LocalFrameView::WillDoLayout(const RenderElement &layoutRoot) noexcept
+  void FrameView::WillDoLayout(const RenderElement &layoutRoot) noexcept
   {
     bool subtreeLayout = !Is<RenderView>(layoutRoot);
     if (subtreeLayout)
@@ -1705,7 +1699,7 @@ namespace krys::boo
     }
   }
 
-  void LocalFrameView::MarkRootOrBodyRendererDirty() const noexcept
+  void FrameView::MarkRootOrBodyRendererDirty() const noexcept
   {
     auto &document = *Frame().Document();
     auto *documentElement = dom::TreeQueries::DocumentElement(document);
@@ -1722,14 +1716,14 @@ namespace krys::boo
     }
   }
 
-  bool LocalFrameView::LogicalScroll(ScrollLogicalDirection direction, ScrollGranularity granularity,
-                                     ScrollIsAnimated animated) noexcept
+  bool FrameView::LogicalScroll(ScrollLogicalDirection direction, ScrollGranularity granularity,
+                                ScrollIsAnimated animated) noexcept
   {
     return Scroll(LogicalToPhysical(direction, IsVerticalDocument(), IsFlippedDocument()), granularity, 1,
                   animated);
   }
 
-  bool LocalFrameView::IsVerticalDocument() const noexcept
+  bool FrameView::IsVerticalDocument() const noexcept
   {
     const RenderView *renderView = GetRenderView();
     if (!renderView)
@@ -1740,7 +1734,7 @@ namespace krys::boo
     return renderView->GetWritingMode().IsHorizontal();
   }
 
-  bool LocalFrameView::IsFlippedDocument() const noexcept
+  bool FrameView::IsFlippedDocument() const noexcept
   {
     const RenderView *renderView = GetRenderView();
     if (!renderView)
@@ -1751,13 +1745,13 @@ namespace krys::boo
     return renderView->GetWritingMode().IsBlockFlipped();
   }
 
-  bool LocalFrameView::ScrollAnimatorEnabled() const noexcept
+  bool FrameView::ScrollAnimatorEnabled() const noexcept
   {
     auto *document = Frame().Document();
     return document && document->GetSettings().ScrollAnimatorEnabled;
   }
 
-  bool LocalFrameView::IsScrollable() const noexcept
+  bool FrameView::IsScrollable() const noexcept
   {
     // Check for:
     // 1) If there an actual overflow.
@@ -1786,7 +1780,7 @@ namespace krys::boo
     return horizontalMode != ScrollbarMode::AlwaysOff || verticalMode != ScrollbarMode::AlwaysOff;
   }
 
-  void LocalFrameView::PaintContents(GraphicsContext &context, const RectI &dirtyRect) noexcept
+  void FrameView::PaintContents(GraphicsContext &context, const RectI &dirtyRect) noexcept
   {
     auto *renderView = const_cast<RenderView *>(GetRenderView());
     if (!renderView)
@@ -1823,15 +1817,15 @@ namespace krys::boo
     _isPainting = false;
   }
 
-  void LocalFrameView::SetNodeToDraw(Node *node) noexcept
+  void FrameView::SetNodeToDraw(Node *node) noexcept
   {
     _nodeToDraw = ShareRefPtr(node);
   }
 
   // Booey has one frame: its selection is the only one to clear and restore.
-  void LocalFrameView::PaintContentsForSnapshot(GraphicsContext &context, const RectI &imageRect,
-                                                SelectionInSnapshot shouldPaintSelection,
-                                                CoordinateSpaceForSnapshot coordinateSpace) noexcept
+  void FrameView::PaintContentsForSnapshot(GraphicsContext &context, const RectI &imageRect,
+                                           SelectionInSnapshot shouldPaintSelection,
+                                           CoordinateSpaceForSnapshot coordinateSpace) noexcept
   {
     auto *document = Frame().Document();
     if (!document)
@@ -1878,14 +1872,14 @@ namespace krys::boo
     SetPaintBehavior(oldBehavior);
   }
 
-  void LocalFrameView::AvailableContentSizeChanged(AvailableSizeChangeReason reason) noexcept
+  void FrameView::AvailableContentSizeChanged(AvailableSizeChangeReason reason) noexcept
   {
     if (auto *document = Frame().Document())
     {
       // FIXME: Find a more appropriate way of handling potential recursive layouts when the viewport is
       // resized to accommodate the content but the content always overflows the viewport. See
       // webkit.org/b/165781.
-      if (_layoutContext.GetLayoutPhase() != LocalFrameViewLayoutContext::LayoutPhase::InViewSizeAdjust
+      if (_layoutContext.GetLayoutPhase() != FrameViewLayoutContext::LayoutPhase::InViewSizeAdjust
           || !UseFixedLayout())
       {
         document->UpdateViewportUnitsOnResize();
@@ -1903,7 +1897,7 @@ namespace krys::boo
     }
   }
 
-  void LocalFrameView::SetMediaType(const CSSOMStringAtom &mediaType) noexcept
+  void FrameView::SetMediaType(const CSSOMStringAtom &mediaType) noexcept
   {
     if (_mediaType == mediaType)
     {
@@ -1918,7 +1912,7 @@ namespace krys::boo
     }
   }
 
-  void LocalFrameView::ClearSizeOverrideForCSSDefaultViewportUnits() noexcept
+  void FrameView::ClearSizeOverrideForCSSDefaultViewportUnits() noexcept
   {
     if (!_defaultViewportSizeOverride)
     {
@@ -1932,12 +1926,12 @@ namespace krys::boo
     }
   }
 
-  void LocalFrameView::SetSizeForCSSDefaultViewportUnits(SizeF size) noexcept
+  void FrameView::SetSizeForCSSDefaultViewportUnits(SizeF size) noexcept
   {
     SetOverrideSizeForCSSDefaultViewportUnits({size.Width(), size.Height()});
   }
 
-  void LocalFrameView::SetOverrideSizeForCSSDefaultViewportUnits(OverrideViewportSize size) noexcept
+  void FrameView::SetOverrideSizeForCSSDefaultViewportUnits(OverrideViewportSize size) noexcept
   {
     if (_defaultViewportSizeOverride == size)
     {
@@ -1952,12 +1946,12 @@ namespace krys::boo
     }
   }
 
-  SizeF LocalFrameView::SizeForCSSDefaultViewportUnits() const noexcept
+  SizeF FrameView::SizeForCSSDefaultViewportUnits() const noexcept
   {
     return CalculateSizeForCSSViewportUnitsOverride(_defaultViewportSizeOverride);
   }
 
-  void LocalFrameView::ClearSizeOverrideForCSSSmallViewportUnits() noexcept
+  void FrameView::ClearSizeOverrideForCSSSmallViewportUnits() noexcept
   {
     if (!_smallViewportSizeOverride)
     {
@@ -1971,12 +1965,12 @@ namespace krys::boo
     }
   }
 
-  void LocalFrameView::SetSizeForCSSSmallViewportUnits(SizeF size) noexcept
+  void FrameView::SetSizeForCSSSmallViewportUnits(SizeF size) noexcept
   {
     SetOverrideSizeForCSSSmallViewportUnits({size.Width(), size.Height()});
   }
 
-  void LocalFrameView::SetOverrideSizeForCSSSmallViewportUnits(OverrideViewportSize size) noexcept
+  void FrameView::SetOverrideSizeForCSSSmallViewportUnits(OverrideViewportSize size) noexcept
   {
     if (_smallViewportSizeOverride && *_smallViewportSizeOverride == size)
     {
@@ -1991,12 +1985,12 @@ namespace krys::boo
     }
   }
 
-  SizeF LocalFrameView::SizeForCSSSmallViewportUnits() const noexcept
+  SizeF FrameView::SizeForCSSSmallViewportUnits() const noexcept
   {
     return CalculateSizeForCSSViewportUnitsOverride(_smallViewportSizeOverride);
   }
 
-  void LocalFrameView::ClearSizeOverrideForCSSLargeViewportUnits() noexcept
+  void FrameView::ClearSizeOverrideForCSSLargeViewportUnits() noexcept
   {
     if (!_largeViewportSizeOverride)
     {
@@ -2010,12 +2004,12 @@ namespace krys::boo
     }
   }
 
-  void LocalFrameView::SetSizeForCSSLargeViewportUnits(SizeF size) noexcept
+  void FrameView::SetSizeForCSSLargeViewportUnits(SizeF size) noexcept
   {
     SetOverrideSizeForCSSLargeViewportUnits({size.Width(), size.Height()});
   }
 
-  void LocalFrameView::SetOverrideSizeForCSSLargeViewportUnits(OverrideViewportSize size) noexcept
+  void FrameView::SetOverrideSizeForCSSLargeViewportUnits(OverrideViewportSize size) noexcept
   {
     if (_largeViewportSizeOverride && *_largeViewportSizeOverride == size)
     {
@@ -2030,13 +2024,13 @@ namespace krys::boo
     }
   }
 
-  SizeF LocalFrameView::SizeForCSSLargeViewportUnits() const noexcept
+  SizeF FrameView::SizeForCSSLargeViewportUnits() const noexcept
   {
     return CalculateSizeForCSSViewportUnitsOverride(_largeViewportSizeOverride);
   }
 
-  SizeF LocalFrameView::CalculateSizeForCSSViewportUnitsOverride(
-    Maybe<OverrideViewportSize> override) const noexcept
+  SizeF
+    FrameView::CalculateSizeForCSSViewportUnitsOverride(Maybe<OverrideViewportSize> override) const noexcept
   {
     OverrideViewportSize viewportSize;
 
@@ -2069,7 +2063,7 @@ namespace krys::boo
     return {*viewportSize.Width, *viewportSize.Height};
   }
 
-  SizeF LocalFrameView::SizeForCSSDynamicViewportUnits() const noexcept
+  SizeF FrameView::SizeForCSSDynamicViewportUnits() const noexcept
   {
     // FIXME: The layout viewport override rect comes first, once there's a layout viewport.
 
@@ -2131,9 +2125,8 @@ namespace krys::boo
     }
   }
 
-  bool LocalFrameView::ScrollRectToVisible(const LayoutRect &absoluteRect, const RenderObject &renderer,
-                                           bool insideFixed,
-                                           const ScrollRectToVisibleOptions &options) noexcept
+  bool FrameView::ScrollRectToVisible(const LayoutRect &absoluteRect, const RenderObject &renderer,
+                                      bool insideFixed, const ScrollRectToVisibleOptions &options) noexcept
   {
     if (options.RevealMode == SelectionRevealMode::DoNotReveal)
     {
@@ -2180,9 +2173,8 @@ namespace krys::boo
     return true;
   }
 
-  void LocalFrameView::ScrollRectToVisibleInTopLevelView(const LayoutRect &absoluteRect,
-                                                         EnumSet<BoxAxis> isFixed,
-                                                         const ScrollRectToVisibleOptions &options) noexcept
+  void FrameView::ScrollRectToVisibleInTopLevelView(const LayoutRect &absoluteRect, EnumSet<BoxAxis> isFixed,
+                                                    const ScrollRectToVisibleOptions &options) noexcept
   {
     // FIXME: Delegating the scroll to the client (DelegateMainFrameScroll), once there's a client.
     if (options.RevealMode == SelectionRevealMode::RevealUpToMainFrame)
@@ -2234,11 +2226,10 @@ namespace krys::boo
     // FIXME: Scrolling the client's containing scroll views (scrollContainingScrollViewsToRevealRect).
   }
 
-  LayoutRect LocalFrameView::GetPossiblyFixedRectToExpose(const LayoutRect &visibleRect,
-                                                          const LayoutRect &exposeRect,
-                                                          EnumSet<BoxAxis> isFixed,
-                                                          const ScrollAlignment &alignX,
-                                                          const ScrollAlignment &alignY) const noexcept
+  LayoutRect FrameView::GetPossiblyFixedRectToExpose(const LayoutRect &visibleRect,
+                                                     const LayoutRect &exposeRect, EnumSet<BoxAxis> isFixed,
+                                                     const ScrollAlignment &alignX,
+                                                     const ScrollAlignment &alignY) const noexcept
   {
     if (!isFixed.ContainsAny({BoxAxis::Horizontal, BoxAxis::Vertical}))
     {
@@ -2258,10 +2249,10 @@ namespace krys::boo
     return {scrollRect.X(), fixedRect.Y(), scrollRect.Width(), fixedRect.Height()};
   }
 
-  LayoutRect LocalFrameView::GetPossiblyFixedRectToExpose(const LayoutRect &visibleRect,
-                                                          const LayoutRect &exposeRect, bool isFixed,
-                                                          const ScrollAlignment &alignX,
-                                                          const ScrollAlignment &alignY) const noexcept
+  LayoutRect FrameView::GetPossiblyFixedRectToExpose(const LayoutRect &visibleRect,
+                                                     const LayoutRect &exposeRect, bool isFixed,
+                                                     const ScrollAlignment &alignX,
+                                                     const ScrollAlignment &alignY) const noexcept
   {
     if (!isFixed)
     {
@@ -2280,7 +2271,7 @@ namespace krys::boo
     return GetRectToExposeForScrollIntoView(visibleRect, exposeRect, alignX, alignY);
   }
 
-  ScrollPosition LocalFrameView::MaximumScrollPosition() const noexcept
+  ScrollPosition FrameView::MaximumScrollPosition() const noexcept
   {
     ScrollPosition maximumPosition = ScrollableArea::MaximumScrollPosition();
     // FIXME: can this be moved into the base class?
@@ -2289,7 +2280,7 @@ namespace krys::boo
   }
 
   ScrollPosition
-    LocalFrameView::AdjustScrollPositionWithinRange(const ScrollPosition &scrollPosition) const noexcept
+    FrameView::AdjustScrollPositionWithinRange(const ScrollPosition &scrollPosition) const noexcept
   {
     if (GetScrollClamping() == ScrollClamping::Unclamped)
     {
@@ -2299,7 +2290,7 @@ namespace krys::boo
     return scrollPosition.ConstrainedBetween(MinimumScrollPosition(), MaximumScrollPosition());
   }
 
-  void LocalFrameView::SetContentsSize(const SizeI &newSize) noexcept
+  void FrameView::SetContentsSize(const SizeI &newSize) noexcept
   {
     if (ContentsSize() == newSize)
     {
@@ -2313,7 +2304,7 @@ namespace krys::boo
   }
 
   ProhibitScrollingWhenChangingContentSizeForScope::ProhibitScrollingWhenChangingContentSizeForScope(
-    LocalFrameView &view) noexcept
+    FrameView &view) noexcept
       : _view(CreateWeakPtr(static_cast<ScrollableArea *>(&view)))
   {
     ++view._prohibitsScrollingWhenChangingContentSizeCount;
@@ -2322,7 +2313,7 @@ namespace krys::boo
   ProhibitScrollingWhenChangingContentSizeForScope::
     ~ProhibitScrollingWhenChangingContentSizeForScope() noexcept
   {
-    auto *view = static_cast<LocalFrameView *>(_view.get());
+    auto *view = static_cast<FrameView *>(_view.get());
     if (!view)
     {
       return;
@@ -2351,12 +2342,12 @@ namespace krys::boo
   }
 
   UniquePtr<ProhibitScrollingWhenChangingContentSizeForScope>
-    LocalFrameView::ProhibitScrollingWhileContentSizeChanges() noexcept
+    FrameView::ProhibitScrollingWhileContentSizeChanges() noexcept
   {
     return CreateUnique<ProhibitScrollingWhenChangingContentSizeForScope>(*this);
   }
 
-  void LocalFrameView::HandleDeferredScrollbarsUpdate() noexcept
+  void FrameView::HandleDeferredScrollbarsUpdate() noexcept
   {
     if (!std::exchange(_needsDeferredScrollbarsUpdate, false))
     {
@@ -2365,7 +2356,7 @@ namespace krys::boo
     UpdateScrollbars(GetScrollPosition());
   }
 
-  void LocalFrameView::AdjustViewSize() noexcept
+  void FrameView::AdjustViewSize() noexcept
   {
     auto *renderView = GetRenderView();
     if (!renderView)
@@ -2390,14 +2381,14 @@ namespace krys::boo
     SetContentsSize(size);
   }
 
-  void LocalFrameView::SetScrollPosition(const ScrollPosition &scrollPosition,
-                                         const ScrollPositionChangeOptions &options) noexcept
+  void FrameView::SetScrollPosition(const ScrollPosition &scrollPosition,
+                                    const ScrollPositionChangeOptions &options) noexcept
   {
     SetScrollOffsetWithOptions(ScrollOffsetFromPosition(scrollPosition), options);
   }
 
-  void LocalFrameView::SetScrollOffsetWithOptions(Maybe<int32> x, Maybe<int32> y,
-                                                  const ScrollPositionChangeOptions &options) noexcept
+  void FrameView::SetScrollOffsetWithOptions(Maybe<int32> x, Maybe<int32> y,
+                                             const ScrollPositionChangeOptions &options) noexcept
   {
     if (x && y)
     {
@@ -2420,8 +2411,8 @@ namespace krys::boo
     SetScrollOffsetWithOptions(offset, options);
   }
 
-  void LocalFrameView::SetScrollOffsetWithOptions(const ScrollOffset &scrollOffset,
-                                                  const ScrollPositionChangeOptions &options) noexcept
+  void FrameView::SetScrollOffsetWithOptions(const ScrollOffset &scrollOffset,
+                                             const ScrollPositionChangeOptions &options) noexcept
   {
     auto oldScrollType = CurrentScrollType();
     SetCurrentScrollType(options.Type);
@@ -2460,7 +2451,7 @@ namespace krys::boo
     SetCurrentScrollType(oldScrollType);
   }
 
-  void LocalFrameView::UpdateScrollbars(const ScrollPosition &desiredPosition) noexcept
+  void FrameView::UpdateScrollbars(const ScrollPosition &desiredPosition) noexcept
   {
     if (_inUpdateScrollbars)
     {
@@ -2719,7 +2710,7 @@ namespace krys::boo
     }
   }
 
-  void LocalFrameView::SetScrollOffset(const ScrollOffset &offset) noexcept
+  void FrameView::SetScrollOffset(const ScrollOffset &offset) noexcept
   {
     auto constrainedOffset = offset;
     if (GetScrollClamping() == ScrollClamping::Clamped)
@@ -2730,7 +2721,7 @@ namespace krys::boo
     ScrollTo(ScrollPositionFromOffset(constrainedOffset));
   }
 
-  void LocalFrameView::ScrollTo(const ScrollPosition &newPosition) noexcept
+  void FrameView::ScrollTo(const ScrollPosition &newPosition) noexcept
   {
     PointI oldPosition = GetScrollPosition();
     SizeI scrollDelta = newPosition - _scrollPosition;
@@ -2773,7 +2764,7 @@ namespace krys::boo
     // those.
   }
 
-  void LocalFrameView::ScrollPositionChanged(const ScrollPosition &, const ScrollPosition &) noexcept
+  void FrameView::ScrollPositionChanged(const ScrollPosition &, const ScrollPosition &) noexcept
   {
     ScheduleScrollEvent();
 
@@ -2790,7 +2781,7 @@ namespace krys::boo
     ViewportContentsChanged();
   }
 
-  void LocalFrameView::ViewportContentsChanged() noexcept
+  void FrameView::ViewportContentsChanged() noexcept
   {
     if (!Frame().View())
     {
@@ -2803,12 +2794,12 @@ namespace krys::boo
     ResumeVisibleImageAnimations(VisibleContentRect());
   }
 
-  void LocalFrameView::ResumeVisibleImageAnimations() noexcept
+  void FrameView::ResumeVisibleImageAnimations() noexcept
   {
     ResumeVisibleImageAnimations(VisibleContentRect());
   }
 
-  void LocalFrameView::ResumeVisibleImageAnimations(const RectI &visibleRect) noexcept
+  void FrameView::ResumeVisibleImageAnimations(const RectI &visibleRect) noexcept
   {
     if (visibleRect.IsEmpty())
     {
@@ -2822,7 +2813,7 @@ namespace krys::boo
     }
   }
 
-  void LocalFrameView::SetLastUserScrollType(Maybe<UserScrollType> userScrollType) noexcept
+  void FrameView::SetLastUserScrollType(Maybe<UserScrollType> userScrollType) noexcept
   {
     CancelScheduledScrolls();
     if (CurrentScrollType() == ScrollType::Programmatic)
@@ -2849,14 +2840,14 @@ namespace krys::boo
     }
   }
 
-  void LocalFrameView::ScheduleScrollEvent() noexcept
+  void FrameView::ScheduleScrollEvent() noexcept
   {
     SetIsAwaitingScrollend(true);
     Frame().GetEventHandler().ScheduleScrollEvent();
     Frame().GetEventHandler().DispatchFakeMouseMoveEventSoon();
   }
 
-  void LocalFrameView::UpdateSnapOffsetsAndResnap() noexcept
+  void FrameView::UpdateSnapOffsetsAndResnap() noexcept
   {
     auto *document = Frame().Document();
     auto *documentElement = document ? dom::TreeQueries::DocumentElement(*document) : nullptr;
@@ -2875,12 +2866,12 @@ namespace krys::boo
     ResnapAfterLayout();
   }
 
-  void LocalFrameView::RegisterForAnimatedScroll() noexcept
+  void FrameView::RegisterForAnimatedScroll() noexcept
   {
     AddScrollableAreaForAnimatedScroll(*this);
   }
 
-  void LocalFrameView::AddScrollableAreaForAnimatedScroll(ScrollableArea &area) noexcept
+  void FrameView::AddScrollableAreaForAnimatedScroll(ScrollableArea &area) noexcept
   {
     auto isArea = [&](const WeakPtr<ScrollableArea> &existing)
     {
@@ -2897,7 +2888,7 @@ namespace krys::boo
     }
   }
 
-  void LocalFrameView::ServiceScrollAnimations(MonotonicTime::duration now) noexcept
+  void FrameView::ServiceScrollAnimations(MonotonicTime::duration now) noexcept
   {
     auto areas = krys::move(_scrollableAreasForAnimatedScroll);
     _scrollableAreasForAnimatedScroll.clear();
@@ -2921,7 +2912,7 @@ namespace krys::boo
     }
   }
 
-  void LocalFrameView::ScrollDidEnd() noexcept
+  void FrameView::ScrollDidEnd() noexcept
   {
     if (!IsAwaitingScrollend())
     {
@@ -2934,7 +2925,7 @@ namespace krys::boo
     }
   }
 
-  void LocalFrameView::UpdateAnchorPositionedAfterScroll() noexcept
+  void FrameView::UpdateAnchorPositionedAfterScroll() noexcept
   {
     if (auto *view = GetRenderViewForUpdate())
     {
@@ -2942,7 +2933,7 @@ namespace krys::boo
     }
   }
 
-  LayoutPoint LocalFrameView::ScrollPositionForFixedPosition() const noexcept
+  LayoutPoint FrameView::ScrollPositionForFixedPosition() const noexcept
   {
     // FIXME: The layout viewport's origin (visualViewportEnabled), once there are visual viewports.
     LayoutPoint position(GetScrollPosition());
@@ -2965,18 +2956,18 @@ namespace krys::boo
                        LayoutUnit(position.Y() * dragFactorY / frameScaleFactor));
   }
 
-  LayoutRect LocalFrameView::RectForFixedPositionLayout() const noexcept
+  LayoutRect FrameView::RectForFixedPositionLayout() const noexcept
   {
     // FIXME: The layout viewport (visualViewportEnabled), once there are visual viewports.
     return LayoutRect(VisibleContentRect());
   }
 
-  LayoutSize LocalFrameView::BaseLayoutViewportSize() const noexcept
+  LayoutSize FrameView::BaseLayoutViewportSize() const noexcept
   {
     return GetRenderView() ? GetRenderView()->Size() : LayoutSize(Size());
   }
 
-  LayoutRect LocalFrameView::LayoutViewportRect() const noexcept
+  LayoutRect FrameView::LayoutViewportRect() const noexcept
   {
     // FIXME: The layout viewport's own origin and its override (updateLayoutViewport), once there are visual
     // viewports; until then it's at the scroll position.
@@ -2985,45 +2976,45 @@ namespace krys::boo
     return LayoutRect(ScrollPositionForFixedPosition(), BaseLayoutViewportSize());
   }
 
-  bool LocalFrameView::ShouldPlaceVerticalScrollbarOnLeft() const noexcept
+  bool FrameView::ShouldPlaceVerticalScrollbarOnLeft() const noexcept
   {
     auto *renderView = GetRenderView();
     return renderView && renderView->Style().ShouldPlaceVerticalScrollbarOnLeft();
   }
 
-  PointI LocalFrameView::ViewToContents(const PointI &point) const noexcept
+  PointI FrameView::ViewToContents(const PointI &point) const noexcept
   {
     return point + ToSizeI(DocumentScrollPositionRelativeToViewOrigin());
   }
 
-  PointI LocalFrameView::ContentsToView(const PointI &point) const noexcept
+  PointI FrameView::ContentsToView(const PointI &point) const noexcept
   {
     return point - ToSizeI(DocumentScrollPositionRelativeToViewOrigin());
   }
 
-  PointF LocalFrameView::ViewToContents(const PointF &point) const noexcept
+  PointF FrameView::ViewToContents(const PointF &point) const noexcept
   {
     return point + SizeF(ToSizeI(DocumentScrollPositionRelativeToViewOrigin()));
   }
 
-  PointF LocalFrameView::ContentsToView(const PointF &point) const noexcept
+  PointF FrameView::ContentsToView(const PointF &point) const noexcept
   {
     return point - SizeF(ToSizeI(DocumentScrollPositionRelativeToViewOrigin()));
   }
 
-  RectI LocalFrameView::ViewToContents(RectI rect) const noexcept
+  RectI FrameView::ViewToContents(RectI rect) const noexcept
   {
     rect.Move(ToSizeI(DocumentScrollPositionRelativeToViewOrigin()));
     return rect;
   }
 
-  RectI LocalFrameView::ContentsToView(RectI rect) const noexcept
+  RectI FrameView::ContentsToView(RectI rect) const noexcept
   {
     rect.Move(-ToSizeI(DocumentScrollPositionRelativeToViewOrigin()));
     return rect;
   }
 
-  void LocalFrameView::ScheduleSelectionUpdate() noexcept
+  void FrameView::ScheduleSelectionUpdate() noexcept
   {
     if (LayoutContext().NeedsLayout())
     {
@@ -3035,7 +3026,7 @@ namespace krys::boo
     LayoutContext().SetNeedsLayoutAfterViewConfigurationChange();
   }
 
-  void LocalFrameView::ScheduleScrollToFocusedElement(SelectionRevealMode selectionRevealMode) noexcept
+  void FrameView::ScheduleScrollToFocusedElement(SelectionRevealMode selectionRevealMode) noexcept
   {
     if (selectionRevealMode == SelectionRevealMode::DoNotReveal)
     {
@@ -3051,7 +3042,7 @@ namespace krys::boo
     _delayedScrollToFocusedElementTimer.StartOneShot({});
   }
 
-  void LocalFrameView::CancelScheduledScrolls() noexcept
+  void FrameView::CancelScheduledScrolls() noexcept
   {
     _shouldScrollToFocusedElement = false;
     _delayedScrollToFocusedElementTimer.Stop();
@@ -3068,7 +3059,7 @@ namespace krys::boo
     }
   }
 
-  bool LocalFrameView::ScrollToFragment(const net::Url &url) noexcept
+  bool FrameView::ScrollToFragment(const net::Url &url) noexcept
   {
     krys_assert(Frame().Document());
 
@@ -3110,7 +3101,7 @@ namespace krys::boo
     return false;
   }
 
-  bool LocalFrameView::ScrollToAnchorFragment(DOMStringView fragmentIdentifier) noexcept
+  bool FrameView::ScrollToAnchorFragment(DOMStringView fragmentIdentifier) noexcept
   {
     // If our URL has no ref, then we have no place we need to jump to.
     if (!fragmentIdentifier.data())
@@ -3188,7 +3179,7 @@ namespace krys::boo
     return true;
   }
 
-  void LocalFrameView::MaintainScrollPositionAtAnchor(ContainerNode *anchorNode) noexcept
+  void FrameView::MaintainScrollPositionAtAnchor(ContainerNode *anchorNode) noexcept
   {
     _maintainScrollPositionAnchor = CreateWeakPtr(anchorNode);
     if (!anchorNode)
@@ -3221,23 +3212,23 @@ namespace krys::boo
     ScrollToAnchorNowIfNeeded();
   }
 
-  int32 LocalFrameView::MapFromLayoutToCSSUnits(LayoutUnit value) const noexcept
+  int32 FrameView::MapFromLayoutToCSSUnits(LayoutUnit value) const noexcept
   {
     return static_cast<int32>(value / (Frame().PageZoomFactor() * Frame().FrameScaleFactor()));
   }
 
-  LayoutUnit LocalFrameView::MapFromCSSToLayoutUnits(int32 value) const noexcept
+  LayoutUnit FrameView::MapFromCSSToLayoutUnits(int32 value) const noexcept
   {
     return LayoutUnit(value * Frame().PageZoomFactor() * Frame().FrameScaleFactor());
   }
 
-  SizeI LocalFrameView::SizeForResizeEvent() const noexcept
+  SizeI FrameView::SizeForResizeEvent() const noexcept
   {
     // FIXME: The fixed layout size when scrolling is delegated, once it can be.
     return VisibleContentRectIncludingScrollbars().Size();
   }
 
-  void LocalFrameView::ScheduleResizeEventIfNeeded() noexcept
+  void FrameView::ScheduleResizeEventIfNeeded() noexcept
   {
     if (_layoutContext.IsInRenderTreeLayout() || _layoutContext.NeedsLayout())
     {
@@ -3250,8 +3241,7 @@ namespace krys::boo
       return;
     }
 
-    auto *page = Frame().GetPage();
-    if (page && page->GetChromeClient().IsSVGImageChromeClient())
+    if (Frame().GetBooeyClient().IsSVGImageBooeyClient())
     {
       return;
     }
@@ -3280,7 +3270,7 @@ namespace krys::boo
     Frame().Document()->SetNeedsDOMWindowResizeEvent();
   }
 
-  void LocalFrameView::LayoutOrVisualViewportChanged() noexcept
+  void FrameView::LayoutOrVisualViewportChanged() noexcept
   {
     if (auto *window = Frame().Window())
     {
@@ -3291,7 +3281,7 @@ namespace krys::boo
     }
   }
 
-  void LocalFrameView::ScheduleScrollToAnchor() noexcept
+  void FrameView::ScheduleScrollToAnchor() noexcept
   {
     auto *anchorNode = _maintainScrollPositionAnchor.get();
     if (!anchorNode)
@@ -3331,7 +3321,7 @@ namespace krys::boo
                                          });
   }
 
-  void LocalFrameView::ScrollToAnchorNowIfNeeded() noexcept
+  void FrameView::ScrollToAnchorNowIfNeeded() noexcept
   {
     if (!_scheduledToScrollToAnchor)
     {
@@ -3342,7 +3332,7 @@ namespace krys::boo
     ScrollToAnchor();
   }
 
-  void LocalFrameView::ScrollToAnchor() noexcept
+  void FrameView::ScrollToAnchor() noexcept
   {
     RefPtr<ContainerNode> anchorNode = ShareRefPtr(_maintainScrollPositionAnchor.get());
     if (!anchorNode)
@@ -3399,12 +3389,12 @@ namespace krys::boo
     CancelScheduledScrolls();
   }
 
-  void LocalFrameView::ScrollToFocusedElementTimerFired() noexcept
+  void FrameView::ScrollToFocusedElementTimerFired() noexcept
   {
     ScrollToFocusedElementInternal();
   }
 
-  void LocalFrameView::ScrollToFocusedElementInternal() noexcept
+  void FrameView::ScrollToFocusedElementInternal() noexcept
   {
     krys_assert(_shouldScrollToFocusedElement);
     auto *document = Frame().Document();
@@ -3454,30 +3444,30 @@ namespace krys::boo
     ScrollRectToVisible(anchorRectWithScrollMargin, *renderer, insideFixed, options);
   }
 
-  float LocalFrameView::FrameScaleFactor() const noexcept
+  float FrameView::FrameScaleFactor() const noexcept
   {
     return Frame().FrameScaleFactor();
   }
 
-  float LocalFrameView::DocumentToAbsoluteScaleFactor(Maybe<float> usedZoom) const noexcept
+  float FrameView::DocumentToAbsoluteScaleFactor(Maybe<float> usedZoom) const noexcept
   {
     // If usedZoom is passed, it already factors in pageZoomFactor().
     return (usedZoom ? *usedZoom : Frame().PageZoomFactor()) * Frame().FrameScaleFactor();
   }
 
-  float LocalFrameView::AbsoluteToDocumentScaleFactor(Maybe<float> usedZoom) const noexcept
+  float FrameView::AbsoluteToDocumentScaleFactor(Maybe<float> usedZoom) const noexcept
   {
     // If usedZoom is passed, it already factors in pageZoomFactor().
     return 1 / DocumentToAbsoluteScaleFactor(usedZoom);
   }
 
-  RectF LocalFrameView::AbsoluteToDocumentRect(RectF rect, Maybe<float> usedZoom) const noexcept
+  RectF FrameView::AbsoluteToDocumentRect(RectF rect, Maybe<float> usedZoom) const noexcept
   {
     rect.Scale(AbsoluteToDocumentScaleFactor(usedZoom));
     return rect;
   }
 
-  SizeF LocalFrameView::DocumentToClientOffset() const noexcept
+  SizeF FrameView::DocumentToClientOffset() const noexcept
   {
     auto clientOrigin =
       -SizeF(static_cast<float>(VisibleContentRect().X()), static_cast<float>(VisibleContentRect().Y()));
@@ -3486,30 +3476,30 @@ namespace krys::boo
     return clientOrigin.Scaled(1 / (Frame().PageZoomFactor() * Frame().FrameScaleFactor()));
   }
 
-  RectF LocalFrameView::DocumentToClientRect(RectF rect) const noexcept
+  RectF FrameView::DocumentToClientRect(RectF rect) const noexcept
   {
     rect.Move(DocumentToClientOffset());
     return rect;
   }
 
-  RectF LocalFrameView::AbsoluteToClientRect(RectF rect, Maybe<float> usedZoom) const noexcept
+  RectF FrameView::AbsoluteToClientRect(RectF rect, Maybe<float> usedZoom) const noexcept
   {
     return DocumentToClientRect(AbsoluteToDocumentRect(rect, usedZoom));
   }
 
-  RectF LocalFrameView::AbsoluteToLayoutViewportRect(RectF rect) const noexcept
+  RectF FrameView::AbsoluteToLayoutViewportRect(RectF rect) const noexcept
   {
     rect.Scale(1 / Frame().FrameScaleFactor());
     rect.MoveBy(-PointF(LayoutViewportRect().Location()));
     return rect;
   }
 
-  PointD LocalFrameView::AbsoluteToDocumentPoint(PointD point, Maybe<float> usedZoom) const noexcept
+  PointD FrameView::AbsoluteToDocumentPoint(PointD point, Maybe<float> usedZoom) const noexcept
   {
     return point.Scaled(AbsoluteToDocumentScaleFactor(usedZoom));
   }
 
-  PointD LocalFrameView::DocumentToClientPoint(PointD point) const noexcept
+  PointD FrameView::DocumentToClientPoint(PointD point) const noexcept
   {
     return point + SizeD(DocumentToClientOffset());
   }
@@ -3517,49 +3507,47 @@ namespace krys::boo
   // The window is the view's own coordinates: it's the root of its (absent) widget tree, at the origin.
   // FIXME: The conversions through the root view (rootViewToContents), once views are widgets in a tree.
 
-  PointD LocalFrameView::WindowToContents(const PointD &point) const noexcept
+  PointD FrameView::WindowToContents(const PointD &point) const noexcept
   {
     return point + SizeD(ToSizeI(DocumentScrollPositionRelativeToViewOrigin()));
   }
 
-  PointI LocalFrameView::WindowToContents(const PointI &point) const noexcept
+  PointI FrameView::WindowToContents(const PointI &point) const noexcept
   {
     return ViewToContents(point);
   }
 
-  PointI LocalFrameView::ContentsToWindow(const PointI &point) const noexcept
+  PointI FrameView::ContentsToWindow(const PointI &point) const noexcept
   {
     return ContentsToView(point);
   }
 
-  RectI LocalFrameView::ContentsToWindow(const RectI &rect) const noexcept
+  RectI FrameView::ContentsToWindow(const RectI &rect) const noexcept
   {
     return ContentsToView(rect);
   }
 
-  RectI LocalFrameView::ContentsToScreen(const RectI &rect) const noexcept
+  RectI FrameView::ContentsToScreen(const RectI &rect) const noexcept
   {
     auto *frame = _frame.get();
-    auto *page = frame ? frame->GetPage() : nullptr;
-    if (!page)
+    if (!frame)
     {
       return {};
     }
-    return page->GetChromeClient().RootViewToScreen(ContentsToWindow(rect));
+    return frame->GetBooeyClient().RootViewToScreen(ContentsToWindow(rect));
   }
 
-  PointI LocalFrameView::ScreenToContents(const PointI &point) const noexcept
+  PointI FrameView::ScreenToContents(const PointI &point) const noexcept
   {
     auto *frame = _frame.get();
-    auto *page = frame ? frame->GetPage() : nullptr;
-    if (!page)
+    if (!frame)
     {
       return {};
     }
-    return WindowToContents(page->GetChromeClient().ScreenToRootView(point));
+    return WindowToContents(frame->GetBooeyClient().ScreenToRootView(point));
   }
 
-  void LocalFrameView::ResetScrollAnchor() noexcept
+  void FrameView::ResetScrollAnchor() noexcept
   {
     krys_assert(Frame().Document());
     auto &document = *Frame().Document();

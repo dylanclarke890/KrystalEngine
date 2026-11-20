@@ -40,7 +40,7 @@ namespace krys::boo
 {
   class Document;
   class Element;
-  class Page;
+  class Frame;
   class PlatformMouseEvent;
   class PlatformWheelEvent;
 
@@ -59,7 +59,7 @@ namespace krys::boo
   /// @brief A page's pointer lock: the element the mouse's events go to while it's locked
   /// (`requestPointerLock()`), with the cursor hidden and the mouse's movement as its moves' `movementX` and
   /// `movementY`, the `pointerlockchange` and `pointerlockerror` events, and unlocking (`exitPointerLock()`,
-  /// Escape, the element going away). The host locks and unlocks the pointer (the chrome client's
+  /// Escape, the element going away). The host locks and unlocks the pointer (the Booey client's
   /// `RequestPointerLock()` and `RequestPointerUnlock()`).
   /// @see https://w3c.github.io/pointerlock/
   class PointerLockController
@@ -67,7 +67,7 @@ namespace krys::boo
     KRYS_NON_COPY_MOVABLE(PointerLockController);
 
   private:
-    WeakPtr<Page> _page;
+    WeakPtr<Frame> _frame;
     bool _lockPending {false};
     bool _unlockPending {false};
     Maybe<dom::PointerLockOptions> _options;
@@ -77,7 +77,7 @@ namespace krys::boo
     WeakPtr<Document> _documentAllowedToRelockWithoutUserGesture;
 
   public:
-    explicit PointerLockController(Page &page) noexcept;
+    explicit PointerLockController(Frame &frame) noexcept;
 
     ~PointerLockController() noexcept;
 

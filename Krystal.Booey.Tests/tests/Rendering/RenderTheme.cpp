@@ -245,8 +245,8 @@ namespace krys::boo::tests
   TEST_CASE_METHOD(css::tests::ValueFixture, "RenderTheme::PlatformColorsDidChange: every page restyles",
                    "[Rendering][RenderTheme]")
   {
-    PaintFixture first(u8"<!DOCTYPE html><p>One", {200, 100}, true);
-    PaintFixture second(u8"<!DOCTYPE html><p>Two", {200, 100}, true);
+    PaintFixture first(u8"<!DOCTYPE html><p>One");
+    PaintFixture second(u8"<!DOCTYPE html><p>Two");
     (void)first.Painted();
     (void)second.Painted();
     REQUIRE_FALSE(first.Document->HasPendingFullStyleRebuild());

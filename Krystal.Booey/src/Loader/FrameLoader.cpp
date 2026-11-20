@@ -40,23 +40,22 @@
 #include "Krystal.Booey/DOM/Nodes/Element.hpp"
 #include "Krystal.Booey/HTML/Elements/HTMLFormElement.hpp"
 #include "Krystal.Booey/HTML/EventLoop/EventLoop.hpp"
+#include "Krystal.Booey/HTML/Window.hpp"
 #include "Krystal.Booey/Input/EventHandler.hpp"
 #include "Krystal.Booey/Loader/Cache/CachedResourceLoader.hpp"
 #include "Krystal.Booey/Loader/DocumentLoader.hpp"
 #include "Krystal.Booey/Loader/FormSubmission.hpp"
 #include "Krystal.Booey/Loader/FrameLoadRequest.hpp"
 #include "Krystal.Booey/Loader/NavigationAction.hpp"
-#include "Krystal.Booey/Page/Clients/ChromeClient.hpp"
-#include "Krystal.Booey/Page/LocalDOMWindow.hpp"
-#include "Krystal.Booey/Page/LocalFrame.hpp"
-#include "Krystal.Booey/Page/LocalFrameView.hpp"
-#include "Krystal.Booey/Page/Page.hpp"
+#include "Krystal.Booey/Page/Clients/BooeyClient.hpp"
+#include "Krystal.Booey/Page/Frame.hpp"
+#include "Krystal.Booey/Page/FrameView.hpp"
 #include "Krystal.Core/Strings/ASCII.hpp"
 #include "Krystal.Core/Utils/SetForScope.hpp"
 
 namespace krys::boo
 {
-  FrameLoader::FrameLoader(LocalFrame &frame, UniquePtr<LocalFrameLoaderClient> &&client) noexcept
+  FrameLoader::FrameLoader(boo::Frame &frame, UniquePtr<FrameLoaderClient> &&client) noexcept
       : _frame(frame), _client(client ? krys::move(client) : CreateUnique<EmptyFrameLoaderClient>())
   {
   }
@@ -181,7 +180,7 @@ namespace krys::boo
 
   void FrameLoader::TransitionToCommittedForNewPage() noexcept
   {
-    RefPtr<LocalFrameView> oldView = ShareRefPtr(_frame.View());
+    RefPtr<FrameView> oldView = ShareRefPtr(_frame.View());
     if (!oldView)
     {
       return;
@@ -199,8 +198,7 @@ namespace krys::boo
     }
 
     // The old document is unloaded, unless it's the document of an SVG image, which fires no events.
-    if (_documentLoader
-        && !(_frame.GetPage() && _frame.GetPage()->GetChromeClient().IsSVGImageChromeClient()))
+    if (_documentLoader && !_frame.GetBooeyClient().IsSVGImageBooeyClient())
     {
       DispatchUnloadEvents();
     }
@@ -291,7 +289,7 @@ namespace krys::boo
 
       // 12. If oldDocument's salvageable state is false, then fire an event named unload at oldDocument's
       //     relevant global object, with legacy target override flag set.
-      if (RefPtr<LocalDOMWindow> window = ShareRefPtr(document->Window()))
+      if (RefPtr<Window> window = ShareRefPtr(document->Window()))
       {
         auto unloadEvent = Event::Create(event_names::Unload, false, false);
         (void)dom::EventDispatcher::DispatchToTarget(*unloadEvent, window.get(), true);
@@ -472,7 +470,7 @@ namespace krys::boo
                 || submission->GetMethod() == FormSubmission::Method::Get);
 
     auto *document = _frame.Document();
-    if (!_frame.GetPage() || !document || submission->Action().IsEmpty())
+    if (!document || submission->Action().IsEmpty())
     {
       return;
     }
@@ -499,7 +497,7 @@ namespace krys::boo
     // The navigation is planned for a later task, which a later submission of the form cancels.
     html::EventLoop::Current().QueueTask(
       html::TaskSource::DOMManipulation, *document,
-      [this, frame = Ref<LocalFrame>(ShareRef(_frame)), submission = krys::move(submission)]
+      [this, frame = Ref<boo::Frame>(ShareRef(_frame)), submission = krys::move(submission)]
       {
         auto *document = _frame.Document();
         if (submission->WasCancelled() || !document || !IsNavigationAllowed())
@@ -537,7 +535,7 @@ namespace krys::boo
     _client->DispatchNewWindowRequested(action, request, formSubmission, frameName);
   }
 
-  LocalFrame *FrameLoader::FindFrameForNavigation(DOMStringView name) const noexcept
+  boo::Frame *FrameLoader::FindFrameForNavigation(DOMStringView name) const noexcept
   {
     // https://html.spec.whatwg.org/#the-rules-for-choosing-a-navigable
     // 1. Let chosen be null.
@@ -582,7 +580,7 @@ namespace krys::boo
 
   void FrameLoader::LoadInSameDocument(const net::Url &url) noexcept
   {
-    Ref<LocalFrame> protectedFrame = ShareRef(_frame);
+    Ref<boo::Frame> protectedFrame = ShareRef(_frame);
     RefPtr<boo::Document> document = ShareRefPtr(_frame.Document());
     if (!document)
     {
@@ -610,7 +608,7 @@ namespace krys::boo
 
   void FrameLoader::FinishedParsing() noexcept
   {
-    Ref<LocalFrame> frame = ShareRef(_frame);
+    Ref<boo::Frame> frame = ShareRef(_frame);
     if (_state == FrameState::CommittedPage)
     {
       _client->DispatchDidFinishDocumentLoad();
@@ -632,7 +630,7 @@ namespace krys::boo
 
   void FrameLoader::ScrollToFragment(const net::Url &url) noexcept
   {
-    RefPtr<LocalFrameView> view = ShareRefPtr(_frame.View());
+    RefPtr<FrameView> view = ShareRefPtr(_frame.View());
     RefPtr<boo::Document> document = ShareRefPtr(_frame.Document());
     if (!view || !document)
     {

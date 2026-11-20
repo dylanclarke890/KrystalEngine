@@ -33,7 +33,7 @@
 #include "Krystal.Booey/DOM/Nodes/Document.hpp"
 #include "Krystal.Booey/Graphics/GraphicsContext.hpp"
 #include "Krystal.Booey/Graphics/GraphicsContextSwitcher.hpp"
-#include "Krystal.Booey/Page/Page.hpp"
+#include "Krystal.Booey/Page/Frame.hpp"
 #include "Krystal.Booey/Rendering/Layers/RenderLayer.hpp"
 #include "Krystal.Booey/Rendering/Painting/CSSFilterRenderer.hpp"
 #include "Krystal.Booey/Rendering/RenderElement.hpp"
@@ -158,12 +158,12 @@ namespace krys::boo
                                                          const LayoutRect &layerRepaintRect,
                                                          const LayoutRect &clipRect) noexcept
   {
-    auto *page = renderer.GetDocument().GetPage();
-    if (!page)
+    auto *frame = renderer.GetDocument().Frame();
+    if (!frame)
     {
       return nullptr;
     }
-    auto preferredFilterRenderingModes = page->PreferredFilterRenderingModes(context);
+    auto preferredFilterRenderingModes = frame->PreferredFilterRenderingModes(context);
     auto outsets = CalculateOutsets(renderer, RectF(filterBoxRect));
 
     auto dirtyFilterRegion = dirtyRect;

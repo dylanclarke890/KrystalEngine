@@ -3,8 +3,8 @@
 #include "Krystal.Booey.Tests/Loader/NavigationTestUtils.hpp"
 #include "Krystal.Booey/DOM/IntersectionObservers/IntersectionObserverEntry.hpp"
 #include "Krystal.Booey/DOM/Nodes/Document.hpp"
-#include "Krystal.Booey/Page/LocalDOMWindow.hpp"
-#include "Krystal.Booey/Page/Page.hpp"
+#include "Krystal.Booey/HTML/Window.hpp"
+#include "Krystal.Booey/Page/Frame.hpp"
 #include <cmath>
 
 namespace krys::boo::tests
@@ -158,7 +158,7 @@ namespace krys::boo::tests
     auto &window = *fixture.Document->Window();
     auto update = [&]
     {
-      fixture.TestPage->UpdateRendering();
+      fixture.Frame->UpdateRendering();
     };
 
     SECTION("Each target is reported first, then when it crosses a threshold")
@@ -238,8 +238,7 @@ namespace krys::boo::tests
       Recorder recorder(*fixture.Document);
       recorder.Observer->Observe(a);
       (void)fixture.Document->UpdateLayout();
-      CHECK(recorder.Observer->UpdateObservations(fixture.TestPage->MainFrame())
-            == IntersectionObserver::NeedNotify::Yes);
+      CHECK(recorder.Observer->UpdateObservations(*fixture.Frame) == IntersectionObserver::NeedNotify::Yes);
       auto records = recorder.Observer->TakeRecords();
       REQUIRE(records.size() == 1);
       CHECK(ToObserved(*records[0])
@@ -285,7 +284,7 @@ namespace krys::boo::tests
     auto &t = fixture.ById(u8"t");
     auto update = [&]
     {
-      fixture.TestPage->UpdateRendering();
+      fixture.Frame->UpdateRendering();
     };
 
     SECTION("An element root reports its scrolled contents")
@@ -339,7 +338,7 @@ namespace krys::boo::tests
     auto &a = fixture.ById(u8"a");
     auto update = [&]
     {
-      fixture.TestPage->UpdateRendering();
+      fixture.Frame->UpdateRendering();
     };
 
     SECTION("A removed target stops intersecting")

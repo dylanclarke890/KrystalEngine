@@ -26,7 +26,7 @@
 #include "Krystal.Booey/Rendering/TextBoxTrimmer.hpp"
 #include "Krystal.Booey/Layout/Integration/Inline/InlineIteratorBox.hpp"
 #include "Krystal.Booey/Layout/Integration/Inline/InlineIteratorLineBox.hpp"
-#include "Krystal.Booey/Page/LocalFrameView.hpp"
+#include "Krystal.Booey/Page/FrameView.hpp"
 #include "Krystal.Booey/Rendering/MultiColumn/RenderMultiColumnFlow.hpp"
 #include "Krystal.Booey/Rendering/RenderBlockFlow.hpp"
 #include "Krystal.Booey/Rendering/RenderView.hpp"
@@ -45,12 +45,12 @@ namespace krys::boo
       return textBoxTrimRoot.Style().GetTextBoxTrim();
     }
 
-    KRYS_NODISCARD LocalFrameViewLayoutContext &LayoutContext(const RenderBox &renderer) noexcept
+    KRYS_NODISCARD FrameViewLayoutContext &LayoutContext(const RenderBox &renderer) noexcept
     {
       return renderer.View().FrameView().LayoutContext();
     }
 
-    void RemoveTextBoxTrimStart(LocalFrameViewLayoutContext &layoutContext) noexcept
+    void RemoveTextBoxTrimStart(FrameViewLayoutContext &layoutContext) noexcept
     {
       auto textBoxTrim = layoutContext.GetTextBoxTrim();
       if (!textBoxTrim || !textBoxTrim->TrimFirstFormattedLine)
@@ -59,7 +59,7 @@ namespace krys::boo
         return;
       }
       layoutContext.SetTextBoxTrim(
-        LocalFrameViewLayoutContext::TextBoxTrim {false, textBoxTrim->LastFormattedLineRoot});
+        FrameViewLayoutContext::TextBoxTrim {false, textBoxTrim->LastFormattedLineRoot});
     }
 
     KRYS_NODISCARD bool
@@ -257,8 +257,8 @@ namespace krys::boo
       lastFormattedLineRoot = _previousTextBoxTrimStatus->LastFormattedLineRoot.get();
     }
 
-    layoutContext.SetTextBoxTrim(LocalFrameViewLayoutContext::TextBoxTrim {
-      shouldTrimFirstFormattedLineStart, CreateWeakPtr(lastFormattedLineRoot)});
+    layoutContext.SetTextBoxTrim(FrameViewLayoutContext::TextBoxTrim {shouldTrimFirstFormattedLineStart,
+                                                                      CreateWeakPtr(lastFormattedLineRoot)});
   }
 
   void TextBoxTrimmer::AdjustTextBoxTrimStatusAfterLayout() noexcept
@@ -311,7 +311,7 @@ namespace krys::boo
     if (_previousTextBoxTrimStatus)
     {
       layoutContext.SetTextBoxTrim(
-        LocalFrameViewLayoutContext::TextBoxTrim {false, _previousTextBoxTrimStatus->LastFormattedLineRoot});
+        FrameViewLayoutContext::TextBoxTrim {false, _previousTextBoxTrimStatus->LastFormattedLineRoot});
     }
   }
 

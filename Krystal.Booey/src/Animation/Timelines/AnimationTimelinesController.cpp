@@ -34,8 +34,8 @@
 #include "Krystal.Booey/DOM/Algorithms/EventDispatcher.hpp"
 #include "Krystal.Booey/DOM/Nodes/Document.hpp"
 #include "Krystal.Booey/HTML/EventLoop/EventLoop.hpp"
-#include "Krystal.Booey/Page/LocalDOMWindow.hpp"
-#include "Krystal.Booey/Page/Page.hpp"
+#include "Krystal.Booey/HTML/Window.hpp"
+#include "Krystal.Booey/Page/Frame.hpp"
 #include "Krystal.Booey/Page/Settings.hpp"
 #include <algorithm>
 
@@ -45,9 +45,9 @@ namespace krys::boo
       : _cachedCurrentTimeClearanceTimer(*this, &AnimationTimelinesController::ClearCachedCurrentTime),
         _document(document)
   {
-    if (auto *page = document.GetPage())
+    if (auto *frame = document.Frame())
     {
-      if (document.GetSettings().HiddenPageCSSAnimationSuspensionEnabled && !page->IsVisible())
+      if (document.GetSettings().HiddenPageCSSAnimationSuspensionEnabled && !frame->IsVisible())
       {
         SuspendAnimations();
       }
@@ -386,11 +386,11 @@ namespace krys::boo
     {
       // In order to not have a stale cached current time, we schedule a timer to reset it in the time it
       // would take an animation frame to run under normal circumstances.
-      auto *page = _document.GetPage();
-      _cachedCurrentTimeClearanceTimer.StartOneShot(page
-                                                      ? page->PreferredRenderingUpdateInterval()
+      auto *frame = _document.Frame();
+      _cachedCurrentTimeClearanceTimer.StartOneShot(frame
+                                                      ? frame->PreferredRenderingUpdateInterval()
                                                       : std::chrono::duration_cast<MonotonicTime::duration>(
-                                                          Seconds {1.0 / Page::FullSpeedFramesPerSecond}));
+                                                          Seconds {1.0 / Frame::FullSpeedFramesPerSecond}));
     }
   }
 

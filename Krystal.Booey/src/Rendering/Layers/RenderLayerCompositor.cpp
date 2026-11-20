@@ -27,10 +27,9 @@
 #include "Krystal.Booey/Animation/KeyframeEffectStack.hpp"
 #include "Krystal.Booey/DOM/Nodes/Document.hpp"
 #include "Krystal.Booey/Graphics/GraphicsContext.hpp"
-#include "Krystal.Booey/Page/Clients/ChromeClient.hpp"
-#include "Krystal.Booey/Page/LocalFrame.hpp"
-#include "Krystal.Booey/Page/LocalFrameView.hpp"
-#include "Krystal.Booey/Page/Page.hpp"
+#include "Krystal.Booey/Page/Clients/BooeyClient.hpp"
+#include "Krystal.Booey/Page/Frame.hpp"
+#include "Krystal.Booey/Page/FrameView.hpp"
 #include "Krystal.Booey/Page/Scrolling/ScrollingConstraints.hpp"
 #include "Krystal.Booey/Page/Settings.hpp"
 #include "Krystal.Booey/Platform/Scrolling/Scrollbar.hpp"
@@ -619,7 +618,7 @@ namespace krys::boo
   void RenderLayerCompositor::CacheAcceleratedCompositingFlags() noexcept
   {
     // Compositing is on whenever the host makes graphics layers, as forceCompositingMode has it.
-    // FIXME: The chrome's compositing triggers.
+    // FIXME: The Booey client's compositing triggers.
     bool hasAcceleratedCompositing = GetGraphicsLayerFactory() != nullptr;
     const auto &settings = _renderView.GetDocument().GetSettings();
     bool showDebugBorders = settings.ShowDebugBorders;
@@ -702,9 +701,9 @@ namespace krys::boo
   {
     krys_debug_assert(!_flushingLayers);
 
-    if (auto *page = _renderView.GetDocument().GetPage())
+    if (auto *frame = _renderView.GetDocument().Frame())
     {
-      page->ScheduleRenderingUpdate({RenderingUpdateStep::LayerFlush});
+      frame->ScheduleRenderingUpdate({RenderingUpdateStep::LayerFlush});
     }
   }
 
@@ -2665,7 +2664,7 @@ namespace krys::boo
     PointI scrollPosition = frameView.GetScrollPosition();
 
     // We use scroll position here because the root content layer is offset to account for scrollOrigin (see
-    // LocalFrameView::positionForRootContentLayer).
+    // FrameView::positionForRootContentLayer).
     _scrolledContentsLayer->SetPosition(
       PointF(static_cast<float>(-scrollPosition.X()), static_cast<float>(-scrollPosition.Y())));
 
@@ -2868,7 +2867,7 @@ namespace krys::boo
         return;
       }
 
-      AttachRootLayer(RootLayerAttachedViaChromeClient);
+      AttachRootLayer(RootLayerAttachedViaBooeyClient);
     }
     else
     {
@@ -4056,8 +4055,8 @@ namespace krys::boo
 
   float RenderLayerCompositor::PageScaleFactor() const noexcept
   {
-    auto *page = _renderView.GetDocument().GetPage();
-    return page ? page->PageScaleFactor() : 1;
+    auto *frame = _renderView.GetDocument().Frame();
+    return frame ? frame->PageScaleFactor() : 1;
   }
 
   float RenderLayerCompositor::ZoomedOutPageScaleFactor() const noexcept
@@ -4284,7 +4283,7 @@ namespace krys::boo
 
   void RenderLayerCompositor::EnsureRootLayer() noexcept
   {
-    RootLayerAttachment expectedAttachment = RootLayerAttachedViaChromeClient;
+    RootLayerAttachment expectedAttachment = RootLayerAttachedViaBooeyClient;
     if (expectedAttachment == _rootLayerAttachment)
     {
       return;
@@ -4426,10 +4425,10 @@ namespace krys::boo
     switch (attachment)
     {
       case RootLayerUnattached: krys_debug_assert(false); break;
-      case RootLayerAttachedViaChromeClient:
-        if (auto *page = GetPage())
+      case RootLayerAttachedViaBooeyClient:
+        if (auto *frame = Frame())
         {
-          page->GetChromeClient().AttachRootGraphicsLayer(_renderView.FrameView().Frame(),
+          frame->GetBooeyClient().AttachRootGraphicsLayer(_renderView.FrameView().Frame(),
                                                           RootGraphicsLayer());
         }
         break;
@@ -4454,10 +4453,10 @@ namespace krys::boo
 
     switch (_rootLayerAttachment)
     {
-      case RootLayerAttachedViaChromeClient:
-        if (auto *page = GetPage())
+      case RootLayerAttachedViaBooeyClient:
+        if (auto *frame = Frame())
         {
-          page->GetChromeClient().AttachRootGraphicsLayer(_renderView.FrameView().Frame(), nullptr);
+          frame->GetBooeyClient().AttachRootGraphicsLayer(_renderView.FrameView().Frame(), nullptr);
         }
         break;
       case RootLayerUnattached: break;
@@ -4582,13 +4581,13 @@ namespace krys::boo
 
   GraphicsLayerFactory *RenderLayerCompositor::GetGraphicsLayerFactory() const noexcept
   {
-    auto *page = GetPage();
-    return page ? page->GetChromeClient().GetGraphicsLayerFactory() : nullptr;
+    auto *frame = Frame();
+    return frame ? frame->GetBooeyClient().GetGraphicsLayerFactory() : nullptr;
   }
 
-  Page *RenderLayerCompositor::GetPage() const noexcept
+  boo::Frame *RenderLayerCompositor::Frame() const noexcept
   {
-    return _renderView.GetDocument().GetPage();
+    return _renderView.GetDocument().Frame();
   }
 
   void RenderLayerCompositor::UpdateRootContentLayerClipping() noexcept

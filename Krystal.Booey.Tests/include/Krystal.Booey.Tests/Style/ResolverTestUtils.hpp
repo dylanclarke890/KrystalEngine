@@ -7,7 +7,7 @@
 #include "Krystal.Booey/HTML/Elements/HTMLBodyElement.hpp"
 #include "Krystal.Booey/HTML/EventLoop/EventLoop.hpp"
 #include "Krystal.Booey/HTML/Parser/DocumentParser.hpp"
-#include "Krystal.Booey/Page/LocalFrame.hpp"
+#include "Krystal.Booey/Page/Frame.hpp"
 #include "Krystal.Booey/Rendering/Style/RenderStyle+GettersInlines.hpp"
 #include "Krystal.Booey/Style/ResolvedStyle.hpp"
 #include "Krystal.Booey/Style/Resolver.hpp"
@@ -32,7 +32,7 @@ namespace krys::boo::style::tests
   struct ResolverFixture : css::tests::ValueFixture
   {
     Ref<HTMLDocument> Document;
-    RefPtr<LocalFrame> Frame;
+    RefPtr<boo::Frame> Frame;
 
     explicit ResolverFixture(utf8_string &&markup, WithView withView = WithView::Yes) noexcept
         : Document(Parse(krys::move(markup)))
@@ -40,7 +40,7 @@ namespace krys::boo::style::tests
       Document->StyleScope().FlushPendingUpdate();
       if (withView == WithView::Yes)
       {
-        Frame = LocalFrame::Create();
+        Frame = boo::Frame::Create();
         Frame->CreateView({800, 600});
         Frame->SetDocument(ShareRefPtr<boo::Document>(Document.get()));
       }

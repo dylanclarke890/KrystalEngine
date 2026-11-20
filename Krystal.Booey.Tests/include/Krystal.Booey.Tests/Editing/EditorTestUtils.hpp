@@ -13,10 +13,10 @@
 #include "Krystal.Booey/Editing/Selection/FrameSelection.hpp"
 #include "Krystal.Booey/HTML/Elements/HTMLBodyElement.hpp"
 #include "Krystal.Booey/Input/LegacyKeyCodes.hpp"
-#include "Krystal.Booey/Page/Clients/ChromeClient.hpp"
+#include "Krystal.Booey/Page/Clients/BooeyClient.hpp"
 #include "Krystal.Booey/Page/Clients/EditorClient.hpp"
-#include "Krystal.Booey/Page/LocalFrameView.hpp"
-#include "Krystal.Booey/Page/Page.hpp"
+#include "Krystal.Booey/Page/Frame.hpp"
+#include "Krystal.Booey/Page/FrameView.hpp"
 #include "Krystal.Booey/Platform/Pasteboard/Pasteboard.hpp"
 #include "Krystal.Booey/Platform/Pasteboard/PasteboardCustomData.hpp"
 #include "Krystal.Booey/Platform/Pasteboard/PasteboardStrategy.hpp"
@@ -45,12 +45,12 @@ namespace krys::boo::tests
       return true;
     }
 
-    KRYS_NODISCARD bool CanCopyCut(LocalFrame *, bool defaultValue) const noexcept final
+    KRYS_NODISCARD bool CanCopyCut(boo::Frame *, bool defaultValue) const noexcept final
     {
       return defaultValue;
     }
 
-    KRYS_NODISCARD bool CanPaste(LocalFrame *, bool defaultValue) const noexcept final
+    KRYS_NODISCARD bool CanPaste(boo::Frame *, bool defaultValue) const noexcept final
     {
       return defaultValue;
     }
@@ -76,7 +76,7 @@ namespace krys::boo::tests
     bool InputMethodEnabled {false};
 
     // Abandons the composition if the selection changed for any reason but the input method's own action.
-    void RespondToChangedSelection(LocalFrame *frame) noexcept final
+    void RespondToChangedSelection(boo::Frame *frame) noexcept final
     {
       if (!frame || !frame->Document())
       {
@@ -387,22 +387,20 @@ namespace krys::boo::tests
   };
 
   /// @brief A document in a page whose editor client is a `TestEditorClient`, with a pasteboard strategy
-  /// that records writes, and the chrome client given, if any.
+  /// that records writes, and the Booey client given, if any.
   struct EditorFixture : style::tests::ResolverFixture
   {
-    RefPtr<Page> TestPage;
     TestEditorClient *Client {nullptr};
     RecordingPasteboardStrategy Pasteboard;
 
-    explicit EditorFixture(utf8_stringview markup, UniquePtr<ChromeClient> chromeClient = nullptr) noexcept
+    explicit EditorFixture(utf8_stringview markup, UniquePtr<BooeyClient> booeyClient = nullptr) noexcept
         : ResolverFixture(u8"<!DOCTYPE html><style>body{margin:0;font:10px/20px sans-serif}</style>"
                             + utf8_string(markup),
                           style::tests::WithView::No)
     {
       auto client = CreateUnique<TestEditorClient>();
       Client = client.get();
-      TestPage = Page::Create(krys::move(chromeClient), krys::move(client));
-      Frame = ShareRefPtr(&TestPage->MainFrame());
+      Frame = boo::Frame::Create(krys::move(booeyClient), krys::move(client));
       Frame->CreateView({400, 300});
       Frame->SetDocument(ShareRefPtr<boo::Document>(Document.get()));
       (void)Document->UpdateLayout();

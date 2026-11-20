@@ -8,15 +8,14 @@
 #include "Krystal.Booey/DOM/Nodes/Element.hpp"
 #include "Krystal.Booey/DOM/Nodes/ShadowRoot.hpp"
 #include "Krystal.Booey/HTML/EventLoop/EventLoop.hpp"
+#include "Krystal.Booey/HTML/Window.hpp"
 #include "Krystal.Booey/Input/EventHandler.hpp"
 #include "Krystal.Booey/Input/PlatformKeyboardEvent.hpp"
 #include "Krystal.Booey/Input/PlatformWheelEvent.hpp"
 #include "Krystal.Booey/Input/PointerCaptureController.hpp"
-#include "Krystal.Booey/Page/Clients/ChromeClient.hpp"
-#include "Krystal.Booey/Page/LocalDOMWindow.hpp"
-#include "Krystal.Booey/Page/LocalFrame.hpp"
-#include "Krystal.Booey/Page/LocalFrameView.hpp"
-#include "Krystal.Booey/Page/Page.hpp"
+#include "Krystal.Booey/Page/Clients/BooeyClient.hpp"
+#include "Krystal.Booey/Page/Frame.hpp"
+#include "Krystal.Booey/Page/FrameView.hpp"
 #include <string>
 
 namespace krys::boo::tests
@@ -28,7 +27,7 @@ namespace krys::boo::tests
 
     /// @brief A host that answers requests to lock the pointer with @p Result and to unlock it with
     /// @p UnlockResult, counting them.
-    class LockChromeClient final : public ChromeClient
+    class LockBooeyClient final : public BooeyClient
     {
     public:
       PointerLockRequestResult Result {PointerLockRequestResult::Success};
@@ -37,7 +36,7 @@ namespace krys::boo::tests
       uint32 Locks {0};
       uint32 Unlocks {0};
 
-      void AttachRootGraphicsLayer(LocalFrame &, GraphicsLayer *) noexcept final
+      void AttachRootGraphicsLayer(boo::Frame &, GraphicsLayer *) noexcept final
       {
       }
 
@@ -98,8 +97,7 @@ namespace krys::boo::tests
     /// events at its document.
     struct LockFixture : style::tests::ResolverFixture
     {
-      LockChromeClient *Chrome {nullptr};
-      RefPtr<Page> TestPage;
+      LockBooeyClient *Client {nullptr};
       List<std::string> Records;
 
       LockFixture() noexcept
@@ -107,10 +105,9 @@ namespace krys::boo::tests
                             u8"<div id=a></div><div id=b></div><div id=host></div>",
                             style::tests::WithView::No)
       {
-        auto chrome = CreateUnique<LockChromeClient>();
-        Chrome = chrome.get();
-        TestPage = Page::Create(krys::move(chrome));
-        Frame = ShareRefPtr(&TestPage->MainFrame());
+        auto client = CreateUnique<LockBooeyClient>();
+        Client = client.get();
+        Frame = boo::Frame::Create(krys::move(client));
         Frame->CreateView({200, 200});
         Frame->SetDocument(ShareRefPtr<boo::Document>(Document.get()));
         (void)Document->UpdateLayout();
@@ -127,7 +124,7 @@ namespace krys::boo::tests
 
       KRYS_NODISCARD PointerLockController &Controller() const noexcept
       {
-        return TestPage->GetPointerLockController();
+        return Frame->GetPointerLockController();
       }
 
       KRYS_NODISCARD EventHandler &Handler() noexcept
@@ -212,14 +209,14 @@ namespace krys::boo::tests
 
     // Without a user gesture, the request fails and the host isn't asked.
     CHECK(fixture.Lock(a) == "NotAllowedError");
-    CHECK(fixture.Chrome->Locks == 0);
+    CHECK(fixture.Client->Locks == 0);
     CHECK(fixture.Take() == Strings {"pointerlockerror:document"});
     CHECK(fixture.Document->PointerLockElement() == nullptr);
 
     // With one, the host locks the pointer.
     fixture.Activate();
     CHECK(fixture.Lock(a) == "ok");
-    CHECK(fixture.Chrome->Locks == 1);
+    CHECK(fixture.Client->Locks == 1);
     CHECK(fixture.Take() == Strings {"pointerlockchange:document"});
     CHECK(fixture.Controller().IsLocked());
     CHECK(fixture.Document->PointerLockElement().get() == &a);
@@ -240,7 +237,7 @@ namespace krys::boo::tests
 
     // Moving the lock to another element of the document needs no host.
     CHECK(fixture.Lock(b) == "ok");
-    CHECK(fixture.Chrome->Locks == 1);
+    CHECK(fixture.Client->Locks == 1);
     CHECK(fixture.Take() == Strings {"pointerlockchange:document"});
     CHECK(fixture.Document->PointerLockElement().get() == &b);
 
@@ -248,14 +245,14 @@ namespace krys::boo::tests
     {
       fixture.Document->ExitPointerLock();
       fixture.Run();
-      CHECK(fixture.Chrome->Unlocks == 1);
+      CHECK(fixture.Client->Unlocks == 1);
       CHECK(fixture.Take() == Strings {"pointerlockchange:document"});
       CHECK_FALSE(fixture.Controller().IsLocked());
       CHECK(fixture.Document->PointerLockElement() == nullptr);
 
       fixture.Deactivate();
       CHECK(fixture.Lock(a) == "ok");
-      CHECK(fixture.Chrome->Locks == 2);
+      CHECK(fixture.Client->Locks == 2);
       CHECK(fixture.Take() == Strings {"pointerlockchange:document"});
     }
 
@@ -266,7 +263,7 @@ namespace krys::boo::tests
                                                              u8"Escape", u8"U+001B", 27, false, false, false,
                                                              {}, MonotonicTime::Now()));
       fixture.Run();
-      CHECK(fixture.Chrome->Unlocks == 1);
+      CHECK(fixture.Client->Unlocks == 1);
       CHECK(fixture.Take() == Strings {"pointerlockchange:document"});
       CHECK_FALSE(fixture.Controller().IsLocked());
 
@@ -278,7 +275,7 @@ namespace krys::boo::tests
     {
       b.Remove();
       fixture.Run();
-      CHECK(fixture.Chrome->Unlocks == 1);
+      CHECK(fixture.Client->Unlocks == 1);
       CHECK(fixture.Take() == Strings {"pointerlockchange:document"});
       CHECK_FALSE(fixture.Controller().IsLocked());
       CHECK(fixture.Controller().GetElement() == nullptr);
@@ -307,8 +304,8 @@ namespace krys::boo::tests
       REQUIRE_FALSE(b.SetPointerCapture(MousePointerId).HasException());
       (void)fixture.Handler().MouseMoved(LockFixture::Mouse(Type::MouseMoved, 50, 25, {}, 1));
       (void)fixture.Take();
-      CHECK(fixture.TestPage->GetPointerCaptureController().PointerCaptureElement(fixture.Document.get(),
-                                                                                  MousePointerId)
+      CHECK(fixture.Frame->GetPointerCaptureController().PointerCaptureElement(fixture.Document.get(),
+                                                                               MousePointerId)
             == &b);
 
       // As if releasePointerCapture() were called, but the locked pointer's events don't process the release,
@@ -317,19 +314,19 @@ namespace krys::boo::tests
       CHECK(fixture.Lock(a) == "ok");
       CHECK(fixture.Take() == Strings {"lostpointercapture:b", "pointerlockchange:document"});
       CHECK_FALSE(b.HasPointerCapture(MousePointerId));
-      CHECK_FALSE(fixture.TestPage->GetPointerCaptureController().PointerCaptureElement(
-        fixture.Document.get(), MousePointerId));
+      CHECK_FALSE(fixture.Frame->GetPointerCaptureController().PointerCaptureElement(fixture.Document.get(),
+                                                                                     MousePointerId));
     }
 
     SECTION("a host that doesn't lock the pointer")
     {
-      fixture.Chrome->Result = PointerLockRequestResult::Failure;
+      fixture.Client->Result = PointerLockRequestResult::Failure;
       fixture.Activate();
       CHECK(fixture.Lock(a) == "WrongDocumentError");
       CHECK(fixture.Take() == Strings {"pointerlockerror:document"});
       CHECK(fixture.Controller().GetElement() == nullptr);
 
-      fixture.Chrome->Result = PointerLockRequestResult::Unsupported;
+      fixture.Client->Result = PointerLockRequestResult::Unsupported;
       CHECK(fixture.Lock(a) == "NotSupportedError");
       CHECK(fixture.Take() == Strings {"pointerlockerror:document"});
       CHECK(fixture.Controller().GetElement() == nullptr);
@@ -341,17 +338,17 @@ namespace krys::boo::tests
       auto element = fixture.Document->CreateElement(u8"div").ReleaseValue();
       CHECK(fixture.Lock(*element) == "WrongDocumentError");
       CHECK(fixture.Take() == Strings {"pointerlockerror:document"});
-      CHECK(fixture.Chrome->Locks == 0);
+      CHECK(fixture.Client->Locks == 0);
     }
 
     SECTION("unadjusted movement, with a mouse")
     {
       fixture.Activate();
-      fixture.Chrome->Mouse = false;
+      fixture.Client->Mouse = false;
       CHECK(fixture.Lock(a, {.UnadjustedMovement = true}) == "NotSupportedError");
       CHECK(fixture.Take() == Strings {"pointerlockerror:document"});
 
-      fixture.Chrome->Mouse = true;
+      fixture.Client->Mouse = true;
       CHECK(fixture.Lock(a, {.UnadjustedMovement = true}) == "ok");
       (void)fixture.Take();
       auto move = LockFixture::Mouse(Type::MouseMoved, 0, 0, {6, 4});

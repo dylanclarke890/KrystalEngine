@@ -25,16 +25,16 @@
 #include "Krystal.Booey/DOM/Events/EventNames.hpp"
 #include "Krystal.Booey/DOM/Nodes/Document.hpp"
 #include "Krystal.Booey/Editing/Editor.hpp"
+#include "Krystal.Booey/HTML/Window.hpp"
 #include "Krystal.Booey/Input/LegacyKeyCodes.hpp"
-#include "Krystal.Booey/Page/LocalDOMWindow.hpp"
-#include "Krystal.Booey/Page/LocalFrame.hpp"
+#include "Krystal.Booey/Page/Frame.hpp"
 #include "Krystal.Core/Strings/CodePointIterator.hpp"
 
 namespace krys::boo
 {
   namespace
   {
-    KRYS_NODISCARD bool ViewIsCompositing(const LocalDOMWindow *view) noexcept
+    KRYS_NODISCARD bool ViewIsCompositing(const Window *view) noexcept
     {
       if (!view)
       {
@@ -117,7 +117,7 @@ namespace krys::boo
     _createTime = key.Timestamp();
   }
 
-  Ref<KeyboardEvent> KeyboardEvent::Create(const PlatformKeyboardEvent &key, LocalDOMWindow *view) noexcept
+  Ref<KeyboardEvent> KeyboardEvent::Create(const PlatformKeyboardEvent &key, Window *view) noexcept
   {
     UIEventInit init;
     init.View = view;
@@ -129,9 +129,9 @@ namespace krys::boo
     return event;
   }
 
-  void KeyboardEvent::InitKeyboardEvent(DOMStringAtom type, bool canBubble, bool cancelable,
-                                        LocalDOMWindow *view, DOMStringView keyIdentifier, uint32 location,
-                                        bool ctrlKey, bool altKey, bool shiftKey, bool metaKey) noexcept
+  void KeyboardEvent::InitKeyboardEvent(DOMStringAtom type, bool canBubble, bool cancelable, Window *view,
+                                        DOMStringView keyIdentifier, uint32 location, bool ctrlKey,
+                                        bool altKey, bool shiftKey, bool metaKey) noexcept
   {
     if (_dispatched)
     {

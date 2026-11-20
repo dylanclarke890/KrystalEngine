@@ -55,6 +55,7 @@
 #include "Krystal.Booey/HTML/Elements/HTMLHtmlElement.hpp"
 #include "Krystal.Booey/HTML/Elements/HTMLInputElement.hpp"
 #include "Krystal.Booey/HTML/EventLoop/EventLoop.hpp"
+#include "Krystal.Booey/HTML/Window.hpp"
 #include "Krystal.Booey/Input/AutoscrollController.hpp"
 #include "Krystal.Booey/Input/MouseEventWithHitTestResults.hpp"
 #include "Krystal.Booey/Input/PointerCaptureController.hpp"
@@ -63,10 +64,8 @@
 #include "Krystal.Booey/Loader/Cache/CachedImage.hpp"
 #include "Krystal.Booey/Page/Drag/DragController.hpp"
 #include "Krystal.Booey/Page/Drag/DragState.hpp"
-#include "Krystal.Booey/Page/LocalDOMWindow.hpp"
-#include "Krystal.Booey/Page/LocalFrame.hpp"
-#include "Krystal.Booey/Page/LocalFrameView.hpp"
-#include "Krystal.Booey/Page/Page.hpp"
+#include "Krystal.Booey/Page/Frame.hpp"
+#include "Krystal.Booey/Page/FrameView.hpp"
 #include "Krystal.Booey/Page/Scrolling/ScrollLatchingController.hpp"
 #include "Krystal.Booey/Page/Settings.hpp"
 #include "Krystal.Booey/Platform/Pasteboard/Pasteboard.hpp"
@@ -140,7 +139,7 @@ namespace krys::boo
       return element;
     }
 
-    KRYS_NODISCARD PointD DocumentPointForWindowPoint(LocalFrame &frame, const PointD &windowPoint) noexcept
+    KRYS_NODISCARD PointD DocumentPointForWindowPoint(Frame &frame, const PointD &windowPoint) noexcept
     {
       auto *view = frame.View();
       if (!view)
@@ -237,7 +236,7 @@ namespace krys::boo
     }
 
     KRYS_NODISCARD Scrollbar *ScrollbarForMouseEvent(const MouseEventWithHitTestResults &mouseEvent,
-                                                     LocalFrameView *view) noexcept
+                                                     FrameView *view) noexcept
     {
       if (view)
       {
@@ -263,7 +262,7 @@ namespace krys::boo
     }
   }
 
-  EventHandler::EventHandler(LocalFrame &frame) noexcept
+  EventHandler::EventHandler(Frame &frame) noexcept
       : _frame(frame), _autoscrollController(CreateUnique<AutoscrollController>()),
         _fakeMouseMoveEventTimer(*this, &EventHandler::FakeMouseMoveEventTimerFired),
         _hoverTimer(*this, &EventHandler::HoverTimerFired)
@@ -474,7 +473,7 @@ namespace krys::boo
   bool EventHandler::HandleMousePressEvent(const PlatformMouseEvent &platformMouseEvent) noexcept
   {
     Ref frame = ShareRef(_frame);
-    RefPtr<LocalFrameView> protectedView = ShareRefPtr(frame->View());
+    RefPtr<FrameView> protectedView = ShareRefPtr(frame->View());
 
     // FIXME: Page overlays and synthetic touch events.
 
@@ -485,13 +484,10 @@ namespace krys::boo
       window->NotifyActivated();
     }
 
-    if (auto *page = frame->GetPage())
+    if (auto &pointerLockController = frame->GetPointerLockController(); pointerLockController.IsLocked())
     {
-      if (auto &pointerLockController = page->GetPointerLockController(); pointerLockController.IsLocked())
-      {
-        pointerLockController.DispatchLockedMouseEvent(platformMouseEvent, event_names::MouseDown);
-        return true;
-      }
+      pointerLockController.DispatchLockedMouseEvent(platformMouseEvent, event_names::MouseDown);
+      return true;
     }
 
     CancelFakeMouseMoveEvent();
@@ -616,12 +612,12 @@ namespace krys::boo
   bool EventHandler::MouseMoved(const PlatformMouseEvent &event) noexcept
   {
     Ref frame = ShareRef(_frame);
-    RefPtr<LocalFrameView> protectedView = ShareRefPtr(frame->View());
+    RefPtr<FrameView> protectedView = ShareRefPtr(frame->View());
 
     // The longest a move took to handle.
     auto start = MonotonicTime::Now();
 
-    // FIXME: Page overlays, and telling the chrome the mouse moved over an element.
+    // FIXME: Page overlays, and telling the Booey client the mouse moved over an element.
     HitTestResult hitTestResult;
     bool result = HandleMouseMoveEvent(event, &hitTestResult);
 
@@ -635,17 +631,14 @@ namespace krys::boo
     CancelFakeMouseMoveEvent();
 
     Ref frame = ShareRef(_frame);
-    RefPtr<LocalFrameView> protectedView = ShareRefPtr(frame->View());
+    RefPtr<FrameView> protectedView = ShareRefPtr(frame->View());
 
     // FIXME: Synthetic touch events, hover timers, fake mouse moves and frame set resizing.
 
-    if (auto *page = frame->GetPage())
+    if (auto &pointerLockController = frame->GetPointerLockController(); pointerLockController.IsLocked())
     {
-      if (auto &pointerLockController = page->GetPointerLockController(); pointerLockController.IsLocked())
-      {
-        pointerLockController.DispatchLockedMouseEvent(platformMouseEvent, event_names::MouseMove);
-        return true;
-      }
+      pointerLockController.DispatchLockedMouseEvent(platformMouseEvent, event_names::MouseMove);
+      return true;
     }
 
     SetLastKnownMousePosition(platformMouseEvent.Position(), platformMouseEvent.GlobalPosition());
@@ -804,7 +797,7 @@ namespace krys::boo
                                       FireMouseOverOut::No);
     }
 
-    // FIXME: Telling the chrome client about the click (didDispatchClickEvent), once it wants to know.
+    // FIXME: Telling the Booey client about the click (didDispatchClickEvent), once it wants to know.
     return swallowed;
   }
 
@@ -825,17 +818,14 @@ namespace krys::boo
   bool EventHandler::HandleMouseReleaseEvent(const PlatformMouseEvent &platformMouseEvent) noexcept
   {
     Ref frame = ShareRef(_frame);
-    RefPtr<LocalFrameView> protectedView = ShareRefPtr(frame->View());
+    RefPtr<FrameView> protectedView = ShareRefPtr(frame->View());
 
     frame->Document()->Selection().SetCaretBlinkingSuspended(false);
 
-    if (auto *page = frame->GetPage())
+    if (auto &pointerLockController = frame->GetPointerLockController(); pointerLockController.IsLocked())
     {
-      if (auto &pointerLockController = page->GetPointerLockController(); pointerLockController.IsLocked())
-      {
-        pointerLockController.DispatchLockedMouseEvent(platformMouseEvent, event_names::MouseUp);
-        return true;
-      }
+      pointerLockController.DispatchLockedMouseEvent(platformMouseEvent, event_names::MouseUp);
+      return true;
     }
 
     // FIXME: Page overlays, synthetic touch events and user gestures.
@@ -1266,15 +1256,12 @@ namespace krys::boo
 
     if (initialKeyEvent.GetType() == Type::KeyDown && initialKeyEvent.Key() == u8"Escape")
     {
-      if (auto *page = _frame.GetPage(); page && page->GetPointerLockController().GetElement())
+      if (_frame.GetPointerLockController().GetElement())
       {
-        page->GetPointerLockController().RequestPointerUnlockAndForceCursorVisible();
+        _frame.GetPointerLockController().RequestPointerUnlockAndForceCursorVisible();
       }
       // Escape hides any validation message.
-      if (auto *page = _frame.GetPage())
-      {
-        page->GetChromeClient().HideAnyValidationMessage();
-      }
+      _frame.GetBooeyClient().HideAnyValidationMessage();
     }
 
     // Check for cases where we are too early for events -- possible unmatched key up from pressing return in
@@ -1568,7 +1555,7 @@ namespace krys::boo
       return true;
     }
 
-    RefPtr<LocalFrameView> view = ShareRefPtr(_frame.View());
+    RefPtr<FrameView> view = ShareRefPtr(_frame.View());
     if (!view)
     {
       return false;
@@ -1694,7 +1681,7 @@ namespace krys::boo
       return true;
     }
 
-    RefPtr<LocalFrameView> view = ShareRefPtr(frame->View());
+    RefPtr<FrameView> view = ShareRefPtr(frame->View());
     return view && view->Scroll(direction, granularity);
   }
 
@@ -1711,7 +1698,7 @@ namespace krys::boo
       return true;
     }
 
-    RefPtr<LocalFrameView> view = ShareRefPtr(frame->View());
+    RefPtr<FrameView> view = ShareRefPtr(frame->View());
     return view && view->LogicalScroll(direction, granularity, animated);
   }
 
@@ -1750,15 +1737,9 @@ namespace krys::boo
       return;
     }
 
-    auto *page = _frame.GetPage();
-    if (!page)
-    {
-      return;
-    }
-
-    // FIXME: Whether the chrome sets cursors (supportsSettingCursor).
+    // FIXME: Whether the Booey client sets cursors (supportsSettingCursor).
     _hasScheduledCursorUpdate = true;
-    page->ScheduleRenderingUpdate({RenderingUpdateStep::CursorUpdate});
+    _frame.ScheduleRenderingUpdate({RenderingUpdateStep::CursorUpdate});
   }
 
   void EventHandler::UpdateCursorIfNeeded() noexcept
@@ -1781,7 +1762,7 @@ namespace krys::boo
       return;
     }
 
-    // FIXME: Whether the chrome wants fake mouse moves (shouldDispatchFakeMouseMoveEvents).
+    // FIXME: Whether the Booey client wants fake mouse moves (shouldDispatchFakeMouseMoveEvents).
 
     // If the content has ever taken longer than fakeMouseMoveShortInterval we
     // reschedule the timer and use a longer time. This will cause the content
@@ -1832,7 +1813,7 @@ namespace krys::boo
 
     // Nothing is shown under the mouse in a hidden page. (Unlike WebKit, a page whose view isn't focused
     // still gets them, as it does real mouse moves.)
-    if (auto *page = frame->GetPage(); page && !page->IsVisible())
+    if (!frame->IsVisible())
     {
       return;
     }
@@ -1901,9 +1882,9 @@ namespace krys::boo
     UpdateCursor(*view, result, shiftKey);
   }
 
-  void EventHandler::UpdateCursor(LocalFrameView &view, const HitTestResult &result, bool shiftKey) noexcept
+  void EventHandler::UpdateCursor(FrameView &view, const HitTestResult &result, bool shiftKey) noexcept
   {
-    // FIXME: Telling the view, and through it the chrome, to set the cursor; until then the host reads
+    // FIXME: Telling the view, and through it the Booey client, to set the cursor; until then the host reads
     // CurrentMouseCursor().
     (void)view;
     if (auto optionalCursor = SelectCursor(result, shiftKey))
@@ -1988,7 +1969,7 @@ namespace krys::boo
         }
         auto size = image->Size();
         // Limit the size of cursors (in UI pixels) so that they cannot be used to cover UI elements in
-        // chrome.
+        // the host's UI.
         size.Scale(1 / scale);
         if (size.Width() > MaximumCursorSize || size.Height() > MaximumCursorSize)
         {
@@ -2111,9 +2092,9 @@ namespace krys::boo
 
   void EventHandler::SetFrameWasScrolledByUser() noexcept
   {
-    if (RefPtr<LocalFrameView> view = ShareRefPtr(_frame.View()))
+    if (RefPtr<FrameView> view = ShareRefPtr(_frame.View()))
     {
-      view->SetLastUserScrollType(LocalFrameView::UserScrollType::Explicit);
+      view->SetLastUserScrollType(FrameView::UserScrollType::Explicit);
     }
   }
 
@@ -2177,19 +2158,16 @@ namespace krys::boo
       return false;
     }
 
-    RefPtr<LocalFrameView> view = ShareRefPtr(frame->View());
+    RefPtr<FrameView> view = ShareRefPtr(frame->View());
     if (!view)
     {
       return false;
     }
 
-    if (auto *page = frame->GetPage())
+    if (auto &pointerLockController = frame->GetPointerLockController(); pointerLockController.IsLocked())
     {
-      if (auto &pointerLockController = page->GetPointerLockController(); pointerLockController.IsLocked())
-      {
-        pointerLockController.DispatchLockedWheelEvent(event);
-        return true;
-      }
+      pointerLockController.DispatchLockedWheelEvent(event);
+      return true;
     }
 
     _isHandlingWheelEvent = true;
@@ -2198,11 +2176,8 @@ namespace krys::boo
     SetLastKnownMousePosition(PointD(event.Position().X(), event.Position().Y()),
                               PointD(event.GlobalPosition().X(), event.GlobalPosition().Y()));
 
-    if (auto *page = frame->GetPage())
-    {
-      page->GetScrollLatchingController().ReceivedWheelEvent(event);
-      page->GetWheelEventDeltaFilter().UpdateFromEvent(event);
-    }
+    frame->GetScrollLatchingController().ReceivedWheelEvent(event);
+    frame->GetWheelEventDeltaFilter().UpdateFromEvent(event);
 
     HitTestRequest request;
     HitTestResult result(LayoutPoint(view->WindowToContents(event.Position())));
@@ -2245,21 +2220,18 @@ namespace krys::boo
       return false;
     }
 
-    if (auto *page = frame->GetPage())
+    WeakPtr<ScrollableArea> latchedScroller;
+    if (!frame->GetScrollLatchingController().LatchingAllowsScrolling(latchedScroller))
     {
-      WeakPtr<ScrollableArea> latchedScroller;
-      if (!page->GetScrollLatchingController().LatchingAllowsScrolling(latchedScroller))
-      {
-        _isHandlingWheelEvent = false;
-        return false;
-      }
+      _isHandlingWheelEvent = false;
+      return false;
     }
 
     // The view takes a gesture's steps on its axis too, as the boxes do.
     auto delta = event.Delta();
-    if (auto *page = frame->GetPage(); page && WheelEventDeltaFilter::ShouldApplyFilteringForEvent(event))
+    if (WheelEventDeltaFilter::ShouldApplyFilteringForEvent(event))
     {
-      delta = page->GetWheelEventDeltaFilter().FilteredDelta();
+      delta = frame->GetWheelEventDeltaFilter().FilteredDelta();
     }
     auto filteredDelta = view->DeltaForPropagation(delta);
     if (view->ShouldBlockScrollPropagation(filteredDelta))
@@ -2283,9 +2255,8 @@ namespace krys::boo
 
     // A gesture's start moves nothing, so its scroller is found at its first step, from the element it
     // started over rather than the one the pointer has reached.
-    auto *page = _frame.GetPage();
-    if (auto *latchedElement = page && wheelEvent.UseLatchedEventElement()
-                                 ? page->GetScrollLatchingController().LatchedElement()
+    if (auto *latchedElement = wheelEvent.UseLatchedEventElement()
+                                 ? _frame.GetScrollLatchingController().LatchedElement()
                                  : nullptr)
     {
       wheelEventTarget = ShareRefPtr(latchedElement);
@@ -2322,11 +2293,8 @@ namespace krys::boo
       }
     }
 
-    if (page)
-    {
-      page->GetScrollLatchingController().UpdateAndFetchLatchingState(*view, wheelEvent, wheelEventTarget,
-                                                                      scrollableArea);
-    }
+    _frame.GetScrollLatchingController().UpdateAndFetchLatchingState(*view, wheelEvent, wheelEventTarget,
+                                                                     scrollableArea);
   }
 
   bool EventHandler::ProcessWheelEventForScrolling(const PlatformWheelEvent &event,
@@ -2334,7 +2302,7 @@ namespace krys::boo
   {
     // We do another check on the frame view because the event handler can run JS which results in the frame
     // getting destroyed.
-    RefPtr<LocalFrameView> view = ShareRefPtr(_frame.View());
+    RefPtr<FrameView> view = ShareRefPtr(_frame.View());
 
     // A gesture latched to a box scrolled it in the wheel event's default action, and goes no further.
     if (event.UseLatchedEventElement() && scrollableArea && scrollableArea.get() != view.get())
@@ -2350,10 +2318,7 @@ namespace krys::boo
 
   void EventHandler::ClearLatchedState() noexcept
   {
-    if (auto *page = _frame.GetPage())
-    {
-      page->GetScrollLatchingController().Clear();
-    }
+    _frame.GetScrollLatchingController().Clear();
   }
 
   bool EventHandler::HandleWheelEventInAppropriateEnclosingBox(Node *startNode, const WheelEvent &wheelEvent,
@@ -2471,15 +2436,14 @@ namespace krys::boo
       filteredPlatformDelta = platformEvent->Delta();
     }
 
-    auto *page = _frame.GetPage();
     auto &platformEvent = wheelEvent.UnderlyingPlatformEvent();
-    if (page && platformEvent && WheelEventDeltaFilter::ShouldApplyFilteringForEvent(*platformEvent))
+    if (platformEvent && WheelEventDeltaFilter::ShouldApplyFilteringForEvent(*platformEvent))
     {
-      filteredPlatformDelta = page->GetWheelEventDeltaFilter().FilteredDelta();
+      filteredPlatformDelta = _frame.GetWheelEventDeltaFilter().FilteredDelta();
     }
 
     WeakPtr<ScrollableArea> latchedScroller;
-    if (page && !page->GetScrollLatchingController().LatchingAllowsScrolling(latchedScroller))
+    if (!_frame.GetScrollLatchingController().LatchingAllowsScrolling(latchedScroller))
     {
       return false;
     }
@@ -2515,7 +2479,7 @@ namespace krys::boo
   {
     Ref frame = ShareRef(_frame);
     RefPtr<boo::Document> document = ShareRefPtr(frame->Document());
-    RefPtr<LocalFrameView> view = ShareRefPtr(frame->View());
+    RefPtr<FrameView> view = ShareRefPtr(frame->View());
     if (!document || !view || (!wheelEvent.DeltaX() && !wheelEvent.DeltaY()))
     {
       return false;
@@ -2639,8 +2603,8 @@ namespace krys::boo
       return CharacterCount(*range, TextIteratorBehavior::EmitsCharactersBetweenAllVisiblePositions);
     }
 
-    KRYS_NODISCARD AppendTrailingWhitespace AppendTrailingWhitespaceForEvent(
-      const LocalFrame &frame, const MouseEventWithHitTestResults &event) noexcept
+    KRYS_NODISCARD AppendTrailingWhitespace
+      AppendTrailingWhitespaceForEvent(const Frame &frame, const MouseEventWithHitTestResults &event) noexcept
     {
       auto *document = frame.Document();
       return event.Event().ClickCount() == 2 && document
@@ -2797,16 +2761,16 @@ namespace krys::boo
 
   bool EventHandler::SendContextMenuEvent(const PlatformMouseEvent &event) noexcept
   {
-    Ref<LocalFrame> frame = ShareRef(_frame);
+    Ref<Frame> frame = ShareRef(_frame);
 
     // Context menus should not be handled while pointer is locked.
-    if (auto *page = frame->GetPage(); !page || page->GetPointerLockController().IsLocked())
+    if (frame->GetPointerLockController().IsLocked())
     {
       return false;
     }
 
     RefPtr<boo::Document> doc = ShareRefPtr(frame->Document());
-    RefPtr<LocalFrameView> view = ShareRefPtr(frame->View());
+    RefPtr<FrameView> view = ShareRefPtr(frame->View());
     if (!doc || !view)
     {
       return false;
@@ -2857,7 +2821,7 @@ namespace krys::boo
       }
     }
 
-    KRYS_NODISCARD HitTestResult HitTestResultInFrame(LocalFrame *frame, const LayoutPoint &point,
+    KRYS_NODISCARD HitTestResult HitTestResultInFrame(Frame *frame, const LayoutPoint &point,
                                                       EnumSet<HitTestRequest::Type> hitType) noexcept
     {
       HitTestResult result(point);
@@ -2893,12 +2857,9 @@ namespace krys::boo
     // The pointers of the touches that ended before are forgotten, so a later touch with the same id starts
     // afresh. They're kept until now so the host's tap after a touch ends sees whether the touch's
     // pointerdown was cancelled.
-    if (auto *page = frame->GetPage())
+    for (auto pointerId : std::exchange(_endedTouchPointerIds, {}))
     {
-      for (auto pointerId : std::exchange(_endedTouchPointerIds, {}))
-      {
-        page->GetPointerCaptureController().TouchWithIdentifierWasRemoved(pointerId);
-      }
+      frame->GetPointerCaptureController().TouchWithIdentifierWasRemoved(pointerId);
     }
 
     // First build up the lists to use for the 'touches', 'targetTouches' and 'changedTouches' attributes
@@ -3068,23 +3029,19 @@ namespace krys::boo
       {
         continue;
       }
-      RefPtr<LocalFrame> targetFrame = ShareRefPtr(document->Frame());
+      RefPtr<Frame> targetFrame = ShareRefPtr(document->Frame());
       if (!targetFrame || !targetFrame->View())
       {
         continue;
       }
 
       // FIXME: Pass the touch delta for pointermove events by remembering the position per pointer.
-      if (auto *page = targetFrame->GetPage())
+      auto &pointerCaptureController = targetFrame->GetPointerCaptureController();
+      pointerCaptureController.DispatchEventForTouchAtIndex(*touchTarget, event, index, !index,
+                                                            targetFrame->View(), {0, 0});
+      if (pointState == PlatformTouchPoint::TouchReleased || pointState == PlatformTouchPoint::TouchCancelled)
       {
-        auto &pointerCaptureController = page->GetPointerCaptureController();
-        pointerCaptureController.DispatchEventForTouchAtIndex(*touchTarget, event, index, !index,
-                                                              targetFrame->View(), {0, 0});
-        if (pointState == PlatformTouchPoint::TouchReleased
-            || pointState == PlatformTouchPoint::TouchCancelled)
-        {
-          _endedTouchPointerIds.push_back(PointerEvent::PointerIdForTouch(point));
-        }
+        _endedTouchPointerIds.push_back(PointerEvent::PointerIdForTouch(point));
       }
 
       // pagePoint should always be relative to the target elements containing frame.
@@ -3235,7 +3192,7 @@ namespace krys::boo
   // FIXME: The editor client's shouldAllowSingleClickToChangeSelection, with the editor.
   bool EventHandler::HandleMousePressEventSingleClick(const MouseEventWithHitTestResults &event) noexcept
   {
-    Ref<LocalFrame> frame = ShareRef(_frame);
+    Ref<Frame> frame = ShareRef(_frame);
     (void)frame->Document()->UpdateLayoutIgnorePendingStylesheets();
     RefPtr<Node> targetNode = ShareRefPtr(event.TargetNode());
     if (!targetNode || !targetNode->Renderer() || !MouseDownMayStartSelect())
@@ -3352,7 +3309,7 @@ namespace krys::boo
     return UpdateSelectionForMouseDownDispatchingSelectStart(targetNode.get(), newSelection, granularity);
   }
 
-  // FIXME: The chrome client's shouldUseMouseEventForSelection and quirks, once there are any. (There's no
+  // FIXME: The Booey client's shouldUseMouseEventForSelection and quirks, once there are any. (There's no
   // image overlay text; see DIFFERENCES.md.)
   bool EventHandler::CanMouseDownStartSelect(const MouseEventWithHitTestResults &event) noexcept
   {
@@ -3374,7 +3331,7 @@ namespace krys::boo
   // (No widgets, as frames and plug-ins aren't planned, and no image overlay text; see DIFFERENCES.md.)
   bool EventHandler::HandleMousePressEvent(const MouseEventWithHitTestResults &event) noexcept
   {
-    Ref<LocalFrame> frame = ShareRef(_frame);
+    Ref<Frame> frame = ShareRef(_frame);
 
     // Reset drag state.
     SetDragStateSource(nullptr);
@@ -3487,7 +3444,7 @@ namespace krys::boo
       return false;
     }
 
-    Ref<LocalFrame> frame = ShareRef(_frame);
+    Ref<Frame> frame = ShareRef(_frame);
 
     if (HandleDrag(event, checkDragHysteresis))
     {
@@ -3706,7 +3663,7 @@ namespace krys::boo
       StopAutoscrollTimer();
     }
 
-    Ref<LocalFrame> frame = ShareRef(_frame);
+    Ref<Frame> frame = ShareRef(_frame);
 
     // Used to prevent mouseMoveEvent from initiating a drag before
     // the mouse is pressed again.
@@ -3829,12 +3786,6 @@ namespace krys::boo
 
   EnumSet<DragSourceAction> EventHandler::UpdateDragSourceActionsAllowed() const noexcept
   {
-    auto *page = _frame.GetPage();
-    if (!page)
-    {
-      return {};
-    }
-
     auto *view = _frame.View();
     if (!view)
     {
@@ -3842,7 +3793,7 @@ namespace krys::boo
     }
 
     // The frame's view is the root view.
-    return page->GetDragController().DelegateDragSourceAction(
+    return _frame.GetDragController().DelegateDragSourceAction(
       view->ContentsToWindow(RoundedPointI(_mouseDownContentsPosition)));
   }
 
@@ -3868,12 +3819,6 @@ namespace krys::boo
       return false;
     }
 
-    auto *page = _frame.GetPage();
-    if (!page)
-    {
-      return false;
-    }
-
     (void)UpdateDragSourceActionsAllowed();
     HitTestResult result(LayoutPoint(view->WindowToContents(FlooredPointI(event.Position()))));
     document->HitTest(
@@ -3883,7 +3828,7 @@ namespace krys::boo
     DragState state;
     auto *targetElement = result.TargetElement();
     return targetElement
-           && page->GetDragController().DraggableElement(
+           && _frame.GetDragController().DraggableElement(
              &_frame, targetElement, RoundedPointI(result.GetHitTestLocation().Point()), state);
   }
 
@@ -3891,8 +3836,8 @@ namespace krys::boo
                                        const PlatformMouseEvent &event,
                                        dom::DataTransfer &dataTransfer) noexcept
   {
-    Ref<LocalFrame> frame = ShareRef(_frame);
-    RefPtr<LocalFrameView> view = ShareRefPtr(frame->View());
+    Ref<Frame> frame = ShareRef(_frame);
+    RefPtr<FrameView> view = ShareRefPtr(frame->View());
 
     // FIXME: We might want to dispatch a dragleave even if the view is gone.
     if (!view)
@@ -3964,7 +3909,7 @@ namespace krys::boo
                                     const Func<UniquePtr<Pasteboard>()> &makePasteboard,
                                     EnumSet<DragOperation> sourceOperationMask, bool draggingFiles) noexcept
   {
-    Ref<LocalFrame> frame = ShareRef(_frame);
+    Ref<Frame> frame = ShareRef(_frame);
     if (!frame->View())
     {
       return {};
@@ -4041,7 +3986,7 @@ namespace krys::boo
                                        EnumSet<DragOperation> sourceOperationMask,
                                        bool draggingFiles) noexcept
   {
-    Ref<LocalFrame> frame = ShareRef(_frame);
+    Ref<Frame> frame = ShareRef(_frame);
 
     if (RefPtr<Element> dragTarget = _dragTarget)
     {
@@ -4059,7 +4004,7 @@ namespace krys::boo
                                         EnumSet<DragOperation> sourceOperationMask,
                                         bool draggingFiles) noexcept
   {
-    Ref<LocalFrame> frame = ShareRef(_frame);
+    Ref<Frame> frame = ShareRef(_frame);
 
     bool preventedDefault = false;
     if (RefPtr<Element> dragTarget = _dragTarget)
@@ -4188,11 +4133,8 @@ namespace krys::boo
   bool EventHandler::DispatchDragStartEventOnSourceElement(dom::DataTransfer &dataTransfer) noexcept
   {
     Ref<Element> draggedElement = ShareRef(*DraggedElement());
-    if (auto *page = _frame.GetPage())
-    {
-      page->GetDragController().PrepareForDragStart(_frame, GetDragState().Type, *draggedElement,
-                                                    dataTransfer, RoundedPointI(_mouseDownContentsPosition));
-    }
+    _frame.GetDragController().PrepareForDragStart(_frame, GetDragState().Type, *draggedElement, dataTransfer,
+                                                   RoundedPointI(_mouseDownContentsPosition));
     return !DispatchDragEvent(event_names::DragStart, *draggedElement, _mouseDownEvent, dataTransfer)
            && !_frame.Document()->Selection().Selection().IsInPasswordField();
   }
@@ -4211,7 +4153,7 @@ namespace krys::boo
       return false;
     }
 
-    Ref<LocalFrame> frame = ShareRef(_frame);
+    Ref<Frame> frame = ShareRef(_frame);
     auto &dragState = GetDragState();
 
     // Careful that the drag starting logic stays in sync with EventMayStartDrag().
@@ -4225,13 +4167,10 @@ namespace krys::boo
         HitTestRequest(EnumSet<HitTestRequest::Type> {HitTestRequest::Type::ReadOnly,
                                                       HitTestRequest::Type::DisallowUserAgentShadowContent}),
         result);
-      if (auto *page = frame->GetPage())
-      {
-        SetDragStateSource(page->GetDragController()
-                             .DraggableElement(frame.get(), result.TargetElement(),
-                                               RoundedPointI(_mouseDownContentsPosition), dragState)
-                             .get());
-      }
+      SetDragStateSource(frame->GetDragController()
+                           .DraggableElement(frame.get(), result.TargetElement(),
+                                             RoundedPointI(_mouseDownContentsPosition), dragState)
+                           .get());
 
       if (!DraggedElement())
       {
@@ -4366,11 +4305,9 @@ namespace krys::boo
 
     if (_mouseDownMayStartDrag)
     {
-      auto *page = frame->GetPage();
-      _didStartDrag = page
-                      && page->GetDragController().StartDrag(
-                        *frame, dragState, sourceOperationMask, event.Event(),
-                        RoundedPointI(_mouseDownContentsPosition), hasNonDefaultPasteboardData);
+      _didStartDrag = frame->GetDragController().StartDrag(
+        *frame, dragState, sourceOperationMask, event.Event(), RoundedPointI(_mouseDownContentsPosition),
+        hasNonDefaultPasteboardData);
       // The host could re-enter this code and start another drag.
       if (_didStartDrag)
       {

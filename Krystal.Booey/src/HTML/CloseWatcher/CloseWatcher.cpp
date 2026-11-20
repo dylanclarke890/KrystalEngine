@@ -31,7 +31,7 @@
 #include "Krystal.Booey/DOM/Events/EventNames.hpp"
 #include "Krystal.Booey/DOM/Nodes/Document.hpp"
 #include "Krystal.Booey/HTML/CloseWatcher/CloseWatcherManager.hpp"
-#include "Krystal.Booey/Page/LocalDOMWindow.hpp"
+#include "Krystal.Booey/HTML/Window.hpp"
 
 namespace krys::boo::html
 {
@@ -142,7 +142,7 @@ namespace krys::boo::html
 
     // 4. Let window be closeWatcher's window.
     // 5. If window's associated Document is not fully active, then return true.
-    RefPtr<LocalDOMWindow> window = _document ? ShareRefPtr(_document->Window()) : nullptr;
+    RefPtr<Window> window = _document ? ShareRefPtr(_document->Window()) : nullptr;
     if (!window || !_document->IsFullyActive())
     {
       return true;

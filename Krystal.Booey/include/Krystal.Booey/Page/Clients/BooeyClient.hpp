@@ -47,25 +47,25 @@ namespace krys::boo
   class ColorChooserClient;
   class DataListSuggestionsClient;
   class DateTimeChooserClient;
+  class Frame;
   class GraphicsLayer;
   class GraphicsLayerFactory;
   class HTMLSelectElement;
-  class LocalFrame;
   class PopupMenuClient;
   class SVGImageElement;
 
   /// @brief What a page asks of its host: the window's side of the page, and its graphics.
-  // FIXME: The rest of the chrome client: tooltips, cursors, scrolling the host's view, search popups and the
+  // FIXME: The rest of the Booey client: tooltips, cursors, scrolling the host's view, search popups and the
   // other compositing hooks (layer flushes, compositing triggers, display refresh monitors), once there are
   // any.
-  class ChromeClient : public GraphicsClient
+  class BooeyClient : public GraphicsClient
   {
-    KRYS_NON_COPY_MOVABLE(ChromeClient);
+    KRYS_NON_COPY_MOVABLE(BooeyClient);
 
   public:
-    ChromeClient() noexcept = default;
+    BooeyClient() noexcept = default;
 
-    ~ChromeClient() noexcept override = default;
+    ~BooeyClient() noexcept override = default;
 
     /// @brief The page asks to be brought to the front (`window.focus()`); the host decides whether it is.
     virtual void Focus() noexcept
@@ -85,8 +85,8 @@ namespace krys::boo
       return false;
     }
 
-    /// @brief Whether this is the chrome client of an SVG image's page.
-    KRYS_NODISCARD virtual bool IsSVGImageChromeClient() const noexcept
+    /// @brief Whether this is the Booey client of an SVG image's page.
+    KRYS_NODISCARD virtual bool IsSVGImageBooeyClient() const noexcept
     {
       return false;
     }
@@ -124,7 +124,7 @@ namespace krys::boo
     }
 
     /// @brief Pass nullptr as the GraphicsLayer to detach the root layer.
-    virtual void AttachRootGraphicsLayer(LocalFrame &, GraphicsLayer *) noexcept = 0;
+    virtual void AttachRootGraphicsLayer(Frame &, GraphicsLayer *) noexcept = 0;
 
     /// @brief The factory the page's graphics layers come from; null when the host doesn't composite, so the
     /// page isn't composited.
@@ -237,7 +237,7 @@ namespace krys::boo
     /// @brief Shows the host's file picker for a file input in @p frame, answering @p chooser with the files
     /// the user chooses, or cancelling it, now or later; a host that doesn't override this has no file
     /// picker, so the choice is cancelled at once.
-    virtual void RunOpenPanel(LocalFrame &frame, FileChooser &chooser) noexcept
+    virtual void RunOpenPanel(Frame &frame, FileChooser &chooser) noexcept
     {
       (void)frame;
       chooser.Cancel();
@@ -376,11 +376,11 @@ namespace krys::boo
     }
   };
 
-  /// @brief The chrome client of a page that has no host.
-  class EmptyChromeClient final : public ChromeClient
+  /// @brief The Booey client of a page that has no host.
+  class EmptyBooeyClient final : public BooeyClient
   {
   public:
-    void AttachRootGraphicsLayer(LocalFrame &, GraphicsLayer *) noexcept final
+    void AttachRootGraphicsLayer(Frame &, GraphicsLayer *) noexcept final
     {
     }
   };

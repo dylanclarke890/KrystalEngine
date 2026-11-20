@@ -951,7 +951,7 @@ Status: reviewed (2026-11-01)
 ##### [7.4.6.4 Scrolling to a fragment](https://html.spec.whatwg.org/#scrolling-to-a-fragment)
 
 Status: reviewed (2026-11-01)
-> `LocalFrameView::ScrollToFragment` and `ScrollToAnchorFragment`, with `Document::FindAnchor` (which matches an `a` element's `name` ASCII case-insensitively in quirks mode; see `DIFFERENCES.md`). The scroll position is kept at the target while layout changes.
+> `FrameView::ScrollToFragment` and `ScrollToAnchorFragment`, with `Document::FindAnchor` (which matches an `a` element's `name` ASCII case-insensitively in quirks mode; see `DIFFERENCES.md`). The scroll position is kept at the target while layout changes.
 <!-- definitions: target-element top-of-the-document -->
 
 - [x] [scroll to the fragment](https://html.spec.whatwg.org/#scroll-to-the-fragment-identifier) — To scroll to the fragment given a Document document:

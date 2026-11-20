@@ -8,8 +8,7 @@
 #include "Krystal.Booey/HTML/EventLoop/EventLoop.hpp"
 #include "Krystal.Booey/HTML/Parser/DocumentParser.hpp"
 #include "Krystal.Booey/Loader/Cache/MemoryCache.hpp"
-#include "Krystal.Booey/Page/LocalFrame.hpp"
-#include "Krystal.Booey/Page/Page.hpp"
+#include "Krystal.Booey/Page/Frame.hpp"
 #include "Krystal.Booey/Platform/PlatformStrategies.hpp"
 #include "Krystal.Booey/Rendering/RenderElement.hpp"
 #include "Krystal.Booey/Rendering/Style/StyleImage.hpp"
@@ -193,8 +192,8 @@ namespace krys::boo::tests
     LoaderFixture loader;
     loader.Strategy.Resources[u8"file:///images/update.png"] = img::tests::images::PNG;
 
-    auto page = Page::Create();
-    auto &frame = page->MainFrame();
+    auto page = boo::Frame::Create();
+    auto &frame = *page;
     frame.CreateView({200, 100});
     auto document = CreateRef<HTMLDocument>();
     frame.SetDocument(ShareRefPtr<boo::Document>(document.get()));

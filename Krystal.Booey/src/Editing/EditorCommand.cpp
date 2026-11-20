@@ -36,8 +36,8 @@
 #include "Krystal.Booey/Infra/StringAlgorithms.hpp"
 #include "Krystal.Booey/Input/EventHandler.hpp"
 #include "Krystal.Booey/Page/Clients/EditorClient.hpp"
-#include "Krystal.Booey/Page/LocalFrame.hpp"
-#include "Krystal.Booey/Page/LocalFrameView.hpp"
+#include "Krystal.Booey/Page/Frame.hpp"
+#include "Krystal.Booey/Page/FrameView.hpp"
 #include "Krystal.Booey/Page/Settings.hpp"
 #include "Krystal.Booey/Platform/Scrolling/Scrollbar.hpp"
 #include "Krystal.Booey/Rendering/RenderBox.hpp"
@@ -52,14 +52,14 @@ namespace krys::boo
   class EditorInternalCommand
   {
   public:
-    bool (*Execute)(LocalFrame &, Event *, EditorCommandSource, utf8_stringview) noexcept;
-    bool (*IsSupportedFromDOM)(LocalFrame *) noexcept;
-    bool (*IsEnabled)(LocalFrame &, Event *, EditorCommandSource) noexcept;
+    bool (*Execute)(boo::Frame &, Event *, EditorCommandSource, utf8_stringview) noexcept;
+    bool (*IsSupportedFromDOM)(boo::Frame *) noexcept;
+    bool (*IsEnabled)(boo::Frame &, Event *, EditorCommandSource) noexcept;
     bool IsTextInsertion;
-    bool (*AllowExecutionWhenDisabled)(LocalFrame &, EditorCommandSource) noexcept;
+    bool (*AllowExecutionWhenDisabled)(boo::Frame &, EditorCommandSource) noexcept;
     /// @brief The command's state and value; null for a command without them.
-    TriState (*State)(LocalFrame &, Event *) noexcept {nullptr};
-    utf8_string (*Value)(LocalFrame &, Event *) noexcept {nullptr};
+    TriState (*State)(boo::Frame &, Event *) noexcept {nullptr};
+    utf8_string (*Value)(boo::Frame &, Event *) noexcept {nullptr};
   };
 
   namespace
@@ -67,12 +67,12 @@ namespace krys::boo
     constexpr bool IsNotTextInsertion = false;
     constexpr bool IsTextInsertion = true;
 
-    KRYS_NODISCARD LocalFrame &TargetFrame(LocalFrame &frame, Event *) noexcept
+    KRYS_NODISCARD boo::Frame &TargetFrame(boo::Frame &frame, Event *) noexcept
     {
       return frame;
     }
 
-    bool ExpandSelectionToGranularity(LocalFrame &frame, TextGranularity granularity) noexcept
+    bool ExpandSelectionToGranularity(boo::Frame &frame, TextGranularity granularity) noexcept
     {
       auto &frameSelection = frame.Document()->Selection();
       VisibleSelection selection = frameSelection.Selection();
@@ -94,7 +94,7 @@ namespace krys::boo
       return true;
     }
 
-    KRYS_NODISCARD uint32 VerticalScrollDistance(LocalFrame &frame) noexcept
+    KRYS_NODISCARD uint32 VerticalScrollDistance(boo::Frame &frame) noexcept
     {
       auto *focusedElement = frame.Document()->FocusedElement();
       if (!focusedElement)
@@ -118,7 +118,7 @@ namespace krys::boo
 
     // Execute command functions
 
-    bool ExecuteMakeTextWritingDirectionLeftToRight(LocalFrame &frame, Event *, EditorCommandSource,
+    bool ExecuteMakeTextWritingDirectionLeftToRight(boo::Frame &frame, Event *, EditorCommandSource,
                                                     utf8_stringview) noexcept
     {
       auto style = css::MutableStyleProperties::Create();
@@ -128,7 +128,7 @@ namespace krys::boo
       return true;
     }
 
-    bool ExecuteMakeTextWritingDirectionNatural(LocalFrame &frame, Event *, EditorCommandSource,
+    bool ExecuteMakeTextWritingDirectionNatural(boo::Frame &frame, Event *, EditorCommandSource,
                                                 utf8_stringview) noexcept
     {
       auto style = css::MutableStyleProperties::Create();
@@ -137,7 +137,7 @@ namespace krys::boo
       return true;
     }
 
-    bool ExecuteMakeTextWritingDirectionRightToLeft(LocalFrame &frame, Event *, EditorCommandSource,
+    bool ExecuteMakeTextWritingDirectionRightToLeft(boo::Frame &frame, Event *, EditorCommandSource,
                                                     utf8_stringview) noexcept
     {
       auto style = css::MutableStyleProperties::Create();
@@ -147,7 +147,7 @@ namespace krys::boo
       return true;
     }
 
-    bool ExecuteMoveBackward(LocalFrame &frame, Event *, EditorCommandSource, utf8_stringview) noexcept
+    bool ExecuteMoveBackward(boo::Frame &frame, Event *, EditorCommandSource, utf8_stringview) noexcept
     {
       (void)frame.Document()->Selection().Modify(FrameSelection::Alteration::Move,
                                                  SelectionDirection::Backward,
@@ -155,7 +155,7 @@ namespace krys::boo
       return true;
     }
 
-    bool ExecuteMoveBackwardAndModifySelection(LocalFrame &frame, Event *, EditorCommandSource,
+    bool ExecuteMoveBackwardAndModifySelection(boo::Frame &frame, Event *, EditorCommandSource,
                                                utf8_stringview) noexcept
     {
       (void)frame.Document()->Selection().Modify(FrameSelection::Alteration::Extend,
@@ -164,14 +164,14 @@ namespace krys::boo
       return true;
     }
 
-    bool ExecuteMoveDown(LocalFrame &frame, Event *, EditorCommandSource, utf8_stringview) noexcept
+    bool ExecuteMoveDown(boo::Frame &frame, Event *, EditorCommandSource, utf8_stringview) noexcept
     {
       return frame.Document()->Selection().Modify(FrameSelection::Alteration::Move,
                                                   SelectionDirection::Forward,
                                                   TextGranularity::LineGranularity, UserTriggered::Yes);
     }
 
-    bool ExecuteMoveDownAndModifySelection(LocalFrame &frame, Event *, EditorCommandSource,
+    bool ExecuteMoveDownAndModifySelection(boo::Frame &frame, Event *, EditorCommandSource,
                                            utf8_stringview) noexcept
     {
       (void)frame.Document()->Selection().Modify(FrameSelection::Alteration::Extend,
@@ -180,7 +180,7 @@ namespace krys::boo
       return true;
     }
 
-    bool ExecuteMoveForward(LocalFrame &frame, Event *, EditorCommandSource, utf8_stringview) noexcept
+    bool ExecuteMoveForward(boo::Frame &frame, Event *, EditorCommandSource, utf8_stringview) noexcept
     {
       (void)frame.Document()->Selection().Modify(FrameSelection::Alteration::Move,
                                                  SelectionDirection::Forward,
@@ -188,7 +188,7 @@ namespace krys::boo
       return true;
     }
 
-    bool ExecuteMoveForwardAndModifySelection(LocalFrame &frame, Event *, EditorCommandSource,
+    bool ExecuteMoveForwardAndModifySelection(boo::Frame &frame, Event *, EditorCommandSource,
                                               utf8_stringview) noexcept
     {
       (void)frame.Document()->Selection().Modify(FrameSelection::Alteration::Extend,
@@ -197,13 +197,13 @@ namespace krys::boo
       return true;
     }
 
-    bool ExecuteMoveLeft(LocalFrame &frame, Event *, EditorCommandSource, utf8_stringview) noexcept
+    bool ExecuteMoveLeft(boo::Frame &frame, Event *, EditorCommandSource, utf8_stringview) noexcept
     {
       return frame.Document()->Selection().Modify(FrameSelection::Alteration::Move, SelectionDirection::Left,
                                                   TextGranularity::CharacterGranularity, UserTriggered::Yes);
     }
 
-    bool ExecuteMoveLeftAndModifySelection(LocalFrame &frame, Event *, EditorCommandSource,
+    bool ExecuteMoveLeftAndModifySelection(boo::Frame &frame, Event *, EditorCommandSource,
                                            utf8_stringview) noexcept
     {
       (void)frame.Document()->Selection().Modify(FrameSelection::Alteration::Extend, SelectionDirection::Left,
@@ -211,13 +211,13 @@ namespace krys::boo
       return true;
     }
 
-    bool ExecuteMoveRight(LocalFrame &frame, Event *, EditorCommandSource, utf8_stringview) noexcept
+    bool ExecuteMoveRight(boo::Frame &frame, Event *, EditorCommandSource, utf8_stringview) noexcept
     {
       return frame.Document()->Selection().Modify(FrameSelection::Alteration::Move, SelectionDirection::Right,
                                                   TextGranularity::CharacterGranularity, UserTriggered::Yes);
     }
 
-    bool ExecuteMoveRightAndModifySelection(LocalFrame &frame, Event *, EditorCommandSource,
+    bool ExecuteMoveRightAndModifySelection(boo::Frame &frame, Event *, EditorCommandSource,
                                             utf8_stringview) noexcept
     {
       (void)frame.Document()->Selection().Modify(FrameSelection::Alteration::Extend,
@@ -226,7 +226,7 @@ namespace krys::boo
       return true;
     }
 
-    bool ExecuteMoveToBeginningOfDocument(LocalFrame &frame, Event *, EditorCommandSource,
+    bool ExecuteMoveToBeginningOfDocument(boo::Frame &frame, Event *, EditorCommandSource,
                                           utf8_stringview) noexcept
     {
       (void)frame.Document()->Selection().Modify(FrameSelection::Alteration::Move,
@@ -235,7 +235,7 @@ namespace krys::boo
       return true;
     }
 
-    bool ExecuteMoveToBeginningOfDocumentAndModifySelection(LocalFrame &frame, Event *, EditorCommandSource,
+    bool ExecuteMoveToBeginningOfDocumentAndModifySelection(boo::Frame &frame, Event *, EditorCommandSource,
                                                             utf8_stringview) noexcept
     {
       (void)frame.Document()->Selection().Modify(FrameSelection::Alteration::Extend,
@@ -244,7 +244,7 @@ namespace krys::boo
       return true;
     }
 
-    bool ExecuteMoveToBeginningOfLine(LocalFrame &frame, Event *, EditorCommandSource,
+    bool ExecuteMoveToBeginningOfLine(boo::Frame &frame, Event *, EditorCommandSource,
                                       utf8_stringview) noexcept
     {
       (void)frame.Document()->Selection().Modify(FrameSelection::Alteration::Move,
@@ -253,7 +253,7 @@ namespace krys::boo
       return true;
     }
 
-    bool ExecuteMoveToBeginningOfLineAndModifySelection(LocalFrame &frame, Event *, EditorCommandSource,
+    bool ExecuteMoveToBeginningOfLineAndModifySelection(boo::Frame &frame, Event *, EditorCommandSource,
                                                         utf8_stringview) noexcept
     {
       (void)frame.Document()->Selection().Modify(FrameSelection::Alteration::Extend,
@@ -262,7 +262,7 @@ namespace krys::boo
       return true;
     }
 
-    bool ExecuteMoveToBeginningOfParagraph(LocalFrame &frame, Event *, EditorCommandSource,
+    bool ExecuteMoveToBeginningOfParagraph(boo::Frame &frame, Event *, EditorCommandSource,
                                            utf8_stringview) noexcept
     {
       (void)frame.Document()->Selection().Modify(FrameSelection::Alteration::Move,
@@ -271,7 +271,7 @@ namespace krys::boo
       return true;
     }
 
-    bool ExecuteMoveToBeginningOfParagraphAndModifySelection(LocalFrame &frame, Event *, EditorCommandSource,
+    bool ExecuteMoveToBeginningOfParagraphAndModifySelection(boo::Frame &frame, Event *, EditorCommandSource,
                                                              utf8_stringview) noexcept
     {
       (void)frame.Document()->Selection().Modify(FrameSelection::Alteration::Extend,
@@ -280,7 +280,7 @@ namespace krys::boo
       return true;
     }
 
-    bool ExecuteMoveToBeginningOfSentence(LocalFrame &frame, Event *, EditorCommandSource,
+    bool ExecuteMoveToBeginningOfSentence(boo::Frame &frame, Event *, EditorCommandSource,
                                           utf8_stringview) noexcept
     {
       (void)frame.Document()->Selection().Modify(FrameSelection::Alteration::Move,
@@ -289,7 +289,7 @@ namespace krys::boo
       return true;
     }
 
-    bool ExecuteMoveToBeginningOfSentenceAndModifySelection(LocalFrame &frame, Event *, EditorCommandSource,
+    bool ExecuteMoveToBeginningOfSentenceAndModifySelection(boo::Frame &frame, Event *, EditorCommandSource,
                                                             utf8_stringview) noexcept
     {
       (void)frame.Document()->Selection().Modify(FrameSelection::Alteration::Extend,
@@ -298,7 +298,7 @@ namespace krys::boo
       return true;
     }
 
-    bool ExecuteMoveToEndOfDocument(LocalFrame &frame, Event *, EditorCommandSource, utf8_stringview) noexcept
+    bool ExecuteMoveToEndOfDocument(boo::Frame &frame, Event *, EditorCommandSource, utf8_stringview) noexcept
     {
       (void)frame.Document()->Selection().Modify(FrameSelection::Alteration::Move,
                                                  SelectionDirection::Forward,
@@ -306,7 +306,7 @@ namespace krys::boo
       return true;
     }
 
-    bool ExecuteMoveToEndOfDocumentAndModifySelection(LocalFrame &frame, Event *, EditorCommandSource,
+    bool ExecuteMoveToEndOfDocumentAndModifySelection(boo::Frame &frame, Event *, EditorCommandSource,
                                                       utf8_stringview) noexcept
     {
       (void)frame.Document()->Selection().Modify(FrameSelection::Alteration::Extend,
@@ -315,7 +315,7 @@ namespace krys::boo
       return true;
     }
 
-    bool ExecuteMoveToEndOfLine(LocalFrame &frame, Event *, EditorCommandSource, utf8_stringview) noexcept
+    bool ExecuteMoveToEndOfLine(boo::Frame &frame, Event *, EditorCommandSource, utf8_stringview) noexcept
     {
       (void)frame.Document()->Selection().Modify(FrameSelection::Alteration::Move,
                                                  SelectionDirection::Forward, TextGranularity::LineBoundary,
@@ -323,7 +323,7 @@ namespace krys::boo
       return true;
     }
 
-    bool ExecuteMoveToEndOfLineAndModifySelection(LocalFrame &frame, Event *, EditorCommandSource,
+    bool ExecuteMoveToEndOfLineAndModifySelection(boo::Frame &frame, Event *, EditorCommandSource,
                                                   utf8_stringview) noexcept
     {
       (void)frame.Document()->Selection().Modify(FrameSelection::Alteration::Extend,
@@ -332,7 +332,7 @@ namespace krys::boo
       return true;
     }
 
-    bool ExecuteMoveToEndOfParagraph(LocalFrame &frame, Event *, EditorCommandSource,
+    bool ExecuteMoveToEndOfParagraph(boo::Frame &frame, Event *, EditorCommandSource,
                                      utf8_stringview) noexcept
     {
       (void)frame.Document()->Selection().Modify(FrameSelection::Alteration::Move,
@@ -341,7 +341,7 @@ namespace krys::boo
       return true;
     }
 
-    bool ExecuteMoveToEndOfParagraphAndModifySelection(LocalFrame &frame, Event *, EditorCommandSource,
+    bool ExecuteMoveToEndOfParagraphAndModifySelection(boo::Frame &frame, Event *, EditorCommandSource,
                                                        utf8_stringview) noexcept
     {
       (void)frame.Document()->Selection().Modify(FrameSelection::Alteration::Extend,
@@ -350,7 +350,7 @@ namespace krys::boo
       return true;
     }
 
-    bool ExecuteMoveToEndOfSentence(LocalFrame &frame, Event *, EditorCommandSource, utf8_stringview) noexcept
+    bool ExecuteMoveToEndOfSentence(boo::Frame &frame, Event *, EditorCommandSource, utf8_stringview) noexcept
     {
       (void)frame.Document()->Selection().Modify(FrameSelection::Alteration::Move,
                                                  SelectionDirection::Forward,
@@ -358,7 +358,7 @@ namespace krys::boo
       return true;
     }
 
-    bool ExecuteMoveToEndOfSentenceAndModifySelection(LocalFrame &frame, Event *, EditorCommandSource,
+    bool ExecuteMoveToEndOfSentenceAndModifySelection(boo::Frame &frame, Event *, EditorCommandSource,
                                                       utf8_stringview) noexcept
     {
       (void)frame.Document()->Selection().Modify(FrameSelection::Alteration::Extend,
@@ -367,14 +367,14 @@ namespace krys::boo
       return true;
     }
 
-    bool ExecuteMoveToLeftEndOfLine(LocalFrame &frame, Event *, EditorCommandSource, utf8_stringview) noexcept
+    bool ExecuteMoveToLeftEndOfLine(boo::Frame &frame, Event *, EditorCommandSource, utf8_stringview) noexcept
     {
       (void)frame.Document()->Selection().Modify(FrameSelection::Alteration::Move, SelectionDirection::Left,
                                                  TextGranularity::LineBoundary, UserTriggered::Yes);
       return true;
     }
 
-    bool ExecuteMoveToLeftEndOfLineAndModifySelection(LocalFrame &frame, Event *, EditorCommandSource,
+    bool ExecuteMoveToLeftEndOfLineAndModifySelection(boo::Frame &frame, Event *, EditorCommandSource,
                                                       utf8_stringview) noexcept
     {
       (void)frame.Document()->Selection().Modify(FrameSelection::Alteration::Extend, SelectionDirection::Left,
@@ -382,7 +382,7 @@ namespace krys::boo
       return true;
     }
 
-    bool ExecuteMoveToRightEndOfLine(LocalFrame &frame, Event *, EditorCommandSource,
+    bool ExecuteMoveToRightEndOfLine(boo::Frame &frame, Event *, EditorCommandSource,
                                      utf8_stringview) noexcept
     {
       (void)frame.Document()->Selection().Modify(FrameSelection::Alteration::Move, SelectionDirection::Right,
@@ -390,7 +390,7 @@ namespace krys::boo
       return true;
     }
 
-    bool ExecuteMoveToRightEndOfLineAndModifySelection(LocalFrame &frame, Event *, EditorCommandSource,
+    bool ExecuteMoveToRightEndOfLineAndModifySelection(boo::Frame &frame, Event *, EditorCommandSource,
                                                        utf8_stringview) noexcept
     {
       (void)frame.Document()->Selection().Modify(FrameSelection::Alteration::Extend,
@@ -399,14 +399,14 @@ namespace krys::boo
       return true;
     }
 
-    bool ExecuteMoveUp(LocalFrame &frame, Event *, EditorCommandSource, utf8_stringview) noexcept
+    bool ExecuteMoveUp(boo::Frame &frame, Event *, EditorCommandSource, utf8_stringview) noexcept
     {
       return frame.Document()->Selection().Modify(FrameSelection::Alteration::Move,
                                                   SelectionDirection::Backward,
                                                   TextGranularity::LineGranularity, UserTriggered::Yes);
     }
 
-    bool ExecuteMoveUpAndModifySelection(LocalFrame &frame, Event *, EditorCommandSource,
+    bool ExecuteMoveUpAndModifySelection(boo::Frame &frame, Event *, EditorCommandSource,
                                          utf8_stringview) noexcept
     {
       (void)frame.Document()->Selection().Modify(FrameSelection::Alteration::Extend,
@@ -415,7 +415,7 @@ namespace krys::boo
       return true;
     }
 
-    bool ExecuteMoveWordBackward(LocalFrame &frame, Event *, EditorCommandSource, utf8_stringview) noexcept
+    bool ExecuteMoveWordBackward(boo::Frame &frame, Event *, EditorCommandSource, utf8_stringview) noexcept
     {
       (void)frame.Document()->Selection().Modify(FrameSelection::Alteration::Move,
                                                  SelectionDirection::Backward,
@@ -423,7 +423,7 @@ namespace krys::boo
       return true;
     }
 
-    bool ExecuteMoveWordBackwardAndModifySelection(LocalFrame &frame, Event *, EditorCommandSource,
+    bool ExecuteMoveWordBackwardAndModifySelection(boo::Frame &frame, Event *, EditorCommandSource,
                                                    utf8_stringview) noexcept
     {
       (void)frame.Document()->Selection().Modify(FrameSelection::Alteration::Extend,
@@ -432,7 +432,7 @@ namespace krys::boo
       return true;
     }
 
-    bool ExecuteMoveWordForward(LocalFrame &frame, Event *, EditorCommandSource, utf8_stringview) noexcept
+    bool ExecuteMoveWordForward(boo::Frame &frame, Event *, EditorCommandSource, utf8_stringview) noexcept
     {
       (void)frame.Document()->Selection().Modify(FrameSelection::Alteration::Move,
                                                  SelectionDirection::Forward,
@@ -440,7 +440,7 @@ namespace krys::boo
       return true;
     }
 
-    bool ExecuteMoveWordForwardAndModifySelection(LocalFrame &frame, Event *, EditorCommandSource,
+    bool ExecuteMoveWordForwardAndModifySelection(boo::Frame &frame, Event *, EditorCommandSource,
                                                   utf8_stringview) noexcept
     {
       (void)frame.Document()->Selection().Modify(FrameSelection::Alteration::Extend,
@@ -449,14 +449,14 @@ namespace krys::boo
       return true;
     }
 
-    bool ExecuteMoveWordLeft(LocalFrame &frame, Event *, EditorCommandSource, utf8_stringview) noexcept
+    bool ExecuteMoveWordLeft(boo::Frame &frame, Event *, EditorCommandSource, utf8_stringview) noexcept
     {
       (void)frame.Document()->Selection().Modify(FrameSelection::Alteration::Move, SelectionDirection::Left,
                                                  TextGranularity::WordGranularity, UserTriggered::Yes);
       return true;
     }
 
-    bool ExecuteMoveWordLeftAndModifySelection(LocalFrame &frame, Event *, EditorCommandSource,
+    bool ExecuteMoveWordLeftAndModifySelection(boo::Frame &frame, Event *, EditorCommandSource,
                                                utf8_stringview) noexcept
     {
       (void)frame.Document()->Selection().Modify(FrameSelection::Alteration::Extend, SelectionDirection::Left,
@@ -464,14 +464,14 @@ namespace krys::boo
       return true;
     }
 
-    bool ExecuteMoveWordRight(LocalFrame &frame, Event *, EditorCommandSource, utf8_stringview) noexcept
+    bool ExecuteMoveWordRight(boo::Frame &frame, Event *, EditorCommandSource, utf8_stringview) noexcept
     {
       (void)frame.Document()->Selection().Modify(FrameSelection::Alteration::Move, SelectionDirection::Right,
                                                  TextGranularity::WordGranularity, UserTriggered::Yes);
       return true;
     }
 
-    bool ExecuteMoveWordRightAndModifySelection(LocalFrame &frame, Event *, EditorCommandSource,
+    bool ExecuteMoveWordRightAndModifySelection(boo::Frame &frame, Event *, EditorCommandSource,
                                                 utf8_stringview) noexcept
     {
       (void)frame.Document()->Selection().Modify(FrameSelection::Alteration::Extend,
@@ -480,7 +480,7 @@ namespace krys::boo
       return true;
     }
 
-    bool ExecuteMoveParagraphBackwardAndModifySelection(LocalFrame &frame, Event *, EditorCommandSource,
+    bool ExecuteMoveParagraphBackwardAndModifySelection(boo::Frame &frame, Event *, EditorCommandSource,
                                                         utf8_stringview) noexcept
     {
       (void)frame.Document()->Selection().Modify(FrameSelection::Alteration::Extend,
@@ -489,7 +489,7 @@ namespace krys::boo
       return true;
     }
 
-    bool ExecuteMoveParagraphForwardAndModifySelection(LocalFrame &frame, Event *, EditorCommandSource,
+    bool ExecuteMoveParagraphForwardAndModifySelection(boo::Frame &frame, Event *, EditorCommandSource,
                                                        utf8_stringview) noexcept
     {
       (void)frame.Document()->Selection().Modify(FrameSelection::Alteration::Extend,
@@ -498,7 +498,7 @@ namespace krys::boo
       return true;
     }
 
-    bool ExecuteMovePageDown(LocalFrame &frame, Event *, EditorCommandSource, utf8_stringview) noexcept
+    bool ExecuteMovePageDown(boo::Frame &frame, Event *, EditorCommandSource, utf8_stringview) noexcept
     {
       uint32 distance = VerticalScrollDistance(frame);
       if (!distance)
@@ -510,7 +510,7 @@ namespace krys::boo
                                                   FrameSelection::CursorAlignOnScroll::Always);
     }
 
-    bool ExecuteMovePageDownAndModifySelection(LocalFrame &frame, Event *, EditorCommandSource,
+    bool ExecuteMovePageDownAndModifySelection(boo::Frame &frame, Event *, EditorCommandSource,
                                                utf8_stringview) noexcept
     {
       uint32 distance = VerticalScrollDistance(frame);
@@ -523,7 +523,7 @@ namespace krys::boo
                                                   FrameSelection::CursorAlignOnScroll::Always);
     }
 
-    bool ExecuteMovePageUp(LocalFrame &frame, Event *, EditorCommandSource, utf8_stringview) noexcept
+    bool ExecuteMovePageUp(boo::Frame &frame, Event *, EditorCommandSource, utf8_stringview) noexcept
     {
       uint32 distance = VerticalScrollDistance(frame);
       if (!distance)
@@ -535,7 +535,7 @@ namespace krys::boo
                                                   FrameSelection::CursorAlignOnScroll::Always);
     }
 
-    bool ExecuteMovePageUpAndModifySelection(LocalFrame &frame, Event *, EditorCommandSource,
+    bool ExecuteMovePageUpAndModifySelection(boo::Frame &frame, Event *, EditorCommandSource,
                                              utf8_stringview) noexcept
     {
       uint32 distance = VerticalScrollDistance(frame);
@@ -548,36 +548,36 @@ namespace krys::boo
                                                   FrameSelection::CursorAlignOnScroll::Always);
     }
 
-    bool ExecuteScrollPageBackward(LocalFrame &frame, Event *, EditorCommandSource, utf8_stringview) noexcept
+    bool ExecuteScrollPageBackward(boo::Frame &frame, Event *, EditorCommandSource, utf8_stringview) noexcept
     {
       return frame.GetEventHandler().LogicalScrollRecursively(
         ScrollLogicalDirection::ScrollBlockDirectionBackward, ScrollGranularity::Page);
     }
 
-    bool ExecuteScrollPageForward(LocalFrame &frame, Event *, EditorCommandSource, utf8_stringview) noexcept
+    bool ExecuteScrollPageForward(boo::Frame &frame, Event *, EditorCommandSource, utf8_stringview) noexcept
     {
       return frame.GetEventHandler().LogicalScrollRecursively(
         ScrollLogicalDirection::ScrollBlockDirectionForward, ScrollGranularity::Page);
     }
 
-    bool ExecuteScrollLineUp(LocalFrame &frame, Event *, EditorCommandSource, utf8_stringview) noexcept
+    bool ExecuteScrollLineUp(boo::Frame &frame, Event *, EditorCommandSource, utf8_stringview) noexcept
     {
       return frame.GetEventHandler().ScrollRecursively(ScrollDirection::ScrollUp, ScrollGranularity::Line);
     }
 
-    bool ExecuteScrollLineDown(LocalFrame &frame, Event *, EditorCommandSource, utf8_stringview) noexcept
+    bool ExecuteScrollLineDown(boo::Frame &frame, Event *, EditorCommandSource, utf8_stringview) noexcept
     {
       return frame.GetEventHandler().ScrollRecursively(ScrollDirection::ScrollDown, ScrollGranularity::Line);
     }
 
-    bool ExecuteScrollToBeginningOfDocument(LocalFrame &frame, Event *, EditorCommandSource,
+    bool ExecuteScrollToBeginningOfDocument(boo::Frame &frame, Event *, EditorCommandSource,
                                             utf8_stringview) noexcept
     {
       return frame.GetEventHandler().LogicalScrollRecursively(
         ScrollLogicalDirection::ScrollBlockDirectionBackward, ScrollGranularity::Document);
     }
 
-    bool ExecuteScrollToEndOfDocument(LocalFrame &frame, Event *, EditorCommandSource,
+    bool ExecuteScrollToEndOfDocument(boo::Frame &frame, Event *, EditorCommandSource,
                                       utf8_stringview) noexcept
     {
       return frame.GetEventHandler().LogicalScrollRecursively(
@@ -590,39 +590,39 @@ namespace krys::boo
                                                              : Editor::FromMenuOrKeyBinding::No;
     }
 
-    bool ExecuteCopy(LocalFrame &frame, Event *, EditorCommandSource source, utf8_stringview) noexcept
+    bool ExecuteCopy(boo::Frame &frame, Event *, EditorCommandSource source, utf8_stringview) noexcept
     {
       frame.Document()->GetEditor().Copy(FromMenuOrKeyBindingFor(source));
       return true;
     }
 
-    bool ExecuteCut(LocalFrame &frame, Event *, EditorCommandSource source, utf8_stringview) noexcept
+    bool ExecuteCut(boo::Frame &frame, Event *, EditorCommandSource source, utf8_stringview) noexcept
     {
       frame.Document()->GetEditor().Cut(FromMenuOrKeyBindingFor(source));
       return true;
     }
 
-    bool ExecutePaste(LocalFrame &frame, Event *, EditorCommandSource source, utf8_stringview) noexcept
+    bool ExecutePaste(boo::Frame &frame, Event *, EditorCommandSource source, utf8_stringview) noexcept
     {
       frame.Document()->GetEditor().Paste(FromMenuOrKeyBindingFor(source));
       return true;
     }
 
-    bool ExecutePasteAndMatchStyle(LocalFrame &frame, Event *, EditorCommandSource source,
+    bool ExecutePasteAndMatchStyle(boo::Frame &frame, Event *, EditorCommandSource source,
                                    utf8_stringview) noexcept
     {
       frame.Document()->GetEditor().PasteAsPlainText(FromMenuOrKeyBindingFor(source));
       return true;
     }
 
-    bool ExecutePasteAsPlainText(LocalFrame &frame, Event *, EditorCommandSource source,
+    bool ExecutePasteAsPlainText(boo::Frame &frame, Event *, EditorCommandSource source,
                                  utf8_stringview) noexcept
     {
       frame.Document()->GetEditor().PasteAsPlainText(FromMenuOrKeyBindingFor(source));
       return true;
     }
 
-    bool ExecuteDelete(LocalFrame &frame, Event *, EditorCommandSource source, utf8_stringview) noexcept
+    bool ExecuteDelete(boo::Frame &frame, Event *, EditorCommandSource source, utf8_stringview) noexcept
     {
       switch (source)
       {
@@ -647,14 +647,14 @@ namespace krys::boo
       return false;
     }
 
-    bool ExecuteDeleteBackward(LocalFrame &frame, Event *, EditorCommandSource, utf8_stringview) noexcept
+    bool ExecuteDeleteBackward(boo::Frame &frame, Event *, EditorCommandSource, utf8_stringview) noexcept
     {
       (void)frame.Document()->GetEditor().DeleteWithDirection(
         SelectionDirection::Backward, TextGranularity::CharacterGranularity, false, true);
       return true;
     }
 
-    bool ExecuteDeleteBackwardByDecomposingPreviousCharacter(LocalFrame &frame, Event *, EditorCommandSource,
+    bool ExecuteDeleteBackwardByDecomposingPreviousCharacter(boo::Frame &frame, Event *, EditorCommandSource,
                                                              utf8_stringview) noexcept
     {
       (void)frame.Document()->GetEditor().DeleteWithDirection(
@@ -662,14 +662,14 @@ namespace krys::boo
       return true;
     }
 
-    bool ExecuteDeleteForward(LocalFrame &frame, Event *, EditorCommandSource, utf8_stringview) noexcept
+    bool ExecuteDeleteForward(boo::Frame &frame, Event *, EditorCommandSource, utf8_stringview) noexcept
     {
       (void)frame.Document()->GetEditor().DeleteWithDirection(
         SelectionDirection::Forward, TextGranularity::CharacterGranularity, false, true);
       return true;
     }
 
-    bool ExecuteDeleteToBeginningOfLine(LocalFrame &frame, Event *, EditorCommandSource,
+    bool ExecuteDeleteToBeginningOfLine(boo::Frame &frame, Event *, EditorCommandSource,
                                         utf8_stringview) noexcept
     {
       (void)frame.Document()->GetEditor().DeleteWithDirection(SelectionDirection::Backward,
@@ -677,7 +677,7 @@ namespace krys::boo
       return true;
     }
 
-    bool ExecuteDeleteToBeginningOfParagraph(LocalFrame &frame, Event *, EditorCommandSource,
+    bool ExecuteDeleteToBeginningOfParagraph(boo::Frame &frame, Event *, EditorCommandSource,
                                              utf8_stringview) noexcept
     {
       (void)frame.Document()->GetEditor().DeleteWithDirection(
@@ -685,7 +685,7 @@ namespace krys::boo
       return true;
     }
 
-    bool ExecuteDeleteToEndOfLine(LocalFrame &frame, Event *, EditorCommandSource, utf8_stringview) noexcept
+    bool ExecuteDeleteToEndOfLine(boo::Frame &frame, Event *, EditorCommandSource, utf8_stringview) noexcept
     {
       // Despite its name, this command should delete the newline at the end of
       // a paragraph if you are at the end of a paragraph (like DeleteToEndOfParagraph).
@@ -694,7 +694,7 @@ namespace krys::boo
       return true;
     }
 
-    bool ExecuteDeleteToEndOfParagraph(LocalFrame &frame, Event *, EditorCommandSource,
+    bool ExecuteDeleteToEndOfParagraph(boo::Frame &frame, Event *, EditorCommandSource,
                                        utf8_stringview) noexcept
     {
       // Despite its name, this command should delete the newline at the end of
@@ -704,21 +704,21 @@ namespace krys::boo
       return true;
     }
 
-    bool ExecuteDeleteWordBackward(LocalFrame &frame, Event *, EditorCommandSource, utf8_stringview) noexcept
+    bool ExecuteDeleteWordBackward(boo::Frame &frame, Event *, EditorCommandSource, utf8_stringview) noexcept
     {
       (void)frame.Document()->GetEditor().DeleteWithDirection(SelectionDirection::Backward,
                                                               TextGranularity::WordGranularity, true, false);
       return true;
     }
 
-    bool ExecuteDeleteWordForward(LocalFrame &frame, Event *, EditorCommandSource, utf8_stringview) noexcept
+    bool ExecuteDeleteWordForward(boo::Frame &frame, Event *, EditorCommandSource, utf8_stringview) noexcept
     {
       (void)frame.Document()->GetEditor().DeleteWithDirection(SelectionDirection::Forward,
                                                               TextGranularity::WordGranularity, true, false);
       return true;
     }
 
-    bool ExecuteForwardDelete(LocalFrame &frame, Event *, EditorCommandSource source,
+    bool ExecuteForwardDelete(boo::Frame &frame, Event *, EditorCommandSource source,
                               utf8_stringview) noexcept
     {
       switch (source)
@@ -739,14 +739,14 @@ namespace krys::boo
       return false;
     }
 
-    bool ExecuteInsertBacktab(LocalFrame &frame, Event *event, EditorCommandSource, utf8_stringview) noexcept
+    bool ExecuteInsertBacktab(boo::Frame &frame, Event *event, EditorCommandSource, utf8_stringview) noexcept
     {
       return TargetFrame(frame, event)
         .GetEventHandler()
         .HandleTextInputEvent(u8"\t", event, dom::TextEventInputType::BackTab);
     }
 
-    bool ExecuteInsertLineBreak(LocalFrame &frame, Event *event, EditorCommandSource source,
+    bool ExecuteInsertLineBreak(boo::Frame &frame, Event *event, EditorCommandSource source,
                                 utf8_stringview) noexcept
     {
       switch (source)
@@ -767,7 +767,7 @@ namespace krys::boo
       return false;
     }
 
-    bool ExecuteInsertNewline(LocalFrame &frame, Event *event, EditorCommandSource, utf8_stringview) noexcept
+    bool ExecuteInsertNewline(boo::Frame &frame, Event *event, EditorCommandSource, utf8_stringview) noexcept
     {
       auto &targetFrame = TargetFrame(frame, event);
       return targetFrame.GetEventHandler().HandleTextInputEvent(
@@ -776,65 +776,65 @@ namespace krys::boo
                                                             : dom::TextEventInputType::LineBreak);
     }
 
-    bool ExecuteInsertParagraph(LocalFrame &frame, Event *, EditorCommandSource, utf8_stringview) noexcept
+    bool ExecuteInsertParagraph(boo::Frame &frame, Event *, EditorCommandSource, utf8_stringview) noexcept
     {
       TypingCommand::InsertParagraphSeparator(*frame.Document(), {});
       return true;
     }
 
-    bool ExecuteInsertTab(LocalFrame &frame, Event *event, EditorCommandSource, utf8_stringview) noexcept
+    bool ExecuteInsertTab(boo::Frame &frame, Event *event, EditorCommandSource, utf8_stringview) noexcept
     {
       return TargetFrame(frame, event)
         .GetEventHandler()
         .HandleTextInputEvent(u8"\t", event, dom::TextEventInputType::Keyboard);
     }
 
-    bool ExecuteInsertText(LocalFrame &frame, Event *event, EditorCommandSource,
+    bool ExecuteInsertText(boo::Frame &frame, Event *event, EditorCommandSource,
                            utf8_stringview value) noexcept
     {
       TypingCommand::InsertText(*frame.Document(), value, event, {});
       return true;
     }
 
-    bool ExecuteRedo(LocalFrame &frame, Event *, EditorCommandSource, utf8_stringview) noexcept
+    bool ExecuteRedo(boo::Frame &frame, Event *, EditorCommandSource, utf8_stringview) noexcept
     {
       frame.Document()->GetEditor().Redo();
       return true;
     }
 
-    bool ExecuteUndo(LocalFrame &frame, Event *, EditorCommandSource, utf8_stringview) noexcept
+    bool ExecuteUndo(boo::Frame &frame, Event *, EditorCommandSource, utf8_stringview) noexcept
     {
       frame.Document()->GetEditor().Undo();
       return true;
     }
 
-    bool ExecuteSelectAll(LocalFrame &frame, Event *, EditorCommandSource, utf8_stringview) noexcept
+    bool ExecuteSelectAll(boo::Frame &frame, Event *, EditorCommandSource, utf8_stringview) noexcept
     {
       frame.Document()->Selection().SelectAll();
       return true;
     }
 
-    bool ExecuteSelectLine(LocalFrame &frame, Event *, EditorCommandSource, utf8_stringview) noexcept
+    bool ExecuteSelectLine(boo::Frame &frame, Event *, EditorCommandSource, utf8_stringview) noexcept
     {
       return ExpandSelectionToGranularity(frame, TextGranularity::LineGranularity);
     }
 
-    bool ExecuteSelectParagraph(LocalFrame &frame, Event *, EditorCommandSource, utf8_stringview) noexcept
+    bool ExecuteSelectParagraph(boo::Frame &frame, Event *, EditorCommandSource, utf8_stringview) noexcept
     {
       return ExpandSelectionToGranularity(frame, TextGranularity::ParagraphGranularity);
     }
 
-    bool ExecuteSelectSentence(LocalFrame &frame, Event *, EditorCommandSource, utf8_stringview) noexcept
+    bool ExecuteSelectSentence(boo::Frame &frame, Event *, EditorCommandSource, utf8_stringview) noexcept
     {
       return ExpandSelectionToGranularity(frame, TextGranularity::SentenceGranularity);
     }
 
-    bool ExecuteSelectWord(LocalFrame &frame, Event *, EditorCommandSource, utf8_stringview) noexcept
+    bool ExecuteSelectWord(boo::Frame &frame, Event *, EditorCommandSource, utf8_stringview) noexcept
     {
       return ExpandSelectionToGranularity(frame, TextGranularity::WordGranularity);
     }
 
-    bool ExecuteUnselect(LocalFrame &frame, Event *, EditorCommandSource, utf8_stringview) noexcept
+    bool ExecuteUnselect(boo::Frame &frame, Event *, EditorCommandSource, utf8_stringview) noexcept
     {
       frame.Document()->Selection().Clear();
       return true;
@@ -842,24 +842,24 @@ namespace krys::boo
 
     // Supported functions
 
-    bool Supported(LocalFrame *) noexcept
+    bool Supported(boo::Frame *) noexcept
     {
       return true;
     }
 
-    bool SupportedFromMenuOrKeyBinding(LocalFrame *) noexcept
+    bool SupportedFromMenuOrKeyBinding(boo::Frame *) noexcept
     {
       return false;
     }
 
     // With no script access to the clipboard, copying and cutting are allowed, as the default policy allows
     // them.
-    KRYS_NODISCARD bool DefaultValueForSupportedCopyCut(LocalFrame &) noexcept
+    KRYS_NODISCARD bool DefaultValueForSupportedCopyCut(boo::Frame &) noexcept
     {
       return true;
     }
 
-    bool SupportedCopyCut(LocalFrame *frame) noexcept
+    bool SupportedCopyCut(boo::Frame *frame) noexcept
     {
       if (!frame)
       {
@@ -874,7 +874,7 @@ namespace krys::boo
 
     // With no script access to the clipboard, pasting from the DOM is disallowed, as the default settings
     // disallow it.
-    bool SupportedPaste(LocalFrame *frame) noexcept
+    bool SupportedPaste(boo::Frame *frame) noexcept
     {
       if (!frame)
       {
@@ -889,69 +889,69 @@ namespace krys::boo
 
     // Enabled functions
 
-    bool Enabled(LocalFrame &, Event *, EditorCommandSource) noexcept
+    bool Enabled(boo::Frame &, Event *, EditorCommandSource) noexcept
     {
       return true;
     }
 
-    bool EnabledRedo(LocalFrame &frame, Event *, EditorCommandSource) noexcept
+    bool EnabledRedo(boo::Frame &frame, Event *, EditorCommandSource) noexcept
     {
       return frame.Document()->GetEditor().CanRedo();
     }
 
-    bool EnabledUndo(LocalFrame &frame, Event *, EditorCommandSource) noexcept
+    bool EnabledUndo(boo::Frame &frame, Event *, EditorCommandSource) noexcept
     {
       return frame.Document()->GetEditor().CanUndo();
     }
 
-    bool EnabledVisibleSelection(LocalFrame &frame, Event *event, EditorCommandSource) noexcept
+    bool EnabledVisibleSelection(boo::Frame &frame, Event *event, EditorCommandSource) noexcept
     {
       // The term "visible" here includes a caret in editable text or a range in any text.
       const VisibleSelection &selection = frame.Document()->GetEditor().SelectionForCommand(event);
       return (selection.IsCaret() && selection.IsContentEditable()) || selection.IsRange();
     }
 
-    KRYS_NODISCARD bool CaretBrowsingEnabled(LocalFrame &frame) noexcept
+    KRYS_NODISCARD bool CaretBrowsingEnabled(boo::Frame &frame) noexcept
     {
       return frame.Document()->GetSettings().CaretBrowsingEnabled;
     }
 
-    bool EnabledVisibleSelectionOrCaretBrowsing(LocalFrame &frame, Event *event,
+    bool EnabledVisibleSelectionOrCaretBrowsing(boo::Frame &frame, Event *event,
                                                 EditorCommandSource source) noexcept
     {
       return CaretBrowsingEnabled(frame) || EnabledVisibleSelection(frame, event, source);
     }
 
-    bool EnabledCopy(LocalFrame &frame, Event *, EditorCommandSource) noexcept
+    bool EnabledCopy(boo::Frame &frame, Event *, EditorCommandSource) noexcept
     {
       auto &editor = frame.Document()->GetEditor();
       return editor.CanDHTMLCopy() || editor.CanCopy();
     }
 
-    bool EnabledCut(LocalFrame &frame, Event *, EditorCommandSource) noexcept
+    bool EnabledCut(boo::Frame &frame, Event *, EditorCommandSource) noexcept
     {
       auto &editor = frame.Document()->GetEditor();
       return editor.CanDHTMLCut() || editor.CanCut();
     }
 
-    bool EnabledPaste(LocalFrame &frame, Event *, EditorCommandSource) noexcept
+    bool EnabledPaste(boo::Frame &frame, Event *, EditorCommandSource) noexcept
     {
       auto &editor = frame.Document()->GetEditor();
       return editor.CanDHTMLPaste() || editor.CanPaste();
     }
 
-    bool EnabledInEditableText(LocalFrame &frame, Event *event, EditorCommandSource) noexcept
+    bool EnabledInEditableText(boo::Frame &frame, Event *event, EditorCommandSource) noexcept
     {
       return frame.Document()->GetEditor().SelectionForCommand(event).RootEditableElement();
     }
 
-    bool EnabledInEditableTextOrCaretBrowsing(LocalFrame &frame, Event *event,
+    bool EnabledInEditableTextOrCaretBrowsing(boo::Frame &frame, Event *event,
                                               EditorCommandSource source) noexcept
     {
       return CaretBrowsingEnabled(frame) || EnabledInEditableText(frame, event, source);
     }
 
-    bool EnabledDelete(LocalFrame &frame, Event *event, EditorCommandSource source) noexcept
+    bool EnabledDelete(boo::Frame &frame, Event *event, EditorCommandSource source) noexcept
     {
       switch (source)
       {
@@ -966,7 +966,7 @@ namespace krys::boo
       return false;
     }
 
-    bool EnabledInRichlyEditableText(LocalFrame &frame, Event *, EditorCommandSource) noexcept
+    bool EnabledInRichlyEditableText(boo::Frame &frame, Event *, EditorCommandSource) noexcept
     {
       const auto &selection = frame.Document()->Selection().Selection();
       return selection.IsCaretOrRange() && selection.IsContentRichlyEditable()
@@ -975,12 +975,12 @@ namespace krys::boo
 
     // AllowExecutionWhenDisabled functions
 
-    bool DoNotAllowExecutionWhenDisabled(LocalFrame &, EditorCommandSource) noexcept
+    bool DoNotAllowExecutionWhenDisabled(boo::Frame &, EditorCommandSource) noexcept
     {
       return false;
     }
 
-    bool AllowExecutionWhenDisabledCopyCut(LocalFrame &, EditorCommandSource source) noexcept
+    bool AllowExecutionWhenDisabledCopyCut(boo::Frame &, EditorCommandSource source) noexcept
     {
       switch (source)
       {
@@ -992,7 +992,7 @@ namespace krys::boo
       return false;
     }
 
-    bool AllowExecutionWhenDisabledPaste(LocalFrame &, EditorCommandSource source) noexcept
+    bool AllowExecutionWhenDisabledPaste(boo::Frame &, EditorCommandSource source) noexcept
     {
       switch (source)
       {
@@ -1295,7 +1295,7 @@ namespace krys::boo
     krys_debug_assert(command || !_document);
   }
 
-  LocalFrame *Editor::Command::Frame() const noexcept
+  boo::Frame *Editor::Command::Frame() const noexcept
   {
     return _document ? _document->Frame() : nullptr;
   }
@@ -1312,7 +1312,7 @@ namespace krys::boo
     }
 
     (void)_document->UpdateLayoutIgnorePendingStylesheets();
-    RefPtr<LocalFrame> frame = ShareRefPtr(Frame());
+    RefPtr<boo::Frame> frame = ShareRefPtr(Frame());
     if (!frame)
     {
       return false;

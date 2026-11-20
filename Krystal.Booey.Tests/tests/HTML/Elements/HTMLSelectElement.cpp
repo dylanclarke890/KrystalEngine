@@ -15,11 +15,11 @@
 #include "Krystal.Booey/HTML/Elements/HTMLOptGroupElement.hpp"
 #include "Krystal.Booey/HTML/Elements/HTMLOptionElement.hpp"
 #include "Krystal.Booey/HTML/EventLoop/EventLoop.hpp"
+#include "Krystal.Booey/HTML/Window.hpp"
 #include "Krystal.Booey/Input/EventHandler.hpp"
 #include "Krystal.Booey/Input/LegacyKeyCodes.hpp"
 #include "Krystal.Booey/Input/PlatformKeyboardEvent.hpp"
 #include "Krystal.Booey/Input/PlatformMouseEvent.hpp"
-#include "Krystal.Booey/Page/LocalDOMWindow.hpp"
 #include "Krystal.Booey/Rendering/FormControls/RenderListBox.hpp"
 #include "Krystal.Booey/Rendering/FormControls/RenderMenuList.hpp"
 #include "Krystal.Booey/Style/StyleAppearance.hpp"
@@ -82,16 +82,16 @@ namespace krys::boo::tests
       }
     };
 
-    /// @brief A chrome client counting the reports of a focused select's options changing.
-    struct SelectChromeClient final : ChromeClient
+    /// @brief A Booey client counting the reports of a focused select's options changing.
+    struct SelectBooeyClient final : BooeyClient
     {
       int32 *OptionChanges {nullptr};
 
-      explicit SelectChromeClient(int32 &optionChanges) noexcept : OptionChanges(&optionChanges)
+      explicit SelectBooeyClient(int32 &optionChanges) noexcept : OptionChanges(&optionChanges)
       {
       }
 
-      void AttachRootGraphicsLayer(LocalFrame &, GraphicsLayer *) noexcept final
+      void AttachRootGraphicsLayer(boo::Frame &, GraphicsLayer *) noexcept final
       {
       }
 
@@ -103,12 +103,12 @@ namespace krys::boo::tests
   }
 
   TEST_CASE_METHOD(css::tests::ValueFixture,
-                   "HTMLSelectElement: the chrome client hears of a focused select's options changing",
+                   "HTMLSelectElement: the Booey client hears of a focused select's options changing",
                    "[HTML][HTMLSelectElement]")
   {
     int32 optionChanges = 0;
     EditorFixture fixture(u8"<select id=s><option>a</select><select id=other><option>b</select>",
-                          CreateUnique<SelectChromeClient>(optionChanges));
+                          CreateUnique<SelectBooeyClient>(optionChanges));
     auto &select = SelectById(fixture, u8"s");
     auto addOption = [&]
     {

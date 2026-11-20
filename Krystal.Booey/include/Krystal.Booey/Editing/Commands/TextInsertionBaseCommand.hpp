@@ -29,7 +29,7 @@
 
 namespace krys::boo
 {
-  class LocalFrame;
+  class Frame;
 
   /// @brief The base of commands that insert text, which can apply themselves to a selection other than the
   /// frame's.
@@ -42,7 +42,7 @@ namespace krys::boo
     explicit TextInsertionBaseCommand(Document &document,
                                       EditAction editingAction = EditAction::Unspecified) noexcept;
 
-    static void ApplyTextInsertionCommand(LocalFrame *frame, TextInsertionBaseCommand &command,
+    static void ApplyTextInsertionCommand(Frame *frame, TextInsertionBaseCommand &command,
                                           const VisibleSelection &selectionForInsertion,
                                           const VisibleSelection &endingSelection) noexcept;
   };

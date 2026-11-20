@@ -36,7 +36,7 @@
 #include "Krystal.Booey/HTML/Canvas/CanvasRenderingContext2DBase.hpp"
 #include "Krystal.Booey/HTML/Elements/HTMLCanvasElement.hpp"
 #include "Krystal.Booey/Loader/Cache/CachedImage.hpp"
-#include "Krystal.Booey/Page/LocalFrameView.hpp"
+#include "Krystal.Booey/Page/FrameView.hpp"
 #include "Krystal.Booey/Platform/Scrolling/Scrollbar.hpp"
 #include "Krystal.Booey/Rendering/Layers/RenderLayerScrollableArea.hpp"
 #include "Krystal.Booey/Rendering/Painting/BackgroundPainter.hpp"
@@ -1655,7 +1655,7 @@ namespace krys::boo
       SizeF backgroundSize = SizeF(primaryGraphicsLayerRect.Size());
       if (BackgroundLayerPaintsFixedRootBackground())
       {
-        const LocalFrameView &frameView = Renderer().View().FrameView();
+        const FrameView &frameView = Renderer().View().FrameView();
         backgroundPosition = PointF(frameView.ScrollPositionForFixedPosition());
         backgroundSize = SizeF(frameView.GetLayoutSize());
       }

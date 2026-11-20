@@ -26,7 +26,7 @@
 
 #include "Krystal.Booey/DOM/Scheduling/ScriptedAnimationController.hpp"
 #include "Krystal.Booey/DOM/Nodes/Document.hpp"
-#include "Krystal.Booey/Page/Page.hpp"
+#include "Krystal.Booey/Page/Frame.hpp"
 #include <cmath>
 
 namespace krys::boo::dom
@@ -56,10 +56,10 @@ namespace krys::boo::dom
     }
   }
 
-  Page *ScriptedAnimationController::GetPage() const noexcept
+  boo::Frame *ScriptedAnimationController::Frame() const noexcept
   {
     auto *document = _document.get();
-    return document ? document->GetPage() : nullptr;
+    return document ? document->Frame() : nullptr;
   }
 
   ScriptedAnimationController::CallbackId
@@ -159,9 +159,9 @@ namespace krys::boo::dom
 
   void ScriptedAnimationController::ScheduleAnimation() noexcept
   {
-    if (auto *page = GetPage())
+    if (auto *frame = Frame())
     {
-      page->ScheduleRenderingUpdate(RenderingUpdateStep::AnimationFrameCallbacks);
+      frame->ScheduleRenderingUpdate(RenderingUpdateStep::AnimationFrameCallbacks);
     }
   }
 }

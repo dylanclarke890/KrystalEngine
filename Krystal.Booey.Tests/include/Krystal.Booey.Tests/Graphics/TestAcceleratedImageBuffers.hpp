@@ -4,7 +4,7 @@
 #include "Krystal.Booey/Graphics/DisplayLists/DisplayListRecorderImpl.hpp"
 #include "Krystal.Booey/Graphics/ImageBuffers/ImageBuffer.hpp"
 #include "Krystal.Booey/Graphics/ImageBuffers/ImageBufferBackend.hpp"
-#include "Krystal.Booey/Page/Clients/ChromeClient.hpp"
+#include "Krystal.Booey/Page/Clients/BooeyClient.hpp"
 
 namespace krys::boo::tests
 {
@@ -49,12 +49,12 @@ namespace krys::boo::tests
 
   /// @brief A host that makes accelerated buffers with `TestAcceleratedBackend`, and leaves the rest to the
   /// page.
-  class AcceleratingChromeClient final : public ChromeClient
+  class AcceleratingBooeyClient final : public BooeyClient
   {
   public:
     mutable int32 BuffersMade {0};
 
-    void AttachRootGraphicsLayer(LocalFrame &, GraphicsLayer *) noexcept override
+    void AttachRootGraphicsLayer(boo::Frame &, GraphicsLayer *) noexcept override
     {
     }
 

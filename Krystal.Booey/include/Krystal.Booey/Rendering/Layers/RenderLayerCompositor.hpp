@@ -48,10 +48,10 @@ namespace krys
 
 namespace krys::boo
 {
+  class Frame;
   class GraphicsLayerFactory;
   class LayerOverlapMap;
-  class LocalFrameView;
-  class Page;
+  class FrameView;
   class RenderLayerBacking;
   class RenderView;
   class Scrollbar;
@@ -137,7 +137,7 @@ namespace krys::boo
     enum RootLayerAttachment : uint8
     {
       RootLayerUnattached,
-      RootLayerAttachedViaChromeClient,
+      RootLayerAttachedViaBooeyClient,
     };
 
     class BackingSharingState;
@@ -627,7 +627,7 @@ namespace krys::boo
 
     KRYS_NODISCARD RectF VisibleRectForLayerFlushing() const noexcept;
 
-    KRYS_NODISCARD Page *GetPage() const noexcept;
+    KRYS_NODISCARD boo::Frame *Frame() const noexcept;
 
     // Non layout-dependent
     KRYS_NODISCARD static bool

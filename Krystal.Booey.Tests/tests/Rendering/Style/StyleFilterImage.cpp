@@ -2,7 +2,7 @@
 #include "catch2/catch_test_macros.hpp"
 #include "Krystal.Booey.Tests/Loader/PageInFrameFixture.hpp"
 #include "Krystal.Booey.Tests/Loader/TestLoader.hpp"
-#include "Krystal.Booey/Page/Page.hpp"
+#include "Krystal.Booey/Page/Frame.hpp"
 #include "Krystal.Booey/Rendering/GeneratedContent/RenderListItem.hpp"
 #include "Krystal.Booey/Rendering/GeneratedContent/RenderListMarker.hpp"
 #include "Krystal.Booey/Rendering/RenderElement.hpp"
@@ -66,9 +66,9 @@ namespace krys::boo::tests
     loader.Strategy.Resources[u8"file:///b.jpg"] = img::tests::images::JPEG;
 
     // Filters need the page's rendering modes.
-    auto page = Page::Create();
-    PageInFrameFixture fixture(*page, u8"<style>body{margin:0}</style><div style='width:16px;height:8px;"
-                                      u8"background-image: filter(url(file:///b.jpg), sepia())'></div>");
+    auto frame = boo::Frame::Create();
+    PageInFrameFixture fixture(*frame, u8"<style>body{margin:0}</style><div style='width:16px;height:8px;"
+                                       u8"background-image: filter(url(file:///b.jpg), sepia())'></div>");
     RunNetworkingTasks();
 
     auto painted = fixture.Painted();

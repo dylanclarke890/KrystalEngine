@@ -6,7 +6,7 @@
 #include "Krystal.Booey/Graphics/DisplayLists/DisplayListRecorderImpl.hpp"
 #include "Krystal.Booey/Graphics/Fonts/FontDatabase.hpp"
 #include "Krystal.Booey/Graphics/Fonts/WOFFFileFormat.hpp"
-#include "Krystal.Booey/Page/LocalFrameView.hpp"
+#include "Krystal.Booey/Page/FrameView.hpp"
 #include "Krystal.Core/Types/SharedBuffer.hpp"
 #include <cmath>
 #include <cstring>

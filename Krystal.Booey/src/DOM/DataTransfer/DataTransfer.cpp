@@ -34,7 +34,7 @@
 #include "Krystal.Booey/HTML/Elements/HTMLImageElement.hpp"
 #include "Krystal.Booey/Loader/Cache/CachedImage.hpp"
 #include "Krystal.Booey/Loader/Cache/CachedImageClient.hpp"
-#include "Krystal.Booey/Page/LocalFrame.hpp"
+#include "Krystal.Booey/Page/Frame.hpp"
 #include "Krystal.Booey/Platform/Pasteboard/Pasteboard.hpp"
 #include "Krystal.Booey/Platform/Pasteboard/StaticPasteboard.hpp"
 #include "Krystal.Core/Strings/ASCII.hpp"
@@ -870,7 +870,7 @@ namespace krys::boo::dom
 
     if (_dragImageElement)
     {
-      if (RefPtr<LocalFrame> frame = ShareRefPtr(_dragImageElement->NodeDocument().Frame()))
+      if (RefPtr<Frame> frame = ShareRefPtr(_dragImageElement->NodeDocument().Frame()))
       {
         return CreateDragImageForNode(*frame, *DragImageElement());
       }

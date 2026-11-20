@@ -10,10 +10,9 @@
 #include "Krystal.Booey/HTML/Canvas/EngineTextureRenderingContext.hpp"
 #include "Krystal.Booey/HTML/Elements/HTMLCanvasElement.hpp"
 #include "Krystal.Booey/HTML/EventLoop/EventLoop.hpp"
-#include "Krystal.Booey/Page/Clients/ChromeClient.hpp"
-#include "Krystal.Booey/Page/LocalFrame.hpp"
-#include "Krystal.Booey/Page/LocalFrameView.hpp"
-#include "Krystal.Booey/Page/Page.hpp"
+#include "Krystal.Booey/Page/Clients/BooeyClient.hpp"
+#include "Krystal.Booey/Page/Frame.hpp"
+#include "Krystal.Booey/Page/FrameView.hpp"
 #include "Krystal.Booey/Page/Settings.hpp"
 #include "Krystal.Booey/Rendering/Layers/RenderLayer.hpp"
 #include "Krystal.Booey/Rendering/Layers/RenderLayerBacking.hpp"
@@ -133,13 +132,13 @@ namespace krys::boo::tests
       }
     };
 
-    class CompositingChromeClient final : public ChromeClient
+    class CompositingBooeyClient final : public BooeyClient
     {
     public:
       CompositingTestFactory Factory;
       GraphicsLayer *RootLayer {nullptr};
 
-      void AttachRootGraphicsLayer(LocalFrame &, GraphicsLayer *layer) noexcept final
+      void AttachRootGraphicsLayer(boo::Frame &, GraphicsLayer *layer) noexcept final
       {
         RootLayer = layer;
       }
@@ -153,20 +152,18 @@ namespace krys::boo::tests
     /// @brief A document in a 200x100 view of a page whose host composites it.
     struct CompositingFixture : style::tests::ResolverFixture
     {
-      CompositingChromeClient *Chrome {nullptr};
-      RefPtr<Page> TestPage;
+      CompositingBooeyClient *Client {nullptr};
 
       explicit CompositingFixture(utf8_stringview markup) noexcept
           : ResolverFixture(u8"<!DOCTYPE html><style>body{margin:0}</style>" + utf8_string(markup),
                             style::tests::WithView::No)
       {
-        auto chrome = CreateUnique<CompositingChromeClient>();
-        Chrome = chrome.get();
-        TestPage = Page::Create(krys::move(chrome));
-        Frame = ShareRefPtr(&TestPage->MainFrame());
+        auto client = CreateUnique<CompositingBooeyClient>();
+        Client = client.get();
+        Frame = boo::Frame::Create(krys::move(client));
         Frame->CreateView({200, 100});
         Frame->SetDocument(ShareRefPtr<boo::Document>(Document.get()));
-        TestPage->UpdateRendering();
+        Frame->UpdateRendering();
       }
 
       KRYS_NODISCARD RenderLayerCompositor &Compositor() noexcept
@@ -209,11 +206,11 @@ namespace krys::boo::tests
       {
         auto &loop = html::EventLoop::Current();
         loop.Run(loop.Now() + delta);
-        if (!TestPage->IsRenderingUpdateScheduled())
+        if (!Frame->IsRenderingUpdateScheduled())
         {
           return false;
         }
-        TestPage->UpdateRendering();
+        Frame->UpdateRendering();
         return true;
       }
 
@@ -245,7 +242,7 @@ namespace krys::boo::tests
   {
     CompositingFixture fixture(u8"<div style='width:50px;height:50px;background:green'></div>");
     CHECK(fixture.Compositor().UsesCompositing());
-    CHECK(fixture.Chrome->RootLayer);
+    CHECK(fixture.Client->RootLayer);
     CHECK(fixture.Frame->View()->GetRenderView()->Layer()->IsComposited());
     CHECK(fixture.LayerTree()
           == u8"(GraphicsLayer\n  (anchor 0.00 0.00)\n  (bounds 200.00 100.00)\n  (children 1\n    "
@@ -276,7 +273,7 @@ namespace krys::boo::tests
     settings->ShowDebugBorders = true;
     settings->ShowRepaintCounter = true;
     fixture.Document->SetSettings(Ref<Settings>(settings));
-    fixture.TestPage->UpdateRendering();
+    fixture.Frame->UpdateRendering();
     CHECK(fixture.GraphicsLayerOf(u8"blurred").IsShowingDebugBorder());
     CHECK(fixture.GraphicsLayerOf(u8"blurred").IsShowingRepaintCounter());
   }
@@ -400,7 +397,7 @@ namespace krys::boo::tests
     contents.NeedsDisplayRects.clear();
     graphicsLayer.NeedsDisplayRects.clear();
     fixture.ById(u8"scroller").SetScrollTop(30);
-    fixture.TestPage->UpdateRendering();
+    fixture.Frame->UpdateRendering();
     CHECK(backing.ScrollContainerLayer()->BoundsOrigin() == PointF(0, 30));
     CHECK(contents.NeedsDisplayRects.empty());
     CHECK(graphicsLayer.NeedsDisplayRects.empty());
@@ -416,7 +413,7 @@ namespace krys::boo::tests
     CHECK(backing.ScrolledContentsLayer()->Size().Height() == 200);
 
     REQUIRE_FALSE(fixture.ById(u8"content").SetAttribute(u8"style", u8"height:400px").HasException());
-    fixture.TestPage->UpdateRendering();
+    fixture.Frame->UpdateRendering();
     CHECK(backing.ScrolledContentsLayer()->Size().Height() == 400);
 
     SECTION("and a scrollbar it comes to need gets a layer")
@@ -424,7 +421,7 @@ namespace krys::boo::tests
       CHECK_FALSE(backing.LayerForHorizontalScrollbar());
       REQUIRE_FALSE(
         fixture.ById(u8"content").SetAttribute(u8"style", u8"height:400px;width:300px").HasException());
-      fixture.TestPage->UpdateRendering();
+      fixture.Frame->UpdateRendering();
       CHECK(backing.LayerForHorizontalScrollbar());
     }
   }
@@ -437,7 +434,7 @@ namespace krys::boo::tests
     CHECK_FALSE(fixture.LayerOf(u8"scroller").IsComposited());
 
     REQUIRE_FALSE(fixture.ById(u8"content").SetAttribute(u8"style", u8"height:200px").HasException());
-    fixture.TestPage->UpdateRendering();
+    fixture.Frame->UpdateRendering();
     CHECK(fixture.LayerOf(u8"scroller").IsComposited());
     CHECK(fixture.LayerOf(u8"scroller").UsesCompositedScrolling());
   }
@@ -449,7 +446,7 @@ namespace krys::boo::tests
     auto &layer = fixture.GraphicsLayerOf(u8"box");
     CHECK(layer.DeviceScaleFactor() == 1);
 
-    fixture.TestPage->SetDeviceScaleFactor(2);
+    fixture.Frame->SetDeviceScaleFactor(2);
     CHECK(fixture.Compositor().DeviceScaleFactor() == 2);
     CHECK(layer.DeviceScaleFactor() == 2);
     // The layers are told, to draw their contents again at the new scale.
@@ -477,7 +474,7 @@ namespace krys::boo::tests
       graphicsLayer.NeedsDisplayRects.clear();
       viewLayer.NeedsDisplayRects.clear();
       fixture.Frame->View()->SetScrollPosition({0, 50});
-      fixture.TestPage->UpdateRendering();
+      fixture.Frame->UpdateRendering();
       CHECK(backing.ViewportAnchorLayer()->Position() == PointF(0, 50));
       CHECK(graphicsLayer.NeedsDisplayRects.empty());
       CHECK(viewLayer.NeedsDisplayRects.empty());
@@ -522,7 +519,7 @@ namespace krys::boo::tests
     auto &graphicsLayer = static_cast<CompositingTestLayer &>(*header.Backing()->GetGraphicsLayer());
     graphicsLayer.NeedsDisplayRects.clear();
     fixture.ById(u8"scroller").SetScrollTop(40);
-    fixture.TestPage->UpdateRendering();
+    fixture.Frame->UpdateRendering();
     CHECK(header.Backing()->ViewportAnchorLayer()->Position().Y() == 40);
     CHECK(graphicsLayer.NeedsDisplayRects.empty());
   }
@@ -539,7 +536,7 @@ namespace krys::boo::tests
     graphicsLayer.NeedsDisplayRects.clear();
 
     fixture.ById(u8"inner").SetAttribute(u8"style", u8"width:10px;height:10px;background:green");
-    fixture.TestPage->UpdateRendering();
+    fixture.Frame->UpdateRendering();
     CHECK_FALSE(graphicsLayer.NeedsDisplayRects.empty());
   }
 
@@ -562,7 +559,7 @@ namespace krys::boo::tests
           == CanvasCompositingStrategy::CanvasAsLayerContents);
 
     // The context composites the canvas, before it has a texture.
-    fixture.TestPage->UpdateRendering();
+    fixture.Frame->UpdateRendering();
     auto &layer = fixture.LayerOf(u8"canvas");
     REQUIRE(layer.IsComposited());
     CHECK(fixture.Compositor().ReasonsForCompositing(layer).Contains(CompositingReason::Canvas));
@@ -571,7 +568,7 @@ namespace krys::boo::tests
     // Its texture's delegate is the layer's contents, placed by object-fit, and nothing else is painted.
     auto texture = AdoptRef(*new FakeEngineTexture({40, 20}));
     textureContext.SetTexture(texture);
-    fixture.TestPage->UpdateRendering();
+    fixture.Frame->UpdateRendering();
     auto &graphicsLayer = fixture.GraphicsLayerOf(u8"canvas");
     CHECK(graphicsLayer.Delegate == texture->Delegate.get());
     CHECK(graphicsLayer.Purpose == GraphicsLayer::ContentsLayerPurpose::Canvas);
@@ -592,7 +589,7 @@ namespace krys::boo::tests
     SECTION("pixelated canvases are scaled without interpolation")
     {
       REQUIRE_FALSE(canvas.SetAttribute(u8"style", u8"image-rendering:pixelated").HasException());
-      fixture.TestPage->UpdateRendering();
+      fixture.Frame->UpdateRendering();
       CHECK(fixture.GraphicsLayerOf(u8"canvas").ContentsMagnificationFilter()
             == GraphicsLayer::ScalingFilter::Nearest);
       CHECK(fixture.GraphicsLayerOf(u8"canvas").ContentsMinificationFilter()
@@ -602,7 +599,7 @@ namespace krys::boo::tests
     SECTION("a border is painted beneath the texture")
     {
       REQUIRE_FALSE(canvas.SetAttribute(u8"style", u8"border:2px solid").HasException());
-      fixture.TestPage->UpdateRendering();
+      fixture.Frame->UpdateRendering();
       CHECK(fixture.GraphicsLayerOf(u8"canvas").DrawsContent());
       CHECK(fixture.GraphicsLayerOf(u8"canvas").ContentsRect() == RectF(2, 2, 40, 20));
     }
@@ -610,7 +607,7 @@ namespace krys::boo::tests
     SECTION("removing the texture removes the contents")
     {
       textureContext.SetTexture(nullptr);
-      fixture.TestPage->UpdateRendering();
+      fixture.Frame->UpdateRendering();
       CHECK(fixture.GraphicsLayerOf(u8"canvas").Delegate == nullptr);
     }
   }

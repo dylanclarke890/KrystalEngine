@@ -5,7 +5,7 @@
 #include "Krystal.Booey/HTML/EventLoop/EventLoop.hpp"
 #include "Krystal.Booey/Input/EventHandler.hpp"
 #include "Krystal.Booey/Input/PlatformMouseEvent.hpp"
-#include "Krystal.Booey/Page/LocalFrameView.hpp"
+#include "Krystal.Booey/Page/FrameView.hpp"
 #include "Krystal.Booey/Platform/Scrolling/ScrollbarsController.hpp"
 #include "Krystal.Booey/Platform/Scrolling/ScrollbarTheme.hpp"
 #include "Krystal.Booey/Platform/Scrolling/ScrollbarThemeAdwaita.hpp"
@@ -275,12 +275,11 @@ namespace krys::boo::tests
     SECTION("light dark follows the page's appearance")
     {
       PaintFixture fixture(
-        u8"<!DOCTYPE html><div id=box style='overflow: scroll; color-scheme: light dark'></div>", {200, 100},
-        true);
+        u8"<!DOCTYPE html><div id=box style='overflow: scroll; color-scheme: light dark'></div>");
       (void)fixture.Painted();
       CHECK_FALSE(ScrollableAreaOf(fixture, u8"box")->UseDarkAppearanceForScrollbars());
 
-      fixture.TestPage->SetUseDarkAppearance(true);
+      fixture.Frame->SetUseDarkAppearance(true);
       (void)fixture.Painted();
       CHECK(ScrollableAreaOf(fixture, u8"box")->UseDarkAppearanceForScrollbars());
     }
@@ -354,8 +353,7 @@ namespace krys::boo::tests
       u8"<!DOCTYPE html><style>body { margin: 0 }</style>"
       u8"<div id=box style='overflow: scroll; width: 100px; height: 100px; scrollbar-color: red "
       u8"blue'><div style='position: relative; width: 300px; height: 300px; background: lime'>"
-      u8"</div></div>",
-      {200, 100}, true);
+      u8"</div></div>");
     constexpr utf8_stringview Thumb = u8"(color #FF0000)";
     constexpr utf8_stringview Child = u8"(color #00FF00)";
     auto &loop = html::EventLoop::Current();
@@ -391,8 +389,7 @@ namespace krys::boo::tests
       u8"<!DOCTYPE html><style>body { margin: 0 } div { overflow: scroll }</style>"
       u8"<div id=outer style='width: 150px; height: 90px'>"
       u8"<div id=inner style='width: 60px; height: 60px'><p style='width: 200px; height: 200px'></div>"
-      u8"<p style='width: 300px; height: 300px'></div>",
-      {200, 100}, true);
+      u8"<p style='width: 300px; height: 300px'></div>");
     (void)fixture.Painted();
     auto &loop = html::EventLoop::Current();
     auto &outer = *ScrollableAreaOf(fixture, u8"outer")->VerticalScrollbar();
@@ -433,8 +430,7 @@ namespace krys::boo::tests
     using namespace std::chrono_literals;
     auto classic = MakeScopeExit([] { ScrollbarThemeAdwaita::SetUsesOverlayScrollbars(false); });
     PaintFixture fixture(u8"<!DOCTYPE html><div id=box style='overflow: scroll; width: 100px; height: 100px'>"
-                         u8"<div style='width: 300px; height: 300px'></div></div>",
-                         {200, 100}, true);
+                         u8"<div style='width: 300px; height: 300px'></div></div>");
     (void)fixture.Painted();
     auto &loop = html::EventLoop::Current();
     auto &box = BoxOf(fixture, u8"box");

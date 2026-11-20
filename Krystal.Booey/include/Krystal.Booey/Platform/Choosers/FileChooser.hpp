@@ -64,7 +64,7 @@ namespace krys::boo
     virtual void FileChoosingCancelled() noexcept = 0;
   };
 
-  /// @brief A request for the host to let the user choose files (`ChromeClient::RunOpenPanel`), answered once
+  /// @brief A request for the host to let the user choose files (`BooeyClient::RunOpenPanel`), answered once
   /// with `ChooseFiles` or `Cancel`, whenever the host is ready. An answer after its input went away, or a
   /// second one, does nothing.
   class FileChooser final : public RefCounted<FileChooser>

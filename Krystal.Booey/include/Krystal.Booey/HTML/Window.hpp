@@ -68,18 +68,17 @@ namespace krys::boo::html
 namespace krys::boo
 {
   class DOMSelection;
-  class LocalFrame;
-  class Page;
+  class Frame;
   class VisualViewport;
 
   /// @brief A document's window: the global object of the document a frame shows, which the window events
   /// (`load`, `resize` and the others) fire at, and which the document's events bubble to.
   /// @note The document makes its window as it becomes a frame's document, and keeps it.
   /// @see https://html.spec.whatwg.org/#the-window-object
-  class LocalDOMWindow final : public EventTarget
+  class Window final : public EventTarget
   {
     KRYS_TYPE_CAST_TRAITS_ACCESS();
-    KRYS_NON_COPY_MOVABLE(LocalDOMWindow);
+    KRYS_NON_COPY_MOVABLE(Window);
 
   private:
     WeakPtr<boo::Document> _document;
@@ -99,23 +98,20 @@ namespace krys::boo
     /// @see https://html.spec.whatwg.org/#last-history-action-activation-timestamp
     dom::DOMHighResTimeStamp _lastHistoryActionActivationTimestamp;
 
-    explicit LocalDOMWindow(boo::Document &document) noexcept;
+    explicit Window(boo::Document &document) noexcept;
 
   public:
-    ~LocalDOMWindow() noexcept override;
+    ~Window() noexcept override;
 
     /// @brief A window for @p document, which must be in a frame.
-    KRYS_NODISCARD static Ref<LocalDOMWindow> Create(boo::Document &document) noexcept;
+    KRYS_NODISCARD static Ref<boo::Window> Create(boo::Document &document) noexcept;
 
     /// @brief The window's document (its associated `Document`), unless it has been destroyed.
     /// @see https://html.spec.whatwg.org/#concept-document-window
     KRYS_NODISCARD boo::Document *Document() const noexcept;
 
     /// @brief The frame showing the window's document (its navigable), if any.
-    KRYS_NODISCARD LocalFrame *Frame() const noexcept;
-
-    /// @brief The page of the window's frame, if any.
-    KRYS_NODISCARD Page *GetPage() const noexcept;
+    KRYS_NODISCARD boo::Frame *Frame() const noexcept;
 
     /// @brief Whether the window's document is the one its frame shows.
     KRYS_NODISCARD bool IsCurrentlyDisplayedInFrame() const noexcept;
@@ -272,7 +268,7 @@ namespace krys::boo
 #pragma endregion
 
     /// @brief Calls @p function with each window that exists.
-    static void ForEachWindow(const Func<void(LocalDOMWindow &)> &function) noexcept;
+    static void ForEachWindow(const Func<void(boo::Window &)> &function) noexcept;
 
     /// @see https://html.spec.whatwg.org/#dom-queuemicrotask
     static void QueueMicrotask(Func<void()> &&callback) noexcept;
@@ -326,7 +322,7 @@ namespace krys::boo
   };
 }
 
-KRYS_SPECIALIZE_TYPE_CAST_TRAITS_BEGIN(krys::boo::LocalDOMWindow)
+KRYS_SPECIALIZE_TYPE_CAST_TRAITS_BEGIN(krys::boo::Window)
   static bool IsType(const krys::boo::EventTarget &target) noexcept
   {
     return target.IsWindow();

@@ -43,8 +43,7 @@
 #include "Krystal.Booey/HTML/Elements/HTMLInputElement.hpp"
 #include "Krystal.Booey/HTML/Events/SubmitEvent.hpp"
 #include "Krystal.Booey/HTML/Forms/DOMFormData.hpp"
-#include "Krystal.Booey/Page/LocalFrame.hpp"
-#include "Krystal.Booey/Page/Page.hpp"
+#include "Krystal.Booey/Page/Frame.hpp"
 #include "Krystal.Booey/Page/Settings.hpp"
 #include "Krystal.Booey/Style/Invalidation/PseudoClassChangeInvalidation.hpp"
 #include "Krystal.Core/Strings/ASCII.hpp"
@@ -560,7 +559,7 @@ namespace krys::boo
       }
     }
 
-    bool shouldValidate = NodeDocument().GetPage()
+    bool shouldValidate = NodeDocument().Frame()
                           && NodeDocument().GetSettings().InteractiveFormValidationEnabled && !NoValidate();
     if (shouldValidate)
     {

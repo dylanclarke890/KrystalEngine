@@ -6,8 +6,7 @@
 #include "Krystal.Booey/DOM/Nodes/Document.hpp"
 #include "Krystal.Booey/HTML/Elements/HTMLImageElement.hpp"
 #include "Krystal.Booey/Loader/Cache/CachedImage.hpp"
-#include "Krystal.Booey/Page/LocalFrame.hpp"
-#include "Krystal.Booey/Page/Page.hpp"
+#include "Krystal.Booey/Page/Frame.hpp"
 #include "Krystal.Booey/Page/Settings.hpp"
 #include "Krystal.Booey/Rendering/RenderBox.hpp"
 #include "Krystal.Booey/SVG/Animation/SMILTimeContainer.hpp"
@@ -122,7 +121,7 @@ namespace krys::boo::svg::tests
     CHECK_FALSE(IsInSVGImage(&ImageById(fixture, u8"i")));
   }
 
-  TEST_CASE("SVGImage: an SVG image's animations run in the rendering update of the page showing it",
+  TEST_CASE("SVGImage: an SVG image's animations run in the rendering update of the frame showing it",
             "[SVG][SVGImage]")
   {
     LoaderFixture loader;
@@ -131,18 +130,16 @@ namespace krys::boo::svg::tests
       u8R"svg(<svg xmlns="http://www.w3.org/2000/svg" width="40" height="20"><rect id="r" width="10")svg"
       u8R"svg( height="10"><animate attributeName="x" from="0" to="100" dur="1s"/></rect></svg>)svg",
       u8"image/svg+xml");
-    auto testPage = Page::Create();
-    PageInFrameFixture fixture(*testPage, u8R"html(<img id=i src="file:///moving.svg">)html");
+    PageInFrameFixture fixture(u8R"html(<img id=i src="file:///moving.svg">)html");
     RunNetworkingTasks();
 
     auto *svgImage = SVGImageOf(ImageById(fixture, u8"i"));
     REQUIRE(svgImage);
     auto root = svgImage->RootElement();
     REQUIRE(root);
-    auto *page = fixture.Frame->GetPage();
-    REQUIRE(page);
+    auto *frame = fixture.Frame.get();
     (void)fixture.Document->UpdateLayout();
-    page->UpdateRendering();
+    frame->UpdateRendering();
     svgImage->StartAnimation();
     html::EventLoop::Current().RunUntilIdle();
     REQUIRE(root->TimeContainer().IsActive());
@@ -153,17 +150,17 @@ namespace krys::boo::svg::tests
     // The image's page asks the page showing it for its rendering updates, and is updated in them.
     for (int i = 0; i < 2; ++i)
     {
-      CHECK(page->IsRenderingUpdateScheduled());
+      CHECK(frame->IsRenderingUpdateScheduled());
       auto x = rect.X().ValueInSpecifiedUnits();
-      page->UpdateRendering();
+      frame->UpdateRendering();
       CHECK(rect.X().ValueInSpecifiedUnits() > x);
     }
 
     // Held by the page showing it, the image's animations pause, and play again after.
-    page->SetImageAnimationEnabled(false);
+    frame->SetImageAnimationEnabled(false);
     CHECK(root->AnimationsPaused());
     CHECK_FALSE(SVGImageOf(ImageById(fixture, u8"i"))->GetImageObserver()->AllowsAnimation(*svgImage));
-    page->SetImageAnimationEnabled(true);
+    frame->SetImageAnimationEnabled(true);
     CHECK_FALSE(root->AnimationsPaused());
   }
 
@@ -211,9 +208,9 @@ namespace krys::boo::svg::tests
       u8R"svg( @media (prefers-color-scheme: dark) { rect { fill: lime } }</style>)svg"
       u8R"svg(<rect width="40" height="20"/></svg>)svg",
       u8"image/svg+xml");
-    auto page = Page::Create();
-    page->SetUseDarkAppearance(true);
-    PageInFrameFixture fixture(*page, u8R"html(<body style="margin: 0"></body>)html");
+    auto frame = boo::Frame::Create();
+    frame->SetUseDarkAppearance(true);
+    PageInFrameFixture fixture(*frame, u8R"html(<body style="margin: 0"></body>)html");
 
     auto settings = Settings::Create();
     fixture.Document->SetSettings(Ref<Settings>(settings));

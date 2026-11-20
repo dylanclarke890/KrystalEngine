@@ -35,8 +35,8 @@
 #include "Krystal.Booey/Graphics/Images/Image.hpp"
 #include "Krystal.Booey/Graphics/TextRuns/StringTruncator.hpp"
 #include "Krystal.Booey/Graphics/TextRuns/TextRun.hpp"
+#include "Krystal.Booey/Page/Frame.hpp"
 #include "Krystal.Booey/Page/FrameSnapshotting.hpp"
-#include "Krystal.Booey/Page/LocalFrame.hpp"
 #include "Krystal.Booey/Page/Settings.hpp"
 #include "Krystal.Booey/Rendering/RenderElement.hpp"
 #include "Krystal.Net/Url.hpp"
@@ -171,7 +171,7 @@ namespace krys::boo
       KRYS_NON_COPY_MOVABLE(ScopedNodeDragEnabler);
 
       // Elements have no drag state to set while they're painted: no pseudo-class matches dragged elements.
-      ScopedNodeDragEnabler(LocalFrame &frame, boo::Node &) noexcept
+      ScopedNodeDragEnabler(Frame &frame, boo::Node &) noexcept
       {
         (void)frame.Document()->UpdateLayout();
       }
@@ -198,14 +198,14 @@ namespace krys::boo
     }
   }
 
-  DragImageRef CreateDragImageForNode(LocalFrame &frame, boo::Node &node) noexcept
+  DragImageRef CreateDragImageForNode(Frame &frame, boo::Node &node) noexcept
   {
     ScopedNodeDragEnabler enableDrag(frame, node);
     SnapshotOptions options {{SnapshotFlags::DraggableElement}};
     return CreateDragImageFromSnapshot(SnapshotNode(frame, node, krys::move(options)), &node);
   }
 
-  DragImageData CreateDragImageForSelection(LocalFrame &frame, bool forceBlackText) noexcept
+  DragImageData CreateDragImageForSelection(Frame &frame, bool forceBlackText) noexcept
   {
     SnapshotOptions options;
     if (forceBlackText)

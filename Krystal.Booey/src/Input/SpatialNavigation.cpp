@@ -31,8 +31,8 @@
 #include "Krystal.Booey/HTML/Elements/HTMLAreaElement.hpp"
 #include "Krystal.Booey/HTML/Elements/HTMLImageElement.hpp"
 #include "Krystal.Booey/HTML/Elements/HTMLSelectElement.hpp"
-#include "Krystal.Booey/Page/LocalFrame.hpp"
-#include "Krystal.Booey/Page/LocalFrameView.hpp"
+#include "Krystal.Booey/Page/Frame.hpp"
+#include "Krystal.Booey/Page/FrameView.hpp"
 #include "Krystal.Booey/Platform/Scrolling/Scrollbar.hpp"
 #include "Krystal.Booey/Rendering/Layers/RenderLayer.hpp"
 #include "Krystal.Booey/Rendering/Layers/RenderLayerScrollableArea.hpp"
@@ -451,7 +451,7 @@ namespace krys::boo
     return !containerViewportRect.Intersects(rect);
   }
 
-  bool ScrollInDirection(LocalFrame *frame, dom::FocusDirection direction) noexcept
+  bool ScrollInDirection(Frame *frame, dom::FocusDirection direction) noexcept
   {
     krys_debug_assert(frame);
 
@@ -574,7 +574,7 @@ namespace krys::boo
     return false;
   }
 
-  bool CanScrollInDirection(const LocalFrame *frame, dom::FocusDirection direction) noexcept
+  bool CanScrollInDirection(const Frame *frame, dom::FocusDirection direction) noexcept
   {
     if (!frame || !frame->View())
     {
@@ -641,7 +641,7 @@ namespace krys::boo
     return {};
   }
 
-  LayoutRect FrameRectInAbsoluteCoordinates(LocalFrame *frame) noexcept
+  LayoutRect FrameRectInAbsoluteCoordinates(Frame *frame) noexcept
   {
     return LayoutRect(frame->View()->VisibleContentRect());
   }

@@ -24,7 +24,7 @@
  * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-#include "Krystal.Booey/Page/LocalDOMWindow.hpp"
+#include "Krystal.Booey/HTML/Window.hpp"
 #include "Krystal.Booey/CSS/CSSOM/CSSComputedStyleDeclaration.hpp"
 #include "Krystal.Booey/CSS/CSSOM/MediaQueryList.hpp"
 #include "Krystal.Booey/CSS/Selectors/SelectorParser.hpp"
@@ -37,11 +37,10 @@
 #include "Krystal.Booey/HTML/CustomElement/CustomElementRegistry.hpp"
 #include "Krystal.Booey/HTML/Elements/HTMLElement.hpp"
 #include "Krystal.Booey/HTML/EventLoop/EventLoop.hpp"
-#include "Krystal.Booey/Page/Clients/ChromeClient.hpp"
+#include "Krystal.Booey/Page/Clients/BooeyClient.hpp"
 #include "Krystal.Booey/Page/DOMSelection.hpp"
-#include "Krystal.Booey/Page/LocalFrame.hpp"
-#include "Krystal.Booey/Page/LocalFrameView.hpp"
-#include "Krystal.Booey/Page/Page.hpp"
+#include "Krystal.Booey/Page/Frame.hpp"
+#include "Krystal.Booey/Page/FrameView.hpp"
 #include "Krystal.Booey/Page/Scrolling/ScrollBehavior.hpp"
 #include "Krystal.Booey/Page/VisualViewport.hpp"
 #include <limits>
@@ -50,14 +49,14 @@ namespace krys::boo
 {
   namespace
   {
-    KRYS_NODISCARD List<LocalDOMWindow *> &AllWindows() noexcept
+    KRYS_NODISCARD List<boo::Window *> &AllWindows() noexcept
     {
-      static List<LocalDOMWindow *> windows;
+      static List<boo::Window *> windows;
       return windows;
     }
   }
 
-  LocalDOMWindow::LocalDOMWindow(boo::Document &document) noexcept
+  boo::Window::Window(boo::Document &document) noexcept
       : EventTarget(dom::EventTargetFlags::IsWindow), _document(CreateWeakPtr(&document)),
         _timeOrigin(html::EventLoop::Current().Now()),
         _lastActivationTimestamp(std::numeric_limits<dom::DOMHighResTimeStamp>::infinity()),
@@ -67,12 +66,12 @@ namespace krys::boo
     AllWindows().push_back(this);
   }
 
-  LocalDOMWindow::~LocalDOMWindow() noexcept
+  boo::Window::~Window() noexcept
   {
     std::erase(AllWindows(), this);
   }
 
-  void LocalDOMWindow::ForEachWindow(const Func<void(LocalDOMWindow &)> &function) noexcept
+  void boo::Window::ForEachWindow(const Func<void(boo::Window &)> &function) noexcept
   {
     auto windows = AllWindows();
     for (auto *window : windows)
@@ -81,17 +80,17 @@ namespace krys::boo
     }
   }
 
-  Ref<LocalDOMWindow> LocalDOMWindow::Create(boo::Document &document) noexcept
+  Ref<boo::Window> boo::Window::Create(boo::Document &document) noexcept
   {
-    return AdoptRef(*new LocalDOMWindow(document));
+    return AdoptRef(*new Window(document));
   }
 
-  boo::Document *LocalDOMWindow::Document() const noexcept
+  boo::Document *boo::Window::Document() const noexcept
   {
     return _document.get();
   }
 
-  void LocalDOMWindow::DidAddEventListener(const EventListener &listener) noexcept
+  void boo::Window::DidAddEventListener(const EventListener &listener) noexcept
   {
     EventTarget::DidAddEventListener(listener);
     if (auto *document = Document())
@@ -100,25 +99,19 @@ namespace krys::boo
     }
   }
 
-  LocalFrame *LocalDOMWindow::Frame() const noexcept
+  boo::Frame *boo::Window::Frame() const noexcept
   {
     auto *document = Document();
     return document ? document->Frame() : nullptr;
   }
 
-  Page *LocalDOMWindow::GetPage() const noexcept
-  {
-    auto *frame = Frame();
-    return frame ? frame->GetPage() : nullptr;
-  }
-
-  bool LocalDOMWindow::IsCurrentlyDisplayedInFrame() const noexcept
+  bool boo::Window::IsCurrentlyDisplayedInFrame() const noexcept
   {
     auto *frame = Frame();
     return frame && frame->Document() == Document();
   }
 
-  html::CustomElementRegistry &LocalDOMWindow::EnsureCustomElementRegistry() noexcept
+  html::CustomElementRegistry &boo::Window::EnsureCustomElementRegistry() noexcept
   {
     if (!_customElementRegistry)
     {
@@ -133,11 +126,11 @@ namespace krys::boo
     return *_customElementRegistry;
   }
 
-  void LocalDOMWindow::Focus() noexcept
+  void boo::Window::Focus() noexcept
   {
     // Let current be this's navigable. If current is null, then return.
-    auto *page = GetPage();
-    if (!page)
+    auto *frame = Frame();
+    if (!frame)
     {
       return;
     }
@@ -145,10 +138,10 @@ namespace krys::boo
     // to indicate to the user that the page is attempting to gain focus: the host decides whether to bring
     // its window to the front. The focusing steps would focus the document's viewport, but the focused
     // element is kept, as browsers do.
-    page->GetChromeClient().Focus();
+    frame->GetBooeyClient().Focus();
   }
 
-  bool LocalDOMWindow::IsNamedObject(const Element &element, DOMStringView name) noexcept
+  bool boo::Window::IsNamedObject(const Element &element, DOMStringView name) noexcept
   {
     if (!Is<HTMLElement>(element) || name.empty())
     {
@@ -171,7 +164,7 @@ namespace krys::boo
   }
 
   Maybe<Variant<RefPtr<Element>, RefPtr<dom::HTMLCollection>>>
-    LocalDOMWindow::NamedItem(DOMStringView name) const noexcept
+    boo::Window::NamedItem(DOMStringView name) const noexcept
   {
     // The named objects are in a document tree with window's associated Document as their root. There are no
     // child navigables.
@@ -218,7 +211,7 @@ namespace krys::boo
     return Variant<RefPtr<Element>, RefPtr<dom::HTMLCollection>>(krys::move(collection));
   }
 
-  List<DOMString> LocalDOMWindow::SupportedPropertyNames() const noexcept
+  List<DOMString> boo::Window::SupportedPropertyNames() const noexcept
   {
     // The window's document-tree child navigable target name property set (empty: there are no child
     // navigables), then the values of the name content attributes of embed, form, img and object elements,
@@ -256,7 +249,7 @@ namespace krys::boo
     return names;
   }
 
-  html::CloseWatcherManager &LocalDOMWindow::GetCloseWatcherManager() const noexcept
+  html::CloseWatcherManager &boo::Window::GetCloseWatcherManager() const noexcept
   {
     if (!_closeWatcherManager)
     {
@@ -265,33 +258,33 @@ namespace krys::boo
     return *_closeWatcherManager;
   }
 
-  html::CloseWatcherManager *LocalDOMWindow::CloseWatcherManagerIfExists() const noexcept
+  html::CloseWatcherManager *boo::Window::CloseWatcherManagerIfExists() const noexcept
   {
     return _closeWatcherManager.get();
   }
 
-  RefPtr<MediaQueryList> LocalDOMWindow::MatchMedia(DOMStringView query) noexcept
+  RefPtr<MediaQueryList> boo::Window::MatchMedia(DOMStringView query) noexcept
   {
     auto *document = Document();
     return document ? RefPtr<MediaQueryList>(document->GetMediaQueryMatcher().MatchMedia(query)) : nullptr;
   }
 
-  VisualViewport &LocalDOMWindow::GetVisualViewport() const noexcept
+  VisualViewport &boo::Window::GetVisualViewport() const noexcept
   {
     if (!_visualViewport)
     {
-      _visualViewport = VisualViewport::Create(const_cast<LocalDOMWindow &>(*this));
+      _visualViewport = VisualViewport::Create(const_cast<boo::Window &>(*this));
       _visualViewport->Update();
     }
     return *_visualViewport;
   }
 
-  VisualViewport *LocalDOMWindow::OptionalVisualViewport() const noexcept
+  VisualViewport *boo::Window::OptionalVisualViewport() const noexcept
   {
     return _visualViewport.get();
   }
 
-  int32 LocalDOMWindow::InnerWidth() const noexcept
+  int32 boo::Window::InnerWidth() const noexcept
   {
     auto *frame = Frame();
     auto *view = frame ? frame->View() : nullptr;
@@ -303,7 +296,7 @@ namespace krys::boo
       view->UnobscuredContentRect(ScrollableArea::VisibleContentRectIncludesScrollbars::Yes).Width());
   }
 
-  int32 LocalDOMWindow::InnerHeight() const noexcept
+  int32 boo::Window::InnerHeight() const noexcept
   {
     auto *frame = Frame();
     auto *view = frame ? frame->View() : nullptr;
@@ -315,7 +308,7 @@ namespace krys::boo
       view->UnobscuredContentRect(ScrollableArea::VisibleContentRectIncludesScrollbars::Yes).Height());
   }
 
-  int32 LocalDOMWindow::ScrollX() const noexcept
+  int32 boo::Window::ScrollX() const noexcept
   {
     auto *frame = Frame();
     auto *view = frame ? frame->View() : nullptr;
@@ -334,7 +327,7 @@ namespace krys::boo
              : 0;
   }
 
-  int32 LocalDOMWindow::ScrollY() const noexcept
+  int32 boo::Window::ScrollY() const noexcept
   {
     auto *frame = Frame();
     auto *view = frame ? frame->View() : nullptr;
@@ -353,25 +346,25 @@ namespace krys::boo
              : 0;
   }
 
-  void LocalDOMWindow::ScrollTo(double x, double y) const noexcept
+  void boo::Window::ScrollTo(double x, double y) const noexcept
   {
     ScrollTo(ScrollToOptions(x, y));
   }
 
-  void LocalDOMWindow::ScrollTo(const ScrollToOptions &options) const noexcept
+  void boo::Window::ScrollTo(const ScrollToOptions &options) const noexcept
   {
     ScrollTo(options, ScrollSnapPointSelectionMethod::Closest);
   }
 
-  void LocalDOMWindow::ScrollTo(const ScrollToOptions &options,
-                                ScrollSnapPointSelectionMethod snapPointSelectionMethod) const noexcept
+  void boo::Window::ScrollTo(const ScrollToOptions &options,
+                             ScrollSnapPointSelectionMethod snapPointSelectionMethod) const noexcept
   {
     if (!IsCurrentlyDisplayedInFrame())
     {
       return;
     }
 
-    RefPtr<LocalFrameView> view = ShareRefPtr(Frame()->View());
+    RefPtr<FrameView> view = ShareRefPtr(Frame()->View());
     if (!view)
     {
       return;
@@ -403,12 +396,12 @@ namespace krys::boo
                                                  animated, snapPointSelectionMethod));
   }
 
-  void LocalDOMWindow::ScrollBy(double x, double y) const noexcept
+  void boo::Window::ScrollBy(double x, double y) const noexcept
   {
     ScrollBy(ScrollToOptions(x, y));
   }
 
-  void LocalDOMWindow::ScrollBy(const ScrollToOptions &options) const noexcept
+  void boo::Window::ScrollBy(const ScrollToOptions &options) const noexcept
   {
     if (!IsCurrentlyDisplayedInFrame())
     {
@@ -429,7 +422,7 @@ namespace krys::boo
     ScrollTo(scrollToOptions, ScrollSnapPointSelectionMethod::Directional);
   }
 
-  double LocalDOMWindow::DevicePixelRatio() const noexcept
+  double boo::Window::DevicePixelRatio() const noexcept
   {
     auto *frame = Frame();
     if (!frame)
@@ -439,12 +432,11 @@ namespace krys::boo
     // Page zoom applies to all frames synchronously, so include it in devicePixelRatio
     // for both main frame and iframes. FrameScaleFactor() doesn't include page zoom
     // since page zoom is applied globally for rendering.
-    auto *page = frame->GetPage();
-    return (page ? page->DeviceScaleFactor() : 1.f) * frame->FrameScaleFactor() * frame->PageZoomFactor();
+    return frame->DeviceScaleFactor() * frame->FrameScaleFactor() * frame->PageZoomFactor();
   }
 
-  Ref<CSSStyleDeclaration> LocalDOMWindow::GetComputedStyle(Element &element,
-                                                            const CSSOMString &pseudoElement) noexcept
+  Ref<CSSStyleDeclaration> boo::Window::GetComputedStyle(Element &element,
+                                                         const CSSOMString &pseudoElement) noexcept
   {
     if (!pseudoElement.starts_with(u8':'))
     {
@@ -466,7 +458,7 @@ namespace krys::boo
   }
 
   // https://html.spec.whatwg.org/#activation-notification
-  void LocalDOMWindow::NotifyActivated() noexcept
+  void boo::Window::NotifyActivated() noexcept
   {
     // 1. Assert: document is fully active.
     // 2. Let windows be « document's relevant global object ».
@@ -481,14 +473,14 @@ namespace krys::boo
     GetCloseWatcherManager().NotifyAboutUserActivation();
   }
 
-  bool LocalDOMWindow::HasStickyActivation() const noexcept
+  bool boo::Window::HasStickyActivation() const noexcept
   {
     // When the current high resolution time given W is greater than or equal to the last activation timestamp
     // in W, W is said to have sticky activation.
     return NowTimestamp() >= _lastActivationTimestamp;
   }
 
-  bool LocalDOMWindow::HasTransientActivation() const noexcept
+  bool boo::Window::HasTransientActivation() const noexcept
   {
     // When the current high resolution time is greater than or equal to the last activation timestamp in W,
     // and less than the last activation timestamp in W plus the transient activation duration, then W is said
@@ -497,7 +489,7 @@ namespace krys::boo
     return now >= _lastActivationTimestamp && now < _lastActivationTimestamp + TransientActivationDuration();
   }
 
-  bool LocalDOMWindow::HasHistoryActionActivation() const noexcept
+  bool boo::Window::HasHistoryActionActivation() const noexcept
   {
     // When the last history-action activation timestamp of W is not equal to the last activation timestamp of
     // W, then W is said to have history-action activation.
@@ -505,7 +497,7 @@ namespace krys::boo
   }
 
   // https://html.spec.whatwg.org/#consume-user-activation
-  bool LocalDOMWindow::ConsumeTransientActivation() noexcept
+  bool boo::Window::ConsumeTransientActivation() noexcept
   {
     // (Without transient activation, consuming changes nothing observable, so it returns early to report it.)
     if (!HasTransientActivation())
@@ -528,7 +520,7 @@ namespace krys::boo
   }
 
   // https://html.spec.whatwg.org/#consume-history-action-user-activation
-  bool LocalDOMWindow::ConsumeHistoryActionUserActivation() noexcept
+  bool boo::Window::ConsumeHistoryActionUserActivation() noexcept
   {
     if (!HasHistoryActionActivation())
     {
@@ -547,20 +539,20 @@ namespace krys::boo
   }
 
   // https://html.spec.whatwg.org/#dom-queuemicrotask
-  void LocalDOMWindow::QueueMicrotask(Func<void()> &&callback) noexcept
+  void boo::Window::QueueMicrotask(Func<void()> &&callback) noexcept
   {
     // Queue a microtask to invoke callback with « » and "report".
     // (C++ callbacks don't throw.)
     html::EventLoop::Current().QueueMicrotask(krys::move(callback));
   }
 
-  int32 LocalDOMWindow::RequestAnimationFrame(dom::FrameRequestCallback &&callback) noexcept
+  int32 boo::Window::RequestAnimationFrame(dom::FrameRequestCallback &&callback) noexcept
   {
     auto *document = Document();
     return document ? document->RequestAnimationFrame(krys::move(callback)) : 0;
   }
 
-  void LocalDOMWindow::CancelAnimationFrame(int32 handle) noexcept
+  void boo::Window::CancelAnimationFrame(int32 handle) noexcept
   {
     if (auto *document = Document())
     {
@@ -568,27 +560,27 @@ namespace krys::boo
     }
   }
 
-  dom::DOMHighResTimeStamp LocalDOMWindow::NowTimestamp() const noexcept
+  dom::DOMHighResTimeStamp boo::Window::NowTimestamp() const noexcept
   {
     return std::chrono::duration<double, std::milli>(html::EventLoop::Current().Now() - _timeOrigin).count();
   }
 
-  void LocalDOMWindow::FreezeNowTimestamp() noexcept
+  void boo::Window::FreezeNowTimestamp() noexcept
   {
     _frozenNowTimestamp = NowTimestamp();
   }
 
-  void LocalDOMWindow::UnfreezeNowTimestamp() noexcept
+  void boo::Window::UnfreezeNowTimestamp() noexcept
   {
     _frozenNowTimestamp = null;
   }
 
-  dom::DOMHighResTimeStamp LocalDOMWindow::FrozenNowTimestamp() const noexcept
+  dom::DOMHighResTimeStamp boo::Window::FrozenNowTimestamp() const noexcept
   {
     return _frozenNowTimestamp.value_or(NowTimestamp());
   }
 
-  DOMSelection *LocalDOMWindow::GetSelection() const noexcept
+  DOMSelection *boo::Window::GetSelection() const noexcept
   {
     // Return the associated Document's selection: the same object as document.getSelection(), which is null
     // without a browsing context.

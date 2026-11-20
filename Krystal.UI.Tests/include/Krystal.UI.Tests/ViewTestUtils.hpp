@@ -2,7 +2,7 @@
 
 #include "Krystal.Booey/HTML/EventLoop/EventLoop.hpp"
 #include "Krystal.Booey/Loader/FrameLoader.hpp"
-#include "Krystal.Booey/Page/LocalFrame.hpp"
+#include "Krystal.Booey/Page/Frame.hpp"
 #include "Krystal.UI/View.hpp"
 
 namespace krys::ui::tests

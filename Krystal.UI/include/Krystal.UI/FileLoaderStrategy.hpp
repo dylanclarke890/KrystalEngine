@@ -27,8 +27,7 @@ namespace krys::ui
     {
     }
 
-    void LoadResource(boo::LocalFrame &, const net::ResourceRequest &request,
-                      const boo::ResourceLoaderOptions &,
+    void LoadResource(boo::Frame &, const net::ResourceRequest &request, const boo::ResourceLoaderOptions &,
                       Func<void(boo::LoadResult &&)> &&completionHandler) noexcept override;
   };
 }

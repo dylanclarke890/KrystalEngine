@@ -5,8 +5,8 @@
 #include "Krystal.Booey/Editing/Selection/FrameSelection.hpp"
 #include "Krystal.Booey/HTML/EventLoop/EventLoop.hpp"
 #include "Krystal.Booey/HTML/Parser/DocumentParser.hpp"
+#include "Krystal.Booey/HTML/Window.hpp"
 #include "Krystal.Booey/Loader/FrameLoader.hpp"
-#include "Krystal.Booey/Page/LocalDOMWindow.hpp"
 #include "Krystal.Net/Url.hpp"
 
 namespace krys::boo::tests
@@ -164,8 +164,8 @@ namespace krys::boo::tests
 
   TEST_CASE("A document's own fragment is scrolled to once it's parsed", "[Loader][FragmentNavigation]")
   {
-    auto page = Page::Create();
-    auto &frame = page->MainFrame();
+    auto page = boo::Frame::Create();
+    auto &frame = *page;
     frame.CreateView({400, 300});
     auto document = CreateRef<HTMLDocument>();
     document->SetUrl(net::Url(u8"https://example.com/page.html#section"));

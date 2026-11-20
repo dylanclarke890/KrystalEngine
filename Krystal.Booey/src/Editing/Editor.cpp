@@ -68,9 +68,8 @@
 #include "Krystal.Booey/Input/EventHandler.hpp"
 #include "Krystal.Booey/Loader/Cache/CachedImage.hpp"
 #include "Krystal.Booey/Page/Clients/EditorClient.hpp"
-#include "Krystal.Booey/Page/LocalFrame.hpp"
-#include "Krystal.Booey/Page/LocalFrameView.hpp"
-#include "Krystal.Booey/Page/Page.hpp"
+#include "Krystal.Booey/Page/Frame.hpp"
+#include "Krystal.Booey/Page/FrameView.hpp"
 #include "Krystal.Booey/Page/Settings.hpp"
 #include "Krystal.Booey/Platform/Pasteboard/Pasteboard.hpp"
 #include "Krystal.Booey/Platform/Pasteboard/StaticPasteboard.hpp"
@@ -250,9 +249,9 @@ namespace krys::boo
 
   EditorClient *Editor::Client() const noexcept
   {
-    if (auto *page = _document.GetPage())
+    if (auto *frame = _document.Frame())
     {
-      return &page->GetEditorClient();
+      return &frame->GetEditorClient();
     }
     return nullptr;
   }
@@ -551,7 +550,7 @@ namespace krys::boo
     pasteboard.Write(pasteboardContent);
   }
 
-  IgnoreSelectionChangeForScope::IgnoreSelectionChangeForScope(LocalFrame &frame) noexcept
+  IgnoreSelectionChangeForScope::IgnoreSelectionChangeForScope(boo::Frame &frame) noexcept
       : _selectionChange(*frame.Document(), null, TemporarySelectionOption::IgnoreSelectionChanges)
   {
   }

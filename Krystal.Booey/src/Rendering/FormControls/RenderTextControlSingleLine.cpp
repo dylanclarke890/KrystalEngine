@@ -29,7 +29,7 @@
 #include "Krystal.Booey/HTML/Elements/HTMLInputElement.hpp"
 #include "Krystal.Booey/HTML/Shadow/TextControlInnerElements.hpp"
 #include "Krystal.Booey/Layout/Integration/Inline/InlineIteratorLineBox.hpp"
-#include "Krystal.Booey/Page/LocalFrame.hpp"
+#include "Krystal.Booey/Page/Frame.hpp"
 #include "Krystal.Booey/Rendering/HitTesting/HitTestLocation.hpp"
 #include "Krystal.Booey/Rendering/HitTesting/HitTestResult.hpp"
 #include "Krystal.Booey/Rendering/Layers/RenderLayer.hpp"

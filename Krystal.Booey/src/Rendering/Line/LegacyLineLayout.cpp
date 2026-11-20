@@ -26,8 +26,8 @@
 
 #include "Krystal.Booey/Accessibility/AXObjectCache.hpp"
 #include "Krystal.Booey/Graphics/Fonts/FontCascade.hpp"
-#include "Krystal.Booey/Page/LocalFrameView.hpp"
-#include "Krystal.Booey/Page/LocalFrameViewLayoutContext.hpp"
+#include "Krystal.Booey/Page/FrameView.hpp"
+#include "Krystal.Booey/Page/FrameViewLayoutContext.hpp"
 #include "Krystal.Booey/Rendering/Layers/RenderLayer.hpp"
 #include "Krystal.Booey/Rendering/Line/BreakingContext.hpp"
 #include "Krystal.Booey/Rendering/Line/InlineWalker.hpp"
@@ -722,7 +722,7 @@ namespace krys::boo
     return _flow.Style();
   }
 
-  const LocalFrameViewLayoutContext &LegacyLineLayout::LayoutContext() const noexcept
+  const FrameViewLayoutContext &LegacyLineLayout::LayoutContext() const noexcept
   {
     return _flow.View().FrameView().LayoutContext();
   }

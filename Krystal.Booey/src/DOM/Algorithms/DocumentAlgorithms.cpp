@@ -14,7 +14,7 @@
 #include "Krystal.Booey/HTML/Algorithms/CustomElementAlgorithms.hpp"
 #include "Krystal.Booey/HTML/CustomElement/CustomElementReactionQueue.hpp"
 #include "Krystal.Booey/HTML/CustomElement/CustomElementRegistry.hpp"
-#include "Krystal.Booey/Page/LocalDOMWindow.hpp"
+#include "Krystal.Booey/HTML/Window.hpp"
 
 namespace krys::boo::dom
 {

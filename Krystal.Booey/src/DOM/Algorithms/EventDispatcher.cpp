@@ -35,7 +35,7 @@
 #include "Krystal.Booey/DOM/Nodes/ShadowRoot.hpp"
 #include "Krystal.Booey/HTML/CustomElement/CustomElementReactionQueue.hpp"
 #include "Krystal.Booey/HTML/CustomElement/CustomElementRegistry.hpp"
-#include "Krystal.Booey/Page/LocalDOMWindow.hpp"
+#include "Krystal.Booey/HTML/Window.hpp"
 #include <ranges>
 
 namespace krys::boo::dom
@@ -86,7 +86,7 @@ namespace krys::boo::dom
     {
       // Only HTML gives the flag, and only for a Window.
       krys_debug_assert(target->IsWindow());
-      targetOverride = Downcast<LocalDOMWindow>(*target).Document();
+      targetOverride = Downcast<Window>(*target).Document();
       krys_debug_assert(targetOverride);
     }
 
@@ -516,9 +516,9 @@ namespace krys::boo::dom
     }
   }
 
-  LocalDOMWindow *EventDispatcher::RelevantWindow(EventTarget &target) noexcept
+  Window *EventDispatcher::RelevantWindow(EventTarget &target) noexcept
   {
-    if (auto *window = DynamicDowncast<LocalDOMWindow>(target))
+    if (auto *window = DynamicDowncast<Window>(target))
     {
       return window;
     }
@@ -580,7 +580,7 @@ namespace krys::boo::dom
       // 2g. Let listenerGlobal be listener callback's associated realm's global object.
       // Listeners are host code rather than script, so their global is targetGlobal: the current target's
       // window, or its node document's.
-      RefPtr<LocalDOMWindow> global = ShareRefPtr(RelevantWindow(*event._currentTarget));
+      RefPtr<Window> global = ShareRefPtr(RelevantWindow(*event._currentTarget));
 
       // 2h. If targetGlobal or listenerGlobal is a Window object whose associated Document is not fully
       // active, then continue.

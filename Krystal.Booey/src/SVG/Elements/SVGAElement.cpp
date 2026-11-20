@@ -33,7 +33,7 @@
 #include "Krystal.Booey/HTML/Algorithms/HyperlinkAlgorithms.hpp"
 #include "Krystal.Booey/Infra/StringAlgorithms.hpp"
 #include "Krystal.Booey/Loader/FrameLoader.hpp"
-#include "Krystal.Booey/Page/LocalFrame.hpp"
+#include "Krystal.Booey/Page/Frame.hpp"
 #include "Krystal.Booey/Rendering/SVG/Legacy/LegacyRenderSVGTransformableContainer.hpp"
 #include "Krystal.Booey/Rendering/SVG/RenderSVGInline.hpp"
 #include "Krystal.Booey/SVG/Animation/SVGSMILElement.hpp"
@@ -188,7 +188,7 @@ namespace krys::boo
     auto referrerPolicy =
       HasRel(SVGALinkRelation::NoReferrer) ? ReferrerPolicy::NoReferrer : ReferrerPolicy::EmptyString;
 
-    if (RefPtr<LocalFrame> frame = ShareRefPtr(document->Frame()))
+    if (RefPtr<Frame> frame = ShareRefPtr(document->Frame()))
     {
       frame->Loader().ChangeLocation(completedUrl, target, &event, referrerPolicy, null, this);
     }

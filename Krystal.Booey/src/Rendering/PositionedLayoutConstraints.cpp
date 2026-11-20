@@ -24,7 +24,7 @@
  */
 
 #include "Krystal.Booey/Rendering/PositionedLayoutConstraints.hpp"
-#include "Krystal.Booey/Page/LocalFrameView.hpp"
+#include "Krystal.Booey/Page/FrameView.hpp"
 #include "Krystal.Booey/Rendering/Grid/RenderGrid.hpp"
 #include "Krystal.Booey/Rendering/Layers/RenderLayer.hpp"
 #include "Krystal.Booey/Rendering/RenderInline.hpp"
@@ -57,13 +57,10 @@ namespace krys::boo
         _style(selfStyleOverride),
         _alignment(_containingAxis == LogicalBoxAxis::Inline ? selfStyleOverride.GetJustifySelf().Resolve()
                                                              : selfStyleOverride.GetAlignSelf().Resolve()),
-        _defaultAnchorBox(NeedsAnchor()
-                            ? style::AnchorPositionEvaluator::DefaultAnchorForBox(renderer)
-                            : nullptr),
-        _marginBefore(style::MarginEdge::Fixed {0}),
-        _marginAfter(style::MarginEdge::Fixed {0}),
-        _insetBefore(style::InsetEdge::Fixed {0}),
-        _insetAfter(style::InsetEdge::Fixed {0})
+        _defaultAnchorBox(NeedsAnchor() ? style::AnchorPositionEvaluator::DefaultAnchorForBox(renderer)
+                                        : nullptr),
+        _marginBefore(style::MarginEdge::Fixed {0}), _marginAfter(style::MarginEdge::Fixed {0}),
+        _insetBefore(style::InsetEdge::Fixed {0}), _insetAfter(style::InsetEdge::Fixed {0})
   {
     krys_debug_assert(_container);
 

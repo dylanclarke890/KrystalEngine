@@ -142,7 +142,7 @@ Status: n/a (no origins)
 #### [7.1.2 Origin-keyed agent clusters](https://html.spec.whatwg.org/#origin-keyed-agent-clusters)
 
 Status: reviewed (2026-11-01)
-> `LocalDOMWindow::OriginAgentCluster` is false, as no document is origin-keyed.
+> `Window::OriginAgentCluster` is false, as no document is origin-keyed.
 <!-- definitions: origin-agent-cluster -->
 
 - [x] [Window.originAgentCluster](https://html.spec.whatwg.org/#dom-originagentcluster) — The originAgentCluster getter steps are to return the surrounding agent's agent cluster's is origin-keyed.

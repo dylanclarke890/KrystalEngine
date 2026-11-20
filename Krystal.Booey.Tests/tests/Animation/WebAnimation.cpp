@@ -12,9 +12,8 @@
 #include "Krystal.Booey/DOM/Nodes/HTMLDocument.hpp"
 #include "Krystal.Booey/HTML/EventLoop/EventLoop.hpp"
 #include "Krystal.Booey/HTML/Parser/DocumentParser.hpp"
-#include "Krystal.Booey/Page/LocalDOMWindow.hpp"
-#include "Krystal.Booey/Page/LocalFrame.hpp"
-#include "Krystal.Booey/Page/Page.hpp"
+#include "Krystal.Booey/HTML/Window.hpp"
+#include "Krystal.Booey/Page/Frame.hpp"
 #include "Krystal.Booey/Style/Scope/Scope.hpp"
 
 namespace krys::boo::tests
@@ -26,14 +25,14 @@ namespace krys::boo::tests
     /// @brief A page showing a document with a `#target` element, and an animation of an effect on it.
     struct AnimationFixture
     {
-      Ref<Page> TestPage {Page::Create()};
+      Ref<boo::Frame> TestFrame {boo::Frame::Create()};
       RefPtr<HTMLDocument> Document;
       RefPtr<KeyframeEffect> Effect;
       RefPtr<WebAnimation> Animation;
 
       AnimationFixture() noexcept
       {
-        auto &frame = TestPage->MainFrame();
+        auto &frame = *TestFrame;
         frame.CreateView({200, 100});
         Document = CreateRef<HTMLDocument>();
         frame.SetDocument(ShareRefPtr<boo::Document>(Document.get()));
@@ -41,7 +40,7 @@ namespace krys::boo::tests
         parser->InputStream().Append(u8"<!DOCTYPE html><div id=target></div>", IsEOF::Yes);
         parser->PumpTokenizer();
         Document->StyleScope().FlushPendingUpdate();
-        TestPage->UpdateRendering();
+        TestFrame->UpdateRendering();
 
         auto target = Document->GetElementById(u8"target");
         REQUIRE(target);
@@ -53,7 +52,7 @@ namespace krys::boo::tests
       ~AnimationFixture() noexcept
       {
         Animation->Cancel(WebAnimation::Silently::Yes);
-        TestPage->MainFrame().SetDocument(nullptr);
+        TestFrame->SetDocument(nullptr);
       }
 
       /// @brief Runs the event loop @p delta after its last run, then the rendering update if one is
@@ -62,9 +61,9 @@ namespace krys::boo::tests
       {
         auto &loop = html::EventLoop::Current();
         loop.Run(loop.Now() + delta);
-        if (TestPage->IsRenderingUpdateScheduled())
+        if (TestFrame->IsRenderingUpdateScheduled())
         {
-          TestPage->UpdateRendering();
+          TestFrame->UpdateRendering();
         }
       }
 
@@ -171,7 +170,7 @@ namespace krys::boo::tests
     CHECK(animation.GetPlayState() == WebAnimation::PlayState::Running);
     CHECK(animation.CurrentTime() == WebAnimationTime {Seconds {0}});
     CHECK(animation.IsRelevant());
-    CHECK(fixture.TestPage->IsRenderingUpdateScheduled());
+    CHECK(fixture.TestFrame->IsRenderingUpdateScheduled());
 
     // It becomes ready, with the time of the frame after it was played as its start time.
     fixture.Frame();
@@ -338,10 +337,10 @@ namespace krys::boo::tests
     SECTION("In a hidden page it stays suspended when the document resumes")
     {
       document.Suspend(Reason);
-      fixture.TestPage->SetIsVisible(false);
+      fixture.TestFrame->SetIsVisible(false);
       document.Resume(Reason);
       CHECK(animation.IsSuspended());
-      fixture.TestPage->SetIsVisible(true);
+      fixture.TestFrame->SetIsVisible(true);
       CHECK_FALSE(animation.IsSuspended());
     }
 

@@ -11,8 +11,8 @@
 #include "Krystal.Booey/HTML/Elements/HTMLTextAreaElement.hpp"
 #include "Krystal.Booey/Input/EventHandler.hpp"
 #include "Krystal.Booey/Input/PlatformKeyboardEvent.hpp"
-#include "Krystal.Booey/Page/Clients/ChromeClient.hpp"
-#include "Krystal.Booey/Page/LocalFrame.hpp"
+#include "Krystal.Booey/Page/Clients/BooeyClient.hpp"
+#include "Krystal.Booey/Page/Frame.hpp"
 
 namespace krys::boo::html::tests
 {
@@ -23,14 +23,14 @@ namespace krys::boo::html::tests
 
   namespace
   {
-    /// @brief A chrome client that keeps the validation message it's asked to show.
-    struct ValidationChromeClient final : ChromeClient
+    /// @brief A Booey client that keeps the validation message it's asked to show.
+    struct ValidationBooeyClient final : BooeyClient
     {
       const boo::Element *Anchor {nullptr};
       DOMString Message;
       uint32 ShowCount {0};
 
-      void AttachRootGraphicsLayer(LocalFrame &, GraphicsLayer *) noexcept final
+      void AttachRootGraphicsLayer(boo::Frame &, GraphicsLayer *) noexcept final
       {
       }
 
@@ -61,7 +61,7 @@ namespace krys::boo::html::tests
       }
     };
 
-    void PressEscape(LocalFrame &frame) noexcept
+    void PressEscape(boo::Frame &frame) noexcept
     {
       (void)frame.GetEventHandler().KeyEvent(PlatformKeyboardEvent(PlatformEvent::Type::KeyDown, u8"", u8"",
                                                                    u8"Escape", u8"", u8"", 0, false, false,
@@ -158,11 +158,11 @@ namespace krys::boo::html::tests
   TEST_CASE("Constraint validation: the host shows the validation message",
             "[HTML][Forms][html:report-validity-steps][html:interactively-validate-the-constraints]")
   {
-    auto chromeClient = CreateUnique<ValidationChromeClient>();
-    auto *client = chromeClient.get();
+    auto booeyClient = CreateUnique<ValidationBooeyClient>();
+    auto *client = booeyClient.get();
     EditorFixture fixture(u8"<form id=f><input id=ok><input id=t required pattern=x><input id=u required>"
                           u8"<input id=hidden required style=display:none></form><input id=other>",
-                          krys::move(chromeClient));
+                          krys::move(booeyClient));
     auto &form = Downcast<HTMLFormElement>(fixture.ById(u8"f"));
     auto &t = Downcast<HTMLInputElement>(fixture.ById(u8"t"));
     auto &u = Downcast<HTMLInputElement>(fixture.ById(u8"u"));

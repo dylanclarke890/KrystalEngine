@@ -33,8 +33,8 @@
 
 namespace krys::boo
 {
-  class LocalDOMWindow;
-  class LocalFrame;
+  class Frame;
+  class Window;
 
   /// @brief The part of the page the user sees: the layout viewport, as pages aren't pinch-zoomed. It fires
   /// `resize` as its size changes, and `scroll` as it moves within the layout viewport (never, at scale 1).
@@ -44,7 +44,7 @@ namespace krys::boo
     KRYS_NON_COPY_MOVABLE(VisualViewport);
 
   private:
-    WeakPtr<LocalDOMWindow> _window;
+    WeakPtr<Window> _window;
     double _offsetLeft {0};
     double _offsetTop {0};
     double _pageLeft {0};
@@ -53,10 +53,10 @@ namespace krys::boo
     double _height {0};
     double _scale {1};
 
-    explicit VisualViewport(LocalDOMWindow &window) noexcept;
+    explicit VisualViewport(Window &window) noexcept;
 
   public:
-    KRYS_NODISCARD static Ref<VisualViewport> Create(LocalDOMWindow &window) noexcept;
+    KRYS_NODISCARD static Ref<VisualViewport> Create(Window &window) noexcept;
 
     /// @see https://drafts.csswg.org/cssom-view/#dom-visualviewport-offsetleft
     KRYS_NODISCARD double OffsetLeft() const noexcept;
@@ -84,7 +84,7 @@ namespace krys::boo
     void Update() noexcept;
 
   private:
-    KRYS_NODISCARD LocalFrame *Frame() const noexcept;
+    KRYS_NODISCARD boo::Frame *Frame() const noexcept;
 
     void UpdateFrameLayout() const noexcept;
   };

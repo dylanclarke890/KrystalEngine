@@ -35,7 +35,7 @@
 
 namespace krys::boo
 {
-  class LocalFrame;
+  class Frame;
 
   /// @brief A resource the host loaded: its response and all of its bytes.
   struct LoadedResource
@@ -58,7 +58,7 @@ namespace krys::boo
     /// or the reason it couldn't load.
     /// @note The handler may be called at any time on the main thread, even before this returns: Booey
     /// queues the completion as a networking task either way.
-    virtual void LoadResource(LocalFrame &frame, const net::ResourceRequest &request,
+    virtual void LoadResource(Frame &frame, const net::ResourceRequest &request,
                               const ResourceLoaderOptions &options,
                               Func<void(LoadResult &&)> &&completionHandler) noexcept = 0;
   };

@@ -1,4 +1,4 @@
-﻿#include "Krystal.Booey/Page/LocalFrameView.hpp"
+﻿#include "Krystal.Booey/Page/FrameView.hpp"
 #include "catch2/catch_test_macros.hpp"
 #include "Krystal.Booey.Tests/Style/ResolverTestUtils.hpp"
 #include "Krystal.Booey/CSS/CSSOM/MediaQueryList.hpp"
@@ -6,9 +6,8 @@
 #include "Krystal.Booey/HTML/Canvas/CanvasRenderingContext2D.hpp"
 #include "Krystal.Booey/HTML/Elements/HTMLCanvasElement.hpp"
 #include "Krystal.Booey/HTML/EventLoop/EventLoop.hpp"
-#include "Krystal.Booey/Page/LocalDOMWindow.hpp"
-#include "Krystal.Booey/Page/LocalFrame.hpp"
-#include "Krystal.Booey/Page/Page.hpp"
+#include "Krystal.Booey/HTML/Window.hpp"
+#include "Krystal.Booey/Page/Frame.hpp"
 #include "Krystal.Booey/Rendering/RenderBox.hpp"
 #include "Krystal.Booey/Rendering/RenderView.hpp"
 #include "Krystal.Booey/Rendering/Style/RenderStyle+GettersInlines.hpp"
@@ -27,8 +26,7 @@ namespace krys::boo::tests
     /// @brief A parsed document shown in a page's main frame, with an 800x600 view.
     struct FrameFixture : ResolverFixture
     {
-      Ref<Page> TestPage {Page::Create()};
-      Ref<LocalFrame> Frame {ShareRef(TestPage->MainFrame())};
+      Ref<boo::Frame> Frame {boo::Frame::Create()};
 
       explicit FrameFixture(utf8_string &&markup) noexcept : ResolverFixture(krys::move(markup), WithView::No)
       {
@@ -36,7 +34,7 @@ namespace krys::boo::tests
         Frame->SetDocument(ShareRefPtr<boo::Document>(Document.get()));
       }
 
-      KRYS_NODISCARD LocalFrameView &View() const noexcept
+      KRYS_NODISCARD FrameView &View() const noexcept
       {
         return *Frame->View();
       }
@@ -82,14 +80,14 @@ namespace krys::boo::tests
     };
   }
 
-  TEST_CASE_METHOD(css::tests::ValueFixture, "LocalFrame: documents and views", "[Page][LocalFrame]")
+  TEST_CASE_METHOD(css::tests::ValueFixture, "Frame: documents and views", "[Page][Frame]")
   {
     auto document = ResolverFixture::Parse(u8"<!DOCTYPE html><p id=p>x</p>");
     CHECK_FALSE(document->Frame());
     CHECK_FALSE(document->View());
     CHECK_FALSE(document->GetRenderView());
 
-    auto frame = LocalFrame::Create();
+    auto frame = boo::Frame::Create();
     frame->CreateView({800, 600});
     auto &view = *frame->View();
     CHECK(&view.Frame() == frame.get());
@@ -134,7 +132,7 @@ namespace krys::boo::tests
 
     SECTION("A document outlives its frame")
     {
-      frame = LocalFrame::Create();
+      frame = boo::Frame::Create();
       CHECK_FALSE(document->Frame());
       CHECK_FALSE(document->HasLivingRenderTree());
       // Its style is still resolved, without a view, but it has no renderers.
@@ -144,7 +142,7 @@ namespace krys::boo::tests
     }
   }
 
-  TEST_CASE_METHOD(css::tests::ValueFixture, "LocalFrameView: sizes", "[Page][LocalFrameView]")
+  TEST_CASE_METHOD(css::tests::ValueFixture, "FrameView: sizes", "[Page][FrameView]")
   {
     FrameFixture fixture {u8"<!DOCTYPE html>"};
     auto &view = fixture.View();
@@ -195,7 +193,7 @@ namespace krys::boo::tests
     }
   }
 
-  TEST_CASE_METHOD(css::tests::ValueFixture, "LocalFrameView: viewport units", "[Page][LocalFrameView]")
+  TEST_CASE_METHOD(css::tests::ValueFixture, "FrameView: viewport units", "[Page][FrameView]")
   {
     SECTION("Viewport units are zero without a view")
     {
@@ -270,8 +268,8 @@ namespace krys::boo::tests
     }
   }
 
-  TEST_CASE_METHOD(css::tests::ValueFixture, "LocalFrameView: registered properties with viewport units",
-                   "[Page][LocalFrameView]")
+  TEST_CASE_METHOD(css::tests::ValueFixture, "FrameView: registered properties with viewport units",
+                   "[Page][FrameView]")
   {
     FrameFixture fixture {u8R"(<!DOCTYPE html><style>
       @property --size { syntax: '<length>'; inherits: false; initial-value: 10vw }
@@ -287,8 +285,8 @@ namespace krys::boo::tests
     CHECK(fixture.Width(u8"d") == "100px");
   }
 
-  TEST_CASE_METHOD(css::tests::ValueFixture, "LocalFrameView: layout re-evaluates media queries",
-                   "[Page][LocalFrameView]")
+  TEST_CASE_METHOD(css::tests::ValueFixture, "FrameView: layout re-evaluates media queries",
+                   "[Page][FrameView]")
   {
     // The root hides the view's scrollbars, so a resize doesn't lay the document out at once to fit them.
     FrameFixture fixture {u8R"(<!DOCTYPE html><style>
@@ -333,7 +331,7 @@ namespace krys::boo::tests
       REQUIRE(empty->DocumentElement());
       REQUIRE(empty->Body());
       CHECK(empty->ShouldScheduleLayout());
-      auto frame = LocalFrame::Create();
+      auto frame = boo::Frame::Create();
       frame->CreateView({800, 600});
       REQUIRE_FALSE(empty->Body()->Remove().HasException());
       frame->SetDocument(ShareRefPtr<Document>(empty.get()));
@@ -343,7 +341,7 @@ namespace krys::boo::tests
     }
   }
 
-  TEST_CASE_METHOD(css::tests::ValueFixture, "LocalFrameView: media type", "[Page][LocalFrameView]")
+  TEST_CASE_METHOD(css::tests::ValueFixture, "FrameView: media type", "[Page][FrameView]")
   {
     FrameFixture fixture {u8R"(<!DOCTYPE html><style>
       @media print { p { color: rgb(0, 0, 255) } }
@@ -368,8 +366,7 @@ namespace krys::boo::tests
     CHECK(EqualIgnoringSemanticColor(fixture.Rendered(u8"p").GetColor(), Black));
   }
 
-  TEST_CASE_METHOD(css::tests::ValueFixture, "Page: dark appearance and device scale factor",
-                   "[Page][LocalFrame]")
+  TEST_CASE_METHOD(css::tests::ValueFixture, "Page: dark appearance and device scale factor", "[Page][Frame]")
   {
     FrameFixture fixture {u8R"(<!DOCTYPE html><style>
       @media (prefers-color-scheme: dark) { p { color: rgb(0, 0, 255) } }
@@ -388,10 +385,10 @@ namespace krys::boo::tests
     auto hiDPI = document.Window()->MatchMedia(u8"(resolution: 2x)");
     CHECK_FALSE(hiDPI->Matches());
 
-    fixture.TestPage->SetUseDarkAppearance(true);
-    fixture.TestPage->SetDeviceScaleFactor(2);
-    CHECK(fixture.TestPage->UseDarkAppearance());
-    CHECK(fixture.TestPage->DeviceScaleFactor() == 2);
+    fixture.Frame->SetUseDarkAppearance(true);
+    fixture.Frame->SetDeviceScaleFactor(2);
+    CHECK(fixture.Frame->UseDarkAppearance());
+    CHECK(fixture.Frame->DeviceScaleFactor() == 2);
 
     document.UpdateStyleIfNeeded();
     CHECK(fixture.Rendered(u8"p").GetColor() == Blue);
@@ -404,8 +401,8 @@ namespace krys::boo::tests
     CHECK(hiDPI->Matches());
   }
 
-  TEST_CASE_METHOD(css::tests::ValueFixture, "LocalFrameView: the style recalc and layout timers",
-                   "[Page][LocalFrameView][Timer]")
+  TEST_CASE_METHOD(css::tests::ValueFixture, "FrameView: the style recalc and layout timers",
+                   "[Page][FrameView][Timer]")
   {
     FrameFixture fixture {u8"<!DOCTYPE html><div id=box style=width:10px;height:10px></div>"};
     auto &loop = html::EventLoop::Current();
@@ -433,8 +430,7 @@ namespace krys::boo::tests
     }
   }
 
-  TEST_CASE_METHOD(css::tests::ValueFixture, "LocalFrameView: no layout while painting",
-                   "[Page][LocalFrameView]")
+  TEST_CASE_METHOD(css::tests::ValueFixture, "FrameView: no layout while painting", "[Page][FrameView]")
   {
     FrameFixture fixture {
       u8"<!DOCTYPE html><div id=box style='width:10px;height:10px'></div><canvas id=canvas></canvas>"};

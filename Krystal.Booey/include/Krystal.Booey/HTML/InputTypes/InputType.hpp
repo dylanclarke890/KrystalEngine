@@ -46,7 +46,7 @@
 namespace krys::boo
 {
   class BeforeTextInsertedEvent;
-  class ChromeClient;
+  class BooeyClient;
   class DragData;
   class Event;
   class HTMLElement;
@@ -636,8 +636,8 @@ namespace krys::boo::html
       return _element;
     }
 
-    /// @brief The chrome client of the element's page, which makes pickers; null without a page.
-    KRYS_NODISCARD ChromeClient *GetChromeClient() const noexcept;
+    /// @brief The Booey client of the element's page, which makes pickers; null without a page.
+    KRYS_NODISCARD BooeyClient *GetBooeyClient() const noexcept;
 
     /// @brief Whether the element's window has transient activation, which a click or key needs to open a
     /// picker, as in Chrome. It isn't consumed.

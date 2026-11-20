@@ -77,7 +77,7 @@ namespace krys::boo
 
     /// @brief A trusted input event, which bubbles and crosses shadow boundaries.
     KRYS_NODISCARD static Ref<InputEvent>
-      Create(const DOMStringAtom &type, LocalDOMWindow *view, DOMStringView inputType, bool cancelable,
+      Create(const DOMStringAtom &type, Window *view, DOMStringView inputType, bool cancelable,
              Maybe<DOMString> data, RefPtr<dom::DataTransfer> &&dataTransfer,
              const List<RefPtr<dom::StaticRange>> &targetRanges, int32 detail,
              dom::IsInputMethodComposing isInputMethodComposing) noexcept;

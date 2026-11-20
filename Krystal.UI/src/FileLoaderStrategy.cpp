@@ -75,7 +75,7 @@ namespace krys::ui
     }
   }
 
-  void FileLoaderStrategy::LoadResource(boo::LocalFrame &, const net::ResourceRequest &request,
+  void FileLoaderStrategy::LoadResource(boo::Frame &, const net::ResourceRequest &request,
                                         const boo::ResourceLoaderOptions &,
                                         Func<void(boo::LoadResult &&)> &&completionHandler) noexcept
   {

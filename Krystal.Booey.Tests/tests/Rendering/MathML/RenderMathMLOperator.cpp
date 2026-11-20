@@ -8,7 +8,7 @@
 #include "Krystal.Booey/Graphics/Fonts/FontCascade.hpp"
 #include "Krystal.Booey/Graphics/Fonts/OpenTypeMathData.hpp"
 #include "Krystal.Booey/MathML/Elements/MathMLOperatorElement.hpp"
-#include "Krystal.Booey/Page/LocalFrameView.hpp"
+#include "Krystal.Booey/Page/FrameView.hpp"
 #include "Krystal.Core/TypeCast.hpp"
 #include <algorithm>
 #include <cmath>

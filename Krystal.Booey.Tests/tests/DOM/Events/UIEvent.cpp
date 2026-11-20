@@ -8,8 +8,8 @@
 #include "Krystal.Booey/DOM/Events/TextEvent.hpp"
 #include "Krystal.Booey/HTML/Algorithms/FocusAlgorithms.hpp"
 #include "Krystal.Booey/HTML/Elements/HTMLElement.hpp"
+#include "Krystal.Booey/HTML/Window.hpp"
 #include "Krystal.Booey/Input/EventHandler.hpp"
-#include "Krystal.Booey/Page/LocalDOMWindow.hpp"
 #include <map>
 #include <string>
 
@@ -21,9 +21,9 @@ namespace krys::boo::tests
     struct ViewRecorder : EventListenerCallback
     {
       std::map<std::string, bool> &Records;
-      LocalDOMWindow *Window;
+      boo::Window *Window;
 
-      ViewRecorder(std::map<std::string, bool> &records, LocalDOMWindow *window) noexcept
+      ViewRecorder(std::map<std::string, bool> &records, boo::Window *window) noexcept
           : Records(records), Window(window)
       {
       }

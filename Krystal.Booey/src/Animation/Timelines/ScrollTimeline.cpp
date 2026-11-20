@@ -29,8 +29,8 @@
 #include "Krystal.Booey/Animation/WebAnimation.hpp"
 #include "Krystal.Booey/DOM/Nodes/Document.hpp"
 #include "Krystal.Booey/DOM/Nodes/Element.hpp"
-#include "Krystal.Booey/Page/LocalFrameView.hpp"
-#include "Krystal.Booey/Page/Page.hpp"
+#include "Krystal.Booey/Page/Frame.hpp"
+#include "Krystal.Booey/Page/FrameView.hpp"
 #include "Krystal.Booey/Rendering/Layers/RenderLayer.hpp"
 #include "Krystal.Booey/Rendering/Layers/RenderLayerScrollableArea.hpp"
 #include "Krystal.Booey/Rendering/RenderBox.hpp"
@@ -454,9 +454,9 @@ namespace krys::boo
       return;
     }
 
-    if (auto *page = source->Element.NodeDocument().GetPage())
+    if (auto *frame = source->Element.NodeDocument().Frame())
     {
-      page->ScheduleRenderingUpdate(RenderingUpdateStep::Animations);
+      frame->ScheduleRenderingUpdate(RenderingUpdateStep::Animations);
     }
   }
 }

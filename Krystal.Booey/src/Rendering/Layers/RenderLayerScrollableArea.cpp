@@ -50,9 +50,9 @@
 #include "Krystal.Booey/HTML/Elements/HTMLBodyElement.hpp"
 #include "Krystal.Booey/HTML/Elements/HTMLHtmlElement.hpp"
 #include "Krystal.Booey/Input/EventHandler.hpp"
-#include "Krystal.Booey/Page/LocalFrame.hpp"
-#include "Krystal.Booey/Page/LocalFrameView.hpp"
-#include "Krystal.Booey/Page/LocalFrameViewLayoutContext.hpp"
+#include "Krystal.Booey/Page/Frame.hpp"
+#include "Krystal.Booey/Page/FrameView.hpp"
+#include "Krystal.Booey/Page/FrameViewLayoutContext.hpp"
 #include "Krystal.Booey/Page/Scrolling/ScrollAnchoringController.hpp"
 #include "Krystal.Booey/Page/Scrolling/ScrollBehavior.hpp"
 #include "Krystal.Booey/Page/Scrolling/ScrollSnapOffsetsInfo.hpp"
@@ -185,7 +185,7 @@ namespace krys::boo
     // The speed grows faster than the distance, as in WebKit.
     auto adjustedDelta = [](int32 delta)
     {
-      if (std::abs(delta) <= LocalFrameView::NoPanScrollRadius)
+      if (std::abs(delta) <= FrameView::NoPanScrollRadius)
       {
         return 0;
       }
@@ -1738,7 +1738,7 @@ namespace krys::boo
                                                                     const PointI &parentPoint) const noexcept
   {
     auto &renderer = _layer.Renderer();
-    // LocalFrameView::convertFromContainingViewToRenderer: from the view's coordinates into page ("absolute")
+    // FrameView::convertFromContainingViewToRenderer: from the view's coordinates into page ("absolute")
     // coordinates, then the renderer's.
     auto &view = renderer.View().FrameView();
     PointI absolutePoint = parentPoint + SizeI(view.ScrollX(), view.ScrollY());

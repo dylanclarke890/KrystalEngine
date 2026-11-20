@@ -10,7 +10,7 @@
 #include "Krystal.Booey/Graphics/DisplayLists/DisplayListItems.hpp"
 #include "Krystal.Booey/Graphics/DisplayLists/DisplayListRecorderImpl.hpp"
 #include "Krystal.Booey/HTML/Elements/HTMLInputElement.hpp"
-#include "Krystal.Booey/Page/LocalFrameView.hpp"
+#include "Krystal.Booey/Page/FrameView.hpp"
 #include <format>
 #include <string>
 

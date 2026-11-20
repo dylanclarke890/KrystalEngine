@@ -74,7 +74,7 @@ namespace krys::boo
     WheelEvent(DOMStringAtom type, const WheelEventInit &initializer = {}) noexcept;
 
     /// @brief A trusted `wheel` event from @p event, which happened in @p view.
-    KRYS_NODISCARD static Ref<WheelEvent> Create(const PlatformWheelEvent &event, LocalFrameView *view,
+    KRYS_NODISCARD static Ref<WheelEvent> Create(const PlatformWheelEvent &event, boo::FrameView *view,
                                                  IsCancelable isCancelable = IsCancelable::Yes) noexcept;
 
     KRYS_NODISCARD const Maybe<PlatformWheelEvent> &UnderlyingPlatformEvent() const noexcept
@@ -114,7 +114,7 @@ namespace krys::boo
     }
 
   private:
-    WheelEvent(const PlatformWheelEvent &event, LocalFrameView *view, IsCancelable isCancelable) noexcept;
+    WheelEvent(const PlatformWheelEvent &event, boo::FrameView *view, IsCancelable isCancelable) noexcept;
   };
 }
 

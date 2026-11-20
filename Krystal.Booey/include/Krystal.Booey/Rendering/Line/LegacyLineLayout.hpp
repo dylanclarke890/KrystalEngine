@@ -37,7 +37,7 @@ namespace krys::boo
   class LegacyInlineFlowBox;
   class LegacyRootInlineBox;
   class LineInfo;
-  class LocalFrameViewLayoutContext;
+  class FrameViewLayoutContext;
   class RenderBlockFlow;
   class RenderObject;
   class RenderStyle;
@@ -100,6 +100,6 @@ namespace krys::boo
 
     KRYS_NODISCARD const RenderStyle &Style() const noexcept;
 
-    KRYS_NODISCARD const LocalFrameViewLayoutContext &LayoutContext() const noexcept;
+    KRYS_NODISCARD const FrameViewLayoutContext &LayoutContext() const noexcept;
   };
 }

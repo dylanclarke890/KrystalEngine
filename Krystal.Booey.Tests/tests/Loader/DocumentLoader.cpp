@@ -11,16 +11,15 @@
 #include "Krystal.Booey/HTML/Elements/HTMLElement.hpp"
 #include "Krystal.Booey/HTML/EventLoop/EventLoop.hpp"
 #include "Krystal.Booey/HTML/Events/PageTransitionEvent.hpp"
+#include "Krystal.Booey/HTML/Window.hpp"
 #include "Krystal.Booey/Loader/Cache/CachedResourceLoader.hpp"
 #include "Krystal.Booey/Loader/DocumentWriter.hpp"
 #include "Krystal.Booey/Loader/FrameLoader.hpp"
+#include "Krystal.Booey/Loader/FrameLoaderClient.hpp"
 #include "Krystal.Booey/Loader/FrameLoadRequest.hpp"
-#include "Krystal.Booey/Loader/LocalFrameLoaderClient.hpp"
 #include "Krystal.Booey/Loader/NavigationAction.hpp"
-#include "Krystal.Booey/Page/LocalDOMWindow.hpp"
-#include "Krystal.Booey/Page/LocalFrame.hpp"
-#include "Krystal.Booey/Page/LocalFrameView.hpp"
-#include "Krystal.Booey/Page/Page.hpp"
+#include "Krystal.Booey/Page/Frame.hpp"
+#include "Krystal.Booey/Page/FrameView.hpp"
 #include "Krystal.Booey/Style/Scope/Scope.hpp"
 #include <chrono>
 #include <format>
@@ -62,7 +61,7 @@ namespace krys::boo::tests
     LoadFixture fixture;
     fixture.LoadMarkup(u8"<!DOCTYPE html><p>First</p>", u8"https://example.com/first.html");
     html::EventLoop::Current().RunUntilIdle();
-    RefPtr<LocalDOMWindow> firstWindow = ShareRefPtr(fixture.Document().Window());
+    RefPtr<Window> firstWindow = ShareRefPtr(fixture.Document().Window());
 
     fixture.LoadUrl(u8"about:blank");
     html::EventLoop::Current().RunUntilIdle();

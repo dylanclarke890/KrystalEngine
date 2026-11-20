@@ -9,9 +9,8 @@
 #include "Krystal.Booey/HTML/EventLoop/EventLoop.hpp"
 #include "Krystal.Booey/HTML/Forms/DOMFormData.hpp"
 #include "Krystal.Booey/Loader/FormSubmission.hpp"
-#include "Krystal.Booey/Page/LocalFrame.hpp"
-#include "Krystal.Booey/Page/LocalFrameView.hpp"
-#include "Krystal.Booey/Page/Page.hpp"
+#include "Krystal.Booey/Page/Frame.hpp"
+#include "Krystal.Booey/Page/FrameView.hpp"
 #include <string>
 
 namespace krys::boo::tests
@@ -63,7 +62,6 @@ namespace krys::boo::tests
   struct FormFixture : style::tests::ResolverFixture
   {
     RecordingFrameLoaderClient *LoaderClient {nullptr};
-    RefPtr<Page> TestPage;
     List<ReceivedSubmission> SubmissionList;
 
     explicit FormFixture(utf8_stringview markup) noexcept
@@ -78,8 +76,7 @@ namespace krys::boo::tests
         }
       };
       LoaderClient = loaderClient.get();
-      TestPage = Page::Create(nullptr, nullptr, krys::move(loaderClient));
-      Frame = ShareRefPtr(&TestPage->MainFrame());
+      Frame = boo::Frame::Create(nullptr, nullptr, krys::move(loaderClient));
       Frame->CreateView({200, 100});
       Frame->SetDocument(ShareRefPtr<boo::Document>(Document.get()));
     }

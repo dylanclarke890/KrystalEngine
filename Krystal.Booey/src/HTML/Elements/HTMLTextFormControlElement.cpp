@@ -49,7 +49,7 @@
 #include "Krystal.Booey/HTML/Shadow/TextControlInnerElements.hpp"
 #include "Krystal.Booey/Infra/StringAlgorithms.hpp"
 #include "Krystal.Booey/Layout/Integration/Inline/InlineIteratorLineBox.hpp"
-#include "Krystal.Booey/Page/LocalFrame.hpp"
+#include "Krystal.Booey/Page/Frame.hpp"
 #include "Krystal.Booey/Rendering/FormControls/RenderTextControlSingleLine.hpp"
 #include "Krystal.Booey/Rendering/Selection/CaretRectComputation.hpp"
 #include "Krystal.Booey/Rendering/Style/RenderStyle+GettersInlines.hpp"

@@ -41,7 +41,7 @@ namespace krys::ui
 
 #pragma region PopupMenu
 
-    void Show(const RectI &rect, boo::LocalFrameView &view, int32 selectedIndex) noexcept override;
+    void Show(const RectI &rect, boo::FrameView &view, int32 selectedIndex) noexcept override;
 
     void Hide() noexcept final;
 

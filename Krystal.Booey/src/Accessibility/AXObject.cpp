@@ -69,11 +69,11 @@
 #include "Krystal.Booey/HTML/Elements/HTMLElement.hpp"
 #include "Krystal.Booey/HTML/Elements/HTMLSlotElement.hpp"
 #include "Krystal.Booey/HTML/MicroParsers/Numbers.hpp"
+#include "Krystal.Booey/HTML/Window.hpp"
 #include "Krystal.Booey/Infra/StringAlgorithms.hpp"
-#include "Krystal.Booey/Page/Clients/ChromeClient.hpp"
-#include "Krystal.Booey/Page/LocalDOMWindow.hpp"
-#include "Krystal.Booey/Page/LocalFrameView.hpp"
-#include "Krystal.Booey/Page/Page.hpp"
+#include "Krystal.Booey/Page/Clients/BooeyClient.hpp"
+#include "Krystal.Booey/Page/Frame.hpp"
+#include "Krystal.Booey/Page/FrameView.hpp"
 #include "Krystal.Booey/Rendering/HitTesting/HitTestRequest.hpp"
 #include "Krystal.Booey/Rendering/HitTesting/HitTestResult.hpp"
 #include "Krystal.Booey/Rendering/Layers/RenderLayer.hpp"
@@ -379,13 +379,13 @@ namespace krys::boo
     return node ? &node->NodeDocument() : nullptr;
   }
 
-  Page *AXObject::GetPage() const noexcept
+  boo::Frame *AXObject::Frame() const noexcept
   {
     auto *document = GetDocument();
-    return document ? document->GetPage() : nullptr;
+    return document ? document->Frame() : nullptr;
   }
 
-  LocalFrameView *AXObject::DocumentFrameView() const noexcept
+  FrameView *AXObject::DocumentFrameView() const noexcept
   {
     auto *document = GetDocument();
     return document ? document->View() : nullptr;
@@ -1758,9 +1758,9 @@ namespace krys::boo
     {
       return;
     }
-    if (auto *page = document->GetPage())
+    if (auto *frame = document->Frame())
     {
-      page->GetChromeClient().Focus();
+      frame->GetBooeyClient().Focus();
     }
   }
 
@@ -1781,7 +1781,7 @@ namespace krys::boo
     }
     if (auto *renderer = Renderer())
     {
-      (void)LocalFrameView::ScrollRectToVisible(ElementRect(), *renderer, false, {});
+      (void)FrameView::ScrollRectToVisible(ElementRect(), *renderer, false, {});
     }
   }
 

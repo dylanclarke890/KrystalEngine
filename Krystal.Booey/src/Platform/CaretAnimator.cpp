@@ -27,7 +27,7 @@
 #include "Krystal.Booey/DOM/Nodes/Document.hpp"
 #include "Krystal.Booey/Graphics/GraphicsContext.hpp"
 #include "Krystal.Booey/HTML/EventLoop/EventLoop.hpp"
-#include "Krystal.Booey/Page/Page.hpp"
+#include "Krystal.Booey/Page/Frame.hpp"
 
 namespace krys::boo
 {
@@ -38,15 +38,15 @@ namespace krys::boo
 
   bool CaretAnimator::IsBlinkingSuspended() const noexcept
   {
-    auto *page = GetPage();
-    return _isBlinkingSuspended || (page && page->PrefersNonBlinkingCaret());
+    auto *frame = Frame();
+    return _isBlinkingSuspended || (frame && frame->PrefersNonBlinkingCaret());
   }
 
-  Page *CaretAnimator::GetPage() const noexcept
+  boo::Frame *CaretAnimator::Frame() const noexcept
   {
     if (auto *document = _client.GetDocument())
     {
-      return document->GetPage();
+      return document->Frame();
     }
 
     return nullptr;
@@ -95,9 +95,9 @@ namespace krys::boo
 
   void CaretAnimator::ScheduleAnimation() noexcept
   {
-    if (auto *page = GetPage())
+    if (auto *frame = Frame())
     {
-      page->ScheduleRenderingUpdate({RenderingUpdateStep::CaretAnimation});
+      frame->ScheduleRenderingUpdate({RenderingUpdateStep::CaretAnimation});
     }
   }
 

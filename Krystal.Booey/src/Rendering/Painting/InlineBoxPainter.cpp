@@ -26,7 +26,7 @@
 #include "Krystal.Booey/DOM/Nodes/Document.hpp"
 #include "Krystal.Booey/Graphics/GraphicsContext.hpp"
 #include "Krystal.Booey/Layout/Integration/Inline/InlineIteratorLineBox.hpp"
-#include "Krystal.Booey/Page/LocalFrameView.hpp"
+#include "Krystal.Booey/Page/FrameView.hpp"
 #include "Krystal.Booey/Rendering/Painting/BackgroundPainter.hpp"
 #include "Krystal.Booey/Rendering/Painting/BorderPainter.hpp"
 #include "Krystal.Booey/Rendering/Painting/PaintInfo.hpp"

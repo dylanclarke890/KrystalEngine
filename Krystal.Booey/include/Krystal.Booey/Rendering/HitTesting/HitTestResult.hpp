@@ -37,8 +37,8 @@
 namespace krys::boo
 {
   class Element;
+  class Frame;
   class Image;
-  class LocalFrame;
   class Node;
 
   enum class HitTestProgress
@@ -172,7 +172,7 @@ namespace krys::boo
       return _doublePointInInnerNodeFrame;
     }
 
-    KRYS_NODISCARD LocalFrame *InnerNodeFrame() const noexcept;
+    KRYS_NODISCARD boo::Frame *InnerNodeFrame() const noexcept;
 
     /// @brief The hit-tested point in the coordinates of the inner node's renderer.
     KRYS_NODISCARD const LayoutPoint &LocalPoint() const noexcept
@@ -190,7 +190,7 @@ namespace krys::boo
       return _hitTestLocation;
     }
 
-    KRYS_NODISCARD LocalFrame *Frame() const noexcept;
+    KRYS_NODISCARD boo::Frame *Frame() const noexcept;
 
     KRYS_NODISCARD bool IsOverLink() const noexcept;
 

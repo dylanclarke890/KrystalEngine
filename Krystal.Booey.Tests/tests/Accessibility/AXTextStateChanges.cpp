@@ -80,7 +80,7 @@ namespace krys::boo::ax::tests
 
     editor.SetSelectedVisiblePositionRange(editor.VisiblePositionRangeForRange({1, 2}));
     // The host's next rendering update tells accessibility.
-    page.TestPage->UpdateRendering();
+    page.Frame->UpdateRendering();
     CHECK(AXFixture::WasPosted(page.TakeNotifications(), editor, AXNotification::SelectedTextChanged));
   }
 }

@@ -7,10 +7,9 @@
 #include "Krystal.Booey/DOM/Nodes/Element.hpp"
 #include "Krystal.Booey/HTML/Elements/HTMLElement.hpp"
 #include "Krystal.Booey/HTML/EventLoop/EventLoop.hpp"
+#include "Krystal.Booey/HTML/Window.hpp"
 #include "Krystal.Booey/Input/EventHandler.hpp"
-#include "Krystal.Booey/Page/LocalDOMWindow.hpp"
-#include "Krystal.Booey/Page/LocalFrame.hpp"
-#include "Krystal.Booey/Page/Page.hpp"
+#include "Krystal.Booey/Page/Frame.hpp"
 #include <string>
 
 namespace krys::boo::tests
@@ -72,8 +71,7 @@ namespace krys::boo::tests
 
       explicit PointerFixture(bool recordPointerMoves = true) noexcept
           : PaintFixture(u8"<!DOCTYPE html><style>body{margin:0}div{width:100px;height:50px}</style>"
-                         u8"<div id=a></div><div id=b></div>",
-                         {200, 100}, true)
+                         u8"<div id=a></div><div id=b></div>")
       {
         (void)Document->UpdateLayout();
         // Capturing at the document sees the events that don't bubble too.
@@ -98,7 +96,7 @@ namespace krys::boo::tests
 
       KRYS_NODISCARD PointerCaptureController &Controller() noexcept
       {
-        return TestPage->GetPointerCaptureController();
+        return Frame->GetPointerCaptureController();
       }
 
       KRYS_NODISCARD static PlatformMouseEvent Event(PlatformEvent::Type type, double x, double y,
@@ -477,8 +475,8 @@ namespace krys::boo::tests
       fixture.Controller().CancelPointer(MousePointerId, PointI(10, 10));
       CHECK(fixture.Take().empty());
 
-      // The page's main document changing forgets it.
-      fixture.TestPage->DidChangeMainDocument(fixture.Document.get());
+      // The frame's document changing forgets it.
+      fixture.Frame->SetDocument(nullptr);
       CHECK_FALSE(fixture.Controller().HasCancelledPointerEventForIdentifier(MousePointerId));
     }
   }

@@ -50,14 +50,14 @@ namespace krys::boo
 
   /// @brief What a frame's loader tells its host: the navigations the page asks for, and what happened to
   /// the loads the host started.
-  class LocalFrameLoaderClient
+  class FrameLoaderClient
   {
-    KRYS_NON_COPY_MOVABLE(LocalFrameLoaderClient);
+    KRYS_NON_COPY_MOVABLE(FrameLoaderClient);
 
   public:
-    LocalFrameLoaderClient() noexcept = default;
+    FrameLoaderClient() noexcept = default;
 
-    virtual ~LocalFrameLoaderClient() noexcept = default;
+    virtual ~FrameLoaderClient() noexcept = default;
 
     /// @brief The page asks the frame to navigate to @p request (a link followed or a form submitted), which
     /// @p action started. Booey doesn't load it: the host decides, and loads it with `FrameLoader::Load` if
@@ -138,7 +138,7 @@ namespace krys::boo
   };
 
   /// @brief The loader client of a frame that has no host: it ignores every navigation.
-  class EmptyFrameLoaderClient final : public LocalFrameLoaderClient
+  class EmptyFrameLoaderClient final : public FrameLoaderClient
   {
   };
 }

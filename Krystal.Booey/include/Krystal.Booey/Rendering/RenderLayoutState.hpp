@@ -28,7 +28,7 @@
 #include "Krystal.Booey/Graphics/Geometry/LayoutRect.hpp"
 #include "Krystal.Booey/Graphics/Geometry/LayoutSize.hpp"
 #include "Krystal.Booey/Graphics/Geometry/LayoutUnit.hpp"
-#include "Krystal.Booey/Page/LocalFrameViewLayoutContext.hpp"
+#include "Krystal.Booey/Page/FrameViewLayoutContext.hpp"
 #include "Krystal.Core/Attributes.hpp"
 #include "Krystal.Core/Debug.hpp"
 #include "Krystal.Core/Enum.hpp"
@@ -90,9 +90,9 @@ namespace krys::boo
   public:
     RenderLayoutState() noexcept = default;
 
-    RenderLayoutState(const LocalFrameViewLayoutContext::LayoutStateStack &layoutStateStack,
-                      RenderBox &renderer, const LayoutSize &offset, LayoutUnit pageLogicalHeight,
-                      bool pageLogicalHeightChanged, Maybe<LineClamp> lineClamp) noexcept;
+    RenderLayoutState(const FrameViewLayoutContext::LayoutStateStack &layoutStateStack, RenderBox &renderer,
+                      const LayoutSize &offset, LayoutUnit pageLogicalHeight, bool pageLogicalHeightChanged,
+                      Maybe<LineClamp> lineClamp) noexcept;
 
     explicit RenderLayoutState(RenderElement &renderer) noexcept;
 
@@ -188,8 +188,8 @@ namespace krys::boo
     void ComputeClipRect(const RenderLayoutState &ancestor, RenderBox &renderer) noexcept;
 
     // FIXME: webkit.org/b/179440 these functions should be part of the pagination
-    // code/LocalFrameViewLayoutContext.
-    void ComputePaginationInformation(const LocalFrameViewLayoutContext::LayoutStateStack &layoutStateStack,
+    // code/FrameViewLayoutContext.
+    void ComputePaginationInformation(const FrameViewLayoutContext::LayoutStateStack &layoutStateStack,
                                       RenderBox &renderer, LayoutUnit pageLogicalHeight,
                                       bool pageLogicalHeightChanged) noexcept;
   };
@@ -200,7 +200,7 @@ namespace krys::boo
     KRYS_NON_COPYABLE(LayoutStateMaintainer);
 
   private:
-    LocalFrameViewLayoutContext &_context;
+    FrameViewLayoutContext &_context;
     bool _paintOffsetCacheIsDisabled {false};
     bool _didPushLayoutState {false};
 
@@ -217,7 +217,7 @@ namespace krys::boo
     KRYS_NON_COPYABLE(SubtreeLayoutStateMaintainer);
 
   private:
-    LocalFrameViewLayoutContext *_context {nullptr};
+    FrameViewLayoutContext *_context {nullptr};
     bool _didDisablePaintOffsetCache {false};
 
   public:
@@ -232,10 +232,10 @@ namespace krys::boo
     KRYS_NON_COPYABLE(LayoutStateDisabler);
 
   private:
-    LocalFrameViewLayoutContext &_context;
+    FrameViewLayoutContext &_context;
 
   public:
-    explicit LayoutStateDisabler(LocalFrameViewLayoutContext &context) noexcept;
+    explicit LayoutStateDisabler(FrameViewLayoutContext &context) noexcept;
 
     ~LayoutStateDisabler() noexcept;
   };
@@ -246,12 +246,11 @@ namespace krys::boo
     KRYS_NON_COPYABLE(FlexPercentResolveDisabler);
 
   private:
-    LocalFrameViewLayoutContext &_layoutContext;
+    FrameViewLayoutContext &_layoutContext;
     const RenderBox &_flexItem;
 
   public:
-    FlexPercentResolveDisabler(LocalFrameViewLayoutContext &layoutContext,
-                               const RenderBox &flexItem) noexcept;
+    FlexPercentResolveDisabler(FrameViewLayoutContext &layoutContext, const RenderBox &flexItem) noexcept;
 
     ~FlexPercentResolveDisabler() noexcept;
   };
@@ -271,10 +270,10 @@ namespace krys::boo
     };
 
   private:
-    LocalFrameViewLayoutContext &_layoutContext;
+    FrameViewLayoutContext &_layoutContext;
 
   public:
-    ContentVisibilityOverrideScope(LocalFrameViewLayoutContext &layoutContext,
+    ContentVisibilityOverrideScope(FrameViewLayoutContext &layoutContext,
                                    EnumSet<OverrideType> overrideTypes) noexcept;
 
     ~ContentVisibilityOverrideScope() noexcept;

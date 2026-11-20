@@ -10,10 +10,9 @@
 #include "Krystal.Booey/Graphics/DisplayLists/DisplayListItems.hpp"
 #include "Krystal.Booey/Graphics/GraphicsContext.hpp"
 #include "Krystal.Booey/Graphics/ImageBuffers/ImageBufferDisplayListBackend.hpp"
+#include "Krystal.Booey/Page/Frame.hpp"
 #include "Krystal.Booey/Page/FrameSnapshotting.hpp"
-#include "Krystal.Booey/Page/LocalFrame.hpp"
-#include "Krystal.Booey/Page/LocalFrameView.hpp"
-#include "Krystal.Booey/Page/Page.hpp"
+#include "Krystal.Booey/Page/FrameView.hpp"
 #include "Krystal.Net/Url.hpp"
 
 namespace krys::boo::tests
@@ -23,15 +22,12 @@ namespace krys::boo::tests
     /// @brief A 400x300 view of @p markup in a page, with no body margin and 10px text on 20px lines.
     struct SnapshotFixture : style::tests::ResolverFixture
     {
-      RefPtr<Page> TestPage;
-
       explicit SnapshotFixture(utf8_stringview markup) noexcept
           : ResolverFixture(u8"<!DOCTYPE html><style>body{margin:0;font:10px/20px sans-serif}</style>"
                               + utf8_string(markup),
-                            style::tests::WithView::No),
-            TestPage(Page::Create())
+                            style::tests::WithView::No)
       {
-        Frame = ShareRefPtr(&TestPage->MainFrame());
+        Frame = boo::Frame::Create();
         Frame->CreateView({400, 300});
         Frame->SetDocument(ShareRefPtr<boo::Document>(Document.get()));
         (void)Document->UpdateLayout();

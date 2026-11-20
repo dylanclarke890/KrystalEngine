@@ -4,12 +4,12 @@
 #include "Krystal.Booey/DOM/Events/EventNames.hpp"
 #include "Krystal.Booey/HTML/Elements/HTMLElement.hpp"
 #include "Krystal.Booey/HTML/Elements/HTMLSelectElement.hpp"
+#include "Krystal.Booey/HTML/Window.hpp"
 #include "Krystal.Booey/Input/EventHandler.hpp"
 #include "Krystal.Booey/Input/LegacyKeyCodes.hpp"
 #include "Krystal.Booey/Input/PlatformKeyboardEvent.hpp"
 #include "Krystal.Booey/Input/PlatformWheelEvent.hpp"
-#include "Krystal.Booey/Page/LocalDOMWindow.hpp"
-#include "Krystal.Booey/Page/LocalFrameView.hpp"
+#include "Krystal.Booey/Page/FrameView.hpp"
 #include "Krystal.Booey/Page/Scrolling/ScrollOptions.hpp"
 #include "Krystal.Booey/Page/Settings.hpp"
 #include "Krystal.Booey/Rendering/FormControls/RenderListBox.hpp"
@@ -62,7 +62,7 @@ namespace krys::boo::tests
     bool PressKey(AnimationPageFixture &fixture, const utf8_string &key, utf8_string identifier,
                   int32 keyCode) noexcept
     {
-      return fixture.TestPage->MainFrame().GetEventHandler().KeyEvent(
+      return fixture.TestFrame->GetEventHandler().KeyEvent(
         PlatformKeyboardEvent(PlatformEvent::Type::RawKeyDown, u8"", u8"", key, key, krys::move(identifier),
                               keyCode, false, false, false, {}, {}));
     }
@@ -345,7 +345,7 @@ namespace krys::boo::tests
   {
     AnimationPageFixture fixture {utf8_string(Page)};
     auto &scroller = fixture.ById(u8"s");
-    auto &handler = fixture.TestPage->MainFrame().GetEventHandler();
+    auto &handler = fixture.TestFrame->GetEventHandler();
     // A notch down (the content moves up), over the box.
     auto notch = [&](PointI position = {10, 10})
     {

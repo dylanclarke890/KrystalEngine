@@ -5,7 +5,7 @@
 #include "Krystal.Booey/HTML/Elements/HTMLElement.hpp"
 #include "Krystal.Booey/Input/EventHandler.hpp"
 #include "Krystal.Booey/Input/PlatformWheelEvent.hpp"
-#include "Krystal.Booey/Page/LocalFrameView.hpp"
+#include "Krystal.Booey/Page/FrameView.hpp"
 #include "Krystal.Booey/Page/Settings.hpp"
 #include "Krystal.Core/Utils/ScopeExit.hpp"
 
@@ -26,7 +26,7 @@ namespace krys::boo::tests
     /// @brief A step of a touchpad's pan at @p position, with the content following @p deltaY.
     bool Pan(AnimationPageFixture &fixture, Phase phase, float deltaY, PointI position = {10, 10}) noexcept
     {
-      return fixture.TestPage->MainFrame().GetEventHandler().HandleWheelEvent(
+      return fixture.TestFrame->GetEventHandler().HandleWheelEvent(
         PlatformWheelEvent(position, position, 0, deltaY, 0, 0,
                            PlatformWheelEventGranularity::ScrollByPixelWheelEvent, {}, {})
           .CopyAsTouchpadPan(phase, Phase::None));
@@ -34,7 +34,7 @@ namespace krys::boo::tests
 
     KRYS_NODISCARD int32 ViewY(AnimationPageFixture &fixture) noexcept
     {
-      return fixture.TestPage->MainFrame().View()->GetScrollPosition().Y();
+      return fixture.TestFrame->View()->GetScrollPosition().Y();
     }
 
     struct WheelCounter : public EventListenerCallback
@@ -119,7 +119,7 @@ namespace krys::boo::tests
       settings.ScrollAnimatorEnabled = false;
       auto restoreSettings = MakeScopeExit([&] { settings.ScrollAnimatorEnabled = true; });
       box.SetScrollTop(200);
-      auto &handler = fixture.TestPage->MainFrame().GetEventHandler();
+      auto &handler = fixture.TestFrame->GetEventHandler();
       CHECK(handler.HandleWheelEvent(
         PlatformWheelEvent(PointI(10, 10), PointI(10, 10), 0, -100, 0, 1,
                            PlatformWheelEventGranularity::ScrollByPixelWheelEvent, {}, {})));

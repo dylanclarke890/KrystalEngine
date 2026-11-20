@@ -56,8 +56,8 @@
 #include "Krystal.Booey/Input/EventHandler.hpp"
 #include "Krystal.Booey/Layout/Integration/Inline/InlineIteratorTextBox.hpp"
 #include "Krystal.Booey/Loader/Cache/CachedImage.hpp"
-#include "Krystal.Booey/Page/LocalFrame.hpp"
-#include "Krystal.Booey/Page/LocalFrameView.hpp"
+#include "Krystal.Booey/Page/Frame.hpp"
+#include "Krystal.Booey/Page/FrameView.hpp"
 #include "Krystal.Booey/Platform/Scrolling/ScrollbarTheme.hpp"
 #include "Krystal.Booey/Rendering/HitTesting/HitTestingTransformState.hpp"
 #include "Krystal.Booey/Rendering/HitTesting/HitTestResult.hpp"
@@ -6822,10 +6822,10 @@ namespace krys::boo
   void RenderLayer::Autoscroll(const PointI &positionInWindow) noexcept
   {
     PointI currentDocumentPosition = Renderer().View().FrameView().WindowToContents(positionInWindow);
-    LocalFrameView::ScrollRectToVisible(
-      LayoutRect(LayoutPoint(currentDocumentPosition), LayoutSize(1_lu, 1_lu)), Renderer(), false,
-      {SelectionRevealMode::Reveal, ScrollAlignment::AlignToEdgeIfNeeded,
-       ScrollAlignment::AlignToEdgeIfNeeded});
+    FrameView::ScrollRectToVisible(LayoutRect(LayoutPoint(currentDocumentPosition), LayoutSize(1_lu, 1_lu)),
+                                   Renderer(), false,
+                                   {SelectionRevealMode::Reveal, ScrollAlignment::AlignToEdgeIfNeeded,
+                                    ScrollAlignment::AlignToEdgeIfNeeded});
   }
 
   bool RenderLayer::HitTestForeignObjectLayers(const HitTestRequest &request, HitTestResult &result,

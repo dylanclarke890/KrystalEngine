@@ -9,7 +9,7 @@
 #include "Krystal.Booey/HTML/Elements/HTMLImageElement.hpp"
 #include "Krystal.Booey/HTML/EventLoop/EventLoop.hpp"
 #include "Krystal.Booey/Loader/Cache/CachedImage.hpp"
-#include "Krystal.Booey/Page/LocalFrameView.hpp"
+#include "Krystal.Booey/Page/FrameView.hpp"
 #include "Krystal.Booey/Platform/PlatformStrategies.hpp"
 #include "Krystal.Core/Threading/JobSystem.hpp"
 #include "Krystal.Core/Threading/ManualWorkQueue.hpp"

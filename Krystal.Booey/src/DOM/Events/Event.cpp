@@ -25,7 +25,7 @@
 #include "Krystal.Booey/DOM/Events/EventTarget.hpp"
 #include "Krystal.Booey/DOM/Nodes/Document.hpp"
 #include "Krystal.Booey/HTML/EventLoop/EventLoop.hpp"
-#include "Krystal.Booey/Page/LocalDOMWindow.hpp"
+#include "Krystal.Booey/HTML/Window.hpp"
 #include "Krystal.Core/Assert.hpp"
 #include "Krystal.Core/Time/MonotonicTime.hpp"
 #include "Krystal.Core/Utils/Move.hpp"

@@ -33,6 +33,7 @@
 
 namespace krys
 {
+  class AffineTransform;
   class TextStream;
 }
 

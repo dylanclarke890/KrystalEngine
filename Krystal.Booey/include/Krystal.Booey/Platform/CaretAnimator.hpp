@@ -39,9 +39,9 @@ namespace krys::boo
   class CaretAnimator;
   class Color;
   class Document;
+  class Frame;
   class GraphicsContext;
   class Node;
-  class Page;
 
   enum class CaretAnimatorStopReason : uint8
   {
@@ -138,7 +138,7 @@ namespace krys::boo
     void DidEnd() noexcept;
 
     // FIXME: This is layering violation. Platform code should not rely on the rest of the engine.
-    KRYS_NODISCARD Page *GetPage() const noexcept;
+    KRYS_NODISCARD boo::Frame *Frame() const noexcept;
 
     /// @brief The current time: the event loop's, which is the host's.
     KRYS_NODISCARD static MonotonicTime::duration Now() noexcept;

@@ -37,7 +37,7 @@ namespace krys::boo
 
   InputEvent::~InputEvent() noexcept = default;
 
-  Ref<InputEvent> InputEvent::Create(const DOMStringAtom &type, LocalDOMWindow *view, DOMStringView inputType,
+  Ref<InputEvent> InputEvent::Create(const DOMStringAtom &type, Window *view, DOMStringView inputType,
                                      bool cancelable, Maybe<DOMString> data,
                                      RefPtr<dom::DataTransfer> &&dataTransfer,
                                      const List<RefPtr<dom::StaticRange>> &targetRanges, int32 detail,

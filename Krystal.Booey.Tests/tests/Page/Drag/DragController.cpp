@@ -9,7 +9,7 @@
 #include "Krystal.Booey/HTML/Elements/HTMLInputElement.hpp"
 #include "Krystal.Booey/Input/EventHandler.hpp"
 #include "Krystal.Booey/Page/Clients/DragClient.hpp"
-#include "Krystal.Booey/Page/LocalFrame.hpp"
+#include "Krystal.Booey/Page/Frame.hpp"
 #include "Krystal.Booey/Platform/Pasteboard/DragData.hpp"
 #include <algorithm>
 
@@ -45,7 +45,7 @@ namespace krys::boo::tests
         return Mask;
       }
 
-      void StartDrag(DragItem dragItem, dom::DataTransfer &dataTransfer, LocalFrame &) noexcept override
+      void StartDrag(DragItem dragItem, dom::DataTransfer &dataTransfer, boo::Frame &) noexcept override
       {
         ++Starts;
         LastItem = krys::move(dragItem);
@@ -77,7 +77,6 @@ namespace krys::boo::tests
     /// 10px text on 20px lines and 40px tall divs.
     struct DragFixture : style::tests::ResolverFixture
     {
-      RefPtr<Page> TestPage;
       TestDragClient *Client {nullptr};
       RecordingPasteboardStrategy Pasteboard;
       List<utf8_string> Log;
@@ -90,8 +89,7 @@ namespace krys::boo::tests
       {
         auto client = CreateUnique<TestDragClient>();
         Client = client.get();
-        TestPage = Page::Create(nullptr, CreateUnique<TestEditorClient>(), nullptr, krys::move(client));
-        Frame = ShareRefPtr(&TestPage->MainFrame());
+        Frame = boo::Frame::Create(nullptr, CreateUnique<TestEditorClient>(), nullptr, krys::move(client));
         Frame->CreateView({400, 300});
         Frame->SetDocument(ShareRefPtr<boo::Document>(Document.get()));
         (void)Document->UpdateLayout();
@@ -110,7 +108,7 @@ namespace krys::boo::tests
 
       KRYS_NODISCARD DragController &Controller() const noexcept
       {
-        return TestPage->GetDragController();
+        return Frame->GetDragController();
       }
 
       KRYS_NODISCARD FrameSelection &Selection() noexcept
@@ -482,11 +480,11 @@ namespace krys::boo::tests
       CHECK(fixture.Client->Data.Text() == u8"abc");
 
       CHECK(fixture.DragTo(200, 50) == DragOperation::Move);
-      CHECK(fixture.TestPage->GetDragCaretController().HasCaret());
+      CHECK(fixture.Frame->GetDragCaretController().HasCaret());
       CHECK(fixture.Controller().GetDragHandlingMethod() == DragHandlingMethod::EditRichText);
       CHECK(fixture.Drop(200, 50));
       fixture.End(200, 50, {DragOperation::Move});
-      CHECK(!fixture.TestPage->GetDragCaretController().HasCaret());
+      CHECK(!fixture.Frame->GetDragCaretController().HasCaret());
       CHECK(fixture.InnerHTML(a) == "&nbsp;def");
       CHECK(fixture.InnerHTML(b) == "xyzabc");
     }
@@ -522,13 +520,13 @@ namespace krys::boo::tests
       fixture.Client->Data.SetText(u8"dropped");
       fixture.Client->SourceMask = AnyDragOperation();
       (void)fixture.DragTo(200, 50);
-      auto &caret = fixture.TestPage->GetDragCaretController();
+      auto &caret = fixture.Frame->GetDragCaretController();
       CHECK(caret.HasCaret());
       CHECK(caret.IsContentEditable());
       // The block it's in paints it.
       CHECK(caret.CaretRenderer() == fixture.ById(u8"b").Renderer());
       CHECK(!fixture.DragTo(200, 90));
-      CHECK(!fixture.TestPage->GetDragCaretController().HasCaret());
+      CHECK(!fixture.Frame->GetDragCaretController().HasCaret());
       fixture.Exit(200, 90);
     }
 

@@ -56,7 +56,7 @@ namespace krys::boo::dom
 
 namespace krys::boo
 {
-  class LocalFrame;
+  class Frame;
 
   /// @brief A document's `Selection`: the script's view of the frame's selection, which is the range it
   /// associates with it.
@@ -127,7 +127,7 @@ namespace krys::boo
     void Empty() noexcept;
 
   private:
-    KRYS_NODISCARD LocalFrame *Frame() const noexcept;
+    KRYS_NODISCARD boo::Frame *Frame() const noexcept;
 
     KRYS_NODISCARD Maybe<dom::SimpleRange> GetRange() const noexcept;
 

@@ -32,12 +32,11 @@
 #include "Krystal.Booey/DOM/Nodes/Document.hpp"
 #include "Krystal.Booey/HTML/EventLoop/EventLoop.hpp"
 #include "Krystal.Booey/Loader/FrameLoader.hpp"
+#include "Krystal.Booey/Loader/FrameLoaderClient.hpp"
 #include "Krystal.Booey/Loader/Icons/IconLoader.hpp"
 #include "Krystal.Booey/Loader/Icons/LinkIconCollector.hpp"
 #include "Krystal.Booey/Loader/LoaderStrategy.hpp"
-#include "Krystal.Booey/Loader/LocalFrameLoaderClient.hpp"
-#include "Krystal.Booey/Page/LocalFrame.hpp"
-#include "Krystal.Booey/Page/Page.hpp"
+#include "Krystal.Booey/Page/Frame.hpp"
 #include "Krystal.Booey/Page/Settings.hpp"
 #include "Krystal.Booey/Platform/PlatformStrategies.hpp"
 #include "Krystal.Core/Strings/ASCII.hpp"
@@ -60,7 +59,7 @@ namespace krys::boo
     return AdoptRef(*new DocumentLoader(krys::move(request), krys::move(substituteData)));
   }
 
-  void DocumentLoader::AttachToFrame(LocalFrame &frame) noexcept
+  void DocumentLoader::AttachToFrame(boo::Frame &frame) noexcept
   {
     _frame = CreateWeakPtr(&frame);
     _writer.SetFrame(frame);
@@ -76,15 +75,9 @@ namespace krys::boo
 
   void DocumentLoader::StartIconLoading() noexcept
   {
-    RefPtr<LocalFrame> frame = ShareRefPtr(_frame.get());
+    RefPtr<boo::Frame> frame = ShareRefPtr(_frame.get());
     auto *document = frame ? frame->Document() : nullptr;
     if (!document || !document->GetSettings().IconLoadingEnabled)
-    {
-      return;
-    }
-
-    auto *page = frame->GetPage();
-    if (!page || &page->MainFrame() != frame.get())
     {
       return;
     }
@@ -179,7 +172,7 @@ namespace krys::boo
 
   void DocumentLoader::StartLoadingMainResource() noexcept
   {
-    RefPtr<LocalFrame> frame = ShareRefPtr(_frame.get());
+    RefPtr<boo::Frame> frame = ShareRefPtr(_frame.get());
     if (!frame)
     {
       return;
@@ -270,7 +263,7 @@ namespace krys::boo
     // The data, if it arrives, is dropped.
     _isStopping = true;
     _isLoadingMainResource = false;
-    if (RefPtr<LocalFrame> frame = ShareRefPtr(_frame.get()))
+    if (RefPtr<boo::Frame> frame = ShareRefPtr(_frame.get()))
     {
       net::ResourceError cancelled(utf8_string(ErrorDomainBooeyInternal), 0, _request.Url(), u8"Cancelled",
                                    net::ResourceError::Type::Cancellation);
@@ -284,7 +277,7 @@ namespace krys::boo
   {
     _isLoadingMainResource = false;
     _mainDocumentError = krys::move(error);
-    if (RefPtr<LocalFrame> frame = ShareRefPtr(_frame.get()))
+    if (RefPtr<boo::Frame> frame = ShareRefPtr(_frame.get()))
     {
       Ref<DocumentLoader> protectedThis = ShareRef(*this);
       frame->Loader().ReceivedMainResourceError(*this, _mainDocumentError);
@@ -301,7 +294,7 @@ namespace krys::boo
 
   void DocumentLoader::CommitLoad(Span<const uint8> data) noexcept
   {
-    RefPtr<LocalFrame> frame = ShareRefPtr(_frame.get());
+    RefPtr<boo::Frame> frame = ShareRefPtr(_frame.get());
     if (!frame)
     {
       return;

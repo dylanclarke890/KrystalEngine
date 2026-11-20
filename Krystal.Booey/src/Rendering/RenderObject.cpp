@@ -42,8 +42,8 @@
 #include "Krystal.Booey/HTML/Elements/HTMLHRElement.hpp"
 #include "Krystal.Booey/HTML/Elements/HTMLLegendElement.hpp"
 #include "Krystal.Booey/Layout/LayoutTree/LayoutBox.hpp"
-#include "Krystal.Booey/Page/LocalFrameView.hpp"
-#include "Krystal.Booey/Page/LocalFrameViewLayoutContext.hpp"
+#include "Krystal.Booey/Page/FrameView.hpp"
+#include "Krystal.Booey/Page/FrameViewLayoutContext.hpp"
 #include "Krystal.Booey/Page/Scrolling/ScrollAnchoringController.hpp"
 #include "Krystal.Booey/Rendering/FormControls/RenderTextControl.hpp"
 #include "Krystal.Booey/Rendering/Fragmentation/RenderFragmentedFlow.hpp"
@@ -1409,7 +1409,7 @@ namespace krys::boo
     return *GetDocument().GetRenderView();
   }
 
-  LocalFrameViewLayoutContext &RenderObject::LayoutContext() const noexcept
+  FrameViewLayoutContext &RenderObject::LayoutContext() const noexcept
   {
     return View().FrameView().LayoutContext();
   }
@@ -1493,15 +1493,15 @@ namespace krys::boo
 
   bool RenderObject::CachedImageListener::UseSystemDarkAppearance() const noexcept
   {
-    auto *page = _renderer.GetDocument().GetPage();
-    return page && page->UseDarkAppearance();
+    auto *frame = _renderer.GetDocument().Frame();
+    return frame && frame->UseDarkAppearance();
   }
 
   void RenderObject::ScheduleRenderingUpdateForImage(CachedImage &) noexcept
   {
-    if (auto *page = GetDocument().GetPage())
+    if (auto *frame = GetDocument().Frame())
     {
-      page->ScheduleRenderingUpdate({RenderingUpdateStep::Images});
+      frame->ScheduleRenderingUpdate({RenderingUpdateStep::Images});
     }
   }
 

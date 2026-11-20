@@ -37,8 +37,8 @@
 #include "Krystal.Booey/HTML/Elements/HTMLFieldSetElement.hpp"
 #include "Krystal.Booey/HTML/Elements/HTMLFormElement.hpp"
 #include "Krystal.Booey/HTML/Elements/HTMLLegendElement.hpp"
-#include "Krystal.Booey/Page/Clients/ChromeClient.hpp"
-#include "Krystal.Booey/Page/Page.hpp"
+#include "Krystal.Booey/Page/Clients/BooeyClient.hpp"
+#include "Krystal.Booey/Page/Frame.hpp"
 #include "Krystal.Booey/Style/Invalidation/PseudoClassChangeInvalidation.hpp"
 
 namespace krys::boo::html
@@ -119,18 +119,18 @@ namespace krys::boo::html
 
   namespace
   {
-    KRYS_NODISCARD ChromeClient *ValidationChromeClientOf(const HTMLElement &element) noexcept
+    KRYS_NODISCARD BooeyClient *ValidationBooeyClientOf(const HTMLElement &element) noexcept
     {
-      auto *page = element.NodeDocument().GetPage();
-      return page ? &page->GetChromeClient() : nullptr;
+      auto *frame = element.NodeDocument().Frame();
+      return frame ? &frame->GetBooeyClient() : nullptr;
     }
   }
 
   void ValidatedFormListedElement::UpdateVisibleValidationMessage(HTMLElement &validationAnchor) noexcept
   {
     auto &element = AsHTMLElement();
-    auto *chromeClient = ValidationChromeClientOf(element);
-    if (!chromeClient)
+    auto *booeyClient = ValidationBooeyClientOf(element);
+    if (!booeyClient)
     {
       return;
     }
@@ -157,16 +157,16 @@ namespace krys::boo::html
     }
 
     _validationMessageAnchor = CreateWeakPtr(&validationAnchor);
-    chromeClient->ShowValidationMessage(validationAnchor, message);
+    booeyClient->ShowValidationMessage(validationAnchor, message);
   }
 
   void ValidatedFormListedElement::HideVisibleValidationMessage() noexcept
   {
     auto *anchor = _validationMessageAnchor.get();
-    auto *chromeClient = ValidationChromeClientOf(AsHTMLElement());
-    if (anchor && chromeClient)
+    auto *booeyClient = ValidationBooeyClientOf(AsHTMLElement());
+    if (anchor && booeyClient)
     {
-      chromeClient->HideValidationMessage(*anchor);
+      booeyClient->HideValidationMessage(*anchor);
     }
   }
 
@@ -270,8 +270,8 @@ namespace krys::boo::html
   bool ValidatedFormListedElement::IsShowingValidationMessage() const noexcept
   {
     auto *anchor = _validationMessageAnchor.get();
-    auto *chromeClient = ValidationChromeClientOf(AsHTMLElement());
-    return anchor && chromeClient && chromeClient->IsValidationMessageVisible(*anchor);
+    auto *booeyClient = ValidationBooeyClientOf(AsHTMLElement());
+    return anchor && booeyClient && booeyClient->IsValidationMessageVisible(*anchor);
   }
 
   bool ValidatedFormListedElement::IsFocusingWithValidationMessage() const noexcept

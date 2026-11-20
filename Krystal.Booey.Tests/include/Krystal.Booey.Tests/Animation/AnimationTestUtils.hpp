@@ -9,8 +9,7 @@
 #include "Krystal.Booey/DOM/Nodes/HTMLDocument.hpp"
 #include "Krystal.Booey/HTML/EventLoop/EventLoop.hpp"
 #include "Krystal.Booey/HTML/Parser/DocumentParser.hpp"
-#include "Krystal.Booey/Page/LocalFrame.hpp"
-#include "Krystal.Booey/Page/Page.hpp"
+#include "Krystal.Booey/Page/Frame.hpp"
 #include "Krystal.Booey/Rendering/RenderElement.hpp"
 #include "Krystal.Booey/Style/Scope/Scope.hpp"
 #include <string>
@@ -21,12 +20,12 @@ namespace krys::boo::tests
   /// animations on.
   struct AnimationPageFixture
   {
-    Ref<Page> TestPage {Page::Create()};
+    Ref<boo::Frame> TestFrame {boo::Frame::Create()};
     RefPtr<HTMLDocument> Document;
 
     explicit AnimationPageFixture(utf8_string markup) noexcept
     {
-      auto &frame = TestPage->MainFrame();
+      auto &frame = *TestFrame;
       frame.CreateView({200, 100});
       Document = CreateRef<HTMLDocument>();
       frame.SetDocument(ShareRefPtr<boo::Document>(Document.get()));
@@ -34,12 +33,12 @@ namespace krys::boo::tests
       parser->InputStream().Append(krys::move(markup), IsEOF::Yes);
       parser->PumpTokenizer();
       Document->StyleScope().FlushPendingUpdate();
-      TestPage->UpdateRendering();
+      TestFrame->UpdateRendering();
     }
 
     ~AnimationPageFixture() noexcept
     {
-      TestPage->MainFrame().SetDocument(nullptr);
+      TestFrame->SetDocument(nullptr);
     }
 
     KRYS_NODISCARD Element &ById(DOMStringView id) const noexcept
@@ -59,9 +58,9 @@ namespace krys::boo::tests
     {
       auto &loop = html::EventLoop::Current();
       loop.Run(loop.Now() + delta);
-      if (TestPage->IsRenderingUpdateScheduled())
+      if (TestFrame->IsRenderingUpdateScheduled())
       {
-        TestPage->UpdateRendering();
+        TestFrame->UpdateRendering();
       }
     }
 

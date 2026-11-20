@@ -29,8 +29,8 @@
 
 #include "Krystal.Booey/Rendering/Shapes/ShapeOutsideInfo.hpp"
 #include "Krystal.Booey/Graphics/Geometry/LayoutRoundedRect.hpp"
-#include "Krystal.Booey/Page/LocalFrameView.hpp"
-#include "Krystal.Booey/Page/LocalFrameViewLayoutContext.hpp"
+#include "Krystal.Booey/Page/FrameView.hpp"
+#include "Krystal.Booey/Page/FrameViewLayoutContext.hpp"
 #include "Krystal.Booey/Rendering/FloatingObjects.hpp"
 #include "Krystal.Booey/Rendering/RenderBlockFlow.hpp"
 #include "Krystal.Booey/Rendering/RenderView.hpp"

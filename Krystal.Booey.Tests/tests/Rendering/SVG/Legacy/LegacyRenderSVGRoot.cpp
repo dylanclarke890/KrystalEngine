@@ -3,7 +3,7 @@
 #include "Krystal.Booey.Tests/Rendering/PaintTestUtils.hpp"
 #include "Krystal.Booey.Tests/Style/ResolverTestUtils.hpp"
 #include "Krystal.Booey/Infra/Namespaces.hpp"
-#include "Krystal.Booey/Page/LocalFrameView.hpp"
+#include "Krystal.Booey/Page/FrameView.hpp"
 #include "Krystal.Booey/Rendering/RenderTreeAsText.hpp"
 #include "Krystal.Booey/SVG/Elements/SVGSvgElement.hpp"
 #include "Krystal.Core/TypeCast.hpp"

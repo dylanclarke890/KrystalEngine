@@ -21,7 +21,7 @@
 
 #include "Krystal.Booey/SVG/SVGDocumentExtensions.hpp"
 #include "Krystal.Booey/DOM/Nodes/Document.hpp"
-#include "Krystal.Booey/Page/Page.hpp"
+#include "Krystal.Booey/Page/Frame.hpp"
 #include "Krystal.Booey/Rendering/SVG/Legacy/SVGResourcesCache.hpp"
 #include "Krystal.Booey/SVG/Animation/SMILTimeContainer.hpp"
 #include "Krystal.Booey/SVG/Elements/SVGElement.hpp"
@@ -36,8 +36,8 @@ namespace krys::boo
   {
     KRYS_NODISCARD bool AnimationsPausedForDocument(Document &document) noexcept
     {
-      auto *page = document.GetPage();
-      return !page || !page->IsVisible() || !page->ImageAnimationEnabled();
+      auto *frame = document.Frame();
+      return !frame || !frame->IsVisible() || !frame->ImageAnimationEnabled();
     }
   }
 

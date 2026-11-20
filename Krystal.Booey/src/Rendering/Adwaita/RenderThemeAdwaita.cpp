@@ -30,7 +30,7 @@
 #include "Krystal.Booey/Graphics/Adwaita/Adwaita.hpp"
 #include "Krystal.Booey/Graphics/Fonts/FontCascade.hpp"
 #include "Krystal.Booey/HTML/Elements/HTMLInputElement.hpp"
-#include "Krystal.Booey/Page/Page.hpp"
+#include "Krystal.Booey/Page/Frame.hpp"
 #include "Krystal.Booey/Rendering/FormControls/RenderProgress.hpp"
 #include "Krystal.Booey/Rendering/RenderElement.hpp"
 #include "Krystal.Booey/Rendering/Style/RenderStyle+GettersInlines.hpp"
@@ -294,12 +294,12 @@ namespace krys::boo
   MonotonicTime::duration RenderThemeAdwaita::AnimationRepeatIntervalForProgressBar(
     const RenderProgress &renderProgress) const noexcept
   {
-    if (auto *page = renderProgress.GetDocument().GetPage())
+    if (auto *frame = renderProgress.GetDocument().Frame())
     {
-      return page->PreferredRenderingUpdateInterval();
+      return frame->PreferredRenderingUpdateInterval();
     }
     return std::chrono::duration_cast<MonotonicTime::duration>(
-      std::chrono::duration<double>(1.0 / Page::FullSpeedFramesPerSecond));
+      std::chrono::duration<double>(1.0 / Frame::FullSpeedFramesPerSecond));
   }
 
   RectI RenderThemeAdwaita::ProgressBarRectForBounds(const RenderProgress &,

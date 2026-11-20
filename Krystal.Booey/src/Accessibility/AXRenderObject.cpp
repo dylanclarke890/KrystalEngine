@@ -52,7 +52,7 @@
 #include "Krystal.Booey/HTML/Shadow/SpinButtonElement.hpp"
 #include "Krystal.Booey/Infra/StringAlgorithms.hpp"
 #include "Krystal.Booey/Loader/Cache/CachedImage.hpp"
-#include "Krystal.Booey/Page/LocalFrameView.hpp"
+#include "Krystal.Booey/Page/FrameView.hpp"
 #include "Krystal.Booey/Rendering/FormControls/RenderListBox.hpp"
 #include "Krystal.Booey/Rendering/GeneratedContent/RenderListItem.hpp"
 #include "Krystal.Booey/Rendering/GeneratedContent/RenderListMarker.hpp"

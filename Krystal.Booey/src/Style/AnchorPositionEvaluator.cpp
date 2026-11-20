@@ -29,8 +29,8 @@
 #include "Krystal.Booey/DOM/Nodes/Element.hpp"
 #include "Krystal.Booey/DOM/Nodes/PseudoElement.hpp"
 #include "Krystal.Booey/HTML/Elements/HTMLElement.hpp"
-#include "Krystal.Booey/Page/LocalFrameView.hpp"
-#include "Krystal.Booey/Page/LocalFrameViewLayoutContext.hpp"
+#include "Krystal.Booey/Page/FrameView.hpp"
+#include "Krystal.Booey/Page/FrameViewLayoutContext.hpp"
 #include "Krystal.Booey/Rendering/Fragmentation/RenderFragmentedFlow.hpp"
 #include "Krystal.Booey/Rendering/Layers/RenderLayer.hpp"
 #include "Krystal.Booey/Rendering/Layers/RenderLayerCompositor.hpp"
@@ -190,7 +190,7 @@ namespace krys::boo
     _scrollSnapshots.emplace_back(scroller, LayoutPoint(scroller.ConstrainedScrollPosition()));
   }
 
-  static ScrollPosition ConstrainedViewportScrollPosition(const LocalFrameView &view) noexcept
+  static ScrollPosition ConstrainedViewportScrollPosition(const FrameView &view) noexcept
   {
     auto position = view.ScrollPositionRespectingCustomFixedPosition();
     return view.ConstrainedScrollPosition(ScrollPosition {position.X().ToInt(), position.Y().ToInt()});
@@ -380,7 +380,7 @@ namespace krys::boo::style
     return ScrollPosition {position.X().ToInt(), position.Y().ToInt()};
   }
 
-  static ScrollPosition ConstrainedScrollPositionOfView(const LocalFrameView &view) noexcept
+  static ScrollPosition ConstrainedScrollPositionOfView(const FrameView &view) noexcept
   {
     return view.ConstrainedScrollPosition(
       TruncatedScrollPosition(view.ScrollPositionRespectingCustomFixedPosition()));

@@ -395,9 +395,9 @@ namespace krys::boo::tests
       explicit CaretFixture(utf8_stringview markup) noexcept
           : PaintFixture(u8"<!DOCTYPE html><style>body{margin:0;font:10px/20px sans-serif}</style>"
                            + utf8_string(markup),
-                         {400, 300}, true)
+                         {400, 300})
       {
-        TestPage->UpdateRendering();
+        Frame->UpdateRendering();
       }
 
       KRYS_NODISCARD FrameSelection &Selection() noexcept
@@ -433,7 +433,7 @@ namespace krys::boo::tests
       {
         auto &loop = html::EventLoop::Current();
         loop.Run(loop.Now() + delay);
-        TestPage->UpdateRendering();
+        Frame->UpdateRendering();
       }
     };
   }
@@ -449,7 +449,7 @@ namespace krys::boo::tests
     SECTION("A caret in editable text has a rect, and paints in the caret colour")
     {
       selection.MoveTo(dom::MakeContainerOffsetPosition(ShareRefPtr(&text), 0), Affinity::Downstream);
-      fixture.TestPage->UpdateRendering();
+      fixture.Frame->UpdateRendering();
       CHECK(selection.IsCaretVisible());
       auto bounds = selection.AbsoluteCaretBounds();
       CHECK(bounds.X() == 0);
@@ -460,7 +460,7 @@ namespace krys::boo::tests
 
       // Moving the caret moves its rect.
       selection.MoveTo(dom::MakeContainerOffsetPosition(ShareRefPtr(&text), 3), Affinity::Downstream);
-      fixture.TestPage->UpdateRendering();
+      fixture.Frame->UpdateRendering();
       CHECK(selection.AbsoluteCaretBounds().X() > 10);
     }
 
@@ -468,14 +468,14 @@ namespace krys::boo::tests
     {
       selection.MoveTo(dom::MakeContainerOffsetPosition(ShareRefPtr(&fixture.TextIn(u8"p")), 2),
                        Affinity::Downstream);
-      fixture.TestPage->UpdateRendering();
+      fixture.Frame->UpdateRendering();
       CHECK_FALSE(fixture.PaintsCaret(u8"#000000"));
     }
 
     SECTION("The caret blinks")
     {
       selection.MoveTo(dom::MakeContainerOffsetPosition(ShareRefPtr(&text), 2), Affinity::Downstream);
-      fixture.TestPage->UpdateRendering();
+      fixture.Frame->UpdateRendering();
       CHECK(selection.GetCaretAnimator().IsActive());
       CHECK(fixture.PaintsCaret(u8"#FF0000"));
 
@@ -488,7 +488,7 @@ namespace krys::boo::tests
       fixture.Advance(std::chrono::milliseconds(550));
       CHECK_FALSE(fixture.PaintsCaret(u8"#FF0000"));
       selection.MoveTo(dom::MakeContainerOffsetPosition(ShareRefPtr(&text), 4), Affinity::Downstream);
-      fixture.TestPage->UpdateRendering();
+      fixture.Frame->UpdateRendering();
       CHECK(fixture.PaintsCaret(u8"#FF0000"));
 
       // The event handler suspends the blinking while the mouse is down; the next blink, which takes its
@@ -502,12 +502,12 @@ namespace krys::boo::tests
     SECTION("A page that prefers a caret that doesn't blink keeps it shown")
     {
       selection.MoveTo(dom::MakeContainerOffsetPosition(ShareRefPtr(&text), 2), Affinity::Downstream);
-      fixture.TestPage->UpdateRendering();
+      fixture.Frame->UpdateRendering();
       fixture.Advance(std::chrono::milliseconds(550));
       CHECK_FALSE(fixture.PaintsCaret(u8"#FF0000"));
 
       // A hidden caret is shown at its next blink, and stays shown.
-      fixture.TestPage->SetPrefersNonBlinkingCaret(true);
+      fixture.Frame->SetPrefersNonBlinkingCaret(true);
       CHECK(selection.IsCaretBlinkingSuspended());
       fixture.Advance(std::chrono::milliseconds(550));
       CHECK(fixture.PaintsCaret(u8"#FF0000"));
@@ -515,7 +515,7 @@ namespace krys::boo::tests
       CHECK(fixture.PaintsCaret(u8"#FF0000"));
 
       // It blinks again once the preference is gone.
-      fixture.TestPage->SetPrefersNonBlinkingCaret(false);
+      fixture.Frame->SetPrefersNonBlinkingCaret(false);
       fixture.Advance(std::chrono::milliseconds(550));
       CHECK_FALSE(fixture.PaintsCaret(u8"#FF0000"));
     }
@@ -523,13 +523,13 @@ namespace krys::boo::tests
     SECTION("An unfocused document hides the caret")
     {
       selection.MoveTo(dom::MakeContainerOffsetPosition(ShareRefPtr(&text), 2), Affinity::Downstream);
-      fixture.TestPage->UpdateRendering();
+      fixture.Frame->UpdateRendering();
       fixture.Document->SetFocusedAndActive(false);
-      fixture.TestPage->UpdateRendering();
+      fixture.Frame->UpdateRendering();
       CHECK_FALSE(selection.IsCaretVisible());
       CHECK_FALSE(fixture.PaintsCaret(u8"#FF0000"));
       fixture.Document->SetFocusedAndActive(true);
-      fixture.TestPage->UpdateRendering();
+      fixture.Frame->UpdateRendering();
       CHECK(selection.IsCaretVisible());
       CHECK(fixture.PaintsCaret(u8"#FF0000"));
     }
@@ -550,9 +550,9 @@ namespace krys::boo::tests
     SECTION("Removing the text the caret is in")
     {
       selection.MoveTo(dom::MakeContainerOffsetPosition(ShareRefPtr(&text), 2), Affinity::Downstream);
-      fixture.TestPage->UpdateRendering();
+      fixture.Frame->UpdateRendering();
       (void)fixture.ById(u8"e").RemoveChild(text);
-      fixture.TestPage->UpdateRendering();
+      fixture.Frame->UpdateRendering();
       CHECK(selection.IsCaret());
       CHECK(selection.Selection().Start().DeprecatedNode() == &fixture.ById(u8"e"));
     }
@@ -603,7 +603,7 @@ namespace krys::boo::tests
     auto &selection = fixture.Selection();
     selection.MoveTo(dom::MakeContainerOffsetPosition(ShareRefPtr(&fixture.TextIn(u8"e")), 0),
                      Affinity::Downstream);
-    fixture.TestPage->UpdateRendering();
+    fixture.Frame->UpdateRendering();
     auto before = selection.AbsoluteCaretBounds();
 
     // Scrolling lays nothing out, so it's the scroll that makes the caret's rect stale.

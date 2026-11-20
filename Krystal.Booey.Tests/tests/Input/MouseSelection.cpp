@@ -7,7 +7,7 @@
 #include "Krystal.Booey/DOM/Nodes/Text.hpp"
 #include "Krystal.Booey/Editing/Selection/FrameSelection.hpp"
 #include "Krystal.Booey/Input/EventHandler.hpp"
-#include "Krystal.Booey/Page/LocalFrame.hpp"
+#include "Krystal.Booey/Page/Frame.hpp"
 
 namespace krys::boo::tests
 {

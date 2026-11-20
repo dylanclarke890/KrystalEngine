@@ -3,7 +3,7 @@
 #include "Krystal.Booey/DOM/Nodes/Document.hpp"
 #include "Krystal.Booey/DOM/Nodes/Element.hpp"
 #include "Krystal.Booey/HTML/EventLoop/EventLoop.hpp"
-#include "Krystal.Booey/Page/LocalFrame.hpp"
+#include "Krystal.Booey/Page/Frame.hpp"
 #include "Krystal.Booey/Rendering/Style/RenderStyle+GettersInlines.hpp"
 
 namespace krys::boo::tests
@@ -46,7 +46,7 @@ namespace krys::boo::tests
 
       void SetHostDark(bool dark) noexcept
       {
-        TestPage->SetUseDarkAppearance(dark);
+        Frame().SetUseDarkAppearance(dark);
       }
 
       KRYS_NODISCARD Ref<Element> AddMeta(DOMStringView name, DOMStringView content) const
@@ -65,7 +65,7 @@ namespace krys::boo::tests
   {
     ColorSchemeFixture fixture;
     auto &document = fixture.Document();
-    REQUIRE(document.GetPage());
+    REQUIRE(document.Frame());
 
     CHECK(fixture.ColorOf(u8"normal") == Red);
     CHECK(fixture.ColorOf(u8"both") == Red);
@@ -75,7 +75,7 @@ namespace krys::boo::tests
     CHECK(document.StyleColorOptions(nullptr) == style::ColorOptions::None);
 
     fixture.SetHostDark(true);
-    CHECK(document.GetPage()->UseDarkAppearance());
+    CHECK(document.Frame()->UseDarkAppearance());
     CHECK(fixture.ColorOf(u8"normal") == Red);
     CHECK(fixture.ColorOf(u8"both") == Blue);
     CHECK(fixture.ColorOf(u8"dark") == Blue);

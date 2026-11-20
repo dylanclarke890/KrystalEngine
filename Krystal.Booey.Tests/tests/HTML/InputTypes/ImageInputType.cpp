@@ -311,9 +311,9 @@ namespace krys::boo::tests
     LoaderFixture loader;
     loader.Strategy.Resources[u8"file:///a.png"] = img::tests::images::PNG;
 
-    Ref<Page> page = Page::Create();
+    Ref<boo::Frame> frame = boo::Frame::Create();
     InputFixture fixture(
-      *page,
+      *frame,
       u8"<style>body { margin: 0 } dialog { inset: 0; margin: 0; padding: 0; border: 0 }</style>"
       u8"<dialog id=d open><form method=dialog><input id=i type=image src='file:///a.png' width=30 height=20 "
       u8"style='display: block'></form></dialog>");

@@ -34,7 +34,7 @@
 namespace krys::boo
 {
   class Element;
-  class LocalFrame;
+  class Frame;
   class RenderObject;
   class RenderView;
 
@@ -59,15 +59,15 @@ namespace krys::boo
 
   /// @brief The render tree and layer tree of @p frame's document, laid out, as text: the dump layout tests
   /// compare.
-  KRYS_NODISCARD utf8_string ExternalRepresentation(LocalFrame *frame,
+  KRYS_NODISCARD utf8_string ExternalRepresentation(Frame *frame,
                                                     EnumSet<RenderAsTextFlag> behavior = {}) noexcept;
 
   /// @brief The render tree and layer tree under @p element's box, laid out, as text.
   KRYS_NODISCARD utf8_string ExternalRepresentation(boo::Element *element,
                                                     EnumSet<RenderAsTextFlag> behavior = {}) noexcept;
 
-  void ExternalRepresentationForLocalFrame(TextStream &ts, LocalFrame &frame,
-                                           EnumSet<RenderAsTextFlag> behavior = {}) noexcept;
+  void ExternalRepresentationForFrame(TextStream &ts, Frame &frame,
+                                      EnumSet<RenderAsTextFlag> behavior = {}) noexcept;
 
   void Write(TextStream &ts, const RenderObject &renderer, EnumSet<RenderAsTextFlag> behavior = {}) noexcept;
 

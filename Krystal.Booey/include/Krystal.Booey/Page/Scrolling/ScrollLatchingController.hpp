@@ -35,7 +35,7 @@
 namespace krys::boo
 {
   class Element;
-  class LocalFrameView;
+  class FrameView;
   class PlatformWheelEvent;
   class ScrollableArea;
 
@@ -81,7 +81,7 @@ namespace krys::boo
 
     /// @brief Latches the event's element and scroller at a gesture's start (or once its deltas are enough
     /// to scroll), and for the gesture's later events replaces them with the latched ones.
-    void UpdateAndFetchLatchingState(const LocalFrameView &view, const PlatformWheelEvent &wheelEvent,
+    void UpdateAndFetchLatchingState(const FrameView &view, const PlatformWheelEvent &wheelEvent,
                                      RefPtr<Element> &latchedElement,
                                      WeakPtr<ScrollableArea> &scrollableArea) noexcept;
 
@@ -89,7 +89,7 @@ namespace krys::boo
     void RemoveLatchingStateForTarget(const Element &element) noexcept;
 
   private:
-    KRYS_NODISCARD static bool ShouldLatchToScrollableArea(const LocalFrameView &view,
+    KRYS_NODISCARD static bool ShouldLatchToScrollableArea(const FrameView &view,
                                                            ScrollableArea *scrollableArea,
                                                            SizeF scrollDelta) noexcept;
   };

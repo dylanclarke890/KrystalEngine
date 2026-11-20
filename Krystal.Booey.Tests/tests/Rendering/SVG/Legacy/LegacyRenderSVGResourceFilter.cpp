@@ -56,7 +56,7 @@ namespace krys::boo::tests
                    "[Rendering][SVG][LegacyRenderSVGResourceFilter]")
   {
     // A filtered shape is drawn into an image buffer, which is drawn through the filter.
-    PaintFixture fixture(FilteredShape, {200, 100}, true);
+    PaintFixture fixture(FilteredShape);
     auto painted = fixture.Painted();
     CAPTURE(css::tests::ToNarrow(painted));
     CHECK(Contains(painted, u8R"((draw-filtered-image-buffer
@@ -66,8 +66,7 @@ namespace krys::boo::tests
     auto identity =
       PaintFixture(u8R"html(<!DOCTYPE html><body style="margin: 0"><svg width=200 height=100>)html"
                    u8R"html(<filter id=f><feOffset /></filter>)html"
-                   u8R"html(<rect x=10 y=10 width=40 height=20 filter="url(#f)" /></svg></body>)html",
-                   {200, 100}, true)
+                   u8R"html(<rect x=10 y=10 width=40 height=20 filter="url(#f)" /></svg></body>)html")
         .Painted();
     CAPTURE(css::tests::ToNarrow(identity));
     CHECK_FALSE(Contains(identity, u8"draw-filtered-image-buffer"));
@@ -82,8 +81,7 @@ namespace krys::boo::tests
     PaintFixture fixture(
       u8R"html(<!DOCTYPE html><body style="margin: 0"><svg width=0 height=0>)html"
       u8R"html(<filter id=f><feGaussianBlur stdDeviation=2 /></filter></svg>)html"
-      u8R"html(<div id=box style="width: 40px; height: 30px; background: green; filter: url(#f)"></div></body>)html",
-      {200, 100}, true);
+      u8R"html(<div id=box style="width: 40px; height: 30px; background: green; filter: url(#f)"></div></body>)html");
     auto painted = fixture.Painted();
     CAPTURE(css::tests::ToNarrow(painted));
     CHECK(Contains(painted, u8"(draw-filtered-image-buffer"));

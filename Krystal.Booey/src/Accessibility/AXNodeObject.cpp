@@ -65,10 +65,10 @@
 #include "Krystal.Booey/HTML/Elements/HTMLTextAreaElement.hpp"
 #include "Krystal.Booey/HTML/Elements/HTMLTextFormControlElement.hpp"
 #include "Krystal.Booey/HTML/MicroParsers/Numbers.hpp"
+#include "Krystal.Booey/HTML/Window.hpp"
 #include "Krystal.Booey/Infra/Namespaces.hpp"
 #include "Krystal.Booey/Infra/StringAlgorithms.hpp"
 #include "Krystal.Booey/MathML/Elements/MathMLElement.hpp"
-#include "Krystal.Booey/Page/LocalDOMWindow.hpp"
 #include "Krystal.Booey/Rendering/FormControls/RenderListBox.hpp"
 #include "Krystal.Booey/Rendering/FormControls/RenderTextControl.hpp"
 #include "Krystal.Booey/Rendering/GeneratedContent/RenderListItem.hpp"
@@ -2304,7 +2304,7 @@ namespace krys::boo
     auto *element = DynamicDowncast<Element>(GetNode());
     auto *focusedElement = document->FocusedElement();
     // Focusing the focused element does nothing, so it's unfocused first (focus may have gone to the host's
-    // chrome and come back).
+    // UI and come back).
     if (focusedElement && (!focused || !element || focusedElement == element))
     {
       html::FocusAlgorithms::UnfocusingSteps(*focusedElement);

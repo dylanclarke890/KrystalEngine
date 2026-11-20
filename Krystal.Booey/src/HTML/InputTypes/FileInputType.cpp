@@ -28,9 +28,8 @@
 #include "Krystal.Booey/DOM/Nodes/ShadowRoot.hpp"
 #include "Krystal.Booey/HTML/Elements/HTMLInputElement.hpp"
 #include "Krystal.Booey/HTML/Forms/DOMFormData.hpp"
-#include "Krystal.Booey/Page/Clients/ChromeClient.hpp"
-#include "Krystal.Booey/Page/LocalFrame.hpp"
-#include "Krystal.Booey/Page/Page.hpp"
+#include "Krystal.Booey/Page/Clients/BooeyClient.hpp"
+#include "Krystal.Booey/Page/Frame.hpp"
 #include "Krystal.Booey/Platform/LocalizedStrings.hpp"
 #include "Krystal.Booey/Platform/Pasteboard/DragData.hpp"
 #include "Krystal.Booey/Rendering/FormControls/RenderFileUploadControl.hpp"
@@ -295,8 +294,8 @@ namespace krys::boo::html
   {
     krys_debug_assert(Element());
     auto *frame = Element()->NodeDocument().Frame();
-    auto *chromeClient = GetChromeClient();
-    if (!frame || !chromeClient)
+    auto *booeyClient = GetBooeyClient();
+    if (!frame || !booeyClient)
     {
       return;
     }
@@ -308,11 +307,8 @@ namespace krys::boo::html
     }
     Ref<FileChooser> chooser = FileChooser::Create(*this, ChooserSettings());
     _fileChooser = chooser;
-    if (auto *page = frame->GetPage())
-    {
-      page->NotifyPopupOpeningObservers();
-    }
-    chromeClient->RunOpenPanel(*frame, *chooser);
+    frame->NotifyPopupOpeningObservers();
+    booeyClient->RunOpenPanel(*frame, *chooser);
   }
 
   void FileInputType::HandleActivationBehavior(Event &event) noexcept

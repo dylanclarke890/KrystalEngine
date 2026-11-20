@@ -25,7 +25,7 @@
 
 namespace krys::boo
 {
-  class LocalFrameView;
+  class FrameView;
 
   /// @brief A menu the host shows for a menu list: its options, below or above the control.
   class PopupMenu : public RefCounted<PopupMenu>
@@ -35,7 +35,7 @@ namespace krys::boo
 
     /// @brief Shows the menu for a control at @p rect, in the coordinates of @p view's contents, with the
     /// item at @p selectedIndex chosen.
-    virtual void Show(const RectI &rect, LocalFrameView &view, int32 selectedIndex) noexcept = 0;
+    virtual void Show(const RectI &rect, FrameView &view, int32 selectedIndex) noexcept = 0;
 
     virtual void Hide() noexcept = 0;
 

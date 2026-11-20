@@ -8,7 +8,7 @@
 #include "Krystal.Booey/Editing/Selection/FrameSelection.hpp"
 #include "Krystal.Booey/Input/LegacyKeyCodes.hpp"
 #include "Krystal.Booey/Input/PlatformKeyboardEvent.hpp"
-#include "Krystal.Booey/Page/LocalFrame.hpp"
+#include "Krystal.Booey/Page/Frame.hpp"
 #include <array>
 
 namespace krys::ui
@@ -112,12 +112,12 @@ namespace krys::ui
     return true;
   }
 
-  bool EditorClient::CanCopyCut(boo::LocalFrame *, bool defaultValue) const noexcept
+  bool EditorClient::CanCopyCut(boo::Frame *, bool defaultValue) const noexcept
   {
     return defaultValue;
   }
 
-  bool EditorClient::CanPaste(boo::LocalFrame *, bool defaultValue) const noexcept
+  bool EditorClient::CanPaste(boo::Frame *, bool defaultValue) const noexcept
   {
     return defaultValue;
   }
@@ -209,7 +209,7 @@ namespace krys::ui
     return node->NodeDocument().GetEditor().InsertText(keyEvent->Text(), &event);
   }
 
-  void EditorClient::RespondToChangedSelection(boo::LocalFrame *frame) noexcept
+  void EditorClient::RespondToChangedSelection(boo::Frame *frame) noexcept
   {
     if (!frame || !frame->Document())
     {

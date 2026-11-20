@@ -79,7 +79,7 @@ namespace krys::boo
   class EditorClient;
   class EditorInternalCommand;
   enum class FrameSelectionSetSelectionOption : uint8;
-  class LocalFrame;
+  class Frame;
   class Pasteboard;
   class ProhibitScrollingWhenChangingContentSizeForScope;
   enum class RevealExtentOption : bool;
@@ -121,7 +121,7 @@ namespace krys::boo
     TemporarySelectionChange _selectionChange;
 
   public:
-    explicit IgnoreSelectionChangeForScope(LocalFrame &frame) noexcept;
+    explicit IgnoreSelectionChangeForScope(boo::Frame &frame) noexcept;
 
     ~IgnoreSelectionChangeForScope() noexcept = default;
 
@@ -225,7 +225,7 @@ namespace krys::boo
       KRYS_NODISCARD utf8_string Value(Event *triggeringEvent = nullptr) const noexcept;
 
     private:
-      KRYS_NODISCARD LocalFrame *Frame() const noexcept;
+      KRYS_NODISCARD boo::Frame *Frame() const noexcept;
     };
 
     explicit Editor(Document &document) noexcept;

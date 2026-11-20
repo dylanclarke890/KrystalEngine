@@ -32,9 +32,8 @@
 #include "Krystal.Booey/HTML/Elements/HTMLSelectElement.hpp"
 #include "Krystal.Booey/Infra/StringAlgorithms.hpp"
 #include "Krystal.Booey/Layout/Integration/Inline/LayoutIntegrationLineLayout.hpp"
-#include "Krystal.Booey/Page/Clients/ChromeClient.hpp"
-#include "Krystal.Booey/Page/LocalFrame.hpp"
-#include "Krystal.Booey/Page/Page.hpp"
+#include "Krystal.Booey/Page/Clients/BooeyClient.hpp"
+#include "Krystal.Booey/Page/Frame.hpp"
 #include "Krystal.Booey/Platform/Choosers/PopupMenu.hpp"
 #include "Krystal.Booey/Rendering/RenderBlockFlow.hpp"
 #include "Krystal.Booey/Rendering/RenderText.hpp"
@@ -113,9 +112,9 @@ namespace krys::boo
     }
     innerStyle.SetPaddingBox(krys::move(paddingBox));
 
-    // A document without a page behaves as with the default chrome client.
-    auto *page = GetDocument().GetPage();
-    if (page && page->GetChromeClient().SelectItemWritingDirectionIsNatural())
+    // A document without a page behaves as with the default Booey client.
+    auto *frame = GetDocument().Frame();
+    if (frame && frame->GetBooeyClient().SelectItemWritingDirectionIsNatural())
     {
       // Items in the popup will not respect the CSS text-align and direction properties, so we must adjust
       // our own style to match.
@@ -128,7 +127,7 @@ namespace krys::boo
       (void)innerStyle.SetDirection(direction);
     }
     else if (_optionStyle
-             && (!page || page->GetChromeClient().SelectItemAlignmentFollowsMenuWritingDirection()))
+             && (!frame || frame->GetBooeyClient().SelectItemAlignmentFollowsMenuWritingDirection()))
     {
       if (_optionStyle->GetWritingMode().BidiDirection() != innerStyle.GetWritingMode().BidiDirection()
           || _optionStyle->GetUnicodeBidi() != innerStyle.GetUnicodeBidi())
@@ -389,10 +388,10 @@ namespace krys::boo
     krys_debug_assert(_innerBlock);
     if (!_popup)
     {
-      if (auto *page = GetDocument().GetPage())
+      if (auto *frame = GetDocument().Frame())
       {
-        page->NotifyPopupOpeningObservers();
-        _popup = page->GetChromeClient().CreatePopupMenu(*this);
+        frame->NotifyPopupOpeningObservers();
+        _popup = frame->GetBooeyClient().CreatePopupMenu(*this);
       }
     }
     if (!_popup)

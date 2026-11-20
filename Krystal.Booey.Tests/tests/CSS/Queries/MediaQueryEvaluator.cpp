@@ -6,8 +6,8 @@
 #include "Krystal.Booey/CSS/Queries/MediaQueryFeatures.hpp"
 #include "Krystal.Booey/CSS/Queries/MediaQueryParser.hpp"
 #include "Krystal.Booey/DOM/Nodes/Document.hpp"
-#include "Krystal.Booey/Page/LocalFrame.hpp"
-#include "Krystal.Booey/Page/LocalFrameView.hpp"
+#include "Krystal.Booey/Page/Frame.hpp"
+#include "Krystal.Booey/Page/FrameView.hpp"
 #include "Krystal.Booey/Rendering/Style/RenderStyle+GettersInlines.hpp"
 #include "Krystal.Booey/Rendering/Style/RenderStyle+SettersInlines.hpp"
 
@@ -36,22 +36,22 @@ namespace krys::boo::css::tests
     }
 
     /// @brief Shows @p document in a new frame with a view of @p viewSize.
-    KRYS_NODISCARD Ref<LocalFrame> ShowInFrame(Document &document, SizeI viewSize = {800, 600})
+    KRYS_NODISCARD Ref<boo::Frame> ShowInFrame(Document &document, SizeI viewSize = {800, 600})
     {
-      auto frame = LocalFrame::Create();
+      auto frame = boo::Frame::Create();
       frame->CreateView(viewSize);
       frame->SetDocument(ShareRefPtr(&document));
       return frame;
     }
 
     /// @brief Evaluates queries against a document with a root element and an 800x600 screen view, in a page
-    /// on a 1920x1080 screen whose chrome client's answers the test sets (`Chrome`).
+    /// on a 1920x1080 screen whose Booey client's answers the test sets (`Client`).
     struct EvaluationFixture : ValueFixture
     {
       Ref<boo::Document> Document {CreateRef<boo::Document>()};
-      MediaPage Media {*Document};
-      Ref<LocalFrame> Frame {ShareRef(Media.Frame())};
-      MediaChromeClient &Chrome {*Media.Chrome};
+      MediaFrame Media {*Document};
+      Ref<boo::Frame> Frame {ShareRef(Media.Frame())};
+      MediaBooeyClient &Client {*Media.Client};
       RenderStyle RootStyle {RenderStyle::Create()};
       SizeI ViewSize {800, 600};
       CSSOMStringAtom ViewMediaType {Screen()};
@@ -62,7 +62,7 @@ namespace krys::boo::css::tests
         REQUIRE_FALSE(Document->AppendChild(*root).HasException());
       }
 
-      /// @brief Whether @p text matches with the current page, chrome client and view, for @p mediaType.
+      /// @brief Whether @p text matches with the current page, Booey client and view, for @p mediaType.
       KRYS_NODISCARD bool Matches(utf8_stringview text, const CSSOMStringAtom &mediaType = Screen())
       {
         auto &view = *Frame->View();
@@ -296,7 +296,7 @@ namespace krys::boo::css::tests
       CHECK(fixture.Matches(u8"(resolution: 96dpi)"));
       CHECK(fixture.Matches(u8"(resolution)"));
 
-      fixture.Media.TestPage->SetDeviceScaleFactor(2.f);
+      fixture.Media.Frame().SetDeviceScaleFactor(2.f);
       CHECK(fixture.Matches(u8"(resolution: 2x)"));
       CHECK(fixture.Matches(u8"(min-resolution: 192dpi)"));
       CHECK_FALSE(fixture.Matches(u8"(min-resolution: 3dppx)"));
@@ -319,7 +319,7 @@ namespace krys::boo::css::tests
       CHECK_FALSE(fixture.Matches(u8"(monochrome)"));
       CHECK(fixture.Matches(u8"(monochrome: 0)"));
 
-      fixture.Chrome.Monochrome = true;
+      fixture.Client.Monochrome = true;
       CHECK(fixture.Matches(u8"(monochrome)"));
       CHECK(fixture.Matches(u8"(monochrome: 8)"));
     }
@@ -332,14 +332,14 @@ namespace krys::boo::css::tests
       CHECK(fixture.Matches(u8"(dynamic-range: standard)"));
       CHECK_FALSE(fixture.Matches(u8"(dynamic-range: high)"));
 
-      fixture.Chrome.ExtendedColor = true;
-      fixture.Chrome.HighDynamicRange = true;
+      fixture.Client.ExtendedColor = true;
+      fixture.Client.HighDynamicRange = true;
       CHECK(fixture.Matches(u8"(color-gamut: srgb)"));
       CHECK(fixture.Matches(u8"(color-gamut: p3)"));
       CHECK_FALSE(fixture.Matches(u8"(color-gamut: rec2020)"));
       CHECK(fixture.Matches(u8"(dynamic-range: high)"));
 
-      fixture.Chrome.Rec2020Color = true;
+      fixture.Client.Rec2020Color = true;
       CHECK(fixture.Matches(u8"(color-gamut: p3)"));
       CHECK(fixture.Matches(u8"(color-gamut: rec2020)"));
     }
@@ -388,9 +388,9 @@ namespace krys::boo::css::tests
 
     SECTION("A touch screen with a stylus")
     {
-      fixture.Chrome.PrimaryHovers = false;
-      fixture.Chrome.Primary = PointerCharacteristics::Coarse;
-      fixture.Chrome.AllAvailable = PointerCharacteristics::Coarse | PointerCharacteristics::Fine;
+      fixture.Client.PrimaryHovers = false;
+      fixture.Client.Primary = PointerCharacteristics::Coarse;
+      fixture.Client.AllAvailable = PointerCharacteristics::Coarse | PointerCharacteristics::Fine;
 
       CHECK_FALSE(fixture.Matches(u8"(hover)"));
       CHECK(fixture.Matches(u8"(hover: none)"));
@@ -403,10 +403,10 @@ namespace krys::boo::css::tests
 
     SECTION("No pointing device")
     {
-      fixture.Chrome.PrimaryHovers = false;
-      fixture.Chrome.AnyHovers = false;
-      fixture.Chrome.Primary = PointerCharacteristics::None;
-      fixture.Chrome.AllAvailable = PointerCharacteristics::None;
+      fixture.Client.PrimaryHovers = false;
+      fixture.Client.AnyHovers = false;
+      fixture.Client.Primary = PointerCharacteristics::None;
+      fixture.Client.AllAvailable = PointerCharacteristics::None;
 
       CHECK_FALSE(fixture.Matches(u8"(any-hover)"));
       CHECK(fixture.Matches(u8"(pointer: none)"));
@@ -435,10 +435,10 @@ namespace krys::boo::css::tests
 
     SECTION("With preferences")
     {
-      fixture.Media.TestPage->SetUseDarkAppearance(true);
-      fixture.Chrome.PrefersContrast = true;
-      fixture.Chrome.PrefersReducedMotion = true;
-      fixture.Chrome.Inverted = true;
+      fixture.Media.Frame().SetUseDarkAppearance(true);
+      fixture.Client.PrefersContrast = true;
+      fixture.Client.PrefersReducedMotion = true;
+      fixture.Client.Inverted = true;
 
       CHECK(fixture.Matches(u8"(prefers-color-scheme: dark)"));
       CHECK(fixture.Matches(u8"(prefers-contrast: more)"));
@@ -461,7 +461,7 @@ namespace krys::boo::css::tests
     CHECK_FALSE(fixture.Matches(u8"(scripting: none)"));
     CHECK(fixture.Matches(u8"(display-mode: browser)"));
 
-    fixture.Media.TestPage->SetDisplayMode(ApplicationDisplayMode::Standalone);
+    fixture.Media.Frame().SetDisplayMode(ApplicationDisplayMode::Standalone);
     CHECK(fixture.Matches(u8"(display-mode: standalone)"));
     CHECK_FALSE(fixture.Matches(u8"(display-mode: browser)"));
   }

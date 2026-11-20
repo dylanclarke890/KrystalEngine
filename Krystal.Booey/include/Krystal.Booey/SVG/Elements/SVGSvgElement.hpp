@@ -33,7 +33,7 @@ namespace krys::boo::css
 
 namespace krys::boo
 {
-  class LocalFrame;
+  class Frame;
   class SVGAngle;
   class SVGLength;
   class SVGMatrix;
@@ -277,7 +277,7 @@ namespace krys::boo
 
     KRYS_NODISCARD bool IsValid() const noexcept override;
 
-    KRYS_NODISCARD LocalFrame *FrameForCurrentScale() const noexcept;
+    KRYS_NODISCARD Frame *FrameForCurrentScale() const noexcept;
 
     KRYS_NODISCARD Ref<dom::NodeList>
       CollectIntersectionOrEnclosureList(SVGRect &, SVGElement *,

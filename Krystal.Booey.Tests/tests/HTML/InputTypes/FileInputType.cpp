@@ -7,8 +7,8 @@
 #include "Krystal.Booey/HTML/Elements/HTMLFormElement.hpp"
 #include "Krystal.Booey/HTML/Elements/HTMLInputElement.hpp"
 #include "Krystal.Booey/HTML/Forms/DOMFormData.hpp"
-#include "Krystal.Booey/Page/Clients/ChromeClient.hpp"
-#include "Krystal.Booey/Page/LocalDOMWindow.hpp"
+#include "Krystal.Booey/HTML/Window.hpp"
+#include "Krystal.Booey/Page/Clients/BooeyClient.hpp"
 #include "Krystal.Booey/Platform/Choosers/FileChooser.hpp"
 
 namespace krys::boo::html::tests
@@ -20,16 +20,16 @@ namespace krys::boo::html::tests
 
   namespace
   {
-    /// @brief A chrome client that keeps the file choosers it's asked to show, unanswered.
-    struct FileChromeClient final : ChromeClient
+    /// @brief A Booey client that keeps the file choosers it's asked to show, unanswered.
+    struct FileBooeyClient final : BooeyClient
     {
       List<Ref<FileChooser>> Choosers;
 
-      void AttachRootGraphicsLayer(LocalFrame &, GraphicsLayer *) noexcept final
+      void AttachRootGraphicsLayer(boo::Frame &, GraphicsLayer *) noexcept final
       {
       }
 
-      void RunOpenPanel(LocalFrame &, FileChooser &chooser) noexcept final
+      void RunOpenPanel(boo::Frame &, FileChooser &chooser) noexcept final
       {
         Choosers.push_back(ShareRef(chooser));
       }
@@ -174,11 +174,11 @@ namespace krys::boo::html::tests
   TEST_CASE("FileInputType: the host's file chooser",
             "[HTML][Forms][Input][html:show-the-picker,-if-applicable][html:attr-input-accept]")
   {
-    auto chromeClient = CreateUnique<FileChromeClient>();
-    auto *client = chromeClient.get();
+    auto booeyClient = CreateUnique<FileBooeyClient>();
+    auto *client = booeyClient.get();
     EditorFixture fixture(
       u8"<input type=file id=f multiple accept=' image/*, .PDF, text/plain ,nonsense, ., image/'>",
-      krys::move(chromeClient));
+      krys::move(booeyClient));
     auto &input = Downcast<HTMLInputElement>(fixture.ById(u8"f"));
     auto log = EventLog::ListenTo(input, {u8"input", u8"change", u8"cancel"});
     auto userClick = [&](HTMLElement &element)

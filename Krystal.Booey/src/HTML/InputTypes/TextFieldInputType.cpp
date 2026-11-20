@@ -48,9 +48,9 @@
 #include "Krystal.Booey/HTML/Forms/DOMFormData.hpp"
 #include "Krystal.Booey/HTML/Parser/ParserIdioms.hpp"
 #include "Krystal.Booey/HTML/Shadow/TextControlInnerElements.hpp"
-#include "Krystal.Booey/Page/Clients/ChromeClient.hpp"
-#include "Krystal.Booey/Page/LocalFrameView.hpp"
-#include "Krystal.Booey/Page/Page.hpp"
+#include "Krystal.Booey/Page/Clients/BooeyClient.hpp"
+#include "Krystal.Booey/Page/Frame.hpp"
+#include "Krystal.Booey/Page/FrameView.hpp"
 #include "Krystal.Booey/Rendering/FormControls/RenderTextControlSingleLine.hpp"
 #include "Krystal.Booey/Rendering/Layers/RenderLayer.hpp"
 #include "Krystal.Booey/Rendering/Layers/RenderLayerScrollableArea.hpp"
@@ -886,8 +886,8 @@ namespace krys::boo::html
     // ASCII case (see DIFFERENCES.md).
     List<DataListSuggestion> suggestions;
     List<DataListSuggestion> matchesContainingValue;
-    auto *page = element->NodeDocument().GetPage();
-    bool canShowLabels = page && page->GetChromeClient().CanShowDataListSuggestionLabels();
+    auto *frame = element->NodeDocument().Frame();
+    bool canShowLabels = frame && frame->GetBooeyClient().CanShowDataListSuggestionLabels();
     if (auto dataList = element->List())
     {
       for (auto &option : dataList->Suggestions())
@@ -963,17 +963,17 @@ namespace krys::boo::html
       return;
     }
 
-    auto *page = element.NodeDocument().GetPage();
-    if (!page)
+    auto *frame = element.NodeDocument().Frame();
+    if (!frame)
     {
       return;
     }
     if (!_suggestionPicker && !Suggestions().empty())
     {
       // The field matches :open while its suggestions are shown.
-      page->NotifyPopupOpeningObservers();
+      frame->NotifyPopupOpeningObservers();
       style::PseudoClassChangeInvalidation styleInvalidation(element, css::SelectorPseudoClass::Open, true);
-      _suggestionPicker = page->GetChromeClient().CreateDataListSuggestionPicker(*this);
+      _suggestionPicker = frame->GetBooeyClient().CreateDataListSuggestionPicker(*this);
     }
     if (auto picker = _suggestionPicker)
     {

@@ -26,7 +26,7 @@ namespace krys::boo::tests
 
     SECTION("the host makes the modes it has backends for")
     {
-      AcceleratingChromeClient client;
+      AcceleratingBooeyClient client;
       auto accelerated = ImageBuffer::Create({10, 20}, RenderingMode::Accelerated, RenderingPurpose::Canvas,
                                              1, DestinationColorSpace::SRGB(), &client);
       REQUIRE(accelerated);

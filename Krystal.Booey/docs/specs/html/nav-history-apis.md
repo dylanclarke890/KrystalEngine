@@ -70,7 +70,7 @@ Status: n/a (no script engine: these are JavaScript object internals)
 #### [7.2.2 The Window object](https://html.spec.whatwg.org/#the-window-object)
 
 Status: reviewed (2026-11-01)
-> `LocalDOMWindow` (with `DOMWindow` merged in): `window`, `self` and `frames` are the window itself, as there's no `WindowProxy`; `Document::DefaultView` is the window while the document is its frame's.
+> `Window` (with `DOMWindow` merged in): `window`, `self` and `frames` are the window itself, as there's no `WindowProxy`; `Document::DefaultView` is the window while the document is its frame's.
 <!-- definitions: concept-document-window dom-frames dom-self htmldocument -->
 
 - [x] [browsing context (Window)](https://html.spec.whatwg.org/#window-bc) — A Window's browsing context is its associated Document's browsing context.
@@ -225,7 +225,7 @@ Status: reviewed (2026-11-01)
 ##### [7.2.2.3 Named access on the Window object](https://html.spec.whatwg.org/#named-access-on-the-window-object)
 
 Status: reviewed (2026-11-01)
-> `LocalDOMWindow::NamedItem` and `IsNamedObject`; there are no child navigables to name.
+> `Window::NamedItem` and `IsNamedObject`; there are no child navigables to name.
 
 - [x] [document-tree child navigable target name property set](https://html.spec.whatwg.org/#document-tree-child-navigable-target-name-property-set) — The document-tree child navigable target name property set of a Window object window is the return value of running these steps:
   - 1. Let children be the document-tree child navigables of window's associated Document.

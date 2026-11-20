@@ -28,7 +28,7 @@
 #include "Krystal.Booey/Loader/Cache/CachedResourceLoader.hpp"
 #include "Krystal.Booey/Loader/Cache/CachedResourceRequest.hpp"
 #include "Krystal.Booey/Loader/DocumentLoader.hpp"
-#include "Krystal.Booey/Page/LocalFrame.hpp"
+#include "Krystal.Booey/Page/Frame.hpp"
 #include "Krystal.Core/Types/SharedBuffer.hpp"
 #include <algorithm>
 

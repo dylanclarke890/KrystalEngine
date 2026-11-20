@@ -50,7 +50,7 @@
 #include "Krystal.Booey/HTML/Sanitizer/SetHTMLOptions.hpp"
 #include "Krystal.Booey/HTML/Types/DocumentReadyState.hpp"
 #include "Krystal.Booey/HTML/Types/DocumentVisibilityState.hpp"
-#include "Krystal.Booey/Page/Page.hpp"
+#include "Krystal.Booey/Page/RenderingUpdateStep.hpp"
 #include "Krystal.Booey/Rendering/RenderPtr.hpp"
 #include "Krystal.Booey/Rendering/Style/RenderStyleConstants.hpp"
 #include "Krystal.Booey/Style/Values/Color/ColorOptions.hpp"
@@ -96,6 +96,7 @@ namespace krys::boo
   class Editor;
   class Element;
   class FontLoadRequest;
+  class Frame;
   class FrameSelection;
   class GraphicsClient;
   class HTMLBaseElement;
@@ -111,9 +112,8 @@ namespace krys::boo
   class HitTestResult;
   class IntersectionObserver;
   struct IntersectionObserverData;
-  class LocalDOMWindow;
-  class LocalFrame;
-  class LocalFrameView;
+  class Window;
+  class FrameView;
   class MediaQueryList;
   class MouseEvent;
   class MouseEventWithHitTestResults;
@@ -419,9 +419,9 @@ namespace krys::boo
     UniquePtr<StyleOriginatedTimelinesController> _styleOriginatedTimelinesController;
     RefPtr<DocumentTimeline> _timeline;
 
-    WeakPtr<LocalFrame> _frame;
+    WeakPtr<boo::Frame> _frame;
     // The document's window, made as the document becomes a frame's.
-    RefPtr<LocalDOMWindow> _domWindow;
+    RefPtr<boo::Window> _domWindow;
     bool _needsDOMWindowResizeEvent {false};
     bool _needsVisualViewportResizeEvent {false};
     bool _needsVisualViewportScrollEvent {false};
@@ -1082,7 +1082,7 @@ namespace krys::boo
     /// them. Observations that were skipped (no deeper than the last round's) are reported as an error at the
     /// window, and left for the next update.
     /// @see https://html.spec.whatwg.org/#update-the-rendering
-    void UpdateResizeObservations(Page &page) noexcept;
+    void UpdateResizeObservations(boo::Frame &page) noexcept;
 
     void AddResizeObserver(ResizeObserver &observer) noexcept;
 
@@ -1514,22 +1514,19 @@ namespace krys::boo
 #pragma region Frame and layout
 
     /// @brief The frame the document is shown in, if any.
-    KRYS_NODISCARD LocalFrame *Frame() const noexcept;
-
-    /// @brief The page of the document's frame, if any.
-    KRYS_NODISCARD boo::Page *GetPage() const noexcept;
+    KRYS_NODISCARD boo::Frame *Frame() const noexcept;
 
     /// @brief The host's graphics, which make the document's accelerated image buffers; null without a page.
     KRYS_NODISCARD GraphicsClient *GetGraphicsClient() const noexcept;
 
     /// @brief The document's window (its relevant global object), if it has been in a frame; it keeps it
     /// after leaving the frame.
-    KRYS_NODISCARD LocalDOMWindow *Window() const noexcept;
+    KRYS_NODISCARD boo::Window *Window() const noexcept;
 
     /// @brief The document's window while it's in a frame (its browsing context's `WindowProxy`); null
     /// otherwise.
     /// @see https://html.spec.whatwg.org/#dom-document-defaultview
-    KRYS_NODISCARD LocalDOMWindow *DefaultView() const noexcept;
+    KRYS_NODISCARD boo::Window *DefaultView() const noexcept;
 
     /// @brief Fires @p event at the document's window, if it has one.
     void DispatchWindowEvent(Event &event) noexcept;
@@ -1749,7 +1746,7 @@ namespace krys::boo
     }
 
     /// @brief The view the document is laid out in: its frame's, if any.
-    KRYS_NODISCARD LocalFrameView *View() const noexcept;
+    KRYS_NODISCARD FrameView *View() const noexcept;
 
     /// @brief The root of the document's render tree, if it has one.
     KRYS_NODISCARD const boo::RenderView *GetRenderView() const noexcept
@@ -1801,7 +1798,7 @@ namespace krys::boo
     void CreateDOMWindow() noexcept;
 
     /// @brief Called when @p frame starts showing the document.
-    void DidBecomeCurrentDocumentInFrame(LocalFrame &frame) noexcept;
+    void DidBecomeCurrentDocumentInFrame(boo::Frame &frame) noexcept;
 
     /// @brief Called when the document's frame stops showing it.
     void WillBeRemovedFromFrame() noexcept;

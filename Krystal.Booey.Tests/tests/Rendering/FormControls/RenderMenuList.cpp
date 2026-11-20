@@ -29,7 +29,7 @@ namespace krys::boo::layout::tests
       {
       }
 
-      void Show(const RectI &rect, LocalFrameView &, int32 selectedIndex) noexcept final
+      void Show(const RectI &rect, FrameView &, int32 selectedIndex) noexcept final
       {
         ShownAt = rect;
         ShownIndex = selectedIndex;
@@ -60,12 +60,12 @@ namespace krys::boo::layout::tests
       }
     };
 
-    /// @brief A chrome client whose popup menus record how they're shown.
-    struct PopupChromeClient final : ChromeClient
+    /// @brief A Booey client whose popup menus record how they're shown.
+    struct PopupBooeyClient final : BooeyClient
     {
       mutable RefPtr<RecordingPopupMenu> Popup;
 
-      void AttachRootGraphicsLayer(LocalFrame &, GraphicsLayer *) noexcept final
+      void AttachRootGraphicsLayer(boo::Frame &, GraphicsLayer *) noexcept final
       {
       }
 
@@ -95,10 +95,10 @@ namespace krys::boo::layout::tests
   TEST_CASE_METHOD(css::tests::ValueFixture, "RenderMenuList: the selected option's text",
                    "[Rendering][RenderMenuList]")
   {
-    auto chromeClient = CreateUnique<PopupChromeClient>();
+    auto booeyClient = CreateUnique<PopupBooeyClient>();
     EditorFixture fixture(u8"<style>select{margin:0}</style>"
                           u8"<select id=s><option>Apple</option><option id=b>Banana split</option></select>",
-                          krys::move(chromeClient));
+                          krys::move(booeyClient));
 
     auto &select = Downcast<HTMLSelectElement>(fixture.ById(u8"s"));
     auto &menuList = Downcast<RenderMenuList>(*select.Renderer());
@@ -129,12 +129,12 @@ layer at (0,0) size 400x23
 
   TEST_CASE_METHOD(css::tests::ValueFixture, "RenderMenuList: the popup", "[Rendering][RenderMenuList]")
   {
-    auto chromeClient = CreateUnique<PopupChromeClient>();
-    auto &client = *chromeClient;
+    auto booeyClient = CreateUnique<PopupBooeyClient>();
+    auto &client = *booeyClient;
     EditorFixture fixture(u8"<style>body{margin:0}select{margin:0}</style>"
                           u8"<select id=s><option>Apple</option><option disabled>Banana</option>"
                           u8"<optgroup label=Group><option>Cherry</option></optgroup><hr></select>",
-                          krys::move(chromeClient));
+                          krys::move(booeyClient));
 
     auto &select = Downcast<HTMLSelectElement>(fixture.ById(u8"s"));
     auto &menuList = Downcast<RenderMenuList>(*select.Renderer());

@@ -28,9 +28,9 @@
 #include "Krystal.Booey/Editing/Selection/FrameSelection.hpp"
 #include "Krystal.Booey/Editing/Selection/TextAffinity.hpp"
 #include "Krystal.Booey/Graphics/GraphicsContext.hpp"
-#include "Krystal.Booey/Page/LocalFrameView.hpp"
-#include "Krystal.Booey/Page/LocalFrameViewLayoutContext.hpp"
-#include "Krystal.Booey/Page/Page.hpp"
+#include "Krystal.Booey/Page/Frame.hpp"
+#include "Krystal.Booey/Page/FrameView.hpp"
+#include "Krystal.Booey/Page/FrameViewLayoutContext.hpp"
 #include "Krystal.Booey/Page/Settings.hpp"
 #include "Krystal.Booey/Rendering/Fragmentation/RenderFragmentedFlow.hpp"
 #include "Krystal.Booey/Rendering/GeneratedContent/RenderListMarker.hpp"
@@ -2786,13 +2786,13 @@ namespace krys::boo
       }
       case CaretType::DragCaret:
       {
-        auto *page = GetDocument().GetPage();
-        if (!page)
+        auto *frame = GetDocument().Frame();
+        if (!frame)
         {
           return;
         }
 
-        auto &dragCaretController = page->GetDragCaretController();
+        auto &dragCaretController = frame->GetDragCaretController();
         auto *caretPainter = dragCaretController.CaretRenderer();
         if (!caretPainter)
         {

@@ -54,7 +54,7 @@ namespace krys::boo::xml
 
 namespace krys::boo
 {
-  class LocalFrame;
+  class Frame;
 
   /// @brief Writes a loaded document into its frame: makes the document (and its window), gives it to the
   /// frame, and feeds its bytes to the parser.
@@ -73,7 +73,7 @@ namespace krys::boo
     };
 
   private:
-    WeakPtr<LocalFrame> _frame;
+    WeakPtr<Frame> _frame;
     RefPtr<html::DocumentParser> _parser;
     RefPtr<xml::XMLDocumentParser> _xmlParser;
     /// @brief The image document being written, which takes the bytes as they are rather than a parser.
@@ -90,7 +90,7 @@ namespace krys::boo
 
     ~DocumentWriter() noexcept;
 
-    void SetFrame(LocalFrame &frame) noexcept;
+    void SetFrame(Frame &frame) noexcept;
 
     void SetMimeType(utf8_string mimeType) noexcept
     {

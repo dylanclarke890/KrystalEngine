@@ -29,8 +29,8 @@
 #include "Krystal.Booey/Graphics/GraphicsContextStateSaver.hpp"
 #include "Krystal.Booey/Graphics/Images/Image.hpp"
 #include "Krystal.Booey/Loader/Cache/CachedImage.hpp"
-#include "Krystal.Booey/Page/Clients/ChromeClient.hpp"
-#include "Krystal.Booey/Page/Page.hpp"
+#include "Krystal.Booey/Page/Clients/BooeyClient.hpp"
+#include "Krystal.Booey/Page/Frame.hpp"
 #include "Krystal.Booey/Rendering/HitTesting/HitTestRequest.hpp"
 #include "Krystal.Booey/Rendering/HitTesting/HitTestResult.hpp"
 #include "Krystal.Booey/Rendering/HitTesting/PointerEventsHitRules.hpp"
@@ -69,9 +69,9 @@ namespace krys::boo
       return;
     }
 
-    if (auto *page = ImageElement().NodeDocument().GetPage())
+    if (auto *frame = ImageElement().NodeDocument().Frame())
     {
-      page->GetChromeClient().DidFinishLoadingImageForSVGImage(ImageElement());
+      frame->GetBooeyClient().DidFinishLoadingImageForSVGImage(ImageElement());
     }
 
     LegacyRenderSVGModelObject::NotifyFinished(newImage);

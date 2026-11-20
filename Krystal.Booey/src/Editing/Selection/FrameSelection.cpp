@@ -46,8 +46,8 @@
 #include "Krystal.Booey/HTML/Elements/HTMLSelectElement.hpp"
 #include "Krystal.Booey/HTML/Elements/HTMLTextFormControlElement.hpp"
 #include "Krystal.Booey/HTML/EventLoop/EventLoop.hpp"
-#include "Krystal.Booey/Page/LocalFrame.hpp"
-#include "Krystal.Booey/Page/LocalFrameView.hpp"
+#include "Krystal.Booey/Page/Frame.hpp"
+#include "Krystal.Booey/Page/FrameView.hpp"
 #include "Krystal.Booey/Page/Settings.hpp"
 #include "Krystal.Booey/Platform/SimpleCaretAnimator.hpp"
 #include "Krystal.Booey/Rendering/HitTesting/HitTestRequest.hpp"
@@ -686,7 +686,7 @@ namespace krys::boo
     // the selection rect could intersect more than just that.
     if (auto *view = _document->Frame() ? _document->Frame()->View() : nullptr)
     {
-      view->SetLastUserScrollType(LocalFrameView::UserScrollType::Implicit);
+      view->SetLastUserScrollType(FrameView::UserScrollType::Implicit);
     }
     ScrollRectToVisibleOptions options;
     options.RevealMode = revealSelectionOptions.RevealMode;
@@ -694,8 +694,7 @@ namespace krys::boo
     options.AlignY = revealSelectionOptions.Alignment;
     options.Behavior = revealSelectionOptions.Behavior;
     options.OnlyAllowForward = revealSelectionOptions.OnlyAllowForward;
-    (void)LocalFrameView::ScrollRectToVisible(rect, *start.DeprecatedNode()->Renderer(), insideFixed,
-                                              options);
+    (void)FrameView::ScrollRectToVisible(rect, *start.DeprecatedNode()->Renderer(), insideFixed, options);
     UpdateAppearance();
   }
 
@@ -2383,7 +2382,7 @@ namespace krys::boo
     return RendererForCaretPainting(_position.DeepEquivalent().DeprecatedNode());
   }
 
-  void DragCaretController::PaintDragCaret(LocalFrame *frame, GraphicsContext &context,
+  void DragCaretController::PaintDragCaret(Frame *frame, GraphicsContext &context,
                                            const LayoutPoint &paintOffset) const noexcept
   {
     auto *node = _position.DeepEquivalent().DeprecatedNode();

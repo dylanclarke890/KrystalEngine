@@ -48,14 +48,13 @@
 #include "Krystal.Booey/HTML/Elements/HTMLSlotElement.hpp"
 #include "Krystal.Booey/HTML/Elements/HTMLSummaryElement.hpp"
 #include "Krystal.Booey/HTML/MicroParsers/Numbers.hpp"
+#include "Krystal.Booey/HTML/Window.hpp"
 #include "Krystal.Booey/Infra/Namespaces.hpp"
 #include "Krystal.Booey/Input/EventHandler.hpp"
 #include "Krystal.Booey/Input/SpatialNavigation.hpp"
 #include "Krystal.Booey/Page/Clients/EditorClient.hpp"
-#include "Krystal.Booey/Page/LocalDOMWindow.hpp"
-#include "Krystal.Booey/Page/LocalFrame.hpp"
-#include "Krystal.Booey/Page/LocalFrameView.hpp"
-#include "Krystal.Booey/Page/Page.hpp"
+#include "Krystal.Booey/Page/Frame.hpp"
+#include "Krystal.Booey/Page/FrameView.hpp"
 #include "Krystal.Booey/Rendering/HitTesting/HitTestResult.hpp"
 #include "Krystal.Booey/Rendering/Style/RenderStyle+GettersInlines.hpp"
 #include "Krystal.Core/Strings/ASCII.hpp"
@@ -1509,7 +1508,7 @@ namespace krys::boo::html
     {
       FireFocusEvent(u8"blur", *focusedElement, nullptr);
     }
-    if (RefPtr<LocalDOMWindow> window = ShareRefPtr(document.Window()))
+    if (RefPtr<Window> window = ShareRefPtr(document.Window()))
     {
       FocusEventInit attributes;
       attributes.View = window.get();

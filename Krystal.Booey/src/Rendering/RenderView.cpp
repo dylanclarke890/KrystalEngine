@@ -27,9 +27,8 @@
 #include "Krystal.Booey/Layout/Integration/LayoutIntegrationFormattingContextLayout.hpp"
 #include "Krystal.Booey/Layout/LayoutState.hpp"
 #include "Krystal.Booey/Layout/LayoutTree/LayoutInitialContainingBlock.hpp"
-#include "Krystal.Booey/Page/LocalFrame.hpp"
-#include "Krystal.Booey/Page/LocalFrameView.hpp"
-#include "Krystal.Booey/Page/Page.hpp"
+#include "Krystal.Booey/Page/Frame.hpp"
+#include "Krystal.Booey/Page/FrameView.hpp"
 #include "Krystal.Booey/Rendering/GeneratedContent/RenderCounter.hpp"
 #include "Krystal.Booey/Rendering/HitTesting/HitTestResult.hpp"
 #include "Krystal.Booey/Rendering/Iterators/RenderChildIterator.hpp"
@@ -266,8 +265,8 @@ namespace krys::boo
 
     Compositor().RootBackgroundColorOrTransparencyChanged();
 
-    auto *page = GetDocument().GetPage();
-    float pageScaleFactor = page ? page->PageScaleFactor() : 1;
+    auto *frame = GetDocument().Frame();
+    float pageScaleFactor = frame ? frame->PageScaleFactor() : 1;
 
     // If painting will entirely fill the view, no need to fill the background.
     if (rootFillsViewport && rootObscuresBackground && pageScaleFactor >= 1

@@ -81,22 +81,21 @@ namespace krys::boo
 
     /// @brief A trusted `textInput` event, which bubbles, can be cancelled and crosses shadow boundaries.
     KRYS_NODISCARD static Ref<TextEvent>
-      Create(LocalDOMWindow *view, DOMStringView data,
+      Create(Window *view, DOMStringView data,
              dom::TextEventInputType inputType = dom::TextEventInputType::Keyboard) noexcept;
 
-    KRYS_NODISCARD static Ref<TextEvent> CreateForPlainTextPaste(LocalDOMWindow *view, DOMStringView data,
+    KRYS_NODISCARD static Ref<TextEvent> CreateForPlainTextPaste(Window *view, DOMStringView data,
                                                                  bool shouldSmartReplace) noexcept;
 
-    KRYS_NODISCARD static Ref<TextEvent> CreateForFragmentPaste(LocalDOMWindow *view,
-                                                                RefPtr<DocumentFragment> &&data,
+    KRYS_NODISCARD static Ref<TextEvent> CreateForFragmentPaste(Window *view, RefPtr<DocumentFragment> &&data,
                                                                 dom::TextEventInputType inputType,
                                                                 bool shouldSmartReplace,
                                                                 bool shouldMatchStyle) noexcept;
 
-    KRYS_NODISCARD static Ref<TextEvent> CreateForDrop(LocalDOMWindow *view, DOMStringView data) noexcept;
+    KRYS_NODISCARD static Ref<TextEvent> CreateForDrop(Window *view, DOMStringView data) noexcept;
 
     /// @see https://w3c.github.io/uievents/#dom-textevent-inittextevent
-    void InitTextEvent(DOMStringAtom type, bool bubbles, bool cancelable, LocalDOMWindow *view,
+    void InitTextEvent(DOMStringAtom type, bool bubbles, bool cancelable, Window *view,
                        DOMStringView data) noexcept;
 
     KRYS_NODISCARD bool IsTextEvent() const noexcept final

@@ -34,7 +34,7 @@
 #include "Krystal.Booey/HTML/Images/ImageDocument.hpp"
 #include "Krystal.Booey/HTML/Parser/DocumentParser.hpp"
 #include "Krystal.Booey/Loader/FrameLoader.hpp"
-#include "Krystal.Booey/Page/LocalFrame.hpp"
+#include "Krystal.Booey/Page/Frame.hpp"
 #include "Krystal.Booey/Style/Scope/Scope.hpp"
 #include "Krystal.Booey/Text/EncodingRegistry.hpp"
 #include "Krystal.Booey/XML/XMLDocumentParser.hpp"
@@ -122,14 +122,14 @@ namespace krys::boo
     }
   }
 
-  void DocumentWriter::SetFrame(LocalFrame &frame) noexcept
+  void DocumentWriter::SetFrame(Frame &frame) noexcept
   {
     _frame = CreateWeakPtr(&frame);
   }
 
   bool DocumentWriter::Begin(const net::Url &url) noexcept
   {
-    RefPtr<LocalFrame> frame = ShareRefPtr(_frame.get());
+    RefPtr<Frame> frame = ShareRefPtr(_frame.get());
     if (!frame)
     {
       return false;
@@ -153,7 +153,7 @@ namespace krys::boo
     _hasReceivedSomeData = false;
 
     // The view starts over for the new document, its scrollbars staying as they are until its first layout
-    // (FrameLoader::clear's LocalFrameView::clear).
+    // (FrameLoader::clear's FrameView::clear).
     if (auto *view = frame->View())
     {
       view->Clear();
@@ -265,7 +265,7 @@ namespace krys::boo
     // writing more data.
     _state = State::Finished;
 
-    RefPtr<LocalFrame> protectedFrame = ShareRefPtr(_frame.get());
+    RefPtr<Frame> protectedFrame = ShareRefPtr(_frame.get());
     if (RefPtr<ImageDocument> imageDocument = krys::move(_imageDocument))
     {
       _hasReceivedSomeData = true;

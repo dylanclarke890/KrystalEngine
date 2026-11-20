@@ -199,7 +199,7 @@ Status: reviewed (2026-11-01)
 ##### [8.1.3.5 Secure contexts](https://html.spec.whatwg.org/#secure-contexts)
 
 Status: reviewed (2026-11-01)
-> `LocalDOMWindow::IsSecureContext`: the document's URL is potentially trustworthy; there are no ancestors to check.
+> `Window::IsSecureContext`: the document's URL is potentially trustworthy; there are no ancestors to check.
 
 - [x] [secure context](https://html.spec.whatwg.org/#secure-context) — An environment environment is a secure context if the following algorithm returns true:
   - 1. If environment is an environment settings object:
@@ -556,7 +556,7 @@ Status: n/a (no JavaScript)
 ##### [8.1.4.6 Runtime script errors](https://html.spec.whatwg.org/#runtime-script-errors)
 
 Status: reviewed (2026-11-01)
-> `LocalDOMWindow::ReportError` reports an exception, with a message and a value but no script location (FIXME).
+> `Window::ReportError` reports an exception, with a message and a value but no script location (FIXME).
 <!-- definitions: report-exception-omiterror report-the-exception -->
 
 - [x] [extract error information](https://html.spec.whatwg.org/#extract-error) — To extract error information from a JavaScript value exception:
@@ -1233,7 +1233,7 @@ Status: reviewed (2026-11-01)
 ###### [8.1.8.2.1 IDL definitions](https://html.spec.whatwg.org/#idl-definitions)
 
 Status: reviewed (2026-11-01)
-> The `On<Name>()` handlers of `HTMLElement`, `Document` and `LocalDOMWindow`.
+> The `On<Name>()` handlers of `HTMLElement`, `Document` and `Window`.
 
 ##### [8.1.8.3 Event firing](https://html.spec.whatwg.org/#event-firing)
 
@@ -1256,7 +1256,7 @@ Status: reviewed (2026-11-01)
 ### [8.2 The WindowOrWorkerGlobalScope mixin](https://html.spec.whatwg.org/#windoworworkerglobalscope-mixin)
 
 Status: reviewed (2026-11-01)
-> `LocalDOMWindow::Origin` and `IsSecureContext`; `CrossOriginIsolated` is false.
+> `Window::Origin` and `IsSecureContext`; `CrossOriginIsolated` is false.
 
 - [x] [WindowOrWorkerGlobalScope.isSecureContext](https://html.spec.whatwg.org/#dom-issecurecontext) — The isSecureContext getter steps are to return true if this's relevant settings object is a secure context, or false otherwise.
 
@@ -1271,7 +1271,7 @@ Status: reviewed (2026-11-01)
 ### [8.3 Base64 utility methods](https://html.spec.whatwg.org/#atob)
 
 Status: reviewed (2026-11-01)
-> `LocalDOMWindow::Btoa` and `Atob`.
+> `Window::Btoa` and `Atob`.
 
 - [x] [WindowOrWorkerGlobalScope.btoa(data)](https://html.spec.whatwg.org/#dom-btoa) — The btoa(data) method must throw an "InvalidCharacterError" DOMException if data contains any character whose code point is greater than U+00FF. Otherwise, the user agent must convert data to a byte sequence whose nth byte is the eight-bit representation of the nth code point of data, and then must apply forgiving-base64 encode to that byte sequence and return the result.
 

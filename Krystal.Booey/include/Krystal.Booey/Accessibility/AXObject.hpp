@@ -144,8 +144,8 @@ namespace krys::boo
 {
   class AXObject;
   class AXObjectCache;
-  class LocalFrameView;
-  class Page;
+  class Frame;
+  class FrameView;
   class RenderObject;
   class RenderStyle;
 
@@ -295,9 +295,9 @@ namespace krys::boo
 
     KRYS_NODISCARD virtual Document *GetDocument() const noexcept;
 
-    KRYS_NODISCARD Page *GetPage() const noexcept;
+    KRYS_NODISCARD boo::Frame *Frame() const noexcept;
 
-    KRYS_NODISCARD LocalFrameView *DocumentFrameView() const noexcept;
+    KRYS_NODISCARD FrameView *DocumentFrameView() const noexcept;
 
     /// @brief The style of the object's renderer, or else its element's computed style.
     KRYS_NODISCARD const RenderStyle *Style() const noexcept;

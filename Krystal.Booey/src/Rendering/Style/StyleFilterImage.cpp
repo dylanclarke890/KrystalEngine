@@ -32,7 +32,7 @@
 #include "Krystal.Booey/Graphics/Images/FilterGeneratedImage.hpp"
 #include "Krystal.Booey/Graphics/NullGraphicsContext.hpp"
 #include "Krystal.Booey/Loader/Cache/CachedImage.hpp"
-#include "Krystal.Booey/Page/Page.hpp"
+#include "Krystal.Booey/Page/Frame.hpp"
 #include "Krystal.Booey/Rendering/Painting/CSSFilterRenderer.hpp"
 #include "Krystal.Booey/Rendering/RenderElement.hpp"
 #include "Krystal.Core/Utils/PointerComparison.hpp"
@@ -136,13 +136,13 @@ namespace krys::boo
       return ShareRefPtr(&Image::NullImage());
     }
 
-    auto *page = renderer->GetDocument().GetPage();
-    if (!page)
+    auto *frame = renderer->GetDocument().Frame();
+    if (!frame)
     {
       return ShareRefPtr(&Image::NullImage());
     }
 
-    auto preferredFilterRenderingModes = page->PreferredFilterRenderingModes(destinationContext);
+    auto preferredFilterRenderingModes = frame->PreferredFilterRenderingModes(destinationContext);
     auto sourceImageRect = RectF {PointF(), size};
 
     auto cssFilter = CSSFilterRenderer::Create(const_cast<RenderElement &>(*renderer), _filter,

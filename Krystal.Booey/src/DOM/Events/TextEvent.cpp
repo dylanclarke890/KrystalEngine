@@ -63,7 +63,7 @@ namespace krys::boo
 
   TextEvent::~TextEvent() noexcept = default;
 
-  Ref<TextEvent> TextEvent::Create(LocalDOMWindow *view, DOMStringView data,
+  Ref<TextEvent> TextEvent::Create(Window *view, DOMStringView data,
                                    dom::TextEventInputType inputType) noexcept
   {
     auto event = CreateRef<TextEvent>(data, inputType);
@@ -72,7 +72,7 @@ namespace krys::boo
     return event;
   }
 
-  Ref<TextEvent> TextEvent::CreateForPlainTextPaste(LocalDOMWindow *view, DOMStringView data,
+  Ref<TextEvent> TextEvent::CreateForPlainTextPaste(Window *view, DOMStringView data,
                                                     bool shouldSmartReplace) noexcept
   {
     auto event =
@@ -82,7 +82,7 @@ namespace krys::boo
     return event;
   }
 
-  Ref<TextEvent> TextEvent::CreateForFragmentPaste(LocalDOMWindow *view, RefPtr<DocumentFragment> &&data,
+  Ref<TextEvent> TextEvent::CreateForFragmentPaste(Window *view, RefPtr<DocumentFragment> &&data,
                                                    dom::TextEventInputType inputType, bool shouldSmartReplace,
                                                    bool shouldMatchStyle) noexcept
   {
@@ -93,12 +93,12 @@ namespace krys::boo
     return event;
   }
 
-  Ref<TextEvent> TextEvent::CreateForDrop(LocalDOMWindow *view, DOMStringView data) noexcept
+  Ref<TextEvent> TextEvent::CreateForDrop(Window *view, DOMStringView data) noexcept
   {
     return Create(view, data, dom::TextEventInputType::Drop);
   }
 
-  void TextEvent::InitTextEvent(DOMStringAtom type, bool bubbles, bool cancelable, LocalDOMWindow *view,
+  void TextEvent::InitTextEvent(DOMStringAtom type, bool bubbles, bool cancelable, Window *view,
                                 DOMStringView data) noexcept
   {
     if (_dispatched)

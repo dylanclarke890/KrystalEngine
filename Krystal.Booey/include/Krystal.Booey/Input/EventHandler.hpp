@@ -73,8 +73,8 @@ namespace krys::boo
 {
   class AutoscrollController;
   struct DragState;
-  class LocalFrame;
-  class LocalFrameView;
+  class Frame;
+  class FrameView;
   class MouseEventWithHitTestResults;
   class Pasteboard;
   class RenderBox;
@@ -206,7 +206,7 @@ namespace krys::boo
     };
 
   private:
-    LocalFrame &_frame;
+    Frame &_frame;
 
     RefPtr<Node> _mousePressNode;
     bool _mousePressed {false};
@@ -274,7 +274,7 @@ namespace krys::boo
     List<PointerId> _endedTouchPointerIds;
 
   public:
-    explicit EventHandler(LocalFrame &frame) noexcept;
+    explicit EventHandler(Frame &frame) noexcept;
 
     ~EventHandler() noexcept;
 
@@ -678,7 +678,7 @@ namespace krys::boo
 
     KRYS_NODISCARD bool IsElementAnAncestorOfLastElementUnderMouse(Element *element) const noexcept;
 
-    void UpdateCursor(LocalFrameView &view, const HitTestResult &result, bool shiftKey) noexcept;
+    void UpdateCursor(FrameView &view, const HitTestResult &result, bool shiftKey) noexcept;
 
     KRYS_NODISCARD Maybe<Cursor> SelectCursor(const HitTestResult &result, bool shiftKey) const noexcept;
 

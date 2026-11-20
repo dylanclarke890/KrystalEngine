@@ -1,4 +1,33 @@
 ﻿/*
+ * Copyright (C) 1998, 1999 Torben Weis <weis@kde.org>
+ *                     1999 Lars Knoll <knoll@kde.org>
+ *                     1999 Antti Koivisto <koivisto@kde.org>
+ *                     2000 Simon Hausmann <hausmann@kde.org>
+ *                     2000 Stefan Schimanski <1Stein@gmx.de>
+ *                     2001 George Staikos <staikos@kde.org>
+ * Copyright (C) 2004-2025 Apple Inc. All rights reserved.
+ * Copyright (C) 2005 Alexey Proskuryakov <ap@nypop.com>
+ * Copyright (C) 2008 Nokia Corporation and/or its subsidiary(-ies)
+ * Copyright (C) 2008 Eric Seidel <eric@webkit.org>
+ * Copyright (C) 2008 Google Inc.
+ *
+ * This library is free software; you can redistribute it and/or
+ * modify it under the terms of the GNU Library General Public
+ * License as published by the Free Software Foundation; either
+ * version 2 of the License, or (at your option) any later version.
+ *
+ * This library is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU
+ * Library General Public License for more details.
+ *
+ * You should have received a copy of the GNU Library General Public License
+ * along with this library; see the file COPYING.LIB.  If not, write to
+ * the Free Software Foundation, Inc., 51 Franklin Street, Fifth Floor,
+ * Boston, MA 02110-1301, USA.
+ */
+
+/*
  * Copyright (C) 2006-2025 Apple Inc. All rights reserved.
  * Copyright (C) 2008 Torch Mobile Inc. All rights reserved. (http://www.torchmobile.com/)
  *
@@ -17,15 +46,18 @@
  * Boston, MA 02110-1301, USA.
  */
 
-#include "Krystal.Booey/Page/Page.hpp"
+#include "Krystal.Booey/Page/Frame.hpp"
 #include "Krystal.Booey/Animation/Timelines/AnimationTimelinesController.hpp"
 #include "Krystal.Booey/CSS/Queries/MediaQuery.hpp"
 #include "Krystal.Booey/DOM/Events/EventNames.hpp"
 #include "Krystal.Booey/DOM/Nodes/Document.hpp"
+#include "Krystal.Booey/Editing/Editing.hpp"
 #include "Krystal.Booey/Editing/Selection/FrameSelection.hpp"
+#include "Krystal.Booey/Editing/Selection/VisiblePosition.hpp"
 #include "Krystal.Booey/HTML/Algorithms/FocusAlgorithms.hpp"
 #include "Krystal.Booey/HTML/Algorithms/RenderBlocking.hpp"
 #include "Krystal.Booey/HTML/EventLoop/EventLoop.hpp"
+#include "Krystal.Booey/HTML/Window.hpp"
 #include "Krystal.Booey/Input/EventHandler.hpp"
 #include "Krystal.Booey/Input/PointerCaptureController.hpp"
 #include "Krystal.Booey/Input/PointerLockController.hpp"
@@ -33,35 +65,37 @@
 #include "Krystal.Booey/Loader/Cache/CachedImage.hpp"
 #include "Krystal.Booey/Loader/Cache/CachedResourceLoader.hpp"
 #include "Krystal.Booey/Loader/FrameLoader.hpp"
-#include "Krystal.Booey/Page/Clients/ChromeClient.hpp"
+#include "Krystal.Booey/Page/Clients/BooeyClient.hpp"
 #include "Krystal.Booey/Page/Drag/DragController.hpp"
-#include "Krystal.Booey/Page/LocalDOMWindow.hpp"
-#include "Krystal.Booey/Page/LocalFrame.hpp"
-#include "Krystal.Booey/Page/LocalFrameView.hpp"
+#include "Krystal.Booey/Page/FrameView.hpp"
 #include "Krystal.Booey/Page/PopupOpeningObserver.hpp"
 #include "Krystal.Booey/Page/Scrolling/ScrollLatchingController.hpp"
 #include "Krystal.Booey/Page/Settings.hpp"
+#include "Krystal.Booey/Rendering/HitTesting/HitTestSource.hpp"
+#include "Krystal.Booey/Rendering/Layers/RenderLayerCompositor.hpp"
 #include "Krystal.Booey/Rendering/RenderView.hpp"
 #include "Krystal.Booey/Style/AnchorPositionEvaluator.hpp"
 #include "Krystal.Booey/Style/Resolver.hpp"
 #include "Krystal.Booey/Style/Scope/Scope.hpp"
 #include "Krystal.Booey/SVG/Graphics/SVGImage.hpp"
 #include "Krystal.Booey/SVG/SVGDocumentExtensions.hpp"
+#include "Krystal.Core/Assert.hpp"
 #include "Krystal.Core/Threading/NeverDestroyed.hpp"
 #include "Krystal.Core/Types/List.hpp"
+#include "Krystal.Core/Utils/SetForScope.hpp"
 
 namespace krys::boo
 {
   namespace
   {
-    /// @brief The pages alive.
-    KRYS_NODISCARD List<Page *> &AllPages() noexcept
+    /// @brief The frames alive.
+    KRYS_NODISCARD List<Frame *> &AllFrames() noexcept
     {
-      static MainThreadNeverDestroyed<List<Page *>> pages;
-      return pages;
+      static MainThreadNeverDestroyed<List<Frame *>> frames;
+      return frames;
     }
 
-    /// @brief The SVG images @p document has loaded, each with its own page.
+    /// @brief The SVG images @p document has loaded, each with its own frame.
     KRYS_NODISCARD List<Ref<SVGImage>> SVGImagesOf(Document &document) noexcept
     {
       List<Ref<SVGImage>> images;
@@ -93,9 +127,9 @@ namespace krys::boo
       RenderingUpdateStep::LayerFlush};
   }
 
-  Page::Page(UniquePtr<ChromeClient> chromeClient, UniquePtr<EditorClient> editorClient,
-             UniquePtr<DragClient> dragClient) noexcept
-      : _chromeClient(krys::move(chromeClient)), _editorClient(krys::move(editorClient)),
+  Frame::Frame(UniquePtr<BooeyClient> booeyClient, UniquePtr<EditorClient> editorClient,
+               UniquePtr<FrameLoaderClient> loaderClient, UniquePtr<DragClient> dragClient) noexcept
+      : _booeyClient(krys::move(booeyClient)), _editorClient(krys::move(editorClient)),
         _pointerCaptureController(CreateUnique<PointerCaptureController>(*this)),
         _pointerLockController(CreateUnique<PointerLockController>(*this)),
         _scrollLatchingController(CreateUnique<ScrollLatchingController>()),
@@ -103,119 +137,275 @@ namespace krys::boo
         _dragController(CreateUnique<DragController>(
           *this,
           dragClient ? krys::move(dragClient) : UniquePtr<DragClient>(CreateUnique<EmptyDragClient>()))),
-        _dragCaretController(CreateUnique<DragCaretController>())
+        _dragCaretController(CreateUnique<DragCaretController>()),
+        _eventHandler(CreateUnique<EventHandler>(*this)),
+        _loader(CreateUnique<FrameLoader>(*this, krys::move(loaderClient)))
   {
-    if (!_chromeClient)
+    if (!_booeyClient)
     {
-      _chromeClient = CreateUnique<EmptyChromeClient>();
+      _booeyClient = CreateUnique<EmptyBooeyClient>();
     }
     if (!_editorClient)
     {
       _editorClient = CreateUnique<EmptyEditorClient>();
     }
-    AllPages().push_back(this);
+    AllFrames().push_back(this);
   }
 
-  void Page::UpdateStyleForAllPagesAfterGlobalChangeInEnvironment() noexcept
+  Frame::~Frame() noexcept
   {
-    ForEachPage([](Page &page) { page.UpdateStyleAfterChangeInEnvironment(); });
-  }
-
-  void Page::ForEachPage(const Func<void(Page &)> &function) noexcept
-  {
-    // A copy, so the function can make and destroy pages.
-    for (auto *page : List<Page *>(AllPages()))
+    std::erase(AllFrames(), this);
+    if (_document)
     {
-      function(*page);
+      _document->WillBeRemovedFromFrame();
     }
   }
 
-  void Page::SetPageScaleFactor(float scale, const PointI &origin) noexcept
+  Ref<Frame> Frame::Create(UniquePtr<BooeyClient> booeyClient, UniquePtr<EditorClient> editorClient,
+                           UniquePtr<FrameLoaderClient> loaderClient,
+                           UniquePtr<DragClient> dragClient) noexcept
   {
-    RefPtr<boo::Document> mainDocument = ShareRefPtr(_mainFrame->Document());
-    RefPtr<LocalFrameView> mainFrameView = mainDocument ? ShareRefPtr(mainDocument->View()) : nullptr;
+    return AdoptRef(*new Frame(krys::move(booeyClient), krys::move(editorClient), krys::move(loaderClient),
+                               krys::move(dragClient)));
+  }
+
+  void Frame::UpdateStyleForAllFramesAfterGlobalChangeInEnvironment() noexcept
+  {
+    ForEachFrame([](Frame &frame) { frame.UpdateStyleAfterChangeInEnvironment(); });
+  }
+
+  void Frame::ForEachFrame(const Func<void(Frame &)> &function) noexcept
+  {
+    // A copy, so the function can make and destroy frames.
+    for (auto *frame : List<Frame *>(AllFrames()))
+    {
+      function(*frame);
+    }
+  }
+
+  boo::Window *Frame::Window() const noexcept
+  {
+    return _document ? _document->Window() : nullptr;
+  }
+
+  void Frame::SetView(RefPtr<FrameView> &&view) noexcept
+  {
+    if (_view)
+    {
+      _view->LayoutContext().UnscheduleLayout();
+    }
+
+    // The document's render tree belongs to the view it's laid out in.
+    if (_document && _document->HasLivingRenderTree())
+    {
+      _document->DestroyRenderTree();
+    }
+
+    _view = krys::move(view);
+
+    if (_document && _view)
+    {
+      _document->CreateRenderTree();
+    }
+  }
+
+  void Frame::CreateView(const SizeI &viewportSize, const SizeI &fixedLayoutSize,
+                         bool useFixedLayout) noexcept
+  {
+    SetView(nullptr);
+
+    Ref frameView = FrameView::Create(*this, viewportSize);
+    frameView->SetFixedLayoutSize(fixedLayoutSize);
+    frameView->SetUseFixedLayout(useFixedLayout);
+
+    SetView(krys::move(frameView));
+  }
+
+  VisiblePosition Frame::VisiblePositionForPoint(const PointI &framePoint) const noexcept
+  {
+    HitTestResult result = GetEventHandler().HitTestResultAtPoint(
+      LayoutPoint(framePoint), {HitTestRequest::Type::ReadOnly, HitTestRequest::Type::Active,
+                                HitTestRequest::Type::AllowVisibleChildFrameContentOnly});
+    RefPtr<Node> node = ShareRefPtr(result.InnerNonSharedNode());
+    if (!node)
+    {
+      return {};
+    }
+    auto *renderer = node->Renderer();
+    if (!renderer)
+    {
+      return {};
+    }
+    auto visiblePos = renderer->VisiblePositionForPoint(result.LocalPoint(), HitTestSource::User);
+    if (visiblePos.IsNull())
+    {
+      visiblePos = VisiblePosition(FirstPositionInOrBeforeNode(node.get()));
+    }
+    return visiblePos;
+  }
+
+  boo::Document *Frame::DocumentAtPoint(const PointI &point) const noexcept
+  {
+    if (!View())
+    {
+      return nullptr;
+    }
+
+    PointI pt = View()->WindowToContents(point);
+    HitTestResult result = HitTestResult(LayoutPoint(pt));
+
+    if (Document() && Document()->GetRenderView())
+    {
+      result = GetEventHandler().HitTestResultAtPoint(
+        LayoutPoint(pt),
+        {HitTestRequest::Type::ReadOnly, HitTestRequest::Type::Active,
+         HitTestRequest::Type::DisallowUserAgentShadowContent, HitTestRequest::Type::AllowChildFrameContent});
+    }
+    return result.InnerNode() ? &result.InnerNode()->NodeDocument() : nullptr;
+  }
+
+  void Frame::SetDocument(const RefPtr<boo::Document> &newDocument) noexcept
+  {
+    krys_assert_msg(!newDocument || !newDocument->Frame(), "a document is in one frame at most");
+
+    if (_documentIsBeingReplaced)
+    {
+      return;
+    }
+
+    SetForScope documentIsBeingReplaced(_documentIsBeingReplaced, true);
+
+    _pointerCaptureController->Reset();
+
+    // The mouse's state refers to the old document's nodes.
+    _eventHandler->Clear();
+
+    if (RefPtr<boo::Document> previousDocument = _document)
+    {
+      previousDocument->WillBeRemovedFromFrame();
+    }
+
+    _document = newDocument;
+
+    // Don't use _document because it can be overwritten and we want to guarantee
+    // that the document is not destroyed during this function call.
+    if (newDocument)
+    {
+      newDocument->DidBecomeCurrentDocumentInFrame(*this);
+    }
+  }
+
+  void Frame::DeviceOrPageScaleFactorChanged() noexcept
+  {
+    if (auto *root = _document ? _document->GetRenderView() : nullptr)
+    {
+      root->Compositor().DeviceOrPageScaleFactorChanged();
+    }
+  }
+
+  void Frame::SetPageZoomFactor(float factor) noexcept
+  {
+    SetPageAndTextZoomFactors(factor, _textZoomFactor);
+  }
+
+  void Frame::SetTextZoomFactor(float factor) noexcept
+  {
+    SetPageAndTextZoomFactors(_pageZoomFactor, factor);
+  }
+
+  void Frame::SetPageAndTextZoomFactors(float pageZoomFactor, float textZoomFactor) noexcept
+  {
+    if (_pageZoomFactor == pageZoomFactor && _textZoomFactor == textZoomFactor)
+    {
+      return;
+    }
+
+    _pageZoomFactor = pageZoomFactor;
+    _textZoomFactor = textZoomFactor;
+
+    RefPtr<boo::Document> document = _document;
+    if (!document)
+    {
+      return;
+    }
+
+    document->ResolveStyle(boo::Document::ResolveStyleType::Rebuild);
+
+    if (RefPtr<FrameView> view = _view)
+    {
+      auto &layoutContext = view->LayoutContext();
+      if (document->GetRenderView() && layoutContext.NeedsLayout() && layoutContext.DidFirstLayout())
+      {
+        layoutContext.Layout();
+      }
+    }
+  }
+
+  void Frame::SetPageScaleFactor(float scale, const PointI &origin) noexcept
+  {
+    RefPtr<boo::Document> document = _document;
+    RefPtr<FrameView> frameView = document ? ShareRefPtr(document->View()) : nullptr;
 
     if (scale == _pageScaleFactor)
     {
-      if (mainFrameView && mainFrameView->GetScrollPosition() != origin)
+      if (frameView && frameView->GetScrollPosition() != origin)
       {
-        (void)mainDocument->UpdateLayoutIgnorePendingStylesheets(
-          {dom::LayoutOptions::UpdateCompositingLayers});
+        (void)document->UpdateLayoutIgnorePendingStylesheets({dom::LayoutOptions::UpdateCompositingLayers});
       }
     }
     else
     {
       _pageScaleFactor = scale;
 
-      if (RefPtr<LocalFrameView> view = ShareRefPtr(_mainFrame->View()))
+      if (RefPtr<FrameView> view = _view)
       {
         view->LayoutContext().SetNeedsLayoutAfterViewConfigurationChange();
         view->SetNeedsCompositingGeometryUpdate();
         view->SetDescendantsNeedUpdateBackingAndHierarchyTraversal();
 
-        if (mainDocument)
+        if (document)
         {
-          mainDocument->ResolveStyle(Document::ResolveStyleType::Rebuild);
+          document->ResolveStyle(boo::Document::ResolveStyleType::Rebuild);
         }
 
         // Transform change on RenderView doesn't trigger repaint on non-composited contents.
         view->InvalidateRect(RectI(LayoutRect::InfiniteRect()));
 
-        _mainFrame->DeviceOrPageScaleFactorChanged();
+        DeviceOrPageScaleFactorChanged();
       }
 
-      if (mainFrameView && mainFrameView->GetScrollPosition() != origin && mainDocument->GetRenderView()
-          && mainDocument->GetRenderView()->NeedsLayout() && mainFrameView->LayoutContext().DidFirstLayout())
+      if (frameView && frameView->GetScrollPosition() != origin && document->GetRenderView()
+          && document->GetRenderView()->NeedsLayout() && frameView->LayoutContext().DidFirstLayout())
       {
-        auto &layoutContext = mainFrameView->LayoutContext();
+        auto &layoutContext = frameView->LayoutContext();
         layoutContext.Layout();
         (void)layoutContext.UpdateCompositingLayersAfterLayoutIfNeeded();
       }
     }
 
-    if (mainFrameView && mainFrameView->GetScrollPosition() != origin)
+    if (frameView && frameView->GetScrollPosition() != origin)
     {
-      mainFrameView->SetScrollPosition(origin);
+      frameView->SetScrollPosition(origin);
     }
   }
 
-  void Page::DidChangeMainDocument(Document *newDocument) noexcept
-  {
-    (void)newDocument;
-    _pointerCaptureController->Reset();
-  }
-
-  Page::~Page() noexcept
-  {
-    std::erase(AllPages(), this);
-  }
-
-  Ref<Page> Page::Create(UniquePtr<ChromeClient> chromeClient, UniquePtr<EditorClient> editorClient,
-                         UniquePtr<LocalFrameLoaderClient> mainFrameLoaderClient,
-                         UniquePtr<DragClient> dragClient) noexcept
-  {
-    Ref<Page> page =
-      AdoptRef(*new Page(krys::move(chromeClient), krys::move(editorClient), krys::move(dragClient)));
-    page->_mainFrame = LocalFrame::Create(page.get(), krys::move(mainFrameLoaderClient));
-    return page;
-  }
-
-  EnumSet<FilterRenderingMode> Page::PreferredFilterRenderingModes(const GraphicsContext &) noexcept
+  EnumSet<FilterRenderingMode> Frame::PreferredFilterRenderingModes(const GraphicsContext &) noexcept
   {
     // There's no software rendering: the drawing backend applies filters on the GPU.
     return {FilterRenderingMode::Accelerated, FilterRenderingMode::GraphicsContext};
   }
 
-  void Page::ScheduleRenderingUpdate(EnumSet<RenderingUpdateStep> requestedSteps) noexcept
+  void Frame::ScheduleRenderingUpdate(EnumSet<RenderingUpdateStep> requestedSteps) noexcept
   {
     if (!_renderingUpdateDepth)
     {
-      if (_chromeClient->ScheduleRenderingUpdate())
+      if (_booeyClient->ScheduleRenderingUpdate())
       {
         return;
       }
 
-      // The host's frames are the page's rendering opportunities: it runs a scheduled update at its next one.
+      // The host's frames are the frame's rendering opportunities: it runs a scheduled update at its next
+      // one.
       _renderingUpdateIsScheduled = true;
       return;
     }
@@ -230,7 +420,7 @@ namespace krys::boo
     }
   }
 
-  void Page::SetImageAnimationEnabled(bool enabled) noexcept
+  void Frame::SetImageAnimationEnabled(bool enabled) noexcept
   {
     if (_imageAnimationEnabled == enabled)
     {
@@ -239,7 +429,7 @@ namespace krys::boo
     _imageAnimationEnabled = enabled;
 
     ForEachDocument(
-      [enabled](Document &document)
+      [enabled](boo::Document &document)
       {
         if (auto *svgExtensions = document.SVGExtensionsIfExists())
         {
@@ -253,7 +443,7 @@ namespace krys::boo
           }
         }
 
-        // An SVG image's animations are its page's SMIL animations.
+        // An SVG image's animations are its frame's SMIL animations.
         for (auto &image : SVGImagesOf(document))
         {
           if (enabled)
@@ -274,20 +464,20 @@ namespace krys::boo
       });
   }
 
-  void Page::SetDisplayNominalFramesPerSecond(uint32 framesPerSecond) noexcept
+  void Frame::SetDisplayNominalFramesPerSecond(uint32 framesPerSecond) noexcept
   {
     krys_debug_assert(framesPerSecond);
     _displayNominalFramesPerSecond = std::max(framesPerSecond, 1u);
   }
 
-  MonotonicTime::duration Page::PreferredRenderingUpdateInterval() const noexcept
+  MonotonicTime::duration Frame::PreferredRenderingUpdateInterval() const noexcept
   {
     return std::chrono::duration_cast<MonotonicTime::duration>(
       std::chrono::duration<double>(1.0 / _displayNominalFramesPerSecond));
   }
 
   // https://html.spec.whatwg.org/#update-the-rendering
-  void Page::UpdateRendering() noexcept
+  void Frame::UpdateRendering() noexcept
   {
     Ref protectedThis = ShareRef(*this);
 
@@ -298,7 +488,7 @@ namespace krys::boo
       return;
     }
 
-    // A hidden page's documents aren't rendered: the update stays scheduled until the page is shown.
+    // A hidden frame's document isn't rendered: the update stays scheduled until the frame is shown.
     if (!_isVisible)
     {
       return;
@@ -317,7 +507,7 @@ namespace krys::boo
     // aren't (see DIFFERENCES.md).
 
     ForEachDocument(
-      [](Document &document)
+      [](boo::Document &document)
       {
         if (auto *window = document.Window())
         {
@@ -325,52 +515,54 @@ namespace krys::boo
         }
       });
 
-    RunProcessingStep(RenderingUpdateStep::FlushAutofocusCandidates,
-                      [](Document &document) { html::FocusAlgorithms::FlushAutofocusCandidates(document); });
+    RunProcessingStep(RenderingUpdateStep::FlushAutofocusCandidates, [](boo::Document &document)
+                      { html::FocusAlgorithms::FlushAutofocusCandidates(document); });
 
-    RunProcessingStep(RenderingUpdateStep::Resize, [](Document &document) { document.RunResizeSteps(); });
+    RunProcessingStep(RenderingUpdateStep::Resize,
+                      [](boo::Document &document) { document.RunResizeSteps(); });
 
-    RunProcessingStep(RenderingUpdateStep::Scroll, [](Document &document) { document.RunScrollSteps(); });
+    RunProcessingStep(RenderingUpdateStep::Scroll,
+                      [](boo::Document &document) { document.RunScrollSteps(); });
 
     RunProcessingStep(RenderingUpdateStep::MediaQueryEvaluation,
-                      [](Document &document) { document.EvaluateMediaQueriesAndReportChanges(); });
+                      [](boo::Document &document) { document.EvaluateMediaQueriesAndReportChanges(); });
 
     // FIXME: Fullscreen events, once there's fullscreen.
     RunProcessingStep(RenderingUpdateStep::Animations,
-                      [](Document &document) { document.UpdateAnimationsAndSendEvents(); });
+                      [](boo::Document &document) { document.UpdateAnimationsAndSendEvents(); });
 
     RunProcessingStep(RenderingUpdateStep::AnimationFrameCallbacks,
-                      [](Document &document) { document.ServiceRequestAnimationFrameCallbacks(); });
+                      [](boo::Document &document) { document.ServiceRequestAnimationFrameCallbacks(); });
 
     RunProcessingStep(RenderingUpdateStep::CaretAnimation,
-                      [](Document &document) { document.ServiceCaretAnimation(); });
+                      [](boo::Document &document) { document.ServiceCaretAnimation(); });
 
-    // An SVG image's page is updated with the page that shows it, which its updates are scheduled with.
+    // An SVG image's frame is updated with the frame that shows it, which its updates are scheduled with.
     RunProcessingStep(RenderingUpdateStep::Images,
-                      [](Document &document)
+                      [](boo::Document &document)
                       {
                         for (auto &image : SVGImagesOf(document))
                         {
-                          if (RefPtr<Page> page = ShareRefPtr(image->InternalPage()))
+                          if (RefPtr<Frame> frame = ShareRefPtr(image->InternalFrame()))
                           {
-                            page->UpdateRendering();
+                            frame->UpdateRendering();
                           }
                         }
                       });
 
     LayoutIfNeeded();
 
-    ForEachDocument([](Document &document) { document.ProcessTopLayerRemovals(); });
+    ForEachDocument([](boo::Document &document) { document.ProcessTopLayerRemovals(); });
 
     RunProcessingStep(RenderingUpdateStep::ResizeObservations,
-                      [this](Document &document) { document.UpdateResizeObservations(*this); });
+                      [this](boo::Document &document) { document.UpdateResizeObservations(*this); });
 
     // https://drafts.csswg.org/scroll-animations-1/#event-loop
-    ForEachDocument([](Document &document) { document.RunPostRenderingUpdateAnimationTasks(); });
+    ForEachDocument([](boo::Document &document) { document.RunPostRenderingUpdateAnimationTasks(); });
 
     // https://html.spec.whatwg.org/#focus-fixup-rule
     RunProcessingStep(RenderingUpdateStep::FocusFixup,
-                      [](Document &document)
+                      [](boo::Document &document)
                       {
                         // If the focused area of the document is not a focusable area, run the focusing steps
                         // for the document's viewport.
@@ -385,14 +577,14 @@ namespace krys::boo
                         }
                       });
 
-    RunProcessingStep(RenderingUpdateStep::UpdateContentRelevancy, [](Document &document)
+    RunProcessingStep(RenderingUpdateStep::UpdateContentRelevancy, [](boo::Document &document)
                       { (void)document.UpdateRelevancyOfContentVisibilityElements(); });
 
     RunProcessingStep(RenderingUpdateStep::IntersectionObservations,
-                      [](Document &document) { document.UpdateIntersectionObservations(); });
+                      [](boo::Document &document) { document.UpdateIntersectionObservations(); });
 
     RunProcessingStep(RenderingUpdateStep::SnapshottedScrollOffsets,
-                      [](Document &document)
+                      [](boo::Document &document)
                       {
                         if (auto *renderView = document.GetRenderView())
                         {
@@ -404,10 +596,10 @@ namespace krys::boo
     DoAfterUpdateRendering();
 
     RunProcessingStep(RenderingUpdateStep::PrepareCanvasesForDisplayOrFlush,
-                      [](Document &document) { document.PrepareCanvasesForDisplayOrFlushIfNeeded(); });
+                      [](boo::Document &document) { document.PrepareCanvasesForDisplayOrFlushIfNeeded(); });
 
     ForEachDocument(
-      [](Document &document)
+      [](boo::Document &document)
       {
         if (auto *window = document.Window())
         {
@@ -421,13 +613,13 @@ namespace krys::boo
     FinalizeRenderingUpdate();
   }
 
-  void Page::FinalizeRenderingUpdate() noexcept
+  void Frame::FinalizeRenderingUpdate() noexcept
   {
     // FIXME: Invalidating images whose decodes are asynchronous (invalidateImagesWithAsyncDecodes), so a
     // host's snapshot draws them, once hosts take snapshots.
     _renderingUpdateRemainingSteps.Remove(RenderingUpdateStep::LayerFlush);
 
-    if (RefPtr<LocalFrameView> view = ShareRefPtr(_mainFrame->View()))
+    if (RefPtr<FrameView> view = _view)
     {
       view->FlushCompositingState();
     }
@@ -437,12 +629,12 @@ namespace krys::boo
     RenderingUpdateCompleted();
   }
 
-  void Page::DoAfterUpdateRendering() noexcept
+  void Frame::DoAfterUpdateRendering() noexcept
   {
     // Code here should do once-per-frame work that needs to be done before painting, and requires
     // layout to be up-to-date. It should not run script, trigger layout, or dirty layout.
     RunProcessingStep(RenderingUpdateStep::CursorUpdate,
-                      [](Document &document)
+                      [](boo::Document &document)
                       {
                         if (auto *frame = document.Frame())
                         {
@@ -452,18 +644,18 @@ namespace krys::boo
 
     // FIXME: Paint and event timing, once there are any.
 
-    ForEachDocument([](Document &document)
+    ForEachDocument([](boo::Document &document)
                     { document.Selection().UpdateAppearanceAfterUpdatingRendering(); });
 
-    ForEachRenderableDocument([](Document &document) { document.UpdateHighlightPositions(); });
+    ForEachRenderableDocument([](boo::Document &document) { document.UpdateHighlightPositions(); });
   }
 
-  void Page::RenderingUpdateCompleted() noexcept
+  void Frame::RenderingUpdateCompleted() noexcept
   {
     _renderingUpdateRemainingSteps = {};
     // The renderers destroyed during the update are deleted once it's over (upstream: when the page is idle).
     ForEachDocument(
-      [](Document &document)
+      [](boo::Document &document)
       {
         if (auto *view = document.View())
         {
@@ -474,28 +666,28 @@ namespace krys::boo
     if (!_unfulfilledRequestedSteps.IsEmpty() || _skippedRenderBlockedDocument)
     {
       _unfulfilledRequestedSteps = {};
-      // As any request between updates is, so the chrome client hears of it.
+      // As any request between updates is, so the Booey client hears of it.
       ScheduleRenderingUpdate();
     }
   }
 
-  void Page::LayoutIfNeeded(EnumSet<dom::LayoutOptions> layoutOptions) noexcept
+  void Frame::LayoutIfNeeded(EnumSet<dom::LayoutOptions> layoutOptions) noexcept
   {
-    if (RefPtr<boo::Document> document = ShareRefPtr(_mainFrame->Document()); document && _mainFrame->View())
+    if (RefPtr<boo::Document> document = _document; document && _view)
     {
       (void)document->UpdateLayout(layoutOptions);
     }
   }
 
-  void Page::ForEachDocument(const Func<void(Document &)> &functor) const noexcept
+  void Frame::ForEachDocument(const Func<void(boo::Document &)> &functor) const noexcept
   {
-    if (RefPtr<boo::Document> document = ShareRefPtr(_mainFrame->Document()))
+    if (RefPtr<boo::Document> document = _document)
     {
       functor(*document);
     }
   }
 
-  void Page::SetIsVisible(bool isVisible) noexcept
+  void Frame::SetIsVisible(bool isVisible) noexcept
   {
     if (_isVisible == isVisible)
     {
@@ -507,7 +699,7 @@ namespace krys::boo
     {
       ResumeScriptedAnimations();
 
-      if (RefPtr<LocalFrameView> view = ShareRefPtr(_mainFrame->View()))
+      if (RefPtr<FrameView> view = _view)
       {
         view->Show();
         // Shown, the overlay scrollbars show, then fade.
@@ -515,7 +707,7 @@ namespace krys::boo
       }
 
       ForEachDocument(
-        [](Document &document)
+        [](boo::Document &document)
         {
           if (document.GetSettings().HiddenPageCSSAnimationSuspensionEnabled)
           {
@@ -532,13 +724,13 @@ namespace krys::boo
 
       ResumeAnimatingImages();
 
-      // Updates asked for while the page was hidden were put off until now.
+      // Updates asked for while the frame was hidden were put off until now.
       ScheduleRenderingUpdate();
     }
     else
     {
       ForEachDocument(
-        [](Document &document)
+        [](boo::Document &document)
         {
           if (document.GetSettings().HiddenPageCSSAnimationSuspensionEnabled)
           {
@@ -554,7 +746,7 @@ namespace krys::boo
         });
 
       SuspendScriptedAnimations();
-      if (RefPtr<LocalFrameView> view = ShareRefPtr(_mainFrame->View()))
+      if (RefPtr<FrameView> view = _view)
       {
         view->Hide();
         // Hidden, the overlay scrollbars hide at once.
@@ -562,38 +754,38 @@ namespace krys::boo
       }
     }
 
-    ForEachDocument([](Document &document) { document.VisibilityStateChanged(); });
+    ForEachDocument([](boo::Document &document) { document.VisibilityStateChanged(); });
   }
 
-  void Page::SuspendScriptedAnimations() noexcept
+  void Frame::SuspendScriptedAnimations() noexcept
   {
     _scriptedAnimationsSuspended = true;
-    ForEachDocument([](Document &document) { document.SuspendScriptedAnimationControllerCallbacks(); });
+    ForEachDocument([](boo::Document &document) { document.SuspendScriptedAnimationControllerCallbacks(); });
   }
 
-  void Page::ResumeScriptedAnimations() noexcept
+  void Frame::ResumeScriptedAnimations() noexcept
   {
     _scriptedAnimationsSuspended = false;
-    ForEachDocument([](Document &document) { document.ResumeScriptedAnimationControllerCallbacks(); });
+    ForEachDocument([](boo::Document &document) { document.ResumeScriptedAnimationControllerCallbacks(); });
   }
 
-  void Page::ResumeAnimatingImages() noexcept
+  void Frame::ResumeAnimatingImages() noexcept
   {
     // Drawing models which cache painted content while out-of-window require that we repaint animated images
     // to kickstart the animation loop.
-    if (RefPtr<LocalFrameView> view = ShareRefPtr(_mainFrame->View()))
+    if (RefPtr<FrameView> view = _view)
     {
       view->ResumeVisibleImageAnimations();
     }
   }
 
-  void Page::ForEachRenderableDocument(const Func<void(Document &)> &functor) const noexcept
+  void Frame::ForEachRenderableDocument(const Func<void(boo::Document &)> &functor) const noexcept
   {
     // https://html.spec.whatwg.org/#update-the-rendering
     // Remove from docs any Document doc for which doc is render-blocked.
-    List<Ref<Document>> documents;
+    List<Ref<boo::Document>> documents;
     ForEachDocument(
-      [&](Document &document)
+      [&](boo::Document &document)
       {
         if (html::RenderBlocking::IsRenderBlocked(document))
         {
@@ -608,24 +800,23 @@ namespace krys::boo
     }
   }
 
-  void Page::RunProcessingStep(RenderingUpdateStep step,
-                               const Func<void(Document &)> &perDocumentFunction) noexcept
+  void Frame::RunProcessingStep(RenderingUpdateStep step,
+                                const Func<void(boo::Document &)> &perDocumentFunction) noexcept
   {
     _renderingUpdateRemainingSteps.Remove(step);
     ForEachRenderableDocument(perDocumentFunction);
   }
 
-  bool Page::UseDarkAppearance() const noexcept
+  bool Frame::UseDarkAppearance() const noexcept
   {
-    auto *view = MainFrame().View();
-    if (!view || view->MediaType() != css::mq::ScreenAtom())
+    if (!_view || _view->MediaType() != css::mq::ScreenAtom())
     {
       return false;
     }
     return _useDarkAppearance;
   }
 
-  void Page::SetDeviceScaleFactor(float deviceScaleFactor) noexcept
+  void Frame::SetDeviceScaleFactor(float deviceScaleFactor) noexcept
   {
     if (_deviceScaleFactor == deviceScaleFactor)
     {
@@ -633,15 +824,15 @@ namespace krys::boo
     }
     _deviceScaleFactor = deviceScaleFactor;
     UpdateStyleAfterChangeInEnvironment();
-    _mainFrame->DeviceOrPageScaleFactorChanged();
+    DeviceOrPageScaleFactorChanged();
   }
 
-  void Page::RegisterPopupOpeningObserver(PopupOpeningObserver &observer) noexcept
+  void Frame::RegisterPopupOpeningObserver(PopupOpeningObserver &observer) noexcept
   {
     _popupOpeningObservers.push_back(&observer);
   }
 
-  void Page::UnregisterPopupOpeningObserver(PopupOpeningObserver &observer) noexcept
+  void Frame::UnregisterPopupOpeningObserver(PopupOpeningObserver &observer) noexcept
   {
     auto it = std::find(_popupOpeningObservers.begin(), _popupOpeningObservers.end(), &observer);
     krys_debug_assert(it != _popupOpeningObservers.end());
@@ -651,7 +842,7 @@ namespace krys::boo
     }
   }
 
-  void Page::NotifyPopupOpeningObservers() const noexcept
+  void Frame::NotifyPopupOpeningObservers() const noexcept
   {
     // An observer may unregister as it's told.
     auto observers = _popupOpeningObservers;
@@ -665,12 +856,12 @@ namespace krys::boo
     }
   }
 
-  void Page::ScreenPropertiesDidChange() noexcept
+  void Frame::ScreenPropertiesDidChange() noexcept
   {
     UpdateStyleAfterChangeInEnvironment();
   }
 
-  void Page::SetUseDarkAppearance(bool useDarkAppearance) noexcept
+  void Frame::SetUseDarkAppearance(bool useDarkAppearance) noexcept
   {
     if (_useDarkAppearance == useDarkAppearance)
     {
@@ -679,9 +870,9 @@ namespace krys::boo
     _useDarkAppearance = useDarkAppearance;
     UpdateStyleAfterChangeInEnvironment();
 
-    // Scrollbars that follow the page's appearance change with it, though their styles don't.
+    // Scrollbars that follow the frame's appearance change with it, though their styles don't.
     ForEachDocument(
-      [](Document &document)
+      [](boo::Document &document)
       {
         if (auto *view = document.View())
         {
@@ -690,7 +881,7 @@ namespace krys::boo
       });
   }
 
-  void Page::SetDisplayMode(ApplicationDisplayMode displayMode) noexcept
+  void Frame::SetDisplayMode(ApplicationDisplayMode displayMode) noexcept
   {
     if (_displayMode == displayMode)
     {
@@ -700,10 +891,10 @@ namespace krys::boo
     UpdateStyleAfterChangeInEnvironment();
   }
 
-  void Page::UpdateStyleAfterChangeInEnvironment() noexcept
+  void Frame::UpdateStyleAfterChangeInEnvironment() noexcept
   {
     ForEachDocument(
-      [](Document &document)
+      [](boo::Document &document)
       {
         if (auto *styleResolver = document.StyleScope().ResolverIfExists())
         {

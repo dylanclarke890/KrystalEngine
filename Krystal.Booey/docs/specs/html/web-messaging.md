@@ -35,7 +35,7 @@ Status: reviewed (2026-11-01)
 
 Status: reviewed (2026-11-01)
 > Fixed: a message's origin and source are the posting window's as it posts, not as the message arrives.
-> `LocalDOMWindow::PostMessage`: only to the window itself, with no structured serialization, transfers or ports (see `DIFFERENCES.md`).
+> `Window::PostMessage`: only to the window itself, with no structured serialization, transfers or ports (see `DIFFERENCES.md`).
 <!-- definitions: posted-message-task-source -->
 
 - [x] [window post message steps](https://html.spec.whatwg.org/#window-post-message-steps) — The window post message steps, given a targetWindow, message, and options, are as follows:

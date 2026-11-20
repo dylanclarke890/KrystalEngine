@@ -1,7 +1,7 @@
 ﻿#include "Krystal.UI/ValidationMessageOverlay.hpp"
 #include "Krystal.Booey/DOM/Nodes/Document.hpp"
 #include "Krystal.Booey/DOM/Nodes/Element.hpp"
-#include "Krystal.Booey/Page/LocalFrameView.hpp"
+#include "Krystal.Booey/Page/FrameView.hpp"
 #include "Krystal.Booey/Rendering/RenderBox.hpp"
 #include "Krystal.Booey/Rendering/Style/RenderStyle+GettersInlines.hpp"
 #include "Krystal.UI/View.hpp"
@@ -111,7 +111,7 @@ namespace krys::ui
       return;
     }
 
-    // The owner lets go of the bubble, which its chrome client still holds.
+    // The owner lets go of the bubble, which its Booey client still holds.
     Ref<ValidationMessageOverlay> protectedThis = ShareRef(*this);
     _visible = false;
     _anchor = nullptr;

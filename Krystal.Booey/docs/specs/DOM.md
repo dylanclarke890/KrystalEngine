@@ -189,7 +189,7 @@ Status: reviewed (2026-10-30)
 ### [2.3. Legacy extensions to the Window interface](https://dom.spec.whatwg.org/#interface-window-extensions)
 
 Status: reviewed (2026-10-30)
-> Code: `LocalDOMWindow::CurrentEvent` and its `_currentEvent`, which the dispatcher's inner invoke sets (reviewed with 2.9). Tests: `tests/Page/LocalDOMWindow.cpp`.
+> Code: `Window::CurrentEvent` and its `_currentEvent`, which the dispatcher's inner invoke sets (reviewed with 2.9). Tests: `tests/HTML/Window.cpp`.
 <!-- definitions: window-current-event -->
 
 - [x] [Window.event](https://dom.spec.whatwg.org/#dom-window-event) — The event getter steps are to return this’s current event.
@@ -305,7 +305,7 @@ Status: n/a (service workers)
 ### [2.9. Dispatching events](https://dom.spec.whatwg.org/#dispatching-events)
 
 Status: reviewed (2026-10-30)
-> Code: `EventDispatcher` (`DispatchToTarget`, `AppendToEventPath`, `Invoke`, `InnerInvoke`); listeners are host code, so their global is the current target's window (`RelevantWindow`, `DIFFERENCES.md`). Default event handlers run after dispatch, as upstream (`DIFFERENCES.md`). Known issue: no Event Timing (inner invoke step 2l). Tests: `tests/DOM/Algorithms/EventDispatcher.cpp`, with the path's effects in `tests/DOM/Events/Event.cpp` and the window in `tests/Page/LocalDOMWindow.cpp`.
+> Code: `EventDispatcher` (`DispatchToTarget`, `AppendToEventPath`, `Invoke`, `InnerInvoke`); listeners are host code, so their global is the current target's window (`RelevantWindow`, `DIFFERENCES.md`). Default event handlers run after dispatch, as upstream (`DIFFERENCES.md`). Known issue: no Event Timing (inner invoke step 2l). Tests: `tests/DOM/Algorithms/EventDispatcher.cpp`, with the path's effects in `tests/DOM/Events/Event.cpp` and the window in `tests/HTML/Window.cpp`.
 
 - [x] [dispatch](https://dom.spec.whatwg.org/#concept-event-dispatch) — To dispatch an event event to an EventTarget object target, with an optional legacy target override flag and an optional legacyOutputDidListenersThrowFlag:
   - 1. Set event’s dispatch flag.

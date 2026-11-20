@@ -11,8 +11,7 @@
 #include "Krystal.Booey/Input/PlatformTouchEvent.hpp"
 #include "Krystal.Booey/Input/PointerLockController.hpp"
 #include "Krystal.Booey/Page/Drag/DragActions.hpp"
-#include "Krystal.Booey/Page/LocalFrame.hpp"
-#include "Krystal.Booey/Page/Page.hpp"
+#include "Krystal.Booey/Page/Frame.hpp"
 #include "Krystal.Booey/Platform/Choosers/FileChooser.hpp"
 #include "Krystal.Booey/Platform/Cursor.hpp"
 #include "Krystal.Booey/Platform/Pasteboard/DragImage.hpp"
@@ -139,16 +138,16 @@ namespace krys::ui
     KRYS_NON_COPY_MOVABLE(View);
 
   public:
-    class ChromeClient;
+    class BooeyClient;
     class DragClient;
     class FrameLoaderClient;
 
   private:
     /// @brief The page's editor client, which the page owns.
     EditorClient *_editorClient {nullptr};
-    /// @brief The page's chrome client, which the page owns: it hands Booey the graphics layers and keeps the
+    /// @brief The page's Booey client, which the page owns: it hands Booey the graphics layers and keeps the
     /// root of the page's layer tree.
-    ChromeClient *_chromeClient {nullptr};
+    BooeyClient *_booeyClient {nullptr};
     /// @brief The main frame's loader client, which the frame owns: it asks the navigation handler.
     FrameLoaderClient *_frameLoaderClient {nullptr};
     /// @brief The page's drag client, which the page owns: it starts the view's drag.
@@ -156,8 +155,7 @@ namespace krys::ui
     /// @brief The page's accelerated image buffers (its canvases' bitmaps), whose textures go with the view.
     UniquePtr<AcceleratedImageBuffers> _acceleratedImageBuffers {
       CreateUnique<AcceleratedImageBuffers>(_fonts)};
-    Ref<boo::Page> _page;
-    Ref<boo::LocalFrame> _frame;
+    Ref<boo::Frame> _frame;
     FontFaceCache _fonts;
     /// @brief Made on the first replay, with the renderer's device.
     UniquePtr<ImageBufferTextures> _imageBuffers;
@@ -724,14 +722,9 @@ namespace krys::ui
     /// @brief The view's document: the main frame's.
     KRYS_NODISCARD boo::HTMLDocument &Document() const noexcept;
 
-    KRYS_NODISCARD boo::LocalFrame &Frame() const noexcept
+    KRYS_NODISCARD boo::Frame &Frame() const noexcept
     {
       return *_frame;
-    }
-
-    KRYS_NODISCARD boo::Page &GetPage() const noexcept
-    {
-      return *_page;
     }
 
     KRYS_NODISCARD FontFaceCache &Fonts() noexcept
