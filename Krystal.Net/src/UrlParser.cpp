@@ -2718,11 +2718,15 @@ namespace krys::net
     {
       return null;
     }
+
+#if KRYS_DEBUG
     for (char8 c : *converted)
     {
       krys_debug_assert(text::IsASCII(c));
       krys_debug_assert(!text::IsASCIIUpper(c));
     }
+#endif
+
     if (domain != utf8_stringview {*converted})
     {
       SyntaxViolation(iteratorForSyntaxViolationPosition);
