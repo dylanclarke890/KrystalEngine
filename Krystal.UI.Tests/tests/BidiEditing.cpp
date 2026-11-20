@@ -1,4 +1,5 @@
 ﻿#include "catch2/catch_test_macros.hpp"
+#include "Krystal.Booey/DOM/Geometry/DOMRectList.hpp"
 #include "Krystal.Booey/DOM/Nodes/Element.hpp"
 #include "Krystal.Booey/DOM/Nodes/Text.hpp"
 #include "Krystal.Booey/Editing/Editor.hpp"

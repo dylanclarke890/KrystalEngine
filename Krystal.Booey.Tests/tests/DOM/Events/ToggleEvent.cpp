@@ -35,7 +35,7 @@ namespace krys::boo::dom::tests
       ToggleEventInit init;
       init.OldState = u8"closed";
       init.NewState = u8"open";
-      init.Source = ShareRefPtr(&button);
+      init.Source = &button;
       auto event = CreateRef<ToggleEvent>(u8"toggle", init);
       CHECK_FALSE(event->IsTrusted());
       CHECK(Narrow(event->OldState()) == "closed");
@@ -56,7 +56,7 @@ namespace krys::boo::dom::tests
       REQUIRE_FALSE(shadow->AppendChild(*inner).HasException());
 
       CommandEventInit init;
-      init.Source = inner;
+      init.Source = inner.get();
       init.Command = u8"--refresh";
       auto event = CommandEvent::Create(u8"command", init, true);
       CHECK(event->IsTrusted());

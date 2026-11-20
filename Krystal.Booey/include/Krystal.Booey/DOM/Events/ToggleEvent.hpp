@@ -14,7 +14,8 @@ namespace krys::boo
   {
     DOMString OldState;
     DOMString NewState;
-    RefPtr<Element> Source;
+    /// @note A plain pointer: the event takes its own reference.
+    Element *Source {nullptr};
   };
 
   /// @brief Fired at a dialog, popover or details element as it opens or closes (`toggle`), or before

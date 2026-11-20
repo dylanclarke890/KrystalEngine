@@ -143,4 +143,14 @@ namespace krys::boo::dom
     }
     return *it->second;
   }
+
+  Element *ElementRareData::InvokedPopover() const noexcept
+  {
+    return _invokedPopover.get();
+  }
+
+  void ElementRareData::SetInvokedPopover(Element *element) noexcept
+  {
+    _invokedPopover = CreateWeakPtr(element);
+  }
 }

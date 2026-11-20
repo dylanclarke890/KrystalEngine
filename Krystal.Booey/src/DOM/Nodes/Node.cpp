@@ -36,6 +36,7 @@
 #include "Krystal.Booey/DOM/Events/MouseEvent.hpp"
 #include "Krystal.Booey/DOM/Internals/ElementRareData.hpp"
 #include "Krystal.Booey/DOM/Iterators/ComposedTreeAncestorIterator.hpp"
+#include "Krystal.Booey/DOM/MutationObservers/TransientRegisteredObserver.hpp"
 #include "Krystal.Booey/DOM/Nodes/Attr.hpp"
 #include "Krystal.Booey/DOM/Nodes/CharacterData.hpp"
 #include "Krystal.Booey/DOM/Nodes/ContainerNode.hpp"

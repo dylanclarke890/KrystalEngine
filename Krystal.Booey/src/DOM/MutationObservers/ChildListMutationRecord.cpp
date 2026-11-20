@@ -41,4 +41,29 @@ namespace krys::boo::dom
         _previousSibling(krys::move(previousSibling)), _nextSibling(krys::move(nextSibling))
   {
   }
+
+  Ref<Node> ChildListMutationRecord::Target() const noexcept
+  {
+    return _target;
+  }
+
+  RefPtr<NodeList> ChildListMutationRecord::AddedNodes() const noexcept
+  {
+    return _addedNodes;
+  }
+
+  RefPtr<NodeList> ChildListMutationRecord::RemovedNodes() const noexcept
+  {
+    return _removedNodes;
+  }
+
+  RefPtr<Node> ChildListMutationRecord::PreviousSibling() const noexcept
+  {
+    return _previousSibling;
+  }
+
+  RefPtr<Node> ChildListMutationRecord::NextSibling() const noexcept
+  {
+    return _nextSibling;
+  }
 }

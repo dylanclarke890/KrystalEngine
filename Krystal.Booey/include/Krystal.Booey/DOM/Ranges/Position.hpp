@@ -26,10 +26,8 @@
 #pragma once
 
 #include "Krystal.Booey/DOM/Nodes/ContainerNode.hpp"
-#include "Krystal.Booey/DOM/Ranges/BoundaryPoint.hpp"
 #include "Krystal.Booey/Editing/Selection/EditingBoundary.hpp"
 #include "Krystal.Booey/Editing/Selection/TextAffinity.hpp"
-#include "Krystal.Booey/Text/WritingMode.hpp"
 #include "Krystal.Core/Attributes.hpp"
 #include "Krystal.Core/Types/Maybe.hpp"
 #include "Krystal.Core/Types/RefPtr.hpp"
@@ -45,6 +43,7 @@ namespace krys::boo
 
 namespace krys::boo::dom
 {
+  struct BoundaryPoint;
   struct SimpleRange;
 
   enum class PositionMoveType : uint8

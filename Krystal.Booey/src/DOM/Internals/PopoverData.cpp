@@ -44,4 +44,24 @@ namespace krys::boo::dom
     }
     return ShareRef(*_toggleEventTask);
   }
+
+  HTMLElement *PopoverData::Invoker() const noexcept
+  {
+    return _invoker.get();
+  }
+
+  void PopoverData::SetInvoker(HTMLElement *element) noexcept
+  {
+    _invoker = CreateWeakPtr(element);
+  }
+
+  Element *PopoverData::PreviouslyFocusedElement() const noexcept
+  {
+    return _previouslyFocusedElement.get();
+  }
+
+  void PopoverData::SetPreviouslyFocusedElement(Element *element) noexcept
+  {
+    _previouslyFocusedElement = CreateWeakPtr(element);
+  }
 }

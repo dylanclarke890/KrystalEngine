@@ -24,6 +24,7 @@
 #pragma once
 
 #include "Krystal.Booey/DOM/Events/EventPathItem.hpp"
+#include "Krystal.Booey/DOM/Events/EventTarget.hpp"
 #include "Krystal.Booey/DOM/Types/DOMHighResTimeStamp.hpp"
 #include "Krystal.Booey/DOM/Types/DOMString.hpp"
 #include "Krystal.Core/Enum.hpp"
@@ -53,6 +54,7 @@ KRYS_DEFINE_CONTIGUOUS_ENUM_TRAITS(krys::boo::dom::EventPhaseType, 4u)
 namespace krys::boo
 {
   class Document;
+  class ShadowRoot;
 }
 
 namespace krys::boo::dom

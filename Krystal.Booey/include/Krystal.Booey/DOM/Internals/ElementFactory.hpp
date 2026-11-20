@@ -2,6 +2,7 @@
 
 #include "Krystal.Booey/DOM/Types/DOMString.hpp"
 #include "Krystal.Booey/DOM/Types/QualifiedName.hpp"
+#include "Krystal.Booey/HTML/Elements/HTMLElement.hpp"
 #include "Krystal.Booey/Infra/Namespaces.hpp"
 #include "Krystal.Core/Attributes.hpp"
 #include "Krystal.Core/TypeCast.hpp"

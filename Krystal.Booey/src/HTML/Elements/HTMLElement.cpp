@@ -1521,7 +1521,7 @@ namespace krys::boo
     // Composed, with relatedTarget the subject if retargeting the source against it gives it, else the
     // source.
     init.Composed = true;
-    init.Source = ShareRefPtr<Element>(source);
+    init.Source = source;
     auto event = ToggleEvent::Create(event_names::BeforeToggle, init, cancelable);
     (void)dom::EventDispatcher::DispatchFromSource(*event, *this, source);
     return !event->DefaultPrevented();

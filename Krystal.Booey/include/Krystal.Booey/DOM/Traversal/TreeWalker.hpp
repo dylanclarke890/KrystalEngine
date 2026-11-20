@@ -4,6 +4,11 @@
 #include "Krystal.Booey/DOM/Traversal/TraversalBase.hpp"
 #include "Krystal.Core/RefCounted.hpp"
 
+namespace krys::boo
+{
+  class Document;
+}
+
 namespace krys::boo::dom
 {
   /// @brief Walks the subtree of its root, moving its current node to the nodes its filter accepts.

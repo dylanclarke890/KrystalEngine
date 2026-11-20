@@ -1,6 +1,9 @@
 ﻿#pragma once
 
+#include "Krystal.Booey/DOM/Types/DOMString.hpp"
 #include "Krystal.Booey/DOM/Types/ExceptionOr.hpp"
+#include "Krystal.Core/Types/Maybe.hpp"
+#include "Krystal.Core/Types/RefPtr.hpp"
 #include "Krystal.Core/Types/UniquePtr.hpp"
 
 namespace krys::boo::html
@@ -13,11 +16,15 @@ namespace krys::boo
   class Attr;
   class Element;
   class Node;
+  class ShadowRoot;
 }
 
 namespace krys::boo::dom
 {
+  enum class Clonable : bool;
+  enum class DelegatesFocus : bool;
   enum class InsertAdjacentWhere : uint8;
+  enum class Serialisable : bool;
   enum class ShadowRootMode : uint8;
   enum class SlotAssignmentMode : uint8;
 

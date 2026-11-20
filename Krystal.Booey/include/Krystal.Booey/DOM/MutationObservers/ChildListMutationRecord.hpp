@@ -59,29 +59,14 @@ namespace krys::boo::dom
       return type;
     }
 
-    KRYS_NODISCARD Ref<Node> Target() const noexcept override
-    {
-      return _target;
-    }
+    KRYS_NODISCARD Ref<Node> Target() const noexcept override;
 
-    KRYS_NODISCARD RefPtr<NodeList> AddedNodes() const noexcept override
-    {
-      return _addedNodes;
-    }
+    KRYS_NODISCARD RefPtr<NodeList> AddedNodes() const noexcept override;
 
-    KRYS_NODISCARD RefPtr<NodeList> RemovedNodes() const noexcept override
-    {
-      return _removedNodes;
-    }
+    KRYS_NODISCARD RefPtr<NodeList> RemovedNodes() const noexcept override;
 
-    KRYS_NODISCARD RefPtr<Node> PreviousSibling() const noexcept override
-    {
-      return _previousSibling;
-    }
+    KRYS_NODISCARD RefPtr<Node> PreviousSibling() const noexcept override;
 
-    KRYS_NODISCARD RefPtr<Node> NextSibling() const noexcept override
-    {
-      return _nextSibling;
-    }
+    KRYS_NODISCARD RefPtr<Node> NextSibling() const noexcept override;
   };
 }

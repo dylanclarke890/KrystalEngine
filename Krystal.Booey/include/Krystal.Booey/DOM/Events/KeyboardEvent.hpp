@@ -27,7 +27,6 @@
 #include "Krystal.Booey/DOM/Events/UIEvent.hpp"
 #include "Krystal.Booey/DOM/Events/UIEventWithKeyState.hpp"
 #include "Krystal.Booey/DOM/Types/DOMString.hpp"
-#include "Krystal.Booey/Input/PlatformKeyboardEvent.hpp"
 #include "Krystal.Core/Attributes.hpp"
 #include "Krystal.Core/Numeric.hpp"
 #include "Krystal.Core/Types/Maybe.hpp"
@@ -35,6 +34,7 @@
 
 namespace krys::boo
 {
+  class PlatformKeyboardEvent;
   class Window;
 
   /// @see https://w3c.github.io/uievents/#dictdef-keyboardeventinit

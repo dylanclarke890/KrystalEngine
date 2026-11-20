@@ -53,6 +53,7 @@
 #include "Krystal.Booey/DOM/Events/MouseEvent.hpp"
 #include "Krystal.Booey/DOM/Events/PointerEvent.hpp"
 #include "Krystal.Booey/DOM/Events/WheelEvent.hpp"
+#include "Krystal.Booey/DOM/Geometry/DOMRectList.hpp"
 #include "Krystal.Booey/DOM/Internals/ElementRareData.hpp"
 #include "Krystal.Booey/DOM/Internals/IdTargetObserverRegistry.hpp"
 #include "Krystal.Booey/DOM/Internals/PopoverData.hpp"

@@ -7,7 +7,7 @@ namespace krys::boo
 {
   ToggleEvent::ToggleEvent(DOMStringAtom type, const ToggleEventInit &eventInitDict) noexcept
       : Event(krys::move(type), eventInitDict), _oldState(eventInitDict.OldState),
-        _newState(eventInitDict.NewState), _source(eventInitDict.Source)
+        _newState(eventInitDict.NewState), _source(ShareRefPtr(eventInitDict.Source))
   {
   }
 

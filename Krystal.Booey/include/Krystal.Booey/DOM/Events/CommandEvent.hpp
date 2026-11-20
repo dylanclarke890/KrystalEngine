@@ -12,7 +12,8 @@ namespace krys::boo
   /// @see https://html.spec.whatwg.org/#commandeventinit
   struct CommandEventInit : EventInit
   {
-    RefPtr<Element> Source;
+    /// @note A plain pointer: the event takes its own reference.
+    Element *Source {nullptr};
     DOMString Command;
   };
 

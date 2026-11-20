@@ -47,10 +47,7 @@ namespace krys::boo::dom
     EmptyNodeMutationRecord(Ref<Node> &&target, DOMStringAtom oldValue) noexcept;
 
   public:
-    KRYS_NODISCARD Ref<Node> Target() const noexcept final
-    {
-      return _target;
-    }
+    KRYS_NODISCARD Ref<Node> Target() const noexcept final;
 
     KRYS_NODISCARD RefPtr<NodeList> AddedNodes() const noexcept final;
 

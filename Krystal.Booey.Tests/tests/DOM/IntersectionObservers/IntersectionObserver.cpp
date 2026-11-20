@@ -136,11 +136,11 @@ namespace krys::boo::tests
     SECTION("The root is an element or a document")
     {
       auto &a = fixture.ById(u8"a");
-      Recorder byElement(document, {.Root = ShareRefPtr(&a)});
+      Recorder byElement(document, {.Root = &a});
       CHECK(byElement.Observer->Root() == &a);
       CHECK(byElement.Observer->TrackingDocument() == &document);
 
-      Recorder byDocument(document, {.Root = RefPtr<Document>(ShareRefPtr(&document))});
+      Recorder byDocument(document, {.Root = &document});
       CHECK(byDocument.Observer->Root() == &document);
 
       Recorder implicit(document);
@@ -289,7 +289,7 @@ namespace krys::boo::tests
 
     SECTION("An element root reports its scrolled contents")
     {
-      Recorder recorder(*fixture.Document, {.Root = ShareRefPtr(&scroller)});
+      Recorder recorder(*fixture.Document, {.Root = &scroller});
       recorder.Observer->Observe(t);
       update();
       CHECK(recorder.Take()
@@ -325,7 +325,7 @@ namespace krys::boo::tests
 
     SECTION("A target outside the root is not intersecting")
     {
-      Recorder recorder(*fixture.Document, {.Root = ShareRefPtr(&t)});
+      Recorder recorder(*fixture.Document, {.Root = &t});
       recorder.Observer->Observe(scroller);
       update();
       CHECK(recorder.Take() == List<List<Observed>> {{{"scroller", false, 0, {}, {}, {}}}});
@@ -373,7 +373,7 @@ namespace krys::boo::tests
     SECTION("A destroyed root disconnects its observers")
     {
       RefPtr<Element> root = fixture.Document->CreateElement(u8"div").ReleaseValue();
-      Recorder recorder(*fixture.Document, {.Root = root});
+      Recorder recorder(*fixture.Document, {.Root = root.get()});
       recorder.Observer->Observe(a);
       CHECK(recorder.Observer->HasObservationTargets());
       root = nullptr;
@@ -385,8 +385,7 @@ namespace krys::boo::tests
     SECTION("A destroyed observer leaves its targets and its root")
     {
       {
-        Recorder recorder(*fixture.Document,
-                          {.Root = RefPtr<boo::Document>(ShareRefPtr(fixture.Document.get()))});
+        Recorder recorder(*fixture.Document, {.Root = fixture.Document.get()});
         recorder.Observer->Observe(a);
         REQUIRE(a.IntersectionObserverDataIfExists());
         CHECK(a.IntersectionObserverDataIfExists()->Registrations.size() == 1);

@@ -392,7 +392,7 @@ namespace krys::boo
     init.Bubbles = false;
     init.Cancelable = true;
     init.Composed = true;
-    init.Source = ShareRefPtr<boo::Element>(this);
+    init.Source = this;
     init.Command = commandRaw.value_or(DOMString());
 
     auto event = CommandEvent::Create(event_names::Command, init, true);

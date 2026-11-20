@@ -146,4 +146,9 @@ namespace krys::boo::dom
     // (The same File each time.)
     return _file;
   }
+
+  RefPtr<File> DataTransferItem::GetFile() const noexcept
+  {
+    return _file;
+  }
 }

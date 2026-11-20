@@ -1308,6 +1308,7 @@ set(KRYSTAL_BOOEY_DOM_SOURCES
   src/DOM/MutationObservers/ChildListMutationRecord.cpp
   src/DOM/MutationObservers/EmptyNodeMutationRecord.cpp
   src/DOM/MutationObservers/MutationObserver.cpp
+  src/DOM/MutationObservers/MutationRecord.cpp
   src/DOM/Nodes/Attr.cpp
   src/DOM/Nodes/CDATASection.cpp
   src/DOM/Nodes/CharacterData.cpp

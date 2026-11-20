@@ -30,9 +30,7 @@ namespace krys::boo::dom
     WeakRef<Document> _document;
 
   private:
-    DOMImplementation(Document &document) noexcept : _document(CreateWeakRef(document))
-    {
-    }
+    explicit DOMImplementation(Document &document) noexcept;
 
   public:
 #pragma region DOMImplementation - https://dom.spec.whatwg.org/#interface-domimplementation

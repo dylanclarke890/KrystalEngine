@@ -25,12 +25,16 @@
 
 #pragma once
 
-#include "Krystal.Booey/DOM/Events/ToggleEventTask.hpp"
 #include "Krystal.Core/Attributes.hpp"
 #include "Krystal.Core/Enum.hpp"
 #include "Krystal.Core/Macros.hpp"
 #include "Krystal.Core/Types/RefPtr.hpp"
 #include "Krystal.Core/Types/WeakPtr.hpp"
+
+namespace krys::boo::dom
+{
+  class ToggleEventTask;
+}
 
 namespace krys::boo
 {
@@ -134,29 +138,17 @@ namespace krys::boo::dom
       _openedInPopoverMode = mode;
     }
 
-    KRYS_NODISCARD Element *PreviouslyFocusedElement() const noexcept
-    {
-      return _previouslyFocusedElement.get();
-    }
+    KRYS_NODISCARD Element *PreviouslyFocusedElement() const noexcept;
 
-    void SetPreviouslyFocusedElement(Element *element) noexcept
-    {
-      _previouslyFocusedElement = CreateWeakPtr(element);
-    }
+    void SetPreviouslyFocusedElement(Element *element) noexcept;
 
     KRYS_NODISCARD Ref<ToggleEventTask> EnsureToggleEventTask(Element &element) noexcept;
 
     /// @brief The element that showed the popover (its popover trigger).
     /// @see https://html.spec.whatwg.org/#popover-trigger
-    KRYS_NODISCARD HTMLElement *Invoker() const noexcept
-    {
-      return _invoker.get();
-    }
+    KRYS_NODISCARD HTMLElement *Invoker() const noexcept;
 
-    void SetInvoker(HTMLElement *element) noexcept
-    {
-      _invoker = CreateWeakPtr(element);
-    }
+    void SetInvoker(HTMLElement *element) noexcept;
 
     /// @see https://html.spec.whatwg.org/#popover-close-watcher
     KRYS_NODISCARD html::CloseWatcher *CloseWatcher() const noexcept

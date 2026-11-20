@@ -1,6 +1,5 @@
 ﻿#pragma once
 
-#include "Krystal.Booey/DOM/Abort/AbortAlgorithmHandle.hpp"
 #include "Krystal.Core/Numeric.hpp"
 #include "Krystal.Core/Types/Any.hpp"
 #include "Krystal.Core/Types/Func.hpp"
@@ -10,6 +9,7 @@
 
 namespace krys::boo
 {
+  class AbortAlgorithmHandle;
   class AbortController;
   class AbortSignal;
 }

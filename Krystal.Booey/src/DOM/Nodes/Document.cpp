@@ -92,6 +92,7 @@
 #include "Krystal.Booey/DOM/Nodes/ProcessingInstruction.hpp"
 #include "Krystal.Booey/DOM/Nodes/Text.hpp"
 #include "Krystal.Booey/DOM/Ranges/Range.hpp"
+#include "Krystal.Booey/DOM/Ranges/StaticRange.hpp"
 #include "Krystal.Booey/DOM/ResizeObservers/ResizeObserver.hpp"
 #include "Krystal.Booey/DOM/ResizeObservers/ResizeObserverEntry.hpp"
 #include "Krystal.Booey/DOM/Traversal/TreeWalker.hpp"

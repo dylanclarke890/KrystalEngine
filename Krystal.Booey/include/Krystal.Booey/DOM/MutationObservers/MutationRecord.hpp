@@ -51,16 +51,10 @@ namespace krys::boo::dom
     KRYS_NODISCARD virtual RefPtr<NodeList> RemovedNodes() const noexcept = 0;
 
     /// @see https://dom.spec.whatwg.org/#dom-mutationrecord-previoussibling
-    KRYS_NODISCARD virtual RefPtr<Node> PreviousSibling() const noexcept
-    {
-      return nullptr;
-    }
+    KRYS_NODISCARD virtual RefPtr<Node> PreviousSibling() const noexcept;
 
     /// @see https://dom.spec.whatwg.org/#dom-mutationrecord-nextsibling
-    KRYS_NODISCARD virtual RefPtr<Node> NextSibling() const noexcept
-    {
-      return nullptr;
-    }
+    KRYS_NODISCARD virtual RefPtr<Node> NextSibling() const noexcept;
 
     /// @see https://dom.spec.whatwg.org/#dom-mutationrecord-attributename
     KRYS_NODISCARD virtual const DOMStringAtom &AttributeName() const noexcept KRYS_LIFETIME_BOUND

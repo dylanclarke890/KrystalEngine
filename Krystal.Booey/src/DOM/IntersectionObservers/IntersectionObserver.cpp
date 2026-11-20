@@ -245,7 +245,7 @@ namespace krys::boo
     if (init.Root)
     {
       root = SwitchOn(*init.Root,
-                      [](auto &elementOrDocument) -> RefPtr<ContainerNode> { return elementOrDocument; });
+                      [](auto *elementOrDocument) { return ShareRefPtr<ContainerNode>(elementOrDocument); });
     }
 
     auto rootMarginOrException = ParseMargin(init.RootMargin, u8"rootMargin");

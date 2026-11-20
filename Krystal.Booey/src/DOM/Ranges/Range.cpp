@@ -27,6 +27,7 @@
 #include "Krystal.Booey/DOM/Algorithms/MutationAlgorithms.hpp"
 #include "Krystal.Booey/DOM/Algorithms/NodeAlgorithms.hpp"
 #include "Krystal.Booey/DOM/Algorithms/TreeQueries.hpp"
+#include "Krystal.Booey/DOM/Geometry/DOMRectList.hpp"
 #include "Krystal.Booey/DOM/Internals/ElementFactory.hpp"
 #include "Krystal.Booey/DOM/Iterators/SubtreeRanges.hpp"
 #include "Krystal.Booey/DOM/Nodes/Attr.hpp"

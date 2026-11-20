@@ -60,4 +60,9 @@ namespace krys::boo::dom
 
     return _removedNodes;
   }
+
+  Ref<Node> EmptyNodeMutationRecord::Target() const noexcept
+  {
+    return _target;
+  }
 }

@@ -26,6 +26,7 @@
 #include "Krystal.Booey/DOM/ResizeObservers/ResizeObservation.hpp"
 #include "Krystal.Booey/DOM/Nodes/Document.hpp"
 #include "Krystal.Booey/DOM/Nodes/Element.hpp"
+#include "Krystal.Booey/DOM/ResizeObservers/ResizeObserverBoxOptions.hpp"
 #include "Krystal.Booey/Rendering/RenderBox.hpp"
 #include "Krystal.Booey/Rendering/Style/RenderStyle+GettersInlines.hpp"
 #include "Krystal.Booey/SVG/Elements/SVGElement.hpp"
@@ -190,5 +191,10 @@ namespace krys::boo
       ++depth;
     }
     return depth;
+  }
+
+  Element *ResizeObservation::Target() const noexcept
+  {
+    return _target.get();
   }
 }

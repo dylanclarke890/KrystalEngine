@@ -1,5 +1,6 @@
 ﻿#include "Krystal.Gfx.Tests/Golden.hpp"
 #include "catch2/catch_test_macros.hpp"
+#include "Krystal.Booey/DOM/Geometry/DOMRectList.hpp"
 #include "Krystal.Booey/DOM/Geometry/DOMRectReadOnly.hpp"
 #include "Krystal.Booey/DOM/Nodes/Text.hpp"
 #include "Krystal.Booey/DOM/Ranges/Position.hpp"

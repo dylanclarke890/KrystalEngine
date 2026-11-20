@@ -1,5 +1,6 @@
 ﻿#pragma once
 
+#include "Krystal.Booey/DOM/Nodes/Node.hpp"
 #include "Krystal.Core/Attributes.hpp"
 #include "Krystal.Core/CanMakeWeakPtr.hpp"
 #include "Krystal.Core/Numeric.hpp"
