@@ -5,6 +5,7 @@
 #include "Krystal.Booey/DOM/Events/EventNames.hpp"
 #include "Krystal.Booey/DOM/Nodes/Document.hpp"
 #include "Krystal.Booey/HTML/EventLoop/EventLoop.hpp"
+#include <algorithm>
 
 namespace krys::boo
 {
@@ -65,6 +66,12 @@ namespace krys::boo
       ++_abortEventListenerCount;
       UpdateHeldBySources();
     }
+  }
+
+  bool AbortSignal::HasAbortAlgorithm(uint64 id) const noexcept
+  {
+    return std::ranges::any_of(_abortAlgorithms,
+                               [id](const AbortAlgorithm &algorithm) { return algorithm.Id == id; });
   }
 
   void AbortSignal::DidRemoveEventListener(const EventListener &listener) noexcept

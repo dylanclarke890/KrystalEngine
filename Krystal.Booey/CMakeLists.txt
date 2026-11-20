@@ -1048,6 +1048,7 @@ set(KRYSTAL_BOOEY_CSS_SOURCES
 )
 
 set(KRYSTAL_BOOEY_DOM_HEADERS
+  include/Krystal.Booey/DOM/Abort/AbortAlgorithmHandle.hpp
   include/Krystal.Booey/DOM/Abort/AbortController.hpp
   include/Krystal.Booey/DOM/Abort/AbortSignal.hpp
   include/Krystal.Booey/DOM/Algorithms/AbortAlgorithms.hpp
@@ -1218,6 +1219,7 @@ set(KRYSTAL_BOOEY_DOM_HEADERS
 )
 
 set(KRYSTAL_BOOEY_DOM_SOURCES
+  src/DOM/Abort/AbortAlgorithmHandle.cpp
   src/DOM/Abort/AbortController.cpp
   src/DOM/Abort/AbortSignal.cpp
   src/DOM/Algorithms/AbortAlgorithms.cpp

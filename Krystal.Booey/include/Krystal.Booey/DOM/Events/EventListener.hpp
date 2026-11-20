@@ -1,5 +1,6 @@
 ﻿#pragma once
 
+#include "Krystal.Booey/DOM/Abort/AbortAlgorithmHandle.hpp"
 #include "Krystal.Booey/DOM/Types/DOMString.hpp"
 #include "Krystal.Core/Attributes.hpp"
 #include "Krystal.Core/CanMakeWeakPtr.hpp"
@@ -66,6 +67,8 @@ namespace krys::boo
     const DOMStringAtom _type;
     const RefPtr<EventListenerCallback> _callback;
     RefPtr<AbortSignal> _signal {nullptr};
+    /// @brief The abort steps the listener added to its signal, which go with it.
+    AbortAlgorithmHandle _signalAlgorithm;
     bool _removed {false};
     bool _capture {false};
     Maybe<bool> _passive;

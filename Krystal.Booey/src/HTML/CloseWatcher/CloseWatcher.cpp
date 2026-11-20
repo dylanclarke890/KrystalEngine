@@ -86,16 +86,15 @@ namespace krys::boo::html
       // 3.2. Add the following steps to options["signal"]: Destroy closeWatcher.
       else
       {
-        watcher->_signal = signal;
-        AbortAlgorithmCallback algorithm = [weakWatcher = CreateWeakPtr(watcher.get())](const Any &)
-        {
-          if (auto strongWatcher = weakWatcher.lock())
+        watcher->_signalAlgorithm = dom::AbortAlgorithms::Add(
+          [weakWatcher = CreateWeakPtr(watcher.get())](const Any &)
           {
-            strongWatcher->Destroy();
-          }
-        };
-        dom::AbortAlgorithms::Add(algorithm, *signal);
-        watcher->_signalAlgorithm = krys::move(algorithm);
+            if (auto strongWatcher = weakWatcher.lock())
+            {
+              strongWatcher->Destroy();
+            }
+          },
+          *signal);
       }
     }
 
@@ -217,9 +216,6 @@ namespace krys::boo::html
 
     _active = false;
 
-    if (_signal && _signalAlgorithm)
-    {
-      dom::AbortAlgorithms::Remove(*_signalAlgorithm, *_signal);
-    }
+    _signalAlgorithm.Remove();
   }
 }

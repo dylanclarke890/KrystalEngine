@@ -212,15 +212,12 @@ namespace krys::boo::dom::tests
     SECTION("An abort algorithm keeps it alive, until it's removed")
     {
       bool aborted = false;
-      AbortAlgorithmCallback algorithm = [&](const Any &)
-      {
-        aborted = true;
-      };
+      AbortAlgorithmHandle algorithm;
       WeakPtr<AbortSignal> weakDependent;
       {
         auto dependent = AbortSignal::Any({ShareRef(source)});
         weakDependent = CreateWeakPtr(dependent.get());
-        AbortAlgorithms::Add(algorithm, *dependent);
+        algorithm = AbortAlgorithms::Add([&](const Any &) { aborted = true; }, *dependent);
       }
       REQUIRE(weakDependent);
 
@@ -232,7 +229,7 @@ namespace krys::boo::dom::tests
 
       SECTION("Removing it lets the signal be freed")
       {
-        AbortAlgorithms::Remove(algorithm, *weakDependent);
+        algorithm.Remove();
         html::EventLoop::Current().RunUntilIdle();
         CHECK_FALSE(weakDependent);
       }
@@ -273,6 +270,26 @@ namespace krys::boo::dom::tests
         weakDependent = CreateWeakPtr(dependent.get());
         auto handle = dependent->AddEventListener(event_names::Abort, [](Event &) {});
       }
+      html::EventLoop::Current().RunUntilIdle();
+      CHECK_FALSE(weakDependent);
+    }
+
+    SECTION("A listener's abort steps keep it alive, until the listener is removed")
+    {
+      auto target = CreateRef<EventTarget>();
+      WeakPtr<AbortSignal> weakDependent;
+      EventListenerHandle listener;
+      {
+        auto dependent = AbortSignal::Any({ShareRef(source)});
+        weakDependent = CreateWeakPtr(dependent.get());
+        AddEventListenerOptions options;
+        options.Signal = dependent;
+        listener = target->AddEventListener(event_names::Load, [](Event &) {}, options);
+      }
+      REQUIRE(weakDependent);
+
+      // The listener holds its signal, and removing it takes its abort steps off the signal too.
+      listener.Remove();
       html::EventLoop::Current().RunUntilIdle();
       CHECK_FALSE(weakDependent);
     }

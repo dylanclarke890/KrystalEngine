@@ -25,6 +25,7 @@
 
 #pragma once
 
+#include "Krystal.Booey/DOM/Abort/AbortAlgorithmHandle.hpp"
 #include "Krystal.Booey/DOM/Abort/AbortSignal.hpp"
 #include "Krystal.Booey/DOM/Events/EventTarget.hpp"
 #include "Krystal.Booey/DOM/Types/ExceptionOr.hpp"
@@ -72,8 +73,7 @@ namespace krys::boo::html
     GetEnabledState _getEnabledState;
     bool _active {true};
     bool _isRunningCancelAction {false};
-    RefPtr<AbortSignal> _signal;
-    Maybe<AbortAlgorithmCallback> _signalAlgorithm;
+    AbortAlgorithmHandle _signalAlgorithm;
 
   public:
     CloseWatcher(Document &document, CancelAction &&cancelAction, CloseAction &&closeAction,
