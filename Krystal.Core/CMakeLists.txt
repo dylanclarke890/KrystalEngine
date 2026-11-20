@@ -5,7 +5,6 @@ target_link_libraries(Krystal.Core
     llvm
 
   PRIVATE
-    stb
     RapidJSON rapidjson
     spdlog::spdlog
     # we don't link RapidXML as a library since it's header-only
@@ -144,8 +143,6 @@ target_sources(Krystal.Core
       include/Krystal.Core/IO/Streams/StreamUtils.hpp
       include/Krystal.Core/IO/Common.hpp
       include/Krystal.Core/IO/IFileBackend.hpp
-      include/Krystal.Core/IO/Image.hpp
-      include/Krystal.Core/IO/ImageLoader.hpp
       include/Krystal.Core/IO/Path.hpp
       include/Krystal.Core/IO/VirtualFileSystem.hpp
       
@@ -326,7 +323,6 @@ target_sources(Krystal.Core
     # IO
     src/IO/Backends/NativeFileBackend.cpp
     src/IO/Streams/NativeFileStream.cpp
-    src/IO/ImageLoader.cpp
     src/IO/Path.cpp
     src/IO/VirtualFileSystem.cpp
     

@@ -6,7 +6,6 @@ target_link_libraries(Krystal.Gfx
     Krystal.Text
 
   PRIVATE
-    stb
     Freetype::Freetype
 )
 

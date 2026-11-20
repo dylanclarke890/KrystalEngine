@@ -23,9 +23,6 @@ target_compile_options(Krystal.Core.Tests
     $<$<CXX_COMPILER_ID:MSVC>:/W4 /MP /utf-8>
 )
 
-target_compile_definitions(Krystal.Core.Tests PRIVATE
-    KRYS_CORE_TESTS_DATA_DIR="${CMAKE_CURRENT_SOURCE_DIR}/data")
-
 catch_discover_tests(Krystal.Core.Tests)
 
 target_precompile_headers(Krystal.Core.Tests
@@ -115,7 +112,6 @@ target_sources(Krystal.Core.Tests
   PRIVATE tests/IO/Backends/NativeFileBackend.cpp
 	PRIVATE tests/IO/Streams/NativeFileStream.cpp
 	PRIVATE tests/IO/Streams/MemoryStream.cpp
-	PRIVATE tests/IO/ImageLoader.cpp
 	PRIVATE tests/IO/Path.cpp
 	PRIVATE tests/IO/VirtualFileSystem.cpp
 
