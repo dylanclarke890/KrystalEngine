@@ -31,7 +31,7 @@ namespace krys::boo::tests
     void ScrollTo(AnimationPageFixture &fixture, int32 top) noexcept
     {
       fixture.ById(u8"scroller").SetScrollTop(top);
-      fixture.TestPage->UpdateRendering();
+      fixture.TestFrame->UpdateRendering();
     }
 
     KRYS_NODISCARD CSSAnimation &OnlyAnimation(Element &element) noexcept

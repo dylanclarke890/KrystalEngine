@@ -52,12 +52,11 @@ namespace krys::boo
 {
   class DragData;
   struct DragState;
+  class Frame;
   class FrameSelection;
   class HTMLInputElement;
   class HitTestResult;
   class Image;
-  class LocalFrame;
-  class Page;
   class PlatformMouseEvent;
 
   /// @brief A page's drags and drops: which element a press may drag, starting a drag through the host's
@@ -70,7 +69,7 @@ namespace krys::boo
     KRYS_NON_COPY_MOVABLE(DragController);
 
   private:
-    Page &_page;
+    Frame &_frame;
     UniquePtr<DragClient> _client;
 
     /// @brief The document the mouse was last dragged over.
@@ -91,7 +90,7 @@ namespace krys::boo
     bool _isPerformingDrop {false};
 
   public:
-    DragController(Page &page, UniquePtr<DragClient> &&client) noexcept;
+    DragController(Frame &page, UniquePtr<DragClient> &&client) noexcept;
 
     ~DragController() noexcept;
 
@@ -99,10 +98,10 @@ namespace krys::boo
 
     /// @brief A drag entered or moved over @p frame.
     /// @return The operation a drop there would do, if any.
-    Maybe<DragOperation> DragEnteredOrUpdated(LocalFrame &frame, DragData dragData) noexcept;
+    Maybe<DragOperation> DragEnteredOrUpdated(Frame &frame, DragData dragData) noexcept;
 
     /// @brief A drag left @p frame.
-    void DragExited(LocalFrame &frame, DragData dragData) noexcept;
+    void DragExited(Frame &frame, DragData dragData) noexcept;
 
     /// @brief Drops the drag where it is.
     /// @return Whether the drop was handled.
@@ -171,7 +170,7 @@ namespace krys::boo
     EnumSet<DragSourceAction> DelegateDragSourceAction(const PointI &rootViewPoint) noexcept;
 
     /// @brief The element a press at @p dragOrigin on @p start would drag, noting in @p state what it drags.
-    KRYS_NODISCARD RefPtr<Element> DraggableElement(const LocalFrame *sourceFrame, Element *start,
+    KRYS_NODISCARD RefPtr<Element> DraggableElement(const Frame *sourceFrame, Element *start,
                                                     const PointI &dragOrigin,
                                                     DragState &state) const noexcept;
 
@@ -182,13 +181,12 @@ namespace krys::boo
 
     /// @brief Writes what a drag of @p element (the selection, an image or a link, as @p actionMask says)
     /// carries by default to @p dataTransfer, before `dragstart` lets the page change it.
-    void PrepareForDragStart(LocalFrame &sourceFrame, EnumSet<DragSourceAction> actionMask,
-                             Element &sourceElement, dom::DataTransfer &dataTransfer,
-                             const PointI &dragOrigin) const noexcept;
+    void PrepareForDragStart(Frame &sourceFrame, EnumSet<DragSourceAction> actionMask, Element &sourceElement,
+                             dom::DataTransfer &dataTransfer, const PointI &dragOrigin) const noexcept;
 
     /// @brief Starts the drag @p state describes, handing it to the client.
     /// @return Whether it started.
-    bool StartDrag(LocalFrame &src, const DragState &state, EnumSet<DragOperation> sourceOperationMask,
+    bool StartDrag(Frame &src, const DragState &state, EnumSet<DragOperation> sourceOperationMask,
                    const PlatformMouseEvent &dragEvent, const PointI &dragOrigin,
                    HasNonDefaultPasteboardData hasData) noexcept;
 
@@ -203,17 +201,17 @@ namespace krys::boo
     constexpr static float DragImageAlpha = 0.75f;
 
   private:
-    bool DispatchTextInputEventFor(LocalFrame *innerFrame, const DragData &dragData) noexcept;
+    bool DispatchTextInputEventFor(Frame *innerFrame, const DragData &dragData) noexcept;
 
     bool CanProcessDrag(const DragData &dragData) noexcept;
 
     bool ConcludeEditDrag(const DragData &dragData) noexcept;
 
-    DragHandlingMethod TryDocumentDrag(LocalFrame &frame, const DragData &dragData,
+    DragHandlingMethod TryDocumentDrag(Frame &frame, const DragData &dragData,
                                        EnumSet<DragDestinationAction> destinationActionMask,
                                        Maybe<DragOperation> &dragOperation) noexcept;
 
-    bool TryDHTMLDrag(LocalFrame &frame, const DragData &dragData, Maybe<DragOperation> &operation) noexcept;
+    bool TryDHTMLDrag(Frame &frame, const DragData &dragData, Maybe<DragOperation> &operation) noexcept;
 
     void ClearDragCaret() noexcept;
 
@@ -225,15 +223,15 @@ namespace krys::boo
 
     void DisallowFileAccessIfNeeded(DragData &dragData) noexcept;
 
-    KRYS_NODISCARD static Maybe<HitTestResult> HitTestResultForDragStart(LocalFrame &source, Element &element,
+    KRYS_NODISCARD static Maybe<HitTestResult> HitTestResultForDragStart(Frame &source, Element &element,
                                                                          const PointI &location) noexcept;
 
     KRYS_NODISCARD static bool ShouldUseCachedImageForDragImage(const Image &image) noexcept;
 
-    void DoImageDrag(Element &element, const PointI &dragOrigin, const RectI &layoutRect, LocalFrame &frame,
+    void DoImageDrag(Element &element, const PointI &dragOrigin, const RectI &layoutRect, Frame &frame,
                      PointI &dragImageOffset, const DragState &state) noexcept;
 
-    void DoSystemDrag(DragImage image, const PointI &dragLoc, const PointI &eventPos, LocalFrame &frame,
+    void DoSystemDrag(DragImage image, const PointI &dragLoc, const PointI &eventPos, Frame &frame,
                       const DragState &state) noexcept;
 
     KRYS_NODISCARD DragClient &Client() const noexcept

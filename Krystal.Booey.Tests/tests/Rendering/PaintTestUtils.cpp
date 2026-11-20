@@ -4,24 +4,16 @@
 #include "Krystal.Booey/Graphics/DisplayLists/DisplayListItems.hpp"
 #include "Krystal.Booey/Graphics/DisplayLists/DisplayListRecorderImpl.hpp"
 #include "Krystal.Booey/Graphics/Fonts/Font.hpp"
+#include "Krystal.Booey/Page/Frame.hpp"
 #include "Krystal.Booey/Page/LocalFrameView.hpp"
-#include "Krystal.Booey/Page/Page.hpp"
 #include "Krystal.Core/Strings/CodePointIterator.hpp"
 
 namespace krys::boo::tests
 {
-  PaintFixture::PaintFixture(utf8_string &&markup, SizeI viewSize, bool inPage) noexcept
+  PaintFixture::PaintFixture(utf8_string &&markup, SizeI viewSize) noexcept
       : ResolverFixture(krys::move(markup), style::tests::WithView::No), ViewSize(viewSize)
   {
-    if (inPage)
-    {
-      TestPage = Page::Create();
-      Frame = ShareRefPtr(&TestPage->MainFrame());
-    }
-    else
-    {
-      Frame = LocalFrame::Create();
-    }
+    Frame = boo::Frame::Create();
     Frame->CreateView(ViewSize);
     Frame->SetDocument(ShareRefPtr<boo::Document>(Document.get()));
   }

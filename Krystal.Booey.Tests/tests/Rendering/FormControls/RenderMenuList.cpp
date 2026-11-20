@@ -65,7 +65,7 @@ namespace krys::boo::layout::tests
     {
       mutable RefPtr<RecordingPopupMenu> Popup;
 
-      void AttachRootGraphicsLayer(LocalFrame &, GraphicsLayer *) noexcept final
+      void AttachRootGraphicsLayer(boo::Frame &, GraphicsLayer *) noexcept final
       {
       }
 

@@ -1398,17 +1398,17 @@ namespace krys::ui::tests
 
       // Twice as far apart: twice the scale, with the document's (150, 200) between them at (200, 200).
       touch(pal::PointerAction::Moved, {300, 200}, 2);
-      CHECK(view.GetPage().PageScaleFactor() == 2);
+      CHECK(view.Frame().PageScaleFactor() == 2);
       CHECK(view.ScrollPosition() == PointI(100, 200));
 
       // The scale has its limits.
       touch(pal::PointerAction::Moved, {1'000, 200}, 2);
-      CHECK(view.GetPage().PageScaleFactor() == 5);
+      CHECK(view.Frame().PageScaleFactor() == 5);
       touch(pal::PointerAction::Moved, {110, 200}, 2);
-      CHECK(view.GetPage().PageScaleFactor() == 1);
+      CHECK(view.Frame().PageScaleFactor() == 1);
       touch(pal::PointerAction::Released, {110, 200}, 2);
       touch(pal::PointerAction::Released, {100, 200}, 1);
-      CHECK(view.GetPage().PageScaleFactor() == 1);
+      CHECK(view.Frame().PageScaleFactor() == 1);
     }
 
     SECTION("touch-action: pan-x doesn't pinch")
@@ -1416,7 +1416,7 @@ namespace krys::ui::tests
       touch(pal::PointerAction::Pressed, {100, 125}, 1);
       touch(pal::PointerAction::Pressed, {200, 125}, 2);
       touch(pal::PointerAction::Moved, {300, 125}, 2);
-      CHECK(view.GetPage().PageScaleFactor() == 1);
+      CHECK(view.Frame().PageScaleFactor() == 1);
       CHECK(records == List<std::string> {"pointerdown:panx/touch3", "pointerdown:panx/touch4"});
     }
   }
@@ -2854,16 +2854,16 @@ namespace krys::ui::tests
 
     // A hidden page's update waits, without asking the host to paint each frame.
     auto now = boo::html::EventLoop::Current().Now();
-    view.GetPage().ScheduleRenderingUpdate();
+    view.Frame().ScheduleRenderingUpdate();
     CHECK_FALSE(view.Update(now));
-    CHECK(view.GetPage().IsRenderingUpdateScheduled());
+    CHECK(view.Frame().IsRenderingUpdateScheduled());
 
     view.SetVisible(true);
     CHECK_FALSE(view.Document().Hidden());
     boo::html::EventLoop::Current().RunUntilIdle();
     CHECK(changes == 2);
     CHECK(view.Update(now));
-    CHECK_FALSE(view.GetPage().IsRenderingUpdateScheduled());
+    CHECK_FALSE(view.Frame().IsRenderingUpdateScheduled());
   }
 
   TEST_CASE("View: hands the host the icons the page names", "[UI]")

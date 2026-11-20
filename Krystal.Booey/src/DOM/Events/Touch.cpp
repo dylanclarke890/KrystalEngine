@@ -25,14 +25,14 @@
 
 #include "Krystal.Booey/DOM/Events/Touch.hpp"
 #include "Krystal.Booey/DOM/Events/EventTarget.hpp"
-#include "Krystal.Booey/Page/LocalFrame.hpp"
+#include "Krystal.Booey/Page/Frame.hpp"
 #include "Krystal.Booey/Page/LocalFrameView.hpp"
 
 namespace krys::boo
 {
   namespace
   {
-    KRYS_NODISCARD PointI ContentsOffset(LocalFrame *frame) noexcept
+    KRYS_NODISCARD PointI ContentsOffset(Frame *frame) noexcept
     {
       if (!frame)
       {
@@ -47,7 +47,7 @@ namespace krys::boo
       return frameView->GetScrollPosition().Scaled(scale);
     }
 
-    KRYS_NODISCARD PointD ScaledLocation(LocalFrame *frame, const PointD &pagePosition) noexcept
+    KRYS_NODISCARD PointD ScaledLocation(Frame *frame, const PointD &pagePosition) noexcept
     {
       if (!frame || !frame->View())
       {
@@ -58,7 +58,7 @@ namespace krys::boo
     }
   }
 
-  Ref<Touch> Touch::Create(LocalFrame *frame, EventTarget *target, int32 identifier, const PointD &screenPos,
+  Ref<Touch> Touch::Create(Frame *frame, EventTarget *target, int32 identifier, const PointD &screenPos,
                            const PointD &pagePos, const SizeD &radius, float rotationAngle, float force,
                            double twist) noexcept
   {
@@ -66,7 +66,7 @@ namespace krys::boo
       *new Touch(frame, target, identifier, screenPos, pagePos, radius, rotationAngle, twist, force));
   }
 
-  Touch::Touch(LocalFrame *frame, EventTarget *target, int32 identifier, const PointD &screenPosition,
+  Touch::Touch(Frame *frame, EventTarget *target, int32 identifier, const PointD &screenPosition,
                const PointD &pagePosition, const SizeD &radius, float rotationAngle, double twist,
                float force) noexcept
       : _target(ShareRefPtr(target)), _identifier(identifier),

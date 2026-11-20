@@ -53,9 +53,8 @@
 #include "Krystal.Booey/Loader/Cache/CachedImage.hpp"
 #include "Krystal.Booey/Loader/FrameLoader.hpp"
 #include "Krystal.Booey/Page/Drag/DragState.hpp"
-#include "Krystal.Booey/Page/LocalFrame.hpp"
+#include "Krystal.Booey/Page/Frame.hpp"
 #include "Krystal.Booey/Page/LocalFrameView.hpp"
-#include "Krystal.Booey/Page/Page.hpp"
 #include "Krystal.Booey/Platform/Pasteboard/DragData.hpp"
 #include "Krystal.Booey/Platform/Pasteboard/Pasteboard.hpp"
 #include "Krystal.Booey/Rendering/HitTesting/HitTestRequest.hpp"
@@ -91,11 +90,9 @@ namespace krys::boo
                                 SyntheticClickType::NoTap);
     }
 
-    KRYS_NODISCARD RefPtr<DocumentFragment> DocumentFragmentFromDragData(const DragData &dragData,
-                                                                         LocalFrame &frame,
-                                                                         const dom::SimpleRange &context,
-                                                                         bool allowPlainText,
-                                                                         bool &chosePlainText) noexcept
+    KRYS_NODISCARD RefPtr<DocumentFragment>
+      DocumentFragmentFromDragData(const DragData &dragData, Frame &frame, const dom::SimpleRange &context,
+                                   bool allowPlainText, bool &chosePlainText) noexcept
     {
       chosePlainText = false;
 
@@ -192,7 +189,7 @@ namespace krys::boo
       return ShareRefPtr(host ? host : element);
     }
 
-    KRYS_NODISCARD bool SetSelectionToDragCaret(LocalFrame *frame, VisibleSelection &dragCaret,
+    KRYS_NODISCARD bool SetSelectionToDragCaret(Frame *frame, VisibleSelection &dragCaret,
                                                 const PointI &point) noexcept
     {
       Ref protectedFrame = ShareRef(*frame);
@@ -240,7 +237,7 @@ namespace krys::boo
       return DragOperation::Generic;
     }
 
-    KRYS_NODISCARD bool ImageElementIsDraggable(const HTMLImageElement &, const LocalFrame &) noexcept
+    KRYS_NODISCARD bool ImageElementIsDraggable(const HTMLImageElement &, const Frame &) noexcept
     {
       return true;
     }
@@ -294,7 +291,7 @@ namespace krys::boo
       return view->ContentsToWindow(renderer->AbsoluteBoundingBoxRect());
     }
 
-    KRYS_NODISCARD PointI DragLocForSelectionDrag(LocalFrame &src) noexcept
+    KRYS_NODISCARD PointI DragLocForSelectionDrag(Frame &src) noexcept
     {
       RectI draggingRect = EnclosingRectI(src.Document()->Selection().SelectionBounds());
       int32 xpos = draggingRect.MaxX();
@@ -339,8 +336,8 @@ namespace krys::boo
     }
   }
 
-  DragController::DragController(Page &page, UniquePtr<DragClient> &&client) noexcept
-      : _page(page), _client(krys::move(client))
+  DragController::DragController(Frame &frame, UniquePtr<DragClient> &&client) noexcept
+      : _frame(frame), _client(krys::move(client))
   {
   }
 
@@ -370,7 +367,7 @@ namespace krys::boo
 
   void DragController::ClearDragCaret() noexcept
   {
-    _page.GetDragCaretController().Clear();
+    _frame.GetDragCaretController().Clear();
   }
 
   void DragController::DragEnded() noexcept
@@ -383,7 +380,7 @@ namespace krys::boo
     Client().DragEnded();
   }
 
-  void DragController::DragExited(LocalFrame &frame, DragData dragData) noexcept
+  void DragController::DragExited(Frame &frame, DragData dragData) noexcept
   {
     DisallowFileAccessIfNeeded(dragData);
     if (frame.View())
@@ -402,15 +399,15 @@ namespace krys::boo
   bool DragController::PerformDragOperation(DragData dragData) noexcept
   {
     SetForScope isPerformingDrop(_isPerformingDrop, true);
-    Ref<LocalFrame> mainFrame = ShareRef(_page.MainFrame());
-    if (!mainFrame->Document())
+    Ref<Frame> frame = ShareRef(_frame);
+    if (!frame->Document())
     {
       return false;
     }
 
-    IgnoreSelectionChangeForScope ignoreSelectionChanges {*mainFrame};
+    IgnoreSelectionChangeForScope ignoreSelectionChanges {*frame};
 
-    _documentUnderMouse = ShareRefPtr(mainFrame->DocumentAtPoint(dragData.ClientPosition()));
+    _documentUnderMouse = ShareRefPtr(frame->DocumentAtPoint(dragData.ClientPosition()));
 
     DisallowFileAccessIfNeeded(dragData);
 
@@ -419,9 +416,9 @@ namespace krys::boo
     {
       Client().WillPerformDragDestinationAction(DragDestinationAction::DHTML, dragData);
       bool preventedDefault = false;
-      if (mainFrame->View())
+      if (frame->View())
       {
-        preventedDefault = mainFrame->GetEventHandler().PerformDragAndDrop(
+        preventedDefault = frame->GetEventHandler().PerformDragAndDrop(
           CreateMouseEvent(dragData), Pasteboard::Create(dragData), dragData.DraggingSourceOperationMask(),
           dragData.ContainsFiles());
       }
@@ -462,7 +459,7 @@ namespace krys::boo
     _documentUnderMouse = krys::move(newDocument);
   }
 
-  Maybe<DragOperation> DragController::DragEnteredOrUpdated(LocalFrame &frame, DragData dragData) noexcept
+  Maybe<DragOperation> DragController::DragEnteredOrUpdated(Frame &frame, DragData dragData) noexcept
   {
     auto point = frame.View()->WindowToContents(dragData.ClientPosition());
     auto hitTestResult = HitTestResult(LayoutPoint(point));
@@ -505,7 +502,7 @@ namespace krys::boo
     }
   }
 
-  DragHandlingMethod DragController::TryDocumentDrag(LocalFrame &frame, const DragData &dragData,
+  DragHandlingMethod DragController::TryDocumentDrag(Frame &frame, const DragData &dragData,
                                                      EnumSet<DragDestinationAction> destinationActionMask,
                                                      Maybe<DragOperation> &dragOperation) noexcept
   {
@@ -571,7 +568,7 @@ namespace krys::boo
 
       if (!_fileInputElementUnderMouse)
       {
-        _page.GetDragCaretController().SetCaretPosition(
+        _frame.GetDragCaretController().SetCaretPosition(
           _documentUnderMouse->Frame()->VisiblePositionForPoint(point));
       }
       else
@@ -613,7 +610,7 @@ namespace krys::boo
         return DragHandlingMethod::UploadFile;
       }
 
-      if (_page.GetDragCaretController().IsContentRichlyEditable())
+      if (_frame.GetDragCaretController().IsContentRichlyEditable())
       {
         return DragHandlingMethod::EditRichText;
       }
@@ -636,9 +633,9 @@ namespace krys::boo
     return _dragSourceAction;
   }
 
-  bool DragController::DispatchTextInputEventFor(LocalFrame *innerFrame, const DragData &dragData) noexcept
+  bool DragController::DispatchTextInputEventFor(Frame *innerFrame, const DragData &dragData) noexcept
   {
-    auto &dragCaretController = _page.GetDragCaretController();
+    auto &dragCaretController = _frame.GetDragCaretController();
     krys_debug_assert(dragCaretController.HasCaret());
     utf8_string text = dragCaretController.IsContentRichlyEditable() ? utf8_string() : dragData.AsPlainText();
     auto target = innerFrame->Document()->GetEditor().FindEventTargetFrom(
@@ -668,10 +665,10 @@ namespace krys::boo
     {
       return false;
     }
-    RefPtr<LocalFrame> innerFrame = ShareRefPtr(element->NodeDocument().Frame());
+    RefPtr<Frame> innerFrame = ShareRefPtr(element->NodeDocument().Frame());
     krys_debug_assert(innerFrame);
 
-    auto &dragCaretController = _page.GetDragCaretController();
+    auto &dragCaretController = _frame.GetDragCaretController();
     if (dragCaretController.HasCaret() && !DispatchTextInputEventFor(innerFrame.get(), dragData))
     {
       return true;
@@ -795,14 +792,13 @@ namespace krys::boo
   // FIXME: Colour inputs (ForColorControl), with dragging colours.
   bool DragController::CanProcessDrag(const DragData &dragData) noexcept
   {
-    auto &mainFrame = _page.MainFrame();
-    if (!mainFrame.View() || !mainFrame.Document() || !mainFrame.Document()->GetRenderView())
+    if (!_frame.View() || !_frame.Document() || !_frame.Document()->GetRenderView())
     {
       return false;
     }
-    PointI point = mainFrame.View()->WindowToContents(dragData.ClientPosition());
+    PointI point = _frame.View()->WindowToContents(dragData.ClientPosition());
 
-    HitTestResult result = mainFrame.GetEventHandler().HitTestResultAtPoint(
+    HitTestResult result = _frame.GetEventHandler().HitTestResultAtPoint(
       LayoutPoint(point), {HitTestRequest::Type::ReadOnly, HitTestRequest::Type::Active,
                            HitTestRequest::Type::AllowChildFrameContent});
 
@@ -841,7 +837,7 @@ namespace krys::boo
     return true;
   }
 
-  bool DragController::TryDHTMLDrag(LocalFrame &frame, const DragData &dragData,
+  bool DragController::TryDHTMLDrag(Frame &frame, const DragData &dragData,
                                     Maybe<DragOperation> &operation) noexcept
   {
     krys_debug_assert(_documentUnderMouse);
@@ -879,7 +875,7 @@ namespace krys::boo
 
   // FIXME: Colour inputs, with dragging colours. (No attachments or models, which are Cocoa's, and no
   // image overlay text; see DIFFERENCES.md.)
-  RefPtr<Element> DragController::DraggableElement(const LocalFrame *sourceFrame, Element *startElement,
+  RefPtr<Element> DragController::DraggableElement(const Frame *sourceFrame, Element *startElement,
                                                    const PointI &dragOrigin, DragState &state) const noexcept
   {
     state.Type = sourceFrame->Document()->Selection().Contains(LayoutPoint(dragOrigin))
@@ -931,7 +927,7 @@ namespace krys::boo
     return selectionDragElement;
   }
 
-  void DragController::PrepareForDragStart(LocalFrame &source, EnumSet<boo::DragSourceAction> actionMask,
+  void DragController::PrepareForDragStart(Frame &source, EnumSet<boo::DragSourceAction> actionMask,
                                            Element &element, dom::DataTransfer &dataTransfer,
                                            const PointI &dragOrigin) const noexcept
   {
@@ -972,7 +968,7 @@ namespace krys::boo
     }
   }
 
-  Maybe<HitTestResult> DragController::HitTestResultForDragStart(LocalFrame &source, Element &element,
+  Maybe<HitTestResult> DragController::HitTestResultForDragStart(Frame &source, Element &element,
                                                                  const PointI &location) noexcept
   {
     if (!source.View() || !source.Document() || !source.Document()->GetRenderView())
@@ -1000,7 +996,7 @@ namespace krys::boo
 
   // FIXME: Touch drags, which upstream refuses on GTK, with touch drags. The page has no device scale factor
   // of its own: the document's is used.
-  bool DragController::StartDrag(LocalFrame &src, const DragState &state,
+  bool DragController::StartDrag(Frame &src, const DragState &state,
                                  EnumSet<DragOperation> sourceOperationMask,
                                  const PlatformMouseEvent &dragEvent, const PointI &dragOrigin,
                                  HasNonDefaultPasteboardData hasData) noexcept
@@ -1183,8 +1179,7 @@ namespace krys::boo
   }
 
   void DragController::DoImageDrag(Element &element, const PointI &dragOrigin, const RectI &layoutRect,
-                                   LocalFrame &frame, PointI &dragImageOffset,
-                                   const DragState &state) noexcept
+                                   Frame &frame, PointI &dragImageOffset, const DragState &state) noexcept
   {
     PointI mouseDownPoint = dragOrigin;
     DragImage dragImage;
@@ -1244,12 +1239,12 @@ namespace krys::boo
 
   // Booey has one frame, whose view is the root view: its window coordinates are the root view's.
   void DragController::DoSystemDrag(DragImage image, const PointI &dragLoc, const PointI &eventPos,
-                                    LocalFrame &frame, const DragState &state) noexcept
+                                    Frame &frame, const DragState &state) noexcept
   {
     _didInitiateDrag = true;
     _dragInitiator = ShareRefPtr(frame.Document());
     // Protect this frame and view, as a load may occur mid drag and attempt to unload this frame
-    Ref<LocalFrame> mainFrame = ShareRef(_page.MainFrame());
+    Ref<Frame> protectedFrame = ShareRef(_frame);
     RefPtr<LocalFrameView> frameView = ShareRefPtr(frame.View());
 
     DragItem item;
@@ -1301,7 +1296,7 @@ namespace krys::boo
         item.Url = frame.Document()->CompleteUrl(link->GetAttribute(u8"href").value_or(DOMString()));
       }
     }
-    Client().StartDrag(krys::move(item), *state.DataTransfer, *mainFrame);
+    Client().StartDrag(krys::move(item), *state.DataTransfer, *protectedFrame);
   }
 
   const SizeI &DragController::MaxDragImageSize() noexcept
@@ -1326,8 +1321,7 @@ namespace krys::boo
   // Manual drag caret manipulation
   void DragController::PlaceDragCaret(const PointI &windowPoint) noexcept
   {
-    auto &mainFrame = _page.MainFrame();
-    MouseMovedIntoDocument(ShareRefPtr(mainFrame.DocumentAtPoint(windowPoint)));
+    MouseMovedIntoDocument(ShareRefPtr(_frame.DocumentAtPoint(windowPoint)));
     if (!_documentUnderMouse)
     {
       return;
@@ -1340,6 +1334,6 @@ namespace krys::boo
     }
     PointI framePoint = frameView->WindowToContents(windowPoint);
 
-    _page.GetDragCaretController().SetCaretPosition(frame->VisiblePositionForPoint(framePoint));
+    _frame.GetDragCaretController().SetCaretPosition(frame->VisiblePositionForPoint(framePoint));
   }
 }

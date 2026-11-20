@@ -36,8 +36,8 @@
 namespace krys::boo
 {
   class Element;
+  class Frame;
   class LocalFrameView;
-  class Page;
   class RenderBox;
   class SVGImageChromeClient;
   class SVGImageForContainer;
@@ -51,7 +51,7 @@ namespace krys::boo
     friend class SVGImageForContainer;
 
   private:
-    RefPtr<Page> _page;
+    RefPtr<Frame> _frame;
     Timer _startAnimationTimer;
     SizeF _intrinsicSize;
 
@@ -98,9 +98,9 @@ namespace krys::boo
 
     void ScheduleStartAnimation() noexcept;
 
-    KRYS_NODISCARD Page *InternalPage() noexcept
+    KRYS_NODISCARD Frame *InternalFrame() noexcept
     {
-      return _page.get();
+      return _frame.get();
     }
 
     KRYS_NODISCARD RefPtr<SVGSvgElement> RootElement() const noexcept;
@@ -134,7 +134,7 @@ namespace krys::boo
 
     KRYS_NODISCARD bool CurrentFrameIsComplete() const noexcept final
     {
-      return static_cast<bool>(_page);
+      return static_cast<bool>(_frame);
     }
 
     ImageDrawResult Draw(GraphicsContext &, const RectF &destination, const RectF &source,

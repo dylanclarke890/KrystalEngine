@@ -47,9 +47,8 @@
 #include "Krystal.Booey/HTML/Images/ImageDocument.hpp"
 #include "Krystal.Booey/Input/EventHandler.hpp"
 #include "Krystal.Booey/Page/Clients/ChromeClient.hpp"
+#include "Krystal.Booey/Page/Frame.hpp"
 #include "Krystal.Booey/Page/LocalDOMWindow.hpp"
-#include "Krystal.Booey/Page/LocalFrame.hpp"
-#include "Krystal.Booey/Page/Page.hpp"
 #include "Krystal.Booey/Page/Scrolling/ScrollAnchoringController.hpp"
 #include "Krystal.Booey/Page/Scrolling/ScrollBehavior.hpp"
 #include "Krystal.Booey/Page/Scrolling/ScrollSnapOffsetsInfo.hpp"
@@ -85,7 +84,7 @@
 
 namespace krys::boo
 {
-  LocalFrameView::LocalFrameView(LocalFrame &frame) noexcept
+  LocalFrameView::LocalFrameView(boo::Frame &frame) noexcept
       : _frame(CreateWeakPtr(&frame)), _mediaType(css::mq::ScreenAtom()), _layoutContext(*this),
         _delayedScrollToFocusedElementTimer(*this, &LocalFrameView::ScrollToFocusedElementTimerFired)
   {
@@ -96,16 +95,14 @@ namespace krys::boo
 
   namespace
   {
-    /// @brief Whether a new view for the frame starts shown: when its page is visible, or always for a frame
-    /// without a page, as nothing would show it.
-    KRYS_NODISCARD bool NewViewStartsShown(const LocalFrame &frame) noexcept
+    /// @brief Whether a new view for the frame starts shown: when the frame is visible.
+    KRYS_NODISCARD bool NewViewStartsShown(const boo::Frame &frame) noexcept
     {
-      auto *page = frame.GetPage();
-      return !page || page->IsVisible();
+      return frame.IsVisible();
     }
   }
 
-  Ref<LocalFrameView> LocalFrameView::Create(LocalFrame &frame) noexcept
+  Ref<LocalFrameView> LocalFrameView::Create(boo::Frame &frame) noexcept
   {
     Ref<LocalFrameView> view = AdoptRef(*new LocalFrameView(frame));
     if (NewViewStartsShown(frame))
@@ -115,7 +112,7 @@ namespace krys::boo
     return view;
   }
 
-  Ref<LocalFrameView> LocalFrameView::Create(LocalFrame &frame, const SizeI &initialSize) noexcept
+  Ref<LocalFrameView> LocalFrameView::Create(boo::Frame &frame, const SizeI &initialSize) noexcept
   {
     Ref<LocalFrameView> view = AdoptRef(*new LocalFrameView(frame));
     view->_frameRect = RectI(view->_frameRect.Location(), initialSize);
@@ -137,7 +134,7 @@ namespace krys::boo
     _selfVisible = false;
   }
 
-  LocalFrame &LocalFrameView::Frame() const noexcept
+  boo::Frame &LocalFrameView::Frame() const noexcept
   {
     krys_assert_msg(_frame, "a view doesn't outlive its frame");
     return *_frame;
@@ -204,10 +201,7 @@ namespace krys::boo
     // The host paints the damage in its next frame.
     if (auto *frame = _frame.get())
     {
-      if (auto *page = frame->GetPage())
-      {
-        page->GetChromeClient().InvalidateContentsAndRootView(damage);
-      }
+      frame->GetChromeClient().InvalidateContentsAndRootView(damage);
       if (auto *document = frame->Document())
       {
         document->ScheduleRenderingUpdate({});
@@ -1023,14 +1017,14 @@ namespace krys::boo
   void LocalFrameView::InvalidatePanScrollIcon(const PointI &iconPosition) noexcept
   {
     auto *frame = _frame.get();
-    auto *page = frame ? frame->GetPage() : nullptr;
-    if (page)
+    if (!frame)
     {
-      page->GetChromeClient().InvalidateContentsAndRootView(RectI(iconPosition.X() - PanScrollIconSize / 2,
-                                                                  iconPosition.Y() - PanScrollIconSize / 2,
-                                                                  PanScrollIconSize, PanScrollIconSize));
+      return;
     }
-    if (auto *document = frame ? frame->Document() : nullptr)
+    frame->GetChromeClient().InvalidateContentsAndRootView(RectI(iconPosition.X() - PanScrollIconSize / 2,
+                                                                 iconPosition.Y() - PanScrollIconSize / 2,
+                                                                 PanScrollIconSize, PanScrollIconSize));
+    if (auto *document = frame->Document())
     {
       document->ScheduleRenderingUpdate({});
     }
@@ -1384,9 +1378,9 @@ namespace krys::boo
   {
     auto style = [this]
     {
-      if (auto *page = Frame().GetPage())
+      if (auto *frame = &Frame())
       {
-        if (auto clientStyle = page->GetChromeClient().PreferredScrollbarOverlayStyle())
+        if (auto clientStyle = frame->GetChromeClient().PreferredScrollbarOverlayStyle())
         {
           return *clientStyle;
         }
@@ -3250,8 +3244,7 @@ namespace krys::boo
       return;
     }
 
-    auto *page = Frame().GetPage();
-    if (page && page->GetChromeClient().IsSVGImageChromeClient())
+    if (Frame().GetChromeClient().IsSVGImageChromeClient())
     {
       return;
     }
@@ -3540,23 +3533,21 @@ namespace krys::boo
   RectI LocalFrameView::ContentsToScreen(const RectI &rect) const noexcept
   {
     auto *frame = _frame.get();
-    auto *page = frame ? frame->GetPage() : nullptr;
-    if (!page)
+    if (!frame)
     {
       return {};
     }
-    return page->GetChromeClient().RootViewToScreen(ContentsToWindow(rect));
+    return frame->GetChromeClient().RootViewToScreen(ContentsToWindow(rect));
   }
 
   PointI LocalFrameView::ScreenToContents(const PointI &point) const noexcept
   {
     auto *frame = _frame.get();
-    auto *page = frame ? frame->GetPage() : nullptr;
-    if (!page)
+    if (!frame)
     {
       return {};
     }
-    return WindowToContents(page->GetChromeClient().ScreenToRootView(point));
+    return WindowToContents(frame->GetChromeClient().ScreenToRootView(point));
   }
 
   void LocalFrameView::ResetScrollAnchor() noexcept

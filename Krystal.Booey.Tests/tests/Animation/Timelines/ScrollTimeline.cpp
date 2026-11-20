@@ -41,7 +41,7 @@ namespace krys::boo::tests
       auto &scroller = fixture.ById(u8"scroller");
       scroller.SetScrollTop(top);
       scroller.SetScrollLeft(left);
-      fixture.TestPage->UpdateRendering();
+      fixture.TestFrame->UpdateRendering();
     }
   }
 
@@ -129,7 +129,7 @@ namespace krys::boo::tests
     auto animation = result.ReleaseValue();
 
     // The animation's duration is the timeline's, and its start time is aligned with the scroller's start.
-    fixture.TestPage->UpdateRendering();
+    fixture.TestFrame->UpdateRendering();
     CHECK_FALSE(animation->Pending());
     CHECK(Percentage(animation->StartTime()) == 0);
     CHECK(fixture.Opacity(u8"box") == Catch::Approx(0));

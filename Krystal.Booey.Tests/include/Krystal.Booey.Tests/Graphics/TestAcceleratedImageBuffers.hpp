@@ -54,7 +54,7 @@ namespace krys::boo::tests
   public:
     mutable int32 BuffersMade {0};
 
-    void AttachRootGraphicsLayer(LocalFrame &, GraphicsLayer *) noexcept override
+    void AttachRootGraphicsLayer(boo::Frame &, GraphicsLayer *) noexcept override
     {
     }
 

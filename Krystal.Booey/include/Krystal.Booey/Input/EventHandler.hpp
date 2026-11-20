@@ -73,7 +73,7 @@ namespace krys::boo
 {
   class AutoscrollController;
   struct DragState;
-  class LocalFrame;
+  class Frame;
   class LocalFrameView;
   class MouseEventWithHitTestResults;
   class Pasteboard;
@@ -206,7 +206,7 @@ namespace krys::boo
     };
 
   private:
-    LocalFrame &_frame;
+    Frame &_frame;
 
     RefPtr<Node> _mousePressNode;
     bool _mousePressed {false};
@@ -274,7 +274,7 @@ namespace krys::boo
     List<PointerId> _endedTouchPointerIds;
 
   public:
-    explicit EventHandler(LocalFrame &frame) noexcept;
+    explicit EventHandler(Frame &frame) noexcept;
 
     ~EventHandler() noexcept;
 

@@ -3,7 +3,7 @@
 #include "Krystal.Booey.Tests/Rendering/PaintTestUtils.hpp"
 #include "Krystal.Booey.Tests/Style/ResolverTestUtils.hpp"
 #include "Krystal.Booey/DOM/Nodes/PseudoElement.hpp"
-#include "Krystal.Booey/Page/Page.hpp"
+#include "Krystal.Booey/Page/Frame.hpp"
 #include "Krystal.Booey/Rendering/Iterators/RenderChildIterator.hpp"
 #include "Krystal.Booey/Rendering/RenderInline.hpp"
 #include "Krystal.Booey/Rendering/RenderView.hpp"
@@ -339,8 +339,8 @@ namespace krys::boo::tests
                    "RenderTreeBuilder: destroyed renderers are kept until the rendering update is over",
                    "[Rendering][RenderTreeBuilder]")
   {
-    PaintFixture fixture(u8"<!DOCTYPE html><div id=a>x</div>", {200, 100}, true);
-    fixture.TestPage->UpdateRendering();
+    PaintFixture fixture(u8"<!DOCTYPE html><div id=a>x</div>");
+    fixture.Frame->UpdateRendering();
     Ref<Element> element = ShareRef(fixture.ById(u8"a"));
     auto *renderer = element->Renderer();
     REQUIRE(renderer);
@@ -354,6 +354,6 @@ namespace krys::boo::tests
     CHECK_FALSE(element->Renderer());
     CHECK_FALSE(weak);
     CHECK(renderer->BeingDestroyed());
-    fixture.TestPage->UpdateRendering();
+    fixture.Frame->UpdateRendering();
   }
 }

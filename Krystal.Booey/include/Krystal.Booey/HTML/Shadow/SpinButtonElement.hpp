@@ -33,7 +33,7 @@
 
 namespace krys::boo
 {
-  class Page;
+  class Frame;
 }
 
 namespace krys::boo::html
@@ -72,7 +72,7 @@ namespace krys::boo::html
     SpinButtonOwner *_spinButtonOwner;
     bool _capturing {false};
     // The page told of popups while the mouse is captured.
-    WeakPtr<boo::Page> _popupObservedPage;
+    WeakPtr<boo::Frame> _popupObservedFrame;
     UpDownState _upDownState {UpDownState::Indeterminate};
     UpDownState _pressStartingState {UpDownState::Indeterminate};
     Timer _repeatingTimer;

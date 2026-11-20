@@ -34,9 +34,8 @@
 #include "Krystal.Booey/Graphics/GraphicsContext.hpp"
 #include "Krystal.Booey/Graphics/ImageBuffers/ImageBuffer.hpp"
 #include "Krystal.Booey/Graphics/Paths/Path.hpp"
-#include "Krystal.Booey/Page/LocalFrame.hpp"
+#include "Krystal.Booey/Page/Frame.hpp"
 #include "Krystal.Booey/Page/LocalFrameView.hpp"
-#include "Krystal.Booey/Page/Page.hpp"
 #include "Krystal.Booey/Rendering/RenderObject.hpp"
 #include "Krystal.Core/Geometry/Rect.hpp"
 
@@ -48,12 +47,12 @@ namespace krys::boo
     {
       KRYS_NON_COPY_MOVABLE(ScopedFramePaintingState);
 
-      const LocalFrame &Frame;
+      const boo::Frame &Frame;
       const boo::Node *Node;
       const EnumSet<boo::PaintBehavior> PaintBehavior;
       const boo::Color BackgroundColor;
 
-      ScopedFramePaintingState(LocalFrame &frame, boo::Node *node) noexcept
+      ScopedFramePaintingState(boo::Frame &frame, boo::Node *node) noexcept
           : Frame(frame), Node(node), PaintBehavior(frame.View()->GetPaintBehavior()),
             BackgroundColor(frame.View()->BaseBackgroundColor())
       {
@@ -69,7 +68,7 @@ namespace krys::boo
     };
   }
 
-  RefPtr<ImageBuffer> SnapshotFrameRect(LocalFrame &frame, const RectI &imageRect,
+  RefPtr<ImageBuffer> SnapshotFrameRect(Frame &frame, const RectI &imageRect,
                                         SnapshotOptions options) noexcept
   {
     List<RectF> clipRects;
@@ -77,15 +76,10 @@ namespace krys::boo
   }
 
   // FIXME: The page's scale when it delegates scaling to the host, once pages can.
-  RefPtr<ImageBuffer> SnapshotFrameRectWithClip(LocalFrame &frame, const RectI &imageRect,
+  RefPtr<ImageBuffer> SnapshotFrameRectWithClip(Frame &frame, const RectI &imageRect,
                                                 const List<RectF> &clipRects,
                                                 SnapshotOptions options) noexcept
   {
-    if (!frame.GetPage())
-    {
-      return nullptr;
-    }
-
     Ref<boo::Document> document = ShareRef(*frame.Document());
     (void)document->UpdateLayout();
 
@@ -174,7 +168,7 @@ namespace krys::boo
     return buffer;
   }
 
-  RefPtr<ImageBuffer> SnapshotSelection(LocalFrame &frame, SnapshotOptions options) noexcept
+  RefPtr<ImageBuffer> SnapshotSelection(Frame &frame, SnapshotOptions options) noexcept
   {
     auto &selection = frame.Document()->Selection();
 
@@ -195,7 +189,7 @@ namespace krys::boo
     return SnapshotFrameRect(frame, EnclosingRectI(selectionBounds), krys::move(options));
   }
 
-  RefPtr<ImageBuffer> SnapshotNode(LocalFrame &frame, boo::Node &node, SnapshotOptions options) noexcept
+  RefPtr<ImageBuffer> SnapshotNode(Frame &frame, boo::Node &node, SnapshotOptions options) noexcept
   {
     if (!node.Renderer())
     {

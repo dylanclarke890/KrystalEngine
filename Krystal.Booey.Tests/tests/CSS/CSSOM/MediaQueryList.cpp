@@ -7,8 +7,8 @@
 #include "Krystal.Booey/DOM/Events/EventListener.hpp"
 #include "Krystal.Booey/DOM/Nodes/HTMLDocument.hpp"
 #include "Krystal.Booey/HTML/Parser/DocumentParser.hpp"
+#include "Krystal.Booey/Page/Frame.hpp"
 #include "Krystal.Booey/Page/LocalDOMWindow.hpp"
-#include "Krystal.Booey/Page/LocalFrame.hpp"
 #include "Krystal.Booey/Page/LocalFrameView.hpp"
 
 namespace krys::boo::css::tests
@@ -51,9 +51,9 @@ namespace krys::boo::css::tests
     };
 
     /// @brief Shows @p document in a new frame with an 800x600 view.
-    KRYS_NODISCARD Ref<LocalFrame> ShowInFrame(Document &document) noexcept
+    KRYS_NODISCARD Ref<boo::Frame> ShowInFrame(Document &document) noexcept
     {
-      auto frame = LocalFrame::Create();
+      auto frame = boo::Frame::Create();
       frame->CreateView({800, 600});
       frame->SetDocument(ShareRefPtr(&document));
       return frame;
@@ -63,8 +63,8 @@ namespace krys::boo::css::tests
     struct MatchMediaFixture : ValueFixture
     {
       Ref<HTMLDocument> Document {Parse(u8"<!DOCTYPE html><p>")};
-      MediaPage Media {*Document};
-      Ref<LocalFrame> Frame {ShareRef(Media.Frame())};
+      MediaFrame Media {*Document};
+      Ref<boo::Frame> Frame {ShareRef(Media.Frame())};
 
       /// @brief Resizes the view to be @p width wide.
       void Resize(int32 width)

@@ -46,7 +46,7 @@
 namespace krys::boo
 {
   class Document;
-  class LocalFrame;
+  class Frame;
 
   template <typename T>
   using ResourceErrorOr = Expected<T, net::ResourceError>;
@@ -141,7 +141,7 @@ namespace krys::boo
 
     KRYS_NODISCARD bool ShouldPerformImageLoad(const net::Url &) const noexcept;
 
-    KRYS_NODISCARD LocalFrame *Frame() const noexcept; // Can be null
+    KRYS_NODISCARD boo::Frame *Frame() const noexcept; // Can be null
 
     KRYS_NODISCARD boo::Document *GetDocument() const noexcept; // Can be null
 

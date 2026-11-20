@@ -9,9 +9,8 @@
 #include "Krystal.Booey/Input/EventHandler.hpp"
 #include "Krystal.Booey/Input/PlatformTouchEvent.hpp"
 #include "Krystal.Booey/Input/PointerCaptureController.hpp"
+#include "Krystal.Booey/Page/Frame.hpp"
 #include "Krystal.Booey/Page/LocalDOMWindow.hpp"
-#include "Krystal.Booey/Page/LocalFrame.hpp"
-#include "Krystal.Booey/Page/Page.hpp"
 #include <string>
 
 namespace krys::boo::tests
@@ -84,8 +83,7 @@ namespace krys::boo::tests
 
       explicit TouchFixture(bool recordPointerMoves = true) noexcept
           : PaintFixture(u8"<!DOCTYPE html><style>body{margin:0}div{width:100px;height:50px}</style>"
-                         u8"<div id=a></div><div id=b></div>",
-                         {200, 100}, true)
+                         u8"<div id=a></div><div id=b></div>")
       {
         (void)Document->UpdateLayout();
         // Capturing at the document sees the events that don't bubble too.
@@ -354,8 +352,7 @@ namespace krys::boo::tests
   TEST_CASE("EventHandler: touches in a document with no touch or pointer listener", "[Page][TouchEvent]")
   {
     PaintFixture fixture(u8"<!DOCTYPE html><style>body{margin:0}div{width:100px;height:50px}</style>"
-                         u8"<div id=a></div>",
-                         {200, 100}, true);
+                         u8"<div id=a></div>");
     (void)fixture.Document->UpdateLayout();
     auto &handler = fixture.Frame->GetEventHandler();
     auto touch = [&](Type type, State state)

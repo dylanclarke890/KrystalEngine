@@ -12,7 +12,7 @@
 #include "Krystal.Booey/Input/EventHandler.hpp"
 #include "Krystal.Booey/Input/PlatformKeyboardEvent.hpp"
 #include "Krystal.Booey/Page/Clients/ChromeClient.hpp"
-#include "Krystal.Booey/Page/LocalFrame.hpp"
+#include "Krystal.Booey/Page/Frame.hpp"
 
 namespace krys::boo::html::tests
 {
@@ -30,7 +30,7 @@ namespace krys::boo::html::tests
       DOMString Message;
       uint32 ShowCount {0};
 
-      void AttachRootGraphicsLayer(LocalFrame &, GraphicsLayer *) noexcept final
+      void AttachRootGraphicsLayer(boo::Frame &, GraphicsLayer *) noexcept final
       {
       }
 
@@ -61,7 +61,7 @@ namespace krys::boo::html::tests
       }
     };
 
-    void PressEscape(LocalFrame &frame) noexcept
+    void PressEscape(boo::Frame &frame) noexcept
     {
       (void)frame.GetEventHandler().KeyEvent(PlatformKeyboardEvent(PlatformEvent::Type::KeyDown, u8"", u8"",
                                                                    u8"Escape", u8"", u8"", 0, false, false,

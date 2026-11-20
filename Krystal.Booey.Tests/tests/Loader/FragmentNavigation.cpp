@@ -164,8 +164,8 @@ namespace krys::boo::tests
 
   TEST_CASE("A document's own fragment is scrolled to once it's parsed", "[Loader][FragmentNavigation]")
   {
-    auto page = Page::Create();
-    auto &frame = page->MainFrame();
+    auto page = boo::Frame::Create();
+    auto &frame = *page;
     frame.CreateView({400, 300});
     auto document = CreateRef<HTMLDocument>();
     document->SetUrl(net::Url(u8"https://example.com/page.html#section"));

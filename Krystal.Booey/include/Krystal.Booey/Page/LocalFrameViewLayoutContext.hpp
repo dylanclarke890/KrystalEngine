@@ -45,7 +45,7 @@
 namespace krys::boo
 {
   class Document;
-  class LocalFrame;
+  class Frame;
   class LocalFrameView;
   class RenderBlock;
   class RenderBlockFlow;
@@ -305,7 +305,7 @@ namespace krys::boo
       return _frameView;
     }
 
-    KRYS_NODISCARD LocalFrame &Frame() const noexcept;
+    KRYS_NODISCARD boo::Frame &Frame() const noexcept;
 
     KRYS_NODISCARD boo::Document *Document() const noexcept;
 

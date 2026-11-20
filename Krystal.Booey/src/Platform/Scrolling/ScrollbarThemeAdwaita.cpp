@@ -30,9 +30,8 @@
 #include "Krystal.Booey/Graphics/GraphicsContextStateSaver.hpp"
 #include "Krystal.Booey/Graphics/Paths/Path.hpp"
 #include "Krystal.Booey/Input/PlatformMouseEvent.hpp"
-#include "Krystal.Booey/Page/LocalFrame.hpp"
+#include "Krystal.Booey/Page/Frame.hpp"
 #include "Krystal.Booey/Page/LocalFrameView.hpp"
-#include "Krystal.Booey/Page/Page.hpp"
 #include "Krystal.Booey/Platform/Scrolling/ScrollableArea.hpp"
 #include "Krystal.Booey/Platform/Scrolling/Scrollbar.hpp"
 
@@ -92,14 +91,14 @@ namespace krys::boo
     }
     theme._usesOverlayScrollbars = overlay;
 
-    Page::ForEachPage(
-      [](Page &page)
+    Frame::ForEachFrame(
+      [](Frame &frame)
       {
-        if (auto *view = page.MainFrame().View())
+        if (auto *view = frame.View())
         {
           view->ForEachScrollableArea([](ScrollableArea &area) { area.ScrollbarStyleChanged(); });
         }
-        page.ScheduleRenderingUpdate();
+        frame.ScheduleRenderingUpdate();
       });
   }
 

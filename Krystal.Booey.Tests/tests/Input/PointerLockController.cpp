@@ -13,10 +13,9 @@
 #include "Krystal.Booey/Input/PlatformWheelEvent.hpp"
 #include "Krystal.Booey/Input/PointerCaptureController.hpp"
 #include "Krystal.Booey/Page/Clients/ChromeClient.hpp"
+#include "Krystal.Booey/Page/Frame.hpp"
 #include "Krystal.Booey/Page/LocalDOMWindow.hpp"
-#include "Krystal.Booey/Page/LocalFrame.hpp"
 #include "Krystal.Booey/Page/LocalFrameView.hpp"
-#include "Krystal.Booey/Page/Page.hpp"
 #include <string>
 
 namespace krys::boo::tests
@@ -37,7 +36,7 @@ namespace krys::boo::tests
       uint32 Locks {0};
       uint32 Unlocks {0};
 
-      void AttachRootGraphicsLayer(LocalFrame &, GraphicsLayer *) noexcept final
+      void AttachRootGraphicsLayer(boo::Frame &, GraphicsLayer *) noexcept final
       {
       }
 
@@ -99,7 +98,6 @@ namespace krys::boo::tests
     struct LockFixture : style::tests::ResolverFixture
     {
       LockChromeClient *Chrome {nullptr};
-      RefPtr<Page> TestPage;
       List<std::string> Records;
 
       LockFixture() noexcept
@@ -109,8 +107,7 @@ namespace krys::boo::tests
       {
         auto chrome = CreateUnique<LockChromeClient>();
         Chrome = chrome.get();
-        TestPage = Page::Create(krys::move(chrome));
-        Frame = ShareRefPtr(&TestPage->MainFrame());
+        Frame = boo::Frame::Create(krys::move(chrome));
         Frame->CreateView({200, 200});
         Frame->SetDocument(ShareRefPtr<boo::Document>(Document.get()));
         (void)Document->UpdateLayout();
@@ -127,7 +124,7 @@ namespace krys::boo::tests
 
       KRYS_NODISCARD PointerLockController &Controller() const noexcept
       {
-        return TestPage->GetPointerLockController();
+        return Frame->GetPointerLockController();
       }
 
       KRYS_NODISCARD EventHandler &Handler() noexcept
@@ -307,8 +304,8 @@ namespace krys::boo::tests
       REQUIRE_FALSE(b.SetPointerCapture(MousePointerId).HasException());
       (void)fixture.Handler().MouseMoved(LockFixture::Mouse(Type::MouseMoved, 50, 25, {}, 1));
       (void)fixture.Take();
-      CHECK(fixture.TestPage->GetPointerCaptureController().PointerCaptureElement(fixture.Document.get(),
-                                                                                  MousePointerId)
+      CHECK(fixture.Frame->GetPointerCaptureController().PointerCaptureElement(fixture.Document.get(),
+                                                                               MousePointerId)
             == &b);
 
       // As if releasePointerCapture() were called, but the locked pointer's events don't process the release,
@@ -317,8 +314,8 @@ namespace krys::boo::tests
       CHECK(fixture.Lock(a) == "ok");
       CHECK(fixture.Take() == Strings {"lostpointercapture:b", "pointerlockchange:document"});
       CHECK_FALSE(b.HasPointerCapture(MousePointerId));
-      CHECK_FALSE(fixture.TestPage->GetPointerCaptureController().PointerCaptureElement(
-        fixture.Document.get(), MousePointerId));
+      CHECK_FALSE(fixture.Frame->GetPointerCaptureController().PointerCaptureElement(fixture.Document.get(),
+                                                                                     MousePointerId));
     }
 
     SECTION("a host that doesn't lock the pointer")

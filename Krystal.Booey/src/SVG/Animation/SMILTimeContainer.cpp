@@ -28,7 +28,7 @@
 #include "Krystal.Booey/Animation/Timelines/DocumentTimeline.hpp"
 #include "Krystal.Booey/DOM/Algorithms/TreeQueries.hpp"
 #include "Krystal.Booey/DOM/Nodes/Document.hpp"
-#include "Krystal.Booey/Page/Page.hpp"
+#include "Krystal.Booey/Page/Frame.hpp"
 #include "Krystal.Booey/SVG/Animation/SVGSMILElement.hpp"
 #include "Krystal.Booey/SVG/Elements/SVGSvgElement.hpp"
 #include <algorithm>
@@ -254,9 +254,9 @@ namespace krys::boo::svg
   {
     _animationFrameScheduled = true;
     RefPtr<SVGSvgElement> owner = ShareRefPtr(_ownerSVGElement.get());
-    if (auto *page = owner ? owner->NodeDocument().GetPage() : nullptr)
+    if (auto *frame = owner ? owner->NodeDocument().Frame() : nullptr)
     {
-      page->ScheduleRenderingUpdate({RenderingUpdateStep::Animations});
+      frame->ScheduleRenderingUpdate({RenderingUpdateStep::Animations});
     }
   }
 

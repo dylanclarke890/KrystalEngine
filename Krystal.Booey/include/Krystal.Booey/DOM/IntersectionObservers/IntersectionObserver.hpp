@@ -44,9 +44,9 @@ namespace krys::boo
   class ContainerNode;
   class Document;
   class Element;
+  class Frame;
   class IntersectionObserver;
   class IntersectionObserverEntry;
-  class LocalFrame;
   class LocalFrameView;
 
   struct IntersectionObserverRegistration
@@ -210,7 +210,7 @@ namespace krys::boo
     /// @brief Queues an entry for each target whose intersection with the root crossed a threshold, or that
     /// hasn't been observed yet.
     /// @see https://w3c.github.io/IntersectionObserver/#update-intersection-observations-algo
-    KRYS_NODISCARD NeedNotify UpdateObservations(const LocalFrame &hostFrame) noexcept;
+    KRYS_NODISCARD NeedNotify UpdateObservations(const Frame &hostFrame) noexcept;
 
     KRYS_NODISCARD Maybe<double> NowTimestamp() const noexcept;
 

@@ -78,7 +78,7 @@ namespace krys::boo::dom::tests
 
     SECTION("The window, the document, its document element and its body")
     {
-      boo::tests::PaintFixture fixture(u8"<!DOCTYPE html><body><div id=box></div></body>", {200, 100}, true);
+      boo::tests::PaintFixture fixture(u8"<!DOCTYPE html><body><div id=box></div></body>");
       auto *window = fixture.Document->Window();
       REQUIRE(window);
 

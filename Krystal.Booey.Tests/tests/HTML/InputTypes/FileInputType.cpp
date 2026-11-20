@@ -25,11 +25,11 @@ namespace krys::boo::html::tests
     {
       List<Ref<FileChooser>> Choosers;
 
-      void AttachRootGraphicsLayer(LocalFrame &, GraphicsLayer *) noexcept final
+      void AttachRootGraphicsLayer(boo::Frame &, GraphicsLayer *) noexcept final
       {
       }
 
-      void RunOpenPanel(LocalFrame &, FileChooser &chooser) noexcept final
+      void RunOpenPanel(boo::Frame &, FileChooser &chooser) noexcept final
       {
         Choosers.push_back(ShareRef(chooser));
       }

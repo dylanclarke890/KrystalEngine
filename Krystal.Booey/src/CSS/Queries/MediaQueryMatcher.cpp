@@ -22,7 +22,7 @@
 #include "Krystal.Booey/CSS/Queries/MediaQueryEvaluator.hpp"
 #include "Krystal.Booey/CSS/Queries/MediaQueryParser.hpp"
 #include "Krystal.Booey/DOM/Nodes/Document.hpp"
-#include "Krystal.Booey/Page/LocalFrame.hpp"
+#include "Krystal.Booey/Page/Frame.hpp"
 #include "Krystal.Booey/Page/LocalFrameView.hpp"
 #include "Krystal.Booey/Rendering/Style/RenderStyle+GettersInlines.hpp"
 #include "Krystal.Booey/Style/ResolvedStyle.hpp"

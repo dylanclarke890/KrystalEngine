@@ -42,9 +42,9 @@ namespace krys::boo
   class Document;
   class Element;
   class EventTarget;
+  class Frame;
   class LocalFrameView;
   class MouseEvent;
-  class Page;
   class PlatformTouchEvent;
   class PointerEvent;
 
@@ -92,7 +92,7 @@ namespace krys::boo
     };
 
   private:
-    WeakPtr<Page> _page;
+    WeakPtr<Frame> _frame;
     // While PointerId is defined as int32, we use int64 here so that we may use a value outside of the
     // int32 range to have safe empty and removed values, allowing any int32 to be provided through the
     // API for lookup in this hashmap.
@@ -101,7 +101,7 @@ namespace krys::boo
     bool _haveAnyCapturingElement {false};
 
   public:
-    explicit PointerCaptureController(Page &page) noexcept;
+    explicit PointerCaptureController(Frame &frame) noexcept;
 
     /// @brief The element capturing @p pointerId, if it's in @p document.
     KRYS_NODISCARD Element *PointerCaptureElement(Document *document, PointerId pointerId) const noexcept;

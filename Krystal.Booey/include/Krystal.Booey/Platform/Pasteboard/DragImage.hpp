@@ -42,8 +42,8 @@ namespace krys::net
 namespace krys::boo
 {
   class Element;
+  class Frame;
   class Image;
-  class LocalFrame;
   class Node;
 
   /// @brief A drag image: an image buffer the host draws under the cursor, its size in device pixels.
@@ -80,10 +80,10 @@ namespace krys::boo
   };
 
   /// @brief A snapshot of @p node, as it's painted when dragged.
-  KRYS_NODISCARD DragImageRef CreateDragImageForNode(LocalFrame &frame, boo::Node &node) noexcept;
+  KRYS_NODISCARD DragImageRef CreateDragImageForNode(Frame &frame, boo::Node &node) noexcept;
 
   /// @brief A snapshot of the frame's selection.
-  KRYS_NODISCARD DragImageData CreateDragImageForSelection(LocalFrame &frame,
+  KRYS_NODISCARD DragImageData CreateDragImageForSelection(Frame &frame,
                                                            bool forceBlackText = false) noexcept;
 
   /// @brief A label for a dragged link: its text in bold over its URL, or the URL alone if there's no text.

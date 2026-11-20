@@ -38,7 +38,7 @@
 #include "Krystal.Booey/HTML/Elements/HTMLFormElement.hpp"
 #include "Krystal.Booey/HTML/Elements/HTMLLegendElement.hpp"
 #include "Krystal.Booey/Page/Clients/ChromeClient.hpp"
-#include "Krystal.Booey/Page/Page.hpp"
+#include "Krystal.Booey/Page/Frame.hpp"
 #include "Krystal.Booey/Style/Invalidation/PseudoClassChangeInvalidation.hpp"
 
 namespace krys::boo::html
@@ -121,8 +121,8 @@ namespace krys::boo::html
   {
     KRYS_NODISCARD ChromeClient *ValidationChromeClientOf(const HTMLElement &element) noexcept
     {
-      auto *page = element.NodeDocument().GetPage();
-      return page ? &page->GetChromeClient() : nullptr;
+      auto *frame = element.NodeDocument().Frame();
+      return frame ? &frame->GetChromeClient() : nullptr;
     }
   }
 

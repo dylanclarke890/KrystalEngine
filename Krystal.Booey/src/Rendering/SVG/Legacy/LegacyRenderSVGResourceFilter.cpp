@@ -27,7 +27,7 @@
 #include "Krystal.Booey/Graphics/Filters/FilterResults.hpp"
 #include "Krystal.Booey/Graphics/GraphicsContext.hpp"
 #include "Krystal.Booey/Graphics/ImageBuffers/ImageBuffer.hpp"
-#include "Krystal.Booey/Page/Page.hpp"
+#include "Krystal.Booey/Page/Frame.hpp"
 #include "Krystal.Booey/Rendering/SVG/SVGRenderingContext.hpp"
 #include "Krystal.Booey/SVG/Elements/SVGFilterElement.hpp"
 #include "Krystal.Booey/SVG/SVGLengthContext.hpp"
@@ -150,13 +150,13 @@ namespace krys::boo
     // kMaxFilterSize.
     (void)ImageBuffer::SizeNeedsClamping(filterData->SourceImageRect.Size(), filterScale);
 
-    auto *page = renderer.GetDocument().GetPage();
-    if (!page)
+    auto *frame = renderer.GetDocument().Frame();
+    if (!frame)
     {
       _rendererFilterDataMap.erase(&renderer);
       return {};
     }
-    auto preferredFilterModes = page->PreferredFilterRenderingModes(*context);
+    auto preferredFilterModes = frame->PreferredFilterRenderingModes(*context);
 
     // Create the SVGFilterRenderer object.
     filterData->Filter = SVGFilterRenderer::Create(contextElement, filterElement,

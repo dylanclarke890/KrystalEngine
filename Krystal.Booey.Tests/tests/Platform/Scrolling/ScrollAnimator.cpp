@@ -62,7 +62,7 @@ namespace krys::boo::tests
     bool PressKey(AnimationPageFixture &fixture, const utf8_string &key, utf8_string identifier,
                   int32 keyCode) noexcept
     {
-      return fixture.TestPage->MainFrame().GetEventHandler().KeyEvent(
+      return fixture.TestFrame->GetEventHandler().KeyEvent(
         PlatformKeyboardEvent(PlatformEvent::Type::RawKeyDown, u8"", u8"", key, key, krys::move(identifier),
                               keyCode, false, false, false, {}, {}));
     }
@@ -345,7 +345,7 @@ namespace krys::boo::tests
   {
     AnimationPageFixture fixture {utf8_string(Page)};
     auto &scroller = fixture.ById(u8"s");
-    auto &handler = fixture.TestPage->MainFrame().GetEventHandler();
+    auto &handler = fixture.TestFrame->GetEventHandler();
     // A notch down (the content moves up), over the box.
     auto notch = [&](PointI position = {10, 10})
     {

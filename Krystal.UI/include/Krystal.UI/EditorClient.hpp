@@ -29,9 +29,9 @@ namespace krys::ui
                                                   boo::Affinity affinity,
                                                   bool stillSelecting) noexcept override;
 
-    KRYS_NODISCARD bool CanCopyCut(boo::LocalFrame *frame, bool defaultValue) const noexcept override;
+    KRYS_NODISCARD bool CanCopyCut(boo::Frame *frame, bool defaultValue) const noexcept override;
 
-    KRYS_NODISCARD bool CanPaste(boo::LocalFrame *frame, bool defaultValue) const noexcept override;
+    KRYS_NODISCARD bool CanPaste(boo::Frame *frame, bool defaultValue) const noexcept override;
 
     bool HandleKeyboardEvent(boo::KeyboardEvent &event) noexcept override;
 
@@ -39,7 +39,7 @@ namespace krys::ui
     {
     }
 
-    void RespondToChangedSelection(boo::LocalFrame *frame) noexcept override;
+    void RespondToChangedSelection(boo::Frame *frame) noexcept override;
 
     void DiscardedComposition(const boo::Document &document) noexcept override;
 

@@ -5,8 +5,8 @@
 #include "Krystal.Booey/DOM/Nodes/Document.hpp"
 #include "Krystal.Booey/DOM/ResizeObservers/ResizeObserverEntry.hpp"
 #include "Krystal.Booey/HTML/EventLoop/EventLoop.hpp"
+#include "Krystal.Booey/Page/Frame.hpp"
 #include "Krystal.Booey/Page/LocalDOMWindow.hpp"
-#include "Krystal.Booey/Page/Page.hpp"
 #include "Krystal.Booey/Rendering/RenderBox.hpp"
 
 namespace krys::boo::tests
@@ -88,7 +88,7 @@ namespace krys::boo::tests
     Recorder recorder(*fixture.Document);
     auto update = [&]
     {
-      fixture.TestPage->UpdateRendering();
+      fixture.Frame->UpdateRendering();
     };
 
     SECTION("The first observation reports the content box, and changes report again")
@@ -152,7 +152,7 @@ namespace krys::boo::tests
 
     SECTION("The device pixel content box is in whole device pixels, snapped where it sits")
     {
-      fixture.TestPage->SetDeviceScaleFactor(1.5f);
+      fixture.Frame->SetDeviceScaleFactor(1.5f);
       SetStyle(a, u8"width: 101px; height: 50px; margin-left: 0.5px; writing-mode: vertical-lr");
       recorder.Observer->Observe(a, {ResizeObserverBoxOptions::DevicePixelContentBox});
       update();
@@ -208,7 +208,7 @@ namespace krys::boo::tests
     Recorder recorder(*fixture.Document);
     auto update = [&]
     {
-      fixture.TestPage->UpdateRendering();
+      fixture.Frame->UpdateRendering();
     };
 
     SECTION("Resizing a deeper element in a callback is reported in the same update")
@@ -279,7 +279,7 @@ namespace krys::boo::tests
     auto &box = fixture.ById(u8"box");
     auto update = [&]
     {
-      fixture.TestPage->UpdateRendering();
+      fixture.Frame->UpdateRendering();
     };
     auto height = [&]
     {

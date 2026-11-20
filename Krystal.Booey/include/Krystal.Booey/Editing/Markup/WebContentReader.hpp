@@ -33,19 +33,19 @@
 namespace krys::boo
 {
   class DocumentFragment;
-  class LocalFrame;
+  class Frame;
   enum class MSOListQuirks : bool;
 
   /// @brief Reads a pasteboard's content for a frame's document.
   class FrameWebContentReader : public PasteboardWebContentReader
   {
   private:
-    WeakPtr<LocalFrame> _frame;
+    WeakPtr<boo::Frame> _frame;
 
   public:
-    explicit FrameWebContentReader(LocalFrame &frame) noexcept;
+    explicit FrameWebContentReader(boo::Frame &frame) noexcept;
 
-    KRYS_NODISCARD LocalFrame &Frame() const noexcept
+    KRYS_NODISCARD boo::Frame &Frame() const noexcept
     {
       return *_frame;
     }
@@ -70,7 +70,7 @@ namespace krys::boo
     bool _madeFragmentFromPlainText {false};
 
   public:
-    WebContentReader(LocalFrame &frame, dom::SimpleRange context, bool allowPlainText) noexcept;
+    WebContentReader(boo::Frame &frame, dom::SimpleRange context, bool allowPlainText) noexcept;
 
     ~WebContentReader() noexcept override;
 
@@ -107,7 +107,7 @@ namespace krys::boo
     utf8_string _markup;
 
   public:
-    explicit WebContentMarkupReader(LocalFrame &frame) noexcept : FrameWebContentReader(frame)
+    explicit WebContentMarkupReader(boo::Frame &frame) noexcept : FrameWebContentReader(frame)
     {
     }
 

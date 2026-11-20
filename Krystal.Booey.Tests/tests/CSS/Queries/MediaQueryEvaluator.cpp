@@ -6,7 +6,7 @@
 #include "Krystal.Booey/CSS/Queries/MediaQueryFeatures.hpp"
 #include "Krystal.Booey/CSS/Queries/MediaQueryParser.hpp"
 #include "Krystal.Booey/DOM/Nodes/Document.hpp"
-#include "Krystal.Booey/Page/LocalFrame.hpp"
+#include "Krystal.Booey/Page/Frame.hpp"
 #include "Krystal.Booey/Page/LocalFrameView.hpp"
 #include "Krystal.Booey/Rendering/Style/RenderStyle+GettersInlines.hpp"
 #include "Krystal.Booey/Rendering/Style/RenderStyle+SettersInlines.hpp"
@@ -36,9 +36,9 @@ namespace krys::boo::css::tests
     }
 
     /// @brief Shows @p document in a new frame with a view of @p viewSize.
-    KRYS_NODISCARD Ref<LocalFrame> ShowInFrame(Document &document, SizeI viewSize = {800, 600})
+    KRYS_NODISCARD Ref<boo::Frame> ShowInFrame(Document &document, SizeI viewSize = {800, 600})
     {
-      auto frame = LocalFrame::Create();
+      auto frame = boo::Frame::Create();
       frame->CreateView(viewSize);
       frame->SetDocument(ShareRefPtr(&document));
       return frame;
@@ -49,8 +49,8 @@ namespace krys::boo::css::tests
     struct EvaluationFixture : ValueFixture
     {
       Ref<boo::Document> Document {CreateRef<boo::Document>()};
-      MediaPage Media {*Document};
-      Ref<LocalFrame> Frame {ShareRef(Media.Frame())};
+      MediaFrame Media {*Document};
+      Ref<boo::Frame> Frame {ShareRef(Media.Frame())};
       MediaChromeClient &Chrome {*Media.Chrome};
       RenderStyle RootStyle {RenderStyle::Create()};
       SizeI ViewSize {800, 600};
@@ -296,7 +296,7 @@ namespace krys::boo::css::tests
       CHECK(fixture.Matches(u8"(resolution: 96dpi)"));
       CHECK(fixture.Matches(u8"(resolution)"));
 
-      fixture.Media.TestPage->SetDeviceScaleFactor(2.f);
+      fixture.Media.Frame().SetDeviceScaleFactor(2.f);
       CHECK(fixture.Matches(u8"(resolution: 2x)"));
       CHECK(fixture.Matches(u8"(min-resolution: 192dpi)"));
       CHECK_FALSE(fixture.Matches(u8"(min-resolution: 3dppx)"));
@@ -435,7 +435,7 @@ namespace krys::boo::css::tests
 
     SECTION("With preferences")
     {
-      fixture.Media.TestPage->SetUseDarkAppearance(true);
+      fixture.Media.Frame().SetUseDarkAppearance(true);
       fixture.Chrome.PrefersContrast = true;
       fixture.Chrome.PrefersReducedMotion = true;
       fixture.Chrome.Inverted = true;
@@ -461,7 +461,7 @@ namespace krys::boo::css::tests
     CHECK_FALSE(fixture.Matches(u8"(scripting: none)"));
     CHECK(fixture.Matches(u8"(display-mode: browser)"));
 
-    fixture.Media.TestPage->SetDisplayMode(ApplicationDisplayMode::Standalone);
+    fixture.Media.Frame().SetDisplayMode(ApplicationDisplayMode::Standalone);
     CHECK(fixture.Matches(u8"(display-mode: standalone)"));
     CHECK_FALSE(fixture.Matches(u8"(display-mode: browser)"));
   }

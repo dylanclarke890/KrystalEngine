@@ -11,8 +11,7 @@
 #include "Krystal.Booey/Input/EventHandler.hpp"
 #include "Krystal.Booey/Input/PlatformKeyboardEvent.hpp"
 #include "Krystal.Booey/Input/PlatformMouseEvent.hpp"
-#include "Krystal.Booey/Page/LocalFrame.hpp"
-#include "Krystal.Booey/Page/Page.hpp"
+#include "Krystal.Booey/Page/Frame.hpp"
 #include "Krystal.Booey/Rendering/RenderElement.hpp"
 #include "Krystal.Booey/Rendering/Style/RenderStyle+GettersInlines.hpp"
 
@@ -74,14 +73,14 @@ namespace krys::boo::html::tests
       }
     };
 
-    void PressKey(LocalFrame &frame, utf8_string key) noexcept
+    void PressKey(boo::Frame &frame, utf8_string key) noexcept
     {
       (void)frame.GetEventHandler().KeyEvent(PlatformKeyboardEvent(PlatformEvent::Type::KeyDown, u8"", u8"",
                                                                    krys::move(key), u8"", u8"", 0, false,
                                                                    false, false, {}, MonotonicTime::Now()));
     }
 
-    void Click(LocalFrame &frame, double x, double y) noexcept
+    void Click(boo::Frame &frame, double x, double y) noexcept
     {
       auto &handler = frame.GetEventHandler();
       (void)handler.HandleMousePressEvent(PlatformMouseEvent(PointD(x, y), PointD(x, y), MouseButton::Left,
@@ -225,7 +224,7 @@ namespace krys::boo::html::tests
 
       // It leaves the top layer at the next rendering update.
       CHECK(document.IsPendingTopLayerRemoval(dialog));
-      fixture.TestPage->UpdateRendering();
+      fixture.Frame->UpdateRendering();
       CHECK_FALSE(dialog.IsInTopLayer());
       REQUIRE(before.Renderer());
       CHECK_FALSE(before.Renderer()->Style().EffectiveInert());

@@ -41,7 +41,7 @@
 #include "Krystal.Booey/HTML/Elements/HTMLSelectElement.hpp"
 #include "Krystal.Booey/HTML/Elements/HTMLTextAreaElement.hpp"
 #include "Krystal.Booey/Input/EventHandler.hpp"
-#include "Krystal.Booey/Page/LocalFrame.hpp"
+#include "Krystal.Booey/Page/Frame.hpp"
 #include "Krystal.Booey/Page/LocalFrameView.hpp"
 #include "Krystal.Booey/Page/LocalFrameViewLayoutContext.hpp"
 #include "Krystal.Booey/Platform/Scrolling/ScrollbarTheme.hpp"

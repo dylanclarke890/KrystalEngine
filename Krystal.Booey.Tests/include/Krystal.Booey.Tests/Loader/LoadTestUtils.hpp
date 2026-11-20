@@ -9,8 +9,7 @@
 #include "Krystal.Booey/Loader/NavigationAction.hpp"
 #include "Krystal.Booey/Loader/SubstituteData.hpp"
 #include "Krystal.Booey/Page/Clients/ChromeClient.hpp"
-#include "Krystal.Booey/Page/LocalFrame.hpp"
-#include "Krystal.Booey/Page/Page.hpp"
+#include "Krystal.Booey/Page/Frame.hpp"
 #include "Krystal.Core/Types/Func.hpp"
 #include "Krystal.Core/Types/List.hpp"
 #include "Krystal.Net/ResourceError.hpp"
@@ -89,13 +88,13 @@ namespace krys::boo::tests
     }
   };
 
-  /// @brief A page whose main frame starts with its initial empty document, and whose loads come from a
+  /// @brief A frame that starts with its initial empty document, and whose loads come from a
   /// test strategy.
   struct LoadFixture : css::tests::ValueFixture, LoaderFixture
   {
     List<std::string> Events;
     LoadRecordingClient *Client {nullptr};
-    Ref<Page> TestPage {CreatePage()};
+    Ref<boo::Frame> TestFrame {CreateFrame()};
 
     LoadFixture() noexcept
     {
@@ -104,16 +103,16 @@ namespace krys::boo::tests
       Events.clear();
     }
 
-    KRYS_NODISCARD Ref<Page> CreatePage() noexcept
+    KRYS_NODISCARD Ref<boo::Frame> CreateFrame() noexcept
     {
       auto client = CreateUnique<LoadRecordingClient>(Events);
       Client = client.get();
-      return Page::Create(CreateUnique<EmptyChromeClient>(), nullptr, krys::move(client));
+      return boo::Frame::Create(CreateUnique<EmptyChromeClient>(), nullptr, krys::move(client));
     }
 
-    KRYS_NODISCARD LocalFrame &Frame() const noexcept
+    KRYS_NODISCARD boo::Frame &Frame() const noexcept
     {
-      return TestPage->MainFrame();
+      return *TestFrame;
     }
 
     KRYS_NODISCARD boo::Document &Document() const noexcept

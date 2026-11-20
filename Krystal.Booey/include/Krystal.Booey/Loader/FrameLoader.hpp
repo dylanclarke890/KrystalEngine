@@ -60,8 +60,8 @@ namespace krys::boo
 {
   class DocumentLoader;
   class FormSubmission;
+  class Frame;
   class FrameLoadRequest;
-  class LocalFrame;
   class NavigationAction;
 
   /// @brief Where a frame is in loading a document.
@@ -83,7 +83,7 @@ namespace krys::boo
     KRYS_NON_COPY_MOVABLE(FrameLoader);
 
   private:
-    LocalFrame &_frame;
+    boo::Frame &_frame;
     UniquePtr<LocalFrameLoaderClient> _client;
     FrameLoadType _loadType {FrameLoadType::Standard};
     /// @brief The loader of the frame's document.
@@ -105,7 +105,7 @@ namespace krys::boo
   public:
     /// @param client The host's side of the loader; without one, the loader has an empty client, which
     /// ignores every navigation.
-    FrameLoader(LocalFrame &frame, UniquePtr<LocalFrameLoaderClient> &&client) noexcept;
+    FrameLoader(boo::Frame &frame, UniquePtr<LocalFrameLoaderClient> &&client) noexcept;
 
     ~FrameLoader() noexcept;
 
@@ -114,7 +114,7 @@ namespace krys::boo
       return *_client;
     }
 
-    KRYS_NODISCARD LocalFrame &Frame() const noexcept
+    KRYS_NODISCARD boo::Frame &Frame() const noexcept
     {
       return _frame;
     }
@@ -191,7 +191,7 @@ namespace krys::boo
     /// @brief The frame a navigation targeting @p name navigates: this frame for an empty name, `_self`,
     /// `_parent` and `_top` (a frame is the only one in its tree); null for `_blank` and other names, which
     /// would open a new browsing context.
-    KRYS_NODISCARD LocalFrame *FindFrameForNavigation(DOMStringView name) const noexcept;
+    KRYS_NODISCARD boo::Frame *FindFrameForNavigation(DOMStringView name) const noexcept;
 
     /// @brief Run when the parser stops parsing the frame's document: scrolls to its URL's fragment.
     void FinishedParsing() noexcept;

@@ -14,7 +14,7 @@
 #include "Krystal.Booey/HTML/Elements/HTMLStyleElement.hpp"
 #include "Krystal.Booey/HTML/EventLoop/EventLoop.hpp"
 #include "Krystal.Booey/HTML/Parser/DocumentParser.hpp"
-#include "Krystal.Booey/Page/LocalFrame.hpp"
+#include "Krystal.Booey/Page/Frame.hpp"
 #include "Krystal.Booey/Page/LocalFrameView.hpp"
 #include "Krystal.Booey/Style/DeclarationOrigin.hpp"
 #include "Krystal.Booey/Style/Rules/RuleSet.hpp"
@@ -239,7 +239,7 @@ namespace krys::boo::style::tests
     // queries) at once to fit them.
     auto document = Parse(u8"<!DOCTYPE html><style>@media (min-width: 1000px) { .wide {} } .always {}"
                           u8"html { overflow: hidden }</style><style>@media screen { .screen {} }</style>");
-    auto frame = LocalFrame::Create();
+    auto frame = boo::Frame::Create();
     frame->CreateView({800, 600});
     frame->SetDocument(ShareRefPtr<boo::Document>(document.get()));
     (void)document->UpdateLayout();

@@ -34,7 +34,7 @@
 #include "Krystal.Booey/DOM/Algorithms/TreeQueries.hpp"
 #include "Krystal.Booey/DOM/Events/EventNames.hpp"
 #include "Krystal.Booey/DOM/Nodes/Document.hpp"
-#include "Krystal.Booey/Page/Page.hpp"
+#include "Krystal.Booey/Page/Frame.hpp"
 #include "Krystal.Booey/Rendering/RenderElement.hpp"
 #include "Krystal.Booey/Rendering/Style/RenderStyle.hpp"
 #include "Krystal.Booey/Style/Styleable.hpp"
@@ -87,12 +87,12 @@ namespace krys::boo
 
   Seconds DocumentTimeline::AnimationInterval() const noexcept
   {
-    auto *page = _document ? _document->GetPage() : nullptr;
-    if (!page)
+    auto *frame = _document ? _document->Frame() : nullptr;
+    if (!frame)
     {
       return Infinity;
     }
-    return std::chrono::duration_cast<Seconds>(page->PreferredRenderingUpdateInterval());
+    return std::chrono::duration_cast<Seconds>(frame->PreferredRenderingUpdateInterval());
   }
 
   void DocumentTimeline::SuspendAnimations() noexcept
@@ -143,7 +143,7 @@ namespace krys::boo
 
   void DocumentTimeline::ScheduleAnimationResolution() noexcept
   {
-    if (AnimationsAreSuspended() || _animationResolutionScheduled || !_document || !_document->GetPage())
+    if (AnimationsAreSuspended() || _animationResolutionScheduled || !_document || !_document->Frame())
     {
       return;
     }
@@ -154,7 +154,7 @@ namespace krys::boo
       return;
     }
 
-    _document->GetPage()->ScheduleRenderingUpdate({RenderingUpdateStep::Animations});
+    _document->Frame()->ScheduleRenderingUpdate({RenderingUpdateStep::Animations});
     _animationResolutionScheduled = true;
   }
 

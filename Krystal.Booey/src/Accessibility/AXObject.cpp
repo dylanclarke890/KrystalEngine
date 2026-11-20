@@ -71,9 +71,9 @@
 #include "Krystal.Booey/HTML/MicroParsers/Numbers.hpp"
 #include "Krystal.Booey/Infra/StringAlgorithms.hpp"
 #include "Krystal.Booey/Page/Clients/ChromeClient.hpp"
+#include "Krystal.Booey/Page/Frame.hpp"
 #include "Krystal.Booey/Page/LocalDOMWindow.hpp"
 #include "Krystal.Booey/Page/LocalFrameView.hpp"
-#include "Krystal.Booey/Page/Page.hpp"
 #include "Krystal.Booey/Rendering/HitTesting/HitTestRequest.hpp"
 #include "Krystal.Booey/Rendering/HitTesting/HitTestResult.hpp"
 #include "Krystal.Booey/Rendering/Layers/RenderLayer.hpp"
@@ -379,10 +379,10 @@ namespace krys::boo
     return node ? &node->NodeDocument() : nullptr;
   }
 
-  Page *AXObject::GetPage() const noexcept
+  boo::Frame *AXObject::Frame() const noexcept
   {
     auto *document = GetDocument();
-    return document ? document->GetPage() : nullptr;
+    return document ? document->Frame() : nullptr;
   }
 
   LocalFrameView *AXObject::DocumentFrameView() const noexcept
@@ -1758,9 +1758,9 @@ namespace krys::boo
     {
       return;
     }
-    if (auto *page = document->GetPage())
+    if (auto *frame = document->Frame())
     {
-      page->GetChromeClient().Focus();
+      frame->GetChromeClient().Focus();
     }
   }
 

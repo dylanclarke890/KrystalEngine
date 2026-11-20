@@ -12,7 +12,7 @@
 #include "Krystal.Booey/HTML/EventLoop/EventLoop.hpp"
 #include "Krystal.Booey/Input/EventHandler.hpp"
 #include "Krystal.Booey/Input/PlatformMouseEvent.hpp"
-#include "Krystal.Booey/Page/LocalFrame.hpp"
+#include "Krystal.Booey/Page/Frame.hpp"
 
 namespace krys::boo::html::tests
 {
@@ -73,7 +73,7 @@ namespace krys::boo::html::tests
       }
     };
 
-    void Click(LocalFrame &frame, double x, double y) noexcept
+    void Click(boo::Frame &frame, double x, double y) noexcept
     {
       auto &handler = frame.GetEventHandler();
       (void)handler.HandleMousePressEvent(PlatformMouseEvent(PointD(x, y), PointD(x, y), MouseButton::Left,

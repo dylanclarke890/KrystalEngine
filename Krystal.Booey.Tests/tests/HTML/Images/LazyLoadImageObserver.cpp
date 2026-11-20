@@ -5,9 +5,8 @@
 #include "Krystal.Booey.Tests/Loader/TestLoader.hpp"
 #include "Krystal.Booey/DOM/Nodes/HTMLDocument.hpp"
 #include "Krystal.Booey/HTML/Elements/HTMLImageElement.hpp"
+#include "Krystal.Booey/Page/Frame.hpp"
 #include "Krystal.Booey/Page/LocalDOMWindow.hpp"
-#include "Krystal.Booey/Page/LocalFrame.hpp"
-#include "Krystal.Booey/Page/Page.hpp"
 #include "Krystal.Image.Tests/TestImages.hpp"
 
 namespace krys::boo::tests
@@ -19,14 +18,14 @@ namespace krys::boo::tests
     struct LazyImageFixture : css::tests::ValueFixture
     {
       constexpr static SizeI ViewSize {200, 100};
-      Ref<Page> TestPage;
+      Ref<boo::Frame> TestFrame;
       Ref<HTMLDocument> Document;
 
       explicit LazyImageFixture(utf8_string &&markup) noexcept
-          : TestPage(Page::Create()), Document(CreateRef<HTMLDocument>())
+          : TestFrame(boo::Frame::Create()), Document(CreateRef<HTMLDocument>())
       {
         html::EventLoop::Current().RunUntilIdle();
-        auto &frame = TestPage->MainFrame();
+        auto &frame = *TestFrame;
         frame.CreateView(ViewSize);
         frame.SetDocument(ShareRefPtr<boo::Document>(Document.get()));
         auto parser = CreateRef<html::DocumentParser>(*Document);
@@ -35,9 +34,9 @@ namespace krys::boo::tests
         Document->StyleScope().FlushPendingUpdate();
       }
 
-      KRYS_NODISCARD LocalFrame &Frame() const noexcept
+      KRYS_NODISCARD boo::Frame &Frame() const noexcept
       {
-        return TestPage->MainFrame();
+        return *TestFrame;
       }
 
       KRYS_NODISCARD Element &ById(DOMStringView id) const noexcept
@@ -54,7 +53,7 @@ namespace krys::boo::tests
 
       void UpdateRendering() noexcept
       {
-        TestPage->UpdateRendering();
+        TestFrame->UpdateRendering();
       }
 
       /// @brief Whether any image paints.

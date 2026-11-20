@@ -66,8 +66,8 @@ namespace krys::boo::tests
   {
     AnimationPageFixture fixture {
       u8"<!DOCTYPE html><style>body{margin:0;width:1000px;height:1000px}</style>"};
-    auto &handler = fixture.TestPage->MainFrame().GetEventHandler();
-    auto &view = *fixture.TestPage->MainFrame().View();
+    auto &handler = fixture.TestFrame->GetEventHandler();
+    auto &view = *fixture.TestFrame->View();
     auto pan = [&](Phase phase, float deltaX, float deltaY)
     {
       PlatformWheelEvent event(PointI(10, 10), PointI(10, 10), deltaX, deltaY, 0, 0,

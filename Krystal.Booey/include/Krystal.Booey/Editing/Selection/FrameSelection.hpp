@@ -130,8 +130,8 @@ namespace krys::boo
 {
   class Color;
   class EditingStyle;
+  class Frame;
   class GraphicsContext;
-  class LocalFrame;
   class RenderBlock;
   class RenderStyle;
   class RenderView;
@@ -213,7 +213,7 @@ namespace krys::boo
 
     KRYS_NODISCARD RenderBlock *CaretRenderer() const noexcept;
 
-    void PaintDragCaret(LocalFrame *frame, GraphicsContext &context,
+    void PaintDragCaret(Frame *frame, GraphicsContext &context,
                         const LayoutPoint &paintOffset) const noexcept;
 
     KRYS_NODISCARD bool IsContentEditable() const noexcept;

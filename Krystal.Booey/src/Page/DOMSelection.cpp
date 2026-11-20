@@ -41,7 +41,7 @@
 #include "Krystal.Booey/Editing/TextIterator.hpp"
 #include "Krystal.Booey/HTML/CustomElement/CustomElementReactionQueue.hpp"
 #include "Krystal.Booey/Infra/StringAlgorithms.hpp"
-#include "Krystal.Booey/Page/LocalFrame.hpp"
+#include "Krystal.Booey/Page/Frame.hpp"
 #include <algorithm>
 
 namespace krys::boo
@@ -64,7 +64,7 @@ namespace krys::boo
       return {};
     }
 
-    KRYS_NODISCARD RefPtr<Node> SelectionShadowAncestor(LocalFrame &frame) noexcept
+    KRYS_NODISCARD RefPtr<Node> SelectionShadowAncestor(boo::Frame &frame) noexcept
     {
       auto *node = frame.Document()->Selection().Selection().CanonicalAnchor().AnchorNode();
       if (!node || !node->IsInShadowTree())
@@ -74,7 +74,7 @@ namespace krys::boo
       return ShareRefPtr(AncestorNodeInThisScope(node->NodeDocument(), node));
     }
 
-    KRYS_NODISCARD RefPtr<dom::Range> CreateLiveRangeBeforeShadowHostWithSelection(LocalFrame &frame) noexcept
+    KRYS_NODISCARD RefPtr<dom::Range> CreateLiveRangeBeforeShadowHostWithSelection(boo::Frame &frame) noexcept
     {
       if (RefPtr<Node> shadowAncestor = SelectionShadowAncestor(frame))
       {
@@ -91,7 +91,7 @@ namespace krys::boo
   {
   }
 
-  LocalFrame *DOMSelection::Frame() const noexcept
+  boo::Frame *DOMSelection::Frame() const noexcept
   {
     auto *document = _document.get();
     return document ? document->Frame() : nullptr;

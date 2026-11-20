@@ -32,8 +32,7 @@ namespace krys::boo::tests
       explicit FilterFixture(utf8_stringview filter) noexcept
           : PaintFixture(
               u8"<!DOCTYPE html><style>body{margin:0}#box{width:40px;height:30px;background:red;filter:"
-                + utf8_string(filter) + u8"}</style><div id=box></div>",
-              {200, 100}, true)
+              + utf8_string(filter) + u8"}</style><div id=box></div>")
       {
         (void)Document->UpdateLayout();
       }

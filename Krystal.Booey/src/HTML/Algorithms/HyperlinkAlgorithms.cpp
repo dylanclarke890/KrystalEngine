@@ -7,7 +7,7 @@
 #include "Krystal.Booey/HTML/Elements/HTMLImageElement.hpp"
 #include "Krystal.Booey/Infra/StringAlgorithms.hpp"
 #include "Krystal.Booey/Loader/FrameLoader.hpp"
-#include "Krystal.Booey/Page/LocalFrame.hpp"
+#include "Krystal.Booey/Page/Frame.hpp"
 #include "Krystal.Booey/Rendering/Replaced/RenderImage.hpp"
 #include "Krystal.Core/Strings/ASCII.hpp"
 #include <cmath>
@@ -177,7 +177,7 @@ namespace krys::boo::html
 
     // 1. If subject cannot navigate, then return.
     Ref<Document> document = ShareRef(subject.NodeDocument());
-    RefPtr<LocalFrame> frame = ShareRefPtr(document->Frame());
+    RefPtr<Frame> frame = ShareRefPtr(document->Frame());
     if (!frame || (!Is<HTMLAnchorElement>(subject) && !subject.IsConnected()))
     {
       return;

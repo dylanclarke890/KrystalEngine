@@ -10,9 +10,8 @@
 #include "Krystal.Booey/Graphics/Images/BitmapImage.hpp"
 #include "Krystal.Booey/HTML/Elements/HTMLMapElement.hpp"
 #include "Krystal.Booey/HTML/Parser/DocumentParser.hpp"
-#include "Krystal.Booey/Page/LocalFrame.hpp"
+#include "Krystal.Booey/Page/Frame.hpp"
 #include "Krystal.Booey/Page/LocalFrameView.hpp"
-#include "Krystal.Booey/Page/Page.hpp"
 #include "Krystal.Booey/Platform/PlatformStrategies.hpp"
 #include "Krystal.Booey/Rendering/Replaced/RenderImage.hpp"
 #include "Krystal.Booey/Style/Scope/Scope.hpp"
@@ -547,14 +546,14 @@ namespace krys::boo::tests
     CHECK(image.CurrentFrameIndex() == 2u);
   }
 
-  TEST_CASE("HTMLImageElement: animations pause while the page is hidden", "[HTML][HTMLImageElement]")
+  TEST_CASE("HTMLImageElement: animations pause while the frame is hidden", "[HTML][HTMLImageElement]")
   {
     using namespace std::chrono_literals;
     LoaderFixture loader;
     loader.Strategy.Resources[u8"file:///a.gif"] = img::tests::images::AnimatedGIF;
 
-    Ref<Page> page = Page::Create();
-    ImageFixture fixture(*page, u8"<img id=img src='file:///a.gif'>");
+    Ref<boo::Frame> frame = boo::Frame::Create();
+    ImageFixture fixture(*frame, u8"<img id=img src='file:///a.gif'>");
     RunNetworkingTasks();
     auto &loop = html::EventLoop::Current();
     auto &image = Downcast<BitmapImage>(*fixture.Image(u8"img").GetImage());
@@ -565,7 +564,7 @@ namespace krys::boo::tests
     REQUIRE(image.IsAnimating());
 
     // Hidden, the next frame finds the image invisible, and its animation pauses.
-    page->SetIsVisible(false);
+    frame->SetIsVisible(false);
     loop.Run(start + 100ms);
     CHECK(image.CurrentFrameIndex() == 1u);
     CHECK(renderer.HasPausedImageAnimations());
@@ -573,7 +572,7 @@ namespace krys::boo::tests
     CHECK(image.CurrentFrameIndex() == 1u);
 
     // Shown, it resumes.
-    page->SetIsVisible(true);
+    frame->SetIsVisible(true);
     CHECK_FALSE(renderer.HasPausedImageAnimations());
     CHECK(image.IsAnimating());
     loop.Run(start + 400ms);

@@ -11,7 +11,7 @@
 #include "Krystal.Booey/HTML/Elements/HTMLLinkElement.hpp"
 #include "Krystal.Booey/HTML/EventLoop/EventLoop.hpp"
 #include "Krystal.Booey/HTML/Parser/DocumentParser.hpp"
-#include "Krystal.Booey/Page/LocalFrame.hpp"
+#include "Krystal.Booey/Page/Frame.hpp"
 #include "Krystal.Booey/Page/LocalFrameView.hpp"
 
 namespace krys::boo::style::tests

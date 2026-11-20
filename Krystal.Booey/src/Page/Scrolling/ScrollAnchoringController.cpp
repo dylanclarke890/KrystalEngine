@@ -28,7 +28,7 @@
 #include "Krystal.Booey/DOM/Nodes/Document.hpp"
 #include "Krystal.Booey/DOM/Nodes/Element.hpp"
 #include "Krystal.Booey/HTML/Elements/HTMLHtmlElement.hpp"
-#include "Krystal.Booey/Page/LocalFrame.hpp"
+#include "Krystal.Booey/Page/Frame.hpp"
 #include "Krystal.Booey/Page/LocalFrameView.hpp"
 #include "Krystal.Booey/Rendering/Layers/RenderLayer.hpp"
 #include "Krystal.Booey/Rendering/Layers/RenderLayerScrollableArea.hpp"

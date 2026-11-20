@@ -57,8 +57,7 @@
 #include "Krystal.Booey/HTML/Parser/DocumentParser.hpp"
 #include "Krystal.Booey/Infra/StringAlgorithms.hpp"
 #include "Krystal.Booey/Loader/DocumentWriter.hpp"
-#include "Krystal.Booey/Page/LocalFrame.hpp"
-#include "Krystal.Booey/Page/Page.hpp"
+#include "Krystal.Booey/Page/Frame.hpp"
 #include "Krystal.Booey/Page/Settings.hpp"
 #include "Krystal.Booey/Rendering/RenderBlock.hpp"
 #include "Krystal.Booey/Rendering/RenderElement.hpp"
@@ -1543,34 +1542,32 @@ namespace krys::boo
   }
 
   // FIXME: The destination page's dark appearance (setUseColorAppearance), with dark appearance.
-  Ref<Page> CreatePageForSanitizingWebContent(Document *) noexcept
+  Ref<Frame> CreateFrameForSanitizingWebContent(Document *) noexcept
   {
-    Ref<Page> page = Page::Create();
-
-    auto &frame = page->MainFrame();
-    frame.CreateView(SizeI {800, 600});
+    Ref<Frame> frame = Frame::Create();
+    frame->CreateView(SizeI {800, 600});
 
     constexpr static utf8_stringview markup = u8"<!DOCTYPE html><html><head><meta name='color-scheme' "
                                               u8"content='light dark'/></head><body></body></html>";
     DocumentWriter writer;
-    writer.SetFrame(frame);
+    writer.SetFrame(*frame);
     writer.SetMimeType(u8"text/html");
     if (writer.Begin({}))
     {
       writer.AddData(Span<const uint8>(reinterpret_cast<const uint8 *>(markup.data()), markup.size()));
       writer.End();
-      krys_assert(frame.Document() && frame.Document()->Body());
+      krys_assert(frame->Document() && frame->Document()->Body());
     }
 
-    return page;
+    return frame;
   }
 
   Maybe<utf8_string> SanitizeMarkup(utf8_stringview rawHTML, Document *destinationDocument,
                                     MSOListQuirks msoListQuirks,
                                     const Func<void(DocumentFragment &)> &fragmentSanitizer) noexcept
   {
-    Ref<Page> page = CreatePageForSanitizingWebContent(destinationDocument);
-    RefPtr<boo::Document> stagingDocument = ShareRefPtr(page->MainFrame().Document());
+    Ref<Frame> frame = CreateFrameForSanitizingWebContent(destinationDocument);
+    RefPtr<boo::Document> stagingDocument = ShareRefPtr(frame->Document());
     if (!stagingDocument)
     {
       return null;
@@ -1585,7 +1582,7 @@ namespace krys::boo
 
     auto markup =
       SanitizedMarkupForFragmentInDocument(krys::move(fragment), *stagingDocument, msoListQuirks, rawHTML);
-    page->MainFrame().SetDocument(nullptr);
+    frame->SetDocument(nullptr);
     return markup;
   }
 

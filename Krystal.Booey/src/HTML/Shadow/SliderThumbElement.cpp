@@ -43,7 +43,7 @@
 #include "Krystal.Booey/HTML/InputTypes/StepRange.hpp"
 #include "Krystal.Booey/HTML/Parser/ParserIdioms.hpp"
 #include "Krystal.Booey/Input/EventHandler.hpp"
-#include "Krystal.Booey/Page/LocalFrame.hpp"
+#include "Krystal.Booey/Page/Frame.hpp"
 #include "Krystal.Booey/Rendering/FormControls/RenderSlider.hpp"
 #include "Krystal.Booey/Rendering/RenderFlexibleBox.hpp"
 #include "Krystal.Booey/Rendering/RenderTheme.hpp"

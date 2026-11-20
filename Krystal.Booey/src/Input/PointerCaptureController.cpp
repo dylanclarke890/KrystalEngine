@@ -32,15 +32,14 @@
 #include "Krystal.Booey/Input/EventHandler.hpp"
 #include "Krystal.Booey/Input/PlatformTouchEvent.hpp"
 #include "Krystal.Booey/Input/PointerLockController.hpp"
-#include "Krystal.Booey/Page/LocalFrame.hpp"
-#include "Krystal.Booey/Page/Page.hpp"
+#include "Krystal.Booey/Page/Frame.hpp"
 #include "Krystal.Booey/Rendering/HitTesting/HitTestRequest.hpp"
 #include "Krystal.Booey/Rendering/HitTesting/HitTestResult.hpp"
 #include <algorithm>
 
 namespace krys::boo
 {
-  PointerCaptureController::PointerCaptureController(Page &page) noexcept : _page(CreateWeakPtr(&page))
+  PointerCaptureController::PointerCaptureController(Frame &frame) noexcept : _frame(CreateWeakPtr(&frame))
   {
     Reset();
   }
@@ -90,9 +89,9 @@ namespace krys::boo
 
     // 3. If this method is invoked while the document has a locked element, throw an exception with the name
     // InvalidStateError.
-    if (auto *page = capturingTarget->NodeDocument().GetPage())
+    if (auto *frame = capturingTarget->NodeDocument().Frame())
     {
-      if (page->GetPointerLockController().IsLocked())
+      if (frame->GetPointerLockController().IsLocked())
       {
         return Exception {ExceptionCode::InvalidStateError};
       }
@@ -445,8 +444,8 @@ namespace krys::boo
                                                               LocalFrameView *view,
                                                               const PointD &touchDelta) noexcept
   {
-    RefPtr<Page> page = ShareRefPtr(_page.get());
-    if (!page)
+    RefPtr<Frame> frame = ShareRefPtr(_frame.get());
+    if (!frame)
     {
       return;
     }
@@ -797,8 +796,8 @@ namespace krys::boo
       return;
     }
 
-    RefPtr<Page> page = ShareRefPtr(_page.get());
-    if (!page)
+    RefPtr<Frame> frame = ShareRefPtr(_frame.get());
+    if (!frame)
     {
       return;
     }
@@ -818,8 +817,7 @@ namespace krys::boo
       constexpr EnumSet<HitTestRequest::Type> hitType {
         HitTestRequest::Type::ReadOnly, HitTestRequest::Type::Active,
         HitTestRequest::Type::DisallowUserAgentShadowContent, HitTestRequest::Type::AllowChildFrameContent};
-      return ShareRefPtr(page->MainFrame()
-                           .GetEventHandler()
+      return ShareRefPtr(frame->GetEventHandler()
                            .HitTestResultAtPoint(LayoutPoint(documentPoint), hitType)
                            .InnerNonSharedElement());
     }();

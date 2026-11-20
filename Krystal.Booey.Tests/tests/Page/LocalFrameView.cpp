@@ -6,9 +6,8 @@
 #include "Krystal.Booey/HTML/Canvas/CanvasRenderingContext2D.hpp"
 #include "Krystal.Booey/HTML/Elements/HTMLCanvasElement.hpp"
 #include "Krystal.Booey/HTML/EventLoop/EventLoop.hpp"
+#include "Krystal.Booey/Page/Frame.hpp"
 #include "Krystal.Booey/Page/LocalDOMWindow.hpp"
-#include "Krystal.Booey/Page/LocalFrame.hpp"
-#include "Krystal.Booey/Page/Page.hpp"
 #include "Krystal.Booey/Rendering/RenderBox.hpp"
 #include "Krystal.Booey/Rendering/RenderView.hpp"
 #include "Krystal.Booey/Rendering/Style/RenderStyle+GettersInlines.hpp"
@@ -27,8 +26,7 @@ namespace krys::boo::tests
     /// @brief A parsed document shown in a page's main frame, with an 800x600 view.
     struct FrameFixture : ResolverFixture
     {
-      Ref<Page> TestPage {Page::Create()};
-      Ref<LocalFrame> Frame {ShareRef(TestPage->MainFrame())};
+      Ref<boo::Frame> Frame {boo::Frame::Create()};
 
       explicit FrameFixture(utf8_string &&markup) noexcept : ResolverFixture(krys::move(markup), WithView::No)
       {
@@ -82,14 +80,14 @@ namespace krys::boo::tests
     };
   }
 
-  TEST_CASE_METHOD(css::tests::ValueFixture, "LocalFrame: documents and views", "[Page][LocalFrame]")
+  TEST_CASE_METHOD(css::tests::ValueFixture, "Frame: documents and views", "[Page][Frame]")
   {
     auto document = ResolverFixture::Parse(u8"<!DOCTYPE html><p id=p>x</p>");
     CHECK_FALSE(document->Frame());
     CHECK_FALSE(document->View());
     CHECK_FALSE(document->GetRenderView());
 
-    auto frame = LocalFrame::Create();
+    auto frame = boo::Frame::Create();
     frame->CreateView({800, 600});
     auto &view = *frame->View();
     CHECK(&view.Frame() == frame.get());
@@ -134,7 +132,7 @@ namespace krys::boo::tests
 
     SECTION("A document outlives its frame")
     {
-      frame = LocalFrame::Create();
+      frame = boo::Frame::Create();
       CHECK_FALSE(document->Frame());
       CHECK_FALSE(document->HasLivingRenderTree());
       // Its style is still resolved, without a view, but it has no renderers.
@@ -333,7 +331,7 @@ namespace krys::boo::tests
       REQUIRE(empty->DocumentElement());
       REQUIRE(empty->Body());
       CHECK(empty->ShouldScheduleLayout());
-      auto frame = LocalFrame::Create();
+      auto frame = boo::Frame::Create();
       frame->CreateView({800, 600});
       REQUIRE_FALSE(empty->Body()->Remove().HasException());
       frame->SetDocument(ShareRefPtr<Document>(empty.get()));
@@ -368,8 +366,7 @@ namespace krys::boo::tests
     CHECK(EqualIgnoringSemanticColor(fixture.Rendered(u8"p").GetColor(), Black));
   }
 
-  TEST_CASE_METHOD(css::tests::ValueFixture, "Page: dark appearance and device scale factor",
-                   "[Page][LocalFrame]")
+  TEST_CASE_METHOD(css::tests::ValueFixture, "Page: dark appearance and device scale factor", "[Page][Frame]")
   {
     FrameFixture fixture {u8R"(<!DOCTYPE html><style>
       @media (prefers-color-scheme: dark) { p { color: rgb(0, 0, 255) } }
@@ -388,10 +385,10 @@ namespace krys::boo::tests
     auto hiDPI = document.Window()->MatchMedia(u8"(resolution: 2x)");
     CHECK_FALSE(hiDPI->Matches());
 
-    fixture.TestPage->SetUseDarkAppearance(true);
-    fixture.TestPage->SetDeviceScaleFactor(2);
-    CHECK(fixture.TestPage->UseDarkAppearance());
-    CHECK(fixture.TestPage->DeviceScaleFactor() == 2);
+    fixture.Frame->SetUseDarkAppearance(true);
+    fixture.Frame->SetDeviceScaleFactor(2);
+    CHECK(fixture.Frame->UseDarkAppearance());
+    CHECK(fixture.Frame->DeviceScaleFactor() == 2);
 
     document.UpdateStyleIfNeeded();
     CHECK(fixture.Rendered(u8"p").GetColor() == Blue);

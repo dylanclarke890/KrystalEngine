@@ -31,8 +31,7 @@
 #include "Krystal.Booey/DOM/Events/MouseEvent.hpp"
 #include "Krystal.Booey/DOM/Nodes/Document.hpp"
 #include "Krystal.Booey/Input/EventHandler.hpp"
-#include "Krystal.Booey/Page/LocalFrame.hpp"
-#include "Krystal.Booey/Page/Page.hpp"
+#include "Krystal.Booey/Page/Frame.hpp"
 #include "Krystal.Booey/Platform/Scrolling/ScrollbarTheme.hpp"
 #include "Krystal.Booey/Rendering/RenderBox.hpp"
 #include "Krystal.Booey/Rendering/RenderTheme.hpp"
@@ -137,11 +136,8 @@ namespace krys::boo::html
           {
             frame->GetEventHandler().SetCapturingMouseEventsElement(ShareRefPtr(this));
             _capturing = true;
-            if (auto *page = NodeDocument().GetPage())
-            {
-              page->RegisterPopupOpeningObserver(*this);
-              _popupObservedPage = CreateWeakPtr(page);
-            }
+            frame->RegisterPopupOpeningObserver(*this);
+            _popupObservedFrame = CreateWeakPtr(frame);
           }
         }
         auto oldUpDownState = _upDownState;
@@ -221,11 +217,11 @@ namespace krys::boo::html
 
   void SpinButtonElement::StopObservingPopups() noexcept
   {
-    if (auto *page = _popupObservedPage.get())
+    if (auto *frame = _popupObservedFrame.get())
     {
-      page->UnregisterPopupOpeningObserver(*this);
+      frame->UnregisterPopupOpeningObserver(*this);
     }
-    _popupObservedPage = nullptr;
+    _popupObservedFrame = nullptr;
   }
 
   bool SpinButtonElement::MatchesReadWritePseudoClass() const noexcept

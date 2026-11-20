@@ -37,7 +37,7 @@ namespace krys::boo::tests
     bool Defer {false};
     List<Pair<net::Url, Func<void(LoadResult &&)>>> Deferred;
 
-    void LoadResource(LocalFrame &, const net::ResourceRequest &request, const ResourceLoaderOptions &,
+    void LoadResource(boo::Frame &, const net::ResourceRequest &request, const ResourceLoaderOptions &,
                       Func<void(LoadResult &&)> &&completionHandler) noexcept override
     {
       Requests.push_back(request.Url().String());

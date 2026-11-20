@@ -6,7 +6,7 @@
 #include "Krystal.Booey/DOM/Events/MouseEvent.hpp"
 #include "Krystal.Booey/DOM/Nodes/Element.hpp"
 #include "Krystal.Booey/Page/Clients/ChromeClient.hpp"
-#include "Krystal.Booey/Page/Page.hpp"
+#include "Krystal.Booey/Page/Frame.hpp"
 
 namespace krys::boo::tests
 {
@@ -16,7 +16,7 @@ namespace krys::boo::tests
     class OffsetChromeClient final : public ChromeClient
     {
     public:
-      void AttachRootGraphicsLayer(LocalFrame &, GraphicsLayer *) noexcept override
+      void AttachRootGraphicsLayer(boo::Frame &, GraphicsLayer *) noexcept override
       {
       }
 
@@ -51,10 +51,10 @@ namespace krys::boo::tests
             "[DOM][SimulatedClick]")
   {
     auto chrome = CreateUnique<OffsetChromeClient>();
-    auto page = Page::Create(krys::move(chrome));
-    PageInFrameFixture fixture(*page, u8"<style>body{margin:0}</style>"
-                                      u8"<button id=button style='position:absolute;left:10px;top:20px;"
-                                      u8"width:40px;height:10px'></button>");
+    auto frame = boo::Frame::Create(krys::move(chrome));
+    PageInFrameFixture fixture(*frame, u8"<style>body{margin:0}</style>"
+                                       u8"<button id=button style='position:absolute;left:10px;top:20px;"
+                                       u8"width:40px;height:10px'></button>");
     auto &button = fixture.ById(u8"button");
     auto recorder = CreateRef<CoordinateRecorder>();
     button.AddEventListener(event_names::Click, recorder, false);

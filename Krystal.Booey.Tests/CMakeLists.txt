@@ -433,7 +433,7 @@ target_sources(Krystal.Booey.Tests
 		tests/Platform/Pasteboard/DragImage.cpp
 		tests/DOM/IntersectionObservers/IntersectionObserver.cpp
 		tests/DOM/ResizeObservers/ResizeObserver.cpp
-		tests/Page/Page.cpp
+		tests/Page/Frame.cpp
 		tests/Page/LocalDOMWindow.cpp
 		tests/Loader/DocumentLoader.cpp
 		tests/Loader/Icons/IconLoader.cpp

@@ -28,8 +28,8 @@
 #include "Krystal.Booey/DOM/Nodes/Document.hpp"
 #include "Krystal.Booey/Graphics/GraphicsContext.hpp"
 #include "Krystal.Booey/Graphics/ImageBuffers/ImageBuffer.hpp"
+#include "Krystal.Booey/Page/Frame.hpp"
 #include "Krystal.Booey/Page/LocalFrameView.hpp"
-#include "Krystal.Booey/Page/Page.hpp"
 #include "Krystal.Booey/Rendering/Layers/RenderLayer.hpp"
 #include "Krystal.Booey/Rendering/Painting/PaintInfo.hpp"
 #include "Krystal.Booey/Rendering/RenderElement.hpp"
@@ -286,8 +286,8 @@ namespace krys::boo
     {
       return;
     }
-    auto *page = renderer.GetDocument().GetPage();
-    if (!page)
+    auto *frame = renderer.GetDocument().Frame();
+    if (!frame)
     {
       return;
     }
@@ -316,7 +316,7 @@ namespace krys::boo
     _cssFilter = CSSFilterRenderer::Create(
       renderer, style.GetFilter(),
       {.ReferenceBox = renderer.ObjectBoundingBox(), .FilterRegion = filterRegion, .Scale = scale},
-      page->PreferredFilterRenderingModes(context), context);
+      frame->PreferredFilterRenderingModes(context), context);
     if (!_cssFilter)
     {
       return;

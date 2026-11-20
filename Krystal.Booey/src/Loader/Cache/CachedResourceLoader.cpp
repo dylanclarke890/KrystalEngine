@@ -30,8 +30,7 @@
 #include "Krystal.Booey/Loader/Cache/MemoryCache.hpp"
 #include "Krystal.Booey/Loader/LoaderStrategy.hpp"
 #include "Krystal.Booey/Page/Clients/ChromeClient.hpp"
-#include "Krystal.Booey/Page/LocalFrame.hpp"
-#include "Krystal.Booey/Page/Page.hpp"
+#include "Krystal.Booey/Page/Frame.hpp"
 #include "Krystal.Booey/Page/Settings.hpp"
 
 namespace krys::boo
@@ -101,7 +100,7 @@ namespace krys::boo
     return found != _documentResources.end() ? found->second.get() : nullptr;
   }
 
-  LocalFrame *CachedResourceLoader::Frame() const noexcept
+  boo::Frame *CachedResourceLoader::Frame() const noexcept
   {
     auto *document = GetDocument();
     return document ? document->Frame() : nullptr;
@@ -206,8 +205,8 @@ namespace krys::boo
     // SVG Images have unique security rules that prevent all subresource requests except for data urls.
     if (type != CachedResource::Type::MainResource)
     {
-      if (auto *page = Frame()->GetPage();
-          page && page->GetChromeClient().IsSVGImageChromeClient() && !url.ProtocolIsData())
+      if (auto *frame = Frame();
+          frame && frame->GetChromeClient().IsSVGImageChromeClient() && !url.ProtocolIsData())
       {
         return Unexpected<net::ResourceError>(net::ResourceError(utf8_string(ErrorDomainBooeyInternal), 0,
                                                                  url, u8"Not allowed to request resource",
@@ -311,7 +310,7 @@ namespace krys::boo
   void CachedResourceLoader::LoadDone() noexcept
   {
     Ref<CachedResourceLoader> protectedThis = ShareRef(*this);
-    if (RefPtr<LocalFrame> frame = ShareRefPtr(Frame()))
+    if (RefPtr<boo::Frame> frame = ShareRefPtr(Frame()))
     {
       frame->Loader().LoadDone();
     }

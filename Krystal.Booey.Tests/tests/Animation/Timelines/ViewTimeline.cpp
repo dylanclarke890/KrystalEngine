@@ -37,7 +37,7 @@ namespace krys::boo::tests
     void ScrollTo(AnimationPageFixture &fixture, int32 top) noexcept
     {
       fixture.ById(u8"scroller").SetScrollTop(top);
-      fixture.TestPage->UpdateRendering();
+      fixture.TestFrame->UpdateRendering();
     }
 
     KRYS_NODISCARD Ref<ViewTimeline> CreateTimeline(AnimationPageFixture &fixture,
@@ -156,7 +156,7 @@ namespace krys::boo::tests
       fixture.ById(u8"subject").Animate(List<InputKeyframe> {krys::move(from), krys::move(to)}, options);
     REQUIRE(result.HasValue());
     auto animation = result.ReleaseValue();
-    fixture.TestPage->UpdateRendering();
+    fixture.TestFrame->UpdateRendering();
 
     // The keyframes sit at the contain range's place in the cover range.
     auto keyframes = animation->GetKeyframeEffect()->GetKeyframes();

@@ -193,11 +193,11 @@ namespace krys::boo::tests
     (void)fixture.Window().RequestAnimationFrame([&](double) { ++frames; });
 
     document.Suspend(Reason);
-    fixture.TestPage->UpdateRendering();
+    fixture.Frame().UpdateRendering();
     CHECK(frames == 0);
 
     document.Resume(Reason);
-    fixture.TestPage->UpdateRendering();
+    fixture.Frame().UpdateRendering();
     CHECK(frames == 1);
   }
 }

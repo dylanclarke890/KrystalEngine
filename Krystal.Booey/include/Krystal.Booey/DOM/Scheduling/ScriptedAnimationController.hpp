@@ -37,7 +37,7 @@
 namespace krys::boo
 {
   class Document;
-  class Page;
+  class Frame;
 }
 
 namespace krys::boo::dom
@@ -95,7 +95,7 @@ namespace krys::boo::dom
     }
 
   private:
-    KRYS_NODISCARD Page *GetPage() const noexcept;
+    KRYS_NODISCARD boo::Frame *Frame() const noexcept;
 
     /// @brief Asks the page for a rendering update that runs the callbacks.
     void ScheduleAnimation() noexcept;

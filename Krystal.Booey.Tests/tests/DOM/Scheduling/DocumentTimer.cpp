@@ -3,8 +3,7 @@
 #include "Krystal.Booey.Tests/Loader/LoadTestUtils.hpp"
 #include "Krystal.Booey/DOM/Nodes/Document.hpp"
 #include "Krystal.Booey/HTML/EventLoop/EventLoop.hpp"
-#include "Krystal.Booey/Page/LocalFrame.hpp"
-#include "Krystal.Booey/Page/Page.hpp"
+#include "Krystal.Booey/Page/Frame.hpp"
 #include <string>
 
 namespace krys::boo::tests
@@ -129,7 +128,7 @@ namespace krys::boo::tests
     {
       auto timeout = document.StartTimer(5ms, [&] { order.emplace_back("timeout"); });
       auto interval = document.StartRepeatingTimer(5ms, [&] { order.emplace_back("interval"); });
-      fixture.TestPage->MainFrame().SetDocument(nullptr);
+      fixture.Frame().SetDocument(nullptr);
       CHECK_FALSE(timeout.IsActive());
       CHECK_FALSE(interval.IsActive());
       AdvanceTimers(10ms);

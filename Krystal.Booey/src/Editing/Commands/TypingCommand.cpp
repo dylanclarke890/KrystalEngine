@@ -37,7 +37,7 @@
 #include "Krystal.Booey/Editing/Selection/FrameSelection.hpp"
 #include "Krystal.Booey/Editing/Selection/VisibleUnits.hpp"
 #include "Krystal.Booey/HTML/Elements/HTMLElement.hpp"
-#include "Krystal.Booey/Page/LocalFrame.hpp"
+#include "Krystal.Booey/Page/Frame.hpp"
 #include "Krystal.Booey/Rendering/RenderObject.hpp"
 
 namespace krys::boo
@@ -311,7 +311,7 @@ namespace krys::boo
       return;
     }
 
-    RefPtr<LocalFrame> frame = ShareRefPtr(document.Frame());
+    RefPtr<Frame> frame = ShareRefPtr(document.Frame());
     auto command = Create(document, Type::InsertText, newText, options, compositionType);
     command->SetTriggeringEventIsUntrusted(triggeringEventIsUntrusted);
     ApplyTextInsertionCommand(frame.get(), *command, selectionForInsertion, currentSelection);
@@ -478,7 +478,7 @@ namespace krys::boo
   // events it fires (`input` from AppliedEditing) to the whole of the typing.
   void TypingCommand::TypingAddedToOpenCommand(Type commandTypeForAddedTyping) noexcept
   {
-    RefPtr<LocalFrame> protectedFrame = ShareRefPtr(GetDocument().Frame());
+    RefPtr<Frame> protectedFrame = ShareRefPtr(GetDocument().Frame());
 
     UpdatePreservesTypingStyle(commandTypeForAddedTyping);
 
@@ -633,7 +633,7 @@ namespace krys::boo
 
   void TypingCommand::DeleteKeyPressed(TextGranularity granularity, bool shouldAddToKillRing) noexcept
   {
-    RefPtr<LocalFrame> protectedFrame = ShareRefPtr(GetDocument().Frame());
+    RefPtr<Frame> protectedFrame = ShareRefPtr(GetDocument().Frame());
 
     VisibleSelection selectionToDelete;
     VisibleSelection selectionAfterUndo;
@@ -787,7 +787,7 @@ namespace krys::boo
 
   void TypingCommand::ForwardDeleteKeyPressed(TextGranularity granularity, bool shouldAddToKillRing) noexcept
   {
-    RefPtr<LocalFrame> protectedFrame = ShareRefPtr(GetDocument().Frame());
+    RefPtr<Frame> protectedFrame = ShareRefPtr(GetDocument().Frame());
 
     VisibleSelection selectionToDelete;
     VisibleSelection selectionAfterUndo;

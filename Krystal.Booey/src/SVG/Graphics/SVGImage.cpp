@@ -33,10 +33,9 @@
 #include "Krystal.Booey/Loader/DocumentLoader.hpp"
 #include "Krystal.Booey/Loader/DocumentWriter.hpp"
 #include "Krystal.Booey/Loader/FrameLoader.hpp"
-#include "Krystal.Booey/Page/LocalFrame.hpp"
+#include "Krystal.Booey/Page/Frame.hpp"
 #include "Krystal.Booey/Page/LocalFrameView.hpp"
 #include "Krystal.Booey/Page/LocalFrameViewLayoutContext.hpp"
-#include "Krystal.Booey/Page/Page.hpp"
 #include "Krystal.Booey/Page/Settings.hpp"
 #include "Krystal.Booey/Rendering/RenderBox.hpp"
 #include "Krystal.Booey/Rendering/Style/RenderStyle.hpp"
@@ -56,17 +55,17 @@ namespace krys::boo
   SVGImage::~SVGImage() noexcept
   {
     // Clear _page, so that SVGImageChromeClient knows we're destructed.
-    _page = nullptr;
+    _frame = nullptr;
   }
 
   RefPtr<SVGSvgElement> SVGImage::RootElement() const noexcept
   {
-    if (!_page)
+    if (!_frame)
     {
       return nullptr;
     }
 
-    auto *document = _page->MainFrame().Document();
+    auto *document = _frame->Document();
     if (!document)
     {
       return nullptr;
@@ -156,7 +155,7 @@ namespace krys::boo
                                              const RectF &dstRect, const RectF &srcRect,
                                              ImagePaintingOptions options) noexcept
   {
-    if (!_page)
+    if (!_frame)
     {
       return ImageDrawResult::DidNothing;
     }
@@ -233,7 +232,7 @@ namespace krys::boo
   ImageDrawResult SVGImage::Draw(GraphicsContext &context, const RectF &destination, const RectF &source,
                                  ImagePaintingOptions options) noexcept
   {
-    if (!_page)
+    if (!_frame)
     {
       return ImageDrawResult::DidNothing;
     }
@@ -317,12 +316,12 @@ namespace krys::boo
 
   LocalFrameView *SVGImage::FrameView() const noexcept
   {
-    if (!_page)
+    if (!_frame)
     {
       return nullptr;
     }
 
-    return _page->MainFrame().View();
+    return _frame->View();
   }
 
   bool SVGImage::HasRelativeWidth() const noexcept
@@ -440,23 +439,23 @@ namespace krys::boo
       // This will become an issue when SVGImage will be able to load other
       // SVGImage objects, but we're safe now, because SVGImage can only be
       // loaded by a top-level document.
-      _page = Page::Create(CreateUnique<SVGImageChromeClient>(this));
+      _frame = Frame::Create(CreateUnique<SVGImageChromeClient>(this));
 
       // The image's document takes the settings of the document that loaded it, and the appearance of what
       // shows it.
       auto observer = GetImageObserver();
       RefPtr<Settings> settings = observer ? ShareRefPtr(observer->GetSettings()) : nullptr;
 
-      auto &mainFrame = _page->MainFrame();
-      mainFrame.CreateView({});
+      auto &frame = *_frame;
+      frame.CreateView({});
       if (observer && observer->UseSystemDarkAppearance())
       {
-        _page->SetUseDarkAppearance(true);
+        _frame->SetUseDarkAppearance(true);
       }
-      auto &loader = mainFrame.Loader();
+      auto &loader = frame.Loader();
       loader.Init();
 
-      RefPtr<LocalFrameView> frameView = ShareRefPtr(mainFrame.View());
+      RefPtr<LocalFrameView> frameView = ShareRefPtr(frame.View());
       // SVG Images will always synthesize a viewBox, if it's not available, and thus never see scrollbars.
       frameView->SetScrollbarModes(ScrollbarMode::AlwaysOff, ScrollbarMode::AlwaysOff);
       frameView->SetTransparent(true); // SVG Images are transparent.
@@ -466,7 +465,7 @@ namespace krys::boo
       activeDocumentLoader->Writer().SetMimeType(u8"image/svg+xml");
       if (activeDocumentLoader->Writer().Begin(net::Url())) // create the empty document
       {
-        if (auto *document = mainFrame.Document(); document && settings)
+        if (auto *document = frame.Document(); document && settings)
         {
           Ref<Settings> documentSettings = settings;
           document->SetSettings(krys::move(documentSettings));
@@ -475,7 +474,7 @@ namespace krys::boo
         activeDocumentLoader->Writer().End();
       }
 
-      if (auto *document = mainFrame.Document())
+      if (auto *document = frame.Document())
       {
         document->UpdateLayoutIgnorePendingStylesheets();
       }
@@ -484,7 +483,7 @@ namespace krys::boo
       _intrinsicSize = SizeF(ContainerSize());
     }
 
-    return _page ? img::EncodedDataStatus::Complete : img::EncodedDataStatus::Unknown;
+    return _frame ? img::EncodedDataStatus::Complete : img::EncodedDataStatus::Unknown;
   }
 
   utf8_string SVGImage::FilenameExtension() const noexcept
@@ -496,12 +495,12 @@ namespace krys::boo
   {
     krys_debug_assert(element);
 
-    auto *page = element->NodeDocument().GetPage();
-    if (!page)
+    auto *frame = element->NodeDocument().Frame();
+    if (!frame)
     {
       return false;
     }
 
-    return page->GetChromeClient().IsSVGImageChromeClient();
+    return frame->GetChromeClient().IsSVGImageChromeClient();
   }
 }

@@ -15,7 +15,7 @@
 #include "Krystal.Booey/HTML/CustomElement/CustomElementRegistry.hpp"
 #include "Krystal.Booey/HTML/Elements/HTMLInputElement.hpp"
 #include "Krystal.Booey/HTML/Elements/HTMLSlotElement.hpp"
-#include "Krystal.Booey/Page/LocalFrame.hpp"
+#include "Krystal.Booey/Page/Frame.hpp"
 #include <string>
 
 namespace krys::boo::dom::tests
@@ -337,7 +337,7 @@ namespace krys::boo::dom::tests
   TEST_CASE("Inner invoke: listeners in a document that isn't fully active aren't called",
             "[EventDispatcher][dom:concept-event-listener-inner-invoke]")
   {
-    boo::tests::PaintFixture fixture(u8"<!DOCTYPE html><p id=p></p>", {200, 100}, true);
+    boo::tests::PaintFixture fixture(u8"<!DOCTYPE html><p id=p></p>");
     Ref<boo::Document> old = ShareRef(*fixture.Document);
     auto p = old->GetElementById(u8"p");
     REQUIRE(p);
@@ -456,7 +456,7 @@ namespace krys::boo::dom::tests
   TEST_CASE("Action versus occurrence: keyboard events a script dispatches don't type or move focus",
             "[EventDispatcher][dom:action-versus-occurrence]")
   {
-    boo::tests::PaintFixture fixture(u8"<!DOCTYPE html><input id=a><input id=b>", {200, 100}, true);
+    boo::tests::PaintFixture fixture(u8"<!DOCTYPE html><input id=a><input id=b>");
     auto &a = Downcast<HTMLInputElement>(*fixture.Document->GetElementById(u8"a"));
     a.Focus();
     REQUIRE(fixture.Document->FocusedElement() == &a);

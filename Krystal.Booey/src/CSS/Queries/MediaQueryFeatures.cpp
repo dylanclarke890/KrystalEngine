@@ -26,9 +26,8 @@
 #include "Krystal.Booey/CSS/Queries/GenericMediaQueryEvaluator.hpp"
 #include "Krystal.Booey/CSS/Queries/MediaQuery.hpp"
 #include "Krystal.Booey/Page/Clients/ChromeClient.hpp"
-#include "Krystal.Booey/Page/LocalFrame.hpp"
+#include "Krystal.Booey/Page/Frame.hpp"
 #include "Krystal.Booey/Page/LocalFrameView.hpp"
-#include "Krystal.Booey/Page/Page.hpp"
 #include "Krystal.Booey/Rendering/RenderView.hpp"
 #include "Krystal.Booey/Rendering/Style/RenderStyle+GettersInlines.hpp"
 #include "Krystal.Core/Threading/NeverDestroyed.hpp"
@@ -187,19 +186,19 @@ namespace krys::boo::css::mq::features
     ValueFunction _valueFunction;
   };
 
-  /// @brief The document's page, if its frame has one.
-  KRYS_NODISCARD static const Page *PageOf(const FeatureEvaluationContext &context) noexcept
+  /// @brief The document's frame, if it's in one.
+  KRYS_NODISCARD static const Frame *FrameOf(const FeatureEvaluationContext &context) noexcept
   {
-    return context.Document->GetPage();
+    return context.Document->Frame();
   }
 
-  /// @brief The chrome client of the document's page, which answers for the screen, the pointing devices
-  /// and the user's preferences; a frame without a page gets an empty chrome client's answers.
+  /// @brief The chrome client of the document's frame, which answers for the screen, the pointing devices
+  /// and the user's preferences; a document without a frame gets an empty chrome client's answers.
   KRYS_NODISCARD static const ChromeClient &ChromeOf(const FeatureEvaluationContext &context) noexcept
   {
-    if (auto *page = PageOf(context))
+    if (auto *frame = FrameOf(context))
     {
-      return page->GetChromeClient();
+      return frame->GetChromeClient();
     }
     static MainThreadNeverDestroyed<EmptyChromeClient> emptyChromeClient;
     return emptyChromeClient;
@@ -218,8 +217,8 @@ namespace krys::boo::css::mq::features
 
     if (mediaType == ScreenAtom())
     {
-      auto *page = PageOf(context);
-      return page ? page->DeviceScaleFactor() : 1.f;
+      auto *frame = FrameOf(context);
+      return frame ? frame->DeviceScaleFactor() : 1.f;
     }
     if (mediaType == PrintAtom())
     {
@@ -536,8 +535,8 @@ namespace krys::boo::css::mq::features
       {
         auto identifier = [&]
         {
-          auto *page = PageOf(context);
-          switch (page ? page->DisplayMode() : ApplicationDisplayMode::Browser)
+          auto *frame = FrameOf(context);
+          switch (frame ? frame->DisplayMode() : ApplicationDisplayMode::Browser)
           {
             case ApplicationDisplayMode::Fullscreen: return ValueId::Fullscreen;
             case ApplicationDisplayMode::Standalone: return ValueId::Standalone;
@@ -582,8 +581,8 @@ namespace krys::boo::css::mq::features
       u8"prefers-color-scheme", FixedVector {ValueId::Light, ValueId::Dark}, Dependency::Appearance,
       [](auto &context)
       {
-        auto *page = PageOf(context);
-        bool useDarkAppearance = page && page->UseDarkAppearance();
+        auto *frame = FrameOf(context);
+        bool useDarkAppearance = frame && frame->UseDarkAppearance();
         return MatchingIdentifiers {useDarkAppearance ? ValueId::Dark : ValueId::Light};
       }};
     return schema;

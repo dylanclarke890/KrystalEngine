@@ -109,7 +109,7 @@ namespace krys::ui
       return _view && _view->_displayColour.HighDynamicRange;
     }
 
-    void RunOpenPanel(boo::LocalFrame &, boo::FileChooser &chooser) noexcept override
+    void RunOpenPanel(boo::Frame &, boo::FileChooser &chooser) noexcept override
     {
       if (_fileChooserHandler)
       {
@@ -158,7 +158,7 @@ namespace krys::ui
       return _validationMessage && _validationMessage->IsShownAt(anchor);
     }
 
-    void AttachRootGraphicsLayer(boo::LocalFrame &, boo::GraphicsLayer *layer) noexcept override
+    void AttachRootGraphicsLayer(boo::Frame &, boo::GraphicsLayer *layer) noexcept override
     {
       _rootLayer = layer ? &Downcast<GraphicsLayerTextureMapper>(*layer) : nullptr;
     }
@@ -385,8 +385,7 @@ namespace krys::ui
       return boo::AnyDragSourceAction();
     }
 
-    void StartDrag(boo::DragItem item, boo::dom::DataTransfer &dataTransfer,
-                   boo::LocalFrame &) noexcept override
+    void StartDrag(boo::DragItem item, boo::dom::DataTransfer &dataTransfer, boo::Frame &) noexcept override
     {
       if (_view)
       {
@@ -589,9 +588,8 @@ namespace krys::ui
   }
 
   View::View(const SizeI &viewportSize) noexcept
-      : _page(boo::Page::Create(CreateChromeClient(_chromeClient), CreateEditorClient(_editorClient),
-                                CreateFrameLoaderClient(_frameLoaderClient), CreateDragClient(_dragClient))),
-        _frame(ShareRef(_page->MainFrame()))
+      : _frame(boo::Frame::Create(CreateChromeClient(_chromeClient), CreateEditorClient(_editorClient),
+                                  CreateFrameLoaderClient(_frameLoaderClient), CreateDragClient(_dragClient)))
   {
     static std::once_flag valuePool;
     std::call_once(valuePool, [] { boo::css::StaticValuePool::Init(); });
@@ -835,14 +833,14 @@ namespace krys::ui
     {
       return;
     }
-    _page->SetDeviceScaleFactor(scale);
+    _frame->SetDeviceScaleFactor(scale);
     // The viewport's CSS pixels change with it.
     Resize(_viewportPixels);
   }
 
   float View::DeviceScaleFactor() const noexcept
   {
-    return _page->DeviceScaleFactor();
+    return _frame->DeviceScaleFactor();
   }
 
   PointI View::ToPage(const PointI &point) const noexcept
@@ -893,8 +891,8 @@ namespace krys::ui
 
     // The overlay's page shares the event loop, and updates with the page.
     bool overlayUpdated = false;
-    if (_overlay && _overlay->ContentView().GetPage().IsVisible()
-        && _overlay->ContentView().GetPage().IsRenderingUpdateScheduled())
+    if (_overlay && _overlay->ContentView().Frame().IsVisible()
+        && _overlay->ContentView().Frame().IsRenderingUpdateScheduled())
     {
       _overlay->ContentView().UpdateRendering();
       overlayUpdated = true;
@@ -902,9 +900,9 @@ namespace krys::ui
 
     // Each frame is a rendering opportunity, except for a hidden page, whose update waits until it's shown.
     bool updated = overlayUpdated;
-    if (_page->IsVisible() && _page->IsRenderingUpdateScheduled())
+    if (_frame->IsVisible() && _frame->IsRenderingUpdateScheduled())
     {
-      _page->UpdateRendering();
+      _frame->UpdateRendering();
       _needsPaint = true;
       updated = true;
     }
@@ -920,7 +918,7 @@ namespace krys::ui
 
   void View::UpdateRendering() noexcept
   {
-    _page->UpdateRendering();
+    _frame->UpdateRendering();
     _needsPaint = true;
   }
 
@@ -1483,8 +1481,8 @@ namespace krys::ui
         _penButton = boo::MouseButton::None;
         _penButtons = 0;
         handler.CancelMousePress();
-        _page->GetPointerCaptureController().CancelPointer(boo::PenPointerId,
-                                                           _frame->View()->WindowToContents(intPoint));
+        _frame->GetPointerCaptureController().CancelPointer(boo::PenPointerId,
+                                                            _frame->View()->WindowToContents(intPoint));
         break;
       }
     }
@@ -1623,7 +1621,7 @@ namespace krys::ui
           auto first = _touches[0].Point.Pos();
           auto second = _touches[1].Point.Pos();
           auto centre = PointD((first.X() + second.X()) / 2, (first.Y() + second.Y()) / 2);
-          _pinchStartScale = _page->PageScaleFactor();
+          _pinchStartScale = _frame->PageScaleFactor();
           _pinchStartDistance = std::hypot(second.X() - first.X(), second.Y() - first.Y());
           auto scroll = ScrollPosition();
           _pinchDocumentPoint = PointD((scroll.X() + centre.X()) / _pinchStartScale,
@@ -1754,8 +1752,8 @@ namespace krys::ui
     {
       boo::PlatformTouchPoint point(id, boo::PlatformTouchPoint::TouchCancelled, position, position, {}, 0,
                                     0);
-      _page->GetPointerCaptureController().CancelPointer(boo::PointerEvent::PointerIdForTouch(point),
-                                                         view->WindowToContents(FlooredPointI(position)));
+      _frame->GetPointerCaptureController().CancelPointer(boo::PointerEvent::PointerIdForTouch(point),
+                                                          view->WindowToContents(FlooredPointI(position)));
       PerformMicrotaskCheckpoint();
     }
   }
@@ -1858,7 +1856,7 @@ namespace krys::ui
     // The document point that was between the touches stays between them.
     PointI origin(static_cast<int32>(std::lround(_pinchDocumentPoint.X() * scale - centre.X())),
                   static_cast<int32>(std::lround(_pinchDocumentPoint.Y() * scale - centre.Y())));
-    _page->SetPageScaleFactor(scale, origin);
+    _frame->SetPageScaleFactor(scale, origin);
     PerformMicrotaskCheckpoint();
     _needsPaint = true;
   }
@@ -1923,7 +1921,7 @@ namespace krys::ui
 
     // The chrome client answers the pointing device media features from these.
     _pointingDevices = devices;
-    _page->UpdateStyleAfterChangeInEnvironment();
+    _frame->UpdateStyleAfterChangeInEnvironment();
   }
 
   pal::CursorShape View::CurrentCursor() const noexcept
@@ -2483,19 +2481,19 @@ namespace krys::ui
     if (!focused && _pointerLocked)
     {
       (void)UnlockPointer();
-      _page->GetPointerLockController().DidLosePointerLock();
+      _frame->GetPointerLockController().DidLosePointerLock();
     }
     PerformMicrotaskCheckpoint();
   }
 
   void View::SetVisible(bool visible) noexcept
   {
-    _page->SetIsVisible(visible);
+    _frame->SetIsVisible(visible);
   }
 
   bool View::IsVisible() const noexcept
   {
-    return _page->IsVisible();
+    return _frame->IsVisible();
   }
 
   void View::SetDisplayColour(const pal::DisplayColour &colour) noexcept
@@ -2505,17 +2503,17 @@ namespace krys::ui
       return;
     }
     _displayColour = colour;
-    _page->ScreenPropertiesDidChange();
+    _frame->ScreenPropertiesDidChange();
   }
 
   void View::SetFramesPerSecond(uint32 framesPerSecond) noexcept
   {
-    _page->SetDisplayNominalFramesPerSecond(framesPerSecond);
+    _frame->SetDisplayNominalFramesPerSecond(framesPerSecond);
   }
 
   void View::SetImageAnimationEnabled(bool enabled) noexcept
   {
-    _page->SetImageAnimationEnabled(enabled);
+    _frame->SetImageAnimationEnabled(enabled);
   }
 
   void View::SetNavigationHandler(Func<void(const NavigationRequest &)> &&handler) noexcept
@@ -2628,12 +2626,12 @@ namespace krys::ui
     bool inView = point.X() >= 0 && point.Y() >= 0 && point.X() < size.Width() && point.Y() < size.Height();
     if (inView)
     {
-      drag.Operation = _page->GetDragController().DragEnteredOrUpdated(*_frame, krys::move(data));
+      drag.Operation = _frame->GetDragController().DragEnteredOrUpdated(*_frame, krys::move(data));
       drag.InView = true;
     }
     else if (drag.InView)
     {
-      _page->GetDragController().DragExited(*_frame, krys::move(data));
+      _frame->GetDragController().DragExited(*_frame, krys::move(data));
       drag.InView = false;
       drag.Operation = null;
     }
@@ -2649,7 +2647,7 @@ namespace krys::ui
       _needsPaint = true;
     }
 
-    auto &controller = _page->GetDragController();
+    auto &controller = _frame->GetDragController();
     EnumSet<boo::DragOperation> operation;
     if (drag.InView)
     {
@@ -2679,7 +2677,7 @@ namespace krys::ui
                                                   const pal::DragInput &input) noexcept
   {
     auto point = ToPage(viewPoint);
-    auto &controller = _page->GetDragController();
+    auto &controller = _frame->GetDragController();
     if (input.Action == pal::DragAction::Entered)
     {
       _systemDrag = SystemDrag {};

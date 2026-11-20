@@ -9,7 +9,7 @@
 #include "Krystal.Booey/HTML/Elements/HTMLElement.hpp"
 #include "Krystal.Booey/HTML/EventLoop/EventLoop.hpp"
 #include "Krystal.Booey/HTML/Parser/DocumentParser.hpp"
-#include "Krystal.Booey/Page/LocalFrame.hpp"
+#include "Krystal.Booey/Page/Frame.hpp"
 
 namespace krys::boo::html::tests
 {
@@ -69,11 +69,11 @@ namespace krys::boo::html::tests
   /// elements.
   struct CustomElementFixture : css::tests::ValueFixture
   {
-    RefPtr<LocalFrame> Frame;
+    RefPtr<boo::Frame> Frame;
     Ref<HTMLDocument> Document;
     Log Calls;
 
-    CustomElementFixture() noexcept : Frame(LocalFrame::Create()), Document(CreateRef<HTMLDocument>())
+    CustomElementFixture() noexcept : Frame(boo::Frame::Create()), Document(CreateRef<HTMLDocument>())
     {
       EventLoop::Current().RunUntilIdle();
       Frame->CreateView({200, 100});

@@ -46,7 +46,7 @@
 #include "Krystal.Booey/HTML/Elements/HTMLSelectElement.hpp"
 #include "Krystal.Booey/HTML/Elements/HTMLTextFormControlElement.hpp"
 #include "Krystal.Booey/HTML/EventLoop/EventLoop.hpp"
-#include "Krystal.Booey/Page/LocalFrame.hpp"
+#include "Krystal.Booey/Page/Frame.hpp"
 #include "Krystal.Booey/Page/LocalFrameView.hpp"
 #include "Krystal.Booey/Page/Settings.hpp"
 #include "Krystal.Booey/Platform/SimpleCaretAnimator.hpp"
@@ -2383,7 +2383,7 @@ namespace krys::boo
     return RendererForCaretPainting(_position.DeepEquivalent().DeprecatedNode());
   }
 
-  void DragCaretController::PaintDragCaret(LocalFrame *frame, GraphicsContext &context,
+  void DragCaretController::PaintDragCaret(Frame *frame, GraphicsContext &context,
                                            const LayoutPoint &paintOffset) const noexcept
   {
     auto *node = _position.DeepEquivalent().DeprecatedNode();

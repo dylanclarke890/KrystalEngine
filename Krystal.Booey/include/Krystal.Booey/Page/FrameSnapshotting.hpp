@@ -39,8 +39,8 @@
 
 namespace krys::boo
 {
+  class Frame;
   class ImageBuffer;
-  class LocalFrame;
   class Node;
 
   /// @brief What a snapshot paints, and how.
@@ -78,17 +78,16 @@ namespace krys::boo
   /// for the view's), at the device scale factor; null if the frame has no page or the rect is empty.
   /// @note Shareable and accelerated snapshots are the same as others: every image buffer records a display
   /// list.
-  KRYS_NODISCARD RefPtr<ImageBuffer> SnapshotFrameRect(LocalFrame &, const RectI &, SnapshotOptions) noexcept;
+  KRYS_NODISCARD RefPtr<ImageBuffer> SnapshotFrameRect(Frame &, const RectI &, SnapshotOptions) noexcept;
 
   /// @brief A snapshot of @p imageRect, clipped to @p clipRects if there are any.
-  KRYS_NODISCARD RefPtr<ImageBuffer> SnapshotFrameRectWithClip(LocalFrame &, const RectI &,
-                                                               const List<RectF> &clipRects,
-                                                               SnapshotOptions) noexcept;
+  KRYS_NODISCARD RefPtr<ImageBuffer>
+    SnapshotFrameRectWithClip(Frame &, const RectI &, const List<RectF> &clipRects, SnapshotOptions) noexcept;
 
   /// @brief A snapshot of @p node and its descendants alone, on a transparent background; null if it isn't
   /// rendered.
-  KRYS_NODISCARD RefPtr<ImageBuffer> SnapshotNode(LocalFrame &, boo::Node &, SnapshotOptions) noexcept;
+  KRYS_NODISCARD RefPtr<ImageBuffer> SnapshotNode(Frame &, boo::Node &, SnapshotOptions) noexcept;
 
   /// @brief A snapshot of the frame's selection alone; null if it isn't a range or its bounds are empty.
-  KRYS_NODISCARD RefPtr<ImageBuffer> SnapshotSelection(LocalFrame &, SnapshotOptions) noexcept;
+  KRYS_NODISCARD RefPtr<ImageBuffer> SnapshotSelection(Frame &, SnapshotOptions) noexcept;
 }

@@ -39,9 +39,8 @@
 #include "Krystal.Booey/HTML/EventLoop/EventLoop.hpp"
 #include "Krystal.Booey/Page/Clients/ChromeClient.hpp"
 #include "Krystal.Booey/Page/DOMSelection.hpp"
-#include "Krystal.Booey/Page/LocalFrame.hpp"
+#include "Krystal.Booey/Page/Frame.hpp"
 #include "Krystal.Booey/Page/LocalFrameView.hpp"
-#include "Krystal.Booey/Page/Page.hpp"
 #include "Krystal.Booey/Page/Scrolling/ScrollBehavior.hpp"
 #include "Krystal.Booey/Page/VisualViewport.hpp"
 #include <limits>
@@ -100,16 +99,10 @@ namespace krys::boo
     }
   }
 
-  LocalFrame *LocalDOMWindow::Frame() const noexcept
+  boo::Frame *LocalDOMWindow::Frame() const noexcept
   {
     auto *document = Document();
     return document ? document->Frame() : nullptr;
-  }
-
-  Page *LocalDOMWindow::GetPage() const noexcept
-  {
-    auto *frame = Frame();
-    return frame ? frame->GetPage() : nullptr;
   }
 
   bool LocalDOMWindow::IsCurrentlyDisplayedInFrame() const noexcept
@@ -136,8 +129,8 @@ namespace krys::boo
   void LocalDOMWindow::Focus() noexcept
   {
     // Let current be this's navigable. If current is null, then return.
-    auto *page = GetPage();
-    if (!page)
+    auto *frame = Frame();
+    if (!frame)
     {
       return;
     }
@@ -145,7 +138,7 @@ namespace krys::boo
     // to indicate to the user that the page is attempting to gain focus: the host decides whether to bring
     // its window to the front. The focusing steps would focus the document's viewport, but the focused
     // element is kept, as browsers do.
-    page->GetChromeClient().Focus();
+    frame->GetChromeClient().Focus();
   }
 
   bool LocalDOMWindow::IsNamedObject(const Element &element, DOMStringView name) noexcept
@@ -439,8 +432,7 @@ namespace krys::boo
     // Page zoom applies to all frames synchronously, so include it in devicePixelRatio
     // for both main frame and iframes. FrameScaleFactor() doesn't include page zoom
     // since page zoom is applied globally for rendering.
-    auto *page = frame->GetPage();
-    return (page ? page->DeviceScaleFactor() : 1.f) * frame->FrameScaleFactor() * frame->PageZoomFactor();
+    return frame->DeviceScaleFactor() * frame->FrameScaleFactor() * frame->PageZoomFactor();
   }
 
   Ref<CSSStyleDeclaration> LocalDOMWindow::GetComputedStyle(Element &element,

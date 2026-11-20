@@ -357,7 +357,7 @@ namespace krys::boo::dom::tests
 
     SECTION("Milliseconds since the window's time origin, with their fraction")
     {
-      boo::tests::PaintFixture fixture(u8"<!DOCTYPE html>", {200, 100}, true);
+      boo::tests::PaintFixture fixture(u8"<!DOCTYPE html>");
       auto *window = fixture.Document->Window();
       REQUIRE(window);
       loop.Run(window->TimeOrigin() + 2'500us);
@@ -369,7 +369,7 @@ namespace krys::boo::dom::tests
     {
       auto event = CreateRef<Event>(event_names::Click);
       loop.Run(loop.Now() + 10ms);
-      boo::tests::PaintFixture fixture(u8"<!DOCTYPE html>", {200, 100}, true);
+      boo::tests::PaintFixture fixture(u8"<!DOCTYPE html>");
       REQUIRE(fixture.Document->Window());
       CHECK(event->TimeStampForBindings(*fixture.Document) == 0);
     }

@@ -47,16 +47,15 @@
 #include "Krystal.Booey/Loader/FrameLoadRequest.hpp"
 #include "Krystal.Booey/Loader/NavigationAction.hpp"
 #include "Krystal.Booey/Page/Clients/ChromeClient.hpp"
+#include "Krystal.Booey/Page/Frame.hpp"
 #include "Krystal.Booey/Page/LocalDOMWindow.hpp"
-#include "Krystal.Booey/Page/LocalFrame.hpp"
 #include "Krystal.Booey/Page/LocalFrameView.hpp"
-#include "Krystal.Booey/Page/Page.hpp"
 #include "Krystal.Core/Strings/ASCII.hpp"
 #include "Krystal.Core/Utils/SetForScope.hpp"
 
 namespace krys::boo
 {
-  FrameLoader::FrameLoader(LocalFrame &frame, UniquePtr<LocalFrameLoaderClient> &&client) noexcept
+  FrameLoader::FrameLoader(boo::Frame &frame, UniquePtr<LocalFrameLoaderClient> &&client) noexcept
       : _frame(frame), _client(client ? krys::move(client) : CreateUnique<EmptyFrameLoaderClient>())
   {
   }
@@ -199,8 +198,7 @@ namespace krys::boo
     }
 
     // The old document is unloaded, unless it's the document of an SVG image, which fires no events.
-    if (_documentLoader
-        && !(_frame.GetPage() && _frame.GetPage()->GetChromeClient().IsSVGImageChromeClient()))
+    if (_documentLoader && !_frame.GetChromeClient().IsSVGImageChromeClient())
     {
       DispatchUnloadEvents();
     }
@@ -472,7 +470,7 @@ namespace krys::boo
                 || submission->GetMethod() == FormSubmission::Method::Get);
 
     auto *document = _frame.Document();
-    if (!_frame.GetPage() || !document || submission->Action().IsEmpty())
+    if (!document || submission->Action().IsEmpty())
     {
       return;
     }
@@ -499,7 +497,7 @@ namespace krys::boo
     // The navigation is planned for a later task, which a later submission of the form cancels.
     html::EventLoop::Current().QueueTask(
       html::TaskSource::DOMManipulation, *document,
-      [this, frame = Ref<LocalFrame>(ShareRef(_frame)), submission = krys::move(submission)]
+      [this, frame = Ref<boo::Frame>(ShareRef(_frame)), submission = krys::move(submission)]
       {
         auto *document = _frame.Document();
         if (submission->WasCancelled() || !document || !IsNavigationAllowed())
@@ -537,7 +535,7 @@ namespace krys::boo
     _client->DispatchNewWindowRequested(action, request, formSubmission, frameName);
   }
 
-  LocalFrame *FrameLoader::FindFrameForNavigation(DOMStringView name) const noexcept
+  boo::Frame *FrameLoader::FindFrameForNavigation(DOMStringView name) const noexcept
   {
     // https://html.spec.whatwg.org/#the-rules-for-choosing-a-navigable
     // 1. Let chosen be null.
@@ -582,7 +580,7 @@ namespace krys::boo
 
   void FrameLoader::LoadInSameDocument(const net::Url &url) noexcept
   {
-    Ref<LocalFrame> protectedFrame = ShareRef(_frame);
+    Ref<boo::Frame> protectedFrame = ShareRef(_frame);
     RefPtr<boo::Document> document = ShareRefPtr(_frame.Document());
     if (!document)
     {
@@ -610,7 +608,7 @@ namespace krys::boo
 
   void FrameLoader::FinishedParsing() noexcept
   {
-    Ref<LocalFrame> frame = ShareRef(_frame);
+    Ref<boo::Frame> frame = ShareRef(_frame);
     if (_state == FrameState::CommittedPage)
     {
       _client->DispatchDidFinishDocumentLoad();

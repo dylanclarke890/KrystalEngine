@@ -25,10 +25,9 @@
 
 #include "Krystal.Booey/Page/VisualViewport.hpp"
 #include "Krystal.Booey/DOM/Nodes/Document.hpp"
+#include "Krystal.Booey/Page/Frame.hpp"
 #include "Krystal.Booey/Page/LocalDOMWindow.hpp"
-#include "Krystal.Booey/Page/LocalFrame.hpp"
 #include "Krystal.Booey/Page/LocalFrameView.hpp"
-#include "Krystal.Booey/Page/Page.hpp"
 
 namespace krys::boo
 {
@@ -41,7 +40,7 @@ namespace krys::boo
     return AdoptRef(*new VisualViewport(window));
   }
 
-  LocalFrame *VisualViewport::Frame() const noexcept
+  boo::Frame *VisualViewport::Frame() const noexcept
   {
     auto *window = _window.get();
     return window ? window->Frame() : nullptr;
@@ -151,10 +150,10 @@ namespace krys::boo
         width = visualViewportRect.Width() / pageZoomFactor;
         height = visualViewportRect.Height() / pageZoomFactor;
       }
-      if (auto *page = frame->GetPage())
+      if (frame)
       {
         // FIXME: Divided by the chrome client's base viewport layout size scale factor, once it has one.
-        scale = page->PageScaleFactor();
+        scale = frame->PageScaleFactor();
       }
     }
 

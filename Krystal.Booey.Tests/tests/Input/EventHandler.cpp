@@ -12,9 +12,8 @@
 #include "Krystal.Booey/HTML/Algorithms/FocusAlgorithms.hpp"
 #include "Krystal.Booey/HTML/EventLoop/EventLoop.hpp"
 #include "Krystal.Booey/Input/LegacyKeyCodes.hpp"
+#include "Krystal.Booey/Page/Frame.hpp"
 #include "Krystal.Booey/Page/LocalDOMWindow.hpp"
-#include "Krystal.Booey/Page/LocalFrame.hpp"
-#include "Krystal.Booey/Page/Page.hpp"
 #include "Krystal.Booey/Page/Settings.hpp"
 #include "Krystal.Booey/Rendering/RenderView.hpp"
 #include <string>
@@ -73,8 +72,7 @@ namespace krys::boo::tests
 
       explicit MouseFixture(utf8_stringview markup, bool recordAtDocument = true) noexcept
           : PaintFixture(u8"<!DOCTYPE html><style>body{margin:0;font:16px sans-serif}</style>"
-                           + utf8_string(markup),
-                         {200, 100}, true)
+                         + utf8_string(markup))
       {
         (void)Document->UpdateLayout();
         if (!recordAtDocument)
@@ -752,9 +750,9 @@ namespace krys::boo::tests
       for (int32 frame = 0; frame < 120; ++frame)
       {
         loop.Run(loop.Now() + std::chrono::milliseconds(16));
-        if (fixture.TestPage->IsRenderingUpdateScheduled())
+        if (fixture.Frame->IsRenderingUpdateScheduled())
         {
-          fixture.TestPage->UpdateRendering();
+          fixture.Frame->UpdateRendering();
         }
       }
       CHECK(view->ScrollY() % 100 == 0);

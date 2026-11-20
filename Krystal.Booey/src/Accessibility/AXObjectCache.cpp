@@ -68,9 +68,8 @@
 #include "Krystal.Booey/Infra/StringAlgorithms.hpp"
 #include "Krystal.Booey/MathML/Elements/MathMLElement.hpp"
 #include "Krystal.Booey/Page/Clients/ChromeClient.hpp"
-#include "Krystal.Booey/Page/LocalFrame.hpp"
+#include "Krystal.Booey/Page/Frame.hpp"
 #include "Krystal.Booey/Page/LocalFrameView.hpp"
-#include "Krystal.Booey/Page/Page.hpp"
 #include "Krystal.Booey/Rendering/FormControls/RenderMenuList.hpp"
 #include "Krystal.Booey/Rendering/FormControls/RenderMeter.hpp"
 #include "Krystal.Booey/Rendering/FormControls/RenderProgress.hpp"
@@ -2716,11 +2715,9 @@ namespace krys::boo
 
   void AXObjectCache::OnDocumentLoaded() noexcept
   {
-    // Only a page's main document reports a new document; a frame's reports a layout.
-    auto *frame = _document.Frame();
-    auto *page = frame ? frame->GetPage() : nullptr;
-    auto notification = page && &page->MainFrame() == frame ? AXNotification::NewDocumentLoadComplete
-                                                            : AXNotification::LayoutComplete;
+    // Only a document shown in a frame reports a new document; another reports a layout.
+    auto notification =
+      _document.Frame() ? AXNotification::NewDocumentLoadComplete : AXNotification::LayoutComplete;
     // The web area's object may not exist yet, and making it may not be safe now.
     _deferredNotifications.emplace_back(ShareRef<boo::Node>(_document), notification);
     StartPerformCacheUpdateTimer();
@@ -2948,7 +2945,7 @@ namespace krys::boo
     }
 
     auto textChanges = std::exchange(_textChangesToPost, {});
-    auto *page = _document.GetPage();
+    auto *frame = _document.Frame();
     auto *view = _document.View();
     for (const auto &textChange : textChanges)
     {
@@ -2957,12 +2954,12 @@ namespace krys::boo
         continue;
       }
       // As for the notifications, the host mustn't ask about the object mid-layout or with style out of date.
-      if (!page || !view || view->LayoutContext().IsInLayout() || _document.ChildNeedsStyleRecalc())
+      if (!frame || !view || view->LayoutContext().IsInLayout() || _document.ChildNeedsStyleRecalc())
       {
         break;
       }
-      page->GetChromeClient().PostAccessibilityTextChange(*textChange.Object, textChange.Change,
-                                                          textChange.Offset, textChange.Text);
+      frame->GetChromeClient().PostAccessibilityTextChange(*textChange.Object, textChange.Change,
+                                                           textChange.Offset, textChange.Text);
     }
   }
 
@@ -3012,9 +3009,9 @@ namespace krys::boo
   {
     // The host refers to objects by ID, so it has nothing to make for a new one; it's told when one goes, to
     // let go of what it made for it.
-    if (auto *page = _document.GetPage())
+    if (auto *frame = _document.Frame())
     {
-      page->GetChromeClient().AccessibilityObjectDetached(object, detachmentType);
+      frame->GetChromeClient().AccessibilityObjectDetached(object, detachmentType);
     }
   }
 
@@ -3022,13 +3019,13 @@ namespace krys::boo
   {
     // The host may ask about the object, which mustn't happen in the middle of a layout or with style out of
     // date.
-    auto *page = _document.GetPage();
+    auto *frame = _document.Frame();
     auto *view = _document.View();
-    if (!page || !view || view->LayoutContext().IsInLayout() || _document.ChildNeedsStyleRecalc())
+    if (!frame || !view || view->LayoutContext().IsInLayout() || _document.ChildNeedsStyleRecalc())
     {
       return;
     }
-    page->GetChromeClient().PostAccessibilityNotification(object, notification);
+    frame->GetChromeClient().PostAccessibilityNotification(object, notification);
   }
 
   utf8_stringview NotificationToString(AXNotification notification) noexcept

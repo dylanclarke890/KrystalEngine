@@ -64,14 +64,14 @@ namespace krys::boo
     KRYS_NODISCARD RefPtr<SVGImage> ProtectedImage() const noexcept
     {
       auto *image = _image.get();
-      if (!image || !image->InternalPage())
+      if (!image || !image->InternalFrame())
       {
         return nullptr;
       }
       return ShareRefPtr(image);
     }
 
-    void AttachRootGraphicsLayer(LocalFrame &, GraphicsLayer *) noexcept final
+    void AttachRootGraphicsLayer(Frame &, GraphicsLayer *) noexcept final
     {
     }
 

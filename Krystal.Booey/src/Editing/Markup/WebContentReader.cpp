@@ -27,13 +27,13 @@
 #include "Krystal.Booey/DOM/Nodes/Document.hpp"
 #include "Krystal.Booey/DOM/Nodes/DocumentFragment.hpp"
 #include "Krystal.Booey/Editing/Markup/Markup.hpp"
-#include "Krystal.Booey/Page/LocalFrame.hpp"
+#include "Krystal.Booey/Page/Frame.hpp"
 #include "Krystal.Core/Utils/Move.hpp"
 #include "Krystal.Net/Url.hpp"
 
 namespace krys::boo
 {
-  FrameWebContentReader::FrameWebContentReader(LocalFrame &frame) noexcept : _frame(CreateWeakPtr(&frame))
+  FrameWebContentReader::FrameWebContentReader(boo::Frame &frame) noexcept : _frame(CreateWeakPtr(&frame))
   {
   }
 
@@ -49,7 +49,7 @@ namespace krys::boo
     return ContentOrigin().empty() ? MSOListQuirks::CheckIfNeeded : MSOListQuirks::Disabled;
   }
 
-  WebContentReader::WebContentReader(LocalFrame &frame, dom::SimpleRange context,
+  WebContentReader::WebContentReader(boo::Frame &frame, dom::SimpleRange context,
                                      bool allowPlainText) noexcept
       : FrameWebContentReader(frame), _context(krys::move(context)), _allowPlainText(allowPlainText)
   {

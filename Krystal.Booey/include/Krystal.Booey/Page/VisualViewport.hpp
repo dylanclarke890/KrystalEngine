@@ -33,8 +33,8 @@
 
 namespace krys::boo
 {
+  class Frame;
   class LocalDOMWindow;
-  class LocalFrame;
 
   /// @brief The part of the page the user sees: the layout viewport, as pages aren't pinch-zoomed. It fires
   /// `resize` as its size changes, and `scroll` as it moves within the layout viewport (never, at scale 1).
@@ -84,7 +84,7 @@ namespace krys::boo
     void Update() noexcept;
 
   private:
-    KRYS_NODISCARD LocalFrame *Frame() const noexcept;
+    KRYS_NODISCARD boo::Frame *Frame() const noexcept;
 
     void UpdateFrameLayout() const noexcept;
   };

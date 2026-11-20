@@ -21,7 +21,7 @@
 #include "Krystal.Booey/HTML/Elements/HTMLElement.hpp"
 #include "Krystal.Booey/HTML/Elements/HTMLImageElement.hpp"
 #include "Krystal.Booey/HTML/ImageData/ImageData.hpp"
-#include "Krystal.Booey/Page/Page.hpp"
+#include "Krystal.Booey/Page/Frame.hpp"
 #include "Krystal.Booey/SVG/Elements/SVGImageElement.hpp"
 #include "Krystal.Image.Tests/TestImages.hpp"
 #include <cmath>
@@ -580,12 +580,12 @@ namespace krys::boo::tests
     {
       style::tests::ResolverFixture fixture(u8"<!DOCTYPE html><canvas id=canvas width=20 height=10></canvas>",
                                             style::tests::WithView::No);
-      auto page = Page::Create(CreateUnique<AcceleratingChromeClient>());
-      auto &client = static_cast<AcceleratingChromeClient &>(page->GetChromeClient());
-      fixture.Frame = ShareRefPtr(&page->MainFrame());
+      auto frame = boo::Frame::Create(CreateUnique<AcceleratingChromeClient>());
+      auto &client = static_cast<AcceleratingChromeClient &>(frame->GetChromeClient());
+      fixture.Frame = ShareRefPtr(&*frame);
       fixture.Frame->CreateView({200, 100});
       fixture.Frame->SetDocument(ShareRefPtr<boo::Document>(fixture.Document.get()));
-      page->UpdateRendering();
+      frame->UpdateRendering();
 
       auto &canvas = Downcast<HTMLCanvasElement>(*fixture.Document->GetElementById(u8"canvas"));
       auto context = canvas.GetContext2d();
@@ -598,10 +598,10 @@ namespace krys::boo::tests
       CHECK(context->IsAccelerated());
       CHECK(context->DelegatesDisplay());
       CHECK(context->NeedsPreparationForDisplay());
-      CHECK(page->IsRenderingUpdateScheduled());
+      CHECK(frame->IsRenderingUpdateScheduled());
 
       auto &backend = static_cast<TestAcceleratedBackend &>(*buffer->Backend());
-      page->UpdateRendering();
+      frame->UpdateRendering();
       CHECK(backend.Preparations == 1);
       CHECK(backend.Flushes >= 1);
       CHECK_FALSE(context->HasDeferredOperations());
@@ -609,9 +609,9 @@ namespace krys::boo::tests
 
       // Drawing again prepares it again; an update with nothing drawn doesn't.
       context->FillRect(5, 5, 5, 5);
-      page->UpdateRendering();
+      frame->UpdateRendering();
       CHECK(backend.Preparations == 2);
-      page->UpdateRendering();
+      frame->UpdateRendering();
       CHECK(backend.Preparations == 2);
     }
   }
@@ -1133,8 +1133,9 @@ namespace krys::boo::tests
       CHECK(context.FilterString() == u8"blur(2px) drop-shadow(1px 1px red)");
     }
 
-    SECTION("without a page, drawing isn't filtered")
+    SECTION("without a frame, drawing isn't filtered")
     {
+      fixture.Frame->SetDocument(nullptr);
       context.FillRect(10, 10, 20, 20);
       CHECK(Count(fixture.Drawn(), "begin-transparency-layer") == 0u);
       CHECK(Count(fixture.Drawn(), "fill-rect") == 1u);
@@ -1144,8 +1145,7 @@ namespace krys::boo::tests
   TEST_CASE("CanvasRenderingContext2D: drawing through the filter",
             "[HTML][Canvas][CanvasRenderingContext2D]")
   {
-    PaintFixture fixture(u8"<!DOCTYPE html><canvas id=canvas width=100 height=50></canvas>", {200, 100},
-                         true);
+    PaintFixture fixture(u8"<!DOCTYPE html><canvas id=canvas width=100 height=50></canvas>");
     auto &canvas = Downcast<HTMLCanvasElement>(*fixture.Document->GetElementById(u8"canvas"));
     auto context = canvas.GetContext2d();
     REQUIRE(context);

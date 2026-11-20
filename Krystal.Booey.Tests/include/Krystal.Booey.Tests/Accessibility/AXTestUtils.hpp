@@ -28,7 +28,7 @@ namespace krys::boo::ax::tests
     List<TextChange> TextChanges;
     List<AXId> DetachedObjects;
 
-    void AttachRootGraphicsLayer(LocalFrame &, GraphicsLayer *) noexcept final
+    void AttachRootGraphicsLayer(boo::Frame &, GraphicsLayer *) noexcept final
     {
     }
 
@@ -49,27 +49,26 @@ namespace krys::boo::ax::tests
     }
   };
 
-  /// @brief The page an `AXFixture` is in, made before the fixture's frame.
-  struct AXPage
+  /// @brief Records an `AXFixture`'s notifications: the chrome client of its frame, made before the frame.
+  struct AXRecorder
   {
     NotificationRecorder *Recorder {nullptr};
-    Ref<Page> TestPage {CreatePage()};
 
-    KRYS_NODISCARD Ref<Page> CreatePage() noexcept
+    KRYS_NODISCARD Ref<boo::Frame> CreateFrame() noexcept
     {
       auto recorder = CreateUnique<NotificationRecorder>();
       Recorder = recorder.get();
       // An editor client keeps the undo stack.
-      return Page::Create(krys::move(recorder), CreateUnique<boo::tests::TestEditorClient>());
+      return boo::Frame::Create(krys::move(recorder), CreateUnique<boo::tests::TestEditorClient>());
     }
   };
 
   /// @brief A laid-out page with accessibility enabled (for the fixture's lifetime), whose notifications to
   /// the host are recorded.
-  struct AXFixture : AXPage, boo::tests::PageInFrameFixture
+  struct AXFixture : AXRecorder, boo::tests::PageInFrameFixture
   {
     explicit AXFixture(utf8_string &&markup, SizeI viewSize = {400, 300}) noexcept
-        : PageInFrameFixture(*TestPage, krys::move(markup), viewSize)
+        : PageInFrameFixture(CreateFrame(), krys::move(markup), viewSize, CachePolicy::Use)
     {
       AXObjectCache::EnableAccessibility();
       (void)Document->UpdateLayout();

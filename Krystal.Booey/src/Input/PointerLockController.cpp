@@ -33,8 +33,8 @@
 #include "Krystal.Booey/Input/PlatformWheelEvent.hpp"
 #include "Krystal.Booey/Input/PointerCaptureController.hpp"
 #include "Krystal.Booey/Page/Clients/ChromeClient.hpp"
+#include "Krystal.Booey/Page/Frame.hpp"
 #include "Krystal.Booey/Page/LocalDOMWindow.hpp"
-#include "Krystal.Booey/Page/Page.hpp"
 #include <utility>
 
 namespace krys::boo
@@ -72,7 +72,7 @@ namespace krys::boo
     }
   }
 
-  PointerLockController::PointerLockController(Page &page) noexcept : _page(CreateWeakPtr(&page))
+  PointerLockController::PointerLockController(Frame &frame) noexcept : _frame(CreateWeakPtr(&frame))
   {
   }
 
@@ -140,9 +140,9 @@ namespace krys::boo
         // it or changing the options.
         EnqueueEvent(event_names::PointerLockChange, target);
         Settle(krys::move(promise), {});
-        if (auto *page = _page.get())
+        if (auto *frame = _frame.get())
         {
-          page->GetPointerCaptureController().PointerLockWasApplied();
+          frame->GetPointerCaptureController().PointerLockWasApplied();
         }
       }
       return;
@@ -155,20 +155,20 @@ namespace krys::boo
     {
       _promises.push_back(krys::move(promise));
     }
-    auto *page = _page.get();
-    if (!page)
+    auto *frame = _frame.get();
+    if (!frame)
     {
       return;
     }
-    page->GetChromeClient().RequestPointerLock(
-      [weakPage = WeakPtr<Page>(_page), target = ShareRefPtr(target)](PointerLockRequestResult result)
+    frame->GetChromeClient().RequestPointerLock(
+      [weakFrame = WeakPtr<Frame>(_frame), target = ShareRefPtr(target)](PointerLockRequestResult result)
       {
-        auto *page = weakPage.get();
-        if (!page)
+        auto *frame = weakFrame.get();
+        if (!frame)
         {
           return;
         }
-        auto &controller = page->GetPointerLockController();
+        auto &controller = frame->GetPointerLockController();
         switch (result)
         {
           case PointerLockRequestResult::Success: controller.DidAcquirePointerLock(); break;
@@ -190,26 +190,26 @@ namespace krys::boo
     }
 
     _unlockPending = true;
-    auto *page = _page.get();
-    if (!page)
+    auto *frame = _frame.get();
+    if (!frame)
     {
       return;
     }
-    page->GetChromeClient().RequestPointerUnlock(
-      [weakPage = WeakPtr<Page>(_page)](bool result)
+    frame->GetChromeClient().RequestPointerUnlock(
+      [weakFrame = WeakPtr<Frame>(_frame)](bool result)
       {
-        auto *page = weakPage.get();
-        if (!page)
+        auto *frame = weakFrame.get();
+        if (!frame)
         {
           return;
         }
         if (result)
         {
-          page->GetPointerLockController().DidLosePointerLock();
+          frame->GetPointerLockController().DidLosePointerLock();
         }
         else
         {
-          page->GetPointerLockController().DidNotAcquirePointerLock();
+          frame->GetPointerLockController().DidNotAcquirePointerLock();
         }
       });
   }
@@ -280,9 +280,9 @@ namespace krys::boo
     _documentAllowedToRelockWithoutUserGesture = CreateWeakPtr(&element->NodeDocument());
 
     // When a pointer lock is successfully applied on an element, the pointers' captures are released.
-    if (auto *page = _page.get())
+    if (auto *frame = _frame.get())
     {
-      page->GetPointerCaptureController().PointerLockWasApplied();
+      frame->GetPointerCaptureController().PointerLockWasApplied();
     }
   }
 
@@ -400,7 +400,7 @@ namespace krys::boo
 
   bool PointerLockController::SupportsUnadjustedMovement() const noexcept
   {
-    auto *page = _page.get();
-    return page && page->GetChromeClient().HasAccessoryMousePointingDevice();
+    auto *frame = _frame.get();
+    return frame && frame->GetChromeClient().HasAccessoryMousePointingDevice();
   }
 }

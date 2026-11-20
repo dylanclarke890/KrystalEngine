@@ -6,7 +6,7 @@
 #include "Krystal.Booey/DOM/Collections/NodeList.hpp"
 #include "Krystal.Booey/DOM/Geometry/DOMRect.hpp"
 #include "Krystal.Booey/DOM/Nodes/HTMLDocument.hpp"
-#include "Krystal.Booey/Page/LocalFrame.hpp"
+#include "Krystal.Booey/Page/Frame.hpp"
 #include "Krystal.Booey/Rendering/RenderElement.hpp"
 #include "Krystal.Booey/SVG/SVGAngle.hpp"
 #include "Krystal.Booey/SVG/SVGLength.hpp"

@@ -47,10 +47,10 @@ namespace krys::boo
   class ColorChooserClient;
   class DataListSuggestionsClient;
   class DateTimeChooserClient;
+  class Frame;
   class GraphicsLayer;
   class GraphicsLayerFactory;
   class HTMLSelectElement;
-  class LocalFrame;
   class PopupMenuClient;
   class SVGImageElement;
 
@@ -124,7 +124,7 @@ namespace krys::boo
     }
 
     /// @brief Pass nullptr as the GraphicsLayer to detach the root layer.
-    virtual void AttachRootGraphicsLayer(LocalFrame &, GraphicsLayer *) noexcept = 0;
+    virtual void AttachRootGraphicsLayer(Frame &, GraphicsLayer *) noexcept = 0;
 
     /// @brief The factory the page's graphics layers come from; null when the host doesn't composite, so the
     /// page isn't composited.
@@ -237,7 +237,7 @@ namespace krys::boo
     /// @brief Shows the host's file picker for a file input in @p frame, answering @p chooser with the files
     /// the user chooses, or cancelling it, now or later; a host that doesn't override this has no file
     /// picker, so the choice is cancelled at once.
-    virtual void RunOpenPanel(LocalFrame &frame, FileChooser &chooser) noexcept
+    virtual void RunOpenPanel(Frame &frame, FileChooser &chooser) noexcept
     {
       (void)frame;
       chooser.Cancel();
@@ -380,7 +380,7 @@ namespace krys::boo
   class EmptyChromeClient final : public ChromeClient
   {
   public:
-    void AttachRootGraphicsLayer(LocalFrame &, GraphicsLayer *) noexcept final
+    void AttachRootGraphicsLayer(Frame &, GraphicsLayer *) noexcept final
     {
     }
   };

@@ -144,10 +144,9 @@
 #include "Krystal.Booey/Page/Clients/ChromeClient.hpp"
 #include "Krystal.Booey/Page/Clients/EditorClient.hpp"
 #include "Krystal.Booey/Page/DOMSelection.hpp"
+#include "Krystal.Booey/Page/Frame.hpp"
 #include "Krystal.Booey/Page/LocalDOMWindow.hpp"
-#include "Krystal.Booey/Page/LocalFrame.hpp"
 #include "Krystal.Booey/Page/LocalFrameView.hpp"
-#include "Krystal.Booey/Page/Page.hpp"
 #include "Krystal.Booey/Page/Settings.hpp"
 #include "Krystal.Booey/Page/VisualViewport.hpp"
 #include "Krystal.Booey/Platform/Scrolling/Scrollbar.hpp"
@@ -1695,11 +1694,11 @@ namespace krys::boo
     if (!request.ReadOnly())
     {
       RefPtr<Element> targetElement = ShareRefPtr(result.TargetElement());
-      if (auto *page = GetPage())
+      if (auto *frame = Frame())
       {
         // Before we dispatch a new mouse event, we must run the Process Pending Capture Element steps as
         // defined in https://w3c.github.io/pointerevents/#process-pending-pointer-capture.
-        auto &pointerCaptureController = page->GetPointerCaptureController();
+        auto &pointerCaptureController = frame->GetPointerCaptureController();
         RefPtr<Element> previousCaptureElement =
           ShareRefPtr(pointerCaptureController.PointerCaptureElement(this, event.PointerId()));
         pointerCaptureController.ProcessPendingPointerCapture(event.PointerId());
@@ -1974,10 +1973,7 @@ namespace krys::boo
       }
       frame->GetEventHandler().NodeWillBeRemoved(node);
       _selection->NodeWillBeRemoved(node);
-      if (auto *page = frame->GetPage())
-      {
-        page->GetDragCaretController().NodeWillBeRemoved(node);
-      }
+      frame->GetDragCaretController().NodeWillBeRemoved(node);
     }
   }
 
@@ -2054,28 +2050,22 @@ namespace krys::boo
     return _domSelection.get();
   }
 
-  boo::Page *Document::GetPage() const noexcept
-  {
-    auto *frame = Frame();
-    return frame ? frame->GetPage() : nullptr;
-  }
-
   GraphicsClient *Document::GetGraphicsClient() const noexcept
   {
-    auto *page = GetPage();
-    return page ? &page->GetChromeClient() : nullptr;
+    auto *frame = Frame();
+    return frame ? &frame->GetChromeClient() : nullptr;
   }
 
   html::DocumentVisibilityState Document::VisibilityState() const noexcept
   {
     // The visibility of the document is inherited from the visibility of the page. If there is no page
     // associated with the document, we will assume that the page is hidden, as specified by the spec.
-    auto *page = GetPage();
-    if (!page || _visibilityHiddenDueToDismissal)
+    auto *frame = Frame();
+    if (!frame || _visibilityHiddenDueToDismissal)
     {
       return html::DocumentVisibilityState::Hidden;
     }
-    return page->VisibilityState();
+    return frame->VisibilityState();
   }
 
   void Document::SetVisibilityHiddenDueToDismissal() noexcept
@@ -2115,7 +2105,7 @@ namespace krys::boo
 
   void Document::VisibilityStateChanged() noexcept
   {
-    bool pageIsVisible = GetPage() && GetPage()->IsVisible();
+    bool pageIsVisible = Frame() && Frame()->IsVisible();
 
     // https://w3c.github.io/page-visibility/#reacting-to-visibilitychange-changes
     if (!pageIsVisible)
@@ -2130,7 +2120,7 @@ namespace krys::boo
         (void)dom::EventDispatcher::DispatchToTarget(
           *Event::Create(event_names::VisibilityChange, true, false), protectedThis.get());
 
-        bool pageIsVisible = protectedThis->GetPage() && protectedThis->GetPage()->IsVisible();
+        bool pageIsVisible = protectedThis->Frame() && protectedThis->Frame()->IsVisible();
         if (!pageIsVisible)
         {
           return;
@@ -2181,9 +2171,9 @@ namespace krys::boo
       _intersectionObserversInitialUpdateTimer.Stop();
       requestedSteps.Add(RenderingUpdateStep::IntersectionObservations);
     }
-    if (auto *page = GetPage())
+    if (auto *frame = Frame())
     {
-      page->ScheduleRenderingUpdate(requestedSteps);
+      frame->ScheduleRenderingUpdate(requestedSteps);
     }
   }
 
@@ -2266,7 +2256,7 @@ namespace krys::boo
   void Document::UpdateIntersectionObservations(
     const List<WeakPtr<IntersectionObserver>> &intersectionObservers) noexcept
   {
-    RefPtr<LocalFrame> frame = ShareRefPtr(Frame());
+    RefPtr<boo::Frame> frame = ShareRefPtr(Frame());
     if (!frame)
     {
       return;
@@ -2279,7 +2269,7 @@ namespace krys::boo
     }
 
     // FIXME: The page deferring intersection observations (shouldDeferIntersectionObservations), once it can.
-    if (!GetPage())
+    if (!Frame())
     {
       return;
     }
@@ -2502,7 +2492,7 @@ namespace krys::boo
     }
   }
 
-  void Document::UpdateResizeObservations(Page &page) noexcept
+  void Document::UpdateResizeObservations(boo::Frame &frame) noexcept
   {
     if (_renderView)
     {
@@ -2521,7 +2511,7 @@ namespace krys::boo
     size_t resizeObserverDepth = 0;
     while (true)
     {
-      page.LayoutIfNeeded();
+      frame.LayoutIfNeeded();
       // If we have determined a change because of visibility we need to get up-to-date layout before
       // reporting any values to resize observers.
       if (_contentVisibilityDocumentState
@@ -3263,7 +3253,7 @@ namespace krys::boo
       _scriptedAnimationController = CreateUnique<dom::ScriptedAnimationController>(*this);
 
       // The page may have suspended its animation frame callbacks before the controller was made.
-      if (!GetPage() || GetPage()->ScriptedAnimationsSuspended())
+      if (!Frame() || Frame()->ScriptedAnimationsSuspended())
       {
         _scriptedAnimationController->Suspend();
       }
@@ -3456,9 +3446,9 @@ namespace krys::boo
       timer->Resume();
     }
     // A hidden page's animations stay suspended until it's shown.
-    auto *page = GetPage();
+    auto *frame = Frame();
     if (_timelinesController
-        && !(page && !page->IsVisible() && GetSettings().HiddenPageCSSAnimationSuspensionEnabled))
+        && !(frame && !frame->IsVisible() && GetSettings().HiddenPageCSSAnimationSuspensionEnabled))
     {
       _timelinesController->ResumeAnimations();
     }
@@ -3515,19 +3505,19 @@ namespace krys::boo
 
   void Document::ExitPointerLock() noexcept
   {
-    RefPtr<Page> page = ShareRefPtr(GetPage());
-    if (!page)
+    RefPtr<boo::Frame> frame = ShareRefPtr(Frame());
+    if (!frame)
     {
       return;
     }
-    if (auto *target = page->GetPointerLockController().GetElement())
+    if (auto *target = frame->GetPointerLockController().GetElement())
     {
       if (&target->NodeDocument() != this)
       {
         return;
       }
     }
-    page->GetPointerLockController().RequestPointerUnlock();
+    frame->GetPointerLockController().RequestPointerUnlock();
   }
 
   EventTarget *Document::GetParent(Event &event) const noexcept
@@ -3993,7 +3983,7 @@ namespace krys::boo
     return *InitialContainingBlockStyle();
   }
 
-  LocalFrame *Document::Frame() const noexcept
+  boo::Frame *Document::Frame() const noexcept
   {
     return _frame.get();
   }
@@ -4100,7 +4090,7 @@ namespace krys::boo
     (void)_domWindow->EnsureCustomElementRegistry();
   }
 
-  void Document::DidBecomeCurrentDocumentInFrame(LocalFrame &frame) noexcept
+  void Document::DidBecomeCurrentDocumentInFrame(boo::Frame &frame) noexcept
   {
     _frame = CreateWeakPtr(&frame);
 
@@ -4132,9 +4122,9 @@ namespace krys::boo
       DestroyRenderTree();
     }
 
-    if (auto *page = GetPage())
+    if (auto *frame = Frame())
     {
-      page->GetPointerLockController().DocumentDetached(*this);
+      frame->GetPointerLockController().DocumentDetached(*this);
     }
 
     _styleRecalcTimer.Stop();
@@ -4346,8 +4336,8 @@ namespace krys::boo
 
   float Document::DeviceScaleFactor() const noexcept
   {
-    auto *page = GetPage();
-    return page ? page->DeviceScaleFactor() : 1.f;
+    auto *frame = Frame();
+    return frame ? frame->DeviceScaleFactor() : 1.f;
   }
 
   bool Document::ShouldScheduleLayout() const noexcept
@@ -5218,9 +5208,9 @@ namespace krys::boo
     }
 
     bool pageUsesDarkAppearance = false;
-    if (auto *documentPage = GetPage())
+    if (auto *documentFrame = Frame())
     {
-      pageUsesDarkAppearance = documentPage->UseDarkAppearance();
+      pageUsesDarkAppearance = documentFrame->UseDarkAppearance();
     }
 
     if (GetSettings().UseSystemAppearance)
@@ -5323,9 +5313,9 @@ namespace krys::boo
 
     _colorScheme = colorScheme;
 
-    if (auto *page = GetPage())
+    if (auto *frame = Frame())
     {
-      page->UpdateStyleAfterChangeInEnvironment();
+      frame->UpdateStyleAfterChangeInEnvironment();
     }
   }
 

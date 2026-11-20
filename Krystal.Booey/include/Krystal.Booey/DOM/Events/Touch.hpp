@@ -34,7 +34,7 @@
 namespace krys::boo
 {
   class EventTarget;
-  class LocalFrame;
+  class Frame;
 
   /// @brief A touch on the screen, as a touch event reports it: where it is, the element it began on and the
   /// size and pressure of its contact.
@@ -59,7 +59,7 @@ namespace krys::boo
     PointD _absoluteLocation;
 
   public:
-    KRYS_NODISCARD static Ref<Touch> Create(LocalFrame *frame, EventTarget *target, int32 identifier,
+    KRYS_NODISCARD static Ref<Touch> Create(Frame *frame, EventTarget *target, int32 identifier,
                                             const PointD &screenPos, const PointD &pagePos,
                                             const SizeD &radius, float rotationAngle, float force,
                                             double twist = 0) noexcept;
@@ -151,7 +151,7 @@ namespace krys::boo
     KRYS_NODISCARD Ref<Touch> CloneWithNewTarget(EventTarget *eventTarget) const noexcept;
 
   private:
-    Touch(LocalFrame *frame, EventTarget *target, int32 identifier, const PointD &screenPosition,
+    Touch(Frame *frame, EventTarget *target, int32 identifier, const PointD &screenPosition,
           const PointD &pagePosition, const SizeD &radius, float rotationAngle, double twist,
           float force) noexcept;
 

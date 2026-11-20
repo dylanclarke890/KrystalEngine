@@ -74,7 +74,7 @@ namespace krys::boo::tests
     {
       RefPtr<RecordingDateTimeChooser> Chooser;
 
-      void AttachRootGraphicsLayer(LocalFrame &, GraphicsLayer *) noexcept final
+      void AttachRootGraphicsLayer(boo::Frame &, GraphicsLayer *) noexcept final
       {
       }
 

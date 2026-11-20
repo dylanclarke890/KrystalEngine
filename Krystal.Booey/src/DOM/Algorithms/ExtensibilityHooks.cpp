@@ -36,7 +36,7 @@
 #include "Krystal.Booey/HTML/Elements/HTMLSlotElement.hpp"
 #include "Krystal.Booey/Input/PointerCaptureController.hpp"
 #include "Krystal.Booey/Input/PointerLockController.hpp"
-#include "Krystal.Booey/Page/Page.hpp"
+#include "Krystal.Booey/Page/Frame.hpp"
 #include "Krystal.Booey/Page/Scrolling/ScrollLatchingController.hpp"
 #include "Krystal.Booey/Rendering/Updating/RenderTreeUpdater.hpp"
 #include "Krystal.Booey/Style/Styleable.hpp"
@@ -334,11 +334,11 @@ namespace krys::boo::dom
 
     if (auto *element = DynamicDowncast<Element>(removedNode))
     {
-      if (auto *page = element->NodeDocument().GetPage())
+      if (auto *frame = element->NodeDocument().Frame())
       {
-        page->GetPointerLockController().ElementWasRemoved(*element);
-        page->GetPointerCaptureController().ElementWasRemoved(*element);
-        page->GetScrollLatchingController().RemoveLatchingStateForTarget(*element);
+        frame->GetPointerLockController().ElementWasRemoved(*element);
+        frame->GetPointerCaptureController().ElementWasRemoved(*element);
+        frame->GetScrollLatchingController().RemoveLatchingStateForTarget(*element);
       }
       style::Styleable::FromElement(*element).ElementWasRemoved();
       element->NodeDocument().UserActionElements().ClearAllForElement(*element);

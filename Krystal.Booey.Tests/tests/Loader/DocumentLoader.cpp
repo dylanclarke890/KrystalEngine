@@ -17,10 +17,9 @@
 #include "Krystal.Booey/Loader/FrameLoadRequest.hpp"
 #include "Krystal.Booey/Loader/LocalFrameLoaderClient.hpp"
 #include "Krystal.Booey/Loader/NavigationAction.hpp"
+#include "Krystal.Booey/Page/Frame.hpp"
 #include "Krystal.Booey/Page/LocalDOMWindow.hpp"
-#include "Krystal.Booey/Page/LocalFrame.hpp"
 #include "Krystal.Booey/Page/LocalFrameView.hpp"
-#include "Krystal.Booey/Page/Page.hpp"
 #include "Krystal.Booey/Style/Scope/Scope.hpp"
 #include <chrono>
 #include <format>

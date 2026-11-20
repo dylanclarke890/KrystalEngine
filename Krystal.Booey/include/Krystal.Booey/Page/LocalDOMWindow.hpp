@@ -68,8 +68,7 @@ namespace krys::boo::html
 namespace krys::boo
 {
   class DOMSelection;
-  class LocalFrame;
-  class Page;
+  class Frame;
   class VisualViewport;
 
   /// @brief A document's window: the global object of the document a frame shows, which the window events
@@ -112,10 +111,7 @@ namespace krys::boo
     KRYS_NODISCARD boo::Document *Document() const noexcept;
 
     /// @brief The frame showing the window's document (its navigable), if any.
-    KRYS_NODISCARD LocalFrame *Frame() const noexcept;
-
-    /// @brief The page of the window's frame, if any.
-    KRYS_NODISCARD Page *GetPage() const noexcept;
+    KRYS_NODISCARD boo::Frame *Frame() const noexcept;
 
     /// @brief Whether the window's document is the one its frame shows.
     KRYS_NODISCARD bool IsCurrentlyDisplayedInFrame() const noexcept;

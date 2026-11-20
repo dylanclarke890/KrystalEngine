@@ -42,9 +42,8 @@
 #include "Krystal.Booey/HTML/Elements/HTMLMapElement.hpp"
 #include "Krystal.Booey/HTML/Forms/RadioButtonGroups.hpp"
 #include "Krystal.Booey/Input/PointerLockController.hpp"
-#include "Krystal.Booey/Page/LocalFrame.hpp"
+#include "Krystal.Booey/Page/Frame.hpp"
 #include "Krystal.Booey/Page/LocalFrameView.hpp"
-#include "Krystal.Booey/Page/Page.hpp"
 #include "Krystal.Booey/Rendering/HitTesting/HitTestResult.hpp"
 #include "Krystal.Booey/Rendering/SVG/Legacy/LegacyRenderSVGResourceContainer.hpp"
 #include "Krystal.Booey/Style/Scope/Scope.hpp"
@@ -446,12 +445,12 @@ namespace krys::boo::dom
   RefPtr<Element> DocumentOrShadowRoot::PointerLockElement() const noexcept
   {
     auto &document = _rootNode.NodeDocument();
-    auto *page = document.GetPage();
-    if (!page || page->GetPointerLockController().LockPending())
+    auto *frame = document.Frame();
+    if (!frame || frame->GetPointerLockController().LockPending())
     {
       return nullptr;
     }
-    auto *element = page->GetPointerLockController().GetElement();
+    auto *element = frame->GetPointerLockController().GetElement();
     if (!element || &element->NodeDocument() != &document)
     {
       return nullptr;

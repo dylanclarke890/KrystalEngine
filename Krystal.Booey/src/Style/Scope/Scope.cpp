@@ -43,7 +43,7 @@
 #include "Krystal.Booey/HTML/Elements/HTMLSlotElement.hpp"
 #include "Krystal.Booey/HTML/Elements/HTMLStyleElement.hpp"
 #include "Krystal.Booey/HTML/EventLoop/EventLoop.hpp"
-#include "Krystal.Booey/Page/LocalFrame.hpp"
+#include "Krystal.Booey/Page/Frame.hpp"
 #include "Krystal.Booey/Page/LocalFrameView.hpp"
 #include "Krystal.Booey/Rendering/RenderBox.hpp"
 #include "Krystal.Booey/Rendering/RenderView.hpp"

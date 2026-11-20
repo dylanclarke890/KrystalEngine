@@ -96,10 +96,9 @@
 #include "Krystal.Booey/Input/PlatformMouseEvent.hpp"
 #include "Krystal.Booey/Input/PointerCaptureController.hpp"
 #include "Krystal.Booey/Input/PointerLockController.hpp"
+#include "Krystal.Booey/Page/Frame.hpp"
 #include "Krystal.Booey/Page/LocalDOMWindow.hpp"
-#include "Krystal.Booey/Page/LocalFrame.hpp"
 #include "Krystal.Booey/Page/LocalFrameView.hpp"
-#include "Krystal.Booey/Page/Page.hpp"
 #include "Krystal.Booey/Page/Scrolling/ScrollBehavior.hpp"
 #include "Krystal.Booey/Platform/Scrolling/ScrollableArea.hpp"
 #include "Krystal.Booey/Platform/Scrolling/ScrollAlignment.hpp"
@@ -1076,9 +1075,9 @@ namespace krys::boo
       DispatchPointerEventIfNeeded(Element &element, const MouseEvent &mouseEvent,
                                    const PlatformMouseEvent &platformEvent, bool &didNotSwallowEvent) noexcept
     {
-      if (auto *page = element.NodeDocument().GetPage())
+      if (auto *frame = element.NodeDocument().Frame())
       {
-        auto &pointerCaptureController = page->GetPointerCaptureController();
+        auto &pointerCaptureController = frame->GetPointerCaptureController();
         if (platformEvent.PointerId() != MousePointerId && !dom::IsAnyClick(mouseEvent)
             && pointerCaptureController.PreventsCompatibilityMouseEventsForIdentifier(
               platformEvent.PointerId()))
@@ -2785,28 +2784,28 @@ namespace krys::boo
 
   ExceptionOr<void> Element::SetPointerCapture(int32 pointerId) noexcept
   {
-    if (auto *page = NodeDocument().GetPage())
+    if (auto *frame = NodeDocument().Frame())
     {
-      return page->GetPointerCaptureController().SetPointerCapture(this, static_cast<PointerId>(pointerId));
+      return frame->GetPointerCaptureController().SetPointerCapture(this, static_cast<PointerId>(pointerId));
     }
     return {};
   }
 
   ExceptionOr<void> Element::ReleasePointerCapture(int32 pointerId) noexcept
   {
-    if (auto *page = NodeDocument().GetPage())
+    if (auto *frame = NodeDocument().Frame())
     {
-      return page->GetPointerCaptureController().ReleasePointerCapture(this,
-                                                                       static_cast<PointerId>(pointerId));
+      return frame->GetPointerCaptureController().ReleasePointerCapture(this,
+                                                                        static_cast<PointerId>(pointerId));
     }
     return {};
   }
 
   bool Element::HasPointerCapture(int32 pointerId) noexcept
   {
-    if (auto *page = NodeDocument().GetPage())
+    if (auto *frame = NodeDocument().Frame())
     {
-      return page->GetPointerCaptureController().HasPointerCapture(this, static_cast<PointerId>(pointerId));
+      return frame->GetPointerCaptureController().HasPointerCapture(this, static_cast<PointerId>(pointerId));
     }
     return false;
   }
@@ -2818,10 +2817,10 @@ namespace krys::boo
   void Element::RequestPointerLock(dom::PointerLockOptions options,
                                    Func<void(ExceptionOr<void> &&)> &&promise) noexcept
   {
-    if (auto *page = NodeDocument().GetPage())
+    if (auto *frame = NodeDocument().Frame())
     {
-      page->GetPointerLockController().RequestPointerLock(this, Maybe<dom::PointerLockOptions>(options),
-                                                          krys::move(promise));
+      frame->GetPointerLockController().RequestPointerLock(this, Maybe<dom::PointerLockOptions>(options),
+                                                           krys::move(promise));
     }
   }
 
@@ -3782,14 +3781,13 @@ namespace krys::boo
   namespace
   {
     /// @brief The frame showing @p document, if it has a view.
-    KRYS_NODISCARD LocalFrame *DocumentFrameWithNonNullView(Document &document) noexcept
+    KRYS_NODISCARD Frame *DocumentFrameWithNonNullView(Document &document) noexcept
     {
       auto *frame = document.Frame();
       return frame && frame->View() ? frame : nullptr;
     }
 
-    KRYS_NODISCARD int32 AdjustContentsScrollPositionOrSizeForZoom(int32 value,
-                                                                   const LocalFrame &frame) noexcept
+    KRYS_NODISCARD int32 AdjustContentsScrollPositionOrSizeForZoom(int32 value, const Frame &frame) noexcept
     {
       double zoomFactor = frame.PageZoomFactor() * frame.FrameScaleFactor();
       if (zoomFactor == 1)

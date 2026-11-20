@@ -28,7 +28,7 @@
 #include "Krystal.Booey/DOM/Mixins/NonElementParentNode.hpp"
 #include "Krystal.Booey/DOM/Nodes/Document.hpp"
 #include "Krystal.Booey/Editing/Selection/FrameSelection.hpp"
-#include "Krystal.Booey/Page/LocalFrame.hpp"
+#include "Krystal.Booey/Page/Frame.hpp"
 #include "Krystal.Booey/Page/LocalFrameView.hpp"
 #include "Krystal.Booey/Rendering/Iterators/RenderDescendantIterator.hpp"
 #include "Krystal.Booey/Rendering/RenderView.hpp"
@@ -186,7 +186,7 @@ namespace krys::boo
     return *_viewSpec;
   }
 
-  LocalFrame *SVGSvgElement::FrameForCurrentScale() const noexcept
+  Frame *SVGSvgElement::FrameForCurrentScale() const noexcept
   {
     // The behavior of currentScale() is undefined when we're dealing with non-standalone SVG documents.
     // If the document is embedded, the scaling is handled by the host renderer.

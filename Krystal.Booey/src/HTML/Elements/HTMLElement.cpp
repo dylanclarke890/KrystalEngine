@@ -1447,7 +1447,7 @@ namespace krys::boo
 
     // (A document that isn't in a page has no top-level traversable.)
     Ref<Document> controlDocument = ShareRef(control->NodeDocument());
-    if (!controlDocument->GetPage())
+    if (!controlDocument->Frame())
     {
       return;
     }

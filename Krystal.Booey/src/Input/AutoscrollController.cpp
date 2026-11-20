@@ -30,9 +30,8 @@
 #include "Krystal.Booey/DOM/Nodes/Document.hpp"
 #include "Krystal.Booey/Input/EventHandler.hpp"
 #include "Krystal.Booey/Input/PlatformMouseEvent.hpp"
-#include "Krystal.Booey/Page/LocalFrame.hpp"
+#include "Krystal.Booey/Page/Frame.hpp"
 #include "Krystal.Booey/Page/LocalFrameView.hpp"
-#include "Krystal.Booey/Page/Page.hpp"
 #include "Krystal.Booey/Page/Settings.hpp"
 #include "Krystal.Booey/Rendering/FormControls/RenderListBox.hpp"
 #include "Krystal.Booey/Rendering/Layers/RenderLayer.hpp"
@@ -136,8 +135,7 @@ namespace krys::boo
     }
   }
 
-  void AutoscrollController::UpdatePanScrollState(LocalFrame &frame,
-                                                  const PointI &lastKnownMousePosition) noexcept
+  void AutoscrollController::UpdatePanScrollState(Frame &frame, const PointI &lastKnownMousePosition) noexcept
   {
     // Over the icon at the press there's no scrolling, so the cursor doesn't point anywhere.
     auto radius = LocalFrameView::NoPanScrollRadius;
@@ -303,7 +301,7 @@ namespace krys::boo
       return;
     }
 
-    Ref<LocalFrame> frame = ShareRef(*_autoscrollRenderer->GetDocument().Frame());
+    Ref<Frame> frame = ShareRef(*_autoscrollRenderer->GetDocument().Frame());
     switch (_autoscrollType)
     {
       case AutoscrollType::DragAndDrop:

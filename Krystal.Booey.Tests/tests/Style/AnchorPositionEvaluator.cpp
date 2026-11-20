@@ -5,7 +5,7 @@
 #include "Krystal.Booey/DOM/Nodes/Document.hpp"
 #include "Krystal.Booey/DOM/Nodes/PseudoElement.hpp"
 #include "Krystal.Booey/HTML/Elements/HTMLElement.hpp"
-#include "Krystal.Booey/Page/LocalFrame.hpp"
+#include "Krystal.Booey/Page/Frame.hpp"
 #include "Krystal.Booey/Page/LocalFrameView.hpp"
 #include "Krystal.Booey/Page/LocalFrameViewLayoutContext.hpp"
 #include "Krystal.Booey/Rendering/Layers/RenderLayer.hpp"
@@ -281,7 +281,7 @@ namespace krys::boo::style::tests
     {
       SetStyle(target, u8"position-try-fallbacks: --left");
       CHECK(FrameRectOf(target).X() == 500);
-      fixture.Document->UpdateResizeObservations(*fixture.Document->GetPage());
+      fixture.Document->UpdateResizeObservations(*fixture.Document->Frame());
       CHECK(fixture.Document->StyleScope().LastSuccessfulPositionOptionIndexFor(Styleable {target, null})
             == 0);
 

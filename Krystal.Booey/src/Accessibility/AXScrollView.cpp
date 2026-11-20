@@ -27,7 +27,7 @@
 #include "Krystal.Booey/Accessibility/AXObjectCache.hpp"
 #include "Krystal.Booey/Accessibility/AXScrollbar.hpp"
 #include "Krystal.Booey/DOM/Nodes/Document.hpp"
-#include "Krystal.Booey/Page/LocalFrame.hpp"
+#include "Krystal.Booey/Page/Frame.hpp"
 #include "Krystal.Booey/Page/LocalFrameView.hpp"
 #include "Krystal.Booey/Platform/Scrolling/Scrollbar.hpp"
 

@@ -31,8 +31,8 @@ namespace krys::boo
   class ContainerNode;
   class Document;
   class Element;
+  class Frame;
   class HTMLAreaElement;
-  class LocalFrame;
   class Node;
 
   KRYS_NODISCARD constexpr inline int64 MaxDistance() noexcept
@@ -133,14 +133,14 @@ namespace krys::boo
   KRYS_NODISCARD bool HasOffscreenRect(const Node &node,
                                        dom::FocusDirection direction = dom::FocusDirection::None) noexcept;
 
-  bool ScrollInDirection(LocalFrame *frame, dom::FocusDirection direction) noexcept;
+  bool ScrollInDirection(Frame *frame, dom::FocusDirection direction) noexcept;
 
   bool ScrollInDirection(const ContainerNode &container, dom::FocusDirection direction) noexcept;
 
   KRYS_NODISCARD bool CanScrollInDirection(const ContainerNode &container,
                                            dom::FocusDirection direction) noexcept;
 
-  KRYS_NODISCARD bool CanScrollInDirection(const LocalFrame *frame, dom::FocusDirection direction) noexcept;
+  KRYS_NODISCARD bool CanScrollInDirection(const Frame *frame, dom::FocusDirection direction) noexcept;
 
   KRYS_NODISCARD bool CanBeScrolledIntoView(dom::FocusDirection direction,
                                             const FocusCandidate &candidate) noexcept;
@@ -161,7 +161,7 @@ namespace krys::boo
   KRYS_NODISCARD LayoutRect NodeRectInAbsoluteCoordinates(const ContainerNode &containerNode,
                                                           bool ignoreBorder = false) noexcept;
 
-  KRYS_NODISCARD LayoutRect FrameRectInAbsoluteCoordinates(LocalFrame *frame) noexcept;
+  KRYS_NODISCARD LayoutRect FrameRectInAbsoluteCoordinates(Frame *frame) noexcept;
 
   KRYS_NODISCARD LayoutRect VirtualRectForDirection(dom::FocusDirection direction,
                                                     const LayoutRect &startingRect,

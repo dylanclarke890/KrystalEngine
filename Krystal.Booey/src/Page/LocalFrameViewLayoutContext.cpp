@@ -26,7 +26,7 @@
 #include "Krystal.Booey/Page/LocalFrameViewLayoutContext.hpp"
 #include "Krystal.Booey/Accessibility/AXObjectCache.hpp"
 #include "Krystal.Booey/DOM/Nodes/Document.hpp"
-#include "Krystal.Booey/Page/LocalFrame.hpp"
+#include "Krystal.Booey/Page/Frame.hpp"
 #include "Krystal.Booey/Page/LocalFrameView.hpp"
 #include "Krystal.Booey/Rendering/Layers/RenderLayer.hpp"
 #include "Krystal.Booey/Rendering/Layers/RenderLayerCompositor.hpp"
@@ -74,7 +74,7 @@ namespace krys::boo
     auto renderers = std::exchange(_renderers, {});
   }
 
-  LocalFrame &LocalFrameViewLayoutContext::Frame() const noexcept
+  boo::Frame &LocalFrameViewLayoutContext::Frame() const noexcept
   {
     return _frameView.Frame();
   }

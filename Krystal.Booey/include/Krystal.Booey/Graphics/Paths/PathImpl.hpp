@@ -32,6 +32,11 @@
 #include "Krystal.Core/RefCounted.hpp"
 #include "Krystal.Core/Types/UniquePtr.hpp"
 
+namespace krys
+{
+  class AffineTransform;
+}
+
 namespace krys::boo
 {
   class PathImpl : public ThreadSafeRefCounted<PathImpl>

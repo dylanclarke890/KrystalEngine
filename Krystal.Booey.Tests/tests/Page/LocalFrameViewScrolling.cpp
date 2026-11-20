@@ -19,9 +19,8 @@
 #include "Krystal.Booey/Input/LegacyKeyCodes.hpp"
 #include "Krystal.Booey/Input/PlatformKeyboardEvent.hpp"
 #include "Krystal.Booey/Input/PlatformWheelEvent.hpp"
-#include "Krystal.Booey/Page/LocalFrame.hpp"
+#include "Krystal.Booey/Page/Frame.hpp"
 #include "Krystal.Booey/Page/LocalFrameView.hpp"
-#include "Krystal.Booey/Page/Page.hpp"
 #include "Krystal.Booey/Page/Settings.hpp"
 #include "Krystal.Booey/Platform/Cursor.hpp"
 #include "Krystal.Booey/Platform/Scrolling/Scrollbar.hpp"
@@ -734,7 +733,7 @@ namespace krys::boo::tests
       class LightScrollbarsChromeClient final : public ChromeClient
       {
       public:
-        void AttachRootGraphicsLayer(LocalFrame &, GraphicsLayer *) noexcept override
+        void AttachRootGraphicsLayer(boo::Frame &, GraphicsLayer *) noexcept override
         {
         }
 
@@ -745,8 +744,8 @@ namespace krys::boo::tests
       };
 
       auto chrome = CreateUnique<LightScrollbarsChromeClient>();
-      auto testPage = Page::Create(krys::move(chrome));
-      PageInFrameFixture fixture(*testPage, page(u8"white"));
+      auto frame = boo::Frame::Create(krys::move(chrome));
+      PageInFrameFixture fixture(*frame, page(u8"white"));
       (void)fixture.Document->UpdateLayout();
       CHECK(fixture.Frame->View()->GetScrollbarOverlayStyle() == ScrollbarOverlayStyle::Light);
     }

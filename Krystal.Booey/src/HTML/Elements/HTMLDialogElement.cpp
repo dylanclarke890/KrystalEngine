@@ -454,7 +454,7 @@ namespace krys::boo
     }
 
     Ref<Document> controlDocument = ShareRef(control->NodeDocument());
-    if (!controlDocument->GetPage())
+    if (!controlDocument->Frame())
     {
       return;
     }

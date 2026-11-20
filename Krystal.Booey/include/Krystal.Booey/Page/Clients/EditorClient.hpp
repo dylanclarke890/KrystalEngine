@@ -36,8 +36,8 @@ namespace krys::boo
 {
   class Document;
   class Element;
+  class Frame;
   class KeyboardEvent;
-  class LocalFrame;
   class UndoStep;
 
   /// @brief What a page's editor asks of its host: the commands keys run, input methods, and whether
@@ -59,9 +59,9 @@ namespace krys::boo
                                                           Affinity affinity,
                                                           bool stillSelecting) noexcept = 0;
 
-    KRYS_NODISCARD virtual bool CanCopyCut(LocalFrame *frame, bool defaultValue) const noexcept = 0;
+    KRYS_NODISCARD virtual bool CanCopyCut(Frame *frame, bool defaultValue) const noexcept = 0;
 
-    KRYS_NODISCARD virtual bool CanPaste(LocalFrame *frame, bool defaultValue) const noexcept = 0;
+    KRYS_NODISCARD virtual bool CanPaste(Frame *frame, bool defaultValue) const noexcept = 0;
 
     /// @brief Runs the editor command a `keydown` or `keypress` is bound to, if any.
     /// @return Whether the event was handled, so its default action is done.
@@ -70,7 +70,7 @@ namespace krys::boo
     virtual void RespondToChangedContents() noexcept = 0;
 
     /// @brief Called after the selection changed (unless the change asked not to tell the editor's clients).
-    virtual void RespondToChangedSelection(LocalFrame *frame) noexcept = 0;
+    virtual void RespondToChangedSelection(Frame *frame) noexcept = 0;
 
     /// @brief Called when the page dropped the input method's composition (confirming or cancelling it), so
     /// the host can tell the input method.
@@ -142,12 +142,12 @@ namespace krys::boo
       return false;
     }
 
-    KRYS_NODISCARD bool CanCopyCut(LocalFrame *, bool defaultValue) const noexcept final
+    KRYS_NODISCARD bool CanCopyCut(Frame *, bool defaultValue) const noexcept final
     {
       return defaultValue;
     }
 
-    KRYS_NODISCARD bool CanPaste(LocalFrame *, bool defaultValue) const noexcept final
+    KRYS_NODISCARD bool CanPaste(Frame *, bool defaultValue) const noexcept final
     {
       return defaultValue;
     }
@@ -161,7 +161,7 @@ namespace krys::boo
     {
     }
 
-    void RespondToChangedSelection(LocalFrame *) noexcept final
+    void RespondToChangedSelection(Frame *) noexcept final
     {
     }
 

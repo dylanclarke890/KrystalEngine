@@ -2550,13 +2550,13 @@ set(KRYSTAL_BOOEY_PAGE_HEADERS
   include/Krystal.Booey/Page/Drag/DragController.hpp
   include/Krystal.Booey/Page/Drag/DragItem.hpp
   include/Krystal.Booey/Page/Drag/DragState.hpp
+  include/Krystal.Booey/Page/Frame.hpp
   include/Krystal.Booey/Page/FrameSnapshotting.hpp
   include/Krystal.Booey/Page/LocalDOMWindow.hpp
-  include/Krystal.Booey/Page/LocalFrame.hpp
   include/Krystal.Booey/Page/LocalFrameView.hpp
   include/Krystal.Booey/Page/LocalFrameViewLayoutContext.hpp
-  include/Krystal.Booey/Page/Page.hpp
   include/Krystal.Booey/Page/PopupOpeningObserver.hpp
+  include/Krystal.Booey/Page/RenderingUpdateStep.hpp
   include/Krystal.Booey/Page/Scrolling/ScrollAnchoringController.hpp
   include/Krystal.Booey/Page/Scrolling/ScrollBehavior.hpp
   include/Krystal.Booey/Page/Scrolling/ScrollingConstraints.hpp
@@ -2570,12 +2570,11 @@ set(KRYSTAL_BOOEY_PAGE_HEADERS
 set(KRYSTAL_BOOEY_PAGE_SOURCES
   src/Page/DOMSelection.cpp
   src/Page/Drag/DragController.cpp
+  src/Page/Frame.cpp
   src/Page/FrameSnapshotting.cpp
   src/Page/LocalDOMWindow.cpp
-  src/Page/LocalFrame.cpp
   src/Page/LocalFrameView.cpp
   src/Page/LocalFrameViewLayoutContext.cpp
-  src/Page/Page.cpp
   src/Page/Scrolling/ScrollAnchoringController.cpp
   src/Page/Scrolling/ScrollBehavior.cpp
   src/Page/Scrolling/ScrollingConstraints.cpp

@@ -8,8 +8,8 @@
 #include "Krystal.Booey/Loader/FormSubmission.hpp"
 #include "Krystal.Booey/Loader/LocalFrameLoaderClient.hpp"
 #include "Krystal.Booey/Loader/NavigationAction.hpp"
+#include "Krystal.Booey/Page/Frame.hpp"
 #include "Krystal.Booey/Page/LocalFrameView.hpp"
-#include "Krystal.Booey/Page/Page.hpp"
 #include "Krystal.Core/Types/Func.hpp"
 #include "Krystal.Core/Types/List.hpp"
 #include "Krystal.Net/ResourceRequest.hpp"
@@ -89,15 +89,13 @@ namespace krys::boo::tests
   struct NavigationFixture : style::tests::ResolverFixture
   {
     RecordingFrameLoaderClient *Client {nullptr};
-    RefPtr<Page> TestPage;
 
     explicit NavigationFixture(utf8_stringview markup) noexcept
         : ResolverFixture(u8"<!DOCTYPE html>" + utf8_string(markup), style::tests::WithView::No)
     {
       auto client = CreateUnique<RecordingFrameLoaderClient>();
       Client = client.get();
-      TestPage = Page::Create(nullptr, nullptr, krys::move(client));
-      Frame = ShareRefPtr(&TestPage->MainFrame());
+      Frame = boo::Frame::Create(nullptr, nullptr, krys::move(client));
       Frame->CreateView({400, 300});
       Frame->SetDocument(ShareRefPtr<boo::Document>(Document.get()));
       Document->SetUrl(net::Url(u8"https://example.com/dir/page.html"));

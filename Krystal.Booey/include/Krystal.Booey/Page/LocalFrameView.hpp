@@ -51,9 +51,9 @@
 
 namespace krys::boo
 {
+  class Frame;
   class GraphicsContext;
   class GraphicsLayer;
-  class LocalFrame;
   class LocalFrameView;
   class RenderView;
 
@@ -112,7 +112,7 @@ namespace krys::boo
     };
 
   private:
-    WeakPtr<LocalFrame> _frame;
+    WeakPtr<boo::Frame> _frame;
     RectI _frameRect;
     SizeI _fixedLayoutSize;
     bool _useFixedLayout {false};
@@ -182,16 +182,16 @@ namespace krys::boo
     float _lastUsedZoomFactor {1};
     float _lastFrameScaleFactor {1};
 
-    explicit LocalFrameView(LocalFrame &frame) noexcept;
+    explicit LocalFrameView(boo::Frame &frame) noexcept;
 
   public:
     ~LocalFrameView() noexcept override;
 
-    KRYS_NODISCARD static Ref<LocalFrameView> Create(LocalFrame &frame) noexcept;
+    KRYS_NODISCARD static Ref<LocalFrameView> Create(boo::Frame &frame) noexcept;
 
-    KRYS_NODISCARD static Ref<LocalFrameView> Create(LocalFrame &frame, const SizeI &initialSize) noexcept;
+    KRYS_NODISCARD static Ref<LocalFrameView> Create(boo::Frame &frame, const SizeI &initialSize) noexcept;
 
-    KRYS_NODISCARD LocalFrame &Frame() const noexcept;
+    KRYS_NODISCARD boo::Frame &Frame() const noexcept;
 
     /// @brief The render view of the frame's document, if it has one.
     KRYS_NODISCARD const RenderView *GetRenderView() const noexcept;

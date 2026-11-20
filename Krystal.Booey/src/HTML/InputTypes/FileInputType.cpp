@@ -29,8 +29,7 @@
 #include "Krystal.Booey/HTML/Elements/HTMLInputElement.hpp"
 #include "Krystal.Booey/HTML/Forms/DOMFormData.hpp"
 #include "Krystal.Booey/Page/Clients/ChromeClient.hpp"
-#include "Krystal.Booey/Page/LocalFrame.hpp"
-#include "Krystal.Booey/Page/Page.hpp"
+#include "Krystal.Booey/Page/Frame.hpp"
 #include "Krystal.Booey/Platform/LocalizedStrings.hpp"
 #include "Krystal.Booey/Platform/Pasteboard/DragData.hpp"
 #include "Krystal.Booey/Rendering/FormControls/RenderFileUploadControl.hpp"
@@ -308,10 +307,7 @@ namespace krys::boo::html
     }
     Ref<FileChooser> chooser = FileChooser::Create(*this, ChooserSettings());
     _fileChooser = chooser;
-    if (auto *page = frame->GetPage())
-    {
-      page->NotifyPopupOpeningObservers();
-    }
+    frame->NotifyPopupOpeningObservers();
     chromeClient->RunOpenPanel(*frame, *chooser);
   }
 

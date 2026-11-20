@@ -40,7 +40,7 @@ namespace krys::boo
 {
   class Document;
   class Element;
-  class Page;
+  class Frame;
   class PlatformMouseEvent;
   class PlatformWheelEvent;
 
@@ -67,7 +67,7 @@ namespace krys::boo
     KRYS_NON_COPY_MOVABLE(PointerLockController);
 
   private:
-    WeakPtr<Page> _page;
+    WeakPtr<Frame> _frame;
     bool _lockPending {false};
     bool _unlockPending {false};
     Maybe<dom::PointerLockOptions> _options;
@@ -77,7 +77,7 @@ namespace krys::boo
     WeakPtr<Document> _documentAllowedToRelockWithoutUserGesture;
 
   public:
-    explicit PointerLockController(Page &page) noexcept;
+    explicit PointerLockController(Frame &frame) noexcept;
 
     ~PointerLockController() noexcept;
 

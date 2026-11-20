@@ -11,7 +11,7 @@
 #include "Krystal.Booey/HTML/Elements/HTMLImageElement.hpp"
 #include "Krystal.Booey/HTML/Parser/DocumentParser.hpp"
 #include "Krystal.Booey/Input/EventHandler.hpp"
-#include "Krystal.Booey/Page/LocalFrame.hpp"
+#include "Krystal.Booey/Page/Frame.hpp"
 #include "Krystal.Booey/Rendering/HitTesting/HitTestRequest.hpp"
 #include "Krystal.Booey/Rendering/HitTesting/HitTestResult.hpp"
 
@@ -48,8 +48,7 @@ namespace krys::boo::html::tests
     struct MapFixture : boo::tests::PaintFixture
     {
       // In a page, whose pointer capture controller dispatches the clicks (as pointer events).
-      explicit MapFixture(utf8_stringview markup = MapMarkup) noexcept
-          : PaintFixture(utf8_string(markup), {200, 100}, true)
+      explicit MapFixture(utf8_stringview markup = MapMarkup) noexcept : PaintFixture(utf8_string(markup))
       {
         (void)Document->UpdateLayout();
       }

@@ -29,7 +29,7 @@
 #include "Krystal.Booey/DOM/Nodes/Document.hpp"
 #include "Krystal.Booey/DOM/Nodes/Element.hpp"
 #include "Krystal.Booey/Editing/Selection/FrameSelection.hpp"
-#include "Krystal.Booey/Page/LocalFrame.hpp"
+#include "Krystal.Booey/Page/Frame.hpp"
 
 namespace krys::boo
 {
@@ -38,8 +38,7 @@ namespace krys::boo
   {
   }
 
-  void TextInsertionBaseCommand::ApplyTextInsertionCommand(LocalFrame *frame,
-                                                           TextInsertionBaseCommand &command,
+  void TextInsertionBaseCommand::ApplyTextInsertionCommand(Frame *frame, TextInsertionBaseCommand &command,
                                                            const VisibleSelection &selectionForInsertion,
                                                            const VisibleSelection &endingSelection) noexcept
   {

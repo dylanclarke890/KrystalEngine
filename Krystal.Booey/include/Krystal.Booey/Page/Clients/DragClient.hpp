@@ -40,7 +40,7 @@ namespace krys::boo::dom
 namespace krys::boo
 {
   class DragData;
-  class LocalFrame;
+  class Frame;
 
   /// @brief What a page's drag controller asks of its host: which drags may start, and running a drag that
   /// starts in the page, calling the drag controller back as the cursor moves and the drag ends.
@@ -68,8 +68,7 @@ namespace krys::boo
       DragSourceActionMaskForPoint(const PointI &rootViewPoint) noexcept = 0;
 
     /// @brief Runs a drag of @p dataTransfer's data from @p frame, as @p dragItem describes.
-    virtual void StartDrag(DragItem dragItem, dom::DataTransfer &dataTransfer,
-                           LocalFrame &frame) noexcept = 0;
+    virtual void StartDrag(DragItem dragItem, dom::DataTransfer &dataTransfer, Frame &frame) noexcept = 0;
 
     virtual void DragEnded() noexcept
     {
@@ -93,7 +92,7 @@ namespace krys::boo
       return {};
     }
 
-    void StartDrag(DragItem, dom::DataTransfer &, LocalFrame &) noexcept final
+    void StartDrag(DragItem, dom::DataTransfer &, Frame &) noexcept final
     {
     }
   };

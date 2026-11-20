@@ -5,7 +5,7 @@
 
 namespace krys::boo
 {
-  class Page;
+  class Frame;
 }
 
 namespace krys::boo::tests
@@ -14,10 +14,7 @@ namespace krys::boo::tests
   struct PaintFixture : style::tests::ResolverFixture
   {
     SizeI ViewSize;
-    /// @brief The page whose main frame shows the document, if it has one (filters paint only in a page).
-    RefPtr<Page> TestPage;
-
-    explicit PaintFixture(utf8_string &&markup, SizeI viewSize = {200, 100}, bool inPage = false) noexcept;
+    explicit PaintFixture(utf8_string &&markup, SizeI viewSize = {200, 100}) noexcept;
 
     /// @brief The display list of the whole view, laid out.
     KRYS_NODISCARD Ref<const display_list::DisplayList> PaintedDisplayList() noexcept;

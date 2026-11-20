@@ -9,8 +9,8 @@
 #include "Krystal.Booey/HTML/CloseWatcher/CloseWatcherManager.hpp"
 #include "Krystal.Booey/Input/EventHandler.hpp"
 #include "Krystal.Booey/Input/PlatformKeyboardEvent.hpp"
+#include "Krystal.Booey/Page/Frame.hpp"
 #include "Krystal.Booey/Page/LocalDOMWindow.hpp"
-#include "Krystal.Booey/Page/LocalFrame.hpp"
 
 namespace krys::boo::html::tests
 {
@@ -42,7 +42,7 @@ namespace krys::boo::html::tests
       }
     };
 
-    bool PressKey(LocalFrame &frame, utf8_string key) noexcept
+    bool PressKey(boo::Frame &frame, utf8_string key) noexcept
     {
       return frame.GetEventHandler().KeyEvent(PlatformKeyboardEvent(PlatformEvent::Type::KeyDown, u8"", u8"",
                                                                     krys::move(key), u8"", u8"", 0, false,

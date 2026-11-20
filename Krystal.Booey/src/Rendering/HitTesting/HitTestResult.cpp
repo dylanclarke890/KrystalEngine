@@ -33,7 +33,7 @@
 #include "Krystal.Booey/HTML/Elements/HTMLInputElement.hpp"
 #include "Krystal.Booey/HTML/Elements/HTMLObjectElement.hpp"
 #include "Krystal.Booey/Loader/Cache/CachedImage.hpp"
-#include "Krystal.Booey/Page/LocalFrame.hpp"
+#include "Krystal.Booey/Page/Frame.hpp"
 #include "Krystal.Booey/Platform/Scrolling/Scrollbar.hpp"
 #include "Krystal.Booey/Rendering/Replaced/RenderImage.hpp"
 #include "Krystal.Booey/SVG/Elements/SVGImageElement.hpp"
@@ -162,7 +162,7 @@ namespace krys::boo
     _innerUrlElement = ShareRefPtr(element);
   }
 
-  LocalFrame *HitTestResult::InnerNodeFrame() const noexcept
+  boo::Frame *HitTestResult::InnerNodeFrame() const noexcept
   {
     if (_innerNonSharedNode)
     {
@@ -180,7 +180,7 @@ namespace krys::boo
     _localPoint = _pseudoElementIdentifier ? LayoutPoint() : point;
   }
 
-  LocalFrame *HitTestResult::Frame() const noexcept
+  boo::Frame *HitTestResult::Frame() const noexcept
   {
     if (_innerNonSharedNode)
     {

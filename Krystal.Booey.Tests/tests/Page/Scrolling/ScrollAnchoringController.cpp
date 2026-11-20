@@ -37,7 +37,7 @@ namespace krys::boo::tests
 
     KRYS_NODISCARD LocalFrameView &View(AnimationPageFixture &fixture) noexcept
     {
-      return *fixture.TestPage->MainFrame().View();
+      return *fixture.TestFrame->View();
     }
 
     KRYS_NODISCARD int32 ViewY(AnimationPageFixture &fixture) noexcept

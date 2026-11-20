@@ -54,7 +54,7 @@ namespace krys::boo::tests
 
     bool Wheel(AnimationPageFixture &fixture, float deltaY) noexcept
     {
-      return fixture.TestPage->MainFrame().GetEventHandler().HandleWheelEvent(
+      return fixture.TestFrame->GetEventHandler().HandleWheelEvent(
         PlatformWheelEvent(PointI(10, 10), PointI(10, 10), 0, deltaY, 0, deltaY > 0 ? 1.f : -1.f,
                            PlatformWheelEventGranularity::ScrollByPixelWheelEvent, {}, {}));
     }
@@ -62,7 +62,7 @@ namespace krys::boo::tests
     bool TouchpadPan(AnimationPageFixture &fixture, PlatformWheelEventPhase phase,
                      PlatformWheelEventPhase momentumPhase, float deltaY) noexcept
     {
-      return fixture.TestPage->MainFrame().GetEventHandler().HandleWheelEvent(
+      return fixture.TestFrame->GetEventHandler().HandleWheelEvent(
         PlatformWheelEvent(PointI(10, 10), PointI(10, 10), 0, deltaY, 0, 0,
                            PlatformWheelEventGranularity::ScrollByPixelWheelEvent, {}, {})
           .CopyAsTouchpadPan(phase, momentumPhase));
@@ -70,7 +70,7 @@ namespace krys::boo::tests
 
     bool TouchPan(AnimationPageFixture &fixture, float deltaY) noexcept
     {
-      return fixture.TestPage->MainFrame().GetEventHandler().HandleTouchScroll(
+      return fixture.TestFrame->GetEventHandler().HandleTouchScroll(
         PlatformWheelEvent(PointI(10, 10), PointI(10, 10), 0, deltaY, 0, 0,
                            PlatformWheelEventGranularity::ScrollByPixelWheelEvent, {}, {}));
     }
@@ -121,7 +121,7 @@ namespace krys::boo::tests
     SECTION("an arrow key goes to the next position")
     {
       Downcast<HTMLElement>(scroller).Focus();
-      auto &handler = fixture.TestPage->MainFrame().GetEventHandler();
+      auto &handler = fixture.TestFrame->GetEventHandler();
       CHECK(handler.KeyEvent(PlatformKeyboardEvent(PlatformEvent::Type::RawKeyDown, u8"", u8"", u8"ArrowDown",
                                                    u8"ArrowDown", u8"Down", vk::Down, false, false, false, {},
                                                    {})));
@@ -143,7 +143,7 @@ namespace krys::boo::tests
         CHECK(scroller.ScrollTop() == 80);
       }
 
-      fixture.TestPage->MainFrame().GetEventHandler().DidEndGestureScroll();
+      fixture.TestFrame->GetEventHandler().DidEndGestureScroll();
       CHECK(scroller.ScrollTop() == 80);
       Finish(fixture);
       CHECK(scroller.ScrollTop() == 100);

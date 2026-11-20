@@ -8,9 +8,8 @@
 #include "Krystal.Booey/Graphics/DisplayLists/DisplayListRecorderImpl.hpp"
 #include "Krystal.Booey/HTML/EventLoop/EventLoop.hpp"
 #include "Krystal.Booey/HTML/Parser/DocumentParser.hpp"
-#include "Krystal.Booey/Page/LocalFrame.hpp"
+#include "Krystal.Booey/Page/Frame.hpp"
 #include "Krystal.Booey/Page/LocalFrameView.hpp"
-#include "Krystal.Booey/Page/Page.hpp"
 #include "Krystal.Booey/Rendering/RenderBox.hpp"
 #include "Krystal.Booey/Style/Scope/Scope.hpp"
 
@@ -20,22 +19,22 @@ namespace krys::boo::tests
   struct PageInFrameFixture : css::tests::ValueFixture
   {
     SizeI ViewSize;
-    RefPtr<LocalFrame> Frame;
+    RefPtr<boo::Frame> Frame;
     Ref<HTMLDocument> Document;
 
     explicit PageInFrameFixture(utf8_string markup, SizeI viewSize = {200, 100},
                                 CachePolicy cachePolicy = CachePolicy::Use) noexcept
-        : PageInFrameFixture(LocalFrame::Create(), krys::move(markup), viewSize, cachePolicy)
+        : PageInFrameFixture(boo::Frame::Create(), krys::move(markup), viewSize, cachePolicy)
     {
     }
 
-    /// @brief As above, in @p page's main frame.
-    PageInFrameFixture(Page &page, utf8_string markup, SizeI viewSize = {200, 100}) noexcept
-        : PageInFrameFixture(ShareRef(page.MainFrame()), krys::move(markup), viewSize, CachePolicy::Use)
+    /// @brief As above, in @p frame.
+    PageInFrameFixture(boo::Frame &frame, utf8_string markup, SizeI viewSize = {200, 100}) noexcept
+        : PageInFrameFixture(ShareRef(frame), krys::move(markup), viewSize, CachePolicy::Use)
     {
     }
 
-    PageInFrameFixture(Ref<LocalFrame> frame, utf8_string markup, SizeI viewSize,
+    PageInFrameFixture(Ref<boo::Frame> frame, utf8_string markup, SizeI viewSize,
                        CachePolicy cachePolicy) noexcept
         : ViewSize(viewSize), Frame(krys::move(frame)), Document(CreateRef<HTMLDocument>())
     {

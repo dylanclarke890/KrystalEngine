@@ -33,7 +33,7 @@
 
 namespace krys::boo
 {
-  class LocalFrame;
+  class Frame;
   class Node;
   class PlatformMouseEvent;
   class RenderBox;
@@ -102,6 +102,6 @@ namespace krys::boo
 
     void StartAutoscrollTimer() noexcept;
 
-    void UpdatePanScrollState(LocalFrame &frame, const PointI &lastKnownMousePosition) noexcept;
+    void UpdatePanScrollState(Frame &frame, const PointI &lastKnownMousePosition) noexcept;
   };
 }
