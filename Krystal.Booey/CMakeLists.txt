@@ -4178,12 +4178,6 @@ set(KRYSTAL_BOOEY_TEXT_SOURCES
   src/Text/TextSpacing.cpp
 )
 
-set(KRYSTAL_BOOEY_TYPES_HEADERS
-  include/Krystal.Booey/Types/IsEOF.hpp
-  include/Krystal.Booey/Types/NestingLevelIncrementer.hpp
-  include/Krystal.Booey/Types/SourceLocation.hpp
-)
-
 set(KRYSTAL_BOOEY_XML_HEADERS
   include/Krystal.Booey/XML/PseudoAttributes.hpp
   include/Krystal.Booey/XML/XMLDocumentParser.hpp
@@ -4282,7 +4276,6 @@ target_sources(Krystal.Booey
       ${KRYSTAL_BOOEY_STYLE_HEADERS}
       ${KRYSTAL_BOOEY_SVG_HEADERS}
       ${KRYSTAL_BOOEY_TEXT_HEADERS}
-      ${KRYSTAL_BOOEY_TYPES_HEADERS}
       ${KRYSTAL_BOOEY_XML_HEADERS}
   PRIVATE
     ${KRYSTAL_BOOEY_GENERATED_SOURCES}

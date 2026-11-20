@@ -1,10 +1,10 @@
 ﻿#pragma once
 
 #include "Krystal.Booey/CSS/Types/CSSOMString.hpp"
-#include "Krystal.Booey/Types/IsEOF.hpp"
-#include "Krystal.Booey/Types/SourceLocation.hpp"
 #include "Krystal.Core/Base.hpp"
 #include "Krystal.Core/Strings/Unicode.hpp"
+#include "Krystal.Core/Utils/IsEOF.hpp"
+#include "Krystal.Core/Utils/SourceLocation.hpp"
 #include "Krystal.Text/Encodings/Decode.hpp"
 #include "Krystal.Text/Encodings/UTF.hpp"
 

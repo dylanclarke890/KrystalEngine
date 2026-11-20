@@ -28,7 +28,7 @@
 #include "Krystal.Core/Macros.hpp"
 #include "Krystal.Core/Numeric.hpp"
 
-namespace krys::boo
+namespace krys
 {
   /// @brief Increments a nesting level for the lifetime of the incrementer.
   class NestingLevelIncrementer

@@ -25,7 +25,6 @@
 #pragma once
 
 #include "Krystal.Booey/DOM/Parsing/DocumentParser.hpp"
-#include "Krystal.Booey/Types/SourceLocation.hpp"
 #include "Krystal.Booey/XML/XMLErrors.hpp"
 #include "Krystal.Core/Attributes.hpp"
 #include "Krystal.Core/Types/HashMap.hpp"
@@ -33,6 +32,7 @@
 #include "Krystal.Core/Types/RefPtr.hpp"
 #include "Krystal.Core/Types/Span.hpp"
 #include "Krystal.Core/Types/UniquePtr.hpp"
+#include "Krystal.Core/Utils/SourceLocation.hpp"
 #include <cstdarg>
 
 struct _xmlParserCtxt;

@@ -281,12 +281,15 @@ target_sources(Krystal.Core
       include/Krystal.Core/Utils/ForbidHeapAllocation.hpp
       include/Krystal.Core/Utils/GetPtrHelper.hpp
       include/Krystal.Core/Utils/IndexedRange.hpp
+      include/Krystal.Core/Utils/IsEOF.hpp
       include/Krystal.Core/Utils/Move.hpp
+      include/Krystal.Core/Utils/NestingLevelIncrementer.hpp
       include/Krystal.Core/Utils/NativeHandle.hpp
       include/Krystal.Core/Utils/PointerComparison.hpp
       include/Krystal.Core/Utils/ScopeExit.hpp
       include/Krystal.Core/Utils/ScopedProfiler.hpp
       include/Krystal.Core/Utils/SetForScope.hpp
+      include/Krystal.Core/Utils/SourceLocation.hpp
       include/Krystal.Core/Utils/StringId.hpp
       include/Krystal.Core/Utils/StrongOrder.hpp
       include/Krystal.Core/Utils/Tags.hpp
