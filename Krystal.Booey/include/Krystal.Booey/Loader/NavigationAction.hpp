@@ -28,8 +28,8 @@
 
 #pragma once
 
+#include "Krystal.Booey/Input/MouseEventTypes.hpp"
 #include "Krystal.Booey/Loader/FrameLoadRequest.hpp"
-#include "Krystal.Booey/Page/MouseEventTypes.hpp"
 #include "Krystal.Core/Geometry/Point.hpp"
 #include "Krystal.Core/Types/Maybe.hpp"
 

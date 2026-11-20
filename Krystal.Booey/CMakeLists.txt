@@ -2235,6 +2235,35 @@ set(KRYSTAL_BOOEY_INFRA_HEADERS
   include/Krystal.Booey/Infra/StringAlgorithms.hpp
 )
 
+set(KRYSTAL_BOOEY_INPUT_HEADERS
+  include/Krystal.Booey/Input/AutoscrollController.hpp
+  include/Krystal.Booey/Input/EventHandler.hpp
+  include/Krystal.Booey/Input/LegacyKeyCodes.hpp
+  include/Krystal.Booey/Input/MouseEventTypes.hpp
+  include/Krystal.Booey/Input/MouseEventWithHitTestResults.hpp
+  include/Krystal.Booey/Input/PlatformEvent.hpp
+  include/Krystal.Booey/Input/PlatformKeyboardEvent.hpp
+  include/Krystal.Booey/Input/PlatformMouseEvent.hpp
+  include/Krystal.Booey/Input/PlatformTouchEvent.hpp
+  include/Krystal.Booey/Input/PlatformTouchPoint.hpp
+  include/Krystal.Booey/Input/PlatformWheelEvent.hpp
+  include/Krystal.Booey/Input/PointerCaptureController.hpp
+  include/Krystal.Booey/Input/PointerCharacteristics.hpp
+  include/Krystal.Booey/Input/PointerId.hpp
+  include/Krystal.Booey/Input/PointerLockController.hpp
+  include/Krystal.Booey/Input/SpatialNavigation.hpp
+  include/Krystal.Booey/Input/WheelEventDeltaFilter.hpp
+)
+
+set(KRYSTAL_BOOEY_INPUT_SOURCES
+  src/Input/AutoscrollController.cpp
+  src/Input/EventHandler.cpp
+  src/Input/PointerCaptureController.cpp
+  src/Input/PointerLockController.cpp
+  src/Input/SpatialNavigation.cpp
+  src/Input/WheelEventDeltaFilter.cpp
+)
+
 set(KRYSTAL_BOOEY_LAYOUT_HEADERS
   include/Krystal.Booey/Layout/Floats/FloatAvoider.hpp
   include/Krystal.Booey/Layout/Floats/FloatingContext.hpp
@@ -2497,78 +2526,69 @@ set(KRYSTAL_BOOEY_MATHML_SOURCES
   src/MathML/Elements/MathMLUnderOverElement.cpp
 )
 
+set(KRYSTAL_BOOEY_OBSERVERS_HEADERS
+  include/Krystal.Booey/Observers/IntersectionObserver/IntersectionObserver.hpp
+  include/Krystal.Booey/Observers/IntersectionObserver/IntersectionObserverCallback.hpp
+  include/Krystal.Booey/Observers/IntersectionObserver/IntersectionObserverEntry.hpp
+  include/Krystal.Booey/Observers/IntersectionObserver/IntersectionObserverMarginBox.hpp
+  include/Krystal.Booey/Observers/ResizeObserver/ResizeObservation.hpp
+  include/Krystal.Booey/Observers/ResizeObserver/ResizeObserver.hpp
+  include/Krystal.Booey/Observers/ResizeObserver/ResizeObserverBoxOptions.hpp
+  include/Krystal.Booey/Observers/ResizeObserver/ResizeObserverCallback.hpp
+  include/Krystal.Booey/Observers/ResizeObserver/ResizeObserverEntry.hpp
+  include/Krystal.Booey/Observers/ResizeObserver/ResizeObserverOptions.hpp
+  include/Krystal.Booey/Observers/ResizeObserver/ResizeObserverSize.hpp
+)
+
+set(KRYSTAL_BOOEY_OBSERVERS_SOURCES
+  src/Observers/IntersectionObserver/IntersectionObserver.cpp
+  src/Observers/IntersectionObserver/IntersectionObserverEntry.cpp
+  src/Observers/ResizeObserver/ResizeObservation.cpp
+  src/Observers/ResizeObserver/ResizeObserver.cpp
+)
+
 set(KRYSTAL_BOOEY_PAGE_HEADERS
-  include/Krystal.Booey/Page/AutoscrollController.hpp
-  include/Krystal.Booey/Page/ChromeClient.hpp
+  include/Krystal.Booey/Page/Clients/ChromeClient.hpp
+  include/Krystal.Booey/Page/Clients/DragClient.hpp
+  include/Krystal.Booey/Page/Clients/EditorClient.hpp
   include/Krystal.Booey/Page/DOMSelection.hpp
   include/Krystal.Booey/Page/Drag/DragActions.hpp
-  include/Krystal.Booey/Page/Drag/DragClient.hpp
   include/Krystal.Booey/Page/Drag/DragController.hpp
   include/Krystal.Booey/Page/Drag/DragItem.hpp
   include/Krystal.Booey/Page/Drag/DragState.hpp
-  include/Krystal.Booey/Page/EditorClient.hpp
-  include/Krystal.Booey/Page/EventHandler.hpp
   include/Krystal.Booey/Page/FrameSnapshotting.hpp
-  include/Krystal.Booey/Page/IntersectionObserver/IntersectionObserver.hpp
-  include/Krystal.Booey/Page/IntersectionObserver/IntersectionObserverCallback.hpp
-  include/Krystal.Booey/Page/IntersectionObserver/IntersectionObserverEntry.hpp
-  include/Krystal.Booey/Page/IntersectionObserver/IntersectionObserverMarginBox.hpp
   include/Krystal.Booey/Page/LocalDOMWindow.hpp
   include/Krystal.Booey/Page/LocalFrame.hpp
   include/Krystal.Booey/Page/LocalFrameView.hpp
   include/Krystal.Booey/Page/LocalFrameViewLayoutContext.hpp
-  include/Krystal.Booey/Page/MouseEventTypes.hpp
-  include/Krystal.Booey/Page/MouseEventWithHitTestResults.hpp
   include/Krystal.Booey/Page/Page.hpp
-  include/Krystal.Booey/Page/PointerCaptureController.hpp
-  include/Krystal.Booey/Page/PointerCharacteristics.hpp
-  include/Krystal.Booey/Page/PointerLockController.hpp
   include/Krystal.Booey/Page/PopupOpeningObserver.hpp
-  include/Krystal.Booey/Page/ResizeObserver/ResizeObservation.hpp
-  include/Krystal.Booey/Page/ResizeObserver/ResizeObserver.hpp
-  include/Krystal.Booey/Page/ResizeObserver/ResizeObserverBoxOptions.hpp
-  include/Krystal.Booey/Page/ResizeObserver/ResizeObserverCallback.hpp
-  include/Krystal.Booey/Page/ResizeObserver/ResizeObserverEntry.hpp
-  include/Krystal.Booey/Page/ResizeObserver/ResizeObserverOptions.hpp
-  include/Krystal.Booey/Page/ResizeObserver/ResizeObserverSize.hpp
-  include/Krystal.Booey/Page/ScrollBehavior.hpp
-  include/Krystal.Booey/Page/Scrolling/ScrollingConstraints.hpp
   include/Krystal.Booey/Page/Scrolling/ScrollAnchoringController.hpp
+  include/Krystal.Booey/Page/Scrolling/ScrollBehavior.hpp
+  include/Krystal.Booey/Page/Scrolling/ScrollingConstraints.hpp
   include/Krystal.Booey/Page/Scrolling/ScrollLatchingController.hpp
+  include/Krystal.Booey/Page/Scrolling/ScrollOptions.hpp
   include/Krystal.Booey/Page/Scrolling/ScrollSnapOffsetsInfo.hpp
-  include/Krystal.Booey/Page/ScrollOptions.hpp
   include/Krystal.Booey/Page/Settings.hpp
-  include/Krystal.Booey/Page/SpatialNavigation.hpp
   include/Krystal.Booey/Page/VisualViewport.hpp
-  include/Krystal.Booey/Page/WheelEventDeltaFilter.hpp
 )
 
 set(KRYSTAL_BOOEY_PAGE_SOURCES
-  src/Page/AutoscrollController.cpp
   src/Page/DOMSelection.cpp
   src/Page/Drag/DragController.cpp
-  src/Page/EventHandler.cpp
   src/Page/FrameSnapshotting.cpp
-  src/Page/IntersectionObserver/IntersectionObserver.cpp
-  src/Page/IntersectionObserver/IntersectionObserverEntry.cpp
   src/Page/LocalDOMWindow.cpp
   src/Page/LocalFrame.cpp
   src/Page/LocalFrameView.cpp
   src/Page/LocalFrameViewLayoutContext.cpp
   src/Page/Page.cpp
-  src/Page/PointerCaptureController.cpp
-  src/Page/PointerLockController.cpp
-  src/Page/ResizeObserver/ResizeObservation.cpp
-  src/Page/ResizeObserver/ResizeObserver.cpp
-  src/Page/ScrollBehavior.cpp
-  src/Page/Scrolling/ScrollingConstraints.cpp
   src/Page/Scrolling/ScrollAnchoringController.cpp
+  src/Page/Scrolling/ScrollBehavior.cpp
+  src/Page/Scrolling/ScrollingConstraints.cpp
   src/Page/Scrolling/ScrollLatchingController.cpp
   src/Page/Scrolling/ScrollSnapOffsetsInfo.cpp
   src/Page/Settings.cpp
-  src/Page/SpatialNavigation.cpp
   src/Page/VisualViewport.cpp
-  src/Page/WheelEventDeltaFilter.cpp
 )
 
 set(KRYSTAL_BOOEY_PLATFORM_HEADERS
@@ -2585,14 +2605,6 @@ set(KRYSTAL_BOOEY_PLATFORM_HEADERS
   include/Krystal.Booey/Platform/Choosers/PopupMenuClient.hpp
   include/Krystal.Booey/Platform/Choosers/PopupMenuStyle.hpp
   include/Krystal.Booey/Platform/Cursor.hpp
-  include/Krystal.Booey/Platform/Events/PlatformEvent.hpp
-  include/Krystal.Booey/Platform/Events/PlatformKeyboardEvent.hpp
-  include/Krystal.Booey/Platform/Events/PlatformMouseEvent.hpp
-  include/Krystal.Booey/Platform/Events/PlatformTouchEvent.hpp
-  include/Krystal.Booey/Platform/Events/PlatformTouchPoint.hpp
-  include/Krystal.Booey/Platform/Events/PlatformWheelEvent.hpp
-  include/Krystal.Booey/Platform/Events/PointerId.hpp
-  include/Krystal.Booey/Platform/Events/LegacyKeyCodes.hpp
   include/Krystal.Booey/Platform/GraphicsClient.hpp
   include/Krystal.Booey/Platform/DateComponents.hpp
   include/Krystal.Booey/Platform/LocalizedStrings.hpp
@@ -4266,9 +4278,11 @@ target_sources(Krystal.Booey
       ${KRYSTAL_BOOEY_HISTORY_HEADERS}
       ${KRYSTAL_BOOEY_HTML_HEADERS}
       ${KRYSTAL_BOOEY_INFRA_HEADERS}
+      ${KRYSTAL_BOOEY_INPUT_HEADERS}
       ${KRYSTAL_BOOEY_LAYOUT_HEADERS}
       ${KRYSTAL_BOOEY_LOADER_HEADERS}
       ${KRYSTAL_BOOEY_MATHML_HEADERS}
+      ${KRYSTAL_BOOEY_OBSERVERS_HEADERS}
       ${KRYSTAL_BOOEY_PAGE_HEADERS}
       ${KRYSTAL_BOOEY_PLATFORM_HEADERS}
       ${KRYSTAL_BOOEY_RENDERING_HEADERS}
@@ -4289,9 +4303,11 @@ target_sources(Krystal.Booey
     ${KRYSTAL_BOOEY_GRAPHICS_SOURCES}
     ${KRYSTAL_BOOEY_HISTORY_SOURCES}
     ${KRYSTAL_BOOEY_HTML_SOURCES}
+    ${KRYSTAL_BOOEY_INPUT_SOURCES}
     ${KRYSTAL_BOOEY_LAYOUT_SOURCES}
     ${KRYSTAL_BOOEY_LOADER_SOURCES}
     ${KRYSTAL_BOOEY_MATHML_SOURCES}
+    ${KRYSTAL_BOOEY_OBSERVERS_SOURCES}
     ${KRYSTAL_BOOEY_PAGE_SOURCES}
     ${KRYSTAL_BOOEY_PLATFORM_SOURCES}
     ${KRYSTAL_BOOEY_RENDERING_SOURCES}

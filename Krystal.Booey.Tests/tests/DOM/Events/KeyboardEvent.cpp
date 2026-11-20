@@ -1,6 +1,6 @@
 ﻿#include "Krystal.Booey/DOM/Events/KeyboardEvent.hpp"
 #include "catch2/catch_test_macros.hpp"
-#include "Krystal.Booey/Platform/Events/LegacyKeyCodes.hpp"
+#include "Krystal.Booey/Input/LegacyKeyCodes.hpp"
 
 namespace krys::boo::dom::tests
 {

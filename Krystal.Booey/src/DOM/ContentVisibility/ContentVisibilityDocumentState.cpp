@@ -33,7 +33,7 @@
 #include "Krystal.Booey/DOM/Ranges/SimpleRange.hpp"
 #include "Krystal.Booey/Editing/Selection/FrameSelection.hpp"
 #include "Krystal.Booey/HTML/EventLoop/EventLoop.hpp"
-#include "Krystal.Booey/Page/IntersectionObserver/IntersectionObserverEntry.hpp"
+#include "Krystal.Booey/Observers/IntersectionObserver/IntersectionObserverEntry.hpp"
 #include "Krystal.Booey/Rendering/RenderElement.hpp"
 
 namespace krys::boo::dom

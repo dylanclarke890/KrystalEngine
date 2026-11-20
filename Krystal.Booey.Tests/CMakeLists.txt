@@ -418,21 +418,21 @@ target_sources(Krystal.Booey.Tests
 		tests/DOM/Events/WheelEvent.cpp
 		tests/DOM/Abort/AbortController.cpp
 		tests/DOM/Abort/AbortSignal.cpp
-		tests/Page/AccessKeys.cpp
-		tests/Page/EventHandler.cpp
-		tests/Page/PenAndTouch.cpp
-		tests/Page/PointerLockController.cpp
-		tests/Page/SpatialNavigation.cpp
+		tests/Input/AccessKeys.cpp
+		tests/Input/EventHandler.cpp
+		tests/Input/PenAndTouch.cpp
+		tests/Input/PointerLockController.cpp
+		tests/Input/SpatialNavigation.cpp
 		tests/FileAPI/Blob.cpp
 		tests/DOM/DataTransfer/DataTransfer.cpp
-		tests/Page/PointerCaptureController.cpp
+		tests/Input/PointerCaptureController.cpp
 		tests/Page/DOMSelection.cpp
-		tests/Page/MouseSelection.cpp
+		tests/Input/MouseSelection.cpp
 		tests/Page/Drag/DragController.cpp
 		tests/Graphics/TextRuns/StringTruncator.cpp
 		tests/Platform/Pasteboard/DragImage.cpp
-		tests/Page/IntersectionObserver/IntersectionObserver.cpp
-		tests/Page/ResizeObserver/ResizeObserver.cpp
+		tests/Observers/IntersectionObserver/IntersectionObserver.cpp
+		tests/Observers/ResizeObserver/ResizeObserver.cpp
 		tests/Page/Page.cpp
 		tests/Page/LocalDOMWindow.cpp
 		tests/Loader/DocumentLoader.cpp
@@ -563,7 +563,7 @@ target_sources(Krystal.Booey.Tests
 		tests/Rendering/MultiColumn/RenderMultiColumnFlow.cpp
 		tests/Rendering/Updating/RenderTreeBuilderRuby.cpp
 		tests/Page/Settings.cpp
-		tests/Page/WheelEventDeltaFilter.cpp
+		tests/Input/WheelEventDeltaFilter.cpp
 		tests/Style/Adjuster.cpp
 		tests/Style/AnchorPositionEvaluator.cpp
 		tests/Style/Builder/Builder.cpp

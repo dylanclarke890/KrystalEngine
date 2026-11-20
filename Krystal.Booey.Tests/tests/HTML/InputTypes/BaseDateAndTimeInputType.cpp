@@ -6,15 +6,15 @@
 #include "Krystal.Booey/HTML/Algorithms/FocusAlgorithms.hpp"
 #include "Krystal.Booey/HTML/Elements/HTMLInputElement.hpp"
 #include "Krystal.Booey/HTML/Shadow/DateTimeEditElement.hpp"
-#include "Krystal.Booey/Page/ChromeClient.hpp"
-#include "Krystal.Booey/Page/EventHandler.hpp"
+#include "Krystal.Booey/Input/EventHandler.hpp"
+#include "Krystal.Booey/Input/LegacyKeyCodes.hpp"
+#include "Krystal.Booey/Input/PlatformKeyboardEvent.hpp"
+#include "Krystal.Booey/Page/Clients/ChromeClient.hpp"
 #include "Krystal.Booey/Page/LocalDOMWindow.hpp"
 #include "Krystal.Booey/Page/Settings.hpp"
 #include "Krystal.Booey/Platform/Choosers/DateTimeChooser.hpp"
 #include "Krystal.Booey/Platform/Choosers/DateTimeChooserClient.hpp"
 #include "Krystal.Booey/Platform/Choosers/DateTimeChooserParameters.hpp"
-#include "Krystal.Booey/Platform/Events/LegacyKeyCodes.hpp"
-#include "Krystal.Booey/Platform/Events/PlatformKeyboardEvent.hpp"
 
 namespace krys::boo::tests
 {

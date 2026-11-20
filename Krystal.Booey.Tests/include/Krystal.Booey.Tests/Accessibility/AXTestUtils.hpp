@@ -6,7 +6,7 @@
 #include "Krystal.Booey/Accessibility/AXLogger.hpp"
 #include "Krystal.Booey/Accessibility/AXObject.hpp"
 #include "Krystal.Booey/Accessibility/AXObjectCache.hpp"
-#include "Krystal.Booey/Page/ChromeClient.hpp"
+#include "Krystal.Booey/Page/Clients/ChromeClient.hpp"
 #include <utility>
 
 namespace krys::boo::ax::tests

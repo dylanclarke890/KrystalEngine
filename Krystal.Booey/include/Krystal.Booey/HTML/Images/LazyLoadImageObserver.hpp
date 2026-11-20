@@ -25,7 +25,7 @@
 
 #pragma once
 
-#include "Krystal.Booey/Page/IntersectionObserver/IntersectionObserver.hpp"
+#include "Krystal.Booey/Observers/IntersectionObserver/IntersectionObserver.hpp"
 #include "Krystal.Core/Attributes.hpp"
 #include "Krystal.Core/Macros.hpp"
 #include "Krystal.Core/Types/RefPtr.hpp"

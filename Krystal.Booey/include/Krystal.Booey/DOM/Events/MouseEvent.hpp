@@ -27,7 +27,7 @@
 #include "Krystal.Booey/DOM/Events/EventTarget.hpp"
 #include "Krystal.Booey/DOM/Events/MouseRelatedEvent.hpp"
 #include "Krystal.Booey/DOM/Events/UIEvent.hpp"
-#include "Krystal.Booey/Page/MouseEventTypes.hpp"
+#include "Krystal.Booey/Input/MouseEventTypes.hpp"
 #include "Krystal.Core/Attributes.hpp"
 #include "Krystal.Core/Numeric.hpp"
 #include "Krystal.Core/Types/List.hpp"
