@@ -1862,7 +1862,7 @@ namespace krys::boo
     KRYS_NODISCARD bool ClippingChanged(const RenderStyle &oldStyle, const RenderStyle &newStyle) noexcept
     {
       return oldStyle.OverflowX() != newStyle.OverflowX() || oldStyle.OverflowY() != newStyle.OverflowY()
-             || oldStyle.GetClip() != newStyle.GetClip();
+             || oldStyle.Clip() != newStyle.Clip();
     }
 
     KRYS_NODISCARD bool StyleAffectsLayerGeometry(const RenderStyle &style) noexcept
@@ -1873,23 +1873,22 @@ namespace krys::boo
     KRYS_NODISCARD bool RecompositeChangeRequiresGeometryUpdate(const RenderStyle &oldStyle,
                                                                 const RenderStyle &newStyle) noexcept
     {
-      return oldStyle.GetTransform() != newStyle.GetTransform()
-             || oldStyle.GetTranslate() != newStyle.GetTranslate()
-             || oldStyle.GetScale() != newStyle.GetScale() || oldStyle.GetRotate() != newStyle.GetRotate()
-             || oldStyle.GetTransformBox() != newStyle.GetTransformBox()
-             || oldStyle.GetTransformOriginX() != newStyle.GetTransformOriginX()
-             || oldStyle.GetTransformOriginY() != newStyle.GetTransformOriginY()
-             || oldStyle.GetTransformOriginZ() != newStyle.GetTransformOriginZ()
+      return oldStyle.Transform() != newStyle.Transform() || oldStyle.Translate() != newStyle.Translate()
+             || oldStyle.Scale() != newStyle.Scale() || oldStyle.Rotate() != newStyle.Rotate()
+             || oldStyle.TransformBox() != newStyle.TransformBox()
+             || oldStyle.TransformOriginX() != newStyle.TransformOriginX()
+             || oldStyle.TransformOriginY() != newStyle.TransformOriginY()
+             || oldStyle.TransformOriginZ() != newStyle.TransformOriginZ()
              || oldStyle.UsedTransformStyle3D() != newStyle.UsedTransformStyle3D()
-             || oldStyle.GetPerspective() != newStyle.GetPerspective()
-             || oldStyle.GetPerspectiveOrigin() != newStyle.GetPerspectiveOrigin()
-             || oldStyle.GetBackfaceVisibility() != newStyle.GetBackfaceVisibility()
-             || oldStyle.GetOffsetPath() != newStyle.GetOffsetPath()
-             || oldStyle.GetOffsetAnchor() != newStyle.GetOffsetAnchor()
-             || oldStyle.GetOffsetPosition() != newStyle.GetOffsetPosition()
-             || oldStyle.GetOffsetDistance() != newStyle.GetOffsetDistance()
-             || oldStyle.GetOffsetRotate() != newStyle.GetOffsetRotate()
-             || oldStyle.GetClipPath() != newStyle.GetClipPath()
+             || oldStyle.Perspective() != newStyle.Perspective()
+             || oldStyle.PerspectiveOrigin() != newStyle.PerspectiveOrigin()
+             || oldStyle.BackfaceVisibility() != newStyle.BackfaceVisibility()
+             || oldStyle.OffsetPath() != newStyle.OffsetPath()
+             || oldStyle.OffsetAnchor() != newStyle.OffsetAnchor()
+             || oldStyle.OffsetPosition() != newStyle.OffsetPosition()
+             || oldStyle.OffsetDistance() != newStyle.OffsetDistance()
+             || oldStyle.OffsetRotate() != newStyle.OffsetRotate()
+             || oldStyle.ClipPath() != newStyle.ClipPath()
              || oldStyle.OverscrollBehaviorX() != newStyle.OverscrollBehaviorX()
              || oldStyle.OverscrollBehaviorY() != newStyle.OverscrollBehaviorY();
     }
@@ -2046,7 +2045,7 @@ namespace krys::boo
       }
 
       // image rendering mode can determine whether we use device pixel ratio for the backing store.
-      if (oldStyle && oldStyle->GetImageRendering() != newStyle.GetImageRendering())
+      if (oldStyle && oldStyle->ImageRendering() != newStyle.ImageRendering())
       {
         layer.SetNeedsCompositingConfigurationUpdate();
       }
@@ -2064,8 +2063,8 @@ namespace krys::boo
         }
         // If we're changing to/from 0 opacity, then we need to reconfigure the layer since we try to skip
         // backing store allocation for opacity:0.
-        if (oldStyle && oldStyle->GetOpacity() != newStyle.GetOpacity()
-            && (oldStyle->GetOpacity().IsTransparent() || newStyle.GetOpacity().IsTransparent()))
+        if (oldStyle && oldStyle->Opacity() != newStyle.Opacity()
+            && (oldStyle->Opacity().IsTransparent() || newStyle.Opacity().IsTransparent()))
         {
           layer.SetNeedsCompositingConfigurationUpdate();
         }
@@ -2409,7 +2408,7 @@ namespace krys::boo
     template <typename TFunction>
     AncestorTraversal TraverseAncestorLayers(const RenderLayer &layer, TFunction function) noexcept
     {
-      auto positioningBehavior = layer.Renderer().Style().GetPosition();
+      auto positioningBehavior = layer.Renderer().Style().Position();
       RenderLayer *nextPaintOrderParent = layer.PaintOrderParent();
 
       for (const auto *ancestorLayer = layer.Parent(); ancestorLayer; ancestorLayer = ancestorLayer->Parent())
@@ -2437,7 +2436,7 @@ namespace krys::boo
 
         if (inContainingBlockChain)
         {
-          positioningBehavior = ancestorLayer->Renderer().Style().GetPosition();
+          positioningBehavior = ancestorLayer->Renderer().Style().Position();
         }
 
         if (ancestorLayer == nextPaintOrderParent)
@@ -3046,7 +3045,7 @@ namespace krys::boo
       reasons.Add(CompositingReason::Canvas);
     }
 
-    if ((CanRender3DTransforms() && renderer.Style().GetBackfaceVisibility() == BackfaceVisibility::Hidden))
+    if ((CanRender3DTransforms() && renderer.Style().BackfaceVisibility() == BackfaceVisibility::Hidden))
     {
       reasons.Add(CompositingReason::BackfaceVisibilityHidden);
     }
@@ -3433,14 +3432,14 @@ namespace krys::boo
   {
     KRYS_NODISCARD bool StyleHas3DTransformOperation(const RenderStyle &style) noexcept
     {
-      return style.GetTransform().Has3DOperation() || style.GetTranslate().Is3DOperation()
-             || style.GetScale().Is3DOperation() || style.GetRotate().Is3DOperation();
+      return style.Transform().Has3DOperation() || style.Translate().Is3DOperation()
+             || style.Scale().Is3DOperation() || style.Rotate().Is3DOperation();
     }
 
     KRYS_NODISCARD bool StyleTransformOperationsAreRepresentableIn2D(const RenderStyle &style) noexcept
     {
-      return style.GetTransform().IsRepresentableIn2D() && style.GetTranslate().IsRepresentableIn2D()
-             && style.GetScale().IsRepresentableIn2D() && style.GetRotate().IsRepresentableIn2D();
+      return style.Transform().IsRepresentableIn2D() && style.Translate().IsRepresentableIn2D()
+             && style.Scale().IsRepresentableIn2D() && style.Rotate().IsRepresentableIn2D();
     }
   }
 
@@ -3494,7 +3493,7 @@ namespace krys::boo
   bool RenderLayerCompositor::RequiresCompositingForBackfaceVisibility(
     const RenderLayerModelObject &renderer) noexcept
   {
-    if (renderer.Style().GetBackfaceVisibility() != BackfaceVisibility::Hidden)
+    if (renderer.Style().BackfaceVisibility() != BackfaceVisibility::Hidden)
     {
       return false;
     }
@@ -3527,7 +3526,7 @@ namespace krys::boo
   bool RenderLayerCompositor::RequiresCompositingForWillChange(
     const RenderLayerModelObject &renderer) const noexcept
   {
-    if (!renderer.Style().GetWillChange().CanTriggerCompositing())
+    if (!renderer.Style().WillChange().CanTriggerCompositing())
     {
       return false;
     }
@@ -3542,7 +3541,7 @@ namespace krys::boo
       return true;
     }
 
-    return renderer.Style().GetWillChange().CanTriggerCompositingOnInline();
+    return renderer.Style().WillChange().CanTriggerCompositingOnInline();
   }
 
   bool
@@ -3558,7 +3557,7 @@ namespace krys::boo
       return false;
     }
 
-    auto position = renderer.Style().GetPosition();
+    auto position = renderer.Style().Position();
     bool isFixed = renderer.IsFixedPositioned();
     if (isFixed && !layer.IsStackingContext())
     {
@@ -3697,7 +3696,7 @@ namespace krys::boo
     {
       return true;
     }
-    if (newStyle.GetIsolation() != oldStyle.GetIsolation())
+    if (newStyle.Isolation() != oldStyle.Isolation())
     {
       return true;
     }
@@ -4166,8 +4165,8 @@ namespace krys::boo
       RootBackgroundColorOrTransparencyChanged();
     }
 
-    bool hadFixedBackground = oldStyle && style::HasEntirelyFixedBackground(oldStyle->GetBackgroundLayers());
-    if (hadFixedBackground != style::HasEntirelyFixedBackground(renderer.Style().GetBackgroundLayers()))
+    bool hadFixedBackground = oldStyle && style::HasEntirelyFixedBackground(oldStyle->BackgroundLayers());
+    if (hadFixedBackground != style::HasEntirelyFixedBackground(renderer.Style().BackgroundLayers()))
     {
       RootLayerConfigurationChanged();
     }

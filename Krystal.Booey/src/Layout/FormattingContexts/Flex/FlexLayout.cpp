@@ -581,7 +581,7 @@ namespace krys::boo::layout
         // Collect all the flex items whose inline-axis is parallel to the main-axis, whose align-self is
         // baseline, and whose cross-axis margins are both non-auto.
         auto &flexItem = flexItems[flexItemIndex];
-        if (!flexItem.IsOrthogonal() && flexItem.Style().GetAlignSelf().IsFirstBaseline()
+        if (!flexItem.IsOrthogonal() && flexItem.Style().AlignSelf().IsFirstBaseline()
             && flexItem.CrossAxis().HasNonAutoMargins())
         {
           // Find the largest of the distances between each item's baseline and its hypothetical outer
@@ -624,7 +624,7 @@ namespace krys::boo::layout
     // inner cross size.
     auto linesMayStretch = [&]
     {
-      auto alignContent = FlexContainerStyle().GetAlignContent();
+      auto alignContent = FlexContainerStyle().AlignContent();
       return alignContent.IsStretch() || alignContent.IsNormal();
     };
     if (!linesMayStretch() || !crossAxisAvailableSpace)
@@ -677,10 +677,10 @@ namespace krys::boo::layout
       {
         auto &flexItem = flexItems[flexItemIndex];
         auto &crossAxis = flexItem.CrossAxis();
-        auto flexItemAlignSelf = flexItem.Style().GetAlignSelf();
+        auto flexItemAlignSelf = flexItem.Style().AlignSelf();
         auto alignValue = !flexItemAlignSelf.IsAuto()
                             ? flexItemAlignSelf.Resolve().Position()
-                            : FlexContainerStyle().GetAlignItems().Resolve().Position();
+                            : FlexContainerStyle().AlignItems().Resolve().Position();
         // If a flex item has align-self: stretch, its computed cross size property is auto, and neither of
         // its cross-axis margins are auto, the used outer cross size is the used cross size of its flex line,
         // clamped according to the item's used min and max cross sizes. Otherwise, the used cross size is the
@@ -783,7 +783,7 @@ namespace krys::boo::layout
       };
       resolveMarginAuto();
 
-      auto justifyContentValue = FlexContainerStyle().GetJustifyContent().Resolve();
+      auto justifyContentValue = FlexContainerStyle().JustifyContent().Resolve();
       auto justifyContentDistribution = justifyContentValue.Distribution();
       auto justifyContentPosition = justifyContentValue.Position();
 
@@ -986,9 +986,9 @@ namespace krys::boo::layout
                                                        crossPositionAndMargins[flexItemIndex].Margin());
           auto flexItemOuterCrossPosition = LayoutUnit {};
 
-          auto flexItemAlign = !flexItem.Style().GetAlignSelf().IsAuto()
-                                 ? flexItem.Style().GetAlignSelf().Resolve()
-                                 : FlexContainerStyle().GetAlignItems().Resolve();
+          auto flexItemAlign = !flexItem.Style().AlignSelf().IsAuto()
+                                 ? flexItem.Style().AlignSelf().Resolve()
+                                 : FlexContainerStyle().AlignItems().Resolve();
           auto alignSelfPosition = flexItemAlign.Position();
           auto setFallbackValuesIfApplicable = [&]
           {
@@ -1057,7 +1057,7 @@ namespace krys::boo::layout
     auto distributableCrossSpace = flexContainerUsedCrossSize - flexLinesCrossSize;
     auto initialOffset = [&]() -> LayoutUnit
     {
-      auto alignContentValue = FlexContainerStyle().GetAlignContent().Resolve();
+      auto alignContentValue = FlexContainerStyle().AlignContent().Resolve();
       auto alignContentPosition = alignContentValue.Position();
       auto alignContentDistribution = alignContentValue.Distribution();
 
@@ -1133,7 +1133,7 @@ namespace krys::boo::layout
       {
         return {};
       }
-      return FlexContainerStyle().GetAlignContent().SwitchOn(
+      return FlexContainerStyle().AlignContent().SwitchOn(
         [&](const css::keywords::SpaceBetween &) -> LayoutUnit
         { return distributableCrossSpace / (numberOfLines - 1); },
         [&](const css::keywords::SpaceAround &) -> LayoutUnit
@@ -1190,7 +1190,7 @@ namespace krys::boo::layout
 
   bool FlexLayout::IsSingleLineFlexContainer() const noexcept
   {
-    return FlexContainerStyle().GetFlexWrap() == FlexWrap::NoWrap;
+    return FlexContainerStyle().FlexWrap() == FlexWrap::NoWrap;
   }
 
   const ElementBox &FlexLayout::FlexContainer() const noexcept

@@ -145,12 +145,12 @@ namespace krys::boo::style
       return false;
     }
 
-    if (!renderer->Style().GetOpacity().IsTransparent())
+    if (!renderer->Style().Opacity().IsTransparent())
     {
       return true;
     }
 
-    if (renderer->Style().GetWillChange().ContainsProperty(css::PropertyId::Opacity))
+    if (renderer->Style().WillChange().ContainsProperty(css::PropertyId::Opacity))
     {
       return true;
     }
@@ -457,12 +457,12 @@ namespace krys::boo::style
       return;
     }
 
-    const auto &currentAnimationList = afterChangeStyle.GetAnimations();
+    const auto &currentAnimationList = afterChangeStyle.Animations();
     const auto &previousAnimationList = keyframeEffectStack.CSSAnimationList();
     if (!Element.HasPendingKeyframesUpdate(PseudoElementIdentifier) && previousAnimationList
         && !previousAnimationList->IsInitial() && afterChangeStyle.HasAnimations()
-        && *previousAnimationList == afterChangeStyle.GetAnimations()
-        && !AnimationListContainsNewlyValidAnimation(afterChangeStyle.GetAnimations()))
+        && *previousAnimationList == afterChangeStyle.Animations()
+        && !AnimationListContainsNewlyValidAnimation(afterChangeStyle.Animations()))
     {
       return;
     }
@@ -666,7 +666,7 @@ namespace krys::boo::style
                                             HashSet<CSSOMStringAtom> &transitionCustomProperties,
                                             bool &transitionPropertiesContainAll) noexcept
     {
-      const auto &transitions = style.GetTransitions();
+      const auto &transitions = style.Transitions();
       if (transitions.IsInitial())
       {
         // If we don't have any transitions in the map, this means that the initial value "all 0s" was set.
@@ -739,7 +739,7 @@ namespace krys::boo::style
       auto hasMatchingTransitionProperty = false;
       auto matchingTransitionDuration = 0.0;
       Maybe<Transition> matchingTransition;
-      if (const auto &transitions = newStyle.GetTransitions(); !transitions.IsInitial())
+      if (const auto &transitions = newStyle.Transitions(); !transitions.IsInitial())
       {
         for (const auto &transition : transitions.UsedValues())
         {
@@ -1262,8 +1262,7 @@ namespace krys::boo::style
     {
       if ((currentStyle && currentStyle->ViewTimelineNames() == afterChangeStyle.ViewTimelineNames())
           && (currentStyle && currentStyle->ViewTimelineAxes() == afterChangeStyle.ViewTimelineAxes())
-          && (currentStyle
-              && currentStyle->GetViewTimelineInsets() == afterChangeStyle.GetViewTimelineInsets()))
+          && (currentStyle && currentStyle->ViewTimelineInsets() == afterChangeStyle.ViewTimelineInsets()))
       {
         return;
       }
@@ -1273,7 +1272,7 @@ namespace krys::boo::style
 
       const auto &currentTimelineNames = afterChangeStyle.ViewTimelineNames();
       const auto &currentTimelineAxes = afterChangeStyle.ViewTimelineAxes();
-      const auto &currentTimelineInsets = afterChangeStyle.GetViewTimelineInsets();
+      const auto &currentTimelineInsets = afterChangeStyle.ViewTimelineInsets();
       auto numberOfAxes = currentTimelineAxes.size();
       auto numberOfInsets = currentTimelineInsets.size();
       for (size_t i = 0; i < currentTimelineNames.size(); ++i)

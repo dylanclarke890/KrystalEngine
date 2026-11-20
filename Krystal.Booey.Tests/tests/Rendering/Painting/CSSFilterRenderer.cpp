@@ -60,7 +60,7 @@ namespace krys::boo::tests
           .FilterRegion = {-20, -20, 80, 70},
           .Scale = {1, 1},
         };
-        return CSSFilterRenderer::Create(Box(), Box().Style().GetFilter(), geometry,
+        return CSSFilterRenderer::Create(Box(), Box().Style().Filter(), geometry,
                                          {FilterRenderingMode::GraphicsContext}, context);
       }
 
@@ -161,7 +161,7 @@ namespace krys::boo::tests
     SECTION("blur")
     {
       FilterFixture fixture(u8"blur(4px)");
-      auto outsets = CSSFilterRenderer::CalculateOutsets(fixture.Box(), fixture.Box().Style().GetFilter(),
+      auto outsets = CSSFilterRenderer::CalculateOutsets(fixture.Box(), fixture.Box().Style().Filter(),
                                                          RectF {0, 0, 40, 30});
       // Three standard deviations.
       CHECK(outsets == IntOutsets {12, 12, 12, 12});
@@ -172,7 +172,7 @@ namespace krys::boo::tests
     SECTION("drop shadow")
     {
       FilterFixture fixture(u8"drop-shadow(4px -6px 0 black)");
-      auto outsets = CSSFilterRenderer::CalculateOutsets(fixture.Box(), fixture.Box().Style().GetFilter(),
+      auto outsets = CSSFilterRenderer::CalculateOutsets(fixture.Box(), fixture.Box().Style().Filter(),
                                                          RectF {0, 0, 40, 30});
       // Top, right, bottom, left: the offset moves the shadow up and right.
       CHECK(outsets == IntOutsets {6, 4, 0, 0});

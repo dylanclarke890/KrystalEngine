@@ -83,7 +83,7 @@ namespace krys::boo
           continue;
         }
 
-        if (run->IsText() || run->Style().GetTextDecorationSkipInk() == TextDecorationSkipInk::None)
+        if (run->IsText() || run->Style().TextDecorationSkipInk() == TextDecorationSkipInk::None)
         {
           minLogicalTop = std::min<float>(minLogicalTop, run->LogicalTop());
         }
@@ -115,7 +115,7 @@ namespace krys::boo
           continue;
         }
 
-        if (run->IsText() || run->Style().GetTextDecorationSkipInk() == TextDecorationSkipInk::None)
+        if (run->IsText() || run->Style().TextDecorationSkipInk() == TextDecorationSkipInk::None)
         {
           maxLogicalBottom = std::max<float>(maxLogicalBottom, run->LogicalBottom());
         }
@@ -149,7 +149,7 @@ namespace krys::boo
             // <font> and <a> are always considered decorating boxes.
             return true;
           }
-          return ancestor->Style().GetTextDecorationLine().HasUnderline();
+          return ancestor->Style().TextDecorationLine().HasUnderline();
         };
         if (isDecoratingInlineBox())
         {
@@ -219,7 +219,7 @@ namespace krys::boo
       auto &styleToUse = context.LineStyle;
       auto &fontMetrics = styleToUse.MetricsOfPrimaryFont();
       auto underlineOffset = 0.f;
-      auto textUnderlinePosition = styleToUse.GetTextUnderlinePosition();
+      auto textUnderlinePosition = styleToUse.TextUnderlinePosition();
 
       if (IsAlignedForUnder(styleToUse))
       {
@@ -231,7 +231,7 @@ namespace krys::boo
           // In vertical typographic modes, the underline is aligned as for under, except it is always aligned
           // to the right edge of the text.
           underlineOffset =
-            0.f - (styleToUse.GetTextUnderlineOffset().Resolve(styleToUse) + DefaultGap(styleToUse));
+            0.f - (styleToUse.TextUnderlineOffset().Resolve(styleToUse) + DefaultGap(styleToUse));
         }
         else
         {
@@ -239,7 +239,7 @@ namespace krys::boo
           auto desiredOffset =
             context.TextUnderlinePositionUnder->TextRunLogicalHeight
             + std::max(context.TextUnderlinePositionUnder->TextRunOffsetFromBottomMost, 0.f);
-          desiredOffset += styleToUse.GetTextUnderlineOffset().Resolve(styleToUse) + DefaultGap(styleToUse);
+          desiredOffset += styleToUse.TextUnderlineOffset().Resolve(styleToUse) + DefaultGap(styleToUse);
           underlineOffset = std::max<float>(desiredOffset, static_cast<float>(fontMetrics.IntAscent()));
         }
       }
@@ -247,12 +247,12 @@ namespace krys::boo
       {
         underlineOffset = static_cast<float>(fontMetrics.IntAscent())
                           + fontMetrics.UnderlinePosition().value_or(0.f)
-                          + styleToUse.GetTextUnderlineOffset().Resolve(styleToUse);
+                          + styleToUse.TextUnderlineOffset().Resolve(styleToUse);
       }
       else
       {
         underlineOffset = static_cast<float>(fontMetrics.IntAscent())
-                          + styleToUse.GetTextUnderlineOffset().Resolve(styleToUse, DefaultGap(styleToUse));
+                          + styleToUse.TextUnderlineOffset().Resolve(styleToUse, DefaultGap(styleToUse));
       }
       return underlineOffset;
     }
@@ -272,11 +272,11 @@ namespace krys::boo
         return GlyphOverflow();
       }
 
-      float strokeThickness = lineStyle.GetTextDecorationThickness().Resolve(lineStyle);
+      float strokeThickness = lineStyle.TextDecorationThickness().Resolve(lineStyle);
       WavyStrokeParameters wavyStrokeParameters;
       float wavyOffset = 0;
 
-      TextDecorationStyle decorationStyle = lineStyle.GetTextDecorationStyle();
+      TextDecorationStyle decorationStyle = lineStyle.TextDecorationStyle();
       float height = lineStyle.GetFontCascade().MetricsOfPrimaryFont().Height();
       GlyphOverflow overflowResult;
 
@@ -355,7 +355,7 @@ namespace krys::boo
 
   bool IsAlignedForUnder(const RenderStyle &decoratingBoxStyle) noexcept
   {
-    auto underlinePosition = decoratingBoxStyle.GetTextUnderlinePosition();
+    auto underlinePosition = decoratingBoxStyle.TextUnderlinePosition();
     if (underlinePosition.IsUnder())
     {
       return true;
@@ -375,7 +375,7 @@ namespace krys::boo
       case style::TextUnderlinePosition::Side::NoPreference:
         // When left/right support is not enabled.
         // FIXME: The offset check is mostly about visual overflow, consider splitting out.
-        return underlinePosition.IsAuto() && decoratingBoxStyle.GetTextUnderlineOffset().IsAuto();
+        return underlinePosition.IsAuto() && decoratingBoxStyle.TextUnderlineOffset().IsAuto();
     }
     krys_unreachable();
   }
@@ -427,12 +427,12 @@ namespace krys::boo
       return 0.f;
     }
 
-    if (style.GetTextBoxTrim() != TextBoxTrim::TrimStart && style.GetTextBoxTrim() != TextBoxTrim::TrimBoth)
+    if (style.TextBoxTrim() != TextBoxTrim::TrimStart && style.TextBoxTrim() != TextBoxTrim::TrimBoth)
     {
       return 0.f;
     }
 
-    auto textEdge = style.GetTextBoxEdge().TryTextEdgePair();
+    auto textEdge = style.TextBoxEdge().TryTextEdgePair();
     if (!textEdge)
     {
       return 0.f;
@@ -483,7 +483,7 @@ namespace krys::boo
 
     // If 'right' causes the underline to be drawn on the "over" side of the text, then an overline also
     // switches sides and is drawn on the "under" side.
-    auto underlinePosition = style.GetTextUnderlinePosition();
+    auto underlinePosition = style.TextUnderlinePosition();
     return underlinePosition.VerticalTypographySide() == style::TextUnderlinePosition::Side::Right
              ? InlineBoxContentBoxHeight(inlineBox) + DefaultGap(style)
              : (0.f - DefaultGap(style));

@@ -44,7 +44,7 @@ namespace krys::boo::style
 
   // MARK: - Style adjustment utilities
 
-  inline void ComputedStyle::AddToTextDecorationLineInEffect(TextDecorationLine value) noexcept
+  inline void ComputedStyle::AddToTextDecorationLineInEffect(style::TextDecorationLine value) noexcept
   {
     _inheritedFlags.TextDecorationLineInEffect = TextDecorationLineInEffect().AddOrReplaceIfNotNone(value);
   }
@@ -105,7 +105,7 @@ namespace krys::boo::style
 
   inline void ComputedStyle::ResetBorderExceptRadius() noexcept
   {
-    SetBorderImage(BorderImage {});
+    SetBorderImage(style::BorderImage {});
     ResetBorderTop();
     ResetBorderRight();
     ResetBorderBottom();

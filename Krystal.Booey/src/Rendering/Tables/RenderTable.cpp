@@ -99,7 +99,7 @@ namespace krys::boo
 
   bool RenderTable::CollapseBorders() const noexcept
   {
-    return Style().GetBorderCollapse() == BorderCollapse::Collapse;
+    return Style().BorderCollapse() == BorderCollapse::Collapse;
   }
 
   bool RenderTable::HasSections() const noexcept
@@ -168,9 +168,9 @@ namespace krys::boo
     // In the collapsed border model, there is no cell spacing.
     auto usedZoom = Style().UsedZoomForLength();
     _hSpacing =
-      CollapseBorders() ? 0_lu : style::Evaluate<LayoutUnit>(Style().GetBorderSpacing().Width(), usedZoom);
+      CollapseBorders() ? 0_lu : style::Evaluate<LayoutUnit>(Style().BorderSpacing().Width(), usedZoom);
     _vSpacing =
-      CollapseBorders() ? 0_lu : style::Evaluate<LayoutUnit>(Style().GetBorderSpacing().Height(), usedZoom);
+      CollapseBorders() ? 0_lu : style::Evaluate<LayoutUnit>(Style().BorderSpacing().Height(), usedZoom);
     krys_debug_assert(_hSpacing >= 0);
     krys_debug_assert(_vSpacing >= 0);
 
@@ -436,7 +436,7 @@ namespace krys::boo
     LayoutUnit borders;
     bool isCSSTable = !IsHTMLTableElement();
     if (isCSSTable && styleLogicalWidth.IsSpecified() && styleLogicalWidth.IsPossiblyPositive()
-        && Style().GetBoxSizing() == BoxSizing::ContentBox)
+        && Style().BoxSizing() == BoxSizing::ContentBox)
     {
       borders = BorderStart() + BorderEnd() + (CollapseBorders() ? 0_lu : PaddingStart() + PaddingEnd());
     }
@@ -456,7 +456,7 @@ namespace krys::boo
       // HTML tables size as though CSS height includes border/padding, CSS tables do not.
       LayoutUnit borders;
       // FIXME: We cannot apply box-sizing: content-box on <table> which other browsers allow.
-      if (IsHTMLTableElement() || Style().GetBoxSizing() == BoxSizing::BorderBox)
+      if (IsHTMLTableElement() || Style().BoxSizing() == BoxSizing::BorderBox)
       {
         borders = borderAndPadding;
       }
@@ -511,7 +511,7 @@ namespace krys::boo
     // FIXME: Collapse caption margin.
     for (auto &caption : _captions)
     {
-      auto isBottomCaption = caption->Style().GetCaptionSide() == CaptionSide::Bottom;
+      auto isBottomCaption = caption->Style().CaptionSide() == CaptionSide::Bottom;
       if ((bottomCaptionLayoutPhase == BottomCaptionLayoutPhase::Yes && !isBottomCaption)
           || (bottomCaptionLayoutPhase == BottomCaptionLayoutPhase::No && isBottomCaption))
       {
@@ -2276,7 +2276,7 @@ namespace krys::boo
       LayoutUnit captionLogicalHeight =
         caption->LogicalHeight() + caption->MarginBefore() + caption->MarginAfter();
       bool captionIsBefore =
-        (caption->Style().GetCaptionSide() != CaptionSide::Bottom) ^ GetWritingMode().IsBlockFlipped();
+        (caption->Style().CaptionSide() != CaptionSide::Bottom) ^ GetWritingMode().IsBlockFlipped();
       if (GetWritingMode().IsHorizontal())
       {
         rect.SetHeight(rect.Height() - captionLogicalHeight);

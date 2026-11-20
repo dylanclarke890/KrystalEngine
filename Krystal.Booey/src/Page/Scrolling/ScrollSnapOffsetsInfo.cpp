@@ -424,7 +424,7 @@ namespace krys::boo
                                           const LayoutRect &viewportRect) noexcept
   {
     const auto &style = scrollingElementBox.Style();
-    auto container = style.GetScrollSnapType().TryContainer();
+    auto container = style.ScrollSnapType().TryContainer();
     const auto &boxes = scrollingElementBox.View().BoxesWithScrollSnapPositions();
     if (!container || boxes.empty())
     {
@@ -484,8 +484,8 @@ namespace krys::boo
       }
 
       Expand(scrollSnapArea, style::ExtentForRect(child->Style().GetScrollMarginBox(), scrollSnapArea));
-      auto alignment = child->Style().GetScrollSnapAlign();
-      auto stop = child->Style().GetScrollSnapStop();
+      auto alignment = child->Style().ScrollSnapAlign();
+      auto stop = child->Style().ScrollSnapStop();
 
       // https://drafts.csswg.org/css-scroll-snap-1/#scroll-snap-align
       // Start and end are for the snap container's writing mode, unless the snap area is larger than the

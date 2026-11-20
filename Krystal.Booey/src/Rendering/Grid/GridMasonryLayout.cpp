@@ -267,7 +267,7 @@ namespace krys::boo
     auto gridAxisLines = _gridAxisTracksCount + 1;
 
     // Get item-tolerance from the masonry container's style
-    const auto &tolerance = _renderGrid.Style().GetItemTolerance();
+    const auto &tolerance = _renderGrid.Style().ItemTolerance();
 
     if (tolerance.IsInfinite())
     {

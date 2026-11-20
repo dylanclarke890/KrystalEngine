@@ -384,7 +384,7 @@ namespace krys::boo::style
         // If marginTrimSide is empty we will check if any of the supported margins are in the style
         if (renderer.IsFlexItem() || renderer.IsGridItem())
         {
-          return renderer.Parent()->Style().GetMarginTrim().Contains(marginTrimSide());
+          return renderer.Parent()->Style().MarginTrim().Contains(marginTrimSide());
         }
 
         // Even though margin-trim is not inherited, it is possible for nested block level boxes
@@ -545,8 +545,8 @@ namespace krys::boo::style
         {
           return LayoutRect();
         }
-        return box->Style().GetBoxSizing() == BoxSizing::BorderBox ? box->BorderBoxRect()
-                                                                   : box->ComputedCSSContentBoxRect();
+        return box->Style().BoxSizing() == BoxSizing::BorderBox ? box->BorderBoxRect()
+                                                                : box->ComputedCSSContentBoxRect();
       };
 
       auto isNonReplacedInline = [](auto &renderer)
@@ -706,7 +706,7 @@ namespace krys::boo::style
       {
         return functor(css::keywords::None {});
       }
-      return functor(state.Style.GetContent());
+      return functor(state.Style.Content());
     }
   };
 
@@ -746,7 +746,7 @@ namespace krys::boo::style
     decltype(auto) ComputedValue(ExtractorState &state, F functor) const noexcept
     {
       return krys::SwitchOn(
-        state.Style.GetLineHeight(), [&](const css::keywords::Normal &keyword) { return functor(keyword); },
+        state.Style.LineHeight(), [&](const css::keywords::Normal &keyword) { return functor(keyword); },
         [&](const LineHeight::Fixed &fixed) { return functor(fixed); },
         [&](const LineHeight::Percentage &percentage)
         {
@@ -840,7 +840,7 @@ namespace krys::boo::style
     {
       // FIXME: Adjust this once CSSWG clarifies exactly how the initial value should compute.
       // For now, this gives the most backwards-compatible behavior.
-      auto gridFlow = state.Style.GetGridAutoFlow();
+      auto gridFlow = state.Style.GridAutoFlow();
       switch (gridFlow.GetDirection())
       {
         case GridAutoFlow::Direction::Column:
@@ -890,7 +890,7 @@ namespace krys::boo::style
       {
         return functor(css::keywords::None {});
       }
-      return functor(state.Style.GetRotate());
+      return functor(state.Style.Rotate());
     }
   };
 
@@ -904,7 +904,7 @@ namespace krys::boo::style
       {
         return functor(css::keywords::None {});
       }
-      return functor(state.Style.GetScale());
+      return functor(state.Style.Scale());
     }
   };
 
@@ -918,7 +918,7 @@ namespace krys::boo::style
       {
         return functor(css::keywords::None {});
       }
-      return functor(state.Style.GetTranslate());
+      return functor(state.Style.Translate());
     }
   };
 
@@ -929,7 +929,7 @@ namespace krys::boo::style
     template <typename F>
     decltype(auto) ComputedValue(ExtractorState &state, F functor) const noexcept
     {
-      return functor(state.Style.GetWidows().TryValue().value_or(2));
+      return functor(state.Style.Widows().TryValue().value_or(2));
     }
   };
 
@@ -939,7 +939,7 @@ namespace krys::boo::style
     template <typename F>
     decltype(auto) ComputedValue(ExtractorState &state, F functor) const noexcept
     {
-      return functor(state.Style.GetOrphans().TryValue().value_or(2));
+      return functor(state.Style.Orphans().TryValue().value_or(2));
     }
   };
 
@@ -949,28 +949,28 @@ namespace krys::boo::style
     template <typename F>
     decltype(auto) ComputedValue(ExtractorState &state, F functor) const noexcept
     {
-      auto blockStepSize = state.Style.GetBlockStepSize();
+      auto blockStepSize = state.Style.BlockStepSize();
       bool hasBlockStepSize = blockStepSize != ComputedStyle::InitialBlockStepSize();
       auto blockStepSizeValue = [&]() -> Maybe<BlockStepSize>
       {
         return hasBlockStepSize ? Maybe<BlockStepSize>(blockStepSize) : null;
       };
 
-      auto blockStepInsert = state.Style.GetBlockStepInsert();
+      auto blockStepInsert = state.Style.BlockStepInsert();
       bool hasBlockStepInsert = blockStepInsert != ComputedStyle::InitialBlockStepInsert();
       auto blockStepInsertValue = [&]() -> Maybe<BlockStepInsert>
       {
         return hasBlockStepInsert ? Maybe<BlockStepInsert>(blockStepInsert) : null;
       };
 
-      auto blockStepAlign = state.Style.GetBlockStepAlign();
+      auto blockStepAlign = state.Style.BlockStepAlign();
       bool hasBlockStepAlign = blockStepAlign != ComputedStyle::InitialBlockStepAlign();
       auto blockStepAlignValue = [&]() -> Maybe<BlockStepAlign>
       {
         return hasBlockStepAlign ? Maybe<BlockStepAlign>(blockStepAlign) : null;
       };
 
-      auto blockStepRound = state.Style.GetBlockStepRound();
+      auto blockStepRound = state.Style.BlockStepRound();
       bool hasBlockStepRound = blockStepRound != ComputedStyle::InitialBlockStepRound();
       auto blockStepRoundValue = [&]() -> Maybe<BlockStepRound>
       {
@@ -1032,7 +1032,7 @@ namespace krys::boo::style
       {
         return functor(css::keywords::None {});
       }
-      return functor(css::SpaceSeparatedTuple {*maxLines, state.Style.GetBlockEllipsis()});
+      return functor(css::SpaceSeparatedTuple {*maxLines, state.Style.BlockEllipsis()});
     }
   };
 
@@ -1042,7 +1042,7 @@ namespace krys::boo::style
     template <typename F>
     decltype(auto) ComputedValue(ExtractorState &state, F functor) const noexcept
     {
-      return functor(state.Style.GetMaskBorder());
+      return functor(state.Style.MaskBorder());
     }
   };
 
@@ -1057,15 +1057,15 @@ namespace krys::boo::style
         auto box = state.Renderer->TransformReferenceBoxRect(state.Style);
 
         auto perspectiveOriginX =
-          Length<> {Evaluate<float>(state.Style.GetPerspectiveOriginX(), box.Width(), ZoomNeeded {})};
+          Length<> {Evaluate<float>(state.Style.PerspectiveOriginX(), box.Width(), ZoomNeeded {})};
         auto perspectiveOriginY =
-          Length<> {Evaluate<float>(state.Style.GetPerspectiveOriginY(), box.Height(), ZoomNeeded {})};
+          Length<> {Evaluate<float>(state.Style.PerspectiveOriginY(), box.Height(), ZoomNeeded {})};
 
         return functor(css::SpaceSeparatedTuple {perspectiveOriginX, perspectiveOriginY});
       }
 
       return functor(
-        css::SpaceSeparatedTuple {state.Style.GetPerspectiveOriginX(), state.Style.GetPerspectiveOriginY()});
+        css::SpaceSeparatedTuple {state.Style.PerspectiveOriginX(), state.Style.PerspectiveOriginY()});
     }
   };
 
@@ -1075,8 +1075,8 @@ namespace krys::boo::style
     template <typename F>
     decltype(auto) ComputedValue(ExtractorState &state, F functor) const noexcept
     {
-      auto textBoxTrim = state.Style.GetTextBoxTrim();
-      auto textBoxEdge = state.Style.GetTextBoxEdge();
+      auto textBoxTrim = state.Style.TextBoxTrim();
+      auto textBoxEdge = state.Style.TextBoxEdge();
 
       auto hasDefaultTextBoxTrim = textBoxTrim == ComputedStyle::InitialTextBoxTrim();
       auto hasDefaultTextBoxEdge = textBoxEdge == ComputedStyle::InitialTextBoxEdge();
@@ -1104,24 +1104,24 @@ namespace krys::boo::style
     template <typename F>
     decltype(auto) ComputedValue(ExtractorState &state, F functor) const noexcept
     {
-      auto textDecorationLine = state.Style.GetTextDecorationLine();
+      auto textDecorationLine = state.Style.TextDecorationLine();
       bool hasTextDecorationLine = textDecorationLine != ComputedStyle::InitialTextDecorationLine();
       auto textDecorationLineValue = [&]() -> Maybe<TextDecorationLine>
       {
         return hasTextDecorationLine ? Maybe<TextDecorationLine>(textDecorationLine) : null;
       };
 
-      auto textDecorationThickness = state.Style.GetTextDecorationThickness();
+      auto textDecorationThickness = state.Style.TextDecorationThickness();
       bool hasTextDecorationThickness =
-        state.Style.GetTextDecorationThickness() != ComputedStyle::InitialTextDecorationThickness();
+        state.Style.TextDecorationThickness() != ComputedStyle::InitialTextDecorationThickness();
       auto textDecorationThicknessValue = [&]() -> Maybe<TextDecorationThickness>
       {
         return hasTextDecorationThickness ? Maybe<TextDecorationThickness>(textDecorationThickness) : null;
       };
 
-      auto textDecorationStyle = state.Style.GetTextDecorationStyle();
+      auto textDecorationStyle = state.Style.TextDecorationStyle();
       bool hasTextDecorationStyle =
-        state.Style.GetTextDecorationStyle() != ComputedStyle::InitialTextDecorationStyle();
+        state.Style.TextDecorationStyle() != ComputedStyle::InitialTextDecorationStyle();
       auto textDecorationStyleValue = [&]() -> Maybe<TextDecorationStyle>
       {
         return hasTextDecorationStyle ? Maybe<TextDecorationStyle>(textDecorationStyle) : null;
@@ -1151,8 +1151,8 @@ namespace krys::boo::style
     template <typename F>
     decltype(auto) ComputedValue(ExtractorState &state, F functor) const noexcept
     {
-      auto textWrapMode = state.Style.GetTextWrapMode();
-      auto textWrapStyle = state.Style.GetTextWrapStyle();
+      auto textWrapMode = state.Style.TextWrapMode();
+      auto textWrapStyle = state.Style.TextWrapStyle();
 
       // Omit default longhand values.
       if (textWrapStyle == ComputedStyle::InitialTextWrapStyle())
@@ -1179,24 +1179,24 @@ namespace krys::boo::style
         auto box = state.Renderer->TransformReferenceBoxRect(state.Style);
 
         auto transformOriginX =
-          Length<> {Evaluate<float>(state.Style.GetTransformOriginX(), box.Width(), ZoomNeeded {})};
+          Length<> {Evaluate<float>(state.Style.TransformOriginX(), box.Width(), ZoomNeeded {})};
         auto transformOriginY =
-          Length<> {Evaluate<float>(state.Style.GetTransformOriginY(), box.Height(), ZoomNeeded {})};
+          Length<> {Evaluate<float>(state.Style.TransformOriginY(), box.Height(), ZoomNeeded {})};
 
-        if (auto transformOriginZ = state.Style.GetTransformOriginZ(); !transformOriginZ.IsZero())
+        if (auto transformOriginZ = state.Style.TransformOriginZ(); !transformOriginZ.IsZero())
         {
           return functor(css::SpaceSeparatedTuple {transformOriginX, transformOriginY, transformOriginZ});
         }
         return functor(css::SpaceSeparatedTuple {transformOriginX, transformOriginY});
       }
 
-      if (auto transformOriginZ = state.Style.GetTransformOriginZ(); !transformOriginZ.IsZero())
+      if (auto transformOriginZ = state.Style.TransformOriginZ(); !transformOriginZ.IsZero())
       {
-        return functor(css::SpaceSeparatedTuple {state.Style.GetTransformOriginX(),
-                                                 state.Style.GetTransformOriginY(), transformOriginZ});
+        return functor(css::SpaceSeparatedTuple {state.Style.TransformOriginX(),
+                                                 state.Style.TransformOriginY(), transformOriginZ});
       }
       return functor(
-        css::SpaceSeparatedTuple {state.Style.GetTransformOriginX(), state.Style.GetTransformOriginY()});
+        css::SpaceSeparatedTuple {state.Style.TransformOriginX(), state.Style.TransformOriginY()});
     }
   };
 
@@ -1206,8 +1206,8 @@ namespace krys::boo::style
     template <typename F>
     decltype(auto) ComputedValue(ExtractorState &state, F functor) const noexcept
     {
-      auto whiteSpaceCollapse = state.Style.GetWhiteSpaceCollapse();
-      auto textWrapMode = state.Style.GetTextWrapMode();
+      auto whiteSpaceCollapse = state.Style.WhiteSpaceCollapse();
+      auto textWrapMode = state.Style.TextWrapMode();
 
       // Convert to backwards-compatible keywords if possible.
       if (whiteSpaceCollapse == WhiteSpaceCollapse::Collapse && textWrapMode == TextWrapMode::Wrap)
@@ -1247,7 +1247,7 @@ namespace krys::boo::style
     template <typename F>
     decltype(auto) ComputedValue(ExtractorState &state, F functor) const noexcept
     {
-      return functor(style::Color {state.Style.GetColor()});
+      return functor(style::Color {state.Style.Color()});
     }
   };
 
@@ -1995,11 +1995,11 @@ namespace krys::boo::style
       {
         if constexpr (property == css::PropertyId::Mask)
         {
-          return style->GetMaskLayers();
+          return style->MaskLayers();
         }
         else
         {
-          return style->GetBackgroundLayers();
+          return style->BackgroundLayers();
         }
       }();
 
@@ -2164,7 +2164,7 @@ namespace krys::boo::style
 
   inline RefPtr<css::Value> ExtractorCustom::ExtractBorderImageWidth(ExtractorState &state) noexcept
   {
-    auto &borderImageWidth = state.Style.GetBorderImageWidth();
+    auto &borderImageWidth = state.Style.BorderImageWidth();
     if (borderImageWidth.OverridesBorderWidths())
     {
       return nullptr;
@@ -2176,7 +2176,7 @@ namespace krys::boo::style
     ExtractorCustom::ExtractBorderImageWidthSerialisation(ExtractorState &state, StringBuilder &builder,
                                                           const css::SerialisationContext &context) noexcept
   {
-    auto &borderImageWidth = state.Style.GetBorderImageWidth();
+    auto &borderImageWidth = state.Style.BorderImageWidth();
     if (borderImageWidth.OverridesBorderWidths())
     {
       return;
@@ -2209,7 +2209,7 @@ namespace krys::boo::style
       return CreateCSSValue(state.Pool, state.Style, css::keywords::None {});
     }
 
-    return CreateCSSValue(state.Pool, state.Style, state.Style.GetTransform());
+    return CreateCSSValue(state.Pool, state.Style, state.Style.Transform());
   }
 
   inline void
@@ -2242,7 +2242,7 @@ namespace krys::boo::style
       return;
     }
 
-    Serialise(builder, context, state.Style, state.Style.GetTransform());
+    Serialise(builder, context, state.Style, state.Style.Transform());
   }
 
   inline Ref<css::Value> ExtractorCustom::ExtractGridTemplateColumns(ExtractorState &state) noexcept
@@ -2324,7 +2324,7 @@ namespace krys::boo::style
       return ConvertSingleAnimationDuration(state, value, animation, animations);
     };
     return ExtractCoordinatedValueListValue<css::PropertyId::AnimationDuration>(
-      state, state.Style.GetAnimations(), mapper);
+      state, state.Style.Animations(), mapper);
   }
 
   inline void
@@ -2338,7 +2338,7 @@ namespace krys::boo::style
       builder.Append(ConvertSingleAnimationDuration(state, value, animation, animations)->CssText(context));
     };
     ExtractCoordinatedValueListSerialisation<css::PropertyId::AnimationDuration>(
-      state, builder, context, state.Style.GetAnimations(), mapper);
+      state, builder, context, state.Style.Animations(), mapper);
   }
 
   inline Ref<css::Value> ExtractorCustom::ExtractColor(ExtractorState &state) noexcept
@@ -2472,7 +2472,7 @@ namespace krys::boo::style
 
   inline RefPtr<css::Value> ExtractorCustom::ExtractAnimationShorthand(ExtractorState &state) noexcept
   {
-    auto &animations = state.Style.GetAnimations();
+    auto &animations = state.Style.Animations();
     if (animations.IsInitial())
     {
       return CreateCSSValue(state.Pool, state.Style, css::keywords::None {});
@@ -2496,7 +2496,7 @@ namespace krys::boo::style
     ExtractorCustom::ExtractAnimationShorthandSerialisation(ExtractorState &state, StringBuilder &builder,
                                                             const css::SerialisationContext &context) noexcept
   {
-    auto &animations = state.Style.GetAnimations();
+    auto &animations = state.Style.Animations();
     if (animations.IsInitial())
     {
       Serialise(builder, context, state.Style, css::keywords::None {});
@@ -2564,8 +2564,8 @@ namespace krys::boo::style
     {
       return ConvertAnimationRange(state, value);
     };
-    return ExtractCoordinatedValueListValue<css::PropertyId::AnimationRange>(
-      state, state.Style.GetAnimations(), mapper);
+    return ExtractCoordinatedValueListValue<css::PropertyId::AnimationRange>(state, state.Style.Animations(),
+                                                                             mapper);
   }
 
   inline void ExtractorCustom::ExtractAnimationRangeShorthandSerialisation(
@@ -2578,7 +2578,7 @@ namespace krys::boo::style
       builder.Append(ConvertAnimationRange(state, value)->CssText(context));
     };
     ExtractCoordinatedValueListSerialisation<css::PropertyId::AnimationRange>(
-      state, builder, context, state.Style.GetAnimations(), mapper);
+      state, builder, context, state.Style.Animations(), mapper);
   }
 
   constexpr inline Array<css::PropertyId, 4> BackgroundPropertiesBeforeSlashSeparator {
@@ -2619,7 +2619,7 @@ namespace krys::boo::style
       return CreateCSSValue(state.Pool, state.Style, value);
     };
     return ExtractCoordinatedValueListValue<css::PropertyId::BackgroundPosition>(
-      state, state.Style.GetBackgroundLayers(), mapper);
+      state, state.Style.BackgroundLayers(), mapper);
   }
 
   inline void ExtractorCustom::ExtractBackgroundPositionShorthandSerialisation(
@@ -2631,7 +2631,7 @@ namespace krys::boo::style
       Serialise(builder, context, state.Style, value);
     };
     ExtractCoordinatedValueListSerialisation<css::PropertyId::BackgroundPosition>(
-      state, builder, context, state.Style.GetBackgroundLayers(), mapper);
+      state, builder, context, state.Style.BackgroundLayers(), mapper);
   }
 
 #define KRYS_DEFINE_EXTRACTOR_CUSTOM_ADAPTED_SHORTHAND(name)                                                 \
@@ -2677,7 +2677,7 @@ namespace krys::boo::style
 
   KRYS_DEFINE_EXTRACTOR_CUSTOM_PAGE_BREAK_SHORTHAND(PageBreakAfter, BreakAfter)
   KRYS_DEFINE_EXTRACTOR_CUSTOM_PAGE_BREAK_SHORTHAND(PageBreakBefore, BreakBefore)
-  KRYS_DEFINE_EXTRACTOR_CUSTOM_PAGE_BREAK_SHORTHAND(PageBreakInside, GetBreakInside)
+  KRYS_DEFINE_EXTRACTOR_CUSTOM_PAGE_BREAK_SHORTHAND(PageBreakInside, BreakInside)
 
 #undef KRYS_DEFINE_EXTRACTOR_CUSTOM_PAGE_BREAK_SHORTHAND
 
@@ -2716,7 +2716,7 @@ namespace krys::boo::style
 
   inline RefPtr<css::Value> ExtractorCustom::ExtractBorderImageShorthand(ExtractorState &state) noexcept
   {
-    auto &borderImage = state.Style.GetBorderImage();
+    auto &borderImage = state.Style.BorderImage();
     if (borderImage.Source.IsNone())
     {
       return CreateCSSValue(state.Pool, state.Style, css::keywords::None {});
@@ -2731,7 +2731,7 @@ namespace krys::boo::style
   inline void ExtractorCustom::ExtractBorderImageShorthandSerialisation(
     ExtractorState &state, StringBuilder &builder, const css::SerialisationContext &context) noexcept
   {
-    auto &borderImage = state.Style.GetBorderImage();
+    auto &borderImage = state.Style.BorderImage();
     if (borderImage.Source.IsNone())
     {
       Serialise(builder, context, state.Style, css::keywords::None {});
@@ -2770,13 +2770,13 @@ namespace krys::boo::style
 
   inline RefPtr<css::Value> ExtractorCustom::ExtractColumnsShorthand(ExtractorState &state) noexcept
   {
-    if (state.Style.GetColumnCount() == ComputedStyle::InitialColumnCount())
+    if (state.Style.ColumnCount() == ComputedStyle::InitialColumnCount())
     {
-      return CreateCSSValue(state.Pool, state.Style, state.Style.GetColumnWidth());
+      return CreateCSSValue(state.Pool, state.Style, state.Style.ColumnWidth());
     }
-    if (state.Style.GetColumnWidth() == ComputedStyle::InitialColumnWidth())
+    if (state.Style.ColumnWidth() == ComputedStyle::InitialColumnWidth())
     {
-      return CreateCSSValue(state.Pool, state.Style, state.Style.GetColumnCount());
+      return CreateCSSValue(state.Pool, state.Style, state.Style.ColumnCount());
     }
     return ExtractStandardSpaceSeparatedShorthand(state, css::ColumnsShorthand());
   }
@@ -2785,14 +2785,14 @@ namespace krys::boo::style
     ExtractorCustom::ExtractColumnsShorthandSerialisation(ExtractorState &state, StringBuilder &builder,
                                                           const css::SerialisationContext &context) noexcept
   {
-    if (state.Style.GetColumnCount() == ComputedStyle::InitialColumnCount())
+    if (state.Style.ColumnCount() == ComputedStyle::InitialColumnCount())
     {
-      Serialise(builder, context, state.Style, state.Style.GetColumnWidth());
+      Serialise(builder, context, state.Style, state.Style.ColumnWidth());
       return;
     }
-    if (state.Style.GetColumnWidth() == ComputedStyle::InitialColumnWidth())
+    if (state.Style.ColumnWidth() == ComputedStyle::InitialColumnWidth())
     {
-      Serialise(builder, context, state.Style, state.Style.GetColumnCount());
+      Serialise(builder, context, state.Style, state.Style.ColumnCount());
       return;
     }
     ExtractStandardSpaceSeparatedShorthandSerialisation(state, builder, context, css::ColumnsShorthand());
@@ -2802,14 +2802,14 @@ namespace krys::boo::style
   {
     auto name = [&]() -> Ref<css::Value>
     {
-      if (state.Style.GetContainerNames().IsNone())
+      if (state.Style.ContainerNames().IsNone())
       {
         return CreateCSSValue(state.Pool, state.Style, css::keywords::None {});
       }
       return Ref<css::Value>(ExtractorGenerated::ExtractValue(state, css::PropertyId::ContainerName));
     }();
 
-    if (state.Style.GetContainerType() == ContainerType::Normal)
+    if (state.Style.ContainerType() == ContainerType::Normal)
     {
       return css::ValueList::CreateSlashSeparated({krys::move(name)});
     }
@@ -2823,7 +2823,7 @@ namespace krys::boo::style
     ExtractorCustom::ExtractContainerShorthandSerialisation(ExtractorState &state, StringBuilder &builder,
                                                             const css::SerialisationContext &context) noexcept
   {
-    if (state.Style.GetContainerNames().IsNone())
+    if (state.Style.ContainerNames().IsNone())
     {
       Serialise(builder, context, state.Style, css::keywords::None {});
     }
@@ -2832,7 +2832,7 @@ namespace krys::boo::style
       ExtractorGenerated::ExtractValueSerialisation(state, builder, context, css::PropertyId::ContainerName);
     }
 
-    if (state.Style.GetContainerType() == ContainerType::Normal)
+    if (state.Style.ContainerType() == ContainerType::Normal)
     {
       return;
     }
@@ -2843,13 +2843,13 @@ namespace krys::boo::style
 
   inline RefPtr<css::Value> ExtractorCustom::ExtractFlexFlowShorthand(ExtractorState &state) noexcept
   {
-    if (state.Style.GetFlexWrap() == ComputedStyle::InitialFlexWrap())
+    if (state.Style.FlexWrap() == ComputedStyle::InitialFlexWrap())
     {
-      return CreateCSSValue(state.Pool, state.Style, state.Style.GetFlexDirection());
+      return CreateCSSValue(state.Pool, state.Style, state.Style.FlexDirection());
     }
-    if (state.Style.GetFlexDirection() == ComputedStyle::InitialFlexDirection())
+    if (state.Style.FlexDirection() == ComputedStyle::InitialFlexDirection())
     {
-      return CreateCSSValue(state.Pool, state.Style, state.Style.GetFlexWrap());
+      return CreateCSSValue(state.Pool, state.Style, state.Style.FlexWrap());
     }
     return ExtractStandardSpaceSeparatedShorthand(state, css::FlexFlowShorthand());
   }
@@ -2858,14 +2858,14 @@ namespace krys::boo::style
     ExtractorCustom::ExtractFlexFlowShorthandSerialisation(ExtractorState &state, StringBuilder &builder,
                                                            const css::SerialisationContext &context) noexcept
   {
-    if (state.Style.GetFlexWrap() == ComputedStyle::InitialFlexWrap())
+    if (state.Style.FlexWrap() == ComputedStyle::InitialFlexWrap())
     {
-      Serialise(builder, context, state.Style, state.Style.GetFlexDirection());
+      Serialise(builder, context, state.Style, state.Style.FlexDirection());
       return;
     }
-    if (state.Style.GetFlexDirection() == ComputedStyle::InitialFlexDirection())
+    if (state.Style.FlexDirection() == ComputedStyle::InitialFlexDirection())
     {
-      Serialise(builder, context, state.Style, state.Style.GetFlexWrap());
+      Serialise(builder, context, state.Style, state.Style.FlexWrap());
       return;
     }
     ExtractStandardSpaceSeparatedShorthandSerialisation(state, builder, context, css::FlexFlowShorthand());
@@ -3006,7 +3006,7 @@ namespace krys::boo::style
     {
       return CreateCSSValue(state.Pool, state.Style, value);
     };
-    return ExtractCoordinatedValueListValue<css::PropertyId::MaskPosition>(state, state.Style.GetMaskLayers(),
+    return ExtractCoordinatedValueListValue<css::PropertyId::MaskPosition>(state, state.Style.MaskLayers(),
                                                                            mapper);
   }
 
@@ -3018,8 +3018,8 @@ namespace krys::boo::style
     {
       Serialise(builder, context, state.Style, value);
     };
-    ExtractCoordinatedValueListSerialisation<css::PropertyId::MaskPosition>(
-      state, builder, context, state.Style.GetMaskLayers(), mapper);
+    ExtractCoordinatedValueListSerialisation<css::PropertyId::MaskPosition>(state, builder, context,
+                                                                            state.Style.MaskLayers(), mapper);
   }
 
   inline RefPtr<css::Value> ExtractorCustom::ExtractOffsetShorthand(ExtractorState &state) noexcept
@@ -3033,25 +3033,25 @@ namespace krys::boo::style
     css::ValueListBuilder innerList;
 
     krys::SwitchOn(
-      state.Style.GetOffsetPosition(), [&](const css::keywords::Auto &) {},
+      state.Style.OffsetPosition(), [&](const css::keywords::Auto &) {},
       [&](const css::keywords::Normal &) {}, [&](const Position &position)
       { innerList.push_back(CreateCSSValue(state.Pool, state.Style, position)); });
 
-    bool nonInitialDistance = state.Style.GetOffsetDistance() != ComputedStyle::InitialOffsetDistance();
-    bool nonInitialRotate = state.Style.GetOffsetRotate() != ComputedStyle::InitialOffsetRotate();
+    bool nonInitialDistance = state.Style.OffsetDistance() != ComputedStyle::InitialOffsetDistance();
+    bool nonInitialRotate = state.Style.OffsetRotate() != ComputedStyle::InitialOffsetRotate();
 
     if (state.Style.HasOffsetPath() || nonInitialDistance || nonInitialRotate)
     {
-      innerList.push_back(CreateCSSValue(state.Pool, state.Style, state.Style.GetOffsetPath()));
+      innerList.push_back(CreateCSSValue(state.Pool, state.Style, state.Style.OffsetPath()));
     }
 
     if (nonInitialDistance)
     {
-      innerList.push_back(CreateCSSValue(state.Pool, state.Style, state.Style.GetOffsetDistance()));
+      innerList.push_back(CreateCSSValue(state.Pool, state.Style, state.Style.OffsetDistance()));
     }
     if (nonInitialRotate)
     {
-      innerList.push_back(CreateCSSValue(state.Pool, state.Style, state.Style.GetOffsetRotate()));
+      innerList.push_back(CreateCSSValue(state.Pool, state.Style, state.Style.OffsetRotate()));
     }
 
     auto inner = innerList.empty()
@@ -3059,7 +3059,7 @@ namespace krys::boo::style
                    : Ref<css::Value> {css::ValueList::CreateSpaceSeparated(krys::move(innerList))};
 
     return krys::SwitchOn(
-      state.Style.GetOffsetAnchor(), [&](const css::keywords::Auto &) -> Ref<css::Value> { return inner; },
+      state.Style.OffsetAnchor(), [&](const css::keywords::Auto &) -> Ref<css::Value> { return inner; },
       [&](const Position &position) -> Ref<css::Value>
       {
         return css::ValueList::CreateSlashSeparated(krys::move(inner),
@@ -3077,7 +3077,7 @@ namespace krys::boo::style
 
   inline RefPtr<css::Value> ExtractorCustom::ExtractPositionTryShorthand(ExtractorState &state) noexcept
   {
-    if (state.Style.GetPositionTryOrder() == ComputedStyle::InitialPositionTryOrder())
+    if (state.Style.PositionTryOrder() == ComputedStyle::InitialPositionTryOrder())
     {
       return ExtractorGenerated::ExtractValue(state, css::PropertyId::PositionTryFallbacks);
     }
@@ -3087,7 +3087,7 @@ namespace krys::boo::style
   inline void ExtractorCustom::ExtractPositionTryShorthandSerialisation(
     ExtractorState &state, StringBuilder &builder, const css::SerialisationContext &context) noexcept
   {
-    if (state.Style.GetPositionTryOrder() == ComputedStyle::InitialPositionTryOrder())
+    if (state.Style.PositionTryOrder() == ComputedStyle::InitialPositionTryOrder())
     {
       ExtractorGenerated::ExtractValueSerialisation(state, builder, context,
                                                     css::PropertyId::PositionTryFallbacks);
@@ -3155,7 +3155,7 @@ namespace krys::boo::style
   inline RefPtr<css::Value>
     ExtractorCustom::ExtractTextDecorationSkipShorthand(ExtractorState &state) noexcept
   {
-    switch (state.Style.GetTextDecorationSkipInk())
+    switch (state.Style.TextDecorationSkipInk())
     {
       case TextDecorationSkipInk::None:
         return CreateCSSValue(state.Pool, state.Style, css::keywords::None {});
@@ -3169,7 +3169,7 @@ namespace krys::boo::style
   inline void ExtractorCustom::ExtractTextDecorationSkipShorthandSerialisation(
     ExtractorState &state, StringBuilder &builder, const css::SerialisationContext &context) noexcept
   {
-    switch (state.Style.GetTextDecorationSkipInk())
+    switch (state.Style.TextDecorationSkipInk())
     {
       case TextDecorationSkipInk::None:
         Serialise(builder, context, state.Style, css::keywords::None {});
@@ -3223,7 +3223,7 @@ namespace krys::boo::style
 
   inline RefPtr<css::Value> ExtractorCustom::ExtractTransitionShorthand(ExtractorState &state) noexcept
   {
-    auto &transitions = state.Style.GetTransitions();
+    auto &transitions = state.Style.Transitions();
     if (transitions.IsInitial())
     {
       return CreateCSSValue(state.Pool, state.Style, css::keywords::All {});
@@ -3241,7 +3241,7 @@ namespace krys::boo::style
   inline void ExtractorCustom::ExtractTransitionShorthandSerialisation(
     ExtractorState &state, StringBuilder &builder, const css::SerialisationContext &context) noexcept
   {
-    auto &transitions = state.Style.GetTransitions();
+    auto &transitions = state.Style.Transitions();
     if (transitions.IsInitial())
     {
       Serialise(builder, context, state.Style, css::keywords::All {});

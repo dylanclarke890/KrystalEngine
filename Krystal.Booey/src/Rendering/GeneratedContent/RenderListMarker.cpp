@@ -56,8 +56,8 @@ namespace krys::boo
       }
       // FIXME: Preferably we do this at RenderStyle::changeRequiresLayout but checking against
       // pseudo(::marker) is not sufficient.
-      auto needsLayout = oldStyle.GetListStylePosition() != newStyle.GetListStylePosition()
-                         || oldStyle.GetListStyleType() != newStyle.GetListStyleType()
+      auto needsLayout = oldStyle.ListStylePosition() != newStyle.ListStylePosition()
+                         || oldStyle.ListStyleType() != newStyle.ListStyleType()
                          || oldStyle.IsDisplayInlineType() != newStyle.IsDisplayInlineType();
       return needsLayout ? style::Difference {style::DifferenceResult::Layout} : diff;
     }
@@ -261,7 +261,7 @@ namespace krys::boo
     context.SetStrokeThickness(1.0f);
     context.SetFillColor(color);
 
-    auto &listStyleType = Style().GetListStyleType();
+    auto &listStyleType = Style().ListStyleType();
     if (listStyleType.IsDisc())
     {
       context.FillEllipse(markerRect);
@@ -428,7 +428,7 @@ namespace krys::boo
       return;
     }
 
-    Style().GetListStyleType().SwitchOn(
+    Style().ListStyleType().SwitchOn(
       [&](const css::keywords::None &)
       {
         _textContent = {
@@ -538,7 +538,7 @@ namespace krys::boo
         return {0_lu, 0_lu};
       }
 
-      if (Style().GetListStyleType().IsString())
+      if (Style().ListStyleType().IsString())
       {
         return {-MinPreferredLogicalWidth(), 0_lu};
       }
@@ -553,12 +553,12 @@ namespace krys::boo
 
   bool RenderListMarker::IsInside() const noexcept
   {
-    return Style().GetListStylePosition() == ListStylePosition::Inside;
+    return Style().ListStylePosition() == ListStylePosition::Inside;
   }
 
   bool RenderListMarker::IsDisclosureMarker() const noexcept
   {
-    const auto &listStyleType = Style().GetListStyleType();
+    const auto &listStyleType = Style().ListStyleType();
     if (auto counterStyle = listStyleType.TryCounterStyle())
     {
       const auto &identifier = counterStyle->Identifier.Value;
@@ -574,7 +574,7 @@ namespace krys::boo
 
   RefPtr<css::CounterStyle> RenderListMarker::GetCounterStyle() const noexcept
   {
-    auto counterStyle = Style().GetListStyleType().TryCounterStyle();
+    auto counterStyle = Style().ListStyleType().TryCounterStyle();
     if (!counterStyle)
     {
       return nullptr;
@@ -584,7 +584,7 @@ namespace krys::boo
 
   bool RenderListMarker::WidthUsesMetricsOfPrimaryFont() const noexcept
   {
-    const auto &listType = Style().GetListStyleType();
+    const auto &listType = Style().ListStyleType();
     return listType.IsCircle() || listType.IsDisc() || listType.IsSquare();
   }
 
@@ -604,7 +604,7 @@ namespace krys::boo
     const auto &metricsOfPrimaryFont = style.MetricsOfPrimaryFont();
     auto primaryFontHeight = Snap(metricsOfPrimaryFont.Height());
 
-    if (style.GetLineHeight().IsNormal())
+    if (style.LineHeight().IsNormal())
     {
       auto maxAscentAndDescent = ascentAndDescent(metricsOfPrimaryFont);
 

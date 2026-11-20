@@ -133,7 +133,7 @@ namespace krys::boo::layout
       if (layoutBox.IsInlineBox() && layoutBox.IsInFlow())
       {
         auto &style = layoutBox.Style();
-        return style.GetWritingMode().IsBidiRTL() || style.GetUnicodeBidi() != UnicodeBidi::Normal;
+        return style.GetWritingMode().IsBidiRTL() || style.UnicodeBidi() != UnicodeBidi::Normal;
       }
       return false;
     }
@@ -344,7 +344,7 @@ namespace krys::boo::layout
                                    InlineItemOffsetList &inlineItemOffsetList) noexcept
     {
       auto bidiContextStack = BidiContextStack {};
-      HandleEnterExitBidiContext(paragraphContentBuilder, rootStyle.GetUnicodeBidi(),
+      HandleEnterExitBidiContext(paragraphContentBuilder, rootStyle.UnicodeBidi(),
                                  rootStyle.GetWritingMode().IsBidiLTR(), EnterExitType::EnteringBlock,
                                  bidiContextStack);
 
@@ -399,7 +399,7 @@ namespace krys::boo::layout
         {
           // https://drafts.csswg.org/css-writing-modes/#unicode-bidi
           auto &style = inlineItem.Style();
-          auto initiatesControlCharacter = style.GetUnicodeBidi() != UnicodeBidi::Normal;
+          auto initiatesControlCharacter = style.UnicodeBidi() != UnicodeBidi::Normal;
           if (!initiatesControlCharacter)
           {
             // Opaque items do not have position in the bidi paragraph. They inherit their bidi level from the
@@ -410,7 +410,7 @@ namespace krys::boo::layout
           inlineItemOffsetList.emplace_back(paragraphContentBuilder.Length());
           auto isEnteringBidi = inlineItem.IsInlineBoxStart();
           HandleEnterExitBidiContext(
-            paragraphContentBuilder, style.GetUnicodeBidi(), style.GetWritingMode().IsBidiLTR(),
+            paragraphContentBuilder, style.UnicodeBidi(), style.GetWritingMode().IsBidiLTR(),
             isEnteringBidi ? EnterExitType::EnteringInlineBox : EnterExitType::ExitingInlineBox,
             bidiContextStack);
         }
@@ -477,7 +477,7 @@ namespace krys::boo::layout
                            TrimmableTextSpacings &trimmableTextSpacings, const InlineTextItem &inlineTextItem,
                            size_t inlineItemIndex) noexcept
     {
-      auto autospace = inlineTextItem.Style().GetTextAutospace();
+      auto autospace = inlineTextItem.Style().TextAutospace();
       if (!autospace.IsNoAutospace())
       {
         // We need to store information about spacing added between inline text items since it needs to be
@@ -505,7 +505,7 @@ namespace krys::boo::layout
   InlineItemsBuilder::InlineItemsBuilder(InlineContentCache &inlineContentCache,
                                          const ElementBox &root) noexcept
       : _inlineContentCache(inlineContentCache), _root(root),
-        _hasTextAutospace(!root.Style().GetTextAutospace().IsNoAutospace())
+        _hasTextAutospace(!root.Style().TextAutospace().IsNoAutospace())
   {
   }
 
@@ -619,7 +619,7 @@ namespace krys::boo::layout
         inlineBoxStartIndexesOnInlineItemsList.size() - 1 - (currentCharacterDepth - boundaryDepth);
       size_t boundaryIndex = inlineBoxStartIndexesOnInlineItemsList[inlineBoxStartOnBoundaryIndex];
       const RenderStyle &boundaryOwnerStyle = inlineItemList[boundaryIndex].LayoutBox().Parent().Style();
-      auto boundaryTextAutospace = boundaryOwnerStyle.GetTextAutospace();
+      auto boundaryTextAutospace = boundaryOwnerStyle.TextAutospace();
       if (!boundaryTextAutospace.IsNoAutospace() && !content.empty()
           && boundaryTextAutospace.ShouldApplySpacing(text::CodePointAt(content, 0),
                                                       lastCharacterFromPreviousRun))
@@ -850,7 +850,7 @@ namespace krys::boo::layout
       // Let's not try to do bidi handling when there's no content to reorder.
       return;
     }
-    auto mayNotUseBlockDirection = Root().Style().GetUnicodeBidi() == UnicodeBidi::Plaintext;
+    auto mayNotUseBlockDirection = Root().Style().UnicodeBidi() == UnicodeBidi::Plaintext;
     if (!ContentRequiresVisualReordering() && mayNotUseBlockDirection
         && TextUtil::DirectionForTextContent(paragraphContentBuilder.View()) == text::TextDirection::LTR)
     {
@@ -862,7 +862,7 @@ namespace krys::boo::layout
     // Resolve the paragraph's bidi level runs, then set each run's level on its inline items, splitting them
     // at run boundaries as needed.
     text::BidiLevel rootBidiLevel = text::DefaultLeftToRightBidiLevel;
-    bool useHeuristicBaseDirection = Root().Style().GetUnicodeBidi() == UnicodeBidi::Plaintext;
+    bool useHeuristicBaseDirection = Root().Style().UnicodeBidi() == UnicodeBidi::Plaintext;
     if (!useHeuristicBaseDirection)
     {
       rootBidiLevel = static_cast<text::BidiLevel>(
@@ -946,7 +946,7 @@ namespace krys::boo::layout
       {
         auto &inlineItem = inlineItemList[index];
         auto &style = inlineItem.Style();
-        auto initiatesControlCharacter = style.GetUnicodeBidi() != UnicodeBidi::Normal;
+        auto initiatesControlCharacter = style.UnicodeBidi() != UnicodeBidi::Normal;
 
         if (inlineItem.IsInlineBoxStart())
         {
@@ -1199,8 +1199,8 @@ namespace krys::boo::layout
     auto shouldPreserveSpacesAndTabs = TextUtil::ShouldPreserveSpacesAndTabs(inlineTextBox);
     auto shouldPreserveNewline = TextUtil::ShouldPreserveNewline(inlineTextBox);
     auto lineBreakIteratorFactory = text::CachedLineBreakIteratorFactory {
-      text, style.ComputedLocale().GetPlatform(), TextUtil::LineBreakIteratorMode(style.GetLineBreak()),
-      TextUtil::GetContentAnalysis(style.GetWordBreak())};
+      text, style.ComputedLocale().GetPlatform(), TextUtil::LineBreakIteratorMode(style.LineBreak()),
+      TextUtil::GetContentAnalysis(style.WordBreak())};
     auto currentPosition = partialContentOffset.value_or(0);
     krys_debug_assert(currentPosition <= contentLength);
 
@@ -1229,7 +1229,7 @@ namespace krys::boo::layout
       }
 
       krys_debug_assert(whitespaceContent->Length);
-      if (style.GetWhiteSpaceCollapse() == WhiteSpaceCollapse::BreakSpaces)
+      if (style.WhiteSpaceCollapse() == WhiteSpaceCollapse::BreakSpaces)
       {
         // https://www.w3.org/TR/css-text-3/#white-space-phase-1
         // For break-spaces, a soft wrap opportunity exists after every space and every tab.
@@ -1256,7 +1256,7 @@ namespace krys::boo::layout
       auto startPosition = static_cast<uint32>(currentPosition);
       auto endPosition = startPosition;
       auto hasTrailingSoftHyphen = false;
-      if (style.GetHyphens() == Hyphens::None)
+      if (style.Hyphens() == Hyphens::None)
       {
         // Let's merge candidate InlineTextItems separated by soft hyphen when the style says so.
         do
@@ -1271,7 +1271,7 @@ namespace krys::boo::layout
         krys_debug_assert(startPosition < endPosition);
         hasTrailingSoftHyphen = EndsWithSoftHyphen(text, endPosition);
       }
-      krys_debug_assert(style.GetHyphens() != Hyphens::None || !hasTrailingSoftHyphen);
+      krys_debug_assert(style.Hyphens() != Hyphens::None || !hasTrailingSoftHyphen);
       inlineItemList.push_back(InlineTextItem::CreateNonWhitespaceItem(
         inlineTextBox, startPosition, endPosition - startPosition, text::DefaultLeftToRightBidiLevel,
         hasTrailingSoftHyphen, {}));
@@ -1301,7 +1301,7 @@ namespace krys::boo::layout
   {
     inlineItemList.emplace_back(inlineBox, InlineItem::Type::InlineBoxStart);
     _contentRequiresVisualReordering |= RequiresVisualReordering(inlineBox);
-    _hasTextAutospace |= !inlineBox.Style().GetTextAutospace().IsNoAutospace();
+    _hasTextAutospace |= !inlineBox.Style().TextAutospace().IsNoAutospace();
   }
 
   void InlineItemsBuilder::HandleInlineBoxEnd(const Box &inlineBox, InlineItemList &inlineItemList) noexcept
@@ -1309,7 +1309,7 @@ namespace krys::boo::layout
     inlineItemList.emplace_back(inlineBox, InlineItem::Type::InlineBoxEnd);
     // Inline box end item itself can not trigger bidi content.
     krys_debug_assert(ContentRequiresVisualReordering() || inlineBox.GetWritingMode().IsBidiLTR()
-                      || inlineBox.Style().GetUnicodeBidi() == UnicodeBidi::Normal);
+                      || inlineBox.Style().UnicodeBidi() == UnicodeBidi::Normal);
   }
 
   void InlineItemsBuilder::HandleInlineLevelBox(const Box &layoutBox, InlineItemList &inlineItemList) noexcept

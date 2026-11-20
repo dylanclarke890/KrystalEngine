@@ -116,7 +116,7 @@ namespace krys::boo
   auto LogicalSelectionOffsetCaches::GetContainingBlockInfo(RenderBlock &block) const noexcept
     -> const ContainingBlockInfo &
   {
-    auto position = block.Style().GetPosition();
+    auto position = block.Style().Position();
     if (position == PositionType::Fixed)
     {
       krys_debug_assert(block.ContainingBlock() == _containingBlockForFixedPosition.Block());

@@ -102,7 +102,7 @@ namespace krys::boo
       childStyle.SetMarginLeft(css::keywords::Auto {});
       childStyle.SetMarginRight(css::keywords::Auto {});
     }
-    childStyle.SetTextBoxTrim(Style().GetTextBoxTrim());
+    childStyle.SetTextBoxTrim(Style().TextBoxTrim());
   }
 
   void RenderButton::UpdateFromElement() noexcept

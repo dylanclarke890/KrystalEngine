@@ -60,7 +60,7 @@ namespace krys::boo
       _chunkStyle |= SVGTextChunk::VerticalText;
     }
 
-    switch (style.GetTextAnchor())
+    switch (style.TextAnchor())
     {
       case TextAnchor::Start:  break;
       case TextAnchor::Middle: _chunkStyle |= MiddleAnchor; break;

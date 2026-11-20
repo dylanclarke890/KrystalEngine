@@ -183,11 +183,11 @@ namespace krys::boo
       {
         View().UnregisterBoxWithScrollSnapPositions(*this);
       }
-      if (Style().GetContainerType() != ContainerType::Normal)
+      if (Style().ContainerType() != ContainerType::Normal)
       {
         View().UnregisterContainerQueryBox(*this);
       }
-      if (!Style().GetPositionTryFallbacks().IsNone())
+      if (!Style().PositionTryFallbacks().IsNone())
       {
         View().UnregisterPositionTryBox(*this);
       }
@@ -279,8 +279,8 @@ namespace krys::boo
       if (diff >= style::DifferenceResult::Repaint && (IsDocumentElementRenderer() || IsBody()))
       {
         View().RepaintRootContents();
-        if (style::HasEntirelyFixedBackground(oldStyle->GetBackgroundLayers())
-            != style::HasEntirelyFixedBackground(newStyle.GetBackgroundLayers()))
+        if (style::HasEntirelyFixedBackground(oldStyle->BackgroundLayers())
+            != style::HasEntirelyFixedBackground(newStyle.BackgroundLayers()))
         {
           View().Compositor().RootLayerConfigurationChanged();
         }
@@ -288,8 +288,7 @@ namespace krys::boo
 
       // When a layout hint happens and an object's position style changes, we have to do a layout
       // to dirty the render tree using the old position value now.
-      if (diff == style::DifferenceResult::Layout && Parent()
-          && oldStyle->GetPosition() != newStyle.GetPosition())
+      if (diff == style::DifferenceResult::Layout && Parent() && oldStyle->Position() != newStyle.Position())
       {
         if (!oldStyle->HasOutOfFlowPosition() && newStyle.HasOutOfFlowPosition())
         {
@@ -314,7 +313,7 @@ namespace krys::boo
           ScheduleLayout(MarkContainingBlocksForLayout());
         }
 
-        if (oldStyle->GetPosition() != PositionType::Static && newStyle.HasOutOfFlowPosition())
+        if (oldStyle->Position() != PositionType::Static && newStyle.HasOutOfFlowPosition())
         {
           Parent()->SetChildNeedsLayout();
         }
@@ -334,20 +333,20 @@ namespace krys::boo
     {
       View().UnregisterBoxWithScrollSnapPositions(*this);
     }
-    if (newStyle.GetContainerType() != ContainerType::Normal)
+    if (newStyle.ContainerType() != ContainerType::Normal)
     {
       View().RegisterContainerQueryBox(*this);
     }
-    else if (oldStyle && oldStyle->GetContainerType() != ContainerType::Normal)
+    else if (oldStyle && oldStyle->ContainerType() != ContainerType::Normal)
     {
       View().UnregisterContainerQueryBox(*this);
     }
 
-    if (!newStyle.GetPositionTryFallbacks().IsNone() && newStyle.HasOutOfFlowPosition())
+    if (!newStyle.PositionTryFallbacks().IsNone() && newStyle.HasOutOfFlowPosition())
     {
       View().RegisterPositionTryBox(*this);
     }
-    else if (oldStyle && !oldStyle->GetPositionTryFallbacks().IsNone() && oldStyle->HasOutOfFlowPosition())
+    else if (oldStyle && !oldStyle->PositionTryFallbacks().IsNone() && oldStyle->HasOutOfFlowPosition())
     {
       View().UnregisterPositionTryBox(*this);
     }
@@ -421,11 +420,11 @@ namespace krys::boo
                                          : Layer()->GetScrollableArea();
       if (scrollableArea)
       {
-        if (oldStyle->GetScrollbarWidth() != newStyle.GetScrollbarWidth())
+        if (oldStyle->ScrollbarWidth() != newStyle.ScrollbarWidth())
         {
           scrollableArea->ScrollbarWidthChanged();
         }
-        if (oldStyle->GetScrollbarColor() != newStyle.GetScrollbarColor()
+        if (oldStyle->ScrollbarColor() != newStyle.ScrollbarColor()
             || GetDocument().UseDarkAppearance(oldStyle) != UseDarkAppearance())
         {
           scrollableArea->ScrollbarAppearanceChanged();
@@ -447,7 +446,7 @@ namespace krys::boo
       // FIXME: Telling the compositor the root's or the body's style changed (rootOrBodyStyleChanged).
     }
 
-    if ((oldStyle && !oldStyle->GetShapeOutside().IsNone()) || !Style().GetShapeOutside().IsNone())
+    if ((oldStyle && !oldStyle->ShapeOutside().IsNone()) || !Style().ShapeOutside().IsNone())
     {
       UpdateShapeOutsideInfoAfterStyleChange(Style(), oldStyle);
     }
@@ -677,7 +676,7 @@ namespace krys::boo
       verticalScrollbarWidth = LayoutUnit(VerticalScrollbarWidth());
       horizontalScrollbarHeight = LayoutUnit(HorizontalScrollbarHeight());
 
-      bool bothEdgeScrollbarGutters = Style().GetScrollbarGutter().IsStableBothEdges();
+      bool bothEdgeScrollbarGutters = Style().ScrollbarGutter().IsStableBothEdges();
 
       if (Style().ShouldPlaceVerticalScrollbarOnLeft() || bothEdgeScrollbarGutters)
       {
@@ -709,18 +708,18 @@ namespace krys::boo
   LayoutPoint RenderBox::ContentBoxLocation() const noexcept
   {
     LayoutUnit verticalScrollbarSpace =
-      (Style().ShouldPlaceVerticalScrollbarOnLeft() || Style().GetScrollbarGutter().IsStableBothEdges())
+      (Style().ShouldPlaceVerticalScrollbarOnLeft() || Style().ScrollbarGutter().IsStableBothEdges())
         ? LayoutUnit(VerticalScrollbarWidth())
         : 0_lu;
     LayoutUnit horizontalScrollbarSpace =
-      Style().GetScrollbarGutter().IsStableBothEdges() ? LayoutUnit(HorizontalScrollbarHeight()) : 0_lu;
+      Style().ScrollbarGutter().IsStableBothEdges() ? LayoutUnit(HorizontalScrollbarHeight()) : 0_lu;
     return {BorderLeft() + PaddingLeft() + verticalScrollbarSpace,
             BorderTop() + PaddingTop() + horizontalScrollbarSpace};
   }
 
   LayoutRect RenderBox::ComputedCSSContentBoxRect() const noexcept
   {
-    auto stableBothEdges = Style().GetScrollbarGutter().IsStableBothEdges();
+    auto stableBothEdges = Style().ScrollbarGutter().IsStableBothEdges();
     return LayoutRect(BorderLeft() + ComputedCSSPaddingLeft(), BorderTop() + ComputedCSSPaddingTop(),
                       PaddingBoxWidth() - ComputedCSSPaddingLeft() - ComputedCSSPaddingRight()
                         - (stableBothEdges ? LayoutUnit(VerticalScrollbarWidth()) : 0_lu),
@@ -765,15 +764,15 @@ namespace krys::boo
     return std::max(
       0_lu,
       PaddingBoxWidth() - PaddingLeft() - PaddingRight()
-        - (Style().GetScrollbarGutter().IsStableBothEdges() ? LayoutUnit(VerticalScrollbarWidth()) : 0_lu));
+        - (Style().ScrollbarGutter().IsStableBothEdges() ? LayoutUnit(VerticalScrollbarWidth()) : 0_lu));
   }
 
   LayoutUnit RenderBox::ContentBoxHeight() const noexcept
   {
-    return std::max(0_lu, PaddingBoxHeight() - PaddingTop() - PaddingBottom()
-                            - (Style().GetScrollbarGutter().IsStableBothEdges()
-                                 ? LayoutUnit(HorizontalScrollbarHeight())
-                                 : 0_lu));
+    return std::max(
+      0_lu,
+      PaddingBoxHeight() - PaddingTop() - PaddingBottom()
+        - (Style().ScrollbarGutter().IsStableBothEdges() ? LayoutUnit(HorizontalScrollbarHeight()) : 0_lu));
   }
 
   LayoutSize RenderBox::ContentBoxLogicalSize() const noexcept
@@ -796,7 +795,7 @@ namespace krys::boo
     return std::max(
       LayoutUnit(),
       overridingBorderBoxWidth - BorderAndPaddingLogicalWidth() - LayoutUnit(ScrollbarLogicalWidth())
-        - (Style().GetScrollbarGutter().IsStableBothEdges() ? LayoutUnit(ScrollbarLogicalWidth()) : 0_lu));
+        - (Style().ScrollbarGutter().IsStableBothEdges() ? LayoutUnit(ScrollbarLogicalWidth()) : 0_lu));
   }
 
   LayoutUnit RenderBox::ContentBoxLogicalHeight(LayoutUnit overridingBorderBoxHeight) const noexcept
@@ -804,7 +803,7 @@ namespace krys::boo
     return std::max(
       0_lu,
       overridingBorderBoxHeight - BorderAndPaddingLogicalHeight() - LayoutUnit(ScrollbarLogicalHeight())
-        - (Style().GetScrollbarGutter().IsStableBothEdges() ? LayoutUnit(ScrollbarLogicalHeight()) : 0_lu));
+        - (Style().ScrollbarGutter().IsStableBothEdges() ? LayoutUnit(ScrollbarLogicalHeight()) : 0_lu));
   }
 
   LayoutUnit RenderBox::PaddingBoxWidth() const noexcept
@@ -1264,7 +1263,7 @@ namespace krys::boo
 
   bool RenderBox::IsColumnSpanner() const noexcept
   {
-    return Style().GetColumnSpan() == ColumnSpan::All;
+    return Style().ColumnSpan() == ColumnSpan::All;
   }
 
 #pragma endregion
@@ -1308,7 +1307,7 @@ namespace krys::boo
 
   bool RenderBox::ShouldTrimChildMargin(style::MarginTrimSide type, const RenderBox &child) const noexcept
   {
-    return Style().GetMarginTrim().Contains(type) && IsChildEligibleForMarginTrim(type, child);
+    return Style().MarginTrim().Contains(type) && IsChildEligibleForMarginTrim(type, child);
   }
 
   void RenderBox::MarkMarginAsTrimmed(style::MarginTrimSide newTrimmedMargin) noexcept
@@ -1422,7 +1421,7 @@ namespace krys::boo
       // Case One: The object is being centered in the containing block's available logical width.
       auto marginAutoCenter =
         marginStartLength.IsAuto() && marginEndLength.IsAuto() && childWidth < containerWidthForMarginAuto;
-      auto alignModeCenter = containingBlock.Style().GetTextAlign() == style::TextAlign::WebKitCenter
+      auto alignModeCenter = containingBlock.Style().TextAlign() == style::TextAlign::WebKitCenter
                              && !marginStartLength.IsAuto() && !marginEndLength.IsAuto();
       if (marginAutoCenter || alignModeCenter)
       {
@@ -1462,9 +1461,9 @@ namespace krys::boo
       auto pushToEndFromTextAlign =
         !marginEndLength.IsAuto()
         && ((!containingBlockStyle.GetWritingMode().IsBidiLTR()
-             && containingBlockStyle.GetTextAlign() == style::TextAlign::WebKitLeft)
+             && containingBlockStyle.TextAlign() == style::TextAlign::WebKitLeft)
             || (containingBlockStyle.GetWritingMode().IsBidiLTR()
-                && containingBlockStyle.GetTextAlign() == style::TextAlign::WebKitRight));
+                && containingBlockStyle.TextAlign() == style::TextAlign::WebKitRight));
       if ((marginStartLength.IsAuto() || pushToEndFromTextAlign) && childWidth < containerWidthForMarginAuto)
       {
         marginEnd = ComputeOrTrimInlineMargin(
@@ -1740,7 +1739,7 @@ namespace krys::boo
     RenderBox::AdjustBorderBoxLogicalWidthForBoxSizing(LayoutUnit computedLogicalWidth) const noexcept
   {
     auto bordersAndPadding = BorderAndPaddingLogicalWidth();
-    if (Style().GetBoxSizing() == BoxSizing::ContentBox)
+    if (Style().BoxSizing() == BoxSizing::ContentBox)
     {
       return computedLogicalWidth + bordersAndPadding;
     }
@@ -1750,7 +1749,7 @@ namespace krys::boo
   LayoutUnit RenderBox::AdjustBorderBoxLogicalHeightForBoxSizing(LayoutUnit height) const noexcept
   {
     LayoutUnit bordersPlusPadding = BorderAndPaddingLogicalHeight();
-    if (Style().GetBoxSizing() == BoxSizing::ContentBox)
+    if (Style().BoxSizing() == BoxSizing::ContentBox)
     {
       return height + bordersPlusPadding;
     }
@@ -1767,7 +1766,7 @@ namespace krys::boo
   LayoutUnit
     RenderBox::AdjustContentBoxLogicalWidthForBoxSizing(LayoutUnit computedLogicalWidth) const noexcept
   {
-    if (Style().GetBoxSizing() == BoxSizing::ContentBox)
+    if (Style().BoxSizing() == BoxSizing::ContentBox)
     {
       return std::max(0_lu, computedLogicalWidth);
     }
@@ -1781,7 +1780,7 @@ namespace krys::boo
       return 0_lu;
     }
     LayoutUnit result = *height;
-    if (Style().GetBoxSizing() == BoxSizing::BorderBox)
+    if (Style().BoxSizing() == BoxSizing::BorderBox)
     {
       result -= BorderAndPaddingLogicalHeight();
     }
@@ -1790,7 +1789,7 @@ namespace krys::boo
 
   LayoutUnit RenderBox::AdjustIntrinsicLogicalHeightForBoxSizing(LayoutUnit height) const noexcept
   {
-    if (Style().GetBoxSizing() == BoxSizing::BorderBox)
+    if (Style().BoxSizing() == BoxSizing::BorderBox)
     {
       return height + BorderAndPaddingLogicalHeight();
     }
@@ -1929,7 +1928,7 @@ namespace krys::boo
       auto heightFromAspectRatio =
         BlockSizeFromAspectRatio(BorderAndPaddingLogicalWidth(), BorderAndPaddingLogicalHeight(),
                                  Style().LogicalAspectRatio(), Style().BoxSizingForAspectRatio(),
-                                 LogicalWidth(), Style().GetAspectRatio(), IsRenderReplaced())
+                                 LogicalWidth(), Style().AspectRatio(), IsRenderReplaced())
         - BorderAndPaddingLogicalHeight();
       if (FirstChild())
       {
@@ -2618,19 +2617,19 @@ namespace krys::boo
 
     auto normalBehavior = ContainingBlock()->SelfAlignmentNormalBehavior();
 
-    if (!Style().GetAlignSelf().IsAuto())
+    if (!Style().AlignSelf().IsAuto())
     {
-      return Style().GetAlignSelf().Resolve(StyleSelfAlignmentData {normalBehavior}).Position()
+      return Style().AlignSelf().Resolve(StyleSelfAlignmentData {normalBehavior}).Position()
              == ItemPosition::Stretch;
     }
-    return parentStyle.GetAlignItems().Resolve(StyleSelfAlignmentData {normalBehavior}).Position()
+    return parentStyle.AlignItems().Resolve(StyleSelfAlignmentData {normalBehavior}).Position()
            == ItemPosition::Stretch;
   }
 
   bool RenderBox::IsStretchingColumnFlexItem() const noexcept
   {
     // We don't stretch multiline flexboxes because they need to apply line spacing (align-content) first.
-    if (Is<RenderFlexibleBox>(*Parent()) && Parent()->Style().GetFlexWrap() == FlexWrap::NoWrap
+    if (Is<RenderFlexibleBox>(*Parent()) && Parent()->Style().FlexWrap() == FlexWrap::NoWrap
         && Parent()->Style().IsColumnFlexDirection() && ColumnFlexItemHasStretchAlignment())
     {
       return true;
@@ -2664,13 +2663,13 @@ namespace krys::boo
       }
 
       auto normalBehavior = containingBlock->SelfAlignmentNormalBehavior(this);
-      if (!style.GetJustifySelf().IsAuto())
+      if (!style.JustifySelf().IsAuto())
       {
-        return style.GetJustifySelf().Resolve(StyleSelfAlignmentData {normalBehavior}).Position()
+        return style.JustifySelf().Resolve(StyleSelfAlignmentData {normalBehavior}).Position()
                == ItemPosition::Stretch;
       }
       return containingBlock->Style()
-               .GetJustifyItems()
+               .JustifyItems()
                .Resolve(StyleSelfAlignmentData {normalBehavior})
                .Position()
              == ItemPosition::Stretch;
@@ -2682,15 +2681,12 @@ namespace krys::boo
     }
 
     auto normalBehavior = containingBlock->SelfAlignmentNormalBehavior(this);
-    if (!style.GetAlignSelf().IsAuto())
+    if (!style.AlignSelf().IsAuto())
     {
-      return style.GetAlignSelf().Resolve(StyleSelfAlignmentData {normalBehavior}).Position()
+      return style.AlignSelf().Resolve(StyleSelfAlignmentData {normalBehavior}).Position()
              == ItemPosition::Stretch;
     }
-    return containingBlock->Style()
-             .GetAlignItems()
-             .Resolve(StyleSelfAlignmentData {normalBehavior})
-             .Position()
+    return containingBlock->Style().AlignItems().Resolve(StyleSelfAlignmentData {normalBehavior}).Position()
            == ItemPosition::Stretch;
   }
 
@@ -2722,13 +2718,13 @@ namespace krys::boo
         return true;
       }
 
-      if (!style.GetAlignSelf().IsAuto())
+      if (!style.AlignSelf().IsAuto())
       {
-        return style.GetAlignSelf().Resolve(StyleSelfAlignmentData {normalItemPosition}).Position()
+        return style.AlignSelf().Resolve(StyleSelfAlignmentData {normalItemPosition}).Position()
                == ItemPosition::Stretch;
       }
       return containingBlock->Style()
-               .GetAlignItems()
+               .AlignItems()
                .Resolve(StyleSelfAlignmentData {normalItemPosition})
                .Position()
              == ItemPosition::Stretch;
@@ -2739,13 +2735,13 @@ namespace krys::boo
       return true;
     }
 
-    if (!style.GetJustifySelf().IsAuto())
+    if (!style.JustifySelf().IsAuto())
     {
-      return style.GetJustifySelf().Resolve(StyleSelfAlignmentData {normalItemPosition}).Position()
+      return style.JustifySelf().Resolve(StyleSelfAlignmentData {normalItemPosition}).Position()
              == ItemPosition::Stretch;
     }
     return containingBlock->Style()
-             .GetJustifyItems()
+             .JustifyItems()
              .Resolve(StyleSelfAlignmentData {normalItemPosition})
              .Position()
            == ItemPosition::Stretch;
@@ -2793,7 +2789,7 @@ namespace krys::boo
     if (Is<RenderFlexibleBox>(*Parent()))
     {
       // For multiline columns, we need to apply align-content first, so we can't stretch now.
-      if (!Parent()->Style().IsColumnFlexDirection() || Parent()->Style().GetFlexWrap() != FlexWrap::NoWrap)
+      if (!Parent()->Style().IsColumnFlexDirection() || Parent()->Style().FlexWrap() != FlexWrap::NoWrap)
       {
         return true;
       }
@@ -2959,7 +2955,7 @@ namespace krys::boo
           heightValue =
             BlockSizeFromAspectRatio(HorizontalBorderAndPaddingExtent(), VerticalBorderAndPaddingExtent(),
                                      Style().LogicalAspectRatio(), Style().BoxSizingForAspectRatio(),
-                                     LogicalWidth(), Style().GetAspectRatio(), Is<RenderReplaced>(*this));
+                                     LogicalWidth(), Style().AspectRatio(), Is<RenderReplaced>(*this));
         }
         return heightValue;
       }
@@ -3032,7 +3028,7 @@ namespace krys::boo
       auto intrinsicHeight = logicalHeight != LayoutUnit::Max() ? Maybe<LayoutUnit> {logicalHeight} : null;
       if (ShouldComputeLogicalHeightFromAspectRatio())
       {
-        if (intrinsicHeight && Style().GetBoxSizing() == BoxSizing::ContentBox)
+        if (intrinsicHeight && Style().BoxSizing() == BoxSizing::ContentBox)
         {
           *intrinsicHeight -= RenderBox::BorderBefore() + RenderBox::PaddingBefore()
                               + RenderBox::BorderAfter() + RenderBox::PaddingAfter();
@@ -3040,7 +3036,7 @@ namespace krys::boo
         auto heightFromAspectRatio =
           BlockSizeFromAspectRatio(HorizontalBorderAndPaddingExtent(), VerticalBorderAndPaddingExtent(),
                                    Style().LogicalAspectRatio(), Style().BoxSizingForAspectRatio(),
-                                   LogicalWidth(), Style().GetAspectRatio(), Is<RenderReplaced>(*this));
+                                   LogicalWidth(), Style().AspectRatio(), Is<RenderReplaced>(*this));
         return ConstrainLogicalHeightByMinMax(heightFromAspectRatio, intrinsicHeight);
       }
 
@@ -3523,7 +3519,7 @@ namespace krys::boo
       IsRenderTable()
       || (Is<RenderTableCell>(*containingBlock) && !skippedAutoHeightContainingBlock
           && containingBlock->OverridingBorderBoxLogicalHeight()
-          && Style().GetBoxSizing() == BoxSizing::ContentBox);
+          && Style().BoxSizing() == BoxSizing::ContentBox);
     if (subtractBorderAndPadding)
     {
       result -= BorderAndPaddingLogicalHeight();
@@ -3676,7 +3672,7 @@ namespace krys::boo
       auto borderAndPaddingLogicalHeight = BorderAndPaddingLogicalHeight();
       auto borderBoxLogicalHeight = BlockSizeFromAspectRatio(
         BorderAndPaddingLogicalWidth(), borderAndPaddingLogicalHeight, Style().LogicalAspectRatio(),
-        Style().BoxSizingForAspectRatio(), LogicalWidth(), Style().GetAspectRatio(), IsRenderReplaced());
+        Style().BoxSizingForAspectRatio(), LogicalWidth(), Style().AspectRatio(), IsRenderReplaced());
       if (heightType == AvailableLogicalHeightType::ExcludeMarginBorderPadding)
       {
         return borderBoxLogicalHeight - borderAndPaddingLogicalHeight;
@@ -4007,14 +4003,14 @@ namespace krys::boo
   {
     return HasNonVisibleOverflow() && Layer() && !Layer()->HasOverlayScrollbars()
            && (Style().OverflowY() == Overflow::Scroll || Style().OverflowY() == Overflow::Auto
-               || (Style().OverflowY() == Overflow::Hidden && !Style().GetScrollbarGutter().IsAuto()));
+               || (Style().OverflowY() == Overflow::Hidden && !Style().ScrollbarGutter().IsAuto()));
   }
 
   bool RenderBox::IncludeHorizontalScrollbarSize() const noexcept
   {
     return HasNonVisibleOverflow() && Layer() && !Layer()->HasOverlayScrollbars()
            && (Style().OverflowX() == Overflow::Scroll || Style().OverflowX() == Overflow::Auto
-               || (Style().OverflowX() == Overflow::Hidden && !Style().GetScrollbarGutter().IsAuto()));
+               || (Style().OverflowX() == Overflow::Hidden && !Style().ScrollbarGutter().IsAuto()));
   }
 
   bool RenderBox::CanUseOverlayScrollbars() noexcept
@@ -4250,7 +4246,7 @@ namespace krys::boo
       return true;
     }
 
-    if (Style().GetResize() != style::Resize::None)
+    if (Style().Resize() != style::Resize::None)
     {
       return true;
     }
@@ -4308,22 +4304,22 @@ namespace krys::boo
     // Overlay scrollbars take no space, so reserve none.
     if (IsHorizontalWritingMode()
         && (Style().OverflowY() == Overflow::Scroll
-            || shouldIncludeScrollbarGutter(Style().GetScrollbarGutter(), HasScrollableOverflowY(),
+            || shouldIncludeScrollbarGutter(Style().ScrollbarGutter(), HasScrollableOverflowY(),
                                             Style().OverflowY()))
         && !CanUseOverlayScrollbars())
     {
-      return Style().GetScrollbarGutter().IsStableBothEdges() ? VerticalScrollbarWidth() * 2
-                                                              : VerticalScrollbarWidth();
+      return Style().ScrollbarGutter().IsStableBothEdges() ? VerticalScrollbarWidth() * 2
+                                                           : VerticalScrollbarWidth();
     }
 
     if (!IsHorizontalWritingMode()
         && (Style().OverflowX() == Overflow::Scroll
-            || shouldIncludeScrollbarGutter(Style().GetScrollbarGutter(), HasScrollableOverflowX(),
+            || shouldIncludeScrollbarGutter(Style().ScrollbarGutter(), HasScrollableOverflowX(),
                                             Style().OverflowX()))
         && !CanUseOverlayScrollbars())
     {
-      return Style().GetScrollbarGutter().IsStableBothEdges() ? HorizontalScrollbarHeight() * 2
-                                                              : HorizontalScrollbarHeight();
+      return Style().ScrollbarGutter().IsStableBothEdges() ? HorizontalScrollbarHeight() * 2
+                                                           : HorizontalScrollbarHeight();
     }
 
     return 0;
@@ -4558,7 +4554,7 @@ namespace krys::boo
     const RenderStyle &styleToUse = Style();
     // Paint offset cache is only valid for root-relative, non-fixed position repainting
     if (View().FrameView().LayoutContext().IsPaintOffsetCacheEnabled() && !container
-        && styleToUse.GetPosition() != PositionType::Fixed
+        && styleToUse.Position() != PositionType::Fixed
         && !context.Options.Contains(VisibleRectContext::Option::UseEdgeInclusiveIntersection))
     {
       return ComputeVisibleRectsUsingPaintOffset(rects);
@@ -4614,7 +4610,7 @@ namespace krys::boo
 
     // We are now in our parent container's coordinate space. Apply our transform to obtain a bounding box
     // in the parent's coordinate space that encloses us.
-    auto position = styleToUse.GetPosition();
+    auto position = styleToUse.Position();
     if (HasLayer() && Layer()->IsTransformed())
     {
       context.HasPositionFixedDescendant = position == PositionType::Fixed;
@@ -4784,7 +4780,7 @@ namespace krys::boo
     // Compute box-shadow overflow first.
     if (Style().HasBoxShadow())
     {
-      auto shadowOutsets = style::ShadowOutsetExtent(Style().GetBoxShadow(), Style().UsedZoomForLength());
+      auto shadowOutsets = style::ShadowOutsetExtent(Style().BoxShadow(), Style().UsedZoomForLength());
       // Box-shadow extent's left and top are negative when extends to left and top, respectively, so negate
       // to convert to outsets.
       shadowOutsets.Left() = -shadowOutsets.Left();
@@ -4847,7 +4843,7 @@ namespace krys::boo
     return oldStyle.GridItemColumnStart() == style.GridItemColumnStart()
            && oldStyle.GridItemColumnEnd() == style.GridItemColumnEnd()
            && oldStyle.GridItemRowStart() == style.GridItemRowStart()
-           && oldStyle.GridItemRowEnd() == style.GridItemRowEnd() && oldStyle.GetOrder() == style.GetOrder()
+           && oldStyle.GridItemRowEnd() == style.GridItemRowEnd() && oldStyle.Order() == style.Order()
            && oldStyle.HasOutOfFlowPosition() == style.HasOutOfFlowPosition()
            && (oldStyle.GridTemplateColumns().Subgrid == style.GridTemplateColumns().Subgrid
                || style.GridTemplateColumns().OrderedNamedLines.Map.empty())
@@ -4885,17 +4881,17 @@ namespace krys::boo
   void RenderBox::UpdateShapeOutsideInfoAfterStyleChange(const RenderStyle &style,
                                                          const RenderStyle *oldStyle) noexcept
   {
-    style::ShapeOutside shapeOutside = style.GetShapeOutside();
+    style::ShapeOutside shapeOutside = style.ShapeOutside();
     style::ShapeOutside oldShapeOutside =
-      oldStyle ? oldStyle->GetShapeOutside() : style::ComputedStyle::InitialShapeOutside();
+      oldStyle ? oldStyle->ShapeOutside() : style::ComputedStyle::InitialShapeOutside();
 
-    style::ShapeMargin shapeMargin = style.GetShapeMargin();
+    style::ShapeMargin shapeMargin = style.ShapeMargin();
     style::ShapeMargin oldShapeMargin =
-      oldStyle ? oldStyle->GetShapeMargin() : style::ComputedStyle::InitialShapeMargin();
+      oldStyle ? oldStyle->ShapeMargin() : style::ComputedStyle::InitialShapeMargin();
 
-    style::ShapeImageThreshold shapeImageThreshold = style.GetShapeImageThreshold();
+    style::ShapeImageThreshold shapeImageThreshold = style.ShapeImageThreshold();
     style::ShapeImageThreshold oldShapeImageThreshold =
-      oldStyle ? oldStyle->GetShapeImageThreshold() : style::ComputedStyle::InitialShapeImageThreshold();
+      oldStyle ? oldStyle->ShapeImageThreshold() : style::ComputedStyle::InitialShapeImageThreshold();
 
     // FIXME: A future optimization would do a deep comparison for equality. (bug 100811)
     if (shapeOutside == oldShapeOutside && shapeMargin == oldShapeMargin
@@ -5658,8 +5654,7 @@ namespace krys::boo
 
     return InlineSizeFromAspectRatio(HorizontalBorderAndPaddingExtent(), VerticalBorderAndPaddingExtent(),
                                      Style().LogicalAspectRatio(), Style().BoxSizingForAspectRatio(),
-                                     logicalHeightforAspectRatio, Style().GetAspectRatio(),
-                                     IsRenderReplaced());
+                                     logicalHeightforAspectRatio, Style().AspectRatio(), IsRenderReplaced());
   }
 
   LayoutUnit RenderBox::ComputeLogicalWidthFromAspectRatio() const noexcept
@@ -5711,7 +5706,7 @@ namespace krys::boo
       {
         transferredMinSize = InlineSizeFromAspectRatio(
           BorderAndPaddingLogicalWidth(), BorderAndPaddingLogicalHeight(), *aspectRatio,
-          Style().BoxSizingForAspectRatio(), blockMinSize, Style().GetAspectRatio(), IsRenderReplaced());
+          Style().BoxSizingForAspectRatio(), blockMinSize, Style().AspectRatio(), IsRenderReplaced());
       }
     }
     if (Style().LogicalMaxHeight().IsSpecified())
@@ -5721,7 +5716,7 @@ namespace krys::boo
       {
         transferredMaxSize = InlineSizeFromAspectRatio(
           BorderAndPaddingLogicalWidth(), BorderAndPaddingLogicalHeight(), *aspectRatio,
-          Style().BoxSizingForAspectRatio(), blockMaxSize, Style().GetAspectRatio(), IsRenderReplaced());
+          Style().BoxSizingForAspectRatio(), blockMaxSize, Style().AspectRatio(), IsRenderReplaced());
       }
     }
     // Spec says the transferred max size should be floored by the transferred min size
@@ -5747,7 +5742,7 @@ namespace krys::boo
       {
         transferredMinSize = BlockSizeFromAspectRatio(
           BorderAndPaddingLogicalWidth(), BorderAndPaddingLogicalHeight(), *aspectRatio,
-          Style().BoxSizingForAspectRatio(), inlineMinSize, Style().GetAspectRatio(), IsRenderReplaced());
+          Style().BoxSizingForAspectRatio(), inlineMinSize, Style().AspectRatio(), IsRenderReplaced());
       }
     }
 
@@ -5759,7 +5754,7 @@ namespace krys::boo
       {
         transferredMaxSize = BlockSizeFromAspectRatio(
           BorderAndPaddingLogicalWidth(), BorderAndPaddingLogicalHeight(), *aspectRatio,
-          Style().BoxSizingForAspectRatio(), inlineMaxSize, Style().GetAspectRatio(), IsRenderReplaced());
+          Style().BoxSizingForAspectRatio(), inlineMaxSize, Style().AspectRatio(), IsRenderReplaced());
       }
     }
     // Spec says the transferred max size should be floored by the transferred min size
@@ -6106,7 +6101,7 @@ namespace krys::boo
         auto resolvedLogicalHeight = BlockSizeFromAspectRatio(
           HorizontalBorderAndPaddingExtent(), VerticalBorderAndPaddingExtent(),
           static_cast<double>(LayoutUnit {Style().LogicalAspectRatio()}), Style().BoxSizingForAspectRatio(),
-          LogicalWidth(), Style().GetAspectRatio(), IsRenderReplaced());
+          LogicalWidth(), Style().AspectRatio(), IsRenderReplaced());
         return std::max(LayoutUnit(), resolvedLogicalHeight - blockConstraints.BordersPlusPadding());
       }
       return AdjustContentBoxLogicalHeightForBoxSizing(style::Evaluate<LayoutUnit>(
@@ -6252,7 +6247,7 @@ namespace krys::boo
     auto borderBoxRect = this->BorderBoxRect();
     auto clipRect = LayoutRect(borderBoxRect.Location() + location, borderBoxRect.Size());
 
-    return Style().GetClip().SwitchOn(
+    return Style().Clip().SwitchOn(
       [&](const css::keywords::Auto &) { return clipRect; },
       [&](const style::ClipRect &rect)
       {
@@ -6488,7 +6483,7 @@ namespace krys::boo
 
   bool RenderBox::BackgroundHasOpaqueTopLayer() const noexcept
   {
-    const auto &topLayer = Style().GetBackgroundLayers().UsedFirst();
+    const auto &topLayer = Style().BackgroundLayers().UsedFirst();
     if (topLayer.GetClip() != FillBox::BorderBox)
     {
       return false;
@@ -6507,7 +6502,7 @@ namespace krys::boo
     }
 
     // If there is only one layer and no image, check whether the background color is opaque.
-    if (Style().GetBackgroundLayers().UsedLength() == 1 && !topLayer.HasImage())
+    if (Style().BackgroundLayers().UsedLength() == 1 && !topLayer.HasImage())
     {
       Color bgColor = Style().ColorResolvingCurrentColor(css::PropertyId::BackgroundColor);
       if (bgColor.IsOpaque())
@@ -6534,7 +6529,7 @@ namespace krys::boo
 
   LayoutRect RenderBox::MaskClipRect(const LayoutPoint &paintOffset) noexcept
   {
-    auto &maskBorder = Style().GetMaskBorder();
+    auto &maskBorder = Style().MaskBorder();
     if (!maskBorder.Source.IsNone())
     {
       LayoutRect borderImageRect = BorderBoxRect();
@@ -6546,7 +6541,7 @@ namespace krys::boo
 
     LayoutRect result;
     LayoutRect borderBox = BorderBoxRect();
-    for (auto &maskLayer : Style().GetMaskLayers().UsedValues())
+    for (auto &maskLayer : Style().MaskLayers().UsedValues())
     {
       if (maskLayer.HasImage())
       {
@@ -6575,12 +6570,12 @@ namespace krys::boo
 
       // Don't render a masked element until all the mask images have loaded, to prevent a flash of unmasked
       // content.
-      if (RefPtr<StyleImage> maskBorder = Style().GetMaskBorderSource().TryStyleImage())
+      if (RefPtr<StyleImage> maskBorder = Style().MaskBorderSource().TryStyleImage())
       {
         allMaskImagesLoaded &= maskBorder->IsLoaded(this);
       }
 
-      allMaskImagesLoaded &= style::ImagesAreLoaded(Style().GetMaskLayers(), *this);
+      allMaskImagesLoaded &= style::ImagesAreLoaded(Style().MaskLayers(), *this);
 
       paintInfo.Context().SetCompositeOperation(CompositeOperator::DestinationIn);
       paintInfo.Context().BeginTransparencyLayer(1);
@@ -6589,9 +6584,9 @@ namespace krys::boo
 
     if (allMaskImagesLoaded)
     {
-      BackgroundPainter {*this, paintInfo}.PaintFillLayers(Color(), Style().GetMaskLayers(), paintRect,
+      BackgroundPainter {*this, paintInfo}.PaintFillLayers(Color(), Style().MaskLayers(), paintRect,
                                                            BleedAvoidance::None, compositeOp);
-      BorderPainter {*this, paintInfo}.PaintNinePieceImage(paintRect, Style(), Style().GetMaskBorder(),
+      BorderPainter {*this, paintInfo}.PaintNinePieceImage(paintRect, Style(), Style().MaskBorder(),
                                                            compositeOp);
     }
 
@@ -6716,7 +6711,7 @@ namespace krys::boo
     auto offsetFromHitTestRoot = ToLayoutSize(accumulatedOffset + Location());
     auto hitTestLocationInLocalCoordinates = hitTestLocation.Point() - offsetFromHitTestRoot;
 
-    const auto &clipPath = Style().GetClipPath();
+    const auto &clipPath = Style().ClipPath();
     if (auto basicShape = clipPath.TryBasicShape())
     {
       auto &shape = basicShape->GetShape();
@@ -6799,7 +6794,7 @@ namespace krys::boo
         }
       }
       if ((!renderer->FirstChild() && !renderer->IsInline() && !Is<RenderBlockFlow>(*renderer))
-          || (source == HitTestSource::Script ? renderer->Style().GetVisibility()
+          || (source == HitTestSource::Script ? renderer->Style().Visibility()
                                               : renderer->Style().UsedVisibility())
                != Visibility::Visible)
       {
@@ -6939,7 +6934,7 @@ namespace krys::boo
 
   void RenderBox::ImageChanged(WrappedImagePtr image, const RectI *) noexcept
   {
-    if (auto source = Style().GetBorderImageSource().TryStyleImage(); source && source->Data() == image)
+    if (auto source = Style().BorderImageSource().TryStyleImage(); source && source->Data() == image)
     {
       if (Parent())
       {
@@ -6948,7 +6943,7 @@ namespace krys::boo
       return;
     }
 
-    if (auto source = Style().GetMaskBorderSource().TryStyleImage(); source && source->Data() == image)
+    if (auto source = Style().MaskBorderSource().TryStyleImage(); source && source->Data() == image)
     {
       if (Parent())
       {
@@ -6959,7 +6954,7 @@ namespace krys::boo
 
     if (!View().FrameView().LayoutContext().IsInRenderTreeLayout() && IsFloating())
     {
-      if (auto shapeOutsideImage = Style().GetShapeOutside().GetImage();
+      if (auto shapeOutsideImage = Style().ShapeOutside().GetImage();
           shapeOutsideImage && shapeOutsideImage->Data() == image)
       {
         EnsureShapeOutsideInfo().MarkShapeAsDirty();
@@ -6978,11 +6973,11 @@ namespace krys::boo
 
       if (!didFullRepaint)
       {
-        didFullRepaint = RepaintLayerRectsForImage(image, style.GetBackgroundLayers(), true);
+        didFullRepaint = RepaintLayerRectsForImage(image, style.BackgroundLayers(), true);
       }
       if (!didFullRepaint)
       {
-        didFullRepaint = RepaintLayerRectsForImage(image, style.GetMaskLayers(), false);
+        didFullRepaint = RepaintLayerRectsForImage(image, style.MaskLayers(), false);
       }
     };
 
@@ -6996,15 +6991,14 @@ namespace krys::boo
     // FIXME: The visually non-empty pixel count and the document's image load milestones (didLoadImage), once
     // there are those.
     bool isNonEmpty = false;
-    RefPtr<StyleImage> styleImage =
-      style::FindLayerUsedImage(Style().GetBackgroundLayers(), image, isNonEmpty);
+    RefPtr<StyleImage> styleImage = style::FindLayerUsedImage(Style().BackgroundLayers(), image, isNonEmpty);
 
     if (!IsComposited())
     {
       return;
     }
 
-    if (Layer()->HasCompositedMask() && style::FindLayerUsedImage(Style().GetMaskLayers(), image, isNonEmpty))
+    if (Layer()->HasCompositedMask() && style::FindLayerUsedImage(Style().MaskLayers(), image, isNonEmpty))
     {
       Layer()->ContentChanged(ContentChangeType::MaskImage);
     }

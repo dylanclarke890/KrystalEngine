@@ -38,8 +38,8 @@ namespace krys::boo
   {
     // content-visibility hidden and auto turns on layout containment.
     auto hasContainment = style.UsedContain().Contains(style::ContainValue::Layout)
-                          || style.GetContentVisibility() == ContentVisibility::Hidden
-                          || style.GetContentVisibility() == ContentVisibility::Auto;
+                          || style.ContentVisibility() == ContentVisibility::Hidden
+                          || style.ContentVisibility() == ContentVisibility::Auto;
     if (!hasContainment)
     {
       return false;
@@ -69,8 +69,8 @@ namespace krys::boo
   {
     auto hasContainment =
       style.UsedContain().Contains(style::ContainValue::Size)
-      || style.GetContentVisibility() == ContentVisibility::Hidden
-      || (style.GetContentVisibility() == ContentVisibility::Auto && !element.IsRelevantToUser());
+      || style.ContentVisibility() == ContentVisibility::Hidden
+      || (style.ContentVisibility() == ContentVisibility::Auto && !element.IsRelevantToUser());
     if (!hasContainment)
     {
       return false;
@@ -134,8 +134,8 @@ namespace krys::boo
   {
     // content-visibility hidden and auto turns on style containment.
     return style.UsedContain().Contains(style::ContainValue::Style)
-           || style.GetContentVisibility() == ContentVisibility::Hidden
-           || style.GetContentVisibility() == ContentVisibility::Auto;
+           || style.ContentVisibility() == ContentVisibility::Hidden
+           || style.ContentVisibility() == ContentVisibility::Auto;
   }
 
   KRYS_NODISCARD inline bool ShouldApplyPaintContainment(const RenderStyle &style,
@@ -143,8 +143,8 @@ namespace krys::boo
   {
     // content-visibility hidden and auto turns on paint containment.
     auto hasContainment = style.UsedContain().Contains(style::ContainValue::Paint)
-                          || style.GetContentVisibility() == ContentVisibility::Hidden
-                          || style.GetContentVisibility() == ContentVisibility::Auto;
+                          || style.ContentVisibility() == ContentVisibility::Hidden
+                          || style.ContentVisibility() == ContentVisibility::Auto;
     if (!hasContainment)
     {
       return false;
@@ -176,7 +176,7 @@ namespace krys::boo
       return false;
     }
 
-    switch (style.GetContentVisibility())
+    switch (style.ContentVisibility())
     {
       case ContentVisibility::Visible: return false;
       case ContentVisibility::Hidden:  return true;

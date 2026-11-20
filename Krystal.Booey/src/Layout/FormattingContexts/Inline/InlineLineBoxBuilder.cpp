@@ -616,10 +616,9 @@ namespace krys::boo::layout
       }
       if (run.IsInlineBoxStart() || run.IsLineSpanningInlineBoxStart())
       {
-        auto marginStart =
-          run.IsInlineBoxStart() || style.GetBoxDecorationBreak() == BoxDecorationBreak::Clone
-            ? formattingContext.GeometryForBox(layoutBox).MarginStart()
-            : LayoutUnit {};
+        auto marginStart = run.IsInlineBoxStart() || style.BoxDecorationBreak() == BoxDecorationBreak::Clone
+                             ? formattingContext.GeometryForBox(layoutBox).MarginStart()
+                             : LayoutUnit {};
         // At this point we don't know yet how wide this inline box is. Let's assume it's as long as the line
         // is and adjust it later if we come across an inlineBoxEnd run (see below). Inline box run is based
         // on margin box. Let's convert it to border box.

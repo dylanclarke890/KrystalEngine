@@ -72,7 +72,7 @@ namespace krys::boo
     }
 
     bool setShadow = false;
-    if (auto &shadows = lineStyle.GetTextShadow(); !shadows.IsNone())
+    if (auto &shadows = lineStyle.TextShadow(); !shadows.IsNone())
     {
       const auto &zoomFactor = lineStyle.UsedZoomForLength();
       auto &shadow = shadows[0];

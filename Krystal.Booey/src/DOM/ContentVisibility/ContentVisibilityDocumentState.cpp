@@ -260,7 +260,7 @@ namespace krys::boo::dom
              candidate = ShareRefPtr<const Element>(candidate->ParentElementInComposedTree()))
         {
           if (candidate->Renderer()
-              && candidate->Renderer()->Style().GetContentVisibility() == ContentVisibility::Auto)
+              && candidate->Renderer()->Style().ContentVisibility() == ContentVisibility::Auto)
           {
             found = candidate;
           }

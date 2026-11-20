@@ -36,7 +36,7 @@ namespace krys::boo
 
   RenderPtr<RenderElement> HTMLBRElement::CreateElementRenderer(RenderStyle &&style) noexcept
   {
-    if (RenderElement::IsContentDataSupported(style.GetContent()))
+    if (RenderElement::IsContentDataSupported(style.Content()))
     {
       return RenderElement::CreateFor(*this, krys::move(style));
     }

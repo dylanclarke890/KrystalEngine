@@ -91,7 +91,7 @@ namespace krys::boo::style::tests
       Matched->AuthorDeclarations.push_back(Block(u8"opacity: 0.25"));
       Build();
       CHECK(Style.Display() == DisplayType::Block);
-      CHECK(Style.GetOpacity() == Opacity {0.25f});
+      CHECK(Style.Opacity() == Opacity {0.25f});
     }
 
     SECTION("Font properties apply before the properties that depend on them")
@@ -105,7 +105,7 @@ namespace krys::boo::style::tests
     {
       ParentStyle.SetOpacity(Opacity {0.75f});
       BuildAuthor(u8"opacity: inherit; visibility: hidden");
-      CHECK(Style.GetOpacity() == Opacity {0.75f});
+      CHECK(Style.Opacity() == Opacity {0.75f});
 
       Style = RenderStyle::Clone(ParentStyle);
       Matched = MatchResult::Create();
@@ -113,7 +113,7 @@ namespace krys::boo::style::tests
       Matched->AuthorDeclarations.push_back(Block(u8"opacity: unset"));
       Build();
       // Opacity isn't inherited, so unset is initial.
-      CHECK(Style.GetOpacity() == ComputedStyle::InitialOpacity());
+      CHECK(Style.Opacity() == ComputedStyle::InitialOpacity());
     }
 
     SECTION("Explicitly inherited non-inherited properties are flagged")
@@ -135,17 +135,17 @@ namespace krys::boo::style::tests
       REQUIRE_FALSE(div.HasException());
       Reset(div.Value().get());
       BuilderFixture::Build(PropertyId::BackgroundImage, u8"linear-gradient(red, blue), none");
-      REQUIRE(Style.GetBackgroundLayers().ComputedLength() == 2);
-      CHECK(Style.GetBackgroundLayers().ComputedFirst().HasImage());
-      CHECK(Style.GetBackgroundLayers().ComputedFirst().IsImageSet());
+      REQUIRE(Style.BackgroundLayers().ComputedLength() == 2);
+      CHECK(Style.BackgroundLayers().ComputedFirst().HasImage());
+      CHECK(Style.BackgroundLayers().ComputedFirst().IsImageSet());
       BuilderFixture::Build(PropertyId::MaskImage, u8"linear-gradient(red, blue)");
-      CHECK(Style.GetMaskLayers().ComputedFirst().HasImage());
+      CHECK(Style.MaskLayers().ComputedFirst().HasImage());
     }
 
     SECTION("An empty cascade applies nothing")
     {
       Build();
-      CHECK(Style.GetOpacity() == ComputedStyle::InitialOpacity());
+      CHECK(Style.Opacity() == ComputedStyle::InitialOpacity());
     }
   }
 
@@ -163,7 +163,7 @@ namespace krys::boo::style::tests
     SECTION("revert without a value from an earlier origin is unset")
     {
       BuildAuthor(u8"opacity: 0.5; opacity: revert");
-      CHECK(Style.GetOpacity() == ComputedStyle::InitialOpacity());
+      CHECK(Style.Opacity() == ComputedStyle::InitialOpacity());
     }
 
     SECTION("revert-layer rolls back to the previous layer")
@@ -171,7 +171,7 @@ namespace krys::boo::style::tests
       Matched->AuthorDeclarations.push_back(Block(u8"opacity: 0.25", {.CascadeLayerPriority = 1}));
       Matched->AuthorDeclarations.push_back(Block(u8"opacity: revert-layer", {.CascadeLayerPriority = 2}));
       Build();
-      CHECK(Style.GetOpacity() == Opacity {0.25f});
+      CHECK(Style.Opacity() == Opacity {0.25f});
     }
 
     SECTION("revert on a custom property")

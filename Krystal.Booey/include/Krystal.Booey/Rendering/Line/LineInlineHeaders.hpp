@@ -53,8 +53,8 @@ namespace krys::boo
     {
       const RenderStyle &flowStyle = LineStyle(flow, lineInfo);
       const RenderStyle &parentStyle = LineStyle(*parent, lineInfo);
-      if (flowStyle.GetLineHeight() != parentStyle.GetLineHeight()
-          || flowStyle.GetVerticalAlign() != parentStyle.GetVerticalAlign()
+      if (flowStyle.LineHeight() != parentStyle.LineHeight()
+          || flowStyle.VerticalAlign() != parentStyle.VerticalAlign()
           || !parentStyle.MetricsOfPrimaryFont().HasIdenticalAscentDescentAndLineGap(
             flowStyle.MetricsOfPrimaryFont()))
       {
@@ -74,8 +74,8 @@ namespace krys::boo
     // have 'white-space' set to 'pre-wrap', UAs may visually collapse them.
     return style->CollapseWhiteSpace()
            || (whitespacePosition == WhitespacePosition::TrailingWhitespace
-               && style->GetWhiteSpaceCollapse() == WhiteSpaceCollapse::Preserve
-               && style->GetTextWrapMode() == TextWrapMode::Wrap && !lineInfo.IsEmpty());
+               && style->WhiteSpaceCollapse() == WhiteSpaceCollapse::Preserve
+               && style->TextWrapMode() == TextWrapMode::Wrap && !lineInfo.IsEmpty());
   }
 
   KRYS_NODISCARD inline bool

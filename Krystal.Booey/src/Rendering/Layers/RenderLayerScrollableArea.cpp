@@ -650,11 +650,11 @@ namespace krys::boo
     bool haveNonOverlayVerticalScrollbar = isNonOverlayScrollbar(_vBar.get());
     bool placeVerticalScrollbarOnTheLeft = ShouldPlaceVerticalScrollbarOnLeft();
     bool haveResizer =
-      renderBox.Style().GetResize() != style::Resize::None && !renderBox.Style().GetPseudoElementType();
+      renderBox.Style().Resize() != style::Resize::None && !renderBox.Style().GetPseudoElementType();
     bool scrollbarsAvoidCorner =
       ((haveNonOverlayHorizontalScrollbar && haveNonOverlayVerticalScrollbar)
        || (haveResizer && (haveNonOverlayHorizontalScrollbar || haveNonOverlayVerticalScrollbar)))
-      && renderBox.Style().GetScrollbarWidth() != style::ScrollbarWidth::None;
+      && renderBox.Style().ScrollbarWidth() != style::ScrollbarWidth::None;
 
     SizeI cornerSize;
     if (scrollbarsAvoidCorner)
@@ -859,7 +859,7 @@ namespace krys::boo
     }
 
     if (!_vBar && isHorizontalWritingMode
-        && !(_layer.Renderer().Style().GetScrollbarGutter().IsAuto()
+        && !(_layer.Renderer().Style().ScrollbarGutter().IsAuto()
              || ScrollbarTheme::Theme().UsesOverlayScrollbars()))
     {
       return ScrollbarTheme::Theme().ScrollbarThickness(ScrollbarWidthStyle());
@@ -884,7 +884,7 @@ namespace krys::boo
     }
 
     if (!_hBar && !isHorizontalWritingMode
-        && !(_layer.Renderer().Style().GetScrollbarGutter().IsAuto()
+        && !(_layer.Renderer().Style().ScrollbarGutter().IsAuto()
              || ScrollbarTheme::Theme().UsesOverlayScrollbars()))
     {
       return ScrollbarTheme::Theme().ScrollbarThickness(ScrollbarWidthStyle());
@@ -902,7 +902,7 @@ namespace krys::boo
   {
     if (_layer.GetRenderBox())
     {
-      return style::ToPlatform<style::ScrollbarWidth> {}(_layer.Renderer().Style().GetScrollbarWidth());
+      return style::ToPlatform<style::ScrollbarWidth> {}(_layer.Renderer().Style().ScrollbarWidth());
     }
     return ScrollbarWidth::Auto;
   }
@@ -923,7 +923,7 @@ namespace krys::boo
 
   bool RenderLayerScrollableArea::HasOverflowControls() const noexcept
   {
-    return _hBar || _vBar || _layer.Renderer().Style().GetResize() != style::Resize::None;
+    return _hBar || _vBar || _layer.Renderer().Style().Resize() != style::Resize::None;
   }
 
   bool RenderLayerScrollableArea::PositionOverflowControls(const SizeI &offsetFromRoot) noexcept
@@ -1585,7 +1585,7 @@ namespace krys::boo
                                                const LayoutRect &damageRect) noexcept
   {
     auto &renderer = _layer.Renderer();
-    if (renderer.Style().GetResize() == style::Resize::None)
+    if (renderer.Style().Resize() == style::Resize::None)
     {
       return;
     }
@@ -1605,7 +1605,7 @@ namespace krys::boo
 
     // Draw a frame around the resizer if there are any scrollbars present.
     if (!HasOverlayScrollbars() && (_vBar || _hBar)
-        && renderer.Style().GetScrollbarWidth() != style::ScrollbarWidth::None)
+        && renderer.Style().ScrollbarWidth() != style::ScrollbarWidth::None)
     {
       RenderTheme::Singleton().PaintPlatformResizerFrame(renderer, context, resizerAbsRect);
     }
@@ -1703,7 +1703,7 @@ namespace krys::boo
     auto rects = OverflowControlsRects();
 
     auto &renderer = _layer.Renderer();
-    if (renderer.Style().GetResize() != style::Resize::None)
+    if (renderer.Style().Resize() != style::Resize::None)
     {
       if (rects.Resizer.Contains(localPoint))
       {

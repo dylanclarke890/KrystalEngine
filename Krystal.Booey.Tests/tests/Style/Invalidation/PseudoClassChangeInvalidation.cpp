@@ -24,7 +24,7 @@ namespace krys::boo::style::tests
     {
       auto *style = element.GetRenderStyle();
       REQUIRE(style);
-      return style->GetColor() == Blue;
+      return style->Color() == Blue;
     }
 
     template <typename T>
@@ -106,7 +106,7 @@ namespace krys::boo::style::tests
       // Options aren't rendered, so their style is computed on demand.
       auto *style = option.ComputedStyle();
       REQUIRE(style);
-      CHECK(style->GetColor() == Blue);
+      CHECK(style->Color() == Blue);
     }
 
     SECTION(":link")

@@ -1013,7 +1013,7 @@ namespace krys::boo
 
       // We allow selections to begin within an element that has user-select: none set,
       // but if the element is draggable then dragging should take priority over selection.
-      if (style.GetUserDrag() == UserDrag::Element && style.UsedUserSelect() == UserSelect::None)
+      if (style.UserDrag() == UserDrag::Element && style.UsedUserSelect() == UserSelect::None)
       {
         return false;
       }

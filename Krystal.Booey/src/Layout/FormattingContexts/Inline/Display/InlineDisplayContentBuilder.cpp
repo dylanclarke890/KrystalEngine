@@ -118,9 +118,9 @@ namespace krys::boo::layout
       auto inflateWithBoxShadow = [&]
       {
         auto [topBoxShadow, bottomBoxShadow] =
-          style::ShadowVerticalExtent(style.GetBoxShadow(), style.UsedZoomForLength());
+          style::ShadowVerticalExtent(style.BoxShadow(), style.UsedZoomForLength());
         auto [leftBoxShadow, rightBoxShadow] =
-          style::ShadowHorizontalExtent(style.GetBoxShadow(), style.UsedZoomForLength());
+          style::ShadowHorizontalExtent(style.BoxShadow(), style.UsedZoomForLength());
         if (!topBoxShadow && !bottomBoxShadow && !leftBoxShadow && !rightBoxShadow)
         {
           return;
@@ -228,8 +228,7 @@ namespace krys::boo::layout
         {
           continue;
         }
-        if (displayBox.IsText()
-            || displayBox.Style().GetTextDecorationSkipInk() == TextDecorationSkipInk::None)
+        if (displayBox.IsText() || displayBox.Style().TextDecorationSkipInk() == TextDecorationSkipInk::None)
         {
           auto contentLogicalBottom = isHorizontalWritingMode ? displayBox.Bottom() : displayBox.Right();
           logicalBottom =
@@ -468,7 +467,7 @@ namespace krys::boo::layout
 
       auto addTextShadow = [&]
       {
-        auto textShadow = style::ShadowOutsetExtent(style.GetTextShadow(), style.UsedZoomForLength());
+        auto textShadow = style::ShadowOutsetExtent(style.TextShadow(), style.UsedZoomForLength());
         inkOverflow.Inflate(-textShadow.Top().ToFloat(), textShadow.Right().ToFloat(),
                             textShadow.Bottom().ToFloat(), -textShadow.Left().ToFloat());
       };

@@ -309,10 +309,10 @@ namespace krys::boo::tests
       CHECK(layer.Animations[0].Property == AnimatedProperty::Opacity);
 
       // The layer animates: the page's style isn't updated each frame, but its animated style is.
-      auto opacity = fixture.ById(u8"box").Renderer()->Style().GetOpacity().Value.Value;
+      auto opacity = fixture.ById(u8"box").Renderer()->Style().Opacity().Value.Value;
       CHECK_FALSE(fixture.RunFrame(250ms));
-      CHECK(fixture.ById(u8"box").Renderer()->Style().GetOpacity().Value.Value == opacity);
-      CHECK(fixture.ById(u8"box").Renderer()->AnimatedStyle()->GetOpacity().Value.Value
+      CHECK(fixture.ById(u8"box").Renderer()->Style().Opacity().Value.Value == opacity);
+      CHECK(fixture.ById(u8"box").Renderer()->AnimatedStyle()->Opacity().Value.Value
             == Catch::Approx(opacity + 0.25f).margin(0.02f));
     }
 
@@ -356,7 +356,7 @@ namespace krys::boo::tests
       fixture.StartAnimations();
       CHECK_FALSE(fixture.OnlyEffect(u8"box").IsRunningAccelerated());
       CHECK(fixture.RunFrame(300ms));
-      CHECK(fixture.ById(u8"box").Renderer()->Style().GetOpacity().Value.Value > 0);
+      CHECK(fixture.ById(u8"box").Renderer()->Style().Opacity().Value.Value > 0);
     }
 
     SECTION("a property layers don't animate")

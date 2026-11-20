@@ -158,7 +158,7 @@ namespace krys::boo
     }
 
     if (auto styleImage = style.ListStyleImage().TryStyleImage();
-        style.GetListStyleType().IsNone() && (!styleImage || styleImage->ErrorOccurred()))
+        style.ListStyleType().IsNone() && (!styleImage || styleImage->ErrorOccurred()))
     {
       if (auto *marker = listItemRenderer.MarkerRenderer())
       {

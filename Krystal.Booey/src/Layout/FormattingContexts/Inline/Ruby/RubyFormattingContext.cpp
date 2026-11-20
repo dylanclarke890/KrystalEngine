@@ -58,7 +58,7 @@ namespace krys::boo::layout
     KRYS_NODISCARD RubyPosition GetRubyPosition(const Box &rubyBaseLayoutBox) noexcept
     {
       krys_debug_assert(rubyBaseLayoutBox.IsRubyBase());
-      auto computedRubyPosition = rubyBaseLayoutBox.Style().GetRubyPosition();
+      auto computedRubyPosition = rubyBaseLayoutBox.Style().RubyPosition();
       if (!rubyBaseLayoutBox.GetWritingMode().IsVerticalTypographic())
       {
         return computedRubyPosition;
@@ -237,7 +237,7 @@ namespace krys::boo::layout
 
     auto spaceToDistribute = annotationBoxLogicalWidth - baseContentLogicalWidth;
     auto alignmentOffset = InlineContentAligner::ApplyRubyAlign(
-      rubyBaseLayoutBox.Style().GetRubyAlign(), line.Runs(),
+      rubyBaseLayoutBox.Style().RubyAlign(), line.Runs(),
       {rubyBaseStart, rubyBaseEnd ? *rubyBaseEnd + 1 : runs.size()}, spaceToDistribute);
     if (rubyBaseEnd)
     {
@@ -275,7 +275,7 @@ namespace krys::boo::layout
   InlineLayoutUnit RubyFormattingContext::ApplyRubyAlignOnAnnotationBox(
     Line &line, InlineLayoutUnit spaceToDistribute, InlineFormattingContext &inlineFormattingContext) noexcept
   {
-    return InlineContentAligner::ApplyRubyAlign(inlineFormattingContext.Root().Style().GetRubyAlign(),
+    return InlineContentAligner::ApplyRubyAlign(inlineFormattingContext.Root().Style().RubyAlign(),
                                                 line.Runs(), {0, line.Runs().size()}, spaceToDistribute);
   }
 
@@ -726,7 +726,7 @@ namespace krys::boo::layout
       auto &rubyBaseLayoutBox = displayBoxes[rubyBaseStart].LayoutBox();
       krys_debug_assert(rubyBaseLayoutBox.IsRubyBase());
       krys_debug_assert(HasInterlinearAnnotation(rubyBaseLayoutBox));
-      if (rubyBaseLayoutBox.Style().GetRubyOverhang() == RubyOverhang::None)
+      if (rubyBaseLayoutBox.Style().RubyOverhang() == RubyOverhang::None)
       {
         continue;
       }

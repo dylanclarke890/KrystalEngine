@@ -56,11 +56,11 @@ namespace krys::boo::style
     // value 'center'. https://html.spec.whatwg.org/multipage/rendering.html#rendering
     if (primitiveValue->ValueId() == css::ValueId::InternalThCenter)
     {
-      if (parentStyle.GetTextAlign() == TextAlign::Start)
+      if (parentStyle.TextAlign() == TextAlign::Start)
       {
         return TextAlign::Center;
       }
-      return parentStyle.GetTextAlign();
+      return parentStyle.TextAlign();
     }
 
     if (primitiveValue->ValueId() == css::ValueId::MatchParent)
@@ -71,16 +71,16 @@ namespace krys::boo::style
       {
         return TextAlign::Start;
       }
-      if (parentStyle.GetTextAlign() == TextAlign::Start)
+      if (parentStyle.TextAlign() == TextAlign::Start)
       {
         return parentStyle.GetWritingMode().IsBidiLTR() ? TextAlign::Left : TextAlign::Right;
       }
-      if (parentStyle.GetTextAlign() == TextAlign::End)
+      if (parentStyle.TextAlign() == TextAlign::End)
       {
         return parentStyle.GetWritingMode().IsBidiLTR() ? TextAlign::Right : TextAlign::Left;
       }
 
-      return parentStyle.GetTextAlign();
+      return parentStyle.TextAlign();
     }
 
     return FromCSSValue<TextAlign>(value);

@@ -96,7 +96,7 @@ namespace krys::boo
   {
     RenderBlockFlow::ComputeOverflow(oldClientAfterEdge, options);
 
-    const auto &textShadow = Style().GetTextShadow();
+    const auto &textShadow = Style().TextShadow();
     if (textShadow.IsNone())
     {
       return;

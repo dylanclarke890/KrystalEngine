@@ -55,7 +55,7 @@ namespace krys::boo
       }
       else
       {
-        context->SetFillRule(style.GetFillRule());
+        context->SetFillRule(style.FillRule());
       }
 
       if (resourceMode.Contains(RenderSVGResourceMode::ApplyToText))

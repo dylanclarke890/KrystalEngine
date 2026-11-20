@@ -53,7 +53,7 @@ namespace krys::boo
     style.TextStyles.HasExplicitlySetFillColor = pseudoElementStyle->HasExplicitlySetColor();
 
     auto color = TextDecorationPainter::DecorationColor(*pseudoElementStyle, paintInfo.PaintBehavior);
-    auto decorationStyle = pseudoElementStyle->GetTextDecorationStyle();
+    auto decorationStyle = pseudoElementStyle->TextDecorationStyle();
     auto decorations = pseudoElementStyle->TextDecorationLineInEffect();
 
     if (decorations.HasUnderline())
@@ -160,7 +160,7 @@ namespace krys::boo
       renderer, lineStyle.TextDecorationLineInEffect(), isFirstLine, paintInfo.PaintBehavior);
     markedStyle.TextStyles = ComputeTextPaintStyle(renderer, lineStyle, paintInfo);
     markedStyle.TextShadow =
-      paintInfo.ForceTextColor() ? style::TextShadows {css::keywords::None {}} : lineStyle.GetTextShadow();
+      paintInfo.ForceTextColor() ? style::TextShadows {css::keywords::None {}} : lineStyle.TextShadow();
     return markedStyle;
   }
 

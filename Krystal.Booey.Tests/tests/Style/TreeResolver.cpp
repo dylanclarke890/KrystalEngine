@@ -53,8 +53,8 @@ namespace krys::boo::style::tests
     CHECK_FALSE(document.UpdateStyleIfNeeded());
 
     CHECK(Rendered(*document.DocumentElement()).Display() == DisplayType::Block);
-    CHECK(Rendered(fixture.ById(u8"p")).GetColor() == Blue);
-    CHECK(Rendered(fixture.ById(u8"b")).GetColor() == Blue);
+    CHECK(Rendered(fixture.ById(u8"p")).Color() == Blue);
+    CHECK(Rendered(fixture.ById(u8"b")).Color() == Blue);
     CHECK(fixture.ById(u8"b").StyleValidity() == Validity::Valid);
 
     SECTION("display: none")
@@ -85,7 +85,7 @@ namespace krys::boo::style::tests
       CHECK(c.HasDisplayContents());
       REQUIRE(c.RenderOrDisplayContentsStyle());
       CHECK(c.RenderOrDisplayContentsStyle()->Display() == DisplayType::Contents);
-      CHECK(Rendered(fixture.ById(u8"em")).GetColor() == Red);
+      CHECK(Rendered(fixture.ById(u8"em")).Color() == Red);
     }
   }
 
@@ -108,7 +108,7 @@ namespace krys::boo::style::tests
       CHECK_FALSE(span->GetRenderStyle());
 
       CHECK(document.UpdateStyleIfNeeded());
-      CHECK(Rendered(*span).GetColor() == Blue);
+      CHECK(Rendered(*span).Color() == Blue);
       CHECK_FALSE(d.ChildNeedsStyleRecalc());
 
       REQUIRE_FALSE(d.RemoveChild(*span).HasException());
@@ -125,9 +125,9 @@ namespace krys::boo::style::tests
       REQUIRE_FALSE(d.SetAttribute(u8"style", u8"color: rgb(255, 0, 0)").HasException());
       CHECK(d.StyleValidity() == Validity::InlineStyleInvalid);
       CHECK(document.UpdateStyleIfNeeded());
-      CHECK(Rendered(d).GetColor() == Red);
+      CHECK(Rendered(d).Color() == Red);
       // The inherited change reaches the children.
-      CHECK(Rendered(*span).GetColor() == Red);
+      CHECK(Rendered(*span).Color() == Red);
     }
 
     SECTION("Presentational hints")
@@ -223,25 +223,25 @@ namespace krys::boo::style::tests
     CHECK(u.ChildrenAffectedByFirstChildRules());
     CHECK(u.ChildrenAffectedByForwardPositionalRules());
     CHECK(Rendered(fixture.ById(u8"a")).FirstChildState());
-    CHECK(Rendered(fixture.ById(u8"a")).GetColor() == Blue);
+    CHECK(Rendered(fixture.ById(u8"a")).Color() == Blue);
     CHECK(fixture.ById(u8"b").ChildIndex() == 2);
-    CHECK(Rendered(fixture.ById(u8"b")).GetColor() == Red);
+    CHECK(Rendered(fixture.ById(u8"b")).Color() == Red);
     CHECK(fixture.ById(u8"e").StyleAffectedByEmpty());
     CHECK(Rendered(fixture.ById(u8"e")).EmptyState());
 
     auto &q = Rendered(fixture.ById(u8"q"));
     auto *before = q.GetCachedPseudoStyle({PseudoElementType::Before});
     REQUIRE(before);
-    CHECK(before->GetColor() == Red);
+    CHECK(before->Color() == Red);
     auto *firstLine = q.GetCachedPseudoStyle({PseudoElementType::FirstLine});
     REQUIRE(firstLine);
-    CHECK(firstLine->GetColor() == Blue);
+    CHECK(firstLine->Color() == Blue);
     // ::before has a pseudo-element, whose own style is its computed style.
     auto *beforeElement = fixture.ById(u8"q").BeforePseudoElement();
     REQUIRE(beforeElement);
     CHECK(fixture.ById(u8"q").ComputedStyle(PseudoElementIdentifier {PseudoElementType::Before})
           == beforeElement->GetRenderStyle());
-    CHECK(fixture.ById(u8"q").ComputedStyle(PseudoElementIdentifier {PseudoElementType::Before})->GetColor()
+    CHECK(fixture.ById(u8"q").ComputedStyle(PseudoElementIdentifier {PseudoElementType::Before})->Color()
           == Red);
   }
 
@@ -267,10 +267,10 @@ namespace krys::boo::style::tests
     REQUIRE_FALSE(shadow->AppendChild(*slot).HasException());
 
     document.UpdateStyleIfNeeded();
-    CHECK(Rendered(*inner).GetColor() == Red);
+    CHECK(Rendered(*inner).Color() == Red);
     CHECK(ResolverFixture::Serialised(Rendered(*inner), Rendered(*inner).Width()) == "5px");
     // The slotted element inherits from its slot, and the shadow tree's rules don't apply to it.
-    CHECK(Rendered(fixture.ById(u8"light")).GetColor() == Blue);
+    CHECK(Rendered(fixture.ById(u8"light")).Color() == Blue);
     CHECK(ResolverFixture::Serialised(Rendered(fixture.ById(u8"light")),
                                       Rendered(fixture.ById(u8"light")).Width())
           == "auto");
@@ -303,13 +303,13 @@ namespace krys::boo::style::tests
 
     // Descendants of size containers are resolved after the container and its layout.
     auto &p = Rendered(fixture.ById(u8"p"));
-    CHECK(p.GetColor() == Blue);
+    CHECK(p.Color() == Blue);
     CHECK(ResolverFixture::Serialised(p, p.Width()) == "auto");
     // The size query is evaluated against the container's box, which is as wide as the viewport.
     CHECK(ResolverFixture::Serialised(p, p.Height()) == "5px");
 
     auto &q = Rendered(fixture.ById(u8"q"));
-    CHECK(q.GetColor() == Red);
+    CHECK(q.Color() == Red);
     CHECK(ResolverFixture::Serialised(q, q.Width()) == "auto");
     // A list applies if any of its queries is true, each against its own container.
     CHECK(ResolverFixture::Serialised(q, q.Height()) == "7px");
@@ -346,7 +346,7 @@ namespace krys::boo::style::tests
       REQUIRE_FALSE(fixture.ById(u8"c").SetAttribute(u8"style", u8"--x: 2").HasException());
       document.UpdateStyleIfNeeded();
       auto &changed = Rendered(fixture.ById(u8"p"));
-      CHECK(changed.GetColor() != Blue);
+      CHECK(changed.Color() != Blue);
       CHECK(ResolverFixture::Serialised(changed, changed.Width()) == "1px");
     }
   }
@@ -383,7 +383,7 @@ namespace krys::boo::style::tests
     ResolverFixture fixture {u8R"(<!DOCTYPE html><style>
       div { opacity: sin(sibling-index() * 30deg) }
     </style><div id=a></div><div id=b></div><div id=c></div>)"};
-    CHECK(Rendered(fixture.ById(u8"a")).GetOpacity().Value.Value == Catch::Approx(0.5f));
-    CHECK(Rendered(fixture.ById(u8"c")).GetOpacity().Value.Value == Catch::Approx(1.0f));
+    CHECK(Rendered(fixture.ById(u8"a")).Opacity().Value.Value == Catch::Approx(0.5f));
+    CHECK(Rendered(fixture.ById(u8"c")).Opacity().Value.Value == Catch::Approx(1.0f));
   }
 }

@@ -155,7 +155,7 @@ namespace krys::boo::layout
     const auto &gridTemplateRowsTrackSizes = gridContainerStyle.GridTemplateRows().Sizes;
 
     // 1. Run the Grid Item Placement Algorithm to resolve the placement of all grid items in the grid.
-    auto gridAutoFlow = gridContainerStyle.GetGridAutoFlow();
+    auto gridAutoFlow = gridContainerStyle.GridAutoFlow();
     auto autoFlowOptions =
       GridAutoFlowOptions {gridAutoFlow.IsDense() ? PackingStrategy::Dense : PackingStrategy::Sparse,
                            gridAutoFlow.IsRow() ? GridAutoFlowDirection::Row : GridAutoFlowDirection::Column};

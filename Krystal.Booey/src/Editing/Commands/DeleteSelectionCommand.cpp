@@ -107,7 +107,7 @@ namespace krys::boo
         return true;
       }
 
-      if (style.GetPosition() != PositionType::Static)
+      if (style.Position() != PositionType::Static)
       {
         return true;
       }

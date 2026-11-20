@@ -137,8 +137,7 @@ namespace krys::boo
     // Setup transparency layers before setting up SVG resources!
     bool isRenderingMask = IsRenderingMaskImage(*_renderer);
     // RenderLayer takes care of root opacity.
-    float opacity =
-      (renderer.IsLegacyRenderSVGRoot() || isRenderingMask) ? 1 : style.GetOpacity().Value.Value;
+    float opacity = (renderer.IsLegacyRenderSVGRoot() || isRenderingMask) ? 1 : style.Opacity().Value.Value;
     bool hasBlendMode = style.HasBlendMode();
     bool hasIsolation = style.HasIsolation();
     bool isolateMaskForBlending = false;
@@ -162,7 +161,7 @@ namespace krys::boo
         if (hasBlendMode)
         {
           _paintInfo->Context().SetCompositeOperation(_paintInfo->Context().CompositeOperation(),
-                                                      style.GetBlendMode());
+                                                      style.BlendMode());
         }
 
         _paintInfo->Context().BeginTransparencyLayer(opacity);
@@ -177,7 +176,7 @@ namespace krys::boo
       }
     }
 
-    bool hasSimpleClip = style.GetClipPath().TryBasicShape() || style.GetClipPath().TryBox();
+    bool hasSimpleClip = style.ClipPath().TryBasicShape() || style.ClipPath().TryBox();
     if (hasSimpleClip && !Is<LegacyRenderSVGRoot>(renderer))
     {
       SVGRenderSupport::ClipContextToCSSClippingArea(_paintInfo->Context(), renderer);
@@ -187,7 +186,7 @@ namespace krys::boo
 
     if (!resources)
     {
-      if (style.GetFilter().IsReferenceFilter())
+      if (style.Filter().IsReferenceFilter())
       {
         return;
       }
@@ -266,12 +265,12 @@ namespace krys::boo
   {
     // The root's filter is its layer's.
     const auto &style = renderer.Style();
-    if (!style.HasFilter() || style.GetFilter().IsReferenceFilter() || renderer.IsLegacyRenderSVGRoot())
+    if (!style.HasFilter() || style.Filter().IsReferenceFilter() || renderer.IsLegacyRenderSVGRoot())
     {
       return {};
     }
     auto &element = const_cast<RenderElement &>(renderer);
-    return CSSFilterRenderer::CalculateOutsets(element, style.GetFilter(), renderer.ObjectBoundingBox());
+    return CSSFilterRenderer::CalculateOutsets(element, style.Filter(), renderer.ObjectBoundingBox());
   }
 
   void SVGRenderingContext::BeginCSSFilter() noexcept
@@ -281,8 +280,8 @@ namespace krys::boo
     // box and the stroke bounding box, past which the functions draw by their outsets, as the source.
     auto &renderer = *_renderer;
     const auto &style = renderer.Style();
-    if (!style.HasFilter() || style.GetFilter().IsReferenceFilter() || renderer.IsLegacyRenderSVGRoot()
-        || CSSFilterRenderer::IsIdentity(renderer, style.GetFilter()))
+    if (!style.HasFilter() || style.Filter().IsReferenceFilter() || renderer.IsLegacyRenderSVGRoot()
+        || CSSFilterRenderer::IsIdentity(renderer, style.Filter()))
     {
       return;
     }
@@ -314,7 +313,7 @@ namespace krys::boo
 
     auto &context = _paintInfo->Context();
     _cssFilter = CSSFilterRenderer::Create(
-      renderer, style.GetFilter(),
+      renderer, style.Filter(),
       {.ReferenceBox = renderer.ObjectBoundingBox(), .FilterRegion = filterRegion, .Scale = scale},
       frame->PreferredFilterRenderingModes(context), context);
     if (!_cssFilter)

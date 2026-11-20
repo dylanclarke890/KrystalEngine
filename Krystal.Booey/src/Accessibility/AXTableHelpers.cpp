@@ -292,8 +292,8 @@ namespace krys::boo::ax
       tableBackgroundColor = BackgroundColorOf(*tableStyle);
       auto usedZoom = tableStyle->UsedZoomForLength();
       tableHasBorderSpacing =
-        style::Evaluate<LayoutUnit>(tableStyle->GetBorderSpacing().Width(), usedZoom) > 0
-        && style::Evaluate<LayoutUnit>(tableStyle->GetBorderSpacing().Height(), usedZoom) > 0;
+        style::Evaluate<LayoutUnit>(tableStyle->BorderSpacing().Width(), usedZoom) > 0
+        && style::Evaluate<LayoutUnit>(tableStyle->BorderSpacing().Height(), usedZoom) > 0;
     }
 
     uint32 cellCount = 0;

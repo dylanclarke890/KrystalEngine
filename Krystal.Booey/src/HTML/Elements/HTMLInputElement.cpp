@@ -1074,7 +1074,7 @@ namespace krys::boo
       return;
     }
     // Focus change may affect the result of shouldTruncateText().
-    if (auto *style = ExistingComputedStyle(); style && style->GetTextOverflow() == TextOverflow::Ellipsis)
+    if (auto *style = ExistingComputedStyle(); style && style->TextOverflow() == TextOverflow::Ellipsis)
     {
       InvalidateStyleForSubtreeInternal();
     }
@@ -1308,7 +1308,7 @@ namespace krys::boo
     {
       return false;
     }
-    return NodeDocument().FocusedElement() != this && style.GetTextOverflow() == TextOverflow::Ellipsis;
+    return NodeDocument().FocusedElement() != this && style.TextOverflow() == TextOverflow::Ellipsis;
   }
 
   RenderStyle HTMLInputElement::CreateInnerTextStyle(const RenderStyle &style) noexcept

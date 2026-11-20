@@ -186,18 +186,18 @@ namespace krys::boo
         return true;
       }
 
-      if (oldStyle->GetClipPath() != newStyle.GetClipPath())
+      if (oldStyle->ClipPath() != newStyle.ClipPath())
       {
         return true;
       }
 
       // RenderSVGResourceMarker only supports SVG <mask> references.
-      if (oldStyle->GetMaskLayers().UsedFirst().GetImage() != newStyle.GetMaskLayers().UsedFirst().GetImage())
+      if (oldStyle->MaskLayers().UsedFirst().GetImage() != newStyle.MaskLayers().UsedFirst().GetImage())
       {
         return true;
       }
 
-      if (oldStyle->GetFilter() != newStyle.GetFilter())
+      if (oldStyle->Filter() != newStyle.Filter())
       {
         return true;
       }

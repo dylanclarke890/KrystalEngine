@@ -111,7 +111,7 @@ namespace krys::boo
       return false;
     }
 
-    if (descendantBox->Style().GetColumnSpan() != ColumnSpan::All)
+    if (descendantBox->Style().ColumnSpan() != ColumnSpan::All)
     {
       return false;
     }
@@ -221,7 +221,7 @@ namespace krys::boo
     }
 
     // We only need to resolve for column spanners.
-    if (beforeChild->Style().GetColumnSpan() != ColumnSpan::All)
+    if (beforeChild->Style().ColumnSpan() != ColumnSpan::All)
     {
       return beforeChild;
     }
@@ -333,7 +333,7 @@ namespace krys::boo
       flow.GetSpannerMap().erase(placeholder->Spanner());
       return;
     }
-    if (relative.Style().GetColumnSpan() == ColumnSpan::All)
+    if (relative.Style().ColumnSpan() == ColumnSpan::All)
     {
       if (relative.Parent() != flow.Parent())
       {

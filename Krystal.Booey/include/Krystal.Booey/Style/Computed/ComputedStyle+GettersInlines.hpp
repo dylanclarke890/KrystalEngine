@@ -54,7 +54,7 @@ namespace krys::boo::style
       return true;
     }
 
-    return GetContainerType() == other.GetContainerType() && GetContainerNames() == other.GetContainerNames();
+    return ContainerType() == other.ContainerType() && ContainerNames() == other.ContainerNames();
   }
 
   inline bool ComputedStyle::ScrollPaddingEqual(const ComputedStyle &other) const noexcept

@@ -54,7 +54,7 @@ namespace krys::boo
       // New, top level line clamp.
       layoutState->SetLineClamp(RenderLayoutState::LineClamp {
         static_cast<size_t>(maximumLinesForBlockContainer->Value),
-        _blockContainer.Style().GetOverflowContinue() == OverflowContinue::Discard});
+        _blockContainer.Style().OverflowContinue() == OverflowContinue::Discard});
       return;
     }
 
@@ -71,7 +71,7 @@ namespace krys::boo
       }
       auto effectiveShouldDiscard =
         _previousLineClamp->ShouldDiscardOverflow
-        || _blockContainer.Style().GetOverflowContinue() == OverflowContinue::Discard;
+        || _blockContainer.Style().OverflowContinue() == OverflowContinue::Discard;
       layoutState->SetLineClamp(
         RenderLayoutState::LineClamp {_previousLineClamp->MaximumLines, effectiveShouldDiscard});
       return;

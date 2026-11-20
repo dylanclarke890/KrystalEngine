@@ -97,7 +97,7 @@ namespace krys::boo
   {
     krys_debug_assert(!ShouldApplySizeContainment());
 
-    if (Style().GetAspectRatio().IsRatio())
+    if (Style().AspectRatio().IsRatio())
     {
       return SizeF::NarrowPrecision(Style().AspectRatioLogicalWidth().Value,
                                     Style().AspectRatioLogicalHeight().Value);
@@ -131,7 +131,7 @@ namespace krys::boo
     {
       return *intrinsicRatioValue;
     }
-    if (Style().GetAspectRatio().IsAutoAndRatio())
+    if (Style().AspectRatio().IsAutoAndRatio())
     {
       return SizeF::NarrowPrecision(Style().AspectRatioLogicalWidth().Value,
                                     Style().AspectRatioLogicalHeight().Value);

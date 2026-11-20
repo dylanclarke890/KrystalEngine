@@ -288,7 +288,7 @@ namespace krys::boo
 
     // The excluded subtrees.
     const auto &style = renderer->Style();
-    if (style.GetOverflowAnchor() == OverflowAnchor::None || renderer->IsStickilyPositioned()
+    if (style.OverflowAnchor() == OverflowAnchor::None || renderer->IsStickilyPositioned()
         || renderer->IsFixedPositioned() || renderer->IsPseudoElement() || renderer->IsAnonymousBlock()
         || (renderer->IsAbsolutelyPositioned()
             && AbsolutePositionedElementOutsideScroller(*renderer, _owningScrollableArea))
@@ -357,7 +357,7 @@ namespace krys::boo
     // `overflow-anchor: none` on the scroller (the root, for the view) opts it out, as in Chrome.
     auto *scrollerElement = ElementForScrollableArea(_owningScrollableArea);
     auto *scrollerRenderer = scrollerElement ? scrollerElement->Renderer() : nullptr;
-    if (!scrollerRenderer || scrollerRenderer->Style().GetOverflowAnchor() == OverflowAnchor::None)
+    if (!scrollerRenderer || scrollerRenderer->Style().OverflowAnchor() == OverflowAnchor::None)
     {
       return;
     }

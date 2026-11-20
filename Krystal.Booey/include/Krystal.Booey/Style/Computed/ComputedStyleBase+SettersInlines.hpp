@@ -312,32 +312,32 @@ namespace krys::boo::style
     return _nonInheritedData.Access().MiscData.Access().Mask.Access();
   }
 
-  inline void ComputedStyleBase::SetBackgroundLayers(BackgroundLayers &&layers) noexcept
+  inline void ComputedStyleBase::SetBackgroundLayers(style::BackgroundLayers &&layers) noexcept
   {
     SET_NESTED(_nonInheritedData, BackgroundData, Background, krys::move(layers));
   }
 
-  inline void ComputedStyleBase::SetMaskLayers(MaskLayers &&layers) noexcept
+  inline void ComputedStyleBase::SetMaskLayers(style::MaskLayers &&layers) noexcept
   {
     SET_NESTED(_nonInheritedData, MiscData, Mask, krys::move(layers));
   }
 
-  inline void ComputedStyleBase::SetMaskBorder(MaskBorder &&image) noexcept
+  inline void ComputedStyleBase::SetMaskBorder(style::MaskBorder &&image) noexcept
   {
     SET_DOUBLY_NESTED(_nonInheritedData, RareData, MaskBorder, MaskBorder, krys::move(image));
   }
 
-  inline void ComputedStyleBase::SetBorderImage(BorderImage &&image) noexcept
+  inline void ComputedStyleBase::SetBorderImage(style::BorderImage &&image) noexcept
   {
     SET_DOUBLY_NESTED(_nonInheritedData, SurroundData, Border.BorderImage, BorderImage, krys::move(image));
   }
 
-  inline void ComputedStyleBase::SetPerspectiveOrigin(PerspectiveOrigin &&origin) noexcept
+  inline void ComputedStyleBase::SetPerspectiveOrigin(style::PerspectiveOrigin &&origin) noexcept
   {
     SET_NESTED(_nonInheritedData, RareData, PerspectiveOrigin, krys::move(origin));
   }
 
-  inline void ComputedStyleBase::SetTransformOrigin(TransformOrigin &&origin) noexcept
+  inline void ComputedStyleBase::SetTransformOrigin(style::TransformOrigin &&origin) noexcept
   {
     SET_DOUBLY_NESTED(_nonInheritedData, MiscData, Transform, Origin, krys::move(origin));
   }

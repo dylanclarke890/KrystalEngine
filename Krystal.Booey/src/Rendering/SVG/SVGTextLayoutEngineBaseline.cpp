@@ -49,7 +49,7 @@ namespace krys::boo
   {
     krys_debug_assert(textRenderer.Parent());
 
-    DominantBaseline baseline = textRenderer.Style().GetDominantBaseline();
+    DominantBaseline baseline = textRenderer.Style().DominantBaseline();
     if (baseline == DominantBaseline::Auto)
     {
       if (isVerticalText)
@@ -89,7 +89,7 @@ namespace krys::boo
     auto *textRendererParent = textRenderer.Parent();
     krys_debug_assert(textRendererParent);
 
-    AlignmentBaseline baseline = textRenderer.Style().GetAlignmentBaseline();
+    AlignmentBaseline baseline = textRenderer.Style().AlignmentBaseline();
     if (baseline == AlignmentBaseline::Baseline)
     {
       baseline = DominantBaselineToAlignmentBaseline(isVerticalText, *textRendererParent);

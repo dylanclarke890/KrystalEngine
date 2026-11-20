@@ -167,7 +167,7 @@ namespace krys::boo
                                                                    RenderElement &pseudoRenderer,
                                                                    const RenderStyle &style) noexcept
   {
-    if (auto *contentData = style.GetContent().TryData())
+    if (auto *contentData = style.Content().TryData())
     {
       const auto &altText = contentData->AltText;
       for (auto &contentItem : contentData->List)

@@ -155,7 +155,7 @@ namespace krys::boo::layout_integration
         if (auto *renderInline = DynamicDowncast<RenderInline>(renderer))
         {
           auto &style = renderInline->Style();
-          return style.GetWritingMode().IsBidiRTL() || style.GetUnicodeBidi() != UnicodeBidi::Normal;
+          return style.GetWritingMode().IsBidiRTL() || style.UnicodeBidi() != UnicodeBidi::Normal;
         }
         return false;
       };
@@ -197,11 +197,11 @@ namespace krys::boo::layout_integration
       }
 
       auto &rootBlockContainerStyle = rootBlockContainer.Style();
-      auto shouldBalance = rootBlockContainerStyle.GetTextWrapMode() == TextWrapMode::Wrap
-                           && rootBlockContainerStyle.GetTextWrapStyle() == TextWrapStyle::Balance;
-      auto shouldPrettify = rootBlockContainerStyle.GetTextWrapMode() == TextWrapMode::Wrap
-                            && rootBlockContainerStyle.GetTextWrapStyle() == TextWrapStyle::Pretty;
-      auto hasAutospace = !rootBlockContainerStyle.GetTextAutospace().IsNoAutospace();
+      auto shouldBalance = rootBlockContainerStyle.TextWrapMode() == TextWrapMode::Wrap
+                           && rootBlockContainerStyle.TextWrapStyle() == TextWrapStyle::Balance;
+      auto shouldPrettify = rootBlockContainerStyle.TextWrapMode() == TextWrapMode::Wrap
+                            && rootBlockContainerStyle.TextWrapStyle() == TextWrapStyle::Pretty;
+      auto hasAutospace = !rootBlockContainerStyle.TextAutospace().IsNoAutospace();
       if (rootBlockContainer.GetWritingMode().IsBidiRTL() || shouldBalance || shouldPrettify || hasAutospace)
       {
         return true;
@@ -212,7 +212,7 @@ namespace krys::boo::layout_integration
         for (auto *sibling = rootBlockContainer.FirstChild(); sibling; sibling = sibling->NextSibling())
         {
           if (auto *inlineBox = DynamicDowncast<RenderInline>(*sibling);
-              inlineBox && !inlineBox->Style().GetTextAutospace().IsNoAutospace())
+              inlineBox && !inlineBox->Style().TextAutospace().IsNoAutospace())
           {
             return true;
           }
@@ -495,7 +495,7 @@ namespace krys::boo::layout_integration
           // Note that ContainingBlock() on boxes in top layer (i.e. dialog) may return incorrect result
           // during style change even with not-yet-updated style.
           return DynamicDowncast<RenderBlockFlow>(RenderObject::ContainingBlockForPositionType(
-            Downcast<RenderBox>(renderer).Style().GetPosition(), renderer));
+            Downcast<RenderBox>(renderer).Style().Position(), renderer));
         }
         if (auto *parentInlineBox = DynamicDowncast<RenderInline>(renderer.Parent()))
         {
@@ -990,7 +990,7 @@ namespace krys::boo::layout_integration
                                 layout::IntegrationUtils::ToMarginState(marginInfo, {}),
                                 LineClamp(Flow()),
                                 TextBoxTrim(Flow()),
-                                Flow().Style().GetTextBoxEdge(),
+                                Flow().Style().TextBoxEdge(),
                                 intrusiveInitialLetterBottom()};
     auto inlineFormattingContext =
       layout::InlineFormattingContext {RootLayoutBox(), GetLayoutState(), parentBlockLayoutState};

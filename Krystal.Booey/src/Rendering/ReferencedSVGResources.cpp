@@ -123,7 +123,7 @@ namespace krys::boo
     ReferencedSVGResources::ReferencedSVGResourceIDs(const RenderStyle &style, const Document &) noexcept
   {
     SVGElementIdentifierAndTagPairs referencedResources;
-    if (auto clipPath = style.GetClipPath().TryReference())
+    if (auto clipPath = style.ClipPath().TryReference())
     {
       if (!clipPath->Fragment().View().empty())
       {
@@ -133,7 +133,7 @@ namespace krys::boo
 
     if (style.HasFilter())
     {
-      const auto &filter = style.GetFilter();
+      const auto &filter = style.Filter();
       for (const auto &value : filter)
       {
         if (auto *referenceFilterOperation = DynamicDowncast<style::ReferenceFilterOperation>(value.Get()))

@@ -648,7 +648,7 @@ namespace krys::boo
         states.Add(ControlStyle::State::SpinUp);
       }
     }
-    if (IsFocused(renderer) && renderer.Style().GetOutlineStyle() == OutlineStyle::Auto)
+    if (IsFocused(renderer) && renderer.Style().OutlineStyle() == OutlineStyle::Auto)
     {
       states.Add(ControlStyle::State::Focused);
     }

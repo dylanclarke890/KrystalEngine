@@ -760,7 +760,7 @@ namespace krys::boo
       auto containingBlockForAbsolutePosition = [&]
       {
         if (auto *renderInline = DynamicDowncast<RenderInline>(renderer);
-            renderInline && renderInline->Style().GetPosition() == PositionType::Relative)
+            renderInline && renderInline->Style().Position() == PositionType::Relative)
         {
           // A relatively positioned RenderInline forwards its absolute positioned descendants to
           // its nearest non-anonymous containing block (to avoid having positioned objects list in
@@ -814,7 +814,7 @@ namespace krys::boo
       {
         return &renderer.View();
       }
-      return ContainingBlockForPositionType(renderer.Style().GetPosition(), renderer);
+      return ContainingBlockForPositionType(renderer.Style().Position(), renderer);
     };
 
     return containingBlockForRenderer(static_cast<const RenderElement &>(*this));
@@ -873,7 +873,7 @@ namespace krys::boo
         updateRepaintContainerSkippedFlagIfApplicable();
         return &renderElement.View();
       }
-      auto position = renderElement.Style().GetPosition();
+      auto position = renderElement.Style().Position();
       if (position == PositionType::Static || position == PositionType::Relative
           || position == PositionType::Sticky)
       {
@@ -1609,8 +1609,7 @@ namespace krys::boo
       bool rendererHasOutlineAutoAncestor =
         renderer->HasOutlineAutoAncestor() || originalRenderer->HasOutlineAutoAncestor();
       krys_debug_assert(rendererHasOutlineAutoAncestor
-                        || originalRenderer->OutlineStyleForRepaint().GetOutlineStyle()
-                             == OutlineStyle::Auto);
+                        || originalRenderer->OutlineStyleForRepaint().OutlineStyle() == OutlineStyle::Auto);
       if (originalRenderer == &repaintContainer && rendererHasOutlineAutoAncestor)
       {
         repaintRectNeedsConverting = true;
@@ -2256,7 +2255,7 @@ namespace krys::boo
     if (auto *textControl = DynamicDowncast<RenderTextControl>(renderer))
     {
       if (!textControl->IsFlexItem() && !textControl->IsGridItem()
-          && style.GetFieldSizing() != FieldSizing::Content)
+          && style.FieldSizing() != FieldSizing::Content)
       {
         // Flexing type of layout systems may compute different size than what input's preferred width is
         // which won't happen unless they run their layout as well.

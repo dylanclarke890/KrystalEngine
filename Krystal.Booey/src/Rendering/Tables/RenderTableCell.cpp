@@ -529,8 +529,8 @@ namespace krys::boo
       borderBoxLogicalHeight - (oldIntrinsicPaddingBefore + oldIntrinsicPaddingAfter);
     auto intrinsicPaddingBefore = oldIntrinsicPaddingBefore;
 
-    auto alignment = Style().GetVerticalAlign();
-    if (auto alignContent = Style().GetAlignContent(); !alignContent.IsNormal())
+    auto alignment = Style().VerticalAlign();
+    if (auto alignContent = Style().AlignContent(); !alignContent.IsNormal())
     {
       auto resolveAlignedContent = alignContent.Resolve();
       // align-content overrides vertical-align
@@ -649,7 +649,7 @@ namespace krys::boo
     auto computedLogicaSize = style::Evaluate<LayoutUnit>(specifiedSize, 0_lu, Style().UsedZoomForLength());
     // In strict mode, box-sizing: content-box do the right thing and actually add in the border and padding.
     // Call ComputedCSSPadding* directly to avoid including implicitPadding.
-    if (!GetDocument().InQuirksMode() && Style().GetBoxSizing() != BoxSizing::BorderBox)
+    if (!GetDocument().InQuirksMode() && Style().BoxSizing() != BoxSizing::BorderBox)
     {
       computedLogicaSize +=
         ComputedCSSPaddingBefore() + ComputedCSSPaddingAfter() + BorderBefore() + BorderAfter();
@@ -839,12 +839,12 @@ namespace krys::boo
 
   bool RenderTableCell::IsBaselineAligned() const noexcept
   {
-    if (auto alignContent = Style().GetAlignContent(); !alignContent.IsNormal())
+    if (auto alignContent = Style().AlignContent(); !alignContent.IsNormal())
     {
       return alignContent.IsFirstBaseline();
     }
 
-    const auto &verticalAlign = Style().GetVerticalAlign();
+    const auto &verticalAlign = Style().VerticalAlign();
     return verticalAlign.IsBaseline() || verticalAlign.IsTextBottom() || verticalAlign.IsTextTop()
            || verticalAlign.IsSuper() || verticalAlign.IsSub() || verticalAlign.IsLength();
   }
@@ -875,8 +875,8 @@ namespace krys::boo
     // vertical-align has changed then so will the padding needed to align with other cells - clear it so we
     // can recalculate it from scratch.
     if (oldStyle
-        && (Style().GetVerticalAlign() != oldStyle->GetVerticalAlign()
-            || Style().GetAlignContent() != oldStyle->GetAlignContent()))
+        && (Style().VerticalAlign() != oldStyle->VerticalAlign()
+            || Style().AlignContent() != oldStyle->AlignContent()))
     {
       ClearIntrinsicPadding();
     }
@@ -1797,8 +1797,8 @@ namespace krys::boo
     }
 
     // Shrink our intrinsic padding as much as possible to accommodate the scrollbar.
-    if ((Style().GetVerticalAlign().IsMiddle() && Style().GetAlignContent().IsNormal())
-        || Style().GetAlignContent().Resolve().IsCentered())
+    if ((Style().VerticalAlign().IsMiddle() && Style().AlignContent().IsNormal())
+        || Style().AlignContent().Resolve().IsCentered())
     {
       auto totalHeight = LogicalHeight();
       auto heightWithoutIntrinsicPadding = totalHeight - IntrinsicPaddingBefore() - IntrinsicPaddingAfter();
@@ -2186,7 +2186,7 @@ namespace krys::boo
     }
 
     const auto &backgroundStyle = backgroundObject->Style();
-    auto &bgLayers = backgroundStyle.GetBackgroundLayers();
+    auto &bgLayers = backgroundStyle.BackgroundLayers();
 
     auto color = backgroundStyle.ColorResolvingCurrentColor(css::PropertyId::BackgroundColor);
     if (!style::HasImageInAnyLayer(bgLayers) && !color.IsVisible())

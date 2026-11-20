@@ -36,7 +36,7 @@ namespace krys::boo::style::tests
     auto &o = fixture.ById(u8"o");
     auto &n = fixture.ById(u8"n");
     auto &b = fixture.ById(u8"b");
-    REQUIRE(Rendered(c).GetColor() != Blue);
+    REQUIRE(Rendered(c).Color() != Blue);
 
     SECTION("Adding a class invalidates the descendants and siblings it may affect")
     {
@@ -47,7 +47,7 @@ namespace krys::boo::style::tests
       CHECK(d.StyleValidity() == Validity::Valid);
 
       document.UpdateStyleIfNeeded();
-      CHECK(Rendered(c).GetColor() == Blue);
+      CHECK(Rendered(c).Color() == Blue);
       CHECK(ResolverFixture::Serialised(Rendered(n), Rendered(n).Width()) == "5px");
 
       SECTION("Removing it too")
@@ -55,7 +55,7 @@ namespace krys::boo::style::tests
         d.RemoveAttribute(u8"class");
         CHECK(c.StyleValidity() == Validity::ElementInvalid);
         document.UpdateStyleIfNeeded();
-        CHECK(Rendered(c).GetColor() != Blue);
+        CHECK(Rendered(c).Color() != Blue);
         CHECK(ResolverFixture::Serialised(Rendered(n), Rendered(n).Width()) == "auto");
       }
     }
@@ -92,13 +92,13 @@ namespace krys::boo::style::tests
     CHECK(d.StyleValidity() == Validity::ElementInvalid);
     CHECK(p.StyleValidity() == Validity::Valid);
     document.UpdateStyleIfNeeded();
-    CHECK(Rendered(d).GetColor() == Blue);
+    CHECK(Rendered(d).Color() == Blue);
 
     // IDs matching ancestors invalidate the subtree.
     REQUIRE_FALSE(d.SetAttribute(u8"id", u8"b").HasException());
     CHECK(d.StyleValidity() == Validity::SubtreeInvalid);
     document.UpdateStyleIfNeeded();
-    CHECK(Rendered(d).GetColor() != Blue);
+    CHECK(Rendered(d).Color() != Blue);
     CHECK(ResolverFixture::Serialised(Rendered(p), Rendered(p).Width()) == "5px");
 
     // IDs no rule uses don't.
@@ -128,12 +128,12 @@ namespace krys::boo::style::tests
       REQUIRE_FALSE(d.SetAttribute(u8"data-v", u8"1").HasException());
       CHECK(p.StyleValidity() == Validity::ElementInvalid);
       document.UpdateStyleIfNeeded();
-      CHECK(Rendered(p).GetColor() == Blue);
+      CHECK(Rendered(p).Color() == Blue);
 
       REQUIRE_FALSE(d.SetAttribute(u8"data-v", u8"2").HasException());
       CHECK(p.StyleValidity() == Validity::ElementInvalid);
       document.UpdateStyleIfNeeded();
-      CHECK(Rendered(p).GetColor() != Blue);
+      CHECK(Rendered(p).Color() != Blue);
 
       // Neither value matches.
       REQUIRE_FALSE(d.SetAttribute(u8"data-v", u8"3").HasException());

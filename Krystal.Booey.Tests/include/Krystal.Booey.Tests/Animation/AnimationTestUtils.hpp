@@ -76,7 +76,7 @@ namespace krys::boo::tests
     {
       auto *renderer = ById(id).Renderer();
       REQUIRE(renderer);
-      return renderer->Style().GetOpacity().Value.Value;
+      return renderer->Style().Opacity().Value.Value;
     }
   };
 

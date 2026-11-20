@@ -437,7 +437,7 @@ namespace krys::boo
     for (size_t rowIndex = 0; rowIndex < totalRows; ++rowIndex)
     {
       if (_grid[rowIndex].RowRenderer
-          && _grid[rowIndex].RowRenderer->Style().GetVisibility() == Visibility::Collapse)
+          && _grid[rowIndex].RowRenderer->Style().Visibility() == Visibility::Collapse)
       {
         auto delta = _rowPos[rowIndex + 1] - _rowPos[rowIndex];
         if (delta > 0_lu)
@@ -769,8 +769,8 @@ namespace krys::boo
         auto rowHasVisibilityCollapse = [&](size_t row)
         {
           return (_grid[row].RowRenderer
-                  && _grid[row].RowRenderer->Style().GetVisibility() == Visibility::Collapse)
-                 || Style().GetVisibility() == Visibility::Collapse;
+                  && _grid[row].RowRenderer->Style().Visibility() == Visibility::Collapse)
+                 || Style().Visibility() == Visibility::Collapse;
         };
         if (!rowHasVisibilityCollapse(rowIndex))
         {

@@ -1046,7 +1046,7 @@ namespace krys::boo
 
     Ref textElement = ShareRef(TextElement());
     SVGLengthContext lengthContext(textElement.get());
-    strokeBoundaries.Inflate(lengthContext.ValueForLength(Style().GetStrokeWidth(), style::ZoomNeeded {}));
+    strokeBoundaries.Inflate(lengthContext.ValueForLength(Style().StrokeWidth(), style::ZoomNeeded {}));
     return strokeBoundaries;
   }
 
@@ -1063,7 +1063,7 @@ namespace krys::boo
     auto repaintRect = StrokeBoundingBox();
     SVGRenderSupport::IntersectRepaintRectWithResources(*this, repaintRect, repaintRectCalculation);
 
-    if (auto &textShadow = Style().GetTextShadow(); !textShadow.IsNone())
+    if (auto &textShadow = Style().TextShadow(); !textShadow.IsNone())
     {
       style::AdjustRectForShadow(repaintRect, textShadow, Style().UsedZoomForLength());
     }
@@ -1096,10 +1096,9 @@ namespace krys::boo
       }
 
       return (oldStyle->AffectsTransform() != newStyle.AffectsTransform()
-              || oldStyle->GetTransform() != newStyle.GetTransform()
-              || oldStyle->GetTranslate() != newStyle.GetTranslate()
-              || oldStyle->GetScale() != newStyle.GetScale() || oldStyle->GetRotate() != newStyle.GetRotate()
-              || oldStyle->GetOffsetPath() != newStyle.GetOffsetPath());
+              || oldStyle->Transform() != newStyle.Transform()
+              || oldStyle->Translate() != newStyle.Translate() || oldStyle->Scale() != newStyle.Scale()
+              || oldStyle->Rotate() != newStyle.Rotate() || oldStyle->OffsetPath() != newStyle.OffsetPath());
     };
 
     if (needsTransformUpdate())

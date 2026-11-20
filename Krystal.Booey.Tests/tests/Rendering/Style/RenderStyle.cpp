@@ -19,12 +19,12 @@ namespace krys::boo::tests
   {
     auto style = RenderStyle::Create();
     CHECK(style.Display() == DisplayType::Inline);
-    CHECK(style.GetColor() == boo::Color {boo::Color::black});
-    CHECK(style.GetOpacity() == ComputedStyle::InitialOpacity());
+    CHECK(style.Color() == boo::Color {boo::Color::black});
+    CHECK(style.Opacity() == ComputedStyle::InitialOpacity());
     CHECK(style.Width() == ComputedStyle::InitialWidth());
     CHECK(style.MarginLeft() == ComputedStyle::InitialMarginLeft());
     CHECK(static_cast<BorderStyle>(style.BorderTopStyle()) == BorderStyle::None);
-    CHECK(style.GetMathDepth() == ComputedStyle::InitialMathDepth());
+    CHECK(style.MathDepth() == ComputedStyle::InitialMathDepth());
     CHECK(style.GetWritingMode().IsHorizontal());
     CHECK(style.GetWritingMode().IsBidiLTR());
     CHECK_FALSE(style.HasExplicitlySetColor());
@@ -46,17 +46,17 @@ namespace krys::boo::tests
 
     style.SetColor(boo::Color {Red});
     style.SetHasExplicitlySetColor(true);
-    CHECK(style.GetColor() == Red);
+    CHECK(style.Color() == Red);
     CHECK(style.HasExplicitlySetColor());
 
     style.SetWidth(style::PreferredSize {10_css_px});
     CHECK(style.Width() == style::PreferredSize {10_css_px});
 
     style.SetOpacity(style::Opacity {0.5f});
-    CHECK(style.GetOpacity() == style::Opacity {0.5f});
+    CHECK(style.Opacity() == style::Opacity {0.5f});
 
     style.SetMathDepth(style::MathDepth {3});
-    CHECK(style.GetMathDepth() == style::MathDepth {3});
+    CHECK(style.MathDepth() == style::MathDepth {3});
 
     // Border edges are stored together per edge.
     style.SetBorderTopStyle(BorderStyle::Solid);
@@ -125,7 +125,7 @@ namespace krys::boo::tests
 
     auto child = RenderStyle::Create();
     child.InheritFrom(parent);
-    CHECK(child.GetColor() == Red);
+    CHECK(child.Color() == Red);
     CHECK(child.GetWritingMode().IsBidiRTL());
     CHECK(child.Width() == ComputedStyle::InitialWidth());
     CHECK(child.InheritedEqual(parent));
@@ -134,19 +134,19 @@ namespace krys::boo::tests
     auto copy = RenderStyle::Create();
     copy.CopyNonInheritedFrom(parent);
     CHECK(copy.Width() == style::PreferredSize {10_css_px});
-    CHECK(copy.GetColor() == boo::Color {boo::Color::black});
+    CHECK(copy.Color() == boo::Color {boo::Color::black});
     CHECK(copy.NonInheritedEqual(parent));
 
     auto anonymous = RenderStyle::CreateAnonymousStyleWithDisplay(parent, DisplayType::Block);
     CHECK(anonymous.Display() == DisplayType::Block);
-    CHECK(anonymous.GetColor() == Red);
+    CHECK(anonymous.Color() == Red);
 
     // Fast path inheritance copies only visibility and the inherited data's fast path properties.
     auto fast = RenderStyle::Create();
     CHECK_FALSE(fast.FastPathInheritedEqual(parent));
     fast.FastPathInheritFrom(parent);
     CHECK(fast.FastPathInheritedEqual(parent));
-    CHECK(fast.GetColor() == Red);
+    CHECK(fast.Color() == Red);
   }
 
   TEST_CASE("RenderStyle: pseudo-element styles", "[Rendering][Style][RenderStyle]")
@@ -171,10 +171,10 @@ namespace krys::boo::tests
       clone.GetCachedPseudoStyle(style::PseudoElementIdentifier {PseudoElementType::Before});
     REQUIRE(clonedBefore);
     CHECK(clonedBefore != cached);
-    CHECK(clonedBefore->GetColor() == Blue);
+    CHECK(clonedBefore->Color() == Blue);
 
     auto inheriting = RenderStyle::CreateStyleInheritingFromPseudoStyle(*cached);
-    CHECK(inheriting.GetColor() == Blue);
+    CHECK(inheriting.Color() == Blue);
   }
 
   TEST_CASE("RenderStyle: colours", "[Rendering][Style][RenderStyle]")

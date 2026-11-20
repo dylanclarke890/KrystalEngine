@@ -88,10 +88,10 @@ namespace krys::boo::tests
 
     auto *renderer = top.Renderer();
     REQUIRE(renderer);
-    CHECK(renderer->Style().GetPosition() == PositionType::Absolute);
+    CHECK(renderer->Style().Position() == PositionType::Absolute);
     auto *backdrop = renderer->BackdropRenderer();
     REQUIRE(backdrop);
-    CHECK(backdrop->Style().GetPosition() == PositionType::Fixed);
+    CHECK(backdrop->Style().Position() == PositionType::Fixed);
 
     // Its styleable is the element's ::backdrop.
     auto styleable = style::Styleable::FromRenderer(*backdrop);
@@ -121,7 +121,7 @@ namespace krys::boo::tests
     (void)document.UpdateLayout();
     REQUIRE(top.Renderer());
     CHECK_FALSE(top.Renderer()->BackdropRenderer());
-    CHECK(top.Renderer()->Style().GetPosition() == PositionType::Static);
+    CHECK(top.Renderer()->Style().Position() == PositionType::Static);
     CHECK(document.ElementFromPoint(10, 10).get() == &z);
     CHECK(document.ElementFromPoint(210, 10).get() != &top);
   }
@@ -139,7 +139,7 @@ namespace krys::boo::tests
     {
       auto *renderer = fixture.ById(id).Renderer();
       REQUIRE(renderer);
-      return renderer->Style().GetOverlay();
+      return renderer->Style().Overlay();
     };
     auto isRenderedInTopLayer = [&](DOMStringView id)
     {

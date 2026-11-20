@@ -30,14 +30,14 @@ namespace krys::boo::style::tests
   TEST_CASE_METHOD(BuilderFixture, "Style anchor names", "[Style][Values][AnchorPosition]")
   {
     Build(PropertyId::AnchorName, u8"none");
-    CHECK(Style.GetAnchorNames().IsNone());
+    CHECK(Style.AnchorNames().IsNone());
     Build(PropertyId::AnchorName, u8"--a, --b");
-    CHECK(Serialised(Style.GetAnchorNames()) == "--a, --b");
+    CHECK(Serialised(Style.AnchorNames()) == "--a, --b");
 
     Build(PropertyId::PositionAnchor, u8"auto");
-    CHECK(Style.GetPositionAnchor().IsAuto());
+    CHECK(Style.PositionAnchor().IsAuto());
     Build(PropertyId::PositionAnchor, u8"--a");
-    auto anchor = Style.GetPositionAnchor();
+    auto anchor = Style.PositionAnchor();
     CHECK(anchor.IsName());
     CHECK(Serialised(anchor) == "--a");
     CHECK(Created(anchor) == "--a");
@@ -67,10 +67,10 @@ namespace krys::boo::style::tests
   TEST_CASE_METHOD(BuilderFixture, "Style PositionTryFallbacks", "[Style][Values][AnchorPosition]")
   {
     Build(PropertyId::PositionTryFallbacks, u8"none");
-    CHECK(Style.GetPositionTryFallbacks().IsNone());
+    CHECK(Style.PositionTryFallbacks().IsNone());
 
     Build(PropertyId::PositionTryFallbacks, u8"--foo flip-block, flip-x flip-y, left");
-    auto fallbacks = Style.GetPositionTryFallbacks();
+    auto fallbacks = Style.PositionTryFallbacks();
     CHECK(Serialised(fallbacks) == "--foo flip-block, flip-x flip-y, left");
     CHECK(Created(fallbacks) == "--foo flip-block, flip-x flip-y, left");
 
@@ -93,12 +93,12 @@ namespace krys::boo::style::tests
     auto alignSelf = [&](utf8_stringview value)
     {
       Build(PropertyId::AlignSelf, value);
-      return Serialised(Style.GetAlignSelf());
+      return Serialised(Style.AlignSelf());
     };
     auto justifySelf = [&](utf8_stringview value)
     {
       Build(PropertyId::JustifySelf, value);
-      return Serialised(Style.GetJustifySelf());
+      return Serialised(Style.JustifySelf());
     };
 
     CHECK(alignSelf(u8"start") == "start");
@@ -119,7 +119,7 @@ namespace krys::boo::style::tests
     // logical ones first.
     UseFallback(*this, {PositionTryFallbackTactic::FlipStart});
     Build(PropertyId::JustifySelf, u8"left");
-    CHECK(Serialised(Style.GetAlignSelf()) == "self-start");
-    CHECK(Serialised(Style.GetJustifySelf()) == "right");
+    CHECK(Serialised(Style.AlignSelf()) == "self-start");
+    CHECK(Serialised(Style.JustifySelf()) == "right");
   }
 }

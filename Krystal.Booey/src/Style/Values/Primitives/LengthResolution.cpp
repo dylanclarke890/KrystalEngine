@@ -380,7 +380,7 @@ namespace krys::boo::style
                      : static_cast<float>(
                          conversionData.FontCascadeForFontUnits().MetricsOfPrimaryFont().IntLineSpacing());
         }
-        else if (auto fixedLineHeight = conversionData.Style()->GetLineHeight().TryFixed())
+        else if (auto fixedLineHeight = conversionData.Style()->LineHeight().TryFixed())
         {
           // We can't use computedLineHeightForFontUnits if the line height is fixed since
           // that will apply the usedZoomFactor. We probably should refactor it so that
@@ -649,7 +649,7 @@ namespace krys::boo::style
       return false;
     }
 
-    if (styleA.GetZoom() != styleB.GetZoom())
+    if (styleA.Zoom() != styleB.Zoom())
     {
       return false;
     }

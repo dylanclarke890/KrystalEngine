@@ -126,7 +126,7 @@ namespace krys::boo::layout
     auto &primaryFontMetrics = lineBoxStyle.GetFontCascade().MetricsOfPrimaryFont();
     auto lineHeight = [&]() -> InlineLayoutUnit
     {
-      if (lineBoxStyle.GetLineHeight().IsNormal())
+      if (lineBoxStyle.LineHeight().IsNormal())
       {
         return InlineFormattingUtils::Ascent(primaryFontMetrics, FontBaseline::Alphabetic, floatBox)
                + InlineFormattingUtils::Descent(primaryFontMetrics, FontBaseline::Alphabetic, floatBox);

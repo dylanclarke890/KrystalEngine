@@ -128,7 +128,7 @@ namespace krys::boo::layout
 
     KRYS_NODISCARD bool ContainsTrailingSoftHyphen(const InlineItem &inlineItem) noexcept
     {
-      if (inlineItem.Style().GetHyphens() == Hyphens::None)
+      if (inlineItem.Style().Hyphens() == Hyphens::None)
       {
         return false;
       }
@@ -189,7 +189,7 @@ namespace krys::boo::layout
       {
         return true;
       }
-      if (inlineItem.Style().GetBoxDecorationBreak() == BoxDecorationBreak::Clone)
+      if (inlineItem.Style().BoxDecorationBreak() == BoxDecorationBreak::Clone)
       {
         return true;
       }
@@ -977,9 +977,9 @@ namespace krys::boo::layout
       if (textItem->IsWhitespace())
       {
         bool isFirstLineLeadingPreservedWhiteSpace =
-          style.GetWhiteSpaceCollapse() == WhiteSpaceCollapse::Preserve && isFirstLineInChunk;
+          style.WhiteSpaceCollapse() == WhiteSpaceCollapse::Preserve && isFirstLineInChunk;
         return !isFirstLineLeadingPreservedWhiteSpace
-               && style.GetWhiteSpaceCollapse() != WhiteSpaceCollapse::BreakSpaces;
+               && style.WhiteSpaceCollapse() != WhiteSpaceCollapse::BreakSpaces;
       }
       return false;
     }
@@ -1008,7 +1008,7 @@ namespace krys::boo::layout
     {
       if (textItem->IsWhitespace())
       {
-        return style.GetWhiteSpaceCollapse() != WhiteSpaceCollapse::BreakSpaces;
+        return style.WhiteSpaceCollapse() != WhiteSpaceCollapse::BreakSpaces;
       }
       return false;
     }

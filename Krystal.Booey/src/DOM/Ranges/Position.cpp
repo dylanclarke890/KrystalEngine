@@ -846,7 +846,7 @@ namespace krys::boo::dom
 
       // skip position in unrendered or invisible node
       auto *renderer = currentNode.Renderer();
-      if (!renderer || renderer->Style().GetVisibility() != Visibility::Visible)
+      if (!renderer || renderer->Style().Visibility() != Visibility::Visible)
       {
         continue;
       }
@@ -1003,7 +1003,7 @@ namespace krys::boo::dom
 
       // skip position in unrendered or invisible node
       auto *renderer = currentNode.Renderer();
-      if (!renderer || renderer->Style().GetVisibility() != Visibility::Visible)
+      if (!renderer || renderer->Style().Visibility() != Visibility::Visible)
       {
         continue;
       }
@@ -1223,7 +1223,7 @@ namespace krys::boo::dom
       return false;
     }
 
-    if (renderer->Style().GetVisibility() != Visibility::Visible)
+    if (renderer->Style().Visibility() != Visibility::Visible)
     {
       return false;
     }
@@ -1315,8 +1315,8 @@ namespace krys::boo::dom
       return false;
     }
 
-    if (renderer->Style().GetVisibility() != Visibility::Visible
-        || positionRenderer->Style().GetVisibility() != Visibility::Visible)
+    if (renderer->Style().Visibility() != Visibility::Visible
+        || positionRenderer->Style().Visibility() != Visibility::Visible)
     {
       return false;
     }

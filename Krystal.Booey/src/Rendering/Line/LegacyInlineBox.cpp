@@ -40,7 +40,7 @@ namespace krys::boo
 
   const style::VerticalAlign &LegacyInlineBox::GetVerticalAlign() const noexcept
   {
-    return LineStyle().GetVerticalAlign();
+    return LineStyle().VerticalAlign();
   }
 
   RenderBoxModelObject *LegacyInlineBox::BoxModelObject() const noexcept

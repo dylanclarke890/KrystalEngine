@@ -234,7 +234,7 @@ namespace krys::boo::layout_integration
           // overflow and text-overflow property values don't get forwarded to anonymous block boxes.
           // e.g. <div style="overflow: hidden; text-overflow: ellipsis; width: 100px; white-space: pre;">this
           // text should have ellipsis<div></div></div>
-          styleToAdjust.SetTextOverflow(anonBlockParentStyle.GetTextOverflow());
+          styleToAdjust.SetTextOverflow(anonBlockParentStyle.TextOverflow());
           styleToAdjust.SetOverflowX(anonBlockParentStyle.OverflowX());
           styleToAdjust.SetOverflowY(anonBlockParentStyle.OverflowY());
         }

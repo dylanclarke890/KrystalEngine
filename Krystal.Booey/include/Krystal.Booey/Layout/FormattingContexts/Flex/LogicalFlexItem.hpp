@@ -107,17 +107,17 @@ namespace krys::boo::layout
 
     KRYS_NODISCARD float GrowFactor() const noexcept
     {
-      return Style().GetFlexGrow().Value;
+      return Style().FlexGrow().Value;
     }
 
     KRYS_NODISCARD float ShrinkFactor() const noexcept
     {
-      return Style().GetFlexShrink().Value;
+      return Style().FlexShrink().Value;
     }
 
     KRYS_NODISCARD bool HasContentFlexBasis() const noexcept
     {
-      return Style().GetFlexBasis().IsContent();
+      return Style().FlexBasis().IsContent();
     }
 
     KRYS_NODISCARD static bool HasAvailableSpaceDependentFlexBasis() noexcept
@@ -137,7 +137,7 @@ namespace krys::boo::layout
 
     KRYS_NODISCARD bool IsContentBoxBased() const noexcept
     {
-      return Style().GetBoxSizing() == BoxSizing::ContentBox;
+      return Style().BoxSizing() == BoxSizing::ContentBox;
     }
 
     KRYS_NODISCARD const ElementBox &LayoutBox() const noexcept

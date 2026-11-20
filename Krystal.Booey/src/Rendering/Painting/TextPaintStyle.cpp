@@ -96,8 +96,8 @@ namespace krys::boo
     if (auto pseudoStyle = renderer.SelectionPseudoStyle())
     {
       selectionPaintStyle.HasExplicitlySetFillColor = pseudoStyle->HasExplicitlySetColor();
-      selectionShadow = paintInfo.ForceTextColor() ? style::TextShadows {css::keywords::None {}}
-                                                   : pseudoStyle->GetTextShadow();
+      selectionShadow =
+        paintInfo.ForceTextColor() ? style::TextShadows {css::keywords::None {}} : pseudoStyle->TextShadow();
       auto viewportSize = renderer.View().FrameView().Size();
       float strokeWidth = pseudoStyle->UsedStrokeWidth(viewportSize);
       if (strokeWidth != selectionPaintStyle.StrokeWidth)
@@ -115,7 +115,7 @@ namespace krys::boo
     else
     {
       selectionShadow =
-        paintInfo.ForceTextColor() ? style::TextShadows {css::keywords::None {}} : lineStyle.GetTextShadow();
+        paintInfo.ForceTextColor() ? style::TextShadows {css::keywords::None {}} : lineStyle.TextShadow();
     }
     return selectionPaintStyle;
   }
@@ -163,14 +163,14 @@ namespace krys::boo
     bool forceBackgroundToWhite = false;
     if (renderer.GetDocument().Printing())
     {
-      if (lineStyle.GetPrintColorAdjust() == PrintColorAdjust::Economy)
+      if (lineStyle.PrintColorAdjust() == PrintColorAdjust::Economy)
       {
         forceBackgroundToWhite = true;
       }
 
       if (forceBackgroundToWhite)
       {
-        if (style::HasAnyBackgroundClipText(renderer.Style().GetBackgroundLayers()))
+        if (style::HasAnyBackgroundClipText(renderer.Style().BackgroundLayers()))
         {
           paintStyle.FillColor = Color::black;
         }

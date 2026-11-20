@@ -141,7 +141,7 @@ namespace krys::boo
 
   void LegacyRenderSVGPath::StrokeShape(GraphicsContext &context) const noexcept
   {
-    if (!Style().HasStroke() || !Style().GetStrokeWidth().IsPossiblyPositive())
+    if (!Style().HasStroke() || !Style().StrokeWidth().IsPossiblyPositive())
     {
       return;
     }

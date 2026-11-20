@@ -193,7 +193,7 @@ namespace krys::boo::html::tests
       CHECK(fixture.ById(u8"d").HasFocusWithin());
       CHECK(records == List<std::string> {"focus:a(null)", "focusin:a(null)"});
       document.UpdateStyleIfNeeded();
-      CHECK(a.GetRenderStyle()->GetColor() == boo::Color(boo::Color::blue));
+      CHECK(a.GetRenderStyle()->Color() == boo::Color(boo::Color::blue));
 
       records.clear();
       b.Focus();
@@ -247,7 +247,7 @@ namespace krys::boo::html::tests
       // The focused area stays, but `:focus` doesn't match.
       CHECK(document.ActiveElement() == &a);
       document.UpdateStyleIfNeeded();
-      CHECK(a.GetRenderStyle()->GetColor() != boo::Color(boo::Color::blue));
+      CHECK(a.GetRenderStyle()->Color() != boo::Color(boo::Color::blue));
       document.SetFocusedAndActive(true);
     }
 
@@ -327,7 +327,7 @@ namespace krys::boo::html::tests
       CHECK(document.ActiveElement() == &host);
       CHECK(shadow->ActiveElement() == first.get());
       document.UpdateStyleIfNeeded();
-      CHECK(host.GetRenderStyle()->GetColor() == boo::Color(boo::Color::blue));
+      CHECK(host.GetRenderStyle()->Color() == boo::Color(boo::Color::blue));
 
       // Focusing the host again keeps the focus where it is.
       HTML(*second).Focus();

@@ -83,7 +83,7 @@ namespace krys::boo
         _currentChild =
           _reversedOrder ? _currentChild->PreviousSiblingBox() : _currentChild->NextSiblingBox();
       }
-    } while (!_currentChild || _currentChild->Style().GetOrder().Value != CurrentOrderValue());
+    } while (!_currentChild || _currentChild->Style().Order().Value != CurrentOrderValue());
 
     return _currentChild;
   }
@@ -123,7 +123,7 @@ namespace krys::boo
 
   bool OrderIteratorPopulator::CollectChild(const RenderBox &child) noexcept
   {
-    _iterator._orderValues.push_back(child.Style().GetOrder().Value);
+    _iterator._orderValues.push_back(child.Style().Order().Value);
     return !_iterator.ShouldSkipChild(child);
   }
 }

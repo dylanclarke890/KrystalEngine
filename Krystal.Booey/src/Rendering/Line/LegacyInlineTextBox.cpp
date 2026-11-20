@@ -223,7 +223,7 @@ namespace krys::boo
                      Direction(),
                      false /* directionalOverride */,
                      !Renderer().CanUseSimpleFontCodePath()};
-    textRun.SetTabSize(!style.CollapseWhiteSpace(), style::ToPlatform<style::TabSize> {}(style.GetTabSize()));
+    textRun.SetTabSize(!style.CollapseWhiteSpace(), style::ToPlatform<style::TabSize> {}(style.TabSize()));
     return textRun;
   }
 

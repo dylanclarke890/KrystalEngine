@@ -207,7 +207,7 @@ namespace krys::boo
         auto characterData = data.AllCharactersMap->at(defaultPosition);
 
         auto [valueListPosition, lastCharacter] = state;
-        bool preserveWhiteSpace = text.Style().GetWhiteSpaceCollapse() == WhiteSpaceCollapse::Preserve;
+        bool preserveWhiteSpace = text.Style().WhiteSpaceCollapse() == WhiteSpaceCollapse::Preserve;
         auto view = _run.Text();
         auto length = static_cast<uint32>(view.size());
         uint32 characterIndex = 0;
@@ -266,7 +266,7 @@ namespace krys::boo
                                                            std::tuple<uint32, char32> state) noexcept
   {
     auto [valueListPosition, lastCharacter] = state;
-    bool preserveWhiteSpace = text.Style().GetWhiteSpaceCollapse() == WhiteSpaceCollapse::Preserve;
+    bool preserveWhiteSpace = text.Style().WhiteSpaceCollapse() == WhiteSpaceCollapse::Preserve;
     auto *attributes = text.LayoutAttributes();
     auto &textMetricsValues = attributes->TextMetricsValues();
     // The positioning data is indexed by character, while the metrics cover byte ranges.

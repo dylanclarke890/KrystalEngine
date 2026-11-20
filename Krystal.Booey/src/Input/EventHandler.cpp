@@ -1948,7 +1948,7 @@ namespace krys::boo
     // FIXME: Area elements (styled by their node, as they're display: none), and renderers that choose their
     // own cursor (getCursor).
 
-    auto styleCursor = style ? style->GetCursor() : style::Cursor {null, CursorType::Auto};
+    auto styleCursor = style ? style->Cursor() : style::Cursor {null, CursorType::Auto};
     if (styleCursor.Images)
     {
       for (auto &styleCursorImage : *styleCursor.Images)

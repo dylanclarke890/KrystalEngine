@@ -221,7 +221,7 @@ namespace krys::boo::layout
       auto &textRun = runs[textRunIndex];
       auto &inlineTextItem = Downcast<InlineTextItem>(textRun.Item);
       krys_debug_assert(inlineTextItem.Length());
-      auto lineBreak = textRun.Style.GetLineBreak();
+      auto lineBreak = textRun.Style.LineBreak();
 
       auto lastValidBreakingPositionInsideTextRun = [&]() -> Maybe<size_t>
       {
@@ -245,7 +245,7 @@ namespace krys::boo::layout
         auto &nextInlineTextItem = Downcast<InlineTextItem>(runs[*nextTextRunCandidateIndex].Item);
         auto canBreakAtRunBoundary =
           nextInlineTextItem.IsWhitespace()
-            ? nextInlineTextItem.Style().GetWhiteSpaceCollapse() != WhiteSpaceCollapse::BreakSpaces
+            ? nextInlineTextItem.Style().WhiteSpaceCollapse() != WhiteSpaceCollapse::BreakSpaces
             : CanBreakBefore(text::CodePointAt(nextInlineTextItem.Content(), 0), lineBreak);
         if (canBreakAtRunBoundary)
         {
@@ -272,7 +272,7 @@ namespace krys::boo::layout
                                                                InlineLayoutUnit runLogicalLeft,
                                                                InlineLayoutUnit availableWidth) noexcept
     {
-      krys_debug_assert(textRun.Style.GetWordBreak() == WordBreak::BreakAll);
+      krys_debug_assert(textRun.Style.WordBreak() == WordBreak::BreakAll);
       auto &inlineTextItem = Downcast<InlineTextItem>(textRun.Item);
 
       auto wordBreak = TextUtil::BreakWord(inlineTextItem, textRun.Style.GetFontCascade(),
@@ -284,7 +284,7 @@ namespace krys::boo::layout
 
       // Find out if the candidate position for arbitrary breaking is valid. We can't always break between any
       // characters.
-      auto lineBreak = textRun.Style.GetLineBreak();
+      auto lineBreak = textRun.Style.LineBreak();
       auto text = utf8_stringview {inlineTextItem.GetInlineTextBox().Content()};
       if (CanBreakBefore(text::CodePointAt(text, inlineTextItem.Start() + wordBreak.Length), lineBreak))
       {
@@ -318,18 +318,18 @@ namespace krys::boo::layout
 
     KRYS_NODISCARD size_t LimitBeforeValue(const RenderStyle &style) noexcept
     {
-      return LimitValue(style.GetHyphenateLimitChars().Before);
+      return LimitValue(style.HyphenateLimitChars().Before);
     }
 
     KRYS_NODISCARD size_t LimitAfterValue(const RenderStyle &style) noexcept
     {
-      return LimitValue(style.GetHyphenateLimitChars().After);
+      return LimitValue(style.HyphenateLimitChars().After);
     }
 
     KRYS_NODISCARD inline bool HasEnoughContentForHyphenation(size_t contentLength,
                                                               const RenderStyle &style) noexcept
     {
-      return LimitValue(style.GetHyphenateLimitChars().Word) <= contentLength
+      return LimitValue(style.HyphenateLimitChars().Word) <= contentLength
              && LimitBeforeValue(style) + LimitAfterValue(style) <= contentLength;
     }
 
@@ -744,7 +744,7 @@ namespace krys::boo::layout
               return PartialRun {wordBreak->Length, wordBreak->LogicalWidth};
             }
           }
-          if (CanBreakBefore(text::CodePointAt(inlineTextItem.Content(), 0), style.GetLineBreak()))
+          if (CanBreakBefore(text::CodePointAt(inlineTextItem.Content(), 0), style.LineBreak()))
           {
             return PartialRun {};
           }
@@ -769,7 +769,7 @@ namespace krys::boo::layout
               {
                 return {};
               }
-              if (CanBreakBefore(text::CodePointAt(text, right), style.GetLineBreak()))
+              if (CanBreakBefore(text::CodePointAt(text, right), style.LineBreak()))
               {
                 return TextUtil::WordBreakLeft {
                   right - left,
@@ -1221,7 +1221,7 @@ namespace krys::boo::layout
     {
       auto *textItem = DynamicDowncast<InlineTextItem>(overflowingInlineItem);
       return !textItem || !textItem->IsWhitespace()
-             || textItem->Style().GetLineBreak() != LineBreak::AfterWhiteSpace;
+             || textItem->Style().LineBreak() != LineBreak::AfterWhiteSpace;
     }();
     if (isBreakingAllowedBeforeOverflowingRun)
     {
@@ -1261,13 +1261,13 @@ namespace krys::boo::layout
     // Disregard any prohibition against line breaks mandated by the word-break property.
     // The different wrapping opportunities must not be prioritized.
     // Note hyphenation is not applied.
-    if (style.GetLineBreak() == LineBreak::Anywhere)
+    if (style.LineBreak() == LineBreak::Anywhere)
     {
       return {WordBreakRule::AtArbitraryPosition};
     }
 
     // Breaking is allowed within “words”.
-    if (style.GetWordBreak() == WordBreak::BreakAll)
+    if (style.WordBreak() == WordBreak::BreakAll)
     {
       return {WordBreakRule::AtArbitraryPositionWithinWords};
     }
@@ -1275,7 +1275,7 @@ namespace krys::boo::layout
     auto includeHyphenationIfAllowed = [&](Maybe<InlineContentBreaker::WordBreakRule> wordBreakRule)
       -> EnumSet<InlineContentBreaker::WordBreakRule>
     {
-      auto hyphenationIsAllowed = !_hyphenationIsDisabled && style.GetHyphens() == Hyphens::Auto
+      auto hyphenationIsAllowed = !_hyphenationIsDisabled && style.Hyphens() == Hyphens::Auto
                                   && text::CanHyphenate(style.ComputedLocale().GetPlatform());
       if (hyphenationIsAllowed)
       {
@@ -1295,7 +1295,7 @@ namespace krys::boo::layout
     // For compatibility with legacy content, the word-break property also supports a deprecated break-word
     // keyword. When specified, this has the same effect as word-break: normal and overflow-wrap: anywhere,
     // regardless of the actual value of the overflow-wrap property.
-    if (style.GetWordBreak() == WordBreak::BreakWord && !hasWrapOpportunityAtPreviousPosition)
+    if (style.WordBreak() == WordBreak::BreakWord && !hasWrapOpportunityAtPreviousPosition)
     {
       return includeHyphenationIfAllowed(WordBreakRule::AtArbitraryPosition);
     }
@@ -1305,14 +1305,14 @@ namespace krys::boo::layout
     // introduced by overflow-wrap/word-wrap: break-word are not considered when calculating min-content
     // intrinsic sizes.
     auto overflowWrapBreakWordIsApplicable = !IsMinimumInIntrinsicWidthMode();
-    if (((overflowWrapBreakWordIsApplicable && style.GetOverflowWrap() == OverflowWrap::BreakWord)
-         || style.GetOverflowWrap() == OverflowWrap::Anywhere)
+    if (((overflowWrapBreakWordIsApplicable && style.OverflowWrap() == OverflowWrap::BreakWord)
+         || style.OverflowWrap() == OverflowWrap::Anywhere)
         && !hasWrapOpportunityAtPreviousPosition)
     {
       return includeHyphenationIfAllowed(WordBreakRule::AtArbitraryPosition);
     }
     // Breaking is forbidden within “words”.
-    if (style.GetWordBreak() == WordBreak::KeepAll)
+    if (style.WordBreak() == WordBreak::KeepAll)
     {
       return {};
     }

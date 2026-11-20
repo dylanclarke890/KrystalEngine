@@ -60,14 +60,13 @@ namespace krys::boo::layout
         _hasContent(layoutBox.IsRubyBase() && layoutBox.AssociatedRubyAnnotationBox()),
         _isFirstWithinLayoutBox(positionWithinLayoutBox.Contains(PositionWithinLayoutBox::First)),
         _isLastWithinLayoutBox(positionWithinLayoutBox.Contains(PositionWithinLayoutBox::Last)), _type(type),
-        _style({&style.GetFontCascade().MetricsOfPrimaryFont(), &style.GetLineHeight(),
-                style.GetTextBoxTrim(), style.GetTextBoxEdge(), style.GetLineFitEdge(),
-                style.UsedZoomForLength(), style.LineBoxContain(),
+        _style({&style.GetFontCascade().MetricsOfPrimaryFont(), &style.LineHeight(), style.TextBoxTrim(),
+                style.TextBoxEdge(), style.LineFitEdge(), style.UsedZoomForLength(), style.LineBoxContain(),
                 InlineLayoutUnit(style.GetFontCascade().GetFontDescription().ComputedSize()),
                 css::keywords::Baseline {}})
   {
     _style.VerticalAlignmentValue =
-      ToInlineBoxLevelVerticalAlign(style.GetVerticalAlign(), [this] { return PreferredLineHeight(); });
+      ToInlineBoxLevelVerticalAlign(style.VerticalAlign(), [this] { return PreferredLineHeight(); });
   }
 
   InlineLevelBox InlineLevelBox::CreateAtomicInlineBox(const Box &layoutBox, const RenderStyle &style,

@@ -194,7 +194,7 @@ namespace krys::boo
 
     if (oldStyle && diff == style::DifferenceResult::Layout)
     {
-      if (oldStyle->GetImageOrientation() != Style().GetImageOrientation())
+      if (oldStyle->ImageOrientation() != Style().ImageOrientation())
       {
         RepaintOrMarkForLayout(ImageSizeChangeType::None);
         return;
@@ -885,10 +885,10 @@ namespace krys::boo
     // and/or a broken image.
     if (ShouldDisplayBrokenImageIcon())
     {
-      if (Style().GetAspectRatio().IsAutoAndRatio() && !IsShowingAltText())
+      if (Style().AspectRatio().IsAutoAndRatio() && !IsShowingAltText())
       {
-        return SizeF::NarrowPrecision(Style().GetAspectRatio().Width().Value,
-                                      Style().GetAspectRatio().Height().Value);
+        return SizeF::NarrowPrecision(Style().AspectRatio().Width().Value,
+                                      Style().AspectRatio().Height().Value);
       }
       return {1.0f, 1.0f};
     }

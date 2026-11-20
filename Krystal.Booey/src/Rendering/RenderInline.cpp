@@ -142,9 +142,9 @@ namespace krys::boo
     bool checkFonts = GetDocument().InNoQuirksMode();
     auto mayAffectLayout =
       (parentRenderInline && parentRenderInline->MayAffectLayout())
-      || (parentRenderInline && !HoldsAlternative<css::keywords::Baseline>(parentStyle->GetVerticalAlign()))
-      || !HoldsAlternative<css::keywords::Baseline>(Style().GetVerticalAlign())
-      || !Style().GetTextEmphasisStyle().IsNone()
+      || (parentRenderInline && !HoldsAlternative<css::keywords::Baseline>(parentStyle->VerticalAlign()))
+      || !HoldsAlternative<css::keywords::Baseline>(Style().VerticalAlign())
+      || !Style().TextEmphasisStyle().IsNone()
       || (checkFonts
           && (!parentStyle->GetFontCascade().MetricsOfPrimaryFont().HasIdenticalAscentDescentAndLineGap(
                 Style().GetFontCascade().MetricsOfPrimaryFont())
@@ -159,7 +159,7 @@ namespace krys::boo
       mayAffectLayout =
         !parentStyle->GetFontCascade().MetricsOfPrimaryFont().HasIdenticalAscentDescentAndLineGap(
           childStyle.GetFontCascade().MetricsOfPrimaryFont())
-        || !HoldsAlternative<css::keywords::Baseline>(childStyle.GetVerticalAlign())
+        || !HoldsAlternative<css::keywords::Baseline>(childStyle.VerticalAlign())
         || parentStyle->SpecifiedLineHeight() != childStyle.SpecifiedLineHeight();
     }
     return mayAffectLayout;
@@ -434,14 +434,14 @@ namespace krys::boo
     LayoutSize logicalOffset;
     const auto &childStyle = child->Style();
     auto isHorizontal = GetWritingMode().IsHorizontal();
-    if (!childStyle.HasStaticInlinePosition(isHorizontal) || !childStyle.GetPositionArea().IsNone()
-        || childStyle.GetJustifySelf().IsAnchorCenter())
+    if (!childStyle.HasStaticInlinePosition(isHorizontal) || !childStyle.PositionArea().IsNone()
+        || childStyle.JustifySelf().IsAnchorCenter())
     {
       logicalOffset.SetWidth(inlinePosition);
     }
 
-    if (!childStyle.HasStaticBlockPosition(isHorizontal) || !childStyle.GetPositionArea().IsNone()
-        || childStyle.GetAlignSelf().IsAnchorCenter())
+    if (!childStyle.HasStaticBlockPosition(isHorizontal) || !childStyle.PositionArea().IsNone()
+        || childStyle.AlignSelf().IsAnchorCenter())
     {
       logicalOffset.SetHeight(blockPosition);
     }
@@ -874,7 +874,7 @@ namespace krys::boo
   bool RenderInline::RequiresLayer() const noexcept
   {
     return IsInFlowPositioned() || CreatesGroup() || HasClipPath()
-           || Style().GetWillChange().CanCreateStackingContext() || HasRunningAcceleratedAnimations();
+           || Style().WillChange().CanCreateStackingContext() || HasRunningAcceleratedAnimations();
   }
 
   void RenderInline::StyleWillChange(style::Difference diff, const RenderStyle &newStyle) noexcept

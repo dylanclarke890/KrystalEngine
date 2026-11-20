@@ -141,10 +141,10 @@ namespace krys::boo::tests
     (void)fixture.Document->UpdateLayout();
 
     // A page styles the standard parts.
-    CHECK(field.PlaceholderElement()->GetRenderStyle()->GetColor() == Color(Color::blue));
+    CHECK(field.PlaceholderElement()->GetRenderStyle()->Color() == Color(Color::blue));
 
     // The internal parts are named only in the user agent sheet: a page's rule naming one isn't valid.
-    CHECK(search.CancelButtonElement()->GetRenderStyle()->GetColor() != Color(Color::red));
+    CHECK(search.CancelButtonElement()->GetRenderStyle()->Color() != Color(Color::red));
     CHECK_FALSE(
       css::SelectorParser::ParseSelectorList(u8"input::-webkit-search-cancel-button", {}).has_value());
     css::SelectorParserContext userAgentContext;
@@ -403,7 +403,7 @@ namespace krys::boo::tests
     auto &text = *field.InnerTextElement()->FirstChild()->Renderer();
 
     // The text is drawn masked, one disc per character.
-    CHECK(text.Style().GetTextSecurity() == TextSecurity::Disc);
+    CHECK(text.Style().TextSecurity() == TextSecurity::Disc);
     CHECK(Downcast<RenderText>(text).Text() == u8"••••••");
     CHECK(Downcast<RenderText>(text).OriginalText() == u8"secret");
     field.Focus();
@@ -424,14 +424,14 @@ namespace krys::boo::tests
     auto &search = InputById(fixture, u8"search");
     auto &cancel = *search.CancelButtonElement();
     (void)fixture.Document->UpdateLayout();
-    CHECK(cancel.Renderer()->Style().GetVisibility() == Visibility::Visible);
+    CHECK(cancel.Renderer()->Style().Visibility() == Visibility::Visible);
 
     SECTION("Clicking the cancel button clears the field")
     {
       cancel.Click();
       CHECK(search.Value().empty());
       (void)fixture.Document->UpdateLayout();
-      CHECK(cancel.Renderer()->Style().GetVisibility() == Visibility::Hidden);
+      CHECK(cancel.Renderer()->Style().Visibility() == Visibility::Hidden);
     }
 
     SECTION("Escape clears the field")

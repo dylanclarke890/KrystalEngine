@@ -48,7 +48,7 @@ namespace krys::boo
                 0, /* xPos, only relevant with allowTabs=true */
                 0, /* padding, only relevant for justified text, not relevant for SVG */
                 ExpansionBehavior::AllowRightOnly(), style.GetWritingMode().BidiDirection(),
-                IsOverride(style.GetUnicodeBidi()) /* directionalOverride */);
+                IsOverride(style.UnicodeBidi()) /* directionalOverride */);
 
     // We handle letter & word spacing ourselves.
     run.DisableSpacing();

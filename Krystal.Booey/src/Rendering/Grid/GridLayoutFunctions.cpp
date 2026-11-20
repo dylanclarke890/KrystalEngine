@@ -203,7 +203,7 @@ namespace krys::boo::grid_layout_functions
     }
 
     auto &gridItemStyle = gridItem.Style();
-    auto gridItemFlexWrap = gridItemStyle.GetFlexWrap();
+    auto gridItemFlexWrap = gridItemStyle.FlexWrap();
     if (gridItem.IsRenderFlexibleBox() && gridItem.Style().IsColumnFlexDirection()
         && (gridItemFlexWrap == FlexWrap::Wrap || gridItemFlexWrap == FlexWrap::Reverse))
     {
@@ -345,7 +345,7 @@ namespace krys::boo::grid_layout_functions
       // FIXME: should align-items + align-self: auto/justify-items + justify-self: auto be taken into
       // account?
       if (parentWritingMode.IsHorizontal() == gridItem.IsHorizontalWritingMode()
-          && !gridItem.Style().GetAlignSelf().IsStretch())
+          && !gridItem.Style().AlignSelf().IsStretch())
       {
         // A non-auto inline size means the same for block size (column axis size) because of the aspect
         // ratio.
@@ -354,7 +354,7 @@ namespace krys::boo::grid_layout_functions
           return false;
         }
       }
-      else if (!gridItem.Style().GetJustifySelf().IsStretch())
+      else if (!gridItem.Style().JustifySelf().IsStretch())
       {
         auto &logicalHeight = gridItem.Style().LogicalHeight();
         if (logicalHeight.IsFixed()
@@ -375,7 +375,7 @@ namespace krys::boo::grid_layout_functions
       // FIXME: should align-items + align-self: auto/justify-items + justify-self: auto be taken into
       // account?
       if (parentWritingMode.IsHorizontal() == gridItem.IsHorizontalWritingMode()
-          && !gridItem.Style().GetAlignSelf().IsStretch())
+          && !gridItem.Style().AlignSelf().IsStretch())
       {
         // A non-auto block size means the same for inline size (row axis size) because of the aspect ratio.
         auto &logicalHeight = gridItem.Style().LogicalHeight();
@@ -385,7 +385,7 @@ namespace krys::boo::grid_layout_functions
           return false;
         }
       }
-      else if (!gridItem.Style().GetJustifySelf().IsStretch())
+      else if (!gridItem.Style().JustifySelf().IsStretch())
       {
         if (!gridItem.Style().LogicalWidth().IsAuto())
         {

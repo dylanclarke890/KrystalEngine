@@ -405,7 +405,7 @@ namespace krys::boo
       return false;
     }
 
-    for (const auto &transition : style.GetTransitions().UsedValues())
+    for (const auto &transition : style.Transitions().UsedValues())
     {
       auto result = transition.GetProperty().SwitchOn(
         [&](const css::keywords::All &)

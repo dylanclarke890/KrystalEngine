@@ -523,14 +523,14 @@ namespace krys::boo::style
           return true;
         }
 
-        if (a.GetPosition() != PositionType::Static)
+        if (a.Position() != PositionType::Static)
         {
           if (a.NonInheritedData().SurroundData->Inset != b.NonInheritedData().SurroundData->Inset)
           {
             // FIXME: We would like to use SimplifiedLayout for relative positioning, but we can't quite do
             // that yet. We need to make sure SimplifiedLayout can operate correctly on RenderInlines (we will
             // need to add a selfNeedsSimplifiedLayout bit in order to not get confused and taint every line).
-            if (a.GetPosition() != PositionType::Absolute)
+            if (a.Position() != PositionType::Absolute)
             {
               return true;
             }
@@ -602,7 +602,7 @@ namespace krys::boo::style
       if (a.GetInheritedFlags().BorderCollapse != b.GetInheritedFlags().BorderCollapse
           || a.GetInheritedFlags().EmptyCells != b.GetInheritedFlags().EmptyCells
           || a.GetInheritedFlags().CaptionSide != b.GetInheritedFlags().CaptionSide
-          || a.GetTableLayout() != b.GetTableLayout())
+          || a.TableLayout() != b.TableLayout())
       {
         return true;
       }
@@ -694,7 +694,7 @@ namespace krys::boo::style
     ChangeRequiresOutOfFlowMovementLayoutOnly(const RenderStyle &a, const RenderStyle &b,
                                               EnumSet<DifferenceContextSensitiveProperty> &) noexcept
   {
-    if (a.GetPosition() != PositionType::Absolute)
+    if (a.Position() != PositionType::Absolute)
     {
       return false;
     }
@@ -773,7 +773,7 @@ namespace krys::boo::style
         }
       }
 
-      if (a.GetPosition() != PositionType::Static)
+      if (a.Position() != PositionType::Static)
       {
         if (a.NonInheritedData().RareData.Ptr() != b.NonInheritedData().RareData.Ptr())
         {
@@ -811,7 +811,7 @@ namespace krys::boo::style
     bool currentColorDiffers = a.InheritedData().Color != b.InheritedData().Color;
     if (currentColorDiffers)
     {
-      if (a.GetFilter().HasFilterThatRequiresRepaintForCurrentColorChange()
+      if (a.Filter().HasFilterThatRequiresRepaintForCurrentColorChange()
           || a.BackdropFilter().HasFilterThatRequiresRepaintForCurrentColorChange())
       {
         return true;
@@ -829,7 +829,7 @@ namespace krys::boo::style
     {
       return false;
     }
-    if (style.GetOpacity().IsTransparent())
+    if (style.Opacity().IsTransparent())
     {
       return false;
     }
@@ -1274,7 +1274,7 @@ namespace krys::boo::style
 
   bool BorderIsEquivalentForPainting(const RenderStyle &a, const RenderStyle &b) noexcept
   {
-    bool colorDiffers = a.GetColor() != b.GetColor();
+    bool colorDiffers = a.Color() != b.Color();
 
     if (!colorDiffers
         && (&a.NonInheritedData() == &b.NonInheritedData()

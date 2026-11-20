@@ -155,10 +155,10 @@ namespace krys::boo
     const auto &previousStyle = previousLastStyleChangeEventStyle ? *previousLastStyleChangeEventStyle
                                                                   : RenderStyle::DefaultStyleSingleton();
 
-    auto transformRelatedPropertyChanged = targetStyle.GetTranslate() != previousStyle.GetTranslate()
-                                           || targetStyle.GetScale() != previousStyle.GetScale()
-                                           || targetStyle.GetRotate() != previousStyle.GetRotate()
-                                           || targetStyle.GetTransform() != previousStyle.GetTransform();
+    auto transformRelatedPropertyChanged = targetStyle.Translate() != previousStyle.Translate()
+                                           || targetStyle.Scale() != previousStyle.Scale()
+                                           || targetStyle.Rotate() != previousStyle.Rotate()
+                                           || targetStyle.Transform() != previousStyle.Transform();
 
     auto unanimatedStyle = RenderStyle::Clone(targetStyle);
 

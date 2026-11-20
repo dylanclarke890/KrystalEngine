@@ -160,7 +160,7 @@ namespace krys::boo::style
       {
         return false;
       }
-      if (!isValidContainerForRequiredAxes(style->GetContainerType(), candidateElement.Renderer()))
+      if (!isValidContainerForRequiredAxes(style->ContainerType(), candidateElement.Renderer()))
       {
         return false;
       }
@@ -169,7 +169,7 @@ namespace krys::boo::style
         return true;
       }
 
-      return std::ranges::any_of(style->GetContainerNames(),
+      return std::ranges::any_of(style->ContainerNames(),
                                  [&](auto &scopedName)
                                  {
                                    auto isNameFromAllowedScope = [&](auto &scopedName)

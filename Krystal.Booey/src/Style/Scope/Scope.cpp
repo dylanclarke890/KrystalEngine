@@ -1253,7 +1253,7 @@ namespace krys::boo::style
 
       auto sizeChanged = [&](LayoutSize oldSize)
       {
-        switch (containerRenderer->Style().GetContainerType())
+        switch (containerRenderer->Style().ContainerType())
         {
           case ContainerType::InlineSize: return size.Width() != oldSize.Width();
           case ContainerType::Size:       return size != oldSize;

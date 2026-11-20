@@ -102,12 +102,12 @@ namespace krys::boo
 
   inline bool RenderStyle::CollapseWhiteSpace() const noexcept
   {
-    return CollapseWhiteSpace(GetWhiteSpaceCollapse());
+    return CollapseWhiteSpace(WhiteSpaceCollapse());
   }
 
   inline bool RenderStyle::PreserveNewline() const noexcept
   {
-    return PreserveNewline(GetWhiteSpaceCollapse());
+    return PreserveNewline(WhiteSpaceCollapse());
   }
 
   inline bool RenderStyle::Preserves3D() const noexcept
@@ -127,12 +127,12 @@ namespace krys::boo
 
   inline bool RenderStyle::SpecifiesColumns() const noexcept
   {
-    return !GetColumnCount().IsAuto() || !GetColumnWidth().IsAuto();
+    return !ColumnCount().IsAuto() || !ColumnWidth().IsAuto();
   }
 
   inline bool RenderStyle::AutoWrap() const noexcept
   {
-    return GetTextWrapMode() != TextWrapMode::NoWrap;
+    return TextWrapMode() != TextWrapMode::NoWrap;
   }
 
   inline bool RenderStyle::BorderBottomIsTransparent() const noexcept
@@ -180,22 +180,22 @@ namespace krys::boo
 
   inline UserModify RenderStyle::UsedUserModify() const noexcept
   {
-    return EffectiveInert() ? UserModify::ReadOnly : GetUserModify();
+    return EffectiveInert() ? UserModify::ReadOnly : UserModify();
   }
 
   inline PointerEvents RenderStyle::UsedPointerEvents() const noexcept
   {
-    return EffectiveInert() ? PointerEvents::None : GetPointerEvents();
+    return EffectiveInert() ? PointerEvents::None : PointerEvents();
   }
 
   inline TransformStyle3D RenderStyle::UsedTransformStyle3D() const noexcept
   {
-    return TransformStyleForcedToFlat() ? TransformStyle3D::Flat : GetTransformStyle3D();
+    return TransformStyleForcedToFlat() ? TransformStyle3D::Flat : TransformStyle3D();
   }
 
   inline float RenderStyle::UsedPerspective() const noexcept
   {
-    return GetPerspective().UsedPerspective();
+    return Perspective().UsedPerspective();
   }
 
   inline Visibility RenderStyle::UsedVisibility() const noexcept
@@ -204,24 +204,24 @@ namespace krys::boo
     {
       return Visibility::Hidden;
     }
-    return GetVisibility();
+    return Visibility();
   }
 
   inline bool RenderStyle::BreakOnlyAfterWhiteSpace() const noexcept
   {
-    return GetWhiteSpaceCollapse() == WhiteSpaceCollapse::Preserve
-           || GetWhiteSpaceCollapse() == WhiteSpaceCollapse::PreserveBreaks
-           || GetWhiteSpaceCollapse() == WhiteSpaceCollapse::BreakSpaces
-           || GetLineBreak() == LineBreak::AfterWhiteSpace;
+    return WhiteSpaceCollapse() == WhiteSpaceCollapse::Preserve
+           || WhiteSpaceCollapse() == WhiteSpaceCollapse::PreserveBreaks
+           || WhiteSpaceCollapse() == WhiteSpaceCollapse::BreakSpaces
+           || LineBreak() == LineBreak::AfterWhiteSpace;
   }
 
   inline bool RenderStyle::BreakWords() const noexcept
   {
-    return GetWordBreak() == WordBreak::BreakWord || GetOverflowWrap() == OverflowWrap::BreakWord
-           || GetOverflowWrap() == OverflowWrap::Anywhere;
+    return WordBreak() == WordBreak::BreakWord || OverflowWrap() == OverflowWrap::BreakWord
+           || OverflowWrap() == OverflowWrap::Anywhere;
   }
 
-  constexpr bool RenderStyle::CollapseWhiteSpace(WhiteSpaceCollapse mode) noexcept
+  constexpr bool RenderStyle::CollapseWhiteSpace(boo::WhiteSpaceCollapse mode) noexcept
   {
     return mode == WhiteSpaceCollapse::Collapse || mode == WhiteSpaceCollapse::PreserveBreaks;
   }
@@ -293,7 +293,7 @@ namespace krys::boo
             || display == DisplayType::TableCell || display == DisplayType::TableCaption);
   }
 
-  constexpr bool RenderStyle::PreserveNewline(WhiteSpaceCollapse mode) noexcept
+  constexpr bool RenderStyle::PreserveNewline(boo::WhiteSpaceCollapse mode) noexcept
   {
     return mode == WhiteSpaceCollapse::Preserve || mode == WhiteSpaceCollapse::PreserveBreaks
            || mode == WhiteSpaceCollapse::BreakSpaces;
@@ -360,7 +360,7 @@ namespace krys::boo
 
   inline bool RenderStyle::IsInterCharacterRubyPosition() const noexcept
   {
-    return GetRubyPosition() == RubyPosition::InterCharacter;
+    return RubyPosition() == RubyPosition::InterCharacter;
   }
 
   KRYS_NODISCARD inline bool GeneratesBox(const RenderStyle &style) noexcept
@@ -375,14 +375,14 @@ namespace krys::boo
 
   KRYS_NODISCARD inline bool PseudoElementRendererIsNeeded(const RenderStyle *style) noexcept
   {
-    return style && style->Display() != DisplayType::None && style->GetContent().IsData();
+    return style && style->Display() != DisplayType::None && style->Content().IsData();
   }
 
   // MARK: has*() functions
 
   inline bool RenderStyle::HasAnimations() const noexcept
   {
-    return !GetAnimations().IsInitial();
+    return !Animations().IsInitial();
   }
 
   inline bool RenderStyle::HasAnimationsOrTransitions() const noexcept
@@ -398,7 +398,7 @@ namespace krys::boo
 
   inline bool RenderStyle::HasAspectRatio() const noexcept
   {
-    return GetAspectRatio().HasRatio();
+    return AspectRatio().HasRatio();
   }
 
   inline bool RenderStyle::HasAutoLeftAndRight() const noexcept
@@ -428,12 +428,12 @@ namespace krys::boo
 
   inline bool RenderStyle::HasBackgroundImage() const noexcept
   {
-    return style::HasImageInAnyLayer(GetBackgroundLayers());
+    return style::HasImageInAnyLayer(BackgroundLayers());
   }
 
   inline bool RenderStyle::HasBlendMode() const noexcept
   {
-    return GetBlendMode() != BlendMode::Normal;
+    return BlendMode() != BlendMode::Normal;
   }
 
   inline bool RenderStyle::HasBorder() const noexcept
@@ -448,7 +448,7 @@ namespace krys::boo
 
   inline bool RenderStyle::HasBorderImageOutsets() const noexcept
   {
-    return !GetBorderImageSource().IsNone() && !GetBorderImageOutset().IsZero();
+    return !BorderImageSource().IsNone() && !BorderImageOutset().IsZero();
   }
 
   inline bool RenderStyle::HasBorderRadius() const noexcept
@@ -458,22 +458,22 @@ namespace krys::boo
 
   inline bool RenderStyle::HasBoxShadow() const noexcept
   {
-    return !GetBoxShadow().IsNone();
+    return !BoxShadow().IsNone();
   }
 
   inline bool RenderStyle::HasClip() const noexcept
   {
-    return !GetClip().IsAuto();
+    return !Clip().IsAuto();
   }
 
   inline bool RenderStyle::HasClipPath() const noexcept
   {
-    return !GetClipPath().IsNone();
+    return !ClipPath().IsNone();
   }
 
   inline bool RenderStyle::HasContent() const noexcept
   {
-    return GetContent().IsData();
+    return Content().IsData();
   }
 
   inline bool RenderStyle::HasFill() const noexcept
@@ -483,17 +483,17 @@ namespace krys::boo
 
   inline bool RenderStyle::HasFilter() const noexcept
   {
-    return !GetFilter().IsNone();
+    return !Filter().IsNone();
   }
 
   inline bool RenderStyle::HasInFlowPosition() const noexcept
   {
-    return GetPosition() == PositionType::Relative || GetPosition() == PositionType::Sticky;
+    return Position() == PositionType::Relative || Position() == PositionType::Sticky;
   }
 
   inline bool RenderStyle::HasIsolation() const noexcept
   {
-    return GetIsolation() != Isolation::Auto;
+    return Isolation() != Isolation::Auto;
   }
 
   inline bool RenderStyle::HasMarkers() const noexcept
@@ -503,22 +503,22 @@ namespace krys::boo
 
   inline bool RenderStyle::HasMask() const noexcept
   {
-    return style::HasImageInAnyLayer(GetMaskLayers()) || !GetMaskBorderSource().IsNone();
+    return style::HasImageInAnyLayer(MaskLayers()) || !MaskBorderSource().IsNone();
   }
 
   inline bool RenderStyle::HasOffsetPath() const noexcept
   {
-    return !krys::HoldsAlternative<css::keywords::None>(GetOffsetPath());
+    return !krys::HoldsAlternative<css::keywords::None>(OffsetPath());
   }
 
   inline bool RenderStyle::HasOpacity() const noexcept
   {
-    return !GetOpacity().IsOpaque();
+    return !Opacity().IsOpaque();
   }
 
   inline bool RenderStyle::HasOutline() const noexcept
   {
-    return GetOutlineStyle() != OutlineStyle::None && OutlineWidth().IsPositive();
+    return OutlineStyle() != OutlineStyle::None && OutlineWidth().IsPositive();
   }
 
   inline bool RenderStyle::HasOutlineInVisualOverflow() const noexcept
@@ -528,27 +528,27 @@ namespace krys::boo
 
   inline bool RenderStyle::HasOutOfFlowPosition() const noexcept
   {
-    return GetPosition() == PositionType::Absolute || GetPosition() == PositionType::Fixed;
+    return Position() == PositionType::Absolute || Position() == PositionType::Fixed;
   }
 
   inline bool RenderStyle::HasPerspective() const noexcept
   {
-    return !GetPerspective().IsNone();
+    return !Perspective().IsNone();
   }
 
   inline bool RenderStyle::HasPositionedMask() const noexcept
   {
-    return style::HasImageInAnyLayer(GetMaskLayers());
+    return style::HasImageInAnyLayer(MaskLayers());
   }
 
   inline bool RenderStyle::HasRotate() const noexcept
   {
-    return !GetRotate().IsNone();
+    return !Rotate().IsNone();
   }
 
   inline bool RenderStyle::HasScale() const noexcept
   {
-    return !GetScale().IsNone();
+    return !Scale().IsNone();
   }
 
   inline bool RenderStyle::HasScrollTimelines() const noexcept
@@ -558,7 +558,7 @@ namespace krys::boo
 
   inline bool RenderStyle::HasSnapPosition() const noexcept
   {
-    return !GetScrollSnapAlign().IsNone();
+    return !ScrollSnapAlign().IsNone();
   }
 
   inline bool RenderStyle::HasStaticBlockPosition(bool horizontal) const noexcept
@@ -578,33 +578,33 @@ namespace krys::boo
 
   inline bool RenderStyle::HasTextCombine() const noexcept
   {
-    return GetTextCombine() != TextCombine::None;
+    return TextCombine() != TextCombine::None;
   }
 
   inline bool RenderStyle::HasTextShadow() const noexcept
   {
-    return !GetTextShadow().IsNone();
+    return !TextShadow().IsNone();
   }
 
   inline bool RenderStyle::HasTransform() const noexcept
   {
-    return !GetTransform().IsNone() || HasOffsetPath();
+    return !Transform().IsNone() || HasOffsetPath();
   }
 
   inline bool RenderStyle::HasTransformRelatedProperty() const noexcept
   {
     return HasTransform() || HasRotate() || HasScale() || HasTranslate()
-           || GetTransformStyle3D() == TransformStyle3D::Preserve3D || HasPerspective();
+           || TransformStyle3D() == TransformStyle3D::Preserve3D || HasPerspective();
   }
 
   inline bool RenderStyle::HasTransitions() const noexcept
   {
-    return !GetTransitions().IsInitial();
+    return !Transitions().IsInitial();
   }
 
   inline bool RenderStyle::HasTranslate() const noexcept
   {
-    return !GetTranslate().IsNone();
+    return !Translate().IsNone();
   }
 
   inline bool RenderStyle::HasUsedAppearance() const noexcept
@@ -615,15 +615,15 @@ namespace krys::boo
 
   inline bool RenderStyle::HasUsedContentNone() const noexcept
   {
-    return GetContent().IsNone()
-           || (GetContent().IsNormal()
+    return Content().IsNone()
+           || (Content().IsNormal()
                && (GetPseudoElementType() == PseudoElementType::Before
                    || GetPseudoElementType() == PseudoElementType::After));
   }
 
   inline bool RenderStyle::HasViewportConstrainedPosition() const noexcept
   {
-    return GetPosition() == PositionType::Fixed || GetPosition() == PositionType::Sticky;
+    return Position() == PositionType::Fixed || Position() == PositionType::Sticky;
   }
 
   inline bool RenderStyle::HasViewTimelines() const noexcept
@@ -649,19 +649,19 @@ namespace krys::boo
     {
       return false;
     }
-    return GetStrokeWidth().IsPossiblyPositive();
+    return StrokeWidth().IsPossiblyPositive();
   }
 
   // MARK: is*() functions
 
   inline bool RenderStyle::IsColumnFlexDirection() const noexcept
   {
-    return GetFlexDirection() == FlexDirection::Column || GetFlexDirection() == FlexDirection::ColumnReverse;
+    return FlexDirection() == FlexDirection::Column || FlexDirection() == FlexDirection::ColumnReverse;
   }
 
   inline bool RenderStyle::IsRowFlexDirection() const noexcept
   {
-    return GetFlexDirection() == FlexDirection::Row || GetFlexDirection() == FlexDirection::RowReverse;
+    return FlexDirection() == FlexDirection::Row || FlexDirection() == FlexDirection::RowReverse;
   }
 
   constexpr bool RenderStyle::IsDisplayBlockLevel() const noexcept
@@ -726,7 +726,7 @@ namespace krys::boo
 
   inline bool RenderStyle::IsFixedTableLayout() const noexcept
   {
-    return GetTableLayout() == TableLayoutType::Fixed
+    return TableLayout() == TableLayoutType::Fixed
            && (LogicalWidth().IsSpecified() || LogicalWidth().IsFitContent()
                || LogicalWidth().IsFillAvailable() || LogicalWidth().IsMinContent());
   }
@@ -758,8 +758,7 @@ namespace krys::boo
 
   inline bool RenderStyle::IsReverseFlexDirection() const noexcept
   {
-    return GetFlexDirection() == FlexDirection::RowReverse
-           || GetFlexDirection() == FlexDirection::ColumnReverse;
+    return FlexDirection() == FlexDirection::RowReverse || FlexDirection() == FlexDirection::ColumnReverse;
   }
 
   inline bool RenderStyle::IsSkippedRootOrSkippedContent() const noexcept
@@ -817,17 +816,17 @@ namespace krys::boo
 
   inline style::Number<css::NonNegative> RenderStyle::AspectRatioLogicalHeight() const noexcept
   {
-    return GetWritingMode().IsHorizontal() ? GetAspectRatio().Height() : GetAspectRatio().Width();
+    return GetWritingMode().IsHorizontal() ? AspectRatio().Height() : AspectRatio().Width();
   }
 
   inline style::Number<css::NonNegative> RenderStyle::AspectRatioLogicalWidth() const noexcept
   {
-    return GetWritingMode().IsHorizontal() ? GetAspectRatio().Width() : GetAspectRatio().Height();
+    return GetWritingMode().IsHorizontal() ? AspectRatio().Width() : AspectRatio().Height();
   }
 
   inline double RenderStyle::LogicalAspectRatio() const noexcept
   {
-    auto ratio = GetAspectRatio().TryRatio();
+    auto ratio = AspectRatio().TryRatio();
     krys_debug_assert(ratio);
 
     if (GetWritingMode().IsHorizontal())
@@ -839,7 +838,7 @@ namespace krys::boo
 
   inline BoxSizing RenderStyle::BoxSizingForAspectRatio() const noexcept
   {
-    return GetAspectRatio().IsAutoAndRatio() ? BoxSizing::ContentBox : GetBoxSizing();
+    return AspectRatio().IsAutoAndRatio() ? BoxSizing::ContentBox : BoxSizing();
   }
 
   // MARK: logical grid values
@@ -877,6 +876,6 @@ namespace krys::boo
   KRYS_NODISCARD inline bool IsVisibleToHitTesting(const RenderStyle &style,
                                                    const HitTestRequest &request) noexcept
   {
-    return (request.UserTriggered() ? style.UsedVisibility() : style.GetVisibility()) == Visibility::Visible;
+    return (request.UserTriggered() ? style.UsedVisibility() : style.Visibility()) == Visibility::Visible;
   }
 }

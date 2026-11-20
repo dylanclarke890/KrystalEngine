@@ -209,7 +209,7 @@ namespace krys::boo
 
       const auto &style = renderer.Style();
       WriteIfNotDefault(ts, u8"opacity", style.FillOpacity().Value.Value, 1.0f);
-      WriteIfNotDefault(ts, u8"fill rule", style.GetFillRule(), WindRule::NonZero);
+      WriteIfNotDefault(ts, u8"fill rule", style.FillRule(), WindRule::NonZero);
       ts << u8"}]";
     }
 
@@ -225,7 +225,7 @@ namespace krys::boo
 
       SVGLengthContext lengthContext(&shape);
       double dashOffset = lengthContext.ValueForLength(style.StrokeDashOffset(), style::ZoomNeeded {});
-      double strokeWidth = lengthContext.ValueForLength(style.GetStrokeWidth(), style::ZoomNeeded {});
+      double strokeWidth = lengthContext.ValueForLength(style.StrokeWidth(), style::ZoomNeeded {});
       auto dashArray = DashArray::map(style.StrokeDashArray(), [&](const auto &length) -> DashArrayElement
                                       { return lengthContext.ValueForLength(length, style::ZoomNeeded {}); });
 
@@ -259,9 +259,9 @@ namespace krys::boo
     {
       WriteNameValuePair(ts, u8"transform", renderer.LocalTransform());
     }
-    WriteIfNotDefault(ts, u8"image rendering", style.GetImageRendering(),
+    WriteIfNotDefault(ts, u8"image rendering", style.ImageRendering(),
                       style::ComputedStyle::InitialImageRendering());
-    WriteIfNotDefault(ts, u8"opacity", style.GetOpacity().Value.Value, 1.0f);
+    WriteIfNotDefault(ts, u8"opacity", style.Opacity().Value.Value, 1.0f);
 
     if (auto *shape = DynamicDowncast<LegacyRenderSVGShape>(renderer))
     {
@@ -625,7 +625,7 @@ namespace krys::boo
         // FIXME: Remove this hack, once the new text layout engine is completly landed. We want to preserve
         // the old layout test results for now.
         ts << u8"chunk 1 ";
-        auto anchor = style.GetTextAnchor();
+        auto anchor = style.TextAnchor();
         bool isVerticalText = textBox.Renderer().GetWritingMode().IsVertical();
         if (anchor == TextAnchor::Middle)
         {
@@ -736,7 +736,7 @@ namespace krys::boo
     // cycles are properly ignored in the DRT output.
     if (style.HasPositionedMask())
     {
-      if (auto maskImage = style.GetMaskLayers().UsedFirst().GetImage().TryStyleImage())
+      if (auto maskImage = style.MaskLayers().UsedFirst().GetImage().TryStyleImage())
       {
         auto &document = renderer.GetDocument();
         auto resourceID = SVGURIReference::FragmentIdentifierFromIRIString(maskImage->Url(), document);
@@ -751,7 +751,7 @@ namespace krys::boo
         }
       }
     }
-    if (auto clipPath = style.GetClipPath().TryReference())
+    if (auto clipPath = style.ClipPath().TryReference())
     {
       auto id = clipPath->Fragment();
       if (auto *clipper = GetRenderSVGResourceById<LegacyRenderSVGResourceClipper>(
@@ -766,7 +766,7 @@ namespace krys::boo
     }
     if (style.HasFilter())
     {
-      const auto &filterOperations = style.GetFilter();
+      const auto &filterOperations = style.Filter();
       if (filterOperations.size() == 1)
       {
         if (auto *referenceFilterOperation =

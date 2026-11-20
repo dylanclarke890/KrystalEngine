@@ -101,7 +101,7 @@ namespace krys::boo
       auto shadowRect = rect;
       if (renderer.Style().HasBoxShadow())
       {
-        style::AdjustRectForShadow(shadowRect, renderer.Style().GetBoxShadow(), zoomFactor);
+        style::AdjustRectForShadow(shadowRect, renderer.Style().BoxShadow(), zoomFactor);
       }
 
       auto outlineRect = rect;

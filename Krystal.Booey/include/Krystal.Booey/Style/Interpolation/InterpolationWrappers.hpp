@@ -425,7 +425,7 @@ namespace krys::boo::style::interpolation
   {
   public:
     VisibilityWrapper() noexcept
-        : Wrapper(css::PropertyId::Visibility, &RenderStyleProperties::GetVisibility,
+        : Wrapper(css::PropertyId::Visibility, &RenderStyleProperties::Visibility,
                   &RenderStyleProperties::SetVisibility)
     {
     }

@@ -96,7 +96,7 @@ namespace krys::boo
     auto backgroundColor = _renderer.Style().ColorResolvingCurrentColor(css::PropertyId::BackgroundColor);
     auto compositeOp = Document().CompositeOperatorForBackgroundColor(backgroundColor, _renderer);
 
-    PaintFillLayers(backgroundColor, _renderer.Style().GetBackgroundLayers(), paintRect, bleedAvoidance,
+    PaintFillLayers(backgroundColor, _renderer.Style().BackgroundLayers(), paintRect, bleedAvoidance,
                     compositeOp);
   }
 
@@ -118,8 +118,8 @@ namespace krys::boo
     auto backgroundColor = style.ColorResolvingCurrentColor(css::PropertyId::BackgroundColor);
     auto compositeOp = Document().CompositeOperatorForBackgroundColor(backgroundColor, _renderer);
 
-    PaintFillLayers(backgroundColor, style.GetBackgroundLayers(), View().BackgroundRect(),
-                    BleedAvoidance::None, compositeOp, rootBackgroundRenderer);
+    PaintFillLayers(backgroundColor, style.BackgroundLayers(), View().BackgroundRect(), BleedAvoidance::None,
+                    compositeOp, rootBackgroundRenderer);
   }
 
   bool BackgroundPainter::PaintsOwnBackground(const RenderBoxModelObject &renderer) noexcept
@@ -219,7 +219,7 @@ namespace krys::boo
   {
     void ApplyBoxShadowForBackground(GraphicsContext &context, const RenderStyle &style) noexcept
     {
-      for (const auto &shadow : style.GetBoxShadow())
+      for (const auto &shadow : style.BoxShadow())
       {
         if (style::IsInset(shadow))
         {
@@ -1066,7 +1066,7 @@ namespace krys::boo
 
     bool hasOpaqueBackground = style.ColorResolvingCurrentColor(css::PropertyId::BackgroundColor).IsOpaque();
     const auto &zoomFactor = style.UsedZoomForLength();
-    for (const auto &shadow : style.GetBoxShadow())
+    for (const auto &shadow : style.BoxShadow())
     {
       if (style::GetShadowStyle(shadow) != shadowStyle)
       {
@@ -1307,7 +1307,7 @@ namespace krys::boo
     }
 
     bool hasOneNormalBoxShadow = false;
-    for (const auto &currentShadow : style.GetBoxShadow())
+    for (const auto &currentShadow : style.BoxShadow())
     {
       if (style::IsInset(currentShadow))
       {
@@ -1337,7 +1337,7 @@ namespace krys::boo
       return false;
     }
 
-    const auto &lastBackgroundLayer = style.GetBackgroundLayers().UsedLast();
+    const auto &lastBackgroundLayer = style.BackgroundLayers().UsedLast();
 
     if (lastBackgroundLayer.GetClip() != FillBox::BorderBox)
     {

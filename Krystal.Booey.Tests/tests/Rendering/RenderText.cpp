@@ -69,7 +69,7 @@ namespace krys::boo::tests
       CHECK(wrapper->IsAnonymous());
       CHECK(renderer->Parent() == wrapper);
       CHECK(wrapper->Parent() == fixture.ById(u8"wrap").Renderer());
-      CHECK(renderer->Style().GetColor() == Color {Color::red});
+      CHECK(renderer->Style().Color() == Color {Color::red});
     }
 
     SECTION("A change to the text updates its renderer when style is resolved")

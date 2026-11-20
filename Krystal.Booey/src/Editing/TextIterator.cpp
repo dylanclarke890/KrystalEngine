@@ -603,7 +603,7 @@ namespace krys::boo
   {
     KRYS_NODISCARD bool HasVisibleTextNode(const RenderText &renderer) noexcept
     {
-      if (renderer.Style().GetVisibility() == Visibility::Visible)
+      if (renderer.Style().Visibility() == Visibility::Visible)
       {
         return true;
       }
@@ -611,7 +611,7 @@ namespace krys::boo
       {
         if (auto *firstLetter = renderTextFragment->FirstLetter())
         {
-          if (firstLetter->Style().GetVisibility() == Visibility::Visible)
+          if (firstLetter->Style().Visibility() == Visibility::Visible)
           {
             return true;
           }
@@ -656,7 +656,7 @@ namespace krys::boo
           return false;
         }
       }
-      if (renderer.Style().GetVisibility() != Visibility::Visible
+      if (renderer.Style().Visibility() != Visibility::Visible
           && !_behaviors.Contains(TextIteratorBehavior::IgnoresStyleVisibility))
       {
         return false;
@@ -683,7 +683,7 @@ namespace krys::boo
     }
     else if (!_textRun && !rendererText.empty())
     {
-      if (renderer.Style().GetVisibility() != Visibility::Visible
+      if (renderer.Style().Visibility() != Visibility::Visible
           && !_behaviors.Contains(TextIteratorBehavior::IgnoresStyleVisibility))
       {
         return false;
@@ -701,7 +701,7 @@ namespace krys::boo
     Ref<boo::Text> textNode = Downcast<boo::Text>(_currentNode);
 
     const RenderText &renderer = _firstLetterText ? *_firstLetterText : *textNode->Renderer();
-    if (renderer.Style().GetVisibility() != Visibility::Visible
+    if (renderer.Style().Visibility() != Visibility::Visible
         && !_behaviors.Contains(TextIteratorBehavior::IgnoresStyleVisibility))
     {
       _textRun = {};
@@ -857,7 +857,7 @@ namespace krys::boo
   {
     if (auto *firstLetter = renderer.FirstLetter())
     {
-      if (firstLetter->Style().GetVisibility() != Visibility::Visible
+      if (firstLetter->Style().Visibility() != Visibility::Visible
           && !_behaviors.Contains(TextIteratorBehavior::IgnoresStyleVisibility))
       {
         return;
@@ -890,7 +890,7 @@ namespace krys::boo
       return false;
     }
 
-    if (renderer->Style().GetVisibility() != Visibility::Visible
+    if (renderer->Style().Visibility() != Visibility::Visible
         && !_behaviors.Contains(TextIteratorBehavior::IgnoresStyleVisibility))
     {
       return false;
@@ -1217,7 +1217,7 @@ namespace krys::boo
     // If this node is unrendered or invisible the VisiblePosition checks below won't have much meaning.
     // Additionally, if the range we are iterating over contains huge sections of unrendered content,
     // we would create VisiblePositions on every call to this function without this check.
-    if (!currentNode.Renderer() || currentNode.Renderer()->Style().GetVisibility() != Visibility::Visible)
+    if (!currentNode.Renderer() || currentNode.Renderer()->Style().Visibility() != Visibility::Visible)
     {
       return false;
     }
@@ -1515,15 +1515,14 @@ namespace krys::boo
         auto *renderer = _node->Renderer();
         if (auto *renderText = DynamicDowncast<RenderText>(renderer))
         {
-          if (renderText->Style().GetVisibility() == Visibility::Visible && _offset > 0)
+          if (renderText->Style().Visibility() == Visibility::Visible && _offset > 0)
           {
             _handledNode = HandleTextNode();
           }
         }
         else if (IsRendererReplacedElement(renderer, _behaviors))
         {
-          if (Downcast<RenderElement>(*renderer).Style().GetVisibility() == Visibility::Visible
-              && _offset > 0)
+          if (Downcast<RenderElement>(*renderer).Style().Visibility() == Visibility::Visible && _offset > 0)
           {
             _handledNode = HandleReplacedElement();
           }

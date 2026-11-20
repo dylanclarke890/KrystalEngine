@@ -605,7 +605,7 @@ namespace krys::boo
       return false;
     }
 
-    auto contentVisibility = renderBox.Style().GetContentVisibility();
+    auto contentVisibility = renderBox.Style().ContentVisibility();
     if (contentVisibility == ContentVisibility::Hidden && IsVisiblityHiddenIgnored())
     {
       return false;

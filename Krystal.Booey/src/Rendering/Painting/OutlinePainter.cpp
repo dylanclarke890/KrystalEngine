@@ -93,7 +93,7 @@ namespace krys::boo
     auto hasThemedFocusRing = theme.SupportsFocusRing(renderer, styleToUse);
 
     // Only paint the focus ring by hand if the theme isn't able to draw it.
-    if (styleToUse.GetOutlineStyle() == OutlineStyle::Auto && !hasThemedFocusRing)
+    if (styleToUse.OutlineStyle() == OutlineStyle::Auto && !hasThemedFocusRing)
     {
       LayoutRect paintRectToUse {paintRect};
       if (auto *box = DynamicDowncast<RenderBox>(renderer))
@@ -107,7 +107,7 @@ namespace krys::boo
       return;
     }
 
-    auto borderStyle = ToBorderStyle(styleToUse.GetOutlineStyle());
+    auto borderStyle = ToBorderStyle(styleToUse.OutlineStyle());
     if (!borderStyle || *borderStyle == BorderStyle::None)
     {
       return;
@@ -156,7 +156,7 @@ namespace krys::boo
 
     const auto &styleToUse = renderer.Style();
 
-    if (styleToUse.GetOutlineStyle() == OutlineStyle::Auto)
+    if (styleToUse.OutlineStyle() == OutlineStyle::Auto)
     {
       auto focusRingRects = CollectFocusRingRects(renderer, paintOffset, _paintInfo.PaintContainer);
 
@@ -278,7 +278,7 @@ namespace krys::boo
   {
     const auto &style = renderer.Style();
 
-    krys_debug_assert(style.GetOutlineStyle() == OutlineStyle::Auto);
+    krys_debug_assert(style.OutlineStyle() == OutlineStyle::Auto);
 
     auto deviceScaleFactor = DeviceScaleFactor(renderer);
     auto outlineOffset = style::Evaluate<float>(style.OutlineOffset(), style::ZoomNeeded {});

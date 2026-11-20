@@ -649,8 +649,8 @@ namespace krys::boo
         }
         return BlockSizeFromAspectRatio(HorizontalBorderAndPaddingExtent(), VerticalBorderAndPaddingExtent(),
                                         static_cast<double>(LayoutUnit {style.LogicalAspectRatio()}),
-                                        style.BoxSizingForAspectRatio(), LogicalWidth(),
-                                        style.GetAspectRatio(), IsRenderReplaced());
+                                        style.BoxSizingForAspectRatio(), LogicalWidth(), style.AspectRatio(),
+                                        IsRenderReplaced());
       }
 
       // A positioned element that specified both top/bottom or that specifies
@@ -828,9 +828,9 @@ namespace krys::boo
 
     return style.IsFloating() || style.HasOutOfFlowPosition() || isBlockBoxWithPotentiallyScrollableOverflow()
            || style.UsedContain().Contains(style::ContainValue::Layout)
-           || style.GetContainerType() != ContainerType::Normal
+           || style.ContainerType() != ContainerType::Normal
            || boo::ShouldApplyPaintContainment(style, *GetElement())
-           || (style.IsDisplayBlockLevel() && !style.GetBlockStepSize().IsNone());
+           || (style.IsDisplayBlockLevel() && !style.BlockStepSize().IsNone());
   }
 
   bool RenderBlock::EstablishesIndependentFormattingContext() const noexcept
@@ -870,7 +870,7 @@ namespace krys::boo
     }
     if (flags.Contains(TextRunFlag::RespectDirectionOverride))
     {
-      directionalOverride = IsOverride(style.GetUnicodeBidi());
+      directionalOverride = IsOverride(style.UnicodeBidi());
     }
 
     // The security disc characters (-webkit-text-security) were dropped, so the text is used as it is.
@@ -900,7 +900,7 @@ namespace krys::boo
       return true;
     }
     const auto &style = Style();
-    if (IsBlockContainer() && !style.GetAlignContent().IsNormal())
+    if (IsBlockContainer() && !style.AlignContent().IsNormal())
     {
       return true;
     }
@@ -908,7 +908,7 @@ namespace krys::boo
            || IsInFlowFlexChild() || IsRenderTable() || IsRenderTableCell() || IsRenderTableCaption()
            || IsFieldset() || IsDocumentElementRenderer() || IsRenderFragmentedFlow()
            || IsLegacyRenderSVGForeignObject() || style.SpecifiesColumns()
-           || style.GetColumnSpan() == ColumnSpan::All || style.Display() == DisplayType::FlowRoot
+           || style.ColumnSpan() == ColumnSpan::All || style.Display() == DisplayType::FlowRoot
            || EstablishesIndependentFormattingContext();
   }
 
@@ -932,7 +932,7 @@ namespace krys::boo
   {
     return (orientation == ScrollbarOrientation::Vertical ? IncludeVerticalScrollbarSize()
                                                           : IncludeHorizontalScrollbarSize())
-           && oldStyle.GetScrollbarWidth() != newStyle.GetScrollbarWidth();
+           && oldStyle.ScrollbarWidth() != newStyle.ScrollbarWidth();
   }
 
   bool RenderBlock::PaddingBoxLogicaHeightChanged(const RenderStyle &oldStyle,
@@ -942,7 +942,7 @@ namespace krys::boo
     {
       return (orientation == ScrollbarOrientation::Vertical ? IncludeVerticalScrollbarSize()
                                                             : IncludeHorizontalScrollbarSize())
-             && oldStyle.GetScrollbarWidth() != newStyle.GetScrollbarWidth();
+             && oldStyle.ScrollbarWidth() != newStyle.ScrollbarWidth();
     };
     if (newStyle.GetWritingMode().IsHorizontal())
     {
@@ -1416,7 +1416,7 @@ namespace krys::boo
 
   void RenderBlock::MarkFixedPositionBoxForLayoutIfNeeded(RenderBox &positionedChild) noexcept
   {
-    if (positionedChild.Style().GetPosition() != PositionType::Fixed)
+    if (positionedChild.Style().Position() != PositionType::Fixed)
     {
       return;
     }
@@ -1429,11 +1429,11 @@ namespace krys::boo
     }
 
     auto *parent = positionedChild.Parent();
-    while (parent && !Is<RenderView>(*parent) && parent->Style().GetPosition() != PositionType::Absolute)
+    while (parent && !Is<RenderView>(*parent) && parent->Style().Position() != PositionType::Absolute)
     {
       parent = parent->Parent();
     }
-    if (!parent || parent->Style().GetPosition() != PositionType::Absolute)
+    if (!parent || parent->Style().Position() != PositionType::Absolute)
     {
       return;
     }
@@ -1826,7 +1826,7 @@ namespace krys::boo
     // Across the box, as a block would be (its margins, auto ones among them, having been computed), and as
     // its `text-align` says, which is what `align` maps to.
     LayoutUnit logicalLeft;
-    auto textAlign = legend.Style().GetTextAlign();
+    auto textAlign = legend.Style().TextAlign();
     if (GetWritingMode().IsBidiLTR())
     {
       switch (textAlign)
@@ -2015,7 +2015,7 @@ namespace krys::boo
   {
     // `height` doesn't count what the legend adds to the border, as in other browsers.
     LayoutUnit bordersPlusPadding = BorderAndPaddingLogicalHeight();
-    if (Style().GetBoxSizing() == BoxSizing::ContentBox)
+    if (Style().BoxSizing() == BoxSizing::ContentBox)
     {
       return height + bordersPlusPadding - _intrinsicBorderForFieldset;
     }
@@ -2029,7 +2029,7 @@ namespace krys::boo
       return 0;
     }
     LayoutUnit result = *height;
-    if (Style().GetBoxSizing() == BoxSizing::BorderBox)
+    if (Style().BoxSizing() == BoxSizing::BorderBox)
     {
       result -= BorderAndPaddingLogicalHeight();
     }
@@ -2042,7 +2042,7 @@ namespace krys::boo
 
   LayoutUnit RenderBlock::AdjustIntrinsicLogicalHeightForBoxSizing(LayoutUnit height) const noexcept
   {
-    if (Style().GetBoxSizing() == BoxSizing::BorderBox)
+    if (Style().BoxSizing() == BoxSizing::BorderBox)
     {
       return height + BorderAndPaddingLogicalHeight();
     }
@@ -2168,8 +2168,8 @@ namespace krys::boo
 
     LayoutUnit floatLeftWidth;
     LayoutUnit floatRightWidth;
-    auto nowrap = Style().GetTextWrapMode() == TextWrapMode::NoWrap
-                  && Style().GetWhiteSpaceCollapse() == WhiteSpaceCollapse::Collapse;
+    auto nowrap = Style().TextWrapMode() == TextWrapMode::NoWrap
+                  && Style().WhiteSpaceCollapse() == WhiteSpaceCollapse::Collapse;
     for (auto &childBox : ChildrenOfType<RenderBox>(*this))
     {
       // Positioned children don't affect the min/max width. Legends in fieldsets are skipped here
@@ -2311,7 +2311,7 @@ namespace krys::boo
           childBox.HorizontalBorderAndPaddingExtent(), childBox.VerticalBorderAndPaddingExtent(),
           LayoutUnit {childBoxStyle.LogicalAspectRatio()}.ToDouble(), childBoxStyle.BoxSizingForAspectRatio(),
           LayoutUnit {fixedChildBoxStyleLogicalWidth->ResolveZoom(childBoxStyle.UsedZoomForLength())},
-          Style().GetAspectRatio(), IsRenderReplaced());
+          Style().AspectRatio(), IsRenderReplaced());
         minPreferredLogicalWidth = aspectRatioSize;
         maxPreferredLogicalWidth = aspectRatioSize;
         return;
@@ -3050,7 +3050,7 @@ namespace krys::boo
     KRYS_NODISCARD bool IsChildHitTestCandidate(const RenderBox &box, HitTestSource source) noexcept
     {
       auto visibility =
-        source == HitTestSource::Script ? box.Style().GetVisibility() : box.Style().UsedVisibility();
+        source == HitTestSource::Script ? box.Style().Visibility() : box.Style().UsedVisibility();
       return box.Height() && visibility == Visibility::Visible && !box.IsOutOfFlowPositioned()
              && !box.IsRenderFragmentedFlow();
     }
@@ -3174,11 +3174,11 @@ namespace krys::boo
   LayoutUnit RenderBlock::TextIndentOffset() const noexcept
   {
     LayoutUnit cw;
-    if (Style().GetTextIndent().Length.IsPercentOrCalculated())
+    if (Style().TextIndent().Length.IsPercentOrCalculated())
     {
       cw = ContentBoxLogicalWidth();
     }
-    return style::Evaluate<LayoutUnit>(Style().GetTextIndent().Length, cw, Style().UsedZoomForLength());
+    return style::Evaluate<LayoutUnit>(Style().TextIndent().Length, cw, Style().UsedZoomForLength());
   }
 
   void RenderBlock::OffsetForContents(LayoutPoint &offset) const noexcept
@@ -3244,7 +3244,7 @@ namespace krys::boo
 
     if (IsBody() || IsDocumentElementRenderer() || HasNonVisibleOverflow() || IsPositioned() || IsFloating()
         || IsRenderTableCell() || IsNonReplacedAtomicInlineLevelBox() || IsTransformed() || HasMask()
-        || IsWritingModeRoot() || IsRenderFragmentedFlow() || Style().GetColumnSpan() == ColumnSpan::All
+        || IsWritingModeRoot() || IsRenderFragmentedFlow() || Style().ColumnSpan() == ColumnSpan::All
         || IsInFlowFlexChild() || IsGridItem())
     {
       return true;
@@ -3379,7 +3379,7 @@ namespace krys::boo
       return {};
     }
 
-    if (IsTransformed() || Style().GetColumnSpan() == ColumnSpan::All || IsRenderFragmentedFlow())
+    if (IsTransformed() || Style().ColumnSpan() == ColumnSpan::All || IsRenderFragmentedFlow())
     {
       // FIXME: We should learn how to gap fill multiple columns and transforms eventually.
       lastLogicalTop = BlockDirectionOffset(rootBlock, offsetFromRootBlock) + LogicalHeight();
@@ -3891,7 +3891,7 @@ namespace krys::boo
   {
     auto *fragmentedFlow = EnclosingFragmentedFlow();
     bool checkColumnBreaks = fragmentedFlow && fragmentedFlow->ShouldCheckColumnBreaks();
-    auto breakInside = child.Style().GetBreakInside();
+    auto breakInside = child.Style().BreakInside();
     return child.IsUnsplittableForPagination() || breakInside == BreakInside::Avoid
            || (checkColumnBreaks && breakInside == BreakInside::AvoidColumn);
   }

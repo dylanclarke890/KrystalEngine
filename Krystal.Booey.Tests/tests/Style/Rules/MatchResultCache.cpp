@@ -73,7 +73,7 @@ namespace krys::boo::style::tests
 
       auto style = resolver.UnadjustedStyleForCachedMatchResult(x, Context(), krys::move(*cached));
       CHECK(Serialised(*style.Style, style.Style->Width()) == "7px");
-      CHECK(style.Style->GetOpacity() == Opacity {0.5f});
+      CHECK(style.Style->Opacity() == Opacity {0.5f});
       CHECK(Serialised(*style.Style, style.Style->Height()) == "2px");
 
       CachedMatchResult result {.StyleToUpdate = styleToUpdate};
@@ -103,7 +103,7 @@ namespace krys::boo::style::tests
       auto style = resolver.UnadjustedStyleForCachedMatchResult(x, Context(), krys::move(*cached));
       CHECK(style.Style->ComputedFontSize() == 30);
       CHECK(Serialised(*style.Style, style.Style->Width()) == "30px");
-      CHECK(style.Style->GetOpacity() == Opacity {0.25f});
+      CHECK(style.Style->Opacity() == Opacity {0.25f});
     }
 
     SECTION("Adding a property drops the entry")

@@ -101,6 +101,6 @@ namespace krys::boo::tests
     REQUIRE(style);
     CHECK(style->Display() == DisplayType::GridLanes);
     CHECK(ResolverFixture::Serialised(*style, style->Width()) == "1px");
-    CHECK(style->GetColor() == boo::Color::white);
+    CHECK(style->Color() == boo::Color::white);
   }
 }

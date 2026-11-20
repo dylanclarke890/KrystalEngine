@@ -275,14 +275,14 @@ namespace krys::boo
 
       if (keyframe.AnimatesProperty(AnimatableCSSProperty {css::PropertyId::Transform}))
       {
-        auto [isWidthDependent, isHeightDependent] = style->GetTransform().ComputeSizeDependencies();
+        auto [isWidthDependent, isHeightDependent] = style->Transform().ComputeSizeDependencies();
         _hasWidthDependentTransform = isWidthDependent;
         _hasHeightDependentTransform = isHeightDependent;
       }
 
       if (keyframe.AnimatesProperty(AnimatableCSSProperty {css::PropertyId::Translate}))
       {
-        auto [isWidthDependent, isHeightDependent] = style->GetTranslate().ComputeSizeDependencies();
+        auto [isWidthDependent, isHeightDependent] = style->Translate().ComputeSizeDependencies();
         _hasWidthDependentTransform = isWidthDependent;
         _hasHeightDependentTransform = isHeightDependent;
       }
@@ -293,7 +293,7 @@ namespace krys::boo
       if (!_hasDiscreteTransformInterval
           && keyframe.AnimatesProperty(AnimatableCSSProperty {css::PropertyId::Transform}))
       {
-        _hasDiscreteTransformInterval = style->GetTransform().ContainsNonInvertibleMatrix({});
+        _hasDiscreteTransformInterval = style->Transform().ContainsNonInvertibleMatrix({});
       }
     };
 

@@ -172,7 +172,7 @@ namespace krys::boo
 
   bool RenderMathMLUnderOver::ShouldMoveLimits() const noexcept
   {
-    if (Style().GetMathStyle() == MathStyle::Normal)
+    if (Style().MathStyle() == MathStyle::Normal)
     {
       return false;
     }

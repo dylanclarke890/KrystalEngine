@@ -504,7 +504,7 @@ namespace krys::boo
 
   bool RenderLayer::OverlapBoundsIncludeChildren() const noexcept
   {
-    return HasFilter() && Renderer().Style().GetFilter().HasFilterThatMovesPixels();
+    return HasFilter() && Renderer().Style().Filter().HasFilterThatMovesPixels();
   }
 
   RenderLayerBacking *RenderLayer::EnsureBacking() noexcept
@@ -642,7 +642,7 @@ namespace krys::boo
   {
     krys_debug_assert(!_visibleContentStatusDirty);
 
-    if (!HasVisibleContent() || Renderer().Style().GetOpacity().IsTransparent())
+    if (!HasVisibleContent() || Renderer().Style().Opacity().IsTransparent())
     {
       return false;
     }
@@ -1068,7 +1068,7 @@ namespace krys::boo
     // https://github.com/w3c/fxtf-drafts/issues/557
     return IsRenderViewLayer() || Renderer().IsTransparent() || Renderer().HasBackdropFilter()
            || Renderer().HasClipPath() || Renderer().HasFilter() || Renderer().HasBlendMode()
-           || Renderer().HasMask() || Renderer().Style().GetWillChange().CanBeBackdropRoot();
+           || Renderer().HasMask() || Renderer().Style().WillChange().CanBeBackdropRoot();
   }
 
   bool RenderLayer::SetCanBeBackdropRoot(bool canBeBackdropRoot) noexcept
@@ -1092,7 +1092,7 @@ namespace krys::boo
                                       // explicit z-index.
            || renderer.Style().HasIsolation() || renderer.ShouldApplyPaintContainment()
            || !renderer.Style().UsedZIndex().IsAuto()
-           || renderer.Style().GetWillChange().CanCreateStackingContext() || layer.EstablishesTopLayer();
+           || renderer.Style().WillChange().CanCreateStackingContext() || layer.EstablishesTopLayer();
   }
 
   bool RenderLayer::ShouldBeNormalFlowOnly() const noexcept
@@ -1878,7 +1878,7 @@ namespace krys::boo
     // Subtract our parent's scroll offset.
     RenderLayer *positionedParent;
     if (Renderer().IsOutOfFlowPositioned()
-        && (positionedParent = EnclosingAncestorForPosition(Renderer().Style().GetPosition())))
+        && (positionedParent = EnclosingAncestorForPosition(Renderer().Style().Position())))
     {
       // For positioned layers, we subtract out the enclosing positioned layer's scroll offset.
       if (positionedParent->Renderer().HasNonVisibleOverflow())
@@ -2071,7 +2071,7 @@ namespace krys::boo
       return false;
     }
 
-    if (ShouldPaintWithFilters() && Renderer().Style().GetFilter().HasFilterThatAffectsOpacity())
+    if (ShouldPaintWithFilters() && Renderer().Style().Filter().HasFilterThatAffectsOpacity())
     {
       return false;
     }
@@ -2408,7 +2408,7 @@ namespace krys::boo
       }
     }
 
-    BlendMode newBlendMode = Renderer().Style().GetBlendMode();
+    BlendMode newBlendMode = Renderer().Style().BlendMode();
     if (newBlendMode != _blendMode)
     {
       _blendMode = newBlendMode;
@@ -2778,13 +2778,12 @@ namespace krys::boo
 
   bool RenderLayer::IsVisibilityHiddenOrOpacityZero() const noexcept
   {
-    return !HasVisibleContent() || Renderer().Style().GetOpacity().IsTransparent();
+    return !HasVisibleContent() || Renderer().Style().Opacity().IsTransparent();
   }
 
   bool RenderLayer::IsSubtreeVisibilityHiddenOrOpacityZero() const noexcept
   {
-    return (!HasVisibleContent() && !HasVisibleDescendant())
-           || Renderer().Style().GetOpacity().IsTransparent();
+    return (!HasVisibleContent() && !HasVisibleDescendant()) || Renderer().Style().Opacity().IsTransparent();
   }
 
 #pragma endregion
@@ -2854,7 +2853,7 @@ namespace krys::boo
         SetSelfAndDescendantsNeedPositionUpdate();
       }
 
-      if (oldStyle->GetOpacity().IsTransparent() != Renderer().Style().GetOpacity().IsTransparent())
+      if (oldStyle->Opacity().IsTransparent() != Renderer().Style().Opacity().IsTransparent())
       {
         SetNeedsPositionUpdate();
       }
@@ -3166,7 +3165,7 @@ namespace krys::boo
   bool RenderLayer::ParticipatesInPreserve3D() const noexcept
   {
     return AncestorLayerIsDOMParent(Parent()) && Parent()->Preserves3D()
-           && (Transform() || Renderer().Style().GetBackfaceVisibility() == BackfaceVisibility::Hidden
+           && (Transform() || Renderer().Style().BackfaceVisibility() == BackfaceVisibility::Hidden
                || Preserves3D());
   }
 
@@ -3238,7 +3237,7 @@ namespace krys::boo
 
   bool RenderLayer::ShouldPaintWithFilters(EnumSet<PaintBehavior> paintBehavior) const noexcept
   {
-    const auto &filter = Renderer().Style().GetFilter();
+    const auto &filter = Renderer().Style().Filter();
     if (filter.IsNone())
     {
       return false;
@@ -3288,7 +3287,7 @@ namespace krys::boo
     {
       return RenderLayerFilters::CalculateOutsets(Renderer(), RectF(LocalBoundingBox()));
     }
-    return Renderer().Style().GetFilter().Outsets();
+    return Renderer().Style().Filter().Outsets();
   }
 
   bool RenderLayer::HasAncestorWithFilterOutsets() const noexcept
@@ -3305,8 +3304,7 @@ namespace krys::boo
 
   bool RenderLayer::FilterMovesPixels() const noexcept
   {
-    return HasFilter() && Renderer().Style().GetFilter().HasFilterThatMovesPixels()
-           && ShouldPaintWithFilters();
+    return HasFilter() && Renderer().Style().Filter().HasFilterThatMovesPixels() && ShouldPaintWithFilters();
   }
 
   LayoutRect RenderLayer::AbsoluteFilterRepaintRect() const noexcept
@@ -3416,9 +3414,9 @@ namespace krys::boo
   void RenderLayer::UpdateFiltersAfterStyleChange(style::Difference diff,
                                                   const RenderStyle *oldStyle) noexcept
   {
-    if (Renderer().Style().GetFilter().HasReferenceFilter())
+    if (Renderer().Style().Filter().HasReferenceFilter())
     {
-      EnsureLayerFilters().UpdateReferenceFilterClients(Renderer().Style().GetFilter());
+      EnsureLayerFilters().UpdateReferenceFilterClients(Renderer().Style().Filter());
     }
     else if (!ShouldPaintWithFilters())
     {
@@ -3443,12 +3441,12 @@ namespace krys::boo
       {
         return false;
       }
-      if (oldStyle->GetFilter() != Renderer().Style().GetFilter())
+      if (oldStyle->Filter() != Renderer().Style().Filter())
       {
         return true;
       }
-      auto currentColorChanged = oldStyle->GetColor() != Renderer().Style().GetColor();
-      if (currentColorChanged && oldStyle->GetFilter().HasFilterThatRequiresRepaintForCurrentColorChange())
+      auto currentColorChanged = oldStyle->Color() != Renderer().Style().Color();
+      if (currentColorChanged && oldStyle->Filter().HasFilterThatRequiresRepaintForCurrentColorChange())
       {
         return true;
       }
@@ -3475,7 +3473,7 @@ namespace krys::boo
 
       // Early-return only if we *don't* have reference filters. For reference filters, we still want the
       // FilterEffect graph built for us, even if we're composited.
-      if (!Renderer().Style().GetFilter().HasReferenceFilter())
+      if (!Renderer().Style().Filter().HasReferenceFilter())
       {
         return;
       }
@@ -3675,7 +3673,7 @@ namespace krys::boo
     krys_debug_assert(ancestorLayer != layer);
 
     const auto &renderer = layer->Renderer();
-    auto position = renderer.Style().GetPosition();
+    auto position = renderer.Style().Position();
 
     // FIXME: Positioning of out-of-flow(fixed, absolute) elements collected in a RenderFragmentedFlow
     // may need to be revisited in a future patch.
@@ -4116,7 +4114,7 @@ namespace krys::boo
       backgroundClipRect.Reset();
       return backgroundClipRect;
     }
-    backgroundClipRect = BackgroundClipRectForPosition(*parentRects, Renderer().Style().GetPosition());
+    backgroundClipRect = BackgroundClipRectForPosition(*parentRects, Renderer().Style().Position());
     RenderView &view = Renderer().View();
     // Note: infinite clipRects should not be scrolled here, otherwise they will accidentally no longer be
     // considered infinite.
@@ -4793,7 +4791,7 @@ namespace krys::boo
     // We need a special case for <iframe> because they never have
     // hasNonVisibleOverflow(). However, they do "implicitly" clip their contents, so
     // we want to allow resizing them also.
-    return Renderer().HasNonVisibleOverflow() && Renderer().Style().GetResize() != style::Resize::None;
+    return Renderer().HasNonVisibleOverflow() && Renderer().Style().Resize() != style::Resize::None;
   }
 
   LayoutSize RenderLayer::MinimumSizeForResizing(float zoomFactor) const noexcept
@@ -4861,9 +4859,9 @@ namespace krys::boo
 
     // One mutation record for the style attribute, however many of its properties change.
     StyleAttributeMutationScope mutationScope {styledElement.get()};
-    bool isBoxSizingBorder = renderer->Style().GetBoxSizing() == BoxSizing::BorderBox;
+    bool isBoxSizingBorder = renderer->Style().BoxSizing() == BoxSizing::BorderBox;
 
-    auto resize = renderer->Style().GetResize();
+    auto resize = renderer->Style().Resize();
     bool canResizeWidth = resize == style::Resize::Horizontal || resize == style::Resize::Both
                           || (renderer->IsHorizontalWritingMode() ? resize == style::Resize::Inline
                                                                   : resize == style::Resize::Block);
@@ -4956,7 +4954,7 @@ namespace krys::boo
 
     bool placeVerticalScrollbarOnTheLeft = renderBox.Style().ShouldPlaceVerticalScrollbarOnLeft();
     bool haveResizer =
-      Renderer().Style().GetResize() != style::Resize::None && !Renderer().Style().GetPseudoElementType();
+      Renderer().Style().Resize() != style::Resize::None && !Renderer().Style().GetPseudoElementType();
 
     OverflowControlRects result;
     auto cornerRect = [&](SizeI cornerSize)
@@ -5091,7 +5089,7 @@ namespace krys::boo
   {
     KRYS_NODISCARD float RendererOpacity(const RenderLayerModelObject &renderer) noexcept
     {
-      return renderer.Style().GetOpacity().Value.Value;
+      return renderer.Style().Opacity().Value.Value;
     }
 
     enum TransparencyClipBoxBehavior
@@ -5615,7 +5613,7 @@ namespace krys::boo
     RenderLayer::ComputeClipPath(const LayoutSize &offsetFromRoot,
                                  const LayoutRect &rootRelativeBoundsForNonBoxes) const noexcept
   {
-    const auto &clipPath = Renderer().Style().GetClipPath();
+    const auto &clipPath = Renderer().Style().ClipPath();
 
     if (auto basicShape = clipPath.TryBasicShape())
     {
@@ -5657,8 +5655,8 @@ namespace krys::boo
     LayoutSize paintingOffsetFromRoot =
       LayoutSize(SnapSizeToDevicePixel(offsetFromRoot + paintingInfo.SubpixelOffset, LayoutPoint(),
                                        Renderer().GetDocument().DeviceScaleFactor()));
-    krys_debug_assert(!style.GetClipPath().IsNone());
-    if (style.GetClipPath().IsBasicShape() || (style.GetClipPath().IsBox() && Is<RenderBox>(Renderer())))
+    krys_debug_assert(!style.ClipPath().IsNone());
+    if (style.ClipPath().IsBasicShape() || (style.ClipPath().IsBox() && Is<RenderBox>(Renderer())))
     {
       // clippedContentBounds is used as the reference box for inlines, which is also poorly specified:
       // https://github.com/w3c/csswg-drafts/issues/6383.
@@ -7068,7 +7066,7 @@ namespace krys::boo
     }
 
     // Check for hit test on backface if backface-visibility is 'hidden'
-    if (localTransformState && Renderer().Style().GetBackfaceVisibility() == BackfaceVisibility::Hidden)
+    if (localTransformState && Renderer().Style().BackfaceVisibility() == BackfaceVisibility::Hidden)
     {
       Maybe<TransformationMatrix> invertedMatrix = localTransformState->AccumulatedTransform.Inverse();
       // If the z-vector of the matrix is negative, the back is facing towards the viewer.

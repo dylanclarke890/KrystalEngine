@@ -34,7 +34,7 @@ namespace krys::boo::style
   Ref<DropShadowFilterOperation> DropShadowFilterOperationWithStyleColor::CreateEquivalentWithResolvedColor(
     const RenderStyle &style) noexcept
   {
-    auto resolvedColor = _styleColor.ResolveColor(style.GetColor());
+    auto resolvedColor = _styleColor.ResolveColor(style.Color());
     return DropShadowFilterOperation::Create(Location(), StdDeviation(), resolvedColor);
   }
 

@@ -73,7 +73,7 @@ namespace krys::boo::style::tests
     auto animationName = [&](utf8_stringview value)
     {
       Build(PropertyId::AnimationName, value);
-      return Style.GetAnimations()[0].GetName();
+      return Style.Animations()[0].GetName();
     };
 
     auto name = animationName(u8"slide");

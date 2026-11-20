@@ -210,7 +210,7 @@ namespace krys::boo
 
     KRYS_NODISCARD inline double LogicalAspectRatio() const noexcept;
 
-    KRYS_NODISCARD inline BoxSizing BoxSizingForAspectRatio() const noexcept;
+    KRYS_NODISCARD inline boo::BoxSizing BoxSizingForAspectRatio() const noexcept;
 
     // Logical Grid
     KRYS_NODISCARD inline const style::GridTrackSizes &
@@ -254,30 +254,30 @@ namespace krys::boo
 
     KRYS_NODISCARD float UsedStrokeWidth(const SizeI &viewportSize) const noexcept;
 
-    KRYS_NODISCARD Color UsedStrokeColor() const noexcept;
+    KRYS_NODISCARD boo::Color UsedStrokeColor() const noexcept;
 
-    KRYS_NODISCARD inline PointerEvents UsedPointerEvents() const noexcept;
+    KRYS_NODISCARD inline boo::PointerEvents UsedPointerEvents() const noexcept;
 
-    KRYS_NODISCARD inline Visibility UsedVisibility() const noexcept;
+    KRYS_NODISCARD inline boo::Visibility UsedVisibility() const noexcept;
 
-    KRYS_NODISCARD inline UserModify UsedUserModify() const noexcept;
+    KRYS_NODISCARD inline boo::UserModify UsedUserModify() const noexcept;
 
-    KRYS_NODISCARD UserSelect UsedUserSelect() const noexcept;
+    KRYS_NODISCARD boo::UserSelect UsedUserSelect() const noexcept;
 
     KRYS_NODISCARD style::Contain UsedContain() const noexcept;
 
-    KRYS_NODISCARD inline TransformStyle3D UsedTransformStyle3D() const noexcept;
+    KRYS_NODISCARD inline boo::TransformStyle3D UsedTransformStyle3D() const noexcept;
 
     KRYS_NODISCARD inline float UsedPerspective() const noexcept;
 
-    KRYS_NODISCARD Color UsedScrollbarThumbColor() const noexcept;
+    KRYS_NODISCARD boo::Color UsedScrollbarThumbColor() const noexcept;
 
-    KRYS_NODISCARD Color UsedScrollbarTrackColor() const noexcept;
+    KRYS_NODISCARD boo::Color UsedScrollbarTrackColor() const noexcept;
 
     /// @brief The thumb and track colours of `scrollbar-color`, or nothing for `auto`.
-    KRYS_NODISCARD Maybe<ScrollbarColor> UsedScrollbarColor() const noexcept;
+    KRYS_NODISCARD Maybe<boo::ScrollbarColor> UsedScrollbarColor() const noexcept;
 
-    KRYS_NODISCARD Color UsedAccentColor(style::ColorOptions) const noexcept;
+    KRYS_NODISCARD boo::Color UsedAccentColor(style::ColorOptions) const noexcept;
     // FIXME: `usedFloat()` and `usedClear()` (logical left/right, block-relative) come with the renderers.
 
     // MARK: - has*()
@@ -447,9 +447,9 @@ namespace krys::boo
 
     KRYS_NODISCARD inline bool BreakWords() const noexcept;
 
-    KRYS_NODISCARD constexpr static bool PreserveNewline(WhiteSpaceCollapse) noexcept;
+    KRYS_NODISCARD constexpr static bool PreserveNewline(boo::WhiteSpaceCollapse) noexcept;
 
-    KRYS_NODISCARD constexpr static bool CollapseWhiteSpace(WhiteSpaceCollapse) noexcept;
+    KRYS_NODISCARD constexpr static bool CollapseWhiteSpace(boo::WhiteSpaceCollapse) noexcept;
 
     // Return true if any transform related property (currently transform, translate, scale, rotate,
     // transformStyle3D or perspective) indicates that we are transforming. The usedTransformStyle3D is not
@@ -465,9 +465,9 @@ namespace krys::boo
 
     // Resolves the currentColor keyword, but must not be used for the "color" property which has a different
     // semantic.
-    KRYS_NODISCARD Color ColorResolvingCurrentColor(css::PropertyId colorProperty) const noexcept;
+    KRYS_NODISCARD boo::Color ColorResolvingCurrentColor(css::PropertyId colorProperty) const noexcept;
 
-    KRYS_NODISCARD Color ColorResolvingCurrentColor(const style::Color &) const noexcept;
+    KRYS_NODISCARD boo::Color ColorResolvingCurrentColor(const style::Color &) const noexcept;
 
   private:
     // This constructor is used to implement the replace operation.

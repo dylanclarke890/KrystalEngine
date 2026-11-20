@@ -46,9 +46,9 @@ namespace krys::boo::layout
       // whitespace is preserved).
       auto &style = box.Style();
       return TextUtil::IsWrappingAllowed(style)
-             && (style.GetLineBreak() == LineBreak::Anywhere || style.GetWordBreak() == WordBreak::BreakAll
-                 || style.GetWordBreak() == WordBreak::BreakWord)
-             && style.GetWhiteSpaceCollapse() != WhiteSpaceCollapse::Preserve;
+             && (style.LineBreak() == LineBreak::Anywhere || style.WordBreak() == WordBreak::BreakAll
+                 || style.WordBreak() == WordBreak::BreakWord)
+             && style.WhiteSpaceCollapse() != WhiteSpaceCollapse::Preserve;
     }
 
     KRYS_NODISCARD bool
@@ -56,7 +56,7 @@ namespace krys::boo::layout
                                                      const InlineItemList &inlineItemList) noexcept
     {
       if (inlineItemList.size() != 1
-          || rootBox.Style().GetTextIndent() != style::ComputedStyle::InitialTextIndent())
+          || rootBox.Style().TextIndent() != style::ComputedStyle::InitialTextIndent())
       {
         return false;
       }
@@ -354,7 +354,7 @@ namespace krys::boo::layout
     {
       if (auto *inlineTextBox = DynamicDowncast<InlineTextBox>(*child))
       {
-        krys_debug_assert(inlineTextBox->Style().GetWhiteSpaceCollapse() != WhiteSpaceCollapse::Preserve);
+        krys_debug_assert(inlineTextBox->Style().WhiteSpaceCollapse() != WhiteSpaceCollapse::Preserve);
         auto &fontCascade = inlineTextBox->Style().GetFontCascade();
         auto &content = inlineTextBox->Content();
         auto contentLength = content.length();

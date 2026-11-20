@@ -150,7 +150,7 @@ namespace krys::boo::html
         style = const_cast<Element &>(element).ResolveComputedStyle(
           Element::ResolveComputedStyleMode::RenderedOnly);
       }
-      return style && style->Display() != DisplayType::None && style->GetVisibility() == Visibility::Visible;
+      return style && style->Display() != DisplayType::None && style->Visibility() == Visibility::Visible;
     }
 
     /// @brief Whether @p element is a canvas's fallback content, which isn't rendered, while the canvas is

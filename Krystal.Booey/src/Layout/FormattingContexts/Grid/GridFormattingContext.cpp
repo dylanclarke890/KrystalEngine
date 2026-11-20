@@ -55,7 +55,7 @@ namespace krys::boo::layout
         continue;
       }
 
-      gridItems.push_back({&gridItem, gridItem.Style().GetOrder().Value});
+      gridItems.push_back({&gridItem, gridItem.Style().Order().Value});
     }
 
     std::ranges::stable_sort(gridItems, {}, &GridItem::Order);
@@ -140,20 +140,20 @@ namespace krys::boo::layout
       auto normal = StyleSelfAlignmentData {ItemPosition::Normal};
       auto usedJustifySelf = [&]
       {
-        if (const auto &gridItemJustifySelf = gridItemStyle.GetJustifySelf(); !gridItemJustifySelf.IsAuto())
+        if (const auto &gridItemJustifySelf = gridItemStyle.JustifySelf(); !gridItemJustifySelf.IsAuto())
         {
           return gridItemJustifySelf.Resolve(normal);
         }
-        return Root().Style().GetJustifyItems().Resolve(normal);
+        return Root().Style().JustifyItems().Resolve(normal);
       };
 
       auto usedAlignSelf = [&]
       {
-        if (const auto &gridItemAlignSelf = gridItemStyle.GetAlignSelf(); !gridItemAlignSelf.IsAuto())
+        if (const auto &gridItemAlignSelf = gridItemStyle.AlignSelf(); !gridItemAlignSelf.IsAuto())
         {
           return gridItemAlignSelf.Resolve(normal);
         }
-        return Root().Style().GetAlignItems().Resolve(normal);
+        return Root().Style().AlignItems().Resolve(normal);
       };
 
       auto inlineAxisSizes = PlacedGridItem::ComputedSizes {

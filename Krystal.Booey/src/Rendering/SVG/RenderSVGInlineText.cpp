@@ -117,8 +117,8 @@ namespace krys::boo
     RenderText::StyleDidChange(diff, oldStyle);
     UpdateScaledFont();
 
-    bool newPreserves = Style().GetWhiteSpaceCollapse() == WhiteSpaceCollapse::Preserve;
-    bool oldPreserves = oldStyle ? oldStyle->GetWhiteSpaceCollapse() == WhiteSpaceCollapse::Preserve : false;
+    bool newPreserves = Style().WhiteSpaceCollapse() == WhiteSpaceCollapse::Preserve;
+    bool oldPreserves = oldStyle ? oldStyle->WhiteSpaceCollapse() == WhiteSpaceCollapse::Preserve : false;
     if (oldPreserves && !newPreserves)
     {
       SetText(ApplySVGWhitespaceRules(OriginalText(), false), true);

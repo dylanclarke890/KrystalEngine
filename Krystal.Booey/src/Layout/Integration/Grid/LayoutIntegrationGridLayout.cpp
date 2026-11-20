@@ -155,7 +155,7 @@ namespace krys::boo::layout_integration
       return false;
     }
 
-    if (!renderGridStyle.GetMarginTrim().IsNone())
+    if (!renderGridStyle.MarginTrim().IsNone())
     {
       return false;
     }
@@ -171,7 +171,7 @@ namespace krys::boo::layout_integration
     }
 
     // Only grid-auto-flow: row and row dense are supported.
-    if (renderGridStyle.GetGridAutoFlow().IsColumn())
+    if (renderGridStyle.GridAutoFlow().IsColumn())
     {
       return false;
     }
@@ -190,7 +190,7 @@ namespace krys::boo::layout_integration
       return false;
     }
 
-    if (!renderGridStyle.GetGridTemplateAreas().IsNone())
+    if (!renderGridStyle.GridTemplateAreas().IsNone())
     {
       return false;
     }
@@ -264,17 +264,16 @@ namespace krys::boo::layout_integration
 
       // Normal and legacy (justify-items' initial value) behave as normal for grid items.
       auto normal = StyleSelfAlignmentData {ItemPosition::Normal};
-      auto usedJustifySelf = !gridItemStyle.GetJustifySelf().IsAuto()
-                               ? gridItemStyle.GetJustifySelf().Resolve(normal)
-                               : renderGridStyle.GetJustifyItems().Resolve(normal);
+      auto usedJustifySelf = !gridItemStyle.JustifySelf().IsAuto()
+                               ? gridItemStyle.JustifySelf().Resolve(normal)
+                               : renderGridStyle.JustifyItems().Resolve(normal);
       if (!IsSupportedSelfAlignment(usedJustifySelf))
       {
         return false;
       }
 
-      auto usedAlignSelf = !gridItemStyle.GetAlignSelf().IsAuto()
-                             ? gridItemStyle.GetAlignSelf().Resolve(normal)
-                             : renderGridStyle.GetAlignItems().Resolve(normal);
+      auto usedAlignSelf = !gridItemStyle.AlignSelf().IsAuto() ? gridItemStyle.AlignSelf().Resolve(normal)
+                                                               : renderGridStyle.AlignItems().Resolve(normal);
       if (!IsSupportedSelfAlignment(usedAlignSelf))
       {
         return false;

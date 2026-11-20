@@ -449,7 +449,7 @@ namespace krys::boo::tests
     auto *background = fixture.ById(u8"box")
                          .Renderer()
                          ->Style()
-                         .GetBackgroundLayers()
+                         .BackgroundLayers()
                          .UsedValues()
                          .begin()
                          ->GetImage()

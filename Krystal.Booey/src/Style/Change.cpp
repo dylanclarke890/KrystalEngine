@@ -58,7 +58,7 @@ namespace krys::boo::style
       {
         return true;
       }
-      if (s1.GetColumnSpan() != ColumnSpan::All)
+      if (s1.ColumnSpan() != ColumnSpan::All)
       {
         return false;
       }
@@ -87,7 +87,7 @@ namespace krys::boo::style
       {
         return true;
       }
-      if (s1.GetContent() != s2.GetContent())
+      if (s1.Content() != s2.Content())
       {
         return true;
       }

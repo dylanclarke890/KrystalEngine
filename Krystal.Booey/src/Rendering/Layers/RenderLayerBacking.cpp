@@ -538,7 +538,7 @@ namespace krys::boo
 
   void RenderLayerBacking::UpdateOpacity(const RenderStyle &style) noexcept
   {
-    _graphicsLayer->SetOpacity(CompositingOpacity(style.GetOpacity().Value.Value));
+    _graphicsLayer->SetOpacity(CompositingOpacity(style.Opacity().Value.Value));
   }
 
   void RenderLayerBacking::UpdateTransform(const RenderStyle &style) noexcept
@@ -714,7 +714,7 @@ namespace krys::boo
 
   void RenderLayerBacking::UpdateFilters(const RenderStyle &style) noexcept
   {
-    _canCompositeFilters = _graphicsLayer->SetFilters(ResolveFilters(style.GetFilter(), style));
+    _canCompositeFilters = _graphicsLayer->SetFilters(ResolveFilters(style.Filter(), style));
   }
 
   void RenderLayerBacking::UpdateBackdropFilters(const RenderStyle &style) noexcept
@@ -789,12 +789,12 @@ namespace krys::boo
     // FIXME: where is the blend mode updated when _ancestorClippingStacks come and go?
     if (_ancestorClippingStack)
     {
-      _ancestorClippingStack->Stack().front().ClippingLayer->SetBlendMode(style.GetBlendMode());
+      _ancestorClippingStack->Stack().front().ClippingLayer->SetBlendMode(style.BlendMode());
       _graphicsLayer->SetBlendMode(BlendMode::Normal);
     }
     else
     {
-      _graphicsLayer->SetBlendMode(style.GetBlendMode());
+      _graphicsLayer->SetBlendMode(style.BlendMode());
     }
   }
 
@@ -813,7 +813,7 @@ namespace krys::boo
     // The filters sample the contents layer: a composited image's, or a canvas's.
     auto minificationFilter = GraphicsLayer::ScalingFilter::Linear;
     auto magnificationFilter = GraphicsLayer::ScalingFilter::Linear;
-    switch (style.GetImageRendering())
+    switch (style.ImageRendering())
     {
       case ImageRendering::CrispEdges:
       case ImageRendering::Pixelated:
@@ -869,8 +869,8 @@ namespace krys::boo
     KRYS_NODISCARD bool HasNonZeroTransformOrigin(const RenderLayerModelObject &renderer) noexcept
     {
       const auto &style = renderer.Style();
-      auto fixedTransformOriginX = style.GetTransformOriginX().TryFixed();
-      auto fixedTransformOriginY = style.GetTransformOriginY().TryFixed();
+      auto fixedTransformOriginX = style.TransformOriginX().TryFixed();
+      auto fixedTransformOriginY = style.TransformOriginY().TryFixed();
       return (fixedTransformOriginX && !fixedTransformOriginX->IsZero())
              || (fixedTransformOriginY && !fixedTransformOriginY->IsZero());
     }
@@ -1493,7 +1493,7 @@ namespace krys::boo
     };
     _graphicsLayer->SetAnimationExtent(computeAnimationExtent());
     _graphicsLayer->SetPreserves3D(preserves3D);
-    _graphicsLayer->SetBackfaceVisibility(style.GetBackfaceVisibility() == BackfaceVisibility::Visible);
+    _graphicsLayer->SetBackfaceVisibility(style.BackfaceVisibility() == BackfaceVisibility::Visible);
 
     _graphicsLayer->SetPosition(primaryLayerPosition);
     _graphicsLayer->SetSize(SizeF(primaryGraphicsLayerRect.Size()));
@@ -2245,8 +2245,7 @@ namespace krys::boo
       return false;
     }
 
-    if (style::HasImageWithAttachment(Renderer().Style().GetBackgroundLayers(),
-                                      FillAttachment::LocalBackground))
+    if (style::HasImageWithAttachment(Renderer().Style().BackgroundLayers(), FillAttachment::LocalBackground))
     {
       return true;
     }
@@ -2600,7 +2599,7 @@ namespace krys::boo
       if (hasClipPath)
       {
         // If we have a mask, we need to paint the combined clip-path and mask into the mask layer.
-        if (hasMask || Renderer().Style().GetClipPath().IsReference()
+        if (hasMask || Renderer().Style().ClipPath().IsReference()
             || !GraphicsLayer::SupportsLayerType(GraphicsLayer::Type::Shape))
         {
           maskPhases.Add(GraphicsLayerPaintingPhase::ClipPath);
@@ -2685,7 +2684,7 @@ namespace krys::boo
         break;
       }
 
-      finalOpacity *= curr->Renderer().Style().GetOpacity().Value.Value;
+      finalOpacity *= curr->Renderer().Style().Opacity().Value.Value;
     }
 
     return finalOpacity;
@@ -2710,7 +2709,7 @@ namespace krys::boo
         return false;
       }
 
-      const auto &backgroundLayers = style.GetBackgroundLayers();
+      const auto &backgroundLayers = style.BackgroundLayers();
       if (backgroundLayers.UsedLength() > 1)
       {
         return false;
@@ -2844,7 +2843,7 @@ namespace krys::boo
       return;
     }
 
-    const auto &backgroundLayer = style.GetBackgroundLayers().UsedFirst();
+    const auto &backgroundLayer = style.BackgroundLayers().UsedFirst();
     auto backgroundBox = LayoutRect {BackgroundBoxForSimpleContainerPainting()};
     // FIXME: Absolute paint location is required here.
     auto geometry = BackgroundPainter::CalculateFillLayerImageGeometry(*GetRenderBox(), GetRenderBox(),
@@ -3029,7 +3028,7 @@ namespace krys::boo
       return false;
     }
 
-    if (Renderer().Style().GetBackgroundLayers().UsedFirst().GetClip() == FillBox::Text)
+    if (Renderer().Style().BackgroundLayers().UsedFirst().GetClip() == FillBox::Text)
     {
       return false;
     }
@@ -3312,8 +3311,8 @@ namespace krys::boo
       return false;
     }
 
-    if (Renderer().Style().GetImageRendering() == ImageRendering::CrispEdges
-        || Renderer().Style().GetImageRendering() == ImageRendering::Pixelated)
+    if (Renderer().Style().ImageRendering() == ImageRendering::CrispEdges
+        || Renderer().Style().ImageRendering() == ImageRendering::Pixelated)
     {
       return false;
     }
@@ -3446,7 +3445,7 @@ namespace krys::boo
   {
     KRYS_NODISCARD LayoutRect BackgroundRectForBox(const RenderBox &box) noexcept
     {
-      switch (box.Style().GetBackgroundLayers().UsedFirst().GetClip())
+      switch (box.Style().BackgroundLayers().UsedFirst().GetClip())
       {
         case FillBox::BorderBox:  return box.BorderBoxRect();
         case FillBox::PaddingBox: return box.PaddingBoxRect();
@@ -3899,16 +3898,16 @@ namespace krys::boo
     switch (property)
     {
       case AnimatedProperty::Translate:
-        applyOperation(style::ToPlatform<style::Translate> {}(style.GetTranslate(), size));
+        applyOperation(style::ToPlatform<style::Translate> {}(style.Translate(), size));
         break;
       case AnimatedProperty::Scale:
-        applyOperation(style::ToPlatform<style::Scale> {}(style.GetScale(), size));
+        applyOperation(style::ToPlatform<style::Scale> {}(style.Scale(), size));
         break;
       case AnimatedProperty::Rotate:
-        applyOperation(style::ToPlatform<style::Rotate> {}(style.GetRotate(), size));
+        applyOperation(style::ToPlatform<style::Rotate> {}(style.Rotate(), size));
         break;
       case AnimatedProperty::Transform:
-        style::ToPlatform<style::Transform> {}(style.GetTransform(), size).Apply(matrix);
+        style::ToPlatform<style::Transform> {}(style.Transform(), size).Apply(matrix);
         break;
       default: krys_debug_assert(false); break;
     }
@@ -4051,37 +4050,37 @@ namespace krys::boo
       if (currentKeyframe.AnimatesProperty(css::PropertyId::Rotate))
       {
         rotateVector.Insert(CreateUnique<GraphicsLayerTransformAnimationValue>(
-          offset, style::ToPlatform<style::Rotate> {}(keyframeStyle->GetRotate(), size).get(), tf));
+          offset, style::ToPlatform<style::Rotate> {}(keyframeStyle->Rotate(), size).get(), tf));
       }
 
       if (currentKeyframe.AnimatesProperty(css::PropertyId::Scale))
       {
         scaleVector.Insert(CreateUnique<GraphicsLayerTransformAnimationValue>(
-          offset, style::ToPlatform<style::Scale> {}(keyframeStyle->GetScale(), size).get(), tf));
+          offset, style::ToPlatform<style::Scale> {}(keyframeStyle->Scale(), size).get(), tf));
       }
 
       if (currentKeyframe.AnimatesProperty(css::PropertyId::Translate))
       {
         translateVector.Insert(CreateUnique<GraphicsLayerTransformAnimationValue>(
-          offset, style::ToPlatform<style::Translate> {}(keyframeStyle->GetTranslate(), size).get(), tf));
+          offset, style::ToPlatform<style::Translate> {}(keyframeStyle->Translate(), size).get(), tf));
       }
 
       if (currentKeyframe.AnimatesProperty(css::PropertyId::Transform))
       {
         transformVector.Insert(CreateUnique<GraphicsLayerTransformAnimationValue>(
-          offset, style::ToPlatform<style::Transform> {}(keyframeStyle->GetTransform(), size), tf));
+          offset, style::ToPlatform<style::Transform> {}(keyframeStyle->Transform(), size), tf));
       }
 
       if (currentKeyframe.AnimatesProperty(css::PropertyId::Opacity))
       {
-        opacityVector.Insert(CreateUnique<GraphicsLayerFloatAnimationValue>(
-          offset, keyframeStyle->GetOpacity().Value.Value, tf));
+        opacityVector.Insert(
+          CreateUnique<GraphicsLayerFloatAnimationValue>(offset, keyframeStyle->Opacity().Value.Value, tf));
       }
 
       if (currentKeyframe.AnimatesProperty(css::PropertyId::Filter))
       {
         filterVector.Insert(CreateUnique<GraphicsLayerFilterAnimationValue>(
-          offset, style::ToPlatform<style::Filter> {}(keyframeStyle->GetFilter()), tf));
+          offset, style::ToPlatform<style::Filter> {}(keyframeStyle->Filter()), tf));
       }
 
       if (currentKeyframe.AnimatesProperty(css::PropertyId::BackdropFilter))

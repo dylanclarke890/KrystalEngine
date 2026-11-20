@@ -119,13 +119,13 @@ namespace krys::boo
       Layer()->EstablishesTopLayerWillChange();
     }
     if (diff == style::DifferenceResult::RepaintLayer && Parent() && oldStyle
-        && oldStyle->GetClip() != newStyle.GetClip())
+        && oldStyle->Clip() != newStyle.Clip())
     {
       Layer()->ClearClipRectsIncludingDescendants();
     }
     // What a filter that moves pixels paints reaches past the layer's repaint rects, so when the filter
     // changes, all it painted is repainted, and all it paints after.
-    if (s_hadLayer && Parent() && oldStyle && oldStyle->GetFilter() != newStyle.GetFilter()
+    if (s_hadLayer && Parent() && oldStyle && oldStyle->Filter() != newStyle.Filter()
         && Layer()->FilterMovesPixels())
     {
       View().RepaintViewRectangle(Layer()->AbsoluteFilterRepaintRect());
@@ -138,7 +138,7 @@ namespace krys::boo
     UpdateFromStyle();
     RenderElement::StyleDidChange(diff, oldStyle);
 
-    if (HasLayer() && Parent() && oldStyle && oldStyle->GetFilter() != Style().GetFilter()
+    if (HasLayer() && Parent() && oldStyle && oldStyle->Filter() != Style().Filter()
         && Layer()->FilterMovesPixels())
     {
       View().RepaintViewRectangle(Layer()->AbsoluteFilterRepaintRect());
@@ -153,7 +153,7 @@ namespace krys::boo
     // account its new inline/block position rather than its old block/inline position.
     // Position changes and other types of display changes are handled elsewhere.
     if ((oldStyle && IsOutOfFlowPositioned() && Parent() && (Parent() != ContainingBlock()))
-        && (Style().GetPosition() == oldStyle->GetPosition())
+        && (Style().Position() == oldStyle->Position())
         && (Style().IsOriginalDisplayInlineType() != oldStyle->IsOriginalDisplayInlineType())
         && ((Style().IsOriginalDisplayBlockType()) || (Style().IsOriginalDisplayInlineType()))
         && ((oldStyle->IsOriginalDisplayBlockType()) || (oldStyle->IsOriginalDisplayInlineType())))
@@ -267,7 +267,7 @@ namespace krys::boo
   void RenderLayerModelObject::UpdateLayerTransform() noexcept
   {
     if (auto *box = DynamicDowncast<RenderBox>(*this);
-        box && MotionPath::NeedsUpdateAfterContainingBlockLayout(Style().GetOffsetPath()))
+        box && MotionPath::NeedsUpdateAfterContainingBlockLayout(Style().OffsetPath()))
     {
       if (auto *containingBlock = ContainingBlock())
       {
@@ -355,7 +355,7 @@ namespace krys::boo
 
   LegacyRenderSVGResourceClipper *RenderLayerModelObject::LegacySVGClipperResourceFromStyle() const noexcept
   {
-    if (auto clipPath = Style().GetClipPath().TryReference())
+    if (auto clipPath = Style().ClipPath().TryReference())
     {
       return ReferencedSVGResources::ReferencedClipperRenderer(TreeScopeForSVGReferences(), *clipPath);
     }

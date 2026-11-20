@@ -371,42 +371,42 @@ namespace krys::boo::style
     return _nonInheritedData->RareData->ViewTimelines;
   }
 
-  inline const Animations &ComputedStyleBase::GetAnimations() const
+  inline const Animations &ComputedStyleBase::Animations() const
   {
     return _nonInheritedData->MiscData->Animations;
   }
 
-  inline const Transitions &ComputedStyleBase::GetTransitions() const
+  inline const Transitions &ComputedStyleBase::Transitions() const
   {
     return _nonInheritedData->MiscData->Transitions;
   }
 
-  inline const BackgroundLayers &ComputedStyleBase::GetBackgroundLayers() const
+  inline const BackgroundLayers &ComputedStyleBase::BackgroundLayers() const
   {
     return _nonInheritedData->BackgroundData->Background;
   }
 
-  inline const MaskLayers &ComputedStyleBase::GetMaskLayers() const
+  inline const MaskLayers &ComputedStyleBase::MaskLayers() const
   {
     return _nonInheritedData->MiscData->Mask;
   }
 
-  inline const MaskBorder &ComputedStyleBase::GetMaskBorder() const
+  inline const MaskBorder &ComputedStyleBase::MaskBorder() const
   {
     return _nonInheritedData->RareData->MaskBorder->MaskBorder;
   }
 
-  inline const BorderImage &ComputedStyleBase::GetBorderImage() const
+  inline const BorderImage &ComputedStyleBase::BorderImage() const
   {
     return _nonInheritedData->SurroundData->Border.BorderImage->BorderImage;
   }
 
-  inline const TransformOrigin &ComputedStyleBase::GetTransformOrigin() const
+  inline const TransformOrigin &ComputedStyleBase::TransformOrigin() const
   {
     return _nonInheritedData->MiscData->Transform->Origin;
   }
 
-  inline const PerspectiveOrigin &ComputedStyleBase::GetPerspectiveOrigin() const
+  inline const PerspectiveOrigin &ComputedStyleBase::PerspectiveOrigin() const
   {
     return _nonInheritedData->RareData->PerspectiveOrigin;
   }

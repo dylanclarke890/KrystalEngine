@@ -66,8 +66,8 @@ namespace krys::boo::layout
         auto &style = previousInlineTextItem.Style();
         auto lineBreakIteratorFactory = text::CachedLineBreakIteratorFactory {
           previousInlineTextItem.GetInlineTextBox().Content(), style.ComputedLocale().GetPlatform(),
-          TextUtil::LineBreakIteratorMode(style.GetLineBreak()),
-          TextUtil::GetContentAnalysis(style.GetWordBreak())};
+          TextUtil::LineBreakIteratorMode(style.LineBreak()),
+          TextUtil::GetContentAnalysis(style.WordBreak())};
         auto softWrapOpportunityCandidate = nextInlineTextItem.Start();
         return TextUtil::FindNextBreakablePosition(lineBreakIteratorFactory, softWrapOpportunityCandidate,
                                                    style)
@@ -266,7 +266,7 @@ namespace krys::boo::layout
     // indentation also applies to all lines where the previous line ends with a hard break. [Integration]
     // root()->parent() would normally produce a valid layout box.
     auto shouldIndent = false;
-    auto &textIndent = root.Style().GetTextIndent();
+    auto &textIndent = root.Style().TextIndent();
     if (textIndent.EachLine.has_value())
     {
       shouldIndent =
@@ -370,13 +370,13 @@ namespace krys::boo::layout
 
     auto computedHorizontalAlignment = [&]
     {
-      auto textAlign = rootStyle.GetTextAlign();
+      auto textAlign = rootStyle.TextAlign();
       if (!isLastLineOrLineEndsWithForcedLineBreak)
       {
         return textAlign;
       }
       // The last line before a forced break or the end of the block is aligned according to text-align-last.
-      switch (rootStyle.GetTextAlignLast())
+      switch (rootStyle.TextAlignLast())
       {
         case style::TextAlignLast::Auto:
           if (textAlign == style::TextAlign::Justify)
@@ -557,11 +557,11 @@ namespace krys::boo::layout
         // 'white-space: break-spaces' and '-webkit-line-break: after-white-space': line breaking opportunity
         // exists after every preserved white space character, but not before.
         auto &style = nextInlineTextItem.Style();
-        return style.GetWhiteSpaceCollapse() != WhiteSpaceCollapse::BreakSpaces
-               && style.GetLineBreak() != LineBreak::AfterWhiteSpace;
+        return style.WhiteSpaceCollapse() != WhiteSpaceCollapse::BreakSpaces
+               && style.LineBreak() != LineBreak::AfterWhiteSpace;
       }
-      if (previous.Style().GetLineBreak() == LineBreak::Anywhere
-          || next.Style().GetLineBreak() == LineBreak::Anywhere)
+      if (previous.Style().LineBreak() == LineBreak::Anywhere
+          || next.Style().LineBreak() == LineBreak::Anywhere)
       {
         // which elements’ line-break, word-break, and overflow-wrap properties control the determination of
         // soft wrap opportunities at such boundaries is undefined in this level. There is a soft wrap
@@ -735,12 +735,12 @@ namespace krys::boo::layout
     krys_debug_assert(layoutBox.IsInlineBox() || &layoutBox == &rootBox);
 
     auto &style = layoutBox.Style();
-    auto hasTextEmphasis = !style.GetTextEmphasisStyle().IsNone();
+    auto hasTextEmphasis = !style.TextEmphasisStyle().IsNone();
     if (!hasTextEmphasis)
     {
       return {};
     }
-    auto emphasisPosition = style.GetTextEmphasisPosition();
+    auto emphasisPosition = style.TextEmphasisPosition();
     // Normally we resolve visual -> logical values at pre-layout time, but emphasis values are not part of
     // the general box geometry.
     auto hasAboveTextEmphasis = false;
@@ -779,7 +779,7 @@ namespace krys::boo::layout
     if (auto *rubyBase = enclosingRubyBase();
         rubyBase && RubyFormattingContext::HasInterlinearAnnotation(*rubyBase))
     {
-      auto annotationPosition = rubyBase->Style().GetRubyPosition();
+      auto annotationPosition = rubyBase->Style().RubyPosition();
       if ((hasAboveTextEmphasis && annotationPosition == RubyPosition::Over)
           || (hasUnderTextEmphasis && annotationPosition == RubyPosition::Under))
       {
@@ -788,7 +788,7 @@ namespace krys::boo::layout
       }
     }
     auto annotationSize =
-      style.GetFontCascade().FloatEmphasisMarkHeight(style.GetTextEmphasisStyle().MarkString());
+      style.GetFontCascade().FloatEmphasisMarkHeight(style.TextEmphasisStyle().MarkString());
     return {hasAboveTextEmphasis ? annotationSize : 0.f, hasAboveTextEmphasis ? 0.f : annotationSize};
   }
 
@@ -810,7 +810,7 @@ namespace krys::boo::layout
     }
 
     // Truncation is in effect when the block container has overflow other than visible.
-    if (rootStyle.OverflowX() != Overflow::Visible && rootStyle.GetTextOverflow() == TextOverflow::Ellipsis)
+    if (rootStyle.OverflowX() != Overflow::Visible && rootStyle.TextOverflow() == TextOverflow::Ellipsis)
     {
       return LineEndingTruncationPolicy::WhenContentOverflowsInInlineDirection;
     }

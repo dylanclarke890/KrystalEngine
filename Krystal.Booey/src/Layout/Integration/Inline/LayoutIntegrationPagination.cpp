@@ -52,7 +52,7 @@ namespace krys::boo::layout_integration
 
       auto &renderer = Downcast<RenderBox>(*floatBox.LayoutBox()->RendererForIntegration());
       bool isUnsplittable =
-        renderer.IsUnsplittableForPagination() || renderer.Style().GetBreakInside() == BreakInside::Avoid;
+        renderer.IsUnsplittableForPagination() || renderer.Style().BreakInside() == BreakInside::Avoid;
 
       auto placedByLine = floatBox.PlacedByLine();
       if (!placedByLine)
@@ -92,8 +92,8 @@ namespace krys::boo::layout_integration
     Maybe<uint64> previousPageBreakIndex;
     Maybe<LayoutRestartLine> layoutRestartLine;
 
-    auto widowsValue = flow.Style().GetWidows().TryValue();
-    auto orphansValue = flow.Style().GetOrphans().TryValue();
+    auto widowsValue = flow.Style().Widows().TryValue();
+    auto orphansValue = flow.Style().Orphans().TryValue();
     uint64 widows = widowsValue ? widowsValue->Value : 0;
     uint64 orphans = orphansValue ? orphansValue->Value : 2;
 

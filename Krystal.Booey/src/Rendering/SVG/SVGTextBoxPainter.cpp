@@ -227,7 +227,7 @@ namespace krys::boo
     auto &style = parentRenderer.Style();
 
     bool hasFill = style.HasFill();
-    bool hasVisibleStroke = style.HasStroke() && style.GetStrokeWidth().IsPossiblyPositive();
+    bool hasVisibleStroke = style.HasStroke() && style.StrokeWidth().IsPossiblyPositive();
 
     const RenderStyle *selectionStyle = &style;
     if (hasSelection && shouldPaintSelectionHighlight)
@@ -243,7 +243,7 @@ namespace krys::boo
         if (!hasVisibleStroke)
         {
           hasVisibleStroke =
-            selectionStyle->HasStroke() && selectionStyle->GetStrokeWidth().IsPossiblyPositive();
+            selectionStyle->HasStroke() && selectionStyle->StrokeWidth().IsPossiblyPositive();
         }
       }
       else
@@ -380,7 +380,7 @@ namespace krys::boo
 
     if (PaintingResourceMode().Contains(RenderSVGResourceMode::ApplyToStroke))
     {
-      if (style.GetVectorEffect() == VectorEffect::NonScalingStroke)
+      if (style.VectorEffect() == VectorEffect::NonScalingStroke)
       {
         if (style.GetFontDescription().GetTextRenderingMode() == TextRenderingMode::GeometricPrecision)
         {
@@ -499,7 +499,7 @@ namespace krys::boo
       {
         renderer = &parentBox->Renderer();
 
-        if (!renderer->Style().GetTextDecorationLine().IsNone())
+        if (!renderer->Style().TextDecorationLine().IsNone())
         {
           break;
         }
@@ -531,7 +531,7 @@ namespace krys::boo
           }
           break;
         case style::PaintType::Stroke:
-          if (decorationStyle.HasStroke() && decorationStyle.GetStrokeWidth().IsPossiblyPositive())
+          if (decorationStyle.HasStroke() && decorationStyle.StrokeWidth().IsPossiblyPositive())
           {
             _paintingResourceMode = RenderSVGResourceMode::ApplyToStroke;
             PaintDecorationWithStyle(decoration, fragment, *decorationRenderer);
@@ -606,7 +606,7 @@ namespace krys::boo
     krys_debug_assert(scalingFactor);
 
     const auto &scaledFont = Renderer().ScaledFont();
-    const auto &shadows = style.GetTextShadow();
+    const auto &shadows = style.TextShadow();
 
     PointF textOrigin(fragment.X, fragment.Y);
     SizeF textSize(fragment.Width, fragment.Height);

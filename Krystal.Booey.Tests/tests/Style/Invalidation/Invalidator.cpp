@@ -51,7 +51,7 @@ namespace krys::boo::style::tests
     document.UpdateStyleIfNeeded();
     auto &a = fixture.ById(u8"a");
     auto &b = fixture.ById(u8"b");
-    REQUIRE(Rendered(a).GetColor() == Red);
+    REQUIRE(Rendered(a).Color() == Red);
 
     SECTION("An added style sheet invalidates the elements its rules match")
     {
@@ -64,8 +64,8 @@ namespace krys::boo::style::tests
       CHECK(b.StyleValidity() == Validity::Valid);
 
       document.UpdateStyleIfNeeded();
-      CHECK(Rendered(a).GetColor() == Blue);
-      CHECK(Rendered(b).GetColor() == Red);
+      CHECK(Rendered(a).Color() == Blue);
+      CHECK(Rendered(b).Color() == Red);
 
       SECTION("A removed one rebuilds all style")
       {
@@ -74,7 +74,7 @@ namespace krys::boo::style::tests
         CHECK(document.HasPendingFullStyleRebuild());
 
         document.UpdateStyleIfNeeded();
-        CHECK(Rendered(a).GetColor() == Red);
+        CHECK(Rendered(a).Color() == Red);
       }
     }
 
@@ -87,7 +87,7 @@ namespace krys::boo::style::tests
       CHECK(document.HasPendingFullStyleRebuild());
 
       document.UpdateStyleIfNeeded();
-      CHECK(Rendered(a).GetColor() == Blue);
+      CHECK(Rendered(a).Color() == Blue);
     }
 
     SECTION("Media and nested style rules are looked into")
@@ -101,8 +101,8 @@ namespace krys::boo::style::tests
       CHECK(b.StyleValidity() == Validity::ElementInvalid);
 
       document.UpdateStyleIfNeeded();
-      CHECK(Rendered(a).GetColor() == Blue);
-      CHECK(Rendered(b).GetColor() == Blue);
+      CHECK(Rendered(a).Color() == Blue);
+      CHECK(Rendered(b).Color() == Blue);
     }
   }
 
@@ -161,14 +161,14 @@ namespace krys::boo::style::tests
     REQUIRE_FALSE(shadow->AppendChild(*inner).HasException());
     REQUIRE_FALSE(shadow->AppendChild(*slot).HasException());
     document.UpdateStyleIfNeeded();
-    REQUIRE(Rendered(*inner).GetColor() != Blue);
+    REQUIRE(Rendered(*inner).Color() != Blue);
 
     SECTION("An added sheet invalidates its shadow tree")
     {
       auto style = CreateStyle(document, u8".i { color: rgb(0, 0, 255) }");
       REQUIRE_FALSE(shadow->AppendChild(*style).HasException());
       document.UpdateStyleIfNeeded();
-      CHECK(Rendered(*inner).GetColor() == Blue);
+      CHECK(Rendered(*inner).Color() == Blue);
     }
 
     SECTION(":host and ::slotted() rules invalidate the host and its children")
@@ -176,7 +176,7 @@ namespace krys::boo::style::tests
       auto style = CreateStyle(document, u8":host { color: rgb(0, 0, 255) } ::slotted(.s) { width: 5px }");
       REQUIRE_FALSE(shadow->AppendChild(*style).HasException());
       document.UpdateStyleIfNeeded();
-      CHECK(Rendered(host).GetColor() == Blue);
+      CHECK(Rendered(host).Color() == Blue);
       CHECK(ResolverFixture::Serialised(Rendered(fixture.ById(u8"light")),
                                         Rendered(fixture.ById(u8"light")).Width())
             == "5px");
@@ -189,7 +189,7 @@ namespace krys::boo::style::tests
       // Changing the sheet's contents invalidates them again.
       REQUIRE_FALSE(style->TextContent(u8".i { color: rgb(0, 0, 255) }").HasException());
       document.UpdateStyleIfNeeded();
-      CHECK(Rendered(host).GetColor() != Blue);
+      CHECK(Rendered(host).Color() != Blue);
       CHECK(ResolverFixture::Serialised(Rendered(fixture.ById(u8"light")),
                                         Rendered(fixture.ById(u8"light")).Width())
             == "auto");
@@ -201,13 +201,13 @@ namespace krys::boo::style::tests
       auto style = CreateStyle(document, u8"#host::part(p) { color: rgb(0, 0, 255) }");
       REQUIRE_FALSE(document.Body()->AppendChild(*style).HasException());
       document.UpdateStyleIfNeeded();
-      CHECK(Rendered(*inner).GetColor() == Blue);
+      CHECK(Rendered(*inner).Color() == Blue);
 
       // Changing the part name invalidates the element.
       REQUIRE_FALSE(inner->SetAttribute(u8"part", u8"q").HasException());
       CHECK(inner->StyleValidity() == Validity::ElementInvalid);
       document.UpdateStyleIfNeeded();
-      CHECK(Rendered(*inner).GetColor() != Blue);
+      CHECK(Rendered(*inner).Color() != Blue);
 
       Invalidator::InvalidateShadowParts(*shadow);
       CHECK(inner->StyleValidity() == Validity::ElementInvalid);

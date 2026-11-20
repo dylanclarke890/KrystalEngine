@@ -41,7 +41,7 @@ namespace krys::boo::tests
         Document().UpdateStyleIfNeeded();
         auto *style = ById(id).GetRenderStyle();
         REQUIRE(style);
-        return style->GetColor().ToColorTypeLossy<SRGBA<uint8>>();
+        return style->Color().ToColorTypeLossy<SRGBA<uint8>>();
       }
 
       void SetHostDark(bool dark) noexcept

@@ -94,7 +94,7 @@ namespace krys::boo::style::tests
     CHECK(fixture.Blended(css::PropertyId::Color, 0.5) == "rgb(100, 50, 25)");
     // Without a renderer, the extractor serialises transforms as `none`: check the computed value.
     auto transformed = fixture.Interpolated(css::PropertyId::Transform, 0.25);
-    CHECK(ResolverFixture::Serialised(*transformed, transformed->GetTransform()) == "translateX(25px)");
+    CHECK(ResolverFixture::Serialised(*transformed, transformed->Transform()) == "translateX(25px)");
     CHECK(fixture.Blended(css::PropertyId::FontWeight, 0.5) == "500");
     CHECK(fixture.Blended(css::PropertyId::ZIndex, 0.5) == "6");
 
