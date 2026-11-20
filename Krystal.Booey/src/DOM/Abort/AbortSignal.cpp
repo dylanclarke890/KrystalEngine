@@ -1,5 +1,4 @@
 ﻿#include "Krystal.Booey/DOM/Abort/AbortSignal.hpp"
-#include "Krystal.Booey/DOM/Abort/AbortController.hpp"
 #include "Krystal.Booey/DOM/Algorithms/AbortAlgorithms.hpp"
 #include "Krystal.Booey/DOM/Events/EventListener.hpp"
 #include "Krystal.Booey/DOM/Events/EventNames.hpp"

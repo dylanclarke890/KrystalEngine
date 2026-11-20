@@ -29,7 +29,6 @@
  */
 
 #include "Krystal.Booey/DOM/Internals/NodeRareData.hpp"
-#include "Krystal.Booey/DOM/Abort/AbortSignal.hpp"
 #include "Krystal.Booey/DOM/Collections/HTMLCollection.hpp"
 #include "Krystal.Booey/DOM/Collections/LiveHTMLCollection.hpp"
 #include "Krystal.Booey/DOM/Collections/LiveNodeList.hpp"

@@ -1,5 +1,4 @@
 ﻿#include "Krystal.Booey/DOM/Algorithms/NodeAlgorithms.hpp"
-#include "Krystal.Booey/DOM/Abort/AbortSignal.hpp"
 #include "Krystal.Booey/DOM/Algorithms/ElementAlgorithms.hpp"
 #include "Krystal.Booey/DOM/Algorithms/ExtensibilityHooks.hpp"
 #include "Krystal.Booey/DOM/Algorithms/MutationAlgorithms.hpp"

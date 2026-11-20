@@ -104,7 +104,7 @@ namespace krys::boo::dom::tests
     {
       AbortController controller;
       AddEventListenerOptions options;
-      options.Signal = ShareRefPtr(controller.Signal());
+      options.Signal = controller.Signal();
       Target->AddEventListener(u8"ping", [&](Event &) { ++calls; }, options).Release();
       auto kept = Target->AddEventListener(u8"pong", [&](Event &) { ++calls; }, options);
       controller.Abort();
@@ -120,7 +120,7 @@ namespace krys::boo::dom::tests
       AbortController controller;
       controller.Abort();
       AddEventListenerOptions options;
-      options.Signal = ShareRefPtr(controller.Signal());
+      options.Signal = controller.Signal();
       auto handle = Target->AddEventListener(u8"ping", [&](Event &) { ++calls; }, options);
       CHECK_FALSE(handle.IsActive());
     }

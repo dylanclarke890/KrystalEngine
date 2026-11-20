@@ -1,7 +1,6 @@
 ﻿#include "Krystal.Booey/DOM/Events/EventTarget.hpp"
 #include "catch2/catch_test_macros.hpp"
 #include "Krystal.Booey/DOM/Abort/AbortController.hpp"
-#include "Krystal.Booey/DOM/Abort/AbortSignal.hpp"
 #include "Krystal.Booey/DOM/Events/CustomEvent.hpp"
 #include "Krystal.Booey/DOM/Events/Event.hpp"
 #include "Krystal.Booey/DOM/Events/EventListener.hpp"
@@ -155,7 +154,7 @@ namespace krys::boo::dom::tests
 
       AbortController controller;
       AddEventListenerOptions options;
-      options.Signal = ShareRefPtr(controller.Signal());
+      options.Signal = controller.Signal();
       target->AddEventListener(event_names::Load, Ref<EventListenerCallback> {imgFetched}, options);
       controller.Abort();
       REQUIRE_FALSE(target->DispatchEvent(*CreateRef<Event>(event_names::Load)).HasException());

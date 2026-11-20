@@ -25,6 +25,7 @@
  */
 
 #include "Krystal.Booey/HTML/CloseWatcher/CloseWatcher.hpp"
+#include "Krystal.Booey/DOM/Abort/AbortSignal.hpp"
 #include "Krystal.Booey/DOM/Algorithms/AbortAlgorithms.hpp"
 #include "Krystal.Booey/DOM/Algorithms/EventDispatcher.hpp"
 #include "Krystal.Booey/DOM/Events/Event.hpp"
@@ -75,7 +76,7 @@ namespace krys::boo::html
     };
 
     // 3. If options["signal"] exists:
-    if (RefPtr<AbortSignal> signal = options.Signal)
+    if (auto *signal = options.Signal)
     {
       // 3.1. If options["signal"] is aborted, then destroy closeWatcher.
       if (signal->Aborted())

@@ -26,7 +26,6 @@
 #pragma once
 
 #include "Krystal.Booey/DOM/Events/ToggleEventTask.hpp"
-#include "Krystal.Booey/HTML/CloseWatcher/CloseWatcher.hpp"
 #include "Krystal.Core/Attributes.hpp"
 #include "Krystal.Core/Enum.hpp"
 #include "Krystal.Core/Macros.hpp"
@@ -37,6 +36,11 @@ namespace krys::boo
 {
   class Element;
   class HTMLElement;
+}
+
+namespace krys::boo::html
+{
+  class CloseWatcher;
 }
 
 namespace krys::boo::dom
@@ -95,6 +99,8 @@ namespace krys::boo::dom
 
   public:
     PopoverData() noexcept = default;
+
+    ~PopoverData() noexcept;
 
     KRYS_NODISCARD PopoverState GetPopoverState() const noexcept
     {
@@ -158,10 +164,7 @@ namespace krys::boo::dom
       return _closeWatcher.get();
     }
 
-    void SetCloseWatcher(RefPtr<html::CloseWatcher> &&closeWatcher) noexcept
-    {
-      _closeWatcher = krys::move(closeWatcher);
-    }
+    void SetCloseWatcher(RefPtr<html::CloseWatcher> &&closeWatcher) noexcept;
 
     /// @see https://html.spec.whatwg.org/#popover-hiding
     KRYS_NODISCARD bool IsHidingPopover() const noexcept

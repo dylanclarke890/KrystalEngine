@@ -1033,7 +1033,7 @@ namespace krys::boo
       instance->AddEventListener(
         listener.Type(), ShareRef(*listener.Callback()),
         AddEventListenerOptions {
-          {listener.Capture()}, listener.Once(), listener.Passive(), ShareRefPtr(listener.Signal())});
+          {listener.Capture()}, listener.Once(), listener.Passive(), listener.Signal()});
     }
   }
 

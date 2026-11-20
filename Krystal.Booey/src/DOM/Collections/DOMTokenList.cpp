@@ -24,7 +24,6 @@
  */
 
 #include "Krystal.Booey/DOM/Collections/DOMTokenList.hpp"
-#include "Krystal.Booey/DOM/Abort/AbortSignal.hpp"
 #include "Krystal.Booey/DOM/Algorithms/ElementAlgorithms.hpp"
 #include "Krystal.Booey/DOM/Algorithms/OrderedSet.hpp"
 #include "Krystal.Booey/DOM/Nodes/Attr.hpp"

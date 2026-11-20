@@ -1,5 +1,4 @@
 ﻿#include "Krystal.Booey/DOM/Collections/LiveNodeList.hpp"
-#include "Krystal.Booey/DOM/Abort/AbortSignal.hpp"
 #include "Krystal.Booey/DOM/Iterators/SubtreeRanges.hpp"
 #include "Krystal.Booey/DOM/Nodes/Attr.hpp"
 #include "Krystal.Booey/DOM/Nodes/Document.hpp"

@@ -24,7 +24,6 @@
  */
 
 #include "Krystal.Booey/DOM/Ranges/BoundaryPoint.hpp"
-#include "Krystal.Booey/DOM/Abort/AbortSignal.hpp"
 #include "Krystal.Booey/DOM/Algorithms/TreeQueries.hpp"
 #include "Krystal.Booey/DOM/Nodes/Attr.hpp"
 #include "Krystal.Booey/DOM/Nodes/ContainerNode.hpp"

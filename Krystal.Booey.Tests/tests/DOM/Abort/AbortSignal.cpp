@@ -283,7 +283,7 @@ namespace krys::boo::dom::tests
         auto dependent = AbortSignal::Any({ShareRef(source)});
         weakDependent = CreateWeakPtr(dependent.get());
         AddEventListenerOptions options;
-        options.Signal = dependent;
+        options.Signal = dependent.get();
         listener = target->AddEventListener(event_names::Load, [](Event &) {}, options);
       }
       REQUIRE(weakDependent);

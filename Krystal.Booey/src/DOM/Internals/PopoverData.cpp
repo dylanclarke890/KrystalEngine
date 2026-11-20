@@ -25,9 +25,17 @@
  */
 
 #include "Krystal.Booey/DOM/Internals/PopoverData.hpp"
+#include "Krystal.Booey/HTML/CloseWatcher/CloseWatcher.hpp"
 
 namespace krys::boo::dom
 {
+  PopoverData::~PopoverData() noexcept = default;
+
+  void PopoverData::SetCloseWatcher(RefPtr<html::CloseWatcher> &&closeWatcher) noexcept
+  {
+    _closeWatcher = krys::move(closeWatcher);
+  }
+
   Ref<ToggleEventTask> PopoverData::EnsureToggleEventTask(Element &element) noexcept
   {
     if (!_toggleEventTask)

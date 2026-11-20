@@ -1,7 +1,6 @@
 ﻿#include "Krystal.Booey/DOM/Collections/HTMLCollection.hpp"
 #include "catch2/catch_test_macros.hpp"
 #include "Krystal.Booey.Tests/DOM/TestElement.hpp"
-#include "Krystal.Booey/DOM/Abort/AbortSignal.hpp"
 #include "Krystal.Booey/DOM/Collections/LiveHTMLCollection.hpp"
 #include "Krystal.Booey/DOM/Collections/StaticHTMLCollection.hpp"
 #include "Krystal.Booey/DOM/Nodes/Attr.hpp"

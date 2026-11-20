@@ -1,5 +1,4 @@
 ﻿#include "Krystal.Booey/DOM/MutationObservers/MutationObserver.hpp"
-#include "Krystal.Booey/DOM/Abort/AbortSignal.hpp"
 #include "Krystal.Booey/DOM/Algorithms/MutationObserverAlgorithms.hpp"
 #include "Krystal.Booey/DOM/MutationObservers/TransientRegisteredObserver.hpp"
 #include "Krystal.Booey/DOM/Nodes/Attr.hpp"

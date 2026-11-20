@@ -757,7 +757,7 @@ namespace krys::boo
           descendant.AddEventListener(
             listener->Type(), ShareRef(*listener->Callback()),
             AddEventListenerOptions {
-              {listener->Capture()}, listener->Once(), listener->Passive(), ShareRefPtr(listener->Signal())});
+              {listener->Capture()}, listener->Once(), listener->Passive(), listener->Signal()});
         }
         return descendant;
       });

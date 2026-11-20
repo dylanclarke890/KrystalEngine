@@ -1260,6 +1260,7 @@ set(KRYSTAL_BOOEY_DOM_SOURCES
   src/DOM/Events/ContentVisibilityAutoStateChangeEvent.cpp
   src/DOM/Events/DragEvent.cpp
   src/DOM/Events/Event.cpp
+  src/DOM/Events/EventListener.cpp
   src/DOM/Events/EventListenerHandle.cpp
   src/DOM/Events/EventPathItem.cpp
   src/DOM/Events/EventTarget.cpp
@@ -4223,7 +4224,6 @@ target_precompile_headers(Krystal.Booey
     include/Krystal.Booey/CSS/Values/Primitives/PrimitiveNumeric.hpp
     include/Krystal.Booey/CSS/Values/Value.hpp
 
-    include/Krystal.Booey/DOM/Abort/AbortSignal.hpp
     include/Krystal.Booey/DOM/Iterators/SubtreeRanges.hpp
     include/Krystal.Booey/DOM/Nodes/Attr.hpp
     include/Krystal.Booey/DOM/Nodes/Document.hpp

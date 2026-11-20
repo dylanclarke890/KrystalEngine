@@ -1,5 +1,4 @@
 ﻿#include "Krystal.Booey/DOM/Mixins/ChildNode.hpp"
-#include "Krystal.Booey/DOM/Abort/AbortSignal.hpp"
 #include "Krystal.Booey/DOM/Algorithms/MutationAlgorithms.hpp"
 #include "Krystal.Booey/DOM/Iterators/SubtreeRanges.hpp"
 #include "Krystal.Booey/DOM/Mixins/ParentNode.hpp"

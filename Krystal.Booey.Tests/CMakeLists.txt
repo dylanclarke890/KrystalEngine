@@ -57,7 +57,6 @@ target_precompile_headers(Krystal.Booey.Tests
     <catch2/catch_test_macros.hpp>
     <catch2/matchers/catch_matchers_floating_point.hpp>
 
-    <Krystal.Booey/DOM/Abort/AbortSignal.hpp>
     <Krystal.Booey/DOM/Iterators/SubtreeRanges.hpp>
     <Krystal.Booey/DOM/Nodes/Attr.hpp>
     <Krystal.Booey/DOM/Nodes/Document.hpp>
