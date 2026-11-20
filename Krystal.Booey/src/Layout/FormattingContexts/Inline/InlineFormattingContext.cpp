@@ -232,8 +232,8 @@ namespace krys::boo::layout
     // FIXME: This needs partial support when line-clamped content has nested blocks.
     inlineLayoutState.SetLineCountWithInlineContentIncludingNestedBlocks(inlineLayoutState.LineCount());
 
-    auto textWrapStyle = Root().Style().GetTextWrapStyle();
-    if (Root().Style().GetTextWrapMode() == TextWrapMode::Wrap
+    auto textWrapStyle = Root().Style().TextWrapStyle();
+    if (Root().Style().TextWrapMode() == TextWrapMode::Wrap
         && (textWrapStyle == TextWrapStyle::Balance || textWrapStyle == TextWrapStyle::Pretty))
     {
       auto constrainer = InlineContentConstrainer {*this, inlineItemList, constraints.Horizontal()};
@@ -636,7 +636,7 @@ namespace krys::boo::layout
     {
       // Special 'line-break: after-white-space' behavior where min/max width trims trailing whitespace, while
       // layout should preserve _overflowing_ trailing whitespace.
-      if (Root().Style().GetLineBreak() != LineBreak::AfterWhiteSpace
+      if (Root().Style().LineBreak() != LineBreak::AfterWhiteSpace
           || !lineContent.TrimmedTrailingWhitespaceWidth)
       {
         return null;
@@ -700,7 +700,7 @@ namespace krys::boo::layout
   {
     auto &inlineLayoutState = GetLayoutState();
 
-    if (auto limitLinesValue = Root().Style().GetHyphenateLimitLines().TryValue())
+    if (auto limitLinesValue = Root().Style().HyphenateLimitLines().TryValue())
     {
       inlineLayoutState.SetHyphenationLimitLines(static_cast<size_t>(limitLinesValue->Value));
     }

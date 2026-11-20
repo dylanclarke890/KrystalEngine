@@ -12,7 +12,7 @@ namespace krys::boo::style::tests
     auto style = ResolveForDocument(*document);
 
     CHECK(style.Display() == DisplayType::Block);
-    CHECK(style.GetUserModify() == UserModify::ReadOnly);
+    CHECK(style.UserModify() == UserModify::ReadOnly);
     CHECK(style.ComputedFontSize() == 16);
     CHECK(style.GetFontDescription().SpecifiedSize() == 16);
     CHECK(style.GetFontDescription().FirstFamily() == css::generic_font_family_names::StandardFamily());

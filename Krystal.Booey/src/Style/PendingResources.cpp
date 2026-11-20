@@ -57,12 +57,12 @@ namespace krys::boo::style
 
   void LoadPendingResources(RenderStyle &style, boo::Document &document, const boo::Element *element) noexcept
   {
-    for (auto &backgroundLayer : style.GetBackgroundLayers().UsedValues())
+    for (auto &backgroundLayer : style.BackgroundLayers().UsedValues())
     {
       LoadPendingImage(document, backgroundLayer.GetImage().TryStyleImage().get(), element);
     }
 
-    if (auto *contentData = style.GetContent().TryData())
+    if (auto *contentData = style.Content().TryData())
     {
       for (auto &contentItem : contentData->List)
       {
@@ -73,7 +73,7 @@ namespace krys::boo::style
       }
     }
 
-    if (auto cursorImages = style.GetCursor().Images)
+    if (auto cursorImages = style.Cursor().Images)
     {
       for (auto &cursorImage : *cursorImages)
       {
@@ -82,18 +82,18 @@ namespace krys::boo::style
     }
 
     LoadPendingImage(document, style.ListStyleImage().TryStyleImage().get(), element);
-    LoadPendingImage(document, style.GetBorderImageSource().TryStyleImage().get(), element);
-    LoadPendingImage(document, style.GetMaskBorderSource().TryStyleImage().get(), element);
+    LoadPendingImage(document, style.BorderImageSource().TryStyleImage().get(), element);
+    LoadPendingImage(document, style.MaskBorderSource().TryStyleImage().get(), element);
 
     // Masking operations may be sensitive to timing attacks that can be used to reveal the pixel data of
     // the image used as the mask. As a means to mitigate such attacks CSS mask images and shape-outside
     // images are retrieved in "Anonymous" mode, which uses a potentially CORS-enabled fetch.
-    for (auto &maskLayer : style.GetMaskLayers().UsedValues())
+    for (auto &maskLayer : style.MaskLayers().UsedValues())
     {
       LoadPendingImage(document, maskLayer.GetImage().TryStyleImage().get(), element, LoadPolicy::CORS);
     }
 
-    if (RefPtr<StyleImage> shapeValueImage = style.GetShapeOutside().GetImage())
+    if (RefPtr<StyleImage> shapeValueImage = style.ShapeOutside().GetImage())
     {
       LoadPendingImage(document, shapeValueImage.get(), element, LoadPolicy::Anonymous);
     }

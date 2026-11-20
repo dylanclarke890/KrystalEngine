@@ -72,7 +72,7 @@ namespace krys::boo
       };
 
       CaretAlignment alignment = AlignLogicalLeft;
-      switch (currentStyle.GetTextAlign())
+      switch (currentStyle.TextAlign())
       {
         case style::TextAlign::Left:
         case style::TextAlign::WebKitLeft:
@@ -162,7 +162,7 @@ namespace krys::boo
       float lineRight = lineSelectionRect.MaxX();
 
       bool rightAligned = false;
-      switch (root.Style().GetTextAlign())
+      switch (root.Style().TextAlign())
       {
         case style::TextAlign::Right:
         case style::TextAlign::WebKitRight:  rightAligned = writingMode.IsLogicalLeftLineLeft(); break;

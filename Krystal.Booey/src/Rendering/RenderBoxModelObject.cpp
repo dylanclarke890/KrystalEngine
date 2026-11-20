@@ -180,7 +180,7 @@ namespace krys::boo
     const auto &styleToUse = Style();
     SetHasVisibleBoxDecorations(HasVisibleBoxDecorationStyle());
     SetInline(styleToUse.IsDisplayInlineType());
-    SetPositionState(styleToUse.GetPosition());
+    SetPositionState(styleToUse.Position());
     SetHorizontalWritingMode(styleToUse.GetWritingMode().IsHorizontal());
     SetPaintContainmentApplies(ShouldApplyPaintContainment());
     if (Style().GetWritingMode().IsBlockFlipped())
@@ -1405,7 +1405,7 @@ namespace krys::boo
     }
 
     // Bail if we have any border-image for now. We could look at the image alpha to improve this.
-    if (!Style().GetBorderImageSource().IsNone())
+    if (!Style().BorderImageSource().IsNone())
     {
       return false;
     }

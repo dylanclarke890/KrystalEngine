@@ -65,7 +65,7 @@ namespace krys::boo::inline_iterator
                Direction(),
                false /* directionalOverride */,
                characterScanForCodePath};
-    textRun.SetTabSize(!style.CollapseWhiteSpace(), style::ToPlatform<style::TabSize> {}(style.GetTabSize()));
+    textRun.SetTabSize(!style.CollapseWhiteSpace(), style::ToPlatform<style::TabSize> {}(style.TabSize()));
     return textRun;
   }
 

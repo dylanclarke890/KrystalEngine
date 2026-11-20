@@ -211,14 +211,14 @@ namespace krys::boo::layout
     else
     {
       auto &style = inlineTextBox.Style();
-      auto directionalOverride = IsOverride(style.GetUnicodeBidi());
+      auto directionalOverride = IsOverride(style.UnicodeBidi());
       auto run =
         TextRun(view, contentLogicalLeft, {}, ExpansionBehavior::DefaultBehavior(),
                 directionalOverride ? style.GetWritingMode().BidiDirection() : text::TextDirection::LTR,
                 directionalOverride);
-      if (!style.CollapseWhiteSpace() && !style.GetTabSize().IsZero())
+      if (!style.CollapseWhiteSpace() && !style.TabSize().IsZero())
       {
-        run.SetTabSize(true, style::ToPlatform<style::TabSize> {}(style.GetTabSize()));
+        run.SetTabSize(true, style::ToPlatform<style::TabSize> {}(style.TabSize()));
       }
       // FIXME: consider moving this to TextRun ctor
       run.SetTextSpacingState(spacingState);
@@ -537,8 +537,8 @@ namespace krys::boo::layout
     // We need at least 1 character in the current inline text item and 2 more from previous inline items.
     auto lineBreakIteratorFactory =
       text::CachedLineBreakIteratorFactory {nextContent, nextContentStyle.ComputedLocale().GetPlatform(),
-                                            TextUtil::LineBreakIteratorMode(nextContentStyle.GetLineBreak()),
-                                            TextUtil::GetContentAnalysis(nextContentStyle.GetWordBreak())};
+                                            TextUtil::LineBreakIteratorMode(nextContentStyle.LineBreak()),
+                                            TextUtil::GetContentAnalysis(nextContentStyle.WordBreak())};
     // FIXME: We should look into the entire uncommitted content for more text context.
     char32 lastCharacter = 0;
     char32 secondToLastCharacter = 0;
@@ -553,7 +553,7 @@ namespace krys::boo::layout
             .CodePoint;
       }
     }
-    if (lastCharacter == text::SoftHyphen && previousContentStyle.GetHyphens() == Hyphens::None)
+    if (lastCharacter == text::SoftHyphen && previousContentStyle.Hyphens() == Hyphens::None)
     {
       return false;
     }
@@ -572,7 +572,7 @@ namespace krys::boo::layout
     using NoBreakSpaceBehavior = BreakablePositions::NoBreakSpaceBehavior;
 
     // No-break spaces only break with `nbsp-mode: space`, which isn't supported.
-    auto wordBreak = style.GetWordBreak();
+    auto wordBreak = style.WordBreak();
     if (wordBreak == WordBreak::KeepAll)
     {
       return BreakablePositions::Next<LineBreakRules::Special, WordBreakBehavior::KeepAll,
@@ -598,7 +598,7 @@ namespace krys::boo::layout
   bool TextUtil::ShouldPreserveSpacesAndTabs(const Box &layoutBox) noexcept
   {
     // https://www.w3.org/TR/css-text-4/#white-space-collapsing
-    auto whitespaceCollapse = layoutBox.Style().GetWhiteSpaceCollapse();
+    auto whitespaceCollapse = layoutBox.Style().WhiteSpaceCollapse();
     return whitespaceCollapse == WhiteSpaceCollapse::Preserve
            || whitespaceCollapse == WhiteSpaceCollapse::BreakSpaces;
   }
@@ -606,7 +606,7 @@ namespace krys::boo::layout
   bool TextUtil::ShouldPreserveNewline(const Box &layoutBox) noexcept
   {
     // https://www.w3.org/TR/css-text-4/#white-space-collapsing
-    auto whitespaceCollapse = layoutBox.Style().GetWhiteSpaceCollapse();
+    auto whitespaceCollapse = layoutBox.Style().WhiteSpaceCollapse();
     return whitespaceCollapse == WhiteSpaceCollapse::Preserve
            || whitespaceCollapse == WhiteSpaceCollapse::PreserveBreaks
            || whitespaceCollapse == WhiteSpaceCollapse::BreakSpaces;
@@ -615,14 +615,14 @@ namespace krys::boo::layout
   bool TextUtil::IsWrappingAllowed(const RenderStyle &style) noexcept
   {
     // https://www.w3.org/TR/css-text-4/#text-wrap
-    return style.GetTextWrapMode() != TextWrapMode::NoWrap;
+    return style.TextWrapMode() != TextWrapMode::NoWrap;
   }
 
   bool TextUtil::ShouldTrailingWhitespaceHang(const RenderStyle &style) noexcept
   {
     // https://www.w3.org/TR/css-text-4/#white-space-phase-2
-    return style.GetWhiteSpaceCollapse() == WhiteSpaceCollapse::Preserve
-           && style.GetTextWrapMode() != TextWrapMode::NoWrap;
+    return style.WhiteSpaceCollapse() == WhiteSpaceCollapse::Preserve
+           && style.TextWrapMode() != TextWrapMode::NoWrap;
   }
 
   text::TextBreakLineBehavior TextUtil::LineBreakIteratorMode(LineBreak lineBreak) noexcept
@@ -735,7 +735,7 @@ namespace krys::boo::layout
                                              const RenderStyle &style) noexcept
   {
     if (!inlineTextItem.Length()
-        || !style.GetHangingPunctuation().Contains(style::HangingPunctuationValue::First))
+        || !style.HangingPunctuation().Contains(style::HangingPunctuationValue::First))
     {
       return false;
     }
@@ -764,7 +764,7 @@ namespace krys::boo::layout
                                            const RenderStyle &style) noexcept
   {
     if (!inlineTextItem.Length()
-        || !style.GetHangingPunctuation().Contains(style::HangingPunctuationValue::Last))
+        || !style.HangingPunctuation().Contains(style::HangingPunctuationValue::Last))
     {
       return false;
     }
@@ -795,7 +795,7 @@ namespace krys::boo::layout
                                            const RenderStyle &style) noexcept
   {
     if (!inlineTextItem.Length()
-        || !style.GetHangingPunctuation().ContainsAny(
+        || !style.HangingPunctuation().ContainsAny(
           {style::HangingPunctuationValue::AllowEnd, style::HangingPunctuationValue::ForceEnd}))
     {
       return false;

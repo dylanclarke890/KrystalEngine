@@ -440,7 +440,7 @@ namespace krys::boo::tests
       fixture.Frame(50ms);
       auto *icon = generated(fixture, u8"s", PseudoElementType::PickerIcon);
       REQUIRE(icon);
-      CHECK(icon->Style().GetOpacity().Value.Value == Catch::Approx(0.25f));
+      CHECK(icon->Style().Opacity().Value.Value == Catch::Approx(0.25f));
       CHECK(fixture.Document->GetAnimations().size() == 1);
     }
 
@@ -457,7 +457,7 @@ namespace krys::boo::tests
       fixture.Frame(250ms);
       icon = generated(fixture, u8"s", PseudoElementType::PickerIcon);
       REQUIRE(icon);
-      CHECK(icon->Style().GetOpacity().Value.Value == Catch::Approx(0.25f));
+      CHECK(icon->Style().Opacity().Value.Value == Catch::Approx(0.25f));
     }
 
     SECTION("animating a checkmark, which ends with the picker")
@@ -477,7 +477,7 @@ namespace krys::boo::tests
       fixture.Frame(50ms);
       auto *checkmark = generated(fixture, u8"a", PseudoElementType::Checkmark);
       REQUIRE(checkmark);
-      CHECK(checkmark->Style().GetOpacity().Value.Value == Catch::Approx(0.25f));
+      CHECK(checkmark->Style().Opacity().Value.Value == Catch::Approx(0.25f));
       CHECK(fixture.Document->GetAnimations().size() == 1);
 
       REQUIRE_FALSE(select.SelectPopover()->HidePopover().HasException());

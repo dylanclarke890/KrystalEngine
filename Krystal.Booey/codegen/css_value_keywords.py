@@ -241,6 +241,7 @@ class GenerationContext:
 
         last = count - 1
 
+        to.newline()
         to.write(f"constexpr uint16 TotalValueKeywords = {count};")
         to.write(f"constexpr uint16 LastValueKeyword = {last};")
         to.write(f"constexpr size_t MaxValueKeywordLength = {max_length};")
@@ -310,7 +311,7 @@ class GenerationContext:
         with to.namespace(namespace="keywords"):
             for value in self.values:
                 to.write(f"using {value.id_without_prefix} = KeywordValueConstant<{value.id}>;")
-                to.newline()
+            to.newline()
 
     def generate_css_value_id_gperf(self):
         with open("ValueId.gperf", "w") as output_file:

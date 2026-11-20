@@ -196,7 +196,7 @@ namespace krys::boo
     KRYS_NODISCARD bool RendererObscuresBackground(const RenderElement &rootElement) noexcept
     {
       const auto &style = rootElement.Style();
-      if (style.UsedVisibility() != Visibility::Visible || !style.GetOpacity().IsOpaque()
+      if (style.UsedVisibility() != Visibility::Visible || !style.Opacity().IsOpaque()
           || style.HasTransform())
       {
         return false;
@@ -223,7 +223,7 @@ namespace krys::boo
         return false;
       }
 
-      if (rendererForBackground->Style().GetBackgroundLayers().UsedFirst().GetClip() == FillBox::Text)
+      if (rendererForBackground->Style().BackgroundLayers().UsedFirst().GetClip() == FillBox::Text)
       {
         return false;
       }
@@ -722,7 +722,7 @@ namespace krys::boo
   {
     if (auto *rootBackgroundRenderer = RendererForRootBackground())
     {
-      return style::HasEntirelyFixedBackground(rootBackgroundRenderer->Style().GetBackgroundLayers());
+      return style::HasEntirelyFixedBackground(rootBackgroundRenderer->Style().BackgroundLayers());
     }
     return false;
   }

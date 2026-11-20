@@ -495,8 +495,7 @@ namespace krys::boo::layout
       }
 
       if (oldStyle.GetWritingMode().BidiDirection() != newStyle.GetWritingMode().BidiDirection()
-          || oldStyle.GetUnicodeBidi() != newStyle.GetUnicodeBidi()
-          || oldStyle.GetTabSize() != newStyle.GetTabSize())
+          || oldStyle.UnicodeBidi() != newStyle.UnicodeBidi() || oldStyle.TabSize() != newStyle.TabSize())
       {
         return true;
       }
@@ -558,7 +557,7 @@ namespace krys::boo::layout
       }
 
       auto bidiContextChanged =
-        oldStyle.GetUnicodeBidi() != newStyle.GetUnicodeBidi()
+        oldStyle.UnicodeBidi() != newStyle.UnicodeBidi()
         || oldStyle.GetWritingMode().BidiDirection() != newStyle.GetWritingMode().BidiDirection();
       if (bidiContextChanged)
       {

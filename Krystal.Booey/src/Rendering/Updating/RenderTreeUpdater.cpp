@@ -1008,7 +1008,7 @@ namespace krys::boo
         {
           return false;
         }
-        if (renderElement->Style().GetOpacity().IsTransparent())
+        if (renderElement->Style().Opacity().IsTransparent())
         {
           return false;
         }

@@ -305,8 +305,8 @@ namespace krys::boo
       };
       parameters.SubscriptShiftDown = constant(MathConstant::SubscriptShiftDown);
       parameters.SuperscriptShiftUp =
-        constant(Style().GetMathShift() == MathShift::Compact ? MathConstant::SuperscriptShiftUpCramped
-                                                              : MathConstant::SuperscriptShiftUp);
+        constant(Style().MathShift() == MathShift::Compact ? MathConstant::SuperscriptShiftUpCramped
+                                                           : MathConstant::SuperscriptShiftUp);
       parameters.SubscriptBaselineDropMin = constant(MathConstant::SubscriptBaselineDropMin);
       parameters.SuperScriptBaselineDropMax = constant(MathConstant::SuperscriptBaselineDropMax);
       parameters.SubSuperscriptGapMin = constant(MathConstant::SubSuperscriptGapMin);

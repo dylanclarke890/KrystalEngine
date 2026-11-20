@@ -59,12 +59,12 @@ namespace krys::boo
                                                                  const RenderStyle &style) noexcept
   {
     // This function returns true if there are text emphasis marks and they are suppressed by ruby text.
-    if (style.GetTextEmphasisStyle().IsNone())
+    if (style.TextEmphasisStyle().IsNone())
     {
       return {};
     }
 
-    auto emphasisPosition = style.GetTextEmphasisPosition();
+    auto emphasisPosition = style.TextEmphasisPosition();
     bool isAbove = !emphasisPosition.Contains(style::TextEmphasisPositionValue::Under);
     if (style.GetWritingMode().IsVerticalTypographic())
     {
@@ -97,7 +97,7 @@ namespace krys::boo
       // The emphasis marks are suppressed only if there is a ruby annotation box on the same side and it is
       // not empty.
       if (annotation->HasContentfulInlineLine()
-          && isAbove == (annotation->Style().GetRubyPosition() == RubyPosition::Over))
+          && isAbove == (annotation->Style().RubyPosition() == RubyPosition::Over))
       {
         return {};
       }
@@ -732,7 +732,7 @@ namespace krys::boo
 
     float emphasisMarkOffset = 0;
     auto emphasisExistsAndIsAbove = EmphasisMarkExistsAndIsAbove(_renderer, _style);
-    StringAtom emphasisMark = emphasisExistsAndIsAbove ? _style.GetTextEmphasisStyle().MarkString() : null;
+    StringAtom emphasisMark = emphasisExistsAndIsAbove ? _style.TextEmphasisStyle().MarkString() : null;
     if (!emphasisMark.View().empty())
     {
       emphasisMarkOffset =
@@ -855,7 +855,7 @@ namespace krys::boo
   KRYS_NODISCARD static inline float ComputedTextDecorationThickness(const RenderStyle &styleToUse,
                                                                      float deviceScaleFactor) noexcept
   {
-    return CeilToDevicePixel(styleToUse.GetTextDecorationThickness().Resolve(styleToUse), deviceScaleFactor);
+    return CeilToDevicePixel(styleToUse.TextDecorationThickness().Resolve(styleToUse), deviceScaleFactor);
   }
 
   KRYS_NODISCARD static inline float ComputedAutoTextDecorationThickness(const RenderStyle &styleToUse,
@@ -917,7 +917,7 @@ namespace krys::boo
       // <font> and <a> are always considered decorating boxes.
       return true;
     }
-    return styleToUse.GetTextDecorationLine().ContainsAny({Flag::Underline, Flag::Overline})
+    return styleToUse.TextDecorationLine().ContainsAny({Flag::Underline, Flag::Overline})
            || (inlineBox.IsRootInlineBox()
                && styleToUse.TextDecorationLineInEffect().ContainsAny({Flag::Underline, Flag::Overline}));
   }

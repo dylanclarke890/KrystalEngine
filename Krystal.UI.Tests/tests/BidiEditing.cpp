@@ -588,7 +588,7 @@ namespace krys::ui::tests
       auto *last = paragraph.LastChild();
       REQUIRE(Is<boo::Element>(last));
       CHECK(isRightToLeft(*last));
-      CHECK(last->Renderer()->Style().GetUnicodeBidi() == boo::UnicodeBidi::Embed);
+      CHECK(last->Renderer()->Style().UnicodeBidi() == boo::UnicodeBidi::Embed);
       CHECK(paragraph.TextContent() == boo::DOMString(u8"hello world"));
       CHECK_FALSE(isRightToLeft(paragraph));
     }

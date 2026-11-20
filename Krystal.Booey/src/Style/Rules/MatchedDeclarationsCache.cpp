@@ -70,7 +70,7 @@ namespace krys::boo::style
     {
       return false;
     }
-    if (style.GetZoom() != ComputedStyle::InitialZoom())
+    if (style.Zoom() != ComputedStyle::InitialZoom())
     {
       return false;
     }
@@ -122,7 +122,7 @@ namespace krys::boo::style
       return false;
     }
 
-    if (style.GetColorScheme() != RenderStyle->GetColorScheme())
+    if (style.ColorScheme() != RenderStyle->ColorScheme())
     {
       return false;
     }

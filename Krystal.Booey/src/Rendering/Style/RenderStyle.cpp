@@ -187,12 +187,12 @@ namespace krys::boo
       }
     }
 
-    if (GetOverflowAnchor() != other->GetOverflowAnchor() && GetOverflowAnchor() == OverflowAnchor::None)
+    if (OverflowAnchor() != other->OverflowAnchor() && OverflowAnchor() == OverflowAnchor::None)
     {
       return true;
     }
 
-    if (GetPosition() != other->GetPosition())
+    if (Position() != other->Position())
     {
       return true;
     }
@@ -215,7 +215,7 @@ namespace krys::boo
       }
     }
 
-    if (GetPosition() != PositionType::Static)
+    if (Position() != PositionType::Static)
     {
       if (_computedStyle._nonInheritedData->SurroundData->Inset
           != other->_computedStyle._nonInheritedData->SurroundData->Inset)
@@ -225,7 +225,7 @@ namespace krys::boo
     }
 
     if (HasTransformRelatedProperty() != other->HasTransformRelatedProperty()
-        || GetTransform() != other->GetTransform())
+        || Transform() != other->Transform())
     {
       return true;
     }
@@ -247,7 +247,7 @@ namespace krys::boo
   {
     switch (colorProperty)
     {
-      case css::PropertyId::AccentColor:       return GetAccentColor().ColorOrCurrentColor();
+      case css::PropertyId::AccentColor:       return AccentColor().ColorOrCurrentColor();
       case css::PropertyId::BackgroundColor:   return BackgroundColor();
       case css::PropertyId::BorderBottomColor: return BorderBottomColor();
       case css::PropertyId::BorderLeftColor:   return BorderLeftColor();
@@ -281,7 +281,7 @@ namespace krys::boo
   {
     if (colorProperty == css::PropertyId::Color)
     {
-      return GetColor();
+      return Color();
     }
 
     auto &result = UnresolvedColorForProperty(colorProperty);
@@ -300,7 +300,7 @@ namespace krys::boo
         }
       }
 
-      return GetColor();
+      return Color();
     }
 
     return ColorResolvingCurrentColor(result);
@@ -308,7 +308,7 @@ namespace krys::boo
 
   Color RenderStyle::ColorResolvingCurrentColor(const style::Color &color) const noexcept
   {
-    return color.ResolveColor(GetColor());
+    return color.ResolveColor(Color());
   }
 
   // MARK: - Used Values
@@ -321,7 +321,7 @@ namespace krys::boo
 
   CSSOMString RenderStyle::AltFromContent() const noexcept
   {
-    if (auto *contentData = GetContent().TryData())
+    if (auto *contentData = Content().TryData())
     {
       return contentData->AltText.value_or(CSSOMString {});
     }
@@ -330,10 +330,10 @@ namespace krys::boo
 
   const CSSOMStringAtom &RenderStyle::HyphenString() const noexcept
   {
-    krys_debug_assert(GetHyphens() != Hyphens::None);
+    krys_debug_assert(Hyphens() != Hyphens::None);
 
     return krys::SwitchOn(
-      GetHyphenateCharacter(),
+      HyphenateCharacter(),
       [&](const css::keywords::Auto &) -> const CSSOMStringAtom &
       {
         // U+2010 HYPHEN when the primary font has a glyph for it, as Chrome and WebKit hyphenate; otherwise
@@ -358,7 +358,7 @@ namespace krys::boo
     }
 
     return krys::SwitchOn(
-      GetStrokeWidth(), [&](const style::StrokeWidth::Fixed &fixedStrokeWidth) -> float
+      StrokeWidth(), [&](const style::StrokeWidth::Fixed &fixedStrokeWidth) -> float
       { return style::Evaluate<float>(fixedStrokeWidth, style::ZoomNeeded {}); },
       [&](const style::StrokeWidth::Percentage &percentageStrokeWidth) -> float
       {
@@ -389,9 +389,9 @@ namespace krys::boo
 
   style::Contain RenderStyle::UsedContain() const noexcept
   {
-    auto result = GetContain();
+    auto result = Contain();
 
-    switch (GetContainerType())
+    switch (ContainerType())
     {
       case ContainerType::Normal: break;
       case ContainerType::Size:   result.Add({style::ContainValue::Style, style::ContainValue::Size}); break;
@@ -410,8 +410,8 @@ namespace krys::boo
       return UserSelect::None;
     }
 
-    auto value = GetUserSelect();
-    if (GetUserModify() != UserModify::ReadOnly && GetUserDrag() != UserDrag::Element)
+    auto value = UserSelect();
+    if (UserModify() != UserModify::ReadOnly && UserDrag() != UserDrag::Element)
     {
       return value == UserSelect::None ? UserSelect::Text : value;
     }
@@ -422,33 +422,33 @@ namespace krys::boo
   Color RenderStyle::UsedScrollbarThumbColor() const noexcept
   {
     return krys::SwitchOn(
-      GetScrollbarColor(), [&](const css::keywords::Auto &) -> Color { return {}; },
-      [&](const auto &parts) -> Color { return ColorResolvingCurrentColor(parts.Thumb); });
+      ScrollbarColor(), [&](const css::keywords::Auto &) -> boo::Color { return {}; },
+      [&](const auto &parts) -> boo::Color { return ColorResolvingCurrentColor(parts.Thumb); });
   }
 
   Color RenderStyle::UsedScrollbarTrackColor() const noexcept
   {
     return krys::SwitchOn(
-      GetScrollbarColor(), [&](const css::keywords::Auto &) -> Color { return {}; },
-      [&](const auto &parts) -> Color { return ColorResolvingCurrentColor(parts.Track); });
+      ScrollbarColor(), [&](const css::keywords::Auto &) -> boo::Color { return {}; },
+      [&](const auto &parts) -> boo::Color { return ColorResolvingCurrentColor(parts.Track); });
   }
 
   Maybe<ScrollbarColor> RenderStyle::UsedScrollbarColor() const noexcept
   {
     return krys::SwitchOn(
-      GetScrollbarColor(), [](const css::keywords::Auto &) -> Maybe<ScrollbarColor> { return null; },
-      [&](const auto &parts) -> Maybe<ScrollbarColor>
+      ScrollbarColor(), [](const css::keywords::Auto &) -> Maybe<boo::ScrollbarColor> { return null; },
+      [&](const auto &parts) -> Maybe<boo::ScrollbarColor>
       {
-        return ScrollbarColor {.ThumbColor = ColorResolvingCurrentColor(parts.Thumb),
-                               .TrackColor = ColorResolvingCurrentColor(parts.Track)};
+        return boo::ScrollbarColor {.ThumbColor = ColorResolvingCurrentColor(parts.Thumb),
+                                    .TrackColor = ColorResolvingCurrentColor(parts.Track)};
       });
   }
 
   Color RenderStyle::UsedAccentColor(style::ColorOptions styleColorOptions) const noexcept
   {
     return krys::SwitchOn(
-      GetAccentColor(), [](const css::keywords::Auto &) -> Color { return {}; },
-      [&](const style::Color &color) -> Color
+      AccentColor(), [](const css::keywords::Auto &) -> boo::Color { return {}; },
+      [&](const style::Color &color) -> boo::Color
       {
         auto resolvedAccentColor = ColorResolvingCurrentColor(color);
 
@@ -504,12 +504,12 @@ namespace krys::boo
 
   LayoutBoxExtent RenderStyle::BorderImageOutsets() const noexcept
   {
-    return ImageOutsets(GetBorderImage());
+    return ImageOutsets(BorderImage());
   }
 
   LayoutBoxExtent RenderStyle::MaskBorderOutsets() const noexcept
   {
-    return ImageOutsets(GetMaskBorder());
+    return ImageOutsets(MaskBorder());
   }
 
   // MARK: - Logical
@@ -560,7 +560,7 @@ namespace krys::boo
 
   UsedClear RenderStyle::GetUsedClear(const RenderElement &renderer) noexcept
   {
-    auto computedClear = renderer.Style().GetClear();
+    auto computedClear = renderer.Style().Clear();
     auto writingMode = renderer.ContainingBlock()->Style().GetWritingMode();
     switch (computedClear)
     {

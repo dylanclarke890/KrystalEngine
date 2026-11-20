@@ -249,7 +249,7 @@ namespace krys::boo
       LayoutUnit borderRight = box->BorderRight();
       LayoutUnit borderBottom = box->BorderBottom();
       LayoutUnit borderLeft = box->BorderLeft();
-      bool overridden = renderElement->Style().GetBorderImageWidth().OverridesBorderWidths();
+      bool overridden = renderElement->Style().BorderImageWidth().OverridesBorderWidths();
       if (box->IsFieldset())
       {
         auto &block = Downcast<RenderBlock>(*box);

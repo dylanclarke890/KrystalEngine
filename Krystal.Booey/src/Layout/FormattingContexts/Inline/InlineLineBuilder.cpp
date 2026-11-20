@@ -351,7 +351,7 @@ namespace krys::boo::layout
                                         const Maybe<PreviousLine> &previousLine) noexcept
     {
       krys_debug_assert(!runs.empty());
-      auto shouldUseBlockDirection = rootStyle.GetUnicodeBidi() != UnicodeBidi::Plaintext;
+      auto shouldUseBlockDirection = rootStyle.UnicodeBidi() != UnicodeBidi::Plaintext;
       if (shouldUseBlockDirection)
       {
         return rootStyle.GetWritingMode().BidiDirection();
@@ -868,7 +868,7 @@ namespace krys::boo::layout
         };
         auto isLineBreakAfterWhitespace = [&]
         {
-          return rootStyle.GetLineBreak() == LineBreak::AfterWhiteSpace
+          return rootStyle.LineBreak() == LineBreak::AfterWhiteSpace
                  && GetIntrinsicWidthMode() != IntrinsicWidthMode::Minimum
                  && (!isLastInlineContent || lineHasOverflow());
         };
@@ -936,7 +936,7 @@ namespace krys::boo::layout
             horizontalAvailableSpace - _line.ContentLogicalWidth()
             + (_line.IsHangingTrailingContentWhitespace() ? _line.HangingTrailingContentWidth() : 0.f);
           if (Root().IsRubyAnnotationBox()
-              && rootStyle.GetTextAlign() == style::ComputedStyle::InitialTextAlign())
+              && rootStyle.TextAlign() == style::ComputedStyle::InitialTextAlign())
           {
             lineContent->RubyAnnotationOffset = RubyFormattingContext::ApplyRubyAlignOnAnnotationBox(
               _line, spaceToDistribute, GetFormattingContext());
@@ -948,8 +948,8 @@ namespace krys::boo::layout
           // exactly fill the line box. Unless otherwise specified by text-align-last, the last line before a
           // forced break or the end of the block is start-aligned.
           auto hasTextAlignJustify = (isLastInlineContent || _line.Runs().back().IsLineBreak())
-                                       ? rootStyle.GetTextAlignLast() == style::TextAlignLast::Justify
-                                       : rootStyle.GetTextAlign() == style::TextAlign::Justify;
+                                       ? rootStyle.TextAlignLast() == style::TextAlignLast::Justify
+                                       : rootStyle.TextAlign() == style::TextAlign::Justify;
           if (hasTextAlignJustify)
           {
             auto additionalSpaceForAlignedContent = InlineContentAligner::ApplyTextAlignJustify(
@@ -1123,7 +1123,7 @@ namespace krys::boo::layout
                      ? (boxGeometry.MarginStart() || boxGeometry.BorderStart() || boxGeometry.PaddingStart())
                      : (boxGeometry.MarginEnd() || boxGeometry.BorderEnd() || boxGeometry.PaddingEnd());
           };
-          auto hasBidiIsolation = IsIsolated(style.GetUnicodeBidi());
+          auto hasBidiIsolation = IsIsolated(style.UnicodeBidi());
           type = hasDecoration() || hasBidiIsolation ? ShapingType::Break : ShapingType::Keep;
           break;
         }
@@ -1524,7 +1524,7 @@ namespace krys::boo::layout
         }
 
         contentHasInlineItemsWithDecorationClone |=
-          inlineItem.IsInlineBoxStart() && style.GetBoxDecorationBreak() == BoxDecorationBreak::Clone;
+          inlineItem.IsInlineBoxStart() && style.BoxDecorationBreak() == BoxDecorationBreak::Clone;
         lineCandidate.Content.AppendInlineItem(inlineItem, style, logicalWidth, textSpacingAdjustment);
         currentLogicalRight += logicalWidth;
         continue;
@@ -2203,7 +2203,7 @@ namespace krys::boo::layout
     {
       auto &inlineItem = runs[index].Item;
       if (!inlineItem.IsInlineBoxStartOrEnd()
-          || inlineItem.Style().GetBoxDecorationBreak() != BoxDecorationBreak::Clone)
+          || inlineItem.Style().BoxDecorationBreak() != BoxDecorationBreak::Clone)
       {
         continue;
       }

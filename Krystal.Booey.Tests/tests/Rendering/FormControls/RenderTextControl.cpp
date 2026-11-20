@@ -135,14 +135,14 @@ layer at (447,18) size 51x10
   {
     boo::tests::EditorFixture fixture(u8"<textarea id=area></textarea>");
     auto &area = fixture.ById(u8"area");
-    CHECK(area.Renderer()->Style().GetResize() == style::Resize::None);
+    CHECK(area.Renderer()->Style().Resize() == style::Resize::None);
 
     auto settings = Settings::Create();
     settings->TextAreasAreResizable = true;
     fixture.Document->SetSettings(krys::move(settings));
     fixture.Document->ScheduleFullStyleRebuild();
     (void)fixture.Document->UpdateLayout();
-    CHECK(area.Renderer()->Style().GetResize() == style::Resize::Both);
+    CHECK(area.Renderer()->Style().Resize() == style::Resize::Both);
     CHECK(Downcast<RenderBox>(area.Renderer())->Layer()->CanResize());
   }
 }

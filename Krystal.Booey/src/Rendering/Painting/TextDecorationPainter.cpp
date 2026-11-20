@@ -210,8 +210,8 @@ namespace krys::boo
       }
       else if (decoration == Flag::Underline || decoration == Flag::Overline)
       {
-        if ((style.GetTextDecorationSkipInk() == TextDecorationSkipInk::Auto
-             || style.GetTextDecorationSkipInk() == TextDecorationSkipInk::All)
+        if ((style.TextDecorationSkipInk() == TextDecorationSkipInk::Auto
+             || style.TextDecorationSkipInk() == TextDecorationSkipInk::All)
             && !_writingMode.IsVerticalTypographic())
         {
           if (!_context.PaintingDisabled())
@@ -404,7 +404,7 @@ namespace krys::boo
       }
 
       auto color = TextDecorationPainter::DecorationColor(style, paintBehavior);
-      auto decorationStyle = style.GetTextDecorationStyle();
+      auto decorationStyle = style.TextDecorationStyle();
 
       if (decorations.HasUnderline())
       {
@@ -435,7 +435,7 @@ namespace krys::boo
     do
     {
       const auto &style = styleForRenderer(*current);
-      extractDecorations(style, style.GetTextDecorationLine());
+      extractDecorations(style, style.TextDecorationLine());
 
       if (current->Style().Display() == DisplayType::RubyAnnotation)
       {

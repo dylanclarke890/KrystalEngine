@@ -54,7 +54,7 @@ namespace krys::boo
     switch (behavior)
     {
       case ScrollBehavior::Auto:
-        return associatedElement->Renderer()->Style().GetScrollBehavior() == style::ScrollBehavior::Smooth;
+        return associatedElement->Renderer()->Style().ScrollBehavior() == style::ScrollBehavior::Smooth;
       case ScrollBehavior::Instant: return false;
       case ScrollBehavior::Smooth:  return true;
     }

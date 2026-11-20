@@ -102,7 +102,7 @@ namespace krys::boo
                                     bool &lastCharacterWasSpace) noexcept
     {
       auto string = text.Text();
-      if (text.Style().GetWhiteSpaceCollapse() == WhiteSpaceCollapse::Preserve)
+      if (text.Style().WhiteSpaceCollapse() == WhiteSpaceCollapse::Preserve)
       {
         atCharacter += static_cast<uint32>(std::ranges::count_if(
           string, [](char8 character) { return !krys::text::IsTrailingUTF8(character); }));

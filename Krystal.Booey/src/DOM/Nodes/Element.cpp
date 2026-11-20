@@ -541,7 +541,7 @@ namespace krys::boo
     // change but the styles are otherwise clean we would not need to re-resolve descendants.
     for (auto &element : elementsRequiringComputedStyle | std::views::reverse)
     {
-      if (computedStyle && computedStyle->GetContainerType() != ContainerType::Normal
+      if (computedStyle && computedStyle->ContainerType() != ContainerType::Normal
           && mode != ResolveComputedStyleMode::Editability)
       {
         // If we find a query container we need to bail out and do full style update to resolve it.
@@ -3774,7 +3774,7 @@ namespace krys::boo
   {
     // Elements in the top layer are rendered there while their overlay is auto.
     // https://drafts.csswg.org/css-position-4/#rendered-in-the-top-layer
-    return (element && element->IsInTopLayer() && style.GetOverlay() == Overlay::Auto)
+    return (element && element->IsInTopLayer() && style.Overlay() == Overlay::Auto)
            || style.GetPseudoElementType() == PseudoElementType::Backdrop;
   }
 
@@ -3892,14 +3892,14 @@ namespace krys::boo
         {
           if (curr->Style().UsedZoom() != prev->Style().UsedZoom())
           {
-            zoomFactor = style::Evaluate<double>(prev->Style().GetZoom());
+            zoomFactor = style::Evaluate<double>(prev->Style().Zoom());
             break;
           }
           prev = curr;
         }
         if (prev->IsRenderView())
         {
-          zoomFactor = style::Evaluate<double>(prev->Style().GetZoom());
+          zoomFactor = style::Evaluate<double>(prev->Style().Zoom());
         }
       }
       return zoomFactor;
@@ -4590,7 +4590,7 @@ namespace krys::boo
       // clientWidth/Height, it includes table's border size.
       if (renderer->IsRenderTable())
       {
-        if (renderer->Style().GetBoxSizing() == BoxSizing::ContentBox)
+        if (renderer->Style().BoxSizing() == BoxSizing::ContentBox)
         {
           clientWidth += renderer->PaddingLeft() + renderer->PaddingRight();
         }
@@ -4636,7 +4636,7 @@ namespace krys::boo
       // See ClientWidth() for why the table's padding and borders are added.
       if (renderer->IsRenderTable())
       {
-        if (renderer->Style().GetBoxSizing() == BoxSizing::ContentBox)
+        if (renderer->Style().BoxSizing() == BoxSizing::ContentBox)
         {
           clientHeight += renderer->PaddingTop() + renderer->PaddingBottom();
         }

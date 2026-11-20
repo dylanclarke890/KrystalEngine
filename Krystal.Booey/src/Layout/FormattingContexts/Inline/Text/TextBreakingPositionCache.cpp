@@ -38,9 +38,9 @@ namespace krys::boo::layout
   }
 
   TextBreakingPositionContext::TextBreakingPositionContext(const RenderStyle &style) noexcept
-      : WhitespaceCollapseBehavior(BehaviorForWhiteSpaceCollapse(style.GetWhiteSpaceCollapse())),
-        OverflowWrap(style.GetOverflowWrap()), LineBreak(style.GetLineBreak()),
-        WordBreak(style.GetWordBreak()), Locale(style.ComputedLocale().GetPlatform())
+      : WhitespaceCollapseBehavior(BehaviorForWhiteSpaceCollapse(style.WhiteSpaceCollapse())),
+        OverflowWrap(style.OverflowWrap()), LineBreak(style.LineBreak()), WordBreak(style.WordBreak()),
+        Locale(style.ComputedLocale().GetPlatform())
   {
   }
 

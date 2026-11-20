@@ -215,22 +215,22 @@ namespace krys::boo::layout
 
   bool Box::IsRelativelyPositioned() const noexcept
   {
-    return _style.GetPosition() == PositionType::Relative;
+    return _style.Position() == PositionType::Relative;
   }
 
   bool Box::IsStickyPositioned() const noexcept
   {
-    return _style.GetPosition() == PositionType::Sticky;
+    return _style.Position() == PositionType::Sticky;
   }
 
   bool Box::IsAbsolutelyPositioned() const noexcept
   {
-    return _style.GetPosition() == PositionType::Absolute || IsFixedPositioned();
+    return _style.Position() == PositionType::Absolute || IsFixedPositioned();
   }
 
   bool Box::IsFixedPositioned() const noexcept
   {
-    return _style.GetPosition() == PositionType::Fixed;
+    return _style.Position() == PositionType::Fixed;
   }
 
   bool Box::IsFloatingPositioned() const noexcept
@@ -245,7 +245,7 @@ namespace krys::boo::layout
 
   bool Box::HasFloatClear() const noexcept
   {
-    return _style.GetClear() != Clear::None && (IsBlockLevelBox() || IsLineBreakBox());
+    return _style.Clear() != Clear::None && (IsBlockLevelBox() || IsLineBreakBox());
   }
 
   bool Box::IsFloatAvoider() const noexcept
@@ -558,7 +558,7 @@ namespace krys::boo::layout
       return false;
     }
 
-    if (IsTableBox() && Style().GetBorderCollapse() == BorderCollapse::Collapse)
+    if (IsTableBox() && Style().BorderCollapse() == BorderCollapse::Collapse)
     {
       // When the table collapses its borders with inner table elements, there's no room for padding.
       return false;

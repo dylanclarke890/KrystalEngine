@@ -171,7 +171,7 @@ namespace krys::boo::tests
       fixture.Frame(250ms);
       auto *transition = fixture.RunningTransition(u8"box", css::PropertyId::Opacity);
       REQUIRE(transition);
-      CHECK(transition->TargetStyle().GetOpacity().Value.Value == Catch::Approx(0.1f));
+      CHECK(transition->TargetStyle().Opacity().Value.Value == Catch::Approx(0.1f));
       CHECK(fixture.Opacity(u8"box") == Catch::Approx(0.1f));
       CHECK(std::ranges::find(recorder->Records, "transitioncancel opacity") != recorder->Records.end());
 

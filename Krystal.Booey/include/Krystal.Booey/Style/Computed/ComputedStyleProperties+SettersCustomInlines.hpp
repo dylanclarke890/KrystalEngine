@@ -97,7 +97,7 @@ namespace krys::boo::style
     return true;
   }
 
-  inline bool ComputedStyleProperties::SetZoom(Zoom zoom) noexcept
+  inline bool ComputedStyleProperties::SetZoom(style::Zoom zoom) noexcept
   {
     // Clamp the effective zoom value to avoid overflow in derived computations.
     // This matches other engines values for compatibility.
@@ -122,7 +122,7 @@ namespace krys::boo::style
                     UsedAppearance, static_cast<unsigned>(appearance));
   }
 
-  inline void ComputedStyleProperties::SetBlendMode(BlendMode mode) noexcept
+  inline void ComputedStyleProperties::SetBlendMode(boo::BlendMode mode) noexcept
   {
     SET_NESTED(_nonInheritedData, RareData, EffectiveBlendMode, static_cast<unsigned>(mode));
     SET(_rareInheritedData, IsInSubtreeWithBlendMode, mode != BlendMode::Normal);
@@ -142,7 +142,7 @@ namespace krys::boo::style
                     SpecifiedZIndexValue, index._value);
   }
 
-  inline void ComputedStyleProperties::SetCursor(Cursor cursor) noexcept
+  inline void ComputedStyleProperties::SetCursor(style::Cursor cursor) noexcept
   {
     _inheritedFlags.CursorType = static_cast<unsigned>(cursor.Predefined);
     SET(_rareInheritedData, CursorImages, krys::move(cursor.Images));
@@ -150,14 +150,14 @@ namespace krys::boo::style
 
   // MARK: Support Font properties
 
-  inline void ComputedStyleProperties::SetTextSpacingTrim(TextSpacingTrim value) noexcept
+  inline void ComputedStyleProperties::SetTextSpacingTrim(style::TextSpacingTrim value) noexcept
   {
     auto description = GetFontDescription();
     description.SetTextSpacingTrim(value.Platform());
     SetFontDescription(krys::move(description));
   }
 
-  inline void ComputedStyleProperties::SetTextAutospace(TextAutospace value) noexcept
+  inline void ComputedStyleProperties::SetTextAutospace(style::TextAutospace value) noexcept
   {
     auto description = GetFontDescription();
     description.SetTextAutospace(ConvertToPlatform(value));
@@ -190,14 +190,14 @@ namespace krys::boo::style
     SynchronizeWordSpacingWithFontCascade();
   }
 
-  inline void ComputedStyleProperties::SetFontSizeAdjust(FontSizeAdjust sizeAdjust) noexcept
+  inline void ComputedStyleProperties::SetFontSizeAdjust(style::FontSizeAdjust sizeAdjust) noexcept
   {
     auto description = GetFontDescription();
     description.SetFontSizeAdjust(sizeAdjust.Platform());
     SetFontDescription(krys::move(description));
   }
 
-  inline void ComputedStyleProperties::SetFontOpticalSizing(FontOpticalSizing opticalSizing) noexcept
+  inline void ComputedStyleProperties::SetFontOpticalSizing(boo::FontOpticalSizing opticalSizing) noexcept
   {
     auto description = GetFontDescription();
     description.SetOpticalSizing(opticalSizing);
@@ -211,35 +211,36 @@ namespace krys::boo::style
     SetFontDescription(krys::move(description));
   }
 
-  inline void ComputedStyleProperties::SetFontFeatureSettings(FontFeatureSettings settings) noexcept
+  inline void ComputedStyleProperties::SetFontFeatureSettings(style::FontFeatureSettings settings) noexcept
   {
     auto description = GetFontDescription();
     description.SetFeatureSettings(settings.TakePlatform());
     SetFontDescription(krys::move(description));
   }
 
-  inline void ComputedStyleProperties::SetFontVariationSettings(FontVariationSettings settings) noexcept
+  inline void
+    ComputedStyleProperties::SetFontVariationSettings(style::FontVariationSettings settings) noexcept
   {
     auto description = GetFontDescription();
     description.SetVariationSettings(settings.TakePlatform());
     SetFontDescription(krys::move(description));
   }
 
-  inline void ComputedStyleProperties::SetFontWeight(FontWeight value) noexcept
+  inline void ComputedStyleProperties::SetFontWeight(style::FontWeight value) noexcept
   {
     auto description = GetFontDescription();
     description.SetWeight(value.Platform());
     SetFontDescription(krys::move(description));
   }
 
-  inline void ComputedStyleProperties::SetFontWidth(FontWidth value) noexcept
+  inline void ComputedStyleProperties::SetFontWidth(style::FontWidth value) noexcept
   {
     auto description = GetFontDescription();
     description.SetWidth(value.Platform());
     SetFontDescription(krys::move(description));
   }
 
-  inline void ComputedStyleProperties::SetFontStyle(FontStyle style) noexcept
+  inline void ComputedStyleProperties::SetFontStyle(style::FontStyle style) noexcept
   {
     auto description = GetFontDescription();
     description.SetFontStyleSlope(style.PlatformSlope());
@@ -247,7 +248,7 @@ namespace krys::boo::style
     SetFontDescription(krys::move(description));
   }
 
-  inline void ComputedStyleProperties::SetFontPalette(const FontPalette &value) noexcept
+  inline void ComputedStyleProperties::SetFontPalette(const style::FontPalette &value) noexcept
   {
     auto description = GetFontDescription();
     description.SetFontPalette(value.Platform());
@@ -282,49 +283,49 @@ namespace krys::boo::style
     SetFontDescription(krys::move(description));
   }
 
-  inline void ComputedStyleProperties::SetFontVariantAlternates(FontVariantAlternates value) noexcept
+  inline void ComputedStyleProperties::SetFontVariantAlternates(style::FontVariantAlternates value) noexcept
   {
     auto description = GetFontDescription();
     description.SetVariantAlternates(value.TakePlatform());
     SetFontDescription(krys::move(description));
   }
 
-  inline void ComputedStyleProperties::SetFontVariantCaps(FontVariantCaps value) noexcept
+  inline void ComputedStyleProperties::SetFontVariantCaps(boo::FontVariantCaps value) noexcept
   {
     auto description = GetFontDescription();
     description.SetVariantCaps(value);
     SetFontDescription(krys::move(description));
   }
 
-  inline void ComputedStyleProperties::SetFontVariantEastAsian(FontVariantEastAsian value) noexcept
+  inline void ComputedStyleProperties::SetFontVariantEastAsian(style::FontVariantEastAsian value) noexcept
   {
     auto description = GetFontDescription();
     description.SetVariantEastAsian(value.GetPlatform());
     SetFontDescription(krys::move(description));
   }
 
-  inline void ComputedStyleProperties::SetFontVariantEmoji(FontVariantEmoji value) noexcept
+  inline void ComputedStyleProperties::SetFontVariantEmoji(boo::FontVariantEmoji value) noexcept
   {
     auto description = GetFontDescription();
     description.SetVariantEmoji(value);
     SetFontDescription(krys::move(description));
   }
 
-  inline void ComputedStyleProperties::SetFontVariantLigatures(FontVariantLigatures value) noexcept
+  inline void ComputedStyleProperties::SetFontVariantLigatures(style::FontVariantLigatures value) noexcept
   {
     auto description = GetFontDescription();
     description.SetVariantLigatures(value.GetPlatform());
     SetFontDescription(krys::move(description));
   }
 
-  inline void ComputedStyleProperties::SetFontVariantNumeric(FontVariantNumeric value) noexcept
+  inline void ComputedStyleProperties::SetFontVariantNumeric(style::FontVariantNumeric value) noexcept
   {
     auto description = GetFontDescription();
     description.SetVariantNumeric(value.GetPlatform());
     SetFontDescription(krys::move(description));
   }
 
-  inline void ComputedStyleProperties::SetFontVariantPosition(FontVariantPosition value) noexcept
+  inline void ComputedStyleProperties::SetFontVariantPosition(boo::FontVariantPosition value) noexcept
   {
     auto description = GetFontDescription();
     description.SetVariantPosition(value);

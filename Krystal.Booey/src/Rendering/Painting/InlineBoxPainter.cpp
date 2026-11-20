@@ -162,7 +162,7 @@ namespace krys::boo
     auto color = styleToUse.ColorResolvingCurrentColor(css::PropertyId::BackgroundColor);
     auto compositeOp = Renderer().GetDocument().CompositeOperatorForBackgroundColor(color, Renderer());
 
-    PaintFillLayers(color, styleToUse.GetBackgroundLayers(), paintRect, compositeOp);
+    PaintFillLayers(color, styleToUse.BackgroundLayers(), paintRect, compositeOp);
     PaintBoxShadow(style::ShadowStyle::Inset, paintRect);
 
     // :first-line cannot be used to put borders on a line. Always paint borders with our
@@ -172,7 +172,7 @@ namespace krys::boo
       return;
     }
 
-    auto &borderImage = Renderer().Style().GetBorderImage();
+    auto &borderImage = Renderer().Style().BorderImage();
     auto borderImageSource = borderImage.Source.TryStyleImage();
     bool hasBorderImage =
       borderImageSource && borderImageSource->CanRender(&Renderer(), styleToUse.UsedZoom());
@@ -232,7 +232,7 @@ namespace krys::boo
     auto localRect = LayoutRect {_inlineBox.VisualRect()};
     LayoutPoint adjustedPaintOffset = _paintOffset + localRect.Location();
 
-    auto &maskBorder = Renderer().Style().GetMaskBorder();
+    auto &maskBorder = Renderer().Style().MaskBorder();
     auto maskBorderSource = maskBorder.Source.TryStyleImage();
 
     // Figure out if we need to push a transparency layer to render our mask.
@@ -243,8 +243,8 @@ namespace krys::boo
     CompositeOperator compositeOp = CompositeOperator::SourceOver;
     if (!compositedMask || flattenCompositingLayers)
     {
-      if ((maskBorderSource && style::HasImageInAnyLayer(Renderer().Style().GetMaskLayers()))
-          || Renderer().Style().GetMaskLayers().UsedLength() > 1)
+      if ((maskBorderSource && style::HasImageInAnyLayer(Renderer().Style().MaskLayers()))
+          || Renderer().Style().MaskLayers().UsedLength() > 1)
       {
         pushTransparencyLayer = true;
       }
@@ -260,7 +260,7 @@ namespace krys::boo
 
     LayoutRect paintRect = LayoutRect(adjustedPaintOffset, localRect.Size());
 
-    PaintFillLayers(Color(), Renderer().Style().GetMaskLayers(), paintRect, compositeOp);
+    PaintFillLayers(Color(), Renderer().Style().MaskLayers(), paintRect, compositeOp);
 
     bool hasBoxImage =
       maskBorderSource && maskBorderSource->CanRender(&Renderer(), Renderer().Style().UsedZoom());
@@ -342,7 +342,7 @@ namespace krys::boo
       return;
     }
 
-    if (Renderer().Style().GetBoxDecorationBreak() == BoxDecorationBreak::Clone)
+    if (Renderer().Style().BoxDecorationBreak() == BoxDecorationBreak::Clone)
     {
       GraphicsContextStateSaver stateSaver(_paintInfo.Context());
       _paintInfo.Context().Clip(

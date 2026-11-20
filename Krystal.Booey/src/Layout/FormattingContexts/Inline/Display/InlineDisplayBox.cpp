@@ -40,7 +40,7 @@ namespace krys::boo::inline_display
 
   bool Box::IsVisibleIgnoringUsedVisibility() const noexcept
   {
-    return !IsFullyTruncated() && Style().GetVisibility() == Visibility::Visible;
+    return !IsFullyTruncated() && Style().Visibility() == Visibility::Visible;
   }
 
   boo::WritingMode Box::GetWritingMode() const noexcept

@@ -936,7 +936,7 @@ namespace krys::boo::style
   inline void BuilderCustom::ApplyInheritZoom(BuilderState &builderState) noexcept
   {
     ResetUsedZoom(builderState);
-    builderState.SetZoom(ForwardInheritedValue(builderState.ParentStyle().GetZoom()));
+    builderState.SetZoom(ForwardInheritedValue(builderState.ParentStyle().Zoom()));
   }
 
   inline void BuilderCustom::ApplyValueZoom(BuilderState &builderState, css::Value &value) noexcept
@@ -1485,7 +1485,7 @@ namespace krys::boo::style
       return 0.5f;
     }
 
-    auto rubyPosition = builderState.Style().GetRubyPosition();
+    auto rubyPosition = builderState.Style().RubyPosition();
     if (rubyPosition == RubyPosition::InterCharacter)
     {
       // If the writing mode of the enclosing ruby container is vertical, 'inter-character' value has the same
@@ -1512,8 +1512,8 @@ namespace krys::boo::style
   inline float BuilderCustom::DetermineMathDepthScale(BuilderState &builderState) noexcept
   {
     // Step 1.
-    auto inherited = builderState.ParentStyle().GetMathDepth();
-    auto computed = builderState.Style().GetMathDepth();
+    auto inherited = builderState.ParentStyle().MathDepth();
+    auto computed = builderState.Style().MathDepth();
     float scale = 1.0f;
     float scaleDown = 0.71f;
 
@@ -1644,7 +1644,7 @@ namespace krys::boo::style
   inline void BuilderCustom::ApplyValueColor(BuilderState &builderState, css::Value &value) noexcept
   {
     auto color = ConvertCSSValueToStyle<Color>(builderState, value);
-    builderState.Style().SetColor(color.ResolveColor(builderState.ParentStyle().GetColor()));
+    builderState.Style().SetColor(color.ResolveColor(builderState.ParentStyle().Color()));
 
     builderState.Style().SetDisallowsFastPathInheritance();
     builderState.Style().SetHasExplicitlySetColor(builderState.IsAuthorOrigin());
@@ -1660,7 +1660,7 @@ namespace krys::boo::style
 
   inline void BuilderCustom::ApplyInheritColor(BuilderState &builderState) noexcept
   {
-    builderState.Style().SetColor(ForwardInheritedValue(builderState.ParentStyle().GetColor()));
+    builderState.Style().SetColor(ForwardInheritedValue(builderState.ParentStyle().Color()));
 
     builderState.Style().SetDisallowsFastPathInheritance();
     builderState.Style().SetHasExplicitlySetColor(builderState.IsAuthorOrigin());

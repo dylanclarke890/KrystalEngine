@@ -144,10 +144,9 @@ namespace krys::boo
     {
       parameters.RuleThickness =
         LayoutUnit(mathData->GetMathConstant(*primaryFont, MathConstant::RadicalRuleThickness));
-      parameters.VerticalGap =
-        LayoutUnit(mathData->GetMathConstant(*primaryFont, Style().GetMathStyle() == MathStyle::Normal
-                                                             ? MathConstant::RadicalDisplayStyleVerticalGap
-                                                             : MathConstant::RadicalVerticalGap));
+      parameters.VerticalGap = LayoutUnit(mathData->GetMathConstant(
+        *primaryFont, Style().MathStyle() == MathStyle::Normal ? MathConstant::RadicalDisplayStyleVerticalGap
+                                                               : MathConstant::RadicalVerticalGap));
       parameters.ExtraAscender =
         LayoutUnit(mathData->GetMathConstant(*primaryFont, MathConstant::RadicalExtraAscender));
       if (GetRootType() == RootType::RootWithIndex)
@@ -164,7 +163,7 @@ namespace krys::boo
       // RadicalExtraAscender: Suggested value is RadicalRuleThickness.
       // RadicalDegreeBottomRaisePercent: Suggested value is 60%.
       parameters.RuleThickness = RuleThicknessFallback();
-      if (Style().GetMathStyle() == MathStyle::Normal)
+      if (Style().MathStyle() == MathStyle::Normal)
       {
         parameters.VerticalGap =
           parameters.RuleThickness + LayoutUnit(Style().MetricsOfPrimaryFont().XHeight().value_or(0) / 4);

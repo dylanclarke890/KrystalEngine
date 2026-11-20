@@ -298,7 +298,7 @@ namespace krys::boo::tests
     document.UpdateLayout();
     CHECK(layoutContext.DidFirstLayout());
     CHECK_FALSE(layoutContext.NeedsLayout());
-    CHECK(EqualIgnoringSemanticColor(fixture.Rendered(u8"p").GetColor(), Black));
+    CHECK(EqualIgnoringSemanticColor(fixture.Rendered(u8"p").Color(), Black));
 
     fixture.View().Resize({1'200, 600});
     CHECK(layoutContext.IsLayoutPending());
@@ -306,11 +306,11 @@ namespace krys::boo::tests
 
     // Style updates alone don't re-evaluate media queries for viewport changes; layout does.
     document.UpdateStyleIfNeeded();
-    CHECK(EqualIgnoringSemanticColor(fixture.Rendered(u8"p").GetColor(), Black));
+    CHECK(EqualIgnoringSemanticColor(fixture.Rendered(u8"p").Color(), Black));
 
     CHECK(document.UpdateLayout() == Document::UpdateLayoutResult::ChangesDone);
     CHECK_FALSE(layoutContext.IsLayoutPending());
-    CHECK(fixture.Rendered(u8"p").GetColor() == Blue);
+    CHECK(fixture.Rendered(u8"p").Color() == Blue);
 
     CHECK(document.UpdateLayout() == Document::UpdateLayoutResult::NoChange);
 
@@ -322,7 +322,7 @@ namespace krys::boo::tests
       scrolling.Document->UpdateLayout();
       scrolling.View().Resize({1'200, 600});
       CHECK_FALSE(scrolling.View().LayoutContext().IsLayoutPending());
-      CHECK(scrolling.Rendered(u8"p").GetColor() == Blue);
+      CHECK(scrolling.Rendered(u8"p").Color() == Blue);
     }
 
     SECTION("Layout isn't scheduled before there's a body")
@@ -348,14 +348,14 @@ namespace krys::boo::tests
     </style><p id=p>x</p>)"};
     auto &document = *fixture.Document;
     document.UpdateStyleIfNeeded();
-    CHECK(EqualIgnoringSemanticColor(fixture.Rendered(u8"p").GetColor(), Black));
+    CHECK(EqualIgnoringSemanticColor(fixture.Rendered(u8"p").Color(), Black));
 
     auto paged = document.Window()->MatchMedia(u8"(overflow-block: paged)");
     CHECK_FALSE(paged->Matches());
 
     fixture.View().SetMediaType(u8"print");
     document.UpdateStyleIfNeeded();
-    CHECK(fixture.Rendered(u8"p").GetColor() == Blue);
+    CHECK(fixture.Rendered(u8"p").Color() == Blue);
     CHECK(document.GetMediaQueryMatcher().MediaType() == u8"print");
 
     document.EvaluateMediaQueriesAndReportChanges();
@@ -363,7 +363,7 @@ namespace krys::boo::tests
 
     fixture.View().SetMediaType(u8"screen");
     document.UpdateStyleIfNeeded();
-    CHECK(EqualIgnoringSemanticColor(fixture.Rendered(u8"p").GetColor(), Black));
+    CHECK(EqualIgnoringSemanticColor(fixture.Rendered(u8"p").Color(), Black));
   }
 
   TEST_CASE_METHOD(css::tests::ValueFixture, "Page: dark appearance and device scale factor", "[Page][Frame]")
@@ -374,7 +374,7 @@ namespace krys::boo::tests
     </style><p id=p>x</p><div id=set></div>)"};
     auto &document = *fixture.Document;
     document.UpdateStyleIfNeeded();
-    CHECK(EqualIgnoringSemanticColor(fixture.Rendered(u8"p").GetColor(), Black));
+    CHECK(EqualIgnoringSemanticColor(fixture.Rendered(u8"p").Color(), Black));
     CHECK(document.RenderViewStyle().DeviceScaleFactor() == 1);
     auto imageSet = [&]() -> StyleImageSet &
     {
@@ -391,7 +391,7 @@ namespace krys::boo::tests
     CHECK(fixture.Frame->DeviceScaleFactor() == 2);
 
     document.UpdateStyleIfNeeded();
-    CHECK(fixture.Rendered(u8"p").GetColor() == Blue);
+    CHECK(fixture.Rendered(u8"p").Color() == Blue);
     CHECK(document.DeviceScaleFactor() == 2);
     CHECK(document.RenderViewStyle().DeviceScaleFactor() == 2);
     // An image set picks the image for the device scale factor.

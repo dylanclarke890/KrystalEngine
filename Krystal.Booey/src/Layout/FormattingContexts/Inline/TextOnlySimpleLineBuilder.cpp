@@ -257,8 +257,8 @@ namespace krys::boo::layout
                                                       const InlineItemRange &layoutRange) noexcept
   {
     auto hasWrapOpportunityBeforeWhitespace =
-      rootStyle.GetWhiteSpaceCollapse() != WhiteSpaceCollapse::BreakSpaces
-      && rootStyle.GetLineBreak() != LineBreak::AfterWhiteSpace;
+      rootStyle.WhiteSpaceCollapse() != WhiteSpaceCollapse::BreakSpaces
+      && rootStyle.LineBreak() != LineBreak::AfterWhiteSpace;
     size_t placedInlineItemCount = 0;
 
     auto result = TextOnlyLineBreakResult {};
@@ -590,7 +590,7 @@ namespace krys::boo::layout
     auto isLastInlineContent = IsLastLineWithInlineContent(placedContentEnd, layoutRangeEndIndex);
     auto shouldPreserveTrailingWhitespace = [&]
     {
-      return rootStyle.GetLineBreak() == LineBreak::AfterWhiteSpace
+      return rootStyle.LineBreak() == LineBreak::AfterWhiteSpace
              && GetIntrinsicWidthMode() != IntrinsicWidthMode::Minimum
              && (!isLastInlineContent || horizontalAvailableSpace < _line.ContentLogicalWidth());
     };
@@ -715,35 +715,34 @@ namespace krys::boo::layout
       {
         return false;
       }
-      if (style.GetWordBreak() == WordBreak::AutoPhrase)
+      if (style.WordBreak() == WordBreak::AutoPhrase)
       {
         return false;
       }
-      if (style.GetTextIndent() != style::ComputedStyle::InitialTextIndent())
+      if (style.TextIndent() != style::ComputedStyle::InitialTextIndent())
       {
         return false;
       }
-      if (style.GetTextAlignLast() == style::TextAlignLast::Justify
-          || style.GetTextAlign() == style::TextAlign::Justify
-          || style.Display() == DisplayType::RubyAnnotation)
+      if (style.TextAlignLast() == style::TextAlignLast::Justify
+          || style.TextAlign() == style::TextAlign::Justify || style.Display() == DisplayType::RubyAnnotation)
       {
         return false;
       }
-      if (style.GetBoxDecorationBreak() == BoxDecorationBreak::Clone)
+      if (style.BoxDecorationBreak() == BoxDecorationBreak::Clone)
       {
         return false;
       }
-      if (!style.GetHangingPunctuation().IsNone())
+      if (!style.HangingPunctuation().IsNone())
       {
         return false;
       }
-      if (!style.GetHyphenateLimitLines().IsNoLimit())
+      if (!style.HyphenateLimitLines().IsNoLimit())
       {
         return false;
       }
-      if (style.GetTextWrapMode() == TextWrapMode::Wrap
-          && (style.GetTextWrapStyle() == TextWrapStyle::Balance
-              || style.GetTextWrapStyle() == TextWrapStyle::Pretty))
+      if (style.TextWrapMode() == TextWrapMode::Wrap
+          && (style.TextWrapStyle() == TextWrapStyle::Balance
+              || style.TextWrapStyle() == TextWrapStyle::Pretty))
       {
         return false;
       }

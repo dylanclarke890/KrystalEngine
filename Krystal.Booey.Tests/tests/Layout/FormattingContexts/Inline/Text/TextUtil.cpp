@@ -195,8 +195,8 @@ namespace krys::boo::tests
       auto next = [](utf8_stringview text, const RenderStyle &style)
       {
         auto factory = text::CachedLineBreakIteratorFactory {
-          text, style.ComputedLocale().GetPlatform(), TextUtil::LineBreakIteratorMode(style.GetLineBreak()),
-          TextUtil::GetContentAnalysis(style.GetWordBreak())};
+          text, style.ComputedLocale().GetPlatform(), TextUtil::LineBreakIteratorMode(style.LineBreak()),
+          TextUtil::GetContentAnalysis(style.WordBreak())};
         return TextUtil::FindNextBreakablePosition(factory, 0, style);
       };
       CHECK(next(u8"\u65E5\u672C \u8A9E", normal) == 3);

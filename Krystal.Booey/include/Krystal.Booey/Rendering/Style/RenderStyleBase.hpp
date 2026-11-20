@@ -319,11 +319,11 @@ namespace krys::boo
 
     KRYS_NODISCARD inline const OutlineValue &Outline() const noexcept;
 
-    KRYS_NODISCARD inline const style::Animations &GetAnimations() const noexcept;
+    KRYS_NODISCARD inline const style::Animations &Animations() const noexcept;
 
-    KRYS_NODISCARD inline const style::BackgroundLayers &GetBackgroundLayers() const noexcept;
+    KRYS_NODISCARD inline const style::BackgroundLayers &BackgroundLayers() const noexcept;
 
-    KRYS_NODISCARD inline const style::BorderImage &GetBorderImage() const noexcept;
+    KRYS_NODISCARD inline const style::BorderImage &BorderImage() const noexcept;
 
     KRYS_NODISCARD inline const style::BorderRadius &BorderRadii() const noexcept;
 
@@ -331,13 +331,13 @@ namespace krys::boo
 
     KRYS_NODISCARD inline const style::MarginBox &GetMarginBox() const noexcept;
 
-    KRYS_NODISCARD inline const style::MaskBorder &GetMaskBorder() const noexcept;
+    KRYS_NODISCARD inline const style::MaskBorder &MaskBorder() const noexcept;
 
-    KRYS_NODISCARD inline const style::MaskLayers &GetMaskLayers() const noexcept;
+    KRYS_NODISCARD inline const style::MaskLayers &MaskLayers() const noexcept;
 
     KRYS_NODISCARD inline const style::PaddingBox &GetPaddingBox() const noexcept;
 
-    KRYS_NODISCARD inline const style::PerspectiveOrigin &GetPerspectiveOrigin() const noexcept;
+    KRYS_NODISCARD inline const style::PerspectiveOrigin &PerspectiveOrigin() const noexcept;
 
     KRYS_NODISCARD inline const style::ScrollMarginBox &GetScrollMarginBox() const noexcept;
 
@@ -345,9 +345,9 @@ namespace krys::boo
 
     KRYS_NODISCARD inline const style::ScrollTimelines &GetScrollTimelines() const noexcept;
 
-    KRYS_NODISCARD inline const style::TransformOrigin &GetTransformOrigin() const noexcept;
+    KRYS_NODISCARD inline const style::TransformOrigin &TransformOrigin() const noexcept;
 
-    KRYS_NODISCARD inline const style::Transitions &GetTransitions() const noexcept;
+    KRYS_NODISCARD inline const style::Transitions &Transitions() const noexcept;
 
     KRYS_NODISCARD inline const style::ViewTimelines &GetViewTimelines() const noexcept;
 

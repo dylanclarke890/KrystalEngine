@@ -184,7 +184,7 @@ namespace krys::boo::layout
         {
           return true;
         }
-        if (inlineBox.Style().GetBoxDecorationBreak() != style::ComputedStyle::InitialBoxDecorationBreak())
+        if (inlineBox.Style().BoxDecorationBreak() != style::ComputedStyle::InitialBoxDecorationBreak())
         {
           return true;
         }
@@ -216,7 +216,7 @@ namespace krys::boo::layout
 
       auto &rootStyle = inlineFormattingContext.Root().Style();
       auto &inlineBoxStyle = inlineItemList.front().LayoutBox().Style();
-      if (inlineBoxStyle.GetTextAlign() != rootStyle.GetTextAlign())
+      if (inlineBoxStyle.TextAlign() != rootStyle.TextAlign())
       {
         return false;
       }

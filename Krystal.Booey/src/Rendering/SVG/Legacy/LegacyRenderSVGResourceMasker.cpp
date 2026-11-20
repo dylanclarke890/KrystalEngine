@@ -93,7 +93,7 @@ namespace krys::boo
     {
       // The content is drawn in sRGB; with `color-interpolation: linearRGB`, a luminance mask's luminance
       // is of its colours in linear light.
-      const auto &drawColorSpace = Style().GetColorInterpolation() == ColorInterpolation::LinearRGB
+      const auto &drawColorSpace = Style().ColorInterpolation() == ColorInterpolation::LinearRGB
                                      ? DestinationColorSpace::LinearSRGB()
                                      : DestinationColorSpace::SRGB();
       maskerData->MaskImage = context->CreateScaledImageBuffer(decoratedBounds, scale);
@@ -132,7 +132,7 @@ namespace krys::boo
     }
 
     // Create the luminance mask.
-    if (Style().GetMaskType() == MaskType::Luminance)
+    if (Style().MaskType() == MaskType::Luminance)
     {
       maskImage->ConvertToLuminanceMask(colorSpace);
     }

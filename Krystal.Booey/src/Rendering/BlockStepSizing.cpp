@@ -31,9 +31,9 @@ namespace krys::boo::block_step_sizing
 {
   bool ChildHasSupportedStyle(const RenderStyle &childStyle) noexcept
   {
-    return childStyle.GetBlockStepInsert() == BlockStepInsert::MarginBox
-           && childStyle.GetBlockStepAlign() == BlockStepAlign::Auto
-           && childStyle.GetBlockStepRound() == BlockStepRound::Up;
+    return childStyle.BlockStepInsert() == BlockStepInsert::MarginBox
+           && childStyle.BlockStepAlign() == BlockStepAlign::Auto
+           && childStyle.BlockStepRound() == BlockStepRound::Up;
   }
 
   LayoutUnit ComputeExtraSpace(LayoutUnit stepSize, LayoutUnit boxOuterSize) noexcept

@@ -40,7 +40,7 @@ namespace krys::boo::inline_iterator
   {
     // FIXME: Layout knows the answer to this question so we should consult it.
     RectEdges<bool> closedEdges {true};
-    if (Style().GetBoxDecorationBreak() == BoxDecorationBreak::Clone)
+    if (Style().BoxDecorationBreak() == BoxDecorationBreak::Clone)
     {
       return closedEdges;
     }

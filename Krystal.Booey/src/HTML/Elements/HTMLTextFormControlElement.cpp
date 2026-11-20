@@ -522,7 +522,7 @@ namespace krys::boo
       // Cache selection if renderer is invisible.
       if (auto *renderer = Renderer())
       {
-        if (renderer->Style().GetVisibility() == Visibility::Hidden || !innerText->GetRenderBox()
+        if (renderer->Style().Visibility() == Visibility::Hidden || !innerText->GetRenderBox()
             || !innerText->GetRenderBox()->Height())
         {
           return CacheSelection(start, end, direction);
@@ -1056,9 +1056,9 @@ namespace krys::boo
     // The inner block, if present, always has its direction set to LTR,
     // so we need to inherit the direction and unicode-bidi style from the element.
     textBlockStyle.SetDirection(parentStyle.GetWritingMode().ComputedTextDirection());
-    textBlockStyle.SetUnicodeBidi(parentStyle.GetUnicodeBidi());
+    textBlockStyle.SetUnicodeBidi(parentStyle.UnicodeBidi());
 
-    if (parentStyle.GetFieldSizing() == FieldSizing::Content)
+    if (parentStyle.FieldSizing() == FieldSizing::Content)
     {
       textBlockStyle.SetLogicalMinWidth(style::MinimumSize::Fixed {static_cast<float>(CaretWidth())});
     }

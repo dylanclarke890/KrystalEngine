@@ -529,7 +529,7 @@ namespace krys::boo::layout
       {
         return TextUtil::EllipsisTextInInlineDirection(displayLine.IsHorizontal());
       }
-      return displayBoxes[0].LayoutBox().Style().GetBlockEllipsis().SwitchOn(
+      return displayBoxes[0].LayoutBox().Style().BlockEllipsis().SwitchOn(
         [&](const css::keywords::None &) -> StringAtom { return null; },
         [&](const css::keywords::Auto &) -> StringAtom
         { return TextUtil::EllipsisTextInInlineDirection(displayLine.IsHorizontal()); },

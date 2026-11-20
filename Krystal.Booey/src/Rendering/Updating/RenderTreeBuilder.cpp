@@ -635,7 +635,7 @@ namespace krys::boo
     }
 
     if ((parent.HasOutlineAutoAncestor()
-         || parent.OutlineStyleForRepaint().GetOutlineStyle() == OutlineStyle::Auto)
+         || parent.OutlineStyleForRepaint().OutlineStyle() == OutlineStyle::Auto)
         && !Is<RenderMultiColumnSet>(newChild->PreviousSibling()))
     {
       newChild->SetHasOutlineAutoAncestor();

@@ -46,7 +46,7 @@ namespace krys::boo::layout_integration
   {
     KRYS_NODISCARD inline bool MayHaveScrollbarOrScrollableOverflow(const RenderStyle &style) noexcept
     {
-      return !style.IsOverflowVisible() || !style.GetScrollbarGutter().IsAuto();
+      return !style.IsOverflowVisible() || !style.ScrollbarGutter().IsAuto();
     }
 
     KRYS_NODISCARD inline layout::ConstraintsForFlexContent
@@ -54,7 +54,7 @@ namespace krys::boo::layout_integration
     {
       auto &flexContainerRenderer = Downcast<RenderFlexibleBox>(*flexContainer.RendererForIntegration());
       auto &flexBoxStyle = flexContainer.Style();
-      auto boxSizingIsContentBox = flexBoxStyle.GetBoxSizing() == BoxSizing::ContentBox;
+      auto boxSizingIsContentBox = flexBoxStyle.BoxSizing() == BoxSizing::ContentBox;
       auto availableLogicalWidth = flexContainerRenderer.ContentBoxRect().Width();
       // FIXME: Use root's BoxGeometry which first needs to stop flipping for the formatting context.
       auto horizontalBorderAndPadding =
@@ -163,8 +163,8 @@ namespace krys::boo::layout_integration
       return false;
     }
 
-    auto isColumnDirection = flexBoxStyle.GetFlexDirection() == FlexDirection::Column
-                             || flexBoxStyle.GetFlexDirection() == FlexDirection::ColumnReverse;
+    auto isColumnDirection = flexBoxStyle.FlexDirection() == FlexDirection::Column
+                             || flexBoxStyle.FlexDirection() == FlexDirection::ColumnReverse;
     auto isHorizontalWritingMode = flexBoxStyle.GetWritingMode().IsHorizontal();
     if (!isHorizontalWritingMode)
     {
@@ -185,7 +185,7 @@ namespace krys::boo::layout_integration
       return false;
     }
 
-    if (flexBoxStyle.GetMarginTrim() != style::ComputedStyle::InitialMarginTrim())
+    if (flexBoxStyle.MarginTrim() != style::ComputedStyle::InitialMarginTrim())
     {
       return false;
     }
@@ -231,7 +231,7 @@ namespace krys::boo::layout_integration
     {
       auto &flexItemStyle = flexItem.Style();
 
-      if (!flexItemStyle.GetFlexBasis().IsFixed())
+      if (!flexItemStyle.FlexBasis().IsFixed())
       {
         // Note that percentage values of flex-basis are resolved against the flex item's containing block and
         // if that containing block's size is indefinite, the used value for flex-basis is content.
@@ -291,8 +291,8 @@ namespace krys::boo::layout_integration
         return false;
       }
 
-      auto isBaseline = !flexItemStyle.GetAlignSelf().IsAuto() ? flexItemStyle.GetAlignSelf().IsBaseline()
-                                                               : flexBoxStyle.GetAlignItems().IsBaseline();
+      auto isBaseline = !flexItemStyle.AlignSelf().IsAuto() ? flexItemStyle.AlignSelf().IsBaseline()
+                                                            : flexBoxStyle.AlignItems().IsBaseline();
       if (isBaseline)
       {
         return false;

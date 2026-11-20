@@ -852,7 +852,7 @@ namespace krys::boo::layout
     krys_debug_assert(clearBox.HasFloatClear());
 
     auto clearBoxIsInLeftToRightDirection = Root().GetWritingMode().IsBidiLTR();
-    auto clearValue = clearBox.Style().GetClear();
+    auto clearValue = clearBox.Style().Clear();
     if (clearValue == boo::Clear::Both)
     {
       return clearValue;

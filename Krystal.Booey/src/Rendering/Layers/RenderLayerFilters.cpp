@@ -135,14 +135,14 @@ namespace krys::boo
 
   bool RenderLayerFilters::IsIdentity(RenderElement &renderer) noexcept
   {
-    const auto &filter = renderer.Style().GetFilter();
+    const auto &filter = renderer.Style().Filter();
     return CSSFilterRenderer::IsIdentity(renderer, filter);
   }
 
   IntOutsets RenderLayerFilters::CalculateOutsets(RenderElement &renderer,
                                                   const RectF &targetBoundingBox) noexcept
   {
-    const auto &filter = renderer.Style().GetFilter();
+    const auto &filter = renderer.Style().Filter();
 
     if (!filter.HasFilterThatMovesPixels())
     {
@@ -208,7 +208,7 @@ namespace krys::boo
         || _preferredFilterRenderingModes != preferredFilterRenderingModes)
     {
       // FIXME: This rebuilds the entire effects chain even if the filter style didn't change.
-      _filter = CSSFilterRenderer::Create(renderer, renderer.Style().GetFilter(), geometry,
+      _filter = CSSFilterRenderer::Create(renderer, renderer.Style().Filter(), geometry,
                                           preferredFilterRenderingModes, context);
       hasUpdatedBackingStore = true;
     }

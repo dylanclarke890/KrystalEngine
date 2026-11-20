@@ -387,7 +387,7 @@ namespace krys::boo::style::tests
   TEST_CASE("Style colour(RenderStyle)", "[Style][Values][Color]")
   {
     RenderStyle style {RenderStyle::Create()};
-    CHECK(style.GetColor() == boo::Color::black);
+    CHECK(style.Color() == boo::Color::black);
 
     style.SetColor(boo::Color {Red});
     CHECK(style.ColorResolvingCurrentColor(Color {}) == boo::Color {Red});

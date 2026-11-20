@@ -384,7 +384,7 @@ namespace krys::boo
         return true;
       }
     }
-    if (MultiColumnBlockFlow()->Style().GetColumnFill() == ColumnFill::Balance)
+    if (MultiColumnBlockFlow()->Style().ColumnFill() == ColumnFill::Balance)
     {
       return true;
     }

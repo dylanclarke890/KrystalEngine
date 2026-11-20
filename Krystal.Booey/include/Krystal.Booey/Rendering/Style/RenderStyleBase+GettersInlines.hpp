@@ -417,44 +417,44 @@ namespace krys::boo
     return _computedStyle.GetViewTimelines();
   }
 
-  inline const style::Animations &RenderStyleBase::GetAnimations() const noexcept
+  inline const style::Animations &RenderStyleBase::Animations() const noexcept
   {
-    return _computedStyle.GetAnimations();
+    return _computedStyle.Animations();
   }
 
-  inline const style::Transitions &RenderStyleBase::GetTransitions() const noexcept
+  inline const style::Transitions &RenderStyleBase::Transitions() const noexcept
   {
-    return _computedStyle.GetTransitions();
+    return _computedStyle.Transitions();
   }
 
-  inline const style::BackgroundLayers &RenderStyleBase::GetBackgroundLayers() const noexcept
+  inline const style::BackgroundLayers &RenderStyleBase::BackgroundLayers() const noexcept
   {
-    return _computedStyle.GetBackgroundLayers();
+    return _computedStyle.BackgroundLayers();
   }
 
-  inline const style::MaskLayers &RenderStyleBase::GetMaskLayers() const noexcept
+  inline const style::MaskLayers &RenderStyleBase::MaskLayers() const noexcept
   {
-    return _computedStyle.GetMaskLayers();
+    return _computedStyle.MaskLayers();
   }
 
-  inline const style::MaskBorder &RenderStyleBase::GetMaskBorder() const noexcept
+  inline const style::MaskBorder &RenderStyleBase::MaskBorder() const noexcept
   {
-    return _computedStyle.GetMaskBorder();
+    return _computedStyle.MaskBorder();
   }
 
-  inline const style::BorderImage &RenderStyleBase::GetBorderImage() const noexcept
+  inline const style::BorderImage &RenderStyleBase::BorderImage() const noexcept
   {
-    return _computedStyle.GetBorderImage();
+    return _computedStyle.BorderImage();
   }
 
-  inline const style::TransformOrigin &RenderStyleBase::GetTransformOrigin() const noexcept
+  inline const style::TransformOrigin &RenderStyleBase::TransformOrigin() const noexcept
   {
-    return _computedStyle.GetTransformOrigin();
+    return _computedStyle.TransformOrigin();
   }
 
-  inline const style::PerspectiveOrigin &RenderStyleBase::GetPerspectiveOrigin() const noexcept
+  inline const style::PerspectiveOrigin &RenderStyleBase::PerspectiveOrigin() const noexcept
   {
-    return _computedStyle.GetPerspectiveOrigin();
+    return _computedStyle.PerspectiveOrigin();
   }
 
   inline const OutlineValue &RenderStyleBase::Outline() const noexcept

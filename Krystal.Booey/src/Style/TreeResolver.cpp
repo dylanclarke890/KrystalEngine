@@ -141,12 +141,12 @@ namespace krys::boo::style
   {
     if (oldStyle && newStyle)
     {
-      if (oldStyle->GetPositionTryFallbacks() != newStyle->GetPositionTryFallbacks())
+      if (oldStyle->PositionTryFallbacks() != newStyle->PositionTryFallbacks())
       {
         return true;
       }
 
-      if (oldStyle->GetPositionTryOrder() != newStyle->GetPositionTryOrder())
+      if (oldStyle->PositionTryOrder() != newStyle->PositionTryOrder())
       {
         return true;
       }
@@ -1161,7 +1161,7 @@ namespace krys::boo::style
       }
       // We may need to rebuild the tree starting from further up if there is a position property change to
       // clean up continuations.
-      if (currentStyle && currentStyle->GetPosition() != newStyle->GetPosition())
+      if (currentStyle && currentStyle->Position() != newStyle->Position())
       {
         return true;
       }
@@ -1313,7 +1313,7 @@ namespace krys::boo::style
                                 style::IsInDisplayNoneTree isInDisplayNoneTree) noexcept
   {
     GetScope().SelectorMatchingState.SelectorFilter.PushParent(&element);
-    if (style.GetContainerType() != ContainerType::Normal)
+    if (style.ContainerType() != ContainerType::Normal)
     {
       GetScope().SelectorMatchingState.ContainerQueryEvaluationState.SizeQueryContainers.push_back(
         ShareRef<const boo::Element>(element));
@@ -1765,8 +1765,8 @@ namespace krys::boo::style
     }
 
     auto *existingStyle = element.RenderOrDisplayContentsStyle();
-    if (style->GetContainerType() != ContainerType::Normal
-        || (existingStyle && existingStyle->GetContainerType() != ContainerType::Normal))
+    if (style->ContainerType() != ContainerType::Normal
+        || (existingStyle && existingStyle->ContainerType() != ContainerType::Normal))
     {
       // If any of the queries use font-size relative units then a font size change
       // may affect their evaluation, so force re-evaluating all descendants.
@@ -2027,7 +2027,7 @@ namespace krys::boo::style
   {
     // https://drafts.csswg.org/css-anchor-position-1/#fallback-apply
 
-    if (!resolvedStyle.Style || resolvedStyle.Style->GetPositionTryFallbacks().IsNone())
+    if (!resolvedStyle.Style || resolvedStyle.Style->PositionTryFallbacks().IsNone())
     {
       return;
     }
@@ -2057,7 +2057,7 @@ namespace krys::boo::style
         {RenderStyle::ClonePtr(*resolvedStyle.Style), null, scrollContainerSizeOnGeneration});
 
       size_t i = 0;
-      for (const auto &fallback : resolvedStyle.Style->GetPositionTryFallbacks())
+      for (const auto &fallback : resolvedStyle.Style->PositionTryFallbacks())
       {
         auto index = i++;
         auto optionStyle =
@@ -2167,7 +2167,7 @@ namespace krys::boo::style
       return;
     }
 
-    auto order = options.OriginalStyle().GetPositionTryOrder();
+    auto order = options.OriginalStyle().PositionTryOrder();
     if (order != PositionTryOrder::Normal && options.OptionStyles.size() > 2)
     {
       // "For each entry in the position options list, apply that position option to the box, and find the
@@ -2355,7 +2355,7 @@ namespace krys::boo::style
         return false;
       }
 
-      if (style.GetPositionVisibility().Contains(PositionVisibilityValue::AnchorsVisible))
+      if (style.PositionVisibility().Contains(PositionVisibilityValue::AnchorsVisible))
       {
         // "If the box has a default anchor box but that anchor box is invisible or clipped by intervening
         // boxes, the box’s visibility property computes to force-hidden."
@@ -2364,14 +2364,14 @@ namespace krys::boo::style
           return true;
         }
       }
-      if (style.GetPositionVisibility().Contains(PositionVisibilityValue::NoOverflow))
+      if (style.PositionVisibility().Contains(PositionVisibilityValue::NoOverflow))
       {
         if (AnchorPositionEvaluator::OverflowsInsetModifiedContainingBlock(*anchored))
         {
           return true;
         }
       }
-      if (style.GetPositionVisibility().Contains(PositionVisibilityValue::AnchorsValid))
+      if (style.PositionVisibility().Contains(PositionVisibilityValue::AnchorsValid))
       {
         auto stateIt = _treeResolutionState.AnchorPositionedStates.find(
           {ShareRefPtr<const boo::Element>(&styleable.Element), styleable.PseudoElementIdentifier});
@@ -2418,12 +2418,12 @@ namespace krys::boo::style
     // A changed anchor name is either a name being added, a name being removed, or a name whose
     // interpretation changes. This may change which elements get anchored to it.
 
-    if (!currentStyle || currentStyle->GetAnchorNames() != newStyle.GetAnchorNames())
+    if (!currentStyle || currentStyle->AnchorNames() != newStyle.AnchorNames())
     {
       // This could check which individual names differ but usually there is just one.
       auto addChanged = [&](const RenderStyle &style)
       {
-        for (const auto &name : style.GetAnchorNames())
+        for (const auto &name : style.AnchorNames())
         {
           _changedAnchorNames.insert(name.Name);
         }

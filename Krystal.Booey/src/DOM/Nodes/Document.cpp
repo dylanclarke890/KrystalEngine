@@ -2706,7 +2706,7 @@ namespace krys::boo
       }
 
       auto *renderer = element->Renderer();
-      if (!renderer || renderer->Style().GetOverlay() == Overlay::None)
+      if (!renderer || renderer->Style().Overlay() == Overlay::None)
       {
         element->RemoveFromTopLayer();
       }
@@ -5194,8 +5194,8 @@ namespace krys::boo
 
   EnumSet<boo::ColorScheme> Document::ResolvedColorScheme(const RenderStyle *style) const noexcept
   {
-    bool isNormal = !style || style->GetColorScheme().IsNormal();
-    return isNormal ? _colorScheme : style->GetColorScheme().GetColorScheme();
+    bool isNormal = !style || style->ColorScheme().IsNormal();
+    return isNormal ? _colorScheme : style->ColorScheme().GetColorScheme();
   }
 
   bool Document::UseDarkAppearance(const RenderStyle *style) const noexcept

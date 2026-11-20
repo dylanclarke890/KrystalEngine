@@ -89,7 +89,7 @@ namespace krys::boo
       return null;
     }
 
-    const auto &offsetPath = renderer.Style().GetOffsetPath();
+    const auto &offsetPath = renderer.Style().OffsetPath();
     if (offsetPath.IsNone())
     {
       return null;
@@ -128,7 +128,7 @@ namespace krys::boo
     auto referenceRect = data.ContainingBlockBoundingRect.Rect();
     data.OffsetFromContainingBlock = MotionPathOffsetFromContainer(renderer, *container, referenceRect);
 
-    const auto &offsetPosition = renderer.Style().GetOffsetPosition();
+    const auto &offsetPosition = renderer.Style().OffsetPosition();
     if (offsetPath.IsBasicShape())
     {
       data.UsedStartingPosition = startingPositionForOffsetPosition(offsetPosition, referenceRect);

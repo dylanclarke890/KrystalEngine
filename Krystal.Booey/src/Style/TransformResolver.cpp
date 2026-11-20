@@ -48,9 +48,8 @@ namespace krys::boo::style
 
   bool TransformResolver::AffectedByTransformOrigin(const ComputedStyle &style) noexcept
   {
-    return style.GetRotate().AffectedByTransformOrigin() || style.GetScale().AffectedByTransformOrigin()
-           || style.GetTransform().AffectedByTransformOrigin()
-           || style.GetOffsetPath().AffectedByTransformOrigin();
+    return style.Rotate().AffectedByTransformOrigin() || style.Scale().AffectedByTransformOrigin()
+           || style.Transform().AffectedByTransformOrigin() || style.OffsetPath().AffectedByTransformOrigin();
   }
 
   bool TransformResolver::AffectedByTransformOrigin(const RenderStyle &style) noexcept
@@ -69,8 +68,8 @@ namespace krys::boo::style
     Point3F originTranslate;
     originTranslate.SetXY(
       boundingBox.Location()
-      + Evaluate<PointF>(style.GetTransformOrigin().XY(), boundingBox.Size(), ZoomNeeded {}));
-    originTranslate.SetZ(style.GetTransformOriginZ().ResolveZoom(ZoomNeeded {}));
+      + Evaluate<PointF>(style.TransformOrigin().XY(), boundingBox.Size(), ZoomNeeded {}));
+    originTranslate.SetZ(style.TransformOriginZ().ResolveZoom(ZoomNeeded {}));
     return originTranslate;
   }
 
@@ -89,7 +88,7 @@ namespace krys::boo::style
                                                      const RectF &boundingBox) noexcept
   {
     return boundingBox.Location()
-           + Evaluate<PointF>(style.GetPerspectiveOrigin(), boundingBox.Size(), ZoomNeeded {});
+           + Evaluate<PointF>(style.PerspectiveOrigin(), boundingBox.Size(), ZoomNeeded {});
   }
 
   PointF TransformResolver::ComputePerspectiveOrigin(const RenderStyle &style,
@@ -114,7 +113,7 @@ namespace krys::boo::style
 
     // 3. Multiply by the matrix that would be obtained from the perspective() transform function, where the
     // length is provided by the value of the perspective property
-    _transform.ApplyPerspective(_style.GetPerspective().UsedPerspective());
+    _transform.ApplyPerspective(_style.Perspective().UsedPerspective());
 
     // 4. Translate by the negated computed X and Y values of perspective-origin
     _transform.Translate(-originTranslate.X(), -originTranslate.Y());
@@ -151,19 +150,19 @@ namespace krys::boo::style
     // 3. Translate by the computed X, Y, and Z values of translate.
     if (options.Contains(Option::Translate))
     {
-      _style.GetTranslate().Apply(_transform, boundingBox.Size());
+      _style.Translate().Apply(_transform, boundingBox.Size());
     }
 
     // 4. Rotate by the computed <angle> about the specified axis of rotate.
     if (options.Contains(Option::Rotate))
     {
-      _style.GetRotate().Apply(_transform, boundingBox.Size());
+      _style.Rotate().Apply(_transform, boundingBox.Size());
     }
 
     // 5. Scale by the computed X, Y, and Z values of scale.
     if (options.Contains(Option::Scale))
     {
-      _style.GetScale().Apply(_transform, boundingBox.Size());
+      _style.Scale().Apply(_transform, boundingBox.Size());
     }
 
     // 6. Translate and rotate by the transform specified by offset.
@@ -173,7 +172,7 @@ namespace krys::boo::style
     }
 
     // 7. Multiply by each of the transform functions in transform from left to right.
-    _style.GetTransform().Apply(_transform, boundingBox.Size());
+    _style.Transform().Apply(_transform, boundingBox.Size());
 
     // 8. Translate by the negated computed X, Y and Z values of transform-origin.
     // (implemented in UnapplyTransformOrigin)
@@ -226,7 +225,7 @@ namespace krys::boo::style
 
   void TransformResolver::ApplyMotionPathTransform(const TransformOperationData &transformData) noexcept
   {
-    auto offsetPath = TryPath(_style.GetOffsetPath(), transformData);
+    auto offsetPath = TryPath(_style.OffsetPath(), transformData);
     if (!offsetPath)
     {
       return;
@@ -235,15 +234,15 @@ namespace krys::boo::style
     auto &boundingBox = transformData.BoundingBox;
 
     auto transformOrigin = ComputeTransformOrigin(boundingBox).XY();
-    auto transformBox = _style.GetTransformBox();
+    auto transformBox = _style.TransformBox();
 
-    auto offsetDistance = Evaluate<float>(_style.GetOffsetDistance(), offsetPath->Length(), ZoomNeeded {});
+    auto offsetDistance = Evaluate<float>(_style.OffsetDistance(), offsetPath->Length(), ZoomNeeded {});
     auto offsetAnchor = krys::SwitchOn(
-      _style.GetOffsetAnchor(), [&](const Position &position) -> Maybe<PointF>
+      _style.OffsetAnchor(), [&](const Position &position) -> Maybe<PointF>
       { return Evaluate<PointF>(position, boundingBox.Size(), ZoomNeeded {}); },
       [&](const css::keywords::Auto &) -> Maybe<PointF> { return null; });
-    auto offsetRotate = _style.GetOffsetRotate().GetAngle().Value;
-    auto offsetRotateHasAuto = _style.GetOffsetRotate().HasAuto();
+    auto offsetRotate = _style.OffsetRotate().GetAngle().Value;
+    auto offsetRotateHasAuto = _style.OffsetRotate().HasAuto();
 
     MotionPath::ApplyMotionPathTransform(_transform, transformData, transformOrigin, transformBox,
                                          *offsetPath, offsetAnchor, offsetDistance, offsetRotate,

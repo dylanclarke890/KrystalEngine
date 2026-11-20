@@ -50,7 +50,7 @@ namespace krys::boo::dom::tests
       REQUIRE(renderer);
       CHECK(renderer->GetElement() == before);
       CHECK(renderer->GetType() == RenderObject::Type::Inline);
-      CHECK(renderer->Style().GetColor() == Blue);
+      CHECK(renderer->Style().Color() == Blue);
       CHECK(a.ComputedStyle(style::PseudoElementIdentifier {PseudoElementType::Before})
             == &renderer->Style());
 
@@ -90,7 +90,7 @@ namespace krys::boo::dom::tests
       CHECK(a.BeforePseudoElement() == before);
       CHECK(before->Renderer() == renderer);
       // ::before sets its own color.
-      CHECK(renderer->Style().GetColor() == Blue);
+      CHECK(renderer->Style().Color() == Blue);
     }
 
     SECTION("Losing the content removes the pseudo-element, and getting it back creates one")

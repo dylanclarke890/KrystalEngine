@@ -489,11 +489,11 @@ namespace krys::boo
         intrinsicSize = renderReplaced->ComputeIntrinsicSize();
         preferredAspectRatio = renderReplaced->PreferredAspectRatio();
       }
-      if (Style().GetAspectRatio().IsRatio()
-          || (Style().GetAspectRatio().IsAutoAndRatio() && preferredAspectRatio.IsEmpty()))
+      if (Style().AspectRatio().IsRatio()
+          || (Style().AspectRatio().IsAutoAndRatio() && preferredAspectRatio.IsEmpty()))
       {
-        preferredAspectRatio = SizeF::NarrowPrecision(Style().GetAspectRatio().Width().Value,
-                                                      Style().GetAspectRatio().Height().Value);
+        preferredAspectRatio =
+          SizeF::NarrowPrecision(Style().AspectRatio().Width().Value, Style().AspectRatio().Height().Value);
       }
 
       // Handle zoom & vertical writing modes here, as the embedded document doesn't know about them.
@@ -621,7 +621,7 @@ namespace krys::boo
       return contentRect;
     }
 
-    ObjectFit objectFit = Style().GetObjectFit();
+    ObjectFit objectFit = Style().ObjectFit();
 
     LayoutRect finalRect = contentRect;
     switch (objectFit)
@@ -641,7 +641,7 @@ namespace krys::boo
       case ObjectFit::Fill: break;
     }
 
-    const auto &objectPosition = Style().GetObjectPosition();
+    const auto &objectPosition = Style().ObjectPosition();
 
     auto xOffset = style::Evaluate<LayoutUnit>(objectPosition.X, contentRect.Width() - finalRect.Width(),
                                                style::ZoomNeeded {});
@@ -682,7 +682,7 @@ namespace krys::boo
       preferredAspectRatio = SizeF::NarrowPrecision(Style().AspectRatioLogicalWidth().Value,
                                                     Style().AspectRatioLogicalHeight().Value);
       // FIXME: Videos with their default object size keep the style's ratio, once there's video.
-      if (Style().GetAspectRatio().IsRatio())
+      if (Style().AspectRatio().IsRatio())
       {
         return preferredAspectRatio;
       }

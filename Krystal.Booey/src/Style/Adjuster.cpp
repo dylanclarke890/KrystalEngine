@@ -195,7 +195,7 @@ namespace krys::boo::style
         usedTouchAction = ComputedStyle::InitialTouchAction();
       }
 
-      auto touchAction = style.GetTouchAction();
+      auto touchAction = style.TouchAction();
       if (touchAction == ComputedStyle::InitialTouchAction())
       {
         return usedTouchAction;
@@ -278,9 +278,8 @@ namespace krys::boo::style
     {
       return style.HasOpacity() || style.HasTransformRelatedProperty() || style.HasMask()
              || style.HasClipPath() || style.HasFilter() || style.HasBackdropFilter() || style.HasBlendMode()
-             || style.HasIsolation() || style.GetPosition() == PositionType::Sticky
-             || style.GetPosition() == PositionType::Fixed
-             || style.GetWillChange().CanCreateStackingContext();
+             || style.HasIsolation() || style.Position() == PositionType::Sticky
+             || style.Position() == PositionType::Fixed || style.WillChange().CanCreateStackingContext();
     }
 
     KRYS_NODISCARD bool HasEffectiveDisplayNoneForDisplayContents(const Element &element) noexcept
@@ -371,7 +370,7 @@ namespace krys::boo::style
         style.SetUsedZIndex(0);
       }
     }
-    else if (style.GetPosition() != PositionType::Static)
+    else if (style.Position() != PositionType::Static)
     {
       style.SetUsedZIndex(style.SpecifiedZIndex());
     }
@@ -465,9 +464,8 @@ namespace krys::boo::style
       {
         // Tables never support the -webkit-* values for text-align and will reset back to the default.
         if (IsHTMLElement(element, html::TagName::table)
-            && (style.GetTextAlign() == TextAlign::WebKitLeft
-                || style.GetTextAlign() == TextAlign::WebKitCenter
-                || style.GetTextAlign() == TextAlign::WebKitRight))
+            && (style.TextAlign() == TextAlign::WebKitLeft || style.TextAlign() == TextAlign::WebKitCenter
+                || style.TextAlign() == TextAlign::WebKitRight))
         {
           style.SetTextAlign(TextAlign::Start);
         }
@@ -494,8 +492,8 @@ namespace krys::boo::style
 
       // Top layer elements are always position: absolute; unless the position is set to fixed.
       // https://fullscreen.spec.whatwg.org/#new-stacking-layer
-      if (_element.get() != documentElement.get() && style.GetPosition() != PositionType::Absolute
-          && style.GetPosition() != PositionType::Fixed && dom::IsInTopLayerOrBackdrop(style, _element.get()))
+      if (_element.get() != documentElement.get() && style.Position() != PositionType::Absolute
+          && style.Position() != PositionType::Fixed && dom::IsInTopLayerOrBackdrop(style, _element.get()))
       {
         style.SetPosition(PositionType::Absolute);
       }
@@ -525,7 +523,7 @@ namespace krys::boo::style
       // (and caused a crash in containingBlock() on some sites).
       if ((style.Display() == DisplayType::TableHeaderGroup || style.Display() == DisplayType::TableRowGroup
            || style.Display() == DisplayType::TableFooterGroup || style.Display() == DisplayType::TableRow)
-          && style.GetPosition() == PositionType::Relative)
+          && style.Position() == PositionType::Relative)
       {
         style.SetPosition(PositionType::Static);
       }
@@ -543,14 +541,14 @@ namespace krys::boo::style
       // types. For now, this gives mostly backwards-compatible behavior.
       if (style.Display() == DisplayType::Grid || style.Display() == DisplayType::InlineGrid)
       {
-        if (style.GetGridAutoFlow().GetDirection() == GridAutoFlow::Direction::Normal)
+        if (style.GridAutoFlow().GetDirection() == GridAutoFlow::Direction::Normal)
         {
           style.SetGridAutoFlowDirection(GridAutoFlow::Direction::Row);
         }
       }
       else if (style.Display() == DisplayType::GridLanes || style.Display() == DisplayType::InlineGridLanes)
       {
-        if (style.GetGridAutoFlow().GetDirection() == GridAutoFlow::Direction::Normal)
+        if (style.GridAutoFlow().GetDirection() == GridAutoFlow::Direction::Normal)
         {
           if (!style.GridTemplateRows().IsNone() && style.GridTemplateColumns().IsNone())
           {
@@ -579,7 +577,7 @@ namespace krys::boo::style
       // https://drafts.csswg.org/css-ruby-1/#bidi
       if (style.IsRubyContainerOrInternalRubyBox())
       {
-        style.SetUnicodeBidi(ForceBidiIsolationForRuby(style.GetUnicodeBidi()));
+        style.SetUnicodeBidi(ForceBidiIsolationForRuby(style.UnicodeBidi()));
       }
     }
 
@@ -591,7 +589,7 @@ namespace krys::boo::style
       }
 
       // Make sure our z-index value is only applied if the object is positioned.
-      return style.GetPosition() == PositionType::Static
+      return style.Position() == PositionType::Static
              && !parentBoxStyle.IsDisplayFlexibleOrGridFormattingContextBox();
     };
 
@@ -637,8 +635,8 @@ namespace krys::boo::style
       if (auto *input = DynamicDowncast<HTMLInputElement>(DynamicDowncast<HTMLElement>(element));
           input && input->IsPasswordField())
       {
-        style.SetTextSecurity(style.GetInputSecurity() == InputSecurity::Auto ? TextSecurity::Disc
-                                                                              : TextSecurity::None);
+        style.SetTextSecurity(style.InputSecurity() == InputSecurity::Auto ? TextSecurity::Disc
+                                                                           : TextSecurity::None);
       }
 
       // Disallow -internal-user-modify on ::pseudo elements, except if that pseudo-element targets a slot,
@@ -682,11 +680,11 @@ namespace krys::boo::style
 
     if (ShouldInheritTextDecorationsInEffect(style, _element.get()))
     {
-      style.AddToTextDecorationLineInEffect(style.GetTextDecorationLine());
+      style.AddToTextDecorationLineInEffect(style.TextDecorationLine());
     }
     else
     {
-      style.SetTextDecorationLineInEffect(TextDecorationLine {style.GetTextDecorationLine()});
+      style.SetTextDecorationLineInEffect(TextDecorationLine {style.TextDecorationLine()});
     }
 
     bool overflowIsClipOrVisible =
@@ -761,7 +759,7 @@ namespace krys::boo::style
       style.SetTransformStyleForcedToFlat(forceToFlat);
     }
 
-    style.SetIsEffectivelyTransparent(style.GetOpacity().IsTransparent()
+    style.SetIsEffectivelyTransparent(style.Opacity().IsTransparent()
                                       || _parentStyle.IsEffectivelyTransparent());
 
     if (auto *element = DynamicDowncast<SVGElement>(_element.get()))
@@ -771,10 +769,10 @@ namespace krys::boo::style
 
     // If the inherited value of justify-items includes the 'legacy' keyword (plus 'left', 'right' or
     // 'center'), 'legacy' computes to the the inherited value. Otherwise, 'auto' computes to 'normal'.
-    if (_parentBoxStyle.GetJustifyItems().Resolve().PositionType() == ItemPositionType::Legacy
-        && style.GetJustifyItems().Resolve().Position() == ItemPosition::Legacy)
+    if (_parentBoxStyle.JustifyItems().Resolve().PositionType() == ItemPositionType::Legacy
+        && style.JustifyItems().Resolve().Position() == ItemPosition::Legacy)
     {
-      style.SetJustifyItems(_parentBoxStyle.GetJustifyItems());
+      style.SetJustifyItems(_parentBoxStyle.JustifyItems());
     }
 
     style.SetUsedTouchAction(ComputeUsedTouchAction(style, _parentStyle.UsedTouchAction()));
@@ -818,14 +816,14 @@ namespace krys::boo::style
         *_document, style, *element, _parentStyle.EventListenerRegionTypes()));
     }
 
-    if (_parentStyle.GetContentVisibility() != ContentVisibility::Hidden)
+    if (_parentStyle.ContentVisibility() != ContentVisibility::Hidden)
     {
       if (_element && IsSkippedContentRoot(style, *_element))
       {
-        style.SetUsedContentVisibility(style.GetContentVisibility());
+        style.SetUsedContentVisibility(style.ContentVisibility());
       }
     }
-    if (style.GetContentVisibility() == ContentVisibility::Auto)
+    if (style.ContentVisibility() == ContentVisibility::Auto)
     {
       style.ContainIntrinsicWidthAddAuto();
       style.ContainIntrinsicHeightAddAuto();

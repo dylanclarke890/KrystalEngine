@@ -292,6 +292,6 @@ namespace krys::boo::html::tests
 
     // The user agent's `:link { color: -webkit-link }` resolves to the <body link> colour.
     auto link = fixture.Resolve(fixture.ById(u8"link"));
-    CHECK(link.Style->GetColor() == style::Color(boo::Color(SRGBA<uint8> {255, 0, 0})));
+    CHECK(link.Style->Color() == style::Color(boo::Color(SRGBA<uint8> {255, 0, 0})));
   }
 }

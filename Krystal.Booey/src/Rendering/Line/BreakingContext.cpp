@@ -56,19 +56,19 @@ namespace krys::boo
     }
 
     _currentTextWrap = renderer.IsBlockLevelReplacedOrAtomicInline() || Is<RenderText>(renderer)
-                         ? renderer.Parent()->Style().GetTextWrapMode()
-                         : renderer.Style().GetTextWrapMode();
+                         ? renderer.Parent()->Style().TextWrapMode()
+                         : renderer.Style().TextWrapMode();
     _currentWhitespaceCollapse = renderer.IsBlockLevelReplacedOrAtomicInline() || Is<RenderText>(renderer)
-                                   ? renderer.Parent()->Style().GetWhiteSpaceCollapse()
-                                   : renderer.Style().GetWhiteSpaceCollapse();
+                                   ? renderer.Parent()->Style().WhiteSpaceCollapse()
+                                   : renderer.Style().WhiteSpaceCollapse();
 
     _lastObjectTextWrap = _lastObject->IsBlockLevelReplacedOrAtomicInline() || Is<RenderText>(renderer)
-                            ? _lastObject->Parent()->Style().GetTextWrapMode()
-                            : _lastObject->Style().GetTextWrapMode();
+                            ? _lastObject->Parent()->Style().TextWrapMode()
+                            : _lastObject->Style().TextWrapMode();
     _lastObjectWhitespaceCollapse =
       _lastObject->IsBlockLevelReplacedOrAtomicInline() || Is<RenderText>(renderer)
-        ? _lastObject->Parent()->Style().GetWhiteSpaceCollapse()
-        : _lastObject->Style().GetWhiteSpaceCollapse();
+        ? _lastObject->Parent()->Style().WhiteSpaceCollapse()
+        : _lastObject->Style().WhiteSpaceCollapse();
 
     bool isSVGText = renderer.IsRenderSVGInlineText();
     _autoWrap = !isSVGText && _currentTextWrap != TextWrapMode::NoWrap;
@@ -122,7 +122,7 @@ namespace krys::boo
         return true;
       }
       if (Is<RenderLineBreak>(renderer)
-          && renderer.Parent()->Style().GetBoxDecorationBreak() == BoxDecorationBreak::Clone)
+          && renderer.Parent()->Style().BoxDecorationBreak() == BoxDecorationBreak::Clone)
       {
         return true;
       }
@@ -299,11 +299,10 @@ namespace krys::boo
     const RenderStyle &style = LineStyle(renderer, _lineInfo);
     const FontCascade &font = style.GetFontCascade();
     bool canHangPunctuationAtStart =
-      style.GetHangingPunctuation().Contains(style::HangingPunctuationValue::First);
-    bool canHangPunctuationAtEnd =
-      style.GetHangingPunctuation().Contains(style::HangingPunctuationValue::Last);
+      style.HangingPunctuation().Contains(style::HangingPunctuationValue::First);
+    bool canHangPunctuationAtEnd = style.HangingPunctuation().Contains(style::HangingPunctuationValue::Last);
     bool canHangStopOrCommaAtLineEnd =
-      style.GetHangingPunctuation().Contains(style::HangingPunctuationValue::AllowEnd);
+      style.HangingPunctuation().Contains(style::HangingPunctuationValue::AllowEnd);
     auto endPunctuationIndex = canHangPunctuationAtEnd && _collapseWhiteSpace
                                  ? static_cast<int64>(renderer.LastCharacterIndexStrippingSpaces())
                                : text.empty()
@@ -320,11 +319,11 @@ namespace krys::boo
     bool breakWords =
       isWrappingAllowed && style.BreakWords() && !_width.CommittedWidth() && !_width.HasCommittedReplaced();
     bool midWordBreak = false;
-    bool breakAnywhere = style.GetLineBreak() == LineBreak::Anywhere && _autoWrap;
-    bool breakAll = (style.GetWordBreak() == WordBreak::BreakAll || breakAnywhere) && _autoWrap;
-    bool keepAllWords = style.GetWordBreak() == WordBreak::KeepAll;
-    auto iteratorMode = layout::TextUtil::LineBreakIteratorMode(_blockStyle.GetLineBreak());
-    auto contentAnalysis = layout::TextUtil::GetContentAnalysis(_blockStyle.GetWordBreak());
+    bool breakAnywhere = style.LineBreak() == LineBreak::Anywhere && _autoWrap;
+    bool breakAll = (style.WordBreak() == WordBreak::BreakAll || breakAnywhere) && _autoWrap;
+    bool keepAllWords = style.WordBreak() == WordBreak::KeepAll;
+    auto iteratorMode = layout::TextUtil::LineBreakIteratorMode(_blockStyle.LineBreak());
+    auto contentAnalysis = layout::TextUtil::GetContentAnalysis(_blockStyle.WordBreak());
     bool canUseLineBreakShortcut = iteratorMode == text::TextBreakLineBehavior::Default
                                    && contentAnalysis == text::TextBreakIterator::ContentAnalysis::Mechanical;
 
@@ -621,7 +620,7 @@ namespace krys::boo
         // FIXME: Do this regardless of the container's alignment - will require rebaselining a lot of test
         // results.
         if (_nextObject && _startOfIgnoredSpaces.Offset() && _nextObject->IsBR()
-            && _blockStyle.GetTextAlign() == style::TextAlign::Right)
+            && _blockStyle.TextAlign() == style::TextAlign::Right)
         {
           _startOfIgnoredSpaces.SetOffset(_startOfIgnoredSpaces.Offset() - 1);
           // If there's just a single trailing space start ignoring it now so it collapses away.
@@ -760,8 +759,8 @@ namespace krys::boo
         {
           objectLength = static_cast<uint32>(renderText->Length());
         }
-        if (_blockStyle.GetWhiteSpaceCollapse() == WhiteSpaceCollapse::Preserve
-            && _blockStyle.GetTextWrapMode() == TextWrapMode::NoWrap && !_current.Offset())
+        if (_blockStyle.WhiteSpaceCollapse() == WhiteSpaceCollapse::Preserve
+            && _blockStyle.TextWrapMode() == TextWrapMode::NoWrap && !_current.Offset())
         {
           if (_lastObject)
           {

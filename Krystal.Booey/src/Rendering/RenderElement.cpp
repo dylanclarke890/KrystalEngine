@@ -150,7 +150,7 @@ namespace krys::boo
   {
     if (rendererTypeOverride.IsEmpty())
     {
-      if (RefPtr styleImage = MinimallySupportedContentDataImage(style.GetContent());
+      if (RefPtr styleImage = MinimallySupportedContentDataImage(style.Content());
           styleImage && !Is<PseudoElement>(element))
       {
         style::LoadPendingResources(style, element.NodeDocument(), &element);
@@ -269,7 +269,7 @@ namespace krys::boo
 
     if (diff.ContextSensitiveProperties.Contains(style::DifferenceContextSensitiveProperty::WillChange))
     {
-      if (Style().GetWillChange().CanTriggerCompositing())
+      if (Style().WillChange().CanTriggerCompositing())
       {
         diff.Result = std::max(diff.Result, style::DifferenceResult::RecompositeLayer);
       }
@@ -345,7 +345,7 @@ namespace krys::boo
 
   img::ImageOrientation RenderElement::GetImageOrientation() const noexcept
   {
-    return style::ToPlatform<style::ImageOrientation> {}(Style().GetImageOrientation());
+    return style::ToPlatform<style::ImageOrientation> {}(Style().ImageOrientation());
   }
 
   void RenderElement::InitializeStyle() noexcept
@@ -550,8 +550,8 @@ namespace krys::boo
         {
           // Certain style changes require layer repaint, since the layer could end up being destroyed.
           auto layerMayGetDestroyed =
-            oldStyle.GetPosition() != newStyle.GetPosition() || oldStyle.UsedZIndex() != newStyle.UsedZIndex()
-            || oldStyle.GetClip() != newStyle.GetClip() || oldStyle.HasClip() != newStyle.HasClip()
+            oldStyle.Position() != newStyle.Position() || oldStyle.UsedZIndex() != newStyle.UsedZIndex()
+            || oldStyle.Clip() != newStyle.Clip() || oldStyle.HasClip() != newStyle.HasClip()
             || oldStyle.HasOpacity() != newStyle.HasOpacity()
             || oldStyle.HasTransform() != newStyle.HasTransform()
             || oldStyle.HasFilter() != newStyle.HasFilter();
@@ -588,8 +588,7 @@ namespace krys::boo
       // Note that RenderObject::setNeedsLayout issues setLayerNeedsFullRepaint on renderers with layers.
       if (Is<RenderBox>(*this))
       {
-        if (oldStyle.GetPosition() != newStyle.GetPosition()
-            && oldStyle.GetPosition() == PositionType::Static)
+        if (oldStyle.Position() != newStyle.Position() && oldStyle.Position() == PositionType::Static)
         {
           krys_debug_assert(diff == style::DifferenceResult::Layout);
           return RequiredRepaint::RendererOnly;
@@ -678,7 +677,7 @@ namespace krys::boo
     auto mustRepaintBackgroundOrBorderOnSizeChange =
       [&](LayoutRect oldOutlineBounds, LayoutRect newOutlineBounds)
     {
-      if (HasMask() && MustRepaintFillLayers(*this, Style().GetMaskLayers()))
+      if (HasMask() && MustRepaintFillLayers(*this, Style().MaskLayers()))
       {
         return true;
       }
@@ -702,7 +701,7 @@ namespace krys::boo
         return false;
       }
 
-      if (MustRepaintFillLayers(*this, Style().GetBackgroundLayers()))
+      if (MustRepaintFillLayers(*this, Style().BackgroundLayers()))
       {
         return true;
       }
@@ -857,14 +856,14 @@ namespace krys::boo
     const RenderStyle &outlineStyle = OutlineStyleForRepaint();
     const auto &style = Style();
     auto outlineWidth = LayoutUnit {outlineStyle.OutlineSize()};
-    auto insetShadowExtent = style::ShadowInsetExtent(style.GetBoxShadow(), style.UsedZoomForLength());
+    auto insetShadowExtent = style::ShadowInsetExtent(style.BoxShadow(), style.UsedZoomForLength());
     auto sizeDelta =
       LayoutSize {AbsoluteValue(newOutlineBoundsRect.Width() - oldOutlineBoundsRect.Width()),
                   AbsoluteValue(newOutlineBoundsRect.Height() - oldOutlineBoundsRect.Height())};
     if (sizeDelta.Width())
     {
       auto [shadowLeft, shadowRight] =
-        style::ShadowHorizontalExtent(style.GetBoxShadow(), style.UsedZoomForLength());
+        style::ShadowHorizontalExtent(style.BoxShadow(), style.UsedZoomForLength());
 
       auto insetExtent = [&]
       {
@@ -927,7 +926,7 @@ namespace krys::boo
     if (sizeDelta.Height())
     {
       auto [shadowTop, shadowBottom] =
-        style::ShadowVerticalExtent(style.GetBoxShadow(), style.UsedZoomForLength());
+        style::ShadowVerticalExtent(style.BoxShadow(), style.UsedZoomForLength());
 
       auto insetExtent = [&]
       {
@@ -1030,7 +1029,7 @@ namespace krys::boo
         continue;
       }
       child.SetHasOutlineAutoAncestor(hasOutlineAuto);
-      bool childHasOutlineAuto = child.OutlineStyleForRepaint().GetOutlineStyle() == OutlineStyle::Auto;
+      bool childHasOutlineAuto = child.OutlineStyleForRepaint().OutlineStyle() == OutlineStyle::Auto;
       if (childHasOutlineAuto)
       {
         continue;
@@ -1053,24 +1052,23 @@ namespace krys::boo
         return;
       }
       bool contentVisibilityChanged =
-        oldStyle && oldStyle->GetContentVisibility() != newStyle.GetContentVisibility();
+        oldStyle && oldStyle->ContentVisibility() != newStyle.ContentVisibility();
       if (contentVisibilityChanged)
       {
-        if (oldStyle->GetContentVisibility() == ContentVisibility::Auto)
+        if (oldStyle->ContentVisibility() == ContentVisibility::Auto)
         {
           dom::ContentVisibilityDocumentState::Unobserve(*ShareRef(*GetElement()));
         }
-        auto wasSkippedContent = oldStyle->GetContentVisibility() == ContentVisibility::Hidden
+        auto wasSkippedContent = oldStyle->ContentVisibility() == ContentVisibility::Hidden
                                    ? dom::IsSkippedContent::Yes
                                    : dom::IsSkippedContent::No;
-        auto isSkippedContent = newStyle.GetContentVisibility() == ContentVisibility::Hidden
+        auto isSkippedContent = newStyle.ContentVisibility() == ContentVisibility::Hidden
                                   ? dom::IsSkippedContent::Yes
                                   : dom::IsSkippedContent::No;
         dom::ContentVisibilityDocumentState::UpdateAnimations(*GetElement(), wasSkippedContent,
                                                               isSkippedContent);
       }
-      if ((contentVisibilityChanged || !oldStyle)
-          && newStyle.GetContentVisibility() == ContentVisibility::Auto)
+      if ((contentVisibilityChanged || !oldStyle) && newStyle.ContentVisibility() == ContentVisibility::Auto)
       {
         dom::ContentVisibilityDocumentState::Observe(*ShareRef(*GetElement()));
       }
@@ -1105,7 +1103,7 @@ namespace krys::boo
       }
 
       if ((IsFloating() && _style.Floating() != newStyle.Floating())
-          || (IsOutOfFlowPositioned() && _style.GetPosition() != newStyle.GetPosition()))
+          || (IsOutOfFlowPositioned() && _style.Position() != newStyle.Position()))
       {
         // For changes in float or positioning styles, we need to conceivably remove ourselves
         // from the floating or positioned objects list.
@@ -1114,9 +1112,9 @@ namespace krys::boo
 
       // A box whose new containing block is outside its fragmented flow leaves the flow's box info.
       if (GetFragmentedFlowState() == FragmentedFlowState::InsideFlow
-          && _style.GetPosition() != newStyle.GetPosition())
+          && _style.Position() != newStyle.Position())
       {
-        auto *newContainingBlock = ContainingBlockForPositionType(newStyle.GetPosition(), *this);
+        auto *newContainingBlock = ContainingBlockForPositionType(newStyle.Position(), *this);
         if (newContainingBlock && ContainingBlock() != newContainingBlock)
         {
           if (auto *enclosingFragmentedFlow = LocateEnclosingFragmentedFlow();
@@ -1146,7 +1144,7 @@ namespace krys::boo
 
     // FIXME: A fixed root background composited on its own isn't slow.
     bool newStyleSlowScroll =
-      style::HasImageWithAttachment(newStyle.GetBackgroundLayers(), FillAttachment::FixedBackground);
+      style::HasImageWithAttachment(newStyle.BackgroundLayers(), FillAttachment::FixedBackground);
 
     auto &frameView = View().FrameView();
     if (frameView.HasSlowRepaintObject(*this))
@@ -1338,24 +1336,24 @@ namespace krys::boo
       {
         return;
       }
-      if ((style && style::HasImageInAnyLayer(style->GetBackgroundLayers()))
-          || (oldStyle && style::HasImageInAnyLayer(oldStyle->GetBackgroundLayers())))
+      if ((style && style::HasImageInAnyLayer(style->BackgroundLayers()))
+          || (oldStyle && style::HasImageInAnyLayer(oldStyle->BackgroundLayers())))
       {
-        UpdateFillImages(oldStyle ? &oldStyle->GetBackgroundLayers() : nullptr,
-                         style ? &style->GetBackgroundLayers() : nullptr);
+        UpdateFillImages(oldStyle ? &oldStyle->BackgroundLayers() : nullptr,
+                         style ? &style->BackgroundLayers() : nullptr);
       }
-      if ((style && style::HasImageInAnyLayer(style->GetMaskLayers()))
-          || (oldStyle && style::HasImageInAnyLayer(oldStyle->GetMaskLayers())))
+      if ((style && style::HasImageInAnyLayer(style->MaskLayers()))
+          || (oldStyle && style::HasImageInAnyLayer(oldStyle->MaskLayers())))
       {
-        UpdateFillImages(oldStyle ? &oldStyle->GetMaskLayers() : nullptr,
-                         style ? &style->GetMaskLayers() : nullptr);
+        UpdateFillImages(oldStyle ? &oldStyle->MaskLayers() : nullptr,
+                         style ? &style->MaskLayers() : nullptr);
       }
-      UpdateImage(oldStyle ? oldStyle->GetBorderImageSource().TryStyleImage().get() : nullptr,
-                  style ? style->GetBorderImageSource().TryStyleImage().get() : nullptr);
-      UpdateImage(oldStyle ? oldStyle->GetMaskBorderSource().TryStyleImage().get() : nullptr,
-                  style ? style->GetMaskBorderSource().TryStyleImage().get() : nullptr);
-      UpdateShapeImage(oldStyle ? &oldStyle->GetShapeOutside() : nullptr,
-                       style ? &style->GetShapeOutside() : nullptr);
+      UpdateImage(oldStyle ? oldStyle->BorderImageSource().TryStyleImage().get() : nullptr,
+                  style ? style->BorderImageSource().TryStyleImage().get() : nullptr);
+      UpdateImage(oldStyle ? oldStyle->MaskBorderSource().TryStyleImage().get() : nullptr,
+                  style ? style->MaskBorderSource().TryStyleImage().get() : nullptr);
+      UpdateShapeImage(oldStyle ? &oldStyle->ShapeOutside() : nullptr,
+                       style ? &style->ShapeOutside() : nullptr);
     };
 
     registerImages(&Style(), oldStyle);
@@ -1387,7 +1385,7 @@ namespace krys::boo
       // to mark the new containing blocks for layout. The change that can
       // directly affect the containing block of this object is a change to
       // the position style.
-      if (NeedsLayout() && oldStyle && oldStyle->GetPosition() != _style.GetPosition())
+      if (NeedsLayout() && oldStyle && oldStyle->Position() != _style.Position())
       {
         ScheduleLayout(MarkContainingBlocksForLayout());
       }
@@ -1405,7 +1403,7 @@ namespace krys::boo
       }
     }
 
-    if (oldStyle && oldStyle->GetCursor() != _style.GetCursor())
+    if (oldStyle && oldStyle->Cursor() != _style.Cursor())
     {
       if (auto *frame = GetDocument().Frame())
       {
@@ -1413,8 +1411,8 @@ namespace krys::boo
       }
     }
 
-    bool hadOutlineAuto = oldStyle && oldStyle->GetOutlineStyle() == OutlineStyle::Auto;
-    bool hasOutlineAuto = OutlineStyleForRepaint().GetOutlineStyle() == OutlineStyle::Auto;
+    bool hadOutlineAuto = oldStyle && oldStyle->OutlineStyle() == OutlineStyle::Auto;
+    bool hasOutlineAuto = OutlineStyleForRepaint().OutlineStyle() == OutlineStyle::Auto;
     if (hasOutlineAuto != hadOutlineAuto)
     {
       UpdateOutlineAutoAncestor(hasOutlineAuto);
@@ -1485,7 +1483,7 @@ namespace krys::boo
         {
           newStyle.InheritColumnPropertiesFrom(Style());
         }
-        if (elementChild.Style().GetColumnSpan() == ColumnSpan::All)
+        if (elementChild.Style().ColumnSpan() == ColumnSpan::All)
         {
           newStyle.SetColumnSpan(ColumnSpan::All);
         }
@@ -1638,12 +1636,12 @@ namespace krys::boo
 
   bool RenderElement::IsFixedPositioned() const noexcept
   {
-    return IsOutOfFlowPositioned() && Style().GetPosition() == PositionType::Fixed;
+    return IsOutOfFlowPositioned() && Style().Position() == PositionType::Fixed;
   }
 
   bool RenderElement::IsAbsolutelyPositioned() const noexcept
   {
-    return IsOutOfFlowPositioned() && Style().GetPosition() == PositionType::Absolute;
+    return IsOutOfFlowPositioned() && Style().Position() == PositionType::Absolute;
   }
 
   bool RenderElement::IsBlockLevelBox() const noexcept
@@ -1958,7 +1956,7 @@ namespace krys::boo
   {
     krys_debug_assert(Style().HasBorder());
 
-    auto borderImage = Style().GetBorderImage().Source.TryStyleImage();
+    auto borderImage = Style().BorderImage().Source.TryStyleImage();
     return borderImage && borderImage->CanRender(this, Style().UsedZoom()) && borderImage->IsLoaded(this);
   }
 
@@ -2004,9 +2002,9 @@ namespace krys::boo
   bool RenderElement::CanContainAbsolutelyPositionedObjects(const RenderStyle *styleToUse) const noexcept
   {
     auto &style = styleToUse ? *styleToUse : Style();
-    return MayContainOutOfFlowPositionedObjects(styleToUse) || style.GetPosition() != PositionType::Static
+    return MayContainOutOfFlowPositionedObjects(styleToUse) || style.Position() != PositionType::Static
            || (IsRenderBlock()
-               && style.GetWillChange().CreatesContainingBlockForAbsolutelyPositioned(
+               && style.WillChange().CreatesContainingBlockForAbsolutelyPositioned(
                  IsDocumentElementRenderer()));
   }
 
@@ -2015,7 +2013,7 @@ namespace krys::boo
     auto &style = styleToUse ? *styleToUse : Style();
     return MayContainOutOfFlowPositionedObjects(styleToUse)
            || (IsRenderBlock()
-               && style.GetWillChange().CreatesContainingBlockForOutOfFlowPositioned(
+               && style.WillChange().CreatesContainingBlockForOutOfFlowPositioned(
                  IsDocumentElementRenderer()));
   }
 
@@ -2060,7 +2058,7 @@ namespace krys::boo
 
   bool RenderElement::HasEligibleContainmentForSizeQuery() const noexcept
   {
-    switch (Style().GetContainerType())
+    switch (Style().ContainerType())
     {
       case ContainerType::InlineSize: return ShouldApplyInlineSizeContainment();
       case ContainerType::Size:       return ShouldApplySizeContainment();
@@ -2308,7 +2306,7 @@ namespace krys::boo
 
   bool RenderElement::HasShapeOutside() const noexcept
   {
-    return !Style().GetShapeOutside().IsNone();
+    return !Style().ShapeOutside().IsNone();
   }
 
   bool RenderElement::HasBackdropFilter() const noexcept
@@ -2328,7 +2326,7 @@ namespace krys::boo
 
   bool RenderElement::HasHiddenBackface() const noexcept
   {
-    return Style().GetBackfaceVisibility() == BackfaceVisibility::Hidden;
+    return Style().BackfaceVisibility() == BackfaceVisibility::Hidden;
   }
 
   bool RenderElement::CreatesGroupForStyle(const RenderStyle &style) noexcept
@@ -2344,7 +2342,7 @@ namespace krys::boo
 
   RectF RenderElement::TransformReferenceBoxRect(const RenderStyle &style) const noexcept
   {
-    return ReferenceBoxRect(TransformBoxToCSSBoxType(style.GetTransformBox()));
+    return ReferenceBoxRect(TransformBoxToCSSBoxType(style.TransformBox()));
   }
 
   RectF RenderElement::ReferenceBoxRect(CSSBoxType boxType) const noexcept
@@ -2611,9 +2609,9 @@ namespace krys::boo
     // so that StyleDidChange can safely use RenderBlock::LocateEnclosingFragmentedFlow().
     // FIXME: Share some code with RenderElement::CanContain*.
     auto mayNotBeContainingBlockForDescendantsAnymore =
-      oldStyle.GetPosition() != newStyle.GetPosition()
+      oldStyle.Position() != newStyle.Position()
       || oldStyle.HasTransformRelatedProperty() != newStyle.HasTransformRelatedProperty()
-      || oldStyle.GetWillChange() != newStyle.GetWillChange()
+      || oldStyle.WillChange() != newStyle.WillChange()
       || oldStyle.HasBackdropFilter() != newStyle.HasBackdropFilter()
       || oldStyle.UsedContain().Contains(style::ContainValue::Layout)
            != newStyle.UsedContain().Contains(style::ContainValue::Layout)
@@ -2791,17 +2789,17 @@ namespace krys::boo
 
     auto unregisterImages = [&](const RenderStyle &style)
     {
-      for (auto &backgroundLayer : style.GetBackgroundLayers().UsedValues())
+      for (auto &backgroundLayer : style.BackgroundLayers().UsedValues())
       {
         unregisterImage(backgroundLayer.GetImage().TryStyleImage().get());
       }
-      for (auto &maskLayer : style.GetMaskLayers().UsedValues())
+      for (auto &maskLayer : style.MaskLayers().UsedValues())
       {
         unregisterImage(maskLayer.GetImage().TryStyleImage().get());
       }
-      unregisterImage(style.GetBorderImageSource().TryStyleImage().get());
-      unregisterImage(style.GetMaskBorderSource().TryStyleImage().get());
-      unregisterImage(style.GetShapeOutside().GetImage().get());
+      unregisterImage(style.BorderImageSource().TryStyleImage().get());
+      unregisterImage(style.MaskBorderSource().TryStyleImage().get());
+      unregisterImage(style.ShapeOutside().GetImage().get());
     };
 
     if (HasInitializedStyle())
@@ -2819,7 +2817,7 @@ namespace krys::boo
       View().RemoveRendererWithPausedImageAnimations(*this);
     }
 
-    if (Style().GetContentVisibility() == ContentVisibility::Auto && GetElement())
+    if (Style().ContentVisibility() == ContentVisibility::Auto && GetElement())
     {
       dom::ContentVisibilityDocumentState::Unobserve(*ShareRef(*GetElement()));
     }
@@ -3232,8 +3230,7 @@ namespace krys::boo
 
   bool RenderElement::VisibleToHitTesting(const HitTestRequest *request) const noexcept
   {
-    auto visibility =
-      !request || request->UserTriggered() ? Style().UsedVisibility() : Style().GetVisibility();
+    auto visibility = !request || request->UserTriggered() ? Style().UsedVisibility() : Style().Visibility();
     return visibility == Visibility::Visible && !IsSkippedContent()
            && ((request && request->IgnoreCSSPointerEventsProperty())
                || Style().UsedPointerEvents() != PointerEvents::None);

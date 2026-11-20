@@ -100,72 +100,6 @@ def generate(args: argparse.Namespace):
     ]
 
 
-
-# region Krystal names
-
-
-@functools.cache
-def krystal_type_names() -> frozenset[str]:
-    """The names of the types declared directly in `krys::boo` and `krys::boo::style`."""
-    include_dir = os.path.join(os.path.dirname(os.path.abspath(__file__)), "..", "include", "Krystal.Booey")
-    names = set()
-    for dirpath, _, files in os.walk(include_dir):
-        for file in files:
-            if not file.endswith(".hpp"):
-                continue
-            with open(os.path.join(dirpath, file), encoding="utf-8-sig") as f:
-                text = f.read()
-            top = None
-            nested = None
-            for line in text.splitlines():
-                if line.startswith("namespace "):
-                    top = line[len("namespace "):].strip()
-                    nested = None
-                    continue
-                if line.startswith("  namespace "):
-                    nested = line[len("  namespace "):].strip()
-                    continue
-                if top not in ("krys::boo", "krys::boo::style"):
-                    continue
-                # A using-declaration (`using krys::BlendMode;`) names its last part.
-                match = re.match(r"^  (?:struct|class|enum class|enum|using) (?:\w+::)*(\w+)\b", line)
-                if match:
-                    names.add(match.group(1))
-                    continue
-                match = re.match(r"^    (?:struct|class|enum class|enum|using) (?:\w+::)*(\w+)\b", line)
-                if match and top == "krys::boo" and nested == "style":
-                    names.add(match.group(1))
-    return frozenset(names)
-
-
-def krystal_member_name(name: str) -> str:
-    """`m_name` -> `_name`, `_name` -> `_name`, `name` -> `Name`, keeping a trailing call."""
-    if name.startswith("m_"):
-        return "_" + name[2:]
-    if name.startswith("_"):
-        return name
-    return name[0].upper() + name[1:]
-
-
-def krystal_member_path(component: str) -> str:
-    """Converts each member access of a storage path component (`border.colors()` -> `Border.Colors()`)."""
-    return ".".join(krystal_member_name(part) for part in component.split("."))
-
-
-def krystal_type(type_name: str) -> str:
-    """`Style::X` -> `style::X`, `WebCore::X` and unqualified types -> `boo::X`."""
-    builtins = {"bool", "float", "double", "int", "unsigned", "uint8", "uint16", "uint32", "int32"}
-    if type_name.startswith("Style::"):
-        return "style::" + type_name[len("Style::"):]
-    if type_name.startswith("WebCore::"):
-        return "boo::" + type_name[len("WebCore::"):]
-    if type_name in builtins or "::" in type_name:
-        return type_name
-    return "boo::" + type_name
-
-
-# endregion
-
 # region Schema
 
 
@@ -797,40 +731,21 @@ class StylePropertyCodeGenProperties:
 
     @staticmethod
     def _complete_render_style_name_family(json_value: dict):
-        # The render style accessors are PascalCase (`Width()`, `SetWidth()`, `InitialWidth()`). A getter whose name
-        # is also the name of a type in `krys::boo` or `krys::boo::style` takes a `Get` prefix, since the member
-        # function would otherwise hide the type inside the style classes (`GetColor()`).
+        # The render style accessors are PascalCase (`Width()`, `SetWidth()`, `InitialWidth()`), and the storage is
+        # named after the getter.
         name = json_value["render-style-name-for-methods"]
-        upstream_getter = json_value.get("render-style-getter", name[0].lower() + name[1:])
-        getter = upstream_getter[0].upper() + upstream_getter[1:]
+
+        if "render-style-getter" not in json_value:
+            json_value["render-style-getter"] = name
 
         if "render-style-storage-name" not in json_value:
-            json_value["render-style-storage-name"] = getter
-        else:
-            json_value["render-style-storage-name"] = krystal_member_name(json_value["render-style-storage-name"])
-
-        json_value["render-style-getter"] = ("Get" + getter) if getter in krystal_type_names() else getter
+            json_value["render-style-storage-name"] = json_value["render-style-getter"]
 
         if "render-style-setter" not in json_value:
             json_value["render-style-setter"] = "Set" + name
-        else:
-            json_value["render-style-setter"] = krystal_member_name(json_value["render-style-setter"])
 
         if "render-style-initial" not in json_value:
             json_value["render-style-initial"] = "Initial" + name
-        else:
-            json_value["render-style-initial"] = krystal_member_name(json_value["render-style-initial"])
-
-        for key in ("render-style-storage-path", "render-style-has-explicitly-set-storage-path"):
-            if key in json_value:
-                json_value[key] = [krystal_member_path(component) for component in json_value[key]]
-
-        for key in ("render-style-has-explicitly-set-storage-name",):
-            if key in json_value:
-                json_value[key] = krystal_member_name(json_value[key])
-
-        if "render-style-type" in json_value:
-            json_value["render-style-type"] = krystal_type(json_value["render-style-type"])
 
     @staticmethod
     def from_json(parsing_context: ParsingContext, key_path: str, name: str, json_value: dict):
@@ -1287,13 +1202,13 @@ class StyleProperty:
     @property
     def method_name_for_get_coordinated_value_list(self):
         if "animation-" in self.name:
-            return "GetAnimations"
+            return "Animations"
         if "transition-" in self.name:
-            return "GetTransitions"
+            return "Transitions"
         if "background-" in self.name:
-            return "GetBackgroundLayers"
+            return "BackgroundLayers"
         if "mask-" in self.name:
-            return "GetMaskLayers"
+            return "MaskLayers"
         raise Exception(f"Unrecognized coordinated list value property name: '{self.name}")
 
     @property
@@ -9186,7 +9101,7 @@ class GenerateStyleBuilderGenerated:
 
     def _generate_coordinated_value_list_property_value_setter(self, to: Writer, property):
         to.write(
-            f"ApplyValueCoordinatedValueListProperty<css::{property.id_or_cascade_alias_id}, &RenderStyle::{property.method_name_for_ensure_coordinated_value_list}, {krystal_type(property.codegen_properties.coordinated_value_list_property_item_type)}, {property.type_name_for_coordinated_value_list}>(builderState, value);"
+            f"ApplyValueCoordinatedValueListProperty<css::{property.id_or_cascade_alias_id}, &RenderStyle::{property.method_name_for_ensure_coordinated_value_list}, {property.codegen_properties.coordinated_value_list_property_item_type}, {property.type_name_for_coordinated_value_list}>(builderState, value);"
         )
 
     # Property setter dispatch.

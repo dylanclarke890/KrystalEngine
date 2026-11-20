@@ -73,7 +73,7 @@ namespace krys::boo
     KRYS_NODISCARD LayoutSize ComputeLogicalBoxSize(const RenderBox &renderer,
                                                     bool isHorizontalWritingMode) noexcept
     {
-      const auto &shapeOutside = renderer.Style().GetShapeOutside();
+      const auto &shapeOutside = renderer.Style().ShapeOutside();
       auto size = isHorizontalWritingMode ? renderer.Size() : renderer.Size().TransposedSize();
       switch (shapeOutside.EffectiveCSSBox())
       {
@@ -150,7 +150,7 @@ namespace krys::boo
 
     KRYS_NODISCARD LayoutUnit LogicalTopOffset(const RenderBox &renderer) noexcept
     {
-      switch (renderer.Style().GetShapeOutside().EffectiveCSSBox())
+      switch (renderer.Style().ShapeOutside().EffectiveCSSBox())
       {
         case CSSBoxType::MarginBox:
           return -renderer.MarginBefore(renderer.ContainingBlock()->Style().GetWritingMode());
@@ -217,7 +217,7 @@ namespace krys::boo
         return 0_lu;
       }
 
-      switch (renderer.Style().GetShapeOutside().EffectiveCSSBox())
+      switch (renderer.Style().ShapeOutside().EffectiveCSSBox())
       {
         case CSSBoxType::MarginBox:
           return -renderer.MarginStart(renderer.ContainingBlock()->Style().GetWritingMode());
@@ -257,14 +257,14 @@ namespace krys::boo
     const auto &containingBlock = *renderer.ContainingBlock();
     auto writingMode = containingBlock.Style().GetWritingMode();
     bool isHorizontalWritingMode = containingBlock.IsHorizontalWritingMode();
-    const auto &shapeOutside = style.GetShapeOutside();
+    const auto &shapeOutside = style.ShapeOutside();
 
     auto boxSize = ComputeLogicalBoxSize(renderer, isHorizontalWritingMode);
 
     auto logicalMargin = [&]
     {
       auto shapeMargin =
-        style::Evaluate<LayoutUnit>(style.GetShapeMargin(), containingBlock.ContentBoxLogicalWidth(),
+        style::Evaluate<LayoutUnit>(style.ShapeMargin(), containingBlock.ContentBoxLogicalWidth(),
                                     style::ZoomNeeded {})
           .ToFloat();
       return std::isnan(shapeMargin) ? 0.0f : shapeMargin;
@@ -347,7 +347,7 @@ namespace krys::boo
       return false;
     }
 
-    return box.Style().GetShapeOutside().SwitchOn(
+    return box.Style().ShapeOutside().SwitchOn(
       [](const css::keywords::None &) { return false; }, [](const style::ShapeOutside::Shape &)
       { return true; }, [](const style::ShapeOutside::ShapeBox &) { return true; },
       [](const style::ShapeOutside::ShapeAndShapeBox &) { return true; },

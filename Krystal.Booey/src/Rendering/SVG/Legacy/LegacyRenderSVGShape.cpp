@@ -64,7 +64,7 @@ namespace krys::boo
 
   bool LegacyRenderSVGShape::HasNonScalingStroke() const noexcept
   {
-    return Style().GetVectorEffect() == VectorEffect::NonScalingStroke;
+    return Style().VectorEffect() == VectorEffect::NonScalingStroke;
   }
 
   bool LegacyRenderSVGShape::IsEmpty() const noexcept
@@ -286,7 +286,7 @@ namespace krys::boo
 
   void LegacyRenderSVGShape::StrokeShape(const RenderStyle &style, GraphicsContext &context) noexcept
   {
-    if (!style.HasStroke() || !style.GetStrokeWidth().IsPossiblyPositive())
+    if (!style.HasStroke() || !style.StrokeWidth().IsPossiblyPositive())
     {
       return;
     }
@@ -350,7 +350,7 @@ namespace krys::boo
 
       if (renderingContext.IsRenderingPrepared())
       {
-        if (Style().GetShapeRendering() == ShapeRendering::CrispEdges)
+        if (Style().ShapeRendering() == ShapeRendering::CrispEdges)
         {
           childPaintInfo.Context().SetShouldAntialias(false);
         }
@@ -381,7 +381,7 @@ namespace krys::boo
 
   bool LegacyRenderSVGShape::IsPointInFill(const PointF &point) noexcept
   {
-    return ShapeDependentFillContains(point, Style().GetFillRule());
+    return ShapeDependentFillContains(point, Style().FillRule());
   }
 
   bool LegacyRenderSVGShape::IsPointInStroke(const PointF &point) noexcept
@@ -434,7 +434,7 @@ namespace krys::boo
                                    Style().UsedPointerEvents());
     if (VisibleToHitTesting(&request) || !hitRules.RequireVisible)
     {
-      WindRule fillRule = Style().GetFillRule();
+      WindRule fillRule = Style().FillRule();
       if (request.SVGClipContent())
       {
         fillRule = Style().ClipRule();
@@ -574,7 +574,7 @@ namespace krys::boo
   float LegacyRenderSVGShape::StrokeWidth() const noexcept
   {
     SVGLengthContext lengthContext(&GraphicsElement());
-    auto strokeWidth = lengthContext.ValueForLength(Style().GetStrokeWidth(), style::ZoomNeeded {});
+    auto strokeWidth = lengthContext.ValueForLength(Style().StrokeWidth(), style::ZoomNeeded {});
     return std::isnan(strokeWidth) ? 0 : strokeWidth;
   }
 

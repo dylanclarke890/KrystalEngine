@@ -40,9 +40,9 @@ namespace krys::boo
     {
       if (auto *multiColumnFlow = DynamicDowncast<RenderMultiColumnFlow>(textBoxTrimRoot))
       {
-        return multiColumnFlow->MultiColumnBlockFlow()->Style().GetTextBoxTrim();
+        return multiColumnFlow->MultiColumnBlockFlow()->Style().TextBoxTrim();
       }
-      return textBoxTrimRoot.Style().GetTextBoxTrim();
+      return textBoxTrimRoot.Style().TextBoxTrim();
     }
 
     KRYS_NODISCARD FrameViewLayoutContext &LayoutContext(const RenderBox &renderer) noexcept

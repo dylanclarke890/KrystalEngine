@@ -36,8 +36,8 @@ namespace krys::boo::style
   {
     if (value.ValueId() == css::ValueId::AutoAdd)
     {
-      return {state.ParentStyle().GetMathDepth().Value
-              + (state.ParentStyle().GetMathStyle() == boo::MathStyle::Compact)};
+      return {state.ParentStyle().MathDepth().Value
+              + (state.ParentStyle().MathStyle() == boo::MathStyle::Compact)};
     }
     if (auto *function = DynamicDowncast<css::FunctionValue>(value);
         function && function->Name() == css::ValueId::Add)
@@ -46,7 +46,7 @@ namespace krys::boo::style
       {
         const auto &first = addFunction->item(0);
         auto addend = ConvertCSSValueToStyle<MathDepth::Base>(state, first);
-        return {state.ParentStyle().GetMathDepth().Value + addend.Value};
+        return {state.ParentStyle().MathDepth().Value + addend.Value};
       }
     }
     return {ConvertCSSValueToStyle<MathDepth::Base>(state, value).Value};

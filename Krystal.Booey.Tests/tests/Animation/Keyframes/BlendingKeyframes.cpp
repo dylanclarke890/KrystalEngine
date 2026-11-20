@@ -53,7 +53,7 @@ namespace krys::boo::tests
       CHECK(keyframes[2].Offset() == 1);
 
       REQUIRE(keyframes[1].Style());
-      CHECK(keyframes[1].Style()->GetOpacity().Value.Value == 0.5f);
+      CHECK(keyframes[1].Style()->Opacity().Value.Value == 0.5f);
       // Properties the keyframe doesn't set keep the element's values.
       CHECK(keyframes[1].Style()->Width() == keyframes[0].Style()->Width());
 

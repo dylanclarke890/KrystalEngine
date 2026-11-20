@@ -91,7 +91,7 @@ namespace krys::boo
     _needsYAdjustment = compensatedAxes.Contains(BoxAxis::Vertical);
 
     auto containingWritingMode = anchored.Container()->Style().GetWritingMode();
-    if (auto positionAreaValue = style.GetPositionArea().TryValue())
+    if (auto positionAreaValue = style.PositionArea().TryValue())
     {
       if (positionAreaValue->CoordMatchedTrackForAxis(BoxAxis::Horizontal, containingWritingMode,
                                                       style.GetWritingMode())
@@ -103,12 +103,12 @@ namespace krys::boo
       {
         if (containingWritingMode.IsHorizontal())
         {
-          auto alignment = style.GetJustifySelf();
+          auto alignment = style.JustifySelf();
           _needsXAdjustment |= alignment.IsAuto() || alignment.IsNormal() || alignment.IsAnchorCenter();
         }
         else
         {
-          auto alignment = style.GetAlignSelf();
+          auto alignment = style.AlignSelf();
           _needsXAdjustment |= alignment.IsAuto() || alignment.IsNormal() || alignment.IsAnchorCenter();
         }
       }
@@ -122,12 +122,12 @@ namespace krys::boo
       {
         if (containingWritingMode.IsHorizontal())
         {
-          auto alignment = style.GetAlignSelf();
+          auto alignment = style.AlignSelf();
           _needsYAdjustment |= alignment.IsAuto() || alignment.IsNormal() || alignment.IsAnchorCenter();
         }
         else
         {
-          auto alignment = style.GetJustifySelf();
+          auto alignment = style.JustifySelf();
           _needsYAdjustment |= alignment.IsAuto() || alignment.IsNormal() || alignment.IsAnchorCenter();
         }
       }
@@ -135,14 +135,14 @@ namespace krys::boo
 
     if (!_needsXAdjustment)
     {
-      _needsXAdjustment = containingWritingMode.IsHorizontal() ? style.GetJustifySelf().IsAnchorCenter()
-                                                               : style.GetAlignSelf().IsAnchorCenter();
+      _needsXAdjustment = containingWritingMode.IsHorizontal() ? style.JustifySelf().IsAnchorCenter()
+                                                               : style.AlignSelf().IsAnchorCenter();
     }
     if (!_needsYAdjustment)
     {
       // Upstream reads align-self in both branches.
-      _needsYAdjustment = containingWritingMode.IsHorizontal() ? style.GetAlignSelf().IsAnchorCenter()
-                                                               : style.GetJustifySelf().IsAnchorCenter();
+      _needsYAdjustment = containingWritingMode.IsHorizontal() ? style.AlignSelf().IsAnchorCenter()
+                                                               : style.JustifySelf().IsAnchorCenter();
     }
 
     _isHidden = style.IsForceHidden();
@@ -1234,8 +1234,7 @@ namespace krys::boo::style
     if (anchorName)
     {
       // Check that anchorRenderer has the specified name.
-      krys_debug_assert(std::ranges::any_of(anchorRenderer.Style().GetAnchorNames(),
-                                            [&](const auto &scopedName)
+      krys_debug_assert(std::ranges::any_of(anchorRenderer.Style().AnchorNames(), [&](const auto &scopedName)
                                             { return scopedName.Name == anchorName->Name(); }));
 
       // The anchor and anchor-positioned element must be in the same scope.
@@ -1362,7 +1361,7 @@ namespace krys::boo::style
         continue;
       }
 
-      for (const auto &scopedName : anchorRenderer->Style().GetAnchorNames())
+      for (const auto &scopedName : anchorRenderer->Style().AnchorNames())
       {
         auto resolvedScopedName = ResolvedScopedName::CreateFromScopedName(*anchorElement, scopedName);
         anchorsForAnchorName[resolvedScopedName].push_back(anchorRenderer);
@@ -1464,8 +1463,8 @@ namespace krys::boo::style
       return ClearAnchorScrollSnapshots(anchored);
     }
 
-    if (!anchored.Style().GetPositionTryFallbacks().IsNone()
-        || anchored.Style().GetPositionVisibility().Contains(PositionVisibilityValue::NoOverflow))
+    if (!anchored.Style().PositionTryFallbacks().IsNone()
+        || anchored.Style().PositionVisibility().Contains(PositionVisibilityValue::NoOverflow))
     {
       adjuster.SetFallbackLimits(anchored);
     }
@@ -1511,7 +1510,7 @@ namespace krys::boo::style
       {
         if (adjuster.ExceedsFallbackLimits(scrollOffset))
         {
-          if (!anchored->Style().GetPositionTryFallbacks().IsNone())
+          if (!anchored->Style().PositionTryFallbacks().IsNone())
           {
             anchored->SetNeedsLayout();
             needsInvalidation = true;
@@ -1519,12 +1518,12 @@ namespace krys::boo::style
           else
           {
             shouldBeHidden =
-              anchored->Style().GetPositionVisibility().Contains(PositionVisibilityValue::NoOverflow);
+              anchored->Style().PositionVisibility().Contains(PositionVisibilityValue::NoOverflow);
           }
         }
       }
       if (!shouldBeHidden
-          && anchored->Style().GetPositionVisibility().Contains(PositionVisibilityValue::AnchorsVisible))
+          && anchored->Style().PositionVisibility().Contains(PositionVisibilityValue::AnchorsVisible))
       {
         shouldBeHidden =
           AnchorPositionEvaluator::IsDefaultAnchorInvisibleOrClippedByInterveningBoxes(*anchored);
@@ -1633,7 +1632,7 @@ namespace krys::boo::style
     // an empty anchor positioning state for it so we perform the required layout interleaving.
     auto hasPositionVisibilityNoOverflow =
       GeneratesBox(style) && style.HasOutOfFlowPosition()
-      && style.GetPositionVisibility().Contains(PositionVisibilityValue::NoOverflow);
+      && style.PositionVisibility().Contains(PositionVisibilityValue::NoOverflow);
 
     if (!shouldResolveDefaultAnchor && !hasPositionVisibilityNoOverflow)
     {
@@ -1707,12 +1706,12 @@ namespace krys::boo::style
       return false;
     }
 
-    if (!style.GetPositionArea().IsNone())
+    if (!style.PositionArea().IsNone())
     {
       return true;
     }
 
-    return style.GetJustifySelf().IsAnchorCenter() || style.GetAlignSelf().IsAnchorCenter();
+    return style.JustifySelf().IsAnchorCenter() || style.AlignSelf().IsAnchorCenter();
   }
 
   static css::PropertyId FlipHorizontal(css::PropertyId propertyID) noexcept
@@ -1990,7 +1989,7 @@ namespace krys::boo::style
 
   bool AnchorPositionEvaluator::IsAnchor(const RenderStyle &style) noexcept
   {
-    if (!style.GetAnchorNames().IsNone())
+    if (!style.AnchorNames().IsNone())
     {
       return true;
     }
@@ -2017,7 +2016,7 @@ namespace krys::boo::style
         return false;
       }
       // If we have an explicit anchor name then there is no need for an implicit anchor.
-      if (!pseudoElementStyle->GetPositionAnchor().IsAuto())
+      if (!pseudoElementStyle->PositionAnchor().IsAuto())
       {
         return false;
       }
@@ -2030,7 +2029,7 @@ namespace krys::boo::style
 
   ScopedName AnchorPositionEvaluator::DefaultAnchorName(const RenderStyle &style) noexcept
   {
-    if (auto name = style.GetPositionAnchor().TryName())
+    if (auto name = style.PositionAnchor().TryName())
     {
       return *name;
     }

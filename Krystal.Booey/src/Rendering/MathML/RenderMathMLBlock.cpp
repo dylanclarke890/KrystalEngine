@@ -269,7 +269,7 @@ namespace krys::boo
     RenderBlock::StyleDidChange(diff, oldStyle);
 
     // MathML displaystyle changes can affect layout.
-    if (oldStyle && Style().GetMathStyle() != oldStyle->GetMathStyle())
+    if (oldStyle && Style().MathStyle() != oldStyle->MathStyle())
     {
       SetNeedsLayoutAndPreferredWidthsUpdate();
     }

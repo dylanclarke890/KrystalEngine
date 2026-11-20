@@ -160,11 +160,11 @@ namespace krys::boo
       {
         context.SetAlpha(style.FillOpacity().Value.Value);
         context.SetFillGradient(ShareRef(*gradientData.Gradient), userspaceTransform);
-        context.SetFillRule(style.GetFillRule());
+        context.SetFillRule(style.FillRule());
       }
       else if (resourceMode.Contains(RenderSVGResourceMode::ApplyToStroke))
       {
-        if (style.GetVectorEffect() == VectorEffect::NonScalingStroke)
+        if (style.VectorEffect() == VectorEffect::NonScalingStroke)
         {
           userspaceTransform = LegacyRenderSVGResourceContainer::TransformOnNonScalingStroke(
             &renderer, gradientData.UserspaceTransform);

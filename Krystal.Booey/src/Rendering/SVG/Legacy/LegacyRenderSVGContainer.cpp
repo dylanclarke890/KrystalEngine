@@ -325,7 +325,7 @@ namespace krys::boo
     }
 
     // pointer-events=bounding-box makes it possible for containers to be direct targets.
-    if (Style().GetPointerEvents() == PointerEvents::BoundingBox)
+    if (Style().PointerEvents() == PointerEvents::BoundingBox)
     {
       if (!IsObjectBoundingBoxValid())
       {

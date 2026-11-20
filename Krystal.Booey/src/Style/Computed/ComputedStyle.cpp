@@ -108,7 +108,7 @@ namespace krys::boo::style
       _svgStyle.Access().CopyNonInheritedFrom(other._svgStyle.Get());
     }
 
-    krys_debug_assert(GetZoom() == InitialZoom());
+    krys_debug_assert(Zoom() == InitialZoom());
   }
 
   void ComputedStyle::CopyContentFrom(const ComputedStyle &other) noexcept
@@ -220,16 +220,16 @@ namespace krys::boo::style
 
   bool ComputedStyle::BorderAndBackgroundEqual(const ComputedStyle &other) const noexcept
   {
-    return Border() == other.Border() && GetBackgroundLayers() == other.GetBackgroundLayers()
+    return Border() == other.Border() && BackgroundLayers() == other.BackgroundLayers()
            && BackgroundColor() == other.BackgroundColor();
   }
 
   float ComputedStyle::ComputedLineHeight() const noexcept
   {
-    return ComputeLineHeight(GetLineHeight());
+    return ComputeLineHeight(LineHeight());
   }
 
-  float ComputedStyle::ComputeLineHeight(const LineHeight &lineHeight) const noexcept
+  float ComputedStyle::ComputeLineHeight(const style::LineHeight &lineHeight) const noexcept
   {
     return krys::SwitchOn(
       lineHeight, [&](const css::keywords::Normal &) -> float
@@ -274,7 +274,7 @@ namespace krys::boo::style
 
   void ComputedStyle::AdjustAnimations() noexcept
   {
-    if (GetAnimations().IsInitial())
+    if (Animations().IsInitial())
     {
       return;
     }
@@ -284,7 +284,7 @@ namespace krys::boo::style
 
   void ComputedStyle::AdjustTransitions() noexcept
   {
-    if (GetTransitions().IsInitial())
+    if (Transitions().IsInitial())
     {
       return;
     }
@@ -294,7 +294,7 @@ namespace krys::boo::style
 
   void ComputedStyle::AdjustBackgroundLayers() noexcept
   {
-    if (GetBackgroundLayers().IsInitial())
+    if (BackgroundLayers().IsInitial())
     {
       return;
     }
@@ -304,7 +304,7 @@ namespace krys::boo::style
 
   void ComputedStyle::AdjustMaskLayers() noexcept
   {
-    if (GetMaskLayers().IsInitial())
+    if (MaskLayers().IsInitial())
     {
       return;
     }
@@ -343,7 +343,7 @@ namespace krys::boo::style
     auto numberOfAxes = axes.size();
     krys_debug_assert(numberOfAxes > 0);
 
-    auto &insets = GetViewTimelineInsets();
+    auto &insets = ViewTimelineInsets();
     auto numberOfInsets = insets.size();
     krys_debug_assert(numberOfInsets > 0);
 

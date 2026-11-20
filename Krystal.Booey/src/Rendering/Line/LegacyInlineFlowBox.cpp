@@ -90,10 +90,9 @@ namespace krys::boo
         hasMarkers = textBox->HasMarkers();
       }
       if (childStyle.UsedLetterSpacing() < 0 || childStyle.HasTextShadow()
-          || !childStyle.GetTextEmphasisStyle().IsNone() || childStyle.HasPositiveStrokeWidth() || hasMarkers
-          || !childStyle.GetTextUnderlineOffset().IsAuto()
-          || !childStyle.GetTextDecorationThickness().IsAuto()
-          || !childStyle.GetTextUnderlinePosition().IsAuto())
+          || !childStyle.TextEmphasisStyle().IsNone() || childStyle.HasPositiveStrokeWidth() || hasMarkers
+          || !childStyle.TextUnderlineOffset().IsAuto() || !childStyle.TextDecorationThickness().IsAuto()
+          || !childStyle.TextUnderlinePosition().IsAuto())
       {
         child->ClearKnownToHaveNoOverflow();
       }
@@ -222,16 +221,16 @@ namespace krys::boo
     // letter-spacing is applied to the right, so this is not an issue with left overflow.
     rightGlyphOverflow -= std::min(0, static_cast<int>(lineStyle.GetFontCascade().LetterSpacing()));
 
-    auto [textShadowLogicalTop, textShadowLogicalBottom] = style::ShadowBlockDirectionExtent(
-      lineStyle.GetTextShadow(), writingMode, lineStyle.UsedZoomForLength());
+    auto [textShadowLogicalTop, textShadowLogicalBottom] =
+      style::ShadowBlockDirectionExtent(lineStyle.TextShadow(), writingMode, lineStyle.UsedZoomForLength());
 
     auto childOverflowLogicalTop =
       std::min<LayoutUnit>(textShadowLogicalTop + topGlyphOverflow, topGlyphOverflow);
     auto childOverflowLogicalBottom =
       std::max<LayoutUnit>(textShadowLogicalBottom + bottomGlyphOverflow, bottomGlyphOverflow);
 
-    auto [textShadowLogicalLeft, textShadowLogicalRight] = style::ShadowInlineDirectionExtent(
-      lineStyle.GetTextShadow(), writingMode, lineStyle.UsedZoomForLength());
+    auto [textShadowLogicalLeft, textShadowLogicalRight] =
+      style::ShadowInlineDirectionExtent(lineStyle.TextShadow(), writingMode, lineStyle.UsedZoomForLength());
 
     auto childOverflowLogicalLeft =
       std::min<LayoutUnit>(textShadowLogicalLeft + leftGlyphOverflow, leftGlyphOverflow);

@@ -371,7 +371,7 @@ namespace krys::boo
       case QuoteType::OpenQuote:    isOpenQuote = true; [[fallthrough]];
       case QuoteType::CloseQuote:
       {
-        const auto &quotes = Style().GetQuotes();
+        const auto &quotes = Style().Quotes();
         if (!quotes.IsAuto())
         {
           return isOpenQuote ? quotes.OpenQuote(static_cast<unsigned>(_depth))

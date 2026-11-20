@@ -159,7 +159,7 @@ namespace krys::boo::html::tests
 
     (void)Document->UpdateLayout();
     REQUIRE(element.Renderer());
-    CHECK(element.Renderer()->Style().GetVisibility() == Visibility::Visible);
+    CHECK(element.Renderer()->Style().Visibility() == Visibility::Visible);
 
     CHECK(states.Add(u8"off"));
     CHECK_FALSE(states.Add(u8"off"));
@@ -167,12 +167,12 @@ namespace krys::boo::html::tests
     CHECK(element.Matches(u8":state(off)").ReleaseValue());
     CHECK_FALSE(element.Matches(u8":state(on)").ReleaseValue());
     (void)Document->UpdateLayout();
-    CHECK(element.Renderer()->Style().GetVisibility() == Visibility::Hidden);
+    CHECK(element.Renderer()->Style().Visibility() == Visibility::Hidden);
 
     CHECK(states.Delete(u8"off"));
     CHECK_FALSE(element.Matches(u8":state(off)").ReleaseValue());
     (void)Document->UpdateLayout();
-    CHECK(element.Renderer()->Style().GetVisibility() == Visibility::Visible);
+    CHECK(element.Renderer()->Style().Visibility() == Visibility::Visible);
 
     (void)states.Add(u8"a");
     (void)states.Add(u8"b");

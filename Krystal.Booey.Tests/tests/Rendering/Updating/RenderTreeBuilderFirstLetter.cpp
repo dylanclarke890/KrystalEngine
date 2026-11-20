@@ -38,7 +38,7 @@ namespace krys::boo::tests
       CHECK(firstLetter->IsFirstLetter());
       CHECK(firstLetter->IsAnonymous());
       CHECK(firstLetter->Style().GetPseudoElementType() == PseudoElementType::FirstLetter);
-      CHECK(firstLetter->Style().GetColor() == Red);
+      CHECK(firstLetter->Style().Color() == Red);
 
       auto *letter = DynamicDowncast<RenderTextFragment>(firstLetter->FirstChild());
       REQUIRE(letter);
@@ -51,7 +51,7 @@ namespace krys::boo::tests
       CHECK(remaining->FirstLetter() == firstLetter);
       CHECK(firstLetter->FirstLetterRemainingText() == remaining);
       CHECK(p.FirstChild()->Renderer() == remaining);
-      CHECK(remaining->Style().GetColor() != Red);
+      CHECK(remaining->Style().Color() != Red);
     }
 
     SECTION("A floating first letter is a block flow")
@@ -86,10 +86,10 @@ namespace krys::boo::tests
       document.UpdateStyleIfNeeded();
       REQUIRE(Is<RenderInline>(p.Renderer()->FirstChild()));
       CHECK(p.Renderer()->FirstChild() == firstLetter);
-      CHECK(Downcast<RenderInline>(*p.Renderer()->FirstChild()).Style().GetColor() == Red);
+      CHECK(Downcast<RenderInline>(*p.Renderer()->FirstChild()).Style().Color() == Red);
       auto *remaining = p.FirstChild()->Renderer();
       REQUIRE(Is<RenderTextFragment>(remaining));
-      CHECK(Downcast<RenderText>(*remaining).Style().GetColor() == Blue);
+      CHECK(Downcast<RenderText>(*remaining).Style().Color() == Blue);
     }
 
     SECTION("A change to the text rebuilds the first letter")

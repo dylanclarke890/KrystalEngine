@@ -236,7 +236,7 @@ namespace krys::boo
       return !rectWithOutsets.IsEmpty();
     };
 
-    if (rect.IsEmpty() && !paintsBorderImage(rect, style.GetBorderImage()))
+    if (rect.IsEmpty() && !paintsBorderImage(rect, style.BorderImage()))
     {
       return;
     }
@@ -250,7 +250,7 @@ namespace krys::boo
     }
 
     // border-image is not affected by border-radius.
-    if (PaintNinePieceImage(rect, style, style.GetBorderImage()))
+    if (PaintNinePieceImage(rect, style, style.BorderImage()))
     {
       return;
     }

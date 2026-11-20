@@ -701,7 +701,7 @@ namespace krys::boo
     auto *documentElement = document ? dom::TreeQueries::DocumentElement(*document) : nullptr;
     if (auto *scrollingObject = documentElement ? documentElement->Renderer() : nullptr)
     {
-      return scrollingObject->Style().GetScrollbarGutter();
+      return scrollingObject->Style().ScrollbarGutter();
     }
     return css::keywords::Auto {};
   }
@@ -1324,7 +1324,7 @@ namespace krys::boo
     auto *scrollingObject = documentElement ? documentElement->Renderer() : nullptr;
     if (scrollingObject && GetRenderView())
     {
-      return style::ToPlatform<style::ScrollbarWidth> {}(scrollingObject->Style().GetScrollbarWidth());
+      return style::ToPlatform<style::ScrollbarWidth> {}(scrollingObject->Style().ScrollbarWidth());
     }
     return ScrollbarWidth::Auto;
   }
@@ -2852,7 +2852,7 @@ namespace krys::boo
     auto *document = Frame().Document();
     auto *documentElement = document ? dom::TreeQueries::DocumentElement(*document) : nullptr;
     auto *rootRenderer = documentElement ? DynamicDowncast<RenderBox>(documentElement->Renderer()) : nullptr;
-    if (!rootRenderer || rootRenderer->Style().GetScrollSnapType().IsNone())
+    if (!rootRenderer || rootRenderer->Style().ScrollSnapType().IsNone())
     {
       ClearSnapOffsets();
       return;

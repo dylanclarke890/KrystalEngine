@@ -94,7 +94,7 @@ namespace krys::boo::style
       auto isQueryContainer = [&](Element &element)
       {
         const auto *style = element.GetRenderStyle();
-        return style && style->GetContainerType() != ContainerType::Normal;
+        return style && style->ContainerType() != ContainerType::Normal;
       };
 
       if (isQueryContainer(element))

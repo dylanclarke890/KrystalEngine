@@ -51,15 +51,15 @@ namespace krys::boo::style
     {
       auto &parentStyle = state.ParentStyle();
 
-      if (parentStyle.GetTextAlignLast() == TextAlignLast::Start)
+      if (parentStyle.TextAlignLast() == TextAlignLast::Start)
       {
         return parentStyle.GetWritingMode().IsBidiLTR() ? TextAlignLast::Left : TextAlignLast::Right;
       }
-      if (parentStyle.GetTextAlignLast() == TextAlignLast::End)
+      if (parentStyle.TextAlignLast() == TextAlignLast::End)
       {
         return parentStyle.GetWritingMode().IsBidiLTR() ? TextAlignLast::Right : TextAlignLast::Left;
       }
-      return parentStyle.GetTextAlignLast();
+      return parentStyle.TextAlignLast();
     }
 
     return FromCSSValue<TextAlignLast>(value);

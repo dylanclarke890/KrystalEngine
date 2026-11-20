@@ -818,7 +818,7 @@ namespace krys::boo
     // An element is transparent if it or any of its ancestors is.
     for (auto *ancestor = renderer; ancestor; ancestor = ancestor->Parent())
     {
-      if (ancestor->Style().GetOpacity().IsTransparent())
+      if (ancestor->Style().Opacity().IsTransparent())
       {
         return false;
       }
@@ -2685,7 +2685,7 @@ namespace krys::boo
       // Unlike visibility, content-visibility changes don't reach the tree through the render tree.
       auto isContentVisibilityHidden = [](const RenderStyle &style)
       {
-        return style.GetContentVisibility() == ContentVisibility::Hidden;
+        return style.ContentVisibility() == ContentVisibility::Hidden;
       };
       if (isContentVisibilityHidden(*oldStyle) != isContentVisibilityHidden(*newStyle))
       {

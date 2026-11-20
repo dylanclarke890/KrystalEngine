@@ -622,11 +622,11 @@ namespace krys::boo
 
       inline const OutlineValue &Outline() const;
 
-      inline const Animations &GetAnimations() const;
+      inline const Animations &Animations() const;
 
-      inline const BackgroundLayers &GetBackgroundLayers() const;
+      inline const BackgroundLayers &BackgroundLayers() const;
 
-      inline const BorderImage &GetBorderImage() const;
+      inline const BorderImage &BorderImage() const;
 
       inline const BorderRadius &BorderRadii() const;
 
@@ -634,13 +634,13 @@ namespace krys::boo
 
       inline const MarginBox &GetMarginBox() const;
 
-      inline const MaskBorder &GetMaskBorder() const;
+      inline const MaskBorder &MaskBorder() const;
 
-      inline const MaskLayers &GetMaskLayers() const;
+      inline const MaskLayers &MaskLayers() const;
 
       inline const PaddingBox &GetPaddingBox() const;
 
-      inline const PerspectiveOrigin &GetPerspectiveOrigin() const;
+      inline const PerspectiveOrigin &PerspectiveOrigin() const;
 
       inline const ScrollMarginBox &GetScrollMarginBox() const;
 
@@ -648,17 +648,17 @@ namespace krys::boo
 
       inline const ScrollTimelines &GetScrollTimelines() const;
 
-      inline const TransformOrigin &GetTransformOrigin() const;
+      inline const TransformOrigin &TransformOrigin() const;
 
-      inline const Transitions &GetTransitions() const;
+      inline const Transitions &Transitions() const;
 
       inline const ViewTimelines &GetViewTimelines() const;
 
       KRYS_NODISCARD inline LineWidthBox BorderWidth() const noexcept;
 
-      inline void SetBackgroundLayers(BackgroundLayers &&) noexcept;
+      inline void SetBackgroundLayers(style::BackgroundLayers &&) noexcept;
 
-      inline void SetBorderImage(BorderImage &&) noexcept;
+      inline void SetBorderImage(style::BorderImage &&) noexcept;
 
       inline void SetBorderRadius(BorderRadiusValue &&) noexcept;
 
@@ -674,15 +674,15 @@ namespace krys::boo
 
       inline void SetMarginBox(MarginBox &&) noexcept;
 
-      inline void SetMaskBorder(MaskBorder &&) noexcept;
+      inline void SetMaskBorder(style::MaskBorder &&) noexcept;
 
-      inline void SetMaskLayers(MaskLayers &&) noexcept;
+      inline void SetMaskLayers(style::MaskLayers &&) noexcept;
 
       inline void SetPaddingBox(PaddingBox &&) noexcept;
 
-      inline void SetPerspectiveOrigin(PerspectiveOrigin &&) noexcept;
+      inline void SetPerspectiveOrigin(style::PerspectiveOrigin &&) noexcept;
 
-      inline void SetTransformOrigin(TransformOrigin &&) noexcept;
+      inline void SetTransformOrigin(style::TransformOrigin &&) noexcept;
 
       // MARK: - Properties/descriptors that are not yet generated
 

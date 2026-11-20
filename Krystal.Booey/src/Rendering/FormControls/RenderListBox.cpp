@@ -80,7 +80,7 @@ namespace krys::boo
                                                      const FontCascade &itemFont,
                                                      LayoutRect itemBoundingBox) noexcept
     {
-      auto actualAlignment = itemStyle->GetTextAlign();
+      auto actualAlignment = itemStyle->TextAlign();
       // FIXME: Firefox doesn't respect TextAlign::Justify. Should we?
       // FIXME: Handle TextAlign::End here
       if (actualAlignment == style::TextAlign::Start || actualAlignment == style::TextAlign::Justify)
@@ -343,7 +343,7 @@ namespace krys::boo
 
   uint32 RenderListBox::Size() const noexcept
   {
-    if (Style().GetFieldSizing() == FieldSizing::Content)
+    if (Style().FieldSizing() == FieldSizing::Content)
     {
       return static_cast<uint32>(NumItems());
     }
@@ -609,8 +609,7 @@ namespace krys::boo
     context.SetFillColor(textColor);
 
     TextRun textRun(itemText, 0, 0, ExpansionBehavior::AllowRightOnly(),
-                    itemStyle->GetWritingMode().BidiDirection(), IsOverride(itemStyle->GetUnicodeBidi()),
-                    true);
+                    itemStyle->GetWritingMode().BidiDirection(), IsOverride(itemStyle->UnicodeBidi()), true);
     FontCascade itemFont = Style().GetFontCascade();
     if (optGroupElement)
     {

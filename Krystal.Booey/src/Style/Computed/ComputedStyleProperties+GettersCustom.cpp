@@ -29,7 +29,7 @@
 
 namespace krys::boo::style
 {
-  const boo::Color &ComputedStyleProperties::GetColor() const noexcept
+  const boo::Color &ComputedStyleProperties::Color() const noexcept
   {
     return _inheritedData->Color;
   }
@@ -37,11 +37,11 @@ namespace krys::boo::style
   LineWidth ComputedStyleProperties::OutlineWidth() const noexcept
   {
     auto &outline = _nonInheritedData->BackgroundData->Outline;
-    if (static_cast<OutlineStyle>(outline.OutlineStyle) == OutlineStyle::None)
+    if (static_cast<boo::OutlineStyle>(outline.OutlineStyle) == boo::OutlineStyle::None)
     {
       return 0_css_px;
     }
-    if (static_cast<OutlineStyle>(outline.OutlineStyle) == OutlineStyle::Auto)
+    if (static_cast<boo::OutlineStyle>(outline.OutlineStyle) == boo::OutlineStyle::Auto)
     {
       return LineWidth {std::max(Evaluate<float>(outline.OutlineWidth, ZoomNeeded {}),
                                  RenderTheme::PlatformFocusRingWidth())};
@@ -52,7 +52,7 @@ namespace krys::boo::style
   Length<> ComputedStyleProperties::OutlineOffset() const noexcept
   {
     auto &outline = _nonInheritedData->BackgroundData->Outline;
-    if (static_cast<OutlineStyle>(outline.OutlineStyle) == OutlineStyle::Auto)
+    if (static_cast<boo::OutlineStyle>(outline.OutlineStyle) == boo::OutlineStyle::Auto)
     {
       return Length<> {
         Evaluate<float>(outline.OutlineOffset, ZoomNeeded {})

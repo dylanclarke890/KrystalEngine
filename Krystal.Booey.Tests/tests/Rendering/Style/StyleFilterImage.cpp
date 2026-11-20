@@ -23,7 +23,7 @@ namespace krys::boo::tests
     auto imageSize = [&](DOMStringView id)
     {
       auto &renderer = *fixture.ById(id).Renderer();
-      RefPtr image = renderer.Style().GetBackgroundLayers().UsedValues().begin()->GetImage().TryStyleImage();
+      RefPtr image = renderer.Style().BackgroundLayers().UsedValues().begin()->GetImage().TryStyleImage();
       REQUIRE(image);
       CHECK(Is<StyleFilterImage>(*image));
       return image->ImageSize(&renderer, 1);

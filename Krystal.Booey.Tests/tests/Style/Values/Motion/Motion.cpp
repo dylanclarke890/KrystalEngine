@@ -112,7 +112,7 @@ namespace krys::boo::style::tests
     // A reference to an SVG path or geometry element takes its path; other elements give none.
     auto pathOf = [&](DOMStringView id)
     {
-      return TryPath(fixture.Resolve(fixture.ById(id)).Style->GetOffsetPath(), MotionData());
+      return TryPath(fixture.Resolve(fixture.ById(id)).Style->OffsetPath(), MotionData());
     };
     auto path = pathOf(u8"path");
     REQUIRE(path);

@@ -576,7 +576,7 @@ namespace krys::boo
 
     KRYS_NODISCARD bool IsPointInCSSClippingArea(const RenderElement &renderer, const PointF &point) noexcept
     {
-      const auto &clipPath = renderer.Style().GetClipPath();
+      const auto &clipPath = renderer.Style().ClipPath();
       if (auto basicShape = clipPath.TryBasicShape())
       {
         auto referenceBox = ClipPathReferenceBox(renderer, basicShape->ReferenceBox());
@@ -603,7 +603,7 @@ namespace krys::boo
   void SVGRenderSupport::ClipContextToCSSClippingArea(GraphicsContext &context,
                                                       const RenderElement &renderer) noexcept
   {
-    const auto &clipPath = renderer.Style().GetClipPath();
+    const auto &clipPath = renderer.Style().ClipPath();
     if (auto basicShape = clipPath.TryBasicShape())
     {
       auto localToParentTransform = renderer.LocalToParentTransform();
@@ -625,7 +625,7 @@ namespace krys::boo
 
   bool SVGRenderSupport::PointInClippingArea(const RenderElement &renderer, const PointF &point) noexcept
   {
-    const auto &clipPath = renderer.Style().GetClipPath();
+    const auto &clipPath = renderer.Style().ClipPath();
     if (clipPath.TryBasicShape() || clipPath.TryBox())
     {
       return IsPointInCSSClippingArea(renderer, point);
@@ -700,7 +700,7 @@ namespace krys::boo
     }
 
     SVGLengthContext lengthContext(element);
-    context.SetStrokeThickness(lengthContext.ValueForLength(style.GetStrokeWidth(), style::ZoomNeeded {}));
+    context.SetStrokeThickness(lengthContext.ValueForLength(style.StrokeWidth(), style::ZoomNeeded {}));
     context.SetLineCap(style.CapStyle());
     context.SetLineJoin(style.JoinStyle());
     if (style.JoinStyle() == LineJoin::Miter)

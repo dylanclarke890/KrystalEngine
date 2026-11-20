@@ -2734,7 +2734,7 @@ namespace krys::ui::tests
       auto box = view.Document().GetElementById(u8"box");
       REQUIRE(box);
       REQUIRE(box->Renderer());
-      return box->Renderer()->AnimatedStyle()->GetOpacity().Value.Value;
+      return box->Renderer()->AnimatedStyle()->Opacity().Value.Value;
     };
 
     // Frames at 60 Hz, longer than the timelines controller keeps its cached time: the animation still gets

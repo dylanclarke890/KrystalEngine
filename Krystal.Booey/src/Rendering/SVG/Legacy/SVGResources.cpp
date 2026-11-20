@@ -266,7 +266,7 @@ namespace krys::boo
     UniquePtr<SVGResources> foundResources;
     if (IsClipperFilterMaskerTag(tagName))
     {
-      if (auto clipPath = style.GetClipPath().TryReference())
+      if (auto clipPath = style.ClipPath().TryReference())
       {
         // FIXME: -webkit-clip-path should support external resources
         // https://bugs.webkit.org/show_bug.cgi?id=127032
@@ -283,7 +283,7 @@ namespace krys::boo
 
       if (style.HasFilter())
       {
-        const auto &filterOperations = style.GetFilter();
+        const auto &filterOperations = style.Filter();
         if (filterOperations.size() == 1)
         {
           if (auto *referenceFilterOperation =
@@ -306,7 +306,7 @@ namespace krys::boo
       {
         // FIXME: We should support all the values in the CSS mask property, but for now just use the first
         // mask-image if it's a reference.
-        if (auto maskImage = style.GetMaskLayers().UsedFirst().GetImage().TryStyleImage())
+        if (auto maskImage = style.MaskLayers().UsedFirst().GetImage().TryStyleImage())
         {
           auto resourceID = SVGURIReference::FragmentIdentifierFromIRIString(maskImage->Url(), document);
           if (auto *masker = GetRenderSVGResourceById<LegacyRenderSVGResourceMasker>(treeScope, resourceID))

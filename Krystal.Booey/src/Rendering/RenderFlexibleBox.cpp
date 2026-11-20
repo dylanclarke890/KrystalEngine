@@ -300,7 +300,7 @@ namespace krys::boo
                                                           LayoutUnit availableFreeSpace,
                                                           uint32 numberOfFlexItems, bool isReversed) noexcept
     {
-      auto resolvedJustifyContent = style.GetJustifyContent().Resolve(ContentAlignmentNormalBehavior());
+      auto resolvedJustifyContent = style.JustifyContent().Resolve(ContentAlignmentNormalBehavior());
       auto justifyContentPosition = resolvedJustifyContent.Position();
       auto justifyContentDistribution = resolvedJustifyContent.Distribution();
 
@@ -761,7 +761,7 @@ namespace krys::boo
     }
 
     auto oldStyleAlignItemsIsStretch =
-      oldStyle->GetAlignItems().Resolve(SelfAlignmentNormalBehavior()).Position() == ItemPosition::Stretch;
+      oldStyle->AlignItems().Resolve(SelfAlignmentNormalBehavior()).Position() == ItemPosition::Stretch;
     for (auto &flexItem : ChildrenOfType<RenderBox>(*this))
     {
       // Flex items that were previously stretching need to be relayed out so we
@@ -774,19 +774,19 @@ namespace krys::boo
 
         auto previousAlignment = [&]
         {
-          if (!flexItem.Style().GetAlignSelf().IsAuto())
+          if (!flexItem.Style().AlignSelf().IsAuto())
           {
-            return flexItem.Style().GetAlignSelf().Resolve(normalBehavior).Position();
+            return flexItem.Style().AlignSelf().Resolve(normalBehavior).Position();
           }
-          return oldStyle->GetAlignItems().Resolve(normalBehavior).Position();
+          return oldStyle->AlignItems().Resolve(normalBehavior).Position();
         }();
         auto newAlignment = [&]
         {
-          if (!flexItem.Style().GetAlignSelf().IsAuto())
+          if (!flexItem.Style().AlignSelf().IsAuto())
           {
-            return flexItem.Style().GetAlignSelf().Resolve(normalBehavior).Position();
+            return flexItem.Style().AlignSelf().Resolve(normalBehavior).Position();
           }
-          return Style().GetAlignItems().Resolve(normalBehavior).Position();
+          return Style().AlignItems().Resolve(normalBehavior).Position();
         }();
 
         if (previousAlignment == ItemPosition::Stretch && previousAlignment != newAlignment)
@@ -818,7 +818,7 @@ namespace krys::boo
     bool oldInLayout = _inLayout;
     _inLayout = true;
 
-    if (!Style().GetMarginTrim().IsNone())
+    if (!Style().MarginTrim().IsNone())
     {
       InitializeMarginTrimState();
     }
@@ -964,13 +964,13 @@ namespace krys::boo
 
   bool RenderFlexibleBox::IsColumnOrRowReverse() const noexcept
   {
-    return Style().GetFlexDirection() == FlexDirection::ColumnReverse
-           || Style().GetFlexDirection() == FlexDirection::RowReverse;
+    return Style().FlexDirection() == FlexDirection::ColumnReverse
+           || Style().FlexDirection() == FlexDirection::RowReverse;
   }
 
   bool RenderFlexibleBox::IsWrapReverse() const noexcept
   {
-    return Style().GetFlexWrap() == FlexWrap::Reverse;
+    return Style().FlexWrap() == FlexWrap::Reverse;
   }
 
   bool RenderFlexibleBox::IsHorizontalFlow() const noexcept
@@ -990,7 +990,7 @@ namespace krys::boo
              || GetWritingMode().BlockDirection() == FlowDirection::LeftToRight;
     }
     return GetWritingMode().IsLogicalLeftInlineStart()
-           ^ (Style().GetFlexDirection() == FlexDirection::RowReverse);
+           ^ (Style().FlexDirection() == FlexDirection::RowReverse);
   }
 
   RenderFlexibleBox::Direction RenderFlexibleBox::CrossAxisDirection() const noexcept
@@ -1014,7 +1014,7 @@ namespace krys::boo
 
   bool RenderFlexibleBox::IsMultiline() const noexcept
   {
-    return Style().GetFlexWrap() != FlexWrap::NoWrap;
+    return Style().FlexWrap() != FlexWrap::NoWrap;
   }
 
   // https://drafts.csswg.org/css-flexbox/#min-size-auto
@@ -1044,7 +1044,7 @@ namespace krys::boo
 
   style::FlexBasis RenderFlexibleBox::FlexBasisForFlexItem(const RenderBox &flexItem) const noexcept
   {
-    auto flexBasis = flexItem.Style().GetFlexBasis();
+    auto flexBasis = flexItem.Style().FlexBasis();
     if (flexBasis.IsAuto())
     {
       flexBasis = PreferredMainSizeLengthForFlexItem(flexItem).AsFlexBasis();
@@ -1377,7 +1377,7 @@ namespace krys::boo
     // will include the margins when computing the flexbox's min and max widths.
     // We need to trim the margins of the first and last child early so that
     // these margins do not incorrectly constribute to the box's min/max width
-    auto marginTrim = Style().GetMarginTrim();
+    auto marginTrim = Style().MarginTrim();
     auto isRowsFlexbox = IsHorizontalFlow();
     if (auto *flexItem = FirstInFlowChildBox();
         flexItem && marginTrim.Contains(style::MarginTrimSide::InlineStart))
@@ -1397,7 +1397,7 @@ namespace krys::boo
                                                          LayoutUnit sumHypotheticalMainSize,
                                                          LayoutUnit lineBreakLength) const noexcept
   {
-    auto marginTrim = Style().GetMarginTrim();
+    auto marginTrim = Style().MarginTrim();
     if ((IsHorizontalFlow() && marginTrim.Contains(style::MarginTrimSide::InlineEnd))
         || (IsColumnFlow() && marginTrim.Contains(style::MarginTrimSide::BlockEnd)))
     {
@@ -1470,7 +1470,7 @@ namespace krys::boo
   bool RenderFlexibleBox::IsChildEligibleForMarginTrim(style::MarginTrimSide marginTrimSide,
                                                        const RenderBox &flexItem) const noexcept
   {
-    krys_debug_assert(Style().GetMarginTrim().Contains(marginTrimSide));
+    krys_debug_assert(Style().MarginTrim().Contains(marginTrimSide));
     auto isMarginParallelWithMainAxis = [this](style::MarginTrimSide marginTrimSide)
     {
       if (IsHorizontalFlow())
@@ -1496,36 +1496,36 @@ namespace krys::boo
   {
     if (IsHorizontalFlow())
     {
-      return Style().GetMarginTrim().Contains(style::MarginTrimSide::InlineStart);
+      return Style().MarginTrim().Contains(style::MarginTrimSide::InlineStart);
     }
-    return Style().GetMarginTrim().Contains(style::MarginTrimSide::BlockStart);
+    return Style().MarginTrim().Contains(style::MarginTrimSide::BlockStart);
   }
 
   bool RenderFlexibleBox::ShouldTrimMainAxisMarginEnd() const noexcept
   {
     if (IsHorizontalFlow())
     {
-      return Style().GetMarginTrim().Contains(style::MarginTrimSide::InlineEnd);
+      return Style().MarginTrim().Contains(style::MarginTrimSide::InlineEnd);
     }
-    return Style().GetMarginTrim().Contains(style::MarginTrimSide::BlockEnd);
+    return Style().MarginTrim().Contains(style::MarginTrimSide::BlockEnd);
   }
 
   bool RenderFlexibleBox::ShouldTrimCrossAxisMarginStart() const noexcept
   {
     if (IsHorizontalFlow())
     {
-      return Style().GetMarginTrim().Contains(style::MarginTrimSide::BlockStart);
+      return Style().MarginTrim().Contains(style::MarginTrimSide::BlockStart);
     }
-    return Style().GetMarginTrim().Contains(style::MarginTrimSide::InlineStart);
+    return Style().MarginTrim().Contains(style::MarginTrimSide::InlineStart);
   }
 
   bool RenderFlexibleBox::ShouldTrimCrossAxisMarginEnd() const noexcept
   {
     if (IsHorizontalFlow())
     {
-      return Style().GetMarginTrim().Contains(style::MarginTrimSide::BlockEnd);
+      return Style().MarginTrim().Contains(style::MarginTrimSide::BlockEnd);
     }
-    return Style().GetMarginTrim().Contains(style::MarginTrimSide::InlineEnd);
+    return Style().MarginTrim().Contains(style::MarginTrimSide::InlineEnd);
   }
 
   void RenderFlexibleBox::TrimMainAxisMarginStart(const FlexLayoutItem &flexLayoutItem) noexcept
@@ -1624,8 +1624,8 @@ namespace krys::boo
       {
         return Downcast<RenderReplaced>(flexItem).ComputeIntrinsicAspectRatio();
       }
-      if (flexItem.Style().GetAspectRatio().IsRatio()
-          || (flexItem.Style().GetAspectRatio().IsAutoAndRatio() && flexItemIntrinsicSize.IsEmpty()))
+      if (flexItem.Style().AspectRatio().IsRatio()
+          || (flexItem.Style().AspectRatio().IsAutoAndRatio() && flexItemIntrinsicSize.IsEmpty()))
       {
         return flexItem.Style().LogicalAspectRatio();
       }
@@ -1689,8 +1689,8 @@ namespace krys::boo
     auto crossSize = *crossSizeOptional;
     auto flexItemIntrinsicSize = flexItem.IntrinsicSize();
     LayoutUnit borderAndPadding;
-    if (flexItem.Style().GetAspectRatio().IsRatio()
-        || (flexItem.Style().GetAspectRatio().IsAutoAndRatio() && flexItemIntrinsicSize.IsEmpty()))
+    if (flexItem.Style().AspectRatio().IsRatio()
+        || (flexItem.Style().AspectRatio().IsAutoAndRatio() && flexItemIntrinsicSize.IsEmpty()))
     {
       if (flexItem.Style().BoxSizingForAspectRatio() == BoxSizing::ContentBox)
       {
@@ -1708,7 +1708,7 @@ namespace krys::boo
       // We need to subtract the border and padding extent from the cross axis.
       // Furthermore, the sizing calculations that floor the content box size at zero when applying box-sizing
       // are also ignored. https://drafts.csswg.org/css-flexbox/#algo-main-item.
-      if (flexItem.Style().GetBoxSizing() == BoxSizing::BorderBox)
+      if (flexItem.Style().BoxSizing() == BoxSizing::BorderBox)
       {
         crossSize -= IsHorizontalFlow() ? flexItem.VerticalBorderAndPaddingExtent()
                                         : flexItem.HorizontalBorderAndPaddingExtent();
@@ -2111,10 +2111,10 @@ namespace krys::boo
       }
       lineData.LineItems.push_back(flexLayoutItem);
       lineData.SumFlexBaseSize += flexLayoutItem.FlexBaseMarginBoxSize() + gapBetweenItems;
-      lineData.TotalFlexGrow += style.GetFlexGrow().Value;
-      lineData.TotalFlexShrink += style.GetFlexShrink().Value;
+      lineData.TotalFlexGrow += style.FlexGrow().Value;
+      lineData.TotalFlexShrink += style.FlexShrink().Value;
       lineData.TotalWeightedFlexShrink +=
-        style.GetFlexShrink().Value * flexLayoutItem.FlexBaseContentSize.ToDouble();
+        style.FlexShrink().Value * flexLayoutItem.FlexBaseContentSize.ToDouble();
       lineData.SumHypotheticalMainSize +=
         flexLayoutItem.HypotheticalMainAxisMarginBoxSize() + gapBetweenItems;
     }
@@ -2532,8 +2532,8 @@ namespace krys::boo
         return AlignmentForFlexItem(flexItem) == ItemPosition::Stretch;
       }
 
-      if (flexItem.Style().GetFlexGrow() == style::ComputedStyle::InitialFlexGrow()
-          && flexItem.Style().GetFlexShrink().IsZero()
+      if (flexItem.Style().FlexGrow() == style::ComputedStyle::InitialFlexGrow()
+          && flexItem.Style().FlexShrink().IsZero()
           && FlexItemMainSizeIsDefinite(flexItem, FlexBasisForFlexItem(flexItem)))
       {
         return true;
@@ -2648,10 +2648,9 @@ namespace krys::boo
       auto &flexItemStyle = violation->Style();
       LayoutUnit flexItemSize = violation->FlexedContentSize;
       availableFreeSpace -= flexItemSize - violation->FlexBaseContentSize;
-      totalFlexGrow -= flexItemStyle.GetFlexGrow().Value;
-      totalFlexShrink -= flexItemStyle.GetFlexShrink().Value;
-      totalWeightedFlexShrink -=
-        flexItemStyle.GetFlexShrink().Value * violation->FlexBaseContentSize.ToDouble();
+      totalFlexGrow -= flexItemStyle.FlexGrow().Value;
+      totalFlexShrink -= flexItemStyle.FlexShrink().Value;
+      totalWeightedFlexShrink -= flexItemStyle.FlexShrink().Value * violation->FlexBaseContentSize.ToDouble();
       // totalWeightedFlexShrink can be negative when we exceed the precision of
       // a double when we initially calcuate totalWeightedFlexShrink. We then
       // subtract each child's weighted flex shrink with full precision, now
@@ -2676,8 +2675,8 @@ namespace krys::boo
       krys_debug_assert(!flexLayoutItem.Renderer->IsOutOfFlowPositioned());
       krys_debug_assert(!flexLayoutItem.Frozen);
       float flexFactor = (flexSign == FlexSign::PositiveFlexibility)
-                           ? flexLayoutItem.Style().GetFlexGrow().Value
-                           : flexLayoutItem.Style().GetFlexShrink().Value;
+                           ? flexLayoutItem.Style().FlexGrow().Value
+                           : flexLayoutItem.Style().FlexShrink().Value;
       if (!flexFactor
           || (flexSign == FlexSign::PositiveFlexibility
               && flexLayoutItem.FlexBaseContentSize > flexLayoutItem.HypotheticalMainContentSize)
@@ -2727,13 +2726,13 @@ namespace krys::boo
       if (remainingFreeSpace > 0 && totalFlexGrow > 0 && flexSign == FlexSign::PositiveFlexibility
           && std::isfinite(totalFlexGrow))
       {
-        extraSpace = remainingFreeSpace.ToDouble() * flexItemStyle.GetFlexGrow().Value / totalFlexGrow;
+        extraSpace = remainingFreeSpace.ToDouble() * flexItemStyle.FlexGrow().Value / totalFlexGrow;
       }
       else if (remainingFreeSpace < 0 && totalWeightedFlexShrink > 0
                && flexSign == FlexSign::NegativeFlexibility && std::isfinite(totalWeightedFlexShrink)
-               && !flexItemStyle.GetFlexShrink().IsZero())
+               && !flexItemStyle.FlexShrink().IsZero())
       {
-        extraSpace = remainingFreeSpace.ToDouble() * flexItemStyle.GetFlexShrink().Value
+        extraSpace = remainingFreeSpace.ToDouble() * flexItemStyle.FlexShrink().Value
                      * flexLayoutItem.FlexBaseContentSize.ToDouble() / totalWeightedFlexShrink;
       }
       if (std::isfinite(extraSpace))
@@ -2926,11 +2925,11 @@ namespace krys::boo
   OverflowAlignment RenderFlexibleBox::OverflowAlignmentForFlexItem(const RenderBox &flexItem) const noexcept
   {
     auto normalBehavior = SelfAlignmentNormalBehavior();
-    if (!flexItem.Style().GetAlignSelf().IsAuto())
+    if (!flexItem.Style().AlignSelf().IsAuto())
     {
-      return flexItem.Style().GetAlignSelf().Resolve(normalBehavior).Overflow();
+      return flexItem.Style().AlignSelf().Resolve(normalBehavior).Overflow();
     }
-    return Style().GetAlignItems().Resolve(normalBehavior).Overflow();
+    return Style().AlignItems().Resolve(normalBehavior).Overflow();
   }
 
   ItemPosition RenderFlexibleBox::AlignmentForFlexItem(const RenderBox &flexItem) const noexcept
@@ -2938,11 +2937,11 @@ namespace krys::boo
     auto align = [&]
     {
       auto normalBehavior = SelfAlignmentNormalBehavior();
-      if (!flexItem.Style().GetAlignSelf().IsAuto())
+      if (!flexItem.Style().AlignSelf().IsAuto())
       {
-        return flexItem.Style().GetAlignSelf().Resolve(normalBehavior).Position();
+        return flexItem.Style().AlignSelf().Resolve(normalBehavior).Position();
       }
-      return Style().GetAlignItems().Resolve(normalBehavior).Position();
+      return Style().AlignItems().Resolve(normalBehavior).Position();
     }();
 
     krys_debug_assert(align != ItemPosition::Auto && align != ItemPosition::Normal);
@@ -3158,7 +3157,7 @@ namespace krys::boo
     LayoutUnit mainAxisOffset = FlowAwareBorderStart() + FlowAwarePaddingStart();
     mainAxisOffset += InitialJustifyContentOffset(
       Style(), availableFreeSpace, static_cast<uint32>(flexLayoutItems.size()), IsColumnOrRowReverse());
-    if (Style().GetFlexDirection() == FlexDirection::RowReverse)
+    if (Style().FlexDirection() == FlexDirection::RowReverse)
     {
       mainAxisOffset +=
         LayoutUnit(IsHorizontalFlow() ? VerticalScrollbarWidth() : HorizontalScrollbarHeight());
@@ -3166,7 +3165,7 @@ namespace krys::boo
 
     if (availableFreeSpace < 0)
     {
-      auto resolvedJustifyContent = Style().GetJustifyContent().Resolve(ContentAlignmentNormalBehavior());
+      auto resolvedJustifyContent = Style().JustifyContent().Resolve(ContentAlignmentNormalBehavior());
       auto distribution = resolvedJustifyContent.Distribution();
       auto safety = resolvedJustifyContent.Overflow();
       auto position = ResolveLeftRightAlignment(resolvedJustifyContent.Position(), resolvedJustifyContent,
@@ -3184,7 +3183,7 @@ namespace krys::boo
     LayoutUnit lastBaselineMaxAscent;
     Maybe<BaselineAlignmentState> baselineAlignmentState;
 
-    auto resolvedJustifyContent = Style().GetJustifyContent().Resolve(ContentAlignmentNormalBehavior());
+    auto resolvedJustifyContent = Style().JustifyContent().Resolve(ContentAlignmentNormalBehavior());
     auto distribution = resolvedJustifyContent.Distribution();
     bool shouldFlipMainAxis = !IsColumnFlow() && !IsLeftToRightFlow();
     for (size_t i = 0; i < flexLayoutItems.size(); ++i)
@@ -3321,7 +3320,7 @@ namespace krys::boo
                                                    + LayoutUnit(ScrollbarLogicalHeight())));
     }
 
-    if (Style().GetFlexDirection() == FlexDirection::ColumnReverse)
+    if (Style().FlexDirection() == FlexDirection::ColumnReverse)
     {
       // We have to do an extra pass for column-reverse to reposition the flex
       // items since the start depends on the height of the flexbox, which we
@@ -3347,7 +3346,7 @@ namespace krys::boo
       Style(), availableFreeSpace, static_cast<uint32>(flexLayoutItems.size()), IsColumnOrRowReverse());
     mainAxisOffset -= LayoutUnit(IsHorizontalFlow() ? VerticalScrollbarWidth() : HorizontalScrollbarHeight());
 
-    auto distribution = Style().GetJustifyContent().Resolve(ContentAlignmentNormalBehavior()).Distribution();
+    auto distribution = Style().JustifyContent().Resolve(ContentAlignmentNormalBehavior()).Distribution();
 
     for (size_t i = 0; i < flexLayoutItems.size(); ++i)
     {
@@ -3375,7 +3374,7 @@ namespace krys::boo
       return;
     }
 
-    auto alignedContent = Style().GetAlignContent().Resolve(ContentAlignmentNormalBehavior());
+    auto alignedContent = Style().AlignContent().Resolve(ContentAlignmentNormalBehavior());
     auto position = alignedContent.Position();
     auto distribution = alignedContent.Distribution();
     auto safety = alignedContent.Overflow();
@@ -3805,8 +3804,8 @@ namespace krys::boo
   {
     // Looking for baseline flex candidate on visually first line.
     auto useLastLine = IsWrapReverse();
-    auto useLastItem = Style().GetFlexDirection() == FlexDirection::RowReverse
-                       || Style().GetFlexDirection() == FlexDirection::ColumnReverse;
+    auto useLastItem = Style().FlexDirection() == FlexDirection::RowReverse
+                       || Style().FlexDirection() == FlexDirection::ColumnReverse;
 
     if (!useLastLine)
     {
@@ -3832,8 +3831,8 @@ namespace krys::boo
   {
     // Looking for baseline flex candidate on visually last line.
     auto useLastLine = IsWrapReverse();
-    auto useLastItem = Style().GetFlexDirection() == FlexDirection::RowReverse
-                       || Style().GetFlexDirection() == FlexDirection::ColumnReverse;
+    auto useLastItem = Style().FlexDirection() == FlexDirection::RowReverse
+                       || Style().FlexDirection() == FlexDirection::ColumnReverse;
 
     if (!useLastLine)
     {

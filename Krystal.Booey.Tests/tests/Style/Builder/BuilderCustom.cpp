@@ -68,19 +68,19 @@ namespace krys::boo::style::tests
     {
       ParentStyle.SetColor(boo::Color {boo::Color::blue});
       Apply(PropertyId::Color, u8"currentcolor");
-      CHECK(Style.GetColor() == boo::Color {boo::Color::blue});
+      CHECK(Style.Color() == boo::Color {boo::Color::blue});
       CHECK(Style.DisallowsFastPathInheritance());
     }
 
     SECTION("Author colours are explicitly set")
     {
       Apply(PropertyId::Color, u8"red");
-      CHECK(Style.GetColor() == boo::Color {boo::Color::red});
+      CHECK(Style.Color() == boo::Color {boo::Color::red});
       // Without a current property, the origin isn't the author's.
       CHECK_FALSE(Style.HasExplicitlySetColor());
 
       BuildAuthor(u8"color: initial");
-      CHECK(Style.GetColor() == ComputedStyle::InitialColor());
+      CHECK(Style.Color() == ComputedStyle::InitialColor());
       CHECK(Style.HasExplicitlySetColor());
     }
 
@@ -88,7 +88,7 @@ namespace krys::boo::style::tests
     {
       ParentStyle.SetColor(boo::Color {boo::Color::blue});
       ApplyInherit(PropertyId::Color);
-      CHECK(Style.GetColor() == boo::Color {boo::Color::blue});
+      CHECK(Style.Color() == boo::Color {boo::Color::blue});
     }
 
     SECTION("caret-color: auto")
@@ -270,14 +270,14 @@ namespace krys::boo::style::tests
 
       Apply(PropertyId::Zoom, u8"normal");
       CHECK(Style.UsedZoom() == 1.5f);
-      CHECK(Style.GetZoom() == ComputedStyle::InitialZoom());
+      CHECK(Style.Zoom() == ComputedStyle::InitialZoom());
     }
 
     SECTION("Zero is ignored, but the used zoom is still reset")
     {
       Apply(PropertyId::Zoom, u8"2");
       Apply(PropertyId::Zoom, u8"0");
-      CHECK(Evaluate<float>(Style.GetZoom()) == 2);
+      CHECK(Evaluate<float>(Style.Zoom()) == 2);
       CHECK(Style.UsedZoom() == 1.5f);
     }
 
@@ -287,7 +287,7 @@ namespace krys::boo::style::tests
       std::ignore = ParentStyle.SetZoom(Zoom {3.f});
       std::ignore = ParentStyle.SetUsedZoom(1.5f);
       ApplyInherit(PropertyId::Zoom);
-      CHECK(Evaluate<float>(Style.GetZoom()) == 3);
+      CHECK(Evaluate<float>(Style.Zoom()) == 3);
       CHECK(Style.UsedZoom() == 4.5f);
 
       ApplyInitial(PropertyId::Zoom);

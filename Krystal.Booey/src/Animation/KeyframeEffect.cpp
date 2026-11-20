@@ -1664,7 +1664,7 @@ namespace krys::boo
     TransformOperationsSharedPrimitivesPrefix<style::TransformFunctionType> prefix;
     for (const auto &keyframe : _blendingKeyframes)
     {
-      prefix.Update(keyframe.Style()->GetTransform());
+      prefix.Update(keyframe.Style()->Transform());
     }
 
     _transformFunctionListsMatchPrefix = static_cast<uint32>(prefix.Primitives().size());
@@ -2635,7 +2635,7 @@ namespace krys::boo
     auto fontWeightChanged = [&]()
     {
       return _blendingKeyframes.UsesRelativeFontWeight() && previousUnanimatedStyle
-             && previousUnanimatedStyle->GetFontWeight() != unanimatedStyle.GetFontWeight();
+             && previousUnanimatedStyle->FontWeight() != unanimatedStyle.FontWeight();
     };
 
     auto cssVariableChanged = [&]()
@@ -2665,7 +2665,7 @@ namespace krys::boo
       // For all other color-related properties set to "currentcolor" on a keyframe, it's sufficient to check
       // whether the value "color" resolves to has changed since the last style resolution.
       return _blendingKeyframes.HasPropertySetToCurrentColor() && previousUnanimatedStyle
-             && previousUnanimatedStyle->GetColor() != unanimatedStyle.GetColor();
+             && previousUnanimatedStyle->Color() != unanimatedStyle.Color();
     };
 
     auto logicalPropertyChanged = [&]()
@@ -3072,11 +3072,11 @@ namespace krys::boo
 
       auto hasRotation = [&]
       {
-        if (fromDecomp.Angle || style.GetRotate().AffectedByTransformOrigin())
+        if (fromDecomp.Angle || style.Rotate().AffectedByTransformOrigin())
         {
           return true;
         }
-        for (const auto &operation : style.GetTransform())
+        for (const auto &operation : style.Transform())
         {
           if (operation->GetType() == style::TransformFunctionType::Rotate)
           {
@@ -3532,7 +3532,7 @@ namespace krys::boo
 
       auto styleContainsFilter = [](const RenderStyle &style)
       {
-        return style.GetFilter().HasReferenceFilter() || style.BackdropFilter().HasReferenceFilter();
+        return style.Filter().HasReferenceFilter() || style.BackdropFilter().HasReferenceFilter();
       };
 
       if (auto target = TargetStyleable())

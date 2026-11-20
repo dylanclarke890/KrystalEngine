@@ -70,7 +70,7 @@ namespace krys::boo::layout
 
     auto convertVisualToLogical = [&]
     {
-      auto direction = Root().Style().GetFlexDirection();
+      auto direction = Root().Style().FlexDirection();
       auto previousLogicalOrder = Maybe<int32> {};
       auto isMainAxisParallelWithInlineAxis = FlexFormattingUtils::IsMainAxisParallelWithInlineAxis(Root());
       auto isReversedInCrossAxis = FlexFormattingUtils::AreFlexLinesReversedInCrossAxis(Root());
@@ -111,9 +111,9 @@ namespace krys::boo::layout
           // Auto keyword retrieves the value of the main size property as the used flex-basis.
           // If that value is itself auto, then the used value is content.
           mainAxis.DefiniteFlexBasis =
-            style.GetFlexBasis().IsAuto()
+            style.FlexBasis().IsAuto()
               ? mainAxis.Size
-              : propertyValueForLength(style.GetFlexBasis(), flexContainerMainInnerSize);
+              : propertyValueForLength(style.FlexBasis(), flexContainerMainInnerSize);
 
           auto marginStart = [&]() -> Maybe<LayoutUnit>
           {
@@ -227,7 +227,7 @@ namespace krys::boo::layout
         };
         setCrossAxisValues();
 
-        auto flexItemOrder = style.GetOrder().Value;
+        auto flexItemOrder = style.Order().Value;
         flexItemsNeedReordering =
           flexItemsNeedReordering || flexItemOrder != previousLogicalOrder.value_or(0);
         previousLogicalOrder = flexItemOrder;
@@ -263,7 +263,7 @@ namespace krys::boo::layout
                                                    const ConstraintsForFlexContent &constraints) noexcept
   {
     auto &flexBoxStyle = Root().Style();
-    auto flexDirection = flexBoxStyle.GetFlexDirection();
+    auto flexDirection = flexBoxStyle.FlexDirection();
     auto isLeftToRightDirection = flexBoxStyle.GetWritingMode().IsLogicalLeftInlineStart();
     auto isRowDirection = flexDirection == FlexDirection::Row || flexDirection == FlexDirection::RowReverse;
     auto flexContainerContentBoxPosition = LayoutPoint {
@@ -306,7 +306,7 @@ namespace krys::boo::layout
       auto logicalRect = [&]
       {
         // Note that flex rects are inner size based.
-        if (flexBoxStyle.GetFlexWrap() != FlexWrap::Reverse)
+        if (flexBoxStyle.FlexWrap() != FlexWrap::Reverse)
         {
           return logicalRects[index];
         }

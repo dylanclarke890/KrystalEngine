@@ -78,7 +78,7 @@ namespace krys::boo::style
 {
   // FIXME: Support generating properties that have their storage spread out
 
-  inline Cursor ComputedStyleProperties::GetCursor() const noexcept
+  inline Cursor ComputedStyleProperties::Cursor() const noexcept
   {
     return {_rareInheritedData->CursorImages, static_cast<boo::CursorType>(_inheritedFlags.CursorType)};
   }
@@ -145,42 +145,42 @@ namespace krys::boo::style
     return {List<CSSOMStringAtom> {GetFontDescription().Families()}, GetFontDescription().IsSpecifiedFont()};
   }
 
-  inline FontPalette ComputedStyleProperties::GetFontPalette() const noexcept
+  inline FontPalette ComputedStyleProperties::FontPalette() const noexcept
   {
     return GetFontDescription().GetFontPalette();
   }
 
-  inline FontSizeAdjust ComputedStyleProperties::GetFontSizeAdjust() const noexcept
+  inline FontSizeAdjust ComputedStyleProperties::FontSizeAdjust() const noexcept
   {
     return GetFontDescription().GetFontSizeAdjust();
   }
 
-  inline FontStyle ComputedStyleProperties::GetFontStyle() const noexcept
+  inline FontStyle ComputedStyleProperties::FontStyle() const noexcept
   {
     return {GetFontDescription().FontStyleSlope(), GetFontDescription().GetFontStyleAxis()};
   }
 
-  inline FontOpticalSizing ComputedStyleProperties::GetFontOpticalSizing() const noexcept
+  inline FontOpticalSizing ComputedStyleProperties::FontOpticalSizing() const noexcept
   {
     return GetFontDescription().OpticalSizing();
   }
 
-  inline FontFeatureSettings ComputedStyleProperties::GetFontFeatureSettings() const noexcept
+  inline FontFeatureSettings ComputedStyleProperties::FontFeatureSettings() const noexcept
   {
     return GetFontDescription().FeatureSettings();
   }
 
-  inline FontVariationSettings ComputedStyleProperties::GetFontVariationSettings() const noexcept
+  inline FontVariationSettings ComputedStyleProperties::FontVariationSettings() const noexcept
   {
     return GetFontDescription().VariationSettings();
   }
 
-  inline FontWeight ComputedStyleProperties::GetFontWeight() const noexcept
+  inline FontWeight ComputedStyleProperties::FontWeight() const noexcept
   {
     return GetFontDescription().Weight();
   }
 
-  inline FontWidth ComputedStyleProperties::GetFontWidth() const noexcept
+  inline FontWidth ComputedStyleProperties::FontWidth() const noexcept
   {
     return GetFontDescription().Width();
   }
@@ -205,37 +205,37 @@ namespace krys::boo::style
     return GetFontDescription().FontSynthesisWeight();
   }
 
-  inline FontVariantAlternates ComputedStyleProperties::GetFontVariantAlternates() const noexcept
+  inline FontVariantAlternates ComputedStyleProperties::FontVariantAlternates() const noexcept
   {
     return GetFontDescription().VariantAlternates();
   }
 
-  inline FontVariantCaps ComputedStyleProperties::GetFontVariantCaps() const noexcept
+  inline FontVariantCaps ComputedStyleProperties::FontVariantCaps() const noexcept
   {
     return GetFontDescription().VariantCaps();
   }
 
-  inline FontVariantEastAsian ComputedStyleProperties::GetFontVariantEastAsian() const noexcept
+  inline FontVariantEastAsian ComputedStyleProperties::FontVariantEastAsian() const noexcept
   {
     return GetFontDescription().VariantEastAsian();
   }
 
-  inline FontVariantEmoji ComputedStyleProperties::GetFontVariantEmoji() const noexcept
+  inline FontVariantEmoji ComputedStyleProperties::FontVariantEmoji() const noexcept
   {
     return GetFontDescription().VariantEmoji();
   }
 
-  inline FontVariantLigatures ComputedStyleProperties::GetFontVariantLigatures() const noexcept
+  inline FontVariantLigatures ComputedStyleProperties::FontVariantLigatures() const noexcept
   {
     return GetFontDescription().VariantLigatures();
   }
 
-  inline FontVariantNumeric ComputedStyleProperties::GetFontVariantNumeric() const noexcept
+  inline FontVariantNumeric ComputedStyleProperties::FontVariantNumeric() const noexcept
   {
     return GetFontDescription().VariantNumeric();
   }
 
-  inline FontVariantPosition ComputedStyleProperties::GetFontVariantPosition() const noexcept
+  inline FontVariantPosition ComputedStyleProperties::FontVariantPosition() const noexcept
   {
     return GetFontDescription().VariantPosition();
   }
@@ -245,12 +245,12 @@ namespace krys::boo::style
     return GetFontDescription().GetTextRenderingMode();
   }
 
-  inline TextAutospace ComputedStyleProperties::GetTextAutospace() const noexcept
+  inline TextAutospace ComputedStyleProperties::TextAutospace() const noexcept
   {
     return GetFontDescription().GetTextAutospace();
   }
 
-  inline TextSpacingTrim ComputedStyleProperties::GetTextSpacingTrim() const noexcept
+  inline TextSpacingTrim ComputedStyleProperties::TextSpacingTrim() const noexcept
   {
     return GetFontDescription().GetTextSpacingTrim();
   }

@@ -110,7 +110,7 @@ namespace krys::boo
 
     // We try and read constants to draw the fraction from the OpenType MATH and use fallback values
     // otherwise.
-    bool display = Style().GetMathStyle() == MathStyle::Normal;
+    bool display = Style().MathStyle() == MathStyle::Normal;
     auto primaryFont = Style().GetFontCascade().PrimaryFont();
     if (const auto *mathData = primaryFont->MathData())
     {
@@ -163,7 +163,7 @@ namespace krys::boo
     LayoutUnit gapMin;
 
     // We try and read constants to draw the stack from the OpenType MATH and use fallback values otherwise.
-    bool display = Style().GetMathStyle() == MathStyle::Normal;
+    bool display = Style().MathStyle() == MathStyle::Normal;
     auto primaryFont = Style().GetFontCascade().PrimaryFont();
     if (const auto *mathData = primaryFont->MathData())
     {

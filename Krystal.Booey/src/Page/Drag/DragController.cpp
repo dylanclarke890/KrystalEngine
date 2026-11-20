@@ -900,7 +900,7 @@ namespace krys::boo
         continue;
       }
 
-      UserDrag dragMode = renderer->Style().GetUserDrag();
+      UserDrag dragMode = renderer->Style().UserDrag();
       if (_dragSourceAction.Contains(DragSourceAction::DHTML) && dragMode == UserDrag::Element)
       {
         state.Type = DragSourceAction::DHTML;

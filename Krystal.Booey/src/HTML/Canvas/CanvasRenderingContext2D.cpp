@@ -313,7 +313,7 @@ namespace krys::boo::html
     auto normalizedText = NormalizeSpaces(text);
     const RenderStyle *computedStyle;
     auto direction = ToTextDirection(GetState().Direction, &computedStyle);
-    bool override = computedStyle && IsOverride(computedStyle->GetUnicodeBidi());
+    bool override = computedStyle && IsOverride(computedStyle->UnicodeBidi());
     TextRun textRun(normalizedText, 0, 0, ExpansionBehavior::AllowRightOnly(), direction, override, true);
     return MeasureTextInternal(textRun);
   }
@@ -353,7 +353,7 @@ namespace krys::boo::html
     auto normalizedText = NormalizeSpaces(text);
     const RenderStyle *computedStyle;
     auto direction = ToTextDirection(GetState().Direction, &computedStyle);
-    bool override = computedStyle && IsOverride(computedStyle->GetUnicodeBidi());
+    bool override = computedStyle && IsOverride(computedStyle->UnicodeBidi());
     TextRun textRun(normalizedText, 0, 0, ExpansionBehavior::AllowRightOnly(), direction, override, true);
     DrawTextUnchecked(textRun, x, y, fill, maxWidth);
   }

@@ -55,8 +55,8 @@ namespace krys::boo
         _physicalAxis(selfAxis == LogicalBoxAxis::Inline ? _writingMode.InlineAxis()
                                                          : _writingMode.BlockAxis()),
         _style(selfStyleOverride),
-        _alignment(_containingAxis == LogicalBoxAxis::Inline ? selfStyleOverride.GetJustifySelf().Resolve()
-                                                             : selfStyleOverride.GetAlignSelf().Resolve()),
+        _alignment(_containingAxis == LogicalBoxAxis::Inline ? selfStyleOverride.JustifySelf().Resolve()
+                                                             : selfStyleOverride.AlignSelf().Resolve()),
         _defaultAnchorBox(NeedsAnchor() ? style::AnchorPositionEvaluator::DefaultAnchorForBox(renderer)
                                         : nullptr),
         _marginBefore(style::MarginEdge::Fixed {0}), _marginAfter(style::MarginEdge::Fixed {0}),
@@ -73,7 +73,7 @@ namespace krys::boo
         : renderer.ContainingBlockRangeForPositioned(*_container, OppositeAxis(_physicalAxis)).Size();
 
     // Adjust for scrollable area.
-    if (!_style.GetPositionArea().IsNone() && PositionType::Fixed != _style.GetPosition())
+    if (!_style.PositionArea().IsNone() && PositionType::Fixed != _style.Position())
     {
       ExpandToScrollableArea(_containingRange);
     }
@@ -133,7 +133,7 @@ namespace krys::boo
 
   bool PositionedLayoutConstraints::NeedsAnchor() const noexcept
   {
-    return !_style.GetPositionArea().IsNone() || _alignment.Position() == ItemPosition::AnchorCenter;
+    return !_style.PositionArea().IsNone() || _alignment.Position() == ItemPosition::AnchorCenter;
   }
 
   bool PositionedLayoutConstraints::ContainingCoordsAreFlipped() const noexcept
@@ -282,7 +282,7 @@ namespace krys::boo
     _anchorArea = ExtractRange(anchorRect);
 
     // Adjust containing block for position-area.
-    if (_style.GetPositionArea().IsNone())
+    if (_style.PositionArea().IsNone())
     {
       return;
     }
@@ -307,14 +307,14 @@ namespace krys::boo
                                                                  LayoutRange anchorArea,
                                                                  BoxAxis containerAxis) noexcept
   {
-    krys_debug_assert(!_style.GetPositionArea().IsNone());
+    krys_debug_assert(!_style.PositionArea().IsNone());
     krys_debug_assert(_defaultAnchorBox);
     krys_debug_assert(NeedsAnchor());
     krys_debug_assert(anchorArea.Size() >= 0);
 
     auto adjustedRange = rangeToAdjust;
-    switch (_style.GetPositionArea().TryValue()->CoordMatchedTrackForAxis(
-      containerAxis, _containingWritingMode, _writingMode))
+    switch (_style.PositionArea().TryValue()->CoordMatchedTrackForAxis(containerAxis, _containingWritingMode,
+                                                                       _writingMode))
     {
       case style::PositionAreaTrack::Start:
         adjustedRange.ShiftMaxEdgeTo(anchorArea.Min());
@@ -358,11 +358,11 @@ namespace krys::boo
 
       auto itemResolvedAlignSelf = [&]
       {
-        if (!itemStyle.GetAlignSelf().IsAuto())
+        if (!itemStyle.AlignSelf().IsAuto())
         {
-          return itemStyle.GetAlignSelf().Resolve(StyleSelfAlignmentData {ItemPosition::Start});
+          return itemStyle.AlignSelf().Resolve(StyleSelfAlignmentData {ItemPosition::Start});
         }
-        return parent->Style().GetAlignItems().Resolve(StyleSelfAlignmentData {ItemPosition::Start});
+        return parent->Style().AlignItems().Resolve(StyleSelfAlignmentData {ItemPosition::Start});
       }();
 
       switch (itemResolvedAlignSelf.Position())
@@ -593,7 +593,7 @@ namespace krys::boo
       // See https://www.w3.org/TR/css-align-3/#auto-safety-position
 
       auto containingRange = _originalContainingRange;
-      if (_defaultAnchorBox && PositionType::Fixed == _style.GetPosition())
+      if (_defaultAnchorBox && PositionType::Fixed == _style.Position())
       {
         // We didn't modify the _containingRange to include scrollable area for positioning, but we should
         // allow it for overflow management if we can scroll to reach that overflow.
@@ -654,11 +654,11 @@ namespace krys::boo
 #endif
       const auto *parentStyle = _renderer.Parent() ? &_renderer.Parent()->Style() : nullptr;
 
-      if (!parentStyle || !_style.GetAlignSelf().IsAuto())
+      if (!parentStyle || !_style.AlignSelf().IsAuto())
       {
-        return _style.GetAlignSelf().Resolve(StyleSelfAlignmentData {ItemPosition::Start}).Position();
+        return _style.AlignSelf().Resolve(StyleSelfAlignmentData {ItemPosition::Start}).Position();
       }
-      return parentStyle->GetAlignItems().Resolve(StyleSelfAlignmentData {ItemPosition::Start}).Position();
+      return parentStyle->AlignItems().Resolve(StyleSelfAlignmentData {ItemPosition::Start}).Position();
     }
 
     auto alignmentPosition = [&]
@@ -667,7 +667,7 @@ namespace krys::boo
       return (ItemPosition::Auto == itemPosition) ? ItemPosition::Normal : itemPosition;
     }();
 
-    if (auto positionAreaValue = _style.GetPositionArea().TryValue();
+    if (auto positionAreaValue = _style.PositionArea().TryValue();
         positionAreaValue && ItemPosition::Normal == alignmentPosition)
     {
       alignmentPosition =
@@ -684,7 +684,7 @@ namespace krys::boo
   Pair<bool, bool> PositionedLayoutConstraints::ContainerAllowsInfiniteOverflow() const noexcept
   {
     if (!(_container->HasPotentiallyScrollableOverflow()
-          || (Is<RenderView>(_container) && PositionType::Fixed != _style.GetPosition())))
+          || (Is<RenderView>(_container) && PositionType::Fixed != _style.Position())))
     {
       return {false, false};
     }
@@ -704,7 +704,7 @@ namespace krys::boo
   bool PositionedLayoutConstraints::AlignmentAppliesStretch(ItemPosition normalAlignment) const noexcept
   {
     auto alignmentPosition = _alignment.Position();
-    if (_style.GetPositionArea().IsNone()
+    if (_style.PositionArea().IsNone()
         && (ItemPosition::Auto == alignmentPosition || ItemPosition::Normal == alignmentPosition))
     {
       alignmentPosition = normalAlignment;
@@ -761,14 +761,14 @@ namespace krys::boo
         {
           if (LogicalBoxAxis::Inline == _containingAxis)
           {
-            if (auto justifyItems = _container->Style().GetJustifyItems(); !justifyItems.IsLegacyNone())
+            if (auto justifyItems = _container->Style().JustifyItems(); !justifyItems.IsLegacyNone())
             {
               _alignment = justifyItems.Resolve();
             }
           }
           else
           {
-            _alignment = _container->Style().GetAlignItems().Resolve();
+            _alignment = _container->Style().AlignItems().Resolve();
           }
         }
         if (ItemPosition::Auto == _alignment.Position() || ItemPosition::Normal == _alignment.Position())

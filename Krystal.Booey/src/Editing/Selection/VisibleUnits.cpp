@@ -589,7 +589,7 @@ namespace krys::boo
 
     KRYS_NODISCARD bool IsInTextSecurityMode(Node *node) noexcept
     {
-      return node && node->Renderer() && node->Renderer()->Style().GetTextSecurity() != TextSecurity::None;
+      return node && node->Renderer() && node->Renderer()->Style().TextSecurity() != TextSecurity::None;
     }
   }
 
@@ -1544,7 +1544,7 @@ namespace krys::boo
         continue;
       }
       const RenderStyle &style = r->Style();
-      if (style.GetVisibility() != Visibility::Visible)
+      if (style.Visibility() != Visibility::Visible)
       {
         n = dom::TreeQueries::PreviousPostOrder(*n, startBlock);
         continue;
@@ -1629,7 +1629,7 @@ namespace krys::boo
         continue;
       }
       const RenderStyle &style = r->Style();
-      if (style.GetVisibility() != Visibility::Visible)
+      if (style.Visibility() != Visibility::Visible)
       {
         n = dom::TreeQueries::Next(*n, stayInsideBlock);
         continue;

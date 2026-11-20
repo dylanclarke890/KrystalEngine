@@ -318,7 +318,7 @@ namespace krys::boo
     }
 
     auto &style = Downcast<RenderInline>(*object).Style();
-    auto unicodeBidi = style.GetUnicodeBidi();
+    auto unicodeBidi = style.UnicodeBidi();
     if (unicodeBidi == UnicodeBidi::Normal)
     {
       // http://dev.w3.org/csswg/css3-writing-modes/#unicode-bidi
@@ -351,7 +351,7 @@ namespace krys::boo
       return;
     }
 
-    auto unicodeBidi = Downcast<RenderInline>(*object).Style().GetUnicodeBidi();
+    auto unicodeBidi = Downcast<RenderInline>(*object).Style().UnicodeBidi();
     if (unicodeBidi == UnicodeBidi::Normal)
     {
       return; // Nothing to do for unicode-bidi: normal
@@ -473,7 +473,7 @@ namespace krys::boo
   {
     if (auto *inlineBox = DynamicDowncast<RenderInline>(object))
     {
-      return IsIsolated(inlineBox->Style().GetUnicodeBidi());
+      return IsIsolated(inlineBox->Style().UnicodeBidi());
     }
     return false;
   }

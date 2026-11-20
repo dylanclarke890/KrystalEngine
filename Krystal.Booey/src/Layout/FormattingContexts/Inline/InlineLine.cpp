@@ -59,7 +59,7 @@ namespace krys::boo::layout
     {
       for (auto &inlineBoxStartItem : lineSpanningInlineBoxes)
       {
-        if (inlineBoxStartItem.Style().GetBoxDecorationBreak() != BoxDecorationBreak::Clone)
+        if (inlineBoxStartItem.Style().BoxDecorationBreak() != BoxDecorationBreak::Clone)
         {
           _runs.push_back(Run {inlineBoxStartItem, LastRunLogicalRight(), {}});
         }
@@ -361,7 +361,7 @@ namespace krys::boo::layout
 
     _hasRubyContent = _hasRubyContent || inlineItem.LayoutBox().IsRubyBase();
     _runs.push_back(Run {inlineItem, style, logicalLeft, logicalWidth, textSpacingAdjustment});
-    if (style.GetBoxDecorationBreak() == BoxDecorationBreak::Clone)
+    if (style.BoxDecorationBreak() == BoxDecorationBreak::Clone)
     {
       _inlineBoxListWithClonedDecorationEnd.push_back(&inlineItem.LayoutBox());
     }
@@ -404,7 +404,7 @@ namespace krys::boo::layout
     _runs.push_back(Run {inlineItem, style, logicalLeft, logicalWidth});
     // Do not let negative margin make the content shorter than it already is.
     _contentLogicalWidth = std::max(_contentLogicalWidth, logicalLeft + logicalWidth);
-    if (style.GetBoxDecorationBreak() == BoxDecorationBreak::Clone)
+    if (style.BoxDecorationBreak() == BoxDecorationBreak::Clone)
     {
       krys_debug_assert(&inlineItem.LayoutBox() == _inlineBoxListWithClonedDecorationEnd.back());
       _inlineBoxListWithClonedDecorationEnd.pop_back();
@@ -607,7 +607,7 @@ namespace krys::boo::layout
       if (TextUtil::HasHangableStopOrCommaEnd(inlineTextItem, style))
       {
         auto isConditionalHanging =
-          style.GetHangingPunctuation().Contains(style::HangingPunctuationValue::AllowEnd);
+          style.HangingPunctuation().Contains(style::HangingPunctuationValue::AllowEnd);
         _hangingContent.SetTrailingStopOrComma(TextUtil::HangableStopOrCommaEndWidth(inlineTextItem, style),
                                                isConditionalHanging);
         return;
@@ -1248,7 +1248,7 @@ namespace krys::boo::layout
       }
       if (run.IsLineSpanningInlineBoxStart())
       {
-        if (run.Style().GetBoxDecorationBreak() != BoxDecorationBreak::Clone)
+        if (run.Style().BoxDecorationBreak() != BoxDecorationBreak::Clone)
         {
           return false;
         }

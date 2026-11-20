@@ -419,7 +419,7 @@ namespace krys::boo
                                                                LayoutUnit &maxLogicalWidth) const noexcept
   {
     const auto &style = Style();
-    if (style.GetColumnCount().IsAuto() && style.GetColumnWidth().IsAuto())
+    if (style.ColumnCount().IsAuto() && style.ColumnWidth().IsAuto())
     {
       return;
     }
@@ -427,11 +427,11 @@ namespace krys::boo
     // The min/max intrinsic widths calculated really tell how much space elements need when laid out inside
     // the columns. In order to eventually end up with the desired column width, we need to convert them to
     // values pertaining to the multicol container.
-    auto columnCountValue = style.GetColumnCount().TryValue();
+    auto columnCountValue = style.ColumnCount().TryValue();
     int32 columnCount = columnCountValue ? static_cast<int32>(columnCountValue->Value) : 1;
     LayoutUnit columnWidth;
     LayoutUnit gapExtra = (columnCount - 1) * ColumnGap();
-    if (auto columnWidthLength = style.GetColumnWidth().TryLength())
+    if (auto columnWidthLength = style.ColumnWidth().TryLength())
     {
       columnWidth = style::Evaluate<LayoutUnit>(*columnWidthLength, style::ZoomNeeded {});
       minLogicalWidth = std::min(minLogicalWidth, columnWidth);
@@ -522,8 +522,8 @@ namespace krys::boo
     LayoutUnit desiredColumnWidth = ContentBoxLogicalWidth();
 
     const auto &style = Style();
-    const auto &columnCount = style.GetColumnCount();
-    const auto &columnWidth = style.GetColumnWidth();
+    const auto &columnCount = style.ColumnCount();
+    const auto &columnWidth = style.ColumnWidth();
     if (columnCount.IsAuto() && columnWidth.IsAuto())
     {
       SetComputedColumnCountAndWidth(desiredColumnCount, desiredColumnWidth);
@@ -1086,7 +1086,7 @@ namespace krys::boo
                                                    LayoutUnit &repaintLogicalTop,
                                                    LayoutUnit &repaintLogicalBottom) noexcept
   {
-    auto alignment = Style().GetAlignContent().Resolve();
+    auto alignment = Style().AlignContent().Resolve();
 
     // Exit if no alignment necessary.
     if (alignment.IsNormal() || alignment.IsStartward())
@@ -1238,7 +1238,7 @@ namespace krys::boo
     bool marginTrimBlockStartFromContainingBlock = layoutState->MarginTrimBlockStart();
     bool newMarginTrimBlockStartForSubtree = [&]
     {
-      if (Style().GetMarginTrim().Contains(style::MarginTrimSide::BlockStart))
+      if (Style().MarginTrim().Contains(style::MarginTrimSide::BlockStart))
       {
         return true;
       }
@@ -1329,7 +1329,7 @@ namespace krys::boo
       LayoutBlockChild(child, marginInfo, previousFloatLogicalBottom, maxFloatLogicalBottom);
     }
 
-    if (Style().GetMarginTrim().Contains(style::MarginTrimSide::BlockEnd))
+    if (Style().MarginTrim().Contains(style::MarginTrimSide::BlockEnd))
     {
       TrimBlockEndChildrenMargins();
     }
@@ -1356,7 +1356,7 @@ namespace krys::boo
       }
     };
 
-    krys_debug_assert(Style().GetMarginTrim().Contains(style::MarginTrimSide::BlockEnd));
+    krys_debug_assert(Style().MarginTrim().Contains(style::MarginTrimSide::BlockEnd));
     // If we are trimming the block end margin, we need to make sure we trim the margin of the children
     // at the end of the block by walking back up the container. Any self collapsing children will also need
     // to have their position adjusted to below the last non self-collapsing child in its containing block
@@ -1387,7 +1387,7 @@ namespace krys::boo
       }
       else if (auto *nestedBlock = DynamicDowncast<RenderBlockFlow>(child);
                nestedBlock && nestedBlock->IsBlockContainer() && !nestedBlock->ChildrenInline()
-               && !nestedBlock->Style().GetMarginTrim().Contains(style::MarginTrimSide::BlockEnd))
+               && !nestedBlock->Style().MarginTrim().Contains(style::MarginTrimSide::BlockEnd))
       {
         // The margins *inside* this nested block are protected so we should not introspect and try to trim
         // any of them.
@@ -1478,7 +1478,7 @@ namespace krys::boo
       return;
     }
 
-    switch (child.Style().GetBlockStepInsert())
+    switch (child.Style().BlockStepInsert())
     {
       case BlockStepInsert::MarginBox:
         block_step_sizing::DistributeExtraSpaceToChildMargins(child, extraSpace, Style().GetWritingMode());
@@ -1570,7 +1570,7 @@ namespace krys::boo
     }
 
     const auto &childStyle = child.Style();
-    if (auto blockStepSizeForChild = childStyle.GetBlockStepSize().TryLength();
+    if (auto blockStepSizeForChild = childStyle.BlockStepSize().TryLength();
         blockStepSizeForChild && block_step_sizing::ChildHasSupportedStyle(childStyle))
     {
       PerformBlockStepSizing(child, LayoutUnit(blockStepSizeForChild->ResolveZoom(style::ZoomNeeded {})));
@@ -1741,7 +1741,7 @@ namespace krys::boo
 
   LayoutUnit RenderBlockFlow::StaticInlinePositionForOriginalDisplayInline(LayoutUnit logicalTop) noexcept
   {
-    style::TextAlign textAlign = Style().GetTextAlign();
+    style::TextAlign textAlign = Style().TextAlign();
 
     float logicalLeft = LogicalLeftOffsetForLine(logicalTop).ToFloat();
     float logicalRight = LogicalRightOffsetForLine(logicalTop).ToFloat();
@@ -1792,13 +1792,13 @@ namespace krys::boo
     auto verticalScrollbarWidthClampedToContentBox = std::min<LayoutUnit>(
       LayoutUnit(VerticalScrollbarWidth()), std::max(0_lu, LogicalWidth() - BorderAndPaddingLogicalWidth()));
     auto writingMode = Style().GetWritingMode();
-    if ((Style().ShouldPlaceVerticalScrollbarOnLeft() || Style().GetScrollbarGutter().IsStableBothEdges())
+    if ((Style().ShouldPlaceVerticalScrollbarOnLeft() || Style().ScrollbarGutter().IsStableBothEdges())
         && IsHorizontalWritingMode())
     {
       startPosition +=
         (writingMode.IsLogicalLeftInlineStart() ? 1 : -1) * verticalScrollbarWidthClampedToContentBox;
     }
-    if (Style().GetScrollbarGutter().IsStableBothEdges() && !IsHorizontalWritingMode())
+    if (Style().ScrollbarGutter().IsStableBothEdges() && !IsHorizontalWritingMode())
     {
       startPosition += (writingMode.IsLogicalLeftInlineStart() ? 1 : -1) * HorizontalScrollbarHeight();
     }
@@ -1819,7 +1819,7 @@ namespace krys::boo
     // being centred then the margin calculated to do that has factored in any offset required to avoid
     // floats, so use it if necessary.
 
-    if (Style().GetTextAlign() == style::TextAlign::WebKitCenter
+    if (Style().TextAlign() == style::TextAlign::WebKitCenter
         || child.Style().MarginStart(writingMode).IsAuto())
     {
       newPosition = std::max(newPosition, positionToAvoidFloats + childMarginStart);
@@ -2173,7 +2173,7 @@ namespace krys::boo
   bool RenderBlockFlow::IsChildEligibleForMarginTrim(style::MarginTrimSide marginTrimSide,
                                                      const RenderBox &child) const noexcept
   {
-    krys_debug_assert(Style().GetMarginTrim().Contains(marginTrimSide));
+    krys_debug_assert(Style().MarginTrim().Contains(marginTrimSide));
     if (!child.Style().IsDisplayBlockLevel())
     {
       return false;
@@ -2409,7 +2409,7 @@ namespace krys::boo
     {
       // Update our max pos/neg bottom margins, since we collapsed our bottom margins
       // with our children.
-      auto shouldTrimBlockEndMargin = Style().GetMarginTrim().Contains(style::MarginTrimSide::BlockEnd);
+      auto shouldTrimBlockEndMargin = Style().MarginTrim().Contains(style::MarginTrimSide::BlockEnd);
       auto propagatedPositiveMargin = shouldTrimBlockEndMargin ? 0_lu : marginInfo.PositiveMargin();
       auto propagatedNegativeMargin = shouldTrimBlockEndMargin ? 0_lu : marginInfo.NegativeMargin();
       SetMaxMarginAfterValues(std::max(MaxPositiveMarginAfter(), propagatedPositiveMargin),
@@ -2555,8 +2555,8 @@ namespace krys::boo
   void RenderBlockFlow::UpdateStylesForColumnChildren(const RenderStyle *oldStyle) noexcept
   {
     auto columnsNeedLayout = oldStyle
-                             && (oldStyle->GetColumnCount() != Style().GetColumnCount()
-                                 || oldStyle->GetColumnWidth() != Style().GetColumnWidth());
+                             && (oldStyle->ColumnCount() != Style().ColumnCount()
+                                 || oldStyle->ColumnWidth() != Style().ColumnWidth());
     for (auto *child = FirstChildBox();
          child && (child->IsRenderFragmentedFlow() || child->IsRenderMultiColumnSet());
          child = child->NextSiblingBox())
@@ -2576,8 +2576,8 @@ namespace krys::boo
 
     if (oldStyle)
     {
-      auto oldPosition = oldStyle->GetPosition();
-      auto newPosition = newStyle.GetPosition();
+      auto oldPosition = oldStyle->Position();
+      auto newPosition = newStyle.Position();
 
       if (Parent() && diff == style::DifferenceResult::Layout && oldPosition != newPosition)
       {
@@ -3735,7 +3735,7 @@ namespace krys::boo
   {
     LayoutOptionalOutsets allowance = RenderBox::AllowedLayoutOverflow();
 
-    if (!Style().GetAlignContent().IsNormal())
+    if (!Style().AlignContent().IsNormal())
     {
       if (HasRareBlockFlowData())
       {
@@ -3963,11 +3963,11 @@ namespace krys::boo
     KRYS_NODISCARD bool
       HasSimpleStaticPositionForInlineLevelOutOfFlowChildrenByStyle(const RenderStyle &rootStyle) noexcept
     {
-      if (rootStyle.GetTextAlign() != style::TextAlign::Start)
+      if (rootStyle.TextAlign() != style::TextAlign::Start)
       {
         return false;
       }
-      if (!rootStyle.GetTextIndent().Length.IsKnownZero())
+      if (!rootStyle.TextIndent().Length.IsKnownZero())
       {
         return false;
       }
@@ -4555,7 +4555,7 @@ namespace krys::boo
       TextIndentForBlockContainer(const RenderBlockFlow &renderer) noexcept
     {
       auto &style = renderer.Style();
-      if (auto fixedTextIndent = style.GetTextIndent().Length.TryFixed())
+      if (auto fixedTextIndent = style.TextIndent().Length.TryFixed())
       {
         return !fixedTextIndent->IsZero()
                  ? Maybe<LayoutUnit> {LayoutUnit {fixedTextIndent->ResolveZoom(style.UsedZoomForLength())}}
@@ -4573,7 +4573,7 @@ namespace krys::boo
           // block width (that's exactly to what we try to contribute here) unless the computed value is
           // fixed.
           indentValue =
-            style::Evaluate<LayoutUnit>(style.GetTextIndent().Length, containingBlockFixedLogicalWidthValue,
+            style::Evaluate<LayoutUnit>(style.TextIndent().Length, containingBlockFixedLogicalWidthValue,
                                         containingBlock->Style().UsedZoomForLength());
         }
       }
@@ -4619,9 +4619,9 @@ namespace krys::boo
     bool isPrevChildInlineFlow = false;
     bool shouldBreakLineAfterText = false;
     bool canHangPunctuationAtStart =
-      styleToUse.GetHangingPunctuation().Contains(style::HangingPunctuationValue::First);
+      styleToUse.HangingPunctuation().Contains(style::HangingPunctuationValue::First);
     bool canHangPunctuationAtEnd =
-      styleToUse.GetHangingPunctuation().Contains(style::HangingPunctuationValue::Last);
+      styleToUse.HangingPunctuation().Contains(style::HangingPunctuationValue::Last);
     RenderText *lastText = nullptr;
 
     struct RubyBaseContent
@@ -5466,8 +5466,8 @@ namespace krys::boo
     {
       // We may require a certain minimum number of lines per page in order to satisfy orphans and widows, and
       // that may affect the minimum page height.
-      auto orphans = renderStyle.GetOrphans().TryValue();
-      auto widows = renderStyle.GetWidows().TryValue();
+      auto orphans = renderStyle.Orphans().TryValue();
+      auto widows = renderStyle.Widows().TryValue();
       uint32 lineCount = std::max<uint32>(orphans ? orphans->Value : 1, widows ? widows->Value : 1);
       if (lineCount > 1)
       {
@@ -5603,7 +5603,7 @@ namespace krys::boo
 
       bool avoidFirstLinePageBreak =
         lineBox->IsFirst() && totalLogicalHeight < pageLogicalHeightAtNewOffset && !floatMinimumBottom;
-      auto orphansValue = Style().GetOrphans().TryValue();
+      auto orphansValue = Style().Orphans().TryValue();
       bool affectedByOrphans = orphansValue && static_cast<int32>(orphansValue->Value) >= lineNumber;
 
       if ((avoidFirstLinePageBreak || affectedByOrphans) && !IsOutOfFlowPositioned() && !IsRenderTableCell())

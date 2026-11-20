@@ -134,14 +134,14 @@ namespace krys::boo::style::tests
             == DisplayType::Block);
 
       // Ruby boxes are isolated.
-      CHECK(ruby->GetUnicodeBidi() == UnicodeBidi::Isolate);
-      CHECK(Adjusted(u8"display: ruby; unicode-bidi: bidi-override", &ById(u8"ruby"))->GetUnicodeBidi()
+      CHECK(ruby->UnicodeBidi() == UnicodeBidi::Isolate);
+      CHECK(Adjusted(u8"display: ruby; unicode-bidi: bidi-override", &ById(u8"ruby"))->UnicodeBidi()
             == UnicodeBidi::IsolateOverride);
 
       // Ruby text doesn't float or position.
       auto rt = Adjusted(u8"float: left; position: relative", &ById(u8"rt"));
       CHECK(rt->Floating() == Float::None);
-      CHECK(rt->GetPosition() == PositionType::Static);
+      CHECK(rt->Position() == PositionType::Static);
     }
 
     SECTION("display: contents")
@@ -161,16 +161,16 @@ namespace krys::boo::style::tests
     SECTION("Table parts")
     {
       auto row = Adjusted(u8"display: table-row; position: relative; writing-mode: vertical-rl", &div);
-      CHECK(row->GetPosition() == PositionType::Static);
+      CHECK(row->Position() == PositionType::Static);
       // writing-mode doesn't apply to rows.
       CHECK(row->GetWritingMode().ComputedWritingMode() == StyleWritingMode::HorizontalTb);
-      CHECK(Adjusted(u8"display: table-cell; position: relative", &div)->GetPosition()
+      CHECK(Adjusted(u8"display: table-cell; position: relative", &div)->Position()
             == PositionType::Relative);
 
       // Tables reset the internal text-align values, which only the user agent's style sheets set.
       Mode = css::ParserMode::UASheet;
-      CHECK(Adjusted(u8"text-align: -internal-center", &ById(u8"table"))->GetTextAlign() == TextAlign::Start);
-      CHECK(Adjusted(u8"text-align: -internal-center", &div)->GetTextAlign() == TextAlign::WebKitCenter);
+      CHECK(Adjusted(u8"text-align: -internal-center", &ById(u8"table"))->TextAlign() == TextAlign::Start);
+      CHECK(Adjusted(u8"text-align: -internal-center", &div)->TextAlign() == TextAlign::WebKitCenter);
     }
 
     SECTION("Writing modes")
@@ -183,9 +183,8 @@ namespace krys::boo::style::tests
 
     SECTION("Grid auto flow")
     {
-      CHECK(Adjusted(u8"display: grid", &div)->GetGridAutoFlow().GetDirection()
-            == GridAutoFlow::Direction::Row);
-      CHECK(Adjusted(u8"display: grid; grid-auto-flow: column", &div)->GetGridAutoFlow().GetDirection()
+      CHECK(Adjusted(u8"display: grid", &div)->GridAutoFlow().GetDirection() == GridAutoFlow::Direction::Row);
+      CHECK(Adjusted(u8"display: grid; grid-auto-flow: column", &div)->GridAutoFlow().GetDirection()
             == GridAutoFlow::Direction::Column);
     }
   }
@@ -307,9 +306,9 @@ namespace krys::boo::style::tests
     {
       auto parent = Adjusted(u8"justify-items: legacy left", &div);
       auto child = Adjusted(u8"", &div, parent.get());
-      CHECK(child->GetJustifyItems() == parent->GetJustifyItems());
-      CHECK_FALSE(Adjusted(u8"justify-items: center", &div, parent.get())->GetJustifyItems()
-                  == parent->GetJustifyItems());
+      CHECK(child->JustifyItems() == parent->JustifyItems());
+      CHECK_FALSE(Adjusted(u8"justify-items: center", &div, parent.get())->JustifyItems()
+                  == parent->JustifyItems());
     }
   }
 
@@ -319,16 +318,16 @@ namespace krys::boo::style::tests
 
     SECTION("Password fields")
     {
-      CHECK(Adjusted(u8"", &ById(u8"password"))->GetTextSecurity() == TextSecurity::Disc);
-      CHECK(Adjusted(u8"", &div)->GetTextSecurity() == TextSecurity::None);
+      CHECK(Adjusted(u8"", &ById(u8"password"))->TextSecurity() == TextSecurity::Disc);
+      CHECK(Adjusted(u8"", &div)->TextSecurity() == TextSecurity::None);
     }
 
     SECTION("Marquees")
     {
       auto style = Adjusted(u8"white-space: pre-wrap; text-align: center", &ById(u8"marquee"));
-      CHECK(style->GetWhiteSpaceCollapse() == WhiteSpaceCollapse::Collapse);
-      CHECK(style->GetTextWrapMode() == TextWrapMode::NoWrap);
-      CHECK(style->GetTextAlign() == TextAlign::Start);
+      CHECK(style->WhiteSpaceCollapse() == WhiteSpaceCollapse::Collapse);
+      CHECK(style->TextWrapMode() == TextWrapMode::NoWrap);
+      CHECK(style->TextAlign() == TextAlign::Start);
     }
 
     SECTION("hidden=until-found")
@@ -364,9 +363,9 @@ namespace krys::boo::style::tests
       CHECK_FALSE(DynamicDowncast<SVGElement>(ById(u8"circle"))->IsOutermostSVGSVGElement());
 
       // Only outermost <svg> elements are positioned.
-      CHECK(Adjusted(u8"position: absolute", &svg)->GetPosition() == PositionType::Absolute);
-      CHECK(Adjusted(u8"position: absolute", &inner)->GetPosition() == PositionType::Static);
-      CHECK(Adjusted(u8"position: absolute", &ById(u8"circle"))->GetPosition() == PositionType::Static);
+      CHECK(Adjusted(u8"position: absolute", &svg)->Position() == PositionType::Absolute);
+      CHECK(Adjusted(u8"position: absolute", &inner)->Position() == PositionType::Static);
+      CHECK(Adjusted(u8"position: absolute", &ById(u8"circle"))->Position() == PositionType::Static);
 
       // <foreignObject> isn't zoomed again, and is a block.
       auto foreignObject = Adjusted(u8"display: inline; zoom: 2", &ById(u8"foreignObject"));

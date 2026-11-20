@@ -145,11 +145,10 @@ namespace krys::boo
 
     const auto *style =
       usesBaseAppearance ? renderer.GetCachedPseudoStyle({type}, &renderer.Style()) : nullptr;
-    bool isNeeded =
-      style && style->Display() != DisplayType::None && style->GetContent().TryData() != nullptr;
+    bool isNeeded = style && style->Display() != DisplayType::None && style->Content().TryData() != nullptr;
 
     // Kept while its content stays: an animation or transition of it goes on from frame to frame.
-    if (existing && isNeeded && existing->Style().GetContent() == style->GetContent())
+    if (existing && isNeeded && existing->Style().Content() == style->Content())
     {
       existing->SetStyle(RenderStyle::Clone(*style));
       return;

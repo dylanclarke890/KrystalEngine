@@ -212,7 +212,7 @@ namespace krys::boo::dom
       return false;
     }
 
-    if (renderer->Style().GetVisibility() != Visibility::Visible)
+    if (renderer->Style().Visibility() != Visibility::Visible)
     {
       return false;
     }

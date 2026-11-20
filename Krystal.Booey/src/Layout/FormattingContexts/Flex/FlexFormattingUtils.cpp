@@ -43,7 +43,7 @@ namespace krys::boo::layout
     krys_debug_assert(flexContainer.IsFlexBox());
     auto &flexContainerStyle = flexContainer.Style();
     auto isHorizontalWritingMode = flexContainerStyle.GetWritingMode().IsHorizontal();
-    auto flexDirection = flexContainerStyle.GetFlexDirection();
+    auto flexDirection = flexContainerStyle.FlexDirection();
     return (isHorizontalWritingMode
             && (flexDirection == FlexDirection::Row || flexDirection == FlexDirection::RowReverse))
            || (!isHorizontalWritingMode
@@ -84,14 +84,14 @@ namespace krys::boo::layout
   bool FlexFormattingUtils::IsMainReversedToContentDirection(const ElementBox &flexContainer) noexcept
   {
     krys_debug_assert(flexContainer.IsFlexBox());
-    auto flexDirection = flexContainer.Style().GetFlexDirection();
+    auto flexDirection = flexContainer.Style().FlexDirection();
     return flexDirection == FlexDirection::RowReverse || flexDirection == FlexDirection::ColumnReverse;
   }
 
   bool FlexFormattingUtils::AreFlexLinesReversedInCrossAxis(const ElementBox &flexContainer) noexcept
   {
     krys_debug_assert(flexContainer.IsFlexBox());
-    return flexContainer.Style().GetFlexWrap() == FlexWrap::Reverse;
+    return flexContainer.Style().FlexWrap() == FlexWrap::Reverse;
   }
 
   // The column-gap property specifies spacing between "columns", separating boxes in the container's inline
@@ -102,7 +102,7 @@ namespace krys::boo::layout
                                                    LayoutUnit flexContainerContentBoxWidth) noexcept
   {
     krys_debug_assert(flexContainer.IsFlexBox());
-    auto flexDirection = flexContainer.Style().GetFlexDirection();
+    auto flexDirection = flexContainer.Style().FlexDirection();
     auto isMainAxisInlineAxis =
       flexDirection == FlexDirection::Row || flexDirection == FlexDirection::RowReverse;
     auto &gap = isMainAxisInlineAxis ? flexContainer.Style().ColumnGap() : flexContainer.Style().RowGap();
@@ -113,7 +113,7 @@ namespace krys::boo::layout
                                                     LayoutUnit flexContainerContentBoxHeight) noexcept
   {
     krys_debug_assert(flexContainer.IsFlexBox());
-    auto flexDirection = flexContainer.Style().GetFlexDirection();
+    auto flexDirection = flexContainer.Style().FlexDirection();
     auto isMainAxisInlineAxis =
       flexDirection == FlexDirection::Row || flexDirection == FlexDirection::RowReverse;
     auto &gap = isMainAxisInlineAxis ? flexContainer.Style().RowGap() : flexContainer.Style().ColumnGap();

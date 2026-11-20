@@ -34,7 +34,7 @@ namespace krys::boo
   Maybe<InterpolationQuality>
     ImageQualityController::InterpolationQualityFromStyle(const RenderStyle &style) noexcept
   {
-    switch (style.GetImageRendering())
+    switch (style.ImageRendering())
     {
       case ImageRendering::OptimizeSpeed:   return InterpolationQuality::Low;
       case ImageRendering::CrispEdges:

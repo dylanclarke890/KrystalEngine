@@ -306,7 +306,7 @@ namespace krys::boo::style::tests
     {
       auto a = Resolve(ById(u8"a"));
       CHECK(Serialised(*a.Style, a.Style->Width()) == "40px");
-      CHECK(a.Style->GetOpacity() == Opacity {0.5f});
+      CHECK(a.Style->Opacity() == Opacity {0.5f});
       CHECK(a.Style->Display() == DisplayType::Block);
       CHECK(a.Style->ComputedFontSize() == 20);
       CHECK(Serialised(*a.Style, a.Style->Height()) == "3px");

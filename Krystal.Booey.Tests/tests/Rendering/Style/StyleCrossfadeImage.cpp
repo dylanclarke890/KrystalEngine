@@ -28,7 +28,7 @@ namespace krys::boo::tests
     auto imageSize = [&](DOMStringView id)
     {
       auto &renderer = *fixture.ById(id).Renderer();
-      RefPtr image = renderer.Style().GetBackgroundLayers().UsedValues().begin()->GetImage().TryStyleImage();
+      RefPtr image = renderer.Style().BackgroundLayers().UsedValues().begin()->GetImage().TryStyleImage();
       REQUIRE(image);
       CHECK(Is<StyleCrossfadeImage>(*image));
       return image->ImageSize(&renderer, 1);
@@ -60,7 +60,7 @@ namespace krys::boo::tests
     {
       auto &renderer = *fixture.ById(id).Renderer();
       return Downcast<StyleCrossfadeImage>(
-        *renderer.Style().GetBackgroundLayers().UsedValues().begin()->GetImage().TryStyleImage());
+        *renderer.Style().BackgroundLayers().UsedValues().begin()->GetImage().TryStyleImage());
     };
 
     auto blended = crossfade(u8"to").Blend(crossfade(u8"from"), BlendingContext(0.5));

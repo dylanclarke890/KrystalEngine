@@ -136,7 +136,7 @@ namespace krys::boo::style
                                                          int min, int max, GridTrackSizingDirection direction,
                                                          bool isStartSide) noexcept
     {
-      auto &areas = style.GetGridTemplateAreas().Map.Map;
+      auto &areas = style.GridTemplateAreas().Map.Map;
       auto gridAreaIt = areas.find(name);
       if (gridAreaIt != areas.end())
       {
@@ -171,7 +171,7 @@ namespace krys::boo::style
       auto &gridLineNames = tracks.NamedLines.Map;
       auto &autoRepeatGridLineNames = tracks.AutoRepeatNamedLines.Map;
       auto &implicitGridLineNames =
-        gridContainerStyle->GetGridTemplateAreas().ImplicitNamedGridLines(direction).Map;
+        gridContainerStyle->GridTemplateAreas().ImplicitNamedGridLines(direction).Map;
 
       _namedLinesIndices = FindIndices(gridLineNames, lineName);
       _autoRepeatNamedLinesIndices = FindIndices(autoRepeatGridLineNames, lineName);
@@ -804,7 +804,7 @@ namespace krys::boo::style
     return std::min<uint32>(
       std::max(static_cast<uint32>(style.GridTemplateList(direction).Sizes.size()
                                    + gridContainer.AutoRepeatCountForDirection(direction)),
-               static_cast<uint32>(style.GetGridTemplateAreas().Count(direction))),
+               static_cast<uint32>(style.GridTemplateAreas().Count(direction))),
       static_cast<uint32>(GridPosition::Max()));
   }
 

@@ -51,7 +51,7 @@ namespace krys::boo::style::tests
     SECTION("A value is converted and set")
     {
       Apply(PropertyId::Opacity, u8"0.5");
-      CHECK(Style.GetOpacity() == Opacity {0.5f});
+      CHECK(Style.Opacity() == Opacity {0.5f});
       CHECK(Style.GetFontDescription() == ParentStyle.GetFontDescription());
     }
 
@@ -59,20 +59,20 @@ namespace krys::boo::style::tests
     {
       Apply(PropertyId::Opacity, u8"0.5");
       ApplyInitial(PropertyId::Opacity);
-      CHECK(Style.GetOpacity() == ComputedStyle::InitialOpacity());
+      CHECK(Style.Opacity() == ComputedStyle::InitialOpacity());
     }
 
     SECTION("The parent's value")
     {
       ParentStyle.SetOpacity(Opacity {0.25f});
       ApplyInherit(PropertyId::Opacity);
-      CHECK(Style.GetOpacity() == Opacity {0.25f});
+      CHECK(Style.Opacity() == Opacity {0.25f});
     }
 
     SECTION("Keywords")
     {
       Apply(PropertyId::Visibility, u8"hidden");
-      CHECK(Style.GetVisibility() == Visibility::Hidden);
+      CHECK(Style.Visibility() == Visibility::Hidden);
     }
 
     SECTION("Fast path inherited properties disallow fast path inheritance")
@@ -88,7 +88,7 @@ namespace krys::boo::style::tests
     {
       auto value = css::PrimitiveValue::Create(css::ValueId::Initial);
       Apply(PropertyId::Invalid, *value, ApplyValueType::Value);
-      CHECK(Style.GetOpacity() == ComputedStyle::InitialOpacity());
+      CHECK(Style.Opacity() == ComputedStyle::InitialOpacity());
     }
   }
 
@@ -97,7 +97,7 @@ namespace krys::boo::style::tests
     SECTION("Font properties set the font description")
     {
       Apply(PropertyId::FontWeight, u8"bold");
-      CHECK(Style.GetFontWeight() == FontWeight {700});
+      CHECK(Style.FontWeight() == FontWeight {700});
       CHECK(State->FontDirty());
     }
 
@@ -106,7 +106,7 @@ namespace krys::boo::style::tests
       Apply(PropertyId::FontStyle, u8"italic");
       ParentStyle.SetFontWeight(FontWeight {300});
       ApplyInherit(PropertyId::FontWeight);
-      CHECK(Style.GetFontWeight() == FontWeight {300});
+      CHECK(Style.FontWeight() == FontWeight {300});
     }
 
     SECTION("A system font keyword applies the initial value")
@@ -114,7 +114,7 @@ namespace krys::boo::style::tests
       Apply(PropertyId::FontWeight, u8"bold");
       auto caption = css::PrimitiveValue::Create(css::ValueId::Caption);
       Apply(PropertyId::FontWeight, *caption, ApplyValueType::Value);
-      CHECK(Style.GetFontWeight() == ComputedStyle::InitialFontWeight());
+      CHECK(Style.FontWeight() == ComputedStyle::InitialFontWeight());
     }
   }
 
@@ -124,7 +124,7 @@ namespace krys::boo::style::tests
     SECTION("A list fills the layers")
     {
       Apply(PropertyId::AnimationDuration, u8"1s, 2s");
-      const auto &animations = Style.GetAnimations();
+      const auto &animations = Style.Animations();
       REQUIRE(animations.ComputedLength() == 2);
       CHECK(Serialised(animations[0].GetDuration()) == "1s");
       CHECK(Serialised(animations[1].GetDuration()) == "2s");
@@ -134,7 +134,7 @@ namespace krys::boo::style::tests
     {
       Apply(PropertyId::AnimationDuration, u8"1s, 2s");
       Apply(PropertyId::AnimationDuration, u8"3s");
-      const auto &animations = Style.GetAnimations();
+      const auto &animations = Style.Animations();
       REQUIRE(animations.ComputedLength() == 2);
       CHECK(Serialised(animations[0].GetDuration()) == "3s");
       CHECK_FALSE(animations[1].IsDurationSet());
@@ -144,7 +144,7 @@ namespace krys::boo::style::tests
     {
       Apply(PropertyId::AnimationDuration, u8"1s, 2s");
       ApplyInitial(PropertyId::AnimationDuration);
-      const auto &animations = Style.GetAnimations();
+      const auto &animations = Style.Animations();
       CHECK(animations[0].GetDuration() == Animation::InitialDuration());
       CHECK_FALSE(animations[1].IsDurationSet());
     }
@@ -159,7 +159,7 @@ namespace krys::boo::style::tests
                                       ApplyValueType::Value);
 
       ApplyInherit(PropertyId::AnimationDuration);
-      const auto &animations = Style.GetAnimations();
+      const auto &animations = Style.Animations();
       REQUIRE(animations.ComputedLength() == 2);
       CHECK(Serialised(animations[0].GetDuration()) == "4s");
       CHECK(Serialised(animations[1].GetDuration()) == "5s");

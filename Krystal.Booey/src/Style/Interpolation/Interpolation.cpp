@@ -73,8 +73,8 @@ namespace krys::boo::style::interpolation
                        compositeOperation,
                        iterationCompositeOperation,
                        currentIteration,
-                       from.GetColor(),
-                       to.GetColor(),
+                       from.Color(),
+                       to.Color(),
                        client};
       if (!css::Property::AnimationUsesNonNormalizedDiscreteInterpolation(property))
       {
@@ -253,15 +253,9 @@ namespace krys::boo::style::interpolation
                                    IterationCompositeOperation iterationCompositeOperation,
                                    double currentIteration, const Client &client) noexcept
     {
-      Context context {customProperty,
-                       progress,
-                       false,
-                       compositeOperation,
-                       iterationCompositeOperation,
-                       currentIteration,
-                       from.GetColor(),
-                       to.GetColor(),
-                       client};
+      Context context {
+        customProperty, progress,   false, compositeOperation, iterationCompositeOperation, currentIteration,
+        from.Color(),   to.Color(), client};
 
       auto [fromValue, toValue] = CustomPropertyValuesForInterpolation(customProperty, from, to);
       if (!fromValue || !toValue)

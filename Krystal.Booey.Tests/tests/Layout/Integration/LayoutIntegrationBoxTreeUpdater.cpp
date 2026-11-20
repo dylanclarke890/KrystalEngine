@@ -166,7 +166,7 @@ namespace krys::boo::tests
       auto &wbr = BoxOf(fixture, u8"wbr");
       CHECK(wbr.IsLineBreakBox());
       CHECK(wbr.IsWordBreakOpportunity());
-      CHECK(wbr.Style().GetClear() == Clear::None);
+      CHECK(wbr.Style().Clear() == Clear::None);
       CHECK_FALSE(wbr.HasFloatClear());
 
       auto &inlineBlock = BoxOf(fixture, u8"ib");

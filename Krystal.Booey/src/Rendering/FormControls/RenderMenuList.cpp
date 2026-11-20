@@ -98,7 +98,7 @@ namespace krys::boo
     // Use margin:auto instead of align-items:center to get safe centering, i.e. when the content overflows,
     // treat it the same as align-items: flex-start. But we only do that for the cases where html.css would
     // otherwise use center.
-    if (Style().GetAlignItems().IsCenter())
+    if (Style().AlignItems().IsCenter())
     {
       innerStyle.SetMarginBefore(css::keywords::Auto {});
       innerStyle.SetMarginAfter(css::keywords::Auto {});
@@ -130,14 +130,14 @@ namespace krys::boo
              && (!frame || frame->GetBooeyClient().SelectItemAlignmentFollowsMenuWritingDirection()))
     {
       if (_optionStyle->GetWritingMode().BidiDirection() != innerStyle.GetWritingMode().BidiDirection()
-          || _optionStyle->GetUnicodeBidi() != innerStyle.GetUnicodeBidi())
+          || _optionStyle->UnicodeBidi() != innerStyle.UnicodeBidi())
       {
         _innerBlock->SetNeedsLayoutAndPreferredWidthsUpdate();
       }
       innerStyle.SetTextAlign(GetWritingMode().IsBidiLTR() ? style::TextAlign::Left
                                                            : style::TextAlign::Right);
       (void)innerStyle.SetDirection(_optionStyle->GetWritingMode().BidiDirection());
-      innerStyle.SetUnicodeBidi(_optionStyle->GetUnicodeBidi());
+      innerStyle.SetUnicodeBidi(_optionStyle->UnicodeBidi());
     }
 
     if (_innerBlock && _innerBlock->LayoutBox())
@@ -317,7 +317,7 @@ namespace krys::boo
   void RenderMenuList::ComputeIntrinsicLogicalWidths(LayoutUnit &minLogicalWidth,
                                                      LayoutUnit &maxLogicalWidth) const noexcept
   {
-    if (Style().GetFieldSizing() == FieldSizing::Content)
+    if (Style().FieldSizing() == FieldSizing::Content)
     {
       RenderFlexibleBox::ComputeIntrinsicLogicalWidths(minLogicalWidth, maxLogicalWidth);
       return;
@@ -350,7 +350,7 @@ namespace krys::boo
 
   void RenderMenuList::ComputePreferredLogicalWidths() noexcept
   {
-    if (Style().GetFieldSizing() == FieldSizing::Content)
+    if (Style().FieldSizing() == FieldSizing::Content)
     {
       RenderFlexibleBox::ComputePreferredLogicalWidths();
       return;
@@ -585,13 +585,13 @@ namespace krys::boo
       return MenuStyle();
     }
 
-    return PopupMenuStyle(
-      style->ColorResolvingCurrentColor(css::PropertyId::Color), itemBackgroundColor, style->GetFontCascade(),
-      element->GetAttribute(u8"lang").value_or(DOMString()), style->GetVisibility() == Visibility::Visible,
-      style->Display() == DisplayType::None, true, style->GetWritingMode().BidiDirection(),
-      IsOverride(style->GetUnicodeBidi()),
-      itemHasCustomBackgroundColor ? PopupMenuStyle::BackgroundColorType::CustomBackgroundColor
-                                   : PopupMenuStyle::BackgroundColorType::DefaultBackgroundColor);
+    return PopupMenuStyle(style->ColorResolvingCurrentColor(css::PropertyId::Color), itemBackgroundColor,
+                          style->GetFontCascade(), element->GetAttribute(u8"lang").value_or(DOMString()),
+                          style->Visibility() == Visibility::Visible, style->Display() == DisplayType::None,
+                          true, style->GetWritingMode().BidiDirection(), IsOverride(style->UnicodeBidi()),
+                          itemHasCustomBackgroundColor
+                            ? PopupMenuStyle::BackgroundColorType::CustomBackgroundColor
+                            : PopupMenuStyle::BackgroundColorType::DefaultBackgroundColor);
   }
 
   void RenderMenuList::GetItemBackgroundColor(uint32 listIndex, Color &itemBackgroundColor,
@@ -643,7 +643,7 @@ namespace krys::boo
       styleToUse.ColorResolvingCurrentColor(css::PropertyId::BackgroundColor), styleToUse.GetFontCascade(),
       {}, styleToUse.UsedVisibility() == Visibility::Visible, styleToUse.Display() == DisplayType::None,
       Style().HasUsedAppearance() && Style().UsedAppearance() == StyleAppearance::Menulist,
-      Style().GetWritingMode().BidiDirection(), IsOverride(Style().GetUnicodeBidi()),
+      Style().GetWritingMode().BidiDirection(), IsOverride(Style().UnicodeBidi()),
       PopupMenuStyle::BackgroundColorType::DefaultBackgroundColor, PopupMenuStyle::PopupMenuType::SelectPopup,
       RenderTheme::Singleton().PopupMenuSize(styleToUse, absBounds));
   }

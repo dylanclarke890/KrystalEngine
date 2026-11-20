@@ -23,7 +23,7 @@ namespace krys::boo::tests
     {
       auto *renderer = element.Renderer();
       REQUIRE(renderer);
-      auto image = renderer->Style().GetBackgroundLayers().UsedValues().begin()->GetImage().TryStyleImage();
+      auto image = renderer->Style().BackgroundLayers().UsedValues().begin()->GetImage().TryStyleImage();
       return image.get();
     }
 

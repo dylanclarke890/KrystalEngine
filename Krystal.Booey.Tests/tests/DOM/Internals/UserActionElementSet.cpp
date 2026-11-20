@@ -25,7 +25,7 @@ namespace krys::boo::dom::tests
     {
       auto *style = element.GetRenderStyle();
       REQUIRE(style);
-      return style->GetColor() == Blue;
+      return style->Color() == Blue;
     }
 
     const HitTestRequest Move {{Type::Move}};

@@ -60,13 +60,13 @@ layer at (0,0) size 800x45
     auto &base = *ruby.FirstChild();
     CHECK(base.IsAnonymous());
     CHECK(base.Style().Display() == DisplayType::RubyBase);
-    CHECK(base.Style().GetUnicodeBidi() == UnicodeBidi::Isolate);
-    CHECK(base.Style().GetTextWrapMode() == TextWrapMode::NoWrap);
+    CHECK(base.Style().UnicodeBidi() == UnicodeBidi::Isolate);
+    CHECK(base.Style().TextWrapMode() == TextWrapMode::NoWrap);
     auto &container = *fixture.ById(u8"k").Renderer()->FirstChild();
     CHECK(container.IsAnonymous());
     CHECK(container.Style().Display() == DisplayType::Ruby);
-    CHECK(container.Style().GetUnicodeBidi() == UnicodeBidi::Isolate);
-    CHECK(container.Style().GetTextWrapMode() == TextWrapMode::Wrap);
+    CHECK(container.Style().UnicodeBidi() == UnicodeBidi::Isolate);
+    CHECK(container.Style().TextWrapMode() == TextWrapMode::Wrap);
 
     SECTION("Text added to a ruby container goes in a base")
     {

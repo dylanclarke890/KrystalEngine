@@ -275,7 +275,7 @@ namespace krys::boo
   utf8_string ApplyTextTransform(const RenderStyle &style, utf8_string text,
                                  utf8_stringview previousCharacter) noexcept
   {
-    auto transform = style.GetTextTransform();
+    auto transform = style.TextTransform();
 
     if (transform.IsNone())
     {
@@ -464,11 +464,9 @@ namespace krys::boo
       needsResetText = _useBackslashAsYenSymbol;
     }
 
-    auto oldTransform =
-      oldStyle ? oldStyle->GetTextTransform() : style::TextTransform {css::keywords::None {}};
-    auto oldSecurity = oldStyle ? oldStyle->GetTextSecurity() : TextSecurity::None;
-    if (needsResetText || oldTransform != newStyle.GetTextTransform()
-        || oldSecurity != newStyle.GetTextSecurity())
+    auto oldTransform = oldStyle ? oldStyle->TextTransform() : style::TextTransform {css::keywords::None {}};
+    auto oldSecurity = oldStyle ? oldStyle->TextSecurity() : TextSecurity::None;
+    if (needsResetText || oldTransform != newStyle.TextTransform() || oldSecurity != newStyle.TextSecurity())
     {
       RenderText::SetText(OriginalText(), true);
     }
@@ -570,14 +568,14 @@ namespace krys::boo
     }
 
     const auto &style = Style();
-    if (!style.GetTextTransform().IsNone())
+    if (!style.TextTransform().IsNone())
     {
       _text = ApplyTextTransform(style, krys::move(_text), PreviousCharacter());
     }
 
     // At rendering time, if certain fonts are used, these characters get swapped out with higher-quality PUA
     // characters. See RenderBlock::updateSecurityDiscCharacters().
-    if (style.GetTextSecurity() == TextSecurity::Disc)
+    if (style.TextSecurity() == TextSecurity::Disc)
     {
       SecureText(text::Bullet);
     }
@@ -683,12 +681,12 @@ namespace krys::boo
 
   utf8_string RenderText::TextWithoutConvertingBackslashToYenSymbol() const noexcept
   {
-    if (!_useBackslashAsYenSymbol || Style().GetTextSecurity() != TextSecurity::None)
+    if (!_useBackslashAsYenSymbol || Style().TextSecurity() != TextSecurity::None)
     {
       return _text;
     }
 
-    if (Style().GetTextTransform().IsNone())
+    if (Style().TextTransform().IsNone())
     {
       return OriginalText();
     }
@@ -1235,7 +1233,7 @@ namespace krys::boo
     }
     auto run = RenderBlock::ConstructTextRun(*this, start, length, style);
     run.SetCharacterScanForCodePath(!CanUseSimpleFontCodePath());
-    run.SetTabSize(!style.CollapseWhiteSpace(), style::ToPlatform<style::TabSize> {}(style.GetTabSize()));
+    run.SetTabSize(!style.CollapseWhiteSpace(), style::ToPlatform<style::TabSize> {}(style.TabSize()));
     run.SetXPos(xPos);
     return fontCascade.Width(run, fallbackFonts, glyphOverflow);
   }
@@ -1575,8 +1573,8 @@ namespace krys::boo
     float wordSpacing = font.WordSpacing();
     auto string = utf8_stringview {_text};
     auto length = string.size();
-    auto iteratorMode = layout::TextUtil::LineBreakIteratorMode(style.GetLineBreak());
-    auto contentAnalysis = layout::TextUtil::GetContentAnalysis(style.GetWordBreak());
+    auto iteratorMode = layout::TextUtil::LineBreakIteratorMode(style.LineBreak());
+    auto contentAnalysis = layout::TextUtil::GetContentAnalysis(style.WordBreak());
     text::CachedLineBreakIteratorFactory lineBreakIteratorFactory(
       string, style.ComputedLocale().GetPlatform(), iteratorMode, contentAnalysis);
     bool needsWordSpacing = false;
@@ -1593,14 +1591,14 @@ namespace krys::boo
     float maxWordWidth = std::numeric_limits<float>::max();
     size_t minimumPrefixLength = 0;
     size_t minimumSuffixLength = 0;
-    if (style.GetHyphens() == Hyphens::Auto && text::CanHyphenate(style.ComputedLocale().GetPlatform()))
+    if (style.Hyphens() == Hyphens::Auto && text::CanHyphenate(style.ComputedLocale().GetPlatform()))
     {
       maxWordWidth = 0;
 
       // Map `auto` before and after limits (`hyphenate-limit-chars`) to 2.
-      auto before = style.GetHyphenateLimitChars().Before.TryValue();
+      auto before = style.HyphenateLimitChars().Before.TryValue();
       minimumPrefixLength = before ? static_cast<size_t>(before->Value) : 2;
-      auto after = style.GetHyphenateLimitChars().After.TryValue();
+      auto after = style.HyphenateLimitChars().After.TryValue();
       minimumSuffixLength = after ? static_cast<size_t>(after->Value) : 2;
     }
 
@@ -1609,15 +1607,14 @@ namespace krys::boo
     // -webkit-nbsp-mode was dropped, so no-break spaces never break.
     bool breakNBSP = false;
 
-    bool breakAnywhere = style.GetLineBreak() == LineBreak::Anywhere && style.AutoWrap();
+    bool breakAnywhere = style.LineBreak() == LineBreak::Anywhere && style.AutoWrap();
     // Note the deliberate omission of word-wrap/overflow-wrap's break-word value from this breakAll check.
     // Those do not affect minimum preferred sizes. Note that break-word is a non-standard value for
     // word-break, but we support it as though it means break-all.
-    bool breakAll =
-      (style.GetWordBreak() == WordBreak::BreakAll || style.GetWordBreak() == WordBreak::BreakWord
-       || style.GetOverflowWrap() == OverflowWrap::Anywhere)
-      && style.AutoWrap();
-    bool keepAllWords = style.GetWordBreak() == WordBreak::KeepAll;
+    bool breakAll = (style.WordBreak() == WordBreak::BreakAll || style.WordBreak() == WordBreak::BreakWord
+                     || style.OverflowWrap() == OverflowWrap::Anywhere)
+                    && style.AutoWrap();
+    bool keepAllWords = style.WordBreak() == WordBreak::KeepAll;
     bool canUseLineBreakShortcut = iteratorMode == text::TextBreakLineBehavior::Default
                                    && contentAnalysis == text::TextBreakIterator::ContentAnalysis::Mechanical;
 
@@ -1679,7 +1676,7 @@ namespace krys::boo
         i += characterLength;
         continue;
       }
-      if (c == text::SoftHyphen && style.GetHyphens() != Hyphens::None)
+      if (c == text::SoftHyphen && style.Hyphens() != Hyphens::None)
       {
         krys_debug_assert(i >= lastWordBoundary);
         currMaxWidth += WidthFromCache(font, lastWordBoundary, i - lastWordBoundary, leadWidth + currMaxWidth,
@@ -1700,7 +1697,7 @@ namespace krys::boo
       bool betweenWords = true;
       auto j = i;
       while (c != '\n' && !IsSpaceAccordingToStyle(c) && c != '\t' && c != text::ZeroWidthSpace
-             && (c != text::SoftHyphen || style.GetHyphens() == Hyphens::None))
+             && (c != text::SoftHyphen || style.Hyphens() == Hyphens::None))
       {
         auto previousCharacter = c;
         j += DecodeCodePointAt(string, j).Length;
@@ -1735,7 +1732,7 @@ namespace krys::boo
         float w = WidthFromCacheConsideringPossibleTrailingSpace(
           style, font, i, wordLength, leadWidth + currMaxWidth, isTrailingSpace, wordTrailingSpace,
           fallbackFonts, glyphOverflow);
-        if (c == text::SoftHyphen && style.GetHyphens() != Hyphens::None)
+        if (c == text::SoftHyphen && style.Hyphens() != Hyphens::None)
         {
           currMinWidth = HyphenWidth(style, font);
         }
@@ -1834,8 +1831,7 @@ namespace krys::boo
         else
         {
           auto run = RenderBlock::ConstructTextRun(*this, i, characterLength, style);
-          run.SetTabSize(!style.CollapseWhiteSpace(),
-                         style::ToPlatform<style::TabSize> {}(style.GetTabSize()));
+          run.SetTabSize(!style.CollapseWhiteSpace(), style::ToPlatform<style::TabSize> {}(style.TabSize()));
           run.SetXPos(leadWidth + currMaxWidth);
 
           currMaxWidth += font.Width(run, &fallbackFonts);
@@ -1862,8 +1858,8 @@ namespace krys::boo
       _minWidth = _maxWidth;
     }
 
-    if (style.GetWhiteSpaceCollapse() == WhiteSpaceCollapse::Preserve
-        && style.GetTextWrapMode() == TextWrapMode::NoWrap)
+    if (style.WhiteSpaceCollapse() == WhiteSpaceCollapse::Preserve
+        && style.TextWrapMode() == TextWrapMode::NoWrap)
     {
       if (firstLine)
       {
@@ -1948,7 +1944,7 @@ namespace krys::boo
     {
       auto run = RenderBlock::ConstructTextRun(*this, from, length, style);
       run.SetCharacterScanForCodePath(!CanUseSimpleFontCodePath());
-      run.SetTabSize(!style.CollapseWhiteSpace(), style::ToPlatform<style::TabSize> {}(style.GetTabSize()));
+      run.SetTabSize(!style.CollapseWhiteSpace(), style::ToPlatform<style::TabSize> {}(style.TabSize()));
       run.SetXPos(xPos);
 
       width = fontCascade.Width(run, fallbackFonts, glyphOverflow);

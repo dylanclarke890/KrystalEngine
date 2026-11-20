@@ -167,8 +167,7 @@ namespace krys::boo
       }
     }
 
-    if (oldStyle->GetAlignItems().Resolve(SelfAlignmentNormalBehavior(this)).Position()
-        == ItemPosition::Stretch)
+    if (oldStyle->AlignItems().Resolve(SelfAlignmentNormalBehavior(this)).Position() == ItemPosition::Stretch)
     {
       // Style changes on the grid container implying stretching (to-stretch) or
       // shrinking (from-stretch) require the affected items to be laid out again.
@@ -207,7 +206,7 @@ namespace krys::boo
     };
     if (ExplicitGridDidResize(*oldStyle) || NamedGridLinesDefinitionDidChange(*oldStyle)
         || ImplicitGridLinesDefinitionDidChange(*oldStyle)
-        || oldStyle->GetGridAutoFlow() != Style().GetGridAutoFlow()
+        || oldStyle->GridAutoFlow() != Style().GridAutoFlow()
         || !Style().GridTemplateColumns().AutoRepeatSizes.empty()
         || !Style().GridTemplateRows().AutoRepeatSizes.empty() || subgridDidChange == SubgridDidChange::Yes
         || isSubgridWithIndependentFormattingContextChange())
@@ -230,10 +229,10 @@ namespace krys::boo
   {
     auto &oldGridTemplateColumns = oldStyle.GridTemplateColumns();
     auto &oldGridTemplateRows = oldStyle.GridTemplateRows();
-    auto &oldGridTemplateAreas = oldStyle.GetGridTemplateAreas();
+    auto &oldGridTemplateAreas = oldStyle.GridTemplateAreas();
     auto &newGridTemplateColumns = Style().GridTemplateColumns();
     auto &newGridTemplateRows = Style().GridTemplateRows();
-    auto &newGridTemplateAreas = Style().GetGridTemplateAreas();
+    auto &newGridTemplateAreas = Style().GridTemplateAreas();
 
     return oldGridTemplateColumns.Sizes.size() != newGridTemplateColumns.Sizes.size()
            || oldGridTemplateColumns.AutoRepeatSizes.size() != newGridTemplateColumns.AutoRepeatSizes.size()
@@ -251,8 +250,8 @@ namespace krys::boo
 
   bool RenderGrid::ImplicitGridLinesDefinitionDidChange(const RenderStyle &oldStyle) const noexcept
   {
-    auto &oldGridTemplateAreas = oldStyle.GetGridTemplateAreas();
-    auto &newGridTemplateAreas = Style().GetGridTemplateAreas();
+    auto &oldGridTemplateAreas = oldStyle.GridTemplateAreas();
+    auto &newGridTemplateAreas = Style().GridTemplateAreas();
 
     return oldGridTemplateAreas.ImplicitNamedGridRowLines != newGridTemplateAreas.ImplicitNamedGridRowLines
            || oldGridTemplateAreas.ImplicitNamedGridColumnLines
@@ -1458,7 +1457,7 @@ namespace krys::boo
     {
       return false;
     }
-    return (direction == GridTrackSizingDirection::Columns) == Style().GetGridAutoFlow().IsColumn();
+    return (direction == GridTrackSizingDirection::Columns) == Style().GridAutoFlow().IsColumn();
   }
 
   // Masonry Spec Section 2.3.1 repeat(auto-fit)
@@ -1771,7 +1770,7 @@ namespace krys::boo
   void RenderGrid::PlaceSpecifiedMajorAxisItemsOnGrid(const List<RenderBox *> &autoGridItems) noexcept
   {
     bool isForColumns = AutoPlacementMajorAxisDirection() == GridTrackSizingDirection::Columns;
-    bool isGridAutoFlowDense = Style().GetGridAutoFlow().IsDense();
+    bool isGridAutoFlowDense = Style().GridAutoFlow().IsDense();
 
     // Mapping between the major axis tracks (rows or columns) and the last auto-placed item's position
     // inserted on that track. This is needed to implement "sparse" packing for items locked to a given track.
@@ -1813,7 +1812,7 @@ namespace krys::boo
   void RenderGrid::PlaceAutoMajorAxisItemsOnGrid(const List<RenderBox *> &autoGridItems) noexcept
   {
     AutoPlacementCursor autoPlacementCursor = {0, 0};
-    bool isGridAutoFlowDense = Style().GetGridAutoFlow().IsDense();
+    bool isGridAutoFlowDense = Style().GridAutoFlow().IsDense();
 
     for (auto *autoGridItem : autoGridItems)
     {
@@ -1918,8 +1917,8 @@ namespace krys::boo
 
   GridTrackSizingDirection RenderGrid::AutoPlacementMajorAxisDirection() const noexcept
   {
-    return Style().GetGridAutoFlow().IsColumn() ? GridTrackSizingDirection::Columns
-                                                : GridTrackSizingDirection::Rows;
+    return Style().GridAutoFlow().IsColumn() ? GridTrackSizingDirection::Columns
+                                             : GridTrackSizingDirection::Rows;
   }
 
   GridTrackSizingDirection RenderGrid::AutoPlacementMinorAxisDirection() const noexcept
@@ -2340,16 +2339,16 @@ namespace krys::boo
     auto normalBehavior =
       stretchingMode == StretchingMode::Any ? SelfAlignmentNormalBehavior(&gridItem) : ItemPosition::Normal;
 
-    if (!gridItem.Style().GetAlignSelf().IsAuto())
+    if (!gridItem.Style().AlignSelf().IsAuto())
     {
-      return gridItem.Style().GetAlignSelf().Resolve(normalBehavior);
+      return gridItem.Style().AlignSelf().Resolve(normalBehavior);
     }
 
     if (!gridStyle)
     {
       gridStyle = &Style();
     }
-    return gridStyle->GetAlignItems().Resolve(normalBehavior);
+    return gridStyle->AlignItems().Resolve(normalBehavior);
   }
 
   StyleSelfAlignmentData RenderGrid::JustifySelfForGridItem(const RenderBox &gridItem,
@@ -2365,16 +2364,16 @@ namespace krys::boo
     auto normalBehavior =
       stretchingMode == StretchingMode::Any ? SelfAlignmentNormalBehavior(&gridItem) : ItemPosition::Normal;
 
-    if (!gridItem.Style().GetJustifySelf().IsAuto())
+    if (!gridItem.Style().JustifySelf().IsAuto())
     {
-      return gridItem.Style().GetJustifySelf().Resolve(normalBehavior);
+      return gridItem.Style().JustifySelf().Resolve(normalBehavior);
     }
 
     if (!gridStyle)
     {
       gridStyle = &Style();
     }
-    return gridStyle->GetJustifyItems().Resolve(normalBehavior);
+    return gridStyle->JustifyItems().Resolve(normalBehavior);
   }
 
   bool RenderGrid::AspectRatioPrefersInline(const RenderBox &gridItem, bool blockFlowIsColumnAxis) noexcept
@@ -2520,7 +2519,7 @@ namespace krys::boo
   bool RenderGrid::IsChildEligibleForMarginTrim(style::MarginTrimSide marginTrimSide,
                                                 const RenderBox &gridItem) const noexcept
   {
-    krys_debug_assert(Style().GetMarginTrim().Contains(marginTrimSide));
+    krys_debug_assert(Style().MarginTrim().Contains(marginTrimSide));
 
     auto isTrimmingBlockDirection = marginTrimSide == style::MarginTrimSide::BlockStart
                                     || marginTrimSide == style::MarginTrimSide::BlockEnd;
@@ -3054,8 +3053,8 @@ namespace krys::boo
   StyleContentAlignmentData RenderGrid::ContentAlignment(GridTrackSizingDirection direction) const noexcept
   {
     return direction == GridTrackSizingDirection::Columns
-             ? Style().GetJustifyContent().Resolve(ContentAlignmentNormalBehaviorGrid())
-             : Style().GetAlignContent().Resolve(ContentAlignmentNormalBehaviorGrid());
+             ? Style().JustifyContent().Resolve(ContentAlignmentNormalBehaviorGrid())
+             : Style().AlignContent().Resolve(ContentAlignmentNormalBehaviorGrid());
   }
 
   ContentAlignmentData

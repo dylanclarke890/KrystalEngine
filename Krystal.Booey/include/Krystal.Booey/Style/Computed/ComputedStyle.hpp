@@ -79,7 +79,7 @@ namespace krys::boo::style
 
     void SetPageScaleTransform(float) noexcept;
 
-    inline void AddToTextDecorationLineInEffect(TextDecorationLine) noexcept;
+    inline void AddToTextDecorationLineInEffect(style::TextDecorationLine) noexcept;
 
     inline void ContainIntrinsicWidthAddAuto() noexcept;
 
@@ -121,7 +121,7 @@ namespace krys::boo::style
 
     KRYS_NODISCARD float ComputedLineHeight() const noexcept;
 
-    KRYS_NODISCARD float ComputeLineHeight(const LineHeight &) const noexcept;
+    KRYS_NODISCARD float ComputeLineHeight(const style::LineHeight &) const noexcept;
 
     // MARK: - Non-property initial values.
 

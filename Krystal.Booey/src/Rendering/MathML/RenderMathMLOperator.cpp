@@ -77,8 +77,7 @@ namespace krys::boo
   bool RenderMathMLOperator::IsLargeOperatorInDisplayStyle() const noexcept
   {
     return !HasOperatorFlag(MathMLOperatorDictionary::Stretchy)
-           && HasOperatorFlag(MathMLOperatorDictionary::LargeOp)
-           && Style().GetMathStyle() == MathStyle::Normal;
+           && HasOperatorFlag(MathMLOperatorDictionary::LargeOp) && Style().MathStyle() == MathStyle::Normal;
   }
 
   LayoutUnit RenderMathMLOperator::LeadingSpace() const noexcept
@@ -334,7 +333,7 @@ namespace krys::boo
     ResetStretchSize();
 
     // MathML displaystyle can affect IsLargeOperatorInDisplayStyle()
-    if (oldStyle && Style().GetMathStyle() != oldStyle->GetMathStyle() && !IsAnonymous())
+    if (oldStyle && Style().MathStyle() != oldStyle->MathStyle() && !IsAnonymous())
     {
       UpdateTokenContent();
     }

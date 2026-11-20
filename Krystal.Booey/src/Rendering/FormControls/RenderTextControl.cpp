@@ -86,7 +86,7 @@ namespace krys::boo
   {
     // FIXME: We should get the size of the scrollbar from the RenderTheme instead.
     return ScrollbarTheme::Theme().ScrollbarThickness(
-      style::ToPlatform<style::ScrollbarWidth> {}(Style().GetScrollbarWidth()),
+      style::ToPlatform<style::ScrollbarWidth> {}(Style().ScrollbarWidth()),
       OverlayScrollbarSizeRelevancy::IgnoreOverlayScrollbarSize);
   }
 
@@ -99,7 +99,7 @@ namespace krys::boo
       return RenderBox::ComputeLogicalHeight(LayoutUnit(), LayoutUnit());
     }
 
-    if (Style().GetFieldSizing() == FieldSizing::Content)
+    if (Style().FieldSizing() == FieldSizing::Content)
     {
       auto logicalHeightExtent = RenderBox::ComputeLogicalHeight(logicalHeight, logicalTop);
       if (Style().LogicalHeight().IsSpecified())
@@ -198,7 +198,7 @@ namespace krys::boo
   void RenderTextControl::ComputeIntrinsicLogicalWidths(LayoutUnit &minLogicalWidth,
                                                         LayoutUnit &maxLogicalWidth) const noexcept
   {
-    if (Style().GetFieldSizing() == FieldSizing::Content)
+    if (Style().FieldSizing() == FieldSizing::Content)
     {
       return RenderBlockFlow::ComputeIntrinsicLogicalWidths(minLogicalWidth, maxLogicalWidth);
     }
@@ -233,7 +233,7 @@ namespace krys::boo
   void RenderTextControl::ComputePreferredLogicalWidths() noexcept
   {
     krys_debug_assert(NeedsPreferredLogicalWidthsUpdate());
-    if (Style().GetFieldSizing() == FieldSizing::Content)
+    if (Style().FieldSizing() == FieldSizing::Content)
     {
       RenderBlockFlow::ComputePreferredLogicalWidths();
       return;
@@ -277,7 +277,7 @@ namespace krys::boo
 
     placeholderRenderer->SetIsExcludedFromNormalLayout(true);
 
-    if (Style().GetFieldSizing() == FieldSizing::Content)
+    if (Style().FieldSizing() == FieldSizing::Content)
     {
       // In order to take placeholder height into account while computing the size of the input box, we need
       // to layout the placeholder too (which is how excluded content normally works).
