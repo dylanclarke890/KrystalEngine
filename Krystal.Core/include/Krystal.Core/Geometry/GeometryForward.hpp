@@ -40,7 +40,7 @@ namespace krys
 
   class Region;
 
-  class SegmentF;
+  struct SegmentF;
 
   template <GeometryCoordinate T>
   class Size;
