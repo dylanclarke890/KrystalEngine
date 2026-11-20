@@ -243,7 +243,7 @@ namespace krys::boo::dom
   }
 
   // Make sure any skipped content we want to scroll to is in the viewport, so it can be actually scrolled to
-  // (i.e. the skipped content early exit in LocalFrameView::ScrollRectToVisible does not apply anymore).
+  // (i.e. the skipped content early exit in FrameView::ScrollRectToVisible does not apply anymore).
   void ContentVisibilityDocumentState::UpdateContentRelevancyForScrollIfNeeded(
     const Element &scrollAnchor) noexcept
   {

@@ -12,7 +12,7 @@
 #include "Krystal.Booey/Graphics/ImageBuffers/ImageBufferDisplayListBackend.hpp"
 #include "Krystal.Booey/Page/Frame.hpp"
 #include "Krystal.Booey/Page/FrameSnapshotting.hpp"
-#include "Krystal.Booey/Page/LocalFrameView.hpp"
+#include "Krystal.Booey/Page/FrameView.hpp"
 #include "Krystal.Net/Url.hpp"
 
 namespace krys::boo::tests

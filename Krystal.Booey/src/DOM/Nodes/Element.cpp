@@ -97,8 +97,8 @@
 #include "Krystal.Booey/Input/PointerCaptureController.hpp"
 #include "Krystal.Booey/Input/PointerLockController.hpp"
 #include "Krystal.Booey/Page/Frame.hpp"
+#include "Krystal.Booey/Page/FrameView.hpp"
 #include "Krystal.Booey/Page/LocalDOMWindow.hpp"
-#include "Krystal.Booey/Page/LocalFrameView.hpp"
 #include "Krystal.Booey/Page/Scrolling/ScrollBehavior.hpp"
 #include "Krystal.Booey/Platform/Scrolling/ScrollableArea.hpp"
 #include "Krystal.Booey/Platform/Scrolling/ScrollAlignment.hpp"
@@ -4220,7 +4220,7 @@ namespace krys::boo
     visibleOptions.AlignX = isHorizontal ? alignX : alignY;
     visibleOptions.AlignY = isHorizontal ? alignY : alignX;
     visibleOptions.Behavior = options.Behavior.value_or(ScrollBehavior::Auto);
-    LocalFrameView::ScrollRectToVisible(absoluteBounds, *renderer, insideFixed, visibleOptions);
+    FrameView::ScrollRectToVisible(absoluteBounds, *renderer, insideFixed, visibleOptions);
   }
 
   void Element::ScrollIntoViewIfNotVisible(bool centerIfNotVisible) noexcept
@@ -4241,7 +4241,7 @@ namespace krys::boo
     options.RevealMode = SelectionRevealMode::Reveal;
     options.AlignX = align;
     options.AlignY = align;
-    LocalFrameView::ScrollRectToVisible(absoluteBounds, *renderer, insideFixed, options);
+    FrameView::ScrollRectToVisible(absoluteBounds, *renderer, insideFixed, options);
   }
 
   void Element::ScrollIntoView(bool alignToTop) noexcept

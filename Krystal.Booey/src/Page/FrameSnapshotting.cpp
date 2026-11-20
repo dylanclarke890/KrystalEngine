@@ -35,7 +35,7 @@
 #include "Krystal.Booey/Graphics/ImageBuffers/ImageBuffer.hpp"
 #include "Krystal.Booey/Graphics/Paths/Path.hpp"
 #include "Krystal.Booey/Page/Frame.hpp"
-#include "Krystal.Booey/Page/LocalFrameView.hpp"
+#include "Krystal.Booey/Page/FrameView.hpp"
 #include "Krystal.Booey/Rendering/RenderObject.hpp"
 #include "Krystal.Core/Geometry/Rect.hpp"
 
@@ -83,16 +83,16 @@ namespace krys::boo
     Ref<boo::Document> document = ShareRef(*frame.Document());
     (void)document->UpdateLayout();
 
-    LocalFrameView::SelectionInSnapshot shouldIncludeSelection = LocalFrameView::IncludeSelection;
+    FrameView::SelectionInSnapshot shouldIncludeSelection = FrameView::IncludeSelection;
     if (options.Flags.Contains(SnapshotFlags::ExcludeSelectionHighlighting))
     {
-      shouldIncludeSelection = LocalFrameView::ExcludeSelection;
+      shouldIncludeSelection = FrameView::ExcludeSelection;
     }
 
-    LocalFrameView::CoordinateSpaceForSnapshot coordinateSpace = LocalFrameView::DocumentCoordinates;
+    FrameView::CoordinateSpaceForSnapshot coordinateSpace = FrameView::DocumentCoordinates;
     if (options.Flags.Contains(SnapshotFlags::InViewCoordinates))
     {
-      coordinateSpace = LocalFrameView::ViewCoordinates;
+      coordinateSpace = FrameView::ViewCoordinates;
     }
 
     ScopedFramePaintingState state(frame, nullptr);

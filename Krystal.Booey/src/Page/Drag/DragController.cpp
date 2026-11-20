@@ -54,7 +54,7 @@
 #include "Krystal.Booey/Loader/FrameLoader.hpp"
 #include "Krystal.Booey/Page/Drag/DragState.hpp"
 #include "Krystal.Booey/Page/Frame.hpp"
-#include "Krystal.Booey/Page/LocalFrameView.hpp"
+#include "Krystal.Booey/Page/FrameView.hpp"
 #include "Krystal.Booey/Platform/Pasteboard/DragData.hpp"
 #include "Krystal.Booey/Platform/Pasteboard/Pasteboard.hpp"
 #include "Krystal.Booey/Rendering/HitTesting/HitTestRequest.hpp"
@@ -528,7 +528,7 @@ namespace krys::boo
 
     // It's unclear why this check is after TryDHTMLDrag.
     // We send drag events in TryDHTMLDrag and that may be the reason.
-    RefPtr<LocalFrameView> frameView = ShareRefPtr(_documentUnderMouse->View());
+    RefPtr<FrameView> frameView = ShareRefPtr(_documentUnderMouse->View());
     if (!frameView)
     {
       return DragHandlingMethod::None;
@@ -1245,7 +1245,7 @@ namespace krys::boo
     _dragInitiator = ShareRefPtr(frame.Document());
     // Protect this frame and view, as a load may occur mid drag and attempt to unload this frame
     Ref<Frame> protectedFrame = ShareRef(_frame);
-    RefPtr<LocalFrameView> frameView = ShareRefPtr(frame.View());
+    RefPtr<FrameView> frameView = ShareRefPtr(frame.View());
 
     DragItem item;
     item.Image = krys::move(image);

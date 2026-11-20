@@ -23,8 +23,8 @@
 #include "Krystal.Booey/Input/EventHandler.hpp"
 #include "Krystal.Booey/Input/PlatformKeyboardEvent.hpp"
 #include "Krystal.Booey/Input/PlatformMouseEvent.hpp"
+#include "Krystal.Booey/Page/FrameView.hpp"
 #include "Krystal.Booey/Page/LocalDOMWindow.hpp"
-#include "Krystal.Booey/Page/LocalFrameView.hpp"
 #include "Krystal.Booey/Page/Settings.hpp"
 #include "Krystal.Booey/Page/VisualViewport.hpp"
 #include "Krystal.Booey/Rendering/HitTesting/HitTestResult.hpp"
@@ -71,7 +71,7 @@ namespace krys::boo::tests
         return *element;
       }
 
-      KRYS_NODISCARD LocalFrameView &View() const noexcept
+      KRYS_NODISCARD FrameView &View() const noexcept
       {
         return *TestFrame->View();
       }

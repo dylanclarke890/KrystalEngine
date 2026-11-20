@@ -40,7 +40,7 @@
 #include "Krystal.Booey/Page/Clients/ChromeClient.hpp"
 #include "Krystal.Booey/Page/DOMSelection.hpp"
 #include "Krystal.Booey/Page/Frame.hpp"
-#include "Krystal.Booey/Page/LocalFrameView.hpp"
+#include "Krystal.Booey/Page/FrameView.hpp"
 #include "Krystal.Booey/Page/Scrolling/ScrollBehavior.hpp"
 #include "Krystal.Booey/Page/VisualViewport.hpp"
 #include <limits>
@@ -364,7 +364,7 @@ namespace krys::boo
       return;
     }
 
-    RefPtr<LocalFrameView> view = ShareRefPtr(Frame()->View());
+    RefPtr<FrameView> view = ShareRefPtr(Frame()->View());
     if (!view)
     {
       return;

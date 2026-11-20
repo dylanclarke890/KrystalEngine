@@ -43,7 +43,7 @@ namespace krys::boo
   class Element;
   class EventTarget;
   class Frame;
-  class LocalFrameView;
+  class FrameView;
   class MouseEvent;
   class PlatformTouchEvent;
   class PointerEvent;
@@ -151,8 +151,7 @@ namespace krys::boo
     /// `pointerout` and `pointerleave` after a `pointerup`.
     /// @param view The frame view of @p target's document.
     void DispatchEventForTouchAtIndex(EventTarget &target, const PlatformTouchEvent &event, uint32 index,
-                                      bool isPrimary, LocalFrameView *view,
-                                      const PointD &touchDelta) noexcept;
+                                      bool isPrimary, FrameView *view, const PointD &touchDelta) noexcept;
 
     void TouchWithIdentifierWasRemoved(PointerId pointerId) noexcept;
 
@@ -197,12 +196,12 @@ namespace krys::boo
     void PointerEventWasDispatched(const PointerEvent &event) noexcept;
 
     void DispatchOverOrOutEvent(DOMStringAtom type, EventTarget *target, const PlatformTouchEvent &event,
-                                uint32 index, bool isPrimary, LocalFrameView *view,
+                                uint32 index, bool isPrimary, FrameView *view,
                                 const PointD &touchDelta) noexcept;
 
     void DispatchEnterOrLeaveEvent(DOMStringAtom type, Element &targetElement,
                                    const PlatformTouchEvent &event, uint32 index, bool isPrimary,
-                                   LocalFrameView *view, const PointD &touchDelta) noexcept;
+                                   FrameView *view, const PointD &touchDelta) noexcept;
 
     void UpdateHaveAnyCapturingElement() noexcept;
 

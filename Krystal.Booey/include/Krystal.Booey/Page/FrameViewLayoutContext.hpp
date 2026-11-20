@@ -46,7 +46,7 @@ namespace krys::boo
 {
   class Document;
   class Frame;
-  class LocalFrameView;
+  class FrameView;
   class RenderBlock;
   class RenderBlockFlow;
   class RenderBox;
@@ -56,14 +56,14 @@ namespace krys::boo
 
   /// @brief Schedules and runs a view's layout: the style updates layout needs first, then the layout of the
   /// render tree. A scheduled layout runs on the layout timer, when the host next runs the event loop.
-  class LocalFrameViewLayoutContext final
+  class FrameViewLayoutContext final
   {
     friend class ContentVisibilityOverrideScope;
     friend class LayoutStateMaintainer;
     friend class LayoutStateDisabler;
     friend class SubtreeLayoutStateMaintainer;
 
-    KRYS_NON_COPY_MOVABLE(LocalFrameViewLayoutContext);
+    KRYS_NON_COPY_MOVABLE(FrameViewLayoutContext);
 
   public:
     enum class LayoutPhase : uint8
@@ -115,7 +115,7 @@ namespace krys::boo
       void Clear() noexcept;
     };
 
-    LocalFrameView &_frameView;
+    FrameView &_frameView;
     LayoutPhase _layoutPhase {LayoutPhase::OutsideLayout};
     LayoutNestedState _layoutNestedState {LayoutNestedState::NotInLayout};
     Timer _layoutTimer;
@@ -139,9 +139,9 @@ namespace krys::boo
     mutable DetachedRendererList _detachedRendererList;
 
   public:
-    explicit LocalFrameViewLayoutContext(LocalFrameView &frameView) noexcept;
+    explicit FrameViewLayoutContext(FrameView &frameView) noexcept;
 
-    ~LocalFrameViewLayoutContext() noexcept;
+    ~FrameViewLayoutContext() noexcept;
 
     void Layout() noexcept;
 
@@ -300,7 +300,7 @@ namespace krys::boo
       return !_firstLayout;
     }
 
-    KRYS_NODISCARD LocalFrameView &View() const noexcept
+    KRYS_NODISCARD FrameView &View() const noexcept
     {
       return _frameView;
     }

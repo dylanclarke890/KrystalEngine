@@ -53,11 +53,11 @@
 #include "Krystal.Booey/Input/EventHandler.hpp"
 #include "Krystal.Booey/Loader/Cache/CachePolicy.hpp"
 #include "Krystal.Booey/Loader/FrameLoader.hpp"
-#include "Krystal.Booey/Loader/LocalFrameLoaderClient.hpp"
+#include "Krystal.Booey/Loader/FrameLoaderClient.hpp"
 #include "Krystal.Booey/Page/Clients/ChromeClient.hpp"
 #include "Krystal.Booey/Page/Clients/DragClient.hpp"
 #include "Krystal.Booey/Page/Clients/EditorClient.hpp"
-#include "Krystal.Booey/Page/LocalFrameView.hpp"
+#include "Krystal.Booey/Page/FrameView.hpp"
 #include "Krystal.Booey/Page/RenderingUpdateStep.hpp"
 #include "Krystal.Core/Attributes.hpp"
 #include "Krystal.Core/CanMakeWeakPtr.hpp"
@@ -139,7 +139,7 @@ namespace krys::boo
     MonotonicTime::duration _lastRenderingUpdateTimestamp {};
     uint32 _displayNominalFramesPerSecond {FullSpeedFramesPerSecond};
     RefPtr<boo::Document> _document;
-    RefPtr<LocalFrameView> _view;
+    RefPtr<FrameView> _view;
     UniquePtr<EventHandler> _eventHandler;
     UniquePtr<FrameLoader> _loader;
     float _pageZoomFactor {1};
@@ -148,7 +148,7 @@ namespace krys::boo
     bool _documentIsBeingReplaced {false};
 
     Frame(UniquePtr<ChromeClient> chromeClient, UniquePtr<EditorClient> editorClient,
-          UniquePtr<LocalFrameLoaderClient> loaderClient, UniquePtr<DragClient> dragClient) noexcept;
+          UniquePtr<FrameLoaderClient> loaderClient, UniquePtr<DragClient> dragClient) noexcept;
 
   public:
     ~Frame() noexcept;
@@ -161,7 +161,7 @@ namespace krys::boo
     /// @param dragClient The host's side of drags in the frame; without one, no drag starts in the frame.
     KRYS_NODISCARD static Ref<Frame> Create(UniquePtr<ChromeClient> chromeClient = nullptr,
                                             UniquePtr<EditorClient> editorClient = nullptr,
-                                            UniquePtr<LocalFrameLoaderClient> loaderClient = nullptr,
+                                            UniquePtr<FrameLoaderClient> loaderClient = nullptr,
                                             UniquePtr<DragClient> dragClient = nullptr) noexcept;
 
     /// @brief Calls @p function with each frame that's alive, for changes that reach every frame (the
@@ -214,7 +214,7 @@ namespace krys::boo
     KRYS_NODISCARD LocalDOMWindow *Window() const noexcept;
 
     /// @brief The view the frame's document is laid out in, if any.
-    KRYS_NODISCARD LocalFrameView *View() const noexcept
+    KRYS_NODISCARD FrameView *View() const noexcept
     {
       return _view.get();
     }
@@ -227,7 +227,7 @@ namespace krys::boo
 
     /// @brief Replaces the frame's view. The document's render tree is destroyed with the old view and
     /// created with the new one.
-    void SetView(RefPtr<LocalFrameView> &&view) noexcept;
+    void SetView(RefPtr<FrameView> &&view) noexcept;
 
     /// @brief Gives the frame a new view of @p viewportSize, laid out at @p fixedLayoutSize if
     /// @p useFixedLayout.

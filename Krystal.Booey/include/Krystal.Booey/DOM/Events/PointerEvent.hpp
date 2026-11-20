@@ -148,26 +148,26 @@ namespace krys::boo
     KRYS_NODISCARD static Ref<PointerEvent> Create(const PlatformTouchEvent &event,
                                                    const List<Ref<PointerEvent>> &coalescedEvents,
                                                    const List<Ref<PointerEvent>> &predictedEvents,
-                                                   uint32 touchIndex, bool isPrimary, LocalFrameView *view,
+                                                   uint32 touchIndex, bool isPrimary, boo::FrameView *view,
                                                    const PointD &touchDelta = {}) noexcept;
 
     KRYS_NODISCARD static Ref<PointerEvent>
       Create(const PlatformTouchEvent &event, const List<Ref<PointerEvent>> &coalescedEvents,
              const List<Ref<PointerEvent>> &predictedEvents, bool canBubble, bool isCancelable,
-             uint32 touchIndex, bool isPrimary, LocalFrameView *view, const PointD &touchDelta = {}) noexcept;
+             uint32 touchIndex, bool isPrimary, boo::FrameView *view, const PointD &touchDelta = {}) noexcept;
 
     /// @brief As above, of @p type.
     KRYS_NODISCARD static Ref<PointerEvent> Create(DOMStringAtom type, const PlatformTouchEvent &event,
                                                    const List<Ref<PointerEvent>> &coalescedEvents,
                                                    const List<Ref<PointerEvent>> &predictedEvents,
                                                    bool canBubble, bool isCancelable, uint32 touchIndex,
-                                                   bool isPrimary, LocalFrameView *view,
+                                                   bool isPrimary, boo::FrameView *view,
                                                    const PointD &touchDelta = {}) noexcept;
 
     KRYS_NODISCARD static Ref<PointerEvent> Create(const DOMStringAtom &type, const PlatformTouchEvent &event,
                                                    const List<Ref<PointerEvent>> &coalescedEvents,
                                                    const List<Ref<PointerEvent>> &predictedEvents,
-                                                   uint32 touchIndex, bool isPrimary, LocalFrameView *view,
+                                                   uint32 touchIndex, bool isPrimary, boo::FrameView *view,
                                                    const PointD &touchDelta = {}) noexcept;
 
     /// @brief The type of the event for @p point.
@@ -383,7 +383,7 @@ namespace krys::boo
     PointerEvent(const DOMStringAtom &type, const PlatformTouchEvent &event,
                  const List<Ref<PointerEvent>> &coalescedEvents,
                  const List<Ref<PointerEvent>> &predictedEvents, bool canBubble, bool isCancelable,
-                 uint32 touchIndex, bool isPrimary, LocalFrameView *view, const PointD &touchDelta) noexcept;
+                 uint32 touchIndex, bool isPrimary, boo::FrameView *view, const PointD &touchDelta) noexcept;
   };
 }
 

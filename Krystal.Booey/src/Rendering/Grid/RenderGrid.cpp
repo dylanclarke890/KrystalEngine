@@ -26,8 +26,8 @@
 
 #include "Krystal.Booey/Rendering/Grid/RenderGrid.hpp"
 #include "Krystal.Booey/Layout/Integration/Grid/LayoutIntegrationGridLayout.hpp"
-#include "Krystal.Booey/Page/LocalFrameView.hpp"
-#include "Krystal.Booey/Page/LocalFrameViewLayoutContext.hpp"
+#include "Krystal.Booey/Page/FrameView.hpp"
+#include "Krystal.Booey/Page/FrameViewLayoutContext.hpp"
 #include "Krystal.Booey/Rendering/BaselineAlignment.hpp"
 #include "Krystal.Booey/Rendering/Grid/GridLayoutFunctions.hpp"
 #include "Krystal.Booey/Rendering/Grid/GridLayoutState.hpp"

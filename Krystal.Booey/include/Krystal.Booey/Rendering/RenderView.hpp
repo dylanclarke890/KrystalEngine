@@ -42,7 +42,7 @@ namespace krys::boo::layout
 namespace krys::boo
 {
   class CachedImage;
-  class LocalFrameView;
+  class FrameView;
   class RenderCounter;
 
   class RenderLayerCompositor;
@@ -58,7 +58,7 @@ namespace krys::boo
     KRYS_OVERRIDE_DELETE_FOR_CHECKED_PTR(RenderView);
 
   private:
-    LocalFrameView &_frameView;
+    boo::FrameView &_frameView;
     // Note that currently RenderView::layoutBox(), if it exists, is a child of _initialContainingBlock.
     const UniquePtr<layout::InitialContainingBlock> _initialContainingBlock;
     const UniquePtr<layout::LayoutState> _layoutState;
@@ -98,7 +98,7 @@ namespace krys::boo
     /// @brief The root element.
     KRYS_NODISCARD Node *NodeForHitTest() const noexcept override;
 
-    KRYS_NODISCARD LocalFrameView &FrameView() const noexcept
+    KRYS_NODISCARD boo::FrameView &FrameView() const noexcept
     {
       return _frameView;
     }

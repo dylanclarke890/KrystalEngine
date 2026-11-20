@@ -37,7 +37,7 @@ namespace krys::boo
 {
   class Element;
   class Frame;
-  class LocalFrameView;
+  class FrameView;
   class RenderBox;
   class SVGImageChromeClient;
   class SVGImageForContainer;
@@ -65,7 +65,7 @@ namespace krys::boo
 
     KRYS_NODISCARD RenderBox *EmbeddedContentBox() const noexcept;
 
-    KRYS_NODISCARD LocalFrameView *FrameView() const noexcept;
+    KRYS_NODISCARD boo::FrameView *FrameView() const noexcept;
 
     KRYS_NODISCARD bool IsSVGImage() const noexcept final
     {

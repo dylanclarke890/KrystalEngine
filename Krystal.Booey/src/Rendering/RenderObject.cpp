@@ -42,8 +42,8 @@
 #include "Krystal.Booey/HTML/Elements/HTMLHRElement.hpp"
 #include "Krystal.Booey/HTML/Elements/HTMLLegendElement.hpp"
 #include "Krystal.Booey/Layout/LayoutTree/LayoutBox.hpp"
-#include "Krystal.Booey/Page/LocalFrameView.hpp"
-#include "Krystal.Booey/Page/LocalFrameViewLayoutContext.hpp"
+#include "Krystal.Booey/Page/FrameView.hpp"
+#include "Krystal.Booey/Page/FrameViewLayoutContext.hpp"
 #include "Krystal.Booey/Page/Scrolling/ScrollAnchoringController.hpp"
 #include "Krystal.Booey/Rendering/FormControls/RenderTextControl.hpp"
 #include "Krystal.Booey/Rendering/Fragmentation/RenderFragmentedFlow.hpp"
@@ -1409,7 +1409,7 @@ namespace krys::boo
     return *GetDocument().GetRenderView();
   }
 
-  LocalFrameViewLayoutContext &RenderObject::LayoutContext() const noexcept
+  FrameViewLayoutContext &RenderObject::LayoutContext() const noexcept
   {
     return View().FrameView().LayoutContext();
   }

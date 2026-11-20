@@ -48,14 +48,14 @@
 #include "Krystal.Booey/Loader/NavigationAction.hpp"
 #include "Krystal.Booey/Page/Clients/ChromeClient.hpp"
 #include "Krystal.Booey/Page/Frame.hpp"
+#include "Krystal.Booey/Page/FrameView.hpp"
 #include "Krystal.Booey/Page/LocalDOMWindow.hpp"
-#include "Krystal.Booey/Page/LocalFrameView.hpp"
 #include "Krystal.Core/Strings/ASCII.hpp"
 #include "Krystal.Core/Utils/SetForScope.hpp"
 
 namespace krys::boo
 {
-  FrameLoader::FrameLoader(boo::Frame &frame, UniquePtr<LocalFrameLoaderClient> &&client) noexcept
+  FrameLoader::FrameLoader(boo::Frame &frame, UniquePtr<FrameLoaderClient> &&client) noexcept
       : _frame(frame), _client(client ? krys::move(client) : CreateUnique<EmptyFrameLoaderClient>())
   {
   }
@@ -180,7 +180,7 @@ namespace krys::boo
 
   void FrameLoader::TransitionToCommittedForNewPage() noexcept
   {
-    RefPtr<LocalFrameView> oldView = ShareRefPtr(_frame.View());
+    RefPtr<FrameView> oldView = ShareRefPtr(_frame.View());
     if (!oldView)
     {
       return;
@@ -630,7 +630,7 @@ namespace krys::boo
 
   void FrameLoader::ScrollToFragment(const net::Url &url) noexcept
   {
-    RefPtr<LocalFrameView> view = ShareRefPtr(_frame.View());
+    RefPtr<FrameView> view = ShareRefPtr(_frame.View());
     RefPtr<boo::Document> document = ShareRefPtr(_frame.Document());
     if (!view || !document)
     {

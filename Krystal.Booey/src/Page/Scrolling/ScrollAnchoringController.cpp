@@ -29,7 +29,7 @@
 #include "Krystal.Booey/DOM/Nodes/Element.hpp"
 #include "Krystal.Booey/HTML/Elements/HTMLHtmlElement.hpp"
 #include "Krystal.Booey/Page/Frame.hpp"
-#include "Krystal.Booey/Page/LocalFrameView.hpp"
+#include "Krystal.Booey/Page/FrameView.hpp"
 #include "Krystal.Booey/Rendering/Layers/RenderLayer.hpp"
 #include "Krystal.Booey/Rendering/Layers/RenderLayerScrollableArea.hpp"
 #include "Krystal.Booey/Rendering/RenderBox.hpp"
@@ -56,7 +56,7 @@ namespace krys::boo
       {
         return layerScrollableArea->Layer().Renderer().GetElement();
       }
-      if (auto *document = Downcast<LocalFrameView>(scrollableArea).Frame().Document())
+      if (auto *document = Downcast<boo::FrameView>(scrollableArea).Frame().Document())
       {
         return dom::TreeQueries::DocumentElement(*document);
       }
@@ -70,7 +70,7 @@ namespace krys::boo
       {
         return layerScrollableArea->Layer().Renderer().AbsoluteBoundingBoxRect();
       }
-      return SnappedRectI(Downcast<LocalFrameView>(scrollableArea).LayoutViewportRect());
+      return SnappedRectI(Downcast<boo::FrameView>(scrollableArea).LayoutViewportRect());
     }
 
     /// @brief The element itself or its closest ancestor that's a box: what a priority candidate anchors to.
@@ -151,13 +151,13 @@ namespace krys::boo
   {
   }
 
-  LocalFrameView &ScrollAnchoringController::FrameView() const noexcept
+  boo::FrameView &ScrollAnchoringController::FrameView() const noexcept
   {
     if (auto *layerScrollableArea = DynamicDowncast<RenderLayerScrollableArea>(_owningScrollableArea))
     {
       return layerScrollableArea->Layer().Renderer().View().FrameView();
     }
-    return Downcast<LocalFrameView>(_owningScrollableArea);
+    return Downcast<boo::FrameView>(_owningScrollableArea);
   }
 
   void ScrollAnchoringController::InvalidateAnchorElement() noexcept
@@ -382,8 +382,7 @@ namespace krys::boo
   void ScrollAnchoringController::UpdateAnchorElement() noexcept
   {
     if (_owningScrollableArea.GetScrollPosition().IsZero() || _isQueuedForScrollPositionUpdate
-        || FrameView().LayoutContext().GetLayoutPhase()
-             != LocalFrameViewLayoutContext::LayoutPhase::OutsideLayout)
+        || FrameView().LayoutContext().GetLayoutPhase() != FrameViewLayoutContext::LayoutPhase::OutsideLayout)
     {
       return;
     }

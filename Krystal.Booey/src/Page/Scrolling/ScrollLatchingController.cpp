@@ -26,7 +26,7 @@
 #include "Krystal.Booey/Page/Scrolling/ScrollLatchingController.hpp"
 #include "Krystal.Booey/DOM/Nodes/Element.hpp"
 #include "Krystal.Booey/Input/PlatformWheelEvent.hpp"
-#include "Krystal.Booey/Page/LocalFrameView.hpp"
+#include "Krystal.Booey/Page/FrameView.hpp"
 #include "Krystal.Booey/Platform/Scrolling/ScrollableArea.hpp"
 #include <cmath>
 
@@ -74,7 +74,7 @@ namespace krys::boo
     return static_cast<bool>(_state->GestureScrollableArea);
   }
 
-  void ScrollLatchingController::UpdateAndFetchLatchingState(const LocalFrameView &view,
+  void ScrollLatchingController::UpdateAndFetchLatchingState(const FrameView &view,
                                                              const PlatformWheelEvent &wheelEvent,
                                                              RefPtr<Element> &latchedElement,
                                                              WeakPtr<ScrollableArea> &scrollableArea) noexcept
@@ -121,7 +121,7 @@ namespace krys::boo
     }
   }
 
-  bool ScrollLatchingController::ShouldLatchToScrollableArea(const LocalFrameView &view,
+  bool ScrollLatchingController::ShouldLatchToScrollableArea(const FrameView &view,
                                                              ScrollableArea *scrollableArea,
                                                              SizeF scrollDelta) noexcept
   {

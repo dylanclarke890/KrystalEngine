@@ -66,8 +66,8 @@
 #include "Krystal.Booey/Loader/FrameLoader.hpp"
 #include "Krystal.Booey/Page/Clients/ChromeClient.hpp"
 #include "Krystal.Booey/Page/Drag/DragController.hpp"
+#include "Krystal.Booey/Page/FrameView.hpp"
 #include "Krystal.Booey/Page/LocalDOMWindow.hpp"
-#include "Krystal.Booey/Page/LocalFrameView.hpp"
 #include "Krystal.Booey/Page/PopupOpeningObserver.hpp"
 #include "Krystal.Booey/Page/Scrolling/ScrollLatchingController.hpp"
 #include "Krystal.Booey/Page/Settings.hpp"
@@ -128,7 +128,7 @@ namespace krys::boo
   }
 
   Frame::Frame(UniquePtr<ChromeClient> chromeClient, UniquePtr<EditorClient> editorClient,
-               UniquePtr<LocalFrameLoaderClient> loaderClient, UniquePtr<DragClient> dragClient) noexcept
+               UniquePtr<FrameLoaderClient> loaderClient, UniquePtr<DragClient> dragClient) noexcept
       : _chromeClient(krys::move(chromeClient)), _editorClient(krys::move(editorClient)),
         _pointerCaptureController(CreateUnique<PointerCaptureController>(*this)),
         _pointerLockController(CreateUnique<PointerLockController>(*this)),
@@ -162,7 +162,7 @@ namespace krys::boo
   }
 
   Ref<Frame> Frame::Create(UniquePtr<ChromeClient> chromeClient, UniquePtr<EditorClient> editorClient,
-                           UniquePtr<LocalFrameLoaderClient> loaderClient,
+                           UniquePtr<FrameLoaderClient> loaderClient,
                            UniquePtr<DragClient> dragClient) noexcept
   {
     return AdoptRef(*new Frame(krys::move(chromeClient), krys::move(editorClient), krys::move(loaderClient),
@@ -188,7 +188,7 @@ namespace krys::boo
     return _document ? _document->Window() : nullptr;
   }
 
-  void Frame::SetView(RefPtr<LocalFrameView> &&view) noexcept
+  void Frame::SetView(RefPtr<FrameView> &&view) noexcept
   {
     if (_view)
     {
@@ -214,7 +214,7 @@ namespace krys::boo
   {
     SetView(nullptr);
 
-    Ref frameView = LocalFrameView::Create(*this, viewportSize);
+    Ref frameView = FrameView::Create(*this, viewportSize);
     frameView->SetFixedLayoutSize(fixedLayoutSize);
     frameView->SetUseFixedLayout(useFixedLayout);
 
@@ -331,7 +331,7 @@ namespace krys::boo
 
     document->ResolveStyle(boo::Document::ResolveStyleType::Rebuild);
 
-    if (RefPtr<LocalFrameView> view = _view)
+    if (RefPtr<FrameView> view = _view)
     {
       auto &layoutContext = view->LayoutContext();
       if (document->GetRenderView() && layoutContext.NeedsLayout() && layoutContext.DidFirstLayout())
@@ -344,7 +344,7 @@ namespace krys::boo
   void Frame::SetPageScaleFactor(float scale, const PointI &origin) noexcept
   {
     RefPtr<boo::Document> document = _document;
-    RefPtr<LocalFrameView> frameView = document ? ShareRefPtr(document->View()) : nullptr;
+    RefPtr<FrameView> frameView = document ? ShareRefPtr(document->View()) : nullptr;
 
     if (scale == _pageScaleFactor)
     {
@@ -357,7 +357,7 @@ namespace krys::boo
     {
       _pageScaleFactor = scale;
 
-      if (RefPtr<LocalFrameView> view = _view)
+      if (RefPtr<FrameView> view = _view)
       {
         view->LayoutContext().SetNeedsLayoutAfterViewConfigurationChange();
         view->SetNeedsCompositingGeometryUpdate();
@@ -619,7 +619,7 @@ namespace krys::boo
     // host's snapshot draws them, once hosts take snapshots.
     _renderingUpdateRemainingSteps.Remove(RenderingUpdateStep::LayerFlush);
 
-    if (RefPtr<LocalFrameView> view = _view)
+    if (RefPtr<FrameView> view = _view)
     {
       view->FlushCompositingState();
     }
@@ -699,7 +699,7 @@ namespace krys::boo
     {
       ResumeScriptedAnimations();
 
-      if (RefPtr<LocalFrameView> view = _view)
+      if (RefPtr<FrameView> view = _view)
       {
         view->Show();
         // Shown, the overlay scrollbars show, then fade.
@@ -746,7 +746,7 @@ namespace krys::boo
         });
 
       SuspendScriptedAnimations();
-      if (RefPtr<LocalFrameView> view = _view)
+      if (RefPtr<FrameView> view = _view)
       {
         view->Hide();
         // Hidden, the overlay scrollbars hide at once.
@@ -773,7 +773,7 @@ namespace krys::boo
   {
     // Drawing models which cache painted content while out-of-window require that we repaint animated images
     // to kickstart the animation loop.
-    if (RefPtr<LocalFrameView> view = _view)
+    if (RefPtr<FrameView> view = _view)
     {
       view->ResumeVisibleImageAnimations();
     }

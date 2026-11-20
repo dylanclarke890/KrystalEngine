@@ -34,7 +34,7 @@ namespace krys::boo
 {
   class Document;
   class Element;
-  class LocalFrameView;
+  class FrameView;
   class RenderObject;
   class ScrollableArea;
 
@@ -111,6 +111,6 @@ namespace krys::boo
 
     KRYS_NODISCARD PointF ComputeOffsetFromOwningScroller(const RenderObject &candidate) const noexcept;
 
-    KRYS_NODISCARD LocalFrameView &FrameView() const noexcept;
+    KRYS_NODISCARD boo::FrameView &FrameView() const noexcept;
   };
 }

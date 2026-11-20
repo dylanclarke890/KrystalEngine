@@ -28,8 +28,8 @@
 #include "Krystal.Booey/Loader/NavigationAction.hpp"
 #include "Krystal.Booey/Loader/SubstituteData.hpp"
 #include "Krystal.Booey/Page/Drag/DragController.hpp"
+#include "Krystal.Booey/Page/FrameView.hpp"
 #include "Krystal.Booey/Page/LocalDOMWindow.hpp"
-#include "Krystal.Booey/Page/LocalFrameView.hpp"
 #include "Krystal.Booey/Platform/Pasteboard/DragData.hpp"
 #include "Krystal.Booey/Platform/Pasteboard/Pasteboard.hpp"
 #include "Krystal.Booey/Platform/PlatformStrategies.hpp"
@@ -394,7 +394,7 @@ namespace krys::ui
     }
   };
 
-  class View::FrameLoaderClient final : public boo::LocalFrameLoaderClient
+  class View::FrameLoaderClient final : public boo::FrameLoaderClient
   {
   private:
     View *_view {nullptr};
@@ -554,7 +554,7 @@ namespace krys::ui
   namespace
   {
     /// @brief The main frame's loader client, noted in @p frameLoaderClient as it's handed to the page.
-    KRYS_NODISCARD UniquePtr<boo::LocalFrameLoaderClient>
+    KRYS_NODISCARD UniquePtr<boo::FrameLoaderClient>
       CreateFrameLoaderClient(View::FrameLoaderClient *&frameLoaderClient) noexcept
     {
       auto client = CreateUnique<View::FrameLoaderClient>();
@@ -2421,7 +2421,7 @@ namespace krys::ui
 
     Ref document = ShareRef(Document());
     (void)document->UpdateLayout();
-    RefPtr<boo::LocalFrameView> view = ShareRefPtr(_frame->View());
+    RefPtr<boo::FrameView> view = ShareRefPtr(_frame->View());
 
     // Each axis scrolls the focused element's box (or else the nearest box around it that can), or else the
     // viewport, as the arrow keys do.

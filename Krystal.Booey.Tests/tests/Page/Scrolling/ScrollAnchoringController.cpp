@@ -3,7 +3,7 @@
 #include "Krystal.Booey.Tests/Animation/AnimationTestUtils.hpp"
 #include "Krystal.Booey/DOM/Nodes/FocusOptions.hpp"
 #include "Krystal.Booey/HTML/Elements/HTMLElement.hpp"
-#include "Krystal.Booey/Page/LocalFrameView.hpp"
+#include "Krystal.Booey/Page/FrameView.hpp"
 #include "Krystal.Booey/Rendering/Layers/RenderLayerScrollableArea.hpp"
 #include "Krystal.Booey/Rendering/RenderLayerModelObject.hpp"
 
@@ -35,7 +35,7 @@ namespace krys::boo::tests
       return markup;
     }
 
-    KRYS_NODISCARD LocalFrameView &View(AnimationPageFixture &fixture) noexcept
+    KRYS_NODISCARD boo::FrameView &View(AnimationPageFixture &fixture) noexcept
     {
       return *fixture.TestFrame->View();
     }

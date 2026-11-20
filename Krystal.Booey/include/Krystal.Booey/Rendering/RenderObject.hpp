@@ -85,7 +85,7 @@ namespace krys::boo
   class HitTestRequest;
   class HitTestResult;
   enum class HitTestSource : bool;
-  class LocalFrameViewLayoutContext;
+  class FrameViewLayoutContext;
   class ReferencedSVGResources;
   class RenderBlock;
   class RenderBlockFlow;
@@ -847,7 +847,7 @@ namespace krys::boo
     /// @brief The render tree's root.
     KRYS_NODISCARD RenderView &View() const noexcept;
 
-    KRYS_NODISCARD LocalFrameViewLayoutContext &LayoutContext() const noexcept;
+    KRYS_NODISCARD FrameViewLayoutContext &LayoutContext() const noexcept;
 
     KRYS_NODISCARD layout::Box *LayoutBox() noexcept;
 

@@ -881,8 +881,8 @@ namespace krys::boo
     return ExternalRepresentation(*renderer, behavior);
   }
 
-  void ExternalRepresentationForLocalFrame(TextStream &ts, Frame &frame,
-                                           EnumSet<RenderAsTextFlag> behavior) noexcept
+  void ExternalRepresentationForFrame(TextStream &ts, Frame &frame,
+                                      EnumSet<RenderAsTextFlag> behavior) noexcept
   {
     krys_debug_assert(frame.Document());
 

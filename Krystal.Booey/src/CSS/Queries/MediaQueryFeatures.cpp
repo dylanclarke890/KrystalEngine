@@ -27,7 +27,7 @@
 #include "Krystal.Booey/CSS/Queries/MediaQuery.hpp"
 #include "Krystal.Booey/Page/Clients/ChromeClient.hpp"
 #include "Krystal.Booey/Page/Frame.hpp"
-#include "Krystal.Booey/Page/LocalFrameView.hpp"
+#include "Krystal.Booey/Page/FrameView.hpp"
 #include "Krystal.Booey/Rendering/RenderView.hpp"
 #include "Krystal.Booey/Rendering/Style/RenderStyle+GettersInlines.hpp"
 #include "Krystal.Core/Threading/NeverDestroyed.hpp"
@@ -204,7 +204,7 @@ namespace krys::boo::css::mq::features
     return emptyChromeClient;
   }
 
-  KRYS_NODISCARD static const LocalFrameView &ViewOf(const FeatureEvaluationContext &context) noexcept
+  KRYS_NODISCARD static const FrameView &ViewOf(const FeatureEvaluationContext &context) noexcept
   {
     auto *view = context.Document->View();
     krys_assert_msg(view, "media features are only evaluated for a document with a view");

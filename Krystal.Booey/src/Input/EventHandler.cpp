@@ -64,8 +64,8 @@
 #include "Krystal.Booey/Page/Drag/DragController.hpp"
 #include "Krystal.Booey/Page/Drag/DragState.hpp"
 #include "Krystal.Booey/Page/Frame.hpp"
+#include "Krystal.Booey/Page/FrameView.hpp"
 #include "Krystal.Booey/Page/LocalDOMWindow.hpp"
-#include "Krystal.Booey/Page/LocalFrameView.hpp"
 #include "Krystal.Booey/Page/Scrolling/ScrollLatchingController.hpp"
 #include "Krystal.Booey/Page/Settings.hpp"
 #include "Krystal.Booey/Platform/Pasteboard/Pasteboard.hpp"
@@ -236,7 +236,7 @@ namespace krys::boo
     }
 
     KRYS_NODISCARD Scrollbar *ScrollbarForMouseEvent(const MouseEventWithHitTestResults &mouseEvent,
-                                                     LocalFrameView *view) noexcept
+                                                     FrameView *view) noexcept
     {
       if (view)
       {
@@ -473,7 +473,7 @@ namespace krys::boo
   bool EventHandler::HandleMousePressEvent(const PlatformMouseEvent &platformMouseEvent) noexcept
   {
     Ref frame = ShareRef(_frame);
-    RefPtr<LocalFrameView> protectedView = ShareRefPtr(frame->View());
+    RefPtr<FrameView> protectedView = ShareRefPtr(frame->View());
 
     // FIXME: Page overlays and synthetic touch events.
 
@@ -612,7 +612,7 @@ namespace krys::boo
   bool EventHandler::MouseMoved(const PlatformMouseEvent &event) noexcept
   {
     Ref frame = ShareRef(_frame);
-    RefPtr<LocalFrameView> protectedView = ShareRefPtr(frame->View());
+    RefPtr<FrameView> protectedView = ShareRefPtr(frame->View());
 
     // The longest a move took to handle.
     auto start = MonotonicTime::Now();
@@ -631,7 +631,7 @@ namespace krys::boo
     CancelFakeMouseMoveEvent();
 
     Ref frame = ShareRef(_frame);
-    RefPtr<LocalFrameView> protectedView = ShareRefPtr(frame->View());
+    RefPtr<FrameView> protectedView = ShareRefPtr(frame->View());
 
     // FIXME: Synthetic touch events, hover timers, fake mouse moves and frame set resizing.
 
@@ -818,7 +818,7 @@ namespace krys::boo
   bool EventHandler::HandleMouseReleaseEvent(const PlatformMouseEvent &platformMouseEvent) noexcept
   {
     Ref frame = ShareRef(_frame);
-    RefPtr<LocalFrameView> protectedView = ShareRefPtr(frame->View());
+    RefPtr<FrameView> protectedView = ShareRefPtr(frame->View());
 
     frame->Document()->Selection().SetCaretBlinkingSuspended(false);
 
@@ -1555,7 +1555,7 @@ namespace krys::boo
       return true;
     }
 
-    RefPtr<LocalFrameView> view = ShareRefPtr(_frame.View());
+    RefPtr<FrameView> view = ShareRefPtr(_frame.View());
     if (!view)
     {
       return false;
@@ -1681,7 +1681,7 @@ namespace krys::boo
       return true;
     }
 
-    RefPtr<LocalFrameView> view = ShareRefPtr(frame->View());
+    RefPtr<FrameView> view = ShareRefPtr(frame->View());
     return view && view->Scroll(direction, granularity);
   }
 
@@ -1698,7 +1698,7 @@ namespace krys::boo
       return true;
     }
 
-    RefPtr<LocalFrameView> view = ShareRefPtr(frame->View());
+    RefPtr<FrameView> view = ShareRefPtr(frame->View());
     return view && view->LogicalScroll(direction, granularity, animated);
   }
 
@@ -1882,7 +1882,7 @@ namespace krys::boo
     UpdateCursor(*view, result, shiftKey);
   }
 
-  void EventHandler::UpdateCursor(LocalFrameView &view, const HitTestResult &result, bool shiftKey) noexcept
+  void EventHandler::UpdateCursor(FrameView &view, const HitTestResult &result, bool shiftKey) noexcept
   {
     // FIXME: Telling the view, and through it the chrome, to set the cursor; until then the host reads
     // CurrentMouseCursor().
@@ -2092,9 +2092,9 @@ namespace krys::boo
 
   void EventHandler::SetFrameWasScrolledByUser() noexcept
   {
-    if (RefPtr<LocalFrameView> view = ShareRefPtr(_frame.View()))
+    if (RefPtr<FrameView> view = ShareRefPtr(_frame.View()))
     {
-      view->SetLastUserScrollType(LocalFrameView::UserScrollType::Explicit);
+      view->SetLastUserScrollType(FrameView::UserScrollType::Explicit);
     }
   }
 
@@ -2158,7 +2158,7 @@ namespace krys::boo
       return false;
     }
 
-    RefPtr<LocalFrameView> view = ShareRefPtr(frame->View());
+    RefPtr<FrameView> view = ShareRefPtr(frame->View());
     if (!view)
     {
       return false;
@@ -2302,7 +2302,7 @@ namespace krys::boo
   {
     // We do another check on the frame view because the event handler can run JS which results in the frame
     // getting destroyed.
-    RefPtr<LocalFrameView> view = ShareRefPtr(_frame.View());
+    RefPtr<FrameView> view = ShareRefPtr(_frame.View());
 
     // A gesture latched to a box scrolled it in the wheel event's default action, and goes no further.
     if (event.UseLatchedEventElement() && scrollableArea && scrollableArea.get() != view.get())
@@ -2479,7 +2479,7 @@ namespace krys::boo
   {
     Ref frame = ShareRef(_frame);
     RefPtr<boo::Document> document = ShareRefPtr(frame->Document());
-    RefPtr<LocalFrameView> view = ShareRefPtr(frame->View());
+    RefPtr<FrameView> view = ShareRefPtr(frame->View());
     if (!document || !view || (!wheelEvent.DeltaX() && !wheelEvent.DeltaY()))
     {
       return false;
@@ -2770,7 +2770,7 @@ namespace krys::boo
     }
 
     RefPtr<boo::Document> doc = ShareRefPtr(frame->Document());
-    RefPtr<LocalFrameView> view = ShareRefPtr(frame->View());
+    RefPtr<FrameView> view = ShareRefPtr(frame->View());
     if (!doc || !view)
     {
       return false;
@@ -3837,7 +3837,7 @@ namespace krys::boo
                                        dom::DataTransfer &dataTransfer) noexcept
   {
     Ref<Frame> frame = ShareRef(_frame);
-    RefPtr<LocalFrameView> view = ShareRefPtr(frame->View());
+    RefPtr<FrameView> view = ShareRefPtr(frame->View());
 
     // FIXME: We might want to dispatch a dragleave even if the view is gone.
     if (!view)

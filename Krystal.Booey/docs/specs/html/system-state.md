@@ -24,7 +24,7 @@ Status: reviewed (2026-11-01)
 ##### [8.10.1.1 Client identification](https://html.spec.whatwg.org/#client-identification)
 
 Status: reviewed (2026-11-01)
-> `Navigator`'s NavigatorID members, with the host's user agent string (`LocalFrameLoaderClient::UserAgent`). `platform` and `vendor` don't follow a compatibility mode (see `DIFFERENCES.md`); there's no `oscpu`, which is Gecko's.
+> `Navigator`'s NavigatorID members, with the host's user agent string (`FrameLoaderClient::UserAgent`). `platform` and `vendor` don't follow a compatibility mode (see `DIFFERENCES.md`); there's no `oscpu`, which is Gecko's.
 <!-- definitions: concept-navigator-compatibility-mode -->
 
 - [x] [NavigatorID.appCodeName](https://html.spec.whatwg.org/#dom-navigator-appcodename) — The appCodeName getter steps are to return "Mozilla".

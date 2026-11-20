@@ -29,8 +29,8 @@
 
 #include "Krystal.Booey/Rendering/Fragmentation/RenderFragmentedFlow.hpp"
 #include "Krystal.Booey/Graphics/Transforms/TransformState.hpp"
-#include "Krystal.Booey/Page/LocalFrameView.hpp"
-#include "Krystal.Booey/Page/LocalFrameViewLayoutContext.hpp"
+#include "Krystal.Booey/Page/FrameView.hpp"
+#include "Krystal.Booey/Page/FrameViewLayoutContext.hpp"
 #include "Krystal.Booey/Rendering/Fragmentation/RenderBoxFragmentInfo.hpp"
 #include "Krystal.Booey/Rendering/Fragmentation/RenderFragmentContainer.hpp"
 #include "Krystal.Booey/Rendering/RenderLayoutState.hpp"

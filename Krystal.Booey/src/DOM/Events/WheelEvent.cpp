@@ -56,7 +56,7 @@ namespace krys::boo
   {
   }
 
-  WheelEvent::WheelEvent(const PlatformWheelEvent &event, LocalFrameView *view,
+  WheelEvent::WheelEvent(const PlatformWheelEvent &event, boo::FrameView *view,
                          IsCancelable isCancelable) noexcept
       : MouseEvent(event_names::Wheel, TrustedInit(isCancelable), view, ToPointD(event.GlobalPosition()),
                    ToPointD(event.Position()), 0, 0, event.Modifiers(), MouseButton::Left, 0, nullptr, 0,
@@ -67,7 +67,7 @@ namespace krys::boo
     _createTime = event.Timestamp();
   }
 
-  Ref<WheelEvent> WheelEvent::Create(const PlatformWheelEvent &event, LocalFrameView *view,
+  Ref<WheelEvent> WheelEvent::Create(const PlatformWheelEvent &event, boo::FrameView *view,
                                      IsCancelable isCancelable) noexcept
   {
     return AdoptRef(*new WheelEvent(event, view, isCancelable));

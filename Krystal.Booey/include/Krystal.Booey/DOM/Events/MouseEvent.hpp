@@ -92,7 +92,7 @@ namespace krys::boo
     /// @brief A trusted event of type @p eventType from @p event, which happened in @p view.
     /// @param coalescedEvents The events for the moves @p event stands for.
     /// @param predictedEvents The events for the moves predicted after @p event.
-    KRYS_NODISCARD static Ref<MouseEvent> Create(const DOMStringAtom &eventType, LocalFrameView *view,
+    KRYS_NODISCARD static Ref<MouseEvent> Create(const DOMStringAtom &eventType, boo::FrameView *view,
                                                  const PlatformMouseEvent &event,
                                                  const List<Ref<MouseEvent>> &coalescedEvents,
                                                  const List<Ref<MouseEvent>> &predictedEvents, int32 detail,
@@ -101,7 +101,7 @@ namespace krys::boo
     /// @brief A trusted event from its parts, with its client location rather than its window location.
     KRYS_NODISCARD static Ref<MouseEvent>
       Create(DOMStringAtom eventType, bool canBubble, bool isCancelable, bool isComposed,
-             MonotonicTime::duration timestamp, LocalFrameView *view, int32 detail, double screenX,
+             MonotonicTime::duration timestamp, boo::FrameView *view, int32 detail, double screenX,
              double screenY, double clientX, double clientY, EnumSet<Modifier> modifiers, MouseButton button,
              uint16 buttons, SyntheticClickType syntheticClickType, EventTarget *relatedTarget) noexcept;
 
@@ -201,7 +201,7 @@ namespace krys::boo
       _relatedTarget = ShareRefPtr(relatedTarget);
     }
 
-    MouseEvent(DOMStringAtom type, const UIEventInit &eventInitDict, LocalFrameView *view,
+    MouseEvent(DOMStringAtom type, const UIEventInit &eventInitDict, boo::FrameView *view,
                const PointD &screenLocation, const PointD &windowLocation, double movementX, double movementY,
                EnumSet<Modifier> modifiers, MouseButton button, uint16 buttons, EventTarget *relatedTarget,
                double force, SyntheticClickType syntheticClickType,

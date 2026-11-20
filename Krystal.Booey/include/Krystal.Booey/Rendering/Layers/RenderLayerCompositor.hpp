@@ -51,7 +51,7 @@ namespace krys::boo
   class Frame;
   class GraphicsLayerFactory;
   class LayerOverlapMap;
-  class LocalFrameView;
+  class FrameView;
   class RenderLayerBacking;
   class RenderView;
   class Scrollbar;

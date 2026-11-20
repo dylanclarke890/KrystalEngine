@@ -24,7 +24,7 @@
  */
 
 #include "Krystal.Booey/Rendering/RenderLayoutState.hpp"
-#include "Krystal.Booey/Page/LocalFrameView.hpp"
+#include "Krystal.Booey/Page/FrameView.hpp"
 #include "Krystal.Booey/Rendering/Layers/RenderLayer.hpp"
 #include "Krystal.Booey/Rendering/RenderBox.hpp"
 #include "Krystal.Booey/Rendering/RenderInline.hpp"
@@ -58,7 +58,7 @@ namespace krys::boo
     }
   }
 
-  RenderLayoutState::RenderLayoutState(const LocalFrameViewLayoutContext::LayoutStateStack &layoutStateStack,
+  RenderLayoutState::RenderLayoutState(const FrameViewLayoutContext::LayoutStateStack &layoutStateStack,
                                        RenderBox &renderer, const LayoutSize &offset,
                                        LayoutUnit pageLogicalHeight, bool pageLogicalHeightChanged,
                                        Maybe<LineClamp> lineClamp) noexcept
@@ -147,7 +147,7 @@ namespace krys::boo
   }
 
   void RenderLayoutState::ComputePaginationInformation(
-    const LocalFrameViewLayoutContext::LayoutStateStack &layoutStateStack, RenderBox &renderer,
+    const FrameViewLayoutContext::LayoutStateStack &layoutStateStack, RenderBox &renderer,
     LayoutUnit pageLogicalHeight, bool pageLogicalHeightChanged) noexcept
   {
     const auto *ancestor = layoutStateStack.empty() ? nullptr : layoutStateStack.back().get();
@@ -242,7 +242,7 @@ namespace krys::boo
     }
   }
 
-  LayoutStateDisabler::LayoutStateDisabler(LocalFrameViewLayoutContext &context) noexcept : _context(context)
+  LayoutStateDisabler::LayoutStateDisabler(FrameViewLayoutContext &context) noexcept : _context(context)
   {
     _context.DisablePaintOffsetCache();
   }
@@ -293,7 +293,7 @@ namespace krys::boo
     }
   }
 
-  FlexPercentResolveDisabler::FlexPercentResolveDisabler(LocalFrameViewLayoutContext &layoutContext,
+  FlexPercentResolveDisabler::FlexPercentResolveDisabler(FrameViewLayoutContext &layoutContext,
                                                          const RenderBox &flexItem) noexcept
       : _layoutContext(layoutContext), _flexItem(flexItem)
   {
@@ -305,7 +305,7 @@ namespace krys::boo
     _layoutContext.EnablePercentHeightResolveFor(_flexItem);
   }
 
-  ContentVisibilityOverrideScope::ContentVisibilityOverrideScope(LocalFrameViewLayoutContext &layoutContext,
+  ContentVisibilityOverrideScope::ContentVisibilityOverrideScope(FrameViewLayoutContext &layoutContext,
                                                                  EnumSet<OverrideType> overrideTypes) noexcept
       : _layoutContext(layoutContext)
   {

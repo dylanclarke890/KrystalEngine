@@ -66,8 +66,8 @@ namespace krys::boo
   KRYS_NODISCARD utf8_string ExternalRepresentation(boo::Element *element,
                                                     EnumSet<RenderAsTextFlag> behavior = {}) noexcept;
 
-  void ExternalRepresentationForLocalFrame(TextStream &ts, Frame &frame,
-                                           EnumSet<RenderAsTextFlag> behavior = {}) noexcept;
+  void ExternalRepresentationForFrame(TextStream &ts, Frame &frame,
+                                      EnumSet<RenderAsTextFlag> behavior = {}) noexcept;
 
   void Write(TextStream &ts, const RenderObject &renderer, EnumSet<RenderAsTextFlag> behavior = {}) noexcept;
 

@@ -20,7 +20,7 @@
 #include "Krystal.Booey/Rendering/Line/LegacyInlineFlowBox.hpp"
 
 #include "Krystal.Booey/Page/Frame.hpp"
-#include "Krystal.Booey/Page/LocalFrameView.hpp"
+#include "Krystal.Booey/Page/FrameView.hpp"
 #include "Krystal.Booey/Rendering/Line/LegacyInlineTextBox.hpp"
 #include "Krystal.Booey/Rendering/Line/LegacyRootInlineBox.hpp"
 #include "Krystal.Booey/Rendering/RenderInline.hpp"

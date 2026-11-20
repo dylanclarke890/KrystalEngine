@@ -4,8 +4,8 @@
 #include "Krystal.Booey.Tests/Loader/TestLoader.hpp"
 #include "Krystal.Booey/DOM/Nodes/Document.hpp"
 #include "Krystal.Booey/Loader/FrameLoader.hpp"
+#include "Krystal.Booey/Loader/FrameLoaderClient.hpp"
 #include "Krystal.Booey/Loader/FrameLoadRequest.hpp"
-#include "Krystal.Booey/Loader/LocalFrameLoaderClient.hpp"
 #include "Krystal.Booey/Loader/NavigationAction.hpp"
 #include "Krystal.Booey/Loader/SubstituteData.hpp"
 #include "Krystal.Booey/Page/Clients/ChromeClient.hpp"
@@ -23,7 +23,7 @@ namespace krys::boo::tests
   }
 
   /// @brief Records what the loader tells the host.
-  class LoadRecordingClient final : public LocalFrameLoaderClient
+  class LoadRecordingClient final : public FrameLoaderClient
   {
   public:
     List<std::string> &Events;

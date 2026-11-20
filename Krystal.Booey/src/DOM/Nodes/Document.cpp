@@ -145,8 +145,8 @@
 #include "Krystal.Booey/Page/Clients/EditorClient.hpp"
 #include "Krystal.Booey/Page/DOMSelection.hpp"
 #include "Krystal.Booey/Page/Frame.hpp"
+#include "Krystal.Booey/Page/FrameView.hpp"
 #include "Krystal.Booey/Page/LocalDOMWindow.hpp"
-#include "Krystal.Booey/Page/LocalFrameView.hpp"
 #include "Krystal.Booey/Page/Settings.hpp"
 #include "Krystal.Booey/Page/VisualViewport.hpp"
 #include "Krystal.Booey/Platform/Scrolling/Scrollbar.hpp"
@@ -1666,7 +1666,7 @@ namespace krys::boo
     {
       if (request.AllowsFrameScrollbars())
       {
-        RefPtr<LocalFrameView> frameView = ShareRefPtr(View());
+        RefPtr<FrameView> frameView = ShareRefPtr(View());
         PointI windowPoint = frameView->ContentsToWindow(location.RoundedPoint());
         if (RefPtr<Scrollbar> frameScrollbar = ShareRefPtr(frameView->ScrollbarAtPoint(windowPoint)))
         {
@@ -2262,7 +2262,7 @@ namespace krys::boo
       return;
     }
 
-    RefPtr<LocalFrameView> frameView = ShareRefPtr(View());
+    RefPtr<FrameView> frameView = ShareRefPtr(View());
     if (!frameView)
     {
       return;
@@ -2574,7 +2574,7 @@ namespace krys::boo
   void Document::RunScrollSteps() noexcept
   {
     // Service the smooth scrolls before dispatching the events for them.
-    if (RefPtr<LocalFrameView> frameView = ShareRefPtr(View()))
+    if (RefPtr<FrameView> frameView = ShareRefPtr(View()))
     {
       frameView->ServiceScrollAnimations(html::EventLoop::Current().Now());
     }
@@ -3309,7 +3309,7 @@ namespace krys::boo
     }
 
     // The overlay scrollbars stay hidden while the document is suspended.
-    if (RefPtr<LocalFrameView> view = ShareRefPtr(View()))
+    if (RefPtr<FrameView> view = ShareRefPtr(View()))
     {
       view->ForEachScrollableArea([](ScrollableArea &area) { area.LockOverlayScrollbarStateToHidden(true); });
     }
@@ -3319,7 +3319,7 @@ namespace krys::boo
     SuspendScheduledTasks(reason);
 
     // The frame's timers: the layout, the animations and autoscrolling stop.
-    if (RefPtr<LocalFrameView> view = ShareRefPtr(View()))
+    if (RefPtr<FrameView> view = ShareRefPtr(View()))
     {
       view->LayoutContext().UnscheduleLayout();
       if (_timelinesController)
@@ -3352,7 +3352,7 @@ namespace krys::boo
 
     ResumeScheduledTasks(reason);
 
-    if (RefPtr<LocalFrameView> view = ShareRefPtr(View()))
+    if (RefPtr<FrameView> view = ShareRefPtr(View()))
     {
       view->ForEachScrollableArea([](ScrollableArea &area)
                                   { area.LockOverlayScrollbarStateToHidden(false); });
@@ -3733,7 +3733,7 @@ namespace krys::boo
     UpdateStyleIfNeeded();
 
     // Always do a layout after loading if needed.
-    RefPtr<LocalFrameView> view = ShareRefPtr(View());
+    RefPtr<FrameView> view = ShareRefPtr(View());
     if (view && GetRenderView() && (!GetRenderView()->FirstChild() || GetRenderView()->NeedsLayout()))
     {
       view->LayoutContext().Layout();
@@ -3988,7 +3988,7 @@ namespace krys::boo
     return _frame.get();
   }
 
-  LocalFrameView *Document::View() const noexcept
+  FrameView *Document::View() const noexcept
   {
     return _frame ? _frame->View() : nullptr;
   }
@@ -4430,7 +4430,7 @@ namespace krys::boo
       }
     }
 
-    RefPtr<LocalFrameView> frameView = ShareRefPtr(View());
+    RefPtr<FrameView> frameView = ShareRefPtr(View());
     if (frameView && frameView->LayoutContext().IsInRenderTreeLayout())
     {
       // View layout should not be re-entrant.

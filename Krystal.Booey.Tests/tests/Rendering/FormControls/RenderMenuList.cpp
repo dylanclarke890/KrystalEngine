@@ -29,7 +29,7 @@ namespace krys::boo::layout::tests
       {
       }
 
-      void Show(const RectI &rect, LocalFrameView &, int32 selectedIndex) noexcept final
+      void Show(const RectI &rect, FrameView &, int32 selectedIndex) noexcept final
       {
         ShownAt = rect;
         ShownIndex = selectedIndex;

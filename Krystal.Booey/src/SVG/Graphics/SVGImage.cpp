@@ -34,8 +34,8 @@
 #include "Krystal.Booey/Loader/DocumentWriter.hpp"
 #include "Krystal.Booey/Loader/FrameLoader.hpp"
 #include "Krystal.Booey/Page/Frame.hpp"
-#include "Krystal.Booey/Page/LocalFrameView.hpp"
-#include "Krystal.Booey/Page/LocalFrameViewLayoutContext.hpp"
+#include "Krystal.Booey/Page/FrameView.hpp"
+#include "Krystal.Booey/Page/FrameViewLayoutContext.hpp"
 #include "Krystal.Booey/Page/Settings.hpp"
 #include "Krystal.Booey/Rendering/RenderBox.hpp"
 #include "Krystal.Booey/Rendering/Style/RenderStyle.hpp"
@@ -107,7 +107,7 @@ namespace krys::boo
       return;
     }
 
-    RefPtr<LocalFrameView> view = ShareRefPtr(FrameView());
+    RefPtr<boo::FrameView> view = ShareRefPtr(FrameView());
     view->Resize(ContainerSize());
 
     Downcast<LegacyRenderSVGRoot>(*rootElement->Renderer()).SetContainerSize(SizeI(size));
@@ -178,7 +178,7 @@ namespace krys::boo
                           static_cast<float>(roundedContainerSize.Height()) / containerSize.Height());
     scaledSrc.SetSize(adjustedSrcSize);
 
-    RefPtr<LocalFrameView> view = ShareRefPtr(FrameView());
+    RefPtr<boo::FrameView> view = ShareRefPtr(FrameView());
     (void)view->ScrollToFragment(initialFragmentUrl);
 
     ImageDrawResult result = Draw(context, dstRect, scaledSrc, options);
@@ -237,7 +237,7 @@ namespace krys::boo
       return ImageDrawResult::DidNothing;
     }
 
-    RefPtr<LocalFrameView> view = ShareRefPtr(FrameView());
+    RefPtr<boo::FrameView> view = ShareRefPtr(FrameView());
     krys_debug_assert(view);
 
     GraphicsContextStateSaver stateSaver(context);
@@ -314,7 +314,7 @@ namespace krys::boo
     return DynamicDowncast<RenderBox>(rootElement->Renderer());
   }
 
-  LocalFrameView *SVGImage::FrameView() const noexcept
+  boo::FrameView *SVGImage::FrameView() const noexcept
   {
     if (!_frame)
     {
@@ -455,7 +455,7 @@ namespace krys::boo
       auto &loader = frame.Loader();
       loader.Init();
 
-      RefPtr<LocalFrameView> frameView = ShareRefPtr(frame.View());
+      RefPtr<boo::FrameView> frameView = ShareRefPtr(frame.View());
       // SVG Images will always synthesize a viewBox, if it's not available, and thus never see scrollbars.
       frameView->SetScrollbarModes(ScrollbarMode::AlwaysOff, ScrollbarMode::AlwaysOff);
       frameView->SetTransparent(true); // SVG Images are transparent.

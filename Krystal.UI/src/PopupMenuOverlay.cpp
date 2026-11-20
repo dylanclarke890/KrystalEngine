@@ -2,7 +2,7 @@
 #include "Krystal.Booey/DOM/Algorithms/TreeQueries.hpp"
 #include "Krystal.Booey/DOM/Nodes/Document.hpp"
 #include "Krystal.Booey/DOM/Nodes/Element.hpp"
-#include "Krystal.Booey/Page/LocalFrameView.hpp"
+#include "Krystal.Booey/Page/FrameView.hpp"
 #include "Krystal.Booey/Platform/Choosers/PopupMenuClient.hpp"
 #include "Krystal.Booey/Rendering/RenderBox.hpp"
 #include "Krystal.UI/View.hpp"
@@ -79,7 +79,7 @@ namespace krys::ui
 
   PopupMenuOverlay::~PopupMenuOverlay() noexcept = default;
 
-  void PopupMenuOverlay::Show(const RectI &rect, boo::LocalFrameView &view, int32 selectedIndex) noexcept
+  void PopupMenuOverlay::Show(const RectI &rect, boo::FrameView &view, int32 selectedIndex) noexcept
   {
     if (!_client || !_owner)
     {

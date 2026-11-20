@@ -400,7 +400,7 @@ namespace krys::boo
 
   void PointerCaptureController::DispatchOverOrOutEvent(DOMStringAtom type, EventTarget *target,
                                                         const PlatformTouchEvent &event, uint32 index,
-                                                        bool isPrimary, LocalFrameView *view,
+                                                        bool isPrimary, FrameView *view,
                                                         const PointD &touchDelta) noexcept
   {
     DispatchEvent(*PointerEvent::Create(krys::move(type), event, {}, {}, index, isPrimary, view, touchDelta),
@@ -409,7 +409,7 @@ namespace krys::boo
 
   void PointerCaptureController::DispatchEnterOrLeaveEvent(DOMStringAtom type, Element &targetElement,
                                                            const PlatformTouchEvent &event, uint32 index,
-                                                           bool isPrimary, LocalFrameView *view,
+                                                           bool isPrimary, FrameView *view,
                                                            const PointD &touchDelta) noexcept
   {
     List<Ref<Element>> targetChain;
@@ -440,8 +440,7 @@ namespace krys::boo
 
   void PointerCaptureController::DispatchEventForTouchAtIndex(EventTarget &target,
                                                               const PlatformTouchEvent &platformTouchEvent,
-                                                              uint32 index, bool isPrimary,
-                                                              LocalFrameView *view,
+                                                              uint32 index, bool isPrimary, FrameView *view,
                                                               const PointD &touchDelta) noexcept
   {
     RefPtr<Frame> frame = ShareRefPtr(_frame.get());

@@ -20,7 +20,7 @@
 #include "Krystal.Booey/Input/PlatformKeyboardEvent.hpp"
 #include "Krystal.Booey/Input/PlatformWheelEvent.hpp"
 #include "Krystal.Booey/Page/Frame.hpp"
-#include "Krystal.Booey/Page/LocalFrameView.hpp"
+#include "Krystal.Booey/Page/FrameView.hpp"
 #include "Krystal.Booey/Page/Settings.hpp"
 #include "Krystal.Booey/Platform/Cursor.hpp"
 #include "Krystal.Booey/Platform/Scrolling/Scrollbar.hpp"
@@ -49,7 +49,7 @@ namespace krys::boo::tests
         (void)Document->UpdateLayout();
       }
 
-      KRYS_NODISCARD LocalFrameView &View() noexcept
+      KRYS_NODISCARD FrameView &View() noexcept
       {
         return *Frame->View();
       }
@@ -188,8 +188,8 @@ namespace krys::boo::tests
     }
   }
 
-  TEST_CASE_METHOD(css::tests::ValueFixture, "LocalFrameView: the scroll position and its range",
-                   "[Page][LocalFrameView][Scrolling]")
+  TEST_CASE_METHOD(css::tests::ValueFixture, "FrameView: the scroll position and its range",
+                   "[Page][FrameView][Scrolling]")
   {
     ScrollFixture fixture {TallPage};
     auto &view = fixture.View();
@@ -245,8 +245,8 @@ namespace krys::boo::tests
     }
   }
 
-  TEST_CASE_METHOD(css::tests::ValueFixture, "LocalFrameView: hit testing and coordinates follow the scroll",
-                   "[Page][LocalFrameView][Scrolling]")
+  TEST_CASE_METHOD(css::tests::ValueFixture, "FrameView: hit testing and coordinates follow the scroll",
+                   "[Page][FrameView][Scrolling]")
   {
     ScrollFixture fixture {TallPage};
     auto &target = fixture.ById(u8"target");
@@ -264,8 +264,8 @@ namespace krys::boo::tests
     CHECK(fixture.Frame->GetEventHandler().ElementUnderMouse() == &target);
   }
 
-  TEST_CASE_METHOD(css::tests::ValueFixture, "LocalFrameView: fixed boxes stay in view",
-                   "[Page][LocalFrameView][Scrolling]")
+  TEST_CASE_METHOD(css::tests::ValueFixture, "FrameView: fixed boxes stay in view",
+                   "[Page][FrameView][Scrolling]")
   {
     ScrollFixture fixture {
       utf8_string(TallPage)
@@ -279,8 +279,8 @@ namespace krys::boo::tests
     CHECK(fixture.PaintedScrolled().contains(u8"(rect at (0,210) size 30x30)"));
   }
 
-  TEST_CASE_METHOD(css::tests::ValueFixture, "LocalFrameView: sticky boxes stick to the view",
-                   "[Page][LocalFrameView][Scrolling][Sticky]")
+  TEST_CASE_METHOD(css::tests::ValueFixture, "FrameView: sticky boxes stick to the view",
+                   "[Page][FrameView][Scrolling][Sticky]")
   {
     // A sticky box 50 pixels into a 200 pixel section, which holds it in, above 400 more pixels.
     ScrollFixture fixture {
@@ -304,8 +304,8 @@ namespace krys::boo::tests
     CHECK(sticky.GetBoundingClientRect()->Y() == -120);
   }
 
-  TEST_CASE_METHOD(css::tests::ValueFixture, "LocalFrameView: sticky boxes stick inside their scroller",
-                   "[Page][LocalFrameView][Scrolling][Sticky]")
+  TEST_CASE_METHOD(css::tests::ValueFixture, "FrameView: sticky boxes stick inside their scroller",
+                   "[Page][FrameView][Scrolling][Sticky]")
   {
     ScrollFixture fixture {
       u8"<!DOCTYPE html><style>body{margin:0} .s{width:150px;height:60px;overflow:auto;"
@@ -349,8 +349,8 @@ namespace krys::boo::tests
     CHECK(inl.GetBoundingClientRect()->X() == 10 + 5);
   }
 
-  TEST_CASE_METHOD(css::tests::ValueFixture, "LocalFrameView: painting is scrolled",
-                   "[Page][LocalFrameView][Scrolling]")
+  TEST_CASE_METHOD(css::tests::ValueFixture, "FrameView: painting is scrolled",
+                   "[Page][FrameView][Scrolling]")
   {
     ScrollFixture fixture {TallPage};
     fixture.View().SetScrollPosition({30, 40});
@@ -366,8 +366,8 @@ namespace krys::boo::tests
     CHECK(painted.ends_with(u8"(restore)"));
   }
 
-  TEST_CASE_METHOD(css::tests::ValueFixture, "LocalFrameView: the root background shows under the scrollbars",
-                   "[Page][LocalFrameView][Scrolling]")
+  TEST_CASE_METHOD(css::tests::ValueFixture, "FrameView: the root background shows under the scrollbars",
+                   "[Page][FrameView][Scrolling]")
   {
     ScrollFixture fixture {u8"<!DOCTYPE html><style>html{background:linear-gradient(red,blue)}body{margin:0}"
                            u8"div{width:400px;height:600px}</style><div></div>"};
@@ -385,8 +385,8 @@ namespace krys::boo::tests
   }
 
   TEST_CASE_METHOD(css::tests::ValueFixture,
-                   "LocalFrameView: while scrolling is prohibited, a contents size change doesn't scroll",
-                   "[Page][LocalFrameView][Scrolling]")
+                   "FrameView: while scrolling is prohibited, a contents size change doesn't scroll",
+                   "[Page][FrameView][Scrolling]")
   {
     ScrollFixture fixture {
       u8"<!DOCTYPE html><style>body{margin:0}</style><div id=page style=height:600px></div>"};
@@ -439,8 +439,7 @@ namespace krys::boo::tests
     }
   }
 
-  TEST_CASE_METHOD(css::tests::ValueFixture, "LocalFrameView: scrolling into view",
-                   "[Page][LocalFrameView][Scrolling]")
+  TEST_CASE_METHOD(css::tests::ValueFixture, "FrameView: scrolling into view", "[Page][FrameView][Scrolling]")
   {
     ScrollFixture fixture {utf8_string(TallPage)
                            + u8"<a id=link href=x style=display:block;height:20px>link</a>"};
@@ -466,8 +465,8 @@ namespace krys::boo::tests
     }
   }
 
-  TEST_CASE_METHOD(css::tests::ValueFixture, "LocalFrameView: revealing a selection only forward",
-                   "[Page][LocalFrameView][Scrolling]")
+  TEST_CASE_METHOD(css::tests::ValueFixture, "FrameView: revealing a selection only forward",
+                   "[Page][FrameView][Scrolling]")
   {
     ScrollFixture fixture {u8"<!DOCTYPE html><style>body{margin:0}#page{width:400px;height:600px}</style>"
                            u8"<div id=page><div id=top style=height:20px>top</div>"
@@ -502,8 +501,7 @@ namespace krys::boo::tests
     }
   }
 
-  TEST_CASE_METHOD(css::tests::ValueFixture, "LocalFrameView: scroll events",
-                   "[Page][LocalFrameView][Scrolling]")
+  TEST_CASE_METHOD(css::tests::ValueFixture, "FrameView: scroll events", "[Page][FrameView][Scrolling]")
   {
     ScrollFixture fixture {
       utf8_string(TallPage)
@@ -537,8 +535,8 @@ namespace krys::boo::tests
     CHECK(records == Strings {"scroll:box", "scrollend:box"});
   }
 
-  TEST_CASE_METHOD(css::tests::ValueFixture, "LocalFrameView: the view's scrollbars follow the mouse",
-                   "[Page][LocalFrameView][Scrolling]")
+  TEST_CASE_METHOD(css::tests::ValueFixture, "FrameView: the view's scrollbars follow the mouse",
+                   "[Page][FrameView][Scrolling]")
   {
     ScrollFixture fixture {utf8_string(TallPage) + u8"<input id=field>"};
     auto &view = fixture.View();
@@ -618,8 +616,8 @@ namespace krys::boo::tests
     }
   }
 
-  TEST_CASE_METHOD(css::tests::ValueFixture, "LocalFrameView: the view keeps the boxes that scroll",
-                   "[Page][LocalFrameView][Scrolling]")
+  TEST_CASE_METHOD(css::tests::ValueFixture, "FrameView: the view keeps the boxes that scroll",
+                   "[Page][FrameView][Scrolling]")
   {
     ScrollFixture fixture {u8"<!DOCTYPE html><style>body{margin:0}div{width:50px;height:50px}</style>"
                            u8"<div id=scrolls style=overflow:auto><div style=height:500px></div></div>"
@@ -660,8 +658,8 @@ namespace krys::boo::tests
     CHECK(visited == 2);
   }
 
-  TEST_CASE_METHOD(css::tests::ValueFixture, "LocalFrameView: a page's step leaves out the scroll padding",
-                   "[Page][LocalFrameView][Scrolling]")
+  TEST_CASE_METHOD(css::tests::ValueFixture, "FrameView: a page's step leaves out the scroll padding",
+                   "[Page][FrameView][Scrolling]")
   {
     ScrollFixture fixture {utf8_string(TallPage)};
     auto &view = fixture.View();
@@ -677,9 +675,8 @@ namespace krys::boo::tests
     CHECK(view.VerticalScrollbar()->PageStep() == Scrollbar::PageStep(59));
   }
 
-  TEST_CASE_METHOD(css::tests::ValueFixture,
-                   "LocalFrameView: a box keeps its scroll position as its zoom changes",
-                   "[Page][LocalFrameView][Scrolling]")
+  TEST_CASE_METHOD(css::tests::ValueFixture, "FrameView: a box keeps its scroll position as its zoom changes",
+                   "[Page][FrameView][Scrolling]")
   {
     ScrollFixture fixture {
       u8"<!DOCTYPE html><style>body{margin:0}</style>"
@@ -695,8 +692,8 @@ namespace krys::boo::tests
     CHECK(scroller.ScrollTop() == 100);
   }
 
-  TEST_CASE_METHOD(css::tests::ValueFixture, "LocalFrameView: overlay scrollbars turn light over a dark page",
-                   "[Page][LocalFrameView][Scrolling]")
+  TEST_CASE_METHOD(css::tests::ValueFixture, "FrameView: overlay scrollbars turn light over a dark page",
+                   "[Page][FrameView][Scrolling]")
   {
     auto page = [](utf8_stringview background)
     {
@@ -752,8 +749,8 @@ namespace krys::boo::tests
   }
 
   TEST_CASE_METHOD(css::tests::ValueFixture,
-                   "LocalFrameView: the root's scrollbar-gutter keeps the scrollbar's space",
-                   "[Page][LocalFrameView][Scrolling]")
+                   "FrameView: the root's scrollbar-gutter keeps the scrollbar's space",
+                   "[Page][FrameView][Scrolling]")
   {
     // A short page has no scrollbar, but a stable gutter keeps its 21 pixels.
     auto page = [](utf8_stringview gutter)
@@ -788,9 +785,8 @@ namespace krys::boo::tests
     }
   }
 
-  TEST_CASE_METHOD(css::tests::ValueFixture,
-                   "LocalFrameView: a press in the scrollbars' corner doesn't select",
-                   "[Page][LocalFrameView][Scrolling]")
+  TEST_CASE_METHOD(css::tests::ValueFixture, "FrameView: a press in the scrollbars' corner doesn't select",
+                   "[Page][FrameView][Scrolling]")
   {
     ScrollFixture fixture {
       u8"<!DOCTYPE html><style>body{margin:0}</style><div style=width:400px;height:600px>"
@@ -815,8 +811,8 @@ namespace krys::boo::tests
     CHECK(selection.Selection().IsRange());
   }
 
-  TEST_CASE_METHOD(css::tests::ValueFixture, "LocalFrameView: a box's scrollbars follow the mouse",
-                   "[Page][LocalFrameView][Scrolling]")
+  TEST_CASE_METHOD(css::tests::ValueFixture, "FrameView: a box's scrollbars follow the mouse",
+                   "[Page][FrameView][Scrolling]")
   {
     ScrollFixture fixture {
       u8"<!DOCTYPE html><style>body{margin:0}</style>"
@@ -849,8 +845,7 @@ namespace krys::boo::tests
     }
   }
 
-  TEST_CASE_METHOD(css::tests::ValueFixture, "LocalFrameView: the wheel scrolls",
-                   "[Page][LocalFrameView][Scrolling]")
+  TEST_CASE_METHOD(css::tests::ValueFixture, "FrameView: the wheel scrolls", "[Page][FrameView][Scrolling]")
   {
     // The box is fixed at the top of the view: 50 pixels tall, with 150 more to scroll.
     ScrollFixture fixture {utf8_string(TallPage)
@@ -937,8 +932,8 @@ namespace krys::boo::tests
     }
   }
 
-  TEST_CASE_METHOD(css::tests::ValueFixture, "LocalFrameView: a touch's pan scrolls",
-                   "[Page][LocalFrameView][Scrolling]")
+  TEST_CASE_METHOD(css::tests::ValueFixture, "FrameView: a touch's pan scrolls",
+                   "[Page][FrameView][Scrolling]")
   {
     // The box is fixed at the top of the view: 50 pixels tall, with 150 more to scroll.
     ScrollFixture fixture {utf8_string(TallPage)
@@ -995,8 +990,8 @@ namespace krys::boo::tests
     }
   }
 
-  TEST_CASE_METHOD(css::tests::ValueFixture, "LocalFrameView: the keyboard scrolls",
-                   "[Page][LocalFrameView][Scrolling]")
+  TEST_CASE_METHOD(css::tests::ValueFixture, "FrameView: the keyboard scrolls",
+                   "[Page][FrameView][Scrolling]")
   {
     ScrollFixture fixture {
       utf8_string(TallPage)

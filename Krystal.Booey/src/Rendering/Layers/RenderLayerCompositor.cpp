@@ -29,7 +29,7 @@
 #include "Krystal.Booey/Graphics/GraphicsContext.hpp"
 #include "Krystal.Booey/Page/Clients/ChromeClient.hpp"
 #include "Krystal.Booey/Page/Frame.hpp"
-#include "Krystal.Booey/Page/LocalFrameView.hpp"
+#include "Krystal.Booey/Page/FrameView.hpp"
 #include "Krystal.Booey/Page/Scrolling/ScrollingConstraints.hpp"
 #include "Krystal.Booey/Page/Settings.hpp"
 #include "Krystal.Booey/Platform/Scrolling/Scrollbar.hpp"
@@ -2664,7 +2664,7 @@ namespace krys::boo
     PointI scrollPosition = frameView.GetScrollPosition();
 
     // We use scroll position here because the root content layer is offset to account for scrollOrigin (see
-    // LocalFrameView::positionForRootContentLayer).
+    // FrameView::positionForRootContentLayer).
     _scrolledContentsLayer->SetPosition(
       PointF(static_cast<float>(-scrollPosition.X()), static_cast<float>(-scrollPosition.Y())));
 

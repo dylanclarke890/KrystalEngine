@@ -1,4 +1,4 @@
-﻿#include "Krystal.Booey/Page/LocalFrameView.hpp"
+﻿#include "Krystal.Booey/Page/FrameView.hpp"
 #include "catch2/catch_test_macros.hpp"
 #include "Krystal.Booey.Tests/Style/ResolverTestUtils.hpp"
 #include "Krystal.Booey/CSS/CSSOM/MediaQueryList.hpp"
@@ -34,7 +34,7 @@ namespace krys::boo::tests
         Frame->SetDocument(ShareRefPtr<boo::Document>(Document.get()));
       }
 
-      KRYS_NODISCARD LocalFrameView &View() const noexcept
+      KRYS_NODISCARD FrameView &View() const noexcept
       {
         return *Frame->View();
       }
@@ -142,7 +142,7 @@ namespace krys::boo::tests
     }
   }
 
-  TEST_CASE_METHOD(css::tests::ValueFixture, "LocalFrameView: sizes", "[Page][LocalFrameView]")
+  TEST_CASE_METHOD(css::tests::ValueFixture, "FrameView: sizes", "[Page][FrameView]")
   {
     FrameFixture fixture {u8"<!DOCTYPE html>"};
     auto &view = fixture.View();
@@ -193,7 +193,7 @@ namespace krys::boo::tests
     }
   }
 
-  TEST_CASE_METHOD(css::tests::ValueFixture, "LocalFrameView: viewport units", "[Page][LocalFrameView]")
+  TEST_CASE_METHOD(css::tests::ValueFixture, "FrameView: viewport units", "[Page][FrameView]")
   {
     SECTION("Viewport units are zero without a view")
     {
@@ -268,8 +268,8 @@ namespace krys::boo::tests
     }
   }
 
-  TEST_CASE_METHOD(css::tests::ValueFixture, "LocalFrameView: registered properties with viewport units",
-                   "[Page][LocalFrameView]")
+  TEST_CASE_METHOD(css::tests::ValueFixture, "FrameView: registered properties with viewport units",
+                   "[Page][FrameView]")
   {
     FrameFixture fixture {u8R"(<!DOCTYPE html><style>
       @property --size { syntax: '<length>'; inherits: false; initial-value: 10vw }
@@ -285,8 +285,8 @@ namespace krys::boo::tests
     CHECK(fixture.Width(u8"d") == "100px");
   }
 
-  TEST_CASE_METHOD(css::tests::ValueFixture, "LocalFrameView: layout re-evaluates media queries",
-                   "[Page][LocalFrameView]")
+  TEST_CASE_METHOD(css::tests::ValueFixture, "FrameView: layout re-evaluates media queries",
+                   "[Page][FrameView]")
   {
     // The root hides the view's scrollbars, so a resize doesn't lay the document out at once to fit them.
     FrameFixture fixture {u8R"(<!DOCTYPE html><style>
@@ -341,7 +341,7 @@ namespace krys::boo::tests
     }
   }
 
-  TEST_CASE_METHOD(css::tests::ValueFixture, "LocalFrameView: media type", "[Page][LocalFrameView]")
+  TEST_CASE_METHOD(css::tests::ValueFixture, "FrameView: media type", "[Page][FrameView]")
   {
     FrameFixture fixture {u8R"(<!DOCTYPE html><style>
       @media print { p { color: rgb(0, 0, 255) } }
@@ -401,8 +401,8 @@ namespace krys::boo::tests
     CHECK(hiDPI->Matches());
   }
 
-  TEST_CASE_METHOD(css::tests::ValueFixture, "LocalFrameView: the style recalc and layout timers",
-                   "[Page][LocalFrameView][Timer]")
+  TEST_CASE_METHOD(css::tests::ValueFixture, "FrameView: the style recalc and layout timers",
+                   "[Page][FrameView][Timer]")
   {
     FrameFixture fixture {u8"<!DOCTYPE html><div id=box style=width:10px;height:10px></div>"};
     auto &loop = html::EventLoop::Current();
@@ -430,8 +430,7 @@ namespace krys::boo::tests
     }
   }
 
-  TEST_CASE_METHOD(css::tests::ValueFixture, "LocalFrameView: no layout while painting",
-                   "[Page][LocalFrameView]")
+  TEST_CASE_METHOD(css::tests::ValueFixture, "FrameView: no layout while painting", "[Page][FrameView]")
   {
     FrameFixture fixture {
       u8"<!DOCTYPE html><div id=box style='width:10px;height:10px'></div><canvas id=canvas></canvas>"};

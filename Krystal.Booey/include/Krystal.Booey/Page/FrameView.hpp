@@ -27,7 +27,7 @@
 #include "Krystal.Booey/CSS/Types/CSSOMString.hpp"
 #include "Krystal.Booey/Graphics/Color/Color.hpp"
 #include "Krystal.Booey/Graphics/Geometry/BoxSides.hpp"
-#include "Krystal.Booey/Page/LocalFrameViewLayoutContext.hpp"
+#include "Krystal.Booey/Page/FrameViewLayoutContext.hpp"
 #include "Krystal.Booey/Platform/Scrolling/ScrollableArea.hpp"
 #include "Krystal.Booey/Platform/Scrolling/ScrollTypes.hpp"
 #include "Krystal.Booey/Rendering/Layers/RenderLayer.hpp"
@@ -54,7 +54,7 @@ namespace krys::boo
   class Frame;
   class GraphicsContext;
   class GraphicsLayer;
-  class LocalFrameView;
+  class FrameView;
   class RenderView;
 
   /// @brief While it lives, changes to a view's contents size don't scroll it or change its scrollbars, as
@@ -68,7 +68,7 @@ namespace krys::boo
     WeakPtr<ScrollableArea> _view;
 
   public:
-    explicit ProhibitScrollingWhenChangingContentSizeForScope(LocalFrameView &view) noexcept;
+    explicit ProhibitScrollingWhenChangingContentSizeForScope(FrameView &view) noexcept;
 
     ~ProhibitScrollingWhenChangingContentSizeForScope() noexcept;
   };
@@ -87,13 +87,13 @@ namespace krys::boo
     RectI Rect;
   };
 
-  class LocalFrameView final : public RefCounted<LocalFrameView>,
-                               public CanMakeWeakPtr<LocalFrameView>,
-                               public ScrollableArea
+  class FrameView final : public RefCounted<FrameView>,
+                          public CanMakeWeakPtr<FrameView>,
+                          public ScrollableArea
   {
     friend class ProhibitScrollingWhenChangingContentSizeForScope;
-    KRYS_NON_COPY_MOVABLE(LocalFrameView);
-    KRYS_OVERRIDE_DELETE_FOR_CHECKED_PTR(LocalFrameView);
+    KRYS_NON_COPY_MOVABLE(FrameView);
+    KRYS_OVERRIDE_DELETE_FOR_CHECKED_PTR(FrameView);
 
   public:
     /// @brief How the user scrolled a view: themselves, or by something they did (moving the selection).
@@ -121,7 +121,7 @@ namespace krys::boo
     Maybe<OverrideViewportSize> _defaultViewportSizeOverride;
     Maybe<OverrideViewportSize> _smallViewportSizeOverride;
     Maybe<OverrideViewportSize> _largeViewportSizeOverride;
-    LocalFrameViewLayoutContext _layoutContext;
+    FrameViewLayoutContext _layoutContext;
     EnumSet<PaintBehavior> _paintBehavior;
     boo::Color _baseBackgroundColor {boo::Color::white};
     RefPtr<Node> _nodeToDraw;
@@ -182,14 +182,14 @@ namespace krys::boo
     float _lastUsedZoomFactor {1};
     float _lastFrameScaleFactor {1};
 
-    explicit LocalFrameView(boo::Frame &frame) noexcept;
+    explicit FrameView(boo::Frame &frame) noexcept;
 
   public:
-    ~LocalFrameView() noexcept override;
+    ~FrameView() noexcept override;
 
-    KRYS_NODISCARD static Ref<LocalFrameView> Create(boo::Frame &frame) noexcept;
+    KRYS_NODISCARD static Ref<FrameView> Create(boo::Frame &frame) noexcept;
 
-    KRYS_NODISCARD static Ref<LocalFrameView> Create(boo::Frame &frame, const SizeI &initialSize) noexcept;
+    KRYS_NODISCARD static Ref<FrameView> Create(boo::Frame &frame, const SizeI &initialSize) noexcept;
 
     KRYS_NODISCARD boo::Frame &Frame() const noexcept;
 
@@ -220,12 +220,12 @@ namespace krys::boo
       return !IsVisible();
     }
 
-    KRYS_NODISCARD LocalFrameViewLayoutContext &LayoutContext() noexcept
+    KRYS_NODISCARD FrameViewLayoutContext &LayoutContext() noexcept
     {
       return _layoutContext;
     }
 
-    KRYS_NODISCARD const LocalFrameViewLayoutContext &LayoutContext() const noexcept
+    KRYS_NODISCARD const FrameViewLayoutContext &LayoutContext() const noexcept
     {
       return _layoutContext;
     }
@@ -1127,7 +1127,7 @@ namespace krys::boo
   };
 }
 
-KRYS_SPECIALIZE_TYPE_CAST_TRAITS_BEGIN(krys::boo::LocalFrameView)
+KRYS_SPECIALIZE_TYPE_CAST_TRAITS_BEGIN(krys::boo::FrameView)
   KRYS_NODISCARD static bool IsType(const krys::boo::ScrollableArea &area) noexcept
   {
     return area.IsScrollView();

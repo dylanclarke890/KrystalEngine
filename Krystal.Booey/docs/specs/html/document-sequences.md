@@ -14,7 +14,7 @@ Status: reviewed (2026-11-01)
 #### [7.3.1 Navigables](https://html.spec.whatwg.org/#navigables)
 
 Status: reviewed (2026-11-01)
-> A `LocalFrame` is the navigable: its document is the active document (`Document::Frame` is the node navigable), its window the active window and `SpecifiedName` the target name. Session history entries are `HistoryItem`s, kept by the page's `BackForwardController`, rather than the navigable's.
+> A `Frame` is the navigable: its document is the active document (`Document::Frame` is the node navigable), its window the active window and `SpecifiedName` the target name. Session history entries are `HistoryItem`s, kept by the page's `BackForwardController`, rather than the navigable's.
 <!-- definitions: navigable nav-id nav-parent nav-current-history-entry nav-active-history-entry is-closing delaying-load-events-mode allowed-to-perform-a-navigation-or-history-update -->
 
 - [x] [active document (navigable)](https://html.spec.whatwg.org/#nav-document) — A navigable's active document is its active session history entry's document.

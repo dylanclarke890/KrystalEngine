@@ -37,15 +37,14 @@ namespace krys::boo
   class AXScrollView final : public AXObject
   {
   private:
-    // The view (a LocalFrameView, which has two weak pointer factories, so the ScrollableArea one is used).
+    // The view (a FrameView, which has two weak pointer factories, so the ScrollableArea one is used).
     WeakPtr<ScrollableArea> _scrollView;
     RefPtr<AXObject> _horizontalScrollbar;
     RefPtr<AXObject> _verticalScrollbar;
     bool _childrenDirty {false};
 
   public:
-    KRYS_NODISCARD static Ref<AXScrollView> Create(AXId id, LocalFrameView &view,
-                                                   AXObjectCache &cache) noexcept;
+    KRYS_NODISCARD static Ref<AXScrollView> Create(AXId id, FrameView &view, AXObjectCache &cache) noexcept;
 
     ~AXScrollView() noexcept override;
 
@@ -56,7 +55,7 @@ namespace krys::boo
       return true;
     }
 
-    KRYS_NODISCARD LocalFrameView *ScrollView() const noexcept;
+    KRYS_NODISCARD FrameView *ScrollView() const noexcept;
 
     /// @brief The view's document's web area.
     KRYS_NODISCARD AXObject *WebAreaObject() const noexcept;
@@ -98,7 +97,7 @@ namespace krys::boo
     }
 
   private:
-    AXScrollView(AXId id, LocalFrameView &view, AXObjectCache &cache) noexcept;
+    AXScrollView(AXId id, FrameView &view, AXObjectCache &cache) noexcept;
 
     KRYS_NODISCARD AXRole DetermineAccessibilityRole() noexcept override
     {

@@ -72,8 +72,8 @@
 #include "Krystal.Booey/Infra/StringAlgorithms.hpp"
 #include "Krystal.Booey/Page/Clients/ChromeClient.hpp"
 #include "Krystal.Booey/Page/Frame.hpp"
+#include "Krystal.Booey/Page/FrameView.hpp"
 #include "Krystal.Booey/Page/LocalDOMWindow.hpp"
-#include "Krystal.Booey/Page/LocalFrameView.hpp"
 #include "Krystal.Booey/Rendering/HitTesting/HitTestRequest.hpp"
 #include "Krystal.Booey/Rendering/HitTesting/HitTestResult.hpp"
 #include "Krystal.Booey/Rendering/Layers/RenderLayer.hpp"
@@ -385,7 +385,7 @@ namespace krys::boo
     return document ? document->Frame() : nullptr;
   }
 
-  LocalFrameView *AXObject::DocumentFrameView() const noexcept
+  FrameView *AXObject::DocumentFrameView() const noexcept
   {
     auto *document = GetDocument();
     return document ? document->View() : nullptr;
@@ -1781,7 +1781,7 @@ namespace krys::boo
     }
     if (auto *renderer = Renderer())
     {
-      (void)LocalFrameView::ScrollRectToVisible(ElementRect(), *renderer, false, {});
+      (void)FrameView::ScrollRectToVisible(ElementRect(), *renderer, false, {});
     }
   }
 

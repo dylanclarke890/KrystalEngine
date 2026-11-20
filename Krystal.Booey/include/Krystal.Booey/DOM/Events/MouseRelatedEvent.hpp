@@ -31,7 +31,7 @@
 
 namespace krys::boo
 {
-  class LocalFrameView;
+  class FrameView;
   struct MouseEventInit;
 
   /// @brief An event at a point on the screen: its coordinates in the screen, the viewport, the page, the
@@ -46,7 +46,7 @@ namespace krys::boo
     };
 
   private:
-    RefPtr<LocalFrameView> _view;
+    RefPtr<boo::FrameView> _view;
     double _movementX {0};
     double _movementY {0};
     PointD _windowLocation;
@@ -143,10 +143,10 @@ namespace krys::boo
     }
 
     /// @brief The frame view of the event's view, which its coordinates are relative to.
-    KRYS_NODISCARD LocalFrameView *FrameView() const noexcept;
+    KRYS_NODISCARD boo::FrameView *FrameView() const noexcept;
 
   protected:
-    MouseRelatedEvent(DOMStringAtom type, const UIEventInit &eventInitDict, LocalFrameView *view,
+    MouseRelatedEvent(DOMStringAtom type, const UIEventInit &eventInitDict, boo::FrameView *view,
                       const PointD &screenLocation, const PointD &windowLocation, double movementX,
                       double movementY, EnumSet<Modifier> modifiers, Simulated isSimulated) noexcept;
 

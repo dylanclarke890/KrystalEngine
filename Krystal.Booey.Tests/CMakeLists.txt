@@ -384,8 +384,8 @@ target_sources(Krystal.Booey.Tests
 		tests/Graphics/Fonts/FontDatabase.cpp
 		tests/Graphics/TextRuns/TextRunIterator.cpp
 		tests/Graphics/TextRuns/WidthIterator.cpp
-		tests/Page/LocalFrameView.cpp
-		tests/Page/LocalFrameViewScrolling.cpp
+		tests/Page/FrameView.cpp
+		tests/Page/FrameViewScrolling.cpp
 		tests/Page/Scrolling/ScrollAnchoringController.cpp
 		tests/Page/Scrolling/ScrollLatchingController.cpp
 		tests/Page/Scrolling/ScrollSnapOffsetsInfo.cpp

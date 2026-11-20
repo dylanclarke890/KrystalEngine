@@ -34,8 +34,8 @@
 #include "Krystal.Booey/DOM/Types/DOMString.hpp"
 #include "Krystal.Booey/Loader/Cache/CachePolicy.hpp"
 #include "Krystal.Booey/Loader/FetchOptions.hpp"
+#include "Krystal.Booey/Loader/FrameLoaderClient.hpp"
 #include "Krystal.Booey/Loader/FrameLoaderTypes.hpp"
-#include "Krystal.Booey/Loader/LocalFrameLoaderClient.hpp"
 #include "Krystal.Booey/Loader/SubstituteData.hpp"
 #include "Krystal.Core/Attributes.hpp"
 #include "Krystal.Core/Macros.hpp"
@@ -84,7 +84,7 @@ namespace krys::boo
 
   private:
     boo::Frame &_frame;
-    UniquePtr<LocalFrameLoaderClient> _client;
+    UniquePtr<FrameLoaderClient> _client;
     FrameLoadType _loadType {FrameLoadType::Standard};
     /// @brief The loader of the frame's document.
     RefPtr<DocumentLoader> _documentLoader;
@@ -105,11 +105,11 @@ namespace krys::boo
   public:
     /// @param client The host's side of the loader; without one, the loader has an empty client, which
     /// ignores every navigation.
-    FrameLoader(boo::Frame &frame, UniquePtr<LocalFrameLoaderClient> &&client) noexcept;
+    FrameLoader(boo::Frame &frame, UniquePtr<FrameLoaderClient> &&client) noexcept;
 
     ~FrameLoader() noexcept;
 
-    KRYS_NODISCARD LocalFrameLoaderClient &Client() const noexcept
+    KRYS_NODISCARD FrameLoaderClient &Client() const noexcept
     {
       return *_client;
     }

@@ -47,7 +47,7 @@ namespace krys::boo
   class Frame;
   class IntersectionObserver;
   class IntersectionObserverEntry;
-  class LocalFrameView;
+  class FrameView;
 
   struct IntersectionObserverRegistration
   {
@@ -225,8 +225,8 @@ namespace krys::boo
 
     void RemoveAllTargets() noexcept;
 
-    KRYS_NODISCARD IntersectionObservationState ComputeIntersectionState(
-      const IntersectionObserverRegistration &registration, LocalFrameView &hostFrameView, Element &target,
-      ApplyRootMargin applyRootMargin) const noexcept;
+    KRYS_NODISCARD IntersectionObservationState
+      ComputeIntersectionState(const IntersectionObserverRegistration &registration, FrameView &hostFrameView,
+                               Element &target, ApplyRootMargin applyRootMargin) const noexcept;
   };
 }

@@ -25,7 +25,7 @@
 
 #pragma once
 
-#include "Krystal.Booey/Page/LocalFrameViewLayoutContext.hpp"
+#include "Krystal.Booey/Page/FrameViewLayoutContext.hpp"
 #include "Krystal.Core/Attributes.hpp"
 #include "Krystal.Core/Macros.hpp"
 #include "Krystal.Core/Types/Maybe.hpp"
@@ -43,7 +43,7 @@ namespace krys::boo
 
   private:
     const RenderBlockFlow *_blockContainer;
-    Maybe<LocalFrameViewLayoutContext::TextBoxTrim> _previousTextBoxTrimStatus;
+    Maybe<FrameViewLayoutContext::TextBoxTrim> _previousTextBoxTrimStatus;
     bool _shouldRestoreTextBoxTrimStatus {false};
 
   public:
@@ -73,7 +73,7 @@ namespace krys::boo
 
   private:
     const RenderBox *_renderBox;
-    Maybe<LocalFrameViewLayoutContext::TextBoxTrim> _previousTextBoxTrimStatus;
+    Maybe<FrameViewLayoutContext::TextBoxTrim> _previousTextBoxTrimStatus;
 
   public:
     explicit TextBoxTrimStartDisabler(const RenderBox &renderBox) noexcept;

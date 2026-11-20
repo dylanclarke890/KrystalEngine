@@ -69,7 +69,7 @@
 #include "Krystal.Booey/MathML/Elements/MathMLElement.hpp"
 #include "Krystal.Booey/Page/Clients/ChromeClient.hpp"
 #include "Krystal.Booey/Page/Frame.hpp"
-#include "Krystal.Booey/Page/LocalFrameView.hpp"
+#include "Krystal.Booey/Page/FrameView.hpp"
 #include "Krystal.Booey/Rendering/FormControls/RenderMenuList.hpp"
 #include "Krystal.Booey/Rendering/FormControls/RenderMeter.hpp"
 #include "Krystal.Booey/Rendering/FormControls/RenderProgress.hpp"
@@ -238,7 +238,7 @@ namespace krys::boo
     return GetOrCreate(_document.GetRenderView());
   }
 
-  AXObject *AXObjectCache::GetOrCreate(LocalFrameView &view) noexcept
+  AXObject *AXObjectCache::GetOrCreate(FrameView &view) noexcept
   {
     if (_scrollViewID)
     {

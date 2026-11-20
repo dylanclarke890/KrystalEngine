@@ -153,7 +153,7 @@ namespace krys::boo
     _hasReceivedSomeData = false;
 
     // The view starts over for the new document, its scrollbars staying as they are until its first layout
-    // (FrameLoader::clear's LocalFrameView::clear).
+    // (FrameLoader::clear's FrameView::clear).
     if (auto *view = frame->View())
     {
       view->Clear();

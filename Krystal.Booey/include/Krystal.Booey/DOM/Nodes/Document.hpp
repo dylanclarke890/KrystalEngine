@@ -113,7 +113,7 @@ namespace krys::boo
   class IntersectionObserver;
   struct IntersectionObserverData;
   class LocalDOMWindow;
-  class LocalFrameView;
+  class FrameView;
   class MediaQueryList;
   class MouseEvent;
   class MouseEventWithHitTestResults;
@@ -1746,7 +1746,7 @@ namespace krys::boo
     }
 
     /// @brief The view the document is laid out in: its frame's, if any.
-    KRYS_NODISCARD LocalFrameView *View() const noexcept;
+    KRYS_NODISCARD FrameView *View() const noexcept;
 
     /// @brief The root of the document's render tree, if it has one.
     KRYS_NODISCARD const boo::RenderView *GetRenderView() const noexcept

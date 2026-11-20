@@ -39,8 +39,8 @@
 #include "Krystal.Booey/DOM/Nodes/Element.hpp"
 #include "Krystal.Booey/Graphics/Geometry/BoxSides.hpp"
 #include "Krystal.Booey/Page/Frame.hpp"
+#include "Krystal.Booey/Page/FrameView.hpp"
 #include "Krystal.Booey/Page/LocalDOMWindow.hpp"
-#include "Krystal.Booey/Page/LocalFrameView.hpp"
 #include "Krystal.Booey/Rendering/RenderBlock.hpp"
 #include "Krystal.Booey/Rendering/RenderInline.hpp"
 #include "Krystal.Booey/Rendering/RenderLineBreak.hpp"
@@ -459,7 +459,7 @@ namespace krys::boo
   }
 
   auto IntersectionObserver::ComputeIntersectionState(const IntersectionObserverRegistration &registration,
-                                                      LocalFrameView &hostFrameView, Element &target,
+                                                      FrameView &hostFrameView, Element &target,
                                                       ApplyRootMargin applyRootMargin) const noexcept
     -> IntersectionObservationState
   {
@@ -680,7 +680,7 @@ namespace krys::boo
 
   auto IntersectionObserver::UpdateObservations(const Frame &hostFrame) noexcept -> NeedNotify
   {
-    RefPtr<LocalFrameView> hostFrameView = ShareRefPtr(hostFrame.View());
+    RefPtr<FrameView> hostFrameView = ShareRefPtr(hostFrame.View());
     if (!hostFrameView)
     {
       return NeedNotify::No;

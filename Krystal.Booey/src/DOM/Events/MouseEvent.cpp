@@ -28,7 +28,7 @@
 #include "Krystal.Booey/DOM/Nodes/Node.hpp"
 #include "Krystal.Booey/Input/PlatformMouseEvent.hpp"
 #include "Krystal.Booey/Page/Frame.hpp"
-#include "Krystal.Booey/Page/LocalFrameView.hpp"
+#include "Krystal.Booey/Page/FrameView.hpp"
 #include <cmath>
 
 namespace krys::boo
@@ -73,7 +73,7 @@ namespace krys::boo
     InitCoordinates({FiniteOrZero(initializer.ClientX), FiniteOrZero(initializer.ClientY)});
   }
 
-  MouseEvent::MouseEvent(DOMStringAtom type, const UIEventInit &eventInitDict, LocalFrameView *view,
+  MouseEvent::MouseEvent(DOMStringAtom type, const UIEventInit &eventInitDict, boo::FrameView *view,
                          const PointD &screenLocation, const PointD &windowLocation, double movementX,
                          double movementY, EnumSet<Modifier> modifiers, MouseButton button, uint16 buttons,
                          EventTarget *relatedTarget, double force, SyntheticClickType syntheticClickType,
@@ -88,7 +88,7 @@ namespace krys::boo
     _isTrusted = true;
   }
 
-  Ref<MouseEvent> MouseEvent::Create(const DOMStringAtom &eventType, LocalFrameView *view,
+  Ref<MouseEvent> MouseEvent::Create(const DOMStringAtom &eventType, boo::FrameView *view,
                                      const PlatformMouseEvent &event,
                                      const List<Ref<MouseEvent>> &coalescedEvents,
                                      const List<Ref<MouseEvent>> &predictedEvents, int32 detail,
@@ -112,7 +112,7 @@ namespace krys::boo
   }
 
   Ref<MouseEvent> MouseEvent::Create(DOMStringAtom eventType, bool canBubble, bool isCancelable,
-                                     bool isComposed, MonotonicTime::duration timestamp, LocalFrameView *view,
+                                     bool isComposed, MonotonicTime::duration timestamp, boo::FrameView *view,
                                      int32 detail, double screenX, double screenY, double clientX,
                                      double clientY, EnumSet<Modifier> modifiers, MouseButton button,
                                      uint16 buttons, SyntheticClickType syntheticClickType,

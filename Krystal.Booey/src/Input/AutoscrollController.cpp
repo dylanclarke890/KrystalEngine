@@ -31,7 +31,7 @@
 #include "Krystal.Booey/Input/EventHandler.hpp"
 #include "Krystal.Booey/Input/PlatformMouseEvent.hpp"
 #include "Krystal.Booey/Page/Frame.hpp"
-#include "Krystal.Booey/Page/LocalFrameView.hpp"
+#include "Krystal.Booey/Page/FrameView.hpp"
 #include "Krystal.Booey/Page/Settings.hpp"
 #include "Krystal.Booey/Rendering/FormControls/RenderListBox.hpp"
 #include "Krystal.Booey/Rendering/Layers/RenderLayer.hpp"
@@ -138,7 +138,7 @@ namespace krys::boo
   void AutoscrollController::UpdatePanScrollState(Frame &frame, const PointI &lastKnownMousePosition) noexcept
   {
     // Over the icon at the press there's no scrolling, so the cursor doesn't point anywhere.
-    auto radius = LocalFrameView::NoPanScrollRadius;
+    auto radius = FrameView::NoPanScrollRadius;
     bool east = _panScrollStartPosition.X() < lastKnownMousePosition.X() - radius;
     bool west = _panScrollStartPosition.X() > lastKnownMousePosition.X() + radius;
     bool north = _panScrollStartPosition.Y() > lastKnownMousePosition.Y() + radius;

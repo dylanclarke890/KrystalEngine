@@ -26,7 +26,7 @@
 #include "Krystal.Booey/DOM/Events/Touch.hpp"
 #include "Krystal.Booey/DOM/Events/EventTarget.hpp"
 #include "Krystal.Booey/Page/Frame.hpp"
-#include "Krystal.Booey/Page/LocalFrameView.hpp"
+#include "Krystal.Booey/Page/FrameView.hpp"
 
 namespace krys::boo
 {

@@ -23,11 +23,11 @@
  * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-#include "Krystal.Booey/Page/LocalFrameViewLayoutContext.hpp"
+#include "Krystal.Booey/Page/FrameViewLayoutContext.hpp"
 #include "Krystal.Booey/Accessibility/AXObjectCache.hpp"
 #include "Krystal.Booey/DOM/Nodes/Document.hpp"
 #include "Krystal.Booey/Page/Frame.hpp"
-#include "Krystal.Booey/Page/LocalFrameView.hpp"
+#include "Krystal.Booey/Page/FrameView.hpp"
 #include "Krystal.Booey/Rendering/Layers/RenderLayer.hpp"
 #include "Krystal.Booey/Rendering/Layers/RenderLayerCompositor.hpp"
 #include "Krystal.Booey/Rendering/RenderBox.hpp"
@@ -41,14 +41,14 @@
 
 namespace krys::boo
 {
-  LocalFrameViewLayoutContext::LocalFrameViewLayoutContext(LocalFrameView &frameView) noexcept
-      : _frameView(frameView), _layoutTimer(*this, &LocalFrameViewLayoutContext::LayoutTimerFired)
+  FrameViewLayoutContext::FrameViewLayoutContext(FrameView &frameView) noexcept
+      : _frameView(frameView), _layoutTimer(*this, &FrameViewLayoutContext::LayoutTimerFired)
   {
   }
 
-  LocalFrameViewLayoutContext::~LocalFrameViewLayoutContext() noexcept = default;
+  FrameViewLayoutContext::~FrameViewLayoutContext() noexcept = default;
 
-  bool LocalFrameViewLayoutContext::DetachedRendererList::Append(RenderPtr<RenderObject> renderer) noexcept
+  bool FrameViewLayoutContext::DetachedRendererList::Append(RenderPtr<RenderObject> renderer) noexcept
   {
     krys_debug_assert(!renderer->Parent());
     krys_debug_assert(!renderer->BeingDestroyed());
@@ -68,30 +68,30 @@ namespace krys::boo
     return true;
   }
 
-  void LocalFrameViewLayoutContext::DetachedRendererList::Clear() noexcept
+  void FrameViewLayoutContext::DetachedRendererList::Clear() noexcept
   {
     // Deleting a renderer can't add to the list, but take the list first so it's never walked as it changes.
     auto renderers = std::exchange(_renderers, {});
   }
 
-  boo::Frame &LocalFrameViewLayoutContext::Frame() const noexcept
+  boo::Frame &FrameViewLayoutContext::Frame() const noexcept
   {
     return _frameView.Frame();
   }
 
-  boo::Document *LocalFrameViewLayoutContext::Document() const noexcept
+  boo::Document *FrameViewLayoutContext::Document() const noexcept
   {
     return Frame().Document();
   }
 
-  RenderView *LocalFrameViewLayoutContext::GetRenderView() const noexcept
+  RenderView *FrameViewLayoutContext::GetRenderView() const noexcept
   {
     auto *document = Document();
     return document ? document->GetRenderView() : nullptr;
   }
 
   const AnchorScrollAdjuster *
-    LocalFrameViewLayoutContext::AnchorScrollAdjusterFor(const RenderBox &anchored) const noexcept
+    FrameViewLayoutContext::AnchorScrollAdjusterFor(const RenderBox &anchored) const noexcept
   {
     auto it = std::ranges::find_if(_anchorScrollAdjusters,
                                    [&](const auto &item) { return item.Anchored() == &anchored; });
@@ -103,7 +103,7 @@ namespace krys::boo
   }
 
   AnchorScrollAdjuster::Diff
-    LocalFrameViewLayoutContext::RegisterAnchorScrollAdjuster(AnchorScrollAdjuster &&scrollAdjuster) noexcept
+    FrameViewLayoutContext::RegisterAnchorScrollAdjuster(AnchorScrollAdjuster &&scrollAdjuster) noexcept
   {
     auto it = std::ranges::find_if(_anchorScrollAdjusters, [&](const auto &item)
                                    { return item.Anchored() == scrollAdjuster.Anchored(); });
@@ -121,7 +121,7 @@ namespace krys::boo
                             : AnchorScrollAdjuster::Diff::SnapshotsMatch;
   }
 
-  void LocalFrameViewLayoutContext::UnregisterAnchorScrollAdjusterFor(const RenderBox &anchored) noexcept
+  void FrameViewLayoutContext::UnregisterAnchorScrollAdjusterFor(const RenderBox &anchored) noexcept
   {
     if (auto it = std::ranges::find_if(_anchorScrollAdjusters,
                                        [&](const auto &item) { return item.Anchored() == &anchored; });
@@ -138,8 +138,7 @@ namespace krys::boo
     }
   }
 
-  void
-    LocalFrameViewLayoutContext::InvalidateAnchorDependenciesForScroller(const RenderBox &scroller) noexcept
+  void FrameViewLayoutContext::InvalidateAnchorDependenciesForScroller(const RenderBox &scroller) noexcept
   {
     for (auto &adjuster : _anchorScrollAdjusters)
     {
@@ -147,8 +146,7 @@ namespace krys::boo
     }
   }
 
-  void
-    LocalFrameViewLayoutContext::RemoveScrollerFromAnchorScrollAdjusters(const RenderBox &scroller) noexcept
+  void FrameViewLayoutContext::RemoveScrollerFromAnchorScrollAdjusters(const RenderBox &scroller) noexcept
   {
     if (!GetRenderView() || GetRenderView()->RenderTreeBeingDestroyed())
     {
@@ -172,7 +170,7 @@ namespace krys::boo
     }
   }
 
-  void LocalFrameViewLayoutContext::Layout() noexcept
+  void FrameViewLayoutContext::Layout() noexcept
   {
     Ref protectedView = ShareRef(_frameView);
 
@@ -203,7 +201,7 @@ namespace krys::boo
     }
   }
 
-  void LocalFrameViewLayoutContext::InterleavedLayout() noexcept
+  void FrameViewLayoutContext::InterleavedLayout() noexcept
   {
     Ref protectedView = ShareRef(_frameView);
 
@@ -213,7 +211,7 @@ namespace krys::boo
     Document()->StyleScope().InvalidateForLayoutDependencies(layoutDependencyUpdateContext);
   }
 
-  void LocalFrameViewLayoutContext::PerformLayout() noexcept
+  void FrameViewLayoutContext::PerformLayout() noexcept
   {
     krys_assert(Document());
     krys_assert(!Document()->InRenderTreeUpdate());
@@ -313,7 +311,7 @@ namespace krys::boo
     }
   }
 
-  bool LocalFrameViewLayoutContext::UpdateCompositingLayersAfterStyleChange() noexcept
+  bool FrameViewLayoutContext::UpdateCompositingLayersAfterStyleChange() noexcept
   {
     // If we expect to update compositing after an incipient layout, don't do so here.
     auto *view = GetRenderView();
@@ -332,7 +330,7 @@ namespace krys::boo
     return view->Compositor().DidRecalcStyleWithNoPendingLayout();
   }
 
-  void LocalFrameViewLayoutContext::UpdateCompositingLayersAfterLayout() noexcept
+  void FrameViewLayoutContext::UpdateCompositingLayersAfterLayout() noexcept
   {
     auto *renderView = GetRenderView();
     if (!renderView)
@@ -344,7 +342,7 @@ namespace krys::boo
     _updateCompositingLayersIsPending = false;
   }
 
-  bool LocalFrameViewLayoutContext::UpdateCompositingLayersAfterLayoutIfNeeded() noexcept
+  bool FrameViewLayoutContext::UpdateCompositingLayersAfterLayoutIfNeeded() noexcept
   {
     if (_updateCompositingLayersIsPending)
     {
@@ -355,12 +353,12 @@ namespace krys::boo
     return false;
   }
 
-  bool LocalFrameViewLayoutContext::NeedsLayout() const noexcept
+  bool FrameViewLayoutContext::NeedsLayout() const noexcept
   {
     return NeedsLayoutInternal();
   }
 
-  bool LocalFrameViewLayoutContext::NeedsLayoutInternal() const noexcept
+  bool FrameViewLayoutContext::NeedsLayoutInternal() const noexcept
   {
     // This can return true in cases where the document does not have a body yet.
     // Document::shouldScheduleLayout takes care of preventing us from scheduling
@@ -369,7 +367,7 @@ namespace krys::boo
     return IsLayoutPending() || (renderView && renderView->NeedsLayout()) || SubtreeLayoutRoot();
   }
 
-  void LocalFrameViewLayoutContext::SetNeedsLayoutAfterViewConfigurationChange() noexcept
+  void FrameViewLayoutContext::SetNeedsLayoutAfterViewConfigurationChange() noexcept
   {
     if (auto *renderView = GetRenderView())
     {
@@ -378,7 +376,7 @@ namespace krys::boo
     }
   }
 
-  void LocalFrameViewLayoutContext::ScheduleLayout() noexcept
+  void FrameViewLayoutContext::ScheduleLayout() noexcept
   {
     krys_debug_assert(Frame().View() == &_frameView);
     auto *document = Document();
@@ -411,17 +409,17 @@ namespace krys::boo
     document->ScheduleRenderingUpdate({});
   }
 
-  void LocalFrameViewLayoutContext::LayoutTimerFired() noexcept
+  void FrameViewLayoutContext::LayoutTimerFired() noexcept
   {
     Layout();
   }
 
-  void LocalFrameViewLayoutContext::UnscheduleLayout() noexcept
+  void FrameViewLayoutContext::UnscheduleLayout() noexcept
   {
     _layoutTimer.Stop();
   }
 
-  bool LocalFrameViewLayoutContext::CanPerformLayout() const noexcept
+  bool FrameViewLayoutContext::CanPerformLayout() const noexcept
   {
     if (IsInRenderTreeLayout())
     {
@@ -453,7 +451,7 @@ namespace krys::boo
     return false;
   }
 
-  void LocalFrameViewLayoutContext::ScheduleSubtreeLayout(RenderElement &layoutRoot) noexcept
+  void FrameViewLayoutContext::ScheduleSubtreeLayout(RenderElement &layoutRoot) noexcept
   {
     krys_debug_assert(GetRenderView());
     auto &renderView = *GetRenderView();
@@ -517,24 +515,24 @@ namespace krys::boo
     (void)layoutRoot.MarkContainingBlocksForLayout(&renderView);
   }
 
-  RenderElement *LocalFrameViewLayoutContext::SubtreeLayoutRoot() const noexcept
+  RenderElement *FrameViewLayoutContext::SubtreeLayoutRoot() const noexcept
   {
     return _subtreeLayoutRoot.get();
   }
 
-  void LocalFrameViewLayoutContext::ConvertSubtreeLayoutToFullLayout() noexcept
+  void FrameViewLayoutContext::ConvertSubtreeLayoutToFullLayout() noexcept
   {
     krys_debug_assert(SubtreeLayoutRoot());
     (void)SubtreeLayoutRoot()->MarkContainingBlocksForLayout(GetRenderView());
     ClearSubtreeLayoutRoot();
   }
 
-  void LocalFrameViewLayoutContext::SetSubtreeLayoutRoot(RenderElement &layoutRoot) noexcept
+  void FrameViewLayoutContext::SetSubtreeLayoutRoot(RenderElement &layoutRoot) noexcept
   {
     _subtreeLayoutRoot = CreateWeakPtr(&layoutRoot);
   }
 
-  void LocalFrameViewLayoutContext::UpdateStyleForLayout() noexcept
+  void FrameViewLayoutContext::UpdateStyleForLayout() noexcept
   {
     Ref document = ShareRef(*Document());
 
@@ -554,29 +552,28 @@ namespace krys::boo
     document->UpdateStyleIfNeeded();
   }
 
-  void LocalFrameViewLayoutContext::DisablePercentHeightResolveFor(const RenderBox &flexItem) noexcept
+  void FrameViewLayoutContext::DisablePercentHeightResolveFor(const RenderBox &flexItem) noexcept
   {
     _percentHeightIgnoreList.insert(&flexItem);
   }
 
-  void LocalFrameViewLayoutContext::EnablePercentHeightResolveFor(const RenderBox &flexItem) noexcept
+  void FrameViewLayoutContext::EnablePercentHeightResolveFor(const RenderBox &flexItem) noexcept
   {
     _percentHeightIgnoreList.erase(&flexItem);
   }
 
-  bool
-    LocalFrameViewLayoutContext::IsPercentHeightResolveDisabledFor(const RenderBox &flexItem) const noexcept
+  bool FrameViewLayoutContext::IsPercentHeightResolveDisabledFor(const RenderBox &flexItem) const noexcept
   {
     return _percentHeightIgnoreList.contains(&flexItem);
   }
 
-  void LocalFrameViewLayoutContext::SetBoxNeedsTransformUpdateAfterContainerLayout(
+  void FrameViewLayoutContext::SetBoxNeedsTransformUpdateAfterContainerLayout(
     RenderBox &box, const RenderBlock &container) noexcept
   {
     _containersWithDescendantsNeedingTransformUpdate[&container].push_back(CreateWeakPtr(&box));
   }
 
-  List<WeakPtr<RenderBox>> LocalFrameViewLayoutContext::TakeBoxesNeedingTransformUpdateAfterContainerLayout(
+  List<WeakPtr<RenderBox>> FrameViewLayoutContext::TakeBoxesNeedingTransformUpdateAfterContainerLayout(
     const RenderBlock &container) noexcept
   {
     auto it = _containersWithDescendantsNeedingTransformUpdate.find(&container);
@@ -589,7 +586,7 @@ namespace krys::boo
     return boxes;
   }
 
-  bool LocalFrameViewLayoutContext::IsSkippedContentForLayout(const RenderElement &renderer) const noexcept
+  bool FrameViewLayoutContext::IsSkippedContentForLayout(const RenderElement &renderer) const noexcept
   {
     if (IsVisiblityHiddenIgnored() || IsVisiblityAutoIgnored()
         || (IsRevealedWhenFoundIgnored() && renderer.Style().AutoRevealsWhenFound()))
@@ -601,7 +598,7 @@ namespace krys::boo
     return renderer.IsSkippedContent();
   }
 
-  bool LocalFrameViewLayoutContext::IsSkippedContentRootForLayout(const RenderBox &renderBox) const noexcept
+  bool FrameViewLayoutContext::IsSkippedContentRootForLayout(const RenderBox &renderBox) const noexcept
   {
     if (!IsSkippedContentRoot(renderBox))
     {
@@ -627,7 +624,7 @@ namespace krys::boo
     return true;
   }
 
-  LayoutSize LocalFrameViewLayoutContext::LayoutDelta() const noexcept
+  LayoutSize FrameViewLayoutContext::LayoutDelta() const noexcept
   {
     if (auto *layoutState = this->LayoutState())
     {
@@ -636,7 +633,7 @@ namespace krys::boo
     return {};
   }
 
-  void LocalFrameViewLayoutContext::AddLayoutDelta(const LayoutSize &delta) noexcept
+  void FrameViewLayoutContext::AddLayoutDelta(const LayoutSize &delta) noexcept
   {
     if (auto *layoutState = this->LayoutState())
     {
@@ -645,7 +642,7 @@ namespace krys::boo
   }
 
 #if KRYS_DEBUG
-  bool LocalFrameViewLayoutContext::LayoutDeltaMatches(const LayoutSize &delta) const noexcept
+  bool FrameViewLayoutContext::LayoutDeltaMatches(const LayoutSize &delta) const noexcept
   {
     if (auto *layoutState = this->LayoutState())
     {
@@ -655,7 +652,7 @@ namespace krys::boo
   }
 #endif
 
-  RenderLayoutState *LocalFrameViewLayoutContext::LayoutState() const noexcept
+  RenderLayoutState *FrameViewLayoutContext::LayoutState() const noexcept
   {
     if (_layoutStateStack.empty())
     {
@@ -664,7 +661,7 @@ namespace krys::boo
     return _layoutStateStack.back().get();
   }
 
-  void LocalFrameViewLayoutContext::PushLayoutState(RenderElement &root) noexcept
+  void FrameViewLayoutContext::PushLayoutState(RenderElement &root) noexcept
   {
     krys_debug_assert(!_paintOffsetCacheDisableCount);
     krys_debug_assert(!LayoutState());
@@ -672,8 +669,8 @@ namespace krys::boo
     _layoutStateStack.push_back(CreateUnique<RenderLayoutState>(root));
   }
 
-  bool LocalFrameViewLayoutContext::PushLayoutState(RenderBox &renderer, const LayoutSize &offset,
-                                                    LayoutUnit pageHeight, bool pageHeightChanged) noexcept
+  bool FrameViewLayoutContext::PushLayoutState(RenderBox &renderer, const LayoutSize &offset,
+                                               LayoutUnit pageHeight, bool pageHeightChanged) noexcept
   {
     // We push LayoutState even if layoutState is disabled because it stores layoutDelta too.
     auto *layoutState = this->LayoutState();
@@ -688,7 +685,7 @@ namespace krys::boo
     return false;
   }
 
-  void LocalFrameViewLayoutContext::PopLayoutState() noexcept
+  void FrameViewLayoutContext::PopLayoutState() noexcept
   {
     if (!LayoutState())
     {
@@ -699,7 +696,7 @@ namespace krys::boo
   }
 
 #if KRYS_DEBUG
-  void LocalFrameViewLayoutContext::CheckLayoutState() const noexcept
+  void FrameViewLayoutContext::CheckLayoutState() const noexcept
   {
     krys_debug_assert(LayoutDeltaMatches(LayoutSize()));
     krys_debug_assert(!_paintOffsetCacheDisableCount);
