@@ -4,6 +4,7 @@
 #include "Krystal.Booey/DOM/Algorithms/MutationAlgorithms.hpp"
 #include "Krystal.Booey/DOM/Algorithms/OrderedSet.hpp"
 #include "Krystal.Booey/DOM/Algorithms/TreeQueries.hpp"
+#include "Krystal.Booey/DOM/Collections/DOMTokenList.hpp"
 #include "Krystal.Booey/DOM/Collections/LiveHTMLCollection.hpp"
 #include "Krystal.Booey/DOM/Collections/StaticHTMLCollection.hpp"
 #include "Krystal.Booey/DOM/Internals/ElementFactory.hpp"

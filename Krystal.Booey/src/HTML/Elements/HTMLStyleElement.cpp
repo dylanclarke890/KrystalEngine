@@ -28,6 +28,7 @@
 #include "Krystal.Booey/DOM/Algorithms/ElementAlgorithms.hpp"
 #include "Krystal.Booey/DOM/Algorithms/EventDispatcher.hpp"
 #include "Krystal.Booey/DOM/Algorithms/TreeQueries.hpp"
+#include "Krystal.Booey/DOM/Collections/DOMTokenList.hpp"
 #include "Krystal.Booey/DOM/Events/EventNames.hpp"
 #include "Krystal.Booey/DOM/Nodes/Document.hpp"
 #include "Krystal.Booey/HTML/Algorithms/RenderBlocking.hpp"
@@ -96,9 +97,8 @@ namespace krys::boo
   {
     if (!_blocking)
     {
-      _blocking =
-        dom::ElementAlgorithms::CreateDOMTokenList(*this, u8"blocking", [](Document &, DOMStringView token)
-                                                   { return text::IsASCIICaselessEqual(token, u8"render"); });
+      _blocking = dom::DOMTokenList::Create(*this, u8"blocking", [](Document &, DOMStringView token)
+                                            { return text::IsASCIICaselessEqual(token, u8"render"); });
     }
 
     return *_blocking;

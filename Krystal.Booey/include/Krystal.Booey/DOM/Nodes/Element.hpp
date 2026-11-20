@@ -28,7 +28,6 @@
 #include "Krystal.Booey/Animation/GetAnimationsOptions.hpp"
 #include "Krystal.Booey/Animation/KeyframeAnimationOptions.hpp"
 #include "Krystal.Booey/Animation/Keyframes/KeyframeInput.hpp"
-#include "Krystal.Booey/DOM/Collections/DOMTokenList.hpp"
 #include "Krystal.Booey/DOM/ContentVisibility/ContentRelevancy.hpp"
 #include "Krystal.Booey/DOM/Events/SimulatedClick.hpp"
 #include "Krystal.Booey/DOM/Geometry/DOMRect.hpp"
@@ -167,6 +166,7 @@ namespace krys::boo::dom
 {
   class DatasetDOMStringMap;
   class DocumentAlgorithms;
+  class DOMTokenList;
   class ElementAlgorithms;
   class ElementFactory;
   class ElementRareData;

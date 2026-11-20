@@ -36,6 +36,7 @@
 #include "Krystal.Core/Types/List.hpp"
 #include "Krystal.Core/Types/Maybe.hpp"
 #include "Krystal.Core/Types/SmallList.hpp"
+#include "Krystal.Core/Types/UniquePtr.hpp"
 
 namespace krys::boo
 {
@@ -84,6 +85,12 @@ namespace krys::boo::dom
   public:
     using iterator = TokenList::iterator;
     using const_iterator = TokenList::const_iterator;
+
+    /// @brief A list bound to @p element's @p attributeName, optionally with a function that filters new
+    /// values to the supported ones.
+    KRYS_NODISCARD static UniquePtr<DOMTokenList>
+      Create(Element &element, DOMStringAtom attributeName,
+             IsSupportedTokenFunction &&isSupportedToken = {}) noexcept;
 
     /// @brief Marks the tokens to be parsed again from the attribute, which changed; the owner of the list
     /// calls this from its attribute change steps.

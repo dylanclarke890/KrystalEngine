@@ -50,6 +50,13 @@ namespace krys::boo::dom
     UpdateTokensFromAttributeValue();
   }
 
+  UniquePtr<DOMTokenList> DOMTokenList::Create(Element &element, DOMStringAtom attributeName,
+                                               IsSupportedTokenFunction &&isSupportedToken) noexcept
+  {
+    return UniquePtr<DOMTokenList>(
+      new DOMTokenList(element, krys::move(attributeName), krys::move(isSupportedToken)));
+  }
+
   void DOMTokenList::UpdateTokensFromAttributeValue() const noexcept
   {
     // A missing attribute's value is the empty string, which has no tokens.

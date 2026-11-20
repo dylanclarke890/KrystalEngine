@@ -540,12 +540,4 @@ namespace krys::boo::dom
 
     element.InvalidateStyleAndRenderersForSubtree();
   }
-
-  UniquePtr<DOMTokenList>
-    ElementAlgorithms::CreateDOMTokenList(Element &element, DOMStringAtom attributeName,
-                                          IsSupportedTokenFunction &&isSupportedToken) noexcept
-  {
-    return UniquePtr<DOMTokenList>(
-      new DOMTokenList(element, krys::move(attributeName), krys::move(isSupportedToken)));
-  }
 }

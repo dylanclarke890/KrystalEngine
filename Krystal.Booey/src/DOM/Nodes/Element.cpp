@@ -44,6 +44,7 @@
 #include "Krystal.Booey/DOM/Algorithms/TextAlgorithms.hpp"
 #include "Krystal.Booey/DOM/Algorithms/TreeQueries.hpp"
 #include "Krystal.Booey/DOM/Collections/DatasetDOMStringMap.hpp"
+#include "Krystal.Booey/DOM/Collections/DOMTokenList.hpp"
 #include "Krystal.Booey/DOM/Collections/HTMLCollection.hpp"
 #include "Krystal.Booey/DOM/Collections/NodeList.hpp"
 #include "Krystal.Booey/DOM/Events/EventNames.hpp"
@@ -2022,7 +2023,7 @@ namespace krys::boo
   {
     if (_domTokenList == nullptr)
     {
-      _domTokenList = dom::ElementAlgorithms::CreateDOMTokenList(*this, u8"class");
+      _domTokenList = dom::DOMTokenList::Create(*this, u8"class");
     }
 
     return *_domTokenList;
@@ -2033,7 +2034,7 @@ namespace krys::boo
     auto &rareData = EnsureElementRareData();
     if (!rareData.PartList())
     {
-      rareData.SetPartList(dom::ElementAlgorithms::CreateDOMTokenList(*this, u8"part"));
+      rareData.SetPartList(dom::DOMTokenList::Create(*this, u8"part"));
     }
     return *rareData.PartList();
   }

@@ -1,7 +1,6 @@
 ﻿#include "Krystal.Booey/HTML/Forms/FormListedElement.hpp"
 #include "catch2/catch_test_macros.hpp"
 #include "Krystal.Booey.Tests/HTML/FormTestUtils.hpp"
-#include "Krystal.Booey/DOM/Collections/NodeList.hpp"
 #include "Krystal.Booey/DOM/Nodes/ShadowRoot.hpp"
 #include "Krystal.Booey/HTML/Collections/HTMLFormControlsCollection.hpp"
 #include "Krystal.Booey/HTML/Elements/HTMLButtonElement.hpp"

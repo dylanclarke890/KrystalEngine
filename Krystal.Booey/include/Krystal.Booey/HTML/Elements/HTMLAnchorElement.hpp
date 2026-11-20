@@ -46,6 +46,8 @@ namespace krys::boo
 
     HTMLAnchorElement(Document &document) noexcept;
 
+    ~HTMLAnchorElement() noexcept override;
+
     /// @brief Follows the link, if it is one.
     /// @see https://html.spec.whatwg.org/#the-a-element:activation-behaviour
     void ActivationBehavior(Event &event) noexcept override;

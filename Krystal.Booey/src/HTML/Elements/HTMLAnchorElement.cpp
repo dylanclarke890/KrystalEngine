@@ -27,6 +27,7 @@
 #include "Krystal.Booey/DOM/Algorithms/ElementAlgorithms.hpp"
 #include "Krystal.Booey/DOM/Algorithms/NodeAlgorithms.hpp"
 #include "Krystal.Booey/DOM/Algorithms/TextAlgorithms.hpp"
+#include "Krystal.Booey/DOM/Collections/DOMTokenList.hpp"
 #include "Krystal.Booey/DOM/Events/EventNames.hpp"
 #include "Krystal.Booey/DOM/Events/MouseEvent.hpp"
 #include "Krystal.Booey/DOM/Nodes/Document.hpp"
@@ -44,6 +45,8 @@ namespace krys::boo
   {
     SetEventTargetFlag(dom::EventTargetFlags::HasActivationBehavior);
   }
+
+  HTMLAnchorElement::~HTMLAnchorElement() noexcept = default;
 
   namespace
   {
@@ -169,14 +172,13 @@ namespace krys::boo
   {
     if (!_relList)
     {
-      _relList =
-        dom::ElementAlgorithms::CreateDOMTokenList(*this, u8"rel",
-                                                   [](Document &, DOMStringView token)
-                                                   {
-                                                     return text::IsASCIICaselessEqual(token, u8"noreferrer")
-                                                            || text::IsASCIICaselessEqual(token, u8"noopener")
-                                                            || text::IsASCIICaselessEqual(token, u8"opener");
-                                                   });
+      _relList = dom::DOMTokenList::Create(*this, u8"rel",
+                                           [](Document &, DOMStringView token)
+                                           {
+                                             return text::IsASCIICaselessEqual(token, u8"noreferrer")
+                                                    || text::IsASCIICaselessEqual(token, u8"noopener")
+                                                    || text::IsASCIICaselessEqual(token, u8"opener");
+                                           });
     }
 
     return *_relList;

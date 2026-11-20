@@ -49,6 +49,8 @@ namespace krys::boo
   public:
     HTMLScriptElement(Document &document) noexcept;
 
+    ~HTMLScriptElement() noexcept override;
+
 #pragma region HTMLScriptElement - https://html.spec.whatwg.org/#htmlscriptelement
 
     /// @see https://html.spec.whatwg.org/#dom-script-type

@@ -24,7 +24,7 @@ namespace krys::boo
     Ref<AbortSignal> _signal;
 
   public:
-    ~AbortController() noexcept = default;
+    ~AbortController() noexcept;
 
 #pragma region Abort Controller - https://dom.spec.whatwg.org/#abortcontroller
 
