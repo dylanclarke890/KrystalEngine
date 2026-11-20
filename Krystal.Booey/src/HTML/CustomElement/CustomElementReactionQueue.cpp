@@ -144,6 +144,8 @@ namespace krys::boo::html
     }
   }
 
+  CustomElementQueue::CustomElementQueue() noexcept = default;
+
   CustomElementQueue::~CustomElementQueue() noexcept
   {
     krys_debug_assert(IsEmpty());

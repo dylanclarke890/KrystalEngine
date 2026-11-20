@@ -48,6 +48,11 @@ namespace krys::boo
 
 #pragma region HTMLOptGroupElement
 
+  HTMLSelectElement *HTMLOptGroupElement::OwnerSelectElement() const noexcept
+  {
+    return _ownerSelect.get();
+  }
+
   bool HTMLOptGroupElement::Disabled() const noexcept
   {
     return html::Reflect<bool>(*this, u8"disabled");

@@ -29,6 +29,7 @@
 #include "Krystal.Booey/Text/WritingMode.hpp"
 #include "Krystal.Core/Concepts.hpp"
 #include "Krystal.Core/Types/Array.hpp"
+#include <algorithm>
 
 namespace krys::boo
 {

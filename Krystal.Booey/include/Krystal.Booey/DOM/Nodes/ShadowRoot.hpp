@@ -42,6 +42,7 @@
 namespace krys::boo
 {
   class StyleSheetList;
+  class WebAnimation;
 }
 
 namespace krys::boo::html
@@ -271,7 +272,11 @@ namespace krys::boo
 
     /// @brief The shadow root's children serialised as HTML, with the shadow roots @p options asks for.
     /// @see https://html.spec.whatwg.org/#dom-shadowroot-gethtml
-    KRYS_NODISCARD DOMString GetHTML(dom::GetHTMLOptions options = {}) const noexcept;
+    KRYS_NODISCARD DOMString GetHTML(dom::GetHTMLOptions options) const noexcept;
+
+    /// @brief The same, with no shadow roots.
+    /// @note An overload rather than a default argument, which would need ShadowRoot's definition here.
+    KRYS_NODISCARD DOMString GetHTML() const noexcept;
 
     /// @brief The children serialized; in an XML document, an `InvalidStateError` if they can't be serialized
     /// as well-formed XML.

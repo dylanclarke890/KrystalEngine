@@ -45,6 +45,7 @@ namespace krys::boo
   class Element;
   class HTMLMapElement;
   class LegacyRenderSVGResourceContainer;
+  class Node;
   class SVGElement;
 }
 

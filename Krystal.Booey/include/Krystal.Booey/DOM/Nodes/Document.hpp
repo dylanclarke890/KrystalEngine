@@ -112,6 +112,7 @@ namespace krys::boo
   class HitTestResult;
   class IntersectionObserver;
   struct IntersectionObserverData;
+  class WebAnimation;
   class Window;
   class FrameView;
   class MediaQueryList;
@@ -171,6 +172,8 @@ namespace krys::boo::html
 
 namespace krys::boo::dom
 {
+  enum class FireEvents : bool;
+  enum class FocusPreviousElement : bool;
   enum class PopoverState : uint8;
 
   /// @brief Various flags used for optimizations in the Document class.
@@ -1232,10 +1235,7 @@ namespace krys::boo
 
     /// @brief The document's target element, which `:target` matches; null if there's none.
     /// @see https://html.spec.whatwg.org/#target-element
-    KRYS_NODISCARD Element *CSSTarget() const noexcept
-    {
-      return _cssTarget.get();
-    }
+    KRYS_NODISCARD Element *CSSTarget() const noexcept;
 
     /// @brief Makes @p newTarget (or nothing, if it's null) the document's target element, invalidating the
     /// style of the old and new targets.
@@ -1336,10 +1336,7 @@ namespace krys::boo
 
     /// @brief The showing auto popover the first showing hint popover opened from, if any.
     /// @see https://html.spec.whatwg.org/#hint-stack-parent
-    KRYS_NODISCARD HTMLElement *HintStackParent() const noexcept
-    {
-      return _hintStackParent.get();
-    }
+    KRYS_NODISCARD HTMLElement *HintStackParent() const noexcept;
 
     void SetHintStackParent(HTMLElement *element) noexcept;
 

@@ -27,6 +27,7 @@
 
 #include "Krystal.Core/Geometry/Point.hpp"
 #include "Krystal.Core/Types/Func.hpp"
+#include <array>
 
 namespace krys::boo
 {

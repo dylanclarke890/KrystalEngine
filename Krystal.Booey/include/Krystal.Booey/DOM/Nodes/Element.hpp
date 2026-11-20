@@ -26,7 +26,6 @@
 
 #include "Krystal.Booey/Animation/ElementAnimationRareData.hpp"
 #include "Krystal.Booey/Animation/GetAnimationsOptions.hpp"
-#include "Krystal.Booey/Animation/KeyframeAnimationOptions.hpp"
 #include "Krystal.Booey/Animation/Keyframes/KeyframeInput.hpp"
 #include "Krystal.Booey/DOM/ContentVisibility/ContentRelevancy.hpp"
 #include "Krystal.Booey/DOM/Events/SimulatedClick.hpp"
@@ -69,6 +68,7 @@ namespace krys::boo
   class HTMLElement;
   class HTMLSlotElement;
   struct IntersectionObserverData;
+  struct KeyframeAnimationOptions;
   class PlatformKeyboardEvent;
   class PlatformMouseEvent;
   class PseudoElement;
@@ -498,7 +498,11 @@ namespace krys::boo
 
     /// @brief The element's children serialised as HTML, with the shadow roots @p options asks for.
     /// @see https://html.spec.whatwg.org/#dom-element-gethtml
-    KRYS_NODISCARD DOMString GetHTML(dom::GetHTMLOptions options = {}) const noexcept;
+    KRYS_NODISCARD DOMString GetHTML(dom::GetHTMLOptions options) const noexcept;
+
+    /// @brief The same, with no shadow roots.
+    /// @note An overload rather than a default argument, which would need ShadowRoot's definition here.
+    KRYS_NODISCARD DOMString GetHTML() const noexcept;
 
     /// @brief The children serialized; in an XML document, an `InvalidStateError` if they can't be serialized
     /// as well-formed XML.
@@ -1362,7 +1366,11 @@ namespace krys::boo
     /// @see https://drafts.csswg.org/web-animations-1/#dom-animatable-animate
     KRYS_NODISCARD ExceptionOr<Ref<WebAnimation>>
       Animate(boo::KeyframesInput &&keyframes,
-              Maybe<Variant<double, KeyframeAnimationOptions>> options = null) noexcept;
+              Maybe<Variant<double, KeyframeAnimationOptions>> options) noexcept;
+
+    /// @brief Animates the element with @p keyframes and no options.
+    /// @note An overload rather than a default argument, which would need the options' definition here.
+    KRYS_NODISCARD ExceptionOr<Ref<WebAnimation>> Animate(boo::KeyframesInput &&keyframes) noexcept;
 
     /// @brief The relevant animations whose effects target the element (or, with `subtree`, its descendants
     /// too), in composite order.

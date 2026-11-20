@@ -26,6 +26,7 @@
 #include "Krystal.Booey/DOM/Nodes/Element.hpp"
 #include "Krystal.Booey/Accessibility/AXObjectCache.hpp"
 #include "Krystal.Booey/Animation/CSSAnimation.hpp"
+#include "Krystal.Booey/Animation/KeyframeAnimationOptions.hpp"
 #include "Krystal.Booey/Animation/KeyframeEffect.hpp"
 #include "Krystal.Booey/Animation/KeyframeEffectStack.hpp"
 #include "Krystal.Booey/Animation/WebAnimation.hpp"
@@ -1597,6 +1598,11 @@ namespace krys::boo
 
 #pragma region Animations
 
+  ExceptionOr<Ref<WebAnimation>> Element::Animate(KeyframesInput &&keyframes) noexcept
+  {
+    return Animate(krys::move(keyframes), null);
+  }
+
   ExceptionOr<Ref<WebAnimation>>
     Element::Animate(KeyframesInput &&keyframes,
                      Maybe<Variant<double, KeyframeAnimationOptions>> options) noexcept
@@ -2670,6 +2676,11 @@ namespace krys::boo
     html::CEReactionsScope ceReactions;
     return html::HTMLInsertionAlgorithms::ReplaceWithHTML(
       *this, html, options.Sanitizer ? &*options.Sanitizer : nullptr, html::FragmentParserMode::Unsafe);
+  }
+
+  DOMString Element::GetHTML() const noexcept
+  {
+    return GetHTML(dom::GetHTMLOptions {});
   }
 
   DOMString Element::GetHTML(dom::GetHTMLOptions options) const noexcept

@@ -198,6 +198,11 @@ namespace krys::boo
       html::FragmentParserMode::Unsafe);
   }
 
+  DOMString ShadowRoot::GetHTML() const noexcept
+  {
+    return GetHTML(dom::GetHTMLOptions {});
+  }
+
   DOMString ShadowRoot::GetHTML(dom::GetHTMLOptions options) const noexcept
   {
     return SerializeFragment(*this, SerializedNodes::SubtreesOfChildren, nullptr,

@@ -126,7 +126,7 @@ namespace krys::boo::html
     bool _invoking {false};
 
   public:
-    CustomElementQueue() noexcept = default;
+    CustomElementQueue() noexcept;
 
     ~CustomElementQueue() noexcept;
 

@@ -160,6 +160,16 @@ namespace krys::boo
 
 #pragma endregion
   };
+
+  inline ContainerNode *Node::ParentNode() const noexcept
+  {
+    return _parentNode.get();
+  }
+
+  inline void Node::SetParentNode(ContainerNode *parent) noexcept
+  {
+    _parentNode = ShareCheckedPtr(parent);
+  }
 }
 
 KRYS_SPECIALIZE_TYPE_CAST_TRAITS_BEGIN(krys::boo::ContainerNode)

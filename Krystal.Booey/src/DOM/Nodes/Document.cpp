@@ -2646,6 +2646,11 @@ namespace krys::boo
     }
   }
 
+  Element *Document::CSSTarget() const noexcept
+  {
+    return _cssTarget.get();
+  }
+
   void Document::SetCSSTarget(Element *newTarget) noexcept
   {
     if (_cssTarget.get() == newTarget)
@@ -2993,6 +2998,11 @@ namespace krys::boo
       // 8b. Run the hide popover algorithm given popover, focusPreviousElement, false, false, and null.
       (void)(*popover)->HidePopoverInternal(focusPreviousElement, dom::FireEvents::No, false, nullptr);
     }
+  }
+
+  HTMLElement *Document::HintStackParent() const noexcept
+  {
+    return _hintStackParent.get();
   }
 
   void Document::SetHintStackParent(HTMLElement *element) noexcept
