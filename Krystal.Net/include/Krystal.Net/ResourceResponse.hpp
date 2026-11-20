@@ -92,22 +92,22 @@ namespace krys::net
     }
 
     /// @brief The HTTP status code; 0 for a response that isn't HTTP's (a file's, a `data:` URL's).
-    KRYS_NODISCARD uint16 HttpstatusCode() const noexcept
+    KRYS_NODISCARD uint16 HttpStatusCode() const noexcept
     {
       return _httpStatusCode;
     }
 
-    void SetHttpstatusCode(uint16 statusCode) noexcept
+    void SetHttpStatusCode(uint16 statusCode) noexcept
     {
       _httpStatusCode = statusCode;
     }
 
-    KRYS_NODISCARD const utf8_string &HttpstatusText() const noexcept
+    KRYS_NODISCARD const utf8_string &HttpStatusText() const noexcept
     {
       return _httpStatusText;
     }
 
-    void SetHttpstatusText(utf8_string statusText) noexcept
+    void SetHttpStatusText(utf8_string statusText) noexcept
     {
       _httpStatusText = krys::move(statusText);
     }

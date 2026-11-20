@@ -94,7 +94,7 @@ namespace krys::boo
     RefPtr<SharedBuffer> data =
       resource.LoadFailedOrCanceled() ? nullptr : ShareRefPtr(resource.ResourceBuffer());
     // An error page isn't an icon to decode.
-    if (resource.Response().HttpstatusCode() && !resource.Response().IsSuccessful())
+    if (resource.Response().HttpStatusCode() && !resource.Response().IsSuccessful())
     {
       data = nullptr;
     }

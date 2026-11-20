@@ -104,7 +104,7 @@ namespace krys::boo::tests
       }
       if (auto status = StatusCodes.find(key); status != StatusCodes.end())
       {
-        response.SetHttpstatusCode(status->second);
+        response.SetHttpStatusCode(status->second);
       }
       completionHandler(
         LoadedResource {.Response = krys::move(response), .Data = SharedBuffer::Create(found->second)});

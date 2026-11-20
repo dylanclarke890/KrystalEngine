@@ -92,12 +92,12 @@ namespace krys::boo
 
   Maybe<utf8_string> CachedCSSStyleSheet::SheetText(MimeTypeCheckHint mimeTypeCheckHint,
                                                     bool *hasValidMimeType,
-                                                    bool *hasHttpstatusOK) const noexcept
+                                                    bool *hasHttpStatusOK) const noexcept
   {
     // Ensure hasValidMIMEType and hasHTTPStatusOK always get set (even if the data is null or empty) — which
     // in turn ensures that if the MIME type isn't text/css or the HTTP status isn't an OK status, we never
     // load the resource. https://html.spec.whatwg.org/#link-type-stylesheet:process-the-linked-resource
-    if (!CanUseSheet(mimeTypeCheckHint, hasValidMimeType, hasHttpstatusOK))
+    if (!CanUseSheet(mimeTypeCheckHint, hasValidMimeType, hasHttpStatusOK))
     {
       return null;
     }
@@ -165,7 +165,7 @@ namespace krys::boo
   }
 
   bool CachedCSSStyleSheet::CanUseSheet(MimeTypeCheckHint mimeTypeCheckHint, bool *hasValidMimeType,
-                                        bool *hasHttpstatusOK) const noexcept
+                                        bool *hasHttpStatusOK) const noexcept
   {
     if (ErrorOccurred())
     {
@@ -175,12 +175,12 @@ namespace krys::boo
     // An unsuccessful HTTP response is no style sheet. (A host that gives no status, 0, isn't saying it
     // failed.)
     // https://html.spec.whatwg.org/#fetching-and-processing-a-resource-from-a-link-element:processresponseconsumebody
-    if (Response().Url().ProtocolIsInHttpFamily() && Response().HttpstatusCode()
+    if (Response().Url().ProtocolIsInHttpFamily() && Response().HttpStatusCode()
         && !Response().IsSuccessful())
     {
-      if (hasHttpstatusOK)
+      if (hasHttpStatusOK)
       {
-        *hasHttpstatusOK = false;
+        *hasHttpStatusOK = false;
       }
       return false;
     }

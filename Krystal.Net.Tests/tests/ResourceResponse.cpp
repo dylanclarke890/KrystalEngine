@@ -15,14 +15,14 @@ namespace krys::net::tests
             "[Platform][Network][ResourceResponse]")
   {
     ResourceResponse response(net::Url(u8"https://example.com/"), u8"text/html", 0);
-    CHECK(response.HttpstatusCode() == 0);
+    CHECK(response.HttpStatusCode() == 0);
     CHECK_FALSE(response.IsSuccessful());
     CHECK_FALSE(response.LastModified());
     CHECK(response.HttpHeaderField(u8"Last-Modified").empty());
 
-    response.SetHttpstatusCode(204);
+    response.SetHttpStatusCode(204);
     CHECK(response.IsSuccessful());
-    response.SetHttpstatusCode(404);
+    response.SetHttpStatusCode(404);
     CHECK_FALSE(response.IsSuccessful());
 
     response.SetHttpHeaderField(u8"last-modified", u8"Sun, 06 Nov 1994 08:49:37 GMT");

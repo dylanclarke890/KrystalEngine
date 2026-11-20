@@ -531,10 +531,10 @@ namespace krys::boo::css
     // Always strict about the sheet's type, in quirks mode too (see DIFFERENCES.md).
     auto mimeTypeCheckHint = CachedCSSStyleSheet::MimeTypeCheckHint::Strict;
     bool hasValidMimeType = true;
-    bool hasHttpstatusOK = true;
-    auto sheetText = cachedStyleSheet->SheetText(mimeTypeCheckHint, &hasValidMimeType, &hasHttpstatusOK);
+    bool hasHttpStatusOK = true;
+    auto sheetText = cachedStyleSheet->SheetText(mimeTypeCheckHint, &hasValidMimeType, &hasHttpStatusOK);
 
-    if (!hasHttpstatusOK)
+    if (!hasHttpStatusOK)
     {
       krys_debug_assert(!sheetText);
       return false;
