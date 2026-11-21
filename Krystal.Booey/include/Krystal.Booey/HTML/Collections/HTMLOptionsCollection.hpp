@@ -65,8 +65,11 @@ namespace krys::boo::html
     ExceptionOr<void> SetItem(uint32 index, HTMLOptionElement *option) noexcept;
 
     /// @see https://html.spec.whatwg.org/#dom-htmloptionscollection-add
+    ExceptionOr<void> Add(const OptionOrOptGroupElement &element) noexcept;
+
+    /// @see https://html.spec.whatwg.org/#dom-htmloptionscollection-add
     ExceptionOr<void> Add(const OptionOrOptGroupElement &element,
-                          const Maybe<HTMLElementOrInt> &before = {}) noexcept;
+                          const Maybe<HTMLElementOrInt> &before) noexcept;
 
     /// @see https://html.spec.whatwg.org/#dom-htmloptionscollection-remove
     void Remove(int32 index) noexcept;

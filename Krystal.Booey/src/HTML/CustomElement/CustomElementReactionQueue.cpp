@@ -41,6 +41,11 @@ namespace krys::boo::html
 
   CustomElementReactionStack *CustomElementReactionStack::s_currentProcessingStack = nullptr;
 
+  List<Ref<Element>> CustomElementReactionStack::TakeElements() noexcept
+  {
+    return _queue.TakeElements();
+  }
+
   namespace
   {
     /// @brief The backup element queue, and whether a microtask to process it is queued. It's process-wide,
@@ -74,6 +79,10 @@ namespace krys::boo::html
       }
       return state.Queue;
     }
+  }
+
+  CustomElementReactionQueueItem::CustomElementReactionQueueItem(Type type) noexcept : _type(type)
+  {
   }
 
   CustomElementReactionQueueItem::CustomElementReactionQueueItem(Type type, Payload &&payload) noexcept

@@ -638,4 +638,9 @@ namespace krys::boo::html
   {
     _element.StartDelayingUpdateValidity();
   }
+
+  DelayedUpdateValidityScope::~DelayedUpdateValidityScope() noexcept
+  {
+    _element.EndDelayingUpdateValidity();
+  }
 }

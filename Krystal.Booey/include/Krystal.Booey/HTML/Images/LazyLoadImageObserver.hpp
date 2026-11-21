@@ -25,7 +25,6 @@
 
 #pragma once
 
-#include "Krystal.Booey/DOM/IntersectionObservers/IntersectionObserver.hpp"
 #include "Krystal.Core/Attributes.hpp"
 #include "Krystal.Core/Macros.hpp"
 #include "Krystal.Core/Types/RefPtr.hpp"
@@ -34,6 +33,7 @@ namespace krys::boo
 {
   class Document;
   class Element;
+  class IntersectionObserver;
 }
 
 namespace krys::boo::html

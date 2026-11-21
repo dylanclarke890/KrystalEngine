@@ -43,6 +43,7 @@
 #include "Krystal.Booey/HTML/Algorithms/HTMLInsertionAlgorithms.hpp"
 #include "Krystal.Booey/HTML/CustomElement/CustomElementReactionQueue.hpp"
 #include "Krystal.Booey/HTML/Elements/HTMLSlotElement.hpp"
+#include "Krystal.Booey/HTML/Sanitizer/SetHTMLOptions.hpp"
 #include "Krystal.Booey/Style/Scope/Scope.hpp"
 #include "Krystal.Core/Strings/ASCII.hpp"
 #include "Krystal.Core/TypeCast.hpp"
@@ -137,12 +138,22 @@ namespace krys::boo
 
 #pragma region ShadowRoot (DOM Parsing)
 
+  ExceptionOr<void> ShadowRoot::SetHTML(DOMStringView html) noexcept
+  {
+    return SetHTML(html, {});
+  }
+
   ExceptionOr<void> ShadowRoot::SetHTML(DOMStringView html, const html::SetHTMLOptions &options) noexcept
   {
     html::CEReactionsScope ceReactions;
     // Filter and set HTML given this, html, options, and Safe.
     return html::HTMLInsertionAlgorithms::FilterAndSetHTML(*this, html, &options.Sanitizer,
                                                            html::FragmentParserMode::Safe);
+  }
+
+  ExceptionOr<void> ShadowRoot::AppendHTML(DOMStringView html) noexcept
+  {
+    return AppendHTML(html, {});
   }
 
   ExceptionOr<void> ShadowRoot::AppendHTML(DOMStringView html, const html::SetHTMLOptions &options) noexcept
@@ -153,12 +164,22 @@ namespace krys::boo
                                                                  html::FragmentParserMode::Safe);
   }
 
+  ExceptionOr<void> ShadowRoot::PrependHTML(DOMStringView html) noexcept
+  {
+    return PrependHTML(html, {});
+  }
+
   ExceptionOr<void> ShadowRoot::PrependHTML(DOMStringView html, const html::SetHTMLOptions &options) noexcept
   {
     html::CEReactionsScope ceReactions;
     // Filter and pre-insert HTML given this, this's first child, html, options, and Safe.
     return html::HTMLInsertionAlgorithms::FilterAndPreInsertHTML(
       *this, FirstChild(), html, &options.Sanitizer, html::FragmentParserMode::Safe);
+  }
+
+  ExceptionOr<void> ShadowRoot::SetHTMLUnsafe(DOMStringView html) noexcept
+  {
+    return SetHTMLUnsafe(html, {});
   }
 
   ExceptionOr<void> ShadowRoot::SetHTMLUnsafe(DOMStringView html,
@@ -173,6 +194,11 @@ namespace krys::boo
       *this, html, options.Sanitizer ? &*options.Sanitizer : nullptr, html::FragmentParserMode::Unsafe);
   }
 
+  ExceptionOr<void> ShadowRoot::AppendHTMLUnsafe(DOMStringView html) noexcept
+  {
+    return AppendHTMLUnsafe(html, {});
+  }
+
   ExceptionOr<void> ShadowRoot::AppendHTMLUnsafe(DOMStringView html,
                                                  const html::SetHTMLUnsafeOptions &options) noexcept
   {
@@ -184,6 +210,11 @@ namespace krys::boo
     return html::HTMLInsertionAlgorithms::FilterAndPreInsertHTML(
       *this, nullptr, html, options.Sanitizer ? &*options.Sanitizer : nullptr,
       html::FragmentParserMode::Unsafe);
+  }
+
+  ExceptionOr<void> ShadowRoot::PrependHTMLUnsafe(DOMStringView html) noexcept
+  {
+    return PrependHTMLUnsafe(html, {});
   }
 
   ExceptionOr<void> ShadowRoot::PrependHTMLUnsafe(DOMStringView html,

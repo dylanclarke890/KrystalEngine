@@ -94,6 +94,7 @@
 #include "Krystal.Booey/HTML/Elements/HTMLSelectElement.hpp"
 #include "Krystal.Booey/HTML/Elements/HTMLTemplateElement.hpp"
 #include "Krystal.Booey/HTML/EventLoop/EventLoop.hpp"
+#include "Krystal.Booey/HTML/Sanitizer/SetHTMLOptions.hpp"
 #include "Krystal.Booey/HTML/Window.hpp"
 #include "Krystal.Booey/Infra/Namespaces.hpp"
 #include "Krystal.Booey/Infra/StringAlgorithms.hpp"
@@ -2562,6 +2563,11 @@ namespace krys::boo
     return ReplaceChildrenWithFragment(*container, fragment.ReleaseValue());
   }
 
+  ExceptionOr<void> Element::SetHTML(DOMStringView html) noexcept
+  {
+    return SetHTML(html, {});
+  }
+
   ExceptionOr<void> Element::SetHTML(DOMStringView html, const html::SetHTMLOptions &options) noexcept
   {
     html::CEReactionsScope ceReactions;
@@ -2570,6 +2576,11 @@ namespace krys::boo
     return html::HTMLInsertionAlgorithms::FilterAndSetHTML(
       html::HTMLInsertionAlgorithms::TargetForHTMLInsertion(*this), html, &options.Sanitizer,
       html::FragmentParserMode::Safe);
+  }
+
+  ExceptionOr<void> Element::AppendHTML(DOMStringView html) noexcept
+  {
+    return AppendHTML(html, {});
   }
 
   ExceptionOr<void> Element::AppendHTML(DOMStringView html, const html::SetHTMLOptions &options) noexcept
@@ -2582,6 +2593,11 @@ namespace krys::boo
       html::FragmentParserMode::Safe);
   }
 
+  ExceptionOr<void> Element::PrependHTML(DOMStringView html) noexcept
+  {
+    return PrependHTML(html, {});
+  }
+
   ExceptionOr<void> Element::PrependHTML(DOMStringView html, const html::SetHTMLOptions &options) noexcept
   {
     html::CEReactionsScope ceReactions;
@@ -2590,6 +2606,11 @@ namespace krys::boo
     auto &target = html::HTMLInsertionAlgorithms::TargetForHTMLInsertion(*this);
     return html::HTMLInsertionAlgorithms::FilterAndPreInsertHTML(
       target, target.FirstChild(), html, &options.Sanitizer, html::FragmentParserMode::Safe);
+  }
+
+  ExceptionOr<void> Element::SetHTMLUnsafe(DOMStringView html) noexcept
+  {
+    return SetHTMLUnsafe(html, {});
   }
 
   ExceptionOr<void> Element::SetHTMLUnsafe(DOMStringView html,
@@ -2606,6 +2627,11 @@ namespace krys::boo
       options.Sanitizer ? &*options.Sanitizer : nullptr, html::FragmentParserMode::Unsafe);
   }
 
+  ExceptionOr<void> Element::AppendHTMLUnsafe(DOMStringView html) noexcept
+  {
+    return AppendHTMLUnsafe(html, {});
+  }
+
   ExceptionOr<void> Element::AppendHTMLUnsafe(DOMStringView html,
                                               const html::SetHTMLUnsafeOptions &options) noexcept
   {
@@ -2618,6 +2644,11 @@ namespace krys::boo
     return html::HTMLInsertionAlgorithms::FilterAndPreInsertHTML(
       html::HTMLInsertionAlgorithms::TargetForHTMLInsertion(*this), nullptr, html,
       options.Sanitizer ? &*options.Sanitizer : nullptr, html::FragmentParserMode::Unsafe);
+  }
+
+  ExceptionOr<void> Element::PrependHTMLUnsafe(DOMStringView html) noexcept
+  {
+    return PrependHTMLUnsafe(html, {});
   }
 
   ExceptionOr<void> Element::PrependHTMLUnsafe(DOMStringView html,
@@ -2635,11 +2666,21 @@ namespace krys::boo
       html::FragmentParserMode::Unsafe);
   }
 
+  ExceptionOr<void> Element::BeforeHTML(DOMStringView html) noexcept
+  {
+    return BeforeHTML(html, {});
+  }
+
   ExceptionOr<void> Element::BeforeHTML(DOMStringView html, const html::SetHTMLOptions &options) noexcept
   {
     html::CEReactionsScope ceReactions;
     return html::HTMLInsertionAlgorithms::BeforeHTML(*this, html, &options.Sanitizer,
                                                      html::FragmentParserMode::Safe);
+  }
+
+  ExceptionOr<void> Element::AfterHTML(DOMStringView html) noexcept
+  {
+    return AfterHTML(html, {});
   }
 
   ExceptionOr<void> Element::AfterHTML(DOMStringView html, const html::SetHTMLOptions &options) noexcept
@@ -2649,11 +2690,21 @@ namespace krys::boo
                                                     html::FragmentParserMode::Safe);
   }
 
+  ExceptionOr<void> Element::ReplaceWithHTML(DOMStringView html) noexcept
+  {
+    return ReplaceWithHTML(html, {});
+  }
+
   ExceptionOr<void> Element::ReplaceWithHTML(DOMStringView html, const html::SetHTMLOptions &options) noexcept
   {
     html::CEReactionsScope ceReactions;
     return html::HTMLInsertionAlgorithms::ReplaceWithHTML(*this, html, &options.Sanitizer,
                                                           html::FragmentParserMode::Safe);
+  }
+
+  ExceptionOr<void> Element::BeforeHTMLUnsafe(DOMStringView html) noexcept
+  {
+    return BeforeHTMLUnsafe(html, {});
   }
 
   ExceptionOr<void> Element::BeforeHTMLUnsafe(DOMStringView html,
@@ -2664,12 +2715,22 @@ namespace krys::boo
       *this, html, options.Sanitizer ? &*options.Sanitizer : nullptr, html::FragmentParserMode::Unsafe);
   }
 
+  ExceptionOr<void> Element::AfterHTMLUnsafe(DOMStringView html) noexcept
+  {
+    return AfterHTMLUnsafe(html, {});
+  }
+
   ExceptionOr<void> Element::AfterHTMLUnsafe(DOMStringView html,
                                              const html::SetHTMLUnsafeOptions &options) noexcept
   {
     html::CEReactionsScope ceReactions;
     return html::HTMLInsertionAlgorithms::AfterHTML(
       *this, html, options.Sanitizer ? &*options.Sanitizer : nullptr, html::FragmentParserMode::Unsafe);
+  }
+
+  ExceptionOr<void> Element::ReplaceWithHTMLUnsafe(DOMStringView html) noexcept
+  {
+    return ReplaceWithHTMLUnsafe(html, {});
   }
 
   ExceptionOr<void> Element::ReplaceWithHTMLUnsafe(DOMStringView html,

@@ -517,6 +517,7 @@ set(KRYSTAL_BOOEY_CSS_HEADERS
   include/Krystal.Booey/CSS/Queries/GenericMediaQuerySerialisation.hpp
   include/Krystal.Booey/CSS/Queries/GenericMediaQueryTypes.hpp
   include/Krystal.Booey/CSS/Queries/MediaQuery.hpp
+  include/Krystal.Booey/CSS/Queries/MediaQueryForward.hpp
   include/Krystal.Booey/CSS/Queries/MediaQueryEvaluator.hpp
   include/Krystal.Booey/CSS/Queries/MediaQueryFeatures.hpp
   include/Krystal.Booey/CSS/Queries/MediaQueryMatcher.hpp

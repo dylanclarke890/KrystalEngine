@@ -134,6 +134,7 @@
 #include "Krystal.Booey/HTML/Images/LazyLoadImageObserver.hpp"
 #include "Krystal.Booey/HTML/Parser/DocumentParser.hpp"
 #include "Krystal.Booey/HTML/Sanitizer/SanitizerAlgorithms.hpp"
+#include "Krystal.Booey/HTML/Sanitizer/SetHTMLOptions.hpp"
 #include "Krystal.Booey/HTML/Window.hpp"
 #include "Krystal.Booey/Infra/Namespaces.hpp"
 #include "Krystal.Booey/Infra/StringAlgorithms.hpp"
@@ -852,6 +853,11 @@ namespace krys::boo
   }
 
   // https://html.spec.whatwg.org/#dom-parsehtmlunsafe
+  ExceptionOr<Ref<Document>> Document::ParseHTMLUnsafe(Document &context, DOMStringView markup) noexcept
+  {
+    return ParseHTMLUnsafe(context, markup, {});
+  }
+
   ExceptionOr<Ref<Document>> Document::ParseHTMLUnsafe(Document &context, DOMStringView markup,
                                                        html::ParseHTMLUnsafeOptions options) noexcept
   {
@@ -877,6 +883,11 @@ namespace krys::boo
   }
 
   // https://html.spec.whatwg.org/#dom-parsehtml
+  ExceptionOr<Ref<Document>> Document::ParseHTML(Document &context, DOMStringView html) noexcept
+  {
+    return ParseHTML(context, html, {});
+  }
+
   ExceptionOr<Ref<Document>> Document::ParseHTML(Document &context, DOMStringView html,
                                                  const html::SetHTMLOptions &options) noexcept
   {

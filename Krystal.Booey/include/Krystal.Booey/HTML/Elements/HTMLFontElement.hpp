@@ -1,6 +1,5 @@
 ﻿#pragma once
 
-#include "Krystal.Booey/CSS/Values/ValueId.hpp"
 #include "Krystal.Booey/HTML/Elements/HTMLElement.hpp"
 #include "Krystal.Core/Types/Maybe.hpp"
 

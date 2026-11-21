@@ -25,6 +25,7 @@
 
 #include "Krystal.Booey/HTML/Elements/HTMLSourceElement.hpp"
 #include "Krystal.Booey/CSS/Parser/ParserContext.hpp"
+#include "Krystal.Booey/CSS/Queries/MediaQuery.hpp"
 #include "Krystal.Booey/CSS/Queries/MediaQueryParser.hpp"
 #include "Krystal.Booey/DOM/Nodes/Document.hpp"
 #include "Krystal.Booey/HTML/Attributes/ReflectAttribute.hpp"
@@ -37,6 +38,8 @@ namespace krys::boo
       : HTMLElement(document, html::HTMLElementInterface::Source)
   {
   }
+
+  HTMLSourceElement::~HTMLSourceElement() noexcept = default;
 
 #pragma region HTMLSourceElement
 

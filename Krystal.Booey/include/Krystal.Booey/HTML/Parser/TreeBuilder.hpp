@@ -27,7 +27,6 @@
 #pragma once
 
 #include "Krystal.Booey/DOM/Nodes/Document.hpp"
-#include "Krystal.Booey/DOM/Nodes/DocumentFragment.hpp"
 #include "Krystal.Booey/DOM/Nodes/Element.hpp"
 #include "Krystal.Booey/HTML/Elements/HTMLFormElement.hpp"
 #include "Krystal.Booey/HTML/Elements/HTMLHeadElement.hpp"
@@ -35,13 +34,17 @@
 #include "Krystal.Booey/HTML/Parser/OpenElementStack.hpp"
 #include "Krystal.Booey/HTML/Parser/StackItem.hpp"
 #include "Krystal.Booey/HTML/Parser/TokenAtom.hpp"
-#include "Krystal.Booey/HTML/Parser/Tokenizer.hpp"
 #include "Krystal.Booey/HTML/Sanitizer/SanitizerAlgorithms.hpp"
 #include "Krystal.Booey/HTML/Sanitizer/SanitizerConfig.hpp"
 #include "Krystal.Core/Enum.hpp"
 #include "Krystal.Core/Types/HashMap.hpp"
 #include "Krystal.Core/Types/List.hpp"
 #include "Krystal.Core/Types/Maybe.hpp"
+
+namespace krys::boo::html
+{
+  class Tokenizer;
+}
 
 namespace krys::boo::html
 {

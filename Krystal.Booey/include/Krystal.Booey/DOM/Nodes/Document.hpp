@@ -47,7 +47,6 @@
 #include "Krystal.Booey/Graphics/Fonts/FontSelector.hpp"
 #include "Krystal.Booey/Graphics/GraphicsTypes.hpp"
 #include "Krystal.Booey/HTML/Attributes/EventHandlerAttributes.hpp"
-#include "Krystal.Booey/HTML/Sanitizer/SetHTMLOptions.hpp"
 #include "Krystal.Booey/HTML/Types/DocumentReadyState.hpp"
 #include "Krystal.Booey/HTML/Types/DocumentVisibilityState.hpp"
 #include "Krystal.Booey/Page/RenderingUpdateStep.hpp"
@@ -72,6 +71,12 @@
 #include "Krystal.Core/Types/Variant.hpp"
 #include "Krystal.Core/Types/WeakPtr.hpp"
 #include "Krystal.Net/Url.hpp"
+
+namespace krys::boo::html
+{
+  struct ParseHTMLUnsafeOptions;
+  struct SetHTMLOptions;
+}
 
 namespace krys::text
 {
@@ -664,15 +669,22 @@ namespace krys::boo
     /// @p context, the document of the caller; sanitized only if @p options gives a sanitizer.
     /// @see https://html.spec.whatwg.org/#dom-parsehtmlunsafe
     KRYS_NODISCARD static ExceptionOr<Ref<Document>>
-      ParseHTMLUnsafe(Document &context, DOMStringView markup,
-                      html::ParseHTMLUnsafeOptions options = {}) noexcept;
+      ParseHTMLUnsafe(Document &context, DOMStringView markup, html::ParseHTMLUnsafeOptions options) noexcept;
+
+    /// @brief The same, with default options.
+    KRYS_NODISCARD static ExceptionOr<Ref<Document>> ParseHTMLUnsafe(Document &context,
+                                                                     DOMStringView markup) noexcept;
 
     /// @brief A new HTML document parsed from @p html, with declarative shadow roots and the settings of
     /// @p context, sanitized by @p options (the default configuration if it gives none) with unsafe content
     /// removed.
     /// @see https://html.spec.whatwg.org/#dom-parsehtml
-    KRYS_NODISCARD static ExceptionOr<Ref<Document>>
-      ParseHTML(Document &context, DOMStringView html, const html::SetHTMLOptions &options = {}) noexcept;
+    KRYS_NODISCARD static ExceptionOr<Ref<Document>> ParseHTML(Document &context, DOMStringView html,
+                                                               const html::SetHTMLOptions &options) noexcept;
+
+    /// @brief The same, with default options.
+    KRYS_NODISCARD static ExceptionOr<Ref<Document>> ParseHTML(Document &context,
+                                                               DOMStringView html) noexcept;
 
     /// @brief Sets whether parsing into the document attaches declarative shadow roots.
     /// @see https://dom.spec.whatwg.org/#document-allow-declarative-shadow-roots

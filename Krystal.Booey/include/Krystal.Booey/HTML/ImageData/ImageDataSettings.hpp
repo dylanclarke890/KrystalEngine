@@ -25,9 +25,13 @@
 
 #pragma once
 
-#include "Krystal.Booey/HTML/Canvas/PredefinedColorSpace.hpp"
 #include "Krystal.Booey/HTML/ImageData/ImageDataPixelFormat.hpp"
 #include "Krystal.Core/Types/Maybe.hpp"
+
+namespace krys::boo::html
+{
+  enum class PredefinedColorSpace : uint8;
+}
 
 namespace krys::boo::html
 {

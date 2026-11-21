@@ -27,7 +27,6 @@
 
 #include "Krystal.Booey/DOM/Types/DOMString.hpp"
 #include "Krystal.Booey/DOM/Types/QualifiedName.hpp"
-#include "Krystal.Booey/HTML/CustomElement/CustomElementFormValue.hpp"
 #include "Krystal.Core/Attributes.hpp"
 #include "Krystal.Core/Macros.hpp"
 #include "Krystal.Core/Types/List.hpp"
@@ -104,7 +103,9 @@ namespace krys::boo::html
 
     CustomElementReactionQueueItem &operator=(CustomElementReactionQueueItem &&) noexcept;
 
-    CustomElementReactionQueueItem(Type type, Payload &&payload = null) noexcept;
+    explicit CustomElementReactionQueueItem(Type type) noexcept;
+
+    CustomElementReactionQueueItem(Type type, Payload &&payload) noexcept;
 
     ~CustomElementReactionQueueItem() noexcept;
 
@@ -321,10 +322,7 @@ namespace krys::boo::html
       return s_currentProcessingStack != nullptr;
     }
 
-    KRYS_NODISCARD List<Ref<Element>> TakeElements() noexcept
-    {
-      return _queue.TakeElements();
-    }
+    KRYS_NODISCARD List<Ref<Element>> TakeElements() noexcept;
   };
 
   /// @brief The `[CEReactions]` extended attribute, for the C++ methods it marks: pushes an element queue

@@ -27,6 +27,7 @@
 #include "Krystal.Booey/HTML/CustomElement/CustomElementInterface.hpp"
 #include "Krystal.Booey/DOM/Algorithms/TreeQueries.hpp"
 #include "Krystal.Booey/DOM/Nodes/Document.hpp"
+#include "Krystal.Booey/HTML/CustomElement/CustomElement.hpp"
 #include "Krystal.Booey/HTML/CustomElement/CustomElementReactionQueue.hpp"
 #include "Krystal.Booey/HTML/Elements/HTMLMaybeFormAssociatedCustomElement.hpp"
 #include "Krystal.Booey/HTML/Elements/HTMLUnknownElement.hpp"

@@ -25,6 +25,7 @@
 #pragma once
 
 #include "Krystal.Booey/CSS/Queries/GenericMediaQueryTypes.hpp"
+#include "Krystal.Booey/CSS/Queries/MediaQueryForward.hpp"
 
 namespace krys::boo::css::mq
 {
@@ -62,8 +63,6 @@ namespace krys::boo::css::mq
     CSSOMStringAtom MediaType {null};
     Maybe<mq::Condition> Condition;
   };
-
-  using MediaQueryList = List<MediaQuery>;
 
   struct MediaQueryResult
   {

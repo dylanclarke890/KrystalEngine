@@ -11,7 +11,7 @@ namespace krys::boo
   /// @see https://html.spec.whatwg.org/#submiteventinit
   struct SubmitEventInit : EventInit
   {
-    RefPtr<HTMLElement> Submitter;
+    HTMLElement *Submitter {nullptr};
   };
 
   /// @brief The `submit` event, with the button that submitted the form.

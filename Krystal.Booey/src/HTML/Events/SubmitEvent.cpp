@@ -5,7 +5,7 @@
 namespace krys::boo
 {
   SubmitEvent::SubmitEvent(DOMStringAtom type, const SubmitEventInit &eventInitDict) noexcept
-      : Event(krys::move(type), eventInitDict), _submitter(eventInitDict.Submitter)
+      : Event(krys::move(type), eventInitDict), _submitter(ShareRefPtr(eventInitDict.Submitter))
   {
   }
 
@@ -15,7 +15,7 @@ namespace krys::boo
     init.Bubbles = true;
     init.Cancelable = true;
     init.Composed = true;
-    init.Submitter = krys::move(submitter);
+    init.Submitter = submitter.get();
     auto event = CreateRef<SubmitEvent>(event_names::Submit, init);
     event->_isTrusted = true;
     return event;

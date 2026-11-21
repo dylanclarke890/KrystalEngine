@@ -24,7 +24,6 @@
 
 #include "Krystal.Booey/DOM/Types/USVString.hpp"
 #include "Krystal.Booey/Graphics/Geometry/LayoutPoint.hpp"
-#include "Krystal.Booey/Graphics/Geometry/LayoutSize.hpp"
 #include "Krystal.Booey/Graphics/Paths/Path.hpp"
 #include "Krystal.Booey/HTML/Elements/HTMLElement.hpp"
 #include "Krystal.Booey/HTML/Mixins/UrlDecomposition.hpp"
