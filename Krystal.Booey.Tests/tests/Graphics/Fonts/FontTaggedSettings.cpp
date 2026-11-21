@@ -27,7 +27,7 @@ namespace krys::boo::tests
   TEST_CASE("FontTaggedSettings(insert)", "[Graphics][FontTaggedSettings]")
   {
     FontFeatureSettings settings;
-    CHECK(settings.isEmpty());
+    CHECK(settings.empty());
 
     SECTION("keeps settings sorted by tag")
     {

@@ -348,7 +348,7 @@ namespace krys::boo::html
 
     void AppendToTemporaryBuffer(const auto &characters)
     {
-      _temporaryBuffer.append(characters.begin(), characters.end());
+      _temporaryBuffer.append_range(characters);
     }
 
     void BufferCharacter(char32 character) noexcept

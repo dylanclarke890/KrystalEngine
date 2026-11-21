@@ -184,7 +184,7 @@ namespace krys::boo
         auto &descendantSet = descendantsMapIterator->second;
         krys_debug_assert(descendantSet->contains(&descendant));
         descendantSet->remove(&descendant);
-        if (descendantSet->isEmpty())
+        if (descendantSet->empty())
         {
           s_percentHeightDescendantsMap->erase(descendantsMapIterator);
         }
@@ -253,7 +253,7 @@ namespace krys::boo
         }
 
         auto isNewEntry = false;
-        if (!Is<RenderView>(containingBlock) || descendants->isEmpty())
+        if (!Is<RenderView>(containingBlock) || descendants->empty())
         {
           isNewEntry = descendants->add(&outOfFlowDescendant).second;
         }
@@ -314,7 +314,7 @@ namespace krys::boo
         krys_debug_assert(descendants->contains(descendant));
 
         descendants->remove(descendant);
-        if (descendants->isEmpty())
+        if (descendants->empty())
         {
           _descendantsMap.erase(descendantsIterator);
         }

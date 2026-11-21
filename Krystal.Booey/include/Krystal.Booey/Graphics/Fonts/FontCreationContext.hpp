@@ -106,7 +106,7 @@ namespace krys::boo
                         RefPtr<FontFeatureValues> fontFeatureValues, float sizeAdjust) noexcept
         : _fontFaceCapabilities(fontFaceCapabilities)
     {
-      if (!fontFaceFeatures.isEmpty() || fontPaletteValues
+      if (!fontFaceFeatures.empty() || fontPaletteValues
           || (fontFeatureValues && !fontFeatureValues->IsEmpty()) || sizeAdjust != 1.0f)
       {
         _rareData = FontCreationContextRareData::Create(fontFaceFeatures, fontPaletteValues,

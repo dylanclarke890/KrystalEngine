@@ -151,7 +151,7 @@ namespace krys::boo
     KRYS_NODISCARD bool HasOutOfFlowBoxes() const noexcept
     {
       auto *renderers = OutOfFlowBoxes();
-      return renderers && !renderers->isEmpty();
+      return renderers && !renderers->empty();
     }
 
     KRYS_NODISCARD bool IsContainingBlockAncestorFor(RenderObject &renderer) const noexcept;
@@ -206,7 +206,7 @@ namespace krys::boo
     KRYS_NODISCARD bool HasPercentHeightDescendants() const noexcept
     {
       auto *renderers = PercentHeightDescendants();
-      return renderers && !renderers->isEmpty();
+      return renderers && !renderers->empty();
     }
 
     KRYS_NODISCARD static bool HasPercentHeightContainerMap() noexcept;

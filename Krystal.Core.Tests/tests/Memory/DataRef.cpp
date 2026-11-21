@@ -2,7 +2,6 @@
 #include "catch2/catch_test_macros.hpp"
 #include "Krystal.Core/Memory/PointerComparison.hpp"
 #include "Krystal.Core/Memory/RefCounted.hpp"
-#include "Krystal.Core/Types/RefCountedFixedVector.hpp"
 #include "Krystal.Core/Types/TinyLRUCache.hpp"
 
 namespace krys::tests
@@ -94,24 +93,6 @@ namespace krys::tests
     // Null keys share one default value and aren't cached.
     REQUIRE(cache.Get(-1) == 0);
     REQUIRE(CountingPolicy::Created == 4);
-  }
-
-  TEST_CASE("RefCountedFixedVector shares its elements", "[RefCountedFixedVector]")
-  {
-    auto values = RefCountedFixedVector<int>::create({1, 2, 3});
-    REQUIRE(values->size() == 3);
-    REQUIRE(values->first() == 1);
-    REQUIRE(values->last() == 3);
-    REQUIRE((*values)[1] == 2);
-
-    auto mapped = RefCountedFixedVector<int>::map(*values, [](int value) { return value * 2; });
-    REQUIRE((*mapped)[2] == 6);
-    REQUIRE((*mapped == *RefCountedFixedVector<int>::create({2, 4, 6})));
-
-    auto generated = RefCountedFixedVector<int>::createWithSizeFromGenerator(
-      2, [](size_t index) { return static_cast<int>(index); });
-    REQUIRE(generated->last() == 1);
-    REQUIRE(RefCountedFixedVector<int>::create(5)->size() == 1);
   }
 
   TEST_CASE("ArePointingToEqualData", "[PointerComparison]")

@@ -157,7 +157,7 @@ namespace krys::boo
     }
     for (const auto &shadow : *shadows)
     {
-      ShadowApplier shadowApplier(_renderStyle, _context, &shadow, boxRect, &shadow == &shadows->last(),
+      ShadowApplier shadowApplier(_renderStyle, _context, &shadow, boxRect, &shadow == &shadows->back(),
                                   lastShadowIterationShouldDrawText, opaque, _combinedText != nullptr);
       if (!shadowApplier.NothingToDraw())
       {

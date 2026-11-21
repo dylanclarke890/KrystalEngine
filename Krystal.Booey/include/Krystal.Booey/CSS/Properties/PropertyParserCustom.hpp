@@ -1291,8 +1291,8 @@ namespace krys::boo::css
           else
           {
             SmallList<CSSOMString> combinedLineNames;
-            combinedLineNames.append(previousLineNames->Names().begin(), previousLineNames->Names().end());
-            combinedLineNames.append(lineNames->Names().begin(), lineNames->Names().end());
+            combinedLineNames.append_range(previousLineNames->Names());
+            combinedLineNames.append_range(lineNames->Names());
             templateRows.back() = GridLineNamesValue::Create(combinedLineNames);
           }
         }

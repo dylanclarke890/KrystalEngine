@@ -247,7 +247,7 @@ namespace krys::boo
     while (true)
     {
       auto rebuildRoots = _styleUpdate->TakeRebuildRoots();
-      if (rebuildRoots.isEmpty())
+      if (rebuildRoots.empty())
       {
         break;
       }

@@ -80,7 +80,7 @@ namespace krys::boo::style
         case NameScope::Type::None: return visitor(css::keywords::None {});
         case NameScope::Type::All:  return visitor(css::keywords::All {});
         case NameScope::Type::Ident:
-          if (Names.isEmpty())
+          if (Names.empty())
           {
             return visitor(css::keywords::None {});
           }
@@ -96,7 +96,7 @@ namespace krys::boo::style
              // Two name lists are equal if they contain the same values in the same order.
              // FIXME: This is not symmetrical in the case that other.Names.isEmpty() is true, but
              // Names.isEmpty() is false.
-             && (Names.isEmpty() || std::ranges::equal(Names, other.Names));
+             && (Names.empty() || std::ranges::equal(Names, other.Names));
     }
   };
 

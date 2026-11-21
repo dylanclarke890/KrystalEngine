@@ -1479,7 +1479,7 @@ namespace krys::boo::css
             return false;
           }
           const auto *levels = selector.IntegerList();
-          if (!levels || levels->isEmpty())
+          if (!levels || levels->empty())
           {
             return true;
           }

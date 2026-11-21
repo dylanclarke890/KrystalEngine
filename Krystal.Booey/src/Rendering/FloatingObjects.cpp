@@ -532,7 +532,7 @@ namespace krys::boo
   void FloatingObjects::ComputePlacedFloatsTree() noexcept
   {
     krys_debug_assert(!_placedFloatsTree);
-    if (_set.isEmpty())
+    if (_set.IsEmpty())
     {
       return;
     }

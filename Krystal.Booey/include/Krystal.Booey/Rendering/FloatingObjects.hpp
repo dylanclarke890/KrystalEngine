@@ -290,12 +290,12 @@ namespace krys::boo
       return _objects.size();
     }
 
-    KRYS_NODISCARD bool isEmpty() const noexcept
+    KRYS_NODISCARD bool IsEmpty() const noexcept
     {
       return _objects.empty();
     }
 
-    KRYS_NODISCARD const UniquePtr<FloatingObject> &last() const noexcept
+    KRYS_NODISCARD const UniquePtr<FloatingObject> &Last() const noexcept
     {
       return _objects.back();
     }

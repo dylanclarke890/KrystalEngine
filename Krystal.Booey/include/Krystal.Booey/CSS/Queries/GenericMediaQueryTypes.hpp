@@ -29,11 +29,11 @@
 #include "Krystal.Booey/CSS/Values/Value.hpp"
 #include "Krystal.Booey/CSS/Values/ValueId.hpp"
 #include "Krystal.Booey/Rendering/RenderElement.hpp"
+#include "Krystal.Core/Containers/FixedList.hpp"
 #include "Krystal.Core/Enum.hpp"
 #include "Krystal.Core/Memory/CheckedPtr.hpp"
 #include "Krystal.Core/Memory/RefPtr.hpp"
 #include "Krystal.Core/Memory/WeakPtr.hpp"
-#include "Krystal.Core/Types/FixedVector.hpp"
 #include "Krystal.Core/Types/List.hpp"
 #include "Krystal.Core/Types/Maybe.hpp"
 #include "Krystal.Core/Types/Variant.hpp"
@@ -185,7 +185,7 @@ namespace krys::boo::css::mq
     Type FeatureType;
     ValueType FeatureValueType;
     MediaQueryDynamicDependency Dependencies;
-    FixedVector<ValueId> ValueIdentifiers;
+    FixedList<ValueId> ValueIdentifiers;
 
     KRYS_NODISCARD virtual EvaluationResult Evaluate(const Feature &,
                                                      const FeatureEvaluationContext &) const noexcept
@@ -200,8 +200,7 @@ namespace krys::boo::css::mq
     }
 
     FeatureSchema(CSSOMStringAtom name, Type type, ValueType valueType,
-                  MediaQueryDynamicDependency dependencies,
-                  FixedVector<ValueId> valueIdentifiers = {}) noexcept
+                  MediaQueryDynamicDependency dependencies, FixedList<ValueId> valueIdentifiers = {}) noexcept
         : Name(krys::move(name)), FeatureType(type), FeatureValueType(valueType), Dependencies(dependencies),
           ValueIdentifiers(krys::move(valueIdentifiers))
     {

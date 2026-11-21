@@ -54,6 +54,7 @@
 #include "Krystal.Booey/Rendering/Style/RenderStyleConstants.hpp"
 #include "Krystal.Booey/Style/PseudoElementIdentifier.hpp"
 #include "Krystal.Booey/Style/Values/Color/ColorOptions.hpp"
+#include "Krystal.Core/Containers/FixedList.hpp"
 #include "Krystal.Core/Enum.hpp"
 #include "Krystal.Core/Geometry/Point.hpp"
 #include "Krystal.Core/Geometry/Quad.hpp"
@@ -65,7 +66,6 @@
 #include "Krystal.Core/Time/Timer.hpp"
 #include "Krystal.Core/Types/Array.hpp"
 #include "Krystal.Core/Types/BoolOr.hpp"
-#include "Krystal.Core/Types/FixedVector.hpp"
 #include "Krystal.Core/Types/HashMap.hpp"
 #include "Krystal.Core/Types/List.hpp"
 #include "Krystal.Core/Types/ListHashSet.hpp"
@@ -508,7 +508,7 @@ namespace krys::boo
     bool _isResolvingTreeStyle {false};
     bool _ignorePendingStylesheets {false};
     bool _hasNodesWithMissingStyle {false};
-    Maybe<FixedVector<css::PropertyId>> _exposedComputedCSSPropertyIds;
+    Maybe<FixedList<css::PropertyId>> _exposedComputedCSSPropertyIds;
 
     boo::Color _textColor {boo::Color::black};
     boo::Color _linkColor;
@@ -2020,7 +2020,7 @@ namespace krys::boo
     }
 
     /// @brief The properties a computed style declaration lists, in order.
-    KRYS_NODISCARD const FixedVector<css::PropertyId> &ExposedComputedCSSPropertyIds() noexcept;
+    KRYS_NODISCARD const FixedList<css::PropertyId> &ExposedComputedCSSPropertyIds() noexcept;
 
     /// @brief The colour of `-internal-document-text-color`: the `<body>` element's colour, as of its last
     /// style resolution, or black.

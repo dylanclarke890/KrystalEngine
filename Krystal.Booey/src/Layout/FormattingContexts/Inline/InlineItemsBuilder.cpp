@@ -681,7 +681,8 @@ namespace krys::boo::layout
 
       while (!queue.empty())
       {
-        auto *last = queue.pop_back_val();
+        auto *last = queue.back();
+        queue.pop_back();
         if (auto *nextSibling = last->NextSibling())
         {
           if (appendAndCheckForDamage(*nextSibling))
@@ -796,7 +797,8 @@ namespace krys::boo::layout
 
       while (!layoutQueue.empty())
       {
-        auto *layoutBox = layoutQueue.pop_back_val();
+        auto *layoutBox = layoutQueue.back();
+        layoutQueue.pop_back();
         if (layoutBox->IsOutOfFlowPositioned())
         {
           inlineItemList.emplace_back(*layoutBox, InlineItem::Type::Opaque);

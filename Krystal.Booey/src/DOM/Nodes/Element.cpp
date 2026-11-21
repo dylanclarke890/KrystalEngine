@@ -1875,7 +1875,7 @@ namespace krys::boo
     const Maybe<style::PseudoElementIdentifier> &pseudoElementIdentifier,
     CSSAnimationCollection &&animations) noexcept
   {
-    if (animations.isEmpty() && !AnimationRareData(pseudoElementIdentifier))
+    if (animations.empty() && !AnimationRareData(pseudoElementIdentifier))
     {
       return;
     }

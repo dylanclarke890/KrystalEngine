@@ -227,8 +227,8 @@ namespace krys::boo
       SVGLengthContext lengthContext(&shape);
       double dashOffset = lengthContext.ValueForLength(style.StrokeDashOffset(), style::ZoomNeeded {});
       double strokeWidth = lengthContext.ValueForLength(style.StrokeWidth(), style::ZoomNeeded {});
-      auto dashArray = DashArray::map(style.StrokeDashArray(), [&](const auto &length) -> DashArrayElement
-                                      { return lengthContext.ValueForLength(length, style::ZoomNeeded {}); });
+      auto dashArray = DashArray(std::from_range, style.StrokeDashArray() | std::views::transform([&](const auto &length) -> DashArrayElement
+                                      { return lengthContext.ValueForLength(length, style::ZoomNeeded {}); }));
 
       WriteIfNotDefault(ts, u8"opacity", style.StrokeOpacity().Value.Value, 1.0f);
       WriteIfNotDefault(ts, u8"stroke width", strokeWidth, 1.0);
@@ -236,7 +236,7 @@ namespace krys::boo
       WriteIfNotDefault(ts, u8"line cap", style.CapStyle(), LineCap::Butt);
       WriteIfNotDefault(ts, u8"line join", style.JoinStyle(), LineJoin::Miter);
       WriteIfNotDefault(ts, u8"dash offset", dashOffset, 0.0);
-      if (!dashArray.isEmpty())
+      if (!dashArray.empty())
       {
         WriteNameValuePair(ts, u8"dash array", dashArray);
       }

@@ -204,7 +204,7 @@ namespace krys
       return TreeSearch(data);
     }
 
-    KRYS_NODISCARD bool isEmpty() const noexcept
+    KRYS_NODISCARD bool empty() const noexcept
     {
       return !_root;
     }

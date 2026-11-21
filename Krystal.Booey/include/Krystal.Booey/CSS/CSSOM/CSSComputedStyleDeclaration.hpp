@@ -23,8 +23,8 @@
 #include "Krystal.Booey/CSS/CSSOM/CSSStyleProperties.hpp"
 #include "Krystal.Booey/Style/Extractor/Extractor.hpp"
 #include "Krystal.Booey/Style/PseudoElementIdentifier.hpp"
+#include "Krystal.Core/Containers/FixedList.hpp"
 #include "Krystal.Core/Memory/RefCounted.hpp"
-#include "Krystal.Core/Types/FixedVector.hpp"
 #include "Krystal.Core/Types/Maybe.hpp"
 
 namespace krys::boo
@@ -121,7 +121,7 @@ namespace krys::boo
       return _element;
     }
 
-    KRYS_NODISCARD const FixedVector<css::PropertyId> &ExposedComputedCSSPropertyIds() const noexcept;
+    KRYS_NODISCARD const FixedList<css::PropertyId> &ExposedComputedCSSPropertyIds() const noexcept;
 
     KRYS_NODISCARD style::Extractor GetExtractor() const noexcept;
   };

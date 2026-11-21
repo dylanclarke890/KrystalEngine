@@ -25,12 +25,12 @@
 #include "Krystal.Booey/CSS/Types/CSSOMString.hpp"
 #include "Krystal.Booey/DOM/Types/QualifiedName.hpp"
 #include "Krystal.Booey/Rendering/Style/RenderStyleConstants.hpp"
+#include "Krystal.Core/Containers/FixedList.hpp"
 #include "Krystal.Core/Enum.hpp"
 #include "Krystal.Core/Memory/RefPtr.hpp"
 #include "Krystal.Core/Memory/UniquePtr.hpp"
 #include "Krystal.Core/Strings/ASCII.hpp"
 #include "Krystal.Core/Types/Array.hpp"
-#include "Krystal.Core/Types/FixedVector.hpp"
 #include "Krystal.Core/Types/Func.hpp"
 #include "Krystal.Core/Types/Maybe.hpp"
 
@@ -223,13 +223,13 @@ namespace krys::boo::css
       CSSOMStringAtom Argument {null};
 
       // Used for ::highlight and ::part arguments.
-      FixedVector<CSSOMStringAtom> ArgumentList;
+      FixedList<CSSOMStringAtom> ArgumentList;
 
       // Used for :lang arguments.
-      FixedVector<PossiblyQuotedIdentifier> LangList;
+      FixedList<PossiblyQuotedIdentifier> LangList;
 
       // Used for :heading() levels.
-      FixedVector<int32> IntegerList;
+      FixedList<int32> IntegerList;
 
       // Used for :is(), :not(), :has(), :where(), :host(), :nth-*(... of) and ::slotted().
       UniquePtr<SelectorList> SubSelectors;
@@ -382,18 +382,18 @@ namespace krys::boo::css
       return HasFlag(_flags, SelectorFlag::CaseInsensitiveAttributeValueMatching);
     }
 
-    KRYS_NODISCARD const FixedVector<CSSOMStringAtom> *ArgumentList() const noexcept
+    KRYS_NODISCARD const FixedList<CSSOMStringAtom> *ArgumentList() const noexcept
     {
       return HasRareData() ? &_data.Rare->ArgumentList : nullptr;
     }
 
-    KRYS_NODISCARD const FixedVector<PossiblyQuotedIdentifier> *LangList() const noexcept
+    KRYS_NODISCARD const FixedList<PossiblyQuotedIdentifier> *LangList() const noexcept
     {
       return HasRareData() ? &_data.Rare->LangList : nullptr;
     }
 
     /// @brief The integers of `:heading()`.
-    KRYS_NODISCARD const FixedVector<int32> *IntegerList() const noexcept
+    KRYS_NODISCARD const FixedList<int32> *IntegerList() const noexcept
     {
       return HasRareData() ? &_data.Rare->IntegerList : nullptr;
     }
@@ -508,11 +508,11 @@ namespace krys::boo::css
 
     void SetArgument(const CSSOMStringAtom &value) noexcept;
 
-    void SetArgumentList(FixedVector<CSSOMStringAtom> argumentList) noexcept;
+    void SetArgumentList(FixedList<CSSOMStringAtom> argumentList) noexcept;
 
-    void SetLangList(FixedVector<PossiblyQuotedIdentifier> langList) noexcept;
+    void SetLangList(FixedList<PossiblyQuotedIdentifier> langList) noexcept;
 
-    void SetIntegerList(FixedVector<int32> integerList) noexcept;
+    void SetIntegerList(FixedList<int32> integerList) noexcept;
 
     void SetSubSelectors(UniquePtr<SelectorList> subSelectors) noexcept;
 

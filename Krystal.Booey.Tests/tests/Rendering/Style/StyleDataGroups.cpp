@@ -33,7 +33,7 @@ namespace krys::boo::tests
     auto rareNonInherited = StyleRareNonInheritedData::Create();
     CHECK(rareNonInherited->Zoom == ComputedStyle::InitialZoom());
     CHECK(rareNonInherited->AnchorScope == ComputedStyle::InitialAnchorScope());
-    CHECK(rareNonInherited->ScrollTimelines.isEmpty());
+    CHECK(rareNonInherited->ScrollTimelines.empty());
 
     auto misc = StyleMiscNonInheritedData::Create();
     CHECK(misc->Opacity == ComputedStyle::InitialOpacity());

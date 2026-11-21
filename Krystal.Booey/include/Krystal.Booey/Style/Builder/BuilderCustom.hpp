@@ -676,8 +676,8 @@ namespace krys::boo::style
     return copy;
   }
 
-  KRYS_NODISCARD inline FixedVector<PositionTryFallback>
-    ForwardInheritedValue(const FixedVector<PositionTryFallback> &value) noexcept
+  KRYS_NODISCARD inline FixedList<PositionTryFallback>
+    ForwardInheritedValue(const FixedList<PositionTryFallback> &value) noexcept
   {
     auto copy = value;
     return copy;

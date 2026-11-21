@@ -106,9 +106,9 @@ namespace krys::boo
       controller->RemoveTimeline(*this);
     }
 
-    while (!_animations.isEmpty())
+    while (!_animations.empty())
     {
-      Ref animation = _animations.first();
+      Ref animation = _animations.front();
       animation->Remove();
     }
   }

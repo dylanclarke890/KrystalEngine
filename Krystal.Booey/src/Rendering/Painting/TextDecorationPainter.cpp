@@ -325,7 +325,7 @@ namespace krys::boo
       const auto &zoomFactor = style.UsedZoomForLength();
       for (const auto &shadow : _shadow)
       {
-        if (&shadow == &_shadow.last())
+        if (&shadow == &_shadow.back())
         {
           // The last set of lines paints normally inside the clip.
           boxOrigin.Move(0, -extraOffset);

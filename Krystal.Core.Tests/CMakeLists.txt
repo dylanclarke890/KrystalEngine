@@ -79,7 +79,7 @@ target_sources(Krystal.Core.Tests
 	PRIVATE tests/Types/BloomFilter.cpp
 	PRIVATE tests/Types/CompactVariant.cpp
 	PRIVATE tests/Types/Decimal.cpp
-	PRIVATE tests/Types/FixedVector.cpp
+	PRIVATE tests/Containers/FixedList.cpp
 	PRIVATE tests/Types/IntervalTree.cpp
 	PRIVATE tests/Types/ListHashSet.cpp
 	PRIVATE tests/Types/SharedBuffer.cpp

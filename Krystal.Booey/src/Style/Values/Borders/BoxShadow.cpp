@@ -95,8 +95,10 @@ namespace krys::boo::style
       shadow->Shadow(), [&](const css::keywords::None &) -> BoxShadows { return css::keywords::None {}; },
       [&](const typename css::BoxShadowProperty::List &list) -> BoxShadows
       {
-        return BoxShadows::List::map(list | std::views::reverse, [&](const css::BoxShadow &element)
-                                     { return ConvertToStyle(element, state); });
+        return BoxShadows::List(std::from_range,
+                                (list | std::views::reverse)
+                                  | std::views::transform([&](const css::BoxShadow &element)
+                                                          { return ConvertToStyle(element, state); }));
       });
   }
 

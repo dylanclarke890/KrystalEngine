@@ -68,12 +68,14 @@ namespace krys::boo::style
   struct TypedRequiredListIterator
   {
     using iterator_category = std::forward_iterator_tag;
-    using value_type = const ValueType &;
+    using value_type = ValueType;
     using difference_type = ptrdiff_t;
     using pointer = const ValueType *;
     using reference = const ValueType &;
 
     css::ValueList::iterator Iterator;
+
+    TypedRequiredListIterator() noexcept = default;
 
     TypedRequiredListIterator(css::ValueList::iterator iterator) noexcept : Iterator(iterator)
     {
@@ -85,16 +87,25 @@ namespace krys::boo::style
       return *this;
     }
 
+    TypedRequiredListIterator operator++(int) noexcept
+    {
+      auto result = *this;
+      ++*this;
+      return result;
+    }
+
     KRYS_NODISCARD const ValueType &operator*() const noexcept
     {
       return detail_builder_checking::DowncastValue<ValueType>(*Iterator);
     }
 
-    KRYS_NODISCARD bool operator!=(const TypedRequiredListIterator &other) const noexcept
+    KRYS_NODISCARD bool operator==(const TypedRequiredListIterator &other) const noexcept
     {
-      return Iterator != other.Iterator;
+      return Iterator == other.Iterator;
     }
   };
+
+  static_assert(std::forward_iterator<TypedRequiredListIterator<css::Value>>);
 
   template <typename ListType, typename ValueType>
   struct TypedRequiredList

@@ -28,7 +28,7 @@ namespace krys::boo::css::tests
     }
 
     KRYS_NODISCARD UniquePtr<MutableSelector> WithArguments(UniquePtr<MutableSelector> selector,
-                                                            FixedVector<CSSOMStringAtom> arguments) noexcept
+                                                            FixedList<CSSOMStringAtom> arguments) noexcept
     {
       selector->SetArgumentList(krys::move(arguments));
       return selector;

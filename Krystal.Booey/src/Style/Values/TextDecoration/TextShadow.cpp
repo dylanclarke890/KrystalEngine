@@ -93,8 +93,10 @@ namespace krys::boo::style
       shadow->Shadow(), [&](const css::keywords::None &) -> TextShadows { return css::keywords::None {}; },
       [&](const typename css::TextShadowProperty::List &list) -> TextShadows
       {
-        return TextShadows::List::map(list | std::views::reverse, [&](const css::TextShadow &element)
-                                      { return ConvertToStyle(element, state); });
+        return TextShadows::List(std::from_range,
+                                 (list | std::views::reverse)
+                                   | std::views::transform([&](const css::TextShadow &element)
+                                                           { return ConvertToStyle(element, state); }));
       });
   }
 

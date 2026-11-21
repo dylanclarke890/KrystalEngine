@@ -3,7 +3,6 @@
 #include "Krystal.Core/Strings/String.hpp"
 #include "Krystal.Core/Types/Array.hpp"
 #include "Krystal.Core/Types/HashMap.hpp"
-#include "Krystal.Core/Types/List.hpp"
 #include "Krystal.Gfx/Device.hpp"
 #include "Krystal.Gfx/OpenGL/gl.hpp"
 #include "Krystal.Gfx/OpenGL/GLContext.hpp"

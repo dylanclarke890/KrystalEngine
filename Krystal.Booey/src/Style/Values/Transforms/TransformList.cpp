@@ -146,15 +146,16 @@ namespace krys::boo::style
     {
       krys_debug_assert(context.Progress == 1.0);
 
-      return TransformList::Container::createWithSizeFromGenerator(fromLength + toLength,
-                                                                   [&](auto index)
-                                                                   {
-                                                                     if (index < fromLength)
-                                                                     {
-                                                                       return from[index];
-                                                                     }
-                                                                     return to[index - fromLength];
-                                                                   });
+      return TransformList::Container(std::from_range, std::views::iota(0uz, fromLength + toLength)
+                                                         | std::views::transform(
+                                                           [&](auto index)
+                                                           {
+                                                             if (index < fromLength)
+                                                             {
+                                                               return from[index];
+                                                             }
+                                                             return to[index - fromLength];
+                                                           }));
     }
 
     bool shouldFallBackToDiscrete = ShouldFallBackToDiscreteInterpolation(from, to, boxSize);
@@ -228,19 +229,21 @@ namespace krys::boo::style
 
     if (prefixLength)
     {
-      return TransformList::Container::createWithSizeFromGenerator(
-        *prefixLength + 1,
-        [&](auto i)
-        {
-          if (i == *prefixLength)
-          {
-            return createBlendedMatrixFunctionFromOperationsSuffix(i);
-          }
-          return createBlendedFunction(i);
-        });
+      return TransformList::Container(std::from_range,
+                                      std::views::iota(0uz, *prefixLength + 1)
+                                        | std::views::transform(
+                                          [&](auto i)
+                                          {
+                                            if (i == *prefixLength)
+                                            {
+                                              return createBlendedMatrixFunctionFromOperationsSuffix(i);
+                                            }
+                                            return createBlendedFunction(i);
+                                          }));
     }
 
-    return TransformList::Container::createWithSizeFromGenerator(maxLength, [&](auto i)
-                                                                 { return createBlendedFunction(i); });
+    return TransformList::Container(
+      std::from_range, std::views::iota(0uz, maxLength)
+                         | std::views::transform([&](auto i) { return createBlendedFunction(i); }));
   }
 }

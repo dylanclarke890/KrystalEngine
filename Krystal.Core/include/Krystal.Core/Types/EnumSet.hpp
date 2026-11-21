@@ -29,6 +29,7 @@
 #include "Krystal.Core/Types/Maybe.hpp"
 #include <bit>
 #include <initializer_list>
+#include <ranges>
 
 namespace krys
 {
@@ -99,6 +100,16 @@ namespace krys
     constexpr EnumSet(std::initializer_list<E> initializerList) noexcept
     {
       for (auto &e : initializerList)
+      {
+        Set(e);
+      }
+    }
+
+    /// @brief A set of the elements of @p range.
+    template <std::ranges::input_range TRange>
+    constexpr EnumSet(std::from_range_t, TRange &&range) noexcept
+    {
+      for (E e : range)
       {
         Set(e);
       }

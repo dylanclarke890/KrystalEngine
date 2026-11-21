@@ -640,7 +640,7 @@ namespace krys::boo::style
     }
 
     _matchedPseudoElements.Add(context.PublicPseudoElements);
-    _styleRelations.append(context.StyleRelations.begin(), context.StyleRelations.end());
+    _styleRelations.append_range(context.StyleRelations);
 
     return selectorMatches;
   }

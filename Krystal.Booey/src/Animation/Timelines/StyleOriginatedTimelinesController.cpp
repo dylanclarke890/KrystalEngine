@@ -332,12 +332,9 @@ namespace krys::boo
     for (auto it = _nameToTimelineMap.begin(); it != _nameToTimelineMap.end();)
     {
       auto &timelines = it->second;
-      std::erase_if(timelines,
-                    [](const Ref<ScrollTimeline> &timeline)
-                    {
-                      return timeline->IsInactiveStyleOriginatedTimeline()
-                             && timeline->RelevantAnimations().isEmpty();
-                    });
+      std::erase_if(
+        timelines, [](const Ref<ScrollTimeline> &timeline)
+        { return timeline->IsInactiveStyleOriginatedTimeline() && timeline->RelevantAnimations().empty(); });
       if (timelines.empty())
       {
         it = _nameToTimelineMap.erase(it);

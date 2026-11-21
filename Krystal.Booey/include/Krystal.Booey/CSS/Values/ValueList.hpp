@@ -60,7 +60,7 @@ namespace krys::boo::css
     struct iterator
     {
       using iterator_category = std::forward_iterator_tag;
-      using value_type = const Value &;
+      using value_type = Value;
       using difference_type = ptrdiff_t;
       using pointer = const Value *;
       using reference = const Value &;

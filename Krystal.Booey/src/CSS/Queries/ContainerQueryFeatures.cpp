@@ -80,7 +80,7 @@ namespace krys::boo::css::cq
   {
     SizeFeatureSchema(const CSSOMStringAtom &name, Type type, ValueType valueType,
                       mq::MediaQueryDynamicDependency dependencies,
-                      FixedVector<ValueId> &&valueIdentifiers = {}) noexcept
+                      FixedList<ValueId> &&valueIdentifiers = {}) noexcept
         : mq::FeatureSchema(name, type, valueType, dependencies, krys::move(valueIdentifiers))
     {
     }
@@ -234,7 +234,7 @@ namespace krys::boo::css::cq
       OrientationFeatureSchema() noexcept
           : SizeFeatureSchema(u8"orientation", mq::FeatureSchema::Type::Discrete,
                               mq::FeatureSchema::ValueType::Identifier, Dependency::Viewport,
-                              FixedVector {ValueId::Portrait, ValueId::Landscape})
+                              FixedList {ValueId::Portrait, ValueId::Landscape})
       {
       }
 

@@ -92,48 +92,53 @@ namespace krys::boo::style
 
     auto computeContentList = [&]() -> Content::ListType
     {
-      return Content::ListType::map(
-        *contentList,
-        [&](const css::Value &item) -> Content::ListItem
-        {
-          if (item.IsImage())
-          {
-            if (auto image = state.CreateStyleImage(item))
-            {
-              return Content::Image {ImageWrapper {Ref<StyleImage> {krys::move(image)}}};
-            }
-            state.SetCurrentPropertyInvalidAtComputedValueTime();
-            return Content::Text {CSSOMString {}};
-          }
-          if (const auto *primitive = DynamicDowncast<css::PrimitiveValue>(item))
-          {
-            switch (primitive->ValueId())
-            {
-              case css::ValueId::OpenQuote:    return Content::Quote {QuoteType::OpenQuote};
-              case css::ValueId::CloseQuote:   return Content::Quote {QuoteType::CloseQuote};
-              case css::ValueId::NoOpenQuote:  return Content::Quote {QuoteType::NoOpenQuote};
-              case css::ValueId::NoCloseQuote: return Content::Quote {QuoteType::NoCloseQuote};
-              default:                         break;
-            }
-            if (primitive->IsString())
-            {
-              return Content::Text {primitive->StringValue()};
-            }
-            if (const auto *attr = primitive->CSSAttrValue())
-            {
-              return Content::Text {processAttrContent(*attr)};
-            }
-            state.SetCurrentPropertyInvalidAtComputedValueTime();
-            return Content::Text {CSSOMString {}};
-          }
-          if (const auto *counter = DynamicDowncast<css::CounterValue>(item))
-          {
-            return Content::Counter {counter->Identifier(), counter->Separator(),
-                                     ConvertCSSValueToStyle<CounterStyle>(state, *counter->CounterStyle())};
-          }
-          state.SetCurrentPropertyInvalidAtComputedValueTime();
-          return Content::Text {CSSOMString {}};
-        });
+      return Content::ListType(
+        std::from_range, *contentList
+                           | std::views::transform(
+                             [&](const css::Value &item) -> Content::ListItem
+                             {
+                               if (item.IsImage())
+                               {
+                                 if (auto image = state.CreateStyleImage(item))
+                                 {
+                                   return Content::Image {ImageWrapper {Ref<StyleImage> {krys::move(image)}}};
+                                 }
+                                 state.SetCurrentPropertyInvalidAtComputedValueTime();
+                                 return Content::Text {CSSOMString {}};
+                               }
+                               if (const auto *primitive = DynamicDowncast<css::PrimitiveValue>(item))
+                               {
+                                 switch (primitive->ValueId())
+                                 {
+                                   case css::ValueId::OpenQuote: return Content::Quote {QuoteType::OpenQuote};
+                                   case css::ValueId::CloseQuote:
+                                     return Content::Quote {QuoteType::CloseQuote};
+                                   case css::ValueId::NoOpenQuote:
+                                     return Content::Quote {QuoteType::NoOpenQuote};
+                                   case css::ValueId::NoCloseQuote:
+                                     return Content::Quote {QuoteType::NoCloseQuote};
+                                   default: break;
+                                 }
+                                 if (primitive->IsString())
+                                 {
+                                   return Content::Text {primitive->StringValue()};
+                                 }
+                                 if (const auto *attr = primitive->CSSAttrValue())
+                                 {
+                                   return Content::Text {processAttrContent(*attr)};
+                                 }
+                                 state.SetCurrentPropertyInvalidAtComputedValueTime();
+                                 return Content::Text {CSSOMString {}};
+                               }
+                               if (const auto *counter = DynamicDowncast<css::CounterValue>(item))
+                               {
+                                 return Content::Counter {
+                                   counter->Identifier(), counter->Separator(),
+                                   ConvertCSSValueToStyle<CounterStyle>(state, *counter->CounterStyle())};
+                               }
+                               state.SetCurrentPropertyInvalidAtComputedValueTime();
+                               return Content::Text {CSSOMString {}};
+                             }));
     };
 
     auto computeAltText = [&]() -> Maybe<CSSOMString>

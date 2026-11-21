@@ -96,8 +96,10 @@ namespace krys::boo::style
       return css::keywords::Auto {};
     }
 
-    return ViewTimelineInsetList::Map(
-      *list, [&](const auto &element) -> ViewTimelineInsetItem
-      { return ConvertCSSValueToStyle<ViewTimelineInsetItem>(state, element); });
+    return ViewTimelineInsetList(
+      std::from_range,
+      *list
+        | std::views::transform([&](const auto &element) -> ViewTimelineInsetItem
+                                { return ConvertCSSValueToStyle<ViewTimelineInsetItem>(state, element); }));
   }
 }

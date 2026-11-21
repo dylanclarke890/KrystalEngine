@@ -83,7 +83,7 @@ namespace krys::boo
     return GetExtractor().CopyProperties();
   }
 
-  const FixedVector<css::PropertyId> &
+  const FixedList<css::PropertyId> &
     CSSComputedStyleDeclaration::ExposedComputedCSSPropertyIds() const noexcept
   {
     return ProtectedElement()->NodeDocument().ExposedComputedCSSPropertyIds();

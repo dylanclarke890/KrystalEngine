@@ -120,7 +120,7 @@ namespace krys::boo::style
 
       PositionTryFallback result;
       result.RuleAndTacticsFallback.Rule = krys::move(rule);
-      if (!tactics.isEmpty())
+      if (!tactics.empty())
       {
         result.RuleAndTacticsFallback.Tactics = krys::move(tactics);
       }

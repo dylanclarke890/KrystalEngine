@@ -98,7 +98,7 @@ namespace krys::boo::html
     void SetName(DOMStringView characters) noexcept
     {
       Name.clear();
-      Name.append(characters.begin(), characters.end());
+      Name.append_range(characters);
     }
   };
 
@@ -206,7 +206,7 @@ namespace krys::boo::html
 
       auto encodeResult = krys::text::Encode<krys::text::UTF8>(Span<char32>(&character, 1));
       krys_debug_assert(encodeResult.Error == krys::text::EncodeError::None);
-      _doctypeData->PublicIdentifier.append(encodeResult.Output.begin(), encodeResult.Output.end());
+      _doctypeData->PublicIdentifier.append_range(encodeResult.Output);
     }
 
     void AppendToSystemIdentifier(char32 character)
@@ -216,7 +216,7 @@ namespace krys::boo::html
 
       auto encodeResult = krys::text::Encode<krys::text::UTF8>(Span<char32>(&character, 1));
       krys_debug_assert(encodeResult.Error == krys::text::EncodeError::None);
-      _doctypeData->SystemIdentifier.append(encodeResult.Output.begin(), encodeResult.Output.end());
+      _doctypeData->SystemIdentifier.append_range(encodeResult.Output);
     }
 
     KRYS_NODISCARD UniquePtr<DoctypeData> ReleaseDOCTYPEData() noexcept
@@ -301,7 +301,7 @@ namespace krys::boo::html
 
       auto encodeResult = krys::text::Encode<krys::text::UTF8>(Span<char32>(&character, 1));
       krys_debug_assert(encodeResult.Error == krys::text::EncodeError::None);
-      _currentAttribute->Name.append(encodeResult.Output.begin(), encodeResult.Output.end());
+      _currentAttribute->Name.append_range(encodeResult.Output);
     }
 
     void AppendToCurrentAttributeValue(char32 character) noexcept
@@ -311,7 +311,7 @@ namespace krys::boo::html
 
       auto encodeResult = krys::text::Encode<krys::text::UTF8>(Span<char32>(&character, 1));
       krys_debug_assert(encodeResult.Error == krys::text::EncodeError::None);
-      _currentAttribute->Value.append(encodeResult.Output.begin(), encodeResult.Output.end());
+      _currentAttribute->Value.append_range(encodeResult.Output);
     }
 
     template <size_t N>
@@ -332,7 +332,7 @@ namespace krys::boo::html
 
       auto encodeResult = krys::text::Encode<krys::text::UTF8>(characters);
       krys_debug_assert(encodeResult.Error == krys::text::EncodeError::None);
-      _currentAttribute->Value.append(encodeResult.Output.begin(), encodeResult.Output.end());
+      _currentAttribute->Value.append_range(encodeResult.Output);
     }
 
     void SetSelfClosingFlag() noexcept
@@ -391,7 +391,7 @@ namespace krys::boo::html
     void AppendToComment(stringview characters) noexcept
     {
       krys_debug_assert(_type == TokenType::Comment);
-      _data.append(characters.begin(), characters.end());
+      _data.append_range(characters);
     }
 
     void AppendToComment(Span<char32> characters) noexcept
@@ -416,7 +416,7 @@ namespace krys::boo::html
       krys_debug_assert(_type == TokenType::ProcessingInstruction);
       auto encodeResult = krys::text::Encode<krys::text::UTF8>(Span<char32>(&character, 1));
       krys_debug_assert(encodeResult.Error == krys::text::EncodeError::None);
-      _processingInstructionData.append(encodeResult.Output.begin(), encodeResult.Output.end());
+      _processingInstructionData.append_range(encodeResult.Output);
     }
 
     KRYS_NODISCARD const DataBuffer &ProcessingInstructionData() const noexcept
@@ -447,14 +447,14 @@ namespace krys::boo::html
     {
       auto encodeResult = krys::text::Encode<krys::text::UTF8>(characters);
       krys_debug_assert(encodeResult.Error == krys::text::EncodeError::None);
-      _data.append(encodeResult.Output.begin(), encodeResult.Output.end());
+      _data.append_range(encodeResult.Output);
     }
 
     void AppendToDataInternal(Span<char32> characters) noexcept
     {
       auto encodeResult = krys::text::Encode<krys::text::UTF8>(characters);
       krys_debug_assert(encodeResult.Error == krys::text::EncodeError::None);
-      _data.append(encodeResult.Output.begin(), encodeResult.Output.end());
+      _data.append_range(encodeResult.Output);
     }
   };
 }

@@ -262,7 +262,7 @@ target_sources(Krystal.Core
       include/Krystal.Core/Types/CompactVariant.hpp
       include/Krystal.Core/Types/Decimal.hpp
       include/Krystal.Core/Types/Expected.hpp
-      include/Krystal.Core/Types/FixedVector.hpp
+      include/Krystal.Core/Containers/FixedList.hpp
       include/Krystal.Core/Types/Func.hpp
       include/Krystal.Core/Types/HashMap.hpp
       include/Krystal.Core/Types/HashSet.hpp
@@ -278,7 +278,7 @@ target_sources(Krystal.Core
       include/Krystal.Core/Types/NTTPString.hpp
       include/Krystal.Core/Types/Pair.hpp
       include/Krystal.Core/Types/Queue.hpp
-      include/Krystal.Core/Types/RefCountedFixedVector.hpp
+      include/Krystal.Core/Containers/RefCountedFixedList.hpp
       include/Krystal.Core/Types/SharedBuffer.hpp
       include/Krystal.Core/Types/SmallList.hpp
       include/Krystal.Core/Types/Span.hpp

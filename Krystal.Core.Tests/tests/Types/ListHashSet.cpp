@@ -12,7 +12,7 @@ namespace krys::tests
     std::vector<int> ordered(values.begin(), values.end());
 
     REQUIRE(values.size() == 3);
-    REQUIRE_FALSE(values.isEmpty());
+    REQUIRE_FALSE(values.empty());
     REQUIRE(values.contains(1));
     REQUIRE_FALSE(values.contains(4));
     REQUIRE(ordered == std::vector {3, 1, 2});
@@ -61,7 +61,7 @@ namespace krys::tests
     REQUIRE_FALSE(values.insertBefore(values.begin(), 4).second);
     REQUIRE(values == ListHashSet<int> {2, 3, 5, 1, 4});
     REQUIRE(values.insertBefore(values.end(), 6).second);
-    REQUIRE(values.last() == 6);
+    REQUIRE(values.back() == 6);
     REQUIRE(values.contains(5));
     REQUIRE(values.remove(5));
     REQUIRE(values == ListHashSet<int> {2, 3, 1, 4, 6});

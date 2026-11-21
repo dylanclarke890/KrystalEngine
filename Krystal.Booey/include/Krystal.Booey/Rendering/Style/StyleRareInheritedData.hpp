@@ -64,7 +64,6 @@
 #include "Krystal.Core/Memory/DataRef.hpp"
 #include "Krystal.Core/Memory/RefCounted.hpp"
 #include "Krystal.Core/Types/EnumSet.hpp"
-#include "Krystal.Core/Types/FixedVector.hpp"
 
 #include "Krystal.Booey/Style/Values/ColorAdjust/ColorScheme.hpp"
 

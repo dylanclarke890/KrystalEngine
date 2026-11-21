@@ -303,7 +303,7 @@ namespace krys::boo::css
 
     if (!parseSuccess)
     {
-      parsedProperties.truncate(initialParsedPropertiesSize);
+      parsedProperties.erase(parsedProperties.begin() + initialParsedPropertiesSize, parsedProperties.end());
     }
 
     return parseSuccess;

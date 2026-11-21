@@ -45,8 +45,6 @@
 #include "Krystal.Core/Memory/DataRef.hpp"
 #include "Krystal.Core/Memory/UniquePtr.hpp"
 #include "Krystal.Core/Types/EnumSet.hpp"
-#include "Krystal.Core/Types/FixedVector.hpp"
-#include "Krystal.Core/Types/List.hpp"
 
 namespace krys
 {

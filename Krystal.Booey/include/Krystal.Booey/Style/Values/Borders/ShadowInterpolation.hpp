@@ -105,15 +105,16 @@ namespace krys::boo::style
                                                      const ShadowsType &toShadows, size_t fromLength,
                                                      size_t toLength) noexcept
     {
-      return ShadowListType::createWithSizeFromGenerator(fromLength + toLength,
-                                                         [&](auto index) -> ShadowType
-                                                         {
-                                                           if (index < toLength)
-                                                           {
-                                                             return toShadows[index];
-                                                           }
-                                                           return fromShadows[index - toLength];
-                                                         });
+      return ShadowListType(std::from_range, std::views::iota(0uz, fromLength + toLength)
+                                               | std::views::transform(
+                                                 [&](auto index) -> ShadowType
+                                                 {
+                                                   if (index < toLength)
+                                                   {
+                                                     return toShadows[index];
+                                                   }
+                                                   return fromShadows[index - toLength];
+                                                 }));
     }
 
     KRYS_NODISCARD static ShadowsType BlendMatchedShadowLists(const ShadowsType &fromShadows,
@@ -129,9 +130,12 @@ namespace krys::boo::style
         return AddShadowLists(fromShadows, toShadows, length, length);
       }
 
-      return ShadowListType::createWithSizeFromGenerator(
-        length, [&](auto index) -> ShadowType
-        { return style::Blend(fromShadows[index], toShadows[index], fromStyle, toStyle, context); });
+      return ShadowListType(
+        std::from_range,
+        std::views::iota(0uz, length)
+          | std::views::transform(
+            [&](auto index) -> ShadowType
+            { return style::Blend(fromShadows[index], toShadows[index], fromStyle, toStyle, context); }));
     }
 
     KRYS_NODISCARD static ShadowsType
@@ -146,35 +150,36 @@ namespace krys::boo::style
       }
 
       auto maxLength = std::max(fromLength, toLength);
-      return ShadowListType::createWithSizeFromGenerator(
-        maxLength,
-        [&](auto index) -> ShadowType
-        {
-          auto indexFromEnd = maxLength - index - 1;
-          bool hasFrom = indexFromEnd < fromLength;
-          bool hasTo = indexFromEnd < toLength;
+      return ShadowListType(
+        std::from_range, std::views::iota(0uz, maxLength)
+                           | std::views::transform(
+                             [&](auto index) -> ShadowType
+                             {
+                               auto indexFromEnd = maxLength - index - 1;
+                               bool hasFrom = indexFromEnd < fromLength;
+                               bool hasTo = indexFromEnd < toLength;
 
-          if (hasFrom && hasTo)
-          {
-            const auto &fromShadow = fromShadows[index - (maxLength - fromLength)];
-            const auto &toShadow = toShadows[index - (maxLength - toLength)];
-            return style::Blend(fromShadow, toShadow, fromStyle, toStyle, context);
-          }
-          if (hasFrom)
-          {
-            const auto &fromShadow = fromShadows[index - (maxLength - fromLength)];
-            const auto &toShadow = MatchingShadows::ShadowForInterpolation(fromShadow);
-            return style::Blend(fromShadow, toShadow, fromStyle, toStyle, context);
-          }
-          else if (hasTo)
-          {
-            const auto &toShadow = toShadows[index - (maxLength - toLength)];
-            const auto &fromShadow = MatchingShadows::ShadowForInterpolation(toShadow);
-            return style::Blend(fromShadow, toShadow, fromStyle, toStyle, context);
-          }
+                               if (hasFrom && hasTo)
+                               {
+                                 const auto &fromShadow = fromShadows[index - (maxLength - fromLength)];
+                                 const auto &toShadow = toShadows[index - (maxLength - toLength)];
+                                 return style::Blend(fromShadow, toShadow, fromStyle, toStyle, context);
+                               }
+                               if (hasFrom)
+                               {
+                                 const auto &fromShadow = fromShadows[index - (maxLength - fromLength)];
+                                 const auto &toShadow = MatchingShadows::ShadowForInterpolation(fromShadow);
+                                 return style::Blend(fromShadow, toShadow, fromStyle, toStyle, context);
+                               }
+                               else if (hasTo)
+                               {
+                                 const auto &toShadow = toShadows[index - (maxLength - toLength)];
+                                 const auto &fromShadow = MatchingShadows::ShadowForInterpolation(toShadow);
+                                 return style::Blend(fromShadow, toShadow, fromStyle, toStyle, context);
+                               }
 
-          krys_unreachable();
-        });
+                               krys_unreachable();
+                             }));
     }
   };
 }

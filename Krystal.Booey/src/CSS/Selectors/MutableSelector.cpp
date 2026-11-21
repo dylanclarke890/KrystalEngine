@@ -123,21 +123,21 @@ namespace krys::boo::css
     _selector->SetSubSelectors(CreateUnique<SelectorList>(krys::move(selectorVector)));
   }
 
-  void MutableSelector::SetArgumentList(FixedVector<CSSOMStringAtom> list) noexcept
+  void MutableSelector::SetArgumentList(FixedList<CSSOMStringAtom> list) noexcept
   {
-    krys_debug_assert(!list.isEmpty());
+    krys_debug_assert(!list.empty());
     _selector->SetArgumentList(krys::move(list));
   }
 
-  void MutableSelector::SetIntegerList(FixedVector<int32> list) noexcept
+  void MutableSelector::SetIntegerList(FixedList<int32> list) noexcept
   {
-    krys_debug_assert(!list.isEmpty());
+    krys_debug_assert(!list.empty());
     _selector->SetIntegerList(krys::move(list));
   }
 
-  void MutableSelector::SetLangList(FixedVector<PossiblyQuotedIdentifier> list) noexcept
+  void MutableSelector::SetLangList(FixedList<PossiblyQuotedIdentifier> list) noexcept
   {
-    krys_debug_assert(!list.isEmpty());
+    krys_debug_assert(!list.empty());
     _selector->SetLangList(krys::move(list));
   }
 

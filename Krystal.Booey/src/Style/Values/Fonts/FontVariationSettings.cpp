@@ -83,7 +83,7 @@ namespace krys::boo::style
     CSSValueCreation<FontVariationSettings>::operator()(css::ValuePool &pool, const RenderStyle &style,
                                                         const FontVariationSettings &value) noexcept
   {
-    if (value.Platform().isEmpty())
+    if (value.Platform().empty())
     {
       return CreateCSSValue(pool, style, css::keywords::Normal {});
     }
@@ -104,7 +104,7 @@ namespace krys::boo::style
                                                      const RenderStyle &style,
                                                      const FontVariationSettings &value) noexcept
   {
-    if (value.Platform().isEmpty())
+    if (value.Platform().empty())
     {
       Serialise(builder, context, style, css::keywords::Normal {});
       return;

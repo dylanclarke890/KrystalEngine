@@ -2747,7 +2747,7 @@ namespace krys::ui::tests
       time += frame;
       (void)view.Update(time);
     }
-    auto &animation = *view.Document().GetElementById(u8"box")->Animations(null)->first();
+    auto &animation = *view.Document().GetElementById(u8"box")->Animations(null)->front();
     CHECK_FALSE(animation.Pending());
     auto before = opacity();
     for (int32 i = 0; i < 15; ++i)

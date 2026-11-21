@@ -32,7 +32,6 @@
 #include "Krystal.Booey/Style/Values/Grid/GridTrackSizes.hpp"
 #include "Krystal.Core/Memory/RefCounted.hpp"
 #include "Krystal.Core/Memory/RefPtr.hpp"
-#include "Krystal.Core/Types/List.hpp"
 
 namespace krys::boo
 {

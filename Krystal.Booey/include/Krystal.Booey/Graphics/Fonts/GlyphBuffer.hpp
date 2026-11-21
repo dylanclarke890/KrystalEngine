@@ -294,11 +294,11 @@ namespace krys::boo
 
     void Shrink(uint32 truncationPoint) noexcept
     {
-      _fonts.truncate(truncationPoint);
-      _glyphs.truncate(truncationPoint);
-      _advances.truncate(truncationPoint);
-      _origins.truncate(truncationPoint);
-      _offsetsInString.truncate(truncationPoint);
+      _fonts.resize(truncationPoint);
+      _glyphs.resize(truncationPoint);
+      _advances.resize(truncationPoint);
+      _origins.resize(truncationPoint);
+      _offsetsInString.resize(truncationPoint);
     }
 
     /*

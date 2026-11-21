@@ -344,8 +344,8 @@ namespace krys::boo::css::tests
     auto &colorScheme = mq::features::PrefersColorScheme();
     CHECK(colorScheme.FeatureType == mq::FeatureSchema::Type::Discrete);
     CHECK(colorScheme.Dependencies == mq::MediaQueryDynamicDependency::Appearance);
-    CHECK(colorScheme.ValueIdentifiers.contains(ValueId::Dark));
-    CHECK_FALSE(colorScheme.ValueIdentifiers.contains(ValueId::None));
+    CHECK(std::ranges::contains(colorScheme.ValueIdentifiers, ValueId::Dark));
+    CHECK_FALSE(std::ranges::contains(colorScheme.ValueIdentifiers, ValueId::None));
   }
 
   TEST_CASE_METHOD(ValueFixture, "MediaQuery: TraverseFeatures", "[CSS][Queries][MediaQuery]")

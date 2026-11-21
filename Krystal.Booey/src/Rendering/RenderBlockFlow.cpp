@@ -2970,13 +2970,13 @@ namespace krys::boo
     }
 
     const FloatingObjectSet &floatingObjectSet = _floatingObjects->Set();
-    if (floatingObjectSet.isEmpty())
+    if (floatingObjectSet.IsEmpty())
     {
       return false;
     }
 
     // If all floats have already been positioned, then we have no work to do.
-    if (floatingObjectSet.last()->IsPlaced())
+    if (floatingObjectSet.Last()->IsPlaced())
     {
       return false;
     }

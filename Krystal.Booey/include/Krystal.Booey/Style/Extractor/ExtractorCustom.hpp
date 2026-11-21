@@ -2890,9 +2890,9 @@ namespace krys::boo::style
       // When we add font-language-override, also add code to check for non-expressible values for it here.
       return variantSettingsOmittingExpressible.IsAllNormal() && fontWidth && fontStyle
              && description.GetFontSizeAdjust().IsNone() && description.GetKerning() == Kerning::Auto
-             && description.FeatureSettings().isEmpty()
+             && description.FeatureSettings().empty()
              && description.OpticalSizing() == FontOpticalSizing::Auto
-             && description.VariationSettings().isEmpty();
+             && description.VariationSettings().empty();
     };
 
     auto computedFont = css::FontValue::Create();
@@ -3099,7 +3099,7 @@ namespace krys::boo::style
   inline RefPtr<css::Value> ExtractorCustom::ExtractScrollTimelineShorthand(ExtractorState &state) noexcept
   {
     auto &timelines = state.Style.GetScrollTimelines();
-    if (timelines.isEmpty())
+    if (timelines.empty())
     {
       return CreateCSSValue(state.Pool, state.Style, css::keywords::None {});
     }
@@ -3130,7 +3130,7 @@ namespace krys::boo::style
     ExtractorState &state, StringBuilder &builder, const css::SerialisationContext &context) noexcept
   {
     auto &timelines = state.Style.GetScrollTimelines();
-    if (timelines.isEmpty())
+    if (timelines.empty())
     {
       Serialise(builder, context, state.Style, css::keywords::None {});
       return;
@@ -3261,7 +3261,7 @@ namespace krys::boo::style
   inline RefPtr<css::Value> ExtractorCustom::ExtractViewTimelineShorthand(ExtractorState &state) noexcept
   {
     auto &timelines = state.Style.GetViewTimelines();
-    if (timelines.isEmpty())
+    if (timelines.empty())
     {
       return CreateCSSValue(state.Pool, state.Style, css::keywords::None {});
     }

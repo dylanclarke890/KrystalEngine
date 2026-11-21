@@ -34,7 +34,6 @@
 #include "Krystal.Core/Maths/Extras.hpp"
 #include "Krystal.Core/Memory/UnalignedAccess.hpp"
 #include "Krystal.Core/Types/Array.hpp"
-#include "Krystal.Core/Types/Span.hpp"
 #include "Krystal.Core/Utils/Tags.hpp"
 #include <bit>
 #include <cstring>

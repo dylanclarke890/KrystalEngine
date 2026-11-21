@@ -61,7 +61,7 @@ namespace krys::boo::dom
     // A missing attribute's value is the empty string, which has no tokens.
     auto tokens = OrderedSet::Parser(ElementAlgorithms::GetAttributeValue(*_element, _attributeName));
     _tokens.clear();
-    _tokens.append(tokens.begin(), tokens.end());
+    _tokens.append_range(tokens);
     _tokensNeedUpdating = false;
   }
 

@@ -79,7 +79,7 @@ namespace krys::boo::style
                                                                     const RenderStyle &style,
                                                                     const FontFeatureSettings &value) noexcept
   {
-    if (value.Platform().isEmpty())
+    if (value.Platform().empty())
     {
       return CreateCSSValue(pool, style, css::keywords::Normal {});
     }
@@ -100,7 +100,7 @@ namespace krys::boo::style
                                                    const RenderStyle &style,
                                                    const FontFeatureSettings &value) noexcept
   {
-    if (value.Platform().isEmpty())
+    if (value.Platform().empty())
     {
       Serialise(builder, context, style, css::keywords::Normal {});
       return;

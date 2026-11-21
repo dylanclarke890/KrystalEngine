@@ -233,7 +233,7 @@ namespace krys::boo::css
       SmallList<char8, 32uz> unit(_codePoints.begin() + _originalTextLength, _codePoints.end());
       AppendDataInternal(text);
       _originalTextLength = static_cast<uint32>(_codePoints.size());
-      _codePoints.append(unit.begin(), unit.end());
+      _codePoints.append_range(unit);
     }
 
     /// @brief The text the token was tokenized from (see the setter).
@@ -313,7 +313,7 @@ namespace krys::boo::css
 
       auto encodeResult = krys::text::Encode<krys::text::UTF8>(codePoints);
       krys_debug_assert(encodeResult.Error == krys::text::EncodeError::None);
-      _codePoints.append(encodeResult.Output.begin(), encodeResult.Output.end());
+      _codePoints.append_range(encodeResult.Output);
     }
   };
 }

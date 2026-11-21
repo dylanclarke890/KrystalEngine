@@ -400,7 +400,7 @@ namespace krys
     }
 
     AppendSpan(y);
-    _segments.append(segments.begin(), segments.end());
+    _segments.append_range(segments);
   }
 
   void Region::Shape::AppendSpans(const Shape &shape, krys::Span<const Span> spans) noexcept
@@ -566,11 +566,11 @@ namespace krys
       // Add any remaining segments.
       if (TOperation::ShouldAddRemainingSegmentsFromSpan1 && !s1.empty())
       {
-        segments.append(s1.begin(), s1.end());
+        segments.append_range(s1);
       }
       else if (TOperation::ShouldAddRemainingSegmentsFromSpan2 && !s2.empty())
       {
-        segments.append(s2.begin(), s2.end());
+        segments.append_range(s2);
       }
 
       // Add the span.

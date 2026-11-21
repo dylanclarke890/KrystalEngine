@@ -2,7 +2,6 @@
 #include "Krystal.Booey/HTML/Attributes/EventHandlerAttributes.hpp"
 #include "Krystal.Booey/Infra/Namespaces.hpp"
 #include "Krystal.Core/Memory/NeverDestroyed.hpp"
-#include "Krystal.Core/Types/Array.hpp"
 #include <algorithm>
 #include <ranges>
 

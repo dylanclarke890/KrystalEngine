@@ -373,7 +373,7 @@ namespace krys::boo::css
       return {CSSOMStringAtom(string), token.Type() == TokenType::String};
     }
 
-    KRYS_NODISCARD FixedVector<PossiblyQuotedIdentifier> ConsumeLangArgumentList(TokenRange &tokens) noexcept
+    KRYS_NODISCARD FixedList<PossiblyQuotedIdentifier> ConsumeLangArgumentList(TokenRange &tokens) noexcept
     {
       List<PossiblyQuotedIdentifier> list;
       auto item = ConsumePossiblyQuotedIdentifier(tokens);
@@ -392,7 +392,7 @@ namespace krys::boo::css
         }
         list.push_back(krys::move(item));
       }
-      return FixedVector<PossiblyQuotedIdentifier>(list.begin(), list.end());
+      return FixedList<PossiblyQuotedIdentifier>(list.begin(), list.end());
     }
 
     /// @brief Whether a compound has a pseudo-element, so no compound may follow it.
@@ -1062,7 +1062,7 @@ namespace krys::boo::css
         case SelectorPseudoClass::Lang:
         {
           auto list = ConsumeLangArgumentList(block);
-          if (list.isEmpty() || !block.IsAtEnd())
+          if (list.empty() || !block.IsAtEnd())
           {
             return nullptr;
           }
@@ -1140,7 +1140,7 @@ namespace krys::boo::css
               return nullptr;
             }
           }
-          selector->SetIntegerList(FixedVector<int32>(levels.begin(), levels.end()));
+          selector->SetIntegerList(FixedList<int32>(levels.begin(), levels.end()));
           return selector;
         }
         case SelectorPseudoClass::Dir:
@@ -1195,7 +1195,7 @@ namespace krys::boo::css
           {
             return nullptr;
           }
-          selector->SetArgumentList(FixedVector<CSSOMStringAtom> {CSSOMStringAtom(ident.IdentCodePoints())});
+          selector->SetArgumentList(FixedList<CSSOMStringAtom> {CSSOMStringAtom(ident.IdentCodePoints())});
           return selector;
         }
         case SelectorPseudoElement::Part:
@@ -1210,7 +1210,7 @@ namespace krys::boo::css
             }
             argumentList.emplace_back(ident.IdentCodePoints());
           } while (!block.IsAtEnd());
-          selector->SetArgumentList(FixedVector<CSSOMStringAtom>(argumentList.begin(), argumentList.end()));
+          selector->SetArgumentList(FixedList<CSSOMStringAtom>(argumentList.begin(), argumentList.end()));
           return selector;
         }
         case SelectorPseudoElement::Slotted:

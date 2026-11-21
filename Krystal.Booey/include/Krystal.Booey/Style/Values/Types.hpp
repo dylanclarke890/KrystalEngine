@@ -396,7 +396,9 @@ namespace krys::boo::style
                                      // NOLINTNEXTLINE(cppcoreguidelines-missing-std-forward)
                                      const RenderStyle &style, Rest &&...rest) noexcept
     {
-      return Result::map(value, [&](const auto &x) { return ConvertToCSS(x, style, rest...); });
+      return Result(
+        std::from_range,
+        value | std::views::transform([&](const auto &x) { return ConvertToCSS(x, style, rest...); }));
     }
   };
 
@@ -412,7 +414,9 @@ namespace krys::boo::style
                                      // NOLINTNEXTLINE(cppcoreguidelines-missing-std-forward)
                                      const RenderStyle &style, Rest &&...rest) noexcept
     {
-      return Result::map(value, [&](const auto &x) { return ConvertToCSS(x, style, rest...); });
+      return Result(
+        std::from_range,
+        value | std::views::transform([&](const auto &x) { return ConvertToCSS(x, style, rest...); }));
     }
   };
 
@@ -679,7 +683,8 @@ namespace krys::boo::style
                                      // NOLINTNEXTLINE(cppcoreguidelines-missing-std-forward)
                                      Rest &&...rest) noexcept
     {
-      return Result::map(value, [&](const auto &x) { return ConvertToStyle(x, rest...); });
+      return Result(std::from_range,
+                    value | std::views::transform([&](const auto &x) { return ConvertToStyle(x, rest...); }));
     }
   };
 
@@ -695,7 +700,8 @@ namespace krys::boo::style
                                      // NOLINTNEXTLINE(cppcoreguidelines-missing-std-forward)
                                      Rest &&...rest) noexcept
     {
-      return Result::map(value, [&](const auto &x) { return ConvertToStyle(x, rest...); });
+      return Result(std::from_range,
+                    value | std::views::transform([&](const auto &x) { return ConvertToStyle(x, rest...); }));
     }
   };
 

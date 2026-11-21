@@ -28,7 +28,6 @@
 
 #include "Krystal.Booey/DOM/Collections/LiveNodeList.hpp"
 #include "Krystal.Booey/DOM/Types/DOMString.hpp"
-#include "Krystal.Core/Types/List.hpp"
 
 namespace krys::boo
 {

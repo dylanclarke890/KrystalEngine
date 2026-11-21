@@ -1060,7 +1060,7 @@ namespace krys::boo
   {
     // Handling a change can defer another (an object's ignored state changing), so repeat until none are
     // left.
-    while (!_deferredChildrenChangedList.isEmpty())
+    while (!_deferredChildrenChangedList.empty())
     {
       auto deferred = std::exchange(_deferredChildrenChangedList, {});
       List<Ref<AXObject>> objects;
@@ -1868,7 +1868,7 @@ namespace krys::boo
     }
     auto targetIDs = krys::move(targets->second);
     relations->second.erase(targets);
-    bool removedRelation = !targetIDs.isEmpty();
+    bool removedRelation = !targetIDs.empty();
 
     if (auto symmetric = SymmetricRelation(relation); symmetric != AXRelation::None)
     {

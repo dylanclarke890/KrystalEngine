@@ -56,7 +56,7 @@ namespace krys::boo::style
 
   bool Filter::IsReferenceFilter() const noexcept
   {
-    return size() == 1 && first()->GetType() == FilterOperation::Type::Reference;
+    return size() == 1 && front()->GetType() == FilterOperation::Type::Reference;
   }
 
   bool Filter::HasFilterThatRequiresRepaintForCurrentColorChange() const noexcept
@@ -183,8 +183,9 @@ namespace krys::boo::style
       value, [&](css::keywords::None keyword) -> css::Filter { return keyword; },
       [&](const FilterValueList &list) -> css::Filter
       {
-        return css::FilterValueList::map(list, [&](const FilterValue &value)
-                                         { return ConvertToCSS(value, style); });
+        return css::FilterValueList(
+          std::from_range,
+          list | std::views::transform([&](const FilterValue &value) { return ConvertToCSS(value, style); }));
       });
   }
 
@@ -194,8 +195,10 @@ namespace krys::boo::style
       value, [&](css::keywords::None keyword) -> Filter { return keyword; },
       [&](const css::FilterValueList &list) -> Filter
       {
-        return FilterValueList::map(list, [&](const css::FilterData &value)
-                                    { return ConvertToStyle(value, state); });
+        return FilterValueList(std::from_range,
+                               list
+                                 | std::views::transform([&](const css::FilterData &value)
+                                                         { return ConvertToStyle(value, state); }));
       });
   }
 
@@ -242,7 +245,7 @@ namespace krys::boo::style
   {
     auto blendedFilterList = BlendFilterLists(from._value, to._value, context);
 
-    if (blendedFilterList.isEmpty())
+    if (blendedFilterList.empty())
     {
       return css::keywords::None {};
     }

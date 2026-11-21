@@ -661,7 +661,7 @@ namespace krys::boo
 
     for (const auto &shadow : shadows)
     {
-      if (!draw(&shadow, &shadow == &shadows.last()))
+      if (!draw(&shadow, &shadow == &shadows.back()))
       {
         return;
       }

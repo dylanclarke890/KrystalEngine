@@ -31,7 +31,6 @@
 #include "Krystal.Core/Memory/UniquePtr.hpp"
 #include "Krystal.Core/Move.hpp"
 #include "Krystal.Core/Strings/StringAtom.hpp"
-#include "Krystal.Core/Types/HashSet.hpp"
 #include <cmath>
 #include <limits>
 

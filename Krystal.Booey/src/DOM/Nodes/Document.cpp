@@ -374,7 +374,7 @@ namespace krys::boo
     // first.
     while (!_topLayerElements.empty())
     {
-      Ref<Element> element = _topLayerElements.last();
+      Ref<Element> element = _topLayerElements.back();
       element->RemoveFromTopLayer();
     }
     _openDialogs.clear();
@@ -2864,7 +2864,7 @@ namespace krys::boo
       }
 
       // 6d. Let topmostDialog be the last element of document's open dialogs list.
-      Ref<HTMLDialogElement> topmostDialog = _openDialogs.last();
+      Ref<HTMLDialogElement> topmostDialog = _openDialogs.back();
 
       // 6e. If ancestor is topmostDialog, then return.
       if (ancestor.get() == topmostDialog.get())
@@ -4872,7 +4872,7 @@ namespace krys::boo
     return HasPendingStyleRecalc() && _needsFullStyleRebuild;
   }
 
-  const FixedVector<css::PropertyId> &Document::ExposedComputedCSSPropertyIds() noexcept
+  const FixedList<css::PropertyId> &Document::ExposedComputedCSSPropertyIds() noexcept
   {
     if (!_exposedComputedCSSPropertyIds.has_value())
     {

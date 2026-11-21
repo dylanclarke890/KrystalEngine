@@ -138,7 +138,7 @@ namespace krys::boo
 
     KRYS_NODISCARD bool operator==(const FontTaggedSettings &) const noexcept = default;
 
-    KRYS_NODISCARD bool isEmpty() const noexcept
+    KRYS_NODISCARD bool empty() const noexcept
     {
       return !size();
     }

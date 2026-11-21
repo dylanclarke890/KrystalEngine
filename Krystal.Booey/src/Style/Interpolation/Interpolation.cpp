@@ -161,13 +161,14 @@ namespace krys::boo::style::interpolation
       {
         auto transformListFromSyntaxValueList = [](const CustomProperty::ValueList &list)
         {
-          return TransformList {TransformList::Container::Map(
-            list.Values,
-            [&](const auto &syntaxValue)
-            {
-              krys_debug_assert(std::holds_alternative<TransformFunction>(syntaxValue));
-              return std::get<TransformFunction>(syntaxValue);
-            })};
+          return TransformList {TransformList::Container(
+            std::from_range, list.Values
+                               | std::views::transform(
+                                 [&](const auto &syntaxValue)
+                                 {
+                                   krys_debug_assert(std::holds_alternative<TransformFunction>(syntaxValue));
+                                   return std::get<TransformFunction>(syntaxValue);
+                                 }))};
         };
 
         auto fromTransformList = transformListFromSyntaxValueList(from);

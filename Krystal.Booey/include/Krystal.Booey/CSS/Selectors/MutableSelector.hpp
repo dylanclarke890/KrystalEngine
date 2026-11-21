@@ -139,11 +139,11 @@ namespace krys::boo::css
 
     void AdoptSelectorVector(MutableSelectorList &&selectorVector) noexcept;
 
-    void SetArgumentList(FixedVector<CSSOMStringAtom> list) noexcept;
+    void SetArgumentList(FixedList<CSSOMStringAtom> list) noexcept;
 
-    void SetLangList(FixedVector<PossiblyQuotedIdentifier> list) noexcept;
+    void SetLangList(FixedList<PossiblyQuotedIdentifier> list) noexcept;
 
-    void SetIntegerList(FixedVector<int32> list) noexcept;
+    void SetIntegerList(FixedList<int32> list) noexcept;
 
     void SetSubSelectors(UniquePtr<SelectorList> selectorList) noexcept;
 

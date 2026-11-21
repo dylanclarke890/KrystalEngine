@@ -39,7 +39,6 @@
 #include "Krystal.Core/Strings/String.hpp"
 #include "Krystal.Core/Types/List.hpp"
 #include "Krystal.Core/Types/SharedBuffer.hpp"
-#include "Krystal.Core/Types/Span.hpp"
 
 namespace krys::net
 {

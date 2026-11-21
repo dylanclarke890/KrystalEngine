@@ -1183,7 +1183,8 @@ namespace krys::boo::style
 
       for (const auto &previousTimeline : currentStyle->GetScrollTimelines())
       {
-        if (!currentTimelines.contains(previousTimeline) && previousTimeline->Source().get() == &Element)
+        if (!std::ranges::contains(currentTimelines, previousTimeline)
+            && previousTimeline->Source().get() == &Element)
         {
           previousTimeline->SetSource(nullptr);
         }
@@ -1217,7 +1218,7 @@ namespace krys::boo::style
 
       for (const auto &previousTimelineName : currentStyle->ScrollTimelineNames())
       {
-        if (!currentTimelineNames.contains(previousTimelineName))
+        if (!std::ranges::contains(currentTimelineNames, previousTimelineName))
         {
           styleOriginatedTimelinesController.UnregisterNamedTimeline(previousTimelineName.Value.Value, *this);
         }
@@ -1251,7 +1252,8 @@ namespace krys::boo::style
 
       for (const auto &previousTimeline : currentStyle->GetViewTimelines())
       {
-        if (!currentTimelines.contains(previousTimeline) && previousTimeline->Subject() == &Element)
+        if (!std::ranges::contains(currentTimelines, previousTimeline)
+            && previousTimeline->Subject() == &Element)
         {
           previousTimeline->SetSubject(nullptr);
         }
@@ -1289,7 +1291,7 @@ namespace krys::boo::style
 
       for (const auto &previousTimelineName : currentStyle->ViewTimelineNames())
       {
-        if (!currentTimelineNames.contains(previousTimelineName))
+        if (!std::ranges::contains(currentTimelineNames, previousTimelineName))
         {
           styleOriginatedTimelinesController.UnregisterNamedTimeline(previousTimelineName.Value.Value, *this);
         }

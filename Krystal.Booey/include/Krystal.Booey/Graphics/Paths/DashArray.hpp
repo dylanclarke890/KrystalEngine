@@ -26,7 +26,7 @@
 
 #pragma once
 
-#include "Krystal.Core/Types/FixedVector.hpp"
+#include "Krystal.Core/Containers/FixedList.hpp"
 
 namespace krys::boo
 {
@@ -34,5 +34,5 @@ namespace krys::boo
 
   // DashArray is array of lengths along a path, with elements alternating on, off, on, off state.
   // The array is applied circularly mod path length.
-  using DashArray = FixedVector<DashArrayElement>;
+  using DashArray = FixedList<DashArrayElement>;
 }

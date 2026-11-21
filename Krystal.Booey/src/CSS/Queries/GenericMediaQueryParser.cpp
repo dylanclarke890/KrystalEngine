@@ -357,7 +357,7 @@ namespace krys::boo::css::mq
 
         case FeatureSchema::ValueType::Identifier:
           return primitiveValue && primitiveValue->IsValueId()
-                 && schema.ValueIdentifiers.contains(primitiveValue->ValueId());
+                 && std::ranges::contains(schema.ValueIdentifiers, primitiveValue->ValueId());
 
         case FeatureSchema::ValueType::Ratio:
           if (primitiveValue && primitiveValue->IsNumberOrInteger())

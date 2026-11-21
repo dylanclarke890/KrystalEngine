@@ -194,7 +194,7 @@ namespace krys::boo::tests
       {
         auto &animations = ById(id).AnimationsCreatedByMarkup(null);
         REQUIRE(animations.size() == 1);
-        auto *effect = animations.first()->GetKeyframeEffect();
+        auto *effect = animations.front()->GetKeyframeEffect();
         REQUIRE(effect);
         return *effect;
       }

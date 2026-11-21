@@ -200,7 +200,7 @@ namespace krys::boo::css
   }
 
   bool MatchesLangPseudoClass(const Element &element,
-                              const FixedVector<PossiblyQuotedIdentifier> &langList) noexcept
+                              const FixedList<PossiblyQuotedIdentifier> &langList) noexcept
   {
     // FIXME: WebVTT elements use their cue's language.
     auto language = EffectiveLang(element);

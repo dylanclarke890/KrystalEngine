@@ -47,7 +47,6 @@
 #include "Krystal.Core/Memory/DataRef.hpp"
 #include "Krystal.Core/Memory/RefCounted.hpp"
 #include "Krystal.Core/Memory/RefPtr.hpp"
-#include "Krystal.Core/Types/FixedVector.hpp"
 #include <memory>
 
 namespace krys::boo

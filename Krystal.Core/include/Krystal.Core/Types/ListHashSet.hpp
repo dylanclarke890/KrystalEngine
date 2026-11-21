@@ -7,6 +7,7 @@
 #include <initializer_list>
 #include <iterator>
 #include <list>
+#include <ranges>
 #include <unordered_map>
 #include <utility>
 
@@ -31,6 +32,16 @@ namespace krys
       for (const auto &value : values)
       {
         add(value);
+      }
+    }
+
+    /// @brief A set of the elements of @p range, in order, without repeats.
+    template <std::ranges::input_range TRange>
+    ListHashSet(std::from_range_t, TRange &&range)
+    {
+      for (auto &&value : range)
+      {
+        add(std::forward<decltype(value)>(value));
       }
     }
 
@@ -61,14 +72,9 @@ namespace krys
       return _values.size();
     }
 
-    bool isEmpty() const noexcept
-    {
-      return _values.empty();
-    }
-
     bool empty() const noexcept
     {
-      return isEmpty();
+      return _values.empty();
     }
 
     const_iterator begin() const noexcept
@@ -101,12 +107,12 @@ namespace krys
       return _values.crend();
     }
 
-    const T &first() const
+    const T &front() const
     {
       return _values.front();
     }
 
-    const T &last() const
+    const T &back() const
     {
       return _values.back();
     }

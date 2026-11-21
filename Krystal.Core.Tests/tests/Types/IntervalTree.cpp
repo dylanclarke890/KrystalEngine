@@ -21,7 +21,7 @@ namespace krys::tests
   TEST_CASE("IntervalTree finds overlapping intervals in order", "[IntervalTree]")
   {
     Tree tree;
-    REQUIRE(tree.isEmpty());
+    REQUIRE(tree.empty());
     tree.add({0, 10, 1});
     tree.add({5, 15, 2});
     tree.add({20, 30, 3});
@@ -61,7 +61,7 @@ namespace krys::tests
     CHECK(tree.allOverlaps({-1'000, 1'000, 0}).size() == 100);
 
     tree.clear();
-    CHECK(tree.isEmpty());
+    CHECK(tree.empty());
   }
 
   TEST_CASE("IntervalTree finds the next interval after a point", "[IntervalTree]")

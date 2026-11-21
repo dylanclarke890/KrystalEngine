@@ -25,20 +25,27 @@
 
 #pragma once
 
+#include "Krystal.Core/Attributes.hpp"
+#include "Krystal.Core/Concepts.hpp"
+#include "Krystal.Core/Containers/FixedList.hpp"
 #include "Krystal.Core/Memory/RefCounted.hpp"
 #include "Krystal.Core/Memory/RefPtr.hpp"
 #include "Krystal.Core/Move.hpp"
-#include "Krystal.Core/Types/FixedVector.hpp"
+#include <initializer_list>
+#include <utility>
 
 namespace krys
 {
-  /// @brief A reference-counted, fixed-size vector, so that copies of its owners share the elements.
+  /// @brief A reference-counted `FixedList`, so that copies of its owners share the elements.
   template <typename T>
-  class RefCountedFixedVector : public RefCounted<RefCountedFixedVector<T>>
+  class RefCountedFixedList : public RefCounted<RefCountedFixedList<T>>
   {
   public:
-    using Container = FixedVector<T>;
+    using Container = FixedList<T>;
     using value_type = typename Container::value_type;
+    using size_type = typename Container::size_type;
+    using const_reference = typename Container::const_reference;
+    using const_pointer = typename Container::const_pointer;
     using const_iterator = typename Container::const_iterator;
     using const_reverse_iterator = typename Container::const_reverse_iterator;
 
@@ -46,29 +53,38 @@ namespace krys
     Container _values;
 
   public:
-    KRYS_NODISCARD static Ref<RefCountedFixedVector> create(T &&value)
+    KRYS_NODISCARD static Ref<RefCountedFixedList> Create(T value) noexcept
     {
-      return AdoptRef(*new RefCountedFixedVector(Container {krys::move(value)}));
+      return AdoptRef(*new RefCountedFixedList(Container {krys::move(value)}));
     }
 
-    KRYS_NODISCARD static Ref<RefCountedFixedVector> create(std::initializer_list<T> values)
+    KRYS_NODISCARD static Ref<RefCountedFixedList> Create(std::initializer_list<T> values) noexcept
     {
-      return AdoptRef(*new RefCountedFixedVector(Container {values}));
+      return AdoptRef(*new RefCountedFixedList(Container {values}));
     }
 
-    template <std::invocable<size_t> Generator>
-    KRYS_NODISCARD static Ref<RefCountedFixedVector> createWithSizeFromGenerator(size_t size,
-                                                                                 Generator &&generator)
+    /// @brief A list of the elements of @p range.
+    template <std::ranges::forward_range TRange>
+    KRYS_NODISCARD static Ref<RefCountedFixedList> Create(std::from_range_t, TRange &&range) noexcept
     {
-      return AdoptRef(*new RefCountedFixedVector(
-        Container::createWithSizeFromGenerator(size, std::forward<Generator>(generator))));
+      return AdoptRef(*new RefCountedFixedList(Container(std::from_range, std::forward<TRange>(range))));
     }
 
-    template <typename SizedRange, typename Mapper>
-    KRYS_NODISCARD static Ref<RefCountedFixedVector> map(SizedRange &&range, Mapper &&mapper)
+    /// @brief A list of @p size elements, element `i` being `generator(i)`.
+    /// @brief A list of `mapper(element)` for each element of @p range.
+    KRYS_NODISCARD size_t size() const noexcept
     {
-      return AdoptRef(*new RefCountedFixedVector(
-        Container::map(std::forward<SizedRange>(range), std::forward<Mapper>(mapper))));
+      return _values.size();
+    }
+
+    KRYS_NODISCARD bool empty() const noexcept
+    {
+      return _values.empty();
+    }
+
+    KRYS_NODISCARD const T *data() const noexcept KRYS_LIFETIME_BOUND
+    {
+      return _values.data();
     }
 
     KRYS_NODISCARD const_iterator begin() const noexcept KRYS_LIFETIME_BOUND
@@ -91,38 +107,28 @@ namespace krys
       return _values.rend();
     }
 
-    KRYS_NODISCARD bool isEmpty() const noexcept
-    {
-      return _values.isEmpty();
-    }
-
-    KRYS_NODISCARD size_t size() const noexcept
-    {
-      return _values.size();
-    }
-
     KRYS_NODISCARD const T &operator[](size_t index) const noexcept KRYS_LIFETIME_BOUND
     {
       return _values[index];
     }
 
-    KRYS_NODISCARD const T &first() const noexcept KRYS_LIFETIME_BOUND
+    KRYS_NODISCARD const T &front() const noexcept KRYS_LIFETIME_BOUND
     {
-      return _values.first();
+      return _values.front();
     }
 
-    KRYS_NODISCARD const T &last() const noexcept KRYS_LIFETIME_BOUND
+    KRYS_NODISCARD const T &back() const noexcept KRYS_LIFETIME_BOUND
     {
-      return _values.last();
+      return _values.back();
     }
 
-    KRYS_NODISCARD bool operator==(const RefCountedFixedVector &other) const
+    KRYS_NODISCARD bool operator==(const RefCountedFixedList &other) const noexcept
     {
       return _values == other._values;
     }
 
   private:
-    explicit RefCountedFixedVector(Container &&values) noexcept : _values {krys::move(values)}
+    explicit RefCountedFixedList(Container values) noexcept : _values {krys::move(values)}
     {
     }
   };

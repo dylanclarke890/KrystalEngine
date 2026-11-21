@@ -315,7 +315,7 @@ namespace krys::boo::style
   void ComputedStyle::AdjustScrollTimelines() noexcept
   {
     auto &names = ScrollTimelineNames();
-    if (names.IsNone() && GetScrollTimelines().isEmpty())
+    if (names.IsNone() && GetScrollTimelines().empty())
     {
       return;
     }
@@ -324,9 +324,11 @@ namespace krys::boo::style
     auto numberOfAxes = axes.size();
     krys_debug_assert(numberOfAxes > 0);
 
-    auto timelines = css::CommaSeparatedFixedList<Ref<ScrollTimeline>>::createWithSizeFromGenerator(
-      names.size(),
-      [&](auto i) { return ScrollTimeline::Create(names[i].Value.Value, axes[i % numberOfAxes]); });
+    auto timelines = css::CommaSeparatedFixedList<Ref<ScrollTimeline>>(
+      std::from_range,
+      std::views::iota(0uz, names.size())
+        | std::views::transform(
+          [&](auto i) { return ScrollTimeline::Create(names[i].Value.Value, axes[i % numberOfAxes]); }));
     _nonInheritedData.Access().RareData.Access().ScrollTimelines =
       ScrollTimelines {krys::move(timelines.Value)};
   }
@@ -334,7 +336,7 @@ namespace krys::boo::style
   void ComputedStyle::AdjustViewTimelines() noexcept
   {
     auto &names = ViewTimelineNames();
-    if (names.IsNone() && GetViewTimelines().isEmpty())
+    if (names.IsNone() && GetViewTimelines().empty())
     {
       return;
     }
@@ -347,12 +349,14 @@ namespace krys::boo::style
     auto numberOfInsets = insets.size();
     krys_debug_assert(numberOfInsets > 0);
 
-    auto timelines = css::CommaSeparatedFixedList<Ref<ViewTimeline>>::createWithSizeFromGenerator(
-      names.size(),
-      [&](auto i)
-      {
-        return ViewTimeline::Create(names[i].Value.Value, axes[i % numberOfAxes], insets[i % numberOfInsets]);
-      });
+    auto timelines = css::CommaSeparatedFixedList<Ref<ViewTimeline>>(
+      std::from_range, std::views::iota(0uz, names.size())
+                         | std::views::transform(
+                           [&](auto i)
+                           {
+                             return ViewTimeline::Create(names[i].Value.Value, axes[i % numberOfAxes],
+                                                         insets[i % numberOfInsets]);
+                           }));
     _nonInheritedData.Access().RareData.Access().ViewTimelines = ViewTimelines {krys::move(timelines.Value)};
   }
 }
