@@ -118,7 +118,6 @@ target_sources(Krystal.Core
       include/Krystal.Core/Detection/AddressSpaceBitSize.hpp
       include/Krystal.Core/Detection/Compiler.hpp
       include/Krystal.Core/Detection/CPU.hpp
-      include/Krystal.Core/Detection/NumberOfCores.hpp
       include/Krystal.Core/Detection/OS.hpp
 
       # Events
@@ -309,7 +308,6 @@ target_sources(Krystal.Core
     src/Colour/ColourTextStream.cpp
 
     # Detection
-    src/Detection/NumberOfCores.cpp
     
     # Events
     src/Events/EventManager.cpp
