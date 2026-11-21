@@ -72,7 +72,7 @@ namespace krys::boo::tests
     CHECK(fixture.ColorOf(u8"dark") == Blue);
     CHECK(fixture.ColorOf(u8"light") == Red);
     CHECK_FALSE(document.UseDarkAppearance(nullptr));
-    CHECK(document.StyleColorOptions(nullptr) == style::ColorOptions::None);
+    CHECK(document.StyleColorOptions(nullptr) == style::ColorOptions {});
 
     fixture.SetHostDark(true);
     CHECK(document.Frame()->UseDarkAppearance());
@@ -81,7 +81,7 @@ namespace krys::boo::tests
     CHECK(fixture.ColorOf(u8"dark") == Blue);
     CHECK(fixture.ColorOf(u8"light") == Red);
     CHECK(document.StyleColorOptions(fixture.ById(u8"both").GetRenderStyle())
-          == style::ColorOptions::UseDarkAppearance);
+          == style::ColorOption::UseDarkAppearance);
 
     fixture.SetHostDark(false);
     CHECK(fixture.ColorOf(u8"both") == Red);
@@ -112,7 +112,7 @@ namespace krys::boo::tests
 
       // Renaming the element or removing it drops its colour scheme.
       REQUIRE_FALSE(meta->SetAttribute(u8"name", u8"description").HasException());
-      CHECK(document.ResolvedColorScheme(nullptr).IsEmpty());
+      CHECK(document.ResolvedColorScheme(nullptr).empty());
       CHECK(fixture.ColorOf(u8"normal") == Red);
       // The legacy name supported-color-schemes isn't the standard's.
       REQUIRE_FALSE(meta->SetAttribute(u8"name", u8"supported-color-schemes").HasException());

@@ -219,7 +219,7 @@ namespace krys::boo::style
       }
 
       auto sharedTouchActions = *usedTouchActionEnumSet & *touchActionEnumSet;
-      if (sharedTouchActions.IsEmpty())
+      if (sharedTouchActions.empty())
       {
         return css::keywords::None {};
       }
@@ -422,7 +422,7 @@ namespace krys::boo::style
     // It's important to not clobber an existing used z-index, since an earlier animation may have set it, but
     // we may still need to update the used z-index value from the specified value.
 
-    if (style.UsedZIndex().IsAuto() && impact.Contains(AnimationImpact::ForcesStackingContext))
+    if (style.UsedZIndex().IsAuto() && impact.contains(AnimationImpact::ForcesStackingContext))
     {
       style.SetUsedZIndex(0);
     }

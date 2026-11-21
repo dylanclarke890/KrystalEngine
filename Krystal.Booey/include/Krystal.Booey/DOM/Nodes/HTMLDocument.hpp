@@ -35,12 +35,12 @@ namespace krys::boo
     KRYS_OVERRIDE_DELETE_FOR_CHECKED_PTR(HTMLDocument);
 
   public:
-    HTMLDocument() noexcept : Document(dom::DocumentFlags::IsHTMLDocument)
+    HTMLDocument() noexcept : Document(dom::DocumentFlag::IsHTMLDocument)
     {
     }
 
     explicit HTMLDocument(dom::DocumentFlags flags) noexcept
-        : Document(flags | dom::DocumentFlags::IsHTMLDocument)
+        : Document(flags | dom::DocumentFlag::IsHTMLDocument)
     {
     }
 

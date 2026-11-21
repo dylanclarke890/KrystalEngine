@@ -45,6 +45,9 @@ namespace krys::boo::css
     LengthPercentage,
     AnglePercentage,
   };
-}
 
-KRYS_DEFINE_CONTIGUOUS_ENUM_TRAITS(krys::boo::css::Category, 11uz);
+  consteval Category MaxEnumValue(Category) noexcept
+  {
+    return Category::AnglePercentage;
+  }
+}

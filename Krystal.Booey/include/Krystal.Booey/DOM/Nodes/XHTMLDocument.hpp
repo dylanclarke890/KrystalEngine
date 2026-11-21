@@ -9,7 +9,7 @@ namespace krys::boo
     KRYS_OVERRIDE_DELETE_FOR_CHECKED_PTR(XHTMLDocument);
 
   public:
-    XHTMLDocument() noexcept : XMLDocument(dom::DocumentFlags::IsXHTMLDocument)
+    XHTMLDocument() noexcept : XMLDocument(dom::DocumentFlag::IsXHTMLDocument)
     {
     }
   };

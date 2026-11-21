@@ -154,7 +154,7 @@ namespace krys::boo
 
     // Account for text drawing resetting the context to non-scaled, see
     // SVGInlineTextBox::paintTextWithShadows.
-    if (resourceMode.Contains(RenderSVGResourceMode::ApplyToText))
+    if (resourceMode.contains(RenderSVGResourceMode::ApplyToText))
     {
       auto textScale = ComputeTextPaintingScale(renderer);
       if (textScale != 1)
@@ -183,7 +183,7 @@ namespace krys::boo
     -> EnumSet<ApplyResult>
   {
     krys_debug_assert(context);
-    krys_debug_assert(!resourceMode.IsEmpty());
+    krys_debug_assert(!resourceMode.empty());
 
     if (_shouldCollectPatternAttributes)
     {
@@ -212,13 +212,13 @@ namespace krys::boo
     // Draw pattern
     context->Save();
 
-    if (resourceMode.Contains(RenderSVGResourceMode::ApplyToFill))
+    if (resourceMode.contains(RenderSVGResourceMode::ApplyToFill))
     {
       context->SetAlpha(style.FillOpacity().Value.Value);
       context->SetFillPattern(ShareRef(*patternData->Pattern));
       context->SetFillRule(style.FillRule());
     }
-    else if (resourceMode.Contains(RenderSVGResourceMode::ApplyToStroke))
+    else if (resourceMode.contains(RenderSVGResourceMode::ApplyToStroke))
     {
       if (style.VectorEffect() == VectorEffect::NonScalingStroke)
       {
@@ -230,13 +230,13 @@ namespace krys::boo
       SVGRenderSupport::ApplyStrokeStyleToContext(*context, style, renderer);
     }
 
-    if (resourceMode.Contains(RenderSVGResourceMode::ApplyToText))
+    if (resourceMode.contains(RenderSVGResourceMode::ApplyToText))
     {
-      if (resourceMode.Contains(RenderSVGResourceMode::ApplyToFill))
+      if (resourceMode.contains(RenderSVGResourceMode::ApplyToFill))
       {
         context->SetTextDrawingMode(TextDrawingMode::Fill);
       }
-      else if (resourceMode.Contains(RenderSVGResourceMode::ApplyToStroke))
+      else if (resourceMode.contains(RenderSVGResourceMode::ApplyToStroke))
       {
         context->SetTextDrawingMode(TextDrawingMode::Stroke);
       }
@@ -251,7 +251,7 @@ namespace krys::boo
                                                          const RenderElement *shape) noexcept
   {
     krys_debug_assert(context);
-    krys_debug_assert(!resourceMode.IsEmpty());
+    krys_debug_assert(!resourceMode.empty());
     FillAndStrokePathOrShape(*context, resourceMode, path, shape);
     context->Restore();
   }

@@ -90,7 +90,7 @@ namespace krys::boo
     InterpolationQualityMaintainer interpolationMaintainer(
       context, ImageQualityController::InterpolationQualityFromStyle(Style()));
 
-    CanvasElement().SetIsSnapshotting(paintInfo.PaintBehavior.Contains(PaintBehavior::Snapshotting));
+    CanvasElement().SetIsSnapshotting(paintInfo.PaintBehavior.contains(PaintBehavior::Snapshotting));
     CanvasElement().Paint(context, replacedContentRect);
     CanvasElement().SetIsSnapshotting(false);
   }

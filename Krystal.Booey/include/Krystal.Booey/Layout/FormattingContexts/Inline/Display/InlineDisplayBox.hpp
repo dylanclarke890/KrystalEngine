@@ -203,8 +203,8 @@ namespace krys::boo::inline_display
         : _layoutBox(&layoutBox), _unflippedVisualRect(physicalRect), _inkOverflow(inkOverflow),
           _lineIndex(static_cast<uint32>(lineIndex)), _horizontalExpansion(expansion.HorizontalExpansion),
           _expansionBehavior(expansion.Behavior), _bidiLevel(bidiLevel), _type(type), _hasContent(hasContent),
-          _isFirstForLayoutBox(positionWithinInlineLevelBox.Contains(PositionWithinInlineLevelBox::First)),
-          _isLastForLayoutBox(positionWithinInlineLevelBox.Contains(PositionWithinInlineLevelBox::Last)),
+          _isFirstForLayoutBox(positionWithinInlineLevelBox.contains(PositionWithinInlineLevelBox::First)),
+          _isLastForLayoutBox(positionWithinInlineLevelBox.contains(PositionWithinInlineLevelBox::Last)),
           _isFullyTruncated(isFullyTruncated), _isFirstFormattedLine(isFirstFormattedLine),
           _text(text ? krys::move(*text) : Text {})
     {

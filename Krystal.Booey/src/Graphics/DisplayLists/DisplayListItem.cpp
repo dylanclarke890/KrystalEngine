@@ -39,7 +39,7 @@ namespace krys::boo::display_list
   {
     if (auto *setState = std::get_if<SetState>(&item))
     {
-      if (!flags.Contains(AsTextFlag::IncludePlatformOperations))
+      if (!flags.contains(AsTextFlag::IncludePlatformOperations))
       {
         return true;
       }

@@ -160,23 +160,23 @@ namespace krys::ui::input
   {
     using Modifier = boo::PlatformEvent::Modifier;
     EnumSet<Modifier> result;
-    if (modifiers.Contains(pal::KeyModifier::Shift))
+    if (modifiers.contains(pal::KeyModifier::Shift))
     {
       result.Add(Modifier::ShiftKey);
     }
-    if (modifiers.Contains(pal::KeyModifier::Control))
+    if (modifiers.contains(pal::KeyModifier::Control))
     {
       result.Add(Modifier::ControlKey);
     }
-    if (modifiers.Contains(pal::KeyModifier::Alt))
+    if (modifiers.contains(pal::KeyModifier::Alt))
     {
       result.Add(Modifier::AltKey);
     }
-    if (modifiers.Contains(pal::KeyModifier::Meta))
+    if (modifiers.contains(pal::KeyModifier::Meta))
     {
       result.Add(Modifier::MetaKey);
     }
-    if (modifiers.Contains(pal::KeyModifier::CapsLock))
+    if (modifiers.contains(pal::KeyModifier::CapsLock))
     {
       result.Add(Modifier::CapsLockKey);
     }
@@ -186,15 +186,15 @@ namespace krys::ui::input
   EnumSet<boo::DragOperation> ToBooey(pal::DropOperations operations) noexcept
   {
     EnumSet<boo::DragOperation> result;
-    if (operations.Contains(pal::DropOperation::Copy))
+    if (operations.contains(pal::DropOperation::Copy))
     {
       result.Add(boo::DragOperation::Copy);
     }
-    if (operations.Contains(pal::DropOperation::Move))
+    if (operations.contains(pal::DropOperation::Move))
     {
       result.Add(boo::DragOperation::Move);
     }
-    if (operations.Contains(pal::DropOperation::Link))
+    if (operations.contains(pal::DropOperation::Link))
     {
       result.Add(boo::DragOperation::Link);
     }
@@ -253,7 +253,7 @@ namespace krys::ui::input
                                                                                       : keyValue);
 
     // Alt combinations are system keys, as on Windows.
-    bool isSystemKey = modifiers.Contains(pal::KeyModifier::Alt);
+    bool isSystemKey = modifiers.contains(pal::KeyModifier::Alt);
     return boo::PlatformKeyboardEvent(type, text.Text, text.UnmodifiedText, krys::move(keyValue),
                                       utf8_string(description.Code), krys::move(keyIdentifier),
                                       description.LegacyKeyCode, isAutoRepeat, description.IsKeypad,
@@ -397,7 +397,7 @@ namespace krys::ui::input
     float deltaX = 0;
     float deltaY = 0;
     auto granularity = boo::PlatformWheelEventGranularity::ScrollByPixelWheelEvent;
-    if (isHorizontalWheel || modifiers.Contains(boo::PlatformEvent::Modifier::ShiftKey))
+    if (isHorizontalWheel || modifiers.contains(boo::PlatformEvent::Modifier::ShiftKey))
     {
       deltaX = delta * static_cast<float>(settings.Chars) * boo::ScrollbarPixelsPerLine;
     }

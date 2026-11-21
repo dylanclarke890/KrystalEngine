@@ -35,6 +35,9 @@
 
 namespace krys::boo::dom
 {
+  class EventDispatcher;
+  class EventFactory;
+
   /// @see https://dom.spec.whatwg.org/#dom-event-eventphase
   enum class EventPhaseType : uint8
   {
@@ -47,25 +50,18 @@ namespace krys::boo::dom
     /// @see https://dom.spec.whatwg.org/#dom-event-bubbling_phase
     BUBBLING_PHASE = 3,
   };
-}
 
-KRYS_DEFINE_CONTIGUOUS_ENUM_TRAITS(krys::boo::dom::EventPhaseType, 4u)
+  consteval EventPhaseType MaxEnumValue(EventPhaseType) noexcept
+  {
+    return EventPhaseType::BUBBLING_PHASE;
+  }
+}
 
 namespace krys::boo
 {
   class Document;
-  class ShadowRoot;
-}
-
-namespace krys::boo::dom
-{
-  class EventDispatcher;
-  class EventFactory;
-}
-
-namespace krys::boo
-{
   class EventTarget;
+  class ShadowRoot;
 
   /// @see https://dom.spec.whatwg.org/#dictdef-eventinit
   struct EventInit
@@ -96,7 +92,7 @@ namespace krys::boo
     MonotonicTime::duration _createTime {};
     /// @see https://dom.spec.whatwg.org/#event-path
     List<dom::EventPathItem> _path;
-    dom::EventPhaseType _eventPhase : BitCount<dom::EventPhaseType>() {dom::EventPhaseType::NONE};
+    dom::EventPhaseType _eventPhase : EnumBitWidth<dom::EventPhaseType> {dom::EventPhaseType::NONE};
     bool _isTrusted : 1 {false};
     bool _bubbles : 1 {false};
     bool _cancellable : 1 {false};

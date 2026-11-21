@@ -43,15 +43,6 @@
 #include "Krystal.Core/TriState.hpp"
 #include "Krystal.Core/Types/Maybe.hpp"
 
-namespace krys::boo
-{
-  class CSSStyleProperties;
-  class Document;
-  class Element;
-  class Node;
-  class StyledElement;
-}
-
 namespace krys::boo::css
 {
   class StyleProperties;
@@ -64,7 +55,12 @@ namespace krys::boo::dom
 
 namespace krys::boo
 {
+  class CSSStyleProperties;
+  class Document;
+  class Element;
+  class Node;
   class RenderStyle;
+  class StyledElement;
   class VisibleSelection;
 
   enum class TextDecorationChange : uint8

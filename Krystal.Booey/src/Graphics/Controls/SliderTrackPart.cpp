@@ -94,8 +94,8 @@ namespace krys::boo
     GraphicsContextStateSaver stateSaver(context);
     context.SetFillColor(style.TextColor);
 
-    bool isVerticalWritingMode = style.States.Contains(ControlStyle::State::VerticalWritingMode);
-    bool isInlineFlippedWritingMode = style.States.Contains(ControlStyle::State::InlineFlippedWritingMode);
+    bool isVerticalWritingMode = style.States.contains(ControlStyle::State::VerticalWritingMode);
+    bool isInlineFlippedWritingMode = style.States.contains(ControlStyle::State::InlineFlippedWritingMode);
     bool isInlineFlipped = (!isHorizontal && !isVerticalWritingMode) || isInlineFlippedWritingMode;
 
     for (auto tickRatio : _tickRatios)

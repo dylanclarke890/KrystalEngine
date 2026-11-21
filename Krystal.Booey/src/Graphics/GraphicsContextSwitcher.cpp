@@ -35,7 +35,7 @@ namespace krys::boo
                                                                      RefPtr<Filter> &&filter,
                                                                      FilterResults *results) noexcept
   {
-    if (filter && filter->FilterRenderingModes().Contains(FilterRenderingMode::GraphicsContext))
+    if (filter && filter->FilterRenderingModes().contains(FilterRenderingMode::GraphicsContext))
     {
       return CreateUnique<TransparencyLayerContextSwitcher>(destinationContext, sourceImageRect,
                                                             krys::move(filter));

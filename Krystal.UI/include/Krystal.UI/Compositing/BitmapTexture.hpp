@@ -45,7 +45,7 @@ namespace krys::ui
 
     KRYS_NODISCARD bool IsOpaque() const noexcept
     {
-      return !_flags.Contains(Flags::SupportsAlpha);
+      return !_flags.contains(Flags::SupportsAlpha);
     }
 
     /// @brief The texture, invalid when it couldn't be created.

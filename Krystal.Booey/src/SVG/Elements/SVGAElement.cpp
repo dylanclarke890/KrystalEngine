@@ -48,7 +48,7 @@ namespace krys::boo
       : SVGGraphicsElement(document, CreateUnique<PropertyRegistry>(*this), SVGElementInterface::A),
         SVGURIReference(this), _target(SVGAnimatedString::Create(this))
   {
-    SetEventTargetFlag(dom::EventTargetFlags::HasActivationBehavior);
+    _eventTargetFlags.Add(dom::EventTargetFlag::HasActivationBehavior);
 
     static bool didRegistration = false;
     if (!didRegistration) KRYS_UNLIKELY
@@ -241,6 +241,6 @@ namespace krys::boo
 
   bool SVGAElement::HasRel(SVGALinkRelation relation) const noexcept
   {
-    return _linkRelations.Contains(relation);
+    return _linkRelations.contains(relation);
   }
 }

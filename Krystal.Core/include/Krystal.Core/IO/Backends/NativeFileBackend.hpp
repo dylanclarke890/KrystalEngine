@@ -64,7 +64,7 @@ namespace krys::io
 
         fs::perms permissions = entry.status().permissions();
         const bool isReadOnly = (permissions & fs::perms::owner_write) == fs::perms::none;
-        if (isReadOnly && !!(flags & FileSearchFlags::ExcludeReadOnly))
+        if (isReadOnly && !!(flags & FileSearchFlag::ExcludeReadOnly))
         {
           continue;
         }

@@ -28,7 +28,7 @@ namespace krys::boo::css::tests
       CHECK(descriptors.ExtendsName == u8"decimal");
       CHECK(descriptors.FixedSystemFirstSymbolValue == 1);
       CHECK(descriptors.SpeakAs == CounterStyleSpeakAs::Auto);
-      CHECK(descriptors.ExplicitlySetDescriptors == CounterStyleDescriptor::None);
+      CHECK(descriptors.ExplicitlySetDescriptors == EnumSet<CounterStyleDescriptor> {});
       // `symbolic` needs at least one symbol.
       CHECK_FALSE(descriptors.IsValid());
 
@@ -104,7 +104,7 @@ namespace krys::boo::css::tests
     SECTION("Setters mark the descriptor as explicitly set")
     {
       descriptors.SetPrefix({false, u8"<"});
-      CHECK(HasFlag(descriptors.ExplicitlySetDescriptors, CounterStyleDescriptor::Prefix));
+      CHECK(descriptors.ExplicitlySetDescriptors.contains(CounterStyleDescriptor::Prefix));
       CHECK(ToNarrow(descriptors.PrefixCSSText()) == "\"<\"");
 
       descriptors.SetRanges({{1, 2}});
@@ -170,7 +170,7 @@ namespace krys::boo::css::tests
     CHECK(rule->Range().empty());
     // speak-as is never serialised.
     CHECK(rule->SpeakAs().empty());
-    CHECK(HasFlag(rule->Descriptors().ExplicitlySetDescriptors, CounterStyleDescriptor::SpeakAs));
+    CHECK(rule->Descriptors().ExplicitlySetDescriptors.contains(CounterStyleDescriptor::SpeakAs));
 
     rule->SetName(u8"bar");
     rule->MutableDescriptors().SetPrefix({false, u8"#"});

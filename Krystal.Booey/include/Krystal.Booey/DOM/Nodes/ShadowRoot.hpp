@@ -38,24 +38,23 @@
 
 namespace krys::boo::html
 {
+  class CustomElementRegistry;
+  class TreeBuilder;
+
   struct SetHTMLOptions;
   struct SetHTMLUnsafeOptions;
 }
 
-namespace krys::boo
-{
-  class StyleSheetList;
-  class WebAnimation;
-}
-
-namespace krys::boo::html
-{
-  class CustomElementRegistry;
-  class TreeBuilder;
-}
-
 namespace krys::boo::dom
 {
+  class DocumentAlgorithms;
+  class ElementAlgorithms;
+  class NodeAlgorithms;
+
+  struct GetHTMLOptions;
+
+  enum class ParserContentPolicy : uint8;
+
   /// @see https://dom.spec.whatwg.org/#enumdef-shadowrootmode
   enum class ShadowRootMode : uint8
   {
@@ -66,24 +65,22 @@ namespace krys::boo::dom
     UserAgent,
   };
 
+  consteval ShadowRootMode MaxEnumValue(ShadowRootMode) noexcept
+  {
+    return ShadowRootMode::UserAgent;
+  }
+
   /// @see https://dom.spec.whatwg.org/#enumdef-slotassignmentmode
   enum class SlotAssignmentMode : uint8
   {
     Manual,
     Named,
   };
-}
 
-KRYS_DEFINE_CONTIGUOUS_ENUM_TRAITS(krys::boo::dom::ShadowRootMode, 3u);
-KRYS_DEFINE_CONTIGUOUS_ENUM_TRAITS(krys::boo::dom::SlotAssignmentMode, 2u);
-
-namespace krys::boo::dom
-{
-  class DocumentAlgorithms;
-  class ElementAlgorithms;
-  struct GetHTMLOptions;
-  class NodeAlgorithms;
-  enum class ParserContentPolicy : uint8;
+  consteval SlotAssignmentMode MaxEnumValue(SlotAssignmentMode) noexcept
+  {
+    return SlotAssignmentMode::Named;
+  }
 
   enum class DelegatesFocus : bool
   {
@@ -119,6 +116,9 @@ namespace krys::boo::dom
 
 namespace krys::boo
 {
+  class StyleSheetList;
+  class WebAnimation;
+
   /// @brief The root of a shadow tree, attached to its host element.
   /// @see https://dom.spec.whatwg.org/#interface-shadowroot
   /// @see https://dom.spec.whatwg.org/#concept-shadow-root
@@ -138,7 +138,7 @@ namespace krys::boo
   private:
     /// @brief Open, closed, or the user agent's own (treated as closed).
     /// @see https://dom.spec.whatwg.org/#shadowroot-mode
-    dom::ShadowRootMode _mode : BitCount<dom::ShadowRootMode>() {dom::ShadowRootMode::Open};
+    dom::ShadowRootMode _mode : EnumBitWidth<dom::ShadowRootMode> {dom::ShadowRootMode::Open};
     /// @see https://dom.spec.whatwg.org/#shadowroot-delegates-focus
     bool _delegatesFocus : 1 {false};
     /// @see https://dom.spec.whatwg.org/#shadowroot-available-to-element-internals
@@ -147,7 +147,7 @@ namespace krys::boo
     bool _declarative : 1 {false};
     /// @see https://dom.spec.whatwg.org/#shadowroot-slot-assignment
     dom::SlotAssignmentMode _slotAssignment
-      : BitCount<dom::SlotAssignmentMode>() {dom::SlotAssignmentMode::Manual};
+      : EnumBitWidth<dom::SlotAssignmentMode> {dom::SlotAssignmentMode::Manual};
     /// @see https://dom.spec.whatwg.org/#shadowroot-clonable
     bool _clonable : 1 {false};
     /// @see https://dom.spec.whatwg.org/#shadowroot-serializable
@@ -164,7 +164,7 @@ namespace krys::boo
 
   public:
     ShadowRoot(Document &document, html::CustomElementRegistry *registry = nullptr,
-               dom::NodeFlags flags = dom::NodeFlags::None) noexcept;
+               dom::NodeFlags flags = dom::NodeFlags {}) noexcept;
 
     ~ShadowRoot() noexcept override;
 

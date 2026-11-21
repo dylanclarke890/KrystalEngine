@@ -227,8 +227,11 @@ namespace krys::boo
       SVGLengthContext lengthContext(&shape);
       double dashOffset = lengthContext.ValueForLength(style.StrokeDashOffset(), style::ZoomNeeded {});
       double strokeWidth = lengthContext.ValueForLength(style.StrokeWidth(), style::ZoomNeeded {});
-      auto dashArray = DashArray(std::from_range, style.StrokeDashArray() | std::views::transform([&](const auto &length) -> DashArrayElement
-                                      { return lengthContext.ValueForLength(length, style::ZoomNeeded {}); }));
+      auto dashArray = DashArray(
+        std::from_range,
+        style.StrokeDashArray()
+          | std::views::transform([&](const auto &length) -> DashArrayElement
+                                  { return lengthContext.ValueForLength(length, style::ZoomNeeded {}); }));
 
       WriteIfNotDefault(ts, u8"opacity", style.StrokeOpacity().Value.Value, 1.0f);
       WriteIfNotDefault(ts, u8"stroke width", strokeWidth, 1.0);
@@ -304,7 +307,7 @@ namespace krys::boo
     TextStream &WritePositionAndStyle(TextStream &ts, const RenderElement &renderer,
                                       EnumSet<RenderAsTextFlag> behavior = {}) noexcept
     {
-      if (behavior.Contains(RenderAsTextFlag::ShowSVGGeometry))
+      if (behavior.contains(RenderAsTextFlag::ShowSVGGeometry))
       {
         if (auto *box = DynamicDowncast<RenderBox>(renderer))
         {
@@ -395,7 +398,7 @@ namespace krys::boo
 
       ts << object.RenderName();
 
-      if (behavior.Contains(RenderAsTextFlag::ShowAddresses))
+      if (behavior.contains(RenderAsTextFlag::ShowAddresses))
       {
         ts << ' ' << static_cast<const void *>(&object);
       }

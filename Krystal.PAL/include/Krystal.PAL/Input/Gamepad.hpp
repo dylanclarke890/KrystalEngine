@@ -46,6 +46,11 @@ namespace krys::pal
     Guide,
   };
 
+  consteval GamepadButton MaxEnumValue(GamepadButton) noexcept
+  {
+    return GamepadButton::Guide;
+  }
+
   /// @brief A gamepad's axes, in the order of the standard gamepad layout.
   enum class GamepadAxis : uint8
   {
@@ -54,6 +59,11 @@ namespace krys::pal
     RightX,
     RightY,
   };
+
+  consteval GamepadAxis MaxEnumValue(GamepadAxis) noexcept
+  {
+    return GamepadAxis::RightY;
+  }
 
   /// @brief The state of a gamepad's button.
   enum class GamepadButtonState : uint8
@@ -64,13 +74,7 @@ namespace krys::pal
 
   constexpr inline size_t GamepadButtonCount = 17;
   constexpr inline size_t GamepadAxisCount = 4;
-}
 
-KRYS_DEFINE_CONTIGUOUS_ENUM_TRAITS(krys::pal::GamepadButton, 17uz)
-KRYS_DEFINE_CONTIGUOUS_ENUM_TRAITS(krys::pal::GamepadAxis, 4uz)
-
-namespace krys::pal
-{
   /// @brief A gamepad's state as its backend reads it.
   struct GamepadReading
   {
@@ -165,19 +169,19 @@ namespace krys::pal
     /// @brief Whether @p button was pressed this frame.
     KRYS_NODISCARD bool IsButtonPressed(GamepadButton button) const noexcept
     {
-      return _pressed.Contains(button);
+      return _pressed.contains(button);
     }
 
     /// @brief Whether @p button is down (pressed this frame or before).
     KRYS_NODISCARD bool IsButtonHeld(GamepadButton button) const noexcept
     {
-      return _held.Contains(button) || _pressed.Contains(button);
+      return _held.contains(button) || _pressed.contains(button);
     }
 
     /// @brief Whether @p button was released this frame.
     KRYS_NODISCARD bool WasButtonReleased(GamepadButton button) const noexcept
     {
-      return _released.Contains(button);
+      return _released.contains(button);
     }
 
     /// @brief When the pad's state last changed (on the monotonic clock).

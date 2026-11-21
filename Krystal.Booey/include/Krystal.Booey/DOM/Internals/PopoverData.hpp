@@ -31,11 +31,6 @@
 #include "Krystal.Core/Memory/RefPtr.hpp"
 #include "Krystal.Core/Memory/WeakPtr.hpp"
 
-namespace krys::boo::dom
-{
-  class ToggleEventTask;
-}
-
 namespace krys::boo
 {
   class Element;
@@ -49,6 +44,8 @@ namespace krys::boo::html
 
 namespace krys::boo::dom
 {
+  class ToggleEventTask;
+
   /// @brief The state of an element's `popover` attribute.
   /// @see https://html.spec.whatwg.org/#attr-popover
   enum class PopoverState : uint8
@@ -58,6 +55,11 @@ namespace krys::boo::dom
     Manual,
     Hint,
   };
+
+  consteval PopoverState MaxEnumValue(PopoverState) noexcept
+  {
+    return PopoverState::Hint;
+  }
 
   /// @see https://html.spec.whatwg.org/#popover-visibility-state
   enum class PopoverVisibilityState : bool
@@ -79,12 +81,7 @@ namespace krys::boo::dom
     No,
     Yes,
   };
-}
 
-KRYS_DEFINE_CONTIGUOUS_ENUM_TRAITS(krys::boo::dom::PopoverState, 4uz);
-
-namespace krys::boo::dom
-{
   /// @brief The popover state of an element with a `popover` attribute.
   /// @see https://html.spec.whatwg.org/#the-popover-attribute
   class PopoverData

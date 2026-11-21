@@ -61,12 +61,12 @@ namespace krys::boo::style
     return EvaluateCondition(containerQuery.Condition, *context) == css::mq::EvaluationResult::True;
   }
 
-  static const RenderStyle *StyleForContainer(const Element &container, css::cq::Axis requiredAxes,
+  static const RenderStyle *StyleForContainer(const Element &container, EnumSet<css::cq::Axis> requiredAxes,
                                               const ContainerQueryEvaluationState *evaluationState) noexcept
   {
     // Any element can be a style container and we haven't necessarily committed the style to render tree yet.
     // Look it up from the currently computed style update instead.
-    if (requiredAxes == css::cq::Axis::None && evaluationState && evaluationState->StyleUpdate)
+    if (requiredAxes.empty() && evaluationState && evaluationState->StyleUpdate)
     {
       return evaluationState->StyleUpdate->ElementStyle(container);
     }
@@ -118,9 +118,11 @@ namespace krys::boo::style
       ShareCheckedPtr<const RenderElement>(container->Renderer())};
   }
 
-  RefPtr<const Element> ContainerQueryEvaluator::SelectContainer(
-    css::cq::Axis requiredAxes, const CSSOMString &name, const Element &element, SelectionMode selectionMode,
-    ScopeOrdinal scopeOrdinal, const ContainerQueryEvaluationState *evaluationState) noexcept
+  RefPtr<const Element>
+    ContainerQueryEvaluator::SelectContainer(EnumSet<css::cq::Axis> requiredAxes, const CSSOMString &name,
+                                             const Element &element, SelectionMode selectionMode,
+                                             ScopeOrdinal scopeOrdinal,
+                                             const ContainerQueryEvaluationState *evaluationState) noexcept
   {
     // "For each element, the query container to be queried is selected from among the element’s
     // ancestor query containers that have a valid container-type for all the container features
@@ -131,7 +133,7 @@ namespace krys::boo::style
     auto isValidContainerForRequiredAxes = [&](ContainerType containerType, const RenderElement *principalBox)
     {
       // Any container is valid for style queries.
-      if (requiredAxes == css::cq::Axis::None)
+      if (requiredAxes.empty())
       {
         return true;
       }
@@ -145,7 +147,7 @@ namespace krys::boo::style
           {
             return true;
           }
-          return !HasFlag(requiredAxes, principalBox->IsHorizontalWritingMode() ? css::cq::Axis::Height
+          return !requiredAxes.contains(principalBox->IsHorizontalWritingMode() ? css::cq::Axis::Height
                                                                                 : css::cq::Axis::Width);
         case ContainerType::Normal: return false;
       }
@@ -236,7 +238,7 @@ namespace krys::boo::style
       return nullptr;
     }
 
-    if (evaluationState && requiredAxes != css::cq::Axis::None)
+    if (evaluationState && !requiredAxes.empty())
     {
       for (auto &container : evaluationState->SizeQueryContainers | std::views::reverse)
       {

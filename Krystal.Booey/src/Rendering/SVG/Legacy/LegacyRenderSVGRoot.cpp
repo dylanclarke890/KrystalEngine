@@ -490,7 +490,7 @@ namespace krys::boo
     // Apply initial viewport clip
     if (ShouldApplyViewportClip())
     {
-      if (context.Options.Contains(VisibleRectContext::Option::UseEdgeInclusiveIntersection))
+      if (context.Options.contains(VisibleRectContext::Option::UseEdgeInclusiveIntersection))
       {
         if (!adjustedRect.EdgeInclusiveIntersect(RectF(SnappedRectI(BorderBoxRect()))))
         {

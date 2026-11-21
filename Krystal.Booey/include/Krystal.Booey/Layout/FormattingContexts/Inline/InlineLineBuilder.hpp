@@ -198,7 +198,7 @@ namespace krys::boo::layout
 
     KRYS_NODISCARD bool IsLineConstrainedByFloat() const noexcept
     {
-      return !_lineIsConstrainedByFloat.IsEmpty();
+      return !_lineIsConstrainedByFloat.empty();
     }
 
     KRYS_NODISCARD const FloatingContext &GetFloatingContext() const noexcept

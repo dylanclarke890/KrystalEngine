@@ -413,7 +413,7 @@ namespace krys::boo::layout
       auto lineContentEnd = lineLayoutResult.ItemRange.End;
       leadingInlineItemPosition = InlineFormattingUtils::LeadingInlineItemPositionForNextLine(
         lineContentEnd, previousLineEnd,
-        !lineLayoutResult.Floats.HasIntrusiveFloat.IsEmpty() || !lineLayoutResult.Floats.PlacedFloats.empty(),
+        !lineLayoutResult.Floats.HasIntrusiveFloat.empty() || !lineLayoutResult.Floats.PlacedFloats.empty(),
         needsLayoutRange.End);
 
       auto isEndOfContent =
@@ -754,7 +754,7 @@ namespace krys::boo::layout
       }
       if (auto startPosition = lineDamage->LayoutStartPosition())
       {
-        if (lineDamage->Reasons().Contains(InlineDamage::Reason::Pagination))
+        if (lineDamage->Reasons().contains(InlineDamage::Reason::Pagination))
         {
           // FIXME: We don't support partial rebuild with certain types of content. Let's just re-collect
           // inline items.

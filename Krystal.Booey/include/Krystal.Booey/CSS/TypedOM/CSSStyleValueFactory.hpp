@@ -32,11 +32,6 @@
 #include "Krystal.Core/Types/Maybe.hpp"
 #include "Krystal.Core/Types/Variant.hpp"
 
-namespace krys::boo
-{
-  class Document;
-}
-
 namespace krys::boo::css
 {
   class Value;
@@ -44,6 +39,8 @@ namespace krys::boo::css
 
 namespace krys::boo
 {
+  class Document;
+
   /// @brief A style value, or a string to parse as one or more.
   using CSSStyleValueOrString = Variant<RefPtr<CSSStyleValue>, CSSOMString>;
 

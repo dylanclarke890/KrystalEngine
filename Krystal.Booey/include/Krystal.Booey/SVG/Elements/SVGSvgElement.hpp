@@ -31,6 +31,11 @@ namespace krys::boo::css
   struct DOMMatrix2DInit;
 }
 
+namespace krys::boo::svg
+{
+  class SMILTimeContainer;
+}
+
 namespace krys::boo
 {
   class Frame;
@@ -42,15 +47,7 @@ namespace krys::boo
   class SVGTransform;
   class SVGViewElement;
   class SVGViewSpec;
-}
 
-namespace krys::boo::svg
-{
-  class SMILTimeContainer;
-}
-
-namespace krys::boo
-{
   /// @brief The `<svg>` element: a viewport, the root of an SVG document fragment when it's outermost.
   /// @see https://svgwg.org/svg2-draft/struct.html#InterfaceSVGSVGElement
   class SVGSvgElement final : public SVGGraphicsElement, public SVGFitToViewBox

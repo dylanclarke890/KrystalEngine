@@ -1267,7 +1267,7 @@ namespace krys::boo
     }
 
     // A PaintBehavior may force synchronous decoding.
-    if (paintInfo.PaintBehavior.Contains(PaintBehavior::Snapshotting))
+    if (paintInfo.PaintBehavior.contains(PaintBehavior::Snapshotting))
     {
       return DecodingMode::Synchronous;
     }
@@ -1280,7 +1280,7 @@ namespace krys::boo
 
     auto defaultDecodingMode = [&]() -> DecodingMode
     {
-      if (paintInfo.PaintBehavior.Contains(PaintBehavior::ForceSynchronousImageDecode))
+      if (paintInfo.PaintBehavior.contains(PaintBehavior::ForceSynchronousImageDecode))
       {
         return DecodingMode::Synchronous;
       }

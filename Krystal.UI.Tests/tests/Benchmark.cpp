@@ -70,12 +70,12 @@ namespace krys::ui::tests
       auto device = CreateTestDevice(gfx::DeviceDesc {}.TransientMemoryPerFrame);
       auto renderer = gfx::Renderer2D::Create(*device);
       REQUIRE(renderer.has_value());
-      auto target =
-        device->CreateTexture({.Format = gfx::TextureFormat::RGBA8Unorm,
-                               .Width = width,
-                               .Height = height,
-                               .Usage = gfx::TextureUsage::RenderTarget | gfx::TextureUsage::Sampled,
-                               .DebugName = u8"Benchmark"});
+      auto target = device->CreateTexture(
+        {.Format = gfx::TextureFormat::RGBA8Unorm,
+         .Width = width,
+         .Height = height,
+         .Usage = EnumSet<gfx::TextureUsage> {gfx::TextureUsage::RenderTarget, gfx::TextureUsage::Sampled},
+         .DebugName = u8"Benchmark"});
       REQUIRE(target.has_value());
 
       FrameCosts costs;

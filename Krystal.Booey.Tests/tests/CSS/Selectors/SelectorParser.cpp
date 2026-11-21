@@ -161,10 +161,7 @@ namespace krys::boo::css::tests
   EXECUTE_CSS_SELECTOR_PARSER_TEST_CASE("universal-01.dat");
 
   EXECUTE_CSS_SELECTOR_PARSER_TEST_CASE("where-01.dat");
-}
 
-namespace krys::boo::css::tests
-{
   namespace
   {
     KRYS_NODISCARD CSSOMString Parse(CSSOMStringView input, const SelectorParserContext &context = {},

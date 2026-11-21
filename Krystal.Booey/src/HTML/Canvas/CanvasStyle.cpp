@@ -86,7 +86,8 @@ namespace krys::boo::html
       return ParseColorRawGeneral(colorString, cssParserContext, options, state);
     }
 
-    ColorParsingOptions options {.AllowedColorTypes = css::ColorType::Absolute | css::ColorType::Current};
+    ColorParsingOptions options {
+      .AllowedColorTypes = EnumSet<css::ColorType> {css::ColorType::Absolute, css::ColorType::Current}};
     css::PlatformColorResolutionState state {.ResolvedCurrentColor = Color::black};
     return ParseColorRawGeneral(colorString, cssParserContext, options, state);
   }

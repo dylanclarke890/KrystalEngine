@@ -53,7 +53,7 @@
 
 namespace krys::boo::style
 {
-  static_assert(PublicPseudoIDBits == AllPublicPseudoElementTypes.Size());
+  static_assert(PublicPseudoIDBits == AllPublicPseudoElementTypes.size());
   static_assert(!(static_cast<unsigned>(maxTextTransformValue) >> TextTransformBits));
 
   // Value zero is used to indicate no pseudo-element.

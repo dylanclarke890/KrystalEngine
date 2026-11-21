@@ -38,12 +38,12 @@ namespace krys::boo
     Accelerated,
     GraphicsContext,
   };
-}
 
-KRYS_DEFINE_CONTIGUOUS_ENUM_TRAITS(krys::boo::FilterRenderingMode, 3uz);
+  consteval FilterRenderingMode MaxEnumValue(FilterRenderingMode) noexcept
+  {
+    return FilterRenderingMode::GraphicsContext;
+  }
 
-namespace krys::boo
-{
   constexpr inline EnumSet<FilterRenderingMode> AllFilterRenderingModes = {
     FilterRenderingMode::Software, FilterRenderingMode::Accelerated, FilterRenderingMode::GraphicsContext};
 }

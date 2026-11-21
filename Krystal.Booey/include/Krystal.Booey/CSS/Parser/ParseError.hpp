@@ -15,6 +15,9 @@ namespace krys::boo::css
     UnexpectedEOFInEscapeSequence,
     InvalidEscapeSequence,
   };
-}
 
-KRYS_DEFINE_CONTIGUOUS_ENUM_TRAITS(krys::boo::css::ParseError, 8uz);
+  consteval ParseError MaxEnumValue(ParseError) noexcept
+  {
+    return ParseError::InvalidEscapeSequence;
+  }
+}

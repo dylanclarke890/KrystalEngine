@@ -1266,7 +1266,7 @@ namespace krys::boo::style
 
     if (isComposited && ChangeRequiresLayerRepaint(a, b, changedContextSensitiveProperties))
     {
-      return changedContextSensitiveProperties.Contains(DifferenceContextSensitiveProperty::ClipRect);
+      return changedContextSensitiveProperties.contains(DifferenceContextSensitiveProperty::ClipRect);
     }
 
     return false;

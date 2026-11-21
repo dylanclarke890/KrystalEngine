@@ -86,12 +86,12 @@ namespace krys::boo::css
 
       KRYS_NODISCARD bool IsImportant() const noexcept
       {
-        return HasFlag(_metadata.Flags, PropertyFlag::Important);
+        return _metadata.Flags.contains(PropertyFlag::Important);
       }
 
       KRYS_NODISCARD bool IsImplicit() const noexcept
       {
-        return HasFlag(_metadata.Flags, PropertyFlag::Implicit);
+        return _metadata.Flags.contains(PropertyFlag::Implicit);
       }
 
       KRYS_NODISCARD CSSOMString CssName() const noexcept;

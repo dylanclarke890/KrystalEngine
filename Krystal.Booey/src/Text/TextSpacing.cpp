@@ -143,7 +143,7 @@ namespace krys::boo
       // We already know it is not an Ideograph from here
       // FIXME: Should also check that it is not: upright in vertical text flow using the text-orientation
       // property or the text-combine-upright property.
-      if ((text::MarkCategories | text::LetterCategories).Contains(category))
+      if ((text::MarkCategories | text::LetterCategories).contains(category))
       {
         if (!text::IsEastAsianFullWidth(character))
         {
@@ -158,7 +158,7 @@ namespace krys::boo
         return CharacterClass::NonIdeographNumeral;
       }
 
-      if (text::PunctuationCategories.Contains(category))
+      if (text::PunctuationCategories.contains(category))
       {
         if (text::IsCJKSymbolOrPunctuation(character) || text::IsEastAsianFullWidth(character))
         {

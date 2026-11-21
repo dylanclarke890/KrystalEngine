@@ -54,15 +54,6 @@
 #include "Krystal.Core/Types/Func.hpp"
 #include "Krystal.Core/Types/Maybe.hpp"
 
-namespace krys::boo
-{
-  class Element;
-  class Event;
-  class KeyboardEvent;
-  class Node;
-  class WheelEvent;
-}
-
 namespace krys::boo::dom
 {
   class DataTransfer;
@@ -72,24 +63,29 @@ namespace krys::boo::dom
 namespace krys::boo
 {
   class AutoscrollController;
-  struct DragState;
+  class Element;
+  class Event;
   class Frame;
   class FrameView;
+  class KeyboardEvent;
   class MouseEventWithHitTestResults;
+  class Node;
   class Pasteboard;
   class RenderBox;
   class RenderLayer;
+  class ScrollableArea;
+  class Scrollbar;
   class VisiblePosition;
   class VisibleSelection;
+  class WheelEvent;
+
+  struct DragState;
 
   enum AppendTrailingWhitespace : bool
   {
     ShouldAppendTrailingWhitespace,
     DontAppendTrailingWhitespace,
   };
-
-  class ScrollableArea;
-  class Scrollbar;
 
   // The link drag hysteresis is much larger than the others because there
   // needs to be enough space to cancel the link press without starting a link drag,

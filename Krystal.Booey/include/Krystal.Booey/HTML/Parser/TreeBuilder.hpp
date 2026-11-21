@@ -44,10 +44,7 @@
 namespace krys::boo::html
 {
   class Tokenizer;
-}
 
-namespace krys::boo::html
-{
   enum class InsertionMode : uint8
   {
     Initial,
@@ -73,6 +70,11 @@ namespace krys::boo::html
     AfterAfterFrameset,
   };
 
+  consteval InsertionMode MaxEnumValue(InsertionMode) noexcept
+  {
+    return InsertionMode::AfterAfterFrameset;
+  }
+
   /// @see https://html.spec.whatwg.org/multipage/parsing.html#parser-scripting-mode
   enum class ParserScriptingMode : uint8
   {
@@ -81,13 +83,12 @@ namespace krys::boo::html
     Inert,
     Fragment,
   };
-}
 
-KRYS_DEFINE_CONTIGUOUS_ENUM_TRAITS(krys::boo::html::InsertionMode, 21u)
-KRYS_DEFINE_CONTIGUOUS_ENUM_TRAITS(krys::boo::html::ParserScriptingMode, 4u)
+  consteval ParserScriptingMode MaxEnumValue(ParserScriptingMode) noexcept
+  {
+    return ParserScriptingMode::Fragment;
+  }
 
-namespace krys::boo::html
-{
   /// @see https://html.spec.whatwg.org/multipage/parsing.html#special
   KRYS_NODISCARD constexpr bool IsSpecialElement(TagName tagName, Namespace tagNamespace) noexcept
   {
@@ -273,13 +274,13 @@ namespace krys::boo::html
     Tokenizer &_tokenizer;
 
     /// @see https://html.spec.whatwg.org/multipage/syntax.html#insertion-mode
-    InsertionMode _insertionMode : BitCount<InsertionMode>() {InsertionMode::Initial};
+    InsertionMode _insertionMode : EnumBitWidth<InsertionMode> {InsertionMode::Initial};
 
     /// @see https://html.spec.whatwg.org/multipage/syntax.html#original-insertion-mode
-    InsertionMode _originalInsertionMode : BitCount<InsertionMode>() {InsertionMode::Initial};
+    InsertionMode _originalInsertionMode : EnumBitWidth<InsertionMode> {InsertionMode::Initial};
 
     /// @see https://html.spec.whatwg.org/#scripting-mode
-    ParserScriptingMode _scriptingMode : BitCount<ParserScriptingMode>() {ParserScriptingMode::Normal};
+    ParserScriptingMode _scriptingMode : EnumBitWidth<ParserScriptingMode> {ParserScriptingMode::Normal};
 
     /// @see https://html.spec.whatwg.org/multipage/parsing.html#frameset-ok-flag
     bool _framesetOk : 1 {true};

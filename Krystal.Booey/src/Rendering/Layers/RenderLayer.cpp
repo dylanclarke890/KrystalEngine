@@ -258,7 +258,7 @@ namespace krys::boo
   {
     for (auto *layer = PaintOrderParent(); layer; layer = layer->PaintOrderParent())
     {
-      if (layer->_compositingDirtyBits.Contains(flag))
+      if (layer->_compositingDirtyBits.contains(flag))
       {
         break;
       }
@@ -375,7 +375,7 @@ namespace krys::boo
   {
     if (backingProvider == _backingProviderLayer.get())
     {
-      krys_debug_assert(flags.Contains(UpdateBackingSharingFlags::DuringCompositingUpdate)
+      krys_debug_assert(flags.contains(UpdateBackingSharingFlags::DuringCompositingUpdate)
                         || backingProvider == _backingProviderLayerAtEndOfCompositingUpdate.get());
       return;
     }
@@ -386,7 +386,7 @@ namespace krys::boo
     }
 
     _backingProviderLayer = CreateWeakPtr(backingProvider);
-    if (!flags.Contains(UpdateBackingSharingFlags::DuringCompositingUpdate))
+    if (!flags.contains(UpdateBackingSharingFlags::DuringCompositingUpdate))
     {
       _backingProviderLayerAtEndOfCompositingUpdate = CreateWeakPtr(backingProvider);
     }
@@ -1518,7 +1518,7 @@ namespace krys::boo
     _layerPositionDirtyBits.Add(LayerPositionUpdates::NeedsPositionUpdate);
     for (auto *layer = Parent(); layer; layer = layer->Parent())
     {
-      if (layer->_layerPositionDirtyBits.Contains(LayerPositionUpdates::DescendantNeedsPositionUpdate))
+      if (layer->_layerPositionDirtyBits.contains(LayerPositionUpdates::DescendantNeedsPositionUpdate))
       {
         break;
       }
@@ -1534,7 +1534,7 @@ namespace krys::boo
       return true;
     }
     if (Parent()
-        && Parent()->_layerPositionDirtyBits.Contains(LayerPositionUpdates::AllChildrenNeedPositionUpdate))
+        && Parent()->_layerPositionDirtyBits.contains(LayerPositionUpdates::AllChildrenNeedPositionUpdate))
     {
       return true;
     }
@@ -1650,13 +1650,13 @@ namespace krys::boo
   bool RenderLayer::AncestorLayerPositionStateChanged(EnumSet<UpdateLayerPositionsFlag> flags) const noexcept
   {
     return _hasFixedContainingBlockAncestor
-             != flags.Contains(UpdateLayerPositionsFlag::SeenFixedContainingBlockLayer)
-           || _hasTransformedAncestor != flags.Contains(UpdateLayerPositionsFlag::SeenTransformedLayer)
-           || _has3DTransformedAncestor != flags.Contains(UpdateLayerPositionsFlag::Seen3DTransformedLayer)
-           || _hasFixedAncestor != flags.Contains(UpdateLayerPositionsFlag::SeenFixedLayer)
-           || _hasPaginatedAncestor != flags.Contains(UpdateLayerPositionsFlag::UpdatePagination)
+             != flags.contains(UpdateLayerPositionsFlag::SeenFixedContainingBlockLayer)
+           || _hasTransformedAncestor != flags.contains(UpdateLayerPositionsFlag::SeenTransformedLayer)
+           || _has3DTransformedAncestor != flags.contains(UpdateLayerPositionsFlag::Seen3DTransformedLayer)
+           || _hasFixedAncestor != flags.contains(UpdateLayerPositionsFlag::SeenFixedLayer)
+           || _hasPaginatedAncestor != flags.contains(UpdateLayerPositionsFlag::UpdatePagination)
            || _hasCompositedScrollingAncestor
-                != flags.Contains(UpdateLayerPositionsFlag::SeenCompositedScrollingLayer);
+                != flags.contains(UpdateLayerPositionsFlag::SeenCompositedScrollingLayer);
   }
 
   void RenderLayer::RecursiveUpdateLayerPositions(EnumSet<UpdateLayerPositionsFlag> flags) noexcept
@@ -1671,7 +1671,7 @@ namespace krys::boo
       return;
     }
 
-    if (_layerPositionDirtyBits.Contains(LayerPositionUpdates::AllDescendantsNeedPositionUpdate))
+    if (_layerPositionDirtyBits.contains(LayerPositionUpdates::AllDescendantsNeedPositionUpdate))
     {
       flags.Add(UpdateLayerPositionsFlag::SubtreeNeedsUpdate);
     }
@@ -1699,7 +1699,7 @@ namespace krys::boo
 
     UpdateDescendantDependentFlags();
 
-    if (flags.Contains(UpdateLayerPositionsFlag::UpdatePagination))
+    if (flags.contains(UpdateLayerPositionsFlag::UpdatePagination))
     {
       UpdatePagination();
     }
@@ -1737,17 +1737,17 @@ namespace krys::boo
       }
     };
 
-    repaintIfNecessary(flags.Contains(UpdateLayerPositionsFlag::CheckForRepaint));
+    repaintIfNecessary(flags.contains(UpdateLayerPositionsFlag::CheckForRepaint));
 
     _repaintStatus = RepaintStatus::NeedsNormalRepaint;
     _hasFixedContainingBlockAncestor =
-      flags.Contains(UpdateLayerPositionsFlag::SeenFixedContainingBlockLayer);
-    _hasTransformedAncestor = flags.Contains(UpdateLayerPositionsFlag::SeenTransformedLayer);
-    _has3DTransformedAncestor = flags.Contains(UpdateLayerPositionsFlag::Seen3DTransformedLayer);
-    _hasFixedAncestor = flags.Contains(UpdateLayerPositionsFlag::SeenFixedLayer);
-    _hasStickyAncestor = flags.Contains(UpdateLayerPositionsFlag::SeenStickyLayer);
-    _hasPaginatedAncestor = flags.Contains(UpdateLayerPositionsFlag::UpdatePagination);
-    _hasCompositedScrollingAncestor = flags.Contains(UpdateLayerPositionsFlag::SeenCompositedScrollingLayer);
+      flags.contains(UpdateLayerPositionsFlag::SeenFixedContainingBlockLayer);
+    _hasTransformedAncestor = flags.contains(UpdateLayerPositionsFlag::SeenTransformedLayer);
+    _has3DTransformedAncestor = flags.contains(UpdateLayerPositionsFlag::Seen3DTransformedLayer);
+    _hasFixedAncestor = flags.contains(UpdateLayerPositionsFlag::SeenFixedLayer);
+    _hasStickyAncestor = flags.contains(UpdateLayerPositionsFlag::SeenStickyLayer);
+    _hasPaginatedAncestor = flags.contains(UpdateLayerPositionsFlag::UpdatePagination);
+    _hasCompositedScrollingAncestor = flags.contains(UpdateLayerPositionsFlag::SeenCompositedScrollingLayer);
 
     if (!IsRenderViewLayer())
     {
@@ -1784,7 +1784,7 @@ namespace krys::boo
     }
 
     if (flags.ContainsAny(InvalidationLayerPositionsFlags())
-        || _layerPositionDirtyBits.Contains(LayerPositionUpdates::DescendantNeedsPositionUpdate))
+        || _layerPositionDirtyBits.contains(LayerPositionUpdates::DescendantNeedsPositionUpdate))
     {
       for (RenderLayer *child = FirstChild(); child; child = child->NextSibling())
       {
@@ -1807,8 +1807,8 @@ namespace krys::boo
     if (IsComposited())
     {
       Backing()->UpdateAfterLayout(
-        flags.Contains(UpdateLayerPositionsFlag::ContainingClippingLayerChangedSize),
-        flags.Contains(UpdateLayerPositionsFlag::NeedsFullRepaintInBacking));
+        flags.contains(UpdateLayerPositionsFlag::ContainingClippingLayerChangedSize),
+        flags.contains(UpdateLayerPositionsFlag::NeedsFullRepaintInBacking));
     }
 
     ClearLayerPositionDirtyBits();
@@ -2981,7 +2981,7 @@ namespace krys::boo
     // are running.
     auto styleable = style::Styleable::FromRenderer(Renderer());
     if ((styleable && styleable->IsRunningAcceleratedTransformRelatedAnimation())
-        || !options.Contains(style::TransformResolverOption::TransformOrigin))
+        || !options.contains(style::TransformResolverOption::TransformOrigin))
     {
       auto animatedStyle = Renderer().AnimatedStyle();
 
@@ -3182,7 +3182,7 @@ namespace krys::boo
   bool RenderLayer::PaintsWithTransform(EnumSet<PaintBehavior> paintBehavior) const noexcept
   {
     bool paintsToWindow = !IsComposited() || Backing()->PaintsIntoWindow();
-    return Transform() && (paintBehavior.Contains(PaintBehavior::FlattenCompositingLayers) || paintsToWindow);
+    return Transform() && (paintBehavior.contains(PaintBehavior::FlattenCompositingLayers) || paintsToWindow);
   }
 
   RenderLayer *RenderLayer::EnclosingTransformedAncestor() const noexcept
@@ -3253,7 +3253,7 @@ namespace krys::boo
       return false;
     }
 
-    if (paintBehavior.Contains(PaintBehavior::FlattenCompositingLayers))
+    if (paintBehavior.contains(PaintBehavior::FlattenCompositingLayers))
     {
       return true;
     }
@@ -3884,8 +3884,8 @@ namespace krys::boo
   {
     ClipRectsType clipRectsType = clipRectsContext.Type;
     krys_debug_assert(clipRectsType < NumCachedClipRectsTypes);
-    krys_debug_assert(!clipRectsContext.Options.Contains(ClipRectsOption::Temporary));
-    krys_debug_assert(!clipRectsContext.Options.Contains(ClipRectsOption::OutsideFilter));
+    krys_debug_assert(!clipRectsContext.Options.contains(ClipRectsOption::Temporary));
+    krys_debug_assert(!clipRectsContext.Options.contains(ClipRectsOption::OutsideFilter));
     if (_clipRectsCache)
     {
       if (auto *clipRects = _clipRectsCache->GetClipRects(clipRectsContext))
@@ -4060,7 +4060,7 @@ namespace krys::boo
     }
 
     if (clipRectsContext.Type == PaintingClipRects && _suppressAncestorClippingInsideFilter
-        && !clipRectsContext.Options.Contains(ClipRectsOption::OutsideFilter))
+        && !clipRectsContext.Options.contains(ClipRectsOption::OutsideFilter))
     {
       return nullptr;
     }
@@ -4073,8 +4073,8 @@ namespace krys::boo
       return result;
     };
 
-    if (clipRectsContext.Options.Contains(ClipRectsOption::Temporary)
-        || clipRectsContext.Options.Contains(ClipRectsOption::OutsideFilter))
+    if (clipRectsContext.Options.contains(ClipRectsOption::Temporary)
+        || clipRectsContext.Options.contains(ClipRectsOption::OutsideFilter))
     {
       return temporaryParentClipRects(clipRectsContext);
     }
@@ -4138,7 +4138,7 @@ namespace krys::boo
 
     bool shouldApplyClip = clipRectsContext.Type != PaintingClipRects
                            || !_suppressAncestorClippingInsideFilter
-                           || clipRectsContext.Options.Contains(ClipRectsOption::OutsideFilter);
+                           || clipRectsContext.Options.contains(ClipRectsOption::OutsideFilter);
 
     if (shouldApplyClip && Renderer().HasClip())
     {
@@ -4158,7 +4158,7 @@ namespace krys::boo
   {
     auto backgroundRect = CalculateBackgroundClipRect(clipRectsContext, offsetFromRoot);
 
-    if (clipRectsContext.Options.Contains(ClipRectsOption::OutsideFilter)
+    if (clipRectsContext.Options.contains(ClipRectsOption::OutsideFilter)
         || !Renderer().HasClipOrNonVisibleOverflow())
     {
       return backgroundRect;
@@ -4201,7 +4201,7 @@ namespace krys::boo
   {
     auto foregroundRect = CalculateBackgroundClipRect(clipRectsContext, offsetFromRoot);
 
-    if (clipRectsContext.Options.Contains(ClipRectsOption::OutsideFilter)
+    if (clipRectsContext.Options.contains(ClipRectsOption::OutsideFilter)
         || !Renderer().HasNonVisibleOverflow())
     {
       return foregroundRect;
@@ -4382,7 +4382,7 @@ namespace krys::boo
     {
       RenderBox *box = GetRenderBox();
       krys_debug_assert(box);
-      if (!flags.Contains(DontConstrainForMask) && box->HasMask())
+      if (!flags.contains(DontConstrainForMask) && box->HasMask())
       {
         result = box->MaskClipRect(LayoutPoint());
         // The mask clip rect is in physical coordinates, so we have to flip, since localBoundingBox is not.
@@ -4393,7 +4393,7 @@ namespace krys::boo
         result = box->VisualOverflowRect();
       }
 
-      if (flags.Contains(IncludeRootBackgroundPaintingArea) && Renderer().IsDocumentElementRenderer())
+      if (flags.contains(IncludeRootBackgroundPaintingArea) && Renderer().IsDocumentElementRenderer())
       {
         // If the root layer becomes composited (e.g. because some descendant with negative z-index is
         // composited), then it has to be big enough to cover the viewport in order to display the background.
@@ -4425,7 +4425,7 @@ namespace krys::boo
     }
 
     auto inclusionMode = ExcludeCompositedPaginatedLayers;
-    if (flags.Contains(UseFragmentBoxesIncludingCompositing))
+    if (flags.contains(UseFragmentBoxesIncludingCompositing))
     {
       inclusionMode = IncludeCompositedPaginatedLayers;
     }
@@ -4479,7 +4479,7 @@ namespace krys::boo
 
     // FIXME: This could be improved to do a check like hasVisibleNonCompositingDescendantLayers() (bug
     // 92580).
-    if (flags.Contains(ExcludeHiddenDescendants) && this != ancestorLayer && !HasVisibleContent()
+    if (flags.contains(ExcludeHiddenDescendants) && this != ancestorLayer && !HasVisibleContent()
         && !HasVisibleDescendant())
     {
       return LayoutRect();
@@ -4510,12 +4510,12 @@ namespace krys::boo
     {
       bool clipExceedsBounds = false;
       LayoutRect localClipRect =
-        this->LocalClipRect(clipExceedsBounds, flags.Contains(UseLocalClipRectExcludingCompositingIfPossible)
+        this->LocalClipRect(clipExceedsBounds, flags.contains(UseLocalClipRectExcludingCompositingIfPossible)
                                                  ? LocalClipRectMode::ExcludeCompositingState
                                                  : LocalClipRectMode::IncludeCompositingState);
       if (!localClipRect.IsInfinite() && !clipExceedsBounds)
       {
-        if (flags.Contains(IncludeSelfTransform) && PaintsWithTransform({}))
+        if (flags.contains(IncludeSelfTransform) && PaintsWithTransform({}))
         {
           localClipRect = MapRect(*Transform(), localClipRect);
         }
@@ -4527,17 +4527,17 @@ namespace krys::boo
 
     // FIXME: should probably just pass 'flags' down to descendants.
     EnumSet<CalculateLayerBoundsFlag> descendantFlags = DefaultCalculateLayerBoundsFlags();
-    if (flags.Contains(PreserveAncestorFlags))
+    if (flags.contains(PreserveAncestorFlags))
     {
       descendantFlags = flags;
     }
     else
     {
-      if (flags.Contains(ExcludeHiddenDescendants))
+      if (flags.contains(ExcludeHiddenDescendants))
       {
         descendantFlags.Add(ExcludeHiddenDescendants);
       }
-      if (flags.Contains(IncludeCompositedDescendants))
+      if (flags.contains(IncludeCompositedDescendants))
       {
         descendantFlags.Add(IncludeCompositedDescendants);
       }
@@ -4553,7 +4553,7 @@ namespace krys::boo
 
     auto computeLayersUnion = [this, &unionBounds, flags, descendantFlags](const RenderLayer &childLayer)
     {
-      if (!flags.Contains(IncludeCompositedDescendants)
+      if (!flags.contains(IncludeCompositedDescendants)
           && (childLayer.IsComposited() || childLayer.PaintsIntoProvidedBacking()))
       {
         return;
@@ -4580,16 +4580,16 @@ namespace krys::boo
       computeLayersUnion(*childLayer);
     }
 
-    if (flags.Contains(IncludeFilterOutsets)
-        || (flags.Contains(IncludePaintedFilterOutsets)
-            && ShouldPaintWithFilters(flags.Contains(IncludeCompositedDescendants)
+    if (flags.contains(IncludeFilterOutsets)
+        || (flags.contains(IncludePaintedFilterOutsets)
+            && ShouldPaintWithFilters(flags.contains(IncludeCompositedDescendants)
                                         ? EnumSet<PaintBehavior> {PaintBehavior::FlattenCompositingLayers}
                                         : EnumSet<PaintBehavior> {})))
     {
       Expand(unionBounds, ToLayoutBoxExtent(FilterOutsets()));
     }
 
-    if (flags.Contains(IncludeSelfTransform) && PaintsWithTransform({}))
+    if (flags.contains(IncludeSelfTransform) && PaintsWithTransform({}))
     {
       TransformationMatrix *affineTrans = Transform();
       boundingBoxRect = MapRect(*affineTrans, boundingBoxRect);
@@ -5032,7 +5032,7 @@ namespace krys::boo
     }
 
     bool shouldComputeRepaintRects =
-      (flags.Contains(UpdateLayerPositionsAfterScrollFlag::HasSeenViewportConstrainedAncestor)
+      (flags.contains(UpdateLayerPositionsAfterScrollFlag::HasSeenViewportConstrainedAncestor)
        || flags.ContainsAll({UpdateLayerPositionsAfterScrollFlag::IsOverflowScroll,
                              UpdateLayerPositionsAfterScrollFlag::HasSeenAncestorWithOverflowClip}))
       && IsSelfPaintingLayer();
@@ -5224,7 +5224,7 @@ namespace krys::boo
     {
       return false;
     }
-    return paintBehavior.Contains(PaintBehavior::FlattenCompositingLayers) || !IsComposited();
+    return paintBehavior.contains(PaintBehavior::FlattenCompositingLayers) || !IsComposited();
   }
 
   bool RenderLayer::HasNonOpacityTransparency() const noexcept
@@ -5249,7 +5249,7 @@ namespace krys::boo
       return TransformationMatrix();
     }
 
-    if (paintBehavior.Contains(PaintBehavior::FlattenCompositingLayers))
+    if (paintBehavior.contains(PaintBehavior::FlattenCompositingLayers))
     {
       TransformationMatrix matrix = *_transform;
       MakeMatrixRenderable(matrix, false /* flatten 3d */);
@@ -5268,12 +5268,12 @@ namespace krys::boo
     }
 
     bool paintsToWindow = !IsComposited() || Backing()->PaintsIntoWindow();
-    if (paintsToWindow || paintBehavior.Contains(PaintBehavior::FlattenCompositingLayers))
+    if (paintsToWindow || paintBehavior.contains(PaintBehavior::FlattenCompositingLayers))
     {
       return true;
     }
 
-    return paintFlags.Contains(PaintLayerFlag::PaintingCompositingMaskPhase);
+    return paintFlags.contains(PaintLayerFlag::PaintingCompositingMaskPhase);
   }
 
   bool RenderLayer::ShouldApplyClipPath(EnumSet<PaintBehavior> paintBehavior,
@@ -5285,13 +5285,13 @@ namespace krys::boo
     }
 
     bool paintsToWindow = !IsComposited() || Backing()->PaintsIntoWindow();
-    if (paintsToWindow || paintBehavior.Contains(PaintBehavior::FlattenCompositingLayers))
+    if (paintsToWindow || paintBehavior.contains(PaintBehavior::FlattenCompositingLayers))
     {
       return true;
     }
 
-    return paintFlags.Contains(PaintLayerFlag::PaintingCompositingClipPathPhase)
-           || paintFlags.Contains(PaintLayerFlag::CollectingEventRegion);
+    return paintFlags.contains(PaintLayerFlag::PaintingCompositingClipPathPhase)
+           || paintFlags.contains(PaintLayerFlag::CollectingEventRegion);
   }
 
   RectF RenderLayer::ReferenceBoxRectForClipPath(CSSBoxType boxType, const LayoutSize &offsetFromRoot,
@@ -5409,7 +5409,7 @@ namespace krys::boo
       for (RenderLayer *layer = rule == IncludeSelfForBorderRadius ? this : Parent(); layer;
            layer = layer->Parent())
       {
-        if (paintBehavior.Contains(PaintBehavior::CompositedOverflowScrollContent)
+        if (paintBehavior.contains(PaintBehavior::CompositedOverflowScrollContent)
             && layer->UsesCompositedScrolling())
         {
           break;
@@ -5451,7 +5451,7 @@ namespace krys::boo
                                           EnumSet<RenderLayer::PaintLayerFlag> paintFlags) noexcept
   {
     return layer->Renderer().IsDocumentElementRenderer()
-           && paintFlags.Contains(RenderLayer::PaintLayerFlag::PaintingRootBackgroundOnly);
+           && paintFlags.contains(RenderLayer::PaintLayerFlag::PaintingRootBackgroundOnly);
   }
 
   void RenderLayer::PaintLayer(GraphicsContext &context, const LayerPaintingInfo &paintingInfo,
@@ -5460,7 +5460,7 @@ namespace krys::boo
     auto shouldContinuePaint = [&]()
     {
       return Backing()->PaintsIntoWindow() || Backing()->PaintsIntoCompositedAncestor()
-             || ShouldDoSoftwarePaint(this, paintFlags.Contains(PaintLayerFlag::PaintingReflection))
+             || ShouldDoSoftwarePaint(this, paintFlags.contains(PaintLayerFlag::PaintingReflection))
              || PaintForFixedRootBackground(this, paintFlags);
     };
 
@@ -5482,7 +5482,7 @@ namespace krys::boo
     if (paintsIntoDifferentCompositedDestination())
     {
       if (!context.PerformingPaintInvalidation()
-          && !paintingInfo.PaintBehavior.Contains(PaintBehavior::FlattenCompositingLayers))
+          && !paintingInfo.PaintBehavior.contains(PaintBehavior::FlattenCompositingLayers))
       {
         return;
       }
@@ -5491,7 +5491,7 @@ namespace krys::boo
     }
 
     if (GetViewportConstrainedNotCompositedReason() == NotCompositedForBoundsOutOfView
-        && !paintingInfo.PaintBehavior.Contains(PaintBehavior::Snapshotting))
+        && !paintingInfo.PaintBehavior.contains(PaintBehavior::Snapshotting))
     {
       // Don't paint out-of-view viewport constrained layers (when doing prepainting) because they will never
       // be visible unless their position or viewport size is changed.
@@ -5529,7 +5529,7 @@ namespace krys::boo
 
     // PaintLayerFlag::AppliedTransform is used in RenderReplica, to avoid applying the transform twice.
     if (PaintsWithTransform(paintingInfo.PaintBehavior)
-        && !paintFlags.Contains(PaintLayerFlag::AppliedTransform))
+        && !paintFlags.contains(PaintLayerFlag::AppliedTransform))
     {
       TransformationMatrix layerTransform = RenderableTransform(paintingInfo.PaintBehavior);
       // If the transform can't be inverted, then don't paint anything.
@@ -5540,7 +5540,7 @@ namespace krys::boo
 
       // If we have a transparency layer enclosing us and we are the root of a transform, then we need to
       // establish the transparency layer from the parent now, assuming there is a parent
-      if (paintFlags.Contains(PaintLayerFlag::HaveTransparency))
+      if (paintFlags.contains(PaintLayerFlag::HaveTransparency))
       {
         if (this != paintingInfo.RootLayer && Parent())
         {
@@ -5563,14 +5563,14 @@ namespace krys::boo
       GraphicsContextStateSaver stateSaver(context, false);
       if (Parent())
       {
-        auto options = paintFlags.Contains(PaintLayerFlag::PaintingOverflowContents)
+        auto options = paintFlags.contains(PaintLayerFlag::PaintingOverflowContents)
                          ? ClipRectOptionsForPaintingOverflowContents
                          : ClipRectDefaultOptions;
         if (ShouldHaveFiltersForPainting(context, paintFlags, paintingInfo.PaintBehavior))
         {
           options.Add(ClipRectsOption::OutsideFilter);
         }
-        if (paintFlags.Contains(PaintLayerFlag::TemporaryClipRects))
+        if (paintFlags.contains(PaintLayerFlag::TemporaryClipRects))
         {
           options.Add(ClipRectsOption::Temporary);
         }
@@ -5579,7 +5579,7 @@ namespace krys::boo
         clipRect.Intersect(paintingInfo.PaintDirtyRect);
 
         EnumSet<PaintBehavior> paintBehavior;
-        if (paintFlags.Contains(PaintLayerFlag::PaintingOverflowContents))
+        if (paintFlags.contains(PaintLayerFlag::PaintingOverflowContents))
         {
           paintBehavior.Add(PaintBehavior::CompositedOverflowScrollContent);
         }
@@ -5706,7 +5706,7 @@ namespace krys::boo
       return false;
     }
 
-    if (paintFlags.Contains(PaintLayerFlag::PaintingOverlayScrollbars))
+    if (paintFlags.contains(PaintLayerFlag::PaintingOverlayScrollbars))
     {
       return false;
     }
@@ -5796,14 +5796,14 @@ namespace krys::boo
     auto localPaintFlags = paintFlags;
     localPaintFlags.Remove(PaintLayerFlag::AppliedTransform);
 
-    bool haveTransparency = localPaintFlags.Contains(PaintLayerFlag::HaveTransparency);
-    bool isPaintingOverlayScrollbars = localPaintFlags.Contains(PaintLayerFlag::PaintingOverlayScrollbars);
+    bool haveTransparency = localPaintFlags.contains(PaintLayerFlag::HaveTransparency);
+    bool isPaintingOverlayScrollbars = localPaintFlags.contains(PaintLayerFlag::PaintingOverlayScrollbars);
     bool isPaintingCompositedForeground =
-      localPaintFlags.Contains(PaintLayerFlag::PaintingCompositingForegroundPhase);
+      localPaintFlags.contains(PaintLayerFlag::PaintingCompositingForegroundPhase);
     bool isPaintingCompositedBackground =
-      localPaintFlags.Contains(PaintLayerFlag::PaintingCompositingBackgroundPhase);
-    bool isPaintingOverflowContents = localPaintFlags.Contains(PaintLayerFlag::PaintingOverflowContents);
-    bool isCollectingEventRegion = localPaintFlags.Contains(PaintLayerFlag::CollectingEventRegion);
+      localPaintFlags.contains(PaintLayerFlag::PaintingCompositingBackgroundPhase);
+    bool isPaintingOverflowContents = localPaintFlags.contains(PaintLayerFlag::PaintingOverflowContents);
+    bool isCollectingEventRegion = localPaintFlags.contains(PaintLayerFlag::CollectingEventRegion);
 
     bool isSelfPaintingLayer = IsSelfPaintingLayer();
     bool isInsideSkippedSubtree = Renderer().IsSkippedContent();
@@ -5820,7 +5820,7 @@ namespace krys::boo
 
     auto shouldSkipNonFixedTopDocumentContent = [&]
     {
-      if (!paintingInfo.PaintBehavior.Contains(PaintBehavior::FixedAndStickyLayersOnly))
+      if (!paintingInfo.PaintBehavior.contains(PaintBehavior::FixedAndStickyLayersOnly))
       {
         return false;
       }
@@ -5860,7 +5860,7 @@ namespace krys::boo
       }
 
       // For the current layer, the outline has been painted by the primary GraphicsLayer.
-      if (localPaintFlags.Contains(PaintLayerFlag::PaintingOverflowContentsRoot))
+      if (localPaintFlags.contains(PaintLayerFlag::PaintingOverflowContentsRoot))
       {
         return false;
       }
@@ -5869,7 +5869,7 @@ namespace krys::boo
       // content.
       // FIXME: inset outlines will have the wrong z-ordering with scrolled content. See also
       // webkit.org/b/249457.
-      if (localPaintFlags.Contains(PaintLayerFlag::PaintingOverflowContainer))
+      if (localPaintFlags.contains(PaintLayerFlag::PaintingOverflowContainer))
       {
         return isPaintingCompositedBackground;
       }
@@ -5879,12 +5879,12 @@ namespace krys::boo
 
     bool shouldPaintNegativeZIndexChildren = [&]()
     {
-      if (localPaintFlags.Contains(PaintLayerFlag::PaintingOverflowContainer))
+      if (localPaintFlags.contains(PaintLayerFlag::PaintingOverflowContainer))
       {
         return false;
       }
 
-      if (localPaintFlags.Contains(PaintLayerFlag::PaintingOverflowContents))
+      if (localPaintFlags.contains(PaintLayerFlag::PaintingOverflowContents))
       {
         // Overflow contents has the "PaintingCompositingForegroundPhase" phase,
         // but we need to paint negative z-index layers here so they scroll with the content.
@@ -5903,7 +5903,7 @@ namespace krys::boo
       return false;
     };
 
-    if (paintingInfo.PaintBehavior.Contains(PaintBehavior::DraggableSnapshot)
+    if (paintingInfo.PaintBehavior.contains(PaintBehavior::DraggableSnapshot)
         && paintingInfo.SubtreePaintRoot)
     {
       if (paintingInfo.SubtreePaintRoot->HasLayer())
@@ -5924,7 +5924,7 @@ namespace krys::boo
       }
     }
 
-    if (localPaintFlags.Contains(PaintLayerFlag::PaintingRootBackgroundOnly) && !Renderer().IsRenderView()
+    if (localPaintFlags.contains(PaintLayerFlag::PaintingRootBackgroundOnly) && !Renderer().IsRenderView()
         && !Renderer().IsDocumentElementRenderer())
     {
       // If beginTransparencyLayers was called prior to this, ensure the transparency state is cleaned up
@@ -5970,15 +5970,15 @@ namespace krys::boo
       SetupClipPath(context, stateSaver, paintingInfo, localPaintFlags, columnAwareOffsetFromRoot);
     }
 
-    bool applySVGClippingMask = localPaintFlags.Contains(PaintLayerFlag::PaintingSVGClippingMask);
+    bool applySVGClippingMask = localPaintFlags.contains(PaintLayerFlag::PaintingSVGClippingMask);
     if (applySVGClippingMask)
     {
       localPaintFlags.Remove(PaintLayerFlag::PaintingSVGClippingMask);
     }
 
     bool selectionAndBackgroundsOnly =
-      paintingInfo.PaintBehavior.Contains(PaintBehavior::SelectionAndBackgroundsOnly);
-    bool selectionOnly = paintingInfo.PaintBehavior.Contains(PaintBehavior::SelectionOnly);
+      paintingInfo.PaintBehavior.contains(PaintBehavior::SelectionAndBackgroundsOnly);
+    bool selectionOnly = paintingInfo.PaintBehavior.contains(PaintBehavior::SelectionOnly);
 
     LayerFragments layerFragments;
     RenderObject *subtreePaintRootForRenderer = nullptr;
@@ -5996,18 +5996,18 @@ namespace krys::boo
       };
       EnumSet<PaintBehavior> paintBehavior = paintingInfo.PaintBehavior & flagsToCopy;
 
-      if (localPaintFlags.Contains(PaintLayerFlag::PaintingSkipRootBackground))
+      if (localPaintFlags.contains(PaintLayerFlag::PaintingSkipRootBackground))
       {
         paintBehavior.Add(PaintBehavior::SkipRootBackground);
       }
-      else if (localPaintFlags.Contains(PaintLayerFlag::PaintingRootBackgroundOnly))
+      else if (localPaintFlags.contains(PaintLayerFlag::PaintingRootBackgroundOnly))
       {
         paintBehavior.Add(PaintBehavior::RootBackgroundOnly);
       }
 
       // FIXME: This seems wrong. We should retain the DefaultAsynchronousImageDecode flag for all
       // RenderLayers painted into the root tile cache.
-      if (paintingInfo.PaintBehavior.Contains(PaintBehavior::DefaultAsynchronousImageDecode)
+      if (paintingInfo.PaintBehavior.contains(PaintBehavior::DefaultAsynchronousImageDecode)
           && IsRenderViewLayer())
       {
         paintBehavior.Add(PaintBehavior::DefaultAsynchronousImageDecode);
@@ -6034,7 +6034,7 @@ namespace krys::boo
         auto clipRectOptions =
           isPaintingOverflowContents ? ClipRectOptionsForPaintingOverflowContents : ClipRectDefaultOptions;
         clipRectOptions.Add(ClipRectsOption::OutsideFilter);
-        if (localPaintFlags.Contains(PaintLayerFlag::TemporaryClipRects))
+        if (localPaintFlags.contains(PaintLayerFlag::TemporaryClipRects))
         {
           clipRectOptions.Add(ClipRectsOption::Temporary);
         }
@@ -6077,7 +6077,7 @@ namespace krys::boo
         // fragment, as well as whether or not the content of each fragment should paint.
         auto clipRectOptions =
           isPaintingOverflowContents ? ClipRectOptionsForPaintingOverflowContents : ClipRectDefaultOptions;
-        if (localPaintFlags.Contains(PaintLayerFlag::TemporaryClipRects))
+        if (localPaintFlags.contains(PaintLayerFlag::TemporaryClipRects))
         {
           clipRectOptions.Add(ClipRectsOption::Temporary);
         }
@@ -6153,15 +6153,15 @@ namespace krys::boo
       }
 
       if (applySVGClippingMask
-          || (!paintFlags.Contains(PaintLayerFlag::PaintingCompositingMaskPhase)
-              && paintFlags.Contains(PaintLayerFlag::PaintingCompositingClipPathPhase)))
+          || (!paintFlags.contains(PaintLayerFlag::PaintingCompositingMaskPhase)
+              && paintFlags.contains(PaintLayerFlag::PaintingCompositingClipPathPhase)))
       {
         // Re-use paintChildClippingMaskForFragments to paint black for the compositing clipping mask.
         PaintChildClippingMaskForFragments(layerFragments, context, paintingInfo, paintBehavior,
                                            subtreePaintRootForRenderer);
       }
 
-      if (localPaintFlags.Contains(PaintLayerFlag::PaintingChildClippingMaskPhase))
+      if (localPaintFlags.contains(PaintLayerFlag::PaintingChildClippingMaskPhase))
       {
         // Paint the border radius mask for the fragments.
         PaintChildClippingMaskForFragments(layerFragments, context, paintingInfo, paintBehavior,
@@ -6461,14 +6461,14 @@ namespace krys::boo
     LayoutRect transformedExtent = TransparencyClipBox(*this, paginatedLayer, PaintingTransparencyClipBox,
                                                        RootOfTransparencyClipBox, paintingInfo.PaintBehavior);
 
-    auto clipRectOptions = paintFlags.Contains(PaintLayerFlag::PaintingOverflowContents)
+    auto clipRectOptions = paintFlags.contains(PaintLayerFlag::PaintingOverflowContents)
                              ? ClipRectOptionsForPaintingOverflowContents
                              : ClipRectDefaultOptions;
     if (ShouldHaveFiltersForPainting(context, paintFlags, paintingInfo.PaintBehavior))
     {
       clipRectOptions.Add(ClipRectsOption::OutsideFilter);
     }
-    if (paintFlags.Contains(PaintLayerFlag::TemporaryClipRects))
+    if (paintFlags.contains(PaintLayerFlag::TemporaryClipRects))
     {
       clipRectOptions.Add(ClipRectsOption::Temporary);
     }
@@ -6496,7 +6496,7 @@ namespace krys::boo
       }
 
       EnumSet<PaintBehavior> paintBehavior;
-      if (paintFlags.Contains(PaintLayerFlag::PaintingOverflowContents))
+      if (paintFlags.contains(PaintLayerFlag::PaintingOverflowContents))
       {
         paintBehavior.Add(PaintBehavior::CompositedOverflowScrollContent);
       }
@@ -6517,7 +6517,7 @@ namespace krys::boo
     {
       fragment.ShouldPaintContent = shouldPaintContent;
       if (this != localPaintingInfo.RootLayer
-          || !localPaintFlags.Contains(PaintLayerFlag::PaintingOverflowContents))
+          || !localPaintFlags.contains(PaintLayerFlag::PaintingOverflowContents))
       {
         LayoutSize newOffsetFromRoot = offsetFromRoot + fragment.PaginationOffset;
         fragment.ShouldPaintContent &=
@@ -6604,11 +6604,11 @@ namespace krys::boo
     }
 
     EnumSet<PaintBehavior> localPaintBehavior;
-    if (localPaintingInfo.PaintBehavior.Contains(PaintBehavior::ForceBlackText))
+    if (localPaintingInfo.PaintBehavior.contains(PaintBehavior::ForceBlackText))
     {
       localPaintBehavior = PaintBehavior::ForceBlackText;
     }
-    else if (localPaintingInfo.PaintBehavior.Contains(PaintBehavior::ForceWhiteText))
+    else if (localPaintingInfo.PaintBehavior.contains(PaintBehavior::ForceWhiteText))
     {
       localPaintBehavior = PaintBehavior::ForceWhiteText;
     }
@@ -6644,9 +6644,9 @@ namespace krys::boo
 
     // We have to loop through every fragment multiple times, since we have to repaint in each specific phase
     // in order for interleaving of the fragments to work properly.
-    bool selectionOnly = localPaintingInfo.PaintBehavior.Contains(PaintBehavior::SelectionOnly);
+    bool selectionOnly = localPaintingInfo.PaintBehavior.contains(PaintBehavior::SelectionOnly);
     bool selectionAndBackgroundsOnly =
-      localPaintingInfo.PaintBehavior.Contains(PaintBehavior::SelectionAndBackgroundsOnly);
+      localPaintingInfo.PaintBehavior.contains(PaintBehavior::SelectionAndBackgroundsOnly);
 
     if (!selectionOnly)
     {

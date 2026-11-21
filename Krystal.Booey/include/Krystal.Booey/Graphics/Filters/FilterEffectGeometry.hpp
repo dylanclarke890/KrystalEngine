@@ -41,12 +41,12 @@ namespace krys::boo
     HasWidth,
     HasHeight,
   };
-}
 
-KRYS_DEFINE_CONTIGUOUS_ENUM_TRAITS(krys::boo::FilterEffectGeometryFlag, 4uz);
+  consteval FilterEffectGeometryFlag MaxEnumValue(FilterEffectGeometryFlag) noexcept
+  {
+    return FilterEffectGeometryFlag::HasHeight;
+  }
 
-namespace krys::boo
-{
   /// @brief A filter primitive's subregion (its `x`, `y`, `width` and `height`), the parts that are given.
   class FilterEffectGeometry
   {
@@ -67,22 +67,22 @@ namespace krys::boo
 
     KRYS_NODISCARD Maybe<float> X() const noexcept
     {
-      return _flags.Contains(Flags::HasX) ? Maybe<float> {_boundaries.X()} : null;
+      return _flags.contains(Flags::HasX) ? Maybe<float> {_boundaries.X()} : null;
     }
 
     KRYS_NODISCARD Maybe<float> Y() const noexcept
     {
-      return _flags.Contains(Flags::HasY) ? Maybe<float> {_boundaries.Y()} : null;
+      return _flags.contains(Flags::HasY) ? Maybe<float> {_boundaries.Y()} : null;
     }
 
     KRYS_NODISCARD Maybe<float> Width() const noexcept
     {
-      return _flags.Contains(Flags::HasWidth) ? Maybe<float> {_boundaries.Width()} : null;
+      return _flags.contains(Flags::HasWidth) ? Maybe<float> {_boundaries.Width()} : null;
     }
 
     KRYS_NODISCARD Maybe<float> Height() const noexcept
     {
-      return _flags.Contains(Flags::HasHeight) ? Maybe<float> {_boundaries.Height()} : null;
+      return _flags.contains(Flags::HasHeight) ? Maybe<float> {_boundaries.Height()} : null;
     }
   };
 }

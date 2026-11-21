@@ -32,11 +32,6 @@
 #include "Krystal.Core/Containers/List.hpp"
 #include "Krystal.Core/Types/Variant.hpp"
 
-namespace krys::boo
-{
-  class Document;
-}
-
 namespace krys::boo::css::calc
 {
   struct Child;
@@ -49,6 +44,7 @@ namespace krys::boo
   class CSSMathSum;
   class CSSNumericValue;
   class CSSUnitValue;
+  class Document;
 
   /// @brief A number, or a numeric value.
   /// @see https://drafts.css-houdini.org/css-typed-om/#typedefdef-cssnumberish

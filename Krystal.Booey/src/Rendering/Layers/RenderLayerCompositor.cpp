@@ -1481,7 +1481,7 @@ namespace krys::boo
     layer.UpdateDescendantDependentFlags();
     layer.UpdateLayerListsIfNeeded();
 
-    bool layerNeedsUpdate = !updateLevel.IsEmpty();
+    bool layerNeedsUpdate = !updateLevel.empty();
     if (layer.DescendantsNeedUpdateBackingAndHierarchyTraversal())
     {
       updateLevel.Add(UpdateLevel::AllDescendants);
@@ -1544,7 +1544,7 @@ namespace krys::boo
     bool requireDescendantTraversal =
       layer.HasDescendantNeedingUpdateBackingOrHierarchyTraversal()
       || (layer.HasCompositingDescendant()
-          && (!layerBacking || layer.NeedsCompositingLayerConnection() || !updateLevel.IsEmpty()));
+          && (!layerBacking || layer.NeedsCompositingLayerConnection() || !updateLevel.empty()));
 
     bool requiresChildRebuild =
       layerBacking && layer.NeedsCompositingLayerConnection() && !layer.HasCompositingDescendant();
@@ -2751,7 +2751,7 @@ namespace krys::boo
 
     // Exclude any implicitly created layers that wrap the root contents layer, unless the caller explicitly
     // requested the true root to be included.
-    GraphicsLayer *dumpRootLayer = options.Contains(LayerTreeAsTextOptions::IncludeRootLayers)
+    GraphicsLayer *dumpRootLayer = options.contains(LayerTreeAsTextOptions::IncludeRootLayers)
                                      ? RootGraphicsLayer()
                                      : _rootContentsLayer.get();
 

@@ -148,7 +148,7 @@ namespace krys::boo
     RenderElement::CreateFor(Element &element, RenderStyle &&style,
                              EnumSet<ConstructBlockLevelRendererFor> rendererTypeOverride) noexcept
   {
-    if (rendererTypeOverride.IsEmpty())
+    if (rendererTypeOverride.empty())
     {
       if (RefPtr styleImage = MinimallySupportedContentDataImage(style.Content());
           styleImage && !Is<PseudoElement>(element))
@@ -166,7 +166,7 @@ namespace krys::boo
       case DisplayType::None:
       case DisplayType::Contents: return nullptr;
       case DisplayType::Inline:
-        if (rendererTypeOverride.Contains(ConstructBlockLevelRendererFor::Inline))
+        if (rendererTypeOverride.contains(ConstructBlockLevelRendererFor::Inline))
         {
           return CreateRenderer<RenderBlockFlow>(Type::BlockFlow, element, krys::move(style));
         }
@@ -176,7 +176,7 @@ namespace krys::boo
       case DisplayType::InlineBlock:
         return CreateRenderer<RenderBlockFlow>(Type::BlockFlow, element, krys::move(style));
       case DisplayType::ListItem:
-        if (rendererTypeOverride.Contains(ConstructBlockLevelRendererFor::ListItem))
+        if (rendererTypeOverride.contains(ConstructBlockLevelRendererFor::ListItem))
         {
           return CreateRenderer<RenderBlockFlow>(Type::BlockFlow, element, krys::move(style));
         }
@@ -199,7 +199,7 @@ namespace krys::boo
     }
 
     if (style.IsDisplayTableOrTablePart()
-        && rendererTypeOverride.Contains(ConstructBlockLevelRendererFor::TableOrTablePart))
+        && rendererTypeOverride.contains(ConstructBlockLevelRendererFor::TableOrTablePart))
     {
       return CreateRenderer<RenderBlockFlow>(Type::BlockFlow, element, krys::move(style));
     }
@@ -230,7 +230,7 @@ namespace krys::boo
     bool isComposited = layer && layer->IsComposited();
 
     // If transform changed, and we are not composited, need to do a layout.
-    if (diff.ContextSensitiveProperties.Contains(style::DifferenceContextSensitiveProperty::Transform))
+    if (diff.ContextSensitiveProperties.contains(style::DifferenceContextSensitiveProperty::Transform))
     {
       // FIXME: when transforms are taken into account for overflow, we will need to do a layout.
       if (!isComposited)
@@ -243,7 +243,7 @@ namespace krys::boo
       }
     }
 
-    if (diff.ContextSensitiveProperties.Contains(style::DifferenceContextSensitiveProperty::Opacity))
+    if (diff.ContextSensitiveProperties.contains(style::DifferenceContextSensitiveProperty::Opacity))
     {
       if (!isComposited)
       {
@@ -255,7 +255,7 @@ namespace krys::boo
       }
     }
 
-    if (diff.ContextSensitiveProperties.Contains(style::DifferenceContextSensitiveProperty::ClipPath))
+    if (diff.ContextSensitiveProperties.contains(style::DifferenceContextSensitiveProperty::ClipPath))
     {
       if (layer && layer->WillCompositeClipPath())
       {
@@ -267,7 +267,7 @@ namespace krys::boo
       }
     }
 
-    if (diff.ContextSensitiveProperties.Contains(style::DifferenceContextSensitiveProperty::WillChange))
+    if (diff.ContextSensitiveProperties.contains(style::DifferenceContextSensitiveProperty::WillChange))
     {
       if (Style().WillChange().CanTriggerCompositing())
       {
@@ -275,7 +275,7 @@ namespace krys::boo
       }
     }
 
-    if (diff.ContextSensitiveProperties.Contains(style::DifferenceContextSensitiveProperty::Filter) && layer)
+    if (diff.ContextSensitiveProperties.contains(style::DifferenceContextSensitiveProperty::Filter) && layer)
     {
       if (!isComposited || layer->ShouldPaintWithFilters())
       {
@@ -1164,7 +1164,7 @@ namespace krys::boo
     RenderElement::GetCachedPseudoStyle(const style::PseudoElementIdentifier &pseudoElementIdentifier,
                                         const RenderStyle *parentStyle) const noexcept
   {
-    if (AllPublicPseudoElementTypes.Contains(pseudoElementIdentifier.Type)
+    if (AllPublicPseudoElementTypes.contains(pseudoElementIdentifier.Type)
         && !Style().HasPseudoStyle(pseudoElementIdentifier.Type))
     {
       return nullptr;
@@ -1189,7 +1189,7 @@ namespace krys::boo
                                           const RenderStyle *parentStyle,
                                           const RenderStyle *ownStyle) const noexcept
   {
-    if (AllPublicPseudoElementTypes.Contains(pseudoElementRequest.GetType()) && !ownStyle
+    if (AllPublicPseudoElementTypes.contains(pseudoElementRequest.GetType()) && !ownStyle
         && !Style().HasPseudoStyle(pseudoElementRequest.GetType()))
     {
       return nullptr;
@@ -1536,7 +1536,7 @@ namespace krys::boo
 
     bool preserve3D = ParticipatesInPreserve3D();
     if (ShouldUseTransformFromContainer(container)
-        && geometryMap.MapCoordinatesFlags().Contains(MapCoordinatesMode::UseTransforms))
+        && geometryMap.MapCoordinatesFlags().contains(MapCoordinatesMode::UseTransforms))
     {
       TransformationMatrix t;
       GetTransformFromContainer(containerOffset, t);
@@ -1970,7 +1970,7 @@ namespace krys::boo
     // Nothing prints: only an explicit request annotates links.
     const auto *element = GetElement();
     return element && css::IsLink(*element)
-           && View().FrameView().GetPaintBehavior().Contains(PaintBehavior::AnnotateLinks);
+           && View().FrameView().GetPaintBehavior().contains(PaintBehavior::AnnotateLinks);
   }
 
   bool RenderElement::HasClip() const noexcept

@@ -9,8 +9,8 @@ namespace krys::ui
     for (auto &entry : _textures)
     {
       if (entry.Texture->GetRefCount() == 1 && entry.Texture->Size() == size
-          && entry.Texture->GetFlags().Contains(BitmapTexture::Flags::DepthBuffer)
-               == flags.Contains(BitmapTexture::Flags::DepthBuffer))
+          && entry.Texture->GetFlags().contains(BitmapTexture::Flags::DepthBuffer)
+               == flags.contains(BitmapTexture::Flags::DepthBuffer))
       {
         entry.Texture->Reset(size, flags);
         entry.LastUsedFrame = frame;

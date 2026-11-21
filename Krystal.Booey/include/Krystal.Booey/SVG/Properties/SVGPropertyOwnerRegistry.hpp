@@ -35,11 +35,6 @@
 #include "Krystal.Core/Memory/NeverDestroyed.hpp"
 #include <algorithm>
 
-namespace krys::boo
-{
-  class SVGConditionalProcessingAttributes;
-}
-
 namespace krys::boo::svg
 {
   template <typename T>
@@ -50,6 +45,8 @@ namespace krys::boo::svg
 
 namespace krys::boo
 {
+  class SVGConditionalProcessingAttributes;
+
   /// @brief The property registry of @p TOwner: the attributes its own properties reflect, each with the
   /// accessor that reaches the property, then those of @p TBaseTypes, the owner's bases that have properties.
   template <typename TOwner, typename... TBaseTypes>

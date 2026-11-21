@@ -102,7 +102,7 @@ namespace krys::boo::html
         auto rgba = color.ToColorTypeLossy<SRGBA<uint8>>();
         // 4c. If element's alpha attribute is not specified, then set htmlCompatible to true.
         // 4d. Otherwise, set color to color converted using the 'color()' function.
-        color = alpha ? Color(rgba, ColorFlags::UseColorFunctionSerialisation) : Color(ResolvedColour(rgba));
+        color = alpha ? Color(rgba, ColorFlag::UseColorFunctionSerialisation) : Color(ResolvedColour(rgba));
       }
       // 5. Otherwise:
       else

@@ -51,7 +51,7 @@ namespace krys::boo::css
         }
       }
 
-      Array<bool, EnumTraits<TokenType>::DistinctValues> Buffer {};
+      Array<bool, (ToUnderlying(MaxEnumValue(TokenType {})) + 1uz)> Buffer {};
     };
 
     // Spaces and tabs are counted as spaces, and newlines kept, as the original whitespace is serialised for

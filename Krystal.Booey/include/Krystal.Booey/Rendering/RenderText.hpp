@@ -34,11 +34,6 @@
 #include "Krystal.Core/TypeCast.hpp"
 #include "Krystal.Core/Types/Maybe.hpp"
 
-namespace krys::boo
-{
-  class Text;
-}
-
 namespace krys::boo::layout
 {
   class InlineTextBox;
@@ -48,6 +43,8 @@ namespace krys::boo
 {
   class RenderInline;
   class RenderStyle;
+  class Text;
+
   struct WordTrailingSpace;
 
   /// @brief Renders a text node (or anonymous text, such as generated content): its text, after the style's

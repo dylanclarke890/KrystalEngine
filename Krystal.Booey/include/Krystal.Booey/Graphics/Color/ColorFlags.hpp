@@ -25,26 +25,36 @@
 
 #pragma once
 
+#include "Krystal.Core/Containers/EnumSet.hpp"
 #include "Krystal.Core/Enum.hpp"
 
 namespace krys::boo
 {
-  enum class ColorFlags : uint8
+  enum class ColorFlag : uint8
   {
-    None = 0,
-    Semantic = 1 << 0,
-    UseColorFunctionSerialisation = 1 << 1,
+    Semantic,
+    UseColorFunctionSerialisation,
   };
 
-  enum class ColorFlagsIncludingPrivate : uint8
+  consteval ColorFlag MaxEnumValue(ColorFlag) noexcept
   {
-    None = 0,
-    Semantic = static_cast<uint8>(ColorFlags::Semantic),
-    UseColorFunctionSerialisation = static_cast<uint8>(ColorFlags::UseColorFunctionSerialisation),
-    Valid = 1 << 2,
-    OutOfLine = 1 << 3,
+    return ColorFlag::UseColorFunctionSerialisation;
+  }
+
+  using ColorFlags = EnumSet<ColorFlag>;
+
+  enum class ColorFlagIncludingPrivate : uint8
+  {
+    Semantic = static_cast<uint8>(ColorFlag::Semantic),
+    UseColorFunctionSerialisation = static_cast<uint8>(ColorFlag::UseColorFunctionSerialisation),
+    Valid,
+    OutOfLine,
   };
+
+  consteval ColorFlagIncludingPrivate MaxEnumValue(ColorFlagIncludingPrivate) noexcept
+  {
+    return ColorFlagIncludingPrivate::OutOfLine;
+  }
+
+  using ColorFlagsIncludingPrivate = EnumSet<ColorFlagIncludingPrivate>;
 }
-
-KRYS_DEFINE_FLAGS_ENUM_TRAITS(krys::boo::ColorFlags, 3uz)
-KRYS_DEFINE_FLAGS_ENUM_TRAITS(krys::boo::ColorFlagsIncludingPrivate, 5uz)

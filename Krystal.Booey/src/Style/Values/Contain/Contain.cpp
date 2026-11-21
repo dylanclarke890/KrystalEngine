@@ -59,7 +59,7 @@ namespace krys::boo::style
       switch (item.ValueId())
       {
         case css::ValueId::Size:
-          if (result.Contains(ContainValue::InlineSize))
+          if (result.contains(ContainValue::InlineSize))
           {
             state.SetCurrentPropertyInvalidAtComputedValueTime();
             return css::keywords::None {};
@@ -67,7 +67,7 @@ namespace krys::boo::style
           result.Value.Add(ContainValue::Size);
           break;
         case css::ValueId::InlineSize:
-          if (result.Contains(ContainValue::Size))
+          if (result.contains(ContainValue::Size))
           {
             state.SetCurrentPropertyInvalidAtComputedValueTime();
             return css::keywords::None {};

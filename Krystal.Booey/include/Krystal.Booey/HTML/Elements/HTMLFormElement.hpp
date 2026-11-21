@@ -30,13 +30,6 @@
 #include "Krystal.Core/Memory/WeakPtr.hpp"
 #include "Krystal.Core/Types/Variant.hpp"
 
-namespace krys::boo
-{
-  class Event;
-  class HTMLFormControlElement;
-  class HTMLImageElement;
-}
-
 namespace krys::boo::html
 {
   class DOMFormData;
@@ -50,6 +43,10 @@ namespace krys::boo::html
 
 namespace krys::boo
 {
+  class Event;
+  class HTMLFormControlElement;
+  class HTMLImageElement;
+
   /// @see https://html.spec.whatwg.org/#htmlformelement
   class HTMLFormElement : public HTMLElement
   {

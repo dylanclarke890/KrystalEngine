@@ -478,14 +478,14 @@ namespace krys::boo
     // If a container was specified, and was not nullptr or the RenderView,
     // then we should have found it by now.
     krys_debug_assert(!ancestorContainer || ancestorContainer == this);
-    krys_debug_assert(!wasFixed || *wasFixed == mode.Contains(MapCoordinatesMode::IsFixed));
+    krys_debug_assert(!wasFixed || *wasFixed == mode.contains(MapCoordinatesMode::IsFixed));
 
-    if (mode.Contains(MapCoordinatesMode::IsFixed))
+    if (mode.contains(MapCoordinatesMode::IsFixed))
     {
       transformState.Move(ToLayoutSize(FrameView().ScrollPositionRespectingCustomFixedPosition()));
     }
 
-    if (!ancestorContainer && mode.Contains(MapCoordinatesMode::UseTransforms)
+    if (!ancestorContainer && mode.contains(MapCoordinatesMode::UseTransforms)
         && ShouldUseTransformFromContainer(nullptr))
     {
       TransformationMatrix t;
@@ -521,14 +521,14 @@ namespace krys::boo
   void RenderView::MapAbsoluteToLocalPoint(EnumSet<MapCoordinatesMode> mode,
                                            TransformState &transformState) const noexcept
   {
-    if (mode.Contains(MapCoordinatesMode::UseTransforms) && ShouldUseTransformFromContainer(nullptr))
+    if (mode.contains(MapCoordinatesMode::UseTransforms) && ShouldUseTransformFromContainer(nullptr))
     {
       TransformationMatrix t;
       GetTransformFromContainer(LayoutSize(), t);
       transformState.ApplyTransform(t);
     }
 
-    if (mode.Contains(MapCoordinatesMode::IsFixed))
+    if (mode.contains(MapCoordinatesMode::IsFixed))
     {
       transformState.Move(ToLayoutSize(FrameView().ScrollPositionRespectingCustomFixedPosition()));
     }

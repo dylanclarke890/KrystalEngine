@@ -106,6 +106,11 @@ namespace krys::boo::css::calc
     DPCM,
   };
 
+  consteval NumericIdentity MaxEnumValue(NumericIdentity) noexcept
+  {
+    return NumericIdentity::DPCM;
+  }
+
   constexpr uint8 NumberOfNumericIdentityTypes = static_cast<uint8>(NumericIdentity::DPCM) + 1;
 
   KRYS_NODISCARD constexpr NumericIdentity ToNumericIdentity(const Number &) noexcept
@@ -296,6 +301,3 @@ namespace krys::boo::css::calc
     return false;
   }
 }
-
-KRYS_DEFINE_CONTIGUOUS_ENUM_TRAITS(krys::boo::css::calc::NumericIdentity,
-                                   krys::boo::css::calc::NumberOfNumericIdentityTypes);

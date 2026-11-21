@@ -28,7 +28,3 @@
 #include "Krystal.Booey/Graphics/Color/Color.hpp"
 #include "Krystal.Core/Hashing/FastHash.hpp"
 #include "Krystal.Core/Utils/Tags.hpp"
-
-namespace krys
-{
-}

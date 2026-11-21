@@ -198,10 +198,7 @@ namespace krys::boo::tests
     fixture.Document->SetFocusedAndActive(true);
     CHECK(selection.IsFocusedAndActive());
   }
-}
 
-namespace krys::boo::tests
-{
   namespace
   {
     using Alteration = FrameSelection::Alteration;
@@ -379,10 +376,7 @@ namespace krys::boo::tests
       CHECK(view->GetScrollPosition().Y() > 1'500);
     }
   }
-}
 
-namespace krys::boo::tests
-{
   namespace
   {
     /// @brief A page showing @p markup (10px text on 20px lines, no body margin) in a 400x300 view.

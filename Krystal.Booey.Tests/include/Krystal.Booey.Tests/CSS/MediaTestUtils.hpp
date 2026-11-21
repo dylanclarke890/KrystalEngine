@@ -12,9 +12,9 @@ namespace krys::boo::css::tests
   /// @brief A Booey client whose answers to the media features are the test's.
   struct MediaBooeyClient final : BooeyClient
   {
-    PointerCharacteristics Primary {PointerCharacteristics::Fine};
+    PointerCharacteristics Primary {PointerCharacteristic::Fine};
     bool PrimaryHovers {true};
-    PointerCharacteristics AllAvailable {PointerCharacteristics::Fine};
+    PointerCharacteristics AllAvailable {PointerCharacteristic::Fine};
     bool AnyHovers {true};
     SizeF Screen {1'920, 1'080};
     int32 DepthPerComponent {8};

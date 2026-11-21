@@ -46,7 +46,7 @@
 
 namespace krys::boo
 {
-  ImageDocument::ImageDocument() noexcept : HTMLDocument(dom::DocumentFlags::IsImageDocument)
+  ImageDocument::ImageDocument() noexcept : HTMLDocument(dom::DocumentFlag::IsImageDocument)
   {
     // https://html.spec.whatwg.org/#read-media
     // 2. Set document's mode to "no-quirks".

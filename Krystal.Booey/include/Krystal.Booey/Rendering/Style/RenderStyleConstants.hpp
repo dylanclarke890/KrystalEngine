@@ -63,12 +63,12 @@ namespace krys::boo
 
     HighestEnumValue = PickerIcon,
   };
-}
 
-KRYS_DEFINE_CONTIGUOUS_ENUM_TRAITS(krys::boo::PseudoElementType, 13uz);
+  consteval PseudoElementType MaxEnumValue(PseudoElementType) noexcept
+  {
+    return PseudoElementType::HighestEnumValue;
+  }
 
-namespace krys::boo
-{
   constexpr EnumSet<PseudoElementType> AllPublicPseudoElementTypes {
     PseudoElementType::FirstLine,     PseudoElementType::FirstLetter, PseudoElementType::GrammarError,
     PseudoElementType::Highlight,     PseudoElementType::Marker,      PseudoElementType::Before,

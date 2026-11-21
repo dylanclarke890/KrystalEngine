@@ -92,6 +92,11 @@ namespace krys::boo::html
     ControlCharacterReference,
   };
 
+  consteval ParseError MaxEnumValue(ParseError) noexcept
+  {
+    return ParseError::ControlCharacterReference;
+  }
+
   enum class TokenizerState : uint8
   {
     Data,
@@ -180,13 +185,12 @@ namespace krys::boo::html
     DecimalCharacterReference,
     NumericCharacterReferenceEnd,
   };
-}
 
-KRYS_DEFINE_CONTIGUOUS_ENUM_TRAITS(krys::boo::html::ParseError, 46uz);
-KRYS_DEFINE_CONTIGUOUS_ENUM_TRAITS(krys::boo::html::TokenizerState, 85u)
+  consteval TokenizerState MaxEnumValue(TokenizerState) noexcept
+  {
+    return TokenizerState::NumericCharacterReferenceEnd;
+  }
 
-namespace krys::boo::html
-{
   class NextTokenPtr
   {
     friend class Tokenizer;
@@ -251,8 +255,8 @@ namespace krys::boo::html
   class Tokenizer
   {
   private:
-    TokenizerState _state : BitCount<TokenizerState>() {TokenizerState::Data};
-    TokenizerState _characterReferenceReturnState : BitCount<TokenizerState>() {TokenizerState::Data};
+    TokenizerState _state : EnumBitWidth<TokenizerState> {TokenizerState::Data};
+    TokenizerState _characterReferenceReturnState : EnumBitWidth<TokenizerState> {TokenizerState::Data};
     Token _token;
     InputStream &_input;
     SmallList<char32, 32u> _appropriateEndTagName;

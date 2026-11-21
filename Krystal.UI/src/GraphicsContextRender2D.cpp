@@ -598,8 +598,8 @@ namespace krys::ui
                                            const PointF &position, boo::FontSmoothingMode) noexcept
   {
     const auto mode = GetTextDrawingMode();
-    const bool fill = mode.Contains(boo::TextDrawingMode::Fill);
-    const bool stroke = mode.Contains(boo::TextDrawingMode::Stroke);
+    const bool fill = mode.contains(boo::TextDrawingMode::Fill);
+    const bool stroke = mode.contains(boo::TextDrawingMode::Stroke);
     if ((!fill && !stroke) || glyphs.empty())
     {
       return;

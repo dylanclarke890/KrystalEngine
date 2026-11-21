@@ -7,8 +7,8 @@
 namespace krys::boo
 {
   HTMLSlotElement::HTMLSlotElement(Document &document) noexcept
-      : HTMLElement(document, html::HTMLElementInterface::Slot, html::HTMLElementFlags::None,
-                    dom::NodeFlags::IsHTMLSlotElement)
+      : HTMLElement(document, html::HTMLElementInterface::Slot, html::HTMLElementFlags {},
+                    dom::NodeFlag::IsHTMLSlotElement)
   {
   }
 

@@ -47,6 +47,11 @@ namespace krys::boo::dom
     Undefined,
   };
 
+  consteval TextDirectionState MaxEnumValue(TextDirectionState) noexcept
+  {
+    return TextDirectionState::Undefined;
+  }
+
   /// @brief The state a `dir` attribute's @p value (null if the attribute is missing) puts it in.
   KRYS_NODISCARD TextDirectionState ParseTextDirectionState(Maybe<DOMStringView> value) noexcept;
 
@@ -60,5 +65,3 @@ namespace krys::boo::dom
   /// it's a `<bdi>` without a valid one.
   KRYS_NODISCARD bool ElementHasAutoTextDirectionState(const Element &element) noexcept;
 }
-
-KRYS_DEFINE_CONTIGUOUS_ENUM_TRAITS(krys::boo::dom::TextDirectionState, 4u);

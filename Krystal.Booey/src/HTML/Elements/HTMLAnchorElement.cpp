@@ -43,7 +43,7 @@ namespace krys::boo
   HTMLAnchorElement::HTMLAnchorElement(Document &document) noexcept
       : HTMLElement(document, html::HTMLElementInterface::Anchor)
   {
-    SetEventTargetFlag(dom::EventTargetFlags::HasActivationBehavior);
+    _eventTargetFlags.Add(dom::EventTargetFlag::HasActivationBehavior);
   }
 
   HTMLAnchorElement::~HTMLAnchorElement() noexcept = default;

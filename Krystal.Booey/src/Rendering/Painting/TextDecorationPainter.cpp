@@ -461,12 +461,12 @@ namespace krys::boo
   Color TextDecorationPainter::DecorationColor(const RenderStyle &style,
                                                EnumSet<PaintBehavior> paintBehavior) noexcept
   {
-    if (paintBehavior.Contains(PaintBehavior::ForceBlackText))
+    if (paintBehavior.contains(PaintBehavior::ForceBlackText))
     {
       return Color::black;
     }
 
-    if (paintBehavior.Contains(PaintBehavior::ForceWhiteText))
+    if (paintBehavior.contains(PaintBehavior::ForceWhiteText))
     {
       return Color::white;
     }

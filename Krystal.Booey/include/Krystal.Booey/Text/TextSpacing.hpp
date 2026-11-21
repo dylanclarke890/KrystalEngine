@@ -127,12 +127,12 @@ namespace krys::boo
     IdeographNumeric,
     Normal,
   };
-}
 
-KRYS_DEFINE_CONTIGUOUS_ENUM_TRAITS(krys::boo::TextAutospaceType, 4uz);
+  consteval TextAutospaceType MaxEnumValue(TextAutospaceType) noexcept
+  {
+    return TextAutospaceType::Normal;
+  }
 
-namespace krys::boo
-{
   class TextAutospace
   {
   public:
@@ -151,17 +151,17 @@ namespace krys::boo
 
     KRYS_NODISCARD constexpr bool IsAuto() const noexcept
     {
-      return _options.Contains(Type::Auto);
+      return _options.contains(Type::Auto);
     }
 
     KRYS_NODISCARD constexpr bool IsNoAutospace() const noexcept
     {
-      return _options.IsEmpty();
+      return _options.empty();
     }
 
     KRYS_NODISCARD constexpr bool IsNormal() const noexcept
     {
-      return _options.Contains(Type::Normal);
+      return _options.contains(Type::Normal);
     }
 
     KRYS_NODISCARD constexpr bool HasIdeographAlpha() const noexcept

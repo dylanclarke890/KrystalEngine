@@ -38,17 +38,32 @@ namespace krys::boo::css
     EndOfFile,
   };
 
+  consteval TokenType MaxEnumValue(TokenType) noexcept
+  {
+    return TokenType::EndOfFile;
+  }
+
   enum class HashTokenType : uint8
   {
     Unrestricted,
     Id,
   };
 
+  consteval HashTokenType MaxEnumValue(HashTokenType) noexcept
+  {
+    return HashTokenType::Id;
+  }
+
   enum class NumericValueType : uint8
   {
     Number,
     Integer,
   };
+
+  consteval NumericValueType MaxEnumValue(NumericValueType) noexcept
+  {
+    return NumericValueType::Integer;
+  }
 
   enum class NumericSignChar : uint8
   {
@@ -57,20 +72,20 @@ namespace krys::boo::css
     Minus,
   };
 
+  consteval NumericSignChar MaxEnumValue(NumericSignChar) noexcept
+  {
+    return NumericSignChar::Minus;
+  }
+
   enum class BlockTokenType : uint8
   {
     None,
     Start,
     End,
   };
+
+  consteval BlockTokenType MaxEnumValue(BlockTokenType) noexcept
+  {
+    return BlockTokenType::End;
+  }
 }
-
-KRYS_DEFINE_CONTIGUOUS_ENUM_TRAITS(krys::boo::css::TokenType, 27uz);
-
-KRYS_DEFINE_CONTIGUOUS_ENUM_TRAITS(krys::boo::css::HashTokenType, 2uz);
-
-KRYS_DEFINE_CONTIGUOUS_ENUM_TRAITS(krys::boo::css::NumericValueType, 2uz);
-
-KRYS_DEFINE_CONTIGUOUS_ENUM_TRAITS(krys::boo::css::NumericSignChar, 3uz);
-
-KRYS_DEFINE_CONTIGUOUS_ENUM_TRAITS(krys::boo::css::BlockTokenType, 3uz);

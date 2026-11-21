@@ -33,11 +33,6 @@
 #include "Krystal.Core/Memory/RefPtr.hpp"
 #include "Krystal.Core/Memory/WeakPtr.hpp"
 
-namespace krys::boo::svg
-{
-  class ConditionEventListener;
-}
-
 namespace krys::boo
 {
   class SVGSMILElement;

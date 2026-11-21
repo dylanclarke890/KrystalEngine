@@ -37,7 +37,7 @@ namespace krys::boo
 
   public:
     explicit MathMLUnknownElement(Document &document) noexcept
-        : MathMLRowElement(document, MathMLElementInterface::Unknown, dom::NodeFlags::IsUnknownElement)
+        : MathMLRowElement(document, MathMLElementInterface::Unknown, dom::NodeFlag::IsUnknownElement)
     {
     }
 

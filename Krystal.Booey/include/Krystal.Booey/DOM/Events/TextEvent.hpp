@@ -31,11 +31,6 @@
 #include "Krystal.Core/Memory/RefPtr.hpp"
 #include "Krystal.Core/TypeCast.hpp"
 
-namespace krys::boo
-{
-  class DocumentFragment;
-}
-
 namespace krys::boo::dom
 {
   enum class TextEventInputType : uint8
@@ -55,6 +50,8 @@ namespace krys::boo::dom
 
 namespace krys::boo
 {
+  class DocumentFragment;
+
   /// @brief The text an edit inserts (`textInput`): typed, pasted or dropped, which listeners can cancel
   /// before the editor inserts it.
   /// @note Legacy.

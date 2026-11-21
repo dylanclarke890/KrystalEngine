@@ -75,27 +75,27 @@ namespace krys::boo::layout
     // FIXME: This should not be a box's property.
     KRYS_NODISCARD bool CanUseSimplifiedContentMeasuring() const noexcept
     {
-      return _contentCharacteristicSet.Contains(ContentCharacteristic::CanUseSimplifiedContentMeasuring);
+      return _contentCharacteristicSet.contains(ContentCharacteristic::CanUseSimplifiedContentMeasuring);
     }
 
     KRYS_NODISCARD bool CanUseSimpleFontCodePath() const noexcept
     {
-      return _contentCharacteristicSet.Contains(ContentCharacteristic::CanUseSimpleFontCodepath);
+      return _contentCharacteristicSet.contains(ContentCharacteristic::CanUseSimpleFontCodepath);
     }
 
     KRYS_NODISCARD bool ShouldUseSimpleGlyphOverflowCodePath() const noexcept
     {
-      return _contentCharacteristicSet.Contains(ContentCharacteristic::ShouldUseSimpleGlyphOverflowCodePath);
+      return _contentCharacteristicSet.contains(ContentCharacteristic::ShouldUseSimpleGlyphOverflowCodePath);
     }
 
     KRYS_NODISCARD bool HasPositionDependentContentWidth() const noexcept
     {
-      return _contentCharacteristicSet.Contains(ContentCharacteristic::HasPositionDependentContentWidth);
+      return _contentCharacteristicSet.contains(ContentCharacteristic::HasPositionDependentContentWidth);
     }
 
     KRYS_NODISCARD bool HasStrongDirectionalityContent() const noexcept
     {
-      return _contentCharacteristicSet.Contains(ContentCharacteristic::HasStrongDirectionalityContent);
+      return _contentCharacteristicSet.contains(ContentCharacteristic::HasStrongDirectionalityContent);
     }
 
     void SetContent(utf8_string newContent, EnumSet<ContentCharacteristic> contentCharacteristicSet) noexcept

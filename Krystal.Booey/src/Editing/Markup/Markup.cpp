@@ -1409,11 +1409,11 @@ namespace krys::boo
     {
       auto &document = contextElement.NodeDocument();
       if (Is<HTMLDocument>(document)
-          || parserContentPolicy.Contains(dom::ParserContentPolicy::AlwaysParseAsHTML))
+          || parserContentPolicy.contains(dom::ParserContentPolicy::AlwaysParseAsHTML))
       {
         return ParseHTMLIntoFragment(
           markup, contextElement,
-          parserContentPolicy.Contains(dom::ParserContentPolicy::AllowDeclarativeShadowRoots));
+          parserContentPolicy.contains(dom::ParserContentPolicy::AllowDeclarativeShadowRoots));
       }
 
       Ref<DocumentFragment> fragment = document.CreateDocumentFragment();

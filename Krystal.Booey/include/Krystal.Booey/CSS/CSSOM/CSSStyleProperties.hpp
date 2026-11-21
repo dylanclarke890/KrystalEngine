@@ -34,11 +34,6 @@
 #include "Krystal.Core/Memory/WeakPtr.hpp"
 #include "Krystal.Core/TypeCast.hpp"
 
-namespace krys::boo
-{
-  class StyledElement;
-}
-
 namespace krys::boo::css
 {
   class MutableStyleProperties;
@@ -48,6 +43,8 @@ namespace krys::boo::css
 
 namespace krys::boo
 {
+  class StyledElement;
+
   /// @brief A declaration block of CSS properties exposed to scripts: a style rule's `style`, an element's
   /// `style` attribute or a computed style.
   /// @see https://drafts.csswg.org/cssom/#the-cssstyleproperties-interface

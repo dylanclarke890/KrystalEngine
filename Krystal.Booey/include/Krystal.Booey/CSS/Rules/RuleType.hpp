@@ -62,7 +62,10 @@ namespace krys::boo::css
     FunctionDeclarations,
   };
 
+  consteval RuleType MaxEnumValue(RuleType) noexcept
+  {
+    return RuleType::FunctionDeclarations;
+  }
+
   constexpr auto FirstUnexposedRuleType = RuleType::LayerBlock;
 }
-
-KRYS_DEFINE_ENUM_TRAITS(krys::boo::css::RuleType, 25uz, false, false);

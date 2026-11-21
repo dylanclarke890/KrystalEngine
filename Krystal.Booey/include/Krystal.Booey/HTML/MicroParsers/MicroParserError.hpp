@@ -12,6 +12,9 @@ namespace krys::boo::html
     OutOfRange,
     InvalidSign,
   };
-}
 
-KRYS_DEFINE_CONTIGUOUS_ENUM_TRAITS(krys::boo::html::MicroParserError, 5uz);
+  consteval MicroParserError MaxEnumValue(MicroParserError) noexcept
+  {
+    return MicroParserError::InvalidSign;
+  }
+}

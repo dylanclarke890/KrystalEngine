@@ -39,11 +39,6 @@
 #include <functional>
 #include <utility>
 
-namespace krys
-{
-  class TextStream;
-}
-
 namespace krys::boo
 {
   class Color;
@@ -51,6 +46,8 @@ namespace krys::boo
 
 namespace krys
 {
+  class TextStream;
+
   template <>
   struct FastHash<krys::boo::Color>;
 }
@@ -155,12 +152,12 @@ namespace krys::boo
 
     Color() noexcept = default;
 
-    Color(SRGBA<uint8> color, ColorFlags flags = ColorFlags::None) noexcept
+    Color(SRGBA<uint8> color, ColorFlags flags = ColorFlags {}) noexcept
     {
       SetColor(color, ToFlagsIncludingPrivate(flags));
     }
 
-    Color(Maybe<SRGBA<uint8>> color, ColorFlags flags = ColorFlags::None) noexcept
+    Color(Maybe<SRGBA<uint8>> color, ColorFlags flags = ColorFlags {}) noexcept
     {
       if (color)
       {
@@ -169,14 +166,14 @@ namespace krys::boo
     }
 
     template <IsColourTypeWithComponentType<float> ColorType>
-    Color(const ColorType &color, ColorFlags flags = ColorFlags::None) noexcept
+    Color(const ColorType &color, ColorFlags flags = ColorFlags {}) noexcept
     {
       SetOutOfLineComponents(OutOfLineComponents::Create(AsColourComponents(color.Unresolved())),
                              ColourSpaceFor<ColorType>, ToFlagsIncludingPrivate(flags));
     }
 
     template <IsColourTypeWithComponentType<float> ColorType>
-    Color(const Maybe<ColorType> &color, ColorFlags flags = ColorFlags::None) noexcept
+    Color(const Maybe<ColorType> &color, ColorFlags flags = ColorFlags {}) noexcept
     {
       if (color)
       {
@@ -245,17 +242,17 @@ namespace krys::boo
 
     KRYS_NODISCARD bool IsValid() const noexcept
     {
-      return HasFlag(Flags(), ColorFlagsIncludingPrivate::Valid);
+      return Flags().contains(ColorFlagIncludingPrivate::Valid);
     }
 
     KRYS_NODISCARD bool IsSemantic() const noexcept
     {
-      return HasFlag(Flags(), ColorFlagsIncludingPrivate::Semantic);
+      return Flags().contains(ColorFlagIncludingPrivate::Semantic);
     }
 
     KRYS_NODISCARD bool UsesColorFunctionSerialisation() const noexcept
     {
-      return HasFlag(Flags(), ColorFlagsIncludingPrivate::UseColorFunctionSerialisation);
+      return Flags().contains(ColorFlagIncludingPrivate::UseColorFunctionSerialisation);
     }
 
     /// @note Named `Space` rather than `ColourSpace` so it doesn't hide the `ColourSpace` type.
@@ -389,15 +386,14 @@ namespace krys::boo
     KRYS_NODISCARD utf8_string DebugDescription() const noexcept;
 
   private:
-    Color(Ref<OutOfLineComponents> &&color, ColourSpace colorSpace,
-          ColorFlags flags = ColorFlags::None) noexcept
+    Color(Ref<OutOfLineComponents> &&color, ColourSpace colorSpace, ColorFlags flags = ColorFlags {}) noexcept
     {
       SetOutOfLineComponents(krys::move(color), colorSpace, ToFlagsIncludingPrivate(flags));
     }
 
     KRYS_NODISCARD static ColorFlagsIncludingPrivate ToFlagsIncludingPrivate(ColorFlags flags) noexcept
     {
-      return static_cast<ColorFlagsIncludingPrivate>(ToUnderlying(flags));
+      return ColorFlagsIncludingPrivate::FromRaw(flags.ToRaw());
     }
 
     KRYS_NODISCARD ColorFlagsIncludingPrivate Flags() const noexcept
@@ -407,26 +403,27 @@ namespace krys::boo
 
     KRYS_NODISCARD bool IsOutOfLine() const noexcept
     {
-      return HasFlag(Flags(), ColorFlagsIncludingPrivate::OutOfLine);
+      return Flags().contains(ColorFlagIncludingPrivate::OutOfLine);
     }
 
     KRYS_NODISCARD bool IsInline() const noexcept
     {
-      return !HasFlag(Flags(), ColorFlagsIncludingPrivate::OutOfLine);
+      return !Flags().contains(ColorFlagIncludingPrivate::OutOfLine);
     }
 
     void SetColor(SRGBA<uint8> color,
-                  ColorFlagsIncludingPrivate flags = ColorFlagsIncludingPrivate::None) noexcept
+                  ColorFlagsIncludingPrivate flags = ColorFlagsIncludingPrivate {}) noexcept
     {
-      flags |= ColorFlagsIncludingPrivate::Valid;
+      flags |= ColorFlagIncludingPrivate::Valid;
       _colorAndFlags = EncodedInlineColor(color) | EncodedColorSpace(ColourSpace::SRGB) | EncodedFlags(flags);
       krys_assert(IsInline());
     }
 
     void SetOutOfLineComponents(Ref<OutOfLineComponents> &&color, ColourSpace colorSpace,
-                                ColorFlagsIncludingPrivate flags = ColorFlagsIncludingPrivate::None) noexcept
+                                ColorFlagsIncludingPrivate flags = ColorFlagsIncludingPrivate {}) noexcept
     {
-      flags |= ColorFlagsIncludingPrivate::Valid | ColorFlagsIncludingPrivate::OutOfLine;
+      flags |=
+        ColorFlagsIncludingPrivate {ColorFlagIncludingPrivate::Valid, ColorFlagIncludingPrivate::OutOfLine};
       _colorAndFlags =
         EncodedOutOfLineComponents(krys::move(color)) | EncodedColorSpace(colorSpace) | EncodedFlags(flags);
       krys_assert(IsOutOfLine());
@@ -457,7 +454,7 @@ namespace krys::boo
 
     KRYS_NODISCARD static uint64 EncodedFlags(ColorFlagsIncludingPrivate flags) noexcept
     {
-      return static_cast<uint64>(flags) << flagsShift;
+      return static_cast<uint64>(flags.ToRaw()) << flagsShift;
     }
 
     KRYS_NODISCARD static uint64 EncodedColorSpace(ColourSpace colorSpace) noexcept
@@ -483,7 +480,7 @@ namespace krys::boo
 
     KRYS_NODISCARD static ColorFlagsIncludingPrivate DecodedFlags(uint64 value) noexcept
     {
-      return static_cast<ColorFlagsIncludingPrivate>(static_cast<uint8>(value >> flagsShift));
+      return ColorFlagsIncludingPrivate::FromRaw(static_cast<uint8>(value >> flagsShift));
     }
 
     KRYS_NODISCARD static ColourSpace DecodedColorSpace(uint64 value) noexcept
@@ -526,8 +523,8 @@ namespace krys::boo
   {
     if (a.IsOutOfLine() && b.IsOutOfLine())
     {
-      auto aFlags = a.Flags() & ~ColorFlagsIncludingPrivate::Semantic;
-      auto bFlags = b.Flags() & ~ColorFlagsIncludingPrivate::Semantic;
+      auto aFlags = a.Flags() - ColorFlagIncludingPrivate::Semantic;
+      auto bFlags = b.Flags() - ColorFlagIncludingPrivate::Semantic;
       return a.AsOutOfLine().UnresolvedComponents() == b.AsOutOfLine().UnresolvedComponents()
              && a.Space() == b.Space() && aFlags == bFlags;
     }
@@ -543,8 +540,8 @@ namespace krys::boo
       return OutOfLineComponentsEqualIgnoringSemanticColor(a, b);
     }
 
-    auto aFlags = a.Flags() & ~ColorFlagsIncludingPrivate::Semantic;
-    auto bFlags = b.Flags() & ~ColorFlagsIncludingPrivate::Semantic;
+    auto aFlags = a.Flags() - ColorFlagIncludingPrivate::Semantic;
+    auto bFlags = b.Flags() - ColorFlagIncludingPrivate::Semantic;
     return a.AsPackedInline().Value == b.AsPackedInline().Value && aFlags == bFlags;
   }
 

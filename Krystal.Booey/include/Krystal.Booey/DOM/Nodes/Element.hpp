@@ -51,36 +51,9 @@
 #include "Krystal.Core/Memory/WeakPtr.hpp"
 #include "Krystal.Core/Types/Pair.hpp"
 
-namespace krys::boo::html
-{
-  struct SetHTMLOptions;
-  struct SetHTMLUnsafeOptions;
-}
-
 namespace krys::i18n
 {
   class Locale;
-}
-
-namespace krys::boo
-{
-  class HTMLButtonElement;
-  class HTMLElement;
-  class HTMLSlotElement;
-  struct IntersectionObserverData;
-  struct KeyframeAnimationOptions;
-  class LayoutUnit;
-  class PlatformKeyboardEvent;
-  class PlatformMouseEvent;
-  class PseudoElement;
-  class RenderElement;
-  class RenderStyle;
-  class RenderTreeUpdater;
-  struct ResizeObserverData;
-  class ShadowRoot;
-  class StylePropertyMap;
-  class StylePropertyMapReadOnly;
-  enum class PseudoElementType : uint8;
 }
 
 namespace krys::net
@@ -111,6 +84,9 @@ namespace krys::boo::html
   class CustomStateSet;
   class OpenElementStack;
   class TreeBuilder;
+
+  struct SetHTMLOptions;
+  struct SetHTMLUnsafeOptions;
 }
 
 namespace krys::boo::xml
@@ -121,9 +97,26 @@ namespace krys::boo::xml
 namespace krys::boo::dom
 {
   class DOMRectList;
+  class DOMTokenList;
+  class DatasetDOMStringMap;
+  class DocumentAlgorithms;
+  class ElementAlgorithms;
+  class ElementFactory;
+  class ElementRareData;
+  class ExtensibilityHooks;
+  class HTMLCollection;
+  class NamedNodeMap;
+  class NodeAlgorithms;
+  class NodeList;
+  class PopoverData;
+  class SlotAlgorithms;
+  class TreeQueries;
+
   struct GetHTMLOptions;
-  enum class PopoverState : uint8;
+  struct ShadowRootInit;
+
   enum class ParserContentPolicy : uint8;
+  enum class PopoverState : uint8;
 
   /// @see https://dom.spec.whatwg.org/#concept-element-custom-element-state
   enum class CustomElementState : uint8
@@ -134,6 +127,11 @@ namespace krys::boo::dom
     Precustomized,
     Custom,
   };
+
+  consteval CustomElementState MaxEnumValue(CustomElementState) noexcept
+  {
+    return CustomElementState::Custom;
+  }
 
   /// @brief The state of a button's `command` attribute: the command it sends its `commandfor` element.
   /// @see https://html.spec.whatwg.org/#attr-button-command
@@ -153,6 +151,11 @@ namespace krys::boo::dom
     RequestClose,
   };
 
+  consteval CommandType MaxEnumValue(CommandType) noexcept
+  {
+    return CommandType::RequestClose;
+  }
+
   /// @see https://dom.spec.whatwg.org/#insert-adjacent
   enum class InsertAdjacentWhere : uint8
   {
@@ -161,33 +164,35 @@ namespace krys::boo::dom
     BeforeEnd,
     AfterEnd,
   };
-}
 
-KRYS_DEFINE_CONTIGUOUS_ENUM_TRAITS(krys::boo::dom::CustomElementState, 5uz);
-KRYS_DEFINE_CONTIGUOUS_ENUM_TRAITS(krys::boo::dom::CommandType, 8uz);
-KRYS_DEFINE_CONTIGUOUS_ENUM_TRAITS(krys::boo::dom::InsertAdjacentWhere, 4uz);
-
-namespace krys::boo::dom
-{
-  class DatasetDOMStringMap;
-  class DocumentAlgorithms;
-  class DOMTokenList;
-  class ElementAlgorithms;
-  class ElementFactory;
-  class ElementRareData;
-  class ExtensibilityHooks;
-  class HTMLCollection;
-  class NamedNodeMap;
-  class NodeAlgorithms;
-  class NodeList;
-  class PopoverData;
-  struct ShadowRootInit;
-  class SlotAlgorithms;
-  class TreeQueries;
+  consteval InsertAdjacentWhere MaxEnumValue(InsertAdjacentWhere) noexcept
+  {
+    return InsertAdjacentWhere::AfterEnd;
+  }
 }
 
 namespace krys::boo
 {
+  class HTMLButtonElement;
+  class HTMLElement;
+  class HTMLSlotElement;
+  class LayoutUnit;
+  class PlatformKeyboardEvent;
+  class PlatformMouseEvent;
+  class PseudoElement;
+  class RenderElement;
+  class RenderStyle;
+  class RenderTreeUpdater;
+  class ShadowRoot;
+  class StylePropertyMap;
+  class StylePropertyMapReadOnly;
+
+  struct IntersectionObserverData;
+  struct KeyframeAnimationOptions;
+  struct ResizeObserverData;
+
+  enum class PseudoElementType : uint8;
+
   /// @brief A node with a qualified name and attributes.
   /// @see https://dom.spec.whatwg.org/#interface-element
   /// @see https://dom.spec.whatwg.org/#concept-element
@@ -797,7 +802,7 @@ namespace krys::boo
     /// parser have always finished.
     KRYS_NODISCARD bool IsFinishedParsingChildren() const noexcept
     {
-      return !HasNodeFlag(dom::NodeFlags::IsParsingChildren);
+      return !_nodeFlags.contains(dom::NodeFlag::IsParsingChildren);
     }
 
     KRYS_NODISCARD const QualifiedName &TagQualifiedName() const noexcept
@@ -903,11 +908,11 @@ namespace krys::boo
     /// attribute list. Everything that reads the attribute list calls this first.
     void SynchronizeAllAttributes() const noexcept
     {
-      if (HasNodeFlag(dom::NodeFlags::StyleAttributeIsDirty)) KRYS_UNLIKELY
+      if (_nodeFlags.contains(dom::NodeFlag::StyleAttributeIsDirty)) KRYS_UNLIKELY
       {
         SynchronizeStyleAttribute();
       }
-      if (HasNodeFlag(dom::NodeFlags::AnimatedSVGAttributesAreDirty)) KRYS_UNLIKELY
+      if (_nodeFlags.contains(dom::NodeFlag::AnimatedSVGAttributesAreDirty)) KRYS_UNLIKELY
       {
         SynchronizeAnimatedSVGAttributes();
       }
@@ -1160,7 +1165,7 @@ namespace krys::boo
     /// @brief Whether the element's style is resolved by `ResolveCustomStyle`.
     KRYS_NODISCARD bool HasCustomStyleResolveCallbacks() const noexcept
     {
-      return HasNodeFlag(dom::NodeFlags::HasCustomStyleResolveCallbacks);
+      return _nodeFlags.contains(dom::NodeFlag::HasCustomStyleResolveCallbacks);
     }
 
     /// @brief The element's style, for elements with custom style resolve callbacks (user agent shadow tree
@@ -1267,67 +1272,67 @@ namespace krys::boo
 
     KRYS_NODISCARD bool NeedsUpdateQueryContainerDependentStyle() const noexcept
     {
-      return HasNodeFlag(dom::NodeFlags::NeedsUpdateQueryContainerDependentStyle);
+      return _nodeFlags.contains(dom::NodeFlag::NeedsUpdateQueryContainerDependentStyle);
     }
 
     void ClearNeedsUpdateQueryContainerDependentStyle() noexcept
     {
-      ClearNodeFlag(dom::NodeFlags::NeedsUpdateQueryContainerDependentStyle);
+      _nodeFlags.Remove(dom::NodeFlag::NeedsUpdateQueryContainerDependentStyle);
     }
 
     KRYS_NODISCARD bool StyleAffectedByEmpty() const noexcept
     {
-      return HasStyleFlag(dom::NodeStyleFlags::StyleAffectedByEmpty);
+      return _nodeStyleFlags.contains(dom::NodeStyleFlag::StyleAffectedByEmpty);
     }
 
     KRYS_NODISCARD bool StyleIsAffectedByPreviousSibling() const noexcept
     {
-      return HasStyleFlag(dom::NodeStyleFlags::StyleIsAffectedByPreviousSibling);
+      return _nodeStyleFlags.contains(dom::NodeStyleFlag::StyleIsAffectedByPreviousSibling);
     }
 
     KRYS_NODISCARD bool DescendantsAffectedByPreviousSibling() const noexcept
     {
-      return HasStyleFlag(dom::NodeStyleFlags::DescendantsAffectedByPreviousSibling);
+      return _nodeStyleFlags.contains(dom::NodeStyleFlag::DescendantsAffectedByPreviousSibling);
     }
 
     KRYS_NODISCARD bool AffectsNextSiblingElementStyle() const noexcept
     {
-      return HasStyleFlag(dom::NodeStyleFlags::AffectsNextSiblingElementStyle);
+      return _nodeStyleFlags.contains(dom::NodeStyleFlag::AffectsNextSiblingElementStyle);
     }
 
     KRYS_NODISCARD bool ChildrenAffectedByFirstChildRules() const noexcept
     {
-      return HasStyleFlag(dom::NodeStyleFlags::ChildrenAffectedByFirstChildRules);
+      return _nodeStyleFlags.contains(dom::NodeStyleFlag::ChildrenAffectedByFirstChildRules);
     }
 
     KRYS_NODISCARD bool ChildrenAffectedByLastChildRules() const noexcept
     {
-      return HasStyleFlag(dom::NodeStyleFlags::ChildrenAffectedByLastChildRules);
+      return _nodeStyleFlags.contains(dom::NodeStyleFlag::ChildrenAffectedByLastChildRules);
     }
 
     KRYS_NODISCARD bool ChildrenAffectedByForwardPositionalRules() const noexcept
     {
-      return HasStyleFlag(dom::NodeStyleFlags::ChildrenAffectedByForwardPositionalRules);
+      return _nodeStyleFlags.contains(dom::NodeStyleFlag::ChildrenAffectedByForwardPositionalRules);
     }
 
     KRYS_NODISCARD bool DescendantsAffectedByForwardPositionalRules() const noexcept
     {
-      return HasStyleFlag(dom::NodeStyleFlags::DescendantsAffectedByForwardPositionalRules);
+      return _nodeStyleFlags.contains(dom::NodeStyleFlag::DescendantsAffectedByForwardPositionalRules);
     }
 
     KRYS_NODISCARD bool ChildrenAffectedByBackwardPositionalRules() const noexcept
     {
-      return HasStyleFlag(dom::NodeStyleFlags::ChildrenAffectedByBackwardPositionalRules);
+      return _nodeStyleFlags.contains(dom::NodeStyleFlag::ChildrenAffectedByBackwardPositionalRules);
     }
 
     KRYS_NODISCARD bool DescendantsAffectedByBackwardPositionalRules() const noexcept
     {
-      return HasStyleFlag(dom::NodeStyleFlags::DescendantsAffectedByBackwardPositionalRules);
+      return _nodeStyleFlags.contains(dom::NodeStyleFlag::DescendantsAffectedByBackwardPositionalRules);
     }
 
     KRYS_NODISCARD bool AffectedByHasWithPositionalPseudoClass() const noexcept
     {
-      return HasStyleFlag(dom::NodeStyleFlags::AffectedByHasWithPositionalPseudoClass);
+      return _nodeStyleFlags.contains(dom::NodeStyleFlag::AffectedByHasWithPositionalPseudoClass);
     }
 
     /// @brief Whether selector matching set a flag on the element while matching its children.
@@ -1339,57 +1344,57 @@ namespace krys::boo
 
     void SetStyleAffectedByEmpty() noexcept
     {
-      SetStyleFlag(dom::NodeStyleFlags::StyleAffectedByEmpty);
+      _nodeStyleFlags.Add(dom::NodeStyleFlag::StyleAffectedByEmpty);
     }
 
     void SetStyleIsAffectedByPreviousSibling() noexcept
     {
-      SetStyleFlag(dom::NodeStyleFlags::StyleIsAffectedByPreviousSibling);
+      _nodeStyleFlags.Add(dom::NodeStyleFlag::StyleIsAffectedByPreviousSibling);
     }
 
     void SetDescendantsAffectedByPreviousSibling() noexcept
     {
-      SetStyleFlag(dom::NodeStyleFlags::DescendantsAffectedByPreviousSibling);
+      _nodeStyleFlags.Add(dom::NodeStyleFlag::DescendantsAffectedByPreviousSibling);
     }
 
     void SetAffectsNextSiblingElementStyle() noexcept
     {
-      SetStyleFlag(dom::NodeStyleFlags::AffectsNextSiblingElementStyle);
+      _nodeStyleFlags.Add(dom::NodeStyleFlag::AffectsNextSiblingElementStyle);
     }
 
     void SetChildrenAffectedByFirstChildRules() noexcept
     {
-      SetStyleFlag(dom::NodeStyleFlags::ChildrenAffectedByFirstChildRules);
+      _nodeStyleFlags.Add(dom::NodeStyleFlag::ChildrenAffectedByFirstChildRules);
     }
 
     void SetChildrenAffectedByLastChildRules() noexcept
     {
-      SetStyleFlag(dom::NodeStyleFlags::ChildrenAffectedByLastChildRules);
+      _nodeStyleFlags.Add(dom::NodeStyleFlag::ChildrenAffectedByLastChildRules);
     }
 
     void SetChildrenAffectedByForwardPositionalRules() noexcept
     {
-      SetStyleFlag(dom::NodeStyleFlags::ChildrenAffectedByForwardPositionalRules);
+      _nodeStyleFlags.Add(dom::NodeStyleFlag::ChildrenAffectedByForwardPositionalRules);
     }
 
     void SetDescendantsAffectedByForwardPositionalRules() noexcept
     {
-      SetStyleFlag(dom::NodeStyleFlags::DescendantsAffectedByForwardPositionalRules);
+      _nodeStyleFlags.Add(dom::NodeStyleFlag::DescendantsAffectedByForwardPositionalRules);
     }
 
     void SetChildrenAffectedByBackwardPositionalRules() noexcept
     {
-      SetStyleFlag(dom::NodeStyleFlags::ChildrenAffectedByBackwardPositionalRules);
+      _nodeStyleFlags.Add(dom::NodeStyleFlag::ChildrenAffectedByBackwardPositionalRules);
     }
 
     void SetDescendantsAffectedByBackwardPositionalRules() noexcept
     {
-      SetStyleFlag(dom::NodeStyleFlags::DescendantsAffectedByBackwardPositionalRules);
+      _nodeStyleFlags.Add(dom::NodeStyleFlag::DescendantsAffectedByBackwardPositionalRules);
     }
 
     void SetAffectedByHasWithPositionalPseudoClass() noexcept
     {
-      SetStyleFlag(dom::NodeStyleFlags::AffectedByHasWithPositionalPseudoClass);
+      _nodeStyleFlags.Add(dom::NodeStyleFlag::AffectedByHasWithPositionalPseudoClass);
     }
 
     void SetChildIndex(uint32 index) noexcept;
@@ -1570,7 +1575,7 @@ namespace krys::boo
     /// @see https://drafts.csswg.org/css-position-4/#in-top-layer
     KRYS_NODISCARD bool IsInTopLayer() const noexcept
     {
-      return HasEventTargetFlag(dom::EventTargetFlags::IsInTopLayer);
+      return _eventTargetFlags.contains(dom::EventTargetFlag::IsInTopLayer);
     }
 
     /// @brief Adds the element, which must be connected, to the top of its document's top layer, where it's
@@ -1739,13 +1744,13 @@ namespace krys::boo
     /// @brief Whether the element has user action state in its document (`Document::UserActionElements`).
     KRYS_NODISCARD bool IsUserActionElement() const noexcept
     {
-      return HasNodeFlag(dom::NodeFlags::IsUserActionElement);
+      return _nodeFlags.contains(dom::NodeFlag::IsUserActionElement);
     }
 
     void SetUserActionElement(bool flag) noexcept
     {
-      flag ? SetNodeFlag(dom::NodeFlags::IsUserActionElement)
-           : ClearNodeFlag(dom::NodeFlags::IsUserActionElement);
+      flag ? _nodeFlags.Add(dom::NodeFlag::IsUserActionElement)
+           : _nodeFlags.Remove(dom::NodeFlag::IsUserActionElement);
     }
 
     /// @brief Whether the element is in the chain of elements that became `:active` when the pointer was
@@ -1854,7 +1859,7 @@ namespace krys::boo
     /// @brief Called by the parser when it pushes this element onto the stack of open elements.
     void BeginParsingChildren() noexcept
     {
-      SetNodeFlag(dom::NodeFlags::IsParsingChildren);
+      _nodeFlags.Add(dom::NodeFlag::IsParsingChildren);
     }
 
     /// @brief Called by the parser when it pops this element off the stack of open elements. Overrides must
@@ -1898,10 +1903,7 @@ namespace krys::boo::dom
   /// @brief Invalidates the style of @p sibling and its following siblings that sibling combinators make
   /// depend on their previous siblings, up to the first one that doesn't affect the next.
   void InvalidateForSiblingCombinators(Element *sibling) noexcept;
-}
 
-namespace krys::boo::dom
-{
   /// @brief Whether an element with @p style is in the top layer, or is a `::backdrop`.
   KRYS_NODISCARD bool IsInTopLayerOrBackdrop(const RenderStyle &style, const Element *element) noexcept;
 }

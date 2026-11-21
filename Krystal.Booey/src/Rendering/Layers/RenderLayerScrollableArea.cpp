@@ -1557,18 +1557,18 @@ namespace krys::boo
     if (RefPtr<Scrollbar> hBar = _hBar;
         hBar
         && (!LayerForHorizontalScrollbar()
-            || paintBehavior.Contains(PaintBehavior::FlattenCompositingLayers)))
+            || paintBehavior.contains(PaintBehavior::FlattenCompositingLayers)))
     {
       hBar->Paint(context, damageRect);
     }
     if (RefPtr<Scrollbar> vBar = _vBar;
         vBar
-        && (!LayerForVerticalScrollbar() || paintBehavior.Contains(PaintBehavior::FlattenCompositingLayers)))
+        && (!LayerForVerticalScrollbar() || paintBehavior.contains(PaintBehavior::FlattenCompositingLayers)))
     {
       vBar->Paint(context, damageRect);
     }
 
-    if (LayerForScrollCorner() && !paintBehavior.Contains(PaintBehavior::FlattenCompositingLayers))
+    if (LayerForScrollCorner() && !paintBehavior.contains(PaintBehavior::FlattenCompositingLayers))
     {
       return;
     }

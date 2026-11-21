@@ -33,11 +33,6 @@
 #include "Krystal.Core/Memory/RefCounted.hpp"
 #include "Krystal.Core/Types/Maybe.hpp"
 
-namespace krys::boo
-{
-  class SVGElement;
-}
-
 namespace krys::boo::svg
 {
   /// @see https://svgwg.org/specs/animations/#AnimationModes
@@ -64,6 +59,8 @@ namespace krys::boo::svg
 
 namespace krys::boo
 {
+  class SVGElement;
+
   /// @brief Animates one attribute of a target element for an animation element: an animated property's
   /// animated value, or a presentation attribute's animated style property.
   class SVGAttributeAnimator : public RefCounted<SVGAttributeAnimator>,

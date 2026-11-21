@@ -27,11 +27,6 @@
 #include "Krystal.Core/Memory/RefCounted.hpp"
 #include "Krystal.Core/Types/Maybe.hpp"
 
-namespace krys::boo
-{
-  class Element;
-}
-
 namespace krys::boo::css
 {
   class MutableStyleProperties;
@@ -39,6 +34,8 @@ namespace krys::boo::css
 
 namespace krys::boo
 {
+  class Element;
+
   /// @brief The read-only declaration block of an element's resolved values, as returned by
   /// `getComputedStyle()`.
   class CSSComputedStyleDeclaration final : public CSSStyleProperties,

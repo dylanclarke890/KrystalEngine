@@ -25,11 +25,6 @@
 #include "Krystal.Core/Geometry/AffineTransform.hpp"
 #include "Krystal.Core/Geometry/Rect.hpp"
 
-namespace krys::boo
-{
-  class SVGElement;
-}
-
 namespace krys::boo::svg
 {
   enum class CTMScope : bool
@@ -41,6 +36,8 @@ namespace krys::boo::svg
 
 namespace krys::boo
 {
+  class SVGElement;
+
   /// @brief The elements with a place in a coordinate system: their viewport elements, bounding box and
   /// transforms to their viewport and to the screen.
   class SVGLocatable

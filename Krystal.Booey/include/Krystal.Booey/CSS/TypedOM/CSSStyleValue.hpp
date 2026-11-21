@@ -40,15 +40,7 @@
 namespace krys::boo
 {
   class Document;
-}
 
-namespace krys::boo::css
-{
-  class Value;
-}
-
-namespace krys::boo
-{
   /// @brief The kinds of Typed OM values.
   enum class CSSStyleValueType : uint8
   {
@@ -78,6 +70,8 @@ namespace krys::boo
 
 namespace krys::boo::css
 {
+  class Value;
+
   KRYS_NODISCARD constexpr bool IsCSSNumericValue(CSSStyleValueType type) noexcept
   {
     switch (type)
@@ -192,12 +186,12 @@ namespace krys::boo
     Nested,
     WithoutParentheses,
   };
-}
 
-KRYS_DEFINE_CONTIGUOUS_ENUM_TRAITS(krys::boo::SerialisationArguments, 2uz);
+  consteval SerialisationArguments MaxEnumValue(SerialisationArguments) noexcept
+  {
+    return SerialisationArguments::WithoutParentheses;
+  }
 
-namespace krys::boo
-{
   /// @brief A CSS value as the Typed OM represents it.
   /// @see https://drafts.css-houdini.org/css-typed-om/#cssstylevalue
   class CSSStyleValue : public RefCounted<CSSStyleValue>

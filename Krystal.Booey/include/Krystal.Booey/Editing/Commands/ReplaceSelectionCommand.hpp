@@ -45,12 +45,12 @@ namespace krys::boo
     MovingParagraph,
     SanitizeFragment,
   };
-}
 
-KRYS_DEFINE_CONTIGUOUS_ENUM_TRAITS(krys::boo::ReplaceSelectionCommandOption, 6uz);
+  consteval ReplaceSelectionCommandOption MaxEnumValue(ReplaceSelectionCommandOption) noexcept
+  {
+    return ReplaceSelectionCommandOption::SanitizeFragment;
+  }
 
-namespace krys::boo
-{
   /// @brief Replaces the selection with a fragment (pasted, dropped or moved content), merging its first and
   /// last paragraphs with the paragraphs around it and removing the styles it doesn't need.
   class ReplaceSelectionCommand : public CompositeEditCommand

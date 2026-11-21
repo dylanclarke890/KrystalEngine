@@ -188,7 +188,7 @@ namespace krys::boo
 
   protected:
     HTMLFormControlElement(Document &document, html::HTMLElementInterface interface,
-                           html::HTMLElementFlags flags = html::HTMLElementFlags::None) noexcept;
+                           html::HTMLElementFlags flags = html::HTMLElementFlags {}) noexcept;
 
     void OnInsert() noexcept override;
 

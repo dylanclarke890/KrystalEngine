@@ -40,9 +40,10 @@ namespace krys::boo
   class GraphicsContext;
   class ImageBuffer;
   class LegacyRenderSVGResourceFilter;
-  struct PaintInfo;
   class RenderElement;
   class RenderObject;
+
+  struct PaintInfo;
 
   /// @brief The steps `SVGRenderingContext` has taken, so that its destructor can undo them.
   enum class SVGRenderingContextFlag : uint8
@@ -54,12 +55,12 @@ namespace krys::boo
     EndCSSFilterLayer,
     PrepareToRenderSVGContentWasCalled,
   };
-}
 
-KRYS_DEFINE_CONTIGUOUS_ENUM_TRAITS(krys::boo::SVGRenderingContextFlag, 6uz);
+  consteval SVGRenderingContextFlag MaxEnumValue(SVGRenderingContextFlag) noexcept
+  {
+    return SVGRenderingContextFlag::PrepareToRenderSVGContentWasCalled;
+  }
 
-namespace krys::boo
-{
   /// @brief Applies an SVG renderer's opacity, blending, clipping, masking and filters around its painting.
   class SVGRenderingContext
   {
@@ -117,7 +118,7 @@ namespace krys::boo
 
     KRYS_NODISCARD bool IsRenderingPrepared() const noexcept
     {
-      return _renderingFlags.Contains(RenderingFlag::RenderingPrepared);
+      return _renderingFlags.contains(RenderingFlag::RenderingPrepared);
     }
 
     KRYS_NODISCARD bool PathClippingIsEntirelyWithinRendererContents() const noexcept

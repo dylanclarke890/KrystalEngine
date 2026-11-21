@@ -37,16 +37,6 @@
 #include "Krystal.Core/Types/Func.hpp"
 #include "Krystal.Core/Types/Maybe.hpp"
 
-namespace krys::boo
-{
-  class ContainerNode;
-  class Document;
-  class DocumentFragment;
-  class Element;
-  class Node;
-  class ShadowRoot;
-}
-
 namespace krys::boo::dom
 {
   struct SimpleRange;
@@ -55,7 +45,13 @@ namespace krys::boo::dom
 
 namespace krys::boo
 {
+  class ContainerNode;
+  class Document;
+  class DocumentFragment;
+  class Element;
   class Frame;
+  class Node;
+  class ShadowRoot;
   class VisibleSelection;
 
   enum class ResolveUrls : uint8

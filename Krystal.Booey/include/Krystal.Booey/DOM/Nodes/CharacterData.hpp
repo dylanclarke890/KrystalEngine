@@ -36,7 +36,7 @@ namespace krys::boo
 
   protected:
     CharacterData(Document &document, DOMString data, dom::NodeType type,
-                  dom::NodeFlags flags = dom::NodeFlags::None) noexcept;
+                  dom::NodeFlags flags = dom::NodeFlags {}) noexcept;
 
   public:
 #pragma region CharacterData - https://dom.spec.whatwg.org/#characterdata

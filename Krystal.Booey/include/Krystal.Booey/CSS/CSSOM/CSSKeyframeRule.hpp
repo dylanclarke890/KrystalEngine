@@ -30,13 +30,6 @@
 #include "Krystal.Core/Memory/RefPtr.hpp"
 #include "Krystal.Core/TypeCast.hpp"
 
-namespace krys::boo
-{
-  class CSSKeyframesRule;
-  class CSSStyleProperties;
-  class StyleRuleCSSStyleProperties;
-}
-
 namespace krys::boo::css
 {
   class KeyframeRule;
@@ -44,6 +37,10 @@ namespace krys::boo::css
 
 namespace krys::boo
 {
+  class CSSKeyframesRule;
+  class CSSStyleProperties;
+  class StyleRuleCSSStyleProperties;
+
   /// @brief A keyframe of an `@keyframes` rule, exposed to scripts.
   /// @see https://drafts.csswg.org/css-animations/#interface-csskeyframerule
   class CSSKeyframeRule final : public CSSRule

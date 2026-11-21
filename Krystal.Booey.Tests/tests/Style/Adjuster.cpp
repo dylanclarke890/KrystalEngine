@@ -443,19 +443,19 @@ namespace krys::boo::style::tests
 
     auto root = Build(u8"");
     CHECK_FALSE(Adjuster::AdjustEventListenerRegionTypesForRootStyle(*root, *Document));
-    CHECK(root->EventListenerRegionTypes().IsEmpty());
+    CHECK(root->EventListenerRegionTypes().empty());
   }
 
   TEST_CASE_METHOD(AdjusterFixture, "Change: determining changes", "[Style][Change]")
   {
     auto base = Build(u8"display: block; color: red");
-    CHECK(DetermineChanges(*base, *Build(u8"display: block; color: red")).IsEmpty());
+    CHECK(DetermineChanges(*base, *Build(u8"display: block; color: red")).empty());
 
     // Colour is inherited through the fast path.
     CHECK(DetermineChanges(*base, *Build(u8"display: block; color: blue"))
           == EnumSet<Change> {Change::FastPathInherited});
     CHECK(DetermineChanges(*base, *Build(u8"display: block; color: red; font-size: 30px"))
-            .Contains(Change::Inherited));
+            .contains(Change::Inherited));
     CHECK(DetermineChanges(*base, *Build(u8"display: block; color: red; margin-top: 3px"))
           == EnumSet<Change> {Change::NonInherited});
 
@@ -463,11 +463,11 @@ namespace krys::boo::style::tests
     CHECK(DetermineChanges(*base, *Build(u8"display: inline; color: red"))
           == EnumSet<Change> {Change::NonInherited, Change::Renderer});
     CHECK(DetermineChanges(*base, *Build(u8"display: block; color: red; column-span: all"))
-            .Contains(Change::Renderer));
+            .contains(Change::Renderer));
 
     // Query container changes affect descendants.
     CHECK(DetermineChanges(*base, *Build(u8"display: block; color: red; container-type: size"))
-            .Contains(Change::Container));
+            .contains(Change::Container));
 
     CHECK(InheritedChanges() == EnumSet<Change> {Change::Inherited, Change::FastPathInherited});
   }

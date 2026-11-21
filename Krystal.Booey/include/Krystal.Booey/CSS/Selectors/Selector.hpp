@@ -26,6 +26,7 @@
 #include "Krystal.Booey/DOM/Types/QualifiedName.hpp"
 #include "Krystal.Booey/Rendering/Style/RenderStyleConstants.hpp"
 #include "Krystal.Core/Containers/Array.hpp"
+#include "Krystal.Core/Containers/EnumSet.hpp"
 #include "Krystal.Core/Containers/FixedList.hpp"
 #include "Krystal.Core/Enum.hpp"
 #include "Krystal.Core/Memory/RefPtr.hpp"
@@ -36,6 +37,10 @@
 
 namespace krys::boo::css
 {
+  class SelectorList;
+
+  struct SelectorParserContext;
+
   enum class SelectorMatch : uint8
   {
     None = 0,
@@ -78,6 +83,11 @@ namespace krys::boo::css
     ForgivingUnknownNestContaining,
   };
 
+  consteval SelectorMatch MaxEnumValue(SelectorMatch) noexcept
+  {
+    return SelectorMatch::ForgivingUnknownNestContaining;
+  }
+
   /// @brief The relationship between two selectors in a SelectorList. From the perspective of the second
   /// (rightmost) selector, so the relationship of `p` in the selector `div > p` is `SelectorRelation::Child`,
   /// and the relationship of `p` in the selector `div p` is `SelectorRelation::Descendant` (`div` does not
@@ -103,28 +113,37 @@ namespace krys::boo::css
     ShadowSlotted,
   };
 
+  consteval SelectorRelation MaxEnumValue(SelectorRelation) noexcept
+  {
+    return SelectorRelation::ShadowSlotted;
+  }
+
   enum class SelectorFlag : uint8
   {
-    None = 0,
     /// @brief Set when an attribute selector has a case-insensitive matching flag (e.g. `[attr=value i]`).
-    CaseInsensitiveAttributeValueMatching = 1 << 0,
+    CaseInsensitiveAttributeValueMatching,
     /// @brief Set when a selector is the last selector in a selector list.
-    IsLastInSelectorList = 1 << 1,
+    IsLastInSelectorList,
     /// @brief Set when a selector is the first component of a complex selector (e.g. `div` in `div > p`).
-    IsFirstInComplexSelector = 1 << 2,
+    IsFirstInComplexSelector,
     /// @brief Set when a selector is the last component of a complex selector (e.g. `p` in `div > p`).
-    IsLastInComplexSelector = 1 << 3,
+    IsLastInComplexSelector,
     /// @brief Set when a selector has rare data.
-    HasRareData = 1 << 4,
+    HasRareData,
     /// @brief Set when the type selector is for a namespace rule (e.g. `@namespace svg
     /// url(http://www.w3.org/2000/svg);`).
-    TagIsForNamespaceRule = 1 << 5,
+    TagIsForNamespaceRule,
     /// @brief Set when a selector is implicit (it isn't written by a UA or author but is implied by the
     /// CSSOM, e.g. `:root`).
-    IsImplicit = 1 << 6,
+    IsImplicit,
     /// @brief Set when an attribute selector has a case-sensitive matching flag (e.g. `[attr=value s]`).
-    CaseSensitiveAttributeValueMatching = 1 << 7,
+    CaseSensitiveAttributeValueMatching,
   };
+
+  consteval SelectorFlag MaxEnumValue(SelectorFlag) noexcept
+  {
+    return SelectorFlag::CaseSensitiveAttributeValueMatching;
+  }
 
   /// @brief An attribute selector's case flag.
   /// @see https://drafts.csswg.org/selectors/#attribute-case
@@ -149,16 +168,6 @@ namespace krys::boo::css
     No,
     Yes,
   };
-}
-
-KRYS_DEFINE_CONTIGUOUS_ENUM_TRAITS(krys::boo::css::SelectorMatch, 17uz);
-KRYS_DEFINE_CONTIGUOUS_ENUM_TRAITS(krys::boo::css::SelectorRelation, 8uz);
-KRYS_DEFINE_FLAGS_ENUM_TRAITS(krys::boo::css::SelectorFlag, 8uz);
-
-namespace krys::boo::css
-{
-  class SelectorList;
-  struct SelectorParserContext;
 
   struct PossiblyQuotedIdentifier
   {
@@ -271,7 +280,8 @@ namespace krys::boo::css
     SelectorMatch _match {SelectorMatch::None};
     // A SelectorPseudoClass or SelectorPseudoElement, depending on _match.
     uint8 _pseudoType {0};
-    SelectorFlag _flags {SelectorFlag::IsFirstInComplexSelector | SelectorFlag::IsLastInComplexSelector};
+    EnumSet<SelectorFlag> _flags {SelectorFlag::IsFirstInComplexSelector,
+                                  SelectorFlag::IsLastInComplexSelector};
 
     union DataUnion
     {
@@ -374,12 +384,12 @@ namespace krys::boo::css
     /// @brief Whether the selector's `s` flag makes it match case-sensitively, whatever the attribute.
     KRYS_NODISCARD bool IsAttributeValueMatchingCaseSensitive() const noexcept
     {
-      return HasFlag(_flags, SelectorFlag::CaseSensitiveAttributeValueMatching);
+      return _flags.contains(SelectorFlag::CaseSensitiveAttributeValueMatching);
     }
 
     KRYS_NODISCARD bool IsAttributeValueMatchingCaseInsensitive() const noexcept
     {
-      return HasFlag(_flags, SelectorFlag::CaseInsensitiveAttributeValueMatching);
+      return _flags.contains(SelectorFlag::CaseInsensitiveAttributeValueMatching);
     }
 
     KRYS_NODISCARD const FixedList<CSSOMStringAtom> *ArgumentList() const noexcept
@@ -461,17 +471,17 @@ namespace krys::boo::css
 
     KRYS_NODISCARD bool IsLastInSelectorList() const noexcept
     {
-      return HasFlag(_flags, SelectorFlag::IsLastInSelectorList);
+      return _flags.contains(SelectorFlag::IsLastInSelectorList);
     }
 
     KRYS_NODISCARD bool IsFirstInComplexSelector() const noexcept
     {
-      return HasFlag(_flags, SelectorFlag::IsFirstInComplexSelector);
+      return _flags.contains(SelectorFlag::IsFirstInComplexSelector);
     }
 
     KRYS_NODISCARD bool IsLastInComplexSelector() const noexcept
     {
-      return HasFlag(_flags, SelectorFlag::IsLastInComplexSelector);
+      return _flags.contains(SelectorFlag::IsLastInComplexSelector);
     }
 
     // FIXME: This should ideally be private, but StyleRule uses it.
@@ -483,7 +493,7 @@ namespace krys::boo::css
     /// @brief Whether this selector is not author/UA written.
     KRYS_NODISCARD bool IsImplicit() const noexcept
     {
-      return HasFlag(_flags, SelectorFlag::IsImplicit);
+      return _flags.contains(SelectorFlag::IsImplicit);
     }
 
     /// @brief Relation and selector list bits are ignored.
@@ -492,12 +502,12 @@ namespace krys::boo::css
   private:
     KRYS_NODISCARD bool HasRareData() const noexcept
     {
-      return HasFlag(_flags, SelectorFlag::HasRareData);
+      return _flags.contains(SelectorFlag::HasRareData);
     }
 
     void SetFlag(SelectorFlag flag, bool value) noexcept
     {
-      _flags = value ? (_flags | flag) : (_flags & ~flag);
+      _flags.Set(flag, value);
     }
 
     void SetValue(const CSSOMStringAtom &value, MatchLowercase matchLowercase = MatchLowercase::No) noexcept;

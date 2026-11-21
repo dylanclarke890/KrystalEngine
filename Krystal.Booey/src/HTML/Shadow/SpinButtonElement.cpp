@@ -39,7 +39,7 @@
 namespace krys::boo::html
 {
   SpinButtonElement::SpinButtonElement(Document &document, SpinButtonOwner &spinButtonOwner) noexcept
-      : HTMLDivElement(document, dom::NodeFlags::HasCustomStyleResolveCallbacks),
+      : HTMLDivElement(document, dom::NodeFlag::HasCustomStyleResolveCallbacks),
         _spinButtonOwner(&spinButtonOwner), _repeatingTimer(*this, &SpinButtonElement::RepeatingTimerFired)
   {
   }

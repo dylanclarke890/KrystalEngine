@@ -105,7 +105,7 @@ namespace krys::boo
         // FIXME: Why is preserving the semantic bit desired and/or correct here?
         if (IsSemantic())
         {
-          return {result, ColorFlags::Semantic};
+          return {result, ColorFlag::Semantic};
         }
 
         return {result};
@@ -140,10 +140,10 @@ namespace krys::boo
 
     if (IsOutOfLine())
     {
-      return {ProtectedAsOutOfLine(), Space(), ColorFlags::Semantic};
+      return {ProtectedAsOutOfLine(), Space(), ColorFlag::Semantic};
     }
 
-    return {AsInline(), ColorFlags::Semantic};
+    return {AsInline(), ColorFlag::Semantic};
   }
 
   ColourComponents<float, 4>

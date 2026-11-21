@@ -93,7 +93,7 @@ namespace krys::io
         return {};
       }
 
-      if (!!(flags & FileSearchFlags::Recursive))
+      if (!!(flags & FileSearchFlag::Recursive))
       {
         return SearchFiles<true>(fullPath, flags);
       }

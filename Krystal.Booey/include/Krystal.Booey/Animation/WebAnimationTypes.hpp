@@ -46,6 +46,11 @@ namespace krys::boo
     ForcesStackingContext,
   };
 
+  consteval AnimationImpact MaxEnumValue(AnimationImpact) noexcept
+  {
+    return AnimationImpact::ForcesStackingContext;
+  }
+
   enum class UseCachedCurrentTime : bool
   {
     No,
@@ -105,5 +110,3 @@ namespace krys::boo
     }
   };
 }
-
-KRYS_DEFINE_CONTIGUOUS_ENUM_TRAITS(krys::boo::AnimationImpact, 2uz);

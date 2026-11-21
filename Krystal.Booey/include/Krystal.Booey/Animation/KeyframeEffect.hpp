@@ -43,12 +43,6 @@
 #include "Krystal.Core/Maths/CompositeOperation.hpp"
 #include "Krystal.Core/Types/Pair.hpp"
 
-namespace krys::boo
-{
-  class Document;
-  class Element;
-}
-
 namespace krys::boo::style
 {
   struct ResolutionContext;
@@ -57,6 +51,8 @@ namespace krys::boo::style
 
 namespace krys::boo
 {
+  class Document;
+  class Element;
   class ViewTimeline;
 
   /// @brief An animation effect that animates properties of an element, or of one of its pseudo-elements,

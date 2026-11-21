@@ -257,10 +257,10 @@ namespace krys::boo
 
   Document::Document(dom::DocumentFlags flags) noexcept : Document()
   {
-    SetDocumentFlag(flags);
+    _documentFlags.Add(flags);
 
     // An HTML document is a text/html one, however it's made.
-    if (HasDocumentFlag(dom::DocumentFlags::IsHTMLDocument))
+    if (_documentFlags.contains(dom::DocumentFlag::IsHTMLDocument))
     {
       _contentType = u8"text/html";
     }
@@ -269,7 +269,7 @@ namespace krys::boo
 #pragma region Document (DOM)
 
   Document::Document() noexcept
-      : ContainerNode(*this, dom::NodeType::DOCUMENT_NODE, dom::NodeFlags::IsContainerNode),
+      : ContainerNode(*this, dom::NodeType::DOCUMENT_NODE, dom::NodeFlag::IsContainerNode),
         DocumentOrShadowRoot(static_cast<ContainerNode &>(*this)), _url(net::AboutBlankUrl()), _baseUrl(_url),
         _settings(ShareRef(Settings::Default())),
         _userActionElements(CreateUnique<dom::UserActionElementSet>()),
@@ -279,7 +279,7 @@ namespace krys::boo
   {
     // Set this's origin to the origin of current global object's associated Document. (Skipped: documents
     // have no origin.)
-    SetNodeFlag(dom::NodeFlags::IsConnected);
+    _nodeFlags.Add(dom::NodeFlag::IsConnected);
     _styleScope = CreateUnique<style::Scope>(*this);
     _selection = CreateUnique<FrameSelection>(this);
     _editor = CreateUnique<boo::Editor>(*this);
@@ -2381,7 +2381,7 @@ namespace krys::boo
   dom::DidUpdateAnyContentRelevancy Document::UpdateRelevancyOfContentVisibilityElements(
     UpdateLayoutIfContentVisibilityChanged updateLayout) noexcept
   {
-    if (_contentRelevancyUpdate.IsEmpty() || !IsObservingContentVisibilityTargets())
+    if (_contentRelevancyUpdate.empty() || !IsObservingContentVisibilityTargets())
     {
       return dom::DidUpdateAnyContentRelevancy::No;
     }
@@ -4434,7 +4434,7 @@ namespace krys::boo
     bool oldIgnore = _ignorePendingStylesheets;
     auto restoreIgnorePendingStylesheets = MakeScopeExit([&] { _ignorePendingStylesheets = oldIgnore; });
 
-    if (layoutOptions.Contains(dom::LayoutOptions::IgnorePendingStylesheets))
+    if (layoutOptions.contains(dom::LayoutOptions::IgnorePendingStylesheets))
     {
       if (!HaveStylesheetsLoaded())
       {
@@ -4510,24 +4510,24 @@ namespace krys::boo
         };
 
         auto isSkippedContentStale = markRendererDirtyIfNeeded(*rootForLayout);
-        if (layoutOptions.Contains(dom::LayoutOptions::TreatContentVisibilityHiddenAsVisible))
+        if (layoutOptions.contains(dom::LayoutOptions::TreatContentVisibilityHiddenAsVisible))
         {
           for (auto &descendant : DescendantsOfType<RenderObject>(*rootForLayout))
           {
             isSkippedContentStale |= markRendererDirtyIfNeeded(descendant);
           }
         }
-        else if (layoutOptions.Contains(dom::LayoutOptions::TreatContentVisibilityAutoAsVisible)
-                 || layoutOptions.Contains(dom::LayoutOptions::TreatRevealedWhenFoundAsVisible))
+        else if (layoutOptions.contains(dom::LayoutOptions::TreatContentVisibilityAutoAsVisible)
+                 || layoutOptions.contains(dom::LayoutOptions::TreatRevealedWhenFoundAsVisible))
         {
           for (auto &descendant : DescendantsOfType<RenderObject>(*rootForLayout))
           {
             // FIXME: While 'c-v: auto' is used 'hidden' inside 'c-v: hidden' we could entirly skip hidden
             // subtrees here.
             auto shouldLayoutSkippedContent =
-              (layoutOptions.Contains(dom::LayoutOptions::TreatContentVisibilityAutoAsVisible)
+              (layoutOptions.contains(dom::LayoutOptions::TreatContentVisibilityAutoAsVisible)
                && descendant.Style().UsedContentVisibility() == ContentVisibility::Auto)
-              || (layoutOptions.Contains(dom::LayoutOptions::TreatRevealedWhenFoundAsVisible)
+              || (layoutOptions.contains(dom::LayoutOptions::TreatRevealedWhenFoundAsVisible)
                   && descendant.Style().AutoRevealsWhenFound());
 
             if (shouldLayoutSkippedContent)
@@ -4546,15 +4546,15 @@ namespace krys::boo
         {
           auto types = EnumSet<ContentVisibilityOverrideScope::OverrideType> {};
 
-          if (layoutOptions.Contains(dom::LayoutOptions::TreatContentVisibilityHiddenAsVisible))
+          if (layoutOptions.contains(dom::LayoutOptions::TreatContentVisibilityHiddenAsVisible))
           {
             types.Add(ContentVisibilityOverrideScope::OverrideType::Hidden);
           }
-          if (layoutOptions.Contains(dom::LayoutOptions::TreatContentVisibilityAutoAsVisible))
+          if (layoutOptions.contains(dom::LayoutOptions::TreatContentVisibilityAutoAsVisible))
           {
             types.Add(ContentVisibilityOverrideScope::OverrideType::Auto);
           }
-          if (layoutOptions.Contains(dom::LayoutOptions::TreatRevealedWhenFoundAsVisible))
+          if (layoutOptions.contains(dom::LayoutOptions::TreatRevealedWhenFoundAsVisible))
           {
             types.Add(ContentVisibilityOverrideScope::OverrideType::RevealedWhenFound);
           }
@@ -4574,7 +4574,7 @@ namespace krys::boo
 
       result = didRunLayout ? UpdateLayoutResult::ChangesDone : result;
 
-      if (layoutOptions.Contains(dom::LayoutOptions::UpdateCompositingLayers)
+      if (layoutOptions.contains(dom::LayoutOptions::UpdateCompositingLayers)
           && layoutContext.UpdateCompositingLayersAfterLayoutIfNeeded())
       {
         result = UpdateLayoutResult::ChangesDone;
@@ -4978,7 +4978,7 @@ namespace krys::boo
         auto documentChanges = _initialContainingBlockStyle
                                  ? style::DetermineChanges(newStyle, *_initialContainingBlockStyle)
                                  : EnumSet<style::Change> {style::Change::Renderer};
-        if (!documentChanges.IsEmpty())
+        if (!documentChanges.empty())
         {
           _initialContainingBlockStyle = RenderStyle::ClonePtr(newStyle);
           // The used style may end up differing from the computed style due to propagation of properties from
@@ -5225,7 +5225,7 @@ namespace krys::boo
   {
     auto colorScheme = ResolvedColorScheme(style);
 
-    if (colorScheme.Contains(boo::ColorScheme::Dark) && !colorScheme.Contains(boo::ColorScheme::Light))
+    if (colorScheme.contains(boo::ColorScheme::Dark) && !colorScheme.contains(boo::ColorScheme::Light))
     {
       return true;
     }
@@ -5241,7 +5241,7 @@ namespace krys::boo
       return pageUsesDarkAppearance;
     }
 
-    if (colorScheme.Contains(boo::ColorScheme::Dark))
+    if (colorScheme.contains(boo::ColorScheme::Dark))
     {
       return pageUsesDarkAppearance;
     }
@@ -5251,14 +5251,14 @@ namespace krys::boo
 
   style::ColorOptions Document::StyleColorOptions(const RenderStyle *style) const noexcept
   {
-    auto options = style::ColorOptions::None;
+    auto options = style::ColorOptions {};
     if (GetSettings().UseSystemAppearance)
     {
-      options |= style::ColorOptions::UseSystemAppearance;
+      options |= style::ColorOption::UseSystemAppearance;
     }
     if (UseDarkAppearance(style))
     {
-      options |= style::ColorOptions::UseDarkAppearance;
+      options |= style::ColorOption::UseDarkAppearance;
     }
     return options;
   }
@@ -5329,7 +5329,7 @@ namespace krys::boo
                              });
 
     // If the value was just "only", that is synonymous for "only light".
-    if (colorScheme.IsEmpty() && !allowsTransformations)
+    if (colorScheme.empty() && !allowsTransformations)
     {
       colorScheme.Add(boo::ColorScheme::Light);
     }

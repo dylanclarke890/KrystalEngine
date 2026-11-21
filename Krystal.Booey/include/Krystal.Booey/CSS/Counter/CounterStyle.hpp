@@ -129,7 +129,7 @@ namespace krys::boo::css
       return _descriptors.FixedSystemFirstSymbolValue;
     }
 
-    KRYS_NODISCARD CounterStyleDescriptor ExplicitlySetDescriptors() const noexcept
+    KRYS_NODISCARD EnumSet<CounterStyleDescriptor> ExplicitlySetDescriptors() const noexcept
     {
       return _descriptors.ExplicitlySetDescriptors;
     }

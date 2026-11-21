@@ -255,7 +255,7 @@ namespace krys::boo
       return;
     }
 
-    bool forceBlackBorder = _paintInfo.PaintBehavior.Contains(PaintBehavior::ForceBlackBorder);
+    bool forceBlackBorder = _paintInfo.PaintBehavior.contains(PaintBehavior::ForceBlackBorder);
     auto [shape, edges] = [&]() -> Pair<BorderShape, BorderEdges>
     {
       switch (bleedAvoidance)
@@ -545,7 +545,7 @@ namespace krys::boo
     constexpr static Array<BoxSide, 4> paintOrderSides = {BoxSide::Top, BoxSide::Bottom, BoxSide::Left,
                                                           BoxSide::Right};
 
-    while (!edgesToDraw.IsEmpty())
+    while (!edgesToDraw.empty())
     {
       // Find undrawn edges sharing a color.
       Color commonColor;
@@ -553,14 +553,14 @@ namespace krys::boo
       EnumSet<BoxSide> commonColorEdgeSet;
       for (auto side : paintOrderSides)
       {
-        if (!edgesToDraw.Contains(side))
+        if (!edgesToDraw.contains(side))
         {
           continue;
         }
 
         const auto &edge = sides.Edges.At(side);
         bool includeEdge;
-        if (commonColorEdgeSet.IsEmpty())
+        if (commonColorEdgeSet.empty())
         {
           commonColor = edge.GetColor();
           includeEdge = true;
@@ -766,7 +766,7 @@ namespace krys::boo
     auto paintOneSide = [&](BoxSide side, BoxSide adjacentSide1, BoxSide adjacentSide2)
     {
       const auto &edge = sides.Edges.At(side);
-      if (!edge.ShouldRender() || !edgesToDraw.Contains(side))
+      if (!edge.ShouldRender() || !edgesToDraw.contains(side))
       {
         return;
       }

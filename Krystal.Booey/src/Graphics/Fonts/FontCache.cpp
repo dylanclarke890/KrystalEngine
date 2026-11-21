@@ -113,7 +113,7 @@ namespace krys::boo
     {
       it->second = CreateFontPlatformData(description, family, options);
 
-      if (!it->second && !options.Contains(FontLookupOptions::ExactFamilyNameMatch))
+      if (!it->second && !options.contains(FontLookupOptions::ExactFamilyNameMatch))
       {
         // We were unable to find a font. We have a small set of fonts that we alias to other names,
         // e.g., Arial/Helvetica, Courier/Courier New, etc. Try looking up the font under the aliased name.
@@ -320,7 +320,7 @@ namespace krys::boo
   {
     syntheticBold = false;
     bool allowSyntheticBold =
-      description.HasAutoFontSynthesisWeight() && !options.Contains(FontLookupOptions::DisallowBoldSynthesis);
+      description.HasAutoFontSynthesisWeight() && !options.contains(FontLookupOptions::DisallowBoldSynthesis);
     if (allowSyntheticBold && IsFontWeightBold(description.Weight()))
     {
       // A face lighter than semi-bold is emboldened.
@@ -330,7 +330,7 @@ namespace krys::boo
     // We requested an italic font, but the face is neither oblique nor italic.
     syntheticOblique = false;
     bool allowSyntheticOblique = description.HasAutoFontSynthesisStyle()
-                                 && !options.Contains(FontLookupOptions::DisallowObliqueSynthesis);
+                                 && !options.contains(FontLookupOptions::DisallowObliqueSynthesis);
     if (allowSyntheticOblique && description.FontStyleSlope())
     {
       syntheticOblique = capabilities.Slope.Maximum == NormalItalicValue();

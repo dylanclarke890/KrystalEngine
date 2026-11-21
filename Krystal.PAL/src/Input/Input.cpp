@@ -47,9 +47,9 @@ namespace krys::pal
     _mouse._scrollDelta = 0;
     _mouse._horizontalScrollDelta = 0;
     _mouse._held |= _mouse._pressed;
-    _mouse._held &= ~_mouse._released;
-    _mouse._pressed = MouseButton::None;
-    _mouse._released = MouseButton::None;
+    _mouse._held.Remove(_mouse._released);
+    _mouse._pressed = {};
+    _mouse._released = {};
 
     for (const auto &key : _keyboard._pressed)
     {
@@ -128,7 +128,7 @@ namespace krys::pal
       {
         auto button = static_cast<GamepadButton>(i);
         bool down = Gamepad::IsPressedValue(button, pad._buttons[i]);
-        bool wasDown = pad._held.Contains(button);
+        bool wasDown = pad._held.contains(button);
         if (down && !wasDown)
         {
           pad._pressed.Add(button);

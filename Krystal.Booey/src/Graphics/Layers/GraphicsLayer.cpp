@@ -869,7 +869,7 @@ namespace krys::boo
   {
     ts << Indent << '(' << "GraphicsLayer";
 
-    if (options.Contains(LayerTreeAsTextOptions::Debug))
+    if (options.contains(LayerTreeAsTextOptions::Debug))
     {
       ts << ' ' << static_cast<const void *>(this);
       ts << " \"" << _name << '"';
@@ -888,7 +888,7 @@ namespace krys::boo
       totalChildCount += static_cast<uint32>(children.size());
       for (const auto &child : children)
       {
-        if (options.Contains(LayerTreeAsTextOptions::Debug)
+        if (options.contains(LayerTreeAsTextOptions::Debug)
             || !child->Client().ShouldSkipLayerInDump(child.get(), options))
         {
           TextStream::IndentScope indentScope(ts);
@@ -971,7 +971,7 @@ namespace krys::boo
       ts << Indent << "(contentsOpaque " << _contentsOpaque << ")\n";
     }
 
-    if (_masksToBounds && options.Contains(LayerTreeAsTextOptions::IncludeClipping))
+    if (_masksToBounds && options.contains(LayerTreeAsTextOptions::IncludeClipping))
     {
       ts << Indent << "(clips " << _masksToBounds << ")\n";
     }
@@ -1001,7 +1001,7 @@ namespace krys::boo
       ts << Indent << "(backdropRoot " << _isBackdropRoot << ")\n";
     }
 
-    if (options.Contains(LayerTreeAsTextOptions::Debug))
+    if (options.contains(LayerTreeAsTextOptions::Debug))
     {
       ts << Indent << "(primary-layer-id " << PrimaryLayerID() << ")\n";
     }
@@ -1011,12 +1011,12 @@ namespace krys::boo
       ts << Indent << "(backgroundColor " << SerialisationForRenderTreeAsText(_backgroundColor) << ")\n";
     }
 
-    if (options.Contains(LayerTreeAsTextOptions::IncludeAcceleratesDrawing) && _acceleratesDrawing)
+    if (options.contains(LayerTreeAsTextOptions::IncludeAcceleratesDrawing) && _acceleratesDrawing)
     {
       ts << Indent << "(acceleratesDrawing " << _acceleratesDrawing << ")\n";
     }
 
-    if (options.Contains(LayerTreeAsTextOptions::IncludeBackingStoreAttached))
+    if (options.contains(LayerTreeAsTextOptions::IncludeBackingStoreAttached))
     {
       ts << Indent << "(backingStoreAttached " << BackingStoreAttachedForTesting() << ")\n";
     }
@@ -1038,7 +1038,7 @@ namespace krys::boo
     if (_maskLayer)
     {
       ts << Indent << "(mask layer";
-      if (options.Contains(LayerTreeAsTextOptions::Debug))
+      if (options.contains(LayerTreeAsTextOptions::Debug))
       {
         ts << ' ' << static_cast<const void *>(_maskLayer.get());
       }
@@ -1051,7 +1051,7 @@ namespace krys::boo
     if (_replicaLayer)
     {
       ts << Indent << "(replica layer";
-      if (options.Contains(LayerTreeAsTextOptions::Debug))
+      if (options.contains(LayerTreeAsTextOptions::Debug))
       {
         ts << ' ' << static_cast<const void *>(_replicaLayer.get());
       }
@@ -1064,14 +1064,14 @@ namespace krys::boo
     if (_replicatedLayer)
     {
       ts << Indent << "(replicated layer";
-      if (options.Contains(LayerTreeAsTextOptions::Debug))
+      if (options.contains(LayerTreeAsTextOptions::Debug))
       {
         ts << ' ' << static_cast<const void *>(_replicatedLayer);
       }
       ts << ")\n";
     }
 
-    if (options.Contains(LayerTreeAsTextOptions::IncludeRepaintRects))
+    if (options.contains(LayerTreeAsTextOptions::IncludeRepaintRects))
     {
       auto it = RepaintRectMap().find(this);
       if (it != RepaintRectMap().end() && !it->second.empty()
@@ -1097,7 +1097,7 @@ namespace krys::boo
       }
     }
 
-    if (options.Contains(LayerTreeAsTextOptions::IncludePaintingPhases) && !PaintingPhase().IsEmpty())
+    if (options.contains(LayerTreeAsTextOptions::IncludePaintingPhases) && !PaintingPhase().empty())
     {
       ts << Indent << "(paintingPhases " << PaintingPhase() << ")\n";
     }

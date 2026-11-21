@@ -36,27 +36,26 @@
 
 namespace krys::boo
 {
-  enum class WritingModeFlags : uint8
+  enum class BoxAxis : uint8;
+  enum class LogicalBoxAxis : uint8;
+
+  /// @brief The bits of a packed `WritingMode`: a layout, so masks and a shift rather than a set.
+  struct WritingModeFlags
   {
-    None = 0,
-    IsVerticalText = 1 << 0, // Vertical writing modes.
-    IsFlippedBlock = 1 << 1, // RL or BT block flow directions.
-    IsVerticalType = 1 << 2, // Vertical typographic mode.
-    IsBidiRTL = 1 << 3,      // Bidi directionality.
-    IsUprightType = 1 << 4,  // Upright text orientation.
-    IsSidewaysType = 1 << 5, // Sideways text orientation.
+    constexpr static uint8 None = 0;
+    constexpr static uint8 IsVerticalText = 1 << 0; // Vertical writing modes.
+    constexpr static uint8 IsFlippedBlock = 1 << 1; // RL or BT block flow directions.
+    constexpr static uint8 IsVerticalType = 1 << 2; // Vertical typographic mode.
+    constexpr static uint8 IsBidiRTL = 1 << 3;      // Bidi directionality.
+    constexpr static uint8 IsUprightType = 1 << 4;  // Upright text orientation.
+    constexpr static uint8 IsSidewaysType = 1 << 5; // Sideways text orientation.
 
-    BlockFlowMask = IsVerticalText | IsFlippedBlock,
-    WritingModeMask = BlockFlowMask | IsVerticalType,
-    OrientationMask = IsSidewaysType | IsUprightType, // Both is an error.
-    OrientationShift = 4,
+    constexpr static uint8 BlockFlowMask = IsVerticalText | IsFlippedBlock;
+    constexpr static uint8 WritingModeMask = BlockFlowMask | IsVerticalType;
+    constexpr static uint8 OrientationMask = IsSidewaysType | IsUprightType; // Both is an error.
+    constexpr static uint8 OrientationShift = 4;
   };
-}
 
-KRYS_DEFINE_FLAGS_ENUM_TRAITS(krys::boo::WritingModeFlags, 7uz);
-
-namespace krys::boo
-{
   enum class StyleWritingMode : uint8
   {
     HorizontalTb = 0,
@@ -82,9 +81,6 @@ namespace krys::boo
     BottomToTop = static_cast<uint8>(WritingModeFlags::IsFlippedBlock),
     RightToLeft = static_cast<uint8>(WritingModeFlags::IsVerticalText | WritingModeFlags::IsFlippedBlock),
   };
-
-  enum class BoxAxis : uint8;
-  enum class LogicalBoxAxis : uint8;
 
   /// WritingMode efficiently stores a writing mode and can rapidly compute interesting things about it for
   /// use in layout. It fits in 1 byte, and can be cheaply copied or passed around by value.
@@ -179,7 +175,7 @@ namespace krys::boo
     {
       Data self = (_bits & (WritingModeFlags::BlockFlowMask));
       Data other = (writingMode._bits & (WritingModeFlags::BlockFlowMask));
-      return static_cast<WritingModeFlags>(self ^ other) == WritingModeFlags::IsFlippedBlock;
+      return (self ^ other) == WritingModeFlags::IsFlippedBlock;
     }
 
     KRYS_NODISCARD constexpr bool IsInlineOpposing(WritingMode writingMode) const noexcept
@@ -228,8 +224,7 @@ namespace krys::boo
 
     KRYS_NODISCARD constexpr bool IsBlockLeftToRight() const noexcept
     {
-      return static_cast<WritingModeFlags>(_bits & WritingModeFlags::BlockFlowMask)
-             == WritingModeFlags::IsVerticalText;
+      return (_bits & WritingModeFlags::BlockFlowMask) == WritingModeFlags::IsVerticalText;
     }
 
     KRYS_NODISCARD constexpr bool IsInlineTopToBottom() const noexcept
@@ -304,15 +299,14 @@ namespace krys::boo
     KRYS_NODISCARD constexpr bool IsLineOverRight() const noexcept
     {
       return IsVerticalTypographic()
-             || static_cast<WritingModeFlags>(_bits & WritingModeFlags::WritingModeMask)
+             || (_bits & WritingModeFlags::WritingModeMask)
                   == (WritingModeFlags::IsVerticalText | WritingModeFlags::IsFlippedBlock); // sideways-rl
     }
 
     /// @brief line-over == left
     KRYS_NODISCARD constexpr bool IsLineOverLeft() const noexcept
     {
-      return static_cast<WritingModeFlags>(_bits & WritingModeFlags::WritingModeMask)
-             == WritingModeFlags::IsVerticalText; // sideways-lr
+      return (_bits & WritingModeFlags::WritingModeMask) == WritingModeFlags::IsVerticalText; // sideways-lr
     }
 
 #pragma endregion

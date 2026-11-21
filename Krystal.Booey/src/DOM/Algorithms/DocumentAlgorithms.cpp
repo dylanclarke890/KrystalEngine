@@ -24,7 +24,8 @@ namespace krys::boo::dom
     // the base Document class also has a public constructor. In that case 'IsXMLDocument' is not set but it
     // should be treated as an 'xml' doc as per the spec. A 'html' type document will always be created via
     // the HTMLDocument class.
-    return document.HasDocumentFlag(DocumentFlags::IsXMLDocument) || document._flags == DocumentFlags::None;
+    return document._documentFlags.contains(DocumentFlag::IsXMLDocument)
+           || document._documentFlags == DocumentFlags {};
   }
 
   ExceptionOr<ElementCreationOptions>

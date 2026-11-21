@@ -34,6 +34,9 @@ namespace krys::boo
     Replace,
     Accumulate,
   };
-}
 
-KRYS_DEFINE_CONTIGUOUS_ENUM_TRAITS(krys::boo::IterationCompositeOperation, 2uz);
+  consteval IterationCompositeOperation MaxEnumValue(IterationCompositeOperation) noexcept
+  {
+    return IterationCompositeOperation::Accumulate;
+  }
+}

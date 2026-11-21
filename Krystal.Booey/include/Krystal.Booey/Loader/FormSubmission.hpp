@@ -39,13 +39,6 @@
 #include "Krystal.Core/Strings/String.hpp"
 #include "Krystal.Net/Url.hpp"
 
-namespace krys::boo
-{
-  class Event;
-  class HTMLFormControlElement;
-  class HTMLFormElement;
-}
-
 namespace krys::boo::html
 {
   class DOMFormData;
@@ -53,7 +46,10 @@ namespace krys::boo::html
 
 namespace krys::boo
 {
+  class Event;
   class FrameLoadRequest;
+  class HTMLFormControlElement;
+  class HTMLFormElement;
 
   enum class FormSubmissionTrigger : uint8
   {

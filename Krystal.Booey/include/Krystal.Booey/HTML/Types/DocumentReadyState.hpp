@@ -11,6 +11,9 @@ namespace krys::boo::html
     Interactive,
     Complete,
   };
-}
 
-KRYS_DEFINE_CONTIGUOUS_ENUM_TRAITS(krys::boo::html::DocumentReadyState, 3uz);
+  consteval DocumentReadyState MaxEnumValue(DocumentReadyState) noexcept
+  {
+    return DocumentReadyState::Complete;
+  }
+}

@@ -146,24 +146,26 @@ namespace krys::boo::css::tests
     mq::MediaQueryEvaluator evaluator {Screen()};
 
     CHECK(evaluator.CollectDynamicDependencies(ParseMediaQueries(u8"screen"))
-          == MediaQueryDynamicDependency::None);
+          == EnumSet<MediaQueryDynamicDependency> {});
     CHECK(evaluator.CollectDynamicDependencies(ParseMediaQueries(u8"(color)"))
-          == MediaQueryDynamicDependency::None);
+          == EnumSet<MediaQueryDynamicDependency> {});
     CHECK(evaluator.CollectDynamicDependencies(ParseMediaQueries(u8"(min-width: 10px)"))
           == MediaQueryDynamicDependency::Viewport);
     CHECK(evaluator.CollectDynamicDependencies(
             ParseMediaQueries(u8"(orientation: portrait) or (prefers-reduced-motion)"))
-          == (MediaQueryDynamicDependency::Viewport | MediaQueryDynamicDependency::Accessibility));
+          == (EnumSet<MediaQueryDynamicDependency> {MediaQueryDynamicDependency::Viewport,
+                                                    MediaQueryDynamicDependency::Accessibility}));
     CHECK(evaluator.CollectDynamicDependencies(ParseMediaQueries(u8"(width), (prefers-color-scheme: dark)"))
-          == (MediaQueryDynamicDependency::Viewport | MediaQueryDynamicDependency::Appearance));
+          == (EnumSet<MediaQueryDynamicDependency> {MediaQueryDynamicDependency::Viewport,
+                                                    MediaQueryDynamicDependency::Appearance}));
 
     // Queries for another media type contribute nothing.
     CHECK(evaluator.CollectDynamicDependencies(ParseMediaQueries(u8"print and (width)"))
-          == MediaQueryDynamicDependency::None);
+          == EnumSet<MediaQueryDynamicDependency> {});
 
     // Unknown features have no schema.
     CHECK(evaluator.CollectDynamicDependencies(ParseMediaQueries(u8"(foo: bar)"))
-          == MediaQueryDynamicDependency::None);
+          == EnumSet<MediaQueryDynamicDependency> {});
   }
 
   TEST_CASE("MediaQueryEvaluator: a document needs a view and a root element",
@@ -388,8 +390,9 @@ namespace krys::boo::css::tests
     SECTION("A touch screen with a stylus")
     {
       fixture.Client.PrimaryHovers = false;
-      fixture.Client.Primary = PointerCharacteristics::Coarse;
-      fixture.Client.AllAvailable = PointerCharacteristics::Coarse | PointerCharacteristics::Fine;
+      fixture.Client.Primary = PointerCharacteristic::Coarse;
+      fixture.Client.AllAvailable =
+        PointerCharacteristics {PointerCharacteristic::Coarse, PointerCharacteristic::Fine};
 
       CHECK_FALSE(fixture.Matches(u8"(hover)"));
       CHECK(fixture.Matches(u8"(hover: none)"));
@@ -404,8 +407,8 @@ namespace krys::boo::css::tests
     {
       fixture.Client.PrimaryHovers = false;
       fixture.Client.AnyHovers = false;
-      fixture.Client.Primary = PointerCharacteristics::None;
-      fixture.Client.AllAvailable = PointerCharacteristics::None;
+      fixture.Client.Primary = PointerCharacteristics {};
+      fixture.Client.AllAvailable = PointerCharacteristics {};
 
       CHECK_FALSE(fixture.Matches(u8"(any-hover)"));
       CHECK(fixture.Matches(u8"(pointer: none)"));

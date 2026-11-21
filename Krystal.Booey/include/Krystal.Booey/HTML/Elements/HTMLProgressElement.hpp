@@ -23,11 +23,6 @@
 #include "Krystal.Booey/HTML/Elements/HTMLElement.hpp"
 #include "Krystal.Core/Memory/WeakPtr.hpp"
 
-namespace krys::boo
-{
-  class RenderProgress;
-}
-
 namespace krys::boo::html
 {
   class ProgressValueElement;
@@ -35,6 +30,8 @@ namespace krys::boo::html
 
 namespace krys::boo
 {
+  class RenderProgress;
+
   /// @see https://html.spec.whatwg.org/#htmlprogresselement
   class HTMLProgressElement : public HTMLElement
   {

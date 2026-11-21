@@ -32,12 +32,6 @@
 #include "Krystal.Core/Memory/WeakPtr.hpp"
 #include "Krystal.Core/Types/Variant.hpp"
 
-namespace krys::boo
-{
-  class HTMLOptGroupElement;
-  class KeyboardEvent;
-}
-
 namespace krys::boo::dom
 {
   class HTMLCollection;
@@ -50,6 +44,9 @@ namespace krys::boo::html
 
 namespace krys::boo
 {
+  class HTMLOptGroupElement;
+  class KeyboardEvent;
+
   /// @see https://html.spec.whatwg.org/#htmlselectelement
   class HTMLSelectElement : public HTMLFormControlElement, private html::TypeAheadDataSource
   {

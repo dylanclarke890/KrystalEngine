@@ -45,12 +45,12 @@ namespace krys::ui::tests
         REQUIRE(renderer.has_value());
         _renderer = krys::move(*renderer);
         _imageBuffers = CreateUnique<ImageBufferTextures>(*_device, _fonts);
-        auto target =
-          _device->CreateTexture({.Format = gfx::TextureFormat::RGBA8Unorm,
-                                  .Width = Width,
-                                  .Height = Height,
-                                  .Usage = gfx::TextureUsage::RenderTarget | gfx::TextureUsage::Sampled,
-                                  .DebugName = u8"Target"});
+        auto target = _device->CreateTexture(
+          {.Format = gfx::TextureFormat::RGBA8Unorm,
+           .Width = Width,
+           .Height = Height,
+           .Usage = EnumSet<gfx::TextureUsage> {gfx::TextureUsage::RenderTarget, gfx::TextureUsage::Sampled},
+           .DebugName = u8"Target"});
         REQUIRE(target.has_value());
         _target = *target;
       }

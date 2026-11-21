@@ -37,7 +37,7 @@ namespace krys::boo::style::tests
 
     public:
       explicit StyleCallbackElement(boo::Document &document) noexcept
-          : HTMLDivElement(document, dom::NodeFlags::HasCustomStyleResolveCallbacks)
+          : HTMLDivElement(document, dom::NodeFlag::HasCustomStyleResolveCallbacks)
       {
       }
 

@@ -93,7 +93,7 @@ namespace krys::boo
     const auto &animation = _backingStyleAnimation;
     Ref animationEffect = ShareRef(*Effect());
 
-    if (!_overriddenProperties.Contains(Property::FillMode))
+    if (!_overriddenProperties.contains(Property::FillMode))
     {
       switch (animation.GetFillMode())
       {
@@ -104,7 +104,7 @@ namespace krys::boo
       }
     }
 
-    if (!_overriddenProperties.Contains(Property::Direction))
+    if (!_overriddenProperties.contains(Property::Direction))
     {
       switch (animation.GetDirection())
       {
@@ -119,7 +119,7 @@ namespace krys::boo
       }
     }
 
-    if (!_overriddenProperties.Contains(Property::IterationCount))
+    if (!_overriddenProperties.contains(Property::IterationCount))
     {
       if (auto iterations = animation.GetIterationCount().TryValue())
       {
@@ -131,12 +131,12 @@ namespace krys::boo
       }
     }
 
-    if (!_overriddenProperties.Contains(Property::Delay))
+    if (!_overriddenProperties.contains(Property::Delay))
     {
       animationEffect->SetDelay(Seconds {animation.GetDelay().Value});
     }
 
-    if (!_overriddenProperties.Contains(Property::Duration))
+    if (!_overriddenProperties.contains(Property::Duration))
     {
       if (auto duration = animation.GetDuration().TryTime())
       {
@@ -148,7 +148,7 @@ namespace krys::boo
       }
     }
 
-    if (!_overriddenProperties.Contains(Property::CompositeOperation))
+    if (!_overriddenProperties.contains(Property::CompositeOperation))
     {
       if (auto *keyframeEffect = DynamicDowncast<KeyframeEffect>(animationEffect.get()))
       {
@@ -156,11 +156,11 @@ namespace krys::boo
       }
     }
 
-    if (!_overriddenProperties.Contains(Property::RangeStart))
+    if (!_overriddenProperties.contains(Property::RangeStart))
     {
       SetRangeStart(style::SingleAnimationRangeStart {animation.GetRange().Start});
     }
-    if (!_overriddenProperties.Contains(Property::RangeEnd))
+    if (!_overriddenProperties.contains(Property::RangeEnd))
     {
       SetRangeEnd(style::SingleAnimationRangeEnd {animation.GetRange().End});
     }
@@ -168,7 +168,7 @@ namespace krys::boo
     EffectTimingDidChange();
 
     // Synchronize the play state
-    if (!_overriddenProperties.Contains(Property::PlayState))
+    if (!_overriddenProperties.contains(Property::PlayState))
     {
       auto styleOriginatedPlayState = animation.GetPlayState();
       if (_lastStyleOriginatedPlayState != styleOriginatedPlayState)
@@ -202,7 +202,7 @@ namespace krys::boo
 
   void CSSAnimation::SyncStyleOriginatedTimeline() noexcept
   {
-    if (_overriddenProperties.Contains(Property::Timeline) || !Effect())
+    if (_overriddenProperties.contains(Property::Timeline) || !Effect())
     {
       return;
     }
@@ -429,7 +429,7 @@ namespace krys::boo
 
   void CSSAnimation::KeyframesRuleDidChange() noexcept
   {
-    if (_overriddenProperties.Contains(Property::Keyframes))
+    if (_overriddenProperties.contains(Property::Keyframes))
     {
       return;
     }

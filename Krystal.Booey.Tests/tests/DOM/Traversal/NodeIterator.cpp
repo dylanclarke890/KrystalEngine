@@ -20,7 +20,7 @@ namespace krys::boo::dom::tests
   {
     TestElementFixture data;
 
-    auto nodeIterator = data.Document->CreateNodeIterator(*data.Node, WhatToShow::SHOW_ALL, nullptr);
+    auto nodeIterator = data.Document->CreateNodeIterator(*data.Node, ShowAll, nullptr);
     REQUIRE(&nodeIterator->Root() == data.Node);
   }
 
@@ -31,7 +31,7 @@ namespace krys::boo::dom::tests
   {
     TestElementFixture data;
 
-    auto nodeIterator = data.Document->CreateNodeIterator(*data.Node, WhatToShow::SHOW_ALL, nullptr);
+    auto nodeIterator = data.Document->CreateNodeIterator(*data.Node, ShowAll, nullptr);
     REQUIRE(&nodeIterator->ReferenceNode() == data.Node);
     REQUIRE(nodeIterator->PointerBeforeReferenceNode());
   }
@@ -44,7 +44,7 @@ namespace krys::boo::dom::tests
 
     SECTION("root with no children")
     {
-      auto nodeIterator = data.Document->CreateNodeIterator(*data.Node, WhatToShow::SHOW_ALL, nullptr);
+      auto nodeIterator = data.Document->CreateNodeIterator(*data.Node, ShowAll, nullptr);
 
       auto nextNodeResult = nodeIterator->NextNode();
       REQUIRE_FALSE(nextNodeResult.HasException());
@@ -73,7 +73,7 @@ namespace krys::boo::dom::tests
       REQUIRE_FALSE(data.Node->AppendChild(*sibling1.Value()).HasException());
       REQUIRE_FALSE(data.Node->AppendChild(*sibling2.Value()).HasException());
 
-      auto nodeIterator = data.Document->CreateNodeIterator(*data.Node, WhatToShow::SHOW_ALL, nullptr);
+      auto nodeIterator = data.Document->CreateNodeIterator(*data.Node, ShowAll, nullptr);
 
       auto nextNodeResult = nodeIterator->NextNode();
       REQUIRE_FALSE(nextNodeResult.HasException());
@@ -124,7 +124,7 @@ namespace krys::boo::dom::tests
     REQUIRE_FALSE(parent->AppendChild(*sibling).HasException());
     REQUIRE_FALSE(parent->AppendChild(*data.Node).HasException());
 
-    auto nodeIterator = data.Document->CreateNodeIterator(*data.Node, WhatToShow::SHOW_ALL, nullptr);
+    auto nodeIterator = data.Document->CreateNodeIterator(*data.Node, ShowAll, nullptr);
     auto previousNodeResult = nodeIterator->PreviousNode();
     REQUIRE_FALSE(previousNodeResult.HasException());
     CHECK(previousNodeResult.Value() == nullptr);
@@ -143,7 +143,7 @@ namespace krys::boo::dom::tests
     REQUIRE_FALSE(data.Node->AppendChild(*sibling2).HasException());
 
     RefPtr<NodeFilter> filter = CreateRefPtr<TextNodeFilter>();
-    auto nodeIterator = data.Document->CreateNodeIterator(*data.Node, WhatToShow::SHOW_ALL, RefPtr {filter});
+    auto nodeIterator = data.Document->CreateNodeIterator(*data.Node, ShowAll, RefPtr {filter});
     CHECK(nodeIterator->Filter() == filter.get());
 
     auto nextNodeResult = nodeIterator->NextNode();
@@ -181,8 +181,8 @@ namespace krys::boo::dom::tests
     REQUIRE_FALSE(data.Node->AppendChild(*sibling1.Value()).HasException());
     REQUIRE_FALSE(data.Node->AppendChild(*sibling2).HasException());
 
-    auto nodeIterator = data.Document->CreateNodeIterator(*data.Node, WhatToShow::SHOW_TEXT);
-    CHECK(nodeIterator->WhatToShow() == WhatToShow::SHOW_TEXT);
+    auto nodeIterator = data.Document->CreateNodeIterator(*data.Node, WhatToShowFlag::SHOW_TEXT);
+    CHECK(nodeIterator->WhatToShow() == WhatToShowFlag::SHOW_TEXT);
 
     auto nextNodeResult = nodeIterator->NextNode();
     REQUIRE_FALSE(nextNodeResult.HasException());
@@ -383,7 +383,7 @@ namespace krys::boo::dom::tests
   {
     AdjustTestData data;
     auto filter = CreateRef<CallbackNodeFilter>();
-    auto iterator = data.Document->CreateNodeIterator(*data.Div, WhatToShow::SHOW_ALL, filter);
+    auto iterator = data.Document->CreateNodeIterator(*data.Div, ShowAll, filter);
     List<const Node *> seen;
     filter->Callback = [&](const Node &node)
     {
@@ -419,7 +419,7 @@ namespace krys::boo::dom::tests
     AdjustTestData data;
     auto filter = CreateRef<CallbackNodeFilter>();
     filter->Result = FilterResult::FILTER_ACCEPT;
-    auto iterator = data.Document->CreateNodeIterator(*data.U, WhatToShow::SHOW_ALL, filter);
+    auto iterator = data.Document->CreateNodeIterator(*data.U, ShowAll, filter);
     filter->Callback = [](const Node &) {};
     REQUIRE(iterator->NextNode().ReleaseValue() == data.U.get());
 

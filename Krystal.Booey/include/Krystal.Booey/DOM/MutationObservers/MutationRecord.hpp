@@ -16,9 +16,12 @@ namespace krys::boo::dom
     Attributes,
     CharacterData,
   };
-}
 
-KRYS_DEFINE_CONTIGUOUS_ENUM_TRAITS(krys::boo::dom::MutationRecordType, 3uz);
+  consteval MutationRecordType MaxEnumValue(MutationRecordType) noexcept
+  {
+    return MutationRecordType::CharacterData;
+  }
+}
 
 namespace krys::boo
 {

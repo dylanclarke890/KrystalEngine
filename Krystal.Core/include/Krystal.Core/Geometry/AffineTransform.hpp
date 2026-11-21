@@ -39,10 +39,6 @@
 namespace krys
 {
   class TextStream;
-}
-
-namespace krys
-{
   class TransformationMatrix;
 
   /// @brief A 2D affine transform: a 2x2 matrix [a c; b d] plus a translation (e, f).
@@ -305,10 +301,7 @@ namespace krys
   constexpr inline AffineTransform AffineTransform::Identity {};
 
   KRYS_NODISCARD AffineTransform CreateMapBetweenRects(const RectF &source, const RectF &dest) noexcept;
-}
 
-namespace krys
-{
   TextStream &operator<<(TextStream &ts, const AffineTransform &transform) noexcept;
 
   /// @brief @p point mapped by @p transform, in double precision.

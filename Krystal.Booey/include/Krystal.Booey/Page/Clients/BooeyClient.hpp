@@ -257,7 +257,7 @@ namespace krys::boo
     /// @brief What the primary pointing device can do (`pointer`).
     KRYS_NODISCARD virtual PointerCharacteristics PrimaryPointingDevice() const noexcept
     {
-      return PointerCharacteristics::Fine;
+      return PointerCharacteristic::Fine;
     }
 
     /// @brief Whether the primary pointing device can hover (`hover`).
@@ -269,7 +269,7 @@ namespace krys::boo
     /// @brief What the available pointing devices can do, together (`any-pointer`).
     KRYS_NODISCARD virtual PointerCharacteristics AllAvailablePointingDevices() const noexcept
     {
-      return PointerCharacteristics::Fine;
+      return PointerCharacteristic::Fine;
     }
 
     /// @brief Whether any available pointing device can hover (`any-hover`).

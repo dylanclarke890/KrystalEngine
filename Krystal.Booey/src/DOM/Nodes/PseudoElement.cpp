@@ -41,10 +41,10 @@ namespace krys::boo
   }
 
   PseudoElement::PseudoElement(Element &host, PseudoElementType pseudoElementType) noexcept
-      : Element(host.NodeDocument(), dom::PseudoElementTagName(), dom::NodeFlags::IsPseudoElement),
+      : Element(host.NodeDocument(), dom::PseudoElementTagName(), dom::NodeFlag::IsPseudoElement),
         _hostElement(CreateWeakPtr(&host)), _pseudoElementType(pseudoElementType)
   {
-    SetNodeFlag(dom::NodeFlags::IsConnected);
+    _nodeFlags.Add(dom::NodeFlag::IsConnected);
     krys_debug_assert(pseudoElementType == PseudoElementType::Before
                       || pseudoElementType == PseudoElementType::After);
   }

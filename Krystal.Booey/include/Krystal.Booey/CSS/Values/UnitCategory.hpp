@@ -39,6 +39,9 @@ namespace krys::boo::css
     Flex,
     Other,
   };
-}
 
-KRYS_DEFINE_CONTIGUOUS_ENUM_TRAITS(krys::boo::css::UnitCategory, 11uz);
+  consteval UnitCategory MaxEnumValue(UnitCategory) noexcept
+  {
+    return UnitCategory::Other;
+  }
+}

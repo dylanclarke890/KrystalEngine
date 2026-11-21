@@ -267,9 +267,9 @@ namespace krys::boo::style::tests
       auto sheet = ParseSheet(u8"@starting-style { .a {} } .b {}");
       auto ruleSet = Build(*sheet);
       REQUIRE(
-        ruleSet->ClassRules(Atom(u8"a"))->front().UsedRuleTypes().Contains(UsedRuleType::StartingStyle));
+        ruleSet->ClassRules(Atom(u8"a"))->front().UsedRuleTypes().contains(UsedRuleType::StartingStyle));
       REQUIRE_FALSE(
-        ruleSet->ClassRules(Atom(u8"b"))->front().UsedRuleTypes().Contains(UsedRuleType::StartingStyle));
+        ruleSet->ClassRules(Atom(u8"b"))->front().UsedRuleTypes().contains(UsedRuleType::StartingStyle));
       REQUIRE(ruleSet->Features().HasStartingStyleRules);
     }
   }

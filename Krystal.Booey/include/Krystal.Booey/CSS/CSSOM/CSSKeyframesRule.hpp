@@ -32,12 +32,6 @@
 #include "Krystal.Core/Memory/UniquePtr.hpp"
 #include "Krystal.Core/TypeCast.hpp"
 
-namespace krys::boo
-{
-  class CSSKeyframeRule;
-  class CSSRuleList;
-}
-
 namespace krys::boo::css
 {
   class KeyframesRule;
@@ -45,6 +39,9 @@ namespace krys::boo::css
 
 namespace krys::boo
 {
+  class CSSKeyframeRule;
+  class CSSRuleList;
+
   /// @brief An `@keyframes` rule, exposed to scripts.
   /// @see https://drafts.csswg.org/css-animations/#interface-csskeyframesrule
   class CSSKeyframesRule final : public CSSRule

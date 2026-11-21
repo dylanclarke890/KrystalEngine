@@ -173,12 +173,12 @@ namespace krys::boo::layout
 
     KRYS_NODISCARD bool IsListMarkerImage() const noexcept
     {
-      return _replacedData && _replacedData->ListMarkerAttributes.Contains(ListMarkerAttribute::Image);
+      return _replacedData && _replacedData->ListMarkerAttributes.contains(ListMarkerAttribute::Image);
     }
 
     KRYS_NODISCARD bool IsListMarkerOutside() const noexcept
     {
-      return _replacedData && _replacedData->ListMarkerAttributes.Contains(ListMarkerAttribute::Outside);
+      return _replacedData && _replacedData->ListMarkerAttributes.contains(ListMarkerAttribute::Outside);
     }
 
     // FIXME: This is temporary until after list marker content is accessible by IFC (webkit.org/b/294342)

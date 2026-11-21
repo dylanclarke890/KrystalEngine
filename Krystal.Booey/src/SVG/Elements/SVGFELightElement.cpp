@@ -158,7 +158,7 @@ namespace krys::boo
   {
     SVGElement::OnChildrenChanged();
 
-    if (HasNodeFlag(dom::NodeFlags::IsParsingChildren))
+    if (_nodeFlags.contains(dom::NodeFlag::IsParsingChildren))
     {
       return;
     }

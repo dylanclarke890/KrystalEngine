@@ -519,7 +519,7 @@ namespace krys::boo
       return;
     }
 
-    if (mode.Contains(MapCoordinatesMode::ApplyContainerFlip))
+    if (mode.contains(MapCoordinatesMode::ApplyContainerFlip))
     {
       if (auto *box = DynamicDowncast<RenderBox>(*container))
       {
@@ -814,7 +814,7 @@ namespace krys::boo
   {
     // Repaint offset cache is only valid for root-relative repainting
     if (View().FrameView().LayoutContext().IsPaintOffsetCacheEnabled() && !container
-        && !context.Options.Contains(VisibleRectContext::Option::UseEdgeInclusiveIntersection))
+        && !context.Options.contains(VisibleRectContext::Option::UseEdgeInclusiveIntersection))
     {
       return ComputeVisibleRectsUsingPaintOffset(rects);
     }
@@ -850,7 +850,7 @@ namespace krys::boo
                         .ApplyCachedClipAndScrollPosition(adjustedRects, container, context);
       if (isEmpty)
       {
-        if (context.Options.Contains(VisibleRectContext::Option::UseEdgeInclusiveIntersection))
+        if (context.Options.contains(VisibleRectContext::Option::UseEdgeInclusiveIntersection))
         {
           return null;
         }

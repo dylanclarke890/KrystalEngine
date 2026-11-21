@@ -37,12 +37,12 @@ namespace krys::ui::tests
       auto renderer = gfx::Renderer2D::Create(*_device);
       REQUIRE(renderer.has_value());
       _renderer = krys::move(*renderer);
-      auto target =
-        _device->CreateTexture({.Format = gfx::TextureFormat::RGBA8Unorm,
-                                .Width = width,
-                                .Height = height,
-                                .Usage = gfx::TextureUsage::RenderTarget | gfx::TextureUsage::Sampled,
-                                .DebugName = u8"Repaint"});
+      auto target = _device->CreateTexture(
+        {.Format = gfx::TextureFormat::RGBA8Unorm,
+         .Width = width,
+         .Height = height,
+         .Usage = EnumSet<gfx::TextureUsage> {gfx::TextureUsage::RenderTarget, gfx::TextureUsage::Sampled},
+         .DebugName = u8"Repaint"});
       REQUIRE(target.has_value());
       _target = *target;
     }

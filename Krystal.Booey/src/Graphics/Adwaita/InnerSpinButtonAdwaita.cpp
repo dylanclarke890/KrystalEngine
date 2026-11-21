@@ -51,7 +51,7 @@ namespace krys::boo
     SRGBA<uint8> spinButtonBackgroundHoveredColor;
     SRGBA<uint8> spinButtonBackgroundPressedColor;
 
-    bool useDarkAppearance = style.States.Contains(ControlStyle::State::DarkAppearance);
+    bool useDarkAppearance = style.States.contains(ControlStyle::State::DarkAppearance);
     if (useDarkAppearance)
     {
       spinButtonBorderColor = SpinButtonBorderColorDark;
@@ -88,14 +88,14 @@ namespace krys::boo
     RectF buttonRect = fieldRect;
     buttonRect.SetHeight(fieldRect.Height() / 2.0f);
     {
-      if (style.States.Contains(ControlStyle::State::SpinUp))
+      if (style.States.contains(ControlStyle::State::SpinUp))
       {
         path.AddRoundedRect(FloatRoundedRect(buttonRect, corner, corner, {}, {}));
-        if (style.States.Contains(ControlStyle::State::Pressed))
+        if (style.States.contains(ControlStyle::State::Pressed))
         {
           graphicsContext.SetFillColor(spinButtonBackgroundPressedColor);
         }
-        else if (style.States.Contains(ControlStyle::State::Hovered))
+        else if (style.States.contains(ControlStyle::State::Hovered))
         {
           graphicsContext.SetFillColor(spinButtonBackgroundHoveredColor);
         }
@@ -108,14 +108,14 @@ namespace krys::boo
 
     buttonRect.Move(0, buttonRect.Height());
     {
-      if (!style.States.Contains(ControlStyle::State::SpinUp))
+      if (!style.States.contains(ControlStyle::State::SpinUp))
       {
         path.AddRoundedRect(FloatRoundedRect(buttonRect, {}, {}, corner, corner));
-        if (style.States.Contains(ControlStyle::State::Pressed))
+        if (style.States.contains(ControlStyle::State::Pressed))
         {
           graphicsContext.SetFillColor(spinButtonBackgroundPressedColor);
         }
-        else if (style.States.Contains(ControlStyle::State::Hovered))
+        else if (style.States.contains(ControlStyle::State::Hovered))
         {
           graphicsContext.SetFillColor(spinButtonBackgroundHoveredColor);
         }

@@ -65,6 +65,9 @@ namespace krys::text
     Windows1257,
     Windows1258,
   };
-}
 
-KRYS_DEFINE_CONTIGUOUS_ENUM_TRAITS(krys::text::EncodingId, 55uz)
+  consteval EncodingId MaxEnumValue(EncodingId) noexcept
+  {
+    return EncodingId::Windows1258;
+  }
+}

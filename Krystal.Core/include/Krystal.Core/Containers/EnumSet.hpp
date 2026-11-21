@@ -25,6 +25,7 @@
 
 #pragma once
 
+#include "Krystal.Core/Assert.hpp"
 #include "Krystal.Core/Enum.hpp"
 #include "Krystal.Core/Types/Maybe.hpp"
 #include <bit>
@@ -33,26 +34,33 @@
 
 namespace krys
 {
-  /// EnumSet is a class that represents a Set of enumerators in a space-efficient manner when the highest
-  /// value is less than 64 (powers of 2 are not required). If the enum has defined traits they will be used
-  /// to compute the storage size. Otherwise 64 bits are used.
+  /// @brief A set of values of the enum @p E, one bit per value.
+  ///
+  /// Each enumerator is a bit index (counted from `MinEnumValue`, if declared), not a mask. The storage fits
+  /// the enum's `MaxEnumValue` hook (see `Enum.hpp`), or is 64 bits without one; either way the range spans
+  /// at most 64 values.
   template <typename E>
   class EnumSet
   {
     static_assert(IsEnum<E>, "E is not an enum type");
 
+    constexpr static int64 MinValue = detail::MinEnumUnderlying<E>();
+
   public:
     KRYS_NODISCARD constexpr static size_t StorageSize() noexcept
     {
-      if constexpr (EnumTraits<E>::DistinctValues > 0u)
+      if constexpr (HasMaxEnumValue<E>)
       {
-        static_assert(EnumTraits<E>::DistinctValues <= 64u, "EnumSet supports at most 64 enum values");
+        constexpr int64 bits = detail::MaxEnumUnderlying<E>() - MinValue + 1;
+        static_assert(bits <= 64, "EnumSet supports a range of at most 64 enum values");
 
-        // Bytes needed for the highest value's bit, rounded up to a power of two.
-        return std::bit_ceil(((static_cast<size_t>(EnumTraits<E>::DistinctValues) - 1uz) >> 3) + 1uz);
+        // Bytes needed for the highest bit, rounded up to a power of two.
+        return std::bit_ceil(static_cast<size_t>((bits - 1) / 8 + 1));
       }
-
-      return 8uz;
+      else
+      {
+        return 8uz;
+      }
     }
 
     template <typename StorageType>
@@ -70,7 +78,7 @@ namespace krys
     public:
       KRYS_NODISCARD constexpr E operator*() const noexcept
       {
-        return static_cast<E>(std::countr_zero(_value));
+        return static_cast<E>(std::countr_zero(_value) + MinValue);
       }
 
       // Iterates from smallest to largest enum value by turning off the rightmost Set bit.
@@ -133,12 +141,18 @@ namespace krys
       return _storage;
     }
 
-    KRYS_NODISCARD constexpr bool IsEmpty() const noexcept
+    /// @brief The set's bits, for `FastHash` (which mixes them).
+    KRYS_NODISCARD constexpr size_t Hash() const noexcept
+    {
+      return static_cast<size_t>(_storage);
+    }
+
+    KRYS_NODISCARD constexpr bool empty() const noexcept
     {
       return !_storage;
     }
 
-    KRYS_NODISCARD constexpr size_t Size() const noexcept
+    KRYS_NODISCARD constexpr size_t size() const noexcept
     {
       return std::popcount(_storage);
     }
@@ -155,10 +169,10 @@ namespace krys
 
     constexpr explicit operator bool() const noexcept
     {
-      return !IsEmpty();
+      return !empty();
     }
 
-    KRYS_NODISCARD constexpr bool Contains(E e) const noexcept
+    KRYS_NODISCARD constexpr bool contains(E e) const noexcept
     {
       return Get(e);
     }
@@ -208,7 +222,7 @@ namespace krys
 
     KRYS_NODISCARD constexpr Maybe<E> ToSingleValue() const noexcept
     {
-      return HasExactlyOneBitSet() ? Maybe<E>(static_cast<E>(std::countr_zero(_storage))) : null;
+      return HasExactlyOneBitSet() ? Maybe<E>(static_cast<E>(std::countr_zero(_storage) + MinValue)) : null;
     }
 
     friend constexpr bool operator==(const EnumSet &, const EnumSet &) noexcept = default;
@@ -240,14 +254,26 @@ namespace krys
     }
 
   private:
+    /// @brief The bit for @p e. Out of range, it's a compile error in constant evaluation (the shift
+    /// overflows) and an assertion otherwise.
+    KRYS_NODISCARD constexpr static StorageType Bit(E e) noexcept
+    {
+      const int64 index = static_cast<int64>(ToUnderlying(e)) - MinValue;
+      if !consteval
+      {
+        krys_debug_assert(index >= 0 && index < static_cast<int64>(sizeof(StorageType) * 8));
+      }
+      return static_cast<StorageType>(static_cast<StorageType>(1) << index);
+    }
+
     constexpr bool Get(E e) const noexcept
     {
-      return _storage & (static_cast<StorageType>(1) << ToUnderlying(e));
+      return _storage & Bit(e);
     }
 
     constexpr void Set(E e) noexcept
     {
-      _storage |= (static_cast<StorageType>(1) << ToUnderlying(e));
+      _storage |= Bit(e);
     }
 
     enum InitializationTag

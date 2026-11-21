@@ -1987,7 +1987,7 @@ namespace krys::boo
     if ((text::SeparatorCategories
          | text::GeneralCategorySet {text::GeneralCategory::Unassigned, text::GeneralCategory::Control,
                                      text::GeneralCategory::Format})
-          .Contains(category))
+          .contains(category))
     {
       return false;
     }
@@ -2001,7 +2001,7 @@ namespace krys::boo
       return false;
     }
 
-    if (text::PunctuationCategories.Contains(category))
+    if (text::PunctuationCategories.contains(category))
     {
       return c == U'#' || c == U'%' || c == U'&' || c == U'@' || c == text::ArabicIndicPerMilleSign
              || c == text::ArabicIndicPerTenThousandSign || c == text::ArabicPercentSign

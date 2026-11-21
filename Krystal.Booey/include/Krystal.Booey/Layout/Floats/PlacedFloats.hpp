@@ -179,12 +179,12 @@ namespace krys::boo::layout
 
     KRYS_NODISCARD bool HasStartPositioned() const noexcept
     {
-      return _positionTypes.Contains(PositionType::Start);
+      return _positionTypes.contains(PositionType::Start);
     }
 
     KRYS_NODISCARD bool HasEndPositioned() const noexcept
     {
-      return _positionTypes.Contains(PositionType::End);
+      return _positionTypes.contains(PositionType::End);
     }
 
     KRYS_NODISCARD Maybe<LayoutUnit> HighestPositionOnBlockAxis() const noexcept;

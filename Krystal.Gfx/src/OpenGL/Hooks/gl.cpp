@@ -1595,10 +1595,7 @@ namespace krys::gfx::opengl
     }
     return false;
   }
-}
 
-namespace krys::gfx::opengl
-{
 #pragma region GL Core Functions
 
 #pragma region 1.0

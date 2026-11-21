@@ -96,12 +96,12 @@ namespace krys::pal
     Modal,
     Editable,
   };
-}
 
-KRYS_DEFINE_CONTIGUOUS_ENUM_TRAITS(krys::pal::AccessibilityState, 20uz);
+  consteval AccessibilityState MaxEnumValue(AccessibilityState) noexcept
+  {
+    return AccessibilityState::Editable;
+  }
 
-namespace krys::pal
-{
   enum class AccessibilityAction : uint8
   {
     /// @brief Activates the node, as a click would.
@@ -117,12 +117,12 @@ namespace krys::pal
     /// @brief Sets the value with `IAccessibilityTree::SetValue` or `SetRangeValue`.
     SetValue,
   };
-}
 
-KRYS_DEFINE_CONTIGUOUS_ENUM_TRAITS(krys::pal::AccessibilityAction, 10uz);
+  consteval AccessibilityAction MaxEnumValue(AccessibilityAction) noexcept
+  {
+    return AccessibilityAction::SetValue;
+  }
 
-namespace krys::pal
-{
   /// @brief How a live region announces its changes.
   enum class AccessibilityLiveSetting : uint8
   {

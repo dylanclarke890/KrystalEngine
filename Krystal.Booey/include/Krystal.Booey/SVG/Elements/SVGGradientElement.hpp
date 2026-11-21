@@ -30,10 +30,7 @@
 namespace krys::boo
 {
   class GradientColorStops;
-}
 
-namespace krys::boo
-{
   enum SVGSpreadMethodType : uint8
   {
     SVGSpreadMethodUnknown = 0,

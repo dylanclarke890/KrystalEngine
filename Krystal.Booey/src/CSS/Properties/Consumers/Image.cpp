@@ -966,7 +966,7 @@ namespace krys::boo::css
     // https://w3c.github.io/csswg-drafts/css-images-4/#image-set-notation
     KRYS_NODISCARD static RefPtr<ImageSetOptionValue>
       ConsumeImageSetOption(TokenRange &tokens, PropertyParserState &state,
-                            AllowedImageType allowedImageTypes) noexcept
+                            EnumSet<AllowedImageType> allowedImageTypes) noexcept
     {
       auto image = ConsumeImage(tokens, state, allowedImageTypes);
       if (!image)
@@ -1015,7 +1015,7 @@ namespace krys::boo::css
     }
 
     KRYS_NODISCARD static RefPtr<Value> ConsumeImageSet(TokenRange &args, PropertyParserState &state,
-                                                        AllowedImageType allowedImageTypes) noexcept
+                                                        EnumSet<AllowedImageType> allowedImageTypes) noexcept
     {
       ValueListBuilder imageSet;
       do
@@ -1036,10 +1036,10 @@ namespace krys::boo::css
     // https://drafts.csswg.org/css-images-4/#image-values
 
     RefPtr<Value> ConsumeImage(TokenRange &tokens, PropertyParserState &state,
-                               AllowedImageType allowedImageTypes) noexcept
+                               EnumSet<AllowedImageType> allowedImageTypes) noexcept
     {
       if (tokens.Peek().Type() == TokenType::String
-          && HasFlag(allowedImageTypes, AllowedImageType::RawStringAsUrl))
+          && allowedImageTypes.contains(AllowedImageType::RawStringAsUrl))
       {
         auto imageUrl = CompleteUrl(CSSOMString(tokens.Peek().IdentCodePoints()), state.Context);
         if (!imageUrl)
@@ -1056,7 +1056,7 @@ namespace krys::boo::css
       {
         auto consumeGeneratedImage = [&](auto consumer) -> RefPtr<Value>
         {
-          if (!HasFlag(allowedImageTypes, AllowedImageType::GeneratedImage))
+          if (!allowedImageTypes.contains(AllowedImageType::GeneratedImage))
           {
             return nullptr;
           }
@@ -1075,7 +1075,7 @@ namespace krys::boo::css
 
         auto consumeImageSetImage = [&](auto consumer) -> RefPtr<Value>
         {
-          if (!HasFlag(allowedImageTypes, AllowedImageType::ImageSet))
+          if (!allowedImageTypes.contains(AllowedImageType::ImageSet))
           {
             return nullptr;
           }
@@ -1147,7 +1147,7 @@ namespace krys::boo::css
               {
                 return ConsumeImageSet(args, state,
                                        (allowedImageTypes | AllowedImageType::RawStringAsUrl)
-                                         & ~AllowedImageType::ImageSet);
+                                         - AllowedImageType::ImageSet);
               });
           }
           default:
@@ -1157,10 +1157,11 @@ namespace krys::boo::css
         }
       }
 
-      if (HasFlag(allowedImageTypes, AllowedImageType::UrlFunction))
+      if (allowedImageTypes.contains(AllowedImageType::UrlFunction))
       {
         if (auto imageUrl = ConsumeUrlRaw(
-              tokens, state, AllowedUrlModifiers::CrossOrigin | AllowedUrlModifiers::ReferrerPolicy))
+              tokens, state,
+              AllowedUrlModifiers {AllowedUrlModifier::CrossOrigin, AllowedUrlModifier::ReferrerPolicy}))
         {
           return ImageValue::Create(krys::move(*imageUrl));
         }
@@ -1172,7 +1173,7 @@ namespace krys::boo::css
     // MARK: <image> | none
 
     RefPtr<Value> ConsumeImageOrNone(TokenRange &tokens, PropertyParserState &state,
-                                     AllowedImageType allowedImageTypes) noexcept
+                                     EnumSet<AllowedImageType> allowedImageTypes) noexcept
     {
       if (tokens.Peek().ValueId() == ValueId::None)
       {

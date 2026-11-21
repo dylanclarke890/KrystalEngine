@@ -34,16 +34,16 @@ namespace krys::pal
 
   KRYS_NODISCARD bool Mouse::IsButtonPressed(MouseButton button) const noexcept
   {
-    return (_pressed & button) == button;
+    return _pressed.contains(button);
   }
 
   KRYS_NODISCARD bool Mouse::IsButtonHeld(MouseButton button) const noexcept
   {
-    return (_held & button) == button;
+    return _held.contains(button);
   }
 
   KRYS_NODISCARD bool Mouse::WasButtonReleased(MouseButton button) const noexcept
   {
-    return (_released & button) == button;
+    return _released.contains(button);
   }
 }

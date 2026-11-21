@@ -97,7 +97,7 @@ namespace krys::boo
             return false;
           }
 
-          if (auto flags = effectElement.EffectGeometryFlags(); !flags.IsEmpty())
+          if (auto flags = effectElement.EffectGeometryFlags(); !flags.empty())
           {
             auto effectBoundaries = SVGLengthContext::ResolveRectangle(
               contextElement, effectElement, filter.PrimitiveUnits(), filter.ReferenceBox());
@@ -367,7 +367,7 @@ namespace krys::boo
       modes = modes & effect->SupportedFilterRenderingModes(preferredFilterRenderingModes);
     }
 
-    krys_debug_assert(!modes.IsEmpty());
+    krys_debug_assert(!modes.empty());
     return modes;
   }
 
@@ -428,7 +428,7 @@ namespace krys::boo
   RefPtr<FilterImage> SVGFilterRenderer::Apply(FilterImage *sourceImage, FilterResults &results) noexcept
   {
     krys_debug_assert(!_expression.empty());
-    krys_debug_assert(FilterRenderingModes().Contains(FilterRenderingMode::Accelerated));
+    krys_debug_assert(FilterRenderingModes().contains(FilterRenderingMode::Accelerated));
     krys_debug_assert(IsValidSVGFilterExpression(_expression, _effects));
 
     FilterImageVector stack;
@@ -500,7 +500,7 @@ namespace krys::boo
                                                           const FilterStyle &sourceStyle) const noexcept
   {
     krys_debug_assert(!_expression.empty());
-    krys_debug_assert(FilterRenderingModes().Contains(FilterRenderingMode::GraphicsContext));
+    krys_debug_assert(FilterRenderingModes().contains(FilterRenderingMode::GraphicsContext));
 
     FilterStyleVector styles;
     FilterStyle lastStyle = sourceStyle;

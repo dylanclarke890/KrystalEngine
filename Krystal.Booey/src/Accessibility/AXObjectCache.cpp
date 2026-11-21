@@ -1180,7 +1180,7 @@ namespace krys::boo
     };
     auto recomputeParentTableProperties = [this, &element](EnumSet<TableProperty> properties)
     {
-      if (!properties.Contains(TableProperty::CellSlots))
+      if (!properties.contains(TableProperty::CellSlots))
       {
         // Only non-ARIA tables (ARIA ones are always exposed) can change whether they're exposed.
         if (IsHTMLTablePart(element))
@@ -1203,7 +1203,7 @@ namespace krys::boo
       }
       if (auto *parentTable = DynamicDowncast<AXNodeObject>(object->ParentTable()))
       {
-        if (properties.Contains(TableProperty::Exposed) && !parentTable->IsAriaTable())
+        if (properties.contains(TableProperty::Exposed) && !parentTable->IsAriaTable())
         {
           DeferRecomputeTableIsExposed(parentTable->GetElement());
         }

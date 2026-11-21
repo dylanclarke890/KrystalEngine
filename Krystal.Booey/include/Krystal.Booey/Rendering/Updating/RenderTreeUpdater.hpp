@@ -35,15 +35,6 @@
 #include "Krystal.Core/Memory/UniquePtr.hpp"
 #include "Krystal.Core/Types/Maybe.hpp"
 
-namespace krys::boo
-{
-  class ContainerNode;
-  class Document;
-  class Element;
-  class Node;
-  class Text;
-}
-
 namespace krys::boo::style
 {
   struct ElementUpdate;
@@ -54,11 +45,16 @@ namespace krys::boo::style
 
 namespace krys::boo
 {
+  class ContainerNode;
+  class Document;
+  class Element;
+  class Node;
   class RenderElement;
   class RenderObject;
   class RenderStyle;
   class RenderTreeBuilder;
   class RenderView;
+  class Text;
 
   /// @brief Applies a style update to the render tree.
   class RenderTreeUpdater

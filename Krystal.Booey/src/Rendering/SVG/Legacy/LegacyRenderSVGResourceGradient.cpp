@@ -67,7 +67,7 @@ namespace krys::boo
     }
 
     float textPaintingScale = 1;
-    if (resourceMode.Contains(RenderSVGResourceMode::ApplyToText))
+    if (resourceMode.contains(RenderSVGResourceMode::ApplyToText))
     {
       textPaintingScale = ComputeTextPaintingScale(renderer);
     }
@@ -147,22 +147,22 @@ namespace krys::boo
                                const GradientData &gradientData,
                                EnumSet<RenderSVGResourceMode> resourceMode) noexcept
     {
-      if (resourceMode.Contains(RenderSVGResourceMode::ApplyToText))
+      if (resourceMode.contains(RenderSVGResourceMode::ApplyToText))
       {
-        context.SetTextDrawingMode(resourceMode.Contains(RenderSVGResourceMode::ApplyToFill)
+        context.SetTextDrawingMode(resourceMode.contains(RenderSVGResourceMode::ApplyToFill)
                                      ? TextDrawingMode::Fill
                                      : TextDrawingMode::Stroke);
       }
 
       auto userspaceTransform = gradientData.UserspaceTransform;
 
-      if (resourceMode.Contains(RenderSVGResourceMode::ApplyToFill))
+      if (resourceMode.contains(RenderSVGResourceMode::ApplyToFill))
       {
         context.SetAlpha(style.FillOpacity().Value.Value);
         context.SetFillGradient(ShareRef(*gradientData.Gradient), userspaceTransform);
         context.SetFillRule(style.FillRule());
       }
-      else if (resourceMode.Contains(RenderSVGResourceMode::ApplyToStroke))
+      else if (resourceMode.contains(RenderSVGResourceMode::ApplyToStroke))
       {
         if (style.VectorEffect() == VectorEffect::NonScalingStroke)
         {
@@ -209,7 +209,7 @@ namespace krys::boo
     -> EnumSet<ApplyResult>
   {
     krys_debug_assert(context);
-    krys_debug_assert(!resourceMode.IsEmpty());
+    krys_debug_assert(!resourceMode.empty());
 
     auto *gradientData = GradientDataForRenderer(renderer, resourceMode);
     if (!gradientData)
@@ -237,7 +237,7 @@ namespace krys::boo
                                                           const RenderElement *shape) noexcept
   {
     krys_debug_assert(context);
-    krys_debug_assert(!resourceMode.IsEmpty());
+    krys_debug_assert(!resourceMode.empty());
 
     if (!_gradientApplier)
     {

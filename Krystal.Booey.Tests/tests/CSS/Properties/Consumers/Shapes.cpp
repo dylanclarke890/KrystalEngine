@@ -10,7 +10,7 @@ namespace krys::boo::css::parse_property::tests
   {
     KRYS_NODISCARD RefPtr<Value> BasicShape(TokenRange &tokens, PropertyParserState &state) noexcept
     {
-      return ConsumeBasicShape(tokens, state, PathParsingOption::None);
+      return ConsumeBasicShape(tokens, state, {});
     }
   }
 

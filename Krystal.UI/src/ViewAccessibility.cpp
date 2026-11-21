@@ -584,7 +584,7 @@ namespace krys::ui
       actions.Add(Action::Increment);
       actions.Add(Action::Decrement);
     }
-    if (states.Contains(State::Expandable))
+    if (states.contains(State::Expandable))
     {
       actions.Add(Action::Expand);
       actions.Add(Action::Collapse);

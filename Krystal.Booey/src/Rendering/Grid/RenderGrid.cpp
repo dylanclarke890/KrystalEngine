@@ -363,7 +363,7 @@ namespace krys::boo
         EnumSet<AlignmentContextType> innerAlignmentContextTypes;
         auto *inner = DynamicDowncast<RenderGrid>(gridItem);
 
-        if (alignmentContextTypes.Contains(AlignmentContextType::Rows))
+        if (alignmentContextTypes.contains(AlignmentContextType::Rows))
         {
           if (inner && inner->IsSubgridInParentDirection(GridTrackSizingDirection::Rows))
           {
@@ -378,7 +378,7 @@ namespace krys::boo
           }
         }
 
-        if (alignmentContextTypes.Contains(AlignmentContextType::Columns))
+        if (alignmentContextTypes.contains(AlignmentContextType::Columns))
         {
           if (inner && inner->IsSubgridInParentDirection(GridTrackSizingDirection::Columns))
           {
@@ -401,7 +401,7 @@ namespace krys::boo
               : inner->IsSubgridRows();
         }
 
-        if (!innerAlignmentContextTypes.IsEmpty())
+        if (!innerAlignmentContextTypes.empty())
         {
           CacheBaselineAlignedGridItems(*inner, algorithm, innerAlignmentContextTypes, callback,
                                         cachingRowSubgridsForRootGrid);

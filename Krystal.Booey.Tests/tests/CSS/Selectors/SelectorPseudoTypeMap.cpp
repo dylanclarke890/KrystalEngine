@@ -27,10 +27,10 @@ namespace krys::boo::css::tests
 
   TEST_CASE("SelectorEnums(traits)", "[CSS][Selectors][SelectorPseudoTypeMap]")
   {
-    STATIC_CHECK(EnumTraits<SelectorPseudoClass>::DistinctValues == 65uz);
-    STATIC_CHECK(EnumTraits<SelectorPseudoElement>::DistinctValues == 18uz);
-    STATIC_CHECK(BitCount<SelectorPseudoClass>() == 7u);
-    STATIC_CHECK(BitCount<SelectorPseudoElement>() == 5u);
+    STATIC_CHECK((ToUnderlying(MaxEnumValue(SelectorPseudoClass {})) + 1uz) == 65uz);
+    STATIC_CHECK((ToUnderlying(MaxEnumValue(SelectorPseudoElement {})) + 1uz) == 18uz);
+    STATIC_CHECK(EnumBitWidth<SelectorPseudoClass> == 7u);
+    STATIC_CHECK(EnumBitWidth<SelectorPseudoElement> == 5u);
   }
 
   TEST_CASE("FindPseudoClassAndCompatibilityElementName(pseudo-classes)",

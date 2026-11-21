@@ -24,7 +24,7 @@ namespace krys::boo::dom
     // 3. If the nth bit (where 0 is the least significant bit) of traverser’s whatToShow is not set, then
     // return
     //    FILTER_SKIP.
-    auto whatToShow = static_cast<underlying_t<WhatToShow>>(traverser.WhatToShow());
+    auto whatToShow = traverser.WhatToShow().ToRaw();
     if ((whatToShow & (1u << n)) == 0u)
     {
       return FilterResult::FILTER_SKIP;

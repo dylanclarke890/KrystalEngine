@@ -212,7 +212,7 @@ namespace krys::boo
 
     bool paintSelectedTextOnly = _paintInfo.Phase == PaintPhase::Selection;
     bool shouldPaintSelectionHighlight =
-      !_paintInfo.PaintBehavior.Contains(PaintBehavior::SkipSelectionHighlight);
+      !_paintInfo.PaintBehavior.contains(PaintBehavior::SkipSelectionHighlight);
     bool hasSelection = !parentRenderer.GetDocument().Printing() && _haveSelection;
     if (!hasSelection && paintSelectedTextOnly)
     {
@@ -252,7 +252,7 @@ namespace krys::boo
       }
     }
 
-    if (Renderer().View().FrameView().GetPaintBehavior().Contains(PaintBehavior::RenderingSVGClipOrMask))
+    if (Renderer().View().FrameView().GetPaintBehavior().contains(PaintBehavior::RenderingSVGClipOrMask))
     {
       hasFill = true;
       hasVisibleStroke = false;
@@ -342,11 +342,11 @@ namespace krys::boo
       {RenderSVGResourceMode::ApplyToFill, RenderSVGResourceMode::ApplyToStroke}));
 
     Color fallbackColor;
-    if (PaintingResourceMode().Contains(RenderSVGResourceMode::ApplyToFill))
+    if (PaintingResourceMode().contains(RenderSVGResourceMode::ApplyToFill))
     {
       _legacyPaintingResource = LegacyRenderSVGResource::FillPaintingResource(renderer, style, fallbackColor);
     }
-    else if (PaintingResourceMode().Contains(RenderSVGResourceMode::ApplyToStroke))
+    else if (PaintingResourceMode().contains(RenderSVGResourceMode::ApplyToStroke))
     {
       _legacyPaintingResource =
         LegacyRenderSVGResource::StrokePaintingResource(renderer, style, fallbackColor);
@@ -378,7 +378,7 @@ namespace krys::boo
       }
     }
 
-    if (PaintingResourceMode().Contains(RenderSVGResourceMode::ApplyToStroke))
+    if (PaintingResourceMode().contains(RenderSVGResourceMode::ApplyToStroke))
     {
       if (style.VectorEffect() == VectorEffect::NonScalingStroke)
       {
@@ -548,7 +548,7 @@ namespace krys::boo
     const RenderBoxModelObject &decorationRenderer) noexcept
   {
     krys_debug_assert(!_legacyPaintingResource);
-    krys_debug_assert(!PaintingResourceMode().IsEmpty());
+    krys_debug_assert(!PaintingResourceMode().empty());
 
     auto &context = _paintInfo.Context();
     auto &decorationStyle = decorationRenderer.Style();

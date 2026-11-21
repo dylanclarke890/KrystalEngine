@@ -212,19 +212,19 @@ namespace krys::boo::style::tests
     {
       CHECK(keyword(css::ValueId::InternalDocumentTextColor).GetResolvedColor() == boo::Color::black);
 
-      auto link = css::ColorFromKeyword(css::ValueId::WebkitLink, ColorOptions::None);
+      auto link = css::ColorFromKeyword(css::ValueId::WebkitLink, ColorOptions {});
       CHECK(keyword(css::ValueId::WebkitLink).GetResolvedColor() == link);
 
       CHECK(keyword(css::ValueId::WebkitActivelink).GetResolvedColor()
-            == css::ColorFromKeyword(css::ValueId::WebkitActivelink, ColorOptions::None));
+            == css::ColorFromKeyword(css::ValueId::WebkitActivelink, ColorOptions {}));
       CHECK(keyword(css::ValueId::WebkitFocusRingColor).GetResolvedColor()
-            == RenderTheme::Singleton().FocusRingColor(ColorOptions::None));
+            == RenderTheme::Singleton().FocusRingColor(ColorOptions {}));
     }
 
     SECTION("system colours follow the style's colour scheme")
     {
-      auto light = css::ColorFromKeyword(css::ValueId::Linktext, ColorOptions::None);
-      auto dark = css::ColorFromKeyword(css::ValueId::Linktext, ColorOptions::UseDarkAppearance);
+      auto light = css::ColorFromKeyword(css::ValueId::Linktext, ColorOptions {});
+      auto dark = css::ColorFromKeyword(css::ValueId::Linktext, ColorOption::UseDarkAppearance);
       REQUIRE(light != dark);
 
       CHECK(keyword(css::ValueId::Linktext).GetResolvedColor() == light);
@@ -234,7 +234,7 @@ namespace krys::boo::style::tests
         null});
       CHECK(keyword(css::ValueId::Linktext).GetResolvedColor() == dark);
       CHECK(keyword(css::ValueId::WebkitLink).GetResolvedColor()
-            == css::ColorFromKeyword(css::ValueId::WebkitLink, ColorOptions::UseDarkAppearance));
+            == css::ColorFromKeyword(css::ValueId::WebkitLink, ColorOption::UseDarkAppearance));
     }
 
     SECTION("light-dark() picks by the style's colour scheme")

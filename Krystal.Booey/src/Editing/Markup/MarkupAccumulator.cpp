@@ -336,17 +336,17 @@ namespace krys::boo
       size_t length = 1;
       switch (character)
       {
-        case '&':  replacement = entityMask.Contains(EntityMask::Amp) ? u8"&amp;" : u8""; break;
-        case '<':  replacement = entityMask.Contains(EntityMask::Lt) ? u8"&lt;" : u8""; break;
-        case '>':  replacement = entityMask.Contains(EntityMask::Gt) ? u8"&gt;" : u8""; break;
-        case '"':  replacement = entityMask.Contains(EntityMask::Quot) ? u8"&quot;" : u8""; break;
-        case '\t': replacement = entityMask.Contains(EntityMask::Tab) ? u8"&#9;" : u8""; break;
-        case '\n': replacement = entityMask.Contains(EntityMask::LineFeed) ? u8"&#10;" : u8""; break;
-        case '\r': replacement = entityMask.Contains(EntityMask::CarriageReturn) ? u8"&#13;" : u8""; break;
+        case '&':  replacement = entityMask.contains(EntityMask::Amp) ? u8"&amp;" : u8""; break;
+        case '<':  replacement = entityMask.contains(EntityMask::Lt) ? u8"&lt;" : u8""; break;
+        case '>':  replacement = entityMask.contains(EntityMask::Gt) ? u8"&gt;" : u8""; break;
+        case '"':  replacement = entityMask.contains(EntityMask::Quot) ? u8"&quot;" : u8""; break;
+        case '\t': replacement = entityMask.contains(EntityMask::Tab) ? u8"&#9;" : u8""; break;
+        case '\n': replacement = entityMask.contains(EntityMask::LineFeed) ? u8"&#10;" : u8""; break;
+        case '\r': replacement = entityMask.contains(EntityMask::CarriageReturn) ? u8"&#13;" : u8""; break;
         case 0xC2:
           // U+00A0 NO-BREAK SPACE, which is two bytes in UTF-8.
           if (i + 1 < source.size() && static_cast<uint8>(source[i + 1]) == 0xA0
-              && entityMask.Contains(EntityMask::Nbsp))
+              && entityMask.contains(EntityMask::Nbsp))
           {
             replacement = u8"&nbsp;";
             length = 2;

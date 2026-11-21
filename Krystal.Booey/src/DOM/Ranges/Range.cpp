@@ -240,7 +240,8 @@ namespace krys::boo::dom
   {
     // 1. If how is not one of START_TO_START, START_TO_END, END_TO_END, and END_TO_START, then throw a
     //    "NotSupportedError" DOMException.
-    if (static_cast<uint32>(std::to_underlying(how)) >= EnumTraits<BoundaryPointComparator>::DistinctValues)
+    if (static_cast<uint32>(std::to_underlying(how))
+        >= (ToUnderlying(MaxEnumValue(BoundaryPointComparator {})) + 1uz))
     {
       return Exception(ExceptionCode::NotSupportedError);
     }

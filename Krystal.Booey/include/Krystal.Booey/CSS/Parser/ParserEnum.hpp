@@ -41,8 +41,11 @@ namespace krys::boo::css
     Function,
   };
 
+  consteval NestedParserContextType MaxEnumValue(NestedParserContextType) noexcept
+  {
+    return NestedParserContextType::Function;
+  }
+
   /// @brief The innermost rule a selector or rule is nested inside, if any.
   using NestedContext = Maybe<NestedParserContextType>;
 }
-
-KRYS_DEFINE_CONTIGUOUS_ENUM_TRAITS(krys::boo::css::NestedParserContextType, 3uz);

@@ -34,11 +34,6 @@
 #include "Krystal.Core/Memory/WeakPtr.hpp"
 #include "Krystal.Core/Types/Func.hpp"
 
-namespace krys::boo
-{
-  class Document;
-}
-
 namespace krys::boo::style
 {
   struct ResolutionContext;
@@ -46,8 +41,10 @@ namespace krys::boo::style
 
 namespace krys::boo
 {
+  class Document;
   class KeyframeEffect;
   class RenderStyle;
+
   struct Settings;
 
   /// @brief The relevant keyframe effects targeting an element, or one of its pseudo-elements, sorted by

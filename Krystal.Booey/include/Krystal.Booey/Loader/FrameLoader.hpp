@@ -43,12 +43,6 @@
 #include "Krystal.Core/Memory/UniquePtr.hpp"
 #include "Krystal.Core/Types/Maybe.hpp"
 
-namespace krys::boo
-{
-  class Element;
-  class Event;
-}
-
 namespace krys::net
 {
   class ResourceError;
@@ -59,6 +53,8 @@ namespace krys::net
 namespace krys::boo
 {
   class DocumentLoader;
+  class Element;
+  class Event;
   class FormSubmission;
   class Frame;
   class FrameLoadRequest;

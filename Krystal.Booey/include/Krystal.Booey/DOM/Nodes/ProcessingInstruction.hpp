@@ -32,11 +32,6 @@
 #include "Krystal.Core/TypeCast.hpp"
 #include "Krystal.Core/Types/Maybe.hpp"
 
-namespace krys::boo
-{
-  class CSSStyleSheet;
-}
-
 namespace krys::boo::dom
 {
   class NodeAlgorithms;
@@ -45,6 +40,8 @@ namespace krys::boo::dom
 
 namespace krys::boo
 {
+  class CSSStyleSheet;
+
   /// @brief A processing instruction (`<?target data?>`), whose data holds pseudo-attributes.
   /// @see https://dom.spec.whatwg.org/#interface-processinginstruction
   class ProcessingInstruction : public CharacterData, private CachedStyleSheetClient

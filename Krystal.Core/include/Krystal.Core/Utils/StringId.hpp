@@ -60,10 +60,7 @@ namespace krys
   {
     return StringId(s, count);
   }
-}
 
-namespace krys
-{
   template <>
   struct FastHash<StringId>
   {

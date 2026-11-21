@@ -219,12 +219,12 @@ void main()
   private:
     KRYS_NODISCARD bool CreateResources() noexcept
     {
-      auto texture =
-        _device.CreateTexture({.Format = gfx::TextureFormat::RGBA8Unorm,
-                               .Width = TextureSize,
-                               .Height = TextureSize,
-                               .Usage = gfx::TextureUsage::RenderTarget | gfx::TextureUsage::Sampled,
-                               .DebugName = u8"Editor.Cube"});
+      auto texture = _device.CreateTexture(
+        {.Format = gfx::TextureFormat::RGBA8Unorm,
+         .Width = TextureSize,
+         .Height = TextureSize,
+         .Usage = EnumSet<gfx::TextureUsage> {gfx::TextureUsage::RenderTarget, gfx::TextureUsage::Sampled},
+         .DebugName = u8"Editor.Cube"});
       auto depth = _device.CreateTexture({.Format = gfx::TextureFormat::Depth32Float,
                                           .Width = TextureSize,
                                           .Height = TextureSize,

@@ -84,12 +84,12 @@ namespace krys::ui::tests
         setup(view, device, textures);
       }
 
-      auto target =
-        device.CreateTexture({.Format = gfx::TextureFormat::RGBA8Unorm,
-                              .Width = width,
-                              .Height = height,
-                              .Usage = gfx::TextureUsage::RenderTarget | gfx::TextureUsage::Sampled,
-                              .DebugName = u8"Golden"});
+      auto target = device.CreateTexture(
+        {.Format = gfx::TextureFormat::RGBA8Unorm,
+         .Width = width,
+         .Height = height,
+         .Usage = EnumSet<gfx::TextureUsage> {gfx::TextureUsage::RenderTarget, gfx::TextureUsage::Sampled},
+         .DebugName = u8"Golden"});
       REQUIRE(target.has_value());
       device.BeginFrame();
       auto &commands = device.GetCommandBuffer();

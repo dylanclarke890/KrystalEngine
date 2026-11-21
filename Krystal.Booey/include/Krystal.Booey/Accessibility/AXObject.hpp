@@ -71,9 +71,15 @@
 
 namespace krys::boo
 {
+  class AXObject;
+  class AXObjectCache;
   class Document;
   class Element;
+  class Frame;
+  class FrameView;
   class Node;
+  class RenderObject;
+  class RenderStyle;
 
   /// @brief Why an accessibility object is being detached from its cache.
   enum class AXDetachmentType : uint8
@@ -83,6 +89,11 @@ namespace krys::boo
     ElementChanged,
   };
 
+  consteval AXDetachmentType MaxEnumValue(AXDetachmentType) noexcept
+  {
+    return AXDetachmentType::ElementChanged;
+  }
+
   /// @brief Whether an object must be in the tree, must be left out, or is left to the usual rules.
   enum class AXObjectInclusion : uint8
   {
@@ -90,6 +101,11 @@ namespace krys::boo
     IgnoreObject,
     DefaultBehavior,
   };
+
+  consteval AXObjectInclusion MaxEnumValue(AXObjectInclusion) noexcept
+  {
+    return AXObjectInclusion::DefaultBehavior;
+  }
 
   /// @brief A checkbox's, radio button's or toggle button's state.
   enum class AXButtonState : uint8
@@ -99,6 +115,11 @@ namespace krys::boo
     Mixed,
   };
 
+  consteval AXButtonState MaxEnumValue(AXButtonState) noexcept
+  {
+    return AXButtonState::Mixed;
+  }
+
   /// @brief Which way a slider, scroll bar, list and so on runs.
   enum class AXOrientation : uint8
   {
@@ -106,6 +127,11 @@ namespace krys::boo
     Vertical,
     Horizontal,
   };
+
+  consteval AXOrientation MaxEnumValue(AXOrientation) noexcept
+  {
+    return AXOrientation::Horizontal;
+  }
 
   /// @brief How one object relates to another (each relation has its reverse, such as `LabeledBy` and
   /// `LabelFor`): set up by ARIA's relation attributes, a label's control, and a cell's headers.
@@ -131,22 +157,11 @@ namespace krys::boo
     OwnedBy,
     OwnerFor,
   };
-}
 
-KRYS_DEFINE_CONTIGUOUS_ENUM_TRAITS(krys::boo::AXDetachmentType, 3uz);
-KRYS_DEFINE_CONTIGUOUS_ENUM_TRAITS(krys::boo::AXObjectInclusion, 3uz);
-KRYS_DEFINE_CONTIGUOUS_ENUM_TRAITS(krys::boo::AXButtonState, 3uz);
-KRYS_DEFINE_CONTIGUOUS_ENUM_TRAITS(krys::boo::AXOrientation, 3uz);
-KRYS_DEFINE_CONTIGUOUS_ENUM_TRAITS(krys::boo::AXRelation, 19uz);
-
-namespace krys::boo
-{
-  class AXObject;
-  class AXObjectCache;
-  class Frame;
-  class FrameView;
-  class RenderObject;
-  class RenderStyle;
+  consteval AXRelation MaxEnumValue(AXRelation) noexcept
+  {
+    return AXRelation::OwnerFor;
+  }
 
   /// @brief An accessibility object's identifier, unique within its cache.
   enum class AXId : uint64

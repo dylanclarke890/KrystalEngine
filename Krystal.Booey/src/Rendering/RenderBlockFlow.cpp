@@ -2651,7 +2651,7 @@ namespace krys::boo
         return;
       }
       auto shouldIncludeFloats = !MultiColumnFlow()
-                                 && (options.Contains(ComputeOverflowOptions::RecomputeFloats)
+                                 && (options.contains(ComputeOverflowOptions::RecomputeFloats)
                                      || CreatesNewFormattingContext() || HasSelfPaintingLayer());
       if (!shouldIncludeFloats)
       {

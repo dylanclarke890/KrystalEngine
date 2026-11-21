@@ -94,7 +94,7 @@ namespace krys::boo::style
         }
       }
 
-      if (flags.IsEmpty())
+      if (flags.empty())
       {
         return invalidValue();
       }
@@ -108,22 +108,22 @@ namespace krys::boo::style
   Ref<css::Value> CSSValueCreation<EnumSet<TextDecorationLine::Flag>>::operator()(
     css::ValuePool &, const RenderStyle &, const EnumSet<TextDecorationLine::Flag> &value) noexcept
   {
-    krys_debug_assert(!value.IsEmpty());
+    krys_debug_assert(!value.empty());
 
     css::ValueListBuilder list;
-    if (value.Contains(TextDecorationLine::Flag::Underline))
+    if (value.contains(TextDecorationLine::Flag::Underline))
     {
       list.push_back(css::PrimitiveValue::Create(css::ValueId::Underline));
     }
-    if (value.Contains(TextDecorationLine::Flag::Overline))
+    if (value.contains(TextDecorationLine::Flag::Overline))
     {
       list.push_back(css::PrimitiveValue::Create(css::ValueId::Overline));
     }
-    if (value.Contains(TextDecorationLine::Flag::LineThrough))
+    if (value.contains(TextDecorationLine::Flag::LineThrough))
     {
       list.push_back(css::PrimitiveValue::Create(css::ValueId::LineThrough));
     }
-    if (value.Contains(TextDecorationLine::Flag::Blink))
+    if (value.contains(TextDecorationLine::Flag::Blink))
     {
       list.push_back(css::PrimitiveValue::Create(css::ValueId::Blink));
     }
@@ -136,12 +136,12 @@ namespace krys::boo::style
     StringBuilder &builder, const css::SerialisationContext &, const RenderStyle &,
     const EnumSet<TextDecorationLine::Flag> &value) noexcept
   {
-    krys_debug_assert(!value.IsEmpty());
+    krys_debug_assert(!value.empty());
 
     bool needsSpace = false;
     auto appendOption = [&](TextDecorationLine::Flag option, css::ValueId valueID)
     {
-      if (value.Contains(option))
+      if (value.contains(option))
       {
         if (needsSpace)
         {

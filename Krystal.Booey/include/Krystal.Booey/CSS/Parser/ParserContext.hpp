@@ -93,7 +93,3 @@ namespace krys::boo::css
   /// @brief A standards-mode context with every setting at its default.
   KRYS_NODISCARD const ParserContext &StrictParserContext() noexcept;
 }
-
-namespace krys
-{
-}

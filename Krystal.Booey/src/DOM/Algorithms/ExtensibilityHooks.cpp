@@ -204,7 +204,7 @@ namespace krys::boo::dom
     {
       if (shadowRoot->Host()->IsConnected())
       {
-        shadowRoot->SetNodeFlag(NodeFlags::IsConnected);
+        shadowRoot->_nodeFlags.Add(NodeFlag::IsConnected);
       }
 
       insertedNode.InvalidateStyle(style::Validity::SubtreeInvalid,
@@ -225,12 +225,12 @@ namespace krys::boo::dom
 
     if (parent->IsConnected())
     {
-      insertedNode.SetNodeFlag(NodeFlags::IsConnected);
+      insertedNode._nodeFlags.Add(NodeFlag::IsConnected);
     }
 
     if (parent->IsInShadowTree())
     {
-      insertedNode.SetNodeFlag(NodeFlags::IsInShadowTree);
+      insertedNode._nodeFlags.Add(NodeFlag::IsInShadowTree);
       insertedNode._containingShadowRoot = parent->_containingShadowRoot;
     }
 
@@ -292,11 +292,11 @@ namespace krys::boo::dom
 
     if (parent->IsInShadowTree())
     {
-      movedNode.SetNodeFlag(NodeFlags::IsInShadowTree);
+      movedNode._nodeFlags.Add(NodeFlag::IsInShadowTree);
     }
     else
     {
-      movedNode.ClearNodeFlag(NodeFlags::IsInShadowTree);
+      movedNode._nodeFlags.Remove(NodeFlag::IsInShadowTree);
     }
     movedNode._containingShadowRoot = parent->_containingShadowRoot;
 
@@ -332,7 +332,7 @@ namespace krys::boo::dom
   {
     bool wasConnected = removedNode.IsConnected();
     bool wasInTreeScope = wasConnected || removedNode.IsInShadowTree();
-    removedNode.ClearNodeFlag(NodeFlags::IsConnected);
+    removedNode._nodeFlags.Remove(NodeFlag::IsConnected);
 
     if (auto *element = DynamicDowncast<Element>(removedNode))
     {
@@ -375,7 +375,7 @@ namespace krys::boo::dom
     // its light tree leave the shadow tree they were in, if any.
     if (!Is<ShadowRoot>(TreeQueries::Root(removedNode)))
     {
-      removedNode.ClearNodeFlag(NodeFlags::IsInShadowTree);
+      removedNode._nodeFlags.Remove(NodeFlag::IsInShadowTree);
       removedNode._containingShadowRoot = nullptr;
     }
 

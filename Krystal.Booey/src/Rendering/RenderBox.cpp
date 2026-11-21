@@ -1037,21 +1037,21 @@ namespace krys::boo
     {
       mode.Add(MapCoordinatesMode::IsFixed);
     }
-    else if (mode.Contains(MapCoordinatesMode::IsFixed) && CanContainFixedPositionObjects())
+    else if (mode.contains(MapCoordinatesMode::IsFixed) && CanContainFixedPositionObjects())
     {
       mode.Remove(MapCoordinatesMode::IsFixed);
     }
 
     if (wasFixed)
     {
-      *wasFixed = mode.Contains(MapCoordinatesMode::IsFixed);
+      *wasFixed = mode.contains(MapCoordinatesMode::IsFixed);
     }
 
     auto containerOffset = OffsetFromContainer(*container, LayoutPoint(transformState.MappedPoint()));
 
     // Remove sticky positioning from the offset if it should be ignored. This is done here in order to avoid
     // piping this flag down the method chain.
-    if (mode.Contains(MapCoordinatesMode::IgnoreStickyOffsets) && IsStickilyPositioned())
+    if (mode.contains(MapCoordinatesMode::IgnoreStickyOffsets) && IsStickilyPositioned())
     {
       containerOffset -= StickyPositionOffset();
     }
@@ -1092,7 +1092,7 @@ namespace krys::boo
     {
       mode.Add(MapCoordinatesMode::IsFixed);
     }
-    else if (mode.Contains(MapCoordinatesMode::IsFixed) && CanContainFixedPositionObjects())
+    else if (mode.contains(MapCoordinatesMode::IsFixed) && CanContainFixedPositionObjects())
     {
       // If this box has a transform, it acts as a fixed position container for fixed descendants,
       // and may itself also be fixed position. So propagate 'fixed' up only if this box is fixed position.
@@ -1331,8 +1331,8 @@ namespace krys::boo
     {
       return false;
     }
-    return marginTrimType ? GetRareData().TrimmedMargins.Contains(*marginTrimType)
-                          : !GetRareData().TrimmedMargins.IsEmpty();
+    return marginTrimType ? GetRareData().TrimmedMargins.contains(*marginTrimType)
+                          : !GetRareData().TrimmedMargins.empty();
   }
 
   template <typename Function>
@@ -4555,7 +4555,7 @@ namespace krys::boo
     // Paint offset cache is only valid for root-relative, non-fixed position repainting
     if (View().FrameView().LayoutContext().IsPaintOffsetCacheEnabled() && !container
         && styleToUse.Position() != PositionType::Fixed
-        && !context.Options.Contains(VisibleRectContext::Option::UseEdgeInclusiveIntersection))
+        && !context.Options.contains(VisibleRectContext::Option::UseEdgeInclusiveIntersection))
     {
       return ComputeVisibleRectsUsingPaintOffset(rects);
     }
@@ -4646,7 +4646,7 @@ namespace krys::boo
                         .ApplyCachedClipAndScrollPosition(adjustedRects, container, context);
       if (isEmpty)
       {
-        if (context.Options.Contains(VisibleRectContext::Option::UseEdgeInclusiveIntersection))
+        if (context.Options.contains(VisibleRectContext::Option::UseEdgeInclusiveIntersection))
         {
           return null;
         }
@@ -4712,16 +4712,16 @@ namespace krys::boo
   {
     FlipForWritingMode(rects);
 
-    if (context.Options.Contains(VisibleRectContext::Option::ApplyCompositedContainerScrolls)
+    if (context.Options.contains(VisibleRectContext::Option::ApplyCompositedContainerScrolls)
         || this != container || !UsesCompositedScrolling())
     {
       rects.MoveBy(-LayoutPoint(GetScrollPosition())); // For overflow:auto/scroll/hidden.
     }
 
     // Do not clip scroll layer contents to reduce the number of repaints while scrolling.
-    if ((!context.Options.Contains(VisibleRectContext::Option::ApplyCompositedClips)
+    if ((!context.Options.contains(VisibleRectContext::Option::ApplyCompositedClips)
          && UsesCompositedScrolling())
-        || (!context.Options.Contains(VisibleRectContext::Option::ApplyContainerClip) && this == container))
+        || (!context.Options.contains(VisibleRectContext::Option::ApplyContainerClip) && this == container))
     {
       FlipForWritingMode(rects);
       return true;
@@ -4755,7 +4755,7 @@ namespace krys::boo
     }
 
     bool intersects;
-    if (context.Options.Contains(VisibleRectContext::Option::UseEdgeInclusiveIntersection))
+    if (context.Options.contains(VisibleRectContext::Option::UseEdgeInclusiveIntersection))
     {
       intersects = rects.EdgeInclusiveIntersect(clipRect);
     }
@@ -6559,7 +6559,7 @@ namespace krys::boo
     // Figure out if we need to push a transparency layer to render our mask.
     bool pushTransparencyLayer = false;
     bool compositedMask = HasLayer() && Layer()->HasCompositedMask();
-    bool flattenCompositingLayers = paintInfo.PaintBehavior.Contains(PaintBehavior::FlattenCompositingLayers);
+    bool flattenCompositingLayers = paintInfo.PaintBehavior.contains(PaintBehavior::FlattenCompositingLayers);
     CompositeOperator compositeOp = CompositeOperator::SourceOver;
 
     bool allMaskImagesLoaded = true;

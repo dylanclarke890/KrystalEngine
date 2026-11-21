@@ -145,8 +145,8 @@ namespace krys::boo
       if (renderer.GetDocument().IsFocusedAndActive())
       {
         auto options = renderer.GetDocument().GetSettings().UseSystemAppearance
-                         ? style::ColorOptions::UseSystemAppearance
-                         : style::ColorOptions::None;
+                         ? style::ColorOption::UseSystemAppearance
+                         : style::ColorOptions {};
         paintStyle.FillColor = RenderTheme::Singleton().DefaultButtonTextColor(options);
         return paintStyle;
       }
@@ -220,12 +220,12 @@ namespace krys::boo
 
     Color fillColor =
       fillColorType == UseEmphasisMarkColor ? paintStyle.EmphasisMarkColor : paintStyle.FillColor;
-    if (mode.Contains(TextDrawingMode::Fill) && (fillColor != context.FillColor()))
+    if (mode.contains(TextDrawingMode::Fill) && (fillColor != context.FillColor()))
     {
       context.SetFillColor(fillColor);
     }
 
-    if (mode.Contains(TextDrawingMode::Stroke))
+    if (mode.contains(TextDrawingMode::Stroke))
     {
       if (paintStyle.StrokeColor != context.StrokeColor())
       {

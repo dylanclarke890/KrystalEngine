@@ -72,6 +72,18 @@
 
 namespace krys::boo
 {
+  class Document;
+  class DragCaretController;
+  class DragController;
+  class GraphicsContext;
+  class PointerCaptureController;
+  class PointerLockController;
+  class PopupOpeningObserver;
+  class ScrollLatchingController;
+  class VisiblePosition;
+  class WheelEventDeltaFilter;
+  class Window;
+
   /// @brief How the frame is presented, as an application manifest's `display` member (`display-mode`).
   /// @see https://w3c.github.io/manifest/#display-modes
   enum class ApplicationDisplayMode : uint8
@@ -81,21 +93,6 @@ namespace krys::boo
     MinimalUI,
     Browser,
   };
-}
-
-namespace krys::boo
-{
-  class Document;
-  class DragCaretController;
-  class DragController;
-  class GraphicsContext;
-  class Window;
-  class PointerCaptureController;
-  class PointerLockController;
-  class PopupOpeningObserver;
-  class ScrollLatchingController;
-  class VisiblePosition;
-  class WheelEventDeltaFilter;
 
   /// @brief Shows a document in a view, and runs the rendering update that brings the document up to date
   /// before the host paints it (the specification's "update the rendering"). The host creates a frame, gives

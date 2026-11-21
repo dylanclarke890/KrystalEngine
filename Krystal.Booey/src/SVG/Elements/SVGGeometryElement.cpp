@@ -60,7 +60,7 @@ namespace krys::boo
                                          UniquePtr<SVGPropertyRegistry> &&propertyRegistry,
                                          SVGElementInterface interface) noexcept
       : SVGGraphicsElement(document, krys::move(propertyRegistry), interface,
-                           SVGElementFlags::IsSvgGeometryElement),
+                           SVGElementFlag::IsSvgGeometryElement),
         _pathLength(SVGAnimatedNumber::Create(this))
   {
     static bool didRegistration = false;

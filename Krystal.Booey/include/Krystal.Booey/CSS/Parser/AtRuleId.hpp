@@ -68,9 +68,12 @@ namespace krys::boo::css
     Function,
   };
 
+  consteval AtRuleId MaxEnumValue(AtRuleId) noexcept
+  {
+    return AtRuleId::Function;
+  }
+
   /// @brief Looks up an at-rule by name (without the `@`), ignoring ASCII case.
   /// @return The at-rule, or `AtRuleId::Invalid` if the name isn't a known at-rule.
   KRYS_NODISCARD AtRuleId AtRuleIdFromName(CSSOMStringView name) noexcept;
 }
-
-KRYS_DEFINE_CONTIGUOUS_ENUM_TRAITS(krys::boo::css::AtRuleId, 24uz);

@@ -146,10 +146,7 @@ namespace krys::boo::tests
     CHECK(!image->IsSelected());
     CHECK(image->LocalSelectionRect().IsEmpty());
   }
-}
 
-namespace krys::boo::tests
-{
   TEST_CASE("RenderSelection: painting", "[Rendering][RenderSelection]")
   {
     RenderSelectionFixture fixture(u8"<style>::selection{background:#00FF00;color:#FF0000}</style>"
@@ -179,9 +176,9 @@ namespace krys::boo::tests
     // its colour (Adwaita has no selection foreground colours).
     auto &theme = RenderTheme::Singleton();
     auto activeBackground =
-      SerialisationForRenderTreeAsText(theme.ActiveSelectionBackgroundColor(style::ColorOptions::None));
+      SerialisationForRenderTreeAsText(theme.ActiveSelectionBackgroundColor(style::ColorOptions {}));
     auto overWhite =
-      BlendSourceOver(Color::white, theme.ActiveSelectionBackgroundColor(style::ColorOptions::None))
+      BlendSourceOver(Color::white, theme.ActiveSelectionBackgroundColor(style::ColorOptions {}))
         .ToColorTypeLossy<SRGBA<uint8>>()
         .Resolved();
     CHECK(std::abs(static_cast<int32>(overWhite.Blue) - 247) <= 2);
@@ -191,7 +188,7 @@ namespace krys::boo::tests
     fixture.Document->SetFocusedAndActive(false);
     auto inactive = fixture.Painted();
     auto inactiveBackground =
-      SerialisationForRenderTreeAsText(theme.InactiveSelectionBackgroundColor(style::ColorOptions::None));
+      SerialisationForRenderTreeAsText(theme.InactiveSelectionBackgroundColor(style::ColorOptions {}));
     CHECK_FALSE(inactive.contains(activeBackground));
     CHECK(inactive.contains(u8"(color " + inactiveBackground + u8")"));
   }

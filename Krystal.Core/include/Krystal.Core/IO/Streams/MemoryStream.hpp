@@ -20,7 +20,7 @@ namespace krys::io
     ReadFlags _flags;
 
   public:
-    constexpr static ReadFlags DefaultReadFlags = ReadFlags::None;
+    constexpr static ReadFlags DefaultReadFlags = ReadFlags {};
 
     explicit MemoryStreamReader(List<byte> &buffer, ReadFlags flags = DefaultReadFlags) noexcept
         : _buffer(buffer), _flags(flags)
@@ -49,7 +49,7 @@ namespace krys::io
 
       _isOpen = true;
 
-      if ((_flags & ReadFlags::OpenAtEnd) == ReadFlags::OpenAtEnd)
+      if ((_flags & ReadFlag::OpenAtEnd) == ReadFlag::OpenAtEnd)
       {
         _position = _buffer.size();
       }
@@ -150,7 +150,7 @@ namespace krys::io
     WriteFlags _flags;
 
   public:
-    constexpr static WriteFlags DefaultWriteFlags = WriteFlags::None;
+    constexpr static WriteFlags DefaultWriteFlags = WriteFlags {};
 
     explicit MemoryStreamWriter(List<byte> &buffer, WriteFlags flags = DefaultWriteFlags) noexcept
         : _buffer(buffer), _flags(flags)
@@ -179,12 +179,12 @@ namespace krys::io
 
       _isOpen = true;
 
-      if ((_flags & WriteFlags::Truncate) == WriteFlags::Truncate)
+      if ((_flags & WriteFlag::Truncate) == WriteFlag::Truncate)
       {
         _buffer.clear();
       }
 
-      if ((_flags & WriteFlags::OpenAtEnd) == WriteFlags::OpenAtEnd)
+      if ((_flags & WriteFlag::OpenAtEnd) == WriteFlag::OpenAtEnd)
       {
         _position = _buffer.size();
       }

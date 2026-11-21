@@ -73,12 +73,12 @@ namespace krys::boo
     // Used to indicate to the bindings that a JS exception was thrown below and it should be propagated.
     ExistingExceptionError,
   };
-}
 
-KRYS_DEFINE_CONTIGUOUS_ENUM_TRAITS(krys::boo::ExceptionCode, 38u)
+  consteval ExceptionCode MaxEnumValue(ExceptionCode) noexcept
+  {
+    return ExceptionCode::ExistingExceptionError;
+  }
 
-namespace krys::boo
-{
   class Exception
   {
   private:

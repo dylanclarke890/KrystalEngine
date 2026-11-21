@@ -53,7 +53,7 @@ namespace krys::boo
 
   HTMLFormControlElement::HTMLFormControlElement(Document &document, html::HTMLElementInterface interface,
                                                  html::HTMLElementFlags flags) noexcept
-      : HTMLElement(document, interface, flags, dom::NodeFlags::HasCustomStyleResolveCallbacks)
+      : HTMLElement(document, interface, flags, dom::NodeFlag::HasCustomStyleResolveCallbacks)
   {
   }
 

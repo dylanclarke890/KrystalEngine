@@ -30,11 +30,6 @@
 #include "Krystal.Core/Memory/RefPtr.hpp"
 #include "Krystal.Core/TypeCast.hpp"
 
-namespace krys::boo
-{
-  class CSSFunctionDescriptors;
-}
-
 namespace krys::boo::css
 {
   class FunctionDeclarationsRule;
@@ -42,6 +37,8 @@ namespace krys::boo::css
 
 namespace krys::boo
 {
+  class CSSFunctionDescriptors;
+
   /// @brief The declarations of an `@function` rule, exposed to scripts.
   /// @see https://drafts.csswg.org/css-mixins/#cssfunctiondeclarations
   class CSSFunctionDeclarations final : public CSSRule

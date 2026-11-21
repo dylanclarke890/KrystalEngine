@@ -37,12 +37,6 @@
 #include "Krystal.Core/Types/Maybe.hpp"
 #include "Krystal.Net/Url.hpp"
 
-namespace krys::boo
-{
-  class Document;
-  class Element;
-}
-
 namespace krys::boo::dom
 {
   class DataTransfer;
@@ -50,14 +44,17 @@ namespace krys::boo::dom
 
 namespace krys::boo
 {
+  class Document;
   class DragData;
-  struct DragState;
+  class Element;
   class Frame;
   class FrameSelection;
   class HTMLInputElement;
   class HitTestResult;
   class Image;
   class PlatformMouseEvent;
+
+  struct DragState;
 
   /// @brief A page's drags and drops: which element a press may drag, starting a drag through the host's
   /// drag client, and what a drag over the page and its drop do: the page's drag events, then by default

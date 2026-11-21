@@ -75,8 +75,8 @@ namespace krys::boo::style
   inline bool
     ComputedStyleBase::NonInheritedFlags::HasPseudoStyle(boo::PseudoElementType pseudo) const noexcept
   {
-    krys_debug_assert(AllPublicPseudoElementTypes.Contains(pseudo));
-    return EnumSet<boo::PseudoElementType>::FromRaw(PseudoBits).Contains(pseudo);
+    krys_debug_assert(AllPublicPseudoElementTypes.contains(pseudo));
+    return EnumSet<boo::PseudoElementType>::FromRaw(PseudoBits).contains(pseudo);
   }
 
   inline bool ComputedStyleBase::NonInheritedFlags::HasAnyPublicPseudoStyles() const noexcept

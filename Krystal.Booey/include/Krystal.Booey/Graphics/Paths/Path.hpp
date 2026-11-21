@@ -377,9 +377,6 @@ namespace krys::boo
     }
     return std::nullopt;
   }
-}
 
-namespace krys::boo
-{
   TextStream &operator<<(TextStream &ts, const Path &path) noexcept;
 }

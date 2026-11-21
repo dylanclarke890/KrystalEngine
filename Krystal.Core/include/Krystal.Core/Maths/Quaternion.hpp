@@ -72,10 +72,7 @@ namespace krys
       }
     }
   }
-}
 
-namespace krys
-{
 #pragma region Helper Macros
 
 #define QUATERNION_TEMPLATE_PARAMS krys::Number T

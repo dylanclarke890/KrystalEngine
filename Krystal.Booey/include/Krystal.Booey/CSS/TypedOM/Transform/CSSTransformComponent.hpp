@@ -29,11 +29,6 @@
 #include "Krystal.Booey/CSS/TypedOM/CSSStyleValue.hpp"
 #include "Krystal.Booey/DOM/Types/ExceptionOr.hpp"
 
-namespace krys::boo
-{
-  class Document;
-}
-
 namespace krys::boo::css
 {
   class DOMMatrix;
@@ -42,6 +37,8 @@ namespace krys::boo::css
 
 namespace krys::boo
 {
+  class Document;
+
   /// @brief The kinds of transform components.
   enum class CSSTransformType : uint8
   {

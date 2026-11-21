@@ -40,11 +40,6 @@
 #include "Krystal.Core/Containers/HashSet.hpp"
 #include "Krystal.Core/TypeCast.hpp"
 
-namespace krys::boo
-{
-  class Document;
-}
-
 namespace krys::boo::style
 {
   struct ResolutionContext;
@@ -56,6 +51,7 @@ namespace krys::boo
   class AnimationEffect;
   class AnimationEventBase;
   class AnimationTimeline;
+  class Document;
   class KeyframeEffect;
   class RenderStyle;
 

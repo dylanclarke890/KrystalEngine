@@ -37,7 +37,7 @@ namespace krys::boo::display_list
   utf8_string DisplayList::AsText(EnumSet<AsTextFlag> flags) const noexcept
   {
     TextStream stream(TextStream::LineMode::MultipleLine, TextStream::Formatting::SVGStyleRect);
-    if (flags.Contains(AsTextFlag::IncludeResourceIdentifiers))
+    if (flags.contains(AsTextFlag::IncludeResourceIdentifiers))
     {
       stream.DumpProperty(u8"display-list-identifier", static_cast<const void *>(this));
     }

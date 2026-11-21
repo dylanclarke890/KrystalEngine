@@ -110,23 +110,23 @@ namespace krys::boo
         }
 
         style.BackgroundColor = RenderTheme::Singleton().AnnotationHighlightBackgroundColor(
-          style::ColorOptions::UseSystemAppearance);
+          style::ColorOption::UseSystemAppearance);
         style.TextStyles.FillColor = RenderTheme::Singleton().AnnotationHighlightForegroundColor(
-          style::ColorOptions::UseSystemAppearance);
+          style::ColorOption::UseSystemAppearance);
         break;
       }
       case MarkedText::Type::TextExtractionHighlight:
         // FIXME: This just uses the same color as annotation highlights for now, but we may eventually
         // require a different appearance.
         style.BackgroundColor = RenderTheme::Singleton().AnnotationHighlightBackgroundColor(
-          style::ColorOptions::UseSystemAppearance);
+          style::ColorOption::UseSystemAppearance);
         style.TextStyles.FillColor = RenderTheme::Singleton().AnnotationHighlightForegroundColor(
-          style::ColorOptions::UseSystemAppearance);
+          style::ColorOption::UseSystemAppearance);
         break;
       case MarkedText::Type::TextMatch:
         // Text matches always use the light system appearance.
         style.BackgroundColor =
-          RenderTheme::Singleton().TextSearchHighlightColor(style::ColorOptions::UseSystemAppearance);
+          RenderTheme::Singleton().TextSearchHighlightColor(style::ColorOption::UseSystemAppearance);
         break;
       case MarkedText::Type::DraggedContent:     style.Alpha = 0.25; break;
       case MarkedText::Type::TransparentContent: style.Alpha = 0.0; break;

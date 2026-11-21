@@ -46,7 +46,7 @@ namespace krys::boo
   HTMLAreaElement::HTMLAreaElement(Document &document) noexcept
       : HTMLElement(document, html::HTMLElementInterface::Area)
   {
-    SetEventTargetFlag(dom::EventTargetFlags::HasActivationBehavior);
+    _eventTargetFlags.Add(dom::EventTargetFlag::HasActivationBehavior);
   }
 
   HTMLAreaElement::~HTMLAreaElement() noexcept = default;

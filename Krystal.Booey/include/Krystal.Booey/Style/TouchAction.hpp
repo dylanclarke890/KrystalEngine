@@ -38,6 +38,9 @@ namespace krys::boo
     PanY,
     PinchZoom,
   };
-}
 
-KRYS_DEFINE_CONTIGUOUS_ENUM_TRAITS(krys::boo::TouchAction, 6uz);
+  consteval TouchAction MaxEnumValue(TouchAction) noexcept
+  {
+    return TouchAction::PinchZoom;
+  }
+}

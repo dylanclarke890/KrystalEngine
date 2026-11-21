@@ -58,11 +58,11 @@ namespace krys::boo::css::tests
   TEST_CASE("UnitCategoryForType(every unit)", "[CSS][Units]")
   {
     // Every unit has a category (none falls through to unreachable).
-    for (size_t i = 0uz; i < EnumTraits<UnitType>::DistinctValues; ++i)
+    for (size_t i = 0uz; i < (ToUnderlying(MaxEnumValue(UnitType {})) + 1uz); ++i)
     {
       INFO(i);
       auto category = UnitCategoryForType(static_cast<UnitType>(i));
-      CHECK(static_cast<size_t>(category) < EnumTraits<UnitCategory>::DistinctValues);
+      CHECK(static_cast<size_t>(category) < (ToUnderlying(MaxEnumValue(UnitCategory {})) + 1uz));
     }
   }
 

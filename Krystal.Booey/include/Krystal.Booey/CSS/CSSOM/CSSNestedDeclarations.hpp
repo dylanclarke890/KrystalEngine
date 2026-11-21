@@ -24,12 +24,6 @@
 #include "Krystal.Core/Memory/RefPtr.hpp"
 #include "Krystal.Core/TypeCast.hpp"
 
-namespace krys::boo
-{
-  class CSSStyleProperties;
-  class StyleRuleCSSStyleProperties;
-}
-
 namespace krys::boo::css
 {
   class NestedDeclarationsRule;
@@ -37,6 +31,9 @@ namespace krys::boo::css
 
 namespace krys::boo
 {
+  class CSSStyleProperties;
+  class StyleRuleCSSStyleProperties;
+
   /// @brief Declarations that follow nested rules, exposed to scripts.
   /// @see https://drafts.csswg.org/css-nesting/#the-cssnestrule
   class CSSNestedDeclarations final : public CSSRule

@@ -55,6 +55,7 @@
 #include "Krystal.Booey/Style/PseudoElementIdentifier.hpp"
 #include "Krystal.Booey/Style/Values/Color/ColorOptions.hpp"
 #include "Krystal.Core/Containers/Array.hpp"
+#include "Krystal.Core/Containers/EnumSet.hpp"
 #include "Krystal.Core/Containers/FixedList.hpp"
 #include "Krystal.Core/Containers/HashMap.hpp"
 #include "Krystal.Core/Containers/List.hpp"
@@ -72,12 +73,6 @@
 #include "Krystal.Core/Types/Variant.hpp"
 #include "Krystal.Net/Url.hpp"
 
-namespace krys::boo::html
-{
-  struct ParseHTMLUnsafeOptions;
-  struct SetHTMLOptions;
-}
-
 namespace krys::text
 {
   class ICodec;
@@ -86,59 +81,6 @@ namespace krys::text
 namespace krys::i18n
 {
   class Locale;
-}
-
-namespace krys::boo
-{
-  class AXObjectCache;
-  class AnimationTimelinesController;
-  class Attr;
-  class CDATASection;
-  class CachedResourceLoader;
-  class Comment;
-  class DOMSelection;
-  class DocumentTimeline;
-  class DocumentType;
-  class Editor;
-  class Element;
-  class FontLoadRequest;
-  class Frame;
-  class FrameSelection;
-  class FrameView;
-  class GraphicsClient;
-  class HTMLBaseElement;
-  class HTMLBodyElement;
-  class HTMLDialogElement;
-  class HTMLElement;
-  class HTMLHeadElement;
-  class HTMLHtmlElement;
-  class HTMLInputElement;
-  class HTMLTitleElement;
-  class HitTestLocation;
-  class HitTestRequest;
-  class HitTestResult;
-  class IntersectionObserver;
-  struct IntersectionObserverData;
-  class MediaQueryList;
-  class MouseEvent;
-  class MouseEventWithHitTestResults;
-  class PlatformMouseEvent;
-  class PointerEvent;
-  class ProcessingInstruction;
-  class RenderElement;
-  class RenderStyle;
-  class RenderTreeUpdater;
-  class RenderView;
-  class ResizeObserver;
-  class SVGDocumentExtensions;
-  class SVGElement;
-  struct Settings;
-  class ShadowRoot;
-  class StyleOriginatedTimelinesController;
-  class StyleSheetList;
-  class Text;
-  class WebAnimation;
-  class Window;
 }
 
 namespace krys::boo::css
@@ -173,38 +115,62 @@ namespace krys::boo::html
   class RenderBlocking;
   class TreeBuilder;
 
+  struct ParseHTMLUnsafeOptions;
+  struct SetHTMLOptions;
+
   enum class TaskSource : uint8;
 }
 
 namespace krys::boo::dom
 {
+  class ContentVisibilityDocumentState;
+  class DOMImplementation;
+  class DocumentAlgorithms;
+  class DocumentFontLoader;
+  class HTMLCollection;
+  class HighlightRegistry;
+  class LiveRangeUpdater;
+  class MutationAlgorithms;
+  class NodeAlgorithms;
+  class NodeIterator;
+  class SelectorQuery;
+  class TreeWalker;
+  class UserActionElementSet;
   class VisibilityChangeClient;
-  enum class FocusPreviousElement : bool;
+
+  enum class DidUpdateAnyContentRelevancy : bool;
   enum class FireEvents : bool;
+  enum class FocusPreviousElement : bool;
   enum class PopoverState : uint8;
 
   /// @brief Various flags used for optimizations in the Document class.
-  enum class DocumentFlags : uint16
+  enum class DocumentFlag : uint16
   {
-    None = 0,
 
     /// @brief Indicates the type of the document is 'xml'.
     /// @see https://dom.spec.whatwg.org/#concept-document-type
-    IsXMLDocument = 1 << 1,
+    IsXMLDocument,
 
     /// @brief Indicates the type of the document is 'html'.
     /// @see https://dom.spec.whatwg.org/#concept-document-type
-    IsHTMLDocument = 1 << 2,
+    IsHTMLDocument,
 
     /// @brief Indicates the type of the document is 'xhtml'.
-    IsXHTMLDocument = 1 << 3,
+    IsXHTMLDocument,
 
     /// @brief Indicates the type of the document is 'svg'.
-    IsSVGDocument = 1 << 4,
+    IsSVGDocument,
 
     /// @brief An HTML document made to show an image (`ImageDocument`).
-    IsImageDocument = 1 << 5,
+    IsImageDocument,
   };
+
+  consteval DocumentFlag MaxEnumValue(DocumentFlag) noexcept
+  {
+    return DocumentFlag::IsImageDocument;
+  }
+
+  using DocumentFlags = EnumSet<DocumentFlag>;
 
   /// @see https://dom.spec.whatwg.org/#concept-document-mode
   enum class QuirksMode : uint8
@@ -213,6 +179,11 @@ namespace krys::boo::dom
     Quirks,
     LimitedQuirks,
   };
+
+  consteval QuirksMode MaxEnumValue(QuirksMode) noexcept
+  {
+    return QuirksMode::LimitedQuirks;
+  }
 
   /// @brief Why a document's tasks and active objects (its timers, its animation frame callbacks) are
   /// suspended.
@@ -223,27 +194,6 @@ namespace krys::boo::dom
     /// @brief The host suspended the page.
     PageWillBeSuspended,
   };
-}
-
-KRYS_DEFINE_FLAGS_ENUM_TRAITS(krys::boo::dom::DocumentFlags, 6uz);
-KRYS_DEFINE_CONTIGUOUS_ENUM_TRAITS(krys::boo::dom::QuirksMode, 3uz);
-
-namespace krys::boo::dom
-{
-  class ContentVisibilityDocumentState;
-  class DOMImplementation;
-  class DocumentAlgorithms;
-  class HTMLCollection;
-  class HighlightRegistry;
-  class LiveRangeUpdater;
-  class MutationAlgorithms;
-  class NodeAlgorithms;
-  class NodeIterator;
-  class SelectorQuery;
-  class TreeWalker;
-  class UserActionElementSet;
-
-  enum class DidUpdateAnyContentRelevancy : bool;
 
   /// @see https://dom.spec.whatwg.org/#interface-document
   /// @brief The event a scroll fires at what scrolled.
@@ -252,8 +202,6 @@ namespace krys::boo::dom
     Scroll,
     Scrollend,
   };
-
-  class DocumentFontLoader;
 
   /// @brief When a document reached each point of its loading, in milliseconds since its window's time
   /// origin; 0 for those it hasn't reached.
@@ -292,6 +240,57 @@ namespace krys::boo::dom
 
 namespace krys::boo
 {
+  class AXObjectCache;
+  class AnimationTimelinesController;
+  class Attr;
+  class CDATASection;
+  class CachedResourceLoader;
+  class Comment;
+  class DOMSelection;
+  class DocumentTimeline;
+  class DocumentType;
+  class Editor;
+  class Element;
+  class FontLoadRequest;
+  class Frame;
+  class FrameSelection;
+  class FrameView;
+  class GraphicsClient;
+  class HTMLBaseElement;
+  class HTMLBodyElement;
+  class HTMLDialogElement;
+  class HTMLElement;
+  class HTMLHeadElement;
+  class HTMLHtmlElement;
+  class HTMLInputElement;
+  class HTMLTitleElement;
+  class HitTestLocation;
+  class HitTestRequest;
+  class HitTestResult;
+  class IntersectionObserver;
+  class MediaQueryList;
+  class MouseEvent;
+  class MouseEventWithHitTestResults;
+  class PlatformMouseEvent;
+  class PointerEvent;
+  class ProcessingInstruction;
+  class RenderElement;
+  class RenderStyle;
+  class RenderTreeUpdater;
+  class RenderView;
+  class ResizeObserver;
+  class SVGDocumentExtensions;
+  class SVGElement;
+  class ShadowRoot;
+  class StyleOriginatedTimelinesController;
+  class StyleSheetList;
+  class Text;
+  class WebAnimation;
+  class Window;
+
+  struct IntersectionObserverData;
+  struct Settings;
+
   /// @brief A document: the root of a node tree. It's an XML document unless it's an `HTMLDocument`.
   /// @see https://dom.spec.whatwg.org/#concept-document
   class Document : public ContainerNode, public dom::DocumentOrShadowRoot, public FontSelectorClient
@@ -337,10 +336,10 @@ namespace krys::boo
     List<dom::NodeIterator *> _nodeIterators;
     bool _allowDeclarativeShadowRoots : 1 {false};
     bool _hasXMLDeclaration : 1 {false};
-    dom::QuirksMode _quirksMode : BitCount<dom::QuirksMode>() {dom::QuirksMode::NoQuirks};
-    dom::DocumentFlags _flags : BitCount<dom::DocumentFlags>() {dom::DocumentFlags::None};
+    dom::QuirksMode _quirksMode : EnumBitWidth<dom::QuirksMode> {dom::QuirksMode::NoQuirks};
+    dom::DocumentFlags _documentFlags;
     html::DocumentReadyState _currentDocumentReadiness
-      : BitCount<html::DocumentReadyState>() {html::DocumentReadyState::Complete};
+      : EnumBitWidth<html::DocumentReadyState> {html::DocumentReadyState::Complete};
 
     /// @see https://html.spec.whatwg.org/#parser-cannot-change-the-mode-flag
     bool _parserCannotChangeTheMode : 1 {false};
@@ -653,12 +652,12 @@ namespace krys::boo
 
     /// @see https://dom.spec.whatwg.org/#dom-document-createnodeiterator
     KRYS_NODISCARD static Ref<dom::NodeIterator>
-      CreateNodeIterator(Node &root, dom::WhatToShow whatToShow = dom::WhatToShow::SHOW_ALL,
+      CreateNodeIterator(Node &root, dom::WhatToShow whatToShow = dom::ShowAll,
                          RefPtr<dom::NodeFilter> &&filter = nullptr) noexcept;
 
     /// @see https://dom.spec.whatwg.org/#dom-document-createtreewalker
     KRYS_NODISCARD static Ref<dom::TreeWalker>
-      CreateTreeWalker(Node &root, dom::WhatToShow whatToShow = dom::WhatToShow::SHOW_ALL,
+      CreateTreeWalker(Node &root, dom::WhatToShow whatToShow = dom::ShowAll,
                        RefPtr<dom::NodeFilter> &&filter = nullptr) noexcept;
 
 #pragma endregion
@@ -2296,47 +2295,32 @@ namespace krys::boo
 
     KRYS_NODISCARD bool IsHTMLDocument() const noexcept
     {
-      return HasFlag(_flags, dom::DocumentFlags::IsHTMLDocument);
+      return _documentFlags.contains(dom::DocumentFlag::IsHTMLDocument);
     }
 
     KRYS_NODISCARD bool IsXMLDocument() const noexcept
     {
-      return HasFlag(_flags, dom::DocumentFlags::IsXMLDocument);
+      return _documentFlags.contains(dom::DocumentFlag::IsXMLDocument);
     }
 
     KRYS_NODISCARD bool IsXHTMLDocument() const noexcept
     {
-      return HasFlag(_flags, dom::DocumentFlags::IsXHTMLDocument);
+      return _documentFlags.contains(dom::DocumentFlag::IsXHTMLDocument);
     }
 
     KRYS_NODISCARD bool IsSVGDocument() const noexcept
     {
-      return HasFlag(_flags, dom::DocumentFlags::IsSVGDocument);
+      return _documentFlags.contains(dom::DocumentFlag::IsSVGDocument);
     }
 
     KRYS_NODISCARD bool IsImageDocument() const noexcept
     {
-      return HasFlag(_flags, dom::DocumentFlags::IsImageDocument);
+      return _documentFlags.contains(dom::DocumentFlag::IsImageDocument);
     }
 
 #pragma endregion
 
 #pragma region Document Flags
-
-    KRYS_NODISCARD bool HasDocumentFlag(dom::DocumentFlags flags) const noexcept
-    {
-      return HasFlag(_flags, flags);
-    }
-
-    void SetDocumentFlag(dom::DocumentFlags flags) noexcept
-    {
-      _flags = _flags | flags;
-    }
-
-    void ClearDocumentFlag(dom::DocumentFlags flags) noexcept
-    {
-      _flags = _flags & ~flags;
-    }
 
 #pragma endregion
 

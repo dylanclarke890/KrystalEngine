@@ -86,20 +86,20 @@ namespace krys::boo
       result += text;
     };
 
-    if (options.Contains(AXStreamOption::Role))
+    if (options.contains(AXStreamOption::Role))
     {
       append(RoleToString(object.Role()));
     }
-    if (options.Contains(AXStreamOption::ObjectID))
+    if (options.contains(AXStreamOption::ObjectID))
     {
       append(u8"objectID=" + NumberAsText(static_cast<uint64>(object.ObjectID())));
     }
-    if (options.Contains(AXStreamOption::ParentID))
+    if (options.contains(AXStreamOption::ParentID))
     {
       auto *parent = object.ParentObjectUnignored();
       append(u8"parentID=" + NumberAsText(parent ? static_cast<uint64>(parent->ObjectID()) : 0));
     }
-    if (options.Contains(AXStreamOption::IdentifierAttribute))
+    if (options.contains(AXStreamOption::IdentifierAttribute))
     {
       if (auto *element = object.GetElement())
       {
@@ -109,7 +109,7 @@ namespace krys::boo
         }
       }
     }
-    if (options.Contains(AXStreamOption::Name))
+    if (options.contains(AXStreamOption::Name))
     {
       if (auto name = object.AccessibleName(); !name.empty())
       {
@@ -120,14 +120,14 @@ namespace krys::boo
         append(u8"description=" + Quoted(description));
       }
     }
-    if (options.Contains(AXStreamOption::Value))
+    if (options.contains(AXStreamOption::Value))
     {
       if (object.IsStaticText() || object.IsTextControl())
       {
         append(u8"value=" + Quoted(object.StringValue()));
       }
     }
-    if (options.Contains(AXStreamOption::RendererOrNode))
+    if (options.contains(AXStreamOption::RendererOrNode))
     {
       if (auto *renderer = object.Renderer())
       {
@@ -138,7 +138,7 @@ namespace krys::boo
         append(u8"node=" + node->NodeName());
       }
     }
-    if (options.Contains(AXStreamOption::DisplayContents))
+    if (options.contains(AXStreamOption::DisplayContents))
     {
       if (auto *element = object.GetElement(); element && element->HasDisplayContents())
       {

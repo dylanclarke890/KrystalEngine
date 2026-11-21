@@ -53,7 +53,8 @@ namespace krys::boo::css
     // Options to augment color parsing.
     struct ColorParsingOptions
     {
-      ColorType AllowedColorTypes = ColorType::Absolute | ColorType::Current | ColorType::System;
+      EnumSet<ColorType> AllowedColorTypes =
+        EnumSet<ColorType> {ColorType::Absolute, ColorType::Current, ColorType::System};
     };
 
     // MARK: Mode specific color settings.

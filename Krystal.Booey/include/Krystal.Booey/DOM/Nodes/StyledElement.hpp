@@ -29,12 +29,6 @@
 #include "Krystal.Booey/DOM/Nodes/Element.hpp"
 #include "Krystal.Core/Memory/RefPtr.hpp"
 
-namespace krys::boo
-{
-  class CSSStyleProperties;
-  class StylePropertyMap;
-}
-
 namespace krys::boo::css
 {
   class ImmutableStyleProperties;
@@ -49,6 +43,9 @@ namespace krys::boo::css
 
 namespace krys::boo
 {
+  class CSSStyleProperties;
+  class StylePropertyMap;
+
   /// @brief An element with an inline style: an element that includes `ElementCSSInlineStyle` (HTML, SVG and
   /// MathML elements). The inline style is parsed from the `style` attribute, and changes made through
   /// `Style()` are written back to the attribute lazily.

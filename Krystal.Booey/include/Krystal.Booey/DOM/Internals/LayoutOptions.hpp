@@ -15,6 +15,9 @@ namespace krys::boo::dom
     TreatRevealedWhenFoundAsVisible,
     UpdateCompositingLayers,
   };
-}
 
-KRYS_DEFINE_CONTIGUOUS_ENUM_TRAITS(krys::boo::dom::LayoutOptions, 5uz);
+  consteval LayoutOptions MaxEnumValue(LayoutOptions) noexcept
+  {
+    return LayoutOptions::UpdateCompositingLayers;
+  }
+}

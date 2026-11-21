@@ -220,11 +220,11 @@ namespace krys::boo::tests
       fixture.UpdateRendering();
       CHECK(far.GetContentRelevancy()
               .value_or(EnumSet<dom::ContentRelevancy> {})
-              .Contains(dom::ContentRelevancy::IsInTopLayer));
+              .contains(dom::ContentRelevancy::IsInTopLayer));
 
       dialog.Close();
       fixture.UpdateRendering();
-      CHECK_FALSE(far.GetContentRelevancy().value().Contains(dom::ContentRelevancy::IsInTopLayer));
+      CHECK_FALSE(far.GetContentRelevancy().value().contains(dom::ContentRelevancy::IsInTopLayer));
     }
 
     SECTION("Scrolling into view")

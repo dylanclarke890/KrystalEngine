@@ -1,6 +1,7 @@
 ﻿#pragma once
 
 #include "Krystal.Core/Attributes.hpp"
+#include "Krystal.Core/Containers/EnumSet.hpp"
 #include "Krystal.Core/Containers/List.hpp"
 #include "Krystal.Core/Enum.hpp"
 #include "Krystal.Core/IO/Common.hpp"
@@ -12,12 +13,18 @@
 
 namespace krys::io
 {
-  enum class FileSearchFlags : uint8
+  enum class FileSearchFlag : uint8
   {
-    None = 0,
-    Recursive = 1 << 0,       // Search recursively in subdirectories
-    ExcludeReadOnly = 1 << 1, // Filter out read-only files
+    Recursive,       // Search recursively in subdirectories
+    ExcludeReadOnly, // Filter out read-only files
   };
+
+  consteval FileSearchFlag MaxEnumValue(FileSearchFlag) noexcept
+  {
+    return FileSearchFlag::ExcludeReadOnly;
+  }
+
+  using FileSearchFlags = EnumSet<FileSearchFlag>;
 
   /// @brief Interface for file backend operations.
   class IFileBackend
@@ -60,5 +67,3 @@ namespace krys::io
     KRYS_NODISCARD virtual const Path &Root() const noexcept = 0;
   };
 }
-
-KRYS_DEFINE_FLAGS_ENUM_TRAITS(krys::io::FileSearchFlags, 3u)

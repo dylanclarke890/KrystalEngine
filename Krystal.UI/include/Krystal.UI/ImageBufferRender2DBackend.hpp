@@ -13,11 +13,6 @@
 #include "Krystal.UI/Compositing/PlatformLayerDisplayDelegate.hpp"
 #include "Krystal.UI/TextureImage.hpp"
 
-namespace krys::boo
-{
-  class ImageBuffer;
-}
-
 namespace krys::gfx
 {
   class CommandBuffer;
@@ -27,6 +22,7 @@ namespace krys::gfx
 
 namespace krys::boo
 {
+  class ImageBuffer;
   class NativeImage;
 }
 

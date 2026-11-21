@@ -28,11 +28,6 @@
 #include "Krystal.Core/TypeCast.hpp"
 #include "Krystal.Core/Types/Maybe.hpp"
 
-namespace krys::boo
-{
-  class MediaList;
-}
-
 namespace krys::boo::css
 {
   class ImportRule;
@@ -40,6 +35,8 @@ namespace krys::boo::css
 
 namespace krys::boo
 {
+  class MediaList;
+
   /// @brief An `@import` rule, exposed to scripts.
   /// @see https://drafts.csswg.org/cssom/#the-cssimportrule-interface
   class CSSImportRule final : public CSSRule

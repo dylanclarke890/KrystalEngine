@@ -742,19 +742,19 @@ namespace krys::boo::dom::tests
     auto document = CreateRef<HTMLDocument>();
     auto root = document->CreateElement(u8"div").ReleaseValue();
 
-    auto iterator = document->CreateNodeIterator(*root, WhatToShow::SHOW_ELEMENT);
+    auto iterator = document->CreateNodeIterator(*root, WhatToShowFlag::SHOW_ELEMENT);
     CHECK(&iterator->Root() == root.get());
     CHECK(&iterator->ReferenceNode() == root.get());
     CHECK(iterator->PointerBeforeReferenceNode());
-    CHECK(iterator->WhatToShow() == WhatToShow::SHOW_ELEMENT);
+    CHECK(iterator->WhatToShow() == WhatToShowFlag::SHOW_ELEMENT);
     CHECK(iterator->Filter() == nullptr);
 
-    auto walker = document->CreateTreeWalker(*root, WhatToShow::SHOW_TEXT);
+    auto walker = document->CreateTreeWalker(*root, WhatToShowFlag::SHOW_TEXT);
     CHECK(&walker->Root() == root.get());
     CHECK(&walker->CurrentNode() == root.get());
-    CHECK(walker->WhatToShow() == WhatToShow::SHOW_TEXT);
+    CHECK(walker->WhatToShow() == WhatToShowFlag::SHOW_TEXT);
 
-    CHECK(document->CreateNodeIterator(*root)->WhatToShow() == WhatToShow::SHOW_ALL);
+    CHECK(document->CreateNodeIterator(*root)->WhatToShow() == ShowAll);
   }
 
   TEST_CASE("Document.readyState: complete for a document that isn't loading",

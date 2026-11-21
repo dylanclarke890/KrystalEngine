@@ -30,6 +30,7 @@
 #include "Krystal.Core/Assert.hpp"
 #include "Krystal.Core/Base.hpp"
 #include "Krystal.Core/Containers/Array.hpp"
+#include "Krystal.Core/Containers/EnumSet.hpp"
 #include "Krystal.Core/Containers/SmallList.hpp"
 #include "Krystal.Core/Containers/Span.hpp"
 #include "Krystal.Core/Enum.hpp"
@@ -52,22 +53,27 @@ namespace krys::boo::html
     EndOfFile,
   };
 
-  /// @see A general-purpose enum for all attribute states defined by the HTML spec. May split this out later.
-  enum class ParsedAttributeFlags : uint8
+  consteval TokenType MaxEnumValue(TokenType) noexcept
   {
-    None = 0,
-    HasPrefix = 1 << 1,
-    IsXMLNS = 1 << 2,
-    IsXML = 1 << 3,
-    IsXLink = 1 << 4,
+    return TokenType::EndOfFile;
+  }
+
+  /// @see A general-purpose enum for all attribute states defined by the HTML spec. May split this out later.
+  enum class ParsedAttributeFlag : uint8
+  {
+    HasPrefix,
+    IsXMLNS,
+    IsXML,
+    IsXLink,
   };
-}
 
-KRYS_DEFINE_CONTIGUOUS_ENUM_TRAITS(krys::boo::html::TokenType, 7uz);
-KRYS_DEFINE_FLAGS_ENUM_TRAITS(krys::boo::html::ParsedAttributeFlags, 5uz);
+  consteval ParsedAttributeFlag MaxEnumValue(ParsedAttributeFlag) noexcept
+  {
+    return ParsedAttributeFlag::IsXLink;
+  }
 
-namespace krys::boo::html
-{
+  using ParsedAttributeFlags = EnumSet<ParsedAttributeFlag>;
+
   struct DoctypeData
   {
     SmallList<char8> PublicIdentifier;
@@ -83,7 +89,7 @@ namespace krys::boo::html
     SmallList<char8, 64u> Value;
     /// @brief Flags for the attribute, such as whether it is a foreign attribute or has a prefix. Set during
     /// AdjustForeignAttributes() in the tree builder; checked when creating elements.
-    ParsedAttributeFlags Flags {ParsedAttributeFlags::None};
+    ParsedAttributeFlags Flags {ParsedAttributeFlags {}};
 
     DOMStringView NameView() const noexcept
     {
@@ -110,7 +116,7 @@ namespace krys::boo::html
     using DataBuffer = SmallList<char8, 128u>;
 
   private:
-    TokenType _type : BitCount<TokenType>() {TokenType::Uninitialized};
+    TokenType _type : EnumBitWidth<TokenType> {TokenType::Uninitialized};
 
     // For start/end tag tokens.
     bool _selfClosing : 1 {false};

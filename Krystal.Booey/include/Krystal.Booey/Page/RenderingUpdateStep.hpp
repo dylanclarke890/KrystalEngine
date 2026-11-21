@@ -26,6 +26,9 @@ namespace krys::boo
     PrepareCanvasesForDisplayOrFlush,
     LayerFlush,
   };
-}
 
-KRYS_DEFINE_CONTIGUOUS_ENUM_TRAITS(krys::boo::RenderingUpdateStep, 16uz);
+  consteval RenderingUpdateStep MaxEnumValue(RenderingUpdateStep) noexcept
+  {
+    return RenderingUpdateStep::LayerFlush;
+  }
+}

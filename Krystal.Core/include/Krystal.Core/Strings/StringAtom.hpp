@@ -397,10 +397,7 @@ namespace krys
       return null;
     }
   };
-}
 
-namespace krys
-{
   /// @brief An atom's hash is the one it made of its string when it was created, so hashing one never reads
   /// the string.
   template <>

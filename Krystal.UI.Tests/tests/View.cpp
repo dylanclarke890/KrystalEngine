@@ -1809,9 +1809,9 @@ namespace krys::ui::tests
 
     CHECK(input::ToBooey(pal::MouseButton::Thumb1) == boo::MouseButton::Back);
     auto modifiers = input::ToBooey(pal::KeyModifiers {pal::KeyModifier::Alt, pal::KeyModifier::Meta});
-    CHECK(modifiers.Contains(boo::PlatformEvent::Modifier::AltKey));
-    CHECK(modifiers.Contains(boo::PlatformEvent::Modifier::MetaKey));
-    CHECK_FALSE(modifiers.Contains(boo::PlatformEvent::Modifier::ShiftKey));
+    CHECK(modifiers.contains(boo::PlatformEvent::Modifier::AltKey));
+    CHECK(modifiers.contains(boo::PlatformEvent::Modifier::MetaKey));
+    CHECK_FALSE(modifiers.contains(boo::PlatformEvent::Modifier::ShiftKey));
     CHECK(input::ToCursorShape(boo::Cursor(boo::Cursor::Type::Grab)) == pal::CursorShape::Hand);
   }
 

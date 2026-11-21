@@ -30,11 +30,6 @@
 #include "Krystal.Booey/DOM/Types/ExceptionOr.hpp"
 #include "Krystal.Core/Containers/List.hpp"
 
-namespace krys::boo
-{
-  class Document;
-}
-
 namespace krys::boo::css
 {
   class DOMMatrix;
@@ -43,6 +38,8 @@ namespace krys::boo::css
 
 namespace krys::boo
 {
+  class Document;
+
   /// @brief A `<transform-list>`, as a list of transform components.
   /// @see https://drafts.css-houdini.org/css-typed-om/#csstransformvalue
   class CSSTransformValue final : public CSSStyleValue

@@ -125,8 +125,8 @@ namespace krys::boo
         _inputType(CreateRef<html::TextInputType>(*this))
   {
     // Activation follows the type: see UpdateEventTargetFlags().
-    SetEventTargetFlag(dom::EventTargetFlags::HasLegacyPreActivationBehavior);
-    SetEventTargetFlag(dom::EventTargetFlags::HasLegacyCanceledActivationBehavior);
+    _eventTargetFlags.Add(dom::EventTargetFlag::HasLegacyPreActivationBehavior);
+    _eventTargetFlags.Add(dom::EventTargetFlag::HasLegacyCanceledActivationBehavior);
   }
 
   HTMLInputElement::~HTMLInputElement() noexcept
@@ -1848,11 +1848,11 @@ namespace krys::boo
 
     if (_inputType->HasActivationBehavior())
     {
-      SetEventTargetFlag(dom::EventTargetFlags::HasActivationBehavior);
+      _eventTargetFlags.Add(dom::EventTargetFlag::HasActivationBehavior);
     }
     else
     {
-      ClearEventTargetFlag(dom::EventTargetFlags::HasActivationBehavior);
+      _eventTargetFlags.Remove(dom::EventTargetFlag::HasActivationBehavior);
     }
 
     if (Renderer())

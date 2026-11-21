@@ -293,7 +293,7 @@ namespace krys::boo
     filterRenderer->SetFilterRenderingModes(preferredRenderingModes);
     // Without a mode the page prefers (there's no software rendering to fall back on), the filter can't be
     // applied.
-    if (filterRenderer->FilterRenderingModes().IsEmpty())
+    if (filterRenderer->FilterRenderingModes().empty())
     {
       return nullptr;
     }
@@ -463,7 +463,7 @@ namespace krys::boo
 
   RefPtr<FilterImage> CSSFilterRenderer::Apply(FilterImage *sourceImage, FilterResults &results) noexcept
   {
-    krys_debug_assert(FilterRenderingModes().Contains(FilterRenderingMode::Accelerated));
+    krys_debug_assert(FilterRenderingModes().contains(FilterRenderingMode::Accelerated));
 
     if (!sourceImage)
     {
@@ -487,7 +487,7 @@ namespace krys::boo
   FilterStyleVector CSSFilterRenderer::CreateFilterStyles(GraphicsContext &context,
                                                           const FilterStyle &sourceStyle) const noexcept
   {
-    krys_debug_assert(FilterRenderingModes().Contains(FilterRenderingMode::GraphicsContext));
+    krys_debug_assert(FilterRenderingModes().contains(FilterRenderingMode::GraphicsContext));
 
     FilterStyleVector styles;
     FilterStyle lastStyle = sourceStyle;

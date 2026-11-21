@@ -59,7 +59,7 @@ namespace krys::boo::style
         case css::ValueId::SpellOut: result.Value.Add(SpeakAsValue::SpellOut); break;
         case css::ValueId::Digits:   result.Value.Add(SpeakAsValue::Digits); break;
         case css::ValueId::LiteralPunctuation:
-          if (result.Contains(SpeakAsValue::NoPunctuation))
+          if (result.contains(SpeakAsValue::NoPunctuation))
           {
             state.SetCurrentPropertyInvalidAtComputedValueTime();
             return css::keywords::Normal {};
@@ -67,7 +67,7 @@ namespace krys::boo::style
           result.Value.Add(SpeakAsValue::LiteralPunctuation);
           break;
         case css::ValueId::NoPunctuation:
-          if (result.Contains(SpeakAsValue::LiteralPunctuation))
+          if (result.contains(SpeakAsValue::LiteralPunctuation))
           {
             state.SetCurrentPropertyInvalidAtComputedValueTime();
             return css::keywords::Normal {};

@@ -65,7 +65,10 @@ namespace krys::boo
     EntersSkippedContentRelevantToUser,
   };
 
+  consteval TextIteratorBehavior MaxEnumValue(TextIteratorBehavior) noexcept
+  {
+    return TextIteratorBehavior::EntersSkippedContentRelevantToUser;
+  }
+
   using TextIteratorBehaviors = EnumSet<TextIteratorBehavior>;
 }
-
-KRYS_DEFINE_CONTIGUOUS_ENUM_TRAITS(krys::boo::TextIteratorBehavior, 15u);

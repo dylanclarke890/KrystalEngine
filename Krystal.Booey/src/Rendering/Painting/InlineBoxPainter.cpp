@@ -239,7 +239,7 @@ namespace krys::boo
     bool pushTransparencyLayer = false;
     bool compositedMask = Renderer().HasLayer() && Renderer().Layer()->HasCompositedMask();
     bool flattenCompositingLayers =
-      Renderer().View().FrameView().GetPaintBehavior().Contains(PaintBehavior::FlattenCompositingLayers);
+      Renderer().View().FrameView().GetPaintBehavior().contains(PaintBehavior::FlattenCompositingLayers);
     CompositeOperator compositeOp = CompositeOperator::SourceOver;
     if (!compositedMask || flattenCompositingLayers)
     {

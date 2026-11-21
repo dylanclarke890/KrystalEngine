@@ -36,11 +36,6 @@
 #include "Krystal.Core/Types/Markable.hpp"
 #include "Krystal.Core/Types/Maybe.hpp"
 
-namespace krys
-{
-  class TextStream;
-}
-
 namespace krys::boo
 {
   class FontFeatureValues;
@@ -207,6 +202,8 @@ namespace krys::boo
 
 namespace krys
 {
+  class TextStream;
+
   template <>
   struct MarkableTraits<boo::FontVariantAlternatesValues>
   {

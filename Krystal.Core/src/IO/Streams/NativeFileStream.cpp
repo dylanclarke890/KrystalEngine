@@ -63,7 +63,7 @@ namespace krys::io
         _size = static_cast<uint64>(end);
       }
 
-      if ((_flags & ReadFlags::OpenAtEnd) != ReadFlags::OpenAtEnd)
+      if ((_flags & ReadFlag::OpenAtEnd) != ReadFlag::OpenAtEnd)
       {
         _stream.seekg(std::streamoff(0), std::ios_base::beg);
       }
@@ -250,7 +250,7 @@ namespace krys::io
         return false; // Cannot open a writer for a non-regular file
       }
 
-      if ((_flags & WriteFlags::Create) != WriteFlags::Create)
+      if ((_flags & WriteFlag::Create) != WriteFlag::Create)
       {
         return false; // File does not exist and Create flag is not set
       }
@@ -268,12 +268,12 @@ namespace krys::io
 
     int32 openMode = std::ios::out | std::ios::binary;
 
-    if ((_flags & WriteFlags::Truncate) == WriteFlags::Truncate)
+    if ((_flags & WriteFlag::Truncate) == WriteFlag::Truncate)
     {
       openMode |= std::ios::trunc;
     }
 
-    if ((_flags & WriteFlags::OpenAtEnd) == WriteFlags::OpenAtEnd)
+    if ((_flags & WriteFlag::OpenAtEnd) == WriteFlag::OpenAtEnd)
     {
       openMode |= std::ios::ate;
     }

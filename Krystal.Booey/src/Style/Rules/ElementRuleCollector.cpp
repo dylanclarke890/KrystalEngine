@@ -1118,7 +1118,7 @@ namespace krys::boo::style
       // affects the same exact properties.
       return;
     }
-    if (matchedProperties.UsedRuleTypes.Contains(UsedRuleType::StartingStyle))
+    if (matchedProperties.UsedRuleTypes.contains(UsedRuleType::StartingStyle))
     {
       _result->UsedRuleTypes.Add(UsedRuleType::StartingStyle);
     }

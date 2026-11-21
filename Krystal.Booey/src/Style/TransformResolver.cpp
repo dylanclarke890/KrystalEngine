@@ -148,25 +148,25 @@ namespace krys::boo::style
     auto &boundingBox = transformData.BoundingBox;
 
     // 3. Translate by the computed X, Y, and Z values of translate.
-    if (options.Contains(Option::Translate))
+    if (options.contains(Option::Translate))
     {
       _style.Translate().Apply(_transform, boundingBox.Size());
     }
 
     // 4. Rotate by the computed <angle> about the specified axis of rotate.
-    if (options.Contains(Option::Rotate))
+    if (options.contains(Option::Rotate))
     {
       _style.Rotate().Apply(_transform, boundingBox.Size());
     }
 
     // 5. Scale by the computed X, Y, and Z values of scale.
-    if (options.Contains(Option::Scale))
+    if (options.contains(Option::Scale))
     {
       _style.Scale().Apply(_transform, boundingBox.Size());
     }
 
     // 6. Translate and rotate by the transform specified by offset.
-    if (options.Contains(Option::Offset))
+    if (options.contains(Option::Offset))
     {
       ApplyMotionPathTransform(transformData);
     }
@@ -181,7 +181,7 @@ namespace krys::boo::style
   void TransformResolver::ApplyTransform(const TransformOperationData &transformData,
                                          EnumSet<Option> options) noexcept
   {
-    if (!options.Contains(Option::TransformOrigin) || !AffectedByTransformOrigin())
+    if (!options.contains(Option::TransformOrigin) || !AffectedByTransformOrigin())
     {
       ApplyCSSTransform(transformData, options);
       return;

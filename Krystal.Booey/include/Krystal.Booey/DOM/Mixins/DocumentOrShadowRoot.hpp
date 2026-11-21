@@ -37,18 +37,6 @@
 #include "Krystal.Core/Memory/UniquePtr.hpp"
 #include "Krystal.Core/Memory/WeakPtr.hpp"
 
-namespace krys::boo
-{
-  class CSSStyleSheet;
-  class CSSStyleSheetObservableArray;
-  class ContainerNode;
-  class Element;
-  class HTMLMapElement;
-  class LegacyRenderSVGResourceContainer;
-  class Node;
-  class SVGElement;
-}
-
 namespace krys::boo::html
 {
   class CustomElementAlgorithms;
@@ -63,6 +51,15 @@ namespace krys::boo::style
 
 namespace krys::boo
 {
+  class CSSStyleSheet;
+  class CSSStyleSheetObservableArray;
+  class ContainerNode;
+  class Element;
+  class HTMLMapElement;
+  class LegacyRenderSVGResourceContainer;
+  class Node;
+  class SVGElement;
+
   template <typename>
   class ExceptionOr;
 }

@@ -130,7 +130,7 @@ namespace krys::boo
     // FIXME: Why is preserving the semantic bit desired and/or correct here?
     if (color.IsSemantic())
     {
-      return {result, ColorFlags::Semantic};
+      return {result, ColorFlag::Semantic};
     }
 
     return result;

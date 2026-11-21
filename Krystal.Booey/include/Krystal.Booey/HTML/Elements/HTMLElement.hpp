@@ -29,6 +29,7 @@
 #include "Krystal.Booey/HTML/Attributes/EventHandlerAttributes.hpp"
 #include "Krystal.Booey/HTML/Mixins/HTMLOrSVGOrMathMLElement.hpp"
 #include "Krystal.Core/Colour/ColourTypes.hpp"
+#include "Krystal.Core/Containers/EnumSet.hpp"
 #include "Krystal.Core/Enum.hpp"
 #include "Krystal.Core/Memory/RefPtr.hpp"
 #include "Krystal.Core/Types/BoolOr.hpp"
@@ -47,6 +48,11 @@ namespace krys::boo::dom
 
 namespace krys::boo::html
 {
+  class ElementInternals;
+  class FormAssociatedElement;
+  class FormListedElement;
+  class ValidatedFormListedElement;
+
   /// @see https://html.spec.whatwg.org/multipage/dom.html#showpopoveroptions
   struct ShowPopoverOptions
   {
@@ -61,11 +67,17 @@ namespace krys::boo::html
 
   using TogglePopoverOptionsOrBool = BoolOr<TogglePopoverOptions>;
 
-  enum class HTMLElementFlags : uint8
+  enum class HTMLElementFlag : uint8
   {
-    None = 0,
-    IsMediaElement = 1 << 0,
+    IsMediaElement,
   };
+
+  consteval HTMLElementFlag MaxEnumValue(HTMLElementFlag) noexcept
+  {
+    return HTMLElementFlag::IsMediaElement;
+  }
+
+  using HTMLElementFlags = EnumSet<HTMLElementFlag>;
 
   enum class HTMLElementInterface : uint8
   {
@@ -145,17 +157,11 @@ namespace krys::boo::html
     Video,
     WBR,
   };
-}
 
-KRYS_DEFINE_FLAGS_ENUM_TRAITS(krys::boo::html::HTMLElementFlags, 2u);
-KRYS_DEFINE_CONTIGUOUS_ENUM_TRAITS(krys::boo::html::HTMLElementInterface, 75u);
-
-namespace krys::boo::html
-{
-  class ElementInternals;
-  class FormAssociatedElement;
-  class FormListedElement;
-  class ValidatedFormListedElement;
+  consteval HTMLElementInterface MaxEnumValue(HTMLElementInterface) noexcept
+  {
+    return HTMLElementInterface::WBR;
+  }
 }
 
 namespace krys::boo
@@ -167,14 +173,14 @@ namespace krys::boo
     KRYS_OVERRIDE_DELETE_FOR_CHECKED_PTR(HTMLElement);
 
   private:
-    html::HTMLElementFlags _flags : BitCount<html::HTMLElementFlags>() {html::HTMLElementFlags::None};
+    html::HTMLElementFlags _htmlElementFlags;
     html::HTMLElementInterface _interface
-      : BitCount<html::HTMLElementInterface>() {html::HTMLElementInterface::None};
+      : EnumBitWidth<html::HTMLElementInterface> {html::HTMLElementInterface::None};
 
   protected:
     HTMLElement(Document &document, html::HTMLElementInterface interface,
-                html::HTMLElementFlags flags = html::HTMLElementFlags::None,
-                dom::NodeFlags nodeFlags = dom::NodeFlags::None) noexcept;
+                html::HTMLElementFlags flags = html::HTMLElementFlags {},
+                dom::NodeFlags nodeFlags = dom::NodeFlags {}) noexcept;
 
     /// @brief Constructs an element with its tag name, for elements made outside the element factory (the
     /// elements of user agent shadow trees), which otherwise gives elements their names.
@@ -478,21 +484,6 @@ namespace krys::boo
 #pragma endregion
 
 #pragma region HTMLElement Flags
-
-    void SetHTMLElementFlag(html::HTMLElementFlags flag) noexcept
-    {
-      _flags = _flags | flag;
-    }
-
-    void ClearHTMLElementFlag(html::HTMLElementFlags flag) noexcept
-    {
-      _flags = _flags & ~flag;
-    }
-
-    KRYS_NODISCARD bool HasHTMLElementFlag(html::HTMLElementFlags flag) const noexcept
-    {
-      return HasFlag(_flags, flag);
-    }
 
 #pragma endregion
 
@@ -866,7 +857,7 @@ namespace krys::boo
 
     KRYS_NODISCARD bool IsHTMLMediaElement() const noexcept
     {
-      return HasFlag(_flags, html::HTMLElementFlags::IsMediaElement);
+      return _htmlElementFlags.contains(html::HTMLElementFlag::IsMediaElement);
     }
 
     KRYS_NODISCARD bool IsHTMLMenuElement() const noexcept

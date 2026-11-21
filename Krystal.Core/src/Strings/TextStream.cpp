@@ -20,7 +20,7 @@
  * PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND ON ANY THEORY
  * OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT
  * (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
- * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE. 
+ * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
 #include "Krystal.Core/Strings/TextStream.hpp"
@@ -159,7 +159,7 @@ namespace krys
 
   TextStream &TextStream::operator<<(float f) noexcept
   {
-    if (_formattingFlags.Contains(Formatting::NumberRespectingIntegers))
+    if (_formattingFlags.contains(Formatting::NumberRespectingIntegers))
     {
       return *this << FormatNumberRespectingIntegers(f);
     }
@@ -169,7 +169,7 @@ namespace krys
 
   TextStream &TextStream::operator<<(double d) noexcept
   {
-    if (_formattingFlags.Contains(Formatting::NumberRespectingIntegers))
+    if (_formattingFlags.contains(Formatting::NumberRespectingIntegers))
     {
       return *this << FormatNumberRespectingIntegers(d);
     }

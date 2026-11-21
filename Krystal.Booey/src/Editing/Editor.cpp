@@ -531,7 +531,7 @@ namespace krys::boo
     }
     bool chosePlainText = false;
     auto fragment = WebContentFromPasteboard(*pasteboard, *range,
-                                             options.Contains(PasteOption::AllowPlainText), chosePlainText);
+                                             options.contains(PasteOption::AllowPlainText), chosePlainText);
     if (fragment && ShouldInsertFragment(*fragment, range))
     {
       PasteAsFragment(ShareRef(*fragment), CanSmartReplaceWithPasteboard(*pasteboard), chosePlainText);

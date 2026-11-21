@@ -312,7 +312,7 @@ namespace krys::boo
 
     auto adjustedRects = rects;
     if ((!View().FrameView().LayoutContext().IsPaintOffsetCacheEnabled() || container
-         || context.Options.Contains(VisibleRectContext::Option::UseEdgeInclusiveIntersection))
+         || context.Options.contains(VisibleRectContext::Option::UseEdgeInclusiveIntersection))
         && Parent())
     {
       // Rows are in the same coordinate space, so don't add their offset in.

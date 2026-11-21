@@ -31,10 +31,7 @@
 namespace krys::boo::html
 {
   enum class PredefinedColorSpace : uint8;
-}
 
-namespace krys::boo::html
-{
   /// @see https://html.spec.whatwg.org/#imagedatasettings
   struct ImageDataSettings
   {

@@ -27,6 +27,7 @@
 #include "Krystal.Booey/HTML/Mixins/HTMLOrSVGOrMathMLElement.hpp"
 #include "Krystal.Booey/SVG/Properties/SVGPropertyOwner.hpp"
 #include "Krystal.Booey/SVG/SVGParsingError.hpp"
+#include "Krystal.Core/Containers/EnumSet.hpp"
 #include "Krystal.Core/Containers/List.hpp"
 #include "Krystal.Core/Enum.hpp"
 #include "Krystal.Core/Memory/UniquePtr.hpp"
@@ -39,18 +40,33 @@ namespace krys
 
 namespace krys::boo
 {
+  class SVGAnimatedProperty;
   class SVGAnimatedString;
+  class SVGAttributeAnimator;
+  class SVGConditionalProcessingAttributes;
+  class SVGElementRareData;
+  class SVGPropertyAnimatorFactory;
   class SVGPropertyRegistry;
+  class SVGResourceElementClient;
+  class SVGSvgElement;
+  class SVGUseElement;
+
   enum class ColorInterpolation : uint8;
 
-  enum class SVGElementFlags : uint8
+  enum class SVGElementFlag : uint8
   {
-    None = 0,
-    IsSvgGraphicsElement = 1 << 0,
-    IsSvgGeometryElement = 1 << 1,
-    IsSvgTextContentElement = 1 << 2,
-    IsSvgTextPositioningElement = 1 << 3,
+    IsSvgGraphicsElement,
+    IsSvgGeometryElement,
+    IsSvgTextContentElement,
+    IsSvgTextPositioningElement,
   };
+
+  consteval SVGElementFlag MaxEnumValue(SVGElementFlag) noexcept
+  {
+    return SVGElementFlag::IsSvgTextPositioningElement;
+  }
+
+  using SVGElementFlags = EnumSet<SVGElementFlag>;
 
   enum class SVGElementInterface : uint8
   {
@@ -122,23 +138,14 @@ namespace krys::boo
     Use,
     View,
   };
-}
 
-KRYS_DEFINE_FLAGS_ENUM_TRAITS(krys::boo::SVGElementFlags, 5uz);
-KRYS_DEFINE_CONTIGUOUS_ENUM_TRAITS(krys::boo::SVGElementInterface, 67uz);
+  consteval SVGElementInterface MaxEnumValue(SVGElementInterface) noexcept
+  {
+    return SVGElementInterface::View;
+  }
 
-namespace krys::boo
-{
-  class SVGAnimatedProperty;
-  class SVGAttributeAnimator;
-  class SVGConditionalProcessingAttributes;
-  class SVGElementRareData;
-  class SVGPropertyAnimatorFactory;
   template <typename TOwner, typename... TBaseTypes>
   class SVGPropertyOwnerRegistry;
-  class SVGResourceElementClient;
-  class SVGSvgElement;
-  class SVGUseElement;
 }
 
 namespace krys::boo::svg
@@ -160,8 +167,8 @@ namespace krys::boo
     KRYS_OVERRIDE_DELETE_FOR_CHECKED_PTR(SVGElement);
 
   protected:
-    SVGElementFlags _flags : BitCount<SVGElementFlags>() {SVGElementFlags::None};
-    SVGElementInterface _interface : BitCount<SVGElementInterface>() {SVGElementInterface::None};
+    SVGElementFlags _svgElementFlags;
+    SVGElementInterface _interface : EnumBitWidth<SVGElementInterface> {SVGElementInterface::None};
 
   private:
     UniquePtr<SVGElementRareData> _svgRareData;
@@ -178,13 +185,12 @@ namespace krys::boo
 
   protected:
     SVGElement(Document &document, UniquePtr<SVGPropertyRegistry> &&propertyRegistry,
-               SVGElementInterface interface, SVGElementFlags flags = SVGElementFlags::None,
-               dom::NodeFlags nodeFlags = dom::NodeFlags::None) noexcept;
+               SVGElementInterface interface, SVGElementFlags flags = SVGElementFlags {},
+               dom::NodeFlags nodeFlags = dom::NodeFlags {}) noexcept;
 
     // For the elements whose only properties are SVGElement's (script and unknown elements).
-    SVGElement(Document &document, SVGElementInterface interface,
-               SVGElementFlags flags = SVGElementFlags::None,
-               dom::NodeFlags nodeFlags = dom::NodeFlags::None) noexcept;
+    SVGElement(Document &document, SVGElementInterface interface, SVGElementFlags flags = SVGElementFlags {},
+               dom::NodeFlags nodeFlags = dom::NodeFlags {}) noexcept;
 
   public:
     explicit SVGElement(Document &document) noexcept;
@@ -349,17 +355,17 @@ namespace krys::boo
     /// @brief Whether the element waits for ids as a pending resource of its tree scope.
     KRYS_NODISCARD bool HasPendingResources() const noexcept
     {
-      return HasNodeFlag(dom::NodeFlags::HasPendingResources);
+      return _nodeFlags.contains(dom::NodeFlag::HasPendingResources);
     }
 
     void SetHasPendingResources() noexcept
     {
-      SetNodeFlag(dom::NodeFlags::HasPendingResources);
+      _nodeFlags.Add(dom::NodeFlag::HasPendingResources);
     }
 
     void ClearHasPendingResources() noexcept
     {
-      ClearNodeFlag(dom::NodeFlags::HasPendingResources);
+      _nodeFlags.Remove(dom::NodeFlag::HasPendingResources);
     }
 
     /// @brief Rebuilds what the element made from the resources it was waiting for, now that an element has
@@ -707,12 +713,12 @@ namespace krys::boo
 
     KRYS_NODISCARD bool IsSVGGeometryElement() const noexcept
     {
-      return HasFlag(_flags, SVGElementFlags::IsSvgGeometryElement);
+      return _svgElementFlags.contains(SVGElementFlag::IsSvgGeometryElement);
     }
 
     KRYS_NODISCARD bool IsSVGGraphicsElement() const noexcept
     {
-      return HasFlag(_flags, SVGElementFlags::IsSvgGraphicsElement);
+      return _svgElementFlags.contains(SVGElementFlag::IsSvgGraphicsElement);
     }
 
     KRYS_NODISCARD bool IsSVGImageElement() const noexcept
@@ -807,7 +813,7 @@ namespace krys::boo
 
     KRYS_NODISCARD bool IsSVGTextContentElement() const noexcept
     {
-      return HasFlag(_flags, SVGElementFlags::IsSvgTextContentElement);
+      return _svgElementFlags.contains(SVGElementFlag::IsSvgTextContentElement);
     }
 
     KRYS_NODISCARD bool IsSVGTextElement() const noexcept
@@ -822,7 +828,7 @@ namespace krys::boo
 
     KRYS_NODISCARD bool IsSVGTextPositioningElement() const noexcept
     {
-      return HasFlag(_flags, SVGElementFlags::IsSvgTextPositioningElement);
+      return _svgElementFlags.contains(SVGElementFlag::IsSvgTextPositioningElement);
     }
 
     KRYS_NODISCARD bool IsSVGTitleElement() const noexcept

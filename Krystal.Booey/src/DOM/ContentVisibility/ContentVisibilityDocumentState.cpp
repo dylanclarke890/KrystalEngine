@@ -115,7 +115,7 @@ namespace krys::boo::dom
       }
     };
 
-    if (relevancyToCheck.Contains(ContentRelevancy::OnScreen))
+    if (relevancyToCheck.contains(ContentRelevancy::OnScreen))
     {
       auto viewportProximityIterator = _elementViewportProximities.find(&target);
       auto viewportProximity = ViewportProximity::Far;
@@ -126,7 +126,7 @@ namespace krys::boo::dom
       setRelevancyValue(ContentRelevancy::OnScreen, viewportProximity == ViewportProximity::Near);
     }
 
-    if (relevancyToCheck.Contains(ContentRelevancy::Focused))
+    if (relevancyToCheck.contains(ContentRelevancy::Focused))
     {
       setRelevancyValue(ContentRelevancy::Focused, target.HasFocusWithin());
     }
@@ -137,7 +137,7 @@ namespace krys::boo::dom
       return selectionRange && Intersects<TreeType::ComposedTree>(*selectionRange, target);
     };
 
-    if (relevancyToCheck.Contains(ContentRelevancy::Selected))
+    if (relevancyToCheck.contains(ContentRelevancy::Selected))
     {
       setRelevancyValue(ContentRelevancy::Selected, targetContainsSelection(target));
     }
@@ -153,7 +153,7 @@ namespace krys::boo::dom
       }
       return false;
     };
-    if (relevancyToCheck.Contains(ContentRelevancy::IsInTopLayer))
+    if (relevancyToCheck.contains(ContentRelevancy::IsInTopLayer))
     {
       setRelevancyValue(ContentRelevancy::IsInTopLayer, hasTopLayerInSubtree(target));
     }

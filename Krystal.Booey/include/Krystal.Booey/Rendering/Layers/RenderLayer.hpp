@@ -287,12 +287,12 @@ namespace krys::boo
 
       KRYS_NODISCARD bool RespectOverflowClip() const noexcept
       {
-        return Options.Contains(ClipRectsOption::RespectOverflowClip);
+        return Options.contains(ClipRectsOption::RespectOverflowClip);
       }
 
       KRYS_NODISCARD OverlayScrollbarSizeRelevancy GetOverlayScrollbarSizeRelevancy() const noexcept
       {
-        return Options.Contains(ClipRectsOption::IncludeOverlayScrollbarSize)
+        return Options.contains(ClipRectsOption::IncludeOverlayScrollbarSize)
                  ? OverlayScrollbarSizeRelevancy::IncludeOverlayScrollbarSize
                  : OverlayScrollbarSizeRelevancy::IgnoreOverlayScrollbarSize;
       }
@@ -413,62 +413,62 @@ namespace krys::boo
 
     KRYS_NODISCARD bool HasDescendantNeedingCompositingRequirementsTraversal() const noexcept
     {
-      return _compositingDirtyBits.Contains(Compositing::HasDescendantNeedingRequirementsTraversal);
+      return _compositingDirtyBits.contains(Compositing::HasDescendantNeedingRequirementsTraversal);
     }
 
     KRYS_NODISCARD bool HasDescendantNeedingUpdateBackingOrHierarchyTraversal() const noexcept
     {
-      return _compositingDirtyBits.Contains(Compositing::HasDescendantNeedingBackingOrHierarchyTraversal);
+      return _compositingDirtyBits.contains(Compositing::HasDescendantNeedingBackingOrHierarchyTraversal);
     }
 
     KRYS_NODISCARD bool NeedsCompositingPaintOrderChildrenUpdate() const noexcept
     {
-      return _compositingDirtyBits.Contains(Compositing::NeedsPaintOrderChildrenUpdate);
+      return _compositingDirtyBits.contains(Compositing::NeedsPaintOrderChildrenUpdate);
     }
 
     KRYS_NODISCARD bool NeedsPostLayoutCompositingUpdate() const noexcept
     {
-      return _compositingDirtyBits.Contains(Compositing::NeedsPostLayoutUpdate);
+      return _compositingDirtyBits.contains(Compositing::NeedsPostLayoutUpdate);
     }
 
     KRYS_NODISCARD bool DescendantsNeedCompositingRequirementsTraversal() const noexcept
     {
-      return _compositingDirtyBits.Contains(Compositing::DescendantsNeedRequirementsTraversal);
+      return _compositingDirtyBits.contains(Compositing::DescendantsNeedRequirementsTraversal);
     }
 
     KRYS_NODISCARD bool SubsequentLayersNeedCompositingRequirementsTraversal() const noexcept
     {
-      return _compositingDirtyBits.Contains(Compositing::SubsequentLayersNeedRequirementsTraversal);
+      return _compositingDirtyBits.contains(Compositing::SubsequentLayersNeedRequirementsTraversal);
     }
 
     KRYS_NODISCARD bool NeedsCompositingLayerConnection() const noexcept
     {
-      return _compositingDirtyBits.Contains(Compositing::NeedsLayerConnection);
+      return _compositingDirtyBits.contains(Compositing::NeedsLayerConnection);
     }
 
     KRYS_NODISCARD bool NeedsCompositingGeometryUpdate() const noexcept
     {
-      return _compositingDirtyBits.Contains(Compositing::NeedsGeometryUpdate);
+      return _compositingDirtyBits.contains(Compositing::NeedsGeometryUpdate);
     }
 
     KRYS_NODISCARD bool NeedsCompositingConfigurationUpdate() const noexcept
     {
-      return _compositingDirtyBits.Contains(Compositing::NeedsConfigurationUpdate);
+      return _compositingDirtyBits.contains(Compositing::NeedsConfigurationUpdate);
     }
 
     KRYS_NODISCARD bool NeedsScrollingTreeUpdate() const noexcept
     {
-      return _compositingDirtyBits.Contains(Compositing::NeedsScrollingTreeUpdate);
+      return _compositingDirtyBits.contains(Compositing::NeedsScrollingTreeUpdate);
     }
 
     KRYS_NODISCARD bool ChildrenNeedCompositingGeometryUpdate() const noexcept
     {
-      return _compositingDirtyBits.Contains(Compositing::ChildrenNeedGeometryUpdate);
+      return _compositingDirtyBits.contains(Compositing::ChildrenNeedGeometryUpdate);
     }
 
     KRYS_NODISCARD bool DescendantsNeedUpdateBackingAndHierarchyTraversal() const noexcept
     {
-      return _compositingDirtyBits.Contains(Compositing::DescendantsNeedBackingAndHierarchyTraversal);
+      return _compositingDirtyBits.contains(Compositing::DescendantsNeedBackingAndHierarchyTraversal);
     }
 
     template <Compositing V>
@@ -569,7 +569,7 @@ namespace krys::boo
 
     KRYS_NODISCARD bool NeedsAnyCompositingTraversal() const noexcept
     {
-      return !_compositingDirtyBits.IsEmpty();
+      return !_compositingDirtyBits.empty();
     }
 
     void ClearCompositingPaintOrderState() noexcept

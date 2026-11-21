@@ -71,10 +71,10 @@ namespace krys::boo::css
     mutable uint32 _refCount {RefCountIncrement};
 
   protected:
-    ValueType _type : BitCount<ValueType>();
+    ValueType _type : EnumBitWidth<ValueType>;
 
-    UnitType _unit : BitCount<UnitType>() {UnitType::Unknown};
-    ValueSeparator _valueSeparator : BitCount<ValueSeparator>() {ValueSeparator::SpaceSeparator};
+    UnitType _unit : EnumBitWidth<UnitType> {UnitType::Unknown};
+    ValueSeparator _valueSeparator : EnumBitWidth<ValueSeparator> {ValueSeparator::SpaceSeparator};
     bool _isImplicitInitialValue : 1 {false};
     mutable bool _hasCachedCSSText : 1 {false};
     // Whether a `ValuePair` or `QuadValue` serialises as one value when its values serialise the same. Kept

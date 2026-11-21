@@ -38,12 +38,12 @@ namespace krys::boo
   {
     NoReferrer,
   };
-}
 
-KRYS_DEFINE_CONTIGUOUS_ENUM_TRAITS(krys::boo::SVGALinkRelation, 1uz);
+  consteval SVGALinkRelation MaxEnumValue(SVGALinkRelation) noexcept
+  {
+    return SVGALinkRelation::NoReferrer;
+  }
 
-namespace krys::boo
-{
   /// @brief The `<a>` element: a hyperlink around graphics.
   /// @see https://svgwg.org/svg2-draft/linking.html#InterfaceSVGAElement
   class SVGAElement final : public SVGGraphicsElement, public SVGURIReference

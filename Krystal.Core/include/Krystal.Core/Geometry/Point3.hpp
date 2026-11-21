@@ -29,10 +29,7 @@
 namespace krys
 {
   class TextStream;
-}
 
-namespace krys
-{
   /// @brief A point (or vector) in 3D floating point coordinates.
   class Point3F
   {

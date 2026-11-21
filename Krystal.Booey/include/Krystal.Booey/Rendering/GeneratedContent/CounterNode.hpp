@@ -51,12 +51,12 @@ namespace krys::boo
     Reset,
     Set,
   };
-}
 
-KRYS_DEFINE_CONTIGUOUS_ENUM_TRAITS(krys::boo::CounterNodeType, 3uz);
+  consteval CounterNodeType MaxEnumValue(CounterNodeType) noexcept
+  {
+    return CounterNodeType::Set;
+  }
 
-namespace krys::boo
-{
   /// @brief A counter reference (a reset, increment or set of a counter, or a use of it) in a counter tree.
   class CounterNode : public RefCounted<CounterNode>, public CanMakeWeakPtr<CounterNode>
   {
@@ -93,12 +93,12 @@ namespace krys::boo
 
     KRYS_NODISCARD bool HasResetType() const noexcept
     {
-      return _type.Contains(Type::Reset);
+      return _type.contains(Type::Reset);
     }
 
     KRYS_NODISCARD bool HasSetType() const noexcept
     {
-      return _type.Contains(Type::Set);
+      return _type.contains(Type::Set);
     }
 
     KRYS_NODISCARD int32 Value() const noexcept

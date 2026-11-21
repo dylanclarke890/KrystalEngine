@@ -37,13 +37,6 @@
 #include "Krystal.Core/Memory/CanMakeWeakPtr.hpp"
 #include "Krystal.Core/Types/Maybe.hpp"
 
-namespace krys::boo
-{
-  class ContainerNode;
-  class Element;
-  class Text;
-}
-
 namespace krys::boo::dom
 {
   class DataTransfer;
@@ -52,7 +45,10 @@ namespace krys::boo::dom
 
 namespace krys::boo
 {
+  class ContainerNode;
   class EditingStyle;
+  class Element;
+  class Text;
 
   /// @brief A whitespace run rebalancing replaced in a text node. A no-break space is two bytes and a space
   /// one, so the run's length can change while its characters stay as many.

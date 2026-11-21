@@ -76,7 +76,7 @@ namespace krys::boo::tests
       CHECK(Contains<display_list::FillCompositedRect>(snapshot));
       // The view's state is put back.
       CHECK(frame.View()->BaseBackgroundColor() == Color::white);
-      CHECK(frame.View()->GetPaintBehavior().IsEmpty());
+      CHECK(frame.View()->GetPaintBehavior().empty());
     }
 
     SECTION("A node that isn't rendered")

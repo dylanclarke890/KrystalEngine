@@ -30,15 +30,6 @@
 #include "Krystal.Core/Memory/UniquePtr.hpp"
 #include "Krystal.Core/Memory/WeakPtr.hpp"
 
-namespace krys::boo
-{
-  class CachedImage;
-  class HTMLMapElement;
-  class HTMLPictureElement;
-  class HTMLSourceElement;
-  class Image;
-}
-
 namespace krys::boo::html
 {
   class HTMLImageLoader;
@@ -47,6 +38,12 @@ namespace krys::boo::html
 
 namespace krys::boo
 {
+  class CachedImage;
+  class HTMLMapElement;
+  class HTMLPictureElement;
+  class HTMLSourceElement;
+  class Image;
+
   /// @see https://html.spec.whatwg.org/#htmlimageelement
   // FIXME: decode(), the legacy Image()
   // constructor, and re-selecting the source when the media queries it depends on change.

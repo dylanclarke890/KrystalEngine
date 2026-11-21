@@ -5,12 +5,6 @@
 #include "Krystal.Core/Memory/UniquePtr.hpp"
 #include "Krystal.Core/Memory/WeakPtr.hpp"
 
-namespace krys::boo
-{
-  class Document;
-  class Element;
-}
-
 namespace krys::boo::dom
 {
   class HTMLCollection;
@@ -18,6 +12,9 @@ namespace krys::boo::dom
 
 namespace krys::boo
 {
+  class Document;
+  class Element;
+
   /// @see https://dom.spec.whatwg.org/#interface-documentfragment
   class DocumentFragment : public ContainerNode
   {

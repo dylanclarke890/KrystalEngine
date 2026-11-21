@@ -80,7 +80,7 @@ namespace krys::boo::style
       bool CollectDynamic {false};
       List<DynamicContext> DynamicContextStack;
       List<RuleSet::DynamicMediaQueryRules> DynamicMediaQueryRules;
-      css::mq::MediaQueryDynamicDependency AllDynamicDependencies {};
+      EnumSet<css::mq::MediaQueryDynamicDependency> AllDynamicDependencies {};
 
       KRYS_NODISCARD bool PushAndEvaluate(const css::mq::MediaQueryList &mediaQueries) noexcept;
 

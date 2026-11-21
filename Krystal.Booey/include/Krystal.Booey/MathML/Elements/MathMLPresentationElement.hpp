@@ -41,7 +41,7 @@ namespace krys::boo
   public:
     explicit MathMLPresentationElement(
       Document &document, MathMLElementInterface interface = MathMLElementInterface::Presentation,
-      dom::NodeFlags nodeFlags = dom::NodeFlags::None) noexcept;
+      dom::NodeFlags nodeFlags = dom::NodeFlags {}) noexcept;
 
     /// @brief Parses a MathML length, as MathML Core does: a number and an optional unit, with a unitless
     /// value only allowed for "0".

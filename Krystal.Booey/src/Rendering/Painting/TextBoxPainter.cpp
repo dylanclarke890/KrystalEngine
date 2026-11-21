@@ -256,7 +256,7 @@ namespace krys::boo
 
   void TextBoxPainter::Paint() noexcept
   {
-    if (_paintInfo.PaintBehavior.Contains(PaintBehavior::ExcludeText))
+    if (_paintInfo.PaintBehavior.contains(PaintBehavior::ExcludeText))
     {
       return;
     }
@@ -507,7 +507,7 @@ namespace krys::boo
       StyledMarkedText::SubdivideAndResolve(markedTexts, _renderer, _isFirstLine, _paintInfo);
 
     // ... now remove the selection marked text if we are excluding selection.
-    if (!_isPrinting && _paintInfo.PaintBehavior.Contains(PaintBehavior::ExcludeSelection))
+    if (!_isPrinting && _paintInfo.PaintBehavior.contains(PaintBehavior::ExcludeSelection))
     {
       std::erase_if(styledMarkedTexts, [](const StyledMarkedText &markedText)
                     { return markedText.MarkedType == MarkedText::Type::Selection; });
@@ -524,7 +524,7 @@ namespace krys::boo
       }
 
       RectF textDecorationSelectionClipOutRect;
-      if ((_paintInfo.PaintBehavior.Contains(PaintBehavior::ExcludeSelection))
+      if ((_paintInfo.PaintBehavior.contains(PaintBehavior::ExcludeSelection))
           && selectionStart < selectionEnd && selectionEnd <= length)
       {
         textDecorationSelectionClipOutRect = _paintRect;

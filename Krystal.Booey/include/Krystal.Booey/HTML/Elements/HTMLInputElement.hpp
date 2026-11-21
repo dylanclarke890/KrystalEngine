@@ -28,13 +28,6 @@
 #include "Krystal.Booey/HTML/Elements/HTMLTextFormControlElement.hpp"
 #include "Krystal.Booey/HTML/InputTypes/InputType.hpp"
 
-namespace krys::boo
-{
-  class FileList;
-  class HTMLDataListElement;
-  class HTMLOptionElement;
-}
-
 namespace krys::boo::html
 {
   class RadioButtonGroups;
@@ -56,6 +49,10 @@ namespace krys::boo::html
 
 namespace krys::boo
 {
+  class FileList;
+  class HTMLDataListElement;
+  class HTMLOptionElement;
+
   /// @see https://html.spec.whatwg.org/#htmlinputelement
   class HTMLInputElement : public HTMLTextFormControlElement
   {

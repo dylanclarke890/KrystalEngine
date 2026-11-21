@@ -25,20 +25,22 @@ namespace krys::boo::dom::tests
     {
       return 1ul << (std::to_underlying(type) - 1u);
     };
-    STATIC_CHECK(std::to_underlying(WhatToShow::SHOW_ALL) == 0xFF'FF'FF'FFul);
-    STATIC_CHECK(std::to_underlying(WhatToShow::SHOW_ELEMENT) == bit(NodeType::ELEMENT_NODE));
-    STATIC_CHECK(std::to_underlying(WhatToShow::SHOW_ATTRIBUTE) == bit(NodeType::ATTRIBUTE_NODE));
-    STATIC_CHECK(std::to_underlying(WhatToShow::SHOW_TEXT) == bit(NodeType::TEXT_NODE));
-    STATIC_CHECK(std::to_underlying(WhatToShow::SHOW_CDATA_SECTION) == bit(NodeType::CDATA_SECTION_NODE));
-    STATIC_CHECK(std::to_underlying(WhatToShow::SHOW_ENTITY_REFERENCE) == 0x10ul);
-    STATIC_CHECK(std::to_underlying(WhatToShow::SHOW_ENTITY) == 0x20ul);
-    STATIC_CHECK(std::to_underlying(WhatToShow::SHOW_PROCESSING_INSTRUCTION)
+    STATIC_CHECK(ShowAll.ToRaw() == 0xFFFul);
+    STATIC_CHECK(WhatToShow {WhatToShowFlag::SHOW_ELEMENT}.ToRaw() == bit(NodeType::ELEMENT_NODE));
+    STATIC_CHECK(WhatToShow {WhatToShowFlag::SHOW_ATTRIBUTE}.ToRaw() == bit(NodeType::ATTRIBUTE_NODE));
+    STATIC_CHECK(WhatToShow {WhatToShowFlag::SHOW_TEXT}.ToRaw() == bit(NodeType::TEXT_NODE));
+    STATIC_CHECK(WhatToShow {WhatToShowFlag::SHOW_CDATA_SECTION}.ToRaw()
+                 == bit(NodeType::CDATA_SECTION_NODE));
+    STATIC_CHECK(WhatToShow {WhatToShowFlag::SHOW_ENTITY_REFERENCE}.ToRaw() == 0x10ul);
+    STATIC_CHECK(WhatToShow {WhatToShowFlag::SHOW_ENTITY}.ToRaw() == 0x20ul);
+    STATIC_CHECK(WhatToShow {WhatToShowFlag::SHOW_PROCESSING_INSTRUCTION}.ToRaw()
                  == bit(NodeType::PROCESSING_INSTRUCTION_NODE));
-    STATIC_CHECK(std::to_underlying(WhatToShow::SHOW_COMMENT) == bit(NodeType::COMMENT_NODE));
-    STATIC_CHECK(std::to_underlying(WhatToShow::SHOW_DOCUMENT) == bit(NodeType::DOCUMENT_NODE));
-    STATIC_CHECK(std::to_underlying(WhatToShow::SHOW_DOCUMENT_TYPE) == bit(NodeType::DOCUMENT_TYPE_NODE));
-    STATIC_CHECK(std::to_underlying(WhatToShow::SHOW_DOCUMENT_FRAGMENT)
+    STATIC_CHECK(WhatToShow {WhatToShowFlag::SHOW_COMMENT}.ToRaw() == bit(NodeType::COMMENT_NODE));
+    STATIC_CHECK(WhatToShow {WhatToShowFlag::SHOW_DOCUMENT}.ToRaw() == bit(NodeType::DOCUMENT_NODE));
+    STATIC_CHECK(WhatToShow {WhatToShowFlag::SHOW_DOCUMENT_TYPE}.ToRaw()
+                 == bit(NodeType::DOCUMENT_TYPE_NODE));
+    STATIC_CHECK(WhatToShow {WhatToShowFlag::SHOW_DOCUMENT_FRAGMENT}.ToRaw()
                  == bit(NodeType::DOCUMENT_FRAGMENT_NODE));
-    STATIC_CHECK(std::to_underlying(WhatToShow::SHOW_NOTATION) == 0x800ul);
+    STATIC_CHECK(WhatToShow {WhatToShowFlag::SHOW_NOTATION}.ToRaw() == 0x800ul);
   }
 }

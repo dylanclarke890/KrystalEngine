@@ -258,8 +258,8 @@ namespace krys::ui::tests
       REQUIRE(info);
       CHECK(info->Role == pal::AccessibilityRole::Button);
       CHECK(info->AriaRole == u8"button");
-      CHECK(info->States.Contains(pal::AccessibilityState::Focusable));
-      CHECK(info->Actions.Contains(pal::AccessibilityAction::Press));
+      CHECK(info->States.contains(pal::AccessibilityState::Focusable));
+      CHECK(info->Actions.contains(pal::AccessibilityAction::Press));
       // The view's top left is at the origin in the window.
       CHECK(info->Bounds.X == 0);
       CHECK(info->Bounds.Y == 50);
@@ -270,7 +270,7 @@ namespace krys::ui::tests
       REQUIRE(fieldInfo);
       CHECK(fieldInfo->Role == pal::AccessibilityRole::Edit);
       CHECK(fieldInfo->Value == u8"Hello");
-      CHECK(fieldInfo->States.Contains(pal::AccessibilityState::Editable));
+      CHECK(fieldInfo->States.contains(pal::AccessibilityState::Editable));
 
       auto rangeInfo = tree.Node(range);
       REQUIRE(rangeInfo);
@@ -292,7 +292,7 @@ namespace krys::ui::tests
     {
       CHECK(tree.PerformAction(box, pal::AccessibilityAction::Press));
       CHECK(Downcast<boo::HTMLInputElement>(*view.Document().GetElementById(u8"box")).Checked());
-      CHECK(tree.Node(box).value().States.Contains(pal::AccessibilityState::Checked));
+      CHECK(tree.Node(box).value().States.contains(pal::AccessibilityState::Checked));
 
       CHECK(tree.PerformAction(field, pal::AccessibilityAction::Focus));
       CHECK(tree.Focus() == field);

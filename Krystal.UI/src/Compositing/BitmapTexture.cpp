@@ -37,12 +37,12 @@ namespace krys::ui
     {
       return;
     }
-    auto texture =
-      _device.CreateTexture({.Format = gfx::TextureFormat::RGBA8Unorm,
-                             .Width = static_cast<uint32>(_size.Width()),
-                             .Height = static_cast<uint32>(_size.Height()),
-                             .Usage = gfx::TextureUsage::RenderTarget | gfx::TextureUsage::Sampled,
-                             .DebugName = u8"Bitmap texture"});
+    auto texture = _device.CreateTexture(
+      {.Format = gfx::TextureFormat::RGBA8Unorm,
+       .Width = static_cast<uint32>(_size.Width()),
+       .Height = static_cast<uint32>(_size.Height()),
+       .Usage = EnumSet<gfx::TextureUsage> {gfx::TextureUsage::RenderTarget, gfx::TextureUsage::Sampled},
+       .DebugName = u8"Bitmap texture"});
     if (texture)
     {
       _texture = *texture;

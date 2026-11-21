@@ -25,18 +25,23 @@
 
 #pragma once
 
+#include "Krystal.Core/Containers/EnumSet.hpp"
 #include "Krystal.Core/Enum.hpp"
 
 namespace krys::boo::style
 {
   /// @brief Options for resolving system and keyword colours.
-  enum class ColorOptions : uint8
+  enum class ColorOption : uint8
   {
-    None = 0,
-    UseSystemAppearance = 1 << 0,
-    UseDarkAppearance = 1 << 1,
-    UseElevatedUserInterfaceLevel = 1 << 2,
+    UseSystemAppearance,
+    UseDarkAppearance,
+    UseElevatedUserInterfaceLevel,
   };
-}
 
-KRYS_DEFINE_FLAGS_ENUM_TRAITS(krys::boo::style::ColorOptions, 3uz)
+  consteval ColorOption MaxEnumValue(ColorOption) noexcept
+  {
+    return ColorOption::UseElevatedUserInterfaceLevel;
+  }
+
+  using ColorOptions = EnumSet<ColorOption>;
+}

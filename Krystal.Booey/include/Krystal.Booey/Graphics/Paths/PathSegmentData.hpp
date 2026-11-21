@@ -518,10 +518,7 @@ namespace krys::boo
 
     void Transform(const AffineTransform &) noexcept;
   };
-}
 
-namespace krys::boo
-{
   TextStream &operator<<(TextStream &ts, const PathMoveTo &data) noexcept;
 
   TextStream &operator<<(TextStream &ts, const PathLineTo &data) noexcept;

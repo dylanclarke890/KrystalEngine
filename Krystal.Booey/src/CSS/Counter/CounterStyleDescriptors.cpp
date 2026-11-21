@@ -416,7 +416,7 @@ namespace krys::boo::css
       .SpeakAs = CounterStyleSpeakAs::Auto,
       .ExtendsName = systemData.first,
       .FixedSystemFirstSymbolValue = systemData.second,
-      .ExplicitlySetDescriptors = CounterStyleDescriptor::None,
+      .ExplicitlySetDescriptors = {},
     };
     descriptors.SetExplicitlySetDescriptors(properties);
     return descriptors;
@@ -586,7 +586,7 @@ namespace krys::boo::css
 
   CSSOMString CounterStyleDescriptors::SystemCSSText() const noexcept
   {
-    if (!HasFlag(ExplicitlySetDescriptors, CounterStyleDescriptor::System))
+    if (!ExplicitlySetDescriptors.contains(CounterStyleDescriptor::System))
     {
       return {};
     }
@@ -645,7 +645,7 @@ namespace krys::boo::css
 
   CSSOMString CounterStyleDescriptors::NegativeCSSText() const noexcept
   {
-    if (!HasFlag(ExplicitlySetDescriptors, CounterStyleDescriptor::Negative))
+    if (!ExplicitlySetDescriptors.contains(CounterStyleDescriptor::Negative))
     {
       return {};
     }
@@ -658,7 +658,7 @@ namespace krys::boo::css
 
   CSSOMString CounterStyleDescriptors::PrefixCSSText() const noexcept
   {
-    if (!HasFlag(ExplicitlySetDescriptors, CounterStyleDescriptor::Prefix))
+    if (!ExplicitlySetDescriptors.contains(CounterStyleDescriptor::Prefix))
     {
       return {};
     }
@@ -667,7 +667,7 @@ namespace krys::boo::css
 
   CSSOMString CounterStyleDescriptors::SuffixCSSText() const noexcept
   {
-    if (!HasFlag(ExplicitlySetDescriptors, CounterStyleDescriptor::Suffix))
+    if (!ExplicitlySetDescriptors.contains(CounterStyleDescriptor::Suffix))
     {
       return {};
     }
@@ -676,7 +676,7 @@ namespace krys::boo::css
 
   CSSOMString CounterStyleDescriptors::RangesCSSText() const noexcept
   {
-    if (!HasFlag(ExplicitlySetDescriptors, CounterStyleDescriptor::Range))
+    if (!ExplicitlySetDescriptors.contains(CounterStyleDescriptor::Range))
     {
       return {};
     }
@@ -725,7 +725,7 @@ namespace krys::boo::css
 
   CSSOMString CounterStyleDescriptors::PadCSSText() const noexcept
   {
-    if (!HasFlag(ExplicitlySetDescriptors, CounterStyleDescriptor::Pad))
+    if (!ExplicitlySetDescriptors.contains(CounterStyleDescriptor::Pad))
     {
       return {};
     }
@@ -734,7 +734,7 @@ namespace krys::boo::css
 
   CSSOMString CounterStyleDescriptors::FallbackCSSText() const noexcept
   {
-    if (!HasFlag(ExplicitlySetDescriptors, CounterStyleDescriptor::Fallback))
+    if (!ExplicitlySetDescriptors.contains(CounterStyleDescriptor::Fallback))
     {
       return {};
     }
@@ -743,7 +743,7 @@ namespace krys::boo::css
 
   CSSOMString CounterStyleDescriptors::SymbolsCSSText() const noexcept
   {
-    if (!HasFlag(ExplicitlySetDescriptors, CounterStyleDescriptor::Symbols))
+    if (!ExplicitlySetDescriptors.contains(CounterStyleDescriptor::Symbols))
     {
       return {};
     }
@@ -761,7 +761,7 @@ namespace krys::boo::css
 
   CSSOMString CounterStyleDescriptors::AdditiveSymbolsCSSText() const noexcept
   {
-    if (!HasFlag(ExplicitlySetDescriptors, CounterStyleDescriptor::AdditiveSymbols))
+    if (!ExplicitlySetDescriptors.contains(CounterStyleDescriptor::AdditiveSymbols))
     {
       return {};
     }

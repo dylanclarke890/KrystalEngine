@@ -40,9 +40,6 @@ namespace krys::boo
     Counterclockwise,
     Clockwise,
   };
-}
 
-namespace krys::boo
-{
   TextStream &operator<<(TextStream &ts, RotationDirection direction) noexcept;
 }

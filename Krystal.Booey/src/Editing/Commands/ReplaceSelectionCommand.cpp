@@ -641,8 +641,8 @@ namespace krys::boo
         // inserted node.
         RefPtr<boo::Node> previousNode = ShareRefPtr(TreeQueries::PreviousSkippingChildren(*node));
         krys_debug_assert(previousNode);
-        _lastNodeInserted = HasFlag(_firstNodeInserted->CompareDocumentPosition(*previousNode),
-                                    dom::DocumentPosition::DOCUMENT_POSITION_FOLLOWING)
+        _lastNodeInserted = _firstNodeInserted->CompareDocumentPosition(*previousNode)
+                                .contains(dom::DocumentPosition::DOCUMENT_POSITION_FOLLOWING)
                               ? previousNode
                               : _firstNodeInserted;
       }
@@ -723,12 +723,12 @@ namespace krys::boo
                                                    EnumSet<CommandOption> options,
                                                    EditAction editAction) noexcept
       : CompositeEditCommand(document, editAction),
-        _selectReplacement(options.Contains(CommandOption::SelectReplacement)),
-        _smartReplace(options.Contains(CommandOption::SmartReplace)),
-        _matchStyle(options.Contains(CommandOption::MatchStyle)), _documentFragment(krys::move(fragment)),
-        _preventNesting(options.Contains(CommandOption::PreventNesting)),
-        _movingParagraph(options.Contains(CommandOption::MovingParagraph)),
-        _sanitizeFragment(options.Contains(CommandOption::SanitizeFragment))
+        _selectReplacement(options.contains(CommandOption::SelectReplacement)),
+        _smartReplace(options.contains(CommandOption::SmartReplace)),
+        _matchStyle(options.contains(CommandOption::MatchStyle)), _documentFragment(krys::move(fragment)),
+        _preventNesting(options.contains(CommandOption::PreventNesting)),
+        _movingParagraph(options.contains(CommandOption::MovingParagraph)),
+        _sanitizeFragment(options.contains(CommandOption::SanitizeFragment))
   {
   }
 

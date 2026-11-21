@@ -152,7 +152,7 @@ namespace krys::boo
   {
     ts << o.RenderName();
 
-    if (behavior.Contains(RenderAsTextFlag::ShowAddresses))
+    if (behavior.contains(RenderAsTextFlag::ShowAddresses))
     {
       ts << ' ' << static_cast<const void *>(&o);
     }
@@ -369,7 +369,7 @@ namespace krys::boo
 
   void WriteDebugInfo(TextStream &ts, const RenderObject &object, EnumSet<RenderAsTextFlag> behavior) noexcept
   {
-    if (behavior.Contains(RenderAsTextFlag::ShowIDAndClass))
+    if (behavior.contains(RenderAsTextFlag::ShowIDAndClass))
     {
       if (auto *element = DynamicDowncast<boo::Element>(object.GetNode()))
       {
@@ -395,7 +395,7 @@ namespace krys::boo
       }
     }
 
-    if (behavior.Contains(RenderAsTextFlag::ShowLayoutState))
+    if (behavior.contains(RenderAsTextFlag::ShowLayoutState))
     {
       bool needsLayout = object.SelfNeedsLayout() || object.NeedsOutOfFlowMovementLayout()
                          || object.OutOfFlowChildNeedsLayout() || object.NormalChildNeedsLayout();
@@ -446,7 +446,7 @@ namespace krys::boo
       }
     }
 
-    if (behavior.Contains(RenderAsTextFlag::ShowOverflow))
+    if (behavior.contains(RenderAsTextFlag::ShowOverflow))
     {
       if (auto *box = DynamicDowncast<RenderBox>(object))
       {
@@ -591,7 +591,7 @@ namespace krys::boo
     {
       ts << Indent << "layer ";
 
-      if (behavior.Contains(RenderAsTextFlag::ShowAddresses))
+      if (behavior.contains(RenderAsTextFlag::ShowAddresses))
       {
         ts << static_cast<const void *>(&layer) << ' ';
         if (auto *scrollableArea = layer.GetScrollableArea())
@@ -715,7 +715,7 @@ namespace krys::boo
       layer.UpdateDescendantDependentFlags();
 
       bool shouldPaint =
-        (behavior.Contains(RenderAsTextFlag::ShowAllLayers))
+        (behavior.contains(RenderAsTextFlag::ShowAllLayers))
           ? true
           : layer.IntersectsDamageRect(rects.LayerBounds(), rects.DirtyBackgroundRect().Rect(), &rootLayer,
                                        layer.OffsetFromAncestor(&rootLayer));
@@ -730,7 +730,7 @@ namespace krys::boo
 
       if (negativeZOrderLayers.size())
       {
-        if (behavior.Contains(RenderAsTextFlag::ShowLayerNesting))
+        if (behavior.contains(RenderAsTextFlag::ShowLayerNesting))
         {
           ts << Indent << " negative z-order list (" << static_cast<uint64>(negativeZOrderLayers.size())
              << ")\n";
@@ -742,7 +742,7 @@ namespace krys::boo
           WriteLayers(ts, rootLayer, *currLayer, paintDirtyRect, behavior);
         }
 
-        if (behavior.Contains(RenderAsTextFlag::ShowLayerNesting))
+        if (behavior.contains(RenderAsTextFlag::ShowLayerNesting))
         {
           ts.DecreaseIndent();
         }
@@ -754,7 +754,7 @@ namespace krys::boo
                    rects.DirtyForegroundRect().Rect(),
                    paintsBackgroundSeparately ? LayerPaintPhaseForeground : LayerPaintPhaseAll, behavior);
 
-        if (behavior.Contains(RenderAsTextFlag::ShowLayerFragments))
+        if (behavior.contains(RenderAsTextFlag::ShowLayerFragments))
         {
           LayerFragments layerFragments;
           layer.CollectFragments(layerFragments, &rootLayer, paintDirtyRect,
@@ -790,7 +790,7 @@ namespace krys::boo
       auto normalFlowLayers = layer.NormalFlowLayers();
       if (normalFlowLayers.size())
       {
-        if (behavior.Contains(RenderAsTextFlag::ShowLayerNesting))
+        if (behavior.contains(RenderAsTextFlag::ShowLayerNesting))
         {
           ts << Indent << " normal flow list (" << static_cast<uint64>(normalFlowLayers.size()) << ")\n";
           ts.IncreaseIndent();
@@ -801,7 +801,7 @@ namespace krys::boo
           WriteLayers(ts, rootLayer, *currLayer, paintDirtyRect, behavior);
         }
 
-        if (behavior.Contains(RenderAsTextFlag::ShowLayerNesting))
+        if (behavior.contains(RenderAsTextFlag::ShowLayerNesting))
         {
           ts.DecreaseIndent();
         }
@@ -814,7 +814,7 @@ namespace krys::boo
 
         if (layerCount)
         {
-          if (behavior.Contains(RenderAsTextFlag::ShowLayerNesting))
+          if (behavior.contains(RenderAsTextFlag::ShowLayerNesting))
           {
             ts << Indent << " positive z-order list (" << static_cast<uint64>(layerCount) << ")\n";
             ts.IncreaseIndent();
@@ -825,7 +825,7 @@ namespace krys::boo
             WriteLayers(ts, rootLayer, *currLayer, paintDirtyRect, behavior);
           }
 
-          if (behavior.Contains(RenderAsTextFlag::ShowLayerNesting))
+          if (behavior.contains(RenderAsTextFlag::ShowLayerNesting))
           {
             ts.DecreaseIndent();
           }
@@ -867,7 +867,7 @@ namespace krys::boo
     krys_debug_assert(frame->Document());
 
     auto *document = frame->Document();
-    if (!behavior.Contains(RenderAsTextFlag::DontUpdateLayout))
+    if (!behavior.contains(RenderAsTextFlag::DontUpdateLayout))
     {
       (void)document->UpdateLayout();
     }
@@ -900,9 +900,9 @@ namespace krys::boo
     krys_debug_assert(element);
 
     // This function doesn't support printing mode.
-    krys_debug_assert(!behavior.Contains(RenderAsTextFlag::PrintingMode));
+    krys_debug_assert(!behavior.contains(RenderAsTextFlag::PrintingMode));
 
-    if (!behavior.Contains(RenderAsTextFlag::DontUpdateLayout))
+    if (!behavior.contains(RenderAsTextFlag::DontUpdateLayout))
     {
       (void)element->NodeDocument().UpdateLayout();
     }

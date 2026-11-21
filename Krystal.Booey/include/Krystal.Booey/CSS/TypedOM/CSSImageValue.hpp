@@ -28,12 +28,6 @@
 #include "Krystal.Booey/CSS/TypedOM/CSSStyleValue.hpp"
 #include "Krystal.Core/Memory/WeakPtr.hpp"
 
-namespace krys::boo
-{
-  class CachedImage;
-  class Document;
-}
-
 namespace krys::boo::css
 {
   class ImageValue;
@@ -41,6 +35,9 @@ namespace krys::boo::css
 
 namespace krys::boo
 {
+  class CachedImage;
+  class Document;
+
   /// @brief An image value (`url()`), as the Typed OM represents it.
   /// @see https://drafts.css-houdini.org/css-typed-om/#cssimagevalue
   class CSSImageValue final : public CSSStyleValue

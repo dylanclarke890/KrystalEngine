@@ -92,22 +92,22 @@ namespace krys::boo
 
     KRYS_NODISCARD bool ShiftKey() const noexcept
     {
-      return _modifiers.Contains(Modifier::ShiftKey);
+      return _modifiers.contains(Modifier::ShiftKey);
     }
 
     KRYS_NODISCARD bool ControlKey() const noexcept
     {
-      return _modifiers.Contains(Modifier::ControlKey);
+      return _modifiers.contains(Modifier::ControlKey);
     }
 
     KRYS_NODISCARD bool AltKey() const noexcept
     {
-      return _modifiers.Contains(Modifier::AltKey);
+      return _modifiers.contains(Modifier::AltKey);
     }
 
     KRYS_NODISCARD bool MetaKey() const noexcept
     {
-      return _modifiers.Contains(Modifier::MetaKey);
+      return _modifiers.contains(Modifier::MetaKey);
     }
 
     KRYS_NODISCARD EnumSet<Modifier> Modifiers() const noexcept

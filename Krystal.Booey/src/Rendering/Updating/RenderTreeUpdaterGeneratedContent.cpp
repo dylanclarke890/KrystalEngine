@@ -253,7 +253,7 @@ namespace krys::boo
 
     auto styleChanges = existingStyle ? style::DetermineChanges(*updateStyle, *existingStyle)
                                       : EnumSet<style::Change> {style::Change::Renderer};
-    if (styleChanges.IsEmpty())
+    if (styleChanges.empty())
     {
       return;
     }
@@ -302,7 +302,7 @@ namespace krys::boo
       return;
     }
 
-    if (styleChanges.Contains(style::Change::Renderer))
+    if (styleChanges.contains(style::Change::Renderer))
     {
       CreateContentRenderers(*_updater._builder, *pseudoElementRenderer, *updateStyle);
     }

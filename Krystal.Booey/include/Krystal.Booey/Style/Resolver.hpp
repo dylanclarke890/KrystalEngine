@@ -43,15 +43,6 @@
 #include "Krystal.Core/Memory/WeakPtr.hpp"
 #include "Krystal.Core/Types/Maybe.hpp"
 
-namespace krys::boo
-{
-  class BlendingKeyframe;
-  class BlendingKeyframes;
-  class CSSStyleSheet;
-  class RenderStyle;
-  class TimingFunction;
-}
-
 namespace krys::boo::css
 {
   class MutableStyleProperties;
@@ -60,8 +51,13 @@ namespace krys::boo::css
 
 namespace krys::boo
 {
+  class BlendingKeyframe;
+  class BlendingKeyframes;
+  class CSSStyleSheet;
   class Document;
   class Element;
+  class RenderStyle;
+  class TimingFunction;
 
   // MatchOnlyUserAgentRules is used in media queries, where relative units
   // are interpreted according to the document root element style, and styled only

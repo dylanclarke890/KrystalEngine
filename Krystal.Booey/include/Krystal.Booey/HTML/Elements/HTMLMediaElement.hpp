@@ -38,9 +38,12 @@ namespace krys::boo::html
     Probably,
     Maybe,
   };
-}
 
-KRYS_DEFINE_CONTIGUOUS_ENUM_TRAITS(krys::boo::html::CanPlayTypeResult, 3uz);
+  consteval CanPlayTypeResult MaxEnumValue(CanPlayTypeResult) noexcept
+  {
+    return CanPlayTypeResult::Maybe;
+  }
+}
 
 namespace krys::boo
 {

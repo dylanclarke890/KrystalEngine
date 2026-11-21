@@ -26,10 +26,7 @@
 namespace krys::boo
 {
   class SVGPathElement;
-}
 
-namespace krys::boo
-{
   /// @brief The `<mpath>` element: references the `<path>` its parent `<animateMotion>` moves along.
   /// @see https://svgwg.org/specs/animations/#MPathElement
   class SVGMPathElement final : public SVGElement, public SVGURIReference

@@ -44,14 +44,6 @@
 #include "Krystal.Core/Types/Maybe.hpp"
 #include "Krystal.Core/Types/Variant.hpp"
 
-namespace krys::boo
-{
-  class CSSStyleDeclaration;
-  class Document;
-  class Element;
-  class MediaQueryList;
-}
-
 namespace krys::boo::dom
 {
   class EventDispatcher;
@@ -66,8 +58,12 @@ namespace krys::boo::html
 
 namespace krys::boo
 {
+  class CSSStyleDeclaration;
   class DOMSelection;
+  class Document;
+  class Element;
   class Frame;
+  class MediaQueryList;
   class VisualViewport;
 
   /// @brief A document's window: the global object of the document a frame shows, which the window events

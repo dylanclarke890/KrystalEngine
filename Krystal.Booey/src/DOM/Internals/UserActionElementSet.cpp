@@ -45,12 +45,12 @@ namespace krys::boo::dom
     krys_debug_assert(element.IsUserActionElement());
 
     auto iterator = _elements.find(&element);
-    return iterator != _elements.end() && iterator->second.Contains(flag);
+    return iterator != _elements.end() && iterator->second.contains(flag);
   }
 
   void UserActionElementSet::ClearFlags(Element &element, EnumSet<Flag> flags) noexcept
   {
-    krys_debug_assert(!flags.IsEmpty());
+    krys_debug_assert(!flags.empty());
 
     if (!element.IsUserActionElement())
     {
@@ -60,7 +60,7 @@ namespace krys::boo::dom
     auto iterator = _elements.find(&element);
     krys_debug_assert(iterator != _elements.end());
     auto updatedFlags = iterator->second - flags;
-    if (updatedFlags.IsEmpty())
+    if (updatedFlags.empty())
     {
       element.SetUserActionElement(false);
       _elements.erase(iterator);
@@ -73,7 +73,7 @@ namespace krys::boo::dom
 
   void UserActionElementSet::SetFlags(Element &element, EnumSet<Flag> flags) noexcept
   {
-    krys_debug_assert(!flags.IsEmpty());
+    krys_debug_assert(!flags.empty());
 
     _elements[&element].Add(flags);
 

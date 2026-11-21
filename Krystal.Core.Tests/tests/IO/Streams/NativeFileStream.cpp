@@ -102,7 +102,7 @@ namespace krys::io::tests
 
     SECTION("Constructor and basic operations")
     {
-      NativeFileWriter writer(testFile, WriteFlags::Create | WriteFlags::OpenAtEnd);
+      NativeFileWriter writer(testFile, WriteFlags {WriteFlag::Create, WriteFlag::OpenAtEnd});
 
       REQUIRE(writer.IsOpen()); // Should open in constructor
       REQUIRE(writer.Size() == 0);
@@ -168,7 +168,7 @@ namespace krys::io::tests
 
     SECTION("Invalid directory writing")
     {
-      NativeFileWriter writer(Path("/invalid-path/test.bin"), WriteFlags::None);
+      NativeFileWriter writer(Path("/invalid-path/test.bin"), WriteFlags {});
       REQUIRE_FALSE(writer.IsOpen());
       REQUIRE_FALSE(writer.Open());
     }

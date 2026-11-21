@@ -27,11 +27,6 @@
 #include "Krystal.Booey/HTML/Elements/HTMLFormControlElement.hpp"
 #include "Krystal.Booey/Platform/Scrolling/ScrollTypes.hpp"
 
-namespace krys::boo
-{
-  class VisiblePosition;
-}
-
 namespace krys::boo::dom
 {
   class Position;
@@ -72,6 +67,8 @@ namespace krys::boo::html
 
 namespace krys::boo
 {
+  class VisiblePosition;
+
   /// @brief A form control whose value is text: an input or a textarea. Its text is in an inner text element
   /// in its user agent shadow tree, which the user edits, and its selection is the frame's selection there
   /// while it's focused (and a cached one while it isn't).

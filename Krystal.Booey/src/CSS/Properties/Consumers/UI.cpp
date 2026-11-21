@@ -48,8 +48,9 @@ namespace krys::boo::css::parse_property
     // all-scroll | zoom-in | zoom-out ] https://drafts.csswg.org/css-ui/#propdef-cursor
 
     ValueListBuilder list;
-    while (auto image =
-             ConsumeImage(tokens, state, AllowedImageType::UrlFunction | AllowedImageType::ImageSet))
+    while (
+      auto image = ConsumeImage(
+        tokens, state, EnumSet<AllowedImageType> {AllowedImageType::UrlFunction, AllowedImageType::ImageSet}))
     {
       RefPtr<ValuePair> hotSpot;
       if (auto x = PrimitiveValueResolver<Number<>>::ConsumeAndResolve(tokens, state))

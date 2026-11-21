@@ -53,12 +53,12 @@ namespace krys::boo
     UnderOver,
     Unknown,
   };
-}
 
-KRYS_DEFINE_CONTIGUOUS_ENUM_TRAITS(krys::boo::MathMLElementInterface, 14uz);
+  consteval MathMLElementInterface MaxEnumValue(MathMLElementInterface) noexcept
+  {
+    return MathMLElementInterface::Unknown;
+  }
 
-namespace krys::boo
-{
   /// @see https://w3c.github.io/mathml-core/#dom-and-javascript
   /// @note Subclasses react to their attributes in `AttributeChanged`, then call their base's.
   class MathMLElement : public StyledElement
@@ -71,7 +71,7 @@ namespace krys::boo
   public:
     explicit MathMLElement(Document &document,
                            MathMLElementInterface interface = MathMLElementInterface::None,
-                           dom::NodeFlags nodeFlags = dom::NodeFlags::None) noexcept;
+                           dom::NodeFlags nodeFlags = dom::NodeFlags {}) noexcept;
 
     /// @brief The element's interface, which its tag name selects.
     KRYS_NODISCARD MathMLElementInterface Interface() const noexcept

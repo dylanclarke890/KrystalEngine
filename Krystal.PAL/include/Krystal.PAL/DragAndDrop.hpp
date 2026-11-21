@@ -20,12 +20,12 @@ namespace krys::pal
     /// @brief The target takes a link to it.
     Link,
   };
-}
 
-KRYS_DEFINE_CONTIGUOUS_ENUM_TRAITS(krys::pal::DropOperation, 3uz)
+  consteval DropOperation MaxEnumValue(DropOperation) noexcept
+  {
+    return DropOperation::Link;
+  }
 
-namespace krys::pal
-{
   using DropOperations = EnumSet<DropOperation>;
 
   /// @brief What's dragged over a window from another application, in the formats Krystal reads.

@@ -110,12 +110,12 @@ namespace krys::boo
 
     KRYS_NODISCARD bool ForceBlackText() const noexcept
     {
-      return PaintBehavior.Contains(boo::PaintBehavior::ForceBlackText);
+      return PaintBehavior.contains(boo::PaintBehavior::ForceBlackText);
     }
 
     KRYS_NODISCARD bool ForceWhiteText() const noexcept
     {
-      return PaintBehavior.Contains(boo::PaintBehavior::ForceWhiteText);
+      return PaintBehavior.contains(boo::PaintBehavior::ForceWhiteText);
     }
 
     KRYS_NODISCARD Color ForcedTextColor() const noexcept
@@ -125,12 +125,12 @@ namespace krys::boo
 
     KRYS_NODISCARD bool SkipRootBackground() const noexcept
     {
-      return PaintBehavior.Contains(boo::PaintBehavior::SkipRootBackground);
+      return PaintBehavior.contains(boo::PaintBehavior::SkipRootBackground);
     }
 
     KRYS_NODISCARD bool PaintRootBackgroundOnly() const noexcept
     {
-      return PaintBehavior.Contains(boo::PaintBehavior::RootBackgroundOnly);
+      return PaintBehavior.contains(boo::PaintBehavior::RootBackgroundOnly);
     }
 
     KRYS_NODISCARD const RenderLayer *EnclosingSelfPaintingLayer() const noexcept

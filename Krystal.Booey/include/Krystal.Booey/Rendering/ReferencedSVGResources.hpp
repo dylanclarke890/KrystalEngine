@@ -34,11 +34,6 @@
 #include "Krystal.Core/Memory/UniquePtr.hpp"
 #include <utility>
 
-namespace krys::boo
-{
-  class Document;
-}
-
 namespace krys::boo::dom
 {
   class DocumentOrShadowRoot;
@@ -53,6 +48,7 @@ namespace krys::boo::style
 namespace krys::boo
 {
   class CSSSVGResourceElementClient;
+  class Document;
   class LegacyRenderSVGResourceClipper;
   class LegacyRenderSVGResourceContainer;
   class RenderElement;

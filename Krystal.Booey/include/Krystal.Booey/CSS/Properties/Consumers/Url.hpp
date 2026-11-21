@@ -24,22 +24,27 @@
 
 #pragma once
 
+#include "Krystal.Core/Containers/EnumSet.hpp"
 #include "Krystal.Core/Enum.hpp"
 #include "Krystal.Core/Memory/RefPtr.hpp"
 #include "Krystal.Core/Types/Maybe.hpp"
 
 namespace krys::boo::css::parse_property
 {
-  enum class AllowedUrlModifiers
+  enum class AllowedUrlModifier
   {
-    None = 0,
-    CrossOrigin = 1 << 0,
-    Integrity = 1 << 1,
-    ReferrerPolicy = 1 << 2,
+    CrossOrigin,
+    Integrity,
+    ReferrerPolicy,
   };
-}
 
-KRYS_DEFINE_FLAGS_ENUM_TRAITS(krys::boo::css::parse_property::AllowedUrlModifiers, 4uz)
+  consteval AllowedUrlModifier MaxEnumValue(AllowedUrlModifier) noexcept
+  {
+    return AllowedUrlModifier::ReferrerPolicy;
+  }
+
+  using AllowedUrlModifiers = EnumSet<AllowedUrlModifier>;
+}
 
 namespace krys::boo::css
 {

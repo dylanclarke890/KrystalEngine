@@ -39,12 +39,12 @@ namespace krys::boo
     DHTML,
     Edit,
   };
-}
 
-KRYS_DEFINE_CONTIGUOUS_ENUM_TRAITS(krys::boo::DragDestinationAction, 2uz);
+  consteval DragDestinationAction MaxEnumValue(DragDestinationAction) noexcept
+  {
+    return DragDestinationAction::Edit;
+  }
 
-namespace krys::boo
-{
   KRYS_NODISCARD constexpr EnumSet<DragDestinationAction> AnyDragDestinationAction() noexcept
   {
     return {DragDestinationAction::DHTML, DragDestinationAction::Edit};
@@ -60,12 +60,12 @@ namespace krys::boo
     Selection,
     Color,
   };
-}
 
-KRYS_DEFINE_CONTIGUOUS_ENUM_TRAITS(krys::boo::DragSourceAction, 5uz);
+  consteval DragSourceAction MaxEnumValue(DragSourceAction) noexcept
+  {
+    return DragSourceAction::Color;
+  }
 
-namespace krys::boo
-{
   KRYS_NODISCARD constexpr EnumSet<DragSourceAction> AnyDragSourceAction() noexcept
   {
     return {DragSourceAction::DHTML, DragSourceAction::Image, DragSourceAction::Link,
@@ -82,12 +82,12 @@ namespace krys::boo
     Move,
     Delete,
   };
-}
 
-KRYS_DEFINE_CONTIGUOUS_ENUM_TRAITS(krys::boo::DragOperation, 6uz);
+  consteval DragOperation MaxEnumValue(DragOperation) noexcept
+  {
+    return DragOperation::Delete;
+  }
 
-namespace krys::boo
-{
   KRYS_NODISCARD constexpr EnumSet<DragOperation> AnyDragOperation() noexcept
   {
     return {DragOperation::Copy,    DragOperation::Link, DragOperation::Generic,

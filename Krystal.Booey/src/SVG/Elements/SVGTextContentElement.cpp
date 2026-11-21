@@ -43,7 +43,7 @@ namespace krys::boo
                                                UniquePtr<SVGPropertyRegistry> &&propertyRegistry,
                                                SVGElementInterface interface, SVGElementFlags flags) noexcept
       : SVGGraphicsElement(document, krys::move(propertyRegistry), interface,
-                           flags | SVGElementFlags::IsSvgTextContentElement),
+                           flags | SVGElementFlag::IsSvgTextContentElement),
         _textLength(SVGAnimatedLength::Create(this, SVGLengthMode::Other)),
         _lengthAdjust(SVGAnimatedEnumeration::Create(this, SVGLengthAdjustSpacing))
   {

@@ -27,12 +27,6 @@
 #include "Krystal.Booey/HTML/Elements/HTMLElement.hpp"
 #include "Krystal.Core/Memory/WeakPtr.hpp"
 
-namespace krys::boo
-{
-  class HTMLFormElement;
-  class HTMLSelectElement;
-}
-
 namespace krys::boo::html
 {
   enum class AllowStyleInvalidation : bool
@@ -44,6 +38,9 @@ namespace krys::boo::html
 
 namespace krys::boo
 {
+  class HTMLFormElement;
+  class HTMLSelectElement;
+
   /// @see https://html.spec.whatwg.org/#htmloptionelement
   class HTMLOptionElement : public HTMLElement
   {

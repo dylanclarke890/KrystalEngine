@@ -98,7 +98,7 @@ namespace krys::io
     /// @param directory The directory to search.
     /// @param flags Flags to control the search behavior.
     KRYS_NODISCARD List<VFSFileEntry> SearchFiles(const Path &directory,
-                                                  FileSearchFlags flags = FileSearchFlags::None) const;
+                                                  FileSearchFlags flags = FileSearchFlags {}) const;
 
     /// @returns The first backend that matches the given path.
     KRYS_NODISCARD Maybe<Pair<Path, IFileBackend *>> GetBackend(const Path &path) const noexcept;

@@ -37,10 +37,7 @@
 namespace krys::boo::dom
 {
   class StaticRange;
-}
 
-namespace krys::boo::dom
-{
   enum class IsInputMethodComposing : bool
   {
     No,

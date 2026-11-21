@@ -269,6 +269,11 @@ namespace krys::boo
       RevealedWhenFound,
     };
 
+    friend consteval OverrideType MaxEnumValue(OverrideType) noexcept
+    {
+      return OverrideType::RevealedWhenFound;
+    }
+
   private:
     FrameViewLayoutContext &_layoutContext;
 
@@ -279,5 +284,3 @@ namespace krys::boo
     ~ContentVisibilityOverrideScope() noexcept;
   };
 }
-
-KRYS_DEFINE_CONTIGUOUS_ENUM_TRAITS(krys::boo::ContentVisibilityOverrideScope::OverrideType, 3uz);

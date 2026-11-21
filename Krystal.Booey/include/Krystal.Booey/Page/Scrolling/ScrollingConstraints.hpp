@@ -73,7 +73,7 @@ namespace krys::boo
 
     KRYS_NODISCARD bool HasAnchorEdge(AnchorEdge edge) const noexcept
     {
-      return _anchorEdges.Contains(edge);
+      return _anchorEdges.contains(edge);
     }
 
     void AddAnchorEdge(AnchorEdge edge) noexcept

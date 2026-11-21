@@ -617,7 +617,7 @@ namespace krys::boo::css
 
     auto isExplicitlySet = [&](CounterStyleDescriptor descriptor)
     {
-      return HasFlag(ExplicitlySetDescriptors(), descriptor);
+      return ExplicitlySetDescriptors().contains(descriptor);
     };
 
     SetSystem(extendedCounterStyle.System());

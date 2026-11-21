@@ -29,13 +29,6 @@
 #include "Krystal.Core/Memory/RefPtr.hpp"
 #include "Krystal.Core/Memory/WeakPtr.hpp"
 
-namespace krys::boo
-{
-  class HTMLSlotElement;
-  class RenderStyle;
-  class RenderText;
-}
-
 namespace krys::boo::dom
 {
   class SlotAlgorithms;
@@ -44,6 +37,9 @@ namespace krys::boo::dom
 namespace krys::boo
 {
   class Document;
+  class HTMLSlotElement;
+  class RenderStyle;
+  class RenderText;
 
   /// @brief A node of text: an exclusive Text node, or the CDATASection that derives from it.
   /// @see https://dom.spec.whatwg.org/#interface-text

@@ -14,7 +14,7 @@ namespace krys::boo
 {
   CharacterData::CharacterData(Document &document, DOMString data, dom::NodeType type,
                                dom::NodeFlags flags) noexcept
-      : Node(document, type, flags | dom::NodeFlags::IsCharacterData), _data {krys::move(data)}
+      : Node(document, type, flags | dom::NodeFlag::IsCharacterData), _data {krys::move(data)}
   {
   }
 

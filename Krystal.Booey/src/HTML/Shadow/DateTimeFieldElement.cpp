@@ -40,7 +40,7 @@ namespace krys::boo::html
 {
   DateTimeFieldElement::DateTimeFieldElement(Document &document,
                                              DateTimeFieldElementFieldOwner &fieldOwner) noexcept
-      : HTMLDivElement(document, dom::NodeFlags::HasCustomStyleResolveCallbacks), _fieldOwner(&fieldOwner)
+      : HTMLDivElement(document, dom::NodeFlag::HasCustomStyleResolveCallbacks), _fieldOwner(&fieldOwner)
   {
   }
 

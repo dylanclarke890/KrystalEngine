@@ -225,7 +225,7 @@ namespace krys::boo::dom
       // to
       //     those of node. (Skipped origin: documents have no origin.)
       auto &docCopy = Downcast<Document>(*copy);
-      docCopy._flags = doc._flags;
+      docCopy._documentFlags = doc._documentFlags;
       docCopy._contentType = doc._contentType;
       docCopy._encoding = doc._encoding;
       docCopy.SetQuirksMode(doc._quirksMode);

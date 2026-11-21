@@ -46,17 +46,6 @@ namespace krys::net
   class Url;
 }
 
-namespace krys::boo
-{
-  class Document;
-  class DocumentFragment;
-  class Element;
-  class Event;
-  class KeyboardEvent;
-  class Text;
-  class TextEvent;
-}
-
 namespace krys::boo::dom
 {
   class DataTransfer;
@@ -74,19 +63,28 @@ namespace krys::boo::css
 namespace krys::boo
 {
   class CompositeEditCommand;
+  class Document;
+  class DocumentFragment;
   class EditCommandComposition;
   class EditingStyle;
   class EditorClient;
   class EditorInternalCommand;
-  enum class FrameSelectionSetSelectionOption : uint8;
+  class Element;
+  class Event;
   class Frame;
+  class KeyboardEvent;
   class Pasteboard;
   class ProhibitScrollingWhenChangingContentSizeForScope;
-  enum class RevealExtentOption : bool;
+  class Text;
+  class TextEvent;
+  class VisibleSelection;
+
   struct ScrollAlignment;
+
+  enum class FrameSelectionSetSelectionOption : uint8;
+  enum class RevealExtentOption : bool;
   enum class SelectionDirection : uint8;
   enum class TextGranularity : uint8;
-  class VisibleSelection;
   enum class WritingDirection : uint8;
 
   enum class EditorCommandSource : uint8
@@ -106,12 +104,12 @@ namespace krys::boo
   {
     AllowPlainText,
   };
-}
 
-KRYS_DEFINE_CONTIGUOUS_ENUM_TRAITS(krys::boo::EditorPasteOption, 1uz);
+  consteval EditorPasteOption MaxEnumValue(EditorPasteOption) noexcept
+  {
+    return EditorPasteOption::AllowPlainText;
+  }
 
-namespace krys::boo
-{
   /// @brief Keeps a frame's selection changes from reaching the editor's clients while it lives.
   class IgnoreSelectionChangeForScope
   {

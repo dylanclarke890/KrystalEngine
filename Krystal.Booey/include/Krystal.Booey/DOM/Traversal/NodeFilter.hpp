@@ -2,6 +2,7 @@
 
 #include "Krystal.Booey/DOM/Types/ExceptionOr.hpp"
 #include "Krystal.Core/Attributes.hpp"
+#include "Krystal.Core/Containers/EnumSet.hpp"
 #include "Krystal.Core/Enum.hpp"
 #include "Krystal.Core/Memory/RefCounted.hpp"
 #include "Krystal.Core/Memory/RefPtr.hpp"
@@ -20,42 +21,53 @@ namespace krys::boo::dom
     FILTER_SKIP = 3,
   };
 
+  consteval FilterResult MaxEnumValue(FilterResult) noexcept
+  {
+    return FilterResult::FILTER_SKIP;
+  }
+
   /// @brief The node types a NodeIterator or TreeWalker shows: bit n is set for nodeType n + 1.
   /// @see https://dom.spec.whatwg.org/#concept-traversal-whattoshow
   /// @see https://dom.spec.whatwg.org/#interface-nodefilter
-  enum class WhatToShow : ulong
+  enum class WhatToShowFlag : ulong
   {
-    /// @see https://dom.spec.whatwg.org/#dom-nodefilter-show_all
-    SHOW_ALL = 0xFF'FF'FF'FF,
     /// @see https://dom.spec.whatwg.org/#dom-nodefilter-show_element
-    SHOW_ELEMENT = 0x00'00'00'01,
+    SHOW_ELEMENT,
     /// @see https://dom.spec.whatwg.org/#dom-nodefilter-show_attribute
-    SHOW_ATTRIBUTE = 0x00'00'00'02,
+    SHOW_ATTRIBUTE,
     /// @see https://dom.spec.whatwg.org/#dom-nodefilter-show_text
-    SHOW_TEXT = 0x00'00'00'04,
+    SHOW_TEXT,
     /// @see https://dom.spec.whatwg.org/#dom-nodefilter-show_cdata_section
-    SHOW_CDATA_SECTION = 0x00'00'00'08,
+    SHOW_CDATA_SECTION,
     // Legacy.
-    SHOW_ENTITY_REFERENCE = 0x00'00'00'10,
+    SHOW_ENTITY_REFERENCE,
     // Legacy.
-    SHOW_ENTITY = 0x00'00'00'20,
+    SHOW_ENTITY,
     /// @see https://dom.spec.whatwg.org/#dom-nodefilter-show_processing_instruction
-    SHOW_PROCESSING_INSTRUCTION = 0x00'00'00'40,
+    SHOW_PROCESSING_INSTRUCTION,
     /// @see https://dom.spec.whatwg.org/#dom-nodefilter-show_comment
-    SHOW_COMMENT = 0x00'00'00'80,
+    SHOW_COMMENT,
     /// @see https://dom.spec.whatwg.org/#dom-nodefilter-show_document
-    SHOW_DOCUMENT = 0x00'00'01'00,
+    SHOW_DOCUMENT,
     /// @see https://dom.spec.whatwg.org/#dom-nodefilter-show_document_type
-    SHOW_DOCUMENT_TYPE = 0x00'00'02'00,
+    SHOW_DOCUMENT_TYPE,
     /// @see https://dom.spec.whatwg.org/#dom-nodefilter-show_document_fragment
-    SHOW_DOCUMENT_FRAGMENT = 0x00'00'04'00,
+    SHOW_DOCUMENT_FRAGMENT,
     // Legacy.
-    SHOW_NOTATION = 0x00'00'08'00,
+    SHOW_NOTATION,
   };
-}
 
-KRYS_DEFINE_CONTIGUOUS_ENUM_TRAITS(krys::boo::dom::FilterResult, 3u);
-KRYS_DEFINE_FLAGS_ENUM_TRAITS(krys::boo::dom::WhatToShow, 13u);
+  consteval WhatToShowFlag MaxEnumValue(WhatToShowFlag) noexcept
+  {
+    return WhatToShowFlag::SHOW_NOTATION;
+  }
+
+  using WhatToShow = EnumSet<WhatToShowFlag>;
+
+  /// @see https://dom.spec.whatwg.org/#dom-nodefilter-show_all
+  constexpr WhatToShow ShowAll = WhatToShow::FromRaw(
+    static_cast<WhatToShow::StorageType>((1u << (ToUnderlying(MaxEnumValue(WhatToShowFlag {})) + 1u)) - 1u));
+}
 
 namespace krys::boo
 {

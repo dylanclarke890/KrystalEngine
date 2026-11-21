@@ -46,7 +46,7 @@ namespace krys::boo::html
 #pragma region TextControlInnerContainer
 
   TextControlInnerContainer::TextControlInnerContainer(Document &document) noexcept
-      : HTMLDivElement(document, dom::NodeFlags::HasCustomStyleResolveCallbacks)
+      : HTMLDivElement(document, dom::NodeFlag::HasCustomStyleResolveCallbacks)
   {
   }
 
@@ -79,7 +79,7 @@ namespace krys::boo::html
 #pragma region TextControlInnerElement
 
   TextControlInnerElement::TextControlInnerElement(Document &document) noexcept
-      : HTMLDivElement(document, dom::NodeFlags::HasCustomStyleResolveCallbacks)
+      : HTMLDivElement(document, dom::NodeFlag::HasCustomStyleResolveCallbacks)
   {
   }
 
@@ -115,7 +115,7 @@ namespace krys::boo::html
 #pragma region TextControlInnerTextElement
 
   TextControlInnerTextElement::TextControlInnerTextElement(Document &document) noexcept
-      : HTMLDivElement(document, dom::NodeFlags::HasCustomStyleResolveCallbacks)
+      : HTMLDivElement(document, dom::NodeFlag::HasCustomStyleResolveCallbacks)
   {
   }
 
@@ -182,7 +182,7 @@ namespace krys::boo::html
 #pragma region TextControlPlaceholderElement
 
   TextControlPlaceholderElement::TextControlPlaceholderElement(Document &document) noexcept
-      : HTMLDivElement(document, dom::NodeFlags::HasCustomStyleResolveCallbacks)
+      : HTMLDivElement(document, dom::NodeFlag::HasCustomStyleResolveCallbacks)
   {
   }
 
@@ -236,7 +236,7 @@ namespace krys::boo::html
   }
 
   SearchFieldResultsButtonElement::SearchFieldResultsButtonElement(Document &document) noexcept
-      : HTMLDivElement(document, dom::NodeFlags::HasCustomStyleResolveCallbacks)
+      : HTMLDivElement(document, dom::NodeFlag::HasCustomStyleResolveCallbacks)
   {
   }
 
@@ -301,7 +301,7 @@ namespace krys::boo::html
 #pragma region SearchFieldCancelButtonElement
 
   SearchFieldCancelButtonElement::SearchFieldCancelButtonElement(Document &document) noexcept
-      : HTMLDivElement(document, dom::NodeFlags::HasCustomStyleResolveCallbacks)
+      : HTMLDivElement(document, dom::NodeFlag::HasCustomStyleResolveCallbacks)
   {
   }
 

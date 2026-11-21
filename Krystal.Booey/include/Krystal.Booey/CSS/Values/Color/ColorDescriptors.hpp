@@ -326,7 +326,7 @@ namespace krys::boo::css
     using Canonical = RGBFunctionModernRelative;
     constexpr static bool AllowEagerEvaluationOfResolvableCalc = true;
     constexpr static bool AllowConversionTo8BitSRGB = true;
-    constexpr static ColorFlags FlagsForRelative = ColorFlags::UseColorFunctionSerialisation;
+    constexpr static ColorFlags FlagsForRelative = ColorFlag::UseColorFunctionSerialisation;
     constexpr static auto Syntax = ColorFunctionSyntax::Modern;
     constexpr static bool UsesColorFunctionForSerialisation = false;
     constexpr static CSSOMStringView SerialisationFunctionName = u8"rgb";
@@ -360,7 +360,7 @@ namespace krys::boo::css
     using Canonical = HSLFunctionModern;
     constexpr static bool AllowEagerEvaluationOfResolvableCalc = true;
     constexpr static bool AllowConversionTo8BitSRGB = true;
-    constexpr static ColorFlags FlagsForRelative = ColorFlags::UseColorFunctionSerialisation;
+    constexpr static ColorFlags FlagsForRelative = ColorFlag::UseColorFunctionSerialisation;
     constexpr static ColorFlags FlagsForAbsolute = {};
     constexpr static auto Syntax = ColorFunctionSyntax::Modern;
     constexpr static bool UsesColorFunctionForSerialisation = false;
@@ -407,7 +407,7 @@ namespace krys::boo::css
     using Canonical = HWBFunction;
     constexpr static bool AllowEagerEvaluationOfResolvableCalc = true;
     constexpr static bool AllowConversionTo8BitSRGB = true;
-    constexpr static ColorFlags FlagsForRelative = ColorFlags::UseColorFunctionSerialisation;
+    constexpr static ColorFlags FlagsForRelative = ColorFlag::UseColorFunctionSerialisation;
     constexpr static ColorFlags FlagsForAbsolute = {};
     constexpr static auto Syntax = ColorFunctionSyntax::Modern;
     constexpr static bool UsesColorFunctionForSerialisation = false;
@@ -527,8 +527,8 @@ namespace krys::boo::css
     using Canonical = ColorRGBFunction<T>;
     constexpr static bool AllowEagerEvaluationOfResolvableCalc = false;
     constexpr static bool AllowConversionTo8BitSRGB = false;
-    constexpr static ColorFlags FlagsForRelative = ColorFlags::UseColorFunctionSerialisation;
-    constexpr static ColorFlags FlagsForAbsolute = ColorFlags::UseColorFunctionSerialisation;
+    constexpr static ColorFlags FlagsForRelative = ColorFlag::UseColorFunctionSerialisation;
+    constexpr static ColorFlags FlagsForAbsolute = ColorFlag::UseColorFunctionSerialisation;
     constexpr static auto Syntax = ColorFunctionSyntax::Modern;
     constexpr static bool UsesColorFunctionForSerialisation = true;
     constexpr static CSSOMStringView SerialisationFunctionName = u8"color";
@@ -551,8 +551,8 @@ namespace krys::boo::css
     using Canonical = ColorXYZFunction<T>;
     constexpr static bool AllowEagerEvaluationOfResolvableCalc = false;
     constexpr static bool AllowConversionTo8BitSRGB = false;
-    constexpr static ColorFlags FlagsForRelative = ColorFlags::UseColorFunctionSerialisation;
-    constexpr static ColorFlags FlagsForAbsolute = ColorFlags::UseColorFunctionSerialisation;
+    constexpr static ColorFlags FlagsForRelative = ColorFlag::UseColorFunctionSerialisation;
+    constexpr static ColorFlags FlagsForAbsolute = ColorFlag::UseColorFunctionSerialisation;
     constexpr static auto Syntax = ColorFunctionSyntax::Modern;
     constexpr static bool UsesColorFunctionForSerialisation = true;
     constexpr static CSSOMStringView SerialisationFunctionName = u8"color";

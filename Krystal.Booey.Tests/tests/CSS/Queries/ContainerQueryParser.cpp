@@ -225,7 +225,7 @@ namespace krys::boo::css::tests
     query = ParseContainerQuery(u8"--foo");
     REQUIRE(query);
     CHECK(query->Condition.Queries.empty());
-    CHECK(query->RequiredAxes == cq::Axis::None);
+    CHECK(query->RequiredAxes == EnumSet<cq::Axis> {});
     CHECK(query->ContainsUnknownFeature == cq::ContainsUnknownFeature::No);
     CHECK(ConditionText(u8"--foo") == "--foo");
     CHECK(ConditionText(u8"--foo (width > 1px)") == "--foo (width > 1px)");
@@ -245,11 +245,12 @@ namespace krys::boo::css::tests
     CHECK(axes(u8"(height > 1px)") == cq::Axis::Height);
     CHECK(axes(u8"(inline-size > 1px)") == cq::Axis::Inline);
     CHECK(axes(u8"(block-size > 1px)") == cq::Axis::Block);
-    CHECK(axes(u8"(aspect-ratio > 1/2)") == (cq::Axis::Inline | cq::Axis::Block));
-    CHECK(axes(u8"(orientation: portrait)") == (cq::Axis::Inline | cq::Axis::Block));
-    CHECK(axes(u8"(width > 1px) or (not (block-size > 1px))") == (cq::Axis::Width | cq::Axis::Block));
-    CHECK(axes(u8"style(--foo)") == cq::Axis::None);
-    CHECK(axes(u8"(asdf)") == cq::Axis::None);
+    CHECK(axes(u8"(aspect-ratio > 1/2)") == (EnumSet<cq::Axis> {cq::Axis::Inline, cq::Axis::Block}));
+    CHECK(axes(u8"(orientation: portrait)") == (EnumSet<cq::Axis> {cq::Axis::Inline, cq::Axis::Block}));
+    CHECK(axes(u8"(width > 1px) or (not (block-size > 1px))")
+          == (EnumSet<cq::Axis> {cq::Axis::Width, cq::Axis::Block}));
+    CHECK(axes(u8"style(--foo)") == EnumSet<cq::Axis> {});
+    CHECK(axes(u8"(asdf)") == EnumSet<cq::Axis> {});
   }
 
   // Cases from WPT css/css-conditional/container-queries/at-container-style-parsing.html.

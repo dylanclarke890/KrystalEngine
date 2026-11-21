@@ -33,12 +33,12 @@ namespace krys::boo
     -> EnumSet<ApplyResult>
   {
     krys_debug_assert(context);
-    krys_debug_assert(!resourceMode.IsEmpty());
+    krys_debug_assert(!resourceMode.empty());
 
     bool isRenderingMask =
-      renderer.View().FrameView().GetPaintBehavior().Contains(PaintBehavior::RenderingSVGClipOrMask);
+      renderer.View().FrameView().GetPaintBehavior().contains(PaintBehavior::RenderingSVGClipOrMask);
 
-    if (resourceMode.Contains(RenderSVGResourceMode::ApplyToFill))
+    if (resourceMode.contains(RenderSVGResourceMode::ApplyToFill))
     {
       if (!isRenderingMask)
       {
@@ -58,12 +58,12 @@ namespace krys::boo
         context->SetFillRule(style.FillRule());
       }
 
-      if (resourceMode.Contains(RenderSVGResourceMode::ApplyToText))
+      if (resourceMode.contains(RenderSVGResourceMode::ApplyToText))
       {
         context->SetTextDrawingMode(TextDrawingMode::Fill);
       }
     }
-    else if (resourceMode.Contains(RenderSVGResourceMode::ApplyToStroke))
+    else if (resourceMode.contains(RenderSVGResourceMode::ApplyToStroke))
     {
       // When rendering the mask for a LegacyRenderSVGResourceClipper, the stroke code path is never hit.
       krys_debug_assert(!isRenderingMask);
@@ -72,7 +72,7 @@ namespace krys::boo
 
       SVGRenderSupport::ApplyStrokeStyleToContext(*context, style, renderer);
 
-      if (resourceMode.Contains(RenderSVGResourceMode::ApplyToText))
+      if (resourceMode.contains(RenderSVGResourceMode::ApplyToText))
       {
         context->SetTextDrawingMode(TextDrawingMode::Stroke);
       }
@@ -87,7 +87,7 @@ namespace krys::boo
                                                             const RenderElement *shape) noexcept
   {
     krys_debug_assert(context);
-    krys_debug_assert(!resourceMode.IsEmpty());
+    krys_debug_assert(!resourceMode.empty());
     FillAndStrokePathOrShape(*context, resourceMode, path, shape);
   }
 }

@@ -90,12 +90,13 @@ namespace krys::boo::css::tests
     SECTION("Allowed colour types")
     {
       CHECK(IsColorKeyword(ValueId::Red, ColorType::Absolute));
-      CHECK_FALSE(IsColorKeyword(ValueId::Red, ColorType::Current | ColorType::System));
+      CHECK_FALSE(IsColorKeyword(ValueId::Red, EnumSet<ColorType> {ColorType::Current, ColorType::System}));
       CHECK(IsColorKeyword(ValueId::Currentcolor, ColorType::Current));
       CHECK_FALSE(IsColorKeyword(ValueId::Currentcolor, ColorType::Absolute));
       CHECK(IsColorKeyword(ValueId::Canvas, ColorType::System));
-      CHECK_FALSE(IsColorKeyword(ValueId::Canvas, ColorType::Absolute | ColorType::Current));
-      CHECK_FALSE(IsColorKeyword(ValueId::Red, ColorType::None));
+      CHECK_FALSE(
+        IsColorKeyword(ValueId::Canvas, EnumSet<ColorType> {ColorType::Absolute, ColorType::Current}));
+      CHECK_FALSE(IsColorKeyword(ValueId::Red, {}));
     }
 
     SECTION("Colours")
@@ -104,9 +105,9 @@ namespace krys::boo::css::tests
       CHECK(ColorFromAbsoluteKeyword(ValueId::Aliceblue) == boo::Color {SRGBA<uint8> {240, 248, 255}});
       CHECK(ColorFromAbsoluteKeyword(ValueId::Transparent) == boo::Color::transparentBlack);
       // CSS grey is #808080, which is `Color::darkGray` (`Color::gray` is #a0a0a0).
-      CHECK(ColorFromKeyword(ValueId::Grey, style::ColorOptions::None) == boo::Color::darkGray);
+      CHECK(ColorFromKeyword(ValueId::Grey, style::ColorOptions {}) == boo::Color::darkGray);
       // System colours are the theme's, which are semantic.
-      CHECK(EqualIgnoringSemanticColor(ColorFromKeyword(ValueId::Canvas, style::ColorOptions::None),
+      CHECK(EqualIgnoringSemanticColor(ColorFromKeyword(ValueId::Canvas, style::ColorOptions {}),
                                        boo::Color::white));
     }
 
@@ -124,7 +125,7 @@ namespace krys::boo::css::tests
       CHECK(Resolve(ColorKeyword(ValueId::Currentcolor), state) == boo::Color::blue);
       CHECK(Resolve(ColorKeyword(ValueId::WebkitLink), state) == boo::Color::red);
 
-      state.KeywordOptions = style::ColorOptions::UseDarkAppearance;
+      state.KeywordOptions = style::ColorOption::UseDarkAppearance;
       CHECK(Resolve(ColorKeyword(ValueId::Linktext), state) == boo::Color {SRGBA<uint8> {158, 158, 255}});
     }
 

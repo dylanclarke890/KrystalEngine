@@ -26,11 +26,6 @@
 #include "Krystal.Booey/SVG/Properties/SVGAnimatedPropertyImpl.hpp"
 #include "Krystal.Booey/SVG/SVGLengthValue.hpp"
 
-namespace krys::boo
-{
-  class RenderObject;
-}
-
 namespace krys::boo::dom
 {
   struct DOMPointInit;
@@ -38,6 +33,7 @@ namespace krys::boo::dom
 
 namespace krys::boo
 {
+  class RenderObject;
   class SVGPoint;
   class SVGRect;
 
@@ -168,7 +164,7 @@ namespace krys::boo
 
   protected:
     SVGTextContentElement(Document &, UniquePtr<SVGPropertyRegistry> &&, SVGElementInterface,
-                          SVGElementFlags = SVGElementFlags::None) noexcept;
+                          SVGElementFlags = SVGElementFlags {}) noexcept;
 
     KRYS_NODISCARD bool IsValid() const noexcept override
     {

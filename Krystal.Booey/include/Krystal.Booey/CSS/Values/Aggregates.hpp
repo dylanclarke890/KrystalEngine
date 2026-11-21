@@ -2067,7 +2067,7 @@ namespace krys::boo::css
 
     constexpr EnumSetOrKeywordBase(EnumSet list) noexcept : _value {krys::move(list)}
     {
-      krys_assert(!_value.IsEmpty());
+      krys_assert(!_value.empty());
     }
 
     constexpr EnumSetOrKeywordBase(Keyword) noexcept : _value {}
@@ -2097,9 +2097,9 @@ namespace krys::boo::css
       return _value.ToRaw();
     }
 
-    KRYS_NODISCARD constexpr bool Contains(value_type e) const noexcept
+    KRYS_NODISCARD constexpr bool contains(value_type e) const noexcept
     {
-      return _value.Contains(e);
+      return _value.contains(e);
     }
 
     // The set's queries take the set it wraps, if it wraps one.
@@ -2140,26 +2140,21 @@ namespace krys::boo::css
       return _value.end();
     }
 
-    KRYS_NODISCARD constexpr size_t Size() const noexcept
+    KRYS_NODISCARD constexpr size_t size() const noexcept
     {
-      return _value.Size();
-    }
-
-    KRYS_NODISCARD constexpr bool Contains(const auto &x) const noexcept
-    {
-      return _value.Contains(x);
+      return _value.size();
     }
 
     constexpr bool operator==(const EnumSetOrKeywordBase &) const noexcept = default;
 
     KRYS_NODISCARD constexpr bool IsKeyword() const noexcept
     {
-      return _value.IsEmpty();
+      return _value.empty();
     }
 
     KRYS_NODISCARD constexpr bool IsEnumSet() const noexcept
     {
-      return !_value.IsEmpty();
+      return !_value.empty();
     }
 
     KRYS_NODISCARD constexpr const EnumSet *TryEnumSet() const noexcept
@@ -2322,19 +2317,19 @@ namespace krys::boo::css
       return Value.end();
     }
 
-    KRYS_NODISCARD constexpr bool IsEmpty() const noexcept
+    KRYS_NODISCARD constexpr bool empty() const noexcept
     {
-      return Value.IsEmpty();
+      return Value.empty();
     }
 
-    KRYS_NODISCARD constexpr size_t Size() const noexcept
+    KRYS_NODISCARD constexpr size_t size() const noexcept
     {
-      return Value.Size();
+      return Value.size();
     }
 
-    KRYS_NODISCARD constexpr bool Contains(T e) const noexcept
+    KRYS_NODISCARD constexpr bool contains(T e) const noexcept
     {
-      return Value.Contains(e);
+      return Value.contains(e);
     }
 
     KRYS_NODISCARD constexpr bool ContainsAny(Container other) const noexcept
@@ -2431,19 +2426,19 @@ namespace krys::boo::css
       return Value.end();
     }
 
-    KRYS_NODISCARD constexpr bool IsEmpty() const noexcept
+    KRYS_NODISCARD constexpr bool empty() const noexcept
     {
-      return Value.IsEmpty();
+      return Value.empty();
     }
 
-    KRYS_NODISCARD constexpr size_t Size() const noexcept
+    KRYS_NODISCARD constexpr size_t size() const noexcept
     {
-      return Value.Size();
+      return Value.size();
     }
 
-    KRYS_NODISCARD constexpr bool Contains(T e) const noexcept
+    KRYS_NODISCARD constexpr bool contains(T e) const noexcept
     {
-      return Value.Contains(e);
+      return Value.contains(e);
     }
 
     KRYS_NODISCARD constexpr bool ContainsAny(Container other) const noexcept
@@ -2520,10 +2515,7 @@ namespace krys
       return {null};
     }
   };
-}
 
-namespace krys
-{
   template <>
   struct FastHash<boo::css::CustomIdentifier>
   {

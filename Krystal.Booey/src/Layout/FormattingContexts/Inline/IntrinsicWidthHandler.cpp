@@ -314,7 +314,7 @@ namespace krys::boo::layout
 
       layoutRange.Start = InlineFormattingUtils::LeadingInlineItemPositionForNextLine(
         lineLayoutResult.ItemRange.End, previousLineEnd,
-        !lineLayoutResult.Floats.HasIntrusiveFloat.IsEmpty() || !lineLayoutResult.Floats.PlacedFloats.empty(),
+        !lineLayoutResult.Floats.HasIntrusiveFloat.empty() || !lineLayoutResult.Floats.PlacedFloats.empty(),
         layoutRange.End);
       if (layoutRange.IsEmpty())
       {

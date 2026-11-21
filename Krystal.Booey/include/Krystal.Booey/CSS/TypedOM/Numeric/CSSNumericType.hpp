@@ -32,11 +32,6 @@
 #include "Krystal.Core/Strings/String.hpp"
 #include "Krystal.Core/Types/Maybe.hpp"
 
-namespace krys::boo
-{
-  class CSSNumericValue;
-}
-
 namespace krys::boo::css
 {
   enum class UnitType : uint8;
@@ -44,6 +39,8 @@ namespace krys::boo::css
 
 namespace krys::boo
 {
+  class CSSNumericValue;
+
   /// @brief A numeric value's type: an exponent for each base type it has, and the base type a percentage
   /// resolves against.
   /// @see https://drafts.css-houdini.org/css-typed-om/#dom-cssnumericvalue-type

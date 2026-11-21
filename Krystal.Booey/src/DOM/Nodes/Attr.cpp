@@ -6,7 +6,7 @@
 namespace krys::boo
 {
   Attr::Attr(Document &document, const QualifiedName &qualifiedName, DOMString value) noexcept
-      : Node(document, dom::NodeType::ATTRIBUTE_NODE, dom::NodeFlags::None), _name {qualifiedName},
+      : Node(document, dom::NodeType::ATTRIBUTE_NODE, dom::NodeFlags {}), _name {qualifiedName},
         _value {krys::move(value)}
   {
     // 1. Let attribute be the result of creating a node that implements Attr, given document.

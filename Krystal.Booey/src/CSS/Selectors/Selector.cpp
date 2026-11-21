@@ -553,7 +553,7 @@ namespace krys::boo::css
   {
     StringBuilder builder;
 
-    if (Match() == SelectorMatch::Type && !HasFlag(_flags, SelectorFlag::TagIsForNamespaceRule))
+    if (Match() == SelectorMatch::Type && !_flags.contains(SelectorFlag::TagIsForNamespaceRule))
     {
       if (const auto &prefix = TagQualifiedName().NamespacePrefix(); prefix != null)
       {
@@ -1206,7 +1206,7 @@ namespace krys::boo::css
 
     auto sameFlag = [&](SelectorFlag flag)
     {
-      return HasFlag(_flags, flag) == HasFlag(other._flags, flag);
+      return _flags.contains(flag) == other._flags.contains(flag);
     };
 
     // Relation and selector list bits are ignored.

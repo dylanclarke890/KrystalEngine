@@ -63,7 +63,7 @@ namespace krys::boo
   HTMLButtonElement::HTMLButtonElement(Document &document) noexcept
       : HTMLFormControlElement(document, html::HTMLElementInterface::Button)
   {
-    SetEventTargetFlag(dom::EventTargetFlags::HasActivationBehavior);
+    _eventTargetFlags.Add(dom::EventTargetFlag::HasActivationBehavior);
   }
 
   RenderPtr<RenderElement> HTMLButtonElement::CreateElementRenderer(RenderStyle &&style) noexcept

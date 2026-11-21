@@ -28,11 +28,6 @@
 #include "Krystal.Core/Memory/RefPtr.hpp"
 #include "Krystal.Core/TypeCast.hpp"
 
-namespace krys::boo
-{
-  class MediaList;
-}
-
 namespace krys::boo::css
 {
   class MediaRule;
@@ -40,6 +35,8 @@ namespace krys::boo::css
 
 namespace krys::boo
 {
+  class MediaList;
+
   /// @brief An `@media` rule, exposed to scripts.
   /// @see https://drafts.csswg.org/cssom/#the-cssmediarule-interface
   class CSSMediaRule final : public CSSConditionRule

@@ -8,10 +8,7 @@
 namespace krys::boo::html
 {
   class EngineTexture;
-}
 
-namespace krys::boo::html
-{
   /// @brief A canvas context that shows a texture the host draws (`getContext("krystal-texture")`).
   /// @note The canvas's `width` and `height` are its natural size, whatever the texture's; the texture is
   /// scaled to it. A host that wants them to match resizes its texture when the canvas resizes.

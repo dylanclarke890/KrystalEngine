@@ -39,7 +39,7 @@ namespace krys::boo
   public:
     explicit MathMLRowElement(Document &document,
                               MathMLElementInterface interface = MathMLElementInterface::Row,
-                              dom::NodeFlags nodeFlags = dom::NodeFlags::None) noexcept;
+                              dom::NodeFlags nodeFlags = dom::NodeFlags {}) noexcept;
 
   protected:
     void OnChildrenChanged() noexcept override;

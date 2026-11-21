@@ -42,12 +42,12 @@ namespace krys::boo
     SmartDelete,
     IsAutocompletion,
   };
-}
 
-KRYS_DEFINE_CONTIGUOUS_ENUM_TRAITS(krys::boo::TypingCommandOption, 6uz);
+  consteval TypingCommandOption MaxEnumValue(TypingCommandOption) noexcept
+  {
+    return TypingCommandOption::IsAutocompletion;
+  }
 
-namespace krys::boo
-{
   /// @brief Typing: text, line breaks, paragraph breaks and deletions, which go into the same command (and so
   /// are undone together) while the selection stays where the last one left it.
   // FIXME: Spelling after typing (markMisspellingsAfterTyping), with text checking; and the kill ring

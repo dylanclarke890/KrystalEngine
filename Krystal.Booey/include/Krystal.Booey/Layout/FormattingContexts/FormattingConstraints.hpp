@@ -85,17 +85,17 @@ namespace krys::boo::layout
 
     KRYS_NODISCARD bool IsConstraintsForInlineContent() const noexcept
     {
-      return BaseTypeFlags().Contains(InlineContent);
+      return BaseTypeFlags().contains(InlineContent);
     }
 
     KRYS_NODISCARD bool IsConstraintsForTableContent() const noexcept
     {
-      return BaseTypeFlags().Contains(TableContent);
+      return BaseTypeFlags().contains(TableContent);
     }
 
     KRYS_NODISCARD bool IsConstraintsForFlexContent() const noexcept
     {
-      return BaseTypeFlags().Contains(FlexContent);
+      return BaseTypeFlags().contains(FlexContent);
     }
 
   protected:

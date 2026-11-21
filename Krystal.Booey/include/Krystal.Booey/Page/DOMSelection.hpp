@@ -39,13 +39,6 @@
 #include "Krystal.Core/Memory/WeakPtr.hpp"
 #include "Krystal.Core/Types/Maybe.hpp"
 
-namespace krys::boo
-{
-  class Document;
-  class Node;
-  class ShadowRoot;
-}
-
 namespace krys::boo::dom
 {
   class Position;
@@ -56,7 +49,10 @@ namespace krys::boo::dom
 
 namespace krys::boo
 {
+  class Document;
   class Frame;
+  class Node;
+  class ShadowRoot;
 
   /// @brief A document's `Selection`: the script's view of the frame's selection, which is the range it
   /// associates with it.

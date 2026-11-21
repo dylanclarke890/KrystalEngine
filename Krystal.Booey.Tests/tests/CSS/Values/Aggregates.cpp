@@ -11,9 +11,12 @@ namespace krys::boo::css::tests
     C,
     D,
   };
-}
 
-KRYS_DEFINE_CONTIGUOUS_ENUM_TRAITS(krys::boo::css::tests::TestFlag, 4uz);
+  consteval TestFlag MaxEnumValue(TestFlag) noexcept
+  {
+    return TestFlag::D;
+  }
+}
 
 // Types defined through the conformance macros, which other value headers use at namespace/global scope.
 namespace krys::boo::css::tests
@@ -417,9 +420,9 @@ namespace krys::boo::css::tests
 
     TestEnumSetOrNone set {TestFlag::A, TestFlag::C};
     CHECK(set.IsEnumSet());
-    CHECK(set.Size() == 2);
-    CHECK(set.Contains(TestFlag::A));
-    CHECK_FALSE(set.Contains(TestFlag::B));
+    CHECK(set.size() == 2);
+    CHECK(set.contains(TestFlag::A));
+    CHECK_FALSE(set.contains(TestFlag::B));
     CHECK(set.ContainsAny({TestFlag::B, TestFlag::C}));
     CHECK(set.ContainsAll({TestFlag::A, TestFlag::C}));
     CHECK_FALSE(set.ContainsOnly({TestFlag::A}));
@@ -429,7 +432,7 @@ namespace krys::boo::css::tests
     CHECK(TestEnumSetOrNone::FromRaw(0).IsKeyword());
 
     CHECK(
-      set.SwitchOn([](keywords::None) { return 0uz; }, [](const EnumSet<TestFlag> &s) { return s.Size(); })
+      set.SwitchOn([](keywords::None) { return 0uz; }, [](const EnumSet<TestFlag> &s) { return s.size(); })
       == 2uz);
   }
 
@@ -452,9 +455,9 @@ namespace krys::boo::css::tests
   TEST_CASE("Aggregates(enum sets)", "[CSS][Aggregates]")
   {
     SpaceSeparatedEnumSet<TestFlag> set {TestFlag::A, TestFlag::D};
-    CHECK(set.Size() == 2);
-    CHECK_FALSE(set.IsEmpty());
-    CHECK(set.Contains(TestFlag::D));
+    CHECK(set.size() == 2);
+    CHECK_FALSE(set.empty());
+    CHECK(set.contains(TestFlag::D));
     CHECK(set.ContainsAny({TestFlag::A}));
     CHECK(set.ContainsAll({TestFlag::A, TestFlag::D}));
     CHECK(set.ContainsOnly({TestFlag::A, TestFlag::B, TestFlag::D}));

@@ -197,11 +197,12 @@ void main()
       KRYS_NODISCARD TextureHandle Target(uint32 width, uint32 height,
                                           TextureFormat format = TextureFormat::RGBA8Unorm)
       {
-        return Track(_device->CreateTexture({.Format = format,
-                                             .Width = width,
-                                             .Height = height,
-                                             .Usage = TextureUsage::RenderTarget | TextureUsage::Sampled,
-                                             .DebugName = u8"Target"}));
+        return Track(_device->CreateTexture(
+          {.Format = format,
+           .Width = width,
+           .Height = height,
+           .Usage = EnumSet<TextureUsage> {TextureUsage::RenderTarget, TextureUsage::Sampled},
+           .DebugName = u8"Target"}));
       }
 
       template <typename TFunc>

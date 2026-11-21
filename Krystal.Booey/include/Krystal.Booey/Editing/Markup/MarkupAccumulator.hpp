@@ -59,12 +59,12 @@ namespace krys::boo
     LineFeed,
     CarriageReturn,
   };
-}
 
-KRYS_DEFINE_CONTIGUOUS_ENUM_TRAITS(krys::boo::EntityMask, 8uz);
+  consteval EntityMask MaxEnumValue(EntityMask) noexcept
+  {
+    return EntityMask::CarriageReturn;
+  }
 
-namespace krys::boo
-{
   constexpr inline EnumSet<EntityMask> EntityMaskInCDATA {};
   constexpr inline EnumSet<EntityMask> EntityMaskInPCDATA {EntityMask::Amp, EntityMask::Lt, EntityMask::Gt};
   // Non-breaking space needs to be escaped in innerHTML for compatibility reason. See

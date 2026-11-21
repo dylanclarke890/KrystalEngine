@@ -192,7 +192,7 @@ namespace krys
 
     KRYS_NODISCARD bool HasFormattingFlag(Formatting flag) const noexcept
     {
-      return _formattingFlags.Contains(flag);
+      return _formattingFlags.contains(flag);
     }
 
     template <typename T>

@@ -209,10 +209,7 @@ namespace krys
       ColourSpace;
     krys::AlphaPremultiplication AlphaPremultiplication;
   };
-}
 
-namespace krys
-{
   template <>
   struct FastHash<krys::ColourInterpolationMethod>
   {

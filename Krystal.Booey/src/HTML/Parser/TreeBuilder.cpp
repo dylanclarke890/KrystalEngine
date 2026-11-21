@@ -4526,7 +4526,7 @@ namespace krys::boo::html
     // 17. For each attribute of token's attributes:
     for (auto &attr : attributes)
     {
-      if (attr.Flags == ParsedAttributeFlags::None)
+      if (attr.Flags == ParsedAttributeFlags {})
       {
         // 17a. If sanitizerConfig is not null: [...] if the result of checking if a sanitizer config allows
         // an
@@ -4549,26 +4549,26 @@ namespace krys::boo::html
         DOMStringAtom prefix = null;
         size_t prefixLength = 0uz;
 
-        if (HasFlag(attr.Flags, ParsedAttributeFlags::IsXML))
+        if (attr.Flags.contains(ParsedAttributeFlag::IsXML))
         {
           namespaceUri = infra::namespaces::XML;
           prefix = infra::namespace_prefixes::XML;
           prefixLength = 4uz; // xml + :
         }
 
-        if (HasFlag(attr.Flags, ParsedAttributeFlags::IsXLink))
+        if (attr.Flags.contains(ParsedAttributeFlag::IsXLink))
         {
           namespaceUri = infra::namespaces::XLink;
           prefix = infra::namespace_prefixes::XLink;
           prefixLength = 6uz; // xlink + :
         }
 
-        if (HasFlag(attr.Flags, ParsedAttributeFlags::IsXMLNS))
+        if (attr.Flags.contains(ParsedAttributeFlag::IsXMLNS))
         {
           namespaceUri = infra::namespaces::XMLNS;
 
           // xmlns:xlink has the xmlns prefix; xmlns has none.
-          if (HasFlag(attr.Flags, ParsedAttributeFlags::HasPrefix))
+          if (attr.Flags.contains(ParsedAttributeFlag::HasPrefix))
           {
             prefix = infra::namespace_prefixes::XMLNS;
             prefixLength = 6uz; // xmlns + :
@@ -4737,17 +4737,25 @@ namespace krys::boo::html
   void TreeBuilder::AdjustForeignAttributes(TokenAtom &token) noexcept
   {
     constexpr static Array<Pair<DOMStringView, ParsedAttributeFlags>, 11uz> attributesToAdjust = {
-      Pair {u8"xlink:actuate", ParsedAttributeFlags::HasPrefix | ParsedAttributeFlags::IsXLink},
-      Pair {u8"xlink:arcrole", ParsedAttributeFlags::HasPrefix | ParsedAttributeFlags::IsXLink},
-      Pair {u8"xlink:href", ParsedAttributeFlags::HasPrefix | ParsedAttributeFlags::IsXLink},
-      Pair {u8"xlink:role", ParsedAttributeFlags::HasPrefix | ParsedAttributeFlags::IsXLink},
-      Pair {u8"xlink:show", ParsedAttributeFlags::HasPrefix | ParsedAttributeFlags::IsXLink},
-      Pair {u8"xlink:title", ParsedAttributeFlags::HasPrefix | ParsedAttributeFlags::IsXLink},
-      Pair {u8"xlink:type", ParsedAttributeFlags::HasPrefix | ParsedAttributeFlags::IsXLink},
-      Pair {u8"xml:lang", ParsedAttributeFlags::HasPrefix | ParsedAttributeFlags::IsXML},
-      Pair {u8"xml:space", ParsedAttributeFlags::HasPrefix | ParsedAttributeFlags::IsXML},
-      Pair {u8"xmlns", ParsedAttributeFlags::IsXMLNS},
-      Pair {u8"xmlns:xlink", ParsedAttributeFlags::HasPrefix | ParsedAttributeFlags::IsXMLNS},
+      Pair {u8"xlink:actuate",
+            ParsedAttributeFlags {ParsedAttributeFlag::HasPrefix, ParsedAttributeFlag::IsXLink}},
+      Pair {u8"xlink:arcrole",
+            ParsedAttributeFlags {ParsedAttributeFlag::HasPrefix, ParsedAttributeFlag::IsXLink}},
+      Pair {u8"xlink:href",
+            ParsedAttributeFlags {ParsedAttributeFlag::HasPrefix, ParsedAttributeFlag::IsXLink}},
+      Pair {u8"xlink:role",
+            ParsedAttributeFlags {ParsedAttributeFlag::HasPrefix, ParsedAttributeFlag::IsXLink}},
+      Pair {u8"xlink:show",
+            ParsedAttributeFlags {ParsedAttributeFlag::HasPrefix, ParsedAttributeFlag::IsXLink}},
+      Pair {u8"xlink:title",
+            ParsedAttributeFlags {ParsedAttributeFlag::HasPrefix, ParsedAttributeFlag::IsXLink}},
+      Pair {u8"xlink:type",
+            ParsedAttributeFlags {ParsedAttributeFlag::HasPrefix, ParsedAttributeFlag::IsXLink}},
+      Pair {u8"xml:lang", ParsedAttributeFlags {ParsedAttributeFlag::HasPrefix, ParsedAttributeFlag::IsXML}},
+      Pair {u8"xml:space", ParsedAttributeFlags {ParsedAttributeFlag::HasPrefix, ParsedAttributeFlag::IsXML}},
+      Pair {u8"xmlns", ParsedAttributeFlag::IsXMLNS},
+      Pair {u8"xmlns:xlink",
+            ParsedAttributeFlags {ParsedAttributeFlag::HasPrefix, ParsedAttributeFlag::IsXMLNS}},
     };
 
     for (auto &attr : token.Attributes())

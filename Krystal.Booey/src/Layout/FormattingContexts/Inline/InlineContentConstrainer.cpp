@@ -207,7 +207,7 @@ namespace krys::boo::layout
 
     KRYS_NODISCARD bool HasIntrusiveOrNewlyPlacedFloat(const LineLayoutResult &lineLayoutResult) noexcept
     {
-      return !lineLayoutResult.Floats.HasIntrusiveFloat.IsEmpty()
+      return !lineLayoutResult.Floats.HasIntrusiveFloat.empty()
              || !lineLayoutResult.Floats.PlacedFloats.empty();
     }
 

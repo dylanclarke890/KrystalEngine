@@ -39,7 +39,7 @@ namespace krys::boo::html
     friend class TreeBuilder;
 
   private:
-    TokenType _type : BitCount<TokenType>();
+    TokenType _type : EnumBitWidth<TokenType>;
 
     bool _isSelfClosing : 1 {false};
     bool _selfClosingTagAcknowledged : 1 {false};

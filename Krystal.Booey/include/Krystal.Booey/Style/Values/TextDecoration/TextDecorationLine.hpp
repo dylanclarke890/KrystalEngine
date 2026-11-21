@@ -101,7 +101,7 @@ namespace krys::boo::style
     }
 
     constexpr TextDecorationLine(EnumSet<TextDecorationLine::Flag> flags) noexcept
-        : _packed(flags.IsEmpty() ? SingleValueNone : PackFlags(flags))
+        : _packed(flags.empty() ? SingleValueNone : PackFlags(flags))
     {
     }
 
@@ -261,19 +261,19 @@ namespace krys::boo::style
     KRYS_NODISCARD constexpr static uint8 PackFlags(EnumSet<TextDecorationLine::Flag> flags) noexcept
     {
       uint8 result = static_cast<uint8>(Type::Flags);
-      if (flags.Contains(TextDecorationLine::Flag::Underline))
+      if (flags.contains(TextDecorationLine::Flag::Underline))
       {
         result |= UnderlineBit;
       }
-      if (flags.Contains(TextDecorationLine::Flag::Overline))
+      if (flags.contains(TextDecorationLine::Flag::Overline))
       {
         result |= OverlineBit;
       }
-      if (flags.Contains(TextDecorationLine::Flag::LineThrough))
+      if (flags.contains(TextDecorationLine::Flag::LineThrough))
       {
         result |= LineThroughBit;
       }
-      if (flags.Contains(TextDecorationLine::Flag::Blink))
+      if (flags.contains(TextDecorationLine::Flag::Blink))
       {
         result |= BlinkBit;
       }

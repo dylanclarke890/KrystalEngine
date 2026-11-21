@@ -864,11 +864,11 @@ namespace krys::boo
   {
     auto textDirection = text::TextDirection::LTR;
     bool directionalOverride = false;
-    if (flags.Contains(TextRunFlag::RespectDirection))
+    if (flags.contains(TextRunFlag::RespectDirection))
     {
       textDirection = style.GetWritingMode().BidiDirection();
     }
-    if (flags.Contains(TextRunFlag::RespectDirectionOverride))
+    if (flags.contains(TextRunFlag::RespectDirectionOverride))
     {
       directionalOverride = IsOverride(style.UnicodeBidi());
     }
@@ -2498,7 +2498,7 @@ namespace krys::boo
         return false;
       }
 
-      if (paintInfo.PaintBehavior.Contains(PaintBehavior::CompositedOverflowScrollContent) && HasLayer()
+      if (paintInfo.PaintBehavior.contains(PaintBehavior::CompositedOverflowScrollContent) && HasLayer()
           && Layer()->UsesCompositedScrolling())
       {
         return false;

@@ -40,6 +40,11 @@ namespace krys::boo
     StrokeWidth,
   };
 
+  consteval SVGMarkerUnitsType MaxEnumValue(SVGMarkerUnitsType) noexcept
+  {
+    return SVGMarkerUnitsType::StrokeWidth;
+  }
+
   enum SVGMarkerOrientType : uint8
   {
     SVGMarkerOrientUnknown = 0,
@@ -153,5 +158,3 @@ namespace krys::boo
     }
   };
 }
-
-KRYS_DEFINE_CONTIGUOUS_ENUM_TRAITS(krys::boo::SVGMarkerUnitsType, 3uz);

@@ -34,10 +34,7 @@
 namespace krys::boo::dom
 {
   class DOMRectList;
-}
 
-namespace krys::boo::dom
-{
   /// @see https://dom.spec.whatwg.org/#dom-range-compareboundarypoints
   enum class BoundaryPointComparator
   {
@@ -46,9 +43,12 @@ namespace krys::boo::dom
     EndToEnd,
     EndToStart,
   };
-}
 
-KRYS_DEFINE_CONTIGUOUS_ENUM_TRAITS(krys::boo::dom::BoundaryPointComparator, 4u)
+  consteval BoundaryPointComparator MaxEnumValue(BoundaryPointComparator) noexcept
+  {
+    return BoundaryPointComparator::EndToStart;
+  }
+}
 
 namespace krys::boo
 {

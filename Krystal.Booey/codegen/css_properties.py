@@ -2435,12 +2435,10 @@ class Term:
 
 class BuiltinSchema:
     class StringParameter:
-        def __init__(self, name, *, mappings: dict[str, str] | None = None, default=None, separator=", "):
+        def __init__(self, name, *, mappings: dict[str, str] | None = None, default=None):
             self.name = name
             self.mappings = mappings
             self.default = default
-            # Joins the mapped values of a parameter given several (e.g. " | " for a set of flags).
-            self.separator = separator
 
     class RangeParameter:
         def __init__(self, name):
@@ -2498,7 +2496,7 @@ class BuiltinSchema:
                                         f"'{parameter}' passed to <{self.entry.name.name}> does not match any of the supported mappings. Supported mappings are {', '.join(quote_iterable(descriptor.mappings.keys()))}."
                                     )
 
-                            self.parameter_map[descriptor.name] = descriptor.separator.join(
+                            self.parameter_map[descriptor.name] = ", ".join(
                                 map(lambda x: descriptor.mappings[x], parameter.value)
                             )
                         else:
@@ -2531,7 +2529,7 @@ class BuiltinSchema:
                     if descriptor.name in self.parameter_map:
                         self.results[descriptor.name] = self.parameter_map[descriptor.name]
                     elif descriptor.mappings and descriptor.default:
-                        self.results[descriptor.name] = descriptor.separator.join(
+                        self.results[descriptor.name] = ", ".join(
                             map(
                                 lambda x: descriptor.mappings[x],
                                 (descriptor.default if isinstance(descriptor.default, list) else [descriptor.default]),
@@ -2611,9 +2609,9 @@ ALLOWED_IMAGE_TYPES_MAPPINGS = {
     "generated": "AllowedImageType::GeneratedImage",
 }
 ALLOWED_URL_MODIFIER_MAPPINGS = {
-    "crossorigin": "AllowedUrlModifiers::CrossOrigin",
-    "integrity": "AllowedUrlModifiers::Integrity",
-    "referrerpolicy": "AllowedUrlModifiers::ReferrerPolicy",
+    "crossorigin": "AllowedUrlModifier::CrossOrigin",
+    "integrity": "AllowedUrlModifier::Integrity",
+    "referrerpolicy": "AllowedUrlModifier::ReferrerPolicy",
 }
 
 
@@ -2652,7 +2650,6 @@ class ReferenceTerm:
                 "allowed-types",
                 mappings=ALLOWED_COLOR_TYPES_MAPPINGS,
                 default=["absolute", "current", "system"],
-                separator=" | ",
             ),
         ),
         BuiltinSchema.Entry(
@@ -2661,7 +2658,6 @@ class ReferenceTerm:
                 "allowed-types",
                 mappings=ALLOWED_IMAGE_TYPES_MAPPINGS,
                 default=["url", "image-set", "generated"],
-                separator=" | ",
             ),
         ),
         BuiltinSchema.Entry("string"),
@@ -4781,8 +4777,8 @@ class TermGeneratorReferenceTerm(TermGenerator):
                 return f"ConsumeColor({range_string}, {state_string}, {{.AllowedColorTypes = {{}}}})"
             elif isinstance(builtin, BuiltinImageConsumer):  # type: ignore
                 if builtin.allowed_types:
-                    return f"ConsumeImage({range_string}, {state_string}, {builtin.allowed_types})"
-                return f"ConsumeImage({range_string}, {state_string}, AllowedImageType::None)"
+                    return f"ConsumeImage({range_string}, {state_string}, {{{builtin.allowed_types}}})"
+                return f"ConsumeImage({range_string}, {state_string}, {{}})"
             elif isinstance(builtin, BuiltinCustomIdentConsumer):  # type: ignore
                 if builtin.excluding:
                     return f"ConsumeCustomIdentExcluding({range_string}, {{{ ', '.join(ValueKeywordName(id).id for id in builtin.excluding)}}})"
@@ -7468,11 +7464,11 @@ class GeneratePropertyId:
                 self._generate_property_id_hpp_property_constants(to=writer)
                 self._generate_property_id_hpp_property_settings(to=writer)
                 self._generate_property_id_hpp_declarations(to=writer)
-            writer.newline()
-
-            writer.write(
-                f"KRYS_DEFINE_CONTIGUOUS_ENUM_TRAITS(::krys::boo::css::PropertyId, ::krys::boo::css::TotalPropertyIdValues);"
-            )
+                writer.newline()
+                writer.write("consteval PropertyId MaxEnumValue(PropertyId) noexcept")
+                writer.write("{")
+                writer.write("  return static_cast<PropertyId>(TotalPropertyIdValues - 1);")
+                writer.write("}")
             writer.newline()
 
             with writer.namespace(namespace="std"):

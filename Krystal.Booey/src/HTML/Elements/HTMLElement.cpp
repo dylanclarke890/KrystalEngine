@@ -79,16 +79,16 @@ namespace krys::boo
 {
   HTMLElement::HTMLElement(Document &document, html::HTMLElementInterface interface,
                            html::HTMLElementFlags flags, dom::NodeFlags nodeFlags) noexcept
-      : StyledElement(document, dom::NullQualifiedName(), nodeFlags | dom::NodeFlags::IsHTMLElement),
-        _flags(flags), _interface(interface)
+      : StyledElement(document, dom::NullQualifiedName(), nodeFlags | dom::NodeFlag::IsHTMLElement),
+        _htmlElementFlags(flags), _interface(interface)
   {
   }
 
   HTMLElement::HTMLElement(Document &document, html::HTMLElementInterface interface, DOMStringAtom localName,
                            html::HTMLElementFlags flags, dom::NodeFlags nodeFlags) noexcept
       : StyledElement(document, QualifiedName(infra::namespaces::HTML, null, krys::move(localName)),
-                      nodeFlags | dom::NodeFlags::IsHTMLElement),
-        _flags(flags), _interface(interface)
+                      nodeFlags | dom::NodeFlag::IsHTMLElement),
+        _htmlElementFlags(flags), _interface(interface)
   {
   }
 

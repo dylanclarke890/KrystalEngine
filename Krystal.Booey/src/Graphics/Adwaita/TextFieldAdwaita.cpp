@@ -48,7 +48,7 @@ namespace krys::boo
     SRGBA<uint8> textFieldBackgroundColor;
     SRGBA<uint8> textFieldBorderColor;
 
-    if (style.States.Contains(ControlStyle::State::DarkAppearance))
+    if (style.States.contains(ControlStyle::State::DarkAppearance))
     {
       textFieldBackgroundColor = TextFieldBackgroundColorDark;
       textFieldBorderColor = TextFieldBorderColorDark;
@@ -59,10 +59,10 @@ namespace krys::boo
       textFieldBorderColor = TextFieldBorderColorLight;
     }
 
-    bool enabled = style.States.Contains(ControlStyle::State::Enabled)
-                   && !style.States.Contains(ControlStyle::State::ReadOnly);
+    bool enabled = style.States.contains(ControlStyle::State::Enabled)
+                   && !style.States.contains(ControlStyle::State::ReadOnly);
     int32 borderSize = TextFieldBorderSize;
-    if (style.States.Contains(ControlStyle::State::Focused))
+    if (style.States.contains(ControlStyle::State::Focused))
     {
       borderSize *= 2;
     }
@@ -80,7 +80,7 @@ namespace krys::boo
     corner.Expand(static_cast<float>(-borderSize), static_cast<float>(-borderSize));
     path.AddRoundedRect(fieldRect, corner);
     graphicsContext.SetFillRule(WindRule::EvenOdd);
-    if (enabled && style.States.Contains(ControlStyle::State::Focused))
+    if (enabled && style.States.contains(ControlStyle::State::Focused))
     {
       graphicsContext.SetFillColor(SystemFocusRingColor());
     }
@@ -96,17 +96,17 @@ namespace krys::boo
     graphicsContext.SetFillColor(textFieldBackgroundColor);
     graphicsContext.FillPath(path);
 
-    if (style.States.Contains(ControlStyle::State::ListButton))
+    if (style.States.contains(ControlStyle::State::ListButton))
     {
       auto zoomedArrowSize = MenuListButtonArrowSize * style.ZoomFactor;
       RectF arrowRect = borderRect.Rect();
       auto borderWidth = arrowRect.Width();
       auto borderHeight = arrowRect.Height();
       arrowRect.SetSize({zoomedArrowSize, zoomedArrowSize});
-      if (!style.States.Contains(ControlStyle::State::VerticalWritingMode))
+      if (!style.States.contains(ControlStyle::State::VerticalWritingMode))
       {
         auto centerY = (borderHeight / 2) - (zoomedArrowSize / 2);
-        if (style.States.Contains(ControlStyle::State::InlineFlippedWritingMode))
+        if (style.States.contains(ControlStyle::State::InlineFlippedWritingMode))
         {
           arrowRect.Move(TextFieldBorderSize, centerY);
         }
@@ -120,7 +120,7 @@ namespace krys::boo
         auto centerX = (borderWidth / 2) - (zoomedArrowSize / 2);
         arrowRect.Move(centerX, borderHeight - zoomedArrowSize + TextFieldBorderSize);
       }
-      bool useDarkAppearance = style.States.Contains(ControlStyle::State::DarkAppearance);
+      bool useDarkAppearance = style.States.contains(ControlStyle::State::DarkAppearance);
       PaintArrow(graphicsContext, arrowRect, ArrowDirection::Down, useDarkAppearance);
     }
 

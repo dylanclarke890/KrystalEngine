@@ -185,7 +185,8 @@ namespace krys::boo::css
       }
       bool matches = MediaConditionMatches(*mediaCondition);
       mq::MediaQueryEvaluator evaluator {mq::ScreenAtom()};
-      if (evaluator.CollectDynamicDependencies(*mediaCondition) != mq::MediaQueryDynamicDependency::None)
+      if (evaluator.CollectDynamicDependencies(*mediaCondition)
+          != EnumSet<mq::MediaQueryDynamicDependency> {})
       {
         _dynamicMediaQueryResults.push_back({mq::MediaQueryList {*mediaCondition}, matches});
       }

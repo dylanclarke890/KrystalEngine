@@ -32,13 +32,6 @@
 #include "Krystal.Core/Types/Maybe.hpp"
 #include "Krystal.Core/Types/Pair.hpp"
 
-namespace krys::boo
-{
-  class SVGAnimatedProperty;
-  class SVGAttributeAnimator;
-  class SVGProperty;
-}
-
 namespace krys::boo::svg
 {
   enum class AnimationMode : uint8;
@@ -47,6 +40,10 @@ namespace krys::boo::svg
 
 namespace krys::boo
 {
+  class SVGAnimatedProperty;
+  class SVGAttributeAnimator;
+  class SVGProperty;
+
   /// @brief An element's registry of the properties that reflect its attributes.
   class SVGPropertyRegistry
   {

@@ -35,10 +35,7 @@
 namespace krys::boo::dom
 {
   class StaticRange;
-}
 
-namespace krys::boo::dom
-{
   /// @brief A document's custom highlights by name, in the order they were registered (which is the order
   /// they're painted in, below their priority).
   /// @see https://drafts.csswg.org/css-highlight-api-1/#highlight-registry

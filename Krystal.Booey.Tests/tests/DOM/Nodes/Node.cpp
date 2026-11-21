@@ -47,7 +47,7 @@ namespace krys::boo::dom::tests
 
     public:
       NamespaceTestElement(Document &document, DOMStringAtom namespacePrefix) noexcept
-          : Element(document, {u8"http://a", krys::move(namespacePrefix), u8"test-element"}, NodeFlags::None)
+          : Element(document, {u8"http://a", krys::move(namespacePrefix), u8"test-element"}, NodeFlags {})
       {
       }
     };
@@ -540,11 +540,12 @@ namespace krys::boo::dom::tests
             "[dom:dom-node-document_position_implementation_specific]")
   {
     using enum DocumentPosition;
+    using DocumentPositions = EnumSet<DocumentPosition>;
 
     SECTION("same node returns equivalent")
     {
       NodeTestData data {};
-      REQUIRE(data.Node->CompareDocumentPosition(*data.Node) == DOCUMENT_POSITION_EQUIVALENT);
+      REQUIRE(data.Node->CompareDocumentPosition(*data.Node) == DocumentPositions {});
     }
 
     SECTION("disconnected node")
@@ -554,21 +555,21 @@ namespace krys::boo::dom::tests
       auto disconnectedNode = CreateRef<TestElement>(*data.Document);
       auto position = data.Node->CompareDocumentPosition(*disconnectedNode);
 
-      REQUIRE(HasFlag(position, DOCUMENT_POSITION_DISCONNECTED));
-      REQUIRE(HasFlag(position, DOCUMENT_POSITION_IMPLEMENTATION_SPECIFIC));
+      REQUIRE(position.contains(DOCUMENT_POSITION_DISCONNECTED));
+      REQUIRE(position.contains(DOCUMENT_POSITION_IMPLEMENTATION_SPECIFIC));
 
-      auto nodePrecedesDisconnected = HasFlag(position, DOCUMENT_POSITION_PRECEDING);
+      auto nodePrecedesDisconnected = position.contains(DOCUMENT_POSITION_PRECEDING);
       // Should be either preceding or following, but not both.
-      REQUIRE(nodePrecedesDisconnected ^ HasFlag(position, DOCUMENT_POSITION_FOLLOWING));
+      REQUIRE(nodePrecedesDisconnected ^ position.contains(DOCUMENT_POSITION_FOLLOWING));
 
       auto reversePosition = disconnectedNode->CompareDocumentPosition(*data.Node);
 
-      REQUIRE(HasFlag(reversePosition, DOCUMENT_POSITION_DISCONNECTED));
-      REQUIRE(HasFlag(reversePosition, DOCUMENT_POSITION_IMPLEMENTATION_SPECIFIC));
+      REQUIRE(reversePosition.contains(DOCUMENT_POSITION_DISCONNECTED));
+      REQUIRE(reversePosition.contains(DOCUMENT_POSITION_IMPLEMENTATION_SPECIFIC));
 
-      auto reverseNodePrecedesDisconnected = HasFlag(reversePosition, DOCUMENT_POSITION_PRECEDING);
+      auto reverseNodePrecedesDisconnected = reversePosition.contains(DOCUMENT_POSITION_PRECEDING);
       // Should be either preceding or following, but not both.
-      REQUIRE(reverseNodePrecedesDisconnected ^ HasFlag(reversePosition, DOCUMENT_POSITION_FOLLOWING));
+      REQUIRE(reverseNodePrecedesDisconnected ^ reversePosition.contains(DOCUMENT_POSITION_FOLLOWING));
 
       // If it was following one way, it should be preceding the other.
       REQUIRE(reverseNodePrecedesDisconnected != nodePrecedesDisconnected);
@@ -584,13 +585,13 @@ namespace krys::boo::dom::tests
       REQUIRE_FALSE(data.Node->AppendChild(*sibling2).HasException());
 
       CHECK(data.Node->CompareDocumentPosition(*sibling1)
-            == (DOCUMENT_POSITION_CONTAINED_BY | DOCUMENT_POSITION_FOLLOWING));
+            == DocumentPositions {DOCUMENT_POSITION_CONTAINED_BY, DOCUMENT_POSITION_FOLLOWING});
       CHECK(sibling1->CompareDocumentPosition(*data.Node)
-            == (DOCUMENT_POSITION_CONTAINS | DOCUMENT_POSITION_PRECEDING));
+            == DocumentPositions {DOCUMENT_POSITION_CONTAINS, DOCUMENT_POSITION_PRECEDING});
       CHECK(data.Node->CompareDocumentPosition(*sibling2)
-            == (DOCUMENT_POSITION_CONTAINED_BY | DOCUMENT_POSITION_FOLLOWING));
+            == DocumentPositions {DOCUMENT_POSITION_CONTAINED_BY, DOCUMENT_POSITION_FOLLOWING});
       CHECK(sibling2->CompareDocumentPosition(*data.Node)
-            == (DOCUMENT_POSITION_CONTAINS | DOCUMENT_POSITION_PRECEDING));
+            == DocumentPositions {DOCUMENT_POSITION_CONTAINS, DOCUMENT_POSITION_PRECEDING});
       CHECK(sibling1->CompareDocumentPosition(*sibling2) == DOCUMENT_POSITION_FOLLOWING);
       CHECK(sibling2->CompareDocumentPosition(*sibling1) == DOCUMENT_POSITION_PRECEDING);
 
@@ -611,15 +612,15 @@ namespace krys::boo::dom::tests
 
       // 5b. Two attributes of the same element: by their order in its attribute list.
       CHECK(b->CompareDocumentPosition(*a)
-            == (DOCUMENT_POSITION_IMPLEMENTATION_SPECIFIC | DOCUMENT_POSITION_PRECEDING));
+            == DocumentPositions {DOCUMENT_POSITION_IMPLEMENTATION_SPECIFIC, DOCUMENT_POSITION_PRECEDING});
       CHECK(a->CompareDocumentPosition(*b)
-            == (DOCUMENT_POSITION_IMPLEMENTATION_SPECIFIC | DOCUMENT_POSITION_FOLLOWING));
+            == DocumentPositions {DOCUMENT_POSITION_IMPLEMENTATION_SPECIFIC, DOCUMENT_POSITION_FOLLOWING});
 
       // 7. and 8. An attribute is inside its element, and before its element's children.
       CHECK(a->CompareDocumentPosition(*element)
-            == (DOCUMENT_POSITION_CONTAINS | DOCUMENT_POSITION_PRECEDING));
+            == DocumentPositions {DOCUMENT_POSITION_CONTAINS, DOCUMENT_POSITION_PRECEDING});
       CHECK(element->CompareDocumentPosition(*a)
-            == (DOCUMENT_POSITION_CONTAINED_BY | DOCUMENT_POSITION_FOLLOWING));
+            == DocumentPositions {DOCUMENT_POSITION_CONTAINED_BY, DOCUMENT_POSITION_FOLLOWING});
       CHECK(a->CompareDocumentPosition(*child) == DOCUMENT_POSITION_FOLLOWING);
       CHECK(child->CompareDocumentPosition(*a) == DOCUMENT_POSITION_PRECEDING);
     }
@@ -635,11 +636,13 @@ namespace krys::boo::dom::tests
       {
         auto forward = first->CompareDocumentPosition(*second);
         auto backward = second->CompareDocumentPosition(*first);
-        CHECK(HasFlag(forward, DOCUMENT_POSITION_DISCONNECTED | DOCUMENT_POSITION_IMPLEMENTATION_SPECIFIC));
-        CHECK(HasFlag(backward, DOCUMENT_POSITION_DISCONNECTED | DOCUMENT_POSITION_IMPLEMENTATION_SPECIFIC));
-        CHECK(HasFlag(forward, DOCUMENT_POSITION_PRECEDING)
-              == HasFlag(backward, DOCUMENT_POSITION_FOLLOWING));
-        CHECK(HasFlag(forward, DOCUMENT_POSITION_PRECEDING) != HasFlag(forward, DOCUMENT_POSITION_FOLLOWING));
+        CHECK(
+          forward.ContainsAll({DOCUMENT_POSITION_DISCONNECTED, DOCUMENT_POSITION_IMPLEMENTATION_SPECIFIC}));
+        CHECK(
+          backward.ContainsAll({DOCUMENT_POSITION_DISCONNECTED, DOCUMENT_POSITION_IMPLEMENTATION_SPECIFIC}));
+        CHECK(forward.contains(DOCUMENT_POSITION_PRECEDING)
+              == backward.contains(DOCUMENT_POSITION_FOLLOWING));
+        CHECK(forward.contains(DOCUMENT_POSITION_PRECEDING) != forward.contains(DOCUMENT_POSITION_FOLLOWING));
       }
     }
   }

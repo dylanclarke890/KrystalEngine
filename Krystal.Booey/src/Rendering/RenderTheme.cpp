@@ -1617,7 +1617,7 @@ namespace krys::boo
 
   RenderTheme::ColorCache &RenderTheme::GetColorCache(style::ColorOptions options) const noexcept
   {
-    return _colorCacheMap[static_cast<uint8>(options)];
+    return _colorCacheMap[options.ToRaw()];
   }
 
   namespace
@@ -1635,7 +1635,7 @@ namespace krys::boo
 
   Color RenderTheme::SystemColor(ValueId cssValueId, style::ColorOptions options) const noexcept
   {
-    auto useDarkAppearance = HasFlag(options, style::ColorOptions::UseDarkAppearance);
+    auto useDarkAppearance = options.contains(style::ColorOption::UseDarkAppearance);
 
     // NOLINTBEGIN(bugprone-branch-clone): one documented case per system colour.
     // NOLINTBEGIN(bugprone-branch-clone): one documented case per system colour.

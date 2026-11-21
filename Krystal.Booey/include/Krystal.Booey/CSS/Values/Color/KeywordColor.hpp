@@ -53,7 +53,7 @@ namespace krys::boo::css
 
   KRYS_NODISCARD bool IsColorKeyword(ValueId) noexcept;
 
-  KRYS_NODISCARD bool IsColorKeyword(ValueId, ColorType allowedColorTypes) noexcept;
+  KRYS_NODISCARD bool IsColorKeyword(ValueId, EnumSet<ColorType> allowedColorTypes) noexcept;
 
   KRYS_NODISCARD boo::Color ColorFromAbsoluteKeyword(ValueId) noexcept;
 

@@ -40,6 +40,11 @@ namespace krys::boo::style
     SubtreeInvalid,
   };
 
+  consteval Validity MaxEnumValue(Validity) noexcept
+  {
+    return Validity::SubtreeInvalid;
+  }
+
   /// @brief What else an invalidation asks of the next style resolution.
   enum class InvalidationMode : uint8
   {
@@ -49,14 +54,20 @@ namespace krys::boo::style
     InsertedIntoAncestor,
   };
 
+  consteval InvalidationMode MaxEnumValue(InvalidationMode) noexcept
+  {
+    return InvalidationMode::InsertedIntoAncestor;
+  }
+
   enum class InvalidationScope : uint8
   {
     All,
     SelfChildrenAndSiblings,
     Descendants,
   };
-}
 
-KRYS_DEFINE_CONTIGUOUS_ENUM_TRAITS(krys::boo::style::Validity, 5u);
-KRYS_DEFINE_CONTIGUOUS_ENUM_TRAITS(krys::boo::style::InvalidationMode, 4u);
-KRYS_DEFINE_CONTIGUOUS_ENUM_TRAITS(krys::boo::style::InvalidationScope, 3u);
+  consteval InvalidationScope MaxEnumValue(InvalidationScope) noexcept
+  {
+    return InvalidationScope::Descendants;
+  }
+}

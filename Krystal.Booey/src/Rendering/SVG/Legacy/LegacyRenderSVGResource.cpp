@@ -53,7 +53,7 @@ namespace krys::boo
 
       // When rendering the mask for a LegacyRenderSVGResourceClipper, always use the initial fill paint
       // server.
-      if (renderer.View().FrameView().GetPaintBehavior().Contains(PaintBehavior::RenderingSVGClipOrMask))
+      if (renderer.View().FrameView().GetPaintBehavior().contains(PaintBehavior::RenderingSVGClipOrMask))
       {
         // Ignore stroke.
         if (!applyToFill)
@@ -289,7 +289,7 @@ namespace krys::boo
     {
       krys_debug_assert(shape->IsLegacyRenderSVGShape());
 
-      if (resourceMode.Contains(RenderSVGResourceMode::ApplyToFill))
+      if (resourceMode.contains(RenderSVGResourceMode::ApplyToFill))
       {
         if (auto *svgShape = DynamicDowncast<LegacyRenderSVGShape>(shape))
         {
@@ -297,7 +297,7 @@ namespace krys::boo
         }
       }
 
-      if (resourceMode.Contains(RenderSVGResourceMode::ApplyToStroke))
+      if (resourceMode.contains(RenderSVGResourceMode::ApplyToStroke))
       {
         if (auto *svgShape = DynamicDowncast<LegacyRenderSVGShape>(shape))
         {
@@ -313,11 +313,11 @@ namespace krys::boo
       return;
     }
 
-    if (resourceMode.Contains(RenderSVGResourceMode::ApplyToFill))
+    if (resourceMode.contains(RenderSVGResourceMode::ApplyToFill))
     {
       context.FillPath(*path);
     }
-    if (resourceMode.Contains(RenderSVGResourceMode::ApplyToStroke))
+    if (resourceMode.contains(RenderSVGResourceMode::ApplyToStroke))
     {
       context.StrokePath(*path);
     }

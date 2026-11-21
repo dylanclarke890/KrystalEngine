@@ -30,11 +30,6 @@
 #include "Krystal.Core/Strings/StringBuilder.hpp"
 #include "Krystal.Core/TypeCast.hpp"
 
-namespace krys::boo
-{
-  class CSSRuleList;
-}
-
 namespace krys::boo::css
 {
   class GroupRule;
@@ -42,6 +37,8 @@ namespace krys::boo::css
 
 namespace krys::boo
 {
+  class CSSRuleList;
+
   /// @brief The base of the rules that contain other rules.
   /// @see https://drafts.csswg.org/cssom/#the-cssgroupingrule-interface
   class CSSGroupingRule : public CSSRule

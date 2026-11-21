@@ -2606,7 +2606,7 @@ namespace krys::boo
         }
       }
 
-      bool paintsContent = !maskPhases.IsEmpty();
+      bool paintsContent = !maskPhases.empty();
       GraphicsLayer::Type requiredLayerType =
         paintsContent ? GraphicsLayer::Type::Normal : GraphicsLayer::Type::Shape;
       if (_maskLayer && _maskLayer->GetType() != requiredLayerType)
@@ -3698,7 +3698,7 @@ namespace krys::boo
         RenderLayer::PaintLayerFlag::PaintingCompositingBackgroundPhase,
         RenderLayer::PaintLayerFlag::PaintingCompositingForegroundPhase};
 
-      if (graphicsLayer->PaintingPhase().Contains(GraphicsLayerPaintingPhase::OverflowContents))
+      if (graphicsLayer->PaintingPhase().contains(GraphicsLayerPaintingPhase::OverflowContents))
       {
         sharingLayerPaintFlags.Add(RenderLayer::PaintLayerFlag::PaintingOverflowContents);
       }
@@ -3721,33 +3721,33 @@ namespace krys::boo
     EnumSet<RenderLayer::PaintLayerFlag> paintFlags;
 
     auto paintingPhase = graphicsLayer.PaintingPhase();
-    if (paintingPhase.Contains(GraphicsLayerPaintingPhase::Background))
+    if (paintingPhase.contains(GraphicsLayerPaintingPhase::Background))
     {
       paintFlags.Add(RenderLayer::PaintLayerFlag::PaintingCompositingBackgroundPhase);
     }
-    if (paintingPhase.Contains(GraphicsLayerPaintingPhase::Foreground))
+    if (paintingPhase.contains(GraphicsLayerPaintingPhase::Foreground))
     {
       paintFlags.Add(RenderLayer::PaintLayerFlag::PaintingCompositingForegroundPhase);
     }
-    if (paintingPhase.Contains(GraphicsLayerPaintingPhase::Mask))
+    if (paintingPhase.contains(GraphicsLayerPaintingPhase::Mask))
     {
       paintFlags.Add(RenderLayer::PaintLayerFlag::PaintingCompositingMaskPhase);
     }
-    if (paintingPhase.Contains(GraphicsLayerPaintingPhase::ClipPath))
+    if (paintingPhase.contains(GraphicsLayerPaintingPhase::ClipPath))
     {
       paintFlags.Add(RenderLayer::PaintLayerFlag::PaintingCompositingClipPathPhase);
     }
-    if (paintingPhase.Contains(GraphicsLayerPaintingPhase::ChildClippingMask))
+    if (paintingPhase.contains(GraphicsLayerPaintingPhase::ChildClippingMask))
     {
       paintFlags.Add(RenderLayer::PaintLayerFlag::PaintingChildClippingMaskPhase);
     }
-    if (paintingPhase.Contains(GraphicsLayerPaintingPhase::OverflowContents))
+    if (paintingPhase.contains(GraphicsLayerPaintingPhase::OverflowContents))
     {
       paintFlags.Add({RenderLayer::PaintLayerFlag::PaintingOverflowContents,
                       RenderLayer::PaintLayerFlag::PaintingOverflowContentsRoot});
     }
 
-    if (paintingPhase.Contains(GraphicsLayerPaintingPhase::CompositedScroll))
+    if (paintingPhase.contains(GraphicsLayerPaintingPhase::CompositedScroll))
     {
       if (&graphicsLayer == _graphicsLayer.get())
       {
@@ -3778,7 +3778,7 @@ namespace krys::boo
     adjustedClipRect.Move(SizeF(_subpixelOffsetFromRenderer));
     RectI dirtyRect = EnclosingRectI(adjustedClipRect);
 
-    if (!layerPaintBehavior.Contains(GraphicsLayerPaintBehavior::ForceSynchronousImageDecode))
+    if (!layerPaintBehavior.contains(GraphicsLayerPaintBehavior::ForceSynchronousImageDecode))
     {
       if (!graphicsLayer.RepaintCount())
       {
@@ -3790,7 +3790,7 @@ namespace krys::boo
         || &graphicsLayer == _backgroundLayer.get() || &graphicsLayer == _maskLayer.get()
         || &graphicsLayer == _scrolledContentsLayer.get())
     {
-      if (!graphicsLayer.PaintingPhase().Contains(GraphicsLayerPaintingPhase::OverflowContents))
+      if (!graphicsLayer.PaintingPhase().contains(GraphicsLayerPaintingPhase::OverflowContents))
       {
         dirtyRect.Intersect(EnclosingRectI(RectF(CompositedBoundsIncludingMargin())));
       }
@@ -3798,11 +3798,11 @@ namespace krys::boo
       // We have to use the same root as for hit testing, because both methods can compute and cache
       // clipRects.
       EnumSet<PaintBehavior> behavior;
-      if (layerPaintBehavior.Contains(GraphicsLayerPaintBehavior::ForceSynchronousImageDecode))
+      if (layerPaintBehavior.contains(GraphicsLayerPaintBehavior::ForceSynchronousImageDecode))
       {
         behavior.Add(PaintBehavior::ForceSynchronousImageDecode);
       }
-      else if (layerPaintBehavior.Contains(GraphicsLayerPaintBehavior::DefaultAsynchronousImageDecode))
+      else if (layerPaintBehavior.contains(GraphicsLayerPaintBehavior::DefaultAsynchronousImageDecode))
       {
         behavior.Add(PaintBehavior::DefaultAsynchronousImageDecode);
       }
@@ -3945,7 +3945,7 @@ namespace krys::boo
   bool RenderLayerBacking::ShouldSkipLayerInDump(const GraphicsLayer *layer,
                                                  EnumSet<LayerTreeAsTextOptions> options) const noexcept
   {
-    if (options.Contains(LayerTreeAsTextOptions::Debug))
+    if (options.contains(LayerTreeAsTextOptions::Debug))
     {
       return false;
     }
@@ -3960,7 +3960,7 @@ namespace krys::boo
   {
     // For backwards compatibility, skip some properties on the root tile cache.
     if (_isMainFrameRenderViewLayer && layer == _graphicsLayer.get()
-        && !options.Contains(LayerTreeAsTextOptions::IncludeRootLayerProperties))
+        && !options.contains(LayerTreeAsTextOptions::IncludeRootLayerProperties))
     {
       if (propertyName == u8"drawsContent")
       {

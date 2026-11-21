@@ -59,12 +59,12 @@ namespace krys::boo
     ListButtonPressed,
     VerticalWritingMode,
   };
-}
 
-KRYS_DEFINE_CONTIGUOUS_ENUM_TRAITS(krys::boo::ControlStyleState, 18uz);
+  consteval ControlStyleState MaxEnumValue(ControlStyleState) noexcept
+  {
+    return ControlStyleState::VerticalWritingMode;
+  }
 
-namespace krys::boo
-{
   /// @brief The states and style a theme draws a form control with.
   struct ControlStyle
   {

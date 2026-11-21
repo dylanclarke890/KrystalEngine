@@ -228,7 +228,7 @@ namespace krys::boo::layout
 
     KRYS_NODISCARD bool IsInitialContainingBlock() const noexcept
     {
-      return BaseTypeFlags().Contains(InitialContainingBlockFlag);
+      return BaseTypeFlags().contains(InitialContainingBlockFlag);
     }
 
     KRYS_NODISCARD bool IsLayoutContainmentBox() const noexcept;
@@ -379,12 +379,12 @@ namespace krys::boo::layout
 
     KRYS_NODISCARD bool IsElementBox() const noexcept
     {
-      return BaseTypeFlags().Contains(ElementBoxFlag);
+      return BaseTypeFlags().contains(ElementBoxFlag);
     }
 
     KRYS_NODISCARD bool IsInlineTextBox() const noexcept
     {
-      return BaseTypeFlags().Contains(InlineTextBoxFlag);
+      return BaseTypeFlags().contains(InlineTextBoxFlag);
     }
 
     KRYS_NODISCARD bool IsPaddingApplicable() const noexcept;

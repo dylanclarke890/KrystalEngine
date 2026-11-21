@@ -325,10 +325,10 @@ namespace krys::boo::style::tests
       auto &n = fixture.ById(u8"n");
       CHECK(ContainerQueryEvaluator::SelectContainer(Axis::Width, {}, fixture.ById(u8"p")).get() == &c);
       CHECK_FALSE(ContainerQueryEvaluator::SelectContainer(Axis::Width, {}, fixture.ById(u8"q")));
-      CHECK(ContainerQueryEvaluator::SelectContainer(Axis::None, u8"foo", fixture.ById(u8"q")).get() == &n);
-      CHECK_FALSE(ContainerQueryEvaluator::SelectContainer(Axis::None, u8"bar", fixture.ById(u8"q")));
+      CHECK(ContainerQueryEvaluator::SelectContainer({}, u8"foo", fixture.ById(u8"q")).get() == &n);
+      CHECK_FALSE(ContainerQueryEvaluator::SelectContainer({}, u8"bar", fixture.ById(u8"q")));
       // Any ancestor is a style container.
-      CHECK(ContainerQueryEvaluator::SelectContainer(Axis::None, {}, fixture.ById(u8"q")).get() == &n);
+      CHECK(ContainerQueryEvaluator::SelectContainer({}, {}, fixture.ById(u8"q")).get() == &n);
     }
 
     SECTION("Changes")

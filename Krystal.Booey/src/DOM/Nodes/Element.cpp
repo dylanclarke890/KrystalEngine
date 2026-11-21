@@ -487,7 +487,7 @@ namespace krys::boo
       }
 
       auto documentElement = document->DocumentElement();
-      if (!documentElement || documentElement->HasNodeFlag(dom::NodeFlags::IsComputedStyleInvalid))
+      if (!documentElement || documentElement->_nodeFlags.contains(dom::NodeFlag::IsComputedStyleInvalid))
       {
         return documentElement;
       }
@@ -497,7 +497,7 @@ namespace krys::boo
       for (auto element = ShareRefPtr<const Element>(this); element;
            element = ShareRefPtr<const Element>(element->ParentElementInComposedTree()))
       {
-        if (element->HasNodeFlag(dom::NodeFlags::IsComputedStyleInvalid))
+        if (element->_nodeFlags.contains(dom::NodeFlag::IsComputedStyleInvalid))
         {
           rootmost = element;
           continue;
@@ -562,19 +562,19 @@ namespace krys::boo
       {
         auto changes = style::DetermineChanges(*existing, *style);
         changes.Remove(style::Change::NonInherited);
-        if (!changes.IsEmpty())
+        if (!changes.empty())
         {
           for (auto &child : dom::ComposedTreeChildren(*element))
           {
             if (auto *childElement = DynamicDowncast<Element>(child))
             {
-              childElement->SetNodeFlag(dom::NodeFlags::IsComputedStyleInvalid);
+              childElement->_nodeFlags.Add(dom::NodeFlag::IsComputedStyleInvalid);
             }
           }
         }
       }
       rareData.SetComputedStyle(krys::move(style));
-      element->ClearNodeFlag(dom::NodeFlags::IsComputedStyleInvalid);
+      element->_nodeFlags.Remove(dom::NodeFlag::IsComputedStyleInvalid);
 
       if (mode == ResolveComputedStyleMode::RenderedOnly && computedStyle->Display() == DisplayType::None)
       {
@@ -671,8 +671,8 @@ namespace krys::boo
 
   void Element::ResetStyleRelations() noexcept
   {
-    ClearStyleFlags(dom::NodeStyleFlags::StyleAffectedByEmpty);
-    ClearStyleFlags(dom::NodeStyleFlags::AffectedByHasWithPositionalPseudoClass);
+    _nodeStyleFlags.Remove(dom::NodeStyleFlag::StyleAffectedByEmpty);
+    _nodeStyleFlags.Remove(dom::NodeStyleFlag::AffectedByHasWithPositionalPseudoClass);
     if (!GetElementRareData())
     {
       return;
@@ -682,18 +682,20 @@ namespace krys::boo
 
   void Element::ResetChildStyleRelations() noexcept
   {
-    ClearStyleFlags(dom::NodeStyleFlags::ChildrenAffectedByFirstChildRules
-                    | dom::NodeStyleFlags::ChildrenAffectedByLastChildRules
-                    | dom::NodeStyleFlags::ChildrenAffectedByForwardPositionalRules
-                    | dom::NodeStyleFlags::ChildrenAffectedByBackwardPositionalRules);
+    _nodeStyleFlags.Remove(
+      dom::NodeStyleFlags {dom::NodeStyleFlag::ChildrenAffectedByFirstChildRules,
+                           dom::NodeStyleFlag::ChildrenAffectedByLastChildRules,
+                           dom::NodeStyleFlag::ChildrenAffectedByForwardPositionalRules,
+                           dom::NodeStyleFlag::ChildrenAffectedByBackwardPositionalRules});
   }
 
   void Element::ResetAllDescendantStyleRelations() noexcept
   {
     ResetChildStyleRelations();
 
-    ClearStyleFlags(dom::NodeStyleFlags::DescendantsAffectedByForwardPositionalRules
-                    | dom::NodeStyleFlags::DescendantsAffectedByBackwardPositionalRules);
+    _nodeStyleFlags.Remove(
+      dom::NodeStyleFlags {dom::NodeStyleFlag::DescendantsAffectedByForwardPositionalRules,
+                           dom::NodeStyleFlag::DescendantsAffectedByBackwardPositionalRules});
   }
 
   bool Element::HasDisplayContents() const noexcept
@@ -1014,7 +1016,7 @@ namespace krys::boo
     // FIXME: Ideally we would just recompute things that are actually affected by containers queries within
     // the subtree.
     Node::InvalidateStyle(style::Validity::SubtreeInvalid);
-    SetNodeFlag(dom::NodeFlags::NeedsUpdateQueryContainerDependentStyle);
+    _nodeFlags.Add(dom::NodeFlag::NeedsUpdateQueryContainerDependentStyle);
   }
 
   void Element::InvalidateForResumingQueryContainerResolution() noexcept
@@ -1036,7 +1038,7 @@ namespace krys::boo
 
   void Element::FinishParsingChildren() noexcept
   {
-    ClearNodeFlag(dom::NodeFlags::IsParsingChildren);
+    _nodeFlags.Remove(dom::NodeFlag::IsParsingChildren);
     style::ChildChangeInvalidation::InvalidateAfterFinishedParsingChildren(*this);
   }
 
@@ -3093,7 +3095,7 @@ namespace krys::boo
   void Element::SynchronizeAnimatedSVGAttributes() const noexcept
   {
     auto &svgElement = const_cast<SVGElement &>(Downcast<SVGElement>(*this));
-    svgElement.ClearNodeFlag(dom::NodeFlags::AnimatedSVGAttributesAreDirty);
+    svgElement._nodeFlags.Remove(dom::NodeFlag::AnimatedSVGAttributesAreDirty);
     svgElement.SynchronizeAllSVGAttributes();
   }
 
@@ -3258,7 +3260,7 @@ namespace krys::boo
 
     Ref<Document> document = ShareRef(NodeDocument());
     document->AddTopLayerElement(*this);
-    SetEventTargetFlag(dom::EventTargetFlags::IsInTopLayer);
+    _eventTargetFlags.Add(dom::EventTargetFlag::IsInTopLayer);
 
     document->ScheduleContentRelevancyUpdate(dom::ContentRelevancy::IsInTopLayer);
 
@@ -3307,7 +3309,7 @@ namespace krys::boo
 
     // Unable to protect the document as it may have started destruction.
     NodeDocument().RemoveTopLayerElement(*this);
-    ClearEventTargetFlag(dom::EventTargetFlags::IsInTopLayer);
+    _eventTargetFlags.Remove(dom::EventTargetFlag::IsInTopLayer);
 
     NodeDocument().ScheduleContentRelevancyUpdate(dom::ContentRelevancy::IsInTopLayer);
 
@@ -3517,7 +3519,7 @@ namespace krys::boo
   {
     if (auto relevancy = GetContentRelevancy())
     {
-      return !relevancy->IsEmpty();
+      return !relevancy->empty();
     }
     return false;
   }

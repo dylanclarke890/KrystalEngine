@@ -9,12 +9,6 @@
 #include "Krystal.Core/Types/Any.hpp"
 #include "Krystal.Core/Types/Func.hpp"
 
-namespace krys::boo
-{
-  class AbortAlgorithmHandle;
-  class Document;
-}
-
 namespace krys::boo::dom
 {
   class AbortAlgorithms;
@@ -22,6 +16,9 @@ namespace krys::boo::dom
 
 namespace krys::boo
 {
+  class AbortAlgorithmHandle;
+  class Document;
+
   /// @see https://dom.spec.whatwg.org/#abortsignal
   class AbortSignal : public EventTarget
   {

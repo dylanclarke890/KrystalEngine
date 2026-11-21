@@ -158,12 +158,12 @@ namespace krys::ui
     if (isNew)
     {
       auto &device = renderer.GetDevice();
-      auto texture =
-        device.CreateTexture({.Format = gfx::TextureFormat::RGBA8Unorm,
-                              .Width = width,
-                              .Height = height,
-                              .Usage = gfx::TextureUsage::RenderTarget | gfx::TextureUsage::Sampled,
-                              .DebugName = u8"UI.AcceleratedImageBuffer"});
+      auto texture = device.CreateTexture(
+        {.Format = gfx::TextureFormat::RGBA8Unorm,
+         .Width = width,
+         .Height = height,
+         .Usage = EnumSet<gfx::TextureUsage> {gfx::TextureUsage::RenderTarget, gfx::TextureUsage::Sampled},
+         .DebugName = u8"UI.AcceleratedImageBuffer"});
       if (!texture)
       {
         return {};
@@ -254,7 +254,7 @@ namespace krys::ui
       auto state = *below;
       state.DidApplyChanges();
       state.MergeAllChanges(level.State);
-      if (!state.Changes().IsEmpty())
+      if (!state.Changes().empty())
       {
         items.emplace_back(dl::SetState(state));
       }
@@ -500,11 +500,12 @@ namespace krys::ui
     const auto size = backend.Size();
     const auto width = static_cast<uint32>(size.Width());
     const auto height = static_cast<uint32>(size.Height());
-    auto copy = _device->CreateTexture({.Format = gfx::TextureFormat::RGBA8Unorm,
-                                        .Width = width,
-                                        .Height = height,
-                                        .Usage = gfx::TextureUsage::RenderTarget | gfx::TextureUsage::Sampled,
-                                        .DebugName = u8"UI.ImageBufferSnapshot"});
+    auto copy = _device->CreateTexture(
+      {.Format = gfx::TextureFormat::RGBA8Unorm,
+       .Width = width,
+       .Height = height,
+       .Usage = EnumSet<gfx::TextureUsage> {gfx::TextureUsage::RenderTarget, gfx::TextureUsage::Sampled},
+       .DebugName = u8"UI.ImageBufferSnapshot"});
     if (!copy)
     {
       return nullptr;

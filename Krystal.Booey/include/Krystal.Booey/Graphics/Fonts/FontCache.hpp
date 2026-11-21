@@ -60,12 +60,12 @@ namespace krys::boo
     DisallowBoldSynthesis,
     DisallowObliqueSynthesis,
   };
-}
 
-KRYS_DEFINE_CONTIGUOUS_ENUM_TRAITS(krys::boo::FontLookupOptions, 3uz);
+  consteval FontLookupOptions MaxEnumValue(FontLookupOptions) noexcept
+  {
+    return FontLookupOptions::DisallowObliqueSynthesis;
+  }
 
-namespace krys::boo
-{
   /// @brief Hashes `FontPlatformData`, for the font cache's maps.
   struct FontPlatformDataHash
   {

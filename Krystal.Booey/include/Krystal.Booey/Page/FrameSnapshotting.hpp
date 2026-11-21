@@ -61,12 +61,12 @@ namespace krys::boo
     FixedAndStickyLayersOnly,
     DraggableElement,
   };
-}
 
-KRYS_DEFINE_CONTIGUOUS_ENUM_TRAITS(krys::boo::SnapshotFlags, 14uz)
+  consteval SnapshotFlags MaxEnumValue(SnapshotFlags) noexcept
+  {
+    return SnapshotFlags::DraggableElement;
+  }
 
-namespace krys::boo
-{
   /// @brief How a snapshot is taken.
   /// FIXME: The pixel format and colour space, with bitmap image buffers.
   struct SnapshotOptions

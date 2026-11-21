@@ -126,8 +126,6 @@ namespace krys
   /// Markable takes Traits, which should have IsEmptyValue and EmptyValue functions. By using
   /// one value of T as an empty value, we can remove the required flag in Maybe. This class is intended to be
   /// used as a member of a class to compact the size of the class. Otherwise, you should use Maybe.
-  /// @note This strategy is similar to krys::HashTable, which uses two values of T as an empty value and a
-  /// deleted value.
   template <typename T, typename Traits = MarkableTraits<T>>
   class Markable
   {

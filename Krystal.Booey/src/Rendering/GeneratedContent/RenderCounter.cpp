@@ -393,7 +393,7 @@ namespace krys::boo
         }
       }
 
-      bool isReset = type.Contains(CounterNode::Type::Reset);
+      bool isReset = type.contains(CounterNode::Type::Reset);
       while (currentRenderer)
       {
         auto currentCounter = ShareRefPtr(MakeCounterNode(*currentRenderer, identifier, false));

@@ -65,10 +65,10 @@
 namespace krys::boo
 {
   Node::Node(Document &document, dom::NodeType type, dom::NodeFlags flags) noexcept
-      : EventTarget(dom::EventTargetFlags::IsNode), _nodeType(type), _nodeDocument(&document),
+      : EventTarget(dom::EventTargetFlag::IsNode), _nodeType(type), _nodeDocument(&document),
         _parentNode(nullptr), _previousSibling(nullptr), _nextSibling(nullptr)
   {
-    _flags = flags;
+    _nodeFlags = flags;
     if (type != dom::NodeType::DOCUMENT_NODE)
     {
       document.IncrementReferencingNodeCount();
@@ -209,8 +209,8 @@ namespace krys::boo
   {
     if (UsesEffectiveTextDirection())
     {
-      return HasNodeFlag(dom::NodeFlags::EffectiveTextDirectionIsRTL) ? text::TextDirection::RTL
-                                                                      : text::TextDirection::LTR;
+      return _nodeFlags.contains(dom::NodeFlag::EffectiveTextDirectionIsRTL) ? text::TextDirection::RTL
+                                                                             : text::TextDirection::LTR;
     }
 
     // The document element's directionality, if it's an HTML element that keeps one.
@@ -227,11 +227,11 @@ namespace krys::boo
   {
     if (direction == text::TextDirection::RTL)
     {
-      SetNodeFlag(dom::NodeFlags::EffectiveTextDirectionIsRTL);
+      _nodeFlags.Add(dom::NodeFlag::EffectiveTextDirectionIsRTL);
     }
     else
     {
-      ClearNodeFlag(dom::NodeFlags::EffectiveTextDirectionIsRTL);
+      _nodeFlags.Remove(dom::NodeFlag::EffectiveTextDirectionIsRTL);
     }
   }
 
@@ -426,12 +426,12 @@ namespace krys::boo
     return this == otherNode;
   }
 
-  dom::DocumentPosition Node::CompareDocumentPosition(const Node &other) const noexcept
+  EnumSet<dom::DocumentPosition> Node::CompareDocumentPosition(const Node &other) const noexcept
   {
     // 1. If this is other, then return zero.
     if (this == &other)
     {
-      return dom::DocumentPosition::DOCUMENT_POSITION_EQUIVALENT;
+      return {};
     }
 
     // 2. Let node1 be other and node2 be this.
@@ -467,8 +467,9 @@ namespace krys::boo
           //         and DOCUMENT_POSITION_PRECEDING.
           if (dom::NodeAlgorithms::Equals(*attr, *attr1))
           {
-            return dom::DocumentPosition::DOCUMENT_POSITION_IMPLEMENTATION_SPECIFIC
-                   | dom::DocumentPosition::DOCUMENT_POSITION_PRECEDING;
+            return EnumSet<dom::DocumentPosition> {
+              dom::DocumentPosition::DOCUMENT_POSITION_IMPLEMENTATION_SPECIFIC,
+              dom::DocumentPosition::DOCUMENT_POSITION_PRECEDING};
           }
 
           // 5b.i.B. If attr equals attr2, then return the result of adding
@@ -476,8 +477,9 @@ namespace krys::boo
           //         and DOCUMENT_POSITION_FOLLOWING.
           if (dom::NodeAlgorithms::Equals(*attr, *attr2))
           {
-            return dom::DocumentPosition::DOCUMENT_POSITION_IMPLEMENTATION_SPECIFIC
-                   | dom::DocumentPosition::DOCUMENT_POSITION_FOLLOWING;
+            return EnumSet<dom::DocumentPosition> {
+              dom::DocumentPosition::DOCUMENT_POSITION_IMPLEMENTATION_SPECIFIC,
+              dom::DocumentPosition::DOCUMENT_POSITION_FOLLOWING};
           }
         }
       }
@@ -493,8 +495,9 @@ namespace krys::boo
       auto orderingFlag = &other < this ? dom::DocumentPosition::DOCUMENT_POSITION_PRECEDING
                                         : dom::DocumentPosition::DOCUMENT_POSITION_FOLLOWING;
 
-      return dom::DocumentPosition::DOCUMENT_POSITION_DISCONNECTED
-             | dom::DocumentPosition::DOCUMENT_POSITION_IMPLEMENTATION_SPECIFIC | orderingFlag;
+      return EnumSet<dom::DocumentPosition> {dom::DocumentPosition::DOCUMENT_POSITION_DISCONNECTED,
+                                             dom::DocumentPosition::DOCUMENT_POSITION_IMPLEMENTATION_SPECIFIC}
+             | orderingFlag;
     }
 
     // 7. If node1 is an ancestor of node2 and attr1 is null, or node1 is node2 and attr2 is non-null, then
@@ -503,8 +506,8 @@ namespace krys::boo
     if ((dom::TreeQueries::IsAncestor(*node1, *node2) && attr1 == nullptr)
         || (node1 == node2 && attr2 != nullptr))
     {
-      return dom::DocumentPosition::DOCUMENT_POSITION_CONTAINS
-             | dom::DocumentPosition::DOCUMENT_POSITION_PRECEDING;
+      return EnumSet<dom::DocumentPosition> {dom::DocumentPosition::DOCUMENT_POSITION_CONTAINS,
+                                             dom::DocumentPosition::DOCUMENT_POSITION_PRECEDING};
     }
 
     // 8. If node1 is a descendant of node2 and attr2 is null, or node1 is node2 and attr1 is non-null, then
@@ -512,8 +515,8 @@ namespace krys::boo
     if ((dom::TreeQueries::IsDescendant(*node1, *node2) && attr2 == nullptr)
         || (node1 == node2 && attr1 != nullptr))
     {
-      return dom::DocumentPosition::DOCUMENT_POSITION_CONTAINED_BY
-             | dom::DocumentPosition::DOCUMENT_POSITION_FOLLOWING;
+      return EnumSet<dom::DocumentPosition> {dom::DocumentPosition::DOCUMENT_POSITION_CONTAINED_BY,
+                                             dom::DocumentPosition::DOCUMENT_POSITION_FOLLOWING};
     }
 
     // 9. If node1 is preceding node2, then return DOCUMENT_POSITION_PRECEDING.
@@ -1034,11 +1037,11 @@ namespace krys::boo
     {
       case style::InvalidationMode::Normal: break;
       case style::InvalidationMode::RecompositeLayer:
-        SetNodeFlag(dom::NodeFlags::StyleResolutionShouldRecompositeLayer);
+        _nodeFlags.Add(dom::NodeFlag::StyleResolutionShouldRecompositeLayer);
         break;
       case style::InvalidationMode::RebuildRenderer:
       case style::InvalidationMode::InsertedIntoAncestor:
-        SetNodeFlag(dom::NodeFlags::HasInvalidRenderer);
+        _nodeFlags.Add(dom::NodeFlag::HasInvalidRenderer);
         break;
     }
   }
@@ -1104,7 +1107,7 @@ namespace krys::boo
 
     if (validity != style::Validity::Valid)
     {
-      SetNodeFlag(dom::NodeFlags::IsComputedStyleInvalid);
+      _nodeFlags.Add(dom::NodeFlag::IsComputedStyleInvalid);
     }
 
     bool markAncestors =

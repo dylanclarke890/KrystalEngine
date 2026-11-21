@@ -32,7 +32,7 @@ namespace krys::boo
                                                        UniquePtr<SVGPropertyRegistry> &&propertyRegistry,
                                                        SVGElementInterface interface) noexcept
       : SVGTextContentElement(document, krys::move(propertyRegistry), interface,
-                              SVGElementFlags::IsSvgTextPositioningElement),
+                              SVGElementFlag::IsSvgTextPositioningElement),
         _x(SVGAnimatedLengthList::Create(this, SVGLengthMode::Width)),
         _y(SVGAnimatedLengthList::Create(this, SVGLengthMode::Height)),
         _dx(SVGAnimatedLengthList::Create(this, SVGLengthMode::Width)),

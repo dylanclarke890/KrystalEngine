@@ -13,7 +13,7 @@ namespace krys::boo
   DocumentType::DocumentType(Document &document, DOMString name, DOMString publicId,
                              DOMString systemId) noexcept
       // 1. Let doctype be the result of creating a node that implements DocumentType, given document.
-      : Node(document, dom::NodeType::DOCUMENT_TYPE_NODE, dom::NodeFlags::None),
+      : Node(document, dom::NodeType::DOCUMENT_TYPE_NODE, dom::NodeFlags {}),
         // 2. Set doctype's name to name, public ID to publicId, and system ID to systemId.
         _name(krys::move(name)), _publicId(krys::move(publicId)), _systemId(krys::move(systemId))
   {

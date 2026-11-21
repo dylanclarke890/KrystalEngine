@@ -202,11 +202,18 @@ def generate_enums_hpp(path, pseudo_classes, pseudo_elements):
         with writer.namespace(namespace=NAMESPACE):
             write_enum_class(writer, PSEUDO_CLASS_TYPE, class_values)
             writer.newline()
+            write_max_enum_value(writer, PSEUDO_CLASS_TYPE, len(class_values))
+            writer.newline()
             write_enum_class(writer, PSEUDO_ELEMENT_TYPE, element_values)
-        writer.newline()
+            writer.newline()
+            write_max_enum_value(writer, PSEUDO_ELEMENT_TYPE, len(element_values))
 
-        writer.write(f"KRYS_DEFINE_CONTIGUOUS_ENUM_TRAITS(::{NAMESPACE}::{PSEUDO_CLASS_TYPE}, {len(class_values)}uz);")
-        writer.write(f"KRYS_DEFINE_CONTIGUOUS_ENUM_TRAITS(::{NAMESPACE}::{PSEUDO_ELEMENT_TYPE}, {len(element_values)}uz);")
+
+def write_max_enum_value(writer: Writer, type_name: str, count: int):
+    writer.write(f"consteval {type_name} MaxEnumValue({type_name}) noexcept")
+    writer.write("{")
+    writer.write(f"  return static_cast<{type_name}>({count - 1});")
+    writer.write("}")
 
 
 def write_enum_class(writer: Writer, type_name: str, values: list[str]):

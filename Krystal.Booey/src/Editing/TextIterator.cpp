@@ -156,7 +156,7 @@ namespace krys::boo
         return box->Size().IsEmpty();
       }
 
-      if (behaviors.Contains(TextIteratorBehavior::EntersSkippedContentRelevantToUser)
+      if (behaviors.contains(TextIteratorBehavior::EntersSkippedContentRelevantToUser)
           && IsSkippedContentRoot(*box))
       {
         // This may reveal collapsed content to find-in-page, but it's uncommon (and highly redundant) to have
@@ -205,7 +205,7 @@ namespace krys::boo
 
     KRYS_NODISCARD bool IsClippedByFrameAncestor(const Document &, TextIteratorBehaviors behaviors) noexcept
     {
-      if (!behaviors.Contains(TextIteratorBehavior::ClipsToFrameAncestors))
+      if (!behaviors.contains(TextIteratorBehavior::ClipsToFrameAncestors))
       {
         return false;
       }
@@ -323,8 +323,8 @@ namespace krys::boo
       : _behaviors(behaviors)
   {
     krys_debug_assert(
-      !_behaviors.Contains(TextIteratorBehavior::EmitsObjectReplacementCharacters)
-      || !_behaviors.Contains(TextIteratorBehavior::EmitsObjectReplacementCharactersForImages));
+      !_behaviors.contains(TextIteratorBehavior::EmitsObjectReplacementCharacters)
+      || !_behaviors.contains(TextIteratorBehavior::EmitsObjectReplacementCharactersForImages));
 
     range.Start.GetDocument().UpdateLayoutIgnorePendingStylesheets();
 
@@ -365,7 +365,7 @@ namespace krys::boo
 
   utf8_string TextIterator::RendererTextForBehavior(const RenderText &renderer) const noexcept
   {
-    return _behaviors.Contains(TextIteratorBehavior::EmitsOriginalText) ? renderer.OriginalText()
+    return _behaviors.contains(TextIteratorBehavior::EmitsOriginalText) ? renderer.OriginalText()
                                                                         : renderer.Text();
   }
 
@@ -415,14 +415,14 @@ namespace krys::boo
 
       auto &style = renderer->Style();
       if (style.UsedUserSelect() == UserSelect::None
-          && behaviors.Contains(TextIteratorBehavior::IgnoresUserSelectNone))
+          && behaviors.contains(TextIteratorBehavior::IgnoresUserSelectNone))
       {
         return false;
       }
 
       if (renderer->IsSkippedContent())
       {
-        if (!behaviors.Contains(TextIteratorBehavior::EntersSkippedContentRelevantToUser))
+        if (!behaviors.contains(TextIteratorBehavior::EntersSkippedContentRelevantToUser))
         {
           return false;
         }
@@ -440,7 +440,7 @@ namespace krys::boo
         return false;
       }
 
-      if (behaviors.Contains(TextIteratorBehavior::EntersSkippedContentRelevantToUser))
+      if (behaviors.contains(TextIteratorBehavior::EntersSkippedContentRelevantToUser))
       {
         return renderBox->Style().UsedContentVisibility() == ContentVisibility::Hidden
                && !renderBox->Style().AutoRevealsWhenFound();
@@ -625,7 +625,7 @@ namespace krys::boo
   {
     Ref<boo::Text> textNode = Downcast<boo::Text>(_currentNode);
 
-    if (_fullyClippedStack.Top() && !_behaviors.Contains(TextIteratorBehavior::IgnoresStyleVisibility))
+    if (_fullyClippedStack.Top() && !_behaviors.contains(TextIteratorBehavior::IgnoresStyleVisibility))
     {
       return false;
     }
@@ -657,7 +657,7 @@ namespace krys::boo
         }
       }
       if (renderer.Style().Visibility() != Visibility::Visible
-          && !_behaviors.Contains(TextIteratorBehavior::IgnoresStyleVisibility))
+          && !_behaviors.contains(TextIteratorBehavior::IgnoresStyleVisibility))
       {
         return false;
       }
@@ -684,7 +684,7 @@ namespace krys::boo
     else if (!_textRun && !rendererText.empty())
     {
       if (renderer.Style().Visibility() != Visibility::Visible
-          && !_behaviors.Contains(TextIteratorBehavior::IgnoresStyleVisibility))
+          && !_behaviors.contains(TextIteratorBehavior::IgnoresStyleVisibility))
       {
         return false;
       }
@@ -702,7 +702,7 @@ namespace krys::boo
 
     const RenderText &renderer = _firstLetterText ? *_firstLetterText : *textNode->Renderer();
     if (renderer.Style().Visibility() != Visibility::Visible
-        && !_behaviors.Contains(TextIteratorBehavior::IgnoresStyleVisibility))
+        && !_behaviors.contains(TextIteratorBehavior::IgnoresStyleVisibility))
     {
       _textRun = {};
       return;
@@ -782,7 +782,7 @@ namespace krys::boo
               break;
             }
           }
-          if (subrunEnd == runEnd && _behaviors.Contains(TextIteratorBehavior::BehavesAsIfNodesFollowing))
+          if (subrunEnd == runEnd && _behaviors.contains(TextIteratorBehavior::BehavesAsIfNodesFollowing))
           {
             bool lastSpaceCollapsedByNextNonTextRun =
               !nextTextRun && rendererText.size() > subrunEnd && rendererText[subrunEnd] == ' ';
@@ -858,7 +858,7 @@ namespace krys::boo
     if (auto *firstLetter = renderer.FirstLetter())
     {
       if (firstLetter->Style().Visibility() != Visibility::Visible
-          && !_behaviors.Contains(TextIteratorBehavior::IgnoresStyleVisibility))
+          && !_behaviors.contains(TextIteratorBehavior::IgnoresStyleVisibility))
       {
         return;
       }
@@ -891,7 +891,7 @@ namespace krys::boo
     }
 
     if (renderer->Style().Visibility() != Visibility::Visible
-        && !_behaviors.Contains(TextIteratorBehavior::IgnoresStyleVisibility))
+        && !_behaviors.contains(TextIteratorBehavior::IgnoresStyleVisibility))
     {
       return false;
     }
@@ -903,7 +903,7 @@ namespace krys::boo
     }
 
     if (auto *renderTextControl = DynamicDowncast<RenderTextControl>(*renderer);
-        renderTextControl && _behaviors.Contains(TextIteratorBehavior::EntersTextControls))
+        renderTextControl && _behaviors.contains(TextIteratorBehavior::EntersTextControls))
     {
       if (auto innerTextElement = renderTextControl->TextFormControlElement().InnerTextElement())
       {
@@ -920,12 +920,12 @@ namespace krys::boo
 
     auto shouldEmitObjectReplacementCharacter = [&]
     {
-      if (_behaviors.Contains(TextIteratorBehavior::EmitsObjectReplacementCharacters))
+      if (_behaviors.contains(TextIteratorBehavior::EmitsObjectReplacementCharacters))
       {
         return true;
       }
 
-      if (_behaviors.Contains(TextIteratorBehavior::EmitsObjectReplacementCharactersForImages)
+      if (_behaviors.contains(TextIteratorBehavior::EmitsObjectReplacementCharactersForImages)
           && IsHTMLElementOfType(*_currentNode, html::TagName::img))
       {
         return true;
@@ -944,7 +944,7 @@ namespace krys::boo
       return true;
     }
 
-    if (_behaviors.Contains(TextIteratorBehavior::EmitsCharactersBetweenAllVisiblePositions))
+    if (_behaviors.contains(TextIteratorBehavior::EmitsCharactersBetweenAllVisiblePositions))
     {
       // We want replaced elements to behave like punctuation for boundary
       // finding, and to simply take up space for the selection preservation
@@ -959,7 +959,7 @@ namespace krys::boo
     _positionEndOffset = 1;
 
     if (auto *renderImage = DynamicDowncast<RenderImage>(*renderer);
-        renderImage && _behaviors.Contains(TextIteratorBehavior::EmitsImageAltText))
+        renderImage && _behaviors.contains(TextIteratorBehavior::EmitsImageAltText))
     {
       auto altText = utf8_string(renderImage->AltText());
       if (!altText.empty())
@@ -1160,7 +1160,7 @@ namespace krys::boo
   // (if it's atomic).
   bool TextIterator::ShouldRepresentNodeOffsetZero() noexcept
   {
-    if (_behaviors.Contains(TextIteratorBehavior::EmitsCharactersBetweenAllVisiblePositions))
+    if (_behaviors.contains(TextIteratorBehavior::EmitsCharactersBetweenAllVisiblePositions))
     {
       if (auto *renderer = _currentNode->Renderer(); renderer && renderer->IsRenderTable())
       {
@@ -1245,7 +1245,7 @@ namespace krys::boo
   {
     return node.Renderer() && node.Renderer()->IsRenderTable()
            && (node.Renderer()->IsInline()
-               || _behaviors.Contains(TextIteratorBehavior::EmitsCharactersBetweenAllVisiblePositions));
+               || _behaviors.contains(TextIteratorBehavior::EmitsCharactersBetweenAllVisiblePositions));
   }
 
   void TextIterator::RepresentNodeOffsetZero() noexcept
@@ -1295,12 +1295,12 @@ namespace krys::boo
   {
     RefPtr<Node> currentNode = _currentNode;
     if (ShouldEmitNewlineForNode(currentNode.get(),
-                                 _behaviors.Contains(TextIteratorBehavior::EmitsOriginalText)))
+                                 _behaviors.contains(TextIteratorBehavior::EmitsOriginalText)))
     {
       auto parentNode = ShareRefPtr<Node>(currentNode->ParentNode());
       EmitCharacter('\n', krys::move(parentNode), krys::move(currentNode), 0, 1);
     }
-    else if (_behaviors.Contains(TextIteratorBehavior::EmitsCharactersBetweenAllVisiblePositions)
+    else if (_behaviors.contains(TextIteratorBehavior::EmitsCharactersBetweenAllVisiblePositions)
              && currentNode->Renderer() && currentNode->Renderer()->IsHR())
     {
       auto parentNode = ShareRefPtr<Node>(currentNode->ParentNode());
@@ -1336,7 +1336,7 @@ namespace krys::boo
     if (_lastTextNode
         && ShouldEmitNewlineAfterNode(
           *_currentNode,
-          _behaviors.Contains(TextIteratorBehavior::EmitsCharactersBetweenAllVisiblePositions)))
+          _behaviors.contains(TextIteratorBehavior::EmitsCharactersBetweenAllVisiblePositions)))
     {
       // use extra newline to represent margin bottom, as needed
       bool addNewline = ShouldEmitExtraNewlineForNode(*_currentNode);
@@ -1399,13 +1399,13 @@ namespace krys::boo
 
     // FIXME: This probably yields the wrong offsets when text-transform: lowercase turns a single character
     // into two characters.
-    utf8_string string = _behaviors.Contains(TextIteratorBehavior::EmitsOriginalText)
+    utf8_string string = _behaviors.contains(TextIteratorBehavior::EmitsOriginalText)
                            ? renderer.OriginalText()
-                           : (_behaviors.Contains(TextIteratorBehavior::EmitsTextsWithoutTranscoding)
+                           : (_behaviors.contains(TextIteratorBehavior::EmitsTextsWithoutTranscoding)
                                 ? renderer.TextWithoutConvertingBackslashToYenSymbol()
                                 : renderer.Text());
 
-    krys_debug_assert(_behaviors.Contains(TextIteratorBehavior::EmitsOriginalText)
+    krys_debug_assert(_behaviors.contains(TextIteratorBehavior::EmitsOriginalText)
                       || string.size() >= static_cast<size_t>(textEndOffset));
 
     textEndOffset = std::min(static_cast<int32>(string.size()), textEndOffset);
@@ -1700,7 +1700,7 @@ namespace krys::boo
       EmitCharacter('\t', ShareRefPtr<Node>(currentNode->ParentNode()), index + 1, index + 1);
     }
     else if (ShouldEmitNewlineForNode(currentNode.get(),
-                                      _behaviors.Contains(TextIteratorBehavior::EmitsOriginalText))
+                                      _behaviors.contains(TextIteratorBehavior::EmitsOriginalText))
              || ShouldEmitNewlineAfterNode(*_node))
     {
       if (_lastCharacter != '\n')
@@ -1723,7 +1723,7 @@ namespace krys::boo
       EmitCharacter('\t', krys::move(node), 0, 0);
     }
     else if (ShouldEmitNewlineForNode(node.get(),
-                                      _behaviors.Contains(TextIteratorBehavior::EmitsOriginalText))
+                                      _behaviors.contains(TextIteratorBehavior::EmitsOriginalText))
              || ShouldEmitNewlineBeforeNode(*_node))
     {
       // The start of this emitted range is wrong. Ensuring correctness would require

@@ -53,10 +53,9 @@ namespace krys::boo
 {
   ShadowRoot::ShadowRoot(Document &document, html::CustomElementRegistry *registry,
                          dom::NodeFlags flags) noexcept
-      : DocumentFragment(document, flags | dom::NodeFlags::IsShadowRoot),
-        DocumentOrShadowRoot(*this, registry)
+      : DocumentFragment(document, flags | dom::NodeFlag::IsShadowRoot), DocumentOrShadowRoot(*this, registry)
   {
-    SetNodeFlag(dom::NodeFlags::IsInShadowTree);
+    _nodeFlags.Add(dom::NodeFlag::IsInShadowTree);
     _containingShadowRoot = this;
     _styleScope = CreateUnique<style::Scope>(*this);
   }

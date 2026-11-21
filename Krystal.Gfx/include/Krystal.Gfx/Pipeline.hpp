@@ -1,6 +1,7 @@
 ﻿#pragma once
 
 #include "Krystal.Core/Attributes.hpp"
+#include "Krystal.Core/Containers/EnumSet.hpp"
 #include "Krystal.Core/Containers/SmallList.hpp"
 #include "Krystal.Core/Enum.hpp"
 #include "Krystal.Core/Numeric.hpp"
@@ -68,15 +69,23 @@ namespace krys::gfx
     Max,
   };
 
-  enum class ColourWriteMask : uint8
+  enum class ColourChannel : uint8
   {
-    None = 0,
-    Red = 1 << 0,
-    Green = 1 << 1,
-    Blue = 1 << 2,
-    Alpha = 1 << 3,
-    All = Red | Green | Blue | Alpha,
+    Red,
+    Green,
+    Blue,
+    Alpha,
   };
+
+  consteval ColourChannel MaxEnumValue(ColourChannel) noexcept
+  {
+    return ColourChannel::Alpha;
+  }
+
+  using ColourWriteMask = EnumSet<ColourChannel>;
+
+  constexpr ColourWriteMask AllColourChannels {ColourChannel::Red, ColourChannel::Green, ColourChannel::Blue,
+                                               ColourChannel::Alpha};
 
   /// @brief How fragment output is combined with the colour target. One state applies to every colour target.
   struct BlendState
@@ -88,7 +97,7 @@ namespace krys::gfx
     BlendFactor SourceAlpha {BlendFactor::One};
     BlendFactor DestinationAlpha {BlendFactor::Zero};
     BlendOp AlphaOp {BlendOp::Add};
-    ColourWriteMask WriteMask {ColourWriteMask::All};
+    ColourWriteMask WriteMask {AllColourChannels};
 
     constexpr bool operator==(const BlendState &) const noexcept = default;
 
@@ -196,5 +205,3 @@ namespace krys::gfx
     utf8_stringview DebugName;
   };
 }
-
-KRYS_DEFINE_FLAGS_ENUM_TRAITS(krys::gfx::ColourWriteMask, 4uz)

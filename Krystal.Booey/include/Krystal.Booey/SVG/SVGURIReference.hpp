@@ -29,12 +29,6 @@
 #include "Krystal.Core/Memory/RefPtr.hpp"
 #include "Krystal.Core/Types/Maybe.hpp"
 
-namespace krys::boo
-{
-  class Document;
-  class Element;
-}
-
 namespace krys::boo::dom
 {
   class DocumentOrShadowRoot;
@@ -48,7 +42,10 @@ namespace krys::boo::style
 
 namespace krys::boo
 {
+  class Document;
+  class Element;
   class SVGElement;
+
   template <typename TOwner, typename... TBaseTypes>
   class SVGPropertyOwnerRegistry;
 

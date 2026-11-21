@@ -54,7 +54,7 @@ namespace krys::boo
   {
     KRYS_NODISCARD bool IsRenderingMaskImage(const RenderObject &object) noexcept
     {
-      return object.View().FrameView().GetPaintBehavior().Contains(PaintBehavior::RenderingSVGClipOrMask);
+      return object.View().FrameView().GetPaintBehavior().contains(PaintBehavior::RenderingSVGClipOrMask);
     }
 
     KRYS_NODISCARD AffineTransform &CurrentContentTransformation() noexcept
@@ -84,7 +84,7 @@ namespace krys::boo
 
     krys_debug_assert(_renderer && _paintInfo);
 
-    if (_renderingFlags.Contains(RenderingFlag::EndFilterLayer))
+    if (_renderingFlags.contains(RenderingFlag::EndFilterLayer))
     {
       krys_debug_assert(_filter);
       GraphicsContext *contextPtr = &_paintInfo->Context();
@@ -93,7 +93,7 @@ namespace krys::boo
       _paintInfo->Rect = _savedPaintRect;
     }
 
-    if (_renderingFlags.Contains(RenderingFlag::EndCSSFilterLayer))
+    if (_renderingFlags.contains(RenderingFlag::EndCSSFilterLayer))
     {
       krys_debug_assert(_cssFilterSwitcher && _savedContext);
       _paintInfo->SetContext(*_savedContext);
@@ -101,12 +101,12 @@ namespace krys::boo
       _cssFilterSwitcher->EndDrawSourceImage(*_savedContext);
     }
 
-    if (_renderingFlags.Contains(RenderingFlag::EndOpacityLayer))
+    if (_renderingFlags.contains(RenderingFlag::EndOpacityLayer))
     {
       _paintInfo->Context().EndTransparencyLayer();
     }
 
-    if (_renderingFlags.Contains(RenderingFlag::RestoreGraphicsContext))
+    if (_renderingFlags.contains(RenderingFlag::RestoreGraphicsContext))
     {
       _paintInfo->Context().Restore();
     }
@@ -118,7 +118,7 @@ namespace krys::boo
   {
 #ifndef NDEBUG
     // This function must not be called twice!
-    krys_debug_assert(!_renderingFlags.Contains(RenderingFlag::PrepareToRenderSVGContentWasCalled));
+    krys_debug_assert(!_renderingFlags.contains(RenderingFlag::PrepareToRenderSVGContentWasCalled));
     _renderingFlags.Add(RenderingFlag::PrepareToRenderSVGContentWasCalled);
 #endif
 
@@ -225,7 +225,7 @@ namespace krys::boo
       }
 
       _pathClippingIsEntirelyWithinRendererContents =
-        result.Contains(LegacyRenderSVGResource::ApplyResult::ClipContainsRendererContent);
+        result.contains(LegacyRenderSVGResource::ApplyResult::ClipContainsRendererContent);
     }
 
     if (!isRenderingMask)

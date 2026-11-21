@@ -427,10 +427,10 @@ namespace krys::boo::style::tests
       ElementRuleCollector collector(p, RuleSetsFor(p), nullptr);
       collector.MatchAllRules(true, false);
       REQUIRE(Names(collector.GetMatchResult().AuthorDeclarations) == Strings {"element"});
-      REQUIRE(collector.MatchedPseudoElements().Contains(PseudoElementType::Before));
-      REQUIRE(collector.MatchedPseudoElements().Contains(PseudoElementType::Marker));
-      REQUIRE(collector.MatchedPseudoElements().Contains(PseudoElementType::Highlight));
-      REQUIRE_FALSE(collector.MatchedPseudoElements().Contains(PseudoElementType::After));
+      REQUIRE(collector.MatchedPseudoElements().contains(PseudoElementType::Before));
+      REQUIRE(collector.MatchedPseudoElements().contains(PseudoElementType::Marker));
+      REQUIRE(collector.MatchedPseudoElements().contains(PseudoElementType::Highlight));
+      REQUIRE_FALSE(collector.MatchedPseudoElements().contains(PseudoElementType::After));
     }
 
     SECTION("A requested pseudo-element")

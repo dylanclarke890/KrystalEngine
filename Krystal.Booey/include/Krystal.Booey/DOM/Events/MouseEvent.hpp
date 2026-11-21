@@ -33,13 +33,6 @@
 #include "Krystal.Core/Memory/RefPtr.hpp"
 #include "Krystal.Core/Numeric.hpp"
 
-namespace krys::boo
-{
-  class Element;
-  class Node;
-  class PlatformMouseEvent;
-}
-
 namespace krys::boo::dom
 {
   /// @brief Whether @p eventType is `click` or `auxclick`.
@@ -50,6 +43,10 @@ namespace krys::boo::dom
 
 namespace krys::boo
 {
+  class Element;
+  class Node;
+  class PlatformMouseEvent;
+
   /// @see https://w3c.github.io/uievents/#dictdef-mouseeventinit
   struct MouseEventInit : EventModifierInit
   {

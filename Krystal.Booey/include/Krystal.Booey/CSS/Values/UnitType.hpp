@@ -121,6 +121,11 @@ namespace krys::boo::css
     QuirkyEm,
   };
 
+  consteval UnitType MaxEnumValue(UnitType) noexcept
+  {
+    return UnitType::QuirkyEm;
+  }
+
   /// @brief Maps a dimension token's unit to its UnitType, ignoring ASCII case.
   /// @return `UnitType::Unknown` if the unit isn't recognised.
   KRYS_NODISCARD constexpr UnitType ParseUnitType(utf8_stringview str) noexcept
@@ -181,5 +186,3 @@ namespace krys::boo::css
     return UnitType::Unknown;
   }
 }
-
-KRYS_DEFINE_CONTIGUOUS_ENUM_TRAITS(krys::boo::css::UnitType, 78uz);
