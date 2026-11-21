@@ -33,6 +33,7 @@
 #include "Krystal.Booey/Rendering/RenderElement.hpp"
 #include "Krystal.Booey/Rendering/Updating/RenderTreeBuilderBlock.hpp"
 #include "Krystal.Booey/Rendering/Updating/RenderTreeUpdaterGeneratedContent.hpp"
+#include "Krystal.Booey/Style/Values/Content/Content.hpp"
 
 namespace krys::boo
 {

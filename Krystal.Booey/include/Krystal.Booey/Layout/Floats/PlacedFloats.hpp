@@ -137,7 +137,7 @@ namespace krys::boo::layout
     using List = krys::List<Item>;
 
   private:
-    enum class PositionType : bool
+    enum class PositionType : uint8
     {
       Start,
       End,

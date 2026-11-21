@@ -45,7 +45,7 @@ namespace krys::boo::layout
       bool ShouldDiscardOverflow {false};
     };
 
-    enum class TextBoxTrimSide : bool
+    enum class TextBoxTrimSide : uint8
     {
       Start,
       End,

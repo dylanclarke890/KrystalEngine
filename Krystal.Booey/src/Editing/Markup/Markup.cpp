@@ -1650,6 +1650,13 @@ namespace krys::boo
 
   utf8_string SerializeFragment(const Node &node, SerializedNodes root, List<Ref<Node>> *nodes,
                                 ResolveUrls resolveUrls, Maybe<SerializationSyntax> serializationSyntax,
+                                SerializeShadowRoots serializeShadowRoots) noexcept
+  {
+    return SerializeFragment(node, root, nodes, resolveUrls, serializationSyntax, serializeShadowRoots, {});
+  }
+
+  utf8_string SerializeFragment(const Node &node, SerializedNodes root, List<Ref<Node>> *nodes,
+                                ResolveUrls resolveUrls, Maybe<SerializationSyntax> serializationSyntax,
                                 SerializeShadowRoots serializeShadowRoots,
                                 List<Ref<ShadowRoot>> &&explicitShadowRoots) noexcept
   {

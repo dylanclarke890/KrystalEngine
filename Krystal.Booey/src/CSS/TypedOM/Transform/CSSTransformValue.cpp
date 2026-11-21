@@ -40,6 +40,13 @@
 #include "Krystal.Booey/CSS/Values/FunctionValue.hpp"
 #include "Krystal.Booey/CSS/Values/TransformListValue.hpp"
 #include "Krystal.Booey/CSS/Values/ValueListBuilder.hpp"
+#include "Krystal.Booey/Style/Values/Transforms/Perspective.hpp"
+#include "Krystal.Booey/Style/Values/Transforms/Rotate.hpp"
+#include "Krystal.Booey/Style/Values/Transforms/Scale.hpp"
+#include "Krystal.Booey/Style/Values/Transforms/Translate.hpp"
+#include "Krystal.Core/Geometry/TransformationMatrix.hpp"
+#include "Krystal.Core/Maths/Matrix.hpp"
+#include "Krystal.Core/Maths/Transform.hpp"
 
 #include <algorithm>
 

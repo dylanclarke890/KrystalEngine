@@ -23,6 +23,7 @@
 
 #include "Krystal.Booey/HTML/Elements/HTMLMetaElement.hpp"
 #include "Krystal.Booey/DOM/Nodes/Attr.hpp"
+#include "Krystal.Booey/DOM/Nodes/Document.hpp"
 #include "Krystal.Booey/DOM/Nodes/ShadowRoot.hpp"
 #include "Krystal.Booey/HTML/Attributes/ReflectAttribute.hpp"
 #include "Krystal.Booey/HTML/Elements/HTMLSlotElement.hpp"

@@ -32,9 +32,11 @@
 #include "Krystal.Booey/Rendering/Style/RenderStyle.hpp"
 #include "Krystal.Booey/Style/PropertyCascade.hpp"
 #include "Krystal.Booey/Style/TreeResolutionState.hpp"
+#include "Krystal.Booey/Style/Values/AnchorPosition/PositionTryFallbackTactic.hpp"
 #include "Krystal.Booey/Text/TextFlags.hpp"
 #include "Krystal.Core/CanMakeCheckedPtr.hpp"
 #include "Krystal.Core/Types/HashSet.hpp"
+#include "Krystal.Core/Types/List.hpp"
 #include <bitset>
 
 namespace krys::boo

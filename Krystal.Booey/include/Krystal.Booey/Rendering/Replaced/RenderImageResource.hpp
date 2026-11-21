@@ -29,6 +29,7 @@
 #include "Krystal.Booey/Graphics/Images/ImageTypes.hpp"
 #include "Krystal.Booey/Loader/Cache/CachedImage.hpp"
 #include "Krystal.Booey/Loader/Cache/CachedResourceHandle.hpp"
+#include "Krystal.Booey/Rendering/Style/StyleImage.hpp"
 #include "Krystal.Core/Attributes.hpp"
 #include "Krystal.Core/Geometry/Size.hpp"
 #include "Krystal.Core/Macros.hpp"

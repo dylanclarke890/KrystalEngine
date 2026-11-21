@@ -52,11 +52,9 @@ namespace krys::boo
     boo::ColorGlyphType ColorGlyphType;
     WeakPtr<const boo::Font> Font;
 
+    /// @note Defined in Font.hpp, where Font is complete.
     GlyphData(boo::Glyph glyph = 0, const boo::Font *font = nullptr,
-              boo::ColorGlyphType colorGlyphType = boo::ColorGlyphType::Outline) noexcept
-        : Glyph(glyph), ColorGlyphType(colorGlyphType), Font(CreateWeakPtr(font))
-    {
-    }
+              boo::ColorGlyphType colorGlyphType = boo::ColorGlyphType::Outline) noexcept;
 
     KRYS_NODISCARD bool IsValid() const noexcept
     {
@@ -79,9 +77,8 @@ namespace krys::boo
     Array<Glyph, Size> _glyphs {};
     std::bitset<Size> _isColor;
 
-    explicit GlyphPage(const Font &font) noexcept : _font(CreateWeakPtr(&font))
-    {
-    }
+    /// @note Defined in Font.hpp, as are the members that read the font.
+    explicit GlyphPage(const Font &font) noexcept;
 
   public:
     KRYS_NODISCARD static Ref<GlyphPage> Create(const Font &font) noexcept
@@ -125,12 +122,7 @@ namespace krys::boo
       return GlyphForIndex(IndexForCodePoint(c));
     }
 
-    KRYS_NODISCARD GlyphData GlyphDataForIndex(uint32 index) const noexcept
-    {
-      Glyph glyph = GlyphForIndex(index);
-      auto colorGlyphType = ColorGlyphTypeForIndex(index);
-      return GlyphData(glyph, glyph ? _font.get() : nullptr, colorGlyphType);
-    }
+    KRYS_NODISCARD GlyphData GlyphDataForIndex(uint32 index) const noexcept;
 
     KRYS_NODISCARD Glyph GlyphForIndex(uint32 index) const noexcept
     {
@@ -152,10 +144,7 @@ namespace krys::boo
       _isColor.set(index, colorGlyphType == ColorGlyphType::Color);
     }
 
-    KRYS_NODISCARD const Font &GetFont() const noexcept
-    {
-      return *_font;
-    }
+    KRYS_NODISCARD const Font &GetFont() const noexcept;
 
     /// @brief Fills the page with the glyphs of @p codePoints, the code points of the page in order.
     /// @return Whether the font has any of them.

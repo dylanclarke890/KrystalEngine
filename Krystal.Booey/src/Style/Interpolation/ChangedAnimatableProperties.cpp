@@ -27,8 +27,8 @@
 #include "Krystal.Booey/Style/Interpolation/ChangedAnimatableProperties.hpp"
 #include "Krystal.Booey/Animation/WebAnimationTypes.hpp"
 #include "Krystal.Booey/CSS/Properties/Property.hpp"
+#include "Krystal.Booey/Rendering/Style/RenderStyle+GettersInlines.hpp"
 #include "Krystal.Booey/Rendering/Style/RenderStyle.hpp"
-#include "Krystal.Booey/Rendering/Style/RenderStyleProperties+GettersInlines.hpp"
 #include "Krystal.Booey/Style/Interpolation/ChangedAnimatablePropertiesGenerated.hpp"
 
 namespace krys::boo::style

@@ -172,7 +172,7 @@ namespace krys::boo::inline_display
       float HorizontalExpansion {0};
     };
 
-    enum class PositionWithinInlineLevelBox : bool
+    enum class PositionWithinInlineLevelBox : uint8
     {
       First,
       Last,

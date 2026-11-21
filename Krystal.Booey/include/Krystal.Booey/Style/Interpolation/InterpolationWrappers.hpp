@@ -34,9 +34,9 @@
   #error "Please do not include this file anywhere except from generated code."
 #endif
 
+#include "Krystal.Booey/Rendering/Style/RenderStyle+GettersInlines.hpp"
+#include "Krystal.Booey/Rendering/Style/RenderStyle+SettersInlines.hpp"
 #include "Krystal.Booey/Rendering/Style/RenderStyle.hpp"
-#include "Krystal.Booey/Rendering/Style/RenderStyleProperties+GettersInlines.hpp"
-#include "Krystal.Booey/Rendering/Style/RenderStyleProperties+SettersInlines.hpp"
 #include "Krystal.Booey/Style/Interpolation/InterpolationContext.hpp"
 #include "Krystal.Booey/Style/Interpolation/InterpolationFunctions.hpp"
 #include "Krystal.Booey/Style/Interpolation/InterpolationWrapperBase.hpp"

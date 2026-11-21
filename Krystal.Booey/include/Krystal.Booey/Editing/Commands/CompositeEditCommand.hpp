@@ -26,6 +26,7 @@
 
 #pragma once
 
+#include "Krystal.Booey/Accessibility/AXObjectCache.hpp"
 #include "Krystal.Booey/DOM/Ranges/Position.hpp"
 #include "Krystal.Booey/DOM/Types/DOMString.hpp"
 #include "Krystal.Booey/Editing/Commands/EditCommand.hpp"

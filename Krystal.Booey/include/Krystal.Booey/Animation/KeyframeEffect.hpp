@@ -34,6 +34,7 @@
 #include "Krystal.Booey/Animation/Timelines/TimelineRangeOffset.hpp"
 #include "Krystal.Booey/CSS/Properties/MutableStyleProperties.hpp"
 #include "Krystal.Booey/Graphics/Animation/IterationCompositeOperation.hpp"
+#include "Krystal.Booey/Graphics/Layers/GraphicsLayerAnimation.hpp"
 #include "Krystal.Booey/Style/Interpolation/InterpolationClient.hpp"
 #include "Krystal.Booey/Style/PseudoElementIdentifier.hpp"
 #include "Krystal.Booey/Style/Styleable.hpp"

@@ -440,4 +440,26 @@ namespace krys::boo
 
     KRYS_NODISCARD float PlatformWidthForGlyph(Glyph glyph) const noexcept;
   };
+
+  inline GlyphData::GlyphData(boo::Glyph glyph, const boo::Font *font,
+                              boo::ColorGlyphType colorGlyphType) noexcept
+      : Glyph(glyph), ColorGlyphType(colorGlyphType), Font(CreateWeakPtr(font))
+  {
+  }
+
+  inline GlyphPage::GlyphPage(const boo::Font &font) noexcept : _font(CreateWeakPtr(&font))
+  {
+  }
+
+  inline GlyphData GlyphPage::GlyphDataForIndex(uint32 index) const noexcept
+  {
+    Glyph glyph = GlyphForIndex(index);
+    auto colorGlyphType = ColorGlyphTypeForIndex(index);
+    return GlyphData(glyph, glyph ? _font.get() : nullptr, colorGlyphType);
+  }
+
+  inline const Font &GlyphPage::GetFont() const noexcept
+  {
+    return *_font;
+  }
 }
