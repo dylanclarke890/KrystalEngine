@@ -60,7 +60,7 @@ namespace krys::boo::css::tests
     auto original = CreateUnique<SelectorList>(Sample());
     SelectorList copy(*original);
     CHECK(copy == *original);
-    CHECK(DefaultHash<SelectorList>::Hash(copy) == DefaultHash<SelectorList>::Hash(*original));
+    CHECK(FastHash<SelectorList> {}(copy) == FastHash<SelectorList> {}(*original));
 
     // The copy owns its own rare data and selector lists.
     original.reset();

@@ -114,12 +114,4 @@ DEFINE_VARIANT_LIKE_CONFORMANCE(krys::boo::style::PreferredSize)
 
 namespace krys
 {
-  template <>
-  struct HashTraits<krys::boo::style::PreferredSize> : GenericHashTraits<krys::boo::style::PreferredSize>
-  {
-    KRYS_NODISCARD static krys::boo::style::PreferredSize EmptyValue() noexcept
-    {
-      return krys::boo::style::PreferredSize {HashTableEmptyValueTag {}};
-    }
-  };
 }

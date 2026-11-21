@@ -37,6 +37,10 @@ find_package(spdlog CONFIG REQUIRED)
 find_path(RAPIDXML_INCLUDE_DIRS "rapidxml/rapidxml.hpp")
 target_include_directories(Krystal.Core PRIVATE ${RAPIDXML_INCLUDE_DIRS})
 
+# Third-party - rapidhash (header-only; public, since the hashers inline it)
+find_path(RAPIDHASH_INCLUDE_DIRS "rapidhash.h" REQUIRED)
+target_include_directories(Krystal.Core PUBLIC ${RAPIDHASH_INCLUDE_DIRS})
+
 target_precompile_headers(Krystal.Core PRIVATE
   <chrono>
   <concepts>
@@ -75,7 +79,9 @@ target_sources(Krystal.Core
       include/Krystal.Core/Debug.hpp
       include/Krystal.Core/Endian.hpp
       include/Krystal.Core/Enum.hpp
-      include/Krystal.Core/Hash.hpp
+      include/Krystal.Core/Hashing/FastHash.hpp
+      include/Krystal.Core/Hashing/HashAlgorithm.hpp
+      include/Krystal.Core/Hashing/StableHash.hpp
       include/Krystal.Core/Macros.hpp
       include/Krystal.Core/Numeric.hpp
       include/Krystal.Core/RefCounted.hpp

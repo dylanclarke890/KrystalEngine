@@ -30,7 +30,7 @@
 #include "Krystal.Booey/DOM/Types/QualifiedName.hpp"
 #include "Krystal.Booey/HTML/Types/Namespace.hpp"
 #include "Krystal.Booey/HTML/Types/TagName.hpp"
-#include "Krystal.Core/Hash.hpp"
+#include "Krystal.Core/Hashing/FastHash.hpp"
 #include "Krystal.Core/Types/HashSet.hpp"
 #include <utility>
 
@@ -61,12 +61,12 @@ namespace krys::boo::dom
 
     size_t operator()(const QualifiedNameCacheKey &key) const
     {
-      return krys::Hash::Combine(key.NamespaceURI, key.NamespacePrefix, key.LocalName);
+      return krys::CombineFastHashes(key.NamespaceURI, key.NamespacePrefix, key.LocalName);
     }
 
     size_t operator()(QualifiedNameStorage *ptr) const
     {
-      return krys::Hash::Combine(ptr->_namespaceURI, ptr->_namespacePrefix, ptr->_localName);
+      return krys::CombineFastHashes(ptr->_namespaceURI, ptr->_namespacePrefix, ptr->_localName);
     }
   };
 

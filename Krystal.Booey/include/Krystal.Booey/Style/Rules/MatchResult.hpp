@@ -31,7 +31,7 @@
 #include "Krystal.Booey/Style/Rules/RuleSet.hpp"
 #include "Krystal.Booey/Style/Scope/ScopeOrdinal.hpp"
 #include "Krystal.Core/Enum.hpp"
-#include "Krystal.Core/Hash.hpp"
+#include "Krystal.Core/Hashing/FastHash.hpp"
 #include "Krystal.Core/RefCounted.hpp"
 #include "Krystal.Core/Types/List.hpp"
 #include "Krystal.Core/Types/SmallList.hpp"
@@ -154,11 +154,9 @@ namespace krys::boo::style
 namespace krys
 {
   template <>
-  struct DefaultHash<boo::style::MatchedProperties>
+  struct FastHash<boo::style::MatchedProperties>
   {
-    constexpr static bool IsSafeToCompareToEmptyOrDeleted = false;
-
-    KRYS_NODISCARD static size_t Hash(const boo::style::MatchedProperties &matchedProperties) noexcept
+    KRYS_NODISCARD size_t operator()(const boo::style::MatchedProperties &matchedProperties) const noexcept
     {
       // Ignore non-cacheable properties when computing hash.
       if (matchedProperties.IsCacheable == boo::style::IsCacheable::Partially)
@@ -167,52 +165,38 @@ namespace krys
       }
       krys_debug_assert(matchedProperties.IsCacheable == boo::style::IsCacheable::Yes);
 
-      return krys::Hash::Combine(
+      return krys::CombineFastHashes(
         matchedProperties.Properties.get(), ToUnderlying(matchedProperties.AllowlistType),
         ToUnderlying(matchedProperties.StyleScopeOrdinal), ToUnderlying(matchedProperties.FromStyleAttribute),
         matchedProperties.CascadeLayerPriority, matchedProperties.UsedRuleTypes.ToRaw());
-    }
-
-    KRYS_NODISCARD static bool Equal(const boo::style::MatchedProperties &a,
-                                     const boo::style::MatchedProperties &b) noexcept
-    {
-      return a == b;
     }
   };
 
   /// @brief Hashes the cacheable part of a match result; results with equal hashes are compared with
   /// `CacheablePropertiesEqual`.
   template <>
-  struct DefaultHash<boo::style::MatchResult>
+  struct FastHash<boo::style::MatchResult>
   {
-    constexpr static bool IsSafeToCompareToEmptyOrDeleted = false;
-
-    KRYS_NODISCARD static size_t Hash(const boo::style::MatchResult &matchResult) noexcept
+    KRYS_NODISCARD size_t operator()(const boo::style::MatchResult &matchResult) const noexcept
     {
       krys_debug_assert(!matchResult.IsCompletelyNonCacheable);
 
-      size_t seed = krys::Hash::Combine(matchResult.IsForLink, matchResult.NonCacheablePropertyIds.size());
+      size_t seed =
+        krys::CombineFastHashes(matchResult.IsForLink, matchResult.NonCacheablePropertyIds.size());
       for (auto id : matchResult.NonCacheablePropertyIds)
       {
-        seed = krys::Hash::Combine(seed, ToUnderlying(id));
+        seed = krys::CombineFastHashes(seed, ToUnderlying(id));
       }
       for (auto *declarations : {&matchResult.UserAgentDeclarations, &matchResult.UserDeclarations,
                                  &matchResult.AuthorDeclarations})
       {
-        seed = krys::Hash::Combine(seed, declarations->size());
+        seed = krys::CombineFastHashes(seed, declarations->size());
         for (auto &matchedProperties : *declarations)
         {
-          seed =
-            krys::Hash::Combine(seed, DefaultHash<boo::style::MatchedProperties>::Hash(matchedProperties));
+          seed = krys::CombineFastHashes(seed, FastHash<boo::style::MatchedProperties> {}(matchedProperties));
         }
       }
       return seed;
-    }
-
-    KRYS_NODISCARD static bool Equal(const boo::style::MatchResult &a,
-                                     const boo::style::MatchResult &b) noexcept
-    {
-      return a.CacheablePropertiesEqual(b);
     }
   };
 }

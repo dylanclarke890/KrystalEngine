@@ -29,7 +29,7 @@
 #include "Krystal.Booey/CSS/Selectors/SelectorList.hpp"
 #include "Krystal.Booey/CSS/Selectors/SelectorPseudoTypeMap.hpp"
 #include "Krystal.Booey/CSS/Selectors/UserAgentParts.hpp"
-#include "Krystal.Core/Hash.hpp"
+#include "Krystal.Core/Hashing/FastHash.hpp"
 #include "Krystal.Core/Strings/StringBuilder.hpp"
 #include "Krystal.Core/Types/Queue.hpp"
 #include <charconv>
@@ -1251,23 +1251,23 @@ namespace krys::boo::css
     KRYS_NODISCARD size_t HashSimpleSelector(size_t seed, const Selector &simpleSelector) noexcept
     {
       // This hash does try to include every possible thing in a selector.
-      seed = Hash::Combine(seed, simpleSelector.Match());
+      seed = CombineFastHashes(seed, simpleSelector.Match());
 
       switch (simpleSelector.Match())
       {
         case SelectorMatch::Type:
         {
-          seed = Hash::Combine(seed, simpleSelector.TagQualifiedName().get());
+          seed = CombineFastHashes(seed, simpleSelector.TagQualifiedName().get());
           break;
         }
         case SelectorMatch::PseudoClass:
         {
-          seed = Hash::Combine(seed, simpleSelector.PseudoClass());
+          seed = CombineFastHashes(seed, simpleSelector.PseudoClass());
           break;
         }
         case SelectorMatch::PseudoElement:
         {
-          seed = Hash::Combine(seed, simpleSelector.PseudoElement());
+          seed = CombineFastHashes(seed, simpleSelector.PseudoElement());
           break;
         }
         case SelectorMatch::AttributeEquals:
@@ -1278,18 +1278,19 @@ namespace krys::boo::css
         case SelectorMatch::AttributeSuffix:
         case SelectorMatch::AttributeSubstring:
         {
-          seed = Hash::Combine(seed, simpleSelector.Attribute().get(), simpleSelector.Value().ExistingHash());
+          seed =
+            CombineFastHashes(seed, simpleSelector.Attribute().get(), simpleSelector.Value().ExistingHash());
           break;
         }
         default:
         {
-          seed = Hash::Combine(seed, simpleSelector.Value().ExistingHash());
+          seed = CombineFastHashes(seed, simpleSelector.Value().ExistingHash());
           break;
         }
       }
       if (const auto *selectorList = simpleSelector.SubSelectors())
       {
-        seed = Hash::Combine(seed, DefaultHash<SelectorList>::Hash(*selectorList));
+        seed = CombineFastHashes(seed, FastHash<SelectorList> {}(*selectorList));
       }
       return seed;
     }
@@ -1344,7 +1345,7 @@ namespace krys::boo::css
         relationToRight = simpleSelector->Relation();
         continue;
       }
-      seed = Hash::Combine(seed, relationToRight);
+      seed = CombineFastHashes(seed, relationToRight);
       seed = HashSimpleSelector(seed, *simpleSelector);
       relationToRight = simpleSelector->Relation();
     }

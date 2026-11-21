@@ -90,15 +90,8 @@ namespace krys::boo::tests
     CHECK(FourCharacterTagHash::Hash(FontFeatureTag("liga"))
           != FourCharacterTagHash::Hash(FontFeatureTag("kern")));
 
-    FontTag deleted {};
-    CHECK(FourCharacterTagHashTraits::EmptyValueIsZero);
-    CHECK_FALSE(FourCharacterTagHashTraits::IsDeletedValue(deleted));
-    FourCharacterTagHashTraits::ConstructDeletedValue(deleted);
-    CHECK(FourCharacterTagHashTraits::IsDeletedValue(deleted));
-
-    using SettingHash = DefaultHash<FontFeature>;
-    CHECK(SettingHash::Hash({FontFeatureTag("liga"), 1}) == SettingHash::Hash({FontFeatureTag("liga"), 1}));
-    CHECK(SettingHash::Hash({FontFeatureTag("liga"), 1}) != SettingHash::Hash({FontFeatureTag("liga"), 0}));
-    CHECK(SettingHash::Equal({FontFeatureTag("liga"), 1}, {FontFeatureTag("liga"), 1}));
+    FastHash<FontFeature> settingHash;
+    CHECK(settingHash({FontFeatureTag("liga"), 1}) == settingHash({FontFeatureTag("liga"), 1}));
+    CHECK(settingHash({FontFeatureTag("liga"), 1}) != settingHash({FontFeatureTag("liga"), 0}));
   }
 }

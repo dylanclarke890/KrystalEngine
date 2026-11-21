@@ -25,7 +25,7 @@
 #include "Krystal.Booey/Graphics/Fonts/FontDescription.hpp"
 #include "Krystal.Booey/Graphics/Fonts/FontSizeAdjust.hpp"
 #include "Krystal.Booey/Rendering/Style/RenderStyleConstants.hpp"
-#include "Krystal.Core/Hash.hpp"
+#include "Krystal.Core/Hashing/FastHash.hpp"
 #include "Krystal.Core/Strings/StringBuilder.hpp"
 #include <hb-ot.h>
 #include <hb.h>
@@ -201,11 +201,11 @@ namespace krys::boo
 
   size_t FontPlatformData::Hash() const noexcept
   {
-    return Hash::Combine(static_cast<const void *>(_face.get()), _size, static_cast<uint8>(_orientation),
-                         static_cast<uint8>(_widthVariant), static_cast<uint8>(_textRenderingMode),
-                         _syntheticBold, _syntheticOblique, _isHashTableDeletedValue, _paletteIndex,
-                         _paletteOverrides.size(), _fontFaceFeatures.size(),
-                         static_cast<const void *>(_fontFeatureValues.get()));
+    return CombineFastHashes(static_cast<const void *>(_face.get()), _size, static_cast<uint8>(_orientation),
+                             static_cast<uint8>(_widthVariant), static_cast<uint8>(_textRenderingMode),
+                             _syntheticBold, _syntheticOblique, _isHashTableDeletedValue, _paletteIndex,
+                             _paletteOverrides.size(), _fontFaceFeatures.size(),
+                             static_cast<const void *>(_fontFeatureValues.get()));
   }
 
   bool FontPlatformData::operator==(const FontPlatformData &other) const noexcept

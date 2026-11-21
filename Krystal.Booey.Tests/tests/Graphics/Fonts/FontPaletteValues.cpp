@@ -16,10 +16,10 @@ namespace krys::boo::tests
                   == FontPaletteIndex(FontPaletteIndex::Type::Light));
       CHECK(FontPaletteIndex(3u) == FontPaletteIndex(3u));
       CHECK_FALSE(FontPaletteIndex(3u) == FontPaletteIndex(4u));
-      CHECK(DefaultHash<FontPaletteIndex>::Hash(FontPaletteIndex(3u))
-            == DefaultHash<FontPaletteIndex>::Hash(FontPaletteIndex(3u)));
-      CHECK(DefaultHash<FontPaletteIndex>::Hash(FontPaletteIndex(3u))
-            != DefaultHash<FontPaletteIndex>::Hash(FontPaletteIndex(4u)));
+      CHECK(FastHash<FontPaletteIndex> {}(FontPaletteIndex(3u))
+            == FastHash<FontPaletteIndex> {}(FontPaletteIndex(3u)));
+      CHECK(FastHash<FontPaletteIndex> {}(FontPaletteIndex(3u))
+            != FastHash<FontPaletteIndex> {}(FontPaletteIndex(4u)));
     }
 
     SECTION("FontPaletteValues")
@@ -38,9 +38,9 @@ namespace krys::boo::tests
 
       CHECK_FALSE(base == overridden);
       CHECK(base == FontPaletteValues(FontPaletteIndex(1u), {}));
-      CHECK(DefaultHash<FontPaletteValues>::Hash(base)
-            == DefaultHash<FontPaletteValues>::Hash(FontPaletteValues(FontPaletteIndex(1u), {})));
-      CHECK(DefaultHash<FontPaletteValues>::Hash(base) != DefaultHash<FontPaletteValues>::Hash(overridden));
+      CHECK(FastHash<FontPaletteValues> {}(base)
+            == FastHash<FontPaletteValues> {}(FontPaletteValues(FontPaletteIndex(1u), {})));
+      CHECK(FastHash<FontPaletteValues> {}(base) != FastHash<FontPaletteValues> {}(overridden));
     }
   }
 }

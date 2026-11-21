@@ -557,13 +557,8 @@ namespace krys::tests
 
   TEST_CASE("RectI: Hashing", "[Geometry][RectI]")
   {
-    CHECK(DefaultHash<RectI>::Hash(RectI(1, 2, 3, 4)) == DefaultHash<RectI>::Hash(RectI(1, 2, 3, 4)));
-    CHECK(DefaultHash<RectI>::Equal(RectI(1, 2, 3, 4), RectI(1, 2, 3, 4)));
-
-    RectI deleted;
-    HashTraits<RectI>::ConstructDeletedValue(deleted);
-    CHECK(HashTraits<RectI>::IsDeletedValue(deleted));
-    CHECK_FALSE(HashTraits<RectI>::IsDeletedValue(RectI()));
+    CHECK(FastHash<RectI> {}(RectI(1, 2, 3, 4)) == FastHash<RectI> {}(RectI(1, 2, 3, 4)));
+    CHECK(FastHash<RectI> {}(RectI(1, 2, 3, 4)) != FastHash<RectI> {}(RectI(1, 2, 4, 3)));
   }
 
   using Catch::Matchers::WithinULP;

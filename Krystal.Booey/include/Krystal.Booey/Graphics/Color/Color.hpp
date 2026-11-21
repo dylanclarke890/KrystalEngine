@@ -29,7 +29,7 @@
 #include "Krystal.Core/Colour/ColourConversion.hpp"
 #include "Krystal.Core/Colour/ColourSpace.hpp"
 #include "Krystal.Core/Colour/ColourUtilities.hpp"
-#include "Krystal.Core/Hash.hpp"
+#include "Krystal.Core/Hashing/FastHash.hpp"
 #include "Krystal.Core/RefCounted.hpp"
 #include "Krystal.Core/Strings/String.hpp"
 #include "Krystal.Core/Types/Pair.hpp"
@@ -52,7 +52,7 @@ namespace krys::boo
 namespace krys
 {
   template <>
-  struct DefaultHash<krys::boo::Color>;
+  struct FastHash<krys::boo::Color>;
 }
 
 namespace krys::boo
@@ -63,7 +63,7 @@ namespace krys::boo
   /// - 4x float color components + color space, stored in a reference counted sub-object
   class Color
   {
-    friend struct krys::DefaultHash<Color>;
+    friend struct krys::FastHash<Color>;
 
     // Out of line and inline colors will always be non-equal.
     friend bool operator==(const Color &a, const Color &b) noexcept;
@@ -588,24 +588,17 @@ namespace krys::boo
 namespace krys
 {
   template <>
-  struct DefaultHash<krys::boo::Color>
+  struct FastHash<krys::boo::Color>
   {
-    constexpr static bool IsSafeToCompareToEmptyOrDeleted = true;
-
-    KRYS_NODISCARD static size_t Hash(const krys::boo::Color &color) noexcept
+    KRYS_NODISCARD size_t operator()(const krys::boo::Color &color) const noexcept
     {
       if (color.IsOutOfLine())
       {
         auto [c1, c2, c3, alpha] = color.AsOutOfLine().UnresolvedComponents();
-        return krys::Hash::Combine(c1, c2, c3, alpha, color.Space(), color.Flags());
+        return krys::CombineFastHashes(c1, c2, c3, alpha, color.Space(), color.Flags());
       }
 
-      return krys::Hash::Combine(color.AsPackedInline().Value, color.Flags());
-    }
-
-    KRYS_NODISCARD static bool Equal(const krys::boo::Color &a, const krys::boo::Color &b) noexcept
-    {
-      return a == b;
+      return krys::CombineFastHashes(color.AsPackedInline().Value, color.Flags());
     }
   };
 }

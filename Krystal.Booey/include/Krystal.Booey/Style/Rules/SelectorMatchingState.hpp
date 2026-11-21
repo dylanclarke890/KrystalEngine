@@ -27,7 +27,7 @@
 #include "Krystal.Booey/CSS/Selectors/SelectorFilter.hpp"
 #include "Krystal.Booey/Style/ContainerQueryEvaluator.hpp"
 #include "Krystal.Booey/Style/Invalidation/HasSelectorFilter.hpp"
-#include "Krystal.Core/Hash.hpp"
+#include "Krystal.Core/Hashing/FastHash.hpp"
 #include "Krystal.Core/Types/HashMap.hpp"
 #include "Krystal.Core/Types/Pair.hpp"
 #include "Krystal.Core/Types/UniquePtr.hpp"
@@ -50,7 +50,7 @@ namespace krys::boo::style
     template <typename T, typename U>
     KRYS_NODISCARD size_t operator()(const Pair<T, U> &pair) const noexcept
     {
-      return Hash::Combine(pair.first, pair.second);
+      return CombineFastHashes(pair.first, pair.second);
     }
   };
 

@@ -27,7 +27,7 @@
 #include "Krystal.Booey/CSS/Types/CSSOMString.hpp"
 #include "Krystal.Core/Attributes.hpp"
 #include "Krystal.Core/Enum.hpp"
-#include "Krystal.Core/Hash.hpp"
+#include "Krystal.Core/Hashing/FastHash.hpp"
 #include "Krystal.Core/Numeric.hpp"
 #include "Krystal.Core/Types/Array.hpp"
 #include "Krystal.Core/Types/HashMap.hpp"
@@ -147,8 +147,7 @@ namespace krys::boo::style
   {
     KRYS_NODISCARD size_t operator()(const PseudoClassInvalidationKey &key) const noexcept
     {
-      return Hash::Combine(std::get<0>(key), std::get<1>(key))
-             ^ std::hash<CSSOMStringAtom> {}(std::get<2>(key));
+      return FastHash<PseudoClassInvalidationKey> {}(key);
     }
   };
 

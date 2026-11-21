@@ -26,7 +26,7 @@
 
 #include "Krystal.Booey/CSS/Calc/Tree.hpp"
 #include "Krystal.Booey/CSS/Types/CSSOMString.hpp"
-#include "Krystal.Core/Hash.hpp"
+#include "Krystal.Core/Hashing/FastHash.hpp"
 #include "Krystal.Core/Types/Variant.hpp"
 #include "Krystal.Core/TypeTraits.hpp"
 #include "Krystal.Core/Utils/Tags.hpp"
@@ -90,26 +90,19 @@ namespace krys::boo::css::calc
 
   struct RandomCachingKeyHash
   {
-    constexpr static bool IsSafeToCompareToEmptyOrDeleted = true;
-
     KRYS_NODISCARD static size_t Hash(const RandomCachingKey &key) noexcept
     {
       return krys::SwitchOn(
         key.Identifier,
         [&](const Random::SharingOptions::Auto &autoValue) -> size_t
         {
-          return krys::Hash::Combine(key.Identifier.index(), ToUnderlying(autoValue.Property),
-                                     autoValue.Index);
+          return krys::CombineFastHashes(key.Identifier.index(), ToUnderlying(autoValue.Property),
+                                         autoValue.Index);
         },
         [&](const CSSOMStringAtom &string) -> size_t
-        { return krys::Hash::Combine(key.Identifier.index(), string); },
+        { return krys::CombineFastHashes(key.Identifier.index(), string); },
         [](const krys::HashTableDeletedValueTag &) -> size_t { krys_unreachable(); },
         [](const krys::HashTableEmptyValueTag &) -> size_t { krys_unreachable(); });
-    }
-
-    KRYS_NODISCARD static bool Equal(const RandomCachingKey &a, const RandomCachingKey &b) noexcept
-    {
-      return a == b;
     }
 
     // Lets `HashMap` use this as its hasher.
@@ -123,36 +116,7 @@ namespace krys::boo::css::calc
 namespace krys
 {
   template <>
-  struct HashTraits<krys::boo::css::calc::RandomCachingKey>
-      : public GenericHashTraits<krys::boo::css::calc::RandomCachingKey>
-  {
-    constexpr static bool HasIsEmptyValueFunction = true;
-    constexpr static bool EmptyValueIsZero = false;
-
-    KRYS_NODISCARD static krys::boo::css::calc::RandomCachingKey EmptyValue() noexcept
-    {
-      return krys::boo::css::calc::RandomCachingKey(HashTableEmptyValueTag {});
-    }
-
-    KRYS_NODISCARD static bool IsEmptyValue(const krys::boo::css::calc::RandomCachingKey &value) noexcept
-    {
-      return value.IsHashTableEmptyValue();
-    }
-
-    static void ConstructDeletedValue(krys::boo::css::calc::RandomCachingKey &slot) noexcept
-    {
-      new (NotNullTag {}, &slot) krys::boo::css::calc::RandomCachingKey(HashTableDeletedValueTag {});
-    }
-
-    KRYS_NODISCARD static bool IsDeletedValue(const krys::boo::css::calc::RandomCachingKey &slot) noexcept
-    {
-      return slot.IsHashTableDeletedValue();
-    }
-  };
-
-  template <>
-  struct DefaultHash<krys::boo::css::calc::RandomCachingKey>
-      : public krys::boo::css::calc::RandomCachingKeyHash
+  struct FastHash<krys::boo::css::calc::RandomCachingKey> : public krys::boo::css::calc::RandomCachingKeyHash
   {
   };
 }

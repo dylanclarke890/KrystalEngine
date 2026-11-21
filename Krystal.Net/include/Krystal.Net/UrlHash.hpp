@@ -25,7 +25,7 @@
 
 #pragma once
 
-#include "Krystal.Core/Hash.hpp"
+#include "Krystal.Core/Hashing/FastHash.hpp"
 #include "Krystal.Core/Utils/ForbidHeapAllocation.hpp"
 #include "Krystal.Core/Utils/Tags.hpp"
 #include "Krystal.Net/Url.hpp"
@@ -34,32 +34,11 @@
 namespace krys
 {
   template <>
-  struct DefaultHash<net::Url>
+  struct FastHash<net::Url>
   {
-    constexpr static bool IsSafeToCompareToEmptyOrDeleted = false;
-
-    KRYS_NODISCARD static size_t Hash(const net::Url &key) noexcept
+    KRYS_NODISCARD size_t operator()(const net::Url &key) const noexcept
     {
-      return std::hash<utf8_string> {}(key.String());
-    }
-
-    KRYS_NODISCARD static bool Equal(const net::Url &a, const net::Url &b) noexcept
-    {
-      return a.String() == b.String();
-    }
-  };
-
-  template <>
-  struct HashTraits<net::Url> : public GenericHashTraits<net::Url>
-  {
-    static void ConstructDeletedValue(net::Url &slot) noexcept
-    {
-      new (NotNullTag {}, std::addressof(slot)) net::Url(HashTableDeletedValueTag {});
-    }
-
-    KRYS_NODISCARD static bool IsDeletedValue(const net::Url &value) noexcept
-    {
-      return value.IsHashTableDeletedValue();
+      return FastHash<utf8_string> {}(key.String());
     }
   };
 }

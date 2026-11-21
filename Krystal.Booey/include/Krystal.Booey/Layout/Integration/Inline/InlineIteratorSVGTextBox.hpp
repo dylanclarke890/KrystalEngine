@@ -27,7 +27,7 @@
 
 #include "Krystal.Booey/Layout/Integration/Inline/InlineIteratorTextBox.hpp"
 #include "Krystal.Booey/Rendering/SVG/RenderSVGInlineText.hpp"
-#include "Krystal.Core/Hash.hpp"
+#include "Krystal.Core/Hashing/FastHash.hpp"
 #include "Krystal.Core/Types/List.hpp"
 #include <utility>
 
@@ -67,7 +67,7 @@ namespace krys::boo::inline_iterator
   {
     KRYS_NODISCARD size_t operator()(const SVGTextBox::Key &key) const noexcept
     {
-      return UnsignedIntegerPairHash(DefaultHash<const RenderSVGInlineText *>::Hash(key.first), key.second);
+      return CombineFastHashes(key.first, key.second);
     }
   };
 

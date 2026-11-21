@@ -489,7 +489,7 @@ namespace krys::boo::style::tests
     auto second = MatchResult::Create();
     REQUIRE(first->IsEmpty());
     REQUIRE(first->CacheablePropertiesEqual(*second));
-    REQUIRE(DefaultHash<MatchResult>::Hash(*first) == DefaultHash<MatchResult>::Hash(*second));
+    REQUIRE(FastHash<MatchResult> {}(*first) == FastHash<MatchResult> {}(*second));
 
     first->AuthorDeclarations.push_back({ShareRef<const css::StyleProperties>(*a)});
     REQUIRE_FALSE(first->IsEmpty());
@@ -497,7 +497,7 @@ namespace krys::boo::style::tests
 
     second->AuthorDeclarations.push_back({ShareRef<const css::StyleProperties>(*a)});
     REQUIRE(first->CacheablePropertiesEqual(*second));
-    REQUIRE(DefaultHash<MatchResult>::Hash(*first) == DefaultHash<MatchResult>::Hash(*second));
+    REQUIRE(FastHash<MatchResult> {}(*first) == FastHash<MatchResult> {}(*second));
 
     SECTION("Different declaration blocks")
     {
@@ -512,7 +512,7 @@ namespace krys::boo::style::tests
       second->AuthorDeclarations.back().IsCacheable = IsCacheable::Partially;
       second->AuthorDeclarations.back().Properties = ShareRef<const css::StyleProperties>(*b);
       REQUIRE(first->CacheablePropertiesEqual(*second));
-      REQUIRE(DefaultHash<MatchResult>::Hash(*first) == DefaultHash<MatchResult>::Hash(*second));
+      REQUIRE(FastHash<MatchResult> {}(*first) == FastHash<MatchResult> {}(*second));
 
       first->NonCacheablePropertyIds.push_back(css::PropertyId::Color);
       REQUIRE_FALSE(first->CacheablePropertiesEqual(*second));

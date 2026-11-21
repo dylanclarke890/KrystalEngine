@@ -26,14 +26,14 @@
 #include "Krystal.Booey/Style/Rules/StyleSheetContentsCache.hpp"
 #include "Krystal.Booey/CSS/StyleSheets/StyleSheetContents.hpp"
 #include "Krystal.Core/Assert.hpp"
-#include "Krystal.Core/Hash.hpp"
+#include "Krystal.Core/Hashing/FastHash.hpp"
 #include "Krystal.Core/Threading/NeverDestroyed.hpp"
 
 namespace krys::boo::style
 {
   size_t StyleSheetContentsCache::KeyHash::operator()(const Key &key) const noexcept
   {
-    return Hash::Combine(std::hash<CSSOMString> {}(key.first), key.second.Hash());
+    return CombineFastHashes(key.first, key.second.Hash());
   }
 
   StyleSheetContentsCache::StyleSheetContentsCache() noexcept = default;

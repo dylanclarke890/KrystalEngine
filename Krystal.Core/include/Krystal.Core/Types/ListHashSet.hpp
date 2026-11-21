@@ -1,5 +1,6 @@
 #pragma once
 
+#include "Krystal.Core/Hashing/FastHash.hpp"
 #include "Krystal.Core/Utils/Move.hpp"
 #include <cstddef>
 #include <functional>
@@ -11,7 +12,7 @@
 
 namespace krys
 {
-  template <typename T, typename Hash = std::hash<T>, typename KeyEqual = std::equal_to<T>>
+  template <typename T, typename Hash = FastHash<T>, typename KeyEqual = std::equal_to<T>>
   class ListHashSet
   {
     using Storage = std::list<T>;

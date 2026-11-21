@@ -98,6 +98,6 @@ namespace krys::boo::css
       | static_cast<uint32>(colorLayersEnabled) << 6
       | static_cast<uint32>(cssInternalAutoBaseParsingEnabled) << 7
       | static_cast<uint32>(webkitMediaTextTrackDisplayQuirkEnabled) << 8;
-    return krys::Hash::Combine(BaseUrl, Charset, PropertySettings, Mode, bits);
+    return krys::CombineFastHashes(BaseUrl, Charset, PropertySettings, Mode, bits);
   }
 }

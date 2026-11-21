@@ -124,7 +124,7 @@ namespace krys::tests
 
     auto hash = [](const ColourInterpolationMethod &method)
     {
-      return DefaultHash<ColourInterpolationMethod>::Hash(method);
+      return FastHash<ColourInterpolationMethod> {}(method);
     };
     CHECK(hash(a) == hash(b));
     CHECK(hash(a) != hash(c));

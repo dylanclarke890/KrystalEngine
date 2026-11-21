@@ -310,7 +310,7 @@ namespace krys::boo
       {
         KRYS_NODISCARD size_t operator()(const PseudoElementIdentifier &identifier) const noexcept
         {
-          return DefaultHash<PseudoElementIdentifier>::Hash(identifier);
+          return FastHash<PseudoElementIdentifier> {}(identifier);
         }
       };
 

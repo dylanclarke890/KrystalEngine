@@ -7470,25 +7470,6 @@ class GeneratePropertyId:
                 self._generate_property_id_hpp_declarations(to=writer)
             writer.newline()
 
-            with writer.namespace(namespace="krys"):
-                writer.write_block("""\
-                  template<>
-                  struct DefaultHash<::krys::boo::css::PropertyId>
-                  {
-                    constexpr static bool IsSafeToCompareToEmptyOrDeleted = true;
-
-                    KRYS_NODISCARD constexpr static size_t Hash(::krys::boo::css::PropertyId id) noexcept
-                    {
-                      return IntegerHash<uint16>::Hash(static_cast<uint16>(id));
-                    }
-
-                    KRYS_NODISCARD constexpr static bool Equal(::krys::boo::css::PropertyId a, ::krys::boo::css::PropertyId b) noexcept
-                    {
-                      return a == b;
-                    }
-                  };""")
-            writer.newline()
-
             writer.write(
                 f"KRYS_DEFINE_CONTIGUOUS_ENUM_TRAITS(::krys::boo::css::PropertyId, ::krys::boo::css::TotalPropertyIdValues);"
             )
@@ -8329,7 +8310,7 @@ class GeneratePropertyId:
                 with to.indent():
                     for i, expression in enumerate(rest):
                         to.write(f"| {expression}" + (";" if i == len(rest) - 1 else ""))
-                to.write(f"return DefaultHash<uint64>::Hash(bits);")
+                to.write(f"return FastHash<uint64> {{}}(bits);")
         to.newline()
 
     def _generate_valid_keywords_for_property(self, *, to: Writer):

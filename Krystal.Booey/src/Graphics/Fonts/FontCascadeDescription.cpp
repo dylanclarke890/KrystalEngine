@@ -29,6 +29,7 @@
 
 #include "Krystal.Booey/Graphics/Fonts/FontCascadeDescription.hpp"
 #include "Krystal.Booey/Graphics/Fonts/Font.hpp"
+#include "Krystal.Core/Hashing/FastHash.hpp"
 #include "Krystal.Core/Strings/ASCII.hpp"
 #include <functional>
 
@@ -76,7 +77,7 @@ namespace krys::boo
 
   size_t FontCascadeDescription::FamilyNameHash(const StringAtom &family) noexcept
   {
-    return std::hash<utf8_string> {}(FoldedFamilyName(family.View()));
+    return FastHash<utf8_string> {}(FoldedFamilyName(family.View()));
   }
 
   utf8_string FontCascadeDescription::FoldedFamilyName(utf8_stringview family) noexcept

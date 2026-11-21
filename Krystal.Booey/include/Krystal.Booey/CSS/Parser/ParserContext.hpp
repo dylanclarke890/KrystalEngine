@@ -29,7 +29,7 @@
 #include "Krystal.Booey/CSS/Properties/PropertyId.hpp"
 #include "Krystal.Booey/CSS/Rules/RuleType.hpp"
 #include "Krystal.Core/Attributes.hpp"
-#include "Krystal.Core/Hash.hpp"
+#include "Krystal.Core/Hashing/FastHash.hpp"
 #include "Krystal.Core/Types/Maybe.hpp"
 #include "Krystal.Core/Utils/Tags.hpp"
 #include "Krystal.Net/Url.hpp"
@@ -96,22 +96,4 @@ namespace krys::boo::css
 
 namespace krys
 {
-  template <>
-  struct HashTraits<boo::css::ParserContext> : public GenericHashTraits<boo::css::ParserContext>
-  {
-    static void ConstructDeletedValue(boo::css::ParserContext &slot) noexcept
-    {
-      new (NotNullTag {}, std::addressof(slot.BaseUrl)) net::Url(HashTableDeletedValueTag {});
-    }
-
-    KRYS_NODISCARD static bool IsDeletedValue(const boo::css::ParserContext &value) noexcept
-    {
-      return value.BaseUrl.IsHashTableDeletedValue();
-    }
-
-    KRYS_NODISCARD static boo::css::ParserContext EmptyValue() noexcept
-    {
-      return boo::css::ParserContext(boo::css::ParserMode::HTMLStandard);
-    }
-  };
 }

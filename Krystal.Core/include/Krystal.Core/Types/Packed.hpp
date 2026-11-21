@@ -30,7 +30,7 @@
 #include "Krystal.Core/Detection/AddressSpaceBitSize.hpp"
 #include "Krystal.Core/Detection/CPU.hpp"
 #include "Krystal.Core/Detection/OS.hpp"
-#include "Krystal.Core/Hash.hpp"
+#include "Krystal.Core/Hashing/FastHash.hpp"
 #include "Krystal.Core/Maths/Extras.hpp"
 #include "Krystal.Core/Types/Array.hpp"
 #include "Krystal.Core/Types/Span.hpp"
@@ -356,10 +356,5 @@ namespace krys
     {
       return ptr.get() == std::bit_cast<T *>(static_cast<uintptr_t>(StorageType::Alignment));
     }
-  };
-
-  template <typename P>
-  struct DefaultHash<PackedPtr<P>> : PtrHash<PackedPtr<P>>
-  {
   };
 }

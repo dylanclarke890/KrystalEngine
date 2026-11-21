@@ -25,7 +25,7 @@
 #include "Krystal.Booey/CSS/Properties/ImmutableStyleProperties.hpp"
 #include "Krystal.Booey/CSS/Properties/StylePropertiesInlines.hpp"
 #include "Krystal.Booey/CSS/Values/CustomPropertyValue.hpp"
-#include "Krystal.Core/Hash.hpp"
+#include "Krystal.Core/Hashing/FastHash.hpp"
 #include "Krystal.Core/Threading/NeverDestroyed.hpp"
 #include "Krystal.Core/Types/HashMap.hpp"
 #include <new>
@@ -83,7 +83,7 @@ namespace krys::boo::css
 
     auto computeHash = [&]() -> size_t
     {
-      auto seed = Hash::Combine(mode);
+      auto seed = CombineFastHashes(mode);
       for (auto &property : properties)
       {
         if (!property.Value().AddHash(seed))
@@ -91,7 +91,7 @@ namespace krys::boo::css
           return 0uz;
         }
 
-        seed = Hash::Combine(seed, property.Id(), static_cast<bool>(property.Important()));
+        seed = CombineFastHashes(seed, property.Id(), static_cast<bool>(property.Important()));
       }
 
       return seed;

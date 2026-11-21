@@ -28,6 +28,7 @@
 #include "Krystal.Booey/CSS/Properties/PropertyId.hpp"
 #include "Krystal.Booey/CSS/Types/CSSOMString.hpp"
 #include "Krystal.Core/Enum.hpp"
+#include "Krystal.Core/Hashing/FastHash.hpp"
 #include "Krystal.Core/Types/HashSet.hpp"
 #include "Krystal.Core/Types/Span.hpp"
 #include "Krystal.Core/Types/Variant.hpp"
@@ -71,9 +72,9 @@ namespace krys::boo
     {
       if (const auto *id = std::get_if<css::PropertyId>(&property))
       {
-        return DefaultHash<css::PropertyId>::Hash(*id);
+        return FastHash<css::PropertyId> {}(*id);
       }
-      return std::hash<CSSOMStringAtom> {}(std::get<CSSOMStringAtom>(property));
+      return FastHash<CSSOMStringAtom> {}(std::get<CSSOMStringAtom>(property));
     }
   };
 

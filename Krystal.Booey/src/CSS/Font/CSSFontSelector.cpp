@@ -40,7 +40,7 @@
 #include "Krystal.Booey/Page/Settings.hpp"
 #include "Krystal.Booey/Style/Scope/Scope.hpp"
 #include "Krystal.Core/Assert.hpp"
-#include "Krystal.Core/Hash.hpp"
+#include "Krystal.Core/Hashing/FastHash.hpp"
 #include "Krystal.Core/Strings/ASCII.hpp"
 #include "Krystal.Core/Threading/NeverDestroyed.hpp"
 #include "Krystal.Core/Types/Array.hpp"
@@ -63,7 +63,7 @@ namespace krys::boo::css
 
   size_t CSSFontSelector::PaletteKeyHash::operator()(const PaletteKey &key) const noexcept
   {
-    return Hash::Combine(std::hash<StringAtom> {}(key.Family), std::hash<StringAtom> {}(key.Name));
+    return CombineFastHashes(key.Family, key.Name);
   }
 
   CSSFontSelector::CSSFontSelector(Document &document) noexcept

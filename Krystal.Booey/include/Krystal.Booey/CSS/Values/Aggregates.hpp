@@ -32,6 +32,7 @@
 #include "Krystal.Booey/Graphics/Geometry/RectEdges.hpp"
 #include "Krystal.Core/Attributes.hpp"
 #include "Krystal.Core/Enum.hpp"
+#include "Krystal.Core/Hashing/FastHash.hpp"
 #include "Krystal.Core/Types/EnumSet.hpp"
 #include "Krystal.Core/Types/FixedVector.hpp"
 #include "Krystal.Core/Types/ListHashSet.hpp"
@@ -2732,17 +2733,20 @@ namespace krys
   };
 }
 
-namespace std
+namespace krys
 {
   template <>
-  struct hash<krys::boo::css::CustomIdentifier>
+  struct FastHash<boo::css::CustomIdentifier>
   {
-    size_t operator()(const krys::boo::css::CustomIdentifier &identifier) const noexcept
+    KRYS_NODISCARD size_t operator()(const boo::css::CustomIdentifier &identifier) const noexcept
     {
-      return hash<krys::boo::CSSOMStringAtom> {}(identifier.Value);
+      return FastHash<boo::CSSOMStringAtom> {}(identifier.Value);
     }
   };
+}
 
+namespace std
+{
   template <krys::boo::css::ValueId C, typename T>
   class tuple_size<krys::boo::css::FunctionNotation<C, T>> : public std::integral_constant<size_t, 1>
   {

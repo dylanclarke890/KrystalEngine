@@ -1,6 +1,7 @@
 ﻿#pragma once
 
 #include "Krystal.Core/Attributes.hpp"
+#include "Krystal.Core/Hashing/FastHash.hpp"
 #include "Krystal.Core/Numeric.hpp"
 #include "Krystal.Core/Strings/String.hpp"
 #include "Krystal.Gfx/CompareOp.hpp"
@@ -85,25 +86,9 @@ namespace krys::gfx
   {
     KRYS_NODISCARD size_t operator()(const SamplerDesc &desc) const noexcept
     {
-      auto mix = [](size_t seed, size_t value)
-      {
-        return seed ^ (value + 0x9E'37'79'B9'7F'4A'7C'55 + (seed << 6) + (seed >> 2));
-      };
-      size_t seed = 0u;
-      seed = mix(seed, static_cast<size_t>(desc.MinFilter));
-      seed = mix(seed, static_cast<size_t>(desc.MagFilter));
-      seed = mix(seed, static_cast<size_t>(desc.MipmapMode));
-      seed = mix(seed, static_cast<size_t>(desc.AddressU));
-      seed = mix(seed, static_cast<size_t>(desc.AddressV));
-      seed = mix(seed, static_cast<size_t>(desc.AddressW));
-      seed = mix(seed, static_cast<size_t>(desc.BorderColour));
-      seed = mix(seed, std::hash<float> {}(desc.MaxAnisotropy));
-      seed = mix(seed, std::hash<float> {}(desc.MinLod));
-      seed = mix(seed, std::hash<float> {}(desc.MaxLod));
-      seed = mix(seed, std::hash<float> {}(desc.LodBias));
-      seed = mix(seed, static_cast<size_t>(desc.CompareEnabled));
-      seed = mix(seed, static_cast<size_t>(desc.Compare));
-      return seed;
+      return CombineFastHashes(desc.MinFilter, desc.MagFilter, desc.MipmapMode, desc.AddressU, desc.AddressV,
+                               desc.AddressW, desc.BorderColour, desc.MaxAnisotropy, desc.MinLod, desc.MaxLod,
+                               desc.LodBias, desc.CompareEnabled, desc.Compare);
     }
   };
 }

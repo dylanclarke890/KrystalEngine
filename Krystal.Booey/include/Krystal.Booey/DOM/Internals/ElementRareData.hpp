@@ -77,7 +77,7 @@ namespace krys::boo::dom
     {
       KRYS_NODISCARD size_t operator()(const Maybe<style::PseudoElementIdentifier> &identifier) const noexcept
       {
-        return identifier ? DefaultHash<style::PseudoElementIdentifier>::Hash(*identifier) + 1 : 0;
+        return identifier ? FastHash<style::PseudoElementIdentifier> {}(*identifier) + 1 : 0;
       }
     };
 

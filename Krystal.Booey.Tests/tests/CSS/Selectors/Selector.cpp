@@ -475,7 +475,6 @@ namespace krys::boo::css::tests
     };
     CHECK(withList(u8"p") == withList(u8"p"));
     CHECK(!(withList(u8"p") == withList(u8"q")));
-    CHECK(DefaultHash<SelectorList>::Hash(withList(u8"p"))
-          == DefaultHash<SelectorList>::Hash(withList(u8"p")));
+    CHECK(FastHash<SelectorList> {}(withList(u8"p")) == FastHash<SelectorList> {}(withList(u8"p")));
   }
 }

@@ -33,7 +33,7 @@
 
 #include "Krystal.Booey/Graphics/Geometry/LayoutGeometryForward.hpp"
 #include "Krystal.Core/Attributes.hpp"
-#include "Krystal.Core/Hash.hpp"
+#include "Krystal.Core/Hashing/FastHash.hpp"
 #include "Krystal.Core/Maths/Extras.hpp"
 #include "Krystal.Core/Numeric.hpp"
 #include "Krystal.Core/Types/Markable.hpp"
@@ -818,45 +818,17 @@ namespace krys
   }
 
   template <>
-  struct DefaultHash<boo::LayoutUnit>
+  struct FastHash<boo::LayoutUnit>
   {
-    constexpr static bool IsSafeToCompareToEmptyOrDeleted = true;
-
-    KRYS_NODISCARD static size_t Hash(const boo::LayoutUnit &p) noexcept
+    KRYS_NODISCARD size_t operator()(const boo::LayoutUnit &p) const noexcept
     {
-      return DefaultHash<int32>::Hash(p.RawValue());
-    }
-
-    KRYS_NODISCARD static bool Equal(const boo::LayoutUnit &a, const boo::LayoutUnit &b) noexcept
-    {
-      return a == b;
+      return FastHash<int32> {}(p.RawValue());
     }
   };
 
   // The empty value is INT_MIN, the deleted value is INT_MAX. During the course of layout
   // these values are typically only used to represent uninitialized values, so they are
   // good candidates to represent the deleted and empty values in HashMaps as well.
-  template <>
-  struct HashTraits<boo::LayoutUnit> : public GenericHashTraits<boo::LayoutUnit>
-  {
-    constexpr static bool EmptyValueIsZero = false;
-
-    KRYS_NODISCARD constexpr static boo::LayoutUnit EmptyValue() noexcept
-    {
-      return boo::LayoutUnit::FromRawValue(Limits<int32>::min());
-    }
-
-    constexpr static void ConstructDeletedValue(boo::LayoutUnit &slot) noexcept
-    {
-      slot.SetRawValue(Limits<int32>::max());
-    }
-
-    KRYS_NODISCARD constexpr static bool IsDeletedValue(boo::LayoutUnit value) noexcept
-    {
-      return value.RawValue() == Limits<int32>::max();
-    }
-  };
-
   template <>
   struct MarkableTraits<boo::LayoutUnit>
   {

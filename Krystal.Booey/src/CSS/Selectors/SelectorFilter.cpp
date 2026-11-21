@@ -35,6 +35,7 @@
 #include "Krystal.Booey/DOM/Nodes/ShadowRoot.hpp"
 #include "Krystal.Booey/HTML/Elements/HTMLElement.hpp"
 #include "Krystal.Core/Assert.hpp"
+#include "Krystal.Core/Hashing/FastHash.hpp"
 #include "Krystal.Core/TypeCast.hpp"
 #include <functional>
 #include <tuple>
@@ -56,7 +57,7 @@ namespace krys::boo::css
     /// @brief A non-zero hash of @p identifier (zero ends a `SelectorFilter::Hashes`).
     KRYS_NODISCARD uint32 IdentifierHash(const CSSOMStringAtom &identifier) noexcept
     {
-      const size_t hash = std::hash<CSSOMStringAtom> {}(identifier);
+      const size_t hash = FastHash<CSSOMStringAtom> {}(identifier);
       const auto result = static_cast<uint32>(hash ^ (hash >> 32));
       return result ? result : 0x80'00'00'00u;
     }

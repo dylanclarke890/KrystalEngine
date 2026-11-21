@@ -27,7 +27,7 @@
 
 #include "Krystal.Core/Assert.hpp"
 #include "Krystal.Core/Attributes.hpp"
-#include "Krystal.Core/Hash.hpp"
+#include "Krystal.Core/Hashing/FastHash.hpp"
 #include "Krystal.Core/Numeric.hpp"
 #include "Krystal.Core/Types/List.hpp"
 #include "Krystal.Core/Types/Maybe.hpp"
@@ -411,69 +411,46 @@ namespace krys::boo
 namespace krys
 {
   template <>
-  struct DefaultHash<boo::FontSelectionValue>
+  struct FastHash<boo::FontSelectionValue>
   {
-    KRYS_NODISCARD static size_t Hash(const boo::FontSelectionValue &value) noexcept
+    KRYS_NODISCARD size_t operator()(const boo::FontSelectionValue &value) const noexcept
     {
-      return DefaultHash<short>::Hash(value.RawValue());
-    }
-
-    KRYS_NODISCARD static bool Equal(const boo::FontSelectionValue &a,
-                                     const boo::FontSelectionValue &b) noexcept
-    {
-      return a == b;
+      return FastHash<short> {}(value.RawValue());
     }
   };
 
   template <>
-  struct DefaultHash<boo::FontSelectionRange>
+  struct FastHash<boo::FontSelectionRange>
   {
-    KRYS_NODISCARD static size_t Hash(const boo::FontSelectionRange &range) noexcept
+    KRYS_NODISCARD size_t operator()(const boo::FontSelectionRange &range) const noexcept
     {
-      return krys::Hash::Combine(range.Minimum, range.Maximum);
-    }
-
-    KRYS_NODISCARD static bool Equal(const boo::FontSelectionRange &a,
-                                     const boo::FontSelectionRange &b) noexcept
-    {
-      return a == b;
+      return krys::CombineFastHashes(range.Minimum, range.Maximum);
     }
   };
 
   template <>
-  struct DefaultHash<boo::FontSelectionRequest>
+  struct FastHash<boo::FontSelectionRequest>
   {
-    KRYS_NODISCARD static size_t Hash(const boo::FontSelectionRequest &request) noexcept
+    KRYS_NODISCARD size_t operator()(const boo::FontSelectionRequest &request) const noexcept
     {
       // An absent slope hashes apart from every present one.
-      return krys::Hash::Combine(request.Weight, request.Width, request.Slope.has_value(),
-                                 request.Slope.value_or(boo::FontSelectionValue {}));
-    }
-
-    KRYS_NODISCARD static bool Equal(const boo::FontSelectionRequest &a,
-                                     const boo::FontSelectionRequest &b) noexcept
-    {
-      return a == b;
+      return krys::CombineFastHashes(request.Weight, request.Width, request.Slope.has_value(),
+                                     request.Slope.value_or(boo::FontSelectionValue {}));
     }
   };
 
   template <>
-  struct DefaultHash<boo::FontSelectionSpecifiedCapabilities>
+  struct FastHash<boo::FontSelectionSpecifiedCapabilities>
   {
-    KRYS_NODISCARD static size_t Hash(const boo::FontSelectionSpecifiedCapabilities &capabilities) noexcept
+    KRYS_NODISCARD size_t
+      operator()(const boo::FontSelectionSpecifiedCapabilities &capabilities) const noexcept
     {
       auto range = [](const boo::FontSelectionSpecifiedCapabilities::OptionalRange &value)
       {
-        return value ? krys::Hash::Combine(true, *value) : DefaultHash<bool>::Hash(false);
+        return value ? krys::CombineFastHashes(true, *value) : FastHash<bool> {}(false);
       };
-      return krys::Hash::Combine(range(capabilities.Weight), range(capabilities.Width),
-                                 range(capabilities.Slope));
-    }
-
-    KRYS_NODISCARD static bool Equal(const boo::FontSelectionSpecifiedCapabilities &a,
-                                     const boo::FontSelectionSpecifiedCapabilities &b) noexcept
-    {
-      return a == b;
+      return krys::CombineFastHashes(range(capabilities.Weight), range(capabilities.Width),
+                                     range(capabilities.Slope));
     }
   };
 }

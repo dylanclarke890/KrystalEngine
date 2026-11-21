@@ -28,7 +28,7 @@
 #include "Krystal.Booey/Style/Rules/RuleData.hpp"
 #include "Krystal.Booey/Style/Rules/RuleFeature.hpp"
 #include "Krystal.Core/Attributes.hpp"
-#include "Krystal.Core/Hash.hpp"
+#include "Krystal.Core/Hashing/FastHash.hpp"
 #include "Krystal.Core/Macros.hpp"
 #include "Krystal.Core/RefCounted.hpp"
 #include "Krystal.Core/Types/HashMap.hpp"
@@ -162,7 +162,7 @@ namespace krys::boo::style
         size_t seed = indexes.size();
         for (auto index : indexes)
         {
-          seed = Hash::Combine(seed, index);
+          seed = CombineFastHashes(seed, index);
         }
         return seed;
       }

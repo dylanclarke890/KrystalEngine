@@ -20,7 +20,7 @@
 
 #include "Krystal.Booey/CSS/Values/ValueList.hpp"
 #include "Krystal.Booey/CSS/Values/PrimitiveValue.hpp"
-#include "Krystal.Core/Hash.hpp"
+#include "Krystal.Core/Hashing/FastHash.hpp"
 #include "Krystal.Core/Strings/StringBuilder.hpp"
 #include <limits>
 
@@ -257,7 +257,7 @@ namespace krys::boo::css
 
   bool ValueContainingList::AddDerivedHash(size_t &seed) const noexcept
   {
-    seed = Hash::Combine(seed, Separator());
+    seed = CombineFastHashes(seed, Separator());
 
     for (auto &item : *this)
     {

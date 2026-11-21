@@ -418,12 +418,7 @@ namespace krys::boo::tests
 
   TEST_CASE("LayoutUnit: hash and markable traits", "[Core][LayoutUnit]")
   {
-    CHECK(DefaultHash<LayoutUnit>::Hash(LayoutUnit(2)) == DefaultHash<int32>::Hash(128));
-    CHECK(DefaultHash<LayoutUnit>::Equal(LayoutUnit(2), LayoutUnit(2)));
-    STATIC_CHECK(HashTraits<LayoutUnit>::EmptyValue() == LayoutUnit::Min());
-    LayoutUnit slot;
-    HashTraits<LayoutUnit>::ConstructDeletedValue(slot);
-    CHECK(HashTraits<LayoutUnit>::IsDeletedValue(slot));
+    CHECK(FastHash<LayoutUnit> {}(LayoutUnit(2)) == FastHash<int32> {}(128));
     STATIC_CHECK(MarkableTraits<LayoutUnit>::IsEmptyValue(MarkableTraits<LayoutUnit>::EmptyValue()));
     STATIC_CHECK(MarkableTraits<LayoutUnit>::EmptyValue() == LayoutUnit(-1));
   }

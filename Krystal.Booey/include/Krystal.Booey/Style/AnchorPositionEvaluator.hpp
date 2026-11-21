@@ -36,7 +36,7 @@
 #include "Krystal.Booey/Style/Scope/ScopedName.hpp"
 #include "Krystal.Booey/Text/WritingMode.hpp"
 #include "Krystal.Core/Attributes.hpp"
-#include "Krystal.Core/Hash.hpp"
+#include "Krystal.Core/Hashing/FastHash.hpp"
 #include "Krystal.Core/Types/CheckedPtr.hpp"
 #include "Krystal.Core/Types/HashMap.hpp"
 #include "Krystal.Core/Types/HashSet.hpp"
@@ -205,8 +205,7 @@ namespace krys::boo::style
   {
     KRYS_NODISCARD size_t operator()(const AnchorPositionedKey &key) const noexcept
     {
-      auto pseudoHash = key.second ? DefaultHash<PseudoElementIdentifier>::Hash(*key.second) : 0uz;
-      return UnsignedIntegerPairHash(std::hash<const boo::Element *> {}(key.first.get()), pseudoHash);
+      return CombineFastHashes(key.first.get(), key.second);
     }
   };
 

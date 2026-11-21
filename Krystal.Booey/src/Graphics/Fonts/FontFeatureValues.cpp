@@ -103,16 +103,16 @@ namespace krys::boo
       size_t sum = 0;
       for (const auto &[name, values] : tags)
       {
-        size_t entry = DefaultHash<CSSOMString>::Hash(name);
+        size_t entry = FastHash<CSSOMString> {}(name);
         for (auto value : values)
         {
-          entry = krys::Hash::Combine(entry, value);
+          entry = krys::CombineFastHashes(entry, value);
         }
         sum += entry;
       }
-      return krys::Hash::Combine(tags.empty(), sum);
+      return krys::CombineFastHashes(tags.empty(), sum);
     };
-    return krys::Hash::Combine(hashTags(_styleset), hashTags(_stylistic), hashTags(_characterVariant),
-                               hashTags(_swash), hashTags(_ornaments), hashTags(_annotation));
+    return krys::CombineFastHashes(hashTags(_styleset), hashTags(_stylistic), hashTags(_characterVariant),
+                                   hashTags(_swash), hashTags(_ornaments), hashTags(_annotation));
   }
 }

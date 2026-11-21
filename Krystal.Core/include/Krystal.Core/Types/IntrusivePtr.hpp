@@ -3,7 +3,7 @@
 #include "Krystal.Core/Assert.hpp"
 #include "Krystal.Core/Attributes.hpp"
 #include "Krystal.Core/Concepts.hpp"
-#include "Krystal.Core/Hash.hpp"
+#include "Krystal.Core/Hashing/FastHash.hpp"
 #include "Krystal.Core/TypeCast.hpp"
 #include "Krystal.Core/TypeTraits.hpp"
 #include "Krystal.Core/Utils/ForbidHeapAllocation.hpp"
@@ -455,30 +455,9 @@ namespace krys
   }
 
   template <typename T, typename PtrTraits, typename RefPolicy, IsNullable Nullable>
-  struct DefaultHash<IntrusivePtr<T, PtrTraits, RefPolicy, Nullable>>
-      : public PtrHash<IntrusivePtr<T, PtrTraits, RefPolicy, Nullable>>
-  {
-  };
-
-  template <typename T, typename PtrTraits, typename RefPolicy, IsNullable Nullable>
   constexpr bool IsSmartPtr<IntrusivePtr<T, PtrTraits, RefPolicy, Nullable>> = true;
 
   template <typename T, typename PtrTraits, typename RefPolicy, IsNullable Nullable>
   constexpr bool IsNullableSmartPtr<IntrusivePtr<T, PtrTraits, RefPolicy, Nullable>> =
     IntrusivePtr<T, PtrTraits, RefPolicy, Nullable>::nullable;
-}
-
-namespace std
-{
-  template <typename T, typename PtrTraits, typename RefPolicy, krys::IsNullable Nullable>
-  struct hash<krys::IntrusivePtr<T, PtrTraits, RefPolicy, Nullable>>
-  {
-    using argument_type = krys::IntrusivePtr<T, PtrTraits, RefPolicy, Nullable>;
-    using result_type = size_t;
-
-    constexpr result_type operator()(const argument_type &ptr) const noexcept
-    {
-      return krys::Hash::Combine(ptr.get());
-    }
-  };
 }

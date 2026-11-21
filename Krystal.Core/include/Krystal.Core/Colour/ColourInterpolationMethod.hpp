@@ -28,7 +28,7 @@
 #include "Krystal.Core/Assert.hpp"
 #include "Krystal.Core/Colour/AlphaPremultiplication.hpp"
 #include "Krystal.Core/Colour/ColourTypes.hpp"
-#include "Krystal.Core/Hash.hpp"
+#include "Krystal.Core/Hashing/FastHash.hpp"
 #include "Krystal.Core/Strings/String.hpp"
 #include "Krystal.Core/Types/Variant.hpp"
 #include "Krystal.Core/Visitor.hpp"
@@ -214,9 +214,9 @@ namespace krys
 namespace krys
 {
   template <>
-  struct DefaultHash<krys::ColourInterpolationMethod>
+  struct FastHash<krys::ColourInterpolationMethod>
   {
-    KRYS_NODISCARD static size_t Hash(const krys::ColourInterpolationMethod &method) noexcept
+    KRYS_NODISCARD size_t operator()(const krys::ColourInterpolationMethod &method) const noexcept
     {
       return krys::SwitchOn(
         method.ColourSpace,
@@ -225,22 +225,16 @@ namespace krys
           if constexpr (MethodColourSpace::ColourType::Model::CoordinateSystem
                         == krys::ColourSpaceCoordinateSystem::CylindricalPolar)
           {
-            return krys::Hash::Combine(method.AlphaPremultiplication,
-                                       methodColorSpace.InterpolationColourSpace,
-                                       methodColorSpace.HueInterpolationMethod);
+            return krys::CombineFastHashes(method.AlphaPremultiplication,
+                                           methodColorSpace.InterpolationColourSpace,
+                                           methodColorSpace.HueInterpolationMethod);
           }
           else
           {
-            return krys::Hash::Combine(method.AlphaPremultiplication,
-                                       methodColorSpace.InterpolationColourSpace);
+            return krys::CombineFastHashes(method.AlphaPremultiplication,
+                                           methodColorSpace.InterpolationColourSpace);
           }
         });
-    }
-
-    KRYS_NODISCARD static bool Equal(const krys::ColourInterpolationMethod &a,
-                                     const krys::ColourInterpolationMethod &b) noexcept
-    {
-      return a == b;
     }
   };
 }

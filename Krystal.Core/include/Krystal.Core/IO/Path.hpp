@@ -1,6 +1,7 @@
 ﻿#pragma once
 
 #include "Krystal.Core/Attributes.hpp"
+#include "Krystal.Core/Hashing/FastHash.hpp"
 #include "Krystal.Core/Numeric.hpp"
 #include "Krystal.Core/Strings/String.hpp"
 #include <filesystem>
@@ -90,14 +91,14 @@ namespace krys::io
   };
 }
 
-namespace std
+namespace krys
 {
   template <>
-  struct hash<krys::io::Path>
+  struct FastHash<io::Path>
   {
-    size_t operator()(const krys::io::Path &path) const noexcept
+    KRYS_NODISCARD size_t operator()(const io::Path &path) const noexcept
     {
-      return std::hash<krys::string>()(path.ToString());
+      return FastHash<string> {}(path.ToString());
     }
   };
 }

@@ -29,7 +29,7 @@
 #include "Krystal.Booey/Graphics/Fonts/FontTaggedSettings.hpp"
 #include "Krystal.Core/Assert.hpp"
 #include "Krystal.Core/Attributes.hpp"
-#include "Krystal.Core/Hash.hpp"
+#include "Krystal.Core/Hashing/FastHash.hpp"
 #include "Krystal.Core/Types/HashMap.hpp"
 #include "Krystal.Core/Types/List.hpp"
 #include "Krystal.Core/Types/Markable.hpp"
@@ -433,15 +433,15 @@ namespace krys::boo
 namespace krys
 {
   template <>
-  struct DefaultHash<boo::FontVariantAlternatesValues>
+  struct FastHash<boo::FontVariantAlternatesValues>
   {
-    KRYS_NODISCARD static size_t Hash(const boo::FontVariantAlternatesValues &key) noexcept;
+    KRYS_NODISCARD size_t operator()(const boo::FontVariantAlternatesValues &key) const noexcept;
   };
 
   template <>
-  struct DefaultHash<boo::FontVariantAlternates>
+  struct FastHash<boo::FontVariantAlternates>
   {
-    KRYS_NODISCARD static size_t Hash(const boo::FontVariantAlternates &key) noexcept;
+    KRYS_NODISCARD size_t operator()(const boo::FontVariantAlternates &key) const noexcept;
   };
 }
 

@@ -57,12 +57,12 @@ namespace krys::boo::style
     {
       KRYS_NODISCARD size_t operator()(const css::CascadeLayerName &name) const noexcept
       {
-        size_t seed = name.size();
-        for (auto &segment : name)
+        size_t hash = FastHash<size_t> {}(name.size());
+        for (const auto &segment : name)
         {
-          seed ^= std::hash<CSSOMStringAtom> {}(segment) + 0x9E'37'79'B9 + (seed << 6) + (seed >> 2);
+          hash = CombineFastHashes(hash, segment);
         }
-        return seed;
+        return hash;
       }
     };
 

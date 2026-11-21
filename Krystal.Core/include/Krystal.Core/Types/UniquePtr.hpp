@@ -2,7 +2,7 @@
 
 #include "Krystal.Core/Attributes.hpp"
 #include "Krystal.Core/Concepts.hpp"
-#include "Krystal.Core/Hash.hpp"
+#include "Krystal.Core/Hashing/FastHash.hpp"
 #include "Krystal.Core/TypeCast.hpp"
 #include "Krystal.Core/TypeTraits.hpp"
 #include <memory>
@@ -33,9 +33,4 @@ namespace krys
 
   template <typename T>
   constexpr bool IsNullableSmartPtr<UniquePtr<T>> = true;
-
-  template <typename P, typename Deleter>
-  struct DefaultHash<UniquePtr<P, Deleter>> : public PtrHash<UniquePtr<P, Deleter>>
-  {
-  };
 }

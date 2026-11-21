@@ -37,7 +37,7 @@
 #include "Krystal.Booey/Style/Resolver.hpp"
 #include "Krystal.Booey/Style/Values/Primitives/LengthResolution.hpp"
 #include "Krystal.Core/Assert.hpp"
-#include "Krystal.Core/Hash.hpp"
+#include "Krystal.Core/Hashing/FastHash.hpp"
 #include <algorithm>
 
 namespace krys::boo::style
@@ -149,7 +149,7 @@ namespace krys::boo::style
         return 0;
       }
     }
-    auto hash = krys::Hash::Combine(DefaultHash<MatchResult>::Hash(matchResult), &inheritedCustomProperties);
+    auto hash = krys::CombineFastHashes(FastHash<MatchResult> {}(matchResult), &inheritedCustomProperties);
     // Zero means "not cacheable".
     return static_cast<uint32>(hash) ? static_cast<uint32>(hash) : 1;
   }

@@ -26,6 +26,7 @@
 #pragma once
 
 #include "Krystal.Core/Attributes.hpp"
+#include "Krystal.Core/Hashing/FastHash.hpp"
 #include "Krystal.Core/Numeric.hpp"
 #include <functional>
 
@@ -55,14 +56,14 @@ namespace krys::boo::style
   };
 }
 
-namespace std
+namespace krys
 {
   template <>
-  struct hash<krys::boo::style::ScopeIdentifier>
+  struct FastHash<boo::style::ScopeIdentifier>
   {
-    size_t operator()(krys::boo::style::ScopeIdentifier identifier) const noexcept
+    KRYS_NODISCARD size_t operator()(boo::style::ScopeIdentifier identifier) const noexcept
     {
-      return hash<krys::uint64> {}(identifier.ToUInt64());
+      return FastHash<uint64> {}(identifier.ToUInt64());
     }
   };
 }

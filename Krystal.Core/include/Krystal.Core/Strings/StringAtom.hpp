@@ -2,7 +2,7 @@
 
 #include "Krystal.Core/Assert.hpp"
 #include "Krystal.Core/Attributes.hpp"
-#include "Krystal.Core/Hash.hpp"
+#include "Krystal.Core/Hashing/FastHash.hpp"
 #include "Krystal.Core/Macros.hpp"
 #include "Krystal.Core/Numeric.hpp"
 #include "Krystal.Core/Strings/ASCII.hpp"
@@ -35,7 +35,7 @@ namespace krys
 
   public:
     StringAtomImpl(utf8_string string, StringAtomPool &pool) noexcept
-        : _string(krys::move(string)), _hash(std::hash<utf8_stringview> {}(_string)), _pool(&pool)
+        : _string(krys::move(string)), _hash(FastHash<utf8_stringview> {}(_string)), _pool(&pool)
     {
     }
 
@@ -399,12 +399,16 @@ namespace krys
   };
 }
 
-namespace std
+namespace krys
 {
+  /// @brief An atom's hash is the one it made of its string when it was created, so hashing one never reads
+  /// the string.
   template <>
-  struct hash<krys::StringAtom>
+  struct FastHash<StringAtom>
   {
-    size_t operator()(const krys::StringAtom &atom) const noexcept
+    using is_avalanching = std::true_type;
+
+    KRYS_NODISCARD size_t operator()(const StringAtom &atom) const noexcept
     {
       return atom.ExistingHash();
     }

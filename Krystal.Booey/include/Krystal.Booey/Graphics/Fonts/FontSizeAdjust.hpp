@@ -27,7 +27,7 @@
 
 #include "Krystal.Booey/Graphics/Fonts/FontMetrics.hpp"
 #include "Krystal.Core/Attributes.hpp"
-#include "Krystal.Core/Hash.hpp"
+#include "Krystal.Core/Hashing/FastHash.hpp"
 #include "Krystal.Core/Numeric.hpp"
 #include "Krystal.Core/Types/Markable.hpp"
 #include "Krystal.Core/Types/Maybe.hpp"
@@ -96,17 +96,13 @@ namespace krys::boo
 namespace krys
 {
   template <>
-  struct DefaultHash<boo::FontSizeAdjust>
+  struct FastHash<boo::FontSizeAdjust>
   {
-    KRYS_NODISCARD static size_t Hash(const boo::FontSizeAdjust &fontSizeAdjust) noexcept
+    KRYS_NODISCARD size_t operator()(const boo::FontSizeAdjust &fontSizeAdjust) const noexcept
     {
-      return krys::Hash::Combine(static_cast<uint8>(fontSizeAdjust.MetricType),
-                                 static_cast<bool>(fontSizeAdjust.Type), fontSizeAdjust.Value.value_or(0.f));
-    }
-
-    KRYS_NODISCARD static bool Equal(const boo::FontSizeAdjust &a, const boo::FontSizeAdjust &b) noexcept
-    {
-      return a == b;
+      return krys::CombineFastHashes(static_cast<uint8>(fontSizeAdjust.MetricType),
+                                     static_cast<bool>(fontSizeAdjust.Type),
+                                     fontSizeAdjust.Value.value_or(0.f));
     }
   };
 }

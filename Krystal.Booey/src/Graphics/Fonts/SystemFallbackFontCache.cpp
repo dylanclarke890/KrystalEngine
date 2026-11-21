@@ -32,7 +32,7 @@
 #include "Krystal.Booey/Graphics/Fonts/FontCache.hpp"
 #include "Krystal.Booey/Graphics/Fonts/FontCascade.hpp"
 #include "Krystal.Booey/Graphics/Fonts/FontDescription.hpp"
-#include "Krystal.Core/Hash.hpp"
+#include "Krystal.Core/Hashing/FastHash.hpp"
 #include "Krystal.Core/Strings/CodePointIterator.hpp"
 #include "Krystal.Core/Strings/Unicode.hpp"
 
@@ -40,9 +40,8 @@ namespace krys::boo
 {
   size_t CharacterFallbackMapKeyHash::operator()(const CharacterFallbackMapKey &key) const noexcept
   {
-    return Hash::Combine(std::hash<utf8_stringview> {}(key.Locale.View()),
-                         std::hash<utf8_string> {}(key.String), key.IsForPlatformFont,
-                         static_cast<uint8>(key.ResolvedEmojiPolicy));
+    return CombineFastHashes(key.Locale.View(), key.String, key.IsForPlatformFont,
+                             static_cast<uint8>(key.ResolvedEmojiPolicy));
   }
 
   SystemFallbackFontCache &SystemFallbackFontCache::Singleton() noexcept

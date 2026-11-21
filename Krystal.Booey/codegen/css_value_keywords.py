@@ -197,30 +197,6 @@ class GenerationContext:
                 self._generate_hpp_constant_aliases(to=writer)
             writer.newline()
 
-            with writer.namespace(namespace="krys"):
-                writer.write_block("""\
-                    template<>
-                    struct DefaultHash<::krys::boo::css::ValueId>
-                    {
-                      constexpr static bool IsSafeToCompareToEmptyOrDeleted = true;
-
-                      KRYS_NODISCARD constexpr static size_t Hash(::krys::boo::css::ValueId id) noexcept
-                      {
-                        return IntegerHash<uint16>::Hash(static_cast<uint16>(id));
-                      }
-
-                      KRYS_NODISCARD constexpr static bool Equal(::krys::boo::css::ValueId a, ::krys::boo::css::ValueId b) noexcept
-                      {
-                        return a == b;
-                      }
-                    };
-
-                    template<>
-                    struct HashTraits<::krys::boo::css::ValueId> : StrongEnumHashTraits<::krys::boo::css::ValueId>
-                    {
-                    };""")
-            writer.newline()
-
             with writer.namespace(namespace="std"):
                 writer.write_block("""\
                     template<>

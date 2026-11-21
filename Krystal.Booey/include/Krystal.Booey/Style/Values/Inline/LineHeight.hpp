@@ -42,11 +42,11 @@ namespace krys::boo::style
 
     KRYS_NODISCARD size_t ValueForHash() const noexcept
     {
-      return SwitchOn([&](const css::keywords::Normal &) -> size_t { return Hash::Combine(0); },
-                      [&](const Fixed &fixed) -> size_t { return Hash::Combine(1, fixed.UnresolvedValue()); },
-                      [&](const Percentage &percentage) -> size_t
-                      { return Hash::Combine(2, percentage.Value); },
-                      [&](const Calc &) -> size_t { return Hash::Combine(3); });
+      return SwitchOn(
+        [&](const css::keywords::Normal &) -> size_t { return CombineFastHashes(0); },
+        [&](const Fixed &fixed) -> size_t { return CombineFastHashes(1, fixed.UnresolvedValue()); },
+        [&](const Percentage &percentage) -> size_t { return CombineFastHashes(2, percentage.Value); },
+        [&](const Calc &) -> size_t { return CombineFastHashes(3); });
     }
   };
 

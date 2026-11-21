@@ -65,8 +65,7 @@ namespace krys::boo::css::tests
     ParserContext b {ParserMode::HTMLStandard};
     CHECK(a == b);
     CHECK(a.Hash() == b.Hash());
-    CHECK(DefaultHash<ParserContext>::Equal(a, b));
-    CHECK(DefaultHash<ParserContext>::Hash(a) == a.Hash());
+    CHECK(FastHash<ParserContext> {}(a) == FastHash<ParserContext> {}(b));
 
     SECTION("Mode")
     {
@@ -102,18 +101,6 @@ namespace krys::boo::css::tests
       CHECK(a != b);
       CHECK(a.Hash() == b.Hash());
     }
-  }
-
-  TEST_CASE("HashTraits<ParserContext>", "[CSS][Parser][ParserContext]")
-  {
-    using Traits = HashTraits<ParserContext>;
-    CHECK(Traits::EmptyValue() == ParserContext {ParserMode::HTMLStandard});
-    CHECK_FALSE(Traits::IsDeletedValue(Traits::EmptyValue()));
-
-    auto deleted = Traits::EmptyValue();
-    deleted.BaseUrl.~Url();
-    Traits::ConstructDeletedValue(deleted);
-    CHECK(Traits::IsDeletedValue(deleted));
   }
 
   TEST_CASE("StrictParserContext", "[CSS][Parser][ParserContext]")

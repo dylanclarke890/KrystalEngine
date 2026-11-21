@@ -48,8 +48,10 @@ target_precompile_headers(Krystal.Core.Tests
 )
 
 target_sources(Krystal.Core.Tests
-	PRIVATE tests/Hash.cpp
 	PRIVATE tests/RefCounted.cpp
+
+  # Hashing
+	PRIVATE tests/Hashing/FastHash.cpp
 
   # Colour
 	PRIVATE tests/Colour/ColourConversion.cpp
