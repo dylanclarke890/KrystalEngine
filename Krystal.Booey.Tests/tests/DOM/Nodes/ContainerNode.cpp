@@ -1,12 +1,10 @@
 ﻿#include "Krystal.Booey/DOM/Nodes/ContainerNode.hpp"
 #include "catch2/catch_test_macros.hpp"
 #include "Krystal.Booey.Tests/DOM/TestElement.hpp"
-#include "Krystal.Booey/DOM/Abort/AbortSignal.hpp"
 #include "Krystal.Booey/DOM/Collections/NodeList.hpp"
 #include "Krystal.Booey/DOM/Nodes/Attr.hpp"
 #include "Krystal.Booey/DOM/Nodes/Document.hpp"
 #include "Krystal.Booey/DOM/Nodes/ShadowRoot.hpp"
-#include "Krystal.Booey/HTML/CustomElement/CustomElementRegistry.hpp"
 #include "Krystal.Booey/HTML/Elements/HTMLSlotElement.hpp"
 
 namespace krys::boo::dom::tests

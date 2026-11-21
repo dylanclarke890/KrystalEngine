@@ -39,7 +39,6 @@
 #include "Krystal.Booey/DOM/Nodes/Text.hpp"
 #include "Krystal.Booey/HTML/Algorithms/CustomElementAlgorithms.hpp"
 #include "Krystal.Booey/HTML/CustomElement/CustomElementReactionQueue.hpp"
-#include "Krystal.Booey/HTML/CustomElement/CustomElementRegistry.hpp"
 #include "Krystal.Booey/HTML/Elements/HTMLTemplateElement.hpp"
 #include "Krystal.Booey/HTML/EventLoop/EventLoop.hpp"
 #include "Krystal.Booey/HTML/Parser/CharacterReference.hpp"
@@ -464,11 +463,10 @@ namespace krys::boo::xml
     QualifiedName qName(uri, prefix, localName);
 
     auto &document = _currentNode->NodeDocument();
-    RefPtr<html::CustomElementRegistry> registry =
-      ShareRefPtr(html::CustomElementAlgorithms::LookUpCustomElementRegistry(*_currentNode));
+    auto *registry = html::CustomElementAlgorithms::LookUpCustomElementRegistry(*_currentNode);
     bool willConstructCustomElement =
       !_parsingFragment
-      && html::CustomElementAlgorithms::LookupCustomElementDefinition(registry.get(), uri, localName);
+      && html::CustomElementAlgorithms::LookupCustomElementDefinition(registry, uri, localName);
 
     Maybe<html::CustomElementReactionStack> customElementReactionStack;
     if (willConstructCustomElement) KRYS_UNLIKELY

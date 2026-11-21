@@ -1,5 +1,6 @@
 ﻿#include "Krystal.Booey/Input/EventHandler.hpp"
 #include "catch2/catch_test_macros.hpp"
+#include "Krystal.Booey.Tests/DOM/DOMTestUtils.hpp"
 #include "Krystal.Booey.Tests/Rendering/PaintTestUtils.hpp"
 #include "Krystal.Booey/DOM/Events/EventListener.hpp"
 #include "Krystal.Booey/DOM/Events/FocusEvent.hpp"
@@ -22,7 +23,7 @@ namespace krys::boo::tests
 {
   namespace
   {
-    KRYS_NODISCARD std::string Name(const EventTarget *target)
+    KRYS_NODISCARD std::string ElementName(const EventTarget *target)
     {
       auto *node = DynamicDowncast<Node>(target);
       auto *element = node ? DynamicDowncast<Element>(*node) : nullptr;
@@ -48,12 +49,12 @@ namespace krys::boo::tests
       void HandleEvent(Event &event) noexcept override
       {
         auto type = std::string(event.Type().View().begin(), event.Type().View().end());
-        auto record = type + ":" + Name(event.Target().get());
+        auto record = type + ":" + ElementName(event.Target().get());
         if (!event.IsMouseEvent() || type == "mouseover" || type == "mouseout")
         {
           auto related = event.IsMouseEvent() ? static_cast<MouseEvent &>(event).RelatedTarget()
                                               : static_cast<FocusEvent &>(event).RelatedTarget();
-          record += "(" + Name(related.get()) + ")";
+          record += "(" + ElementName(related.get()) + ")";
         }
         if (event.IsMouseEvent() && type != "mousemove" && type != "mouseover" && type != "mouseout"
             && type != "mouseenter" && type != "mouseleave")
@@ -131,26 +132,10 @@ namespace krys::boo::tests
       }
     };
 
-    /// @brief Calls @p action when it handles an event.
-    template <typename TAction>
-    struct ActionListener : public EventListenerCallback
-    {
-      TAction Action;
-
-      explicit ActionListener(TAction action) noexcept : Action(krys::move(action))
-      {
-      }
-
-      void HandleEvent(Event &event) noexcept override
-      {
-        Action(event);
-      }
-    };
-
     template <typename TAction>
     void Listen(EventTarget &target, utf8_stringview type, TAction action)
     {
-      Ref<EventListenerCallback> listener = CreateRef<ActionListener<TAction>>(krys::move(action));
+      Ref<EventListenerCallback> listener = CreateRef<FunctionListener>(krys::move(action));
       target.AddEventListener(DOMStringAtom(type), krys::move(listener), false);
     }
 
@@ -169,7 +154,7 @@ namespace krys::boo::tests
       {
         auto &key = static_cast<KeyboardEvent &>(event);
         auto type = std::string(key.Type().View().begin(), key.Type().View().end());
-        Records.push_back(type + ":" + Name(event.Target().get()) + "/"
+        Records.push_back(type + ":" + ElementName(event.Target().get()) + "/"
                           + std::string(key.Key().begin(), key.Key().end()) + "/"
                           + std::to_string(key.KeyCode()) + "/" + std::to_string(key.CharCode()));
       }
@@ -550,7 +535,7 @@ namespace krys::boo::tests
       (void)clicks.Move(100, 30);
       (void)clicks.Press(100, 30);
       (void)clicks.Release(100, 30);
-      REQUIRE(Name(clicks.Handler().ElementUnderMouse()) == "plain");
+      REQUIRE(ElementName(clicks.Handler().ElementUnderMouse()) == "plain");
       CHECK(clicks.Document->SequentialFocusNavigationStartingPoint() == &clicks.ById(u8"plain"));
       CHECK(clicks.Handler().KeyEvent(PlatformKeyboardEvent(Type::KeyDown, u8"", u8"", u8"Tab", u8"Tab",
                                                             u8"U+0009", vk::Tab, false, false, false, {},
@@ -685,7 +670,7 @@ namespace krys::boo::tests
     MouseFixture fixture {u8"<div id=a style=height:20px>hello world</div>"};
     List<std::string> records;
     Listen(*fixture.Document, u8"contextmenu",
-           [&](Event &event) { records.push_back("contextmenu:" + Name(event.Target().get())); });
+           [&](Event &event) { records.push_back("contextmenu:" + ElementName(event.Target().get())); });
     auto event = MouseFixture::Event(PlatformEvent::Type::MousePressed, 5, 5, MouseButton::Right, 1);
 
     SECTION("after a press of the right button, which no longer holds the mouse")

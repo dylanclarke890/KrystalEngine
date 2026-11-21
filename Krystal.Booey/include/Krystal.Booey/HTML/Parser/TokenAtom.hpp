@@ -26,7 +26,6 @@
 
 #pragma once
 
-#include "Krystal.Booey/DOM/Algorithms/NameValidation.hpp"
 #include "Krystal.Booey/DOM/Types/DOMString.hpp"
 #include "Krystal.Booey/HTML/Parser/Token.hpp"
 #include "Krystal.Core/Assert.hpp"

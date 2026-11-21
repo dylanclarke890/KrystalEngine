@@ -3,6 +3,7 @@
 #include "Krystal.Booey.Tests/Loader/PageInFrameFixture.hpp"
 #include "Krystal.Booey.Tests/Loader/TestLoader.hpp"
 #include "Krystal.Booey.Tests/Rendering/PaintTestUtils.hpp"
+#include "Krystal.Booey.Tests/StringTestUtils.hpp"
 #include "Krystal.Booey/DOM/Nodes/Element.hpp"
 #include "Krystal.Booey/DOM/Nodes/HTMLDocument.hpp"
 #include "Krystal.Booey/HTML/EventLoop/EventLoop.hpp"
@@ -25,11 +26,6 @@ namespace krys::boo::tests
       REQUIRE(renderer);
       auto image = renderer->Style().BackgroundLayers().UsedValues().begin()->GetImage().TryStyleImage();
       return image.get();
-    }
-
-    KRYS_NODISCARD bool Contains(const utf8_string &text, utf8_stringview part) noexcept
-    {
-      return text.contains(part);
     }
   }
 

@@ -1,5 +1,4 @@
 ﻿#include "Krystal.Booey/DOM/Events/EventPathItem.hpp"
-#include "Krystal.Booey/DOM/Abort/AbortSignal.hpp"
 #include "Krystal.Booey/DOM/Events/EventTarget.hpp"
 
 namespace krys::boo::dom

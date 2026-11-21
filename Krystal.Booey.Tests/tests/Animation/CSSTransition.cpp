@@ -36,14 +36,14 @@ namespace krys::boo::tests
     constexpr std::initializer_list<const char8_t *> TransitionEvents {
       u8"transitionrun", u8"transitionstart", u8"transitionend", u8"transitioncancel"};
 
-    constexpr utf8_stringview FadingBox =
+    constexpr utf8_stringview TransitioningBox =
       u8"<!DOCTYPE html><style>#box{opacity:0;transition:opacity 1s linear}</style><div id=box></div>";
   }
 
   TEST_CASE_METHOD(css::tests::ValueFixture, "CSSTransition: a style change starts a transition",
                    "[Animation][CSSTransition]")
   {
-    TransitionFixture fixture {utf8_string(FadingBox)};
+    TransitionFixture fixture {utf8_string(TransitioningBox)};
     CHECK(fixture.Opacity(u8"box") == 0.0f);
     CHECK_FALSE(fixture.RunningTransition(u8"box", css::PropertyId::Opacity));
 
@@ -238,7 +238,7 @@ namespace krys::boo::tests
 
   TEST_CASE_METHOD(css::tests::ValueFixture, "CSSTransition: transition events", "[Animation][CSSTransition]")
   {
-    TransitionFixture fixture {utf8_string(FadingBox)};
+    TransitionFixture fixture {utf8_string(TransitioningBox)};
     auto recorder = CreateRef<AnimationEventRecorder>();
     recorder->Listen(fixture.ById(u8"box"), TransitionEvents);
 
@@ -278,7 +278,7 @@ namespace krys::boo::tests
   TEST_CASE_METHOD(css::tests::ValueFixture, "CSSTransition: changing the end value of a running transition",
                    "[Animation][CSSTransition]")
   {
-    TransitionFixture fixture {utf8_string(FadingBox)};
+    TransitionFixture fixture {utf8_string(TransitioningBox)};
     fixture.SetStyle(u8"box", u8"opacity:1");
     fixture.Frame();
     fixture.StartAnimations();
@@ -327,7 +327,7 @@ namespace krys::boo::tests
   TEST_CASE_METHOD(css::tests::ValueFixture, "CSSTransition: canceling transitions",
                    "[Animation][CSSTransition]")
   {
-    TransitionFixture fixture {utf8_string(FadingBox)};
+    TransitionFixture fixture {utf8_string(TransitioningBox)};
     auto recorder = CreateRef<AnimationEventRecorder>();
     recorder->Listen(fixture.ById(u8"box"), TransitionEvents);
     fixture.SetStyle(u8"box", u8"opacity:1");
@@ -432,7 +432,7 @@ namespace krys::boo::tests
   TEST_CASE_METHOD(css::tests::ValueFixture, "CSSTransition: removing the element cancels its transitions",
                    "[Animation][CSSTransition]")
   {
-    TransitionFixture fixture {utf8_string(FadingBox)};
+    TransitionFixture fixture {utf8_string(TransitioningBox)};
     fixture.SetStyle(u8"box", u8"opacity:1");
     fixture.Frame();
     Ref transition = ShareRef(*fixture.RunningTransition(u8"box", css::PropertyId::Opacity));

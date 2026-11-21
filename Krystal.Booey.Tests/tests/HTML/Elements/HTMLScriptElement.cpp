@@ -2,20 +2,14 @@
 #include "catch2/catch_test_macros.hpp"
 #include "Krystal.Booey.Tests/CSS/ValueTestUtils.hpp"
 #include "Krystal.Booey.Tests/Loader/NavigationTestUtils.hpp"
+#include "Krystal.Booey.Tests/StringTestUtils.hpp"
 #include "Krystal.Booey/DOM/Nodes/Document.hpp"
 #include "Krystal.Booey/DOM/Nodes/Text.hpp"
 
 namespace krys::boo::html::tests
 {
+  using boo::tests::Narrow;
   using boo::tests::NavigationFixture;
-
-  namespace
-  {
-    KRYS_NODISCARD std::string Narrow(DOMStringView string)
-    {
-      return std::string(reinterpret_cast<const char *>(string.data()), string.size());
-    }
-  }
 
   TEST_CASE_METHOD(css::tests::ValueFixture, "HTMLScriptElement: async reflects force async",
                    "[HTML][HTMLScriptElement][html:dom-script-async]")

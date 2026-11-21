@@ -29,19 +29,23 @@
 
 #include "Krystal.Booey/DOM/Mixins/DocumentOrShadowRoot.hpp"
 #include "Krystal.Booey/DOM/Nodes/DocumentFragment.hpp"
-#include "Krystal.Booey/DOM/Nodes/GetHTMLOptions.hpp"
-#include "Krystal.Booey/DOM/Parsing/ParserContentPolicy.hpp"
 #include "Krystal.Booey/HTML/Attributes/EventHandlerAttributes.hpp"
-#include "Krystal.Booey/HTML/Sanitizer/SetHTMLOptions.hpp"
 #include "Krystal.Core/Enum.hpp"
 #include "Krystal.Core/Types/EnumSet.hpp"
 #include "Krystal.Core/Types/HashMap.hpp"
 #include "Krystal.Core/Types/Maybe.hpp"
 #include "Krystal.Core/Types/SmallList.hpp"
 
+namespace krys::boo::html
+{
+  struct SetHTMLOptions;
+  struct SetHTMLUnsafeOptions;
+}
+
 namespace krys::boo
 {
   class StyleSheetList;
+  class WebAnimation;
 }
 
 namespace krys::boo::html
@@ -77,7 +81,9 @@ namespace krys::boo::dom
 {
   class DocumentAlgorithms;
   class ElementAlgorithms;
+  struct GetHTMLOptions;
   class NodeAlgorithms;
+  enum class ParserContentPolicy : uint8;
 
   enum class DelegatesFocus : bool
   {
@@ -157,7 +163,7 @@ namespace krys::boo
     mutable Maybe<PartMappings> _partMappings;
 
   public:
-    ShadowRoot(Document &document, RefPtr<html::CustomElementRegistry> &&registry = nullptr,
+    ShadowRoot(Document &document, html::CustomElementRegistry *registry = nullptr,
                dom::NodeFlags flags = dom::NodeFlags::None) noexcept;
 
     ~ShadowRoot() noexcept override;
@@ -239,39 +245,60 @@ namespace krys::boo
     /// @brief Replaces the shadow root's children with @p html, parsed as HTML in its host's context,
     /// sanitized by @p options (the default configuration if it gives none) with unsafe content removed.
     /// @see https://html.spec.whatwg.org/#dom-shadowroot-sethtml
-    ExceptionOr<void> SetHTML(DOMStringView html, const html::SetHTMLOptions &options = {}) noexcept;
+    ExceptionOr<void> SetHTML(DOMStringView html, const html::SetHTMLOptions &options) noexcept;
+
+    /// @brief The same, with default options.
+    ExceptionOr<void> SetHTML(DOMStringView html) noexcept;
 
     /// @brief Appends @p html, parsed as HTML in the host's context, sanitized by @p options (the default
     /// configuration if it gives none) with unsafe content removed.
     /// @see https://html.spec.whatwg.org/#dom-shadowroot-appendhtml
-    ExceptionOr<void> AppendHTML(DOMStringView html, const html::SetHTMLOptions &options = {}) noexcept;
+    ExceptionOr<void> AppendHTML(DOMStringView html, const html::SetHTMLOptions &options) noexcept;
+
+    /// @brief The same, with default options.
+    ExceptionOr<void> AppendHTML(DOMStringView html) noexcept;
 
     /// @brief Prepends @p html, parsed as HTML in the host's context, sanitized by @p options (the default
     /// configuration if it gives none) with unsafe content removed.
     /// @see https://html.spec.whatwg.org/#dom-shadowroot-prependhtml
-    ExceptionOr<void> PrependHTML(DOMStringView html, const html::SetHTMLOptions &options = {}) noexcept;
+    ExceptionOr<void> PrependHTML(DOMStringView html, const html::SetHTMLOptions &options) noexcept;
+
+    /// @brief The same, with default options.
+    ExceptionOr<void> PrependHTML(DOMStringView html) noexcept;
 
     /// @brief Replaces the shadow root's children with @p html, parsed as HTML in its host's context;
     /// sanitized only if @p options gives a sanitizer.
     /// @see https://html.spec.whatwg.org/#dom-shadowroot-sethtmlunsafe
-    ExceptionOr<void> SetHTMLUnsafe(DOMStringView html,
-                                    const html::SetHTMLUnsafeOptions &options = {}) noexcept;
+    ExceptionOr<void> SetHTMLUnsafe(DOMStringView html, const html::SetHTMLUnsafeOptions &options) noexcept;
+
+    /// @brief The same, with default options.
+    ExceptionOr<void> SetHTMLUnsafe(DOMStringView html) noexcept;
 
     /// @brief Appends @p html, parsed as HTML in the host's context; sanitized only if @p options gives a
     /// sanitizer.
     /// @see https://html.spec.whatwg.org/#dom-shadowroot-appendhtmlunsafe
     ExceptionOr<void> AppendHTMLUnsafe(DOMStringView html,
-                                       const html::SetHTMLUnsafeOptions &options = {}) noexcept;
+                                       const html::SetHTMLUnsafeOptions &options) noexcept;
+
+    /// @brief The same, with default options.
+    ExceptionOr<void> AppendHTMLUnsafe(DOMStringView html) noexcept;
 
     /// @brief Prepends @p html, parsed as HTML in the host's context; sanitized only if @p options gives a
     /// sanitizer.
     /// @see https://html.spec.whatwg.org/#dom-shadowroot-prependhtmlunsafe
     ExceptionOr<void> PrependHTMLUnsafe(DOMStringView html,
-                                        const html::SetHTMLUnsafeOptions &options = {}) noexcept;
+                                        const html::SetHTMLUnsafeOptions &options) noexcept;
+
+    /// @brief The same, with default options.
+    ExceptionOr<void> PrependHTMLUnsafe(DOMStringView html) noexcept;
 
     /// @brief The shadow root's children serialised as HTML, with the shadow roots @p options asks for.
     /// @see https://html.spec.whatwg.org/#dom-shadowroot-gethtml
-    KRYS_NODISCARD DOMString GetHTML(dom::GetHTMLOptions options = {}) const noexcept;
+    KRYS_NODISCARD DOMString GetHTML(dom::GetHTMLOptions options) const noexcept;
+
+    /// @brief The same, with no shadow roots.
+    /// @note An overload rather than a default argument, which would need ShadowRoot's definition here.
+    KRYS_NODISCARD DOMString GetHTML() const noexcept;
 
     /// @brief The children serialized; in an XML document, an `InvalidStateError` if they can't be serialized
     /// as well-formed XML.

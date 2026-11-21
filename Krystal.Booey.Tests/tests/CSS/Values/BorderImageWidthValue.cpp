@@ -5,14 +5,6 @@
 
 namespace krys::boo::css::tests
 {
-  namespace
-  {
-    KRYS_NODISCARD Ref<PrimitiveValue> Px(double value) noexcept
-    {
-      return PrimitiveValue::Create(value, UnitType::px);
-    }
-  }
-
   TEST_CASE_METHOD(ValueFixture, "BorderImageWidthValue::Create", "[CSS][Values][BorderImageWidthValue]")
   {
     auto value = BorderImageWidthValue::Create(Quad {Px(1.0), Px(2.0), Px(3.0), Px(4.0)}, false);

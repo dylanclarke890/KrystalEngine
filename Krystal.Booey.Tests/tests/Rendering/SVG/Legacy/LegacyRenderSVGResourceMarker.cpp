@@ -1,6 +1,8 @@
 ﻿#include "Krystal.Booey/Rendering/SVG/Legacy/LegacyRenderSVGResourceMarker.hpp"
 #include "catch2/catch_test_macros.hpp"
 #include "Krystal.Booey.Tests/Rendering/PaintTestUtils.hpp"
+#include "Krystal.Booey.Tests/Rendering/SVG/LegacySVGTestUtils.hpp"
+#include "Krystal.Booey.Tests/StringTestUtils.hpp"
 #include "Krystal.Booey.Tests/Style/ResolverTestUtils.hpp"
 #include "Krystal.Booey/Rendering/RenderTreeAsText.hpp"
 #include "Krystal.Booey/Rendering/SVG/Legacy/SVGResources.hpp"
@@ -13,18 +15,6 @@ namespace krys::boo::tests
 
   namespace
   {
-    KRYS_NODISCARD Element &ElementById(Document &document, DOMStringView id) noexcept
-    {
-      auto element = document.GetElementById(id);
-      krys_assert(element);
-      return *element;
-    }
-
-    KRYS_NODISCARD bool Contains(utf8_stringview text, utf8_stringview part) noexcept
-    {
-      return text.contains(part);
-    }
-
     /// @brief A page with a path marked at every vertex by a 4x4 marker with the given attributes.
     KRYS_NODISCARD utf8_string MarkedPath(utf8_stringview markerAttributes,
                                           utf8_stringview pathAttributes = {})
@@ -55,11 +45,11 @@ layer at (0,0) size 800x104
         RenderSVGPath {path} at (8,7) size 45x45 [stroke={[type=SOLID] [color=#000000]}] [fill={[type=SOLID] [color=#000000]}] [start marker=k] [middle marker=k] [end marker=k] [data="M 10 10 L 50 10 L 50 50"]
 )");
 
-    auto *renderer = ElementById(*fixture.Document, u8"p").Renderer();
+    auto *renderer = ById(*fixture.Document, u8"p").Renderer();
     REQUIRE(renderer);
     auto *resources = SVGResourcesCache::CachedResourcesForRenderer(*renderer);
     REQUIRE(resources);
-    auto *marker = ElementById(*fixture.Document, u8"k").Renderer();
+    auto *marker = ById(*fixture.Document, u8"k").Renderer();
     CHECK(resources->MarkerStart() == marker);
     CHECK(resources->MarkerMid() == marker);
     CHECK(resources->MarkerEnd() == marker);
@@ -95,7 +85,7 @@ layer at (0,0) size 800x104
     CAPTURE(css::tests::ToNarrow(painted));
     CHECK(Contains(painted, u8"t=(12.00,12.00)})"));
 
-    auto *renderer = ElementById(*fixture.Document, u8"p").Renderer();
+    auto *renderer = ById(*fixture.Document, u8"p").Renderer();
     REQUIRE(renderer);
     auto *resources = SVGResourcesCache::CachedResourcesForRenderer(*renderer);
     REQUIRE(resources);

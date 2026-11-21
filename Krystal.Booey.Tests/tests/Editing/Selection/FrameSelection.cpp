@@ -1,5 +1,6 @@
 ﻿#include "Krystal.Booey/Editing/Selection/FrameSelection.hpp"
 #include "catch2/catch_test_macros.hpp"
+#include "Krystal.Booey.Tests/DOM/DOMTestUtils.hpp"
 #include "Krystal.Booey.Tests/Rendering/PaintTestUtils.hpp"
 #include "Krystal.Booey/DOM/Collections/HTMLCollection.hpp"
 #include "Krystal.Booey/DOM/Events/Event.hpp"
@@ -48,11 +49,6 @@ namespace krys::boo::tests
         Selection().UpdateAppearanceAfterUpdatingRendering();
       }
     };
-
-    KRYS_NODISCARD dom::Position At(Node &node, uint32 offset) noexcept
-    {
-      return dom::MakeContainerOffsetPosition(ShareRefPtr(&node), offset);
-    }
   }
 
   TEST_CASE("FrameSelection: setting the selection", "[Editing][FrameSelection]")

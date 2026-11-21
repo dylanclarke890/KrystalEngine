@@ -1,6 +1,7 @@
 ﻿#include "Krystal.Booey/SVG/Elements/SVGMarkerElement.hpp"
 #include "catch2/catch_test_macros.hpp"
 #include "Krystal.Booey.Tests/Style/ResolverTestUtils.hpp"
+#include "Krystal.Booey.Tests/SVG/SVGTestUtils.hpp"
 #include "Krystal.Booey/SVG/Elements/SVGClipPathElement.hpp"
 #include "Krystal.Booey/SVG/Elements/SVGMaskElement.hpp"
 #include "Krystal.Booey/SVG/SVGAngle.hpp"
@@ -10,24 +11,13 @@ namespace krys::boo::svg::tests
 {
   using style::tests::ResolverFixture;
 
-  namespace
-  {
-    template <typename T>
-    KRYS_NODISCARD T &ElementById(Document &document, DOMStringView id) noexcept
-    {
-      auto element = document.GetElementById(id);
-      krys_assert(element);
-      return Downcast<T>(Downcast<SVGElement>(*element));
-    }
-  }
-
   TEST_CASE_METHOD(css::tests::ValueFixture, "SVGMarkerElement: attributes", "[SVG][SVGMarkerElement]")
   {
     ResolverFixture fixture {
       u8R"html(<!DOCTYPE html><svg><marker id=defaults /><marker id=k refX=1 refY=2 markerWidth=5 markerHeight=6 markerUnits=userSpaceOnUse orient=45deg />)html"
       u8R"html(<marker id=auto orient=auto /><marker id=reverse orient=auto-start-reverse /><marker id=invalid markerUnits=bogus orient=bogus /></svg>)html"};
 
-    auto &defaults = ElementById<SVGMarkerElement>(*fixture.Document, u8"defaults");
+    auto &defaults = ById<SVGMarkerElement>(*fixture.Document, u8"defaults");
     CHECK(defaults.RefX().ValueAsString() == u8"0");
     CHECK(defaults.MarkerWidth().ValueAsString() == u8"3");
     CHECK(defaults.MarkerHeight().ValueAsString() == u8"3");
@@ -35,7 +25,7 @@ namespace krys::boo::svg::tests
     CHECK(defaults.OrientType() == SVGMarkerOrientAngle);
     CHECK(defaults.OrientAngle().Value() == 0);
 
-    auto &k = ElementById<SVGMarkerElement>(*fixture.Document, u8"k");
+    auto &k = ById<SVGMarkerElement>(*fixture.Document, u8"k");
     CHECK(k.RefX().ValueAsString() == u8"1");
     CHECK(k.RefY().ValueAsString() == u8"2");
     CHECK(k.MarkerWidth().ValueAsString() == u8"5");
@@ -44,10 +34,10 @@ namespace krys::boo::svg::tests
     CHECK(k.OrientType() == SVGMarkerOrientAngle);
     CHECK(k.OrientAngle().Value() == 45);
 
-    CHECK(ElementById<SVGMarkerElement>(*fixture.Document, u8"auto").OrientType() == SVGMarkerOrientAuto);
-    CHECK(ElementById<SVGMarkerElement>(*fixture.Document, u8"reverse").OrientType()
+    CHECK(ById<SVGMarkerElement>(*fixture.Document, u8"auto").OrientType() == SVGMarkerOrientAuto);
+    CHECK(ById<SVGMarkerElement>(*fixture.Document, u8"reverse").OrientType()
           == SVGMarkerOrientAutoStartReverse);
-    auto &invalid = ElementById<SVGMarkerElement>(*fixture.Document, u8"invalid");
+    auto &invalid = ById<SVGMarkerElement>(*fixture.Document, u8"invalid");
     CHECK(invalid.MarkerUnits() == SVGMarkerUnitsType::StrokeWidth);
     CHECK(invalid.OrientAngle().Value() == 0);
   }
@@ -55,7 +45,7 @@ namespace krys::boo::svg::tests
   TEST_CASE_METHOD(css::tests::ValueFixture, "SVGMarkerElement: orient", "[SVG][SVGMarkerElement]")
   {
     ResolverFixture fixture {u8R"html(<!DOCTYPE html><svg><marker id=k /></svg>)html"};
-    auto &k = ElementById<SVGMarkerElement>(*fixture.Document, u8"k");
+    auto &k = ById<SVGMarkerElement>(*fixture.Document, u8"k");
     CHECK(k.Orient().View().empty());
 
     k.SetOrient(u8"auto");
@@ -78,7 +68,7 @@ namespace krys::boo::svg::tests
                    "[SVG][SVGMarkerElement]")
   {
     ResolverFixture fixture {u8R"html(<!DOCTYPE html><svg><marker id=k viewBox="0 0 2 4" /></svg>)html"};
-    auto &k = ElementById<SVGMarkerElement>(*fixture.Document, u8"k");
+    auto &k = ById<SVGMarkerElement>(*fixture.Document, u8"k");
 
     // The view box is fitted into the marker's viewport, keeping its aspect ratio and centred.
     CHECK(k.ViewBoxToViewTransform(4, 4) == AffineTransform(1, 0, 0, 1, 1, 0));
@@ -91,12 +81,12 @@ namespace krys::boo::svg::tests
       u8R"html(<!DOCTYPE html><svg><clipPath id=c /><clipPath id=bbox clipPathUnits=objectBoundingBox />)html"
       u8R"html(<mask id=defaults /><mask id=m x=1 y=2 width=3 height=4 maskUnits=userSpaceOnUse maskContentUnits=objectBoundingBox /></svg>)html"};
 
-    CHECK(ElementById<SVGClipPathElement>(*fixture.Document, u8"c").ClipPathUnits()
+    CHECK(ById<SVGClipPathElement>(*fixture.Document, u8"c").ClipPathUnits()
           == SVGUnitTypes::SVG_UNIT_TYPE_USERSPACEONUSE);
-    CHECK(ElementById<SVGClipPathElement>(*fixture.Document, u8"bbox").ClipPathUnits()
+    CHECK(ById<SVGClipPathElement>(*fixture.Document, u8"bbox").ClipPathUnits()
           == SVGUnitTypes::SVG_UNIT_TYPE_OBJECTBOUNDINGBOX);
 
-    auto &defaults = ElementById<SVGMaskElement>(*fixture.Document, u8"defaults");
+    auto &defaults = ById<SVGMaskElement>(*fixture.Document, u8"defaults");
     CHECK(defaults.X().ValueAsString() == u8"-10%");
     CHECK(defaults.Y().ValueAsString() == u8"-10%");
     CHECK(defaults.Width().ValueAsString() == u8"120%");
@@ -104,7 +94,7 @@ namespace krys::boo::svg::tests
     CHECK(defaults.MaskUnits() == SVGUnitTypes::SVG_UNIT_TYPE_OBJECTBOUNDINGBOX);
     CHECK(defaults.MaskContentUnits() == SVGUnitTypes::SVG_UNIT_TYPE_USERSPACEONUSE);
 
-    auto &m = ElementById<SVGMaskElement>(*fixture.Document, u8"m");
+    auto &m = ById<SVGMaskElement>(*fixture.Document, u8"m");
     CHECK(m.X().ValueAsString() == u8"1");
     CHECK(m.Height().ValueAsString() == u8"4");
     CHECK(m.MaskUnits() == SVGUnitTypes::SVG_UNIT_TYPE_USERSPACEONUSE);

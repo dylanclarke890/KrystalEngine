@@ -1,6 +1,8 @@
 ﻿#include "Krystal.Booey/Style/Invalidation/PseudoClassChangeInvalidation.hpp"
 #include "catch2/catch_test_macros.hpp"
+#include "Krystal.Booey.Tests/DOM/DOMTestUtils.hpp"
 #include "Krystal.Booey.Tests/Style/ResolverTestUtils.hpp"
+#include "Krystal.Booey.Tests/Style/StyleTestUtils.hpp"
 #include "Krystal.Booey/DOM/Nodes/Text.hpp"
 #include "Krystal.Booey/HTML/Elements/HTMLInputElement.hpp"
 #include "Krystal.Booey/HTML/Elements/HTMLOptionElement.hpp"
@@ -9,24 +11,10 @@
 
 namespace krys::boo::style::tests
 {
+  using boo::tests::CreateElement;
+
   namespace
   {
-    const boo::Color Blue {boo::Color::blue};
-
-    KRYS_NODISCARD Ref<Element> Create(Document &document, DOMStringAtom localName)
-    {
-      auto element = document.CreateElement(krys::move(localName));
-      REQUIRE_FALSE(element.HasException());
-      return element.ReleaseValue();
-    }
-
-    KRYS_NODISCARD bool IsBlue(const Element &element)
-    {
-      auto *style = element.GetRenderStyle();
-      REQUIRE(style);
-      return style->Color() == Blue;
-    }
-
     template <typename T>
     KRYS_NODISCARD T &HTML(Element &element)
     {
@@ -217,7 +205,7 @@ namespace krys::boo::style::tests
       CHECK_FALSE(IsBlue(l));
 
       // Another first legend disables the controls in the old one.
-      auto legend = Create(document, u8"legend");
+      auto legend = CreateElement(document, u8"legend");
       REQUIRE_FALSE(f.InsertBefore(*legend, l.ParentElement()).HasException());
       CHECK(l.StyleValidity() != Validity::Valid);
       document.UpdateStyleIfNeeded();
@@ -240,7 +228,7 @@ namespace krys::boo::style::tests
       };
       REQUIRE(width(b1) == "5px");
 
-      auto b0 = Create(document, u8"button");
+      auto b0 = CreateElement(document, u8"button");
       REQUIRE_FALSE(form.InsertBefore(*b0, &b1).HasException());
       // The form invalidates the subtrees of its old and new default buttons.
       CHECK(b1.StyleValidity() >= Validity::ElementInvalid);

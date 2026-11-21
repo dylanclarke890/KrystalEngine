@@ -27,6 +27,7 @@
 
 #include "Krystal.Core/Attributes.hpp"
 #include "Krystal.Core/RefCounted.hpp"
+#include "Krystal.Core/Types/RefPtr.hpp"
 
 namespace krys::boo::html
 {

@@ -22,7 +22,7 @@ namespace krys::boo::css::tests
       return ToNarrow(result);
     }
 
-    KRYS_NODISCARD cq::ContainerQuery ParseContainerQuery(utf8_stringview text)
+    KRYS_NODISCARD cq::ContainerQuery ParseValidContainerQuery(utf8_stringview text)
     {
       Tokens tokens {text};
       auto range = tokens.Tokenizer.Tokens();
@@ -277,7 +277,7 @@ namespace krys::boo::css::tests
 
     SECTION("ContainerRule")
     {
-      auto rule = ContainerRule::Create({ParseContainerQuery(u8"card (min-width: 10px)")}, {});
+      auto rule = ContainerRule::Create({ParseValidContainerQuery(u8"card (min-width: 10px)")}, {});
       CHECK(rule->Type() == RuleType::Container);
       CHECK(rule->IsContainerRule());
       CHECK(rule->IsGroupRule());

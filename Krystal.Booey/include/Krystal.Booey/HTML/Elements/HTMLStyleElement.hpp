@@ -22,7 +22,7 @@
 
 #pragma once
 
-#include "Krystal.Booey/CSS/Queries/MediaQuery.hpp"
+#include "Krystal.Booey/CSS/Queries/MediaQueryForward.hpp"
 #include "Krystal.Booey/HTML/Elements/HTMLElement.hpp"
 #include "Krystal.Booey/HTML/Internals/InlineStyleSheetOwner.hpp"
 

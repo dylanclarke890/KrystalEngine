@@ -3,6 +3,7 @@
 #include "catch2/catch_test_macros.hpp"
 #include "Krystal.Booey.Tests/Graphics/TestPathStrokeStrategy.hpp"
 #include "Krystal.Booey.Tests/Style/ResolverTestUtils.hpp"
+#include "Krystal.Booey.Tests/SVG/SVGTestUtils.hpp"
 #include "Krystal.Booey/Rendering/RenderElement.hpp"
 #include "Krystal.Booey/SVG/Elements/SVGCircleElement.hpp"
 #include "Krystal.Booey/SVG/Elements/SVGEllipseElement.hpp"
@@ -22,17 +23,6 @@ namespace krys::boo::svg::tests
   using boo::tests::PathStrokeStrategyScope;
   using Catch::Approx;
   using style::tests::ResolverFixture;
-
-  namespace
-  {
-    template <typename T>
-    KRYS_NODISCARD T &ById(Document &document, DOMStringView id) noexcept
-    {
-      auto element = document.GetElementById(id);
-      krys_assert(element);
-      return Downcast<T>(Downcast<SVGElement>(*element));
-    }
-  }
 
   TEST_CASE_METHOD(css::tests::ValueFixture, "SVGGeometryElement: the shapes' attributes",
                    "[SVG][SVGGeometryElement]")

@@ -36,6 +36,8 @@ namespace krys::boo::dom
   {
   }
 
+  ToggleEventTask::~ToggleEventTask() noexcept = default;
+
   void ToggleEventTask::Queue(ToggleState oldState, ToggleState newState, Element *source) noexcept
   {
     if (_data)
@@ -71,10 +73,15 @@ namespace krys::boo::dom
         // Composed, with relatedTarget the element if retargeting the source against it gives it, else the
         // source.
         init.Composed = true;
-        init.Source = krys::move(data.Source);
-        RefPtr<Element> source = init.Source;
+        RefPtr<Element> source = krys::move(data.Source);
+        init.Source = source.get();
         auto event = ToggleEvent::Create(event_names::Toggle, init, false);
         (void)EventDispatcher::DispatchFromSource(*event, *element, source.get());
       });
+  }
+
+  Ref<ToggleEventTask> ToggleEventTask::Create(Element &element) noexcept
+  {
+    return CreateRef<ToggleEventTask>(element);
   }
 }

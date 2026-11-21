@@ -34,7 +34,6 @@
 #include "Krystal.Booey/CSS/Values/RatioValue.hpp"
 #include "Krystal.Booey/CSS/Values/ValueList.hpp"
 #include "Krystal.Booey/CSS/Values/ValuePool.hpp"
-#include "Krystal.Booey/DOM/Abort/AbortSignal.hpp"
 #include "Krystal.Booey/DOM/Algorithms/ElementAlgorithms.hpp"
 #include "Krystal.Booey/DOM/Algorithms/EventDispatcher.hpp"
 #include "Krystal.Booey/DOM/Algorithms/MutationAlgorithms.hpp"
@@ -58,7 +57,6 @@
 #include "Krystal.Booey/HTML/CloseWatcher/CloseWatcher.hpp"
 #include "Krystal.Booey/HTML/Collections/LabelsNodeList.hpp"
 #include "Krystal.Booey/HTML/CustomElement/CustomElementReactionQueue.hpp"
-#include "Krystal.Booey/HTML/CustomElement/CustomElementRegistry.hpp"
 #include "Krystal.Booey/HTML/CustomElement/ElementInternals.hpp"
 #include "Krystal.Booey/HTML/Elements/HTMLBRElement.hpp"
 #include "Krystal.Booey/HTML/Elements/HTMLButtonElement.hpp"
@@ -1523,7 +1521,7 @@ namespace krys::boo
     // Composed, with relatedTarget the subject if retargeting the source against it gives it, else the
     // source.
     init.Composed = true;
-    init.Source = ShareRefPtr<Element>(source);
+    init.Source = source;
     auto event = ToggleEvent::Create(event_names::BeforeToggle, init, cancelable);
     (void)dom::EventDispatcher::DispatchFromSource(*event, *this, source);
     return !event->DefaultPrevented();

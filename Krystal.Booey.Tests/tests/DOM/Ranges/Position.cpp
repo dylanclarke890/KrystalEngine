@@ -1,5 +1,6 @@
 ﻿#include "Krystal.Booey/DOM/Ranges/Position.hpp"
 #include "catch2/catch_test_macros.hpp"
+#include "Krystal.Booey.Tests/DOM/DOMTestUtils.hpp"
 #include "Krystal.Booey.Tests/Rendering/PaintTestUtils.hpp"
 #include "Krystal.Booey/DOM/Nodes/Document.hpp"
 #include "Krystal.Booey/DOM/Nodes/Text.hpp"
@@ -10,6 +11,8 @@
 
 namespace krys::boo::dom::tests
 {
+  using boo::tests::At;
+
   namespace
   {
     /// @brief A laid out document in a 200x100 view.
@@ -28,11 +31,6 @@ namespace krys::boo::dom::tests
         return Downcast<Text>(*ById(id).FirstChild());
       }
     };
-
-    KRYS_NODISCARD Position At(Node &node, uint32 offset) noexcept
-    {
-      return MakeContainerOffsetPosition(ShareRefPtr(&node), offset);
-    }
   }
 
   TEST_CASE("Position: anchors and containers", "[DOM][Position]")

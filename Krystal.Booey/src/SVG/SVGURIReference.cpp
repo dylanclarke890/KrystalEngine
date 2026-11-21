@@ -139,8 +139,7 @@ namespace krys::boo
 
   auto SVGURIReference::TargetElementFromIRIString(DOMStringView iri,
                                                    const dom::DocumentOrShadowRoot &treeScope,
-                                                   const RefPtr<Document> &externalDocument) noexcept
-    -> TargetElementResult
+                                                   Document *externalDocument) noexcept -> TargetElementResult
   {
     // If there's no fragment identifier contained within the IRI string, we can't lookup an element.
     size_t startOfFragmentIdentifier = iri.find(u8'#');
@@ -194,8 +193,7 @@ namespace krys::boo
 
   auto SVGURIReference::TargetElementFromIRIString(const style::Url &iri,
                                                    const dom::DocumentOrShadowRoot &treeScope,
-                                                   const RefPtr<Document> &externalDocument) noexcept
-    -> TargetElementResult
+                                                   Document *externalDocument) noexcept -> TargetElementResult
   {
     return TargetElementFromIRIString(iri.Resolved.String(), treeScope, externalDocument);
   }

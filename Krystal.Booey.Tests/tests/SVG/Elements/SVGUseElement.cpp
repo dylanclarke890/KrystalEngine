@@ -3,6 +3,7 @@
 #include "Krystal.Booey.Tests/Loader/PageInFrameFixture.hpp"
 #include "Krystal.Booey.Tests/Loader/TestLoader.hpp"
 #include "Krystal.Booey.Tests/Style/ResolverTestUtils.hpp"
+#include "Krystal.Booey.Tests/SVG/SVGTestUtils.hpp"
 #include "Krystal.Booey/CSS/CSSOM/CSSStyleProperties.hpp"
 #include "Krystal.Booey/DOM/Events/Event.hpp"
 #include "Krystal.Booey/DOM/Nodes/ShadowRoot.hpp"
@@ -19,21 +20,6 @@ namespace krys::boo::svg::tests
 
   namespace
   {
-    template <typename T>
-    KRYS_NODISCARD T &ById(Document &document, DOMStringView id) noexcept
-    {
-      auto element = document.GetElementById(id);
-      krys_assert(element);
-      if constexpr (SameType<T, SVGElement>)
-      {
-        return Downcast<SVGElement>(*element);
-      }
-      else
-      {
-        return Downcast<T>(Downcast<SVGElement>(*element));
-      }
-    }
-
     // The root of @p use's instances, after the document's style is updated.
     KRYS_NODISCARD SVGElement *TargetClone(ResolverFixture &fixture, SVGUseElement &use) noexcept
     {

@@ -4244,7 +4244,7 @@ namespace krys::boo::html
     // 13a.x.1. Let registry be null if template has a shadowrootcustomelementregistry attribute; otherwise
     //           declarativeShadowHostElement's node document's custom element registry.
     bool keepRegistryNull = templateElement.HasAttribute(u8"shadowrootcustomelementregistry");
-    RefPtr<CustomElementRegistry> registry =
+    CustomElementRegistry *registry =
       keepRegistryNull ? nullptr : declarativeShadowHostElement->NodeDocument().CustomElementRegistry();
 
     // 13a.x.2. Attach a shadow root with declarativeShadowHostElement, mode, delegatesFocus, serializable,
@@ -4254,7 +4254,7 @@ namespace krys::boo::html
     //           return.
     if (auto result = dom::ElementAlgorithms::AttachShadowRoot(*declarativeShadowHostElement, *mode, clonable,
                                                                serializable, delegatesFocus, slotAssignment,
-                                                               krys::move(referenceTarget), registry.get());
+                                                               krys::move(referenceTarget), registry);
         result.HasException())
     {
       InsertElementAtAdjustedInsertionLocation(templateElement, insertionLocation, true);
@@ -4487,7 +4487,7 @@ namespace krys::boo::html
     // (Elements that the sanitizer will remove or replace with their children are created with a null custom
     // element registry, so creating an element finds no custom element definition and no custom element
     // constructor runs for them.)
-    auto creationRegistry = sanitizerAction == SanitizerAction::Keep ? registry : nullptr;
+    auto *creationRegistry = sanitizerAction == SanitizerAction::Keep ? registry.get() : nullptr;
 
     // 12. Let definition be null if sanitizerAction is not "Keep"; otherwise the result of looking up a
     //     custom element definition given registry, namespace, localName, and is.

@@ -2,6 +2,7 @@
 #include "catch2/catch_test_macros.hpp"
 #include "Krystal.Booey.Tests/Layout/LayoutTestUtils.hpp"
 #include "Krystal.Booey.Tests/Rendering/PaintTestUtils.hpp"
+#include "Krystal.Booey.Tests/Rendering/RenderTestUtils.hpp"
 #include "Krystal.Booey.Tests/Style/ResolverTestUtils.hpp"
 
 namespace krys::boo::tests
@@ -10,16 +11,9 @@ namespace krys::boo::tests
 
   namespace
   {
-    /// @brief The box of the element with id @p id, after updating layout.
-    KRYS_NODISCARD RenderBox &BoxOf(ResolverFixture &fixture, DOMStringView id) noexcept
-    {
-      (void)fixture.Document->UpdateLayout();
-      return Downcast<RenderBox>(*fixture.ById(id).Renderer());
-    }
-
     KRYS_NODISCARD RenderFlexibleBox &FlexBoxOf(ResolverFixture &fixture, DOMStringView id) noexcept
     {
-      return Downcast<RenderFlexibleBox>(BoxOf(fixture, id));
+      return Downcast<RenderFlexibleBox>(LaidOutBoxOf(fixture, id));
     }
   }
 
@@ -86,9 +80,9 @@ layer at (0,0) size 800x10
         u8"<div id=f><div id=a>a</div><div id=b>b</div></div>")};
 
       // The first item's start margin and the last item's end margin are trimmed.
-      CHECK(BoxOf(fixture, u8"a").Location() == LayoutPoint(0, 0));
-      CHECK(BoxOf(fixture, u8"b").Location() == LayoutPoint(30, 0));
-      CHECK(BoxOf(fixture, u8"b").MarginRight() == 0_lu);
+      CHECK(LaidOutBoxOf(fixture, u8"a").Location() == LayoutPoint(0, 0));
+      CHECK(LaidOutBoxOf(fixture, u8"b").Location() == LayoutPoint(30, 0));
+      CHECK(LaidOutBoxOf(fixture, u8"b").MarginRight() == 0_lu);
     }
   }
 
@@ -127,9 +121,9 @@ layer at (0,0) size 800x100
         u8"<div id=f><div id=a>a</div><div id=b>b</div><div id=c>c</div></div>")};
 
       // Two items and a 5px column gap fit on the first line; the lines are pushed apart.
-      CHECK(BoxOf(fixture, u8"a").FrameRect() == LayoutRect(0, 0, 40, 10));
-      CHECK(BoxOf(fixture, u8"b").FrameRect() == LayoutRect(45, 0, 40, 10));
-      CHECK(BoxOf(fixture, u8"c").FrameRect() == LayoutRect(0, 90, 40, 10));
+      CHECK(LaidOutBoxOf(fixture, u8"a").FrameRect() == LayoutRect(0, 0, 40, 10));
+      CHECK(LaidOutBoxOf(fixture, u8"b").FrameRect() == LayoutRect(45, 0, 40, 10));
+      CHECK(LaidOutBoxOf(fixture, u8"c").FrameRect() == LayoutRect(0, 90, 40, 10));
     }
 
     SECTION("Baseline alignment")
@@ -139,9 +133,9 @@ layer at (0,0) size 800x100
         u8"<div id=f><div id=a>a</div><div id=b>b</div><div id=c></div></div>")};
 
       // b's and the empty c's (synthesized from its bottom edge) baselines line up with a's at 16px.
-      CHECK(BoxOf(fixture, u8"a").FrameRect() == LayoutRect(0, 0, 20, 20));
-      CHECK(BoxOf(fixture, u8"b").FrameRect() == LayoutRect(20, 8, 10, 10));
-      CHECK(BoxOf(fixture, u8"c").FrameRect() == LayoutRect(30, 16, 0, 0));
+      CHECK(LaidOutBoxOf(fixture, u8"a").FrameRect() == LayoutRect(0, 0, 20, 20));
+      CHECK(LaidOutBoxOf(fixture, u8"b").FrameRect() == LayoutRect(20, 8, 10, 10));
+      CHECK(LaidOutBoxOf(fixture, u8"c").FrameRect() == LayoutRect(30, 16, 0, 0));
       CHECK(FlexBoxOf(fixture, u8"f").Height() == 20_lu);
       CHECK(FlexBoxOf(fixture, u8"f").FirstLineBaseline() == 16_lu);
     }
@@ -153,9 +147,9 @@ layer at (0,0) size 800x100
         u8"<div id=f><div id=a>a</div><div id=b>b</div><div id=c>c</div></div>")};
 
       // Auto margins center a across the line instead of stretching it, and push b and c to the end.
-      CHECK(BoxOf(fixture, u8"a").FrameRect() == LayoutRect(0, 20, 10, 10));
-      CHECK(BoxOf(fixture, u8"b").FrameRect() == LayoutRect(780, 0, 10, 50));
-      CHECK(BoxOf(fixture, u8"c").FrameRect() == LayoutRect(790, 0, 10, 50));
+      CHECK(LaidOutBoxOf(fixture, u8"a").FrameRect() == LayoutRect(0, 20, 10, 10));
+      CHECK(LaidOutBoxOf(fixture, u8"b").FrameRect() == LayoutRect(780, 0, 10, 50));
+      CHECK(LaidOutBoxOf(fixture, u8"c").FrameRect() == LayoutRect(790, 0, 10, 50));
     }
 
     SECTION("An inline flex container, reversed both ways")
@@ -168,8 +162,8 @@ layer at (0,0) size 800x100
 
       // The items run right to left, and the container sits on the line by the baseline of its visually first
       // item.
-      CHECK(BoxOf(fixture, u8"a").FrameRect() == LayoutRect(10, 0, 20, 20));
-      CHECK(BoxOf(fixture, u8"b").FrameRect() == LayoutRect(0, 0, 10, 20));
+      CHECK(LaidOutBoxOf(fixture, u8"a").FrameRect() == LayoutRect(10, 0, 20, 20));
+      CHECK(LaidOutBoxOf(fixture, u8"b").FrameRect() == LayoutRect(0, 0, 10, 20));
       CHECK(FlexBoxOf(fixture, u8"f").FrameRect() == LayoutRect(10, 0, 30, 20));
       CHECK(FlexBoxOf(fixture, u8"f").FirstLineBaseline() == 8_lu);
     }
@@ -184,14 +178,14 @@ layer at (0,0) size 800x100
       u8"<div id=f><div id=p></div><div id=a>a</div></div>")};
 
     // The out-of-flow child's static position is aligned as if it were the only item.
-    CHECK(BoxOf(fixture, u8"a").FrameRect() == LayoutRect(45, 40, 10, 10));
-    CHECK(BoxOf(fixture, u8"p").FrameRect() == LayoutRect(40, 40, 20, 10));
+    CHECK(LaidOutBoxOf(fixture, u8"a").FrameRect() == LayoutRect(45, 40, 10, 10));
+    CHECK(LaidOutBoxOf(fixture, u8"p").FrameRect() == LayoutRect(40, 40, 20, 10));
 
     SECTION("An item going out of flow")
     {
       REQUIRE_FALSE(fixture.ById(u8"a").SetAttribute(u8"style", u8"position: absolute").HasException());
       (void)fixture.Document->UpdateLayout();
-      CHECK(BoxOf(fixture, u8"a").FrameRect() == LayoutRect(45, 40, 10, 10));
+      CHECK(LaidOutBoxOf(fixture, u8"a").FrameRect() == LayoutRect(45, 40, 10, 10));
       CHECK(FlexBoxOf(fixture, u8"f").FirstLineBaseline() == null);
     }
   }
@@ -201,21 +195,21 @@ layer at (0,0) size 800x100
     ResolverFixture fixture {layout::tests::AhemDocument(
       u8"#f { display: flex; height: 50px }", u8"<div id=f><div id=a>a</div><div id=b>bb</div></div>")};
 
-    CHECK(BoxOf(fixture, u8"a").FrameRect() == LayoutRect(0, 0, 10, 50));
+    CHECK(LaidOutBoxOf(fixture, u8"a").FrameRect() == LayoutRect(0, 0, 10, 50));
 
     SECTION("No longer stretching")
     {
       REQUIRE_FALSE(fixture.ById(u8"f").SetAttribute(u8"style", u8"align-items: center").HasException());
       (void)fixture.Document->UpdateLayout();
-      CHECK(BoxOf(fixture, u8"a").FrameRect() == LayoutRect(0, 20, 10, 10));
-      CHECK(BoxOf(fixture, u8"b").FrameRect() == LayoutRect(10, 20, 20, 10));
+      CHECK(LaidOutBoxOf(fixture, u8"a").FrameRect() == LayoutRect(0, 20, 10, 10));
+      CHECK(LaidOutBoxOf(fixture, u8"b").FrameRect() == LayoutRect(10, 20, 20, 10));
     }
 
     SECTION("Removing an item")
     {
       REQUIRE_FALSE(fixture.ById(u8"a").Remove().HasException());
       (void)fixture.Document->UpdateLayout();
-      CHECK(BoxOf(fixture, u8"b").FrameRect() == LayoutRect(0, 0, 20, 50));
+      CHECK(LaidOutBoxOf(fixture, u8"b").FrameRect() == LayoutRect(0, 0, 20, 50));
     }
   }
 
@@ -232,9 +226,9 @@ layer at (0,0) size 800x100
 
       // The 80px of free space is shared 1:3:1.
       CHECK(FlexBoxOf(fixture, u8"f").HasModernLayout());
-      CHECK(BoxOf(fixture, u8"a").FrameRect() == LayoutRect(0, 0, 56, 20));
-      CHECK(BoxOf(fixture, u8"b").FrameRect() == LayoutRect(56, 0, 88, 20));
-      CHECK(BoxOf(fixture, u8"c").FrameRect() == LayoutRect(144, 0, 56, 20));
+      CHECK(LaidOutBoxOf(fixture, u8"a").FrameRect() == LayoutRect(0, 0, 56, 20));
+      CHECK(LaidOutBoxOf(fixture, u8"b").FrameRect() == LayoutRect(56, 0, 88, 20));
+      CHECK(LaidOutBoxOf(fixture, u8"c").FrameRect() == LayoutRect(144, 0, 56, 20));
       CHECK(FlexBoxOf(fixture, u8"f").Height() == 20_lu);
     }
 
@@ -246,9 +240,9 @@ layer at (0,0) size 800x100
         u8"<div id=f><div id=a>a</div><div id=b>b</div><div id=c>c</div></div>")};
 
       CHECK(FlexBoxOf(fixture, u8"f").HasModernLayout());
-      CHECK(BoxOf(fixture, u8"a").FrameRect() == LayoutRect(55, 0, 40, 10));
-      CHECK(BoxOf(fixture, u8"b").FrameRect() == LayoutRect(5, 0, 40, 10));
-      CHECK(BoxOf(fixture, u8"c").FrameRect() == LayoutRect(30, 10, 40, 10));
+      CHECK(LaidOutBoxOf(fixture, u8"a").FrameRect() == LayoutRect(55, 0, 40, 10));
+      CHECK(LaidOutBoxOf(fixture, u8"b").FrameRect() == LayoutRect(5, 0, 40, 10));
+      CHECK(LaidOutBoxOf(fixture, u8"c").FrameRect() == LayoutRect(30, 10, 40, 10));
     }
 
     SECTION("Unsupported content")
@@ -259,7 +253,7 @@ layer at (0,0) size 800x100
 
       // The items need a fixed height.
       CHECK_FALSE(FlexBoxOf(fixture, u8"f").HasModernLayout());
-      CHECK(BoxOf(fixture, u8"a").FrameRect() == LayoutRect(0, 0, 200, 10));
+      CHECK(LaidOutBoxOf(fixture, u8"a").FrameRect() == LayoutRect(0, 0, 200, 10));
     }
   }
 

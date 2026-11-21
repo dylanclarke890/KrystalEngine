@@ -2,6 +2,7 @@
 #include "catch2/catch_test_macros.hpp"
 #include "Krystal.Booey.Tests/Loader/PageInFrameFixture.hpp"
 #include "Krystal.Booey.Tests/Loader/TestLoader.hpp"
+#include "Krystal.Booey.Tests/StringTestUtils.hpp"
 #include "Krystal.Booey/CSS/Selectors/SelectorCheckerTestFunctions.hpp"
 #include "Krystal.Booey/DOM/Nodes/Document.hpp"
 #include "Krystal.Booey/HTML/Elements/HTMLImageElement.hpp"
@@ -17,6 +18,7 @@
 
 namespace krys::boo::svg::tests
 {
+  using boo::tests::Contains;
   using boo::tests::LoaderFixture;
   using boo::tests::PageInFrameFixture;
   using boo::tests::RunNetworkingTasks;
@@ -27,12 +29,7 @@ namespace krys::boo::svg::tests
       u8R"svg(<svg xmlns="http://www.w3.org/2000/svg" width="40" height="20">)svg"
       u8R"svg(<rect width="40" height="20" fill="green"/></svg>)svg";
 
-    KRYS_NODISCARD bool Contains(const utf8_string &text, utf8_stringview part) noexcept
-    {
-      return text.contains(part);
-    }
-
-    KRYS_NODISCARD HTMLImageElement &ImageById(PageInFrameFixture &fixture, DOMStringView id) noexcept
+    KRYS_NODISCARD HTMLImageElement &HTMLImageById(PageInFrameFixture &fixture, DOMStringView id) noexcept
     {
       return Downcast<HTMLImageElement>(Downcast<HTMLElement>(fixture.ById(id)));
     }
@@ -52,7 +49,7 @@ namespace krys::boo::svg::tests
                                u8R"html(<img id=wide src="file:///a.svg" width=80></body>)html");
     RunNetworkingTasks();
 
-    auto &image = ImageById(fixture, u8"i");
+    auto &image = HTMLImageById(fixture, u8"i");
     auto *svgImage = SVGImageOf(image);
     REQUIRE(svgImage);
     CHECK(svgImage->Size() == SizeF(40, 20));
@@ -71,7 +68,7 @@ namespace krys::boo::svg::tests
     CHECK(Is<SVGImageForContainer>(*forContainer));
     CHECK(forContainer->Size() == SizeF(40, 20));
 
-    auto &wide = ImageById(fixture, u8"wide");
+    auto &wide = HTMLImageById(fixture, u8"wide");
     auto *wideRenderer = DynamicDowncast<RenderBox>(wide.Renderer());
     REQUIRE(wideRenderer);
     CHECK(wideRenderer->Size() == LayoutSize(80, 40));
@@ -93,7 +90,7 @@ namespace krys::boo::svg::tests
       u8R"html(<body style="margin: 0"><img id=i src="file:///ratio.svg" width=60>)html", {400, 300});
     RunNetworkingTasks();
 
-    auto &image = ImageById(fixture, u8"i");
+    auto &image = HTMLImageById(fixture, u8"i");
     auto *svgImage = SVGImageOf(image);
     REQUIRE(svgImage);
     // Without a width or height, the image's own size is its view box's.
@@ -111,14 +108,14 @@ namespace krys::boo::svg::tests
     PageInFrameFixture fixture(u8R"html(<img id=i src="file:///a.svg">)html");
     RunNetworkingTasks();
 
-    auto *svgImage = SVGImageOf(ImageById(fixture, u8"i"));
+    auto *svgImage = SVGImageOf(HTMLImageById(fixture, u8"i"));
     REQUIRE(svgImage);
     auto root = svgImage->RootElement();
     REQUIRE(root);
     CHECK(root->ViewBox().IsEmpty());
     CHECK(root->CurrentViewBoxRect() == RectF(0, 0, 40, 20));
     CHECK(IsInSVGImage(root.get()));
-    CHECK_FALSE(IsInSVGImage(&ImageById(fixture, u8"i")));
+    CHECK_FALSE(IsInSVGImage(&HTMLImageById(fixture, u8"i")));
   }
 
   TEST_CASE("SVGImage: an SVG image's animations run in the rendering update of the frame showing it",
@@ -133,7 +130,7 @@ namespace krys::boo::svg::tests
     PageInFrameFixture fixture(u8R"html(<img id=i src="file:///moving.svg">)html");
     RunNetworkingTasks();
 
-    auto *svgImage = SVGImageOf(ImageById(fixture, u8"i"));
+    auto *svgImage = SVGImageOf(HTMLImageById(fixture, u8"i"));
     REQUIRE(svgImage);
     auto root = svgImage->RootElement();
     REQUIRE(root);
@@ -159,7 +156,7 @@ namespace krys::boo::svg::tests
     // Held by the page showing it, the image's animations pause, and play again after.
     frame->SetImageAnimationEnabled(false);
     CHECK(root->AnimationsPaused());
-    CHECK_FALSE(SVGImageOf(ImageById(fixture, u8"i"))->GetImageObserver()->AllowsAnimation(*svgImage));
+    CHECK_FALSE(SVGImageOf(HTMLImageById(fixture, u8"i"))->GetImageObserver()->AllowsAnimation(*svgImage));
     frame->SetImageAnimationEnabled(true);
     CHECK_FALSE(root->AnimationsPaused());
   }
@@ -175,7 +172,7 @@ namespace krys::boo::svg::tests
     PageInFrameFixture fixture(u8R"html(<img id=i src="file:///links.svg">)html");
     RunNetworkingTasks();
 
-    auto *svgImage = SVGImageOf(ImageById(fixture, u8"i"));
+    auto *svgImage = SVGImageOf(HTMLImageById(fixture, u8"i"));
     REQUIRE(svgImage);
     CHECK(loader.Strategy.Requests == List<utf8_string> {u8"file:///links.svg"});
 
@@ -221,7 +218,7 @@ namespace krys::boo::svg::tests
     (void)fixture.Document->UpdateLayout();
     RunNetworkingTasks();
 
-    auto *svgImage = SVGImageOf(ImageById(fixture, u8"i"));
+    auto *svgImage = SVGImageOf(HTMLImageById(fixture, u8"i"));
     REQUIRE(svgImage);
     auto root = svgImage->RootElement();
     REQUIRE(root);

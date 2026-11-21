@@ -1,5 +1,8 @@
 ﻿#include "Krystal.Booey/CSS/Values/Images/Gradient.hpp"
 #include "catch2/catch_test_macros.hpp"
+#include "Krystal.Booey.Tests/CSS/ColorTestUtils.hpp"
+#include "Krystal.Booey.Tests/CSS/PositionTestUtils.hpp"
+#include "Krystal.Booey.Tests/CSS/ValueTestUtils.hpp"
 #include "Krystal.Booey/CSS/Values/Primitives/NumericTypesComputedStyleDependencies.hpp"
 #include "Krystal.Booey/CSS/Values/Primitives/NumericTypesSerialisation.hpp"
 #include "Krystal.Booey/CSS/Values/Primitives/NumericTypesValueVisitation.hpp"
@@ -13,35 +16,9 @@ namespace krys::boo::css::tests
     using NLP = LengthPercentage<NonNegative>;
     using Method = GradientColorInterpolationMethod;
 
-    template <typename T>
-    CSSOMString SerialiseForTest(const T &value)
-    {
-      return Serialise(DefaultSerialisationContext(), value);
-    }
-
-    Color Red()
-    {
-      return Color {KeywordColor {ValueId::Red}};
-    }
-
-    Color Blue()
-    {
-      return Color {KeywordColor {ValueId::Blue}};
-    }
-
-    Position At(TwoComponentPositionHorizontal x, TwoComponentPositionVertical y)
-    {
-      return Position {TwoComponentPositionHorizontalVertical {krys::move(x), krys::move(y)}};
-    }
-
     Position LeftTop()
     {
-      return At({keywords::Left {}}, {keywords::Top {}});
-    }
-
-    Position Centre()
-    {
-      return At({keywords::Center {}}, {keywords::Center {}});
+      return PositionAt({keywords::Left {}}, {keywords::Top {}});
     }
 
     Method Standard(ColourInterpolationMethod method = {ColourInterpolationMethod::OKLab {},
@@ -57,14 +34,14 @@ namespace krys::boo::css::tests
 
     GradientLinearColorStopList RedBlue()
     {
-      return {GradientLinearColorStop {.Color = Red(), .Position = {}},
-              GradientLinearColorStop {.Color = Blue(), .Position = {}}};
+      return {GradientLinearColorStop {.Color = ColorKeyword(ValueId::Red), .Position = {}},
+              GradientLinearColorStop {.Color = ColorKeyword(ValueId::Blue), .Position = {}}};
     }
 
     GradientAngularColorStopList AngularRedBlue()
     {
-      return {GradientAngularColorStop {.Color = Red(), .Position = {}},
-              GradientAngularColorStop {.Color = Blue(), .Position = {}}};
+      return {GradientAngularColorStop {.Color = ColorKeyword(ValueId::Red), .Position = {}},
+              GradientAngularColorStop {.Color = ColorKeyword(ValueId::Blue), .Position = {}}};
     }
 
     Gradient Linear(LinearGradient::GradientLineType line, Method method = Standard(),
@@ -119,10 +96,11 @@ namespace krys::boo::css::tests
 
     // Stops: colour and position, colour only, and a position-only colour hint.
     CHECK(
-      SerialiseForTest(Linear(Vertical {keywords::Bottom {}}, Standard(),
-                              {GradientLinearColorStop {.Color = Red(), .Position = LP {10_css_percentage}},
-                               GradientLinearColorStop {.Color = {}, .Position = LP {50_css_percentage}},
-                               GradientLinearColorStop {.Color = Blue(), .Position = {}}}))
+      SerialiseForTest(Linear(
+        Vertical {keywords::Bottom {}}, Standard(),
+        {GradientLinearColorStop {.Color = ColorKeyword(ValueId::Red), .Position = LP {10_css_percentage}},
+         GradientLinearColorStop {.Color = {}, .Position = LP {50_css_percentage}},
+         GradientLinearColorStop {.Color = ColorKeyword(ValueId::Blue), .Position = {}}}))
       == u8"linear-gradient(red 10%, 50%, blue)");
 
     CHECK(SerialiseForTest(Gradient {FunctionNotation<ValueId::RepeatingLinearGradient, LinearGradient> {
@@ -140,8 +118,8 @@ namespace krys::boo::css::tests
     // `farthest-corner` and a centred position are the defaults.
     CHECK(SerialiseForTest(Radial(Ellipse {.Size = RadialGradient::Extent {keywords::FarthestCorner {}}}))
           == u8"radial-gradient(red, blue)");
-    CHECK(SerialiseForTest(Radial(
-            Ellipse {.Size = RadialGradient::Extent {keywords::FarthestCorner {}}, .Position = Centre()}))
+    CHECK(SerialiseForTest(Radial(Ellipse {.Size = RadialGradient::Extent {keywords::FarthestCorner {}},
+                                           .Position = CentrePosition()}))
           == u8"radial-gradient(red, blue)");
     CHECK(SerialiseForTest(Radial(Ellipse {.Size = RadialGradient::Extent {keywords::ClosestSide {}}}))
           == u8"radial-gradient(closest-side, red, blue)");
@@ -157,7 +135,7 @@ namespace krys::boo::css::tests
     CHECK(SerialiseForTest(
             Radial(Circle {.Size = RadialGradient::Extent {keywords::ClosestSide {}}, .Position = LeftTop()}))
           == u8"radial-gradient(circle closest-side at left top, red, blue)");
-    CHECK(SerialiseForTest(Radial(Circle {.Size = Circle::Length {10_css_px}, .Position = Centre()}))
+    CHECK(SerialiseForTest(Radial(Circle {.Size = Circle::Length {10_css_px}, .Position = CentrePosition()}))
           == u8"radial-gradient(10px, red, blue)");
 
     CHECK(SerialiseForTest(
@@ -174,7 +152,7 @@ namespace krys::boo::css::tests
   {
     // A zero angle and a centred position are the defaults.
     CHECK(SerialiseForTest(Conic({})) == u8"conic-gradient(red, blue)");
-    CHECK(SerialiseForTest(Conic({.Angle = Angle<> {0_css_deg}, .Position = Centre()}))
+    CHECK(SerialiseForTest(Conic({.Angle = Angle<> {0_css_deg}, .Position = CentrePosition()}))
           == u8"conic-gradient(red, blue)");
     CHECK(SerialiseForTest(Conic({.Angle = Angle<> {90_css_deg}}))
           == u8"conic-gradient(from 90deg, red, blue)");
@@ -190,8 +168,9 @@ namespace krys::boo::css::tests
             Gradient {FunctionNotation<ValueId::RepeatingConicGradient, ConicGradient> {ConicGradient {
               .ColourInterpolationMethod = Standard(),
               .GradientBox = {},
-              .Stops = {GradientAngularColorStop {.Color = Red(), .Position = AnglePercentage<> {10_css_deg}},
-                        GradientAngularColorStop {.Color = Blue(),
+              .Stops = {GradientAngularColorStop {.Color = ColorKeyword(ValueId::Red),
+                                                  .Position = AnglePercentage<> {10_css_deg}},
+                        GradientAngularColorStop {.Color = ColorKeyword(ValueId::Blue),
                                                   .Position = AnglePercentage<> {50_css_percentage}}}}}})
           == u8"repeating-conic-gradient(red 10deg, blue 50%)");
   }
@@ -206,7 +185,7 @@ namespace krys::boo::css::tests
       Linear(Angle<> {90_css_deg})
       != Gradient {FunctionNotation<ValueId::RepeatingLinearGradient, LinearGradient> {LinearGradient {
         .ColourInterpolationMethod = Standard(), .GradientLine = Angle<> {90_css_deg}, .Stops = RedBlue()}}});
-    CHECK(Conic({.Position = LeftTop()}) != Conic({.Position = Centre()}));
+    CHECK(Conic({.Position = LeftTop()}) != Conic({.Position = CentrePosition()}));
   }
 
   TEST_CASE("Gradient(Dependencies and visitation)", "[CSS][Images][Gradient]")
@@ -214,8 +193,8 @@ namespace krys::boo::css::tests
     CHECK(CollectComputedStyleDependencies(Linear(Angle<> {90_css_deg})).Properties.empty());
     CHECK(CollectComputedStyleDependencies(
             Linear(Vertical {keywords::Bottom {}}, Standard(),
-                   {GradientLinearColorStop {.Color = Red(), .Position = LP {1_css_em}},
-                    GradientLinearColorStop {.Color = Blue(), .Position = {}}}))
+                   {GradientLinearColorStop {.Color = ColorKeyword(ValueId::Red), .Position = LP {1_css_em}},
+                    GradientLinearColorStop {.Color = ColorKeyword(ValueId::Blue), .Position = {}}}))
             .Properties
           == List<PropertyId> {PropertyId::FontSize});
     CHECK(CollectComputedStyleDependencies(

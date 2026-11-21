@@ -1,6 +1,8 @@
 ﻿#include "Krystal.Booey/Rendering/SVG/Legacy/LegacyRenderSVGResourceClipper.hpp"
 #include "catch2/catch_test_macros.hpp"
 #include "Krystal.Booey.Tests/Rendering/PaintTestUtils.hpp"
+#include "Krystal.Booey.Tests/Rendering/SVG/LegacySVGTestUtils.hpp"
+#include "Krystal.Booey.Tests/StringTestUtils.hpp"
 #include "Krystal.Booey.Tests/Style/ResolverTestUtils.hpp"
 #include "Krystal.Booey/Rendering/RenderTreeAsText.hpp"
 #include "Krystal.Booey/Rendering/SVG/Legacy/SVGResources.hpp"
@@ -14,25 +16,6 @@ namespace krys::boo::tests
 
   namespace
   {
-    KRYS_NODISCARD Element &ElementById(Document &document, DOMStringView id) noexcept
-    {
-      auto element = document.GetElementById(id);
-      krys_assert(element);
-      return *element;
-    }
-
-    KRYS_NODISCARD SVGResources *ResourcesById(Document &document, DOMStringView id) noexcept
-    {
-      auto *renderer = ElementById(document, id).Renderer();
-      krys_assert(renderer);
-      return SVGResourcesCache::CachedResourcesForRenderer(*renderer);
-    }
-
-    KRYS_NODISCARD bool Contains(utf8_stringview text, utf8_stringview part) noexcept
-    {
-      return text.contains(part);
-    }
-
     constexpr const char8_t *ClippedShapes =
       u8R"html(<!DOCTYPE html><body style="margin: 0"><svg width=200 height=100>)html"
       u8R"html(<clipPath id=c><circle cx=20 cy=20 r=10 /></clipPath>)html"
@@ -70,7 +53,7 @@ layer at (0,0) size 800x104
 
     auto *resources = ResourcesById(*fixture.Document, u8"r");
     REQUIRE(resources);
-    CHECK(resources->Clipper() == ElementById(*fixture.Document, u8"c").Renderer());
+    CHECK(resources->Clipper() == ById(*fixture.Document, u8"c").Renderer());
   }
 
   TEST_CASE_METHOD(css::tests::ValueFixture, "LegacyRenderSVGResourceClipper: painting",
@@ -94,8 +77,8 @@ layer at (0,0) size 800x104
   {
     ResolverFixture fixture {ClippedShapes};
     (void)fixture.Document->UpdateLayout();
-    auto &r = ElementById(*fixture.Document, u8"r");
-    auto &s = ElementById(*fixture.Document, u8"s");
+    auto &r = ById(*fixture.Document, u8"r");
+    auto &s = ById(*fixture.Document, u8"s");
 
     // Only the parts of a shape inside its clip path are hit.
     CHECK(fixture.Document->ElementFromPoint(20, 20).get() == &r);
@@ -125,12 +108,12 @@ layer at (0,0) size 800x104
   (rect at (0,18) size 40x40))"));
 
     // And is only hit inside it.
-    auto &box = ElementById(*fixture.Document, u8"box");
+    auto &box = ById(*fixture.Document, u8"box");
     CHECK(fixture.Document->ElementFromPoint(20, 38).get() == &box);
     CHECK(fixture.Document->ElementFromPoint(2, 20).get() != &box);
 
     // Changing the clip path repaints the box with the new one.
-    (void)ElementById(*fixture.Document, u8"c").FirstElementChild()->SetAttribute(u8"r", u8"5");
+    (void)ById(*fixture.Document, u8"c").FirstElementChild()->SetAttribute(u8"r", u8"5");
     painted = fixture.Painted();
     CAPTURE(css::tests::ToNarrow(painted));
     CHECK(Contains(painted, u8"(path add ellipse in rect at (15,15) size 10x10)"));

@@ -201,8 +201,8 @@ namespace krys::boo::html::tests
     SECTION("upgraded, they fail")
     {
       auto registry = CustomElementRegistry::CreateScoped();
-      auto element = Document->CreateElement(u8"x-broken",
-                                             dom::ElementCreationOptions {.CustomElementRegistry = registry});
+      auto element = Document->CreateElement(
+        u8"x-broken", dom::ElementCreationOptions {.CustomElementRegistry = registry.get()});
       REQUIRE_FALSE(element.HasException());
       CHECK(element.Value()->IsCustomElementUpgradeCandidate());
       REQUIRE_FALSE(registry->Define(u8"x-broken", [](HTMLElement &) { return UniquePtr<CustomElement> {}; })
@@ -319,7 +319,7 @@ namespace krys::boo::html::tests
     {
       auto registry = CustomElementRegistry::CreateScoped();
       auto candidate = Document->CreateElement(
-        u8"x-closed", dom::ElementCreationOptions {.CustomElementRegistry = registry});
+        u8"x-closed", dom::ElementCreationOptions {.CustomElementRegistry = registry.get()});
       REQUIRE_FALSE(candidate.HasException());
       REQUIRE_FALSE(candidate.Value()->AttachShadow({}).HasException());
       REQUIRE_FALSE(registry
@@ -342,8 +342,8 @@ namespace krys::boo::html::tests
                              { return CreateUnique<LoggingElement>(element, Calls); })
                     .HasException());
 
-    auto inScope =
-      Document->CreateElement(u8"x-scoped", dom::ElementCreationOptions {.CustomElementRegistry = scoped});
+    auto inScope = Document->CreateElement(
+      u8"x-scoped", dom::ElementCreationOptions {.CustomElementRegistry = scoped.get()});
     REQUIRE_FALSE(inScope.HasException());
     CHECK(inScope.Value()->IsDefinedCustomElement());
 
@@ -357,14 +357,14 @@ namespace krys::boo::html::tests
       CHECK(initializeDocument.GetException().Code() == ExceptionCode::NotSupportedError);
 
       REQUIRE_FALSE(scoped->Initialize(*global).HasException());
-      CHECK(global->CustomElementRegistry().get() == &Registry());
+      CHECK(global->CustomElementRegistry() == &Registry());
       CHECK(global->IsCustomElementUpgradeCandidate());
     }
 
     SECTION("a definition added later upgrades the scope's connected elements")
     {
-      auto later =
-        Document->CreateElement(u8"x-later", dom::ElementCreationOptions {.CustomElementRegistry = scoped});
+      auto later = Document->CreateElement(
+        u8"x-later", dom::ElementCreationOptions {.CustomElementRegistry = scoped.get()});
       REQUIRE_FALSE(later.HasException());
       REQUIRE_FALSE(Body().AppendChild(*later.Value()).HasException());
       (void)TakeCalls();

@@ -11,7 +11,7 @@ namespace krys::boo::html::tests
 
   namespace
   {
-    KRYS_NODISCARD std::string Text(const Node &node) noexcept
+    KRYS_NODISCARD std::string TextContentOf(const Node &node) noexcept
     {
       auto text = node.TextContent().value_or(DOMString());
       return std::string(reinterpret_cast<const char *>(text.data()), text.size());
@@ -33,34 +33,34 @@ namespace krys::boo::html::tests
       u8"<option id=one>One</option><option id=two selected>Two <b>bold</b></option></select></form>");
     auto &select = fixture.Get<HTMLSelectElement>(u8"s");
     auto &selectedcontent = fixture.Get<HTMLSelectedContentElement>(u8"sc");
-    CHECK(Text(selectedcontent) == "Two bold");
+    CHECK(TextContentOf(selectedcontent) == "Two bold");
     CHECK(selectedcontent.FirstElementChild());
 
     SECTION("selectedIndex, value and selected")
     {
       select.SelectedIndex(0);
-      CHECK(Text(selectedcontent) == "One");
+      CHECK(TextContentOf(selectedcontent) == "One");
       select.Value(u8"nothing");
-      CHECK(Text(selectedcontent).empty());
+      CHECK(TextContentOf(selectedcontent).empty());
       fixture.Get<HTMLOptionElement>(u8"two").Selected(true);
-      CHECK(Text(selectedcontent) == "Two bold");
+      CHECK(TextContentOf(selectedcontent) == "Two bold");
     }
 
     SECTION("Resetting, and a clean option's selected attribute")
     {
       select.SelectedIndex(0);
       fixture.Get<HTMLFormElement>(u8"f").Reset();
-      CHECK(Text(selectedcontent) == "Two bold");
+      CHECK(TextContentOf(selectedcontent) == "Two bold");
       fixture.Get<HTMLOptionElement>(u8"one").DefaultSelected(true);
-      CHECK(Text(selectedcontent) == "One");
+      CHECK(TextContentOf(selectedcontent) == "One");
     }
 
     SECTION("Removing the selected option updates it in a microtask")
     {
       (void)fixture.Get<HTMLOptionElement>(u8"two").Remove();
-      CHECK(Text(selectedcontent) == "Two bold");
+      CHECK(TextContentOf(selectedcontent) == "Two bold");
       RunMicrotasks();
-      CHECK(Text(selectedcontent) == "One");
+      CHECK(TextContentOf(selectedcontent) == "One");
     }
 
     SECTION("It isn't kept up to date while the select has multiple")
@@ -68,16 +68,16 @@ namespace krys::boo::html::tests
       select.Multiple(true);
       fixture.Get<HTMLOptionElement>(u8"two").Selected(false);
       fixture.Get<HTMLOptionElement>(u8"one").Selected(true);
-      CHECK(Text(selectedcontent) == "Two bold");
+      CHECK(TextContentOf(selectedcontent) == "Two bold");
       select.Multiple(false);
-      CHECK(Text(selectedcontent) == "One");
+      CHECK(TextContentOf(selectedcontent) == "One");
     }
 
     SECTION("An inserted selectedcontent mirrors the selected option straight away")
     {
       auto inserted = fixture.Document->CreateElement(u8"selectedcontent").ReleaseValue();
       REQUIRE_FALSE(select.AppendChild(*inserted).HasException());
-      CHECK(Text(*inserted) == "Two bold");
+      CHECK(TextContentOf(*inserted) == "Two bold");
     }
   }
 

@@ -27,6 +27,7 @@
 
 #include "Krystal.Booey/CSS/Selectors/SelectorList.hpp"
 #include "Krystal.Booey/CSS/Selectors/SelectorParserContext.hpp"
+#include "Krystal.Booey/DOM/Collections/NodeList.hpp"
 #include "Krystal.Booey/DOM/Types/DOMString.hpp"
 #include "Krystal.Core/Attributes.hpp"
 #include "Krystal.Core/Macros.hpp"

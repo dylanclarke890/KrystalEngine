@@ -21,12 +21,16 @@
 
 #pragma once
 
-#include "Krystal.Booey/Graphics/GradientColorStops.hpp"
 #include "Krystal.Booey/SVG/Elements/SVGElement.hpp"
 #include "Krystal.Booey/SVG/Properties/SVGAnimatedPropertyImpl.hpp"
 #include "Krystal.Booey/SVG/SVGTransformList.hpp"
 #include "Krystal.Booey/SVG/SVGUnitTypes.hpp"
 #include "Krystal.Booey/SVG/SVGURIReference.hpp"
+
+namespace krys::boo
+{
+  class GradientColorStops;
+}
 
 namespace krys::boo
 {

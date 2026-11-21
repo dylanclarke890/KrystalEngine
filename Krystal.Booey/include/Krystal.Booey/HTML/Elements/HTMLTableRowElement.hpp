@@ -1,8 +1,12 @@
 ﻿#pragma once
 
-#include "Krystal.Booey/DOM/Collections/HTMLCollection.hpp"
 #include "Krystal.Booey/HTML/Elements/HTMLTablePartElement.hpp"
 #include "Krystal.Core/Types/WeakPtr.hpp"
+
+namespace krys::boo::dom
+{
+  class HTMLCollection;
+}
 
 namespace krys::boo
 {

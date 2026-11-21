@@ -28,6 +28,7 @@
 #include "Krystal.Booey/Graphics/Fonts/FontSelectionAlgorithm.hpp"
 #include "Krystal.Booey/Graphics/Fonts/FontTaggedSettings.hpp"
 #include "Krystal.Booey/Rendering/Style/RenderStyleConstants.hpp"
+#include "Krystal.Booey/Text/TextFlags.hpp"
 #include "Krystal.Core/CanMakeWeakPtr.hpp"
 #include "Krystal.Core/RefCounted.hpp"
 #include "Krystal.Core/Time/Timer.hpp"

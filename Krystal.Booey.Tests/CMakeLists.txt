@@ -16,6 +16,14 @@ set_target_properties(Krystal.Booey.Tests
   	CXX_STANDARD_REQUIRED ON
 		CXX_EXTENSIONS OFF
 		COMPILE_WARNING_AS_ERROR ON
+		# Compiling the tests in batches loads the precompiled header and instantiates the shared templates once per
+		# batch rather than once per file. Batched files share their file-local helpers' names, so those must be
+		# unique or shared (as in Krystal.Booey).
+		UNITY_BUILD ON
+		UNITY_BUILD_BATCH_SIZE 16
+		# The batched sources stay in the project, excluded from the build, and MSBuild warns that those sharing a
+		# name would write the same object file, which they never do.
+		VS_GLOBAL_MSBuildWarningsAsMessages MSB8027
 )
 
 target_compile_features(Krystal.Booey.Tests
@@ -25,7 +33,7 @@ target_compile_features(Krystal.Booey.Tests
 
 target_compile_options(Krystal.Booey.Tests
 	PRIVATE
-		$<$<CXX_COMPILER_ID:MSVC>:/W4 /MP /utf-8>
+		$<$<CXX_COMPILER_ID:MSVC>:/W4 /MP /utf-8 /bigobj>
 )
 
 # The test images Krystal.Image.Tests keeps.
@@ -57,7 +65,6 @@ target_precompile_headers(Krystal.Booey.Tests
     <catch2/catch_test_macros.hpp>
     <catch2/matchers/catch_matchers_floating_point.hpp>
 
-    <Krystal.Booey/DOM/Abort/AbortSignal.hpp>
     <Krystal.Booey/DOM/Iterators/SubtreeRanges.hpp>
     <Krystal.Booey/DOM/Nodes/Attr.hpp>
     <Krystal.Booey/DOM/Nodes/Document.hpp>
@@ -68,7 +75,6 @@ target_precompile_headers(Krystal.Booey.Tests
     <Krystal.Booey/DOM/Types/ExceptionOr.hpp>
     <Krystal.Booey/DOM/Types/USVString.hpp>
 
-    <Krystal.Booey/HTML/CustomElement/CustomElementRegistry.hpp>
     <Krystal.Booey/HTML/Elements/HTMLSlotElement.hpp>
     <Krystal.Booey/HTML/Parser/DocumentParser.hpp>
     <Krystal.Booey/HTML/Parser/CharacterReference.hpp>
@@ -87,20 +93,32 @@ target_sources(Krystal.Booey.Tests
       include
     FILES
 		include/Krystal.Booey.Tests/Accessibility/AXTestUtils.hpp
+		include/Krystal.Booey.Tests/DOM/DOMTestUtils.hpp
 		include/Krystal.Booey.Tests/DOM/TestElement.hpp
+		include/Krystal.Booey.Tests/Input/InputTestUtils.hpp
 		include/Krystal.Booey.Tests/SVG/AnimationTestUtils.hpp
 		include/Krystal.Booey.Tests/SVG/PropertyTestUtils.hpp
+		include/Krystal.Booey.Tests/SVG/SVGTestUtils.hpp
 		include/Krystal.Booey.Tests/SVG/TestSVGElement.hpp
 		include/Krystal.Booey.Tests/CSS/ConsumerTestUtils.hpp
 		include/Krystal.Booey.Tests/CSS/MediaTestUtils.hpp
 		include/Krystal.Booey.Tests/CSS/SelectorTestUtils.hpp
 		include/Krystal.Booey.Tests/Animation/AnimationTestUtils.hpp
+		include/Krystal.Booey.Tests/CSS/CalcTestUtils.hpp
+		include/Krystal.Booey.Tests/CSS/ColorTestUtils.hpp
+		include/Krystal.Booey.Tests/CSS/PositionTestUtils.hpp
+		include/Krystal.Booey.Tests/CSS/TypedOMTestUtils.hpp
 		include/Krystal.Booey.Tests/CSS/ValueTestUtils.hpp
+		include/Krystal.Booey.Tests/CSS/VariableTestUtils.hpp
 		include/Krystal.Booey.Tests/Rendering/MathML/MathMLTestUtils.hpp
+		include/Krystal.Booey.Tests/Rendering/RenderTestUtils.hpp
+		include/Krystal.Booey.Tests/Rendering/SVG/LegacySVGTestUtils.hpp
 		include/Krystal.Booey.Tests/HTML/CustomElementTestUtils.hpp
 		include/Krystal.Booey.Tests/HTML/TableTestUtils.hpp
 		include/Krystal.Booey.Tests/Style/BuilderTestUtils.hpp
 		include/Krystal.Booey.Tests/Style/ResolverTestUtils.hpp
+		include/Krystal.Booey.Tests/Style/StyleTestUtils.hpp
+		include/Krystal.Booey.Tests/StringTestUtils.hpp
 		include/Krystal.Booey.Tests/TestParserUtils.hpp
 	PRIVATE
 		# CSS

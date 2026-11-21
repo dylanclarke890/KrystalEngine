@@ -13,11 +13,11 @@ namespace krys::boo::tests
     using Strings = List<std::string>;
     using Modifier = PlatformEvent::Modifier;
 
-    struct Recorder : EventListenerCallback
+    struct AccessKeyRecorder : EventListenerCallback
     {
       Strings &Records;
 
-      explicit Recorder(Strings &records) noexcept : Records(records)
+      explicit AccessKeyRecorder(Strings &records) noexcept : Records(records)
       {
       }
 
@@ -33,7 +33,7 @@ namespace krys::boo::tests
     struct AccessKeyFixture : EditorFixture
     {
       Strings Records;
-      Ref<EventListenerCallback> Listener {CreateRef<Recorder>(Records)};
+      Ref<EventListenerCallback> Listener {CreateRef<AccessKeyRecorder>(Records)};
 
       explicit AccessKeyFixture(utf8_stringview markup) noexcept : EditorFixture(markup)
       {

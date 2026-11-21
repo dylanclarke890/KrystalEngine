@@ -32,6 +32,7 @@
 #include "Krystal.Booey/HTML/Elements/HTMLOutputElement.hpp"
 #include "Krystal.Booey/DOM/Algorithms/ElementAlgorithms.hpp"
 #include "Krystal.Booey/DOM/Algorithms/NodeAlgorithms.hpp"
+#include "Krystal.Booey/DOM/Collections/DOMTokenList.hpp"
 #include "Krystal.Booey/HTML/Attributes/ReflectAttribute.hpp"
 #include "Krystal.Booey/HTML/CustomElement/CustomElementReactionQueue.hpp"
 
@@ -62,7 +63,7 @@ namespace krys::boo
   {
     if (!_htmlFor)
     {
-      _htmlFor = dom::ElementAlgorithms::CreateDOMTokenList(*this, u8"for");
+      _htmlFor = dom::DOMTokenList::Create(*this, u8"for");
     }
 
     return *_htmlFor;

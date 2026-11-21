@@ -1,9 +1,14 @@
 ﻿#pragma once
 
-#include "Krystal.Booey/HTML/Canvas/EngineTexture.hpp"
 #include "Krystal.Booey/HTML/Canvas/GPUBasedCanvasRenderingContext.hpp"
 #include "Krystal.Core/Geometry/Rect.hpp"
+#include "Krystal.Core/Strings/String.hpp"
 #include "Krystal.Core/Types/Maybe.hpp"
+
+namespace krys::boo::html
+{
+  class EngineTexture;
+}
 
 namespace krys::boo::html
 {
@@ -19,6 +24,8 @@ namespace krys::boo::html
     constexpr static utf8_stringview ContextType = u8"krystal-texture";
 
     explicit EngineTextureRenderingContext(CanvasBase &canvas) noexcept;
+
+    ~EngineTextureRenderingContext() noexcept override;
 
     /// @brief Shows @p texture, or nothing if it's null.
     void SetTexture(RefPtr<EngineTexture> texture) noexcept;

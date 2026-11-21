@@ -27,6 +27,7 @@
 
 #include "Krystal.Booey/DOM/IntersectionObservers/IntersectionObserverCallback.hpp"
 #include "Krystal.Booey/DOM/IntersectionObservers/IntersectionObserverMarginBox.hpp"
+#include "Krystal.Booey/DOM/Nodes/ContainerNode.hpp"
 #include "Krystal.Booey/DOM/Types/DOMString.hpp"
 #include "Krystal.Booey/DOM/Types/ExceptionOr.hpp"
 #include "Krystal.Core/CanMakeWeakPtr.hpp"
@@ -74,7 +75,8 @@ namespace krys::boo
   /// @see https://w3c.github.io/IntersectionObserver/#dictdef-intersectionobserverinit
   struct IntersectionObserverInit
   {
-    Maybe<Variant<RefPtr<Element>, RefPtr<Document>>> Root;
+    /// @note Plain pointers: the observer takes its own reference.
+    Maybe<Variant<Element *, Document *>> Root;
     DOMString RootMargin {u8"0px"};
     DOMString ScrollMargin {u8"0px"};
     Variant<double, List<double>> Threshold {0.0};

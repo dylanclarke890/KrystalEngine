@@ -22,7 +22,7 @@
 #pragma once
 
 #include "Krystal.Booey/SVG/Elements/SVGElement.hpp"
-#include "Krystal.Booey/SVG/Properties/SVGAnimatedPropertyImpl.hpp"
+#include "Krystal.Booey/SVG/Properties/SVGAnimatedString.hpp"
 
 namespace krys::boo
 {

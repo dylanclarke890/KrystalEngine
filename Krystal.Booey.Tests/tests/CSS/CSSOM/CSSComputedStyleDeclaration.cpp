@@ -8,7 +8,7 @@ namespace krys::boo::css::tests
 {
   namespace
   {
-    KRYS_NODISCARD std::string Value(CSSStyleDeclaration &declaration, CSSOMStringView property)
+    KRYS_NODISCARD std::string PropertyValueText(CSSStyleDeclaration &declaration, CSSOMStringView property)
     {
       return ToNarrow(declaration.GetPropertyValue(CSSOMString(property)));
     }
@@ -24,11 +24,11 @@ namespace krys::boo::css::tests
     auto style = fixture.Document->Window()->GetComputedStyle(a);
 
     CHECK(style->GetStyleDeclarationType() == StyleDeclarationType::Style);
-    CHECK(Value(*style, u8"color") == "rgb(0, 0, 255)");
-    CHECK(Value(*style, u8"margin") == "1px 2px");
-    CHECK(Value(*style, u8"margin-left") == "2px");
-    CHECK(Value(*style, u8"--x") == "3");
-    CHECK(Value(*style, u8"not-a-property").empty());
+    CHECK(PropertyValueText(*style, u8"color") == "rgb(0, 0, 255)");
+    CHECK(PropertyValueText(*style, u8"margin") == "1px 2px");
+    CHECK(PropertyValueText(*style, u8"margin-left") == "2px");
+    CHECK(PropertyValueText(*style, u8"--x") == "3");
+    CHECK(PropertyValueText(*style, u8"not-a-property").empty());
     CHECK(style->GetPropertyPriority(u8"color").empty());
     CHECK(style->GetPropertyShorthand(u8"color").empty());
     CHECK_FALSE(style->IsPropertyImplicit(u8"color"));
@@ -51,7 +51,7 @@ namespace krys::boo::css::tests
 
     // It's live.
     REQUIRE_FALSE(a.SetAttribute(u8"style", u8"color: rgb(0, 128, 0)").HasException());
-    CHECK(Value(*style, u8"color") == "rgb(0, 128, 0)");
+    CHECK(PropertyValueText(*style, u8"color") == "rgb(0, 128, 0)");
 
     auto &properties = static_cast<CSSStyleProperties &>(*style);
     CHECK(ToNarrow(properties.GetPropertyValueInternal(PropertyId::MarginTop)) == "1px");
@@ -60,17 +60,17 @@ namespace krys::boo::css::tests
     SECTION("pseudo-elements")
     {
       auto before = fixture.Document->Window()->GetComputedStyle(a, u8"::before");
-      CHECK(Value(*before, u8"color") == "rgb(255, 0, 0)");
-      CHECK(Value(*before, u8"content") == "\"b\"");
+      CHECK(PropertyValueText(*before, u8"color") == "rgb(255, 0, 0)");
+      CHECK(PropertyValueText(*before, u8"content") == "\"b\"");
 
       // A string that doesn't start with a colon is ignored.
-      CHECK(Value(*fixture.Document->Window()->GetComputedStyle(a, u8"before"), u8"color")
+      CHECK(PropertyValueText(*fixture.Document->Window()->GetComputedStyle(a, u8"before"), u8"color")
             == "rgb(0, 128, 0)");
 
       // An invalid pseudo-element gives an empty declaration.
       auto invalid = fixture.Document->Window()->GetComputedStyle(a, u8"::nonsense");
       CHECK(invalid->Length() == 0);
-      CHECK(Value(*invalid, u8"color").empty());
+      CHECK(PropertyValueText(*invalid, u8"color").empty());
     }
   }
 }

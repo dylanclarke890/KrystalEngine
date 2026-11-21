@@ -53,6 +53,7 @@
 #include "Krystal.Booey/Rendering/SVG/RenderSVGGradientStop.hpp"
 #include "Krystal.Booey/Rendering/SVG/RenderSVGInlineText.hpp"
 #include "Krystal.Booey/Rendering/SVG/RenderSVGText.hpp"
+#include "Krystal.Booey/Style/Computed/ComputedStyle+InitialInlines.hpp"
 #include "Krystal.Booey/Style/Values/FilterEffects/Filter.hpp"
 #include "Krystal.Booey/SVG/Elements/SVGCircleElement.hpp"
 #include "Krystal.Booey/SVG/Elements/SVGEllipseElement.hpp"

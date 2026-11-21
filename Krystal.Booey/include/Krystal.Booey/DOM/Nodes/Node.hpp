@@ -28,7 +28,6 @@
 #include "Krystal.Booey/DOM/Internals/NodeRareData.hpp"
 #include "Krystal.Booey/DOM/Types/DOMString.hpp"
 #include "Krystal.Booey/DOM/Types/ExceptionOr.hpp"
-#include "Krystal.Booey/Style/PseudoElementIdentifier.hpp"
 #include "Krystal.Booey/Style/Validity.hpp"
 #include "Krystal.Core/Assert.hpp"
 #include "Krystal.Core/Base.hpp"
@@ -39,6 +38,11 @@
 #include "Krystal.Core/Types/RefPtr.hpp"
 #include "Krystal.Core/Types/UniquePtr.hpp"
 #include <compare>
+
+namespace krys::boo::style
+{
+  struct PseudoElementIdentifier;
+}
 
 namespace krys::text
 {
@@ -283,10 +287,8 @@ namespace krys::boo
 
     /// @see https://dom.spec.whatwg.org/#concept-tree-parent
     /// @see https://dom.spec.whatwg.org/#dom-node-parentnode
-    KRYS_NODISCARD ContainerNode *ParentNode() const noexcept
-    {
-      return _parentNode.get();
-    }
+    /// @note Defined in ContainerNode.hpp, where the parent's type is complete.
+    KRYS_NODISCARD ContainerNode *ParentNode() const noexcept;
 
     /// @see https://dom.spec.whatwg.org/#dom-node-parentelement
     /// @see https://dom.spec.whatwg.org/#parent-element
@@ -969,10 +971,8 @@ namespace krys::boo
 #pragma region Relationships
 
     /// @warn Be careful when modifying node relationships. Node constraints are not checked.
-    void SetParentNode(ContainerNode *parent) noexcept
-    {
-      _parentNode = ShareCheckedPtr(parent);
-    }
+    /// @note Defined in ContainerNode.hpp, where the parent's type is complete.
+    void SetParentNode(ContainerNode *parent) noexcept;
 
     /// @warn Be careful when modifying node relationships. Node constraints are not checked.
     void SetNextSibling(Node *sibling) noexcept

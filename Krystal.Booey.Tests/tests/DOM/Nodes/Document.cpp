@@ -511,11 +511,11 @@ namespace krys::boo::dom::tests
       auto document = CreateRef<HTMLDocument>();
       auto scoped = html::CustomElementRegistry::CreateScoped();
       auto element =
-        document->CreateElement(u8"div", ElementCreationOptions {.CustomElementRegistry = scoped})
+        document->CreateElement(u8"div", ElementCreationOptions {.CustomElementRegistry = scoped.get()})
           .ReleaseValue();
       CHECK(element->CustomElementRegistry() == scoped);
       auto result = document->CreateElement(
-        u8"div", ElementCreationOptions {.CustomElementRegistry = scoped, .Is = u8"x-a"});
+        u8"div", ElementCreationOptions {.CustomElementRegistry = scoped.get(), .Is = u8"x-a"});
       REQUIRE(result.HasException());
       CHECK(result.GetException().Code() == ExceptionCode::NotSupportedError);
     }
@@ -616,7 +616,7 @@ namespace krys::boo::dom::tests
       auto withoutRegistry = CreateRef<TestElement>(*source);
       auto scoped = html::CustomElementRegistry::CreateScoped();
       auto withScoped =
-        document->ImportNode(*withoutRegistry, ImportNodeOptions {.CustomElementRegistry = scoped})
+        document->ImportNode(*withoutRegistry, ImportNodeOptions {.CustomElementRegistry = scoped.get()})
           .ReleaseValue();
       CHECK(Downcast<Element>(*withScoped).CustomElementRegistry() == scoped);
 
@@ -624,8 +624,8 @@ namespace krys::boo::dom::tests
       CHECK(Downcast<Element>(*withGlobal).CustomElementRegistry() == global);
 
       auto otherGlobal = html::CustomElementRegistry::Create(*source);
-      auto result =
-        document->ImportNode(*withoutRegistry, ImportNodeOptions {.CustomElementRegistry = otherGlobal});
+      auto result = document->ImportNode(*withoutRegistry,
+                                         ImportNodeOptions {.CustomElementRegistry = otherGlobal.get()});
       REQUIRE(result.HasException());
       CHECK(result.GetException().Code() == ExceptionCode::NotSupportedError);
     }

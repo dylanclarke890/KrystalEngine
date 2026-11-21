@@ -1,6 +1,5 @@
 ﻿#include <utility>
 
-#include "Krystal.Booey/DOM/Collections/NodeList.hpp"
 #include "Krystal.Booey/DOM/MutationObservers/AttributesMutationRecord.hpp"
 #include "Krystal.Core/Utils/Move.hpp"
 

@@ -42,6 +42,7 @@
 #include "Krystal.Booey/HTML/Elements/HTMLHRElement.hpp"
 #include "Krystal.Booey/HTML/Elements/HTMLLegendElement.hpp"
 #include "Krystal.Booey/Layout/LayoutTree/LayoutBox.hpp"
+#include "Krystal.Booey/Page/Frame.hpp"
 #include "Krystal.Booey/Page/FrameView.hpp"
 #include "Krystal.Booey/Page/FrameViewLayoutContext.hpp"
 #include "Krystal.Booey/Page/Scrolling/ScrollAnchoringController.hpp"

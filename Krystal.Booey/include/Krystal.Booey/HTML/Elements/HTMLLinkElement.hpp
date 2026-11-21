@@ -23,7 +23,6 @@
 
 #pragma once
 
-#include "Krystal.Booey/DOM/Collections/DOMTokenList.hpp"
 #include "Krystal.Booey/DOM/Events/EventSender.hpp"
 #include "Krystal.Booey/DOM/Types/USVString.hpp"
 #include "Krystal.Booey/HTML/Elements/HTMLElement.hpp"
@@ -47,6 +46,11 @@ namespace krys::boo::css
 namespace krys::boo::style
 {
   class Scope;
+}
+
+namespace krys::boo::dom
+{
+  class DOMTokenList;
 }
 
 namespace krys::boo::html

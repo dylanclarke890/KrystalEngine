@@ -64,17 +64,17 @@ namespace krys::boo::html
     // 4. Return null.
     if (auto *element = DynamicDowncast<Element>(node))
     {
-      return element->CustomElementRegistry().get();
+      return element->CustomElementRegistry();
     }
 
     if (auto *document = DynamicDowncast<Document>(node))
     {
-      return document->CustomElementRegistry().get();
+      return document->CustomElementRegistry();
     }
 
     if (auto *shadowRoot = DynamicDowncast<ShadowRoot>(node))
     {
-      return shadowRoot->CustomElementRegistry().get();
+      return shadowRoot->CustomElementRegistry();
     }
 
     return nullptr;

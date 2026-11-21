@@ -27,6 +27,7 @@
 #include "Krystal.Booey/DOM/Algorithms/EventDispatcher.hpp"
 #include "Krystal.Booey/DOM/Algorithms/EventTargetAlgorithms.hpp"
 #include "Krystal.Booey/DOM/Algorithms/TreeQueries.hpp"
+#include "Krystal.Booey/DOM/Collections/DOMTokenList.hpp"
 #include "Krystal.Booey/DOM/Events/EventNames.hpp"
 #include "Krystal.Booey/DOM/Events/FormDataEvent.hpp"
 #include "Krystal.Booey/DOM/Iterators/SubtreeRanges.hpp"
@@ -262,14 +263,13 @@ namespace krys::boo
   {
     if (!_relList)
     {
-      _relList =
-        dom::ElementAlgorithms::CreateDOMTokenList(*this, u8"rel",
-                                                   [](Document &, DOMStringView token)
-                                                   {
-                                                     return text::IsASCIICaselessEqual(token, u8"noreferrer")
-                                                            || text::IsASCIICaselessEqual(token, u8"noopener")
-                                                            || text::IsASCIICaselessEqual(token, u8"opener");
-                                                   });
+      _relList = dom::DOMTokenList::Create(*this, u8"rel",
+                                           [](Document &, DOMStringView token)
+                                           {
+                                             return text::IsASCIICaselessEqual(token, u8"noreferrer")
+                                                    || text::IsASCIICaselessEqual(token, u8"noopener")
+                                                    || text::IsASCIICaselessEqual(token, u8"opener");
+                                           });
     }
 
     return *_relList;

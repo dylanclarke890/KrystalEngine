@@ -25,12 +25,16 @@
 #pragma once
 
 #include "Krystal.Booey/DOM/Geometry/DOMRect.hpp"
-#include "Krystal.Booey/DOM/Geometry/DOMRectList.hpp"
 #include "Krystal.Booey/DOM/Ranges/AbstractRange.hpp"
 #include "Krystal.Booey/DOM/Ranges/BoundaryPoint.hpp"
 #include "Krystal.Booey/DOM/Types/SmallNodeList.hpp"
 #include "Krystal.Core/Enum.hpp"
 #include <compare>
+
+namespace krys::boo::dom
+{
+  class DOMRectList;
+}
 
 namespace krys::boo::dom
 {

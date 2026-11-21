@@ -1,6 +1,7 @@
 ﻿#include "Krystal.Booey/Rendering/Replaced/RenderHTMLCanvas.hpp"
 #include "catch2/catch_test_macros.hpp"
 #include "Krystal.Booey.Tests/Loader/PageInFrameFixture.hpp"
+#include "Krystal.Booey.Tests/StringTestUtils.hpp"
 #include "Krystal.Booey/HTML/Elements/HTMLCanvasElement.hpp"
 #include "Krystal.Booey/Rendering/Layers/RenderLayer.hpp"
 #include "Krystal.Booey/Rendering/Layers/RenderLayerBacking.hpp"
@@ -30,17 +31,6 @@ namespace krys::boo::tests
         return *renderer;
       }
     };
-
-    KRYS_NODISCARD size_t Count(const utf8_string &text, utf8_stringview part) noexcept
-    {
-      size_t count = 0;
-      for (auto position = text.find(part); position != utf8_string::npos;
-           position = text.find(part, position + 1))
-      {
-        ++count;
-      }
-      return count;
-    }
   }
 
   TEST_CASE("RenderHTMLCanvas: the canvas's size is its natural size", "[Rendering][RenderHTMLCanvas]")

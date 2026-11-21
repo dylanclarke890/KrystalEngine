@@ -29,12 +29,11 @@ namespace krys::boo::dom
     /// @see https://dom.spec.whatwg.org/#concept-namednodemap-element
     CheckedRef<Element> _associatedElement;
 
-    explicit NamedNodeMap(Element &associatedElement) noexcept
-        : _associatedElement(ShareCheckedRef(associatedElement))
-    {
-    }
+    explicit NamedNodeMap(Element &associatedElement) noexcept;
 
   public:
+    ~NamedNodeMap() noexcept;
+
 #pragma region NamedNodeMap - https://dom.spec.whatwg.org/#namednodemap
 
     /// @see https://dom.spec.whatwg.org/#dom-namednodemap-length

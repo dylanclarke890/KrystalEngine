@@ -20,7 +20,18 @@
 
 namespace krys::boo::css::tests
 {
-  using namespace parse_property;
+  using parse_property::ColorParsingOptions;
+  using parse_property::ConsumeColor;
+  using parse_property::ConsumeColorInterpolationMethod;
+  using parse_property::ConsumeColorRaw;
+  using parse_property::ConsumeDynamicRangeLimit;
+  using parse_property::ConsumeUnresolvedColor;
+  using parse_property::ConsumeUnresolvedDynamicRangeLimit;
+  using parse_property::DeprecatedParseColorRawWithoutContext;
+  using parse_property::IsColorKeywordAllowed;
+  using parse_property::ParseColorRaw;
+  using parse_property::ParseColorRawGeneral;
+  using parse_property::ParseColorRawSimple;
 
   namespace
   {
@@ -50,16 +61,16 @@ namespace krys::boo::css::tests
 
     /// @brief Serialises as a std::string, which Catch2 can print.
     template <typename T>
-    std::string SerialiseForTest(const T &value)
+    std::string SerialiseToNarrow(const T &value)
     {
       auto serialised = Serialise(DefaultSerialisationContext(), value);
       return std::string(serialised.begin(), serialised.end());
     }
 
-    std::string Serialised(utf8_stringview css, const ParseOptions &options = {})
+    std::string SerialisedColor(utf8_stringview css, const ParseOptions &options = {})
     {
       auto color = Parse(css, options);
-      return color ? SerialiseForTest(*color) : std::string("<invalid>");
+      return color ? SerialiseToNarrow(*color) : std::string("<invalid>");
     }
 
     boo::Color Resolve(const Color &color)
@@ -188,19 +199,19 @@ namespace krys::boo::css::tests
       REQUIRE(rgb->Resolved());
       CHECK(rgb->Resolved()->Value.TryGetAsSRGBABytes() == SRGBA<uint8> {255, 128, 0});
 
-      CHECK(Serialised(u8"rgb(255 128 0)") == "rgb(255, 128, 0)");
-      CHECK(Serialised(u8"rgba(255 128 0 / 50%)") == "rgba(255, 128, 0, 0.5)");
-      CHECK(Serialised(u8"rgb(100% 0% 0%)") == "rgb(255, 0, 0)");
-      CHECK(Serialised(u8"rgb(none 0 0)") == "rgb(0, 0, 0)");
-      CHECK(Serialised(u8"rgb(300 -10 0)") == "rgb(255, 0, 0)");
-      CHECK(Serialised(u8"RGB(255 0 0)") == "rgb(255, 0, 0)");
+      CHECK(SerialisedColor(u8"rgb(255 128 0)") == "rgb(255, 128, 0)");
+      CHECK(SerialisedColor(u8"rgba(255 128 0 / 50%)") == "rgba(255, 128, 0, 0.5)");
+      CHECK(SerialisedColor(u8"rgb(100% 0% 0%)") == "rgb(255, 0, 0)");
+      CHECK(SerialisedColor(u8"rgb(none 0 0)") == "rgb(0, 0, 0)");
+      CHECK(SerialisedColor(u8"rgb(300 -10 0)") == "rgb(255, 0, 0)");
+      CHECK(SerialisedColor(u8"RGB(255 0 0)") == "rgb(255, 0, 0)");
     }
 
     SECTION("Legacy syntax")
     {
-      CHECK(Serialised(u8"rgb(255, 128, 0)") == "rgb(255, 128, 0)");
-      CHECK(Serialised(u8"rgba(255, 128, 0, 0.5)") == "rgba(255, 128, 0, 0.5)");
-      CHECK(Serialised(u8"rgb(100%, 0%, 0%)") == "rgb(255, 0, 0)");
+      CHECK(SerialisedColor(u8"rgb(255, 128, 0)") == "rgb(255, 128, 0)");
+      CHECK(SerialisedColor(u8"rgba(255, 128, 0, 0.5)") == "rgba(255, 128, 0, 0.5)");
+      CHECK(SerialisedColor(u8"rgb(100%, 0%, 0%)") == "rgb(255, 0, 0)");
 
       // The legacy syntax doesn't allow `none`, mixing numbers and percentages, or a slash.
       CHECK_FALSE(Parse(u8"rgb(none, 0, 0)"));
@@ -213,11 +224,11 @@ namespace krys::boo::css::tests
 
     SECTION("hsl()")
     {
-      CHECK(Serialised(u8"hsl(120deg 100% 50%)") == "rgb(0, 255, 0)");
-      CHECK(Serialised(u8"hsl(120 100 50)") == "rgb(0, 255, 0)");
-      CHECK(Serialised(u8"hsla(0.5turn 100% 50% / 0.25)") == "rgba(0, 255, 255, 0.25)");
-      CHECK(Serialised(u8"hsl(120, 100%, 50%)") == "rgb(0, 255, 0)");
-      CHECK(Serialised(u8"hsl(120deg, 100%, 50%, 50%)") == "rgba(0, 255, 0, 0.5)");
+      CHECK(SerialisedColor(u8"hsl(120deg 100% 50%)") == "rgb(0, 255, 0)");
+      CHECK(SerialisedColor(u8"hsl(120 100 50)") == "rgb(0, 255, 0)");
+      CHECK(SerialisedColor(u8"hsla(0.5turn 100% 50% / 0.25)") == "rgba(0, 255, 255, 0.25)");
+      CHECK(SerialisedColor(u8"hsl(120, 100%, 50%)") == "rgb(0, 255, 0)");
+      CHECK(SerialisedColor(u8"hsl(120deg, 100%, 50%, 50%)") == "rgba(0, 255, 0, 0.5)");
 
       // The legacy syntax only takes percentages for saturation and lightness.
       CHECK_FALSE(Parse(u8"hsl(120, 100, 50)"));
@@ -229,7 +240,7 @@ namespace krys::boo::css::tests
       auto rgb = Parse(u8"rgb(calc(200 + 55) 0 0)");
       REQUIRE(rgb);
       CHECK(rgb->IsResolved());
-      CHECK(SerialiseForTest(*rgb) == "rgb(255, 0, 0)");
+      CHECK(SerialiseToNarrow(*rgb) == "rgb(255, 0, 0)");
     }
 
     SECTION("calc() that needs conversion data is kept")
@@ -245,16 +256,16 @@ namespace krys::boo::css::tests
   {
     SECTION("lab(), lch(), oklab(), oklch(), hwb()")
     {
-      CHECK(Serialised(u8"lab(50% 40 59.5)") == "lab(50 40 59.5)");
-      CHECK(Serialised(u8"lab(50 40 59.5 / 0.5)") == "lab(50 40 59.5 / 0.5)");
-      CHECK(Serialised(u8"lch(50% 30 270deg)") == "lch(50 30 270)");
-      CHECK(Serialised(u8"oklab(0.5 0.1 -0.1)") == "oklab(0.5 0.1 -0.1)");
-      CHECK(Serialised(u8"oklch(50% 0.2 90)") == "oklch(0.5 0.2 90)");
+      CHECK(SerialisedColor(u8"lab(50% 40 59.5)") == "lab(50 40 59.5)");
+      CHECK(SerialisedColor(u8"lab(50 40 59.5 / 0.5)") == "lab(50 40 59.5 / 0.5)");
+      CHECK(SerialisedColor(u8"lch(50% 30 270deg)") == "lch(50 30 270)");
+      CHECK(SerialisedColor(u8"oklab(0.5 0.1 -0.1)") == "oklab(0.5 0.1 -0.1)");
+      CHECK(SerialisedColor(u8"oklch(50% 0.2 90)") == "oklch(0.5 0.2 90)");
       // Hues are normalised to [0, 360).
-      CHECK(Serialised(u8"lch(50 30 400)") == "lch(50 30 40)");
-      CHECK(Serialised(u8"oklch(0.5 0.125 -90deg)") == "oklch(0.5 0.125 270)");
-      CHECK(Serialised(u8"hwb(120 0% 0%)") == "rgb(0, 255, 0)");
-      CHECK(Serialised(u8"lab(none 0 0)") == "lab(none 0 0)");
+      CHECK(SerialisedColor(u8"lch(50 30 400)") == "lch(50 30 40)");
+      CHECK(SerialisedColor(u8"oklch(0.5 0.125 -90deg)") == "oklch(0.5 0.125 270)");
+      CHECK(SerialisedColor(u8"hwb(120 0% 0%)") == "rgb(0, 255, 0)");
+      CHECK(SerialisedColor(u8"lab(none 0 0)") == "lab(none 0 0)");
 
       // These don't have a legacy syntax.
       CHECK_FALSE(Parse(u8"lab(50, 40, 59.5)"));
@@ -270,16 +281,16 @@ namespace krys::boo::css::tests
 
     SECTION("color()")
     {
-      CHECK(Serialised(u8"color(srgb 1 0 0)") == "color(srgb 1 0 0)");
-      CHECK(Serialised(u8"color(display-p3 1 0 0 / 50%)") == "color(display-p3 1 0 0 / 0.5)");
-      CHECK(Serialised(u8"color(srgb-linear 100% 0% 0%)") == "color(srgb-linear 1 0 0)");
-      CHECK(Serialised(u8"color(a98-rgb 1 0 0)") == "color(a98-rgb 1 0 0)");
-      CHECK(Serialised(u8"color(prophoto-rgb 1 0 0)") == "color(prophoto-rgb 1 0 0)");
-      CHECK(Serialised(u8"color(rec2020 1 0 0)") == "color(rec2020 1 0 0)");
-      CHECK(Serialised(u8"color(display-p3-linear 1 0 0)") == "color(display-p3-linear 1 0 0)");
-      CHECK(Serialised(u8"color(xyz 1 0 0)") == "color(xyz-d65 1 0 0)");
-      CHECK(Serialised(u8"color(xyz-d50 1 0 0)") == "color(xyz-d50 1 0 0)");
-      CHECK(Serialised(u8"color(xyz-d65 1 0 0)") == "color(xyz-d65 1 0 0)");
+      CHECK(SerialisedColor(u8"color(srgb 1 0 0)") == "color(srgb 1 0 0)");
+      CHECK(SerialisedColor(u8"color(display-p3 1 0 0 / 50%)") == "color(display-p3 1 0 0 / 0.5)");
+      CHECK(SerialisedColor(u8"color(srgb-linear 100% 0% 0%)") == "color(srgb-linear 1 0 0)");
+      CHECK(SerialisedColor(u8"color(a98-rgb 1 0 0)") == "color(a98-rgb 1 0 0)");
+      CHECK(SerialisedColor(u8"color(prophoto-rgb 1 0 0)") == "color(prophoto-rgb 1 0 0)");
+      CHECK(SerialisedColor(u8"color(rec2020 1 0 0)") == "color(rec2020 1 0 0)");
+      CHECK(SerialisedColor(u8"color(display-p3-linear 1 0 0)") == "color(display-p3-linear 1 0 0)");
+      CHECK(SerialisedColor(u8"color(xyz 1 0 0)") == "color(xyz-d65 1 0 0)");
+      CHECK(SerialisedColor(u8"color(xyz-d50 1 0 0)") == "color(xyz-d50 1 0 0)");
+      CHECK(SerialisedColor(u8"color(xyz-d65 1 0 0)") == "color(xyz-d65 1 0 0)");
       CHECK_FALSE(Parse(u8"color(foo 1 0 0)"));
       CHECK_FALSE(Parse(u8"color(srgb 1 0)"));
       CHECK_FALSE(Parse(u8"color(srgb, 1, 0, 0)"));
@@ -290,7 +301,7 @@ namespace krys::boo::css::tests
       auto relative = Parse(u8"rgb(from red r g b)");
       REQUIRE(relative);
       CHECK_FALSE(relative->IsResolved());
-      CHECK(SerialiseForTest(*relative) == "rgb(from red r g b)");
+      CHECK(SerialiseToNarrow(*relative) == "rgb(from red r g b)");
       CHECK(Bytes(Resolve(*relative)) == SRGBA<uint8> {255, 0, 0});
 
       CHECK(Bytes(u8"rgb(from red b g r)") == SRGBA<uint8> {0, 0, 255});
@@ -310,14 +321,14 @@ namespace krys::boo::css::tests
 
     SECTION("color-mix()")
     {
-      CHECK(Serialised(u8"color-mix(in srgb, red, blue)") == "color-mix(in srgb, red, blue)");
-      CHECK(Serialised(u8"color-mix(red, blue)") == "color-mix(red, blue)");
-      CHECK(Serialised(u8"color-mix(in oklab, red, blue)") == "color-mix(red, blue)");
-      CHECK(Serialised(u8"color-mix(in srgb, red 25%, blue)") == "color-mix(in srgb, red 25%, blue)");
-      CHECK(Serialised(u8"color-mix(in srgb, 25% red, blue)") == "color-mix(in srgb, red 25%, blue)");
-      CHECK(Serialised(u8"color-mix(in hsl longer hue, red, blue)")
+      CHECK(SerialisedColor(u8"color-mix(in srgb, red, blue)") == "color-mix(in srgb, red, blue)");
+      CHECK(SerialisedColor(u8"color-mix(red, blue)") == "color-mix(red, blue)");
+      CHECK(SerialisedColor(u8"color-mix(in oklab, red, blue)") == "color-mix(red, blue)");
+      CHECK(SerialisedColor(u8"color-mix(in srgb, red 25%, blue)") == "color-mix(in srgb, red 25%, blue)");
+      CHECK(SerialisedColor(u8"color-mix(in srgb, 25% red, blue)") == "color-mix(in srgb, red 25%, blue)");
+      CHECK(SerialisedColor(u8"color-mix(in hsl longer hue, red, blue)")
             == "color-mix(in hsl longer hue, red, blue)");
-      CHECK(Serialised(u8"color-mix(in lch, red, blue)") == "color-mix(in lch, red, blue)");
+      CHECK(SerialisedColor(u8"color-mix(in lch, red, blue)") == "color-mix(in lch, red, blue)");
       CHECK(Bytes(u8"color-mix(in srgb, red, blue)") == SRGBA<uint8> {128, 0, 128});
 
       CHECK_FALSE(Parse(u8"color-mix(in srgb, red)"));
@@ -336,7 +347,7 @@ namespace krys::boo::css::tests
 
     SECTION("light-dark()")
     {
-      CHECK(Serialised(u8"light-dark(red, blue)") == "light-dark(red, blue)");
+      CHECK(SerialisedColor(u8"light-dark(red, blue)") == "light-dark(red, blue)");
       CHECK_FALSE(Parse(u8"light-dark(red)"));
       CHECK_FALSE(Parse(u8"light-dark(red blue)"));
     }
@@ -347,15 +358,15 @@ namespace krys::boo::css::tests
 
       auto enabled = ParseOptions {};
       enabled.Context.colorLayersEnabled = true;
-      CHECK(Serialised(u8"contrast-color(red)", enabled) == "contrast-color(red)");
-      CHECK(Serialised(u8"color-layers(red, blue)", enabled) == "color-layers(red, blue)");
+      CHECK(SerialisedColor(u8"contrast-color(red)", enabled) == "contrast-color(red)");
+      CHECK(SerialisedColor(u8"color-layers(red, blue)", enabled) == "color-layers(red, blue)");
       CHECK_FALSE(Parse(u8"contrast-color(red, blue)", enabled));
       CHECK_FALSE(Parse(u8"color-layers(red blue)", enabled));
-      CHECK(Serialised(u8"color-layers(multiply, red, blue)", enabled)
+      CHECK(SerialisedColor(u8"color-layers(multiply, red, blue)", enabled)
             == "color-layers(multiply, red, blue)");
-      CHECK(Serialised(u8"color-layers(HUE, red)", enabled) == "color-layers(hue, red)");
-      CHECK(Serialised(u8"color-layers(color, red)", enabled) == "color-layers(color, red)");
-      CHECK(Serialised(u8"color-layers(normal, red)", enabled) == "color-layers(red)");
+      CHECK(SerialisedColor(u8"color-layers(HUE, red)", enabled) == "color-layers(hue, red)");
+      CHECK(SerialisedColor(u8"color-layers(color, red)", enabled) == "color-layers(color, red)");
+      CHECK(SerialisedColor(u8"color-layers(normal, red)", enabled) == "color-layers(red)");
       CHECK_FALSE(Parse(u8"color-layers(multiply)", enabled));
       CHECK_FALSE(Parse(u8"color-layers(multiply red)", enabled));
       CHECK_FALSE(Parse(u8"color-layers(red, multiply)", enabled));
@@ -475,7 +486,7 @@ namespace krys::boo::css::tests
 
     auto mix = ParseDynamicRangeLimit(u8"dynamic-range-limit-mix(standard 25%, 75% no-limit)", enabled);
     REQUIRE(mix);
-    CHECK(SerialiseForTest(*mix) == "dynamic-range-limit-mix(standard 25%, no-limit 75%)");
+    CHECK(SerialiseToNarrow(*mix) == "dynamic-range-limit-mix(standard 25%, no-limit 75%)");
 
     CHECK(ParseDynamicRangeLimit(
       u8"dynamic-range-limit-mix(dynamic-range-limit-mix(standard 50%, constrained 50%) 10%, no-limit 90%)",

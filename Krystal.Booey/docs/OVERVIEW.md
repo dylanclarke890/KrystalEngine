@@ -14,7 +14,7 @@ The specifications are the reference for behaviour, and Chrome is the reference 
 
 **Dropped on purpose:** `-webkit-`/`-apple-` features, other non-standard features and legacy aliases (properties, pseudo-classes and elements, at-rules, SVG 1.1 features SVG 2 removed). The exceptions are the `-webkit-` form control pseudo-elements and the `-webkit-link`/`-webkit-focus-ring-color` keywords, the only way to style built-in controls; the properties the engine itself needs are internal (`-internal-*`), set only by the user agent's style sheets and C++ (see `DIFFERENCES.md`). Standard features are kept where a C++ application declaring and rendering documents could use them, even before Booey does, so they're easy to wire up; browser-oriented ones (the not-planned list) are removed rather than kept unused, with a `DIFFERENCES.md` entry.
 
-Without scripting, the DOM's callbacks are C++: listeners are `Func`s owned by `EventListenerHandle`s, observer callbacks (`MutationCallback`, `ResizeObserverCallback`, `IntersectionObserverCallback`) are `Func`s, and the window has the spec's `Window` interface for C++ callers.
+Without scripting, the DOM's callbacks are C++: listeners are `Func`s owned by `EventListenerHandle`s, abort algorithms are `Func`s owned by `AbortAlgorithmHandle`s, observer callbacks (`MutationCallback`, `ResizeObserverCallback`, `IntersectionObserverCallback`) are `Func`s, and the window has the spec's `Window` interface for C++ callers.
 
 ## Working on Booey
 

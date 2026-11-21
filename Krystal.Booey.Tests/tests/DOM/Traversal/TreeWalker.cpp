@@ -1,5 +1,6 @@
 ﻿#include "Krystal.Booey/DOM/Traversal/TreeWalker.hpp"
 #include "catch2/catch_test_macros.hpp"
+#include "Krystal.Booey.Tests/DOM/DOMTestUtils.hpp"
 #include "Krystal.Booey.Tests/DOM/TestElement.hpp"
 #include "Krystal.Booey/DOM/Nodes/Element.hpp"
 #include "Krystal.Booey/DOM/Nodes/HTMLDocument.hpp"
@@ -8,34 +9,13 @@
 
 namespace krys::boo::dom::tests
 {
-  namespace
-  {
-    struct CommonTestData
-    {
-      Ref<Document> Document;
-      Ref<TestElement> Node;
-
-      CommonTestData() : Document(CreateRef<HTMLDocument>()), Node(CreateRef<TestElement>(*Document))
-      {
-      }
-    };
-
-    class TextNodeFilter : public NodeFilter
-    {
-    public:
-      KRYS_NODISCARD ExceptionOr<FilterResult> AcceptNode(const Node &node) const noexcept override
-      {
-        return node.NodeType() == NodeType::TEXT_NODE ? FilterResult::FILTER_ACCEPT
-                                                      : FilterResult::FILTER_REJECT;
-      }
-    };
-  }
+  using boo::tests::TextNodeFilter;
 
   TEST_CASE(
     "TreeWalker.root and currentNode: its root, where it starts",
     "[DOM][TreeWalker][dom:interface-treewalker][dom:dom-treewalker-root][dom:dom-treewalker-currentnode]")
   {
-    CommonTestData data;
+    TestElementFixture data;
     auto treeWalker = data.Document->CreateTreeWalker(*data.Node, WhatToShow::SHOW_ALL, nullptr);
     REQUIRE(&treeWalker->Root() == data.Node);
     REQUIRE(&treeWalker->CurrentNode() == data.Node);
@@ -46,7 +26,7 @@ namespace krys::boo::dom::tests
             "treewalker-nextsibling]"
             "[dom:dom-treewalker-previoussibling][dom:dom-treewalker-parentnode]")
   {
-    CommonTestData data;
+    TestElementFixture data;
     auto child1 = CreateRef<TestElement>(*data.Document);
     auto child2 = CreateRef<TestElement>(*data.Document);
 
@@ -86,7 +66,7 @@ namespace krys::boo::dom::tests
             "[DOM][TreeWalker][dom:dom-treewalker-filter][dom:concept-traverse-children][dom:concept-"
             "traverse-siblings]")
   {
-    CommonTestData data;
+    TestElementFixture data;
 
     auto textNode = CreateRef<krys::boo::Text>(*data.Document, u8"Hello, World!");
 
@@ -110,7 +90,7 @@ namespace krys::boo::dom::tests
   TEST_CASE("TreeWalker traversal: only nodes its whatToShow shows are returned",
             "[DOM][TreeWalker][dom:dom-treewalker-whattoshow][dom:concept-traverse-children]")
   {
-    CommonTestData data;
+    TestElementFixture data;
 
     auto elementNode = CreateRef<TestElement>(*data.Document);
     auto textNode = CreateRef<krys::boo::Text>(*data.Document, u8"Hello, World!");

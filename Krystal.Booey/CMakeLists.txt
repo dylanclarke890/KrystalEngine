@@ -517,6 +517,7 @@ set(KRYSTAL_BOOEY_CSS_HEADERS
   include/Krystal.Booey/CSS/Queries/GenericMediaQuerySerialisation.hpp
   include/Krystal.Booey/CSS/Queries/GenericMediaQueryTypes.hpp
   include/Krystal.Booey/CSS/Queries/MediaQuery.hpp
+  include/Krystal.Booey/CSS/Queries/MediaQueryForward.hpp
   include/Krystal.Booey/CSS/Queries/MediaQueryEvaluator.hpp
   include/Krystal.Booey/CSS/Queries/MediaQueryFeatures.hpp
   include/Krystal.Booey/CSS/Queries/MediaQueryMatcher.hpp
@@ -1048,6 +1049,7 @@ set(KRYSTAL_BOOEY_CSS_SOURCES
 )
 
 set(KRYSTAL_BOOEY_DOM_HEADERS
+  include/Krystal.Booey/DOM/Abort/AbortAlgorithmHandle.hpp
   include/Krystal.Booey/DOM/Abort/AbortController.hpp
   include/Krystal.Booey/DOM/Abort/AbortSignal.hpp
   include/Krystal.Booey/DOM/Algorithms/AbortAlgorithms.hpp
@@ -1218,6 +1220,7 @@ set(KRYSTAL_BOOEY_DOM_HEADERS
 )
 
 set(KRYSTAL_BOOEY_DOM_SOURCES
+  src/DOM/Abort/AbortAlgorithmHandle.cpp
   src/DOM/Abort/AbortController.cpp
   src/DOM/Abort/AbortSignal.cpp
   src/DOM/Algorithms/AbortAlgorithms.cpp
@@ -1258,6 +1261,7 @@ set(KRYSTAL_BOOEY_DOM_SOURCES
   src/DOM/Events/ContentVisibilityAutoStateChangeEvent.cpp
   src/DOM/Events/DragEvent.cpp
   src/DOM/Events/Event.cpp
+  src/DOM/Events/EventListener.cpp
   src/DOM/Events/EventListenerHandle.cpp
   src/DOM/Events/EventPathItem.cpp
   src/DOM/Events/EventTarget.cpp
@@ -1305,6 +1309,7 @@ set(KRYSTAL_BOOEY_DOM_SOURCES
   src/DOM/MutationObservers/ChildListMutationRecord.cpp
   src/DOM/MutationObservers/EmptyNodeMutationRecord.cpp
   src/DOM/MutationObservers/MutationObserver.cpp
+  src/DOM/MutationObservers/MutationRecord.cpp
   src/DOM/Nodes/Attr.cpp
   src/DOM/Nodes/CDATASection.cpp
   src/DOM/Nodes/CharacterData.cpp
@@ -4221,7 +4226,6 @@ target_precompile_headers(Krystal.Booey
     include/Krystal.Booey/CSS/Values/Primitives/PrimitiveNumeric.hpp
     include/Krystal.Booey/CSS/Values/Value.hpp
 
-    include/Krystal.Booey/DOM/Abort/AbortSignal.hpp
     include/Krystal.Booey/DOM/Iterators/SubtreeRanges.hpp
     include/Krystal.Booey/DOM/Nodes/Attr.hpp
     include/Krystal.Booey/DOM/Nodes/Document.hpp
@@ -4231,7 +4235,6 @@ target_precompile_headers(Krystal.Booey
     include/Krystal.Booey/DOM/Types/DOMString.hpp
     include/Krystal.Booey/DOM/Types/ExceptionOr.hpp
     include/Krystal.Booey/DOM/Types/USVString.hpp
-    include/Krystal.Booey/HTML/CustomElement/CustomElementRegistry.hpp
     include/Krystal.Booey/HTML/Elements/HTMLSlotElement.hpp
     include/Krystal.Booey/HTML/Internals/PresentationalHints.hpp
 

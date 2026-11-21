@@ -2,7 +2,6 @@
 
 #include "Krystal.Booey/DOM/Nodes/Node.hpp"
 #include "Krystal.Booey/DOM/Types/QualifiedName.hpp"
-#include "Krystal.Booey/HTML/CustomElement/CustomElementReactionQueue.hpp"
 #include "Krystal.Core/Attributes.hpp"
 #include "Krystal.Core/TypeCast.hpp"
 
@@ -84,17 +83,10 @@ namespace krys::boo
     KRYS_NODISCARD const DOMString &Value() const noexcept;
 
     /// @see https://dom.spec.whatwg.org/#dom-attr-value
-    void Value(DOMString value) noexcept
-    {
-      html::CEReactionsScope ceReactions;
-      SetExistingAttributeValue(*this, krys::move(value));
-    }
+    void Value(DOMString value) noexcept;
 
     /// @see https://dom.spec.whatwg.org/#dom-attr-ownerelement
-    KRYS_NODISCARD Element *OwnerElement() const noexcept
-    {
-      return _ownerElement.get();
-    }
+    KRYS_NODISCARD Element *OwnerElement() const noexcept;
 
     /// @see https://dom.spec.whatwg.org/#dom-attr-specified
     KRYS_NODISCARD static bool Specified() noexcept
@@ -119,12 +111,7 @@ namespace krys::boo
     }
 
     /// @see https://dom.spec.whatwg.org/#dom-node-nodevalue
-    ExceptionOr<void> NodeValue(DOMString value) noexcept final
-    {
-      html::CEReactionsScope ceReactions;
-      SetExistingAttributeValue(*this, krys::move(value));
-      return {};
-    }
+    ExceptionOr<void> NodeValue(DOMString value) noexcept final;
 
     /// @see https://dom.spec.whatwg.org/#dom-node-textcontent
     KRYS_NODISCARD Maybe<DOMString> TextContent() const noexcept final
@@ -133,12 +120,7 @@ namespace krys::boo
     }
 
     /// @see https://dom.spec.whatwg.org/#dom-node-textcontent
-    ExceptionOr<void> TextContent(DOMString value) noexcept final
-    {
-      html::CEReactionsScope ceReactions;
-      SetExistingAttributeValue(*this, krys::move(value));
-      return {};
-    }
+    ExceptionOr<void> TextContent(DOMString value) noexcept final;
 
 #pragma endregion
 

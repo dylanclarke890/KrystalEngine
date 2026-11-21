@@ -238,9 +238,6 @@ namespace krys::boo::html
   public:
     explicit DelayedUpdateValidityScope(ValidatedFormListedElement &element) noexcept;
 
-    ~DelayedUpdateValidityScope() noexcept
-    {
-      _element.EndDelayingUpdateValidity();
-    }
+    ~DelayedUpdateValidityScope() noexcept;
   };
 }

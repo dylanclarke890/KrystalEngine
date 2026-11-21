@@ -2,7 +2,6 @@
 #include "catch2/catch_test_macros.hpp"
 #include "Krystal.Booey.Tests/Rendering/PaintTestUtils.hpp"
 #include "Krystal.Booey/DOM/Abort/AbortController.hpp"
-#include "Krystal.Booey/DOM/Abort/AbortSignal.hpp"
 #include "Krystal.Booey/DOM/Events/EventListenerHandle.hpp"
 #include "Krystal.Booey/DOM/Events/EventNames.hpp"
 #include "Krystal.Booey/DOM/Events/EventTarget.hpp"
@@ -60,13 +59,13 @@ namespace krys::boo::dom::tests
       AddEventListenerOptions given = WithCapture(true);
       given.Once = true;
       given.Passive = false;
-      given.Signal = ShareRefPtr(controller.Signal());
+      given.Signal = controller.Signal();
 
       auto options = EventTargetAlgorithms::FlattenMoreOptions(given);
       REQUIRE(options.Capture);
       REQUIRE(options.Once);
       REQUIRE(options.Passive == false);
-      REQUIRE(options.Signal.get() == controller.Signal());
+      REQUIRE(options.Signal == controller.Signal());
     }
   }
 
@@ -118,7 +117,7 @@ namespace krys::boo::dom::tests
       AbortController controller;
       controller.Abort();
       AddEventListenerOptions options;
-      options.Signal = ShareRefPtr(controller.Signal());
+      options.Signal = controller.Signal();
       REQUIRE_FALSE(EventTargetAlgorithms::AddEventListener(*target, *Listener(click, callback, options)));
       REQUIRE(target->EventListeners().empty());
     }
@@ -153,7 +152,7 @@ namespace krys::boo::dom::tests
     {
       AbortController controller;
       AddEventListenerOptions options;
-      options.Signal = ShareRefPtr(controller.Signal());
+      options.Signal = controller.Signal();
       auto listener = Listener(click, callback, options);
       REQUIRE(EventTargetAlgorithms::AddEventListener(*target, *listener));
       controller.Abort();

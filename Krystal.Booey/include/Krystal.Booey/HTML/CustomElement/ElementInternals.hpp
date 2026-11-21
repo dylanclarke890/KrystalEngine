@@ -90,10 +90,7 @@ namespace krys::boo::html
     }
 
     /// @brief The element whose internals these are; null once it's gone.
-    KRYS_NODISCARD HTMLElement *Element() const noexcept
-    {
-      return _target.get();
-    }
+    KRYS_NODISCARD HTMLElement *Element() const noexcept;
 
     /// @brief The element's shadow root, open or closed, if it was attached while the element was a custom
     /// element.
@@ -165,10 +162,7 @@ namespace krys::boo::html
                                    const Maybe<List<Ref<boo::Element>>> &elements) noexcept;
 
   private:
-    KRYS_NODISCARD HTMLElement *TargetElement() noexcept
-    {
-      return _target.get();
-    }
+    KRYS_NODISCARD HTMLElement *TargetElement() noexcept;
 
     KRYS_NODISCARD FormAssociatedCustomElement *ElementAsFormAssociatedCustom() const noexcept;
 

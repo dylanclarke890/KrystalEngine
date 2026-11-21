@@ -5,14 +5,6 @@
 
 namespace krys::boo::css::tests
 {
-  namespace
-  {
-    KRYS_NODISCARD Ref<PrimitiveValue> Px(double value) noexcept
-    {
-      return PrimitiveValue::Create(value, UnitType::px);
-    }
-  }
-
   TEST_CASE_METHOD(ValueFixture, "QuadValue::Create", "[CSS][Values][QuadValue]")
   {
     SECTION("One value for all four sides")

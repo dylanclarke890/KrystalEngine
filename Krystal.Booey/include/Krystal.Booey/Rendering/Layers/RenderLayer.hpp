@@ -96,6 +96,7 @@ namespace krys::boo
   class HitTestRequest;
   class HitTestResult;
   class Path;
+  class PlatformMouseEvent;
   class RenderBox;
   class RenderLayerBacking;
   class RenderLayerCompositor;

@@ -24,6 +24,7 @@
  */
 
 #include "Krystal.Booey/DOM/Highlights/HighlightRegistry.hpp"
+#include "Krystal.Booey/DOM/Ranges/StaticRange.hpp"
 #include <algorithm>
 
 namespace krys::boo::dom

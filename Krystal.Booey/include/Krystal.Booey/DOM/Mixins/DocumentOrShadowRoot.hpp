@@ -45,6 +45,7 @@ namespace krys::boo
   class Element;
   class HTMLMapElement;
   class LegacyRenderSVGResourceContainer;
+  class Node;
   class SVGElement;
 }
 
@@ -103,8 +104,9 @@ namespace krys::boo::dom
     UniquePtr<style::Scope> _styleScope;
 
     /// @param rootNode The document or shadow root itself.
+    /// @param registry Shared by the document or shadow root; null for none.
     explicit DocumentOrShadowRoot(ContainerNode &rootNode,
-                                  RefPtr<html::CustomElementRegistry> &&registry = nullptr) noexcept;
+                                  html::CustomElementRegistry *registry = nullptr) noexcept;
 
     ~DocumentOrShadowRoot() noexcept;
 
@@ -119,7 +121,14 @@ namespace krys::boo::dom
 
     /// @brief Returns node's CustomElementRegistry object, if any; otherwise null.
     /// @see https://dom.spec.whatwg.org/#dom-documentorshadowroot-customelementregistry
-    KRYS_NODISCARD RefPtr<html::CustomElementRegistry> CustomElementRegistry() const noexcept;
+    KRYS_NODISCARD html::CustomElementRegistry *CustomElementRegistry() const noexcept
+    {
+      // 1. If this is a document, then return this's custom element registry.
+      // 2. Assert: this is a ShadowRoot node.
+      // 3. Return this's custom element registry.
+      // Documents and shadow roots keep their registry here alike.
+      return _customElementRegistry.get();
+    }
 
     void SetCustomElementRegistry(RefPtr<html::CustomElementRegistry> &&registry) noexcept;
 

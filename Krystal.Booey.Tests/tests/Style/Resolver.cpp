@@ -1,7 +1,9 @@
 ﻿#include "Krystal.Booey/Style/Resolver.hpp"
 #include "catch2/catch_test_macros.hpp"
 #include "Krystal.Booey.Tests/CSS/ValueTestUtils.hpp"
+#include "Krystal.Booey.Tests/DOM/DOMTestUtils.hpp"
 #include "Krystal.Booey.Tests/Style/ResolverTestUtils.hpp"
+#include "Krystal.Booey.Tests/Style/StyleTestUtils.hpp"
 #include "Krystal.Booey/CSS/Calc/RandomCachingKey.hpp"
 #include "Krystal.Booey/CSS/Counter/CounterStyleRegistry.hpp"
 #include "Krystal.Booey/CSS/CSSOM/CSSStyleSheet.hpp"
@@ -24,36 +26,12 @@
 
 namespace krys::boo::style::tests
 {
+  using boo::tests::ParseDocument;
+  using boo::tests::RunTasks;
   using css::tests::ToNarrow;
 
   namespace
   {
-    Ref<HTMLDocument> Parse(utf8_string &&input) noexcept
-    {
-      auto document = CreateRef<HTMLDocument>();
-      auto parser = CreateRef<html::DocumentParser>(*document);
-      parser->InputStream().Append(krys::move(input), IsEOF::Yes);
-      parser->PumpTokenizer();
-      return document;
-    }
-
-    void RunTasks() noexcept
-    {
-      html::EventLoop::Current().RunUntilIdle();
-    }
-
-    Ref<HTMLStyleElement> CreateStyle(boo::Document &document, DOMString &&text) noexcept
-    {
-      auto style = CreateRef<HTMLStyleElement>(document);
-      REQUIRE_FALSE(style->TextContent(krys::move(text)).HasException());
-      return style;
-    }
-
-    KRYS_NODISCARD CSSOMStringAtom Atom(utf8_stringview string)
-    {
-      return CSSOMStringAtom(string);
-    }
-
     KRYS_NODISCARD bool HasClassRule(const Resolver &resolver, utf8_stringview className)
     {
       return resolver.RuleSets().AuthorStyle().ClassRules(Atom(className)) != nullptr;
@@ -64,7 +42,7 @@ namespace krys::boo::style::tests
   {
     RunTasks();
     auto document =
-      Parse(u8"<!DOCTYPE html><style>.a {} #b {}</style><style>@media screen { .c {} }</style>");
+      ParseDocument(u8"<!DOCTYPE html><style>.a {} #b {}</style><style>@media screen { .c {} }</style>");
     auto &scope = document->StyleScope();
     scope.FlushPendingUpdate();
     REQUIRE_FALSE(scope.ResolverIfExists());
@@ -145,11 +123,11 @@ namespace krys::boo::style::tests
                    "[Style][Resolver]")
   {
     RunTasks();
-    auto document = Parse(u8"<!DOCTYPE html><style>"
-                          u8"@counter-style thumbs { system: cyclic; symbols: x y; }"
-                          u8"@keyframes spin { from {} to {} }"
-                          u8"@font-face { font-family: f; src: local(f); }"
-                          u8"</style>");
+    auto document = ParseDocument(u8"<!DOCTYPE html><style>"
+                                  u8"@counter-style thumbs { system: cyclic; symbols: x y; }"
+                                  u8"@keyframes spin { from {} to {} }"
+                                  u8"@font-face { font-family: f; src: local(f); }"
+                                  u8"</style>");
     auto &scope = document->StyleScope();
     scope.FlushPendingUpdate();
     auto &resolver = scope.GetResolver();
@@ -189,7 +167,8 @@ namespace krys::boo::style::tests
   TEST_CASE_METHOD(css::tests::ValueFixture, "Resolver: shadow trees share resolvers", "[Style][Resolver]")
   {
     RunTasks();
-    auto document = Parse(u8"<!DOCTYPE html><div id=one></div><div id=two></div><div id=three></div>");
+    auto document =
+      ParseDocument(u8"<!DOCTYPE html><div id=one></div><div id=two></div><div id=three></div>");
     auto attach = [&](utf8_stringview id, DOMString &&text)
     {
       auto host = document->GetElementById(id);
@@ -237,8 +216,9 @@ namespace krys::boo::style::tests
 
     // The root hides the view's scrollbars, so a resize doesn't lay the document out (and evaluate the media
     // queries) at once to fit them.
-    auto document = Parse(u8"<!DOCTYPE html><style>@media (min-width: 1000px) { .wide {} } .always {}"
-                          u8"html { overflow: hidden }</style><style>@media screen { .screen {} }</style>");
+    auto document =
+      ParseDocument(u8"<!DOCTYPE html><style>@media (min-width: 1000px) { .wide {} } .always {}"
+                    u8"html { overflow: hidden }</style><style>@media screen { .screen {} }</style>");
     auto frame = boo::Frame::Create();
     frame->CreateView({800, 600});
     frame->SetDocument(ShareRefPtr<boo::Document>(document.get()));

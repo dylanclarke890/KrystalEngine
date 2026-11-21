@@ -1,5 +1,6 @@
 ﻿#include "Krystal.Booey/CSS/Values/Primitives/Position.hpp"
 #include "catch2/catch_test_macros.hpp"
+#include "Krystal.Booey.Tests/CSS/ValueTestUtils.hpp"
 #include "Krystal.Booey/CSS/Values/Primitives/NumericTypesComputedStyleDependencies.hpp"
 #include "Krystal.Booey/CSS/Values/Primitives/NumericTypesSerialisation.hpp"
 #include "Krystal.Booey/CSS/Values/Primitives/NumericTypesValueVisitation.hpp"
@@ -12,11 +13,6 @@ namespace krys::boo::css::tests
     Position TwoComponent(TwoComponentPositionHorizontal x, TwoComponentPositionVertical y)
     {
       return Position {TwoComponentPositionHorizontalVertical {krys::move(x), krys::move(y)}};
-    }
-
-    CSSOMString SerialiseForTest(const auto &value)
-    {
-      return Serialise(DefaultSerialisationContext(), value);
     }
   }
 

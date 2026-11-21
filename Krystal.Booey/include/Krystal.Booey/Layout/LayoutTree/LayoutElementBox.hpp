@@ -50,7 +50,7 @@ namespace krys::boo::layout
     KRYS_OVERRIDE_DELETE_FOR_CHECKED_PTR(ElementBox);
 
   public:
-    enum class ListMarkerAttribute : bool
+    enum class ListMarkerAttribute : uint8
     {
       Image,
       Outside,

@@ -83,8 +83,7 @@ namespace krys::boo::dom
     if (!_observer)
     {
       auto observer = IntersectionObserver::Create(
-        document, &UpdateViewportProximities,
-        {.Root = RefPtr<Document>(ShareRefPtr(&document)), .RootMargin = u8"", .ScrollMargin = u8""});
+        document, &UpdateViewportProximities, {.Root = &document, .RootMargin = u8"", .ScrollMargin = u8""});
       if (observer.HasException())
       {
         return nullptr;

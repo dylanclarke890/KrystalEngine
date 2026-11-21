@@ -42,6 +42,16 @@ namespace krys::boo::html
 
   ElementInternals::~ElementInternals() noexcept = default;
 
+  HTMLElement *ElementInternals::Element() const noexcept
+  {
+    return _target.get();
+  }
+
+  HTMLElement *ElementInternals::TargetElement() noexcept
+  {
+    return _target.get();
+  }
+
   // https://html.spec.whatwg.org/#dom-elementinternals-shadowroot
   RefPtr<boo::ShadowRoot> ElementInternals::ShadowRoot() const noexcept
   {

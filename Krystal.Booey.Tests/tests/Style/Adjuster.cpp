@@ -2,6 +2,7 @@
 #include "catch2/catch_test_macros.hpp"
 #include "Krystal.Booey.Tests/CSS/RuleTestUtils.hpp"
 #include "Krystal.Booey.Tests/CSS/ValueTestUtils.hpp"
+#include "Krystal.Booey.Tests/DOM/DOMTestUtils.hpp"
 #include "Krystal.Booey.Tests/Style/BuilderTestUtils.hpp"
 #include "Krystal.Booey/DOM/Nodes/HTMLDocument.hpp"
 #include "Krystal.Booey/HTML/Elements/HTMLBodyElement.hpp"
@@ -18,20 +19,13 @@
 
 namespace krys::boo::style::tests
 {
+  using boo::tests::ParseDocument;
+
   namespace
   {
-    KRYS_NODISCARD Ref<HTMLDocument> Parse(utf8_string &&input) noexcept
-    {
-      auto document = CreateRef<HTMLDocument>();
-      auto parser = CreateRef<html::DocumentParser>(*document);
-      parser->InputStream().Append(krys::move(input), IsEOF::Yes);
-      parser->PumpTokenizer();
-      return document;
-    }
-
     struct AdjusterFixture : css::tests::ValueFixture
     {
-      Ref<HTMLDocument> Document {Parse(u8R"(<!DOCTYPE html><body><div id=parent>
+      Ref<HTMLDocument> Document {ParseDocument(u8R"(<!DOCTYPE html><body><div id=parent>
         <div id=div></div><span id=span></span><img id=img><table id=table></table><ruby id=ruby></ruby>
         <textarea id=textarea></textarea><input id=password type=PassWord><marquee id=marquee></marquee>
         <legend id=legend></legend><rt id=rt></rt>

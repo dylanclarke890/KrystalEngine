@@ -3,6 +3,7 @@
 #include "catch2/catch_test_macros.hpp"
 #include "Krystal.Booey.Tests/Graphics/TestPathStrokeStrategy.hpp"
 #include "Krystal.Booey.Tests/Rendering/PaintTestUtils.hpp"
+#include "Krystal.Booey.Tests/Rendering/SVG/LegacySVGTestUtils.hpp"
 #include "Krystal.Booey.Tests/Style/ResolverTestUtils.hpp"
 #include "Krystal.Booey/Rendering/RenderTreeAsText.hpp"
 #include "Krystal.Booey/Rendering/SVG/Legacy/LegacyRenderSVGContainer.hpp"
@@ -19,25 +20,6 @@ namespace krys::boo::tests
   namespace
   {
     // The renderers' overrides are private; tests call them through RenderObject.
-    KRYS_NODISCARD const RenderObject &AsObject(const RenderObject &renderer) noexcept
-    {
-      return renderer;
-    }
-
-    KRYS_NODISCARD Element &ElementById(Document &document, DOMStringView id) noexcept
-    {
-      auto element = document.GetElementById(id);
-      krys_assert(element);
-      return *element;
-    }
-
-    template <typename T>
-    KRYS_NODISCARD T &RendererById(Document &document, DOMStringView id) noexcept
-    {
-      auto *renderer = ElementById(document, id).Renderer();
-      krys_assert(renderer);
-      return Downcast<T>(*renderer);
-    }
   }
 
   TEST_CASE_METHOD(css::tests::ValueFixture, "LegacyRenderSVGShape: the render tree",
@@ -167,22 +149,22 @@ layer at (0,0) size 800x104
     auto *svg = fixture.Document->QuerySelector(u8"svg").ReleaseValue().get();
 
     // A filled rect is hit inside it, and on its stroke (rects with miter joins need no stroker).
-    CHECK(hit(30, 30) == &ElementById(*fixture.Document, u8"rect"));
-    CHECK(hit(7, 30) == &ElementById(*fixture.Document, u8"rect"));
+    CHECK(hit(30, 30) == &ById(*fixture.Document, u8"rect"));
+    CHECK(hit(7, 30) == &ById(*fixture.Document, u8"rect"));
     // An unfilled one only on its stroke; inside it, the <svg> is hit.
-    CHECK(hit(62, 30) == &ElementById(*fixture.Document, u8"hollow"));
+    CHECK(hit(62, 30) == &ById(*fixture.Document, u8"hollow"));
     CHECK(hit(80, 30) == svg);
 
     // Circles are hit inside the circle, not its bounding box's corners.
-    CHECK(hit(150, 30) == &ElementById(*fixture.Document, u8"circle"));
+    CHECK(hit(150, 30) == &ById(*fixture.Document, u8"circle"));
     CHECK(hit(132, 12) == svg);
 
     // Paths by their fill rule.
-    CHECK(hit(210, 45) == &ElementById(*fixture.Document, u8"path"));
+    CHECK(hit(210, 45) == &ById(*fixture.Document, u8"path"));
     CHECK(hit(235, 15) == svg);
 
     // `pointer-events: fill` hits the fill even when there's none; `painted` doesn't.
-    CHECK(hit(280, 30) == &ElementById(*fixture.Document, u8"none"));
+    CHECK(hit(280, 30) == &ById(*fixture.Document, u8"none"));
     CHECK(hit(375, 25) == svg);
 
     // Hidden shapes aren't hit with the initial `pointer-events`.

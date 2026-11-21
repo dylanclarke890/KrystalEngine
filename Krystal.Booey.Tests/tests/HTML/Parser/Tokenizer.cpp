@@ -276,7 +276,7 @@ namespace krys::boo::html::tests
       CHECK(equal);
     }
 
-    void RunTest(const string &filename) noexcept
+    void RunTokenizerTest(const string &filename) noexcept
     {
       static string basedir = KRYS_BOOEY_TESTS_DATA_DIR "/html-tokenizer/";
 
@@ -293,7 +293,7 @@ namespace krys::boo::html::tests
 #define EXECUTE_HTML_TOKENIZER_TEST_CASE(FileName, Tags)                                                     \
   TEST_CASE("Tokenizer(" FileName ")", "[HTML][Tokenizer]" Tags)                                             \
   {                                                                                                          \
-    RunTest(FileName);                                                                                       \
+    RunTokenizerTest(FileName);                                                                              \
   }
 
   EXECUTE_HTML_TOKENIZER_TEST_CASE("afterattributename-01.dat", "[html:after-attribute-name-state]");

@@ -12,7 +12,7 @@ namespace krys::boo::tests
 {
   namespace
   {
-    constexpr utf8_stringview BaseStyle =
+    constexpr utf8_stringview InlineBlockStyle =
       u8"body{margin:0;font:20px/20px Ahem}#b{width:100px;height:30px;background:#0f0}";
 
     KRYS_NODISCARD std::string Format(const dom::DOMRectReadOnly &rect)
@@ -247,7 +247,7 @@ namespace krys::boo::tests
        u8"0,10,100,30"},
     }));
 
-    AnimationPageFixture fixture {u8"<!DOCTYPE html><style>" + utf8_string(BaseStyle) + testCase.Style
+    AnimationPageFixture fixture {u8"<!DOCTYPE html><style>" + utf8_string(InlineBlockStyle) + testCase.Style
                                   + u8"</style>" + testCase.Body};
     (void)fixture.Document->UpdateLayout();
 
@@ -277,7 +277,7 @@ namespace krys::boo::tests
     };
     auto page = [](utf8_stringview style, utf8_stringview body)
     {
-      return u8"<!DOCTYPE html><style>" + utf8_string(BaseStyle) + utf8_string(style) + u8"</style>"
+      return u8"<!DOCTYPE html><style>" + utf8_string(InlineBlockStyle) + utf8_string(style) + u8"</style>"
              + utf8_string(body);
     };
 

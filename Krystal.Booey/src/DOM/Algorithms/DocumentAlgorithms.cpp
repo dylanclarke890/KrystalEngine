@@ -142,7 +142,7 @@ namespace krys::boo::dom
           auto &shadowRootInclusiveDescendant = Downcast<ShadowRoot>(inclusiveDescendant);
           auto registry = shadowRootInclusiveDescendant.CustomElementRegistry();
           if ((registry == nullptr && !shadowRootInclusiveDescendant._keepCustomElementRegistryNull)
-              || html::CustomElementAlgorithms::IsGlobalCustomElementRegistry(registry.get()))
+              || html::CustomElementAlgorithms::IsGlobalCustomElementRegistry(registry))
           {
             shadowRootInclusiveDescendant._customElementRegistry = documentEffectiveGlobalRegistry;
           }
@@ -175,7 +175,7 @@ namespace krys::boo::dom
             if (registry != nullptr || parent == nullptr
                 || TreeQueries::IsExclusiveDocumentFragmentNode(*parent))
             {
-              newRegistry = document.CustomElementRegistry().get();
+              newRegistry = document.CustomElementRegistry();
             }
             // 3c.ii.C. Otherwise, set registry to the result of looking up a custom element registry given
             //          inclusiveDescendant's parent.

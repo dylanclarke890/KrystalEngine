@@ -28,7 +28,6 @@
 
 #include "Krystal.Booey/DOM/Types/DOMString.hpp"
 #include "Krystal.Booey/DOM/Types/QualifiedName.hpp"
-#include "Krystal.Booey/HTML/CustomElement/CustomElement.hpp"
 #include "Krystal.Core/RefCounted.hpp"
 #include "Krystal.Core/Types/Func.hpp"
 #include "Krystal.Core/Types/HashSet.hpp"
@@ -46,6 +45,7 @@ namespace krys::boo
 
 namespace krys::boo::html
 {
+  class CustomElement;
   class CustomElementRegistry;
 
   /// @brief Creates the behaviour of a custom element for @p element; null if it can't (the element is then

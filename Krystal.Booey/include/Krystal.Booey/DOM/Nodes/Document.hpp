@@ -27,10 +27,10 @@
 
 #pragma once
 
+#include "Krystal.Booey/CSS/Types/CSSOMString.hpp"
 #include "Krystal.Booey/DOM/Collections/LiveCollection.hpp"
 #include "Krystal.Booey/DOM/ContentVisibility/ContentRelevancy.hpp"
 #include "Krystal.Booey/DOM/Internals/LayoutOptions.hpp"
-#include "Krystal.Booey/DOM/Internals/VisibilityChangeClient.hpp"
 #include "Krystal.Booey/DOM/Mixins/DocumentOrShadowRoot.hpp"
 #include "Krystal.Booey/DOM/Nodes/ContainerNode.hpp"
 #include "Krystal.Booey/DOM/Nodes/DOMImplementation.hpp"
@@ -47,12 +47,12 @@
 #include "Krystal.Booey/Graphics/Fonts/FontSelector.hpp"
 #include "Krystal.Booey/Graphics/GraphicsTypes.hpp"
 #include "Krystal.Booey/HTML/Attributes/EventHandlerAttributes.hpp"
-#include "Krystal.Booey/HTML/Sanitizer/SetHTMLOptions.hpp"
 #include "Krystal.Booey/HTML/Types/DocumentReadyState.hpp"
 #include "Krystal.Booey/HTML/Types/DocumentVisibilityState.hpp"
 #include "Krystal.Booey/Page/RenderingUpdateStep.hpp"
 #include "Krystal.Booey/Rendering/RenderPtr.hpp"
 #include "Krystal.Booey/Rendering/Style/RenderStyleConstants.hpp"
+#include "Krystal.Booey/Style/PseudoElementIdentifier.hpp"
 #include "Krystal.Booey/Style/Values/Color/ColorOptions.hpp"
 #include "Krystal.Core/Enum.hpp"
 #include "Krystal.Core/Geometry/Point.hpp"
@@ -71,6 +71,12 @@
 #include "Krystal.Core/Types/Variant.hpp"
 #include "Krystal.Core/Types/WeakPtr.hpp"
 #include "Krystal.Net/Url.hpp"
+
+namespace krys::boo::html
+{
+  struct ParseHTMLUnsafeOptions;
+  struct SetHTMLOptions;
+}
 
 namespace krys::text
 {
@@ -98,6 +104,7 @@ namespace krys::boo
   class FontLoadRequest;
   class Frame;
   class FrameSelection;
+  class FrameView;
   class GraphicsClient;
   class HTMLBaseElement;
   class HTMLBodyElement;
@@ -112,8 +119,6 @@ namespace krys::boo
   class HitTestResult;
   class IntersectionObserver;
   struct IntersectionObserverData;
-  class Window;
-  class FrameView;
   class MediaQueryList;
   class MouseEvent;
   class MouseEventWithHitTestResults;
@@ -132,6 +137,8 @@ namespace krys::boo
   class StyleOriginatedTimelinesController;
   class StyleSheetList;
   class Text;
+  class WebAnimation;
+  class Window;
 }
 
 namespace krys::boo::css
@@ -171,6 +178,9 @@ namespace krys::boo::html
 
 namespace krys::boo::dom
 {
+  class VisibilityChangeClient;
+  enum class FocusPreviousElement : bool;
+  enum class FireEvents : bool;
   enum class PopoverState : uint8;
 
   /// @brief Various flags used for optimizations in the Document class.
@@ -261,7 +271,9 @@ namespace krys::boo::dom
   /// @see https://dom.spec.whatwg.org/#dictdef-elementcreationoptions
   struct ElementCreationOptions
   {
-    RefPtr<html::CustomElementRegistry> CustomElementRegistry;
+    /// @note A plain pointer: the options are only read while the element is made, which takes its own
+    /// reference.
+    html::CustomElementRegistry *CustomElementRegistry {nullptr};
     DOMStringAtom Is {null};
   };
 
@@ -270,7 +282,8 @@ namespace krys::boo::dom
   /// @see https://dom.spec.whatwg.org/#dictdef-importnodeoptions
   struct ImportNodeOptions
   {
-    RefPtr<html::CustomElementRegistry> CustomElementRegistry;
+    /// @note A plain pointer: the options are only read while the node is imported.
+    html::CustomElementRegistry *CustomElementRegistry {nullptr};
     bool SelfOnly {false};
   };
 
@@ -656,15 +669,22 @@ namespace krys::boo
     /// @p context, the document of the caller; sanitized only if @p options gives a sanitizer.
     /// @see https://html.spec.whatwg.org/#dom-parsehtmlunsafe
     KRYS_NODISCARD static ExceptionOr<Ref<Document>>
-      ParseHTMLUnsafe(Document &context, DOMStringView markup,
-                      html::ParseHTMLUnsafeOptions options = {}) noexcept;
+      ParseHTMLUnsafe(Document &context, DOMStringView markup, html::ParseHTMLUnsafeOptions options) noexcept;
+
+    /// @brief The same, with default options.
+    KRYS_NODISCARD static ExceptionOr<Ref<Document>> ParseHTMLUnsafe(Document &context,
+                                                                     DOMStringView markup) noexcept;
 
     /// @brief A new HTML document parsed from @p html, with declarative shadow roots and the settings of
     /// @p context, sanitized by @p options (the default configuration if it gives none) with unsafe content
     /// removed.
     /// @see https://html.spec.whatwg.org/#dom-parsehtml
-    KRYS_NODISCARD static ExceptionOr<Ref<Document>>
-      ParseHTML(Document &context, DOMStringView html, const html::SetHTMLOptions &options = {}) noexcept;
+    KRYS_NODISCARD static ExceptionOr<Ref<Document>> ParseHTML(Document &context, DOMStringView html,
+                                                               const html::SetHTMLOptions &options) noexcept;
+
+    /// @brief The same, with default options.
+    KRYS_NODISCARD static ExceptionOr<Ref<Document>> ParseHTML(Document &context,
+                                                               DOMStringView html) noexcept;
 
     /// @brief Sets whether parsing into the document attaches declarative shadow roots.
     /// @see https://dom.spec.whatwg.org/#document-allow-declarative-shadow-roots
@@ -1229,10 +1249,7 @@ namespace krys::boo
 
     /// @brief The document's target element, which `:target` matches; null if there's none.
     /// @see https://html.spec.whatwg.org/#target-element
-    KRYS_NODISCARD Element *CSSTarget() const noexcept
-    {
-      return _cssTarget.get();
-    }
+    KRYS_NODISCARD Element *CSSTarget() const noexcept;
 
     /// @brief Makes @p newTarget (or nothing, if it's null) the document's target element, invalidating the
     /// style of the old and new targets.
@@ -1333,10 +1350,7 @@ namespace krys::boo
 
     /// @brief The showing auto popover the first showing hint popover opened from, if any.
     /// @see https://html.spec.whatwg.org/#hint-stack-parent
-    KRYS_NODISCARD HTMLElement *HintStackParent() const noexcept
-    {
-      return _hintStackParent.get();
-    }
+    KRYS_NODISCARD HTMLElement *HintStackParent() const noexcept;
 
     void SetHintStackParent(HTMLElement *element) noexcept;
 

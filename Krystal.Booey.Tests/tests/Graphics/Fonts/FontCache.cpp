@@ -1,6 +1,7 @@
 ﻿#include "Krystal.Booey/Graphics/Fonts/FontCache.hpp"
 #include "catch2/catch_approx.hpp"
 #include "catch2/catch_test_macros.hpp"
+#include "Krystal.Booey.Tests/Layout/LayoutTestUtils.hpp"
 #include "Krystal.Booey/Graphics/Fonts/FontCascade.hpp"
 #include "Krystal.Booey/Graphics/Fonts/FontCreationContext.hpp"
 #include "Krystal.Booey/Graphics/Fonts/FontCustomPlatformData.hpp"
@@ -11,14 +12,10 @@
 
 namespace krys::boo::tests
 {
+  using layout::tests::RegisterAhem;
+
   namespace
   {
-    void RegisterAhem()
-    {
-      (void)FontDatabase::Singleton().AddFontFile(std::filesystem::path {KRYS_BOOEY_TESTS_DATA_DIR} / "fonts"
-                                                  / "Ahem.ttf");
-    }
-
     KRYS_NODISCARD FontCascadeDescription Description(List<StringAtom> &&families, float size = 16)
     {
       FontCascadeDescription description;
@@ -27,18 +24,18 @@ namespace krys::boo::tests
       return description;
     }
 
-    const StringAtom Ahem {u8"Ahem"};
+    const StringAtom AhemFamily {u8"Ahem"};
   }
 
   TEST_CASE("FontCache: fonts for families", "[Graphics][FontCache]")
   {
     RegisterAhem();
     auto &cache = FontCache::Singleton();
-    auto description = Description({Ahem});
+    auto description = Description({AhemFamily});
 
     SECTION("A registered family")
     {
-      auto font = cache.FontForFamily(description, Ahem);
+      auto font = cache.FontForFamily(description, AhemFamily);
       REQUIRE(font);
       CHECK(font->PlatformData().FamilyName() == u8"Ahem");
       CHECK(font->PlatformData().Size() == 16);
@@ -63,7 +60,7 @@ namespace krys::boo::tests
       auto bold = description;
       bold.SetWeight(BoldWeightValue());
       bold.SetIsItalic(true);
-      auto font = cache.FontForFamily(bold, Ahem);
+      auto font = cache.FontForFamily(bold, AhemFamily);
       REQUIRE(font);
       CHECK(font->PlatformData().SyntheticBold());
       CHECK(font->PlatformData().SyntheticOblique());
@@ -73,14 +70,14 @@ namespace krys::boo::tests
                                            FontLookupOptions::DisallowObliqueSynthesis};
       auto exactDescription = bold;
       exactDescription.SetComputedSize(17);
-      auto exact = cache.FontForFamily(exactDescription, Ahem, disallow);
+      auto exact = cache.FontForFamily(exactDescription, AhemFamily, disallow);
       REQUIRE(exact);
       CHECK_FALSE(exact->PlatformData().SyntheticBold());
       CHECK_FALSE(exact->PlatformData().SyntheticOblique());
 
       bold.SetFontSynthesisWeight(FontSynthesisLonghandValue::None);
       bold.SetFontSynthesisStyle(FontSynthesisLonghandValue::None);
-      auto unsynthesized = cache.FontForFamily(bold, Ahem);
+      auto unsynthesized = cache.FontForFamily(bold, AhemFamily);
       REQUIRE(unsynthesized);
       CHECK_FALSE(unsynthesized->PlatformData().SyntheticBold());
       CHECK_FALSE(unsynthesized->PlatformData().SyntheticOblique());
@@ -95,7 +92,7 @@ namespace krys::boo::tests
 
     SECTION("System fallback searches the registered faces")
     {
-      auto &original = *cache.FontForFamily(description, Ahem);
+      auto &original = *cache.FontForFamily(description, AhemFamily);
       // Liberation Sans has no CJK; Ahem has U+4E00.
       auto cjk = cache.SystemFallbackForCharacterCluster(Description({}), original, IsForPlatformFont::No,
                                                          FontCache::PreferColoredFont::No, u8"\u4E00");
@@ -119,7 +116,7 @@ namespace krys::boo::tests
       auto families = cache.SystemFontFamilies();
       CHECK(std::ranges::find(families, u8"Ahem") != families.end());
       CHECK(cache.UseBackslashAsYenSignForFamily(u8"MS Gothic"));
-      CHECK_FALSE(cache.UseBackslashAsYenSignForFamily(Ahem));
+      CHECK_FALSE(cache.UseBackslashAsYenSignForFamily(AhemFamily));
     }
   }
 
@@ -129,7 +126,7 @@ namespace krys::boo::tests
 
     SECTION("The primary font is the first family that has a font")
     {
-      FontCascade cascade {Description({StringAtom {u8"No Such Family"}, Ahem})};
+      FontCascade cascade {Description({StringAtom {u8"No Such Family"}, AhemFamily})};
       cascade.Update();
       CHECK(cascade.PrimaryFont()->PlatformData().FamilyName() == u8"Ahem");
       CHECK(cascade.MetricsOfPrimaryFont().Ascent() == Catch::Approx(12.8f));
@@ -144,7 +141,7 @@ namespace krys::boo::tests
 
     SECTION("Characters the families lack fall back")
     {
-      FontCascade cascade {Description({Ahem})};
+      FontCascade cascade {Description({AhemFamily})};
       cascade.Update();
       auto cyrillic = cascade.GlyphDataForCharacter(U'\u0416', false);
       REQUIRE(cyrillic.IsValid());
@@ -167,7 +164,7 @@ namespace krys::boo::tests
 
     SECTION("Small caps use a smaller font for lowercase letters")
     {
-      auto description = Description({Ahem}, 20);
+      auto description = Description({AhemFamily}, 20);
       description.SetVariantCaps(FontVariantCaps::Small);
       FontCascade cascade {krys::move(description)};
       cascade.Update();
@@ -180,7 +177,7 @@ namespace krys::boo::tests
     SECTION("font-size-adjust scales the font to give its metric the aspect value")
     {
       // Ahem's x-height is 0.8em, so an aspect value of 0.4 halves a 20px font.
-      auto description = Description({Ahem}, 20);
+      auto description = Description({AhemFamily}, 20);
       description.SetFontSizeAdjust({.Value = 0.4f});
       FontCascade cascade {FontCascadeDescription {description}};
       cascade.Update();
@@ -220,19 +217,19 @@ namespace krys::boo::tests
 
     SECTION("Cascades with equal descriptions share their fonts")
     {
-      FontCascade a {Description({Ahem})};
+      FontCascade a {Description({AhemFamily})};
       FontCascade b {Description({StringAtom {u8"AHEM"}})};
       a.Update();
       b.Update();
       CHECK(a.Fonts() == b.Fonts());
-      FontCascade c {Description({Ahem}, 12)};
+      FontCascade c {Description({AhemFamily}, 12)};
       c.Update();
       CHECK(a.Fonts() != c.Fonts());
     }
 
     SECTION("A cascade for a platform font")
     {
-      auto font = FontCache::Singleton().FontForFamily(Description({Ahem}), Ahem);
+      auto font = FontCache::Singleton().FontForFamily(Description({AhemFamily}), AhemFamily);
       FontCascade cascade {font->PlatformData()};
       CHECK(cascade.IsPlatformFont());
       CHECK(cascade.PrimaryFont().get() == font.get());
@@ -241,7 +238,7 @@ namespace krys::boo::tests
 
     SECTION("Invalidating the font cache makes cascades stale")
     {
-      FontCascade cascade {Description({Ahem})};
+      FontCascade cascade {Description({AhemFamily})};
       cascade.Update();
       auto generation = FontCache::Singleton().Generation();
       FontCache::InvalidateAllFontCaches();

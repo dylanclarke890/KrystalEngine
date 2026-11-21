@@ -2,6 +2,7 @@
 #include "catch2/catch_test_macros.hpp"
 #include "Krystal.Booey.Tests/Layout/LayoutTestUtils.hpp"
 #include "Krystal.Booey.Tests/Rendering/PaintTestUtils.hpp"
+#include "Krystal.Booey.Tests/Rendering/RenderTestUtils.hpp"
 #include "Krystal.Booey.Tests/Style/ResolverTestUtils.hpp"
 #include "Krystal.Booey/Rendering/Tables/RenderTableCell.hpp"
 
@@ -14,22 +15,9 @@ namespace krys::boo::tests
     // HTML tables without the default spacing and cell padding.
     constexpr auto PlainTables = u8"table { border-spacing: 0 } td { padding: 0 } ";
 
-    /// @brief The box of the element with id @p id, after updating layout.
-    KRYS_NODISCARD RenderBox &BoxOf(ResolverFixture &fixture, DOMStringView id) noexcept
-    {
-      (void)fixture.Document->UpdateLayout();
-      return Downcast<RenderBox>(*fixture.ById(id).Renderer());
-    }
-
     KRYS_NODISCARD RenderTableCell &CellOf(ResolverFixture &fixture, DOMStringView id) noexcept
     {
-      return Downcast<RenderTableCell>(BoxOf(fixture, id));
-    }
-
-    /// @brief The border box of the element with id @p id, relative to its container.
-    KRYS_NODISCARD LayoutRect RectOf(ResolverFixture &fixture, DOMStringView id) noexcept
-    {
-      return BoxOf(fixture, id).FrameRect();
+      return Downcast<RenderTableCell>(LaidOutBoxOf(fixture, id));
     }
   }
 
@@ -67,10 +55,10 @@ layer at (0,0) size 800x10
         u8"<div id=t><div class=r id=r><div class=c id=a>a</div><div class=c id=b>bbb</div></div></div>")};
 
       // The spacing goes around every column and row.
-      CHECK(RectOf(fixture, u8"t") == LayoutRect(0, 0, 55, 16));
-      CHECK(RectOf(fixture, u8"r") == LayoutRect(0, 3, 55, 10));
-      CHECK(RectOf(fixture, u8"a") == LayoutRect(5, 3, 10, 10));
-      CHECK(RectOf(fixture, u8"b") == LayoutRect(20, 3, 30, 10));
+      CHECK(FrameRectOf(fixture, u8"t") == LayoutRect(0, 0, 55, 16));
+      CHECK(FrameRectOf(fixture, u8"r") == LayoutRect(0, 3, 55, 10));
+      CHECK(FrameRectOf(fixture, u8"a") == LayoutRect(5, 3, 10, 10));
+      CHECK(FrameRectOf(fixture, u8"b") == LayoutRect(20, 3, 30, 10));
     }
 
     SECTION("Percentage columns")
@@ -80,8 +68,8 @@ layer at (0,0) size 800x10
                                     u8"<table><tr><td id=a>a</td><td id=b>b</td></tr></table>")};
 
       // The percentage column takes 25% of the table, the auto column the rest.
-      CHECK(RectOf(fixture, u8"a") == LayoutRect(0, 0, 50, 10));
-      CHECK(RectOf(fixture, u8"b") == LayoutRect(50, 0, 150, 10));
+      CHECK(FrameRectOf(fixture, u8"a") == LayoutRect(0, 0, 50, 10));
+      CHECK(FrameRectOf(fixture, u8"b") == LayoutRect(50, 0, 150, 10));
     }
 
     SECTION("Column spans")
@@ -91,9 +79,9 @@ layer at (0,0) size 800x10
         u8"<table><tr><td id=a colspan=2>aaaaaa</td></tr><tr><td id=c>c</td><td id=d>dd</td></tr></table>")};
 
       // The spanning cell's 60px is shared by the columns in proportion to their own widths (10px and 20px).
-      CHECK(RectOf(fixture, u8"a") == LayoutRect(0, 0, 60, 10));
-      CHECK(RectOf(fixture, u8"c") == LayoutRect(0, 10, 20, 10));
-      CHECK(RectOf(fixture, u8"d") == LayoutRect(20, 10, 40, 10));
+      CHECK(FrameRectOf(fixture, u8"a") == LayoutRect(0, 0, 60, 10));
+      CHECK(FrameRectOf(fixture, u8"c") == LayoutRect(0, 10, 20, 10));
+      CHECK(FrameRectOf(fixture, u8"d") == LayoutRect(20, 10, 40, 10));
       CHECK(CellOf(fixture, u8"a").ColSpan() == 2);
     }
 
@@ -104,8 +92,8 @@ layer at (0,0) size 800x10
         u8"<table><tr><td id=a rowspan=2>a</td><td id=b>b</td></tr><tr><td id=c>c</td></tr></table>")};
 
       // c is placed after the slot a takes in the second row.
-      CHECK(RectOf(fixture, u8"a") == LayoutRect(0, 0, 10, 20));
-      CHECK(RectOf(fixture, u8"c") == LayoutRect(10, 10, 10, 10));
+      CHECK(FrameRectOf(fixture, u8"a") == LayoutRect(0, 0, 10, 20));
+      CHECK(FrameRectOf(fixture, u8"c") == LayoutRect(10, 10, 10, 10));
       CHECK(CellOf(fixture, u8"c").Col() == 1);
       // tbody's vertical-align: middle centres a's content in its two rows.
       CHECK(CellOf(fixture, u8"a").IntrinsicPaddingBefore() == 5_lu);
@@ -117,7 +105,7 @@ layer at (0,0) size 800x10
         PlainTables, u8"<table><tr><td id=a "
                      u8"rowspan=0>a</td><td>b</td></tr><tr><td>c</td></tr><tr><td>d</td></tr></table>")};
 
-      CHECK(RectOf(fixture, u8"a") == LayoutRect(0, 0, 10, 30));
+      CHECK(FrameRectOf(fixture, u8"a") == LayoutRect(0, 0, 10, 30));
     }
   }
 
@@ -130,9 +118,9 @@ layer at (0,0) size 800x10
         u8"<table><tr><td id=a>a</td><td id=b>b</td><td id=c>c</td></tr></table>")};
 
       // The auto columns share what the fixed column leaves.
-      CHECK(RectOf(fixture, u8"a") == LayoutRect(0, 0, 100, 10));
-      CHECK(RectOf(fixture, u8"b") == LayoutRect(100, 0, 100, 10));
-      CHECK(RectOf(fixture, u8"c") == LayoutRect(200, 0, 100, 10));
+      CHECK(FrameRectOf(fixture, u8"a") == LayoutRect(0, 0, 100, 10));
+      CHECK(FrameRectOf(fixture, u8"b") == LayoutRect(100, 0, 100, 10));
+      CHECK(FrameRectOf(fixture, u8"c") == LayoutRect(200, 0, 100, 10));
     }
 
     SECTION("Widths from columns")
@@ -141,8 +129,8 @@ layer at (0,0) size 800x10
         utf8_string {PlainTables} + u8"table { table-layout: fixed; width: 300px }",
         u8"<table><col style='width: 50px'><col><tr><td id=a>a</td><td id=b>b</td></tr></table>")};
 
-      CHECK(RectOf(fixture, u8"a") == LayoutRect(0, 0, 50, 10));
-      CHECK(RectOf(fixture, u8"b") == LayoutRect(50, 0, 250, 10));
+      CHECK(FrameRectOf(fixture, u8"a") == LayoutRect(0, 0, 50, 10));
+      CHECK(FrameRectOf(fixture, u8"b") == LayoutRect(50, 0, 250, 10));
     }
   }
 
@@ -155,8 +143,8 @@ layer at (0,0) size 800x10
         u8"<table><tr><td id=a>a</td><td id=b>b</td></tr></table>")};
 
       // Ahem's ascent is 0.8em, so b is pushed down by 16px - 8px to a's baseline.
-      CHECK(RectOf(fixture, u8"a") == LayoutRect(0, 0, 20, 20));
-      CHECK(RectOf(fixture, u8"b") == LayoutRect(20, 0, 10, 20));
+      CHECK(FrameRectOf(fixture, u8"a") == LayoutRect(0, 0, 20, 20));
+      CHECK(FrameRectOf(fixture, u8"b") == LayoutRect(20, 0, 10, 20));
       CHECK(CellOf(fixture, u8"b").IntrinsicPaddingBefore() == 8_lu);
       CHECK(CellOf(fixture, u8"b").IntrinsicPaddingAfter() == 2_lu);
     }
@@ -169,8 +157,8 @@ layer at (0,0) size 800x10
         u8"id=b>b</div></div></div>")};
 
       // The 30px the rows don't use is shared between the auto rows.
-      CHECK(RectOf(fixture, u8"a") == LayoutRect(0, 0, 10, 25));
-      CHECK(RectOf(fixture, u8"b") == LayoutRect(0, 25, 10, 25));
+      CHECK(FrameRectOf(fixture, u8"a") == LayoutRect(0, 0, 10, 25));
+      CHECK(FrameRectOf(fixture, u8"b") == LayoutRect(0, 25, 10, 25));
     }
 
     SECTION("Captions")
@@ -181,10 +169,10 @@ layer at (0,0) size 800x10
                                     u8"id=bottom>c</caption><tr><td id=a>a</td></tr></table>")};
 
       // The table is as wide as its widest caption, and its rows sit between the captions.
-      CHECK(RectOf(fixture, u8"t") == LayoutRect(0, 0, 30, 30));
-      CHECK(RectOf(fixture, u8"top") == LayoutRect(0, 0, 30, 10));
-      CHECK(RectOf(fixture, u8"a") == LayoutRect(0, 0, 30, 10));
-      CHECK(RectOf(fixture, u8"bottom") == LayoutRect(0, 20, 30, 10));
+      CHECK(FrameRectOf(fixture, u8"t") == LayoutRect(0, 0, 30, 30));
+      CHECK(FrameRectOf(fixture, u8"top") == LayoutRect(0, 0, 30, 10));
+      CHECK(FrameRectOf(fixture, u8"a") == LayoutRect(0, 0, 30, 10));
+      CHECK(FrameRectOf(fixture, u8"bottom") == LayoutRect(0, 20, 30, 10));
     }
   }
 
@@ -198,9 +186,9 @@ layer at (0,0) size 800x10
         u8"id=h><tr><td>h</td></tr></thead></table>")};
 
       // The header comes first and the footer last, whatever their order in the document.
-      CHECK(RectOf(fixture, u8"h") == LayoutRect(0, 0, 10, 10));
-      CHECK(RectOf(fixture, u8"b") == LayoutRect(0, 10, 10, 10));
-      CHECK(RectOf(fixture, u8"f") == LayoutRect(0, 20, 10, 10));
+      CHECK(FrameRectOf(fixture, u8"h") == LayoutRect(0, 0, 10, 10));
+      CHECK(FrameRectOf(fixture, u8"b") == LayoutRect(0, 10, 10, 10));
+      CHECK(FrameRectOf(fixture, u8"f") == LayoutRect(0, 20, 10, 10));
     }
 
     SECTION("A collapsed row")
@@ -211,9 +199,9 @@ layer at (0,0) size 800x10
         u8"id=c><td>c</td></tr></table>")};
 
       // The collapsed row takes no space.
-      CHECK(RectOf(fixture, u8"r") == LayoutRect(0, 10, 10, 0));
-      CHECK(RectOf(fixture, u8"c") == LayoutRect(0, 10, 10, 10));
-      CHECK(RectOf(fixture, u8"t") == LayoutRect(0, 0, 10, 20));
+      CHECK(FrameRectOf(fixture, u8"r") == LayoutRect(0, 10, 10, 0));
+      CHECK(FrameRectOf(fixture, u8"c") == LayoutRect(0, 10, 10, 10));
+      CHECK(FrameRectOf(fixture, u8"t") == LayoutRect(0, 0, 10, 20));
     }
   }
 
@@ -228,10 +216,10 @@ layer at (0,0) size 800x10
       // Each cell has half of each border it shares; the table has the outer halves.
       CHECK(CellOf(fixture, u8"a").BorderLeft() == 1_lu);
       CHECK(CellOf(fixture, u8"a").BorderRight() == 1_lu);
-      CHECK(Downcast<RenderTable>(BoxOf(fixture, u8"t")).BorderLeft() == 1_lu);
-      CHECK(RectOf(fixture, u8"a") == LayoutRect(0, 0, 12, 12));
-      CHECK(RectOf(fixture, u8"b") == LayoutRect(12, 0, 12, 12));
-      CHECK(RectOf(fixture, u8"t") == LayoutRect(0, 0, 26, 14));
+      CHECK(Downcast<RenderTable>(LaidOutBoxOf(fixture, u8"t")).BorderLeft() == 1_lu);
+      CHECK(FrameRectOf(fixture, u8"a") == LayoutRect(0, 0, 12, 12));
+      CHECK(FrameRectOf(fixture, u8"b") == LayoutRect(12, 0, 12, 12));
+      CHECK(FrameRectOf(fixture, u8"t") == LayoutRect(0, 0, 26, 14));
     }
 
     SECTION("A hidden border wins")
@@ -244,7 +232,7 @@ layer at (0,0) size 800x10
       // The border between the cells is suppressed on both sides.
       CHECK(CellOf(fixture, u8"a").BorderRight() == 0_lu);
       CHECK(CellOf(fixture, u8"b").BorderLeft() == 0_lu);
-      CHECK(RectOf(fixture, u8"b") == LayoutRect(11, 0, 11, 12));
+      CHECK(FrameRectOf(fixture, u8"b") == LayoutRect(11, 0, 11, 12));
     }
 
     SECTION("A flex item on its first layout")
@@ -256,9 +244,9 @@ layer at (0,0) size 800x10
 
       // The flex container sizes the table before the table has laid out, so its outer halves of the
       // borders (1px each side) have to be known then: each item gets half of the 98px left over.
-      CHECK(RectOf(fixture, u8"t").Width() == 51_lu);
-      CHECK(RectOf(fixture, u8"other").X() == 51_lu);
-      CHECK(RectOf(fixture, u8"other").Width() == 49_lu);
+      CHECK(FrameRectOf(fixture, u8"t").Width() == 51_lu);
+      CHECK(FrameRectOf(fixture, u8"other").X() == 51_lu);
+      CHECK(FrameRectOf(fixture, u8"other").Width() == 49_lu);
     }
   }
 
@@ -267,12 +255,12 @@ layer at (0,0) size 800x10
     ResolverFixture fixture {layout::tests::AhemDocument(
       PlainTables,
       u8"<table><tr><td id=a>a</td><td id=b>b</td></tr><tr><td id=c>cccc</td><td id=d>d</td></tr></table>")};
-    CHECK(RectOf(fixture, u8"a") == LayoutRect(0, 0, 40, 10));
+    CHECK(FrameRectOf(fixture, u8"a") == LayoutRect(0, 0, 40, 10));
 
     // a now spans both columns, so b moves to a third column.
     REQUIRE_FALSE(fixture.ById(u8"a").SetAttribute(u8"colspan", u8"2").HasException());
-    CHECK(RectOf(fixture, u8"a") == LayoutRect(0, 0, 50, 10));
-    CHECK(RectOf(fixture, u8"b") == LayoutRect(50, 0, 10, 10));
+    CHECK(FrameRectOf(fixture, u8"a") == LayoutRect(0, 0, 50, 10));
+    CHECK(FrameRectOf(fixture, u8"b") == LayoutRect(50, 0, 10, 10));
     CHECK(CellOf(fixture, u8"b").Col() == 2);
   }
 
@@ -281,12 +269,12 @@ layer at (0,0) size 800x10
   {
     ResolverFixture fixture {layout::tests::AhemDocument(
       PlainTables, u8"<table><col id=col width=50><tr><td id=a>a</td><td id=b>b</td></tr></table>")};
-    CHECK(RectOf(fixture, u8"a").Width() == 50_lu);
-    CHECK(RectOf(fixture, u8"b").X() == 50_lu);
+    CHECK(FrameRectOf(fixture, u8"a").Width() == 50_lu);
+    CHECK(FrameRectOf(fixture, u8"b").X() == 50_lu);
 
     REQUIRE_FALSE(fixture.ById(u8"col").SetAttribute(u8"width", u8"80").HasException());
-    CHECK(RectOf(fixture, u8"a").Width() == 80_lu);
-    CHECK(RectOf(fixture, u8"b").X() == 80_lu);
+    CHECK(FrameRectOf(fixture, u8"a").Width() == 80_lu);
+    CHECK(FrameRectOf(fixture, u8"b").X() == 80_lu);
   }
 
   TEST_CASE("RenderTable: paints separated borders and backgrounds", "[Rendering][RenderTable]")

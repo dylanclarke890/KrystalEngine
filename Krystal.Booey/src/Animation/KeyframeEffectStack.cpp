@@ -31,6 +31,9 @@
 #include "Krystal.Booey/DOM/Nodes/Document.hpp"
 #include "Krystal.Booey/Rendering/Style/RenderStyle.hpp"
 #include "Krystal.Booey/Style/Interpolation/Interpolation.hpp"
+#include "Krystal.Booey/Style/Values/Transforms/Rotate.hpp"
+#include "Krystal.Booey/Style/Values/Transforms/Scale.hpp"
+#include "Krystal.Booey/Style/Values/Transforms/Translate.hpp"
 #include <algorithm>
 
 namespace krys::boo

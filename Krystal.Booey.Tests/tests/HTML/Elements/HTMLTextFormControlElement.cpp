@@ -25,15 +25,6 @@ namespace krys::boo::tests
       html::EventLoop::Current().RunUntilIdle();
     }
 
-    /// @brief Presses the key @p key (with the key identifier @p identifier) in the frame, as the host does.
-    bool PressKey(EditorFixture &fixture, const utf8_string &key, utf8_string identifier,
-                  int32 keyCode) noexcept
-    {
-      return fixture.Frame->GetEventHandler().KeyEvent(
-        PlatformKeyboardEvent(PlatformEvent::Type::RawKeyDown, u8"", u8"", key, key, krys::move(identifier),
-                              keyCode, false, false, false, {}, {}));
-    }
-
     KRYS_NODISCARD HTMLInputElement &InputById(EditorFixture &fixture, utf8_stringview id) noexcept
     {
       return Downcast<HTMLInputElement>(fixture.ById(id));

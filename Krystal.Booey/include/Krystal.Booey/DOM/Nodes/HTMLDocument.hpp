@@ -26,6 +26,8 @@
 
 namespace krys::boo
 {
+  class QualifiedName;
+
   /// @brief A document whose type is "html", with the content type text/html.
   /// @see https://dom.spec.whatwg.org/#html-document
   class HTMLDocument : public Document

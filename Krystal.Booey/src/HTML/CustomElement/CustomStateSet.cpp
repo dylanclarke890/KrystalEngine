@@ -80,4 +80,9 @@ namespace krys::boo::html
   {
     return _states.size();
   }
+
+  Ref<CustomStateSet> CustomStateSet::Create(Element &element) noexcept
+  {
+    return CreateRef<CustomStateSet>(element);
+  }
 }

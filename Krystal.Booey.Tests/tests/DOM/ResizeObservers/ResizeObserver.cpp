@@ -1,6 +1,7 @@
 ﻿#include "Krystal.Booey/DOM/ResizeObservers/ResizeObserver.hpp"
 #include "catch2/catch_test_macros.hpp"
 #include "Krystal.Booey.Tests/Loader/NavigationTestUtils.hpp"
+#include "Krystal.Booey.Tests/StringTestUtils.hpp"
 #include "Krystal.Booey/DOM/Events/EventListenerHandle.hpp"
 #include "Krystal.Booey/DOM/Nodes/Document.hpp"
 #include "Krystal.Booey/DOM/ResizeObservers/ResizeObserverEntry.hpp"
@@ -15,31 +16,26 @@ namespace krys::boo::tests
   {
     /// @brief An observation as delivered: the target's ID, its content rect, and its content box and border
     /// box sizes (inline by block).
-    struct Observed
+    struct ObservedResize
     {
       std::string Id;
       double X {0}, Y {0}, Width {0}, Height {0};
       double ContentInline {0}, ContentBlock {0};
       double BorderInline {0}, BorderBlock {0};
 
-      bool operator==(const Observed &) const = default;
+      bool operator==(const ObservedResize &) const = default;
     };
 
-    KRYS_NODISCARD std::string Narrow(DOMStringView string)
-    {
-      return std::string(reinterpret_cast<const char *>(string.data()), string.size());
-    }
-
     /// @brief An observer that records what it's told, round by round.
-    struct Recorder
+    struct ResizeRecorder
     {
-      List<List<Observed>> Rounds;
+      List<List<ObservedResize>> Rounds;
       /// @brief Each entry's device pixel content box size (inline, block).
       List<std::pair<double, double>> DevicePixelSizes;
       Func<void(ResizeObserver &)> OnDeliver;
       Ref<ResizeObserver> Observer;
 
-      explicit Recorder(Document &document) noexcept
+      explicit ResizeRecorder(Document &document) noexcept
           : Observer(ResizeObserver::Create(
               document,
               [this](const List<Ref<ResizeObserverEntry>> &entries, ResizeObserver &observer)
@@ -65,7 +61,7 @@ namespace krys::boo::tests
       }
 
       /// @brief The rounds delivered since the last call.
-      KRYS_NODISCARD List<List<Observed>> Take() noexcept
+      KRYS_NODISCARD List<List<ObservedResize>> Take() noexcept
       {
         return std::exchange(Rounds, {});
       }
@@ -85,7 +81,7 @@ namespace krys::boo::tests
       u8"</div><div id=b style='display: none'></div>");
     auto &a = fixture.ById(u8"a");
     auto &b = fixture.ById(u8"b");
-    Recorder recorder(*fixture.Document);
+    ResizeRecorder recorder(*fixture.Document);
     auto update = [&]
     {
       fixture.Frame->UpdateRendering();
@@ -95,14 +91,14 @@ namespace krys::boo::tests
     {
       recorder.Observer->Observe(a);
       update();
-      CHECK(recorder.Take() == List<List<Observed>> {{{"a", 10, 10, 100, 50, 100, 50, 124, 74}}});
+      CHECK(recorder.Take() == List<List<ObservedResize>> {{{"a", 10, 10, 100, 50, 100, 50, 124, 74}}});
 
       update();
       CHECK(recorder.Take().empty());
 
       SetStyle(a, u8"width: 80px; height: 50px; padding: 4px; border: 2px solid");
       update();
-      CHECK(recorder.Take() == List<List<Observed>> {{{"a", 4, 4, 80, 50, 80, 50, 92, 62}}});
+      CHECK(recorder.Take() == List<List<ObservedResize>> {{{"a", 4, 4, 80, 50, 80, 50, 92, 62}}});
 
       // Only the padding changing leaves the content box as it was.
       SetStyle(a, u8"width: 80px; height: 50px; padding: 6px; border: 2px solid");
@@ -118,7 +114,7 @@ namespace krys::boo::tests
 
       SetStyle(a, u8"width: 100px; height: 50px; padding: 12px; border: 2px solid");
       update();
-      CHECK(recorder.Take() == List<List<Observed>> {{{"a", 12, 12, 100, 50, 100, 50, 128, 78}}});
+      CHECK(recorder.Take() == List<List<ObservedResize>> {{{"a", 12, 12, 100, 50, 100, 50, 128, 78}}});
 
       // Observing again with the same box changes nothing; with another, the observation starts over.
       recorder.Observer->Observe(a, {ResizeObserverBoxOptions::BorderBox});
@@ -133,13 +129,13 @@ namespace krys::boo::tests
     {
       recorder.Observer->Observe(b);
       update();
-      CHECK(recorder.Take() == List<List<Observed>> {{{"b"}}});
+      CHECK(recorder.Take() == List<List<ObservedResize>> {{{"b"}}});
       update();
       CHECK(recorder.Take().empty());
 
       SetStyle(b, u8"width: 10px; height: 20px");
       update();
-      CHECK(recorder.Take() == List<List<Observed>> {{{"b", 0, 0, 10, 20, 10, 20, 10, 20}}});
+      CHECK(recorder.Take() == List<List<ObservedResize>> {{{"b", 0, 0, 10, 20, 10, 20, 10, 20}}});
     }
 
     SECTION("Sizes are in the writing mode's axes and unzoomed")
@@ -147,7 +143,7 @@ namespace krys::boo::tests
       SetStyle(a, u8"width: 100px; height: 50px; writing-mode: vertical-lr; zoom: 2");
       recorder.Observer->Observe(a);
       update();
-      CHECK(recorder.Take() == List<List<Observed>> {{{"a", 0, 0, 100, 50, 50, 100, 50, 100}}});
+      CHECK(recorder.Take() == List<List<ObservedResize>> {{{"a", 0, 0, 100, 50, 50, 100, 50, 100}}});
     }
 
     SECTION("The device pixel content box is in whole device pixels, snapped where it sits")
@@ -179,7 +175,7 @@ namespace krys::boo::tests
       SetStyle(a, u8"width: 10px");
       SetStyle(b, u8"width: 10px");
       update();
-      CHECK(recorder.Take() == List<List<Observed>> {{{"b", 0, 0, 10, 0, 10, 0, 10, 0}}});
+      CHECK(recorder.Take() == List<List<ObservedResize>> {{{"b", 0, 0, 10, 0, 10, 0, 10, 0}}});
 
       recorder.Observer->Disconnect();
       SetStyle(b, u8"width: 20px");
@@ -188,7 +184,7 @@ namespace krys::boo::tests
 
       // An observer that's destroyed leaves its targets.
       {
-        Recorder other(*fixture.Document);
+        ResizeRecorder other(*fixture.Document);
         other.Observer->Observe(a);
         REQUIRE(a.ResizeObserverDataIfExists());
         CHECK(a.ResizeObserverDataIfExists()->Observers.size() == 1);
@@ -205,7 +201,7 @@ namespace krys::boo::tests
       u8"<div id=outer style='width: 200px; height: 100px'><div id=inner style='height: 10px'></div></div>");
     auto &outer = fixture.ById(u8"outer");
     auto &inner = fixture.ById(u8"inner");
-    Recorder recorder(*fixture.Document);
+    ResizeRecorder recorder(*fixture.Document);
     auto update = [&]
     {
       fixture.Frame->UpdateRendering();
@@ -227,7 +223,7 @@ namespace krys::boo::tests
       auto rounds = recorder.Take();
       REQUIRE(rounds.size() == 2);
       CHECK(rounds[0].size() == 2); // The outer box, and the inner box as it's as wide.
-      CHECK(rounds[1] == List<Observed> {{"inner", 0, 0, 150, 30, 150, 30, 150, 30}});
+      CHECK(rounds[1] == List<ObservedResize> {{"inner", 0, 0, 150, 30, 150, 30, 150, 30}});
     }
 
     SECTION("Resizing a shallower element in a callback is left for the next update")
@@ -244,10 +240,10 @@ namespace krys::boo::tests
       };
       SetStyle(inner, u8"height: 20px");
       update();
-      CHECK(recorder.Take() == List<List<Observed>> {{{"inner", 0, 0, 200, 20, 200, 20, 200, 20}}});
+      CHECK(recorder.Take() == List<List<ObservedResize>> {{{"inner", 0, 0, 200, 20, 200, 20, 200, 20}}});
 
       update();
-      CHECK(recorder.Take() == List<List<Observed>> {{{"outer", 0, 5, 200, 100, 200, 100, 200, 105}}});
+      CHECK(recorder.Take() == List<List<ObservedResize>> {{{"outer", 0, 5, 200, 100, 200, 100, 200, 105}}});
     }
 
     SECTION("A removed target is reported as empty; a destroyed one is forgotten")
@@ -259,7 +255,7 @@ namespace krys::boo::tests
       Ref<Element> removed = ShareRef(inner);
       removed->Remove();
       update();
-      CHECK(recorder.Take() == List<List<Observed>> {{{"inner"}}});
+      CHECK(recorder.Take() == List<List<ObservedResize>> {{{"inner"}}});
 
       {
         auto element = fixture.Document->CreateElement(u8"div").ReleaseValue();

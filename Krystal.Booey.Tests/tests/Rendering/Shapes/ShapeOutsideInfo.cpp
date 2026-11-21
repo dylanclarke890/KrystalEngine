@@ -1,5 +1,6 @@
 ﻿#include "Krystal.Booey/Rendering/Shapes/ShapeOutsideInfo.hpp"
 #include "catch2/catch_test_macros.hpp"
+#include "Krystal.Booey.Tests/Rendering/RenderTestUtils.hpp"
 #include "Krystal.Booey.Tests/Style/ResolverTestUtils.hpp"
 #include "Krystal.Booey/Rendering/RenderBlockFlow.hpp"
 #include "Krystal.Booey/Rendering/Shapes/LayoutShape.hpp"
@@ -10,11 +11,6 @@ namespace krys::boo::tests
 
   namespace
   {
-    KRYS_NODISCARD RenderBox &BoxOf(ResolverFixture &fixture, DOMStringView id) noexcept
-    {
-      return Downcast<RenderBox>(*fixture.ById(id).Renderer());
-    }
-
     KRYS_NODISCARD const LayoutShape &ShapeOf(ResolverFixture &fixture, DOMStringView id) noexcept
     {
       auto *info = BoxOf(fixture, id).GetShapeOutsideInfo();

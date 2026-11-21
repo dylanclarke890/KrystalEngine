@@ -12,14 +12,14 @@ namespace krys::boo::dom::tests
 {
   namespace
   {
-    struct CommonTestData
+    struct CharacterDataTestData
     {
       Ref<boo::Document> Document;
       Ref<Text> Node;
       Ref<dom::Range> FullRange;
       Ref<dom::Range> PartialRange;
 
-      CommonTestData()
+      CharacterDataTestData()
           : Document(CreateRef<boo::Document>()), Node(CreateRef<Text>(*Document, u8"Hello, world!")),
             FullRange(Document->CreateRange()), PartialRange(Document->CreateRange())
       {
@@ -56,7 +56,7 @@ namespace krys::boo::dom::tests
     "CharacterData.data: its data, which setting replaces all of",
     "[DOM][CharacterData][dom:interface-characterdata][dom:dom-characterdata-data][dom:concept-cd-data]")
   {
-    CommonTestData data;
+    CharacterDataTestData data;
     CHECK(data.Node->Data() == u8"Hello, world!");
     auto observer = data.Observe();
 
@@ -82,7 +82,7 @@ namespace krys::boo::dom::tests
   TEST_CASE("CharacterData.length: its length, in UTF-8 code units",
             "[DOM][CharacterData][dom:dom-characterdata-length]")
   {
-    CommonTestData data;
+    CharacterDataTestData data;
     CHECK(data.Node->Length() == 13uz);
     CHECK(CreateRef<Text>(*data.Document, u8"é")->Length() == 2uz);
     CHECK(CreateRef<Text>(*data.Document, u8"")->Length() == 0uz);
@@ -91,7 +91,7 @@ namespace krys::boo::dom::tests
   TEST_CASE("CharacterData.substringData(): substrings its data, changing nothing",
             "[DOM][CharacterData][dom:dom-characterdata-substringdata]")
   {
-    CommonTestData data;
+    CharacterDataTestData data;
 
     CHECK(data.Node->SubstringData(0, 5).Value() == u8"Hello");
     CHECK(data.Node->SubstringData(7, 20).Value() == u8"world!");
@@ -106,7 +106,7 @@ namespace krys::boo::dom::tests
   TEST_CASE("CharacterData.appendData(): replaces data at the end, with nothing removed",
             "[DOM][CharacterData][dom:dom-characterdata-appenddata]")
   {
-    CommonTestData data;
+    CharacterDataTestData data;
     REQUIRE_FALSE(data.Node->AppendData(u8" How are you?").HasException());
     CHECK(data.Node->Data() == u8"Hello, world! How are you?");
     // A boundary at the end isn't after offset + count, so it stays.
@@ -116,7 +116,7 @@ namespace krys::boo::dom::tests
   TEST_CASE("CharacterData.insertData(): replaces data at the offset, with nothing removed",
             "[DOM][CharacterData][dom:dom-characterdata-insertdata]")
   {
-    CommonTestData data;
+    CharacterDataTestData data;
 
     auto outOfBounds = data.Node->InsertData(20, u8"test");
     REQUIRE(outOfBounds.HasException());
@@ -130,7 +130,7 @@ namespace krys::boo::dom::tests
   TEST_CASE("CharacterData.deleteData(): replaces count code units at the offset with nothing",
             "[DOM][CharacterData][dom:dom-characterdata-deletedata]")
   {
-    CommonTestData data;
+    CharacterDataTestData data;
 
     auto outOfBounds = data.Node->DeleteData(20, 5);
     REQUIRE(outOfBounds.HasException());
@@ -145,7 +145,7 @@ namespace krys::boo::dom::tests
   TEST_CASE("CharacterData.replaceData(): replaces count code units at the offset with the data",
             "[DOM][CharacterData][dom:dom-characterdata-replacedata]")
   {
-    CommonTestData data;
+    CharacterDataTestData data;
     auto observer = data.Observe();
 
     auto outOfBounds = data.Node->ReplaceData(20, 5, u8"test");
@@ -161,7 +161,7 @@ namespace krys::boo::dom::tests
   TEST_CASE("Node.nodeValue: character data's is its data, which setting it replaces",
             "[DOM][CharacterData][dom:dom-node-nodevalue]")
   {
-    CommonTestData data;
+    CharacterDataTestData data;
     CHECK(data.Node->NodeValue() == u8"Hello, world!");
     REQUIRE_FALSE(data.Node->NodeValue(u8"New value").HasException());
     CHECK(data.Node->NodeValue() == u8"New value");
@@ -171,7 +171,7 @@ namespace krys::boo::dom::tests
   TEST_CASE("Node.textContent: character data's is its data, which setting it replaces",
             "[DOM][CharacterData][dom:dom-node-textcontent][dom:get-text-content][dom:set-text-content]")
   {
-    CommonTestData data;
+    CharacterDataTestData data;
     CHECK(data.Node->TextContent() == u8"Hello, world!");
     REQUIRE_FALSE(data.Node->TextContent(u8"New value").HasException());
     CHECK(data.Node->TextContent() == u8"New value");

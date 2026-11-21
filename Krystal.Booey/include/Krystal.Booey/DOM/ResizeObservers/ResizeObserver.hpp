@@ -25,7 +25,6 @@
 
 #pragma once
 
-#include "Krystal.Booey/DOM/ResizeObservers/ResizeObservation.hpp"
 #include "Krystal.Booey/DOM/ResizeObservers/ResizeObserverCallback.hpp"
 #include "Krystal.Booey/DOM/ResizeObservers/ResizeObserverOptions.hpp"
 #include "Krystal.Core/CanMakeWeakPtr.hpp"
@@ -40,6 +39,7 @@ namespace krys::boo
 {
   class Document;
   class Element;
+  class ResizeObservation;
 
   /// @brief The resize observers observing an element.
   struct ResizeObserverData

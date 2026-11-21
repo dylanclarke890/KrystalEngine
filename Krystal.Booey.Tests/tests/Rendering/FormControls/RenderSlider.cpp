@@ -1,6 +1,7 @@
 ﻿#include "Krystal.Booey/Rendering/FormControls/RenderSlider.hpp"
 #include "catch2/catch_test_macros.hpp"
 #include "Krystal.Booey.Tests/Editing/EditorTestUtils.hpp"
+#include "Krystal.Booey.Tests/Input/InputTestUtils.hpp"
 #include "Krystal.Booey.Tests/Layout/LayoutTestUtils.hpp"
 #include "Krystal.Booey.Tests/Style/ResolverTestUtils.hpp"
 #include "Krystal.Booey/DOM/Events/EventNames.hpp"
@@ -15,19 +16,8 @@
 
 namespace krys::boo::layout::tests
 {
+  using boo::tests::MouseEventAt;
   using style::tests::ResolverFixture;
-
-  namespace
-  {
-    KRYS_NODISCARD PlatformMouseEvent MouseEvent(PlatformEvent::Type type, PointI position) noexcept
-    {
-      PointD point(position.X(), position.Y());
-      int32 clickCount = type == PlatformEvent::Type::MousePressed ? 1 : 0;
-      return PlatformMouseEvent(
-        point, point, type == PlatformEvent::Type::MouseMoved ? MouseButton::None : MouseButton::Left, type,
-        clickCount, {}, MonotonicTime::Now());
-    }
-  }
 
   TEST_CASE_METHOD(css::tests::ValueFixture, "RenderSlider: the thumb sits at the value along the track",
                    "[Rendering][RenderSlider]")
@@ -94,30 +84,30 @@ layer at (0,0) size 800x66
     auto changes = fixture.Listen(event_names::Change);
 
     // Pressing on the thumb and dragging it moves it with the mouse, firing input; releasing fires change.
-    (void)handler.HandleMousePressEvent(MouseEvent(PlatformEvent::Type::MousePressed, {64, 10}));
-    (void)handler.MouseMoved(MouseEvent(PlatformEvent::Type::MouseMoved, {10, 10}));
+    (void)handler.HandleMousePressEvent(MouseEventAt(PlatformEvent::Type::MousePressed, {64, 10}));
+    (void)handler.MouseMoved(MouseEventAt(PlatformEvent::Type::MouseMoved, {10, 10}));
     CHECK(input.Value() == u8"0");
     CHECK(inputs->Count >= 1);
     CHECK(changes->Count == 0);
-    (void)handler.MouseMoved(MouseEvent(PlatformEvent::Type::MouseMoved, {300, 10}));
+    (void)handler.MouseMoved(MouseEventAt(PlatformEvent::Type::MouseMoved, {300, 10}));
     CHECK(input.Value() == u8"100");
-    (void)handler.HandleMouseReleaseEvent(MouseEvent(PlatformEvent::Type::MouseReleased, {300, 10}));
+    (void)handler.HandleMouseReleaseEvent(MouseEventAt(PlatformEvent::Type::MouseReleased, {300, 10}));
     CHECK(changes->Count == 1);
 
     // Moving afterwards doesn't drag.
-    (void)handler.MouseMoved(MouseEvent(PlatformEvent::Type::MouseMoved, {10, 10}));
+    (void)handler.MouseMoved(MouseEventAt(PlatformEvent::Type::MouseMoved, {10, 10}));
     CHECK(input.Value() == u8"100");
 
     // Clicking the track jumps the thumb there and starts a drag.
-    (void)handler.HandleMousePressEvent(MouseEvent(PlatformEvent::Type::MousePressed, {37, 10}));
+    (void)handler.HandleMousePressEvent(MouseEventAt(PlatformEvent::Type::MousePressed, {37, 10}));
     CHECK(input.Value() == u8"25");
-    (void)handler.HandleMouseReleaseEvent(MouseEvent(PlatformEvent::Type::MouseReleased, {37, 10}));
+    (void)handler.HandleMouseReleaseEvent(MouseEventAt(PlatformEvent::Type::MouseReleased, {37, 10}));
 
     // A disabled range doesn't move.
     input.SetAttribute(u8"disabled", u8"");
     (void)fixture.Document->UpdateLayout();
-    (void)handler.HandleMousePressEvent(MouseEvent(PlatformEvent::Type::MousePressed, {100, 10}));
-    (void)handler.HandleMouseReleaseEvent(MouseEvent(PlatformEvent::Type::MouseReleased, {100, 10}));
+    (void)handler.HandleMousePressEvent(MouseEventAt(PlatformEvent::Type::MousePressed, {100, 10}));
+    (void)handler.HandleMouseReleaseEvent(MouseEventAt(PlatformEvent::Type::MouseReleased, {100, 10}));
     CHECK(input.Value() == u8"25");
   }
 
@@ -142,13 +132,13 @@ layer at (0,0) size 800x66
     SECTION("The thumb snaps to a tick within 5 pixels")
     {
       // The value 50 is at the track's middle.
-      (void)handler.HandleMousePressEvent(MouseEvent(PlatformEvent::Type::MousePressed, {100, 16}));
+      (void)handler.HandleMousePressEvent(MouseEventAt(PlatformEvent::Type::MousePressed, {100, 16}));
       CHECK(input.Value() == u8"50");
-      (void)handler.MouseMoved(MouseEvent(PlatformEvent::Type::MouseMoved, {104, 16}));
+      (void)handler.MouseMoved(MouseEventAt(PlatformEvent::Type::MouseMoved, {104, 16}));
       CHECK(input.Value() == u8"50");
-      (void)handler.MouseMoved(MouseEvent(PlatformEvent::Type::MouseMoved, {110, 16}));
+      (void)handler.MouseMoved(MouseEventAt(PlatformEvent::Type::MouseMoved, {110, 16}));
       CHECK(input.Value() != u8"50");
-      (void)handler.HandleMouseReleaseEvent(MouseEvent(PlatformEvent::Type::MouseReleased, {110, 16}));
+      (void)handler.HandleMouseReleaseEvent(MouseEventAt(PlatformEvent::Type::MouseReleased, {110, 16}));
     }
 
     SECTION("Changing the datalist changes the ticks")
@@ -157,10 +147,10 @@ layer at (0,0) size 800x66
       html::EventLoop::Current().RunUntilIdle();
       (void)fixture.Document->UpdateLayout();
       CHECK(Downcast<RenderBox>(*input.Renderer()).Height() == 32_lu);
-      (void)handler.HandleMousePressEvent(MouseEvent(PlatformEvent::Type::MousePressed, {100, 16}));
-      (void)handler.MouseMoved(MouseEvent(PlatformEvent::Type::MouseMoved, {104, 16}));
+      (void)handler.HandleMousePressEvent(MouseEventAt(PlatformEvent::Type::MousePressed, {100, 16}));
+      (void)handler.MouseMoved(MouseEventAt(PlatformEvent::Type::MouseMoved, {104, 16}));
       CHECK(input.Value() != u8"50");
-      (void)handler.HandleMouseReleaseEvent(MouseEvent(PlatformEvent::Type::MouseReleased, {104, 16}));
+      (void)handler.HandleMouseReleaseEvent(MouseEventAt(PlatformEvent::Type::MouseReleased, {104, 16}));
     }
   }
 

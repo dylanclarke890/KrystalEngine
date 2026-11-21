@@ -1,6 +1,7 @@
 ﻿#include "Krystal.Booey/CSS/Calc/Value.hpp"
 #include "catch2/catch_approx.hpp"
 #include "catch2/catch_test_macros.hpp"
+#include "Krystal.Booey.Tests/CSS/CalcTestUtils.hpp"
 #include "Krystal.Booey/CSS/Calc/SymbolTable.hpp"
 #include "Krystal.Booey/CSS/Values/NoConversionDataRequiredTag.hpp"
 #include "Krystal.Booey/CSS/Values/Primitives/NumericCategory.hpp"
@@ -14,11 +15,6 @@ namespace krys::boo::css::calc::tests
 {
   namespace
   {
-    Child Num(double value, UnitType unit = UnitType::Number)
-    {
-      return CreateNumeric(value, unit);
-    }
-
     Ref<Value> Create(css::Category category, css::Range range, Child &&root, Type type,
                       bool requiresConversionData = false)
     {

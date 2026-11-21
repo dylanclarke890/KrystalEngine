@@ -2,6 +2,7 @@
 #include "catch2/catch_test_macros.hpp"
 #include "Krystal.Booey.Tests/Animation/AnimationTestUtils.hpp"
 #include "Krystal.Booey.Tests/CSS/ValueTestUtils.hpp"
+#include "Krystal.Booey.Tests/StringTestUtils.hpp"
 #include "Krystal.Booey/Animation/KeyframeEffect.hpp"
 #include "Krystal.Booey/Animation/WebAnimation.hpp"
 #include "Krystal.Booey/CSS/TypedOM/CSSUnitValue.hpp"
@@ -12,11 +13,6 @@ namespace krys::boo::tests
 {
   namespace
   {
-    KRYS_NODISCARD std::string Narrow(const DOMString &string)
-    {
-      return std::string(string.begin(), string.end());
-    }
-
     /// @brief A page with `#box`, and a keyframe effect on it with no keyframes.
     struct EffectFixture : AnimationPageFixture
     {

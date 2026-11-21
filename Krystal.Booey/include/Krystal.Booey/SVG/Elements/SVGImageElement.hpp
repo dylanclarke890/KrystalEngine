@@ -22,7 +22,6 @@
 #pragma once
 
 #include "Krystal.Booey/SVG/Elements/SVGGraphicsElement.hpp"
-#include "Krystal.Booey/SVG/SVGPreserveAspectRatio.hpp"
 #include "Krystal.Booey/SVG/SVGURIReference.hpp"
 
 namespace krys::boo

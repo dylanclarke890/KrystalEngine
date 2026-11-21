@@ -22,6 +22,7 @@
 #include "Krystal.Booey/CSS/Selectors/UserAgentParts.hpp"
 #include "Krystal.Booey/CSS/UserAgentStyleSheets.hpp"
 #include "Krystal.Booey/CSS/Values/UnitType.hpp"
+#include "Krystal.Booey/DOM/Nodes/Document.hpp"
 #include "Krystal.Booey/DOM/Nodes/ShadowRoot.hpp"
 #include "Krystal.Booey/HTML/Attributes/ReflectAttribute.hpp"
 #include "Krystal.Booey/HTML/Elements/HTMLDivElement.hpp"

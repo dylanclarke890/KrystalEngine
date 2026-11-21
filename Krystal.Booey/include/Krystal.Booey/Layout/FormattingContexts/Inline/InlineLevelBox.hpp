@@ -116,7 +116,7 @@ namespace krys::boo::layout
     friend class InlineFormattingUtils;
     friend class RubyFormattingContext;
 
-    enum class PositionWithinLayoutBox : bool
+    enum class PositionWithinLayoutBox : uint8
     {
       First,
       Last,

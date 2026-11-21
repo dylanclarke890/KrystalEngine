@@ -25,6 +25,7 @@
 #pragma once
 
 #include "Krystal.Booey/CSS/Types/CSSOMString.hpp"
+#include "Krystal.Booey/DOM/Nodes/ContainerNode.hpp"
 #include "Krystal.Booey/Graphics/Color/Color.hpp"
 #include "Krystal.Booey/Graphics/Geometry/BoxSides.hpp"
 #include "Krystal.Booey/Page/FrameViewLayoutContext.hpp"
@@ -32,6 +33,7 @@
 #include "Krystal.Booey/Platform/Scrolling/ScrollTypes.hpp"
 #include "Krystal.Booey/Rendering/Layers/RenderLayer.hpp"
 #include "Krystal.Booey/Rendering/Painting/PaintPhase.hpp"
+#include "Krystal.Booey/Style/Values/Overflow/ScrollbarGutter.hpp"
 #include "Krystal.Core/Attributes.hpp"
 #include "Krystal.Core/CanMakeWeakPtr.hpp"
 #include "Krystal.Core/Geometry/Point.hpp"

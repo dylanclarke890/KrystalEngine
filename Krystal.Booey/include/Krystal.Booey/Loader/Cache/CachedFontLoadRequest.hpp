@@ -26,6 +26,7 @@
 
 #pragma once
 
+#include "Krystal.Booey/Graphics/Fonts/Font.hpp"
 #include "Krystal.Booey/Loader/Cache/CachedFont.hpp"
 #include "Krystal.Booey/Loader/Cache/CachedFontClient.hpp"
 #include "Krystal.Booey/Loader/Cache/CachedResourceHandle.hpp"

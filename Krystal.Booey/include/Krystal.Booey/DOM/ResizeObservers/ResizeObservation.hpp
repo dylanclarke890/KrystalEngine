@@ -25,7 +25,6 @@
 
 #pragma once
 
-#include "Krystal.Booey/DOM/ResizeObservers/ResizeObserverBoxOptions.hpp"
 #include "Krystal.Booey/Graphics/Geometry/LayoutPoint.hpp"
 #include "Krystal.Booey/Graphics/Geometry/LayoutSize.hpp"
 #include "Krystal.Core/Geometry/Rect.hpp"
@@ -38,6 +37,7 @@
 namespace krys::boo
 {
   class Element;
+  enum class ResizeObserverBoxOptions : uint8;
 
   /// @brief A resize observer's observation of one element: the box it observes and the sizes it last
   /// reported.
@@ -84,10 +84,7 @@ namespace krys::boo
 
     KRYS_NODISCARD SizeF DevicePixelContentBoxSize() const noexcept;
 
-    KRYS_NODISCARD Element *Target() const noexcept
-    {
-      return _target.get();
-    }
+    KRYS_NODISCARD Element *Target() const noexcept;
 
     KRYS_NODISCARD ResizeObserverBoxOptions ObservedBox() const noexcept
     {

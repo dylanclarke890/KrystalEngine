@@ -1,5 +1,6 @@
 ﻿#include "Krystal.Booey/DOM/Events/ToggleEvent.hpp"
 #include "catch2/catch_test_macros.hpp"
+#include "Krystal.Booey.Tests/StringTestUtils.hpp"
 #include "Krystal.Booey.Tests/Style/ResolverTestUtils.hpp"
 #include "Krystal.Booey/DOM/Events/CommandEvent.hpp"
 #include "Krystal.Booey/DOM/Events/EventListenerHandle.hpp"
@@ -10,15 +11,8 @@
 
 namespace krys::boo::dom::tests
 {
+  using boo::tests::Narrow;
   using style::tests::ResolverFixture;
-
-  namespace
-  {
-    KRYS_NODISCARD std::string Narrow(const DOMString &string)
-    {
-      return std::string(reinterpret_cast<const char *>(string.data()), string.size());
-    }
-  }
 
   TEST_CASE_METHOD(
     css::tests::ValueFixture, "ToggleEvent and CommandEvent",
@@ -35,7 +29,7 @@ namespace krys::boo::dom::tests
       ToggleEventInit init;
       init.OldState = u8"closed";
       init.NewState = u8"open";
-      init.Source = ShareRefPtr(&button);
+      init.Source = &button;
       auto event = CreateRef<ToggleEvent>(u8"toggle", init);
       CHECK_FALSE(event->IsTrusted());
       CHECK(Narrow(event->OldState()) == "closed");
@@ -56,7 +50,7 @@ namespace krys::boo::dom::tests
       REQUIRE_FALSE(shadow->AppendChild(*inner).HasException());
 
       CommandEventInit init;
-      init.Source = inner;
+      init.Source = inner.get();
       init.Command = u8"--refresh";
       auto event = CommandEvent::Create(u8"command", init, true);
       CHECK(event->IsTrusted());

@@ -1,12 +1,10 @@
 ﻿#include "Krystal.Booey/DOM/Algorithms/IteratorAlgorithms.hpp"
-#include "Krystal.Booey/DOM/Abort/AbortSignal.hpp"
 #include "Krystal.Booey/DOM/Algorithms/TreeQueries.hpp"
 #include "Krystal.Booey/DOM/Iterators/SubtreeRanges.hpp"
 #include "Krystal.Booey/DOM/Nodes/Attr.hpp"
 #include "Krystal.Booey/DOM/Nodes/ShadowRoot.hpp"
 #include "Krystal.Booey/DOM/Traversal/NodeIterator.hpp"
 #include "Krystal.Booey/DOM/Traversal/TreeWalker.hpp"
-#include "Krystal.Booey/HTML/CustomElement/CustomElementRegistry.hpp"
 #include "Krystal.Booey/HTML/Elements/HTMLSlotElement.hpp"
 
 namespace krys::boo::dom

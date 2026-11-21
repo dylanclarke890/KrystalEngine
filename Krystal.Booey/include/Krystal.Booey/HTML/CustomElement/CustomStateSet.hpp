@@ -50,10 +50,7 @@ namespace krys::boo::html
 
     ~CustomStateSet() noexcept;
 
-    KRYS_NODISCARD static Ref<CustomStateSet> Create(Element &element) noexcept
-    {
-      return CreateRef<CustomStateSet>(element);
-    }
+    KRYS_NODISCARD static Ref<CustomStateSet> Create(Element &element) noexcept;
 
     /// @return Whether @p state wasn't in the set.
     bool Add(const DOMStringAtom &state) noexcept;

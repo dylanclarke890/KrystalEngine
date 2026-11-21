@@ -15,7 +15,7 @@ namespace krys::boo::svg::tests
 
   namespace
   {
-    void Click(boo::Element &target, int16 button = 0) noexcept
+    void DispatchClick(boo::Element &target, int16 button = 0) noexcept
     {
       MouseEventInit init;
       init.Bubbles = true;
@@ -65,7 +65,7 @@ namespace krys::boo::svg::tests
 
     SECTION("the host is asked, with the action")
     {
-      Click(fixture.ById(u8"inner"));
+      DispatchClick(fixture.ById(u8"inner"));
       REQUIRE(fixture.Navigations().size() == 1);
       auto &navigation = fixture.Navigations()[0];
       CHECK(navigation.Url == "https://example.com/dir/next.html");
@@ -76,13 +76,13 @@ namespace krys::boo::svg::tests
 
     SECTION("a link without href isn't followed")
     {
-      Click(fixture.ById(u8"plain"));
+      DispatchClick(fixture.ById(u8"plain"));
       CHECK(fixture.Navigations().empty());
     }
 
     SECTION("xlink:href, and xlink:show=new opens a new window")
     {
-      Click(fixture.ById(u8"xlink"));
+      DispatchClick(fixture.ById(u8"xlink"));
       REQUIRE(fixture.Navigations().size() == 1);
       CHECK(fixture.Navigations()[0].Url == "https://example.com/dir/x.html");
       CHECK(fixture.Navigations()[0].IsNewWindow);
@@ -91,18 +91,18 @@ namespace krys::boo::svg::tests
 
     SECTION("targets and link types")
     {
-      Click(fixture.ById(u8"blank"));
+      DispatchClick(fixture.ById(u8"blank"));
       REQUIRE(fixture.Navigations().size() == 1);
       CHECK(fixture.Navigations()[0].NewWindowName == "_blank");
 
-      Click(fixture.ById(u8"noopener"));
+      DispatchClick(fixture.ById(u8"noopener"));
       REQUIRE(fixture.Navigations().size() == 2);
       CHECK(fixture.Navigations()[1].NewWindowName == "results");
     }
 
     SECTION("other buttons' clicks are followed too")
     {
-      Click(fixture.ById(u8"inner"), 1);
+      DispatchClick(fixture.ById(u8"inner"), 1);
       CHECK(fixture.Navigations().size() == 1);
     }
   }
@@ -126,7 +126,7 @@ namespace krys::boo::svg::tests
     CHECK(fixture.ById(u8"nested").Renderer() == nullptr);
 
     // Clicking a link in a summary follows it rather than toggling the details.
-    Click(fixture.ById(u8"r"));
+    DispatchClick(fixture.ById(u8"r"));
     CHECK(fixture.Navigations().size() == 1);
     auto &details =
       Downcast<HTMLDetailsElement>(*fixture.Document->QuerySelector(u8"details").ReleaseValue());

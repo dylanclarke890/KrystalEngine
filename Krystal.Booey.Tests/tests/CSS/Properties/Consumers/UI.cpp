@@ -5,6 +5,7 @@
 namespace krys::boo::css::parse_property::tests
 {
   using css::tests::ConsumeToText;
+  using css::tests::ContextWithBaseUrl;
 
   namespace
   {
@@ -12,11 +13,6 @@ namespace krys::boo::css::parse_property::tests
     {
       return ConsumeCursor(tokens, state);
     };
-
-    ParserContext Context(ParserMode mode = ParserMode::HTMLStandard)
-    {
-      return ParserContext {mode, net::Url(u8"https://example.com/dir/")};
-    }
   }
 
   TEST_CASE("parse_property(ConsumeCursor keywords)", "[CSS][Properties][Consumers]")
@@ -33,12 +29,12 @@ namespace krys::boo::css::parse_property::tests
 
     // `hand` is a quirks-mode alias for `pointer`.
     CHECK(ConsumeToText(u8"hand", Cursor) == "<null>");
-    CHECK(ConsumeToText(u8"hand", Cursor, Context(ParserMode::HTMLQuirks)) == "pointer");
+    CHECK(ConsumeToText(u8"hand", Cursor, ContextWithBaseUrl(ParserMode::HTMLQuirks)) == "pointer");
   }
 
   TEST_CASE("parse_property(ConsumeCursor images)", "[CSS][Properties][Consumers]")
   {
-    auto context = Context();
+    auto context = ContextWithBaseUrl();
 
     CHECK(ConsumeToText(u8"url(a.png), auto", Cursor, context) == "url(\"a.png\"), auto");
     CHECK(ConsumeToText(u8"url(a.png) 1 2, pointer", Cursor, context) == "url(\"a.png\") 1 2, pointer");

@@ -70,14 +70,7 @@ namespace krys::boo
       return false;
     }
 
-    KRYS_NODISCARD bool CanStartSelection() const noexcept override
-    {
-      if (ShadowRoot())
-      {
-        return HTMLElement::CanStartSelection();
-      }
-      return false;
-    }
+    KRYS_NODISCARD bool CanStartSelection() const noexcept override;
 
     HTMLImageElement(Document &document) noexcept;
 

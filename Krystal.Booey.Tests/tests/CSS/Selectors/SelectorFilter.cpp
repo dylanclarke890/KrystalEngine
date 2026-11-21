@@ -1,5 +1,6 @@
 ﻿#include "Krystal.Booey/CSS/Selectors/SelectorFilter.hpp"
 #include "catch2/catch_test_macros.hpp"
+#include "Krystal.Booey.Tests/DOM/DOMTestUtils.hpp"
 #include "Krystal.Booey/CSS/Selectors/Selector.hpp"
 #include "Krystal.Booey/CSS/Selectors/SelectorChecker.hpp"
 #include "Krystal.Booey/CSS/Selectors/SelectorParser.hpp"
@@ -13,24 +14,11 @@
 
 namespace krys::boo::css::tests
 {
+  using boo::tests::ById;
+  using boo::tests::ParseDocument;
+
   namespace
   {
-    KRYS_NODISCARD Ref<HTMLDocument> Parse(utf8_string &&input) noexcept
-    {
-      auto document = CreateRef<HTMLDocument>();
-      auto parser = CreateRef<html::DocumentParser>(*document);
-      parser->InputStream().Append(krys::move(input), IsEOF::Yes);
-      parser->PumpTokenizer();
-      return document;
-    }
-
-    KRYS_NODISCARD boo::Element &ById(Document &document, DOMStringView id)
-    {
-      auto element = document.GetElementById(id);
-      REQUIRE(element);
-      return *element;
-    }
-
     KRYS_NODISCARD SelectorList ParseSelector(const Document &document, CSSOMStringView text)
     {
       auto list = SelectorParser::ParseSelectorList(text, SelectorParserContext(document));
@@ -51,7 +39,7 @@ namespace krys::boo::css::tests
 
   TEST_CASE("SelectorFilter: hashes of ancestor identifiers", "[CSS][Selectors][SelectorFilter]")
   {
-    auto document = Parse(u8"<!DOCTYPE html>");
+    auto document = ParseDocument(u8"<!DOCTYPE html>");
     auto hashes = [&](CSSOMStringView text)
     {
       return SelectorFilter::CollectHashes(*ParseSelector(*document, text).FirstSelectorComponent());
@@ -79,8 +67,8 @@ namespace krys::boo::css::tests
 
   TEST_CASE("SelectorFilter: fast rejection", "[CSS][Selectors][SelectorFilter]")
   {
-    auto document =
-      Parse(u8"<!DOCTYPE html><div id=outer class='a b' data-x><section><p id=leaf></p></section></div>");
+    auto document = ParseDocument(
+      u8"<!DOCTYPE html><div id=outer class='a b' data-x><section><p id=leaf></p></section></div>");
     auto &outer = ById(*document, u8"outer");
     auto &section = *outer.FirstElementChild();
     auto &leaf = ById(*document, u8"leaf");
@@ -128,7 +116,7 @@ namespace krys::boo::css::tests
 
   TEST_CASE("SelectorFilter: quirks mode folds class and ID case", "[CSS][Selectors][SelectorFilter]")
   {
-    auto document = Parse(u8"<div id=Outer class=Big><p></p></div>");
+    auto document = ParseDocument(u8"<div id=Outer class=Big><p></p></div>");
     REQUIRE(document->InQuirksMode());
     SelectorFilter filter;
     filter.PushParentInitializingIfNeeded(ById(*document, u8"Outer"));
@@ -144,7 +132,7 @@ namespace krys::boo::css::tests
   TEST_CASE("HasSelectorFilter: children and descendants", "[CSS][Selectors][SelectorFilter][Style]")
   {
     auto document =
-      Parse(u8"<!DOCTYPE html><div id=root><span class=child><b class=grandchild></b></span></div>");
+      ParseDocument(u8"<!DOCTYPE html><div id=root><span class=child><b class=grandchild></b></span></div>");
     auto &root = ById(*document, u8"root");
 
     REQUIRE(style::HasSelectorFilter::TypeForMatchElement(style::MatchElement::HasChild)
@@ -177,8 +165,8 @@ namespace krys::boo::css::tests
 
   TEST_CASE("SelectorChecker: :has() match cache and filters", "[CSS][Selectors][SelectorChecker][Style]")
   {
-    auto document =
-      Parse(u8"<!DOCTYPE html><div id=a><p class=x></p></div><div id=b><section><p></p></section></div>");
+    auto document = ParseDocument(
+      u8"<!DOCTYPE html><div id=a><p class=x></p></div><div id=b><section><p></p></section></div>");
     auto &a = ById(*document, u8"a");
     auto &b = ById(*document, u8"b");
     SelectorChecker checker(*document);
@@ -222,9 +210,9 @@ namespace krys::boo::css::tests
 
   TEST_CASE("SelectorChecker: style relations", "[CSS][Selectors][SelectorChecker][Style]")
   {
-    auto document =
-      Parse(u8"<!DOCTYPE html><ul id=list><li id=first></li><li id=second></li><li id=third></li></ul>"
-            u8"<p id=empty></p>");
+    auto document = ParseDocument(
+      u8"<!DOCTYPE html><ul id=list><li id=first></li><li id=second></li><li id=third></li></ul>"
+      u8"<p id=empty></p>");
     auto &list = ById(*document, u8"list");
     auto &first = ById(*document, u8"first");
     auto &second = ById(*document, u8"second");

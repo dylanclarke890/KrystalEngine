@@ -1,18 +1,15 @@
 ﻿#include "Krystal.Booey/Graphics/Fonts/FontCascade.hpp"
 #include "catch2/catch_approx.hpp"
 #include "catch2/catch_test_macros.hpp"
+#include "Krystal.Booey.Tests/Layout/LayoutTestUtils.hpp"
 #include "Krystal.Booey/Graphics/Fonts/FontDatabase.hpp"
 
 namespace krys::boo::tests
 {
+  using layout::tests::RegisterAhem;
+
   namespace
   {
-    void RegisterAhem()
-    {
-      (void)FontDatabase::Singleton().AddFontFile(std::filesystem::path {KRYS_BOOEY_TESTS_DATA_DIR} / "fonts"
-                                                  / "Ahem.ttf");
-    }
-
     /// @brief A 16px Ahem cascade: every Ahem glyph is a 1em square, so most characters are 16px wide.
     KRYS_NODISCARD FontCascade Ahem(float size = 16)
     {

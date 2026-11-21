@@ -7,7 +7,7 @@ namespace krys::boo::tests
 {
   namespace
   {
-    constexpr auto none = std::numeric_limits<float>::quiet_NaN();
+    constexpr auto NoneComponent = std::numeric_limits<float>::quiet_NaN();
     constexpr auto infinity = std::numeric_limits<float>::infinity();
   }
 
@@ -72,7 +72,8 @@ namespace krys::boo::tests
     CHECK(SerialisationForCSS(ExtendedDisplayP3<float> {0, 0, 0, 1}) == u8"color(display-p3 0 0 0)");
 
     // Missing and non-finite components.
-    CHECK(SerialisationForCSS(ExtendedSRGBA<float> {none, 0, 0, none}) == u8"color(srgb none 0 0 / none)");
+    CHECK(SerialisationForCSS(ExtendedSRGBA<float> {NoneComponent, 0, 0, NoneComponent})
+          == u8"color(srgb none 0 0 / none)");
     CHECK(SerialisationForCSS(ExtendedSRGBA<float> {infinity, -infinity, 0, 1})
           == u8"color(srgb calc(infinity) calc(-infinity) 0)");
 
@@ -117,7 +118,7 @@ namespace krys::boo::tests
     // (Hues are in [0, 360], normalised as they're parsed.)
     CHECK(SerialisationForCSS(LCHA<float> {50, 30, 40, 1}) == u8"lch(50 30 40)");
     CHECK(SerialisationForCSS(OKLCHA<float> {0.5f, 0.125f, 270, 1}) == u8"oklch(0.5 0.125 270)");
-    CHECK(SerialisationForCSS(OKLCHA<float> {0.5f, 0.125f, none, 1}) == u8"oklch(0.5 0.125 none)");
+    CHECK(SerialisationForCSS(OKLCHA<float> {0.5f, 0.125f, NoneComponent, 1}) == u8"oklch(0.5 0.125 none)");
 
     // HTML and the render tree use the CSS serialisation.
     CHECK(SerialisationForHTML(Lab<float> {50, 20, -30, 1}) == u8"lab(50 20 -30)");

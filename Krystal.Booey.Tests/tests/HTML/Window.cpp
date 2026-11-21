@@ -10,7 +10,6 @@
 #include "Krystal.Booey/DOM/Nodes/Element.hpp"
 #include "Krystal.Booey/DOM/Nodes/HTMLDocument.hpp"
 #include "Krystal.Booey/HTML/Attributes/EventHandlerAttributes.hpp"
-#include "Krystal.Booey/HTML/CustomElement/CustomElementRegistry.hpp"
 #include "Krystal.Booey/HTML/Elements/HTMLBodyElement.hpp"
 #include "Krystal.Booey/HTML/Elements/HTMLElement.hpp"
 #include "Krystal.Booey/HTML/EventLoop/EventLoop.hpp"
@@ -111,7 +110,7 @@ namespace krys::boo::tests
     CHECK_FALSE(Is<boo::Window>(static_cast<EventTarget &>(*document)));
 
     // The window's custom element registry is the document's.
-    CHECK(&window->CustomElements() == document->CustomElementRegistry().get());
+    CHECK(&window->CustomElements() == document->CustomElementRegistry());
 
     // Leaving the frame, the document keeps its window, which has no browsing context.
     frame->SetDocument(nullptr);

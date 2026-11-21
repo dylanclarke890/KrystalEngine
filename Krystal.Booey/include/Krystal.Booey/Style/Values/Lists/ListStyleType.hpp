@@ -64,22 +64,22 @@ namespace krys::boo::style
 
     // <counter-style> specific constructors.
 
-    ListStyleType(css::keywords::Circle keyword) noexcept
+    ListStyleType(css::keywords::Circle) noexcept
         : ListStyleType {CounterStyle {{CSSOMStringAtom {css::ToString(css::keywords::Circle::Value)}}}}
     {
     }
 
-    ListStyleType(css::keywords::Decimal keyword) noexcept
+    ListStyleType(css::keywords::Decimal) noexcept
         : ListStyleType {CounterStyle {{CSSOMStringAtom {css::ToString(css::keywords::Decimal::Value)}}}}
     {
     }
 
-    ListStyleType(css::keywords::Disc keyword) noexcept
+    ListStyleType(css::keywords::Disc) noexcept
         : ListStyleType {CounterStyle {{CSSOMStringAtom {css::ToString(css::keywords::Disc::Value)}}}}
     {
     }
 
-    ListStyleType(css::keywords::Square keyword) noexcept
+    ListStyleType(css::keywords::Square) noexcept
         : ListStyleType {CounterStyle {{CSSOMStringAtom {css::ToString(css::keywords::Square::Value)}}}}
     {
     }

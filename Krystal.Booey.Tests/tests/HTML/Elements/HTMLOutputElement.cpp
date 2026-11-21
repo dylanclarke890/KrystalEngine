@@ -1,19 +1,13 @@
 ﻿#include "Krystal.Booey/HTML/Elements/HTMLOutputElement.hpp"
 #include "catch2/catch_test_macros.hpp"
 #include "Krystal.Booey.Tests/HTML/FormTestUtils.hpp"
+#include "Krystal.Booey.Tests/StringTestUtils.hpp"
 #include "Krystal.Booey/HTML/Elements/HTMLFormElement.hpp"
 
 namespace krys::boo::html::tests
 {
   using boo::tests::FormFixture;
-
-  namespace
-  {
-    KRYS_NODISCARD std::string Str(DOMStringView text) noexcept
-    {
-      return std::string(reinterpret_cast<const char *>(text.data()), text.size());
-    }
-  }
+  using boo::tests::Narrow;
 
   TEST_CASE("HTMLOutputElement: the value and the default value override",
             "[HTML][Forms][HTMLOutputElement][html:concept-output-default-value][html:dom-output-value]"
@@ -22,25 +16,25 @@ namespace krys::boo::html::tests
   {
     FormFixture fixture(u8"<form id=f><output id=o>a<b>b</b></output></form>");
     auto &output = fixture.Get<HTMLOutputElement>(u8"o");
-    CHECK(Str(output.Type()) == "output");
-    CHECK(Str(output.Value()) == "ab");
-    CHECK(Str(output.DefaultValue()) == "ab");
+    CHECK(Narrow(output.Type()) == "output");
+    CHECK(Narrow(output.Value()) == "ab");
+    CHECK(Narrow(output.DefaultValue()) == "ab");
 
     // Without an override, setting the default value sets the content.
     output.DefaultValue(u8"c");
-    CHECK(Str(output.Value()) == "c");
+    CHECK(Narrow(output.Value()) == "c");
 
     // Setting the value keeps the default value as the override.
     output.Value(u8"d");
-    CHECK(Str(output.Value()) == "d");
-    CHECK(Str(output.DefaultValue()) == "c");
+    CHECK(Narrow(output.Value()) == "d");
+    CHECK(Narrow(output.DefaultValue()) == "c");
     output.DefaultValue(u8"e");
-    CHECK(Str(output.Value()) == "d");
+    CHECK(Narrow(output.Value()) == "d");
 
     // Resetting puts the default value back, and drops the override.
     fixture.Get<HTMLFormElement>(u8"f").Reset();
-    CHECK(Str(output.Value()) == "e");
+    CHECK(Narrow(output.Value()) == "e");
     output.DefaultValue(u8"f");
-    CHECK(Str(output.Value()) == "f");
+    CHECK(Narrow(output.Value()) == "f");
   }
 }

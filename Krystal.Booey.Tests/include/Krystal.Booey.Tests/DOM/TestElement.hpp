@@ -1,6 +1,7 @@
 ﻿#pragma once
 
 #include "Krystal.Booey/DOM/Nodes/Element.hpp"
+#include "Krystal.Booey/DOM/Nodes/HTMLDocument.hpp"
 #include "Krystal.Booey/DOM/Types/QualifiedName.hpp"
 #include "Krystal.Booey/Infra/Namespaces.hpp"
 
@@ -16,4 +17,17 @@ namespace krys::boo::dom::tests
     {
     }
   };
+
+  /// @brief A document, and a test element of it that isn't inserted.
+  struct TestElementFixture
+  {
+    Ref<Document> Document;
+    Ref<TestElement> Node;
+
+    TestElementFixture() : Document(CreateRef<HTMLDocument>()), Node(CreateRef<TestElement>(*Document))
+    {
+    }
+  };
+
+  constexpr const char8 *TestNamespace = u8"http://example.com/ns";
 }

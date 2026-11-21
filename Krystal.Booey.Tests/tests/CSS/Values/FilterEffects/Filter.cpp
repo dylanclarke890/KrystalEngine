@@ -1,5 +1,6 @@
 ﻿#include "Krystal.Booey/CSS/Values/FilterEffects/Filter.hpp"
 #include "catch2/catch_test_macros.hpp"
+#include "Krystal.Booey.Tests/CSS/ValueTestUtils.hpp"
 #include "Krystal.Booey/CSS/Parser/ParserContext.hpp"
 #include "Krystal.Booey/CSS/Values/Primitives/NumericTypesComputedStyleDependencies.hpp"
 #include "Krystal.Booey/CSS/Values/Primitives/NumericTypesSerialisation.hpp"
@@ -12,12 +13,6 @@ namespace krys::boo::css::tests
   {
     using L = Length<AllUnzoomed>;
     using NL = Length<NonNegativeUnzoomed>;
-
-    template <typename T>
-    CSSOMString SerialiseForTest(const T &value)
-    {
-      return Serialise(DefaultSerialisationContext(), value);
-    }
 
     FilterReference Reference(utf8_stringview url)
     {

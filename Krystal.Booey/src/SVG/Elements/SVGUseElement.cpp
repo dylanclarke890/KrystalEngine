@@ -594,8 +594,8 @@ namespace krys::boo
     const SVGUseElement &original =
       correspondingElement ? Downcast<SVGUseElement>(*correspondingElement) : *this;
 
-    auto targetResult = TargetElementFromIRIString(original.Href(), original.TreeScope(),
-                                                   ShareRefPtr(original.ExternalDocument()));
+    auto targetResult =
+      TargetElementFromIRIString(original.Href(), original.TreeScope(), original.ExternalDocument());
     if (targetID)
     {
       *targetID = krys::move(targetResult.Identifier);
@@ -757,7 +757,7 @@ namespace krys::boo
           descendant.AddEventListener(
             listener->Type(), ShareRef(*listener->Callback()),
             AddEventListenerOptions {
-              {listener->Capture()}, listener->Once(), listener->Passive(), ShareRefPtr(listener->Signal())});
+              {listener->Capture()}, listener->Once(), listener->Passive(), listener->Signal()});
         }
         return descendant;
       });

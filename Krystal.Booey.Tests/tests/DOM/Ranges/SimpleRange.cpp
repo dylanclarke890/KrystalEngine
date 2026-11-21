@@ -7,7 +7,7 @@ namespace krys::boo::dom::tests
 {
   namespace
   {
-    KRYS_NODISCARD BoundaryPoint At(Node &node, uint64 offset) noexcept
+    KRYS_NODISCARD BoundaryPoint BoundaryAt(Node &node, uint64 offset) noexcept
     {
       return {ShareRef(node), offset};
     }
@@ -27,10 +27,10 @@ namespace krys::boo::dom::tests
 
     SECTION("Tree order of boundary points")
     {
-      CHECK(std::is_lt(TreeOrder(At(d, 0), At(bText, 1))));
-      CHECK(std::is_gt(TreeOrder(At(d, 1), At(bText, 1))));
-      CHECK(std::is_lt(TreeOrder(At(bText, 2), At(iText, 0))));
-      CHECK(std::is_eq(TreeOrder(At(d, 1), At(d, 1))));
+      CHECK(std::is_lt(TreeOrder(BoundaryAt(d, 0), BoundaryAt(bText, 1))));
+      CHECK(std::is_gt(TreeOrder(BoundaryAt(d, 1), BoundaryAt(bText, 1))));
+      CHECK(std::is_lt(TreeOrder(BoundaryAt(bText, 2), BoundaryAt(iText, 0))));
+      CHECK(std::is_eq(TreeOrder(BoundaryAt(d, 1), BoundaryAt(d, 1))));
       CHECK(MakeBoundaryPointBeforeNode(i).value().Offset == 1);
       CHECK(MakeBoundaryPointAfterNode(i).value().Offset == 2);
       CHECK(MakeBoundaryPointAfterNodeContents(bText).Offset == 2);
@@ -39,8 +39,8 @@ namespace krys::boo::dom::tests
     SECTION("Ranges selecting nodes")
     {
       auto selectingB = *MakeRangeSelectingNode(b);
-      CHECK(selectingB.Start == At(d, 0));
-      CHECK(selectingB.End == At(d, 1));
+      CHECK(selectingB.Start == BoundaryAt(d, 0));
+      CHECK(selectingB.End == BoundaryAt(d, 1));
       CHECK(!selectingB.Collapsed());
       auto contents = MakeRangeSelectingNodeContents(d);
       CHECK(contents.EndOffset() == 2);
@@ -48,32 +48,32 @@ namespace krys::boo::dom::tests
       CHECK(!Contains(selectingB, contents));
       CHECK(Contains(contents, bText));
       CHECK(!Contains(contents, p));
-      CHECK(Contains(contents, At(iText, 1)));
-      CHECK(CommonInclusiveAncestor(SimpleRange {At(bText, 1), At(iText, 1)}) == &d);
+      CHECK(Contains(contents, BoundaryAt(iText, 1)));
+      CHECK(CommonInclusiveAncestor(SimpleRange {BoundaryAt(bText, 1), BoundaryAt(iText, 1)}) == &d);
     }
 
     SECTION("Intersection and union")
     {
-      SimpleRange first {At(bText, 1), At(iText, 1)};
-      SimpleRange second {At(iText, 0), At(d, 2)};
+      SimpleRange first {BoundaryAt(bText, 1), BoundaryAt(iText, 1)};
+      SimpleRange second {BoundaryAt(iText, 0), BoundaryAt(d, 2)};
       CHECK(Intersects(first, second));
       CHECK(Intersects(first, i));
       CHECK(!Intersects(first, p));
       auto common = *Intersection(first, second);
-      CHECK(common.Start == At(iText, 0));
-      CHECK(common.End == At(iText, 1));
+      CHECK(common.Start == BoundaryAt(iText, 0));
+      CHECK(common.End == BoundaryAt(iText, 1));
       auto both = UnionRange(first, second);
-      CHECK(both.Start == At(bText, 1));
-      CHECK(both.End == At(d, 2));
-      CHECK(!Intersection(first, SimpleRange {At(p, 0), At(p, 0)}));
-      CHECK(std::is_eq(TreeOrder(first, At(i, 0))));
-      CHECK(std::is_lt(TreeOrder(At(d, 0), first)));
+      CHECK(both.Start == BoundaryAt(bText, 1));
+      CHECK(both.End == BoundaryAt(d, 2));
+      CHECK(!Intersection(first, SimpleRange {BoundaryAt(p, 0), BoundaryAt(p, 0)}));
+      CHECK(std::is_eq(TreeOrder(first, BoundaryAt(i, 0))));
+      CHECK(std::is_lt(TreeOrder(BoundaryAt(d, 0), first)));
     }
 
     SECTION("Intersecting nodes")
     {
       List<Node *> nodes;
-      for (auto &node : IntersectingNodes(SimpleRange {At(bText, 1), At(iText, 1)}))
+      for (auto &node : IntersectingNodes(SimpleRange {BoundaryAt(bText, 1), BoundaryAt(iText, 1)}))
       {
         nodes.push_back(&node);
       }

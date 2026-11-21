@@ -1,7 +1,9 @@
 ﻿#include "Krystal.Booey/Style/TreeResolver.hpp"
 #include "catch2/catch_approx.hpp"
 #include "catch2/catch_test_macros.hpp"
+#include "Krystal.Booey.Tests/DOM/DOMTestUtils.hpp"
 #include "Krystal.Booey.Tests/Style/ResolverTestUtils.hpp"
+#include "Krystal.Booey.Tests/Style/StyleTestUtils.hpp"
 #include "Krystal.Booey/DOM/Iterators/ComposedTreeIterator.hpp"
 #include "Krystal.Booey/DOM/Nodes/PseudoElement.hpp"
 #include "Krystal.Booey/DOM/Nodes/ShadowRoot.hpp"
@@ -14,24 +16,12 @@
 
 namespace krys::boo::style::tests
 {
+  using boo::tests::CreateElement;
+
   namespace
   {
     const boo::Color Blue {boo::Color::blue};
     const boo::Color Red {boo::Color::red};
-
-    KRYS_NODISCARD Ref<boo::Element> Create(Document &document, DOMStringAtom localName)
-    {
-      auto element = document.CreateElement(krys::move(localName));
-      REQUIRE_FALSE(element.HasException());
-      return element.ReleaseValue();
-    }
-
-    KRYS_NODISCARD const RenderStyle &Rendered(const boo::Element &element)
-    {
-      auto *style = element.GetRenderStyle();
-      REQUIRE(style);
-      return *style;
-    }
   }
 
   TEST_CASE_METHOD(css::tests::ValueFixture, "TreeResolver: resolves a document", "[Style][TreeResolver]")
@@ -99,7 +89,7 @@ namespace krys::boo::style::tests
 
     SECTION("Insertion and removal")
     {
-      auto span = Create(document, u8"span");
+      auto span = CreateElement(document, u8"span");
       REQUIRE_FALSE(d.AppendChild(*span).HasException());
       CHECK(span->StyleValidity() == Validity::SubtreeInvalid);
       CHECK(d.ChildNeedsStyleRecalc());
@@ -118,7 +108,7 @@ namespace krys::boo::style::tests
 
     SECTION("Inline style")
     {
-      auto span = Create(document, u8"span");
+      auto span = CreateElement(document, u8"span");
       REQUIRE_FALSE(d.AppendChild(*span).HasException());
       document.UpdateStyleIfNeeded();
 
@@ -260,8 +250,8 @@ namespace krys::boo::style::tests
 
     auto style = CreateRef<HTMLStyleElement>(document);
     REQUIRE_FALSE(style->TextContent(u8"slot { color: rgb(0, 0, 255) } div { width: 5px }").HasException());
-    auto inner = Create(document, u8"div");
-    auto slot = Create(document, u8"slot");
+    auto inner = CreateElement(document, u8"div");
+    auto slot = CreateElement(document, u8"slot");
     REQUIRE_FALSE(shadow->AppendChild(*style).HasException());
     REQUIRE_FALSE(shadow->AppendChild(*inner).HasException());
     REQUIRE_FALSE(shadow->AppendChild(*slot).HasException());

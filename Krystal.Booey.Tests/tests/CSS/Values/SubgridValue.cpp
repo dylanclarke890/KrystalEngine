@@ -6,17 +6,9 @@
 
 namespace krys::boo::css::tests
 {
-  namespace
-  {
-    Ref<Value> Names(List<CSSOMString> names)
-    {
-      return GridLineNamesValue::Create(names);
-    }
-  }
-
   TEST_CASE_METHOD(ValueFixture, "SubgridValue::Create", "[CSS][Values][SubgridValue]")
   {
-    auto value = SubgridValue::Create({Names({u8"a"}), Names({u8"b", u8"c"})});
+    auto value = SubgridValue::Create({LineNames({u8"a"}), LineNames({u8"b", u8"c"})});
     CHECK(value->IsSubgridValue());
     CHECK(value->ContainsValueList());
     REQUIRE(value->Length() == 2u);
@@ -27,17 +19,19 @@ namespace krys::boo::css::tests
   TEST_CASE_METHOD(ValueFixture, "SubgridValue serialisation", "[CSS][Values][SubgridValue]")
   {
     CHECK(CssText(*SubgridValue::Create({})) == "subgrid");
-    CHECK(CssText(*SubgridValue::Create({Names({u8"a"})})) == "subgrid [a]");
-    CHECK(CssText(*SubgridValue::Create({Names({u8"a"}), Names({u8"b", u8"c"})})) == "subgrid [a] [b c]");
+    CHECK(CssText(*SubgridValue::Create({LineNames({u8"a"})})) == "subgrid [a]");
+    CHECK(CssText(*SubgridValue::Create({LineNames({u8"a"}), LineNames({u8"b", u8"c"})}))
+          == "subgrid [a] [b c]");
   }
 
   TEST_CASE_METHOD(ValueFixture, "SubgridValue equality and hashing", "[CSS][Values][SubgridValue]")
   {
-    auto a = SubgridValue::Create({Names({u8"a"}), Names({u8"b"})});
-    auto b = SubgridValue::Create({Names({u8"a"}), Names({u8"b"})});
-    auto reordered = SubgridValue::Create({Names({u8"b"}), Names({u8"a"})});
-    auto shorter = SubgridValue::Create({Names({u8"a"})});
-    auto transformList = TransformListValue::Create(ValueListBuilder {Names({u8"a"}), Names({u8"b"})});
+    auto a = SubgridValue::Create({LineNames({u8"a"}), LineNames({u8"b"})});
+    auto b = SubgridValue::Create({LineNames({u8"a"}), LineNames({u8"b"})});
+    auto reordered = SubgridValue::Create({LineNames({u8"b"}), LineNames({u8"a"})});
+    auto shorter = SubgridValue::Create({LineNames({u8"a"})});
+    auto transformList =
+      TransformListValue::Create(ValueListBuilder {LineNames({u8"a"}), LineNames({u8"b"})});
 
     CHECK(*a == *b);
     CHECK(*SubgridValue::Create({}) == *SubgridValue::Create({}));
@@ -57,7 +51,7 @@ namespace krys::boo::css::tests
 
   TEST_CASE_METHOD(ValueFixture, "SubgridValue visits its items", "[CSS][Values][SubgridValue]")
   {
-    auto value = SubgridValue::Create({Names({u8"a"}), Names({u8"b"})});
+    auto value = SubgridValue::Create({LineNames({u8"a"}), LineNames({u8"b"})});
     auto children = Children(*value);
     REQUIRE(children.size() == 2uz);
     CHECK(children[0uz] == value->Item(0u));

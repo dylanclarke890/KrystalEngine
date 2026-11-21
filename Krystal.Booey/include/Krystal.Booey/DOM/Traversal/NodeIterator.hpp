@@ -7,6 +7,7 @@
 
 namespace krys::boo
 {
+  class Document;
   class Node;
 }
 

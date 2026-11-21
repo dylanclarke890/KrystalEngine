@@ -4,9 +4,14 @@
 #include "Krystal.Booey/DOM/Types/DOMString.hpp"
 #include "Krystal.Booey/DOM/Types/ExceptionOr.hpp"
 #include "Krystal.Booey/DOM/Types/NodeOrString.hpp"
-#include "Krystal.Booey/HTML/Sanitizer/SetHTMLOptions.hpp"
 #include "Krystal.Core/Strings/ASCII.hpp"
 #include <algorithm>
+
+namespace krys::boo::html
+{
+  struct SetHTMLOptions;
+  struct SetHTMLUnsafeOptions;
+}
 
 namespace krys::boo::dom
 {
@@ -132,35 +137,52 @@ namespace krys::boo
     /// @brief Inserts before the node @p html, parsed as HTML in its parent's context, sanitized by @p
     /// options (the default configuration if it gives none) with unsafe content removed.
     /// @see https://html.spec.whatwg.org/#dom-nondocumenttypechildnode-beforehtml
-    ExceptionOr<void> BeforeHTML(DOMStringView html, const html::SetHTMLOptions &options = {}) noexcept;
+    ExceptionOr<void> BeforeHTML(DOMStringView html, const html::SetHTMLOptions &options) noexcept;
+
+    /// @brief The same, with default options.
+    ExceptionOr<void> BeforeHTML(DOMStringView html) noexcept;
 
     /// @brief Inserts after the node @p html, parsed as HTML in its parent's context, sanitized by @p options
     /// (the default configuration if it gives none) with unsafe content removed.
     /// @see https://html.spec.whatwg.org/#dom-nondocumenttypechildnode-afterhtml
-    ExceptionOr<void> AfterHTML(DOMStringView html, const html::SetHTMLOptions &options = {}) noexcept;
+    ExceptionOr<void> AfterHTML(DOMStringView html, const html::SetHTMLOptions &options) noexcept;
+
+    /// @brief The same, with default options.
+    ExceptionOr<void> AfterHTML(DOMStringView html) noexcept;
 
     /// @brief Replaces the node with @p html, parsed as HTML in its parent's context, sanitized by @p options
     /// (the default configuration if it gives none) with unsafe content removed.
     /// @see https://html.spec.whatwg.org/#dom-nondocumenttypechildnode-replacewithhtml
-    ExceptionOr<void> ReplaceWithHTML(DOMStringView html, const html::SetHTMLOptions &options = {}) noexcept;
+    ExceptionOr<void> ReplaceWithHTML(DOMStringView html, const html::SetHTMLOptions &options) noexcept;
+
+    /// @brief The same, with default options.
+    ExceptionOr<void> ReplaceWithHTML(DOMStringView html) noexcept;
 
     /// @brief Inserts before the node @p html, parsed as HTML in its parent's context; sanitized only if @p
     /// options gives a sanitizer.
     /// @see https://html.spec.whatwg.org/#dom-nondocumenttypechildnode-beforehtmlunsafe
     ExceptionOr<void> BeforeHTMLUnsafe(DOMStringView html,
-                                       const html::SetHTMLUnsafeOptions &options = {}) noexcept;
+                                       const html::SetHTMLUnsafeOptions &options) noexcept;
+
+    /// @brief The same, with default options.
+    ExceptionOr<void> BeforeHTMLUnsafe(DOMStringView html) noexcept;
 
     /// @brief Inserts after the node @p html, parsed as HTML in its parent's context; sanitized only if @p
     /// options gives a sanitizer.
     /// @see https://html.spec.whatwg.org/#dom-nondocumenttypechildnode-afterhtmlunsafe
-    ExceptionOr<void> AfterHTMLUnsafe(DOMStringView html,
-                                      const html::SetHTMLUnsafeOptions &options = {}) noexcept;
+    ExceptionOr<void> AfterHTMLUnsafe(DOMStringView html, const html::SetHTMLUnsafeOptions &options) noexcept;
+
+    /// @brief The same, with default options.
+    ExceptionOr<void> AfterHTMLUnsafe(DOMStringView html) noexcept;
 
     /// @brief Replaces the node with @p html, parsed as HTML in its parent's context; sanitized only if @p
     /// options gives a sanitizer.
     /// @see https://html.spec.whatwg.org/#dom-nondocumenttypechildnode-replacewithhtmlunsafe
     ExceptionOr<void> ReplaceWithHTMLUnsafe(DOMStringView html,
-                                            const html::SetHTMLUnsafeOptions &options = {}) noexcept;
+                                            const html::SetHTMLUnsafeOptions &options) noexcept;
+
+    /// @brief The same, with default options.
+    ExceptionOr<void> ReplaceWithHTMLUnsafe(DOMStringView html) noexcept;
 
 #pragma endregion
 

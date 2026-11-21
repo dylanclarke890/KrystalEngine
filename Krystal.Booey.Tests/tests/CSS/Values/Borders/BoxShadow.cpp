@@ -1,4 +1,6 @@
 ﻿#include "catch2/catch_test_macros.hpp"
+#include "Krystal.Booey.Tests/CSS/ColorTestUtils.hpp"
+#include "Krystal.Booey.Tests/CSS/ValueTestUtils.hpp"
 #include "Krystal.Booey/CSS/Values/Borders/BoxShadowProperty.hpp"
 #include "Krystal.Booey/CSS/Values/Primitives/NumericTypesComputedStyleDependencies.hpp"
 #include "Krystal.Booey/CSS/Values/Primitives/NumericTypesSerialisation.hpp"
@@ -12,17 +14,6 @@ namespace krys::boo::css::tests
     using L = Length<AllUnzoomed>;
     using NL = Length<NonNegativeUnzoomed>;
 
-    template <typename T>
-    CSSOMString SerialiseForTest(const T &value)
-    {
-      return Serialise(DefaultSerialisationContext(), value);
-    }
-
-    Color Red()
-    {
-      return Color {KeywordColor {ValueId::Red}};
-    }
-
     BoxShadow Offset(L x, L y)
     {
       return BoxShadow {.Location = {x, y}};
@@ -30,7 +21,7 @@ namespace krys::boo::css::tests
 
     BoxShadow Full()
     {
-      return BoxShadow {.Color = Red(),
+      return BoxShadow {.Color = ColorKeyword(ValueId::Red),
                         .Location = {L {1_css_px}, L {2_css_px}},
                         .Blur = NL {3_css_px},
                         .Spread = L {4_css_px},
@@ -48,8 +39,9 @@ namespace krys::boo::css::tests
     CHECK(SerialiseForTest(BoxShadow {
             .Location = {L {1_css_px}, L {2_css_px}}, .Spread = L {4_css_px}, .Inset = keywords::Inset {}})
           == u8"1px 2px 4px inset");
-    CHECK(SerialiseForTest(
-            BoxShadow {.Color = Red(), .Location = {L {1_css_em}, L {2_css_em}}, .Blur = NL {0_css_px}})
+    CHECK(SerialiseForTest(BoxShadow {.Color = ColorKeyword(ValueId::Red),
+                                      .Location = {L {1_css_em}, L {2_css_em}},
+                                      .Blur = NL {0_css_px}})
           == u8"red 1em 2em 0px");
   }
 

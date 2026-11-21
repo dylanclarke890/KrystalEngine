@@ -78,6 +78,7 @@
 #include "Krystal.Booey/Rendering/RenderElement.hpp"
 #include "Krystal.Booey/Rendering/RenderObject.hpp"
 #include "Krystal.Booey/Rendering/RenderView.hpp"
+#include "Krystal.Booey/Style/Values/Color/Opacity.hpp"
 #include "Krystal.Booey/SVG/Elements/SVGElement.hpp"
 #include "Krystal.Core/Utils/SetForScope.hpp"
 #include <utility>

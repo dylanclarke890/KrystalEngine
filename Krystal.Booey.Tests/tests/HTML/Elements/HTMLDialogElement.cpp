@@ -1,6 +1,8 @@
 ﻿#include "Krystal.Booey/HTML/Elements/HTMLDialogElement.hpp"
 #include "catch2/catch_test_macros.hpp"
+#include "Krystal.Booey.Tests/Input/InputTestUtils.hpp"
 #include "Krystal.Booey.Tests/Loader/NavigationTestUtils.hpp"
+#include "Krystal.Booey.Tests/StringTestUtils.hpp"
 #include "Krystal.Booey/DOM/Events/Event.hpp"
 #include "Krystal.Booey/DOM/Events/EventListenerHandle.hpp"
 #include "Krystal.Booey/DOM/Events/ToggleEvent.hpp"
@@ -17,15 +19,13 @@
 
 namespace krys::boo::html::tests
 {
+  using boo::tests::Click;
+  using boo::tests::Narrow;
   using boo::tests::NavigationFixture;
+  using boo::tests::PressKey;
 
   namespace
   {
-    KRYS_NODISCARD std::string Narrow(DOMStringView string)
-    {
-      return std::string(reinterpret_cast<const char *>(string.data()), string.size());
-    }
-
     /// @brief Records the dialog's events, as `"<type>"`, or `"<type>:<old>><new>"` for toggle events.
     struct DialogEventLog
     {
@@ -72,24 +72,6 @@ namespace krys::boo::html::tests
         return std::exchange(Events, {});
       }
     };
-
-    void PressKey(boo::Frame &frame, utf8_string key) noexcept
-    {
-      (void)frame.GetEventHandler().KeyEvent(PlatformKeyboardEvent(PlatformEvent::Type::KeyDown, u8"", u8"",
-                                                                   krys::move(key), u8"", u8"", 0, false,
-                                                                   false, false, {}, MonotonicTime::Now()));
-    }
-
-    void Click(boo::Frame &frame, double x, double y) noexcept
-    {
-      auto &handler = frame.GetEventHandler();
-      (void)handler.HandleMousePressEvent(PlatformMouseEvent(PointD(x, y), PointD(x, y), MouseButton::Left,
-                                                             PlatformEvent::Type::MousePressed, 1, {},
-                                                             MonotonicTime::Now()));
-      (void)handler.HandleMouseReleaseEvent(PlatformMouseEvent(PointD(x, y), PointD(x, y), MouseButton::Left,
-                                                               PlatformEvent::Type::MouseReleased, 1, {},
-                                                               MonotonicTime::Now()));
-    }
   }
 
   TEST_CASE_METHOD(

@@ -76,6 +76,7 @@
 #include "Krystal.Booey/DOM/Internals/ElementFactory.hpp"
 #include "Krystal.Booey/DOM/Internals/PopoverData.hpp"
 #include "Krystal.Booey/DOM/Internals/UserActionElementSet.hpp"
+#include "Krystal.Booey/DOM/Internals/VisibilityChangeClient.hpp"
 #include "Krystal.Booey/DOM/IntersectionObservers/IntersectionObserver.hpp"
 #include "Krystal.Booey/DOM/Iterators/ComposedTreeIterator.hpp"
 #include "Krystal.Booey/DOM/Iterators/SubtreeRanges.hpp"
@@ -91,6 +92,7 @@
 #include "Krystal.Booey/DOM/Nodes/ProcessingInstruction.hpp"
 #include "Krystal.Booey/DOM/Nodes/Text.hpp"
 #include "Krystal.Booey/DOM/Ranges/Range.hpp"
+#include "Krystal.Booey/DOM/Ranges/StaticRange.hpp"
 #include "Krystal.Booey/DOM/ResizeObservers/ResizeObserver.hpp"
 #include "Krystal.Booey/DOM/ResizeObservers/ResizeObserverEntry.hpp"
 #include "Krystal.Booey/DOM/Traversal/TreeWalker.hpp"
@@ -132,6 +134,7 @@
 #include "Krystal.Booey/HTML/Images/LazyLoadImageObserver.hpp"
 #include "Krystal.Booey/HTML/Parser/DocumentParser.hpp"
 #include "Krystal.Booey/HTML/Sanitizer/SanitizerAlgorithms.hpp"
+#include "Krystal.Booey/HTML/Sanitizer/SetHTMLOptions.hpp"
 #include "Krystal.Booey/HTML/Window.hpp"
 #include "Krystal.Booey/Infra/Namespaces.hpp"
 #include "Krystal.Booey/Infra/StringAlgorithms.hpp"
@@ -585,7 +588,7 @@ namespace krys::boo
     bool subtree = false;
 
     // 3. Let registry be null.
-    RefPtr<html::CustomElementRegistry> registry = nullptr;
+    html::CustomElementRegistry *registry = nullptr;
 
     // 4. If options is a boolean, then set subtree to options.
     if (std::holds_alternative<bool>(options))
@@ -620,7 +623,7 @@ namespace krys::boo
     // 7. Return the result of cloning a node given node with document set to this, subtree set to subtree,
     // and
     //    fallbackRegistry set to registry.
-    return dom::NodeAlgorithms::CloneNode(node, this, subtree, nullptr, registry.get());
+    return dom::NodeAlgorithms::CloneNode(node, this, subtree, nullptr, registry);
   }
 
   ExceptionOr<Ref<Node>> Document::AdoptNode(Node &node) noexcept
@@ -850,6 +853,11 @@ namespace krys::boo
   }
 
   // https://html.spec.whatwg.org/#dom-parsehtmlunsafe
+  ExceptionOr<Ref<Document>> Document::ParseHTMLUnsafe(Document &context, DOMStringView markup) noexcept
+  {
+    return ParseHTMLUnsafe(context, markup, {});
+  }
+
   ExceptionOr<Ref<Document>> Document::ParseHTMLUnsafe(Document &context, DOMStringView markup,
                                                        html::ParseHTMLUnsafeOptions options) noexcept
   {
@@ -875,6 +883,11 @@ namespace krys::boo
   }
 
   // https://html.spec.whatwg.org/#dom-parsehtml
+  ExceptionOr<Ref<Document>> Document::ParseHTML(Document &context, DOMStringView html) noexcept
+  {
+    return ParseHTML(context, html, {});
+  }
+
   ExceptionOr<Ref<Document>> Document::ParseHTML(Document &context, DOMStringView html,
                                                  const html::SetHTMLOptions &options) noexcept
   {
@@ -2646,6 +2659,11 @@ namespace krys::boo
     }
   }
 
+  Element *Document::CSSTarget() const noexcept
+  {
+    return _cssTarget.get();
+  }
+
   void Document::SetCSSTarget(Element *newTarget) noexcept
   {
     if (_cssTarget.get() == newTarget)
@@ -2993,6 +3011,11 @@ namespace krys::boo
       // 8b. Run the hide popover algorithm given popover, focusPreviousElement, false, false, and null.
       (void)(*popover)->HidePopoverInternal(focusPreviousElement, dom::FireEvents::No, false, nullptr);
     }
+  }
+
+  HTMLElement *Document::HintStackParent() const noexcept
+  {
+    return _hintStackParent.get();
   }
 
   void Document::SetHintStackParent(HTMLElement *element) noexcept

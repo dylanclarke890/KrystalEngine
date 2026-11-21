@@ -8,24 +8,11 @@
 
 namespace krys::boo::dom::tests
 {
-  namespace
-  {
-    struct CommonTestData
-    {
-      Ref<Document> Document;
-      Ref<TestElement> Node;
-
-      CommonTestData() : Document(CreateRef<HTMLDocument>()), Node(CreateRef<TestElement>(*Document))
-      {
-      }
-    };
-  }
-
   TEST_CASE("Create an attribute: the document, qualified name and value it's given, with no element",
             "[DOM][Attr][dom:create-an-attribute][dom:interface-attr][dom:concept-attribute]"
             "[dom:concept-attribute-element]")
   {
-    CommonTestData data;
+    TestElementFixture data;
     auto attr = data.Document->CreateAttributeNS(u8"urn:x", u8"x:a").ReleaseValue();
     CHECK(&attr->NodeDocument() == data.Document.get());
     CHECK(attr->Value().empty());
@@ -43,7 +30,7 @@ namespace krys::boo::dom::tests
             "[dom:concept-attribute-local-name][dom:concept-attribute-qualified-name]"
             "[dom:concept-named-attribute]")
   {
-    CommonTestData data;
+    TestElementFixture data;
 
     SECTION("With a prefix, the name is the prefix, a colon and the local name")
     {
@@ -75,7 +62,7 @@ namespace krys::boo::dom::tests
     "Attr.value: its value, which is set as an existing attribute value",
     "[DOM][Attr][dom:dom-attr-value][dom:concept-attribute-value][dom:set-an-existing-attribute-value]")
   {
-    CommonTestData data;
+    TestElementFixture data;
     auto attr = data.Document->CreateAttribute(u8"test-attr").ReleaseValue();
 
     SECTION("Without an element, it's just set")
@@ -104,7 +91,7 @@ namespace krys::boo::dom::tests
 
   TEST_CASE("Attr.ownerElement: its element", "[DOM][Attr][dom:dom-attr-ownerelement]")
   {
-    CommonTestData data;
+    TestElementFixture data;
     auto attr = data.Document->CreateAttribute(u8"test-attr").ReleaseValue();
     CHECK(attr->OwnerElement() == nullptr);
 
@@ -117,7 +104,7 @@ namespace krys::boo::dom::tests
 
   TEST_CASE("Attr.specified: always true", "[DOM][Attr][dom:dom-attr-specified]")
   {
-    CommonTestData data;
+    TestElementFixture data;
     auto attr = data.Document->CreateAttribute(u8"test-attr").ReleaseValue();
     CHECK(attr->Specified());
     REQUIRE_FALSE(data.Node->SetAttributeNode(*attr).HasException());
@@ -126,7 +113,7 @@ namespace krys::boo::dom::tests
 
   TEST_CASE("Node.nodeName: an Attr's is its qualified name", "[DOM][Attr][dom:dom-node-nodename]")
   {
-    CommonTestData data;
+    TestElementFixture data;
     auto attr = data.Document->CreateAttributeNS(u8"http://example.com/ns", u8"ns:test-attr").ReleaseValue();
     CHECK(attr->NodeName() == u8"ns:test-attr");
   }
@@ -134,7 +121,7 @@ namespace krys::boo::dom::tests
   TEST_CASE("Node.nodeValue: an Attr's is its value, which setting it sets",
             "[DOM][Attr][dom:dom-node-nodevalue]")
   {
-    CommonTestData data;
+    TestElementFixture data;
     auto attr = data.Document->CreateAttribute(u8"test-attr").ReleaseValue();
     CHECK(attr->NodeValue() == u8"");
     REQUIRE_FALSE(data.Node->SetAttributeNode(*attr).HasException());
@@ -146,7 +133,7 @@ namespace krys::boo::dom::tests
   TEST_CASE("Node.textContent: an Attr's is its value, which setting it sets",
             "[DOM][Attr][dom:dom-node-textcontent][dom:get-text-content][dom:set-text-content]")
   {
-    CommonTestData data;
+    TestElementFixture data;
     auto attr = data.Document->CreateAttribute(u8"test-attr").ReleaseValue();
     CHECK(attr->TextContent() == u8"");
     REQUIRE_FALSE(data.Node->SetAttributeNode(*attr).HasException());

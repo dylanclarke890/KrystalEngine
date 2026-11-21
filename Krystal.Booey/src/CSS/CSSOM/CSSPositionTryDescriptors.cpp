@@ -25,6 +25,7 @@
 #include "Krystal.Booey/CSS/CSSOM/CSSPositionTryDescriptors.hpp"
 #include "Krystal.Booey/CSS/CSSOM/CSSPositionTryRule.hpp"
 #include "Krystal.Booey/CSS/CSSOM/CSSStyleSheet.hpp"
+#include "Krystal.Booey/DOM/Nodes/Element.hpp"
 #include "Krystal.Booey/DOM/Types/ExceptionOr.hpp"
 #include "Krystal.Booey/Style/Scope/Scope.hpp"
 #include "Krystal.Core/Assert.hpp"

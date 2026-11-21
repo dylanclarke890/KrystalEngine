@@ -1,5 +1,6 @@
 ﻿#include "Krystal.Booey/HTML/CloseWatcher/CloseWatcher.hpp"
 #include "catch2/catch_test_macros.hpp"
+#include "Krystal.Booey.Tests/Input/InputTestUtils.hpp"
 #include "Krystal.Booey.Tests/Loader/NavigationTestUtils.hpp"
 #include "Krystal.Booey/DOM/Abort/AbortController.hpp"
 #include "Krystal.Booey/DOM/Events/Event.hpp"
@@ -15,6 +16,7 @@
 namespace krys::boo::html::tests
 {
   using boo::tests::NavigationFixture;
+  using boo::tests::PressKey;
 
   namespace
   {
@@ -41,13 +43,6 @@ namespace krys::boo::html::tests
           watcher.AddEventListener(u8"close", [this, name](Event &) { Events.push_back(name + ":close"); }));
       }
     };
-
-    bool PressKey(boo::Frame &frame, utf8_string key) noexcept
-    {
-      return frame.GetEventHandler().KeyEvent(PlatformKeyboardEvent(PlatformEvent::Type::KeyDown, u8"", u8"",
-                                                                    krys::move(key), u8"", u8"", 0, false,
-                                                                    false, false, {}, MonotonicTime::Now()));
-    }
   }
 
   TEST_CASE_METHOD(
@@ -102,15 +97,13 @@ namespace krys::boo::html::tests
     SECTION("A signal destroys it as it aborts")
     {
       AbortController controller;
-      auto signalled =
-        CloseWatcher::Create(document, {.Signal = ShareRefPtr(controller.Signal())}).ReleaseValue();
+      auto signalled = CloseWatcher::Create(document, {.Signal = controller.Signal()}).ReleaseValue();
       CHECK(signalled->IsActive());
       controller.Abort();
       CHECK_FALSE(signalled->IsActive());
 
       // An aborted signal gives an inactive watcher.
-      auto aborted =
-        CloseWatcher::Create(document, {.Signal = ShareRefPtr(controller.Signal())}).ReleaseValue();
+      auto aborted = CloseWatcher::Create(document, {.Signal = controller.Signal()}).ReleaseValue();
       CHECK_FALSE(aborted->IsActive());
     }
 

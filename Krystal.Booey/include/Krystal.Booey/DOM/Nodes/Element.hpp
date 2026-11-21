@@ -26,30 +26,22 @@
 
 #include "Krystal.Booey/Animation/ElementAnimationRareData.hpp"
 #include "Krystal.Booey/Animation/GetAnimationsOptions.hpp"
-#include "Krystal.Booey/Animation/KeyframeAnimationOptions.hpp"
 #include "Krystal.Booey/Animation/Keyframes/KeyframeInput.hpp"
-#include "Krystal.Booey/DOM/Collections/DOMTokenList.hpp"
 #include "Krystal.Booey/DOM/ContentVisibility/ContentRelevancy.hpp"
 #include "Krystal.Booey/DOM/Events/SimulatedClick.hpp"
 #include "Krystal.Booey/DOM/Geometry/DOMRect.hpp"
-#include "Krystal.Booey/DOM/Geometry/DOMRectList.hpp"
 #include "Krystal.Booey/DOM/Mixins/ARIAMixin.hpp"
 #include "Krystal.Booey/DOM/Nodes/ContainerNode.hpp"
 #include "Krystal.Booey/DOM/Nodes/FocusOptions.hpp"
-#include "Krystal.Booey/DOM/Nodes/GetHTMLOptions.hpp"
 #include "Krystal.Booey/DOM/Nodes/NamedNodeMap.hpp"
 #include "Krystal.Booey/DOM/Nodes/PointerLockOptions.hpp"
-#include "Krystal.Booey/DOM/Parsing/ParserContentPolicy.hpp"
 #include "Krystal.Booey/DOM/Types/NodeOrString.hpp"
 #include "Krystal.Booey/DOM/Types/QualifiedName.hpp"
-#include "Krystal.Booey/Graphics/Geometry/LayoutUnit.hpp"
-#include "Krystal.Booey/HTML/Sanitizer/SetHTMLOptions.hpp"
 #include "Krystal.Booey/Input/PlatformWheelEvent.hpp"
 #include "Krystal.Booey/Page/Scrolling/ScrollOptions.hpp"
 #include "Krystal.Booey/Platform/Scrolling/ScrollTypes.hpp"
 #include "Krystal.Booey/Rendering/HitTesting/HitTestRequest.hpp"
 #include "Krystal.Booey/Rendering/RenderPtr.hpp"
-#include "Krystal.Booey/Style/Change.hpp"
 #include "Krystal.Core/Enum.hpp"
 #include "Krystal.Core/Geometry/Point.hpp"
 #include "Krystal.Core/Geometry/Rect.hpp"
@@ -58,6 +50,12 @@
 #include "Krystal.Core/Types/Pair.hpp"
 #include "Krystal.Core/Types/UniquePtr.hpp"
 #include "Krystal.Core/Types/WeakPtr.hpp"
+
+namespace krys::boo::html
+{
+  struct SetHTMLOptions;
+  struct SetHTMLUnsafeOptions;
+}
 
 namespace krys::i18n
 {
@@ -70,10 +68,11 @@ namespace krys::boo
   class HTMLElement;
   class HTMLSlotElement;
   struct IntersectionObserverData;
+  struct KeyframeAnimationOptions;
+  class LayoutUnit;
   class PlatformKeyboardEvent;
   class PlatformMouseEvent;
   class PseudoElement;
-  enum class PseudoElementType : uint8;
   class RenderElement;
   class RenderStyle;
   class RenderTreeUpdater;
@@ -81,6 +80,7 @@ namespace krys::boo
   class ShadowRoot;
   class StylePropertyMap;
   class StylePropertyMapReadOnly;
+  enum class PseudoElementType : uint8;
 }
 
 namespace krys::net
@@ -99,6 +99,7 @@ namespace krys::boo::style
   struct ResolutionContext;
   class Resolver;
   struct UnadjustedStyle;
+  enum class Change : uint8;
 }
 
 namespace krys::boo::html
@@ -119,7 +120,10 @@ namespace krys::boo::xml
 
 namespace krys::boo::dom
 {
+  class DOMRectList;
+  struct GetHTMLOptions;
   enum class PopoverState : uint8;
+  enum class ParserContentPolicy : uint8;
 
   /// @see https://dom.spec.whatwg.org/#concept-element-custom-element-state
   enum class CustomElementState : uint8
@@ -167,6 +171,7 @@ namespace krys::boo::dom
 {
   class DatasetDOMStringMap;
   class DocumentAlgorithms;
+  class DOMTokenList;
   class ElementAlgorithms;
   class ElementFactory;
   class ElementRareData;
@@ -392,9 +397,9 @@ namespace krys::boo
     void SetUserAgentPart(const DOMStringAtom &part) noexcept;
 
     /// @see https://dom.spec.whatwg.org/#dom-element-customelementregistry
-    KRYS_NODISCARD RefPtr<html::CustomElementRegistry> CustomElementRegistry() const noexcept
+    KRYS_NODISCARD html::CustomElementRegistry *CustomElementRegistry() const noexcept
     {
-      return _customElementRegistry;
+      return _customElementRegistry.get();
     }
 
     /// @see https://dom.spec.whatwg.org/#dom-element-closest
@@ -433,72 +438,110 @@ namespace krys::boo
     /// context, sanitized by @p options (the default configuration if it gives none) with unsafe content
     /// removed.
     /// @see https://html.spec.whatwg.org/#dom-element-sethtml
-    ExceptionOr<void> SetHTML(DOMStringView html, const html::SetHTMLOptions &options = {}) noexcept;
+    ExceptionOr<void> SetHTML(DOMStringView html, const html::SetHTMLOptions &options) noexcept;
+
+    /// @brief The same, with default options.
+    ExceptionOr<void> SetHTML(DOMStringView html) noexcept;
 
     /// @brief Appends @p html, parsed as HTML in the element's context, sanitized by @p options (the default
     /// configuration if it gives none) with unsafe content removed.
     /// @see https://html.spec.whatwg.org/#dom-element-appendhtml
-    ExceptionOr<void> AppendHTML(DOMStringView html, const html::SetHTMLOptions &options = {}) noexcept;
+    ExceptionOr<void> AppendHTML(DOMStringView html, const html::SetHTMLOptions &options) noexcept;
+
+    /// @brief The same, with default options.
+    ExceptionOr<void> AppendHTML(DOMStringView html) noexcept;
 
     /// @brief Prepends @p html, parsed as HTML in the element's context, sanitized by @p options (the default
     /// configuration if it gives none) with unsafe content removed.
     /// @see https://html.spec.whatwg.org/#dom-element-prependhtml
-    ExceptionOr<void> PrependHTML(DOMStringView html, const html::SetHTMLOptions &options = {}) noexcept;
+    ExceptionOr<void> PrependHTML(DOMStringView html, const html::SetHTMLOptions &options) noexcept;
+
+    /// @brief The same, with default options.
+    ExceptionOr<void> PrependHTML(DOMStringView html) noexcept;
 
     /// @brief Replaces the element's children (a template's contents) with @p html, parsed as HTML in its
     /// context; sanitized only if @p options gives a sanitizer.
     /// @see https://html.spec.whatwg.org/#dom-element-sethtmlunsafe
-    ExceptionOr<void> SetHTMLUnsafe(DOMStringView html,
-                                    const html::SetHTMLUnsafeOptions &options = {}) noexcept;
+    ExceptionOr<void> SetHTMLUnsafe(DOMStringView html, const html::SetHTMLUnsafeOptions &options) noexcept;
+
+    /// @brief The same, with default options.
+    ExceptionOr<void> SetHTMLUnsafe(DOMStringView html) noexcept;
 
     /// @brief Appends @p html, parsed as HTML in the element's context; sanitized only if @p options gives a
     /// sanitizer.
     /// @see https://html.spec.whatwg.org/#dom-element-appendhtmlunsafe
     ExceptionOr<void> AppendHTMLUnsafe(DOMStringView html,
-                                       const html::SetHTMLUnsafeOptions &options = {}) noexcept;
+                                       const html::SetHTMLUnsafeOptions &options) noexcept;
+
+    /// @brief The same, with default options.
+    ExceptionOr<void> AppendHTMLUnsafe(DOMStringView html) noexcept;
 
     /// @brief Prepends @p html, parsed as HTML in the element's context; sanitized only if @p options gives a
     /// sanitizer.
     /// @see https://html.spec.whatwg.org/#dom-element-prependhtmlunsafe
     ExceptionOr<void> PrependHTMLUnsafe(DOMStringView html,
-                                        const html::SetHTMLUnsafeOptions &options = {}) noexcept;
+                                        const html::SetHTMLUnsafeOptions &options) noexcept;
+
+    /// @brief The same, with default options.
+    ExceptionOr<void> PrependHTMLUnsafe(DOMStringView html) noexcept;
 
     /// @brief Inserts before the element @p html, parsed as HTML in its parent's context, sanitized by @p
     /// options (the default configuration if it gives none) with unsafe content removed.
     /// @see https://html.spec.whatwg.org/#dom-nondocumenttypechildnode-beforehtml
-    ExceptionOr<void> BeforeHTML(DOMStringView html, const html::SetHTMLOptions &options = {}) noexcept;
+    ExceptionOr<void> BeforeHTML(DOMStringView html, const html::SetHTMLOptions &options) noexcept;
+
+    /// @brief The same, with default options.
+    ExceptionOr<void> BeforeHTML(DOMStringView html) noexcept;
 
     /// @brief Inserts after the element @p html, parsed as HTML in its parent's context, sanitized by @p
     /// options (the default configuration if it gives none) with unsafe content removed.
     /// @see https://html.spec.whatwg.org/#dom-nondocumenttypechildnode-afterhtml
-    ExceptionOr<void> AfterHTML(DOMStringView html, const html::SetHTMLOptions &options = {}) noexcept;
+    ExceptionOr<void> AfterHTML(DOMStringView html, const html::SetHTMLOptions &options) noexcept;
+
+    /// @brief The same, with default options.
+    ExceptionOr<void> AfterHTML(DOMStringView html) noexcept;
 
     /// @brief Replaces the element with @p html, parsed as HTML in its parent's context, sanitized by @p
     /// options (the default configuration if it gives none) with unsafe content removed.
     /// @see https://html.spec.whatwg.org/#dom-nondocumenttypechildnode-replacewithhtml
-    ExceptionOr<void> ReplaceWithHTML(DOMStringView html, const html::SetHTMLOptions &options = {}) noexcept;
+    ExceptionOr<void> ReplaceWithHTML(DOMStringView html, const html::SetHTMLOptions &options) noexcept;
+
+    /// @brief The same, with default options.
+    ExceptionOr<void> ReplaceWithHTML(DOMStringView html) noexcept;
 
     /// @brief Inserts before the element @p html, parsed as HTML in its parent's context; sanitized only if
     /// @p options gives a sanitizer.
     /// @see https://html.spec.whatwg.org/#dom-nondocumenttypechildnode-beforehtmlunsafe
     ExceptionOr<void> BeforeHTMLUnsafe(DOMStringView html,
-                                       const html::SetHTMLUnsafeOptions &options = {}) noexcept;
+                                       const html::SetHTMLUnsafeOptions &options) noexcept;
+
+    /// @brief The same, with default options.
+    ExceptionOr<void> BeforeHTMLUnsafe(DOMStringView html) noexcept;
 
     /// @brief Inserts after the element @p html, parsed as HTML in its parent's context; sanitized only if @p
     /// options gives a sanitizer.
     /// @see https://html.spec.whatwg.org/#dom-nondocumenttypechildnode-afterhtmlunsafe
-    ExceptionOr<void> AfterHTMLUnsafe(DOMStringView html,
-                                      const html::SetHTMLUnsafeOptions &options = {}) noexcept;
+    ExceptionOr<void> AfterHTMLUnsafe(DOMStringView html, const html::SetHTMLUnsafeOptions &options) noexcept;
+
+    /// @brief The same, with default options.
+    ExceptionOr<void> AfterHTMLUnsafe(DOMStringView html) noexcept;
 
     /// @brief Replaces the element with @p html, parsed as HTML in its parent's context; sanitized only if @p
     /// options gives a sanitizer.
     /// @see https://html.spec.whatwg.org/#dom-nondocumenttypechildnode-replacewithhtmlunsafe
     ExceptionOr<void> ReplaceWithHTMLUnsafe(DOMStringView html,
-                                            const html::SetHTMLUnsafeOptions &options = {}) noexcept;
+                                            const html::SetHTMLUnsafeOptions &options) noexcept;
+
+    /// @brief The same, with default options.
+    ExceptionOr<void> ReplaceWithHTMLUnsafe(DOMStringView html) noexcept;
 
     /// @brief The element's children serialised as HTML, with the shadow roots @p options asks for.
     /// @see https://html.spec.whatwg.org/#dom-element-gethtml
-    KRYS_NODISCARD DOMString GetHTML(dom::GetHTMLOptions options = {}) const noexcept;
+    KRYS_NODISCARD DOMString GetHTML(dom::GetHTMLOptions options) const noexcept;
+
+    /// @brief The same, with no shadow roots.
+    /// @note An overload rather than a default argument, which would need ShadowRoot's definition here.
+    KRYS_NODISCARD DOMString GetHTML() const noexcept;
 
     /// @brief The children serialized; in an XML document, an `InvalidStateError` if they can't be serialized
     /// as well-formed XML.
@@ -1362,7 +1405,11 @@ namespace krys::boo
     /// @see https://drafts.csswg.org/web-animations-1/#dom-animatable-animate
     KRYS_NODISCARD ExceptionOr<Ref<WebAnimation>>
       Animate(boo::KeyframesInput &&keyframes,
-              Maybe<Variant<double, KeyframeAnimationOptions>> options = null) noexcept;
+              Maybe<Variant<double, KeyframeAnimationOptions>> options) noexcept;
+
+    /// @brief Animates the element with @p keyframes and no options.
+    /// @note An overload rather than a default argument, which would need the options' definition here.
+    KRYS_NODISCARD ExceptionOr<Ref<WebAnimation>> Animate(boo::KeyframesInput &&keyframes) noexcept;
 
     /// @brief The relevant animations whose effects target the element (or, with `subtree`, its descendants
     /// too), in composite order.

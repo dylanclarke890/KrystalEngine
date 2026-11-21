@@ -303,8 +303,8 @@ namespace krys::boo::dom
   }
 
   DocumentOrShadowRoot::DocumentOrShadowRoot(ContainerNode &rootNode,
-                                             RefPtr<html::CustomElementRegistry> &&registry) noexcept
-      : _rootNode(rootNode), _customElementRegistry(krys::move(registry)),
+                                             html::CustomElementRegistry *registry) noexcept
+      : _rootNode(rootNode), _customElementRegistry(ShareRefPtr(registry)),
         _idTargetObserverRegistry(CreateUnique<dom::IdTargetObserverRegistry>()),
         _radioButtonGroups(CreateUnique<html::RadioButtonGroups>())
   {
@@ -423,15 +423,6 @@ namespace krys::boo::dom
   }
 
 #pragma region DocumentOrShadowRoot Mixin (DOM)
-
-  RefPtr<html::CustomElementRegistry> DocumentOrShadowRoot::CustomElementRegistry() const noexcept
-  {
-    // 1. If this is a document, then return this's custom element registry.
-    // 2. Assert: this is a ShadowRoot node.
-    // 3. Return this's custom element registry.
-    // Documents and shadow roots keep their registry here alike.
-    return _customElementRegistry;
-  }
 
   void DocumentOrShadowRoot::SetCustomElementRegistry(RefPtr<html::CustomElementRegistry> &&registry) noexcept
   {

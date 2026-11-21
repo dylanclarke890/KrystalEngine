@@ -2,6 +2,7 @@
 #include "catch2/catch_test_macros.hpp"
 #include "Krystal.Booey.Tests/Layout/LayoutTestUtils.hpp"
 #include "Krystal.Booey.Tests/Rendering/PaintTestUtils.hpp"
+#include "Krystal.Booey.Tests/StringTestUtils.hpp"
 #include "Krystal.Booey.Tests/Style/ResolverTestUtils.hpp"
 #include "Krystal.Booey/CSS/Selectors/UserAgentParts.hpp"
 #include "Krystal.Booey/DOM/Nodes/Document.hpp"
@@ -16,6 +17,7 @@
 
 namespace krys::boo::layout::tests
 {
+  using boo::tests::Narrow;
   using style::tests::ResolverFixture;
 
   namespace
@@ -33,11 +35,6 @@ namespace krys::boo::layout::tests
     KRYS_NODISCARD HTMLInputElement &ButtonOf(HTMLInputElement &input) noexcept
     {
       return Downcast<HTMLInputElement>(*input.UserAgentShadowRoot()->FirstChild());
-    }
-
-    KRYS_NODISCARD std::string Narrow(utf8_stringview text) noexcept
-    {
-      return std::string(text.begin(), text.end());
     }
 
     /// @brief The text runs @p fixture's view paints, as "glyphs@x,y", in order.

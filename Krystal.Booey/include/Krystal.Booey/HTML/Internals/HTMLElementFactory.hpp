@@ -1,6 +1,5 @@
 ﻿#pragma once
 
-#include "Krystal.Booey/DOM/Types/DOMString.hpp"
 #include "Krystal.Booey/DOM/Types/QualifiedName.hpp"
 #include "Krystal.Booey/HTML/Types/TagName.hpp"
 #include "Krystal.Core/Attributes.hpp"

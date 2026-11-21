@@ -144,15 +144,9 @@ namespace krys::boo::dom
 
     void SetPopoverData(UniquePtr<PopoverData> &&popoverData) noexcept;
 
-    KRYS_NODISCARD Element *InvokedPopover() const noexcept
-    {
-      return _invokedPopover.get();
-    }
+    KRYS_NODISCARD Element *InvokedPopover() const noexcept;
 
-    void SetInvokedPopover(Element *element) noexcept
-    {
-      _invokedPopover = CreateWeakPtr(element);
-    }
+    void SetInvokedPopover(Element *element) noexcept;
 
     KRYS_NODISCARD ExplicitlySetAttrElementsMap &GetExplicitlySetAttrElementsMap() noexcept
     {

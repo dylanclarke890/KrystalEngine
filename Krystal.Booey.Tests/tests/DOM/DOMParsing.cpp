@@ -7,6 +7,7 @@
 #include "Krystal.Booey/DOM/Nodes/Comment.hpp"
 #include "Krystal.Booey/DOM/Nodes/DocumentFragment.hpp"
 #include "Krystal.Booey/DOM/Nodes/Element.hpp"
+#include "Krystal.Booey/DOM/Nodes/GetHTMLOptions.hpp"
 #include "Krystal.Booey/DOM/Nodes/HTMLDocument.hpp"
 #include "Krystal.Booey/DOM/Nodes/ProcessingInstruction.hpp"
 #include "Krystal.Booey/DOM/Nodes/ShadowRoot.hpp"

@@ -1,7 +1,6 @@
 ﻿#include "Krystal.Booey/DOM/Collections/HTMLCollection.hpp"
 #include "catch2/catch_test_macros.hpp"
 #include "Krystal.Booey.Tests/DOM/TestElement.hpp"
-#include "Krystal.Booey/DOM/Abort/AbortSignal.hpp"
 #include "Krystal.Booey/DOM/Collections/LiveHTMLCollection.hpp"
 #include "Krystal.Booey/DOM/Collections/StaticHTMLCollection.hpp"
 #include "Krystal.Booey/DOM/Nodes/Attr.hpp"
@@ -9,7 +8,6 @@
 #include "Krystal.Booey/DOM/Nodes/HTMLDocument.hpp"
 #include "Krystal.Booey/DOM/Nodes/ShadowRoot.hpp"
 #include "Krystal.Booey/DOM/Nodes/Text.hpp"
-#include "Krystal.Booey/HTML/CustomElement/CustomElementRegistry.hpp"
 #include "Krystal.Booey/HTML/Elements/HTMLSlotElement.hpp"
 #include "Krystal.Booey/Infra/Namespaces.hpp"
 
@@ -22,7 +20,7 @@ namespace krys::boo::dom::tests
       return true;
     };
 
-    struct CommonTestData
+    struct HTMLCollectionTestData
     {
       Ref<Document> Document;
       Ref<TestElement> Element;
@@ -32,7 +30,7 @@ namespace krys::boo::dom::tests
       Ref<TestElement> ElementChild2;
       Ref<HTMLCollection> Collection;
 
-      CommonTestData(LiveHTMLCollectionFilterFunc &&filter = DefaultFilter) noexcept
+      HTMLCollectionTestData(LiveHTMLCollectionFilterFunc &&filter = DefaultFilter) noexcept
           : Document(CreateRef<HTMLDocument>()), Element(CreateRef<TestElement>(*Document)),
             TextChild1(CreateRef<Text>(*Document, u8"")), TextChild2(CreateRef<Text>(*Document, u8"")),
             ElementChild1(CreateRef<TestElement>(*Document)),
@@ -52,7 +50,7 @@ namespace krys::boo::dom::tests
         REQUIRE_FALSE(ElementChild2->SetAttribute(u8"id", u8"element-id-2").HasException());
       }
 
-      ~CommonTestData() noexcept
+      ~HTMLCollectionTestData() noexcept
       {
         if (Element->ParentNode())
         {
@@ -84,7 +82,7 @@ namespace krys::boo::dom::tests
   TEST_CASE("HTMLCollection.length: the number of elements",
             "[DOM][HTMLCollection][dom:interface-htmlcollection][dom:dom-htmlcollection-length]")
   {
-    CommonTestData data;
+    HTMLCollectionTestData data;
 
     REQUIRE(data.Collection->Length() == 2uz);
     REQUIRE_FALSE(data.Element->RemoveChild(*data.ElementChild1).HasException());
@@ -94,7 +92,7 @@ namespace krys::boo::dom::tests
   TEST_CASE("HTMLCollection.item(): the indexth element, or null",
             "[DOM][HTMLCollection][dom:dom-htmlcollection-item]")
   {
-    CommonTestData data;
+    HTMLCollectionTestData data;
 
     auto result = data.Collection->Item(0uz);
     REQUIRE(result != nullptr);
@@ -110,7 +108,7 @@ namespace krys::boo::dom::tests
 
   TEST_CASE("HTMLCollection[index]: as item()", "[DOM][HTMLCollection][dom:dom-htmlcollection-item]")
   {
-    CommonTestData data;
+    HTMLCollectionTestData data;
     auto &collection = *data.Collection;
 
     auto result = collection[0uz];
@@ -128,7 +126,7 @@ namespace krys::boo::dom::tests
   TEST_CASE("HTMLCollection.namedItem(): the first element with the key as its ID or name",
             "[DOM][HTMLCollection][dom:dom-htmlcollection-nameditem-key]")
   {
-    CommonTestData data;
+    HTMLCollectionTestData data;
 
     SECTION("Search by name")
     {
@@ -162,7 +160,7 @@ namespace krys::boo::dom::tests
   TEST_CASE("HTMLCollection[name]: as namedItem()",
             "[DOM][HTMLCollection][dom:dom-htmlcollection-nameditem-key]")
   {
-    CommonTestData data;
+    HTMLCollectionTestData data;
     auto &collection = *data.Collection;
 
     SECTION("Search by name")

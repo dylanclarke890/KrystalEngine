@@ -2,6 +2,8 @@
 #include "catch2/catch_test_macros.hpp"
 #include "Krystal.Booey.Tests/CSS/ConsumerTestUtils.hpp"
 #include "Krystal.Booey.Tests/CSS/ValueTestUtils.hpp"
+#include "Krystal.Booey.Tests/DOM/DOMTestUtils.hpp"
+#include "Krystal.Booey.Tests/Style/StyleTestUtils.hpp"
 #include "Krystal.Booey/CSS/Values/SerialisationContext.hpp"
 #include "Krystal.Booey/DOM/Nodes/HTMLDocument.hpp"
 #include "Krystal.Booey/DOM/Nodes/ShadowRoot.hpp"
@@ -16,29 +18,12 @@
 
 namespace krys::boo::style::tests
 {
+  using boo::tests::ParseDocument;
+  using boo::tests::RunTasks;
   using css::tests::ToNarrow;
 
   namespace
   {
-    KRYS_NODISCARD Ref<HTMLDocument> Parse(utf8_string &&input) noexcept
-    {
-      auto document = CreateRef<HTMLDocument>();
-      auto parser = CreateRef<html::DocumentParser>(*document);
-      parser->InputStream().Append(krys::move(input), IsEOF::Yes);
-      parser->PumpTokenizer();
-      return document;
-    }
-
-    void RunTasks() noexcept
-    {
-      html::EventLoop::Current().RunUntilIdle();
-    }
-
-    KRYS_NODISCARD CSSOMStringAtom Atom(utf8_stringview name) noexcept
-    {
-      return CSSOMStringAtom {name};
-    }
-
     KRYS_NODISCARD css::CustomPropertySyntax Syntax(utf8_stringview syntax)
     {
       auto parsed = css::CustomPropertySyntax::Parse(syntax);
@@ -81,7 +66,7 @@ namespace krys::boo::style::tests
                    "[Style][CustomPropertyRegistry]")
   {
     RunTasks();
-    auto document = Parse(u8"<!DOCTYPE html>");
+    auto document = ParseDocument(u8"<!DOCTYPE html>");
     auto &registry = document->StyleScope().GetCustomPropertyRegistry();
 
     SECTION("Unregistered properties are inherited")
@@ -149,7 +134,7 @@ namespace krys::boo::style::tests
                    "[Style][CustomPropertyRegistry]")
   {
     RunTasks();
-    auto document = Parse(u8"<!DOCTYPE html>");
+    auto document = ParseDocument(u8"<!DOCTYPE html>");
     auto &registry = document->StyleScope().GetCustomPropertyRegistry();
 
     SECTION("Parsing")
@@ -206,9 +191,10 @@ namespace krys::boo::style::tests
                    "[Style][CustomPropertyRegistry]")
   {
     RunTasks();
-    auto document = Parse(u8"<!DOCTYPE html><div id=host></div><style>"
-                          u8"@property --x { syntax: '<length>'; inherits: false; initial-value: 5px }"
-                          u8"</style>");
+    auto document =
+      ParseDocument(u8"<!DOCTYPE html><div id=host></div><style>"
+                    u8"@property --x { syntax: '<length>'; inherits: false; initial-value: 5px }"
+                    u8"</style>");
     auto &scope = document->StyleScope();
     scope.FlushPendingUpdate();
     std::ignore = scope.GetResolver();

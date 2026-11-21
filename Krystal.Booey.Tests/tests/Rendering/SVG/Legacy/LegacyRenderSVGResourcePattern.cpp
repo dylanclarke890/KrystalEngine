@@ -1,6 +1,8 @@
 ﻿#include "Krystal.Booey/Rendering/SVG/Legacy/LegacyRenderSVGResourcePattern.hpp"
 #include "catch2/catch_test_macros.hpp"
 #include "Krystal.Booey.Tests/Rendering/PaintTestUtils.hpp"
+#include "Krystal.Booey.Tests/Rendering/SVG/LegacySVGTestUtils.hpp"
+#include "Krystal.Booey.Tests/StringTestUtils.hpp"
 #include "Krystal.Booey.Tests/Style/ResolverTestUtils.hpp"
 #include "Krystal.Booey/Rendering/RenderTreeAsText.hpp"
 #include "Krystal.Booey/Rendering/SVG/Legacy/SVGResources.hpp"
@@ -11,21 +13,6 @@
 namespace krys::boo::tests
 {
   using style::tests::ResolverFixture;
-
-  namespace
-  {
-    KRYS_NODISCARD Element &ElementById(Document &document, DOMStringView id) noexcept
-    {
-      auto element = document.GetElementById(id);
-      krys_assert(element);
-      return *element;
-    }
-
-    KRYS_NODISCARD bool Contains(utf8_stringview text, utf8_stringview part) noexcept
-    {
-      return text.contains(part);
-    }
-  }
 
   TEST_CASE_METHOD(css::tests::ValueFixture, "LegacyRenderSVGResourcePattern: the render tree",
                    "[Rendering][SVG][LegacyRenderSVGResourcePattern]")
@@ -50,9 +37,9 @@ namespace krys::boo::tests
 
     // The attributes, with the content, come from the referenced pattern where the pattern doesn't have them.
     svg::PatternAttributes attributes;
-    Downcast<LegacyRenderSVGResourcePattern>(*ElementById(*fixture.Document, u8"q").Renderer())
+    Downcast<LegacyRenderSVGResourcePattern>(*ById(*fixture.Document, u8"q").Renderer())
       .CollectPatternAttributes(attributes);
-    CHECK(attributes.PatternContentElement() == &ElementById(*fixture.Document, u8"p"));
+    CHECK(attributes.PatternContentElement() == &ById(*fixture.Document, u8"p"));
     CHECK(attributes.Width().ValueAsString() == u8"10");
   }
 
@@ -91,12 +78,12 @@ namespace krys::boo::tests
     (void)fixture.Document->UpdateLayout();
 
     auto *inner =
-      SVGResourcesCache::CachedResourcesForRenderer(*ElementById(*fixture.Document, u8"inner").Renderer());
+      SVGResourcesCache::CachedResourcesForRenderer(*ById(*fixture.Document, u8"inner").Renderer());
     CHECK((!inner || !inner->Fill()));
     auto *outer =
-      SVGResourcesCache::CachedResourcesForRenderer(*ElementById(*fixture.Document, u8"outer").Renderer());
+      SVGResourcesCache::CachedResourcesForRenderer(*ById(*fixture.Document, u8"outer").Renderer());
     REQUIRE(outer);
-    CHECK(outer->Fill() == ElementById(*fixture.Document, u8"p").Renderer());
+    CHECK(outer->Fill() == ById(*fixture.Document, u8"p").Renderer());
 
     // Painting doesn't recurse.
     PaintFixture paint(

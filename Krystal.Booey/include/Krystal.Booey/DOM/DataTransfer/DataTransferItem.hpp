@@ -79,10 +79,7 @@ namespace krys::boo::dom
     KRYS_NODISCARD static Ref<DataTransferItem> Create(WeakPtr<DataTransferItemList> &&list,
                                                        DOMStringView type, Ref<File> &&file) noexcept;
 
-    KRYS_NODISCARD RefPtr<File> GetFile() const noexcept
-    {
-      return _file;
-    }
+    KRYS_NODISCARD RefPtr<File> GetFile() const noexcept;
 
     /// @brief Detaches the item from its list, after which it has no type and gives no data.
     void ClearListAndPutIntoDisabledMode() noexcept;

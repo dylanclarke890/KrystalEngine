@@ -74,9 +74,8 @@ namespace krys::boo::dom::tests
 
     SECTION("The namespace, prefix, local name and registry it's given")
     {
-      auto element =
-        ElementFactory::Create(*document, QualifiedName {infra::namespaces::HTML, u8"h", u8"div"}, null,
-                               false, RefPtr<html::CustomElementRegistry>(registry));
+      auto element = ElementFactory::Create(
+        *document, QualifiedName {infra::namespaces::HTML, u8"h", u8"div"}, null, false, registry.get());
       CHECK(ElementIs<HTMLDivElement, HTMLElement>(*element));
       CHECK(element->NamespaceURI() == infra::namespaces::HTML);
       CHECK(element->Prefix() == u8"h");

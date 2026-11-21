@@ -91,6 +91,15 @@ namespace krys::boo
     SetForm(nullptr);
   }
 
+  bool HTMLImageElement::CanStartSelection() const noexcept
+  {
+    if (ShadowRoot())
+    {
+      return HTMLElement::CanStartSelection();
+    }
+    return false;
+  }
+
   void HTMLImageElement::ResetFormOwner() noexcept
   {
     SetForm(HTMLFormElement::FindClosestFormAncestor(*this));

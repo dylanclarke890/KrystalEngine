@@ -22,6 +22,7 @@
  */
 
 #include "Krystal.Booey/SVG/Elements/SVGGradientElement.hpp"
+#include "Krystal.Booey/Graphics/GradientColorStops.hpp"
 #include "Krystal.Booey/SVG/Elements/SVGStopElement.hpp"
 #include "Krystal.Booey/SVG/Properties/SVGPropertyOwnerRegistry.hpp"
 #include "Krystal.Booey/SVG/SVGNames.hpp"

@@ -11,6 +11,8 @@ namespace krys::boo
   {
   }
 
+  AbortController::~AbortController() noexcept = default;
+
   void AbortController::Abort(Maybe<::krys::Any> reason) noexcept
   {
     // The spec's signal abort on the controller's signal (AbortSignal::Abort is the static abort()).

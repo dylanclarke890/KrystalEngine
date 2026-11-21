@@ -1,6 +1,5 @@
 ﻿#pragma once
 
-#include "Krystal.Booey/DOM/Events/EventTarget.hpp"
 #include "Krystal.Booey/DOM/Types/DOMString.hpp"
 #include "Krystal.Core/Attributes.hpp"
 #include "Krystal.Core/Types/Func.hpp"
@@ -8,6 +7,7 @@
 namespace krys::boo
 {
   class Event;
+  class EventTarget;
 }
 
 namespace krys::boo::html

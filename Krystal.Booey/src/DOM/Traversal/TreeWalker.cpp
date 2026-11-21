@@ -1,5 +1,6 @@
 ﻿#include "Krystal.Booey/DOM/Traversal/TreeWalker.hpp"
 #include "Krystal.Booey/DOM/Algorithms/IteratorAlgorithms.hpp"
+#include "Krystal.Booey/DOM/Nodes/ContainerNode.hpp"
 
 namespace krys::boo::dom
 {

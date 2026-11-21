@@ -1,6 +1,7 @@
 ﻿#include "Krystal.Booey/Rendering/RenderObject.hpp"
 #include "catch2/catch_test_macros.hpp"
 #include "Krystal.Booey.Tests/Layout/LayoutTestUtils.hpp"
+#include "Krystal.Booey.Tests/Rendering/RenderTestUtils.hpp"
 #include "Krystal.Booey.Tests/Style/ResolverTestUtils.hpp"
 #include "Krystal.Booey/Rendering/RenderBox.hpp"
 #include "Krystal.Booey/Rendering/RenderInline.hpp"
@@ -9,15 +10,6 @@
 namespace krys::boo::tests
 {
   using style::tests::ResolverFixture;
-
-  namespace
-  {
-    KRYS_NODISCARD RenderElement &RendererOf(ResolverFixture &fixture, DOMStringView id) noexcept
-    {
-      (void)fixture.Document->UpdateLayout();
-      return *fixture.ById(id).Renderer();
-    }
-  }
 
   TEST_CASE_METHOD(css::tests::ValueFixture, "RenderObject: geometry mapping", "[Rendering][RenderObject]")
   {
@@ -35,19 +27,19 @@ namespace krys::boo::tests
     SECTION("Points")
     {
       // The outer box's border box starts at (20, 10); the inner box is inside its border.
-      auto &inner = RendererOf(fixture, u8"inner");
+      auto &inner = LaidOutRendererOf(fixture, u8"inner");
       CHECK(inner.LocalToAbsolute() == PointF(30, 13));
       CHECK(inner.LocalToAbsolute(PointF(1, 2)) == PointF(31, 15));
       CHECK(inner.AbsoluteToLocal(PointF(31, 15)) == PointF(1, 2));
 
       // Relative positioning offsets the box.
-      auto &rel = RendererOf(fixture, u8"rel");
+      auto &rel = LaidOutRendererOf(fixture, u8"rel");
       CHECK(rel.LocalToAbsolute() == PointF(28, 39));
     }
 
     SECTION("Transforms")
     {
-      auto &moved = RendererOf(fixture, u8"moved");
+      auto &moved = LaidOutRendererOf(fixture, u8"moved");
       CHECK(moved.LocalToAbsolute(PointF(), MapCoordinatesMode::UseTransforms) == PointF(53, 83));
       // Without UseTransforms, the transform is ignored.
       CHECK(moved.LocalToAbsolute() == PointF(23, 43));
@@ -58,13 +50,13 @@ namespace krys::boo::tests
     SECTION("Quads")
     {
       List<QuadF> quads;
-      Downcast<RenderBox>(RendererOf(fixture, u8"outer")).AbsoluteQuads(quads);
+      Downcast<RenderBox>(LaidOutRendererOf(fixture, u8"outer")).AbsoluteQuads(quads);
       REQUIRE(quads.size() == 1);
       CHECK(quads[0].BoundingBox() == RectF(20, 10, 206, 106));
 
       // An inline has a quad per line.
       quads.clear();
-      Downcast<RenderInline>(RendererOf(fixture, u8"inl")).AbsoluteQuads(quads);
+      Downcast<RenderInline>(LaidOutRendererOf(fixture, u8"inl")).AbsoluteQuads(quads);
       REQUIRE(quads.size() == 2);
       CHECK(quads[0].BoundingBox() == RectF(0, 116, 20, 10));
       CHECK(quads[1].BoundingBox() == RectF(0, 126, 20, 10));

@@ -3,6 +3,7 @@
 #include "Krystal.Booey.Tests/CSS/ValueTestUtils.hpp"
 #include "Krystal.Booey.Tests/Loader/PageInFrameFixture.hpp"
 #include "Krystal.Booey.Tests/Loader/TestLoader.hpp"
+#include "Krystal.Booey.Tests/StringTestUtils.hpp"
 #include "Krystal.Booey/DOM/Nodes/DOMImplementation.hpp"
 #include "Krystal.Booey/HTML/Elements/HTMLDialogElement.hpp"
 #include "Krystal.Booey/HTML/Elements/HTMLInputElement.hpp"
@@ -38,17 +39,6 @@ namespace krys::boo::tests
         return Is<RenderImage>(ById(id).Renderer());
       }
     };
-
-    KRYS_NODISCARD size_t Count(const utf8_string &text, utf8_stringview part) noexcept
-    {
-      size_t count = 0;
-      for (auto position = text.find(part); position != utf8_string::npos;
-           position = text.find(part, position + 1))
-      {
-        ++count;
-      }
-      return count;
-    }
   }
 
   TEST_CASE("ImageInputType: loads its source, fires load and paints",

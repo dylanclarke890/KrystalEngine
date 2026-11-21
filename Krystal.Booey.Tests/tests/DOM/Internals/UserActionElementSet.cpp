@@ -1,6 +1,7 @@
 ﻿#include "Krystal.Booey/DOM/Internals/UserActionElementSet.hpp"
 #include "catch2/catch_test_macros.hpp"
 #include "Krystal.Booey.Tests/Style/ResolverTestUtils.hpp"
+#include "Krystal.Booey.Tests/Style/StyleTestUtils.hpp"
 #include "Krystal.Booey/DOM/Nodes/ShadowRoot.hpp"
 #include "Krystal.Booey/Rendering/HitTesting/HitTestRequest.hpp"
 #include "Krystal.Booey/Rendering/Style/RenderStyle+GettersInlines.hpp"
@@ -9,23 +10,16 @@ namespace krys::boo::dom::tests
 {
   using style::tests::ResolverFixture;
   using Type = HitTestRequest::Type;
+  using style::tests::Blue;
+  using style::tests::IsBlue;
 
   namespace
   {
-    const boo::Color Blue {boo::Color::blue};
-
     KRYS_NODISCARD std::string Width(const Element &element)
     {
       auto *style = element.GetRenderStyle();
       REQUIRE(style);
       return ResolverFixture::Serialised(*style, style->Width());
-    }
-
-    KRYS_NODISCARD bool IsBlue(const Element &element)
-    {
-      auto *style = element.GetRenderStyle();
-      REQUIRE(style);
-      return style->Color() == Blue;
     }
 
     const HitTestRequest Move {{Type::Move}};

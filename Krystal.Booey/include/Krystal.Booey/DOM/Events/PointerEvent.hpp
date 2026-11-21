@@ -303,15 +303,9 @@ namespace krys::boo
     // support legacy content. In those user agents, the values of those (inherited) attributes in
     // PointerEvents must be null to encourage the use of the standardized alternates (i.e. target
     // and relatedTarget).
-    KRYS_NODISCARD RefPtr<Node> ToElement() const noexcept final
-    {
-      return nullptr;
-    }
+    KRYS_NODISCARD RefPtr<Node> ToElement() const noexcept final;
 
-    KRYS_NODISCARD RefPtr<Node> FromElement() const noexcept final
-    {
-      return nullptr;
-    }
+    KRYS_NODISCARD RefPtr<Node> FromElement() const noexcept final;
 
     /// @brief Whether a pointer event of @p type always says which button changed: `pointerdown`,
     /// `pointerup`, `click`, `auxclick` and `contextmenu`.

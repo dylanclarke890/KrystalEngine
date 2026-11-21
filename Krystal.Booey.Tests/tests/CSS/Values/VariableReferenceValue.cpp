@@ -1,33 +1,18 @@
 ﻿#include "Krystal.Booey/CSS/Values/VariableReferenceValue.hpp"
 #include "catch2/catch_test_macros.hpp"
 #include "Krystal.Booey.Tests/CSS/ValueTestUtils.hpp"
+#include "Krystal.Booey.Tests/CSS/VariableTestUtils.hpp"
 #include "Krystal.Booey/CSS/Parser/InputStream.hpp"
 #include "Krystal.Booey/CSS/Parser/Tokenizer.hpp"
 
 // Only the Builder-free half: resolution needs `style::Builder`.
 namespace krys::boo::css::tests
 {
-  namespace
-  {
-    Ref<VariableData> MakeData(utf8_stringview css, const ParserContext &context = StrictParserContext())
-    {
-      InputStream input {CSSOMString(css)};
-      Tokenizer tokenizer {input};
-      REQUIRE(tokenizer.PumpTokenizer());
-      return VariableData::Create(tokenizer.Tokens(), context);
-    }
-
-    Ref<VariableReferenceValue> MakeReference(utf8_stringview css)
-    {
-      return VariableReferenceValue::Create(MakeData(css));
-    }
-  }
-
   TEST_CASE_METHOD(ValueFixture, "VariableReferenceValue::Create", "[CSS][Values][VariableReferenceValue]")
   {
     SECTION("From data")
     {
-      auto data = MakeData(u8"var(--x, 1px) solid");
+      auto data = MakeVariableData(u8"var(--x, 1px) solid");
       auto *dataPointer = data.get();
       auto value = VariableReferenceValue::Create(krys::move(data));
       CHECK(value->IsVariableReferenceValue());
@@ -58,7 +43,7 @@ namespace krys::boo::css::tests
     {
       auto narrow = ToNarrow(css);
       INFO(narrow);
-      auto value = MakeReference(css);
+      auto value = MakeVariableReference(css);
       CHECK(CssText(*value) == narrow);
       // The text is cached; serialising again gives the same result.
       CHECK(CssText(*value) == narrow);
@@ -68,15 +53,15 @@ namespace krys::boo::css::tests
   TEST_CASE_METHOD(ValueFixture, "VariableReferenceValue equality and hashing",
                    "[CSS][Values][VariableReferenceValue]")
   {
-    auto a = MakeReference(u8"var(--x)");
-    auto b = MakeReference(u8"var(--x)");
+    auto a = MakeVariableReference(u8"var(--x)");
+    auto b = MakeVariableReference(u8"var(--x)");
 
     CHECK(*a == *b);
-    CHECK_FALSE(*a == *MakeReference(u8"var(--y)"));
-    CHECK_FALSE(*a == *MakeReference(u8"var(--x, red)"));
+    CHECK_FALSE(*a == *MakeVariableReference(u8"var(--y)"));
+    CHECK_FALSE(*a == *MakeVariableReference(u8"var(--x, red)"));
 
     // Values sharing their data are equal.
-    auto data = MakeData(u8"var(--z)");
+    auto data = MakeVariableData(u8"var(--z)");
     auto shared1 = VariableReferenceValue::Create(Ref<VariableData> {data});
     auto shared2 = VariableReferenceValue::Create(Ref<VariableData> {data});
     CHECK(*shared1 == *shared2);
@@ -88,6 +73,6 @@ namespace krys::boo::css::tests
 
   TEST_CASE_METHOD(ValueFixture, "VariableReferenceValue visitation", "[CSS][Values][VariableReferenceValue]")
   {
-    CHECK(Children(*MakeReference(u8"var(--x, 1px)")).empty());
+    CHECK(Children(*MakeVariableReference(u8"var(--x, 1px)")).empty());
   }
 }

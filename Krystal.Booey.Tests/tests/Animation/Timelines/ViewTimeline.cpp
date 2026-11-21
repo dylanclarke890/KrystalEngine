@@ -3,6 +3,7 @@
 #include "catch2/catch_test_macros.hpp"
 #include "Krystal.Booey.Tests/Animation/AnimationTestUtils.hpp"
 #include "Krystal.Booey.Tests/CSS/ValueTestUtils.hpp"
+#include "Krystal.Booey/Animation/KeyframeAnimationOptions.hpp"
 #include "Krystal.Booey/Animation/KeyframeEffect.hpp"
 #include "Krystal.Booey/Animation/WebAnimation.hpp"
 #include "Krystal.Booey/CSS/TypedOM/CSSUnitValue.hpp"
@@ -19,25 +20,12 @@ namespace krys::boo::tests
       u8"scrollbar-width:none}.spacer{height:200px}#subject{height:50px}</style>"
       u8"<div id=scroller><div class=spacer></div><div id=subject></div><div class=spacer></div></div>";
 
-    KRYS_NODISCARD double Percentage(const Maybe<WebAnimationTime> &time) noexcept
-    {
-      REQUIRE(time);
-      REQUIRE(time->Percentage());
-      return *time->Percentage();
-    }
-
     KRYS_NODISCARD double Px(const CSSNumericValue &value) noexcept
     {
       const auto *unitValue = DynamicDowncast<CSSUnitValue>(value);
       REQUIRE(unitValue);
       CHECK(unitValue->UnitEnum() == css::UnitType::px);
       return unitValue->Value();
-    }
-
-    void ScrollTo(AnimationPageFixture &fixture, int32 top) noexcept
-    {
-      fixture.ById(u8"scroller").SetScrollTop(top);
-      fixture.TestFrame->UpdateRendering();
     }
 
     KRYS_NODISCARD Ref<ViewTimeline> CreateTimeline(AnimationPageFixture &fixture,

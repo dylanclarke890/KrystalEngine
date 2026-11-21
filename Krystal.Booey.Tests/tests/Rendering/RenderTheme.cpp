@@ -2,6 +2,7 @@
 #include "catch2/catch_test_macros.hpp"
 #include "Krystal.Booey.Tests/Editing/EditorTestUtils.hpp"
 #include "Krystal.Booey.Tests/Rendering/PaintTestUtils.hpp"
+#include "Krystal.Booey.Tests/StringTestUtils.hpp"
 #include "Krystal.Booey/DOM/Nodes/Document.hpp"
 #include "Krystal.Booey/HTML/Elements/HTMLInputElement.hpp"
 #include "Krystal.Booey/Rendering/RenderBox.hpp"
@@ -104,11 +105,6 @@ namespace krys::boo::tests
     KRYS_NODISCARD const RenderStyle &StyleOf(EditorFixture &fixture, DOMStringView id) noexcept
     {
       return fixture.ById(id).Renderer()->Style();
-    }
-
-    KRYS_NODISCARD bool Contains(utf8_stringview haystack, utf8_stringview needle) noexcept
-    {
-      return haystack.contains(needle);
     }
   }
 

@@ -20,7 +20,7 @@ namespace krys::boo::tests
       bool operator==(const Rect &) const noexcept = default;
     };
 
-    constexpr utf8_stringview BaseStyle =
+    constexpr utf8_stringview FieldsetStyle =
       u8"body{margin:0}fieldset{margin:0;padding:0;border:10px solid #000;width:300px;box-sizing:content-box}"
       u8"legend{padding:0;width:50px;height:20px}#c{height:30px}";
 
@@ -150,7 +150,7 @@ namespace krys::boo::tests
        Rect {10, 10, 50, 20}, null, Rect {10, 30, 300, 30}},
     }));
 
-    AnimationPageFixture fixture {u8"<!DOCTYPE html><style>" + utf8_string(BaseStyle) + testCase.Style
+    AnimationPageFixture fixture {u8"<!DOCTYPE html><style>" + utf8_string(FieldsetStyle) + testCase.Style
                                   + u8"</style><fieldset id=f>" + testCase.Body + u8"</fieldset>"};
     (void)fixture.Document->UpdateLayout();
 
@@ -180,7 +180,7 @@ namespace krys::boo::tests
   TEST_CASE("RenderBlock: a fieldset's legend changing", "[Rendering][RenderBlock]")
   {
     AnimationPageFixture fixture {
-      u8"<!DOCTYPE html><style>" + utf8_string(BaseStyle)
+      u8"<!DOCTYPE html><style>" + utf8_string(FieldsetStyle)
       + u8"</style><fieldset id=f><legend id=l></legend><div id=c></div></fieldset>"};
     (void)fixture.Document->UpdateLayout();
     REQUIRE(RectOf(fixture, u8"c")->Y == 20);
@@ -223,7 +223,7 @@ namespace krys::boo::tests
     SECTION("in the border")
     {
       AnimationPageFixture fixture {
-        u8"<!DOCTYPE html><style>" + utf8_string(BaseStyle)
+        u8"<!DOCTYPE html><style>" + utf8_string(FieldsetStyle)
         + u8"</style><fieldset id=f><legend id=l></legend><div id=c></div></fieldset>"};
       (void)fixture.Document->UpdateLayout();
       CHECK(fixture.Document->ElementFromPoint(15, 5).get() == &fixture.ById(u8"l"));
@@ -234,7 +234,7 @@ namespace krys::boo::tests
     SECTION("when the contents scroll")
     {
       AnimationPageFixture fixture {
-        u8"<!DOCTYPE html><style>" + utf8_string(BaseStyle)
+        u8"<!DOCTYPE html><style>" + utf8_string(FieldsetStyle)
         + u8"fieldset{overflow:auto;height:60px;scrollbar-width:none}#c{height:300px}</style>"
           u8"<fieldset id=f><legend id=l></legend><div id=c></div></fieldset>"};
       (void)fixture.Document->UpdateLayout();
@@ -250,7 +250,7 @@ namespace krys::boo::tests
 
     SECTION("positioned, and so with a layer, in a fieldset that clips")
     {
-      AnimationPageFixture fixture {u8"<!DOCTYPE html><style>" + utf8_string(BaseStyle)
+      AnimationPageFixture fixture {u8"<!DOCTYPE html><style>" + utf8_string(FieldsetStyle)
                                     + u8"fieldset{overflow:hidden;height:60px;scrollbar-width:none}"
                                       u8"legend{position:relative;left:5px}#c{height:300px}</style>"
                                       u8"<fieldset id=f><legend id=l></legend><div id=c></div></fieldset>"};
@@ -264,7 +264,7 @@ namespace krys::boo::tests
     SECTION("overflowing the clip of a fieldset whose legend's taller than the border")
     {
       AnimationPageFixture fixture {
-        u8"<!DOCTYPE html><style>" + utf8_string(BaseStyle)
+        u8"<!DOCTYPE html><style>" + utf8_string(FieldsetStyle)
         + u8"fieldset{overflow:hidden;height:60px}legend{height:40px}#c{height:300px}</style>"
           u8"<fieldset id=f><legend id=l></legend><div id=c></div></fieldset>"};
       (void)fixture.Document->UpdateLayout();
@@ -278,7 +278,7 @@ namespace krys::boo::tests
     SECTION("not scrolling")
     {
       AnimationPageFixture fixture {
-        u8"<!DOCTYPE html><style>" + utf8_string(BaseStyle)
+        u8"<!DOCTYPE html><style>" + utf8_string(FieldsetStyle)
         + u8"</style><fieldset id=f><legend id=l></legend><div id=c></div></fieldset>"};
       auto &fieldset = fixture.ById(u8"f");
       CHECK(fieldset.ClientTop() == 10);
@@ -289,7 +289,7 @@ namespace krys::boo::tests
     SECTION("scrolling")
     {
       AnimationPageFixture fixture {
-        u8"<!DOCTYPE html><style>" + utf8_string(BaseStyle)
+        u8"<!DOCTYPE html><style>" + utf8_string(FieldsetStyle)
         + u8"fieldset{overflow:auto;height:60px;scrollbar-width:none}#c{height:300px}</style>"
           u8"<fieldset id=f><legend id=l></legend><div id=c></div></fieldset>"};
       auto &fieldset = fixture.ById(u8"f");

@@ -1,6 +1,7 @@
 ﻿#include "Krystal.Booey/Style/Invalidation/AttributeChangeInvalidation.hpp"
 #include "catch2/catch_test_macros.hpp"
 #include "Krystal.Booey.Tests/Style/ResolverTestUtils.hpp"
+#include "Krystal.Booey.Tests/Style/StyleTestUtils.hpp"
 #include "Krystal.Booey/CSS/Properties/PropertyId.hpp"
 #include "Krystal.Booey/DOM/Nodes/StyledElement.hpp"
 #include "Krystal.Booey/Rendering/Style/RenderStyle+GettersInlines.hpp"
@@ -9,18 +10,6 @@
 
 namespace krys::boo::style::tests
 {
-  namespace
-  {
-    const boo::Color Blue {boo::Color::blue};
-
-    KRYS_NODISCARD const RenderStyle &Rendered(const Element &element)
-    {
-      auto *style = element.GetRenderStyle();
-      REQUIRE(style);
-      return *style;
-    }
-  }
-
   TEST_CASE_METHOD(css::tests::ValueFixture, "ClassChangeInvalidation: class changes",
                    "[Style][Invalidation]")
   {

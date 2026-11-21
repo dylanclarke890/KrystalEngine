@@ -1,4 +1,5 @@
 ﻿#include "Krystal.Booey/HTML/Elements/HTMLPreElement.hpp"
+#include "Krystal.Booey/CSS/Properties/MutableStyleProperties.hpp"
 #include "Krystal.Booey/HTML/Attributes/ReflectAttribute.hpp"
 #include "Krystal.Booey/HTML/Internals/PresentationalHints.hpp"
 

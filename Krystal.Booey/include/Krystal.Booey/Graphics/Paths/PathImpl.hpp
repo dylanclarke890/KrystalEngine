@@ -30,6 +30,7 @@
 #include "Krystal.Booey/Graphics/Paths/PathSegment.hpp"
 
 #include "Krystal.Core/RefCounted.hpp"
+#include "Krystal.Core/Types/RefPtr.hpp"
 #include "Krystal.Core/Types/UniquePtr.hpp"
 
 namespace krys

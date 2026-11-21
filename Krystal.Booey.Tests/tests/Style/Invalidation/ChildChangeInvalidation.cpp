@@ -1,29 +1,14 @@
 ﻿#include "Krystal.Booey/Style/Invalidation/ChildChangeInvalidation.hpp"
 #include "catch2/catch_test_macros.hpp"
+#include "Krystal.Booey.Tests/DOM/DOMTestUtils.hpp"
 #include "Krystal.Booey.Tests/Style/ResolverTestUtils.hpp"
+#include "Krystal.Booey.Tests/Style/StyleTestUtils.hpp"
 #include "Krystal.Booey/DOM/Nodes/Text.hpp"
 #include "Krystal.Booey/Rendering/Style/RenderStyle+GettersInlines.hpp"
 
 namespace krys::boo::style::tests
 {
-  namespace
-  {
-    const boo::Color Blue {boo::Color::blue};
-
-    KRYS_NODISCARD Ref<Element> Create(Document &document, DOMStringAtom localName)
-    {
-      auto element = document.CreateElement(krys::move(localName));
-      REQUIRE_FALSE(element.HasException());
-      return element.ReleaseValue();
-    }
-
-    KRYS_NODISCARD bool IsBlue(const Element &element)
-    {
-      auto *style = element.GetRenderStyle();
-      REQUIRE(style);
-      return style->Color() == Blue;
-    }
-  }
+  using boo::tests::CreateElement;
 
   TEST_CASE_METHOD(css::tests::ValueFixture, "ChildChangeInvalidation: structural pseudo-classes",
                    "[Style][Invalidation]")
@@ -70,9 +55,9 @@ namespace krys::boo::style::tests
       REQUIRE_FALSE(IsBlue(l2));
       REQUIRE(IsBlue(l3));
 
-      auto first = Create(document, u8"li");
+      auto first = CreateElement(document, u8"li");
       REQUIRE_FALSE(u.InsertBefore(*first, &l1).HasException());
-      auto last = Create(document, u8"li");
+      auto last = CreateElement(document, u8"li");
       REQUIRE_FALSE(u.AppendChild(*last).HasException());
       CHECK(l1.StyleValidity() != Validity::Valid);
       CHECK(l3.StyleValidity() != Validity::Valid);
@@ -99,9 +84,9 @@ namespace krys::boo::style::tests
       REQUIRE(IsBlue(b2));
       REQUIRE(IsBlue(i1));
 
-      auto b0 = Create(document, u8"b");
+      auto b0 = CreateElement(document, u8"b");
       REQUIRE_FALSE(nth.InsertBefore(*b0, &b1).HasException());
-      auto i3 = Create(document, u8"i");
+      auto i3 = CreateElement(document, u8"i");
       REQUIRE_FALSE(nth.AppendChild(*i3).HasException());
       document.UpdateStyleIfNeeded();
       CHECK(IsBlue(b1));
@@ -115,7 +100,7 @@ namespace krys::boo::style::tests
       auto &s = fixture.ById(u8"s");
       auto &sp = fixture.ById(u8"sp");
       REQUIRE(IsBlue(sp));
-      auto between = Create(document, u8"b");
+      auto between = CreateElement(document, u8"b");
       REQUIRE_FALSE(s.InsertBefore(*between, &sp).HasException());
       CHECK(sp.StyleValidity() != Validity::Valid);
       document.UpdateStyleIfNeeded();
@@ -148,7 +133,7 @@ namespace krys::boo::style::tests
 
     SECTION("Inserted and removed children")
     {
-      auto x = Create(document, u8"i");
+      auto x = CreateElement(document, u8"i");
       REQUIRE_FALSE(x->SetAttribute(u8"class", u8"x").HasException());
       REQUIRE_FALSE(d.AppendChild(*x).HasException());
       CHECK(d.StyleValidity() != Validity::Valid);
@@ -162,7 +147,7 @@ namespace krys::boo::style::tests
 
     SECTION("Descendants")
     {
-      auto y = Create(document, u8"i");
+      auto y = CreateElement(document, u8"i");
       REQUIRE_FALSE(y->SetAttribute(u8"class", u8"y").HasException());
       REQUIRE_FALSE(fixture.ById(u8"b").AppendChild(*y).HasException());
       document.UpdateStyleIfNeeded();
@@ -179,7 +164,7 @@ namespace krys::boo::style::tests
 
     SECTION("Siblings")
     {
-      auto z = Create(document, u8"i");
+      auto z = CreateElement(document, u8"i");
       REQUIRE_FALSE(z->SetAttribute(u8"class", u8"z").HasException());
       REQUIRE_FALSE(fixture.ById(u8"a").AppendChild(*z).HasException());
       document.UpdateStyleIfNeeded();

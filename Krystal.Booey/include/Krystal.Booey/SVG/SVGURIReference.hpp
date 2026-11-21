@@ -84,11 +84,11 @@ namespace krys::boo
 
     KRYS_NODISCARD static TargetElementResult
       TargetElementFromIRIString(DOMStringView iri, const dom::DocumentOrShadowRoot &treeScope,
-                                 const RefPtr<Document> &externalDocument = nullptr) noexcept;
+                                 Document *externalDocument = nullptr) noexcept;
 
     KRYS_NODISCARD static TargetElementResult
       TargetElementFromIRIString(const style::Url &iri, const dom::DocumentOrShadowRoot &treeScope,
-                                 const RefPtr<Document> &externalDocument = nullptr) noexcept;
+                                 Document *externalDocument = nullptr) noexcept;
 
     KRYS_NODISCARD static bool IsExternalURIReference(DOMStringView uri, const Document &document) noexcept;
 

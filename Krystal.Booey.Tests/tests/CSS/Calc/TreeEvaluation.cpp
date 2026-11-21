@@ -1,6 +1,7 @@
 ﻿#include "Krystal.Booey/CSS/Calc/TreeEvaluation.hpp"
 #include "catch2/catch_approx.hpp"
 #include "catch2/catch_test_macros.hpp"
+#include "Krystal.Booey.Tests/CSS/CalcTestUtils.hpp"
 #include "Krystal.Booey/CSS/Calc/SymbolTable.hpp"
 #include "Krystal.Booey/CSS/Calc/Tree.hpp"
 #include "Krystal.Booey/CSS/Values/Primitives/NumericCategory.hpp"
@@ -12,25 +13,6 @@ namespace krys::boo::css::calc::tests
 {
   namespace
   {
-    Child Num(double value, UnitType unit = UnitType::Number)
-    {
-      return CreateNumeric(value, unit);
-    }
-
-    template <typename Op>
-    Child Node(Op op, Type type = Type::CreateLength())
-    {
-      return CreateChild(krys::move(op), type);
-    }
-
-    template <typename... Cs>
-    List<Child> ChildList(Cs &&...children)
-    {
-      List<Child> list;
-      (list.push_back(std::forward<Cs>(children)), ...);
-      return list;
-    }
-
     Maybe<double> Evaluate(Child &&root, const SymbolTable &symbols = {},
                            Maybe<ToLengthConversionData> conversionData = null)
     {
@@ -64,34 +46,38 @@ namespace krys::boo::css::calc::tests
 
   TEST_CASE("TreeEvaluation(operations)", "[CSS][Calc][TreeEvaluation]")
   {
-    CHECK(Evaluate(Node(Add(Num(1.0, UnitType::in), Num(4.0, UnitType::px)))) == 100.0);
-    CHECK(Evaluate(Node(Subtract(Num(10.0, UnitType::px), Num(4.0, UnitType::px)))) == 6.0);
-    CHECK(Evaluate(Node(Multiply(Num(2.0), Num(3.0, UnitType::px)))) == 6.0);
-    CHECK(Evaluate(Node(Multiply(Num(3.0, UnitType::px), Node(Invert {.A = Num(2.0)})))) == 1.5);
-    CHECK(Evaluate(Node(Min {.Children = ChildList(Num(3.0, UnitType::px), Num(1.0, UnitType::in))})) == 3.0);
-    CHECK(Evaluate(Node(Max {.Children = ChildList(Num(3.0, UnitType::px), Num(1.0, UnitType::in))}))
+    CHECK(Evaluate(OperationNode(Add(Num(1.0, UnitType::in), Num(4.0, UnitType::px)))) == 100.0);
+    CHECK(Evaluate(OperationNode(Subtract(Num(10.0, UnitType::px), Num(4.0, UnitType::px)))) == 6.0);
+    CHECK(Evaluate(OperationNode(Multiply(Num(2.0), Num(3.0, UnitType::px)))) == 6.0);
+    CHECK(Evaluate(OperationNode(Multiply(Num(3.0, UnitType::px), OperationNode(Invert {.A = Num(2.0)}))))
+          == 1.5);
+    CHECK(Evaluate(OperationNode(Min {.Children = ChildList(Num(3.0, UnitType::px), Num(1.0, UnitType::in))}))
+          == 3.0);
+    CHECK(Evaluate(OperationNode(Max {.Children = ChildList(Num(3.0, UnitType::px), Num(1.0, UnitType::in))}))
           == 96.0);
-    CHECK(Evaluate(Node(Hypot {.Children = ChildList(Num(3.0, UnitType::px), Num(4.0, UnitType::px))}))
-          == 5.0);
-    CHECK(Evaluate(Node(
+    CHECK(
+      Evaluate(OperationNode(Hypot {.Children = ChildList(Num(3.0, UnitType::px), Num(4.0, UnitType::px))}))
+      == 5.0);
+    CHECK(Evaluate(OperationNode(
             Clamp {.Min = Num(1.0, UnitType::px), .Val = Num(5.0, UnitType::px), .Max = keywords::None {}}))
           == 5.0);
-    CHECK(Evaluate(Node(
+    CHECK(Evaluate(OperationNode(
             Clamp {.Min = keywords::None {}, .Val = Num(5.0, UnitType::px), .Max = Num(2.0, UnitType::px)}))
           == 2.0);
-    CHECK(Evaluate(Node(RoundUp {.A = Num(7.0, UnitType::px), .B = Num(5.0, UnitType::px)})) == 10.0);
-    CHECK(Evaluate(Node(Pow {.A = Num(2.0), .B = Num(10.0)})) == 1024.0);
-    CHECK(Evaluate(Node(Sin {.A = Num(0.5)})) == Catch::Approx(std::sin(0.5)));
-    CHECK(Evaluate(Node(Progress {.Value = Num(5.0), .Start = Num(0.0), .End = Num(10.0)})) == 0.5);
+    CHECK(Evaluate(OperationNode(RoundUp {.A = Num(7.0, UnitType::px), .B = Num(5.0, UnitType::px)}))
+          == 10.0);
+    CHECK(Evaluate(OperationNode(Pow {.A = Num(2.0), .B = Num(10.0)})) == 1024.0);
+    CHECK(Evaluate(OperationNode(Sin {.A = Num(0.5)})) == Catch::Approx(std::sin(0.5)));
+    CHECK(Evaluate(OperationNode(Progress {.Value = Num(5.0), .Start = Num(0.0), .End = Num(10.0)})) == 0.5);
 
     // Any child that can't be evaluated fails the whole operation.
-    CHECK_FALSE(Evaluate(Node(Add(Num(1.0, UnitType::em), Num(4.0, UnitType::px)))));
-    CHECK_FALSE(Evaluate(
-      Node(Clamp {.Min = Num(1.0, UnitType::em), .Val = Num(5.0, UnitType::px), .Max = keywords::None {}})));
+    CHECK_FALSE(Evaluate(OperationNode(Add(Num(1.0, UnitType::em), Num(4.0, UnitType::px)))));
+    CHECK_FALSE(Evaluate(OperationNode(
+      Clamp {.Min = Num(1.0, UnitType::em), .Val = Num(5.0, UnitType::px), .Max = keywords::None {}})));
 
     // random() needs a style builder.
-    CHECK_FALSE(
-      Evaluate(Node(Random {.Sharing = Random::SharingFixed {css::Number<css::ClosedUnitRange> {0.5}},
+    CHECK_FALSE(Evaluate(
+      OperationNode(Random {.Sharing = Random::SharingFixed {css::Number<css::ClosedUnitRange> {0.5}},
                             .Min = Num(0.0, UnitType::px),
                             .Max = Num(10.0, UnitType::px),
                             .Step = null})));
@@ -101,10 +87,10 @@ namespace krys::boo::css::calc::tests
   // degrees, as simplification takes it; a number is radians.
   TEST_CASE("TreeEvaluation(trigonometric functions of angles)", "[CSS][Calc][TreeEvaluation]")
   {
-    CHECK(Evaluate(Node(Sin {.A = Num(90.0, UnitType::deg)})) == Catch::Approx(1.0));
-    CHECK(Evaluate(Node(Cos {.A = Num(180.0, UnitType::deg)})) == Catch::Approx(-1.0));
-    CHECK(Evaluate(Node(Tan {.A = Num(45.0, UnitType::deg)})) == Catch::Approx(1.0));
-    CHECK(Evaluate(Node(Sin {.A = Num(std::numbers::pi / 2)})) == Catch::Approx(1.0));
+    CHECK(Evaluate(OperationNode(Sin {.A = Num(90.0, UnitType::deg)})) == Catch::Approx(1.0));
+    CHECK(Evaluate(OperationNode(Cos {.A = Num(180.0, UnitType::deg)})) == Catch::Approx(-1.0));
+    CHECK(Evaluate(OperationNode(Tan {.A = Num(45.0, UnitType::deg)})) == Catch::Approx(1.0));
+    CHECK(Evaluate(OperationNode(Sin {.A = Num(std::numbers::pi / 2)})) == Catch::Approx(1.0));
   }
 
   TEST_CASE("TreeEvaluation(with default conversion data)", "[CSS][Calc][TreeEvaluation]")
@@ -112,7 +98,8 @@ namespace krys::boo::css::calc::tests
     // Default conversion data has no style, render view or builder: absolute lengths resolve, and
     // builder-dependent functions still fail.
     auto conversionData = ToLengthConversionData {};
-    CHECK(Evaluate(Node(Add(Num(1.0, UnitType::in), Num(4.0, UnitType::px))), {}, conversionData) == 100.0);
+    CHECK(Evaluate(OperationNode(Add(Num(1.0, UnitType::in), Num(4.0, UnitType::px))), {}, conversionData)
+          == 100.0);
     CHECK_FALSE(Evaluate(CreateChild(SiblingCount {}), {}, conversionData));
   }
 }

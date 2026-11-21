@@ -1,5 +1,4 @@
 ﻿#include "Krystal.Booey/DOM/MutationObservers/CharacterDataMutationRecord.hpp"
-#include "Krystal.Booey/DOM/Collections/NodeList.hpp"
 
 namespace krys::boo::dom
 {

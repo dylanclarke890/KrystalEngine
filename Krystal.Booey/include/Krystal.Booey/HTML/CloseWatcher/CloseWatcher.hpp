@@ -25,7 +25,7 @@
 
 #pragma once
 
-#include "Krystal.Booey/DOM/Abort/AbortSignal.hpp"
+#include "Krystal.Booey/DOM/Abort/AbortAlgorithmHandle.hpp"
 #include "Krystal.Booey/DOM/Events/EventTarget.hpp"
 #include "Krystal.Booey/DOM/Types/ExceptionOr.hpp"
 #include "Krystal.Booey/HTML/Attributes/EventHandlerAttributes.hpp"
@@ -37,6 +37,7 @@
 
 namespace krys::boo
 {
+  class AbortSignal;
   class Document;
 }
 
@@ -53,7 +54,8 @@ namespace krys::boo::html
     /// @see https://html.spec.whatwg.org/#closewatcheroptions
     struct Options
     {
-      RefPtr<AbortSignal> Signal;
+      /// @note A plain pointer, as the options are only read while the watcher is made.
+      AbortSignal *Signal {nullptr};
     };
 
     /// @brief Given whether it can refuse, returns whether to close.
@@ -72,8 +74,7 @@ namespace krys::boo::html
     GetEnabledState _getEnabledState;
     bool _active {true};
     bool _isRunningCancelAction {false};
-    RefPtr<AbortSignal> _signal;
-    Maybe<AbortAlgorithmCallback> _signalAlgorithm;
+    AbortAlgorithmHandle _signalAlgorithm;
 
   public:
     CloseWatcher(Document &document, CancelAction &&cancelAction, CloseAction &&closeAction,
