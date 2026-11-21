@@ -6,8 +6,7 @@
 namespace krys::boo
 {
   HTMLUnknownElement::HTMLUnknownElement(Document &document) noexcept
-      : HTMLElement(document, html::HTMLElementInterface::Unknown, html::HTMLElementFlags {},
-                    dom::NodeFlag::IsUnknownElement)
+      : HTMLElement(document, html::HTMLElementInterface::Unknown, {}, dom::NodeFlag::IsUnknownElement)
   {
   }
 }

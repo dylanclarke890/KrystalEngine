@@ -50,7 +50,7 @@ namespace krys::boo::css::cq
     }
     if (feature.Schema == &features::AspectRatio() || feature.Schema == &features::Orientation())
     {
-      return EnumSet<Axis> {Axis::Inline, Axis::Block};
+      return {Axis::Inline, Axis::Block};
     }
     return {};
   }

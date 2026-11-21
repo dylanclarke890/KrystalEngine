@@ -136,7 +136,7 @@ namespace krys::boo::css::mq
   {
     if (!EvaluateMediaType(query))
     {
-      return EnumSet<MediaQueryDynamicDependency> {};
+      return {};
     }
 
     auto result = EnumSet<MediaQueryDynamicDependency> {};

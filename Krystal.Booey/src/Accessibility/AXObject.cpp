@@ -1704,9 +1704,8 @@ namespace krys::boo
     if (document)
     {
       HitTestResult result {LayoutPoint(ClickPoint())};
-      (void)document->HitTest(HitTestRequest(EnumSet<HitTestRequest::Type> {
-                                HitTestRequest::Type::ReadOnly, HitTestRequest::Type::Active,
-                                HitTestRequest::Type::AccessibilityHitTest}),
+      (void)document->HitTest(HitTestRequest({HitTestRequest::Type::ReadOnly, HitTestRequest::Type::Active,
+                                              HitTestRequest::Type::AccessibilityHitTest}),
                               result);
       if (auto *innerNode = result.InnerNode())
       {

@@ -89,7 +89,7 @@ namespace krys::io::tests
     SECTION("Precedence: longest component prefix wins for reads")
     {
       // Both base and override have /data/ui/theme.txt, override must win.
-      auto r = vfs->GetReader(Path("/data/ui/theme.txt"), ReadFlags {});
+      auto r = vfs->GetReader(Path("/data/ui/theme.txt"), {});
       REQUIRE(r != nullptr);
       REQUIRE(ReadAllText(*r) == "override-theme");
     }
@@ -97,7 +97,7 @@ namespace krys::io::tests
     SECTION("Fallback: if specific mount lacks the file, fall back to less specific")
     {
       // Only base has /data/fallback.txt (under / mount at base/data/fallback.txt).
-      auto r = vfs->GetReader(Path("/data/fallback.txt"), ReadFlags {});
+      auto r = vfs->GetReader(Path("/data/fallback.txt"), {});
       REQUIRE(r != nullptr);
       REQUIRE(ReadAllText(*r) == "base-fallback");
     }
@@ -106,7 +106,7 @@ namespace krys::io::tests
     {
       // Create a file under /data (should land in 'data' physical root).
       {
-        auto w = vfs->GetWriter(Path("/data/new.txt"), WriteFlags {WriteFlag::Create, WriteFlag::Truncate});
+        auto w = vfs->GetWriter(Path("/data/new.txt"), {WriteFlag::Create, WriteFlag::Truncate});
         REQUIRE(w != nullptr);
 
         const char *text = "hello-new";
@@ -116,14 +116,14 @@ namespace krys::io::tests
         w->Flush();
       }
       {
-        auto r = vfs->GetReader(Path("/data/new.txt"), ReadFlags {});
+        auto r = vfs->GetReader(Path("/data/new.txt"), {});
         REQUIRE(r != nullptr);
         REQUIRE(ReadAllText(*r) == "hello-new");
       }
 
       // Create a file at the VFS root (should land in 'base' physical root).
       {
-        auto w = vfs->GetWriter(Path("/new_root.txt"), WriteFlags {WriteFlag::Create, WriteFlag::Truncate});
+        auto w = vfs->GetWriter(Path("/new_root.txt"), {WriteFlag::Create, WriteFlag::Truncate});
         REQUIRE(w != nullptr);
 
         const char *text = "root-file";
@@ -132,7 +132,7 @@ namespace krys::io::tests
         w->Flush();
       }
       {
-        auto r = vfs->GetReader(Path("/new_root.txt"), ReadFlags {});
+        auto r = vfs->GetReader(Path("/new_root.txt"), {});
         REQUIRE(r != nullptr);
         REQUIRE(ReadAllText(*r) == "root-file");
       }
@@ -150,7 +150,7 @@ namespace krys::io::tests
     SECTION("SearchFiles: non-recursive, de-dup by logical (virtual) path; precedence picks override")
     {
       // We expect to see 'shared.txt' only once, and it should refer to the override, not base.
-      auto list = vfs->SearchFiles(Path("/data"), FileSearchFlags {});
+      auto list = vfs->SearchFiles(Path("/data"), {});
       REQUIRE_FALSE(list.empty());
 
       // There should be exactly one 'shared.txt'.
@@ -172,7 +172,7 @@ namespace krys::io::tests
 
     SECTION("SearchFiles: recursive vs non-recursive")
     {
-      auto flat = vfs->SearchFiles(Path("/data"), FileSearchFlags {});
+      auto flat = vfs->SearchFiles(Path("/data"), {});
       auto rec = vfs->SearchFiles(Path("/data"), FileSearchFlag::Recursive);
 
       // Recursive must include nested files like ui/theme.txt and images/pic.png
@@ -216,7 +216,7 @@ namespace krys::io::tests
       const Path p("/temp_delete.txt");
 
       {
-        auto w = vfs->GetWriter(p, WriteFlags {WriteFlag::Create, WriteFlag::Truncate});
+        auto w = vfs->GetWriter(p, {WriteFlag::Create, WriteFlag::Truncate});
         REQUIRE(w != nullptr);
 
         const char *msg = "to-be-deleted";
@@ -229,14 +229,14 @@ namespace krys::io::tests
       REQUIRE_FALSE(vfs->Exists(p));
 
       {
-        auto w = vfs->GetWriter(p, WriteFlags {WriteFlag::Create, WriteFlag::Truncate});
+        auto w = vfs->GetWriter(p, {WriteFlag::Create, WriteFlag::Truncate});
         REQUIRE(w != nullptr);
 
         const char *msg = "recreated";
         Span<const byte> d {reinterpret_cast<const byte *>(msg), std::strlen(msg)};
         REQUIRE(w->Write(d));
       }
-      auto r = vfs->GetReader(p, ReadFlags {});
+      auto r = vfs->GetReader(p, {});
       REQUIRE(r != nullptr);
       REQUIRE(ReadAllText(*r) == "recreated");
     }

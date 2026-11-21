@@ -1808,7 +1808,7 @@ namespace krys::ui::tests
     CHECK(deadUp.Key() == u8"Dead");
 
     CHECK(input::ToBooey(pal::MouseButton::Thumb1) == boo::MouseButton::Back);
-    auto modifiers = input::ToBooey(pal::KeyModifiers {pal::KeyModifier::Alt, pal::KeyModifier::Meta});
+    auto modifiers = input::ToBooey({pal::KeyModifier::Alt, pal::KeyModifier::Meta});
     CHECK(modifiers.contains(boo::PlatformEvent::Modifier::AltKey));
     CHECK(modifiers.contains(boo::PlatformEvent::Modifier::MetaKey));
     CHECK_FALSE(modifiers.contains(boo::PlatformEvent::Modifier::ShiftKey));
@@ -1918,7 +1918,7 @@ namespace krys::ui::tests
     // The horizontal wheel, and the vertical one with Shift, scroll sideways.
     CHECK(view.MouseWheel({50, 50}, 0.5f, 0, {}, threeLines));
     CHECK(view.ScrollPosition() == PointI(50, 50));
-    CHECK(view.MouseWheel({50, 50}, 0, -0.5f, pal::KeyModifiers {pal::KeyModifier::Shift}, threeLines));
+    CHECK(view.MouseWheel({50, 50}, 0, -0.5f, {pal::KeyModifier::Shift}, threeLines));
     CHECK(view.ScrollPosition() == PointI(100, 50));
 
     // A page per notch: four fifths of the 79 pixels in view, less the horizontal scrollbar.

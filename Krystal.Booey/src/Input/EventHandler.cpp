@@ -520,8 +520,7 @@ namespace krys::boo
       return false;
     }
     MouseEventWithHitTestResults mouseEvent = document->PrepareMouseEvent(
-      HitTestRequest(EnumSet<HitTestRequest::Type> {HitTestRequest::Type::Active,
-                                                    HitTestRequest::Type::DisallowUserAgentShadowContent}),
+      HitTestRequest({HitTestRequest::Type::Active, HitTestRequest::Type::DisallowUserAgentShadowContent}),
       documentPoint, platformMouseEvent);
 
     if (!mouseEvent.TargetNode())
@@ -847,8 +846,7 @@ namespace krys::boo
     }
 
     MouseEventWithHitTestResults mouseEvent = PrepareMouseEvent(
-      HitTestRequest(EnumSet<HitTestRequest::Type> {HitTestRequest::Type::Release,
-                                                    HitTestRequest::Type::DisallowUserAgentShadowContent}),
+      HitTestRequest({HitTestRequest::Type::Release, HitTestRequest::Type::DisallowUserAgentShadowContent}),
       platformMouseEvent);
 
     // FIXME: Mouse capture.
@@ -1875,9 +1873,8 @@ namespace krys::boo
     bool shiftKey = _lastPlatformMouseEvent.ShiftKey();
 
     HitTestResult result {LayoutPoint(view->WindowToContents(*_lastKnownMousePosition))};
-    document->HitTest(HitTestRequest(EnumSet<HitTestRequest::Type> {
-                        HitTestRequest::Type::ReadOnly, HitTestRequest::Type::AllowFrameScrollbars}),
-                      result);
+    document->HitTest(
+      HitTestRequest({HitTestRequest::Type::ReadOnly, HitTestRequest::Type::AllowFrameScrollbars}), result);
 
     UpdateCursor(*view, result, shiftKey);
   }
@@ -2127,10 +2124,9 @@ namespace krys::boo
     if (RefPtr<boo::Document> document = ShareRefPtr(_frame.Document()))
     {
       HitTestResult result {LayoutPoint(windowPoint)};
-      (void)document->HitTest(
-        HitTestRequest(EnumSet<HitTestRequest::Type> {HitTestRequest::Type::ReadOnly,
-                                                      HitTestRequest::Type::DisallowUserAgentShadowContent}),
-        result);
+      (void)document->HitTest(HitTestRequest({HitTestRequest::Type::ReadOnly,
+                                              HitTestRequest::Type::DisallowUserAgentShadowContent}),
+                              result);
       return result.GetScrollbar();
     }
     return false;
@@ -2784,8 +2780,7 @@ namespace krys::boo
     const auto flooredEventPosition = FlooredPointI(event.Position());
     LayoutPoint viewportPos {view->WindowToContents(flooredEventPosition)};
     MouseEventWithHitTestResults mouseEvent = doc->PrepareMouseEvent(
-      HitTestRequest(EnumSet<HitTestRequest::Type> {HitTestRequest::Type::Active,
-                                                    HitTestRequest::Type::DisallowUserAgentShadowContent}),
+      HitTestRequest({HitTestRequest::Type::Active, HitTestRequest::Type::DisallowUserAgentShadowContent}),
       PointD(viewportPos), event);
 
     // Do not show context menus when clicking on scrollbars.
@@ -3822,8 +3817,7 @@ namespace krys::boo
     (void)UpdateDragSourceActionsAllowed();
     HitTestResult result(LayoutPoint(view->WindowToContents(FlooredPointI(event.Position()))));
     document->HitTest(
-      HitTestRequest(EnumSet<HitTestRequest::Type> {HitTestRequest::Type::ReadOnly,
-                                                    HitTestRequest::Type::DisallowUserAgentShadowContent}),
+      HitTestRequest({HitTestRequest::Type::ReadOnly, HitTestRequest::Type::DisallowUserAgentShadowContent}),
       result);
     DragState state;
     auto *targetElement = result.TargetElement();
@@ -3916,8 +3910,7 @@ namespace krys::boo
     }
 
     MouseEventWithHitTestResults mouseEvent = PrepareMouseEvent(
-      HitTestRequest(EnumSet<HitTestRequest::Type> {HitTestRequest::Type::ReadOnly,
-                                                    HitTestRequest::Type::DisallowUserAgentShadowContent}),
+      HitTestRequest({HitTestRequest::Type::ReadOnly, HitTestRequest::Type::DisallowUserAgentShadowContent}),
       event);
 
     RefPtr<Element> newTarget;
@@ -4088,8 +4081,7 @@ namespace krys::boo
     // Send a hit test request so that RenderLayer gets a chance to update the :hover and :active
     // pseudoclasses.
     (void)PrepareMouseEvent(
-      HitTestRequest(EnumSet<HitTestRequest::Type> {HitTestRequest::Type::Release,
-                                                    HitTestRequest::Type::DisallowUserAgentShadowContent}),
+      HitTestRequest({HitTestRequest::Type::Release, HitTestRequest::Type::DisallowUserAgentShadowContent}),
       event);
 
     if (ShouldDispatchEventsToDragSourceElement())
@@ -4163,10 +4155,9 @@ namespace krys::boo
 
       // Try to find an element that wants to be dragged.
       HitTestResult result(_mouseDownContentsPosition);
-      frame->Document()->HitTest(
-        HitTestRequest(EnumSet<HitTestRequest::Type> {HitTestRequest::Type::ReadOnly,
-                                                      HitTestRequest::Type::DisallowUserAgentShadowContent}),
-        result);
+      frame->Document()->HitTest(HitTestRequest({HitTestRequest::Type::ReadOnly,
+                                                 HitTestRequest::Type::DisallowUserAgentShadowContent}),
+                                 result);
       SetDragStateSource(frame->GetDragController()
                            .DraggableElement(frame.get(), result.TargetElement(),
                                              RoundedPointI(_mouseDownContentsPosition), dragState)

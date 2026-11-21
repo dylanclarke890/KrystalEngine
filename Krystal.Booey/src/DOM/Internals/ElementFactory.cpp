@@ -111,7 +111,7 @@ namespace krys::boo::dom
 
     if (result == nullptr)
     {
-      result = AdoptRefPtr<Element>(new Element(document, name, NodeFlags {}));
+      result = AdoptRefPtr<Element>(new Element(document, name, {}));
     }
 
     // Create an element internal's step 2, and steps 5a.iv.I-K: the element's namespace, prefix and local

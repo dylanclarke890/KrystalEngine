@@ -32,7 +32,7 @@ namespace krys::boo
   HTMLMaybeFormAssociatedCustomElement::HTMLMaybeFormAssociatedCustomElement(
     Document &document, const DOMStringAtom &localName) noexcept
       : HTMLElement(document, html::HTMLElementInterface::MaybeFormAssociatedCustom, localName,
-                    html::HTMLElementFlags {}, dom::NodeFlags {})
+                    html::HTMLElementFlags {}, {})
   {
     krys_debug_assert(dom::NameValidation::IsValidCustomElementName(localName.View()));
   }

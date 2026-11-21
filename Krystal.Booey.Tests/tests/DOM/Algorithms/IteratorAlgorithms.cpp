@@ -74,8 +74,8 @@ namespace krys::boo::dom::tests
     CHECK(filter->Calls[0] == data.Comment.get());
 
     // Elements and text, through a TreeWalker.
-    auto walker = data.Document->CreateTreeWalker(
-      *data.Div, WhatToShow {WhatToShowFlag::SHOW_ELEMENT, WhatToShowFlag::SHOW_TEXT});
+    auto walker =
+      data.Document->CreateTreeWalker(*data.Div, {WhatToShowFlag::SHOW_ELEMENT, WhatToShowFlag::SHOW_TEXT});
     CHECK(walker->NextNode().ReleaseValue() == data.B.get());
     CHECK(walker->NextNode().ReleaseValue() == data.BText.get());
     CHECK(walker->NextNode().ReleaseValue() == nullptr);

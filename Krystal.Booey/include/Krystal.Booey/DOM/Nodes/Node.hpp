@@ -569,16 +569,15 @@ namespace krys::boo
 
     void ClearChildNeedsStyleRecalc() noexcept
     {
-      _nodeStyleFlags.Remove(dom::NodeStyleFlags {dom::NodeStyleFlag::DescendantNeedsStyleResolution,
-                                                  dom::NodeStyleFlag::DirectChildNeedsStyleResolution});
+      _nodeStyleFlags.Remove({dom::NodeStyleFlag::DescendantNeedsStyleResolution,
+                              dom::NodeStyleFlag::DirectChildNeedsStyleResolution});
     }
 
     void SetHasValidStyle() noexcept
     {
       _styleValidity = style::Validity::Valid;
-      _nodeFlags.Remove(dom::NodeFlags {dom::NodeFlag::IsComputedStyleInvalid,
-                                        dom::NodeFlag::HasInvalidRenderer,
-                                        dom::NodeFlag::StyleResolutionShouldRecompositeLayer});
+      _nodeFlags.Remove({dom::NodeFlag::IsComputedStyleInvalid, dom::NodeFlag::HasInvalidRenderer,
+                         dom::NodeFlag::StyleResolutionShouldRecompositeLayer});
     }
 
     /// @brief The object the node is rendered as, or null if it isn't rendered.

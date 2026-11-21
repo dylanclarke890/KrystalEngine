@@ -212,18 +212,18 @@ namespace krys::boo::style::tests
     {
       CHECK(keyword(css::ValueId::InternalDocumentTextColor).GetResolvedColor() == boo::Color::black);
 
-      auto link = css::ColorFromKeyword(css::ValueId::WebkitLink, ColorOptions {});
+      auto link = css::ColorFromKeyword(css::ValueId::WebkitLink, {});
       CHECK(keyword(css::ValueId::WebkitLink).GetResolvedColor() == link);
 
       CHECK(keyword(css::ValueId::WebkitActivelink).GetResolvedColor()
-            == css::ColorFromKeyword(css::ValueId::WebkitActivelink, ColorOptions {}));
+            == css::ColorFromKeyword(css::ValueId::WebkitActivelink, {}));
       CHECK(keyword(css::ValueId::WebkitFocusRingColor).GetResolvedColor()
-            == RenderTheme::Singleton().FocusRingColor(ColorOptions {}));
+            == RenderTheme::Singleton().FocusRingColor({}));
     }
 
     SECTION("system colours follow the style's colour scheme")
     {
-      auto light = css::ColorFromKeyword(css::ValueId::Linktext, ColorOptions {});
+      auto light = css::ColorFromKeyword(css::ValueId::Linktext, {});
       auto dark = css::ColorFromKeyword(css::ValueId::Linktext, ColorOption::UseDarkAppearance);
       REQUIRE(light != dark);
 

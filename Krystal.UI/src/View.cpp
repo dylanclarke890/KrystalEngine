@@ -2322,8 +2322,7 @@ namespace krys::ui
       (void)boo::html::FocusAlgorithms::SequentialNavigation(*document, FocusDirection::Forward);
       PerformMicrotaskCheckpoint();
     }
-    if (pressed(GamepadButton::LeftShoulder)
-        && !GamepadOverlayKey(pal::Key::Tab, pal::KeyModifiers {pal::KeyModifier::Shift}))
+    if (pressed(GamepadButton::LeftShoulder) && !GamepadOverlayKey(pal::Key::Tab, {pal::KeyModifier::Shift}))
     {
       GamepadInteraction(true);
       Ref document = ShareRef(Document());

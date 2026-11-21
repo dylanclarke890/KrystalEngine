@@ -32,52 +32,47 @@ namespace krys::boo::tests
   {
     SECTION("CSS Color 4 system colours, Adwaita's where it has its own")
     {
-      CHECK(SystemColor(ValueId::Canvas, ColorOptions {}) == SRGBA<uint8> {255, 255, 255});
+      CHECK(SystemColor(ValueId::Canvas, {}) == SRGBA<uint8> {255, 255, 255});
       CHECK(SystemColor(ValueId::Canvas, ColorOption::UseDarkAppearance) == SRGBA<uint8> {30, 30, 30});
-      CHECK(SystemColor(ValueId::Canvastext, ColorOptions {}) == SRGBA<uint8> {0, 0, 0});
+      CHECK(SystemColor(ValueId::Canvastext, {}) == SRGBA<uint8> {0, 0, 0});
       CHECK(SystemColor(ValueId::Canvastext, ColorOption::UseDarkAppearance) == SRGBA<uint8> {255, 255, 255});
-      CHECK(SystemColor(ValueId::Buttonface, ColorOptions {}) == Components(Color::lightGray));
-      CHECK(SystemColor(ValueId::Buttontext, ColorOptions {}) == SRGBA<uint8> {0, 0, 0, 204});
-      CHECK(SystemColor(ValueId::Highlight, ColorOptions {}) == SRGBA<uint8> {52, 132, 228});
-      CHECK(SystemColor(ValueId::Mark, ColorOptions {}) == Components(Color::yellow));
-      CHECK(SystemColor(ValueId::Graytext, ColorOptions {}) == SRGBA<uint8> {0, 0, 0, 102});
+      CHECK(SystemColor(ValueId::Buttonface, {}) == Components(Color::lightGray));
+      CHECK(SystemColor(ValueId::Buttontext, {}) == SRGBA<uint8> {0, 0, 0, 204});
+      CHECK(SystemColor(ValueId::Highlight, {}) == SRGBA<uint8> {52, 132, 228});
+      CHECK(SystemColor(ValueId::Mark, {}) == Components(Color::yellow));
+      CHECK(SystemColor(ValueId::Graytext, {}) == SRGBA<uint8> {0, 0, 0, 102});
       CHECK(SystemColor(ValueId::Field, ColorOption::UseDarkAppearance) == SRGBA<uint8> {45, 45, 45});
-      CHECK(SystemColor(ValueId::Accentcolor, ColorOptions {}) == SRGBA<uint8> {0, 122, 255});
-      CHECK(SystemColor(ValueId::Text, ColorOptions {}) == SRGBA<uint8> {0, 0, 0});
+      CHECK(SystemColor(ValueId::Accentcolor, {}) == SRGBA<uint8> {0, 122, 255});
+      CHECK(SystemColor(ValueId::Text, {}) == SRGBA<uint8> {0, 0, 0});
     }
 
     SECTION("Links depend on the appearance and visited state")
     {
-      CHECK(SystemColor(ValueId::Linktext, ColorOptions {}) == SRGBA<uint8> {0, 0, 238});
+      CHECK(SystemColor(ValueId::Linktext, {}) == SRGBA<uint8> {0, 0, 238});
       CHECK(SystemColor(ValueId::Linktext, ColorOption::UseDarkAppearance) == SRGBA<uint8> {158, 158, 255});
-      CHECK(SystemColor(ValueId::Visitedtext, ColorOptions {}) == SRGBA<uint8> {85, 26, 139});
-      CHECK(SystemColor(ValueId::Activetext, ColorOptions {}) == Components(Color::red));
+      CHECK(SystemColor(ValueId::Visitedtext, {}) == SRGBA<uint8> {85, 26, 139});
+      CHECK(SystemColor(ValueId::Activetext, {}) == Components(Color::red));
       CHECK(SystemColor(ValueId::WebkitActivelink, ColorOption::UseDarkAppearance)
             == SRGBA<uint8> {255, 158, 158});
 
-      CHECK(SystemColor(ValueId::WebkitLink, ColorOptions {})
-            == SystemColor(ValueId::Linktext, ColorOptions {}));
+      CHECK(SystemColor(ValueId::WebkitLink, {}) == SystemColor(ValueId::Linktext, {}));
     }
 
     SECTION("Deprecated system colours map to their replacements")
     {
-      CHECK(SystemColor(ValueId::Activeborder, ColorOptions {})
-            == SystemColor(ValueId::Buttonborder, ColorOptions {}));
-      CHECK(SystemColor(ValueId::Buttonshadow, ColorOptions {})
-            == SystemColor(ValueId::Buttonface, ColorOptions {}));
-      CHECK(SystemColor(ValueId::Inactivecaptiontext, ColorOptions {})
-            == SystemColor(ValueId::Graytext, ColorOptions {}));
-      CHECK(SystemColor(ValueId::Menu, ColorOptions {}) == SystemColor(ValueId::Canvas, ColorOptions {}));
-      CHECK(SystemColor(ValueId::Windowtext, ColorOptions {})
-            == SystemColor(ValueId::Canvastext, ColorOptions {}));
+      CHECK(SystemColor(ValueId::Activeborder, {}) == SystemColor(ValueId::Buttonborder, {}));
+      CHECK(SystemColor(ValueId::Buttonshadow, {}) == SystemColor(ValueId::Buttonface, {}));
+      CHECK(SystemColor(ValueId::Inactivecaptiontext, {}) == SystemColor(ValueId::Graytext, {}));
+      CHECK(SystemColor(ValueId::Menu, {}) == SystemColor(ValueId::Canvas, {}));
+      CHECK(SystemColor(ValueId::Windowtext, {}) == SystemColor(ValueId::Canvastext, {}));
     }
 
     SECTION("Anything else is the invalid colour")
     {
       auto &theme = RenderTheme::Singleton();
-      CHECK_FALSE(theme.SystemColor(ValueId::Red, ColorOptions {}).IsValid());
-      CHECK_FALSE(theme.SystemColor(ValueId::Currentcolor, ColorOptions {}).IsValid());
-      CHECK_FALSE(theme.SystemColor(ValueId::InternalDocumentTextColor, ColorOptions {}).IsValid());
+      CHECK_FALSE(theme.SystemColor(ValueId::Red, {}).IsValid());
+      CHECK_FALSE(theme.SystemColor(ValueId::Currentcolor, {}).IsValid());
+      CHECK_FALSE(theme.SystemColor(ValueId::InternalDocumentTextColor, {}).IsValid());
     }
   }
 
@@ -86,13 +81,13 @@ namespace krys::boo::tests
     auto &theme = RenderTheme::Singleton();
 
     // The accent colour at 30% over white for the active selection; a translucent grey for the inactive one.
-    CHECK(Components(theme.ActiveSelectionBackgroundColor(ColorOptions {}))
+    CHECK(Components(theme.ActiveSelectionBackgroundColor({}))
           == Components(theme.TransformSelectionBackgroundColor(
-            Color(SRGBA<uint8> {52, 132, 228}).ColorWithAlphaMultipliedBy(0.3f), ColorOptions {})));
-    CHECK_FALSE(theme.ActiveSelectionForegroundColor(ColorOptions {}).IsValid());
+            Color(SRGBA<uint8> {52, 132, 228}).ColorWithAlphaMultipliedBy(0.3f), {})));
+    CHECK_FALSE(theme.ActiveSelectionForegroundColor({}).IsValid());
 
     // The focus ring is the accent colour at 80%.
-    CHECK(Components(theme.FocusRingColor(ColorOptions {})) == SRGBA<uint8> {52, 132, 228, 204});
+    CHECK(Components(theme.FocusRingColor({})) == SRGBA<uint8> {52, 132, 228, 204});
 
     // List boxes select in translucent black, or white when dark.
     CHECK(Components(theme.ActiveListBoxSelectionForegroundColor(ColorOption::UseDarkAppearance))

@@ -467,9 +467,8 @@ namespace krys::boo
           //         and DOCUMENT_POSITION_PRECEDING.
           if (dom::NodeAlgorithms::Equals(*attr, *attr1))
           {
-            return EnumSet<dom::DocumentPosition> {
-              dom::DocumentPosition::DOCUMENT_POSITION_IMPLEMENTATION_SPECIFIC,
-              dom::DocumentPosition::DOCUMENT_POSITION_PRECEDING};
+            return {dom::DocumentPosition::DOCUMENT_POSITION_IMPLEMENTATION_SPECIFIC,
+                    dom::DocumentPosition::DOCUMENT_POSITION_PRECEDING};
           }
 
           // 5b.i.B. If attr equals attr2, then return the result of adding
@@ -477,9 +476,8 @@ namespace krys::boo
           //         and DOCUMENT_POSITION_FOLLOWING.
           if (dom::NodeAlgorithms::Equals(*attr, *attr2))
           {
-            return EnumSet<dom::DocumentPosition> {
-              dom::DocumentPosition::DOCUMENT_POSITION_IMPLEMENTATION_SPECIFIC,
-              dom::DocumentPosition::DOCUMENT_POSITION_FOLLOWING};
+            return {dom::DocumentPosition::DOCUMENT_POSITION_IMPLEMENTATION_SPECIFIC,
+                    dom::DocumentPosition::DOCUMENT_POSITION_FOLLOWING};
           }
         }
       }
@@ -506,8 +504,8 @@ namespace krys::boo
     if ((dom::TreeQueries::IsAncestor(*node1, *node2) && attr1 == nullptr)
         || (node1 == node2 && attr2 != nullptr))
     {
-      return EnumSet<dom::DocumentPosition> {dom::DocumentPosition::DOCUMENT_POSITION_CONTAINS,
-                                             dom::DocumentPosition::DOCUMENT_POSITION_PRECEDING};
+      return {dom::DocumentPosition::DOCUMENT_POSITION_CONTAINS,
+              dom::DocumentPosition::DOCUMENT_POSITION_PRECEDING};
     }
 
     // 8. If node1 is a descendant of node2 and attr2 is null, or node1 is node2 and attr1 is non-null, then
@@ -515,8 +513,8 @@ namespace krys::boo
     if ((dom::TreeQueries::IsDescendant(*node1, *node2) && attr2 == nullptr)
         || (node1 == node2 && attr1 != nullptr))
     {
-      return EnumSet<dom::DocumentPosition> {dom::DocumentPosition::DOCUMENT_POSITION_CONTAINED_BY,
-                                             dom::DocumentPosition::DOCUMENT_POSITION_FOLLOWING};
+      return {dom::DocumentPosition::DOCUMENT_POSITION_CONTAINED_BY,
+              dom::DocumentPosition::DOCUMENT_POSITION_FOLLOWING};
     }
 
     // 9. If node1 is preceding node2, then return DOCUMENT_POSITION_PRECEDING.

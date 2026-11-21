@@ -256,7 +256,7 @@ namespace krys::boo::css::cq
     {
       StyleFeatureSchema() noexcept
           : mq::FeatureSchema(u8"style", mq::FeatureSchema::Type::Discrete,
-                              mq::FeatureSchema::ValueType::CustomProperty, EnumSet<Dependency> {})
+                              mq::FeatureSchema::ValueType::CustomProperty, {})
       {
       }
 

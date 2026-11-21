@@ -36,7 +36,7 @@ namespace krys::boo::style::tests
     CHECK(lines.HasUnderline());
     CHECK(lines.HasLineThrough());
     CHECK_FALSE(lines.HasOverline());
-    CHECK(lines.ContainsAny(EnumSet<Flag> {Flag::Overline, Flag::LineThrough}));
+    CHECK(lines.ContainsAny({Flag::Overline, Flag::LineThrough}));
     // The packed form is the type bit, then the flags.
     CHECK(lines.ToRaw() == ((1 << 4) | 0x1 | 0x4));
     CHECK(TextDecorationLine::FromRaw(lines.ToRaw()) == lines);

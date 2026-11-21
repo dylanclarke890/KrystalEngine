@@ -23,7 +23,7 @@ namespace krys::boo::css::parse_property::tests
   TEST_CASE("parse_property(ConsumeURL)", "[CSS][Properties][Consumers]")
   {
     ParserContext context {ParserMode::HTMLStandard, net::Url(u8"https://example.com/dir/")};
-    auto consume = UrlConsumer(AllowedUrlModifiers {});
+    auto consume = UrlConsumer({});
 
     CHECK(ConsumeToText(u8"url(a.png)", consume, context) == "url(\"a.png\")");
     CHECK(ConsumeToText(u8"url(\"a.png\")", consume, context) == "url(\"a.png\")");

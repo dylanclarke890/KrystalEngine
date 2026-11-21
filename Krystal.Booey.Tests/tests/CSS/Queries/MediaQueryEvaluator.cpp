@@ -407,8 +407,8 @@ namespace krys::boo::css::tests
     {
       fixture.Client.PrimaryHovers = false;
       fixture.Client.AnyHovers = false;
-      fixture.Client.Primary = PointerCharacteristics {};
-      fixture.Client.AllAvailable = PointerCharacteristics {};
+      fixture.Client.Primary = {};
+      fixture.Client.AllAvailable = {};
 
       CHECK_FALSE(fixture.Matches(u8"(any-hover)"));
       CHECK(fixture.Matches(u8"(pointer: none)"));

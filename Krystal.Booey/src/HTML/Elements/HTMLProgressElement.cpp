@@ -32,7 +32,7 @@
 namespace krys::boo
 {
   HTMLProgressElement::HTMLProgressElement(Document &document) noexcept
-      : HTMLElement(document, html::HTMLElementInterface::Progress, html::HTMLElementFlags {},
+      : HTMLElement(document, html::HTMLElementInterface::Progress, {},
                     dom::NodeFlag::HasCustomStyleResolveCallbacks)
   {
   }
