@@ -2,9 +2,9 @@
 
 #include "Krystal.Core/Attributes.hpp"
 #include "Krystal.Core/Concepts.hpp"
+#include "Krystal.Core/Containers/Array.hpp"
 #include "Krystal.Core/Numeric.hpp"
 #include "Krystal.Core/Strings/StringBuilder.hpp"
-#include "Krystal.Core/Types/Array.hpp"
 
 namespace krys
 {

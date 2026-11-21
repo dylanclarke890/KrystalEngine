@@ -38,9 +38,9 @@
 #include "Krystal.Booey/Style/Interpolation/InterpolationClient.hpp"
 #include "Krystal.Booey/Style/PseudoElementIdentifier.hpp"
 #include "Krystal.Booey/Style/Styleable.hpp"
+#include "Krystal.Core/Containers/EnumSet.hpp"
+#include "Krystal.Core/Containers/HashMap.hpp"
 #include "Krystal.Core/Maths/CompositeOperation.hpp"
-#include "Krystal.Core/Types/EnumSet.hpp"
-#include "Krystal.Core/Types/HashMap.hpp"
 #include "Krystal.Core/Types/Pair.hpp"
 
 namespace krys::boo

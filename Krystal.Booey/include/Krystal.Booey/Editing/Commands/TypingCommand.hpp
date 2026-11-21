@@ -27,7 +27,7 @@
 
 #include "Krystal.Booey/Editing/Commands/TextInsertionBaseCommand.hpp"
 #include "Krystal.Booey/Editing/Selection/TextGranularity.hpp"
-#include "Krystal.Core/Types/EnumSet.hpp"
+#include "Krystal.Core/Containers/EnumSet.hpp"
 
 namespace krys::boo
 {

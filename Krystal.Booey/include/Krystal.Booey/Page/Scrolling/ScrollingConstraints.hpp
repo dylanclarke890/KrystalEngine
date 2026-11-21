@@ -26,11 +26,11 @@
 #pragma once
 
 #include "Krystal.Core/Attributes.hpp"
+#include "Krystal.Core/Containers/EnumSet.hpp"
 #include "Krystal.Core/Geometry/Point.hpp"
 #include "Krystal.Core/Geometry/Rect.hpp"
 #include "Krystal.Core/Geometry/Size.hpp"
 #include "Krystal.Core/TypeCast.hpp"
-#include "Krystal.Core/Types/EnumSet.hpp"
 
 namespace krys::boo
 {

@@ -27,7 +27,7 @@
 
 #include "Krystal.Booey/Graphics/GradientColorStop.hpp"
 #include "Krystal.Core/Assert.hpp"
-#include "Krystal.Core/Types/SmallList.hpp"
+#include "Krystal.Core/Containers/SmallList.hpp"
 #include <algorithm>
 
 namespace krys

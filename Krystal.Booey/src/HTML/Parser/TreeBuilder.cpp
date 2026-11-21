@@ -54,7 +54,7 @@
 #include "Krystal.Booey/HTML/Parser/Token.hpp"
 #include "Krystal.Booey/Infra/StringAlgorithms.hpp"
 #include "Krystal.Booey/SVG/Elements/SVGScriptElement.hpp"
-#include "Krystal.Core/Types/Array.hpp"
+#include "Krystal.Core/Containers/Array.hpp"
 #include "Krystal.Core/Types/Pair.hpp"
 
 namespace krys::boo::html

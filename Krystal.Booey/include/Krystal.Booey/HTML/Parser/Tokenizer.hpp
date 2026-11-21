@@ -31,11 +31,11 @@
 #include "Krystal.Booey/HTML/Parser/Token.hpp"
 #include "Krystal.Core/Assert.hpp"
 #include "Krystal.Core/Base.hpp"
+#include "Krystal.Core/Containers/List.hpp"
+#include "Krystal.Core/Containers/SmallList.hpp"
 #include "Krystal.Core/Enum.hpp"
 #include "Krystal.Core/Numeric.hpp"
 #include "Krystal.Core/Types/Func.hpp"
-#include "Krystal.Core/Types/List.hpp"
-#include "Krystal.Core/Types/SmallList.hpp"
 #include "Krystal.Core/Utils/IsEOF.hpp"
 #include <algorithm>
 #include <ranges>

@@ -50,8 +50,8 @@
 #include "Krystal.Booey/SVG/SVGDocumentExtensions.hpp"
 #include "Krystal.Booey/SVG/SVGElementRareData.hpp"
 #include "Krystal.Booey/SVG/SVGNames.hpp"
+#include "Krystal.Core/Containers/HashMap.hpp"
 #include "Krystal.Core/Geometry/AffineTransform.hpp"
-#include "Krystal.Core/Types/HashMap.hpp"
 #include <algorithm>
 
 namespace krys::boo

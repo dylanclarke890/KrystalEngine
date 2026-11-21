@@ -28,9 +28,9 @@
 #include "Krystal.Booey/Graphics/Geometry/LayoutRect.hpp"
 #include "Krystal.Booey/Graphics/GraphicsContext.hpp"
 #include "Krystal.Booey/Rendering/Painting/PaintPhase.hpp"
+#include "Krystal.Core/Containers/EnumSet.hpp"
+#include "Krystal.Core/Containers/ListHashSet.hpp"
 #include "Krystal.Core/Geometry/AffineTransform.hpp"
-#include "Krystal.Core/Types/EnumSet.hpp"
-#include "Krystal.Core/Types/ListHashSet.hpp"
 
 namespace krys::boo
 {

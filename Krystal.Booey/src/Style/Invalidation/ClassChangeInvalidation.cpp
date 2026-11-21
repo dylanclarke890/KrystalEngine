@@ -25,8 +25,8 @@
 
 #include "Krystal.Booey/Style/Invalidation/ClassChangeInvalidation.hpp"
 #include "Krystal.Booey/Style/Invalidation/InvalidationFunctions.hpp"
+#include "Krystal.Core/Containers/SmallList.hpp"
 #include "Krystal.Core/Types/Maybe.hpp"
-#include "Krystal.Core/Types/SmallList.hpp"
 
 namespace krys::boo::style
 {

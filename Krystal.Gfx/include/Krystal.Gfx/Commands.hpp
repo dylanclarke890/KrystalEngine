@@ -1,8 +1,8 @@
 ﻿#pragma once
 
 #include "Krystal.Core/Commands/CommandType.hpp"
+#include "Krystal.Core/Containers/Array.hpp"
 #include "Krystal.Core/Numeric.hpp"
-#include "Krystal.Core/Types/Array.hpp"
 #include "Krystal.Gfx/Formats.hpp"
 #include "Krystal.Gfx/Handles.hpp"
 #include "Krystal.Gfx/Pipeline.hpp"

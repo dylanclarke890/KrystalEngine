@@ -2,12 +2,12 @@
 
 #include "Krystal.Core/Assert.hpp"
 #include "Krystal.Core/Attributes.hpp"
+#include "Krystal.Core/Containers/Array.hpp"
+#include "Krystal.Core/Containers/List.hpp"
+#include "Krystal.Core/Containers/Span.hpp"
 #include "Krystal.Core/Endian.hpp"
 #include "Krystal.Core/Numeric.hpp"
 #include "Krystal.Core/Strings/String.hpp"
-#include "Krystal.Core/Types/Array.hpp"
-#include "Krystal.Core/Types/List.hpp"
-#include "Krystal.Core/Types/Span.hpp"
 #include <cstring>
 
 namespace krys

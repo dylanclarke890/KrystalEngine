@@ -1,6 +1,6 @@
 ﻿#pragma once
 
-#include "Krystal.Core/Types/Array.hpp"
+#include "Krystal.Core/Containers/Array.hpp"
 
 namespace krys::serialisation
 {

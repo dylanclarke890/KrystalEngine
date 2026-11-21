@@ -29,10 +29,10 @@
 #include "Krystal.Booey/Animation/WebAnimationTypes.hpp"
 #include "Krystal.Booey/Graphics/Animation/IterationCompositeOperation.hpp"
 #include "Krystal.Booey/Graphics/Animation/TimingFunction.hpp"
+#include "Krystal.Core/Containers/List.hpp"
 #include "Krystal.Core/Maths/CompositeOperation.hpp"
 #include "Krystal.Core/TypeCast.hpp"
 #include "Krystal.Core/Types/Func.hpp"
-#include "Krystal.Core/Types/List.hpp"
 #include <cmath>
 
 namespace krys::boo

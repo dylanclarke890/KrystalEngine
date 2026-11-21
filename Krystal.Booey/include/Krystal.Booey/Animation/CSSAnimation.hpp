@@ -29,8 +29,8 @@
 #include "Krystal.Booey/Animation/Timing/OptionalEffectTiming.hpp"
 #include "Krystal.Booey/Style/Scope/ScopedName.hpp"
 #include "Krystal.Booey/Style/Values/Animations/Animation.hpp"
+#include "Krystal.Core/Containers/EnumSet.hpp"
 #include "Krystal.Core/Enum.hpp"
-#include "Krystal.Core/Types/EnumSet.hpp"
 
 namespace krys::boo
 {

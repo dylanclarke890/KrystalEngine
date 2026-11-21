@@ -3,8 +3,8 @@
 #include "Krystal.Booey/DOM/Collections/CollectionIndexCache.hpp"
 #include "Krystal.Booey/DOM/Collections/HTMLCollection.hpp"
 #include "Krystal.Booey/DOM/Collections/LiveCollection.hpp"
+#include "Krystal.Core/Containers/HashMap.hpp"
 #include "Krystal.Core/Types/Func.hpp"
-#include "Krystal.Core/Types/HashMap.hpp"
 
 namespace krys::boo
 {

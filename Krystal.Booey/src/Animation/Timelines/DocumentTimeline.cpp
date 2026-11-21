@@ -38,7 +38,7 @@
 #include "Krystal.Booey/Rendering/RenderElement.hpp"
 #include "Krystal.Booey/Rendering/Style/RenderStyle.hpp"
 #include "Krystal.Booey/Style/Styleable.hpp"
-#include "Krystal.Core/Types/HashSet.hpp"
+#include "Krystal.Core/Containers/HashSet.hpp"
 
 namespace krys::boo
 {

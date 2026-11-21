@@ -36,9 +36,9 @@
 #include "Krystal.Booey/HTML/Parser/TokenAtom.hpp"
 #include "Krystal.Booey/HTML/Sanitizer/SanitizerAlgorithms.hpp"
 #include "Krystal.Booey/HTML/Sanitizer/SanitizerConfig.hpp"
+#include "Krystal.Core/Containers/HashMap.hpp"
+#include "Krystal.Core/Containers/List.hpp"
 #include "Krystal.Core/Enum.hpp"
-#include "Krystal.Core/Types/HashMap.hpp"
-#include "Krystal.Core/Types/List.hpp"
 #include "Krystal.Core/Types/Maybe.hpp"
 
 namespace krys::boo::html

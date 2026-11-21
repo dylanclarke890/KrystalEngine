@@ -27,10 +27,10 @@
 #include "Krystal.Booey/Style/Values/Primitives/CoordinatedValueListValue.hpp"
 #include "Krystal.Booey/Style/Values/Types.hpp"
 #include "Krystal.Core/Assert.hpp"
+#include "Krystal.Core/Containers/List.hpp"
+#include "Krystal.Core/Containers/Span.hpp"
 #include "Krystal.Core/Memory/RefCounted.hpp"
 #include "Krystal.Core/Memory/RefPtr.hpp"
-#include "Krystal.Core/Types/List.hpp"
-#include "Krystal.Core/Types/Span.hpp"
 #include <algorithm>
 
 namespace krys::boo::style

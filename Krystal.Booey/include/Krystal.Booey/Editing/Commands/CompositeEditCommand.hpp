@@ -33,8 +33,8 @@
 #include "Krystal.Booey/Editing/Commands/UndoStep.hpp"
 #include "Krystal.Booey/Editing/Selection/VisiblePosition.hpp"
 #include "Krystal.Core/Attributes.hpp"
+#include "Krystal.Core/Containers/List.hpp"
 #include "Krystal.Core/Memory/CanMakeWeakPtr.hpp"
-#include "Krystal.Core/Types/List.hpp"
 #include "Krystal.Core/Types/Maybe.hpp"
 
 namespace krys::boo

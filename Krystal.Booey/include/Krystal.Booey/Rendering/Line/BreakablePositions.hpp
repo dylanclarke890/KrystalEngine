@@ -22,12 +22,12 @@
 #pragma once
 
 #include "Krystal.Core/Attributes.hpp"
+#include "Krystal.Core/Containers/Array.hpp"
 #include "Krystal.Core/Numeric.hpp"
 #include "Krystal.Core/Strings/ASCII.hpp"
 #include "Krystal.Core/Strings/CodePointIterator.hpp"
 #include "Krystal.Core/Strings/String.hpp"
 #include "Krystal.Core/Strings/Unicode.hpp"
-#include "Krystal.Core/Types/Array.hpp"
 #include "Krystal.Core/Types/Maybe.hpp"
 #include "Krystal.Text/TextBreakIterator.hpp"
 

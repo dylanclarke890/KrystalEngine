@@ -1,10 +1,10 @@
 ﻿#pragma once
 
 #include "Krystal.Core/Attributes.hpp"
+#include "Krystal.Core/Containers/List.hpp"
 #include "Krystal.Core/Macros.hpp"
 #include "Krystal.Core/Memory/RefCounted.hpp"
 #include "Krystal.Core/Numeric.hpp"
-#include "Krystal.Core/Types/List.hpp"
 
 namespace krys::pal
 {

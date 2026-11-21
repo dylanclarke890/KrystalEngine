@@ -30,11 +30,11 @@
 #include "Krystal.Booey/Style/Rules/RuleSet.hpp"
 #include "Krystal.Booey/Style/Scope/ScopeOrdinal.hpp"
 #include "Krystal.Core/Attributes.hpp"
+#include "Krystal.Core/Containers/EnumSet.hpp"
+#include "Krystal.Core/Containers/List.hpp"
+#include "Krystal.Core/Containers/SmallList.hpp"
 #include "Krystal.Core/Memory/RefPtr.hpp"
-#include "Krystal.Core/Types/EnumSet.hpp"
-#include "Krystal.Core/Types/List.hpp"
 #include "Krystal.Core/Types/Maybe.hpp"
-#include "Krystal.Core/Types/SmallList.hpp"
 #include <limits>
 #include <utility>
 

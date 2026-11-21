@@ -29,13 +29,13 @@
 #include "Krystal.Booey/CSS/Types/CSSOMString.hpp"
 #include "Krystal.Booey/DOM/Types/ExceptionOr.hpp"
 #include "Krystal.Core/Attributes.hpp"
+#include "Krystal.Core/Containers/EnumSet.hpp"
+#include "Krystal.Core/Containers/List.hpp"
 #include "Krystal.Core/Enum.hpp"
 #include "Krystal.Core/Memory/RefCounted.hpp"
 #include "Krystal.Core/Memory/RefPtr.hpp"
 #include "Krystal.Core/Strings/StringBuilder.hpp"
 #include "Krystal.Core/TypeCast.hpp"
-#include "Krystal.Core/Types/EnumSet.hpp"
-#include "Krystal.Core/Types/List.hpp"
 
 namespace krys::boo
 {

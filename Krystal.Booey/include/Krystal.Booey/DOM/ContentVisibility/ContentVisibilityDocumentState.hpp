@@ -28,10 +28,10 @@
 #include "Krystal.Booey/DOM/ContentVisibility/ContentRelevancy.hpp"
 #include "Krystal.Booey/DOM/IntersectionObservers/IntersectionObserver.hpp"
 #include "Krystal.Core/Attributes.hpp"
+#include "Krystal.Core/Containers/EnumSet.hpp"
+#include "Krystal.Core/Containers/HashMap.hpp"
 #include "Krystal.Core/Macros.hpp"
 #include "Krystal.Core/Memory/RefPtr.hpp"
-#include "Krystal.Core/Types/EnumSet.hpp"
-#include "Krystal.Core/Types/HashMap.hpp"
 
 namespace krys::boo
 {

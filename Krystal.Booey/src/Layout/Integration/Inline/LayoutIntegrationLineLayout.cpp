@@ -63,7 +63,7 @@
 #include "Krystal.Booey/Rendering/Shapes/ShapeOutsideInfo.hpp"
 #include "Krystal.Booey/Rendering/Style/RenderStyle+GettersInlines.hpp"
 #include "Krystal.Booey/Rendering/SVG/RenderSVGBlock.hpp"
-#include "Krystal.Core/Types/SmallList.hpp"
+#include "Krystal.Core/Containers/SmallList.hpp"
 
 #include <ranges>
 

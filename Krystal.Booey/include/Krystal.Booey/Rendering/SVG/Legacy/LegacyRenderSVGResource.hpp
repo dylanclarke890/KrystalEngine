@@ -22,10 +22,10 @@
 
 #include "Krystal.Booey/Rendering/RepaintRectCalculation.hpp"
 #include "Krystal.Core/Attributes.hpp"
+#include "Krystal.Core/Containers/EnumSet.hpp"
+#include "Krystal.Core/Containers/HashSet.hpp"
 #include "Krystal.Core/Enum.hpp"
 #include "Krystal.Core/Geometry/Rect.hpp"
-#include "Krystal.Core/Types/EnumSet.hpp"
-#include "Krystal.Core/Types/HashSet.hpp"
 
 namespace krys::boo
 {

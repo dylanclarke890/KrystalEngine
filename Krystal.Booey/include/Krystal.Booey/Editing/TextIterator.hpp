@@ -31,11 +31,11 @@
 #include "Krystal.Booey/Layout/Integration/Inline/InlineIteratorLogicalOrderTraversal.hpp"
 #include "Krystal.Booey/Layout/Integration/Inline/InlineIteratorTextBox.hpp"
 #include "Krystal.Core/Attributes.hpp"
+#include "Krystal.Core/Containers/List.hpp"
 #include "Krystal.Core/Memory/CanMakeWeakPtr.hpp"
 #include "Krystal.Core/Memory/RefPtr.hpp"
 #include "Krystal.Core/Memory/WeakPtr.hpp"
 #include "Krystal.Core/Strings/String.hpp"
-#include "Krystal.Core/Types/List.hpp"
 
 namespace krys::boo
 {

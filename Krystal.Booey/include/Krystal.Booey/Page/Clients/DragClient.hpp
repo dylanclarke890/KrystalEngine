@@ -28,9 +28,9 @@
 #include "Krystal.Booey/Page/Drag/DragActions.hpp"
 #include "Krystal.Booey/Page/Drag/DragItem.hpp"
 #include "Krystal.Core/Attributes.hpp"
+#include "Krystal.Core/Containers/EnumSet.hpp"
 #include "Krystal.Core/Geometry/Point.hpp"
 #include "Krystal.Core/Macros.hpp"
-#include "Krystal.Core/Types/EnumSet.hpp"
 
 namespace krys::boo::dom
 {

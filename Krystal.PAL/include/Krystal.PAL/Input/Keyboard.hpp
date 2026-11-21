@@ -1,8 +1,8 @@
 ﻿#pragma once
 
 #include "Krystal.Core/Attributes.hpp"
+#include "Krystal.Core/Containers/HashSet.hpp"
 #include "Krystal.Core/Numeric.hpp"
-#include "Krystal.Core/Types/HashSet.hpp"
 #include "Krystal.PAL/Input/Keys.hpp"
 
 namespace krys::pal

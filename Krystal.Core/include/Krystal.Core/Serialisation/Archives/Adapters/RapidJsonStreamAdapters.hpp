@@ -1,9 +1,9 @@
 ﻿#pragma once
 
 #include "Krystal.Core/Assert.hpp"
+#include "Krystal.Core/Containers/Array.hpp"
 #include "Krystal.Core/IO/Streams/Stream.hpp"
 #include "Krystal.Core/Macros.hpp"
-#include "Krystal.Core/Types/Array.hpp"
 
 namespace krys::serialisation
 {

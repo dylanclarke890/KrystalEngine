@@ -60,6 +60,7 @@
 #include "Krystal.Booey/Page/FrameView.hpp"
 #include "Krystal.Booey/Page/RenderingUpdateStep.hpp"
 #include "Krystal.Core/Attributes.hpp"
+#include "Krystal.Core/Containers/EnumSet.hpp"
 #include "Krystal.Core/Geometry/Size.hpp"
 #include "Krystal.Core/Macros.hpp"
 #include "Krystal.Core/Memory/CanMakeWeakPtr.hpp"
@@ -67,7 +68,6 @@
 #include "Krystal.Core/Memory/RefPtr.hpp"
 #include "Krystal.Core/Memory/UniquePtr.hpp"
 #include "Krystal.Core/Time/MonotonicTime.hpp"
-#include "Krystal.Core/Types/EnumSet.hpp"
 #include "Krystal.Core/Types/Func.hpp"
 
 namespace krys::boo

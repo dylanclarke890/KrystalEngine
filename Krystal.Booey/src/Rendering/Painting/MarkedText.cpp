@@ -34,7 +34,7 @@
 #include "Krystal.Booey/Rendering/Style/RenderStyle+GettersInlines.hpp"
 #include "Krystal.Booey/Style/PseudoElementRequest.hpp"
 #include "Krystal.Core/Assert.hpp"
-#include "Krystal.Core/Types/HashSet.hpp"
+#include "Krystal.Core/Containers/HashSet.hpp"
 #include "Krystal.Core/Types/Maybe.hpp"
 #include <algorithm>
 #include <limits>

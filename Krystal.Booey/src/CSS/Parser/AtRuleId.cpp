@@ -28,8 +28,8 @@
 // OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
 #include "Krystal.Booey/CSS/Parser/AtRuleId.hpp"
+#include "Krystal.Core/Containers/Array.hpp"
 #include "Krystal.Core/Strings/ASCII.hpp"
-#include "Krystal.Core/Types/Array.hpp"
 #include "Krystal.Core/Types/Pair.hpp"
 
 namespace krys::boo::css

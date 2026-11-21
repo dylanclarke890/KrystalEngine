@@ -22,8 +22,8 @@
 #include "Krystal.Text/BidiContext.hpp"
 
 #include "Krystal.Core/Assert.hpp"
+#include "Krystal.Core/Containers/List.hpp"
 #include "Krystal.Core/Memory/NeverDestroyed.hpp"
-#include "Krystal.Core/Types/List.hpp"
 #include "Krystal.Text/Bidi.hpp"
 
 namespace krys::text

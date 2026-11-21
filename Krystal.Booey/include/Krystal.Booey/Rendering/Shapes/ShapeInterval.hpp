@@ -31,8 +31,8 @@
 
 #include "Krystal.Core/Assert.hpp"
 #include "Krystal.Core/Attributes.hpp"
+#include "Krystal.Core/Containers/List.hpp"
 #include "Krystal.Core/Numeric.hpp"
-#include "Krystal.Core/Types/List.hpp"
 #include <algorithm>
 
 namespace krys::boo

@@ -28,8 +28,8 @@
 #include "Krystal.Booey/DOM/Nodes/Element.hpp"
 #include "Krystal.Booey/Style/Invalidation/Invalidator.hpp"
 #include "Krystal.Core/Attributes.hpp"
+#include "Krystal.Core/Containers/Span.hpp"
 #include "Krystal.Core/Macros.hpp"
-#include "Krystal.Core/Types/Span.hpp"
 
 namespace krys::boo::style
 {

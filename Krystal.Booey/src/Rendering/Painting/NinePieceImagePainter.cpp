@@ -32,7 +32,7 @@
 #include "Krystal.Booey/Rendering/Style/StyleImage.hpp"
 #include "Krystal.Booey/Style/Values/Backgrounds/BorderImage.hpp"
 #include "Krystal.Booey/Style/Values/Primitives/NumericTypesEvaluation.hpp"
-#include "Krystal.Core/Types/Array.hpp"
+#include "Krystal.Core/Containers/Array.hpp"
 
 namespace krys::boo
 {

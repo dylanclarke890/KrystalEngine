@@ -1,4 +1,4 @@
-﻿#include "Krystal.Core/Types/IntervalTree.hpp"
+﻿#include "Krystal.Core/Containers/IntervalTree.hpp"
 #include "catch2/catch_test_macros.hpp"
 
 namespace krys::tests

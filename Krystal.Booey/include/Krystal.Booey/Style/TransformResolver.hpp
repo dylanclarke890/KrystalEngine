@@ -26,8 +26,8 @@
 #pragma once
 
 #include "Krystal.Booey/Style/Computed/ComputedStyle.hpp"
+#include "Krystal.Core/Containers/EnumSet.hpp"
 #include "Krystal.Core/Geometry/GeometryForward.hpp"
-#include "Krystal.Core/Types/EnumSet.hpp"
 
 namespace krys
 {

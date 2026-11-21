@@ -22,9 +22,9 @@
 
 #include "Krystal.Booey/Layout/Integration/Inline/InlineIteratorSVGTextBox.hpp"
 #include "Krystal.Booey/Rendering/SVG/SVGTextFragment.hpp"
+#include "Krystal.Core/Containers/HashMap.hpp"
+#include "Krystal.Core/Containers/List.hpp"
 #include "Krystal.Core/Geometry/AffineTransform.hpp"
-#include "Krystal.Core/Types/HashMap.hpp"
-#include "Krystal.Core/Types/List.hpp"
 
 namespace krys::boo
 {

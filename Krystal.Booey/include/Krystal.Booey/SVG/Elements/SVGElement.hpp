@@ -27,10 +27,10 @@
 #include "Krystal.Booey/HTML/Mixins/HTMLOrSVGOrMathMLElement.hpp"
 #include "Krystal.Booey/SVG/Properties/SVGPropertyOwner.hpp"
 #include "Krystal.Booey/SVG/SVGParsingError.hpp"
+#include "Krystal.Core/Containers/List.hpp"
 #include "Krystal.Core/Enum.hpp"
 #include "Krystal.Core/Memory/UniquePtr.hpp"
 #include "Krystal.Core/Memory/WeakPtr.hpp"
-#include "Krystal.Core/Types/List.hpp"
 
 namespace krys
 {

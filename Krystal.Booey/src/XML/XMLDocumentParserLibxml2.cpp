@@ -47,10 +47,10 @@
 #include "Krystal.Booey/SVG/Elements/SVGElement.hpp"
 #include "Krystal.Booey/XML/XMLDocumentParser.hpp"
 #include "Krystal.Booey/XML/XMLDocumentParserScope.hpp"
+#include "Krystal.Core/Containers/Array.hpp"
 #include "Krystal.Core/Move.hpp"
 #include "Krystal.Core/Strings/ASCII.hpp"
 #include "Krystal.Core/Strings/StringBuilder.hpp"
-#include "Krystal.Core/Types/Array.hpp"
 #include "Krystal.Net/Url.hpp"
 #include <algorithm>
 #include <cstdio>

@@ -27,7 +27,7 @@
 #include "Krystal.Booey/SVG/LinearGradientAttributes.hpp"
 #include "Krystal.Booey/SVG/Properties/SVGPropertyOwnerRegistry.hpp"
 #include "Krystal.Booey/SVG/SVGNames.hpp"
-#include "Krystal.Core/Types/HashSet.hpp"
+#include "Krystal.Core/Containers/HashSet.hpp"
 
 namespace krys::boo
 {

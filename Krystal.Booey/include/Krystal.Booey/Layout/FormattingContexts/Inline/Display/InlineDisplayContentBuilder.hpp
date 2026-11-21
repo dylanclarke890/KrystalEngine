@@ -32,9 +32,9 @@
 #include "Krystal.Booey/Layout/FormattingContexts/Inline/LineLayoutResult.hpp"
 #include "Krystal.Booey/Text/WritingMode.hpp"
 #include "Krystal.Core/Attributes.hpp"
+#include "Krystal.Core/Containers/HashMap.hpp"
+#include "Krystal.Core/Containers/List.hpp"
 #include "Krystal.Core/Geometry/Size.hpp"
-#include "Krystal.Core/Types/HashMap.hpp"
-#include "Krystal.Core/Types/List.hpp"
 
 namespace krys::boo::layout
 {

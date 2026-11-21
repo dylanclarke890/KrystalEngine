@@ -24,9 +24,9 @@
 #include "Krystal.Booey/Graphics/Fonts/FontCascade.hpp"
 #include "Krystal.Booey/Graphics/TextRuns/TextRun.hpp"
 #include "Krystal.Booey/Text/TextSpacing.hpp"
+#include "Krystal.Core/Containers/List.hpp"
 #include "Krystal.Core/Strings/CodePointIterator.hpp"
 #include "Krystal.Core/Strings/Unicode.hpp"
-#include "Krystal.Core/Types/List.hpp"
 #include "Krystal.Text/Bidi.hpp"
 #include "Krystal.Text/CharacterProperties.hpp"
 #include <algorithm>

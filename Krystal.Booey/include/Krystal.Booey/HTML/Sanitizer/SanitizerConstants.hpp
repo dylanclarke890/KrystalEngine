@@ -2,8 +2,8 @@
 
 #include "Krystal.Booey/HTML/Sanitizer/SanitizerConfig.hpp"
 #include "Krystal.Core/Attributes.hpp"
+#include "Krystal.Core/Containers/Span.hpp"
 #include "Krystal.Core/Strings/String.hpp"
-#include "Krystal.Core/Types/Span.hpp"
 
 namespace krys::boo::html
 {

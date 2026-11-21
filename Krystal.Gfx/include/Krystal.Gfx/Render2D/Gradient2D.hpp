@@ -4,10 +4,10 @@
 #include "Krystal.Core/Colour/ColourInterpolationMethod.hpp"
 #include "Krystal.Core/Colour/ColourTypes.hpp"
 #include "Krystal.Core/Colour/GradientSpreadMethod.hpp"
+#include "Krystal.Core/Containers/Array.hpp"
+#include "Krystal.Core/Containers/List.hpp"
 #include "Krystal.Core/Maths/Vector.hpp"
 #include "Krystal.Core/Numeric.hpp"
-#include "Krystal.Core/Types/Array.hpp"
-#include "Krystal.Core/Types/List.hpp"
 #include "Krystal.Core/Types/Variant.hpp"
 
 namespace krys::gfx

@@ -8,9 +8,9 @@
 #include "Krystal.Booey/DOM/Nodes/Element.hpp"
 #include "Krystal.Booey/HTML/Elements/HTMLInputElement.hpp"
 #include "Krystal.Booey/HTML/Window.hpp"
+#include "Krystal.Core/Containers/Array.hpp"
 #include "Krystal.Core/Macros.hpp"
 #include "Krystal.Core/Memory/WeakPtr.hpp"
-#include "Krystal.Core/Types/Array.hpp"
 #include <format>
 
 namespace krys::editor

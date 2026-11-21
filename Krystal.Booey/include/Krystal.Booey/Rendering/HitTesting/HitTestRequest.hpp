@@ -25,7 +25,7 @@
 #include "Krystal.Booey/Rendering/HitTesting/HitTestSource.hpp"
 #include "Krystal.Core/Assert.hpp"
 #include "Krystal.Core/Attributes.hpp"
-#include "Krystal.Core/Types/EnumSet.hpp"
+#include "Krystal.Core/Containers/EnumSet.hpp"
 
 namespace krys::boo
 {

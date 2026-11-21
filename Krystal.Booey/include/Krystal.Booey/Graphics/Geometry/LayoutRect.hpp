@@ -34,8 +34,8 @@
 #include "Krystal.Booey/Graphics/Geometry/LayoutGeometryForward.hpp"
 #include "Krystal.Booey/Graphics/Geometry/LayoutPoint.hpp"
 #include "Krystal.Core/Attributes.hpp"
+#include "Krystal.Core/Containers/Span.hpp"
 #include "Krystal.Core/Geometry/Rect.hpp"
-#include "Krystal.Core/Types/Span.hpp"
 
 namespace krys
 {

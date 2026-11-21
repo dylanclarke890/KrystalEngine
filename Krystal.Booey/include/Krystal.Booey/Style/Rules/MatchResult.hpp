@@ -30,11 +30,11 @@
 #include "Krystal.Booey/Style/Rules/PropertyAllowlist.hpp"
 #include "Krystal.Booey/Style/Rules/RuleSet.hpp"
 #include "Krystal.Booey/Style/Scope/ScopeOrdinal.hpp"
+#include "Krystal.Core/Containers/List.hpp"
+#include "Krystal.Core/Containers/SmallList.hpp"
 #include "Krystal.Core/Enum.hpp"
 #include "Krystal.Core/Hashing/FastHash.hpp"
 #include "Krystal.Core/Memory/RefCounted.hpp"
-#include "Krystal.Core/Types/List.hpp"
-#include "Krystal.Core/Types/SmallList.hpp"
 #include <algorithm>
 
 namespace krys::boo::style

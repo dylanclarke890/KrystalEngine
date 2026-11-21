@@ -2,13 +2,13 @@
 
 #include "Krystal.Core/Assert.hpp"
 #include "Krystal.Core/Attributes.hpp"
+#include "Krystal.Core/Containers/HashMap.hpp"
 #include "Krystal.Core/Hashing/FastHash.hpp"
 #include "Krystal.Core/Macros.hpp"
 #include "Krystal.Core/Move.hpp"
 #include "Krystal.Core/Numeric.hpp"
 #include "Krystal.Core/Strings/ASCII.hpp"
 #include "Krystal.Core/Strings/String.hpp"
-#include "Krystal.Core/Types/HashMap.hpp"
 #include "Krystal.Core/Types/Markable.hpp"
 #include "Krystal.Core/Types/Null.hpp"
 #include <utility>

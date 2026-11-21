@@ -71,10 +71,10 @@
 #include "Krystal.Booey/Rendering/Style/RenderStyle+GettersInlines.hpp"
 #include "Krystal.Booey/Rendering/SVG/Legacy/LegacyRenderSVGRoot.hpp"
 #include "Krystal.Booey/Rendering/SVG/SVGRenderSupport.hpp"
+#include "Krystal.Core/Containers/HashSet.hpp"
 #include "Krystal.Core/Geometry/AffineTransform.hpp"
 #include "Krystal.Core/Geometry/Quad.hpp"
 #include "Krystal.Core/Geometry/Rect.hpp"
-#include "Krystal.Core/Types/HashSet.hpp"
 
 namespace krys::boo
 {

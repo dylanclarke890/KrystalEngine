@@ -26,7 +26,7 @@
 #include "Krystal.Booey/DOM/Events/UIEvent.hpp"
 #include "Krystal.Booey/Input/PlatformEvent.hpp"
 #include "Krystal.Core/Attributes.hpp"
-#include "Krystal.Core/Types/EnumSet.hpp"
+#include "Krystal.Core/Containers/EnumSet.hpp"
 
 namespace krys::boo
 {

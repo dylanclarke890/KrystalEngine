@@ -1,11 +1,11 @@
 ﻿#pragma once
 
 #include "Krystal.Core/Attributes.hpp"
+#include "Krystal.Core/Containers/List.hpp"
+#include "Krystal.Core/Containers/Span.hpp"
 #include "Krystal.Core/Geometry/Size.hpp"
 #include "Krystal.Core/Numeric.hpp"
-#include "Krystal.Core/Types/List.hpp"
 #include "Krystal.Core/Types/Maybe.hpp"
-#include "Krystal.Core/Types/Span.hpp"
 
 namespace krys::img
 {

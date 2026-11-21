@@ -25,9 +25,9 @@
 #pragma once
 
 #include "Krystal.Booey/CSS/Calc/RandomCachingKey.hpp"
+#include "Krystal.Core/Containers/HashMap.hpp"
 #include "Krystal.Core/Memory/RefCounted.hpp"
 #include "Krystal.Core/Memory/RefPtr.hpp"
-#include "Krystal.Core/Types/HashMap.hpp"
 #include <random>
 
 namespace krys::boo::css::calc

@@ -1,9 +1,9 @@
 ﻿#include "Krystal.Core/Threading/JobSequence.hpp"
 #include "catch2/catch_test_macros.hpp"
+#include "Krystal.Core/Containers/List.hpp"
 #include "Krystal.Core/Threading/JobSystem.hpp"
 #include "Krystal.Core/Threading/MainThread.hpp"
 #include "Krystal.Core/Threading/ManualWorkQueue.hpp"
-#include "Krystal.Core/Types/List.hpp"
 #include <atomic>
 #include <latch>
 

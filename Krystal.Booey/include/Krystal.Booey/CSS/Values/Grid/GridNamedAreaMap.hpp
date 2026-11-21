@@ -28,9 +28,9 @@
 #include "Krystal.Booey/CSS/Values/Types.hpp"
 #include "Krystal.Booey/Rendering/Style/GridArea.hpp"
 #include "Krystal.Core/Attributes.hpp"
+#include "Krystal.Core/Containers/HashMap.hpp"
+#include "Krystal.Core/Containers/SmallList.hpp"
 #include "Krystal.Core/Strings/StringBuilder.hpp"
-#include "Krystal.Core/Types/HashMap.hpp"
-#include "Krystal.Core/Types/SmallList.hpp"
 
 namespace krys::boo::css
 {

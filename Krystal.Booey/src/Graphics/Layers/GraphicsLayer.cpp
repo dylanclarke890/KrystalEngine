@@ -29,11 +29,11 @@
 #include "Krystal.Booey/Graphics/Layers/GraphicsLayerFactory.hpp"
 #include "Krystal.Booey/Graphics/Layers/GraphicsLayerFilterAnimationValue.hpp"
 #include "Krystal.Booey/Graphics/Layers/GraphicsLayerKeyframeValueList.hpp"
+#include "Krystal.Core/Containers/HashMap.hpp"
 #include "Krystal.Core/Geometry/Rect.hpp"
 #include "Krystal.Core/Geometry/Size.hpp"
 #include "Krystal.Core/Memory/NeverDestroyed.hpp"
 #include "Krystal.Core/Strings/TextStream.hpp"
-#include "Krystal.Core/Types/HashMap.hpp"
 #include <format>
 
 namespace krys::boo

@@ -26,10 +26,10 @@
 #include "Krystal.Booey/Rendering/Painting/GapRects.hpp"
 #include "Krystal.Booey/Rendering/RenderBox.hpp"
 #include "Krystal.Core/Attributes.hpp"
+#include "Krystal.Core/Containers/EnumSet.hpp"
+#include "Krystal.Core/Containers/ListHashSet.hpp"
 #include "Krystal.Core/Macros.hpp"
 #include "Krystal.Core/TypeCast.hpp"
-#include "Krystal.Core/Types/EnumSet.hpp"
-#include "Krystal.Core/Types/ListHashSet.hpp"
 #include "Krystal.Core/Types/Pair.hpp"
 
 namespace krys::boo

@@ -40,10 +40,10 @@
 #include "Krystal.Booey/Page/Settings.hpp"
 #include "Krystal.Booey/Style/Scope/Scope.hpp"
 #include "Krystal.Core/Assert.hpp"
+#include "Krystal.Core/Containers/Array.hpp"
 #include "Krystal.Core/Hashing/FastHash.hpp"
 #include "Krystal.Core/Memory/NeverDestroyed.hpp"
 #include "Krystal.Core/Strings/ASCII.hpp"
-#include "Krystal.Core/Types/Array.hpp"
 #include "Krystal.Core/Utils/SetForScope.hpp"
 #include <algorithm>
 

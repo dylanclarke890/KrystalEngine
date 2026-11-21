@@ -26,7 +26,7 @@
 #include "Krystal.Booey/Layout/FormattingContexts/Grid/GridLayout.hpp"
 #include "Krystal.Booey/Layout/FormattingContexts/Grid/UnplacedGridItem.hpp"
 #include "Krystal.Core/Assert.hpp"
-#include "Krystal.Core/Types/HashSet.hpp"
+#include "Krystal.Core/Containers/HashSet.hpp"
 #include <algorithm>
 
 namespace krys::boo::layout

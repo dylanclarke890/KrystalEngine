@@ -31,7 +31,7 @@
 #include "Krystal.Booey/Layout/LayoutUnits.hpp"
 #include "Krystal.Booey/Rendering/Style/RenderStyleConstants.hpp"
 #include "Krystal.Core/Attributes.hpp"
-#include "Krystal.Core/Types/HashMap.hpp"
+#include "Krystal.Core/Containers/HashMap.hpp"
 
 namespace krys::boo::layout
 {

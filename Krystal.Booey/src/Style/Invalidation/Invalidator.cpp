@@ -37,8 +37,8 @@
 #include "Krystal.Booey/Style/Rules/ScopeRuleSets.hpp"
 #include "Krystal.Booey/Style/Rules/SelectorMatchingState.hpp"
 #include "Krystal.Booey/Style/Scope/Scope.hpp"
+#include "Krystal.Core/Containers/SmallList.hpp"
 #include "Krystal.Core/Move.hpp"
-#include "Krystal.Core/Types/SmallList.hpp"
 #include "Krystal.Core/Utils/SetForScope.hpp"
 #include <ranges>
 

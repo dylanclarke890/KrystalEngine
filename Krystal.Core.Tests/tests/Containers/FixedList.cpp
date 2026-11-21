@@ -1,7 +1,7 @@
 ﻿#include "Krystal.Core/Containers/FixedList.hpp"
 #include "catch2/catch_test_macros.hpp"
 #include "Krystal.Core/Containers/RefCountedFixedList.hpp"
-#include "Krystal.Core/Types/Span.hpp"
+#include "Krystal.Core/Containers/Span.hpp"
 #include <algorithm>
 #include <array>
 #include <ranges>

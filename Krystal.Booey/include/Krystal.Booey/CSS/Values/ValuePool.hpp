@@ -31,12 +31,12 @@
 #include "Krystal.Booey/CSS/Values/ValueId.hpp"
 #include "Krystal.Booey/Graphics/Color/Color.hpp"
 #include "Krystal.Core/Assert.hpp"
+#include "Krystal.Core/Containers/Array.hpp"
+#include "Krystal.Core/Containers/HashMap.hpp"
 #include "Krystal.Core/Hashing/FastHash.hpp"
 #include "Krystal.Core/Memory/AlignedStorage.hpp"
 #include "Krystal.Core/Memory/NeverDestroyed.hpp"
 #include "Krystal.Core/Memory/RefPtr.hpp"
-#include "Krystal.Core/Types/Array.hpp"
-#include "Krystal.Core/Types/HashMap.hpp"
 
 namespace krys::boo::css
 {

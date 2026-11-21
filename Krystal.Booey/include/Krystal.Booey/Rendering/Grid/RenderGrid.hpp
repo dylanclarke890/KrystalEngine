@@ -36,10 +36,10 @@
 #include "Krystal.Booey/Rendering/Style/StyleSelfAlignmentData.hpp"
 #include "Krystal.Booey/Style/Values/Grid/GridTrackSizingDirection.hpp"
 #include "Krystal.Core/Attributes.hpp"
+#include "Krystal.Core/Containers/HashMap.hpp"
+#include "Krystal.Core/Containers/List.hpp"
 #include "Krystal.Core/Macros.hpp"
 #include "Krystal.Core/TypeCast.hpp"
-#include "Krystal.Core/Types/HashMap.hpp"
-#include "Krystal.Core/Types/List.hpp"
 #include "Krystal.Core/Types/Maybe.hpp"
 #include "Krystal.Core/Types/Pair.hpp"
 #include <functional>

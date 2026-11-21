@@ -7455,8 +7455,8 @@ class GeneratePropertyId:
                 headers=[
                     "Krystal.Booey/CSS/Types/CSSOMString.hpp",
                     "Krystal.Core/Base.hpp",
-                    "Krystal.Core/Types/Array.hpp",
-                    "Krystal.Core/Types/Span.hpp",
+                    "Krystal.Core/Containers/Array.hpp",
+                    "Krystal.Core/Containers/Span.hpp",
                 ],
             )
 
@@ -7918,7 +7918,7 @@ class GeneratePropertyId:
                     "Krystal.Booey/CSS/Values/ValueId.hpp",
                     "Krystal.Booey/Page/Settings.hpp",
                     "Krystal.Core/Strings/ASCII.hpp",
-                    "Krystal.Core/Types/SmallList.hpp",
+                    "Krystal.Core/Containers/SmallList.hpp",
                     "Krystal.Core/Strings/String.hpp",
                 ],
             )
@@ -8932,7 +8932,7 @@ class GeneratePropertyShorthandFunctions:
                 for_header="Krystal.Booey/CSS/Properties/PropertyShorthandFunctions.hpp",
                 headers=[
                     "Krystal.Booey/CSS/Properties/PropertyShorthand.hpp",
-                    "Krystal.Core/Types/Array.hpp",
+                    "Krystal.Core/Containers/Array.hpp",
                 ],
             )
 
@@ -9581,7 +9581,7 @@ class GenerateStyleInterpolationWrapperMap:
                 generator_name=GENERATOR_NAME,
                 headers=[
                     "Krystal.Booey/CSS/Properties/PropertyId.hpp",
-                    "Krystal.Core/Types/Array.hpp",
+                    "Krystal.Core/Containers/Array.hpp",
                     "Krystal.Core/Memory/NeverDestroyed.hpp",
                 ],
             )
@@ -9599,7 +9599,7 @@ class GenerateStyleInterpolationWrapperMap:
                 for_header="Krystal.Booey/Style/Interpolation/InterpolationWrapperMap.hpp",
                 headers=[
                     "Krystal.Booey/CSS/Properties/PropertyShorthand.hpp",
-                    "Krystal.Core/Types/List.hpp",
+                    "Krystal.Core/Containers/List.hpp",
                 ],
             )
 

@@ -21,7 +21,7 @@
 #pragma once
 
 #include "Krystal.Booey/CSS/Types/CSSOMString.hpp"
-#include "Krystal.Core/Types/HashMap.hpp"
+#include "Krystal.Core/Containers/HashMap.hpp"
 
 namespace krys::boo
 {

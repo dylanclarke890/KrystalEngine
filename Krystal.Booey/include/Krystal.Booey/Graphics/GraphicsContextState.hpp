@@ -29,7 +29,7 @@
 #include "Krystal.Booey/Graphics/GraphicsTypes.hpp"
 #include "Krystal.Booey/Graphics/Paths/WindRule.hpp"
 #include "Krystal.Booey/Graphics/SourceBrush.hpp"
-#include "Krystal.Core/Types/EnumSet.hpp"
+#include "Krystal.Core/Containers/EnumSet.hpp"
 
 namespace krys
 {

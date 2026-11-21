@@ -29,7 +29,7 @@
 #include "Krystal.Booey/Rendering/Style/RenderStyle+GettersInlines.hpp"
 #include "Krystal.Booey/Rendering/Style/StyleContentAlignmentData.hpp"
 #include "Krystal.Booey/Rendering/Style/StyleSelfAlignmentData.hpp"
-#include "Krystal.Core/Types/ListHashSet.hpp"
+#include "Krystal.Core/Containers/ListHashSet.hpp"
 #include <cmath>
 
 namespace krys::boo::layout

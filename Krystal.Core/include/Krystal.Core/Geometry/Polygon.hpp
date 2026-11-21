@@ -30,11 +30,11 @@
 #pragma once
 
 #include "Krystal.Core/Attributes.hpp"
+#include "Krystal.Core/Containers/IntervalTree.hpp"
+#include "Krystal.Core/Containers/List.hpp"
 #include "Krystal.Core/Geometry/Point.hpp"
 #include "Krystal.Core/Geometry/Rect.hpp"
 #include "Krystal.Core/Macros.hpp"
-#include "Krystal.Core/Types/IntervalTree.hpp"
-#include "Krystal.Core/Types/List.hpp"
 #include <functional>
 
 namespace krys

@@ -30,9 +30,9 @@
 #include "Krystal.Booey/Style/Invalidation/Invalidator.hpp"
 #include "Krystal.Booey/Style/Scope/Scope.hpp"
 #include "Krystal.Core/Attributes.hpp"
+#include "Krystal.Core/Containers/HashSet.hpp"
 #include "Krystal.Core/Macros.hpp"
 #include "Krystal.Core/Memory/RefPtr.hpp"
-#include "Krystal.Core/Types/HashSet.hpp"
 
 namespace krys::boo::style
 {

@@ -29,9 +29,9 @@
 #include "Krystal.Booey/CSS/Selectors/SelectorList.hpp"
 #include "Krystal.Booey/CSS/Selectors/SelectorPseudoTypeMap.hpp"
 #include "Krystal.Booey/CSS/Selectors/UserAgentParts.hpp"
+#include "Krystal.Core/Containers/Queue.hpp"
 #include "Krystal.Core/Hashing/FastHash.hpp"
 #include "Krystal.Core/Strings/StringBuilder.hpp"
-#include "Krystal.Core/Types/Queue.hpp"
 #include <charconv>
 
 namespace krys::boo::css

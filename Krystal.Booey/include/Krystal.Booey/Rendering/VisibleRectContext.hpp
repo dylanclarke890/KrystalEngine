@@ -26,8 +26,8 @@
 
 #include "Krystal.Booey/DOM/IntersectionObservers/IntersectionObserverMarginBox.hpp"
 #include "Krystal.Booey/Rendering/RepaintRectCalculation.hpp"
+#include "Krystal.Core/Containers/EnumSet.hpp"
 #include "Krystal.Core/Enum.hpp"
-#include "Krystal.Core/Types/EnumSet.hpp"
 #include "Krystal.Core/Types/Maybe.hpp"
 
 namespace krys::boo

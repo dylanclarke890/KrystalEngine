@@ -27,12 +27,12 @@
 
 #include "Krystal.Booey/Graphics/ImageBuffers/PixelBufferFormat.hpp"
 #include "Krystal.Core/Attributes.hpp"
+#include "Krystal.Core/Containers/Span.hpp"
 #include "Krystal.Core/Geometry/Size.hpp"
 #include "Krystal.Core/Macros.hpp"
 #include "Krystal.Core/Memory/RefCounted.hpp"
 #include "Krystal.Core/Memory/RefPtr.hpp"
 #include "Krystal.Core/Types/Maybe.hpp"
-#include "Krystal.Core/Types/Span.hpp"
 
 namespace krys::boo
 {

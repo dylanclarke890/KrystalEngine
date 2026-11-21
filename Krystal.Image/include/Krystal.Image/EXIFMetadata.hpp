@@ -40,9 +40,9 @@
 #pragma once
 
 #include "Krystal.Core/Attributes.hpp"
+#include "Krystal.Core/Containers/Span.hpp"
 #include "Krystal.Core/Geometry/Size.hpp"
 #include "Krystal.Core/Types/Maybe.hpp"
-#include "Krystal.Core/Types/Span.hpp"
 #include "Krystal.Image/ImageOrientation.hpp"
 
 namespace krys::img

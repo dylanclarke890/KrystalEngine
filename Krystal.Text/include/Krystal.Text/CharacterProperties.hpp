@@ -26,8 +26,8 @@
 #pragma once
 
 #include "Krystal.Core/Attributes.hpp"
+#include "Krystal.Core/Containers/EnumSet.hpp"
 #include "Krystal.Core/Numeric.hpp"
-#include "Krystal.Core/Types/EnumSet.hpp"
 #include "Krystal.Text/Script.hpp"
 
 namespace krys::text

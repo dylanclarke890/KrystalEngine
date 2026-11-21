@@ -28,7 +28,7 @@
 #include "Krystal.Booey/Graphics/Geometry/BoxSides.hpp"
 #include "Krystal.Booey/Text/WritingMode.hpp"
 #include "Krystal.Core/Concepts.hpp"
-#include "Krystal.Core/Types/Array.hpp"
+#include "Krystal.Core/Containers/Array.hpp"
 #include <algorithm>
 
 namespace krys::boo

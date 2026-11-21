@@ -27,7 +27,7 @@
 
 #include "Krystal.Booey/Layout/FormattingContexts/Inline/Display/InlineDisplayBox.hpp"
 #include "Krystal.Booey/Layout/FormattingContexts/Inline/Display/InlineDisplayLine.hpp"
-#include "Krystal.Core/Types/List.hpp"
+#include "Krystal.Core/Containers/List.hpp"
 
 namespace krys::boo::inline_display
 {

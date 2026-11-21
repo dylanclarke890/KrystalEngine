@@ -1,12 +1,12 @@
 ﻿#pragma once
 
 #include "Krystal.Core/Attributes.hpp"
+#include "Krystal.Core/Containers/Span.hpp"
 #include "Krystal.Core/Macros.hpp"
 #include "Krystal.Core/Memory/UniquePtr.hpp"
 #include "Krystal.Core/Numeric.hpp"
 #include "Krystal.Core/Types/Expected.hpp"
 #include "Krystal.Core/Types/Maybe.hpp"
-#include "Krystal.Core/Types/Span.hpp"
 #include "Krystal.Gfx/Buffer.hpp"
 #include "Krystal.Gfx/CommandBuffer.hpp"
 #include "Krystal.Gfx/Handles.hpp"

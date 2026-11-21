@@ -24,9 +24,9 @@
  */
 
 #include "Krystal.Text/CharacterProperties.hpp"
+#include "Krystal.Core/Containers/Array.hpp"
+#include "Krystal.Core/Containers/List.hpp"
 #include "Krystal.Core/Strings/CodePointIterator.hpp"
-#include "Krystal.Core/Types/Array.hpp"
-#include "Krystal.Core/Types/List.hpp"
 #include "Krystal.Core/Types/Maybe.hpp"
 #include <algorithm>
 #include <unicode/uchar.h>

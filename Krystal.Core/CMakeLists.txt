@@ -112,6 +112,24 @@ target_sources(Krystal.Core
       include/Krystal.Core/Commands/CommandListReader.hpp
       include/Krystal.Core/Commands/CommandType.hpp
 
+      # Containers
+      include/Krystal.Core/Containers/Array.hpp
+      include/Krystal.Core/Containers/BloomFilter.hpp
+      include/Krystal.Core/Containers/EnumSet.hpp
+      include/Krystal.Core/Containers/FixedList.hpp
+      include/Krystal.Core/Containers/HashMap.hpp
+      include/Krystal.Core/Containers/HashSet.hpp
+      include/Krystal.Core/Containers/IntervalTree.hpp
+      include/Krystal.Core/Containers/List.hpp
+      include/Krystal.Core/Containers/ListHashSet.hpp
+      include/Krystal.Core/Containers/Queue.hpp
+      include/Krystal.Core/Containers/RedBlackTree.hpp
+      include/Krystal.Core/Containers/RefCountedFixedList.hpp
+      include/Krystal.Core/Containers/SmallList.hpp
+      include/Krystal.Core/Containers/Span.hpp
+      include/Krystal.Core/Containers/Stack.hpp
+      include/Krystal.Core/Containers/TinyLRUCache.hpp
+
       # Detection
       include/Krystal.Core/Detection/AddressSpaceBitSize.hpp
       include/Krystal.Core/Detection/Compiler.hpp
@@ -256,20 +274,11 @@ target_sources(Krystal.Core
 
       # Types
       include/Krystal.Core/Types/Any.hpp
-      include/Krystal.Core/Types/Array.hpp
       include/Krystal.Core/Types/BoolOr.hpp
-      include/Krystal.Core/Types/BloomFilter.hpp
       include/Krystal.Core/Types/CompactVariant.hpp
       include/Krystal.Core/Types/Decimal.hpp
       include/Krystal.Core/Types/Expected.hpp
-      include/Krystal.Core/Containers/FixedList.hpp
       include/Krystal.Core/Types/Func.hpp
-      include/Krystal.Core/Types/HashMap.hpp
-      include/Krystal.Core/Types/HashSet.hpp
-      include/Krystal.Core/Types/List.hpp
-      include/Krystal.Core/Types/ListHashSet.hpp
-      include/Krystal.Core/Types/RedBlackTree.hpp
-      include/Krystal.Core/Types/IntervalTree.hpp
       include/Krystal.Core/Types/IterationStatus.hpp
       include/Krystal.Core/Types/Markable.hpp
       include/Krystal.Core/Types/Maybe.hpp
@@ -277,13 +286,7 @@ target_sources(Krystal.Core
       include/Krystal.Core/Types/Null.hpp
       include/Krystal.Core/Types/NTTPString.hpp
       include/Krystal.Core/Types/Pair.hpp
-      include/Krystal.Core/Types/Queue.hpp
-      include/Krystal.Core/Containers/RefCountedFixedList.hpp
       include/Krystal.Core/Types/SharedBuffer.hpp
-      include/Krystal.Core/Types/SmallList.hpp
-      include/Krystal.Core/Types/Span.hpp
-      include/Krystal.Core/Types/Stack.hpp
-      include/Krystal.Core/Types/TinyLRUCache.hpp
       include/Krystal.Core/Types/Variant.hpp
 
       # Utils

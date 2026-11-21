@@ -33,8 +33,8 @@
 #include "Krystal.Booey/CSS/Types/CSSOMString.hpp"
 #include "Krystal.Booey/CSS/Values/Value.hpp"
 #include "Krystal.Core/Containers/FixedList.hpp"
+#include "Krystal.Core/Containers/Span.hpp"
 #include "Krystal.Core/Memory/RefPtr.hpp"
-#include "Krystal.Core/Types/Span.hpp"
 
 namespace krys::boo::css
 {

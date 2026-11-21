@@ -36,7 +36,7 @@
 #include "Krystal.Booey/SVG/Elements/SVGElement.hpp"
 #include "Krystal.Booey/SVG/Elements/SVGFilterElement.hpp"
 #include "Krystal.Booey/SVG/SVGResourceElementClient.hpp"
-#include "Krystal.Core/Types/HashSet.hpp"
+#include "Krystal.Core/Containers/HashSet.hpp"
 
 namespace krys::boo
 {

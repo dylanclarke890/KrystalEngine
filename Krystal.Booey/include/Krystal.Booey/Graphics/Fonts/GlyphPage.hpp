@@ -33,12 +33,12 @@
 #include "Krystal.Booey/Text/TextFlags.hpp"
 #include "Krystal.Core/Assert.hpp"
 #include "Krystal.Core/Attributes.hpp"
+#include "Krystal.Core/Containers/Array.hpp"
+#include "Krystal.Core/Containers/Span.hpp"
 #include "Krystal.Core/Macros.hpp"
 #include "Krystal.Core/Memory/RefCounted.hpp"
 #include "Krystal.Core/Memory/RefPtr.hpp"
 #include "Krystal.Core/Memory/WeakPtr.hpp"
-#include "Krystal.Core/Types/Array.hpp"
-#include "Krystal.Core/Types/Span.hpp"
 #include <bitset>
 
 namespace krys::boo

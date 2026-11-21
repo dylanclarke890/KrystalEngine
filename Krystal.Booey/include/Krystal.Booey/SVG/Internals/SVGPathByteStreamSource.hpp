@@ -23,7 +23,7 @@
 #include "Krystal.Booey/SVG/Internals/SVGPathSource.hpp"
 #include "Krystal.Core/Assert.hpp"
 #include "Krystal.Core/Concepts.hpp"
-#include "Krystal.Core/Types/Span.hpp"
+#include "Krystal.Core/Containers/Span.hpp"
 #include <cstring>
 
 namespace krys::boo

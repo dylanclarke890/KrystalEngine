@@ -27,7 +27,7 @@
 
 #include "Krystal.Booey/CSS/Values/ValueId.hpp"
 #include "Krystal.Core/Attributes.hpp"
-#include "Krystal.Core/Types/HashMap.hpp"
+#include "Krystal.Core/Containers/HashMap.hpp"
 #include "Krystal.Core/Types/Maybe.hpp"
 #include <initializer_list>
 #include <tuple>

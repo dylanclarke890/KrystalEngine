@@ -23,7 +23,7 @@
 #include "Krystal.Booey/CSS/Selectors/SelectorInlines.hpp"
 #include "Krystal.Booey/CSS/Selectors/SelectorList.hpp"
 #include "Krystal.Booey/CSS/Selectors/SelectorPseudoTypeMap.hpp"
-#include "Krystal.Core/Types/SmallList.hpp"
+#include "Krystal.Core/Containers/SmallList.hpp"
 
 namespace krys::boo::css
 {

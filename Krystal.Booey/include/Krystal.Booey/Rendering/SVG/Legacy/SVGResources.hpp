@@ -20,9 +20,9 @@
 #pragma once
 
 #include "Krystal.Core/Attributes.hpp"
+#include "Krystal.Core/Containers/HashSet.hpp"
 #include "Krystal.Core/Memory/UniquePtr.hpp"
 #include "Krystal.Core/Memory/WeakPtr.hpp"
-#include "Krystal.Core/Types/HashSet.hpp"
 
 namespace krys::boo
 {

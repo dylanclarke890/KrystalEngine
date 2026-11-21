@@ -30,8 +30,8 @@
 #include "Krystal.Booey/Style/Values/TextDecoration/TextShadow.hpp"
 #include "Krystal.Booey/Text/WritingMode.hpp"
 #include "Krystal.Core/Attributes.hpp"
+#include "Krystal.Core/Containers/EnumSet.hpp"
 #include "Krystal.Core/Geometry/Point.hpp"
-#include "Krystal.Core/Types/EnumSet.hpp"
 
 namespace krys::boo
 {

@@ -29,8 +29,8 @@
 #include "Krystal.Booey/DOM/Nodes/Element.hpp"
 #include "Krystal.Booey/DOM/Nodes/Text.hpp"
 #include "Krystal.Core/Assert.hpp"
+#include "Krystal.Core/Containers/List.hpp"
 #include "Krystal.Core/Memory/CheckedPtr.hpp"
-#include "Krystal.Core/Types/List.hpp"
 
 namespace krys::boo::dom
 {

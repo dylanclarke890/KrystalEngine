@@ -28,8 +28,8 @@
 #include "Krystal.Booey/SVG/Animation/SVGSMILElement.hpp"
 #include "Krystal.Booey/SVG/Properties/SVGAttributeAnimator.hpp"
 #include "Krystal.Booey/SVG/SVGTests.hpp"
+#include "Krystal.Core/Containers/List.hpp"
 #include "Krystal.Core/Maths/UnitBezier.hpp"
-#include "Krystal.Core/Types/List.hpp"
 #include "Krystal.Core/Types/Maybe.hpp"
 
 namespace krys::boo::svg

@@ -1,7 +1,7 @@
 ﻿#pragma once
 
+#include "Krystal.Core/Containers/Span.hpp"
 #include "Krystal.Core/Numeric.hpp"
-#include "Krystal.Core/Types/Span.hpp"
 
 // Generated from TestImages.hpp's images, with EXIF resolution metadata spliced in: the density JPEG is
 // 16x8 at 144 dots per inch (8x4), the mismatched one names 16x8, the centimetre one is in dots per

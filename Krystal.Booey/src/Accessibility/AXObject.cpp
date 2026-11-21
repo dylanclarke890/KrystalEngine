@@ -82,7 +82,7 @@
 #include "Krystal.Booey/Rendering/Style/RenderStyle.hpp"
 #include "Krystal.Booey/Rendering/Updating/RenderTreeBuilder.hpp"
 #include "Krystal.Booey/SVG/Elements/SVGElement.hpp"
-#include "Krystal.Core/Types/HashMap.hpp"
+#include "Krystal.Core/Containers/HashMap.hpp"
 #include <algorithm>
 #include <format>
 #include <limits>

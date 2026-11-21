@@ -27,12 +27,12 @@
 
 #include "Krystal.Booey/DOM/ResizeObservers/ResizeObserverCallback.hpp"
 #include "Krystal.Booey/DOM/ResizeObservers/ResizeObserverOptions.hpp"
+#include "Krystal.Core/Containers/List.hpp"
 #include "Krystal.Core/Macros.hpp"
 #include "Krystal.Core/Memory/CanMakeWeakPtr.hpp"
 #include "Krystal.Core/Memory/RefCounted.hpp"
 #include "Krystal.Core/Memory/RefPtr.hpp"
 #include "Krystal.Core/Memory/WeakPtr.hpp"
-#include "Krystal.Core/Types/List.hpp"
 #include <limits>
 
 namespace krys::boo

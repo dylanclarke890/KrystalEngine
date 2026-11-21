@@ -27,9 +27,9 @@
 
 #include "Krystal.Booey/Graphics/Fonts/Font.hpp"
 #include "Krystal.Core/Attributes.hpp"
+#include "Krystal.Core/Containers/SmallList.hpp"
 #include "Krystal.Core/Memory/RefCounted.hpp"
 #include "Krystal.Core/Memory/RefPtr.hpp"
-#include "Krystal.Core/Types/SmallList.hpp"
 
 namespace krys::boo
 {

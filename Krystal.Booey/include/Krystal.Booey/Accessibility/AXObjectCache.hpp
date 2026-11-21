@@ -28,11 +28,11 @@
 #include "Krystal.Booey/Accessibility/AXNotifications.hpp"
 #include "Krystal.Booey/Accessibility/AXObject.hpp"
 #include "Krystal.Booey/Editing/Selection/VisibleSelection.hpp"
+#include "Krystal.Core/Containers/HashMap.hpp"
+#include "Krystal.Core/Containers/HashSet.hpp"
+#include "Krystal.Core/Containers/ListHashSet.hpp"
 #include "Krystal.Core/Memory/CanMakeWeakPtr.hpp"
 #include "Krystal.Core/Time/Timer.hpp"
-#include "Krystal.Core/Types/HashMap.hpp"
-#include "Krystal.Core/Types/HashSet.hpp"
-#include "Krystal.Core/Types/ListHashSet.hpp"
 #include "Krystal.Core/Types/Pair.hpp"
 
 namespace krys::boo

@@ -30,9 +30,9 @@
 #include "Krystal.Booey/Page/FrameView.hpp"
 #include "Krystal.Booey/Rendering/RenderView.hpp"
 #include "Krystal.Booey/Rendering/Style/RenderStyle+GettersInlines.hpp"
+#include "Krystal.Core/Containers/SmallList.hpp"
 #include "Krystal.Core/Memory/NeverDestroyed.hpp"
 #include "Krystal.Core/Types/Func.hpp"
-#include "Krystal.Core/Types/SmallList.hpp"
 
 namespace krys::boo::css::mq::features
 {

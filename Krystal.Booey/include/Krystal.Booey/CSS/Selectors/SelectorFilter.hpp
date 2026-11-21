@@ -30,11 +30,11 @@
 
 #include "Krystal.Booey/CSS/Types/CSSOMString.hpp"
 #include "Krystal.Core/Attributes.hpp"
+#include "Krystal.Core/Containers/Array.hpp"
+#include "Krystal.Core/Containers/BloomFilter.hpp"
+#include "Krystal.Core/Containers/List.hpp"
+#include "Krystal.Core/Containers/SmallList.hpp"
 #include "Krystal.Core/Numeric.hpp"
-#include "Krystal.Core/Types/Array.hpp"
-#include "Krystal.Core/Types/BloomFilter.hpp"
-#include "Krystal.Core/Types/List.hpp"
-#include "Krystal.Core/Types/SmallList.hpp"
 
 namespace krys::boo
 {

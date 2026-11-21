@@ -37,7 +37,7 @@
 #include "Krystal.Booey/Style/Values/Inline/VerticalAlign.hpp"
 #include "Krystal.Booey/Style/Values/NonStandard/WebKitLineBoxContain.hpp"
 #include "Krystal.Core/Attributes.hpp"
-#include "Krystal.Core/Types/EnumSet.hpp"
+#include "Krystal.Core/Containers/EnumSet.hpp"
 #include "Krystal.Core/Types/Maybe.hpp"
 #include "Krystal.Core/Types/Variant.hpp"
 

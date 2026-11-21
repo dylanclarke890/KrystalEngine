@@ -1,11 +1,11 @@
 ﻿#pragma once
 
 #include "Krystal.Core/Attributes.hpp"
+#include "Krystal.Core/Containers/Array.hpp"
+#include "Krystal.Core/Containers/HashMap.hpp"
+#include "Krystal.Core/Containers/List.hpp"
 #include "Krystal.Core/Log/ILogger.hpp"
 #include "Krystal.Core/Strings/String.hpp"
-#include "Krystal.Core/Types/Array.hpp"
-#include "Krystal.Core/Types/HashMap.hpp"
-#include "Krystal.Core/Types/List.hpp"
 #include "Krystal.Gfx/OpenGL/gl.hpp"
 
 namespace krys::gfx::opengl

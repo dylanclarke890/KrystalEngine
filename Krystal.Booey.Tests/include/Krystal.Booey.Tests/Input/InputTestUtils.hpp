@@ -5,8 +5,8 @@
 #include "Krystal.Booey/Input/PlatformKeyboardEvent.hpp"
 #include "Krystal.Booey/Input/PlatformMouseEvent.hpp"
 #include "Krystal.Booey/Page/Frame.hpp"
+#include "Krystal.Core/Containers/EnumSet.hpp"
 #include "Krystal.Core/Time/MonotonicTime.hpp"
-#include "Krystal.Core/Types/EnumSet.hpp"
 #include <string>
 
 namespace krys::boo::tests

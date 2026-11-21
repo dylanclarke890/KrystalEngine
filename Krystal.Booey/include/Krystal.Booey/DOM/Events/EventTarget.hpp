@@ -4,15 +4,15 @@
 #include "Krystal.Booey/DOM/Events/EventListenerHandle.hpp"
 #include "Krystal.Booey/DOM/Types/DOMString.hpp"
 #include "Krystal.Booey/DOM/Types/ExceptionOr.hpp"
+#include "Krystal.Core/Containers/List.hpp"
+#include "Krystal.Core/Containers/SmallList.hpp"
+#include "Krystal.Core/Containers/Span.hpp"
 #include "Krystal.Core/Enum.hpp"
 #include "Krystal.Core/Memory/CanMakeWeakPtr.hpp"
 #include "Krystal.Core/Memory/RefCounted.hpp"
 #include "Krystal.Core/Memory/RefPtr.hpp"
 #include "Krystal.Core/Memory/UniquePtr.hpp"
 #include "Krystal.Core/Types/Func.hpp"
-#include "Krystal.Core/Types/List.hpp"
-#include "Krystal.Core/Types/SmallList.hpp"
-#include "Krystal.Core/Types/Span.hpp"
 
 namespace krys::boo::dom
 {

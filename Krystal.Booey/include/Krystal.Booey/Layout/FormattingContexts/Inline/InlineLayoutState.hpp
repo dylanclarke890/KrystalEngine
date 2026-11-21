@@ -30,7 +30,7 @@
 #include "Krystal.Booey/Layout/LayoutTree/LayoutElementBox.hpp"
 #include "Krystal.Booey/Layout/LayoutUnits.hpp"
 #include "Krystal.Core/Attributes.hpp"
-#include "Krystal.Core/Types/HashMap.hpp"
+#include "Krystal.Core/Containers/HashMap.hpp"
 #include "Krystal.Core/Types/Maybe.hpp"
 
 namespace krys::boo::layout

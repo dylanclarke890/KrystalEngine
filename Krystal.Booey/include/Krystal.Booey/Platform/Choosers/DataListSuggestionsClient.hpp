@@ -26,8 +26,8 @@
 #pragma once
 
 #include "Krystal.Booey/Platform/Choosers/DataListSuggestionPicker.hpp"
+#include "Krystal.Core/Containers/List.hpp"
 #include "Krystal.Core/Geometry/Rect.hpp"
-#include "Krystal.Core/Types/List.hpp"
 
 namespace krys::boo
 {

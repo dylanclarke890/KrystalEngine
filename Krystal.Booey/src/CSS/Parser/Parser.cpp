@@ -69,8 +69,8 @@
 #include "Krystal.Booey/CSS/Values/VariableData.hpp"
 #include "Krystal.Booey/DOM/Nodes/Document.hpp"
 #include "Krystal.Booey/HTML/Elements/HTMLElement.hpp"
+#include "Krystal.Core/Containers/HashSet.hpp"
 #include "Krystal.Core/Strings/ASCII.hpp"
-#include "Krystal.Core/Types/HashSet.hpp"
 #include "Krystal.Core/Utils/NestingLevelIncrementer.hpp"
 #include <bitset>
 

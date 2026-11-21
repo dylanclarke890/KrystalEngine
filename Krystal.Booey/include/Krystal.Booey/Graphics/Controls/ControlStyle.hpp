@@ -27,8 +27,8 @@
 
 #include "Krystal.Booey/Graphics/Color/Color.hpp"
 #include "Krystal.Booey/Graphics/Geometry/BoxExtents.hpp"
+#include "Krystal.Core/Containers/EnumSet.hpp"
 #include "Krystal.Core/Enum.hpp"
-#include "Krystal.Core/Types/EnumSet.hpp"
 
 namespace krys
 {

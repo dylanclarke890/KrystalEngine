@@ -34,9 +34,9 @@
 #include "Krystal.Booey/Style/TreeResolutionState.hpp"
 #include "Krystal.Booey/Style/Values/AnchorPosition/PositionTryFallbackTactic.hpp"
 #include "Krystal.Booey/Text/TextFlags.hpp"
+#include "Krystal.Core/Containers/HashSet.hpp"
+#include "Krystal.Core/Containers/List.hpp"
 #include "Krystal.Core/Memory/CanMakeCheckedPtr.hpp"
-#include "Krystal.Core/Types/HashSet.hpp"
-#include "Krystal.Core/Types/List.hpp"
 #include <bitset>
 
 namespace krys::boo

@@ -26,10 +26,10 @@
 #pragma once
 
 #include "Krystal.Core/Attributes.hpp"
+#include "Krystal.Core/Containers/SmallList.hpp"
+#include "Krystal.Core/Containers/Span.hpp"
 #include "Krystal.Core/Geometry/Rect.hpp"
 #include "Krystal.Core/Memory/UniquePtr.hpp"
-#include "Krystal.Core/Types/SmallList.hpp"
-#include "Krystal.Core/Types/Span.hpp"
 #include <utility>
 
 namespace krys

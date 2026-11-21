@@ -25,8 +25,8 @@
 
 #include "Krystal.Booey/Text/TextFlags.hpp"
 #include "Krystal.Booey/Graphics/Fonts/FontFeatureValues.hpp"
+#include "Krystal.Core/Containers/Span.hpp"
 #include "Krystal.Core/Strings/TextStream.hpp"
-#include "Krystal.Core/Types/Span.hpp"
 
 namespace krys::boo
 {
@@ -238,7 +238,8 @@ namespace krys::boo
 
 namespace krys
 {
-  size_t FastHash<boo::FontVariantAlternatesValues>::operator()(const boo::FontVariantAlternatesValues &key) const noexcept
+  size_t FastHash<boo::FontVariantAlternatesValues>::operator()(
+    const boo::FontVariantAlternatesValues &key) const noexcept
   {
     auto hashString = [](const Maybe<boo::CSSOMString> &string) -> size_t
     {
@@ -258,7 +259,8 @@ namespace krys
                                    hashString(key.Ornaments), hashString(key.Annotation));
   }
 
-  size_t FastHash<boo::FontVariantAlternates>::operator()(const boo::FontVariantAlternates &key) const noexcept
+  size_t
+    FastHash<boo::FontVariantAlternates>::operator()(const boo::FontVariantAlternates &key) const noexcept
   {
     if (key.IsNormal())
     {

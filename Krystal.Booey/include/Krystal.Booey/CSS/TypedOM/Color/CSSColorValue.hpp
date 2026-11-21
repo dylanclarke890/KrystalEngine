@@ -29,7 +29,7 @@
 #include "Krystal.Booey/CSS/TypedOM/CSSNumericValue.hpp"
 #include "Krystal.Booey/CSS/TypedOM/CSSStyleValue.hpp"
 #include "Krystal.Booey/DOM/Types/ExceptionOr.hpp"
-#include "Krystal.Core/Types/Span.hpp"
+#include "Krystal.Core/Containers/Span.hpp"
 #include "Krystal.Core/Types/Variant.hpp"
 
 namespace krys::boo

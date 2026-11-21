@@ -1,8 +1,8 @@
 ﻿#include "Krystal.Core/Types/SharedBuffer.hpp"
 #include "catch2/catch_test_macros.hpp"
+#include "Krystal.Core/Containers/Array.hpp"
+#include "Krystal.Core/Containers/List.hpp"
 #include "Krystal.Core/TypeCast.hpp"
-#include "Krystal.Core/Types/Array.hpp"
-#include "Krystal.Core/Types/List.hpp"
 
 namespace krys::tests
 {

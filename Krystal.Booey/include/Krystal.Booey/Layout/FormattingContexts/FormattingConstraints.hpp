@@ -27,8 +27,8 @@
 
 #include "Krystal.Booey/Graphics/Geometry/LayoutUnit.hpp"
 #include "Krystal.Core/Attributes.hpp"
+#include "Krystal.Core/Containers/EnumSet.hpp"
 #include "Krystal.Core/TypeCast.hpp"
-#include "Krystal.Core/Types/EnumSet.hpp"
 
 namespace krys::boo::layout
 {

@@ -1,10 +1,10 @@
 ﻿#pragma once
 
 #include "Krystal.Core/Attributes.hpp"
+#include "Krystal.Core/Containers/Queue.hpp"
 #include "Krystal.Core/Macros.hpp"
 #include "Krystal.Core/Numeric.hpp"
 #include "Krystal.Core/Threading/WorkQueue.hpp"
-#include "Krystal.Core/Types/Queue.hpp"
 
 namespace krys
 {

@@ -27,13 +27,13 @@
 
 #include "Krystal.Core/Assert.hpp"
 #include "Krystal.Core/Concepts.hpp"
+#include "Krystal.Core/Containers/Array.hpp"
 #include "Krystal.Core/Detection/AddressSpaceBitSize.hpp"
 #include "Krystal.Core/Detection/CPU.hpp"
 #include "Krystal.Core/Detection/OS.hpp"
 #include "Krystal.Core/Hashing/FastHash.hpp"
 #include "Krystal.Core/Maths/Extras.hpp"
 #include "Krystal.Core/Memory/UnalignedAccess.hpp"
-#include "Krystal.Core/Types/Array.hpp"
 #include "Krystal.Core/Utils/Tags.hpp"
 #include <bit>
 #include <cstring>

@@ -1,11 +1,11 @@
 ﻿#pragma once
 
 #include "Krystal.Core/Attributes.hpp"
+#include "Krystal.Core/Containers/List.hpp"
+#include "Krystal.Core/Containers/Span.hpp"
 #include "Krystal.Core/IO/Common.hpp"
 #include "Krystal.Core/IO/Streams/Stream.hpp"
 #include "Krystal.Core/Numeric.hpp"
-#include "Krystal.Core/Types/List.hpp"
-#include "Krystal.Core/Types/Span.hpp"
 #include <algorithm>
 #include <cstring>
 

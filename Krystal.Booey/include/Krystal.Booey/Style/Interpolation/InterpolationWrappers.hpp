@@ -43,7 +43,7 @@
 #include "Krystal.Booey/Style/Values/Primitives/LengthWrapperBlending.hpp"
 #include "Krystal.Booey/Style/Values/Primitives/NumericTypesBlending.hpp"
 #include "Krystal.Booey/Style/Values/Types.hpp"
-#include "Krystal.Core/Types/List.hpp"
+#include "Krystal.Core/Containers/List.hpp"
 #include <algorithm>
 
 namespace krys::boo::style::interpolation

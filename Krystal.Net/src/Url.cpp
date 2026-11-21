@@ -26,12 +26,12 @@
 
 #include "Krystal.Net/Url.hpp"
 #include "Krystal.Core/Assert.hpp"
+#include "Krystal.Core/Containers/Array.hpp"
 #include "Krystal.Core/Detection/OS.hpp"
 #include "Krystal.Core/Memory/NeverDestroyed.hpp"
 #include "Krystal.Core/Move.hpp"
 #include "Krystal.Core/Strings/ASCII.hpp"
 #include "Krystal.Core/Strings/CodePointIterator.hpp"
-#include "Krystal.Core/Types/Array.hpp"
 #include "Krystal.Net/UrlParser.hpp"
 #include "Krystal.Text/IDNA.hpp"
 #include <algorithm>

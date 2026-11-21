@@ -1,7 +1,7 @@
 ﻿#pragma once
 
+#include "Krystal.Core/Containers/SmallList.hpp"
 #include "Krystal.Core/Memory/RefPtr.hpp"
-#include "Krystal.Core/Types/SmallList.hpp"
 
 namespace krys::boo
 {

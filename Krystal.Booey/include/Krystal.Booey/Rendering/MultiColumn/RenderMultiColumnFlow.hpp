@@ -27,10 +27,10 @@
 
 #include "Krystal.Booey/Rendering/Fragmentation/RenderFragmentedFlow.hpp"
 #include "Krystal.Core/Attributes.hpp"
+#include "Krystal.Core/Containers/HashMap.hpp"
 #include "Krystal.Core/Macros.hpp"
 #include "Krystal.Core/Memory/WeakPtr.hpp"
 #include "Krystal.Core/TypeCast.hpp"
-#include "Krystal.Core/Types/HashMap.hpp"
 
 namespace krys::boo
 {

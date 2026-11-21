@@ -1,9 +1,9 @@
 ﻿#pragma once
 
+#include "Krystal.Core/Containers/Span.hpp"
 #include "Krystal.Core/Enum.hpp"
 #include "Krystal.Core/Numeric.hpp"
 #include "Krystal.Core/Strings/String.hpp"
-#include "Krystal.Core/Types/Span.hpp"
 
 namespace krys::gfx
 {

@@ -1,10 +1,10 @@
 ﻿#pragma once
 
 #include "Krystal.Core/Attributes.hpp"
+#include "Krystal.Core/Containers/Array.hpp"
+#include "Krystal.Core/Containers/Span.hpp"
 #include "Krystal.Core/Numeric.hpp"
 #include "Krystal.Core/Strings/String.hpp"
-#include "Krystal.Core/Types/Array.hpp"
-#include "Krystal.Core/Types/Span.hpp"
 #include <algorithm>
 
 namespace krys::boo::html

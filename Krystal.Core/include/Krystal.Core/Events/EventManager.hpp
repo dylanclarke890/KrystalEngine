@@ -1,15 +1,15 @@
 ﻿#pragma once
 
 #include "Krystal.Core/Concepts.hpp"
+#include "Krystal.Core/Containers/HashMap.hpp"
+#include "Krystal.Core/Containers/List.hpp"
+#include "Krystal.Core/Containers/Queue.hpp"
 #include "Krystal.Core/Events/Event.hpp"
 #include "Krystal.Core/Macros.hpp"
 #include "Krystal.Core/Memory/UniquePtr.hpp"
 #include "Krystal.Core/Move.hpp"
 #include "Krystal.Core/Numeric.hpp"
 #include "Krystal.Core/Types/Func.hpp"
-#include "Krystal.Core/Types/HashMap.hpp"
-#include "Krystal.Core/Types/List.hpp"
-#include "Krystal.Core/Types/Queue.hpp"
 
 namespace krys
 {

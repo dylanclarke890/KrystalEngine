@@ -23,8 +23,8 @@
  */
 
 #include "Krystal.Booey/CSS/Values/Grid/GridNamedAreaMap.hpp"
+#include "Krystal.Core/Containers/HashSet.hpp"
 #include "Krystal.Core/Strings/StringBuilder.hpp"
-#include "Krystal.Core/Types/HashSet.hpp"
 
 namespace krys::boo::css
 {

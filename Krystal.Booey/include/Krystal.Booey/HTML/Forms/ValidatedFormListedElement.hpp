@@ -30,8 +30,8 @@
 #pragma once
 
 #include "Krystal.Booey/HTML/Forms/FormListedElement.hpp"
+#include "Krystal.Core/Containers/List.hpp"
 #include "Krystal.Core/TriState.hpp"
-#include "Krystal.Core/Types/List.hpp"
 
 namespace krys::boo
 {

@@ -26,10 +26,10 @@
 #pragma once
 
 #include "Krystal.Core/Attributes.hpp"
+#include "Krystal.Core/Containers/List.hpp"
 #include "Krystal.Core/Move.hpp"
 #include "Krystal.Core/Numeric.hpp"
 #include "Krystal.Core/Strings/StringAtom.hpp"
-#include "Krystal.Core/Types/List.hpp"
 
 namespace krys::boo
 {

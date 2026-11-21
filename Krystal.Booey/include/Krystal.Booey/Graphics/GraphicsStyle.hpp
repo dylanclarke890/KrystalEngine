@@ -26,8 +26,8 @@
 #pragma once
 
 #include "Krystal.Booey/Graphics/Color/Color.hpp"
+#include "Krystal.Core/Containers/Array.hpp"
 #include "Krystal.Core/Geometry/Size.hpp"
-#include "Krystal.Core/Types/Array.hpp"
 #include "Krystal.Core/Types/Variant.hpp"
 
 namespace krys

@@ -37,8 +37,8 @@
 #include "Krystal.Booey/Page/Frame.hpp"
 #include "Krystal.Booey/Platform/Pasteboard/Pasteboard.hpp"
 #include "Krystal.Booey/Platform/Pasteboard/StaticPasteboard.hpp"
+#include "Krystal.Core/Containers/HashSet.hpp"
 #include "Krystal.Core/Strings/ASCII.hpp"
-#include "Krystal.Core/Types/HashSet.hpp"
 #include "Krystal.Net/Url.hpp"
 #include <algorithm>
 

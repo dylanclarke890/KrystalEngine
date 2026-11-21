@@ -28,9 +28,9 @@
 #include "Krystal.Booey/Layout/FormattingContexts/FormattingConstraints.hpp"
 #include "Krystal.Booey/Layout/LayoutState.hpp"
 #include "Krystal.Core/Attributes.hpp"
+#include "Krystal.Core/Containers/HashMap.hpp"
 #include "Krystal.Core/Macros.hpp"
 #include "Krystal.Core/Memory/CheckedPtr.hpp"
-#include "Krystal.Core/Types/HashMap.hpp"
 #include "Krystal.Core/Types/Maybe.hpp"
 
 namespace krys::boo::layout

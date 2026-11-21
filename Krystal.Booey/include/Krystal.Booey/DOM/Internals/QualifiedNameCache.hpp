@@ -30,8 +30,8 @@
 #include "Krystal.Booey/DOM/Types/QualifiedName.hpp"
 #include "Krystal.Booey/HTML/Types/Namespace.hpp"
 #include "Krystal.Booey/HTML/Types/TagName.hpp"
+#include "Krystal.Core/Containers/HashSet.hpp"
 #include "Krystal.Core/Hashing/FastHash.hpp"
-#include "Krystal.Core/Types/HashSet.hpp"
 #include <utility>
 
 namespace krys::boo::dom

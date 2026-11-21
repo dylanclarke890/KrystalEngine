@@ -26,7 +26,7 @@
 
 #include "Krystal.Booey/CSS/Values/ValueId.hpp"
 #include "Krystal.Core/Concepts.hpp"
-#include "Krystal.Core/Types/Array.hpp"
+#include "Krystal.Core/Containers/Array.hpp"
 #include "Krystal.Core/Visitor.hpp"
 #include <ranges>
 #include <tuple>
