@@ -33,10 +33,10 @@
 #include "Krystal.Booey/DOM/Events/Event.hpp"
 #include "Krystal.Booey/DOM/Types/DOMString.hpp"
 #include "Krystal.Core/Attributes.hpp"
-#include "Krystal.Core/CanMakeWeakPtr.hpp"
-#include "Krystal.Core/RefCounted.hpp"
+#include "Krystal.Core/Memory/CanMakeWeakPtr.hpp"
+#include "Krystal.Core/Memory/RefCounted.hpp"
+#include "Krystal.Core/Memory/RefPtr.hpp"
 #include "Krystal.Core/Strings/String.hpp"
-#include "Krystal.Core/Types/RefPtr.hpp"
 #include "Krystal.Net/Url.hpp"
 
 namespace krys::boo

@@ -26,9 +26,9 @@
 #pragma once
 
 #include "Krystal.Core/Assert.hpp"
+#include "Krystal.Core/Memory/RefPtr.hpp"
 #include "Krystal.Core/Types/Array.hpp"
 #include "Krystal.Core/Types/Maybe.hpp"
-#include "Krystal.Core/Types/RefPtr.hpp"
 
 namespace krys::boo::css
 {

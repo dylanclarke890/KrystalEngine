@@ -28,7 +28,7 @@
 #include "Krystal.Booey/Rendering/Painting/PaintInfo.hpp"
 #include "Krystal.Booey/Rendering/RenderBlockFlow.hpp"
 #include "Krystal.Booey/Rendering/Style/RenderStyle+GettersInlines.hpp"
-#include "Krystal.Core/Utils/Move.hpp"
+#include "Krystal.Core/Move.hpp"
 
 namespace krys::boo
 {

@@ -1,7 +1,7 @@
 ﻿#include "Krystal.Booey/HTML/Sanitizer/SanitizerConstants.hpp"
 #include "Krystal.Booey/HTML/Attributes/EventHandlerAttributes.hpp"
 #include "Krystal.Booey/Infra/Namespaces.hpp"
-#include "Krystal.Core/Threading/NeverDestroyed.hpp"
+#include "Krystal.Core/Memory/NeverDestroyed.hpp"
 #include "Krystal.Core/Types/Array.hpp"
 #include <algorithm>
 #include <ranges>
@@ -316,7 +316,7 @@ namespace krys::boo::html
         }
         return config;
       }()};
-    return configuration.get();
+    return *configuration;
   }
 
   const SanitizerConfig &SanitizerConstants::BuiltInSafeBaselineConfiguration() noexcept
@@ -344,7 +344,7 @@ namespace krys::boo::html
                                                             config.RemoveAttributes.emplace();
                                                             return config;
                                                           }()};
-    return configuration.get();
+    return *configuration;
   }
 
   Span<const SanitizerElementNamespace> SanitizerConstants::BuiltInNonReplaceableElements() noexcept
@@ -354,7 +354,7 @@ namespace krys::boo::html
       {u8"svg", infra::namespaces::SVG},
       {u8"math", infra::namespaces::MathML},
     }};
-    return elements.get();
+    return *elements;
   }
 
   bool SanitizerConstants::IsNavigatingUrlAttribute(const SanitizerElementNamespace &element,

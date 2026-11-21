@@ -26,7 +26,7 @@
 
 #include "Krystal.Booey/Rendering/Line/LegacyInlineIterator.hpp"
 #include "Krystal.Booey/Rendering/Line/LineInfo.hpp"
-#include "Krystal.Core/Types/CheckedPtr.hpp"
+#include "Krystal.Core/Memory/CheckedPtr.hpp"
 #include "Krystal.Text/TextBreakIterator.hpp"
 
 namespace krys::boo

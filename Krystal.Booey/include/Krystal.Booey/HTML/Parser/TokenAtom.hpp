@@ -29,8 +29,8 @@
 #include "Krystal.Booey/DOM/Types/DOMString.hpp"
 #include "Krystal.Booey/HTML/Parser/Token.hpp"
 #include "Krystal.Core/Assert.hpp"
+#include "Krystal.Core/Move.hpp"
 #include "Krystal.Core/Numeric.hpp"
-#include "Krystal.Core/Utils/Move.hpp"
 
 namespace krys::boo::html
 {

@@ -24,7 +24,7 @@
  */
 
 #include "Krystal.Booey/Graphics/Images/ImageFrame.hpp"
-#include "Krystal.Core/Threading/NeverDestroyed.hpp"
+#include "Krystal.Core/Memory/NeverDestroyed.hpp"
 
 namespace krys::boo
 {

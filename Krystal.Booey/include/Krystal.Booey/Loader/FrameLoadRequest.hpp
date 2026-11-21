@@ -29,7 +29,7 @@
 #include "Krystal.Booey/Loader/FetchOptions.hpp"
 #include "Krystal.Booey/Loader/FrameLoaderTypes.hpp"
 #include "Krystal.Booey/Loader/SubstituteData.hpp"
-#include "Krystal.Core/Types/RefPtr.hpp"
+#include "Krystal.Core/Memory/RefPtr.hpp"
 #include "Krystal.Net/ResourceRequest.hpp"
 
 namespace krys::boo

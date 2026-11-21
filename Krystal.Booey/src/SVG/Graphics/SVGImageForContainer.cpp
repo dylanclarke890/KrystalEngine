@@ -20,7 +20,7 @@
 #include "Krystal.Booey/SVG/Graphics/SVGImageForContainer.hpp"
 #include "Krystal.Booey/Graphics/Images/NativeImage.hpp"
 #include "Krystal.Core/Geometry/Size.hpp"
-#include "Krystal.Core/Utils/Move.hpp"
+#include "Krystal.Core/Move.hpp"
 
 namespace krys::boo
 {

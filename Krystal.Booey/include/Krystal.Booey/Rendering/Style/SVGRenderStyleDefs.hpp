@@ -42,9 +42,9 @@
 #include "Krystal.Booey/Style/Values/SVG/SVGRadiusComponent.hpp"
 #include "Krystal.Booey/Style/Values/SVG/SVGStrokeDasharray.hpp"
 #include "Krystal.Booey/Style/Values/SVG/SVGStrokeDashoffset.hpp"
-#include "Krystal.Core/RefCounted.hpp"
+#include "Krystal.Core/Memory/RefCounted.hpp"
+#include "Krystal.Core/Memory/RefPtr.hpp"
 #include "Krystal.Core/Types/FixedVector.hpp"
-#include "Krystal.Core/Types/RefPtr.hpp"
 
 namespace krys::boo
 {

@@ -27,8 +27,8 @@
 #include "Krystal.Core/Attributes.hpp"
 #include "Krystal.Core/Geometry/Point.hpp"
 #include "Krystal.Core/Geometry/Size.hpp"
+#include "Krystal.Core/Memory/RefPtr.hpp"
 #include "Krystal.Core/Types/List.hpp"
-#include "Krystal.Core/Types/RefPtr.hpp"
 
 namespace krys::boo
 {

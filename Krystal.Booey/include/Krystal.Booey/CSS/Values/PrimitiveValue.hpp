@@ -31,10 +31,10 @@
 #include "Krystal.Booey/DOM/Types/ExceptionOr.hpp"
 #include "Krystal.Booey/Graphics/Geometry/LayoutUnit.hpp"
 #include "Krystal.Core/Maths/Extras.hpp"
+#include "Krystal.Core/Memory/NeverDestroyed.hpp"
+#include "Krystal.Core/Memory/RefPtr.hpp"
 #include "Krystal.Core/Strings/StringAtom.hpp"
-#include "Krystal.Core/Threading/NeverDestroyed.hpp"
 #include "Krystal.Core/Types/Maybe.hpp"
-#include "Krystal.Core/Types/RefPtr.hpp"
 #include <cmath>
 #include <limits>
 

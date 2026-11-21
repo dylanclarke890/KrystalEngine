@@ -33,9 +33,9 @@
 #include "Krystal.Booey/Graphics/Fonts/SystemFonts.hpp"
 #include "Krystal.Core/Assert.hpp"
 #include "Krystal.Core/Enum.hpp"
+#include "Krystal.Core/Memory/RefPtr.hpp"
 #include "Krystal.Core/Types/List.hpp"
 #include "Krystal.Core/Types/Maybe.hpp"
-#include "Krystal.Core/Types/RefPtr.hpp"
 #include "Krystal.Core/Types/Variant.hpp"
 
 namespace krys::boo

@@ -30,7 +30,7 @@
 #include "Krystal.Booey/DOM/Nodes/Element.hpp"
 #include "Krystal.Booey/DOM/Nodes/ShadowRoot.hpp"
 #include "Krystal.Booey/HTML/Elements/HTMLSlotElement.hpp"
-#include "Krystal.Core/Types/CheckedPtr.hpp"
+#include "Krystal.Core/Memory/CheckedPtr.hpp"
 
 namespace krys::boo::dom
 {

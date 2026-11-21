@@ -2,9 +2,9 @@
 
 #include "Krystal.Core/Assert.hpp"
 #include "Krystal.Core/Concepts.hpp"
+#include "Krystal.Core/Memory/RefPtr.hpp"
+#include "Krystal.Core/Memory/WeakPtrImpl.hpp"
 #include "Krystal.Core/TypeCast.hpp"
-#include "Krystal.Core/Types/RefPtr.hpp"
-#include "Krystal.Core/Types/WeakPtrImpl.hpp"
 #include "Krystal.Core/TypeTraits.hpp"
 
 namespace krys::detail

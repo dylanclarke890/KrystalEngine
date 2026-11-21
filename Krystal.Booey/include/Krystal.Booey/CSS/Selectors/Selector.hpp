@@ -26,13 +26,13 @@
 #include "Krystal.Booey/DOM/Types/QualifiedName.hpp"
 #include "Krystal.Booey/Rendering/Style/RenderStyleConstants.hpp"
 #include "Krystal.Core/Enum.hpp"
+#include "Krystal.Core/Memory/RefPtr.hpp"
+#include "Krystal.Core/Memory/UniquePtr.hpp"
 #include "Krystal.Core/Strings/ASCII.hpp"
 #include "Krystal.Core/Types/Array.hpp"
 #include "Krystal.Core/Types/FixedVector.hpp"
 #include "Krystal.Core/Types/Func.hpp"
 #include "Krystal.Core/Types/Maybe.hpp"
-#include "Krystal.Core/Types/RefPtr.hpp"
-#include "Krystal.Core/Types/UniquePtr.hpp"
 
 namespace krys::boo::css
 {

@@ -34,13 +34,13 @@
 #include "Krystal.Booey/Loader/Cache/CachedResourceRequest.hpp"
 #include "Krystal.Booey/Loader/Cache/CachedSVGDocument.hpp"
 #include "Krystal.Booey/Loader/Cache/CachePolicy.hpp"
-#include "Krystal.Core/CanMakeWeakPtr.hpp"
-#include "Krystal.Core/RefCounted.hpp"
+#include "Krystal.Core/Memory/CanMakeWeakPtr.hpp"
+#include "Krystal.Core/Memory/RefCounted.hpp"
+#include "Krystal.Core/Memory/WeakPtr.hpp"
 #include "Krystal.Core/Time/Timer.hpp"
 #include "Krystal.Core/Types/Expected.hpp"
 #include "Krystal.Core/Types/HashMap.hpp"
 #include "Krystal.Core/Types/HashSet.hpp"
-#include "Krystal.Core/Types/WeakPtr.hpp"
 #include "Krystal.Net/ResourceError.hpp"
 
 namespace krys::boo

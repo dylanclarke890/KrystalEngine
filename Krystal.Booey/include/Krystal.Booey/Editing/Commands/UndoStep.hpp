@@ -32,7 +32,7 @@
 
 #include "Krystal.Booey/Editing/EditAction.hpp"
 #include "Krystal.Core/Attributes.hpp"
-#include "Krystal.Core/RefCounted.hpp"
+#include "Krystal.Core/Memory/RefCounted.hpp"
 #include "Krystal.Core/Strings/String.hpp"
 
 namespace krys::boo

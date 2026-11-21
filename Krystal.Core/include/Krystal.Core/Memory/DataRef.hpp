@@ -1,8 +1,8 @@
 ﻿#pragma once
 
 #include "Krystal.Core/Attributes.hpp"
-#include "Krystal.Core/Types/RefPtr.hpp"
-#include "Krystal.Core/Utils/Move.hpp"
+#include "Krystal.Core/Memory/RefPtr.hpp"
+#include "Krystal.Core/Move.hpp"
 
 namespace krys
 {

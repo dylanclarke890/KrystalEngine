@@ -27,7 +27,7 @@
 #include "Krystal.Booey/CSS/StyleSheets/StyleSheetContents.hpp"
 #include "Krystal.Core/Assert.hpp"
 #include "Krystal.Core/Hashing/FastHash.hpp"
-#include "Krystal.Core/Threading/NeverDestroyed.hpp"
+#include "Krystal.Core/Memory/NeverDestroyed.hpp"
 
 namespace krys::boo::style
 {

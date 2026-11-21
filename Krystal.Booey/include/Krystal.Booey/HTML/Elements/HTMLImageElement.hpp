@@ -27,8 +27,8 @@
 #include "Krystal.Booey/HTML/Elements/HTMLElement.hpp"
 #include "Krystal.Booey/HTML/Forms/FormAssociatedElement.hpp"
 #include "Krystal.Booey/Loader/ImageLoader.hpp"
-#include "Krystal.Core/Types/UniquePtr.hpp"
-#include "Krystal.Core/Types/WeakPtr.hpp"
+#include "Krystal.Core/Memory/UniquePtr.hpp"
+#include "Krystal.Core/Memory/WeakPtr.hpp"
 
 namespace krys::boo
 {

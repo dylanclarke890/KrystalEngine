@@ -50,7 +50,7 @@
 #include "Krystal.Booey/CSS/Rules/PositionTryRule.hpp"
 #include "Krystal.Booey/CSS/StyleSheets/StyleSheetContents.hpp"
 #include "Krystal.Core/Assert.hpp"
-#include "Krystal.Core/Utils/Move.hpp"
+#include "Krystal.Core/Move.hpp"
 #include <functional>
 #include <memory>
 

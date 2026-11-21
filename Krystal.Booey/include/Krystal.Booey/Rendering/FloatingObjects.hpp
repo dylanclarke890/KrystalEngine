@@ -26,10 +26,10 @@
 #include "Krystal.Booey/Graphics/Geometry/LayoutRect.hpp"
 #include "Krystal.Core/Attributes.hpp"
 #include "Krystal.Core/Macros.hpp"
+#include "Krystal.Core/Memory/UniquePtr.hpp"
+#include "Krystal.Core/Memory/WeakPtr.hpp"
 #include "Krystal.Core/Types/HashMap.hpp"
 #include "Krystal.Core/Types/IntervalTree.hpp"
-#include "Krystal.Core/Types/UniquePtr.hpp"
-#include "Krystal.Core/Types/WeakPtr.hpp"
 #include <list>
 
 namespace krys::boo

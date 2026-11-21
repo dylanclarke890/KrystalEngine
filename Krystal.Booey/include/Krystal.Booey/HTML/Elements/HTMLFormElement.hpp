@@ -27,8 +27,8 @@
 #include "Krystal.Booey/HTML/Elements/HTMLElement.hpp"
 #include "Krystal.Booey/HTML/Forms/RadioButtonGroups.hpp"
 #include "Krystal.Booey/Loader/FormSubmission.hpp"
+#include "Krystal.Core/Memory/WeakPtr.hpp"
 #include "Krystal.Core/Types/Variant.hpp"
-#include "Krystal.Core/Types/WeakPtr.hpp"
 
 namespace krys::boo
 {

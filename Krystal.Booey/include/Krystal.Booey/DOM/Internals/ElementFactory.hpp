@@ -5,9 +5,9 @@
 #include "Krystal.Booey/HTML/Elements/HTMLElement.hpp"
 #include "Krystal.Booey/Infra/Namespaces.hpp"
 #include "Krystal.Core/Attributes.hpp"
+#include "Krystal.Core/Memory/RefPtr.hpp"
 #include "Krystal.Core/TypeCast.hpp"
 #include "Krystal.Core/Types/Maybe.hpp"
-#include "Krystal.Core/Types/RefPtr.hpp"
 
 namespace krys::boo
 {

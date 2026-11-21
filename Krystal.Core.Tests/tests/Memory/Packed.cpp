@@ -1,4 +1,4 @@
-﻿#include "Krystal.Core/Types/Packed.hpp"
+﻿#include "Krystal.Core/Memory/Packed.hpp"
 #include "catch2/catch_test_macros.hpp"
 
 #include <array>

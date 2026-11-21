@@ -32,7 +32,7 @@
 #include "Krystal.Booey/Style/Scope/ScopeOrdinal.hpp"
 #include "Krystal.Core/Enum.hpp"
 #include "Krystal.Core/Hashing/FastHash.hpp"
-#include "Krystal.Core/RefCounted.hpp"
+#include "Krystal.Core/Memory/RefCounted.hpp"
 #include "Krystal.Core/Types/List.hpp"
 #include "Krystal.Core/Types/SmallList.hpp"
 #include <algorithm>

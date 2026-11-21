@@ -24,7 +24,7 @@
  */
 
 #include "Krystal.Booey/Graphics/Fonts/FontGenericFamilies.hpp"
-#include "Krystal.Core/Threading/NeverDestroyed.hpp"
+#include "Krystal.Core/Memory/NeverDestroyed.hpp"
 #include "Krystal.I18n/Language.hpp"
 #include "Krystal.Text/Script.hpp"
 

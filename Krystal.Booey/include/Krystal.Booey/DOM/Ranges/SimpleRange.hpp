@@ -27,8 +27,8 @@
 
 #include "Krystal.Booey/DOM/Ranges/BoundaryPoint.hpp"
 #include "Krystal.Core/Attributes.hpp"
+#include "Krystal.Core/Memory/RefPtr.hpp"
 #include "Krystal.Core/Types/Maybe.hpp"
-#include "Krystal.Core/Types/RefPtr.hpp"
 #include <compare>
 #include <cstddef>
 #include <iterator>

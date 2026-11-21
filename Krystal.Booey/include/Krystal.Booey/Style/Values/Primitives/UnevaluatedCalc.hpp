@@ -26,8 +26,8 @@
 
 #include "Krystal.Booey/Style/Values/Primitives/Concepts.hpp"
 #include "Krystal.Core/Attributes.hpp"
-#include "Krystal.Core/Types/IntrusivePtr.hpp"
-#include "Krystal.Core/Types/RefPtr.hpp"
+#include "Krystal.Core/Memory/IntrusivePtr.hpp"
+#include "Krystal.Core/Memory/RefPtr.hpp"
 
 namespace krys::boo::style::calc
 {

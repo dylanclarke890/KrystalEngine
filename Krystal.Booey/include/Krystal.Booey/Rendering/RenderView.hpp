@@ -26,12 +26,12 @@
 #include "Krystal.Core/Attributes.hpp"
 #include "Krystal.Core/Geometry/Size.hpp"
 #include "Krystal.Core/Macros.hpp"
+#include "Krystal.Core/Memory/UniquePtr.hpp"
+#include "Krystal.Core/Memory/WeakPtr.hpp"
 #include "Krystal.Core/Numeric.hpp"
 #include "Krystal.Core/TypeCast.hpp"
 #include "Krystal.Core/Types/HashMap.hpp"
 #include "Krystal.Core/Types/HashSet.hpp"
-#include "Krystal.Core/Types/UniquePtr.hpp"
-#include "Krystal.Core/Types/WeakPtr.hpp"
 
 namespace krys::boo::layout
 {

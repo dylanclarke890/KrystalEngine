@@ -27,7 +27,7 @@
 #pragma once
 
 #include "Krystal.Booey/CSS/Values/ValueId.hpp"
-#include "Krystal.Core/Types/RefPtr.hpp"
+#include "Krystal.Core/Memory/RefPtr.hpp"
 
 namespace krys::boo::css
 {

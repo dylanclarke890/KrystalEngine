@@ -10,8 +10,8 @@
 #include "Krystal.Booey/FileAPI/FileList.hpp"
 #include "Krystal.Booey/HTML/Elements/HTMLInputElement.hpp"
 #include "Krystal.Core/Macros.hpp"
+#include "Krystal.Core/Memory/WeakPtr.hpp"
 #include "Krystal.Core/Types/List.hpp"
-#include "Krystal.Core/Types/WeakPtr.hpp"
 #include <format>
 #include <string>
 

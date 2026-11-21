@@ -37,12 +37,12 @@
 #include "Krystal.Booey/Style/Values/Sizing/MinimumSize.hpp"
 #include "Krystal.Core/Attributes.hpp"
 #include "Krystal.Core/Macros.hpp"
+#include "Krystal.Core/Memory/UniquePtr.hpp"
 #include "Krystal.Core/Types/HashMap.hpp"
 #include "Krystal.Core/Types/HashSet.hpp"
 #include "Krystal.Core/Types/List.hpp"
 #include "Krystal.Core/Types/Maybe.hpp"
 #include "Krystal.Core/Types/Span.hpp"
-#include "Krystal.Core/Types/UniquePtr.hpp"
 #include <map>
 
 namespace krys::boo

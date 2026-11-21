@@ -28,8 +28,8 @@
 #include "Krystal.Core/Attributes.hpp"
 #include "Krystal.Core/Concepts.hpp"
 #include "Krystal.Core/Macros.hpp"
-#include "Krystal.Core/Types/CompactPtrTuple.hpp"
-#include "Krystal.Core/Types/UniquePtr.hpp"
+#include "Krystal.Core/Memory/CompactPtrTuple.hpp"
+#include "Krystal.Core/Memory/UniquePtr.hpp"
 #include <memory>
 
 namespace krys

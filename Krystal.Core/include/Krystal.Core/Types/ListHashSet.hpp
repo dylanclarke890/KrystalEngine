@@ -1,7 +1,7 @@
 #pragma once
 
 #include "Krystal.Core/Hashing/FastHash.hpp"
-#include "Krystal.Core/Utils/Move.hpp"
+#include "Krystal.Core/Move.hpp"
 #include <cstddef>
 #include <functional>
 #include <initializer_list>

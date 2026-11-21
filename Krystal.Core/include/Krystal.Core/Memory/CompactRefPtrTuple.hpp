@@ -26,8 +26,8 @@
 #pragma once
 
 #include "Krystal.Core/Attributes.hpp"
-#include "Krystal.Core/Types/CompactPtrTuple.hpp"
-#include "Krystal.Core/Types/RefPtr.hpp"
+#include "Krystal.Core/Memory/CompactPtrTuple.hpp"
+#include "Krystal.Core/Memory/RefPtr.hpp"
 
 namespace krys
 {

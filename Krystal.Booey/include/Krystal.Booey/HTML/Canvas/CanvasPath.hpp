@@ -32,9 +32,9 @@
 #include "Krystal.Booey/DOM/Types/ExceptionOr.hpp"
 #include "Krystal.Booey/Graphics/Paths/Path.hpp"
 #include "Krystal.Core/Attributes.hpp"
+#include "Krystal.Core/Move.hpp"
 #include "Krystal.Core/Types/Span.hpp"
 #include "Krystal.Core/Types/Variant.hpp"
-#include "Krystal.Core/Utils/Move.hpp"
 
 namespace krys::boo::html
 {

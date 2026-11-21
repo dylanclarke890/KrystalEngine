@@ -3,7 +3,7 @@
 #include "catch2/matchers/catch_matchers_floating_point.hpp"
 #include "Krystal.Booey/DOM/Nodes/Document.hpp"
 #include "Krystal.Booey/HTML/Elements/HTMLElement.hpp"
-#include "Krystal.Core/Utils/Move.hpp"
+#include "Krystal.Core/Move.hpp"
 #include <numbers>
 
 namespace krys::boo::html::tests

@@ -24,7 +24,7 @@
  */
 
 #include "Krystal.Booey/CSS/Rules/CounterStyleRule.hpp"
-#include "Krystal.Core/Utils/Move.hpp"
+#include "Krystal.Core/Move.hpp"
 
 namespace krys::boo::css
 {

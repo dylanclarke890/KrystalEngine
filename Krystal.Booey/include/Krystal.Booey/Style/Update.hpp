@@ -27,12 +27,12 @@
 
 #include "Krystal.Booey/Style/Change.hpp"
 #include "Krystal.Core/Attributes.hpp"
-#include "Krystal.Core/CanMakeCheckedPtr.hpp"
+#include "Krystal.Core/Memory/CanMakeCheckedPtr.hpp"
+#include "Krystal.Core/Memory/RefPtr.hpp"
+#include "Krystal.Core/Memory/UniquePtr.hpp"
 #include "Krystal.Core/Types/HashMap.hpp"
 #include "Krystal.Core/Types/ListHashSet.hpp"
 #include "Krystal.Core/Types/Maybe.hpp"
-#include "Krystal.Core/Types/RefPtr.hpp"
-#include "Krystal.Core/Types/UniquePtr.hpp"
 #include <limits>
 #include <utility>
 

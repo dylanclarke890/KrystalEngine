@@ -23,15 +23,15 @@
 #include "Krystal.Booey/Graphics/Filters/FilterOperations.hpp"
 #include "Krystal.Booey/Graphics/Geometry/FloatRoundedRect.hpp"
 #include "Krystal.Booey/Graphics/Layers/GraphicsLayerEnums.hpp"
-#include "Krystal.Core/CanMakeCheckedPtr.hpp"
-#include "Krystal.Core/CanMakeWeakPtr.hpp"
 #include "Krystal.Core/Geometry/Point.hpp"
 #include "Krystal.Core/Geometry/Point3.hpp"
 #include "Krystal.Core/Geometry/Size.hpp"
 #include "Krystal.Core/Geometry/TransformationMatrix.hpp"
+#include "Krystal.Core/Memory/CanMakeCheckedPtr.hpp"
+#include "Krystal.Core/Memory/CanMakeWeakPtr.hpp"
+#include "Krystal.Core/Memory/WeakPtr.hpp"
 #include "Krystal.Core/Time/MonotonicTime.hpp"
 #include "Krystal.Core/Types/List.hpp"
-#include "Krystal.Core/Types/WeakPtr.hpp"
 #include "Krystal.UI/Compositing/TextureMapperAnimation.hpp"
 
 namespace krys::ui

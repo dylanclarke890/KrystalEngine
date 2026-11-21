@@ -28,8 +28,8 @@
 #include "Krystal.Booey/Style/Values/Box/Margin.hpp"
 #include "Krystal.Booey/Style/Values/Box/Padding.hpp"
 #include "Krystal.Booey/Style/Values/Position/Inset.hpp"
-#include "Krystal.Core/RefCounted.hpp"
-#include "Krystal.Core/Types/RefPtr.hpp"
+#include "Krystal.Core/Memory/RefCounted.hpp"
+#include "Krystal.Core/Memory/RefPtr.hpp"
 
 namespace krys::boo
 {

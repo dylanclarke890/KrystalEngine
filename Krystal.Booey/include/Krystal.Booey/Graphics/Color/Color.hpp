@@ -30,10 +30,10 @@
 #include "Krystal.Core/Colour/ColourSpace.hpp"
 #include "Krystal.Core/Colour/ColourUtilities.hpp"
 #include "Krystal.Core/Hashing/FastHash.hpp"
-#include "Krystal.Core/RefCounted.hpp"
+#include "Krystal.Core/Memory/RefCounted.hpp"
+#include "Krystal.Core/Memory/RefPtr.hpp"
 #include "Krystal.Core/Strings/String.hpp"
 #include "Krystal.Core/Types/Pair.hpp"
-#include "Krystal.Core/Types/RefPtr.hpp"
 #include "Krystal.Core/Utils/Tags.hpp"
 #include <bit>
 #include <functional>

@@ -30,10 +30,10 @@
 #include "Krystal.Core/Attributes.hpp"
 #include "Krystal.Core/Concepts.hpp"
 #include "Krystal.Core/Macros.hpp"
+#include "Krystal.Core/Memory/RefPtr.hpp"
 #include "Krystal.Core/Types/EnumSet.hpp"
 #include "Krystal.Core/Types/HashMap.hpp"
 #include "Krystal.Core/Types/List.hpp"
-#include "Krystal.Core/Types/RefPtr.hpp"
 
 namespace krys::boo
 {

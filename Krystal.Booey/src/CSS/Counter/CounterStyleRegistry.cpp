@@ -26,7 +26,7 @@
 #include "Krystal.Booey/CSS/Counter/CounterStyleRegistry.hpp"
 #include "Krystal.Booey/Style/Values/CounterStyles/CounterStyle.hpp"
 #include "Krystal.Core/Assert.hpp"
-#include "Krystal.Core/Threading/NeverDestroyed.hpp"
+#include "Krystal.Core/Memory/NeverDestroyed.hpp"
 
 namespace krys::boo::css
 {

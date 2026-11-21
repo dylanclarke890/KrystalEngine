@@ -31,12 +31,12 @@
 #include "Krystal.Booey/Style/Validity.hpp"
 #include "Krystal.Core/Assert.hpp"
 #include "Krystal.Core/Base.hpp"
-#include "Krystal.Core/CanMakeCheckedPtr.hpp"
 #include "Krystal.Core/Enum.hpp"
+#include "Krystal.Core/Memory/CanMakeCheckedPtr.hpp"
+#include "Krystal.Core/Memory/CheckedPtr.hpp"
+#include "Krystal.Core/Memory/RefPtr.hpp"
+#include "Krystal.Core/Memory/UniquePtr.hpp"
 #include "Krystal.Core/TypeCast.hpp"
-#include "Krystal.Core/Types/CheckedPtr.hpp"
-#include "Krystal.Core/Types/RefPtr.hpp"
-#include "Krystal.Core/Types/UniquePtr.hpp"
 #include <compare>
 
 namespace krys::boo::style

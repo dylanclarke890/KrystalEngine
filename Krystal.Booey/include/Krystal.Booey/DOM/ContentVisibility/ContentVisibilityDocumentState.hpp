@@ -29,9 +29,9 @@
 #include "Krystal.Booey/DOM/IntersectionObservers/IntersectionObserver.hpp"
 #include "Krystal.Core/Attributes.hpp"
 #include "Krystal.Core/Macros.hpp"
+#include "Krystal.Core/Memory/RefPtr.hpp"
 #include "Krystal.Core/Types/EnumSet.hpp"
 #include "Krystal.Core/Types/HashMap.hpp"
-#include "Krystal.Core/Types/RefPtr.hpp"
 
 namespace krys::boo
 {

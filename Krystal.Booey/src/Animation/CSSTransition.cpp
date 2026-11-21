@@ -30,7 +30,7 @@
 #include "Krystal.Booey/Rendering/Style/RenderStyle.hpp"
 #include "Krystal.Booey/Style/Resolver.hpp"
 #include "Krystal.Booey/Style/Styleable.hpp"
-#include "Krystal.Core/Utils/Move.hpp"
+#include "Krystal.Core/Move.hpp"
 
 namespace krys::boo
 {

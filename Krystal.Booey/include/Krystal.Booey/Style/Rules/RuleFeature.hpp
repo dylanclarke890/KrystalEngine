@@ -28,13 +28,13 @@
 #include "Krystal.Core/Attributes.hpp"
 #include "Krystal.Core/Enum.hpp"
 #include "Krystal.Core/Hashing/FastHash.hpp"
+#include "Krystal.Core/Memory/RefPtr.hpp"
+#include "Krystal.Core/Memory/UniquePtr.hpp"
 #include "Krystal.Core/Numeric.hpp"
 #include "Krystal.Core/Types/Array.hpp"
 #include "Krystal.Core/Types/HashMap.hpp"
 #include "Krystal.Core/Types/HashSet.hpp"
 #include "Krystal.Core/Types/List.hpp"
-#include "Krystal.Core/Types/RefPtr.hpp"
-#include "Krystal.Core/Types/UniquePtr.hpp"
 #include <tuple>
 
 namespace krys::boo::css

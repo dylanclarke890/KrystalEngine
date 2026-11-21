@@ -28,8 +28,8 @@
 #include "Krystal.Core/Attributes.hpp"
 #include "Krystal.Core/Enum.hpp"
 #include "Krystal.Core/Macros.hpp"
-#include "Krystal.Core/Types/RefPtr.hpp"
-#include "Krystal.Core/Types/WeakPtr.hpp"
+#include "Krystal.Core/Memory/RefPtr.hpp"
+#include "Krystal.Core/Memory/WeakPtr.hpp"
 
 namespace krys::boo::dom
 {

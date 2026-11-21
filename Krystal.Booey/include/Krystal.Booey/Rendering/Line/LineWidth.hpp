@@ -31,7 +31,7 @@
 
 #include "Krystal.Booey/Graphics/Geometry/LayoutUnit.hpp"
 #include "Krystal.Core/Attributes.hpp"
-#include "Krystal.Core/Types/CheckedPtr.hpp"
+#include "Krystal.Core/Memory/CheckedPtr.hpp"
 
 namespace krys::boo
 {

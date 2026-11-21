@@ -25,9 +25,9 @@
 
 #include "Krystal.Net/UrlParser.hpp"
 #include "Krystal.Core/Assert.hpp"
+#include "Krystal.Core/Move.hpp"
 #include "Krystal.Core/Strings/ASCII.hpp"
 #include "Krystal.Core/Types/SmallList.hpp"
-#include "Krystal.Core/Utils/Move.hpp"
 #include "Krystal.Text/IDNA.hpp"
 #include <algorithm>
 #include <limits>

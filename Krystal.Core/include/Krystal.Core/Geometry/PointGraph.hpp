@@ -30,8 +30,8 @@
 #include "Krystal.Core/Geometry/Point.hpp"
 #include "Krystal.Core/Geometry/Rect.hpp"
 #include "Krystal.Core/Macros.hpp"
+#include "Krystal.Core/Memory/UniquePtr.hpp"
 #include "Krystal.Core/Types/List.hpp"
-#include "Krystal.Core/Types/UniquePtr.hpp"
 #include <algorithm>
 #include <utility>
 

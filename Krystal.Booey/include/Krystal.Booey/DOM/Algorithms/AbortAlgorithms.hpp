@@ -1,11 +1,11 @@
 ﻿#pragma once
 
+#include "Krystal.Core/Memory/RefPtr.hpp"
 #include "Krystal.Core/Numeric.hpp"
 #include "Krystal.Core/Types/Any.hpp"
 #include "Krystal.Core/Types/Func.hpp"
 #include "Krystal.Core/Types/List.hpp"
 #include "Krystal.Core/Types/Maybe.hpp"
-#include "Krystal.Core/Types/RefPtr.hpp"
 
 namespace krys::boo
 {

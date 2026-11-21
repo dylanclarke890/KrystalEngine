@@ -1,5 +1,5 @@
 ﻿#include "Krystal.Image/ICCProfileTransform.hpp"
-#include "Krystal.Core/Types/UniquePtr.hpp"
+#include "Krystal.Core/Memory/UniquePtr.hpp"
 #include <array>
 #include <cstring>
 #include <lcms2.h>

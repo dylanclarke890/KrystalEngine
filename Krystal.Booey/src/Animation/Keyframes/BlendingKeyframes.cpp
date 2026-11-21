@@ -372,7 +372,7 @@ namespace krys::boo
           keyframe->SetKey({css::ValueId::Invalid, 0});
           return keyframe;
         }()};
-      return *rule.get();
+      return **rule;
     }
 
     KRYS_NODISCARD const css::KeyframeRule &HundredPercentKeyframe() noexcept
@@ -384,7 +384,7 @@ namespace krys::boo
           keyframe->SetKey({css::ValueId::Invalid, 1});
           return keyframe;
         }()};
-      return *rule.get();
+      return **rule;
     }
   }
 

@@ -27,10 +27,10 @@
 #include "Krystal.Core/Geometry/Size.hpp"
 #include "Krystal.Core/Geometry/TransformationMatrix.hpp"
 #include "Krystal.Core/Maths/CompositeOperation.hpp"
-#include "Krystal.Core/RefCounted.hpp"
+#include "Krystal.Core/Memory/RefCounted.hpp"
+#include "Krystal.Core/Memory/RefPtr.hpp"
 #include "Krystal.Core/TypeCast.hpp"
 #include "Krystal.Core/Types/Maybe.hpp"
-#include "Krystal.Core/Types/RefPtr.hpp"
 
 namespace krys::boo
 {

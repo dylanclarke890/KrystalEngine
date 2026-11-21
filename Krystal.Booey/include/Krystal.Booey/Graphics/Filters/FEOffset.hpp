@@ -26,7 +26,7 @@
 #include "Krystal.Booey/Graphics/Geometry/BoxExtents.hpp"
 #include "Krystal.Core/Attributes.hpp"
 #include "Krystal.Core/Geometry/Size.hpp"
-#include "Krystal.Core/Types/RefPtr.hpp"
+#include "Krystal.Core/Memory/RefPtr.hpp"
 
 namespace krys::boo
 {

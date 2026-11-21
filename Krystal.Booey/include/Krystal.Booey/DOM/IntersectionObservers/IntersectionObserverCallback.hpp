@@ -1,8 +1,8 @@
 ﻿#pragma once
 
+#include "Krystal.Core/Memory/RefPtr.hpp"
 #include "Krystal.Core/Types/Func.hpp"
 #include "Krystal.Core/Types/List.hpp"
-#include "Krystal.Core/Types/RefPtr.hpp"
 
 namespace krys::boo
 {

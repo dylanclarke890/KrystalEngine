@@ -25,7 +25,7 @@
 #include "Krystal.Booey/Graphics/Color/Color.hpp"
 #include "Krystal.Booey/Graphics/Filters/FilterEffect.hpp"
 #include "Krystal.Core/Attributes.hpp"
-#include "Krystal.Core/Types/RefPtr.hpp"
+#include "Krystal.Core/Memory/RefPtr.hpp"
 
 namespace krys::boo
 {

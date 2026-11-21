@@ -26,7 +26,7 @@
 #pragma once
 
 #include "Krystal.Core/Attributes.hpp"
-#include "Krystal.Core/Types/UniquePtr.hpp"
+#include "Krystal.Core/Memory/UniquePtr.hpp"
 #include <utility>
 
 namespace krys::boo

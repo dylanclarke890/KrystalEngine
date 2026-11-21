@@ -34,8 +34,8 @@
 #include "Krystal.Booey/Text/WritingMode.hpp"
 #include "Krystal.Core/Attributes.hpp"
 #include "Krystal.Core/Geometry/Rect.hpp"
+#include "Krystal.Core/Memory/RefPtr.hpp"
 #include "Krystal.Core/Strings/String.hpp"
-#include "Krystal.Core/Types/RefPtr.hpp"
 
 namespace krys::boo
 {

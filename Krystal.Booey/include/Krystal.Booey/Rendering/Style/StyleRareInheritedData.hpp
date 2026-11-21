@@ -61,8 +61,8 @@
 #include "Krystal.Booey/Style/Values/TextDecoration/TextUnderlinePosition.hpp"
 #include "Krystal.Booey/Style/Values/UI/AccentColor.hpp"
 #include "Krystal.Booey/Style/Values/UI/Cursor.hpp"
-#include "Krystal.Core/RefCounted.hpp"
-#include "Krystal.Core/Types/DataRef.hpp"
+#include "Krystal.Core/Memory/DataRef.hpp"
+#include "Krystal.Core/Memory/RefCounted.hpp"
 #include "Krystal.Core/Types/EnumSet.hpp"
 #include "Krystal.Core/Types/FixedVector.hpp"
 

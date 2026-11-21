@@ -30,11 +30,11 @@
 #include "Krystal.Core/Assert.hpp"
 #include "Krystal.Core/Base.hpp"
 #include "Krystal.Core/Enum.hpp"
+#include "Krystal.Core/Memory/UniquePtr.hpp"
+#include "Krystal.Core/Move.hpp"
 #include "Krystal.Core/Types/Array.hpp"
 #include "Krystal.Core/Types/SmallList.hpp"
 #include "Krystal.Core/Types/Span.hpp"
-#include "Krystal.Core/Types/UniquePtr.hpp"
-#include "Krystal.Core/Utils/Move.hpp"
 #include "Krystal.Text/Encodings/Encode.hpp"
 #include "Krystal.Text/Encodings/UTF.hpp"
 

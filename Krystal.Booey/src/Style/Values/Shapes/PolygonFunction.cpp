@@ -52,7 +52,7 @@ namespace krys::boo::style
   static const boo::Path &CachedPolygonPath(const List<PointF> &points)
   {
     static NeverDestroyed<TinyLRUCache<List<PointF>, boo::Path, 4, PolygonPathPolicy>> cache;
-    return cache.get().Get(points);
+    return cache->Get(points);
   }
 
   // MARK: - Path

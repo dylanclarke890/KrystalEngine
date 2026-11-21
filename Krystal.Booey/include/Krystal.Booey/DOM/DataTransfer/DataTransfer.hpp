@@ -28,15 +28,15 @@
 #include "Krystal.Booey/Page/Drag/DragActions.hpp"
 #include "Krystal.Booey/Platform/Pasteboard/DragImage.hpp"
 #include "Krystal.Core/Attributes.hpp"
-#include "Krystal.Core/CanMakeWeakPtr.hpp"
 #include "Krystal.Core/Geometry/Point.hpp"
 #include "Krystal.Core/Macros.hpp"
-#include "Krystal.Core/RefCounted.hpp"
+#include "Krystal.Core/Memory/CanMakeWeakPtr.hpp"
+#include "Krystal.Core/Memory/RefCounted.hpp"
+#include "Krystal.Core/Memory/RefPtr.hpp"
+#include "Krystal.Core/Memory/UniquePtr.hpp"
 #include "Krystal.Core/Types/EnumSet.hpp"
 #include "Krystal.Core/Types/List.hpp"
 #include "Krystal.Core/Types/Maybe.hpp"
-#include "Krystal.Core/Types/RefPtr.hpp"
-#include "Krystal.Core/Types/UniquePtr.hpp"
 
 namespace krys::boo
 {

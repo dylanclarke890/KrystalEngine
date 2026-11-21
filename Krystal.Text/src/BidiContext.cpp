@@ -22,7 +22,7 @@
 #include "Krystal.Text/BidiContext.hpp"
 
 #include "Krystal.Core/Assert.hpp"
-#include "Krystal.Core/Threading/NeverDestroyed.hpp"
+#include "Krystal.Core/Memory/NeverDestroyed.hpp"
 #include "Krystal.Core/Types/List.hpp"
 #include "Krystal.Text/Bidi.hpp"
 
@@ -58,24 +58,24 @@ namespace krys::text
       {
         static NeverDestroyed<RefPtr<BidiContext>> ltrContext =
           CreateUncached(0, BidiClass::LeftToRight, false, BidiEmbeddingSource::FromStyleOrDOM, nullptr);
-        return ltrContext.get();
+        return *ltrContext;
       }
 
       static NeverDestroyed<RefPtr<BidiContext>> ltrOverrideContext =
         CreateUncached(0, BidiClass::LeftToRight, true, BidiEmbeddingSource::FromStyleOrDOM, nullptr);
-      return ltrOverrideContext.get();
+      return *ltrOverrideContext;
     }
 
     if (!override)
     {
       static NeverDestroyed<RefPtr<BidiContext>> rtlContext =
         CreateUncached(1, BidiClass::RightToLeft, false, BidiEmbeddingSource::FromStyleOrDOM, nullptr);
-      return rtlContext.get();
+      return *rtlContext;
     }
 
     static NeverDestroyed<RefPtr<BidiContext>> rtlOverrideContext =
       CreateUncached(1, BidiClass::RightToLeft, true, BidiEmbeddingSource::FromStyleOrDOM, nullptr);
-    return rtlOverrideContext.get();
+    return *rtlOverrideContext;
   }
 
   namespace

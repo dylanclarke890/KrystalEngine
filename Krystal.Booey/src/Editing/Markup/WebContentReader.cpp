@@ -28,7 +28,7 @@
 #include "Krystal.Booey/DOM/Nodes/DocumentFragment.hpp"
 #include "Krystal.Booey/Editing/Markup/Markup.hpp"
 #include "Krystal.Booey/Page/Frame.hpp"
-#include "Krystal.Core/Utils/Move.hpp"
+#include "Krystal.Core/Move.hpp"
 #include "Krystal.Net/Url.hpp"
 
 namespace krys::boo

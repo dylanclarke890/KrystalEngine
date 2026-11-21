@@ -23,8 +23,8 @@
 #include "Krystal.Booey/DOM/Types/DOMString.hpp"
 #include "Krystal.Booey/HTML/Types/Namespace.hpp"
 #include "Krystal.Booey/HTML/Types/TagName.hpp"
-#include "Krystal.Core/RefCounted.hpp"
-#include "Krystal.Core/Types/RefPtr.hpp"
+#include "Krystal.Core/Memory/RefCounted.hpp"
+#include "Krystal.Core/Memory/RefPtr.hpp"
 
 namespace krys::boo
 {

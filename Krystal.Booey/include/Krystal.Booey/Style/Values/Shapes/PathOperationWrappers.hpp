@@ -27,8 +27,8 @@
 #pragma once
 
 #include "Krystal.Booey/Rendering/PathOperation.hpp"
+#include "Krystal.Core/Memory/PointerComparison.hpp"
 #include "Krystal.Core/Strings/StringBuilder.hpp"
-#include "Krystal.Core/Utils/PointerComparison.hpp"
 
 namespace krys::boo::style
 {

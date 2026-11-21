@@ -24,7 +24,7 @@
 #include "Krystal.Booey/CSS/Properties/Property.hpp"
 #include "Krystal.Booey/CSS/Types/CSSOMString.hpp"
 #include "Krystal.Booey/Graphics/Color/Color.hpp"
-#include "Krystal.Core/RefCounted.hpp"
+#include "Krystal.Core/Memory/RefCounted.hpp"
 #include "Krystal.Core/Types/Func.hpp"
 #include "Krystal.Core/Types/Maybe.hpp"
 #include "Krystal.Core/Types/Span.hpp"

@@ -34,8 +34,8 @@
 #include "Krystal.Booey/Style/Values/Primitives/NumericTypesConversions.hpp"
 #include "Krystal.Booey/Style/Values/Primitives/NumericTypesEvaluation.hpp"
 #include "Krystal.Booey/Style/Values/Primitives/NumericTypesSerialisation.hpp"
+#include "Krystal.Core/Memory/NeverDestroyed.hpp"
 #include "Krystal.Core/Strings/StringBuilder.hpp"
-#include "Krystal.Core/Threading/NeverDestroyed.hpp"
 #include <ranges>
 
 namespace krys::boo::style
@@ -155,7 +155,7 @@ namespace krys::boo::style
                    .Spread = {0},
                    .Inset = css::keywords::Inset {}}};
 
-      return IsInset(shadowToMatch) ? defaultInsetShadowData.get() : defaultShadowData.get();
+      return IsInset(shadowToMatch) ? *defaultInsetShadowData : *defaultShadowData;
     }
   };
 

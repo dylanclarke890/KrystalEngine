@@ -48,7 +48,14 @@ target_precompile_headers(Krystal.Core.Tests
 )
 
 target_sources(Krystal.Core.Tests
-	PRIVATE tests/RefCounted.cpp
+	PRIVATE tests/Memory/CheckedPtr.cpp
+	PRIVATE tests/Memory/DataRef.cpp
+	PRIVATE tests/Memory/NeverDestroyed.cpp
+	PRIVATE tests/Memory/Packed.cpp
+	PRIVATE tests/Memory/RefCounted.cpp
+	PRIVATE tests/Memory/RefPtr.cpp
+	PRIVATE tests/Memory/ThreadSafeWeakPtr.cpp
+	PRIVATE tests/Memory/WeakPtr.cpp
 
   # Hashing
 	PRIVATE tests/Hashing/FastHash.cpp
@@ -71,14 +78,11 @@ target_sources(Krystal.Core.Tests
   # Types
 	PRIVATE tests/Types/BloomFilter.cpp
 	PRIVATE tests/Types/CompactVariant.cpp
-	PRIVATE tests/Types/DataRef.cpp
 	PRIVATE tests/Types/Decimal.cpp
 	PRIVATE tests/Types/FixedVector.cpp
 	PRIVATE tests/Types/IntervalTree.cpp
 	PRIVATE tests/Types/ListHashSet.cpp
-	PRIVATE tests/Types/Packed.cpp
 	PRIVATE tests/Types/SharedBuffer.cpp
-	PRIVATE tests/Types/ThreadSafeWeakPtr.cpp
 
   # Threading
 	PRIVATE tests/Threading/CancellationToken.cpp
@@ -86,7 +90,6 @@ target_sources(Krystal.Core.Tests
 	PRIVATE tests/Threading/JobSystem.cpp
 	PRIVATE tests/Threading/MainThread.cpp
 	PRIVATE tests/Threading/ManualWorkQueue.cpp
-	PRIVATE tests/Threading/NeverDestroyed.cpp
 	PRIVATE tests/Threading/TaskInbox.cpp
 	PRIVATE tests/Threading/Thread.cpp
 

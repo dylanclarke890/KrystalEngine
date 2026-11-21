@@ -1,6 +1,6 @@
 ﻿#include "Krystal.Net/Url.hpp"
 #include "catch2/catch_test_macros.hpp"
-#include "Krystal.Core/Utils/Move.hpp"
+#include "Krystal.Core/Move.hpp"
 #include "Krystal.Net/UrlHash.hpp"
 #include <string>
 

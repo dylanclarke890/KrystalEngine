@@ -26,8 +26,8 @@
 #pragma once
 
 #include "Krystal.Booey/CSS/Values/Types.hpp"
+#include "Krystal.Core/Memory/UniquePtr.hpp"
 #include "Krystal.Core/Types/CompactVariant.hpp"
-#include "Krystal.Core/Types/UniquePtr.hpp"
 #include "Krystal.Core/Visitor.hpp"
 
 namespace krys::boo::css

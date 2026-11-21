@@ -1,4 +1,4 @@
-﻿#include "Krystal.Core/Types/ThreadSafeWeakPtr.hpp"
+﻿#include "Krystal.Core/Memory/ThreadSafeWeakPtr.hpp"
 #include "catch2/catch_test_macros.hpp"
 #include <atomic>
 #include <thread>

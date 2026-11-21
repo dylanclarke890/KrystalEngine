@@ -25,8 +25,8 @@
 
 #pragma once
 
+#include "Krystal.Core/Memory/RefPtr.hpp"
 #include "Krystal.Core/Numeric.hpp"
-#include "Krystal.Core/Types/RefPtr.hpp"
 
 namespace krys::boo
 {

@@ -27,7 +27,7 @@
 
 #include "Krystal.Booey/CSS/Types/CSSOMString.hpp"
 #include "Krystal.Booey/Loader/Cache/CachedResource.hpp"
-#include "Krystal.Core/Types/RefPtr.hpp"
+#include "Krystal.Core/Memory/RefPtr.hpp"
 
 namespace krys::boo
 {

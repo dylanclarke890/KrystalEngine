@@ -25,10 +25,10 @@
 
 #pragma once
 
-#include "Krystal.Core/RefCounted.hpp"
+#include "Krystal.Core/Memory/RefCounted.hpp"
+#include "Krystal.Core/Memory/RefPtr.hpp"
+#include "Krystal.Core/Move.hpp"
 #include "Krystal.Core/Types/FixedVector.hpp"
-#include "Krystal.Core/Types/RefPtr.hpp"
-#include "Krystal.Core/Utils/Move.hpp"
 
 namespace krys
 {

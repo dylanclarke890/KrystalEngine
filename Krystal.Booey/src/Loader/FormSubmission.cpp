@@ -37,8 +37,8 @@
 #include "Krystal.Booey/HTML/Forms/DOMFormData.hpp"
 #include "Krystal.Booey/Infra/StringAlgorithms.hpp"
 #include "Krystal.Booey/Loader/FrameLoadRequest.hpp"
+#include "Krystal.Core/Move.hpp"
 #include "Krystal.Core/Strings/ASCII.hpp"
-#include "Krystal.Core/Utils/Move.hpp"
 
 namespace krys::boo
 {

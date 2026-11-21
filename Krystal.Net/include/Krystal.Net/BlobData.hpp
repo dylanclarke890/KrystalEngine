@@ -32,14 +32,14 @@
 
 #include "Krystal.Core/Attributes.hpp"
 #include "Krystal.Core/Macros.hpp"
+#include "Krystal.Core/Memory/RefCounted.hpp"
+#include "Krystal.Core/Memory/RefPtr.hpp"
+#include "Krystal.Core/Move.hpp"
 #include "Krystal.Core/Numeric.hpp"
-#include "Krystal.Core/RefCounted.hpp"
 #include "Krystal.Core/Strings/String.hpp"
 #include "Krystal.Core/Types/List.hpp"
-#include "Krystal.Core/Types/RefPtr.hpp"
 #include "Krystal.Core/Types/SharedBuffer.hpp"
 #include "Krystal.Core/Types/Span.hpp"
-#include "Krystal.Core/Utils/Move.hpp"
 
 namespace krys::net
 {

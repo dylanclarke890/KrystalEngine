@@ -2,8 +2,8 @@
 
 #include "Krystal.Booey/HTML/Sanitizer/Sanitizer.hpp"
 #include "Krystal.Booey/HTML/Sanitizer/SanitizerConfig.hpp"
+#include "Krystal.Core/Memory/RefPtr.hpp"
 #include "Krystal.Core/Types/Maybe.hpp"
-#include "Krystal.Core/Types/RefPtr.hpp"
 #include "Krystal.Core/Types/Variant.hpp"
 
 namespace krys::boo::html

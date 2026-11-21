@@ -26,7 +26,7 @@
 #include "Krystal.Booey/CSS/Properties/StylePropertiesInlines.hpp"
 #include "Krystal.Booey/CSS/Values/CustomPropertyValue.hpp"
 #include "Krystal.Core/Hashing/FastHash.hpp"
-#include "Krystal.Core/Threading/NeverDestroyed.hpp"
+#include "Krystal.Core/Memory/NeverDestroyed.hpp"
 #include "Krystal.Core/Types/HashMap.hpp"
 #include <new>
 
@@ -68,7 +68,7 @@ namespace krys::boo::css
   KRYS_NODISCARD static HashMap<size_t, Ref<ImmutableStyleProperties>> &DeduplicationMap() noexcept
   {
     static NeverDestroyed<HashMap<size_t, Ref<ImmutableStyleProperties>>> map;
-    return map.get();
+    return *map;
   }
 
   Ref<ImmutableStyleProperties> ImmutableStyleProperties::CreateDeduplicating(Span<const Property> properties,

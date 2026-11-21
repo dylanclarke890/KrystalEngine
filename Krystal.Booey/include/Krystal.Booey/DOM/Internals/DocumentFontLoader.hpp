@@ -27,7 +27,7 @@
 #pragma once
 
 #include "Krystal.Booey/Loader/Cache/CachedResourceHandle.hpp"
-#include "Krystal.Core/CanMakeWeakPtr.hpp"
+#include "Krystal.Core/Memory/CanMakeWeakPtr.hpp"
 #include "Krystal.Core/Time/Timer.hpp"
 #include "Krystal.Core/Types/List.hpp"
 

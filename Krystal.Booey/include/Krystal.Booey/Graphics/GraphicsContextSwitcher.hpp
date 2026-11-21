@@ -28,8 +28,8 @@
 #include "Krystal.Core/Attributes.hpp"
 #include "Krystal.Core/Geometry/Rect.hpp"
 #include "Krystal.Core/Macros.hpp"
-#include "Krystal.Core/Types/RefPtr.hpp"
-#include "Krystal.Core/Types/UniquePtr.hpp"
+#include "Krystal.Core/Memory/RefPtr.hpp"
+#include "Krystal.Core/Memory/UniquePtr.hpp"
 
 namespace krys::boo
 {

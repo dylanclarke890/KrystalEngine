@@ -45,7 +45,7 @@
 #include "Krystal.Booey/Style/Builder/Builder.hpp"
 #include "Krystal.Booey/Style/CustomProperty.hpp"
 #include "Krystal.Booey/Style/Rules/MatchResult.hpp"
-#include "Krystal.Core/Threading/NeverDestroyed.hpp"
+#include "Krystal.Core/Memory/NeverDestroyed.hpp"
 
 namespace krys::boo::css::cq
 {

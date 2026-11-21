@@ -1,9 +1,9 @@
-﻿#include "Krystal.Core/Types/DataRef.hpp"
+﻿#include "Krystal.Core/Memory/DataRef.hpp"
 #include "catch2/catch_test_macros.hpp"
-#include "Krystal.Core/RefCounted.hpp"
+#include "Krystal.Core/Memory/PointerComparison.hpp"
+#include "Krystal.Core/Memory/RefCounted.hpp"
 #include "Krystal.Core/Types/RefCountedFixedVector.hpp"
 #include "Krystal.Core/Types/TinyLRUCache.hpp"
-#include "Krystal.Core/Utils/PointerComparison.hpp"
 
 namespace krys::tests
 {

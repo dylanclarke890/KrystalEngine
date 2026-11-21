@@ -2,7 +2,7 @@
 #include "catch2/catch_approx.hpp"
 #include "catch2/catch_test_macros.hpp"
 #include "Krystal.Booey/Animation/Timing/WebAnimationTime.hpp"
-#include "Krystal.Core/Types/UniquePtr.hpp"
+#include "Krystal.Core/Memory/UniquePtr.hpp"
 
 namespace krys::boo::tests
 {

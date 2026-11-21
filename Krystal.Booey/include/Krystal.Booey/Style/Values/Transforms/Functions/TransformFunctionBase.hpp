@@ -30,7 +30,7 @@
 #include "Krystal.Core/Geometry/Size.hpp"
 #include "Krystal.Core/Geometry/TransformationMatrix.hpp"
 
-#include "Krystal.Core/RefCounted.hpp"
+#include "Krystal.Core/Memory/RefCounted.hpp"
 
 namespace krys::boo
 {

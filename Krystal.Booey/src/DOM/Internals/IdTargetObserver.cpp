@@ -25,7 +25,7 @@
 
 #include "Krystal.Booey/DOM/Internals/IdTargetObserver.hpp"
 #include "Krystal.Booey/DOM/Internals/IdTargetObserverRegistry.hpp"
-#include "Krystal.Core/Utils/Move.hpp"
+#include "Krystal.Core/Move.hpp"
 
 namespace krys::boo::dom
 {

@@ -30,7 +30,7 @@
 #include "Krystal.Core/Colour/ColourUtilities.hpp"
 #include "Krystal.Core/Geometry/Rect.hpp"
 #include "Krystal.Core/Geometry/Size.hpp"
-#include "Krystal.Core/Types/UniquePtr.hpp"
+#include "Krystal.Core/Memory/UniquePtr.hpp"
 #include "Krystal.Image/PixelData.hpp"
 #include <algorithm>
 

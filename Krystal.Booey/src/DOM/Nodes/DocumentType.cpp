@@ -6,7 +6,7 @@
 #include "Krystal.Booey/DOM/Nodes/ShadowRoot.hpp"
 #include "Krystal.Booey/HTML/CustomElement/CustomElementReactionQueue.hpp"
 #include "Krystal.Booey/HTML/Elements/HTMLSlotElement.hpp"
-#include "Krystal.Core/Utils/Move.hpp"
+#include "Krystal.Core/Move.hpp"
 
 namespace krys::boo
 {

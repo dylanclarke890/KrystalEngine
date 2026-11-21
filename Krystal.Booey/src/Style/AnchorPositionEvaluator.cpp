@@ -45,7 +45,7 @@
 #include "Krystal.Booey/Style/Scope/Scope.hpp"
 #include "Krystal.Booey/Style/Styleable.hpp"
 #include "Krystal.Core/Assert.hpp"
-#include "Krystal.Core/Threading/NeverDestroyed.hpp"
+#include "Krystal.Core/Memory/NeverDestroyed.hpp"
 #include "Krystal.Core/TypeCast.hpp"
 #include <algorithm>
 #include <ranges>

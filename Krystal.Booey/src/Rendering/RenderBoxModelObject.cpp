@@ -50,8 +50,8 @@
 #include "Krystal.Booey/Style/AnchorPositionEvaluator.hpp"
 #include "Krystal.Booey/Style/Calc/TreeEvaluation.hpp"
 #include "Krystal.Booey/Style/Styleable.hpp"
+#include "Krystal.Core/Memory/WeakPtr.hpp"
 #include "Krystal.Core/Types/HashMap.hpp"
-#include "Krystal.Core/Types/WeakPtr.hpp"
 
 namespace krys::boo
 {

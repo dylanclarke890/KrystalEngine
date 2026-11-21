@@ -28,12 +28,12 @@
 
 #include "Krystal.Booey/DOM/Types/DOMString.hpp"
 #include "Krystal.Booey/DOM/Types/QualifiedName.hpp"
-#include "Krystal.Core/RefCounted.hpp"
+#include "Krystal.Core/Memory/RefCounted.hpp"
+#include "Krystal.Core/Memory/RefPtr.hpp"
+#include "Krystal.Core/Memory/UniquePtr.hpp"
 #include "Krystal.Core/Types/Func.hpp"
 #include "Krystal.Core/Types/HashSet.hpp"
 #include "Krystal.Core/Types/List.hpp"
-#include "Krystal.Core/Types/RefPtr.hpp"
-#include "Krystal.Core/Types/UniquePtr.hpp"
 
 namespace krys::boo
 {

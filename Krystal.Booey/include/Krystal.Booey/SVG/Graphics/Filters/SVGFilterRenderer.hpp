@@ -27,9 +27,9 @@
 #include "Krystal.Booey/Graphics/Geometry/BoxExtents.hpp"
 #include "Krystal.Booey/SVG/Graphics/Filters/SVGFilterExpression.hpp"
 #include "Krystal.Booey/SVG/SVGUnitTypes.hpp"
+#include "Krystal.Core/Memory/RefPtr.hpp"
+#include "Krystal.Core/Memory/UniquePtr.hpp"
 #include "Krystal.Core/Types/Func.hpp"
-#include "Krystal.Core/Types/RefPtr.hpp"
-#include "Krystal.Core/Types/UniquePtr.hpp"
 
 namespace krys::boo
 {

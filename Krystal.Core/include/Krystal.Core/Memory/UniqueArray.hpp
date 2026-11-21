@@ -26,7 +26,7 @@
 #pragma once
 
 #include "Krystal.Core/Concepts.hpp"
-#include "Krystal.Core/Types/UniquePtr.hpp"
+#include "Krystal.Core/Memory/UniquePtr.hpp"
 #include "Krystal.Core/Utils/Tags.hpp"
 #include <bit>
 

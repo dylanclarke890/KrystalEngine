@@ -26,9 +26,9 @@
 #include "Krystal.Booey/SVG/SVGResourceElementClient.hpp"
 #include "Krystal.Booey/SVG/SVGTests.hpp"
 #include "Krystal.Core/Macros.hpp"
+#include "Krystal.Core/Memory/UniquePtr.hpp"
+#include "Krystal.Core/Memory/WeakPtr.hpp"
 #include "Krystal.Core/Types/List.hpp"
-#include "Krystal.Core/Types/UniquePtr.hpp"
-#include "Krystal.Core/Types/WeakPtr.hpp"
 #include <algorithm>
 
 namespace krys::boo

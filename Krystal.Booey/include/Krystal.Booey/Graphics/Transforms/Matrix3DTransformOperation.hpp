@@ -26,7 +26,7 @@
 #pragma once
 
 #include "Krystal.Booey/Graphics/Transforms/TransformOperation.hpp"
-#include "Krystal.Core/Types/RefPtr.hpp"
+#include "Krystal.Core/Memory/RefPtr.hpp"
 
 namespace krys::boo
 {

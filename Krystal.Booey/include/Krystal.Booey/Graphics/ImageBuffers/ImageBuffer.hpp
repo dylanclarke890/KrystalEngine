@@ -29,14 +29,14 @@
 
 #include "Krystal.Booey/Graphics/ImageBuffers/ImageBufferBackend.hpp"
 #include "Krystal.Booey/Graphics/RenderingResourceIdentifier.hpp"
-#include "Krystal.Core/CanMakeWeakPtr.hpp"
 #include "Krystal.Core/Geometry/Point.hpp"
 #include "Krystal.Core/Geometry/Size.hpp"
-#include "Krystal.Core/RefCounted.hpp"
+#include "Krystal.Core/Memory/CanMakeWeakPtr.hpp"
+#include "Krystal.Core/Memory/RefCounted.hpp"
+#include "Krystal.Core/Memory/RefPtr.hpp"
+#include "Krystal.Core/Memory/UniquePtr.hpp"
 #include "Krystal.Core/Strings/String.hpp"
 #include "Krystal.Core/Types/List.hpp"
-#include "Krystal.Core/Types/RefPtr.hpp"
-#include "Krystal.Core/Types/UniquePtr.hpp"
 #include <utility>
 
 namespace krys::boo

@@ -57,7 +57,7 @@
 #include "Krystal.Booey/SVG/Elements/SVGStyleElement.hpp"
 #include "Krystal.Core/Assert.hpp"
 #include "Krystal.Core/Hashing/FastHash.hpp"
-#include "Krystal.Core/Utils/Move.hpp"
+#include "Krystal.Core/Move.hpp"
 #include <algorithm>
 #include <utility>
 

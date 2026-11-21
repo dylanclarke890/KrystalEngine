@@ -26,7 +26,7 @@
 
 #pragma once
 
-#include "Krystal.Core/Utils/Move.hpp"
+#include "Krystal.Core/Move.hpp"
 
 namespace krys
 {

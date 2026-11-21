@@ -23,7 +23,7 @@
 #include "Krystal.Booey/Input/PlatformMouseEvent.hpp"
 #include "Krystal.Booey/Rendering/HitTesting/HitTestResult.hpp"
 #include "Krystal.Core/Attributes.hpp"
-#include "Krystal.Core/Utils/Move.hpp"
+#include "Krystal.Core/Move.hpp"
 
 namespace krys::boo
 {

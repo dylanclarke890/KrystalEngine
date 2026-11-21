@@ -56,7 +56,7 @@ namespace krys::boo::style
   static const boo::Path &CachedCirclePath(const RectF &rect)
   {
     static NeverDestroyed<TinyLRUCache<RectF, boo::Path, 4, CirclePathPolicy>> cache;
-    return cache.get().Get(rect);
+    return cache->Get(rect);
   }
 
   // MARK: - Path Generation

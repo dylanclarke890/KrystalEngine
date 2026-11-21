@@ -25,8 +25,8 @@
 #include "Krystal.Booey/CSS/Selectors/SelectorFilter.hpp"
 #include "Krystal.Booey/Style/Rules/PropertyAllowlist.hpp"
 #include "Krystal.Core/Attributes.hpp"
+#include "Krystal.Core/Memory/CompactRefPtrTuple.hpp"
 #include "Krystal.Core/Numeric.hpp"
-#include "Krystal.Core/Types/CompactRefPtrTuple.hpp"
 #include "Krystal.Core/Types/EnumSet.hpp"
 
 namespace krys::boo::style

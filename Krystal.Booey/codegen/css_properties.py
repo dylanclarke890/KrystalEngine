@@ -8575,7 +8575,7 @@ class GeneratePropertyParsing:
                 headers=[
                     "Krystal.Booey/CSS/Properties/PropertyId.hpp",
                     "Krystal.Booey/CSS/Values/ValueId.hpp",
-                    "Krystal.Core/Types/RefPtr.hpp",
+                    "Krystal.Core/Memory/RefPtr.hpp",
                 ],
             )
 
@@ -9582,7 +9582,7 @@ class GenerateStyleInterpolationWrapperMap:
                 headers=[
                     "Krystal.Booey/CSS/Properties/PropertyId.hpp",
                     "Krystal.Core/Types/Array.hpp",
-                    "Krystal.Core/Threading/NeverDestroyed.hpp",
+                    "Krystal.Core/Memory/NeverDestroyed.hpp",
                 ],
             )
 
@@ -9628,7 +9628,7 @@ class GenerateStyleInterpolationWrapperMap:
               KRYS_NODISCARD static WrapperMap &Singleton() noexcept
               {
                 static NeverDestroyed<WrapperMap> map;
-                return map.get();
+                return *map;
               }
 
               /// @brief The wrapper of @p id, or null if it isn't animatable.

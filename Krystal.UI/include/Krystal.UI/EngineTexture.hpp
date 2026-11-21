@@ -2,7 +2,7 @@
 
 #include "Krystal.Booey/HTML/Canvas/EngineTexture.hpp"
 #include "Krystal.Core/Colour/AlphaPremultiplication.hpp"
-#include "Krystal.Core/Types/WeakPtr.hpp"
+#include "Krystal.Core/Memory/WeakPtr.hpp"
 #include "Krystal.Gfx/Handles.hpp"
 
 namespace krys::boo

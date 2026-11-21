@@ -21,8 +21,8 @@
  */
 
 #include "Krystal.Booey/Graphics/Layers/GraphicsLayerAnimation.hpp"
+#include "Krystal.Core/Memory/PointerComparison.hpp"
 #include "Krystal.Core/Strings/TextStream.hpp"
-#include "Krystal.Core/Utils/PointerComparison.hpp"
 
 namespace krys::boo
 {

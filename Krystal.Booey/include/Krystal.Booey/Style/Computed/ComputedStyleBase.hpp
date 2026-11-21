@@ -42,11 +42,11 @@
 #include "Krystal.Booey/Text/UnicodeBidi.hpp"
 #include "Krystal.Booey/Text/WritingMode.hpp"
 #include "Krystal.Core/Geometry/GeometryForward.hpp"
-#include "Krystal.Core/Types/DataRef.hpp"
+#include "Krystal.Core/Memory/DataRef.hpp"
+#include "Krystal.Core/Memory/UniquePtr.hpp"
 #include "Krystal.Core/Types/EnumSet.hpp"
 #include "Krystal.Core/Types/FixedVector.hpp"
 #include "Krystal.Core/Types/List.hpp"
-#include "Krystal.Core/Types/UniquePtr.hpp"
 
 namespace krys
 {

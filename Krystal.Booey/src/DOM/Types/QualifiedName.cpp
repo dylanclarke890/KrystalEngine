@@ -19,7 +19,7 @@
 
 #include "Krystal.Booey/DOM/Types/QualifiedName.hpp"
 #include "Krystal.Booey/DOM/Internals/QualifiedNameCache.hpp"
-#include "Krystal.Core/Utils/Move.hpp"
+#include "Krystal.Core/Move.hpp"
 
 namespace krys::boo
 {

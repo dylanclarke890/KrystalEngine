@@ -1,7 +1,7 @@
 ﻿#include "Krystal.Core/Hashing/FastHash.hpp"
 #include "catch2/catch_test_macros.hpp"
 #include "Krystal.Core/Hashing/StableHash.hpp"
-#include "Krystal.Core/Types/UniquePtr.hpp"
+#include "Krystal.Core/Memory/UniquePtr.hpp"
 #include <optional>
 #include <string>
 #include <variant>

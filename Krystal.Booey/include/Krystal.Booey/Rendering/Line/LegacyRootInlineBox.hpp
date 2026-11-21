@@ -21,8 +21,8 @@
 #pragma once
 
 #include "Krystal.Booey/Rendering/Line/LegacyInlineFlowBox.hpp"
-#include "Krystal.Core/Types/CheckedPtr.hpp"
-#include "Krystal.Core/Types/WeakPtr.hpp"
+#include "Krystal.Core/Memory/CheckedPtr.hpp"
+#include "Krystal.Core/Memory/WeakPtr.hpp"
 #include <algorithm>
 
 namespace krys::boo

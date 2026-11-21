@@ -44,8 +44,8 @@
 #include "Krystal.Booey/Page/FrameView.hpp"
 #include "Krystal.Booey/Style/ResolveForDocument.hpp"
 #include "Krystal.Booey/Style/Scope/Scope.hpp"
+#include "Krystal.Core/Memory/NeverDestroyed.hpp"
 #include "Krystal.Core/Strings/ASCII.hpp"
-#include "Krystal.Core/Threading/NeverDestroyed.hpp"
 
 namespace krys::boo
 {

@@ -26,11 +26,11 @@
 #include "Krystal.Booey/CSS/Values/Value.hpp"
 #include "Krystal.Booey/Graphics/Images/Image.hpp"
 #include "Krystal.Booey/Style/Values/Primitives/Url.hpp"
-#include "Krystal.Core/CanMakeWeakPtr.hpp"
 #include "Krystal.Core/Geometry/Size.hpp"
-#include "Krystal.Core/RefCounted.hpp"
+#include "Krystal.Core/Memory/CanMakeWeakPtr.hpp"
+#include "Krystal.Core/Memory/RefCounted.hpp"
+#include "Krystal.Core/Memory/RefPtr.hpp"
 #include "Krystal.Core/TypeCast.hpp"
-#include "Krystal.Core/Types/RefPtr.hpp"
 
 namespace krys::boo
 {

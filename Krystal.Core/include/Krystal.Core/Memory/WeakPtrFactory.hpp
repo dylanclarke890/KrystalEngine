@@ -28,12 +28,12 @@
 
 #include "Krystal.Core/Attributes.hpp"
 #include "Krystal.Core/Macros.hpp"
+#include "Krystal.Core/Memory/CompactRefPtrTuple.hpp"
+#include "Krystal.Core/Memory/RefPtr.hpp"
+#include "Krystal.Core/Memory/WeakPtr.hpp"
+#include "Krystal.Core/Memory/WeakPtrImpl.hpp"
 #include "Krystal.Core/Numeric.hpp"
 #include "Krystal.Core/TypeCast.hpp"
-#include "Krystal.Core/Types/CompactRefPtrTuple.hpp"
-#include "Krystal.Core/Types/RefPtr.hpp"
-#include "Krystal.Core/Types/WeakPtr.hpp"
-#include "Krystal.Core/Types/WeakPtrImpl.hpp"
 
 namespace krys::detail
 {

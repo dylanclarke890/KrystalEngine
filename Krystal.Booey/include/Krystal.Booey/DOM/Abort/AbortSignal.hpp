@@ -3,11 +3,11 @@
 #include "Krystal.Booey/DOM/Events/EventTarget.hpp"
 #include "Krystal.Booey/HTML/Attributes/EventHandlerAttributes.hpp"
 #include "Krystal.Core/Attributes.hpp"
+#include "Krystal.Core/Memory/WeakPtr.hpp"
 #include "Krystal.Core/Numeric.hpp"
 #include "Krystal.Core/Types/Any.hpp"
 #include "Krystal.Core/Types/Func.hpp"
 #include "Krystal.Core/Types/List.hpp"
-#include "Krystal.Core/Types/WeakPtr.hpp"
 
 namespace krys::boo
 {

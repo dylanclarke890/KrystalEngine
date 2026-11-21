@@ -26,8 +26,8 @@
 #pragma once
 
 #include "Krystal.Core/Attributes.hpp"
-#include "Krystal.Core/Threading/NeverDestroyed.hpp"
-#include "Krystal.Core/Utils/Move.hpp"
+#include "Krystal.Core/Memory/NeverDestroyed.hpp"
+#include "Krystal.Core/Move.hpp"
 #include <array>
 #include <utility>
 
@@ -77,7 +77,7 @@ namespace krys
       if (TPolicy::IsKeyNull(key))
       {
         static NeverDestroyed<TValue> valueForNull {TPolicy::CreateValueForNullKey()};
-        return valueForNull.get();
+        return *valueForNull;
       }
 
       for (size_t i = _size; i-- > 0;)

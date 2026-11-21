@@ -1,5 +1,5 @@
 ﻿#include "Krystal.PAL/Win32/UIAutomation.hpp"
-#include "Krystal.Core/Utils/Move.hpp"
+#include "Krystal.Core/Move.hpp"
 
 #include <ole2.h>
 #include <uiautomation.h>

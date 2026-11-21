@@ -25,8 +25,8 @@
 #include "Krystal.Booey/Graphics/Gradient.hpp"
 #include "Krystal.Booey/Rendering/SVG/Legacy/LegacyRenderSVGResourceContainer.hpp"
 #include "Krystal.Booey/SVG/Elements/SVGGradientElement.hpp"
+#include "Krystal.Core/Memory/UniquePtr.hpp"
 #include "Krystal.Core/Types/HashMap.hpp"
-#include "Krystal.Core/Types/UniquePtr.hpp"
 
 namespace krys::boo
 {

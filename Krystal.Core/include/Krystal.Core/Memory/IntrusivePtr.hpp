@@ -4,10 +4,10 @@
 #include "Krystal.Core/Attributes.hpp"
 #include "Krystal.Core/Concepts.hpp"
 #include "Krystal.Core/Hashing/FastHash.hpp"
+#include "Krystal.Core/Memory/ForbidHeapAllocation.hpp"
+#include "Krystal.Core/Move.hpp"
 #include "Krystal.Core/TypeCast.hpp"
 #include "Krystal.Core/TypeTraits.hpp"
-#include "Krystal.Core/Utils/ForbidHeapAllocation.hpp"
-#include "Krystal.Core/Utils/Move.hpp"
 #include <xutility>
 
 namespace krys

@@ -29,8 +29,8 @@
 #include "Krystal.Booey/Graphics/Images/ImageFrameAnimator.hpp"
 #include "Krystal.Booey/Graphics/Images/ImageFrameWorkQueue.hpp"
 #include "Krystal.Booey/Graphics/Images/ImageSource.hpp"
+#include "Krystal.Core/Memory/WeakPtr.hpp"
 #include "Krystal.Core/Types/List.hpp"
-#include "Krystal.Core/Types/WeakPtr.hpp"
 #include "Krystal.Image/ImageDecoder.hpp"
 
 namespace krys::boo

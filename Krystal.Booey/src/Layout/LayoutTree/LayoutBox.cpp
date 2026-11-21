@@ -31,7 +31,7 @@
 #include "Krystal.Booey/Rendering/RenderObject.hpp"
 #include "Krystal.Booey/Rendering/Shapes/LayoutShape.hpp"
 #include "Krystal.Booey/Rendering/Style/RenderStyle+GettersInlines.hpp"
-#include "Krystal.Core/Threading/NeverDestroyed.hpp"
+#include "Krystal.Core/Memory/NeverDestroyed.hpp"
 #include <utility>
 
 namespace krys::boo::layout

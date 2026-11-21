@@ -25,8 +25,8 @@
 
 #include "Krystal.Booey/DOM/Types/DOMString.hpp"
 #include "Krystal.Booey/HTML/Forms/FormAssociatedElement.hpp"
+#include "Krystal.Core/Memory/UniquePtr.hpp"
 #include "Krystal.Core/Types/Maybe.hpp"
-#include "Krystal.Core/Types/UniquePtr.hpp"
 
 namespace krys::boo
 {

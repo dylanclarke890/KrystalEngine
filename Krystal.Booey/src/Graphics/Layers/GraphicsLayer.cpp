@@ -31,8 +31,8 @@
 #include "Krystal.Booey/Graphics/Layers/GraphicsLayerKeyframeValueList.hpp"
 #include "Krystal.Core/Geometry/Rect.hpp"
 #include "Krystal.Core/Geometry/Size.hpp"
+#include "Krystal.Core/Memory/NeverDestroyed.hpp"
 #include "Krystal.Core/Strings/TextStream.hpp"
-#include "Krystal.Core/Threading/NeverDestroyed.hpp"
 #include "Krystal.Core/Types/HashMap.hpp"
 #include <format>
 

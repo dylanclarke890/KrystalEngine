@@ -1,4 +1,4 @@
-﻿#include "Krystal.Core/Threading/NeverDestroyed.hpp"
+﻿#include "Krystal.Core/Memory/NeverDestroyed.hpp"
 #include "catch2/catch_test_macros.hpp"
 
 namespace krys::tests
@@ -20,12 +20,12 @@ namespace krys::tests
   TEST_CASE("NeverDestroyed", "[Utils][NeverDestroyed]")
   {
     static NeverDestroyed<Counter> counter(3);
-    CHECK(counter.get().Value == 3);
+    CHECK(counter->Value == 3);
     CHECK(counter->Value == 3);
 
     counter->Value = 4;
     const auto &constCounter = counter;
-    CHECK(constCounter.get().Value == 4);
+    CHECK(constCounter->Value == 4);
   }
 
   TEST_CASE("LazyNeverDestroyed", "[Utils][NeverDestroyed]")
@@ -39,7 +39,7 @@ namespace krys::tests
 #if KRYS_DEBUG
     CHECK(LazyCounter.IsConstructed());
 #endif
-    CHECK(LazyCounter.get().Value == 7);
+    CHECK(LazyCounter->Value == 7);
     CHECK(LazyCounter->Value == 7);
   }
 }

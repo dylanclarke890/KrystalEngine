@@ -1,4 +1,4 @@
-﻿#include "Krystal.Core/RefCounted.hpp"
+﻿#include "Krystal.Core/Memory/RefCounted.hpp"
 #include "catch2/catch_test_macros.hpp"
 
 namespace krys::tests

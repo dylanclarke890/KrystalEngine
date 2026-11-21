@@ -24,7 +24,7 @@
 #include "Krystal.Booey/CSS/Values/Primitives/Url.hpp"
 #include "Krystal.Booey/CSS/Values/Value.hpp"
 #include "Krystal.Booey/Loader/Cache/CachedResourceHandle.hpp"
-#include "Krystal.Core/Types/RefPtr.hpp"
+#include "Krystal.Core/Memory/RefPtr.hpp"
 #include "Krystal.Net/Url.hpp"
 
 namespace krys::boo

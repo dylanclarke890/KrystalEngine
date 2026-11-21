@@ -28,7 +28,7 @@
 #include "Krystal.Booey/DOM/Types/DOMString.hpp"
 #include "Krystal.Booey/FileAPI/File.hpp"
 #include "Krystal.Booey/HTML/Forms/DOMFormData.hpp"
-#include "Krystal.Core/Types/RefPtr.hpp"
+#include "Krystal.Core/Memory/RefPtr.hpp"
 #include "Krystal.Core/Types/Variant.hpp"
 
 namespace krys::boo::html

@@ -25,7 +25,7 @@
 #include "Krystal.Booey/DOM/Nodes/Document.hpp"
 #include "Krystal.Booey/Loader/Cache/CachedResourceLoader.hpp"
 #include "Krystal.Booey/Loader/Cache/CachedResourceRequest.hpp"
-#include "Krystal.Core/Utils/Move.hpp"
+#include "Krystal.Core/Move.hpp"
 
 namespace krys::boo::css
 {

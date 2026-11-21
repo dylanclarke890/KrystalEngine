@@ -2,11 +2,11 @@
 
 #include "Krystal.Core/Attributes.hpp"
 #include "Krystal.Core/Macros.hpp"
-#include "Krystal.Core/RefCounted.hpp"
+#include "Krystal.Core/Memory/RefCounted.hpp"
+#include "Krystal.Core/Memory/RefPtr.hpp"
 #include "Krystal.Core/Threading/WorkQueue.hpp"
 #include "Krystal.Core/Types/Func.hpp"
 #include "Krystal.Core/Types/Queue.hpp"
-#include "Krystal.Core/Types/RefPtr.hpp"
 #include <mutex>
 
 namespace krys

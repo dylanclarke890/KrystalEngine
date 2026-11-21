@@ -30,8 +30,8 @@
 #include "Krystal.Booey/CSS/DOMMatrix/DOMMatrix2DInit.hpp"
 #include "Krystal.Booey/DOM/Types/DOMString.hpp"
 #include "Krystal.Booey/HTML/Canvas/CanvasPath.hpp"
-#include "Krystal.Core/RefCounted.hpp"
-#include "Krystal.Core/Types/RefPtr.hpp"
+#include "Krystal.Core/Memory/RefCounted.hpp"
+#include "Krystal.Core/Memory/RefPtr.hpp"
 
 namespace krys::boo::html
 {

@@ -1,7 +1,7 @@
 ﻿#include "Krystal.PAL/Events.hpp"
 #include "Krystal.Core/Events/Event.hpp"
+#include "Krystal.Core/Move.hpp"
 #include "Krystal.Core/Numeric.hpp"
-#include "Krystal.Core/Utils/Move.hpp"
 #include "Krystal.PAL/Input/Keys.hpp"
 #include "Krystal.PAL/Input/MouseButtons.hpp"
 

@@ -1,5 +1,5 @@
 ﻿#include "Krystal.Gfx/Render2D/PathStroker.hpp"
-#include "Krystal.Core/Utils/Move.hpp"
+#include "Krystal.Core/Move.hpp"
 #include "Krystal.Gfx/Render2D/Dashing.hpp"
 #include "Krystal.Gfx/Render2D/Flattening.hpp"
 #include "Krystal.Gfx/Render2D/PathRasteriser.hpp"

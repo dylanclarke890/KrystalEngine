@@ -2,10 +2,10 @@
 
 #include "Krystal.Core/Attributes.hpp"
 #include "Krystal.Core/Macros.hpp"
+#include "Krystal.Core/Memory/UniquePtr.hpp"
 #include "Krystal.Core/Numeric.hpp"
 #include "Krystal.Core/Strings/String.hpp"
 #include "Krystal.Core/Types/Expected.hpp"
-#include "Krystal.Core/Types/UniquePtr.hpp"
 #include <format>
 
 namespace krys::log

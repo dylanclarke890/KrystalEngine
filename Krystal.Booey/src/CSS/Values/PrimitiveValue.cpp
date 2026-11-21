@@ -30,8 +30,8 @@
 #include "Krystal.Booey/Style/Values/Primitives/LengthResolution.hpp"
 #include "Krystal.Core/Hashing/FastHash.hpp"
 #include "Krystal.Core/Maths/Extras.hpp"
+#include "Krystal.Core/Memory/NeverDestroyed.hpp"
 #include "Krystal.Core/Strings/StringBuilder.hpp"
-#include "Krystal.Core/Threading/NeverDestroyed.hpp"
 #include "Krystal.Core/Types/HashMap.hpp"
 #include <algorithm>
 #include <charconv>
@@ -65,7 +65,7 @@ namespace krys::boo::css
     KRYS_NODISCARD HashMap<const PrimitiveValue *, CSSOMString> &SerialisedPrimitiveValues() noexcept
     {
       static NeverDestroyed<HashMap<const PrimitiveValue *, CSSOMString>> map;
-      return map.get();
+      return *map;
     }
 
     KRYS_NODISCARD PrimitiveValue *ValueFromPool(Span<AlignedStorage<PrimitiveValue>> pool,

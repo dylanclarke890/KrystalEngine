@@ -26,8 +26,8 @@
 #pragma once
 
 #include "Krystal.Booey/SVG/Properties/SVGAttributeAnimator.hpp"
+#include "Krystal.Core/Memory/RefPtr.hpp"
 #include "Krystal.Core/Types/List.hpp"
-#include "Krystal.Core/Types/RefPtr.hpp"
 #include <utility>
 
 namespace krys::boo

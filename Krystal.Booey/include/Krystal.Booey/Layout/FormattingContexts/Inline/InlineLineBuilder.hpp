@@ -28,11 +28,11 @@
 #include "Krystal.Booey/Layout/Floats/FloatingContext.hpp"
 #include "Krystal.Booey/Layout/FormattingContexts/Inline/AbstractLineBuilder.hpp"
 #include "Krystal.Core/Attributes.hpp"
+#include "Krystal.Core/Memory/UniquePtr.hpp"
 #include "Krystal.Core/Types/EnumSet.hpp"
 #include "Krystal.Core/Types/List.hpp"
 #include "Krystal.Core/Types/Maybe.hpp"
 #include "Krystal.Core/Types/SmallList.hpp"
-#include "Krystal.Core/Types/UniquePtr.hpp"
 
 namespace krys::boo::layout
 {

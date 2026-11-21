@@ -27,10 +27,10 @@
 #include "Krystal.Booey/CSS/Values/ValueType.hpp"
 #include "Krystal.Core/Assert.hpp"
 #include "Krystal.Core/Macros.hpp"
+#include "Krystal.Core/Memory/RefPtr.hpp"
 #include "Krystal.Core/TypeCast.hpp"
 #include "Krystal.Core/Types/Func.hpp"
 #include "Krystal.Core/Types/IterationStatus.hpp"
-#include "Krystal.Core/Types/RefPtr.hpp"
 #include "Krystal.Core/Types/SmallList.hpp"
 
 namespace krys::boo

@@ -53,7 +53,7 @@ namespace krys::boo::style
   static const boo::Path &CachedRoundedInsetPath(const FloatRoundedRect &rect)
   {
     static NeverDestroyed<TinyLRUCache<FloatRoundedRect, boo::Path, 4, RoundedInsetPathPolicy>> cache;
-    return cache.get().Get(rect);
+    return cache->Get(rect);
   }
 
   // MARK: - Path

@@ -52,8 +52,8 @@
 #include "Krystal.Booey/Style/Values/Color/KeywordColor.hpp"
 #include "Krystal.Booey/Style/Values/Color/LightDarkColor.hpp"
 #include "Krystal.Booey/Style/Values/Color/RelativeColor.hpp"
+#include "Krystal.Core/Memory/NeverDestroyed.hpp"
 #include "Krystal.Core/Strings/StringBuilder.hpp"
-#include "Krystal.Core/Threading/NeverDestroyed.hpp"
 
 namespace krys::boo::style
 {
@@ -225,7 +225,7 @@ namespace krys::boo::style
   const Color &Color::GetCurrentColor() noexcept
   {
     static NeverDestroyed<Color> color {CurrentColor {}};
-    return color.get();
+    return *color;
   }
 
   Color::ColorKind Color::Copy(const ColorKind &other) noexcept

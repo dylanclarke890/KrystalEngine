@@ -33,6 +33,8 @@
 #include "Krystal.Core/Attributes.hpp"
 #include "Krystal.Core/Enum.hpp"
 #include "Krystal.Core/Hashing/FastHash.hpp"
+#include "Krystal.Core/Memory/PointerComparison.hpp"
+#include "Krystal.Core/Memory/UniquePtr.hpp"
 #include "Krystal.Core/Types/EnumSet.hpp"
 #include "Krystal.Core/Types/FixedVector.hpp"
 #include "Krystal.Core/Types/ListHashSet.hpp"
@@ -40,10 +42,8 @@
 #include "Krystal.Core/Types/Maybe.hpp"
 #include "Krystal.Core/Types/RefCountedFixedVector.hpp"
 #include "Krystal.Core/Types/SmallList.hpp"
-#include "Krystal.Core/Types/UniquePtr.hpp"
 #include "Krystal.Core/Types/Variant.hpp"
 #include "Krystal.Core/Utils/Apply.hpp"
-#include "Krystal.Core/Utils/PointerComparison.hpp"
 #include "Krystal.Core/Visitor.hpp"
 #include <functional>
 #include <initializer_list>

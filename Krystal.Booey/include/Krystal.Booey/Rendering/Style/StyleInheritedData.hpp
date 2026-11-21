@@ -29,7 +29,7 @@
 #include "Krystal.Booey/Style/Values/Color/Color.hpp"
 #include "Krystal.Booey/Style/Values/CSS2/BorderSpacing.hpp"
 #include "Krystal.Booey/Style/Values/Inline/LineHeight.hpp"
-#include "Krystal.Core/Types/DataRef.hpp"
+#include "Krystal.Core/Memory/DataRef.hpp"
 
 namespace krys::boo
 {

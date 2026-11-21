@@ -22,7 +22,7 @@
 
 #include "Krystal.Booey/CSS/Types/CSSOMString.hpp"
 #include "Krystal.Core/Attributes.hpp"
-#include "Krystal.Core/RefCounted.hpp"
+#include "Krystal.Core/Memory/RefCounted.hpp"
 #include "Krystal.Net/Url.hpp"
 
 namespace krys::boo

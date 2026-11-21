@@ -1,7 +1,7 @@
 ﻿#include "catch2/catch_test_macros.hpp"
-#include "Krystal.Core/CanMakeCheckedPtr.hpp"
-#include "Krystal.Core/Types/CheckedPtr.hpp"
-#include "Krystal.Core/Utils/Move.hpp"
+#include "Krystal.Core/Memory/CanMakeCheckedPtr.hpp"
+#include "Krystal.Core/Memory/CheckedPtr.hpp"
+#include "Krystal.Core/Move.hpp"
 
 namespace krys::tests
 {

@@ -29,9 +29,9 @@
 #include "Krystal.Booey/CSS/Types/CSSOMString.hpp"
 #include "Krystal.Core/Attributes.hpp"
 #include "Krystal.Core/Macros.hpp"
+#include "Krystal.Core/Memory/RefPtr.hpp"
 #include "Krystal.Core/Types/HashMap.hpp"
 #include "Krystal.Core/Types/Pair.hpp"
-#include "Krystal.Core/Types/RefPtr.hpp"
 
 namespace krys::boo::css
 {

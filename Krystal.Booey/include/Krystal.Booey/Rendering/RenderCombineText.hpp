@@ -22,7 +22,7 @@
 
 #include "Krystal.Booey/Graphics/Fonts/FontCascade.hpp"
 #include "Krystal.Booey/Rendering/RenderText.hpp"
-#include "Krystal.Core/Types/UniquePtr.hpp"
+#include "Krystal.Core/Memory/UniquePtr.hpp"
 
 namespace krys::boo
 {

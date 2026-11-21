@@ -24,8 +24,8 @@
 #include "Krystal.Booey/SVG/Internals/SVGPathByteStream.hpp"
 #include "Krystal.Booey/SVG/Internals/SVGPathUtilities.hpp"
 #include "Krystal.Booey/SVG/Properties/SVGProperty.hpp"
+#include "Krystal.Core/Memory/RefPtr.hpp"
 #include "Krystal.Core/Types/Maybe.hpp"
-#include "Krystal.Core/Types/RefPtr.hpp"
 
 namespace krys::boo
 {

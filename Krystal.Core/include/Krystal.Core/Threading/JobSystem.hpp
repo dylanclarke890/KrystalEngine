@@ -2,6 +2,7 @@
 
 #include "Krystal.Core/Attributes.hpp"
 #include "Krystal.Core/Macros.hpp"
+#include "Krystal.Core/Memory/UniquePtr.hpp"
 #include "Krystal.Core/Numeric.hpp"
 #include "Krystal.Core/Threading/Thread.hpp"
 #include "Krystal.Core/Threading/WorkQueue.hpp"
@@ -9,7 +10,6 @@
 #include "Krystal.Core/Types/List.hpp"
 #include "Krystal.Core/Types/Maybe.hpp"
 #include "Krystal.Core/Types/Queue.hpp"
-#include "Krystal.Core/Types/UniquePtr.hpp"
 #include <chrono>
 #include <condition_variable>
 #include <mutex>

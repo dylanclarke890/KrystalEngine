@@ -29,10 +29,10 @@
 #include "Krystal.Booey/Rendering/Style/RenderStyle+SettersInlines.hpp"
 #include "Krystal.Booey/Style/Rules/MatchResult.hpp"
 #include "Krystal.Core/Assert.hpp"
+#include "Krystal.Core/Memory/RefPtr.hpp"
+#include "Krystal.Core/Memory/WeakPtr.hpp"
 #include "Krystal.Core/TypeCast.hpp"
 #include "Krystal.Core/Types/List.hpp"
-#include "Krystal.Core/Types/RefPtr.hpp"
-#include "Krystal.Core/Types/WeakPtr.hpp"
 
 namespace krys::boo::style
 {

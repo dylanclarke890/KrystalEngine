@@ -27,7 +27,7 @@
 
 #include "Krystal.Core/Attributes.hpp"
 #include "Krystal.Core/Geometry/Point3.hpp"
-#include "Krystal.Core/RefCounted.hpp"
+#include "Krystal.Core/Memory/RefCounted.hpp"
 #include "Krystal.Core/TypeCast.hpp"
 
 namespace krys

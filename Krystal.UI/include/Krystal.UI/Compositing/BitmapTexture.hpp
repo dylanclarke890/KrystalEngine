@@ -2,9 +2,9 @@
 
 #include "Krystal.Core/Attributes.hpp"
 #include "Krystal.Core/Geometry/Size.hpp"
-#include "Krystal.Core/RefCounted.hpp"
+#include "Krystal.Core/Memory/RefCounted.hpp"
+#include "Krystal.Core/Memory/RefPtr.hpp"
 #include "Krystal.Core/Types/EnumSet.hpp"
-#include "Krystal.Core/Types/RefPtr.hpp"
 #include "Krystal.Gfx/Device.hpp"
 
 namespace krys::ui

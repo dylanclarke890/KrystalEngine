@@ -25,9 +25,9 @@
 #include "Krystal.Booey/Rendering/RenderBlockFlow.hpp"
 #include "Krystal.Core/Attributes.hpp"
 #include "Krystal.Core/Macros.hpp"
+#include "Krystal.Core/Memory/WeakPtr.hpp"
 #include "Krystal.Core/TypeCast.hpp"
 #include "Krystal.Core/Types/Maybe.hpp"
-#include "Krystal.Core/Types/WeakPtr.hpp"
 
 namespace krys::boo
 {

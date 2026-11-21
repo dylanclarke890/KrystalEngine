@@ -27,7 +27,7 @@
 #include "Krystal.Booey/CSS/Properties/Types/IsImportant.hpp"
 #include "Krystal.Booey/CSS/Types/CSSOMString.hpp"
 #include "Krystal.Booey/DOM/Nodes/Element.hpp"
-#include "Krystal.Core/Types/RefPtr.hpp"
+#include "Krystal.Core/Memory/RefPtr.hpp"
 
 namespace krys::boo
 {

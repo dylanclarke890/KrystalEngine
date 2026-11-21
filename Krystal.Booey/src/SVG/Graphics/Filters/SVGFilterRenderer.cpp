@@ -30,8 +30,8 @@
 #include "Krystal.Booey/SVG/SVGFilterPrimitiveStandardAttributes.hpp"
 #include "Krystal.Booey/SVG/SVGLengthContext.hpp"
 #include "Krystal.Core/Geometry/GeometryUtilities.hpp"
+#include "Krystal.Core/Memory/PointerComparison.hpp"
 #include "Krystal.Core/Strings/TextStream.hpp"
-#include "Krystal.Core/Utils/PointerComparison.hpp"
 #include <numbers>
 
 namespace krys::boo

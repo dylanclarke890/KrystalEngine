@@ -1,6 +1,6 @@
 ﻿#pragma once
 
-#include "Krystal.Core/Types/IntrusivePtr.hpp"
+#include "Krystal.Core/Memory/IntrusivePtr.hpp"
 
 namespace krys
 {

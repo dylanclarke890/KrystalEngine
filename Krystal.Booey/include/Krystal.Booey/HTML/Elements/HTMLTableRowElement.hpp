@@ -1,7 +1,7 @@
 ﻿#pragma once
 
 #include "Krystal.Booey/HTML/Elements/HTMLTablePartElement.hpp"
-#include "Krystal.Core/Types/WeakPtr.hpp"
+#include "Krystal.Core/Memory/WeakPtr.hpp"
 
 namespace krys::boo::dom
 {

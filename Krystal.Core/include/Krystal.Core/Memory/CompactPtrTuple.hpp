@@ -30,10 +30,10 @@
 #include "Krystal.Core/Concepts.hpp"
 #include "Krystal.Core/Detection/AddressSpaceBitSize.hpp"
 #include "Krystal.Core/Detection/OS.hpp"
+#include "Krystal.Core/Memory/AllowCompactPointers.hpp"
+#include "Krystal.Core/Move.hpp"
 #include "Krystal.Core/Numeric.hpp"
 #include "Krystal.Core/TypeTraits.hpp"
-#include "Krystal.Core/Utils/AllowCompactPointers.hpp"
-#include "Krystal.Core/Utils/Move.hpp"
 #include <bit>
 
 #if KRYS_OS(DARWIN)

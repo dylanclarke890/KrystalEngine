@@ -29,9 +29,9 @@
 #include "Krystal.Booey/Graphics/Paths/PathElement.hpp"
 #include "Krystal.Booey/Graphics/Paths/PathSegment.hpp"
 
-#include "Krystal.Core/RefCounted.hpp"
-#include "Krystal.Core/Types/RefPtr.hpp"
-#include "Krystal.Core/Types/UniquePtr.hpp"
+#include "Krystal.Core/Memory/RefCounted.hpp"
+#include "Krystal.Core/Memory/RefPtr.hpp"
+#include "Krystal.Core/Memory/UniquePtr.hpp"
 
 namespace krys
 {

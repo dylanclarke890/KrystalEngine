@@ -29,7 +29,7 @@
 #include "Krystal.Booey/Graphics/Color/Color.hpp"
 #include "Krystal.Booey/Graphics/Geometry/BoxExtents.hpp"
 #include "Krystal.Core/Geometry/Point.hpp"
-#include "Krystal.Core/RefCounted.hpp"
+#include "Krystal.Core/Memory/RefCounted.hpp"
 
 namespace krys::boo
 {

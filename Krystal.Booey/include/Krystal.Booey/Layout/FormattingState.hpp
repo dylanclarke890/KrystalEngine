@@ -29,7 +29,7 @@
 #include "Krystal.Booey/Layout/LayoutState.hpp"
 #include "Krystal.Core/Attributes.hpp"
 #include "Krystal.Core/Macros.hpp"
-#include "Krystal.Core/Types/CheckedPtr.hpp"
+#include "Krystal.Core/Memory/CheckedPtr.hpp"
 #include "Krystal.Core/Types/HashMap.hpp"
 #include "Krystal.Core/Types/Maybe.hpp"
 

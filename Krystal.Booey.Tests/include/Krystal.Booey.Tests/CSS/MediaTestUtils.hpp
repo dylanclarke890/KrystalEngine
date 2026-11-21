@@ -5,7 +5,7 @@
 #include "Krystal.Booey/DOM/Nodes/Document.hpp"
 #include "Krystal.Booey/Page/Clients/BooeyClient.hpp"
 #include "Krystal.Booey/Page/Frame.hpp"
-#include "Krystal.Core/Types/UniquePtr.hpp"
+#include "Krystal.Core/Memory/UniquePtr.hpp"
 
 namespace krys::boo::css::tests
 {

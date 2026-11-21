@@ -23,8 +23,8 @@
 #include "Krystal.Booey/DOM/Events/Event.hpp"
 #include "Krystal.Booey/DOM/Internals/EventFactory.hpp"
 #include "Krystal.Booey/DOM/Types/DOMString.hpp"
+#include "Krystal.Core/Memory/RefPtr.hpp"
 #include "Krystal.Core/Types/List.hpp"
-#include "Krystal.Core/Types/RefPtr.hpp"
 #include "Krystal.Core/Types/SmallList.hpp"
 
 namespace krys::boo

@@ -29,9 +29,9 @@
 #include "Krystal.Booey/DOM/Events/EventSender.hpp"
 #include "Krystal.Booey/SVG/Animation/SMILTime.hpp"
 #include "Krystal.Booey/SVG/Elements/SVGElement.hpp"
+#include "Krystal.Core/Memory/RefPtr.hpp"
+#include "Krystal.Core/Memory/WeakPtr.hpp"
 #include "Krystal.Core/Types/List.hpp"
-#include "Krystal.Core/Types/RefPtr.hpp"
-#include "Krystal.Core/Types/WeakPtr.hpp"
 
 namespace krys::boo::svg
 {

@@ -28,8 +28,8 @@
 #include "Krystal.Booey/SVG/Properties/SVGAnimatedPropertyImpl.hpp"
 #include "Krystal.Booey/SVG/Properties/SVGAnimatedString.hpp"
 #include "Krystal.Booey/SVG/SVGUnitTypes.hpp"
+#include "Krystal.Core/Memory/RefPtr.hpp"
 #include "Krystal.Core/Types/List.hpp"
-#include "Krystal.Core/Types/RefPtr.hpp"
 
 namespace krys::boo
 {

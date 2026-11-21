@@ -29,12 +29,12 @@
 #include "Krystal.Booey/DOM/Types/ExceptionOr.hpp"
 #include "Krystal.Booey/Infra/StringAlgorithms.hpp"
 #include "Krystal.Core/Base.hpp"
-#include "Krystal.Core/Types/CheckedPtr.hpp"
+#include "Krystal.Core/Memory/CheckedPtr.hpp"
+#include "Krystal.Core/Memory/UniquePtr.hpp"
 #include "Krystal.Core/Types/Func.hpp"
 #include "Krystal.Core/Types/List.hpp"
 #include "Krystal.Core/Types/Maybe.hpp"
 #include "Krystal.Core/Types/SmallList.hpp"
-#include "Krystal.Core/Types/UniquePtr.hpp"
 
 namespace krys::boo
 {

@@ -44,10 +44,10 @@
 #include "Krystal.Booey/Style/Values/Sizing/AspectRatio.hpp"
 #include "Krystal.Booey/Style/Values/Transitions/Transitions.hpp"
 #include "Krystal.Booey/Style/Values/UI/Resize.hpp"
-#include "Krystal.Core/RefCounted.hpp"
-#include "Krystal.Core/Types/DataRef.hpp"
+#include "Krystal.Core/Memory/DataRef.hpp"
+#include "Krystal.Core/Memory/RefCounted.hpp"
+#include "Krystal.Core/Memory/RefPtr.hpp"
 #include "Krystal.Core/Types/FixedVector.hpp"
-#include "Krystal.Core/Types/RefPtr.hpp"
 #include <memory>
 
 namespace krys::boo

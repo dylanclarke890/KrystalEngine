@@ -31,7 +31,7 @@
 #include "Krystal.Core/Geometry/AffineTransform.hpp"
 #include "Krystal.Core/Geometry/Size.hpp"
 #include "Krystal.Core/Macros.hpp"
-#include "Krystal.Core/Types/RefPtr.hpp"
+#include "Krystal.Core/Memory/RefPtr.hpp"
 #include "Krystal.Core/Types/Span.hpp"
 
 namespace krys::boo

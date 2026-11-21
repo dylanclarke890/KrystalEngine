@@ -21,8 +21,8 @@
 
 #include "Krystal.Booey/Style/Difference.hpp"
 #include "Krystal.Core/Attributes.hpp"
+#include "Krystal.Core/Memory/UniquePtr.hpp"
 #include "Krystal.Core/Types/HashMap.hpp"
-#include "Krystal.Core/Types/UniquePtr.hpp"
 
 namespace krys::boo
 {

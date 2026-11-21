@@ -26,8 +26,8 @@
 #include "Krystal.Booey/HTML/EventLoop/EventLoop.hpp"
 #include "Krystal.Booey/HTML/Window.hpp"
 #include "Krystal.Core/Assert.hpp"
+#include "Krystal.Core/Move.hpp"
 #include "Krystal.Core/Time/MonotonicTime.hpp"
-#include "Krystal.Core/Utils/Move.hpp"
 #include <algorithm>
 
 namespace krys::boo

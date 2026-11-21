@@ -29,8 +29,8 @@
 #include "Krystal.Booey/DOM/Types/DOMString.hpp"
 #include "Krystal.Booey/DOM/Types/QualifiedName.hpp"
 #include "Krystal.Core/Attributes.hpp"
-#include "Krystal.Core/CanMakeWeakPtr.hpp"
-#include "Krystal.Core/RefCounted.hpp"
+#include "Krystal.Core/Memory/CanMakeWeakPtr.hpp"
+#include "Krystal.Core/Memory/RefCounted.hpp"
 #include "Krystal.Core/Types/Maybe.hpp"
 
 namespace krys::boo

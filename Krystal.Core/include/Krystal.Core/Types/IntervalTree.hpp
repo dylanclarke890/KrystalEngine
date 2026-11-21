@@ -27,10 +27,10 @@
 #pragma once
 
 #include "Krystal.Core/Attributes.hpp"
+#include "Krystal.Core/Move.hpp"
 #include "Krystal.Core/Types/List.hpp"
 #include "Krystal.Core/Types/Maybe.hpp"
 #include "Krystal.Core/Types/RedBlackTree.hpp"
-#include "Krystal.Core/Utils/Move.hpp"
 
 namespace krys
 {

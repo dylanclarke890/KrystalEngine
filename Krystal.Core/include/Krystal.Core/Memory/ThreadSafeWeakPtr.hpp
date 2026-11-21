@@ -29,9 +29,9 @@
 #include "Krystal.Core/Atomics.hpp"
 #include "Krystal.Core/Attributes.hpp"
 #include "Krystal.Core/Macros.hpp"
+#include "Krystal.Core/Memory/RefPtr.hpp"
+#include "Krystal.Core/Memory/TaggedPtr.hpp"
 #include "Krystal.Core/Numeric.hpp"
-#include "Krystal.Core/Types/RefPtr.hpp"
-#include "Krystal.Core/Types/TaggedPtr.hpp"
 #include <mutex>
 
 namespace krys

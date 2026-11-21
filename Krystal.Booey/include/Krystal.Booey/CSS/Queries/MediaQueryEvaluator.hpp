@@ -26,7 +26,7 @@
 
 #include "Krystal.Booey/CSS/Queries/GenericMediaQueryEvaluator.hpp"
 #include "Krystal.Booey/CSS/Queries/MediaQuery.hpp"
-#include "Krystal.Core/Types/WeakPtr.hpp"
+#include "Krystal.Core/Memory/WeakPtr.hpp"
 
 namespace krys::boo
 {

@@ -29,8 +29,8 @@
 #include "Krystal.Booey/Graphics/Images/BitmapImage.hpp"
 #include "Krystal.Booey/Graphics/Images/NativeImage.hpp"
 #include "Krystal.Booey/SVG/Graphics/SVGImage.hpp"
+#include "Krystal.Core/Memory/NeverDestroyed.hpp"
 #include "Krystal.Core/Strings/TextStream.hpp"
-#include "Krystal.Core/Threading/NeverDestroyed.hpp"
 #include "Krystal.Core/Time/Timer.hpp"
 #include <cmath>
 

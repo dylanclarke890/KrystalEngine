@@ -28,9 +28,9 @@
 #include "Krystal.Booey/Style/ContainerQueryEvaluator.hpp"
 #include "Krystal.Booey/Style/Invalidation/HasSelectorFilter.hpp"
 #include "Krystal.Core/Hashing/FastHash.hpp"
+#include "Krystal.Core/Memory/UniquePtr.hpp"
 #include "Krystal.Core/Types/HashMap.hpp"
 #include "Krystal.Core/Types/Pair.hpp"
-#include "Krystal.Core/Types/UniquePtr.hpp"
 
 namespace krys::boo::style
 {

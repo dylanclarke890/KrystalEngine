@@ -31,10 +31,10 @@
 #include "Krystal.Core/Geometry/Point.hpp"
 #include "Krystal.Core/Geometry/Size.hpp"
 #include "Krystal.Core/Macros.hpp"
+#include "Krystal.Core/Memory/RefPtr.hpp"
+#include "Krystal.Core/Memory/UniquePtr.hpp"
 #include "Krystal.Core/Types/EnumSet.hpp"
 #include "Krystal.Core/Types/Maybe.hpp"
-#include "Krystal.Core/Types/RefPtr.hpp"
-#include "Krystal.Core/Types/UniquePtr.hpp"
 #include "Krystal.Net/Url.hpp"
 
 namespace krys::boo

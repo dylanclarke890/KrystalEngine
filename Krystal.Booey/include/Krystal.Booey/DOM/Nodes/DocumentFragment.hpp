@@ -2,8 +2,8 @@
 
 #include "Krystal.Booey/DOM/Nodes/ContainerNode.hpp"
 #include "Krystal.Booey/DOM/Types/NodeOrString.hpp"
-#include "Krystal.Core/Types/UniquePtr.hpp"
-#include "Krystal.Core/Types/WeakPtr.hpp"
+#include "Krystal.Core/Memory/UniquePtr.hpp"
+#include "Krystal.Core/Memory/WeakPtr.hpp"
 
 namespace krys::boo
 {

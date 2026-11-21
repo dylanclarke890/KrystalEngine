@@ -37,10 +37,10 @@
 #include "Krystal.Core/Assert.hpp"
 #include "Krystal.Core/Attributes.hpp"
 #include "Krystal.Core/Concepts.hpp"
+#include "Krystal.Core/Move.hpp"
 #include "Krystal.Core/Types/Maybe.hpp"
 #include "Krystal.Core/Types/Null.hpp"
 #include "Krystal.Core/TypeTraits.hpp"
-#include "Krystal.Core/Utils/Move.hpp"
 #include <cmath>
 #include <limits>
 

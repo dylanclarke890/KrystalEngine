@@ -27,8 +27,8 @@
 
 #include "Krystal.Booey/CSS/CSSOM/CSSRule.hpp"
 #include "Krystal.Core/Attributes.hpp"
+#include "Krystal.Core/Memory/RefPtr.hpp"
 #include "Krystal.Core/TypeCast.hpp"
-#include "Krystal.Core/Types/RefPtr.hpp"
 
 namespace krys::boo
 {

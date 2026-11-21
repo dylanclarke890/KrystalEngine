@@ -24,9 +24,9 @@
 #include "Krystal.Booey/Graphics/Fonts/GlyphBuffer.hpp"
 #include "Krystal.Booey/Text/WritingMode.hpp"
 #include "Krystal.Core/Attributes.hpp"
+#include "Krystal.Core/Memory/RefPtr.hpp"
 #include "Krystal.Core/Types/HashSet.hpp"
 #include "Krystal.Core/Types/Maybe.hpp"
-#include "Krystal.Core/Types/RefPtr.hpp"
 #include "Krystal.Core/Types/SmallList.hpp"
 #include <limits>
 

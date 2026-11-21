@@ -39,9 +39,9 @@
 #include "Krystal.Booey/Platform/DateComponents.hpp"
 #include "Krystal.Booey/Rendering/RenderPtr.hpp"
 #include "Krystal.Core/Enum.hpp"
-#include "Krystal.Core/RefCounted.hpp"
+#include "Krystal.Core/Memory/RefCounted.hpp"
+#include "Krystal.Core/Memory/RefPtr.hpp"
 #include "Krystal.Core/Types/Decimal.hpp"
-#include "Krystal.Core/Types/RefPtr.hpp"
 
 namespace krys::boo
 {

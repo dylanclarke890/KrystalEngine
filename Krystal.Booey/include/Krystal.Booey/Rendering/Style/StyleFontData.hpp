@@ -28,7 +28,7 @@
 #include "Krystal.Booey/Graphics/Fonts/FontCascade.hpp"
 #include "Krystal.Booey/Style/Values/Text/LetterSpacing.hpp"
 #include "Krystal.Booey/Style/Values/Text/WordSpacing.hpp"
-#include "Krystal.Core/Types/DataRef.hpp"
+#include "Krystal.Core/Memory/DataRef.hpp"
 
 namespace krys::boo
 {

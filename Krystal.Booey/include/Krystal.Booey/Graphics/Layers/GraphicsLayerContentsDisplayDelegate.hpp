@@ -26,7 +26,7 @@
 #pragma once
 
 #include "Krystal.Core/Macros.hpp"
-#include "Krystal.Core/RefCounted.hpp"
+#include "Krystal.Core/Memory/RefCounted.hpp"
 
 namespace krys::boo
 {

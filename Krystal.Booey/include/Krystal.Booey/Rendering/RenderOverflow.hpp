@@ -24,8 +24,8 @@
 #include "Krystal.Booey/Graphics/Geometry/LayoutRect.hpp"
 #include "Krystal.Booey/Graphics/Geometry/LayoutUnit.hpp"
 #include "Krystal.Core/Attributes.hpp"
-#include "Krystal.Core/CanMakeCheckedPtr.hpp"
 #include "Krystal.Core/Macros.hpp"
+#include "Krystal.Core/Memory/CanMakeCheckedPtr.hpp"
 #include <algorithm>
 
 namespace krys::boo

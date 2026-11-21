@@ -26,7 +26,7 @@
 #pragma once
 
 #include "Krystal.Booey/SVG/Properties/SVGAnimationAdditiveFunction.hpp"
-#include "Krystal.Core/Types/RefPtr.hpp"
+#include "Krystal.Core/Memory/RefPtr.hpp"
 #include <utility>
 
 namespace krys::boo

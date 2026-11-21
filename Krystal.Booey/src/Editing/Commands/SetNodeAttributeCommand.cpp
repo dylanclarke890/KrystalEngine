@@ -31,7 +31,7 @@
 #include "Krystal.Booey/DOM/Nodes/Text.hpp"
 #include "Krystal.Booey/Editing/Commands/ApplyStyleCommand.hpp"
 #include "Krystal.Booey/Editing/Editing.hpp"
-#include "Krystal.Core/Utils/Move.hpp"
+#include "Krystal.Core/Move.hpp"
 
 namespace krys::boo
 {

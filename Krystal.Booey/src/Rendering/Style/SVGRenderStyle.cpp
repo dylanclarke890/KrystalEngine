@@ -31,14 +31,14 @@
 #include "Krystal.Booey/Style/Computed/ComputedStyle+InitialInlines.hpp"
 
 #include "Krystal.Booey/Animation/WebAnimationTypes.hpp"
-#include "Krystal.Core/Threading/NeverDestroyed.hpp"
+#include "Krystal.Core/Memory/NeverDestroyed.hpp"
 
 namespace krys::boo
 {
   static const SVGRenderStyle &DefaultSVGStyle() noexcept
   {
     static NeverDestroyed<DataRef<SVGRenderStyle>> style {SVGRenderStyle::CreateDefaultStyle()};
-    return *style.get();
+    return **style;
   }
 
   Ref<SVGRenderStyle> SVGRenderStyle::CreateDefaultStyle() noexcept

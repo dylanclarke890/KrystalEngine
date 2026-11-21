@@ -1,6 +1,6 @@
 ﻿#include "Krystal.Core/Events/EventManager.hpp"
 #include "Krystal.Core/Events/Event.hpp"
-#include "Krystal.Core/Utils/Move.hpp"
+#include "Krystal.Core/Move.hpp"
 
 namespace krys
 {

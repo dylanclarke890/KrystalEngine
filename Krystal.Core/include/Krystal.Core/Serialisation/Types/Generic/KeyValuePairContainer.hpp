@@ -1,7 +1,7 @@
 ﻿#pragma once
 
+#include "Krystal.Core/Move.hpp"
 #include "Krystal.Core/Serialisation/Builtins.hpp"
-#include "Krystal.Core/Utils/Move.hpp"
 
 namespace krys::serialisation
 {

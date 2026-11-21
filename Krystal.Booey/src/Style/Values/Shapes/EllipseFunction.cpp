@@ -57,7 +57,7 @@ namespace krys::boo::style
   static const boo::Path &CachedEllipsePath(const RectF &rect)
   {
     static NeverDestroyed<TinyLRUCache<RectF, boo::Path, 4, EllipsePathPolicy>> cache;
-    return cache.get().Get(rect);
+    return cache->Get(rect);
   }
 
   // MARK: - Path Generation

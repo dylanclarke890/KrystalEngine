@@ -21,7 +21,7 @@
 #include "Krystal.Booey/HTML/Forms/RadioButtonGroups.hpp"
 #include "Krystal.Booey/Accessibility/AXObjectCache.hpp"
 #include "Krystal.Booey/HTML/Elements/HTMLInputElement.hpp"
-#include "Krystal.Core/Types/WeakPtr.hpp"
+#include "Krystal.Core/Memory/WeakPtr.hpp"
 #include <algorithm>
 
 namespace krys::boo::html

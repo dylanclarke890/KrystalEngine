@@ -1,6 +1,6 @@
 ﻿#include "Krystal.Text/Regex.hpp"
 #include "catch2/catch_test_macros.hpp"
-#include "Krystal.Core/Utils/Move.hpp"
+#include "Krystal.Core/Move.hpp"
 
 namespace krys::text::tests
 {

@@ -3,7 +3,7 @@
 #include "Krystal.Booey/DOM/Nodes/Node.hpp"
 #include "Krystal.Booey/DOM/Traversal/NodeFilter.hpp"
 #include "Krystal.Core/Attributes.hpp"
-#include "Krystal.Core/Types/RefPtr.hpp"
+#include "Krystal.Core/Memory/RefPtr.hpp"
 
 namespace krys::boo
 {

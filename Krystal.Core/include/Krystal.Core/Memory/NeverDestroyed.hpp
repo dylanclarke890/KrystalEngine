@@ -27,10 +27,10 @@
 
 #include "Krystal.Core/Assert.hpp"
 #include "Krystal.Core/Macros.hpp"
+#include "Krystal.Core/Memory/AlignedStorage.hpp"
+#include "Krystal.Core/Memory/ForbidHeapAllocation.hpp"
+#include "Krystal.Core/Move.hpp"
 #include "Krystal.Core/Threading/MainThread.hpp"
-#include "Krystal.Core/Utils/AlignedStorage.hpp"
-#include "Krystal.Core/Utils/ForbidHeapAllocation.hpp"
-#include "Krystal.Core/Utils/Move.hpp"
 
 namespace krys
 {
@@ -84,9 +84,14 @@ namespace krys
       return *StoragePointer();
     }
 
-    KRYS_NODISCARD T &get() noexcept
+    KRYS_NODISCARD T &operator*() noexcept
     {
       return *StoragePointer();
+    }
+
+    KRYS_NODISCARD T *get() noexcept
+    {
+      return StoragePointer();
     }
 
     KRYS_NODISCARD T *operator->() noexcept
@@ -99,9 +104,14 @@ namespace krys
       return *StoragePointer();
     }
 
-    KRYS_NODISCARD const T &get() const noexcept
+    KRYS_NODISCARD const T &operator*() const noexcept
     {
       return *StoragePointer();
+    }
+
+    KRYS_NODISCARD const T *get() const noexcept
+    {
+      return StoragePointer();
     }
 
     KRYS_NODISCARD const T *operator->() const noexcept
@@ -171,9 +181,14 @@ namespace krys
       return *StoragePointer();
     }
 
-    KRYS_NODISCARD T &get() noexcept
+    KRYS_NODISCARD T &operator*() noexcept
     {
       return *StoragePointer();
+    }
+
+    KRYS_NODISCARD T *get() noexcept
+    {
+      return StoragePointer();
     }
 
     KRYS_NODISCARD T *operator->() noexcept
@@ -186,9 +201,14 @@ namespace krys
       return *StoragePointer();
     }
 
-    KRYS_NODISCARD const T &get() const noexcept
+    KRYS_NODISCARD const T &operator*() const noexcept
     {
       return *StoragePointer();
+    }
+
+    KRYS_NODISCARD const T *get() const noexcept
+    {
+      return StoragePointer();
     }
 
     KRYS_NODISCARD const T *operator->() const noexcept

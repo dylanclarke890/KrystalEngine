@@ -21,9 +21,9 @@
 
 #include "Krystal.Core/Geometry/Rect.hpp"
 #include "Krystal.Core/Geometry/Size.hpp"
-#include "Krystal.Core/RefCounted.hpp"
+#include "Krystal.Core/Memory/RefCounted.hpp"
+#include "Krystal.Core/Memory/RefPtr.hpp"
 #include "Krystal.Core/Types/List.hpp"
-#include "Krystal.Core/Types/RefPtr.hpp"
 #include "Krystal.UI/Compositing/TextureMapperBackingStore.hpp"
 #include "Krystal.UI/Compositing/TextureMapperTile.hpp"
 

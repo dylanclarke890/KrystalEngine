@@ -27,8 +27,8 @@
 
 #include "Krystal.Core/Attributes.hpp"
 #include "Krystal.Core/Geometry/Rect.hpp"
-#include "Krystal.Core/RefCounted.hpp"
-#include "Krystal.Core/Types/RefPtr.hpp"
+#include "Krystal.Core/Memory/RefCounted.hpp"
+#include "Krystal.Core/Memory/RefPtr.hpp"
 #include <cmath>
 
 namespace krys::boo::dom

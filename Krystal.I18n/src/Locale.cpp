@@ -30,8 +30,8 @@
 
 #include "Krystal.I18n/Locale.hpp"
 #include "Krystal.Core/Assert.hpp"
+#include "Krystal.Core/Move.hpp"
 #include "Krystal.Core/Strings/CodePointIterator.hpp"
-#include "Krystal.Core/Utils/Move.hpp"
 #include "Krystal.I18n/DateTimeFormat.hpp"
 #include "Krystal.Text/Bidi.hpp"
 #include <format>

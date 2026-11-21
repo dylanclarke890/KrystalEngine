@@ -28,10 +28,10 @@
 #include "Krystal.Booey/Animation/WebAnimationTypes.hpp"
 #include "Krystal.Booey/Rendering/Style/RenderStyleConstants.hpp"
 #include "Krystal.Core/Attributes.hpp"
-#include "Krystal.Core/Types/CheckedPtr.hpp"
+#include "Krystal.Core/Memory/CheckedPtr.hpp"
+#include "Krystal.Core/Memory/RefPtr.hpp"
+#include "Krystal.Core/Memory/UniquePtr.hpp"
 #include "Krystal.Core/Types/EnumSet.hpp"
-#include "Krystal.Core/Types/RefPtr.hpp"
-#include "Krystal.Core/Types/UniquePtr.hpp"
 
 namespace krys::boo
 {

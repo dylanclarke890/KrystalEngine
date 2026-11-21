@@ -1,5 +1,5 @@
 ﻿#include "Krystal.Gfx/Device.hpp"
-#include "Krystal.Core/Utils/Move.hpp"
+#include "Krystal.Core/Move.hpp"
 #include "Krystal.Gfx/OpenGL/GLDevice.hpp"
 
 namespace krys::gfx

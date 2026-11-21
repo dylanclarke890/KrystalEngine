@@ -30,10 +30,10 @@
 #include "Krystal.Core/Attributes.hpp"
 #include "Krystal.Core/Geometry/Rect.hpp"
 #include "Krystal.Core/Macros.hpp"
-#include "Krystal.Core/RefCounted.hpp"
+#include "Krystal.Core/Memory/RefCounted.hpp"
+#include "Krystal.Core/Memory/RefPtr.hpp"
+#include "Krystal.Core/Memory/WeakPtr.hpp"
 #include "Krystal.Core/Time/Timer.hpp"
-#include "Krystal.Core/Types/RefPtr.hpp"
-#include "Krystal.Core/Types/WeakPtr.hpp"
 #include <algorithm>
 #include <cmath>
 

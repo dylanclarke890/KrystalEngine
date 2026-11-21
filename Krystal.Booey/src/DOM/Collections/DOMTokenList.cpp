@@ -32,7 +32,7 @@
 #include "Krystal.Booey/HTML/CustomElement/CustomElementReactionQueue.hpp"
 #include "Krystal.Booey/HTML/Elements/HTMLSlotElement.hpp"
 #include "Krystal.Booey/Infra/StringAlgorithms.hpp"
-#include "Krystal.Core/Utils/Move.hpp"
+#include "Krystal.Core/Move.hpp"
 #include "Krystal.Core/Utils/SetForScope.hpp"
 
 namespace krys::boo::dom

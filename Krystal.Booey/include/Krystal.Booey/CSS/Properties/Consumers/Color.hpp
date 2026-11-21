@@ -29,8 +29,8 @@
 #include "Krystal.Booey/CSS/Values/Color/ColorType.hpp"
 #include "Krystal.Booey/CSS/Values/ValueId.hpp"
 #include "Krystal.Core/Attributes.hpp"
+#include "Krystal.Core/Memory/RefPtr.hpp"
 #include "Krystal.Core/Types/Maybe.hpp"
-#include "Krystal.Core/Types/RefPtr.hpp"
 
 namespace krys::boo
 {

@@ -28,7 +28,7 @@
 #include "Krystal.Booey/Loader/Cache/CachedCSSStyleSheet.hpp"
 #include "Krystal.Booey/Style/Rules/RuleData.hpp"
 #include "Krystal.Core/Assert.hpp"
-#include "Krystal.Core/Utils/Move.hpp"
+#include "Krystal.Core/Move.hpp"
 #include <algorithm>
 #include <utility>
 

@@ -24,8 +24,8 @@
 #include "Krystal.Booey/Graphics/Filters/FilterFunction.hpp"
 #include "Krystal.Core/Geometry/Point3.hpp"
 #include "Krystal.Core/Geometry/Rect.hpp"
+#include "Krystal.Core/Memory/RefPtr.hpp"
 #include "Krystal.Core/Types/List.hpp"
-#include "Krystal.Core/Types/RefPtr.hpp"
 
 namespace krys::boo
 {

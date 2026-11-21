@@ -87,7 +87,7 @@ namespace krys::boo::style
     static NeverDestroyed<
       TinyLRUCache<SVGPathTransformedByteStream, boo::Path, 4, TransformedByteStreamPathPolicy>>
       cache;
-    return cache.get().Get(SVGPathTransformedByteStream {stream, zoom, offset});
+    return cache->Get(SVGPathTransformedByteStream {stream, zoom, offset});
   }
 
   // MARK: - Conversion

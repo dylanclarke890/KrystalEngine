@@ -1,7 +1,7 @@
 ﻿#include "catch2/catch_test_macros.hpp"
-#include "Krystal.Core/CanMakeWeakPtr.hpp"
-#include "Krystal.Core/RefCounted.hpp"
-#include "Krystal.Core/Types/WeakPtr.hpp"
+#include "Krystal.Core/Memory/CanMakeWeakPtr.hpp"
+#include "Krystal.Core/Memory/RefCounted.hpp"
+#include "Krystal.Core/Memory/WeakPtr.hpp"
 
 namespace krys::tests
 {

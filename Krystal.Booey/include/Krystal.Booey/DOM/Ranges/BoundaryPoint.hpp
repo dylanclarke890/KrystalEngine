@@ -26,8 +26,8 @@
 #pragma once
 
 #include "Krystal.Booey/DOM/Nodes/Node.hpp"
+#include "Krystal.Core/Memory/RefPtr.hpp"
 #include "Krystal.Core/Types/Maybe.hpp"
-#include "Krystal.Core/Types/RefPtr.hpp"
 #include <compare>
 
 namespace krys::boo

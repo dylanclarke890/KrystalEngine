@@ -31,7 +31,7 @@
 #include "Krystal.Booey/Graphics/Geometry/LayoutUnit.hpp"
 #include "Krystal.Core/Attributes.hpp"
 #include "Krystal.Core/Macros.hpp"
-#include "Krystal.Core/Types/UniquePtr.hpp"
+#include "Krystal.Core/Memory/UniquePtr.hpp"
 
 namespace krys::boo
 {

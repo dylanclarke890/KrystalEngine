@@ -28,8 +28,8 @@
 #include "Krystal.Booey/DOM/Nodes/Element.hpp"
 #include "Krystal.Booey/Style/PseudoElementIdentifier.hpp"
 #include "Krystal.Booey/Style/Values/Animations/Animations.hpp"
+#include "Krystal.Core/Memory/WeakPtr.hpp"
 #include "Krystal.Core/Types/Maybe.hpp"
-#include "Krystal.Core/Types/WeakPtr.hpp"
 
 namespace krys::boo
 {

@@ -26,7 +26,7 @@
 #pragma once
 
 #include "Krystal.Core/Hashing/FastHash.hpp"
-#include "Krystal.Core/Utils/ForbidHeapAllocation.hpp"
+#include "Krystal.Core/Memory/ForbidHeapAllocation.hpp"
 #include "Krystal.Core/Utils/Tags.hpp"
 #include "Krystal.Net/Url.hpp"
 #include <memory>

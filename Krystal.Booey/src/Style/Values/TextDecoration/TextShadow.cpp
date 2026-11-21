@@ -35,8 +35,8 @@
 #include "Krystal.Booey/Style/Values/Primitives/NumericTypesConversions.hpp"
 #include "Krystal.Booey/Style/Values/Primitives/NumericTypesEvaluation.hpp"
 #include "Krystal.Booey/Style/Values/Primitives/NumericTypesSerialisation.hpp"
+#include "Krystal.Core/Memory/NeverDestroyed.hpp"
 #include "Krystal.Core/Strings/StringBuilder.hpp"
-#include "Krystal.Core/Threading/NeverDestroyed.hpp"
 #include <ranges>
 
 namespace krys::boo::style
@@ -130,7 +130,7 @@ namespace krys::boo::style
         .Location = {{0}, {0}},
         .Blur = {0},
       }};
-      return defaultShadowData.get();
+      return *defaultShadowData;
     }
   };
 

@@ -34,7 +34,7 @@
 #include "Krystal.Booey/Rendering/RenderInline.hpp"
 #include "Krystal.Booey/Rendering/RenderView.hpp"
 #include "Krystal.Booey/Rendering/Style/RenderStyle+GettersInlines.hpp"
-#include "Krystal.Core/Utils/Move.hpp"
+#include "Krystal.Core/Move.hpp"
 #include <ranges>
 
 namespace krys::boo

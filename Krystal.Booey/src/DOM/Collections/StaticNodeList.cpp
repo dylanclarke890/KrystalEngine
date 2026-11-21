@@ -1,7 +1,7 @@
 ﻿#include "Krystal.Booey/DOM/Collections/StaticNodeList.hpp"
 #include "Krystal.Booey/DOM/Nodes/ContainerNode.hpp"
 #include "Krystal.Booey/DOM/Nodes/Document.hpp"
-#include "Krystal.Core/Utils/Move.hpp"
+#include "Krystal.Core/Move.hpp"
 
 namespace krys::boo
 {

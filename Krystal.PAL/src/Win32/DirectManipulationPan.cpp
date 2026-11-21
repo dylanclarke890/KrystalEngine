@@ -1,5 +1,5 @@
 ﻿#include "Krystal.PAL/Win32/DirectManipulationPan.hpp"
-#include "Krystal.Core/Utils/Move.hpp"
+#include "Krystal.Core/Move.hpp"
 
 namespace krys::pal::win32
 {

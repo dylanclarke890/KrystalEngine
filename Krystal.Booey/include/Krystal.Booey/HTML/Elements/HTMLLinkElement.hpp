@@ -29,7 +29,7 @@
 #include "Krystal.Booey/Loader/Cache/CachedCSSStyleSheet.hpp"
 #include "Krystal.Booey/Loader/Cache/CachedResourceHandle.hpp"
 #include "Krystal.Booey/Loader/Cache/CachedStyleSheetClient.hpp"
-#include "Krystal.Core/Types/WeakPtr.hpp"
+#include "Krystal.Core/Memory/WeakPtr.hpp"
 
 namespace krys::boo
 {

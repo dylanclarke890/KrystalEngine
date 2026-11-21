@@ -12,7 +12,7 @@
 #include "Krystal.Booey/DOM/Nodes/ShadowRoot.hpp"
 #include "Krystal.Booey/HTML/Elements/HTMLBodyElement.hpp"
 #include "Krystal.Booey/HTML/Elements/HTMLSlotElement.hpp"
-#include "Krystal.Core/Utils/Move.hpp"
+#include "Krystal.Core/Move.hpp"
 #include <ranges>
 
 namespace krys::boo::dom

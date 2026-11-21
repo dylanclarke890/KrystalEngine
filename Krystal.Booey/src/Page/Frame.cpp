@@ -80,7 +80,7 @@
 #include "Krystal.Booey/SVG/Graphics/SVGImage.hpp"
 #include "Krystal.Booey/SVG/SVGDocumentExtensions.hpp"
 #include "Krystal.Core/Assert.hpp"
-#include "Krystal.Core/Threading/NeverDestroyed.hpp"
+#include "Krystal.Core/Memory/NeverDestroyed.hpp"
 #include "Krystal.Core/Types/List.hpp"
 #include "Krystal.Core/Utils/SetForScope.hpp"
 

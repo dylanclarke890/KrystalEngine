@@ -59,7 +59,7 @@
 #include "Krystal.Booey/Style/Extractor/Extractor.hpp"
 #include "Krystal.Booey/Style/ResolveForFont.hpp"
 #include "Krystal.Booey/Style/Resolver.hpp"
-#include "Krystal.Core/Utils/Move.hpp"
+#include "Krystal.Core/Move.hpp"
 #include <algorithm>
 #include <array>
 

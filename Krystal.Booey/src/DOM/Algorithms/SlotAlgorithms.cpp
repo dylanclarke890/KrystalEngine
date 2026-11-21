@@ -12,7 +12,7 @@
 #include "Krystal.Booey/HTML/Elements/HTMLSelectElement.hpp"
 #include "Krystal.Booey/HTML/Elements/HTMLSlotElement.hpp"
 #include "Krystal.Booey/Rendering/Updating/RenderTreeUpdater.hpp"
-#include "Krystal.Core/Utils/Move.hpp"
+#include "Krystal.Core/Move.hpp"
 #include <algorithm>
 
 namespace krys::boo::dom

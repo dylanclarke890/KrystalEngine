@@ -32,7 +32,7 @@
 
 #include "Krystal.Booey/Animation/WebAnimationTypes.hpp"
 #include "Krystal.Booey/Graphics/Animation/AnimationUtilities.hpp"
-#include "Krystal.Core/Utils/Move.hpp"
+#include "Krystal.Core/Move.hpp"
 
 namespace krys::boo::style::interpolation
 {

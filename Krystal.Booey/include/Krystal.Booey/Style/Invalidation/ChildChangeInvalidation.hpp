@@ -31,8 +31,8 @@
 #include "Krystal.Booey/Style/Scope/Scope.hpp"
 #include "Krystal.Core/Attributes.hpp"
 #include "Krystal.Core/Macros.hpp"
+#include "Krystal.Core/Memory/RefPtr.hpp"
 #include "Krystal.Core/Types/HashSet.hpp"
-#include "Krystal.Core/Types/RefPtr.hpp"
 
 namespace krys::boo::style
 {

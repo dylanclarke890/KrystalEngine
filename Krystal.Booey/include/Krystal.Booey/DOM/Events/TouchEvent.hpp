@@ -30,8 +30,8 @@
 #include "Krystal.Booey/DOM/Events/TouchList.hpp"
 #include "Krystal.Booey/DOM/Events/UIEvent.hpp"
 #include "Krystal.Core/Attributes.hpp"
+#include "Krystal.Core/Memory/RefPtr.hpp"
 #include "Krystal.Core/Types/List.hpp"
-#include "Krystal.Core/Types/RefPtr.hpp"
 
 namespace krys::boo
 {

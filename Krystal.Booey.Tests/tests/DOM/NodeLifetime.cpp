@@ -5,7 +5,7 @@
 #include "Krystal.Booey/DOM/Nodes/Text.hpp"
 #include "Krystal.Booey/HTML/EventLoop/EventLoop.hpp"
 #include "Krystal.Booey/HTML/Parser/DocumentParser.hpp"
-#include "Krystal.Core/Types/WeakPtr.hpp"
+#include "Krystal.Core/Memory/WeakPtr.hpp"
 
 namespace krys::boo::dom::tests
 {

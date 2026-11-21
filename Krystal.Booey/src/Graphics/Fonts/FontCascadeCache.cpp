@@ -32,7 +32,7 @@
 #include "Krystal.Booey/Graphics/Fonts/FontCascadeDescription.hpp"
 #include "Krystal.Booey/Graphics/Fonts/FontSelector.hpp"
 #include "Krystal.Core/Hashing/FastHash.hpp"
-#include "Krystal.Core/Utils/Move.hpp"
+#include "Krystal.Core/Move.hpp"
 
 namespace krys::boo
 {

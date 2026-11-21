@@ -28,10 +28,10 @@
 #include "Krystal.Booey/CSS/Selectors/MutableSelector.hpp"
 #include "Krystal.Booey/CSS/Selectors/Selector.hpp"
 #include "Krystal.Core/Hashing/FastHash.hpp"
+#include "Krystal.Core/Memory/UniqueArray.hpp"
 #include "Krystal.Core/Strings/StringBuilder.hpp"
 #include "Krystal.Core/Types/List.hpp"
 #include "Krystal.Core/Types/Maybe.hpp"
-#include "Krystal.Core/Types/UniqueArray.hpp"
 
 namespace krys::boo::css
 {

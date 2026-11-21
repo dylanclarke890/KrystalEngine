@@ -28,6 +28,7 @@
 #include "Krystal.Core/Attributes.hpp"
 #include "Krystal.Core/Concepts.hpp"
 #include "Krystal.Core/Numeric.hpp"
+#include "Krystal.Core/Types/Array.hpp"
 #include <bit>
 
 namespace krys

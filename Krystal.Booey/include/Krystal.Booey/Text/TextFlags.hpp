@@ -30,11 +30,11 @@
 #include "Krystal.Core/Assert.hpp"
 #include "Krystal.Core/Attributes.hpp"
 #include "Krystal.Core/Hashing/FastHash.hpp"
+#include "Krystal.Core/Memory/RefPtr.hpp"
 #include "Krystal.Core/Types/HashMap.hpp"
 #include "Krystal.Core/Types/List.hpp"
 #include "Krystal.Core/Types/Markable.hpp"
 #include "Krystal.Core/Types/Maybe.hpp"
-#include "Krystal.Core/Types/RefPtr.hpp"
 
 namespace krys
 {

@@ -38,8 +38,8 @@
 #include "Krystal.Booey/Style/StyleAppearance.hpp"
 #include "Krystal.Booey/Text/TextFlags.hpp"
 #include "Krystal.Core/Geometry/Segment.hpp"
+#include "Krystal.Core/Move.hpp"
 #include "Krystal.Core/Types/Func.hpp"
-#include "Krystal.Core/Utils/Move.hpp"
 
 namespace krys::boo::display_list
 {

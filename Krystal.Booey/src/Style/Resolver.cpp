@@ -64,7 +64,7 @@
 #include "Krystal.Booey/SVG/Elements/SVGElement.hpp"
 #include "Krystal.Booey/SVG/Elements/SVGSvgElement.hpp"
 #include "Krystal.Core/Assert.hpp"
-#include "Krystal.Core/Threading/NeverDestroyed.hpp"
+#include "Krystal.Core/Memory/NeverDestroyed.hpp"
 #include "Krystal.Core/TypeCast.hpp"
 
 namespace krys::boo::style

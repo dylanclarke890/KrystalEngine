@@ -25,8 +25,8 @@
 #pragma once
 
 #include "Krystal.Booey/CSS/Properties/StyleProperties.hpp"
+#include "Krystal.Core/Memory/Packed.hpp"
 #include "Krystal.Core/Types/Maybe.hpp"
-#include "Krystal.Core/Types/Packed.hpp"
 #include "Krystal.Core/Types/Span.hpp"
 #include <bit>
 

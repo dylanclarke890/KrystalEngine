@@ -53,11 +53,11 @@
 #include "Krystal.Core/Geometry/AffineTransform.hpp"
 #include "Krystal.Core/Geometry/Rect.hpp"
 #include "Krystal.Core/Geometry/Size.hpp"
+#include "Krystal.Core/Memory/UniquePtr.hpp"
 #include "Krystal.Core/Time/Timer.hpp"
 #include "Krystal.Core/Types/EnumSet.hpp"
 #include "Krystal.Core/Types/List.hpp"
 #include "Krystal.Core/Types/SmallList.hpp"
-#include "Krystal.Core/Types/UniquePtr.hpp"
 #include "Krystal.Image/ImageOrientation.hpp"
 
 namespace krys::boo

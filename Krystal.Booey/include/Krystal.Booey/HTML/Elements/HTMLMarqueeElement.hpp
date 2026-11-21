@@ -1,8 +1,8 @@
 ﻿#pragma once
 
 #include "Krystal.Booey/HTML/Elements/HTMLElement.hpp"
-#include "Krystal.Core/Types/RefPtr.hpp"
-#include "Krystal.Core/Types/WeakPtr.hpp"
+#include "Krystal.Core/Memory/RefPtr.hpp"
+#include "Krystal.Core/Memory/WeakPtr.hpp"
 
 namespace krys::boo
 {

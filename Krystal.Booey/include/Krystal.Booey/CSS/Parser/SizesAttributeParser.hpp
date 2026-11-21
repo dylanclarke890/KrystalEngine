@@ -32,9 +32,9 @@
 #include "Krystal.Booey/CSS/Parser/TokenRange.hpp"
 #include "Krystal.Booey/CSS/Queries/MediaQuery.hpp"
 #include "Krystal.Core/Attributes.hpp"
+#include "Krystal.Core/Memory/WeakPtr.hpp"
 #include "Krystal.Core/Types/List.hpp"
 #include "Krystal.Core/Types/Maybe.hpp"
-#include "Krystal.Core/Types/WeakPtr.hpp"
 
 namespace krys::boo
 {

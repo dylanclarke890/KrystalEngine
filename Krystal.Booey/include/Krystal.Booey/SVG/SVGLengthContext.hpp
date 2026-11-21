@@ -26,8 +26,8 @@
 #include "Krystal.Booey/SVG/SVGUnitTypes.hpp"
 #include "Krystal.Core/Attributes.hpp"
 #include "Krystal.Core/Geometry/Rect.hpp"
+#include "Krystal.Core/Memory/WeakPtr.hpp"
 #include "Krystal.Core/Types/Maybe.hpp"
-#include "Krystal.Core/Types/WeakPtr.hpp"
 
 namespace krys::boo::css
 {

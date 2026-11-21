@@ -29,8 +29,8 @@
 #include "Krystal.Booey/HTML/Elements/HTMLFormControlElement.hpp"
 #include "Krystal.Booey/HTML/Elements/HTMLOptionElement.hpp"
 #include "Krystal.Booey/HTML/Forms/TypeAhead.hpp"
+#include "Krystal.Core/Memory/WeakPtr.hpp"
 #include "Krystal.Core/Types/Variant.hpp"
-#include "Krystal.Core/Types/WeakPtr.hpp"
 
 namespace krys::boo
 {

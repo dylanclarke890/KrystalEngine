@@ -27,7 +27,7 @@
 #pragma once
 
 #include "Krystal.Core/Attributes.hpp"
-#include "Krystal.Core/Types/WeakPtrFactory.hpp"
+#include "Krystal.Core/Memory/WeakPtrFactory.hpp"
 
 namespace krys::detail
 {

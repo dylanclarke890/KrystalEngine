@@ -32,6 +32,8 @@
 #include "Krystal.Core/Attributes.hpp"
 #include "Krystal.Core/Debug.hpp"
 #include "Krystal.Core/Macros.hpp"
+#include "Krystal.Core/Memory/UniquePtr.hpp"
+#include "Krystal.Core/Memory/WeakPtr.hpp"
 #include "Krystal.Core/Numeric.hpp"
 #include "Krystal.Core/Time/Timer.hpp"
 #include "Krystal.Core/Types/HashMap.hpp"
@@ -39,8 +41,6 @@
 #include "Krystal.Core/Types/List.hpp"
 #include "Krystal.Core/Types/ListHashSet.hpp"
 #include "Krystal.Core/Types/Maybe.hpp"
-#include "Krystal.Core/Types/UniquePtr.hpp"
-#include "Krystal.Core/Types/WeakPtr.hpp"
 
 namespace krys::boo
 {

@@ -29,7 +29,7 @@
 #include "Krystal.Booey/CSS/Values/Value.hpp"
 #include "Krystal.Booey/Graphics/Geometry/BoxSides.hpp"
 #include "Krystal.Booey/Text/WritingMode.hpp"
-#include "Krystal.Core/Types/RefPtr.hpp"
+#include "Krystal.Core/Memory/RefPtr.hpp"
 #include "Krystal.Core/Types/SmallList.hpp"
 #include "Krystal.Core/Types/Span.hpp"
 

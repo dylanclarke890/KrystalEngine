@@ -112,7 +112,7 @@
 #include "Krystal.Booey/CSS/Values/ValueList.hpp"
 #include "Krystal.Booey/CSS/Values/ValuePair.hpp"
 #include "Krystal.Core/Types/Maybe.hpp"
-#include "Krystal.Core/Utils/ZippedRange.hpp"
+#include <ranges>
 
 namespace krys::boo::css
 {
@@ -1814,7 +1814,7 @@ namespace krys::boo::css
       guard.Commit();
 
       auto shorthandProperties = shorthand.Properties();
-      for (auto [value, longhand] : zippedRange(values, shorthandProperties.first(values.size())))
+      for (auto &&[value, longhand] : std::views::zip(values, shorthandProperties.first(values.size())))
       {
         result.AddPropertyForCurrentShorthand(state, longhand, krys::move(value), IsImplicit::Yes);
       }

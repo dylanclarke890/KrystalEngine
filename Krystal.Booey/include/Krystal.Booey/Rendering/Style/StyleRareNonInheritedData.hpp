@@ -78,7 +78,7 @@
 #include "Krystal.Booey/Style/Values/Transforms/Translate.hpp"
 #include "Krystal.Booey/Style/Values/Viewport/Zoom.hpp"
 #include "Krystal.Booey/Style/Values/WillChange/WillChange.hpp"
-#include "Krystal.Core/Types/DataRef.hpp"
+#include "Krystal.Core/Memory/DataRef.hpp"
 #include "Krystal.Core/Types/EnumSet.hpp"
 #include "Krystal.Core/Types/Markable.hpp"
 #include <memory>

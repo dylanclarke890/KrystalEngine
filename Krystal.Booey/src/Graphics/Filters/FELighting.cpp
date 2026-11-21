@@ -28,8 +28,8 @@
 
 #include "Krystal.Booey/Graphics/Filters/FELighting.hpp"
 #include "Krystal.Booey/Graphics/Filters/Filter.hpp"
-#include "Krystal.Core/Utils/Move.hpp"
-#include "Krystal.Core/Utils/PointerComparison.hpp"
+#include "Krystal.Core/Memory/PointerComparison.hpp"
+#include "Krystal.Core/Move.hpp"
 #include <algorithm>
 
 namespace krys::boo

@@ -1,7 +1,7 @@
 ﻿#include "Krystal.Core/Threading/TaskInbox.hpp"
 #include "catch2/catch_test_macros.hpp"
+#include "Krystal.Core/Memory/UniquePtr.hpp"
 #include "Krystal.Core/Threading/Thread.hpp"
-#include "Krystal.Core/Types/UniquePtr.hpp"
 #include <atomic>
 #include <thread>
 

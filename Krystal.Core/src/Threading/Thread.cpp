@@ -1,5 +1,5 @@
 ﻿#include "Krystal.Core/Threading/Thread.hpp"
-#include "Krystal.Core/Utils/Move.hpp"
+#include "Krystal.Core/Move.hpp"
 
 #ifdef _WIN32
   #ifndef WIN32_LEAN_AND_MEAN

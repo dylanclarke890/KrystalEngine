@@ -43,7 +43,7 @@
 #include "Krystal.Booey/Style/Values/Animations/SingleAnimationRange.hpp"
 #include "Krystal.Booey/Style/Values/Primitives/LengthWrapperDeprecatedCSSValueConversion.hpp"
 #include "Krystal.Booey/Style/Values/ScrollSnap/ScrollPadding.hpp"
-#include "Krystal.Core/Utils/Move.hpp"
+#include "Krystal.Core/Move.hpp"
 #include "Krystal.Core/Visitor.hpp"
 #include <utility>
 

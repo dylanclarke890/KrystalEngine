@@ -1,7 +1,7 @@
 ﻿#include "Krystal.Booey/HTML/EventLoop/EventLoop.hpp"
 #include "Krystal.Booey/DOM/Nodes/Document.hpp"
 #include "Krystal.Core/Assert.hpp"
-#include "Krystal.Core/Threading/NeverDestroyed.hpp"
+#include "Krystal.Core/Memory/NeverDestroyed.hpp"
 #include "Krystal.Core/Time/ThreadTimers.hpp"
 #include "Krystal.Core/Time/Timer.hpp"
 #include <algorithm>

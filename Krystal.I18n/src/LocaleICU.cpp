@@ -30,7 +30,7 @@
 
 #include "LocaleICU.hpp"
 #include "Krystal.Core/Assert.hpp"
-#include "Krystal.Core/Utils/Move.hpp"
+#include "Krystal.Core/Move.hpp"
 #include "Krystal.I18n/Language.hpp"
 #include "Krystal.I18n/LocaleToScriptMapping.hpp"
 #include "Krystal.Text/Script.hpp"

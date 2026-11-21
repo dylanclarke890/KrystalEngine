@@ -26,7 +26,7 @@
 #include "Krystal.Booey/CSS/Rules/FunctionRule.hpp"
 #include "Krystal.Booey/CSS/Properties/MutableStyleProperties.hpp"
 #include "Krystal.Booey/CSS/Properties/StyleProperties.hpp"
-#include "Krystal.Core/Utils/Move.hpp"
+#include "Krystal.Core/Move.hpp"
 
 namespace krys::boo::css
 {

@@ -27,8 +27,8 @@
 
 #include "Krystal.Booey/CSS/Values/ToLengthConversionData.hpp"
 #include "Krystal.Core/Macros.hpp"
+#include "Krystal.Core/Memory/RefPtr.hpp"
 #include "Krystal.Core/Numeric.hpp"
-#include "Krystal.Core/Types/RefPtr.hpp"
 
 namespace krys::boo
 {

@@ -32,10 +32,10 @@
 #include "Krystal.Booey/CSS/Values/ValuePair.hpp"
 #include "Krystal.Booey/Style/Builder/BuilderState.hpp"
 #include "Krystal.Core/Attributes.hpp"
+#include "Krystal.Core/Memory/RefPtr.hpp"
 #include "Krystal.Core/TypeCast.hpp"
 #include "Krystal.Core/Types/Maybe.hpp"
 #include "Krystal.Core/Types/Pair.hpp"
-#include "Krystal.Core/Types/RefPtr.hpp"
 #include <iterator>
 
 namespace krys::boo::style

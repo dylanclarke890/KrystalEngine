@@ -34,9 +34,9 @@
 #include "Krystal.Booey/Graphics/Fonts/FontSelector.hpp"
 #include "Krystal.Core/Assert.hpp"
 #include "Krystal.Core/Hashing/FastHash.hpp"
+#include "Krystal.Core/Memory/NeverDestroyed.hpp"
 #include "Krystal.Core/Strings/ASCII.hpp"
 #include "Krystal.Core/Strings/CodePointIterator.hpp"
-#include "Krystal.Core/Threading/NeverDestroyed.hpp"
 #include "Krystal.Text/CharacterProperties.hpp"
 
 namespace krys::boo

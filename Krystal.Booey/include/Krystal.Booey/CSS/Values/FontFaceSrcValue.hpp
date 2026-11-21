@@ -29,8 +29,8 @@
 #include "Krystal.Booey/CSS/Values/Primitives/Url.hpp"
 #include "Krystal.Booey/CSS/Values/Value.hpp"
 #include "Krystal.Booey/Loader/Cache/CachedResourceHandle.hpp"
+#include "Krystal.Core/Memory/RefPtr.hpp"
 #include "Krystal.Core/Types/List.hpp"
-#include "Krystal.Core/Types/RefPtr.hpp"
 
 namespace krys::boo
 {
