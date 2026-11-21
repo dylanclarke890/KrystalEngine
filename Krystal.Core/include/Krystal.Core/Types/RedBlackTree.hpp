@@ -1,4 +1,54 @@
-﻿#pragma once
+﻿/*
+ * Copyright (C) 2010 Google Inc. All rights reserved.
+ * Copyright (C) 2019-2024 Apple Inc. All rights reserved.
+ *
+ * Redistribution and use in source and binary forms, with or without
+ * modification, are permitted provided that the following conditions
+ * are met:
+ *
+ * 1.  Redistributions of source code must retain the above copyright
+ *     notice, this list of conditions and the following disclaimer.
+ * 2.  Redistributions in binary form must reproduce the above copyright
+ *     notice, this list of conditions and the following disclaimer in the
+ *     documentation and/or other materials provided with the distribution.
+ *
+ * THIS SOFTWARE IS PROVIDED BY APPLE AND ITS CONTRIBUTORS "AS IS" AND ANY
+ * EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE IMPLIED
+ * WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE ARE
+ * DISCLAIMED. IN NO EVENT SHALL APPLE OR ITS CONTRIBUTORS BE LIABLE FOR ANY
+ * DIRECT, INDIRECT, INCIDENTAL, SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES
+ * (INCLUDING, BUT NOT LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES;
+ * LOSS OF USE, DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND
+ * ON ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT
+ * (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF
+ * THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
+ */
+
+// A red-black tree, which is a form of a balanced binary tree. It
+// supports efficient insertion, deletion and queries of comparable
+// elements. The same element may be inserted multiple times. The
+// algorithmic complexity of common operations is:
+//
+//   Insertion: O(lg(n))
+//   Deletion:  O(lg(n))
+//   Querying:  O(lg(n))
+//
+// Type T must supply a default constructor, a copy constructor, and
+// the "<" and "==" operators.
+//
+// In debug mode, printing of the data contained in the tree is
+// enabled. This makes use of WTF::TextStream.
+//
+// This red-black tree is designed to be _augmented_; subclasses can
+// add additional and summary information to each node to efficiently
+// store and index more complex data structures. A concrete example is
+// the IntervalTree, which extends each node with a summary statistic
+// to efficiently store one-dimensional intervals.
+//
+// The design of this red-black tree comes from Cormen, Leiserson,
+// and Rivest, _Introduction to Algorithms_, MIT Press, 1990.
+
+#pragma once
 
 #include "Krystal.Core/Assert.hpp"
 #include "Krystal.Core/Attributes.hpp"
