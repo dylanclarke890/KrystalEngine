@@ -47,7 +47,6 @@ namespace krys::tests
   {
     SharedBufferBuilder builder;
     CHECK(builder.IsNull());
-    CHECK_FALSE(builder);
 
     builder.Append(Bytes({1, 2}));
     builder.Append(Span<const uint8>());

@@ -329,11 +329,6 @@ namespace krys
 
     void AppendSpans(Span<const Span<const uint8>> spans) noexcept;
 
-    KRYS_NODISCARD explicit operator bool() const noexcept
-    {
-      return !IsNull();
-    }
-
     KRYS_NODISCARD bool IsNull() const noexcept
     {
       return _state == State::Null;
