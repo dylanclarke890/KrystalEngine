@@ -24,7 +24,6 @@
 #include "Krystal.Core/Concepts.hpp"
 #include "Krystal.Core/Numeric.hpp"
 #include "Krystal.Core/TypeTraits.hpp"
-#include "Krystal.Core/Utils/GetPtrHelper.hpp"
 #include "Krystal.Core/Utils/Tags.hpp"
 #include <bit>
 #include <xhash>
@@ -191,8 +190,8 @@ namespace krys
   struct PtrHashBase<T, true /* IsSmartPointer */>
   {
     using type = T;
-    using PtrType = typename GetPtrHelper<T>::PtrType;
-    using UnderlyingType = typename GetPtrHelper<T>::UnderlyingType;
+    using PtrType = decltype(std::declval<const T &>().get());
+    using UnderlyingType = remove_ptr_t<PtrType>;
 
     constexpr static bool IsSafeToCompareToEmptyOrDeleted = true;
 
@@ -203,7 +202,7 @@ namespace krys
 
     KRYS_NODISCARD constexpr static size_t Hash(const T &key) noexcept
     {
-      return Hash(GetPtr(key));
+      return Hash(key.get());
     }
 
     KRYS_NODISCARD constexpr static bool Equal(add_const_t<UnderlyingType> *a,
@@ -214,17 +213,17 @@ namespace krys
 
     KRYS_NODISCARD constexpr static bool Equal(const T &a, const T &b) noexcept
     {
-      return GetPtr(a) == GetPtr(b);
+      return a.get() == b.get();
     }
 
     KRYS_NODISCARD constexpr static bool Equal(add_const_t<UnderlyingType> *a, const T &b) noexcept
     {
-      return a == GetPtr(b);
+      return a == b.get();
     }
 
     KRYS_NODISCARD constexpr static bool Equal(const T &a, add_const_t<UnderlyingType> *b) noexcept
     {
-      return GetPtr(a) == b;
+      return a.get() == b;
     }
   };
 

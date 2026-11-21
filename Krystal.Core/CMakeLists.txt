@@ -279,7 +279,6 @@ target_sources(Krystal.Core
       include/Krystal.Core/Utils/Apply.hpp
       include/Krystal.Core/Utils/ByteUtils.hpp
       include/Krystal.Core/Utils/ForbidHeapAllocation.hpp
-      include/Krystal.Core/Utils/GetPtrHelper.hpp
       include/Krystal.Core/Utils/IndexedRange.hpp
       include/Krystal.Core/Utils/IsEOF.hpp
       include/Krystal.Core/Utils/Move.hpp
