@@ -185,16 +185,6 @@ namespace krys::boo
       }
     }
 
-    explicit Color(HashTableEmptyValueTag) noexcept
-        : _colorAndFlags(EncodedFlags(ColorFlagsIncludingPrivate::HashTableEmptyValue))
-    {
-    }
-
-    explicit Color(HashTableDeletedValueTag) noexcept
-        : _colorAndFlags(EncodedFlags(ColorFlagsIncludingPrivate::HashTableDeletedValue))
-    {
-    }
-
     Color(const Color &other) noexcept : _colorAndFlags(other._colorAndFlags)
     {
       if (IsOutOfLine())
@@ -251,16 +241,6 @@ namespace krys::boo
       {
         AsOutOfLine().SubRef();
       }
-    }
-
-    KRYS_NODISCARD bool IsHashTableDeletedValue() const noexcept
-    {
-      return HasFlag(Flags(), ColorFlagsIncludingPrivate::HashTableDeletedValue);
-    }
-
-    KRYS_NODISCARD bool IsHashTableEmptyValue() const noexcept
-    {
-      return HasFlag(Flags(), ColorFlagsIncludingPrivate::HashTableEmptyValue);
     }
 
     KRYS_NODISCARD bool IsValid() const noexcept

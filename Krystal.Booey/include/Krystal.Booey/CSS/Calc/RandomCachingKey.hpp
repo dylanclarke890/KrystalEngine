@@ -29,63 +29,20 @@
 #include "Krystal.Core/Hashing/FastHash.hpp"
 #include "Krystal.Core/Types/Variant.hpp"
 #include "Krystal.Core/TypeTraits.hpp"
-#include "Krystal.Core/Utils/Tags.hpp"
 
 namespace krys::boo::css::calc
 {
   struct RandomCachingKey
   {
-    using IdentifierVariant = Variant<Random::SharingOptions::Auto, CSSOMStringAtom,
-                                      krys::HashTableDeletedValueTag, krys::HashTableEmptyValueTag>;
+    using IdentifierVariant = Variant<Random::SharingOptions::Auto, CSSOMStringAtom>;
 
     IdentifierVariant Identifier;
 
-    RandomCachingKey(Variant<Random::SharingOptions::Auto, CSSOMStringAtom> &&identifier) noexcept
-        : Identifier {krys::SwitchOn(krys::move(identifier), [](auto &&alternative)
-                                     { return IdentifierVariant {krys::move(alternative)}; })}
+    RandomCachingKey(IdentifierVariant identifier) noexcept : Identifier {krys::move(identifier)}
     {
     }
 
-    RandomCachingKey(const Variant<Random::SharingOptions::Auto, CSSOMStringAtom> &identifier) noexcept
-        : Identifier {krys::SwitchOn(identifier,
-                                     [](const auto &alternative) { return IdentifierVariant {alternative}; })}
-    {
-    }
-
-    explicit RandomCachingKey(krys::HashTableDeletedValueTag) noexcept
-        : Identifier {krys::HashTableDeletedValueTag {}}
-    {
-    }
-
-    explicit RandomCachingKey(krys::HashTableEmptyValueTag) noexcept
-        : Identifier {krys::HashTableEmptyValueTag {}}
-    {
-    }
-
-    KRYS_NODISCARD bool IsHashTableDeletedValue() const noexcept
-    {
-      return std::holds_alternative<krys::HashTableDeletedValueTag>(Identifier);
-    }
-
-    KRYS_NODISCARD bool IsHashTableEmptyValue() const noexcept
-    {
-      return std::holds_alternative<krys::HashTableEmptyValueTag>(Identifier);
-    }
-
-    KRYS_NODISCARD bool operator==(const RandomCachingKey &other) const noexcept
-    {
-      if (Identifier.index() != other.Identifier.index())
-      {
-        return false;
-      }
-
-      return krys::SwitchOn(
-        Identifier, [&](const Random::SharingOptions::Auto &autoValue)
-        { return autoValue == std::get<Random::SharingOptions::Auto>(other.Identifier); },
-        [&](const CSSOMStringAtom &string) { return string == std::get<CSSOMStringAtom>(other.Identifier); },
-        [](const krys::HashTableDeletedValueTag &) { return true; },
-        [](const krys::HashTableEmptyValueTag &) { return true; });
-    }
+    KRYS_NODISCARD bool operator==(const RandomCachingKey &) const noexcept = default;
   };
 
   struct RandomCachingKeyHash
@@ -100,9 +57,7 @@ namespace krys::boo::css::calc
                                          autoValue.Index);
         },
         [&](const CSSOMStringAtom &string) -> size_t
-        { return krys::CombineFastHashes(key.Identifier.index(), string); },
-        [](const krys::HashTableDeletedValueTag &) -> size_t { krys_unreachable(); },
-        [](const krys::HashTableEmptyValueTag &) -> size_t { krys_unreachable(); });
+        { return krys::CombineFastHashes(key.Identifier.index(), string); });
     }
 
     // Lets `HashMap` use this as its hasher.

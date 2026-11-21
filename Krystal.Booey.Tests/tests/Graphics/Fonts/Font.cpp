@@ -176,7 +176,6 @@ namespace krys::boo::tests
       CHECK(data.FamilyName() == u8"Ahem");
       CHECK(data.Description() == u8"Ahem 16px");
       CHECK_FALSE(FontPlatformData {}.Face());
-      CHECK(FontPlatformData {HashTableDeletedValueTag {}}.IsHashTableDeletedValue());
       CHECK(Font::CreateSystemFallbackFontPlaceholder()->IsSystemFontFallbackPlaceholder());
       CHECK(Font::Create(data)->Description() == u8"Ahem 16px");
     }

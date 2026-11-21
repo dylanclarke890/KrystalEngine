@@ -132,10 +132,6 @@ namespace krys::boo::style
     {
     }
 
-    explicit LengthWrapperBase(HashTableEmptyValueTag token) noexcept : _value(token)
-    {
-    }
-
     KRYS_NODISCARD KRYS_ALWAYS_INLINE bool IsFixed() const noexcept
     {
       return HoldsAlternative<Fixed>();

@@ -285,17 +285,6 @@ namespace krys
   public:
     using Base = PackedAlignedPtr<T, 1>;
     using Base::Base;
-
-    // Hash table deleted values, which are only constructed and never copied or destroyed.
-    Packed(HashTableDeletedValueTag) noexcept
-        : Base(std::bit_cast<T *>(static_cast<uintptr_t>(Base::Alignment)))
-    {
-    }
-
-    KRYS_NODISCARD bool IsHashTableDeletedValue() const noexcept
-    {
-      return Base::get() == std::bit_cast<T *>(static_cast<uintptr_t>(Base::Alignment));
-    }
   };
 
   template <typename T>
@@ -342,19 +331,6 @@ namespace krys
     KRYS_NODISCARD KRYS_ALWAYS_INLINE constexpr static T *unwrap(const StorageType &ptr) noexcept
     {
       return ptr.get();
-    }
-
-    // We assume that,
-    // 1. The alignment is < 4KB. (It is tested by HashTraits).
-    // 2. The first page (including nullptr) is never mapped.
-    KRYS_ALWAYS_INLINE constexpr static StorageType HashTableDeletedValue() noexcept
-    {
-      return StorageType {std::bit_cast<T *>(static_cast<uintptr_t>(StorageType::Alignment))};
-    }
-
-    KRYS_ALWAYS_INLINE constexpr static bool IsHashTableDeletedValue(const StorageType &ptr) noexcept
-    {
-      return ptr.get() == std::bit_cast<T *>(static_cast<uintptr_t>(StorageType::Alignment));
     }
   };
 }

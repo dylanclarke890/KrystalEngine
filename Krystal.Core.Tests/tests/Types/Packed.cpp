@@ -85,14 +85,4 @@ namespace krys::tests
     PackedPtr<const Object> pointer {&object};
     REQUIRE(pointer->Value == 42);
   }
-
-  TEST_CASE("PackedPtr has a hash table deleted value", "[Packed]")
-  {
-    PackedPtr<int> deleted {HashTableDeletedValueTag {}};
-    REQUIRE(deleted.IsHashTableDeletedValue());
-
-    int value = 0;
-    PackedPtr<int> pointer {&value};
-    REQUIRE_FALSE(pointer.IsHashTableDeletedValue());
-  }
 }

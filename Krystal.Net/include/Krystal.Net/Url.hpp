@@ -63,7 +63,6 @@ namespace krys::net
     uint32 _protocolIsInHttpFamily : 1 {false};
     uint32 _hasOpaquePath : 1 {false};
     uint32 _isNull : 1 {true};
-    uint32 _isHashTableDeletedValue : 1 {false};
 
     // This is out of order to align the bits better. The port is after the host.
     uint32 _portLength : 3 {0};
@@ -82,8 +81,6 @@ namespace krys::net
   public:
     /// @brief A null URL.
     Url() noexcept = default;
-
-    explicit Url(HashTableDeletedValueTag) noexcept;
 
     /// @brief Resolves `relative` against `base`. `base` can be null or invalid, in which case `relative` is
     /// parsed as an absolute URL. A null `relative` (`data() == nullptr`) gives `base` without its fragment.
@@ -117,11 +114,6 @@ namespace krys::net
 
     /// @brief Like `StrippedForUseAsReferrer`, but without the query either.
     KRYS_NODISCARD utf8_string StrippedForUseAsReport() const noexcept;
-
-    KRYS_NODISCARD bool IsHashTableDeletedValue() const noexcept
-    {
-      return _isHashTableDeletedValue;
-    }
 
     KRYS_NODISCARD bool IsNull() const noexcept
     {

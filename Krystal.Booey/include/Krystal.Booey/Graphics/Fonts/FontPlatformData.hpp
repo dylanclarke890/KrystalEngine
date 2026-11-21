@@ -58,15 +58,12 @@ namespace krys::boo
     bool _syntheticBold {false};
     bool _syntheticOblique {false};
     bool _isColorBitmapFont {false};
-    bool _isHashTableDeletedValue {false};
     FontFeatureSettings _fontFaceFeatures;
     RefPtr<FontFeatureValues> _fontFeatureValues;
     uint32 _paletteIndex {0};
     List<FontPaletteValues::OverriddenColor> _paletteOverrides;
 
   public:
-    explicit FontPlatformData(HashTableDeletedValueTag) noexcept;
-
     FontPlatformData() noexcept;
 
     FontPlatformData(Ref<text::FreeTypeFace> face, float size, bool syntheticBold, bool syntheticOblique,
@@ -181,11 +178,6 @@ namespace krys::boo
     KRYS_NODISCARD size_t Hash() const noexcept;
 
     KRYS_NODISCARD bool operator==(const FontPlatformData &other) const noexcept;
-
-    KRYS_NODISCARD bool IsHashTableDeletedValue() const noexcept
-    {
-      return _isHashTableDeletedValue;
-    }
 
     KRYS_NODISCARD static bool IsEmoji() noexcept
     {
