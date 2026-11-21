@@ -469,7 +469,7 @@ namespace krys::text
     std::copy_n(encoded.begin(), offset, _encoded.end() - offset);
   }
 
-  CachedTextBreakIterator &CachedLineBreakIteratorFactory::Get() noexcept
+  CachedTextBreakIterator &CachedLineBreakIteratorFactory::operator*() noexcept
   {
     auto priorContext = _priorContext.Characters();
     if (!_iterator)
@@ -481,7 +481,7 @@ namespace krys::text
     else if (priorContext.data() != _cachedPriorContext)
     {
       ResetStringAndReleaseIterator(_stringView, _locale, _mode, _contentAnalysis);
-      return Get();
+      return **this;
     }
     return *_iterator;
   }

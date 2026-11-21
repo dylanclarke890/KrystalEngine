@@ -1,24 +1,4 @@
-﻿/*
- * Copyright (C) 2003-2020 Apple Inc. All rights reserved.
- *
- * This library is free software; you can redistribute it and/or
- * modify it under the terms of the GNU Library General Public
- * License as published by the Free Software Foundation; either
- * version 2 of the License, or (at your option) any later version.
- *
- * This library is distributed in the hope that it will be useful,
- * but WITHOUT ANY WARRANTY; without even the implied warranty of
- * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU
- * Library General Public License for more details.
- *
- * You should have received a copy of the GNU Library General Public License
- * along with this library; see the file COPYING.LIB.  If not, write to
- * the Free Software Foundation, Inc., 51 Franklin Street, Fifth Floor,
- * Boston, MA 02110-1301, USA.
- *
- */
-
-#pragma once
+﻿#pragma once
 
 #include "Krystal.Core/Attributes.hpp"
 #include "Krystal.Core/Types/RefPtr.hpp"
@@ -36,47 +16,42 @@ namespace krys
     Ref<T> _data;
 
   public:
-    DataRef(Ref<T> &&data) noexcept : _data(krys::move(data))
+    constexpr DataRef(Ref<T> &&data) noexcept : _data(krys::move(data))
     {
     }
 
-    DataRef(const DataRef &other) noexcept : _data(other._data)
+    constexpr DataRef(const DataRef &other) noexcept : _data(other._data)
     {
     }
 
-    DataRef &operator=(const DataRef &other) noexcept = default;
+    constexpr DataRef &operator=(const DataRef &other) noexcept = default;
 
-    DataRef(DataRef &&) noexcept = default;
+    constexpr DataRef(DataRef &&) noexcept = default;
 
-    DataRef &operator=(DataRef &&) noexcept = default;
+    constexpr DataRef &operator=(DataRef &&) noexcept = default;
 
-    KRYS_NODISCARD operator const T &() const noexcept KRYS_LIFETIME_BOUND
+    KRYS_NODISCARD constexpr operator const T &() const noexcept KRYS_LIFETIME_BOUND
     {
       return *_data;
     }
 
-    KRYS_NODISCARD const T *Ptr() const noexcept KRYS_LIFETIME_BOUND
+    KRYS_NODISCARD constexpr const T *get() const noexcept KRYS_LIFETIME_BOUND
     {
       return _data.get();
     }
 
-    KRYS_NODISCARD const T &Get() const noexcept KRYS_LIFETIME_BOUND
+    KRYS_NODISCARD constexpr const T &operator*() const noexcept KRYS_LIFETIME_BOUND
     {
       return *_data;
     }
 
-    KRYS_NODISCARD const T &operator*() const noexcept KRYS_LIFETIME_BOUND
-    {
-      return *_data;
-    }
-
-    KRYS_NODISCARD const T *operator->() const noexcept KRYS_LIFETIME_BOUND
+    KRYS_NODISCARD constexpr const T *operator->() const noexcept KRYS_LIFETIME_BOUND
     {
       return _data.get();
     }
 
     /// @brief The data for writing, copied first if it's shared.
-    KRYS_NODISCARD T &Access() noexcept KRYS_LIFETIME_BOUND
+    KRYS_NODISCARD constexpr T &Access() noexcept KRYS_LIFETIME_BOUND
     {
       if (!_data->HasOneRef())
       {
@@ -85,7 +60,7 @@ namespace krys
       return *_data;
     }
 
-    KRYS_NODISCARD bool operator==(const DataRef &other) const noexcept
+    KRYS_NODISCARD constexpr bool operator==(const DataRef &other) const noexcept
     {
       return _data.get() == other._data.get() || *_data == *other._data;
     }

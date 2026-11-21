@@ -425,7 +425,12 @@ namespace krys::text
       return _contentAnalysis;
     }
 
-    KRYS_NODISCARD CachedTextBreakIterator &Get() noexcept;
+    KRYS_NODISCARD CachedTextBreakIterator &operator*() noexcept;
+
+    KRYS_NODISCARD CachedTextBreakIterator *operator->() noexcept
+    {
+      return &**this;
+    }
 
     void ResetStringAndReleaseIterator(utf8_stringview stringView, const StringAtom &locale,
                                        TextBreakLineBehavior mode,

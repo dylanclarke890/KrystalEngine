@@ -56,19 +56,19 @@ namespace krys::tests
     DataRef<Counter> a {Counter::Create(1)};
     auto b = a;
     // Copies share the data until one of them writes.
-    REQUIRE(a.Ptr() == b.Ptr());
+    REQUIRE(a.get() == b.get());
     REQUIRE((a == b));
 
     b.Access().Value = 2;
-    REQUIRE(a.Ptr() != b.Ptr());
+    REQUIRE(a.get() != b.get());
     REQUIRE(a->Value == 1);
     REQUIRE(b->Value == 2);
     REQUIRE_FALSE((a == b));
 
     // Data that isn't shared is written in place.
-    const auto *before = b.Ptr();
+    const auto *before = b.get();
     b.Access().Value = 3;
-    REQUIRE(b.Ptr() == before);
+    REQUIRE(b.get() == before);
 
     // Separate data with equal values compares equal.
     REQUIRE((DataRef<Counter> {Counter::Create(4)} == DataRef<Counter> {Counter::Create(4)}));

@@ -616,7 +616,7 @@ namespace krys::boo::tests
       REQUIRE(fixture.Client->LastItem);
       auto &item = *fixture.Client->LastItem;
       REQUIRE(item.Image);
-      CHECK(DragImageSize(item.Image.Get()) == SizeI(100, 40));
+      CHECK(DragImageSize(item.Image.get()) == SizeI(100, 40));
       CHECK(item.EventPositionInContentCoordinates == PointI(10, 15));
       CHECK(item.DragLocationInContentCoordinates == PointI(0, 0));
       CHECK(item.DragPreviewFrameInRootViewCoordinates == RectI(0, 0, 100, 40));
@@ -634,7 +634,7 @@ namespace krys::boo::tests
       REQUIRE(fixture.Client->LastItem);
       auto &item = *fixture.Client->LastItem;
       REQUIRE(item.Image);
-      CHECK(DragImageSize(item.Image.Get()) == SizeI(30, 20));
+      CHECK(DragImageSize(item.Image.get()) == SizeI(30, 20));
       CHECK(item.DragLocationInContentCoordinates == PointI(5, 9));
       CHECK(item.DragPreviewFrameInRootViewCoordinates.Size() == SizeI(30, 20));
       fixture.End(10, 30, {});
@@ -648,7 +648,7 @@ namespace krys::boo::tests
       REQUIRE(fixture.Client->LastItem);
       auto &item = *fixture.Client->LastItem;
       REQUIRE(item.Image);
-      auto size = DragImageSize(item.Image.Get());
+      auto size = DragImageSize(item.Image.get());
       CHECK(size.Width() <= 200);
       CHECK(item.DragLocationInContentCoordinates == PointI(5 - size.Width() / 2, 8));
       fixture.End(5, 60, {});

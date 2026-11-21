@@ -51,20 +51,15 @@ namespace krys::boo::layout
     {
     }
 
-    KRYS_NODISCARD const T &Get() const noexcept
+    KRYS_NODISCARD const T &operator*() const noexcept
     {
       krys_debug_assert(_current);
       return *_current;
     }
 
-    KRYS_NODISCARD const T &operator*() const noexcept
-    {
-      return Get();
-    }
-
     KRYS_NODISCARD const T *operator->() const noexcept
     {
-      return &Get();
+      return &**this;
     }
 
     KRYS_NODISCARD bool operator==(const LayoutIterator &other) const noexcept

@@ -309,7 +309,7 @@ namespace krys
     CompactPtrTuple(TPtr ptr, TData data) noexcept : _data(Encode(ptr, data))
     {
       krys_assert(this->Data() == data);
-      krys_assert(this->Ptr() == ptr);
+      krys_assert(this->get() == ptr);
     }
 
     template <typename TOther>
@@ -319,7 +319,7 @@ namespace krys
     {
     }
 
-    KRYS_NODISCARD constexpr TPtr Ptr() const noexcept
+    KRYS_NODISCARD constexpr TPtr get() const noexcept
     {
       return std::bit_cast<TPtr>(_data & PtrMask);
     }
@@ -327,7 +327,7 @@ namespace krys
     constexpr void SetPtr(TPtr ptr) noexcept
     {
       _data = Encode(ptr, Data());
-      krys_assert(this->Ptr() == ptr);
+      krys_assert(this->get() == ptr);
     }
 
     KRYS_NODISCARD constexpr TData Data() const noexcept
@@ -337,7 +337,7 @@ namespace krys
 
     constexpr void SetData(TData data) noexcept
     {
-      _data = Encode(Ptr(), data);
+      _data = Encode(get(), data);
       krys_assert(this->Data() == data);
     }
 
@@ -380,7 +380,7 @@ namespace krys
     {
     }
 
-    KRYS_NODISCARD constexpr TPtr Ptr() const noexcept
+    KRYS_NODISCARD constexpr TPtr get() const noexcept
     {
       return _ptr;
     }

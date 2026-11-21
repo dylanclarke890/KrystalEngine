@@ -60,7 +60,7 @@ namespace krys::boo::style
 
     if (_svgStyle != inheritParent._svgStyle)
     {
-      _svgStyle.Access().InheritFrom(inheritParent._svgStyle.Get());
+      _svgStyle.Access().InheritFrom(*inheritParent._svgStyle);
     }
   }
 
@@ -87,7 +87,7 @@ namespace krys::boo::style
     _inheritedFlags.Visibility = inheritParent._inheritedFlags.Visibility;
     _inheritedFlags.HasExplicitlySetColor = inheritParent._inheritedFlags.HasExplicitlySetColor;
 
-    if (_inheritedData.Ptr() != inheritParent._inheritedData.Ptr())
+    if (_inheritedData.get() != inheritParent._inheritedData.get())
     {
       if (_inheritedData->NonFastPathInheritedEqual(*inheritParent._inheritedData))
       {
@@ -105,7 +105,7 @@ namespace krys::boo::style
 
     if (_svgStyle != other._svgStyle)
     {
-      _svgStyle.Access().CopyNonInheritedFrom(other._svgStyle.Get());
+      _svgStyle.Access().CopyNonInheritedFrom(*other._svgStyle);
     }
 
     krys_debug_assert(Zoom() == InitialZoom());
@@ -136,14 +136,14 @@ namespace krys::boo::style
   bool ComputedStyle::InheritedEqual(const ComputedStyle &other) const noexcept
   {
     return _inheritedFlags == other._inheritedFlags && _inheritedData == other._inheritedData
-           && (_svgStyle.Ptr() == other._svgStyle.Ptr() || _svgStyle->InheritedEqual(other._svgStyle))
+           && (_svgStyle.get() == other._svgStyle.get() || _svgStyle->InheritedEqual(other._svgStyle))
            && _rareInheritedData == other._rareInheritedData;
   }
 
   bool ComputedStyle::NonInheritedEqual(const ComputedStyle &other) const noexcept
   {
     return _nonInheritedFlags == other._nonInheritedFlags && _nonInheritedData == other._nonInheritedData
-           && (_svgStyle.Ptr() == other._svgStyle.Ptr() || _svgStyle->NonInheritedEqual(other._svgStyle));
+           && (_svgStyle.get() == other._svgStyle.get() || _svgStyle->NonInheritedEqual(other._svgStyle));
   }
 
   bool ComputedStyle::FastPathInheritedEqual(const ComputedStyle &other) const noexcept
@@ -156,7 +156,7 @@ namespace krys::boo::style
     {
       return false;
     }
-    if (_inheritedData.Ptr() == other._inheritedData.Ptr())
+    if (_inheritedData.get() == other._inheritedData.get())
     {
       return true;
     }
@@ -175,7 +175,7 @@ namespace krys::boo::style
     {
       return false;
     }
-    if (_inheritedData.Ptr() != other._inheritedData.Ptr()
+    if (_inheritedData.get() != other._inheritedData.get()
         && !_inheritedData->NonFastPathInheritedEqual(*other._inheritedData))
     {
       return false;
@@ -184,7 +184,7 @@ namespace krys::boo::style
     {
       return false;
     }
-    if (_svgStyle.Ptr() != other._svgStyle.Ptr() && !_svgStyle->InheritedEqual(other._svgStyle))
+    if (_svgStyle.get() != other._svgStyle.get() && !_svgStyle->InheritedEqual(other._svgStyle))
     {
       return false;
     }
@@ -194,8 +194,8 @@ namespace krys::boo::style
   bool
     ComputedStyle::DescendantAffectingNonInheritedPropertiesEqual(const ComputedStyle &other) const noexcept
   {
-    if (_nonInheritedData.Ptr() == other._nonInheritedData.Ptr()
-        || _nonInheritedData->MiscData.Ptr() == other._nonInheritedData->MiscData.Ptr())
+    if (_nonInheritedData.get() == other._nonInheritedData.get()
+        || _nonInheritedData->MiscData.get() == other._nonInheritedData->MiscData.get())
     {
       return true;
     }
@@ -256,8 +256,8 @@ namespace krys::boo::style
 
   bool ComputedStyle::ScrollSnapDataEquivalent(const ComputedStyle &other) const noexcept
   {
-    if (_nonInheritedData.Ptr() == other._nonInheritedData.Ptr()
-        || _nonInheritedData->RareData.Ptr() == other._nonInheritedData->RareData.Ptr())
+    if (_nonInheritedData.get() == other._nonInheritedData.get()
+        || _nonInheritedData->RareData.get() == other._nonInheritedData->RareData.get())
     {
       return true;
     }

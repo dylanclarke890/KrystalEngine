@@ -11451,7 +11451,7 @@ class GenerateStyleChangedAnimatablePropertiesGenerated:
                 child_value_getter = f"{child.name}"
 
                 # For "data" nodes, first check if both point to the same object.
-                to.write(f"if (a.{child_value_getter}.Ptr() != b.{child_value_getter}.Ptr())")
+                to.write(f"if (a.{child_value_getter}.get() != b.{child_value_getter}.get())")
                 with to.indent():
                     to.write(
                         f"{child_function_name}(*a.{child_value_getter}, *b.{child_value_getter}, changingProperties);"

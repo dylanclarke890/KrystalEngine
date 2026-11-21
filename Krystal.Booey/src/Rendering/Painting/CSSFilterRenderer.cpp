@@ -50,7 +50,7 @@ namespace krys::boo
     /// @brief The value of a `filter` property's list, or of a list of filter operations.
     KRYS_NODISCARD const FilterOperation &OperationOf(const style::FilterValue &value) noexcept
     {
-      return value.Get();
+      return *value;
     }
 
     KRYS_NODISCARD const FilterOperation &OperationOf(const Ref<FilterOperation> &operation) noexcept
@@ -527,7 +527,7 @@ namespace krys::boo
 
     for (const auto &value : filter)
     {
-      const auto &operation = value.Get();
+      const auto &operation = *value;
       if (auto *referenceOperation = DynamicDowncast<style::ReferenceFilterOperation>(operation))
       {
         if (!IsIdentityReferenceFilter(*referenceOperation, renderer))
@@ -580,7 +580,7 @@ namespace krys::boo
 
     for (const auto &value : filter)
     {
-      const auto &operation = value.Get();
+      const auto &operation = *value;
       if (auto *referenceOperation = DynamicDowncast<style::ReferenceFilterOperation>(operation))
       {
         outsets += CalculateReferenceFilterOutsets(*referenceOperation, renderer, targetBoundingBox);

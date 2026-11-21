@@ -267,12 +267,12 @@ namespace krys::boo::style
 
   inline const CustomPropertyData &ComputedStyleBase::InheritedCustomProperties() const
   {
-    return _rareInheritedData->CustomProperties.Get();
+    return *_rareInheritedData->CustomProperties;
   }
 
   inline const CustomPropertyData &ComputedStyleBase::NonInheritedCustomProperties() const
   {
-    return _nonInheritedData->RareData->CustomProperties.Get();
+    return *_nonInheritedData->RareData->CustomProperties;
   }
 
   // MARK: - Zoom

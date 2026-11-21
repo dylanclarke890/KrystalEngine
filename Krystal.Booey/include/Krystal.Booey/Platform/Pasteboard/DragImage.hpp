@@ -122,7 +122,7 @@ namespace krys::boo
       return !!_dragImageRef;
     }
 
-    KRYS_NODISCARD const DragImageRef &Get() const noexcept
+    KRYS_NODISCARD const DragImageRef &get() const noexcept
     {
       return _dragImageRef;
     }

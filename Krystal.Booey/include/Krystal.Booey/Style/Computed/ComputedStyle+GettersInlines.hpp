@@ -35,9 +35,9 @@ namespace krys::boo::style
 {
   inline bool ComputedStyle::ColumnSpanEqual(const ComputedStyle &other) const noexcept
   {
-    if (_nonInheritedData.Ptr() == other._nonInheritedData.Ptr()
-        || _nonInheritedData->MiscData.Ptr() == other._nonInheritedData->MiscData.Ptr()
-        || _nonInheritedData->MiscData->MultiCol.Ptr() == other._nonInheritedData->MiscData->MultiCol.Ptr())
+    if (_nonInheritedData.get() == other._nonInheritedData.get()
+        || _nonInheritedData->MiscData.get() == other._nonInheritedData->MiscData.get()
+        || _nonInheritedData->MiscData->MultiCol.get() == other._nonInheritedData->MiscData->MultiCol.get())
     {
       return true;
     }
@@ -48,8 +48,8 @@ namespace krys::boo::style
 
   inline bool ComputedStyle::ContainerTypeAndNamesEqual(const ComputedStyle &other) const noexcept
   {
-    if (_nonInheritedData.Ptr() == other._nonInheritedData.Ptr()
-        || _nonInheritedData->RareData.Ptr() == other._nonInheritedData->RareData.Ptr())
+    if (_nonInheritedData.get() == other._nonInheritedData.get()
+        || _nonInheritedData->RareData.get() == other._nonInheritedData->RareData.get())
     {
       return true;
     }
@@ -59,8 +59,8 @@ namespace krys::boo::style
 
   inline bool ComputedStyle::ScrollPaddingEqual(const ComputedStyle &other) const noexcept
   {
-    if (_nonInheritedData.Ptr() == other._nonInheritedData.Ptr()
-        || _nonInheritedData->RareData.Ptr() == other._nonInheritedData->RareData.Ptr())
+    if (_nonInheritedData.get() == other._nonInheritedData.get()
+        || _nonInheritedData->RareData.get() == other._nonInheritedData->RareData.get())
     {
       return true;
     }
@@ -70,8 +70,8 @@ namespace krys::boo::style
 
   inline bool ComputedStyle::FontCascadeEqual(const ComputedStyle &other) const noexcept
   {
-    return _inheritedData.Ptr() == other._inheritedData.Ptr()
-           || _inheritedData->FontData.Ptr() == other._inheritedData->FontData.Ptr()
+    return _inheritedData.get() == other._inheritedData.get()
+           || _inheritedData->FontData.get() == other._inheritedData->FontData.get()
            || _inheritedData->FontData->FontCascade == other._inheritedData->FontData->FontCascade;
   }
 }

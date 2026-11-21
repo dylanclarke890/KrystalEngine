@@ -771,7 +771,7 @@ namespace krys::boo
       if (filterOperations.size() == 1)
       {
         if (auto *referenceFilterOperation =
-              DynamicDowncast<style::ReferenceFilterOperation>(filterOperations.begin()->Get()))
+              DynamicDowncast<style::ReferenceFilterOperation>(**filterOperations.begin()))
         {
           auto id = referenceFilterOperation->Fragment();
           if (auto *filter = GetRenderSVGResourceById<LegacyRenderSVGResourceFilter>(

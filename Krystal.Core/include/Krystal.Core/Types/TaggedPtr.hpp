@@ -66,12 +66,12 @@ namespace krys
       return Traits::UnwrapTag(_ptr);
     }
 
-    KRYS_NODISCARD constexpr const T *Ptr() const noexcept
+    KRYS_NODISCARD constexpr const T *get() const noexcept
     {
       return Traits::UnwrapPtr(_ptr);
     }
 
-    KRYS_NODISCARD constexpr T *Ptr() noexcept
+    KRYS_NODISCARD constexpr T *get() noexcept
     {
       return Traits::UnwrapPtr(_ptr);
     }
@@ -83,7 +83,7 @@ namespace krys
 
     constexpr void SetTag(tag_type tag) noexcept
     {
-      _ptr = Traits::Wrap(Ptr(), tag);
+      _ptr = Traits::Wrap(get(), tag);
     }
 
     constexpr TaggedPtr &operator=(const T *ptr) noexcept
@@ -94,12 +94,12 @@ namespace krys
 
     constexpr const T *operator->() const noexcept
     {
-      return Ptr();
+      return get();
     }
 
     constexpr T *operator->() noexcept
     {
-      return Ptr();
+      return get();
     }
   };
 

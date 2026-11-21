@@ -88,18 +88,12 @@ namespace krys::boo::inline_iterator
 
     KRYS_NODISCARD const SVGTextBox &operator*() const noexcept
     {
-      return Get();
+      return static_cast<const SVGTextBox &>(_box);
     }
 
     KRYS_NODISCARD const SVGTextBox *operator->() const noexcept
     {
-      return &Get();
-    }
-
-  private:
-    KRYS_NODISCARD const SVGTextBox &Get() const noexcept
-    {
-      return static_cast<const SVGTextBox &>(_box);
+      return &**this;
     }
   };
 

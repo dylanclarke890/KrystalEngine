@@ -118,12 +118,12 @@ namespace krys::boo::inline_iterator
 
     KRYS_NODISCARD const TextBox &operator*() const noexcept
     {
-      return Get();
+      return static_cast<const TextBox &>(_box);
     }
 
     KRYS_NODISCARD const TextBox *operator->() const noexcept
     {
-      return &Get();
+      return &**this;
     }
 
     /// @brief Traverses to the next text box generated for the same text renderer.
@@ -136,12 +136,6 @@ namespace krys::boo::inline_iterator
     BoxIterator &TraverseLineRightwardOnLineIgnoringLineBreak() = delete;
 
     BoxIterator &TraverseLineLeftwardOnLineIgnoringLineBreak() = delete;
-
-  private:
-    KRYS_NODISCARD const TextBox &Get() const noexcept
-    {
-      return static_cast<const TextBox &>(_box);
-    }
   };
 
   KRYS_NODISCARD TextBoxIterator LineLeftmostTextBoxFor(const RenderText &text) noexcept;

@@ -336,7 +336,7 @@ namespace krys::boo
       if (!nextBreak || *nextBreak < i)
       {
         // At the start of the string, i - 1 wraps around and the iterator lands in the prior context.
-        nextBreak = factory.Get().Following(static_cast<uint32>(i - 1));
+        nextBreak = factory->Following(static_cast<uint32>(i - 1));
       }
       // Fast forward while our behavior matches ICU.
       if (nextBreak && i < *nextBreak)

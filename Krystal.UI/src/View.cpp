@@ -1085,9 +1085,9 @@ namespace krys::ui
       return;
     }
 
-    auto &image = *_drag->Image.Get();
+    auto &image = *_drag->Image.get();
     // The image is in device pixels.
-    SizeF size(boo::DragImageSize(_drag->Image.Get()));
+    SizeF size(boo::DragImageSize(_drag->Image.get()));
     size.Scale(1 / _frame->Document()->DeviceScaleFactor());
     boo::GraphicsContextStateSaver stateSaver(context);
     if (_drag->FadeImage)

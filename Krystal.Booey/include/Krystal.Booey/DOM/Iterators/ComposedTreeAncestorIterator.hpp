@@ -74,11 +74,6 @@ namespace krys::boo::dom
       return *this;
     }
 
-    KRYS_NODISCARD Element &Get() const noexcept
-    {
-      return *_current;
-    }
-
   private:
     KRYS_NODISCARD static Element *TraverseParent(Node *current) noexcept
     {
@@ -139,7 +134,7 @@ namespace krys::boo::dom
       {
         return nullptr;
       }
-      return &it.Get();
+      return &*it;
     }
   };
 

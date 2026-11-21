@@ -38,7 +38,7 @@ namespace krys::boo
   static const SVGRenderStyle &DefaultSVGStyle() noexcept
   {
     static NeverDestroyed<DataRef<SVGRenderStyle>> style {SVGRenderStyle::CreateDefaultStyle()};
-    return style->Get();
+    return *style.get();
   }
 
   Ref<SVGRenderStyle> SVGRenderStyle::CreateDefaultStyle() noexcept

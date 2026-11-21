@@ -94,14 +94,14 @@ namespace krys
       return *this;
     }
 
-    KRYS_NODISCARD T *Ptr() const noexcept KRYS_LIFETIME_BOUND
+    KRYS_NODISCARD T *get() const noexcept KRYS_LIFETIME_BOUND
     {
-      return _data.Ptr();
+      return _data.get();
     }
 
     KRYS_NODISCARD UniquePtr<T, Deleter> MoveToUniquePtr() noexcept
     {
-      T *ptr = _data.Ptr();
+      T *ptr = _data.get();
       _data.SetPtr(nullptr);
 
       return UniquePtr<T, Deleter>(ptr);
@@ -139,7 +139,7 @@ namespace krys
 
     constexpr void DeletePtr() noexcept
     {
-      if (T *ptr = _data.Ptr())
+      if (T *ptr = _data.get())
       {
         Deleter()(ptr);
       }

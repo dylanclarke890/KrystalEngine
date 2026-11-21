@@ -167,8 +167,8 @@ namespace krys::boo
       return false;
     }
 
-    if (_computedStyle._nonInheritedData->BoxData.Ptr()
-        != other->_computedStyle._nonInheritedData->BoxData.Ptr())
+    if (_computedStyle._nonInheritedData->BoxData.get()
+        != other->_computedStyle._nonInheritedData->BoxData.get())
     {
       if (_computedStyle._nonInheritedData->BoxData->Width
             != other->_computedStyle._nonInheritedData->BoxData->Width
@@ -197,8 +197,8 @@ namespace krys::boo
       return true;
     }
 
-    if (_computedStyle._nonInheritedData->SurroundData.Ptr()
-        && other->_computedStyle._nonInheritedData->SurroundData.Ptr()
+    if (_computedStyle._nonInheritedData->SurroundData.get()
+        && other->_computedStyle._nonInheritedData->SurroundData.get()
         && _computedStyle._nonInheritedData->SurroundData
              != other->_computedStyle._nonInheritedData->SurroundData)
     {

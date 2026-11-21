@@ -76,7 +76,7 @@ namespace krys::boo::style
 
     KRYS_NODISCARD const css::StyleRule &StyleRule() const noexcept
     {
-      return *_styleRuleWithSelectorIndex.Ptr();
+      return *_styleRuleWithSelectorIndex.get();
     }
 
     KRYS_NODISCARD const css::Selector *Selector() const noexcept

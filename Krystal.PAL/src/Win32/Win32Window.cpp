@@ -310,7 +310,7 @@ namespace
       }
     }
 
-    KRYS_NODISCARD HIMC Get() const noexcept
+    KRYS_NODISCARD HIMC get() const noexcept
     {
       return _context;
     }
@@ -1700,7 +1700,7 @@ namespace krys::pal
       // The result commits the composition; without one, it's text typed as it is.
       if ((changes & GCS_RESULTSTR) != 0)
       {
-        auto result = ToUtf8(CompositionString(context.Get(), GCS_RESULTSTR));
+        auto result = ToUtf8(CompositionString(context.get(), GCS_RESULTSTR));
         if (_composing)
         {
           _compositionEmpty = true;
@@ -1717,7 +1717,7 @@ namespace krys::pal
         return;
       }
 
-      const auto text = CompositionString(context.Get(), GCS_COMPSTR);
+      const auto text = CompositionString(context.get(), GCS_COMPSTR);
       const auto offsets = Utf8Offsets(text);
       const auto length = static_cast<DWORD>(text.size());
 
@@ -1725,12 +1725,12 @@ namespace krys::pal
       List<BYTE> attributes;
       if ((changes & GCS_COMPATTR) != 0)
       {
-        attributes = CompositionData<BYTE>(context.Get(), GCS_COMPATTR);
+        attributes = CompositionData<BYTE>(context.get(), GCS_COMPATTR);
       }
       List<DWORD> boundaries;
       if ((changes & GCS_COMPCLAUSE) != 0)
       {
-        boundaries = CompositionData<DWORD>(context.Get(), GCS_COMPCLAUSE);
+        boundaries = CompositionData<DWORD>(context.get(), GCS_COMPCLAUSE);
       }
       if (boundaries.size() < 2)
       {
@@ -1755,7 +1755,7 @@ namespace krys::pal
       DWORD caret = length;
       if ((changes & GCS_CURSORPOS) != 0)
       {
-        const LONG position = ::ImmGetCompositionStringW(context.Get(), GCS_CURSORPOS, nullptr, 0);
+        const LONG position = ::ImmGetCompositionStringW(context.get(), GCS_CURSORPOS, nullptr, 0);
         caret = position < 0 ? length : (std::min)(static_cast<DWORD>(position), length);
       }
       input.Caret = offsets[caret];
@@ -1812,7 +1812,7 @@ namespace krys::pal
       InputContext context(_handle);
       if (context)
       {
-        ::ImmNotifyIME(context.Get(), NI_COMPOSITIONSTR, CPS_COMPLETE, 0);
+        ::ImmNotifyIME(context.get(), NI_COMPOSITIONSTR, CPS_COMPLETE, 0);
       }
     }
 
@@ -1828,7 +1828,7 @@ namespace krys::pal
       InputContext context(_handle);
       if (context)
       {
-        ::ImmNotifyIME(context.Get(), NI_COMPOSITIONSTR, CPS_CANCEL, 0);
+        ::ImmNotifyIME(context.get(), NI_COMPOSITIONSTR, CPS_CANCEL, 0);
       }
     }
 
@@ -1850,16 +1850,16 @@ namespace krys::pal
           .dwStyle = CFS_CANDIDATEPOS,
           .ptCurrentPos = {rect.X, rect.Y + rect.Height},
         };
-        ::ImmSetCandidateWindow(context.Get(), &position);
+        ::ImmSetCandidateWindow(context.get(), &position);
         CANDIDATEFORM exclude {
           .dwIndex = 0,
           .dwStyle = CFS_EXCLUDE,
           .ptCurrentPos = {rect.X, rect.Y},
           .rcArea = {rect.X, rect.Y, rect.X + rect.Width, rect.Y + rect.Height},
         };
-        ::ImmSetCandidateWindow(context.Get(), &exclude);
+        ::ImmSetCandidateWindow(context.get(), &exclude);
         COMPOSITIONFORM composition {.dwStyle = CFS_POINT, .ptCurrentPos = {rect.X, rect.Y}};
-        ::ImmSetCompositionWindow(context.Get(), &composition);
+        ::ImmSetCompositionWindow(context.get(), &composition);
       }
 
       // The caret is never shown.

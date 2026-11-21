@@ -136,7 +136,7 @@ namespace krys::boo
       const auto &filter = style.Filter();
       for (const auto &value : filter)
       {
-        if (auto *referenceFilterOperation = DynamicDowncast<style::ReferenceFilterOperation>(value.Get()))
+        if (auto *referenceFilterOperation = DynamicDowncast<style::ReferenceFilterOperation>(*value))
         {
           if (!referenceFilterOperation->Fragment().View().empty())
           {

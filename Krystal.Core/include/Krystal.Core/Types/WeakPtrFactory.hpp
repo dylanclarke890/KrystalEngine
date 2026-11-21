@@ -58,7 +58,7 @@ namespace krys::detail
     {
       if constexpr (UseCompactPointer)
       {
-        if (auto *pointer = _impl.Ptr())
+        if (auto *pointer = _impl.get())
         {
           pointer->reset();
         }
@@ -78,7 +78,7 @@ namespace krys::detail
 
       if constexpr (UseCompactPointer)
       {
-        if (_impl.Ptr())
+        if (_impl.get())
         {
           return;
         }
@@ -100,7 +100,7 @@ namespace krys::detail
     {
       if constexpr (UseCompactPointer)
       {
-        return _impl.Ptr();
+        return _impl.get();
       }
       else
       {
@@ -115,8 +115,8 @@ namespace krys::detail
 
       if constexpr (UseCompactPointer)
       {
-        krys_assert(&object == _impl.Ptr()->template get<T>());
-        return WeakPtr<U, WeakPtrImpl, RawPtrTraits<U>>(*_impl.Ptr());
+        krys_assert(&object == _impl.get()->template get<T>());
+        return WeakPtr<U, WeakPtrImpl, RawPtrTraits<U>>(*_impl.get());
       }
       else
       {
@@ -129,7 +129,7 @@ namespace krys::detail
     {
       if constexpr (UseCompactPointer)
       {
-        if (auto *pointer = _impl.Ptr())
+        if (auto *pointer = _impl.get())
         {
           pointer->reset();
           _impl.SetPtr(nullptr);
@@ -148,7 +148,7 @@ namespace krys::detail
     {
       if constexpr (UseCompactPointer)
       {
-        if (auto *pointer = _impl.Ptr())
+        if (auto *pointer = _impl.get())
         {
           return pointer->GetRefCount() - 1;
         }

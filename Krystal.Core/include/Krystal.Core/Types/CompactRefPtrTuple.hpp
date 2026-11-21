@@ -59,18 +59,18 @@ namespace krys
 
     constexpr ~CompactRefPtrTuple() noexcept
     {
-      RefPtr<T>::ref_policy::SubRef(_data.Ptr());
+      RefPtr<T>::ref_policy::SubRef(_data.get());
     }
 
     constexpr CompactRefPtrTuple(const CompactRefPtrTuple &other) noexcept
     {
-      SetPtr(other.Ptr());
+      SetPtr(other.get());
       SetData(other.Data());
     }
 
     constexpr CompactRefPtrTuple(CompactRefPtrTuple &&other) noexcept
     {
-      _data.SetPtr(other.Ptr());
+      _data.SetPtr(other.get());
       _data.SetData(other.Data());
       other._data.SetPtr(nullptr);
       other._data.SetData({});
@@ -90,14 +90,14 @@ namespace krys
       return *this;
     }
 
-    KRYS_NODISCARD constexpr T *Ptr() const noexcept KRYS_LIFETIME_BOUND
+    KRYS_NODISCARD constexpr T *get() const noexcept KRYS_LIFETIME_BOUND
     {
-      return _data.Ptr();
+      return _data.get();
     }
 
     constexpr void SetPtr(T *ptr) noexcept
     {
-      auto *old = _data.Ptr();
+      auto *old = _data.get();
       _data.SetPtr(RefPtr<T>::ref_policy::AddRef(ptr));
       RefPtr<T>::ref_policy::SubRef(old);
     }
@@ -105,7 +105,7 @@ namespace krys
     // NOLINTNEXTLINE(cppcoreguidelines-rvalue-reference-param-not-moved): taken over by release().
     constexpr void SetPtr(RefPtr<T> &&ptr) noexcept
     {
-      auto *old = _data.Ptr();
+      auto *old = _data.get();
       _data.SetPtr(ptr.release());
       RefPtr<T>::ref_policy::SubRef(old);
     }
@@ -113,7 +113,7 @@ namespace krys
     // NOLINTNEXTLINE(cppcoreguidelines-rvalue-reference-param-not-moved): taken over by release().
     constexpr void SetPtr(Ref<T> &&ptr) noexcept
     {
-      auto *old = _data.Ptr();
+      auto *old = _data.get();
       _data.SetPtr(&ptr.release());
       RefPtr<T>::ref_policy::SubRef(old);
     }

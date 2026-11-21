@@ -1156,10 +1156,10 @@ namespace krys::boo
         dragImage = DragImage {dragImageRef};
         if (dragImage)
         {
-          _dragOffset = DragOffsetForLinkDragImage(dragImage.Get());
+          _dragOffset = DragOffsetForLinkDragImage(dragImage.get());
           dragLoc = PointI(dragOrigin.X() + _dragOffset.X(), dragOrigin.Y() + _dragOffset.Y());
           dragImage =
-            DragImage {PlatformAdjustDragImageForDeviceScaleFactor(dragImage.Get(), deviceScaleFactor)};
+            DragImage {PlatformAdjustDragImageForDeviceScaleFactor(dragImage.get(), deviceScaleFactor)};
         }
       }
 
@@ -1198,11 +1198,11 @@ namespace krys::boo
     if (image && !layoutRect.IsEmpty() && ShouldUseCachedImageForDragImage(*image)
         && (dragImage = DragImage {CreateDragImageFromImage(image, orientation)}))
     {
-      dragImage = DragImage {FitDragImageToMaxSize(dragImage.Get(), layoutRect.Size(), MaxDragImageSize())};
-      SizeI fittedSize = DragImageSize(dragImage.Get());
+      dragImage = DragImage {FitDragImageToMaxSize(dragImage.get(), layoutRect.Size(), MaxDragImageSize())};
+      SizeI fittedSize = DragImageSize(dragImage.get());
 
-      dragImage = DragImage {PlatformAdjustDragImageForDeviceScaleFactor(dragImage.Get(), deviceScaleFactor)};
-      dragImage = DragImage {DissolveDragImageToFraction(dragImage.Get(), DragImageAlpha)};
+      dragImage = DragImage {PlatformAdjustDragImageForDeviceScaleFactor(dragImage.get(), deviceScaleFactor)};
+      dragImage = DragImage {DissolveDragImageToFraction(dragImage.get(), DragImageAlpha)};
 
       // Properly orient the drag image and orient it differently if it's smaller than the original.
       float scale = fittedSize.Width() / static_cast<float>(layoutRect.Width());
@@ -1221,9 +1221,9 @@ namespace krys::boo
         if (dragImage)
         {
           dragImage =
-            DragImage {PlatformAdjustDragImageForDeviceScaleFactor(dragImage.Get(), deviceScaleFactor)};
+            DragImage {PlatformAdjustDragImageForDeviceScaleFactor(dragImage.get(), deviceScaleFactor)};
           scaledOrigin =
-            PointI(DragIconRightInset - DragImageSize(dragImage.Get()).Width(), DragIconBottomInset);
+            PointI(DragIconRightInset - DragImageSize(dragImage.get()).Width(), DragIconBottomInset);
         }
       }
     }
@@ -1271,7 +1271,7 @@ namespace krys::boo
         }
         else
         {
-          dragPreviewSize = DragImageSize(item.Image.Get());
+          dragPreviewSize = DragImageSize(item.Image.get());
           dragPreviewSize.Scale(1 / frame.Document()->DeviceScaleFactor());
         }
         item.DragPreviewFrameInRootViewCoordinates = {item.DragLocationInWindowCoordinates, dragPreviewSize};

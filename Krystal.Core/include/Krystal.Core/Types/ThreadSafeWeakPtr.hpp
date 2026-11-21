@@ -511,7 +511,7 @@ namespace krys
 
     KRYS_NODISCARD RefPtr<T> get() const noexcept
     {
-      return _controlBlock ? _controlBlock->template TryCreateStrongReference<T>(_objectOfCorrectType.Ptr())
+      return _controlBlock ? _controlBlock->template TryCreateStrongReference<T>(_objectOfCorrectType.get())
                            : nullptr;
     }
 

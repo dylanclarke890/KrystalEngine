@@ -87,7 +87,7 @@ namespace krys::boo
           return otherSegment && singleSegment == otherSegment.value();
         }
 
-        return impl.Ptr() && other.AsImpl() && impl->DefinitelyEqual(*other.AsImpl());
+        return impl.get() && other.AsImpl() && impl->DefinitelyEqual(*other.AsImpl());
       });
   }
 
@@ -126,7 +126,7 @@ namespace krys::boo
   {
     if (auto ref = std::get_if<DataRef<PathImpl>>(&_data))
     {
-      return ref->Ptr();
+      return ref->get();
     }
     return nullptr;
   }

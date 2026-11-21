@@ -59,13 +59,13 @@ namespace krys::boo::tests
   {
     DataRef<StyleNonInheritedData> first {StyleNonInheritedData::Create()};
     auto second = first;
-    CHECK(first.Ptr() == second.Ptr());
+    CHECK(first.get() == second.get());
 
     // Writing through one reference copies the shared data first, down the nested groups that are written.
     second.Access().BoxData.Access().Width = style::PreferredSize {10_css_px};
-    CHECK(first.Ptr() != second.Ptr());
-    CHECK(first->BoxData.Ptr() != second->BoxData.Ptr());
-    CHECK(first->RareData.Ptr() == second->RareData.Ptr());
+    CHECK(first.get() != second.get());
+    CHECK(first->BoxData.get() != second->BoxData.get());
+    CHECK(first->RareData.get() == second->RareData.get());
     CHECK(first->BoxData->Width == ComputedStyle::InitialWidth());
     CHECK(second->BoxData->Width == style::PreferredSize {10_css_px});
     CHECK_FALSE(first == second);
@@ -126,8 +126,8 @@ namespace krys::boo::tests
     auto defaults = SVGRenderStyle::CreateDefaultStyle();
     auto style = SVGRenderStyle::Create();
     // New styles share the groups of a single default style.
-    CHECK(style->FillData.Ptr() == SVGRenderStyle::Create()->FillData.Ptr());
-    CHECK(style->FillData.Ptr() != defaults->FillData.Ptr());
+    CHECK(style->FillData.get() == SVGRenderStyle::Create()->FillData.get());
+    CHECK(style->FillData.get() != defaults->FillData.get());
     CHECK(*style == *defaults);
     CHECK(style->InheritedEqual(*defaults));
     CHECK(style->NonInheritedEqual(*defaults));
