@@ -489,6 +489,10 @@ namespace krys::boo::layout
       {
         return true;
       }
+      if (TextUtil::StartsSVGTextChunk(inlineTextItem.GetInlineTextBox(), inlineTextItem.Start()))
+      {
+        return true;
+      }
       if (inlineTextItem.IsQuirkNonBreakingSpace() || lastRun.IsNonBreakingSpace())
       {
         return true;
@@ -660,6 +664,10 @@ namespace krys::boo::layout
         return true;
       }
       if (inlineTextItem.IsZeroWidthSpaceSeparator())
+      {
+        return true;
+      }
+      if (TextUtil::StartsSVGTextChunk(inlineTextItem.GetInlineTextBox(), inlineTextItem.Start()))
       {
         return true;
       }

@@ -37,7 +37,6 @@ namespace krys::boo::inline_iterator
 namespace krys::boo
 {
   class RenderSVGInlineText;
-  class SVGRootInlineBox;
   class SVGTextElement;
   class SVGTextLayoutEngine;
 
@@ -123,8 +122,6 @@ namespace krys::boo
 
     void UpdatePositionAndOverflow(const RectF &) noexcept;
 
-    KRYS_NODISCARD SVGRootInlineBox *LegacyRootBox() const noexcept;
-
     void GraphicsElement() const = delete;
 
   private:
@@ -156,10 +153,6 @@ namespace krys::boo
 
     void LayoutCharactersInTextBoxes(const inline_iterator::InlineBoxIterator &,
                                      SVGTextLayoutEngine &) noexcept;
-
-    RectF LayoutChildBoxes(LegacyInlineFlowBox *, SVGTextFragmentMap &) noexcept;
-
-    void LayoutRootBox(const RectF &) noexcept;
 
     void ReorderValueListsToLogicalOrder() noexcept;
 

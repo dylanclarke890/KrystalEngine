@@ -33,6 +33,7 @@
 #include "Krystal.Booey/Layout/LayoutTree/LayoutInlineTextBox.hpp"
 #include "Krystal.Booey/Rendering/Line/BreakablePositions.hpp"
 #include "Krystal.Booey/Rendering/Style/RenderStyle+GettersInlines.hpp"
+#include "Krystal.Booey/Rendering/SVG/RenderSVGInlineText.hpp"
 #include "Krystal.Booey/Style/Values/Text/TabSize.hpp"
 #include "Krystal.Booey/Text/UnicodeBidi.hpp"
 #include "Krystal.Core/Strings/CodePointIterator.hpp"
@@ -503,7 +504,8 @@ namespace krys::boo::layout
       return findBreakingPositionInSimpleText();
     }
 
-    auto graphemeClusterIterator = text::NonSharedCharacterBreakIterator {text.substr(startPosition, length)};
+    auto graphemeClusterIterator =
+      text::TextBreakIterator {text.substr(startPosition, length), text::TextBreakUnit::GraphemeCluster};
     auto leftSide = TextUtil::WordBreakLeft {};
     for (auto clusterStartPosition = graphemeClusterIterator.Next(); clusterStartPosition;
          clusterStartPosition = graphemeClusterIterator.Next())
@@ -537,8 +539,7 @@ namespace krys::boo::layout
     // We need at least 1 character in the current inline text item and 2 more from previous inline items.
     auto lineBreakIteratorFactory =
       text::CachedLineBreakIteratorFactory {nextContent, nextContentStyle.ComputedLocale().GetPlatform(),
-                                            TextUtil::LineBreakIteratorMode(nextContentStyle.LineBreak()),
-                                            TextUtil::GetContentAnalysis(nextContentStyle.WordBreak())};
+                                            TextUtil::LineBreakIteratorMode(nextContentStyle.LineBreak())};
     // FIXME: We should look into the entire uncommitted content for more text context.
     char32 lastCharacter = 0;
     char32 secondToLastCharacter = 0;
@@ -612,6 +613,13 @@ namespace krys::boo::layout
            || whitespaceCollapse == WhiteSpaceCollapse::BreakSpaces;
   }
 
+  bool TextUtil::StartsSVGTextChunk(const InlineTextBox &inlineTextBox, size_t position) noexcept
+  {
+    auto *svgText = DynamicDowncast<RenderSVGInlineText>(inlineTextBox.RendererForIntegration());
+    return svgText && position < svgText->Text().size()
+           && svgText->CharacterStartsNewTextChunk(static_cast<int32>(position));
+  }
+
   bool TextUtil::IsWrappingAllowed(const RenderStyle &style) noexcept
   {
     // https://www.w3.org/TR/css-text-4/#text-wrap
@@ -640,17 +648,17 @@ namespace krys::boo::layout
     return text::TextBreakLineBehavior::Default;
   }
 
-  text::TextBreakIterator::ContentAnalysis TextUtil::GetContentAnalysis(WordBreak wordBreak) noexcept
+  TextUtil::ContentAnalysis TextUtil::GetContentAnalysis(WordBreak wordBreak) noexcept
   {
     switch (wordBreak)
     {
       case WordBreak::Normal:
       case WordBreak::BreakAll:
       case WordBreak::KeepAll:
-      case WordBreak::BreakWord:  return text::TextBreakIterator::ContentAnalysis::Mechanical;
-      case WordBreak::AutoPhrase: return text::TextBreakIterator::ContentAnalysis::Linguistic;
+      case WordBreak::BreakWord:  return ContentAnalysis::Mechanical;
+      case WordBreak::AutoPhrase: return ContentAnalysis::Linguistic;
     }
-    return text::TextBreakIterator::ContentAnalysis::Mechanical;
+    return ContentAnalysis::Mechanical;
   }
 
   bool TextUtil::IsStrongDirectionalityCharacter(char32 character) noexcept
@@ -694,7 +702,8 @@ namespace krys::boo::layout
       krys_debug_assert(endOfCodePoint > startPosition);
       return endOfCodePoint - startPosition;
     }
-    auto graphemeClustersIterator = text::NonSharedCharacterBreakIterator {textContent};
+    auto graphemeClustersIterator =
+      text::TextBreakIterator {textContent, text::TextBreakUnit::GraphemeCluster};
     auto nextPosition = graphemeClustersIterator.Following(static_cast<uint32>(startPosition));
     if (!nextPosition)
     {

@@ -49,7 +49,6 @@
 #include "Krystal.Booey/Rendering/SVG/Legacy/LegacyRenderSVGContainer.hpp"
 #include "Krystal.Booey/Rendering/SVG/Legacy/LegacyRenderSVGRoot.hpp"
 #include "Krystal.Booey/Rendering/SVG/RenderSVGInline.hpp"
-#include "Krystal.Booey/Rendering/SVG/RenderSVGInlineText.hpp"
 #include "Krystal.Booey/Rendering/SVG/RenderSVGText.hpp"
 #include "Krystal.Booey/Rendering/Tables/RenderTable.hpp"
 #include "Krystal.Booey/Rendering/Tables/RenderTableCell.hpp"
@@ -1297,11 +1296,6 @@ namespace krys::boo
     if (willBeDestroyed == RenderTreeBuilder::WillBeDestroyed::No)
     {
       child.SetNeedsLayoutAndPreferredWidthsUpdate();
-    }
-
-    if (auto *textRenderer = DynamicDowncast<RenderSVGInlineText>(child))
-    {
-      textRenderer->RemoveAndDestroyLegacyTextBoxes();
     }
 
     if (auto *listItemRenderer = DynamicDowncast<RenderListItem>(child);

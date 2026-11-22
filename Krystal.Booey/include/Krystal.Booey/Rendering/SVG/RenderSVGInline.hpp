@@ -89,8 +89,6 @@ namespace krys::boo
 
     void AbsoluteQuads(List<QuadF> &, bool *wasFixed) const noexcept final;
 
-    KRYS_NODISCARD UniquePtr<LegacyInlineFlowBox> CreateInlineFlowBox() noexcept final;
-
     void WillBeDestroyed() noexcept final;
 
     void StyleDidChange(style::Difference, const RenderStyle *oldStyle) noexcept final;

@@ -69,14 +69,12 @@ namespace krys::boo::inline_iterator
 
   LeafBoxIterator InlineBox::FirstLeafBox() const noexcept
   {
-    return SwitchOn(_pathVariant,
-                    [](const auto &path) { return LeafBoxIterator {path.FirstLeafBoxForInlineBox()}; });
+    return LeafBoxIterator {_path.FirstLeafBoxForInlineBox()};
   }
 
   LeafBoxIterator InlineBox::LastLeafBox() const noexcept
   {
-    return SwitchOn(_pathVariant,
-                    [](const auto &path) { return LeafBoxIterator {path.LastLeafBoxForInlineBox()}; });
+    return LeafBoxIterator {_path.LastLeafBoxForInlineBox()};
   }
 
   LeafBoxIterator InlineBox::EndLeafBox() const noexcept
@@ -106,13 +104,13 @@ namespace krys::boo::inline_iterator
 
   InlineBoxIterator &InlineBoxIterator::TraverseInlineBoxLineRightward() noexcept
   {
-    SwitchOn(_box._pathVariant, [](auto &path) { path.TraverseNextInlineBox(); });
+    _box._path.TraverseNextInlineBox();
     return *this;
   }
 
   InlineBoxIterator &InlineBoxIterator::TraverseInlineBoxLineLeftward() noexcept
   {
-    SwitchOn(_box._pathVariant, [](auto &path) { path.TraversePreviousInlineBox(); });
+    _box._path.TraversePreviousInlineBox();
     return *this;
   }
 
@@ -122,7 +120,7 @@ namespace krys::boo::inline_iterator
     {
       return lineLayout->FirstInlineBoxFor(renderInline);
     }
-    return InlineBoxIterator {BoxLegacyPath {renderInline.FirstLegacyInlineBox()}};
+    return {};
   }
 
   InlineBoxIterator FirstRootInlineBoxFor(const RenderBlockFlow &block) noexcept
@@ -131,12 +129,7 @@ namespace krys::boo::inline_iterator
     {
       return lineLayout->FirstRootInlineBox();
     }
-    return InlineBoxIterator {BoxLegacyPath {block.LegacyRootBox()}};
-  }
-
-  InlineBoxIterator InlineBoxFor(const LegacyInlineFlowBox &legacyInlineFlowBox) noexcept
-  {
-    return InlineBoxIterator {BoxLegacyPath {&legacyInlineFlowBox}};
+    return {};
   }
 
   InlineBoxIterator InlineBoxFor(const layout_integration::InlineContent &content,
@@ -148,6 +141,6 @@ namespace krys::boo::inline_iterator
   InlineBoxIterator InlineBoxFor(const layout_integration::InlineContent &content, size_t boxIndex) noexcept
   {
     krys_debug_assert(content.DisplayContent().BoxList[boxIndex].IsInlineBox());
-    return InlineBoxIterator {BoxModernPath {content, boxIndex}};
+    return InlineBoxIterator {InlineContentBoxPath {content, boxIndex}};
   }
 }

@@ -32,7 +32,6 @@ namespace krys::boo
   class RenderStyle;
   class RenderSVGInlineText;
   class RenderSVGTextPath;
-  class SVGInlineTextBox;
 
   /// @brief Performs the second layout phase for SVG text.
   ///

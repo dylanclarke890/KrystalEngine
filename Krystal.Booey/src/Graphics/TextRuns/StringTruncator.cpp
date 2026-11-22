@@ -42,7 +42,7 @@ namespace krys::boo
     using TruncationFunction = utf8_string(utf8_stringview string, uint32 length, uint32 keepCount,
                                            bool shouldInsertEllipsis);
 
-    KRYS_NODISCARD uint32 TextBreakAtOrPreceding(text::BreakIteratorView it, uint32 offset) noexcept
+    KRYS_NODISCARD uint32 TextBreakAtOrPreceding(const text::TextBreakIterator &it, uint32 offset) noexcept
     {
       if (it.IsBoundary(offset))
       {
@@ -51,7 +51,7 @@ namespace krys::boo
       return it.Preceding(offset).value_or(0);
     }
 
-    KRYS_NODISCARD uint32 BoundedTextBreakFollowing(text::BreakIteratorView it, uint32 offset,
+    KRYS_NODISCARD uint32 BoundedTextBreakFollowing(const text::TextBreakIterator &it, uint32 offset,
                                                     uint32 length) noexcept
     {
       return it.Following(offset).value_or(length);
@@ -64,7 +64,7 @@ namespace krys::boo
       krys_assert(keepCount < StringBufferSize);
 
       uint32 omitStart = (keepCount + 1) / 2;
-      text::NonSharedCharacterBreakIterator it(string.substr(0, length));
+      text::TextBreakIterator it(string.substr(0, length), text::TextBreakUnit::GraphemeCluster);
       uint32 omitEnd = BoundedTextBreakFollowing(it, omitStart + (length - keepCount) - 1, length);
       omitStart = TextBreakAtOrPreceding(it, omitStart);
 
@@ -83,7 +83,7 @@ namespace krys::boo
       krys_assert(keepCount < length);
       krys_assert(keepCount < StringBufferSize);
 
-      text::NonSharedCharacterBreakIterator it(string.substr(0, length));
+      text::TextBreakIterator it(string.substr(0, length), text::TextBreakUnit::GraphemeCluster);
       uint32 keepLength = TextBreakAtOrPreceding(it, keepCount);
 
       utf8_string buffer(string.substr(0, keepLength));
@@ -100,7 +100,7 @@ namespace krys::boo
       krys_debug_assert(keepCount < length);
       krys_debug_assert(keepCount < StringBufferSize);
 
-      text::NonSharedCharacterBreakIterator it(string.substr(0, length));
+      text::TextBreakIterator it(string.substr(0, length), text::TextBreakUnit::GraphemeCluster);
       uint32 keepLength = TextBreakAtOrPreceding(it, keepCount);
       return utf8_string(string.substr(0, keepLength));
     }
@@ -124,7 +124,7 @@ namespace krys::boo
 
       uint32 startIndex = length - keepCount;
 
-      text::NonSharedCharacterBreakIterator it(string);
+      text::TextBreakIterator it(string, text::TextBreakUnit::GraphemeCluster);
       uint32 adjustedStartIndex =
         it.IsBoundary(startIndex) ? startIndex : BoundedTextBreakFollowing(it, startIndex, length);
 

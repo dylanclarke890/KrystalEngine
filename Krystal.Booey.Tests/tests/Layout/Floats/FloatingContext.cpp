@@ -16,7 +16,7 @@ namespace krys::boo::tests
 
   namespace
   {
-    KRYS_NODISCARD const layout::Box &BoxOf(ResolverFixture &fixture, DOMStringView id) noexcept
+    KRYS_NODISCARD const layout::Box &FloatingBoxOf(ResolverFixture &fixture, DOMStringView id) noexcept
     {
       auto box = fixture.ById(id).Renderer()->LayoutBox();
       REQUIRE(box);
@@ -89,10 +89,10 @@ namespace krys::boo::tests
     auto floatingContext = layout::FloatingContext {rootBox, layoutState, placedFloats};
     CHECK(floatingContext.IsEmpty());
 
-    auto &f1 = BoxOf(fixture, u8"f1");
-    auto &f2 = BoxOf(fixture, u8"f2");
-    auto &r1 = BoxOf(fixture, u8"r1");
-    auto &f3 = BoxOf(fixture, u8"f3");
+    auto &f1 = FloatingBoxOf(fixture, u8"f1");
+    auto &f2 = FloatingBoxOf(fixture, u8"f2");
+    auto &r1 = FloatingBoxOf(fixture, u8"r1");
+    auto &f3 = FloatingBoxOf(fixture, u8"f3");
     CHECK(floatingContext.IsStartPositioned(f1));
     CHECK_FALSE(floatingContext.IsStartPositioned(r1));
 
@@ -140,14 +140,14 @@ namespace krys::boo::tests
       CHECK(placedFloats.LowestPositionOnBlockAxis(Clear::InlineEnd) == 20_lu);
 
       // Clearance takes a line break below the floats it clears.
-      auto &clearLeft = BoxOf(fixture, u8"brl");
+      auto &clearLeft = FloatingBoxOf(fixture, u8"brl");
       auto clearance =
         floatingContext.GetBlockAxisPositionWithClearance(clearLeft, SetGeometry(layoutState, clearLeft, {}));
       REQUIRE(clearance);
       CHECK(clearance->Position == 30_lu);
       CHECK(clearance->Clearance == 30_lu);
 
-      auto &clearRight = BoxOf(fixture, u8"brr");
+      auto &clearRight = FloatingBoxOf(fixture, u8"brr");
       clearance = floatingContext.GetBlockAxisPositionWithClearance(clearRight,
                                                                     SetGeometry(layoutState, clearRight, {}));
       REQUIRE(clearance);
@@ -159,7 +159,7 @@ namespace krys::boo::tests
       CHECK_FALSE(clearance);
 
       // A formatting context root is placed beside the floats where it fits, without overlapping them.
-      auto &inlineBlock = BoxOf(fixture, u8"ib");
+      auto &inlineBlock = FloatingBoxOf(fixture, u8"ib");
       CHECK(floatingContext.PositionForNonFloatingFloatAvoider(
               inlineBlock, SetGeometry(layoutState, inlineBlock, {100_lu, 10_lu}))
             == LayoutPoint {90_lu, 0_lu});
@@ -222,15 +222,15 @@ namespace krys::boo::tests
     auto floatingContext = layout::FloatingContext {rootBox, layoutState, placedFloats};
 
     // In a right-to-left context, the start is on the right.
-    CHECK(floatingContext.IsStartPositioned(BoxOf(fixture, u8"r")));
-    CHECK(floatingContext.IsStartPositioned(BoxOf(fixture, u8"s")));
-    CHECK_FALSE(floatingContext.IsStartPositioned(BoxOf(fixture, u8"l")));
+    CHECK(floatingContext.IsStartPositioned(FloatingBoxOf(fixture, u8"r")));
+    CHECK(floatingContext.IsStartPositioned(FloatingBoxOf(fixture, u8"s")));
+    CHECK_FALSE(floatingContext.IsStartPositioned(FloatingBoxOf(fixture, u8"l")));
 
     // The floats are placed in logical coordinates: the start float at the logical start.
-    auto &start = BoxOf(fixture, u8"r");
+    auto &start = FloatingBoxOf(fixture, u8"r");
     CHECK(PlaceFloat(floatingContext, placedFloats, SetGeometry(layoutState, start, {50_lu, 10_lu}), start)
           == LayoutPoint {0_lu, 0_lu});
-    auto &end = BoxOf(fixture, u8"l");
+    auto &end = FloatingBoxOf(fixture, u8"l");
     CHECK(PlaceFloat(floatingContext, placedFloats, SetGeometry(layoutState, end, {50_lu, 10_lu}), end)
           == LayoutPoint {250_lu, 0_lu});
   }

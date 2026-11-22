@@ -49,8 +49,6 @@
 #include "Krystal.Booey/Rendering/Layers/RenderLayer.hpp"
 #include "Krystal.Booey/Rendering/LayoutRepainter.hpp"
 #include "Krystal.Booey/Rendering/Line/InlineWalker.hpp"
-#include "Krystal.Booey/Rendering/Line/LegacyLineLayout.hpp"
-#include "Krystal.Booey/Rendering/Line/LegacyRootInlineBox.hpp"
 #include "Krystal.Booey/Rendering/LineClampUpdater.hpp"
 #include "Krystal.Booey/Rendering/MultiColumn/RenderMultiColumnFlow.hpp"
 #include "Krystal.Booey/Rendering/MultiColumn/RenderMultiColumnSet.hpp"
@@ -207,57 +205,6 @@ namespace krys::boo
 
   // Do not add any code in below destructor. Add it to willBeDestroyed() instead.
   RenderBlockFlow::~RenderBlockFlow() noexcept = default;
-
-  void RenderBlockFlow::WillBeDestroyed() noexcept
-  {
-    if (!RenderTreeBeingDestroyed())
-    {
-      if (LegacyRootBox())
-      {
-        // We can't wait for RenderBox::destroy to clear the selection,
-        // because by then we will have nuked the line boxes.
-        if (IsSelectionBorder())
-        {
-          GetDocument().Selection().SetNeedsSelectionUpdate();
-        }
-
-        // If we are an anonymous block, then our line boxes might have children
-        // that will outlast this block. In the non-anonymous block case those
-        // children will be destroyed by the time we return from this function.
-        if (IsAnonymousBlock())
-        {
-          if (auto *childBox = LegacyRootBox()->FirstChild())
-          {
-            childBox->RemoveFromParent();
-          }
-        }
-      }
-      else if (auto *parent = Parent(); parent && parent->IsSVGRenderer())
-      {
-        parent->DirtyLineFromChangedChild();
-      }
-    }
-
-    if (SvgTextLayout())
-    {
-      SvgTextLayout()->DeleteLegacyRootBox();
-    }
-
-    RenderBlock::WillBeDestroyed();
-  }
-
-  LegacyRootInlineBox *RenderBlockFlow::LegacyRootBox() const noexcept
-  {
-    return SvgTextLayout() ? SvgTextLayout()->LegacyRootBox() : nullptr;
-  }
-
-  void RenderBlockFlow::DirtyLineFromChangedChild() noexcept
-  {
-    if (SvgTextLayout() && SvgTextLayout()->LegacyRootBox())
-    {
-      SvgTextLayout()->LegacyRootBox()->MarkDirty();
-    }
-  }
 
   RenderBlockFlow *RenderBlockFlow::PreviousSiblingWithOverhangingFloats(bool &parentHasFloats) const noexcept
   {
@@ -1117,17 +1064,6 @@ namespace krys::boo
     {
       inlineLayout->ShiftLinesBy(space);
     }
-    else if (auto *svgTextLayout = SvgTextLayout())
-    {
-      if (IsHorizontalWritingMode())
-      {
-        svgTextLayout->ShiftLineBy(0_lu, space);
-      }
-      else
-      {
-        svgTextLayout->ShiftLineBy(-space, 0_lu);
-      }
-    }
     else
     {
       for (auto *child = FirstChildBox(); child; child = child->NextSiblingBox())
@@ -1451,19 +1387,7 @@ namespace krys::boo
                                              LayoutUnit &repaintLogicalBottom) noexcept
   {
     ComputeAndSetLineLayoutPath();
-
-    if (GetLineLayoutPath() == LineLayoutPath::InlinePath)
-    {
-      return LayoutInlineContent(relayoutChildren, previousHeight, repaintLogicalTop, repaintLogicalBottom);
-    }
-
-    if (!SvgTextLayout())
-    {
-      _lineLayout = CreateUnique<LegacyLineLayout>(*this);
-    }
-
-    SvgTextLayout()->LayoutLineBoxes();
-    _previousInlineLayoutContentTopAndBottomIncludingInkOverflow = null;
+    LayoutInlineContent(relayoutChildren, previousHeight, repaintLogicalTop, repaintLogicalBottom);
   }
 
   void RenderBlockFlow::PerformBlockStepSizing(RenderBox &child,
@@ -1927,11 +1851,6 @@ namespace krys::boo
     if (InlineLayout())
     {
       return !InlineLayout()->IsSelfCollapsingContent();
-    }
-
-    if (SvgTextLayout())
-    {
-      return SvgTextLayout()->LineCount();
     }
 
     // Containers with no children.
@@ -3623,10 +3542,6 @@ namespace krys::boo
       {
         inlineLayout->CollectOverflow();
       }
-      else if (auto *svgTextLayout = SvgTextLayout())
-      {
-        svgTextLayout->AddOverflowFromInlineChildren();
-      }
       // If this block is flowed inside a flow thread, make sure its overflow is propagated to the containing
       // fragments.
       if (_overflow)
@@ -3758,7 +3673,7 @@ namespace krys::boo
     if (ChildrenInline() && !value)
     {
       SetLineLayoutPath(LineLayoutPath::UndeterminedPath);
-      _lineLayout = std::monostate();
+      _lineLayout = nullptr;
     }
 
     RenderBlock::SetChildrenInline(value);
@@ -3784,8 +3699,7 @@ namespace krys::boo
     {
       return;
     }
-    SetLineLayoutPath(layout_integration::LineLayout::CanUseFor(*this) ? LineLayoutPath::InlinePath
-                                                                       : LineLayoutPath::SvgTextPath);
+    SetLineLayoutPath(LineLayoutPath::InlinePath);
   }
 
   bool RenderBlockFlow::HasContentfulInlineOrBlockLine() const noexcept
@@ -3863,7 +3777,7 @@ namespace krys::boo
         break;
     }
 
-    _lineLayout = std::monostate();
+    _lineLayout = nullptr;
   }
 
   size_t RenderBlockFlow::LineCount() const noexcept
@@ -3876,10 +3790,6 @@ namespace krys::boo
     if (InlineLayout())
     {
       return InlineLayout()->LineCount();
-    }
-    if (SvgTextLayout())
-    {
-      return SvgTextLayout()->LineCount();
     }
 
     return 0;
@@ -4195,7 +4105,7 @@ namespace krys::boo
     if (inlineContentStatus.HasSimpleOutOfFlowContentOnly)
     {
       // Shortcut the layout.
-      _lineLayout = std::monostate();
+      _lineLayout = nullptr;
 
       SetStaticPositionsForSimpleOutOfFlowContent();
       SetLogicalHeight(BorderAndPaddingLogicalHeight() + LayoutUnit(ScrollbarLogicalHeight()));
@@ -6304,10 +6214,7 @@ namespace krys::boo
       return {};
     }
 
-    // FIXME: Do we really need to check for SVG content here?
-    auto hasInlineOrSVGContent =
-      HasContentfulInlineLine() || (SvgTextLayout() && SvgTextLayout()->LineCount());
-    if (!hasInlineOrSVGContent)
+    if (!HasContentfulInlineLine())
     {
       // Update our lastLogicalTop to be the bottom of the block. <hr>s or empty blocks with height can trip
       // this case.

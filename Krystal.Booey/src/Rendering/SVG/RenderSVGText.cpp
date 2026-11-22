@@ -45,11 +45,8 @@
 #include "Krystal.Booey/Rendering/SVG/RenderSVGInline.hpp"
 #include "Krystal.Booey/Rendering/SVG/RenderSVGInlineText.hpp"
 #include "Krystal.Booey/Rendering/SVG/RenderSVGTextPath.hpp"
-#include "Krystal.Booey/Rendering/SVG/SVGInlineFlowBox.hpp"
-#include "Krystal.Booey/Rendering/SVG/SVGInlineTextBox.hpp"
 #include "Krystal.Booey/Rendering/SVG/SVGRenderingContext.hpp"
 #include "Krystal.Booey/Rendering/SVG/SVGRenderSupport.hpp"
-#include "Krystal.Booey/Rendering/SVG/SVGRootInlineBox.hpp"
 #include "Krystal.Booey/Rendering/SVG/SVGTextBoxPainter.hpp"
 #include "Krystal.Booey/Rendering/SVG/SVGTextLayoutEngine.hpp"
 #include "Krystal.Booey/Rendering/SVG/SVGVisitedRendererTracking.hpp"
@@ -491,8 +488,7 @@ namespace krys::boo
 
   void RenderSVGText::ComputePerCharacterLayoutInformation() noexcept
   {
-    auto hasSVGContent = LegacyRootBox() || (InlineLayout() && InlineLayout()->HasContentfulInlineLine());
-    if (!hasSVGContent)
+    if (!IsObjectBoundingBoxValid())
     {
       return;
     }
@@ -515,21 +511,9 @@ namespace krys::boo
     // Perform SVG text layout phase three (see SVGTextChunkBuilder for details).
     auto fragmentMap = characterLayout.FinishLayout();
 
-    if (LegacyRootBox())
-    {
-      // Perform SVG text layout phase four
-      // Position & resize all SVGInlineText/FlowBoxes in the inline box tree, resize the root box as well as
-      // the RenderSVGText parent block.
-      auto childRect = LayoutChildBoxes(LegacyRootBox(), fragmentMap);
-      LayoutRootBox(childRect);
-      return;
-    }
-
-    if (InlineLayout())
-    {
-      auto boundaries = InlineLayout()->ApplySVGTextFragments(krys::move(fragmentMap));
-      UpdatePositionAndOverflow(boundaries);
-    }
+    // Perform SVG text layout phase four: position the boxes from their fragments.
+    auto boundaries = InlineLayout()->ApplySVGTextFragments(krys::move(fragmentMap));
+    UpdatePositionAndOverflow(boundaries);
   }
 
   void RenderSVGText::LayoutCharactersInTextBoxes(const inline_iterator::InlineBoxIterator &parent,
@@ -579,77 +563,6 @@ namespace krys::boo
     }
   }
 
-  RectF RenderSVGText::LayoutChildBoxes(LegacyInlineFlowBox *start, SVGTextFragmentMap &fragmentMap) noexcept
-  {
-    RectF childRect;
-
-    for (auto *child = start->FirstChild(); child; child = child->NextOnLine())
-    {
-      RectF boxRect;
-      if (auto *textBox = DynamicDowncast<SVGInlineTextBox>(*child))
-      {
-        krys_debug_assert(Is<RenderSVGInlineText>(textBox->Renderer()));
-
-        auto it = fragmentMap.find(inline_iterator::MakeKey(*inline_iterator::SVGTextBoxFor(textBox)));
-        if (it != fragmentMap.end())
-        {
-          textBox->SetTextFragments(krys::move(it->second));
-        }
-
-        boxRect = textBox->CalculateBoundaries();
-        textBox->SetX(boxRect.X());
-        textBox->SetY(boxRect.Y());
-        textBox->SetLogicalWidth(boxRect.Width());
-        textBox->SetLogicalHeight(boxRect.Height());
-      }
-      else
-      {
-        // Skip generated content.
-        if (!child->Renderer().GetNode())
-        {
-          continue;
-        }
-
-        auto &flowBox = Downcast<SVGInlineFlowBox>(*child);
-        LayoutChildBoxes(&flowBox, fragmentMap);
-
-        boxRect = flowBox.CalculateBoundaries();
-        flowBox.SetX(boxRect.X());
-        flowBox.SetY(boxRect.Y());
-        flowBox.SetLogicalWidth(boxRect.Width());
-        flowBox.SetLogicalHeight(boxRect.Height());
-      }
-      childRect.Unite(boxRect);
-    }
-
-    return childRect;
-  }
-
-  void RenderSVGText::LayoutRootBox(const RectF &childRect) noexcept
-  {
-    // Finally, assign the root block position, now that all content is laid out.
-    UpdatePositionAndOverflow(childRect);
-
-    // Position all children relative to the parent block.
-    for (auto *child = LegacyRootBox()->FirstChild(); child; child = child->NextOnLine())
-    {
-      // Skip generated content.
-      if (!child->Renderer().GetNode())
-      {
-        continue;
-      }
-      child->AdjustPosition(-childRect.X(), -childRect.Y());
-    }
-
-    LegacyRootBox()->SetX(0);
-    LegacyRootBox()->SetY(0);
-    LegacyRootBox()->SetLogicalWidth(childRect.Width());
-    LegacyRootBox()->SetLogicalHeight(childRect.Height());
-
-    auto boundingRect = EnclosingLayoutRect(childRect);
-    LegacyRootBox()->SetLineTopBottomPositions(0, boundingRect.Height(), 0, boundingRect.Height());
-  }
-
   namespace
   {
     void SwapItemsInLayoutAttributes(SVGTextLayoutAttributes *firstAttributes,
@@ -670,8 +583,9 @@ namespace krys::boo
     }
 
     void FindFirstAndLastAttributesInVector(List<SVGTextLayoutAttributes *> &attributes,
-                                            RenderSVGInlineText *firstContext,
-                                            RenderSVGInlineText *lastContext, SVGTextLayoutAttributes *&first,
+                                            const RenderSVGInlineText *firstContext,
+                                            const RenderSVGInlineText *lastContext,
+                                            SVGTextLayoutAttributes *&first,
                                             SVGTextLayoutAttributes *&last) noexcept
     {
       first = nullptr;
@@ -697,9 +611,9 @@ namespace krys::boo
       krys_debug_assert(last);
     }
 
-    KRYS_NODISCARD bool IsSingleCharacter(const SVGInlineTextBox &textBox) noexcept
+    KRYS_NODISCARD bool IsSingleCharacter(const inline_iterator::SVGTextBox &textBox) noexcept
     {
-      auto text = utf8_stringview(textBox.Renderer().Text()).substr(textBox.Start(), textBox.Len());
+      auto text = utf8_stringview(textBox.Renderer().Text()).substr(textBox.Start(), textBox.Length());
       return !text.empty()
              && krys::text::DecodeUTF8(Span<const char8>(text.data(), text.size())).Length == text.size();
     }
@@ -715,30 +629,22 @@ namespace krys::boo
         {
           return;
         }
-        auto *legacyFirst = span.front()->GetLegacyInlineBox();
-        auto *legacyLast = span.back()->GetLegacyInlineBox();
-        if (!Is<SVGInlineTextBox>(legacyFirst) || !Is<SVGInlineTextBox>(legacyLast))
-        {
-          std::swap(span.front(), span.back());
-          span = span.subspan(1, span.size() - 2);
-          continue;
-        }
-
-        auto &firstTextBox = Downcast<SVGInlineTextBox>(*legacyFirst);
-        auto &lastTextBox = Downcast<SVGInlineTextBox>(*legacyLast);
+        auto *firstTextBox = DynamicDowncast<inline_iterator::SVGTextBox>(*span.front());
+        auto *lastTextBox = DynamicDowncast<inline_iterator::SVGTextBox>(*span.back());
 
         // Reordering is only necessary for bidi text that is _absolutely_ positioned.
-        if (IsSingleCharacter(firstTextBox) && IsSingleCharacter(lastTextBox))
+        if (firstTextBox && lastTextBox && IsSingleCharacter(*firstTextBox)
+            && IsSingleCharacter(*lastTextBox))
         {
-          RenderSVGInlineText &firstContext = firstTextBox.Renderer();
-          RenderSVGInlineText &lastContext = lastTextBox.Renderer();
+          const auto &firstContext = firstTextBox->Renderer();
+          const auto &lastContext = lastTextBox->Renderer();
 
           SVGTextLayoutAttributes *firstAttributes = nullptr;
           SVGTextLayoutAttributes *lastAttributes = nullptr;
           FindFirstAndLastAttributesInVector(attributes, &firstContext, &lastContext, firstAttributes,
                                              lastAttributes);
-          SwapItemsInLayoutAttributes(firstAttributes, lastAttributes, firstTextBox.Start(),
-                                      lastTextBox.Start());
+          SwapItemsInLayoutAttributes(firstAttributes, lastAttributes, firstTextBox->Start(),
+                                      lastTextBox->Start());
         }
 
         std::swap(span.front(), span.back());
@@ -750,15 +656,11 @@ namespace krys::boo
 
   void RenderSVGText::ReorderValueListsToLogicalOrder() noexcept
   {
-    auto lineBox =
-      inline_iterator::LineBoxIterator(inline_iterator::LineBoxIteratorLegacyPath(LegacyRootBox()));
-    if (!lineBox)
+    for (auto lineBox = inline_iterator::FirstLineBoxFor(*this); lineBox; lineBox.TraverseNext())
     {
-      return;
+      std::ignore = inline_iterator::LeafBoxesInLogicalOrder(
+        lineBox, [&](auto span) { ReverseInlineBoxRangeAndValueListsIfNeeded(_layoutAttributes, span); });
     }
-
-    (void)inline_iterator::LeafBoxesInLogicalOrder(
-      lineBox, [&](auto span) { ReverseInlineBoxRangeAndValueListsIfNeeded(_layoutAttributes, span); });
   }
 
   bool RenderSVGText::NodeAtPointF(const HitTestRequest &request, HitTestResult &result,
@@ -976,17 +878,9 @@ namespace krys::boo
       {
         if (auto *textBox = DynamicDowncast<inline_iterator::SVGTextBox>(box))
         {
-          if (textBox->GetLegacyInlineBox())
-          {
-            LegacySVGTextBoxPainter painter(*textBox->GetLegacyInlineBox(), paintInfo, paintOffset);
-            painter.PaintSelectionBackground();
-          }
-          else
-          {
-            ModernSVGTextBoxPainter painter(textBox->ModernPath().GetInlineContent(),
-                                            textBox->ModernPath().BoxIndex(), paintInfo, paintOffset);
-            painter.PaintSelectionBackground();
-          }
+          SVGTextBoxPainter painter(textBox->ContentPath().GetInlineContent(),
+                                    textBox->ContentPath().BoxIndex(), paintInfo, paintOffset);
+          painter.PaintSelectionBackground();
         }
       }
     }
@@ -1002,17 +896,9 @@ namespace krys::boo
 
       if (auto *textBox = DynamicDowncast<inline_iterator::SVGTextBox>(*box))
       {
-        if (textBox->GetLegacyInlineBox())
-        {
-          LegacySVGTextBoxPainter painter(*textBox->GetLegacyInlineBox(), paintInfo, paintOffset);
-          painter.Paint();
-        }
-        else
-        {
-          ModernSVGTextBoxPainter painter(textBox->ModernPath().GetInlineContent(),
-                                          textBox->ModernPath().BoxIndex(), paintInfo, paintOffset);
-          painter.Paint();
-        }
+        SVGTextBoxPainter painter(textBox->ContentPath().GetInlineContent(),
+                                  textBox->ContentPath().BoxIndex(), paintInfo, paintOffset);
+        painter.Paint();
       }
       else
       {
@@ -1109,14 +995,9 @@ namespace krys::boo
     RenderSVGBlock::StyleDidChange(diff, oldStyle);
   }
 
-  SVGRootInlineBox *RenderSVGText::LegacyRootBox() const noexcept
-  {
-    return Downcast<SVGRootInlineBox>(RenderSVGBlock::LegacyRootBox());
-  }
-
   bool RenderSVGText::IsObjectBoundingBoxValid() const noexcept
   {
-    // If we don't have any line boxes, then consider the bbox invalid.
-    return LegacyRootBox();
+    // Without any lines, the bounding box is invalid.
+    return InlineLayout() && InlineLayout()->HasContentfulInlineLine();
   }
 }

@@ -78,8 +78,6 @@ namespace krys::boo::layout_integration
       NodeMutation,
     };
 
-    KRYS_NODISCARD bool CanUseForLineLayout(const RenderBlockFlow &) noexcept;
-
     KRYS_NODISCARD bool
       ShouldInvalidateLineLayoutAfterChangeFor(const RenderBlockFlow &rootBlockContainer,
                                                const RenderObject &renderer, const LineLayout &lineLayout,
@@ -236,7 +234,7 @@ namespace krys::boo::layout_integration
             return true;
           }
         }
-        return !CanUseForLineLayout(rootBlockContainer);
+        return false;
       };
       switch (typeOfChange)
       {
@@ -332,15 +330,6 @@ namespace krys::boo::layout_integration
       return layout::InlineFormattingUtils::SnapToInt(
         rootRenderer.BorderAndPaddingBefore().ToFloat() + baseline, *rootLayoutBox,
         layout::InlineFormattingUtils::SnapDirection::Floor);
-    }
-
-    KRYS_NODISCARD bool CanUseForLineLayout(const RenderBlockFlow &rootContainer) noexcept
-    {
-      if (Is<RenderSVGBlock>(rootContainer) && !rootContainer.IsLegacyRenderSVGForeignObject())
-      {
-        return rootContainer.GetDocument().GetSettings().UseIFCForSVGText;
-      }
-      return true;
     }
 
     KRYS_NODISCARD bool CanUseForPreferredWidthComputationImpl(const RenderBlockFlow &blockContainer) noexcept
@@ -521,11 +510,6 @@ namespace krys::boo::layout_integration
   const LineLayout *LineLayout::Containing(const RenderObject &renderer) noexcept
   {
     return Containing(const_cast<RenderObject &>(renderer));
-  }
-
-  bool LineLayout::CanUseFor(const RenderBlockFlow &flow) noexcept
-  {
-    return CanUseForLineLayout(flow);
   }
 
   bool LineLayout::CanUseForPreferredWidthComputation(const RenderBlockFlow &flow) noexcept
@@ -1760,7 +1744,7 @@ namespace krys::boo::layout_integration
       return {};
     }
 
-    return inline_iterator::LineBoxIterator {inline_iterator::LineBoxIteratorModernPath {*_inlineContent, 0}};
+    return inline_iterator::LineBoxIterator {inline_iterator::InlineContentLineBoxPath {*_inlineContent, 0}};
   }
 
   inline_iterator::LineBoxIterator LineLayout::LastLineBox() const noexcept
@@ -1772,7 +1756,7 @@ namespace krys::boo::layout_integration
 
     auto &lines = _inlineContent->DisplayContent().LineList;
     return inline_iterator::LineBoxIterator {
-      inline_iterator::LineBoxIteratorModernPath {*_inlineContent, lines.empty() ? 0 : lines.size() - 1}};
+      inline_iterator::InlineContentLineBoxPath {*_inlineContent, lines.empty() ? 0 : lines.size() - 1}};
   }
 
   LayoutRect LineLayout::FirstInlineBoxRect(const RenderInline &renderInline) const noexcept

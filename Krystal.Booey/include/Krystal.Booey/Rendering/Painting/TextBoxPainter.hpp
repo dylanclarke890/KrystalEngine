@@ -27,8 +27,8 @@
 #include "Krystal.Booey/Graphics/Geometry/LayoutPoint.hpp"
 #include "Krystal.Booey/Graphics/Geometry/LayoutRect.hpp"
 #include "Krystal.Booey/Graphics/TextRuns/TextRun.hpp"
-#include "Krystal.Booey/Layout/Integration/Inline/InlineIteratorBoxModernPath.hpp"
 #include "Krystal.Booey/Layout/Integration/Inline/InlineIteratorInlineBox.hpp"
+#include "Krystal.Booey/Layout/Integration/Inline/InlineIteratorInlineContentBoxPath.hpp"
 #include "Krystal.Booey/Layout/Integration/Inline/InlineIteratorTextBox.hpp"
 #include "Krystal.Booey/Rendering/Painting/MarkedText.hpp"
 #include "Krystal.Booey/Rendering/Painting/TextDecorationPainter.hpp"
@@ -68,7 +68,7 @@ namespace krys::boo
 
   protected:
     // FIXME: We could just talk to the display box directly.
-    const inline_iterator::BoxModernPath _textBox;
+    const inline_iterator::InlineContentBoxPath _textBox;
     const RenderText &_renderer;
     const boo::Document &_document;
     const RenderStyle &_style;
@@ -99,7 +99,7 @@ namespace krys::boo
                          WritingMode writingMode, const style::ZoomFactor &zoomFactor) noexcept;
 
   protected:
-    KRYS_NODISCARD const inline_iterator::BoxModernPath &TextBox() const noexcept
+    KRYS_NODISCARD const inline_iterator::InlineContentBoxPath &TextBox() const noexcept
     {
       return _textBox;
     }

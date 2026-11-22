@@ -26,14 +26,12 @@
 #include "Krystal.Booey/Layout/Integration/Inline/InlineIteratorSVGTextBox.hpp"
 #include "Krystal.Booey/Layout/Integration/Inline/LayoutIntegrationLineLayout.hpp"
 #include "Krystal.Booey/Rendering/SVG/RenderSVGText.hpp"
-#include "Krystal.Booey/Rendering/SVG/SVGInlineTextBox.hpp"
-#include "Krystal.Booey/Rendering/SVG/SVGRootInlineBox.hpp"
 #include "Krystal.Booey/Rendering/SVG/SVGTextBoxPainter.hpp"
 #include "Krystal.Booey/Rendering/SVG/SVGTextFragment.hpp"
 
 namespace krys::boo::inline_iterator
 {
-  SVGTextBox::SVGTextBox(PathVariant &&path) noexcept : TextBox(krys::move(path))
+  SVGTextBox::SVGTextBox(InlineContentBoxPath path) noexcept : TextBox(krys::move(path))
   {
   }
 
@@ -101,16 +99,11 @@ namespace krys::boo::inline_iterator
 
   const List<SVGTextFragment> &SVGTextBox::TextFragments() const noexcept
   {
-    return SwitchOn(_pathVariant, [&](const auto &path) -> const List<SVGTextFragment> &
-                    { return path.SvgTextFragments(); });
+    return _path.SvgTextFragments();
   }
 
-  const SVGInlineTextBox *SVGTextBox::GetLegacyInlineBox() const noexcept
-  {
-    return Downcast<SVGInlineTextBox>(TextBox::GetLegacyInlineBox());
-  }
-
-  SVGTextBoxIterator::SVGTextBoxIterator(Box::PathVariant &&path) noexcept : TextBoxIterator(krys::move(path))
+  SVGTextBoxIterator::SVGTextBoxIterator(InlineContentBoxPath path) noexcept
+      : TextBoxIterator(krys::move(path))
   {
   }
 
@@ -130,17 +123,12 @@ namespace krys::boo::inline_iterator
       return SVGTextBoxIterator {*box};
     }
 
-    return SVGTextBoxIterator {BoxLegacyPath {text.FirstLegacyTextBox()}};
+    return {};
   }
 
   BoxRange<SVGTextBoxIterator> SVGTextBoxesFor(const RenderSVGInlineText &text) noexcept
   {
     return BoxRange<SVGTextBoxIterator> {FirstSVGTextBoxFor(text)};
-  }
-
-  SVGTextBoxIterator SVGTextBoxFor(const SVGInlineTextBox *box) noexcept
-  {
-    return SVGTextBoxIterator {BoxLegacyPath {box}};
   }
 
   SVGTextBoxIterator SVGTextBoxFor(const layout_integration::InlineContent &inlineContent,
@@ -151,7 +139,7 @@ namespace krys::boo::inline_iterator
     {
       return {};
     }
-    return SVGTextBoxIterator {BoxModernPath {inlineContent, boxIndex}};
+    return SVGTextBoxIterator {InlineContentBoxPath {inlineContent, boxIndex}};
   }
 
   SVGTextBox::Key MakeKey(const SVGTextBox &textBox) noexcept
@@ -165,7 +153,6 @@ namespace krys::boo::inline_iterator
     {
       return BoxRange<BoxIterator> {BoxIterator {*lineLayout->FirstRootInlineBox()}};
     }
-
-    return BoxRange<BoxIterator> {BoxIterator {BoxLegacyPath {svgText.LegacyRootBox()}}};
+    return BoxRange<BoxIterator> {BoxIterator {}};
   }
 }

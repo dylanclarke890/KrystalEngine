@@ -37,12 +37,12 @@
 
 namespace krys::boo::inline_iterator
 {
-  const RenderText &BoxModernPath::GetRenderText() const noexcept
+  const RenderText &InlineContentBoxPath::GetRenderText() const noexcept
   {
     return Downcast<RenderText>(Renderer());
   }
 
-  TextRun BoxModernPath::GetTextRun(TextRunMode mode) const noexcept
+  TextRun InlineContentBoxPath::GetTextRun(TextRunMode mode) const noexcept
   {
     auto &style = GetBox().Style();
     auto expansion = GetBox().GetExpansion();
@@ -69,7 +69,7 @@ namespace krys::boo::inline_iterator
     return textRun;
   }
 
-  TextBoxSelectableRange BoxModernPath::SelectableRange() const noexcept
+  TextBoxSelectableRange InlineContentBoxPath::SelectableRange() const noexcept
   {
     auto &box = GetBox();
     auto &textContent = box.GetText();
@@ -103,18 +103,18 @@ namespace krys::boo::inline_iterator
       return true;
     }
 
-    return _box._pathVariant == other._box._pathVariant;
+    return _box._path == other._box._path;
   }
 
   BoxIterator &BoxIterator::TraverseLineRightwardOnLine() noexcept
   {
-    SwitchOn(_box._pathVariant, [](auto &path) { path.TraverseNextBoxOnLine(); });
+    _box._path.TraverseNextBoxOnLine();
     return *this;
   }
 
   BoxIterator &BoxIterator::TraverseLineRightwardOnLineSkippingChildren() noexcept
   {
-    SwitchOn(_box._pathVariant, [](auto &path) { path.TraverseNextBoxOnLineSkippingChildren(); });
+    _box._path.TraverseNextBoxOnLineSkippingChildren();
     return *this;
   }
 
@@ -172,8 +172,7 @@ namespace krys::boo::inline_iterator
 
   InlineBoxIterator Box::ParentInlineBox() const noexcept
   {
-    return SwitchOn(_pathVariant,
-                    [](const auto &path) { return InlineBoxIterator {path.ParentInlineBox()}; });
+    return InlineBoxIterator {_path.ParentInlineBox()};
   }
 
   RenderObjectHighlightState Box::SelectionState() const noexcept
@@ -193,14 +192,8 @@ namespace krys::boo::inline_iterator
 
   LineBoxIterator Box::GetLineBox() const noexcept
   {
-    return SwitchOn(
-      _pathVariant, [](const BoxLegacyPath &path)
-      { return LineBoxIterator {LineBoxIteratorLegacyPath {&path.RootInlineBox()}}; },
-      [](const BoxModernPath &path)
-      {
-        return LineBoxIterator {
-          LineBoxIteratorModernPath {path.GetInlineContent(), path.GetBox().LineIndex()}};
-      });
+    const auto &path = ContentPath();
+    return LineBoxIterator {InlineContentLineBoxPath {path.GetInlineContent(), path.GetBox().LineIndex()}};
   }
 
   RectF Box::VisualRect() const noexcept
@@ -212,13 +205,13 @@ namespace krys::boo::inline_iterator
 
   LeafBoxIterator &LeafBoxIterator::TraverseLineRightwardOnLine() noexcept
   {
-    SwitchOn(_box._pathVariant, [](auto &path) { path.TraverseNextLeafOnLine(); });
+    _box._path.TraverseNextLeafOnLine();
     return *this;
   }
 
   LeafBoxIterator &LeafBoxIterator::TraverseLineLeftwardOnLine() noexcept
   {
-    SwitchOn(_box._pathVariant, [](auto &path) { path.TraversePreviousLeafOnLine(); });
+    _box._path.TraversePreviousLeafOnLine();
     return *this;
   }
 
@@ -284,6 +277,6 @@ namespace krys::boo::inline_iterator
 
   LeafBoxIterator BoxFor(const layout_integration::InlineContent &content, size_t boxIndex) noexcept
   {
-    return LeafBoxIterator {BoxModernPath {content, boxIndex}};
+    return LeafBoxIterator {InlineContentBoxPath {content, boxIndex}};
   }
 }

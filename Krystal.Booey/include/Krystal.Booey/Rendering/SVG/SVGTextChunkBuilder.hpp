@@ -27,7 +27,6 @@
 namespace krys::boo
 {
   class RenderSVGInlineText;
-  class SVGInlineTextBox;
   struct SVGTextFragment;
 
   using SVGTextChunkStarts = HashSet<inline_iterator::SVGTextBox::Key, inline_iterator::SVGTextBoxKeyHash>;
@@ -36,7 +35,7 @@ namespace krys::boo
   ///
   /// Phase one built the layout information from the SVG DOM stored in the RenderSVGInlineText objects
   /// (SVGTextLayoutAttributes). Phase two performed the actual per-character layout, computing the final
-  /// positions for each character, stored in the SVGInlineTextBox objects (SVGTextFragment). Phase three
+  /// positions for each character, stored in the SVG text boxes (SVGTextFragment). Phase three
   /// performs all modifications that have to be applied to each individual text chunk (text-anchor &
   /// textLength).
   class SVGTextChunkBuilder

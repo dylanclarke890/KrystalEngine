@@ -40,30 +40,16 @@
 #include "Krystal.Booey/Rendering/SVG/Legacy/SVGResourcesCache.hpp"
 #include "Krystal.Booey/Rendering/SVG/RenderSVGInlineText.hpp"
 #include "Krystal.Booey/Rendering/SVG/RenderSVGText.hpp"
-#include "Krystal.Booey/Rendering/SVG/SVGInlineTextBox.hpp"
 #include "Krystal.Booey/Rendering/SVG/SVGTextFragment.hpp"
 #include "Krystal.Booey/Style/Values/Borders/Shadow.hpp"
 #include <algorithm>
 
 namespace krys::boo
 {
-  LegacySVGTextBoxPainter::LegacySVGTextBoxPainter(const SVGInlineTextBox &textBox, PaintInfo &paintInfo,
-                                                   const LayoutPoint &paintOffset) noexcept
-      : SVGTextBoxPainter(inline_iterator::BoxLegacyPath {&textBox}, paintInfo, paintOffset)
-  {
-  }
-
-  ModernSVGTextBoxPainter::ModernSVGTextBoxPainter(const layout_integration::InlineContent &inlineContent,
-                                                   size_t boxIndex, PaintInfo &paintInfo,
-                                                   const LayoutPoint &paintOffset) noexcept
-      : SVGTextBoxPainter(inline_iterator::BoxModernPath {inlineContent, boxIndex}, paintInfo, paintOffset)
-  {
-  }
-
-  template <typename TTextBoxPath>
-  SVGTextBoxPainter<TTextBoxPath>::SVGTextBoxPainter(TTextBoxPath &&textBox, PaintInfo &paintInfo,
-                                                     const LayoutPoint &paintOffset) noexcept
-      : _textBox(krys::move(textBox)), _renderer(Downcast<RenderSVGInlineText>(_textBox.Renderer())),
+  SVGTextBoxPainter::SVGTextBoxPainter(const layout_integration::InlineContent &inlineContent,
+                                       size_t boxIndex, PaintInfo &paintInfo,
+                                       const LayoutPoint &paintOffset) noexcept
+      : _textBox(inlineContent, boxIndex), _renderer(Downcast<RenderSVGInlineText>(_textBox.Renderer())),
         _paintInfo(paintInfo), _selectableRange(_textBox.SelectableRange()), _paintOffset(paintOffset),
         _haveSelection(!_renderer.GetDocument().Printing()
                        && _renderer.View().Selection().HighlightStateForTextBox(_renderer, _selectableRange)
@@ -71,14 +57,12 @@ namespace krys::boo
   {
   }
 
-  template <typename TTextBoxPath>
-  inline_iterator::SVGTextBoxIterator SVGTextBoxPainter<TTextBoxPath>::TextBoxIterator() const noexcept
+  inline_iterator::SVGTextBoxIterator SVGTextBoxPainter::TextBoxIterator() const noexcept
   {
-    return inline_iterator::SVGTextBoxIterator {TTextBoxPath {_textBox}};
+    return inline_iterator::SVGTextBoxIterator {inline_iterator::InlineContentBoxPath {_textBox}};
   }
 
-  template <typename TTextBoxPath>
-  const RenderBoxModelObject &SVGTextBoxPainter<TTextBoxPath>::ParentRenderer() const noexcept
+  const RenderBoxModelObject &SVGTextBoxPainter::ParentRenderer() const noexcept
   {
     return TextBoxIterator()->ParentInlineBox()->Renderer();
   }
@@ -126,8 +110,7 @@ namespace krys::boo
     }
   }
 
-  template <typename TTextBoxPath>
-  void SVGTextBoxPainter<TTextBoxPath>::PaintSelectionBackground() noexcept
+  void SVGTextBoxPainter::PaintSelectionBackground() noexcept
   {
     krys_debug_assert(_paintInfo.ShouldPaintWithinRoot(Renderer()));
     krys_debug_assert(_paintInfo.Phase == PaintPhase::Foreground
@@ -193,8 +176,7 @@ namespace krys::boo
     krys_debug_assert(!_legacyPaintingResource);
   }
 
-  template <typename TTextBoxPath>
-  void SVGTextBoxPainter<TTextBoxPath>::Paint() noexcept
+  void SVGTextBoxPainter::Paint() noexcept
   {
     krys_debug_assert(_paintInfo.ShouldPaintWithinRoot(Renderer()));
     krys_debug_assert(_paintInfo.Phase == PaintPhase::Foreground
@@ -205,8 +187,8 @@ namespace krys::boo
       return;
     }
 
-    // Note: We're explicitly not supporting composition & custom underlines and custom highlighters - unlike
-    // LegacyInlineTextBox. If we ever need that for SVG, it's very easy to refactor and reuse the code.
+    // Note: We're explicitly not supporting composition & custom underlines and custom highlighters, unlike
+    // HTML text boxes.
 
     auto &parentRenderer = ParentRenderer();
 
@@ -331,11 +313,9 @@ namespace krys::boo
     krys_debug_assert(!_legacyPaintingResource);
   }
 
-  template <typename TTextBoxPath>
-  bool SVGTextBoxPainter<TTextBoxPath>::AcquireLegacyPaintingResource(GraphicsContext *&context,
-                                                                      float scalingFactor,
-                                                                      RenderBoxModelObject &renderer,
-                                                                      const RenderStyle &style) noexcept
+  bool SVGTextBoxPainter::AcquireLegacyPaintingResource(GraphicsContext *&context, float scalingFactor,
+                                                        RenderBoxModelObject &renderer,
+                                                        const RenderStyle &style) noexcept
   {
     krys_debug_assert(scalingFactor);
     krys_debug_assert(PaintingResourceMode().ContainsAny(
@@ -411,9 +391,7 @@ namespace krys::boo
     return true;
   }
 
-  template <typename TTextBoxPath>
-  void SVGTextBoxPainter<TTextBoxPath>::ReleaseLegacyPaintingResource(GraphicsContext *&context,
-                                                                      const Path *path) noexcept
+  void SVGTextBoxPainter::ReleaseLegacyPaintingResource(GraphicsContext *&context, const Path *path) noexcept
   {
     krys_debug_assert(_legacyPaintingResource);
 
@@ -477,9 +455,8 @@ namespace krys::boo
     }
   }
 
-  template <typename TTextBoxPath>
-  void SVGTextBoxPainter<TTextBoxPath>::PaintDecoration(style::TextDecorationLine decoration,
-                                                        const SVGTextFragment &fragment) noexcept
+  void SVGTextBoxPainter::PaintDecoration(style::TextDecorationLine decoration,
+                                          const SVGTextFragment &fragment) noexcept
   {
     if (Renderer().Style().TextDecorationLineInEffect().IsNone())
     {
@@ -542,10 +519,9 @@ namespace krys::boo
     }
   }
 
-  template <typename TTextBoxPath>
-  void SVGTextBoxPainter<TTextBoxPath>::PaintDecorationWithStyle(
-    style::TextDecorationLine decoration, const SVGTextFragment &fragment,
-    const RenderBoxModelObject &decorationRenderer) noexcept
+  void SVGTextBoxPainter::PaintDecorationWithStyle(style::TextDecorationLine decoration,
+                                                   const SVGTextFragment &fragment,
+                                                   const RenderBoxModelObject &decorationRenderer) noexcept
   {
     krys_debug_assert(!_legacyPaintingResource);
     krys_debug_assert(!PaintingResourceMode().empty());
@@ -594,11 +570,9 @@ namespace krys::boo
     }
   }
 
-  template <typename TTextBoxPath>
-  void SVGTextBoxPainter<TTextBoxPath>::PaintTextWithShadows(const RenderStyle &style, TextRun &textRun,
-                                                             const SVGTextFragment &fragment,
-                                                             uint32 startPosition,
-                                                             uint32 endPosition) noexcept
+  void SVGTextBoxPainter::PaintTextWithShadows(const RenderStyle &style, TextRun &textRun,
+                                               const SVGTextFragment &fragment, uint32 startPosition,
+                                               uint32 endPosition) noexcept
   {
     auto &context = _paintInfo.Context();
 
@@ -668,10 +642,9 @@ namespace krys::boo
     }
   }
 
-  template <typename TTextBoxPath>
-  void SVGTextBoxPainter<TTextBoxPath>::PaintText(const RenderStyle &style, const RenderStyle &selectionStyle,
-                                                  const SVGTextFragment &fragment, bool hasSelection,
-                                                  bool paintSelectedTextOnly) noexcept
+  void SVGTextBoxPainter::PaintText(const RenderStyle &style, const RenderStyle &selectionStyle,
+                                    const SVGTextFragment &fragment, bool hasSelection,
+                                    bool paintSelectedTextOnly) noexcept
   {
     uint32 startPosition = 0;
     uint32 endPosition = 0;
@@ -724,12 +697,8 @@ namespace krys::boo
     return run;
   }
 
-  template <typename TTextBoxPath>
-  std::pair<uint32, uint32> SVGTextBoxPainter<TTextBoxPath>::SelectionStartEnd() const noexcept
+  std::pair<uint32, uint32> SVGTextBoxPainter::SelectionStartEnd() const noexcept
   {
     return _renderer.View().Selection().RangeForTextBox(_renderer, _selectableRange);
   }
-
-  template class SVGTextBoxPainter<inline_iterator::BoxModernPath>;
-  template class SVGTextBoxPainter<inline_iterator::BoxLegacyPath>;
 }

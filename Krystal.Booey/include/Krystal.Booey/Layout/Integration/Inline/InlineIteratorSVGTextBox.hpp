@@ -34,7 +34,6 @@
 namespace krys::boo
 {
   class RenderSVGText;
-  class SVGInlineTextBox;
   struct SVGTextFragment;
 }
 
@@ -46,7 +45,7 @@ namespace krys::boo::inline_iterator
   public:
     using Key = std::pair<const RenderSVGInlineText *, uint32>;
 
-    explicit SVGTextBox(PathVariant &&path) noexcept;
+    explicit SVGTextBox(InlineContentBoxPath path) noexcept;
 
     KRYS_NODISCARD RectF CalculateBoundariesIncludingSVGTransform() const noexcept;
 
@@ -58,8 +57,6 @@ namespace krys::boo::inline_iterator
     {
       return Downcast<RenderSVGInlineText>(TextBox::Renderer());
     }
-
-    KRYS_NODISCARD const SVGInlineTextBox *GetLegacyInlineBox() const noexcept;
   };
 
   /// @brief Hashes an SVGTextBox::Key.
@@ -77,7 +74,7 @@ namespace krys::boo::inline_iterator
   public:
     SVGTextBoxIterator() noexcept = default;
 
-    explicit SVGTextBoxIterator(Box::PathVariant &&path) noexcept;
+    explicit SVGTextBoxIterator(InlineContentBoxPath path) noexcept;
 
     explicit SVGTextBoxIterator(const Box &box) noexcept;
 
@@ -100,8 +97,6 @@ namespace krys::boo::inline_iterator
   KRYS_NODISCARD SVGTextBoxIterator FirstSVGTextBoxFor(const RenderSVGInlineText &text) noexcept;
 
   KRYS_NODISCARD BoxRange<SVGTextBoxIterator> SVGTextBoxesFor(const RenderSVGInlineText &text) noexcept;
-
-  KRYS_NODISCARD SVGTextBoxIterator SVGTextBoxFor(const SVGInlineTextBox *box) noexcept;
 
   KRYS_NODISCARD SVGTextBoxIterator SVGTextBoxFor(const layout_integration::InlineContent &inlineContent,
                                                   size_t boxIndex) noexcept;

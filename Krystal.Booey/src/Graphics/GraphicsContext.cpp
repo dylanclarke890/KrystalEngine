@@ -33,9 +33,8 @@
 #include "Krystal.Booey/Graphics/Gradient.hpp"
 #include "Krystal.Booey/Graphics/Images/Image.hpp"
 #include "Krystal.Booey/Graphics/Paths/Path.hpp"
-#include "Krystal.Booey/Graphics/TextRuns/TextRunIterator.hpp"
 #include "Krystal.Core/Move.hpp"
-#include "Krystal.Text/BidiResolver.hpp"
+#include "Krystal.Text/Bidi.hpp"
 #include <cmath>
 
 namespace krys::boo
@@ -162,36 +161,37 @@ namespace krys::boo
   void GraphicsContext::DrawBidiText(const FontCascade &font, const TextRun &run, const PointF &point,
                                      FontCascade::CustomFontNotReadyAction customFontNotReadyAction) noexcept
   {
-    text::BidiResolver<TextRunIterator, text::BidiCharacterRun> bidiResolver;
-    bidiResolver.SetStatus(text::BidiStatus(run.Direction(), run.DirectionalOverride()));
-    bidiResolver.SetPositionIgnoringNestedIsolates(TextRunIterator(&run, 0));
-
-    // FIXME: This ownership should be reversed. We should pass BidiRunList
-    // to BidiResolver in createBidiRunsForLine.
-    auto &bidiRuns = bidiResolver.Runs();
-    bidiResolver.CreateBidiRunsForLine(TextRunIterator(&run, run.Length()));
-
-    if (!bidiRuns.RunCount())
+    auto baseLevel =
+      run.Direction() == text::TextDirection::RTL ? text::RightToLeftBidiLevel : text::LeftToRightBidiLevel;
+    // An override draws every character in the base direction, as one run.
+    auto runs = run.DirectionalOverride() ? List<text::BidiLevelRun> {{0, run.Length(), baseLevel}}
+                                          : text::ResolveBidiLevelRuns(run.Text(), baseLevel);
+    if (runs.empty())
     {
       return;
     }
 
-    auto currentPoint = point;
-    auto *bidiRun = bidiRuns.FirstRun();
-    while (bidiRun)
+    List<text::BidiLevel> levels;
+    levels.reserve(runs.size());
+    for (const auto &levelRun : runs)
     {
-      auto subrun = run.SubRun(bidiRun->Start(), bidiRun->Stop() - bidiRun->Start());
-      bool isRTL = bidiRun->Level() % 2;
-      subrun.SetDirection(isRTL ? text::TextDirection::RTL : text::TextDirection::LTR);
-      subrun.SetDirectionalOverride(bidiRun->DirOverride(false));
+      levels.push_back(levelRun.Level);
+    }
+    List<int32> visualToLogical(runs.size());
+    text::ReorderBidiRunsVisually(levels, visualToLogical);
+
+    auto currentPoint = point;
+    for (auto logicalIndex : visualToLogical)
+    {
+      const auto &levelRun = runs[static_cast<size_t>(logicalIndex)];
+      auto subrun =
+        run.SubRun(static_cast<uint32>(levelRun.Start), static_cast<uint32>(levelRun.End - levelRun.Start));
+      subrun.SetDirection(levelRun.Level % 2 ? text::TextDirection::RTL : text::TextDirection::LTR);
+      subrun.SetDirectionalOverride(run.DirectionalOverride());
 
       std::ignore = font.DrawText(*this, subrun, currentPoint, 0, null, customFontNotReadyAction);
       currentPoint.Move(font.Width(subrun), 0);
-
-      bidiRun = bidiRun->Next();
     }
-
-    bidiRuns.Clear();
   }
 
   void GraphicsContext::DrawEmphasisMarks(const FontCascade &font, const TextRun &run, const StringAtom &mark,

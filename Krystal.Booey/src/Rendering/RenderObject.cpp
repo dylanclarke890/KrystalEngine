@@ -2185,15 +2185,6 @@ namespace krys::boo
     return containingBlock ? containingBlock->EnclosingFragmentedFlow() : nullptr;
   }
 
-  void RenderObject::InsertedIntoTree() noexcept
-  {
-    // FIXME: We should ASSERT(isRooted()) here but generated content makes some out-of-order insertion.
-    if (!IsFloating() && Parent()->IsSVGRenderer() && Parent()->ChildrenInline())
-    {
-      Parent()->DirtyLineFromChangedChild();
-    }
-  }
-
   void RenderObject::WillBeRemovedFromTree() noexcept
   {
     // FIXME: We should ASSERT(isRooted()) but we have some out-of-order removals which would need to be fixed

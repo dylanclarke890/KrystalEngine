@@ -21,12 +21,11 @@
  */
 
 #include "Krystal.Booey/Rendering/SVG/RenderSVGInline.hpp"
-#include "Krystal.Booey/Rendering/Line/LegacyInlineFlowBox.hpp"
+#include "Krystal.Booey/Layout/Integration/Inline/InlineIteratorInlineBox.hpp"
 #include "Krystal.Booey/Rendering/Style/RenderStyle+GettersInlines.hpp"
 #include "Krystal.Booey/Rendering/SVG/Legacy/SVGResourcesCache.hpp"
 #include "Krystal.Booey/Rendering/SVG/RenderSVGInlineText.hpp"
 #include "Krystal.Booey/Rendering/SVG/RenderSVGText.hpp"
-#include "Krystal.Booey/Rendering/SVG/SVGInlineFlowBox.hpp"
 #include "Krystal.Booey/Rendering/SVG/SVGRenderSupport.hpp"
 #include "Krystal.Booey/SVG/Elements/SVGGraphicsElement.hpp"
 #include "Krystal.Core/Geometry/Quad.hpp"
@@ -44,13 +43,6 @@ namespace krys::boo
   SVGGraphicsElement &RenderSVGInline::GraphicsElement() const noexcept
   {
     return Downcast<SVGGraphicsElement>(Downcast<SVGElement>(*RenderInline::GetElement()));
-  }
-
-  UniquePtr<LegacyInlineFlowBox> RenderSVGInline::CreateInlineFlowBox() noexcept
-  {
-    auto box = CreateUnique<SVGInlineFlowBox>(*this);
-    box->SetHasVirtualLogicalHeight();
-    return box;
   }
 
   bool RenderSVGInline::IsChildAllowed(const RenderObject &child, const RenderStyle &style) const noexcept
@@ -160,12 +152,12 @@ namespace krys::boo
     }
 
     RectF textBoundingBox = textAncestor->StrokeBoundingBox();
-    for (auto *box = FirstLegacyInlineBox(); box; box = box->NextLineBox())
+    for (auto box = inline_iterator::LineLeftmostInlineBoxFor(*this); box;
+         box.TraverseInlineBoxLineRightward())
     {
-      quads.push_back(
-        LocalToAbsoluteQuad(RectF(textBoundingBox.X() + box->X(), textBoundingBox.Y() + box->Y(),
-                                  box->LogicalWidth(), box->LogicalHeight()),
-                            MapCoordinatesMode::UseTransforms, wasFixed));
+      auto rect = box->VisualRectIgnoringBlockDirection();
+      rect.MoveBy(textBoundingBox.Location());
+      quads.push_back(LocalToAbsoluteQuad(rect, MapCoordinatesMode::UseTransforms, wasFixed));
     }
   }
 

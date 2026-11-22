@@ -53,7 +53,7 @@ namespace krys::boo::inline_iterator
 
   TextBoxIterator &TextBoxIterator::TraverseNextTextBox() noexcept
   {
-    SwitchOn(_box._pathVariant, [](auto &path) { path.TraverseNextTextBox(); });
+    _box._path.TraverseNextTextBox();
     return *this;
   }
 
@@ -63,19 +63,9 @@ namespace krys::boo::inline_iterator
     {
       return lineLayout->TextBoxesFor(text);
     }
-    if (auto *svgText = DynamicDowncast<RenderSVGInlineText>(text))
-    {
-      return TextBoxIterator {BoxLegacyPath {svgText->FirstLegacyTextBox()}};
-    }
-
     // During teardown we may hit this codepath _after_ the display content is destroyed (e.g. calling repaint
     // on RenderText).
-    return TextBoxIterator {BoxLegacyPath {nullptr}};
-  }
-
-  TextBoxIterator TextBoxFor(const LegacyInlineTextBox *legacyInlineTextBox) noexcept
-  {
-    return TextBoxIterator {BoxLegacyPath {legacyInlineTextBox}};
+    return {};
   }
 
   TextBoxIterator TextBoxFor(const layout_integration::InlineContent &content,
@@ -87,7 +77,7 @@ namespace krys::boo::inline_iterator
   TextBoxIterator TextBoxFor(const layout_integration::InlineContent &content, size_t boxIndex) noexcept
   {
     krys_debug_assert(content.DisplayContent().BoxList[boxIndex].IsTextOrSoftLineBreak());
-    return TextBoxIterator {BoxModernPath {content, boxIndex}};
+    return TextBoxIterator {InlineContentBoxPath {content, boxIndex}};
   }
 
   BoxRange<TextBoxIterator> TextBoxesFor(const RenderText &text) noexcept

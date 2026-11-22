@@ -32,7 +32,7 @@ namespace krys::boo::style::tests
       }
     };
 
-    constexpr css::NoConversionDataRequiredTag Token {};
+    constexpr css::NoConversionDataRequiredTag NoConversionData {};
   }
 
   TEST_CASE("Style Types: conversions through aggregates", "[Style][Types]")
@@ -41,26 +41,26 @@ namespace krys::boo::style::tests
     using StyleSize = css::SpaceSeparatedSize<Number<>>;
     STATIC_CHECK((SameType<StyleType<CSSSize>, StyleSize>));
 
-    auto size = ConvertToStyle(CSSSize {css::Number<> {1}, css::Number<> {2}}, Token);
+    auto size = ConvertToStyle(CSSSize {css::Number<> {1}, css::Number<> {2}}, NoConversionData);
     CHECK(size.Width() == Number<> {1});
     CHECK(size.Height() == Number<> {2});
 
-    auto present = ConvertToStyle(Maybe<css::Number<>> {css::Number<> {3}}, Token);
+    auto present = ConvertToStyle(Maybe<css::Number<>> {css::Number<> {3}}, NoConversionData);
     REQUIRE(present);
     CHECK(*present == Number<> {3});
-    CHECK_FALSE(ConvertToStyle(Maybe<css::Number<>> {}, Token));
+    CHECK_FALSE(ConvertToStyle(Maybe<css::Number<>> {}, NoConversionData));
 
     auto variant =
-      ConvertToStyle(Variant<css::Number<>, css::keywords::Auto> {css::keywords::Auto {}}, Token);
+      ConvertToStyle(Variant<css::Number<>, css::keywords::Auto> {css::keywords::Auto {}}, NoConversionData);
     CHECK(std::holds_alternative<css::keywords::Auto>(variant));
 
-    auto list =
-      ConvertToStyle(css::CommaSeparatedList<css::Number<>> {css::Number<> {1}, css::Number<> {2}}, Token);
+    auto list = ConvertToStyle(css::CommaSeparatedList<css::Number<>> {css::Number<> {1}, css::Number<> {2}},
+                               NoConversionData);
     REQUIRE(list.size() == 2);
     CHECK(list[1] == Number<> {2});
 
     // Non-converting types pass through.
-    CHECK(ConvertToStyle(css::keywords::Auto {}, Token) == css::keywords::Auto {});
+    CHECK(ConvertToStyle(css::keywords::Auto {}, NoConversionData) == css::keywords::Auto {});
   }
 
   TEST_CASE("Style Types: blending through aggregates", "[Style][Types]")

@@ -35,7 +35,6 @@
 #include "Krystal.Booey/Rendering/HitTesting/HitTestSource.hpp"
 #include "Krystal.Booey/Rendering/Iterators/RenderChildIterator.hpp"
 #include "Krystal.Booey/Rendering/Layers/RenderLayer.hpp"
-#include "Krystal.Booey/Rendering/Line/LegacyRootInlineBox.hpp"
 #include "Krystal.Booey/Rendering/RenderBlock.hpp"
 #include "Krystal.Booey/Rendering/RenderGeometryMap.hpp"
 #include "Krystal.Booey/Rendering/RenderLayoutState.hpp"
@@ -62,61 +61,6 @@ namespace krys::boo
 
   // Do not add any code in below destructor. Add it to willBeDestroyed() instead.
   RenderInline::~RenderInline() noexcept = default;
-
-  void RenderInline::WillBeDestroyed() noexcept
-  {
-    if (!RenderTreeBeingDestroyed())
-    {
-      if (auto *inlineBox = FirstLegacyInlineBox())
-      {
-        // We can't wait for RenderBoxModelObject::destroy to clear the selection,
-        // because by then we will have nuked the line boxes.
-        if (IsSelectionBorder())
-        {
-          GetDocument().Selection().SetNeedsSelectionUpdate();
-        }
-
-        // If line boxes are contained inside a root, that means we're an inline.
-        // In that case, we need to remove all the line boxes so that the parent
-        // lines aren't pointing to deleted children. If the first line box does
-        // not have a parent that means they are either already disconnected or
-        // root lines that can just be destroyed without disconnecting.
-        if (inlineBox->Parent())
-        {
-          for (auto *box = inlineBox; box; box = box->NextLineBox())
-          {
-            box->RemoveFromParent();
-          }
-        }
-      }
-      else if (auto *parent = Parent(); parent && parent->IsSVGRenderer())
-      {
-        parent->DirtyLineFromChangedChild();
-      }
-    }
-
-    _legacyLineBoxes.DeleteLineBoxes();
-
-    RenderBoxModelObject::WillBeDestroyed();
-  }
-
-  void RenderInline::DeleteLegacyLineBoxes() noexcept
-  {
-    _legacyLineBoxes.DeleteLineBoxes();
-  }
-
-  UniquePtr<LegacyInlineFlowBox> RenderInline::CreateInlineFlowBox() noexcept
-  {
-    return CreateUnique<LegacyInlineFlowBox>(*this);
-  }
-
-  LegacyInlineFlowBox *RenderInline::CreateAndAppendInlineFlowBox() noexcept
-  {
-    auto newFlowBox = CreateInlineFlowBox();
-    auto *flowBox = newFlowBox.get();
-    _legacyLineBoxes.AppendLineBox(krys::move(newFlowBox));
-    return flowBox;
-  }
 
   void RenderInline::UpdateFromStyle() noexcept
   {
@@ -324,15 +268,6 @@ namespace krys::boo
         }
         return inlineBoxRects;
       }
-      if (auto *curr = renderInline.FirstLegacyInlineBox())
-      {
-        List<RectF> rects;
-        for (; curr; curr = curr->NextLineBox())
-        {
-          rects.emplace_back(curr->TopLeft(), curr->Size());
-        }
-        return rects;
-      }
       return {RectF()};
     }
   }
@@ -393,12 +328,7 @@ namespace krys::boo
     // relative to the inline itself.
     auto inlinePosition = Layer()->StaticInlinePosition();
     auto blockPosition = Layer()->StaticBlockPosition();
-    if (auto *legacyInlineBox = FirstLegacyInlineBox())
-    {
-      inlinePosition = LayoutUnit::FromFloatRound(legacyInlineBox->LogicalLeft());
-      blockPosition = LayoutUnit(legacyInlineBox->LogicalTop());
-    }
-    else if (layout_integration::LineLayout::Containing(*this))
+    if (layout_integration::LineLayout::Containing(*this))
     {
       if (!LayoutBox())
       {
@@ -560,10 +490,6 @@ namespace krys::boo
     {
       return lineLayout->FirstInlineBoxRect(*this).Location();
     }
-    if (auto *inlineBox = FirstLegacyInlineBox())
-    {
-      return FlooredLayoutPoint(inlineBox->LocationIncludingFlipping());
-    }
     return {};
   }
 
@@ -595,38 +521,7 @@ namespace krys::boo
       return EnclosingRectI(layout->EnclosingBorderBoxRectFor(*this));
     }
 
-    krys_debug_assert(!FirstLegacyInlineBox()
-                      == !LastLegacyInlineBox()); // Either both are null or both exist.
-    RectI result;
-    if (FirstLegacyInlineBox() && LastLegacyInlineBox())
-    {
-      // Return the width of the minimal left side and the maximal right side.
-      float logicalLeftSide = 0;
-      float logicalRightSide = 0;
-      for (auto *curr = FirstLegacyInlineBox(); curr; curr = curr->NextLineBox())
-      {
-        if (curr == FirstLegacyInlineBox() || curr->LogicalLeft() < logicalLeftSide)
-        {
-          logicalLeftSide = curr->LogicalLeft();
-        }
-        if (curr == FirstLegacyInlineBox() || curr->LogicalRight() > logicalRightSide)
-        {
-          logicalRightSide = curr->LogicalRight();
-        }
-      }
-
-      bool isHorizontal = GetWritingMode().IsHorizontal();
-
-      float x = isHorizontal ? logicalLeftSide : FirstLegacyInlineBox()->X();
-      float y = isHorizontal ? FirstLegacyInlineBox()->Y() : logicalLeftSide;
-      float width =
-        isHorizontal ? logicalRightSide - logicalLeftSide : LastLegacyInlineBox()->LogicalBottom() - x;
-      float height =
-        isHorizontal ? LastLegacyInlineBox()->LogicalBottom() - y : logicalRightSide - logicalLeftSide;
-      result = EnclosingRectI(RectF(x, y, width, height));
-    }
-
-    return result;
+    return {};
   }
 
   LayoutRect RenderInline::LinesVisualOverflowBoundingBox() const noexcept
@@ -642,34 +537,7 @@ namespace krys::boo
       return layout->InkOverflowBoundingBoxRectFor(*this);
     }
 
-    if (!FirstLegacyInlineBox() || !LastLegacyInlineBox())
-    {
-      return {};
-    }
-
-    // Return the width of the minimal left side and the maximal right side.
-    LayoutUnit logicalLeftSide = LayoutUnit::Max();
-    LayoutUnit logicalRightSide = LayoutUnit::Min();
-    for (auto *curr = FirstLegacyInlineBox(); curr; curr = curr->NextLineBox())
-    {
-      logicalLeftSide = std::min(logicalLeftSide, curr->LogicalLeftVisualOverflow());
-      logicalRightSide = std::max(logicalRightSide, curr->LogicalRightVisualOverflow());
-    }
-
-    const LegacyRootInlineBox &firstRootBox = FirstLegacyInlineBox()->Root();
-    const LegacyRootInlineBox &lastRootBox = LastLegacyInlineBox()->Root();
-
-    LayoutUnit logicalTop = FirstLegacyInlineBox()->LogicalTopVisualOverflow(firstRootBox.LineTop());
-    LayoutUnit logicalWidth = logicalRightSide - logicalLeftSide;
-    LayoutUnit logicalHeight =
-      LastLegacyInlineBox()->LogicalBottomVisualOverflow(lastRootBox.LineBottom()) - logicalTop;
-
-    LayoutRect rect(logicalLeftSide, logicalTop, logicalWidth, logicalHeight);
-    if (!GetWritingMode().IsHorizontal())
-    {
-      rect = rect.TransposedRect();
-    }
-    return rect;
+    return {};
   }
 
 #pragma region Repaint
@@ -701,20 +569,7 @@ namespace krys::boo
                       || insideSelfPaintingInlineBox());
 #endif
 
-    auto knownEmpty = [&]
-    {
-      if (FirstLegacyInlineBox())
-      {
-        return false;
-      }
-      if (layout_integration::LineLayout::Containing(*this))
-      {
-        return false;
-      }
-      return true;
-    };
-
-    if (knownEmpty())
+    if (!layout_integration::LineLayout::Containing(*this))
     {
       return LayoutRect();
     }

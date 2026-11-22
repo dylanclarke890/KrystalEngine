@@ -42,8 +42,7 @@ namespace krys::boo::layout_integration
   {
     KRYS_NODISCARD inline float EndPaddingQuirkValue(const RenderBlockFlow &flow) noexcept
     {
-      // FIXME: It's the copy of the lets-adjust-overflow-for-the-caret behavior from
-      // LegacyLineLayout::addOverflowFromInlineChildren.
+      // FIXME: It's the copy of the lets-adjust-overflow-for-the-caret behavior from the legacy line layout.
       auto endPadding = flow.HasNonVisibleOverflow() ? flow.PaddingEnd() : 0_lu;
       if (!endPadding)
       {

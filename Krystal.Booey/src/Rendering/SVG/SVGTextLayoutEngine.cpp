@@ -315,7 +315,7 @@ namespace krys::boo
 
   SVGTextFragmentMap SVGTextLayoutEngine::FinishLayout() noexcept
   {
-    // After all text fragments are stored in their correpsonding SVGInlineTextBoxes, we can layout individual
+    // After all text fragments are stored in their corresponding SVG text boxes, we can layout individual
     // text chunks. Chunk layouting is only performed for line layout boxes, not for path layout, where it has
     // already been done.
     _chunkLayoutBuilder.LayoutTextChunks(_lineLayoutBoxes, _lineLayoutChunkStarts, _fragmentMap);

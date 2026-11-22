@@ -891,7 +891,9 @@ namespace krys::boo
     /// @brief Destroys the object, which must have been detached from the render tree.
     void Destroy() noexcept;
 
-    virtual void InsertedIntoTree() noexcept;
+    virtual void InsertedIntoTree() noexcept
+    {
+    }
 
     virtual void WillBeRemovedFromTree() noexcept;
 

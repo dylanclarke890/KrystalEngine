@@ -19,7 +19,6 @@
  */
 
 #include "Krystal.Booey/Rendering/SVG/SVGTextChunkBuilder.hpp"
-#include "Krystal.Booey/Rendering/SVG/SVGInlineTextBox.hpp"
 #include "Krystal.Booey/Rendering/SVG/SVGTextFragment.hpp"
 
 namespace krys::boo

@@ -52,7 +52,7 @@ namespace krys::boo::inline_iterator
 
   /// @brief A position in a block container's display boxes, with the traversals the box iterators are built
   /// on.
-  class BoxModernPath
+  class InlineContentBoxPath
   {
   private:
     WeakPtr<const layout_integration::InlineContent> _inlineContent;
@@ -60,15 +60,15 @@ namespace krys::boo::inline_iterator
 
   public:
     /// @brief An iterator at the end, with no content.
-    BoxModernPath() noexcept = default;
+    InlineContentBoxPath() noexcept = default;
 
-    explicit BoxModernPath(const layout_integration::InlineContent &inlineContent) noexcept
+    explicit InlineContentBoxPath(const layout_integration::InlineContent &inlineContent) noexcept
         : _inlineContent(CreateWeakPtr(&inlineContent))
     {
       SetAtEnd();
     }
 
-    BoxModernPath(const layout_integration::InlineContent &inlineContent, size_t startIndex) noexcept
+    InlineContentBoxPath(const layout_integration::InlineContent &inlineContent, size_t startIndex) noexcept
         : _inlineContent(CreateWeakPtr(&inlineContent)), _boxIndex(startIndex)
     {
     }
@@ -288,7 +288,7 @@ namespace krys::boo::inline_iterator
       }
     }
 
-    KRYS_NODISCARD BoxModernPath FirstLeafBoxForInlineBox() const noexcept
+    KRYS_NODISCARD InlineContentBoxPath FirstLeafBoxForInlineBox() const noexcept
     {
       krys_debug_assert(GetBox().IsInlineBox());
 
@@ -306,7 +306,7 @@ namespace krys::boo::inline_iterator
       return first;
     }
 
-    KRYS_NODISCARD BoxModernPath LastLeafBoxForInlineBox() const noexcept
+    KRYS_NODISCARD InlineContentBoxPath LastLeafBoxForInlineBox() const noexcept
     {
       krys_debug_assert(GetBox().IsInlineBox());
 
@@ -322,7 +322,7 @@ namespace krys::boo::inline_iterator
       return last;
     }
 
-    KRYS_NODISCARD BoxModernPath ParentInlineBox() const noexcept
+    KRYS_NODISCARD InlineContentBoxPath ParentInlineBox() const noexcept
     {
       krys_debug_assert(!AtEnd());
 
@@ -360,7 +360,8 @@ namespace krys::boo::inline_iterator
       return _inlineContent->SvgTextFragments(_boxIndex);
     }
 
-    KRYS_NODISCARD friend bool operator==(const BoxModernPath &a, const BoxModernPath &b) noexcept
+    KRYS_NODISCARD friend bool operator==(const InlineContentBoxPath &a,
+                                          const InlineContentBoxPath &b) noexcept
     {
       return a._inlineContent.get() == b._inlineContent.get() && a._boxIndex == b._boxIndex;
     }

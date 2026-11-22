@@ -197,10 +197,6 @@ namespace krys::boo
 
     static void DidAttachChild(RenderObject &child, RenderObject *beforeChild) noexcept;
 
-    virtual void DirtyLineFromChangedChild() noexcept
-    {
-    }
-
     void InsertedIntoTree() noexcept override;
 
     void WillBeRemovedFromTree() noexcept override;

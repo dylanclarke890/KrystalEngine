@@ -43,7 +43,6 @@
 #include "Krystal.Booey/Page/FrameViewLayoutContext.hpp"
 #include "Krystal.Booey/Rendering/HitTesting/HitTestSource.hpp"
 #include "Krystal.Booey/Rendering/Line/BreakablePositions.hpp"
-#include "Krystal.Booey/Rendering/Line/LegacyInlineTextBox.hpp"
 #include "Krystal.Booey/Rendering/Line/WordTrailingSpace.hpp"
 #include "Krystal.Booey/Rendering/MathML/MathVariant.hpp"
 #include "Krystal.Booey/Rendering/RenderBlockFlow.hpp"
@@ -1153,14 +1152,14 @@ namespace krys::boo
       return current - 1;
     }
 
-    text::CachedTextBreakIterator iterator(_text, {}, text::TextBreakIterator::CaretMode {}, null);
+    text::TextBreakIterator iterator(_text, text::TextBreakUnit::GraphemeCluster);
     auto preceding = iterator.Preceding(static_cast<uint32>(current));
     return preceding ? static_cast<int32>(*preceding) : current - 1;
   }
 
   int32 RenderText::PreviousOffsetForBackwardDeletion(int32 current) const noexcept
   {
-    text::CachedTextBreakIterator iterator(_text, {}, text::TextBreakIterator::DeleteMode {}, null);
+    text::TextBreakIterator iterator(_text, text::TextBreakUnit::GraphemeCluster);
     auto preceding = iterator.Preceding(static_cast<uint32>(current));
     return preceding ? static_cast<int32>(*preceding) : 0;
   }
@@ -1172,7 +1171,7 @@ namespace krys::boo
       return current + 1;
     }
 
-    text::CachedTextBreakIterator iterator(_text, {}, text::TextBreakIterator::CaretMode {}, null);
+    text::TextBreakIterator iterator(_text, text::TextBreakUnit::GraphemeCluster);
     auto following = iterator.Following(static_cast<uint32>(current));
     return following ? static_cast<int32>(*following) : current + 1;
   }
@@ -1576,7 +1575,7 @@ namespace krys::boo
     auto iteratorMode = layout::TextUtil::LineBreakIteratorMode(style.LineBreak());
     auto contentAnalysis = layout::TextUtil::GetContentAnalysis(style.WordBreak());
     text::CachedLineBreakIteratorFactory lineBreakIteratorFactory(
-      string, style.ComputedLocale().GetPlatform(), iteratorMode, contentAnalysis);
+      string, style.ComputedLocale().GetPlatform(), iteratorMode);
     bool needsWordSpacing = false;
     bool ignoringSpaces = false;
     bool isSpace = false;
@@ -1616,7 +1615,7 @@ namespace krys::boo
                     && style.AutoWrap();
     bool keepAllWords = style.WordBreak() == WordBreak::KeepAll;
     bool canUseLineBreakShortcut = iteratorMode == text::TextBreakLineBehavior::Default
-                                   && contentAnalysis == text::TextBreakIterator::ContentAnalysis::Mechanical;
+                                   && contentAnalysis == layout::TextUtil::ContentAnalysis::Mechanical;
 
     size_t i = 0;
     while (i < length)
@@ -1990,6 +1989,29 @@ namespace krys::boo
 
   namespace
   {
+    // Snaps a selection rect to whole pixels, keeping it within the box's logical right edge.
+    KRYS_NODISCARD LayoutRect SnappedSelectionRect(const LayoutRect &selectionRect, float logicalRight,
+                                                   WritingMode writingMode) noexcept
+    {
+      auto snappedSelectionRect = EnclosingRectI(selectionRect);
+      LayoutUnit logicalWidth {snappedSelectionRect.Width()};
+      if (static_cast<float>(snappedSelectionRect.X()) > logicalRight)
+      {
+        logicalWidth = 0_lu;
+      }
+      else if (static_cast<float>(snappedSelectionRect.MaxX()) > logicalRight)
+      {
+        logicalWidth = LayoutUnit {logicalRight - static_cast<float>(snappedSelectionRect.X())};
+      }
+
+      if (writingMode.IsHorizontal())
+      {
+        return {LayoutUnit {snappedSelectionRect.X()}, selectionRect.Y(), logicalWidth,
+                selectionRect.Height()};
+      }
+      return {selectionRect.Y(), LayoutUnit {snappedSelectionRect.X()}, selectionRect.Height(), logicalWidth};
+    }
+
     KRYS_NODISCARD LayoutRect SelectionRectForTextBox(const inline_iterator::TextBox &textBox,
                                                       uint32 rangeStart, uint32 rangeEnd) noexcept
     {

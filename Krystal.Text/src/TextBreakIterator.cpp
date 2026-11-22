@@ -1,30 +1,6 @@
-﻿/*
- * (C) 1999 Lars Knoll (knoll@kde.org)
- * Copyright (C) 2004-2023 Apple Inc. All rights reserved.
- * Copyright (C) 2007-2009 Torch Mobile, Inc.
- *
- * This library is free software; you can redistribute it and/or
- * modify it under the terms of the GNU Library General Public
- * License as published by the Free Software Foundation; either
- * version 2 of the License, or (at your option) any later version.
- *
- * This library is distributed in the hope that it will be useful,
- * but WITHOUT ANY WARRANTY; without even the implied warranty of
- * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU
- * Library General Public License for more details.
- *
- * You should have received a copy of the GNU Library General Public License
- * along with this library; see the file COPYING.LIB.  If not, write to
- * the Free Software Foundation, Inc., 51 Franklin Street, Fifth Floor,
- * Boston, MA 02110-1301, USA.
- */
-
-#include "Krystal.Text/TextBreakIterator.hpp"
+﻿#include "Krystal.Text/TextBreakIterator.hpp"
 #include "Krystal.Core/Assert.hpp"
-#include "Krystal.Core/Memory/NeverDestroyed.hpp"
-#include "Krystal.Core/Move.hpp"
 #include "Krystal.Core/Strings/Unicode.hpp"
-#include "Krystal.Core/Visitor.hpp"
 #include <algorithm>
 #include <unicode/ubrk.h>
 #include <unicode/uloc.h>
@@ -33,639 +9,395 @@
 
 namespace krys::text
 {
-  /// @brief Gives @p iterator the UTF-8 @p string. The iterator keeps a reference to the string's memory.
-  KRYS_NODISCARD static bool SetUTF8Text(UBreakIterator &iterator, utf8_stringview string) noexcept
+  namespace
   {
-    UErrorCode status = U_ZERO_ERROR;
-    UText text = UTEXT_INITIALIZER;
-    utext_openUTF8(&text, reinterpret_cast<const char *>(string.data()), static_cast<int64_t>(string.size()),
-                   &status);
-    if (U_FAILURE(status))
+    KRYS_NODISCARD UBreakIteratorType ToICU(TextBreakUnit unit) noexcept
     {
-      return false;
-    }
-
-    // The iterator makes a shallow clone of the text.
-    ubrk_setUText(&iterator, &text, &status);
-    utext_close(&text);
-    return U_SUCCESS(status);
-  }
-
-  // MARK: - TextBreakIteratorICU
-
-  TextBreakIteratorICU::TextBreakIteratorICU(utf8_stringview string, utf8_stringview priorContext, Mode mode,
-                                             const StringAtom &locale) noexcept
-  {
-    auto type =
-      SwitchOn(mode, [](LineMode) { return UBRK_LINE; }, [](CharacterMode) { return UBRK_CHARACTER; });
-
-    auto localeWithOptionalBreakKeyword = SwitchOn(
-      mode, [&locale](LineMode lineMode) { return MakeLocaleWithBreakKeyword(locale, lineMode.Behavior); },
-      [&locale](CharacterMode) { return locale; });
-
-    UErrorCode status = U_ZERO_ERROR;
-    utf8_string localeID {localeWithOptionalBreakKeyword.View()};
-    _iterator = ubrk_open(type, reinterpret_cast<const char *>(localeID.c_str()), nullptr, 0, &status);
-    if (!_iterator || U_FAILURE(status))
-    {
-      status = U_ZERO_ERROR;
-      // There's no reason for this to ever fail, unless there's an allocation failure.
-      _iterator = ubrk_open(type, "", nullptr, 0, &status);
-    }
-    krys_assert(_iterator);
-    krys_assert(U_SUCCESS(status));
-
-    SetText(string, priorContext);
-  }
-
-  TextBreakIteratorICU::TextBreakIteratorICU(TextBreakIteratorICU &&other) noexcept
-      : _iterator(std::exchange(other._iterator, nullptr)), _priorContextLength(other._priorContextLength),
-        _textWithPriorContext(krys::move(other._textWithPriorContext))
-  {
-  }
-
-  TextBreakIteratorICU &TextBreakIteratorICU::operator=(TextBreakIteratorICU &&other) noexcept
-  {
-    if (_iterator)
-    {
-      ubrk_close(_iterator);
-    }
-    _iterator = std::exchange(other._iterator, nullptr);
-    _priorContextLength = other._priorContextLength;
-    _textWithPriorContext = krys::move(other._textWithPriorContext);
-    return *this;
-  }
-
-  TextBreakIteratorICU::~TextBreakIteratorICU() noexcept
-  {
-    if (_iterator)
-    {
-      ubrk_close(_iterator); // FIXME: Use an RAII wrapper for this
-    }
-  }
-
-  void TextBreakIteratorICU::SetText(utf8_stringview string, utf8_stringview priorContext) noexcept
-  {
-    krys_debug_assert(_iterator);
-
-    // ICU iterates over UTF-8 text in place, so a prior context must be copied in front of the text.
-    auto text = string;
-    if (priorContext.empty())
-    {
-      _textWithPriorContext.clear();
-    }
-    else
-    {
-      _textWithPriorContext.assign(priorContext.begin(), priorContext.end());
-      _textWithPriorContext.insert(_textWithPriorContext.end(), string.begin(), string.end());
-      text = utf8_stringview {_textWithPriorContext.data(), _textWithPriorContext.size()};
-    }
-
-    if (SetUTF8Text(*_iterator, text))
-    {
-      _priorContextLength = static_cast<uint32>(priorContext.size());
-    }
-    else
-    {
-      krys_debug_assert_msg(false, "ICU couldn't take the text");
-      _priorContextLength = 0;
-    }
-  }
-
-  Maybe<uint32> TextBreakIteratorICU::Preceding(uint32 location) const noexcept
-  {
-    if (!location)
-    {
-      return null;
-    }
-    auto result = ubrk_preceding(_iterator, static_cast<int32>(location + _priorContextLength));
-    if (result == UBRK_DONE)
-    {
-      return null;
-    }
-    return std::max(static_cast<uint32>(result), _priorContextLength) - _priorContextLength;
-  }
-
-  Maybe<uint32> TextBreakIteratorICU::Following(uint32 location) const noexcept
-  {
-    auto result = ubrk_following(_iterator, static_cast<int32>(location + _priorContextLength));
-    if (result == UBRK_DONE)
-    {
-      return null;
-    }
-    return static_cast<uint32>(result) - _priorContextLength;
-  }
-
-  bool TextBreakIteratorICU::IsBoundary(uint32 location) const noexcept
-  {
-    return ubrk_isBoundary(_iterator, static_cast<int32>(location + _priorContextLength));
-  }
-
-  StringAtom TextBreakIteratorICU::MakeLocaleWithBreakKeyword(const StringAtom &locale,
-                                                              TextBreakLineBehavior behavior) noexcept
-  {
-    if (behavior == TextBreakLineBehavior::Default)
-    {
-      return locale;
-    }
-
-    // The uloc functions model locales as char*.
-    auto utf8Locale = locale.View();
-    if (utf8Locale.empty())
-    {
-      return locale;
-    }
-
-    const char *keywordValue = nullptr;
-    switch (behavior)
-    {
-      case TextBreakLineBehavior::Default:
-        // nullptr will cause any existing values to be removed.
-        krys_unreachable();
-        break;
-      case TextBreakLineBehavior::Loose:  keywordValue = "loose"; break;
-      case TextBreakLineBehavior::Normal: keywordValue = "normal"; break;
-      case TextBreakLineBehavior::Strict: keywordValue = "strict"; break;
-    }
-
-    List<char> scratchBuffer(utf8Locale.size() + 11, 0);
-    std::ranges::copy(utf8Locale, scratchBuffer.begin());
-
-    UErrorCode status = U_ZERO_ERROR;
-    int32 lengthNeeded = uloc_setKeywordValue("lb", keywordValue, scratchBuffer.data(),
-                                              static_cast<int32>(scratchBuffer.size()), &status);
-    if (status == U_BUFFER_OVERFLOW_ERROR || status == U_STRING_NOT_TERMINATED_WARNING)
-    {
-      scratchBuffer.resize(static_cast<size_t>(lengthNeeded) + 1);
-      std::fill(scratchBuffer.begin() + static_cast<ptrdiff_t>(utf8Locale.size()), scratchBuffer.end(), 0);
-      status = U_ZERO_ERROR;
-      int32 lengthNeeded2 = uloc_setKeywordValue("lb", keywordValue, scratchBuffer.data(),
-                                                 static_cast<int32>(scratchBuffer.size()), &status);
-      if (!U_SUCCESS(status) || lengthNeeded != lengthNeeded2)
+      switch (unit)
       {
-        return locale;
+        case TextBreakUnit::GraphemeCluster: return UBRK_CHARACTER;
+        case TextBreakUnit::Word:            return UBRK_WORD;
+        case TextBreakUnit::Sentence:        return UBRK_SENTENCE;
+        case TextBreakUnit::Line:            return UBRK_LINE;
       }
+      krys_unreachable();
     }
-    else if (!U_SUCCESS(status))
+
+    // The ICU locale for line breaking with @p behavior: the locale with its `lb` keyword set. A locale is
+    // needed for the keyword to apply.
+    KRYS_NODISCARD utf8_string LocaleId(const StringAtom &locale, TextBreakUnit unit,
+                                        TextBreakLineBehavior behavior) noexcept
     {
-      return locale;
-    }
-    return StringAtom {utf8_stringview {reinterpret_cast<const char8 *>(scratchBuffer.data()),
-                                        static_cast<size_t>(lengthNeeded)}};
-  }
-
-  // MARK: - TextBreakIterator
-
-  TextBreakIteratorICU TextBreakIterator::MapModeToBackingIterator(utf8_stringview string,
-                                                                   utf8_stringview priorContext, Mode mode,
-                                                                   ContentAnalysis,
-                                                                   const StringAtom &locale) noexcept
-  {
-    return SwitchOn(
-      mode,
-      [&](TextBreakIterator::LineMode lineMode)
+      auto id = utf8_string {locale.View()};
+      if (unit != TextBreakUnit::Line || behavior == TextBreakLineBehavior::Default || id.empty())
       {
-        return TextBreakIteratorICU(string, priorContext, TextBreakIteratorICU::LineMode {lineMode.Behavior},
-                                    locale);
-      },
-      [&](TextBreakIterator::CaretMode)
-      { return TextBreakIteratorICU(string, priorContext, TextBreakIteratorICU::CharacterMode {}, locale); },
-      [&](TextBreakIterator::DeleteMode)
-      { return TextBreakIteratorICU(string, priorContext, TextBreakIteratorICU::CharacterMode {}, locale); },
-      [&](TextBreakIterator::CharacterMode)
-      { return TextBreakIteratorICU(string, priorContext, TextBreakIteratorICU::CharacterMode {}, locale); });
-  }
+        return id;
+      }
 
-  TextBreakIterator::TextBreakIterator(utf8_stringview string, utf8_stringview priorContext, Mode mode,
-                                       ContentAnalysis contentAnalysis, const StringAtom &locale) noexcept
-      : _backing(MapModeToBackingIterator(string, priorContext, mode, contentAnalysis, locale)), _mode(mode),
-        _locale(locale)
-  {
-  }
-
-  // MARK: - TextBreakIteratorCache
-
-  TextBreakIteratorCache &TextBreakIteratorCache::Singleton() noexcept
-  {
-    static MainThreadNeverDestroyed<TextBreakIteratorCache> cache;
-    return cache;
-  }
-
-  TextBreakIterator TextBreakIteratorCache::Take(utf8_stringview string, utf8_stringview priorContext,
-                                                 TextBreakIterator::Mode mode,
-                                                 TextBreakIterator::ContentAnalysis contentAnalysis,
-                                                 const StringAtom &locale) noexcept
-  {
-    auto iter = std::ranges::find_if(_unused,
-                                     [&](TextBreakIterator &candidate)
-                                     {
-                                       return candidate.GetMode() == mode
-                                              && candidate.GetContentAnalysis() == contentAnalysis
-                                              && candidate.GetLocale() == locale;
-                                     });
-    if (iter == _unused.end())
-    {
-      return TextBreakIterator(string, priorContext, mode, contentAnalysis, locale);
+      const char *value = behavior == TextBreakLineBehavior::Loose    ? "loose"
+                          : behavior == TextBreakLineBehavior::Normal ? "normal"
+                                                                      : "strict";
+      Array<char, ULOC_FULLNAME_CAPACITY> buffer {};
+      if (id.size() >= buffer.size())
+      {
+        return id;
+      }
+      std::ranges::copy(id, buffer.begin());
+      UErrorCode status = U_ZERO_ERROR;
+      auto length =
+        uloc_setKeywordValue("lb", value, buffer.data(), static_cast<int32>(buffer.size()), &status);
+      if (U_FAILURE(status) || status == U_STRING_NOT_TERMINATED_WARNING)
+      {
+        return id;
+      }
+      return utf8_string {reinterpret_cast<const char8 *>(buffer.data()), static_cast<size_t>(length)};
     }
-    auto result = krys::move(*iter);
-    _unused.erase(iter);
-    result.SetText(string, priorContext);
-    return result;
+
+    // Released ICU iterators, for reuse: opening one loads its rules, which is slow.
+    class IteratorPool
+    {
+      KRYS_NON_COPY_MOVABLE(IteratorPool);
+
+    private:
+      struct Entry
+      {
+        UBreakIterator *Iterator;
+        TextBreakUnit Unit;
+        utf8_string LocaleId;
+      };
+
+      constexpr static size_t Capacity = 4;
+
+      List<Entry> _entries;
+
+    public:
+      IteratorPool() noexcept = default;
+
+      ~IteratorPool() noexcept
+      {
+        for (auto &entry : _entries)
+        {
+          ubrk_close(entry.Iterator);
+        }
+      }
+
+      KRYS_NODISCARD static IteratorPool &Current() noexcept
+      {
+        thread_local IteratorPool pool;
+        return pool;
+      }
+
+      KRYS_NODISCARD UBreakIterator *Take(TextBreakUnit unit, const utf8_string &localeId) noexcept
+      {
+        auto entry =
+          std::ranges::find_if(_entries, [&](const Entry &candidate)
+                               { return candidate.Unit == unit && candidate.LocaleId == localeId; });
+        if (entry != _entries.end())
+        {
+          auto *iterator = entry->Iterator;
+          _entries.erase(entry);
+          return iterator;
+        }
+
+        UErrorCode status = U_ZERO_ERROR;
+        auto *iterator =
+          ubrk_open(ToICU(unit), reinterpret_cast<const char *>(localeId.c_str()), nullptr, 0, &status);
+        if (U_FAILURE(status) && !localeId.empty())
+        {
+          // An unknown locale falls back to the root rules.
+          status = U_ZERO_ERROR;
+          iterator = ubrk_open(ToICU(unit), "", nullptr, 0, &status);
+        }
+        krys_debug_assert_msg(U_SUCCESS(status), "ICU couldn't open a break iterator");
+        return U_SUCCESS(status) ? iterator : nullptr;
+      }
+
+      void Put(UBreakIterator *iterator, TextBreakUnit unit, utf8_string localeId) noexcept
+      {
+        if (_entries.size() == Capacity)
+        {
+          ubrk_close(_entries.front().Iterator);
+          _entries.erase(_entries.begin());
+        }
+        _entries.push_back({iterator, unit, krys::move(localeId)});
+      }
+    };
   }
 
-  void TextBreakIteratorCache::Put(TextBreakIterator &&iterator) noexcept
+#pragma region TextBreakIterator
+
+  TextBreakIterator::TextBreakIterator(utf8_stringview text, TextBreakUnit unit, const StringAtom &locale,
+                                       TextBreakLineBehavior lineBehavior,
+                                       utf8_stringview priorContext) noexcept
+      : _unit(unit), _localeId(LocaleId(locale, unit, lineBehavior))
   {
-    _unused.push_back(krys::move(iterator));
-    if (_unused.size() > Capacity)
+    _iterator = IteratorPool::Current().Take(_unit, _localeId);
+    if (_iterator)
     {
-      _unused.erase(_unused.begin());
+      SetText(text, priorContext);
     }
   }
 
-  // MARK: - CachedTextBreakIterator
-
-  CachedTextBreakIterator::CachedTextBreakIterator(
-    utf8_stringview string, utf8_stringview priorContext, TextBreakIterator::Mode mode,
-    const StringAtom &locale, TextBreakIterator::ContentAnalysis contentAnalysis) noexcept
-      : _backing(
-          TextBreakIteratorCache::Singleton().Take(string, priorContext, mode, contentAnalysis, locale))
+  TextBreakIterator::TextBreakIterator(TextBreakIterator &&other) noexcept
+      : _iterator(std::exchange(other._iterator, nullptr)), _unit(other._unit),
+        _localeId(krys::move(other._localeId)),
+        _textWithPriorContext(krys::move(other._textWithPriorContext)),
+        _priorContextLength(other._priorContextLength)
   {
   }
 
-  CachedTextBreakIterator::~CachedTextBreakIterator() noexcept
-  {
-    if (_backing)
-    {
-      TextBreakIteratorCache::Singleton().Put(krys::move(*_backing));
-    }
-  }
-
-  CachedTextBreakIterator::CachedTextBreakIterator(CachedTextBreakIterator &&other) noexcept
-      : _backing(std::exchange(other._backing, null))
-  {
-  }
-
-  CachedTextBreakIterator &CachedTextBreakIterator::operator=(CachedTextBreakIterator &&other) noexcept
+  TextBreakIterator &TextBreakIterator::operator=(TextBreakIterator &&other) noexcept
   {
     if (this != &other)
     {
-      if (_backing)
-      {
-        TextBreakIteratorCache::Singleton().Put(krys::move(*_backing));
-      }
-      _backing = std::exchange(other._backing, null);
+      Release();
+      _iterator = std::exchange(other._iterator, nullptr);
+      _unit = other._unit;
+      _localeId = krys::move(other._localeId);
+      // A list keeps its characters in place when it moves, so ICU's pointer into them stays valid.
+      _textWithPriorContext = krys::move(other._textWithPriorContext);
+      _priorContextLength = other._priorContextLength;
     }
     return *this;
   }
 
-  // MARK: - Static iterators
-
-  KRYS_NODISCARD static UBreakIterator *
-    InitializeIterator(UBreakIteratorType type, const char *locale = CurrentTextBreakLocaleID()) noexcept
+  TextBreakIterator::~TextBreakIterator() noexcept
   {
-    UErrorCode openStatus = U_ZERO_ERROR;
-    UBreakIterator *iterator = ubrk_open(type, locale, nullptr, 0, &openStatus);
-    krys_debug_assert_msg(U_SUCCESS(openStatus), "ICU could not open a break iterator");
-    return iterator;
+    Release();
   }
 
-  KRYS_NODISCARD static UBreakIterator *SetTextForIterator(UBreakIterator &iterator,
-                                                           utf8_stringview string) noexcept
+  void TextBreakIterator::Release() noexcept
   {
-    if (!SetUTF8Text(iterator, string))
+    if (auto *iterator = std::exchange(_iterator, nullptr))
     {
-      return nullptr;
+      IteratorPool::Current().Put(iterator, _unit, krys::move(_localeId));
     }
-    return &iterator;
   }
 
-  BreakIteratorView WordBreakIterator(utf8_stringview string) noexcept
+  void TextBreakIterator::SetText(utf8_stringview text, utf8_stringview priorContext) noexcept
   {
-    static UBreakIterator *staticWordBreakIterator = InitializeIterator(UBRK_WORD);
-    if (!staticWordBreakIterator)
+    // ICU reads UTF-8 in place, so a prior context needs a copy of the text after it.
+    auto iterated = text;
+    _textWithPriorContext.clear();
+    if (!priorContext.empty())
     {
-      return {};
+      _textWithPriorContext.reserve(priorContext.size() + text.size());
+      _textWithPriorContext.insert(_textWithPriorContext.end(), priorContext.begin(), priorContext.end());
+      _textWithPriorContext.insert(_textWithPriorContext.end(), text.begin(), text.end());
+      iterated = {_textWithPriorContext.data(), _textWithPriorContext.size()};
     }
+    _priorContextLength = static_cast<uint32>(priorContext.size());
 
-    return BreakIteratorView(SetTextForIterator(*staticWordBreakIterator, string));
+    UErrorCode status = U_ZERO_ERROR;
+    UText utext = UTEXT_INITIALIZER;
+    utext_openUTF8(&utext, reinterpret_cast<const char *>(iterated.data()),
+                   static_cast<int64_t>(iterated.size()), &status);
+    // The iterator keeps a shallow clone of the UText, which refers to the characters.
+    ubrk_setUText(_iterator, &utext, &status);
+    utext_close(&utext);
+    krys_debug_assert_msg(U_SUCCESS(status), "ICU couldn't take the text");
   }
 
-  BreakIteratorView SentenceBreakIterator(utf8_stringview string) noexcept
+  Maybe<uint32> TextBreakIterator::FromICU(int32 index) const noexcept
   {
-    static UBreakIterator *staticSentenceBreakIterator = InitializeIterator(UBRK_SENTENCE);
-    if (!staticSentenceBreakIterator)
-    {
-      return {};
-    }
-
-    return BreakIteratorView(SetTextForIterator(*staticSentenceBreakIterator, string));
-  }
-
-  // MARK: - BreakIteratorView
-
-  KRYS_NODISCARD static Maybe<uint32> BoundaryOrNull(int32 boundary) noexcept
-  {
-    if (boundary == UBRK_DONE)
+    if (index == UBRK_DONE)
     {
       return null;
     }
-    return static_cast<uint32>(boundary);
+    return static_cast<uint32>(std::max(index, static_cast<int32>(_priorContextLength)))
+           - _priorContextLength;
   }
 
-  uint32 BreakIteratorView::First() const noexcept
+  uint32 TextBreakIterator::First() const noexcept
   {
-    return static_cast<uint32>(ubrk_first(_iterator));
+    if (!_priorContextLength)
+    {
+      return static_cast<uint32>(ubrk_first(_iterator));
+    }
+    std::ignore = ubrk_isBoundary(_iterator, static_cast<int32>(_priorContextLength));
+    return Current();
   }
 
-  uint32 BreakIteratorView::Last() const noexcept
+  uint32 TextBreakIterator::Last() const noexcept
   {
-    return static_cast<uint32>(ubrk_last(_iterator));
+    return FromICU(ubrk_last(_iterator)).value_or(0);
   }
 
-  Maybe<uint32> BreakIteratorView::Next() const noexcept
+  Maybe<uint32> TextBreakIterator::Next() const noexcept
   {
-    return BoundaryOrNull(ubrk_next(_iterator));
+    return FromICU(ubrk_next(_iterator));
   }
 
-  Maybe<uint32> BreakIteratorView::Previous() const noexcept
+  Maybe<uint32> TextBreakIterator::Previous() const noexcept
   {
-    return BoundaryOrNull(ubrk_previous(_iterator));
+    auto index = ubrk_previous(_iterator);
+    if (index != UBRK_DONE && index < static_cast<int32>(_priorContextLength))
+    {
+      return null;
+    }
+    return FromICU(index);
   }
 
-  Maybe<uint32> BreakIteratorView::Following(uint32 offset) const noexcept
+  Maybe<uint32> TextBreakIterator::Following(uint32 offset) const noexcept
   {
-    return BoundaryOrNull(ubrk_following(_iterator, static_cast<int32>(offset)));
+    // Unsigned arithmetic, so an offset of -1 lands in the prior context.
+    return FromICU(ubrk_following(_iterator, static_cast<int32>(offset + _priorContextLength)));
   }
 
-  Maybe<uint32> BreakIteratorView::Preceding(uint32 offset) const noexcept
+  Maybe<uint32> TextBreakIterator::Preceding(uint32 offset) const noexcept
   {
-    return BoundaryOrNull(ubrk_preceding(_iterator, static_cast<int32>(offset)));
+    if (!offset)
+    {
+      return null;
+    }
+    return FromICU(ubrk_preceding(_iterator, static_cast<int32>(offset + _priorContextLength)));
   }
 
-  bool BreakIteratorView::IsBoundary(uint32 offset) const noexcept
+  bool TextBreakIterator::IsBoundary(uint32 offset) const noexcept
   {
-    return ubrk_isBoundary(_iterator, static_cast<int32>(offset));
+    return ubrk_isBoundary(_iterator, static_cast<int32>(offset + _priorContextLength));
   }
 
-  uint32 BreakIteratorView::Current() const noexcept
+  uint32 TextBreakIterator::Current() const noexcept
   {
-    return static_cast<uint32>(ubrk_current(_iterator));
+    return FromICU(ubrk_current(_iterator)).value_or(0);
   }
 
-  bool BreakIteratorView::IsWordBreak() const noexcept
+  bool TextBreakIterator::IsWordBreak() const noexcept
   {
     return ubrk_getRuleStatus(_iterator) != UBRK_WORD_NONE;
   }
 
-  // MARK: - CachedLineBreakIteratorFactory
-
-  void CachedLineBreakIteratorFactory::PriorContext::Set(Array<char32, Length> &&newPriorContext) noexcept
+  TextBreakIterator WordBreakIterator(utf8_stringview text) noexcept
   {
-    _priorContext = krys::move(newPriorContext);
+    return TextBreakIterator {text, TextBreakUnit::Word};
+  }
+
+  TextBreakIterator SentenceBreakIterator(utf8_stringview text) noexcept
+  {
+    return TextBreakIterator {text, TextBreakUnit::Sentence};
+  }
+
+#pragma endregion
+
+#pragma region CachedLineBreakIteratorFactory
+
+  void CachedLineBreakIteratorFactory::PriorContext::Set(Array<char32, Length> codePoints) noexcept
+  {
+    _codePoints = codePoints;
     Encode();
   }
 
   void CachedLineBreakIteratorFactory::PriorContext::Update(char32 last) noexcept
   {
-    for (size_t i = 0; i < _priorContext.size() - 1; ++i)
-    {
-      _priorContext[i] = _priorContext[i + 1];
-    }
-    _priorContext[_priorContext.size() - 1] = last;
+    std::shift_left(_codePoints.begin(), _codePoints.end(), 1);
+    _codePoints.back() = last;
     Encode();
   }
 
   void CachedLineBreakIteratorFactory::PriorContext::Reset() noexcept
   {
-    std::ranges::fill(_priorContext, 0);
+    _codePoints = {};
     Encode();
   }
 
   uint32 CachedLineBreakIteratorFactory::PriorContext::GetLength() const noexcept
   {
-    uint32 result = 0;
-    for (auto iterator = std::rbegin(_priorContext); iterator != std::rend(_priorContext) && *iterator;
-         ++iterator)
-    {
-      ++result;
-    }
-    return result;
+    // The code points are right-aligned, after any zeros.
+    auto firstUsed = std::ranges::find_if(_codePoints, [](char32 codePoint) { return codePoint != 0; });
+    return static_cast<uint32>(_codePoints.end() - firstUsed);
   }
 
   void CachedLineBreakIteratorFactory::PriorContext::Encode() noexcept
   {
-    // Encode the last code points, then move them to the end of the buffer, so that the encoding starts at a
-    // different address when its length changes.
-    Array<char8, Length * 4> encoded {};
-    int32 offset = 0;
-    auto length = GetLength();
-    for (auto i = _priorContext.size() - length; i < _priorContext.size(); ++i)
+    _encodedLength = 0;
+    for (auto index = Length - GetLength(); index < Length; ++index)
     {
-      offset += EncodeUTF8(
-        _priorContext[i], Span<char8, MaxUTF8SequenceLength>(encoded.data() + offset, MaxUTF8SequenceLength));
+      _encodedLength += static_cast<uint32>(
+        EncodeUTF8(_codePoints[index], Span<char8, MaxUTF8SequenceLength>(_encoded.data() + _encodedLength,
+                                                                          MaxUTF8SequenceLength)));
     }
-    _encodedLength = static_cast<uint32>(offset);
-    std::ranges::fill(_encoded, 0);
-    std::copy_n(encoded.begin(), offset, _encoded.end() - offset);
   }
 
-  CachedTextBreakIterator &CachedLineBreakIteratorFactory::operator*() noexcept
+  TextBreakIterator &CachedLineBreakIteratorFactory::operator*() noexcept
   {
-    auto priorContext = _priorContext.Characters();
-    if (!_iterator)
+    if (!_iterator || _iteratorPriorContext != _priorContext)
     {
-      _iterator.emplace(_stringView, priorContext, TextBreakIterator::LineMode {_mode}, _locale,
-                        _contentAnalysis);
-      _cachedPriorContext = priorContext.data();
-    }
-    else if (priorContext.data() != _cachedPriorContext)
-    {
-      ResetStringAndReleaseIterator(_stringView, _locale, _mode, _contentAnalysis);
-      return **this;
+      _iterator.emplace(_string, TextBreakUnit::Line, _locale, _mode, _priorContext.Characters());
+      _iteratorPriorContext = _priorContext;
     }
     return *_iterator;
   }
 
-  void CachedLineBreakIteratorFactory::ResetStringAndReleaseIterator(
-    utf8_stringview stringView, const StringAtom &locale, TextBreakLineBehavior mode,
-    TextBreakIterator::ContentAnalysis contentAnalysis) noexcept
+#pragma endregion
+
+#pragma region Grapheme clusters
+
+  namespace
   {
-    _stringView = stringView;
-    _locale = locale;
-    _iterator = null;
-    _cachedPriorContext = nullptr;
-    _mode = mode;
-    _contentAnalysis = contentAnalysis;
-  }
-
-  // MARK: - Non-shared iterators
-
-  static UBreakIterator *nonSharedCharacterBreakIterator = nullptr;
-
-  KRYS_NODISCARD static UBreakIterator *GetNonSharedCharacterBreakIterator() noexcept
-  {
-    if (auto *result = std::exchange(nonSharedCharacterBreakIterator, nullptr))
+    KRYS_NODISCARD bool IsASCII(utf8_stringview text) noexcept
     {
-      return result;
+      return std::ranges::all_of(text, [](char8 c) { return c < 0x80; });
     }
-    return InitializeIterator(UBRK_CHARACTER);
-  }
 
-  static void CacheNonSharedCharacterBreakIterator(UBreakIterator *cacheMe) noexcept
-  {
-    if (auto *old = std::exchange(nonSharedCharacterBreakIterator, cacheMe))
+    KRYS_NODISCARD bool IsCRLF(utf8_stringview text, size_t index) noexcept
     {
-      ubrk_close(old);
+      return text[index] == u8'\r' && index + 1 < text.size() && text[index + 1] == u8'\n';
     }
   }
 
-  NonSharedCharacterBreakIterator::NonSharedCharacterBreakIterator(utf8_stringview string) noexcept
+  uint32 NumGraphemeClusters(utf8_stringview text) noexcept
   {
-    if ((_iterator = GetNonSharedCharacterBreakIterator()))
+    // In ASCII, every character is a cluster except for CRLF, which is one cluster of two.
+    if (IsASCII(text))
     {
-      _iterator = SetTextForIterator(*_iterator, string);
-    }
-  }
-
-  NonSharedCharacterBreakIterator::~NonSharedCharacterBreakIterator() noexcept
-  {
-    if (_iterator)
-    {
-      CacheNonSharedCharacterBreakIterator(_iterator);
-    }
-  }
-
-  NonSharedCharacterBreakIterator::NonSharedCharacterBreakIterator(
-    NonSharedCharacterBreakIterator &&other) noexcept
-
-  {
-    std::swap(_iterator, other._iterator);
-  }
-
-  static UBreakIterator *nonSharedSentenceBreakIterator = nullptr;
-
-  KRYS_NODISCARD static UBreakIterator *GetNonSharedSentenceBreakIterator() noexcept
-  {
-    if (auto *result = std::exchange(nonSharedSentenceBreakIterator, nullptr))
-    {
-      return result;
-    }
-    return InitializeIterator(UBRK_SENTENCE);
-  }
-
-  static void CacheNonSharedSentenceBreakIterator(UBreakIterator *cacheMe) noexcept
-  {
-    if (auto *old = std::exchange(nonSharedSentenceBreakIterator, cacheMe))
-    {
-      ubrk_close(old);
-    }
-  }
-
-  NonSharedSentenceBreakIterator::NonSharedSentenceBreakIterator(utf8_stringview string) noexcept
-  {
-    if ((_iterator = GetNonSharedSentenceBreakIterator()))
-    {
-      _iterator = SetTextForIterator(*_iterator, string);
-    }
-  }
-
-  NonSharedSentenceBreakIterator::~NonSharedSentenceBreakIterator() noexcept
-  {
-    if (_iterator)
-    {
-      CacheNonSharedSentenceBreakIterator(_iterator);
-    }
-  }
-
-  NonSharedSentenceBreakIterator::NonSharedSentenceBreakIterator(
-    NonSharedSentenceBreakIterator &&other) noexcept
-
-  {
-    std::swap(_iterator, other._iterator);
-  }
-
-  // MARK: - Grapheme clusters
-
-  KRYS_NODISCARD static bool IsASCII(utf8_stringview string) noexcept
-  {
-    return std::ranges::all_of(string, [](char8 c) { return c < 0x80; });
-  }
-
-  uint32 NumGraphemeClusters(utf8_stringview string) noexcept
-  {
-    auto stringLength = static_cast<uint32>(string.size());
-
-    if (!stringLength)
-    {
-      return 0;
-    }
-
-    // The only ASCII extended grapheme cluster is CRLF.
-    if (IsASCII(string))
-    {
-      uint32 numCRLF = 0;
-      for (uint32 i = 1; i < stringLength; ++i)
+      uint32 count = 0;
+      for (size_t index = 0; index < text.size(); index += IsCRLF(text, index) ? 2 : 1)
       {
-        numCRLF += string[i - 1] == u8'\r' && string[i] == u8'\n';
+        ++count;
       }
-      return stringLength - numCRLF;
+      return count;
     }
 
-    NonSharedCharacterBreakIterator iterator {string};
-    if (!iterator)
+    TextBreakIterator clusters {text, TextBreakUnit::GraphemeCluster};
+    if (!clusters)
     {
-      krys_debug_assert_msg(false, "ICU couldn't make a character break iterator");
-      return stringLength;
+      return static_cast<uint32>(text.size());
     }
-
-    uint32 numGraphemeClusters = 0;
-    while (iterator.Next())
+    uint32 count = 0;
+    while (clusters.Next())
     {
-      ++numGraphemeClusters;
+      ++count;
     }
-    return numGraphemeClusters;
+    return count;
   }
 
-  uint32 NumCodeUnitsInGraphemeClusters(utf8_stringview string, uint32 numGraphemeClusters) noexcept
+  uint32 NumCodeUnitsInGraphemeClusters(utf8_stringview text, uint32 count) noexcept
   {
-    auto stringLength = static_cast<uint32>(string.size());
-
-    if (stringLength <= numGraphemeClusters)
+    if (IsASCII(text))
     {
-      return stringLength;
-    }
-
-    // The only ASCII extended grapheme cluster is CRLF.
-    if (IsASCII(string))
-    {
-      uint32 i = 0;
-      uint32 j = 0;
-      for (; i < numGraphemeClusters && j + 1 < stringLength; ++i, ++j)
+      size_t index = 0;
+      for (uint32 cluster = 0; cluster < count && index < text.size(); ++cluster)
       {
-        j += string[j] == u8'\r' && string[j + 1] == u8'\n';
+        index += IsCRLF(text, index) ? 2 : 1;
       }
-      return j + (i < numGraphemeClusters);
+      return static_cast<uint32>(index);
     }
 
-    NonSharedCharacterBreakIterator iterator {string};
-    if (!iterator)
+    TextBreakIterator clusters {text, TextBreakUnit::GraphemeCluster};
+    if (!clusters)
     {
-      krys_debug_assert_msg(false, "ICU couldn't make a character break iterator");
-      return stringLength;
+      return static_cast<uint32>(text.size());
     }
-
-    for (uint32 i = 0; i < numGraphemeClusters; ++i)
+    for (uint32 cluster = 0; cluster < count; ++cluster)
     {
-      if (!iterator.Next())
+      if (!clusters.Next())
       {
-        return stringLength;
+        return static_cast<uint32>(text.size());
       }
     }
-    return iterator.Current();
+    return clusters.Current();
   }
 
-  const char *CurrentTextBreakLocaleID() noexcept
-  {
-    return uloc_getDefault();
-  }
+#pragma endregion
 }
