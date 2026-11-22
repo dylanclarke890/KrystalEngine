@@ -32,6 +32,7 @@
 #include "Krystal.Booey/CSS/Properties/PropertyParserState.hpp"
 #include "Krystal.Booey/CSS/Properties/PropertyParsing.hpp"
 #include "Krystal.Booey/CSS/Values/PrimitiveValue.hpp"
+#include "Krystal.Booey/CSS/Values/ToLengthConversionData.hpp"
 #include "Krystal.Booey/CSS/Values/ValueList.hpp"
 #include "Krystal.Booey/CSS/Values/ValuePair.hpp"
 
@@ -219,7 +220,8 @@ namespace krys::boo::css::parse_property
         // If the lower bound of any range is higher than the upper bound, the entire descriptor is invalid
         // and must be ignored.
         if (lowerBound->IsInteger() && upperBound->IsInteger()
-            && lowerBound->ResolveAsIntegerDeprecated() > upperBound->ResolveAsIntegerDeprecated())
+            && lowerBound->ResolveAsInteger(css::ToLengthConversionData::WithoutElement())
+                 > upperBound->ResolveAsInteger(css::ToLengthConversionData::WithoutElement()))
         {
           return nullptr;
         }
@@ -267,7 +269,7 @@ namespace krys::boo::css::parse_property
         }
 
         // Additive tuples must be specified in order of strictly descending weight.
-        auto weight = integer->ResolveAsIntegerDeprecated();
+        auto weight = integer->ResolveAsInteger(css::ToLengthConversionData::WithoutElement());
         if (lastWeight && !(weight < lastWeight))
         {
           return nullptr;

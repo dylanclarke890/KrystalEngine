@@ -33,6 +33,7 @@
 #include "Krystal.Booey/CSS/Values/FontStyleRangeValue.hpp"
 #include "Krystal.Booey/CSS/Values/PrimitiveValue.hpp"
 #include "Krystal.Booey/CSS/Values/PrimitiveValueMappings.hpp"
+#include "Krystal.Booey/CSS/Values/ToLengthConversionData.hpp"
 #include "Krystal.Booey/CSS/Values/UnicodeRangeValue.hpp"
 #include "Krystal.Booey/CSS/Values/ValueList.hpp"
 #include "Krystal.Booey/DOM/Nodes/Document.hpp"
@@ -304,7 +305,8 @@ namespace krys::boo::css
         const auto &feature = Downcast<FontFeatureValue>(rangeValue);
         if (const auto *primitiveValue = DynamicDowncast<PrimitiveValue>(feature.GetValue()))
         {
-          settings.insert({feature.Tag(), primitiveValue->ResolveAsIntegerDeprecated<int>()});
+          settings.insert({feature.Tag(), primitiveValue->ResolveAsInteger<int>(
+                                            css::ToLengthConversionData::WithoutElement())});
         }
       }
     }
@@ -324,7 +326,8 @@ namespace krys::boo::css
     MutableProperties().SetProperty(PropertyId::SizeAdjust, ShareRef(value));
 
     const auto &sizeAdjustValue = Downcast<PrimitiveValue>(value);
-    auto sizeAdjust = sizeAdjustValue.ResolveAsPercentageDeprecated<float>() / 100;
+    auto sizeAdjust =
+      sizeAdjustValue.ResolveAsPercentage<float>(css::ToLengthConversionData::WithoutElement()) / 100;
 
     if (_sizeAdjust == sizeAdjust)
     {

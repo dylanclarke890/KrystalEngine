@@ -329,13 +329,6 @@ namespace krys::boo::css
     }
 
     template <typename T = int64>
-    KRYS_NODISCARD T ResolveAsIntegerDeprecated() const noexcept
-    {
-      krys_debug_assert(IsInteger());
-      return ValueDeprecated<T>();
-    }
-
-    template <typename T = int64>
     KRYS_NODISCARD Maybe<T> ResolveAsIntegerIfNotCalculated() const noexcept
     {
       krys_debug_assert(IsInteger());
@@ -351,13 +344,6 @@ namespace krys::boo::css
     {
       krys_debug_assert(IsNumberOrInteger());
       return Value<T>(UnitType::Number, conversionData);
-    }
-
-    template <typename T = double>
-    KRYS_NODISCARD T ResolveAsNumberDeprecated() const noexcept
-    {
-      krys_debug_assert(IsNumberOrInteger());
-      return ValueDeprecated<T>(UnitType::Number);
     }
 
     template <typename T = double>
@@ -383,13 +369,6 @@ namespace krys::boo::css
     {
       krys_debug_assert(IsPercentage());
       return ValueNoConversionDataRequired<T>();
-    }
-
-    template <typename T = double>
-    KRYS_NODISCARD T ResolveAsPercentageDeprecated() const noexcept
-    {
-      krys_debug_assert(IsPercentage());
-      return ValueDeprecated<T>();
     }
 
 #pragma endregion
@@ -450,13 +429,6 @@ namespace krys::boo::css
     {
       krys_debug_assert(IsAngle());
       return ClampTo<T>(ComputeAngle<Unit>(PrimitiveType(), DoubleValue(conversionData)));
-    }
-
-    template <typename T = double, AngleUnit Unit = UnitTraits<AngleUnit>::Canonical>
-    KRYS_NODISCARD T ResolveAsAngleDeprecated() const noexcept
-    {
-      krys_debug_assert(IsAngle());
-      return ClampTo<T>(ComputeAngle<Unit>(PrimitiveType(), DoubleValueDeprecated()));
     }
 
 #pragma endregion
@@ -607,13 +579,6 @@ namespace krys::boo::css
       return ValueNoConversionDataRequired<T>(UnitType::px);
     }
 
-    template <typename T = double>
-    KRYS_NODISCARD T ResolveAsLengthDeprecated() const noexcept
-    {
-      krys_debug_assert(IsLength());
-      return ValueDeprecated<T>(UnitType::px);
-    }
-
 #pragma endregion
 
 #pragma region Non-converting
@@ -712,8 +677,6 @@ namespace krys::boo::css
 
     KRYS_NODISCARD double DoubleValueNoConversionDataRequired(UnitType targetUnit) const noexcept;
 
-    KRYS_NODISCARD double DoubleValueDeprecated(UnitType targetUnit) const noexcept;
-
     template <typename T = double>
     KRYS_NODISCARD T Value(UnitType targetUnit, const ToLengthConversionData &conversionData) const noexcept
     {
@@ -724,12 +687,6 @@ namespace krys::boo::css
     KRYS_NODISCARD T ValueNoConversionDataRequired(UnitType targetUnit) const noexcept
     {
       return ClampTo<T>(DoubleValueNoConversionDataRequired(targetUnit));
-    }
-
-    template <typename T = double>
-    KRYS_NODISCARD T ValueDeprecated(UnitType targetUnit) const noexcept
-    {
-      return ClampTo<T>(DoubleValueDeprecated(targetUnit));
     }
 
 #pragma endregion
@@ -744,15 +701,7 @@ namespace krys::boo::css
       return _value.Number;
     }
 
-    KRYS_NODISCARD double DoubleValueDeprecated() const noexcept;
-
     KRYS_NODISCARD double DoubleValueDividingBy100IfPercentage(const ToLengthConversionData &) const noexcept;
-
-    template <typename T = double>
-    KRYS_NODISCARD T ValueDeprecated() const noexcept
-    {
-      return ClampTo<T>(DoubleValueDeprecated());
-    }
 
 #pragma endregion
 
@@ -762,7 +711,7 @@ namespace krys::boo::css
     KRYS_NODISCARD Maybe<double> DoubleValueInternal(UnitType targetUnit,
                                                      const ToLengthConversionData &) const noexcept;
 
-    KRYS_NODISCARD Maybe<double> DoubleValueInternalDeprecated(UnitType targetUnit) const noexcept;
+    KRYS_NODISCARD Maybe<double> DoubleValueInternalWithoutConversionData(UnitType targetUnit) const noexcept;
 
     KRYS_NODISCARD bool AddDerivedHash(size_t &seed) const noexcept;
 
@@ -1053,12 +1002,6 @@ namespace krys::boo::css
   {
     krys_debug_assert(IsInteger());
     return Downcast<PrimitiveValue>(*this).ResolveAsInteger(conversionData);
-  }
-
-  inline int64 Value::IntegerDeprecated() const noexcept
-  {
-    krys_debug_assert(IsInteger());
-    return Downcast<PrimitiveValue>(*this).ResolveAsIntegerDeprecated();
   }
 
 #pragma endregion

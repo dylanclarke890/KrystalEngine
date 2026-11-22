@@ -122,8 +122,6 @@ namespace krys::boo::css::calc
 
     KRYS_NODISCARD double DoubleValue(NoConversionDataRequiredTag, const SymbolTable &) const noexcept;
 
-    KRYS_NODISCARD double DoubleValueDeprecated() const noexcept;
-
     KRYS_NODISCARD double ComputeLengthPx(const ToLengthConversionData &) const noexcept;
 
     KRYS_NODISCARD double ComputeLengthPx(const ToLengthConversionData &, const SymbolTable &) const noexcept;

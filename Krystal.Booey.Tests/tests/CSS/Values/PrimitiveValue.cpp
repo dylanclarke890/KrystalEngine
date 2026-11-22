@@ -214,4 +214,20 @@ namespace krys::boo::css::tests
     // Absolute lengths are scaled by zoom.
     CHECK(inches->ResolveAsLength(conversionData.CopyWithAdjustedZoom(2.0f)) == 192.0);
   }
+
+  TEST_CASE_METHOD(ValueFixture, "PrimitiveValue: resolving without an element", "[CSS][PrimitiveValue]")
+  {
+    const auto &conversionData = ToLengthConversionData::WithoutElement();
+
+    // Font-relative units resolve against the initial font, 16px.
+    CHECK(PrimitiveValue::Create(2.0, UnitType::em)->ResolveAsLength(conversionData) == 32.0);
+    CHECK(PrimitiveValue::Create(2.0, UnitType::rem)->ResolveAsLength(conversionData) == 32.0);
+    CHECK(PrimitiveValue::Create(1.0, UnitType::ex)->ResolveAsLength(conversionData) > 0.0);
+    CHECK(PrimitiveValue::Create(1.0, UnitType::ch)->ResolveAsLength(conversionData) > 0.0);
+    // There's no viewport.
+    CHECK(PrimitiveValue::Create(50.0, UnitType::vw)->ResolveAsLength(conversionData) == 0.0);
+    // Other values resolve as with any context.
+    CHECK(PrimitiveValue::Create(3.0, UnitType::Integer)->ResolveAsInteger(conversionData) == 3);
+    CHECK(PrimitiveValue::Create(25.0, UnitType::Percentage)->ResolveAsPercentage(conversionData) == 25.0);
+  }
 }

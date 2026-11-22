@@ -38,6 +38,7 @@
 #include "Krystal.Booey/CSS/Values/CustomPropertyValue.hpp"
 #include "Krystal.Booey/CSS/Values/PrimitiveValue.hpp"
 #include "Krystal.Booey/CSS/Values/RatioValue.hpp"
+#include "Krystal.Booey/CSS/Values/ToLengthConversionData.hpp"
 #include "Krystal.Core/Strings/ASCII.hpp"
 
 namespace krys::boo::css::mq
@@ -347,7 +348,8 @@ namespace krys::boo::css::mq
           {
             return false;
           }
-          if (primitiveValue->IsInteger() && !primitiveValue->ResolveAsIntegerDeprecated())
+          if (primitiveValue->IsInteger()
+              && !primitiveValue->ResolveAsInteger(css::ToLengthConversionData::WithoutElement()))
           {
             return true;
           }
@@ -362,7 +364,8 @@ namespace krys::boo::css::mq
         case FeatureSchema::ValueType::Ratio:
           if (primitiveValue && primitiveValue->IsNumberOrInteger())
           {
-            auto number = primitiveValue->ResolveAsNumberDeprecated<double>();
+            auto number =
+              primitiveValue->ResolveAsNumber<double>(css::ToLengthConversionData::WithoutElement());
             if (number < 0)
             {
               return false;

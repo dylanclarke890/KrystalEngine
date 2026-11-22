@@ -64,6 +64,7 @@
 #include "Krystal.Booey/CSS/Values/ColorValue.hpp"
 #include "Krystal.Booey/CSS/Values/CustomPropertyValue.hpp"
 #include "Krystal.Booey/CSS/Values/PrimitiveValue.hpp"
+#include "Krystal.Booey/CSS/Values/ToLengthConversionData.hpp"
 #include "Krystal.Booey/CSS/Values/ValueList.hpp"
 #include "Krystal.Booey/CSS/Values/ValuePair.hpp"
 #include "Krystal.Booey/CSS/Values/VariableData.hpp"
@@ -902,7 +903,7 @@ namespace krys::boo::css
           return null;
         }
         krys_debug_assert(value->IsInteger());
-        auto tagInteger = value->ResolveAsIntegerDeprecated();
+        auto tagInteger = value->ResolveAsInteger(css::ToLengthConversionData::WithoutElement());
         krys_debug_assert(tagInteger >= 0);
         values.push_back(static_cast<uint32>(tagInteger));
         if (maxValues && values.size() > *maxValues)
@@ -1030,7 +1031,8 @@ namespace krys::boo::css
       const auto &primitiveValue = Downcast<PrimitiveValue>(*basePaletteValue);
       if (primitiveValue.IsInteger())
       {
-        basePalette = FontPaletteIndex(primitiveValue.ResolveAsIntegerDeprecated<uint32>());
+        basePalette = FontPaletteIndex(
+          primitiveValue.ResolveAsInteger<uint32>(css::ToLengthConversionData::WithoutElement()));
       }
       else if (primitiveValue.ValueId() == ValueId::Light)
       {
@@ -1049,7 +1051,8 @@ namespace krys::boo::css
       {
         const auto &pair = Downcast<ValuePair>(item);
 
-        auto key = Downcast<PrimitiveValue>(pair.First()).ResolveAsIntegerDeprecated<uint32>();
+        auto key = Downcast<PrimitiveValue>(pair.First())
+                     .ResolveAsInteger<uint32>(css::ToLengthConversionData::WithoutElement());
         auto color = ColorValue::GetAbsoluteColor(pair.Second());
         if (!color.IsValid())
         {

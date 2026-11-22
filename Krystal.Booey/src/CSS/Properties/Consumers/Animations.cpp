@@ -34,6 +34,7 @@
 #include "Krystal.Booey/CSS/Properties/Consumers/Timeline.hpp"
 #include "Krystal.Booey/CSS/Properties/PropertyParserState.hpp"
 #include "Krystal.Booey/CSS/Values/PrimitiveValue.hpp"
+#include "Krystal.Booey/CSS/Values/ToLengthConversionData.hpp"
 
 namespace krys::boo::css::parse_property
 {
@@ -52,13 +53,13 @@ namespace krys::boo::css::parse_property
     auto ConsumeAndConvertPercentage = [&](TokenRange &tokens,
                                            RestrictedToZeroToHundredRange restricted) -> Maybe<double>
     {
-      // FIXME: We use resolveAsPercentageDeprecated() to deal with calc() and % values.
-      // We will eventually want to return a CSS value that can be kept as-is on a
-      // BlendingKeyframe so that resolution happens when we have the necessary context
-      // when the keyframes are associated with a target element.
+      // FIXME: The percentage resolves without an element, so a calc() with font-relative or viewport units
+      // resolves against initial values. Keep the CSS value on the BlendingKeyframe and resolve it once the
+      // keyframes have a target element.
       if (auto percentageValue = PrimitiveValueResolver<Percentage<>>::ConsumeAndResolve(tokens, state))
       {
-        auto resolvedPercentage = percentageValue->ResolveAsPercentageDeprecated();
+        auto resolvedPercentage =
+          percentageValue->ResolveAsPercentage(css::ToLengthConversionData::WithoutElement());
         if (restricted == RestrictedToZeroToHundredRange::No)
         {
           return resolvedPercentage / 100;

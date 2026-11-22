@@ -35,6 +35,7 @@
 #include "Krystal.Booey/CSS/Values/GlobalKeyword.hpp"
 #include "Krystal.Booey/CSS/Values/PrimitiveValue.hpp"
 #include "Krystal.Booey/CSS/Values/SerialisationContext.hpp"
+#include "Krystal.Booey/CSS/Values/ToLengthConversionData.hpp"
 #include "Krystal.Booey/CSS/Values/ValueList.hpp"
 #include "Krystal.Booey/CSS/Values/ValuePool.hpp"
 #include "Krystal.Booey/DOM/Algorithms/TreeQueries.hpp"
@@ -190,7 +191,7 @@ namespace krys::boo
       if (auto *primitiveValue = DynamicDowncast<css::PrimitiveValue>(value.get()))
       {
         if (propertyID == PropertyId::FontWeight && primitiveValue->IsNumber()
-            && primitiveValue->template ResolveAsNumberDeprecated<float>()
+            && primitiveValue->template ResolveAsNumber<float>(css::ToLengthConversionData::WithoutElement())
                  >= static_cast<float>(BoldThreshold()))
         {
           return ValueId::Bold;
@@ -408,7 +409,8 @@ namespace krys::boo
       }
 
       krys_debug_assert(primitiveValue->IsNumber());
-      return primitiveValue->ResolveAsNumberDeprecated<float>() >= static_cast<float>(BoldThreshold());
+      return primitiveValue->ResolveAsNumber<float>(css::ToLengthConversionData::WithoutElement())
+             >= static_cast<float>(BoldThreshold());
     }
   }
 
@@ -2685,7 +2687,7 @@ namespace krys::boo
     {
       if (IsCSSValueLength(value))
       {
-        int32 pixelFontSize = value->ResolveAsLengthDeprecated<int32>();
+        int32 pixelFontSize = value->ResolveAsLength<int32>(css::ToLengthConversionData::WithoutElement());
         int32 legacyFontSize =
           style::LegacyFontSizeForPixelSize(pixelFontSize, shouldUseFixedFontDefaultSize, document);
         // Use legacy font size only if pixel value matches exactly to that of legacy font size.

@@ -380,12 +380,7 @@ namespace krys::boo::css
   double PrimitiveValue::DoubleValueNoConversionDataRequired(UnitType targetUnit) const noexcept
   {
     krys_debug_assert(!IsCalculated());
-    return DoubleValueInternalDeprecated(targetUnit).value_or(0);
-  }
-
-  double PrimitiveValue::DoubleValueDeprecated(UnitType targetUnit) const noexcept
-  {
-    return DoubleValueInternalDeprecated(targetUnit).value_or(0);
+    return DoubleValueInternalWithoutConversionData(targetUnit).value_or(0);
   }
 
 #pragma endregion
@@ -397,16 +392,6 @@ namespace krys::boo::css
     if (auto *calcValue = CSSCalcValue())
     {
       return calcValue->DoubleValue(conversionData);
-    }
-
-    return _value.Number;
-  }
-
-  double PrimitiveValue::DoubleValueDeprecated() const noexcept
-  {
-    if (auto *calcValue = CSSCalcValue())
-    {
-      return calcValue->DoubleValueDeprecated();
     }
 
     return _value.Number;
@@ -565,7 +550,7 @@ namespace krys::boo::css
     return convertedValue;
   }
 
-  Maybe<double> PrimitiveValue::DoubleValueInternalDeprecated(UnitType targetUnit) const noexcept
+  Maybe<double> PrimitiveValue::DoubleValueInternalWithoutConversionData(UnitType targetUnit) const noexcept
   {
     if (!IsValidUnitTypeForDoubleConversion(PrimitiveUnitType())
         || !IsValidUnitTypeForDoubleConversion(targetUnit))
@@ -576,7 +561,7 @@ namespace krys::boo::css
     UnitType sourceUnitType = PrimitiveType();
     if (targetUnit == sourceUnitType || targetUnit == UnitType::Dimension)
     {
-      return DoubleValueDeprecated();
+      return _value.Number;
     }
 
     UnitCategory sourceCategory = UnitCategoryForType(sourceUnitType);
@@ -627,7 +612,7 @@ namespace krys::boo::css
       }
     }
 
-    double convertedValue = DoubleValueDeprecated();
+    double convertedValue = _value.Number;
 
     // If we don't need to scale it, don't worry about if we can scale it.
     if (sourceUnitType == targetUnitType)

@@ -155,4 +155,15 @@ namespace krys::boo::css::tests
       REQUIRE(Registry == Registry);
     }
   }
+
+  TEST_CASE_METHOD(CounterStyleFixture, "CounterStyle: calc() in a descriptor resolves without an element",
+                   "[CSS][CounterStyle]")
+  {
+    Add(u8"@counter-style sum { system: extends decimal; pad: calc(1 + 2) '0'; }"
+        u8"@counter-style relative { system: extends decimal; pad: calc(48px / 1em) '0'; }");
+
+    CHECK(Text(u8"sum", 7) == "007");
+    // 1em is the initial font's 16px.
+    CHECK(Text(u8"relative", 7) == "007");
+  }
 }

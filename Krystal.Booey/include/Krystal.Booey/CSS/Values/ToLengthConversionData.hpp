@@ -86,6 +86,11 @@ namespace krys::boo::css
 
     ~ToLengthConversionData() noexcept;
 
+    /// @brief The context of a value outside any element, such as an at-rule's descriptor: font-relative
+    /// units resolve against the initial font, and without a viewport, viewport units are zero.
+    /// @see https://drafts.csswg.org/css-values-4/#font-relative-lengths
+    KRYS_NODISCARD static const ToLengthConversionData &WithoutElement() noexcept;
+
     KRYS_NODISCARD const RenderStyle *Style() const noexcept
     {
       return _style;

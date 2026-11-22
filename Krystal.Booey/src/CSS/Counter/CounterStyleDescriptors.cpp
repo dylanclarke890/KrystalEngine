@@ -27,6 +27,7 @@
 #include "Krystal.Booey/CSS/CSSOM/Markup.hpp"
 #include "Krystal.Booey/CSS/Properties/StyleProperties.hpp"
 #include "Krystal.Booey/CSS/Values/PrimitiveValue.hpp"
+#include "Krystal.Booey/CSS/Values/ToLengthConversionData.hpp"
 #include "Krystal.Booey/CSS/Values/ValueList.hpp"
 #include "Krystal.Booey/CSS/Values/ValuePair.hpp"
 #include "Krystal.Core/Strings/StringBuilder.hpp"
@@ -272,11 +273,11 @@ namespace krys::boo::css
       int32 convertedHigh {std::numeric_limits<int32>::max()};
       if (low.IsInteger())
       {
-        convertedLow = low.ResolveAsIntegerDeprecated<int32>();
+        convertedLow = low.ResolveAsInteger<int32>(css::ToLengthConversionData::WithoutElement());
       }
       if (high.IsInteger())
       {
-        convertedHigh = high.ResolveAsIntegerDeprecated<int32>();
+        convertedHigh = high.ResolveAsInteger<int32>(css::ToLengthConversionData::WithoutElement());
       }
       result.emplace_back(convertedLow, convertedHigh);
     }
@@ -294,7 +295,8 @@ namespace krys::boo::css
     for (const auto &additiveSymbol : Downcast<ValueList>(*value))
     {
       auto &pair = Downcast<ValuePair>(additiveSymbol);
-      auto weight = Downcast<PrimitiveValue>(pair.First()).ResolveAsIntegerDeprecated<uint32>();
+      auto weight = Downcast<PrimitiveValue>(pair.First())
+                      .ResolveAsInteger<uint32>(css::ToLengthConversionData::WithoutElement());
       auto symbol = SymbolFromValue(&pair.Second());
       result.emplace_back(symbol, weight);
     }
@@ -305,7 +307,8 @@ namespace krys::boo::css
   {
     auto &list = Downcast<ValueList>(*value);
     krys_debug_assert(list.size() == 2);
-    auto length = Downcast<PrimitiveValue>(list[0]).ResolveAsIntegerDeprecated<int32>();
+    auto length = Downcast<PrimitiveValue>(list[0]).ResolveAsInteger<int32>(
+      css::ToLengthConversionData::WithoutElement());
     krys_debug_assert(length >= 0);
     return {static_cast<uint32>(std::max(0, length)), SymbolFromValue(&list[1])};
   }
@@ -368,7 +371,10 @@ namespace krys::boo::css
       else if (system == CounterStyleSystem::Fixed)
       {
         krys_debug_assert(secondValue.IsInteger());
-        result.second = secondValue.IsInteger() ? static_cast<int32>(secondValue.IntegerDeprecated()) : 1;
+        result.second = secondValue.IsInteger()
+                          ? Downcast<PrimitiveValue>(secondValue)
+                              .ResolveAsInteger<int32>(ToLengthConversionData::WithoutElement())
+                          : 1;
       }
     }
     return result;

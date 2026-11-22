@@ -501,8 +501,6 @@ namespace krys::boo::css
 
     KRYS_NODISCARD inline int64 Integer(const ToLengthConversionData &) const noexcept;
 
-    KRYS_NODISCARD inline int64 IntegerDeprecated() const noexcept;
-
     KRYS_NODISCARD inline const Value &First() const noexcept; // ValuePair
 
     KRYS_NODISCARD inline const Value &Second() const noexcept; // ValuePair
