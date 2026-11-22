@@ -12,8 +12,6 @@ namespace krys::boo::css
 {
   /// @brief The unit of a numeric CSS value. Each unit's facts are in `UnitInfoFor`, and everything else here
   /// is derived from them.
-  /// @note Some enumerators aren't units but what else a `PrimitiveValue` holds (`String`, `ValueId`, `Calc`
-  /// and the like); they have no quantity.
   /// @see https://drafts.csswg.org/css-values-4/#numeric-types
   enum class UnitType : uint8
   {
@@ -102,25 +100,11 @@ namespace krys::boo::css
     dpcm,
 
     fr,
-
-    // A dimension whose unit isn't known.
-    Dimension,
-
-    // Not units: what else a PrimitiveValue holds.
-    String,
-    Ident,
-    CustomIdent,
-    FontFamily,
-    PropertyId,
-    ValueId,
-    Calc,
-    CalcPercentageWithAngle,
-    CalcPercentageWithLength,
   };
 
   consteval UnitType MaxEnumValue(UnitType) noexcept
   {
-    return UnitType::CalcPercentageWithLength;
+    return UnitType::fr;
   }
 
   /// @brief The kind of quantity a unit measures, with lengths split by what they're relative to: units of
@@ -142,7 +126,7 @@ namespace krys::boo::css
     Frequency,
     Resolution,
     Flex,
-    /// @brief Everything else, container-relative lengths included, and the kinds that aren't units.
+    /// @brief Everything else: container-relative lengths and `Unknown`.
     Other,
   };
 
@@ -196,10 +180,10 @@ namespace krys::boo::css
   /// @brief What's known about a unit.
   struct UnitInfo
   {
-    /// @brief The unit as it's written and serialised, in lowercase; empty for the kinds that aren't units,
-    /// and for numbers, integers and `QuirkyEm`.
+    /// @brief The unit as it's written and serialised, in lowercase; empty for `Unknown`, numbers, integers
+    /// and `QuirkyEm`.
     utf8_stringview Name;
-    /// @brief The quantity the unit measures; null for the kinds that aren't units.
+    /// @brief The quantity the unit measures; null for `Unknown`.
     Maybe<Category> Quantity;
     /// @brief For a length, what it's relative to.
     LengthBasis Basis {LengthBasis::Absolute};
@@ -215,96 +199,86 @@ namespace krys::boo::css
     constexpr auto Length = Category::Length;
     switch (unit)
     {
-      case Number:                   return {u8"", Category::Number};
-      case Integer:                  return {u8"", Category::Integer};
-      case Percentage:               return {u8"%", Category::Percentage};
+      case Number:     return {u8"", Category::Number};
+      case Integer:    return {u8"", Category::Integer};
+      case Percentage: return {u8"%", Category::Percentage};
 
-      case px:                       return {u8"px", Length, LengthBasis::Absolute, 1.0};
-      case cm:                       return {u8"cm", Length, LengthBasis::Absolute, pxPerCm};
-      case mm:                       return {u8"mm", Length, LengthBasis::Absolute, pxPerMm};
-      case Q:                        return {u8"q", Length, LengthBasis::Absolute, pxPerQ};
-      case in:                       return {u8"in", Length, LengthBasis::Absolute, pxPerInch};
-      case pt:                       return {u8"pt", Length, LengthBasis::Absolute, pxPerPt};
-      case pc:                       return {u8"pc", Length, LengthBasis::Absolute, pxPerPc};
+      case px:         return {u8"px", Length, LengthBasis::Absolute, 1.0};
+      case cm:         return {u8"cm", Length, LengthBasis::Absolute, pxPerCm};
+      case mm:         return {u8"mm", Length, LengthBasis::Absolute, pxPerMm};
+      case Q:          return {u8"q", Length, LengthBasis::Absolute, pxPerQ};
+      case in:         return {u8"in", Length, LengthBasis::Absolute, pxPerInch};
+      case pt:         return {u8"pt", Length, LengthBasis::Absolute, pxPerPt};
+      case pc:         return {u8"pc", Length, LengthBasis::Absolute, pxPerPc};
 
-      case em:                       return {u8"em", Length, LengthBasis::Font};
-      case ex:                       return {u8"ex", Length, LengthBasis::Font};
-      case cap:                      return {u8"cap", Length, LengthBasis::Font};
-      case ch:                       return {u8"ch", Length, LengthBasis::Font};
-      case ic:                       return {u8"ic", Length, LengthBasis::Font};
-      case lh:                       return {u8"lh", Length, LengthBasis::Font};
-      case QuirkyEm:                 return {u8"", Length, LengthBasis::Font};
+      case em:         return {u8"em", Length, LengthBasis::Font};
+      case ex:         return {u8"ex", Length, LengthBasis::Font};
+      case cap:        return {u8"cap", Length, LengthBasis::Font};
+      case ch:         return {u8"ch", Length, LengthBasis::Font};
+      case ic:         return {u8"ic", Length, LengthBasis::Font};
+      case lh:         return {u8"lh", Length, LengthBasis::Font};
+      case QuirkyEm:   return {u8"", Length, LengthBasis::Font};
 
-      case rem:                      return {u8"rem", Length, LengthBasis::RootFont};
-      case rex:                      return {u8"rex", Length, LengthBasis::RootFont};
-      case rcap:                     return {u8"rcap", Length, LengthBasis::RootFont};
-      case rch:                      return {u8"rch", Length, LengthBasis::RootFont};
-      case ric:                      return {u8"ric", Length, LengthBasis::RootFont};
-      case rlh:                      return {u8"rlh", Length, LengthBasis::RootFont};
+      case rem:        return {u8"rem", Length, LengthBasis::RootFont};
+      case rex:        return {u8"rex", Length, LengthBasis::RootFont};
+      case rcap:       return {u8"rcap", Length, LengthBasis::RootFont};
+      case rch:        return {u8"rch", Length, LengthBasis::RootFont};
+      case ric:        return {u8"ric", Length, LengthBasis::RootFont};
+      case rlh:        return {u8"rlh", Length, LengthBasis::RootFont};
 
-      case vw:                       return {u8"vw", Length, LengthBasis::Viewport};
-      case vh:                       return {u8"vh", Length, LengthBasis::Viewport};
-      case vi:                       return {u8"vi", Length, LengthBasis::Viewport};
-      case vb:                       return {u8"vb", Length, LengthBasis::Viewport};
-      case vmin:                     return {u8"vmin", Length, LengthBasis::Viewport};
-      case vmax:                     return {u8"vmax", Length, LengthBasis::Viewport};
-      case svw:                      return {u8"svw", Length, LengthBasis::Viewport};
-      case svh:                      return {u8"svh", Length, LengthBasis::Viewport};
-      case svi:                      return {u8"svi", Length, LengthBasis::Viewport};
-      case svb:                      return {u8"svb", Length, LengthBasis::Viewport};
-      case svmin:                    return {u8"svmin", Length, LengthBasis::Viewport};
-      case svmax:                    return {u8"svmax", Length, LengthBasis::Viewport};
-      case lvw:                      return {u8"lvw", Length, LengthBasis::Viewport};
-      case lvh:                      return {u8"lvh", Length, LengthBasis::Viewport};
-      case lvi:                      return {u8"lvi", Length, LengthBasis::Viewport};
-      case lvb:                      return {u8"lvb", Length, LengthBasis::Viewport};
-      case lvmin:                    return {u8"lvmin", Length, LengthBasis::Viewport};
-      case lvmax:                    return {u8"lvmax", Length, LengthBasis::Viewport};
-      case dvw:                      return {u8"dvw", Length, LengthBasis::Viewport};
-      case dvh:                      return {u8"dvh", Length, LengthBasis::Viewport};
-      case dvi:                      return {u8"dvi", Length, LengthBasis::Viewport};
-      case dvb:                      return {u8"dvb", Length, LengthBasis::Viewport};
-      case dvmin:                    return {u8"dvmin", Length, LengthBasis::Viewport};
-      case dvmax:                    return {u8"dvmax", Length, LengthBasis::Viewport};
+      case vw:         return {u8"vw", Length, LengthBasis::Viewport};
+      case vh:         return {u8"vh", Length, LengthBasis::Viewport};
+      case vi:         return {u8"vi", Length, LengthBasis::Viewport};
+      case vb:         return {u8"vb", Length, LengthBasis::Viewport};
+      case vmin:       return {u8"vmin", Length, LengthBasis::Viewport};
+      case vmax:       return {u8"vmax", Length, LengthBasis::Viewport};
+      case svw:        return {u8"svw", Length, LengthBasis::Viewport};
+      case svh:        return {u8"svh", Length, LengthBasis::Viewport};
+      case svi:        return {u8"svi", Length, LengthBasis::Viewport};
+      case svb:        return {u8"svb", Length, LengthBasis::Viewport};
+      case svmin:      return {u8"svmin", Length, LengthBasis::Viewport};
+      case svmax:      return {u8"svmax", Length, LengthBasis::Viewport};
+      case lvw:        return {u8"lvw", Length, LengthBasis::Viewport};
+      case lvh:        return {u8"lvh", Length, LengthBasis::Viewport};
+      case lvi:        return {u8"lvi", Length, LengthBasis::Viewport};
+      case lvb:        return {u8"lvb", Length, LengthBasis::Viewport};
+      case lvmin:      return {u8"lvmin", Length, LengthBasis::Viewport};
+      case lvmax:      return {u8"lvmax", Length, LengthBasis::Viewport};
+      case dvw:        return {u8"dvw", Length, LengthBasis::Viewport};
+      case dvh:        return {u8"dvh", Length, LengthBasis::Viewport};
+      case dvi:        return {u8"dvi", Length, LengthBasis::Viewport};
+      case dvb:        return {u8"dvb", Length, LengthBasis::Viewport};
+      case dvmin:      return {u8"dvmin", Length, LengthBasis::Viewport};
+      case dvmax:      return {u8"dvmax", Length, LengthBasis::Viewport};
 
-      case cqw:                      return {u8"cqw", Length, LengthBasis::Container};
-      case cqh:                      return {u8"cqh", Length, LengthBasis::Container};
-      case cqi:                      return {u8"cqi", Length, LengthBasis::Container};
-      case cqb:                      return {u8"cqb", Length, LengthBasis::Container};
-      case cqmin:                    return {u8"cqmin", Length, LengthBasis::Container};
-      case cqmax:                    return {u8"cqmax", Length, LengthBasis::Container};
+      case cqw:        return {u8"cqw", Length, LengthBasis::Container};
+      case cqh:        return {u8"cqh", Length, LengthBasis::Container};
+      case cqi:        return {u8"cqi", Length, LengthBasis::Container};
+      case cqb:        return {u8"cqb", Length, LengthBasis::Container};
+      case cqmin:      return {u8"cqmin", Length, LengthBasis::Container};
+      case cqmax:      return {u8"cqmax", Length, LengthBasis::Container};
 
       // https://drafts.csswg.org/css-values-4/#angles
-      case deg:                      return {u8"deg", Category::Angle, {}, 1.0};
-      case rad:                      return {u8"rad", Category::Angle, {}, degreesPerRadianDouble};
-      case grad:                     return {u8"grad", Category::Angle, {}, degreesPerGradientDouble};
-      case turn:                     return {u8"turn", Category::Angle, {}, degreesPerTurnDouble};
+      case deg:        return {u8"deg", Category::Angle, {}, 1.0};
+      case rad:        return {u8"rad", Category::Angle, {}, degreesPerRadianDouble};
+      case grad:       return {u8"grad", Category::Angle, {}, degreesPerGradientDouble};
+      case turn:       return {u8"turn", Category::Angle, {}, degreesPerTurnDouble};
 
-      case s:                        return {u8"s", Category::Time, {}, 1.0};
-      case ms:                       return {u8"ms", Category::Time, {}, secsPerMs};
+      case s:          return {u8"s", Category::Time, {}, 1.0};
+      case ms:         return {u8"ms", Category::Time, {}, secsPerMs};
 
-      case hz:                       return {u8"hz", Category::Frequency, {}, 1.0};
-      case khz:                      return {u8"khz", Category::Frequency, {}, hertzPerKilohertz};
+      case hz:         return {u8"hz", Category::Frequency, {}, 1.0};
+      case khz:        return {u8"khz", Category::Frequency, {}, hertzPerKilohertz};
 
-      case dppx:                     return {u8"dppx", Category::Resolution, {}, 1.0};
-      case x:                        return {u8"x", Category::Resolution, {}, dppxPerX};
-      case dpi:                      return {u8"dpi", Category::Resolution, {}, dppxPerDpi};
-      case dpcm:                     return {u8"dpcm", Category::Resolution, {}, dppxPerDpcm};
+      case dppx:       return {u8"dppx", Category::Resolution, {}, 1.0};
+      case x:          return {u8"x", Category::Resolution, {}, dppxPerX};
+      case dpi:        return {u8"dpi", Category::Resolution, {}, dppxPerDpi};
+      case dpcm:       return {u8"dpcm", Category::Resolution, {}, dppxPerDpcm};
 
       // https://drafts.csswg.org/css-grid/#fr-unit
-      case fr:                       return {u8"fr", Category::Flex};
+      case fr:         return {u8"fr", Category::Flex};
 
-      case Unknown:
-      case Dimension:
-      case String:
-      case Ident:
-      case CustomIdent:
-      case FontFamily:
-      case PropertyId:
-      case ValueId:
-      case Calc:
-      case CalcPercentageWithAngle:
-      case CalcPercentageWithLength: return {};
+      case Unknown:    return {};
     }
     krys_unreachable();
   }
@@ -348,8 +322,7 @@ namespace krys::boo::css
     return UnitType::Unknown;
   }
 
-  /// @brief @p unit as it's serialised after a number: empty for numbers, integers and the kinds that aren't
-  /// units.
+  /// @brief @p unit as it's serialised after a number: empty for `Unknown`, numbers and integers.
   KRYS_NODISCARD constexpr utf8_stringview UnitTypeString(UnitType unit) noexcept
   {
     return UnitInfoFor(unit).Name;

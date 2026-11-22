@@ -52,8 +52,6 @@ namespace krys::boo::css::tests
     CHECK(UnitCategoryForType(UnitType::x) == UnitCategory::Resolution);
     CHECK(UnitCategoryForType(UnitType::fr) == UnitCategory::Flex);
     CHECK(UnitCategoryForType(UnitType::cqw) == UnitCategory::Other);
-    CHECK(UnitCategoryForType(UnitType::Calc) == UnitCategory::Other);
-    CHECK(UnitCategoryForType(UnitType::ValueId) == UnitCategory::Other);
     CHECK(UnitCategoryForType(UnitType::QuirkyEm) == UnitCategory::FontRelativeLength);
   }
 
@@ -93,7 +91,7 @@ namespace krys::boo::css::tests
     CHECK(CanonicalUnitTypeForUnitType(UnitType::dpi) == UnitType::dppx);
     CHECK(CanonicalUnitTypeForUnitType(UnitType::Integer) == UnitType::Number);
     CHECK(CanonicalUnitTypeForUnitType(UnitType::em) == UnitType::Unknown);
-    CHECK(CanonicalUnitTypeForUnitType(UnitType::String) == UnitType::Unknown);
+    CHECK(CanonicalUnitTypeForUnitType(UnitType::Unknown) == UnitType::Unknown);
   }
 
   TEST_CASE("ConversionToCanonicalUnitsScaleFactor", "[CSS][Units]")
@@ -117,7 +115,7 @@ namespace krys::boo::css::tests
     CHECK_FALSE(ConversionToCanonicalUnitsScaleFactor(UnitType::cqw));
     CHECK_FALSE(ConversionToCanonicalUnitsScaleFactor(UnitType::Number));
     CHECK_FALSE(ConversionToCanonicalUnitsScaleFactor(UnitType::fr));
-    CHECK_FALSE(ConversionToCanonicalUnitsScaleFactor(UnitType::ValueId));
+    CHECK_FALSE(ConversionToCanonicalUnitsScaleFactor(UnitType::Unknown));
   }
 
   TEST_CASE("ConversionToCanonicalUnitRequiresConversionData", "[CSS][Units]")
@@ -133,7 +131,7 @@ namespace krys::boo::css::tests
 
     for (auto unit : {UnitType::Number, UnitType::Integer, UnitType::Percentage, UnitType::px, UnitType::deg,
                       UnitType::turn, UnitType::s, UnitType::ms, UnitType::hz, UnitType::dppx, UnitType::dpi,
-                      UnitType::fr, UnitType::Calc, UnitType::ValueId})
+                      UnitType::fr, UnitType::Unknown})
     {
       INFO(static_cast<int>(unit));
       CHECK_FALSE(ConversionToCanonicalUnitRequiresConversionData(unit));
@@ -150,8 +148,7 @@ namespace krys::boo::css::tests
     CHECK(ToNarrow(UnitTypeString(UnitType::x)) == "x");
 
     // Units that don't serialise with a suffix.
-    for (auto unit : {UnitType::Number, UnitType::Integer, UnitType::Dimension, UnitType::QuirkyEm,
-                      UnitType::Calc, UnitType::String, UnitType::ValueId, UnitType::Unknown})
+    for (auto unit : {UnitType::Number, UnitType::Integer, UnitType::QuirkyEm, UnitType::Unknown})
     {
       INFO(static_cast<int>(unit));
       CHECK(UnitTypeString(unit).empty());
@@ -190,8 +187,7 @@ namespace krys::boo::css::tests
     }
 
     for (auto unit : {UnitType::Number, UnitType::Integer, UnitType::Percentage, UnitType::deg, UnitType::s,
-                      UnitType::hz, UnitType::dppx, UnitType::fr, UnitType::Calc, UnitType::String,
-                      UnitType::ValueId, UnitType::Unknown})
+                      UnitType::hz, UnitType::dppx, UnitType::fr, UnitType::Unknown})
     {
       INFO(static_cast<int>(unit));
       CHECK_FALSE(IsLength(unit));

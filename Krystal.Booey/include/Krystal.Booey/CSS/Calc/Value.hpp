@@ -106,7 +106,12 @@ namespace krys::boo::css::calc
       return _range;
     }
 
+    /// @brief The unit of the number `DoubleValue` returns; `UnitType::Unknown` when the value mixes a
+    /// percentage with a length or angle, which only resolves against a percentage basis.
     KRYS_NODISCARD UnitType PrimitiveType() const noexcept;
+
+    /// @brief Whether the value mixes a percentage with a length, such as `calc(1px + 5%)`.
+    KRYS_NODISCARD bool IsPercentageWithLength() const noexcept;
 
     // Returns whether the calc::Tree requires `ToLengthConversionData` to fully resolve.
     KRYS_NODISCARD bool RequiresConversionData() const noexcept

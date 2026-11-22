@@ -142,62 +142,62 @@ namespace krys::boo::css::calc
   {
     switch (dimension.Unit)
     {
-      case UnitType::cm:                       return NumericIdentity::CM;
-      case UnitType::mm:                       return NumericIdentity::MM;
-      case UnitType::Q:                        return NumericIdentity::Q;
-      case UnitType::in:                       return NumericIdentity::INCH;
-      case UnitType::pt:                       return NumericIdentity::PT;
-      case UnitType::pc:                       return NumericIdentity::PC;
-      case UnitType::em:                       return NumericIdentity::EM;
-      case UnitType::ex:                       return NumericIdentity::EX;
-      case UnitType::lh:                       return NumericIdentity::LH;
-      case UnitType::cap:                      return NumericIdentity::CAP;
-      case UnitType::ch:                       return NumericIdentity::CH;
-      case UnitType::ic:                       return NumericIdentity::IC;
-      case UnitType::rcap:                     return NumericIdentity::RCAP;
-      case UnitType::rch:                      return NumericIdentity::RCH;
-      case UnitType::rem:                      return NumericIdentity::REM;
-      case UnitType::rex:                      return NumericIdentity::REX;
-      case UnitType::ric:                      return NumericIdentity::RIC;
-      case UnitType::rlh:                      return NumericIdentity::RLH;
-      case UnitType::vw:                       return NumericIdentity::VW;
-      case UnitType::vh:                       return NumericIdentity::VH;
-      case UnitType::vmin:                     return NumericIdentity::VMIN;
-      case UnitType::vmax:                     return NumericIdentity::VMAX;
-      case UnitType::vb:                       return NumericIdentity::VB;
-      case UnitType::vi:                       return NumericIdentity::VI;
-      case UnitType::svw:                      return NumericIdentity::SVW;
-      case UnitType::svh:                      return NumericIdentity::SVH;
-      case UnitType::svmin:                    return NumericIdentity::SVMIN;
-      case UnitType::svmax:                    return NumericIdentity::SVMAX;
-      case UnitType::svb:                      return NumericIdentity::SVB;
-      case UnitType::svi:                      return NumericIdentity::SVI;
-      case UnitType::lvw:                      return NumericIdentity::LVW;
-      case UnitType::lvh:                      return NumericIdentity::LVH;
-      case UnitType::lvmin:                    return NumericIdentity::LVMIN;
-      case UnitType::lvmax:                    return NumericIdentity::LVMAX;
-      case UnitType::lvb:                      return NumericIdentity::LVB;
-      case UnitType::lvi:                      return NumericIdentity::LVI;
-      case UnitType::dvw:                      return NumericIdentity::DVW;
-      case UnitType::dvh:                      return NumericIdentity::DVH;
-      case UnitType::dvmin:                    return NumericIdentity::DVMIN;
-      case UnitType::dvmax:                    return NumericIdentity::DVMAX;
-      case UnitType::dvb:                      return NumericIdentity::DVB;
-      case UnitType::dvi:                      return NumericIdentity::DVI;
-      case UnitType::cqw:                      return NumericIdentity::CQW;
-      case UnitType::cqh:                      return NumericIdentity::CQH;
-      case UnitType::cqi:                      return NumericIdentity::CQI;
-      case UnitType::cqb:                      return NumericIdentity::CQB;
-      case UnitType::cqmin:                    return NumericIdentity::CQMIN;
-      case UnitType::cqmax:                    return NumericIdentity::CQMAX;
-      case UnitType::rad:                      return NumericIdentity::RAD;
-      case UnitType::grad:                     return NumericIdentity::GRAD;
-      case UnitType::turn:                     return NumericIdentity::TURN;
-      case UnitType::ms:                       return NumericIdentity::MS;
-      case UnitType::khz:                      return NumericIdentity::KHZ;
-      case UnitType::x:                        return NumericIdentity::X;
-      case UnitType::dpi:                      return NumericIdentity::DPI;
-      case UnitType::dpcm:                     return NumericIdentity::DPCM;
+      case UnitType::cm:         return NumericIdentity::CM;
+      case UnitType::mm:         return NumericIdentity::MM;
+      case UnitType::Q:          return NumericIdentity::Q;
+      case UnitType::in:         return NumericIdentity::INCH;
+      case UnitType::pt:         return NumericIdentity::PT;
+      case UnitType::pc:         return NumericIdentity::PC;
+      case UnitType::em:         return NumericIdentity::EM;
+      case UnitType::ex:         return NumericIdentity::EX;
+      case UnitType::lh:         return NumericIdentity::LH;
+      case UnitType::cap:        return NumericIdentity::CAP;
+      case UnitType::ch:         return NumericIdentity::CH;
+      case UnitType::ic:         return NumericIdentity::IC;
+      case UnitType::rcap:       return NumericIdentity::RCAP;
+      case UnitType::rch:        return NumericIdentity::RCH;
+      case UnitType::rem:        return NumericIdentity::REM;
+      case UnitType::rex:        return NumericIdentity::REX;
+      case UnitType::ric:        return NumericIdentity::RIC;
+      case UnitType::rlh:        return NumericIdentity::RLH;
+      case UnitType::vw:         return NumericIdentity::VW;
+      case UnitType::vh:         return NumericIdentity::VH;
+      case UnitType::vmin:       return NumericIdentity::VMIN;
+      case UnitType::vmax:       return NumericIdentity::VMAX;
+      case UnitType::vb:         return NumericIdentity::VB;
+      case UnitType::vi:         return NumericIdentity::VI;
+      case UnitType::svw:        return NumericIdentity::SVW;
+      case UnitType::svh:        return NumericIdentity::SVH;
+      case UnitType::svmin:      return NumericIdentity::SVMIN;
+      case UnitType::svmax:      return NumericIdentity::SVMAX;
+      case UnitType::svb:        return NumericIdentity::SVB;
+      case UnitType::svi:        return NumericIdentity::SVI;
+      case UnitType::lvw:        return NumericIdentity::LVW;
+      case UnitType::lvh:        return NumericIdentity::LVH;
+      case UnitType::lvmin:      return NumericIdentity::LVMIN;
+      case UnitType::lvmax:      return NumericIdentity::LVMAX;
+      case UnitType::lvb:        return NumericIdentity::LVB;
+      case UnitType::lvi:        return NumericIdentity::LVI;
+      case UnitType::dvw:        return NumericIdentity::DVW;
+      case UnitType::dvh:        return NumericIdentity::DVH;
+      case UnitType::dvmin:      return NumericIdentity::DVMIN;
+      case UnitType::dvmax:      return NumericIdentity::DVMAX;
+      case UnitType::dvb:        return NumericIdentity::DVB;
+      case UnitType::dvi:        return NumericIdentity::DVI;
+      case UnitType::cqw:        return NumericIdentity::CQW;
+      case UnitType::cqh:        return NumericIdentity::CQH;
+      case UnitType::cqi:        return NumericIdentity::CQI;
+      case UnitType::cqb:        return NumericIdentity::CQB;
+      case UnitType::cqmin:      return NumericIdentity::CQMIN;
+      case UnitType::cqmax:      return NumericIdentity::CQMAX;
+      case UnitType::rad:        return NumericIdentity::RAD;
+      case UnitType::grad:       return NumericIdentity::GRAD;
+      case UnitType::turn:       return NumericIdentity::TURN;
+      case UnitType::ms:         return NumericIdentity::MS;
+      case UnitType::khz:        return NumericIdentity::KHZ;
+      case UnitType::x:          return NumericIdentity::X;
+      case UnitType::dpi:        return NumericIdentity::DPI;
+      case UnitType::dpcm:       return NumericIdentity::DPCM;
 
       // Invalid types for NonCanonicalDimension.
       case UnitType::Number:
@@ -209,18 +209,8 @@ namespace krys::boo::css::calc
       case UnitType::hz:
       case UnitType::dppx:
       case UnitType::fr:
-      case UnitType::Calc:
-      case UnitType::CalcPercentageWithAngle:
-      case UnitType::CalcPercentageWithLength:
-      case UnitType::Dimension:
-      case UnitType::FontFamily:
-      case UnitType::Ident:
-      case UnitType::PropertyId:
       case UnitType::QuirkyEm:
-      case UnitType::String:
-      case UnitType::Unknown:
-      case UnitType::ValueId:
-      case UnitType::CustomIdent:              break;
+      case UnitType::Unknown:    break;
     }
 
     krys_unreachable();

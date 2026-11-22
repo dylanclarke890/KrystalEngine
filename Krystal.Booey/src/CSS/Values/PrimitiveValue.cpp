@@ -40,26 +40,6 @@ namespace krys::boo::css
 {
   namespace
   {
-    KRYS_NODISCARD bool IsValidUnitTypeForDoubleConversion(UnitType unitType) noexcept
-    {
-      switch (unitType)
-      {
-        case UnitType::FontFamily:
-        case UnitType::CustomIdent:
-        case UnitType::PropertyId:
-        case UnitType::String:
-        case UnitType::Unknown:
-        case UnitType::ValueId:     return false;
-        case UnitType::Ident:       krys_debug_assert(false); return false;
-        default:                    return true;
-      }
-    }
-
-    KRYS_NODISCARD bool IsStringType(UnitType type) noexcept
-    {
-      return type == UnitType::String || type == UnitType::CustomIdent || type == UnitType::FontFamily;
-    }
-
     KRYS_NODISCARD HashMap<const PrimitiveValue *, CSSOMString> &SerialisedPrimitiveValues() noexcept
     {
       static NeverDestroyed<HashMap<const PrimitiveValue *, CSSOMString>> map;
@@ -93,28 +73,29 @@ namespace krys::boo::css
 
   PrimitiveValue::PrimitiveValue(css::PropertyId property) noexcept : css::Value(ValueType::Primitive)
   {
-    SetPrimitiveUnitType(UnitType::PropertyId);
+    _primitiveKind = PrimitiveKind::PropertyId;
     _value.PropertyId = property;
   }
 
   PrimitiveValue::PrimitiveValue(double value, UnitType unit) noexcept : css::Value(ValueType::Primitive)
   {
-    SetPrimitiveUnitType(unit);
+    _unit = unit;
     _value.Number = value;
   }
 
-  PrimitiveValue::PrimitiveValue(const CSSOMString &value, UnitType unit) noexcept
+  PrimitiveValue::PrimitiveValue(const CSSOMString &value, PrimitiveKind kind) noexcept
       : css::Value(ValueType::Primitive)
   {
-    krys_debug_assert(IsStringType(unit));
-    SetPrimitiveUnitType(unit);
+    krys_debug_assert(kind == PrimitiveKind::String || kind == PrimitiveKind::CustomIdent
+                      || kind == PrimitiveKind::FontFamily);
+    _primitiveKind = kind;
     _value.String = CSSOMStringAtom(value).LeakStorage();
   }
 
   PrimitiveValue::PrimitiveValue(StaticValueTag, css::ValueId keyword) noexcept
       : css::Value(ValueType::Primitive)
   {
-    SetPrimitiveUnitType(UnitType::ValueId);
+    _primitiveKind = PrimitiveKind::ValueId;
     _value.ValueId = keyword;
 
     MakeStatic();
@@ -134,21 +115,21 @@ namespace krys::boo::css
 
   PrimitiveValue::PrimitiveValue(Ref<calc::Value> value) noexcept : css::Value(ValueType::Primitive)
   {
-    SetPrimitiveUnitType(UnitType::Calc);
+    _primitiveKind = PrimitiveKind::Calc;
     _value.Calc = value.release();
   }
 
   PrimitiveValue::~PrimitiveValue() noexcept
   {
-    switch (PrimitiveUnitType())
+    switch (_primitiveKind)
     {
-      case UnitType::String:
-      case UnitType::CustomIdent:
-      case UnitType::FontFamily:               CSSOMStringAtom::DerefStorage(_value.String); break;
-      case UnitType::Calc:                     _value.Calc->SubRef(); break;
-      case UnitType::CalcPercentageWithAngle:
-      case UnitType::CalcPercentageWithLength: krys_debug_assert(false); break;
-      default:                                 break;
+      case PrimitiveKind::String:
+      case PrimitiveKind::CustomIdent:
+      case PrimitiveKind::FontFamily:  CSSOMStringAtom::DerefStorage(_value.String); break;
+      case PrimitiveKind::Calc:        _value.Calc->SubRef(); break;
+      case PrimitiveKind::Number:
+      case PrimitiveKind::PropertyId:
+      case PrimitiveKind::ValueId:     break;
     }
 
     if (_hasCachedCSSText)
@@ -207,12 +188,12 @@ namespace krys::boo::css
 
   Ref<PrimitiveValue> PrimitiveValue::Create(const CSSOMString &value) noexcept
   {
-    return AdoptRef(*new PrimitiveValue(value, UnitType::String));
+    return AdoptRef(*new PrimitiveValue(value, PrimitiveKind::String));
   }
 
   Ref<PrimitiveValue> PrimitiveValue::Create(const CSSOMStringAtom &value) noexcept
   {
-    return AdoptRef(*new PrimitiveValue(value.ToString(), UnitType::String));
+    return AdoptRef(*new PrimitiveValue(value.ToString(), PrimitiveKind::String));
   }
 
   Ref<PrimitiveValue> PrimitiveValue::Create(Ref<calc::Value> value) noexcept
@@ -222,17 +203,17 @@ namespace krys::boo::css
 
   Ref<PrimitiveValue> PrimitiveValue::CreateCustomIdent(const CSSOMString &value) noexcept
   {
-    return AdoptRef(*new PrimitiveValue(value, UnitType::CustomIdent));
+    return AdoptRef(*new PrimitiveValue(value, PrimitiveKind::CustomIdent));
   }
 
   Ref<PrimitiveValue> PrimitiveValue::CreateCustomIdent(const CSSOMStringAtom &value) noexcept
   {
-    return AdoptRef(*new PrimitiveValue(value.ToString(), UnitType::CustomIdent));
+    return AdoptRef(*new PrimitiveValue(value.ToString(), PrimitiveKind::CustomIdent));
   }
 
   Ref<PrimitiveValue> PrimitiveValue::CreateFontFamily(const CSSOMString &value) noexcept
   {
-    return AdoptRef(*new PrimitiveValue(value, UnitType::FontFamily));
+    return AdoptRef(*new PrimitiveValue(value, PrimitiveKind::FontFamily));
   }
 
   Ref<PrimitiveValue> PrimitiveValue::CreateInteger(double value) noexcept
@@ -244,24 +225,17 @@ namespace krys::boo::css
 
   UnitType PrimitiveValue::PrimitiveType() const noexcept
   {
-    auto type = PrimitiveUnitType();
-    switch (type)
+    if (auto *calcValue = CSSCalcValue())
     {
-      case UnitType::PropertyId:
-      case UnitType::ValueId:
-      case UnitType::CustomIdent: return UnitType::Ident;
-      case UnitType::FontFamily:
-        // Web-exposed content expects font family values to have UnitType::String primitive type so we need
-        // to map our internal UnitType::FontFamily type here.
-        return UnitType::String;
-      default:
-        if (auto *calcValue = CSSCalcValue())
-        {
-          return calcValue->PrimitiveType();
-        }
-
-        return type;
+      return calcValue->PrimitiveType();
     }
+    return _unit;
+  }
+
+  bool PrimitiveValue::IsCalculatedPercentageWithLength() const noexcept
+  {
+    auto *calcValue = CSSCalcValue();
+    return calcValue && calcValue->IsPercentageWithLength();
   }
 
   RefPtr<const calc::Value> PrimitiveValue::ProtectedCSSCalcValue() const noexcept
@@ -449,14 +423,15 @@ namespace krys::boo::css
     PrimitiveValue::DoubleValueInternal(UnitType targetUnit,
                                         const ToLengthConversionData &conversionData) const noexcept
   {
-    if (!IsValidUnitTypeForDoubleConversion(PrimitiveUnitType())
-        || !IsValidUnitTypeForDoubleConversion(targetUnit))
+    if ((_primitiveKind != PrimitiveKind::Number && _primitiveKind != PrimitiveKind::Calc)
+        || (_primitiveKind == PrimitiveKind::Number && _unit == UnitType::Unknown)
+        || targetUnit == UnitType::Unknown)
     {
       return null;
     }
 
     UnitType sourceUnitType = PrimitiveType();
-    if (targetUnit == sourceUnitType || targetUnit == UnitType::Dimension)
+    if (targetUnit == sourceUnitType)
     {
       return DoubleValue(conversionData);
     }
@@ -538,14 +513,15 @@ namespace krys::boo::css
 
   Maybe<double> PrimitiveValue::DoubleValueInternalWithoutConversionData(UnitType targetUnit) const noexcept
   {
-    if (!IsValidUnitTypeForDoubleConversion(PrimitiveUnitType())
-        || !IsValidUnitTypeForDoubleConversion(targetUnit))
+    if ((_primitiveKind != PrimitiveKind::Number && _primitiveKind != PrimitiveKind::Calc)
+        || (_primitiveKind == PrimitiveKind::Number && _unit == UnitType::Unknown)
+        || targetUnit == UnitType::Unknown)
     {
       return null;
     }
 
     UnitType sourceUnitType = PrimitiveType();
-    if (targetUnit == sourceUnitType || targetUnit == UnitType::Dimension)
+    if (targetUnit == sourceUnitType)
     {
       return _value.Number;
     }
@@ -627,15 +603,17 @@ namespace krys::boo::css
 
   CSSOMString PrimitiveValue::StringValue() const noexcept
   {
-    switch (PrimitiveUnitType())
+    switch (_primitiveKind)
     {
-      case UnitType::String:
-      case UnitType::CustomIdent:
-      case UnitType::FontFamily:  return CSSOMString(_value.String->View());
-      case UnitType::ValueId:     return CSSOMString(ToString(_value.ValueId));
-      case UnitType::PropertyId:  return CSSOMString(ToString(_value.PropertyId));
-      default:                    return {};
+      case PrimitiveKind::String:
+      case PrimitiveKind::CustomIdent:
+      case PrimitiveKind::FontFamily:  return CSSOMString(_value.String->View());
+      case PrimitiveKind::ValueId:     return CSSOMString(ToString(_value.ValueId));
+      case PrimitiveKind::PropertyId:  return CSSOMString(ToString(_value.PropertyId));
+      case PrimitiveKind::Number:
+      case PrimitiveKind::Calc:        return {};
     }
+    krys_unreachable();
   }
 
   CSSOMString PrimitiveValue::FormatNumberValue(CSSOMStringView suffix) const noexcept
@@ -657,43 +635,44 @@ namespace krys::boo::css
 
   CSSOMString PrimitiveValue::SerialiseInternal(const SerialisationContext &context) const noexcept
   {
-    auto type = PrimitiveUnitType();
-    switch (type)
+    switch (_primitiveKind)
     {
-      case UnitType::Calc:       return ProtectedCSSCalcValue()->CssText(context);
-      // FIXME: This isn't correct.
-      case UnitType::Dimension:  return FormatNumberValue(u8"");
-      case UnitType::FontFamily: return SerialiseFontFamily(CSSOMString(_value.String->View()));
-      case UnitType::Integer:    return FormatIntegerValue(u8"");
-      case UnitType::QuirkyEm:   return FormatNumberValue(u8"em");
-      case UnitType::String:     return SerialiseString(CSSOMString(_value.String->View()));
-      case UnitType::CustomIdent:
+      case PrimitiveKind::Calc:       return ProtectedCSSCalcValue()->CssText(context);
+      case PrimitiveKind::FontFamily: return SerialiseFontFamily(CSSOMString(_value.String->View()));
+      case PrimitiveKind::String:     return SerialiseString(CSSOMString(_value.String->View()));
+      case PrimitiveKind::CustomIdent:
       {
         StringBuilder builder;
         SerialiseIdentifier(CSSOMString(_value.String->View()), builder);
         return krys::move(builder).ToString();
       }
 
-      case UnitType::CalcPercentageWithAngle:
-      case UnitType::CalcPercentageWithLength:
-      case UnitType::Ident:
-      case UnitType::PropertyId:
-      case UnitType::Unknown:
-      case UnitType::ValueId:                  krys_debug_assert(false); return {};
+      case PrimitiveKind::PropertyId:
+      case PrimitiveKind::ValueId:    krys_debug_assert(false); return {};
+      case PrimitiveKind::Number:     break;
+    }
 
+    switch (_unit)
+    {
+      case UnitType::Integer:  return FormatIntegerValue(u8"");
+      case UnitType::QuirkyEm: return FormatNumberValue(u8"em");
+      case UnitType::Unknown:  krys_debug_assert(false); return {};
       default:
         // Every remaining unit is a number with a unit suffix (Number has an empty suffix).
-        return FormatNumberValue(UnitTypeString(type));
+        return FormatNumberValue(UnitTypeString(_unit));
     }
   }
 
   CSSOMString PrimitiveValue::CustomCSSText(const SerialisationContext &context) const noexcept
   {
-    switch (PrimitiveUnitType())
+    if (_primitiveKind == PrimitiveKind::Number && _unit == UnitType::Unknown)
     {
-      case UnitType::Unknown:    return {};
-      case UnitType::ValueId:    return CSSOMString(ToLower(_value.ValueId));
-      case UnitType::PropertyId: return CSSOMString(ToString(_value.PropertyId));
+      return {};
+    }
+    switch (_primitiveKind)
+    {
+      case PrimitiveKind::ValueId:    return CSSOMString(ToLower(_value.ValueId));
+      case PrimitiveKind::PropertyId: return CSSOMString(ToString(_value.PropertyId));
       default:
       {
         auto &map = SerialisedPrimitiveValues();
@@ -713,48 +692,43 @@ namespace krys::boo::css
 
   bool PrimitiveValue::Equals(const PrimitiveValue &other) const noexcept
   {
-    if (PrimitiveUnitType() != other.PrimitiveUnitType())
+    if (_primitiveKind != other._primitiveKind || _unit != other._unit)
     {
       return false;
     }
 
-    switch (PrimitiveUnitType())
+    switch (_primitiveKind)
     {
-      case UnitType::Unknown:    return false;
-      case UnitType::PropertyId: return _value.PropertyId == other._value.PropertyId;
-      case UnitType::ValueId:    return _value.ValueId == other._value.ValueId;
-      case UnitType::String:
-      case UnitType::CustomIdent:
-      case UnitType::FontFamily:
+      case PrimitiveKind::PropertyId: return _value.PropertyId == other._value.PropertyId;
+      case PrimitiveKind::ValueId:    return _value.ValueId == other._value.ValueId;
+      case PrimitiveKind::String:
+      case PrimitiveKind::CustomIdent:
+      case PrimitiveKind::FontFamily:
         return _value.String == other._value.String; // Interned, so equal iff same atom.
-      case UnitType::Calc: return ProtectedCSSCalcValue()->Equals(*other.ProtectedCSSCalcValue());
-      case UnitType::Ident:
-      case UnitType::CalcPercentageWithAngle:
-      case UnitType::CalcPercentageWithLength:
-        // FIXME: seems like these should be handled.
-        krys_debug_assert(false);
-        return false;
-      default: return _value.Number == other._value.Number;
+      case PrimitiveKind::Calc:   return ProtectedCSSCalcValue()->Equals(*other.ProtectedCSSCalcValue());
+      case PrimitiveKind::Number: return _unit != UnitType::Unknown && _value.Number == other._value.Number;
     }
+    krys_unreachable();
   }
 
   bool PrimitiveValue::AddDerivedHash(size_t &seed) const noexcept
   {
-    seed = CombineFastHashes(seed, PrimitiveUnitType());
+    seed = CombineFastHashes(seed, _primitiveKind, _unit);
 
-    switch (PrimitiveUnitType())
+    switch (_primitiveKind)
     {
-      case UnitType::Unknown:                  break;
-      case UnitType::PropertyId:               seed = CombineFastHashes(seed, _value.PropertyId); break;
-      case UnitType::ValueId:                  seed = CombineFastHashes(seed, _value.ValueId); break;
-      case UnitType::String:
-      case UnitType::CustomIdent:
-      case UnitType::FontFamily:               seed = CombineFastHashes(seed, _value.String->Hash()); break;
-      case UnitType::Calc:                     seed = CombineFastHashes(seed, _value.Calc); break;
-      case UnitType::Ident:
-      case UnitType::CalcPercentageWithAngle:
-      case UnitType::CalcPercentageWithLength: krys_debug_assert(false); return false;
-      default:                                 seed = CombineFastHashes(seed, _value.Number); break;
+      case PrimitiveKind::PropertyId:  seed = CombineFastHashes(seed, _value.PropertyId); break;
+      case PrimitiveKind::ValueId:     seed = CombineFastHashes(seed, _value.ValueId); break;
+      case PrimitiveKind::String:
+      case PrimitiveKind::CustomIdent:
+      case PrimitiveKind::FontFamily:  seed = CombineFastHashes(seed, _value.String->Hash()); break;
+      case PrimitiveKind::Calc:        seed = CombineFastHashes(seed, _value.Calc); break;
+      case PrimitiveKind::Number:
+        if (_unit != UnitType::Unknown)
+        {
+          seed = CombineFastHashes(seed, _value.Number);
+        }
+        break;
     }
 
     return true;

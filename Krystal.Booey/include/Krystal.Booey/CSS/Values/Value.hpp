@@ -50,6 +50,26 @@ namespace krys::boo::css
   enum class PropertyId : uint16;
   enum class ValueId : uint16;
 
+  namespace detail
+  {
+    // What a PrimitiveValue holds; a number's unit is in `_unit`, which is `Unknown` for the other kinds.
+    enum class PrimitiveKind : uint8
+    {
+      Number,
+      String,
+      CustomIdent,
+      FontFamily,
+      PropertyId,
+      ValueId,
+      Calc,
+    };
+
+    consteval PrimitiveKind MaxEnumValue(PrimitiveKind) noexcept
+    {
+      return PrimitiveKind::Calc;
+    }
+  }
+
   class Value
   {
     friend class StaticValuePool;
@@ -70,6 +90,8 @@ namespace krys::boo::css
   protected:
     ValueType _type : EnumBitWidth<ValueType>;
 
+    detail::PrimitiveKind _primitiveKind
+      : EnumBitWidth<detail::PrimitiveKind> {detail::PrimitiveKind::Number};
     UnitType _unit : EnumBitWidth<UnitType> {UnitType::Unknown};
     ValueSeparator _valueSeparator : EnumBitWidth<ValueSeparator> {ValueSeparator::Space};
     bool _isImplicitInitialValue : 1 {false};

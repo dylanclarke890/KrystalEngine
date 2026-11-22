@@ -85,6 +85,8 @@ namespace krys::boo::css
     friend LazyNeverDestroyed<PrimitiveValue>;
     friend class Value;
 
+    using PrimitiveKind = detail::PrimitiveKind;
+
   private:
     union ValueUnion
     {
@@ -105,7 +107,7 @@ namespace krys::boo::css
 
     explicit PrimitiveValue(css::PropertyId property) noexcept;
 
-    PrimitiveValue(const CSSOMString &value, UnitType unit) noexcept;
+    PrimitiveValue(const CSSOMString &value, PrimitiveKind kind) noexcept;
 
     PrimitiveValue(double value, UnitType unit) noexcept;
 
@@ -219,13 +221,10 @@ namespace krys::boo::css
 
     KRYS_NODISCARD bool IsCalculated() const noexcept
     {
-      return PrimitiveUnitType() == UnitType::Calc;
+      return _primitiveKind == PrimitiveKind::Calc;
     }
 
-    KRYS_NODISCARD bool IsCalculatedPercentageWithLength() const noexcept
-    {
-      return PrimitiveType() == UnitType::CalcPercentageWithLength;
-    }
+    KRYS_NODISCARD bool IsCalculatedPercentageWithLength() const noexcept;
 
     KRYS_NODISCARD bool IsResolution() const noexcept
     {
@@ -255,7 +254,7 @@ namespace krys::boo::css
 
     KRYS_NODISCARD bool IsValueId() const noexcept
     {
-      return PrimitiveUnitType() == UnitType::ValueId;
+      return _primitiveKind == PrimitiveKind::ValueId;
     }
 
     KRYS_NODISCARD css::ValueId ValueId() const noexcept
@@ -265,7 +264,7 @@ namespace krys::boo::css
 
     KRYS_NODISCARD bool IsPropertyId() const noexcept
     {
-      return PrimitiveUnitType() == UnitType::PropertyId;
+      return _primitiveKind == PrimitiveKind::PropertyId;
     }
 
     KRYS_NODISCARD css::PropertyId PropertyId() const noexcept
@@ -275,12 +274,12 @@ namespace krys::boo::css
 
     KRYS_NODISCARD bool IsString() const noexcept
     {
-      return PrimitiveUnitType() == UnitType::String;
+      return _primitiveKind == PrimitiveKind::String;
     }
 
     KRYS_NODISCARD bool IsCustomIdent() const noexcept
     {
-      return PrimitiveUnitType() == UnitType::CustomIdent;
+      return _primitiveKind == PrimitiveKind::CustomIdent;
     }
 
     KRYS_NODISCARD CSSOMString CustomIdent() const noexcept
@@ -291,13 +290,15 @@ namespace krys::boo::css
 
     KRYS_NODISCARD bool IsFontFamily() const noexcept
     {
-      return PrimitiveUnitType() == UnitType::FontFamily;
+      return _primitiveKind == PrimitiveKind::FontFamily;
     }
 
     KRYS_NODISCARD CSSOMString StringValue() const noexcept;
 
 #pragma endregion
 
+    /// @brief The unit of a number, or of the number a calc() resolves to; `UnitType::Unknown` for the other
+    /// kinds of value, and for a calc() mixing a percentage with a length or angle.
     KRYS_NODISCARD UnitType PrimitiveType() const noexcept;
 
 #pragma region Integer (requires IsInteger())
@@ -483,14 +484,10 @@ namespace krys::boo::css
     void CollectComputedStyleDependencies(css::ComputedStyleDependencies &dependencies) const noexcept;
 
   private:
+    // The stored unit: `Unknown` for every kind but a number, calc() included.
     KRYS_NODISCARD UnitType PrimitiveUnitType() const noexcept
     {
       return _unit;
-    }
-
-    void SetPrimitiveUnitType(UnitType type) noexcept
-    {
-      _unit = type;
     }
 
 #pragma region Length converting
