@@ -1354,7 +1354,7 @@ namespace krys::boo
     {
       lineBox = box->GetLineBox()->Previous();
       // We want to skip zero height boxes.
-      // This could happen in case it is a LegacyRootInlineBox with trailing floats.
+      // This could happen in case it is a root inline box with trailing floats.
       if (!lineBox || !lineBox->LogicalHeight() || !lineBox->LineLeftmostLeafBox())
       {
         lineBox = {};
@@ -1413,7 +1413,7 @@ namespace krys::boo
     {
       lineBox = box->GetLineBox()->Next();
       // We want to skip zero height boxes.
-      // This could happen in case it is a LegacyRootInlineBox with trailing floats.
+      // This could happen in case it is a root inline box with trailing floats.
       if (!lineBox || !lineBox->LogicalHeight() || !lineBox->LineLeftmostLeafBox())
       {
         lineBox = {};

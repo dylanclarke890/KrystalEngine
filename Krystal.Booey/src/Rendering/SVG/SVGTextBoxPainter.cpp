@@ -40,19 +40,12 @@
 #include "Krystal.Booey/Rendering/SVG/Legacy/SVGResourcesCache.hpp"
 #include "Krystal.Booey/Rendering/SVG/RenderSVGInlineText.hpp"
 #include "Krystal.Booey/Rendering/SVG/RenderSVGText.hpp"
-#include "Krystal.Booey/Rendering/SVG/SVGInlineTextBox.hpp"
 #include "Krystal.Booey/Rendering/SVG/SVGTextFragment.hpp"
 #include "Krystal.Booey/Style/Values/Borders/Shadow.hpp"
 #include <algorithm>
 
 namespace krys::boo
 {
-  LegacySVGTextBoxPainter::LegacySVGTextBoxPainter(const SVGInlineTextBox &textBox, PaintInfo &paintInfo,
-                                                   const LayoutPoint &paintOffset) noexcept
-      : SVGTextBoxPainter(inline_iterator::BoxLegacyPath {&textBox}, paintInfo, paintOffset)
-  {
-  }
-
   ModernSVGTextBoxPainter::ModernSVGTextBoxPainter(const layout_integration::InlineContent &inlineContent,
                                                    size_t boxIndex, PaintInfo &paintInfo,
                                                    const LayoutPoint &paintOffset) noexcept
@@ -205,8 +198,8 @@ namespace krys::boo
       return;
     }
 
-    // Note: We're explicitly not supporting composition & custom underlines and custom highlighters - unlike
-    // LegacyInlineTextBox. If we ever need that for SVG, it's very easy to refactor and reuse the code.
+    // Note: We're explicitly not supporting composition & custom underlines and custom highlighters, unlike
+    // HTML text boxes.
 
     auto &parentRenderer = ParentRenderer();
 
@@ -731,5 +724,4 @@ namespace krys::boo
   }
 
   template class SVGTextBoxPainter<inline_iterator::BoxModernPath>;
-  template class SVGTextBoxPainter<inline_iterator::BoxLegacyPath>;
 }

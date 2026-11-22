@@ -45,8 +45,6 @@ namespace krys::boo::inline_iterator
 
 namespace krys::boo
 {
-  class LegacyLineLayout;
-  class LegacyRootInlineBox;
   class RenderBlockFlow;
   class RenderMultiColumnFlow;
 
@@ -166,7 +164,6 @@ namespace krys::boo
     {
       UndeterminedPath,
       InlinePath,
-      SvgTextPath,
     };
 
   protected:
@@ -174,8 +171,7 @@ namespace krys::boo
     UniquePtr<RenderBlockFlowRareData> _rareBlockFlowData;
 
   private:
-    Variant<std::monostate, UniquePtr<layout_integration::LineLayout>, UniquePtr<LegacyLineLayout>>
-      _lineLayout;
+    UniquePtr<layout_integration::LineLayout> _lineLayout;
     LineLayoutPath _lineLayoutPath {LineLayoutPath::UndeterminedPath};
     Maybe<Pair<float, float>> _previousInlineLayoutContentTopAndBottomIncludingInkOverflow;
 
@@ -311,41 +307,20 @@ namespace krys::boo
 
     KRYS_NODISCARD size_t LineCount() const noexcept;
 
-    KRYS_NODISCARD bool HasSvgTextLayout() const noexcept
-    {
-      return std::holds_alternative<UniquePtr<LegacyLineLayout>>(_lineLayout);
-    }
-
-    KRYS_NODISCARD const LegacyLineLayout *SvgTextLayout() const noexcept
-    {
-      return HasSvgTextLayout() ? std::get<UniquePtr<LegacyLineLayout>>(_lineLayout).get() : nullptr;
-    }
-
-    KRYS_NODISCARD LegacyLineLayout *SvgTextLayout() noexcept
-    {
-      return HasSvgTextLayout() ? std::get<UniquePtr<LegacyLineLayout>>(_lineLayout).get() : nullptr;
-    }
-
     KRYS_NODISCARD bool HasInlineLayout() const noexcept
     {
-      return std::holds_alternative<UniquePtr<layout_integration::LineLayout>>(_lineLayout);
+      return _lineLayout != nullptr;
     }
 
     KRYS_NODISCARD const layout_integration::LineLayout *InlineLayout() const noexcept
     {
-      return HasInlineLayout() ? std::get<UniquePtr<layout_integration::LineLayout>>(_lineLayout).get()
-                               : nullptr;
+      return _lineLayout.get();
     }
 
     KRYS_NODISCARD layout_integration::LineLayout *InlineLayout() noexcept
     {
-      return HasInlineLayout() ? std::get<UniquePtr<layout_integration::LineLayout>>(_lineLayout).get()
-                               : nullptr;
+      return _lineLayout.get();
     }
-
-    KRYS_NODISCARD LegacyRootInlineBox *LegacyRootBox() const noexcept;
-
-    void DirtyLineFromChangedChild() noexcept final;
 
     /// @brief The margin collapsing state while a block lays out its block children.
     class MarginInfo
@@ -735,8 +710,6 @@ namespace krys::boo
     void MaterializeRareBlockFlowData() noexcept;
 
   protected:
-    void WillBeDestroyed() noexcept override;
-
     void PaintFloats(PaintInfo &, const LayoutPoint &, bool preservePhase = false) noexcept override;
 
     void PaintInlineChildren(PaintInfo &, const LayoutPoint &) noexcept override;

@@ -153,6 +153,11 @@ namespace krys::boo::layout
 
     KRYS_NODISCARD static bool ShouldPreserveNewline(const Box &layoutBox) noexcept;
 
+    /// @brief Whether the character at @p position of SVG text starts a text chunk (it has an absolute x or
+    /// y, or begins a text path), and so must start a text box of its own. False for other text.
+    KRYS_NODISCARD static bool StartsSVGTextChunk(const InlineTextBox &inlineTextBox,
+                                                  size_t position) noexcept;
+
     KRYS_NODISCARD static bool IsWrappingAllowed(const RenderStyle &style) noexcept;
 
     KRYS_NODISCARD static bool ShouldTrailingWhitespaceHang(const RenderStyle &style) noexcept;

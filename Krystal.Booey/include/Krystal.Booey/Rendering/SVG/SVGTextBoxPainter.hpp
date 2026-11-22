@@ -102,15 +102,7 @@ namespace krys::boo
     KRYS_NODISCARD std::pair<uint32, uint32> SelectionStartEnd() const noexcept;
   };
 
-  extern template class SVGTextBoxPainter<inline_iterator::BoxLegacyPath>;
   extern template class SVGTextBoxPainter<inline_iterator::BoxModernPath>;
-
-  /// @brief Paints a legacy SVG text box.
-  class LegacySVGTextBoxPainter : public SVGTextBoxPainter<inline_iterator::BoxLegacyPath>
-  {
-  public:
-    LegacySVGTextBoxPainter(const SVGInlineTextBox &, PaintInfo &, const LayoutPoint &paintOffset) noexcept;
-  };
 
   /// @brief Paints an SVG text box of the inline content.
   class ModernSVGTextBoxPainter : public SVGTextBoxPainter<inline_iterator::BoxModernPath>

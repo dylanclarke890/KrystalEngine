@@ -109,8 +109,6 @@ namespace krys::boo::layout_integration
 
     KRYS_NODISCARD static const LineLayout *Containing(const RenderObject &renderer) noexcept;
 
-    KRYS_NODISCARD static bool CanUseFor(const RenderBlockFlow &flow) noexcept;
-
     KRYS_NODISCARD static bool CanUseForPreferredWidthComputation(const RenderBlockFlow &flow) noexcept;
 
     KRYS_NODISCARD static bool

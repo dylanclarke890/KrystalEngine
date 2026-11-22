@@ -27,7 +27,6 @@
 
 #include "Krystal.Booey/Graphics/Fonts/FontBaseline.hpp"
 #include "Krystal.Booey/Layout/Integration/Inline/InlineIteratorBox.hpp"
-#include "Krystal.Booey/Layout/Integration/Inline/InlineIteratorLineBoxLegacyPath.hpp"
 #include "Krystal.Core/Attributes.hpp"
 #include "Krystal.Core/Move.hpp"
 #include "Krystal.Core/Visitor.hpp"
@@ -210,7 +209,7 @@ namespace krys::boo::inline_iterator
     friend class LineBoxIterator;
 
   public:
-    using PathVariant = Variant<LineBoxIteratorModernPath, LineBoxIteratorLegacyPath>;
+    using PathVariant = Variant<LineBoxIteratorModernPath>;
 
   private:
     PathVariant _pathVariant;
@@ -400,7 +399,7 @@ namespace krys::boo::inline_iterator
 
   public:
     /// @brief An iterator at the end.
-    LineBoxIterator() noexcept : _lineBox(LineBoxIteratorLegacyPath {nullptr})
+    LineBoxIterator() noexcept : _lineBox(LineBoxIteratorModernPath {})
     {
     }
 

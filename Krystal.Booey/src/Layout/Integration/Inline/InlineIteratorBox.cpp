@@ -193,14 +193,8 @@ namespace krys::boo::inline_iterator
 
   LineBoxIterator Box::GetLineBox() const noexcept
   {
-    return SwitchOn(
-      _pathVariant, [](const BoxLegacyPath &path)
-      { return LineBoxIterator {LineBoxIteratorLegacyPath {&path.RootInlineBox()}}; },
-      [](const BoxModernPath &path)
-      {
-        return LineBoxIterator {
-          LineBoxIteratorModernPath {path.GetInlineContent(), path.GetBox().LineIndex()}};
-      });
+    const auto &path = ModernPath();
+    return LineBoxIterator {LineBoxIteratorModernPath {path.GetInlineContent(), path.GetBox().LineIndex()}};
   }
 
   RectF Box::VisualRect() const noexcept

@@ -43,7 +43,6 @@
 #include "Krystal.Booey/Rendering/Layers/RenderLayer.hpp"
 #include "Krystal.Booey/Rendering/Layers/RenderLayerScrollableArea.hpp"
 #include "Krystal.Booey/Rendering/Line/InlineWalker.hpp"
-#include "Krystal.Booey/Rendering/Line/LegacyRootInlineBox.hpp"
 #include "Krystal.Booey/Rendering/RenderBlockFlow.hpp"
 #include "Krystal.Booey/Rendering/RenderFlexibleBox.hpp"
 #include "Krystal.Booey/Rendering/RenderInline.hpp"
@@ -492,16 +491,6 @@ namespace krys::boo::layout_integration
         if (auto *inlineLayout = blockFlow->InlineLayout())
         {
           return inlineLayout->LastLineBaseline().value_or(0_lu);
-        }
-
-        if (blockFlow->SvgTextLayout())
-        {
-          auto &style = blockFlow->FirstLineStyle();
-          // LegacyInlineFlowBox::PlaceBoxesInBlockDirection will flip lines in case of verticalLR mode, so we
-          // can assume verticalRL for now.
-          return LayoutUnit(
-            blockFlow->LegacyRootBox()->LogicalTop()
-            + style.MetricsOfPrimaryFont().IntAscent(blockFlow->LegacyRootBox()->BaselineType()));
         }
 
         krys_debug_assert(false);

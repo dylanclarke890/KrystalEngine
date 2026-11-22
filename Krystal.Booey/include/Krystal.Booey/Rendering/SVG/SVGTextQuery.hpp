@@ -28,9 +28,7 @@
 
 namespace krys::boo
 {
-  class LegacyInlineFlowBox;
   class RenderObject;
-  class SVGInlineTextBox;
 
   /// @brief Answers SVGTextContentElement's queries (lengths, character positions and extents) from the laid
   /// out text fragments.

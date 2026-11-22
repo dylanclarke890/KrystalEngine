@@ -180,8 +180,6 @@ namespace krys::boo
       return false;
     }
 
-    void WillBeDestroyed() noexcept override;
-
     KRYS_NODISCARD LayoutUnit ComputeReplacedLogicalWidthRespectingMinMaxWidth(
       LayoutUnit logicalWidth,
       ShouldComputePreferred shouldComputePreferred = ShouldComputePreferred::ComputeActual) const noexcept;

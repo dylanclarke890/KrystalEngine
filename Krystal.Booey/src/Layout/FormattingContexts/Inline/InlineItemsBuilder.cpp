@@ -1186,7 +1186,9 @@ namespace krys::boo::layout
         inlineTextBox, {}, static_cast<uint32>(contentLength), text::DefaultLeftToRightBidiLevel, false, {}));
     }
 
-    if (!partialContentOffset
+    // SVG text splits its items at text chunks, which the cache doesn't know about.
+    auto isSVGText = inlineTextBox.RendererForIntegration()->IsRenderSVGInlineText();
+    if (!partialContentOffset && !isSVGText
         && BuildInlineItemListForTextFromBreakingPositionsCache(inlineTextBox, inlineItemList))
     {
       if (!_textContentPopulatedFromCache)
@@ -1205,6 +1207,22 @@ namespace krys::boo::layout
       TextUtil::GetContentAnalysis(style.WordBreak())};
     auto currentPosition = partialContentOffset.value_or(0);
     krys_debug_assert(currentPosition <= contentLength);
+
+    // Each SVG text chunk starts an item (and so a text box) of its own.
+    auto endBeforeNextSVGTextChunk = [&](size_t start, size_t end)
+    {
+      if (isSVGText)
+      {
+        for (auto position = start + 1; position < end; ++position)
+        {
+          if (TextUtil::StartsSVGTextChunk(inlineTextBox, position))
+          {
+            return position;
+          }
+        }
+      }
+      return end;
+    };
 
     auto handleSegmentBreak = [&]
     {
@@ -1231,6 +1249,9 @@ namespace krys::boo::layout
       }
 
       krys_debug_assert(whitespaceContent->Length);
+      whitespaceContent->Length =
+        endBeforeNextSVGTextChunk(currentPosition, currentPosition + whitespaceContent->Length)
+        - currentPosition;
       if (style.WhiteSpaceCollapse() == WhiteSpaceCollapse::BreakSpaces)
       {
         // https://www.w3.org/TR/css-text-3/#white-space-phase-1
@@ -1274,6 +1295,12 @@ namespace krys::boo::layout
         hasTrailingSoftHyphen = EndsWithSoftHyphen(text, endPosition);
       }
       krys_debug_assert(style.Hyphens() != Hyphens::None || !hasTrailingSoftHyphen);
+      if (auto chunkEnd = static_cast<uint32>(endBeforeNextSVGTextChunk(startPosition, endPosition));
+          chunkEnd != endPosition)
+      {
+        endPosition = chunkEnd;
+        hasTrailingSoftHyphen = false;
+      }
       inlineItemList.push_back(InlineTextItem::CreateNonWhitespaceItem(
         inlineTextBox, startPosition, endPosition - startPosition, text::DefaultLeftToRightBidiLevel,
         hasTrailingSoftHyphen, {}));

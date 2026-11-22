@@ -23,15 +23,12 @@
 
 #include "Krystal.Booey/DOM/Nodes/Text.hpp"
 #include "Krystal.Booey/Graphics/Fonts/FontCascade.hpp"
-#include "Krystal.Booey/Rendering/Line/RenderTextLineBoxes.hpp"
 #include "Krystal.Booey/Rendering/RenderText.hpp"
 #include "Krystal.Booey/Rendering/SVG/SVGTextLayoutAttributes.hpp"
 #include "Krystal.Core/Memory/UniquePtr.hpp"
 
 namespace krys::boo
 {
-  class SVGInlineTextBox;
-
   /// @brief The text of an SVG text content element, laid out by the SVG text layout.
   class RenderSVGInlineText final : public RenderText
   {
@@ -41,7 +38,6 @@ namespace krys::boo
     float _scalingFactor {1};
     FontCascade _scaledFont;
     SVGTextLayoutAttributes _layoutAttributes;
-    RenderTextLineBoxes _legacyLineBoxes;
 
   public:
     RenderSVGInlineText(boo::Text &, const utf8_string &) noexcept;
@@ -90,30 +86,7 @@ namespace krys::boo
     /// better job than EnclosingRectI.
     KRYS_NODISCARD RectF FloatLinesBoundingBox() const noexcept;
 
-    void RemoveTextBox(LegacyInlineTextBox &box) noexcept
-    {
-      _legacyLineBoxes.Remove(box);
-    }
-
-    LegacyInlineTextBox *CreateInlineTextBox() noexcept
-    {
-      return _legacyLineBoxes.CreateAndAppendLineBox(*this);
-    }
-
-    void DeleteLegacyLineBoxes() noexcept;
-
-    KRYS_NODISCARD LegacyInlineTextBox *FirstLegacyTextBox() const noexcept
-    {
-      return _legacyLineBoxes.First();
-    }
-
-    void RemoveAndDestroyLegacyTextBoxes() noexcept;
-
-    KRYS_NODISCARD UniquePtr<LegacyInlineTextBox> CreateTextBox() noexcept;
-
   private:
-    void WillBeDestroyed() noexcept final;
-
     KRYS_NODISCARD utf8_stringview RenderName() const noexcept override
     {
       return u8"RenderSVGInlineText";

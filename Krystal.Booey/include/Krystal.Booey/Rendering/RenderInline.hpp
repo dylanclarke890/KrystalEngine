@@ -22,7 +22,6 @@
 
 #pragma once
 
-#include "Krystal.Booey/Rendering/Line/RenderLineBoxList.hpp"
 #include "Krystal.Booey/Rendering/RenderBoxModelObject.hpp"
 #include "Krystal.Core/Attributes.hpp"
 #include "Krystal.Core/Geometry/Rect.hpp"
@@ -32,8 +31,6 @@
 
 namespace krys::boo
 {
-  class LegacyInlineFlowBox;
-
   /// @brief An inline box.
   class RenderInline : public RenderBoxModelObject
   {
@@ -41,7 +38,6 @@ namespace krys::boo
     KRYS_OVERRIDE_DELETE_FOR_CHECKED_PTR(RenderInline);
 
   private:
-    RenderLineBoxList _legacyLineBoxes;
 
   public:
     void Paint(PaintInfo &, const LayoutPoint &) noexcept override;
@@ -176,45 +172,10 @@ namespace krys::boo
 
     KRYS_NODISCARD LayoutUnit InnerPaddingBoxHeight() const noexcept;
 
-    LegacyInlineFlowBox *CreateAndAppendInlineFlowBox() noexcept;
-
-    KRYS_NODISCARD RenderLineBoxList &LegacyLineBoxes() noexcept
-    {
-      return _legacyLineBoxes;
-    }
-
-    KRYS_NODISCARD const RenderLineBoxList &LegacyLineBoxes() const noexcept
-    {
-      return _legacyLineBoxes;
-    }
-
-    void DeleteLegacyLineBoxes() noexcept;
-
-    KRYS_NODISCARD LegacyInlineFlowBox *FirstLegacyInlineBox() const noexcept
-    {
-      return _legacyLineBoxes.FirstLegacyLineBox();
-    }
-
-    KRYS_NODISCARD LegacyInlineFlowBox *LastLegacyInlineBox() const noexcept
-    {
-      return _legacyLineBoxes.LastLegacyLineBox();
-    }
-
   protected:
-    void WillBeDestroyed() noexcept override;
-
     void StyleWillChange(style::Difference diff, const RenderStyle &newStyle) noexcept override;
 
     void UpdateFromStyle() noexcept override;
-
-    /// @brief Subclassed by RenderSVGInline.
-    KRYS_NODISCARD virtual UniquePtr<LegacyInlineFlowBox> CreateInlineFlowBox() noexcept;
-
-  private:
-    void DirtyLineFromChangedChild() noexcept final
-    {
-      _legacyLineBoxes.DirtyLineFromChangedChild(*this);
-    }
   };
 
   /// @brief Whether @p renderer holds nothing but collapsible whitespace (and floating or out-of-flow boxes).

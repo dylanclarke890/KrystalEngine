@@ -33,6 +33,7 @@
 #include "Krystal.Booey/Layout/LayoutTree/LayoutInlineTextBox.hpp"
 #include "Krystal.Booey/Rendering/Line/BreakablePositions.hpp"
 #include "Krystal.Booey/Rendering/Style/RenderStyle+GettersInlines.hpp"
+#include "Krystal.Booey/Rendering/SVG/RenderSVGInlineText.hpp"
 #include "Krystal.Booey/Style/Values/Text/TabSize.hpp"
 #include "Krystal.Booey/Text/UnicodeBidi.hpp"
 #include "Krystal.Core/Strings/CodePointIterator.hpp"
@@ -610,6 +611,13 @@ namespace krys::boo::layout
     return whitespaceCollapse == WhiteSpaceCollapse::Preserve
            || whitespaceCollapse == WhiteSpaceCollapse::PreserveBreaks
            || whitespaceCollapse == WhiteSpaceCollapse::BreakSpaces;
+  }
+
+  bool TextUtil::StartsSVGTextChunk(const InlineTextBox &inlineTextBox, size_t position) noexcept
+  {
+    auto *svgText = DynamicDowncast<RenderSVGInlineText>(inlineTextBox.RendererForIntegration());
+    return svgText && position < svgText->Text().size()
+           && svgText->CharacterStartsNewTextChunk(static_cast<int32>(position));
   }
 
   bool TextUtil::IsWrappingAllowed(const RenderStyle &style) noexcept

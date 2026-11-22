@@ -6,7 +6,6 @@
 #include "Krystal.Booey/DOM/Geometry/DOMPointReadOnly.hpp"
 #include "Krystal.Booey/Layout/Integration/Inline/InlineIteratorLineBox.hpp"
 #include "Krystal.Booey/Layout/Integration/Inline/InlineIteratorTextBox.hpp"
-#include "Krystal.Booey/Page/Settings.hpp"
 #include "Krystal.Booey/Rendering/RenderInline.hpp"
 #include "Krystal.Booey/Rendering/RenderLineBreak.hpp"
 #include "Krystal.Booey/Rendering/RenderText.hpp"
@@ -206,47 +205,67 @@ layer at (0,0) size 800x60
   }
 
   TEST_CASE_METHOD(css::tests::ValueFixture,
-                   "LineLayout: SVG text laid out by the inline formatting context matches the legacy layout",
+                   "LineLayout: lays out SVG text with the inline formatting context",
                    "[Layout][LineLayout][SVG]")
   {
-    // `UseIFCForSVGText` moves SVG text from the legacy line layout to the inline formatting context; each
-    // page draws and answers the text queries the same either way.
-    struct DefaultSettingsGuard
+    // The text queries' answers, which matched the legacy line layout's before it was removed.
+    struct Page
     {
-      ~DefaultSettingsGuard() noexcept
-      {
-        Settings::Default().UseIFCForSVGText = false;
-      }
-    } guard;
-
-    const utf8_stringview pages[] = {
-      // NOLINTNEXTLINE(bugprone-suspicious-missing-comma): one page split over two lines.
-      u8"<text id=t x='10 20 30' y='20 25' dx=3 rotate='0 10'>Hello <tspan fill=red "
-      u8"dy=5>world</tspan></text>",
-      u8"<text id=t x=100 y=40 text-anchor=middle font-size=20>centred <tspan "
-      u8"font-weight=bold>bold</tspan></text>",
-      u8"<path id=p d='M10 80 Q 100 0 190 80' fill=none /><text id=t><textPath href='#p'>along the "
-      u8"path</textPath>"
-      u8"</text>",
-      u8"<text id=t x=50 y=10 writing-mode=vertical-rl>vertical</text>",
-      u8"<text id=t x=10 y=50 direction=rtl>abc \u05D0\u05D1\u05D2 def</text>",
-      u8"<text id=t x=10 y=50 textLength=150 lengthAdjust=spacingAndGlyphs>stretched</text>",
-      u8"<text id=t x=10 y=50 style='letter-spacing: 3px; text-decoration: underline'>deco <a href='#'>"
-      u8"<tspan>link</tspan></a></text>",
+      utf8_stringview Markup;
+      std::string_view Expected;
     };
 
-    auto laidOut = [](utf8_stringview page, bool inlineFormattingContext)
+    const Page pages[] = {
+      {u8"<text id=t x='10 20 30' y='20 25' dx=3 rotate='0 10'>Hello <tspan fill=red "
+       u8"dy=5>world</tspan></text>",
+       "length 79.140625, box 13.000000 5.515625 78.078125 29.843750, 13.000000 20.000000, "
+       "20.000000 25.000000, 30.000000 25.000000, 33.554688 25.000000, 37.109375 25.000000, "
+       "46.007812 25.000000, 50.453125 30.000000, 62.007812 30.000000, 70.906250 30.000000, "
+       "76.234375 30.000000, 79.789062 30.000000"},
+      {u8"<text id=t x=100 y=40 text-anchor=middle font-size=20>centred <tspan "
+       u8"font-weight=bold>bold</tspan></text>",
+       "length 110.078125, box 44.953125 21.890625 110.093750 22.359375, 44.960938 40.000000, "
+       "54.960938 40.000000, 66.083984 40.000000, 77.207031 40.000000, 82.763672 40.000000, "
+       "89.423828 40.000000, 100.546875 40.000000, 111.669922 40.000000, 117.226562 40.000000, "
+       "128.349609 40.000000, 139.472656 40.000000, 143.916016 40.000000"},
+      {u8"<path id=p d='M10 80 Q 100 0 190 80' fill=none /><text id=t><textPath href='#p'>along the "
+       u8"path</textPath></text>",
+       "length 101.421875, box 0.562500 25.421875 100.250000 57.125000, 9.970817 79.966331, "
+       "16.757298 74.210892, 19.496681 71.943604, 26.582964 66.559212, 33.905529 61.499470, "
+       "41.509548 56.877476, 45.388000 54.704323, 49.312889 52.611694, 57.392918 48.874626, "
+       "65.733894 45.773430, 69.954491 44.363754, 78.585030 42.178680, 87.369972 40.759083, "
+       "91.789825 40.240345"},
+      {u8"<text id=t x=50 y=10 writing-mode=vertical-rl>vertical</text>",
+       "length 143.000000, box 41.062500 10.000000 17.875000 50.687500, 44.453125 10.000000, "
+       "44.453125 18.000000, 44.453125 26.898438, 44.453125 32.226562, 44.453125 36.671875, "
+       "44.453125 40.226562, 44.453125 48.226562, 44.453125 57.125000"},
+      {u8"<text id=t x=10 y=50 direction=rtl>abc \u05D0\u05D1\u05D2 def</text>",
+       "length 83.312500, box -73.312500 35.515625 83.312500 17.875000, -73.312500 50.000000, "
+       "-64.414062 50.000000, -55.515625 50.000000, -51.070312 50.000000, -46.625000 50.000000, "
+       "-46.625000 50.000000, -36.578125 50.000000, -36.578125 50.000000, -27.007812 50.000000, "
+       "-27.007812 50.000000, -20.242188 50.000000, -15.796875 50.000000, -6.898438 50.000000, "
+       "2.000000 50.000000"},
+      {u8"<text id=t x=10 y=50 textLength=150 lengthAdjust=spacingAndGlyphs>stretched</text>",
+       "length 65.812500, box 10.000000 35.515625 150.000000 17.875000, 10.000000 50.000000, "
+       "18.000000 50.000000, 22.445312 50.000000, 27.773438 50.000000, 36.671875 50.000000, "
+       "41.117188 50.000000, 49.117188 50.000000, 58.015625 50.000000, 66.914062 50.000000"},
+      {u8"<text id=t x=10 y=50 style='letter-spacing: 3px; text-decoration: underline'>deco <a href='#'>"
+       u8"<tspan>link</tspan></a></text>",
+       "length 63.148438, box 10.000000 35.515625 87.156250 17.875000, 10.000000 50.000000, "
+       "21.898438 50.000000, 33.796875 50.000000, 44.796875 50.000000, 56.695312 50.000000, "
+       "64.140625 50.000000, 70.695312 50.000000, 77.250000 50.000000, 89.148438 50.000000"},
+    };
+
+    for (const auto &page : pages)
     {
-      Settings::Default().UseIFCForSVGText = inlineFormattingContext;
+      INFO(reinterpret_cast<const char *>(utf8_string(page.Markup).c_str()));
       boo::tests::PaintFixture fixture {
-        u8"<!DOCTYPE html><body style=\"margin: 0\"><svg width=200 height=100>" + utf8_string(page)
+        u8"<!DOCTYPE html><body style=\"margin: 0\"><svg width=200 height=100>" + utf8_string(page.Markup)
         + u8"</svg></body>"};
-      auto painted = fixture.Painted();
+      std::ignore = fixture.Painted();
 
       auto &element = Downcast<SVGElement>(*fixture.Document->GetElementById(u8"t"));
-      auto &flow = Downcast<RenderBlockFlow>(*element.Renderer());
-      CHECK(flow.HasSvgTextLayout() == !inlineFormattingContext);
-      CHECK((flow.InlineLayout() != nullptr) == inlineFormattingContext);
+      CHECK(Downcast<RenderBlockFlow>(*element.Renderer()).InlineLayout() != nullptr);
 
       auto &text = Downcast<SVGTextContentElement>(element);
       auto box = Downcast<SVGGraphicsElement>(element).GetBBox();
@@ -262,13 +281,7 @@ layer at (0,0) size 800x60
           result += ", " + std::to_string(point->X()) + " " + std::to_string(point->Y());
         }
       }
-      return result + "\n" + std::string(reinterpret_cast<const char *>(painted.c_str()));
-    };
-
-    for (auto page : pages)
-    {
-      INFO(reinterpret_cast<const char *>(utf8_string(page).c_str()));
-      CHECK(laidOut(page, true) == laidOut(page, false));
+      CHECK(result == page.Expected);
     }
   }
 }

@@ -175,16 +175,6 @@ namespace krys::boo
     return false;
   }
 
-  void RenderReplaced::WillBeDestroyed() noexcept
-  {
-    if (!RenderTreeBeingDestroyed() && Parent())
-    {
-      Parent()->DirtyLineFromChangedChild();
-    }
-
-    RenderBox::WillBeDestroyed();
-  }
-
   void RenderReplaced::StyleDidChange(style::Difference diff, const RenderStyle *oldStyle) noexcept
   {
     RenderBox::StyleDidChange(diff, oldStyle);

@@ -87,12 +87,6 @@ namespace krys::boo::inline_iterator
 
     KRYS_NODISCARD const RenderText &Renderer() const noexcept;
 
-    // FIXME: Remove. For intermediate porting steps only.
-    KRYS_NODISCARD const LegacyInlineTextBox *GetLegacyInlineBox() const noexcept
-    {
-      return Downcast<LegacyInlineTextBox>(Box::GetLegacyInlineBox());
-    }
-
     /// @brief The next text box generated for the same text renderer.
     KRYS_NODISCARD TextBoxIterator NextTextBox() const noexcept;
   };
@@ -139,8 +133,6 @@ namespace krys::boo::inline_iterator
   };
 
   KRYS_NODISCARD TextBoxIterator LineLeftmostTextBoxFor(const RenderText &text) noexcept;
-
-  KRYS_NODISCARD TextBoxIterator TextBoxFor(const LegacyInlineTextBox *legacyInlineTextBox) noexcept;
 
   KRYS_NODISCARD TextBoxIterator TextBoxFor(const layout_integration::InlineContent &content,
                                             const inline_display::Box &box) noexcept;

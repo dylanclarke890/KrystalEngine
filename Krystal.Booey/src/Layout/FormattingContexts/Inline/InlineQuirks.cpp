@@ -97,11 +97,10 @@ namespace krys::boo::layout
     if (inlineLevelBox.IsRootInlineBox())
     {
       // This root inline box has no direct text content and we are in non-standards mode.
-      // Now according to legacy line layout, we need to apply the following list-item specific quirk:
-      // We do not create markers for list items when the list-style-type is none, while other browsers do.
-      // The side effect of having no marker is that in quirks mode we have to specifically check for
-      // list-item and make sure it is treated as if it had content and stretched the line. see
-      // LegacyInlineFlowBox c'tor.
+      // A list-item specific quirk: we do not create markers for list items when the list-style-type is none,
+      // while other browsers do. The side effect of having no marker is that in quirks mode we have to
+      // specifically check for list-item and make sure it is treated as if it had content and stretched the
+      // line.
       return inlineLevelBox.LayoutBox().Style().IsOriginalDisplayListItemType();
     }
     // Non-root inline boxes (e.g. <span>).

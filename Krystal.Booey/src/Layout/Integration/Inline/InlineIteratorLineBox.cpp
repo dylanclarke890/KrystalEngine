@@ -218,7 +218,7 @@ namespace krys::boo::inline_iterator
     {
       return lineLayout->FirstLineBox();
     }
-    return LineBoxIterator {LineBoxIteratorLegacyPath {flow.LegacyRootBox()}};
+    return {};
   }
 
   LineBoxIterator LastLineBoxFor(const RenderBlockFlow &flow) noexcept
@@ -227,7 +227,7 @@ namespace krys::boo::inline_iterator
     {
       return lineLayout->LastLineBox();
     }
-    return LineBoxIterator {LineBoxIteratorLegacyPath {flow.LegacyRootBox()}};
+    return {};
   }
 
   LineBoxIterator LineBoxFor(const layout_integration::InlineContent &inlineContent,

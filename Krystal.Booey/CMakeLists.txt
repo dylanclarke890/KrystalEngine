@@ -2346,11 +2346,9 @@ set(KRYSTAL_BOOEY_LAYOUT_HEADERS
   include/Krystal.Booey/Layout/Integration/Flex/LayoutIntegrationFlexLayout.hpp
   include/Krystal.Booey/Layout/Integration/Grid/LayoutIntegrationGridLayout.hpp
   include/Krystal.Booey/Layout/Integration/Inline/InlineIteratorBox.hpp
-  include/Krystal.Booey/Layout/Integration/Inline/InlineIteratorBoxLegacyPath.hpp
   include/Krystal.Booey/Layout/Integration/Inline/InlineIteratorBoxModernPath.hpp
   include/Krystal.Booey/Layout/Integration/Inline/InlineIteratorInlineBox.hpp
   include/Krystal.Booey/Layout/Integration/Inline/InlineIteratorLineBox.hpp
-  include/Krystal.Booey/Layout/Integration/Inline/InlineIteratorLineBoxLegacyPath.hpp
   include/Krystal.Booey/Layout/Integration/Inline/InlineIteratorLogicalOrderTraversal.hpp
   include/Krystal.Booey/Layout/Integration/Inline/InlineIteratorSVGTextBox.hpp
   include/Krystal.Booey/Layout/Integration/Inline/InlineIteratorTextBox.hpp
@@ -2703,23 +2701,8 @@ set(KRYSTAL_BOOEY_RENDERING_HEADERS
   include/Krystal.Booey/Rendering/Layers/RenderLayerScrollableArea.hpp
   include/Krystal.Booey/Rendering/LayoutRepainter.hpp
   include/Krystal.Booey/Rendering/LayoutScope.hpp
-  include/Krystal.Booey/Rendering/Line/BidiRun.hpp
   include/Krystal.Booey/Rendering/Line/BreakablePositions.hpp
-  include/Krystal.Booey/Rendering/Line/BreakingContext.hpp
   include/Krystal.Booey/Rendering/Line/InlineWalker.hpp
-  include/Krystal.Booey/Rendering/Line/LegacyInlineBox.hpp
-  include/Krystal.Booey/Rendering/Line/LegacyInlineFlowBox.hpp
-  include/Krystal.Booey/Rendering/Line/LegacyInlineIterator.hpp
-  include/Krystal.Booey/Rendering/Line/LegacyInlineTextBox.hpp
-  include/Krystal.Booey/Rendering/Line/LegacyLineLayout.hpp
-  include/Krystal.Booey/Rendering/Line/LegacyRootInlineBox.hpp
-  include/Krystal.Booey/Rendering/Line/LineBreaker.hpp
-  include/Krystal.Booey/Rendering/Line/LineInfo.hpp
-  include/Krystal.Booey/Rendering/Line/LineInlineHeaders.hpp
-  include/Krystal.Booey/Rendering/Line/LineWidth.hpp
-  include/Krystal.Booey/Rendering/Line/RenderLineBoxList.hpp
-  include/Krystal.Booey/Rendering/Line/RenderTextLineBoxes.hpp
-  include/Krystal.Booey/Rendering/Line/TrailingObjects.hpp
   include/Krystal.Booey/Rendering/Line/WordTrailingSpace.hpp
   include/Krystal.Booey/Rendering/LineClampUpdater.hpp
   include/Krystal.Booey/Rendering/MathML/MathOperator.hpp
@@ -2889,14 +2872,11 @@ set(KRYSTAL_BOOEY_RENDERING_HEADERS
   include/Krystal.Booey/Rendering/SVG/RenderSVGText.hpp
   include/Krystal.Booey/Rendering/SVG/RenderSVGTextPath.hpp
   include/Krystal.Booey/Rendering/SVG/RenderSVGTSpan.hpp
-  include/Krystal.Booey/Rendering/SVG/SVGInlineFlowBox.hpp
-  include/Krystal.Booey/Rendering/SVG/SVGInlineTextBox.hpp
   include/Krystal.Booey/Rendering/SVG/SVGMarkerData.hpp
   include/Krystal.Booey/Rendering/SVG/SVGPathData.hpp
   include/Krystal.Booey/Rendering/SVG/SVGRenderingContext.hpp
   include/Krystal.Booey/Rendering/SVG/SVGRenderSupport.hpp
   include/Krystal.Booey/Rendering/SVG/SVGRenderTreeAsText.hpp
-  include/Krystal.Booey/Rendering/SVG/SVGRootInlineBox.hpp
   include/Krystal.Booey/Rendering/SVG/SVGSubpathData.hpp
   include/Krystal.Booey/Rendering/SVG/SVGTextBoxPainter.hpp
   include/Krystal.Booey/Rendering/SVG/SVGTextChunk.hpp
@@ -2984,20 +2964,7 @@ set(KRYSTAL_BOOEY_RENDERING_SOURCES
   src/Rendering/Layers/RenderLayerScrollableArea.cpp
   src/Rendering/LayoutRepainter.cpp
   src/Rendering/LayoutScope.cpp
-  src/Rendering/Line/BidiRun.cpp
   src/Rendering/Line/BreakablePositions.cpp
-  src/Rendering/Line/BreakingContext.cpp
-  src/Rendering/Line/LegacyInlineBox.cpp
-  src/Rendering/Line/LegacyInlineFlowBox.cpp
-  src/Rendering/Line/LegacyInlineIterator.cpp
-  src/Rendering/Line/LegacyInlineTextBox.cpp
-  src/Rendering/Line/LegacyLineLayout.cpp
-  src/Rendering/Line/LegacyRootInlineBox.cpp
-  src/Rendering/Line/LineBreaker.cpp
-  src/Rendering/Line/LineWidth.cpp
-  src/Rendering/Line/RenderLineBoxList.cpp
-  src/Rendering/Line/RenderTextLineBoxes.cpp
-  src/Rendering/Line/TrailingObjects.cpp
   src/Rendering/LineClampUpdater.cpp
   src/Rendering/MathML/MathOperator.cpp
   src/Rendering/MathML/MathVariant.cpp
@@ -3144,13 +3111,10 @@ set(KRYSTAL_BOOEY_RENDERING_SOURCES
   src/Rendering/SVG/RenderSVGInlineText.cpp
   src/Rendering/SVG/RenderSVGText.cpp
   src/Rendering/SVG/RenderSVGTextPath.cpp
-  src/Rendering/SVG/SVGInlineFlowBox.cpp
-  src/Rendering/SVG/SVGInlineTextBox.cpp
   src/Rendering/SVG/SVGPathData.cpp
   src/Rendering/SVG/SVGRenderingContext.cpp
   src/Rendering/SVG/SVGRenderSupport.cpp
   src/Rendering/SVG/SVGRenderTreeAsText.cpp
-  src/Rendering/SVG/SVGRootInlineBox.cpp
   src/Rendering/SVG/SVGTextBoxPainter.cpp
   src/Rendering/SVG/SVGTextChunk.cpp
   src/Rendering/SVG/SVGTextChunkBuilder.cpp

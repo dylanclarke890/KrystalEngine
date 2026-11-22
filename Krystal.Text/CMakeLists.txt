@@ -43,9 +43,6 @@ target_sources(Krystal.Text
     FILES
       include/Krystal.Text/Base64.hpp
       include/Krystal.Text/Bidi.hpp
-      include/Krystal.Text/BidiContext.hpp
-      include/Krystal.Text/BidiResolver.hpp
-      include/Krystal.Text/BidiRunList.hpp
       include/Krystal.Text/CaseMapping.hpp
       include/Krystal.Text/CharacterProperties.hpp
       include/Krystal.Text/EncodingRegistry.hpp
@@ -85,7 +82,6 @@ target_sources(Krystal.Text
   PRIVATE
     src/Base64.cpp
     src/Bidi.cpp
-    src/BidiContext.cpp
     src/CaseMapping.cpp
     src/CharacterProperties.cpp
     src/FreeTypeFace.cpp

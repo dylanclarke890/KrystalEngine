@@ -25,7 +25,6 @@
 
 #pragma once
 
-#include "Krystal.Booey/Layout/Integration/Inline/InlineIteratorBoxLegacyPath.hpp"
 #include "Krystal.Booey/Layout/Integration/Inline/InlineIteratorBoxModernPath.hpp"
 #include "Krystal.Booey/Rendering/Selection/RenderObjectHighlightState.hpp"
 #include "Krystal.Core/Attributes.hpp"
@@ -60,7 +59,7 @@ namespace krys::boo::inline_iterator
     friend class TextBoxIterator;
 
   public:
-    using PathVariant = Variant<BoxModernPath, BoxLegacyPath>;
+    using PathVariant = Variant<BoxModernPath>;
 
   protected:
     PathVariant _pathVariant;
@@ -228,23 +227,9 @@ namespace krys::boo::inline_iterator
 
     KRYS_NODISCARD WritingMode GetWritingMode() const noexcept;
 
-    // FIXME: Remove. For intermediate porting steps only.
-    KRYS_NODISCARD const LegacyInlineBox *GetLegacyInlineBox() const noexcept
-    {
-      if (!std::holds_alternative<BoxLegacyPath>(_pathVariant))
-      {
-        return nullptr;
-      }
-      return std::get<BoxLegacyPath>(_pathVariant).GetLegacyInlineBox();
-    }
-
     KRYS_NODISCARD const inline_display::Box *GetInlineBox() const noexcept
     {
-      if (!std::holds_alternative<BoxModernPath>(_pathVariant))
-      {
-        return nullptr;
-      }
-      return &std::get<BoxModernPath>(_pathVariant).GetBox();
+      return &ModernPath().GetBox();
     }
 
     // Text-relative left/right
@@ -279,11 +264,6 @@ namespace krys::boo::inline_iterator
       return std::get<BoxModernPath>(_pathVariant);
     }
 
-    KRYS_NODISCARD const BoxLegacyPath &LegacyPath() const noexcept
-    {
-      return std::get<BoxLegacyPath>(_pathVariant);
-    }
-
     /// @brief How much of the selection the box holds: for text, which part of the renderer's selection is in
     /// the box.
     KRYS_NODISCARD RenderObjectHighlightState SelectionState() const noexcept;
@@ -303,7 +283,7 @@ namespace krys::boo::inline_iterator
 
   public:
     /// @brief An iterator at the end.
-    BoxIterator() noexcept : _box(BoxLegacyPath {nullptr})
+    BoxIterator() noexcept : _box(BoxModernPath {})
     {
     }
 

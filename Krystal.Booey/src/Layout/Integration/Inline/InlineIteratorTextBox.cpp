@@ -63,19 +63,9 @@ namespace krys::boo::inline_iterator
     {
       return lineLayout->TextBoxesFor(text);
     }
-    if (auto *svgText = DynamicDowncast<RenderSVGInlineText>(text))
-    {
-      return TextBoxIterator {BoxLegacyPath {svgText->FirstLegacyTextBox()}};
-    }
-
     // During teardown we may hit this codepath _after_ the display content is destroyed (e.g. calling repaint
     // on RenderText).
-    return TextBoxIterator {BoxLegacyPath {nullptr}};
-  }
-
-  TextBoxIterator TextBoxFor(const LegacyInlineTextBox *legacyInlineTextBox) noexcept
-  {
-    return TextBoxIterator {BoxLegacyPath {legacyInlineTextBox}};
+    return {};
   }
 
   TextBoxIterator TextBoxFor(const layout_integration::InlineContent &content,

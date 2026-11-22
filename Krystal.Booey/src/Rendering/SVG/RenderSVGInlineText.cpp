@@ -30,9 +30,7 @@
 #include "Krystal.Booey/Rendering/RenderBlock.hpp"
 #include "Krystal.Booey/Rendering/Style/RenderStyle+GettersInlines.hpp"
 #include "Krystal.Booey/Rendering/SVG/RenderSVGText.hpp"
-#include "Krystal.Booey/Rendering/SVG/SVGInlineTextBox.hpp"
 #include "Krystal.Booey/Rendering/SVG/SVGRenderingContext.hpp"
-#include "Krystal.Booey/Rendering/SVG/SVGRootInlineBox.hpp"
 #include "Krystal.Booey/Rendering/SVG/SVGTextBoxPainter.hpp"
 #include "Krystal.Booey/Style/Builder/FontSizeFunctions.hpp"
 #include <cmath>
@@ -87,12 +85,6 @@ namespace krys::boo
 
   RenderSVGInlineText::~RenderSVGInlineText() noexcept = default;
 
-  void RenderSVGInlineText::WillBeDestroyed() noexcept
-  {
-    RemoveAndDestroyLegacyTextBoxes();
-    RenderText::WillBeDestroyed();
-  }
-
   utf8_string RenderSVGInlineText::OriginalText() const noexcept
   {
     return TextNode().Data();
@@ -101,7 +93,6 @@ namespace krys::boo
   void RenderSVGInlineText::SetTextInternal(utf8_string newText, bool force) noexcept
   {
     RenderText::SetTextInternal(newText, force);
-    _legacyLineBoxes.DirtyForTextChange(*this);
     if (!force)
     {
       SetRenderedText(newText);
@@ -141,13 +132,6 @@ namespace krys::boo
     {
       textAncestor->SetNeedsLayout();
     }
-  }
-
-  UniquePtr<LegacyInlineTextBox> RenderSVGInlineText::CreateTextBox() noexcept
-  {
-    auto box = CreateUnique<SVGInlineTextBox>(*this);
-    box->SetHasVirtualLogicalHeight();
-    return box;
   }
 
   RectF RenderSVGInlineText::FloatLinesBoundingBox() const noexcept
@@ -324,19 +308,5 @@ namespace krys::boo
     scaledFont = FontCascade(krys::move(fontDescription));
     scaledFont.Update(ShareRefPtr<FontSelector>(&renderer.GetDocument().GetFontSelector()));
     return true;
-  }
-
-  void RenderSVGInlineText::DeleteLegacyLineBoxes() noexcept
-  {
-    _legacyLineBoxes.DeleteAll();
-  }
-
-  void RenderSVGInlineText::RemoveAndDestroyLegacyTextBoxes() noexcept
-  {
-    if (!RenderTreeBeingDestroyed())
-    {
-      _legacyLineBoxes.RemoveAllFromParent(*this);
-    }
-    DeleteLegacyLineBoxes();
   }
 }

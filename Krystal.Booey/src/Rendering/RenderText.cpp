@@ -43,7 +43,6 @@
 #include "Krystal.Booey/Page/FrameViewLayoutContext.hpp"
 #include "Krystal.Booey/Rendering/HitTesting/HitTestSource.hpp"
 #include "Krystal.Booey/Rendering/Line/BreakablePositions.hpp"
-#include "Krystal.Booey/Rendering/Line/LegacyInlineTextBox.hpp"
 #include "Krystal.Booey/Rendering/Line/WordTrailingSpace.hpp"
 #include "Krystal.Booey/Rendering/MathML/MathVariant.hpp"
 #include "Krystal.Booey/Rendering/RenderBlockFlow.hpp"
@@ -1990,6 +1989,29 @@ namespace krys::boo
 
   namespace
   {
+    // Snaps a selection rect to whole pixels, keeping it within the box's logical right edge.
+    KRYS_NODISCARD LayoutRect SnappedSelectionRect(const LayoutRect &selectionRect, float logicalRight,
+                                                   WritingMode writingMode) noexcept
+    {
+      auto snappedSelectionRect = EnclosingRectI(selectionRect);
+      LayoutUnit logicalWidth {snappedSelectionRect.Width()};
+      if (static_cast<float>(snappedSelectionRect.X()) > logicalRight)
+      {
+        logicalWidth = 0_lu;
+      }
+      else if (static_cast<float>(snappedSelectionRect.MaxX()) > logicalRight)
+      {
+        logicalWidth = LayoutUnit {logicalRight - static_cast<float>(snappedSelectionRect.X())};
+      }
+
+      if (writingMode.IsHorizontal())
+      {
+        return {LayoutUnit {snappedSelectionRect.X()}, selectionRect.Y(), logicalWidth,
+                selectionRect.Height()};
+      }
+      return {selectionRect.Y(), LayoutUnit {snappedSelectionRect.X()}, selectionRect.Height(), logicalWidth};
+    }
+
     KRYS_NODISCARD LayoutRect SelectionRectForTextBox(const inline_iterator::TextBox &textBox,
                                                       uint32 rangeStart, uint32 rangeEnd) noexcept
     {

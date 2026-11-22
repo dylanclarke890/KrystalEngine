@@ -122,7 +122,7 @@ namespace krys::boo::inline_iterator
     {
       return lineLayout->FirstInlineBoxFor(renderInline);
     }
-    return InlineBoxIterator {BoxLegacyPath {renderInline.FirstLegacyInlineBox()}};
+    return {};
   }
 
   InlineBoxIterator FirstRootInlineBoxFor(const RenderBlockFlow &block) noexcept
@@ -131,12 +131,7 @@ namespace krys::boo::inline_iterator
     {
       return lineLayout->FirstRootInlineBox();
     }
-    return InlineBoxIterator {BoxLegacyPath {block.LegacyRootBox()}};
-  }
-
-  InlineBoxIterator InlineBoxFor(const LegacyInlineFlowBox &legacyInlineFlowBox) noexcept
-  {
-    return InlineBoxIterator {BoxLegacyPath {&legacyInlineFlowBox}};
+    return {};
   }
 
   InlineBoxIterator InlineBoxFor(const layout_integration::InlineContent &content,

@@ -28,8 +28,6 @@
 
 namespace krys::boo
 {
-  class SVGInlineTextBox;
-
   using SVGChunkTransformMap =
     HashMap<inline_iterator::SVGTextBox::Key, AffineTransform, inline_iterator::SVGTextBoxKeyHash>;
   using SVGTextFragmentMap =
@@ -51,7 +49,7 @@ namespace krys::boo
     };
 
   private:
-    // Contains all SVGInlineTextBoxes this chunk spans.
+    // Contains all SVG text boxes this chunk spans.
     struct BoxAndFragments
     {
       inline_iterator::SVGTextBoxIterator Box;
