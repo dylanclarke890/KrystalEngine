@@ -41,9 +41,6 @@ namespace krys::boo::css::tests
       CHECK(style.GetPropertyValue(u8"nonsense").empty());
 
       CHECK(style.GetPropertyPriority(u8"color").empty());
-      CHECK(ToNarrow(style.GetPropertyShorthand(u8"margin-top")) == "margin");
-      CHECK(style.GetPropertyShorthand(u8"color").empty());
-      CHECK_FALSE(style.IsPropertyImplicit(u8"margin-top"));
       CHECK(style.ParentRule() == &rule);
     }
 

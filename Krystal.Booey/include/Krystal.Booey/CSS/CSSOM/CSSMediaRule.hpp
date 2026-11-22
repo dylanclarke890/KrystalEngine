@@ -1,26 +1,4 @@
-﻿/*
- * (C) 1999-2003 Lars Knoll (knoll@kde.org)
- * (C) 2002-2003 Dirk Mueller (mueller@kde.org)
- * Copyright (C) 2002-2020 Apple Inc. All rights reserved.
- * Copyright (C) 2006 Samuel Weinig (sam@webkit.org)
- *
- * This library is free software; you can redistribute it and/or
- * modify it under the terms of the GNU Library General Public
- * License as published by the Free Software Foundation; either
- * version 2 of the License, or (at your option) any later version.
- *
- * This library is distributed in the hope that it will be useful,
- * but WITHOUT ANY WARRANTY; without even the implied warranty of
- * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU
- * Library General Public License for more details.
- *
- * You should have received a copy of the GNU Library General Public License
- * along with this library; see the file COPYING.LIB.  If not, write to
- * the Free Software Foundation, Inc., 51 Franklin Street, Fifth Floor,
- * Boston, MA 02110-1301, USA.
- */
-
-#pragma once
+﻿#pragma once
 
 #include "Krystal.Booey/CSS/CSSOM/CSSConditionRule.hpp"
 #include "Krystal.Booey/CSS/Queries/MediaQuery.hpp"
@@ -37,22 +15,24 @@ namespace krys::boo
 {
   class MediaList;
 
-  /// @brief An `@media` rule, exposed to scripts.
+  /// @brief An `@media` rule, as scripts see it.
   /// @see https://drafts.csswg.org/cssom/#the-cssmediarule-interface
   class CSSMediaRule final : public CSSConditionRule
   {
     friend class MediaList;
 
   private:
-    mutable RefPtr<MediaList> _mediaCSSOMWrapper;
+    mutable RefPtr<MediaList> _media;
 
     CSSMediaRule(css::MediaRule &rule, CSSStyleSheet *parent) noexcept;
 
   public:
     ~CSSMediaRule() noexcept override;
 
-    KRYS_NODISCARD static Ref<CSSMediaRule> Create(css::MediaRule &rule, CSSStyleSheet *sheet) noexcept;
+    KRYS_NODISCARD static Ref<CSSMediaRule> Create(css::MediaRule &rule, CSSStyleSheet *parent) noexcept;
 
+    /// @brief The rule's media queries, made when first asked for.
+    /// @see https://drafts.csswg.org/cssom/#dom-cssmediarule-media
     KRYS_NODISCARD MediaList *Media() const noexcept;
 
   private:
@@ -61,10 +41,14 @@ namespace krys::boo
       return css::RuleType::Media;
     }
 
+    /// @see https://drafts.csswg.org/cssom/#serialize-a-css-rule
     KRYS_NODISCARD CSSOMString CssText() const noexcept final;
 
+    /// @see https://drafts.csswg.org/cssom/#serialize-a-css-rule
     KRYS_NODISCARD CSSOMString CssText(const css::SerialisationContext &context) const noexcept final;
 
+    /// @brief The serialisation of the media queries.
+    /// @see https://drafts.csswg.org/css-conditional-3/#dom-cssconditionrule-conditiontext
     KRYS_NODISCARD CSSOMString ConditionText() const noexcept final;
 
     KRYS_NODISCARD const css::mq::MediaQueryList &MediaQueries() const noexcept;

@@ -30,8 +30,6 @@ namespace krys::boo::css::tests
     CHECK(PropertyValueText(*style, u8"--x") == "3");
     CHECK(PropertyValueText(*style, u8"not-a-property").empty());
     CHECK(style->GetPropertyPriority(u8"color").empty());
-    CHECK(style->GetPropertyShorthand(u8"color").empty());
-    CHECK_FALSE(style->IsPropertyImplicit(u8"color"));
     CHECK(style->CssText().empty());
     CHECK_FALSE(style->ParentRule());
 

@@ -330,21 +330,6 @@ namespace krys::boo
     return _propertySet->PropertyIsImportant(property) ? u8"important" : CSSOMString();
   }
 
-  CSSOMString PropertySetCSSStyleProperties::GetPropertyShorthand(const CSSOMString &propertyName) noexcept
-  {
-    auto property = css::PropertyIdFromName(propertyName);
-    if (!IsExposed(property))
-    {
-      return {};
-    }
-    return CSSOMString(_propertySet->GetPropertyShorthand(property));
-  }
-
-  bool PropertySetCSSStyleProperties::IsPropertyImplicit(const CSSOMString &propertyName) noexcept
-  {
-    return _propertySet->IsPropertyImplicit(css::PropertyIdFromName(propertyName));
-  }
-
   ExceptionOr<void> PropertySetCSSStyleProperties::SetProperty(const CSSOMString &propertyName,
                                                                const CSSOMString &value,
                                                                const CSSOMString &priority) noexcept

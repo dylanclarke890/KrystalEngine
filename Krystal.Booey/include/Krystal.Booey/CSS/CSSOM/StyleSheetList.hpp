@@ -1,24 +1,4 @@
-﻿/*
- * (C) 1999-2003 Lars Knoll (knoll@kde.org)
- * Copyright (C) 2004-2025 Apple Inc. All rights reserved.
- *
- * This library is free software; you can redistribute it and/or
- * modify it under the terms of the GNU Library General Public
- * License as published by the Free Software Foundation; either
- * version 2 of the License, or (at your option) any later version.
- *
- * This library is distributed in the hope that it will be useful,
- * but WITHOUT ANY WARRANTY; without even the implied warranty of
- * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU
- * Library General Public License for more details.
- *
- * You should have received a copy of the GNU Library General Public License
- * along with this library; see the file COPYING.LIB.  If not, write to
- * the Free Software Foundation, Inc., 51 Franklin Street, Fifth Floor,
- * Boston, MA 02110-1301, USA.
- */
-
-#pragma once
+﻿#pragma once
 
 #include "Krystal.Core/Attributes.hpp"
 #include "Krystal.Core/Containers/List.hpp"
@@ -27,28 +7,34 @@
 #include "Krystal.Core/Memory/RefPtr.hpp"
 #include "Krystal.Core/Memory/WeakPtr.hpp"
 
+namespace krys::boo::style
+{
+  class Scope;
+}
+
 namespace krys::boo
 {
+  class ContainerNode;
   class Document;
   class Node;
   class ShadowRoot;
   class StyleSheet;
 
-  /// @brief The style sheets of a document or shadow root, in order. Live until its document or shadow root
-  /// goes away; after that it keeps the sheets it had.
+  /// @brief The CSS style sheets of a document or shadow root, in tree order, as scripts see them: the sheets
+  /// of its `<style>` and `<link>` elements, not those it adopted. The list follows its document or shadow
+  /// root until that goes, then keeps the sheets it had.
   /// @see https://drafts.csswg.org/cssom/#the-stylesheetlist-interface
   class StyleSheetList final : public RefCounted<StyleSheetList>
   {
     KRYS_NON_COPY_MOVABLE(StyleSheetList);
 
   private:
-    WeakPtr<Document> _document;
-    WeakPtr<ShadowRoot> _shadowRoot;
+    // The document or shadow root, until it goes.
+    WeakPtr<ContainerNode> _owner;
+    // The sheets once detached from the owner.
     List<RefPtr<StyleSheet>> _detachedStyleSheets;
 
-    explicit StyleSheetList(Document &document) noexcept;
-
-    explicit StyleSheetList(ShadowRoot &shadowRoot) noexcept;
+    explicit StyleSheetList(ContainerNode &owner) noexcept;
 
   public:
     ~StyleSheetList() noexcept;
@@ -59,9 +45,11 @@ namespace krys::boo
 
 #pragma region StyleSheetList - https://drafts.csswg.org/cssom/#the-stylesheetlist-interface
 
+    /// @brief The sheet at @p index, or null past the end.
     /// @see https://drafts.csswg.org/cssom/#dom-stylesheetlist-item
-    KRYS_NODISCARD StyleSheet *Item(uint32 index) noexcept;
+    KRYS_NODISCARD StyleSheet *Item(uint32 index) const noexcept;
 
+    /// @brief The number of sheets.
     /// @see https://drafts.csswg.org/cssom/#dom-stylesheetlist-length
     KRYS_NODISCARD uint32 Length() const noexcept;
 
@@ -75,10 +63,12 @@ namespace krys::boo
     /// @brief The document or shadow root whose sheets these are, or null once detached.
     KRYS_NODISCARD Node *OwnerNode() const noexcept;
 
-    /// @brief Keeps the current sheets and stops following the document or shadow root.
+    /// @brief Keeps the sheets as they are and stops following the document or shadow root, which is going.
     void Detach() noexcept;
 
   private:
+    KRYS_NODISCARD style::Scope *OwnerStyleScope() const noexcept;
+
     KRYS_NODISCARD const List<RefPtr<StyleSheet>> &StyleSheets() const noexcept;
   };
 }

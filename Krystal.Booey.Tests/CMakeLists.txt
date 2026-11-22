@@ -177,6 +177,7 @@ set(KRYSTAL_BOOEY_TESTS_CSS_SOURCES
   tests/CSS/CSSOM/CSSLayerStatementRule.cpp
   tests/CSS/CSSOM/CSSMediaRule.cpp
   tests/CSS/CSSOM/CSSNamespaceRule.cpp
+  tests/CSS/CSSOM/CSSNestedDeclarations.cpp
   tests/CSS/CSSOM/CSSPositionTryRule.cpp
   tests/CSS/CSSOM/CSSPropertyRule.cpp
   tests/CSS/CSSOM/CSSRule.cpp
@@ -189,9 +190,11 @@ set(KRYSTAL_BOOEY_TESTS_CSS_SOURCES
   tests/CSS/CSSOM/CSSStyleSheetObservableArray.cpp
   tests/CSS/CSSOM/CSSSupportsRule.cpp
   tests/CSS/CSSOM/DOMCSSNamespace.cpp
+  tests/CSS/CSSOM/Markup.cpp
   tests/CSS/CSSOM/MediaList.cpp
   tests/CSS/CSSOM/MediaQueryList.cpp
   tests/CSS/CSSOM/PropertySetCSSDescriptors.cpp
+  tests/CSS/CSSOM/StyleSheetList.cpp
   tests/CSS/DOMMatrix/DOMMatrix.cpp
   tests/CSS/Font/CSSFontSelector.cpp
   tests/CSS/Font/FontFace.cpp

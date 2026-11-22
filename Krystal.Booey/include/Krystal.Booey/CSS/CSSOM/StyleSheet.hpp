@@ -1,24 +1,4 @@
-﻿/*
- * (C) 1999-2003 Lars Knoll (knoll@kde.org)
- * Copyright (C) 2004, 2006, 2008, 2012-2024 Apple Inc. All rights reserved.
- *
- * This library is free software; you can redistribute it and/or
- * modify it under the terms of the GNU Library General Public
- * License as published by the Free Software Foundation; either
- * version 2 of the License, or (at your option) any later version.
- *
- * This library is distributed in the hope that it will be useful,
- * but WITHOUT ANY WARRANTY; without even the implied warranty of
- * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU
- * Library General Public License for more details.
- *
- * You should have received a copy of the GNU Library General Public License
- * along with this library; see the file COPYING.LIB.  If not, write to
- * the Free Software Foundation, Inc., 51 Franklin Street, Fifth Floor,
- * Boston, MA 02110-1301, USA.
- */
-
-#pragma once
+﻿#pragma once
 
 #include "Krystal.Booey/CSS/Types/CSSOMString.hpp"
 #include "Krystal.Core/Attributes.hpp"
@@ -31,44 +11,68 @@ namespace krys::boo
   class MediaList;
   class Node;
 
-  /// @brief The base of the style sheets exposed to scripts.
+  /// @brief A style sheet, as scripts see it. CSS style sheets are the only kind (`CSSStyleSheet`).
   /// @see https://drafts.csswg.org/cssom/#the-stylesheet-interface
   class StyleSheet : public RefCounted<StyleSheet>
   {
   public:
     virtual ~StyleSheet() noexcept = default;
 
-    KRYS_NODISCARD virtual bool Disabled() const noexcept = 0;
+#pragma region StyleSheet - https://drafts.csswg.org/cssom/#the-stylesheet-interface
 
-    virtual void SetDisabled(bool disabled) noexcept = 0;
+    /// @brief The sheet's type: `text/css`.
+    /// @see https://drafts.csswg.org/cssom/#dom-stylesheet-type
+    KRYS_NODISCARD virtual CSSOMString Type() const noexcept = 0;
 
+    /// @brief The sheet's location, or empty for a sheet that's embedded or was constructed.
+    /// @see https://drafts.csswg.org/cssom/#dom-stylesheet-href
+    KRYS_NODISCARD virtual CSSOMString Href() const noexcept = 0;
+
+    /// @brief The node that put the sheet in its document, such as a `<style>` or `<link>` element.
+    /// @see https://drafts.csswg.org/cssom/#dom-stylesheet-ownernode
     KRYS_NODISCARD virtual Node *OwnerNode() const noexcept = 0;
 
+    /// @brief The sheet that imports this one with an `@import` rule.
+    /// @see https://drafts.csswg.org/cssom/#dom-stylesheet-parentstylesheet
     KRYS_NODISCARD virtual StyleSheet *ParentStyleSheet() const noexcept
     {
       return nullptr;
     }
 
-    KRYS_NODISCARD virtual CSSOMString Href() const noexcept = 0;
-
+    /// @brief The sheet's title, which puts it in a named set of alternative sheets; empty if it has none.
+    /// @see https://drafts.csswg.org/cssom/#dom-stylesheet-title
     KRYS_NODISCARD virtual CSSOMString Title() const noexcept = 0;
 
+    /// @brief The media queries the sheet applies to.
+    /// @see https://drafts.csswg.org/cssom/#dom-stylesheet-media
     KRYS_NODISCARD virtual MediaList *Media() const noexcept
     {
       return nullptr;
     }
 
-    KRYS_NODISCARD virtual CSSOMString Type() const noexcept = 0;
+    /// @brief Whether the sheet is turned off, so its rules don't apply.
+    /// @see https://drafts.csswg.org/cssom/#dom-stylesheet-disabled
+    KRYS_NODISCARD virtual bool Disabled() const noexcept = 0;
 
+    /// @see https://drafts.csswg.org/cssom/#dom-stylesheet-disabled
+    virtual void SetDisabled(bool disabled) noexcept = 0;
+
+#pragma endregion
+
+    /// @brief The `@import` rule that loaded the sheet.
+    /// @see https://drafts.csswg.org/cssom/#concept-css-style-sheet-owner-css-rule
     KRYS_NODISCARD virtual CSSImportRule *OwnerRule() const noexcept
     {
       return nullptr;
     }
 
+    /// @brief Forgets the owner node, once it no longer holds the sheet.
     virtual void ClearOwnerNode() noexcept = 0;
 
+    /// @brief The URL the sheet's relative URLs resolve against.
     KRYS_NODISCARD virtual net::Url BaseUrl() const noexcept = 0;
 
+    /// @brief Whether the sheet, or a sheet it imports, is still loading.
     KRYS_NODISCARD virtual bool IsLoading() const noexcept = 0;
 
     KRYS_NODISCARD virtual bool IsCSSStyleSheet() const noexcept

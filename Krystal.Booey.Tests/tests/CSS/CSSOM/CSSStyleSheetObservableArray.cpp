@@ -136,15 +136,14 @@ namespace krys::boo::css::tests
     auto &scope = document->StyleScope();
     auto sheet = ConstructedSheetWithText(*document);
 
-    SECTION("After the owned sheets, in the style sheet list too")
+    SECTION("After the owned sheets, but not in the style sheet list")
     {
       REQUIRE_FALSE(document->SetAdoptedStyleSheets({sheet}).HasException());
       REQUIRE(scope.HasPendingUpdate());
       RunTasks();
       REQUIRE(scope.ActiveStyleSheets().size() == 2uz);
       REQUIRE(scope.ActiveStyleSheets()[1].get() == sheet.get());
-      REQUIRE(document->StyleSheets().Length() == 2u);
-      REQUIRE(document->StyleSheets().Item(1) == sheet.get());
+      REQUIRE(document->StyleSheets().Length() == 1u);
 
       REQUIRE_FALSE(document->SetAdoptedStyleSheets({}).HasException());
       REQUIRE(scope.HasPendingUpdate());
@@ -191,7 +190,7 @@ namespace krys::boo::css::tests
       RunTasks();
       REQUIRE(shadow->StyleScope().ActiveStyleSheetsContains(*sheet));
       REQUIRE_FALSE(scope.ActiveStyleSheetsContains(*sheet));
-      REQUIRE(shadow->StyleSheets().Length() == 1u);
+      REQUIRE(shadow->StyleSheets().Length() == 0u);
 
       SECTION("Adoption into another document drops them")
       {

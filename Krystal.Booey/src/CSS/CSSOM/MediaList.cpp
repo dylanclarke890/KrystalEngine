@@ -1,35 +1,51 @@
-﻿/*
- * (C) 1999-2003 Lars Knoll (knoll@kde.org)
- * Copyright (C) 2004-2020 Apple Inc. All rights reserved.
- *
- * This library is free software; you can redistribute it and/or
- * modify it under the terms of the GNU Library General Public
- * License as published by the Free Software Foundation; either
- * version 2 of the License, or (at your option) any later version.
- *
- * This library is distributed in the hope that it will be useful,
- * but WITHOUT ANY WARRANTY; without even the implied warranty of
- * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU
- * Library General Public License for more details.
- *
- * You should have received a copy of the GNU Library General Public License
- * along with this library; see the file COPYING.LIB.  If not, write to
- * the Free Software Foundation, Inc., 51 Franklin Street, Fifth Floor,
- * Boston, MA 02110-1301, USA.
- */
-
-#include "Krystal.Booey/CSS/CSSOM/MediaList.hpp"
+﻿#include "Krystal.Booey/CSS/CSSOM/MediaList.hpp"
 #include "Krystal.Booey/CSS/CSSOM/CSSImportRule.hpp"
 #include "Krystal.Booey/CSS/CSSOM/CSSMediaRule.hpp"
 #include "Krystal.Booey/CSS/CSSOM/CSSStyleSheet.hpp"
 #include "Krystal.Booey/CSS/Parser/ParserContext.hpp"
 #include "Krystal.Booey/CSS/Queries/MediaQueryParser.hpp"
 #include "Krystal.Booey/DOM/Types/ExceptionOr.hpp"
-#include "Krystal.Core/Strings/ASCII.hpp"
 #include "Krystal.Core/Strings/StringBuilder.hpp"
+#include <algorithm>
 
 namespace krys::boo
 {
+  namespace
+  {
+    /// @see https://drafts.csswg.org/cssom/#parse-a-media-query-list
+    KRYS_NODISCARD css::mq::MediaQueryList ParseMediaQueryList(const CSSOMString &text) noexcept
+    {
+      return css::mq::MediaQueryParser::Parse(text, css::StrictParserContext());
+    }
+
+    /// @brief The single query @p text is, or null if it's none or several.
+    /// @see https://drafts.csswg.org/cssom/#parse-a-media-query
+    KRYS_NODISCARD Maybe<css::mq::MediaQuery> ParseMediaQuery(const CSSOMString &text) noexcept
+    {
+      auto queries = ParseMediaQueryList(text);
+      if (queries.size() != 1)
+      {
+        return null;
+      }
+      return krys::move(queries.front());
+    }
+
+    /// @see https://drafts.csswg.org/cssom/#serialize-a-media-query
+    KRYS_NODISCARD CSSOMString SerialiseMediaQuery(const css::mq::MediaQuery &query) noexcept
+    {
+      StringBuilder builder;
+      css::mq::Serialise(builder, query);
+      return krys::move(builder).ToString();
+    }
+
+    /// @brief Whether @p a and @p b serialise the same.
+    /// @see https://drafts.csswg.org/cssom/#compare-media-queries
+    KRYS_NODISCARD bool AreSameMediaQuery(const css::mq::MediaQuery &a, const css::mq::MediaQuery &b) noexcept
+    {
+      return SerialiseMediaQuery(a) == SerialiseMediaQuery(b);
+    }
+  }
+
   MediaList::MediaList(CSSStyleSheet *parentSheet) noexcept : _parentStyleSheet(CreateWeakPtr(parentSheet))
   {
   }
@@ -50,16 +66,89 @@ namespace krys::boo
     return AdoptRef(*new MediaList(parentRule));
   }
 
-  void MediaList::DetachFromParent() noexcept
+  CSSOMString MediaList::MediaText() const noexcept
   {
-    _detachedMediaQueries = MediaQueries();
-    _parentStyleSheet = nullptr;
-    _parentRule = nullptr;
+    // https://drafts.csswg.org/cssom/#serialize-a-media-query-list
+    StringBuilder builder;
+    css::mq::Serialise(builder, MediaQueries());
+    return krys::move(builder).ToString();
+  }
+
+  void MediaList::SetMediaText(const CSSOMString &text) noexcept
+  {
+    // 1. Empty the collection of media queries.
+    // 2. If the given value is the empty string, then return.
+    // 3. Append all the media queries as a result of parsing the given value to the collection of media
+    //    queries.
+    SetMediaQueries(text.empty() ? css::mq::MediaQueryList {} : ParseMediaQueryList(text));
+  }
+
+  CSSOMString MediaList::Item(uint32 index) const noexcept
+  {
+    const auto &queries = MediaQueries();
+    return index < queries.size() ? SerialiseMediaQuery(queries[index]) : CSSOMString {};
   }
 
   uint32 MediaList::Length() const noexcept
   {
     return static_cast<uint32>(MediaQueries().size());
+  }
+
+  void MediaList::AppendMedium(const CSSOMString &medium) noexcept
+  {
+    // 1. Let m be the result of parsing the given value.
+    auto m = ParseMediaQuery(medium);
+
+    // 2. If m is null, then return.
+    if (!m)
+    {
+      return;
+    }
+
+    // 3. If comparing m with any of the media queries in the collection of media queries returns true, then
+    //    return.
+    auto queries = MediaQueries();
+    if (std::ranges::any_of(queries, [&](const auto &query) { return AreSameMediaQuery(*m, query); }))
+    {
+      return;
+    }
+
+    // 4. Append m to the collection of media queries.
+    queries.push_back(krys::move(*m));
+    SetMediaQueries(krys::move(queries));
+  }
+
+  ExceptionOr<void> MediaList::DeleteMedium(const CSSOMString &medium) noexcept
+  {
+    // 1. Let m be the result of parsing the given value.
+    auto m = ParseMediaQuery(medium);
+
+    // 2. If m is null, then return.
+    if (!m)
+    {
+      return {};
+    }
+
+    // 3. Remove any media query from the collection of media queries for which comparing the media query with
+    //    m returns true. If nothing was removed, then throw a NotFoundError exception.
+    auto queries = MediaQueries();
+    auto removed = std::erase_if(queries, [&](const auto &query) { return AreSameMediaQuery(query, *m); });
+    if (!removed)
+    {
+      return ExceptionCode::NotFoundError;
+    }
+    SetMediaQueries(krys::move(queries));
+    return {};
+  }
+
+  CSSRule *MediaList::ParentRule() const noexcept
+  {
+    return _parentRule.get();
+  }
+
+  CSSStyleSheet *MediaList::ParentStyleSheet() const noexcept
+  {
+    return _parentStyleSheet.get();
   }
 
   const css::mq::MediaQueryList &MediaList::MediaQueries() const noexcept
@@ -79,86 +168,36 @@ namespace krys::boo
     return _parentStyleSheet->MediaQueries();
   }
 
-  void MediaList::SetMediaQueries(css::mq::MediaQueryList &&queries) noexcept
+  void MediaList::DetachFromParent() noexcept
   {
-    if (RefPtr parentStyleSheet = _parentStyleSheet.lock())
+    _detachedMediaQueries = MediaQueries();
+    _parentStyleSheet = nullptr;
+    _parentRule = nullptr;
+  }
+
+  void MediaList::SetMediaQueries(css::mq::MediaQueryList queries) noexcept
+  {
+    if (_detachedMediaQueries)
     {
-      parentStyleSheet->SetMediaQueries(krys::move(queries));
-      parentStyleSheet->DidMutate();
+      _detachedMediaQueries = krys::move(queries);
+      return;
+    }
+    if (RefPtr sheet = _parentStyleSheet.lock())
+    {
+      sheet->SetMediaQueries(krys::move(queries));
+      sheet->DidMutate();
       return;
     }
 
+    // A rule's queries are part of its sheet's contents, so changing them is a change to the sheet's rules.
     CSSStyleSheet::RuleMutationScope mutationScope(_parentRule.get());
-    if (auto *rule = DynamicDowncast<CSSImportRule>(_parentRule.get()))
+    if (auto *importRule = DynamicDowncast<CSSImportRule>(_parentRule.get()))
     {
-      rule->SetMediaQueries(krys::move(queries));
+      importRule->SetMediaQueries(krys::move(queries));
     }
-    if (auto *rule = DynamicDowncast<CSSMediaRule>(_parentRule.get()))
+    else if (auto *mediaRule = DynamicDowncast<CSSMediaRule>(_parentRule.get()))
     {
-      rule->SetMediaQueries(krys::move(queries));
+      mediaRule->SetMediaQueries(krys::move(queries));
     }
-  }
-
-  CSSOMString MediaList::MediaText() const noexcept
-  {
-    StringBuilder builder;
-    css::mq::Serialise(builder, MediaQueries());
-    return krys::move(builder).ToString();
-  }
-
-  void MediaList::SetMediaText(const CSSOMString &value) noexcept
-  {
-    SetMediaQueries(css::mq::MediaQueryParser::Parse(value, css::StrictParserContext()));
-  }
-
-  CSSRule *MediaList::ParentRule() const noexcept
-  {
-    return _parentRule.get();
-  }
-
-  CSSStyleSheet *MediaList::ParentStyleSheet() const noexcept
-  {
-    return _parentStyleSheet.get();
-  }
-
-  CSSOMString MediaList::Item(uint32 index) const noexcept
-  {
-    const auto &queries = MediaQueries();
-    if (index < queries.size())
-    {
-      StringBuilder builder;
-      css::mq::Serialise(builder, queries[index]);
-      return krys::move(builder).ToString();
-    }
-    return {};
-  }
-
-  ExceptionOr<void> MediaList::DeleteMedium(const CSSOMString &oldMedium) noexcept
-  {
-    auto valueToRemove = text::ToASCIILower(CSSOMStringView(oldMedium));
-    auto queries = MediaQueries();
-    for (uint32 i = 0; i < queries.size(); ++i)
-    {
-      if (Item(i) == valueToRemove)
-      {
-        queries.erase(queries.begin() + i);
-        SetMediaQueries(krys::move(queries));
-        return {};
-      }
-    }
-    return ExceptionCode::NotFoundError;
-  }
-
-  void MediaList::AppendMedium(const CSSOMString &newMedium) noexcept
-  {
-    if (newMedium.empty())
-    {
-      return;
-    }
-
-    auto newQuery = css::mq::MediaQueryParser::Parse(newMedium, css::StrictParserContext());
-    auto queries = MediaQueries();
-    queries.insert(queries.end(), newQuery.begin(), newQuery.end());
-    SetMediaQueries(krys::move(queries));
   }
 }

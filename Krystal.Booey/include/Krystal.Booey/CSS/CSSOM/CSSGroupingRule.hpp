@@ -1,26 +1,4 @@
-﻿/*
- * (C) 1999-2003 Lars Knoll (knoll@kde.org)
- * (C) 2002-2003 Dirk Mueller (mueller@kde.org)
- * Copyright (C) 2002-2020 Apple Inc. All rights reserved.
- * Copyright (C) 2006 Samuel Weinig (sam@webkit.org)
- *
- * This library is free software; you can redistribute it and/or
- * modify it under the terms of the GNU Library General Public
- * License as published by the Free Software Foundation; either
- * version 2 of the License, or (at your option) any later version.
- *
- * This library is distributed in the hope that it will be useful,
- * but WITHOUT ANY WARRANTY; without even the implied warranty of
- * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU
- * Library General Public License for more details.
- *
- * You should have received a copy of the GNU Library General Public License
- * along with this library; see the file COPYING.LIB.  If not, write to
- * the Free Software Foundation, Inc., 51 Franklin Street, Fifth Floor,
- * Boston, MA 02110-1301, USA.
- */
-
-#pragma once
+﻿#pragma once
 
 #include "Krystal.Booey/CSS/CSSOM/CSSRule.hpp"
 #include "Krystal.Core/Attributes.hpp"
@@ -39,12 +17,13 @@ namespace krys::boo
 {
   class CSSRuleList;
 
-  /// @brief The base of the rules that contain other rules.
+  /// @brief A rule that holds other rules, its child CSS rules, such as `@media` or `@layer`.
   /// @see https://drafts.csswg.org/cssom/#the-cssgroupingrule-interface
   class CSSGroupingRule : public CSSRule
   {
   private:
     Ref<css::GroupRule> _groupRule;
+    // The wrappers of the child rules made so far, by index, and the live list of them.
     mutable List<RefPtr<CSSRule>> _childRuleCSSOMWrappers;
     mutable UniquePtr<CSSRuleList> _ruleListCSSOMWrapper;
 
@@ -54,14 +33,26 @@ namespace krys::boo
   public:
     ~CSSGroupingRule() noexcept override;
 
+#pragma region CSSGroupingRule - https://drafts.csswg.org/cssom/#the-cssgroupingrule-interface
+
+    /// @brief A live list of the child rules.
+    /// @see https://drafts.csswg.org/cssom/#dom-cssgroupingrule-cssrules
     KRYS_NODISCARD CSSRuleList &CssRules() const noexcept;
 
+    /// @brief Parses @p rule and inserts it among the child rules at @p index, returning the index.
+    /// @see https://drafts.csswg.org/cssom/#dom-cssgroupingrule-insertrule
     ExceptionOr<uint32> InsertRule(const CSSOMString &rule, uint32 index) noexcept;
 
+    /// @brief Removes the child rule at @p index.
+    /// @see https://drafts.csswg.org/cssom/#dom-cssgroupingrule-deleterule
     ExceptionOr<void> DeleteRule(uint32 index) noexcept;
 
+#pragma endregion
+
+    /// @brief The number of child rules.
     KRYS_NODISCARD uint32 Length() const noexcept;
 
+    /// @brief The wrapper of the child rule at @p index, made when first asked for; null past the end.
     KRYS_NODISCARD CSSRule *Item(uint32 index) const noexcept;
 
     KRYS_NODISCARD virtual bool IsCSSConditionRule() const noexcept
@@ -82,8 +73,10 @@ namespace krys::boo
 
     void Reattach(css::Rule &rule) noexcept override;
 
+    /// @brief Appends ` {`, each child rule's `cssText` on a line of its own, and `}`.
     void AppendCSSTextForItems(StringBuilder &builder) const noexcept;
 
+    /// @brief As `AppendCSSTextForItems`, with the child rules serialised in @p context.
     void AppendCSSTextWithReplacementUrlsForItems(StringBuilder &builder,
                                                   const css::SerialisationContext &context) const noexcept;
 

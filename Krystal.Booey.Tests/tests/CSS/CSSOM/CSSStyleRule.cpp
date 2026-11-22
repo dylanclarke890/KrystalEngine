@@ -154,23 +154,4 @@ namespace krys::boo::css::tests
     CHECK(RuleText(outer) == "a {\n  & b {\n  & c { }\n}\n}");
     CHECK(inner.Item(0)->ParentStyleSheet() == sheet.get());
   }
-
-  TEST_CASE("CSSNestedDeclarations", "[CSS][CSSOM][CSSNestedDeclarations]")
-  {
-    auto sheet = SheetFromText(u8"a { & b { } color: red; }");
-    auto &outer = RuleAt<CSSStyleRule>(*sheet, 0);
-    REQUIRE(outer.Length() == 2);
-    REQUIRE(Is<CSSNestedDeclarations>(*outer.Item(1)));
-    auto &declarations = Downcast<CSSNestedDeclarations>(*outer.Item(1));
-
-    CHECK(TypeOf(declarations) == RuleType::NestedDeclarations);
-    CHECK(RuleText(declarations) == "color: red;");
-
-    auto &style = declarations.Style();
-    CHECK(&style == &declarations.Style());
-    CHECK(style.ParentRule() == &declarations);
-    REQUIRE_FALSE(style.SetProperty(u8"color", u8"blue", u8"").HasException());
-    CHECK(RuleText(declarations) == "color: blue;");
-    CHECK(RuleText(outer) == "a {\n  & b { }\n  color: blue;\n}");
-  }
 }

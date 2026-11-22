@@ -1,23 +1,4 @@
-﻿/*
- * Copyright (C) 2024 Apple Inc. All rights reserved.
- *
- * This library is free software; you can redistribute it and/or
- * modify it under the terms of the GNU Library General Public
- * License as published by the Free Software Foundation; either
- * version 2 of the License, or (at your option) any later version.
- *
- * This library is distributed in the hope that it will be useful,
- * but WITHOUT ANY WARRANTY; without even the implied warranty of
- * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU
- * Library General Public License for more details.
- *
- * You should have received a copy of the GNU Library General Public License
- * along with this library; see the file COPYING.LIB.  If not, write to
- * the Free Software Foundation, Inc., 51 Franklin Street, Fifth Floor,
- * Boston, MA 02110-1301, USA.
- */
-
-#pragma once
+﻿#pragma once
 
 #include "Krystal.Booey/CSS/CSSOM/CSSRule.hpp"
 #include "Krystal.Core/Attributes.hpp"
@@ -34,13 +15,14 @@ namespace krys::boo
   class CSSStyleProperties;
   class StyleRuleCSSStyleProperties;
 
-  /// @brief Declarations that follow nested rules, exposed to scripts.
+  /// @brief Declarations in a style rule that come after a nested rule, which keep their place among the
+  /// nested rules, as scripts see them.
   /// @see https://drafts.csswg.org/css-nesting/#the-cssnestrule
   class CSSNestedDeclarations final : public CSSRule
   {
   private:
-    Ref<css::NestedDeclarationsRule> _styleRule;
-    RefPtr<StyleRuleCSSStyleProperties> _propertiesCSSOMWrapper;
+    Ref<css::NestedDeclarationsRule> _rule;
+    RefPtr<StyleRuleCSSStyleProperties> _style;
 
     CSSNestedDeclarations(css::NestedDeclarationsRule &rule, CSSStyleSheet *parent) noexcept;
 
@@ -48,19 +30,22 @@ namespace krys::boo
     ~CSSNestedDeclarations() noexcept override;
 
     KRYS_NODISCARD static Ref<CSSNestedDeclarations> Create(css::NestedDeclarationsRule &rule,
-                                                            CSSStyleSheet *sheet) noexcept;
+                                                            CSSStyleSheet *parent) noexcept;
 
+    /// @brief The declarations, made when first asked for.
+    /// @see https://drafts.csswg.org/css-nesting/#dom-cssnesteddeclarations-style
     KRYS_NODISCARD CSSStyleProperties &Style() noexcept;
 
   private:
-    KRYS_NODISCARD CSSOMString CssText() const noexcept final;
-
-    void Reattach(css::Rule &rule) noexcept final;
-
     KRYS_NODISCARD css::RuleType StyleRuleType() const noexcept final
     {
       return css::RuleType::NestedDeclarations;
     }
+
+    /// @brief The serialisation of the declarations, with nothing around them.
+    KRYS_NODISCARD CSSOMString CssText() const noexcept final;
+
+    void Reattach(css::Rule &rule) noexcept final;
   };
 }
 

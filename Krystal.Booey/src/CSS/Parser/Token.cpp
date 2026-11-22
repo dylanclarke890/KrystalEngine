@@ -152,8 +152,14 @@ namespace krys::boo::css
         break;
       case TokenType::Hash:
         builder.Append(u8'#');
-        SerialiseIdentifier(CSSOMString(IdentCodePoints()), builder,
-                            _hashType == HashTokenType::Unrestricted);
+        if (_hashType == HashTokenType::Unrestricted)
+        {
+          SerialiseName(CSSOMString(IdentCodePoints()), builder);
+        }
+        else
+        {
+          SerialiseIdentifier(CSSOMString(IdentCodePoints()), builder);
+        }
         appendCommentIfNeeded({TokenType::Ident, TokenType::Function, TokenType::Url, TokenType::BadUrl,
                                TokenType::Number, TokenType::Percentage, TokenType::Dimension,
                                TokenType::CDC},

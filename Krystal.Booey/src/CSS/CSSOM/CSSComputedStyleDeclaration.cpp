@@ -191,16 +191,6 @@ namespace krys::boo
     return {};
   }
 
-  CSSOMString CSSComputedStyleDeclaration::GetPropertyShorthand(const CSSOMString &) noexcept
-  {
-    return {}; // FIXME: Should this sometimes be null instead of empty, to match a normal style declaration?
-  }
-
-  bool CSSComputedStyleDeclaration::IsPropertyImplicit(const CSSOMString &) noexcept
-  {
-    return false;
-  }
-
   ExceptionOr<void> CSSComputedStyleDeclaration::SetProperty(const CSSOMString &, const CSSOMString &,
                                                              const CSSOMString &) noexcept
   {

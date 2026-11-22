@@ -35,8 +35,6 @@ namespace krys::boo::css::tests
       CHECK(style.GetPropertyValue(u8"nonsense").empty());
       CHECK(style.GetPropertyValue(u8"--x").empty());
       CHECK(style.GetPropertyPriority(u8"font-family").empty());
-      CHECK(style.GetPropertyShorthand(u8"font-family").empty());
-      CHECK_FALSE(style.IsPropertyImplicit(u8"font-family"));
     }
 
     SECTION("setProperty")
