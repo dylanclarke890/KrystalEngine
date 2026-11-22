@@ -22,8 +22,8 @@ namespace krys::boo::tests
         u8"</munder><munderover><mo movablelimits=false>&#x2211;</mo>"
         u8"<mspace id=under2 depth=1em width=3em></mspace><mspace height=1em width=3em></mspace>"
         u8"</munderover></math>");
-      CHECK(Near(BoxOf(fixture, u8"under1").Y() - BoxOf(fixture, u8"ref").MaxY(), 110));
-      CHECK(Near(BoxOf(fixture, u8"under2").Y() - BoxOf(fixture, u8"ref").MaxY(), 110));
+      CHECK(Near(MathMLBoxOf(fixture, u8"under1").Y() - MathMLBoxOf(fixture, u8"ref").MaxY(), 110));
+      CHECK(Near(MathMLBoxOf(fixture, u8"under2").Y() - MathMLBoxOf(fixture, u8"ref").MaxY(), 110));
 
       auto *underOver = fixture.ById(u8"u").Renderer();
       REQUIRE(underOver);
@@ -40,8 +40,8 @@ namespace krys::boo::tests
         u8"<mover><mo movablelimits=false>&#x2211;</mo><mspace id=over1 depth=1em width=3em></mspace></mover>"
         u8"<munderover><mo movablelimits=false>&#x2211;</mo><mspace height=1em width=3em></mspace>"
         u8"<mspace id=over2 depth=1em width=3em></mspace></munderover></math>");
-      CHECK(Near(BoxOf(fixture, u8"ref").Y() - BoxOf(fixture, u8"over1").MaxY(), 70));
-      CHECK(Near(BoxOf(fixture, u8"ref").Y() - BoxOf(fixture, u8"over2").MaxY(), 70));
+      CHECK(Near(MathMLBoxOf(fixture, u8"ref").Y() - MathMLBoxOf(fixture, u8"over1").MaxY(), 70));
+      CHECK(Near(MathMLBoxOf(fixture, u8"ref").Y() - MathMLBoxOf(fixture, u8"over2").MaxY(), 70));
     }
 
     SECTION("OverbarVerticalGap, and AccentBaseHeight for accents")
@@ -55,13 +55,13 @@ namespace krys::boo::tests
                          u8"<mover id=el3 accent=true><mspace id=base3 height=3em width=1em></mspace>"
                          u8"<mspace id=over3 height=1em width=3em></mspace></mover></math>");
       // A script that isn't an accent is OverbarVerticalGap above the base.
-      CHECK(Near(BoxOf(fixture, u8"base1").Y() - BoxOf(fixture, u8"over1").MaxY(), 110));
+      CHECK(Near(MathMLBoxOf(fixture, u8"base1").Y() - MathMLBoxOf(fixture, u8"over1").MaxY(), 110));
       // An accent sits on a base at least AccentBaseHeight tall, and is raised to it over a shorter one.
-      CHECK(Near(BoxOf(fixture, u8"base2").Y() - BoxOf(fixture, u8"over2").MaxY(), 0));
-      CHECK(Near(BoxOf(fixture, u8"base3").Y() - BoxOf(fixture, u8"over3").MaxY(), 40 - 30));
+      CHECK(Near(MathMLBoxOf(fixture, u8"base2").Y() - MathMLBoxOf(fixture, u8"over2").MaxY(), 0));
+      CHECK(Near(MathMLBoxOf(fixture, u8"base3").Y() - MathMLBoxOf(fixture, u8"over3").MaxY(), 40 - 30));
       // The scripts are centred over the base.
-      CHECK(BoxOf(fixture, u8"base1").X() - BoxOf(fixture, u8"el1").X() == 10);
-      CHECK(BoxOf(fixture, u8"over1").X() == BoxOf(fixture, u8"el1").X());
+      CHECK(MathMLBoxOf(fixture, u8"base1").X() - MathMLBoxOf(fixture, u8"el1").X() == 10);
+      CHECK(MathMLBoxOf(fixture, u8"over1").X() == MathMLBoxOf(fixture, u8"el1").X());
     }
   }
 
@@ -73,12 +73,12 @@ namespace krys::boo::tests
       utf8_string body = u8"<math id=math><munder><mo id=o lspace=0 rspace=0>&#x2211;</mo>"
                          u8"<mspace id=s height=1em width=1em></mspace></munder></math>";
       auto fixture = MathFontDocument("limits-lowerlimitgapmin11000", body);
-      CHECK(BoxOf(fixture, u8"s").X() >= BoxOf(fixture, u8"o").MaxX());
+      CHECK(MathMLBoxOf(fixture, u8"s").X() >= MathMLBoxOf(fixture, u8"o").MaxX());
 
       // In display style, they're limits under it.
       fixture.ById(u8"math").SetAttribute(u8"display", u8"block");
-      CHECK(BoxOf(fixture, u8"s").Y() >= BoxOf(fixture, u8"o").MaxY());
-      CHECK(BoxOf(fixture, u8"s").X() < BoxOf(fixture, u8"o").MaxX());
+      CHECK(MathMLBoxOf(fixture, u8"s").Y() >= MathMLBoxOf(fixture, u8"o").MaxY());
+      CHECK(MathMLBoxOf(fixture, u8"s").X() < MathMLBoxOf(fixture, u8"o").MaxX());
     }
 
     SECTION("A horizontal stretchy operator stretches to the other children")
@@ -92,14 +92,14 @@ namespace krys::boo::tests
         u8"<munder><mo id=a lspace=0 rspace=0>&#x295A;</mo><mo id=c lspace=0 rspace=0>&#x295A;</mo></munder>"
         u8"</math>")};
       (void)fixture.Document->UpdateLayout();
-      CHECK(BoxOf(fixture, u8"o").Width() == 30);
+      CHECK(MathMLBoxOf(fixture, u8"o").Width() == 30);
       auto &op = Downcast<RenderMathMLOperator>(*fixture.ById(u8"o").Renderer());
       CHECK(op.StretchSize() == 30_lu);
       CHECK_FALSE(op.IsStretchWidthLocked());
 
       // When every child stretches, they stretch to the widest unstretched one: the 10px base glyph.
-      CHECK(BoxOf(fixture, u8"a").Width() == 10);
-      CHECK(BoxOf(fixture, u8"c").Width() == 10);
+      CHECK(MathMLBoxOf(fixture, u8"a").Width() == 10);
+      CHECK(MathMLBoxOf(fixture, u8"c").Width() == 10);
     }
 
     SECTION("Without the right number of children it's laid out as a row")
@@ -108,8 +108,8 @@ namespace krys::boo::tests
         u8"<math><munder><mspace id=a width=1em height=1em></mspace><mspace id=b width=1em height=1em>"
         u8"</mspace><mspace width=1em height=1em></mspace></munder></math>");
       (void)fixture.Document->UpdateLayout();
-      CHECK(BoxOf(fixture, u8"b").Y() == BoxOf(fixture, u8"a").Y());
-      CHECK(BoxOf(fixture, u8"b").X() == BoxOf(fixture, u8"a").MaxX());
+      CHECK(MathMLBoxOf(fixture, u8"b").Y() == MathMLBoxOf(fixture, u8"a").Y());
+      CHECK(MathMLBoxOf(fixture, u8"b").X() == MathMLBoxOf(fixture, u8"a").MaxX());
     }
   }
 }

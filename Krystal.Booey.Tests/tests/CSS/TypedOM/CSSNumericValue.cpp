@@ -39,7 +39,7 @@ namespace krys::boo::css::tests
     }
 
     template <typename T>
-    KRYS_NODISCARD ExceptionCode Error(ExceptionOr<T> result)
+    KRYS_NODISCARD ExceptionCode NumericError(ExceptionOr<T> result)
     {
       REQUIRE(result.HasException());
       return result.ReleaseException().Code();
@@ -63,7 +63,7 @@ namespace krys::boo::css::tests
     CHECK(percent->Type().Percent == 1);
     CHECK(Factory::Number(3)->Type().MatchesNumber());
 
-    CHECK(Error(CSSUnitValue::Create(1, u8"lemon")) == ExceptionCode::TypeError);
+    CHECK(NumericError(CSSUnitValue::Create(1, u8"lemon")) == ExceptionCode::TypeError);
     CHECK(CSSUnitValue::ParseUnit(u8"lemon") == UnitType::Unknown);
 
     // Conversion within a category, and not across categories.
@@ -71,8 +71,8 @@ namespace krys::boo::css::tests
     CHECK(inches->Value() == Catch::Approx(96));
     CHECK(ToNarrow(inches->Unit()) == "px");
     CHECK(RequireValue(Factory::S(1.5)->To(u8"ms"))->Value() == Catch::Approx(1'500));
-    CHECK(Error(Factory::Px(1)->To(u8"deg")) == ExceptionCode::TypeError);
-    CHECK(Error(Factory::Px(1)->To(u8"lemon")) == ExceptionCode::SyntaxError);
+    CHECK(NumericError(Factory::Px(1)->To(u8"deg")) == ExceptionCode::TypeError);
+    CHECK(NumericError(Factory::Px(1)->To(u8"lemon")) == ExceptionCode::SyntaxError);
     CHECK_FALSE(Factory::Em(1)->ConvertTo(UnitType::px));
 
     CHECK(Numeric(Factory::Px(1))->Equals(*Factory::Px(1)));
@@ -126,9 +126,9 @@ namespace krys::boo::css::tests
 
     SECTION("incompatible types and division by zero are errors")
     {
-      CHECK(Error(Factory::Px(1)->Add({N(Factory::S(1))})) == ExceptionCode::TypeError);
-      CHECK(Error(Factory::Px(1)->Div({0.0})) == ExceptionCode::RangeError);
-      CHECK(Error(Factory::Px(1)->Min({N(Factory::Deg(1))})) == ExceptionCode::TypeError);
+      CHECK(NumericError(Factory::Px(1)->Add({N(Factory::S(1))})) == ExceptionCode::TypeError);
+      CHECK(NumericError(Factory::Px(1)->Div({0.0})) == ExceptionCode::RangeError);
+      CHECK(NumericError(Factory::Px(1)->Min({N(Factory::Deg(1))})) == ExceptionCode::TypeError);
     }
 
     SECTION("a percentage added to a length takes a percent hint")
@@ -166,7 +166,7 @@ namespace krys::boo::css::tests
 
     auto clamp = RequireValue(CSSMathClamp::Create(N(Factory::Px(1)), N(Factory::Em(2)), N(Factory::Px(3))));
     CHECK(StyleValueText(*clamp) == "clamp(1px, 2em, 3px)");
-    CHECK(Error(CSSMathClamp::Create(N(Factory::Px(1)), N(Factory::S(2)), N(Factory::Px(3))))
+    CHECK(NumericError(CSSMathClamp::Create(N(Factory::Px(1)), N(Factory::S(2)), N(Factory::Px(3))))
           == ExceptionCode::TypeError);
 
     // Of the same unit, a clamp resolves to its sum value.
@@ -174,7 +174,7 @@ namespace krys::boo::css::tests
       RequireValue(CSSMathClamp::Create(N(Factory::Px(1)), N(Factory::Px(5)), N(Factory::Px(3))));
     CHECK(StyleValueText(*RequireValue(resolved->To(UnitType::px))) == "3px");
 
-    CHECK(Error(CSSMathSum::Create(List<Ref<CSSNumericValue>> {})) == ExceptionCode::SyntaxError);
+    CHECK(NumericError(CSSMathSum::Create(List<Ref<CSSNumericValue>> {})) == ExceptionCode::SyntaxError);
 
     // As CSS values: calc() expressions, serialised as calc() is (its terms sorted).
     auto sum = RequireValue(Factory::Px(1)->Add({N(Factory::Em(2))}));
@@ -186,7 +186,7 @@ namespace krys::boo::css::tests
     auto sum = RequireValue(Factory::Px(1)->Add({N(Factory::In(1)), N(Factory::Em(2))}));
 
     // A sum of lengths of different kinds has more than one sum value item.
-    CHECK(Error(sum->To(UnitType::px)) == ExceptionCode::TypeError);
+    CHECK(NumericError(sum->To(UnitType::px)) == ExceptionCode::TypeError);
 
     auto split = RequireValue(sum->ToSum({u8"px", u8"em"}));
     REQUIRE(split->Values().Length() == 2);
@@ -197,8 +197,8 @@ namespace krys::boo::css::tests
     auto canonical = RequireValue(sum->ToSum({}));
     CHECK(StyleValueText(*canonical) == "calc(2em + 97px)");
 
-    CHECK(Error(sum->ToSum({u8"px"})) == ExceptionCode::TypeError);
-    CHECK(Error(sum->ToSum({u8"lemon"})) == ExceptionCode::SyntaxError);
+    CHECK(NumericError(sum->ToSum({u8"px"})) == ExceptionCode::TypeError);
+    CHECK(NumericError(sum->ToSum({u8"lemon"})) == ExceptionCode::SyntaxError);
   }
 
   TEST_CASE_METHOD(ValueFixture, "CSSNumericValue: parsing", "[CSS][TypedOM]")
@@ -216,11 +216,11 @@ namespace krys::boo::css::tests
     CHECK(StyleValueText(*calc) == "calc(1px + 2em)");
     CHECK(Is<CSSMathMin>(*RequireValue(CSSNumericValue::Parse(*document, u8"min(1px, 2em)"))));
 
-    CHECK(Error(CSSNumericValue::Parse(*document, u8"")) == ExceptionCode::SyntaxError);
-    CHECK(Error(CSSNumericValue::Parse(*document, u8"auto")) == ExceptionCode::SyntaxError);
-    CHECK(Error(CSSNumericValue::Parse(*document, u8"1px 2px")) == ExceptionCode::SyntaxError);
-    CHECK(Error(CSSNumericValue::Parse(*document, u8"1lemon")) == ExceptionCode::SyntaxError);
-    CHECK(Error(CSSNumericValue::Parse(*document, u8"calc(1px + )")) == ExceptionCode::SyntaxError);
+    CHECK(NumericError(CSSNumericValue::Parse(*document, u8"")) == ExceptionCode::SyntaxError);
+    CHECK(NumericError(CSSNumericValue::Parse(*document, u8"auto")) == ExceptionCode::SyntaxError);
+    CHECK(NumericError(CSSNumericValue::Parse(*document, u8"1px 2px")) == ExceptionCode::SyntaxError);
+    CHECK(NumericError(CSSNumericValue::Parse(*document, u8"1lemon")) == ExceptionCode::SyntaxError);
+    CHECK(NumericError(CSSNumericValue::Parse(*document, u8"calc(1px + )")) == ExceptionCode::SyntaxError);
   }
 
   TEST_CASE_METHOD(ValueFixture, "CSSKeywordValue", "[CSS][TypedOM]")
@@ -229,7 +229,7 @@ namespace krys::boo::css::tests
     CHECK(ToNarrow(keyword->Value()) == "auto");
     CHECK(StyleValueText(*keyword) == "auto");
     CHECK(CssText(*keyword->ToCSSValue()) == "auto");
-    CHECK(Error(CSSKeywordValue::Create(u8"")) == ExceptionCode::TypeError);
+    CHECK(NumericError(CSSKeywordValue::Create(u8"")) == ExceptionCode::TypeError);
     CHECK(keyword->SetValue(u8"").HasException());
     CHECK(ToNarrow(keyword->Value()) == "auto");
 

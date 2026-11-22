@@ -9,8 +9,8 @@ namespace krys::boo::css::tests
 {
   namespace
   {
-    KRYS_NODISCARD Ref<CSSVariableReferenceValue> Reference(CSSOMString variable,
-                                                            RefPtr<CSSUnparsedValue> fallback = {})
+    KRYS_NODISCARD Ref<CSSVariableReferenceValue> VariableReference(CSSOMString variable,
+                                                                    RefPtr<CSSUnparsedValue> fallback = {})
     {
       auto result = CSSVariableReferenceValue::Create(krys::move(variable), krys::move(fallback));
       REQUIRE(result.HasValue());
@@ -26,7 +26,7 @@ namespace krys::boo::css::tests
   TEST_CASE_METHOD(ValueFixture, "CSSUnparsedValue: segments",
                    "[CSS][TypedOM][css-typed-om:cssunparsedvalue]")
   {
-    auto value = CSSUnparsedValue::Create({CSSOMString(u8"1px "), Segment(Reference(u8"--a"))});
+    auto value = CSSUnparsedValue::Create({CSSOMString(u8"1px "), Segment(VariableReference(u8"--a"))});
     CHECK(value->Length() == 2);
     CHECK(ToNarrow(value->ToString()) == "1px var(--a)");
     CHECK(value->IsSupportedPropertyIndex(1));
@@ -83,7 +83,7 @@ namespace krys::boo::css::tests
   {
     CHECK(CSSVariableReferenceValue::Create(u8"a").GetException().Code() == ExceptionCode::TypeError);
 
-    auto reference = Reference(u8"--a", CSSUnparsedValue::Create({CSSOMString(u8"1px")}));
+    auto reference = VariableReference(u8"--a", CSSUnparsedValue::Create({CSSOMString(u8"1px")}));
     CHECK(ToNarrow(reference->ToString()) == "var(--a,1px)");
     CHECK(reference->SetVariable(u8"b").HasException());
     CHECK(ToNarrow(reference->Variable()) == "--a");

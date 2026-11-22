@@ -21,7 +21,7 @@ namespace krys::boo::layout_integration::tests
 
   namespace
   {
-    KRYS_NODISCARD utf8_string Dump(ResolverFixture &fixture) noexcept
+    KRYS_NODISCARD utf8_string DumpInlineLayout(ResolverFixture &fixture) noexcept
     {
       return layout::tests::DumpWithIds(fixture);
     }
@@ -47,7 +47,7 @@ namespace krys::boo::layout_integration::tests
     ResolverFixture fixture {
       Document(u8"#w { width: 50px }", u8"<div id=w>aa bb cc dd</div><div id=br>a<br>bb</div>")};
 
-    CHECK(Dump(fixture) == u8R"(layer at (0,0) size 800x600
+    CHECK(DumpInlineLayout(fixture) == u8R"(layer at (0,0) size 800x600
   RenderView at (0,0) size 800x600
 layer at (0,0) size 800x40
   RenderBlock {HTML} at (0,0) size 800x40
@@ -77,7 +77,7 @@ layer at (0,0) size 800x40
 
     // The inline box's padding and border overflow the line, and the inline block's baseline is its last
     // line's.
-    CHECK(Dump(fixture) == u8R"(layer at (0,0) size 800x600
+    CHECK(DumpInlineLayout(fixture) == u8R"(layer at (0,0) size 800x600
   RenderView at (0,0) size 800x600
 layer at (0,0) size 800x30
   RenderBlock {HTML} at (0,0) size 800x30
@@ -105,7 +105,7 @@ layer at (0,0) size 800x30
       u8"#f { float: left; width: 20px; height: 25px } #d { width: 60px } #r { direction: rtl; width: 60px }",
       u8"<div id=d><div id=f></div>aa bb cc</div><div id=r>aa bb</div>")};
 
-    CHECK(Dump(fixture) == u8R"(layer at (0,0) size 800x600
+    CHECK(DumpInlineLayout(fixture) == u8R"(layer at (0,0) size 800x600
   RenderView at (0,0) size 800x600
 layer at (0,0) size 800x40
   RenderBlock {HTML} at (0,0) size 800x40
@@ -132,7 +132,7 @@ layer at (0,0) size 800x40
 
     // The floats and blocks shrink to fit their text. #min's lines don't fit beside the float, so they start
     // below it.
-    CHECK(Dump(fixture) == u8R"(layer at (0,0) size 800x600
+    CHECK(DumpInlineLayout(fixture) == u8R"(layer at (0,0) size 800x600
   RenderView at (0,0) size 800x600
 layer at (0,0) size 800x60
   RenderBlock {HTML} at (0,0) size 800x60

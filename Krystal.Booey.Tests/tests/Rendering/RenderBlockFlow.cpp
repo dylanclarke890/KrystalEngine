@@ -13,7 +13,7 @@ namespace krys::boo::tests
 
   namespace
   {
-    KRYS_NODISCARD utf8_string Dump(ResolverFixture &fixture) noexcept
+    KRYS_NODISCARD utf8_string DumpWithOverflow(ResolverFixture &fixture) noexcept
     {
       return ExternalRepresentation(
         fixture.Frame.get(),
@@ -38,7 +38,7 @@ namespace krys::boo::tests
     // #a's top margin collapses through the body, but not through the root, which is a formatting context
     // root. #c's child's margin collapses through #c with #b's bottom margin; #empty collapses through
     // itself.
-    CHECK(Dump(fixture) == u8R"(layer at (0,0) size 800x600
+    CHECK(DumpWithOverflow(fixture) == u8R"(layer at (0,0) size 800x600
   RenderView at (0,0) size 800x600
 layer at (0,0) size 800x304
   RenderBlock {HTML} at (0,0) size 800x304
@@ -99,7 +99,7 @@ layer at (8,291) size 784x10
       p { margin: 1em 0 }
     </style><body><div id=ac><div></div></div><div id=trim><div></div><div></div></div><div id=v><div></div></div><div id=s><div></div></div><div id=bfc><div></div></div><p>text</p></body>)html"};
 
-    CHECK(Dump(fixture) == u8R"(layer at (0,0) size 800x600
+    CHECK(DumpWithOverflow(fixture) == u8R"(layer at (0,0) size 800x600
   RenderView at (0,0) size 800x600
 layer at (0,0) size 800x311
   RenderBlock {HTML} at (0,0) size 800x311
@@ -130,7 +130,7 @@ layer at (0,186) size 800x40 clip at (0,186) size 779x19 scrollHeight 100
     ResolverFixture fixture {
       u8R"html(<body><p id=q>x</p><div style="height:10px"></div><p>y</p></body>)html"};
 
-    CHECK(Dump(fixture) == u8R"(layer at (0,0) size 800x600
+    CHECK(DumpWithOverflow(fixture) == u8R"(layer at (0,0) size 800x600
   RenderView at (0,0) size 800x600
 layer at (0,0) size 800x600
   RenderBlock {HTML} at (0,0) size 800x600

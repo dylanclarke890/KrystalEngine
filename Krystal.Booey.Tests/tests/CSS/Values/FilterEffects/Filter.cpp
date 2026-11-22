@@ -14,7 +14,7 @@ namespace krys::boo::css::tests
     using L = Length<AllUnzoomed>;
     using NL = Length<NonNegativeUnzoomed>;
 
-    FilterReference Reference(utf8_stringview url)
+    FilterReference UrlReference(utf8_stringview url)
     {
       ParserContext context {ParserMode::HTMLStandard};
       context.BaseUrl = net::Url {u8"https://example.com/"};
@@ -85,10 +85,10 @@ namespace krys::boo::css::tests
   TEST_CASE("Filter(Serialise property)", "[CSS][FilterEffects][Filter]")
   {
     CHECK(SerialiseForTest(Filter {keywords::None {}}) == u8"none");
-    CHECK(SerialiseForTest(Reference(u8"#shadow")) == u8"url(\"#shadow\")");
+    CHECK(SerialiseForTest(UrlReference(u8"#shadow")) == u8"url(\"#shadow\")");
     CHECK(SerialiseForTest(Filters({BlurFunction {.Parameters = {Blur::Parameter {2_css_px}}}}))
           == u8"blur(2px)");
-    CHECK(SerialiseForTest(Filters({Reference(u8"#a"), Shadow(), SepiaFunction {}}))
+    CHECK(SerialiseForTest(Filters({UrlReference(u8"#a"), Shadow(), SepiaFunction {}}))
           == u8"url(\"#a\") drop-shadow(red 1px 2px 3px) sepia()");
   }
 
@@ -102,8 +102,8 @@ namespace krys::boo::css::tests
     noColor.Parameters.Color = {};
     CHECK(noColor != Shadow());
 
-    CHECK(Reference(u8"#a") == Reference(u8"#a"));
-    CHECK(Reference(u8"#a") != Reference(u8"#b"));
+    CHECK(UrlReference(u8"#a") == UrlReference(u8"#a"));
+    CHECK(UrlReference(u8"#a") != UrlReference(u8"#b"));
 
     // Same parameter, different function.
     CHECK(FilterData {SepiaFunction {}} != FilterData {GrayscaleFunction {}});
@@ -116,7 +116,7 @@ namespace krys::boo::css::tests
 
   TEST_CASE("Filter(SwitchOn)", "[CSS][FilterEffects][Filter]")
   {
-    FilterData data {Reference(u8"#a")};
+    FilterData data {UrlReference(u8"#a")};
     auto isReference =
       data.SwitchOn([](const FilterReference &) { return true; }, [](const auto &) { return false; });
     CHECK(isReference);
@@ -125,7 +125,7 @@ namespace krys::boo::css::tests
   TEST_CASE("Filter(Dependencies and visitation)", "[CSS][FilterEffects][Filter]")
   {
     CHECK(CollectComputedStyleDependencies(Filter {keywords::None {}}).Properties.empty());
-    CHECK(CollectComputedStyleDependencies(Filters({Shadow(), Reference(u8"#a")})).Properties.empty());
+    CHECK(CollectComputedStyleDependencies(Filters({Shadow(), UrlReference(u8"#a")})).Properties.empty());
     CHECK(CollectComputedStyleDependencies(
             Filters({SepiaFunction {}, BlurFunction {.Parameters = {Blur::Parameter {1_css_em}}}}))
             .Properties
@@ -143,7 +143,7 @@ namespace krys::boo::css::tests
     };
 
     // Raw numerics, keyword colours and URLs have no child values.
-    CHECK(VisitValueChildren(visitor, Filters({Shadow(), Reference(u8"#a"), BlurFunction {}}))
+    CHECK(VisitValueChildren(visitor, Filters({Shadow(), UrlReference(u8"#a"), BlurFunction {}}))
           == IterationStatus::Continue);
     CHECK(visited == 0);
   }

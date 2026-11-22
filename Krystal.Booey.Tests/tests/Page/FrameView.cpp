@@ -24,11 +24,12 @@ namespace krys::boo::tests
     const boo::Color Black {boo::Color::black};
 
     /// @brief A parsed document shown in a page's main frame, with an 800x600 view.
-    struct FrameFixture : ResolverFixture
+    struct FrameViewFixture : ResolverFixture
     {
       Ref<boo::Frame> Frame {boo::Frame::Create()};
 
-      explicit FrameFixture(utf8_string &&markup) noexcept : ResolverFixture(krys::move(markup), WithView::No)
+      explicit FrameViewFixture(utf8_string &&markup) noexcept
+          : ResolverFixture(krys::move(markup), WithView::No)
       {
         Frame->CreateView({800, 600});
         Frame->SetDocument(ShareRefPtr<boo::Document>(Document.get()));
@@ -144,7 +145,7 @@ namespace krys::boo::tests
 
   TEST_CASE_METHOD(css::tests::ValueFixture, "FrameView: sizes", "[Page][FrameView]")
   {
-    FrameFixture fixture {u8"<!DOCTYPE html>"};
+    FrameViewFixture fixture {u8"<!DOCTYPE html>"};
     auto &view = fixture.View();
 
     CHECK(view.FrameRect() == RectI {0, 0, 800, 600});
@@ -204,7 +205,7 @@ namespace krys::boo::tests
       CHECK(ResolverFixture::Serialised(*style, style->Width()) == "0px");
     }
 
-    FrameFixture fixture {u8R"(<!DOCTYPE html><style>
+    FrameViewFixture fixture {u8R"(<!DOCTYPE html><style>
       #d { width: 50vw; height: 10vh }
       #s { width: 10svw; height: 10lvh }
       #m { width: 10vmin; height: 10dvh }
@@ -271,7 +272,7 @@ namespace krys::boo::tests
   TEST_CASE_METHOD(css::tests::ValueFixture, "FrameView: registered properties with viewport units",
                    "[Page][FrameView]")
   {
-    FrameFixture fixture {u8R"(<!DOCTYPE html><style>
+    FrameViewFixture fixture {u8R"(<!DOCTYPE html><style>
       @property --size { syntax: '<length>'; inherits: false; initial-value: 10vw }
       #d { width: var(--size) }
     </style><div id=d></div>)"};
@@ -289,7 +290,7 @@ namespace krys::boo::tests
                    "[Page][FrameView]")
   {
     // The root hides the view's scrollbars, so a resize doesn't lay the document out at once to fit them.
-    FrameFixture fixture {u8R"(<!DOCTYPE html><style>
+    FrameViewFixture fixture {u8R"(<!DOCTYPE html><style>
       @media (min-width: 1000px) { p { color: rgb(0, 0, 255) } }
       html { overflow: hidden }
     </style><p id=p>x</p>)"};
@@ -316,7 +317,7 @@ namespace krys::boo::tests
 
     SECTION("A view that can show scrollbars lays out at once on a resize, to fit them")
     {
-      FrameFixture scrolling {u8R"(<!DOCTYPE html><style>
+      FrameViewFixture scrolling {u8R"(<!DOCTYPE html><style>
         @media (min-width: 1000px) { p { color: rgb(0, 0, 255) } }
       </style><p id=p>x</p>)"};
       scrolling.Document->UpdateLayout();
@@ -343,7 +344,7 @@ namespace krys::boo::tests
 
   TEST_CASE_METHOD(css::tests::ValueFixture, "FrameView: media type", "[Page][FrameView]")
   {
-    FrameFixture fixture {u8R"(<!DOCTYPE html><style>
+    FrameViewFixture fixture {u8R"(<!DOCTYPE html><style>
       @media print { p { color: rgb(0, 0, 255) } }
     </style><p id=p>x</p>)"};
     auto &document = *fixture.Document;
@@ -368,7 +369,7 @@ namespace krys::boo::tests
 
   TEST_CASE_METHOD(css::tests::ValueFixture, "Page: dark appearance and device scale factor", "[Page][Frame]")
   {
-    FrameFixture fixture {u8R"(<!DOCTYPE html><style>
+    FrameViewFixture fixture {u8R"(<!DOCTYPE html><style>
       @media (prefers-color-scheme: dark) { p { color: rgb(0, 0, 255) } }
       #set { list-style-image: image-set(url(https://example.com/a.png) 1x, url(https://example.com/b.png) 2x) }
     </style><p id=p>x</p><div id=set></div>)"};
@@ -404,7 +405,7 @@ namespace krys::boo::tests
   TEST_CASE_METHOD(css::tests::ValueFixture, "FrameView: the style recalc and layout timers",
                    "[Page][FrameView][Timer]")
   {
-    FrameFixture fixture {u8"<!DOCTYPE html><div id=box style=width:10px;height:10px></div>"};
+    FrameViewFixture fixture {u8"<!DOCTYPE html><div id=box style=width:10px;height:10px></div>"};
     auto &loop = html::EventLoop::Current();
     loop.RunUntilIdle();
     REQUIRE_FALSE(fixture.Document->HasPendingStyleRecalc());
@@ -432,7 +433,7 @@ namespace krys::boo::tests
 
   TEST_CASE_METHOD(css::tests::ValueFixture, "FrameView: no layout while painting", "[Page][FrameView]")
   {
-    FrameFixture fixture {
+    FrameViewFixture fixture {
       u8"<!DOCTYPE html><div id=box style='width:10px;height:10px'></div><canvas id=canvas></canvas>"};
     html::EventLoop::Current().RunUntilIdle();
     auto &layoutContext = fixture.View().LayoutContext();

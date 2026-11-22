@@ -38,7 +38,7 @@ namespace krys::boo::tests
   namespace
   {
     /// @brief A 400x600 document in a 200x100 view: a 50 pixel box, then `#target`, 20 pixels tall, at 300.
-    constexpr utf8_stringview TallPage =
+    constexpr utf8_stringview TallScrollingPage =
       u8"<!DOCTYPE html><style>body{margin:0}#page{width:400px;height:600px}</style><div id=page>"
       u8"<div id=top style=height:50px></div><div id=target style=margin-top:250px;height:20px></div></div>";
 
@@ -182,7 +182,7 @@ namespace krys::boo::tests
   TEST_CASE_METHOD(css::tests::ValueFixture, "FrameView: the scroll position and its range",
                    "[Page][FrameView][Scrolling]")
   {
-    ScrollFixture fixture {TallPage};
+    ScrollFixture fixture {TallScrollingPage};
     auto &view = fixture.View();
 
     // The contents are the document's size; the range is what doesn't fit in the view, less its scrollbars
@@ -239,7 +239,7 @@ namespace krys::boo::tests
   TEST_CASE_METHOD(css::tests::ValueFixture, "FrameView: hit testing and coordinates follow the scroll",
                    "[Page][FrameView][Scrolling]")
   {
-    ScrollFixture fixture {TallPage};
+    ScrollFixture fixture {TallScrollingPage};
     auto &target = fixture.ById(u8"target");
     fixture.View().SetScrollPosition({0, 300});
 
@@ -259,7 +259,7 @@ namespace krys::boo::tests
                    "[Page][FrameView][Scrolling]")
   {
     ScrollFixture fixture {
-      utf8_string(TallPage)
+      utf8_string(TallScrollingPage)
       + u8"<div id=fixed style=position:fixed;left:0;top:10px;width:30px;height:30px;background:red></div>"};
     auto &fixed = fixture.ById(u8"fixed");
     fixture.View().SetScrollPosition({0, 200});
@@ -343,7 +343,7 @@ namespace krys::boo::tests
   TEST_CASE_METHOD(css::tests::ValueFixture, "FrameView: painting is scrolled",
                    "[Page][FrameView][Scrolling]")
   {
-    ScrollFixture fixture {TallPage};
+    ScrollFixture fixture {TallScrollingPage};
     fixture.View().SetScrollPosition({30, 40});
     auto painted = fixture.PaintedScrolled();
     // The contents move by the scroll position, clipped to the visible part.
@@ -432,7 +432,7 @@ namespace krys::boo::tests
 
   TEST_CASE_METHOD(css::tests::ValueFixture, "FrameView: scrolling into view", "[Page][FrameView][Scrolling]")
   {
-    ScrollFixture fixture {utf8_string(TallPage)
+    ScrollFixture fixture {utf8_string(TallScrollingPage)
                            + u8"<a id=link href=x style=display:block;height:20px>link</a>"};
     auto &view = fixture.View();
 
@@ -495,7 +495,7 @@ namespace krys::boo::tests
   TEST_CASE_METHOD(css::tests::ValueFixture, "FrameView: scroll events", "[Page][FrameView][Scrolling]")
   {
     ScrollFixture fixture {
-      utf8_string(TallPage)
+      utf8_string(TallScrollingPage)
       + u8"<div id=box style=overflow:auto;height:50px><div style=height:200px></div></div>"};
     List<std::string> records;
     Ref<EventListenerCallback> recorder = CreateRef<EventRecorder>(records);
@@ -529,7 +529,7 @@ namespace krys::boo::tests
   TEST_CASE_METHOD(css::tests::ValueFixture, "FrameView: the view's scrollbars follow the mouse",
                    "[Page][FrameView][Scrolling]")
   {
-    ScrollFixture fixture {utf8_string(TallPage) + u8"<input id=field>"};
+    ScrollFixture fixture {utf8_string(TallScrollingPage) + u8"<input id=field>"};
     auto &view = fixture.View();
     auto &handler = fixture.Frame->GetEventHandler();
     REQUIRE(view.VerticalScrollbar());
@@ -652,7 +652,7 @@ namespace krys::boo::tests
   TEST_CASE_METHOD(css::tests::ValueFixture, "FrameView: a page's step leaves out the scroll padding",
                    "[Page][FrameView][Scrolling]")
   {
-    ScrollFixture fixture {utf8_string(TallPage)};
+    ScrollFixture fixture {utf8_string(TallScrollingPage)};
     auto &view = fixture.View();
     REQUIRE(view.VerticalScrollbar());
     // Four fifths of the 79 pixels in view.
@@ -839,7 +839,7 @@ namespace krys::boo::tests
   TEST_CASE_METHOD(css::tests::ValueFixture, "FrameView: the wheel scrolls", "[Page][FrameView][Scrolling]")
   {
     // The box is fixed at the top of the view: 50 pixels tall, with 150 more to scroll.
-    ScrollFixture fixture {utf8_string(TallPage)
+    ScrollFixture fixture {utf8_string(TallScrollingPage)
                            + u8"<div id=box style=position:fixed;top:0;width:100px;height:50px;overflow:auto>"
                              u8"<div style=height:200px></div></div>"};
     ScrollAnimatorOff animatorOff {fixture.Document->GetSettings()};
@@ -927,7 +927,7 @@ namespace krys::boo::tests
                    "[Page][FrameView][Scrolling]")
   {
     // The box is fixed at the top of the view: 50 pixels tall, with 150 more to scroll.
-    ScrollFixture fixture {utf8_string(TallPage)
+    ScrollFixture fixture {utf8_string(TallScrollingPage)
                            + u8"<div id=box style=position:fixed;top:0;width:100px;height:50px;overflow:auto>"
                              u8"<div style=height:200px></div></div>"};
     auto &view = fixture.View();
@@ -985,7 +985,7 @@ namespace krys::boo::tests
                    "[Page][FrameView][Scrolling]")
   {
     ScrollFixture fixture {
-      utf8_string(TallPage)
+      utf8_string(TallScrollingPage)
       + u8"<div id=box tabindex=0 style=position:fixed;top:0;width:100px;height:50px;overflow:auto>"
         u8"<div style=height:200px></div></div>"};
     auto &view = fixture.View();

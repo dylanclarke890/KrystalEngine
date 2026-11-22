@@ -31,7 +31,7 @@ namespace krys::boo::tests
                          u8"<math><mspace id=ref depth=1em width=3em></mspace><mfrac id=f>"
                          u8"<mspace width=3em height=1em id=num></mspace><mspace width=3em></mspace>"
                          u8"</mfrac></math>");
-      CHECK(Near(BoxOf(fixture, u8"ref").Y() - BoxOf(fixture, u8"num").MaxY(), 70 + 10 / 2.0f));
+      CHECK(Near(MathMLBoxOf(fixture, u8"ref").Y() - MathMLBoxOf(fixture, u8"num").MaxY(), 70 + 10 / 2.0f));
       CHECK(FractionById(fixture, u8"f").LineThickness() == 10_lu);
       CHECK(FractionById(fixture, u8"f").RelativeLineThickness() == 1.0f);
     }
@@ -43,7 +43,7 @@ namespace krys::boo::tests
                          u8"<math><mspace id=ref width=3em depth=1em></mspace><mfrac>"
                          u8"<mspace width=3em height=1em id=num></mspace><mspace width=3em></mspace>"
                          u8"</mfrac></math>");
-      CHECK(Near(BoxOf(fixture, u8"ref").Y() - BoxOf(fixture, u8"num").MaxY(), 110));
+      CHECK(Near(MathMLBoxOf(fixture, u8"ref").Y() - MathMLBoxOf(fixture, u8"num").MaxY(), 110));
     }
 
     SECTION("DenominatorGapMin")
@@ -53,7 +53,7 @@ namespace krys::boo::tests
                          u8"<math><mspace id=ref width=3em height=.5em depth=.5em></mspace><mfrac>"
                          u8"<mspace width=3em></mspace><mspace width=3em height=1em id=den></mspace>"
                          u8"</mfrac></math>");
-      CHECK(Near(BoxOf(fixture, u8"den").Y() - BoxOf(fixture, u8"ref").MaxY(), 40));
+      CHECK(Near(MathMLBoxOf(fixture, u8"den").Y() - MathMLBoxOf(fixture, u8"ref").MaxY(), 40));
     }
 
     SECTION("NumeratorDisplayStyleGapMin, in display style only")
@@ -62,11 +62,11 @@ namespace krys::boo::tests
                          u8"</mspace><mfrac><mspace width=3em depth=1em id=num></mspace>"
                          u8"<mspace width=3em></mspace></mfrac></math>";
       auto fixture = MathFontDocument("fraction-numeratordisplaystylegapmin8000-rulethickness1000", body);
-      CHECK(Near(BoxOf(fixture, u8"ref").Y() - BoxOf(fixture, u8"num").MaxY(), 80));
+      CHECK(Near(MathMLBoxOf(fixture, u8"ref").Y() - MathMLBoxOf(fixture, u8"num").MaxY(), 80));
 
       // Inline, the font's other gaps are zero, so the numerator sits on the bar.
       fixture.ById(u8"math").SetAttribute(u8"display", u8"inline");
-      CHECK(Near(BoxOf(fixture, u8"ref").Y() - BoxOf(fixture, u8"num").MaxY(), 0));
+      CHECK(Near(MathMLBoxOf(fixture, u8"ref").Y() - MathMLBoxOf(fixture, u8"num").MaxY(), 0));
     }
 
     SECTION("StackGapMin, with no bar")
@@ -76,7 +76,7 @@ namespace krys::boo::tests
                                              u8"<mspace width=3em height=1em id=num></mspace>"
                                              u8"<mspace width=3em depth=1em id=den></mspace></mfrac></math>");
       CHECK(FractionById(fixture, u8"f").LineThickness() == 0_lu);
-      CHECK(Near(BoxOf(fixture, u8"den").Y() - BoxOf(fixture, u8"num").MaxY(), 80));
+      CHECK(Near(MathMLBoxOf(fixture, u8"den").Y() - MathMLBoxOf(fixture, u8"num").MaxY(), 80));
     }
 
     SECTION("StackTopShiftUp")
@@ -86,7 +86,7 @@ namespace krys::boo::tests
                          u8"<math><mspace id=ref width=3em depth=1em></mspace>"
                          u8"<mfrac linethickness=0px><mspace width=3em height=1em id=num></mspace>"
                          u8"<mspace width=3em></mspace></mfrac></math>");
-      CHECK(Near(BoxOf(fixture, u8"ref").Y() - BoxOf(fixture, u8"num").MaxY(), 90));
+      CHECK(Near(MathMLBoxOf(fixture, u8"ref").Y() - MathMLBoxOf(fixture, u8"num").MaxY(), 90));
     }
   }
 
@@ -102,7 +102,7 @@ namespace krys::boo::tests
       // Fractions have a pixel of padding on either side.
       CHECK(fraction.LogicalWidth() == 42_lu);
       CHECK(fraction.MaxPreferredLogicalWidth() == 42_lu);
-      CHECK(BoxOf(fixture, u8"num").X() - BoxOf(fixture, u8"den").X() == 10);
+      CHECK(MathMLBoxOf(fixture, u8"num").X() - MathMLBoxOf(fixture, u8"den").X() == 10);
       CHECK(fraction.RenderName() == u8"RenderMathMLFraction");
 
       // Its baseline is the numerator's shift above the axis: the numerator's bottom is the bar's top.
@@ -134,8 +134,8 @@ namespace krys::boo::tests
         u8"</mspace><mspace width=1em height=1em></mspace></mfrac></math>");
       auto &fraction = FractionById(fixture, u8"f");
       CHECK(fraction.LogicalWidth() == 42_lu);
-      CHECK(BoxOf(fixture, u8"b").X() - BoxOf(fixture, u8"a").X() == 10);
-      CHECK(BoxOf(fixture, u8"b").Y() == BoxOf(fixture, u8"a").Y());
+      CHECK(MathMLBoxOf(fixture, u8"b").X() - MathMLBoxOf(fixture, u8"a").X() == 10);
+      CHECK(MathMLBoxOf(fixture, u8"b").Y() == MathMLBoxOf(fixture, u8"a").Y());
     }
 
     SECTION("A fraction with an operator for its numerator embellishes it")
@@ -158,7 +158,7 @@ namespace krys::boo::tests
     // The bar is drawn across the fraction on the axis, under the numerator.
     auto lines = PaintedItems<display_list::DrawLine>(fixture);
     REQUIRE(lines.size() == 1);
-    auto numerator = BoxOf(fixture, u8"num");
+    auto numerator = MathMLBoxOf(fixture, u8"num");
     CHECK(lines[0].Point1().X() == numerator.X());
     CHECK(lines[0].Point2().X() == numerator.MaxX());
     CHECK(lines[0].Point1().Y() == lines[0].Point2().Y());

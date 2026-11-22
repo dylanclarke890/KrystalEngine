@@ -10,8 +10,8 @@ namespace krys::boo::tests
 
   namespace
   {
-    const Color Blue {Color::blue};
-    const Color Red {Color::red};
+    const Color BlueColor {Color::blue};
+    const Color RedColor {Color::red};
   }
 
   TEST_CASE_METHOD(css::tests::ValueFixture, "RenderElement: elements get renderers",
@@ -49,7 +49,7 @@ namespace krys::boo::tests
       auto *span = fixture.ById(u8"span").Renderer();
       REQUIRE(span);
       CHECK(span->GetType() == RenderObject::Type::Inline);
-      CHECK(span->Style().Color() == Blue);
+      CHECK(span->Style().Color() == BlueColor);
     }
 
     SECTION("The display chooses the renderer's type")
@@ -91,7 +91,7 @@ namespace krys::boo::tests
       REQUIRE_FALSE(span.SetAttribute(u8"style", u8"color: red").HasException());
       document.UpdateStyleIfNeeded();
       CHECK(span.Renderer() == renderer);
-      CHECK(renderer->Style().Color() == Red);
+      CHECK(renderer->Style().Color() == RedColor);
     }
 
     SECTION("Changing display to none tears the renderer down, and back creates one")
