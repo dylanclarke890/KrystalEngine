@@ -117,40 +117,40 @@ namespace krys::boo::css
 
   Ref<ValueList> ValueList::CreateCommaSeparated(ValueListBuilder values) noexcept
   {
-    return AdoptRef(*new ValueList(ValueSeparator::CommaSeparator, krys::move(values)));
+    return AdoptRef(*new ValueList(ValueSeparator::Comma, krys::move(values)));
   }
 
   Ref<ValueList> ValueList::CreateSlashSeparated(ValueListBuilder values) noexcept
   {
-    return AdoptRef(*new ValueList(ValueSeparator::SlashSeparator, krys::move(values)));
+    return AdoptRef(*new ValueList(ValueSeparator::Slash, krys::move(values)));
   }
 
   Ref<ValueList> ValueList::CreateSlashSeparated(Ref<Value> value1, Ref<Value> value2) noexcept
   {
-    return AdoptRef(*new ValueList(ValueSeparator::SlashSeparator, krys::move(value1), krys::move(value2)));
+    return AdoptRef(*new ValueList(ValueSeparator::Slash, krys::move(value1), krys::move(value2)));
   }
 
   Ref<ValueList> ValueList::CreateSpaceSeparated(ValueListBuilder values) noexcept
   {
-    return AdoptRef(*new ValueList(ValueSeparator::SpaceSeparator, krys::move(values)));
+    return AdoptRef(*new ValueList(ValueSeparator::Space, krys::move(values)));
   }
 
   Ref<ValueList> ValueList::CreateSpaceSeparated(Ref<Value> value1, Ref<Value> value2) noexcept
   {
-    return AdoptRef(*new ValueList(ValueSeparator::SpaceSeparator, krys::move(value1), krys::move(value2)));
+    return AdoptRef(*new ValueList(ValueSeparator::Space, krys::move(value1), krys::move(value2)));
   }
 
   Ref<ValueList> ValueList::CreateSpaceSeparated(Ref<Value> value1, Ref<Value> value2,
                                                  Ref<Value> value3) noexcept
   {
-    return AdoptRef(*new ValueList(ValueSeparator::SpaceSeparator, krys::move(value1), krys::move(value2),
-                                   krys::move(value3)));
+    return AdoptRef(
+      *new ValueList(ValueSeparator::Space, krys::move(value1), krys::move(value2), krys::move(value3)));
   }
 
   Ref<ValueList> ValueList::CreateSpaceSeparated(Ref<Value> value1, Ref<Value> value2, Ref<Value> value3,
                                                  Ref<Value> value4) noexcept
   {
-    return AdoptRef(*new ValueList(ValueSeparator::SpaceSeparator, krys::move(value1), krys::move(value2),
+    return AdoptRef(*new ValueList(ValueSeparator::Space, krys::move(value1), krys::move(value2),
                                    krys::move(value3), krys::move(value4)));
   }
 

@@ -78,12 +78,9 @@ namespace krys::boo::style
         }
         switch (valueList.Separator)
         {
-          case css::ValueSeparator::SpaceSeparator:
-            return css::ValueList::CreateSpaceSeparated(krys::move(builder));
-          case css::ValueSeparator::CommaSeparator:
-            return css::ValueList::CreateCommaSeparated(krys::move(builder));
-          case css::ValueSeparator::SlashSeparator:
-            return css::ValueList::CreateSlashSeparated(krys::move(builder));
+          case css::ValueSeparator::Space: return css::ValueList::CreateSpaceSeparated(krys::move(builder));
+          case css::ValueSeparator::Comma: return css::ValueList::CreateCommaSeparated(krys::move(builder));
+          case css::ValueSeparator::Slash: return css::ValueList::CreateSlashSeparated(krys::move(builder));
         }
         krys_unreachable();
       });

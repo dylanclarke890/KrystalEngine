@@ -37,7 +37,7 @@ namespace krys::boo::css::tests
                                                               PrimitiveValue::Create(1.0, UnitType::Number),
                                                               PrimitiveValue::Create(5.0, UnitType::Number)});
       CHECK(function->size() == 5u);
-      CHECK(function->Separator() == ValueSeparator::CommaSeparator);
+      CHECK(function->Separator() == ValueSeparator::Comma);
       CHECK(CssText(*function) == "matrix(1, 0, 0, 1, 5)");
     }
 

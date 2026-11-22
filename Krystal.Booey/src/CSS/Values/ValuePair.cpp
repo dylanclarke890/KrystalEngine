@@ -43,19 +43,19 @@ namespace krys::boo::css
 
   Ref<ValuePair> ValuePair::Create(Ref<Value> first, Ref<Value> second) noexcept
   {
-    return AdoptRef(*new ValuePair(ValueSeparator::SpaceSeparator, krys::move(first), krys::move(second),
+    return AdoptRef(*new ValuePair(ValueSeparator::Space, krys::move(first), krys::move(second),
                                    IdenticalValueSerialisation::Coalesce));
   }
 
   Ref<ValuePair> ValuePair::CreateSlashSeparated(Ref<Value> first, Ref<Value> second) noexcept
   {
-    return AdoptRef(*new ValuePair(ValueSeparator::SlashSeparator, krys::move(first), krys::move(second),
+    return AdoptRef(*new ValuePair(ValueSeparator::Slash, krys::move(first), krys::move(second),
                                    IdenticalValueSerialisation::DoNotCoalesce));
   }
 
   Ref<ValuePair> ValuePair::CreateNonCoalescing(Ref<Value> first, Ref<Value> second) noexcept
   {
-    return AdoptRef(*new ValuePair(ValueSeparator::SpaceSeparator, krys::move(first), krys::move(second),
+    return AdoptRef(*new ValuePair(ValueSeparator::Space, krys::move(first), krys::move(second),
                                    IdenticalValueSerialisation::DoNotCoalesce));
   }
 

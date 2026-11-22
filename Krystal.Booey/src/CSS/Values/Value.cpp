@@ -437,9 +437,9 @@ namespace krys::boo::css
   {
     switch (separator)
     {
-      case ValueSeparator::SpaceSeparator: return u8" ";
-      case ValueSeparator::CommaSeparator: return u8", ";
-      case ValueSeparator::SlashSeparator: return u8" / ";
+      case ValueSeparator::Space: return u8" ";
+      case ValueSeparator::Comma: return u8", ";
+      case ValueSeparator::Slash: return u8" / ";
     }
 
     krys_debug_assert(false);

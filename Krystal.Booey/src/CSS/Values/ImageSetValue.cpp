@@ -37,7 +37,7 @@ namespace krys::boo::css
   }
 
   ImageSetValue::ImageSetValue(ValueListBuilder builder) noexcept
-      : ValueContainingList(ValueType::ImageSet, ValueSeparator::CommaSeparator, krys::move(builder))
+      : ValueContainingList(ValueType::ImageSet, ValueSeparator::Comma, krys::move(builder))
   {
   }
 

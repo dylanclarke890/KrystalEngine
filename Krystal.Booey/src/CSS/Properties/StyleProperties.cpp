@@ -60,8 +60,7 @@ namespace krys::boo::css
     // for all CSSValueList with comma separators is better than checking the property is one of those
     // longhands. Serializing this way is harmless for other properties; those won't have any implicit initial
     // values.
-    if (auto *list = DynamicDowncast<ValueList>(value);
-        list && list->Separator() == ValueSeparator::CommaSeparator)
+    if (auto *list = DynamicDowncast<ValueList>(value); list && list->Separator() == ValueSeparator::Comma)
     {
       CSSOMString result;
       CSSOMStringView separator = u8"";

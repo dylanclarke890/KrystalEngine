@@ -33,12 +33,12 @@
 namespace krys::boo::css
 {
   TransformListValue::TransformListValue(ValueListBuilder builder) noexcept
-      : ValueContainingList(ValueType::TransformList, ValueSeparator::SpaceSeparator, krys::move(builder))
+      : ValueContainingList(ValueType::TransformList, ValueSeparator::Space, krys::move(builder))
   {
   }
 
   TransformListValue::TransformListValue(Ref<Value> value) noexcept
-      : ValueContainingList(ValueType::TransformList, ValueSeparator::SpaceSeparator, krys::move(value))
+      : ValueContainingList(ValueType::TransformList, ValueSeparator::Space, krys::move(value))
   {
   }
 

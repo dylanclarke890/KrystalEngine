@@ -66,7 +66,7 @@ namespace krys::boo::style::tests
 
     auto list = CustomProperty::CreateForValueList(
       name, CustomProperty::ValueList {.Values = {Length<> {1}, Length<> {2}},
-                                       .Separator = css::ValueSeparator::CommaSeparator});
+                                       .Separator = css::ValueSeparator::Comma});
     CHECK(list->IsValueList());
     CHECK(Serialised(*list) == "1px, 2px");
     CHECK(css::tests::CssText(
