@@ -156,7 +156,6 @@ namespace krys::boo::css
       case UnitType::cqb:
       case UnitType::cqmin:
       case UnitType::cqmax:
-      case UnitType::Attr:
       case UnitType::Calc:
       case UnitType::CalcPercentageWithAngle:
       case UnitType::CalcPercentageWithLength:

@@ -209,7 +209,6 @@ namespace krys::boo::css::calc
       case UnitType::hz:
       case UnitType::dppx:
       case UnitType::fr:
-      case UnitType::Attr:
       case UnitType::Calc:
       case UnitType::CalcPercentageWithAngle:
       case UnitType::CalcPercentageWithLength:

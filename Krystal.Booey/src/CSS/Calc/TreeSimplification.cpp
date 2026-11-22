@@ -283,7 +283,6 @@ namespace krys::boo::css::calc
       case UnitType::Integer:
       case UnitType::Percentage:
       // Non-numeric types should never be stored in a NonCanonicalDimension.
-      case UnitType::Attr:
       case UnitType::Calc:
       case UnitType::CalcPercentageWithAngle:
       case UnitType::CalcPercentageWithLength:

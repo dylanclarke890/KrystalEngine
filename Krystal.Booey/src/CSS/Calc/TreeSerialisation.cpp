@@ -276,7 +276,6 @@ namespace krys::boo::css::calc
       case UnitType::x:          return 63;
 
       // Non-numeric types are not supported.
-      case UnitType::Attr:
       case UnitType::Calc:
       case UnitType::CalcPercentageWithAngle:
       case UnitType::CalcPercentageWithLength:

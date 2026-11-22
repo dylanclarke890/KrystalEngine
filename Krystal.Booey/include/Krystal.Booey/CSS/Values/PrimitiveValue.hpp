@@ -23,7 +23,6 @@
 
 #include "Krystal.Booey/CSS/Properties/PropertyId.hpp"
 #include "Krystal.Booey/CSS/Types/CSSOMString.hpp"
-#include "Krystal.Booey/CSS/Values/AttrValue.hpp"
 #include "Krystal.Booey/CSS/Values/Primitives/Units.hpp"
 #include "Krystal.Booey/CSS/Values/Units.hpp"
 #include "Krystal.Booey/CSS/Values/Value.hpp"
@@ -94,7 +93,6 @@ namespace krys::boo::css
       double Number;
       StringAtomStorage String;
       const calc::Value *Calc;
-      const AttrValue *Attr;
     } _value;
 
     struct CreateImplicitInitialValueTag
@@ -112,8 +110,6 @@ namespace krys::boo::css
     PrimitiveValue(double value, UnitType unit) noexcept;
 
     explicit PrimitiveValue(Ref<calc::Value> value) noexcept;
-
-    explicit PrimitiveValue(Ref<AttrValue> attr) noexcept;
 
     PrimitiveValue(StaticValueTag, css::ValueId keyword) noexcept;
 
@@ -135,8 +131,6 @@ namespace krys::boo::css
     KRYS_NODISCARD static Ref<PrimitiveValue> CreateInteger(double value) noexcept;
 
     KRYS_NODISCARD static Ref<PrimitiveValue> Create(Ref<calc::Value> value) noexcept;
-
-    KRYS_NODISCARD static Ref<PrimitiveValue> Create(Ref<AttrValue> value) noexcept;
 
     /// @note Defined in ValuePool.hpp.
     KRYS_NODISCARD static inline Ref<PrimitiveValue> Create(css::ValueId identifier) noexcept;
@@ -166,11 +160,6 @@ namespace krys::boo::css
     KRYS_NODISCARD bool IsAngle() const noexcept
     {
       return UnitCategoryForType(PrimitiveType()) == UnitCategory::Angle;
-    }
-
-    KRYS_NODISCARD bool IsAttr() const noexcept
-    {
-      return PrimitiveUnitType() == UnitType::Attr;
     }
 
     KRYS_NODISCARD bool IsFontIndependentLength() const noexcept
@@ -636,16 +625,6 @@ namespace krys::boo::css
 
     KRYS_NODISCARD RefPtr<const calc::Value> ProtectedCSSCalcValue() const noexcept;
 
-    KRYS_NODISCARD const AttrValue *CSSAttrValue() const noexcept
-    {
-      return IsAttr() ? _value.Attr : nullptr;
-    }
-
-    KRYS_NODISCARD RefPtr<const AttrValue> ProtectedCSSAttrValue() const noexcept
-    {
-      return ShareRefPtr(CSSAttrValue());
-    }
-
     KRYS_NODISCARD CSSOMString CustomCSSText(const SerialisationContext &context) const noexcept;
 
     KRYS_NODISCARD bool Equals(const PrimitiveValue &other) const noexcept;
@@ -821,7 +800,6 @@ namespace krys::boo::css
       case UnitType::vw:                       return u8"vw";
       case UnitType::x:                        return u8"x";
 
-      case UnitType::Attr:
       case UnitType::Calc:
       case UnitType::CalcPercentageWithAngle:
       case UnitType::CalcPercentageWithLength:

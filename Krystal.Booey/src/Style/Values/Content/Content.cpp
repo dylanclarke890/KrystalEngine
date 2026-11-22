@@ -106,6 +106,10 @@ namespace krys::boo::style
                                  state.SetCurrentPropertyInvalidAtComputedValueTime();
                                  return Content::Text {CSSOMString {}};
                                }
+                               if (const auto *attr = DynamicDowncast<css::AttrValue>(item))
+                               {
+                                 return Content::Text {processAttrContent(*attr)};
+                               }
                                if (const auto *primitive = DynamicDowncast<css::PrimitiveValue>(item))
                                {
                                  switch (primitive->ValueId())
@@ -122,10 +126,6 @@ namespace krys::boo::style
                                  if (primitive->IsString())
                                  {
                                    return Content::Text {primitive->StringValue()};
-                                 }
-                                 if (const auto *attr = primitive->CSSAttrValue())
-                                 {
-                                   return Content::Text {processAttrContent(*attr)};
                                  }
                                  state.SetCurrentPropertyInvalidAtComputedValueTime();
                                  return Content::Text {CSSOMString {}};
@@ -148,8 +148,7 @@ namespace krys::boo::style
         return {};
       }
 
-      auto altTextList =
-        RequiredListDowncast<css::ValueList, css::PrimitiveValue>(state, contentListAltTextPair->Second());
+      auto *altTextList = RequiredDowncast<css::ValueList>(state, contentListAltTextPair->Second());
       if (!altTextList)
       {
         return {};
@@ -158,13 +157,14 @@ namespace krys::boo::style
       CSSOMString altText;
       for (const auto &item : *altTextList)
       {
-        if (item.IsString())
-        {
-          altText += item.StringValue();
-        }
-        else if (const auto *attr = item.CSSAttrValue())
+        if (const auto *attr = DynamicDowncast<css::AttrValue>(item))
         {
           altText += processAttrContent(*attr);
+        }
+        else if (const auto *string = DynamicDowncast<css::PrimitiveValue>(item);
+                 string && string->IsString())
+        {
+          altText += string->StringValue();
         }
       }
       return altText;

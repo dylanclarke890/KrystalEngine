@@ -51,7 +51,6 @@ namespace krys::boo::css
     Dimension,
     String,
     Ident,
-    Attr,
 
     vw,
     vh,

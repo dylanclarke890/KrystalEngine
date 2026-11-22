@@ -44,7 +44,6 @@ namespace krys::boo::css
     {
       switch (unitType)
       {
-        case UnitType::Attr:
         case UnitType::FontFamily:
         case UnitType::CustomIdent:
         case UnitType::PropertyId:
@@ -58,8 +57,7 @@ namespace krys::boo::css
 
     KRYS_NODISCARD bool IsStringType(UnitType type) noexcept
     {
-      return type == UnitType::String || type == UnitType::CustomIdent || type == UnitType::Attr
-             || type == UnitType::FontFamily;
+      return type == UnitType::String || type == UnitType::CustomIdent || type == UnitType::FontFamily;
     }
 
     KRYS_NODISCARD HashMap<const PrimitiveValue *, CSSOMString> &SerialisedPrimitiveValues() noexcept
@@ -140,12 +138,6 @@ namespace krys::boo::css
     _value.Calc = value.release();
   }
 
-  PrimitiveValue::PrimitiveValue(Ref<AttrValue> attr) noexcept : css::Value(ValueType::Primitive)
-  {
-    SetPrimitiveUnitType(UnitType::Attr);
-    _value.Attr = attr.release();
-  }
-
   PrimitiveValue::~PrimitiveValue() noexcept
   {
     switch (PrimitiveUnitType())
@@ -153,7 +145,6 @@ namespace krys::boo::css
       case UnitType::String:
       case UnitType::CustomIdent:
       case UnitType::FontFamily:               CSSOMStringAtom::DerefStorage(_value.String); break;
-      case UnitType::Attr:                     _value.Attr->SubRef(); break;
       case UnitType::Calc:                     _value.Calc->SubRef(); break;
       case UnitType::CalcPercentageWithAngle:
       case UnitType::CalcPercentageWithLength: krys_debug_assert(false); break;
@@ -225,11 +216,6 @@ namespace krys::boo::css
   }
 
   Ref<PrimitiveValue> PrimitiveValue::Create(Ref<calc::Value> value) noexcept
-  {
-    return AdoptRef(*new PrimitiveValue(krys::move(value)));
-  }
-
-  Ref<PrimitiveValue> PrimitiveValue::Create(Ref<AttrValue> value) noexcept
   {
     return AdoptRef(*new PrimitiveValue(krys::move(value)));
   }
@@ -648,7 +634,6 @@ namespace krys::boo::css
       case UnitType::FontFamily:  return CSSOMString(_value.String->View());
       case UnitType::ValueId:     return CSSOMString(ToString(_value.ValueId));
       case UnitType::PropertyId:  return CSSOMString(ToString(_value.PropertyId));
-      case UnitType::Attr:        return ProtectedCSSAttrValue()->CssText(DefaultSerialisationContext());
       default:                    return {};
     }
   }
@@ -675,7 +660,6 @@ namespace krys::boo::css
     auto type = PrimitiveUnitType();
     switch (type)
     {
-      case UnitType::Attr:       return ProtectedCSSAttrValue()->CssText(context);
       case UnitType::Calc:       return ProtectedCSSCalcValue()->CssText(context);
       // FIXME: This isn't correct.
       case UnitType::Dimension:  return FormatNumberValue(u8"");
@@ -743,7 +727,6 @@ namespace krys::boo::css
       case UnitType::CustomIdent:
       case UnitType::FontFamily:
         return _value.String == other._value.String; // Interned, so equal iff same atom.
-      case UnitType::Attr: return ProtectedCSSAttrValue()->Equals(*other.ProtectedCSSAttrValue());
       case UnitType::Calc: return ProtectedCSSCalcValue()->Equals(*other.ProtectedCSSCalcValue());
       case UnitType::Ident:
       case UnitType::CalcPercentageWithAngle:
@@ -767,7 +750,6 @@ namespace krys::boo::css
       case UnitType::String:
       case UnitType::CustomIdent:
       case UnitType::FontFamily:               seed = CombineFastHashes(seed, _value.String->Hash()); break;
-      case UnitType::Attr:                     seed = CombineFastHashes(seed, _value.Attr); break;
       case UnitType::Calc:                     seed = CombineFastHashes(seed, _value.Calc); break;
       case UnitType::Ident:
       case UnitType::CalcPercentageWithAngle:

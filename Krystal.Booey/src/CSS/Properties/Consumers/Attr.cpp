@@ -79,10 +79,6 @@ namespace krys::boo::css::parse_property
       return nullptr;
     }
 
-    auto attr = AttrValue::Create(krys::move(attrName), krys::move(fallback));
-
-    // FIXME: Consider moving to a FunctionValue with a custom-ident rather than a special CSS_ATTR
-    // primitive value.
-    return PrimitiveValue::Create(krys::move(attr));
+    return AttrValue::Create(krys::move(attrName), krys::move(fallback));
   }
 }

@@ -343,7 +343,6 @@ namespace krys::boo::css::calc
         // the type is «[ "percent" → 1 ]».
         return Type {.Percent = 1};
       }
-      case UnitType::Attr:
       case UnitType::Calc:
       case UnitType::CalcPercentageWithAngle:
       case UnitType::CalcPercentageWithLength:
