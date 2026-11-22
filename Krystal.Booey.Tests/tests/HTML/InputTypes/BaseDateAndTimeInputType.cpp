@@ -1,6 +1,7 @@
 ﻿#include "Krystal.Booey/HTML/InputTypes/BaseDateAndTimeInputType.hpp"
 #include "catch2/catch_test_macros.hpp"
 #include "Krystal.Booey.Tests/Editing/EditorTestUtils.hpp"
+#include "Krystal.Booey.Tests/HTML/InputTypeTestUtils.hpp"
 #include "Krystal.Booey/DOM/Nodes/ShadowRoot.hpp"
 #include "Krystal.Booey/DOM/Nodes/Text.hpp"
 #include "Krystal.Booey/HTML/Algorithms/FocusAlgorithms.hpp"
@@ -22,21 +23,6 @@ namespace krys::boo::tests
 
   namespace
   {
-    /// @brief Clicks @p input as a user does, with the window's transient activation that opening a picker
-    /// needs.
-    void UserClick(HTMLInputElement &input) noexcept
-    {
-      input.NodeDocument().Window()->NotifyActivated();
-      input.Click();
-    }
-
-    /// @brief Calls `showPicker()` on @p input during a user gesture, which it needs.
-    KRYS_NODISCARD ExceptionOr<void> ShowPicker(HTMLInputElement &input) noexcept
-    {
-      input.NodeDocument().Window()->NotifyActivated();
-      return input.ShowPicker();
-    }
-
     /// @brief A date chooser that records how it's shown.
     struct RecordingDateTimeChooser final : DateTimeChooser
     {

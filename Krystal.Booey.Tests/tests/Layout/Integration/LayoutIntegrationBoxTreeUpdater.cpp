@@ -30,7 +30,7 @@ namespace krys::boo::tests
       return Downcast<RenderBlockFlow>(*fixture.ById(id).Renderer());
     }
 
-    KRYS_NODISCARD const layout::ElementBox &BoxOf(ResolverFixture &fixture, DOMStringView id) noexcept
+    KRYS_NODISCARD const layout::ElementBox &BoxTreeBoxOf(ResolverFixture &fixture, DOMStringView id) noexcept
     {
       auto box = RendererOf(fixture, id).LayoutBox();
       REQUIRE(box);
@@ -102,11 +102,11 @@ namespace krys::boo::tests
         children.push_back(&child);
       }
       REQUIRE(children.size() == 6);
-      CHECK(children[1] == &BoxOf(fixture, u8"s"));
-      CHECK(children[2] == &BoxOf(fixture, u8"br"));
-      CHECK(children[3] == &BoxOf(fixture, u8"wbr"));
-      CHECK(children[4] == &BoxOf(fixture, u8"ib"));
-      CHECK(layout::ChildrenOfType<layout::ElementBox>(rootBox).First() == &BoxOf(fixture, u8"s"));
+      CHECK(children[1] == &BoxTreeBoxOf(fixture, u8"s"));
+      CHECK(children[2] == &BoxTreeBoxOf(fixture, u8"br"));
+      CHECK(children[3] == &BoxTreeBoxOf(fixture, u8"wbr"));
+      CHECK(children[4] == &BoxTreeBoxOf(fixture, u8"ib"));
+      CHECK(layout::ChildrenOfType<layout::ElementBox>(rootBox).First() == &BoxTreeBoxOf(fixture, u8"s"));
 
       // The formatting context's boxes are all of them: the inline-block has no children.
       auto count = 0;
@@ -146,26 +146,26 @@ namespace krys::boo::tests
 
     SECTION("Inline boxes, line breaks and atomic inline boxes")
     {
-      auto &span = BoxOf(fixture, u8"s");
+      auto &span = BoxTreeBoxOf(fixture, u8"s");
       CHECK(span.IsInlineBox());
       CHECK_FALSE(span.IsAtomicInlineBox());
       CHECK_FALSE(span.IsContainingBlockForInFlow());
       CHECK(TextContents(span) == List<utf8_string> {u8"b", u8"c"});
 
       // A line break clears like a block; a word break opportunity doesn't clear at all.
-      auto &br = BoxOf(fixture, u8"br");
+      auto &br = BoxTreeBoxOf(fixture, u8"br");
       CHECK(br.IsLineBreakBox());
       CHECK_FALSE(br.IsWordBreakOpportunity());
       CHECK(br.HasFloatClear());
       CHECK(br.Style().Display() == DisplayType::Inline);
 
-      auto &wbr = BoxOf(fixture, u8"wbr");
+      auto &wbr = BoxTreeBoxOf(fixture, u8"wbr");
       CHECK(wbr.IsLineBreakBox());
       CHECK(wbr.IsWordBreakOpportunity());
       CHECK(wbr.Style().Clear() == Clear::None);
       CHECK_FALSE(wbr.HasFloatClear());
 
-      auto &inlineBlock = BoxOf(fixture, u8"ib");
+      auto &inlineBlock = BoxTreeBoxOf(fixture, u8"ib");
       CHECK(inlineBlock.IsInlineBlockBox());
       CHECK(inlineBlock.IsAtomicInlineBox());
       CHECK(inlineBlock.IsBlockContainer());
@@ -177,7 +177,7 @@ namespace krys::boo::tests
 
     SECTION("Containing blocks")
     {
-      auto &bold = BoxOf(fixture, u8"bold");
+      auto &bold = BoxTreeBoxOf(fixture, u8"bold");
       auto &textC = *bold.FirstChild();
       CHECK(&layout::FormattingContext::ContainingBlock(textC) == &rootBox);
       CHECK(&layout::FormattingContext::ContainingBlock(bold) == &rootBox);
@@ -194,7 +194,7 @@ namespace krys::boo::tests
             == layout::ContainingBlockChain(textC, rootBox).end());
 
       CHECK(textC.IsDescendantOf(rootBox));
-      CHECK(textC.IsDescendantOfWithinFormattingContext(BoxOf(fixture, u8"s")));
+      CHECK(textC.IsDescendantOfWithinFormattingContext(BoxTreeBoxOf(fixture, u8"s")));
       CHECK(textC.IsInFormattingContextEstablishedBy(rootBox));
 #if KRYS_DEBUG
       CHECK(&layout::FormattingContext::FormattingContextRoot(textC) == &rootBox);
@@ -207,21 +207,21 @@ namespace krys::boo::tests
       auto removed = layout_integration::BoxTreeUpdater(rootRenderer).Remove(rootRenderer, textRenderer);
       CHECK_FALSE(textRenderer.LayoutBox());
       CHECK_FALSE(removed->RendererForIntegration());
-      CHECK(rootBox.FirstChild() == &BoxOf(fixture, u8"s"));
-      CHECK_FALSE(BoxOf(fixture, u8"s").PreviousSibling());
+      CHECK(rootBox.FirstChild() == &BoxTreeBoxOf(fixture, u8"s"));
+      CHECK_FALSE(BoxTreeBoxOf(fixture, u8"s").PreviousSibling());
 
       // The box is inserted after the given renderer's box, or first.
       auto &inserted =
         layout_integration::BoxTreeUpdater(rootRenderer).Insert(rootRenderer, textRenderer, nullptr);
       CHECK(rootBox.FirstChild() == &inserted);
       CHECK(textRenderer.LayoutBox() == &inserted);
-      CHECK(inserted.NextSibling() == &BoxOf(fixture, u8"s"));
+      CHECK(inserted.NextSibling() == &BoxTreeBoxOf(fixture, u8"s"));
       CHECK(TextContents(rootBox) == List<utf8_string> {u8"a", u8"b", u8"c", u8"\ttab"});
     }
 
     SECTION("Updating styles and text")
     {
-      auto oldSpanStyle = RenderStyle::Clone(BoxOf(fixture, u8"s").Style());
+      auto oldSpanStyle = RenderStyle::Clone(BoxTreeBoxOf(fixture, u8"s").Style());
       fixture.ById(u8"s").SetAttribute(u8"style", u8"color: red");
       fixture.ById(u8"bold").SetAttribute(u8"style", u8"color: green");
       (void)fixture.Document->UpdateLayout();
@@ -229,14 +229,14 @@ namespace krys::boo::tests
 
       // The style change updated the box's style.
       auto &spanRenderer = RendererOf(fixture, u8"s");
-      CHECK(BoxOf(fixture, u8"s").Style() == spanRenderer.Style());
-      CHECK_FALSE(BoxOf(fixture, u8"s").Style() == oldSpanStyle);
+      CHECK(BoxTreeBoxOf(fixture, u8"s").Style() == spanRenderer.Style());
+      CHECK_FALSE(BoxTreeBoxOf(fixture, u8"s").Style() == oldSpanStyle);
       layout_integration::BoxTreeUpdater::UpdateStyle(spanRenderer);
-      CHECK(BoxOf(fixture, u8"s").Style() == spanRenderer.Style());
+      CHECK(BoxTreeBoxOf(fixture, u8"s").Style() == spanRenderer.Style());
 
       auto &boldRenderer = RendererOf(fixture, u8"bold");
       layout_integration::BoxTreeUpdater::UpdateStyle(boldRenderer);
-      CHECK(BoxOf(fixture, u8"bold").Style() == boldRenderer.Style());
+      CHECK(BoxTreeBoxOf(fixture, u8"bold").Style() == boldRenderer.Style());
 
       auto &textRenderer = Downcast<RenderText>(*rootRenderer.FirstChild());
       layout_integration::BoxTreeUpdater::UpdateStyle(textRenderer);
@@ -276,10 +276,10 @@ namespace krys::boo::tests
     layout::tests::DetachLineLayouts(fixture);
     (void)layout::tests::BuildBoxTree(BlockOf(fixture, u8"root"));
 
-    CHECK(BoxOf(fixture, u8"button").IsFlexBox());
-    CHECK(BoxOf(fixture, u8"menu").IsFlexBox());
-    CHECK(BoxOf(fixture, u8"slider").IsFlexBox());
-    CHECK_FALSE(BoxOf(fixture, u8"span").IsFlexBox());
+    CHECK(BoxTreeBoxOf(fixture, u8"button").IsFlexBox());
+    CHECK(BoxTreeBoxOf(fixture, u8"menu").IsFlexBox());
+    CHECK(BoxTreeBoxOf(fixture, u8"slider").IsFlexBox());
+    CHECK_FALSE(BoxTreeBoxOf(fixture, u8"span").IsFlexBox());
   }
 
   TEST_CASE_METHOD(css::tests::ValueFixture, "BoxTreeUpdater: anonymous blocks and list markers",

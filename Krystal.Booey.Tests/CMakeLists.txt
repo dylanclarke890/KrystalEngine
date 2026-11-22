@@ -396,7 +396,6 @@ target_sources(Krystal.Booey.Tests
 		tests/CSS/Font/CSSFontSelector.cpp
 		tests/CSS/Font/FontFace.cpp
 		tests/Graphics/Fonts/FontDatabase.cpp
-		tests/Graphics/TextRuns/TextRunIterator.cpp
 		tests/Graphics/TextRuns/WidthIterator.cpp
 		tests/Page/FrameView.cpp
 		tests/Page/FrameViewScrolling.cpp

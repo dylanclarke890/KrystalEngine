@@ -1,8 +1,11 @@
 ﻿#include "Krystal.Booey/Graphics/GraphicsContext.hpp"
 #include "catch2/catch_approx.hpp"
 #include "catch2/catch_test_macros.hpp"
+#include "Krystal.Booey.Tests/Layout/LayoutTestUtils.hpp"
 #include "Krystal.Booey/Graphics/DisplayLists/DisplayListRecorderImpl.hpp"
+#include "Krystal.Booey/Graphics/Fonts/FontCascade.hpp"
 #include "Krystal.Booey/Graphics/NullGraphicsContext.hpp"
+#include "Krystal.Booey/Graphics/TextRuns/TextRun.hpp"
 #include "Krystal.Core/Colour/ColourTextStream.hpp"
 #include "Krystal.Core/Geometry/Segment.hpp"
 #include "Krystal.Core/Strings/TextStream.hpp"
@@ -251,5 +254,35 @@ namespace krys::boo::tests
       CHECK_FALSE(GraphicsContext::DashPatternForStrokeLength(9, 2, false));
       CHECK_FALSE(GraphicsContext::DashPatternForStrokeLength(16, 4, false));
     }
+  }
+
+  TEST_CASE("GraphicsContext: draws bidi text's runs in visual order", "[Graphics][GraphicsContext]")
+  {
+    layout::tests::RegisterAhem();
+    FontCascadeDescription description;
+    description.SetFamilies({StringAtom {u8"Ahem"}});
+    description.SetComputedSize(16);
+    FontCascade font {krys::move(description)};
+    font.Update();
+
+    // In a right-to-left paragraph, "abc" and "d" are left-to-right runs either side of the Hebrew letter, so
+    // "d" is drawn leftmost and "abc" rightmost.
+    TextRun run {u8"abc א d", 0, 0, ExpansionBehavior::DefaultBehavior(), text::TextDirection::RTL};
+    display_list::RecorderImpl recorder({200, 50});
+    recorder.DrawBidiText(font, run, {0, 20});
+
+    auto displayList = recorder.TakeDisplayList();
+    List<const display_list::DrawGlyphs *> glyphRuns;
+    for (const auto &item : displayList->Items())
+    {
+      if (const auto *glyphs = std::get_if<display_list::DrawGlyphs>(&item))
+      {
+        glyphRuns.push_back(glyphs);
+      }
+    }
+    REQUIRE(glyphRuns.size() >= 3u);
+    CHECK(glyphRuns.front()->Glyphs().size() == 1u);
+    CHECK(glyphRuns.back()->Glyphs().size() == 3u);
+    CHECK(glyphRuns.front()->LocalAnchor().X() < glyphRuns.back()->LocalAnchor().X());
   }
 }

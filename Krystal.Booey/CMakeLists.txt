@@ -1662,7 +1662,6 @@ set(KRYSTAL_BOOEY_GRAPHICS_HEADERS
   include/Krystal.Booey/Graphics/TextRuns/StringTruncator.hpp
   include/Krystal.Booey/Graphics/TextRuns/TabSize.hpp
   include/Krystal.Booey/Graphics/TextRuns/TextRun.hpp
-  include/Krystal.Booey/Graphics/TextRuns/TextRunIterator.hpp
   include/Krystal.Booey/Graphics/TextRuns/WidthCache.hpp
   include/Krystal.Booey/Graphics/TextRuns/WidthIterator.hpp
   include/Krystal.Booey/Graphics/Transforms/IdentityTransformOperation.hpp
