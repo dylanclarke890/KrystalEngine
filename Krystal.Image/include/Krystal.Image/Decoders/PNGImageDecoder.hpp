@@ -59,20 +59,17 @@ namespace krys::img
 
     void TryDecodeSize(bool allDataReceived) noexcept override;
 
+    KRYS_NODISCARD FrameLayout LayoutOfFrame(size_t index) const noexcept override;
+
     /// @brief Parses the structure of what's arrived, sizing the image and the frame cache. False if the data
     /// is malformed, which fails the decoder.
     bool Parse(bool allDataReceived) noexcept;
-
-    /// @brief The first frame to decode to be able to decode frame @p index: frames before it build on
-    /// earlier frames, unless an earlier one is complete or clears the whole image.
-    KRYS_NODISCARD size_t FirstFrameToDecode(size_t index) const noexcept;
 
     /// @brief Decodes what's arrived of frame @p index, whose predecessors are decoded. True once it's
     /// complete.
     bool DecodeFrame(size_t index) noexcept;
 
-    /// @brief Sets frame @p index up to be drawn into: its starting pixels are the previous frame's, disposed
-    /// of as that frame asks.
+    /// @brief Sets frame @p index up to be drawn into, and resets the tracking of its alpha.
     bool InitializeFrame(size_t index) noexcept;
 
     /// @brief Writes row @p y of frame @p index from @p pixels, decoded RGB or RGBA, blending them over

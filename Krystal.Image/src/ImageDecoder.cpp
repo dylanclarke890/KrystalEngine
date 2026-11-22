@@ -129,6 +129,107 @@ namespace krys::img
     return duration < 11ms ? 100ms : duration;
   }
 
+  size_t ImageDecoder::FirstFrameToDecode(size_t index) const noexcept
+  {
+    auto canvas = RectI {PointI {}, Size()};
+    for (auto frame = index; frame > 0; --frame)
+    {
+      auto previous = LayoutOfFrame(frame - 1);
+      // A frame restored to what preceded it leaves no trace, so look past it.
+      if (previous.Disposal == ImageDecoderFrame::DisposalMethod::RestoreToPrevious)
+      {
+        continue;
+      }
+      // Decoding can start after a complete frame, or after one that's cleared to transparent everywhere.
+      if (_frameBufferCache[frame - 1].IsComplete()
+          || (previous.Disposal == ImageDecoderFrame::DisposalMethod::RestoreToBackground
+              && previous.Rect.Contains(canvas)))
+      {
+        return frame;
+      }
+    }
+    return 0;
+  }
+
+  bool ImageDecoder::InitializeAnimationFrame(size_t index) noexcept
+  {
+    auto &frame = _frameBufferCache[index];
+    auto canvas = RectI {PointI {}, Size()};
+
+    // The frame starts from the most recent frame not restored to what preceded it.
+    auto base = index;
+    while (base > 0
+           && LayoutOfFrame(base - 1).Disposal == ImageDecoderFrame::DisposalMethod::RestoreToPrevious)
+    {
+      --base;
+    }
+    auto previous = base ? LayoutOfFrame(base - 1) : FrameLayout {};
+    auto previousRect = Intersection(previous.Rect, canvas);
+    auto cleared = previous.Disposal == ImageDecoderFrame::DisposalMethod::RestoreToBackground;
+    if (!base || (cleared && previousRect.Contains(canvas)))
+    {
+      // Nothing to copy: the frame starts transparent.
+      if (!frame.Initialize(Size(), _premultiplyAlpha))
+      {
+        return SetFailed();
+      }
+    }
+    else
+    {
+      const auto &previousFrame = _frameBufferCache[base - 1];
+      krys_debug_assert(previousFrame.IsComplete());
+      if (!previousFrame.HasBackingStore() || !frame.Initialize(*previousFrame.BackingStore()))
+      {
+        return SetFailed();
+      }
+      frame.SetHasAlpha(previousFrame.HasAlpha());
+      if (cleared)
+      {
+        // Browsers restore to transparency rather than the background colour.
+        frame.BackingStore()->ClearRect(previousRect);
+        frame.SetHasAlpha(true);
+      }
+    }
+
+    frame.BackingStore()->SetFrameRect(Intersection(LayoutOfFrame(index).Rect, canvas));
+    frame.SetDecodingStatus(DecodingStatus::Partial);
+    return true;
+  }
+
+  void ImageDecoder::ClearAnimationFrames(size_t clearBeforeFrame) noexcept
+  {
+    if (_frameBufferCache.empty())
+    {
+      return;
+    }
+
+    // The last frame is never cleared: it's empty, being decoded, or the next frame may build on it.
+    auto end = std::min(clearBeforeFrame, _frameBufferCache.size() - 1);
+
+    // Keep the frame the next frame to decode will start from: the latest decoded frame at or before `end`
+    // that isn't restored to what preceded it. Decoded frames in between that are restored can go.
+    auto keep = end;
+    while (keep > 0
+           && (_frameBufferCache[keep].IsInvalid()
+               || _frameBufferCache[keep].GetDisposalMethod()
+                    == ImageDecoderFrame::DisposalMethod::RestoreToPrevious))
+    {
+      if (_frameBufferCache[keep].IsComplete() && keep != end)
+      {
+        _frameBufferCache[keep].Clear();
+      }
+      --keep;
+    }
+    for (size_t index = 0; index < keep; ++index)
+    {
+      krys_debug_assert(!_frameBufferCache[index].IsPartial());
+      if (!_frameBufferCache[index].IsInvalid())
+      {
+        _frameBufferCache[index].Clear();
+      }
+    }
+  }
+
   Maybe<DecodedImage> ImageDecoder::CreateFrameImageAtIndex(size_t index) noexcept
   {
     if (Size().IsEmpty())

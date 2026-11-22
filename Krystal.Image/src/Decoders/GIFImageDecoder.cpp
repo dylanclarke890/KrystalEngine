@@ -670,29 +670,6 @@ namespace krys::img
     return index < _frameBufferCache.size() ? &_frameBufferCache[index] : nullptr;
   }
 
-  size_t GIFImageDecoder::FirstFrameToDecode(size_t index) const noexcept
-  {
-    auto canvas = RectI {PointI {}, Size()};
-    for (auto frame = index; frame > 0; --frame)
-    {
-      const auto &previous = _frameBufferCache[frame - 1];
-      const auto &previousInfo = _parser->Frames()[frame - 1];
-      // A frame restored to what preceded it leaves no trace, so look past it.
-      if (previousInfo.Disposal == ImageDecoderFrame::DisposalMethod::RestoreToPrevious)
-      {
-        continue;
-      }
-      // Decoding can start after a complete frame, or after one that's cleared to transparent everywhere.
-      if (previous.IsComplete()
-          || (previousInfo.Disposal == ImageDecoderFrame::DisposalMethod::RestoreToBackground
-              && previousInfo.Rect.Contains(canvas)))
-      {
-        return frame;
-      }
-    }
-    return 0;
-  }
-
   bool GIFImageDecoder::DecodeFrame(size_t index) noexcept
   {
     if (_frameBufferCache[index].IsComplete())
@@ -730,59 +707,18 @@ namespace krys::img
     return false;
   }
 
+  ImageDecoder::FrameLayout GIFImageDecoder::LayoutOfFrame(size_t index) const noexcept
+  {
+    const auto &info = _parser->Frames()[index];
+    return {info.Rect, info.Disposal};
+  }
+
   bool GIFImageDecoder::InitializeFrame(size_t index) noexcept
   {
-    auto &frame = _frameBufferCache[index];
-    const auto &info = _parser->Frames()[index];
-    auto canvas = RectI {PointI {}, Size()};
-
-    // The frame starts from the most recent frame not restored to what preceded it.
-    auto base = index;
-    while (base > 0
-           && _parser->Frames()[base - 1].Disposal == ImageDecoderFrame::DisposalMethod::RestoreToPrevious)
+    if (!InitializeAnimationFrame(index))
     {
-      --base;
+      return false;
     }
-    if (!base)
-    {
-      if (!frame.Initialize(Size(), _premultiplyAlpha))
-      {
-        return SetFailed();
-      }
-    }
-    else
-    {
-      const auto &previous = _frameBufferCache[base - 1];
-      const auto &previousInfo = _parser->Frames()[base - 1];
-      krys_debug_assert(previous.IsComplete());
-      auto previousRect = Intersection(previousInfo.Rect, canvas);
-      if (previousInfo.Disposal == ImageDecoderFrame::DisposalMethod::RestoreToBackground
-          && previousRect.Contains(canvas))
-      {
-        // Clearing the whole image leaves nothing to copy.
-        if (!frame.Initialize(Size(), _premultiplyAlpha))
-        {
-          return SetFailed();
-        }
-      }
-      else
-      {
-        if (!previous.HasBackingStore() || !frame.Initialize(*previous.BackingStore()))
-        {
-          return SetFailed();
-        }
-        frame.SetHasAlpha(previous.HasAlpha());
-        if (previousInfo.Disposal == ImageDecoderFrame::DisposalMethod::RestoreToBackground)
-        {
-          // Browsers restore to transparency rather than the background colour.
-          frame.BackingStore()->ClearRect(previousRect);
-          frame.SetHasAlpha(true);
-        }
-      }
-    }
-
-    frame.BackingStore()->SetFrameRect(Intersection(info.Rect, canvas));
-    frame.SetDecodingStatus(DecodingStatus::Partial);
     _frameSawTransparency = false;
     return true;
   }
@@ -876,35 +812,6 @@ namespace krys::img
 
   void GIFImageDecoder::ClearFrameBufferCache(size_t clearBeforeFrame) noexcept
   {
-    if (_frameBufferCache.empty())
-    {
-      return;
-    }
-
-    // The last frame is never cleared: it's empty, being decoded, or the next frame may build on it.
-    auto end = std::min(clearBeforeFrame, _frameBufferCache.size() - 1);
-
-    // Keep the frame the next frame to decode will start from: the latest decoded frame at or before `end`
-    // that isn't restored to what preceded it. Decoded frames in between that are restored can go.
-    auto keep = end;
-    while (keep > 0
-           && (_frameBufferCache[keep].IsInvalid()
-               || _frameBufferCache[keep].GetDisposalMethod()
-                    == ImageDecoderFrame::DisposalMethod::RestoreToPrevious))
-    {
-      if (_frameBufferCache[keep].IsComplete() && keep != end)
-      {
-        _frameBufferCache[keep].Clear();
-      }
-      --keep;
-    }
-    for (size_t index = 0; index < keep; ++index)
-    {
-      krys_debug_assert(!_frameBufferCache[index].IsPartial());
-      if (!_frameBufferCache[index].IsInvalid())
-      {
-        _frameBufferCache[index].Clear();
-      }
-    }
+    ClearAnimationFrames(clearBeforeFrame);
   }
 }
