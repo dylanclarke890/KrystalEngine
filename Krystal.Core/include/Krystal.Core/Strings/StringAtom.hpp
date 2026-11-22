@@ -2,7 +2,7 @@
 
 #include "Krystal.Core/Assert.hpp"
 #include "Krystal.Core/Attributes.hpp"
-#include "Krystal.Core/Containers/HashMap.hpp"
+#include "Krystal.Core/Containers/HashSet.hpp"
 #include "Krystal.Core/Hashing/FastHash.hpp"
 #include "Krystal.Core/Macros.hpp"
 #include "Krystal.Core/Move.hpp"
@@ -34,8 +34,9 @@ namespace krys
     StringAtomPool *_pool {nullptr};
 
   public:
-    StringAtomImpl(utf8_string string, StringAtomPool &pool) noexcept
-        : _string(krys::move(string)), _hash(FastHash<utf8_stringview> {}(_string)), _pool(&pool)
+    /// @param hash The `FastHash` of @p string, which the pool has already worked out.
+    StringAtomImpl(utf8_string string, size_t hash, StringAtomPool &pool) noexcept
+        : _string(krys::move(string)), _hash(hash), _pool(&pool)
     {
     }
 
@@ -62,8 +63,51 @@ namespace krys
     KRYS_NON_COPY_MOVABLE(StringAtomPool);
 
   private:
-    // Keyed by a view of each atom's string, which stays put as the atoms are on the heap.
-    HashMap<utf8_stringview, StringAtomImpl *> _atoms;
+    /// A string being looked up, with its hash worked out once for the lookup and the insert that may follow.
+    struct Key
+    {
+      utf8_stringview View;
+      size_t Hash;
+    };
+
+    /// Hashes atoms by their stored hash, so adding or removing one never hashes its string again.
+    struct Hasher
+    {
+      using is_transparent = void;
+      using is_avalanching = std::true_type;
+
+      KRYS_NODISCARD size_t operator()(const StringAtomImpl *atom) const noexcept
+      {
+        return atom->Hash();
+      }
+
+      KRYS_NODISCARD size_t operator()(const Key &key) const noexcept
+      {
+        return key.Hash;
+      }
+    };
+
+    struct KeyEqual
+    {
+      using is_transparent = void;
+
+      KRYS_NODISCARD bool operator()(const StringAtomImpl *a, const StringAtomImpl *b) const noexcept
+      {
+        return a == b;
+      }
+
+      KRYS_NODISCARD bool operator()(const Key &key, const StringAtomImpl *atom) const noexcept
+      {
+        return key.Hash == atom->Hash() && key.View == atom->View();
+      }
+
+      KRYS_NODISCARD bool operator()(const StringAtomImpl *atom, const Key &key) const noexcept
+      {
+        return (*this)(key, atom);
+      }
+    };
+
+    HashSet<StringAtomImpl *, Hasher, KeyEqual> _atoms;
 
   public:
     StringAtomPool() noexcept = default;
@@ -72,7 +116,7 @@ namespace krys
     {
       // Atoms can outlive their thread's pool (a static atom is destroyed after the main thread's
       // thread-local storage), so they free their string themselves from now on.
-      for (auto &[view, atom] : _atoms)
+      for (auto *atom : _atoms)
       {
         atom->_pool = nullptr;
       }
@@ -89,28 +133,30 @@ namespace krys
 
     KRYS_NODISCARD StringAtomImpl &GetOrAdd(utf8_stringview string) noexcept
     {
-      if (auto it = _atoms.find(string); it != _atoms.end())
+      Key key {string, FastHash<utf8_stringview> {}(string)};
+      if (auto it = _atoms.find(key); it != _atoms.end())
       {
-        return *it->second;
+        return **it;
       }
 
-      return Add(utf8_string(string));
+      return Add(utf8_string(string), key.Hash);
     }
 
     KRYS_NODISCARD StringAtomImpl &GetOrAdd(utf8_string &&string) noexcept
     {
-      if (auto it = _atoms.find(utf8_stringview {string}); it != _atoms.end())
+      Key key {string, FastHash<utf8_stringview> {}(string)};
+      if (auto it = _atoms.find(key); it != _atoms.end())
       {
-        return *it->second;
+        return **it;
       }
 
-      return Add(krys::move(string));
+      return Add(krys::move(string), key.Hash);
     }
 
     /// @brief Forgets @p atom's string, as the last atom that referred to it has gone.
     void Remove(const StringAtomImpl &atom) noexcept
     {
-      _atoms.erase(atom.View());
+      _atoms.erase(Key {atom.View(), atom.Hash()});
     }
 
     /// @brief The number of strings interned on this thread.
@@ -120,10 +166,10 @@ namespace krys
     }
 
   private:
-    KRYS_NODISCARD StringAtomImpl &Add(utf8_string string) noexcept
+    KRYS_NODISCARD StringAtomImpl &Add(utf8_string string, size_t hash) noexcept
     {
-      auto *atom = new StringAtomImpl(krys::move(string), *this);
-      _atoms.emplace(atom->View(), atom);
+      auto *atom = new StringAtomImpl(krys::move(string), hash, *this);
+      _atoms.insert(atom);
       return *atom;
     }
   };

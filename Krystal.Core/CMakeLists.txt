@@ -3,6 +3,7 @@ add_library(Krystal.Core STATIC)
 target_link_libraries(Krystal.Core 
   PUBLIC
     llvm
+    unordered_dense::unordered_dense
 
   PRIVATE
     RapidJSON rapidjson
@@ -26,6 +27,9 @@ target_compile_options(Krystal.Core
   PRIVATE
     $<$<CXX_COMPILER_ID:MSVC>:/W4 /MP /utf-8>
 )
+
+# Third-party - unordered_dense (header-only; public, since HashMap and HashSet are built on it)
+find_package(unordered_dense CONFIG REQUIRED)
 
 # Third-party - RapidJSON
 find_package(RapidJSON CONFIG REQUIRED)

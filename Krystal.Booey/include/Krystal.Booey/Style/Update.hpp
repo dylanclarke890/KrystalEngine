@@ -77,8 +77,9 @@ namespace krys::boo::style
     Ref<boo::Document> _document;
     ListHashSet<RefPtr<ContainerNode>> _roots;
     ListHashSet<RefPtr<Element>> _rebuildRoots;
-    HashMap<RefPtr<const Element>, ElementUpdate> _elements;
-    HashMap<RefPtr<const Text>, TextUpdate> _texts;
+    // Node maps: the render tree updater holds element updates while it adds more.
+    NodeHashMap<RefPtr<const Element>, ElementUpdate> _elements;
+    NodeHashMap<RefPtr<const Text>, TextUpdate> _texts;
     UniquePtr<RenderStyle> _initialContainingBlockUpdate;
 
   public:

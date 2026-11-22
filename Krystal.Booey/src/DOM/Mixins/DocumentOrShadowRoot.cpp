@@ -249,8 +249,8 @@ namespace krys::boo::dom
   List<WeakPtr<SVGElement>> DocumentOrShadowRoot::RemovePendingSVGResource(const DOMStringAtom &id) noexcept
   {
     auto &pendingResources = GetSVGResourcesMap().PendingResources;
-    auto node = pendingResources.extract(id);
-    return node ? krys::move(node.mapped()) : WeakSVGElementSet {};
+    auto entry = pendingResources.extract(id);
+    return entry ? krys::move(entry->second) : WeakSVGElementSet {};
   }
 
   void DocumentOrShadowRoot::MarkPendingSVGResourcesForRemoval(const DOMStringAtom &id) noexcept

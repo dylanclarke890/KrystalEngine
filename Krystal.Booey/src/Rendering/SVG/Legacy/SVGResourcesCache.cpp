@@ -69,13 +69,13 @@ namespace krys::boo
       return;
     }
 
-    auto node = _cache.extract(&renderer);
+    auto entry = _cache.extract(&renderer);
     renderer.SetHasCachedSVGResource(false);
-    if (node.empty() || !node.mapped())
+    if (!entry || !entry->second)
     {
       return;
     }
-    auto resources = krys::move(node.mapped());
+    auto resources = krys::move(entry->second);
 
     // Walk resources and register the render object at each resources.
     SVGResources::ResourceSet resourceSet;
