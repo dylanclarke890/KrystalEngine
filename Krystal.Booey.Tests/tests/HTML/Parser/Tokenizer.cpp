@@ -3,12 +3,189 @@
 #include "Krystal.Booey/HTML/Parser/Token.hpp"
 #include "Krystal.Core/Containers/List.hpp"
 #include "Krystal.Core/Types/Maybe.hpp"
-#include <magic_enum/magic_enum.hpp>
+#include <algorithm>
+#include <utility>
 
 namespace krys::boo::html::tests
 {
   namespace
   {
+    // The tokenizer tests name states and errors by their enumerators, in any case.
+    constexpr std::pair<stringview, TokenizerState> TokenizerTestStateNames[] = {
+      {"Data", TokenizerState::Data},
+      {"RCDATA", TokenizerState::RCDATA},
+      {"RAWTEXT", TokenizerState::RAWTEXT},
+      {"ScriptData", TokenizerState::ScriptData},
+      {"PLAINTEXT", TokenizerState::PLAINTEXT},
+      {"TagOpen", TokenizerState::TagOpen},
+      {"EndTagOpen", TokenizerState::EndTagOpen},
+      {"TagName", TokenizerState::TagName},
+      {"RCDATALessThanSign", TokenizerState::RCDATALessThanSign},
+      {"RCDATAEndTagOpen", TokenizerState::RCDATAEndTagOpen},
+      {"RCDATAEndTagName", TokenizerState::RCDATAEndTagName},
+      {"RAWTEXTLessThanSign", TokenizerState::RAWTEXTLessThanSign},
+      {"RAWTEXTEndTagOpen", TokenizerState::RAWTEXTEndTagOpen},
+      {"RAWTEXTEndTagName", TokenizerState::RAWTEXTEndTagName},
+      {"ScriptDataLessThanSign", TokenizerState::ScriptDataLessThanSign},
+      {"ScriptDataEndTagOpen", TokenizerState::ScriptDataEndTagOpen},
+      {"ScriptDataEndTagName", TokenizerState::ScriptDataEndTagName},
+      {"ScriptDataEscapeStart", TokenizerState::ScriptDataEscapeStart},
+      {"ScriptDataEscapeStartDash", TokenizerState::ScriptDataEscapeStartDash},
+      {"ScriptDataEscaped", TokenizerState::ScriptDataEscaped},
+      {"ScriptDataEscapedDash", TokenizerState::ScriptDataEscapedDash},
+      {"ScriptDataEscapedDashDash", TokenizerState::ScriptDataEscapedDashDash},
+      {"ScriptDataEscapedLessThanSign", TokenizerState::ScriptDataEscapedLessThanSign},
+      {"ScriptDataEscapedEndTagOpen", TokenizerState::ScriptDataEscapedEndTagOpen},
+      {"ScriptDataEscapedEndTagName", TokenizerState::ScriptDataEscapedEndTagName},
+      {"ScriptDataDoubleEscapeStart", TokenizerState::ScriptDataDoubleEscapeStart},
+      {"ScriptDataDoubleEscaped", TokenizerState::ScriptDataDoubleEscaped},
+      {"ScriptDataDoubleEscapedDash", TokenizerState::ScriptDataDoubleEscapedDash},
+      {"ScriptDataDoubleEscapedDashDash", TokenizerState::ScriptDataDoubleEscapedDashDash},
+      {"ScriptDataDoubleEscapedLessThanSign", TokenizerState::ScriptDataDoubleEscapedLessThanSign},
+      {"ScriptDataDoubleEscapeEnd", TokenizerState::ScriptDataDoubleEscapeEnd},
+      {"BeforeAttributeName", TokenizerState::BeforeAttributeName},
+      {"AttributeName", TokenizerState::AttributeName},
+      {"AfterAttributeName", TokenizerState::AfterAttributeName},
+      {"BeforeAttributeValue", TokenizerState::BeforeAttributeValue},
+      {"AttributeValueDoubleQuoted", TokenizerState::AttributeValueDoubleQuoted},
+      {"AttributeValueSingleQuoted", TokenizerState::AttributeValueSingleQuoted},
+      {"AttributeValueUnquoted", TokenizerState::AttributeValueUnquoted},
+      {"AfterAttributeValueQuoted", TokenizerState::AfterAttributeValueQuoted},
+      {"SelfClosingStartTag", TokenizerState::SelfClosingStartTag},
+      {"BogusComment", TokenizerState::BogusComment},
+      {"MarkupDeclarationOpen", TokenizerState::MarkupDeclarationOpen},
+      {"CommentStart", TokenizerState::CommentStart},
+      {"CommentStartDash", TokenizerState::CommentStartDash},
+      {"Comment", TokenizerState::Comment},
+      {"CommentLessThanSign", TokenizerState::CommentLessThanSign},
+      {"CommentLessThanSignBang", TokenizerState::CommentLessThanSignBang},
+      {"CommentLessThanSignBangDash", TokenizerState::CommentLessThanSignBangDash},
+      {"CommentLessThanSignBangDashDash", TokenizerState::CommentLessThanSignBangDashDash},
+      {"CommentEndDash", TokenizerState::CommentEndDash},
+      {"CommentEnd", TokenizerState::CommentEnd},
+      {"CommentEndBang", TokenizerState::CommentEndBang},
+      {"DOCTYPE", TokenizerState::DOCTYPE},
+      {"BeforeDOCTYPEName", TokenizerState::BeforeDOCTYPEName},
+      {"DOCTYPEName", TokenizerState::DOCTYPEName},
+      {"AfterDOCTYPEName", TokenizerState::AfterDOCTYPEName},
+      {"AfterDOCTYPEPublicKeyword", TokenizerState::AfterDOCTYPEPublicKeyword},
+      {"BeforeDOCTYPEPublicIdentifier", TokenizerState::BeforeDOCTYPEPublicIdentifier},
+      {"DOCTYPEPublicIdentifierDoubleQuoted", TokenizerState::DOCTYPEPublicIdentifierDoubleQuoted},
+      {"DOCTYPEPublicIdentifierSingleQuoted", TokenizerState::DOCTYPEPublicIdentifierSingleQuoted},
+      {"AfterDOCTYPEPublicIdentifier", TokenizerState::AfterDOCTYPEPublicIdentifier},
+      {"BetweenDOCTYPEPublicAndSystemIdentifiers", TokenizerState::BetweenDOCTYPEPublicAndSystemIdentifiers},
+      {"AfterDOCTYPESystemKeyword", TokenizerState::AfterDOCTYPESystemKeyword},
+      {"BeforeDOCTYPESystemIdentifier", TokenizerState::BeforeDOCTYPESystemIdentifier},
+      {"DOCTYPESystemIdentifierDoubleQuoted", TokenizerState::DOCTYPESystemIdentifierDoubleQuoted},
+      {"DOCTYPESystemIdentifierSingleQuoted", TokenizerState::DOCTYPESystemIdentifierSingleQuoted},
+      {"AfterDOCTYPESystemIdentifier", TokenizerState::AfterDOCTYPESystemIdentifier},
+      {"BogusDOCTYPE", TokenizerState::BogusDOCTYPE},
+      {"CDATASection", TokenizerState::CDATASection},
+      {"CDATASectionBracket", TokenizerState::CDATASectionBracket},
+      {"CDATASectionEnd", TokenizerState::CDATASectionEnd},
+      {"ProcessingInstructionOpen", TokenizerState::ProcessingInstructionOpen},
+      {"ProcessingInstructionTarget", TokenizerState::ProcessingInstructionTarget},
+      {"AfterProcessingInstructionTarget", TokenizerState::AfterProcessingInstructionTarget},
+      {"ProcessingInstructionData", TokenizerState::ProcessingInstructionData},
+      {"ProcessingInstructionQuestionable", TokenizerState::ProcessingInstructionQuestionable},
+      {"CharacterReference", TokenizerState::CharacterReference},
+      {"NamedCharacterReference", TokenizerState::NamedCharacterReference},
+      {"AmbiguousAmpersand", TokenizerState::AmbiguousAmpersand},
+      {"NumericCharacterReference", TokenizerState::NumericCharacterReference},
+      {"HexadecimalCharacterReferenceStart", TokenizerState::HexadecimalCharacterReferenceStart},
+      {"DecimalCharacterReferenceStart", TokenizerState::DecimalCharacterReferenceStart},
+      {"HexadecimalCharacterReference", TokenizerState::HexadecimalCharacterReference},
+      {"DecimalCharacterReference", TokenizerState::DecimalCharacterReference},
+      {"NumericCharacterReferenceEnd", TokenizerState::NumericCharacterReferenceEnd},
+    };
+
+    constexpr std::pair<stringview, ParseError> TokenizerTestErrorNames[] = {
+      {"UnexpectedNullCharacter", ParseError::UnexpectedNullCharacter},
+      {"EOFBeforeTagName", ParseError::EOFBeforeTagName},
+      {"InvalidFirstCharacterOfTagName", ParseError::InvalidFirstCharacterOfTagName},
+      {"MissingEndTagName", ParseError::MissingEndTagName},
+      {"EOFInTag", ParseError::EOFInTag},
+      {"EOFInScriptHTMLCommentLikeText", ParseError::EOFInScriptHTMLCommentLikeText},
+      {"UnexpectedEqualsSignBeforeAttributeName", ParseError::UnexpectedEqualsSignBeforeAttributeName},
+      {"UnexpectedCharacterInAttributeName", ParseError::UnexpectedCharacterInAttributeName},
+      {"DuplicateAttribute", ParseError::DuplicateAttribute},
+      {"MissingAttributeValue", ParseError::MissingAttributeValue},
+      {"UnexpectedCharacterInUnquotedAttributeValue",
+       ParseError::UnexpectedCharacterInUnquotedAttributeValue},
+      {"MissingWhitespaceBetweenAttributes", ParseError::MissingWhitespaceBetweenAttributes},
+      {"UnexpectedSolidusInTag", ParseError::UnexpectedSolidusInTag},
+      {"CDATAInHTMLContent", ParseError::CDATAInHTMLContent},
+      {"IncorrectlyOpenedComment", ParseError::IncorrectlyOpenedComment},
+      {"AbruptClosingOfEmptyComment", ParseError::AbruptClosingOfEmptyComment},
+      {"EOFInComment", ParseError::EOFInComment},
+      {"NestedComment", ParseError::NestedComment},
+      {"IncorrectlyClosedComment", ParseError::IncorrectlyClosedComment},
+      {"EOFInDOCTYPE", ParseError::EOFInDOCTYPE},
+      {"MissingWhitespaceBeforeDOCTYPEName", ParseError::MissingWhitespaceBeforeDOCTYPEName},
+      {"InvalidCharacterSequenceAfterDOCTYPEName", ParseError::InvalidCharacterSequenceAfterDOCTYPEName},
+      {"MissingDOCTYPEName", ParseError::MissingDOCTYPEName},
+      {"MissingWhitespaceAfterDOCTYPEPublicKeyword", ParseError::MissingWhitespaceAfterDOCTYPEPublicKeyword},
+      {"MissingDOCTYPEPublicIdentifier", ParseError::MissingDOCTYPEPublicIdentifier},
+      {"MissingQuoteBeforeDOCTYPEPublicIdentifier", ParseError::MissingQuoteBeforeDOCTYPEPublicIdentifier},
+      {"AbruptDOCTYPEPublicIdentifier", ParseError::AbruptDOCTYPEPublicIdentifier},
+      {"MissingWhitespaceBetweenDOCTYPEPublicAndSystemIdentifiers",
+       ParseError::MissingWhitespaceBetweenDOCTYPEPublicAndSystemIdentifiers},
+      {"MissingQuoteBeforeDOCTYPESystemIdentifier", ParseError::MissingQuoteBeforeDOCTYPESystemIdentifier},
+      {"MissingWhitespaceAfterDOCTYPESystemKeyword", ParseError::MissingWhitespaceAfterDOCTYPESystemKeyword},
+      {"MissingDOCTYPESystemIdentifier", ParseError::MissingDOCTYPESystemIdentifier},
+      {"AbruptDOCTYPESystemIdentifier", ParseError::AbruptDOCTYPESystemIdentifier},
+      {"UnexpectedCharacterAfterDOCTYPESystemIdentifier",
+       ParseError::UnexpectedCharacterAfterDOCTYPESystemIdentifier},
+      {"EOFInCDATA", ParseError::EOFInCDATA},
+      {"EOFInProcessingInstruction", ParseError::EOFInProcessingInstruction},
+      {"InvalidFirstCharacterOfProcessingInstructionTarget",
+       ParseError::InvalidFirstCharacterOfProcessingInstructionTarget},
+      {"InvalidProcessingInstructionTarget", ParseError::InvalidProcessingInstructionTarget},
+      {"DisallowedProcessingInstructionTarget", ParseError::DisallowedProcessingInstructionTarget},
+      {"UnknownNamedCharacterReference", ParseError::UnknownNamedCharacterReference},
+      {"AbsenceOfDigitsInNumericCharacterReference", ParseError::AbsenceOfDigitsInNumericCharacterReference},
+      {"MissingSemicolonAfterCharacterReference", ParseError::MissingSemicolonAfterCharacterReference},
+      {"NullCharacterReference", ParseError::NullCharacterReference},
+      {"CharacterReferenceOutsideUnicodeRange", ParseError::CharacterReferenceOutsideUnicodeRange},
+      {"SurrogateCharacterReference", ParseError::SurrogateCharacterReference},
+      {"NonCharacterCharacterReference", ParseError::NonCharacterCharacterReference},
+      {"ControlCharacterReference", ParseError::ControlCharacterReference},
+    };
+
+    template <typename E, size_t N>
+    consteval bool TokenizerTestNamesInEnumOrder(const std::pair<stringview, E> (&names)[N]) noexcept
+    {
+      for (size_t i = 0; i < N; ++i)
+      {
+        if (ToUnderlying(names[i].second) != i)
+        {
+          return false;
+        }
+      }
+      return N == ToUnderlying(MaxEnumValue(E {})) + 1uz;
+    }
+
+    static_assert(TokenizerTestNamesInEnumOrder(TokenizerTestStateNames));
+    static_assert(TokenizerTestNamesInEnumOrder(TokenizerTestErrorNames));
+
+    template <typename E, size_t N>
+    KRYS_NODISCARD Maybe<E> TokenizerTestEnumFromName(const std::pair<stringview, E> (&names)[N],
+                                                      stringview name) noexcept
+    {
+      auto lower = [](char c)
+      {
+        return c >= 'A' && c <= 'Z' ? static_cast<char>(c - 'A' + 'a') : c;
+      };
+      for (const auto &[candidate, value] : names)
+      {
+        if (std::ranges::equal(candidate, name, {}, lower, lower))
+        {
+          return value;
+        }
+      }
+      return {};
+    }
+
     void SerialiseHTMLToken(Token &token, DOMString &output) noexcept
     {
       switch (token.Type())
@@ -134,9 +311,8 @@ namespace krys::boo::html::tests
         {
           krys::boo::tests::NormaliseData(data);
 
-          auto state = magic_enum::enum_cast<TokenizerState>(
-            stringview(reinterpret_cast<const char *>(data.data()), data.size()),
-            magic_enum::case_insensitive);
+          auto state = TokenizerTestEnumFromName(
+            TokenizerTestStateNames, stringview(reinterpret_cast<const char *>(data.data()), data.size()));
           if (state.has_value())
           {
             currentTest.InitialState = *state;
@@ -146,9 +322,8 @@ namespace krys::boo::html::tests
         {
           krys::boo::tests::NormaliseData(data);
 
-          auto state = magic_enum::enum_cast<TokenizerState>(
-            stringview(reinterpret_cast<const char *>(data.data()), data.size()),
-            magic_enum::case_insensitive);
+          auto state = TokenizerTestEnumFromName(
+            TokenizerTestStateNames, stringview(reinterpret_cast<const char *>(data.data()), data.size()));
           if (state.has_value())
           {
             currentTest.ExpectedState = *state;
@@ -183,7 +358,7 @@ namespace krys::boo::html::tests
 
             text.remove_prefix(1uz); // skip ' '
 
-            auto error = magic_enum::enum_cast<ParseError>(text, magic_enum::case_insensitive);
+            auto error = TokenizerTestEnumFromName(TokenizerTestErrorNames, text);
             if (error.has_value())
             {
               currentTest.Errors.push_back({
@@ -249,10 +424,10 @@ namespace krys::boo::html::tests
       str = u8"\n--- ACTUAL TOKENS ---\n" + tokens;
       UTF8_INFO(str);
 
-      auto initialState = string(magic_enum::enum_name(test.InitialState));
+      auto initialState = string(TokenizerTestStateNames[ToUnderlying(test.InitialState)].first);
       str = u8"\n--- INITIAL STATE ---\n" + krys::boo::tests::ToUTF8(initialState);
 
-      auto expectedState = string(magic_enum::enum_name(test.ExpectedState));
+      auto expectedState = string(TokenizerTestStateNames[ToUnderlying(test.ExpectedState)].first);
       str = u8"\n--- EXPECTED STATE ---\n" + krys::boo::tests::ToUTF8(expectedState);
 
       CHECK(tokenizer.State() == test.ExpectedState);

@@ -10,7 +10,6 @@
     "icu",
     "lcms",
     "libjpeg-turbo",
-    "magic-enum",
     "rapidhash",
     "unordered-dense",
     {

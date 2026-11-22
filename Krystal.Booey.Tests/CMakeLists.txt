@@ -1,14 +1,10 @@
 ﻿add_executable(Krystal.Booey.Tests)
 
-# Third-party - magic_enum (tokenizer test state names)
-find_package(magic_enum CONFIG REQUIRED)
-
 target_link_libraries(Krystal.Booey.Tests
   PRIVATE
 	 	Krystal.Core
 		Krystal.Booey
    	Catch2::Catch2WithMain
-		magic_enum::magic_enum
 )
 
 set_target_properties(Krystal.Booey.Tests
