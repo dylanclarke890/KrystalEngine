@@ -188,4 +188,4 @@ namespace krys::boo
   }
 }
 
-DEFINE_VARIANT_LIKE_CONFORMANCE(krys::boo::style::Filter)
+KRYS_DEFINE_VARIANT_LIKE_CONFORMANCE(krys::boo::style::Filter)

@@ -180,5 +180,5 @@ namespace krys::boo::style
   };
 }
 
-DEFINE_VARIANT_LIKE_CONFORMANCE(krys::boo::style::BackgroundSizeLength)
-DEFINE_VARIANT_LIKE_CONFORMANCE(krys::boo::style::BackgroundSize)
+KRYS_DEFINE_VARIANT_LIKE_CONFORMANCE(krys::boo::style::BackgroundSizeLength)
+KRYS_DEFINE_VARIANT_LIKE_CONFORMANCE(krys::boo::style::BackgroundSize)

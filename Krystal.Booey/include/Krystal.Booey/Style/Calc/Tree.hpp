@@ -1066,7 +1066,7 @@ namespace krys::boo::style::calc
 
 namespace std
 {
-#define OP_TUPLE_LIKE_CONFORMANCE(Op, numberOfArguments)                                                     \
+#define KRYS_OP_TUPLE_LIKE_CONFORMANCE(Op, numberOfArguments)                                                \
   template <>                                                                                                \
   class tuple_size<krys::boo::style::calc::Op> : public std::integral_constant<size_t, numberOfArguments>    \
   {                                                                                                          \
@@ -1078,36 +1078,36 @@ namespace std
     using type = decltype(krys::boo::style::calc::get<I>(std::declval<krys::boo::style::calc::Op>()));       \
   }
 
-  OP_TUPLE_LIKE_CONFORMANCE(Sum, 1);
-  OP_TUPLE_LIKE_CONFORMANCE(Product, 1);
-  OP_TUPLE_LIKE_CONFORMANCE(Negate, 1);
-  OP_TUPLE_LIKE_CONFORMANCE(Invert, 1);
-  OP_TUPLE_LIKE_CONFORMANCE(Min, 1);
-  OP_TUPLE_LIKE_CONFORMANCE(Max, 1);
-  OP_TUPLE_LIKE_CONFORMANCE(Clamp, 3);
-  OP_TUPLE_LIKE_CONFORMANCE(RoundNearest, 2);
-  OP_TUPLE_LIKE_CONFORMANCE(RoundUp, 2);
-  OP_TUPLE_LIKE_CONFORMANCE(RoundDown, 2);
-  OP_TUPLE_LIKE_CONFORMANCE(RoundToZero, 2);
-  OP_TUPLE_LIKE_CONFORMANCE(Mod, 2);
-  OP_TUPLE_LIKE_CONFORMANCE(Rem, 2);
-  OP_TUPLE_LIKE_CONFORMANCE(Sin, 1);
-  OP_TUPLE_LIKE_CONFORMANCE(Cos, 1);
-  OP_TUPLE_LIKE_CONFORMANCE(Tan, 1);
-  OP_TUPLE_LIKE_CONFORMANCE(Asin, 1);
-  OP_TUPLE_LIKE_CONFORMANCE(Acos, 1);
-  OP_TUPLE_LIKE_CONFORMANCE(Atan, 1);
-  OP_TUPLE_LIKE_CONFORMANCE(Atan2, 2);
-  OP_TUPLE_LIKE_CONFORMANCE(Pow, 2);
-  OP_TUPLE_LIKE_CONFORMANCE(Sqrt, 1);
-  OP_TUPLE_LIKE_CONFORMANCE(Hypot, 1);
-  OP_TUPLE_LIKE_CONFORMANCE(Log, 2);
-  OP_TUPLE_LIKE_CONFORMANCE(Exp, 1);
-  OP_TUPLE_LIKE_CONFORMANCE(Abs, 1);
-  OP_TUPLE_LIKE_CONFORMANCE(Sign, 1);
-  OP_TUPLE_LIKE_CONFORMANCE(Progress, 3);
-  OP_TUPLE_LIKE_CONFORMANCE(Random, 4);
-  OP_TUPLE_LIKE_CONFORMANCE(Blend, 3);
+  KRYS_OP_TUPLE_LIKE_CONFORMANCE(Sum, 1);
+  KRYS_OP_TUPLE_LIKE_CONFORMANCE(Product, 1);
+  KRYS_OP_TUPLE_LIKE_CONFORMANCE(Negate, 1);
+  KRYS_OP_TUPLE_LIKE_CONFORMANCE(Invert, 1);
+  KRYS_OP_TUPLE_LIKE_CONFORMANCE(Min, 1);
+  KRYS_OP_TUPLE_LIKE_CONFORMANCE(Max, 1);
+  KRYS_OP_TUPLE_LIKE_CONFORMANCE(Clamp, 3);
+  KRYS_OP_TUPLE_LIKE_CONFORMANCE(RoundNearest, 2);
+  KRYS_OP_TUPLE_LIKE_CONFORMANCE(RoundUp, 2);
+  KRYS_OP_TUPLE_LIKE_CONFORMANCE(RoundDown, 2);
+  KRYS_OP_TUPLE_LIKE_CONFORMANCE(RoundToZero, 2);
+  KRYS_OP_TUPLE_LIKE_CONFORMANCE(Mod, 2);
+  KRYS_OP_TUPLE_LIKE_CONFORMANCE(Rem, 2);
+  KRYS_OP_TUPLE_LIKE_CONFORMANCE(Sin, 1);
+  KRYS_OP_TUPLE_LIKE_CONFORMANCE(Cos, 1);
+  KRYS_OP_TUPLE_LIKE_CONFORMANCE(Tan, 1);
+  KRYS_OP_TUPLE_LIKE_CONFORMANCE(Asin, 1);
+  KRYS_OP_TUPLE_LIKE_CONFORMANCE(Acos, 1);
+  KRYS_OP_TUPLE_LIKE_CONFORMANCE(Atan, 1);
+  KRYS_OP_TUPLE_LIKE_CONFORMANCE(Atan2, 2);
+  KRYS_OP_TUPLE_LIKE_CONFORMANCE(Pow, 2);
+  KRYS_OP_TUPLE_LIKE_CONFORMANCE(Sqrt, 1);
+  KRYS_OP_TUPLE_LIKE_CONFORMANCE(Hypot, 1);
+  KRYS_OP_TUPLE_LIKE_CONFORMANCE(Log, 2);
+  KRYS_OP_TUPLE_LIKE_CONFORMANCE(Exp, 1);
+  KRYS_OP_TUPLE_LIKE_CONFORMANCE(Abs, 1);
+  KRYS_OP_TUPLE_LIKE_CONFORMANCE(Sign, 1);
+  KRYS_OP_TUPLE_LIKE_CONFORMANCE(Progress, 3);
+  KRYS_OP_TUPLE_LIKE_CONFORMANCE(Random, 4);
+  KRYS_OP_TUPLE_LIKE_CONFORMANCE(Blend, 3);
 
-#undef OP_TUPLE_LIKE_CONFORMANCE
+#undef KRYS_OP_TUPLE_LIKE_CONFORMANCE
 }

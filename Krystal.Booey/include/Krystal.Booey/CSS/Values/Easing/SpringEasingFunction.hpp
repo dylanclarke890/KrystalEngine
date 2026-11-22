@@ -74,4 +74,4 @@ namespace krys::boo::css
   }
 }
 
-DEFINE_SPACE_SEPARATED_TUPLE_LIKE_CONFORMANCE(krys::boo::css::SpringEasingParameters, 4)
+KRYS_DEFINE_SPACE_SEPARATED_TUPLE_LIKE_CONFORMANCE(krys::boo::css::SpringEasingParameters, 4)

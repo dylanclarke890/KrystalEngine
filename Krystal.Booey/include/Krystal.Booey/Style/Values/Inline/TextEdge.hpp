@@ -126,4 +126,4 @@ namespace krys::boo::style
   concept TextEdgeDerived = krys::IsBaseOfTemplate<TextEdge, T> && css::VariantLike<T>;
 }
 
-DEFINE_VARIANT_LIKE_CONFORMANCE(krys::boo::style::TextEdgePair)
+KRYS_DEFINE_VARIANT_LIKE_CONFORMANCE(krys::boo::style::TextEdgePair)

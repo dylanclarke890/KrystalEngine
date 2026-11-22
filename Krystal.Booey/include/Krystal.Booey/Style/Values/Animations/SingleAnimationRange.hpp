@@ -222,6 +222,6 @@ namespace krys::boo::style
   };
 }
 
-DEFINE_VARIANT_LIKE_CONFORMANCE(krys::boo::style::SingleAnimationRangeLength)
-DEFINE_VARIANT_LIKE_CONFORMANCE(krys::boo::style::SingleAnimationRangeStart)
-DEFINE_VARIANT_LIKE_CONFORMANCE(krys::boo::style::SingleAnimationRangeEnd)
+KRYS_DEFINE_VARIANT_LIKE_CONFORMANCE(krys::boo::style::SingleAnimationRangeLength)
+KRYS_DEFINE_VARIANT_LIKE_CONFORMANCE(krys::boo::style::SingleAnimationRangeStart)
+KRYS_DEFINE_VARIANT_LIKE_CONFORMANCE(krys::boo::style::SingleAnimationRangeEnd)

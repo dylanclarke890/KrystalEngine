@@ -106,7 +106,7 @@ namespace krys::boo::style
 
 // Macro to define two-way mapping between a CSS and Style type. This is only needed
 // for "tuple-like" types, in lieu of explicit ToCSS/ToStyle specializations.
-#define DEFINE_TYPE_MAPPING(css, style)                                                                      \
+#define KRYS_DEFINE_TYPE_MAPPING(css, style)                                                                 \
   template <>                                                                                                \
   struct ToStyleMapping<css>                                                                                 \
   {                                                                                                          \

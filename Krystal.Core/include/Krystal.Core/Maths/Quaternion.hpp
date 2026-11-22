@@ -73,14 +73,6 @@ namespace krys
     }
   }
 
-#pragma region Helper Macros
-
-#define QUATERNION_TEMPLATE_PARAMS krys::Number T
-#define QUATERNION_TEMPLATE_ARGS T
-#define QUATERNION_TYPE krys::Quaternion<T>
-
-#pragma endregion
-
   /// @brief Represents an axis-angle pair, which is a rotation around a 3D axis.
   template <Number T>
   struct AxisAngle final
@@ -99,27 +91,7 @@ namespace krys
   {
     T w, x, y, z;
 
-  public:
-    constexpr Quaternion(const Quaternion<T> &other) noexcept = default;
-
-    constexpr Quaternion<T> &operator=(const Quaternion<T> &other) noexcept = default;
-
-    constexpr ~Quaternion() noexcept = default;
-
-    constexpr auto operator<=>(const Quaternion<T> &other) const noexcept = default;
-
-    constexpr Quaternion(Quaternion<T> &&other) noexcept : w(other.w), x(other.x), y(other.y), z(other.z)
-    {
-    }
-
-    constexpr Quaternion<T> &operator=(Quaternion<T> &&other) noexcept
-    {
-      w = other.w;
-      x = other.x;
-      y = other.y;
-      z = other.z;
-      return *this;
-    }
+    KRYS_NODISCARD constexpr auto operator<=>(const Quaternion &) const noexcept = default;
 
     /// @brief Constructs the identity quaternion.
     /// @details The identity quaternion has a real part of 1 and an imaginary part of 0, it represents no

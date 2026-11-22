@@ -54,7 +54,7 @@ namespace krys::boo::style
 
     KRYS_NODISCARD constexpr auto operator<=>(const StrokeMiterlimit &) const noexcept = default;
   };
-  DEFINE_TYPE_WRAPPER_GET(StrokeMiterlimit, Value)
+  KRYS_DEFINE_TYPE_WRAPPER_GET(StrokeMiterlimit, Value)
 }
 
-DEFINE_TUPLE_LIKE_CONFORMANCE_FOR_TYPE_WRAPPER(krys::boo::style::StrokeMiterlimit)
+KRYS_DEFINE_TUPLE_LIKE_CONFORMANCE_FOR_TYPE_WRAPPER(krys::boo::style::StrokeMiterlimit)

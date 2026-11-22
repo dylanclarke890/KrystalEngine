@@ -135,7 +135,7 @@ namespace krys::boo::style
     KRYS_NODISCARD bool operator==(const BorderImageOutset &) const noexcept = default;
   };
 
-  DEFINE_TYPE_WRAPPER_GET(BorderImageOutset, Values);
+  KRYS_DEFINE_TYPE_WRAPPER_GET(BorderImageOutset, Values);
 
   // MARK: - Conversion
 
@@ -182,5 +182,5 @@ namespace krys::boo::style
   };
 }
 
-DEFINE_TUPLE_LIKE_CONFORMANCE_FOR_TYPE_WRAPPER(krys::boo::style::BorderImageOutset)
-DEFINE_VARIANT_LIKE_CONFORMANCE(krys::boo::style::BorderImageOutsetValue)
+KRYS_DEFINE_TUPLE_LIKE_CONFORMANCE_FOR_TYPE_WRAPPER(krys::boo::style::BorderImageOutset)
+KRYS_DEFINE_VARIANT_LIKE_CONFORMANCE(krys::boo::style::BorderImageOutsetValue)

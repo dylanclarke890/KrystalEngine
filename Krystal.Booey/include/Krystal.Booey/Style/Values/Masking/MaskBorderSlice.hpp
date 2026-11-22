@@ -189,5 +189,5 @@ namespace krys::boo::style
   };
 }
 
-DEFINE_SPACE_SEPARATED_TUPLE_LIKE_CONFORMANCE(krys::boo::style::MaskBorderSlice, 2)
-DEFINE_VARIANT_LIKE_CONFORMANCE(krys::boo::style::MaskBorderSliceValue)
+KRYS_DEFINE_SPACE_SEPARATED_TUPLE_LIKE_CONFORMANCE(krys::boo::style::MaskBorderSlice, 2)
+KRYS_DEFINE_VARIANT_LIKE_CONFORMANCE(krys::boo::style::MaskBorderSliceValue)

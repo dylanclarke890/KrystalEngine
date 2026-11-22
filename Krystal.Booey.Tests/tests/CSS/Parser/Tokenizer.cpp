@@ -231,10 +231,10 @@ namespace krys::boo::css::tests
     {
       utf8_string str = u8"--- TEST " + krys::boo::tests::ToUTF8(number + 1uz) + u8" OF "
                         + krys::boo::tests::ToUTF8(total) + u8" ---\n" + test.Css;
-      UTF8_INFO(str);
+      KRYS_UTF8_INFO(str);
 
       str = u8"--- EXPECTED TOKENS ---\n" + test.Tokens;
-      UTF8_INFO(str);
+      KRYS_UTF8_INFO(str);
 
       InputStream inputStream(utf8_string(test.Css));
       Tokenizer tokenizer(inputStream);
@@ -242,7 +242,7 @@ namespace krys::boo::css::tests
 
       auto actual = SerialiseCSSTokens(tokenizer.Tokens());
       str = u8"\n--- ACTUAL TOKENS ---\n" + actual;
-      UTF8_INFO(str);
+      KRYS_UTF8_INFO(str);
 
       bool equal = actual == test.Tokens;
       CHECK(equal);
@@ -262,74 +262,74 @@ namespace krys::boo::css::tests
     }
   }
 
-#define EXECUTE_CSS_TOKENIZER_TEST_CASE(FileName)                                                            \
+#define KRYS_EXECUTE_CSS_TOKENIZER_TEST_CASE(FileName)                                                       \
   TEST_CASE("Tokenizer(" FileName ")", "[HTML][Tokenizer]")                                                  \
   {                                                                                                          \
     RunTest(FileName);                                                                                       \
   }
 
-  EXECUTE_CSS_TOKENIZER_TEST_CASE("at-keyword-01.dat");
+  KRYS_EXECUTE_CSS_TOKENIZER_TEST_CASE("at-keyword-01.dat");
 
-  EXECUTE_CSS_TOKENIZER_TEST_CASE("bad-string-01.dat");
+  KRYS_EXECUTE_CSS_TOKENIZER_TEST_CASE("bad-string-01.dat");
 
-  EXECUTE_CSS_TOKENIZER_TEST_CASE("bad-url-01.dat");
+  KRYS_EXECUTE_CSS_TOKENIZER_TEST_CASE("bad-url-01.dat");
 
-  EXECUTE_CSS_TOKENIZER_TEST_CASE("close-curly-01.dat");
+  KRYS_EXECUTE_CSS_TOKENIZER_TEST_CASE("close-curly-01.dat");
 
-  EXECUTE_CSS_TOKENIZER_TEST_CASE("close-paren-01.dat");
+  KRYS_EXECUTE_CSS_TOKENIZER_TEST_CASE("close-paren-01.dat");
 
-  EXECUTE_CSS_TOKENIZER_TEST_CASE("close-square-01.dat");
+  KRYS_EXECUTE_CSS_TOKENIZER_TEST_CASE("close-square-01.dat");
 
-  EXECUTE_CSS_TOKENIZER_TEST_CASE("colon-01.dat");
+  KRYS_EXECUTE_CSS_TOKENIZER_TEST_CASE("colon-01.dat");
 
-  EXECUTE_CSS_TOKENIZER_TEST_CASE("comma-01.dat");
+  KRYS_EXECUTE_CSS_TOKENIZER_TEST_CASE("comma-01.dat");
 
-  EXECUTE_CSS_TOKENIZER_TEST_CASE("digit-01.dat");
+  KRYS_EXECUTE_CSS_TOKENIZER_TEST_CASE("digit-01.dat");
 
-  EXECUTE_CSS_TOKENIZER_TEST_CASE("dimension-01.dat");
+  KRYS_EXECUTE_CSS_TOKENIZER_TEST_CASE("dimension-01.dat");
 
-  EXECUTE_CSS_TOKENIZER_TEST_CASE("escaped-code-point-01.dat");
+  KRYS_EXECUTE_CSS_TOKENIZER_TEST_CASE("escaped-code-point-01.dat");
 
-  EXECUTE_CSS_TOKENIZER_TEST_CASE("full-stop-01.dat");
+  KRYS_EXECUTE_CSS_TOKENIZER_TEST_CASE("full-stop-01.dat");
 
-  EXECUTE_CSS_TOKENIZER_TEST_CASE("fuzz-01.dat");
-  EXECUTE_CSS_TOKENIZER_TEST_CASE("fuzz-02.dat");
-  EXECUTE_CSS_TOKENIZER_TEST_CASE("fuzz-03.dat");
-  EXECUTE_CSS_TOKENIZER_TEST_CASE("fuzz-04.dat");
-  EXECUTE_CSS_TOKENIZER_TEST_CASE("fuzz-05.dat");
-  EXECUTE_CSS_TOKENIZER_TEST_CASE("fuzz-06.dat");
-  EXECUTE_CSS_TOKENIZER_TEST_CASE("fuzz-07.dat");
-  EXECUTE_CSS_TOKENIZER_TEST_CASE("fuzz-08.dat");
+  KRYS_EXECUTE_CSS_TOKENIZER_TEST_CASE("fuzz-01.dat");
+  KRYS_EXECUTE_CSS_TOKENIZER_TEST_CASE("fuzz-02.dat");
+  KRYS_EXECUTE_CSS_TOKENIZER_TEST_CASE("fuzz-03.dat");
+  KRYS_EXECUTE_CSS_TOKENIZER_TEST_CASE("fuzz-04.dat");
+  KRYS_EXECUTE_CSS_TOKENIZER_TEST_CASE("fuzz-05.dat");
+  KRYS_EXECUTE_CSS_TOKENIZER_TEST_CASE("fuzz-06.dat");
+  KRYS_EXECUTE_CSS_TOKENIZER_TEST_CASE("fuzz-07.dat");
+  KRYS_EXECUTE_CSS_TOKENIZER_TEST_CASE("fuzz-08.dat");
 
-  EXECUTE_CSS_TOKENIZER_TEST_CASE("hash-01.dat");
+  KRYS_EXECUTE_CSS_TOKENIZER_TEST_CASE("hash-01.dat");
 
-  EXECUTE_CSS_TOKENIZER_TEST_CASE("hyphen-minus-01.dat");
+  KRYS_EXECUTE_CSS_TOKENIZER_TEST_CASE("hyphen-minus-01.dat");
 
-  EXECUTE_CSS_TOKENIZER_TEST_CASE("ident-01.dat");
+  KRYS_EXECUTE_CSS_TOKENIZER_TEST_CASE("ident-01.dat");
 
-  EXECUTE_CSS_TOKENIZER_TEST_CASE("ident-like-01.dat");
+  KRYS_EXECUTE_CSS_TOKENIZER_TEST_CASE("ident-like-01.dat");
 
-  EXECUTE_CSS_TOKENIZER_TEST_CASE("less-than-01.dat");
+  KRYS_EXECUTE_CSS_TOKENIZER_TEST_CASE("less-than-01.dat");
 
-  EXECUTE_CSS_TOKENIZER_TEST_CASE("number-01.dat");
+  KRYS_EXECUTE_CSS_TOKENIZER_TEST_CASE("number-01.dat");
 
-  EXECUTE_CSS_TOKENIZER_TEST_CASE("numeric-01.dat");
+  KRYS_EXECUTE_CSS_TOKENIZER_TEST_CASE("numeric-01.dat");
 
-  EXECUTE_CSS_TOKENIZER_TEST_CASE("open-curly-01.dat");
+  KRYS_EXECUTE_CSS_TOKENIZER_TEST_CASE("open-curly-01.dat");
 
-  EXECUTE_CSS_TOKENIZER_TEST_CASE("open-paren-01.dat");
+  KRYS_EXECUTE_CSS_TOKENIZER_TEST_CASE("open-paren-01.dat");
 
-  EXECUTE_CSS_TOKENIZER_TEST_CASE("open-square-01.dat");
+  KRYS_EXECUTE_CSS_TOKENIZER_TEST_CASE("open-square-01.dat");
 
-  EXECUTE_CSS_TOKENIZER_TEST_CASE("plus-01.dat");
+  KRYS_EXECUTE_CSS_TOKENIZER_TEST_CASE("plus-01.dat");
 
-  EXECUTE_CSS_TOKENIZER_TEST_CASE("reverse-solidus-01.dat");
+  KRYS_EXECUTE_CSS_TOKENIZER_TEST_CASE("reverse-solidus-01.dat");
 
-  EXECUTE_CSS_TOKENIZER_TEST_CASE("semicolon-01.dat");
+  KRYS_EXECUTE_CSS_TOKENIZER_TEST_CASE("semicolon-01.dat");
 
-  EXECUTE_CSS_TOKENIZER_TEST_CASE("string-01.dat");
+  KRYS_EXECUTE_CSS_TOKENIZER_TEST_CASE("string-01.dat");
 
-  EXECUTE_CSS_TOKENIZER_TEST_CASE("url-01.dat");
+  KRYS_EXECUTE_CSS_TOKENIZER_TEST_CASE("url-01.dat");
 
   TEST_CASE("Tokenizer(empty input)", "[CSS][Tokenizer]")
   {
@@ -343,3 +343,5 @@ namespace krys::boo::css::tests
     CHECK(tokenizer.Tokens().Peek().Type() == TokenType::EndOfFile);
   }
 }
+
+#undef KRYS_EXECUTE_CSS_TOKENIZER_TEST_CASE

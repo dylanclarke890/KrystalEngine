@@ -75,7 +75,7 @@ namespace krys::boo::style
       return Value == other;
     }
   };
-  DEFINE_TYPE_WRAPPER_GET(Zoom, Value)
+  KRYS_DEFINE_TYPE_WRAPPER_GET(Zoom, Value)
 }
 
-DEFINE_TUPLE_LIKE_CONFORMANCE_FOR_TYPE_WRAPPER(krys::boo::style::Zoom)
+KRYS_DEFINE_TUPLE_LIKE_CONFORMANCE_FOR_TYPE_WRAPPER(krys::boo::style::Zoom)

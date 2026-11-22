@@ -115,4 +115,4 @@ namespace krys
   };
 }
 
-DEFINE_TUPLE_LIKE_CONFORMANCE(krys::boo::style::Url, 2)
+KRYS_DEFINE_TUPLE_LIKE_CONFORMANCE(krys::boo::style::Url, 2)

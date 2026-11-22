@@ -354,6 +354,6 @@ namespace krys::boo::style
   };
 }
 
-DEFINE_COMMA_SEPARATED_RANGE_LIKE_CONFORMANCE(krys::boo::style::WillChangeAnimatableFeatures)
-DEFINE_VARIANT_LIKE_CONFORMANCE(krys::boo::style::WillChangeAnimatableFeature)
-DEFINE_VARIANT_LIKE_CONFORMANCE(krys::boo::style::WillChange)
+KRYS_DEFINE_COMMA_SEPARATED_RANGE_LIKE_CONFORMANCE(krys::boo::style::WillChangeAnimatableFeatures)
+KRYS_DEFINE_VARIANT_LIKE_CONFORMANCE(krys::boo::style::WillChangeAnimatableFeature)
+KRYS_DEFINE_VARIANT_LIKE_CONFORMANCE(krys::boo::style::WillChange)

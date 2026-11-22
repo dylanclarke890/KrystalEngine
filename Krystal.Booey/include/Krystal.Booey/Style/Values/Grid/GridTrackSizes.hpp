@@ -53,4 +53,4 @@ namespace krys::boo::style
   };
 }
 
-DEFINE_RANGE_LIKE_CONFORMANCE_FOR_LIST_OR_DEFAULT_DERIVED_TYPE(krys::boo::style::GridTrackSizes)
+KRYS_DEFINE_RANGE_LIKE_CONFORMANCE_FOR_LIST_OR_DEFAULT_DERIVED_TYPE(krys::boo::style::GridTrackSizes)

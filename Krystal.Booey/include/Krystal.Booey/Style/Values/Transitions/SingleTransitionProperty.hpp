@@ -117,7 +117,7 @@ namespace krys::boo::style
     Kind _value;
   };
 
-  DEFINE_TYPE_WRAPPER_GET(SingleTransitionProperty::UnknownProperty, Value);
+  KRYS_DEFINE_TYPE_WRAPPER_GET(SingleTransitionProperty::UnknownProperty, Value);
 
   // MARK: - Conversion
 
@@ -128,6 +128,7 @@ namespace krys::boo::style
   };
 }
 
-DEFINE_TUPLE_LIKE_CONFORMANCE_FOR_TYPE_WRAPPER(krys::boo::style::SingleTransitionProperty::UnknownProperty)
-DEFINE_VARIANT_LIKE_CONFORMANCE(krys::boo::style::SingleTransitionProperty::SingleProperty)
-DEFINE_VARIANT_LIKE_CONFORMANCE(krys::boo::style::SingleTransitionProperty)
+KRYS_DEFINE_TUPLE_LIKE_CONFORMANCE_FOR_TYPE_WRAPPER(
+  krys::boo::style::SingleTransitionProperty::UnknownProperty)
+KRYS_DEFINE_VARIANT_LIKE_CONFORMANCE(krys::boo::style::SingleTransitionProperty::SingleProperty)
+KRYS_DEFINE_VARIANT_LIKE_CONFORMANCE(krys::boo::style::SingleTransitionProperty)

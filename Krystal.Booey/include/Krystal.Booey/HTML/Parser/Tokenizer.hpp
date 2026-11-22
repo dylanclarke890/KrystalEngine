@@ -580,26 +580,26 @@ namespace krys::boo::html
 
 #pragma region State Machine Macros
 
-#define BEGIN_STATE(stateName)                                                                               \
+#define KRYS_BEGIN_STATE(stateName)                                                                          \
   case TokenizerState::stateName:                                                                            \
   stateName:                                                                                                 \
   {                                                                                                          \
     constexpr auto currentState = TokenizerState::stateName;                                                 \
     (void)currentState;
 
-#define END_STATE()                                                                                          \
+#define KRYS_END_STATE()                                                                                     \
   krys_unreachable();                                                                                        \
   break;                                                                                                     \
   }
 
-#define RETURN_IN_CURRENT_STATE(expression)                                                                  \
+#define KRYS_RETURN_IN_CURRENT_STATE(expression)                                                             \
   do                                                                                                         \
   {                                                                                                          \
     _state = currentState;                                                                                   \
     return expression;                                                                                       \
   } while (false)
 
-#define RETURN_IN_CURRENT_STATE_IF_CHARACTERS_BUFFERED()                                                     \
+#define KRYS_RETURN_IN_CURRENT_STATE_IF_CHARACTERS_BUFFERED()                                                \
   do                                                                                                         \
   {                                                                                                          \
     if (HasBufferedCharacterToken())                                                                         \
@@ -610,14 +610,14 @@ namespace krys::boo::html
   } while (false)
 
 // For when the HTML spec says "reconsume the current input character in the <mumble> state."
-#define RECONSUME_IN(newState)                                                                               \
+#define KRYS_RECONSUME_IN(newState)                                                                          \
   do                                                                                                         \
   {                                                                                                          \
     goto newState;                                                                                           \
   } while (false)
 
 // For when the HTML spec says "consume the next input character ... and switch to the <mumble> state."
-#define ADVANCE_TO(newState)                                                                                 \
+#define KRYS_ADVANCE_TO(newState)                                                                            \
   do                                                                                                         \
   {                                                                                                          \
     if (!_input.Advance())                                                                                   \
@@ -630,7 +630,7 @@ namespace krys::boo::html
   } while (false)
 
 // For when the HTML spec says "consume the next input character ... and switch to the <mumble> state."
-#define ADVANCE_PAST_NON_NEWLINE_TO(newState)                                                                \
+#define KRYS_ADVANCE_PAST_NON_NEWLINE_TO(newState)                                                           \
   do                                                                                                         \
   {                                                                                                          \
     if (!_input.Advance())                                                                                   \
@@ -643,7 +643,7 @@ namespace krys::boo::html
   } while (false)
 
 // For more complex cases, caller consumes the characters first and then uses this macro.
-#define SWITCH_TO(newState)                                                                                  \
+#define KRYS_SWITCH_TO(newState)                                                                             \
   do                                                                                                         \
   {                                                                                                          \
     if (!_input.Peek())                                                                                      \
@@ -655,53 +655,53 @@ namespace krys::boo::html
     goto newState;                                                                                           \
   } while (false)
 
-#define RECONSUME_IN_CHARACTER_REFERENCE_RETURN_STATE()                                                      \
+#define KRYS_RECONSUME_IN_CHARACTER_REFERENCE_RETURN_STATE()                                                 \
   do                                                                                                         \
   {                                                                                                          \
     if (_characterReferenceReturnState == TokenizerState::Data)                                              \
     {                                                                                                        \
-      RECONSUME_IN(Data);                                                                                    \
+      KRYS_RECONSUME_IN(Data);                                                                               \
     }                                                                                                        \
     if (_characterReferenceReturnState == TokenizerState::RCDATA)                                            \
     {                                                                                                        \
-      RECONSUME_IN(RCDATA);                                                                                  \
+      KRYS_RECONSUME_IN(RCDATA);                                                                             \
     }                                                                                                        \
     if (_characterReferenceReturnState == TokenizerState::AttributeValueDoubleQuoted)                        \
     {                                                                                                        \
-      RECONSUME_IN(AttributeValueDoubleQuoted);                                                              \
+      KRYS_RECONSUME_IN(AttributeValueDoubleQuoted);                                                         \
     }                                                                                                        \
     if (_characterReferenceReturnState == TokenizerState::AttributeValueSingleQuoted)                        \
     {                                                                                                        \
-      RECONSUME_IN(AttributeValueSingleQuoted);                                                              \
+      KRYS_RECONSUME_IN(AttributeValueSingleQuoted);                                                         \
     }                                                                                                        \
     if (_characterReferenceReturnState == TokenizerState::AttributeValueUnquoted)                            \
     {                                                                                                        \
-      RECONSUME_IN(AttributeValueUnquoted);                                                                  \
+      KRYS_RECONSUME_IN(AttributeValueUnquoted);                                                             \
     }                                                                                                        \
   } while (false)
 
-#define ADVANCE_TO_CHARACTER_REFERENCE_RETURN_STATE()                                                        \
+#define KRYS_ADVANCE_TO_CHARACTER_REFERENCE_RETURN_STATE()                                                   \
   do                                                                                                         \
   {                                                                                                          \
     if (_characterReferenceReturnState == TokenizerState::Data)                                              \
     {                                                                                                        \
-      ADVANCE_TO(Data);                                                                                      \
+      KRYS_ADVANCE_TO(Data);                                                                                 \
     }                                                                                                        \
     if (_characterReferenceReturnState == TokenizerState::RCDATA)                                            \
     {                                                                                                        \
-      ADVANCE_TO(RCDATA);                                                                                    \
+      KRYS_ADVANCE_TO(RCDATA);                                                                               \
     }                                                                                                        \
     if (_characterReferenceReturnState == TokenizerState::AttributeValueDoubleQuoted)                        \
     {                                                                                                        \
-      ADVANCE_TO(AttributeValueDoubleQuoted);                                                                \
+      KRYS_ADVANCE_TO(AttributeValueDoubleQuoted);                                                           \
     }                                                                                                        \
     if (_characterReferenceReturnState == TokenizerState::AttributeValueSingleQuoted)                        \
     {                                                                                                        \
-      ADVANCE_TO(AttributeValueSingleQuoted);                                                                \
+      KRYS_ADVANCE_TO(AttributeValueSingleQuoted);                                                           \
     }                                                                                                        \
     if (_characterReferenceReturnState == TokenizerState::AttributeValueUnquoted)                            \
     {                                                                                                        \
-      ADVANCE_TO(AttributeValueUnquoted);                                                                    \
+      KRYS_ADVANCE_TO(AttributeValueUnquoted);                                                               \
     }                                                                                                        \
   } while (false)
 
@@ -735,2055 +735,2055 @@ namespace krys::boo::html
       char32 character = _input.NextInputCharacter();
       switch (_state)
       {
-        BEGIN_STATE(Data)
-          if (character == Ampersand)
-          {
-            _characterReferenceReturnState = TokenizerState::Data;
-            ADVANCE_PAST_NON_NEWLINE_TO(CharacterReference);
-          }
-          if (character == LessThanSign)
-          {
-            RETURN_IN_CURRENT_STATE_IF_CHARACTERS_BUFFERED();
-            ADVANCE_PAST_NON_NEWLINE_TO(TagOpen);
-          }
-          if (character == EndOfFile) KRYS_UNLIKELY
-          {
-            RETURN_IN_CURRENT_STATE_IF_CHARACTERS_BUFFERED();
-            return EmitEOFToken();
-          }
-          if (character == Null) KRYS_UNLIKELY
-          {
-            ParserError(ParseError::UnexpectedNullCharacter);
-            BufferCharacter(Null); // parser error but we still emit the null as per the spec.
-            ADVANCE_PAST_NON_NEWLINE_TO(Data);
-          }
+        KRYS_BEGIN_STATE(Data)
+        if (character == Ampersand)
+        {
+          _characterReferenceReturnState = TokenizerState::Data;
+          KRYS_ADVANCE_PAST_NON_NEWLINE_TO(CharacterReference);
+        }
+        if (character == LessThanSign)
+        {
+          KRYS_RETURN_IN_CURRENT_STATE_IF_CHARACTERS_BUFFERED();
+          KRYS_ADVANCE_PAST_NON_NEWLINE_TO(TagOpen);
+        }
+        if (character == EndOfFile) KRYS_UNLIKELY
+        {
+          KRYS_RETURN_IN_CURRENT_STATE_IF_CHARACTERS_BUFFERED();
+          return EmitEOFToken();
+        }
+        if (character == Null) KRYS_UNLIKELY
+        {
+          ParserError(ParseError::UnexpectedNullCharacter);
+          BufferCharacter(Null); // parser error but we still emit the null as per the spec.
+          KRYS_ADVANCE_PAST_NON_NEWLINE_TO(Data);
+        }
 
-          BufferCharacter(character);
-          ADVANCE_TO(Data);
-        END_STATE()
+        BufferCharacter(character);
+        KRYS_ADVANCE_TO(Data);
+        KRYS_END_STATE()
 
-        BEGIN_STATE(RCDATA)
-          if (character == Ampersand)
-          {
-            _characterReferenceReturnState = TokenizerState::RCDATA;
-            ADVANCE_PAST_NON_NEWLINE_TO(CharacterReference);
-          }
-          if (character == LessThanSign)
-          {
-            ADVANCE_PAST_NON_NEWLINE_TO(RCDATALessThanSign);
-          }
-          if (character == EndOfFile) KRYS_UNLIKELY
-          {
-            RECONSUME_IN(Data);
-          }
-          if (character == Null) KRYS_UNLIKELY
-          {
-            ParserError(ParseError::UnexpectedNullCharacter);
-            BufferCharacter(Replacement);
-            ADVANCE_PAST_NON_NEWLINE_TO(RCDATA);
-          }
+        KRYS_BEGIN_STATE(RCDATA)
+        if (character == Ampersand)
+        {
+          _characterReferenceReturnState = TokenizerState::RCDATA;
+          KRYS_ADVANCE_PAST_NON_NEWLINE_TO(CharacterReference);
+        }
+        if (character == LessThanSign)
+        {
+          KRYS_ADVANCE_PAST_NON_NEWLINE_TO(RCDATALessThanSign);
+        }
+        if (character == EndOfFile) KRYS_UNLIKELY
+        {
+          KRYS_RECONSUME_IN(Data);
+        }
+        if (character == Null) KRYS_UNLIKELY
+        {
+          ParserError(ParseError::UnexpectedNullCharacter);
+          BufferCharacter(Replacement);
+          KRYS_ADVANCE_PAST_NON_NEWLINE_TO(RCDATA);
+        }
 
-          BufferCharacter(character);
-          ADVANCE_TO(RCDATA);
-        END_STATE()
+        BufferCharacter(character);
+        KRYS_ADVANCE_TO(RCDATA);
+        KRYS_END_STATE()
 
-        BEGIN_STATE(RAWTEXT)
-          if (character == LessThanSign)
-          {
-            ADVANCE_PAST_NON_NEWLINE_TO(RAWTEXTLessThanSign);
-          }
-          if (character == EndOfFile) KRYS_UNLIKELY
-          {
-            RECONSUME_IN(Data);
-          }
-          if (character == Null) KRYS_UNLIKELY
-          {
-            ParserError(ParseError::UnexpectedNullCharacter);
-            BufferCharacter(Replacement);
-            ADVANCE_PAST_NON_NEWLINE_TO(RAWTEXT);
-          }
+        KRYS_BEGIN_STATE(RAWTEXT)
+        if (character == LessThanSign)
+        {
+          KRYS_ADVANCE_PAST_NON_NEWLINE_TO(RAWTEXTLessThanSign);
+        }
+        if (character == EndOfFile) KRYS_UNLIKELY
+        {
+          KRYS_RECONSUME_IN(Data);
+        }
+        if (character == Null) KRYS_UNLIKELY
+        {
+          ParserError(ParseError::UnexpectedNullCharacter);
+          BufferCharacter(Replacement);
+          KRYS_ADVANCE_PAST_NON_NEWLINE_TO(RAWTEXT);
+        }
 
-          BufferCharacter(character);
-          ADVANCE_TO(RAWTEXT);
-        END_STATE()
+        BufferCharacter(character);
+        KRYS_ADVANCE_TO(RAWTEXT);
+        KRYS_END_STATE()
 
-        BEGIN_STATE(ScriptData)
-          if (character == LessThanSign)
-          {
-            ADVANCE_PAST_NON_NEWLINE_TO(ScriptDataLessThanSign);
-          }
-          if (character == EndOfFile) KRYS_UNLIKELY
-          {
-            RECONSUME_IN(Data);
-          }
-          if (character == Null) KRYS_UNLIKELY
-          {
-            ParserError(ParseError::UnexpectedNullCharacter);
-            BufferCharacter(Replacement);
-            ADVANCE_PAST_NON_NEWLINE_TO(ScriptData);
-          }
+        KRYS_BEGIN_STATE(ScriptData)
+        if (character == LessThanSign)
+        {
+          KRYS_ADVANCE_PAST_NON_NEWLINE_TO(ScriptDataLessThanSign);
+        }
+        if (character == EndOfFile) KRYS_UNLIKELY
+        {
+          KRYS_RECONSUME_IN(Data);
+        }
+        if (character == Null) KRYS_UNLIKELY
+        {
+          ParserError(ParseError::UnexpectedNullCharacter);
+          BufferCharacter(Replacement);
+          KRYS_ADVANCE_PAST_NON_NEWLINE_TO(ScriptData);
+        }
 
-          BufferCharacter(character);
-          ADVANCE_TO(ScriptData);
-        END_STATE()
+        BufferCharacter(character);
+        KRYS_ADVANCE_TO(ScriptData);
+        KRYS_END_STATE()
 
-        BEGIN_STATE(PLAINTEXT)
-          if (character == EndOfFile) KRYS_UNLIKELY
-          {
-            RECONSUME_IN(Data);
-          }
-          if (character == Null) KRYS_UNLIKELY
-          {
-            ParserError(ParseError::UnexpectedNullCharacter);
-            BufferCharacter(Replacement);
-            ADVANCE_PAST_NON_NEWLINE_TO(PLAINTEXT);
-          }
+        KRYS_BEGIN_STATE(PLAINTEXT)
+        if (character == EndOfFile) KRYS_UNLIKELY
+        {
+          KRYS_RECONSUME_IN(Data);
+        }
+        if (character == Null) KRYS_UNLIKELY
+        {
+          ParserError(ParseError::UnexpectedNullCharacter);
+          BufferCharacter(Replacement);
+          KRYS_ADVANCE_PAST_NON_NEWLINE_TO(PLAINTEXT);
+        }
 
-          BufferCharacter(character);
-          ADVANCE_TO(PLAINTEXT);
-        END_STATE()
+        BufferCharacter(character);
+        KRYS_ADVANCE_TO(PLAINTEXT);
+        KRYS_END_STATE()
 
-        BEGIN_STATE(TagOpen)
-          if (character == ExclamationMark)
-          {
-            ADVANCE_PAST_NON_NEWLINE_TO(MarkupDeclarationOpen);
-          }
-          if (character == Solidus)
-          {
-            ADVANCE_PAST_NON_NEWLINE_TO(EndTagOpen);
-          }
-          if (krys::text::IsASCIIAlpha(character))
-          {
-            _token.BeginStartTag(krys::text::ToASCIILower(character));
-            ADVANCE_PAST_NON_NEWLINE_TO(TagName);
-          }
-          if (character == QuestionMark)
-          {
-            _temporaryBuffer.clear();
-            ADVANCE_PAST_NON_NEWLINE_TO(ProcessingInstructionOpen);
-          }
-          if (character == EndOfFile) KRYS_UNLIKELY
-          {
-            ParserError(ParseError::EOFBeforeTagName);
-            BufferCharacter(LessThanSign);
-            RECONSUME_IN(Data);
-          }
-
-          ParserError(ParseError::InvalidFirstCharacterOfTagName);
-          BufferCharacter(LessThanSign);
-          RECONSUME_IN(Data);
-        END_STATE()
-
-        BEGIN_STATE(EndTagOpen)
-          if (krys::text::IsASCIIAlpha(character))
-          {
-            _token.BeginEndTag(krys::text::ToASCIILower(character));
-            ADVANCE_PAST_NON_NEWLINE_TO(TagName);
-          }
-          if (character == GreaterThanSign)
-          {
-            ParserError(ParseError::MissingEndTagName);
-            ADVANCE_PAST_NON_NEWLINE_TO(Data); // We don't emit the greater than sign, as per the spec.
-          }
-          if (character == EndOfFile) KRYS_UNLIKELY
-          {
-            ParserError(ParseError::EOFBeforeTagName);
-            BufferCharacters(Array {LessThanSign, Solidus});
-            RECONSUME_IN(Data);
-          }
-
-          ParserError(ParseError::InvalidFirstCharacterOfTagName);
-          _token.BeginComment();
-          RECONSUME_IN(BogusComment);
-        END_STATE()
-
-        BEGIN_STATE(TagName)
-          if (IsTokenizerWhitespace(character))
-          {
-            ADVANCE_TO(BeforeAttributeName);
-          }
-          if (character == Solidus)
-          {
-            ADVANCE_PAST_NON_NEWLINE_TO(SelfClosingStartTag);
-          }
-          if (character == GreaterThanSign)
-          {
-            return EmitTagToken();
-          }
-          if (krys::text::IsASCIIUpper(character))
-          {
-            _token.AppendToName(krys::text::ToASCIILowerUnchecked(character));
-            ADVANCE_PAST_NON_NEWLINE_TO(TagName);
-          }
-          if (character == Null)
-          {
-            _token.AppendToName(Replacement);
-            ParserError(ParseError::UnexpectedNullCharacter);
-            ADVANCE_PAST_NON_NEWLINE_TO(TagName);
-          }
-          if (character == EndOfFile) KRYS_UNLIKELY
-          {
-            ParserError(ParseError::EOFInTag);
-            RECONSUME_IN(Data);
-          }
-
-          _token.AppendToName(character);
-          ADVANCE_PAST_NON_NEWLINE_TO(TagName);
-
-        END_STATE()
-
-        BEGIN_STATE(RCDATALessThanSign)
-          if (character == Solidus)
-          {
-            _temporaryBuffer.clear();
-            krys_debug_assert(_bufferedEndTagName.empty());
-            ADVANCE_PAST_NON_NEWLINE_TO(RCDATAEndTagOpen);
-          }
-
-          BufferCharacter(LessThanSign);
-          RECONSUME_IN(RCDATA);
-        END_STATE()
-
-        BEGIN_STATE(RCDATAEndTagOpen)
-          if (krys::text::IsASCIIAlpha(character))
-          {
-            _temporaryBuffer.push_back(character);
-            AppendToPossibleEndTag(krys::text::ToASCIILower(character));
-            ADVANCE_PAST_NON_NEWLINE_TO(RCDATAEndTagName);
-          }
-
-          BufferCharacters(Array {LessThanSign, Solidus});
-          RECONSUME_IN(RCDATA);
-        END_STATE()
-
-        BEGIN_STATE(RCDATAEndTagName)
-          if (IsTokenizerWhitespace(character))
-          {
-            if (IsAppropriateEndTag())
-            {
-              if (CommitToPartialEndTag(character, TokenizerState::BeforeAttributeName))
-              {
-                return true;
-              }
-              SWITCH_TO(BeforeAttributeName);
-            }
-          }
-          if (character == Solidus)
-          {
-            if (IsAppropriateEndTag())
-            {
-              if (CommitToPartialEndTag(Solidus, TokenizerState::SelfClosingStartTag))
-              {
-                return true;
-              }
-              SWITCH_TO(SelfClosingStartTag);
-            }
-          }
-          if (character == GreaterThanSign)
-          {
-            if (IsAppropriateEndTag())
-            {
-              return CommitToCompleteEndTag();
-            }
-          }
-          if (krys::text::IsASCIIAlpha(character))
-          {
-            _temporaryBuffer.push_back(character);
-            AppendToPossibleEndTag(krys::text::ToASCIILower(character));
-            ADVANCE_PAST_NON_NEWLINE_TO(RCDATAEndTagName);
-          }
-
-          BufferCharacters(Array {LessThanSign, Solidus});
-          BufferCharacters(_temporaryBuffer);
-          _bufferedEndTagName.clear();
+        KRYS_BEGIN_STATE(TagOpen)
+        if (character == ExclamationMark)
+        {
+          KRYS_ADVANCE_PAST_NON_NEWLINE_TO(MarkupDeclarationOpen);
+        }
+        if (character == Solidus)
+        {
+          KRYS_ADVANCE_PAST_NON_NEWLINE_TO(EndTagOpen);
+        }
+        if (krys::text::IsASCIIAlpha(character))
+        {
+          _token.BeginStartTag(krys::text::ToASCIILower(character));
+          KRYS_ADVANCE_PAST_NON_NEWLINE_TO(TagName);
+        }
+        if (character == QuestionMark)
+        {
           _temporaryBuffer.clear();
-          RECONSUME_IN(RCDATA);
-        END_STATE()
-
-        BEGIN_STATE(RAWTEXTLessThanSign)
-          if (character == Solidus)
-          {
-            _temporaryBuffer.clear();
-            krys_debug_assert(_bufferedEndTagName.empty());
-            ADVANCE_PAST_NON_NEWLINE_TO(RAWTEXTEndTagOpen);
-          }
-
+          KRYS_ADVANCE_PAST_NON_NEWLINE_TO(ProcessingInstructionOpen);
+        }
+        if (character == EndOfFile) KRYS_UNLIKELY
+        {
+          ParserError(ParseError::EOFBeforeTagName);
           BufferCharacter(LessThanSign);
-          RECONSUME_IN(RAWTEXT);
-        END_STATE()
+          KRYS_RECONSUME_IN(Data);
+        }
 
-        BEGIN_STATE(RAWTEXTEndTagOpen)
-          if (krys::text::IsASCIIAlpha(character))
-          {
-            _temporaryBuffer.push_back(character);
-            AppendToPossibleEndTag(krys::text::ToASCIILower(character));
-            ADVANCE_PAST_NON_NEWLINE_TO(RAWTEXTEndTagName);
-          }
+        ParserError(ParseError::InvalidFirstCharacterOfTagName);
+        BufferCharacter(LessThanSign);
+        KRYS_RECONSUME_IN(Data);
+        KRYS_END_STATE()
 
+        KRYS_BEGIN_STATE(EndTagOpen)
+        if (krys::text::IsASCIIAlpha(character))
+        {
+          _token.BeginEndTag(krys::text::ToASCIILower(character));
+          KRYS_ADVANCE_PAST_NON_NEWLINE_TO(TagName);
+        }
+        if (character == GreaterThanSign)
+        {
+          ParserError(ParseError::MissingEndTagName);
+          KRYS_ADVANCE_PAST_NON_NEWLINE_TO(Data); // We don't emit the greater than sign, as per the spec.
+        }
+        if (character == EndOfFile) KRYS_UNLIKELY
+        {
+          ParserError(ParseError::EOFBeforeTagName);
           BufferCharacters(Array {LessThanSign, Solidus});
-          RECONSUME_IN(RAWTEXT);
-        END_STATE()
+          KRYS_RECONSUME_IN(Data);
+        }
 
-        BEGIN_STATE(RAWTEXTEndTagName)
-          if (IsTokenizerWhitespace(character))
-          {
-            if (IsAppropriateEndTag())
-            {
-              if (CommitToPartialEndTag(character, TokenizerState::BeforeAttributeName))
-              {
-                return true;
-              }
-              SWITCH_TO(BeforeAttributeName);
-            }
-          }
-          if (character == Solidus)
-          {
-            if (IsAppropriateEndTag())
-            {
-              if (CommitToPartialEndTag(Solidus, TokenizerState::SelfClosingStartTag))
-              {
-                return true;
-              }
-              SWITCH_TO(SelfClosingStartTag);
-            }
-          }
-          if (character == GreaterThanSign)
-          {
-            if (IsAppropriateEndTag())
-            {
-              return CommitToCompleteEndTag();
-            }
-          }
-          if (krys::text::IsASCIIAlpha(character))
-          {
-            _temporaryBuffer.push_back(character);
-            AppendToPossibleEndTag(krys::text::ToASCIILower(character));
-            ADVANCE_PAST_NON_NEWLINE_TO(RAWTEXTEndTagName);
-          }
+        ParserError(ParseError::InvalidFirstCharacterOfTagName);
+        _token.BeginComment();
+        KRYS_RECONSUME_IN(BogusComment);
+        KRYS_END_STATE()
 
-          BufferCharacters(Array {LessThanSign, Solidus});
-          BufferCharacters(_temporaryBuffer);
-          _bufferedEndTagName.clear();
+        KRYS_BEGIN_STATE(TagName)
+        if (IsTokenizerWhitespace(character))
+        {
+          KRYS_ADVANCE_TO(BeforeAttributeName);
+        }
+        if (character == Solidus)
+        {
+          KRYS_ADVANCE_PAST_NON_NEWLINE_TO(SelfClosingStartTag);
+        }
+        if (character == GreaterThanSign)
+        {
+          return EmitTagToken();
+        }
+        if (krys::text::IsASCIIUpper(character))
+        {
+          _token.AppendToName(krys::text::ToASCIILowerUnchecked(character));
+          KRYS_ADVANCE_PAST_NON_NEWLINE_TO(TagName);
+        }
+        if (character == Null)
+        {
+          _token.AppendToName(Replacement);
+          ParserError(ParseError::UnexpectedNullCharacter);
+          KRYS_ADVANCE_PAST_NON_NEWLINE_TO(TagName);
+        }
+        if (character == EndOfFile) KRYS_UNLIKELY
+        {
+          ParserError(ParseError::EOFInTag);
+          KRYS_RECONSUME_IN(Data);
+        }
+
+        _token.AppendToName(character);
+        KRYS_ADVANCE_PAST_NON_NEWLINE_TO(TagName);
+
+        KRYS_END_STATE()
+
+        KRYS_BEGIN_STATE(RCDATALessThanSign)
+        if (character == Solidus)
+        {
           _temporaryBuffer.clear();
-          RECONSUME_IN(RAWTEXT);
-        END_STATE()
-
-        BEGIN_STATE(ScriptDataLessThanSign)
-          if (character == Solidus)
-          {
-            _temporaryBuffer.clear();
-            krys_debug_assert(_bufferedEndTagName.empty());
-            ADVANCE_PAST_NON_NEWLINE_TO(ScriptDataEndTagOpen);
-          }
-          if (character == ExclamationMark)
-          {
-            BufferCharacters(Array {LessThanSign, ExclamationMark});
-            ADVANCE_PAST_NON_NEWLINE_TO(ScriptDataEscapeStart);
-          }
-
-          BufferCharacter(LessThanSign);
-          RECONSUME_IN(ScriptData);
-        END_STATE()
-
-        BEGIN_STATE(ScriptDataEndTagOpen)
-          if (krys::text::IsASCIIAlpha(character))
-          {
-            _temporaryBuffer.push_back(character);
-            AppendToPossibleEndTag(krys::text::ToASCIILower(character));
-            ADVANCE_PAST_NON_NEWLINE_TO(ScriptDataEndTagName);
-          }
-
-          BufferCharacters(Array {LessThanSign, Solidus});
-          RECONSUME_IN(ScriptData);
-        END_STATE()
-
-        BEGIN_STATE(ScriptDataEndTagName)
-          if (IsTokenizerWhitespace(character))
-          {
-            if (IsAppropriateEndTag())
-            {
-              if (CommitToPartialEndTag(character, TokenizerState::BeforeAttributeName))
-              {
-                return true;
-              }
-              SWITCH_TO(BeforeAttributeName);
-            }
-          }
-          if (character == Solidus)
-          {
-            if (IsAppropriateEndTag())
-            {
-              if (CommitToPartialEndTag(Solidus, TokenizerState::SelfClosingStartTag))
-              {
-                return true;
-              }
-              SWITCH_TO(SelfClosingStartTag);
-            }
-          }
-          if (character == GreaterThanSign)
-          {
-            if (IsAppropriateEndTag())
-            {
-              return CommitToCompleteEndTag();
-            }
-          }
-          if (krys::text::IsASCIIAlpha(character))
-          {
-            _temporaryBuffer.push_back(character);
-            AppendToPossibleEndTag(krys::text::ToASCIILower(character));
-            ADVANCE_PAST_NON_NEWLINE_TO(ScriptDataEndTagName);
-          }
-
-          BufferCharacters(Array {LessThanSign, Solidus});
-          BufferCharacters(_temporaryBuffer);
-          _bufferedEndTagName.clear();
-          _temporaryBuffer.clear();
-          RECONSUME_IN(ScriptData);
-        END_STATE()
-
-        BEGIN_STATE(ScriptDataEscapeStart)
-          if (character == HyphenMinus)
-          {
-            BufferCharacter(HyphenMinus);
-            ADVANCE_PAST_NON_NEWLINE_TO(ScriptDataEscapeStartDash);
-          }
-
-          RECONSUME_IN(ScriptData);
-        END_STATE()
-
-        BEGIN_STATE(ScriptDataEscapeStartDash)
-          if (character == HyphenMinus)
-          {
-            BufferCharacter(HyphenMinus);
-            ADVANCE_PAST_NON_NEWLINE_TO(ScriptDataEscapedDashDash);
-          }
-
-          RECONSUME_IN(ScriptData);
-        END_STATE()
-
-        BEGIN_STATE(ScriptDataEscaped)
-          if (character == HyphenMinus)
-          {
-            BufferCharacter(HyphenMinus);
-            ADVANCE_PAST_NON_NEWLINE_TO(ScriptDataEscapedDash);
-          }
-          if (character == LessThanSign)
-          {
-            ADVANCE_PAST_NON_NEWLINE_TO(ScriptDataEscapedLessThanSign);
-          }
-          if (character == Null) KRYS_UNLIKELY
-          {
-            ParserError(ParseError::UnexpectedNullCharacter);
-            BufferCharacter(Replacement);
-            ADVANCE_PAST_NON_NEWLINE_TO(ScriptDataEscaped);
-          }
-          if (character == EndOfFile) KRYS_UNLIKELY
-          {
-            ParserError(ParseError::EOFInScriptHTMLCommentLikeText);
-            RECONSUME_IN(Data);
-          }
-
-          BufferCharacter(character);
-          ADVANCE_TO(ScriptDataEscaped);
-        END_STATE()
-
-        BEGIN_STATE(ScriptDataEscapedDash)
-          if (character == HyphenMinus)
-          {
-            BufferCharacter(HyphenMinus);
-            ADVANCE_PAST_NON_NEWLINE_TO(ScriptDataEscapedDashDash);
-          }
-          if (character == LessThanSign)
-          {
-            ADVANCE_PAST_NON_NEWLINE_TO(ScriptDataEscapedLessThanSign);
-          }
-          if (character == Null) KRYS_UNLIKELY
-          {
-            ParserError(ParseError::UnexpectedNullCharacter);
-            BufferCharacter(Replacement);
-            ADVANCE_PAST_NON_NEWLINE_TO(ScriptDataEscaped);
-          }
-          if (character == EndOfFile) KRYS_UNLIKELY
-          {
-            ParserError(ParseError::EOFInScriptHTMLCommentLikeText);
-            RECONSUME_IN(Data);
-          }
-
-          BufferCharacter(character);
-          ADVANCE_TO(ScriptDataEscaped);
-        END_STATE()
-
-        BEGIN_STATE(ScriptDataEscapedDashDash)
-          if (character == HyphenMinus)
-          {
-            BufferCharacter(HyphenMinus);
-            ADVANCE_PAST_NON_NEWLINE_TO(ScriptDataEscapedDashDash);
-          }
-          if (character == LessThanSign)
-          {
-            ADVANCE_PAST_NON_NEWLINE_TO(ScriptDataEscapedLessThanSign);
-          }
-          if (character == GreaterThanSign)
-          {
-            BufferCharacter(GreaterThanSign);
-            ADVANCE_PAST_NON_NEWLINE_TO(ScriptData);
-          }
-          if (character == Null) KRYS_UNLIKELY
-          {
-            ParserError(ParseError::UnexpectedNullCharacter);
-            BufferCharacter(Replacement);
-            ADVANCE_PAST_NON_NEWLINE_TO(ScriptDataEscaped);
-          }
-          if (character == EndOfFile) KRYS_UNLIKELY
-          {
-            ParserError(ParseError::EOFInScriptHTMLCommentLikeText);
-            RECONSUME_IN(Data);
-          }
-
-          BufferCharacter(character);
-          ADVANCE_TO(ScriptDataEscaped);
-        END_STATE()
-
-        BEGIN_STATE(ScriptDataEscapedLessThanSign)
-          if (character == Solidus)
-          {
-            _temporaryBuffer.clear();
-            krys_debug_assert(_bufferedEndTagName.empty());
-            ADVANCE_PAST_NON_NEWLINE_TO(ScriptDataEscapedEndTagOpen);
-          }
-          if (krys::text::IsASCIIAlpha(character))
-          {
-            _temporaryBuffer.clear();
-            BufferCharacter(LessThanSign);
-            RECONSUME_IN(ScriptDataDoubleEscapeStart);
-          }
-
-          BufferCharacter(LessThanSign);
-          RECONSUME_IN(ScriptDataEscaped);
-        END_STATE()
-
-        BEGIN_STATE(ScriptDataEscapedEndTagOpen)
-          if (krys::text::IsASCIIAlpha(character))
-          {
-            _temporaryBuffer.push_back(character);
-            AppendToPossibleEndTag(krys::text::ToASCIILower(character));
-            ADVANCE_PAST_NON_NEWLINE_TO(ScriptDataEscapedEndTagName);
-          }
-
-          BufferCharacters(Array {LessThanSign, Solidus});
-          RECONSUME_IN(ScriptDataEscaped);
-        END_STATE()
-
-        BEGIN_STATE(ScriptDataEscapedEndTagName)
-          if (IsTokenizerWhitespace(character))
-          {
-            if (IsAppropriateEndTag())
-            {
-              if (CommitToPartialEndTag(character, TokenizerState::BeforeAttributeName))
-              {
-                return true;
-              }
-              SWITCH_TO(BeforeAttributeName);
-            }
-          }
-          if (character == Solidus)
-          {
-            if (IsAppropriateEndTag())
-            {
-              if (CommitToPartialEndTag(Solidus, TokenizerState::SelfClosingStartTag))
-              {
-                return true;
-              }
-              SWITCH_TO(SelfClosingStartTag);
-            }
-          }
-          if (character == GreaterThanSign)
-          {
-            if (IsAppropriateEndTag())
-            {
-              return CommitToCompleteEndTag();
-            }
-          }
-          if (krys::text::IsASCIIAlpha(character))
-          {
-            _temporaryBuffer.push_back(character);
-            AppendToPossibleEndTag(krys::text::ToASCIILower(character));
-            ADVANCE_PAST_NON_NEWLINE_TO(ScriptDataEscapedEndTagName);
-          }
-
-          BufferCharacters(Array {LessThanSign, Solidus});
-          BufferCharacters(_temporaryBuffer);
-          _bufferedEndTagName.clear();
-          _temporaryBuffer.clear();
-          RECONSUME_IN(ScriptDataEscaped);
-        END_STATE()
-
-        BEGIN_STATE(ScriptDataDoubleEscapeStart)
-          if (IsTokenizerWhitespace(character) || character == Solidus || character == GreaterThanSign)
-          {
-            BufferCharacter(character);
-            if (IsTemporaryBufferEqualTo(U"script"))
-            {
-              ADVANCE_TO(ScriptDataDoubleEscaped);
-            }
-            else
-            {
-              ADVANCE_TO(ScriptDataEscaped);
-            }
-          }
-          if (krys::text::IsASCIIAlpha(character))
-          {
-            BufferCharacter(character);
-            _temporaryBuffer.push_back(krys::text::ToASCIILower(character));
-            ADVANCE_PAST_NON_NEWLINE_TO(ScriptDataDoubleEscapeStart);
-          }
-
-          RECONSUME_IN(ScriptDataEscaped);
-        END_STATE()
-
-        BEGIN_STATE(ScriptDataDoubleEscaped)
-          if (character == HyphenMinus)
-          {
-            BufferCharacter(HyphenMinus);
-            ADVANCE_PAST_NON_NEWLINE_TO(ScriptDataDoubleEscapedDash);
-          }
-          if (character == LessThanSign)
-          {
-            BufferCharacter(LessThanSign);
-            ADVANCE_PAST_NON_NEWLINE_TO(ScriptDataDoubleEscapedLessThanSign);
-          }
-          if (character == Null) KRYS_UNLIKELY
-          {
-            ParserError(ParseError::UnexpectedNullCharacter);
-            BufferCharacter(Replacement);
-            ADVANCE_PAST_NON_NEWLINE_TO(ScriptDataDoubleEscaped);
-          }
-          if (character == EndOfFile) KRYS_UNLIKELY
-          {
-            ParserError(ParseError::EOFInScriptHTMLCommentLikeText);
-            RECONSUME_IN(Data);
-          }
-
-          BufferCharacter(character);
-          ADVANCE_TO(ScriptDataDoubleEscaped);
-        END_STATE()
-
-        BEGIN_STATE(ScriptDataDoubleEscapedDash)
-          if (character == HyphenMinus)
-          {
-            BufferCharacter(HyphenMinus);
-            ADVANCE_PAST_NON_NEWLINE_TO(ScriptDataDoubleEscapedDashDash);
-          }
-          if (character == LessThanSign)
-          {
-            BufferCharacter(LessThanSign);
-            ADVANCE_PAST_NON_NEWLINE_TO(ScriptDataDoubleEscapedLessThanSign);
-          }
-          if (character == Null) KRYS_UNLIKELY
-          {
-            ParserError(ParseError::UnexpectedNullCharacter);
-            BufferCharacter(Replacement);
-            ADVANCE_PAST_NON_NEWLINE_TO(ScriptDataDoubleEscaped);
-          }
-          if (character == EndOfFile) KRYS_UNLIKELY
-          {
-            ParserError(ParseError::EOFInScriptHTMLCommentLikeText);
-            RECONSUME_IN(Data);
-          }
-
-          BufferCharacter(character);
-          ADVANCE_TO(ScriptDataDoubleEscaped);
-        END_STATE()
-
-        BEGIN_STATE(ScriptDataDoubleEscapedDashDash)
-          if (character == HyphenMinus)
-          {
-            BufferCharacter(HyphenMinus);
-            ADVANCE_PAST_NON_NEWLINE_TO(ScriptDataDoubleEscapedDashDash);
-          }
-          if (character == LessThanSign)
-          {
-            BufferCharacter(LessThanSign);
-            ADVANCE_PAST_NON_NEWLINE_TO(ScriptDataDoubleEscapedLessThanSign);
-          }
-          if (character == GreaterThanSign)
-          {
-            BufferCharacter(GreaterThanSign);
-            ADVANCE_PAST_NON_NEWLINE_TO(ScriptData);
-          }
-          if (character == Null) KRYS_UNLIKELY
-          {
-            ParserError(ParseError::UnexpectedNullCharacter);
-            BufferCharacter(Replacement);
-            ADVANCE_PAST_NON_NEWLINE_TO(ScriptDataDoubleEscaped);
-          }
-          if (character == EndOfFile) KRYS_UNLIKELY
-          {
-            ParserError(ParseError::EOFInScriptHTMLCommentLikeText);
-            RECONSUME_IN(Data);
-          }
-
-          BufferCharacter(character);
-          ADVANCE_TO(ScriptDataDoubleEscaped);
-        END_STATE()
-
-        BEGIN_STATE(ScriptDataDoubleEscapedLessThanSign)
-          if (character == Solidus)
-          {
-            _temporaryBuffer.clear();
-            krys_debug_assert(_bufferedEndTagName.empty());
-            BufferCharacter(Solidus);
-            ADVANCE_PAST_NON_NEWLINE_TO(ScriptDataDoubleEscapeEnd);
-          }
-
-          RECONSUME_IN(ScriptDataDoubleEscaped);
-        END_STATE()
-
-        BEGIN_STATE(ScriptDataDoubleEscapeEnd)
-          if (IsTokenizerWhitespace(character) || character == Solidus || character == GreaterThanSign)
-          {
-            BufferCharacter(character);
-            if (IsTemporaryBufferEqualTo(U"script"))
-            {
-              ADVANCE_TO(ScriptDataEscaped);
-            }
-            else
-            {
-              ADVANCE_TO(ScriptDataDoubleEscaped);
-            }
-          }
-          if (krys::text::IsASCIIAlpha(character))
-          {
-            BufferCharacter(character);
-            _temporaryBuffer.push_back(krys::text::ToASCIILower(character));
-            ADVANCE_PAST_NON_NEWLINE_TO(ScriptDataDoubleEscapeEnd);
-          }
-
-          RECONSUME_IN(ScriptDataDoubleEscaped);
-        END_STATE()
-
-        BEGIN_STATE(BeforeAttributeName)
-          if (IsTokenizerWhitespace(character))
-          {
-            ADVANCE_TO(BeforeAttributeName);
-          }
-          if (character == Solidus || character == GreaterThanSign)
-          {
-            RECONSUME_IN(AfterAttributeName);
-          }
-          if (character == EqualSign)
-          {
-            ParserError(ParseError::UnexpectedEqualsSignBeforeAttributeName);
-            _token.BeginAttribute();
-            _token.AppendToCurrentAttributeName(EqualSign);
-            ADVANCE_PAST_NON_NEWLINE_TO(AttributeName);
-          }
-
-          _token.BeginAttribute();
-          RECONSUME_IN(AttributeName);
-        END_STATE()
-
-        BEGIN_STATE(AttributeName)
-          if (IsTokenizerWhitespace(character) || character == Solidus || character == GreaterThanSign
-              || character == EndOfFile)
-          {
-            RECONSUME_IN(AfterAttributeName);
-          }
-          if (character == EqualSign)
-          {
-            ADVANCE_PAST_NON_NEWLINE_TO(BeforeAttributeValue);
-          }
-          if (krys::text::IsASCIIUpper(character))
-          {
-            _token.AppendToCurrentAttributeName(krys::text::ToASCIILowerUnchecked(character));
-            ADVANCE_PAST_NON_NEWLINE_TO(AttributeName);
-          }
-          if (character == Null)
-          {
-            ParserError(ParseError::UnexpectedNullCharacter);
-            _token.AppendToCurrentAttributeName(Replacement);
-            ADVANCE_PAST_NON_NEWLINE_TO(AttributeName);
-          }
-          if (character == QuotationMark || character == Apostrophe || character == LessThanSign)
-          {
-            ParserError(ParseError::UnexpectedCharacterInAttributeName);
-            // Treat it as per 'anything else' case below.
-          }
-
-          _token.AppendToCurrentAttributeName(character);
-          ADVANCE_PAST_NON_NEWLINE_TO(AttributeName);
-        END_STATE()
-
-        BEGIN_STATE(AfterAttributeName)
-          if (IsTokenizerWhitespace(character))
-          {
-            // Ignore the character.
-            ADVANCE_TO(AfterAttributeName);
-          }
-          if (character == Solidus)
-          {
-            ADVANCE_PAST_NON_NEWLINE_TO(SelfClosingStartTag);
-          }
-          if (character == EqualSign)
-          {
-            ADVANCE_PAST_NON_NEWLINE_TO(BeforeAttributeValue);
-          }
-          if (character == GreaterThanSign)
-          {
-            return EmitTagToken();
-          }
-          if (character == EndOfFile) KRYS_UNLIKELY
-          {
-            ParserError(ParseError::EOFInTag);
-            RECONSUME_IN(Data);
-          }
-
-          EndAttribute();
-          BeginAttribute();
-          RECONSUME_IN(AttributeName);
-        END_STATE()
-
-        BEGIN_STATE(BeforeAttributeValue)
-          if (IsTokenizerWhitespace(character))
-          {
-            // Ignore the character.
-            ADVANCE_TO(BeforeAttributeValue);
-          }
-          if (character == QuotationMark)
-          {
-            ADVANCE_PAST_NON_NEWLINE_TO(AttributeValueDoubleQuoted);
-          }
-          if (character == Apostrophe)
-          {
-            ADVANCE_PAST_NON_NEWLINE_TO(AttributeValueSingleQuoted);
-          }
-          if (character == GreaterThanSign)
-          {
-            ParserError(ParseError::MissingAttributeValue);
-            EndAttribute();
-            return EmitTagToken();
-          }
-
-          RECONSUME_IN(AttributeValueUnquoted);
-        END_STATE()
-
-        BEGIN_STATE(AttributeValueDoubleQuoted)
-          if (character == QuotationMark)
-          {
-            ADVANCE_PAST_NON_NEWLINE_TO(AfterAttributeValueQuoted);
-          }
-          if (character == Ampersand)
-          {
-            _characterReferenceReturnState = TokenizerState::AttributeValueDoubleQuoted;
-            ADVANCE_PAST_NON_NEWLINE_TO(CharacterReference);
-          }
-          if (character == Null)
-          {
-            ParserError(ParseError::UnexpectedNullCharacter);
-            _token.AppendToCurrentAttributeValue(Replacement);
-            ADVANCE_PAST_NON_NEWLINE_TO(AttributeValueDoubleQuoted);
-          }
-          if (character == EndOfFile) KRYS_UNLIKELY
-          {
-            ParserError(ParseError::EOFInTag);
-            EndAttribute();
-            RECONSUME_IN(Data);
-          }
-
-          _token.AppendToCurrentAttributeValue(character);
-          ADVANCE_TO(AttributeValueDoubleQuoted);
-        END_STATE()
-
-        BEGIN_STATE(AttributeValueSingleQuoted)
-          if (character == Apostrophe)
-          {
-            ADVANCE_PAST_NON_NEWLINE_TO(AfterAttributeValueQuoted);
-          }
-          if (character == Ampersand)
-          {
-            _characterReferenceReturnState = TokenizerState::AttributeValueSingleQuoted;
-            ADVANCE_PAST_NON_NEWLINE_TO(CharacterReference);
-          }
-          if (character == Null)
-          {
-            ParserError(ParseError::UnexpectedNullCharacter);
-            _token.AppendToCurrentAttributeValue(Replacement);
-            ADVANCE_PAST_NON_NEWLINE_TO(AttributeValueSingleQuoted);
-          }
-          if (character == EndOfFile) KRYS_UNLIKELY
-          {
-            ParserError(ParseError::EOFInTag);
-            EndAttribute();
-            RECONSUME_IN(Data);
-          }
-
-          _token.AppendToCurrentAttributeValue(character);
-          ADVANCE_TO(AttributeValueSingleQuoted);
-        END_STATE()
-
-        BEGIN_STATE(AttributeValueUnquoted)
-          if (IsTokenizerWhitespace(character))
-          {
-            EndAttribute();
-            ADVANCE_TO(BeforeAttributeName);
-          }
-          if (character == Ampersand)
-          {
-            _characterReferenceReturnState = TokenizerState::AttributeValueUnquoted;
-            ADVANCE_PAST_NON_NEWLINE_TO(CharacterReference);
-          }
-          if (character == GreaterThanSign)
-          {
-            EndAttribute();
-            return EmitTagToken();
-          }
-          if (character == Null)
-          {
-            ParserError(ParseError::UnexpectedNullCharacter);
-            _token.AppendToCurrentAttributeValue(Replacement);
-            ADVANCE_PAST_NON_NEWLINE_TO(AttributeValueUnquoted);
-          }
-          if (character == QuotationMark || character == Apostrophe || character == LessThanSign
-              || character == EqualSign || character == GraveAccent)
-          {
-            ParserError(ParseError::UnexpectedCharacterInUnquotedAttributeValue);
-            _token.AppendToCurrentAttributeValue(character);
-            ADVANCE_PAST_NON_NEWLINE_TO(AttributeValueUnquoted);
-          }
-          if (character == EndOfFile) KRYS_UNLIKELY
-          {
-            ParserError(ParseError::EOFInTag);
-            EndAttribute();
-            RECONSUME_IN(Data);
-          }
-
-          _token.AppendToCurrentAttributeValue(character);
-          ADVANCE_PAST_NON_NEWLINE_TO(AttributeValueUnquoted);
-        END_STATE()
-
-        BEGIN_STATE(AfterAttributeValueQuoted)
-          if (IsTokenizerWhitespace(character))
-          {
-            EndAttribute();
-            ADVANCE_TO(BeforeAttributeName);
-          }
-          if (character == Solidus)
-          {
-            EndAttribute();
-            ADVANCE_PAST_NON_NEWLINE_TO(SelfClosingStartTag);
-          }
-          if (character == GreaterThanSign)
-          {
-            EndAttribute();
-            return EmitTagToken();
-          }
-          if (character == EndOfFile) KRYS_UNLIKELY
-          {
-            ParserError(ParseError::EOFInTag);
-            EndAttribute();
-            RECONSUME_IN(Data);
-          }
-
-          ParserError(ParseError::MissingWhitespaceBetweenAttributes);
-          EndAttribute();
-          RECONSUME_IN(BeforeAttributeName);
-        END_STATE()
-
-        BEGIN_STATE(SelfClosingStartTag)
-          if (character == GreaterThanSign)
-          {
-            // Set the self-closing flag of the current tag token. (An end tag's flag is only a parse error,
-            // so it's left unset.)
-            if (_token.Type() == TokenType::StartTag)
-            {
-              _token.SetSelfClosingFlag();
-            }
-            return EmitTagToken();
-          }
-          if (character == EndOfFile) KRYS_UNLIKELY
-          {
-            ParserError(ParseError::EOFInTag);
-            RECONSUME_IN(Data);
-          }
-
-          ParserError(ParseError::UnexpectedSolidusInTag);
-
-          if (_token.CurrentAttribute() != nullptr)
-          {
-            EndAttribute();
-          }
-          RECONSUME_IN(BeforeAttributeName);
-        END_STATE()
-
-        BEGIN_STATE(BogusComment)
-          if (character == GreaterThanSign)
-          {
-            return EmitCommentToken(true);
-          }
-          if (character == EndOfFile) KRYS_UNLIKELY
-          {
-            return EmitCommentToken(false);
-          }
-          if (character == Null) KRYS_UNLIKELY
-          {
-            ParserError(ParseError::UnexpectedNullCharacter);
-            _token.AppendToComment(Replacement);
-            ADVANCE_PAST_NON_NEWLINE_TO(BogusComment);
-          }
-
-          _token.AppendToComment(character);
-          ADVANCE_PAST_NON_NEWLINE_TO(BogusComment);
-        END_STATE()
-
-        BEGIN_STATE(MarkupDeclarationOpen)
-          if (character == HyphenMinus)
-          {
-            auto result = _input.AdvancePast<false>("--");
-            if (result == InputStream::MatchResult::Matched)
-            {
-              _token.BeginComment();
-              SWITCH_TO(CommentStart);
-            }
-            if (result == InputStream::MatchResult::NotEnoughCharacters)
-            {
-              RETURN_IN_CURRENT_STATE(HasBufferedCharacterToken());
-            }
-          }
-          else if (krys::text::IsASCIICaselessEqual(character, 'd'))
-          {
-            auto result = _input.AdvancePast("doctype");
-            if (result == InputStream::MatchResult::Matched)
-            {
-              SWITCH_TO(DOCTYPE);
-            }
-            if (result == InputStream::MatchResult::NotEnoughCharacters)
-            {
-              RETURN_IN_CURRENT_STATE(HasBufferedCharacterToken());
-            }
-          }
-          else if (character == '[')
-          {
-            auto result = _input.AdvancePast<false>("[CDATA[");
-            if (result == InputStream::MatchResult::Matched)
-            {
-              if (_isCDATASectionAllowed())
-              {
-                SWITCH_TO(CDATASection);
-              }
-              else
-              {
-                ParserError(ParseError::CDATAInHTMLContent);
-                _token.BeginComment();
-                _token.AppendToComment("[CDATA[");
-                SWITCH_TO(BogusComment);
-              }
-            }
-            if (result == InputStream::MatchResult::NotEnoughCharacters)
-            {
-              RETURN_IN_CURRENT_STATE(HasBufferedCharacterToken());
-            }
-          }
-
-          ParserError(ParseError::IncorrectlyOpenedComment);
-          _token.BeginComment();
-          RECONSUME_IN(BogusComment);
-        END_STATE()
-
-        BEGIN_STATE(CommentStart)
-          if (character == HyphenMinus)
-          {
-            ADVANCE_PAST_NON_NEWLINE_TO(CommentStartDash);
-          }
-          if (character == GreaterThanSign)
-          {
-            ParserError(ParseError::AbruptClosingOfEmptyComment);
-            return EmitCommentToken(true);
-          }
-
-          RECONSUME_IN(Comment);
-        END_STATE()
-
-        BEGIN_STATE(CommentStartDash)
-          if (character == HyphenMinus)
-          {
-            ADVANCE_PAST_NON_NEWLINE_TO(CommentEnd);
-          }
-          if (character == GreaterThanSign)
-          {
-            ParserError(ParseError::AbruptClosingOfEmptyComment);
-            return EmitCommentToken(true);
-          }
-          if (character == EndOfFile) KRYS_UNLIKELY
-          {
-            ParserError(ParseError::EOFInComment);
-            return EmitCommentToken(false);
-          }
-
-          _token.AppendToComment(HyphenMinus);
-          RECONSUME_IN(Comment);
-        END_STATE()
-
-        BEGIN_STATE(Comment)
-          if (character == LessThanSign)
-          {
-            _token.AppendToComment(LessThanSign);
-            ADVANCE_PAST_NON_NEWLINE_TO(CommentLessThanSign);
-          }
-          if (character == HyphenMinus)
-          {
-            ADVANCE_PAST_NON_NEWLINE_TO(CommentEndDash);
-          }
-          if (character == Null) KRYS_UNLIKELY
-          {
-            ParserError(ParseError::UnexpectedNullCharacter);
-            _token.AppendToComment(Replacement);
-            ADVANCE_PAST_NON_NEWLINE_TO(Comment);
-          }
-          if (character == EndOfFile) KRYS_UNLIKELY
-          {
-            ParserError(ParseError::EOFInComment);
-            return EmitCommentToken(false);
-          }
-
-          _token.AppendToComment(character);
-          ADVANCE_TO(Comment);
-        END_STATE()
-
-        BEGIN_STATE(CommentLessThanSign)
-          if (character == ExclamationMark)
-          {
-            _token.AppendToComment(ExclamationMark);
-            ADVANCE_PAST_NON_NEWLINE_TO(CommentLessThanSignBang);
-          }
-          if (character == LessThanSign)
-          {
-            _token.AppendToComment(LessThanSign);
-            ADVANCE_PAST_NON_NEWLINE_TO(CommentLessThanSign);
-          }
-
-          RECONSUME_IN(Comment);
-        END_STATE()
-
-        BEGIN_STATE(CommentLessThanSignBang)
-          if (character == HyphenMinus)
-          {
-            ADVANCE_PAST_NON_NEWLINE_TO(CommentLessThanSignBangDash);
-          }
-
-          RECONSUME_IN(Comment);
-        END_STATE()
-
-        BEGIN_STATE(CommentLessThanSignBangDash)
-          if (character == HyphenMinus)
-          {
-            ADVANCE_PAST_NON_NEWLINE_TO(CommentLessThanSignBangDashDash);
-          }
-
-          RECONSUME_IN(CommentEndDash);
-        END_STATE()
-
-        BEGIN_STATE(CommentLessThanSignBangDashDash)
-          if (character == GreaterThanSign || character == EndOfFile)
-          {
-            RECONSUME_IN(CommentEnd);
-          }
-
-          ParserError(ParseError::NestedComment);
-          RECONSUME_IN(CommentEnd);
-        END_STATE()
-
-        BEGIN_STATE(CommentEndDash)
-          if (character == HyphenMinus)
-          {
-            ADVANCE_PAST_NON_NEWLINE_TO(CommentEnd);
-          }
-          if (character == EndOfFile) KRYS_UNLIKELY
-          {
-            ParserError(ParseError::EOFInComment);
-            return EmitCommentToken(false);
-          }
-
-          _token.AppendToComment(HyphenMinus);
-          RECONSUME_IN(Comment);
-        END_STATE()
-
-        BEGIN_STATE(CommentEnd)
-          if (character == GreaterThanSign)
-          {
-            return EmitCommentToken(true);
-          }
-          if (character == ExclamationMark)
-          {
-            ADVANCE_PAST_NON_NEWLINE_TO(CommentEndBang);
-          }
-          if (character == HyphenMinus)
-          {
-            _token.AppendToComment(HyphenMinus);
-            ADVANCE_PAST_NON_NEWLINE_TO(CommentEnd);
-          }
-          if (character == EndOfFile) KRYS_UNLIKELY
-          {
-            ParserError(ParseError::EOFInComment);
-            return EmitCommentToken(false);
-          }
-
-          _token.AppendToComment("--");
-          RECONSUME_IN(Comment);
-        END_STATE()
-
-        BEGIN_STATE(CommentEndBang)
-          if (character == HyphenMinus)
-          {
-            _token.AppendToComment("--!");
-            ADVANCE_PAST_NON_NEWLINE_TO(CommentEndDash);
-          }
-          if (character == GreaterThanSign)
-          {
-            ParserError(ParseError::IncorrectlyClosedComment);
-            return EmitCommentToken(true);
-          }
-          if (character == EndOfFile) KRYS_UNLIKELY
-          {
-            ParserError(ParseError::EOFInComment);
-            return EmitCommentToken(false);
-          }
-
-          _token.AppendToComment("--!");
-          RECONSUME_IN(Comment);
-        END_STATE()
-
-        BEGIN_STATE(DOCTYPE)
-          if (IsTokenizerWhitespace(character))
-          {
-            ADVANCE_TO(BeforeDOCTYPEName);
-          }
-          if (character == GreaterThanSign)
-          {
-            RECONSUME_IN(BeforeDOCTYPEName);
-          }
-          if (character == EndOfFile)
-          {
-            ParserError(ParseError::EOFInDOCTYPE);
-            _token.BeginDOCTYPE();
-            _token.SetDOCTYPEForceQuirks();
-            return EmitDOCTYPEToken(false);
-          }
-
-          ParserError(ParseError::MissingWhitespaceBeforeDOCTYPEName);
-          RECONSUME_IN(BeforeDOCTYPEName);
-        END_STATE()
-
-        BEGIN_STATE(BeforeDOCTYPEName)
-          if (IsTokenizerWhitespace(character))
-          {
-            ADVANCE_TO(BeforeDOCTYPEName);
-          }
-          if (krys::text::IsASCIIUpper(character))
-          {
-            _token.BeginDOCTYPE();
-            _token.AppendToName(krys::text::ToASCIILowerUnchecked(character));
-            ADVANCE_PAST_NON_NEWLINE_TO(DOCTYPEName);
-          }
-          if (character == Null)
-          {
-            ParserError(ParseError::UnexpectedNullCharacter);
-            _token.BeginDOCTYPE();
-            _token.AppendToName(Replacement);
-            ADVANCE_PAST_NON_NEWLINE_TO(DOCTYPEName);
-          }
-          if (character == GreaterThanSign)
-          {
-            ParserError(ParseError::MissingDOCTYPEName);
-            _token.BeginDOCTYPE();
-            _token.SetDOCTYPEForceQuirks();
-            return EmitDOCTYPEToken(true);
-          }
-          if (character == EndOfFile) KRYS_UNLIKELY
-          {
-            ParserError(ParseError::EOFInDOCTYPE);
-            _token.BeginDOCTYPE();
-            _token.SetDOCTYPEForceQuirks();
-            return EmitDOCTYPEToken(false);
-          }
-
-          _token.BeginDOCTYPE();
-          _token.AppendToName(character);
-          ADVANCE_PAST_NON_NEWLINE_TO(DOCTYPEName);
-        END_STATE()
-
-        BEGIN_STATE(DOCTYPEName)
-          if (IsTokenizerWhitespace(character))
-          {
-            ADVANCE_TO(AfterDOCTYPEName);
-          }
-          if (character == GreaterThanSign)
-          {
-            return EmitDOCTYPEToken(true);
-          }
-          if (krys::text::IsASCIIUpper(character))
-          {
-            _token.AppendToName(krys::text::ToASCIILowerUnchecked(character));
-            ADVANCE_PAST_NON_NEWLINE_TO(DOCTYPEName);
-          }
-          if (character == Null)
-          {
-            ParserError(ParseError::UnexpectedNullCharacter);
-            _token.AppendToName(Replacement);
-            ADVANCE_PAST_NON_NEWLINE_TO(DOCTYPEName);
-          }
-          if (character == EndOfFile) KRYS_UNLIKELY
-          {
-            ParserError(ParseError::EOFInDOCTYPE);
-            _token.SetDOCTYPEForceQuirks();
-            return EmitDOCTYPEToken(false);
-          }
-
-          _token.AppendToName(character);
-          ADVANCE_PAST_NON_NEWLINE_TO(DOCTYPEName);
-        END_STATE()
-
-        BEGIN_STATE(AfterDOCTYPEName)
-          if (IsTokenizerWhitespace(character))
-          {
-            ADVANCE_TO(AfterDOCTYPEName);
-          }
-          if (character == GreaterThanSign)
-          {
-            return EmitDOCTYPEToken(true);
-          }
-          if (character == EndOfFile) KRYS_UNLIKELY
-          {
-            ParserError(ParseError::EOFInDOCTYPE);
-            _token.SetDOCTYPEForceQuirks();
-            return EmitDOCTYPEToken(false);
-          }
-          if (krys::text::IsASCIICaselessEqual(character, 'p'))
-          {
-            auto result = _input.AdvancePast("public");
-            if (result == InputStream::MatchResult::Matched)
-            {
-              SWITCH_TO(AfterDOCTYPEPublicKeyword);
-            }
-            if (result == InputStream::MatchResult::NotEnoughCharacters)
-            {
-              RETURN_IN_CURRENT_STATE(HasBufferedCharacterToken());
-            }
-          }
-          if (krys::text::IsASCIICaselessEqual(character, 's'))
-          {
-            auto result = _input.AdvancePast("system");
-            if (result == InputStream::MatchResult::Matched)
-            {
-              SWITCH_TO(AfterDOCTYPESystemKeyword);
-            }
-            if (result == InputStream::MatchResult::NotEnoughCharacters)
-            {
-              RETURN_IN_CURRENT_STATE(HasBufferedCharacterToken());
-            }
-          }
-
-          ParserError(ParseError::InvalidCharacterSequenceAfterDOCTYPEName);
-          _token.SetDOCTYPEForceQuirks();
-          RECONSUME_IN(BogusDOCTYPE);
-        END_STATE()
-
-        BEGIN_STATE(AfterDOCTYPEPublicKeyword)
-          if (IsTokenizerWhitespace(character))
-          {
-            ADVANCE_TO(BeforeDOCTYPEPublicIdentifier);
-          }
-          if (character == QuotationMark)
-          {
-            ParserError(ParseError::MissingWhitespaceAfterDOCTYPEPublicKeyword);
-            _token.SetPublicIdentifierToEmptyString();
-            ADVANCE_PAST_NON_NEWLINE_TO(DOCTYPEPublicIdentifierDoubleQuoted);
-          }
-          if (character == Apostrophe)
-          {
-            ParserError(ParseError::MissingWhitespaceAfterDOCTYPEPublicKeyword);
-            _token.SetPublicIdentifierToEmptyString();
-            ADVANCE_PAST_NON_NEWLINE_TO(DOCTYPEPublicIdentifierSingleQuoted);
-          }
-          if (character == GreaterThanSign)
-          {
-            ParserError(ParseError::MissingDOCTYPEPublicIdentifier);
-            _token.SetDOCTYPEForceQuirks();
-            return EmitDOCTYPEToken(true);
-          }
-          if (character == EndOfFile) KRYS_UNLIKELY
-          {
-            ParserError(ParseError::EOFInDOCTYPE);
-            _token.SetDOCTYPEForceQuirks();
-            return EmitDOCTYPEToken(false);
-          }
-
-          ParserError(ParseError::MissingQuoteBeforeDOCTYPEPublicIdentifier);
-          _token.SetDOCTYPEForceQuirks();
-          RECONSUME_IN(BogusDOCTYPE);
-        END_STATE()
-
-        BEGIN_STATE(BeforeDOCTYPEPublicIdentifier)
-          if (IsTokenizerWhitespace(character))
-          {
-            ADVANCE_TO(BeforeDOCTYPEPublicIdentifier);
-          }
-          if (character == QuotationMark)
-          {
-            _token.SetPublicIdentifierToEmptyString();
-            ADVANCE_PAST_NON_NEWLINE_TO(DOCTYPEPublicIdentifierDoubleQuoted);
-          }
-          if (character == Apostrophe)
-          {
-            _token.SetPublicIdentifierToEmptyString();
-            ADVANCE_PAST_NON_NEWLINE_TO(DOCTYPEPublicIdentifierSingleQuoted);
-          }
-          if (character == GreaterThanSign)
-          {
-            ParserError(ParseError::MissingDOCTYPEPublicIdentifier);
-            _token.SetDOCTYPEForceQuirks();
-            return EmitDOCTYPEToken(true);
-          }
-          if (character == EndOfFile) KRYS_UNLIKELY
-          {
-            ParserError(ParseError::EOFInDOCTYPE);
-            _token.SetDOCTYPEForceQuirks();
-            return EmitDOCTYPEToken(false);
-          }
-
-          ParserError(ParseError::MissingQuoteBeforeDOCTYPEPublicIdentifier);
-          _token.SetDOCTYPEForceQuirks();
-          RECONSUME_IN(BogusDOCTYPE);
-        END_STATE()
-
-        BEGIN_STATE(DOCTYPEPublicIdentifierDoubleQuoted)
-          if (character == QuotationMark)
-          {
-            ADVANCE_PAST_NON_NEWLINE_TO(AfterDOCTYPEPublicIdentifier);
-          }
-          if (character == Null) KRYS_UNLIKELY
-          {
-            ParserError(ParseError::UnexpectedNullCharacter);
-            _token.AppendToPublicIdentifier(Replacement);
-            ADVANCE_PAST_NON_NEWLINE_TO(DOCTYPEPublicIdentifierDoubleQuoted);
-          }
-          if (character == GreaterThanSign)
-          {
-            ParserError(ParseError::AbruptDOCTYPEPublicIdentifier);
-            _token.SetDOCTYPEForceQuirks();
-            return EmitDOCTYPEToken(true);
-          }
-          if (character == EndOfFile) KRYS_UNLIKELY
-          {
-            ParserError(ParseError::EOFInDOCTYPE);
-            _token.SetDOCTYPEForceQuirks();
-            return EmitDOCTYPEToken(false);
-          }
-
-          _token.AppendToPublicIdentifier(character);
-          ADVANCE_TO(DOCTYPEPublicIdentifierDoubleQuoted);
-        END_STATE()
-
-        BEGIN_STATE(DOCTYPEPublicIdentifierSingleQuoted)
-          if (character == Apostrophe)
-          {
-            ADVANCE_PAST_NON_NEWLINE_TO(AfterDOCTYPEPublicIdentifier);
-          }
-          if (character == Null) KRYS_UNLIKELY
-          {
-            ParserError(ParseError::UnexpectedNullCharacter);
-            _token.AppendToPublicIdentifier(Replacement);
-            ADVANCE_PAST_NON_NEWLINE_TO(DOCTYPEPublicIdentifierSingleQuoted);
-          }
-          if (character == GreaterThanSign)
-          {
-            ParserError(ParseError::AbruptDOCTYPEPublicIdentifier);
-            _token.SetDOCTYPEForceQuirks();
-            return EmitDOCTYPEToken(true);
-          }
-          if (character == EndOfFile) KRYS_UNLIKELY
-          {
-            ParserError(ParseError::EOFInDOCTYPE);
-            _token.SetDOCTYPEForceQuirks();
-            return EmitDOCTYPEToken(false);
-          }
-
-          _token.AppendToPublicIdentifier(character);
-          ADVANCE_TO(DOCTYPEPublicIdentifierSingleQuoted);
-        END_STATE()
-
-        BEGIN_STATE(AfterDOCTYPEPublicIdentifier)
-          if (IsTokenizerWhitespace(character))
-          {
-            ADVANCE_TO(BetweenDOCTYPEPublicAndSystemIdentifiers);
-          }
-          if (character == GreaterThanSign)
-          {
-            return EmitDOCTYPEToken(true);
-          }
-          if (character == QuotationMark)
-          {
-            ParserError(ParseError::MissingWhitespaceBetweenDOCTYPEPublicAndSystemIdentifiers);
-            _token.SetSystemIdentifierToEmptyString();
-            ADVANCE_PAST_NON_NEWLINE_TO(DOCTYPESystemIdentifierDoubleQuoted);
-          }
-          if (character == Apostrophe)
-          {
-            ParserError(ParseError::MissingWhitespaceBetweenDOCTYPEPublicAndSystemIdentifiers);
-            _token.SetSystemIdentifierToEmptyString();
-            ADVANCE_PAST_NON_NEWLINE_TO(DOCTYPESystemIdentifierSingleQuoted);
-          }
-          if (character == EndOfFile) KRYS_UNLIKELY
-          {
-            ParserError(ParseError::EOFInDOCTYPE);
-            _token.SetDOCTYPEForceQuirks();
-            return EmitDOCTYPEToken(false);
-          }
-
-          ParserError(ParseError::MissingQuoteBeforeDOCTYPESystemIdentifier);
-          _token.SetDOCTYPEForceQuirks();
-          RECONSUME_IN(BogusDOCTYPE);
-        END_STATE()
-
-        BEGIN_STATE(BetweenDOCTYPEPublicAndSystemIdentifiers)
-          if (IsTokenizerWhitespace(character))
-          {
-            ADVANCE_TO(BetweenDOCTYPEPublicAndSystemIdentifiers);
-          }
-          if (character == GreaterThanSign)
-          {
-            return EmitDOCTYPEToken(true);
-          }
-          if (character == QuotationMark)
-          {
-            _token.SetSystemIdentifierToEmptyString();
-            ADVANCE_PAST_NON_NEWLINE_TO(DOCTYPESystemIdentifierDoubleQuoted);
-          }
-          if (character == Apostrophe)
-          {
-            _token.SetSystemIdentifierToEmptyString();
-            ADVANCE_PAST_NON_NEWLINE_TO(DOCTYPESystemIdentifierSingleQuoted);
-          }
-          if (character == EndOfFile) KRYS_UNLIKELY
-          {
-            ParserError(ParseError::EOFInDOCTYPE);
-            _token.SetDOCTYPEForceQuirks();
-            return EmitDOCTYPEToken(false);
-          }
-
-          ParserError(ParseError::MissingQuoteBeforeDOCTYPESystemIdentifier);
-          _token.SetDOCTYPEForceQuirks();
-          RECONSUME_IN(BogusDOCTYPE);
-        END_STATE()
-
-        BEGIN_STATE(AfterDOCTYPESystemKeyword)
-          if (IsTokenizerWhitespace(character))
-          {
-            ADVANCE_TO(BeforeDOCTYPESystemIdentifier);
-          }
-          if (character == QuotationMark)
-          {
-            ParserError(ParseError::MissingWhitespaceAfterDOCTYPESystemKeyword);
-            _token.SetSystemIdentifierToEmptyString();
-            ADVANCE_PAST_NON_NEWLINE_TO(DOCTYPESystemIdentifierDoubleQuoted);
-          }
-          if (character == Apostrophe)
-          {
-            ParserError(ParseError::MissingWhitespaceAfterDOCTYPESystemKeyword);
-            _token.SetSystemIdentifierToEmptyString();
-            ADVANCE_PAST_NON_NEWLINE_TO(DOCTYPESystemIdentifierSingleQuoted);
-          }
-          if (character == GreaterThanSign)
-          {
-            ParserError(ParseError::MissingDOCTYPESystemIdentifier);
-            _token.SetDOCTYPEForceQuirks();
-            return EmitDOCTYPEToken(true);
-          }
-          if (character == EndOfFile) KRYS_UNLIKELY
-          {
-            ParserError(ParseError::EOFInDOCTYPE);
-            _token.SetDOCTYPEForceQuirks();
-            return EmitDOCTYPEToken(false);
-          }
-
-          ParserError(ParseError::MissingQuoteBeforeDOCTYPESystemIdentifier);
-          _token.SetDOCTYPEForceQuirks();
-          RECONSUME_IN(BogusDOCTYPE);
-        END_STATE()
-
-        BEGIN_STATE(BeforeDOCTYPESystemIdentifier)
-          if (IsTokenizerWhitespace(character))
-          {
-            ADVANCE_TO(BeforeDOCTYPESystemIdentifier);
-          }
-          if (character == QuotationMark)
-          {
-            _token.SetSystemIdentifierToEmptyString();
-            ADVANCE_PAST_NON_NEWLINE_TO(DOCTYPESystemIdentifierDoubleQuoted);
-          }
-          if (character == Apostrophe)
-          {
-            _token.SetSystemIdentifierToEmptyString();
-            ADVANCE_PAST_NON_NEWLINE_TO(DOCTYPESystemIdentifierSingleQuoted);
-          }
-          if (character == GreaterThanSign)
-          {
-            ParserError(ParseError::MissingDOCTYPESystemIdentifier);
-            _token.SetDOCTYPEForceQuirks();
-            return EmitDOCTYPEToken(true);
-          }
-          if (character == EndOfFile) KRYS_UNLIKELY
-          {
-            ParserError(ParseError::EOFInDOCTYPE);
-            _token.SetDOCTYPEForceQuirks();
-            return EmitDOCTYPEToken(false);
-          }
-
-          ParserError(ParseError::MissingQuoteBeforeDOCTYPESystemIdentifier);
-          _token.SetDOCTYPEForceQuirks();
-          RECONSUME_IN(BogusDOCTYPE);
-        END_STATE()
-
-        BEGIN_STATE(DOCTYPESystemIdentifierDoubleQuoted)
-          if (character == QuotationMark)
-          {
-            ADVANCE_PAST_NON_NEWLINE_TO(AfterDOCTYPESystemIdentifier);
-          }
-          if (character == Null) KRYS_UNLIKELY
-          {
-            ParserError(ParseError::UnexpectedNullCharacter);
-            _token.AppendToSystemIdentifier(Replacement);
-            ADVANCE_PAST_NON_NEWLINE_TO(DOCTYPESystemIdentifierDoubleQuoted);
-          }
-          if (character == GreaterThanSign)
-          {
-            ParserError(ParseError::AbruptDOCTYPESystemIdentifier);
-            _token.SetDOCTYPEForceQuirks();
-            return EmitDOCTYPEToken(true);
-          }
-          if (character == EndOfFile) KRYS_UNLIKELY
-          {
-            ParserError(ParseError::EOFInDOCTYPE);
-            _token.SetDOCTYPEForceQuirks();
-            return EmitDOCTYPEToken(false);
-          }
-
-          _token.AppendToSystemIdentifier(character);
-          ADVANCE_TO(DOCTYPESystemIdentifierDoubleQuoted);
-        END_STATE()
-
-        BEGIN_STATE(DOCTYPESystemIdentifierSingleQuoted)
-          if (character == Apostrophe)
-          {
-            ADVANCE_PAST_NON_NEWLINE_TO(AfterDOCTYPESystemIdentifier);
-          }
-          if (character == Null) KRYS_UNLIKELY
-          {
-            ParserError(ParseError::UnexpectedNullCharacter);
-            _token.AppendToSystemIdentifier(Replacement);
-            ADVANCE_PAST_NON_NEWLINE_TO(DOCTYPESystemIdentifierSingleQuoted);
-          }
-          if (character == GreaterThanSign)
-          {
-            ParserError(ParseError::AbruptDOCTYPESystemIdentifier);
-            _token.SetDOCTYPEForceQuirks();
-            return EmitDOCTYPEToken(true);
-          }
-          if (character == EndOfFile) KRYS_UNLIKELY
-          {
-            ParserError(ParseError::EOFInDOCTYPE);
-            _token.SetDOCTYPEForceQuirks();
-            return EmitDOCTYPEToken(false);
-          }
-
-          _token.AppendToSystemIdentifier(character);
-          ADVANCE_TO(DOCTYPESystemIdentifierSingleQuoted);
-        END_STATE()
-
-        BEGIN_STATE(AfterDOCTYPESystemIdentifier)
-          if (IsTokenizerWhitespace(character))
-          {
-            ADVANCE_TO(AfterDOCTYPESystemIdentifier);
-          }
-          if (character == GreaterThanSign)
-          {
-            return EmitDOCTYPEToken(true);
-          }
-          if (character == EndOfFile) KRYS_UNLIKELY
-          {
-            ParserError(ParseError::EOFInDOCTYPE);
-            _token.SetDOCTYPEForceQuirks();
-            return EmitDOCTYPEToken(false);
-          }
-
-          ParserError(ParseError::UnexpectedCharacterAfterDOCTYPESystemIdentifier);
-          RECONSUME_IN(BogusDOCTYPE);
-        END_STATE()
-
-        BEGIN_STATE(BogusDOCTYPE)
-          if (character == GreaterThanSign)
-          {
-            return EmitDOCTYPEToken(true);
-          }
-          if (character == Null) KRYS_UNLIKELY
-          {
-            ParserError(ParseError::UnexpectedNullCharacter);
-            ADVANCE_PAST_NON_NEWLINE_TO(BogusDOCTYPE);
-          }
-          if (character == EndOfFile) KRYS_UNLIKELY
-          {
-            return EmitDOCTYPEToken(false);
-          }
-
-          ADVANCE_TO(BogusDOCTYPE);
-        END_STATE()
-
-        BEGIN_STATE(CDATASection)
-          if (character == RightSquareBracket)
-          {
-            ADVANCE_PAST_NON_NEWLINE_TO(CDATASectionBracket);
-          }
-          if (character == EndOfFile) KRYS_UNLIKELY
-          {
-            ParserError(ParseError::EOFInCDATA);
-            RECONSUME_IN(Data);
-          }
-
-          _token.AppendToCharacters(character);
-          ADVANCE_TO(CDATASection);
-        END_STATE()
-
-        BEGIN_STATE(CDATASectionBracket)
-          if (character == RightSquareBracket)
-          {
-            ADVANCE_PAST_NON_NEWLINE_TO(CDATASectionEnd);
-          }
-
-          _token.AppendToCharacters(RightSquareBracket);
-          RECONSUME_IN(CDATASection);
-        END_STATE()
-
-        BEGIN_STATE(CDATASectionEnd)
-          if (character == RightSquareBracket)
-          {
-            _token.AppendToCharacters(RightSquareBracket);
-            ADVANCE_PAST_NON_NEWLINE_TO(CDATASectionEnd);
-          }
-          if (character == GreaterThanSign)
-          {
-            ADVANCE_PAST_NON_NEWLINE_TO(Data);
-          }
-
-          _token.AppendToCharacters(RightSquareBracket);
-          _token.AppendToCharacters(RightSquareBracket);
-          RECONSUME_IN(CDATASection);
-        END_STATE()
-
-        BEGIN_STATE(ProcessingInstructionOpen)
-          if (krys::text::IsASCIIAlpha(character) || character == LowLine)
-          {
-            RECONSUME_IN(ProcessingInstructionTarget);
-          }
-          if (character == EndOfFile) KRYS_UNLIKELY
-          {
-            ParserError(ParseError::EOFInProcessingInstruction);
-            return EmitEOFToken();
-          }
-
-          ParserError(ParseError::InvalidFirstCharacterOfProcessingInstructionTarget);
-          ConvertTemporaryBufferToComment();
-          RECONSUME_IN(BogusComment);
-        END_STATE()
-
-        BEGIN_STATE(ProcessingInstructionTarget)
-          if (IsTokenizerWhitespace(character) || character == QuestionMark || character == GreaterThanSign)
-          {
-            if (IsTemporaryBufferASCIICaseInsensitiveMatch(U"xml")
-                || IsTemporaryBufferASCIICaseInsensitiveMatch(U"xml-stylesheet"))
-            {
-              ParserError(ParseError::DisallowedProcessingInstructionTarget);
-              ConvertTemporaryBufferToComment();
-              RECONSUME_IN(BogusComment);
-            }
-
-            _token.BeginProcessingInstruction(_temporaryBuffer);
-            RECONSUME_IN(AfterProcessingInstructionTarget);
-          }
-          if (krys::text::IsASCIIAlphanumeric(character) || character == HyphenMinus || character == LowLine)
-          {
-            _temporaryBuffer.push_back(character);
-            ADVANCE_PAST_NON_NEWLINE_TO(ProcessingInstructionTarget);
-          }
-          if (character == EndOfFile) KRYS_UNLIKELY
-          {
-            ParserError(ParseError::EOFInProcessingInstruction);
-            return EmitEOFToken();
-          }
-
-          ParserError(ParseError::InvalidProcessingInstructionTarget);
-          ConvertTemporaryBufferToComment();
-          RECONSUME_IN(BogusComment);
-        END_STATE()
-
-        BEGIN_STATE(AfterProcessingInstructionTarget)
-          if (IsTokenizerWhitespace(character))
-          {
-            ADVANCE_TO(AfterProcessingInstructionTarget);
-          }
-
-          RECONSUME_IN(ProcessingInstructionData);
-        END_STATE()
-
-        BEGIN_STATE(ProcessingInstructionData)
-          if (character == QuestionMark)
-          {
-            ADVANCE_PAST_NON_NEWLINE_TO(ProcessingInstructionQuestionable);
-          }
-          if (character == GreaterThanSign)
-          {
-            return EmitProcessingInstructionToken();
-          }
-          if (character == EndOfFile) KRYS_UNLIKELY
-          {
-            ParserError(ParseError::EOFInProcessingInstruction);
-            return EmitEOFToken();
-          }
-
-          _token.AppendToProcessingInstructionData(character);
-          ADVANCE_TO(ProcessingInstructionData);
-        END_STATE()
-
-        BEGIN_STATE(ProcessingInstructionQuestionable)
-          if (character == GreaterThanSign)
-          {
-            return EmitProcessingInstructionToken();
-          }
-          if (character == EndOfFile) KRYS_UNLIKELY
-          {
-            ParserError(ParseError::EOFInProcessingInstruction);
-            return EmitEOFToken();
-          }
-
-          _token.AppendToProcessingInstructionData(QuestionMark);
-          RECONSUME_IN(ProcessingInstructionData);
-        END_STATE()
-
-        BEGIN_STATE(CharacterReference)
-          _temporaryBuffer.clear();
-          _temporaryBuffer.push_back(Ampersand);
-
-          if (krys::text::IsASCIIAlphanumeric(character))
-          {
-            _temporaryBuffer.push_back(character);
-            _namedCharacterReferenceMatchEntries = SearchNamedCharacterReferences(_temporaryBuffer);
-            _longestCharacterReferenceMatch = nullptr;
-            ADVANCE_PAST_NON_NEWLINE_TO(NamedCharacterReference);
-          }
-          if (character == NumberSign)
-          {
-            _temporaryBuffer.push_back(character);
-            ADVANCE_PAST_NON_NEWLINE_TO(NumericCharacterReference);
-          }
-
-          FlushCodePointsConsumedAsACharacterReference();
-          RECONSUME_IN_CHARACTER_REFERENCE_RETURN_STATE();
-        END_STATE()
-
-        BEGIN_STATE(NamedCharacterReference)
+          krys_debug_assert(_bufferedEndTagName.empty());
+          KRYS_ADVANCE_PAST_NON_NEWLINE_TO(RCDATAEndTagOpen);
+        }
+
+        BufferCharacter(LessThanSign);
+        KRYS_RECONSUME_IN(RCDATA);
+        KRYS_END_STATE()
+
+        KRYS_BEGIN_STATE(RCDATAEndTagOpen)
+        if (krys::text::IsASCIIAlpha(character))
+        {
           _temporaryBuffer.push_back(character);
-          _namedCharacterReferenceMatchEntries =
-            SearchNamedCharacterReferences(_temporaryBuffer, _namedCharacterReferenceMatchEntries);
+          AppendToPossibleEndTag(krys::text::ToASCIILower(character));
+          KRYS_ADVANCE_PAST_NON_NEWLINE_TO(RCDATAEndTagName);
+        }
 
-          if (!_namedCharacterReferenceMatchEntries.empty())
+        BufferCharacters(Array {LessThanSign, Solidus});
+        KRYS_RECONSUME_IN(RCDATA);
+        KRYS_END_STATE()
+
+        KRYS_BEGIN_STATE(RCDATAEndTagName)
+        if (IsTokenizerWhitespace(character))
+        {
+          if (IsAppropriateEndTag())
           {
-            const auto &first = _namedCharacterReferenceMatchEntries[0];
-            if (character == Semicolon) // Exact match possible only if semicolon is present
+            if (CommitToPartialEndTag(character, TokenizerState::BeforeAttributeName))
             {
-              _temporaryBuffer.clear();
-              AppendToTemporaryBuffer(first.ToSpan());
-              FlushCodePointsConsumedAsACharacterReference();
-              ADVANCE_TO_CHARACTER_REFERENCE_RETURN_STATE();
+              return true;
             }
-
-            // Keep track of the longest match so far
-            if (first.Name.size() == _temporaryBuffer.size())
+            KRYS_SWITCH_TO(BeforeAttributeName);
+          }
+        }
+        if (character == Solidus)
+        {
+          if (IsAppropriateEndTag())
+          {
+            if (CommitToPartialEndTag(Solidus, TokenizerState::SelfClosingStartTag))
             {
-              _longestCharacterReferenceMatch = &first;
+              return true;
             }
-
-            ADVANCE_PAST_NON_NEWLINE_TO(NamedCharacterReference);
+            KRYS_SWITCH_TO(SelfClosingStartTag);
           }
-
-          if (_longestCharacterReferenceMatch)
+        }
+        if (character == GreaterThanSign)
+        {
+          if (IsAppropriateEndTag())
           {
-            const auto &match = *_longestCharacterReferenceMatch;
+            return CommitToCompleteEndTag();
+          }
+        }
+        if (krys::text::IsASCIIAlpha(character))
+        {
+          _temporaryBuffer.push_back(character);
+          AppendToPossibleEndTag(krys::text::ToASCIILower(character));
+          KRYS_ADVANCE_PAST_NON_NEWLINE_TO(RCDATAEndTagName);
+        }
 
-            List<char32> nonMatchingCharacters;
-            for (size_t i = match.Name.size(); i < _temporaryBuffer.size() - 1; ++i)
+        BufferCharacters(Array {LessThanSign, Solidus});
+        BufferCharacters(_temporaryBuffer);
+        _bufferedEndTagName.clear();
+        _temporaryBuffer.clear();
+        KRYS_RECONSUME_IN(RCDATA);
+        KRYS_END_STATE()
+
+        KRYS_BEGIN_STATE(RAWTEXTLessThanSign)
+        if (character == Solidus)
+        {
+          _temporaryBuffer.clear();
+          krys_debug_assert(_bufferedEndTagName.empty());
+          KRYS_ADVANCE_PAST_NON_NEWLINE_TO(RAWTEXTEndTagOpen);
+        }
+
+        BufferCharacter(LessThanSign);
+        KRYS_RECONSUME_IN(RAWTEXT);
+        KRYS_END_STATE()
+
+        KRYS_BEGIN_STATE(RAWTEXTEndTagOpen)
+        if (krys::text::IsASCIIAlpha(character))
+        {
+          _temporaryBuffer.push_back(character);
+          AppendToPossibleEndTag(krys::text::ToASCIILower(character));
+          KRYS_ADVANCE_PAST_NON_NEWLINE_TO(RAWTEXTEndTagName);
+        }
+
+        BufferCharacters(Array {LessThanSign, Solidus});
+        KRYS_RECONSUME_IN(RAWTEXT);
+        KRYS_END_STATE()
+
+        KRYS_BEGIN_STATE(RAWTEXTEndTagName)
+        if (IsTokenizerWhitespace(character))
+        {
+          if (IsAppropriateEndTag())
+          {
+            if (CommitToPartialEndTag(character, TokenizerState::BeforeAttributeName))
             {
-              nonMatchingCharacters.push_back(_temporaryBuffer[i]);
+              return true;
             }
-            _temporaryBuffer.clear();
-
-            if (CharacterReferenceWasConsumedAsPartOfAnAttribute() && match.Name.back() != Semicolon
-                && (character == EqualSign || krys::text::IsASCIIAlphanumeric(character)))
+            KRYS_SWITCH_TO(BeforeAttributeName);
+          }
+        }
+        if (character == Solidus)
+        {
+          if (IsAppropriateEndTag())
+          {
+            if (CommitToPartialEndTag(Solidus, TokenizerState::SelfClosingStartTag))
             {
-              AppendToTemporaryBuffer(match.Name);
-              AppendToTemporaryBuffer(nonMatchingCharacters);
-              FlushCodePointsConsumedAsACharacterReference();
-              RECONSUME_IN_CHARACTER_REFERENCE_RETURN_STATE();
+              return true;
             }
+            KRYS_SWITCH_TO(SelfClosingStartTag);
+          }
+        }
+        if (character == GreaterThanSign)
+        {
+          if (IsAppropriateEndTag())
+          {
+            return CommitToCompleteEndTag();
+          }
+        }
+        if (krys::text::IsASCIIAlpha(character))
+        {
+          _temporaryBuffer.push_back(character);
+          AppendToPossibleEndTag(krys::text::ToASCIILower(character));
+          KRYS_ADVANCE_PAST_NON_NEWLINE_TO(RAWTEXTEndTagName);
+        }
 
-            AppendToTemporaryBuffer(match.ToSpan());
-            AppendToTemporaryBuffer(nonMatchingCharacters);
-            FlushCodePointsConsumedAsACharacterReference();
+        BufferCharacters(Array {LessThanSign, Solidus});
+        BufferCharacters(_temporaryBuffer);
+        _bufferedEndTagName.clear();
+        _temporaryBuffer.clear();
+        KRYS_RECONSUME_IN(RAWTEXT);
+        KRYS_END_STATE()
 
-            if (match.Name.back() != Semicolon)
+        KRYS_BEGIN_STATE(ScriptDataLessThanSign)
+        if (character == Solidus)
+        {
+          _temporaryBuffer.clear();
+          krys_debug_assert(_bufferedEndTagName.empty());
+          KRYS_ADVANCE_PAST_NON_NEWLINE_TO(ScriptDataEndTagOpen);
+        }
+        if (character == ExclamationMark)
+        {
+          BufferCharacters(Array {LessThanSign, ExclamationMark});
+          KRYS_ADVANCE_PAST_NON_NEWLINE_TO(ScriptDataEscapeStart);
+        }
+
+        BufferCharacter(LessThanSign);
+        KRYS_RECONSUME_IN(ScriptData);
+        KRYS_END_STATE()
+
+        KRYS_BEGIN_STATE(ScriptDataEndTagOpen)
+        if (krys::text::IsASCIIAlpha(character))
+        {
+          _temporaryBuffer.push_back(character);
+          AppendToPossibleEndTag(krys::text::ToASCIILower(character));
+          KRYS_ADVANCE_PAST_NON_NEWLINE_TO(ScriptDataEndTagName);
+        }
+
+        BufferCharacters(Array {LessThanSign, Solidus});
+        KRYS_RECONSUME_IN(ScriptData);
+        KRYS_END_STATE()
+
+        KRYS_BEGIN_STATE(ScriptDataEndTagName)
+        if (IsTokenizerWhitespace(character))
+        {
+          if (IsAppropriateEndTag())
+          {
+            if (CommitToPartialEndTag(character, TokenizerState::BeforeAttributeName))
             {
-              ParserError(ParseError::MissingSemicolonAfterCharacterReference);
+              return true;
             }
-
-            RECONSUME_IN_CHARACTER_REFERENCE_RETURN_STATE();
+            KRYS_SWITCH_TO(BeforeAttributeName);
           }
-
-          // no matches at all
-          _temporaryBuffer.pop_back(); // remove the last character added so we can reconsume it
-          FlushCodePointsConsumedAsACharacterReference();
-          RECONSUME_IN(AmbiguousAmpersand);
-        END_STATE()
-
-        BEGIN_STATE(AmbiguousAmpersand)
-          if (krys::text::IsASCIIAlphanumeric(character))
+        }
+        if (character == Solidus)
+        {
+          if (IsAppropriateEndTag())
           {
-            if (CharacterReferenceWasConsumedAsPartOfAnAttribute())
+            if (CommitToPartialEndTag(Solidus, TokenizerState::SelfClosingStartTag))
             {
-              _token.AppendToCurrentAttributeValue(character);
+              return true;
             }
-            else
+            KRYS_SWITCH_TO(SelfClosingStartTag);
+          }
+        }
+        if (character == GreaterThanSign)
+        {
+          if (IsAppropriateEndTag())
+          {
+            return CommitToCompleteEndTag();
+          }
+        }
+        if (krys::text::IsASCIIAlpha(character))
+        {
+          _temporaryBuffer.push_back(character);
+          AppendToPossibleEndTag(krys::text::ToASCIILower(character));
+          KRYS_ADVANCE_PAST_NON_NEWLINE_TO(ScriptDataEndTagName);
+        }
+
+        BufferCharacters(Array {LessThanSign, Solidus});
+        BufferCharacters(_temporaryBuffer);
+        _bufferedEndTagName.clear();
+        _temporaryBuffer.clear();
+        KRYS_RECONSUME_IN(ScriptData);
+        KRYS_END_STATE()
+
+        KRYS_BEGIN_STATE(ScriptDataEscapeStart)
+        if (character == HyphenMinus)
+        {
+          BufferCharacter(HyphenMinus);
+          KRYS_ADVANCE_PAST_NON_NEWLINE_TO(ScriptDataEscapeStartDash);
+        }
+
+        KRYS_RECONSUME_IN(ScriptData);
+        KRYS_END_STATE()
+
+        KRYS_BEGIN_STATE(ScriptDataEscapeStartDash)
+        if (character == HyphenMinus)
+        {
+          BufferCharacter(HyphenMinus);
+          KRYS_ADVANCE_PAST_NON_NEWLINE_TO(ScriptDataEscapedDashDash);
+        }
+
+        KRYS_RECONSUME_IN(ScriptData);
+        KRYS_END_STATE()
+
+        KRYS_BEGIN_STATE(ScriptDataEscaped)
+        if (character == HyphenMinus)
+        {
+          BufferCharacter(HyphenMinus);
+          KRYS_ADVANCE_PAST_NON_NEWLINE_TO(ScriptDataEscapedDash);
+        }
+        if (character == LessThanSign)
+        {
+          KRYS_ADVANCE_PAST_NON_NEWLINE_TO(ScriptDataEscapedLessThanSign);
+        }
+        if (character == Null) KRYS_UNLIKELY
+        {
+          ParserError(ParseError::UnexpectedNullCharacter);
+          BufferCharacter(Replacement);
+          KRYS_ADVANCE_PAST_NON_NEWLINE_TO(ScriptDataEscaped);
+        }
+        if (character == EndOfFile) KRYS_UNLIKELY
+        {
+          ParserError(ParseError::EOFInScriptHTMLCommentLikeText);
+          KRYS_RECONSUME_IN(Data);
+        }
+
+        BufferCharacter(character);
+        KRYS_ADVANCE_TO(ScriptDataEscaped);
+        KRYS_END_STATE()
+
+        KRYS_BEGIN_STATE(ScriptDataEscapedDash)
+        if (character == HyphenMinus)
+        {
+          BufferCharacter(HyphenMinus);
+          KRYS_ADVANCE_PAST_NON_NEWLINE_TO(ScriptDataEscapedDashDash);
+        }
+        if (character == LessThanSign)
+        {
+          KRYS_ADVANCE_PAST_NON_NEWLINE_TO(ScriptDataEscapedLessThanSign);
+        }
+        if (character == Null) KRYS_UNLIKELY
+        {
+          ParserError(ParseError::UnexpectedNullCharacter);
+          BufferCharacter(Replacement);
+          KRYS_ADVANCE_PAST_NON_NEWLINE_TO(ScriptDataEscaped);
+        }
+        if (character == EndOfFile) KRYS_UNLIKELY
+        {
+          ParserError(ParseError::EOFInScriptHTMLCommentLikeText);
+          KRYS_RECONSUME_IN(Data);
+        }
+
+        BufferCharacter(character);
+        KRYS_ADVANCE_TO(ScriptDataEscaped);
+        KRYS_END_STATE()
+
+        KRYS_BEGIN_STATE(ScriptDataEscapedDashDash)
+        if (character == HyphenMinus)
+        {
+          BufferCharacter(HyphenMinus);
+          KRYS_ADVANCE_PAST_NON_NEWLINE_TO(ScriptDataEscapedDashDash);
+        }
+        if (character == LessThanSign)
+        {
+          KRYS_ADVANCE_PAST_NON_NEWLINE_TO(ScriptDataEscapedLessThanSign);
+        }
+        if (character == GreaterThanSign)
+        {
+          BufferCharacter(GreaterThanSign);
+          KRYS_ADVANCE_PAST_NON_NEWLINE_TO(ScriptData);
+        }
+        if (character == Null) KRYS_UNLIKELY
+        {
+          ParserError(ParseError::UnexpectedNullCharacter);
+          BufferCharacter(Replacement);
+          KRYS_ADVANCE_PAST_NON_NEWLINE_TO(ScriptDataEscaped);
+        }
+        if (character == EndOfFile) KRYS_UNLIKELY
+        {
+          ParserError(ParseError::EOFInScriptHTMLCommentLikeText);
+          KRYS_RECONSUME_IN(Data);
+        }
+
+        BufferCharacter(character);
+        KRYS_ADVANCE_TO(ScriptDataEscaped);
+        KRYS_END_STATE()
+
+        KRYS_BEGIN_STATE(ScriptDataEscapedLessThanSign)
+        if (character == Solidus)
+        {
+          _temporaryBuffer.clear();
+          krys_debug_assert(_bufferedEndTagName.empty());
+          KRYS_ADVANCE_PAST_NON_NEWLINE_TO(ScriptDataEscapedEndTagOpen);
+        }
+        if (krys::text::IsASCIIAlpha(character))
+        {
+          _temporaryBuffer.clear();
+          BufferCharacter(LessThanSign);
+          KRYS_RECONSUME_IN(ScriptDataDoubleEscapeStart);
+        }
+
+        BufferCharacter(LessThanSign);
+        KRYS_RECONSUME_IN(ScriptDataEscaped);
+        KRYS_END_STATE()
+
+        KRYS_BEGIN_STATE(ScriptDataEscapedEndTagOpen)
+        if (krys::text::IsASCIIAlpha(character))
+        {
+          _temporaryBuffer.push_back(character);
+          AppendToPossibleEndTag(krys::text::ToASCIILower(character));
+          KRYS_ADVANCE_PAST_NON_NEWLINE_TO(ScriptDataEscapedEndTagName);
+        }
+
+        BufferCharacters(Array {LessThanSign, Solidus});
+        KRYS_RECONSUME_IN(ScriptDataEscaped);
+        KRYS_END_STATE()
+
+        KRYS_BEGIN_STATE(ScriptDataEscapedEndTagName)
+        if (IsTokenizerWhitespace(character))
+        {
+          if (IsAppropriateEndTag())
+          {
+            if (CommitToPartialEndTag(character, TokenizerState::BeforeAttributeName))
             {
-              _token.AppendToCharacters(character);
+              return true;
             }
-            ADVANCE_TO(AmbiguousAmpersand);
+            KRYS_SWITCH_TO(BeforeAttributeName);
           }
-          if (character == Semicolon)
+        }
+        if (character == Solidus)
+        {
+          if (IsAppropriateEndTag())
           {
-            ParserError(ParseError::UnknownNamedCharacterReference);
-            RECONSUME_IN_CHARACTER_REFERENCE_RETURN_STATE();
+            if (CommitToPartialEndTag(Solidus, TokenizerState::SelfClosingStartTag))
+            {
+              return true;
+            }
+            KRYS_SWITCH_TO(SelfClosingStartTag);
           }
+        }
+        if (character == GreaterThanSign)
+        {
+          if (IsAppropriateEndTag())
+          {
+            return CommitToCompleteEndTag();
+          }
+        }
+        if (krys::text::IsASCIIAlpha(character))
+        {
+          _temporaryBuffer.push_back(character);
+          AppendToPossibleEndTag(krys::text::ToASCIILower(character));
+          KRYS_ADVANCE_PAST_NON_NEWLINE_TO(ScriptDataEscapedEndTagName);
+        }
 
-          RECONSUME_IN_CHARACTER_REFERENCE_RETURN_STATE();
-        END_STATE()
+        BufferCharacters(Array {LessThanSign, Solidus});
+        BufferCharacters(_temporaryBuffer);
+        _bufferedEndTagName.clear();
+        _temporaryBuffer.clear();
+        KRYS_RECONSUME_IN(ScriptDataEscaped);
+        KRYS_END_STATE()
 
-        BEGIN_STATE(NumericCharacterReference)
-          _characterReferenceCode = 0;
-          if (krys::text::IsASCIICaselessEqual(character, 'x'))
+        KRYS_BEGIN_STATE(ScriptDataDoubleEscapeStart)
+        if (IsTokenizerWhitespace(character) || character == Solidus || character == GreaterThanSign)
+        {
+          BufferCharacter(character);
+          if (IsTemporaryBufferEqualTo(U"script"))
           {
-            _temporaryBuffer.push_back(character);
-            ADVANCE_PAST_NON_NEWLINE_TO(HexadecimalCharacterReferenceStart);
-          }
-
-          RECONSUME_IN(DecimalCharacterReferenceStart);
-        END_STATE()
-
-        BEGIN_STATE(HexadecimalCharacterReferenceStart)
-          if (krys::text::IsASCIIHexDigit(character))
-          {
-            RECONSUME_IN(HexadecimalCharacterReference);
-          }
-
-          ParserError(ParseError::AbsenceOfDigitsInNumericCharacterReference);
-          FlushCodePointsConsumedAsACharacterReference();
-          RECONSUME_IN_CHARACTER_REFERENCE_RETURN_STATE();
-        END_STATE()
-
-        BEGIN_STATE(DecimalCharacterReferenceStart)
-          if (krys::text::IsASCIIDigit(character))
-          {
-            RECONSUME_IN(DecimalCharacterReference);
-          }
-
-          ParserError(ParseError::AbsenceOfDigitsInNumericCharacterReference);
-          FlushCodePointsConsumedAsACharacterReference();
-          RECONSUME_IN_CHARACTER_REFERENCE_RETURN_STATE();
-        END_STATE()
-
-        BEGIN_STATE(HexadecimalCharacterReference)
-          if (krys::text::IsASCIIHexDigit(character))
-          {
-            // Anything past 0x10FFFF is outside the Unicode range, so the code stops growing there rather
-            // than overflowing back into it.
-            _characterReferenceCode = std::min<int64>(
-              _characterReferenceCode * 16 + static_cast<int64>(krys::text::ToASCIIHexValue(character)),
-              MaxCharacterReferenceCode);
-            ADVANCE_PAST_NON_NEWLINE_TO(HexadecimalCharacterReference);
-          }
-          if (character != Semicolon)
-          {
-            ParserError(ParseError::MissingSemicolonAfterCharacterReference);
-          }
-
-          RECONSUME_IN(NumericCharacterReferenceEnd);
-        END_STATE()
-
-        BEGIN_STATE(DecimalCharacterReference)
-          if (krys::text::IsASCIIDigit(character))
-          {
-            _characterReferenceCode = std::min<int64>(
-              _characterReferenceCode * 10 + static_cast<int64>(character - '0'), MaxCharacterReferenceCode);
-            ADVANCE_PAST_NON_NEWLINE_TO(DecimalCharacterReference);
-          }
-          if (character != Semicolon)
-          {
-            ParserError(ParseError::MissingSemicolonAfterCharacterReference);
-          }
-
-          RECONSUME_IN(NumericCharacterReferenceEnd);
-        END_STATE()
-
-        BEGIN_STATE(NumericCharacterReferenceEnd)
-          if (_characterReferenceCode == Null)
-          {
-            ParserError(ParseError::NullCharacterReference);
-            _characterReferenceCode = Replacement;
-          }
-          else if (_characterReferenceCode > 0x10FFFF)
-          {
-            ParserError(ParseError::CharacterReferenceOutsideUnicodeRange);
-            _characterReferenceCode = Replacement;
-          }
-          else if (krys::text::IsSurrogate(static_cast<char32>(_characterReferenceCode)))
-          {
-            ParserError(ParseError::SurrogateCharacterReference);
-            _characterReferenceCode = Replacement;
-          }
-          else if (krys::text::IsNonUnicodeCharacter(static_cast<char32>(_characterReferenceCode)))
-          {
-            ParserError(ParseError::NonCharacterCharacterReference);
-          }
-          else if (_characterReferenceCode == '\x0D'
-                   || krys::text::IsASCIINonWhitespaceControl(static_cast<char32>(_characterReferenceCode)))
-          {
-            ParserError(ParseError::ControlCharacterReference);
+            KRYS_ADVANCE_TO(ScriptDataDoubleEscaped);
           }
           else
           {
-            auto lookup = SearchNumericCharacterReferences(static_cast<char32>(_characterReferenceCode));
-            if (lookup != 0)
+            KRYS_ADVANCE_TO(ScriptDataEscaped);
+          }
+        }
+        if (krys::text::IsASCIIAlpha(character))
+        {
+          BufferCharacter(character);
+          _temporaryBuffer.push_back(krys::text::ToASCIILower(character));
+          KRYS_ADVANCE_PAST_NON_NEWLINE_TO(ScriptDataDoubleEscapeStart);
+        }
+
+        KRYS_RECONSUME_IN(ScriptDataEscaped);
+        KRYS_END_STATE()
+
+        KRYS_BEGIN_STATE(ScriptDataDoubleEscaped)
+        if (character == HyphenMinus)
+        {
+          BufferCharacter(HyphenMinus);
+          KRYS_ADVANCE_PAST_NON_NEWLINE_TO(ScriptDataDoubleEscapedDash);
+        }
+        if (character == LessThanSign)
+        {
+          BufferCharacter(LessThanSign);
+          KRYS_ADVANCE_PAST_NON_NEWLINE_TO(ScriptDataDoubleEscapedLessThanSign);
+        }
+        if (character == Null) KRYS_UNLIKELY
+        {
+          ParserError(ParseError::UnexpectedNullCharacter);
+          BufferCharacter(Replacement);
+          KRYS_ADVANCE_PAST_NON_NEWLINE_TO(ScriptDataDoubleEscaped);
+        }
+        if (character == EndOfFile) KRYS_UNLIKELY
+        {
+          ParserError(ParseError::EOFInScriptHTMLCommentLikeText);
+          KRYS_RECONSUME_IN(Data);
+        }
+
+        BufferCharacter(character);
+        KRYS_ADVANCE_TO(ScriptDataDoubleEscaped);
+        KRYS_END_STATE()
+
+        KRYS_BEGIN_STATE(ScriptDataDoubleEscapedDash)
+        if (character == HyphenMinus)
+        {
+          BufferCharacter(HyphenMinus);
+          KRYS_ADVANCE_PAST_NON_NEWLINE_TO(ScriptDataDoubleEscapedDashDash);
+        }
+        if (character == LessThanSign)
+        {
+          BufferCharacter(LessThanSign);
+          KRYS_ADVANCE_PAST_NON_NEWLINE_TO(ScriptDataDoubleEscapedLessThanSign);
+        }
+        if (character == Null) KRYS_UNLIKELY
+        {
+          ParserError(ParseError::UnexpectedNullCharacter);
+          BufferCharacter(Replacement);
+          KRYS_ADVANCE_PAST_NON_NEWLINE_TO(ScriptDataDoubleEscaped);
+        }
+        if (character == EndOfFile) KRYS_UNLIKELY
+        {
+          ParserError(ParseError::EOFInScriptHTMLCommentLikeText);
+          KRYS_RECONSUME_IN(Data);
+        }
+
+        BufferCharacter(character);
+        KRYS_ADVANCE_TO(ScriptDataDoubleEscaped);
+        KRYS_END_STATE()
+
+        KRYS_BEGIN_STATE(ScriptDataDoubleEscapedDashDash)
+        if (character == HyphenMinus)
+        {
+          BufferCharacter(HyphenMinus);
+          KRYS_ADVANCE_PAST_NON_NEWLINE_TO(ScriptDataDoubleEscapedDashDash);
+        }
+        if (character == LessThanSign)
+        {
+          BufferCharacter(LessThanSign);
+          KRYS_ADVANCE_PAST_NON_NEWLINE_TO(ScriptDataDoubleEscapedLessThanSign);
+        }
+        if (character == GreaterThanSign)
+        {
+          BufferCharacter(GreaterThanSign);
+          KRYS_ADVANCE_PAST_NON_NEWLINE_TO(ScriptData);
+        }
+        if (character == Null) KRYS_UNLIKELY
+        {
+          ParserError(ParseError::UnexpectedNullCharacter);
+          BufferCharacter(Replacement);
+          KRYS_ADVANCE_PAST_NON_NEWLINE_TO(ScriptDataDoubleEscaped);
+        }
+        if (character == EndOfFile) KRYS_UNLIKELY
+        {
+          ParserError(ParseError::EOFInScriptHTMLCommentLikeText);
+          KRYS_RECONSUME_IN(Data);
+        }
+
+        BufferCharacter(character);
+        KRYS_ADVANCE_TO(ScriptDataDoubleEscaped);
+        KRYS_END_STATE()
+
+        KRYS_BEGIN_STATE(ScriptDataDoubleEscapedLessThanSign)
+        if (character == Solidus)
+        {
+          _temporaryBuffer.clear();
+          krys_debug_assert(_bufferedEndTagName.empty());
+          BufferCharacter(Solidus);
+          KRYS_ADVANCE_PAST_NON_NEWLINE_TO(ScriptDataDoubleEscapeEnd);
+        }
+
+        KRYS_RECONSUME_IN(ScriptDataDoubleEscaped);
+        KRYS_END_STATE()
+
+        KRYS_BEGIN_STATE(ScriptDataDoubleEscapeEnd)
+        if (IsTokenizerWhitespace(character) || character == Solidus || character == GreaterThanSign)
+        {
+          BufferCharacter(character);
+          if (IsTemporaryBufferEqualTo(U"script"))
+          {
+            KRYS_ADVANCE_TO(ScriptDataEscaped);
+          }
+          else
+          {
+            KRYS_ADVANCE_TO(ScriptDataDoubleEscaped);
+          }
+        }
+        if (krys::text::IsASCIIAlpha(character))
+        {
+          BufferCharacter(character);
+          _temporaryBuffer.push_back(krys::text::ToASCIILower(character));
+          KRYS_ADVANCE_PAST_NON_NEWLINE_TO(ScriptDataDoubleEscapeEnd);
+        }
+
+        KRYS_RECONSUME_IN(ScriptDataDoubleEscaped);
+        KRYS_END_STATE()
+
+        KRYS_BEGIN_STATE(BeforeAttributeName)
+        if (IsTokenizerWhitespace(character))
+        {
+          KRYS_ADVANCE_TO(BeforeAttributeName);
+        }
+        if (character == Solidus || character == GreaterThanSign)
+        {
+          KRYS_RECONSUME_IN(AfterAttributeName);
+        }
+        if (character == EqualSign)
+        {
+          ParserError(ParseError::UnexpectedEqualsSignBeforeAttributeName);
+          _token.BeginAttribute();
+          _token.AppendToCurrentAttributeName(EqualSign);
+          KRYS_ADVANCE_PAST_NON_NEWLINE_TO(AttributeName);
+        }
+
+        _token.BeginAttribute();
+        KRYS_RECONSUME_IN(AttributeName);
+        KRYS_END_STATE()
+
+        KRYS_BEGIN_STATE(AttributeName)
+        if (IsTokenizerWhitespace(character) || character == Solidus || character == GreaterThanSign
+            || character == EndOfFile)
+        {
+          KRYS_RECONSUME_IN(AfterAttributeName);
+        }
+        if (character == EqualSign)
+        {
+          KRYS_ADVANCE_PAST_NON_NEWLINE_TO(BeforeAttributeValue);
+        }
+        if (krys::text::IsASCIIUpper(character))
+        {
+          _token.AppendToCurrentAttributeName(krys::text::ToASCIILowerUnchecked(character));
+          KRYS_ADVANCE_PAST_NON_NEWLINE_TO(AttributeName);
+        }
+        if (character == Null)
+        {
+          ParserError(ParseError::UnexpectedNullCharacter);
+          _token.AppendToCurrentAttributeName(Replacement);
+          KRYS_ADVANCE_PAST_NON_NEWLINE_TO(AttributeName);
+        }
+        if (character == QuotationMark || character == Apostrophe || character == LessThanSign)
+        {
+          ParserError(ParseError::UnexpectedCharacterInAttributeName);
+          // Treat it as per 'anything else' case below.
+        }
+
+        _token.AppendToCurrentAttributeName(character);
+        KRYS_ADVANCE_PAST_NON_NEWLINE_TO(AttributeName);
+        KRYS_END_STATE()
+
+        KRYS_BEGIN_STATE(AfterAttributeName)
+        if (IsTokenizerWhitespace(character))
+        {
+          // Ignore the character.
+          KRYS_ADVANCE_TO(AfterAttributeName);
+        }
+        if (character == Solidus)
+        {
+          KRYS_ADVANCE_PAST_NON_NEWLINE_TO(SelfClosingStartTag);
+        }
+        if (character == EqualSign)
+        {
+          KRYS_ADVANCE_PAST_NON_NEWLINE_TO(BeforeAttributeValue);
+        }
+        if (character == GreaterThanSign)
+        {
+          return EmitTagToken();
+        }
+        if (character == EndOfFile) KRYS_UNLIKELY
+        {
+          ParserError(ParseError::EOFInTag);
+          KRYS_RECONSUME_IN(Data);
+        }
+
+        EndAttribute();
+        BeginAttribute();
+        KRYS_RECONSUME_IN(AttributeName);
+        KRYS_END_STATE()
+
+        KRYS_BEGIN_STATE(BeforeAttributeValue)
+        if (IsTokenizerWhitespace(character))
+        {
+          // Ignore the character.
+          KRYS_ADVANCE_TO(BeforeAttributeValue);
+        }
+        if (character == QuotationMark)
+        {
+          KRYS_ADVANCE_PAST_NON_NEWLINE_TO(AttributeValueDoubleQuoted);
+        }
+        if (character == Apostrophe)
+        {
+          KRYS_ADVANCE_PAST_NON_NEWLINE_TO(AttributeValueSingleQuoted);
+        }
+        if (character == GreaterThanSign)
+        {
+          ParserError(ParseError::MissingAttributeValue);
+          EndAttribute();
+          return EmitTagToken();
+        }
+
+        KRYS_RECONSUME_IN(AttributeValueUnquoted);
+        KRYS_END_STATE()
+
+        KRYS_BEGIN_STATE(AttributeValueDoubleQuoted)
+        if (character == QuotationMark)
+        {
+          KRYS_ADVANCE_PAST_NON_NEWLINE_TO(AfterAttributeValueQuoted);
+        }
+        if (character == Ampersand)
+        {
+          _characterReferenceReturnState = TokenizerState::AttributeValueDoubleQuoted;
+          KRYS_ADVANCE_PAST_NON_NEWLINE_TO(CharacterReference);
+        }
+        if (character == Null)
+        {
+          ParserError(ParseError::UnexpectedNullCharacter);
+          _token.AppendToCurrentAttributeValue(Replacement);
+          KRYS_ADVANCE_PAST_NON_NEWLINE_TO(AttributeValueDoubleQuoted);
+        }
+        if (character == EndOfFile) KRYS_UNLIKELY
+        {
+          ParserError(ParseError::EOFInTag);
+          EndAttribute();
+          KRYS_RECONSUME_IN(Data);
+        }
+
+        _token.AppendToCurrentAttributeValue(character);
+        KRYS_ADVANCE_TO(AttributeValueDoubleQuoted);
+        KRYS_END_STATE()
+
+        KRYS_BEGIN_STATE(AttributeValueSingleQuoted)
+        if (character == Apostrophe)
+        {
+          KRYS_ADVANCE_PAST_NON_NEWLINE_TO(AfterAttributeValueQuoted);
+        }
+        if (character == Ampersand)
+        {
+          _characterReferenceReturnState = TokenizerState::AttributeValueSingleQuoted;
+          KRYS_ADVANCE_PAST_NON_NEWLINE_TO(CharacterReference);
+        }
+        if (character == Null)
+        {
+          ParserError(ParseError::UnexpectedNullCharacter);
+          _token.AppendToCurrentAttributeValue(Replacement);
+          KRYS_ADVANCE_PAST_NON_NEWLINE_TO(AttributeValueSingleQuoted);
+        }
+        if (character == EndOfFile) KRYS_UNLIKELY
+        {
+          ParserError(ParseError::EOFInTag);
+          EndAttribute();
+          KRYS_RECONSUME_IN(Data);
+        }
+
+        _token.AppendToCurrentAttributeValue(character);
+        KRYS_ADVANCE_TO(AttributeValueSingleQuoted);
+        KRYS_END_STATE()
+
+        KRYS_BEGIN_STATE(AttributeValueUnquoted)
+        if (IsTokenizerWhitespace(character))
+        {
+          EndAttribute();
+          KRYS_ADVANCE_TO(BeforeAttributeName);
+        }
+        if (character == Ampersand)
+        {
+          _characterReferenceReturnState = TokenizerState::AttributeValueUnquoted;
+          KRYS_ADVANCE_PAST_NON_NEWLINE_TO(CharacterReference);
+        }
+        if (character == GreaterThanSign)
+        {
+          EndAttribute();
+          return EmitTagToken();
+        }
+        if (character == Null)
+        {
+          ParserError(ParseError::UnexpectedNullCharacter);
+          _token.AppendToCurrentAttributeValue(Replacement);
+          KRYS_ADVANCE_PAST_NON_NEWLINE_TO(AttributeValueUnquoted);
+        }
+        if (character == QuotationMark || character == Apostrophe || character == LessThanSign
+            || character == EqualSign || character == GraveAccent)
+        {
+          ParserError(ParseError::UnexpectedCharacterInUnquotedAttributeValue);
+          _token.AppendToCurrentAttributeValue(character);
+          KRYS_ADVANCE_PAST_NON_NEWLINE_TO(AttributeValueUnquoted);
+        }
+        if (character == EndOfFile) KRYS_UNLIKELY
+        {
+          ParserError(ParseError::EOFInTag);
+          EndAttribute();
+          KRYS_RECONSUME_IN(Data);
+        }
+
+        _token.AppendToCurrentAttributeValue(character);
+        KRYS_ADVANCE_PAST_NON_NEWLINE_TO(AttributeValueUnquoted);
+        KRYS_END_STATE()
+
+        KRYS_BEGIN_STATE(AfterAttributeValueQuoted)
+        if (IsTokenizerWhitespace(character))
+        {
+          EndAttribute();
+          KRYS_ADVANCE_TO(BeforeAttributeName);
+        }
+        if (character == Solidus)
+        {
+          EndAttribute();
+          KRYS_ADVANCE_PAST_NON_NEWLINE_TO(SelfClosingStartTag);
+        }
+        if (character == GreaterThanSign)
+        {
+          EndAttribute();
+          return EmitTagToken();
+        }
+        if (character == EndOfFile) KRYS_UNLIKELY
+        {
+          ParserError(ParseError::EOFInTag);
+          EndAttribute();
+          KRYS_RECONSUME_IN(Data);
+        }
+
+        ParserError(ParseError::MissingWhitespaceBetweenAttributes);
+        EndAttribute();
+        KRYS_RECONSUME_IN(BeforeAttributeName);
+        KRYS_END_STATE()
+
+        KRYS_BEGIN_STATE(SelfClosingStartTag)
+        if (character == GreaterThanSign)
+        {
+          // Set the self-closing flag of the current tag token. (An end tag's flag is only a parse error,
+          // so it's left unset.)
+          if (_token.Type() == TokenType::StartTag)
+          {
+            _token.SetSelfClosingFlag();
+          }
+          return EmitTagToken();
+        }
+        if (character == EndOfFile) KRYS_UNLIKELY
+        {
+          ParserError(ParseError::EOFInTag);
+          KRYS_RECONSUME_IN(Data);
+        }
+
+        ParserError(ParseError::UnexpectedSolidusInTag);
+
+        if (_token.CurrentAttribute() != nullptr)
+        {
+          EndAttribute();
+        }
+        KRYS_RECONSUME_IN(BeforeAttributeName);
+        KRYS_END_STATE()
+
+        KRYS_BEGIN_STATE(BogusComment)
+        if (character == GreaterThanSign)
+        {
+          return EmitCommentToken(true);
+        }
+        if (character == EndOfFile) KRYS_UNLIKELY
+        {
+          return EmitCommentToken(false);
+        }
+        if (character == Null) KRYS_UNLIKELY
+        {
+          ParserError(ParseError::UnexpectedNullCharacter);
+          _token.AppendToComment(Replacement);
+          KRYS_ADVANCE_PAST_NON_NEWLINE_TO(BogusComment);
+        }
+
+        _token.AppendToComment(character);
+        KRYS_ADVANCE_PAST_NON_NEWLINE_TO(BogusComment);
+        KRYS_END_STATE()
+
+        KRYS_BEGIN_STATE(MarkupDeclarationOpen)
+        if (character == HyphenMinus)
+        {
+          auto result = _input.AdvancePast<false>("--");
+          if (result == InputStream::MatchResult::Matched)
+          {
+            _token.BeginComment();
+            KRYS_SWITCH_TO(CommentStart);
+          }
+          if (result == InputStream::MatchResult::NotEnoughCharacters)
+          {
+            KRYS_RETURN_IN_CURRENT_STATE(HasBufferedCharacterToken());
+          }
+        }
+        else if (krys::text::IsASCIICaselessEqual(character, 'd'))
+        {
+          auto result = _input.AdvancePast("doctype");
+          if (result == InputStream::MatchResult::Matched)
+          {
+            KRYS_SWITCH_TO(DOCTYPE);
+          }
+          if (result == InputStream::MatchResult::NotEnoughCharacters)
+          {
+            KRYS_RETURN_IN_CURRENT_STATE(HasBufferedCharacterToken());
+          }
+        }
+        else if (character == '[')
+        {
+          auto result = _input.AdvancePast<false>("[CDATA[");
+          if (result == InputStream::MatchResult::Matched)
+          {
+            if (_isCDATASectionAllowed())
             {
-              _characterReferenceCode = lookup;
+              KRYS_SWITCH_TO(CDATASection);
+            }
+            else
+            {
+              ParserError(ParseError::CDATAInHTMLContent);
+              _token.BeginComment();
+              _token.AppendToComment("[CDATA[");
+              KRYS_SWITCH_TO(BogusComment);
             }
           }
-
-          _temporaryBuffer.clear();
-          _temporaryBuffer.push_back(static_cast<char32>(_characterReferenceCode));
-          FlushCodePointsConsumedAsACharacterReference();
-
-          if (character == Semicolon)
+          if (result == InputStream::MatchResult::NotEnoughCharacters)
           {
-            ADVANCE_TO_CHARACTER_REFERENCE_RETURN_STATE();
+            KRYS_RETURN_IN_CURRENT_STATE(HasBufferedCharacterToken());
+          }
+        }
+
+        ParserError(ParseError::IncorrectlyOpenedComment);
+        _token.BeginComment();
+        KRYS_RECONSUME_IN(BogusComment);
+        KRYS_END_STATE()
+
+        KRYS_BEGIN_STATE(CommentStart)
+        if (character == HyphenMinus)
+        {
+          KRYS_ADVANCE_PAST_NON_NEWLINE_TO(CommentStartDash);
+        }
+        if (character == GreaterThanSign)
+        {
+          ParserError(ParseError::AbruptClosingOfEmptyComment);
+          return EmitCommentToken(true);
+        }
+
+        KRYS_RECONSUME_IN(Comment);
+        KRYS_END_STATE()
+
+        KRYS_BEGIN_STATE(CommentStartDash)
+        if (character == HyphenMinus)
+        {
+          KRYS_ADVANCE_PAST_NON_NEWLINE_TO(CommentEnd);
+        }
+        if (character == GreaterThanSign)
+        {
+          ParserError(ParseError::AbruptClosingOfEmptyComment);
+          return EmitCommentToken(true);
+        }
+        if (character == EndOfFile) KRYS_UNLIKELY
+        {
+          ParserError(ParseError::EOFInComment);
+          return EmitCommentToken(false);
+        }
+
+        _token.AppendToComment(HyphenMinus);
+        KRYS_RECONSUME_IN(Comment);
+        KRYS_END_STATE()
+
+        KRYS_BEGIN_STATE(Comment)
+        if (character == LessThanSign)
+        {
+          _token.AppendToComment(LessThanSign);
+          KRYS_ADVANCE_PAST_NON_NEWLINE_TO(CommentLessThanSign);
+        }
+        if (character == HyphenMinus)
+        {
+          KRYS_ADVANCE_PAST_NON_NEWLINE_TO(CommentEndDash);
+        }
+        if (character == Null) KRYS_UNLIKELY
+        {
+          ParserError(ParseError::UnexpectedNullCharacter);
+          _token.AppendToComment(Replacement);
+          KRYS_ADVANCE_PAST_NON_NEWLINE_TO(Comment);
+        }
+        if (character == EndOfFile) KRYS_UNLIKELY
+        {
+          ParserError(ParseError::EOFInComment);
+          return EmitCommentToken(false);
+        }
+
+        _token.AppendToComment(character);
+        KRYS_ADVANCE_TO(Comment);
+        KRYS_END_STATE()
+
+        KRYS_BEGIN_STATE(CommentLessThanSign)
+        if (character == ExclamationMark)
+        {
+          _token.AppendToComment(ExclamationMark);
+          KRYS_ADVANCE_PAST_NON_NEWLINE_TO(CommentLessThanSignBang);
+        }
+        if (character == LessThanSign)
+        {
+          _token.AppendToComment(LessThanSign);
+          KRYS_ADVANCE_PAST_NON_NEWLINE_TO(CommentLessThanSign);
+        }
+
+        KRYS_RECONSUME_IN(Comment);
+        KRYS_END_STATE()
+
+        KRYS_BEGIN_STATE(CommentLessThanSignBang)
+        if (character == HyphenMinus)
+        {
+          KRYS_ADVANCE_PAST_NON_NEWLINE_TO(CommentLessThanSignBangDash);
+        }
+
+        KRYS_RECONSUME_IN(Comment);
+        KRYS_END_STATE()
+
+        KRYS_BEGIN_STATE(CommentLessThanSignBangDash)
+        if (character == HyphenMinus)
+        {
+          KRYS_ADVANCE_PAST_NON_NEWLINE_TO(CommentLessThanSignBangDashDash);
+        }
+
+        KRYS_RECONSUME_IN(CommentEndDash);
+        KRYS_END_STATE()
+
+        KRYS_BEGIN_STATE(CommentLessThanSignBangDashDash)
+        if (character == GreaterThanSign || character == EndOfFile)
+        {
+          KRYS_RECONSUME_IN(CommentEnd);
+        }
+
+        ParserError(ParseError::NestedComment);
+        KRYS_RECONSUME_IN(CommentEnd);
+        KRYS_END_STATE()
+
+        KRYS_BEGIN_STATE(CommentEndDash)
+        if (character == HyphenMinus)
+        {
+          KRYS_ADVANCE_PAST_NON_NEWLINE_TO(CommentEnd);
+        }
+        if (character == EndOfFile) KRYS_UNLIKELY
+        {
+          ParserError(ParseError::EOFInComment);
+          return EmitCommentToken(false);
+        }
+
+        _token.AppendToComment(HyphenMinus);
+        KRYS_RECONSUME_IN(Comment);
+        KRYS_END_STATE()
+
+        KRYS_BEGIN_STATE(CommentEnd)
+        if (character == GreaterThanSign)
+        {
+          return EmitCommentToken(true);
+        }
+        if (character == ExclamationMark)
+        {
+          KRYS_ADVANCE_PAST_NON_NEWLINE_TO(CommentEndBang);
+        }
+        if (character == HyphenMinus)
+        {
+          _token.AppendToComment(HyphenMinus);
+          KRYS_ADVANCE_PAST_NON_NEWLINE_TO(CommentEnd);
+        }
+        if (character == EndOfFile) KRYS_UNLIKELY
+        {
+          ParserError(ParseError::EOFInComment);
+          return EmitCommentToken(false);
+        }
+
+        _token.AppendToComment("--");
+        KRYS_RECONSUME_IN(Comment);
+        KRYS_END_STATE()
+
+        KRYS_BEGIN_STATE(CommentEndBang)
+        if (character == HyphenMinus)
+        {
+          _token.AppendToComment("--!");
+          KRYS_ADVANCE_PAST_NON_NEWLINE_TO(CommentEndDash);
+        }
+        if (character == GreaterThanSign)
+        {
+          ParserError(ParseError::IncorrectlyClosedComment);
+          return EmitCommentToken(true);
+        }
+        if (character == EndOfFile) KRYS_UNLIKELY
+        {
+          ParserError(ParseError::EOFInComment);
+          return EmitCommentToken(false);
+        }
+
+        _token.AppendToComment("--!");
+        KRYS_RECONSUME_IN(Comment);
+        KRYS_END_STATE()
+
+        KRYS_BEGIN_STATE(DOCTYPE)
+        if (IsTokenizerWhitespace(character))
+        {
+          KRYS_ADVANCE_TO(BeforeDOCTYPEName);
+        }
+        if (character == GreaterThanSign)
+        {
+          KRYS_RECONSUME_IN(BeforeDOCTYPEName);
+        }
+        if (character == EndOfFile)
+        {
+          ParserError(ParseError::EOFInDOCTYPE);
+          _token.BeginDOCTYPE();
+          _token.SetDOCTYPEForceQuirks();
+          return EmitDOCTYPEToken(false);
+        }
+
+        ParserError(ParseError::MissingWhitespaceBeforeDOCTYPEName);
+        KRYS_RECONSUME_IN(BeforeDOCTYPEName);
+        KRYS_END_STATE()
+
+        KRYS_BEGIN_STATE(BeforeDOCTYPEName)
+        if (IsTokenizerWhitespace(character))
+        {
+          KRYS_ADVANCE_TO(BeforeDOCTYPEName);
+        }
+        if (krys::text::IsASCIIUpper(character))
+        {
+          _token.BeginDOCTYPE();
+          _token.AppendToName(krys::text::ToASCIILowerUnchecked(character));
+          KRYS_ADVANCE_PAST_NON_NEWLINE_TO(DOCTYPEName);
+        }
+        if (character == Null)
+        {
+          ParserError(ParseError::UnexpectedNullCharacter);
+          _token.BeginDOCTYPE();
+          _token.AppendToName(Replacement);
+          KRYS_ADVANCE_PAST_NON_NEWLINE_TO(DOCTYPEName);
+        }
+        if (character == GreaterThanSign)
+        {
+          ParserError(ParseError::MissingDOCTYPEName);
+          _token.BeginDOCTYPE();
+          _token.SetDOCTYPEForceQuirks();
+          return EmitDOCTYPEToken(true);
+        }
+        if (character == EndOfFile) KRYS_UNLIKELY
+        {
+          ParserError(ParseError::EOFInDOCTYPE);
+          _token.BeginDOCTYPE();
+          _token.SetDOCTYPEForceQuirks();
+          return EmitDOCTYPEToken(false);
+        }
+
+        _token.BeginDOCTYPE();
+        _token.AppendToName(character);
+        KRYS_ADVANCE_PAST_NON_NEWLINE_TO(DOCTYPEName);
+        KRYS_END_STATE()
+
+        KRYS_BEGIN_STATE(DOCTYPEName)
+        if (IsTokenizerWhitespace(character))
+        {
+          KRYS_ADVANCE_TO(AfterDOCTYPEName);
+        }
+        if (character == GreaterThanSign)
+        {
+          return EmitDOCTYPEToken(true);
+        }
+        if (krys::text::IsASCIIUpper(character))
+        {
+          _token.AppendToName(krys::text::ToASCIILowerUnchecked(character));
+          KRYS_ADVANCE_PAST_NON_NEWLINE_TO(DOCTYPEName);
+        }
+        if (character == Null)
+        {
+          ParserError(ParseError::UnexpectedNullCharacter);
+          _token.AppendToName(Replacement);
+          KRYS_ADVANCE_PAST_NON_NEWLINE_TO(DOCTYPEName);
+        }
+        if (character == EndOfFile) KRYS_UNLIKELY
+        {
+          ParserError(ParseError::EOFInDOCTYPE);
+          _token.SetDOCTYPEForceQuirks();
+          return EmitDOCTYPEToken(false);
+        }
+
+        _token.AppendToName(character);
+        KRYS_ADVANCE_PAST_NON_NEWLINE_TO(DOCTYPEName);
+        KRYS_END_STATE()
+
+        KRYS_BEGIN_STATE(AfterDOCTYPEName)
+        if (IsTokenizerWhitespace(character))
+        {
+          KRYS_ADVANCE_TO(AfterDOCTYPEName);
+        }
+        if (character == GreaterThanSign)
+        {
+          return EmitDOCTYPEToken(true);
+        }
+        if (character == EndOfFile) KRYS_UNLIKELY
+        {
+          ParserError(ParseError::EOFInDOCTYPE);
+          _token.SetDOCTYPEForceQuirks();
+          return EmitDOCTYPEToken(false);
+        }
+        if (krys::text::IsASCIICaselessEqual(character, 'p'))
+        {
+          auto result = _input.AdvancePast("public");
+          if (result == InputStream::MatchResult::Matched)
+          {
+            KRYS_SWITCH_TO(AfterDOCTYPEPublicKeyword);
+          }
+          if (result == InputStream::MatchResult::NotEnoughCharacters)
+          {
+            KRYS_RETURN_IN_CURRENT_STATE(HasBufferedCharacterToken());
+          }
+        }
+        if (krys::text::IsASCIICaselessEqual(character, 's'))
+        {
+          auto result = _input.AdvancePast("system");
+          if (result == InputStream::MatchResult::Matched)
+          {
+            KRYS_SWITCH_TO(AfterDOCTYPESystemKeyword);
+          }
+          if (result == InputStream::MatchResult::NotEnoughCharacters)
+          {
+            KRYS_RETURN_IN_CURRENT_STATE(HasBufferedCharacterToken());
+          }
+        }
+
+        ParserError(ParseError::InvalidCharacterSequenceAfterDOCTYPEName);
+        _token.SetDOCTYPEForceQuirks();
+        KRYS_RECONSUME_IN(BogusDOCTYPE);
+        KRYS_END_STATE()
+
+        KRYS_BEGIN_STATE(AfterDOCTYPEPublicKeyword)
+        if (IsTokenizerWhitespace(character))
+        {
+          KRYS_ADVANCE_TO(BeforeDOCTYPEPublicIdentifier);
+        }
+        if (character == QuotationMark)
+        {
+          ParserError(ParseError::MissingWhitespaceAfterDOCTYPEPublicKeyword);
+          _token.SetPublicIdentifierToEmptyString();
+          KRYS_ADVANCE_PAST_NON_NEWLINE_TO(DOCTYPEPublicIdentifierDoubleQuoted);
+        }
+        if (character == Apostrophe)
+        {
+          ParserError(ParseError::MissingWhitespaceAfterDOCTYPEPublicKeyword);
+          _token.SetPublicIdentifierToEmptyString();
+          KRYS_ADVANCE_PAST_NON_NEWLINE_TO(DOCTYPEPublicIdentifierSingleQuoted);
+        }
+        if (character == GreaterThanSign)
+        {
+          ParserError(ParseError::MissingDOCTYPEPublicIdentifier);
+          _token.SetDOCTYPEForceQuirks();
+          return EmitDOCTYPEToken(true);
+        }
+        if (character == EndOfFile) KRYS_UNLIKELY
+        {
+          ParserError(ParseError::EOFInDOCTYPE);
+          _token.SetDOCTYPEForceQuirks();
+          return EmitDOCTYPEToken(false);
+        }
+
+        ParserError(ParseError::MissingQuoteBeforeDOCTYPEPublicIdentifier);
+        _token.SetDOCTYPEForceQuirks();
+        KRYS_RECONSUME_IN(BogusDOCTYPE);
+        KRYS_END_STATE()
+
+        KRYS_BEGIN_STATE(BeforeDOCTYPEPublicIdentifier)
+        if (IsTokenizerWhitespace(character))
+        {
+          KRYS_ADVANCE_TO(BeforeDOCTYPEPublicIdentifier);
+        }
+        if (character == QuotationMark)
+        {
+          _token.SetPublicIdentifierToEmptyString();
+          KRYS_ADVANCE_PAST_NON_NEWLINE_TO(DOCTYPEPublicIdentifierDoubleQuoted);
+        }
+        if (character == Apostrophe)
+        {
+          _token.SetPublicIdentifierToEmptyString();
+          KRYS_ADVANCE_PAST_NON_NEWLINE_TO(DOCTYPEPublicIdentifierSingleQuoted);
+        }
+        if (character == GreaterThanSign)
+        {
+          ParserError(ParseError::MissingDOCTYPEPublicIdentifier);
+          _token.SetDOCTYPEForceQuirks();
+          return EmitDOCTYPEToken(true);
+        }
+        if (character == EndOfFile) KRYS_UNLIKELY
+        {
+          ParserError(ParseError::EOFInDOCTYPE);
+          _token.SetDOCTYPEForceQuirks();
+          return EmitDOCTYPEToken(false);
+        }
+
+        ParserError(ParseError::MissingQuoteBeforeDOCTYPEPublicIdentifier);
+        _token.SetDOCTYPEForceQuirks();
+        KRYS_RECONSUME_IN(BogusDOCTYPE);
+        KRYS_END_STATE()
+
+        KRYS_BEGIN_STATE(DOCTYPEPublicIdentifierDoubleQuoted)
+        if (character == QuotationMark)
+        {
+          KRYS_ADVANCE_PAST_NON_NEWLINE_TO(AfterDOCTYPEPublicIdentifier);
+        }
+        if (character == Null) KRYS_UNLIKELY
+        {
+          ParserError(ParseError::UnexpectedNullCharacter);
+          _token.AppendToPublicIdentifier(Replacement);
+          KRYS_ADVANCE_PAST_NON_NEWLINE_TO(DOCTYPEPublicIdentifierDoubleQuoted);
+        }
+        if (character == GreaterThanSign)
+        {
+          ParserError(ParseError::AbruptDOCTYPEPublicIdentifier);
+          _token.SetDOCTYPEForceQuirks();
+          return EmitDOCTYPEToken(true);
+        }
+        if (character == EndOfFile) KRYS_UNLIKELY
+        {
+          ParserError(ParseError::EOFInDOCTYPE);
+          _token.SetDOCTYPEForceQuirks();
+          return EmitDOCTYPEToken(false);
+        }
+
+        _token.AppendToPublicIdentifier(character);
+        KRYS_ADVANCE_TO(DOCTYPEPublicIdentifierDoubleQuoted);
+        KRYS_END_STATE()
+
+        KRYS_BEGIN_STATE(DOCTYPEPublicIdentifierSingleQuoted)
+        if (character == Apostrophe)
+        {
+          KRYS_ADVANCE_PAST_NON_NEWLINE_TO(AfterDOCTYPEPublicIdentifier);
+        }
+        if (character == Null) KRYS_UNLIKELY
+        {
+          ParserError(ParseError::UnexpectedNullCharacter);
+          _token.AppendToPublicIdentifier(Replacement);
+          KRYS_ADVANCE_PAST_NON_NEWLINE_TO(DOCTYPEPublicIdentifierSingleQuoted);
+        }
+        if (character == GreaterThanSign)
+        {
+          ParserError(ParseError::AbruptDOCTYPEPublicIdentifier);
+          _token.SetDOCTYPEForceQuirks();
+          return EmitDOCTYPEToken(true);
+        }
+        if (character == EndOfFile) KRYS_UNLIKELY
+        {
+          ParserError(ParseError::EOFInDOCTYPE);
+          _token.SetDOCTYPEForceQuirks();
+          return EmitDOCTYPEToken(false);
+        }
+
+        _token.AppendToPublicIdentifier(character);
+        KRYS_ADVANCE_TO(DOCTYPEPublicIdentifierSingleQuoted);
+        KRYS_END_STATE()
+
+        KRYS_BEGIN_STATE(AfterDOCTYPEPublicIdentifier)
+        if (IsTokenizerWhitespace(character))
+        {
+          KRYS_ADVANCE_TO(BetweenDOCTYPEPublicAndSystemIdentifiers);
+        }
+        if (character == GreaterThanSign)
+        {
+          return EmitDOCTYPEToken(true);
+        }
+        if (character == QuotationMark)
+        {
+          ParserError(ParseError::MissingWhitespaceBetweenDOCTYPEPublicAndSystemIdentifiers);
+          _token.SetSystemIdentifierToEmptyString();
+          KRYS_ADVANCE_PAST_NON_NEWLINE_TO(DOCTYPESystemIdentifierDoubleQuoted);
+        }
+        if (character == Apostrophe)
+        {
+          ParserError(ParseError::MissingWhitespaceBetweenDOCTYPEPublicAndSystemIdentifiers);
+          _token.SetSystemIdentifierToEmptyString();
+          KRYS_ADVANCE_PAST_NON_NEWLINE_TO(DOCTYPESystemIdentifierSingleQuoted);
+        }
+        if (character == EndOfFile) KRYS_UNLIKELY
+        {
+          ParserError(ParseError::EOFInDOCTYPE);
+          _token.SetDOCTYPEForceQuirks();
+          return EmitDOCTYPEToken(false);
+        }
+
+        ParserError(ParseError::MissingQuoteBeforeDOCTYPESystemIdentifier);
+        _token.SetDOCTYPEForceQuirks();
+        KRYS_RECONSUME_IN(BogusDOCTYPE);
+        KRYS_END_STATE()
+
+        KRYS_BEGIN_STATE(BetweenDOCTYPEPublicAndSystemIdentifiers)
+        if (IsTokenizerWhitespace(character))
+        {
+          KRYS_ADVANCE_TO(BetweenDOCTYPEPublicAndSystemIdentifiers);
+        }
+        if (character == GreaterThanSign)
+        {
+          return EmitDOCTYPEToken(true);
+        }
+        if (character == QuotationMark)
+        {
+          _token.SetSystemIdentifierToEmptyString();
+          KRYS_ADVANCE_PAST_NON_NEWLINE_TO(DOCTYPESystemIdentifierDoubleQuoted);
+        }
+        if (character == Apostrophe)
+        {
+          _token.SetSystemIdentifierToEmptyString();
+          KRYS_ADVANCE_PAST_NON_NEWLINE_TO(DOCTYPESystemIdentifierSingleQuoted);
+        }
+        if (character == EndOfFile) KRYS_UNLIKELY
+        {
+          ParserError(ParseError::EOFInDOCTYPE);
+          _token.SetDOCTYPEForceQuirks();
+          return EmitDOCTYPEToken(false);
+        }
+
+        ParserError(ParseError::MissingQuoteBeforeDOCTYPESystemIdentifier);
+        _token.SetDOCTYPEForceQuirks();
+        KRYS_RECONSUME_IN(BogusDOCTYPE);
+        KRYS_END_STATE()
+
+        KRYS_BEGIN_STATE(AfterDOCTYPESystemKeyword)
+        if (IsTokenizerWhitespace(character))
+        {
+          KRYS_ADVANCE_TO(BeforeDOCTYPESystemIdentifier);
+        }
+        if (character == QuotationMark)
+        {
+          ParserError(ParseError::MissingWhitespaceAfterDOCTYPESystemKeyword);
+          _token.SetSystemIdentifierToEmptyString();
+          KRYS_ADVANCE_PAST_NON_NEWLINE_TO(DOCTYPESystemIdentifierDoubleQuoted);
+        }
+        if (character == Apostrophe)
+        {
+          ParserError(ParseError::MissingWhitespaceAfterDOCTYPESystemKeyword);
+          _token.SetSystemIdentifierToEmptyString();
+          KRYS_ADVANCE_PAST_NON_NEWLINE_TO(DOCTYPESystemIdentifierSingleQuoted);
+        }
+        if (character == GreaterThanSign)
+        {
+          ParserError(ParseError::MissingDOCTYPESystemIdentifier);
+          _token.SetDOCTYPEForceQuirks();
+          return EmitDOCTYPEToken(true);
+        }
+        if (character == EndOfFile) KRYS_UNLIKELY
+        {
+          ParserError(ParseError::EOFInDOCTYPE);
+          _token.SetDOCTYPEForceQuirks();
+          return EmitDOCTYPEToken(false);
+        }
+
+        ParserError(ParseError::MissingQuoteBeforeDOCTYPESystemIdentifier);
+        _token.SetDOCTYPEForceQuirks();
+        KRYS_RECONSUME_IN(BogusDOCTYPE);
+        KRYS_END_STATE()
+
+        KRYS_BEGIN_STATE(BeforeDOCTYPESystemIdentifier)
+        if (IsTokenizerWhitespace(character))
+        {
+          KRYS_ADVANCE_TO(BeforeDOCTYPESystemIdentifier);
+        }
+        if (character == QuotationMark)
+        {
+          _token.SetSystemIdentifierToEmptyString();
+          KRYS_ADVANCE_PAST_NON_NEWLINE_TO(DOCTYPESystemIdentifierDoubleQuoted);
+        }
+        if (character == Apostrophe)
+        {
+          _token.SetSystemIdentifierToEmptyString();
+          KRYS_ADVANCE_PAST_NON_NEWLINE_TO(DOCTYPESystemIdentifierSingleQuoted);
+        }
+        if (character == GreaterThanSign)
+        {
+          ParserError(ParseError::MissingDOCTYPESystemIdentifier);
+          _token.SetDOCTYPEForceQuirks();
+          return EmitDOCTYPEToken(true);
+        }
+        if (character == EndOfFile) KRYS_UNLIKELY
+        {
+          ParserError(ParseError::EOFInDOCTYPE);
+          _token.SetDOCTYPEForceQuirks();
+          return EmitDOCTYPEToken(false);
+        }
+
+        ParserError(ParseError::MissingQuoteBeforeDOCTYPESystemIdentifier);
+        _token.SetDOCTYPEForceQuirks();
+        KRYS_RECONSUME_IN(BogusDOCTYPE);
+        KRYS_END_STATE()
+
+        KRYS_BEGIN_STATE(DOCTYPESystemIdentifierDoubleQuoted)
+        if (character == QuotationMark)
+        {
+          KRYS_ADVANCE_PAST_NON_NEWLINE_TO(AfterDOCTYPESystemIdentifier);
+        }
+        if (character == Null) KRYS_UNLIKELY
+        {
+          ParserError(ParseError::UnexpectedNullCharacter);
+          _token.AppendToSystemIdentifier(Replacement);
+          KRYS_ADVANCE_PAST_NON_NEWLINE_TO(DOCTYPESystemIdentifierDoubleQuoted);
+        }
+        if (character == GreaterThanSign)
+        {
+          ParserError(ParseError::AbruptDOCTYPESystemIdentifier);
+          _token.SetDOCTYPEForceQuirks();
+          return EmitDOCTYPEToken(true);
+        }
+        if (character == EndOfFile) KRYS_UNLIKELY
+        {
+          ParserError(ParseError::EOFInDOCTYPE);
+          _token.SetDOCTYPEForceQuirks();
+          return EmitDOCTYPEToken(false);
+        }
+
+        _token.AppendToSystemIdentifier(character);
+        KRYS_ADVANCE_TO(DOCTYPESystemIdentifierDoubleQuoted);
+        KRYS_END_STATE()
+
+        KRYS_BEGIN_STATE(DOCTYPESystemIdentifierSingleQuoted)
+        if (character == Apostrophe)
+        {
+          KRYS_ADVANCE_PAST_NON_NEWLINE_TO(AfterDOCTYPESystemIdentifier);
+        }
+        if (character == Null) KRYS_UNLIKELY
+        {
+          ParserError(ParseError::UnexpectedNullCharacter);
+          _token.AppendToSystemIdentifier(Replacement);
+          KRYS_ADVANCE_PAST_NON_NEWLINE_TO(DOCTYPESystemIdentifierSingleQuoted);
+        }
+        if (character == GreaterThanSign)
+        {
+          ParserError(ParseError::AbruptDOCTYPESystemIdentifier);
+          _token.SetDOCTYPEForceQuirks();
+          return EmitDOCTYPEToken(true);
+        }
+        if (character == EndOfFile) KRYS_UNLIKELY
+        {
+          ParserError(ParseError::EOFInDOCTYPE);
+          _token.SetDOCTYPEForceQuirks();
+          return EmitDOCTYPEToken(false);
+        }
+
+        _token.AppendToSystemIdentifier(character);
+        KRYS_ADVANCE_TO(DOCTYPESystemIdentifierSingleQuoted);
+        KRYS_END_STATE()
+
+        KRYS_BEGIN_STATE(AfterDOCTYPESystemIdentifier)
+        if (IsTokenizerWhitespace(character))
+        {
+          KRYS_ADVANCE_TO(AfterDOCTYPESystemIdentifier);
+        }
+        if (character == GreaterThanSign)
+        {
+          return EmitDOCTYPEToken(true);
+        }
+        if (character == EndOfFile) KRYS_UNLIKELY
+        {
+          ParserError(ParseError::EOFInDOCTYPE);
+          _token.SetDOCTYPEForceQuirks();
+          return EmitDOCTYPEToken(false);
+        }
+
+        ParserError(ParseError::UnexpectedCharacterAfterDOCTYPESystemIdentifier);
+        KRYS_RECONSUME_IN(BogusDOCTYPE);
+        KRYS_END_STATE()
+
+        KRYS_BEGIN_STATE(BogusDOCTYPE)
+        if (character == GreaterThanSign)
+        {
+          return EmitDOCTYPEToken(true);
+        }
+        if (character == Null) KRYS_UNLIKELY
+        {
+          ParserError(ParseError::UnexpectedNullCharacter);
+          KRYS_ADVANCE_PAST_NON_NEWLINE_TO(BogusDOCTYPE);
+        }
+        if (character == EndOfFile) KRYS_UNLIKELY
+        {
+          return EmitDOCTYPEToken(false);
+        }
+
+        KRYS_ADVANCE_TO(BogusDOCTYPE);
+        KRYS_END_STATE()
+
+        KRYS_BEGIN_STATE(CDATASection)
+        if (character == RightSquareBracket)
+        {
+          KRYS_ADVANCE_PAST_NON_NEWLINE_TO(CDATASectionBracket);
+        }
+        if (character == EndOfFile) KRYS_UNLIKELY
+        {
+          ParserError(ParseError::EOFInCDATA);
+          KRYS_RECONSUME_IN(Data);
+        }
+
+        _token.AppendToCharacters(character);
+        KRYS_ADVANCE_TO(CDATASection);
+        KRYS_END_STATE()
+
+        KRYS_BEGIN_STATE(CDATASectionBracket)
+        if (character == RightSquareBracket)
+        {
+          KRYS_ADVANCE_PAST_NON_NEWLINE_TO(CDATASectionEnd);
+        }
+
+        _token.AppendToCharacters(RightSquareBracket);
+        KRYS_RECONSUME_IN(CDATASection);
+        KRYS_END_STATE()
+
+        KRYS_BEGIN_STATE(CDATASectionEnd)
+        if (character == RightSquareBracket)
+        {
+          _token.AppendToCharacters(RightSquareBracket);
+          KRYS_ADVANCE_PAST_NON_NEWLINE_TO(CDATASectionEnd);
+        }
+        if (character == GreaterThanSign)
+        {
+          KRYS_ADVANCE_PAST_NON_NEWLINE_TO(Data);
+        }
+
+        _token.AppendToCharacters(RightSquareBracket);
+        _token.AppendToCharacters(RightSquareBracket);
+        KRYS_RECONSUME_IN(CDATASection);
+        KRYS_END_STATE()
+
+        KRYS_BEGIN_STATE(ProcessingInstructionOpen)
+        if (krys::text::IsASCIIAlpha(character) || character == LowLine)
+        {
+          KRYS_RECONSUME_IN(ProcessingInstructionTarget);
+        }
+        if (character == EndOfFile) KRYS_UNLIKELY
+        {
+          ParserError(ParseError::EOFInProcessingInstruction);
+          return EmitEOFToken();
+        }
+
+        ParserError(ParseError::InvalidFirstCharacterOfProcessingInstructionTarget);
+        ConvertTemporaryBufferToComment();
+        KRYS_RECONSUME_IN(BogusComment);
+        KRYS_END_STATE()
+
+        KRYS_BEGIN_STATE(ProcessingInstructionTarget)
+        if (IsTokenizerWhitespace(character) || character == QuestionMark || character == GreaterThanSign)
+        {
+          if (IsTemporaryBufferASCIICaseInsensitiveMatch(U"xml")
+              || IsTemporaryBufferASCIICaseInsensitiveMatch(U"xml-stylesheet"))
+          {
+            ParserError(ParseError::DisallowedProcessingInstructionTarget);
+            ConvertTemporaryBufferToComment();
+            KRYS_RECONSUME_IN(BogusComment);
           }
 
-          RECONSUME_IN_CHARACTER_REFERENCE_RETURN_STATE();
-        END_STATE()
+          _token.BeginProcessingInstruction(_temporaryBuffer);
+          KRYS_RECONSUME_IN(AfterProcessingInstructionTarget);
+        }
+        if (krys::text::IsASCIIAlphanumeric(character) || character == HyphenMinus || character == LowLine)
+        {
+          _temporaryBuffer.push_back(character);
+          KRYS_ADVANCE_PAST_NON_NEWLINE_TO(ProcessingInstructionTarget);
+        }
+        if (character == EndOfFile) KRYS_UNLIKELY
+        {
+          ParserError(ParseError::EOFInProcessingInstruction);
+          return EmitEOFToken();
+        }
+
+        ParserError(ParseError::InvalidProcessingInstructionTarget);
+        ConvertTemporaryBufferToComment();
+        KRYS_RECONSUME_IN(BogusComment);
+        KRYS_END_STATE()
+
+        KRYS_BEGIN_STATE(AfterProcessingInstructionTarget)
+        if (IsTokenizerWhitespace(character))
+        {
+          KRYS_ADVANCE_TO(AfterProcessingInstructionTarget);
+        }
+
+        KRYS_RECONSUME_IN(ProcessingInstructionData);
+        KRYS_END_STATE()
+
+        KRYS_BEGIN_STATE(ProcessingInstructionData)
+        if (character == QuestionMark)
+        {
+          KRYS_ADVANCE_PAST_NON_NEWLINE_TO(ProcessingInstructionQuestionable);
+        }
+        if (character == GreaterThanSign)
+        {
+          return EmitProcessingInstructionToken();
+        }
+        if (character == EndOfFile) KRYS_UNLIKELY
+        {
+          ParserError(ParseError::EOFInProcessingInstruction);
+          return EmitEOFToken();
+        }
+
+        _token.AppendToProcessingInstructionData(character);
+        KRYS_ADVANCE_TO(ProcessingInstructionData);
+        KRYS_END_STATE()
+
+        KRYS_BEGIN_STATE(ProcessingInstructionQuestionable)
+        if (character == GreaterThanSign)
+        {
+          return EmitProcessingInstructionToken();
+        }
+        if (character == EndOfFile) KRYS_UNLIKELY
+        {
+          ParserError(ParseError::EOFInProcessingInstruction);
+          return EmitEOFToken();
+        }
+
+        _token.AppendToProcessingInstructionData(QuestionMark);
+        KRYS_RECONSUME_IN(ProcessingInstructionData);
+        KRYS_END_STATE()
+
+        KRYS_BEGIN_STATE(CharacterReference)
+        _temporaryBuffer.clear();
+        _temporaryBuffer.push_back(Ampersand);
+
+        if (krys::text::IsASCIIAlphanumeric(character))
+        {
+          _temporaryBuffer.push_back(character);
+          _namedCharacterReferenceMatchEntries = SearchNamedCharacterReferences(_temporaryBuffer);
+          _longestCharacterReferenceMatch = nullptr;
+          KRYS_ADVANCE_PAST_NON_NEWLINE_TO(NamedCharacterReference);
+        }
+        if (character == NumberSign)
+        {
+          _temporaryBuffer.push_back(character);
+          KRYS_ADVANCE_PAST_NON_NEWLINE_TO(NumericCharacterReference);
+        }
+
+        FlushCodePointsConsumedAsACharacterReference();
+        KRYS_RECONSUME_IN_CHARACTER_REFERENCE_RETURN_STATE();
+        KRYS_END_STATE()
+
+        KRYS_BEGIN_STATE(NamedCharacterReference)
+        _temporaryBuffer.push_back(character);
+        _namedCharacterReferenceMatchEntries =
+          SearchNamedCharacterReferences(_temporaryBuffer, _namedCharacterReferenceMatchEntries);
+
+        if (!_namedCharacterReferenceMatchEntries.empty())
+        {
+          const auto &first = _namedCharacterReferenceMatchEntries[0];
+          if (character == Semicolon) // Exact match possible only if semicolon is present
+          {
+            _temporaryBuffer.clear();
+            AppendToTemporaryBuffer(first.ToSpan());
+            FlushCodePointsConsumedAsACharacterReference();
+            KRYS_ADVANCE_TO_CHARACTER_REFERENCE_RETURN_STATE();
+          }
+
+          // Keep track of the longest match so far
+          if (first.Name.size() == _temporaryBuffer.size())
+          {
+            _longestCharacterReferenceMatch = &first;
+          }
+
+          KRYS_ADVANCE_PAST_NON_NEWLINE_TO(NamedCharacterReference);
+        }
+
+        if (_longestCharacterReferenceMatch)
+        {
+          const auto &match = *_longestCharacterReferenceMatch;
+
+          List<char32> nonMatchingCharacters;
+          for (size_t i = match.Name.size(); i < _temporaryBuffer.size() - 1; ++i)
+          {
+            nonMatchingCharacters.push_back(_temporaryBuffer[i]);
+          }
+          _temporaryBuffer.clear();
+
+          if (CharacterReferenceWasConsumedAsPartOfAnAttribute() && match.Name.back() != Semicolon
+              && (character == EqualSign || krys::text::IsASCIIAlphanumeric(character)))
+          {
+            AppendToTemporaryBuffer(match.Name);
+            AppendToTemporaryBuffer(nonMatchingCharacters);
+            FlushCodePointsConsumedAsACharacterReference();
+            KRYS_RECONSUME_IN_CHARACTER_REFERENCE_RETURN_STATE();
+          }
+
+          AppendToTemporaryBuffer(match.ToSpan());
+          AppendToTemporaryBuffer(nonMatchingCharacters);
+          FlushCodePointsConsumedAsACharacterReference();
+
+          if (match.Name.back() != Semicolon)
+          {
+            ParserError(ParseError::MissingSemicolonAfterCharacterReference);
+          }
+
+          KRYS_RECONSUME_IN_CHARACTER_REFERENCE_RETURN_STATE();
+        }
+
+        // no matches at all
+        _temporaryBuffer.pop_back(); // remove the last character added so we can reconsume it
+        FlushCodePointsConsumedAsACharacterReference();
+        KRYS_RECONSUME_IN(AmbiguousAmpersand);
+        KRYS_END_STATE()
+
+        KRYS_BEGIN_STATE(AmbiguousAmpersand)
+        if (krys::text::IsASCIIAlphanumeric(character))
+        {
+          if (CharacterReferenceWasConsumedAsPartOfAnAttribute())
+          {
+            _token.AppendToCurrentAttributeValue(character);
+          }
+          else
+          {
+            _token.AppendToCharacters(character);
+          }
+          KRYS_ADVANCE_TO(AmbiguousAmpersand);
+        }
+        if (character == Semicolon)
+        {
+          ParserError(ParseError::UnknownNamedCharacterReference);
+          KRYS_RECONSUME_IN_CHARACTER_REFERENCE_RETURN_STATE();
+        }
+
+        KRYS_RECONSUME_IN_CHARACTER_REFERENCE_RETURN_STATE();
+        KRYS_END_STATE()
+
+        KRYS_BEGIN_STATE(NumericCharacterReference)
+        _characterReferenceCode = 0;
+        if (krys::text::IsASCIICaselessEqual(character, 'x'))
+        {
+          _temporaryBuffer.push_back(character);
+          KRYS_ADVANCE_PAST_NON_NEWLINE_TO(HexadecimalCharacterReferenceStart);
+        }
+
+        KRYS_RECONSUME_IN(DecimalCharacterReferenceStart);
+        KRYS_END_STATE()
+
+        KRYS_BEGIN_STATE(HexadecimalCharacterReferenceStart)
+        if (krys::text::IsASCIIHexDigit(character))
+        {
+          KRYS_RECONSUME_IN(HexadecimalCharacterReference);
+        }
+
+        ParserError(ParseError::AbsenceOfDigitsInNumericCharacterReference);
+        FlushCodePointsConsumedAsACharacterReference();
+        KRYS_RECONSUME_IN_CHARACTER_REFERENCE_RETURN_STATE();
+        KRYS_END_STATE()
+
+        KRYS_BEGIN_STATE(DecimalCharacterReferenceStart)
+        if (krys::text::IsASCIIDigit(character))
+        {
+          KRYS_RECONSUME_IN(DecimalCharacterReference);
+        }
+
+        ParserError(ParseError::AbsenceOfDigitsInNumericCharacterReference);
+        FlushCodePointsConsumedAsACharacterReference();
+        KRYS_RECONSUME_IN_CHARACTER_REFERENCE_RETURN_STATE();
+        KRYS_END_STATE()
+
+        KRYS_BEGIN_STATE(HexadecimalCharacterReference)
+        if (krys::text::IsASCIIHexDigit(character))
+        {
+          // Anything past 0x10FFFF is outside the Unicode range, so the code stops growing there rather
+          // than overflowing back into it.
+          _characterReferenceCode = std::min<int64>(
+            _characterReferenceCode * 16 + static_cast<int64>(krys::text::ToASCIIHexValue(character)),
+            MaxCharacterReferenceCode);
+          KRYS_ADVANCE_PAST_NON_NEWLINE_TO(HexadecimalCharacterReference);
+        }
+        if (character != Semicolon)
+        {
+          ParserError(ParseError::MissingSemicolonAfterCharacterReference);
+        }
+
+        KRYS_RECONSUME_IN(NumericCharacterReferenceEnd);
+        KRYS_END_STATE()
+
+        KRYS_BEGIN_STATE(DecimalCharacterReference)
+        if (krys::text::IsASCIIDigit(character))
+        {
+          _characterReferenceCode = std::min<int64>(
+            _characterReferenceCode * 10 + static_cast<int64>(character - '0'), MaxCharacterReferenceCode);
+          KRYS_ADVANCE_PAST_NON_NEWLINE_TO(DecimalCharacterReference);
+        }
+        if (character != Semicolon)
+        {
+          ParserError(ParseError::MissingSemicolonAfterCharacterReference);
+        }
+
+        KRYS_RECONSUME_IN(NumericCharacterReferenceEnd);
+        KRYS_END_STATE()
+
+        KRYS_BEGIN_STATE(NumericCharacterReferenceEnd)
+        if (_characterReferenceCode == Null)
+        {
+          ParserError(ParseError::NullCharacterReference);
+          _characterReferenceCode = Replacement;
+        }
+        else if (_characterReferenceCode > 0x10FFFF)
+        {
+          ParserError(ParseError::CharacterReferenceOutsideUnicodeRange);
+          _characterReferenceCode = Replacement;
+        }
+        else if (krys::text::IsSurrogate(static_cast<char32>(_characterReferenceCode)))
+        {
+          ParserError(ParseError::SurrogateCharacterReference);
+          _characterReferenceCode = Replacement;
+        }
+        else if (krys::text::IsNonUnicodeCharacter(static_cast<char32>(_characterReferenceCode)))
+        {
+          ParserError(ParseError::NonCharacterCharacterReference);
+        }
+        else if (_characterReferenceCode == '\x0D'
+                 || krys::text::IsASCIINonWhitespaceControl(static_cast<char32>(_characterReferenceCode)))
+        {
+          ParserError(ParseError::ControlCharacterReference);
+        }
+        else
+        {
+          auto lookup = SearchNumericCharacterReferences(static_cast<char32>(_characterReferenceCode));
+          if (lookup != 0)
+          {
+            _characterReferenceCode = lookup;
+          }
+        }
+
+        _temporaryBuffer.clear();
+        _temporaryBuffer.push_back(static_cast<char32>(_characterReferenceCode));
+        FlushCodePointsConsumedAsACharacterReference();
+
+        if (character == Semicolon)
+        {
+          KRYS_ADVANCE_TO_CHARACTER_REFERENCE_RETURN_STATE();
+        }
+
+        KRYS_RECONSUME_IN_CHARACTER_REFERENCE_RETURN_STATE();
+        KRYS_END_STATE()
       }
 
       std::unreachable();
@@ -2792,13 +2792,15 @@ namespace krys::boo::html
 
 #pragma warning(pop)
 
-#undef BEGIN_STATE
-#undef END_STATE
-#undef RETURN_IN_CURRENT_STATE
-#undef RECONSUME_IN
-#undef ADVANCE_TO
-#undef ADVANCE_PAST_NON_NEWLINE_TO
-#undef RECONSUME_IN_CHARACTER_REFERENCE_RETURN_STATE
-#undef ADVANCE_TO_CHARACTER_REFERENCE_RETURN_STATE
+#undef KRYS_BEGIN_STATE
+#undef KRYS_END_STATE
+#undef KRYS_RETURN_IN_CURRENT_STATE
+#undef KRYS_RETURN_IN_CURRENT_STATE_IF_CHARACTERS_BUFFERED
+#undef KRYS_RECONSUME_IN
+#undef KRYS_ADVANCE_TO
+#undef KRYS_ADVANCE_PAST_NON_NEWLINE_TO
+#undef KRYS_RECONSUME_IN_CHARACTER_REFERENCE_RETURN_STATE
+#undef KRYS_ADVANCE_TO_CHARACTER_REFERENCE_RETURN_STATE
+#undef KRYS_SWITCH_TO
   };
 }

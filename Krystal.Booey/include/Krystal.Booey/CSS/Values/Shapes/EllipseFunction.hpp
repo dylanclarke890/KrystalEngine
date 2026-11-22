@@ -70,4 +70,4 @@ namespace krys::boo::css
   };
 }
 
-DEFINE_TUPLE_LIKE_CONFORMANCE(krys::boo::css::Ellipse, 2)
+KRYS_DEFINE_TUPLE_LIKE_CONFORMANCE(krys::boo::css::Ellipse, 2)

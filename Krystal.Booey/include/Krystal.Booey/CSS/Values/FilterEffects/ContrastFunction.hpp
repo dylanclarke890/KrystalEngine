@@ -42,7 +42,7 @@ namespace krys::boo::css
 
   using ContrastFunction = FunctionNotation<ValueId::Contrast, Contrast>;
 
-  DEFINE_TYPE_WRAPPER_GET(Contrast, Value)
+  KRYS_DEFINE_TYPE_WRAPPER_GET(Contrast, Value)
 }
 
-DEFINE_TUPLE_LIKE_CONFORMANCE(krys::boo::css::Contrast, 1)
+KRYS_DEFINE_TUPLE_LIKE_CONFORMANCE(krys::boo::css::Contrast, 1)

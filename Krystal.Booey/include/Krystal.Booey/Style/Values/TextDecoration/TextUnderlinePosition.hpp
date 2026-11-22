@@ -155,4 +155,4 @@ namespace krys::boo::style
   };
 }
 
-DEFINE_VARIANT_LIKE_CONFORMANCE(krys::boo::style::TextUnderlinePosition)
+KRYS_DEFINE_VARIANT_LIKE_CONFORMANCE(krys::boo::style::TextUnderlinePosition)

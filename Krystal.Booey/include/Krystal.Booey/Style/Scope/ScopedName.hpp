@@ -87,4 +87,4 @@ namespace krys
   };
 }
 
-DEFINE_VARIANT_LIKE_CONFORMANCE(krys::boo::style::ScopedName)
+KRYS_DEFINE_VARIANT_LIKE_CONFORMANCE(krys::boo::style::ScopedName)

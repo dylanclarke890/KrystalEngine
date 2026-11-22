@@ -58,7 +58,7 @@ namespace krys::boo::style
     }
   }
 
-  DEFINE_TYPE_MAPPING(css::Ellipse, Ellipse)
+  KRYS_DEFINE_TYPE_MAPPING(css::Ellipse, Ellipse)
 
   KRYS_NODISCARD PointF ResolvePosition(const Ellipse &value, SizeF boxSize) noexcept;
 
@@ -81,4 +81,4 @@ namespace krys::boo::style
   };
 }
 
-DEFINE_TUPLE_LIKE_CONFORMANCE(krys::boo::style::Ellipse, 2)
+KRYS_DEFINE_TUPLE_LIKE_CONFORMANCE(krys::boo::style::Ellipse, 2)

@@ -195,6 +195,6 @@ namespace krys::boo::style
   };
 }
 
-DEFINE_VARIANT_LIKE_CONFORMANCE(krys::boo::style::GridPosition)
-DEFINE_VARIANT_LIKE_CONFORMANCE(krys::boo::style::GridPosition::Explicit)
-DEFINE_VARIANT_LIKE_CONFORMANCE(krys::boo::style::GridPosition::Span)
+KRYS_DEFINE_VARIANT_LIKE_CONFORMANCE(krys::boo::style::GridPosition)
+KRYS_DEFINE_VARIANT_LIKE_CONFORMANCE(krys::boo::style::GridPosition::Explicit)
+KRYS_DEFINE_VARIANT_LIKE_CONFORMANCE(krys::boo::style::GridPosition::Span)

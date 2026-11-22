@@ -46,31 +46,31 @@ namespace krys
     return One<T>();
   }
 
-  template <VECTOR_TEMPLATE_PARAMS>
-  KRYS_NODISCARD constexpr auto Lerp(const VECTOR_TYPE &x, const VECTOR_TYPE &y,
-                                     const VECTOR_TYPE &t) noexcept
+  template <Number T, size_t N>
+  KRYS_NODISCARD constexpr auto Lerp(const Vector<T, N> &x, const Vector<T, N> &y,
+                                     const Vector<T, N> &t) noexcept
   {
     auto weight = Clamp(t, Zero<T>(), One<T>());
     return (x * (One<T>() - weight)) + (y * weight);
   }
 
-  template <VECTOR_TEMPLATE_PARAMS>
-  KRYS_NODISCARD constexpr auto Lerp(const VECTOR_TYPE &x, const VECTOR_TYPE &y, T t) noexcept
+  template <Number T, size_t N>
+  KRYS_NODISCARD constexpr auto Lerp(const Vector<T, N> &x, const Vector<T, N> &y, T t) noexcept
   {
     t = Clamp(t, Zero<T>(), One<T>());
     return (x * (One<T>() - t)) + (y * t);
   }
 
-  template <MATRIX_TEMPLATE_PARAMS>
-  KRYS_NODISCARD constexpr auto Lerp(const MATRIX_TYPE &x, const MATRIX_TYPE &y,
-                                     const MATRIX_TYPE &t) noexcept
+  template <Number T, size_t C, size_t R>
+  KRYS_NODISCARD constexpr auto Lerp(const Matrix<T, C, R> &x, const Matrix<T, C, R> &y,
+                                     const Matrix<T, C, R> &t) noexcept
   {
     auto weight = Clamp(t, Zero<T>(), One<T>());
     return (x * (One<T>() - weight)) + (y * weight);
   }
 
-  template <MATRIX_TEMPLATE_PARAMS>
-  KRYS_NODISCARD constexpr auto Lerp(const MATRIX_TYPE &x, const MATRIX_TYPE &y, T t) noexcept
+  template <Number T, size_t C, size_t R>
+  KRYS_NODISCARD constexpr auto Lerp(const Matrix<T, C, R> &x, const Matrix<T, C, R> &y, T t) noexcept
   {
     t = Clamp(t, Zero<T>(), One<T>());
     return (x * (One<T>() - t)) + (y * t);

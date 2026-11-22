@@ -86,4 +86,4 @@ namespace krys::boo::css
                                      ResourceLoaderOptions &loaderOptions) noexcept;
 }
 
-DEFINE_SPACE_SEPARATED_TUPLE_LIKE_CONFORMANCE(krys::boo::css::UrlModifiers, 3uz)
+KRYS_DEFINE_SPACE_SEPARATED_TUPLE_LIKE_CONFORMANCE(krys::boo::css::UrlModifiers, 3uz)

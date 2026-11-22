@@ -42,7 +42,7 @@ namespace krys::boo::css
 
   using SepiaFunction = FunctionNotation<ValueId::Sepia, Sepia>;
 
-  DEFINE_TYPE_WRAPPER_GET(Sepia, Value)
+  KRYS_DEFINE_TYPE_WRAPPER_GET(Sepia, Value)
 }
 
-DEFINE_TUPLE_LIKE_CONFORMANCE(krys::boo::css::Sepia, 1)
+KRYS_DEFINE_TUPLE_LIKE_CONFORMANCE(krys::boo::css::Sepia, 1)

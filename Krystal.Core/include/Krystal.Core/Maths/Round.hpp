@@ -3,28 +3,11 @@
 #include "Krystal.Core/Attributes.hpp"
 #include "Krystal.Core/Concepts.hpp"
 #include "Krystal.Core/Maths/Matrix.hpp"
+#include "Krystal.Core/Maths/Traits.hpp"
 #include "Krystal.Core/Maths/Vector.hpp"
 
 namespace krys
 {
-#pragma region Helper Macros
-
-#define VECTOR_ROUND_FUNC(FuncName)                                                                          \
-  template <FloatingPoint T, int N>                                                                          \
-  KRYS_NODISCARD constexpr auto FuncName(const VECTOR_TYPE &x) noexcept                                      \
-  {                                                                                                          \
-    return MapEach(x, [](auto v) { return FuncName(v); });                                                   \
-  }
-
-#define MATRIX_ROUND_FUNC(FuncName)                                                                          \
-  template <FloatingPoint T, int R, int C>                                                                   \
-  KRYS_NODISCARD constexpr auto FuncName(const MATRIX_TYPE &x) noexcept                                      \
-  {                                                                                                          \
-    return MapEach(x, [](auto v) { return FuncName(v); });                                                   \
-  }
-
-#pragma endregion
-
   template <FloatingPoint T>
   KRYS_NODISCARD constexpr T Ceil(T x) noexcept
   {
@@ -81,16 +64,35 @@ namespace krys
     return std::trunc(x);
   }
 
-  VECTOR_ROUND_FUNC(Ceil);
-  VECTOR_ROUND_FUNC(Floor);
-  VECTOR_ROUND_FUNC(Round);
-  VECTOR_ROUND_FUNC(Trunc);
+  /// @brief Each component of @p x rounded up.
+  template <VectorOrMatrix TValue>
+  requires FloatingPoint<typename Traits<TValue>::ComponentType>
+  KRYS_NODISCARD constexpr auto Ceil(const TValue &x) noexcept
+  {
+    return MapEach(x, [](auto v) { return Ceil(v); });
+  }
 
-  MATRIX_ROUND_FUNC(Ceil);
-  MATRIX_ROUND_FUNC(Floor);
-  MATRIX_ROUND_FUNC(Round);
-  MATRIX_ROUND_FUNC(Trunc);
+  /// @brief Each component of @p x rounded down.
+  template <VectorOrMatrix TValue>
+  requires FloatingPoint<typename Traits<TValue>::ComponentType>
+  KRYS_NODISCARD constexpr auto Floor(const TValue &x) noexcept
+  {
+    return MapEach(x, [](auto v) { return Floor(v); });
+  }
 
-#undef VECTOR_ROUND_FUNC
-#undef MATRIX_ROUND_FUNC
+  /// @brief Each component of @p x rounded to the nearest integer, halves away from zero.
+  template <VectorOrMatrix TValue>
+  requires FloatingPoint<typename Traits<TValue>::ComponentType>
+  KRYS_NODISCARD constexpr auto Round(const TValue &x) noexcept
+  {
+    return MapEach(x, [](auto v) { return Round(v); });
+  }
+
+  /// @brief Each component of @p x rounded towards zero.
+  template <VectorOrMatrix TValue>
+  requires FloatingPoint<typename Traits<TValue>::ComponentType>
+  KRYS_NODISCARD constexpr auto Trunc(const TValue &x) noexcept
+  {
+    return MapEach(x, [](auto v) { return Trunc(v); });
+  }
 }

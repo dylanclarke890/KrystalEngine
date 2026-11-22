@@ -61,18 +61,18 @@ namespace krys
       return Float() * (max - min) + min;
     }
 
-    template <VECTOR_TEMPLATE_PARAMS>
+    template <Number T, size_t N>
     static auto Vector()
     {
-      VECTOR_TYPE vec;
+      krys::Vector<T, N> vec;
       vec = MapEach(vec, [](auto) { return T(Float()); });
       return vec;
     }
 
-    template <VECTOR_TEMPLATE_PARAMS>
+    template <Number T, size_t N>
     static auto Vector(float min, float max)
     {
-      VECTOR_TYPE vec;
+      krys::Vector<T, N> vec;
       vec = MapEach(vec, [&min, &max](auto) { return T(Float(min, max)); });
       return vec;
     }

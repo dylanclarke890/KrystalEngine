@@ -178,7 +178,7 @@ namespace krys::boo::style
     KRYS_NODISCARD bool operator==(const MaskBorderWidth &) const noexcept = default;
   };
 
-  DEFINE_TYPE_WRAPPER_GET(MaskBorderWidth, Values);
+  KRYS_DEFINE_TYPE_WRAPPER_GET(MaskBorderWidth, Values);
 
   // MARK: - Conversion
 
@@ -224,6 +224,6 @@ namespace krys::boo::style
   };
 }
 
-DEFINE_TUPLE_LIKE_CONFORMANCE_FOR_TYPE_WRAPPER(krys::boo::style::MaskBorderWidth)
-DEFINE_VARIANT_LIKE_CONFORMANCE(krys::boo::style::MaskBorderWidthValueLength)
-DEFINE_VARIANT_LIKE_CONFORMANCE(krys::boo::style::MaskBorderWidthValue)
+KRYS_DEFINE_TUPLE_LIKE_CONFORMANCE_FOR_TYPE_WRAPPER(krys::boo::style::MaskBorderWidth)
+KRYS_DEFINE_VARIANT_LIKE_CONFORMANCE(krys::boo::style::MaskBorderWidthValueLength)
+KRYS_DEFINE_VARIANT_LIKE_CONFORMANCE(krys::boo::style::MaskBorderWidthValue)

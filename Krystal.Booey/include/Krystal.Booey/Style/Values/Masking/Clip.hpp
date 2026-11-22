@@ -80,7 +80,7 @@ namespace krys::boo::style
     KRYS_NODISCARD bool operator==(const ClipRect &) const noexcept = default;
   };
 
-  DEFINE_TYPE_WRAPPER_GET(ClipRect, Value);
+  KRYS_DEFINE_TYPE_WRAPPER_GET(ClipRect, Value);
 
   // <'clip'> = <rect()> | auto
   // https://drafts.fxtf.org/css-masking/#propdef-clip
@@ -158,6 +158,6 @@ namespace krys::boo::style
   };
 }
 
-DEFINE_TUPLE_LIKE_CONFORMANCE_FOR_TYPE_WRAPPER(krys::boo::style::ClipRect);
-DEFINE_VARIANT_LIKE_CONFORMANCE(krys::boo::style::ClipEdge);
-DEFINE_VARIANT_LIKE_CONFORMANCE(krys::boo::style::Clip);
+KRYS_DEFINE_TUPLE_LIKE_CONFORMANCE_FOR_TYPE_WRAPPER(krys::boo::style::ClipRect);
+KRYS_DEFINE_VARIANT_LIKE_CONFORMANCE(krys::boo::style::ClipEdge);
+KRYS_DEFINE_VARIANT_LIKE_CONFORMANCE(krys::boo::style::Clip);

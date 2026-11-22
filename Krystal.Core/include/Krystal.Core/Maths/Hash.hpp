@@ -6,10 +6,10 @@
 
 namespace krys
 {
-  template <VECTOR_TEMPLATE_PARAMS>
-  struct FastHash<VECTOR_TYPE>
+  template <Number T, size_t N>
+  struct FastHash<Vector<T, N>>
   {
-    KRYS_NODISCARD size_t operator()(const VECTOR_TYPE &v) const noexcept
+    KRYS_NODISCARD size_t operator()(const Vector<T, N> &v) const noexcept
     {
       if constexpr (N == 1)
       {
@@ -30,10 +30,10 @@ namespace krys
     }
   };
 
-  template <MATRIX_TEMPLATE_PARAMS>
-  struct FastHash<MATRIX_TYPE>
+  template <Number T, size_t C, size_t R>
+  struct FastHash<Matrix<T, C, R>>
   {
-    KRYS_NODISCARD size_t operator()(const MATRIX_TYPE &m) const noexcept
+    KRYS_NODISCARD size_t operator()(const Matrix<T, C, R> &m) const noexcept
     {
       size_t hash = 0;
       for (size_t i = 0; i < R; i++)

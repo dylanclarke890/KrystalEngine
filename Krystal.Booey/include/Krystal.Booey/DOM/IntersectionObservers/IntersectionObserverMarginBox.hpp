@@ -41,4 +41,4 @@ namespace krys::boo
     css::MinimallySerialisingSpaceSeparatedRectEdges<IntersectionObserverMarginEdge>;
 }
 
-DEFINE_VARIANT_LIKE_CONFORMANCE(krys::boo::IntersectionObserverMarginEdge)
+KRYS_DEFINE_VARIANT_LIKE_CONFORMANCE(krys::boo::IntersectionObserverMarginEdge)

@@ -110,4 +110,4 @@ namespace krys::boo::style
   using PreferredSizePair = css::SpaceSeparatedSize<PreferredSize>;
 }
 
-DEFINE_VARIANT_LIKE_CONFORMANCE(krys::boo::style::PreferredSize)
+KRYS_DEFINE_VARIANT_LIKE_CONFORMANCE(krys::boo::style::PreferredSize)

@@ -129,5 +129,5 @@ namespace krys::boo::style
   };
 }
 
-DEFINE_VARIANT_LIKE_CONFORMANCE(krys::boo::style::PositionTryFallback)
-DEFINE_SPACE_SEPARATED_TUPLE_LIKE_CONFORMANCE(krys::boo::style::PositionTryFallback::RuleAndTactics, 2)
+KRYS_DEFINE_VARIANT_LIKE_CONFORMANCE(krys::boo::style::PositionTryFallback)
+KRYS_DEFINE_SPACE_SEPARATED_TUPLE_LIKE_CONFORMANCE(krys::boo::style::PositionTryFallback::RuleAndTactics, 2)

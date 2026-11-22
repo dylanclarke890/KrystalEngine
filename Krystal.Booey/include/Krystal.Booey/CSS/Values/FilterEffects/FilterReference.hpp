@@ -38,7 +38,7 @@ namespace krys::boo::css
     KRYS_NODISCARD bool operator==(const FilterReference &) const noexcept = default;
   };
 
-  DEFINE_TYPE_WRAPPER_GET(FilterReference, Url)
+  KRYS_DEFINE_TYPE_WRAPPER_GET(FilterReference, Url)
 }
 
-DEFINE_TUPLE_LIKE_CONFORMANCE(krys::boo::css::FilterReference, 1)
+KRYS_DEFINE_TUPLE_LIKE_CONFORMANCE(krys::boo::css::FilterReference, 1)

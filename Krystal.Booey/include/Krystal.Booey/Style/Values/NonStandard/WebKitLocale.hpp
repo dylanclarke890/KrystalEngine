@@ -102,4 +102,4 @@ namespace krys::boo::style
   };
 }
 
-DEFINE_VARIANT_LIKE_CONFORMANCE(krys::boo::style::WebkitLocale)
+KRYS_DEFINE_VARIANT_LIKE_CONFORMANCE(krys::boo::style::WebkitLocale)

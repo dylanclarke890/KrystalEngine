@@ -118,4 +118,4 @@ namespace krys::boo::style
   // MARK: - Evaluation
 }
 
-DEFINE_VARIANT_LIKE_CONFORMANCE(krys::boo::style::OffsetPosition)
+KRYS_DEFINE_VARIANT_LIKE_CONFORMANCE(krys::boo::style::OffsetPosition)

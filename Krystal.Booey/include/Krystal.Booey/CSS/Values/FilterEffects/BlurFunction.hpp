@@ -42,7 +42,7 @@ namespace krys::boo::css
 
   using BlurFunction = FunctionNotation<ValueId::Blur, Blur>;
 
-  DEFINE_TYPE_WRAPPER_GET(Blur, Value)
+  KRYS_DEFINE_TYPE_WRAPPER_GET(Blur, Value)
 }
 
-DEFINE_TUPLE_LIKE_CONFORMANCE(krys::boo::css::Blur, 1)
+KRYS_DEFINE_TUPLE_LIKE_CONFORMANCE(krys::boo::css::Blur, 1)

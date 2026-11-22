@@ -96,4 +96,4 @@ namespace krys::boo::style
   using MaximumSizePair = css::SpaceSeparatedSize<MaximumSize>;
 }
 
-DEFINE_VARIANT_LIKE_CONFORMANCE(krys::boo::style::MaximumSize)
+KRYS_DEFINE_VARIANT_LIKE_CONFORMANCE(krys::boo::style::MaximumSize)

@@ -179,5 +179,5 @@ namespace krys::boo::style
   };
 }
 
-DEFINE_VARIANT_LIKE_CONFORMANCE(krys::boo::style::Rotate::Function)
-DEFINE_VARIANT_LIKE_CONFORMANCE(krys::boo::style::Rotate)
+KRYS_DEFINE_VARIANT_LIKE_CONFORMANCE(krys::boo::style::Rotate::Function)
+KRYS_DEFINE_VARIANT_LIKE_CONFORMANCE(krys::boo::style::Rotate)

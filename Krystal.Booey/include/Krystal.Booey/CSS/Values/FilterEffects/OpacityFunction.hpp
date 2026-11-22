@@ -42,7 +42,7 @@ namespace krys::boo::css
 
   using OpacityFunction = FunctionNotation<ValueId::Opacity, Opacity>;
 
-  DEFINE_TYPE_WRAPPER_GET(Opacity, Value)
+  KRYS_DEFINE_TYPE_WRAPPER_GET(Opacity, Value)
 }
 
-DEFINE_TUPLE_LIKE_CONFORMANCE(krys::boo::css::Opacity, 1)
+KRYS_DEFINE_TUPLE_LIKE_CONFORMANCE(krys::boo::css::Opacity, 1)

@@ -27,9 +27,9 @@
 
 #include "Krystal.Booey/Rendering/Style/RenderStyle.hpp"
 
-#define RENDER_STYLE_PROPERTIES_SETTERS_INLINES_INCLUDE_TRAP 1
+#define KRYS_RENDER_STYLE_PROPERTIES_SETTERS_INLINES_INCLUDE_TRAP 1
 #include "Krystal.Booey/Rendering/Style/RenderStyleProperties+SettersInlines.hpp"
-#undef RENDER_STYLE_PROPERTIES_SETTERS_INLINES_INCLUDE_TRAP
+#undef KRYS_RENDER_STYLE_PROPERTIES_SETTERS_INLINES_INCLUDE_TRAP
 
 namespace krys::boo
 {

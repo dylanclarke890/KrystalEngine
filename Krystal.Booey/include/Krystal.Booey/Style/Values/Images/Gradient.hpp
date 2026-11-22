@@ -157,7 +157,7 @@ namespace krys::boo
       }
     }
 
-    DEFINE_TYPE_MAPPING(css::LinearGradient, LinearGradient)
+    KRYS_DEFINE_TYPE_MAPPING(css::LinearGradient, LinearGradient)
 
     // MARK: - RadialGradient
 
@@ -235,9 +235,9 @@ namespace krys::boo
       }
     }
 
-    DEFINE_TYPE_MAPPING(css::RadialGradient::Ellipse, RadialGradient::Ellipse)
-    DEFINE_TYPE_MAPPING(css::RadialGradient::Circle, RadialGradient::Circle)
-    DEFINE_TYPE_MAPPING(css::RadialGradient, RadialGradient)
+    KRYS_DEFINE_TYPE_MAPPING(css::RadialGradient::Ellipse, RadialGradient::Ellipse)
+    KRYS_DEFINE_TYPE_MAPPING(css::RadialGradient::Circle, RadialGradient::Circle)
+    KRYS_DEFINE_TYPE_MAPPING(css::RadialGradient, RadialGradient)
 
     // MARK: - ConicGradient
 
@@ -288,8 +288,8 @@ namespace krys::boo
       }
     }
 
-    DEFINE_TYPE_MAPPING(css::ConicGradient::GradientBoxType, ConicGradient::GradientBoxType)
-    DEFINE_TYPE_MAPPING(css::ConicGradient, ConicGradient)
+    KRYS_DEFINE_TYPE_MAPPING(css::ConicGradient::GradientBoxType, ConicGradient::GradientBoxType)
+    KRYS_DEFINE_TYPE_MAPPING(css::ConicGradient, ConicGradient)
 
     // MARK: - Gradient (variant)
 
@@ -318,12 +318,12 @@ namespace krys::boo
   }
 }
 
-DEFINE_TUPLE_LIKE_CONFORMANCE(krys::boo::style::LinearGradient, 3)
-DEFINE_TUPLE_LIKE_CONFORMANCE(krys::boo::style::RadialGradient::Ellipse, 2)
-DEFINE_TUPLE_LIKE_CONFORMANCE(krys::boo::style::RadialGradient::Circle, 2)
-DEFINE_TUPLE_LIKE_CONFORMANCE(krys::boo::style::RadialGradient, 3)
-DEFINE_TUPLE_LIKE_CONFORMANCE(krys::boo::style::ConicGradient::GradientBoxType, 2)
-DEFINE_TUPLE_LIKE_CONFORMANCE(krys::boo::style::ConicGradient, 3)
+KRYS_DEFINE_TUPLE_LIKE_CONFORMANCE(krys::boo::style::LinearGradient, 3)
+KRYS_DEFINE_TUPLE_LIKE_CONFORMANCE(krys::boo::style::RadialGradient::Ellipse, 2)
+KRYS_DEFINE_TUPLE_LIKE_CONFORMANCE(krys::boo::style::RadialGradient::Circle, 2)
+KRYS_DEFINE_TUPLE_LIKE_CONFORMANCE(krys::boo::style::RadialGradient, 3)
+KRYS_DEFINE_TUPLE_LIKE_CONFORMANCE(krys::boo::style::ConicGradient::GradientBoxType, 2)
+KRYS_DEFINE_TUPLE_LIKE_CONFORMANCE(krys::boo::style::ConicGradient, 3)
 
 template <typename C, typename P>
 constexpr inline bool krys::boo::css::TreatAsTupleLike<krys::boo::style::GradientColorStop<C, P>> = true;

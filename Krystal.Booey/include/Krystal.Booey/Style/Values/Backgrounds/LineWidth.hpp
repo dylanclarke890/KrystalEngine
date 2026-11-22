@@ -72,7 +72,7 @@ namespace krys::boo
       KRYS_NODISCARD constexpr auto operator<=>(const LineWidth &) const noexcept = default;
     };
 
-    DEFINE_TYPE_WRAPPER_GET(LineWidth, Value);
+    KRYS_DEFINE_TYPE_WRAPPER_GET(LineWidth, Value);
 
     using LineWidthBox = css::MinimallySerialisingSpaceSeparatedRectEdges<style::LineWidth>;
 
@@ -109,4 +109,4 @@ namespace krys::boo
   }
 }
 
-DEFINE_TUPLE_LIKE_CONFORMANCE_FOR_TYPE_WRAPPER(krys::boo::style::LineWidth)
+KRYS_DEFINE_TUPLE_LIKE_CONFORMANCE_FOR_TYPE_WRAPPER(krys::boo::style::LineWidth)

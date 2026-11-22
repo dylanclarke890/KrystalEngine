@@ -64,4 +64,4 @@ namespace krys::boo::css
   };
 }
 
-DEFINE_TUPLE_LIKE_CONFORMANCE(krys::boo::css::Inset, 2)
+KRYS_DEFINE_TUPLE_LIKE_CONFORMANCE(krys::boo::css::Inset, 2)

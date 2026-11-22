@@ -42,7 +42,7 @@ namespace krys::boo::css
 
   using CubicBezierEasingFunction = FunctionNotation<ValueId::CubicBezier, CubicBezierEasingParameters>;
 
-  DEFINE_TYPE_WRAPPER_GET(CubicBezierEasingParameters, Value)
+  KRYS_DEFINE_TYPE_WRAPPER_GET(CubicBezierEasingParameters, Value)
 }
 
-DEFINE_TUPLE_LIKE_CONFORMANCE(krys::boo::css::CubicBezierEasingParameters, 1)
+KRYS_DEFINE_TUPLE_LIKE_CONFORMANCE(krys::boo::css::CubicBezierEasingParameters, 1)

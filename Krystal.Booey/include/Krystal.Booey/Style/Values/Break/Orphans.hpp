@@ -62,4 +62,4 @@ namespace krys::boo::style
   };
 }
 
-DEFINE_VARIANT_LIKE_CONFORMANCE(krys::boo::style::Orphans)
+KRYS_DEFINE_VARIANT_LIKE_CONFORMANCE(krys::boo::style::Orphans)

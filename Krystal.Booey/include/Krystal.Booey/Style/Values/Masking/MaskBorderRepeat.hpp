@@ -82,7 +82,7 @@ namespace krys::boo::style
     KRYS_NODISCARD constexpr bool operator==(const MaskBorderRepeat &) const noexcept = default;
   };
 
-  DEFINE_TYPE_WRAPPER_GET(MaskBorderRepeat, Values);
+  KRYS_DEFINE_TYPE_WRAPPER_GET(MaskBorderRepeat, Values);
 
   // MARK: - Conversion
 
@@ -93,4 +93,4 @@ namespace krys::boo::style
   };
 }
 
-DEFINE_TUPLE_LIKE_CONFORMANCE_FOR_TYPE_WRAPPER(krys::boo::style::MaskBorderRepeat)
+KRYS_DEFINE_TUPLE_LIKE_CONFORMANCE_FOR_TYPE_WRAPPER(krys::boo::style::MaskBorderRepeat)

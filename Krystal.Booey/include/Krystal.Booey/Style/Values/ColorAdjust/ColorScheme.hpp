@@ -76,7 +76,7 @@ namespace krys::boo::style
     }
   }
 
-  DEFINE_TYPE_MAPPING(css::ColorScheme, ColorScheme)
+  KRYS_DEFINE_TYPE_MAPPING(css::ColorScheme, ColorScheme)
 
   // MARK: - Conversion
 
@@ -104,4 +104,4 @@ namespace krys::boo::style
   };
 }
 
-DEFINE_TUPLE_LIKE_CONFORMANCE(krys::boo::style::ColorScheme, 2)
+KRYS_DEFINE_TUPLE_LIKE_CONFORMANCE(krys::boo::style::ColorScheme, 2)

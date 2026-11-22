@@ -30,7 +30,7 @@
 
 #pragma once
 
-#ifndef STYLE_INTERPOLATION_GENERATED_INCLUDE_TRAP
+#ifndef KRYS_STYLE_INTERPOLATION_GENERATED_INCLUDE_TRAP
   #error "Please do not include this file anywhere except from generated code."
 #endif
 

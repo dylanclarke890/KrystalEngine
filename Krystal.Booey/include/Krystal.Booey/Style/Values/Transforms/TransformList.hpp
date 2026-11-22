@@ -150,4 +150,4 @@ namespace krys::boo
   }
 }
 
-DEFINE_SPACE_SEPARATED_RANGE_LIKE_CONFORMANCE(krys::boo::style::TransformList)
+KRYS_DEFINE_SPACE_SEPARATED_RANGE_LIKE_CONFORMANCE(krys::boo::style::TransformList)

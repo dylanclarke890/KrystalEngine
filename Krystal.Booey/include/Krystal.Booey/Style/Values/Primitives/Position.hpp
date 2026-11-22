@@ -49,7 +49,7 @@ namespace krys::boo::style
 
     KRYS_NODISCARD bool operator==(const TwoComponentPositionHorizontal &) const noexcept = default;
   };
-  DEFINE_TYPE_WRAPPER_GET(TwoComponentPositionHorizontal, Offset)
+  KRYS_DEFINE_TYPE_WRAPPER_GET(TwoComponentPositionHorizontal, Offset)
 
   struct TwoComponentPositionVertical
   {
@@ -57,7 +57,7 @@ namespace krys::boo::style
 
     KRYS_NODISCARD bool operator==(const TwoComponentPositionVertical &) const noexcept = default;
   };
-  DEFINE_TYPE_WRAPPER_GET(TwoComponentPositionVertical, Offset)
+  KRYS_DEFINE_TYPE_WRAPPER_GET(TwoComponentPositionVertical, Offset)
 
   /// @brief A computed `<position>`: a horizontal and a vertical length-percentage.
   struct Position
@@ -208,8 +208,8 @@ namespace krys::boo::style
   };
 }
 
-DEFINE_VARIANT_LIKE_CONFORMANCE(krys::boo::style::PositionX)
-DEFINE_VARIANT_LIKE_CONFORMANCE(krys::boo::style::PositionY)
-DEFINE_TUPLE_LIKE_CONFORMANCE_FOR_TYPE_WRAPPER(krys::boo::style::TwoComponentPositionHorizontal)
-DEFINE_TUPLE_LIKE_CONFORMANCE_FOR_TYPE_WRAPPER(krys::boo::style::TwoComponentPositionVertical)
-DEFINE_SPACE_SEPARATED_TUPLE_LIKE_CONFORMANCE(krys::boo::style::Position, 2)
+KRYS_DEFINE_VARIANT_LIKE_CONFORMANCE(krys::boo::style::PositionX)
+KRYS_DEFINE_VARIANT_LIKE_CONFORMANCE(krys::boo::style::PositionY)
+KRYS_DEFINE_TUPLE_LIKE_CONFORMANCE_FOR_TYPE_WRAPPER(krys::boo::style::TwoComponentPositionHorizontal)
+KRYS_DEFINE_TUPLE_LIKE_CONFORMANCE_FOR_TYPE_WRAPPER(krys::boo::style::TwoComponentPositionVertical)
+KRYS_DEFINE_SPACE_SEPARATED_TUPLE_LIKE_CONFORMANCE(krys::boo::style::Position, 2)

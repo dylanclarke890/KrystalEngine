@@ -3,98 +3,64 @@
 #include "Krystal.Core/Assert.hpp"
 #include "Krystal.Core/Attributes.hpp"
 #include "Krystal.Core/Concepts.hpp"
-#include "Krystal.Core/Macros.hpp"
 #include "Krystal.Core/Maths/Traits.hpp"
 #include "Krystal.Core/Numeric.hpp"
+#include "Krystal.Core/TypeTraits.hpp"
 #include <cmath>
 #include <compare>
-
-#pragma region Helper Macros
-
-#define VECTOR_TEMPLATE_PARAMS krys::Number T, int N
-#define VECTOR_TEMPLATE_ARGS T, N
-#define VECTOR_TYPE krys::Vector<VECTOR_TEMPLATE_ARGS>
-
-#define VECTOR_TYPE_ALIASES(length)                                                                          \
-  template <Number T>                                                                                        \
-  using Vector##length = Vector<T, length>;                                                                  \
-  using Vec##length = Vector<float, length>;                                                                 \
-  using Vec##length##b = Vector<bool, length>;                                                               \
-  using Vec##length##f = Vector<float, length>;                                                              \
-  using Vec##length##d = Vector<double, length>;                                                             \
-  using Vec##length##i = Vector<int, length>;                                                                \
-  using Vec##length##u = Vector<unsigned int, length>;
-
-#define VECTOR_INTROSPECTION(length)                                                                         \
-  constexpr static int Length = length;                                                                      \
-  using Type = Vector<T, Length>;                                                                            \
-  using ComponentType = T;
-
-#define VECTOR_BINARY_OPERATOR(OP)                                                                           \
-  template <VECTOR_TEMPLATE_PARAMS>                                                                          \
-  KRYS_NODISCARD constexpr auto operator OP(const Vector<T, N> &lhs, const Vector<T, N> &rhs) noexcept       \
-  {                                                                                                          \
-    return Zip(lhs, rhs, [](auto l, auto r) { return l OP r; });                                             \
-  }                                                                                                          \
-  template <VECTOR_TEMPLATE_PARAMS>                                                                          \
-  KRYS_NODISCARD constexpr auto operator OP(const Vector<T, N> &lhs, T scalar) noexcept                      \
-  {                                                                                                          \
-    return MapEach(lhs, [&](auto v) { return v OP scalar; });                                                \
-  }
-
-#define VECTOR_UNARY_OPERATOR(OP)                                                                            \
-  template <VECTOR_TEMPLATE_PARAMS>                                                                          \
-  KRYS_NODISCARD constexpr auto operator OP(const Vector<T, N> &rhs) noexcept                                \
-  {                                                                                                          \
-    return MapEach(rhs, [](auto v) { return OP v; });                                                        \
-  }
-
-#define VECTOR_OPERATOR_ASSIGNMENT(OP)                                                                       \
-  constexpr auto &operator KRYS_CONCAT(OP, =)(const Vector &other) noexcept                                  \
-  {                                                                                                          \
-    *this = *this OP other;                                                                                  \
-    return *this;                                                                                            \
-  }                                                                                                          \
-  constexpr auto &operator KRYS_CONCAT(OP, =)(T scalar) noexcept                                             \
-  {                                                                                                          \
-    *this = *this OP scalar;                                                                                 \
-    return *this;                                                                                            \
-  }
-
-#define VECTOR_COMMON_MEMBER_FUNCTIONS()                                                                     \
-  constexpr ~Vector() noexcept = default;                                                                    \
-  constexpr Vector(const Vector &other) noexcept = default;                                                  \
-  constexpr Vector(Vector &&other) noexcept = default;                                                       \
-  constexpr Vector &operator=(const Vector &other) noexcept = default;                                       \
-  constexpr Vector &operator=(Vector &&other) noexcept = default;                                            \
-  constexpr auto operator<=>(const Vector &other) const noexcept = default;                                  \
-  VECTOR_OPERATOR_ASSIGNMENT(+)                                                                              \
-  VECTOR_OPERATOR_ASSIGNMENT(-)                                                                              \
-  VECTOR_OPERATOR_ASSIGNMENT(*)                                                                              \
-  VECTOR_OPERATOR_ASSIGNMENT(/)                                                                              \
-  VECTOR_OPERATOR_ASSIGNMENT(>>)                                                                             \
-  VECTOR_OPERATOR_ASSIGNMENT(<<)                                                                             \
-  VECTOR_OPERATOR_ASSIGNMENT(|)                                                                              \
-  VECTOR_OPERATOR_ASSIGNMENT(&)                                                                              \
-  VECTOR_OPERATOR_ASSIGNMENT(^)
-
-#pragma endregion
+#include <functional>
+#include <utility>
 
 namespace krys
 {
-  template <VECTOR_TEMPLATE_PARAMS>
+  /// @brief A vector of @p N components (1 to 4) of type @p T, named `x`, `y`, `z` and `w` as in shaders.
+  template <Number T, size_t N>
   struct Vector;
+
+  namespace detail
+  {
+    /// @brief The component of @p vector at @p index.
+    template <typename TVector>
+    KRYS_NODISCARD constexpr auto &VectorComponent(TVector &vector, size_t index) noexcept
+    {
+      constexpr size_t length = TVector::Length;
+      krys_debug_assert(index < length);
+
+      if constexpr (length > 3)
+      {
+        if (index == 3)
+        {
+          return vector.w;
+        }
+      }
+      if constexpr (length > 2)
+      {
+        if (index == 2)
+        {
+          return vector.z;
+        }
+      }
+      if constexpr (length > 1)
+      {
+        if (index == 1)
+        {
+          return vector.y;
+        }
+      }
+      return vector.x;
+    }
+  }
 
   template <Number T>
   struct Vector<T, 1>
   {
-    T x;
+    constexpr static size_t Length = 1;
+    using Type = Vector<T, 1>;
+    using ComponentType = T;
 
-    VECTOR_INTROSPECTION(1);
+    T x {0};
 
-    constexpr Vector() noexcept : x(T(0))
-    {
-    }
+    constexpr Vector() noexcept = default;
 
     constexpr explicit Vector(T value) noexcept : x(value)
     {
@@ -105,31 +71,30 @@ namespace krys
     {
     }
 
-    KRYS_NODISCARD constexpr auto operator[](int index) const noexcept
+    KRYS_NODISCARD constexpr T operator[](size_t index) const noexcept
     {
-      krys_debug_assert(index == 0);
-      return x;
+      return detail::VectorComponent(*this, index);
     }
 
-    KRYS_NODISCARD constexpr auto &operator[](int index) noexcept
+    KRYS_NODISCARD constexpr T &operator[](size_t index) noexcept
     {
-      krys_debug_assert(index == 0);
-      return x;
+      return detail::VectorComponent(*this, index);
     }
 
-    VECTOR_COMMON_MEMBER_FUNCTIONS()
+    KRYS_NODISCARD constexpr auto operator<=>(const Vector &) const noexcept = default;
   };
 
   template <Number T>
   struct Vector<T, 2>
   {
-    T x, y;
+    constexpr static size_t Length = 2;
+    using Type = Vector<T, 2>;
+    using ComponentType = T;
 
-    VECTOR_INTROSPECTION(2);
+    T x {0};
+    T y {0};
 
-    constexpr Vector() noexcept : x(T(0)), y(T(0))
-    {
-    }
+    constexpr Vector() noexcept = default;
 
     constexpr explicit Vector(T value) noexcept : x(value), y(value)
     {
@@ -145,41 +110,31 @@ namespace krys
     {
     }
 
-    KRYS_NODISCARD constexpr auto operator[](int index) const noexcept
+    KRYS_NODISCARD constexpr T operator[](size_t index) const noexcept
     {
-      krys_debug_assert(index >= 0 && index < Length);
-      if (index == 0)
-      {
-        return x;
-      }
-
-      return y;
+      return detail::VectorComponent(*this, index);
     }
 
-    KRYS_NODISCARD constexpr auto &operator[](int index) noexcept
+    KRYS_NODISCARD constexpr T &operator[](size_t index) noexcept
     {
-      krys_debug_assert(index >= 0 && index < Length);
-      if (index == 0)
-      {
-        return x;
-      }
-
-      return y;
+      return detail::VectorComponent(*this, index);
     }
 
-    VECTOR_COMMON_MEMBER_FUNCTIONS()
+    KRYS_NODISCARD constexpr auto operator<=>(const Vector &) const noexcept = default;
   };
 
   template <Number T>
   struct Vector<T, 3>
   {
-    T x, y, z;
+    constexpr static size_t Length = 3;
+    using Type = Vector<T, 3>;
+    using ComponentType = T;
 
-    VECTOR_INTROSPECTION(3);
+    T x {0};
+    T y {0};
+    T z {0};
 
-    constexpr Vector() noexcept : x(T(0)), y(T(0)), z(T(0))
-    {
-    }
+    constexpr Vector() noexcept = default;
 
     constexpr explicit Vector(T value) noexcept : x(value), y(value), z(value)
     {
@@ -189,67 +144,47 @@ namespace krys
     {
     }
 
-    constexpr Vector(const Vector<T, 2> &vec2, T zValue) noexcept : x(vec2.x), y(vec2.y), z(zValue)
+    constexpr Vector(const Vector<T, 2> &xy, T zValue) noexcept : x(xy.x), y(xy.y), z(zValue)
     {
     }
 
-    constexpr Vector(const Vector<T, 4> &vec4) noexcept : x(vec4.x), y(vec4.y), z(vec4.z)
+    /// @brief The first three components of @p xyzw.
+    constexpr Vector(const Vector<T, 4> &xyzw) noexcept : x(xyzw.x), y(xyzw.y), z(xyzw.z)
     {
     }
 
-    template <Number U>
+    template <ConvertibleTo<T> U>
     constexpr Vector(const Vector<U, 3> &other) noexcept
         : x(static_cast<T>(other.x)), y(static_cast<T>(other.y)), z(static_cast<T>(other.z))
     {
     }
 
-    KRYS_NODISCARD constexpr auto operator[](int index) const noexcept
+    KRYS_NODISCARD constexpr T operator[](size_t index) const noexcept
     {
-      krys_debug_assert(index >= 0 && index < Length);
-      if (index == 0)
-      {
-        return x;
-      }
-      if (index == 1)
-      {
-        return y;
-      }
-      else
-      {
-        return z;
-      }
+      return detail::VectorComponent(*this, index);
     }
 
-    KRYS_NODISCARD constexpr auto &operator[](int index) noexcept
+    KRYS_NODISCARD constexpr T &operator[](size_t index) noexcept
     {
-      krys_debug_assert(index >= 0 && index < Length);
-      if (index == 0)
-      {
-        return x;
-      }
-      if (index == 1)
-      {
-        return y;
-      }
-      else
-      {
-        return z;
-      }
+      return detail::VectorComponent(*this, index);
     }
 
-    VECTOR_COMMON_MEMBER_FUNCTIONS()
+    KRYS_NODISCARD constexpr auto operator<=>(const Vector &) const noexcept = default;
   };
 
   template <Number T>
   struct Vector<T, 4>
   {
-    T x, y, z, w;
+    constexpr static size_t Length = 4;
+    using Type = Vector<T, 4>;
+    using ComponentType = T;
 
-    VECTOR_INTROSPECTION(4);
+    T x {0};
+    T y {0};
+    T z {0};
+    T w {0};
 
-    constexpr Vector() noexcept : x(T(0)), y(T(0)), z(T(0)), w(T(0))
-    {
-    }
+    constexpr Vector() noexcept = default;
 
     constexpr explicit Vector(T value) noexcept : x(value), y(value), z(value), w(value)
     {
@@ -260,12 +195,12 @@ namespace krys
     {
     }
 
-    constexpr Vector(const Vector<T, 3> &vec3, T wValue) noexcept : x(vec3.x), y(vec3.y), z(vec3.z), w(wValue)
+    constexpr Vector(const Vector<T, 3> &xyz, T wValue) noexcept : x(xyz.x), y(xyz.y), z(xyz.z), w(wValue)
     {
     }
 
-    constexpr Vector(const Vector<T, 2> &vec2a, const Vector<T, 2> &vec2b) noexcept
-        : x(vec2a.x), y(vec2a.y), z(vec2b.x), w(vec2b.y)
+    constexpr Vector(const Vector<T, 2> &xy, const Vector<T, 2> &zw) noexcept
+        : x(xy.x), y(xy.y), z(zw.x), w(zw.y)
     {
     }
 
@@ -276,442 +211,511 @@ namespace krys
     {
     }
 
-    KRYS_NODISCARD constexpr auto operator[](int index) const noexcept
+    KRYS_NODISCARD constexpr T operator[](size_t index) const noexcept
     {
-      krys_debug_assert(index >= 0 && index < Length);
-      if (index == 0)
-      {
-        return x;
-      }
-      if (index == 1)
-      {
-        return y;
-      }
-      else if (index == 2)
-      {
-        return z;
-      }
-      else
-      {
-        return w;
-      }
+      return detail::VectorComponent(*this, index);
     }
 
-    KRYS_NODISCARD constexpr auto &operator[](int index) noexcept
+    KRYS_NODISCARD constexpr T &operator[](size_t index) noexcept
     {
-      krys_debug_assert(index >= 0 && index < Length);
-      if (index == 0)
-      {
-        return x;
-      }
-      if (index == 1)
-      {
-        return y;
-      }
-      else if (index == 2)
-      {
-        return z;
-      }
-      else
-      {
-        return w;
-      }
+      return detail::VectorComponent(*this, index);
     }
 
-    VECTOR_COMMON_MEMBER_FUNCTIONS()
+    KRYS_NODISCARD constexpr auto operator<=>(const Vector &) const noexcept = default;
   };
 
-  template <VECTOR_TEMPLATE_PARAMS>
-  struct Traits<VECTOR_TYPE>
+  template <Number T, size_t N>
+  struct Traits<Vector<T, N>>
   {
     using ComponentType = T;
     constexpr static bool IsVector = true;
     constexpr static bool IsMatrix = false;
 
-    constexpr static int TotalComponents = N;
-    constexpr static int Rows = N;
-    constexpr static int Columns = 1;
+    constexpr static size_t TotalComponents = N;
+    constexpr static size_t Rows = N;
+    constexpr static size_t Columns = 1;
   };
 
   template <typename T>
   concept VectorType = Traits<T>::IsVector;
 
-  VECTOR_TYPE_ALIASES(1);
-  VECTOR_TYPE_ALIASES(2);
-  VECTOR_TYPE_ALIASES(3);
-  VECTOR_TYPE_ALIASES(4);
+#pragma region Aliases
 
-  /// @brief Map each component of the vector using the provided function.
-  template <VECTOR_TEMPLATE_PARAMS, RegularCallable<T> F>
-  KRYS_NODISCARD constexpr auto MapEach(const VECTOR_TYPE &vec, const F &func) noexcept
+  template <Number T>
+  using Vector1 = Vector<T, 1>;
+  using Vec1 = Vector<float, 1>;
+  using Vec1b = Vector<bool, 1>;
+  using Vec1f = Vector<float, 1>;
+  using Vec1d = Vector<double, 1>;
+  using Vec1i = Vector<int, 1>;
+  using Vec1u = Vector<unsigned int, 1>;
+
+  template <Number T>
+  using Vector2 = Vector<T, 2>;
+  using Vec2 = Vector<float, 2>;
+  using Vec2b = Vector<bool, 2>;
+  using Vec2f = Vector<float, 2>;
+  using Vec2d = Vector<double, 2>;
+  using Vec2i = Vector<int, 2>;
+  using Vec2u = Vector<unsigned int, 2>;
+
+  template <Number T>
+  using Vector3 = Vector<T, 3>;
+  using Vec3 = Vector<float, 3>;
+  using Vec3b = Vector<bool, 3>;
+  using Vec3f = Vector<float, 3>;
+  using Vec3d = Vector<double, 3>;
+  using Vec3i = Vector<int, 3>;
+  using Vec3u = Vector<unsigned int, 3>;
+
+  template <Number T>
+  using Vector4 = Vector<T, 4>;
+  using Vec4 = Vector<float, 4>;
+  using Vec4b = Vector<bool, 4>;
+  using Vec4f = Vector<float, 4>;
+  using Vec4d = Vector<double, 4>;
+  using Vec4i = Vector<int, 4>;
+  using Vec4u = Vector<unsigned int, 4>;
+
+#pragma endregion
+
+#pragma region Component-wise algorithms
+
+  /// @brief A vector of @p func applied to each component of @p vec.
+  template <Number T, size_t N, RegularCallable<T> F>
+  KRYS_NODISCARD constexpr auto MapEach(const Vector<T, N> &vec, const F &func) noexcept
   {
-    static_assert(N > 0 && N < 5, "Unsupported vector length");
-
     using U = invoke_result_t<F, T>;
-    using Vec = Vector<U, N>;
-
-    if constexpr (N == 1)
+    return [&]<size_t... I>(std::index_sequence<I...>)
     {
-      auto x = func(vec.x);
-      return Vec(x);
-    }
-    else if constexpr (N == 2)
-    {
-      auto x = func(vec.x);
-      auto y = func(vec.y);
-      return Vec(x, y);
-    }
-    else if constexpr (N == 3)
-    {
-      auto x = func(vec.x);
-      auto y = func(vec.y);
-      auto z = func(vec.z);
-      return Vec(x, y, z);
-    }
-    else if constexpr (N == 4)
-    {
-      auto x = func(vec.x);
-      auto y = func(vec.y);
-      auto z = func(vec.z);
-      auto w = func(vec.w);
-      return Vec(x, y, z, w);
-    }
-    else
-    {
-      static_assert(false, "Unsupported vector length");
-    }
+      return Vector<U, N>(func(vec[I])...);
+    }(std::make_index_sequence<N> {});
   }
 
-  /// @brief Apply a function to each component of the vector.
-  template <VECTOR_TEMPLATE_PARAMS, RegularCallable<T> F>
-  KRYS_NODISCARD constexpr void ForEach(const VECTOR_TYPE &vec, const F &func) noexcept
+  /// @brief Calls @p func with each component of @p vec, in order.
+  template <Number T, size_t N, RegularCallable<T> F>
+  constexpr void ForEach(const Vector<T, N> &vec, const F &func) noexcept
   {
-    static_assert(N > 0 && N < 5, "Unsupported vector length");
-
-    if constexpr (N == 1)
+    [&]<size_t... I>(std::index_sequence<I...>)
     {
-      func(vec.x);
-    }
-    else if constexpr (N == 2)
-    {
-      func(vec.x);
-      func(vec.y);
-    }
-    else if constexpr (N == 3)
-    {
-      func(vec.x);
-      func(vec.y);
-      func(vec.z);
-    }
-    else if constexpr (N == 4)
-    {
-      func(vec.x);
-      func(vec.y);
-      func(vec.z);
-      func(vec.w);
-    }
-    else
-    {
-      static_assert(false, "Unsupported vector length");
-    }
+      (func(vec[I]), ...);
+    }(std::make_index_sequence<N> {});
   }
 
-  /// @brief Zip two vectors together using the provided function.
-  template <VECTOR_TEMPLATE_PARAMS, RegularCallable<T, T> F>
-  KRYS_NODISCARD constexpr auto Zip(const VECTOR_TYPE &lhs, const Vector<T, N> &rhs, const F &func) noexcept
+  /// @brief A vector of @p func applied to each pair of components of @p lhs and @p rhs.
+  template <Number T, size_t N, RegularCallable<T, T> F>
+  KRYS_NODISCARD constexpr auto Zip(const Vector<T, N> &lhs, const Vector<T, N> &rhs, const F &func) noexcept
   {
-    static_assert(N > 0 && N < 5, "Unsupported vector length");
-
     using U = invoke_result_t<F, T, T>;
-    using Vec = Vector<U, N>;
-
-    if constexpr (N == 1)
+    return [&]<size_t... I>(std::index_sequence<I...>)
     {
-      auto x = func(lhs.x, rhs.x);
-      return Vec(x);
-    }
-    else if constexpr (N == 2)
-    {
-      auto x = func(lhs.x, rhs.x);
-      auto y = func(lhs.y, rhs.y);
-      return Vec(x, y);
-    }
-    else if constexpr (N == 3)
-    {
-      auto x = func(lhs.x, rhs.x);
-      auto y = func(lhs.y, rhs.y);
-      auto z = func(lhs.z, rhs.z);
-      return Vec(x, y, z);
-    }
-    else if constexpr (N == 4)
-    {
-      auto x = func(lhs.x, rhs.x);
-      auto y = func(lhs.y, rhs.y);
-      auto z = func(lhs.z, rhs.z);
-      auto w = func(lhs.w, rhs.w);
-      return Vec(x, y, z, w);
-    }
-    else
-    {
-      static_assert(false, "Unsupported vector length");
-    }
+      return Vector<U, N>(func(lhs[I], rhs[I])...);
+    }(std::make_index_sequence<N> {});
   }
 
-  /// @brief Zip three vectors together using the provided function.
-  template <VECTOR_TEMPLATE_PARAMS, RegularCallable<T, T, T> F>
-  KRYS_NODISCARD constexpr auto Zip(const VECTOR_TYPE &a, const VECTOR_TYPE &b, const VECTOR_TYPE &c,
+  /// @brief A vector of @p func applied to each triple of components of @p a, @p b and @p c.
+  template <Number T, size_t N, RegularCallable<T, T, T> F>
+  KRYS_NODISCARD constexpr auto Zip(const Vector<T, N> &a, const Vector<T, N> &b, const Vector<T, N> &c,
                                     const F &func) noexcept
   {
-    static_assert(N > 0 && N < 5, "Unsupported vector length");
-
     using U = invoke_result_t<F, T, T, T>;
-    using Vec = Vector<U, N>;
-
-    if constexpr (N == 1)
+    return [&]<size_t... I>(std::index_sequence<I...>)
     {
-      auto x = func(a.x, b.x, c.x);
-      return Vec(x);
-    }
-    else if constexpr (N == 2)
-    {
-      auto x = func(a.x, b.x, c.x);
-      auto y = func(a.y, b.y, c.y);
-      return Vec(x, y);
-    }
-    else if constexpr (N == 3)
-    {
-      auto x = func(a.x, b.x, c.x);
-      auto y = func(a.y, b.y, c.y);
-      auto z = func(a.z, b.z, c.z);
-      return Vec(x, y, z);
-    }
-    else if constexpr (N == 4)
-    {
-      auto x = func(a.x, b.x, c.x);
-      auto y = func(a.y, b.y, c.y);
-      auto z = func(a.z, b.z, c.z);
-      auto w = func(a.w, b.w, c.w);
-      return Vec(x, y, z, w);
-    }
-    else
-    {
-      static_assert(false, "Unsupported vector length");
-    }
+      return Vector<U, N>(func(a[I], b[I], c[I])...);
+    }(std::make_index_sequence<N> {});
   }
 
-  /// @brief Computes the sum of all components of the vector.
-  template <VECTOR_TEMPLATE_PARAMS>
-  KRYS_NODISCARD constexpr auto Sum(const VECTOR_TYPE &v) noexcept
+  /// @brief The sum of the components of @p v.
+  template <Number T, size_t N>
+  KRYS_NODISCARD constexpr auto Sum(const Vector<T, N> &v) noexcept
   {
-    T sum = T(0);
-    ForEach(v, [&sum](auto val) { sum += val; });
-    return sum;
+    return [&]<size_t... I>(std::index_sequence<I...>)
+    {
+      return (T(0) + ... + v[I]);
+    }(std::make_index_sequence<N> {});
   }
 
-  /// @brief Computes the sum of all components of the vector after applying a function to each component.
-  template <VECTOR_TEMPLATE_PARAMS, RegularCallable<T> F>
-  KRYS_NODISCARD constexpr auto Sum(const VECTOR_TYPE &v, const F &func) noexcept
+  /// @brief The sum of @p func applied to each component of @p v.
+  template <Number T, size_t N, RegularCallable<T> F>
+  KRYS_NODISCARD constexpr auto Sum(const Vector<T, N> &v, const F &func) noexcept
   {
     using U = invoke_result_t<F, T>;
-
-    U sum = U(0);
-    ForEach(v, [&sum, &func](auto val) { sum += func(val); });
-    return sum;
+    return [&]<size_t... I>(std::index_sequence<I...>)
+    {
+      return (U(0) + ... + func(v[I]));
+    }(std::make_index_sequence<N> {});
   }
 
-  /// @brief Checks if any components satisfy the predicate.
-  template <VECTOR_TEMPLATE_PARAMS, Predicate<T> Func>
-  constexpr bool AnyOf(const VECTOR_TYPE &v, const Func &predicate) noexcept
+  /// @brief Whether any component of @p v satisfies @p predicate.
+  template <Number T, size_t N, Predicate<T> F>
+  KRYS_NODISCARD constexpr bool AnyOf(const Vector<T, N> &v, const F &predicate) noexcept
   {
-    if constexpr (N == 1)
+    return [&]<size_t... I>(std::index_sequence<I...>)
     {
-      return predicate(v.x);
-    }
-    else if constexpr (N == 2)
-    {
-      return predicate(v.x) || predicate(v.y);
-    }
-    else if constexpr (N == 3)
-    {
-      return predicate(v.x) || predicate(v.y) || predicate(v.z);
-    }
-    else if constexpr (N == 4)
-    {
-      return predicate(v.x) || predicate(v.y) || predicate(v.z) || predicate(v.w);
-    }
-    else
-    {
-      static_assert(false, "Unsupported number of components.");
-    }
+      return (static_cast<bool>(predicate(v[I])) || ...);
+    }(std::make_index_sequence<N> {});
   }
 
-  /// @brief Checks if all of the components in `v` satisfy the predicate.
-  template <VECTOR_TEMPLATE_PARAMS, Predicate<T> Func>
-  constexpr bool AllOf(const VECTOR_TYPE &v, const Func &predicate) noexcept
+  /// @brief Whether every component of @p v satisfies @p predicate.
+  template <Number T, size_t N, Predicate<T> F>
+  KRYS_NODISCARD constexpr bool AllOf(const Vector<T, N> &v, const F &predicate) noexcept
   {
-    if constexpr (N == 1)
+    return [&]<size_t... I>(std::index_sequence<I...>)
     {
-      return predicate(v.x);
-    }
-    else if constexpr (N == 2)
-    {
-      return predicate(v.x) && predicate(v.y);
-    }
-    else if constexpr (N == 3)
-    {
-      return predicate(v.x) && predicate(v.y) && predicate(v.z);
-    }
-    else if constexpr (N == 4)
-    {
-      return predicate(v.x) && predicate(v.y) && predicate(v.z) && predicate(v.w);
-    }
-    else
-    {
-      static_assert(false, "Unsupported number of components.");
-    }
+      return (static_cast<bool>(predicate(v[I])) && ...);
+    }(std::make_index_sequence<N> {});
   }
 
-  /// @brief Checks if none of the components in `v` satisfy the predicate.
-  template <VECTOR_TEMPLATE_PARAMS, Predicate<T> Func>
-  constexpr bool NoneOf(const VECTOR_TYPE &v, const Func &predicate) noexcept
+  /// @brief Whether no component of @p v satisfies @p predicate.
+  template <Number T, size_t N, Predicate<T> F>
+  KRYS_NODISCARD constexpr bool NoneOf(const Vector<T, N> &v, const F &predicate) noexcept
   {
-    if constexpr (N == 1)
-    {
-      return !predicate(v.x);
-    }
-    else if constexpr (N == 2)
-    {
-      return !predicate(v.x) && !predicate(v.y);
-    }
-    else if constexpr (N == 3)
-    {
-      return !predicate(v.x) && !predicate(v.y) && !predicate(v.z);
-    }
-    else if constexpr (N == 4)
-    {
-      return !predicate(v.x) && !predicate(v.y) && !predicate(v.z) && !predicate(v.w);
-    }
-    else
-    {
-      static_assert(false, "Unsupported number of components.");
-    }
+    return !AnyOf(v, predicate);
   }
 
-  VECTOR_BINARY_OPERATOR(+);
-  VECTOR_BINARY_OPERATOR(-);
-  VECTOR_BINARY_OPERATOR(*);
-  VECTOR_BINARY_OPERATOR(/);
-  VECTOR_BINARY_OPERATOR(>>);
-  VECTOR_BINARY_OPERATOR(<<);
-  VECTOR_BINARY_OPERATOR(|);
-  VECTOR_BINARY_OPERATOR(&);
-  VECTOR_BINARY_OPERATOR(^);
+#pragma endregion
 
-  VECTOR_UNARY_OPERATOR(-);
-  VECTOR_UNARY_OPERATOR(+);
-  VECTOR_UNARY_OPERATOR(~);
+#pragma region Operators
 
-  template <VECTOR_TEMPLATE_PARAMS>
+  template <Number T, size_t N>
+  KRYS_NODISCARD constexpr auto operator+(const Vector<T, N> &lhs, const Vector<T, N> &rhs) noexcept
+  {
+    return Zip(lhs, rhs, std::plus<> {});
+  }
+
+  template <Number T, size_t N>
+  KRYS_NODISCARD constexpr auto operator-(const Vector<T, N> &lhs, const Vector<T, N> &rhs) noexcept
+  {
+    return Zip(lhs, rhs, std::minus<> {});
+  }
+
+  template <Number T, size_t N>
+  KRYS_NODISCARD constexpr auto operator*(const Vector<T, N> &lhs, const Vector<T, N> &rhs) noexcept
+  {
+    return Zip(lhs, rhs, std::multiplies<> {});
+  }
+
+  template <Number T, size_t N>
+  KRYS_NODISCARD constexpr auto operator/(const Vector<T, N> &lhs, const Vector<T, N> &rhs) noexcept
+  {
+    return Zip(lhs, rhs, std::divides<> {});
+  }
+
+  template <Number T, size_t N>
+  KRYS_NODISCARD constexpr auto operator>>(const Vector<T, N> &lhs, const Vector<T, N> &rhs) noexcept
+  {
+    return Zip(lhs, rhs, [](T l, T r) { return l >> r; });
+  }
+
+  template <Number T, size_t N>
+  KRYS_NODISCARD constexpr auto operator<<(const Vector<T, N> &lhs, const Vector<T, N> &rhs) noexcept
+  {
+    return Zip(lhs, rhs, [](T l, T r) { return l << r; });
+  }
+
+  template <Number T, size_t N>
+  KRYS_NODISCARD constexpr auto operator|(const Vector<T, N> &lhs, const Vector<T, N> &rhs) noexcept
+  {
+    return Zip(lhs, rhs, std::bit_or<> {});
+  }
+
+  template <Number T, size_t N>
+  KRYS_NODISCARD constexpr auto operator&(const Vector<T, N> &lhs, const Vector<T, N> &rhs) noexcept
+  {
+    return Zip(lhs, rhs, std::bit_and<> {});
+  }
+
+  template <Number T, size_t N>
+  KRYS_NODISCARD constexpr auto operator^(const Vector<T, N> &lhs, const Vector<T, N> &rhs) noexcept
+  {
+    return Zip(lhs, rhs, std::bit_xor<> {});
+  }
+
+  template <Number T, size_t N>
+  KRYS_NODISCARD constexpr auto operator+(const Vector<T, N> &lhs, T scalar) noexcept
+  {
+    return MapEach(lhs, [scalar](T v) { return v + scalar; });
+  }
+
+  template <Number T, size_t N>
+  KRYS_NODISCARD constexpr auto operator-(const Vector<T, N> &lhs, T scalar) noexcept
+  {
+    return MapEach(lhs, [scalar](T v) { return v - scalar; });
+  }
+
+  template <Number T, size_t N>
+  KRYS_NODISCARD constexpr auto operator*(const Vector<T, N> &lhs, T scalar) noexcept
+  {
+    return MapEach(lhs, [scalar](T v) { return v * scalar; });
+  }
+
+  template <Number T, size_t N>
+  KRYS_NODISCARD constexpr auto operator/(const Vector<T, N> &lhs, T scalar) noexcept
+  {
+    return MapEach(lhs, [scalar](T v) { return v / scalar; });
+  }
+
+  template <Number T, size_t N>
+  KRYS_NODISCARD constexpr auto operator>>(const Vector<T, N> &lhs, T scalar) noexcept
+  {
+    return MapEach(lhs, [scalar](T v) { return v >> scalar; });
+  }
+
+  template <Number T, size_t N>
+  KRYS_NODISCARD constexpr auto operator<<(const Vector<T, N> &lhs, T scalar) noexcept
+  {
+    return MapEach(lhs, [scalar](T v) { return v << scalar; });
+  }
+
+  template <Number T, size_t N>
+  KRYS_NODISCARD constexpr auto operator|(const Vector<T, N> &lhs, T scalar) noexcept
+  {
+    return MapEach(lhs, [scalar](T v) { return v | scalar; });
+  }
+
+  template <Number T, size_t N>
+  KRYS_NODISCARD constexpr auto operator&(const Vector<T, N> &lhs, T scalar) noexcept
+  {
+    return MapEach(lhs, [scalar](T v) { return v & scalar; });
+  }
+
+  template <Number T, size_t N>
+  KRYS_NODISCARD constexpr auto operator^(const Vector<T, N> &lhs, T scalar) noexcept
+  {
+    return MapEach(lhs, [scalar](T v) { return v ^ scalar; });
+  }
+
+  template <Number T, size_t N>
   KRYS_NODISCARD constexpr auto operator+(T scalar, const Vector<T, N> &rhs) noexcept
   {
     return rhs + scalar;
   }
 
-  template <VECTOR_TEMPLATE_PARAMS>
+  template <Number T, size_t N>
   KRYS_NODISCARD constexpr auto operator*(T scalar, const Vector<T, N> &rhs) noexcept
   {
     return rhs * scalar;
   }
 
-  /// @brief Computes the dot product of two vectors.
-  template <VECTOR_TEMPLATE_PARAMS>
-  constexpr auto Dot(const VECTOR_TYPE &a, const VECTOR_TYPE &b) noexcept
+  template <Number T, size_t N>
+  KRYS_NODISCARD constexpr auto operator-(const Vector<T, N> &v) noexcept
   {
-    return Sum(Zip(a, b, [](auto l, auto r) { return l * r; }));
+    return MapEach(v, std::negate<> {});
   }
 
-  /// @brief Computes the length (magnitude) of a vector.
-  template <VECTOR_TEMPLATE_PARAMS>
-  constexpr auto Length(const VECTOR_TYPE &x) noexcept
+  template <Number T, size_t N>
+  KRYS_NODISCARD constexpr auto operator+(const Vector<T, N> &v) noexcept
   {
-    return static_cast<T>(std::sqrt(Dot(x, x)));
+    return MapEach(v, [](T value) { return +value; });
   }
 
-  /// @brief Computes the squared length (magnitude) of a vector.
-  template <VECTOR_TEMPLATE_PARAMS>
-  constexpr T LengthSquared(const VECTOR_TYPE &x) noexcept
+  template <Number T, size_t N>
+  KRYS_NODISCARD constexpr auto operator~(const Vector<T, N> &v) noexcept
   {
-    return Dot(x, x);
+    return MapEach(v, std::bit_not<> {});
   }
 
-  /// @brief Normalizes a vector (scales it to length 1).
-  template <VECTOR_TEMPLATE_PARAMS>
-  constexpr auto Normalize(const VECTOR_TYPE &x) noexcept
+  template <Number T, size_t N>
+  constexpr Vector<T, N> &operator+=(Vector<T, N> &lhs, const Vector<T, N> &rhs) noexcept
   {
-    return x * (1.f / std::sqrt(Dot(x, x)));
+    return lhs = lhs + rhs;
   }
 
-  /// @brief Computes the distance between two vectors.
-  template <VECTOR_TEMPLATE_PARAMS>
-  constexpr T Distance(const VECTOR_TYPE &a, const VECTOR_TYPE &b) noexcept
+  template <Number T, size_t N>
+  constexpr Vector<T, N> &operator+=(Vector<T, N> &lhs, identity_t<T> scalar) noexcept
+  {
+    return lhs = lhs + scalar;
+  }
+
+  template <Number T, size_t N>
+  constexpr Vector<T, N> &operator-=(Vector<T, N> &lhs, const Vector<T, N> &rhs) noexcept
+  {
+    return lhs = lhs - rhs;
+  }
+
+  template <Number T, size_t N>
+  constexpr Vector<T, N> &operator-=(Vector<T, N> &lhs, identity_t<T> scalar) noexcept
+  {
+    return lhs = lhs - scalar;
+  }
+
+  template <Number T, size_t N>
+  constexpr Vector<T, N> &operator*=(Vector<T, N> &lhs, const Vector<T, N> &rhs) noexcept
+  {
+    return lhs = lhs * rhs;
+  }
+
+  template <Number T, size_t N>
+  constexpr Vector<T, N> &operator*=(Vector<T, N> &lhs, identity_t<T> scalar) noexcept
+  {
+    return lhs = lhs * scalar;
+  }
+
+  template <Number T, size_t N>
+  constexpr Vector<T, N> &operator/=(Vector<T, N> &lhs, const Vector<T, N> &rhs) noexcept
+  {
+    return lhs = lhs / rhs;
+  }
+
+  template <Number T, size_t N>
+  constexpr Vector<T, N> &operator/=(Vector<T, N> &lhs, identity_t<T> scalar) noexcept
+  {
+    return lhs = lhs / scalar;
+  }
+
+  template <Number T, size_t N>
+  constexpr Vector<T, N> &operator>>=(Vector<T, N> &lhs, const Vector<T, N> &rhs) noexcept
+  {
+    return lhs = lhs >> rhs;
+  }
+
+  template <Number T, size_t N>
+  constexpr Vector<T, N> &operator>>=(Vector<T, N> &lhs, identity_t<T> scalar) noexcept
+  {
+    return lhs = lhs >> scalar;
+  }
+
+  template <Number T, size_t N>
+  constexpr Vector<T, N> &operator<<=(Vector<T, N> &lhs, const Vector<T, N> &rhs) noexcept
+  {
+    return lhs = lhs << rhs;
+  }
+
+  template <Number T, size_t N>
+  constexpr Vector<T, N> &operator<<=(Vector<T, N> &lhs, identity_t<T> scalar) noexcept
+  {
+    return lhs = lhs << scalar;
+  }
+
+  template <Number T, size_t N>
+  constexpr Vector<T, N> &operator|=(Vector<T, N> &lhs, const Vector<T, N> &rhs) noexcept
+  {
+    return lhs = lhs | rhs;
+  }
+
+  template <Number T, size_t N>
+  constexpr Vector<T, N> &operator|=(Vector<T, N> &lhs, identity_t<T> scalar) noexcept
+  {
+    return lhs = lhs | scalar;
+  }
+
+  template <Number T, size_t N>
+  constexpr Vector<T, N> &operator&=(Vector<T, N> &lhs, const Vector<T, N> &rhs) noexcept
+  {
+    return lhs = lhs & rhs;
+  }
+
+  template <Number T, size_t N>
+  constexpr Vector<T, N> &operator&=(Vector<T, N> &lhs, identity_t<T> scalar) noexcept
+  {
+    return lhs = lhs & scalar;
+  }
+
+  template <Number T, size_t N>
+  constexpr Vector<T, N> &operator^=(Vector<T, N> &lhs, const Vector<T, N> &rhs) noexcept
+  {
+    return lhs = lhs ^ rhs;
+  }
+
+  template <Number T, size_t N>
+  constexpr Vector<T, N> &operator^=(Vector<T, N> &lhs, identity_t<T> scalar) noexcept
+  {
+    return lhs = lhs ^ scalar;
+  }
+
+#pragma endregion
+
+#pragma region Geometry
+
+  /// @brief The dot product of @p a and @p b.
+  template <Number T, size_t N>
+  KRYS_NODISCARD constexpr auto Dot(const Vector<T, N> &a, const Vector<T, N> &b) noexcept
+  {
+    return Sum(a * b);
+  }
+
+  /// @brief The length (magnitude) of @p v.
+  template <Number T, size_t N>
+  KRYS_NODISCARD constexpr auto Length(const Vector<T, N> &v) noexcept
+  {
+    return static_cast<T>(std::sqrt(Dot(v, v)));
+  }
+
+  /// @brief The squared length of @p v, which avoids a square root.
+  template <Number T, size_t N>
+  KRYS_NODISCARD constexpr T LengthSquared(const Vector<T, N> &v) noexcept
+  {
+    return Dot(v, v);
+  }
+
+  /// @brief @p v scaled to length 1.
+  template <Number T, size_t N>
+  KRYS_NODISCARD constexpr auto Normalize(const Vector<T, N> &v) noexcept
+  {
+    return v * static_cast<T>(1 / std::sqrt(Dot(v, v)));
+  }
+
+  /// @brief The distance between @p a and @p b.
+  template <Number T, size_t N>
+  KRYS_NODISCARD constexpr T Distance(const Vector<T, N> &a, const Vector<T, N> &b) noexcept
   {
     return Length(a - b);
   }
 
-  /// @brief Computes the squared distance between two vectors.
-  template <VECTOR_TEMPLATE_PARAMS>
-  constexpr T DistanceSquared(const VECTOR_TYPE &a, const VECTOR_TYPE &b) noexcept
+  /// @brief The squared distance between @p a and @p b.
+  template <Number T, size_t N>
+  KRYS_NODISCARD constexpr T DistanceSquared(const Vector<T, N> &a, const Vector<T, N> &b) noexcept
   {
     return LengthSquared(a - b);
   }
 
-  /// @brief Projects vector `a` onto vector `b`.
-  template <VECTOR_TEMPLATE_PARAMS>
-  constexpr auto Project(const VECTOR_TYPE &a, const VECTOR_TYPE &b) noexcept
+  /// @brief @p a projected onto @p b.
+  template <Number T, size_t N>
+  KRYS_NODISCARD constexpr auto Project(const Vector<T, N> &a, const Vector<T, N> &b) noexcept
   {
     return b * (Dot(a, b) / Dot(b, b));
   }
 
-  /// @brief Reflects vector `v` across the normal `n`.
-  /// @param v The input vector to reflect.
-  /// @param n The normal vector to reflect across (should be normalized).
-  template <VECTOR_TEMPLATE_PARAMS>
-  constexpr auto Reflect(const VECTOR_TYPE &v, const VECTOR_TYPE &n) noexcept
+  /// @brief @p v reflected across the plane with normal @p n.
+  /// @param n The plane's normal, normalised.
+  template <Number T, size_t N>
+  KRYS_NODISCARD constexpr auto Reflect(const Vector<T, N> &v, const Vector<T, N> &n) noexcept
   {
     return v - n * Dot(n, v) * T(2);
   }
 
-  /// @brief Computes the refraction of vector `v` given a normal `n` and a refraction index.
-  /// @param v The incident vector.
-  /// @param n The normal vector (should be normalized).
-  /// @param eta The refraction index.
-  template <VECTOR_TEMPLATE_PARAMS>
-  constexpr auto Refract(const VECTOR_TYPE &v, const VECTOR_TYPE &n, T eta) noexcept
+  /// @brief @p v refracted through a surface with normal @p n.
+  /// @param n The surface's normal, normalised.
+  /// @param eta The ratio of the refractive indices.
+  /// @return The zero vector on total internal reflection.
+  template <Number T, size_t N>
+  KRYS_NODISCARD constexpr auto Refract(const Vector<T, N> &v, const Vector<T, N> &n, T eta) noexcept
   {
     T dot = Dot(v, n);
     T k = T(1) - eta * eta * (T(1) - dot * dot);
     if (k < T(0))
     {
-      return VECTOR_TYPE(0); // Total internal reflection
+      return Vector<T, N>(T(0));
     }
-    return eta * v - (eta * dot + std::sqrt(k)) * n;
+    return eta * v - (eta * dot + static_cast<T>(std::sqrt(k))) * n;
   }
 
-  /// @brief Computes the cross product of two 3D vectors.
+  /// @brief The cross product of @p a and @p b.
   template <FloatingPoint T>
-  constexpr auto Cross(const Vector3<T> &a, const Vector3<T> &b) noexcept
+  KRYS_NODISCARD constexpr auto Cross(const Vector3<T> &a, const Vector3<T> &b) noexcept
   {
     return Vector3<T> {a.y * b.z - a.z * b.y, a.z * b.x - a.x * b.z, a.x * b.y - a.y * b.x};
   }
 
-  /// @return `n` if `Dot(nRef, i)` < `0.0`, otherwise `-n`.
-  template <VECTOR_TEMPLATE_PARAMS>
-  constexpr auto FaceForward(const VECTOR_TYPE &n, const VECTOR_TYPE &i, const VECTOR_TYPE &nRef) noexcept
+  /// @return @p n if `Dot(nRef, i)` is negative, otherwise `-n`.
+  template <Number T, size_t N>
+  KRYS_NODISCARD constexpr auto FaceForward(const Vector<T, N> &n, const Vector<T, N> &i,
+                                            const Vector<T, N> &nRef) noexcept
   {
-    return Dot(nRef, i) < static_cast<T>(0) ? n : -n;
+    return Dot(nRef, i) < T(0) ? n : -n;
   }
 
-  /// @brief Compute the normal of a triangle.
+  /// @brief The unit normal of the triangle @p p1, @p p2, @p p3.
   template <FloatingPoint T>
   KRYS_NODISCARD constexpr auto TriangleNormal(const Vector3<T> &p1, const Vector3<T> &p2,
                                                const Vector3<T> &p3) noexcept
@@ -719,10 +723,5 @@ namespace krys
     return Normalize(Cross(p1 - p2, p1 - p3));
   }
 
-#undef VECTOR_TYPE_ALIASES
-#undef VECTOR_INTROSPECTION
-#undef VECTOR_BINARY_OPERATOR
-#undef VECTOR_UNARY_OPERATOR
-#undef VECTOR_OPERATOR_ASSIGNMENT
-#undef VECTOR_COMMON_MEMBER_FUNCTIONS
+#pragma endregion
 }

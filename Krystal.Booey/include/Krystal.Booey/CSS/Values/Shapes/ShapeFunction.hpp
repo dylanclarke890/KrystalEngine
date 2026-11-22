@@ -58,7 +58,7 @@ namespace krys::boo::css
     KRYS_NODISCARD bool operator==(const ToPosition &) const noexcept = default;
   };
 
-  DEFINE_TYPE_WRAPPER_GET(ToPosition, Offset);
+  KRYS_DEFINE_TYPE_WRAPPER_GET(ToPosition, Offset);
 
   template <>
   struct Serialiser<ToPosition>
@@ -76,7 +76,7 @@ namespace krys::boo::css
     KRYS_NODISCARD bool operator==(const ByCoordinatePair &) const noexcept = default;
   };
 
-  DEFINE_TYPE_WRAPPER_GET(ByCoordinatePair, Offset);
+  KRYS_DEFINE_TYPE_WRAPPER_GET(ByCoordinatePair, Offset);
 
   template <>
   struct Serialiser<ByCoordinatePair>
@@ -164,7 +164,7 @@ namespace krys::boo::css
     KRYS_NODISCARD bool operator==(const MoveCommand &) const noexcept = default;
   };
 
-  DEFINE_TYPE_WRAPPER_GET(MoveCommand, ToBy);
+  KRYS_DEFINE_TYPE_WRAPPER_GET(MoveCommand, ToBy);
 
   template <>
   struct Serialiser<MoveCommand>
@@ -188,7 +188,7 @@ namespace krys::boo::css
     KRYS_NODISCARD bool operator==(const LineCommand &) const noexcept = default;
   };
 
-  DEFINE_TYPE_WRAPPER_GET(LineCommand, ToBy);
+  KRYS_DEFINE_TYPE_WRAPPER_GET(LineCommand, ToBy);
 
   template <>
   struct Serialiser<LineCommand>
@@ -228,9 +228,9 @@ namespace krys::boo::css
     KRYS_NODISCARD bool operator==(const HLineCommand &) const noexcept = default;
   };
 
-  DEFINE_TYPE_WRAPPER_GET(HLineCommand::By, Offset);
-  DEFINE_TYPE_WRAPPER_GET(HLineCommand::To, Offset);
-  DEFINE_TYPE_WRAPPER_GET(HLineCommand, ToBy);
+  KRYS_DEFINE_TYPE_WRAPPER_GET(HLineCommand::By, Offset);
+  KRYS_DEFINE_TYPE_WRAPPER_GET(HLineCommand::To, Offset);
+  KRYS_DEFINE_TYPE_WRAPPER_GET(HLineCommand, ToBy);
 
   template <>
   struct Serialiser<HLineCommand::To>
@@ -284,9 +284,9 @@ namespace krys::boo::css
     KRYS_NODISCARD bool operator==(const VLineCommand &) const noexcept = default;
   };
 
-  DEFINE_TYPE_WRAPPER_GET(VLineCommand::By, Offset);
-  DEFINE_TYPE_WRAPPER_GET(VLineCommand::To, Offset);
-  DEFINE_TYPE_WRAPPER_GET(VLineCommand, ToBy);
+  KRYS_DEFINE_TYPE_WRAPPER_GET(VLineCommand::By, Offset);
+  KRYS_DEFINE_TYPE_WRAPPER_GET(VLineCommand::To, Offset);
+  KRYS_DEFINE_TYPE_WRAPPER_GET(VLineCommand, ToBy);
 
   template <>
   struct Serialiser<VLineCommand::To>
@@ -379,7 +379,7 @@ namespace krys::boo::css
     }
   }
 
-  DEFINE_TYPE_WRAPPER_GET(CurveCommand, ToBy);
+  KRYS_DEFINE_TYPE_WRAPPER_GET(CurveCommand, ToBy);
 
   template <>
   struct Serialiser<CurveCommand::To>
@@ -461,7 +461,7 @@ namespace krys::boo::css
     }
   }
 
-  DEFINE_TYPE_WRAPPER_GET(SmoothCommand, ToBy);
+  KRYS_DEFINE_TYPE_WRAPPER_GET(SmoothCommand, ToBy);
 
   template <>
   struct Serialiser<SmoothCommand::To>
@@ -587,23 +587,23 @@ namespace krys::boo::css
   };
 }
 
-DEFINE_TUPLE_LIKE_CONFORMANCE(krys::boo::css::ToPosition, 1)
-DEFINE_TUPLE_LIKE_CONFORMANCE(krys::boo::css::ByCoordinatePair, 1)
-DEFINE_TUPLE_LIKE_CONFORMANCE(krys::boo::css::RelativeControlPoint, 2)
-DEFINE_TUPLE_LIKE_CONFORMANCE(krys::boo::css::AbsoluteControlPoint, 2)
-DEFINE_TUPLE_LIKE_CONFORMANCE(krys::boo::css::MoveCommand, 1)
-DEFINE_TUPLE_LIKE_CONFORMANCE(krys::boo::css::LineCommand, 1)
-DEFINE_TUPLE_LIKE_CONFORMANCE(krys::boo::css::HLineCommand::To, 1)
-DEFINE_TUPLE_LIKE_CONFORMANCE(krys::boo::css::HLineCommand::By, 1)
-DEFINE_TUPLE_LIKE_CONFORMANCE(krys::boo::css::HLineCommand, 1)
-DEFINE_TUPLE_LIKE_CONFORMANCE(krys::boo::css::VLineCommand::To, 1)
-DEFINE_TUPLE_LIKE_CONFORMANCE(krys::boo::css::VLineCommand::By, 1)
-DEFINE_TUPLE_LIKE_CONFORMANCE(krys::boo::css::VLineCommand, 1)
-DEFINE_TUPLE_LIKE_CONFORMANCE(krys::boo::css::CurveCommand::To, 3)
-DEFINE_TUPLE_LIKE_CONFORMANCE(krys::boo::css::CurveCommand::By, 3)
-DEFINE_TUPLE_LIKE_CONFORMANCE(krys::boo::css::CurveCommand, 1)
-DEFINE_TUPLE_LIKE_CONFORMANCE(krys::boo::css::SmoothCommand::To, 2)
-DEFINE_TUPLE_LIKE_CONFORMANCE(krys::boo::css::SmoothCommand::By, 2)
-DEFINE_TUPLE_LIKE_CONFORMANCE(krys::boo::css::SmoothCommand, 1)
-DEFINE_TUPLE_LIKE_CONFORMANCE(krys::boo::css::ArcCommand, 5)
-DEFINE_TUPLE_LIKE_CONFORMANCE(krys::boo::css::Shape, 3)
+KRYS_DEFINE_TUPLE_LIKE_CONFORMANCE(krys::boo::css::ToPosition, 1)
+KRYS_DEFINE_TUPLE_LIKE_CONFORMANCE(krys::boo::css::ByCoordinatePair, 1)
+KRYS_DEFINE_TUPLE_LIKE_CONFORMANCE(krys::boo::css::RelativeControlPoint, 2)
+KRYS_DEFINE_TUPLE_LIKE_CONFORMANCE(krys::boo::css::AbsoluteControlPoint, 2)
+KRYS_DEFINE_TUPLE_LIKE_CONFORMANCE(krys::boo::css::MoveCommand, 1)
+KRYS_DEFINE_TUPLE_LIKE_CONFORMANCE(krys::boo::css::LineCommand, 1)
+KRYS_DEFINE_TUPLE_LIKE_CONFORMANCE(krys::boo::css::HLineCommand::To, 1)
+KRYS_DEFINE_TUPLE_LIKE_CONFORMANCE(krys::boo::css::HLineCommand::By, 1)
+KRYS_DEFINE_TUPLE_LIKE_CONFORMANCE(krys::boo::css::HLineCommand, 1)
+KRYS_DEFINE_TUPLE_LIKE_CONFORMANCE(krys::boo::css::VLineCommand::To, 1)
+KRYS_DEFINE_TUPLE_LIKE_CONFORMANCE(krys::boo::css::VLineCommand::By, 1)
+KRYS_DEFINE_TUPLE_LIKE_CONFORMANCE(krys::boo::css::VLineCommand, 1)
+KRYS_DEFINE_TUPLE_LIKE_CONFORMANCE(krys::boo::css::CurveCommand::To, 3)
+KRYS_DEFINE_TUPLE_LIKE_CONFORMANCE(krys::boo::css::CurveCommand::By, 3)
+KRYS_DEFINE_TUPLE_LIKE_CONFORMANCE(krys::boo::css::CurveCommand, 1)
+KRYS_DEFINE_TUPLE_LIKE_CONFORMANCE(krys::boo::css::SmoothCommand::To, 2)
+KRYS_DEFINE_TUPLE_LIKE_CONFORMANCE(krys::boo::css::SmoothCommand::By, 2)
+KRYS_DEFINE_TUPLE_LIKE_CONFORMANCE(krys::boo::css::SmoothCommand, 1)
+KRYS_DEFINE_TUPLE_LIKE_CONFORMANCE(krys::boo::css::ArcCommand, 5)
+KRYS_DEFINE_TUPLE_LIKE_CONFORMANCE(krys::boo::css::Shape, 3)

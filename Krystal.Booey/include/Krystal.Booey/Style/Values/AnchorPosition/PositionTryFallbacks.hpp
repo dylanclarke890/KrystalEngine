@@ -40,4 +40,4 @@ namespace krys::boo::style
   };
 }
 
-DEFINE_VARIANT_LIKE_CONFORMANCE(krys::boo::style::PositionTryFallbacks)
+KRYS_DEFINE_VARIANT_LIKE_CONFORMANCE(krys::boo::style::PositionTryFallbacks)

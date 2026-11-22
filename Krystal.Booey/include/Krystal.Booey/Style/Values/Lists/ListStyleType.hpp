@@ -152,4 +152,4 @@ namespace krys::boo::style
   };
 }
 
-DEFINE_VARIANT_LIKE_CONFORMANCE(krys::boo::style::ListStyleType)
+KRYS_DEFINE_VARIANT_LIKE_CONFORMANCE(krys::boo::style::ListStyleType)

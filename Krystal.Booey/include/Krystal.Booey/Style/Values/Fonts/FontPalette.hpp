@@ -95,4 +95,4 @@ namespace krys::boo::style
   };
 }
 
-DEFINE_VARIANT_LIKE_CONFORMANCE(krys::boo::style::FontPalette)
+KRYS_DEFINE_VARIANT_LIKE_CONFORMANCE(krys::boo::style::FontPalette)

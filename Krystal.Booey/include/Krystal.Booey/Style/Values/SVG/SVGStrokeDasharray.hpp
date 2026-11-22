@@ -64,7 +64,7 @@ namespace krys::boo::style
     KRYS_NODISCARD bool operator==(const SVGStrokeDasharrayValue &) const noexcept = default;
   };
 
-  DEFINE_TYPE_WRAPPER_GET(SVGStrokeDasharrayValue, Value);
+  KRYS_DEFINE_TYPE_WRAPPER_GET(SVGStrokeDasharrayValue, Value);
 
   // <dasharray> = [ <dasharray-value>+ ]#
   using SVGStrokeDasharrayList = css::CommaSeparatedFixedList<SVGStrokeDasharrayValue>;
@@ -94,6 +94,6 @@ namespace krys::boo::style
   };
 }
 
-DEFINE_TUPLE_LIKE_CONFORMANCE_FOR_TYPE_WRAPPER(krys::boo::style::SVGStrokeDasharrayValue)
-DEFINE_VARIANT_LIKE_CONFORMANCE(krys::boo::style::SVGStrokeDasharrayValueLength)
-DEFINE_VARIANT_LIKE_CONFORMANCE(krys::boo::style::SVGStrokeDasharray)
+KRYS_DEFINE_TUPLE_LIKE_CONFORMANCE_FOR_TYPE_WRAPPER(krys::boo::style::SVGStrokeDasharrayValue)
+KRYS_DEFINE_VARIANT_LIKE_CONFORMANCE(krys::boo::style::SVGStrokeDasharrayValueLength)
+KRYS_DEFINE_VARIANT_LIKE_CONFORMANCE(krys::boo::style::SVGStrokeDasharray)

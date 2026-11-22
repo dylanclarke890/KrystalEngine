@@ -45,4 +45,4 @@ namespace krys::boo::style
   using InsetBox = css::MinimallySerialisingSpaceSeparatedRectEdges<InsetEdge>;
 }
 
-DEFINE_VARIANT_LIKE_CONFORMANCE(krys::boo::style::InsetEdge)
+KRYS_DEFINE_VARIANT_LIKE_CONFORMANCE(krys::boo::style::InsetEdge)

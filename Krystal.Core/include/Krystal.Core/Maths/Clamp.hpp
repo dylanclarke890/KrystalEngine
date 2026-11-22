@@ -30,54 +30,56 @@ namespace krys
     return Min(Min(a, b), Min(c, d));
   }
 
-  template <VECTOR_TEMPLATE_PARAMS>
-  KRYS_NODISCARD constexpr T Min(const VECTOR_TYPE &v) noexcept
+  template <Number T, size_t N>
+  KRYS_NODISCARD constexpr T Min(const Vector<T, N> &v) noexcept
   {
     T min = std::numeric_limits<T>::max();
     ForEach(v, [&min](auto val) { min = Min(min, val); });
     return min;
   }
 
-  template <MATRIX_TEMPLATE_PARAMS>
-  KRYS_NODISCARD constexpr T Min(const MATRIX_TYPE &v) noexcept
+  template <Number T, size_t C, size_t R>
+  KRYS_NODISCARD constexpr T Min(const Matrix<T, C, R> &v) noexcept
   {
     T min = std::numeric_limits<T>::max();
     ForEach(v, [&min](auto val) { min = Min(min, val); });
     return min;
   }
 
-  template <VECTOR_TEMPLATE_PARAMS>
-  KRYS_NODISCARD constexpr auto Min(const VECTOR_TYPE &a, const VECTOR_TYPE &b) noexcept
+  template <Number T, size_t N>
+  KRYS_NODISCARD constexpr auto Min(const Vector<T, N> &a, const Vector<T, N> &b) noexcept
   {
     return Zip(a, b, [](T x, T y) -> T { return Min(x, y); });
   }
 
-  template <MATRIX_TEMPLATE_PARAMS>
-  KRYS_NODISCARD constexpr auto Min(const MATRIX_TYPE &a, const MATRIX_TYPE &b) noexcept
+  template <Number T, size_t C, size_t R>
+  KRYS_NODISCARD constexpr auto Min(const Matrix<T, C, R> &a, const Matrix<T, C, R> &b) noexcept
   {
     return Zip(a, b, [](T x, T y) -> T { return Min(x, y); });
   }
 
-  template <VECTOR_TEMPLATE_PARAMS>
-  KRYS_NODISCARD constexpr auto Min(const VECTOR_TYPE &a, const VECTOR_TYPE &b, const VECTOR_TYPE &c) noexcept
+  template <Number T, size_t N>
+  KRYS_NODISCARD constexpr auto Min(const Vector<T, N> &a, const Vector<T, N> &b,
+                                    const Vector<T, N> &c) noexcept
   {
     return Zip(a, b, c, [](T x, T y, T z) -> T { return Min(x, y, z); });
   }
 
-  template <MATRIX_TEMPLATE_PARAMS>
-  KRYS_NODISCARD constexpr auto Min(const MATRIX_TYPE &a, const MATRIX_TYPE &b, const MATRIX_TYPE &c) noexcept
+  template <Number T, size_t C, size_t R>
+  KRYS_NODISCARD constexpr auto Min(const Matrix<T, C, R> &a, const Matrix<T, C, R> &b,
+                                    const Matrix<T, C, R> &c) noexcept
   {
     return Zip(a, b, c, [](T x, T y, T z) -> T { return Min(x, y, z); });
   }
 
-  template <VECTOR_TEMPLATE_PARAMS>
-  KRYS_NODISCARD constexpr auto Min(const VECTOR_TYPE &a, T b) noexcept
+  template <Number T, size_t N>
+  KRYS_NODISCARD constexpr auto Min(const Vector<T, N> &a, T b) noexcept
   {
     return MapEach(a, [&b](T v) -> T { return Min(v, b); });
   }
 
-  template <MATRIX_TEMPLATE_PARAMS>
-  KRYS_NODISCARD constexpr auto Min(const MATRIX_TYPE &a, T b) noexcept
+  template <Number T, size_t C, size_t R>
+  KRYS_NODISCARD constexpr auto Min(const Matrix<T, C, R> &a, T b) noexcept
   {
     return MapEach(a, [&b](T v) -> T { return Min(v, b); });
   }
@@ -104,54 +106,56 @@ namespace krys
     return Max(Max(a, b), Max(c, d));
   }
 
-  template <VECTOR_TEMPLATE_PARAMS>
-  KRYS_NODISCARD constexpr T Max(const VECTOR_TYPE &v) noexcept
+  template <Number T, size_t N>
+  KRYS_NODISCARD constexpr T Max(const Vector<T, N> &v) noexcept
   {
     T max = std::numeric_limits<T>::lowest();
     ForEach(v, [&max](auto val) { max = Max(max, val); });
     return max;
   }
 
-  template <MATRIX_TEMPLATE_PARAMS>
-  KRYS_NODISCARD constexpr T Max(const MATRIX_TYPE &v) noexcept
+  template <Number T, size_t C, size_t R>
+  KRYS_NODISCARD constexpr T Max(const Matrix<T, C, R> &v) noexcept
   {
     T max = std::numeric_limits<T>::lowest();
     ForEach(v, [&max](auto val) { max = Max(max, val); });
     return max;
   }
 
-  template <VECTOR_TEMPLATE_PARAMS>
-  KRYS_NODISCARD constexpr auto Max(const VECTOR_TYPE &a, const VECTOR_TYPE &b) noexcept
+  template <Number T, size_t N>
+  KRYS_NODISCARD constexpr auto Max(const Vector<T, N> &a, const Vector<T, N> &b) noexcept
   {
     return Zip(a, b, [](T x, T y) -> T { return Max(x, y); });
   }
 
-  template <MATRIX_TEMPLATE_PARAMS>
-  KRYS_NODISCARD constexpr auto Max(const MATRIX_TYPE &a, const MATRIX_TYPE &b) noexcept
+  template <Number T, size_t C, size_t R>
+  KRYS_NODISCARD constexpr auto Max(const Matrix<T, C, R> &a, const Matrix<T, C, R> &b) noexcept
   {
     return Zip(a, b, [](T x, T y) -> T { return Max(x, y); });
   }
 
-  template <VECTOR_TEMPLATE_PARAMS>
-  KRYS_NODISCARD constexpr auto Max(const VECTOR_TYPE &a, const VECTOR_TYPE &b, const VECTOR_TYPE &c) noexcept
+  template <Number T, size_t N>
+  KRYS_NODISCARD constexpr auto Max(const Vector<T, N> &a, const Vector<T, N> &b,
+                                    const Vector<T, N> &c) noexcept
   {
     return Zip(a, b, c, [](T x, T y, T z) -> T { return Max(x, y, z); });
   }
 
-  template <MATRIX_TEMPLATE_PARAMS>
-  KRYS_NODISCARD constexpr auto Max(const MATRIX_TYPE &a, const MATRIX_TYPE &b, const MATRIX_TYPE &c) noexcept
+  template <Number T, size_t C, size_t R>
+  KRYS_NODISCARD constexpr auto Max(const Matrix<T, C, R> &a, const Matrix<T, C, R> &b,
+                                    const Matrix<T, C, R> &c) noexcept
   {
     return Zip(a, b, c, [](T x, T y, T z) -> T { return Max(x, y, z); });
   }
 
-  template <VECTOR_TEMPLATE_PARAMS>
-  KRYS_NODISCARD constexpr auto Max(const VECTOR_TYPE &a, T b) noexcept
+  template <Number T, size_t N>
+  KRYS_NODISCARD constexpr auto Max(const Vector<T, N> &a, T b) noexcept
   {
     return MapEach(a, [&b](T v) -> T { return Max(v, b); });
   }
 
-  template <MATRIX_TEMPLATE_PARAMS>
-  KRYS_NODISCARD constexpr auto Max(const MATRIX_TYPE &a, T b) noexcept
+  template <Number T, size_t C, size_t R>
+  KRYS_NODISCARD constexpr auto Max(const Matrix<T, C, R> &a, T b) noexcept
   {
     return MapEach(a, [&b](T v) -> T { return Max(v, b); });
   }
@@ -217,56 +221,56 @@ namespace krys
     }
   }
 
-  template <FloatingPoint T, int N>
-  KRYS_NODISCARD constexpr auto FMin(const VECTOR_TYPE &v) noexcept
+  template <FloatingPoint T, size_t N>
+  KRYS_NODISCARD constexpr auto FMin(const Vector<T, N> &v) noexcept
   {
     T min = std::numeric_limits<T>::max();
     ForEach(v, [&min](auto val) { min = FMin(min, val); });
     return min;
   }
 
-  template <FloatingPoint T, int R, int C>
-  KRYS_NODISCARD constexpr auto FMin(const MATRIX_TYPE &m) noexcept
+  template <FloatingPoint T, size_t R, size_t C>
+  KRYS_NODISCARD constexpr auto FMin(const Matrix<T, C, R> &m) noexcept
   {
     T min = std::numeric_limits<T>::max();
     ForEach(m, [&min](auto val) { min = FMin(min, val); });
     return min;
   }
 
-  template <VECTOR_TEMPLATE_PARAMS>
-  KRYS_NODISCARD constexpr auto FMin(const VECTOR_TYPE &a, const VECTOR_TYPE &b) noexcept
+  template <Number T, size_t N>
+  KRYS_NODISCARD constexpr auto FMin(const Vector<T, N> &a, const Vector<T, N> &b) noexcept
   {
     return Zip(a, b, [](T x, T y) -> T { return FMin(x, y); });
   }
 
-  template <MATRIX_TEMPLATE_PARAMS>
-  KRYS_NODISCARD constexpr auto FMin(const MATRIX_TYPE &a, const MATRIX_TYPE &b) noexcept
+  template <Number T, size_t C, size_t R>
+  KRYS_NODISCARD constexpr auto FMin(const Matrix<T, C, R> &a, const Matrix<T, C, R> &b) noexcept
   {
     return Zip(a, b, [](T x, T y) -> T { return FMin(x, y); });
   }
 
-  template <VECTOR_TEMPLATE_PARAMS>
-  KRYS_NODISCARD constexpr auto FMin(const VECTOR_TYPE &a, const VECTOR_TYPE &b,
-                                     const VECTOR_TYPE &c) noexcept
+  template <Number T, size_t N>
+  KRYS_NODISCARD constexpr auto FMin(const Vector<T, N> &a, const Vector<T, N> &b,
+                                     const Vector<T, N> &c) noexcept
   {
     return Zip(a, b, c, [](T x, T y, T z) -> T { return FMin(x, y, z); });
   }
 
-  template <MATRIX_TEMPLATE_PARAMS>
-  KRYS_NODISCARD constexpr auto FMin(const MATRIX_TYPE &a, const MATRIX_TYPE &b,
-                                     const MATRIX_TYPE &c) noexcept
+  template <Number T, size_t C, size_t R>
+  KRYS_NODISCARD constexpr auto FMin(const Matrix<T, C, R> &a, const Matrix<T, C, R> &b,
+                                     const Matrix<T, C, R> &c) noexcept
   {
     return Zip(a, b, c, [](T x, T y, T z) -> T { return FMin(x, y, z); });
   }
 
-  template <VECTOR_TEMPLATE_PARAMS>
-  KRYS_NODISCARD constexpr auto FMin(const VECTOR_TYPE &a, T b) noexcept
+  template <Number T, size_t N>
+  KRYS_NODISCARD constexpr auto FMin(const Vector<T, N> &a, T b) noexcept
   {
     return MapEach(a, [&b](T v) -> T { return FMin(v, b); });
   }
 
-  template <MATRIX_TEMPLATE_PARAMS>
-  KRYS_NODISCARD constexpr auto FMin(const MATRIX_TYPE &a, T b) noexcept
+  template <Number T, size_t C, size_t R>
+  KRYS_NODISCARD constexpr auto FMin(const Matrix<T, C, R> &a, T b) noexcept
   {
     return MapEach(a, [&b](T v) -> T { return FMin(v, b); });
   }
@@ -332,56 +336,56 @@ namespace krys
     }
   }
 
-  template <FloatingPoint T, int N>
-  KRYS_NODISCARD constexpr auto FMax(const VECTOR_TYPE &v) noexcept
+  template <FloatingPoint T, size_t N>
+  KRYS_NODISCARD constexpr auto FMax(const Vector<T, N> &v) noexcept
   {
     T max = std::numeric_limits<T>::lowest();
     ForEach(v, [&max](auto val) { max = FMax(max, val); });
     return max;
   }
 
-  template <FloatingPoint T, int R, int C>
-  KRYS_NODISCARD constexpr auto FMax(const MATRIX_TYPE &m) noexcept
+  template <FloatingPoint T, size_t R, size_t C>
+  KRYS_NODISCARD constexpr auto FMax(const Matrix<T, C, R> &m) noexcept
   {
     T max = std::numeric_limits<T>::lowest();
     ForEach(m, [&max](auto val) { max = FMax(max, val); });
     return max;
   }
 
-  template <VECTOR_TEMPLATE_PARAMS>
-  KRYS_NODISCARD constexpr auto FMax(const VECTOR_TYPE &a, const VECTOR_TYPE &b) noexcept
+  template <Number T, size_t N>
+  KRYS_NODISCARD constexpr auto FMax(const Vector<T, N> &a, const Vector<T, N> &b) noexcept
   {
     return Zip(a, b, [](T x, T y) -> T { return FMax(x, y); });
   }
 
-  template <MATRIX_TEMPLATE_PARAMS>
-  KRYS_NODISCARD constexpr auto FMax(const MATRIX_TYPE &a, const MATRIX_TYPE &b) noexcept
+  template <Number T, size_t C, size_t R>
+  KRYS_NODISCARD constexpr auto FMax(const Matrix<T, C, R> &a, const Matrix<T, C, R> &b) noexcept
   {
     return Zip(a, b, [](T x, T y) -> T { return FMax(x, y); });
   }
 
-  template <VECTOR_TEMPLATE_PARAMS>
-  KRYS_NODISCARD constexpr auto FMax(const VECTOR_TYPE &a, const VECTOR_TYPE &b,
-                                     const VECTOR_TYPE &c) noexcept
+  template <Number T, size_t N>
+  KRYS_NODISCARD constexpr auto FMax(const Vector<T, N> &a, const Vector<T, N> &b,
+                                     const Vector<T, N> &c) noexcept
   {
     return Zip(a, b, c, [](T x, T y, T z) -> T { return FMax(x, y, z); });
   }
 
-  template <MATRIX_TEMPLATE_PARAMS>
-  KRYS_NODISCARD constexpr auto FMax(const MATRIX_TYPE &a, const MATRIX_TYPE &b,
-                                     const MATRIX_TYPE &c) noexcept
+  template <Number T, size_t C, size_t R>
+  KRYS_NODISCARD constexpr auto FMax(const Matrix<T, C, R> &a, const Matrix<T, C, R> &b,
+                                     const Matrix<T, C, R> &c) noexcept
   {
     return Zip(a, b, c, [](T x, T y, T z) -> T { return FMax(x, y, z); });
   }
 
-  template <VECTOR_TEMPLATE_PARAMS>
-  KRYS_NODISCARD constexpr auto FMax(const VECTOR_TYPE &a, T b) noexcept
+  template <Number T, size_t N>
+  KRYS_NODISCARD constexpr auto FMax(const Vector<T, N> &a, T b) noexcept
   {
     return MapEach(a, [&b](T v) -> T { return FMax(v, b); });
   }
 
-  template <MATRIX_TEMPLATE_PARAMS>
-  KRYS_NODISCARD constexpr auto FMax(const MATRIX_TYPE &a, T b) noexcept
+  template <Number T, size_t C, size_t R>
+  KRYS_NODISCARD constexpr auto FMax(const Matrix<T, C, R> &a, T b) noexcept
   {
     return MapEach(a, [&b](T v) -> T { return FMax(v, b); });
   }
@@ -398,32 +402,32 @@ namespace krys
 
   /// @brief Clamps each component of the vector between the corresponding components of the `min` and `max`
   /// vectors.
-  template <VECTOR_TEMPLATE_PARAMS>
-  KRYS_NODISCARD constexpr auto Clamp(const VECTOR_TYPE &value, const VECTOR_TYPE &min,
-                                      const VECTOR_TYPE &max) noexcept
+  template <Number T, size_t N>
+  KRYS_NODISCARD constexpr auto Clamp(const Vector<T, N> &value, const Vector<T, N> &min,
+                                      const Vector<T, N> &max) noexcept
   {
     return Zip(value, min, max, [](auto v, auto lo, auto hi) -> T { return Clamp(v, lo, hi); });
   }
 
   /// @brief Clamps each component of the matrix between the corresponding components of the `min` and `max`
   /// matrices.
-  template <MATRIX_TEMPLATE_PARAMS>
-  KRYS_NODISCARD constexpr auto Clamp(const MATRIX_TYPE &value, const MATRIX_TYPE &min,
-                                      const MATRIX_TYPE &max) noexcept
+  template <Number T, size_t C, size_t R>
+  KRYS_NODISCARD constexpr auto Clamp(const Matrix<T, C, R> &value, const Matrix<T, C, R> &min,
+                                      const Matrix<T, C, R> &max) noexcept
   {
     return Zip(value, min, max, [](auto v, auto lo, auto hi) -> T { return Clamp(v, lo, hi); });
   }
 
   /// @brief Clamps each component of the vector between the scalar values `min` and `max`.
-  template <VECTOR_TEMPLATE_PARAMS>
-  KRYS_NODISCARD constexpr auto Clamp(const VECTOR_TYPE &value, T min, T max) noexcept
+  template <Number T, size_t N>
+  KRYS_NODISCARD constexpr auto Clamp(const Vector<T, N> &value, T min, T max) noexcept
   {
     return MapEach(value, [&min, &max](auto v) -> T { return Clamp(v, min, max); });
   }
 
   /// @brief Clamps each component of the matrix between the scalar values `min` and `max`.
-  template <MATRIX_TEMPLATE_PARAMS>
-  KRYS_NODISCARD constexpr auto Clamp(const MATRIX_TYPE &value, T min, T max) noexcept
+  template <Number T, size_t C, size_t R>
+  KRYS_NODISCARD constexpr auto Clamp(const Matrix<T, C, R> &value, T min, T max) noexcept
   {
     return MapEach(value, [&min, &max](auto v) -> T { return Clamp(v, min, max); });
   }

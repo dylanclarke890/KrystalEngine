@@ -55,4 +55,4 @@ namespace krys::boo::style
   };
 }
 
-DEFINE_VARIANT_LIKE_CONFORMANCE(krys::boo::style::HyphenateLimitChars)
+KRYS_DEFINE_VARIANT_LIKE_CONFORMANCE(krys::boo::style::HyphenateLimitChars)

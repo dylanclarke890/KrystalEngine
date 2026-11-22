@@ -55,4 +55,4 @@ namespace krys::boo::style
   using MarginBox = css::MinimallySerialisingSpaceSeparatedRectEdges<MarginEdge>;
 }
 
-DEFINE_VARIANT_LIKE_CONFORMANCE(krys::boo::style::MarginEdge)
+KRYS_DEFINE_VARIANT_LIKE_CONFORMANCE(krys::boo::style::MarginEdge)

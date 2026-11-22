@@ -60,7 +60,7 @@ namespace krys::boo
       }
     }
 
-    DEFINE_TYPE_MAPPING(css::Inset, Inset)
+    KRYS_DEFINE_TYPE_MAPPING(css::Inset, Inset)
 
     template <>
     struct PathComputation<Inset>
@@ -70,4 +70,4 @@ namespace krys::boo
   }
 }
 
-DEFINE_TUPLE_LIKE_CONFORMANCE(krys::boo::style::Inset, 2)
+KRYS_DEFINE_TUPLE_LIKE_CONFORMANCE(krys::boo::style::Inset, 2)

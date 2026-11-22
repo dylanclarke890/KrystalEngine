@@ -60,7 +60,7 @@ namespace krys::boo::style
     }
   }
 
-  DEFINE_TYPE_MAPPING(css::Polygon, Polygon)
+  KRYS_DEFINE_TYPE_MAPPING(css::Polygon, Polygon)
 
   template <>
   struct PathComputation<Polygon>
@@ -83,4 +83,4 @@ namespace krys::boo::style
   };
 }
 
-DEFINE_TUPLE_LIKE_CONFORMANCE(krys::boo::style::Polygon, 2)
+KRYS_DEFINE_TUPLE_LIKE_CONFORMANCE(krys::boo::style::Polygon, 2)

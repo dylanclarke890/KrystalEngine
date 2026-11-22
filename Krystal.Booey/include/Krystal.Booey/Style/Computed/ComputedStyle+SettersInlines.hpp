@@ -29,9 +29,9 @@
 #include "Krystal.Booey/Style/Computed/ComputedStyle+InitialInlines.hpp"
 #include "Krystal.Booey/Style/Values/Primitives/NumericTypesEvaluation.hpp"
 
-#define COMPUTED_STYLE_PROPERTIES_SETTERS_INLINES_INCLUDE_TRAP 1
+#define KRYS_COMPUTED_STYLE_PROPERTIES_SETTERS_INLINES_INCLUDE_TRAP 1
 #include "Krystal.Booey/Style/Computed/ComputedStyleProperties+SettersInlines.hpp"
-#undef COMPUTED_STYLE_PROPERTIES_SETTERS_INLINES_INCLUDE_TRAP
+#undef KRYS_COMPUTED_STYLE_PROPERTIES_SETTERS_INLINES_INCLUDE_TRAP
 
 namespace krys::boo::style
 {

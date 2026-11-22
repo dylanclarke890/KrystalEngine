@@ -11,8 +11,8 @@ namespace std
 #pragma region Vector
 
   /// @brief Provides a custom formatter for vectors.
-  template <VECTOR_TEMPLATE_PARAMS>
-  struct formatter<VECTOR_TYPE>
+  template <krys::Number T, size_t N>
+  struct formatter<krys::Vector<T, N>>
   {
     constexpr auto parse(format_parse_context &ctx)
     {
@@ -20,7 +20,7 @@ namespace std
     }
 
     template <typename FormatContext>
-    constexpr auto format(const VECTOR_TYPE &v, FormatContext &ctx) const
+    constexpr auto format(const krys::Vector<T, N> &v, FormatContext &ctx) const
     {
       if constexpr (N == 1)
       {
@@ -45,8 +45,8 @@ namespace std
     }
   };
 
-  template <VECTOR_TEMPLATE_PARAMS>
-  ostream &operator<<(std::ostream &os, const VECTOR_TYPE &v)
+  template <krys::Number T, size_t N>
+  ostream &operator<<(std::ostream &os, const krys::Vector<T, N> &v)
   {
     os << std::format("{}", v);
     return os;
@@ -57,8 +57,8 @@ namespace std
 #pragma region Matrix
 
   /// @brief Provides a custom formatter for matrices.
-  template <MATRIX_TEMPLATE_PARAMS>
-  struct formatter<MATRIX_TYPE>
+  template <krys::Number T, size_t C, size_t R>
+  struct formatter<krys::Matrix<T, C, R>>
   {
     constexpr auto parse(format_parse_context &ctx)
     {
@@ -66,7 +66,7 @@ namespace std
     }
 
     template <typename FormatContext>
-    constexpr auto format(const MATRIX_TYPE &m, FormatContext &ctx) const
+    constexpr auto format(const krys::Matrix<T, C, R> &m, FormatContext &ctx) const
     {
       if constexpr (R == 2 && C == 2)
       {
@@ -123,8 +123,8 @@ namespace std
     }
   };
 
-  template <MATRIX_TEMPLATE_PARAMS>
-  ostream &operator<<(std::ostream &os, const MATRIX_TYPE &m)
+  template <krys::Number T, size_t C, size_t R>
+  ostream &operator<<(std::ostream &os, const krys::Matrix<T, C, R> &m)
   {
     os << std::format("{}", m);
     return os;
@@ -134,8 +134,8 @@ namespace std
 
 #pragma region Quaternion
 
-  template <QUATERNION_TEMPLATE_PARAMS>
-  struct formatter<QUATERNION_TYPE>
+  template <krys::Number T>
+  struct formatter<krys::Quaternion<T>>
   {
     constexpr auto parse(format_parse_context &ctx)
     {
@@ -143,14 +143,14 @@ namespace std
     }
 
     template <typename FormatContext>
-    auto format(const QUATERNION_TYPE &q, FormatContext &ctx)
+    auto format(const krys::Quaternion<T> &q, FormatContext &ctx)
     {
       return format_to(ctx.out(), "Q(w: {}, x: {}, y: {}, z: {})", q.w, q.x, q.y, q.z);
     }
   };
 
-  template <QUATERNION_TEMPLATE_PARAMS>
-  ostream &operator<<(std::ostream &os, const QUATERNION_TYPE &q)
+  template <krys::Number T>
+  ostream &operator<<(std::ostream &os, const krys::Quaternion<T> &q)
   {
     os << std::format("{}", q);
     return os;

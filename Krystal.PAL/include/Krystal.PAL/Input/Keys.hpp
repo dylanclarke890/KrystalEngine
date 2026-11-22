@@ -284,11 +284,11 @@ struct std::formatter<krys::pal::Key>
   {
     switch (key)
     {
-#define CASE(val)                                                                                            \
+#define KRYS_CASE(val)                                                                                       \
   case val: return std::format_to(ctx.out(), "{}", KRYS_STRINGIFY(val))
 
-      KRYS_FOR_EACH_KEY(CASE);
-#undef CASE
+      KRYS_FOR_EACH_KEY(KRYS_CASE);
+#undef KRYS_CASE
     }
 
     krys_unreachable();
@@ -307,11 +307,11 @@ struct std::formatter<krys::pal::KeyState>
   {
     switch (state)
     {
-#define CASE(val)                                                                                            \
+#define KRYS_CASE(val)                                                                                       \
   case val: return std::format_to(ctx.out(), "{}", KRYS_STRINGIFY(val))
 
-      KRYS_FOR_EACH_KEY_STATE(CASE);
-#undef CASE
+      KRYS_FOR_EACH_KEY_STATE(KRYS_CASE);
+#undef KRYS_CASE
     }
 
     krys_unreachable();

@@ -42,7 +42,7 @@ namespace krys::boo::css
   // `DynamicRangeLimit.hpp`.
   using DynamicRangeLimitMixFunctionValue =
     FunctionNotation<ValueId::DynamicRangeLimitMix, DynamicRangeLimitMixParameters>;
-  DEFINE_TYPE_WRAPPER(DynamicRangeLimitMixFunction, DynamicRangeLimitMixFunctionValue);
+  KRYS_DEFINE_TYPE_WRAPPER(DynamicRangeLimitMixFunction, DynamicRangeLimitMixFunctionValue);
 
   // Overload of operator== for UniquePtr<DynamicRangeLimitMixFunction> to make DynamicRangeLimit::Kind's
   // operator== work.
@@ -55,4 +55,4 @@ namespace krys::boo::css
   }
 }
 
-DEFINE_TUPLE_LIKE_CONFORMANCE_FOR_TYPE_WRAPPER(krys::boo::css::DynamicRangeLimitMixFunction)
+KRYS_DEFINE_TUPLE_LIKE_CONFORMANCE_FOR_TYPE_WRAPPER(krys::boo::css::DynamicRangeLimitMixFunction)

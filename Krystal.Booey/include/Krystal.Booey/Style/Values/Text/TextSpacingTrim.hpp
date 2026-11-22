@@ -66,7 +66,7 @@ namespace krys::boo::style
     boo::TextSpacingTrim::TrimType Value;
   };
 
-  DEFINE_TYPE_WRAPPER_GET(TextSpacingTrim, Value);
+  KRYS_DEFINE_TYPE_WRAPPER_GET(TextSpacingTrim, Value);
 }
 
-DEFINE_TUPLE_LIKE_CONFORMANCE_FOR_TYPE_WRAPPER(krys::boo::style::TextSpacingTrim);
+KRYS_DEFINE_TUPLE_LIKE_CONFORMANCE_FOR_TYPE_WRAPPER(krys::boo::style::TextSpacingTrim);
