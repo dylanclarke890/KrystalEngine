@@ -66,6 +66,4 @@ namespace krys::boo::css
   {
     return RuleType::FunctionDeclarations;
   }
-
-  constexpr auto FirstUnexposedRuleType = RuleType::LayerBlock;
 }

@@ -1,23 +1,4 @@
-﻿/*
- * Copyright (C) 2010 Nokia Corporation and/or its subsidiary(-ies)
- *
- *  This library is free software; you can redistribute it and/or
- *  modify it under the terms of the GNU Library General Public
- *  License as published by the Free Software Foundation; either
- *  version 2 of the License, or (at your option) any later version.
- *
- *  This library is distributed in the hope that it will be useful,
- *  but WITHOUT ANY WARRANTY; without even the implied warranty of
- *  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU
- *  Library General Public License for more details.
- *
- *  You should have received a copy of the GNU Library General Public License
- *  along with this library; see the file COPYING.LIB.  If not, write to
- *  the Free Software Foundation, Inc., 51 Franklin Street, Fifth Floor,
- *  Boston, MA 02110-1301, USA.
- */
-
-#pragma once
+﻿#pragma once
 
 #include "Krystal.Booey/CSS/Queries/MediaQuery.hpp"
 #include "Krystal.Booey/CSS/Queries/MediaQueryMatcher.hpp"
@@ -28,30 +9,29 @@
 #include "Krystal.Core/Memory/RefPtr.hpp"
 #include "Krystal.Core/Numeric.hpp"
 
-namespace krys::boo::css
+namespace krys::boo::css::mq
 {
-  namespace mq
-  {
-    class MediaQueryEvaluator;
-  }
+  class MediaQueryEvaluator;
 }
 
 namespace krys::boo
 {
-  /// @brief The object `matchMedia()` returns: the current result of a media query list, and `change` events
-  /// whenever it changes.
+  /// @brief What `matchMedia()` returns: whether a media query list matches, and a `change` event whenever
+  /// that changes. The document's media query matcher evaluates its lists together, a round at a time.
   /// @see https://drafts.csswg.org/cssom-view/#the-mediaquerylist-interface
   class MediaQueryList final : public EventTarget
   {
   private:
+    // The matcher, until its document goes.
     RefPtr<css::MediaQueryMatcher> _matcher;
     const css::mq::MediaQueryList _mediaQueries;
-    // Indicates if the query has been evaluated after the last style selector change.
-    uint32 _evaluationRound;
-    // Used to know if the query has changed in the last style selector change.
-    uint32 _changeRound;
     bool _matches;
-    bool _needsNotification {false};
+    // The matcher's round in which the queries were last evaluated, and the round in which they last changed
+    // whether they match.
+    uint32 _evaluatedRound;
+    uint32 _changedRound;
+    // Whether a change awaits a `change` event.
+    bool _needsChangeEvent {false};
 
     MediaQueryList(css::MediaQueryMatcher &matcher, css::mq::MediaQueryList &&mediaQueries,
                    bool matches) noexcept;
@@ -62,26 +42,36 @@ namespace krys::boo
     KRYS_NODISCARD static Ref<MediaQueryList>
       Create(css::MediaQueryMatcher &matcher, css::mq::MediaQueryList &&mediaQueries, bool matches) noexcept;
 
+#pragma region MediaQueryList - https://drafts.csswg.org/cssom-view/#the-mediaquerylist-interface
+
+    /// @brief The serialisation of the media queries.
     /// @see https://drafts.csswg.org/cssom-view/#dom-mediaquerylist-media
     KRYS_NODISCARD CSSOMString Media() const noexcept;
 
+    /// @brief Whether the media queries match, evaluated again if the environment may have changed since.
     /// @see https://drafts.csswg.org/cssom-view/#dom-mediaquerylist-matches
     KRYS_NODISCARD bool Matches() noexcept;
 
-    /// @note Legacy.
+    /// @brief The legacy way to add a `change` listener.
     /// @see https://drafts.csswg.org/cssom-view/#dom-mediaquerylist-addlistener
-    void AddListener(RefPtr<EventListenerCallback> &&listener) noexcept;
+    void AddListener(RefPtr<EventListenerCallback> &&callback) noexcept;
 
-    /// @note Legacy.
+    /// @brief The legacy way to remove a `change` listener.
     /// @see https://drafts.csswg.org/cssom-view/#dom-mediaquerylist-removelistener
-    void RemoveListener(RefPtr<EventListenerCallback> &&listener) noexcept;
+    void RemoveListener(RefPtr<EventListenerCallback> &&callback) noexcept;
 
+#pragma endregion
+
+    /// @brief Evaluates the queries with @p evaluator if they haven't been this round, and fires a `change`
+    /// event for a change if @p eventMode says to dispatch now; otherwise the event waits for a later round.
+    /// @see https://drafts.csswg.org/cssom-view/#evaluate-media-queries-and-report-changes
     void Evaluate(css::mq::MediaQueryEvaluator &evaluator,
                   css::MediaQueryMatcher::EventMode eventMode) noexcept;
 
+    /// @brief Stops using the matcher, whose document is going; the list keeps the result it last had.
     void DetachFromMatcher() noexcept;
 
   private:
-    void SetMatches(bool newValue) noexcept;
+    void SetMatches(bool matches) noexcept;
   };
 }

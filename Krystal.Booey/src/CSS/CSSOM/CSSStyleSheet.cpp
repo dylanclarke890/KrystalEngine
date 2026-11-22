@@ -572,6 +572,11 @@ namespace krys::boo
 
   MediaList *CSSStyleSheet::Media() const noexcept
   {
+    // An imported sheet's media are its `@import` rule's.
+    if (auto *ownerRule = _ownerRule.get())
+    {
+      return &ownerRule->Media();
+    }
     if (!_mediaCSSOMWrapper)
     {
       _mediaCSSOMWrapper = MediaList::Create(const_cast<CSSStyleSheet *>(this));

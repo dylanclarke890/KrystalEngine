@@ -1,26 +1,4 @@
-﻿/*
- * (C) 1999-2003 Lars Knoll (knoll@kde.org)
- * (C) 2002-2003 Dirk Mueller (mueller@kde.org)
- * Copyright (C) 2002-2021 Apple Inc. All rights reserved.
- * Copyright (C) 2011 Andreas Kling (kling@webkit.org)
- *
- * This library is free software; you can redistribute it and/or
- * modify it under the terms of the GNU Library General Public
- * License as published by the Free Software Foundation; either
- * version 2 of the License, or (at your option) any later version.
- *
- * This library is distributed in the hope that it will be useful,
- * but WITHOUT ANY WARRANTY; without even the implied warranty of
- * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU
- * Library General Public License for more details.
- *
- * You should have received a copy of the GNU Library General Public License
- * along with this library; see the file COPYING.LIB.  If not, write to
- * the Free Software Foundation, Inc., 51 Franklin Street, Fifth Floor,
- * Boston, MA 02110-1301, USA.
- */
-
-#pragma once
+﻿#pragma once
 
 #include "Krystal.Booey/CSS/Parser/ParserEnum.hpp"
 #include "Krystal.Booey/CSS/Rules/RuleType.hpp"
@@ -50,32 +28,58 @@ namespace krys::boo::css
 
 namespace krys::boo
 {
-  /// @brief The base of the rules exposed to scripts. Each wraps a rule of the internal rule model.
+  /// @brief A CSS rule as scripts see it: a wrapper of a rule in the internal rule model, made when a script
+  /// first asks for it.
   /// @see https://drafts.csswg.org/cssom/#the-cssrule-interface
   class CSSRule : public RefCounted<CSSRule>, public CanMakeWeakPtr<CSSRule>
   {
   private:
-    mutable bool _hasCachedSelectorText : 1 {false};
-    bool _parentIsRule : 1 {false};
-
-    union
-    {
-      CSSRule *_parentRule;
-      CSSStyleSheet *_parentStyleSheet;
-    };
+    // The rule holding this one, if any; otherwise the style sheet holding it, if any.
+    CSSRule *_parentRule {nullptr};
+    CSSStyleSheet *_parentStyleSheet {nullptr};
+    // For CSSStyleRule: whether its selector text is cached.
+    mutable bool _hasCachedSelectorText {false};
 
   protected:
-    explicit CSSRule(CSSStyleSheet *parent) noexcept : _parentStyleSheet(parent)
+    explicit CSSRule(CSSStyleSheet *parentStyleSheet) noexcept : _parentStyleSheet(parentStyleSheet)
     {
     }
 
   public:
     virtual ~CSSRule() noexcept = default;
 
-    /// @brief The rule's `type`: its rule type, or 0 for the rule types added after the enumeration was
-    /// frozen.
+#pragma region CSSRule - https://drafts.csswg.org/cssom/#the-cssrule-interface
+
+    /// @brief The serialisation of the rule.
+    /// @see https://drafts.csswg.org/cssom/#dom-cssrule-csstext
+    KRYS_NODISCARD virtual CSSOMString CssText() const noexcept = 0;
+
+    /// @brief Setting `cssText` does nothing.
+    /// @see https://drafts.csswg.org/cssom/#dom-cssrule-csstext
+    static ExceptionOr<void> SetCssText(const CSSOMString &text) noexcept;
+
+    /// @brief The rule holding this one, if any.
+    /// @see https://drafts.csswg.org/cssom/#dom-cssrule-parentrule
+    KRYS_NODISCARD CSSRule *ParentRule() const noexcept
+    {
+      return _parentRule;
+    }
+
+    /// @brief The style sheet holding this rule, directly or through its parent rules.
+    /// @see https://drafts.csswg.org/cssom/#dom-cssrule-parentstylesheet
+    KRYS_NODISCARD CSSStyleSheet *ParentStyleSheet() const noexcept
+    {
+      return _parentRule ? _parentRule->ParentStyleSheet() : _parentStyleSheet;
+    }
+
+    /// @brief The deprecated `type`: the number the CSSOM gave the rule's kind, or 0 for the kinds that came
+    /// after it stopped giving them.
+    /// @see https://drafts.csswg.org/cssom/#dom-cssrule-type
     KRYS_NODISCARD uint16 TypeForCSSOM() const noexcept;
 
+#pragma endregion
+
+    /// @brief The kind of rule this wraps.
     KRYS_NODISCARD virtual css::RuleType StyleRuleType() const noexcept = 0;
 
     KRYS_NODISCARD virtual bool IsGroupingRule() const noexcept
@@ -83,46 +87,35 @@ namespace krys::boo
       return false;
     }
 
-    KRYS_NODISCARD virtual CSSOMString CssText() const noexcept = 0;
-
+    /// @brief The rule serialised in @p context, which can replace the URLs in it.
     KRYS_NODISCARD virtual CSSOMString CssText(const css::SerialisationContext &) const noexcept
     {
       return CssText();
     }
 
-    /// @brief Points the wrapper at @p rule, the copy of its rule made when the style sheet was copied on
-    /// write.
+    /// @brief Points the wrapper at @p rule, the copy of its rule made when its style sheet's contents were
+    /// copied to be changed.
     virtual void Reattach(css::Rule &rule) noexcept = 0;
 
+    /// @brief Makes @p styleSheet the rule's parent, and the rule a top-level rule.
     void SetParentStyleSheet(CSSStyleSheet *styleSheet) noexcept
     {
-      _parentIsRule = false;
+      _parentRule = nullptr;
       _parentStyleSheet = styleSheet;
     }
 
+    /// @brief Makes @p rule the rule's parent; null for a rule removed from its parent, which then has no
+    /// style sheet either.
     void SetParentRule(CSSRule *rule) noexcept
     {
-      _parentIsRule = true;
       _parentRule = rule;
+      _parentStyleSheet = nullptr;
     }
 
-    KRYS_NODISCARD CSSStyleSheet *ParentStyleSheet() const noexcept
-    {
-      if (_parentIsRule)
-      {
-        return _parentRule ? _parentRule->ParentStyleSheet() : nullptr;
-      }
-      return _parentStyleSheet;
-    }
-
-    KRYS_NODISCARD CSSRule *ParentRule() const noexcept
-    {
-      return _parentIsRule ? _parentRule : nullptr;
-    }
-
+    /// @brief Whether a style rule holds this one, directly or through other rules.
     KRYS_NODISCARD bool HasStyleRuleAncestor() const noexcept;
 
-    /// @brief The innermost style or scope rule this rule is nested inside, if any.
+    /// @brief What the innermost style or scope rule holding this one makes of it when parsing, if any.
     KRYS_NODISCARD css::NestedContext GetNestedContext() const noexcept;
 
     /// @brief Replaces the child @p rule with a style rule that can hold nested rules.
@@ -130,11 +123,8 @@ namespace krys::boo
     KRYS_NODISCARD virtual RefPtr<css::StyleRuleWithNesting>
       PrepareChildStyleRuleForNesting(css::StyleRule &rule) noexcept;
 
-    virtual void GetChildStyleSheets(HashSet<RefPtr<CSSStyleSheet>> &) noexcept
-    {
-    }
-
-    static ExceptionOr<void> SetCssText(const CSSOMString &text) noexcept;
+    /// @brief Adds the style sheets this rule imports, and those they import, to @p childStyleSheets.
+    virtual void GetChildStyleSheets(HashSet<RefPtr<CSSStyleSheet>> &childStyleSheets) noexcept;
 
   protected:
     KRYS_NODISCARD bool HasCachedSelectorText() const noexcept
@@ -147,6 +137,7 @@ namespace krys::boo
       _hasCachedSelectorText = hasCachedSelectorText;
     }
 
+    /// @brief The parser context of the rule's style sheet, for parsing text set on it.
     KRYS_NODISCARD const css::ParserContext &GetParserContext() const noexcept;
   };
 }

@@ -448,15 +448,16 @@ Status: reviewed (2026-11-22)
 
 #### [6.4.2. The CSSRule Interface](https://drafts.csswg.org/cssom-1/#the-cssrule-interface)
 
-Status: unreviewed
+Status: reviewed (2026-11-22)
+> Code: Krystal.Booey/src/CSS/CSSOM/CSSRule.cpp.
 
-- [ ] [CSSRule.cssText](https://drafts.csswg.org/cssom-1/#dom-cssrule-csstext) — The cssText attribute must return a serialization of the CSS rule. On setting the cssText attribute must do nothing.
+- [x] [CSSRule.cssText](https://drafts.csswg.org/cssom-1/#dom-cssrule-csstext) — The cssText attribute must return a serialization of the CSS rule. On setting the cssText attribute must do nothing.
 
-- [ ] [CSSRule.parentRule](https://drafts.csswg.org/cssom-1/#dom-cssrule-parentrule) — The parentRule attribute must return the parent CSS rule.
+- [x] [CSSRule.parentRule](https://drafts.csswg.org/cssom-1/#dom-cssrule-parentrule) — The parentRule attribute must return the parent CSS rule.
 
-- [ ] [CSSRule.parentStyleSheet](https://drafts.csswg.org/cssom-1/#dom-cssrule-parentstylesheet) — The parentStyleSheet attribute must return the parent CSS style sheet.
+- [x] [CSSRule.parentStyleSheet](https://drafts.csswg.org/cssom-1/#dom-cssrule-parentstylesheet) — The parentStyleSheet attribute must return the parent CSS style sheet.
 
-- [ ] [CSSRule.type](https://drafts.csswg.org/cssom-1/#dom-cssrule-type) — The type attribute is deprecated. It must return an integer, as follows:
+- [x] [CSSRule.type](https://drafts.csswg.org/cssom-1/#dom-cssrule-type) — The type attribute is deprecated. It must return an integer, as follows:
   - • If the object is a CSSStyleRule: Return 1.
   - • If the object is a CSSImportRule: Return 3.
   - • If the object is a CSSMediaRule: Return 4.
@@ -490,17 +491,18 @@ Status: unreviewed
 
 #### [6.4.4. The CSSImportRule Interface](https://drafts.csswg.org/cssom-1/#the-cssimportrule-interface)
 
-Status: unreviewed
+Status: reviewed (2026-11-22)
+> Code: Krystal.Booey/src/CSS/CSSOM/CSSImportRule.cpp; the imported sheet's media is the rule's MediaList (CSSStyleSheet::Media).
 
-- [ ] [CSSImportRule.href](https://drafts.csswg.org/cssom-1/#dom-cssimportrule-href) — The href attribute must return the URL specified by the @import at-rule.
+- [x] [CSSImportRule.href](https://drafts.csswg.org/cssom-1/#dom-cssimportrule-href) — The href attribute must return the URL specified by the @import at-rule.
 
-- [ ] [CSSImportRule.media](https://drafts.csswg.org/cssom-1/#dom-cssimportrule-media) — The media attribute must return the value of the media attribute of the associated CSS style sheet.
+- [x] [CSSImportRule.media](https://drafts.csswg.org/cssom-1/#dom-cssimportrule-media) — The media attribute must return the value of the media attribute of the associated CSS style sheet.
 
-- [ ] [CSSImportRule.styleSheet](https://drafts.csswg.org/cssom-1/#dom-cssimportrule-stylesheet) — The styleSheet attribute must return the associated CSS style sheet, if any, or null otherwise.
+- [x] [CSSImportRule.styleSheet](https://drafts.csswg.org/cssom-1/#dom-cssimportrule-stylesheet) — The styleSheet attribute must return the associated CSS style sheet, if any, or null otherwise.
 
-- [ ] [CSSImportRule.layerName](https://drafts.csswg.org/cssom-1/#dom-cssimportrule-layername) — The layerName attribute must return the layer name declared in the at-rule itself, or an empty string if the layer is anonymous, or null if the at-rule does not declare a layer.
+- [x] [CSSImportRule.layerName](https://drafts.csswg.org/cssom-1/#dom-cssimportrule-layername) — The layerName attribute must return the layer name declared in the at-rule itself, or an empty string if the layer is anonymous, or null if the at-rule does not declare a layer.
 
-- [ ] [CSSImportRule.supportsText](https://drafts.csswg.org/cssom-1/#dom-cssimportrule-supportstext) — The supportsText attribute must return the <supports-condition> declared in the at-rule itself, or null if the at-rule does not declare a supports condition.
+- [x] [CSSImportRule.supportsText](https://drafts.csswg.org/cssom-1/#dom-cssimportrule-supportstext) — The supportsText attribute must return the <supports-condition> declared in the at-rule itself, or null if the at-rule does not declare a supports condition.
 
 #### [6.4.5. The CSSGroupingRule Interface](https://drafts.csswg.org/cssom-1/#the-cssgroupingrule-interface)
 

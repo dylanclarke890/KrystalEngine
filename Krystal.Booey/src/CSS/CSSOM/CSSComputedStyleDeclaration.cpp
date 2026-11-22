@@ -1,32 +1,6 @@
-﻿/*
- * Copyright (C) 2004 Zack Rusin <zack@kde.org>
- * Copyright (C) 2004-2021 Apple Inc. All rights reserved.
- * Copyright (C) 2007 Alexey Proskuryakov <ap@webkit.org>
- * Copyright (C) 2007 Nicholas Shanks <webkit@nickshanks.com>
- * Copyright (C) 2011 Sencha, Inc. All rights reserved.
- * Copyright (C) 2013 Adobe Systems Incorporated. All rights reserved.
- *
- * This library is free software; you can redistribute it and/or
- * modify it under the terms of the GNU Lesser General Public
- * License as published by the Free Software Foundation; either
- * version 2 of the License, or (at your option) any later version.
- *
- * This library is distributed in the hope that it will be useful,
- * but WITHOUT ANY WARRANTY; without even the implied warranty of
- * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU
- * Lesser General Public License for more details.
- *
- * You should have received a copy of the GNU Lesser General Public
- * License along with this library; if not, write to the Free Software
- * Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA
- * 02110-1301  USA
- */
-
-#include "Krystal.Booey/CSS/CSSOM/CSSComputedStyleDeclaration.hpp"
+﻿#include "Krystal.Booey/CSS/CSSOM/CSSComputedStyleDeclaration.hpp"
 #include "Krystal.Booey/CSS/Parser/KeywordLookup.hpp"
 #include "Krystal.Booey/CSS/Properties/MutableStyleProperties.hpp"
-#include "Krystal.Booey/CSS/Selectors/SelectorParser.hpp"
-#include "Krystal.Booey/CSS/Selectors/SelectorParserContext.hpp"
 #include "Krystal.Booey/CSS/Values/SerialisationContext.hpp"
 #include "Krystal.Booey/DOM/Nodes/Document.hpp"
 #include "Krystal.Booey/DOM/Nodes/Element.hpp"
@@ -35,28 +9,38 @@
 
 namespace krys::boo
 {
-  CSSComputedStyleDeclaration::CSSComputedStyleDeclaration(Element &element, IsEmpty isEmpty) noexcept
-      : _element(ShareRef(element)), _isEmpty(isEmpty == IsEmpty::Yes)
-  {
-  }
-
   CSSComputedStyleDeclaration::CSSComputedStyleDeclaration(
-    Element &element, const Maybe<style::PseudoElementIdentifier> &pseudoElementIdentifier) noexcept
-      : _element(ShareRef(element)), _pseudoElementIdentifier(pseudoElementIdentifier)
+    Element &element, const Maybe<style::PseudoElementIdentifier> &pseudoElement, bool hasNoTarget) noexcept
+      : _element(ShareRef(element)), _pseudoElementIdentifier(pseudoElement), _hasNoTarget(hasNoTarget)
   {
   }
 
   CSSComputedStyleDeclaration::~CSSComputedStyleDeclaration() noexcept = default;
 
-  Ref<CSSComputedStyleDeclaration> CSSComputedStyleDeclaration::Create(
-    Element &element, const Maybe<style::PseudoElementIdentifier> &pseudoElementIdentifier) noexcept
+  Ref<CSSComputedStyleDeclaration>
+    CSSComputedStyleDeclaration::Create(Element &element,
+                                        const Maybe<style::PseudoElementIdentifier> &pseudoElement) noexcept
   {
-    return AdoptRef(*new CSSComputedStyleDeclaration(element, pseudoElementIdentifier));
+    return AdoptRef(*new CSSComputedStyleDeclaration(element, pseudoElement, false));
   }
 
   Ref<CSSComputedStyleDeclaration> CSSComputedStyleDeclaration::CreateEmpty(Element &element) noexcept
   {
-    return AdoptRef(*new CSSComputedStyleDeclaration(element, IsEmpty::Yes));
+    return AdoptRef(*new CSSComputedStyleDeclaration(element, null, true));
+  }
+
+  bool CSSComputedStyleDeclaration::HasDeclarations() const noexcept
+  {
+    // 5. If obj is not null, and elt is connected, [...] set decls to a list of all longhand properties that
+    // are
+    //    supported CSS properties, in lexicographical order, with the value being the resolved value computed
+    //    for obj [...].
+    return !_hasNoTarget && _element->IsConnected();
+  }
+
+  const FixedList<css::PropertyId> &CSSComputedStyleDeclaration::ExposedLonghands() const noexcept
+  {
+    return _element->NodeDocument().ExposedComputedCSSPropertyIds();
   }
 
   style::Extractor CSSComputedStyleDeclaration::GetExtractor() const noexcept
@@ -64,8 +48,18 @@ namespace krys::boo
     return style::Extractor(_element.get(), _pseudoElementIdentifier);
   }
 
+  CSSOMString CSSComputedStyleDeclaration::GetPropertyValue(css::PropertyId property) const noexcept
+  {
+    if (_hasNoTarget)
+    {
+      return {};
+    }
+    return GetExtractor().PropertyValueSerialisation(property, css::DefaultSerialisationContext());
+  }
+
   CSSOMString CSSComputedStyleDeclaration::CssText() const noexcept
   {
+    // A computed declaration block serialises as the empty string.
     return {};
   }
 
@@ -74,120 +68,74 @@ namespace krys::boo
     return ExceptionCode::NoModificationAllowedError;
   }
 
-  Ref<css::MutableStyleProperties> CSSComputedStyleDeclaration::CopyProperties() const noexcept
-  {
-    if (_isEmpty)
-    {
-      return css::MutableStyleProperties::Create();
-    }
-    return GetExtractor().CopyProperties();
-  }
-
-  const FixedList<css::PropertyId> &
-    CSSComputedStyleDeclaration::ExposedComputedCSSPropertyIds() const noexcept
-  {
-    return ProtectedElement()->NodeDocument().ExposedComputedCSSPropertyIds();
-  }
-
-  CSSOMString CSSComputedStyleDeclaration::GetPropertyValue(css::PropertyId propertyID) const noexcept
-  {
-    if (_isEmpty)
-    {
-      return {}; // FIXME: Should this be null instead, as it is in StyleProperties::GetPropertyValue?
-    }
-
-    return GetExtractor().PropertyValueSerialisation(propertyID, css::DefaultSerialisationContext());
-  }
-
   uint32 CSSComputedStyleDeclaration::Length() const noexcept
   {
-    if (_isEmpty)
+    if (!HasDeclarations())
     {
       return 0;
     }
-
     style::Extractor::UpdateStyleIfNeededForProperty(*_element, css::PropertyId::Custom);
-
-    const auto *style = ProtectedElement()->ComputedStyle(_pseudoElementIdentifier);
+    const auto *style = _element->ComputedStyle(_pseudoElementIdentifier);
     if (!style)
     {
       return 0;
     }
-
-    return static_cast<uint32>(ExposedComputedCSSPropertyIds().size())
-           + style->InheritedCustomProperties().Size() + style->NonInheritedCustomProperties().Size();
+    return static_cast<uint32>(ExposedLonghands().size()) + style->InheritedCustomProperties().Size()
+           + style->NonInheritedCustomProperties().Size();
   }
 
-  CSSOMString CSSComputedStyleDeclaration::Item(uint32 i) const noexcept
+  CSSOMString CSSComputedStyleDeclaration::Item(uint32 index) const noexcept
   {
-    if (_isEmpty)
+    if (index >= Length())
     {
       return {};
     }
-
-    if (i >= Length())
+    const auto &longhands = ExposedLonghands();
+    if (index < longhands.size())
     {
-      return {};
+      return CSSOMString(ToString(longhands[index]));
     }
 
-    auto exposedCount = static_cast<uint32>(ExposedComputedCSSPropertyIds().size());
-    if (i < exposedCount)
-    {
-      return CSSOMString(ToString(ExposedComputedCSSPropertyIds()[i]));
-    }
-
-    const auto *style = ProtectedElement()->ComputedStyle(_pseudoElementIdentifier);
+    // The custom properties follow, the inherited ones first.
+    const auto *style = _element->ComputedStyle(_pseudoElementIdentifier);
     if (!style)
     {
       return {};
     }
-
-    const auto &inheritedCustomProperties = style->InheritedCustomProperties();
-
-    // FIXME: FindKeyAtIndex does a linear search for the property name, so if
-    // we are called in a loop over all item indexes, we'll spend quadratic time
-    // searching for keys.
-
-    if (i < exposedCount + inheritedCustomProperties.Size())
+    // FIXME: FindKeyAtIndex searches the properties in turn, so going through every item takes quadratic
+    // time.
+    auto customIndex = index - static_cast<uint32>(longhands.size());
+    const auto &inherited = style->InheritedCustomProperties();
+    if (customIndex < inherited.Size())
     {
-      return inheritedCustomProperties.FindKeyAtIndex(i - exposedCount).ToString();
+      return inherited.FindKeyAtIndex(customIndex).ToString();
     }
-
-    const auto &nonInheritedCustomProperties = style->NonInheritedCustomProperties();
-    return nonInheritedCustomProperties.FindKeyAtIndex(i - inheritedCustomProperties.Size() - exposedCount)
-      .ToString();
-  }
-
-  CSSRule *CSSComputedStyleDeclaration::ParentRule() const noexcept
-  {
-    return nullptr;
+    return style->NonInheritedCustomProperties().FindKeyAtIndex(customIndex - inherited.Size()).ToString();
   }
 
   CSSOMString CSSComputedStyleDeclaration::GetPropertyValue(const CSSOMString &propertyName) noexcept
   {
-    if (_isEmpty)
+    if (!HasDeclarations())
     {
       return {};
     }
-
     if (css::IsCustomPropertyName(propertyName))
     {
       return GetExtractor().CustomPropertyValueSerialisation(CSSOMStringAtom {propertyName},
                                                              css::DefaultSerialisationContext());
     }
-
-    auto propertyID = css::PropertyIdFromName(propertyName);
-    if (propertyID == css::PropertyId::Invalid)
+    // A shorthand's value is serialised from its longhands.
+    auto property = css::PropertyIdFromName(propertyName);
+    if (property == css::PropertyId::Invalid)
     {
       return {};
     }
-
-    return GetExtractor().PropertyValueSerialisation(propertyID, css::DefaultSerialisationContext());
+    return GetExtractor().PropertyValueSerialisation(property, css::DefaultSerialisationContext());
   }
 
   CSSOMString CSSComputedStyleDeclaration::GetPropertyPriority(const CSSOMString &) noexcept
   {
-    // All computed styles have a priority of not "important".
+    // No resolved value is important.
     return {};
   }
 
@@ -202,14 +150,28 @@ namespace krys::boo
     return ExceptionCode::NoModificationAllowedError;
   }
 
-  CSSOMString CSSComputedStyleDeclaration::GetPropertyValueInternal(css::PropertyId propertyID) noexcept
+  CSSRule *CSSComputedStyleDeclaration::ParentRule() const noexcept
   {
-    return GetPropertyValue(propertyID);
+    return nullptr;
+  }
+
+  CSSOMString CSSComputedStyleDeclaration::GetPropertyValueInternal(css::PropertyId property) noexcept
+  {
+    return HasDeclarations() ? GetPropertyValue(property) : CSSOMString {};
   }
 
   ExceptionOr<void> CSSComputedStyleDeclaration::SetPropertyInternal(css::PropertyId, const CSSOMString &,
                                                                      css::IsImportant) noexcept
   {
     return ExceptionCode::NoModificationAllowedError;
+  }
+
+  Ref<css::MutableStyleProperties> CSSComputedStyleDeclaration::CopyProperties() const noexcept
+  {
+    if (_hasNoTarget)
+    {
+      return css::MutableStyleProperties::Create();
+    }
+    return GetExtractor().CopyProperties();
   }
 }

@@ -1,23 +1,4 @@
-﻿/*
- * Copyright (C) 2010 Nokia Corporation and/or its subsidiary(-ies)
- *
- *  This library is free software; you can redistribute it and/or
- *  modify it under the terms of the GNU Library General Public
- *  License as published by the Free Software Foundation; either
- *  version 2 of the License, or (at your option) any later version.
- *
- *  This library is distributed in the hope that it will be useful,
- *  but WITHOUT ANY WARRANTY; without even the implied warranty of
- *  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU
- *  Library General Public License for more details.
- *
- *  You should have received a copy of the GNU Library General Public License
- *  along with this library; see the file COPYING.LIB.  If not, write to
- *  the Free Software Foundation, Inc., 51 Franklin Street, Fifth Floor,
- *  Boston, MA 02110-1301, USA.
- */
-
-#include "Krystal.Booey/CSS/CSSOM/MediaQueryList.hpp"
+﻿#include "Krystal.Booey/CSS/CSSOM/MediaQueryList.hpp"
 #include "Krystal.Booey/CSS/CSSOM/MediaQueryListEvent.hpp"
 #include "Krystal.Booey/CSS/Queries/MediaQueryEvaluator.hpp"
 #include "Krystal.Booey/CSS/Queries/MediaQueryParser.hpp"
@@ -30,18 +11,12 @@ namespace krys::boo
 {
   MediaQueryList::MediaQueryList(css::MediaQueryMatcher &matcher, css::mq::MediaQueryList &&mediaQueries,
                                  bool matches) noexcept
-      : _matcher(ShareRefPtr(&matcher)), _mediaQueries(krys::move(mediaQueries)),
-        _evaluationRound(matcher.EvaluationRound()),
-        _changeRound(_evaluationRound - 1), // Any value that is not the same as _evaluationRound would do.
-        _matches(matches)
+      : _matcher(ShareRefPtr(&matcher)), _mediaQueries(krys::move(mediaQueries)), _matches(matches),
+        _evaluatedRound(matcher.EvaluationRound()),
+        // Any round but this one: the result hasn't changed yet.
+        _changedRound(_evaluatedRound - 1)
   {
     matcher.AddMediaQueryList(*this);
-  }
-
-  Ref<MediaQueryList> MediaQueryList::Create(css::MediaQueryMatcher &matcher,
-                                             css::mq::MediaQueryList &&mediaQueries, bool matches) noexcept
-  {
-    return AdoptRef(*new MediaQueryList(matcher, krys::move(mediaQueries), matches));
   }
 
   MediaQueryList::~MediaQueryList() noexcept
@@ -52,9 +27,10 @@ namespace krys::boo
     }
   }
 
-  void MediaQueryList::DetachFromMatcher() noexcept
+  Ref<MediaQueryList> MediaQueryList::Create(css::MediaQueryMatcher &matcher,
+                                             css::mq::MediaQueryList &&mediaQueries, bool matches) noexcept
   {
-    _matcher = nullptr;
+    return AdoptRef(*new MediaQueryList(matcher, krys::move(mediaQueries), matches));
   }
 
   CSSOMString MediaQueryList::Media() const noexcept
@@ -64,81 +40,77 @@ namespace krys::boo
     return krys::move(builder).ToString();
   }
 
-  void MediaQueryList::AddListener(RefPtr<EventListenerCallback> &&listener) noexcept
+  bool MediaQueryList::Matches() noexcept
   {
-    if (!listener)
+    // FIXME: Re-evaluate viewport-dependent queries after updating the owner document's layout once documents
+    // can be nested in frames.
+    if (_matcher && _evaluatedRound != _matcher->EvaluationRound())
     {
-      return;
+      SetMatches(_matcher->Evaluate(_mediaQueries));
     }
-
-    Ref<EventListenerCallback> callback = krys::move(listener);
-    AddEventListener(event_names::Change, krys::move(callback), false);
+    return _matches;
   }
 
-  void MediaQueryList::RemoveListener(RefPtr<EventListenerCallback> &&listener) noexcept
+  void MediaQueryList::AddListener(RefPtr<EventListenerCallback> &&callback) noexcept
   {
-    if (!listener)
+    // 1. Add an event listener with this and an event listener whose type is change, and callback is
+    // callback.
+    //    (Adding one does nothing if its callback is null.)
+    if (callback)
     {
-      return;
+      AddEventListener(event_names::Change, Ref<EventListenerCallback>(krys::move(callback)), false);
     }
+  }
 
-    Ref<EventListenerCallback> callback = krys::move(listener);
-    RemoveEventListener(event_names::Change, krys::move(callback), false);
+  void MediaQueryList::RemoveListener(RefPtr<EventListenerCallback> &&callback) noexcept
+  {
+    // 1. If this's event listener list contains an event listener whose type is change, callback is callback,
+    //    and capture is false, then remove an event listener with this and that event listener.
+    if (callback)
+    {
+      RemoveEventListener(event_names::Change, Ref<EventListenerCallback>(krys::move(callback)), false);
+    }
   }
 
   void MediaQueryList::Evaluate(css::mq::MediaQueryEvaluator &evaluator,
                                 css::MediaQueryMatcher::EventMode eventMode) noexcept
   {
     krys_assert(_matcher);
-    if (_evaluationRound != _matcher->EvaluationRound())
+    if (_evaluatedRound != _matcher->EvaluationRound())
     {
       SetMatches(evaluator.Evaluate(_mediaQueries));
     }
-
-    _needsNotification = _changeRound == _matcher->EvaluationRound() || _needsNotification;
-    if (!_needsNotification || eventMode == css::MediaQueryMatcher::EventMode::Schedule)
+    // A change this round needs an event, as does one whose event was put off.
+    _needsChangeEvent = _needsChangeEvent || _changedRound == _matcher->EvaluationRound();
+    if (!_needsChangeEvent || eventMode == css::MediaQueryMatcher::EventMode::Schedule)
     {
       return;
     }
-    krys_debug_assert(eventMode == css::MediaQueryMatcher::EventMode::DispatchNow);
 
-    // https://drafts.csswg.org/cssom-view/#evaluate-media-queries-and-report-changes
-    MediaQueryListEventInit attributes;
-    attributes.Media = Media();
-    attributes.Matches = Matches();
-    dom::EventDispatcher::FireEvent<MediaQueryListEvent>(event_names::Change, *this, attributes);
-    _needsNotification = false;
+    // 1a. If target's matches state has changed since the last time these steps were run, fire an event named
+    //     change at target using MediaQueryListEvent, with its isTrusted attribute initialized to true, its
+    //     media attribute initialized to target's media, and its matches attribute initialized to target's
+    //     matches state.
+    MediaQueryListEventInit init;
+    init.Media = Media();
+    init.Matches = _matches;
+    dom::EventDispatcher::FireEvent<MediaQueryListEvent>(event_names::Change, *this, init);
+    _needsChangeEvent = false;
   }
 
-  void MediaQueryList::SetMatches(bool newValue) noexcept
+  void MediaQueryList::DetachFromMatcher() noexcept
+  {
+    _matcher = nullptr;
+  }
+
+  void MediaQueryList::SetMatches(bool matches) noexcept
   {
     krys_debug_assert(_matcher);
-    _evaluationRound = _matcher->EvaluationRound();
-
-    if (newValue == _matches)
+    _evaluatedRound = _matcher->EvaluationRound();
+    if (matches != _matches)
     {
-      return;
+      _matches = matches;
+      _changedRound = _evaluatedRound;
     }
-
-    _matches = newValue;
-    _changeRound = _evaluationRound;
-  }
-
-  bool MediaQueryList::Matches() noexcept
-  {
-    if (!_matcher)
-    {
-      return _matches;
-    }
-
-    // FIXME: Re-evaluate viewport-dependent queries after updating the owner document's layout once documents
-    // can be nested in frames.
-
-    if (_evaluationRound != _matcher->EvaluationRound())
-    {
-      SetMatches(_matcher->Evaluate(_mediaQueries));
-    }
-
-    return _matches;
   }
 }
