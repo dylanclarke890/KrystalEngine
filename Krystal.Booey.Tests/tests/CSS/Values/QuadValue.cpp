@@ -11,10 +11,10 @@ namespace krys::boo::css::tests
     {
       auto quad = QuadValue::Create(Px(1.0));
       CHECK(quad->IsQuadValue());
-      CHECK(CssText(quad->GetQuad().Top()) == "1px");
-      CHECK(CssText(quad->GetQuad().Right()) == "1px");
-      CHECK(CssText(quad->GetQuad().Bottom()) == "1px");
-      CHECK(CssText(quad->GetQuad().Left()) == "1px");
+      CHECK(CssText(*quad->Sides().Top) == "1px");
+      CHECK(CssText(*quad->Sides().Right) == "1px");
+      CHECK(CssText(*quad->Sides().Bottom) == "1px");
+      CHECK(CssText(*quad->Sides().Left) == "1px");
       CHECK(CssText(*quad) == "1px");
       CHECK(quad->CanBeCoalesced());
     }
@@ -22,10 +22,10 @@ namespace krys::boo::css::tests
     SECTION("Vertical and horizontal")
     {
       auto quad = QuadValue::Create(Px(1.0), Px(2.0));
-      CHECK(CssText(quad->GetQuad().Top()) == "1px");
-      CHECK(CssText(quad->GetQuad().Right()) == "2px");
-      CHECK(CssText(quad->GetQuad().Bottom()) == "1px");
-      CHECK(CssText(quad->GetQuad().Left()) == "2px");
+      CHECK(CssText(*quad->Sides().Top) == "1px");
+      CHECK(CssText(*quad->Sides().Right) == "2px");
+      CHECK(CssText(*quad->Sides().Bottom) == "1px");
+      CHECK(CssText(*quad->Sides().Left) == "2px");
       CHECK(CssText(*quad) == "1px 2px");
       CHECK_FALSE(quad->CanBeCoalesced());
     }
@@ -33,31 +33,24 @@ namespace krys::boo::css::tests
     SECTION("Top, horizontal and bottom")
     {
       auto quad = QuadValue::Create(Px(1.0), Px(2.0), Px(3.0));
-      CHECK(CssText(quad->GetQuad().Left()) == "2px");
+      CHECK(CssText(*quad->Sides().Left) == "2px");
       CHECK(CssText(*quad) == "1px 2px 3px");
     }
 
     SECTION("Four sides")
     {
       auto quad = QuadValue::Create(Px(1.0), Px(2.0), Px(3.0), Px(4.0));
-      CHECK(CssText(quad->GetQuad().Top()) == "1px");
-      CHECK(CssText(quad->GetQuad().Right()) == "2px");
-      CHECK(CssText(quad->GetQuad().Bottom()) == "3px");
-      CHECK(CssText(quad->GetQuad().Left()) == "4px");
+      CHECK(CssText(*quad->Sides().Top) == "1px");
+      CHECK(CssText(*quad->Sides().Right) == "2px");
+      CHECK(CssText(*quad->Sides().Bottom) == "3px");
+      CHECK(CssText(*quad->Sides().Left) == "4px");
       CHECK(CssText(*quad) == "1px 2px 3px 4px");
     }
 
-    SECTION("From a Quad")
+    SECTION("From side values")
     {
-      auto quad = QuadValue::Create(Quad {Px(1.0), Px(2.0), Px(1.0), Px(2.0)});
+      auto quad = QuadValue::Create(SideValues {Px(1.0), Px(2.0), Px(1.0), Px(2.0)});
       CHECK(CssText(*quad) == "1px 2px");
-    }
-
-    SECTION("Value::GetQuad() forwards to the quad")
-    {
-      auto quad = QuadValue::Create(Px(1.0));
-      const Value &value = *quad;
-      CHECK(&value.GetQuad() == &quad->GetQuad());
     }
   }
 

@@ -703,12 +703,9 @@ set(KRYSTAL_BOOEY_CSS_HEADERS
   include/Krystal.Booey/CSS/Values/Primitives/Url.hpp
   include/Krystal.Booey/CSS/Values/Primitives/UrlModifiers.hpp
   include/Krystal.Booey/CSS/Values/PrimitiveValue.hpp
-  include/Krystal.Booey/CSS/Values/Quad.hpp
   include/Krystal.Booey/CSS/Values/QuadValue.hpp
   include/Krystal.Booey/CSS/Values/RatioValue.hpp
   include/Krystal.Booey/CSS/Values/RayValue.hpp
-  include/Krystal.Booey/CSS/Values/Rect.hpp
-  include/Krystal.Booey/CSS/Values/RectBase.hpp
   include/Krystal.Booey/CSS/Values/RectValue.hpp
   include/Krystal.Booey/CSS/Values/ReflectValue.hpp
   include/Krystal.Booey/CSS/Values/ScrollValue.hpp
@@ -723,6 +720,7 @@ set(KRYSTAL_BOOEY_CSS_HEADERS
   include/Krystal.Booey/CSS/Values/Shapes/RectFunction.hpp
   include/Krystal.Booey/CSS/Values/Shapes/ShapeFunction.hpp
   include/Krystal.Booey/CSS/Values/Shapes/XywhFunction.hpp
+  include/Krystal.Booey/CSS/Values/SideValues.hpp
   include/Krystal.Booey/CSS/Values/SubgridValue.hpp
   include/Krystal.Booey/CSS/Values/TextDecoration/TextShadow.hpp
   include/Krystal.Booey/CSS/Values/TextDecoration/TextShadowProperty.hpp
@@ -1027,6 +1025,7 @@ set(KRYSTAL_BOOEY_CSS_SOURCES
   src/CSS/Values/Shapes/RectFunction.cpp
   src/CSS/Values/Shapes/ShapeFunction.cpp
   src/CSS/Values/Shapes/XywhFunction.cpp
+  src/CSS/Values/SideValues.cpp
   src/CSS/Values/SubgridValue.cpp
   src/CSS/Values/TextShadowPropertyValue.cpp
   src/CSS/Values/TransformListValue.cpp

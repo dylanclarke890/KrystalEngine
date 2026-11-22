@@ -94,7 +94,8 @@ namespace krys::boo::css::parse_property
       return nullptr;
     }
 
-    return RectValue::Create(Rect {krys::move(top), krys::move(right), krys::move(bottom), krys::move(left)});
+    return RectValue::Create(
+      SideValues {krys::move(top), krys::move(right), krys::move(bottom), krys::move(left)});
   }
 
   RefPtr<Value> ConsumeClipPath(TokenRange &tokens, PropertyParserState &state) noexcept

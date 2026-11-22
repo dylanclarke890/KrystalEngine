@@ -42,8 +42,6 @@ namespace krys::boo
 namespace krys::boo::css
 {
   class PrimitiveValue;
-  class Quad;
-  class Rect;
   class StaticValuePool;
   class ToLengthConversionData;
 
@@ -508,10 +506,6 @@ namespace krys::boo::css
     KRYS_NODISCARD inline const Value &First() const noexcept; // ValuePair
 
     KRYS_NODISCARD inline const Value &Second() const noexcept; // ValuePair
-
-    KRYS_NODISCARD inline const Quad &GetQuad() const noexcept; // QuadValue
-
-    KRYS_NODISCARD inline const Rect &GetRect() const noexcept; // RectValue
 
   protected:
     void operator delete(Value *, std::destroying_delete_t) noexcept;

@@ -71,10 +71,10 @@ namespace krys::boo::style
       krys_debug_assert(!widthValue->OverridesBorderWidths());
       auto &widths = widthValue->Widths();
       return MaskBorderWidth {
-        ConvertMaskBorderWidthValue(state, widths.Top()),
-        ConvertMaskBorderWidthValue(state, widths.Right()),
-        ConvertMaskBorderWidthValue(state, widths.Bottom()),
-        ConvertMaskBorderWidthValue(state, widths.Left()),
+        ConvertMaskBorderWidthValue(state, *widths.Top),
+        ConvertMaskBorderWidthValue(state, *widths.Right),
+        ConvertMaskBorderWidthValue(state, *widths.Bottom),
+        ConvertMaskBorderWidthValue(state, *widths.Left),
       };
     }
 

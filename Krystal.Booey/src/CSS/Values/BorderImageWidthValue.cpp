@@ -27,13 +27,14 @@
 
 namespace krys::boo::css
 {
-  BorderImageWidthValue::BorderImageWidthValue(Quad widths, bool overridesBorderWidths) noexcept
+  BorderImageWidthValue::BorderImageWidthValue(SideValues widths, bool overridesBorderWidths) noexcept
       : Value(ValueType::BorderImageWidth), _widths(krys::move(widths)),
         _overridesBorderWidths(overridesBorderWidths)
   {
   }
 
-  Ref<BorderImageWidthValue> BorderImageWidthValue::Create(Quad widths, bool overridesBorderWidths) noexcept
+  Ref<BorderImageWidthValue> BorderImageWidthValue::Create(SideValues widths,
+                                                           bool overridesBorderWidths) noexcept
   {
     return AdoptRef(*new BorderImageWidthValue(krys::move(widths), overridesBorderWidths));
   }
@@ -48,11 +49,11 @@ namespace krys::boo::css
     {
       return CSSOMString();
     }
-    return _widths.CssText(context);
+    return SerialiseSides(_widths, context);
   }
 
   bool BorderImageWidthValue::Equals(const BorderImageWidthValue &other) const noexcept
   {
-    return _overridesBorderWidths == other._overridesBorderWidths && _widths.Equals(other._widths);
+    return _overridesBorderWidths == other._overridesBorderWidths && _widths == other._widths;
   }
 }

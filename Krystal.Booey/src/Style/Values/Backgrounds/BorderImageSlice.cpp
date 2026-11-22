@@ -63,10 +63,10 @@ namespace krys::boo::style
     {
       auto &slices = sliceValue->Slices();
       return BorderImageSlice {
-        ConvertBorderImageSliceValue(state, slices.Top()),
-        ConvertBorderImageSliceValue(state, slices.Right()),
-        ConvertBorderImageSliceValue(state, slices.Bottom()),
-        ConvertBorderImageSliceValue(state, slices.Left()),
+        ConvertBorderImageSliceValue(state, *slices.Top),
+        ConvertBorderImageSliceValue(state, *slices.Right),
+        ConvertBorderImageSliceValue(state, *slices.Bottom),
+        ConvertBorderImageSliceValue(state, *slices.Left),
         sliceValue->Fill() ? Maybe<css::keywords::Fill> {css::keywords::Fill {}} : std::nullopt,
       };
     }

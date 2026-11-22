@@ -70,10 +70,10 @@ namespace krys::boo::style
     {
       auto &widths = widthValue->Widths();
       return BorderImageWidth {
-        ConvertBorderImageWidthValue(state, widths.Top()),
-        ConvertBorderImageWidthValue(state, widths.Right()),
-        ConvertBorderImageWidthValue(state, widths.Bottom()),
-        ConvertBorderImageWidthValue(state, widths.Left()),
+        ConvertBorderImageWidthValue(state, *widths.Top),
+        ConvertBorderImageWidthValue(state, *widths.Right),
+        ConvertBorderImageWidthValue(state, *widths.Bottom),
+        ConvertBorderImageWidthValue(state, *widths.Left),
         widthValue->OverridesBorderWidths(),
       };
     }

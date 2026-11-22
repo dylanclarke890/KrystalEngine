@@ -30,7 +30,7 @@
 #include "Krystal.Booey/CSS/Values/OffsetRotateValue.hpp"
 #include "Krystal.Booey/CSS/Values/PrimitiveValue.hpp"
 #include "Krystal.Booey/CSS/Values/QuadValue.hpp"
-#include "Krystal.Booey/CSS/Values/RectBase.hpp"
+#include "Krystal.Booey/CSS/Values/SideValues.hpp"
 #include "Krystal.Booey/CSS/Values/ValuePair.hpp"
 #include "Krystal.Core/Visitor.hpp"
 
@@ -60,21 +60,21 @@ namespace krys::boo::css
       return IsNumber(DynamicDowncast<PrimitiveValue>(value), number, type);
     }
 
-    KRYS_NODISCARD bool IsNumber(const RectBase &quad, double number, UnitType type) noexcept
+    KRYS_NODISCARD bool IsNumber(const SideValues &quad, double number, UnitType type) noexcept
     {
-      return IsNumber(quad.Top(), number, type) && IsNumber(quad.Right(), number, type)
-             && IsNumber(quad.Bottom(), number, type) && IsNumber(quad.Left(), number, type);
+      return IsNumber(*quad.Top, number, type) && IsNumber(*quad.Right, number, type)
+             && IsNumber(*quad.Bottom, number, type) && IsNumber(*quad.Left, number, type);
     }
 
-    KRYS_NODISCARD bool IsValueId(const RectBase &quad, ValueId valueId) noexcept
+    KRYS_NODISCARD bool IsValueId(const SideValues &quad, ValueId valueId) noexcept
     {
-      return css::IsValueId(quad.Top(), valueId) && css::IsValueId(quad.Right(), valueId)
-             && css::IsValueId(quad.Bottom(), valueId) && css::IsValueId(quad.Left(), valueId);
+      return css::IsValueId(*quad.Top, valueId) && css::IsValueId(*quad.Right, valueId)
+             && css::IsValueId(*quad.Bottom, valueId) && css::IsValueId(*quad.Left, valueId);
     }
 
     KRYS_NODISCARD bool IsNumericQuad(const Value &value, double number, UnitType type) noexcept
     {
-      return value.IsQuadValue() && IsNumber(value.GetQuad(), number, type);
+      return value.IsQuadValue() && IsNumber(Downcast<QuadValue>(value).Sides(), number, type);
     }
   }
 

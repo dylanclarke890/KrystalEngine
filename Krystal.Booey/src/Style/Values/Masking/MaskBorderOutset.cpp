@@ -61,12 +61,12 @@ namespace krys::boo::style
   {
     if (auto *quadValue = DynamicDowncast<css::QuadValue>(value))
     {
-      auto &quad = quadValue->GetQuad();
+      auto &quad = quadValue->Sides();
       return MaskBorderOutset {
-        ConvertMaskBorderOutsetValue(state, quad.Top()),
-        ConvertMaskBorderOutsetValue(state, quad.Right()),
-        ConvertMaskBorderOutsetValue(state, quad.Bottom()),
-        ConvertMaskBorderOutsetValue(state, quad.Left()),
+        ConvertMaskBorderOutsetValue(state, *quad.Top),
+        ConvertMaskBorderOutsetValue(state, *quad.Right),
+        ConvertMaskBorderOutsetValue(state, *quad.Bottom),
+        ConvertMaskBorderOutsetValue(state, *quad.Left),
       };
     }
 

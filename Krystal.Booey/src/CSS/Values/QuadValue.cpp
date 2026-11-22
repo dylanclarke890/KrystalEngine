@@ -27,33 +27,32 @@
 
 namespace krys::boo::css
 {
-  QuadValue::QuadValue(Quad quad) noexcept : Value(ValueType::Quad), _quad(krys::move(quad))
+  QuadValue::QuadValue(SideValues sides) noexcept : Value(ValueType::Quad), _sides(krys::move(sides))
   {
   }
 
-  // A quad value is a value and its quad: its coalescing bit is in the value's bit fields.
+  // A quad value is a value and its sides: its coalescing bit is in the value's bit fields.
   static_assert(sizeof(QuadValue)
-                == ((sizeof(Value) + alignof(Quad) - 1) / alignof(Quad) * alignof(Quad)) + sizeof(Quad));
+                == ((sizeof(Value) + alignof(SideValues) - 1) / alignof(SideValues) * alignof(SideValues))
+                     + sizeof(SideValues));
 
-  Ref<QuadValue> QuadValue::Create(Quad quad) noexcept
+  Ref<QuadValue> QuadValue::Create(SideValues sides) noexcept
   {
-    return AdoptRef(*new QuadValue(krys::move(quad)));
+    return AdoptRef(*new QuadValue(krys::move(sides)));
   }
 
   CSSOMString QuadValue::CustomCSSText(const SerialisationContext &context) const noexcept
   {
-    return _quad.CssText(context);
+    return SerialiseSides(_sides, context);
   }
 
   bool QuadValue::Equals(const QuadValue &other) const noexcept
   {
-    return _quad.Equals(other._quad);
+    return _sides == other._sides;
   }
 
   bool QuadValue::CanBeCoalesced() const noexcept
   {
-    const Value &top = _quad.Top();
-    return _coalesceIdenticalValues && top.Equals(_quad.Right()) && top.Equals(_quad.Left())
-           && top.Equals(_quad.Bottom());
+    return _coalesceIdenticalValues && _sides.AreAllEqual();
   }
 }

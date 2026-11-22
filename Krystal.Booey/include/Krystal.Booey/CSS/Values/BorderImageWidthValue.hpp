@@ -25,7 +25,7 @@
 
 #pragma once
 
-#include "Krystal.Booey/CSS/Values/Quad.hpp"
+#include "Krystal.Booey/CSS/Values/SideValues.hpp"
 #include "Krystal.Booey/CSS/Values/Value.hpp"
 #include "Krystal.Core/Memory/RefPtr.hpp"
 
@@ -35,15 +35,16 @@ namespace krys::boo::css
   class BorderImageWidthValue final : public Value
   {
   private:
-    Quad _widths;
+    SideValues _widths;
     bool _overridesBorderWidths {false};
 
-    BorderImageWidthValue(Quad widths, bool overridesBorderWidths) noexcept;
+    BorderImageWidthValue(SideValues widths, bool overridesBorderWidths) noexcept;
 
   public:
-    KRYS_NODISCARD static Ref<BorderImageWidthValue> Create(Quad widths, bool overridesBorderWidths) noexcept;
+    KRYS_NODISCARD static Ref<BorderImageWidthValue> Create(SideValues widths,
+                                                            bool overridesBorderWidths) noexcept;
 
-    KRYS_NODISCARD const Quad &Widths() const noexcept
+    KRYS_NODISCARD const SideValues &Widths() const noexcept
     {
       return _widths;
     }

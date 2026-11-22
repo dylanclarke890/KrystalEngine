@@ -25,7 +25,7 @@
 
 #pragma once
 
-#include "Krystal.Booey/CSS/Values/Rect.hpp"
+#include "Krystal.Booey/CSS/Values/SideValues.hpp"
 #include "Krystal.Booey/CSS/Values/Value.hpp"
 #include "Krystal.Core/Memory/RefPtr.hpp"
 
@@ -35,16 +35,16 @@ namespace krys::boo::css
   class RectValue final : public Value
   {
   private:
-    Rect _rect;
+    SideValues _sides;
 
-    explicit RectValue(Rect rect) noexcept;
+    explicit RectValue(SideValues sides) noexcept;
 
   public:
-    KRYS_NODISCARD static Ref<RectValue> Create(Rect rect) noexcept;
+    KRYS_NODISCARD static Ref<RectValue> Create(SideValues sides) noexcept;
 
-    KRYS_NODISCARD const Rect &GetRect() const noexcept
+    KRYS_NODISCARD const SideValues &Sides() const noexcept
     {
-      return _rect;
+      return _sides;
     }
 
     KRYS_NODISCARD CSSOMString CustomCSSText(const SerialisationContext &context) const noexcept;
@@ -59,11 +59,3 @@ KRYS_SPECIALIZE_TYPE_CAST_TRAITS_BEGIN(krys::boo::css::RectValue)
     return value.IsRectValue();
   }
 KRYS_SPECIALIZE_TYPE_CAST_TRAITS_END()
-
-namespace krys::boo::css
-{
-  inline const Rect &Value::GetRect() const noexcept
-  {
-    return Downcast<RectValue>(*this).GetRect();
-  }
-}

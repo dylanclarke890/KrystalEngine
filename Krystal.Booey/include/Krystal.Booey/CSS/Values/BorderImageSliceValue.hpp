@@ -25,7 +25,7 @@
 
 #pragma once
 
-#include "Krystal.Booey/CSS/Values/Quad.hpp"
+#include "Krystal.Booey/CSS/Values/SideValues.hpp"
 #include "Krystal.Booey/CSS/Values/Value.hpp"
 #include "Krystal.Core/Memory/RefPtr.hpp"
 
@@ -37,15 +37,15 @@ namespace krys::boo::css
   private:
     // These four values are used to make "cuts" in the border image. They can be numbers
     // or percentages.
-    Quad _slices;
+    SideValues _slices;
     bool _fill {false};
 
-    BorderImageSliceValue(Quad slices, bool fill) noexcept;
+    BorderImageSliceValue(SideValues slices, bool fill) noexcept;
 
   public:
-    KRYS_NODISCARD static Ref<BorderImageSliceValue> Create(Quad slices, bool fill) noexcept;
+    KRYS_NODISCARD static Ref<BorderImageSliceValue> Create(SideValues slices, bool fill) noexcept;
 
-    KRYS_NODISCARD const Quad &Slices() const noexcept
+    KRYS_NODISCARD const SideValues &Slices() const noexcept
     {
       return _slices;
     }
