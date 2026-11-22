@@ -115,7 +115,7 @@ namespace krys::boo::style
       [&](const Value &value) { serialiseValue(value); },
       [&](const ValueList &valueList)
       {
-        auto separator = css::Value::SeparatorCSSText(valueList.Separator);
+        auto separator = css::ToCssText(valueList.Separator);
         for (size_t i = 0; i < valueList.Values.size(); ++i)
         {
           if (i)
@@ -166,7 +166,7 @@ namespace krys::boo::style
       [&](const Value &value) { serialiseValue(value); },
       [&](const ValueList &valueList)
       {
-        auto separator = css::Value::SeparatorCSSText(valueList.Separator);
+        auto separator = css::ToCssText(valueList.Separator);
         for (size_t i = 0; i < valueList.Values.size(); ++i)
         {
           if (i)

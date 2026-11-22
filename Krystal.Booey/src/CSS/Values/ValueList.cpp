@@ -209,7 +209,7 @@ namespace krys::boo::css
     {
       if (!first)
       {
-        builder.Append(SeparatorCSSText());
+        builder.Append(ToCssText(Separator()));
       }
       first = false;
       builder.Append(value.CssText(context));

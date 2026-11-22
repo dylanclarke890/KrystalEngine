@@ -72,7 +72,7 @@ namespace krys::boo::css
     {
       return first;
     }
-    return first.append(SeparatorCSSText()).append(second);
+    return first.append(ToCssText(Separator())).append(second);
   }
 
   bool ValuePair::Equals(const ValuePair &other) const noexcept

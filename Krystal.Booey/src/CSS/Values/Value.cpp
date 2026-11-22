@@ -419,31 +419,24 @@ namespace krys::boo::css
 
     seed = CombineFastHashes(seed, _type);
 
-    return VisitDerived([&](auto &typedThis) { return typedThis.AddDerivedHash(seed); });
-  }
-
-  bool Value::AddDerivedHash(size_t &seed) const noexcept
-  {
-    seed = CombineFastHashes(seed, this);
-    return false;
+    // A class hashes its contents with an `AddDerivedHash`; without one, its values aren't hashed.
+    return VisitDerived(
+      [&](auto &value)
+      {
+        if constexpr (requires { value.AddDerivedHash(seed); })
+        {
+          return value.AddDerivedHash(seed);
+        }
+        else
+        {
+          return false;
+        }
+      });
   }
 
   bool Value::IsCSSLocalUrl(CSSOMStringView relativeUrl) noexcept
   {
     return relativeUrl.empty() || relativeUrl.starts_with(u8'#');
-  }
-
-  CSSOMStringView Value::SeparatorCSSText(ValueSeparator separator) noexcept
-  {
-    switch (separator)
-    {
-      case ValueSeparator::Space: return u8" ";
-      case ValueSeparator::Comma: return u8", ";
-      case ValueSeparator::Slash: return u8" / ";
-    }
-
-    krys_debug_assert(false);
-    return u8" ";
   }
 
   CSSOMString Value::CssText(const SerialisationContext &context) const noexcept

@@ -181,14 +181,13 @@ namespace krys::boo::css
 
     KRYS_NODISCARD bool MayDependOnBaseUrl() const noexcept;
 
-    /// @brief Returns false if the hash is computed from the Value pointer instead of the underlying values.
+    /// @brief Adds the value's contents to @p seed, for deduplicating declaration blocks.
+    /// @return False if the value's class has no `AddDerivedHash`, so it can't be hashed.
     KRYS_NODISCARD bool AddHash(size_t &seed) const noexcept;
 
     /// @brief Empty URLs and fragment-only URLs should not be resolved relative to the base URL.
     /// @see https://www.w3.org/TR/css-values-4/#local-urls
     KRYS_NODISCARD static bool IsCSSLocalUrl(CSSOMStringView relativeUrl) noexcept;
-
-    KRYS_NODISCARD static CSSOMStringView SeparatorCSSText(ValueSeparator separator) noexcept;
 
     KRYS_NODISCARD static bool CustomMayDependOnBaseUrl() noexcept
     {
@@ -254,11 +253,6 @@ namespace krys::boo::css
       return _valueSeparator;
     }
 
-    KRYS_NODISCARD CSSOMStringView SeparatorCSSText() const noexcept
-    {
-      return SeparatorCSSText(Separator());
-    }
-
   private:
     template <typename Visitor>
     constexpr decltype(auto) VisitDerived(Visitor &&) noexcept;
@@ -268,9 +262,6 @@ namespace krys::boo::css
 
     KRYS_NODISCARD static bool
       CustomTraverseSubresources(const Func<bool(const CachedResource &)> &func) noexcept;
-
-    // FIXME: Add custom hash functions for all derived classes and remove this function.
-    KRYS_NODISCARD bool AddDerivedHash(size_t &seed) const noexcept;
   };
 
   template <typename TValue>

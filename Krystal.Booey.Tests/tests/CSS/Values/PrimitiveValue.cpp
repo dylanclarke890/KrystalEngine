@@ -55,4 +55,23 @@ namespace krys::boo::css::tests
     CHECK(PrimitiveValue::Create(3.0, UnitType::Integer)->ResolveAsInteger(conversionData) == 3);
     CHECK(PrimitiveValue::Create(25.0, UnitType::Percentage)->ResolveAsPercentage(conversionData) == 25.0);
   }
+
+  TEST_CASE_METHOD(ValueFixture, "PrimitiveValue: hashing", "[CSS][PrimitiveValue]")
+  {
+    auto hashOf = [](const Ref<PrimitiveValue> &value)
+    {
+      size_t seed = 0uz;
+      CHECK(value->AddHash(seed));
+      return seed;
+    };
+
+    CHECK(hashOf(PrimitiveValue::Create(2.0, UnitType::px))
+          == hashOf(PrimitiveValue::Create(2.0, UnitType::px)));
+    CHECK(hashOf(PrimitiveValue::Create(2.0, UnitType::px))
+          != hashOf(PrimitiveValue::Create(2.0, UnitType::em)));
+    CHECK(hashOf(PrimitiveValue::Create(ValueId::Auto)) == hashOf(PrimitiveValue::Create(ValueId::Auto)));
+    CHECK(hashOf(PrimitiveValue::Create(ValueId::Auto)) != hashOf(PrimitiveValue::Create(ValueId::None)));
+    CHECK(hashOf(PrimitiveValue::Create(CSSOMString(u8"a")))
+          == hashOf(PrimitiveValue::Create(CSSOMString(u8"a"))));
+  }
 }

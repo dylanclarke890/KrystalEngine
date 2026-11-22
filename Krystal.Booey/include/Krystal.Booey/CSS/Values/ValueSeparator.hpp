@@ -1,6 +1,8 @@
 ﻿#pragma once
 
+#include "Krystal.Core/Assert.hpp"
 #include "Krystal.Core/Enum.hpp"
+#include "Krystal.Core/Strings/String.hpp"
 
 namespace krys::boo::css
 {
@@ -18,5 +20,17 @@ namespace krys::boo::css
   consteval ValueSeparator MaxEnumValue(ValueSeparator) noexcept
   {
     return ValueSeparator::Slash;
+  }
+
+  /// @brief @p separator as it's serialised between two values.
+  KRYS_NODISCARD constexpr utf8_stringview ToCssText(ValueSeparator separator) noexcept
+  {
+    switch (separator)
+    {
+      case ValueSeparator::Space: return u8" ";
+      case ValueSeparator::Comma: return u8", ";
+      case ValueSeparator::Slash: return u8" / ";
+    }
+    krys_unreachable();
   }
 }

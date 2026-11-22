@@ -128,7 +128,6 @@ namespace krys::boo::css
     KRYS_NODISCARD bool ContainsSingleEqualItem(const Value &other) const noexcept;
 
     using Value::Separator;
-    using Value::SeparatorCSSText;
 
     KRYS_NODISCARD bool CustomTraverseSubresources(
       KRYS_NOESCAPE const Func<bool(const CachedResource &)> &handler) const noexcept;
