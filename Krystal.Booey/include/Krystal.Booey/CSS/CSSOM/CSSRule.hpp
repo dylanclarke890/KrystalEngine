@@ -37,8 +37,6 @@ namespace krys::boo
     // The rule holding this one, if any; otherwise the style sheet holding it, if any.
     CSSRule *_parentRule {nullptr};
     CSSStyleSheet *_parentStyleSheet {nullptr};
-    // For CSSStyleRule: whether its selector text is cached.
-    mutable bool _hasCachedSelectorText {false};
 
   protected:
     explicit CSSRule(CSSStyleSheet *parentStyleSheet) noexcept : _parentStyleSheet(parentStyleSheet)
@@ -127,16 +125,6 @@ namespace krys::boo
     virtual void GetChildStyleSheets(HashSet<RefPtr<CSSStyleSheet>> &childStyleSheets) noexcept;
 
   protected:
-    KRYS_NODISCARD bool HasCachedSelectorText() const noexcept
-    {
-      return _hasCachedSelectorText;
-    }
-
-    void SetHasCachedSelectorText(bool hasCachedSelectorText) const noexcept
-    {
-      _hasCachedSelectorText = hasCachedSelectorText;
-    }
-
     /// @brief The parser context of the rule's style sheet, for parsing text set on it.
     KRYS_NODISCARD const css::ParserContext &GetParserContext() const noexcept;
   };

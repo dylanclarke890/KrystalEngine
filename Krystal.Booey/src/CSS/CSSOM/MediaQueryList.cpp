@@ -54,8 +54,7 @@ namespace krys::boo
   void MediaQueryList::AddListener(RefPtr<EventListenerCallback> &&callback) noexcept
   {
     // 1. Add an event listener with this and an event listener whose type is change, and callback is
-    // callback.
-    //    (Adding one does nothing if its callback is null.)
+    //    callback. (Adding one does nothing if its callback is null.)
     if (callback)
     {
       AddEventListener(event_names::Change, Ref<EventListenerCallback>(krys::move(callback)), false);

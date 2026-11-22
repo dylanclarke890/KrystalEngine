@@ -57,7 +57,7 @@ namespace krys::boo
     }
     if (!_styleSheet)
     {
-      _styleSheet = CSSStyleSheet::Create(ShareRef(*contents), const_cast<CSSImportRule *>(this), null);
+      _styleSheet = CSSStyleSheet::Create(ShareRef(*contents), const_cast<CSSImportRule *>(this));
     }
     return _styleSheet.get();
   }

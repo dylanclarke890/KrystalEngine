@@ -24,7 +24,9 @@ namespace krys::boo::css::tests
     }
   }
 
-  TEST_CASE("CSSStyleSheet: a sheet from parsed contents", "[CSS][CSSOM][CSSStyleSheet]")
+  TEST_CASE(
+    "CSSStyleSheet: a sheet from parsed contents",
+    "[CSS][CSSOM][CSSStyleSheet][cssom-1:dom-cssstylesheet-cssrules][cssom-1:dom-cssstylesheet-rules]")
   {
     auto sheet = SheetFromText(u8"a { color: red; } @media screen { b { color: blue; } }");
 
@@ -95,7 +97,7 @@ namespace krys::boo::css::tests
     }
   }
 
-  TEST_CASE("CSSStyleSheet: insertRule", "[CSS][CSSOM][CSSStyleSheet]")
+  TEST_CASE("CSSStyleSheet: insertRule", "[CSS][CSSOM][CSSStyleSheet][cssom-1:dom-cssstylesheet-insertrule]")
   {
     auto sheet = SheetFromText(u8"a { color: red; }");
     auto *first = sheet->Item(0);
@@ -116,6 +118,8 @@ namespace krys::boo::css::tests
     SECTION("an index past the end")
     {
       REQUIRE(ExceptionCodeOf(sheet->InsertRule(u8"b { }", 2)) == ExceptionCode::IndexSizeError);
+      // The rule is parsed before the index is checked.
+      REQUIRE(ExceptionCodeOf(sheet->InsertRule(u8"x", 2)) == ExceptionCode::SyntaxError);
     }
 
     SECTION("a rule that doesn't parse")
@@ -142,7 +146,9 @@ namespace krys::boo::css::tests
     }
   }
 
-  TEST_CASE("CSSStyleSheet: deleteRule", "[CSS][CSSOM][CSSStyleSheet]")
+  TEST_CASE(
+    "CSSStyleSheet: deleteRule",
+    "[CSS][CSSOM][CSSStyleSheet][cssom-1:dom-cssstylesheet-deleterule][cssom-1:dom-cssstylesheet-removerule]")
   {
     auto sheet = SheetFromText(u8"a { } b { }");
     RefPtr<CSSRule> first = ShareRefPtr(sheet->Item(0));
@@ -160,7 +166,7 @@ namespace krys::boo::css::tests
     REQUIRE(SheetText(*sheet).empty());
   }
 
-  TEST_CASE("CSSStyleSheet: addRule", "[CSS][CSSOM][CSSStyleSheet]")
+  TEST_CASE("CSSStyleSheet: addRule", "[CSS][CSSOM][CSSStyleSheet][cssom-1:dom-cssstylesheet-addrule]")
   {
     auto sheet = SheetFromText(u8"a { }");
 
@@ -175,7 +181,8 @@ namespace krys::boo::css::tests
     REQUIRE(ExceptionCodeOf(sheet->AddRule(u8"d", u8"", 4)) == ExceptionCode::IndexSizeError);
   }
 
-  TEST_CASE("CSSStyleSheet: rules of a sheet that isn't origin-clean", "[CSS][CSSOM][CSSStyleSheet]")
+  TEST_CASE("CSSStyleSheet: rules of a sheet that isn't origin-clean",
+            "[CSS][CSSOM][CSSStyleSheet][cssom-1:dom-cssstylesheet-cssrules]")
   {
     auto contents = StyleSheetContents::Create(CSSOMTestContext());
     contents->ParseString(u8"a { }");
@@ -190,8 +197,7 @@ namespace krys::boo::css::tests
     REQUIRE(SheetText(*sheet) == "a { }");
   }
 
-  TEST_CASE("CSSStyleSheet: a sheet with a base URL needs an owner document to be accessed",
-            "[CSS][CSSOM][CSSStyleSheet]")
+  TEST_CASE("CSSStyleSheet: a sheet with a base URL", "[CSS][CSSOM][CSSStyleSheet]")
   {
     auto context = CSSOMTestContext();
     context.BaseUrl = net::Url(u8"https://example.com/a.css");
@@ -200,8 +206,9 @@ namespace krys::boo::css::tests
 
     SECTION("no owner")
     {
+      // There are no origins, so a sheet's rules can always be read.
       auto sheet = CSSStyleSheet::Create(Ref<StyleSheetContents>(contents));
-      REQUIRE_FALSE(sheet->CanAccessRules());
+      REQUIRE(sheet->CanAccessRules());
       REQUIRE(ToNarrow(sheet->BaseUrl().String()) == "https://example.com/a.css");
     }
 
@@ -287,6 +294,8 @@ namespace krys::boo::css::tests
     {
       auto sheet = ConstructedSheet(*document);
       REQUIRE(ExceptionCodeOf(sheet->InsertRule(u8"@import \"a.css\";", 0)) == ExceptionCode::SyntaxError);
+      // Whatever the index.
+      REQUIRE(ExceptionCodeOf(sheet->InsertRule(u8"@import \"a.css\";", 5)) == ExceptionCode::SyntaxError);
     }
 
     SECTION("replaceSync ignores @import rules")

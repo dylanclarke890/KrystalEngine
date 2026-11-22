@@ -1,25 +1,4 @@
-﻿/*
- * (C) 1999-2003 Lars Knoll (knoll@kde.org)
- * (C) 2002-2003 Dirk Mueller (mueller@kde.org)
- * Copyright (C) 2002-2024 Apple Inc. All rights reserved.
- *
- * This library is free software; you can redistribute it and/or
- * modify it under the terms of the GNU Library General Public
- * License as published by the Free Software Foundation; either
- * version 2 of the License, or (at your option) any later version.
- *
- * This library is distributed in the hope that it will be useful,
- * but WITHOUT ANY WARRANTY; without even the implied warranty of
- * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU
- * Library General Public License for more details.
- *
- * You should have received a copy of the GNU Library General Public License
- * along with this library; see the file COPYING.LIB.  If not, write to
- * the Free Software Foundation, Inc., 51 Franklin Street, Fifth Floor,
- * Boston, MA 02110-1301, USA.
- */
-
-#include "Krystal.Booey/CSS/CSSOM/CSSStyleRule.hpp"
+﻿#include "Krystal.Booey/CSS/CSSOM/CSSStyleRule.hpp"
 #include "Krystal.Booey/CSS/CSSOM/CSSRuleList.hpp"
 #include "Krystal.Booey/CSS/CSSOM/CSSStyleProperties.hpp"
 #include "Krystal.Booey/CSS/CSSOM/CSSStyleSheet.hpp"
@@ -35,76 +14,80 @@
 #include "Krystal.Booey/DOM/Types/ExceptionOr.hpp"
 #include "Krystal.Booey/Style/Rules/RuleData.hpp"
 #include "Krystal.Core/Assert.hpp"
-#include "Krystal.Core/Containers/HashMap.hpp"
 #include "Krystal.Core/Memory/NeverDestroyed.hpp"
 #include "Krystal.Core/Strings/StringBuilder.hpp"
 
 namespace krys::boo
 {
-  namespace
+  CSSStyleRule::CSSStyleRule(css::StyleRule &rule, CSSStyleSheet *parent) noexcept
+      : CSSRule(parent), _rule(ShareRef(rule))
   {
-    using SelectorTextCache = HashMap<const CSSStyleRule *, CSSOMString>;
-
-    KRYS_NODISCARD SelectorTextCache &GetSelectorTextCache() noexcept
-    {
-      static MainThreadNeverDestroyed<SelectorTextCache> cache;
-      return cache;
-    }
-
-    KRYS_NODISCARD const List<Ref<css::Rule>> &EmptyRuleList() noexcept
-    {
-      static MainThreadNeverDestroyed<List<Ref<css::Rule>>> rules;
-      return rules;
-    }
-  }
-
-  CSSStyleRule::CSSStyleRule(css::StyleRule &styleRule, CSSStyleSheet *parent) noexcept
-      : CSSRule(parent), _styleRule(ShareRef(styleRule))
-  {
-  }
-
-  CSSStyleRule::CSSStyleRule(css::StyleRuleWithNesting &styleRule, CSSStyleSheet *parent) noexcept
-      : CSSRule(parent), _styleRule(ShareRef(styleRule)),
-        _childRuleCSSOMWrappers(styleRule.NestedRules().size())
-  {
+    _childRules.resize(NestedRules().size());
   }
 
   CSSStyleRule::~CSSStyleRule() noexcept
   {
-    if (_propertiesCSSOMWrapper)
+    // The declaration block can outlive the rule, which is no longer its parent.
+    if (_style)
     {
-      _propertiesCSSOMWrapper->ClearParentRule();
-    }
-
-    if (HasCachedSelectorText())
-    {
-      GetSelectorTextCache().erase(this);
-      SetHasCachedSelectorText(false);
+      _style->ClearParentRule();
     }
   }
 
-  Ref<CSSStyleRule> CSSStyleRule::Create(css::StyleRule &rule, CSSStyleSheet *sheet) noexcept
+  Ref<CSSStyleRule> CSSStyleRule::Create(css::StyleRule &rule, CSSStyleSheet *parent) noexcept
   {
-    return AdoptRef(*new CSSStyleRule(rule, sheet));
+    return AdoptRef(*new CSSStyleRule(rule, parent));
   }
 
-  Ref<CSSStyleRule> CSSStyleRule::Create(css::StyleRuleWithNesting &rule, CSSStyleSheet *sheet) noexcept
+  CSSOMString CSSStyleRule::SelectorText() const noexcept
   {
-    return AdoptRef(*new CSSStyleRule(rule, sheet));
+    // A nested rule's selectors are kept as written, as well as resolved against its parent's.
+    if (auto *rule = DynamicDowncast<css::StyleRuleWithNesting>(_rule.get()))
+    {
+      return rule->OriginalSelectorList().SelectorsText();
+    }
+    return _rule->GetSelectorList().SelectorsText();
+  }
+
+  void CSSStyleRule::SetSelectorText(const CSSOMString &text) noexcept
+  {
+    // 1. Run the parse a group of selectors algorithm on the given value.
+    auto *styleSheet = ParentStyleSheet();
+    auto selectors = css::SelectorParser::ParseSelectorList(
+      text, css::SelectorParserContext(GetParserContext()), styleSheet ? &styleSheet->Contents() : nullptr,
+      GetNestedContext());
+
+    // 3. Otherwise, if the algorithm returns a null value, do nothing.
+    // (Nor for selectors too long for the style system's rules; a parsed style sheet splits them into rules.)
+    if (!selectors || selectors->ComponentCount() > style::RuleData::MaximumSelectorComponentCount)
+    {
+      return;
+    }
+
+    // 2. If the algorithm returns a non-null value replace the associated selector list with the returned
+    //    value.
+    CSSStyleSheet::RuleMutationScope mutationScope(this);
+    if (auto *rule = DynamicDowncast<css::StyleRuleWithNesting>(_rule.get()))
+    {
+      rule->WrapperAdoptOriginalSelectorList(krys::move(*selectors));
+    }
+    else
+    {
+      _rule->WrapperAdoptSelectorList(krys::move(*selectors));
+    }
   }
 
   CSSStyleProperties &CSSStyleRule::Style() noexcept
   {
-    if (!_propertiesCSSOMWrapper)
+    if (!_style)
     {
-      _propertiesCSSOMWrapper = StyleRuleCSSStyleProperties::Create(_styleRule->MutableProperties(), *this);
+      _style = StyleRuleCSSStyleProperties::Create(_rule->MutableProperties(), *this);
     }
-    return *_propertiesCSSOMWrapper;
+    return *_style;
   }
 
   StylePropertyMap &CSSStyleRule::StyleMap() noexcept
   {
-    // https://drafts.css-houdini.org/css-typed-om/#dom-cssstylerule-stylemap
     if (!_styleMap)
     {
       _styleMap = DeclaredStylePropertyMap::Create(*this);
@@ -112,252 +95,111 @@ namespace krys::boo
     return *_styleMap;
   }
 
-  CSSOMString CSSStyleRule::GenerateSelectorText() const noexcept
+  CSSRuleList &CSSStyleRule::CssRules() const noexcept
   {
-    if (auto *styleRule = DynamicDowncast<css::StyleRuleWithNesting>(_styleRule.get()))
+    if (!_cssRules)
     {
-      return styleRule->OriginalSelectorList().SelectorsText();
+      _cssRules = CreateUnique<LiveCSSRuleList<CSSStyleRule>>(const_cast<CSSStyleRule &>(*this));
     }
-    return _styleRule->GetSelectorList().SelectorsText();
+    return *_cssRules;
   }
 
-  CSSOMString CSSStyleRule::SelectorText() const noexcept
+  ExceptionOr<uint32> CSSStyleRule::InsertRule(const CSSOMString &rule, uint32 index) noexcept
   {
-    auto &cache = GetSelectorTextCache();
-    if (HasCachedSelectorText())
-    {
-      krys_debug_assert(cache.contains(this));
-      return cache.at(this);
-    }
+    // To insert a CSS rule rule in a CSS rule list list at index index, with a flag nested (set):
+    krys_debug_assert(_childRules.size() == NestedRules().size());
 
-    krys_debug_assert(!cache.contains(this));
-    auto text = GenerateSelectorText();
-    cache[this] = text;
-    SetHasCachedSelectorText(true);
-    return text;
-  }
-
-  void CSSStyleRule::SetSelectorText(const CSSOMString &selectorText) noexcept
-  {
-    // FIXME: getMatchedCSSRules can return CSSStyleRules that are missing parent stylesheet pointer while
-    // referencing StyleRules that are part of stylesheet. Disallow mutations in this case.
-    auto *sheet = ParentStyleSheet();
-    if (!sheet)
-    {
-      return;
-    }
-
-    auto selectorList = css::SelectorParser::ParseSelectorList(
-      selectorText, css::SelectorParserContext(GetParserContext()), &sheet->Contents(), GetNestedContext());
-    if (!selectorList)
-    {
-      return;
-    }
-
-    // NOTE: The selector list has to fit into RuleData. <http://webkit.org/b/118369>
-    // NOTE: The selector list has to fit into RuleData.
-    if (selectorList->ComponentCount() > style::RuleData::MaximumSelectorComponentCount)
-    {
-      return;
-    }
-
-    CSSStyleSheet::RuleMutationScope mutationScope(this);
-
-    if (auto *styleRule = DynamicDowncast<css::StyleRuleWithNesting>(_styleRule.get()))
-    {
-      styleRule->WrapperAdoptOriginalSelectorList(krys::move(*selectorList));
-    }
-    else
-    {
-      _styleRule->WrapperAdoptSelectorList(krys::move(*selectorList));
-    }
-
-    if (HasCachedSelectorText())
-    {
-      GetSelectorTextCache().erase(this);
-      SetHasCachedSelectorText(false);
-    }
-  }
-
-  const List<Ref<css::Rule>> &CSSStyleRule::NestedRules() const noexcept
-  {
-    if (auto *styleRule = DynamicDowncast<css::StyleRuleWithNesting>(_styleRule.get()))
-    {
-      return styleRule->NestedRules();
-    }
-    return EmptyRuleList();
-  }
-
-  // https://w3c.github.io/csswg-drafts/cssom-1/#serialize-a-css-rule
-  CSSOMString CSSStyleRule::CssText() const noexcept
-  {
-    auto declarations = _styleRule->Properties().AsText(css::DefaultSerialisationContext());
-    StringBuilder rules;
-    CssTextForRules(rules);
-    return CssTextInternal(declarations, rules);
-  }
-
-  void CSSStyleRule::CssTextForRules(StringBuilder &rules) const noexcept
-  {
-    for (uint32 index = 0; index < Length(); ++index)
-    {
-      auto ruleText = Item(index)->CssText();
-      if (!ruleText.empty())
-      {
-        rules.Append(u8"\n  ", ruleText);
-      }
-    }
-  }
-
-  CSSOMString CSSStyleRule::CssText(const css::SerialisationContext &context) const noexcept
-  {
-    auto declarations = _styleRule->Properties().AsText(context);
-    StringBuilder rules;
-    CssTextForRulesWithReplacementUrls(rules, context);
-    return CssTextInternal(declarations, rules);
-  }
-
-  void
-    CSSStyleRule::CssTextForRulesWithReplacementUrls(StringBuilder &rules,
-                                                     const css::SerialisationContext &context) const noexcept
-  {
-    for (uint32 index = 0; index < Length(); index++)
-    {
-      rules.Append(u8"\n  ", Item(index)->CssText(context));
-    }
-  }
-
-  CSSOMString CSSStyleRule::CssTextInternal(const CSSOMString &declarations,
-                                            const StringBuilder &rules) const noexcept
-  {
-    StringBuilder builder;
-    builder.Append(SelectorText(), u8" {");
-
-    if (declarations.empty() && rules.IsEmpty())
-    {
-      builder.Append(u8" }");
-      return krys::move(builder).ToString();
-    }
-
-    if (rules.IsEmpty())
-    {
-      builder.Append(u8' ');
-      builder.Append(declarations);
-      builder.Append(u8" }");
-      return krys::move(builder).ToString();
-    }
-
-    if (declarations.empty())
-    {
-      builder.Append(rules);
-      builder.Append(u8"\n}");
-      return krys::move(builder).ToString();
-    }
-
-    builder.Append(u8"\n  ");
-    builder.Append(declarations);
-    builder.Append(rules);
-    builder.Append(u8"\n}");
-    return krys::move(builder).ToString();
-  }
-
-  // FIXME: share all methods below with CSSGroupingRule.
-
-  void CSSStyleRule::Reattach(css::Rule &rule) noexcept
-  {
-    if (auto *styleRuleWithNesting = DynamicDowncast<css::StyleRuleWithNesting>(&rule))
-    {
-      _styleRule = ShareRef(*styleRuleWithNesting);
-    }
-    else
-    {
-      _styleRule = ShareRef(Downcast<css::StyleRule>(rule));
-    }
-
-    if (_propertiesCSSOMWrapper)
-    {
-      _propertiesCSSOMWrapper->Reattach(_styleRule->MutableProperties());
-    }
-  }
-
-  ExceptionOr<uint32> CSSStyleRule::InsertRule(const CSSOMString &ruleString, uint32 index) noexcept
-  {
-    krys_debug_assert(_childRuleCSSOMWrappers.size() == NestedRules().size());
-
-    if (index > NestedRules().size())
+    // 1. Set length to the number of items in list.
+    // 2. If index is greater than length, then throw an IndexSizeError exception.
+    if (index > Length())
     {
       return ExceptionCode::IndexSizeError;
     }
 
+    // 3. Set new rule to the results of performing parse a CSS rule on argument rule.
     auto *styleSheet = ParentStyleSheet();
     auto newRule =
-      css::Parser::ParseRule(ruleString, GetParserContext(), styleSheet ? &styleSheet->Contents() : nullptr,
+      css::Parser::ParseRule(rule, GetParserContext(), styleSheet ? &styleSheet->Contents() : nullptr,
                              css::Parser::AllowedRules::ImportRules, css::NestedParserContextType::Style);
+
+    // 4. If new rule is a syntax error, and nested is set, perform the following substeps: Set declarations
+    //    to the results of performing parse a CSS declaration block, on argument rule.; If declarations is
+    //    empty, throw a SyntaxError exception.; Otherwise, set new rule to a new nested declarations rule
+    //    with declarations as it contents.
+    // 5. If new rule is a syntax error, throw a SyntaxError exception.
     if (!newRule)
     {
-      newRule = css::Parser::ParseNestedDeclarations(GetParserContext(), ruleString);
+      newRule = css::Parser::ParseNestedDeclarations(GetParserContext(), rule);
       if (!newRule)
       {
         return ExceptionCode::SyntaxError;
       }
     }
 
-    // We only accepts style rule, nested group rule (@media,...) or nested declarations inside style rules.
+    // 6. If new rule cannot be inserted into list at the zero-indexed position index due to constraints
+    //    specified by CSS, then throw a HierarchyRequestError exception.
+    // (A style rule holds style rules, conditional group rules and nested declarations.)
     if (!newRule->IsStyleRule() && !newRule->IsGroupRule() && !newRule->IsNestedDeclarationsRule())
     {
       return ExceptionCode::HierarchyRequestError;
     }
 
+    // 7. (Skipped: an @namespace rule can't be nested, so step 6 refused it.)
+
+    // 8. Insert new rule into list at the zero-indexed position index.
     CSSStyleSheet::RuleMutationScope mutationScope(this);
-    if (!_styleRule->IsStyleRuleWithNesting())
+    if (!_rule->IsStyleRuleWithNesting())
     {
-      // Call the parent rule (or parent stylesheet if top-level or nothing if it's an orphaned rule) to
-      // transform the current StyleRule to StyleRuleWithNesting.
-      RefPtr<css::StyleRuleWithNesting> styleRuleWithNesting;
-      if (auto *parent = ParentRule())
+      // The rule becomes one that can hold nested rules, in its parent's place.
+      RefPtr<css::StyleRuleWithNesting> ruleWithNesting;
+      if (auto *parentRule = ParentRule())
       {
-        styleRuleWithNesting = parent->PrepareChildStyleRuleForNesting(*_styleRule);
+        ruleWithNesting = parentRule->PrepareChildStyleRuleForNesting(*_rule);
       }
-      else if (auto *parentSheet = ParentStyleSheet())
+      else if (styleSheet)
       {
-        styleRuleWithNesting = parentSheet->PrepareChildStyleRuleForNesting(*_styleRule);
+        ruleWithNesting = styleSheet->PrepareChildStyleRuleForNesting(*_rule);
       }
       else
       {
-        styleRuleWithNesting = css::StyleRuleWithNesting::Create(krys::move(*_styleRule));
+        ruleWithNesting = css::StyleRuleWithNesting::Create(krys::move(*_rule));
       }
-      krys_debug_assert(styleRuleWithNesting);
-      _styleRule = krys::move(styleRuleWithNesting);
+      krys_debug_assert(ruleWithNesting);
+      _rule = krys::move(ruleWithNesting);
     }
-
-    auto &nestedRules = Downcast<css::StyleRuleWithNesting>(*_styleRule).NestedRules();
+    auto &nestedRules = Downcast<css::StyleRuleWithNesting>(*_rule).NestedRules();
     nestedRules.insert(nestedRules.begin() + index, krys::move(newRule));
-    _childRuleCSSOMWrappers.insert(_childRuleCSSOMWrappers.begin() + index, RefPtr<CSSRule>());
+    _childRules.insert(_childRules.begin() + index, nullptr);
+
+    // 9. Return index.
     return index;
   }
 
   ExceptionOr<void> CSSStyleRule::DeleteRule(uint32 index) noexcept
   {
-    krys_debug_assert(_childRuleCSSOMWrappers.size() == NestedRules().size());
+    // To remove a CSS rule from a CSS rule list list at index index:
+    krys_debug_assert(_childRules.size() == NestedRules().size());
 
-    if (index >= NestedRules().size())
+    // 1. Set length to the number of items in list.
+    // 2. If index is greater than or equal to length, then throw an IndexSizeError exception.
+    if (index >= Length())
     {
-      // IndexSizeError: Raised if the specified index does not correspond to a
-      // rule in the media rule list.
       return ExceptionCode::IndexSizeError;
     }
 
-    auto &rules = Downcast<css::StyleRuleWithNesting>(*_styleRule).NestedRules();
-
+    // 3. Set old rule to the indexth item in list.
+    // 4. (Skipped: an @namespace rule can't be nested.)
+    // 5. Remove rule old rule from list at the zero-indexed position index.
     CSSStyleSheet::RuleMutationScope mutationScope(this);
-    rules.erase(rules.begin() + index);
+    auto &nestedRules = Downcast<css::StyleRuleWithNesting>(*_rule).NestedRules();
+    nestedRules.erase(nestedRules.begin() + index);
 
-    if (_childRuleCSSOMWrappers[index])
+    // 6. Set old rule's parent CSS rule and parent CSS style sheet to null.
+    if (auto &oldRule = _childRules[index])
     {
-      _childRuleCSSOMWrappers[index]->SetParentRule(nullptr);
+      oldRule->SetParentRule(nullptr);
     }
-    _childRuleCSSOMWrappers.erase(_childRuleCSSOMWrappers.begin() + index);
-
+    _childRules.erase(_childRules.begin() + index);
     return {};
   }
 
@@ -372,9 +214,8 @@ namespace krys::boo
     {
       return nullptr;
     }
-
-    krys_debug_assert(_childRuleCSSOMWrappers.size() == NestedRules().size());
-    auto &rule = _childRuleCSSOMWrappers[index];
+    krys_debug_assert(_childRules.size() == NestedRules().size());
+    auto &rule = _childRules[index];
     if (!rule)
     {
       rule = NestedRules()[index]->CreateCSSOMWrapper(const_cast<CSSStyleRule &>(*this));
@@ -382,13 +223,73 @@ namespace krys::boo
     return rule.get();
   }
 
-  CSSRuleList &CSSStyleRule::CssRules() const noexcept
+  CSSOMString CSSStyleRule::CssText() const noexcept
   {
-    if (!_ruleListCSSOMWrapper)
+    return CssText(css::DefaultSerialisationContext());
+  }
+
+  CSSOMString CSSStyleRule::CssText(const css::SerialisationContext &context) const noexcept
+  {
+    // 1. Let s initially be the result of performing serialize a group of selectors on the rule's associated
+    //    selectors, followed by the string " {", i.e., a single SPACE (U+0020), followed by LEFT CURLY
+    //    BRACKET (U+007B).
+    StringBuilder s;
+    s.Append(SelectorText(), u8" {");
+
+    // 2. Let decls be the result of performing serialize a CSS declaration block on the rule's associated
+    //    declarations, or null if there are no such declarations.
+    auto declarations = _rule->Properties().AsText(context);
+
+    // 3. Let rules be the result of performing serialize a CSS rule on each rule in the rule's cssRules list,
+    //    or null if there are no such rules.
+    // 4. If decls and rules are both null, append " }" to s (i.e. a single SPACE (U+0020) followed by RIGHT
+    //    CURLY BRACKET (U+007D)) and return s.
+    // 5. If rules is null:
+    if (Length() == 0)
     {
-      _ruleListCSSOMWrapper = CreateUnique<LiveCSSRuleList<CSSStyleRule>>(const_cast<CSSStyleRule &>(*this));
+      // 5a. Append a single SPACE (U+0020) to s
+      // 5b. Append decls to s
+      // 5c. Append " }" to s (i.e. a single SPACE (U+0020) followed by RIGHT CURLY BRACKET (U+007D)).
+      // 5d. Return s.
+      if (!declarations.empty())
+      {
+        s.Append(u8' ', declarations);
+      }
+      s.Append(u8" }");
+      return krys::move(s).ToString();
     }
-    return *_ruleListCSSOMWrapper;
+
+    // 6. Otherwise:
+    // 6a. If decls is not null, prepend it to rules.
+    // 6b. For each rule in rules: If rule is the empty string, do nothing.; Otherwise:
+    //   6b.i. Append a newline followed by two spaces to s.
+    //   6b.ii. Append rule to s.
+    auto appendRule = [&](const CSSOMString &rule)
+    {
+      if (!rule.empty())
+      {
+        s.Append(u8"\n  ", rule);
+      }
+    };
+    appendRule(declarations);
+    for (uint32 index = 0; index < Length(); ++index)
+    {
+      appendRule(Item(index)->CssText(context));
+    }
+
+    // 6c. Append a newline followed by RIGHT CURLY BRACKET (U+007D) to s.
+    // 6d. Return s.
+    s.Append(u8"\n}");
+    return krys::move(s).ToString();
+  }
+
+  void CSSStyleRule::Reattach(css::Rule &rule) noexcept
+  {
+    _rule = ShareRef(Downcast<css::StyleRule>(rule));
+    if (_style)
+    {
+      _style->Reattach(_rule->MutableProperties());
+    }
   }
 
   void CSSStyleRule::GetChildStyleSheets(HashSet<RefPtr<CSSStyleSheet>> &childStyleSheets) noexcept
@@ -397,5 +298,15 @@ namespace krys::boo
     {
       Item(index)->GetChildStyleSheets(childStyleSheets);
     }
+  }
+
+  const List<Ref<css::Rule>> &CSSStyleRule::NestedRules() const noexcept
+  {
+    if (auto *rule = DynamicDowncast<css::StyleRuleWithNesting>(_rule.get()))
+    {
+      return rule->NestedRules();
+    }
+    static MainThreadNeverDestroyed<List<Ref<css::Rule>>> noRules;
+    return noRules;
   }
 }

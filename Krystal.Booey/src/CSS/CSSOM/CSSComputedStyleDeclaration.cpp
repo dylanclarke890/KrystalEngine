@@ -32,9 +32,8 @@ namespace krys::boo
   bool CSSComputedStyleDeclaration::HasDeclarations() const noexcept
   {
     // 5. If obj is not null, and elt is connected, [...] set decls to a list of all longhand properties that
-    // are
-    //    supported CSS properties, in lexicographical order, with the value being the resolved value computed
-    //    for obj [...].
+    //    are supported CSS properties, in lexicographical order, with the value being the resolved value
+    //    computed for obj [...].
     return !_hasNoTarget && _element->IsConnected();
   }
 
@@ -102,8 +101,7 @@ namespace krys::boo
     {
       return {};
     }
-    // FIXME: FindKeyAtIndex searches the properties in turn, so going through every item takes quadratic
-    // time.
+    // FIXME: FindKeyAtIndex searches the properties in turn, so reading every item takes quadratic time.
     auto customIndex = index - static_cast<uint32>(longhands.size());
     const auto &inherited = style->InheritedCustomProperties();
     if (customIndex < inherited.Size())

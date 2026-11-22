@@ -194,15 +194,16 @@ Status: reviewed (2026-11-22)
 
 #### [6.1.2. The CSSStyleSheet Interface](https://drafts.csswg.org/cssom-1/#the-cssstylesheet-interface)
 
-Status: unreviewed
+Status: reviewed (2026-11-22)
+> Code: Krystal.Booey/src/CSS/CSSOM/CSSStyleSheet.cpp; there's no replace() (no promises), so the disallow modification flag is never set, and every sheet is origin-clean unless created otherwise (there are no origins).
 
-- [ ] [CSSStyleSheet.ownerRule](https://drafts.csswg.org/cssom-1/#dom-cssstylesheet-ownerrule) — The ownerRule attribute must return the owner CSS rule. If a value other than null is ever returned, then that same value must always be returned on each get access.
+- [x] [CSSStyleSheet.ownerRule](https://drafts.csswg.org/cssom-1/#dom-cssstylesheet-ownerrule) — The ownerRule attribute must return the owner CSS rule. If a value other than null is ever returned, then that same value must always be returned on each get access.
 
-- [ ] [CSSStyleSheet.cssRules](https://drafts.csswg.org/cssom-1/#dom-cssstylesheet-cssrules) — The cssRules attribute must follow these steps:
+- [x] [CSSStyleSheet.cssRules](https://drafts.csswg.org/cssom-1/#dom-cssstylesheet-cssrules) — The cssRules attribute must follow these steps:
   - 1. If the origin-clean flag is unset, throw a SecurityError exception.
   - 2. Return a read-only, live CSSRuleList object representing the CSS rules.
 
-- [ ] [CSSStyleSheet.insertRule(rule, index)](https://drafts.csswg.org/cssom-1/#dom-cssstylesheet-insertrule) — The insertRule(rule, index) method must run the following steps:
+- [x] [CSSStyleSheet.insertRule(rule, index)](https://drafts.csswg.org/cssom-1/#dom-cssstylesheet-insertrule) — The insertRule(rule, index) method must run the following steps:
   - 1. If the origin-clean flag is unset, throw a SecurityError exception.
   - 2. If the disallow modification flag is set, throw a NotAllowedError DOMException.
   - 3. Let parsed rule be the return value of invoking parse a rule with rule.
@@ -210,12 +211,12 @@ Status: unreviewed
   - 5. If parsed rule is an @import rule, and the constructed flag is set, throw a SyntaxError DOMException.
   - 6. Return the result of invoking insert a CSS rule rule in the CSS rules at index.
 
-- [ ] [CSSStyleSheet.deleteRule(index)](https://drafts.csswg.org/cssom-1/#dom-cssstylesheet-deleterule) — The deleteRule(index) method must run the following steps:
+- [x] [CSSStyleSheet.deleteRule(index)](https://drafts.csswg.org/cssom-1/#dom-cssstylesheet-deleterule) — The deleteRule(index) method must run the following steps:
   - 1. If the origin-clean flag is unset, throw a SecurityError exception.
   - 2. If the disallow modification flag is set, throw a NotAllowedError DOMException.
   - 3. Remove a CSS rule in the CSS rules at index.
 
-- [ ] [CSSStyleSheet.replace(text)](https://drafts.csswg.org/cssom-1/#dom-cssstylesheet-replace) — The replace(text) method must run the following steps:
+- [x] [CSSStyleSheet.replace(text)](https://drafts.csswg.org/cssom-1/#dom-cssstylesheet-replace) — The replace(text) method must run the following steps:
   - 1. Let promise be a promise.
   - 2. If the constructed flag is not set, or the disallow modification flag is set, reject promise with a NotAllowedError DOMException and return promise.
   - 3. Set the disallow modification flag.
@@ -227,9 +228,9 @@ Status: unreviewed
     - 4e. Resolve promise with sheet.
   - 5. Return promise.
 
-- [ ] [CSSStyleSheet.replaceSync(text)](https://drafts.csswg.org/cssom-1/#dom-cssstylesheet-replacesync) — The replaceSync(text) method must run the steps to synchronously replace the rules of a CSSStyleSheet on this CSSStyleSheet given text.
+- [x] [CSSStyleSheet.replaceSync(text)](https://drafts.csswg.org/cssom-1/#dom-cssstylesheet-replacesync) — The replaceSync(text) method must run the steps to synchronously replace the rules of a CSSStyleSheet on this CSSStyleSheet given text.
 
-- [ ] [synchronously replace the rules of a CSSStyleSheet](https://drafts.csswg.org/cssom-1/#synchronously-replace-the-rules-of-a-cssstylesheet) — To synchronously replace the rules of a CSSStyleSheet on sheet given text, run these steps:
+- [x] [synchronously replace the rules of a CSSStyleSheet](https://drafts.csswg.org/cssom-1/#synchronously-replace-the-rules-of-a-cssstylesheet) — To synchronously replace the rules of a CSSStyleSheet on sheet given text, run these steps:
   - 1. If the constructed flag is not set, or the disallow modification flag is set, throw a NotAllowedError DOMException.
   - 2. Let rules be the result of running parse a stylesheet’s contents from text.
   - 3. If rules contains one or more @import rules, remove those rules from rules.
@@ -237,13 +238,14 @@ Status: unreviewed
 
 ##### [6.1.2.1. Deprecated CSSStyleSheet members](https://drafts.csswg.org/cssom-1/#legacy-css-style-sheet-members)
 
-Status: unreviewed
+Status: reviewed (2026-11-22)
+> Code: Krystal.Booey/src/CSS/CSSOM/CSSStyleSheet.cpp.
 
-- [ ] [CSSStyleSheet.rules](https://drafts.csswg.org/cssom-1/#dom-cssstylesheet-rules) — The rules attribute must follow the same steps as cssRules, and return the same object cssRules would return.
+- [x] [CSSStyleSheet.rules](https://drafts.csswg.org/cssom-1/#dom-cssstylesheet-rules) — The rules attribute must follow the same steps as cssRules, and return the same object cssRules would return.
 
-- [ ] [CSSStyleSheet.removeRule(index)](https://drafts.csswg.org/cssom-1/#dom-cssstylesheet-removerule) — The removeRule(index) method must run the same steps as deleteRule().
+- [x] [CSSStyleSheet.removeRule(index)](https://drafts.csswg.org/cssom-1/#dom-cssstylesheet-removerule) — The removeRule(index) method must run the same steps as deleteRule().
 
-- [ ] [CSSStyleSheet.addRule(selector, block, optionalIndex)](https://drafts.csswg.org/cssom-1/#dom-cssstylesheet-addrule) — The addRule(selector, block, optionalIndex) method must run the following steps:
+- [x] [CSSStyleSheet.addRule(selector, block, optionalIndex)](https://drafts.csswg.org/cssom-1/#dom-cssstylesheet-addrule) — The addRule(selector, block, optionalIndex) method must run the following steps:
   - 1. Let rule be an empty string.
   - 2. Append selector to rule.
   - 3. Append " { " to rule.
@@ -474,15 +476,16 @@ Status: reviewed (2026-11-22)
 
 #### [6.4.3. The CSSStyleRule Interface](https://drafts.csswg.org/cssom-1/#the-cssstylerule-interface)
 
-Status: unreviewed
+Status: reviewed (2026-11-22)
+> Code: Krystal.Booey/src/CSS/CSSOM/CSSStyleRule.cpp, which also implements CSSGroupingRule's members for nested rules (insert and remove a CSS rule).
 <!-- definitions: concept-declarations-specified-order -->
 
-- [ ] [CSSStyleRule.selectorText](https://drafts.csswg.org/cssom-1/#dom-cssstylerule-selectortext) — The selectorText attribute, on getting, must return the result of serializing the rule’s associated selector list. On setting the selectorText attribute these steps must be run:
+- [x] [CSSStyleRule.selectorText](https://drafts.csswg.org/cssom-1/#dom-cssstylerule-selectortext) — The selectorText attribute, on getting, must return the result of serializing the rule’s associated selector list. On setting the selectorText attribute these steps must be run:
   - 1. Run the parse a group of selectors algorithm on the given value.
   - 2. If the algorithm returns a non-null value replace the associated selector list with the returned value.
   - 3. Otherwise, if the algorithm returns a null value, do nothing.
 
-- [ ] [CSSStyleRule.style](https://drafts.csswg.org/cssom-1/#dom-cssstylerule-style) — The style attribute must return a CSSStyleProperties object for the style rule, with the following properties:
+- [x] [CSSStyleRule.style](https://drafts.csswg.org/cssom-1/#dom-cssstylerule-style) — The style attribute must return a CSSStyleProperties object for the style rule, with the following properties:
   - • computed flag: Unset.
   - • readonly flag: Unset.
   - • declarations: The declared declarations in the rule, in specified order.
