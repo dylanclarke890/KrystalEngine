@@ -549,16 +549,6 @@ KRYS_SPECIALIZE_TYPE_CAST_TRAITS_END()
 
 namespace krys::boo::css
 {
-#pragma region Value helpers
-
-  KRYS_NODISCARD inline bool IsCustomIdentValue(const Value &value) noexcept
-  {
-    auto *primitiveValue = DynamicDowncast<PrimitiveValue>(value);
-    return primitiveValue && primitiveValue->IsCustomIdent();
-  }
-
-#pragma endregion
-
 #pragma region Value inline definitions
 
   inline bool Value::IsValueId() const noexcept
@@ -571,6 +561,12 @@ namespace krys::boo::css
   {
     auto *value = DynamicDowncast<PrimitiveValue>(*this);
     return value ? value->ValueId() : css::ValueId::Invalid;
+  }
+
+  inline bool Value::IsCustomIdent() const noexcept
+  {
+    auto *value = DynamicDowncast<PrimitiveValue>(*this);
+    return value && value->IsCustomIdent();
   }
 
 #pragma endregion

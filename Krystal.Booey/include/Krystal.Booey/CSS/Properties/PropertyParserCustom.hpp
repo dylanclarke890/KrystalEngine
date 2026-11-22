@@ -1197,7 +1197,7 @@ namespace krys::boo::css
       }
       else
       {
-        if (IsCustomIdentValue(*startValue))
+        if (startValue->IsCustomIdent())
         {
           endValue = startValue;
         }
@@ -1550,7 +1550,7 @@ namespace krys::boo::css
         return false;
       }
 
-      bool rowStartIsCustomIdent = IsCustomIdentValue(*rowStartValue);
+      bool rowStartIsCustomIdent = rowStartValue->IsCustomIdent();
       if (!columnStartValue)
       {
         if (rowStartIsCustomIdent)
@@ -1577,7 +1577,7 @@ namespace krys::boo::css
 
       if (!columnEndValue)
       {
-        if (IsCustomIdentValue(*columnStartValue))
+        if (columnStartValue->IsCustomIdent())
         {
           columnEndValue = columnStartValue;
         }

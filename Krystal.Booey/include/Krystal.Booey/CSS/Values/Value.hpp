@@ -220,6 +220,9 @@ namespace krys::boo::css
     /// @brief The keyword of a `PrimitiveValue` holding one, otherwise `ValueId::Invalid`.
     KRYS_NODISCARD inline css::ValueId ValueId() const noexcept;
 
+    /// @brief Whether this is a `PrimitiveValue` holding a custom identifier.
+    KRYS_NODISCARD inline bool IsCustomIdent() const noexcept;
+
     KRYS_NODISCARD inline const Value &First() const noexcept; // ValuePair
 
     KRYS_NODISCARD inline const Value &Second() const noexcept; // ValuePair

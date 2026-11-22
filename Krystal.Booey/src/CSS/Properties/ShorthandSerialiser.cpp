@@ -1502,9 +1502,9 @@ namespace krys::boo::css
     KRYS_NODISCARD bool CanOmitTrailingGridAreaValue(const Value &value, const Value &trailing,
                                                      const SerialisationContext &context) noexcept
     {
-      if (IsCustomIdentValue(value))
+      if (value.IsCustomIdent())
       {
-        return IsCustomIdentValue(trailing) && value.CssText(context) == trailing.CssText(context);
+        return trailing.IsCustomIdent() && value.CssText(context) == trailing.CssText(context);
       }
 
       return trailing.ValueId() == ValueId::Auto;
