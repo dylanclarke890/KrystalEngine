@@ -26,7 +26,7 @@
 
 #include "Krystal.Booey/Style/Computed/ComputedStyleBase+SettersInlines.hpp"
 
-#define SET_STYLE_PROPERTY_BASE(read, value, write)                                                          \
+#define KRYS_SET_STYLE_PROPERTY_BASE(read, value, write)                                                     \
   do                                                                                                         \
   {                                                                                                          \
     if (!CompareEqual(read, value))                                                                          \
@@ -34,16 +34,17 @@
       write;                                                                                                 \
     }                                                                                                        \
   } while (0)
-#define SET_STYLE_PROPERTY(read, write, value) SET_STYLE_PROPERTY_BASE(read, value, write = value)
-#define SET(group, variable, value) SET_STYLE_PROPERTY(group->variable, group.Access().variable, value)
-#define SET_NESTED(group, parent, variable, value)                                                           \
-  SET_STYLE_PROPERTY(group->parent->variable, group.Access().parent.Access().variable, value)
-#define SET_DOUBLY_NESTED(group, grandparent, parent, variable, value)                                       \
-  SET_STYLE_PROPERTY(group->grandparent->parent->variable,                                                   \
-                     group.Access().grandparent.Access().parent.Access().variable, value)
-#define SET_NESTED_STRUCT(group, parent, variable, value)                                                    \
-  SET_STYLE_PROPERTY(group->parent.variable, group.Access().parent.variable, value)
-#define SET_STYLE_PROPERTY_PAIR(read, write, variable1, value1, variable2, value2)                           \
+#define KRYS_SET_STYLE_PROPERTY(read, write, value) KRYS_SET_STYLE_PROPERTY_BASE(read, value, write = value)
+#define KRYS_SET(group, variable, value)                                                                     \
+  KRYS_SET_STYLE_PROPERTY(group->variable, group.Access().variable, value)
+#define KRYS_SET_NESTED(group, parent, variable, value)                                                      \
+  KRYS_SET_STYLE_PROPERTY(group->parent->variable, group.Access().parent.Access().variable, value)
+#define KRYS_SET_DOUBLY_NESTED(group, grandparent, parent, variable, value)                                  \
+  KRYS_SET_STYLE_PROPERTY(group->grandparent->parent->variable,                                              \
+                          group.Access().grandparent.Access().parent.Access().variable, value)
+#define KRYS_SET_NESTED_STRUCT(group, parent, variable, value)                                               \
+  KRYS_SET_STYLE_PROPERTY(group->parent.variable, group.Access().parent.variable, value)
+#define KRYS_SET_STYLE_PROPERTY_PAIR(read, write, variable1, value1, variable2, value2)                      \
   do                                                                                                         \
   {                                                                                                          \
     auto &readable = *read;                                                                                  \
@@ -54,13 +55,15 @@
       writable.variable2 = value2;                                                                           \
     }                                                                                                        \
   } while (0)
-#define SET_PAIR(group, variable1, value1, variable2, value2)                                                \
-  SET_STYLE_PROPERTY_PAIR(group, group.Access(), variable1, value1, variable2, value2)
-#define SET_NESTED_PAIR(group, parent, variable1, value1, variable2, value2)                                 \
-  SET_STYLE_PROPERTY_PAIR(group->parent, group.Access().parent.Access(), variable1, value1, variable2, value2)
-#define SET_DOUBLY_NESTED_PAIR(group, grandparent, parent, variable1, value1, variable2, value2)             \
-  SET_STYLE_PROPERTY_PAIR(group->grandparent->parent, group.Access().grandparent.Access().parent.Access(),   \
-                          variable1, value1, variable2, value2)
+#define KRYS_SET_PAIR(group, variable1, value1, variable2, value2)                                           \
+  KRYS_SET_STYLE_PROPERTY_PAIR(group, group.Access(), variable1, value1, variable2, value2)
+#define KRYS_SET_NESTED_PAIR(group, parent, variable1, value1, variable2, value2)                            \
+  KRYS_SET_STYLE_PROPERTY_PAIR(group->parent, group.Access().parent.Access(), variable1, value1, variable2,  \
+                               value2)
+#define KRYS_SET_DOUBLY_NESTED_PAIR(group, grandparent, parent, variable1, value1, variable2, value2)        \
+  KRYS_SET_STYLE_PROPERTY_PAIR(group->grandparent->parent,                                                   \
+                               group.Access().grandparent.Access().parent.Access(), variable1, value1,       \
+                               variable2, value2)
 
 namespace krys::boo::style
 {
@@ -118,14 +121,14 @@ namespace krys::boo::style
 
   inline void ComputedStyleProperties::SetAppearance(StyleAppearance appearance) noexcept
   {
-    SET_NESTED_PAIR(_nonInheritedData, MiscData, Appearance, static_cast<unsigned>(appearance),
-                    UsedAppearance, static_cast<unsigned>(appearance));
+    KRYS_SET_NESTED_PAIR(_nonInheritedData, MiscData, Appearance, static_cast<unsigned>(appearance),
+                         UsedAppearance, static_cast<unsigned>(appearance));
   }
 
   inline void ComputedStyleProperties::SetBlendMode(boo::BlendMode mode) noexcept
   {
-    SET_NESTED(_nonInheritedData, RareData, EffectiveBlendMode, static_cast<unsigned>(mode));
-    SET(_rareInheritedData, IsInSubtreeWithBlendMode, mode != BlendMode::Normal);
+    KRYS_SET_NESTED(_nonInheritedData, RareData, EffectiveBlendMode, static_cast<unsigned>(mode));
+    KRYS_SET(_rareInheritedData, IsInSubtreeWithBlendMode, mode != BlendMode::Normal);
   }
 
   inline void ComputedStyleProperties::SetDisplay(DisplayType value) noexcept
@@ -138,14 +141,14 @@ namespace krys::boo::style
 
   inline void ComputedStyleProperties::SetSpecifiedZIndex(ZIndex index) noexcept
   {
-    SET_NESTED_PAIR(_nonInheritedData, BoxData, HasAutoSpecifiedZIndex, static_cast<uint8>(index._isAuto),
-                    SpecifiedZIndexValue, index._value);
+    KRYS_SET_NESTED_PAIR(_nonInheritedData, BoxData, HasAutoSpecifiedZIndex,
+                         static_cast<uint8>(index._isAuto), SpecifiedZIndexValue, index._value);
   }
 
   inline void ComputedStyleProperties::SetCursor(style::Cursor cursor) noexcept
   {
     _inheritedFlags.CursorType = static_cast<unsigned>(cursor.Predefined);
-    SET(_rareInheritedData, CursorImages, krys::move(cursor.Images));
+    KRYS_SET(_rareInheritedData, CursorImages, krys::move(cursor.Images));
   }
 
   // MARK: Support Font properties
@@ -347,13 +350,13 @@ namespace krys::boo::style
   }
 }
 
-#undef SET
-#undef SET_DOUBLY_NESTED
-#undef SET_DOUBLY_NESTED_PAIR
-#undef SET_NESTED
-#undef SET_NESTED_PAIR
-#undef SET_NESTED_STRUCT
-#undef SET_PAIR
-#undef SET_STYLE_PROPERTY
-#undef SET_STYLE_PROPERTY_BASE
-#undef SET_STYLE_PROPERTY_PAIR
+#undef KRYS_SET
+#undef KRYS_SET_DOUBLY_NESTED
+#undef KRYS_SET_DOUBLY_NESTED_PAIR
+#undef KRYS_SET_NESTED
+#undef KRYS_SET_NESTED_PAIR
+#undef KRYS_SET_NESTED_STRUCT
+#undef KRYS_SET_PAIR
+#undef KRYS_SET_STYLE_PROPERTY
+#undef KRYS_SET_STYLE_PROPERTY_BASE
+#undef KRYS_SET_STYLE_PROPERTY_PAIR

@@ -81,4 +81,4 @@ namespace krys::boo::style
   };
 }
 
-DEFINE_COALESCING_SPACE_SEPARATED_TUPLE_LIKE_CONFORMANCE(krys::boo::style::ScrollSnapAlign, 2)
+KRYS_DEFINE_COALESCING_SPACE_SEPARATED_TUPLE_LIKE_CONFORMANCE(krys::boo::style::ScrollSnapAlign, 2)

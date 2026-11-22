@@ -214,5 +214,5 @@ namespace krys::boo::style
   };
 }
 
-DEFINE_COMMA_SEPARATED_RANGE_LIKE_CONFORMANCE(krys::boo::style::FontFamilies)
-DEFINE_VARIANT_LIKE_CONFORMANCE(krys::boo::style::SingleFontFamily)
+KRYS_DEFINE_COMMA_SEPARATED_RANGE_LIKE_CONFORMANCE(krys::boo::style::FontFamilies)
+KRYS_DEFINE_VARIANT_LIKE_CONFORMANCE(krys::boo::style::SingleFontFamily)

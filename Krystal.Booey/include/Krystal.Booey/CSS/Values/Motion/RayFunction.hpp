@@ -76,4 +76,4 @@ namespace krys::boo::css
   };
 }
 
-DEFINE_TUPLE_LIKE_CONFORMANCE(krys::boo::css::Ray, 4)
+KRYS_DEFINE_TUPLE_LIKE_CONFORMANCE(krys::boo::css::Ray, 4)

@@ -186,5 +186,5 @@ namespace krys::boo::style
   };
 }
 
-DEFINE_VARIANT_LIKE_CONFORMANCE(krys::boo::style::VerticalAlignLength)
-DEFINE_VARIANT_LIKE_CONFORMANCE(krys::boo::style::VerticalAlign)
+KRYS_DEFINE_VARIANT_LIKE_CONFORMANCE(krys::boo::style::VerticalAlignLength)
+KRYS_DEFINE_VARIANT_LIKE_CONFORMANCE(krys::boo::style::VerticalAlign)

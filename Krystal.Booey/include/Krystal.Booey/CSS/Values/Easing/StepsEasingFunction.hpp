@@ -74,7 +74,7 @@ namespace krys::boo::css
 
   using StepsEasingFunction = FunctionNotation<ValueId::Steps, StepsEasingParameters>;
 
-  DEFINE_TYPE_WRAPPER_GET(StepsEasingParameters, Value)
+  KRYS_DEFINE_TYPE_WRAPPER_GET(StepsEasingParameters, Value)
 
   template <size_t I, typename T, typename TKeyword, auto TShouldSerialiseKeyword>
   KRYS_NODISCARD constexpr const auto &
@@ -99,7 +99,7 @@ namespace krys::boo::css
   };
 }
 
-DEFINE_TUPLE_LIKE_CONFORMANCE(krys::boo::css::StepsEasingParameters, 1)
+KRYS_DEFINE_TUPLE_LIKE_CONFORMANCE(krys::boo::css::StepsEasingParameters, 1)
 
 namespace std
 {

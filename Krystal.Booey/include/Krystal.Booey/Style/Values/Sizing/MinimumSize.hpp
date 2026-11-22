@@ -102,4 +102,4 @@ namespace krys::boo::style
   using MinimumSizePair = css::SpaceSeparatedSize<MinimumSize>;
 }
 
-DEFINE_VARIANT_LIKE_CONFORMANCE(krys::boo::style::MinimumSize)
+KRYS_DEFINE_VARIANT_LIKE_CONFORMANCE(krys::boo::style::MinimumSize)

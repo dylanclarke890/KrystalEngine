@@ -157,9 +157,9 @@ namespace krys::boo::style
     }
   }
 
-  DEFINE_TYPE_WRAPPER_GET(Content::Text, Value);
-  DEFINE_TYPE_WRAPPER_GET(Content::Image, Value);
-  DEFINE_TYPE_WRAPPER_GET(Content::Quote, Value);
+  KRYS_DEFINE_TYPE_WRAPPER_GET(Content::Text, Value);
+  KRYS_DEFINE_TYPE_WRAPPER_GET(Content::Image, Value);
+  KRYS_DEFINE_TYPE_WRAPPER_GET(Content::Quote, Value);
 
   template <typename... F>
   decltype(auto) Content::Counter::SwitchOn(F &&...f) const noexcept
@@ -206,9 +206,9 @@ namespace krys::boo::style
   };
 }
 
-DEFINE_SLASH_SEPARATED_TUPLE_LIKE_CONFORMANCE(krys::boo::style::Content::Data, 2)
-DEFINE_TUPLE_LIKE_CONFORMANCE_FOR_TYPE_WRAPPER(krys::boo::style::Content::Text)
-DEFINE_TUPLE_LIKE_CONFORMANCE_FOR_TYPE_WRAPPER(krys::boo::style::Content::Image)
-DEFINE_TUPLE_LIKE_CONFORMANCE_FOR_TYPE_WRAPPER(krys::boo::style::Content::Quote)
-DEFINE_VARIANT_LIKE_CONFORMANCE(krys::boo::style::Content::Counter)
-DEFINE_VARIANT_LIKE_CONFORMANCE(krys::boo::style::Content)
+KRYS_DEFINE_SLASH_SEPARATED_TUPLE_LIKE_CONFORMANCE(krys::boo::style::Content::Data, 2)
+KRYS_DEFINE_TUPLE_LIKE_CONFORMANCE_FOR_TYPE_WRAPPER(krys::boo::style::Content::Text)
+KRYS_DEFINE_TUPLE_LIKE_CONFORMANCE_FOR_TYPE_WRAPPER(krys::boo::style::Content::Image)
+KRYS_DEFINE_TUPLE_LIKE_CONFORMANCE_FOR_TYPE_WRAPPER(krys::boo::style::Content::Quote)
+KRYS_DEFINE_VARIANT_LIKE_CONFORMANCE(krys::boo::style::Content::Counter)
+KRYS_DEFINE_VARIANT_LIKE_CONFORMANCE(krys::boo::style::Content)

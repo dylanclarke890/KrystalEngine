@@ -77,4 +77,4 @@ namespace krys::boo::style
   };
 }
 
-DEFINE_VARIANT_LIKE_CONFORMANCE(krys::boo::style::LineHeight)
+KRYS_DEFINE_VARIANT_LIKE_CONFORMANCE(krys::boo::style::LineHeight)

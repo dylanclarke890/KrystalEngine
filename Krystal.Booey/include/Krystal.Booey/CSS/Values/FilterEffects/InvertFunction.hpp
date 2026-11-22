@@ -42,7 +42,7 @@ namespace krys::boo::css
 
   using InvertFunction = FunctionNotation<ValueId::Invert, Invert>;
 
-  DEFINE_TYPE_WRAPPER_GET(Invert, Value)
+  KRYS_DEFINE_TYPE_WRAPPER_GET(Invert, Value)
 }
 
-DEFINE_TUPLE_LIKE_CONFORMANCE(krys::boo::css::Invert, 1)
+KRYS_DEFINE_TUPLE_LIKE_CONFORMANCE(krys::boo::css::Invert, 1)

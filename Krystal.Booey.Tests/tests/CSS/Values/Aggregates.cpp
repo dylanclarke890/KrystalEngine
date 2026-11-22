@@ -28,7 +28,7 @@ namespace krys::boo::css::tests
     bool operator==(const MacroTupleParameters &) const noexcept = default;
   };
 
-  DEFINE_TYPE_WRAPPER_GET(MacroTupleParameters, value);
+  KRYS_DEFINE_TYPE_WRAPPER_GET(MacroTupleParameters, value);
 
   struct MacroSpacePair
   {
@@ -51,8 +51,8 @@ namespace krys::boo::css::tests
     }
   }
 
-  DEFINE_TYPE_WRAPPER(MacroWrapper, CommaSeparatedPair<int>);
-  DEFINE_TYPE_EXTENDER(MacroExtender, CommaSeparatedPair<int>);
+  KRYS_DEFINE_TYPE_WRAPPER(MacroWrapper, CommaSeparatedPair<int>);
+  KRYS_DEFINE_TYPE_EXTENDER(MacroExtender, CommaSeparatedPair<int>);
 
   struct MacroRange : SpaceSeparatedList<int>
   {
@@ -65,12 +65,12 @@ namespace krys::boo::css::tests
   };
 }
 
-DEFINE_TUPLE_LIKE_CONFORMANCE(krys::boo::css::tests::MacroTupleParameters, 1)
-DEFINE_COALESCING_SLASH_SEPARATED_TUPLE_LIKE_CONFORMANCE(krys::boo::css::tests::MacroSpacePair, 2)
-DEFINE_TUPLE_LIKE_CONFORMANCE_FOR_TYPE_WRAPPER(krys::boo::css::tests::MacroWrapper)
-DEFINE_TUPLE_LIKE_CONFORMANCE_FOR_TYPE_EXTENDER(krys::boo::css::tests::MacroExtender)
-DEFINE_SPACE_SEPARATED_RANGE_LIKE_CONFORMANCE(krys::boo::css::tests::MacroRange)
-DEFINE_EMPTY_LIKE_CONFORMANCE(krys::boo::css::tests::MacroEmpty)
+KRYS_DEFINE_TUPLE_LIKE_CONFORMANCE(krys::boo::css::tests::MacroTupleParameters, 1)
+KRYS_DEFINE_COALESCING_SLASH_SEPARATED_TUPLE_LIKE_CONFORMANCE(krys::boo::css::tests::MacroSpacePair, 2)
+KRYS_DEFINE_TUPLE_LIKE_CONFORMANCE_FOR_TYPE_WRAPPER(krys::boo::css::tests::MacroWrapper)
+KRYS_DEFINE_TUPLE_LIKE_CONFORMANCE_FOR_TYPE_EXTENDER(krys::boo::css::tests::MacroExtender)
+KRYS_DEFINE_SPACE_SEPARATED_RANGE_LIKE_CONFORMANCE(krys::boo::css::tests::MacroRange)
+KRYS_DEFINE_EMPTY_LIKE_CONFORMANCE(krys::boo::css::tests::MacroEmpty)
 
 namespace krys::boo::css::tests
 {

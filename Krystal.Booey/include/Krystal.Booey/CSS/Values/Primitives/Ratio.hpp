@@ -62,4 +62,4 @@ namespace krys::boo::css
   };
 }
 
-DEFINE_SLASH_SEPARATED_TUPLE_LIKE_CONFORMANCE(krys::boo::css::Ratio, 2)
+KRYS_DEFINE_SLASH_SEPARATED_TUPLE_LIKE_CONFORMANCE(krys::boo::css::Ratio, 2)

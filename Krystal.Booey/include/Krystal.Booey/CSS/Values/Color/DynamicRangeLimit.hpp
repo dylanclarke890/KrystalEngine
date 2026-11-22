@@ -84,4 +84,4 @@ namespace krys::boo::css
   }
 }
 
-DEFINE_VARIANT_LIKE_CONFORMANCE(krys::boo::css::DynamicRangeLimit)
+KRYS_DEFINE_VARIANT_LIKE_CONFORMANCE(krys::boo::css::DynamicRangeLimit)

@@ -117,5 +117,5 @@ namespace krys::boo::style
   };
 }
 
-DEFINE_VARIANT_LIKE_CONFORMANCE(krys::boo::style::SVGBaselineShiftLength)
-DEFINE_VARIANT_LIKE_CONFORMANCE(krys::boo::style::SVGBaselineShift)
+KRYS_DEFINE_VARIANT_LIKE_CONFORMANCE(krys::boo::style::SVGBaselineShiftLength)
+KRYS_DEFINE_VARIANT_LIKE_CONFORMANCE(krys::boo::style::SVGBaselineShift)

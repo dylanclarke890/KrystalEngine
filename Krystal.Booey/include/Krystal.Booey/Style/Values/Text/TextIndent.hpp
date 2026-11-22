@@ -110,5 +110,5 @@ namespace krys::boo::style
   };
 }
 
-DEFINE_VARIANT_LIKE_CONFORMANCE(krys::boo::style::TextIndentLength);
-DEFINE_SPACE_SEPARATED_TUPLE_LIKE_CONFORMANCE(krys::boo::style::TextIndent, 3);
+KRYS_DEFINE_VARIANT_LIKE_CONFORMANCE(krys::boo::style::TextIndentLength);
+KRYS_DEFINE_SPACE_SEPARATED_TUPLE_LIKE_CONFORMANCE(krys::boo::style::TextIndent, 3);

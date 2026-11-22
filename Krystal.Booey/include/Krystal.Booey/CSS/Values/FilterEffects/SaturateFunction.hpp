@@ -42,7 +42,7 @@ namespace krys::boo::css
 
   using SaturateFunction = FunctionNotation<ValueId::Saturate, Saturate>;
 
-  DEFINE_TYPE_WRAPPER_GET(Saturate, Value)
+  KRYS_DEFINE_TYPE_WRAPPER_GET(Saturate, Value)
 }
 
-DEFINE_TUPLE_LIKE_CONFORMANCE(krys::boo::css::Saturate, 1)
+KRYS_DEFINE_TUPLE_LIKE_CONFORMANCE(krys::boo::css::Saturate, 1)

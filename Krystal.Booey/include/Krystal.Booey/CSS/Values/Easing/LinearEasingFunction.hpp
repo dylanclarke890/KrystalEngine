@@ -57,7 +57,7 @@ namespace krys::boo::css
 
   using LinearEasingFunction = FunctionNotation<ValueId::Linear, LinearEasingParameters>;
 
-  DEFINE_TYPE_WRAPPER_GET(LinearEasingParameters, Stops)
+  KRYS_DEFINE_TYPE_WRAPPER_GET(LinearEasingParameters, Stops)
 
   template <size_t I>
   KRYS_NODISCARD constexpr const auto &get(const LinearEasingParameters::Stop &value) noexcept
@@ -86,6 +86,6 @@ namespace krys::boo::css
   }
 }
 
-DEFINE_TUPLE_LIKE_CONFORMANCE(krys::boo::css::LinearEasingParameters, 1)
-DEFINE_SPACE_SEPARATED_TUPLE_LIKE_CONFORMANCE(krys::boo::css::LinearEasingParameters::Stop, 2)
-DEFINE_SPACE_SEPARATED_TUPLE_LIKE_CONFORMANCE(krys::boo::css::LinearEasingParameters::Stop::Length, 2)
+KRYS_DEFINE_TUPLE_LIKE_CONFORMANCE(krys::boo::css::LinearEasingParameters, 1)
+KRYS_DEFINE_SPACE_SEPARATED_TUPLE_LIKE_CONFORMANCE(krys::boo::css::LinearEasingParameters::Stop, 2)
+KRYS_DEFINE_SPACE_SEPARATED_TUPLE_LIKE_CONFORMANCE(krys::boo::css::LinearEasingParameters::Stop::Length, 2)

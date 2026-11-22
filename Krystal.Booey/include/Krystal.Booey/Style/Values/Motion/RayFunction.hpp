@@ -72,7 +72,7 @@ namespace krys::boo::style
     }
   }
 
-  DEFINE_TYPE_MAPPING(css::Ray, Ray)
+  KRYS_DEFINE_TYPE_MAPPING(css::Ray, Ray)
 
   // MARK: Serialization
 
@@ -84,4 +84,4 @@ namespace krys::boo::style
   };
 }
 
-DEFINE_TUPLE_LIKE_CONFORMANCE(krys::boo::style::Ray, 4)
+KRYS_DEFINE_TUPLE_LIKE_CONFORMANCE(krys::boo::style::Ray, 4)

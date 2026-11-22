@@ -164,5 +164,5 @@ namespace krys::boo::tests
     return lines;
   }
 
-#define UTF8_INFO(str) INFO(string(reinterpret_cast<const char *>(str.data()), str.size()));
+#define KRYS_UTF8_INFO(str) INFO(string(reinterpret_cast<const char *>(str.data()), str.size()));
 }

@@ -9599,9 +9599,9 @@ class GenerateStyleInterpolationWrapperMap:
                 ],
             )
 
-            writer.write("#define STYLE_INTERPOLATION_GENERATED_INCLUDE_TRAP 1")
+            writer.write("#define KRYS_STYLE_INTERPOLATION_GENERATED_INCLUDE_TRAP 1")
             writer.write('#include "Krystal.Booey/Style/Interpolation/InterpolationWrappers.hpp"')
-            writer.write("#undef STYLE_INTERPOLATION_GENERATED_INCLUDE_TRAP")
+            writer.write("#undef KRYS_STYLE_INTERPOLATION_GENERATED_INCLUDE_TRAP")
 
             with writer.namespace(namespace="krys::boo::style::interpolation"):
                 self._generate_css_property_animation_wrapper_map_cpp_constructor(to=writer)
@@ -10393,7 +10393,7 @@ class GenerateStyleComputedStyleProperties:
             writer.hpp_prelude(generator_name=GENERATOR_NAME)
 
             writer.write_block("""\
-            #ifndef COMPUTED_STYLE_PROPERTIES_GETTERS_INLINES_INCLUDE_TRAP
+            #ifndef KRYS_COMPUTED_STYLE_PROPERTIES_GETTERS_INLINES_INCLUDE_TRAP
             #error "Please do not include this file anywhere except from ComputedStyle+GettersInlines.hpp."
             #endif
             """)
@@ -10733,7 +10733,7 @@ class GenerateStyleComputedStyleProperties:
             writer.hpp_prelude(generator_name=GENERATOR_NAME)
 
             writer.write_block("""\
-                #ifndef COMPUTED_STYLE_PROPERTIES_SETTERS_INLINES_INCLUDE_TRAP
+                #ifndef KRYS_COMPUTED_STYLE_PROPERTIES_SETTERS_INLINES_INCLUDE_TRAP
                 #error "Please do not include this file anywhere except from ComputedStyle+SettersInlines.hpp."
                 #endif
             """)
@@ -10810,7 +10810,7 @@ class GenerateStyleComputedStyleProperties:
             writer.hpp_prelude(generator_name=GENERATOR_NAME)
 
             writer.write_block("""\
-            #ifndef COMPUTED_STYLE_PROPERTIES_INITIAL_INLINES_INCLUDE_TRAP
+            #ifndef KRYS_COMPUTED_STYLE_PROPERTIES_INITIAL_INLINES_INCLUDE_TRAP
                 #error "Please do not include this file anywhere except from ComputedStyle+InitialInlines.hpp."
             #endif
             """)
@@ -11179,7 +11179,7 @@ class GenerateRenderStyleProperties:
 
             writer.hpp_prelude(generator_name=GENERATOR_NAME)
 
-            writer.write("#ifndef RENDER_STYLE_PROPERTIES_GETTERS_INLINES_INCLUDE_TRAP")
+            writer.write("#ifndef KRYS_RENDER_STYLE_PROPERTIES_GETTERS_INLINES_INCLUDE_TRAP")
             writer.write(
                 '#error "Please do not include this file anywhere except from RenderStyle+GettersInlines.hpp."'
             )
@@ -11335,7 +11335,7 @@ class GenerateRenderStyleProperties:
             writer = Writer(output_file)
             writer.hpp_prelude(generator_name=GENERATOR_NAME)
 
-            writer.write("#ifndef RENDER_STYLE_PROPERTIES_SETTERS_INLINES_INCLUDE_TRAP")
+            writer.write("#ifndef KRYS_RENDER_STYLE_PROPERTIES_SETTERS_INLINES_INCLUDE_TRAP")
             writer.write(
                 '#error "Please do not include this file anywhere except from RenderStyle+SettersInlines.hpp."'
             )

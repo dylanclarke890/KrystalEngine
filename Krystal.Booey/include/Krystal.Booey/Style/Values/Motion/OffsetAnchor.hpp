@@ -109,4 +109,4 @@ namespace krys::boo::style
   // MARK: - Evaluation
 }
 
-DEFINE_VARIANT_LIKE_CONFORMANCE(krys::boo::style::OffsetAnchor)
+KRYS_DEFINE_VARIANT_LIKE_CONFORMANCE(krys::boo::style::OffsetAnchor)

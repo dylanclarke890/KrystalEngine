@@ -55,8 +55,8 @@ namespace krys::boo::style
     KRYS_NODISCARD bool operator==(const ToPosition &) const noexcept = default;
   };
 
-  DEFINE_TYPE_WRAPPER_GET(ToPosition, Offset);
-  DEFINE_TYPE_MAPPING(css::ToPosition, ToPosition)
+  KRYS_DEFINE_TYPE_WRAPPER_GET(ToPosition, Offset);
+  KRYS_DEFINE_TYPE_MAPPING(css::ToPosition, ToPosition)
 
   // <by-coordinate-pair> = by <coordinate-pair>
   struct ByCoordinatePair
@@ -68,8 +68,8 @@ namespace krys::boo::style
     KRYS_NODISCARD bool operator==(const ByCoordinatePair &) const noexcept = default;
   };
 
-  DEFINE_TYPE_WRAPPER_GET(ByCoordinatePair, Offset);
-  DEFINE_TYPE_MAPPING(css::ByCoordinatePair, ByCoordinatePair)
+  KRYS_DEFINE_TYPE_WRAPPER_GET(ByCoordinatePair, Offset);
+  KRYS_DEFINE_TYPE_MAPPING(css::ByCoordinatePair, ByCoordinatePair)
 
   // <relative-control-point> = [<coordinate-pair> [from [start | end | origin]]?]
   // Specified https://github.com/w3c/csswg-drafts/issues/10649#issuecomment-2412816773
@@ -96,7 +96,7 @@ namespace krys::boo::style
       return value.Anchor;
     }
   }
-  DEFINE_TYPE_MAPPING(css::RelativeControlPoint, RelativeControlPoint)
+  KRYS_DEFINE_TYPE_MAPPING(css::RelativeControlPoint, RelativeControlPoint)
 
   template <>
   struct Blending<RelativeControlPoint>
@@ -132,7 +132,7 @@ namespace krys::boo::style
       return value.Anchor;
     }
   }
-  DEFINE_TYPE_MAPPING(css::AbsoluteControlPoint, AbsoluteControlPoint)
+  KRYS_DEFINE_TYPE_MAPPING(css::AbsoluteControlPoint, AbsoluteControlPoint)
 
   template <>
   struct Blending<AbsoluteControlPoint>
@@ -158,8 +158,8 @@ namespace krys::boo::style
     KRYS_NODISCARD bool operator==(const MoveCommand &) const noexcept = default;
   };
 
-  DEFINE_TYPE_WRAPPER_GET(MoveCommand, ToBy);
-  DEFINE_TYPE_MAPPING(css::MoveCommand, MoveCommand)
+  KRYS_DEFINE_TYPE_WRAPPER_GET(MoveCommand, ToBy);
+  KRYS_DEFINE_TYPE_MAPPING(css::MoveCommand, MoveCommand)
 
   // MARK: - Line Command
 
@@ -176,8 +176,8 @@ namespace krys::boo::style
     KRYS_NODISCARD bool operator==(const LineCommand &) const noexcept = default;
   };
 
-  DEFINE_TYPE_WRAPPER_GET(LineCommand, ToBy);
-  DEFINE_TYPE_MAPPING(css::LineCommand, LineCommand)
+  KRYS_DEFINE_TYPE_WRAPPER_GET(LineCommand, ToBy);
+  KRYS_DEFINE_TYPE_MAPPING(css::LineCommand, LineCommand)
 
   // MARK: - HLine Command
 
@@ -211,12 +211,12 @@ namespace krys::boo::style
     KRYS_NODISCARD bool operator==(const HLineCommand &) const noexcept = default;
   };
 
-  DEFINE_TYPE_WRAPPER_GET(HLineCommand::By, Offset);
-  DEFINE_TYPE_WRAPPER_GET(HLineCommand::To, Offset);
-  DEFINE_TYPE_WRAPPER_GET(HLineCommand, ToBy);
-  DEFINE_TYPE_MAPPING(css::HLineCommand::To, HLineCommand::To)
-  DEFINE_TYPE_MAPPING(css::HLineCommand::By, HLineCommand::By)
-  DEFINE_TYPE_MAPPING(css::HLineCommand, HLineCommand)
+  KRYS_DEFINE_TYPE_WRAPPER_GET(HLineCommand::By, Offset);
+  KRYS_DEFINE_TYPE_WRAPPER_GET(HLineCommand::To, Offset);
+  KRYS_DEFINE_TYPE_WRAPPER_GET(HLineCommand, ToBy);
+  KRYS_DEFINE_TYPE_MAPPING(css::HLineCommand::To, HLineCommand::To)
+  KRYS_DEFINE_TYPE_MAPPING(css::HLineCommand::By, HLineCommand::By)
+  KRYS_DEFINE_TYPE_MAPPING(css::HLineCommand, HLineCommand)
 
   // MARK: - VLine Command
 
@@ -250,12 +250,12 @@ namespace krys::boo::style
     KRYS_NODISCARD bool operator==(const VLineCommand &) const noexcept = default;
   };
 
-  DEFINE_TYPE_WRAPPER_GET(VLineCommand::By, Offset);
-  DEFINE_TYPE_WRAPPER_GET(VLineCommand::To, Offset);
-  DEFINE_TYPE_WRAPPER_GET(VLineCommand, ToBy);
-  DEFINE_TYPE_MAPPING(css::VLineCommand::To, VLineCommand::To)
-  DEFINE_TYPE_MAPPING(css::VLineCommand::By, VLineCommand::By)
-  DEFINE_TYPE_MAPPING(css::VLineCommand, VLineCommand)
+  KRYS_DEFINE_TYPE_WRAPPER_GET(VLineCommand::By, Offset);
+  KRYS_DEFINE_TYPE_WRAPPER_GET(VLineCommand::To, Offset);
+  KRYS_DEFINE_TYPE_WRAPPER_GET(VLineCommand, ToBy);
+  KRYS_DEFINE_TYPE_MAPPING(css::VLineCommand::To, VLineCommand::To)
+  KRYS_DEFINE_TYPE_MAPPING(css::VLineCommand::By, VLineCommand::By)
+  KRYS_DEFINE_TYPE_MAPPING(css::VLineCommand, VLineCommand)
 
   // MARK: - Curve Command
 
@@ -329,11 +329,11 @@ namespace krys::boo::style
     }
   }
 
-  DEFINE_TYPE_WRAPPER_GET(CurveCommand, ToBy);
+  KRYS_DEFINE_TYPE_WRAPPER_GET(CurveCommand, ToBy);
 
-  DEFINE_TYPE_MAPPING(css::CurveCommand, CurveCommand)
-  DEFINE_TYPE_MAPPING(css::CurveCommand::To, CurveCommand::To)
-  DEFINE_TYPE_MAPPING(css::CurveCommand::By, CurveCommand::By)
+  KRYS_DEFINE_TYPE_MAPPING(css::CurveCommand, CurveCommand)
+  KRYS_DEFINE_TYPE_MAPPING(css::CurveCommand::To, CurveCommand::To)
+  KRYS_DEFINE_TYPE_MAPPING(css::CurveCommand::By, CurveCommand::By)
 
   // MARK: - Smooth Command
 
@@ -396,11 +396,11 @@ namespace krys::boo::style
     }
   }
 
-  DEFINE_TYPE_WRAPPER_GET(SmoothCommand, ToBy);
+  KRYS_DEFINE_TYPE_WRAPPER_GET(SmoothCommand, ToBy);
 
-  DEFINE_TYPE_MAPPING(css::SmoothCommand, SmoothCommand)
-  DEFINE_TYPE_MAPPING(css::SmoothCommand::To, SmoothCommand::To)
-  DEFINE_TYPE_MAPPING(css::SmoothCommand::By, SmoothCommand::By)
+  KRYS_DEFINE_TYPE_MAPPING(css::SmoothCommand, SmoothCommand)
+  KRYS_DEFINE_TYPE_MAPPING(css::SmoothCommand::To, SmoothCommand::To)
+  KRYS_DEFINE_TYPE_MAPPING(css::SmoothCommand::By, SmoothCommand::By)
 
   // MARK: - Arc Command
 
@@ -449,7 +449,7 @@ namespace krys::boo::style
     }
   }
 
-  DEFINE_TYPE_MAPPING(css::ArcCommand, ArcCommand)
+  KRYS_DEFINE_TYPE_MAPPING(css::ArcCommand, ArcCommand)
 
   template <>
   struct Blending<ArcCommand>
@@ -509,7 +509,7 @@ namespace krys::boo::style
     }
   }
 
-  DEFINE_TYPE_MAPPING(css::Shape, Shape)
+  KRYS_DEFINE_TYPE_MAPPING(css::Shape, Shape)
 
   template <>
   struct PathComputation<Shape>
@@ -539,23 +539,23 @@ namespace krys::boo::style
   KRYS_NODISCARD Maybe<Shape> MakeShapeFromPath(const Path &) noexcept;
 }
 
-DEFINE_TUPLE_LIKE_CONFORMANCE(krys::boo::style::ToPosition, 1)
-DEFINE_TUPLE_LIKE_CONFORMANCE(krys::boo::style::ByCoordinatePair, 1)
-DEFINE_TUPLE_LIKE_CONFORMANCE(krys::boo::style::RelativeControlPoint, 2)
-DEFINE_TUPLE_LIKE_CONFORMANCE(krys::boo::style::AbsoluteControlPoint, 2)
-DEFINE_TUPLE_LIKE_CONFORMANCE(krys::boo::style::MoveCommand, 1)
-DEFINE_TUPLE_LIKE_CONFORMANCE(krys::boo::style::LineCommand, 1)
-DEFINE_TUPLE_LIKE_CONFORMANCE(krys::boo::style::HLineCommand::To, 1)
-DEFINE_TUPLE_LIKE_CONFORMANCE(krys::boo::style::HLineCommand::By, 1)
-DEFINE_TUPLE_LIKE_CONFORMANCE(krys::boo::style::HLineCommand, 1)
-DEFINE_TUPLE_LIKE_CONFORMANCE(krys::boo::style::VLineCommand::To, 1)
-DEFINE_TUPLE_LIKE_CONFORMANCE(krys::boo::style::VLineCommand::By, 1)
-DEFINE_TUPLE_LIKE_CONFORMANCE(krys::boo::style::VLineCommand, 1)
-DEFINE_TUPLE_LIKE_CONFORMANCE(krys::boo::style::CurveCommand::To, 3)
-DEFINE_TUPLE_LIKE_CONFORMANCE(krys::boo::style::CurveCommand::By, 3)
-DEFINE_TUPLE_LIKE_CONFORMANCE(krys::boo::style::CurveCommand, 1)
-DEFINE_TUPLE_LIKE_CONFORMANCE(krys::boo::style::SmoothCommand::To, 2)
-DEFINE_TUPLE_LIKE_CONFORMANCE(krys::boo::style::SmoothCommand::By, 2)
-DEFINE_TUPLE_LIKE_CONFORMANCE(krys::boo::style::SmoothCommand, 1)
-DEFINE_TUPLE_LIKE_CONFORMANCE(krys::boo::style::ArcCommand, 5)
-DEFINE_TUPLE_LIKE_CONFORMANCE(krys::boo::style::Shape, 3)
+KRYS_DEFINE_TUPLE_LIKE_CONFORMANCE(krys::boo::style::ToPosition, 1)
+KRYS_DEFINE_TUPLE_LIKE_CONFORMANCE(krys::boo::style::ByCoordinatePair, 1)
+KRYS_DEFINE_TUPLE_LIKE_CONFORMANCE(krys::boo::style::RelativeControlPoint, 2)
+KRYS_DEFINE_TUPLE_LIKE_CONFORMANCE(krys::boo::style::AbsoluteControlPoint, 2)
+KRYS_DEFINE_TUPLE_LIKE_CONFORMANCE(krys::boo::style::MoveCommand, 1)
+KRYS_DEFINE_TUPLE_LIKE_CONFORMANCE(krys::boo::style::LineCommand, 1)
+KRYS_DEFINE_TUPLE_LIKE_CONFORMANCE(krys::boo::style::HLineCommand::To, 1)
+KRYS_DEFINE_TUPLE_LIKE_CONFORMANCE(krys::boo::style::HLineCommand::By, 1)
+KRYS_DEFINE_TUPLE_LIKE_CONFORMANCE(krys::boo::style::HLineCommand, 1)
+KRYS_DEFINE_TUPLE_LIKE_CONFORMANCE(krys::boo::style::VLineCommand::To, 1)
+KRYS_DEFINE_TUPLE_LIKE_CONFORMANCE(krys::boo::style::VLineCommand::By, 1)
+KRYS_DEFINE_TUPLE_LIKE_CONFORMANCE(krys::boo::style::VLineCommand, 1)
+KRYS_DEFINE_TUPLE_LIKE_CONFORMANCE(krys::boo::style::CurveCommand::To, 3)
+KRYS_DEFINE_TUPLE_LIKE_CONFORMANCE(krys::boo::style::CurveCommand::By, 3)
+KRYS_DEFINE_TUPLE_LIKE_CONFORMANCE(krys::boo::style::CurveCommand, 1)
+KRYS_DEFINE_TUPLE_LIKE_CONFORMANCE(krys::boo::style::SmoothCommand::To, 2)
+KRYS_DEFINE_TUPLE_LIKE_CONFORMANCE(krys::boo::style::SmoothCommand::By, 2)
+KRYS_DEFINE_TUPLE_LIKE_CONFORMANCE(krys::boo::style::SmoothCommand, 1)
+KRYS_DEFINE_TUPLE_LIKE_CONFORMANCE(krys::boo::style::ArcCommand, 5)
+KRYS_DEFINE_TUPLE_LIKE_CONFORMANCE(krys::boo::style::Shape, 3)

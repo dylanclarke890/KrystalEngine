@@ -205,5 +205,5 @@ namespace krys::boo::style
   };
 }
 
-DEFINE_VARIANT_LIKE_CONFORMANCE(krys::boo::style::GridTrackBreadthLength)
-DEFINE_VARIANT_LIKE_CONFORMANCE(krys::boo::style::GridTrackBreadth)
+KRYS_DEFINE_VARIANT_LIKE_CONFORMANCE(krys::boo::style::GridTrackBreadthLength)
+KRYS_DEFINE_VARIANT_LIKE_CONFORMANCE(krys::boo::style::GridTrackBreadth)

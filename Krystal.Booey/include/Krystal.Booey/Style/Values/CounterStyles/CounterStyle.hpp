@@ -52,7 +52,7 @@ namespace krys::boo::style
       return Identifier.Value == CSSOMStringAtom {css::ToString(other)};
     }
   };
-  DEFINE_TYPE_WRAPPER_GET(CounterStyle, Identifier)
+  KRYS_DEFINE_TYPE_WRAPPER_GET(CounterStyle, Identifier)
 
   // MARK: - Conversion
 
@@ -63,4 +63,4 @@ namespace krys::boo::style
   };
 }
 
-DEFINE_TUPLE_LIKE_CONFORMANCE_FOR_TYPE_WRAPPER(krys::boo::style::CounterStyle)
+KRYS_DEFINE_TUPLE_LIKE_CONFORMANCE_FOR_TYPE_WRAPPER(krys::boo::style::CounterStyle)

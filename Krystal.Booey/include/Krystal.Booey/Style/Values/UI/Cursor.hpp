@@ -114,4 +114,4 @@ namespace krys::boo::style
   };
 }
 
-DEFINE_COMMA_SEPARATED_TUPLE_LIKE_CONFORMANCE(krys::boo::style::Cursor, 2)
+KRYS_DEFINE_COMMA_SEPARATED_TUPLE_LIKE_CONFORMANCE(krys::boo::style::Cursor, 2)

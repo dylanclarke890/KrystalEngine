@@ -69,7 +69,7 @@ namespace krys::boo::style
     KRYS_NODISCARD bool operator==(const SVGStrokeDashoffset &) const noexcept = default;
   };
 
-  DEFINE_TYPE_WRAPPER_GET(SVGStrokeDashoffset, Value);
+  KRYS_DEFINE_TYPE_WRAPPER_GET(SVGStrokeDashoffset, Value);
 
   // MARK: - Conversion
 
@@ -80,5 +80,5 @@ namespace krys::boo::style
   };
 }
 
-DEFINE_VARIANT_LIKE_CONFORMANCE(krys::boo::style::SVGStrokeDashoffsetLength)
-DEFINE_TUPLE_LIKE_CONFORMANCE_FOR_TYPE_WRAPPER(krys::boo::style::SVGStrokeDashoffset)
+KRYS_DEFINE_VARIANT_LIKE_CONFORMANCE(krys::boo::style::SVGStrokeDashoffsetLength)
+KRYS_DEFINE_TUPLE_LIKE_CONFORMANCE_FOR_TYPE_WRAPPER(krys::boo::style::SVGStrokeDashoffset)

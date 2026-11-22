@@ -52,7 +52,7 @@
 #include <functional>
 
 // Explicitly prefixed name used to avoid conflicts with existing macros that can be indirectly included.
-#define CSS_NUMERIC_RETURN_IF_EXCEPTION(resultVariable, expression)                                          \
+#define KRYS_CSS_NUMERIC_RETURN_IF_EXCEPTION(resultVariable, expression)                                     \
   auto resultOrException_##resultVariable = expression;                                                      \
   if (resultOrException_##resultVariable.HasException())                                                     \
   {                                                                                                          \
@@ -66,7 +66,7 @@ namespace krys::boo
   KRYS_NODISCARD static ExceptionOr<Ref<CSSNumericValue>>
     ConvertToExceptionOrNumericValue(ExceptionOr<Ref<T>> &&input) noexcept
   {
-    CSS_NUMERIC_RETURN_IF_EXCEPTION(result, krys::move(input));
+    KRYS_CSS_NUMERIC_RETURN_IF_EXCEPTION(result, krys::move(input));
     return Ref<CSSNumericValue> {krys::move(result)};
   }
 
@@ -84,7 +84,7 @@ namespace krys::boo
     values.reserve(nodes.size());
     for (const auto &node : nodes)
     {
-      CSS_NUMERIC_RETURN_IF_EXCEPTION(value, CSSNumericValue::ReifyMathExpression(node));
+      KRYS_CSS_NUMERIC_RETURN_IF_EXCEPTION(value, CSSNumericValue::ReifyMathExpression(node));
       values.push_back(krys::move(value));
     }
     return values;
@@ -120,51 +120,51 @@ namespace krys::boo
   KRYS_NODISCARD static ExceptionOr<Ref<CSSNumericValue>>
     ReifyMathExpression(const css::calc::IndirectNode<css::calc::Sum> &root) noexcept
   {
-    CSS_NUMERIC_RETURN_IF_EXCEPTION(values, ReifyMathExpressions(root->Children));
+    KRYS_CSS_NUMERIC_RETURN_IF_EXCEPTION(values, ReifyMathExpressions(root->Children));
     return ConvertToExceptionOrNumericValue(CSSMathSum::Create(krys::move(values)));
   }
 
   KRYS_NODISCARD static ExceptionOr<Ref<CSSNumericValue>>
     ReifyMathExpression(const css::calc::IndirectNode<css::calc::Product> &root) noexcept
   {
-    CSS_NUMERIC_RETURN_IF_EXCEPTION(values, ReifyMathExpressions(root->Children));
+    KRYS_CSS_NUMERIC_RETURN_IF_EXCEPTION(values, ReifyMathExpressions(root->Children));
     return ConvertToExceptionOrNumericValue(CSSMathProduct::Create(krys::move(values)));
   }
 
   KRYS_NODISCARD static ExceptionOr<Ref<CSSNumericValue>>
     ReifyMathExpression(const css::calc::IndirectNode<css::calc::Negate> &root) noexcept
   {
-    CSS_NUMERIC_RETURN_IF_EXCEPTION(child, CSSNumericValue::ReifyMathExpression(root->A));
+    KRYS_CSS_NUMERIC_RETURN_IF_EXCEPTION(child, CSSNumericValue::ReifyMathExpression(root->A));
     return ConvertToExceptionOrNumericValue(CSSMathNegate::Create(krys::move(child)));
   }
 
   KRYS_NODISCARD static ExceptionOr<Ref<CSSNumericValue>>
     ReifyMathExpression(const css::calc::IndirectNode<css::calc::Invert> &root) noexcept
   {
-    CSS_NUMERIC_RETURN_IF_EXCEPTION(child, CSSNumericValue::ReifyMathExpression(root->A));
+    KRYS_CSS_NUMERIC_RETURN_IF_EXCEPTION(child, CSSNumericValue::ReifyMathExpression(root->A));
     return ConvertToExceptionOrNumericValue(CSSMathInvert::Create(krys::move(child)));
   }
 
   KRYS_NODISCARD static ExceptionOr<Ref<CSSNumericValue>>
     ReifyMathExpression(const css::calc::IndirectNode<css::calc::Min> &root) noexcept
   {
-    CSS_NUMERIC_RETURN_IF_EXCEPTION(values, ReifyMathExpressions(root->Children));
+    KRYS_CSS_NUMERIC_RETURN_IF_EXCEPTION(values, ReifyMathExpressions(root->Children));
     return ConvertToExceptionOrNumericValue(CSSMathMin::Create(krys::move(values)));
   }
 
   KRYS_NODISCARD static ExceptionOr<Ref<CSSNumericValue>>
     ReifyMathExpression(const css::calc::IndirectNode<css::calc::Max> &root) noexcept
   {
-    CSS_NUMERIC_RETURN_IF_EXCEPTION(values, ReifyMathExpressions(root->Children));
+    KRYS_CSS_NUMERIC_RETURN_IF_EXCEPTION(values, ReifyMathExpressions(root->Children));
     return ConvertToExceptionOrNumericValue(CSSMathMax::Create(krys::move(values)));
   }
 
   KRYS_NODISCARD static ExceptionOr<Ref<CSSNumericValue>>
     ReifyMathExpression(const css::calc::IndirectNode<css::calc::Clamp> &root) noexcept
   {
-    CSS_NUMERIC_RETURN_IF_EXCEPTION(min, CSSNumericValue::ReifyMathExpression(root->Min));
-    CSS_NUMERIC_RETURN_IF_EXCEPTION(val, CSSNumericValue::ReifyMathExpression(root->Val));
-    CSS_NUMERIC_RETURN_IF_EXCEPTION(max, CSSNumericValue::ReifyMathExpression(root->Max));
+    KRYS_CSS_NUMERIC_RETURN_IF_EXCEPTION(min, CSSNumericValue::ReifyMathExpression(root->Min));
+    KRYS_CSS_NUMERIC_RETURN_IF_EXCEPTION(val, CSSNumericValue::ReifyMathExpression(root->Val));
+    KRYS_CSS_NUMERIC_RETURN_IF_EXCEPTION(max, CSSNumericValue::ReifyMathExpression(root->Max));
     return ConvertToExceptionOrNumericValue(
       CSSMathClamp::Create(krys::move(min), krys::move(val), krys::move(max)));
   }
@@ -373,7 +373,7 @@ namespace krys::boo
     invertedValues.reserve(values.size());
     for (auto &value : values)
     {
-      CSS_NUMERIC_RETURN_IF_EXCEPTION(inverted, boo::Invert(RectifyNumberish(krys::move(value))));
+      KRYS_CSS_NUMERIC_RETURN_IF_EXCEPTION(inverted, boo::Invert(RectifyNumberish(krys::move(value))));
       invertedValues.push_back(krys::move(inverted));
     }
     return MultiplyInternal(krys::move(invertedValues));
@@ -646,4 +646,4 @@ namespace krys::boo
   }
 }
 
-#undef CSS_NUMERIC_RETURN_IF_EXCEPTION
+#undef KRYS_CSS_NUMERIC_RETURN_IF_EXCEPTION

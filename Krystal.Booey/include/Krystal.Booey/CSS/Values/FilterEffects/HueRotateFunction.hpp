@@ -42,7 +42,7 @@ namespace krys::boo::css
 
   using HueRotateFunction = FunctionNotation<ValueId::HueRotate, HueRotate>;
 
-  DEFINE_TYPE_WRAPPER_GET(HueRotate, Value)
+  KRYS_DEFINE_TYPE_WRAPPER_GET(HueRotate, Value)
 }
 
-DEFINE_TUPLE_LIKE_CONFORMANCE(krys::boo::css::HueRotate, 1)
+KRYS_DEFINE_TUPLE_LIKE_CONFORMANCE(krys::boo::css::HueRotate, 1)

@@ -63,4 +63,4 @@ namespace krys::boo::css
   };
 }
 
-DEFINE_VARIANT_LIKE_CONFORMANCE(krys::boo::css::EasingFunction)
+KRYS_DEFINE_VARIANT_LIKE_CONFORMANCE(krys::boo::css::EasingFunction)

@@ -41,4 +41,4 @@ namespace krys::boo::style
   };
 }
 
-DEFINE_VARIANT_LIKE_CONFORMANCE(krys::boo::style::TextBoxEdge)
+KRYS_DEFINE_VARIANT_LIKE_CONFORMANCE(krys::boo::style::TextBoxEdge)

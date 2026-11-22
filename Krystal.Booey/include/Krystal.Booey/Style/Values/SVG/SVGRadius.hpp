@@ -36,4 +36,4 @@ namespace krys::boo::style
   };
 }
 
-DEFINE_VARIANT_LIKE_CONFORMANCE(krys::boo::style::SVGRadius)
+KRYS_DEFINE_VARIANT_LIKE_CONFORMANCE(krys::boo::style::SVGRadius)

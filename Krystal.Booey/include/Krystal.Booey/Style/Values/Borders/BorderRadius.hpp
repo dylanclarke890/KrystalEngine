@@ -118,4 +118,4 @@ namespace krys::boo
   }
 }
 
-DEFINE_TUPLE_LIKE_CONFORMANCE(krys::boo::style::BorderRadius, 4)
+KRYS_DEFINE_TUPLE_LIKE_CONFORMANCE(krys::boo::style::BorderRadius, 4)

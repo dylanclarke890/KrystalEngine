@@ -42,7 +42,7 @@ namespace krys::boo::css
 
   using GrayscaleFunction = FunctionNotation<ValueId::Grayscale, Grayscale>;
 
-  DEFINE_TYPE_WRAPPER_GET(Grayscale, Value)
+  KRYS_DEFINE_TYPE_WRAPPER_GET(Grayscale, Value)
 }
 
-DEFINE_TUPLE_LIKE_CONFORMANCE(krys::boo::css::Grayscale, 1)
+KRYS_DEFINE_TUPLE_LIKE_CONFORMANCE(krys::boo::css::Grayscale, 1)

@@ -360,6 +360,6 @@ namespace krys::boo::style
   };
 }
 
-DEFINE_COMMA_SEPARATED_TUPLE_LIKE_CONFORMANCE(krys::boo::style::GridTrackMinMaxParameters, 2)
-DEFINE_VARIANT_LIKE_CONFORMANCE(krys::boo::style::GridTrackFitContentLength)
-DEFINE_VARIANT_LIKE_CONFORMANCE(krys::boo::style::GridTrackSize)
+KRYS_DEFINE_COMMA_SEPARATED_TUPLE_LIKE_CONFORMANCE(krys::boo::style::GridTrackMinMaxParameters, 2)
+KRYS_DEFINE_VARIANT_LIKE_CONFORMANCE(krys::boo::style::GridTrackFitContentLength)
+KRYS_DEFINE_VARIANT_LIKE_CONFORMANCE(krys::boo::style::GridTrackSize)

@@ -73,10 +73,10 @@ namespace krys::boo::css::tests
 
       utf8_string str = u8"--- TEST " + krys::boo::tests::ToUTF8(number + 1uz) + u8" OF "
                         + krys::boo::tests::ToUTF8(total) + u8" ---\n";
-      UTF8_INFO(str);
+      KRYS_UTF8_INFO(str);
 
       str = u8"\n--- INPUT ---\n" + test.Input;
-      UTF8_INFO(str);
+      KRYS_UTF8_INFO(str);
 
       if (test.ExpectInvalid)
       {
@@ -87,11 +87,11 @@ namespace krys::boo::css::tests
       else
       {
         str = u8"--- EXPECTED OUTPUT ---\n" + test.Output;
-        UTF8_INFO(str);
+        KRYS_UTF8_INFO(str);
 
         auto output = result ? result->SelectorsText() : u8"";
         str = u8"\n--- ACTUAL OUTPUT ---\n" + output;
-        UTF8_INFO(str);
+        KRYS_UTF8_INFO(str);
 
         bool equal = output == test.Output;
         CHECK(equal);
@@ -112,55 +112,55 @@ namespace krys::boo::css::tests
     }
   }
 
-#define EXECUTE_CSS_SELECTOR_PARSER_TEST_CASE(FileName)                                                      \
+#define KRYS_EXECUTE_CSS_SELECTOR_PARSER_TEST_CASE(FileName)                                                 \
   TEST_CASE("CSSSelectorParser(" FileName ")", "[CSS][CSSSelectorParser]")                                   \
   {                                                                                                          \
     RunTest(FileName);                                                                                       \
   }
 
-  EXECUTE_CSS_SELECTOR_PARSER_TEST_CASE("an-plus-b-01.dat");
-  EXECUTE_CSS_SELECTOR_PARSER_TEST_CASE("an-plus-b-02.dat");
+  KRYS_EXECUTE_CSS_SELECTOR_PARSER_TEST_CASE("an-plus-b-01.dat");
+  KRYS_EXECUTE_CSS_SELECTOR_PARSER_TEST_CASE("an-plus-b-02.dat");
 
-  EXECUTE_CSS_SELECTOR_PARSER_TEST_CASE("attribute-01.dat");
+  KRYS_EXECUTE_CSS_SELECTOR_PARSER_TEST_CASE("attribute-01.dat");
 
-  EXECUTE_CSS_SELECTOR_PARSER_TEST_CASE("child-01.dat");
+  KRYS_EXECUTE_CSS_SELECTOR_PARSER_TEST_CASE("child-01.dat");
 
-  EXECUTE_CSS_SELECTOR_PARSER_TEST_CASE("class-01.dat");
+  KRYS_EXECUTE_CSS_SELECTOR_PARSER_TEST_CASE("class-01.dat");
 
-  EXECUTE_CSS_SELECTOR_PARSER_TEST_CASE("descendant-01.dat");
+  KRYS_EXECUTE_CSS_SELECTOR_PARSER_TEST_CASE("descendant-01.dat");
 
-  EXECUTE_CSS_SELECTOR_PARSER_TEST_CASE("focus-visible-01.dat");
+  KRYS_EXECUTE_CSS_SELECTOR_PARSER_TEST_CASE("focus-visible-01.dat");
 
-  EXECUTE_CSS_SELECTOR_PARSER_TEST_CASE("has-01.dat");
-  EXECUTE_CSS_SELECTOR_PARSER_TEST_CASE("has-02.dat");
+  KRYS_EXECUTE_CSS_SELECTOR_PARSER_TEST_CASE("has-01.dat");
+  KRYS_EXECUTE_CSS_SELECTOR_PARSER_TEST_CASE("has-02.dat");
 
-  EXECUTE_CSS_SELECTOR_PARSER_TEST_CASE("heading-01.dat");
-  EXECUTE_CSS_SELECTOR_PARSER_TEST_CASE("heading-02.dat");
+  KRYS_EXECUTE_CSS_SELECTOR_PARSER_TEST_CASE("heading-01.dat");
+  KRYS_EXECUTE_CSS_SELECTOR_PARSER_TEST_CASE("heading-02.dat");
 
-  EXECUTE_CSS_SELECTOR_PARSER_TEST_CASE("id-01.dat");
+  KRYS_EXECUTE_CSS_SELECTOR_PARSER_TEST_CASE("id-01.dat");
 
-  EXECUTE_CSS_SELECTOR_PARSER_TEST_CASE("invalid-pseudo-01.dat");
-  EXECUTE_CSS_SELECTOR_PARSER_TEST_CASE("invalid-pseudo-02.dat");
+  KRYS_EXECUTE_CSS_SELECTOR_PARSER_TEST_CASE("invalid-pseudo-01.dat");
+  KRYS_EXECUTE_CSS_SELECTOR_PARSER_TEST_CASE("invalid-pseudo-02.dat");
 
-  EXECUTE_CSS_SELECTOR_PARSER_TEST_CASE("not-01.dat");
-  EXECUTE_CSS_SELECTOR_PARSER_TEST_CASE("not-02.dat");
+  KRYS_EXECUTE_CSS_SELECTOR_PARSER_TEST_CASE("not-01.dat");
+  KRYS_EXECUTE_CSS_SELECTOR_PARSER_TEST_CASE("not-02.dat");
 
-  EXECUTE_CSS_SELECTOR_PARSER_TEST_CASE("not-03.dat");
+  KRYS_EXECUTE_CSS_SELECTOR_PARSER_TEST_CASE("not-03.dat");
 
-  EXECUTE_CSS_SELECTOR_PARSER_TEST_CASE("part-01.dat");
-  EXECUTE_CSS_SELECTOR_PARSER_TEST_CASE("part-02.dat");
+  KRYS_EXECUTE_CSS_SELECTOR_PARSER_TEST_CASE("part-01.dat");
+  KRYS_EXECUTE_CSS_SELECTOR_PARSER_TEST_CASE("part-02.dat");
 
-  EXECUTE_CSS_SELECTOR_PARSER_TEST_CASE("sibling-01.dat");
+  KRYS_EXECUTE_CSS_SELECTOR_PARSER_TEST_CASE("sibling-01.dat");
 
-  EXECUTE_CSS_SELECTOR_PARSER_TEST_CASE("slotted-01.dat");
-  EXECUTE_CSS_SELECTOR_PARSER_TEST_CASE("slotted-02.dat");
+  KRYS_EXECUTE_CSS_SELECTOR_PARSER_TEST_CASE("slotted-01.dat");
+  KRYS_EXECUTE_CSS_SELECTOR_PARSER_TEST_CASE("slotted-02.dat");
 
-  EXECUTE_CSS_SELECTOR_PARSER_TEST_CASE("state-01.dat");
-  EXECUTE_CSS_SELECTOR_PARSER_TEST_CASE("state-02.dat");
+  KRYS_EXECUTE_CSS_SELECTOR_PARSER_TEST_CASE("state-01.dat");
+  KRYS_EXECUTE_CSS_SELECTOR_PARSER_TEST_CASE("state-02.dat");
 
-  EXECUTE_CSS_SELECTOR_PARSER_TEST_CASE("universal-01.dat");
+  KRYS_EXECUTE_CSS_SELECTOR_PARSER_TEST_CASE("universal-01.dat");
 
-  EXECUTE_CSS_SELECTOR_PARSER_TEST_CASE("where-01.dat");
+  KRYS_EXECUTE_CSS_SELECTOR_PARSER_TEST_CASE("where-01.dat");
 
   namespace
   {
@@ -445,3 +445,5 @@ namespace krys::boo::css::tests
           == SelectorRelation::ShadowSlotted);
   }
 }
+
+#undef KRYS_EXECUTE_CSS_SELECTOR_PARSER_TEST_CASE

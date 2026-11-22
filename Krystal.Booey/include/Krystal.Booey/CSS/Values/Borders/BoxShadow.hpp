@@ -70,4 +70,4 @@ namespace krys::boo::css
   }
 }
 
-DEFINE_SPACE_SEPARATED_TUPLE_LIKE_CONFORMANCE(krys::boo::css::BoxShadow, 5)
+KRYS_DEFINE_SPACE_SEPARATED_TUPLE_LIKE_CONFORMANCE(krys::boo::css::BoxShadow, 5)

@@ -341,4 +341,4 @@ namespace krys::boo::style
   };
 }
 
-DEFINE_VARIANT_LIKE_CONFORMANCE(krys::boo::style::AlignSelf)
+KRYS_DEFINE_VARIANT_LIKE_CONFORMANCE(krys::boo::style::AlignSelf)

@@ -60,21 +60,21 @@ namespace krys::log
       LogImpl(level, message);
     }
 
-#define LOG_METHOD(level)                                                                                    \
+#define KRYS_LOG_METHOD(level)                                                                               \
   template <typename... Args>                                                                                \
   void level(stringview fmt, Args &&...args)                                                                 \
   {                                                                                                          \
     Log(Level::level, fmt, std::forward<Args>(args)...);                                                     \
   }
 
-    LOG_METHOD(Trace)
-    LOG_METHOD(Debug)
-    LOG_METHOD(Info)
-    LOG_METHOD(Warn)
-    LOG_METHOD(Error)
-    LOG_METHOD(Critical)
+    KRYS_LOG_METHOD(Trace)
+    KRYS_LOG_METHOD(Debug)
+    KRYS_LOG_METHOD(Info)
+    KRYS_LOG_METHOD(Warn)
+    KRYS_LOG_METHOD(Error)
+    KRYS_LOG_METHOD(Critical)
 
-#undef LOG_METHOD
+#undef KRYS_LOG_METHOD
 
     virtual void SetLevel(Level level) noexcept = 0;
 

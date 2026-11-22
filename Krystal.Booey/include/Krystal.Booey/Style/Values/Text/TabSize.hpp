@@ -135,4 +135,4 @@ namespace krys::boo
   }
 }
 
-DEFINE_VARIANT_LIKE_CONFORMANCE(krys::boo::style::TabSize);
+KRYS_DEFINE_VARIANT_LIKE_CONFORMANCE(krys::boo::style::TabSize);

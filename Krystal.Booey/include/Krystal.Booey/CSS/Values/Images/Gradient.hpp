@@ -360,12 +360,12 @@ namespace krys::boo::css
     FunctionNotation<ValueId::RepeatingConicGradient, ConicGradient>>;
 }
 
-DEFINE_TUPLE_LIKE_CONFORMANCE(krys::boo::css::LinearGradient, 3)
-DEFINE_TUPLE_LIKE_CONFORMANCE(krys::boo::css::RadialGradient::Ellipse, 2)
-DEFINE_TUPLE_LIKE_CONFORMANCE(krys::boo::css::RadialGradient::Circle, 2)
-DEFINE_TUPLE_LIKE_CONFORMANCE(krys::boo::css::RadialGradient, 3)
-DEFINE_TUPLE_LIKE_CONFORMANCE(krys::boo::css::ConicGradient::GradientBoxType, 2)
-DEFINE_TUPLE_LIKE_CONFORMANCE(krys::boo::css::ConicGradient, 3)
+KRYS_DEFINE_TUPLE_LIKE_CONFORMANCE(krys::boo::css::LinearGradient, 3)
+KRYS_DEFINE_TUPLE_LIKE_CONFORMANCE(krys::boo::css::RadialGradient::Ellipse, 2)
+KRYS_DEFINE_TUPLE_LIKE_CONFORMANCE(krys::boo::css::RadialGradient::Circle, 2)
+KRYS_DEFINE_TUPLE_LIKE_CONFORMANCE(krys::boo::css::RadialGradient, 3)
+KRYS_DEFINE_TUPLE_LIKE_CONFORMANCE(krys::boo::css::ConicGradient::GradientBoxType, 2)
+KRYS_DEFINE_TUPLE_LIKE_CONFORMANCE(krys::boo::css::ConicGradient, 3)
 
 template <typename C, typename P>
 constexpr inline bool krys::boo::css::TreatAsTupleLike<krys::boo::css::GradientColorStop<C, P>> = true;

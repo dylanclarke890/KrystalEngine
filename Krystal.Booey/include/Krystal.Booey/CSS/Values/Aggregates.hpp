@@ -68,7 +68,7 @@ namespace krys::boo::css
   template <typename>
   constexpr SerialisationSeparatorType SerialisationSeparator = SerialisationSeparatorType::None;
 
-#define DEFINE_SERIALISATION_SEPARATOR_FOR_TYPE(T, separator)                                                \
+#define KRYS_DEFINE_SERIALISATION_SEPARATOR_FOR_TYPE(T, separator)                                           \
   namespace krys::boo::css                                                                                   \
   {                                                                                                          \
     template <>                                                                                              \
@@ -90,7 +90,7 @@ namespace krys::boo::css
   template <typename>
   constexpr SerialisationCoalescingType SerialisationCoalescing = SerialisationCoalescingType::None;
 
-#define DEFINE_SERIALISATION_COALESCING_FOR_TYPE(T, coalescing)                                              \
+#define KRYS_DEFINE_SERIALISATION_COALESCING_FOR_TYPE(T, coalescing)                                         \
   namespace krys::boo::css                                                                                   \
   {                                                                                                          \
     template <>                                                                                              \
@@ -125,7 +125,7 @@ namespace krys::boo::css
 #pragma region Helper Macros
 
   /// @brief Defines a simple `get()` implementation for a single value `name`.
-#define DEFINE_TYPE_WRAPPER_GET(T, name)                                                                     \
+#define KRYS_DEFINE_TYPE_WRAPPER_GET(T, name)                                                                \
   template <size_t>                                                                                          \
   KRYS_NODISCARD const auto &get(const T &wrapper) noexcept                                                  \
   {                                                                                                          \
@@ -133,7 +133,7 @@ namespace krys::boo::css
   }
 
 /// @brief Defines a type by extending another type via inheritance.
-#define DEFINE_TYPE_EXTENDER(wrapper, wrapped)                                                               \
+#define KRYS_DEFINE_TYPE_EXTENDER(wrapper, wrapped)                                                          \
   struct wrapper : wrapped                                                                                   \
   {                                                                                                          \
     using Wrapped = wrapped;                                                                                 \
@@ -149,7 +149,7 @@ namespace krys::boo::css
   };
 
 /// @brief Defines a type via direct wrapping of another type.
-#define DEFINE_TYPE_WRAPPER(wrapper, wrapped)                                                                \
+#define KRYS_DEFINE_TYPE_WRAPPER(wrapper, wrapped)                                                           \
   struct wrapper                                                                                             \
   {                                                                                                          \
     using Wrapped = wrapped;                                                                                 \
@@ -195,7 +195,7 @@ namespace krys::boo::css
   };
 
 /// @brief Defines tuple-like conformance for a type with `numberOfArguments` arguments.
-#define DEFINE_TUPLE_LIKE_CONFORMANCE(T, numberOfArguments)                                                  \
+#define KRYS_DEFINE_TUPLE_LIKE_CONFORMANCE(T, numberOfArguments)                                             \
   namespace std                                                                                              \
   {                                                                                                          \
     template <>                                                                                              \
@@ -215,76 +215,76 @@ namespace krys::boo::css
   constexpr inline bool ::krys::boo::css::TreatAsTupleLike<T> = true;
 
 /// @brief Defines tuple-like conformance and that the type should be serialized as space separated.
-#define DEFINE_SPACE_SEPARATED_TUPLE_LIKE_CONFORMANCE(T, numberOfArguments)                                  \
-  DEFINE_TUPLE_LIKE_CONFORMANCE(T, numberOfArguments)                                                        \
-  DEFINE_SERIALISATION_SEPARATOR_FOR_TYPE(T, krys::boo::css::SerialisationSeparatorType::Space)
+#define KRYS_DEFINE_SPACE_SEPARATED_TUPLE_LIKE_CONFORMANCE(T, numberOfArguments)                             \
+  KRYS_DEFINE_TUPLE_LIKE_CONFORMANCE(T, numberOfArguments)                                                   \
+  KRYS_DEFINE_SERIALISATION_SEPARATOR_FOR_TYPE(T, krys::boo::css::SerialisationSeparatorType::Space)
 
 /// @brief Defines tuple-like conformance and that the type should be serialized as coalescing and space
 /// separated.
-#define DEFINE_COALESCING_SPACE_SEPARATED_TUPLE_LIKE_CONFORMANCE(T, numberOfArguments)                       \
+#define KRYS_DEFINE_COALESCING_SPACE_SEPARATED_TUPLE_LIKE_CONFORMANCE(T, numberOfArguments)                  \
   static_assert(numberOfArguments == 2 || numberOfArguments == 4);                                           \
-  DEFINE_SPACE_SEPARATED_TUPLE_LIKE_CONFORMANCE(T, numberOfArguments)                                        \
-  DEFINE_SERIALISATION_COALESCING_FOR_TYPE(T, krys::boo::css::SerialisationCoalescingType::Minimal)
+  KRYS_DEFINE_SPACE_SEPARATED_TUPLE_LIKE_CONFORMANCE(T, numberOfArguments)                                   \
+  KRYS_DEFINE_SERIALISATION_COALESCING_FOR_TYPE(T, krys::boo::css::SerialisationCoalescingType::Minimal)
 
 /// @brief Defines tuple-like conformance and that the type should be serialized as comma separated.
-#define DEFINE_COMMA_SEPARATED_TUPLE_LIKE_CONFORMANCE(T, numberOfArguments)                                  \
-  DEFINE_TUPLE_LIKE_CONFORMANCE(T, numberOfArguments)                                                        \
-  DEFINE_SERIALISATION_SEPARATOR_FOR_TYPE(T, krys::boo::css::SerialisationSeparatorType::Comma)
+#define KRYS_DEFINE_COMMA_SEPARATED_TUPLE_LIKE_CONFORMANCE(T, numberOfArguments)                             \
+  KRYS_DEFINE_TUPLE_LIKE_CONFORMANCE(T, numberOfArguments)                                                   \
+  KRYS_DEFINE_SERIALISATION_SEPARATOR_FOR_TYPE(T, krys::boo::css::SerialisationSeparatorType::Comma)
 
 /// @brief Defines tuple-like conformance and that the type should be serialized as coalescing and comma
 /// separated.
-#define DEFINE_COALESCING_COMMA_SEPARATED_TUPLE_LIKE_CONFORMANCE(T, numberOfArguments)                       \
+#define KRYS_DEFINE_COALESCING_COMMA_SEPARATED_TUPLE_LIKE_CONFORMANCE(T, numberOfArguments)                  \
   static_assert(numberOfArguments == 2 || numberOfArguments == 4);                                           \
-  DEFINE_COMMA_SEPARATED_TUPLE_LIKE_CONFORMANCE(T, numberOfArguments)                                        \
-  DEFINE_SERIALISATION_COALESCING_FOR_TYPE(T, krys::boo::css::SerialisationCoalescingType::Minimal)
+  KRYS_DEFINE_COMMA_SEPARATED_TUPLE_LIKE_CONFORMANCE(T, numberOfArguments)                                   \
+  KRYS_DEFINE_SERIALISATION_COALESCING_FOR_TYPE(T, krys::boo::css::SerialisationCoalescingType::Minimal)
 
 /// @brief Defines tuple-like conformance and that the type should be serialized as slash separated.
-#define DEFINE_SLASH_SEPARATED_TUPLE_LIKE_CONFORMANCE(T, numberOfArguments)                                  \
-  DEFINE_TUPLE_LIKE_CONFORMANCE(T, numberOfArguments)                                                        \
-  DEFINE_SERIALISATION_SEPARATOR_FOR_TYPE(T, krys::boo::css::SerialisationSeparatorType::Slash)
+#define KRYS_DEFINE_SLASH_SEPARATED_TUPLE_LIKE_CONFORMANCE(T, numberOfArguments)                             \
+  KRYS_DEFINE_TUPLE_LIKE_CONFORMANCE(T, numberOfArguments)                                                   \
+  KRYS_DEFINE_SERIALISATION_SEPARATOR_FOR_TYPE(T, krys::boo::css::SerialisationSeparatorType::Slash)
 
 /// @brief Defines tuple-like conformance and that the type should be serialized as coalescing and slash
 /// separated.
-#define DEFINE_COALESCING_SLASH_SEPARATED_TUPLE_LIKE_CONFORMANCE(T, numberOfArguments)                       \
+#define KRYS_DEFINE_COALESCING_SLASH_SEPARATED_TUPLE_LIKE_CONFORMANCE(T, numberOfArguments)                  \
   static_assert(numberOfArguments == 2 || numberOfArguments == 4);                                           \
-  DEFINE_SLASH_SEPARATED_TUPLE_LIKE_CONFORMANCE(T, numberOfArguments)                                        \
-  DEFINE_SERIALISATION_COALESCING_FOR_TYPE(T, krys::boo::css::SerialisationCoalescingType::Minimal)
+  KRYS_DEFINE_SLASH_SEPARATED_TUPLE_LIKE_CONFORMANCE(T, numberOfArguments)                                   \
+  KRYS_DEFINE_SERIALISATION_COALESCING_FOR_TYPE(T, krys::boo::css::SerialisationCoalescingType::Minimal)
 
 /// @brief Defines tuple-like conformance based on the type being extended.
-#define DEFINE_TUPLE_LIKE_CONFORMANCE_FOR_TYPE_EXTENDER(T)                                                   \
-  DEFINE_TUPLE_LIKE_CONFORMANCE(T, std::tuple_size_v<T::Wrapped>)                                            \
-  DEFINE_SERIALISATION_SEPARATOR_FOR_TYPE(T, krys::boo::css::SerialisationSeparator<T::Wrapped>)
+#define KRYS_DEFINE_TUPLE_LIKE_CONFORMANCE_FOR_TYPE_EXTENDER(T)                                              \
+  KRYS_DEFINE_TUPLE_LIKE_CONFORMANCE(T, std::tuple_size_v<T::Wrapped>)                                       \
+  KRYS_DEFINE_SERIALISATION_SEPARATOR_FOR_TYPE(T, krys::boo::css::SerialisationSeparator<T::Wrapped>)
 
 /// @brief Defines tuple-like conformance for a wrapper type.
-#define DEFINE_TUPLE_LIKE_CONFORMANCE_FOR_TYPE_WRAPPER(T) DEFINE_TUPLE_LIKE_CONFORMANCE(T, 1)
+#define KRYS_DEFINE_TUPLE_LIKE_CONFORMANCE_FOR_TYPE_WRAPPER(T) KRYS_DEFINE_TUPLE_LIKE_CONFORMANCE(T, 1)
 
 /// @brief Defines variant-like conformance for a type.
-#define DEFINE_VARIANT_LIKE_CONFORMANCE(T)                                                                   \
+#define KRYS_DEFINE_VARIANT_LIKE_CONFORMANCE(T)                                                              \
   template <>                                                                                                \
   constexpr inline bool ::krys::boo::css::TreatAsVariantLike<T> = true;
 
 /// @brief Defines tokens-like conformance for a type.
-#define DEFINE_RANGE_LIKE_CONFORMANCE(T)                                                                     \
+#define KRYS_DEFINE_RANGE_LIKE_CONFORMANCE(T)                                                                \
   template <>                                                                                                \
   constexpr inline bool ::krys::boo::css::TreatAsRangeLike<T> = true;
 
 /// @brief Defines tokens-like conformance and that the type should be serialized as space separated.
-#define DEFINE_SPACE_SEPARATED_RANGE_LIKE_CONFORMANCE(T)                                                     \
-  DEFINE_RANGE_LIKE_CONFORMANCE(T)                                                                           \
-  DEFINE_SERIALISATION_SEPARATOR_FOR_TYPE(T, krys::boo::css::SerialisationSeparatorType::Space)
+#define KRYS_DEFINE_SPACE_SEPARATED_RANGE_LIKE_CONFORMANCE(T)                                                \
+  KRYS_DEFINE_RANGE_LIKE_CONFORMANCE(T)                                                                      \
+  KRYS_DEFINE_SERIALISATION_SEPARATOR_FOR_TYPE(T, krys::boo::css::SerialisationSeparatorType::Space)
 
 /// @brief Defines a tokens-like conformance and that the type should be serialized as comma separated.
-#define DEFINE_COMMA_SEPARATED_RANGE_LIKE_CONFORMANCE(T)                                                     \
-  DEFINE_RANGE_LIKE_CONFORMANCE(T)                                                                           \
-  DEFINE_SERIALISATION_SEPARATOR_FOR_TYPE(T, krys::boo::css::SerialisationSeparatorType::Comma)
+#define KRYS_DEFINE_COMMA_SEPARATED_RANGE_LIKE_CONFORMANCE(T)                                                \
+  KRYS_DEFINE_RANGE_LIKE_CONFORMANCE(T)                                                                      \
+  KRYS_DEFINE_SERIALISATION_SEPARATOR_FOR_TYPE(T, krys::boo::css::SerialisationSeparatorType::Comma)
 
 /// @brief Defines a tokens-like conformance and that the type should be serialized as slash separated.
-#define DEFINE_SLASH_SEPARATED_RANGE_LIKE_CONFORMANCE(T)                                                     \
-  DEFINE_RANGE_LIKE_CONFORMANCE(T)                                                                           \
-  DEFINE_SERIALISATION_SEPARATOR_FOR_TYPE(T, krys::boo::css::SerialisationSeparatorType::Slash)
+#define KRYS_DEFINE_SLASH_SEPARATED_RANGE_LIKE_CONFORMANCE(T)                                                \
+  KRYS_DEFINE_RANGE_LIKE_CONFORMANCE(T)                                                                      \
+  KRYS_DEFINE_SERIALISATION_SEPARATOR_FOR_TYPE(T, krys::boo::css::SerialisationSeparatorType::Slash)
 
 /// @brief Defines an empty-like conformance for a type.
-#define DEFINE_EMPTY_LIKE_CONFORMANCE(T)                                                                     \
+#define KRYS_DEFINE_EMPTY_LIKE_CONFORMANCE(T)                                                                \
   template <>                                                                                                \
   constexpr bool ::krys::boo::css::TreatAsEmptyLike<T> = true;
 
@@ -1934,8 +1934,8 @@ namespace krys::boo::css
   concept ListOrDefaultDerived = IsBaseOfTemplate<ListOrDefault, T>;
 
 // Helper to define a range-like conformance for a type that derives from `ListOrDefault`.
-#define DEFINE_RANGE_LIKE_CONFORMANCE_FOR_LIST_OR_DEFAULT_DERIVED_TYPE(t)                                    \
-  DEFINE_RANGE_LIKE_CONFORMANCE(t)                                                                           \
+#define KRYS_DEFINE_RANGE_LIKE_CONFORMANCE_FOR_LIST_OR_DEFAULT_DERIVED_TYPE(t)                               \
+  KRYS_DEFINE_RANGE_LIKE_CONFORMANCE(t)                                                                      \
   template <>                                                                                                \
   constexpr inline auto krys::boo::css::SerialisationSeparator<t> =                                          \
     krys::boo::css::SerialisationSeparator<typename t::List>;

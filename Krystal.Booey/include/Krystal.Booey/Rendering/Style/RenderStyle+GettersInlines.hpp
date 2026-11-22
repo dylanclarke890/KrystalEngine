@@ -29,9 +29,9 @@
 #include "Krystal.Booey/Rendering/HitTesting/HitTestRequest.hpp"
 #include "Krystal.Booey/Rendering/Style/RenderStyle.hpp"
 
-#define RENDER_STYLE_PROPERTIES_GETTERS_INLINES_INCLUDE_TRAP 1
+#define KRYS_RENDER_STYLE_PROPERTIES_GETTERS_INLINES_INCLUDE_TRAP 1
 #include "Krystal.Booey/Rendering/Style/RenderStyleProperties+GettersInlines.hpp"
-#undef RENDER_STYLE_PROPERTIES_GETTERS_INLINES_INCLUDE_TRAP
+#undef KRYS_RENDER_STYLE_PROPERTIES_GETTERS_INLINES_INCLUDE_TRAP
 
 namespace krys::boo
 {

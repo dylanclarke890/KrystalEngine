@@ -69,4 +69,4 @@ namespace krys::boo::css
   }
 }
 
-DEFINE_TUPLE_LIKE_CONFORMANCE(krys::boo::css::ColorScheme, 2uz)
+KRYS_DEFINE_TUPLE_LIKE_CONFORMANCE(krys::boo::css::ColorScheme, 2uz)

@@ -151,4 +151,4 @@ namespace krys::boo::style
   };
 }
 
-DEFINE_VARIANT_LIKE_CONFORMANCE(krys::boo::style::Transform)
+KRYS_DEFINE_VARIANT_LIKE_CONFORMANCE(krys::boo::style::Transform)

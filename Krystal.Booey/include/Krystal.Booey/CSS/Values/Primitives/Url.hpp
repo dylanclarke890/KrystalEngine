@@ -90,4 +90,4 @@ namespace krys::boo::css
   KRYS_NODISCARD bool MayDependOnBaseUrl(const CSSUrl &url) noexcept;
 }
 
-DEFINE_TUPLE_LIKE_CONFORMANCE(krys::boo::css::CSSUrl, 3)
+KRYS_DEFINE_TUPLE_LIKE_CONFORMANCE(krys::boo::css::CSSUrl, 3)

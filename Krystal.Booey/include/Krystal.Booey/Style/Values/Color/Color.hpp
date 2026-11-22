@@ -310,4 +310,4 @@ namespace krys
   };
 }
 
-DEFINE_VARIANT_LIKE_CONFORMANCE(krys::boo::style::Color)
+KRYS_DEFINE_VARIANT_LIKE_CONFORMANCE(krys::boo::style::Color)

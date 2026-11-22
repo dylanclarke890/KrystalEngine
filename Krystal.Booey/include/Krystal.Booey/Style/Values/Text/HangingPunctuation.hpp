@@ -125,4 +125,4 @@ namespace krys::boo::style
   };
 }
 
-DEFINE_VARIANT_LIKE_CONFORMANCE(krys::boo::style::HangingPunctuation)
+KRYS_DEFINE_VARIANT_LIKE_CONFORMANCE(krys::boo::style::HangingPunctuation)

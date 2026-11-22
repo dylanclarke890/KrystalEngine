@@ -78,7 +78,7 @@ namespace krys::boo
       KRYS_NODISCARD bool operator==(const ViewTimelineInsetItem &) const noexcept = default;
     };
 
-    DEFINE_TYPE_WRAPPER_GET(ViewTimelineInsetItem, Value);
+    KRYS_DEFINE_TYPE_WRAPPER_GET(ViewTimelineInsetItem, Value);
 
     // <view-timeline-inset-list> = <single-view-timeline-inset-item>#
     using ViewTimelineInsetList = css::CommaSeparatedFixedList<ViewTimelineInsetItem>;
@@ -124,6 +124,6 @@ namespace krys::boo
   }
 }
 
-DEFINE_RANGE_LIKE_CONFORMANCE_FOR_LIST_OR_DEFAULT_DERIVED_TYPE(krys::boo::style::ViewTimelineInsets)
-DEFINE_VARIANT_LIKE_CONFORMANCE(krys::boo::style::ViewTimelineInsetItem::Length)
-DEFINE_TUPLE_LIKE_CONFORMANCE_FOR_TYPE_WRAPPER(krys::boo::style::ViewTimelineInsetItem)
+KRYS_DEFINE_RANGE_LIKE_CONFORMANCE_FOR_LIST_OR_DEFAULT_DERIVED_TYPE(krys::boo::style::ViewTimelineInsets)
+KRYS_DEFINE_VARIANT_LIKE_CONFORMANCE(krys::boo::style::ViewTimelineInsetItem::Length)
+KRYS_DEFINE_TUPLE_LIKE_CONFORMANCE_FOR_TYPE_WRAPPER(krys::boo::style::ViewTimelineInsetItem)

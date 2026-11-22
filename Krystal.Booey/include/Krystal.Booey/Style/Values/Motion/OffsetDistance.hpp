@@ -38,4 +38,4 @@ namespace krys::boo::style
   // MARK: - Evaluation
 }
 
-DEFINE_VARIANT_LIKE_CONFORMANCE(krys::boo::style::OffsetDistance)
+KRYS_DEFINE_VARIANT_LIKE_CONFORMANCE(krys::boo::style::OffsetDistance)

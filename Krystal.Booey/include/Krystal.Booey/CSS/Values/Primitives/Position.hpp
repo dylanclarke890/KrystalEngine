@@ -44,7 +44,7 @@ namespace krys::boo::css
 
     KRYS_NODISCARD bool operator==(const TwoComponentPositionHorizontal &) const noexcept = default;
   };
-  DEFINE_TYPE_WRAPPER_GET(TwoComponentPositionHorizontal, Offset)
+  KRYS_DEFINE_TYPE_WRAPPER_GET(TwoComponentPositionHorizontal, Offset)
 
   struct TwoComponentPositionVertical
   {
@@ -54,7 +54,7 @@ namespace krys::boo::css
 
     KRYS_NODISCARD bool operator==(const TwoComponentPositionVertical &) const noexcept = default;
   };
-  DEFINE_TYPE_WRAPPER_GET(TwoComponentPositionVertical, Offset)
+  KRYS_DEFINE_TYPE_WRAPPER_GET(TwoComponentPositionVertical, Offset)
 
   // MARK: Three Component Types
 
@@ -64,7 +64,7 @@ namespace krys::boo::css
 
     KRYS_NODISCARD bool operator==(const ThreeComponentPositionHorizontal &) const noexcept = default;
   };
-  DEFINE_TYPE_WRAPPER_GET(ThreeComponentPositionHorizontal, Offset)
+  KRYS_DEFINE_TYPE_WRAPPER_GET(ThreeComponentPositionHorizontal, Offset)
 
   struct ThreeComponentPositionVertical
   {
@@ -72,7 +72,7 @@ namespace krys::boo::css
 
     KRYS_NODISCARD bool operator==(const ThreeComponentPositionVertical &) const noexcept = default;
   };
-  DEFINE_TYPE_WRAPPER_GET(ThreeComponentPositionVertical, Offset)
+  KRYS_DEFINE_TYPE_WRAPPER_GET(ThreeComponentPositionVertical, Offset)
 
   // MARK: Four Component Types
 
@@ -84,7 +84,7 @@ namespace krys::boo::css
 
     KRYS_NODISCARD bool operator==(const FourComponentPositionHorizontal &) const noexcept = default;
   };
-  DEFINE_TYPE_WRAPPER_GET(FourComponentPositionHorizontal, Offset)
+  KRYS_DEFINE_TYPE_WRAPPER_GET(FourComponentPositionHorizontal, Offset)
 
   struct FourComponentPositionVertical
   {
@@ -94,7 +94,7 @@ namespace krys::boo::css
 
     KRYS_NODISCARD bool operator==(const FourComponentPositionVertical &) const noexcept = default;
   };
-  DEFINE_TYPE_WRAPPER_GET(FourComponentPositionVertical, Offset)
+  KRYS_DEFINE_TYPE_WRAPPER_GET(FourComponentPositionVertical, Offset)
 
   using TwoComponentPositionHorizontalVertical =
     SpaceSeparatedTuple<TwoComponentPositionHorizontal, TwoComponentPositionVertical>;
@@ -131,7 +131,7 @@ namespace krys::boo::css
 
     Kind Value;
   };
-  DEFINE_TYPE_WRAPPER_GET(Position, Value)
+  KRYS_DEFINE_TYPE_WRAPPER_GET(Position, Value)
 
   /// @brief The horizontal half of a `<position>` (e.g. `background-position-x`).
   struct PositionX
@@ -154,7 +154,7 @@ namespace krys::boo::css
 
     Kind Value;
   };
-  DEFINE_TYPE_WRAPPER_GET(PositionX, Value)
+  KRYS_DEFINE_TYPE_WRAPPER_GET(PositionX, Value)
 
   /// @brief The vertical half of a `<position>` (e.g. `background-position-y`).
   struct PositionY
@@ -178,7 +178,7 @@ namespace krys::boo::css
     Kind Value;
   };
 
-  DEFINE_TYPE_WRAPPER_GET(PositionY, Value)
+  KRYS_DEFINE_TYPE_WRAPPER_GET(PositionY, Value)
 
   /// @brief Whether `position` is `center center` (or `50% 50%`) in its two-component form.
   KRYS_NODISCARD bool IsCenterPosition(const Position &position) noexcept;
@@ -187,12 +187,12 @@ namespace krys::boo::css
   KRYS_NODISCARD Pair<PositionX, PositionY> Split(Position position) noexcept;
 }
 
-DEFINE_TUPLE_LIKE_CONFORMANCE(krys::boo::css::TwoComponentPositionHorizontal, 1)
-DEFINE_TUPLE_LIKE_CONFORMANCE(krys::boo::css::TwoComponentPositionVertical, 1)
-DEFINE_TUPLE_LIKE_CONFORMANCE(krys::boo::css::ThreeComponentPositionHorizontal, 1)
-DEFINE_TUPLE_LIKE_CONFORMANCE(krys::boo::css::ThreeComponentPositionVertical, 1)
-DEFINE_TUPLE_LIKE_CONFORMANCE(krys::boo::css::FourComponentPositionHorizontal, 1)
-DEFINE_TUPLE_LIKE_CONFORMANCE(krys::boo::css::FourComponentPositionVertical, 1)
-DEFINE_TUPLE_LIKE_CONFORMANCE(krys::boo::css::Position, 1)
-DEFINE_TUPLE_LIKE_CONFORMANCE(krys::boo::css::PositionX, 1)
-DEFINE_TUPLE_LIKE_CONFORMANCE(krys::boo::css::PositionY, 1)
+KRYS_DEFINE_TUPLE_LIKE_CONFORMANCE(krys::boo::css::TwoComponentPositionHorizontal, 1)
+KRYS_DEFINE_TUPLE_LIKE_CONFORMANCE(krys::boo::css::TwoComponentPositionVertical, 1)
+KRYS_DEFINE_TUPLE_LIKE_CONFORMANCE(krys::boo::css::ThreeComponentPositionHorizontal, 1)
+KRYS_DEFINE_TUPLE_LIKE_CONFORMANCE(krys::boo::css::ThreeComponentPositionVertical, 1)
+KRYS_DEFINE_TUPLE_LIKE_CONFORMANCE(krys::boo::css::FourComponentPositionHorizontal, 1)
+KRYS_DEFINE_TUPLE_LIKE_CONFORMANCE(krys::boo::css::FourComponentPositionVertical, 1)
+KRYS_DEFINE_TUPLE_LIKE_CONFORMANCE(krys::boo::css::Position, 1)
+KRYS_DEFINE_TUPLE_LIKE_CONFORMANCE(krys::boo::css::PositionX, 1)
+KRYS_DEFINE_TUPLE_LIKE_CONFORMANCE(krys::boo::css::PositionY, 1)

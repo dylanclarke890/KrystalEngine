@@ -70,7 +70,7 @@ namespace krys::boo::style
 
     KRYS_NODISCARD bool operator==(const StrokeWidth &) const noexcept = default;
   };
-  DEFINE_TYPE_WRAPPER_GET(StrokeWidth, Value)
+  KRYS_DEFINE_TYPE_WRAPPER_GET(StrokeWidth, Value)
 
   // MARK: - Conversion
 
@@ -81,5 +81,5 @@ namespace krys::boo::style
   };
 }
 
-DEFINE_VARIANT_LIKE_CONFORMANCE(krys::boo::style::StrokeWidthLength)
-DEFINE_TUPLE_LIKE_CONFORMANCE_FOR_TYPE_WRAPPER(krys::boo::style::StrokeWidth)
+KRYS_DEFINE_VARIANT_LIKE_CONFORMANCE(krys::boo::style::StrokeWidthLength)
+KRYS_DEFINE_TUPLE_LIKE_CONFORMANCE_FOR_TYPE_WRAPPER(krys::boo::style::StrokeWidth)

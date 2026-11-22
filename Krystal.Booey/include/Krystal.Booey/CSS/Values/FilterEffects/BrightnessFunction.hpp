@@ -42,7 +42,7 @@ namespace krys::boo::css
 
   using BrightnessFunction = FunctionNotation<ValueId::Brightness, Brightness>;
 
-  DEFINE_TYPE_WRAPPER_GET(Brightness, Value)
+  KRYS_DEFINE_TYPE_WRAPPER_GET(Brightness, Value)
 }
 
-DEFINE_TUPLE_LIKE_CONFORMANCE(krys::boo::css::Brightness, 1)
+KRYS_DEFINE_TUPLE_LIKE_CONFORMANCE(krys::boo::css::Brightness, 1)

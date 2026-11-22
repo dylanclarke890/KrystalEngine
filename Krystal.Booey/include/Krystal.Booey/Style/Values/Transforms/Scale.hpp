@@ -170,5 +170,5 @@ namespace krys::boo::style
   };
 }
 
-DEFINE_VARIANT_LIKE_CONFORMANCE(krys::boo::style::Scale::Function)
-DEFINE_VARIANT_LIKE_CONFORMANCE(krys::boo::style::Scale)
+KRYS_DEFINE_VARIANT_LIKE_CONFORMANCE(krys::boo::style::Scale::Function)
+KRYS_DEFINE_VARIANT_LIKE_CONFORMANCE(krys::boo::style::Scale)

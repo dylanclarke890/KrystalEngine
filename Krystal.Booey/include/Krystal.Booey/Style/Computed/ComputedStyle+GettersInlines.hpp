@@ -27,9 +27,9 @@
 
 #include "Krystal.Booey/Style/Computed/ComputedStyle.hpp"
 
-#define COMPUTED_STYLE_PROPERTIES_GETTERS_INLINES_INCLUDE_TRAP 1
+#define KRYS_COMPUTED_STYLE_PROPERTIES_GETTERS_INLINES_INCLUDE_TRAP 1
 #include "Krystal.Booey/Style/Computed/ComputedStyleProperties+GettersInlines.hpp"
-#undef COMPUTED_STYLE_PROPERTIES_GETTERS_INLINES_INCLUDE_TRAP
+#undef KRYS_COMPUTED_STYLE_PROPERTIES_GETTERS_INLINES_INCLUDE_TRAP
 
 namespace krys::boo::style
 {

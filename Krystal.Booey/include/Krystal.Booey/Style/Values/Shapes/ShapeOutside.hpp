@@ -153,7 +153,7 @@ namespace krys::boo::style
     RefPtr<Value> _value;
   };
 
-  DEFINE_TYPE_WRAPPER_GET(ShapeOutside::Image, Value);
+  KRYS_DEFINE_TYPE_WRAPPER_GET(ShapeOutside::Image, Value);
 
   template <size_t I>
   const auto &get(const ShapeOutside::ShapeAndShapeBox &value)
@@ -220,6 +220,6 @@ namespace krys::boo::style
   };
 }
 
-DEFINE_SPACE_SEPARATED_TUPLE_LIKE_CONFORMANCE(krys::boo::style::ShapeOutside::ShapeAndShapeBox, 2)
-DEFINE_TUPLE_LIKE_CONFORMANCE_FOR_TYPE_WRAPPER(krys::boo::style::ShapeOutside::Image);
-DEFINE_VARIANT_LIKE_CONFORMANCE(krys::boo::style::ShapeOutside)
+KRYS_DEFINE_SPACE_SEPARATED_TUPLE_LIKE_CONFORMANCE(krys::boo::style::ShapeOutside::ShapeAndShapeBox, 2)
+KRYS_DEFINE_TUPLE_LIKE_CONFORMANCE_FOR_TYPE_WRAPPER(krys::boo::style::ShapeOutside::Image);
+KRYS_DEFINE_VARIANT_LIKE_CONFORMANCE(krys::boo::style::ShapeOutside)

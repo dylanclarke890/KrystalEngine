@@ -38,7 +38,7 @@ namespace krys::boo::style
     KRYS_NODISCARD bool operator==(const ProgressTimelineName &) const noexcept = default;
   };
 
-  DEFINE_TYPE_WRAPPER_GET(ProgressTimelineName, Value);
+  KRYS_DEFINE_TYPE_WRAPPER_GET(ProgressTimelineName, Value);
 
   // <progress-timeline-name-list> = <single-progress-timeline-name>#
   using ProgressTimelineNameList = css::CommaSeparatedFixedList<ProgressTimelineName>;
@@ -61,5 +61,5 @@ namespace krys::boo::style
   };
 }
 
-DEFINE_TUPLE_LIKE_CONFORMANCE(krys::boo::style::ProgressTimelineName, 1)
-DEFINE_VARIANT_LIKE_CONFORMANCE(krys::boo::style::ProgressTimelineNames)
+KRYS_DEFINE_TUPLE_LIKE_CONFORMANCE(krys::boo::style::ProgressTimelineName, 1)
+KRYS_DEFINE_VARIANT_LIKE_CONFORMANCE(krys::boo::style::ProgressTimelineNames)

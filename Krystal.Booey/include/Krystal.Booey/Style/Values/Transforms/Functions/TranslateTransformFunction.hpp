@@ -118,4 +118,4 @@ namespace krys::boo::style
 KRYS_SPECIALIZE_TYPE_TRAITS_STYLE_TRANSFORM_FUNCTION(
   krys::boo::style::TranslateTransformFunction,
   krys::boo::style::TransformFunctionBase::IsTranslateTransformFunctionType)
-DEFINE_VARIANT_LIKE_CONFORMANCE(krys::boo::style::TranslateLengthPercentage)
+KRYS_DEFINE_VARIANT_LIKE_CONFORMANCE(krys::boo::style::TranslateLengthPercentage)

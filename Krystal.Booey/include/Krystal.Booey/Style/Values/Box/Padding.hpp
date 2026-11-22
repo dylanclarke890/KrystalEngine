@@ -41,4 +41,4 @@ namespace krys::boo::style
   using PaddingBox = css::MinimallySerialisingSpaceSeparatedRectEdges<PaddingEdge>;
 }
 
-DEFINE_VARIANT_LIKE_CONFORMANCE(krys::boo::style::PaddingEdge)
+KRYS_DEFINE_VARIANT_LIKE_CONFORMANCE(krys::boo::style::PaddingEdge)

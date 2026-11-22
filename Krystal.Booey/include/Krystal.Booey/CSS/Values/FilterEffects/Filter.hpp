@@ -73,5 +73,5 @@ namespace krys::boo::css
   };
 }
 
-DEFINE_VARIANT_LIKE_CONFORMANCE(krys::boo::css::FilterData)
-DEFINE_VARIANT_LIKE_CONFORMANCE(krys::boo::css::Filter)
+KRYS_DEFINE_VARIANT_LIKE_CONFORMANCE(krys::boo::css::FilterData)
+KRYS_DEFINE_VARIANT_LIKE_CONFORMANCE(krys::boo::css::Filter)

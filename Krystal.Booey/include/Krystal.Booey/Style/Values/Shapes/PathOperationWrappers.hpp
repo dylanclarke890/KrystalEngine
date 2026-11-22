@@ -286,7 +286,7 @@ namespace krys::boo::style
   };
 }
 
-DEFINE_VARIANT_LIKE_CONFORMANCE(krys::boo::style::RayPath)
-DEFINE_VARIANT_LIKE_CONFORMANCE(krys::boo::style::ReferencePath)
-DEFINE_VARIANT_LIKE_CONFORMANCE(krys::boo::style::BasicShapePath)
-DEFINE_VARIANT_LIKE_CONFORMANCE(krys::boo::style::BoxPath)
+KRYS_DEFINE_VARIANT_LIKE_CONFORMANCE(krys::boo::style::RayPath)
+KRYS_DEFINE_VARIANT_LIKE_CONFORMANCE(krys::boo::style::ReferencePath)
+KRYS_DEFINE_VARIANT_LIKE_CONFORMANCE(krys::boo::style::BasicShapePath)
+KRYS_DEFINE_VARIANT_LIKE_CONFORMANCE(krys::boo::style::BoxPath)

@@ -54,7 +54,7 @@ namespace krys::boo::style
     }
   }
 
-  DEFINE_TYPE_MAPPING(css::Ratio, Ratio)
+  KRYS_DEFINE_TYPE_MAPPING(css::Ratio, Ratio)
 
   // MARK: Conversion
 
@@ -66,4 +66,4 @@ namespace krys::boo::style
   };
 }
 
-DEFINE_SLASH_SEPARATED_TUPLE_LIKE_CONFORMANCE(krys::boo::style::Ratio, 2)
+KRYS_DEFINE_SLASH_SEPARATED_TUPLE_LIKE_CONFORMANCE(krys::boo::style::Ratio, 2)

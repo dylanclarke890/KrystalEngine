@@ -926,7 +926,7 @@ namespace krys::pal
           break;
         }
 
-#define BUTTON_STATE(BTN, STATE)                                                                             \
+#define KRYS_BUTTON_STATE(BTN, STATE)                                                                        \
   const auto button = MouseButton::BTN;                                                                      \
   const auto state = MouseButtonState::STATE;
 
@@ -934,7 +934,7 @@ namespace krys::pal
         {
           if (_callbacks.OnMouseButton)
           {
-            BUTTON_STATE(Left, Pressed)
+            KRYS_BUTTON_STATE(Left, Pressed)
             _callbacks.OnMouseButton(handle, button, state, CurrentModifiers());
           }
           break;
@@ -943,7 +943,7 @@ namespace krys::pal
         {
           if (_callbacks.OnMouseButton)
           {
-            BUTTON_STATE(Left, Released)
+            KRYS_BUTTON_STATE(Left, Released)
             _callbacks.OnMouseButton(handle, button, state, CurrentModifiers());
           }
           break;
@@ -952,7 +952,7 @@ namespace krys::pal
         {
           if (_callbacks.OnMouseButton)
           {
-            BUTTON_STATE(Right, Pressed)
+            KRYS_BUTTON_STATE(Right, Pressed)
             _callbacks.OnMouseButton(handle, button, state, CurrentModifiers());
           }
           break;
@@ -961,7 +961,7 @@ namespace krys::pal
         {
           if (_callbacks.OnMouseButton)
           {
-            BUTTON_STATE(Right, Released)
+            KRYS_BUTTON_STATE(Right, Released)
             _callbacks.OnMouseButton(handle, button, state, CurrentModifiers());
           }
           break;
@@ -970,7 +970,7 @@ namespace krys::pal
         {
           if (_callbacks.OnMouseButton)
           {
-            BUTTON_STATE(Middle, Pressed)
+            KRYS_BUTTON_STATE(Middle, Pressed)
             _callbacks.OnMouseButton(handle, button, state, CurrentModifiers());
           }
           break;
@@ -979,13 +979,13 @@ namespace krys::pal
         {
           if (_callbacks.OnMouseButton)
           {
-            BUTTON_STATE(Middle, Released)
+            KRYS_BUTTON_STATE(Middle, Released)
             _callbacks.OnMouseButton(handle, button, state, CurrentModifiers());
           }
           break;
         }
 
-#undef BUTTON_STATE
+#undef KRYS_BUTTON_STATE
 
         case WM_XBUTTONDOWN:
         {

@@ -167,5 +167,5 @@ namespace krys::boo::style
   };
 }
 
-DEFINE_VARIANT_LIKE_CONFORMANCE(krys::boo::style::Translate::Function)
-DEFINE_VARIANT_LIKE_CONFORMANCE(krys::boo::style::Translate)
+KRYS_DEFINE_VARIANT_LIKE_CONFORMANCE(krys::boo::style::Translate::Function)
+KRYS_DEFINE_VARIANT_LIKE_CONFORMANCE(krys::boo::style::Translate)

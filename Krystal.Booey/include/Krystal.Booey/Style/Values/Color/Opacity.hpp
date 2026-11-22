@@ -70,7 +70,7 @@ namespace krys::boo::style
     KRYS_NODISCARD constexpr auto operator<=>(const Opacity &) const noexcept = default;
   };
 
-  DEFINE_TYPE_WRAPPER_GET(Opacity, Value);
+  KRYS_DEFINE_TYPE_WRAPPER_GET(Opacity, Value);
 
   // MARK: - Conversion
 
@@ -81,4 +81,4 @@ namespace krys::boo::style
   };
 }
 
-DEFINE_TUPLE_LIKE_CONFORMANCE_FOR_TYPE_WRAPPER(krys::boo::style::Opacity)
+KRYS_DEFINE_TUPLE_LIKE_CONFORMANCE_FOR_TYPE_WRAPPER(krys::boo::style::Opacity)
