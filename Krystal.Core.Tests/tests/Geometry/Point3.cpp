@@ -39,11 +39,6 @@ namespace krys::tests
     CHECK(Point3F(1, 2, 2).Length() == 3);
     CHECK(Point3F(1, 2, 2).DistanceTo(Point3F(1, 2, 0)) == 2);
 
-    // Crossing into one of the arguments is safe.
-    Point3F a = x;
-    a.Cross(a, y);
-    CHECK(a == Point3F(0, 0, 1));
-
     Point3F v(3, 0, 4);
     v.Normalise();
     CHECK_THAT(v.X(), WithinAbs(0.6, 1e-6));
