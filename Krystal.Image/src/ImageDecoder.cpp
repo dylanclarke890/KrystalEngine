@@ -1,26 +1,4 @@
-﻿/*
- * Copyright (C) 2016-2023 Apple Inc. All rights reserved.
- * Copyright (C) 2008-2009 Torch Mobile, Inc.
- * Copyright (C) Research In Motion Limited 2009-2010. All rights reserved.
- *
- *  This library is free software; you can redistribute it and/or
- *  modify it under the terms of the GNU Library General Public
- *  License as published by the Free Software Foundation; either
- *  version 2 of the License, or (at your option) any later version.
- *
- *  This library is distributed in the hope that it will be useful,
- *  but WITHOUT ANY WARRANTY; without even the implied warranty of
- *  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU
- *  Library General Public License for more details.
- *
- *  You should have received a copy of the GNU Library General Public License
- *  along with this library; see the file COPYING.LIB.  If not, write to
- *  the Free Software Foundation, Inc., 51 Franklin Street, Fifth Floor,
- *  Boston, MA 02110-1301, USA.
- *
- */
-
-#include "Krystal.Image/ImageDecoder.hpp"
+﻿#include "Krystal.Image/ImageDecoder.hpp"
 #include "Krystal.Core/Strings/ASCII.hpp"
 #include "Krystal.Image/Decoders/BMPImageDecoder.hpp"
 #include "Krystal.Image/Decoders/GIFImageDecoder.hpp"
@@ -29,187 +7,140 @@
 #include "Krystal.Image/Decoders/PNGImageDecoder.hpp"
 #include "Krystal.Image/Decoders/WEBPImageDecoder.hpp"
 #include <algorithm>
-#include <array>
 #include <string_view>
 
 namespace krys::img
 {
   namespace
   {
-    KRYS_NODISCARD bool HasPrefix(Span<const uint8> contents, std::string_view prefix) noexcept
+    using DecoderFactory = RefPtr<ImageDecoder> (*)(AlphaOption, GammaAndColorProfileOption) noexcept;
+
+    // The bytes a format starts with, at an offset into the data.
+    struct Signature
     {
-      return contents.size() >= prefix.size()
-             && std::equal(prefix.begin(), prefix.end(), contents.begin(),
-                           [](char a, uint8 b) { return static_cast<uint8>(a) == b; });
+      size_t Offset;
+      std::string_view Bytes;
+    };
+
+    struct Format
+    {
+      DecoderFactory Factory;
+      Signature First;
+      Signature Second {0, {}};
+    };
+
+    template <typename TDecoder>
+    KRYS_NODISCARD RefPtr<ImageDecoder> Make(AlphaOption alphaOption,
+                                             GammaAndColorProfileOption gammaAndColorProfileOption) noexcept
+    {
+      return TDecoder::Create(alphaOption, gammaAndColorProfileOption);
     }
 
-    KRYS_NODISCARD bool MatchesGIFSignature(Span<const uint8> contents) noexcept
-    {
-      return HasPrefix(contents, "GIF87a") || HasPrefix(contents, "GIF89a");
-    }
+    using namespace std::string_view_literals;
 
-    KRYS_NODISCARD bool MatchesPNGSignature(Span<const uint8> contents) noexcept
-    {
-      return HasPrefix(contents, std::string_view("\x89\x50\x4E\x47\x0D\x0A\x1A\x0A", 8));
-    }
+    const Format Formats[] = {
+      {Make<GIFImageDecoder>, {0, "GIF87a"sv}},
+      {Make<GIFImageDecoder>, {0, "GIF89a"sv}},
+      {Make<PNGImageDecoder>, {0, "\x89PNG\r\n\x1A\n"sv}},
+      {Make<ICOImageDecoder>, {0, "\0\0\1\0"sv}}, // An icon.
+      {Make<ICOImageDecoder>, {0, "\0\0\2\0"sv}}, // A cursor.
+      {Make<JPEGImageDecoder>, {0, "\xFF\xD8\xFF"sv}},
+      {Make<BMPImageDecoder>, {0, "BM"sv}},
+      // A RIFF container (with its size in bytes 4 to 8) holding WebP.
+      {Make<WEBPImageDecoder>, {0, "RIFF"sv}, {8, "WEBPVP"sv}},
+    };
 
-    KRYS_NODISCARD bool MatchesJPEGSignature(Span<const uint8> contents) noexcept
+    KRYS_NODISCARD bool Matches(Span<const uint8> data, const Signature &signature) noexcept
     {
-      return HasPrefix(contents, std::string_view("\xFF\xD8\xFF", 3));
-    }
-
-    KRYS_NODISCARD bool MatchesBMPSignature(Span<const uint8> contents) noexcept
-    {
-      return HasPrefix(contents, "BM");
-    }
-
-    KRYS_NODISCARD bool MatchesICOSignature(Span<const uint8> contents) noexcept
-    {
-      return HasPrefix(contents, std::string_view("\x00\x00\x01\x00", 4));
-    }
-
-    KRYS_NODISCARD bool MatchesCURSignature(Span<const uint8> contents) noexcept
-    {
-      return HasPrefix(contents, std::string_view("\x00\x00\x02\x00", 4));
-    }
-
-    KRYS_NODISCARD bool MatchesWebPSignature(Span<const uint8> contents) noexcept
-    {
-      return HasPrefix(contents, "RIFF") && HasPrefix(contents.subspan(8), "WEBPVP");
+      if (data.size() < signature.Offset + signature.Bytes.size())
+      {
+        return false;
+      }
+      return std::ranges::equal(data.subspan(signature.Offset, signature.Bytes.size()), signature.Bytes,
+                                [](uint8 byte, char expected)
+                                { return byte == static_cast<uint8>(expected); });
     }
   }
 
   RefPtr<ImageDecoder> ImageDecoder::Create(const SharedBuffer &data, AlphaOption alphaOption,
                                             GammaAndColorProfileOption gammaAndColorProfileOption) noexcept
   {
-    constexpr size_t lengthOfLongestSignature = 14; // To wit: "RIFF????WEBPVP"
-    if (data.Size() < lengthOfLongestSignature)
+    // Wait for enough data to tell every format apart: the WebP signature ends 14 bytes in.
+    constexpr size_t sniffLength = 14;
+    if (data.Size() < sniffLength)
     {
       return nullptr;
     }
 
-    auto contents = data.GetSpan().first(lengthOfLongestSignature);
-
-    if (MatchesGIFSignature(contents))
+    auto start = data.GetSpan().first(sniffLength);
+    for (const auto &format : Formats)
     {
-      return GIFImageDecoder::Create(alphaOption, gammaAndColorProfileOption);
+      if (Matches(start, format.First) && Matches(start, format.Second))
+      {
+        return format.Factory(alphaOption, gammaAndColorProfileOption);
+      }
     }
-
-    if (MatchesPNGSignature(contents))
-    {
-      return PNGImageDecoder::Create(alphaOption, gammaAndColorProfileOption);
-    }
-
-    if (MatchesICOSignature(contents) || MatchesCURSignature(contents))
-    {
-      return ICOImageDecoder::Create(alphaOption, gammaAndColorProfileOption);
-    }
-
-    if (MatchesJPEGSignature(contents))
-    {
-      return JPEGImageDecoder::Create(alphaOption, gammaAndColorProfileOption);
-    }
-
-    if (MatchesBMPSignature(contents))
-    {
-      return BMPImageDecoder::Create(alphaOption, gammaAndColorProfileOption);
-    }
-
-    if (MatchesWebPSignature(contents))
-    {
-      return WEBPImageDecoder::Create(alphaOption, gammaAndColorProfileOption);
-    }
-
     // FIXME: AVIF and JPEG XL, if they're ever wanted.
     return nullptr;
   }
 
   bool ImageDecoder::SupportsMimeType(utf8_stringview mimeType) noexcept
   {
-    constexpr utf8_stringview supportedTypes[] = {
-      u8"image/png",
+    constexpr utf8_stringview types[] = {
       u8"image/apng",
+      u8"image/bmp",
+      u8"image/gif",
       u8"image/jpeg",
       u8"image/jpg",
       u8"image/pjpeg",
-      u8"image/gif",
-      u8"image/bmp",
-      u8"image/x-bmp",
+      u8"image/png",
       u8"image/webp",
+      u8"image/x-bmp",
       u8"image/x-icon",
       u8"image/vnd.microsoft.icon",
     };
-    return std::ranges::any_of(supportedTypes,
-                               [&](auto type) { return text::IsASCIICaselessEqual(mimeType, type); });
+    return std::ranges::any_of(types, [&](utf8_stringview type)
+                               { return text::IsASCIICaselessEqual(mimeType, type); });
   }
 
   bool ImageDecoder::FrameIsCompleteAtIndex(size_t index) const noexcept
   {
-    if (index >= _frameBufferCache.size())
-    {
-      return false;
-    }
-
-    auto &frame = _frameBufferCache[index];
-    return frame.IsComplete();
+    return index < _frameBufferCache.size() && _frameBufferCache[index].IsComplete();
   }
 
   bool ImageDecoder::FrameHasAlphaAtIndex(size_t index) const noexcept
   {
-    if (_frameBufferCache.size() <= index)
-    {
-      return true;
-    }
-
-    auto &frame = _frameBufferCache[index];
-    if (!frame.IsComplete())
-    {
-      return true;
-    }
-    return frame.HasAlpha();
+    // Until a frame is fully decoded, any of it might still be transparent.
+    return !FrameIsCompleteAtIndex(index) || _frameBufferCache[index].HasAlpha();
   }
 
   seconds ImageDecoder::FrameDurationAtIndex(size_t index) const noexcept
   {
     using namespace std::chrono_literals;
 
-    if (index >= _frameBufferCache.size())
+    if (!FrameIsCompleteAtIndex(index))
     {
       return {};
     }
 
-    auto &frame = _frameBufferCache[index];
-    if (!frame.IsComplete())
-    {
-      return {};
-    }
-
-    // Many annoying ads specify a 0 duration to make an image flash as quickly as possible.
-    // We follow Firefox's behavior and use a duration of 100 ms for any frames that specify
-    // a duration of <= 10 ms. See <rdar://problem/7689300> and <http://webkit.org/b/36082>
-    // for more information.
-    seconds duration = frame.Duration();
-    if (duration < 11ms)
-    {
-      return 100ms;
-    }
-    return duration;
+    // Browsers show frames shorter than 11 ms for 100 ms, since such short durations are almost always meant
+    // as "as fast as possible" rather than as a real rate.
+    auto duration = _frameBufferCache[index].Duration();
+    return duration < 11ms ? 100ms : duration;
   }
 
   Maybe<DecodedImage> ImageDecoder::CreateFrameImageAtIndex(size_t index) noexcept
   {
-    // Zero-height images can cause problems for some ports. If we have an empty image dimension, just bail.
     if (Size().IsEmpty())
     {
       return null;
     }
 
-    auto *buffer = FrameBufferAtIndex(index);
-    if (!buffer || buffer->IsInvalid() || !buffer->HasBackingStore())
+    auto *frame = FrameBufferAtIndex(index);
+    if (!frame || frame->IsInvalid() || !frame->HasBackingStore())
     {
       return null;
     }
-
-    return buffer->BackingStore()->Image();
+    return frame->BackingStore()->Image();
   }
 }
