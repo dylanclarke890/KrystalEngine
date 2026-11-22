@@ -1,24 +1,4 @@
-﻿/*
- * (C) 1999-2003 Lars Knoll (knoll@kde.org)
- * Copyright (C) 2004-2025 Apple Inc. All rights reserved.
- *
- * This library is free software; you can redistribute it and/or
- * modify it under the terms of the GNU Library General Public
- * License as published by the Free Software Foundation; either
- * version 2 of the License, or (at your option) any later version.
- *
- * This library is distributed in the hope that it will be useful,
- * but WITHOUT ANY WARRANTY; without even the implied warranty of
- * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU
- * Library General Public License for more details.
- *
- * You should have received a copy of the GNU Library General Public License
- * along with this library; see the file COPYING.LIB.  If not, write to
- * the Free Software Foundation, Inc., 51 Franklin Street, Fifth Floor,
- * Boston, MA 02110-1301, USA.
- */
-
-#include "Krystal.Booey/CSS/CSSOM/CSSStyleSheet.hpp"
+﻿#include "Krystal.Booey/CSS/CSSOM/CSSStyleSheet.hpp"
 #include "Krystal.Booey/CSS/CSSOM/CSSImportRule.hpp"
 #include "Krystal.Booey/CSS/CSSOM/CSSKeyframesRule.hpp"
 #include "Krystal.Booey/CSS/CSSOM/CSSRuleList.hpp"
@@ -45,9 +25,9 @@ namespace krys::boo
 {
   namespace
   {
-    KRYS_NODISCARD style::Scope &StyleScopeFor(ContainerNode &treeScope) noexcept
+    /// @brief The style scope of a document or shadow root that adopted a sheet.
+    KRYS_NODISCARD style::Scope &AdoptingStyleScope(ContainerNode &treeScope) noexcept
     {
-      krys_debug_assert(Is<Document>(treeScope) || Is<ShadowRoot>(treeScope));
       if (auto *shadowRoot = DynamicDowncast<ShadowRoot>(treeScope))
       {
         return shadowRoot->StyleScope();
@@ -55,13 +35,15 @@ namespace krys::boo
       return Downcast<Document>(treeScope).StyleScope();
     }
 
-    class StyleSheetCSSRuleList final : public CSSRuleList
+    /// @brief A style sheet's live list of rules, which keeps the sheet alive while it's referenced.
+    class StyleSheetRuleList final : public CSSRuleList
     {
     private:
       WeakPtr<CSSStyleSheet> _styleSheet;
 
     public:
-      explicit StyleSheetCSSRuleList(CSSStyleSheet *sheet) noexcept : _styleSheet(CreateWeakPtr(sheet))
+      explicit StyleSheetRuleList(CSSStyleSheet &styleSheet) noexcept
+          : _styleSheet(CreateWeakPtr(&styleSheet))
       {
       }
 
@@ -98,14 +80,71 @@ namespace krys::boo
     };
   }
 
+  CSSStyleSheet::CSSStyleSheet(Ref<css::StyleSheetContents> &&contents, CSSImportRule *ownerRule,
+                               bool isOriginClean) noexcept
+      : _contents(krys::move(contents)), _isOriginClean(isOriginClean), _ownerRule(CreateWeakPtr(ownerRule))
+  {
+    if (auto *parent = ParentStyleSheet())
+    {
+      _styleScope = CreateWeakPtr(parent->StyleScope());
+    }
+    _contents->RegisterClient(this);
+  }
+
+  CSSStyleSheet::CSSStyleSheet(Ref<css::StyleSheetContents> &&contents, Node &ownerNode,
+                               bool isOriginClean) noexcept
+      : _contents(krys::move(contents)), _isOriginClean(isOriginClean),
+        _styleScope(CreateWeakPtr(&style::Scope::ForNode(ownerNode))), _ownerNode(CreateWeakPtr(&ownerNode))
+  {
+    _contents->RegisterClient(this);
+  }
+
+  CSSStyleSheet::CSSStyleSheet(Ref<css::StyleSheetContents> &&contents, Document &document,
+                               Init options) noexcept
+      : _contents(krys::move(contents)), _isDisabled(options.Disabled), _wasConstructedByJS(true),
+        _constructorDocument(CreateWeakPtr(&document))
+  {
+    _contents->RegisterClient(this);
+    _contents->CheckLoaded();
+    // The media are the given media list's, or the given string's.
+    SwitchOn(
+      krys::move(options.Media),
+      [this](const RefPtr<MediaList> &media)
+      {
+        if (auto queries = media->MediaQueries(); !queries.empty())
+        {
+          SetMediaQueries(krys::move(queries));
+        }
+      },
+      [this](const CSSOMString &media)
+      { SetMediaQueries(css::mq::MediaQueryParser::Parse(media, css::StrictParserContext())); });
+  }
+
+  CSSStyleSheet::~CSSStyleSheet() noexcept
+  {
+    // The rules' wrappers and the media list can outlive the sheet, which is no longer their parent.
+    for (auto &rule : _childRules)
+    {
+      if (rule)
+      {
+        rule->SetParentStyleSheet(nullptr);
+      }
+    }
+    if (_media)
+    {
+      _media->DetachFromParent();
+    }
+    _contents->UnregisterClient(this);
+  }
+
   Ref<CSSStyleSheet> CSSStyleSheet::Create(Ref<css::StyleSheetContents> &&contents, CSSImportRule *ownerRule,
-                                           Maybe<bool> isOriginClean) noexcept
+                                           bool isOriginClean) noexcept
   {
     return AdoptRef(*new CSSStyleSheet(krys::move(contents), ownerRule, isOriginClean));
   }
 
   Ref<CSSStyleSheet> CSSStyleSheet::Create(Ref<css::StyleSheetContents> &&contents, Node &ownerNode,
-                                           Maybe<bool> isOriginClean) noexcept
+                                           bool isOriginClean) noexcept
   {
     return AdoptRef(*new CSSStyleSheet(krys::move(contents), ownerNode, isOriginClean));
   }
@@ -118,86 +157,26 @@ namespace krys::boo
 
   ExceptionOr<Ref<CSSStyleSheet>> CSSStyleSheet::Create(Document &document, Init init) noexcept
   {
-    net::Url baseUrl;
-    if (!init.BaseUrl)
-    {
-      baseUrl = document.BaseUrl();
-    }
-    else
+    // The sheet's base URL is the given one, resolved against the document's base URL, or the document's.
+    net::Url baseUrl = document.BaseUrl();
+    if (init.BaseUrl)
     {
       baseUrl = document.CompleteUrl(*init.BaseUrl);
       if (!baseUrl.IsValid())
       {
-        return Exception(ExceptionCode::NotAllowedError, u8"Base URL is invalid");
+        return Exception(ExceptionCode::NotAllowedError, u8"The base URL is invalid");
       }
     }
-
+    // A constructed sheet has no @import rules.
     auto parserContext = css::ParserContext(document, baseUrl, {});
     parserContext.shouldIgnoreImportRules = true;
     return AdoptRef(
       *new CSSStyleSheet(css::StyleSheetContents::Create(parserContext), document, krys::move(init)));
   }
 
-  CSSStyleSheet::CSSStyleSheet(Ref<css::StyleSheetContents> &&contents, CSSImportRule *ownerRule,
-                               Maybe<bool> isOriginClean) noexcept
-      : _contents(krys::move(contents)), _isOriginClean(isOriginClean), _ownerRule(CreateWeakPtr(ownerRule))
+  CSSOMString CSSStyleSheet::Href() const noexcept
   {
-    if (auto *parent = ParentStyleSheet())
-    {
-      _styleScope = CreateWeakPtr(parent->StyleScope());
-    }
-    _contents->RegisterClient(this);
-  }
-
-  CSSStyleSheet::CSSStyleSheet(Ref<css::StyleSheetContents> &&contents, Node &ownerNode,
-                               Maybe<bool> isOriginClean) noexcept
-      : _contents(krys::move(contents)), _isOriginClean(isOriginClean),
-        _styleScope(CreateWeakPtr(&style::Scope::ForNode(ownerNode))), _ownerNode(CreateWeakPtr(&ownerNode))
-  {
-    _contents->RegisterClient(this);
-  }
-
-  // https://w3c.github.io/csswg-drafts/cssom-1/#dom-cssstylesheet-cssstylesheet
-  CSSStyleSheet::CSSStyleSheet(Ref<css::StyleSheetContents> &&contents, Document &document,
-                               Init options) noexcept
-      : _contents(krys::move(contents)), _isDisabled(options.Disabled), _wasConstructedByJS(true),
-        _isOriginClean(true), _constructorDocument(CreateWeakPtr(&document))
-  {
-    _contents->RegisterClient(this);
-    _contents->CheckLoaded();
-
-    SwitchOn(
-      krys::move(options.Media),
-      [this](const RefPtr<MediaList> &mediaList)
-      {
-        if (auto queries = mediaList->MediaQueries(); !queries.empty())
-        {
-          SetMediaQueries(krys::move(queries));
-        }
-      },
-      [this](const CSSOMString &mediaString)
-      { SetMediaQueries(css::mq::MediaQueryParser::Parse(mediaString, css::StrictParserContext())); });
-  }
-
-  CSSStyleSheet::~CSSStyleSheet() noexcept
-  {
-    // For style rules outside the document, .parentStyleSheet can become null even if the style rule
-    // is still observable from JavaScript. This matches the behavior of .parentNode for nodes, but
-    // it's not ideal because it makes the CSSOM's behavior depend on the timing of garbage collection.
-    for (auto &wrapper : _childRuleCSSOMWrappers)
-    {
-      if (wrapper)
-      {
-        wrapper->SetParentStyleSheet(nullptr);
-      }
-    }
-
-    if (_mediaCSSOMWrapper)
-    {
-      _mediaCSSOMWrapper->DetachFromParent();
-    }
-
-    _contents->UnregisterClient(this);
+    return _contents->OriginalUrl();
   }
 
   Node *CSSStyleSheet::OwnerNode() const noexcept
@@ -205,145 +184,24 @@ namespace krys::boo
     return _ownerNode.get();
   }
 
-  RefPtr<css::StyleRuleWithNesting>
-    CSSStyleSheet::PrepareChildStyleRuleForNesting(css::StyleRule &styleRule) noexcept
+  CSSStyleSheet *CSSStyleSheet::ParentStyleSheet() const noexcept
   {
-    RuleMutationScope scope(this);
-    auto &rules = _contents->_childRules;
-    for (auto &rule : rules)
+    auto *ownerRule = _ownerRule.get();
+    return ownerRule ? ownerRule->ParentStyleSheet() : nullptr;
+  }
+
+  MediaList *CSSStyleSheet::Media() const noexcept
+  {
+    // An imported sheet's media are its `@import` rule's.
+    if (auto *ownerRule = _ownerRule.get())
     {
-      if (rule.get() == &styleRule)
-      {
-        auto styleRuleWithNesting = css::StyleRuleWithNesting::Create(krys::move(styleRule));
-        rule = styleRuleWithNesting;
-        return styleRuleWithNesting;
-      }
+      return &ownerRule->Media();
     }
-    return nullptr;
-  }
-
-  auto CSSStyleSheet::WillMutateRules() noexcept -> ContentsClonedForMutation
-  {
-    // If we are the only client it is safe to mutate.
-    if (_contents->HasOneClient() && !_contents->IsInMemoryCache())
+    if (!_media)
     {
-      _contents->SetMutable();
-      return ContentsClonedForMutation::No;
+      _media = MediaList::Create(const_cast<CSSStyleSheet *>(this));
     }
-
-    // Only cacheable stylesheets should have multiple clients.
-    krys_debug_assert(_contents->IsCacheable());
-
-    // Copy-on-write.
-    _contents->UnregisterClient(this);
-    _contents = _contents->Copy();
-    _contents->RegisterClient(this);
-
-    _contents->SetMutable();
-
-    // Any existing CSSOM wrappers need to be connected to the copied child rules.
-    ReattachChildRuleCSSOMWrappers();
-
-    return ContentsClonedForMutation::Yes;
-  }
-
-  void CSSStyleSheet::DidMutateRuleFromCSSStyleDeclaration() noexcept
-  {
-    krys_debug_assert(_contents->IsMutable());
-    krys_debug_assert(_contents->HasOneClient());
-    DidMutate();
-  }
-
-  // FIXME: counter-style: we might need something similar for counter-style (rdar://103018993).
-  void CSSStyleSheet::DidMutateRules(RuleMutationType mutationType,
-                                     ContentsClonedForMutation contentsClonedForMutation,
-                                     css::KeyframesRule *insertedKeyframesRule,
-                                     const CSSOMString &modifiedKeyframesRuleName) noexcept
-  {
-    krys_debug_assert(_contents->IsMutable());
-    krys_debug_assert(_contents->HasOneClient());
-
-    _contents->SetHasResolvedNesting(false);
-
-    ForEachStyleScope(
-      [&](style::Scope &scope)
-      {
-        if ((mutationType == RuleMutationType::RuleInsertion || mutationType == RuleMutationType::RuleReplace)
-            && contentsClonedForMutation == ContentsClonedForMutation::No
-            && !scope.ActiveStyleSheetsContains(*this))
-        {
-          if (insertedKeyframesRule)
-          {
-            if (auto *resolver = scope.ResolverIfExists())
-            {
-              resolver->AddKeyframeStyle(ShareRef(*insertedKeyframesRule));
-            }
-            return;
-          }
-          scope.DidChangeActiveStyleSheetCandidates();
-          return;
-        }
-
-        if (mutationType == RuleMutationType::KeyframesRuleMutation)
-        {
-          if (auto *ownerDocument = OwnerDocument())
-          {
-            ownerDocument->KeyframesRuleDidChange(modifiedKeyframesRuleName);
-          }
-        }
-
-        scope.DidChangeStyleSheetContents();
-
-        _wasMutated = true;
-      });
-  }
-
-  void CSSStyleSheet::DidMutate() noexcept
-  {
-    ForEachStyleScope(
-      [&](style::Scope &scope)
-      {
-        scope.DidChangeStyleSheetContents();
-        _wasMutated = true;
-      });
-  }
-
-  void CSSStyleSheet::ForEachStyleScope(KRYS_NOESCAPE const Func<void(style::Scope &)> &apply) noexcept
-  {
-    if (auto *scope = StyleScope())
-    {
-      apply(*scope);
-      return;
-    }
-    for (auto &treeScope : _adoptingTreeScopes)
-    {
-      if (treeScope)
-      {
-        apply(StyleScopeFor(*treeScope));
-      }
-    }
-  }
-
-  void CSSStyleSheet::ClearOwnerNode() noexcept
-  {
-    _ownerNode = nullptr;
-  }
-
-  CSSImportRule *CSSStyleSheet::OwnerRule() const noexcept
-  {
-    return _ownerRule.get();
-  }
-
-  void CSSStyleSheet::ReattachChildRuleCSSOMWrappers() noexcept
-  {
-    for (uint32 i = 0; i < _childRuleCSSOMWrappers.size(); ++i)
-    {
-      if (!_childRuleCSSOMWrappers[i])
-      {
-        continue;
-      }
-      _childRuleCSSOMWrappers[i]->Reattach(*_contents->RuleAt(i));
-    }
+    return _media.get();
   }
 
   void CSSStyleSheet::SetDisabled(bool disabled) noexcept
@@ -353,183 +211,183 @@ namespace krys::boo
       return;
     }
     _isDisabled = disabled;
-
     ForEachStyleScope([](style::Scope &scope) { scope.DidChangeActiveStyleSheetCandidates(); });
   }
 
-  void CSSStyleSheet::SetMediaQueries(css::mq::MediaQueryList &&mediaQueries) noexcept
+  CSSImportRule *CSSStyleSheet::OwnerRule() const noexcept
   {
-    _mediaQueries = krys::move(mediaQueries);
+    return _ownerRule.get();
   }
 
-  uint32 CSSStyleSheet::Length() const noexcept
+  RefPtr<CSSRuleList> CSSStyleSheet::CssRules() noexcept
   {
-    return _contents->RuleCount();
+    return CanAccessRules() ? CssRulesSkippingAccessCheck() : nullptr;
   }
 
-  CSSRule *CSSStyleSheet::Item(uint32 index) noexcept
+  ExceptionOr<Ref<CSSRuleList>> CSSStyleSheet::CssRulesForBindings() noexcept
   {
-    auto ruleCount = Length();
-    if (index >= ruleCount)
-    {
-      return nullptr;
-    }
-
-    krys_debug_assert(_childRuleCSSOMWrappers.empty() || _childRuleCSSOMWrappers.size() == ruleCount);
-    if (_childRuleCSSOMWrappers.size() < ruleCount)
-    {
-      _childRuleCSSOMWrappers.resize(ruleCount);
-    }
-
-    auto &cssRule = _childRuleCSSOMWrappers[index];
-    if (!cssRule)
-    {
-      cssRule = _contents->RuleAt(index)->CreateCSSOMWrapper(*this);
-    }
-    return cssRule.get();
-  }
-
-  bool CSSStyleSheet::CanAccessRules() const noexcept
-  {
-    if (_isOriginClean)
-    {
-      return *_isOriginClean;
-    }
-
-    const auto &baseUrl = _contents->BaseUrl();
-    if (baseUrl.IsEmpty())
-    {
-      return true;
-    }
-
-    if (!OwnerDocument())
-    {
-      return false;
-    }
-    return true;
-  }
-
-  ExceptionOr<uint32> CSSStyleSheet::InsertRule(const CSSOMString &ruleString, uint32 index) noexcept
-  {
-    krys_debug_assert(_childRuleCSSOMWrappers.empty()
-                      || _childRuleCSSOMWrappers.size() == _contents->RuleCount());
-
+    // 1. If the origin-clean flag is unset, throw a SecurityError exception.
     if (!CanAccessRules())
     {
-      return Exception(ExceptionCode::SecurityError,
-                       u8"Not allowed to insert rule into cross-origin stylesheet");
+      return Exception(ExceptionCode::SecurityError, u8"The style sheet's rules can't be accessed");
     }
 
+    // 2. Return a read-only, live CSSRuleList object representing the CSS rules.
+    return Ref<CSSRuleList>(CssRulesSkippingAccessCheck());
+  }
+
+  ExceptionOr<uint32> CSSStyleSheet::InsertRule(const CSSOMString &rule, uint32 index) noexcept
+  {
+    krys_debug_assert(_childRules.empty() || _childRules.size() == Length());
+
+    // 1. If the origin-clean flag is unset, throw a SecurityError exception.
+    if (!CanAccessRules())
+    {
+      return Exception(ExceptionCode::SecurityError, u8"The style sheet's rules can't be changed");
+    }
+
+    // 2. (Skipped: without replace(), the disallow modification flag is never set.)
+
+    // 3. Let parsed rule be the return value of invoking parse a rule with rule.
+    auto parsedRule = css::Parser::ParseRule(rule, _contents->GetParserContext(), _contents.get(),
+                                             css::Parser::AllowedRules::ImportRules);
+
+    // 4. If parsed rule is a syntax error, throw a SyntaxError DOMException.
+    if (!parsedRule)
+    {
+      return ExceptionCode::SyntaxError;
+    }
+
+    // 5. If parsed rule is an @import rule, and the constructed flag is set, throw a SyntaxError
+    //    DOMException.
+    if (_wasConstructedByJS && parsedRule->IsImportRule())
+    {
+      return Exception(ExceptionCode::SyntaxError, u8"A constructed style sheet can't have @import rules");
+    }
+
+    // 6. Return the result of invoking insert a CSS rule rule in the CSS rules at index.
+    // To insert a CSS rule rule in a CSS rule list list at index index:
+    // 1. Set length to the number of items in list.
+    // 2. If index is greater than length, then throw an IndexSizeError exception.
     if (index > Length())
     {
       return ExceptionCode::IndexSizeError;
     }
 
-    auto rule = css::Parser::ParseRule(ruleString, _contents->GetParserContext(), _contents.get(),
-                                       css::Parser::AllowedRules::ImportRules);
-    if (!rule)
-    {
-      return ExceptionCode::SyntaxError;
-    }
-
-    if (_wasConstructedByJS && rule->IsImportRule())
-    {
-      return Exception(ExceptionCode::SyntaxError,
-                       u8"Cannot inserted an @import rule in a constructed CSSStyleSheet object");
-    }
-
+    // 3.-5. (The rule was parsed above.)
+    // 6. If new rule cannot be inserted into list at the zero-indexed position index due to constraints
+    //    specified by CSS, then throw a HierarchyRequestError exception.
+    // 7. If new rule is an @namespace at-rule, and list contains anything other than @import at-rules, and
+    //    @namespace at-rules, throw an InvalidStateError exception.
+    // 8. Insert new rule into list at the zero-indexed position index.
+    // (The contents refuse a rule in the wrong place: an @namespace rule there is an InvalidStateError, as
+    // in Chrome.)
     RuleMutationScope mutationScope(this, RuleMutationType::RuleInsertion,
-                                    DynamicDowncast<css::KeyframesRule>(rule.get()));
-
-    bool isNamespace = rule->IsNamespaceRule();
-    bool success = _contents->WrapperInsertRule(krys::move(rule), index);
-    if (!success)
+                                    DynamicDowncast<css::KeyframesRule>(parsedRule.get()));
+    bool isNamespaceRule = parsedRule->IsNamespaceRule();
+    if (!_contents->WrapperInsertRule(krys::move(parsedRule), index))
     {
-      if (isNamespace)
-      {
-        return ExceptionCode::InvalidStateError;
-      }
-      return ExceptionCode::HierarchyRequestError;
+      return isNamespaceRule ? ExceptionCode::InvalidStateError : ExceptionCode::HierarchyRequestError;
+    }
+    if (!_childRules.empty())
+    {
+      _childRules.insert(_childRules.begin() + index, nullptr);
     }
 
-    if (!_childRuleCSSOMWrappers.empty())
-    {
-      _childRuleCSSOMWrappers.insert(_childRuleCSSOMWrappers.begin() + index, RefPtr<CSSRule>());
-    }
-
+    // 9. Return index.
     return index;
   }
 
   ExceptionOr<void> CSSStyleSheet::DeleteRule(uint32 index) noexcept
   {
-    krys_debug_assert(_childRuleCSSOMWrappers.empty()
-                      || _childRuleCSSOMWrappers.size() == _contents->RuleCount());
+    krys_debug_assert(_childRules.empty() || _childRules.size() == Length());
 
+    // 1. If the origin-clean flag is unset, throw a SecurityError exception.
     if (!CanAccessRules())
     {
-      return Exception(ExceptionCode::SecurityError,
-                       u8"Not allowed to delete rule from cross-origin stylesheet");
+      return Exception(ExceptionCode::SecurityError, u8"The style sheet's rules can't be changed");
     }
 
+    // 2. (Skipped: without replace(), the disallow modification flag is never set.)
+
+    // 3. Remove a CSS rule in the CSS rules at index.
+    // To remove a CSS rule from a CSS rule list list at index index:
+    // 1. Set length to the number of items in list.
+    // 2. If index is greater than or equal to length, then throw an IndexSizeError exception.
     if (index >= Length())
     {
       return ExceptionCode::IndexSizeError;
     }
 
+    // 3. Set old rule to the indexth item in list.
+    // 4. If old rule is an @namespace at-rule, and list contains anything other than @import at-rules, and
+    //    @namespace at-rules, throw an InvalidStateError exception.
+    // 5. Remove rule old rule from list at the zero-indexed position index.
     RuleMutationScope mutationScope(this);
-
-    bool success = _contents->WrapperDeleteRule(index);
-    if (!success)
+    if (!_contents->WrapperDeleteRule(index))
     {
       return ExceptionCode::InvalidStateError;
     }
 
-    if (!_childRuleCSSOMWrappers.empty())
+    // 6. Set old rule's parent CSS rule and parent CSS style sheet to null.
+    if (!_childRules.empty())
     {
-      if (_childRuleCSSOMWrappers[index])
+      if (auto &oldRule = _childRules[index])
       {
-        _childRuleCSSOMWrappers[index]->SetParentStyleSheet(nullptr);
+        oldRule->SetParentStyleSheet(nullptr);
       }
-      _childRuleCSSOMWrappers.erase(_childRuleCSSOMWrappers.begin() + index);
+      _childRules.erase(_childRules.begin() + index);
     }
-
     return {};
   }
 
-  ExceptionOr<int32> CSSStyleSheet::AddRule(const CSSOMString &selector, const CSSOMString &style,
-                                            Maybe<uint32> index) noexcept
+  ExceptionOr<void> CSSStyleSheet::ReplaceSync(const CSSOMString &text) noexcept
   {
-    CSSOMString text;
-    text.append(selector).append(u8" { ").append(style);
-    if (!style.empty())
+    // To synchronously replace the rules of a CSSStyleSheet on sheet given text:
+    // 1. If the constructed flag is not set, or the disallow modification flag is set, throw a
+    //    NotAllowedError DOMException.
+    if (!_wasConstructedByJS)
     {
-      text.push_back(u8' ');
-    }
-    text.push_back(u8'}');
-
-    auto insertRuleResult = InsertRule(text, index.value_or(Length()));
-    if (insertRuleResult.HasException())
-    {
-      return insertRuleResult.ReleaseException();
+      return Exception(ExceptionCode::NotAllowedError,
+                       u8"Only a constructed style sheet's rules can be replaced");
     }
 
-    // As per Microsoft documentation, always return -1.
-    return -1;
-  }
+    // 2. Let rules be the result of running parse a stylesheet's contents from text.
+    // 3. If rules contains one or more @import rules, remove those rules from rules.
+    // 4. Set sheet's CSS rules to rules.
+    // (A constructed sheet's parser ignores @import rules.)
 
-  ExceptionOr<void> CSSStyleSheet::RemoveRule(uint32 index) noexcept
-  {
-    return DeleteRule(index);
-  }
-
-  ExceptionOr<Ref<CSSRuleList>> CSSStyleSheet::CssRulesForBindings() noexcept
-  {
-    auto cssRules = CssRules();
-    if (!cssRules)
+    // A sheet nothing uses, whose rules no script holds, can share contents parsed from the same text.
+    if (IsDetached() && _childRules.empty())
     {
-      return Exception(ExceptionCode::SecurityError, u8"Not allowed to access cross-origin stylesheet");
+      auto key = style::StyleSheetContentsCache::Key {text, _contents->GetParserContext()};
+      if (auto cached = style::StyleSheetContentsCache::Singleton().Get(key))
+      {
+        _contents->UnregisterClient(this);
+        _contents = krys::move(cached);
+        _contents->RegisterClient(this);
+        return {};
+      }
+      _contents->ParseString(text);
+      if (_contents->IsCacheable())
+      {
+        style::StyleSheetContentsCache::Singleton().Add(krys::move(key), _contents);
+      }
+      return {};
     }
-    return Ref<CSSRuleList>(krys::move(cssRules));
+
+    RuleMutationScope mutationScope(this, RuleMutationType::RuleReplace);
+    _contents->ClearRules();
+    for (auto &rule : _childRules)
+    {
+      if (rule)
+      {
+        rule->SetParentStyleSheet(nullptr);
+      }
+    }
+    _childRules.clear();
+    _contents->ParseString(text);
+    return {};
   }
 
   ExceptionOr<Ref<CSSRuleList>> CSSStyleSheet::Rules() noexcept
@@ -537,168 +395,40 @@ namespace krys::boo
     return CssRulesForBindings();
   }
 
-  RefPtr<CSSRuleList> CSSStyleSheet::CssRules() noexcept
+  ExceptionOr<int32> CSSStyleSheet::AddRule(const CSSOMString &selector, const CSSOMString &block,
+                                            Maybe<uint32> optionalIndex) noexcept
   {
-    if (!CanAccessRules())
+    // 1. Let rule be an empty string.
+    // 2. Append selector to rule.
+    // 3. Append " { " to rule.
+    CSSOMString rule = selector;
+    rule.append(u8" { ");
+
+    // 4. If block is not empty, append block, followed by a space, to rule.
+    if (!block.empty())
     {
-      return nullptr;
-    }
-    return CssRulesSkippingAccessCheck();
-  }
-
-  RefPtr<CSSRuleList> CSSStyleSheet::CssRulesSkippingAccessCheck() noexcept
-  {
-    if (!_ruleListCSSOMWrapper)
-    {
-      _ruleListCSSOMWrapper = CreateUnique<StyleSheetCSSRuleList>(this);
-    }
-    return ShareRefPtr(_ruleListCSSOMWrapper.get());
-  }
-
-  CSSOMString CSSStyleSheet::Href() const noexcept
-  {
-    return _contents->OriginalUrl();
-  }
-
-  net::Url CSSStyleSheet::BaseUrl() const noexcept
-  {
-    return _contents->BaseUrl();
-  }
-
-  bool CSSStyleSheet::IsLoading() const noexcept
-  {
-    return _contents->IsLoading();
-  }
-
-  MediaList *CSSStyleSheet::Media() const noexcept
-  {
-    if (!_mediaCSSOMWrapper)
-    {
-      _mediaCSSOMWrapper = MediaList::Create(const_cast<CSSStyleSheet *>(this));
-    }
-    return _mediaCSSOMWrapper.get();
-  }
-
-  CSSStyleSheet *CSSStyleSheet::ParentStyleSheet() const noexcept
-  {
-    auto *ownerRule = _ownerRule.get();
-    return ownerRule ? ownerRule->ParentStyleSheet() : nullptr;
-  }
-
-  CSSStyleSheet &CSSStyleSheet::RootStyleSheet() noexcept
-  {
-    auto *root = this;
-    while (root->ParentStyleSheet())
-    {
-      root = root->ParentStyleSheet();
-    }
-    return *root;
-  }
-
-  const CSSStyleSheet &CSSStyleSheet::RootStyleSheet() const noexcept
-  {
-    return const_cast<CSSStyleSheet &>(*this).RootStyleSheet();
-  }
-
-  Document *CSSStyleSheet::OwnerDocument() const noexcept
-  {
-    const auto &root = RootStyleSheet();
-    return root.OwnerNode() ? &root.OwnerNode()->NodeDocument() : nullptr;
-  }
-
-  style::Scope *CSSStyleSheet::StyleScope() noexcept
-  {
-    return _styleScope.get();
-  }
-
-  void CSSStyleSheet::ClearChildRuleCSSOMWrappers() noexcept
-  {
-    _childRuleCSSOMWrappers.clear();
-  }
-
-  CSSOMString CSSStyleSheet::Type() const noexcept
-  {
-    return u8"text/css";
-  }
-
-  CSSOMString CSSStyleSheet::CssText(const css::SerialisationContext &context) noexcept
-  {
-    auto ruleList = CssRulesSkippingAccessCheck();
-    if (!ruleList)
-    {
-      return {};
+      rule.append(block).push_back(u8' ');
     }
 
-    CSSOMString result;
-    for (uint32 index = 0; index < ruleList->Length(); ++index)
-    {
-      auto *rule = ruleList->Item(index);
-      if (!rule)
-      {
-        continue;
-      }
+    // 5. Append "}" to rule
+    rule.push_back(u8'}');
 
-      auto ruleText = rule->CssText(context);
-      if (!result.empty() && !ruleText.empty())
-      {
-        result.push_back(u8' ');
-      }
-      result.append(ruleText);
+    // 6. Let index be optionalIndex if provided, or the number of CSS rules in the stylesheet otherwise.
+    auto index = optionalIndex.value_or(Length());
+
+    // 7. Call insertRule(), with rule and index as arguments.
+    if (auto result = InsertRule(rule, index); result.HasException())
+    {
+      return result.ReleaseException();
     }
-    return result;
+
+    // 8. Return -1.
+    return -1;
   }
 
-  // https://w3c.github.io/csswg-drafts/cssom-1/#dom-cssstylesheet-replacesync
-  ExceptionOr<void> CSSStyleSheet::ReplaceSync(const CSSOMString &text) noexcept
+  ExceptionOr<void> CSSStyleSheet::RemoveRule(uint32 index) noexcept
   {
-    if (!_wasConstructedByJS)
-    {
-      return Exception(ExceptionCode::NotAllowedError,
-                       u8"This CSSStyleSheet object was not constructed by JavaScript");
-    }
-
-    // Try to use the cache in the case where contents is replaced before the stylesheet is attached to the
-    // document.
-    if (IsDetached() && _childRuleCSSOMWrappers.empty())
-    {
-      auto key = style::StyleSheetContentsCache::Key {text, _contents->GetParserContext()};
-      auto cachedContents = style::StyleSheetContentsCache::Singleton().Get(key);
-      if (cachedContents)
-      {
-        _contents->UnregisterClient(this);
-        _contents = krys::move(cachedContents);
-        _contents->RegisterClient(this);
-      }
-      else
-      {
-        _contents->ParseString(text);
-        if (_contents->IsCacheable())
-        {
-          style::StyleSheetContentsCache::Singleton().Add(krys::move(key), _contents);
-        }
-      }
-      return {};
-    }
-
-    RuleMutationScope mutationScope(this, RuleMutationType::RuleReplace);
-    _contents->ClearRules();
-    for (auto &childRuleWrapper : _childRuleCSSOMWrappers)
-    {
-      if (childRuleWrapper)
-      {
-        childRuleWrapper->SetParentStyleSheet(nullptr);
-      }
-    }
-    _childRuleCSSOMWrappers.clear();
-    _contents->ParseString(text);
-    return {};
-  }
-
-  bool CSSStyleSheet::IsDetached() const noexcept
-  {
-    return !_ownerNode && !_ownerRule
-           && std::ranges::none_of(_adoptingTreeScopes,
-                                   [](const WeakPtr<ContainerNode> &treeScope) { return !!treeScope; });
+    return DeleteRule(index);
   }
 
   Document *CSSStyleSheet::ConstructorDocument() const noexcept
@@ -715,7 +445,7 @@ namespace krys::boo
     {
       _adoptingTreeScopes.push_back(CreateWeakPtr(&treeScope));
     }
-    StyleScopeFor(treeScope).DidChangeActiveStyleSheetCandidates();
+    AdoptingStyleScope(treeScope).DidChangeActiveStyleSheetCandidates();
   }
 
   void CSSStyleSheet::RemoveAdoptingTreeScope(ContainerNode &treeScope) noexcept
@@ -723,7 +453,185 @@ namespace krys::boo
     krys_debug_assert(Is<Document>(treeScope) || Is<ShadowRoot>(treeScope));
     std::erase_if(_adoptingTreeScopes,
                   [&](const WeakPtr<ContainerNode> &scope) { return !scope || scope.get() == &treeScope; });
-    StyleScopeFor(treeScope).DidChangeStyleSheetContents();
+    AdoptingStyleScope(treeScope).DidChangeStyleSheetContents();
+  }
+
+  uint32 CSSStyleSheet::Length() const noexcept
+  {
+    return _contents->RuleCount();
+  }
+
+  CSSRule *CSSStyleSheet::Item(uint32 index) noexcept
+  {
+    auto length = Length();
+    if (index >= length)
+    {
+      return nullptr;
+    }
+    // The wrappers' list is made, at the rules' length, when one is first asked for.
+    krys_debug_assert(_childRules.empty() || _childRules.size() == length);
+    _childRules.resize(length);
+    auto &rule = _childRules[index];
+    if (!rule)
+    {
+      rule = _contents->RuleAt(index)->CreateCSSOMWrapper(*this);
+    }
+    return rule.get();
+  }
+
+  void CSSStyleSheet::ClearOwnerNode() noexcept
+  {
+    _ownerNode = nullptr;
+  }
+
+  net::Url CSSStyleSheet::BaseUrl() const noexcept
+  {
+    return _contents->BaseUrl();
+  }
+
+  bool CSSStyleSheet::IsLoading() const noexcept
+  {
+    return _contents->IsLoading();
+  }
+
+  Document *CSSStyleSheet::OwnerDocument() const noexcept
+  {
+    auto *ownerNode = RootStyleSheet().OwnerNode();
+    return ownerNode ? &ownerNode->NodeDocument() : nullptr;
+  }
+
+  CSSStyleSheet &CSSStyleSheet::RootStyleSheet() noexcept
+  {
+    auto *root = this;
+    while (auto *parent = root->ParentStyleSheet())
+    {
+      root = parent;
+    }
+    return *root;
+  }
+
+  const CSSStyleSheet &CSSStyleSheet::RootStyleSheet() const noexcept
+  {
+    return const_cast<CSSStyleSheet &>(*this).RootStyleSheet();
+  }
+
+  style::Scope *CSSStyleSheet::StyleScope() noexcept
+  {
+    return _styleScope.get();
+  }
+
+  void CSSStyleSheet::SetMediaQueries(css::mq::MediaQueryList &&mediaQueries) noexcept
+  {
+    _mediaQueries = krys::move(mediaQueries);
+  }
+
+  RefPtr<css::StyleRuleWithNesting>
+    CSSStyleSheet::PrepareChildStyleRuleForNesting(css::StyleRule &styleRule) noexcept
+  {
+    RuleMutationScope mutationScope(this);
+    for (auto &rule : _contents->_childRules)
+    {
+      if (rule.get() == &styleRule)
+      {
+        auto ruleWithNesting = css::StyleRuleWithNesting::Create(krys::move(styleRule));
+        rule = ruleWithNesting;
+        return ruleWithNesting;
+      }
+    }
+    return nullptr;
+  }
+
+  auto CSSStyleSheet::WillMutateRules() noexcept -> ContentsClonedForMutation
+  {
+    // Contents only this sheet uses, and that aren't in the memory cache, can be changed in place.
+    if (_contents->HasOneClient() && !_contents->IsInMemoryCache())
+    {
+      _contents->SetMutable();
+      return ContentsClonedForMutation::No;
+    }
+
+    // Shared contents are copied, and the wrappers moved to the copy's rules.
+    krys_debug_assert(_contents->IsCacheable());
+    _contents->UnregisterClient(this);
+    _contents = _contents->Copy();
+    _contents->RegisterClient(this);
+    _contents->SetMutable();
+    ReattachChildRuleCSSOMWrappers();
+    return ContentsClonedForMutation::Yes;
+  }
+
+  void CSSStyleSheet::DidMutateRules(RuleMutationType mutationType,
+                                     ContentsClonedForMutation contentsClonedForMutation,
+                                     css::KeyframesRule *insertedKeyframesRule,
+                                     const CSSOMString &modifiedKeyframesRuleName) noexcept
+  {
+    krys_debug_assert(_contents->IsMutable());
+    krys_debug_assert(_contents->HasOneClient());
+    _contents->SetHasResolvedNesting(false);
+    ForEachStyleScope(
+      [&](style::Scope &scope)
+      {
+        // Rules added to a sheet that isn't active yet only make it a candidate again; inserted keyframes go
+        // straight to the resolver.
+        bool isInsertion =
+          mutationType == RuleMutationType::RuleInsertion || mutationType == RuleMutationType::RuleReplace;
+        if (isInsertion && contentsClonedForMutation == ContentsClonedForMutation::No
+            && !scope.ActiveStyleSheetsContains(*this))
+        {
+          if (!insertedKeyframesRule)
+          {
+            scope.DidChangeActiveStyleSheetCandidates();
+          }
+          else if (auto *resolver = scope.ResolverIfExists())
+          {
+            resolver->AddKeyframeStyle(ShareRef(*insertedKeyframesRule));
+          }
+          return;
+        }
+
+        if (mutationType == RuleMutationType::KeyframesRuleMutation)
+        {
+          if (auto *document = OwnerDocument())
+          {
+            document->KeyframesRuleDidChange(modifiedKeyframesRuleName);
+          }
+        }
+        scope.DidChangeStyleSheetContents();
+        _wasMutated = true;
+      });
+  }
+
+  void CSSStyleSheet::DidMutateRuleFromCSSStyleDeclaration() noexcept
+  {
+    krys_debug_assert(_contents->IsMutable());
+    krys_debug_assert(_contents->HasOneClient());
+    DidMutate();
+  }
+
+  void CSSStyleSheet::DidMutate() noexcept
+  {
+    ForEachStyleScope(
+      [&](style::Scope &scope)
+      {
+        scope.DidChangeStyleSheetContents();
+        _wasMutated = true;
+      });
+  }
+
+  void CSSStyleSheet::ClearChildRuleCSSOMWrappers() noexcept
+  {
+    _childRules.clear();
+  }
+
+  void CSSStyleSheet::ReattachChildRuleCSSOMWrappers() noexcept
+  {
+    for (uint32 index = 0; index < _childRules.size(); ++index)
+    {
+      if (auto &rule = _childRules[index])
+      {
+        rule->Reattach(*_contents->RuleAt(index));
+      }
+    }
   }
 
   Ref<css::StyleSheetContents> CSSStyleSheet::ProtectedContents() noexcept
@@ -731,27 +639,76 @@ namespace krys::boo
     return _contents;
   }
 
+  CSSOMString CSSStyleSheet::CssText(const css::SerialisationContext &context) noexcept
+  {
+    // The rules' serialisations, separated by spaces.
+    CSSOMString text;
+    for (uint32 index = 0; index < Length(); ++index)
+    {
+      auto ruleText = Item(index)->CssText(context);
+      if (!text.empty() && !ruleText.empty())
+      {
+        text.push_back(u8' ');
+      }
+      text.append(ruleText);
+    }
+    return text;
+  }
+
   void CSSStyleSheet::GetChildStyleSheets(HashSet<RefPtr<CSSStyleSheet>> &childStyleSheets) noexcept
   {
-    auto ruleList = CssRules();
-    if (!ruleList)
+    if (!CanAccessRules())
     {
       return;
     }
-
-    for (uint32 index = 0; index < ruleList->Length(); ++index)
+    for (uint32 index = 0; index < Length(); ++index)
     {
-      if (auto *rule = ruleList->Item(index))
+      Item(index)->GetChildStyleSheets(childStyleSheets);
+    }
+  }
+
+  bool CSSStyleSheet::IsDetached() const noexcept
+  {
+    return !_ownerNode && !_ownerRule
+           && std::ranges::none_of(_adoptingTreeScopes,
+                                   [](const WeakPtr<ContainerNode> &treeScope) { return !!treeScope; });
+  }
+
+  void CSSStyleSheet::ForEachStyleScope(KRYS_NOESCAPE const Func<void(style::Scope &)> &apply) noexcept
+  {
+    // A sheet in a document or shadow root updates its scope; an adopted sheet, every scope that adopted it.
+    if (auto *scope = StyleScope())
+    {
+      apply(*scope);
+      return;
+    }
+    for (auto &treeScope : _adoptingTreeScopes)
+    {
+      if (treeScope)
       {
-        rule->GetChildStyleSheets(childStyleSheets);
+        apply(AdoptingStyleScope(*treeScope));
       }
     }
   }
 
-  CSSStyleSheet::RuleMutationScope::RuleMutationScope(CSSStyleSheet *sheet, RuleMutationType mutationType,
+  CSSOMString CSSStyleSheet::Type() const noexcept
+  {
+    return u8"text/css";
+  }
+
+  RefPtr<CSSRuleList> CSSStyleSheet::CssRulesSkippingAccessCheck() noexcept
+  {
+    if (!_cssRules)
+    {
+      _cssRules = CreateUnique<StyleSheetRuleList>(*this);
+    }
+    return ShareRefPtr(_cssRules.get());
+  }
+
+  CSSStyleSheet::RuleMutationScope::RuleMutationScope(CSSStyleSheet *styleSheet,
+                                                      RuleMutationType mutationType,
                                                       css::KeyframesRule *insertedKeyframesRule) noexcept
-      : _styleSheet(ShareRefPtr(sheet)), _mutationType(mutationType),
-        _contentsClonedForMutation(ContentsClonedForMutation::No),
+      : _styleSheet(ShareRefPtr(styleSheet)), _mutationType(mutationType),
         _insertedKeyframesRule(ShareRefPtr(insertedKeyframesRule))
   {
     krys_debug_assert(_styleSheet);
@@ -761,15 +718,12 @@ namespace krys::boo
   CSSStyleSheet::RuleMutationScope::RuleMutationScope(CSSRule *rule) noexcept
       : _styleSheet(ShareRefPtr(rule ? rule->ParentStyleSheet() : nullptr)),
         _mutationType(Is<CSSKeyframesRule>(rule) ? RuleMutationType::KeyframesRuleMutation
-                                                 : RuleMutationType::OtherMutation),
-        _contentsClonedForMutation(ContentsClonedForMutation::No), _insertedKeyframesRule(nullptr),
-        _modifiedKeyframesRuleName(
-          [rule]
-          {
-            auto *cssKeyframeRule = DynamicDowncast<CSSKeyframesRule>(rule);
-            return cssKeyframeRule ? cssKeyframeRule->Name().ToString() : CSSOMString();
-          }())
+                                                 : RuleMutationType::OtherMutation)
   {
+    if (auto *keyframesRule = DynamicDowncast<CSSKeyframesRule>(rule))
+    {
+      _modifiedKeyframesRuleName = keyframesRule->Name().ToString();
+    }
     if (_styleSheet)
     {
       _contentsClonedForMutation = _styleSheet->WillMutateRules();

@@ -1,25 +1,4 @@
-﻿/*
- * (C) 1999-2003 Lars Knoll (knoll@kde.org)
- * (C) 2002-2003 Dirk Mueller (mueller@kde.org)
- * Copyright (C) 2002-2024 Apple Inc. All rights reserved.
- *
- * This library is free software; you can redistribute it and/or
- * modify it under the terms of the GNU Library General Public
- * License as published by the Free Software Foundation; either
- * version 2 of the License, or (at your option) any later version.
- *
- * This library is distributed in the hope that it will be useful,
- * but WITHOUT ANY WARRANTY; without even the implied warranty of
- * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU
- * Library General Public License for more details.
- *
- * You should have received a copy of the GNU Library General Public License
- * along with this library; see the file COPYING.LIB.  If not, write to
- * the Free Software Foundation, Inc., 51 Franklin Street, Fifth Floor,
- * Boston, MA 02110-1301, USA.
- */
-
-#pragma once
+﻿#pragma once
 
 #include "Krystal.Core/Attributes.hpp"
 #include "Krystal.Core/Containers/List.hpp"
@@ -32,7 +11,7 @@ namespace krys::boo
   class CSSRule;
   class CSSStyleSheet;
 
-  /// @brief An ordered list of rules exposed to scripts.
+  /// @brief An ordered collection of rules, as scripts see it.
   /// @see https://drafts.csswg.org/cssom/#the-cssrulelist-interface
   class CSSRuleList : public AbstractRefCounted
   {
@@ -44,19 +23,28 @@ namespace krys::boo
   public:
     ~CSSRuleList() noexcept override;
 
+#pragma region CSSRuleList - https://drafts.csswg.org/cssom/#the-cssrulelist-interface
+
+    /// @brief The rule at @p index, or null past the end.
+    /// @see https://drafts.csswg.org/cssom/#dom-cssrulelist-item
+    KRYS_NODISCARD virtual CSSRule *Item(uint32 index) const noexcept = 0;
+
+    /// @brief The number of rules.
+    /// @see https://drafts.csswg.org/cssom/#dom-cssrulelist-length
     KRYS_NODISCARD virtual uint32 Length() const noexcept = 0;
 
-    KRYS_NODISCARD virtual CSSRule *Item(uint32 index) const noexcept = 0;
+#pragma endregion
 
     KRYS_NODISCARD bool IsSupportedPropertyIndex(uint32 index) const noexcept
     {
-      return Item(index);
+      return index < Length();
     }
 
+    /// @brief The style sheet the rules are in, if the list follows one.
     KRYS_NODISCARD virtual CSSStyleSheet *GetStyleSheet() const noexcept = 0;
   };
 
-  /// @brief A rule list that owns its rules.
+  /// @brief A list of rules fixed when it's made, which keeps them alive.
   class StaticCSSRuleList final : public CSSRuleList, public RefCounted<StaticCSSRuleList>
   {
   private:
@@ -66,6 +54,8 @@ namespace krys::boo
 
   public:
     ~StaticCSSRuleList() noexcept override;
+
+    KRYS_NODISCARD static Ref<StaticCSSRuleList> Create() noexcept;
 
     void AddRef() const noexcept final
     {
@@ -82,71 +72,69 @@ namespace krys::boo
       return RefCounted::GetRefCount();
     }
 
-    KRYS_NODISCARD static Ref<StaticCSSRuleList> Create() noexcept;
-
+    /// @brief The rules, to fill the list with.
     KRYS_NODISCARD List<RefPtr<CSSRule>> &Rules() noexcept
     {
       return _rules;
-    }
-
-    KRYS_NODISCARD CSSStyleSheet *GetStyleSheet() const noexcept final
-    {
-      return nullptr;
-    }
-
-  private:
-    KRYS_NODISCARD uint32 Length() const noexcept final
-    {
-      return static_cast<uint32>(_rules.size());
     }
 
     KRYS_NODISCARD CSSRule *Item(uint32 index) const noexcept final
     {
       return index < _rules.size() ? _rules[index].get() : nullptr;
     }
+
+    KRYS_NODISCARD uint32 Length() const noexcept final
+    {
+      return static_cast<uint32>(_rules.size());
+    }
+
+    KRYS_NODISCARD CSSStyleSheet *GetStyleSheet() const noexcept final
+    {
+      return nullptr;
+    }
   };
 
-  /// @brief A rule list that reads a rule's child rules as they are now. The rule owns the live list.
-  template <typename TRule>
+  /// @brief The list of a sheet's or rule's child rules, which reads them as they are when asked. Its owner
+  /// holds it and lends it its reference count.
+  template <typename TOwner>
   class LiveCSSRuleList final : public CSSRuleList
   {
   private:
-    TRule &_rule;
+    TOwner &_owner;
 
   public:
-    explicit LiveCSSRuleList(TRule &rule) noexcept : _rule(rule)
+    explicit LiveCSSRuleList(TOwner &owner) noexcept : _owner(owner)
     {
     }
 
     void AddRef() const noexcept final
     {
-      _rule.AddRef();
+      _owner.AddRef();
     }
 
     void SubRef() const noexcept final
     {
-      _rule.SubRef();
+      _owner.SubRef();
     }
 
     KRYS_NODISCARD uint32 GetRefCount() const noexcept final
     {
-      return _rule.GetRefCount();
-    }
-
-  private:
-    KRYS_NODISCARD uint32 Length() const noexcept final
-    {
-      return _rule.Length();
+      return _owner.GetRefCount();
     }
 
     KRYS_NODISCARD CSSRule *Item(uint32 index) const noexcept final
     {
-      return _rule.Item(index);
+      return _owner.Item(index);
+    }
+
+    KRYS_NODISCARD uint32 Length() const noexcept final
+    {
+      return _owner.Length();
     }
 
     KRYS_NODISCARD CSSStyleSheet *GetStyleSheet() const noexcept final
     {
-      return _rule.ParentStyleSheet();
+      return _owner.ParentStyleSheet();
     }
   };
 }

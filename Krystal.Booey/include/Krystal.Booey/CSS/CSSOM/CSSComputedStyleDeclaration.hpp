@@ -1,24 +1,4 @@
-﻿/*
- * Copyright (C) 2004 Zack Rusin <zack@kde.org>
- * Copyright (C) 2004-2019 Apple Inc. All rights reserved.
- *
- * This library is free software; you can redistribute it and/or
- * modify it under the terms of the GNU Lesser General Public
- * License as published by the Free Software Foundation; either
- * version 2 of the License, or (at your option) any later version.
- *
- * This library is distributed in the hope that it will be useful,
- * but WITHOUT ANY WARRANTY; without even the implied warranty of
- * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU
- * Lesser General Public License for more details.
- *
- * You should have received a copy of the GNU Lesser General Public
- * License along with this library; if not, write to the Free Software
- * Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA
- * 02110-1301  USA
- */
-
-#pragma once
+﻿#pragma once
 
 #include "Krystal.Booey/CSS/CSSOM/CSSStyleProperties.hpp"
 #include "Krystal.Booey/Style/Extractor/Extractor.hpp"
@@ -36,23 +16,32 @@ namespace krys::boo
 {
   class Element;
 
-  /// @brief The read-only declaration block of an element's resolved values, as returned by
-  /// `getComputedStyle()`.
+  /// @brief What `getComputedStyle()` returns: a live, read-only declaration block of the resolved values of
+  /// an element or one of its pseudo-elements. Its declarations are every supported longhand, in
+  /// lexicographical order, then the custom properties, while the element is connected; otherwise none.
+  /// @see https://drafts.csswg.org/cssom/#dom-window-getcomputedstyle
   class CSSComputedStyleDeclaration final : public CSSStyleProperties,
                                             public RefCounted<CSSComputedStyleDeclaration>
   {
   private:
-    enum class IsEmpty : bool
-    {
-      No,
-      Yes,
-    };
-
     const Ref<Element> _element;
-    Maybe<style::PseudoElementIdentifier> _pseudoElementIdentifier {null};
-    bool _isEmpty {false};
+    Maybe<style::PseudoElementIdentifier> _pseudoElementIdentifier;
+    // Whether there's no element or pseudo-element to resolve values for, which leaves no declarations.
+    bool _hasNoTarget {false};
+
+    CSSComputedStyleDeclaration(Element &element, const Maybe<style::PseudoElementIdentifier> &pseudoElement,
+                                bool hasNoTarget) noexcept;
 
   public:
+    ~CSSComputedStyleDeclaration() noexcept override;
+
+    /// @brief The declarations of @p element, or of its pseudo-element @p pseudoElement.
+    KRYS_NODISCARD static Ref<CSSComputedStyleDeclaration>
+      Create(Element &element, const Maybe<style::PseudoElementIdentifier> &pseudoElement) noexcept;
+
+    /// @brief Declarations without any, for a pseudo-element that isn't one.
+    KRYS_NODISCARD static Ref<CSSComputedStyleDeclaration> CreateEmpty(Element &element) noexcept;
+
     void AddRef() const noexcept final
     {
       RefCounted::AddRef();
@@ -68,22 +57,14 @@ namespace krys::boo
       return RefCounted::GetRefCount();
     }
 
-    KRYS_NODISCARD static Ref<CSSComputedStyleDeclaration>
-      Create(Element &, const Maybe<style::PseudoElementIdentifier> &) noexcept;
-
-    KRYS_NODISCARD static Ref<CSSComputedStyleDeclaration> CreateEmpty(Element &) noexcept;
-
-    ~CSSComputedStyleDeclaration() noexcept override;
-
-    KRYS_NODISCARD CSSOMString GetPropertyValue(css::PropertyId) const noexcept;
+    /// @brief The serialised resolved value of @p property, whether or not the element is connected.
+    KRYS_NODISCARD CSSOMString GetPropertyValue(css::PropertyId property) const noexcept;
 
   private:
-    CSSComputedStyleDeclaration(Element &, IsEmpty) noexcept;
+    // The CSSOM's members, reached through CSSStyleDeclaration.
+    KRYS_NODISCARD CSSOMString CssText() const noexcept final;
 
-    CSSComputedStyleDeclaration(Element &, const Maybe<style::PseudoElementIdentifier> &) noexcept;
-
-    // CSSOM functions. Don't make these public.
-    KRYS_NODISCARD CSSRule *ParentRule() const noexcept final;
+    ExceptionOr<void> SetCssText(const CSSOMString &text) noexcept final;
 
     KRYS_NODISCARD uint32 Length() const noexcept final;
 
@@ -93,32 +74,25 @@ namespace krys::boo
 
     KRYS_NODISCARD CSSOMString GetPropertyPriority(const CSSOMString &propertyName) noexcept final;
 
-    KRYS_NODISCARD CSSOMString GetPropertyShorthand(const CSSOMString &propertyName) noexcept final;
-
-    KRYS_NODISCARD bool IsPropertyImplicit(const CSSOMString &propertyName) noexcept final;
-
     ExceptionOr<void> SetProperty(const CSSOMString &propertyName, const CSSOMString &value,
                                   const CSSOMString &priority) noexcept final;
 
     ExceptionOr<CSSOMString> RemoveProperty(const CSSOMString &propertyName) noexcept final;
 
-    KRYS_NODISCARD CSSOMString CssText() const noexcept final;
+    KRYS_NODISCARD CSSRule *ParentRule() const noexcept final;
 
-    ExceptionOr<void> SetCssText(const CSSOMString &) noexcept final;
+    KRYS_NODISCARD CSSOMString GetPropertyValueInternal(css::PropertyId property) noexcept final;
 
-    KRYS_NODISCARD CSSOMString GetPropertyValueInternal(css::PropertyId) noexcept final;
-
-    ExceptionOr<void> SetPropertyInternal(css::PropertyId, const CSSOMString &value,
-                                          css::IsImportant) noexcept final;
+    ExceptionOr<void> SetPropertyInternal(css::PropertyId property, const CSSOMString &value,
+                                          css::IsImportant important) noexcept final;
 
     KRYS_NODISCARD Ref<css::MutableStyleProperties> CopyProperties() const noexcept final;
 
-    KRYS_NODISCARD Ref<Element> ProtectedElement() const noexcept
-    {
-      return _element;
-    }
+    /// @brief Whether there are declarations: whether there's an element or pseudo-element, and the element
+    /// is connected.
+    KRYS_NODISCARD bool HasDeclarations() const noexcept;
 
-    KRYS_NODISCARD const FixedList<css::PropertyId> &ExposedComputedCSSPropertyIds() const noexcept;
+    KRYS_NODISCARD const FixedList<css::PropertyId> &ExposedLonghands() const noexcept;
 
     KRYS_NODISCARD style::Extractor GetExtractor() const noexcept;
   };

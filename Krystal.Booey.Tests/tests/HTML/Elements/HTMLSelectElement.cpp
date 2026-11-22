@@ -33,11 +33,6 @@ namespace krys::boo::tests
       return Downcast<HTMLSelectElement>(fixture.ById(id));
     }
 
-    KRYS_NODISCARD HTMLOptionElement &OptionById(EditorFixture &fixture, utf8_stringview id) noexcept
-    {
-      return Downcast<HTMLOptionElement>(fixture.ById(id));
-    }
-
     /// @brief The IDs of the select's list items, in order.
     KRYS_NODISCARD utf8_string ListItemIds(const HTMLSelectElement &select) noexcept
     {

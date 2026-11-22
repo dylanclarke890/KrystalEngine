@@ -1,88 +1,74 @@
-﻿/*
- * (C) 1999-2003 Lars Knoll (knoll@kde.org)
- * (C) 2002-2003 Dirk Mueller (mueller@kde.org)
- * Copyright (C) 2002, 2005, 2006, 2008, 2012 Apple Inc. All rights reserved.
- *
- * This library is free software; you can redistribute it and/or
- * modify it under the terms of the GNU Library General Public
- * License as published by the Free Software Foundation; either
- * version 2 of the License, or (at your option) any later version.
- *
- * This library is distributed in the hope that it will be useful,
- * but WITHOUT ANY WARRANTY; without even the implied warranty of
- * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU
- * Library General Public License for more details.
- *
- * You should have received a copy of the GNU Library General Public License
- * along with this library; see the file COPYING.LIB.  If not, write to
- * the Free Software Foundation, Inc., 51 Franklin Street, Fifth Floor,
- * Boston, MA 02110-1301, USA.
- */
-
-#include "Krystal.Booey/CSS/CSSOM/CSSFontFaceRule.hpp"
+﻿#include "Krystal.Booey/CSS/CSSOM/CSSFontFaceRule.hpp"
 #include "Krystal.Booey/CSS/CSSOM/CSSFontFaceDescriptors.hpp"
 #include "Krystal.Booey/CSS/Properties/MutableStyleProperties.hpp"
 #include "Krystal.Booey/CSS/Properties/StyleProperties.hpp"
 #include "Krystal.Booey/CSS/Rules/Rule.hpp"
 #include "Krystal.Booey/CSS/Values/SerialisationContext.hpp"
+#include "Krystal.Core/Strings/StringBuilder.hpp"
 
 namespace krys::boo
 {
-  CSSFontFaceRule::CSSFontFaceRule(css::FontFaceRule &fontFaceRule, CSSStyleSheet *parent) noexcept
-      : CSSRule(parent), _fontFaceRule(ShareRef(fontFaceRule))
+  namespace
+  {
+    /// @brief `@font-face {`, the declarations with a space either side, and `}`; `@font-face { }` without
+    /// any.
+    KRYS_NODISCARD CSSOMString FontFaceRuleText(const CSSOMString &declarations) noexcept
+    {
+      StringBuilder builder;
+      builder.Append(u8"@font-face { ");
+      if (!declarations.empty())
+      {
+        builder.Append(declarations, u8' ');
+      }
+      builder.Append(u8'}');
+      return krys::move(builder).ToString();
+    }
+  }
+
+  CSSFontFaceRule::CSSFontFaceRule(css::FontFaceRule &rule, CSSStyleSheet *parent) noexcept
+      : CSSRule(parent), _rule(ShareRef(rule))
   {
   }
 
   CSSFontFaceRule::~CSSFontFaceRule() noexcept
   {
-    if (_propertiesCSSOMWrapper)
+    // The descriptors can outlive the rule, which is no longer theirs.
+    if (_style)
     {
-      _propertiesCSSOMWrapper->ClearParentRule();
+      _style->ClearParentRule();
     }
   }
 
-  Ref<CSSFontFaceRule> CSSFontFaceRule::Create(css::FontFaceRule &rule, CSSStyleSheet *sheet) noexcept
+  Ref<CSSFontFaceRule> CSSFontFaceRule::Create(css::FontFaceRule &rule, CSSStyleSheet *parent) noexcept
   {
-    return AdoptRef(*new CSSFontFaceRule(rule, sheet));
+    return AdoptRef(*new CSSFontFaceRule(rule, parent));
   }
 
   CSSFontFaceDescriptors &CSSFontFaceRule::Style() noexcept
   {
-    if (!_propertiesCSSOMWrapper)
+    if (!_style)
     {
-      _propertiesCSSOMWrapper = CSSFontFaceDescriptors::Create(_fontFaceRule->MutableProperties(), *this);
+      _style = CSSFontFaceDescriptors::Create(_rule->MutableProperties(), *this);
     }
-    return *_propertiesCSSOMWrapper;
+    return *_style;
   }
 
   CSSOMString CSSFontFaceRule::CssText() const noexcept
   {
-    return CssTextInternal(_fontFaceRule->Properties().AsText(css::DefaultSerialisationContext()));
+    return CssText(css::DefaultSerialisationContext());
   }
 
   CSSOMString CSSFontFaceRule::CssText(const css::SerialisationContext &context) const noexcept
   {
-    return CssTextInternal(_fontFaceRule->Properties().AsText(context));
-  }
-
-  CSSOMString CSSFontFaceRule::CssTextInternal(const CSSOMString &declarations) noexcept
-  {
-    if (declarations.empty())
-    {
-      return u8"@font-face { }";
-    }
-
-    CSSOMString result;
-    result.append(u8"@font-face { ").append(declarations).append(u8" }");
-    return result;
+    return FontFaceRuleText(_rule->Properties().AsText(context));
   }
 
   void CSSFontFaceRule::Reattach(css::Rule &rule) noexcept
   {
-    _fontFaceRule = ShareRef(Downcast<css::FontFaceRule>(rule));
-    if (_propertiesCSSOMWrapper)
+    _rule = ShareRef(Downcast<css::FontFaceRule>(rule));
+    if (_style)
     {
-      _propertiesCSSOMWrapper->Reattach(_fontFaceRule->MutableProperties());
+      _style->Reattach(_rule->MutableProperties());
     }
   }
 }

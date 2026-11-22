@@ -23,7 +23,7 @@ namespace krys::boo::css::tests
     using Factory = CSSNumericFactory;
 
     template <typename T>
-    KRYS_NODISCARD ExceptionCode Error(const ExceptionOr<T> &result)
+    KRYS_NODISCARD ExceptionCode TransformError(const ExceptionOr<T> &result)
     {
       REQUIRE(result.HasException());
       return result.GetException().Code();
@@ -48,18 +48,18 @@ namespace krys::boo::css::tests
     CHECK(translate->Is2D());
     CHECK(ComponentText(*translate) == "translate(10px, 50%)");
     // A percentage has no matrix.
-    CHECK(Error(translate->ToMatrix()) == ExceptionCode::TypeError);
+    CHECK(TransformError(translate->ToMatrix()) == ExceptionCode::TypeError);
 
     auto translate3d = RequireValue(CSSTranslate::Create(Factory::Px(1), Factory::Px(2), Factory::Px(3)));
     CHECK_FALSE(translate3d->Is2D());
     CHECK(ComponentText(*translate3d) == "translate3d(1px, 2px, 3px)");
     CHECK(Matrix(*translate3d)->M43() == 3);
 
-    CHECK(Error(CSSTranslate::Create(Factory::Px(1), Factory::Deg(1))) == ExceptionCode::TypeError);
-    CHECK(Error(CSSTranslate::Create(Factory::Px(1), Factory::Px(1), Factory::Percent(1)))
+    CHECK(TransformError(CSSTranslate::Create(Factory::Px(1), Factory::Deg(1))) == ExceptionCode::TypeError);
+    CHECK(TransformError(CSSTranslate::Create(Factory::Px(1), Factory::Px(1), Factory::Percent(1)))
           == ExceptionCode::TypeError);
-    CHECK(Error(translate->SetX(Factory::Deg(1))) == ExceptionCode::TypeError);
-    CHECK(Error(translate->SetZ(Factory::Percent(1))) == ExceptionCode::TypeError);
+    CHECK(TransformError(translate->SetX(Factory::Deg(1))) == ExceptionCode::TypeError);
+    CHECK(TransformError(translate->SetZ(Factory::Percent(1))) == ExceptionCode::TypeError);
     CHECK_FALSE(translate->SetY(Factory::Px(4)).HasException());
     CHECK(Matrix(*translate)->F() == 4);
   }
@@ -75,9 +75,9 @@ namespace krys::boo::css::tests
     CHECK_FALSE(rotate3d->Is2D());
     CHECK(ComponentText(*rotate3d) == "rotate3d(1, 0, 0, 90deg)");
 
-    CHECK(Error(CSSRotate::Create(Factory::Px(1))) == ExceptionCode::TypeError);
-    CHECK(Error(rotate->SetX(RefPtr<CSSNumericValue>(Factory::Px(1)))) == ExceptionCode::TypeError);
-    CHECK(Error(rotate->SetAngle(Factory::Px(1))) == ExceptionCode::TypeError);
+    CHECK(TransformError(CSSRotate::Create(Factory::Px(1))) == ExceptionCode::TypeError);
+    CHECK(TransformError(rotate->SetX(RefPtr<CSSNumericValue>(Factory::Px(1)))) == ExceptionCode::TypeError);
+    CHECK(TransformError(rotate->SetAngle(Factory::Px(1))) == ExceptionCode::TypeError);
     // Setting is2D changes the serialisation.
     rotate->SetIs2D(false);
     CHECK(ComponentText(*rotate) == "rotate3d(0, 0, 1, 90deg)");
@@ -91,8 +91,9 @@ namespace krys::boo::css::tests
     CHECK(matrix->A() == 2);
     CHECK(matrix->D() == 3);
     CHECK(ComponentText(*RequireValue(CSSScale::Create(1.0, 2.0, CSSNumberish {3.0}))) == "scale3d(1, 2, 3)");
-    CHECK(Error(CSSScale::Create(RefPtr<CSSNumericValue>(Factory::Px(1)), 1.0)) == ExceptionCode::TypeError);
-    CHECK(Error(scale->SetZ(RefPtr<CSSNumericValue>(Factory::Px(1)))) == ExceptionCode::TypeError);
+    CHECK(TransformError(CSSScale::Create(RefPtr<CSSNumericValue>(Factory::Px(1)), 1.0))
+          == ExceptionCode::TypeError);
+    CHECK(TransformError(scale->SetZ(RefPtr<CSSNumericValue>(Factory::Px(1)))) == ExceptionCode::TypeError);
   }
 
   TEST_CASE_METHOD(ValueFixture, "CSSSkew, CSSSkewX and CSSSkewY", "[CSS][TypedOM][css-typed-om:cssskew]")
@@ -105,13 +106,13 @@ namespace krys::boo::css::tests
     // A skew is always 2D.
     skew->SetIs2D(false);
     CHECK(skew->Is2D());
-    CHECK(Error(CSSSkew::Create(Factory::Px(1), Factory::Deg(0))) == ExceptionCode::TypeError);
+    CHECK(TransformError(CSSSkew::Create(Factory::Px(1), Factory::Deg(0))) == ExceptionCode::TypeError);
 
     auto skewX = RequireValue(CSSSkewX::Create(Factory::Deg(45)));
     CHECK(ComponentText(*skewX) == "skewX(45deg)");
     CHECK(Matrix(*skewX)->C() > 0.99);
     CHECK(ComponentText(*RequireValue(CSSSkewY::Create(Factory::Deg(45)))) == "skewY(45deg)");
-    CHECK(Error(CSSSkewY::Create(Factory::Px(1))) == ExceptionCode::TypeError);
+    CHECK(TransformError(CSSSkewY::Create(Factory::Px(1))) == ExceptionCode::TypeError);
   }
 
   TEST_CASE_METHOD(ValueFixture, "CSSPerspective", "[CSS][TypedOM][css-typed-om:cssperspective]")
@@ -130,8 +131,8 @@ namespace krys::boo::css::tests
     CHECK(ComponentText(*none) == "perspective(NONE)");
     CHECK(Matrix(*none)->IsIdentity());
 
-    CHECK(Error(CSSPerspective::Create(CSSOMString(u8"auto"))) == ExceptionCode::TypeError);
-    CHECK(Error(CSSPerspective::Create(RefPtr<CSSNumericValue>(Factory::Deg(1))))
+    CHECK(TransformError(CSSPerspective::Create(CSSOMString(u8"auto"))) == ExceptionCode::TypeError);
+    CHECK(TransformError(CSSPerspective::Create(RefPtr<CSSNumericValue>(Factory::Deg(1))))
           == ExceptionCode::TypeError);
   }
 
@@ -150,7 +151,8 @@ namespace krys::boo::css::tests
 
   TEST_CASE_METHOD(ValueFixture, "CSSTransformValue", "[CSS][TypedOM][css-typed-om:csstransformvalue]")
   {
-    CHECK(Error(CSSTransformValue::Create(List<Ref<CSSTransformComponent>> {})) == ExceptionCode::TypeError);
+    CHECK(TransformError(CSSTransformValue::Create(List<Ref<CSSTransformComponent>> {}))
+          == ExceptionCode::TypeError);
 
     auto value = RequireValue(
       CSSTransformValue::Create({RequireValue(CSSTranslate::Create(Factory::Px(10), Factory::Px(20))),
@@ -168,7 +170,7 @@ namespace krys::boo::css::tests
     CHECK_FALSE(value->Item(2));
     CHECK(value->SetItem(2, RequireValue(CSSRotate::Create(1.0, 0.0, 0.0, Factory::Deg(10)))).HasValue());
     CHECK_FALSE(value->Is2D());
-    CHECK(Error(value->SetItem(4, RequireValue(CSSSkewX::Create(Factory::Deg(1)))))
+    CHECK(TransformError(value->SetItem(4, RequireValue(CSSSkewX::Create(Factory::Deg(1)))))
           == ExceptionCode::RangeError);
 
     // It converts back to a transform list.

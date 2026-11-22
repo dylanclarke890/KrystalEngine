@@ -28,8 +28,8 @@ namespace krys::boo::tests
     SECTION("RadicalVerticalGap")
     {
       auto fixture = Roots("radical-verticalgap6000-rulethickness1000");
-      CHECK(Near(BoxOf(fixture, u8"b1").Y() - BoxOf(fixture, u8"r1").Y(), 60 + 10));
-      CHECK(Near(BoxOf(fixture, u8"b2").Y() - BoxOf(fixture, u8"r2").Y(), 60 + 10));
+      CHECK(Near(MathMLBoxOf(fixture, u8"b1").Y() - MathMLBoxOf(fixture, u8"r1").Y(), 60 + 10));
+      CHECK(Near(MathMLBoxOf(fixture, u8"b2").Y() - MathMLBoxOf(fixture, u8"r2").Y(), 60 + 10));
       auto *root = fixture.ById(u8"r1").Renderer();
       REQUIRE(root);
       CHECK(Is<RenderMathMLRoot>(*root));
@@ -39,8 +39,8 @@ namespace krys::boo::tests
     SECTION("RadicalExtraAscender")
     {
       auto fixture = Roots("radical-extraascender3000-rulethickness1000");
-      CHECK(Near(BoxOf(fixture, u8"b1").Y() - BoxOf(fixture, u8"r1").Y(), 30 + 10));
-      CHECK(Near(BoxOf(fixture, u8"b2").Y() - BoxOf(fixture, u8"r2").Y(), 30 + 10));
+      CHECK(Near(MathMLBoxOf(fixture, u8"b1").Y() - MathMLBoxOf(fixture, u8"r1").Y(), 30 + 10));
+      CHECK(Near(MathMLBoxOf(fixture, u8"b2").Y() - MathMLBoxOf(fixture, u8"r2").Y(), 30 + 10));
     }
 
     SECTION("RadicalKernBeforeDegree")
@@ -48,7 +48,7 @@ namespace krys::boo::tests
       auto fixture = MathFontDocument("radical-kernbeforedegree4000-rulethickness1000",
                                       u8"<math><mroot id=r><mspace width=3em height=1em></mspace>"
                                       u8"<mspace id=i width=3em height=1em></mspace></mroot></math>");
-      CHECK(Near(BoxOf(fixture, u8"i").X() - BoxOf(fixture, u8"r").X(), 40));
+      CHECK(Near(MathMLBoxOf(fixture, u8"i").X() - MathMLBoxOf(fixture, u8"r").X(), 40));
     }
 
     SECTION("RadicalDegreeBottomRaisePercent")
@@ -57,8 +57,9 @@ namespace krys::boo::tests
                                       u8"<math><mspace id=ref width=3em depth=1em></mspace><mroot>"
                                       u8"<mspace id=b width=3em height=10em></mspace>"
                                       u8"<mspace id=i width=3em height=1em></mspace></mroot></math>");
-      float radicalHeight = BoxOf(fixture, u8"b").Height() + 10;
-      CHECK(Near(BoxOf(fixture, u8"ref").Y() - BoxOf(fixture, u8"i").MaxY(), 25 * radicalHeight / 100));
+      float radicalHeight = MathMLBoxOf(fixture, u8"b").Height() + 10;
+      CHECK(Near(MathMLBoxOf(fixture, u8"ref").Y() - MathMLBoxOf(fixture, u8"i").MaxY(),
+                 25 * radicalHeight / 100));
     }
   }
 
@@ -68,8 +69,8 @@ namespace krys::boo::tests
     SECTION("The radical is drawn before the base, with the rule over it")
     {
       auto fixture = Roots("radical-verticalgap6000-rulethickness1000");
-      auto root = BoxOf(fixture, u8"r1");
-      auto base = BoxOf(fixture, u8"b1");
+      auto root = MathMLBoxOf(fixture, u8"r1");
+      auto base = MathMLBoxOf(fixture, u8"b1");
       CHECK(base.MaxX() == root.MaxX());
       CHECK(base.X() > root.X());
 
@@ -87,8 +88,8 @@ namespace krys::boo::tests
         MathFontDocument("radical-verticalgap6000-rulethickness1000",
                          u8"<math dir=rtl><msqrt id=r><mspace id=b width=3em height=1em></mspace>"
                          u8"</msqrt></math>");
-      CHECK(BoxOf(fixture, u8"b").X() == BoxOf(fixture, u8"r").X());
-      CHECK(BoxOf(fixture, u8"b").MaxX() < BoxOf(fixture, u8"r").MaxX());
+      CHECK(MathMLBoxOf(fixture, u8"b").X() == MathMLBoxOf(fixture, u8"r").X());
+      CHECK(MathMLBoxOf(fixture, u8"b").MaxX() < MathMLBoxOf(fixture, u8"r").MaxX());
     }
 
     SECTION("A root without exactly two children is a row, until its children change")
@@ -97,12 +98,12 @@ namespace krys::boo::tests
                                       u8"<math><mroot id=r><mspace id=b width=3em height=1em></mspace>"
                                       u8"<mspace id=i width=3em height=1em></mspace>"
                                       u8"<mspace id=x width=3em height=1em></mspace></mroot></math>");
-      CHECK(BoxOf(fixture, u8"b").X() == BoxOf(fixture, u8"r").X());
-      CHECK(BoxOf(fixture, u8"i").X() == BoxOf(fixture, u8"b").MaxX());
+      CHECK(MathMLBoxOf(fixture, u8"b").X() == MathMLBoxOf(fixture, u8"r").X());
+      CHECK(MathMLBoxOf(fixture, u8"i").X() == MathMLBoxOf(fixture, u8"b").MaxX());
 
       REQUIRE_FALSE(fixture.ById(u8"x").Remove().HasException());
-      CHECK(Near(BoxOf(fixture, u8"i").X() - BoxOf(fixture, u8"r").X(), 40));
-      CHECK(BoxOf(fixture, u8"b").X() > BoxOf(fixture, u8"i").MaxX());
+      CHECK(Near(MathMLBoxOf(fixture, u8"i").X() - MathMLBoxOf(fixture, u8"r").X(), 40));
+      CHECK(MathMLBoxOf(fixture, u8"b").X() > MathMLBoxOf(fixture, u8"i").MaxX());
     }
   }
 }

@@ -1,179 +1,151 @@
-﻿/*
- * Copyright (C) 2003 Lars Knoll (knoll@kde.org)
- * Copyright (C) 2005 Allan Sandfeld Jensen (kde@carewolf.com)
- * Copyright (C) 2004-2012, 2016 Apple Inc. All rights reserved.
- * Copyright (C) 2007 Nicholas Shanks <webkit@nickshanks.com>
- * Copyright (C) 2008 Eric Seidel <eric@webkit.org>
- * Copyright (C) 2009 Torch Mobile Inc. All rights reserved. (http://www.torchmobile.com/)
- * Copyright (C) 2012 Adobe Systems Incorporated. All rights reserved.
- * Copyright (C) 2012 Intel Corporation. All rights reserved.
- *
- * This library is free software; you can redistribute it and/or
- * modify it under the terms of the GNU Library General Public
- * License as published by the Free Software Foundation; either
- * version 2 of the License, or (at your option) any later version.
- *
- * This library is distributed in the hope that it will be useful,
- * but WITHOUT ANY WARRANTY; without even the implied warranty of
- * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU
- * Library General Public License for more details.
- *
- * You should have received a copy of the GNU Library General Public License
- * along with this library; see the file COPYING.LIB.  If not, write to
- * the Free Software Foundation, Inc., 51 Franklin Street, Fifth Floor,
- * Boston, MA 02110-1301, USA.
- */
-
-#include "Krystal.Booey/CSS/CSSOM/Markup.hpp"
+﻿#include "Krystal.Booey/CSS/CSSOM/Markup.hpp"
 #include "Krystal.Booey/CSS/Parser/ParserIdioms.hpp"
+#include "Krystal.Core/Strings/ASCII.hpp"
 #include "Krystal.Core/Strings/CodePointIterator.hpp"
 #include "Krystal.Core/Strings/HexNumber.hpp"
-#include "Krystal.Core/Strings/StringBuilder.hpp"
 #include "Krystal.Core/Strings/Unicode.hpp"
+#include <algorithm>
 
 namespace krys::boo::css
 {
   namespace
   {
-    void AppendCodePoint(char32 c, StringBuilder &appendTo) noexcept
+    /// @see https://drafts.csswg.org/cssom/#escape-a-character
+    void AppendEscapedCharacter(StringBuilder &appendTo, char32 c) noexcept
     {
-      appendTo.Append(c);
+      appendTo.Append(u8'\\', c);
     }
 
-    /// @brief "ident" from the CSS tokenizer, minus backslash-escape sequences.
-    KRYS_NODISCARD bool IsCSSTokenizerIdentifier(CSSOMStringView string) noexcept
-    {
-      if (string.empty())
-      {
-        return false;
-      }
-
-      // -?
-      while (!string.empty() && string.front() == u8'-')
-      {
-        string.remove_prefix(1);
-      }
-
-      // {nmstart}
-      // Any non-ASCII code point is a name start code point, so checking the lead byte is enough.
-      if (string.empty() || !IsNameStartCodePoint(string.front()))
-      {
-        return false;
-      }
-      string.remove_prefix(1);
-
-      // {nmchar}*
-      // Continuation bytes are non-ASCII, so they pass IsNameCodePoint too.
-      while (!string.empty() && IsNameCodePoint(string.front()))
-      {
-        string.remove_prefix(1);
-      }
-
-      return string.empty();
-    }
-
-    void SerialiseCharacter(char32 c, StringBuilder &appendTo) noexcept
-    {
-      appendTo.Append(u8'\\');
-      AppendCodePoint(c, appendTo);
-    }
-
-    void SerialiseCharacterAsCodePoint(char32 c, StringBuilder &appendTo) noexcept
+    /// @see https://drafts.csswg.org/cssom/#escape-a-character-as-code-point
+    void AppendEscapedCodePoint(StringBuilder &appendTo, char32 c) noexcept
     {
       appendTo.Append(u8'\\', Hex(static_cast<uint32>(c), HexConversionMode::Lowercase), u8' ');
     }
-  }
 
-  void SerialiseIdentifier(const CSSOMString &identifier, StringBuilder &appendTo,
-                           bool skipStartChecks) noexcept
-  {
-    bool isFirst = !skipStartChecks;
-    bool isSecond = false;
-    bool isFirstCharHyphen = false;
-    for (krys::text::CodePointIterator it {utf8_stringview {identifier}}; !it.AtEnd();)
+    /// @brief Whether @p c is in [\1-\1f] or is \7f, which serialising escapes as a code point.
+    KRYS_NODISCARD constexpr bool IsEscapedControl(char32 c) noexcept
     {
-      auto c = *it;
-      bool isLast = (++it).AtEnd();
-      if (!c)
-      {
-        AppendCodePoint(krys::text::UnicodeReplacementChar, appendTo);
-      }
-      else if (c <= 0x1F || c == 0x7F
-               || (0x30 <= c && c <= 0x39 && (isFirst || (isSecond && isFirstCharHyphen))))
-      {
-        SerialiseCharacterAsCodePoint(c, appendTo);
-      }
-      // NOLINTBEGIN(bugprone-branch-clone): the spec's steps, in order.
-      else if (c == U'-' && isFirst && isLast)
-      {
-        SerialiseCharacter(c, appendTo);
-      }
-      else if (0x80 <= c || c == U'-' || c == U'_' || (0x30 <= c && c <= 0x39) || (0x41 <= c && c <= 0x5A)
-               || (0x61 <= c && c <= 0x7A))
-      {
-        AppendCodePoint(c, appendTo);
-      }
-      else
-      {
-        SerialiseCharacter(c, appendTo);
-      }
-      // NOLINTEND(bugprone-branch-clone)
+      return (c >= 0x1 && c <= 0x1F) || c == 0x7F;
+    }
 
-      if (isFirst)
+    /// @brief Appends @p identifier as an identifier, applying the rules for how one starts if
+    /// @p checkStart.
+    /// @see https://drafts.csswg.org/cssom/#serialize-an-identifier
+    void AppendIdentifier(const CSSOMString &identifier, StringBuilder &appendTo, bool checkStart) noexcept
+    {
+      size_t index = 0;
+      auto firstIsHyphen = false;
+      for (text::CodePointIterator it {utf8_stringview {identifier}}; !it.AtEnd(); ++index)
       {
-        isFirst = false;
-        isSecond = true;
-        isFirstCharHyphen = (c == U'-');
-      }
-      else if (isSecond)
-      {
-        isSecond = false;
+        auto c = *it;
+        auto isLast = (++it).AtEnd();
+        auto isFirst = checkStart && index == 0;
+        auto isSecond = checkStart && index == 1;
+        if (!c)
+        {
+          appendTo.Append(text::UnicodeReplacementChar);
+        }
+        // A digit can't start an identifier, nor follow a hyphen that does.
+        else if (IsEscapedControl(c) || (text::IsASCIIDigit(c) && (isFirst || (isSecond && firstIsHyphen))))
+        {
+          AppendEscapedCodePoint(appendTo, c);
+        }
+        // A hyphen alone isn't an identifier.
+        else if (c == U'-' && isFirst && isLast)
+        {
+          AppendEscapedCharacter(appendTo, c);
+        }
+        else if (c >= 0x80 || c == U'-' || c == U'_' || text::IsASCIIAlphanumeric(c))
+        {
+          appendTo.Append(c);
+        }
+        else
+        {
+          AppendEscapedCharacter(appendTo, c);
+        }
+        if (isFirst)
+        {
+          firstIsHyphen = c == U'-';
+        }
       }
     }
+
+    /// @brief Whether @p name is an identifier as it is, with no escapes: an optional hyphen, then a hyphen
+    /// or a name-start code point, then name code points. Non-ASCII code points are name code points, so the
+    /// UTF-8 can be checked a byte at a time.
+    /// @see https://drafts.csswg.org/css-syntax/#would-start-an-identifier
+    KRYS_NODISCARD bool IsIdentifierAsWritten(CSSOMStringView name) noexcept
+    {
+      if (name.starts_with(u8'-'))
+      {
+        name.remove_prefix(1);
+        if (name.empty() || !(name.front() == u8'-' || IsNameStartCodePoint(name.front())))
+        {
+          return false;
+        }
+      }
+      else if (name.empty() || !IsNameStartCodePoint(name.front()))
+      {
+        return false;
+      }
+      return std::ranges::all_of(name, [](char8 c) { return IsNameCodePoint(c); });
+    }
+  }
+
+  void SerialiseIdentifier(const CSSOMString &identifier, StringBuilder &appendTo) noexcept
+  {
+    AppendIdentifier(identifier, appendTo, true);
+  }
+
+  void SerialiseName(const CSSOMString &name, StringBuilder &appendTo) noexcept
+  {
+    AppendIdentifier(name, appendTo, false);
   }
 
   void SerialiseString(const CSSOMString &string, StringBuilder &appendTo) noexcept
   {
     appendTo.Append(u8'"');
-
-    for (krys::text::CodePointIterator it {utf8_stringview {string}}; !it.AtEnd(); ++it)
+    for (text::CodePointIterator it {utf8_stringview {string}}; !it.AtEnd(); ++it)
     {
       auto c = *it;
-      if (c <= 0x1F || c == 0x7F)
+      if (!c)
       {
-        SerialiseCharacterAsCodePoint(c, appendTo);
+        appendTo.Append(text::UnicodeReplacementChar);
+      }
+      else if (IsEscapedControl(c))
+      {
+        AppendEscapedCodePoint(appendTo, c);
       }
       else if (c == U'"' || c == U'\\')
       {
-        SerialiseCharacter(c, appendTo);
+        AppendEscapedCharacter(appendTo, c);
       }
       else
       {
-        AppendCodePoint(c, appendTo);
+        appendTo.Append(c);
       }
     }
-
     appendTo.Append(u8'"');
   }
 
-  CSSOMString SerialiseString(const CSSOMString &value) noexcept
+  CSSOMString SerialiseString(const CSSOMString &string) noexcept
   {
     StringBuilder builder;
-    SerialiseString(value, builder);
+    SerialiseString(string, builder);
     return krys::move(builder).ToString();
   }
 
-  CSSOMString SerialiseUrl(const CSSOMString &value) noexcept
+  CSSOMString SerialiseUrl(const CSSOMString &url) noexcept
   {
     StringBuilder builder;
     builder.Append(u8"url(");
-    SerialiseString(value, builder);
+    SerialiseString(url, builder);
     builder.Append(u8')');
     return krys::move(builder).ToString();
   }
 
-  CSSOMString SerialiseFontFamily(const CSSOMString &value) noexcept
+  CSSOMString SerialiseFontFamily(const CSSOMString &name) noexcept
   {
-    return IsCSSTokenizerIdentifier(value) ? value : SerialiseString(value);
+    return IsIdentifierAsWritten(name) ? name : SerialiseString(name);
   }
 }

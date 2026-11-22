@@ -100,10 +100,6 @@ namespace krys::boo
 
     KRYS_NODISCARD CSSOMString GetPropertyPriority(const CSSOMString &propertyName) noexcept final;
 
-    KRYS_NODISCARD CSSOMString GetPropertyShorthand(const CSSOMString &propertyName) noexcept final;
-
-    KRYS_NODISCARD bool IsPropertyImplicit(const CSSOMString &propertyName) noexcept final;
-
     ExceptionOr<void> SetProperty(const CSSOMString &propertyName, const CSSOMString &value,
                                   const CSSOMString &priority) noexcept final;
 

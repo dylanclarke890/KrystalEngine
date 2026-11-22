@@ -9,7 +9,7 @@
 
 namespace krys::boo::css::tests
 {
-  TEST_CASE("CSSStyleRule: cssText", "[CSS][CSSOM][CSSStyleRule]")
+  TEST_CASE("CSSStyleRule: cssText", "[CSS][CSSOM][CSSStyleRule][cssom-1:serialize-a-css-rule]")
   {
     auto sheet = SheetFromText(u8"a { } "
                                u8"b, c { color: red; margin: 1px 2px; } "
@@ -26,14 +26,14 @@ namespace krys::boo::css::tests
           == "d {\n  color: red;\n  & e { color: blue; }\n}");
   }
 
-  TEST_CASE("CSSStyleRule: selectorText", "[CSS][CSSOM][CSSStyleRule]")
+  TEST_CASE("CSSStyleRule: selectorText", "[CSS][CSSOM][CSSStyleRule][cssom-1:dom-cssstylerule-selectortext]")
   {
     auto sheet = SheetFromText(u8"a > b, .c { color: red; } d { & e { } }");
     auto &rule = RuleAt<CSSStyleRule>(*sheet, 0);
 
     CHECK(TypeOf(rule) == RuleType::Style);
     CHECK(ToNarrow(rule.SelectorText()) == "a > b, .c");
-    // The text is cached.
+    // Reading it again gives the same text.
     CHECK(ToNarrow(rule.SelectorText()) == "a > b, .c");
 
     SECTION("set")
@@ -62,16 +62,26 @@ namespace krys::boo::css::tests
       CHECK(RuleText(outer) == "d {\n  & f { }\n}");
     }
 
-    SECTION("a rule outside a sheet can't be changed")
+    SECTION("a rule outside a sheet")
     {
       auto standalone = rule.GetStyleRule().CreateCSSOMWrapper();
       auto &wrapper = Downcast<CSSStyleRule>(*standalone);
       wrapper.SetSelectorText(u8"z");
-      CHECK(ToNarrow(wrapper.SelectorText()) == "a > b, .c");
+      CHECK(ToNarrow(wrapper.SelectorText()) == "z");
+    }
+
+    SECTION("a rule removed from its sheet")
+    {
+      RefPtr<CSSRule> removed = ShareRefPtr(&rule);
+      REQUIRE_FALSE(sheet->DeleteRule(0).HasException());
+      auto &wrapper = Downcast<CSSStyleRule>(*removed);
+      wrapper.SetSelectorText(u8"y");
+      CHECK(ToNarrow(wrapper.SelectorText()) == "y");
+      CHECK(RuleText(wrapper) == "y { color: red; }");
     }
   }
 
-  TEST_CASE("CSSStyleRule: style", "[CSS][CSSOM][CSSStyleRule]")
+  TEST_CASE("CSSStyleRule: style", "[CSS][CSSOM][CSSStyleRule][cssom-1:dom-cssstylerule-style]")
   {
     auto sheet = SheetFromText(u8"a { color: red; }");
     auto &rule = RuleAt<CSSStyleRule>(*sheet, 0);
@@ -86,7 +96,8 @@ namespace krys::boo::css::tests
     CHECK(RuleText(rule) == "a { color: red; margin: 1px !important; }");
   }
 
-  TEST_CASE("CSSStyleRule: nested rules", "[CSS][CSSOM][CSSStyleRule]")
+  TEST_CASE("CSSStyleRule: nested rules", "[CSS][CSSOM][CSSStyleRule][cssom-1:insert-a-css-rule]"
+                                          "[cssom-1:remove-a-css-rule]")
   {
     auto sheet = SheetFromText(u8"a { color: red; }");
     auto &rule = RuleAt<CSSStyleRule>(*sheet, 0);
@@ -117,6 +128,7 @@ namespace krys::boo::css::tests
       RefPtr<CSSRule> deleted = ShareRefPtr(rule.Item(1));
       REQUIRE_FALSE(rule.DeleteRule(1).HasException());
       CHECK(deleted->ParentRule() == nullptr);
+      CHECK(deleted->ParentStyleSheet() == nullptr);
       CHECK(rule.Length() == 2);
       CHECK(ExceptionCodeOf(rule.DeleteRule(2)) == ExceptionCode::IndexSizeError);
     }
@@ -125,6 +137,11 @@ namespace krys::boo::css::tests
     {
       CHECK(ExceptionCodeOf(rule.InsertRule(u8"& b { }", 1)) == ExceptionCode::IndexSizeError);
       CHECK(ExceptionCodeOf(rule.InsertRule(u8"x", 0)) == ExceptionCode::SyntaxError);
+      // Declarations that don't parse leave the nested declarations empty.
+      CHECK(ExceptionCodeOf(rule.InsertRule(u8"", 0)) == ExceptionCode::SyntaxError);
+      CHECK(ExceptionCodeOf(rule.InsertRule(u8"not-a-property: 1", 0)) == ExceptionCode::SyntaxError);
+      // A bad index is reported before a syntax error.
+      CHECK(ExceptionCodeOf(rule.InsertRule(u8"x", 5)) == ExceptionCode::IndexSizeError);
       CHECK(rule.InsertRule(u8"@font-face { }", 0).HasException());
       CHECK(rule.Length() == 0);
       CHECK_FALSE(rule.GetStyleRule().IsStyleRuleWithNesting());
@@ -153,24 +170,5 @@ namespace krys::boo::css::tests
     CHECK(outer.Item(0) == &inner);
     CHECK(RuleText(outer) == "a {\n  & b {\n  & c { }\n}\n}");
     CHECK(inner.Item(0)->ParentStyleSheet() == sheet.get());
-  }
-
-  TEST_CASE("CSSNestedDeclarations", "[CSS][CSSOM][CSSNestedDeclarations]")
-  {
-    auto sheet = SheetFromText(u8"a { & b { } color: red; }");
-    auto &outer = RuleAt<CSSStyleRule>(*sheet, 0);
-    REQUIRE(outer.Length() == 2);
-    REQUIRE(Is<CSSNestedDeclarations>(*outer.Item(1)));
-    auto &declarations = Downcast<CSSNestedDeclarations>(*outer.Item(1));
-
-    CHECK(TypeOf(declarations) == RuleType::NestedDeclarations);
-    CHECK(RuleText(declarations) == "color: red;");
-
-    auto &style = declarations.Style();
-    CHECK(&style == &declarations.Style());
-    CHECK(style.ParentRule() == &declarations);
-    REQUIRE_FALSE(style.SetProperty(u8"color", u8"blue", u8"").HasException());
-    CHECK(RuleText(declarations) == "color: blue;");
-    CHECK(RuleText(outer) == "a {\n  & b { }\n  color: blue;\n}");
   }
 }

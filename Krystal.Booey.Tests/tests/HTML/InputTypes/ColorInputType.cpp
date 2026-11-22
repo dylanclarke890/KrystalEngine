@@ -73,11 +73,6 @@ namespace krys::boo::tests
       }
     };
 
-    KRYS_NODISCARD HTMLInputElement &InputById(EditorFixture &fixture, utf8_stringview id) noexcept
-    {
-      return Downcast<HTMLInputElement>(fixture.ById(id));
-    }
-
     /// @brief The swatch (the `::-webkit-color-swatch` part) of a colour input.
     KRYS_NODISCARD boo::Element &Swatch(HTMLInputElement &input) noexcept
     {

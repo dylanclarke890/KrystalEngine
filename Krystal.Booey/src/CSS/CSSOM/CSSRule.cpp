@@ -1,25 +1,4 @@
-﻿/*
- * (C) 1999-2003 Lars Knoll (knoll@kde.org)
- * (C) 2002-2003 Dirk Mueller (mueller@kde.org)
- * Copyright (C) 2002-2021 Apple Inc. All rights reserved.
- *
- * This library is free software; you can redistribute it and/or
- * modify it under the terms of the GNU Library General Public
- * License as published by the Free Software Foundation; either
- * version 2 of the License, or (at your option) any later version.
- *
- * This library is distributed in the hope that it will be useful,
- * but WITHOUT ANY WARRANTY; without even the implied warranty of
- * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU
- * Library General Public License for more details.
- *
- * You should have received a copy of the GNU Library General Public License
- * along with this library; see the file COPYING.LIB.  If not, write to
- * the Free Software Foundation, Inc., 51 Franklin Street, Fifth Floor,
- * Boston, MA 02110-1301, USA.
- */
-
-#include "Krystal.Booey/CSS/CSSOM/CSSRule.hpp"
+﻿#include "Krystal.Booey/CSS/CSSOM/CSSRule.hpp"
 #include "Krystal.Booey/CSS/CSSOM/CSSScopeRule.hpp"
 #include "Krystal.Booey/CSS/CSSOM/CSSStyleRule.hpp"
 #include "Krystal.Booey/CSS/CSSOM/CSSStyleSheet.hpp"
@@ -30,47 +9,35 @@
 
 namespace krys::boo
 {
-  namespace
-  {
-    struct SameSizeAsCSSRule : public RefCounted<SameSizeAsCSSRule>, public CanMakeWeakPtr<SameSizeAsCSSRule>
-    {
-      virtual ~SameSizeAsCSSRule() noexcept;
-
-      uint8 Bitfields;
-      void *PointerUnion;
-    };
-
-    static_assert(sizeof(CSSRule) == sizeof(SameSizeAsCSSRule), "CSSRule should stay small");
-  }
-
-  uint16 CSSRule::TypeForCSSOM() const noexcept
-  {
-    // "This enumeration is thus frozen in its current state, and no new new values will be
-    // added to reflect additional at-rules; all at-rules beyond the ones listed above will return 0."
-    // https://drafts.csswg.org/cssom/#the-cssrule-interface
-    if (StyleRuleType() >= css::FirstUnexposedRuleType)
-    {
-      return 0;
-    }
-    return static_cast<uint16>(StyleRuleType());
-  }
-
   ExceptionOr<void> CSSRule::SetCssText(const CSSOMString &) noexcept
   {
     return {};
   }
 
-  const css::ParserContext &CSSRule::GetParserContext() const noexcept
+  uint16 CSSRule::TypeForCSSOM() const noexcept
   {
-    auto *styleSheet = ParentStyleSheet();
-    return styleSheet ? styleSheet->Contents().GetParserContext() : css::StrictParserContext();
+    switch (StyleRuleType())
+    {
+      case css::RuleType::Style:             return 1;
+      case css::RuleType::Import:            return 3;
+      case css::RuleType::Media:             return 4;
+      case css::RuleType::FontFace:          return 5;
+      case css::RuleType::Keyframes:         return 7;
+      case css::RuleType::Keyframe:          return 8;
+      case css::RuleType::Margin:            return 9;
+      case css::RuleType::Namespace:         return 10;
+      case css::RuleType::CounterStyle:      return 11;
+      case css::RuleType::Supports:          return 12;
+      case css::RuleType::FontFeatureValues: return 14;
+      default:                               return 0;
+    }
   }
 
   bool CSSRule::HasStyleRuleAncestor() const noexcept
   {
-    for (auto *current = ParentRule(); current; current = current->ParentRule())
+    for (auto *rule = ParentRule(); rule; rule = rule->ParentRule())
     {
-      if (current->StyleRuleType() == css::RuleType::Style)
+      if (rule->StyleRuleType() == css::RuleType::Style)
       {
         return true;
       }
@@ -80,13 +47,13 @@ namespace krys::boo
 
   css::NestedContext CSSRule::GetNestedContext() const noexcept
   {
-    for (auto *parentRule = ParentRule(); parentRule; parentRule = parentRule->ParentRule())
+    for (auto *rule = ParentRule(); rule; rule = rule->ParentRule())
     {
-      if (Is<CSSStyleRule>(*parentRule))
+      if (Is<CSSStyleRule>(*rule))
       {
         return css::NestedParserContextType::Style;
       }
-      if (Is<CSSScopeRule>(*parentRule))
+      if (Is<CSSScopeRule>(*rule))
       {
         return css::NestedParserContextType::Scope;
       }
@@ -97,5 +64,15 @@ namespace krys::boo
   RefPtr<css::StyleRuleWithNesting> CSSRule::PrepareChildStyleRuleForNesting(css::StyleRule &) noexcept
   {
     return nullptr;
+  }
+
+  void CSSRule::GetChildStyleSheets(HashSet<RefPtr<CSSStyleSheet>> &) noexcept
+  {
+  }
+
+  const css::ParserContext &CSSRule::GetParserContext() const noexcept
+  {
+    auto *styleSheet = ParentStyleSheet();
+    return styleSheet ? styleSheet->Contents().GetParserContext() : css::StrictParserContext();
   }
 }

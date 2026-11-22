@@ -9,7 +9,7 @@
 
 namespace krys::boo::css::tests
 {
-  TEST_CASE("CSSRule: the CSSOM type", "[CSS][CSSOM][CSSRule]")
+  TEST_CASE("CSSRule: the CSSOM type", "[CSS][CSSOM][CSSRule][cssom-1:dom-cssrule-type]")
   {
     auto sheet = SheetFromText(u8"@import \"a.css\"; "
                                u8"@namespace a url(a); "
@@ -46,7 +46,9 @@ namespace krys::boo::css::tests
     CHECK(typeAt(11) == 0);
   }
 
-  TEST_CASE("CSSRule: parents", "[CSS][CSSOM][CSSRule]")
+  TEST_CASE("CSSRule: parents",
+            "[CSS][CSSOM][CSSRule][cssom-1:dom-cssrule-parentrule][cssom-1:dom-cssrule-parentstylesheet]"
+            "[cssom-1:dom-cssrule-csstext]")
   {
     auto sheet = SheetFromText(u8"@media screen { a { & b { } } } @scope (.c) { d { } }");
 
@@ -91,5 +93,14 @@ namespace krys::boo::css::tests
     CHECK(wrapper->ParentRule() == nullptr);
     CHECK(wrapper->ParentStyleSheet() == nullptr);
     CHECK(RuleText(*wrapper) == "a { color: red; }");
+  }
+
+  TEST_CASE("CSSRule: a keyframe rule's CSSOM type", "[CSS][CSSOM][CSSRule][cssom-1:dom-cssrule-type]")
+  {
+    auto sheet = SheetFromText(u8"@keyframes a { from { color: red; } }");
+    auto &keyframes = RuleAt<CSSKeyframesRule>(*sheet, 0);
+    REQUIRE(keyframes.Item(0));
+    CHECK(keyframes.Item(0)->TypeForCSSOM() == 8); // KEYFRAME_RULE
+    CHECK(keyframes.Item(0)->ParentRule() == &keyframes);
   }
 }

@@ -1,25 +1,4 @@
-﻿/*
- * (C) 1999-2003 Lars Knoll (knoll@kde.org)
- * (C) 2002-2003 Dirk Mueller (mueller@kde.org)
- * Copyright (C) 2002, 2006, 2008, 2012 Apple Inc. All rights reserved.
- *
- * This library is free software; you can redistribute it and/or
- * modify it under the terms of the GNU Library General Public
- * License as published by the Free Software Foundation; either
- * version 2 of the License, or (at your option) any later version.
- *
- * This library is distributed in the hope that it will be useful,
- * but WITHOUT ANY WARRANTY; without even the implied warranty of
- * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU
- * Library General Public License for more details.
- *
- * You should have received a copy of the GNU Library General Public License
- * along with this library; see the file COPYING.LIB.  If not, write to
- * the Free Software Foundation, Inc., 51 Franklin Street, Fifth Floor,
- * Boston, MA 02110-1301, USA.
- */
-
-#pragma once
+﻿#pragma once
 
 #include "Krystal.Booey/CSS/CSSOM/CSSRule.hpp"
 #include "Krystal.Core/Attributes.hpp"
@@ -35,21 +14,24 @@ namespace krys::boo
 {
   class CSSFontFaceDescriptors;
 
-  /// @brief An `@font-face` rule, exposed to scripts.
+  /// @brief An `@font-face` rule, as scripts see it.
   /// @see https://drafts.csswg.org/css-fonts/#cssfontfacerule
   class CSSFontFaceRule final : public CSSRule
   {
   private:
-    Ref<css::FontFaceRule> _fontFaceRule;
-    RefPtr<CSSFontFaceDescriptors> _propertiesCSSOMWrapper;
+    Ref<css::FontFaceRule> _rule;
+    RefPtr<CSSFontFaceDescriptors> _style;
 
     CSSFontFaceRule(css::FontFaceRule &rule, CSSStyleSheet *parent) noexcept;
 
   public:
     ~CSSFontFaceRule() noexcept override;
 
-    KRYS_NODISCARD static Ref<CSSFontFaceRule> Create(css::FontFaceRule &rule, CSSStyleSheet *sheet) noexcept;
+    KRYS_NODISCARD static Ref<CSSFontFaceRule> Create(css::FontFaceRule &rule,
+                                                      CSSStyleSheet *parent) noexcept;
 
+    /// @brief The rule's descriptors, made when first asked for.
+    /// @see https://drafts.csswg.org/css-fonts/#dom-cssfontfacerule-style
     KRYS_NODISCARD CSSFontFaceDescriptors &Style() noexcept;
 
   private:
@@ -58,11 +40,11 @@ namespace krys::boo
       return css::RuleType::FontFace;
     }
 
+    /// @see https://drafts.csswg.org/cssom/#serialize-a-css-rule
     KRYS_NODISCARD CSSOMString CssText() const noexcept final;
 
+    /// @see https://drafts.csswg.org/cssom/#serialize-a-css-rule
     KRYS_NODISCARD CSSOMString CssText(const css::SerialisationContext &context) const noexcept final;
-
-    KRYS_NODISCARD static CSSOMString CssTextInternal(const CSSOMString &declarations) noexcept;
 
     void Reattach(css::Rule &rule) noexcept final;
   };

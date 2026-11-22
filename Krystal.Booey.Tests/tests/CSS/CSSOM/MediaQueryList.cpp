@@ -68,7 +68,8 @@ namespace krys::boo::css::tests
     };
   }
 
-  TEST_CASE_METHOD(MatchMediaFixture, "MediaQueryList: matches", "[CSS][MediaQueryList]")
+  TEST_CASE_METHOD(MatchMediaFixture, "MediaQueryList: matches",
+                   "[CSS][MediaQueryList][cssom-view-1:dom-mediaquerylist-matches]")
   {
     SECTION("Queries are evaluated against the environment")
     {
@@ -131,7 +132,8 @@ namespace krys::boo::css::tests
     }
   }
 
-  TEST_CASE_METHOD(MatchMediaFixture, "MediaQueryList: media", "[CSS][MediaQueryList]")
+  TEST_CASE_METHOD(MatchMediaFixture, "MediaQueryList: media",
+                   "[CSS][MediaQueryList][cssom-view-1:dom-mediaquerylist-media]")
   {
     REQUIRE(Document->Window()->MatchMedia(u8"(MIN-WIDTH: 100PX)")->Media() == u8"(min-width: 100px)");
     REQUIRE(Document->Window()->MatchMedia(u8"screen   and (color),PRINT")->Media()
@@ -141,7 +143,10 @@ namespace krys::boo::css::tests
     REQUIRE(Document->Window()->MatchMedia(u8"foo bar")->Media() == u8"not all");
   }
 
-  TEST_CASE_METHOD(MatchMediaFixture, "MediaQueryList: change events", "[CSS][MediaQueryList]")
+  TEST_CASE_METHOD(
+    MatchMediaFixture, "MediaQueryList: change events",
+    "[CSS][MediaQueryList][cssom-view-1:evaluate-media-queries-and-report-changes]"
+    "[cssom-view-1:dom-mediaquerylist-addlistener][cssom-view-1:dom-mediaquerylist-removelistener]")
   {
     List<ChangeRecord> records;
     Ref<EventListenerCallback> recorder = CreateRef<ChangeRecorder>(records);
@@ -218,7 +223,8 @@ namespace krys::boo::css::tests
     }
   }
 
-  TEST_CASE("MediaQueryListEvent: constructor", "[CSS][MediaQueryList]")
+  TEST_CASE("MediaQueryListEvent: constructor", "[CSS][MediaQueryList][cssom-view-1:dom-mediaquerylistevent-"
+                                                "media][cssom-view-1:dom-mediaquerylistevent-matches]")
   {
     auto defaults = CreateRef<MediaQueryListEvent>(u8"change");
     REQUIRE(defaults->Type() == u8"change");

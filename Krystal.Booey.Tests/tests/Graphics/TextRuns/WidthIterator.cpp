@@ -11,7 +11,7 @@ namespace krys::boo::tests
 {
   namespace
   {
-    KRYS_NODISCARD FontCascade Ahem()
+    KRYS_NODISCARD FontCascade WidthAhem()
     {
       (void)FontDatabase::Singleton().AddFontFile(std::filesystem::path {KRYS_BOOEY_TESTS_DATA_DIR} / "fonts"
                                                   / "Ahem.ttf");
@@ -26,7 +26,7 @@ namespace krys::boo::tests
 
   TEST_CASE("WidthIterator", "[Graphics][WidthIterator]")
   {
-    auto cascade = Ahem();
+    auto cascade = WidthAhem();
 
     SECTION("Glyphs are added per character, with byte offsets")
     {
@@ -179,7 +179,7 @@ namespace krys::boo::tests
 
   TEST_CASE("GlyphBuffer and TextRun", "[Graphics][GlyphBuffer]")
   {
-    auto cascade = Ahem();
+    auto cascade = WidthAhem();
     auto &font = *cascade.PrimaryFont();
 
     SECTION("Glyph buffers")

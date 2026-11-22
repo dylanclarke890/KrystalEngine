@@ -27,12 +27,12 @@ namespace krys::boo::tests
         u8"<none></none><mspace id=sup0042 height=1em width=1em></mspace>"
         u8"<none></none><mspace id=sup0043 height=1em width=1em></mspace>"
         u8"</mmultiscripts><mspace id=ref004 height=1em width=1em></mspace></math>");
-      CHECK(Near(BoxOf(fixture, u8"ref001").X() - BoxOf(fixture, u8"sub001").MaxX(), 30));
-      CHECK(Near(BoxOf(fixture, u8"ref002").X() - BoxOf(fixture, u8"sup002").MaxX(), 30));
-      CHECK(Near(BoxOf(fixture, u8"ref003").X() - BoxOf(fixture, u8"sup003").MaxX(), 30));
-      CHECK(Near(BoxOf(fixture, u8"sup0042").X() - BoxOf(fixture, u8"sup0041").MaxX(), 30));
-      CHECK(Near(BoxOf(fixture, u8"sup0043").X() - BoxOf(fixture, u8"sup0042").MaxX(), 30));
-      CHECK(Near(BoxOf(fixture, u8"ref004").X() - BoxOf(fixture, u8"sup0043").MaxX(), 30));
+      CHECK(Near(MathMLBoxOf(fixture, u8"ref001").X() - MathMLBoxOf(fixture, u8"sub001").MaxX(), 30));
+      CHECK(Near(MathMLBoxOf(fixture, u8"ref002").X() - MathMLBoxOf(fixture, u8"sup002").MaxX(), 30));
+      CHECK(Near(MathMLBoxOf(fixture, u8"ref003").X() - MathMLBoxOf(fixture, u8"sup003").MaxX(), 30));
+      CHECK(Near(MathMLBoxOf(fixture, u8"sup0042").X() - MathMLBoxOf(fixture, u8"sup0041").MaxX(), 30));
+      CHECK(Near(MathMLBoxOf(fixture, u8"sup0043").X() - MathMLBoxOf(fixture, u8"sup0042").MaxX(), 30));
+      CHECK(Near(MathMLBoxOf(fixture, u8"ref004").X() - MathMLBoxOf(fixture, u8"sup0043").MaxX(), 30));
 
       auto *scripts = fixture.ById(u8"s").Renderer();
       REQUIRE(scripts);
@@ -55,7 +55,7 @@ namespace krys::boo::tests
         u8"<none></none><mspace id=sup1042 height=1em width=1em></mspace></mmultiscripts></math>");
       for (const auto *id : {u8"sup102", u8"sup103", u8"sup1041", u8"sup1042"})
       {
-        CHECK(Near(BoxOf(fixture, u8"ref101").MaxY() - BoxOf(fixture, id).MaxY(), 70));
+        CHECK(Near(MathMLBoxOf(fixture, u8"ref101").MaxY() - MathMLBoxOf(fixture, id).MaxY(), 70));
       }
     }
 
@@ -73,7 +73,7 @@ namespace krys::boo::tests
         u8"</mmultiscripts></math>");
       for (const auto *id : {u8"sub301", u8"sub302", u8"sub303", u8"sub304"})
       {
-        CHECK(Near(BoxOf(fixture, id).MaxY() - BoxOf(fixture, u8"ref300").MaxY(), 60));
+        CHECK(Near(MathMLBoxOf(fixture, id).MaxY() - MathMLBoxOf(fixture, u8"ref300").MaxY(), 60));
       }
     }
 
@@ -86,8 +86,8 @@ namespace krys::boo::tests
         u8"</msubsup><mmultiscripts><mspace height=2em width=2em></mspace><none></none><none></none>"
         u8"<mspace id=sub4021 height=1em width=1em></mspace><mspace id=sup4022 height=1em width=1em></mspace>"
         u8"</mmultiscripts></math>");
-      CHECK(Near(BoxOf(fixture, u8"sub4011").Y() - BoxOf(fixture, u8"sup4012").MaxY(), 110));
-      CHECK(Near(BoxOf(fixture, u8"sub4021").Y() - BoxOf(fixture, u8"sup4022").MaxY(), 110));
+      CHECK(Near(MathMLBoxOf(fixture, u8"sub4011").Y() - MathMLBoxOf(fixture, u8"sup4012").MaxY(), 110));
+      CHECK(Near(MathMLBoxOf(fixture, u8"sub4021").Y() - MathMLBoxOf(fixture, u8"sup4022").MaxY(), 110));
     }
   }
 
@@ -102,14 +102,14 @@ namespace krys::boo::tests
         u8"<mspace id=sub height=1em width=1em></mspace><mspace id=sup height=1em width=1em>"
         u8"</mspace><mprescripts></mprescripts><mspace id=presub height=1em width=1em></mspace>"
         u8"<mspace id=presup height=1em width=1em></mspace></mmultiscripts></math>");
-      auto base = BoxOf(fixture, u8"base");
-      CHECK(BoxOf(fixture, u8"presub").MaxX() == base.X());
-      CHECK(BoxOf(fixture, u8"presup").MaxX() == base.X());
-      CHECK(BoxOf(fixture, u8"sub").X() == base.MaxX());
-      CHECK(BoxOf(fixture, u8"sup").X() == base.MaxX());
+      auto base = MathMLBoxOf(fixture, u8"base");
+      CHECK(MathMLBoxOf(fixture, u8"presub").MaxX() == base.X());
+      CHECK(MathMLBoxOf(fixture, u8"presup").MaxX() == base.X());
+      CHECK(MathMLBoxOf(fixture, u8"sub").X() == base.MaxX());
+      CHECK(MathMLBoxOf(fixture, u8"sup").X() == base.MaxX());
       // The space after each pair of scripts, the prescripts' first.
-      CHECK(Near(BoxOf(fixture, u8"m").Width(), 30 + 10 + 20 + 10 + 30));
-      CHECK(Near(base.X() - BoxOf(fixture, u8"m").X(), 30 + 10));
+      CHECK(Near(MathMLBoxOf(fixture, u8"m").Width(), 30 + 10 + 20 + 10 + 30));
+      CHECK(Near(base.X() - MathMLBoxOf(fixture, u8"m").X(), 30 + 10));
     }
 
     SECTION("The subscript is pulled under a large operator's italic correction")
@@ -120,8 +120,8 @@ namespace krys::boo::tests
         u8"<math display=block><msubsup><mo id=o lspace=0 rspace=0 largeop=true>&#x2AFF;</mo>"
         u8"<mspace id=sub height=1em width=1em></mspace><mspace id=sup height=1em width=1em></mspace>"
         u8"</msubsup></math>");
-      CHECK(Near(BoxOf(fixture, u8"sup").X() - BoxOf(fixture, u8"sub").X(), 30));
-      CHECK(Near(BoxOf(fixture, u8"sup").X(), BoxOf(fixture, u8"o").MaxX()));
+      CHECK(Near(MathMLBoxOf(fixture, u8"sup").X() - MathMLBoxOf(fixture, u8"sub").X(), 30));
+      CHECK(Near(MathMLBoxOf(fixture, u8"sup").X(), MathMLBoxOf(fixture, u8"o").MaxX()));
     }
 
     SECTION("Scripts embellish an operator base")
@@ -143,10 +143,10 @@ namespace krys::boo::tests
         u8"<msubsup><mspace id=d width=1em height=1em></mspace><mprescripts></mprescripts>"
         u8"<mspace width=1em height=1em></mspace></msubsup></math>");
       (void)fixture.Document->UpdateLayout();
-      CHECK(BoxOf(fixture, u8"b").Y() == BoxOf(fixture, u8"a").Y());
-      CHECK(BoxOf(fixture, u8"c").Y() == BoxOf(fixture, u8"b").Y());
-      CHECK(BoxOf(fixture, u8"c").X() == BoxOf(fixture, u8"b").MaxX());
-      CHECK(BoxOf(fixture, u8"d").Y() == BoxOf(fixture, u8"a").Y());
+      CHECK(MathMLBoxOf(fixture, u8"b").Y() == MathMLBoxOf(fixture, u8"a").Y());
+      CHECK(MathMLBoxOf(fixture, u8"c").Y() == MathMLBoxOf(fixture, u8"b").Y());
+      CHECK(MathMLBoxOf(fixture, u8"c").X() == MathMLBoxOf(fixture, u8"b").MaxX());
+      CHECK(MathMLBoxOf(fixture, u8"d").Y() == MathMLBoxOf(fixture, u8"a").Y());
     }
   }
 }

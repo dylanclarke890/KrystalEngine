@@ -1,26 +1,4 @@
-﻿/**
- * (C) 1999-2003 Lars Knoll (knoll@kde.org)
- * (C) 2002-2003 Dirk Mueller (mueller@kde.org)
- * Copyright (C) 2002-2020 Apple Inc. All rights reserved.
- * Copyright (C) 2006 Samuel Weinig (sam@webkit.org)
- *
- * This library is free software; you can redistribute it and/or
- * modify it under the terms of the GNU Library General Public
- * License as published by the Free Software Foundation; either
- * version 2 of the License, or (at your option) any later version.
- *
- * This library is distributed in the hope that it will be useful,
- * but WITHOUT ANY WARRANTY; without even the implied warranty of
- * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU
- * Library General Public License for more details.
- *
- * You should have received a copy of the GNU Library General Public License
- * along with this library; see the file COPYING.LIB.  If not, write to
- * the Free Software Foundation, Inc., 51 Franklin Street, Fifth Floor,
- * Boston, MA 02110-1301, USA.
- */
-
-#include "Krystal.Booey/CSS/CSSOM/CSSMediaRule.hpp"
+﻿#include "Krystal.Booey/CSS/CSSOM/CSSMediaRule.hpp"
 #include "Krystal.Booey/CSS/CSSOM/MediaList.hpp"
 #include "Krystal.Booey/CSS/Queries/MediaQueryParser.hpp"
 #include "Krystal.Booey/CSS/Rules/Rule.hpp"
@@ -28,32 +6,32 @@
 
 namespace krys::boo
 {
-  CSSMediaRule::CSSMediaRule(css::MediaRule &mediaRule, CSSStyleSheet *parent) noexcept
-      : CSSConditionRule(mediaRule, parent)
+  CSSMediaRule::CSSMediaRule(css::MediaRule &rule, CSSStyleSheet *parent) noexcept
+      : CSSConditionRule(rule, parent)
   {
   }
 
   CSSMediaRule::~CSSMediaRule() noexcept
   {
-    if (_mediaCSSOMWrapper)
+    // The list can outlive the rule, so it keeps the queries itself.
+    if (_media)
     {
-      _mediaCSSOMWrapper->DetachFromParent();
+      _media->DetachFromParent();
     }
   }
 
-  Ref<CSSMediaRule> CSSMediaRule::Create(css::MediaRule &rule, CSSStyleSheet *sheet) noexcept
+  Ref<CSSMediaRule> CSSMediaRule::Create(css::MediaRule &rule, CSSStyleSheet *parent) noexcept
   {
-    return AdoptRef(*new CSSMediaRule(rule, sheet));
+    return AdoptRef(*new CSSMediaRule(rule, parent));
   }
 
-  const css::mq::MediaQueryList &CSSMediaRule::MediaQueries() const noexcept
+  MediaList *CSSMediaRule::Media() const noexcept
   {
-    return Downcast<css::MediaRule>(GetGroupRule()).MediaQueries();
-  }
-
-  void CSSMediaRule::SetMediaQueries(css::mq::MediaQueryList &&queries) noexcept
-  {
-    Downcast<css::MediaRule>(GetGroupRule()).SetMediaQueries(krys::move(queries));
+    if (!_media)
+    {
+      _media = MediaList::Create(const_cast<CSSMediaRule *>(this));
+    }
+    return _media.get();
   }
 
   CSSOMString CSSMediaRule::CssText() const noexcept
@@ -79,12 +57,13 @@ namespace krys::boo
     return krys::move(builder).ToString();
   }
 
-  MediaList *CSSMediaRule::Media() const noexcept
+  const css::mq::MediaQueryList &CSSMediaRule::MediaQueries() const noexcept
   {
-    if (!_mediaCSSOMWrapper)
-    {
-      _mediaCSSOMWrapper = MediaList::Create(const_cast<CSSMediaRule *>(this));
-    }
-    return _mediaCSSOMWrapper.get();
+    return Downcast<css::MediaRule>(GetGroupRule()).MediaQueries();
+  }
+
+  void CSSMediaRule::SetMediaQueries(css::mq::MediaQueryList &&queries) noexcept
+  {
+    Downcast<css::MediaRule>(GetGroupRule()).SetMediaQueries(krys::move(queries));
   }
 }

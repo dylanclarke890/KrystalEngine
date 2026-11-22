@@ -111,4 +111,45 @@ namespace krys::boo::css::tests
     REQUIRE(media->ParentRule() == nullptr);
     REQUIRE(ToNarrow(media->MediaText()) == "screen");
   }
+
+  TEST_CASE("MediaList: appendMedium and deleteMedium compare parsed queries",
+            "[CSS][CSSOM][MediaList][cssom-1:dom-medialist-appendmedium][cssom-1:dom-medialist-deletemedium]"
+            "[cssom-1:compare-media-queries]")
+  {
+    auto sheet = SheetFromText(u8"a { }");
+    auto &media = *sheet->Media();
+    media.SetMediaText(u8"screen, print");
+
+    // A query already in the list isn't appended again, whatever its case.
+    media.AppendMedium(u8"PRINT");
+    CHECK(ToNarrow(media.MediaText()) == "screen, print");
+
+    // A medium must be a single query.
+    media.AppendMedium(u8"tv, speech");
+    CHECK(ToNarrow(media.MediaText()) == "screen, print");
+
+    // Deleting compares serialisations, so whitespace and case don't matter, and every match goes.
+    media.SetMediaText(u8"screen and (min-width: 100px), print, print");
+    REQUIRE(media.Length() == 3u);
+    REQUIRE_FALSE(media.DeleteMedium(u8"screen   AND (MIN-WIDTH:100px)").HasException());
+    CHECK(ToNarrow(media.MediaText()) == "print, print");
+    REQUIRE_FALSE(media.DeleteMedium(u8"print").HasException());
+    CHECK(media.Length() == 0u);
+
+    // A medium that isn't a single query is ignored rather than not found.
+    media.SetMediaText(u8"print");
+    CHECK_FALSE(media.DeleteMedium(u8"print, screen").HasException());
+    CHECK(media.Length() == 1u);
+  }
+
+  TEST_CASE("MediaList: setting mediaText", "[CSS][CSSOM][MediaList][cssom-1:dom-medialist-mediatext]")
+  {
+    auto sheet = SheetFromText(u8"a { }");
+    auto &media = *sheet->Media();
+    media.SetMediaText(u8"print");
+    media.SetMediaText(u8"");
+    CHECK(media.Length() == 0u);
+    CHECK(media.MediaText().empty());
+    CHECK(media.Item(0).empty());
+  }
 }

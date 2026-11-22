@@ -11,7 +11,7 @@ namespace krys::boo::tests
 
   namespace
   {
-    KRYS_NODISCARD utf8_string Dump(ResolverFixture &fixture) noexcept
+    KRYS_NODISCARD utf8_string DumpLayers(ResolverFixture &fixture) noexcept
     {
       return ExternalRepresentation(fixture.Frame.get(),
                                     {RenderAsTextFlag::ShowAllLayers, RenderAsTextFlag::ShowIDAndClass});
@@ -37,7 +37,7 @@ namespace krys::boo::tests
 
     // Floats stack along the line; the block formatting context root shrinks to avoid them; the clearing
     // block moves below them.
-    CHECK(Dump(fixture) == u8R"(layer at (0,0) size 800x600
+    CHECK(DumpLayers(fixture) == u8R"(layer at (0,0) size 800x600
   RenderView at (0,0) size 800x600
 layer at (0,0) size 800x42
   RenderBlock {HTML} at (0,0) size 800x42
@@ -102,7 +102,7 @@ layer at (101,1) size 140x10
     // #f1 overhangs #o, which #next clears; the flow-root encloses its float; #n2 drops below #n1's margin
     // box; #n1 and #n2 intrude into #c2, where .a can't start above #n2 (CSS 2.1 9.5.1 rule 5) and .b clears
     // them; the root encloses the floats that overhang the body.
-    CHECK(Dump(fixture) == u8R"(layer at (0,0) size 800x600
+    CHECK(DumpLayers(fixture) == u8R"(layer at (0,0) size 800x600
   RenderView at (0,0) size 800x600
 layer at (0,0) size 800x154
   RenderBlock {HTML} at (0,0) size 800x154
@@ -151,7 +151,7 @@ layer at (0,0) size 800x154
     CHECK(BoxOf(fixture, u8"f1").Location() == LayoutPoint(0, 10));
     CHECK(BlockOf(fixture, u8"line").LogicalLeftOffsetForLine(0_lu, 1_lu) == 0_lu);
     CHECK(BlockOf(fixture, u8"line").LogicalLeftOffsetForLine(10_lu, 1_lu) == 30_lu);
-    CHECK(Dump(fixture).contains(u8R"(text run at (30,9) width 19: "two ")"));
+    CHECK(DumpLayers(fixture).contains(u8R"(text run at (30,9) width 19: "two ")"));
 
     // Floats that fit beside the first line go to its top, even after its content.
     CHECK(BoxOf(fixture, u8"f2").Location() == LayoutPoint(0, 0));

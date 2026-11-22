@@ -30,8 +30,6 @@ namespace krys::boo::css::tests
     CHECK(PropertyValueText(*style, u8"--x") == "3");
     CHECK(PropertyValueText(*style, u8"not-a-property").empty());
     CHECK(style->GetPropertyPriority(u8"color").empty());
-    CHECK(style->GetPropertyShorthand(u8"color").empty());
-    CHECK_FALSE(style->IsPropertyImplicit(u8"color"));
     CHECK(style->CssText().empty());
     CHECK_FALSE(style->ParentRule());
 
@@ -72,5 +70,39 @@ namespace krys::boo::css::tests
       CHECK(invalid->Length() == 0);
       CHECK(PropertyValueText(*invalid, u8"color").empty());
     }
+  }
+
+  TEST_CASE_METHOD(ValueFixture, "CSSComputedStyleDeclaration: property names and order",
+                   "[CSS][CSSOM][cssom-1:dom-window-getcomputedstyle]")
+  {
+    style::tests::ResolverFixture fixture {
+      u8"<!DOCTYPE html><style>#a { color: rgb(0, 0, 255); --x: 3 }</style><div id=a></div>"};
+    auto style = fixture.Document->Window()->GetComputedStyle(fixture.ById(u8"a"));
+
+    // A property's name is ASCII case-insensitive; a custom property's isn't.
+    CHECK(PropertyValueText(*style, u8"COLOR") == "rgb(0, 0, 255)");
+    CHECK(PropertyValueText(*style, u8"--X").empty());
+
+    // The longhands come in lexicographical order.
+    auto exposed = static_cast<uint32>(fixture.Document->ExposedComputedCSSPropertyIds().size());
+    auto outOfOrder = 0;
+    for (uint32 index = 1; index < exposed; ++index)
+    {
+      outOfOrder += !(style->Item(index - 1) < style->Item(index));
+    }
+    CHECK(outOfOrder == 0);
+  }
+
+  TEST_CASE_METHOD(ValueFixture, "CSSComputedStyleDeclaration: a disconnected element has no declarations",
+                   "[CSS][CSSOM][cssom-1:dom-window-getcomputedstyle]")
+  {
+    style::tests::ResolverFixture fixture {u8"<!DOCTYPE html><div id=a style=color:red></div>"};
+    auto &a = fixture.ById(u8"a");
+    auto style = fixture.Document->Window()->GetComputedStyle(a);
+    CHECK(style->Length() > 0);
+    REQUIRE_FALSE(a.Remove().HasException());
+    CHECK(style->Length() == 0);
+    CHECK(style->Item(0).empty());
+    CHECK(PropertyValueText(*style, u8"color").empty());
   }
 }

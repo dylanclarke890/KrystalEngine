@@ -13,6 +13,8 @@
 #include "Krystal.Booey/Editing/Markup/Markup.hpp"
 #include "Krystal.Booey/Editing/Selection/FrameSelection.hpp"
 #include "Krystal.Booey/HTML/Elements/HTMLBodyElement.hpp"
+#include "Krystal.Booey/HTML/Elements/HTMLInputElement.hpp"
+#include "Krystal.Booey/HTML/Elements/HTMLOptionElement.hpp"
 #include "Krystal.Booey/Input/EventHandler.hpp"
 #include "Krystal.Booey/Input/LegacyKeyCodes.hpp"
 #include "Krystal.Booey/Input/PlatformKeyboardEvent.hpp"
@@ -475,5 +477,17 @@ namespace krys::boo::tests
     return fixture.Frame->GetEventHandler().KeyEvent(
       PlatformKeyboardEvent(PlatformEvent::Type::RawKeyDown, u8"", u8"", key, key, krys::move(identifier),
                             keyCode, false, false, false, modifiers, {}));
+  }
+
+  /// @brief The `<input>` element with id @p id in @p fixture's document.
+  KRYS_NODISCARD inline HTMLInputElement &InputById(EditorFixture &fixture, utf8_stringview id) noexcept
+  {
+    return Downcast<HTMLInputElement>(fixture.ById(id));
+  }
+
+  /// @brief The `<option>` element with id @p id in @p fixture's document.
+  KRYS_NODISCARD inline HTMLOptionElement &OptionById(EditorFixture &fixture, utf8_stringview id) noexcept
+  {
+    return Downcast<HTMLOptionElement>(fixture.ById(id));
   }
 }

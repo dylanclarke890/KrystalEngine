@@ -25,11 +25,6 @@ namespace krys::boo::tests
     {
       html::EventLoop::Current().RunUntilIdle();
     }
-
-    KRYS_NODISCARD HTMLInputElement &InputById(EditorFixture &fixture, utf8_stringview id) noexcept
-    {
-      return Downcast<HTMLInputElement>(fixture.ById(id));
-    }
   }
 
   TEST_CASE_METHOD(css::tests::ValueFixture, "HTMLTextFormControlElement: shadow trees",

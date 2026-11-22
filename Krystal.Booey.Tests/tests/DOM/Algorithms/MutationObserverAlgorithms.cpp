@@ -44,7 +44,7 @@ namespace krys::boo::dom::tests
       }
     };
 
-    KRYS_NODISCARD Ref<Element> NewElement(Document &document, DOMStringAtom name) noexcept
+    KRYS_NODISCARD Ref<Element> MakeElement(Document &document, DOMStringAtom name) noexcept
     {
       return document.CreateElement(krys::move(name)).ReleaseValue();
     }
@@ -58,7 +58,7 @@ namespace krys::boo::dom::tests
     auto &loop = html::EventLoop::Current();
     loop.RunUntilIdle();
     auto document = CreateRef<Document>();
-    auto parent = NewElement(*document, u8"div");
+    auto parent = MakeElement(*document, u8"div");
     REQUIRE_FALSE(document->AppendChild(*parent).HasException());
     RecordingObserver recorder;
     REQUIRE_FALSE(
@@ -66,7 +66,7 @@ namespace krys::boo::dom::tests
 
     SECTION("in one delivery for every mutation since the last")
     {
-      REQUIRE_FALSE(parent->AppendChild(*NewElement(*document, u8"span")).HasException());
+      REQUIRE_FALSE(parent->AppendChild(*MakeElement(*document, u8"span")).HasException());
       REQUIRE_FALSE(parent->SetAttribute(u8"title", u8"x").HasException());
       CHECK(recorder.Deliveries.empty());
       loop.PerformMicrotaskCheckpoint();
@@ -97,20 +97,20 @@ namespace krys::boo::dom::tests
     auto &loop = html::EventLoop::Current();
     loop.RunUntilIdle();
     auto document = CreateRef<Document>();
-    auto parent = NewElement(*document, u8"div");
-    auto child = NewElement(*document, u8"div");
+    auto parent = MakeElement(*document, u8"div");
+    auto child = MakeElement(*document, u8"div");
     REQUIRE_FALSE(parent->AppendChild(*child).HasException());
     RecordingObserver recorder;
     REQUIRE_FALSE(recorder.Observer->Observe(*parent, {.ChildList = true, .Subtree = true}).HasException());
 
     // The removed child is still observed until the observer is notified.
     REQUIRE_FALSE(parent->RemoveChild(*child).HasException());
-    REQUIRE_FALSE(child->AppendChild(*NewElement(*document, u8"span")).HasException());
+    REQUIRE_FALSE(child->AppendChild(*MakeElement(*document, u8"span")).HasException());
     loop.PerformMicrotaskCheckpoint();
     CHECK(recorder.Deliveries == List<std::string> {"childList,childList"});
 
     // Then it isn't.
-    REQUIRE_FALSE(child->AppendChild(*NewElement(*document, u8"span")).HasException());
+    REQUIRE_FALSE(child->AppendChild(*MakeElement(*document, u8"span")).HasException());
     loop.PerformMicrotaskCheckpoint();
     CHECK(recorder.Deliveries.size() == 1);
   }
@@ -122,10 +122,10 @@ namespace krys::boo::dom::tests
     auto &loop = html::EventLoop::Current();
     loop.RunUntilIdle();
     auto document = CreateRef<HTMLDocument>();
-    auto host = NewElement(*document, u8"div");
+    auto host = MakeElement(*document, u8"div");
     REQUIRE_FALSE(document->AppendChild(*host).HasException());
     auto shadow = host->AttachShadow({}).ReleaseValue();
-    auto slot = NewElement(*document, u8"slot");
+    auto slot = MakeElement(*document, u8"slot");
     REQUIRE_FALSE(shadow->AppendChild(*slot).HasException());
 
     struct Counter : EventListenerCallback
@@ -144,7 +144,7 @@ namespace krys::boo::dom::tests
     slot->AddEventListener(u8"slotchange", counter, false);
 
     // A slottable joining the slot signals a slot change, which fires at the next notification.
-    REQUIRE_FALSE(host->AppendChild(*NewElement(*document, u8"span")).HasException());
+    REQUIRE_FALSE(host->AppendChild(*MakeElement(*document, u8"span")).HasException());
     CHECK(counter->Count == 0);
     loop.PerformMicrotaskCheckpoint();
     CHECK(counter->Count == 1);
@@ -157,8 +157,8 @@ namespace krys::boo::dom::tests
     auto &loop = html::EventLoop::Current();
     loop.RunUntilIdle();
     auto document = CreateRef<Document>();
-    auto first = NewElement(*document, u8"div");
-    auto second = NewElement(*document, u8"div");
+    auto first = MakeElement(*document, u8"div");
+    auto second = MakeElement(*document, u8"div");
 
     List<std::string> order;
     auto older = CreateRef<MutationObserver>([&](const List<Ref<MutationRecord>> &, MutationObserver &)
@@ -169,8 +169,8 @@ namespace krys::boo::dom::tests
     REQUIRE_FALSE(newer->Observe(*second, {.ChildList = true}).HasException());
 
     // The newer observer gets its record first.
-    REQUIRE_FALSE(second->AppendChild(*NewElement(*document, u8"span")).HasException());
-    REQUIRE_FALSE(first->AppendChild(*NewElement(*document, u8"span")).HasException());
+    REQUIRE_FALSE(second->AppendChild(*MakeElement(*document, u8"span")).HasException());
+    REQUIRE_FALSE(first->AppendChild(*MakeElement(*document, u8"span")).HasException());
     loop.PerformMicrotaskCheckpoint();
     CHECK(order == List<std::string> {"older", "newer"});
   }
@@ -182,8 +182,8 @@ namespace krys::boo::dom::tests
     auto &loop = html::EventLoop::Current();
     loop.RunUntilIdle();
     auto document = CreateRef<Document>();
-    auto parent = NewElement(*document, u8"div");
-    auto child = NewElement(*document, u8"div");
+    auto parent = MakeElement(*document, u8"div");
+    auto child = MakeElement(*document, u8"div");
     auto text = document->CreateTextNode(u8"a");
     REQUIRE_FALSE(child->AppendChild(*text).HasException());
     REQUIRE_FALSE(parent->AppendChild(*child).HasException());
@@ -210,9 +210,9 @@ namespace krys::boo::dom::tests
     auto &loop = html::EventLoop::Current();
     loop.RunUntilIdle();
     auto document = CreateRef<Document>();
-    auto parent = NewElement(*document, u8"div");
-    auto child = NewElement(*document, u8"div");
-    auto grandchild = NewElement(*document, u8"div");
+    auto parent = MakeElement(*document, u8"div");
+    auto child = MakeElement(*document, u8"div");
+    auto grandchild = MakeElement(*document, u8"div");
     REQUIRE_FALSE(child->AppendChild(*grandchild).HasException());
     REQUIRE_FALSE(parent->AppendChild(*child).HasException());
     RecordingObserver recorder;
@@ -221,7 +221,7 @@ namespace krys::boo::dom::tests
     // The child's transient observer gives the grandchild one of its own as it's removed.
     REQUIRE_FALSE(parent->RemoveChild(*child).HasException());
     REQUIRE_FALSE(child->RemoveChild(*grandchild).HasException());
-    REQUIRE_FALSE(grandchild->AppendChild(*NewElement(*document, u8"span")).HasException());
+    REQUIRE_FALSE(grandchild->AppendChild(*MakeElement(*document, u8"span")).HasException());
     loop.PerformMicrotaskCheckpoint();
     CHECK(recorder.Deliveries == List<std::string> {"childList,childList,childList"});
   }
@@ -233,8 +233,8 @@ namespace krys::boo::dom::tests
     auto &loop = html::EventLoop::Current();
     loop.RunUntilIdle();
     auto document = CreateRef<Document>();
-    auto parent = NewElement(*document, u8"div");
-    auto child = NewElement(*document, u8"div");
+    auto parent = MakeElement(*document, u8"div");
+    auto child = MakeElement(*document, u8"div");
     REQUIRE_FALSE(parent->AppendChild(*child).HasException());
     REQUIRE_FALSE(child->SetAttribute(u8"title", u8"a").HasException());
 
@@ -294,8 +294,8 @@ namespace krys::boo::dom::tests
     auto &loop = html::EventLoop::Current();
     loop.RunUntilIdle();
     auto document = CreateRef<HTMLDocument>();
-    auto parent = NewElement(*document, u8"div");
-    auto child = NewElement(*document, u8"div");
+    auto parent = MakeElement(*document, u8"div");
+    auto child = MakeElement(*document, u8"div");
     REQUIRE_FALSE(parent->AppendChild(*child).HasException());
     REQUIRE_FALSE(child->SetAttribute(u8"style", u8"color: red").HasException());
 
@@ -319,10 +319,10 @@ namespace krys::boo::dom::tests
     auto &loop = html::EventLoop::Current();
     loop.RunUntilIdle();
     auto document = CreateRef<Document>();
-    auto parent = NewElement(*document, u8"div");
-    auto first = NewElement(*document, u8"a");
-    auto middle = NewElement(*document, u8"b");
-    auto last = NewElement(*document, u8"c");
+    auto parent = MakeElement(*document, u8"div");
+    auto first = MakeElement(*document, u8"a");
+    auto middle = MakeElement(*document, u8"b");
+    auto last = MakeElement(*document, u8"c");
     REQUIRE_FALSE(parent->AppendChild(*first).HasException());
     REQUIRE_FALSE(parent->AppendChild(*last).HasException());
 

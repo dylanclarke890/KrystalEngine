@@ -1,25 +1,4 @@
-﻿/*
- * (C) 1999-2003 Lars Knoll (knoll@kde.org)
- * (C) 2002-2003 Dirk Mueller (mueller@kde.org)
- * Copyright (C) 2002-2025 Apple Inc. All rights reserved.
- *
- * This library is free software; you can redistribute it and/or
- * modify it under the terms of the GNU Library General Public
- * License as published by the Free Software Foundation; either
- * version 2 of the License, or (at your option) any later version.
- *
- * This library is distributed in the hope that it will be useful,
- * but WITHOUT ANY WARRANTY; without even the implied warranty of
- * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU
- * Library General Public License for more details.
- *
- * You should have received a copy of the GNU Library General Public License
- * along with this library; see the file COPYING.LIB.  If not, write to
- * the Free Software Foundation, Inc., 51 Franklin Street, Fifth Floor,
- * Boston, MA 02110-1301, USA.
- */
-
-#pragma once
+﻿#pragma once
 
 #include "Krystal.Booey/CSS/CSSOM/CSSRule.hpp"
 #include "Krystal.Booey/CSS/Queries/MediaQuery.hpp"
@@ -37,37 +16,52 @@ namespace krys::boo
 {
   class MediaList;
 
-  /// @brief An `@import` rule, exposed to scripts.
+  /// @brief An `@import` rule, as scripts see it.
   /// @see https://drafts.csswg.org/cssom/#the-cssimportrule-interface
   class CSSImportRule final : public CSSRule
   {
     friend class MediaList;
 
   private:
-    const Ref<css::ImportRule> _importRule;
-    mutable RefPtr<MediaList> _mediaCSSOMWrapper;
-    mutable RefPtr<CSSStyleSheet> _styleSheetCSSOMWrapper;
+    const Ref<css::ImportRule> _rule;
+    // The media list, which the imported style sheet shares, and the imported style sheet, made when first
+    // asked for.
+    mutable RefPtr<MediaList> _media;
+    mutable RefPtr<CSSStyleSheet> _styleSheet;
 
     CSSImportRule(css::ImportRule &rule, CSSStyleSheet *parent) noexcept;
 
   public:
     ~CSSImportRule() noexcept override;
 
-    KRYS_NODISCARD static Ref<CSSImportRule> Create(css::ImportRule &rule, CSSStyleSheet *sheet) noexcept;
+    KRYS_NODISCARD static Ref<CSSImportRule> Create(css::ImportRule &rule, CSSStyleSheet *parent) noexcept;
 
+#pragma region CSSImportRule - https://drafts.csswg.org/cssom/#the-cssimportrule-interface
+
+    /// @brief The URL the rule gives, as written.
+    /// @see https://drafts.csswg.org/cssom/#dom-cssimportrule-href
     KRYS_NODISCARD CSSOMString Href() const noexcept;
 
+    /// @brief The media queries the imported style sheet applies to, which are its style sheet's.
+    /// @see https://drafts.csswg.org/cssom/#dom-cssimportrule-media
     KRYS_NODISCARD MediaList &Media() const noexcept;
 
-    /// @brief The imported style sheet, or null if it hasn't loaded.
+    /// @brief The imported style sheet, or null until it has loaded.
+    /// @see https://drafts.csswg.org/cssom/#dom-cssimportrule-stylesheet
     KRYS_NODISCARD CSSStyleSheet *GetStyleSheet() const noexcept;
 
-    KRYS_NODISCARD RefPtr<CSSStyleSheet> ProtectedStyleSheet() const noexcept;
-
-    /// @brief The layer the sheet is imported into: empty for an anonymous layer, null for none.
+    /// @brief The cascade layer the style sheet is imported into: empty for an anonymous layer, null for
+    /// none.
+    /// @see https://drafts.csswg.org/cssom/#dom-cssimportrule-layername
     KRYS_NODISCARD Maybe<CSSOMString> LayerName() const noexcept;
 
-    KRYS_NODISCARD CSSOMString SupportsText() const noexcept;
+    /// @brief The condition of the rule's `supports()`, or null if it has none.
+    /// @see https://drafts.csswg.org/cssom/#dom-cssimportrule-supportstext
+    KRYS_NODISCARD Maybe<CSSOMString> SupportsText() const noexcept;
+
+#pragma endregion
+
+    KRYS_NODISCARD RefPtr<CSSStyleSheet> ProtectedStyleSheet() const noexcept;
 
   private:
     KRYS_NODISCARD css::RuleType StyleRuleType() const noexcept final
@@ -75,13 +69,12 @@ namespace krys::boo
       return css::RuleType::Import;
     }
 
+    /// @see https://drafts.csswg.org/cssom/#serialize-a-css-rule
     KRYS_NODISCARD CSSOMString CssText() const noexcept final;
 
     void Reattach(css::Rule &rule) noexcept final;
 
     void GetChildStyleSheets(HashSet<RefPtr<CSSStyleSheet>> &childStyleSheets) noexcept final;
-
-    KRYS_NODISCARD CSSOMString CssTextInternal(const CSSOMString &urlString) const noexcept;
 
     KRYS_NODISCARD const css::mq::MediaQueryList &MediaQueries() const noexcept;
 

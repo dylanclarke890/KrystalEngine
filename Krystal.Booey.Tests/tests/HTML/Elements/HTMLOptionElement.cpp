@@ -6,14 +6,6 @@
 
 namespace krys::boo::tests
 {
-  namespace
-  {
-    KRYS_NODISCARD HTMLOptionElement &OptionById(EditorFixture &fixture, utf8_stringview id) noexcept
-    {
-      return Downcast<HTMLOptionElement>(fixture.ById(id));
-    }
-  }
-
   TEST_CASE_METHOD(
     css::tests::ValueFixture, "HTMLOptionElement: text, value and label",
     "[HTML][HTMLOptionElement][html:get-html-aware-text-content][html:dom-option-text]"

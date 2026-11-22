@@ -45,6 +45,7 @@ namespace krys::boo::css
     return AdoptRef(*new FontFaceSrcLocalValue(krys::move(fontFaceName)));
   }
 
+  /// @see https://drafts.csswg.org/cssom/#serialize-a-local
   CSSOMString FontFaceSrcLocalValue::CustomCSSText(const SerialisationContext &) const noexcept
   {
     StringBuilder result;

@@ -9,7 +9,7 @@ namespace krys::boo::tests
   namespace
   {
     /// @brief 10px Ahem: every glyph is a 10px square.
-    KRYS_NODISCARD FontCascade Ahem() noexcept
+    KRYS_NODISCARD FontCascade TruncationAhem() noexcept
     {
       layout::tests::RegisterAhem();
       FontCascadeDescription description;
@@ -25,7 +25,7 @@ namespace krys::boo::tests
 
   TEST_CASE("StringTruncator", "[Graphics][StringTruncator]")
   {
-    auto font = Ahem();
+    auto font = TruncationAhem();
     const float ellipsisWidth = StringTruncator::Width(Ellipsis, font);
     REQUIRE(StringTruncator::Width(u8"abcdefghij", font) == 100);
 

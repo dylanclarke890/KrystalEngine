@@ -664,7 +664,7 @@ namespace krys::boo::style
       {
         continue;
       }
-      styleSheetsForStyleSheetsList.emplace_back(adoptedStyleSheet);
+      // Adopted sheets apply, but aren't in the StyleSheetList, which holds the tree's own CSS style sheets.
       sheets.emplace_back(adoptedStyleSheet);
     }
 

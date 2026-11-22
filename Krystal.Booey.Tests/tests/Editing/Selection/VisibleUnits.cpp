@@ -29,7 +29,7 @@ namespace krys::boo::tests
       return VisiblePosition(dom::MakeContainerOffsetPosition(ShareRefPtr(&node), offset));
     }
 
-    KRYS_NODISCARD int32 OffsetOf(const VisiblePosition &position) noexcept
+    KRYS_NODISCARD int32 UnitOffsetOf(const VisiblePosition &position) noexcept
     {
       return position.DeepEquivalent().DeprecatedEditingOffset();
     }
@@ -40,24 +40,24 @@ namespace krys::boo::tests
     UnitsFixture fixture(u8"<p id=p>The quick, brown fox.</p>");
     auto &text = fixture.TextIn(u8"p");
 
-    CHECK(OffsetOf(StartOfWord(VisibleAt(text, 6))) == 4);
-    CHECK(OffsetOf(EndOfWord(VisibleAt(text, 6))) == 9);
+    CHECK(UnitOffsetOf(StartOfWord(VisibleAt(text, 6))) == 4);
+    CHECK(UnitOffsetOf(EndOfWord(VisibleAt(text, 6))) == 9);
     // On a boundary, the right word by default, the left word if asked.
-    CHECK(OffsetOf(StartOfWord(VisibleAt(text, 4))) == 4);
-    CHECK(OffsetOf(EndOfWord(VisibleAt(text, 9), WordSide::LeftWordIfOnBoundary)) == 9);
-    CHECK(OffsetOf(StartOfWord(VisibleAt(text, 9), WordSide::LeftWordIfOnBoundary)) == 4);
+    CHECK(UnitOffsetOf(StartOfWord(VisibleAt(text, 4))) == 4);
+    CHECK(UnitOffsetOf(EndOfWord(VisibleAt(text, 9), WordSide::LeftWordIfOnBoundary)) == 9);
+    CHECK(UnitOffsetOf(StartOfWord(VisibleAt(text, 9), WordSide::LeftWordIfOnBoundary)) == 4);
     CHECK(IsStartOfWord(VisibleAt(text, 11)));
     CHECK(!IsStartOfWord(VisibleAt(text, 12)));
 
-    CHECK(OffsetOf(NextWordPosition(VisibleAt(text, 0))) == 3);
-    CHECK(OffsetOf(NextWordPosition(VisibleAt(text, 3))) == 9);
-    CHECK(OffsetOf(PreviousWordPosition(VisibleAt(text, 9))) == 4);
-    CHECK(OffsetOf(PreviousWordPosition(VisibleAt(text, 4))) == 0);
+    CHECK(UnitOffsetOf(NextWordPosition(VisibleAt(text, 0))) == 3);
+    CHECK(UnitOffsetOf(NextWordPosition(VisibleAt(text, 3))) == 9);
+    CHECK(UnitOffsetOf(PreviousWordPosition(VisibleAt(text, 9))) == 4);
+    CHECK(UnitOffsetOf(PreviousWordPosition(VisibleAt(text, 4))) == 0);
 
     // Windows moves right to the start of the next word.
-    CHECK(OffsetOf(RightWordPosition(VisibleAt(text, 0), true)) == 4);
-    CHECK(OffsetOf(RightWordPosition(VisibleAt(text, 0), false)) == 3);
-    CHECK(OffsetOf(LeftWordPosition(VisibleAt(text, 9), true)) == 4);
+    CHECK(UnitOffsetOf(RightWordPosition(VisibleAt(text, 0), true)) == 4);
+    CHECK(UnitOffsetOf(RightWordPosition(VisibleAt(text, 0), false)) == 3);
+    CHECK(UnitOffsetOf(LeftWordPosition(VisibleAt(text, 9), true)) == 4);
   }
 
   TEST_CASE("VisibleUnits: words across elements", "[Editing][VisibleUnits]")
@@ -66,10 +66,10 @@ namespace krys::boo::tests
     auto &b = *fixture.ById(u8"b").FirstChild();
     auto start = StartOfWord(VisibleAt(b, 1));
     CHECK(start.DeepEquivalent().DeprecatedNode() == &fixture.TextIn(u8"p"));
-    CHECK(OffsetOf(start) == 0);
+    CHECK(UnitOffsetOf(start) == 0);
     auto end = EndOfWord(VisibleAt(fixture.TextIn(u8"p"), 1));
     CHECK(end.DeepEquivalent().DeprecatedNode() == &b);
-    CHECK(OffsetOf(end) == 2);
+    CHECK(UnitOffsetOf(end) == 2);
   }
 
   TEST_CASE("VisibleUnits: lines", "[Editing][VisibleUnits]")
@@ -79,25 +79,25 @@ namespace krys::boo::tests
       u8"<p id=p style=width:60px;margin:0>aaaa bbbb cccc</p><p id=q style=margin:0>dd<br>ee</p>");
     auto &text = fixture.TextIn(u8"p");
 
-    CHECK(OffsetOf(StartOfLine(VisibleAt(text, 2))) == 0);
+    CHECK(UnitOffsetOf(StartOfLine(VisibleAt(text, 2))) == 0);
     auto endOfFirstLine = EndOfLine(VisibleAt(text, 2));
-    CHECK(OffsetOf(endOfFirstLine) == 9);
-    CHECK(OffsetOf(StartOfLine(VisibleAt(text, 12))) == 10);
-    CHECK(OffsetOf(EndOfLine(VisibleAt(text, 12))) == 14);
+    CHECK(UnitOffsetOf(endOfFirstLine) == 9);
+    CHECK(UnitOffsetOf(StartOfLine(VisibleAt(text, 12))) == 10);
+    CHECK(UnitOffsetOf(EndOfLine(VisibleAt(text, 12))) == 14);
     CHECK(InSameLine(VisibleAt(text, 1), VisibleAt(text, 3)));
     CHECK(!InSameLine(VisibleAt(text, 1), VisibleAt(text, 12)));
     CHECK(IsStartOfLine(VisibleAt(text, 0)));
     CHECK(IsEndOfLine(VisibleAt(text, 14)));
-    CHECK(OffsetOf(LogicalStartOfLine(VisibleAt(text, 12))) == 10);
+    CHECK(UnitOffsetOf(LogicalStartOfLine(VisibleAt(text, 12))) == 10);
 
     // The positions on the lines above and below, at the same horizontal position.
     auto below = NextLinePosition(VisibleAt(text, 2),
                                   VisibleAt(text, 2).LineDirectionPointForBlockDirectionNavigation());
     CHECK(below.DeepEquivalent().DeprecatedNode() == &text);
-    CHECK(OffsetOf(below) == 12);
+    CHECK(UnitOffsetOf(below) == 12);
     auto above = PreviousLinePosition(VisibleAt(text, 12),
                                       VisibleAt(text, 12).LineDirectionPointForBlockDirectionNavigation());
-    CHECK(OffsetOf(above) == 2);
+    CHECK(UnitOffsetOf(above) == 2);
 
     // A line break ends a line: the position before it is the end of the text.
     auto &q = fixture.TextIn(u8"q");
@@ -113,12 +113,12 @@ namespace krys::boo::tests
     auto &three = *fixture.ById(u8"d").LastChild();
 
     CHECK(StartOfParagraph(VisibleAt(one, 2)).DeepEquivalent().DeprecatedNode() == &one);
-    CHECK(OffsetOf(StartOfParagraph(VisibleAt(one, 2))) == 0);
+    CHECK(UnitOffsetOf(StartOfParagraph(VisibleAt(one, 2))) == 0);
     auto paragraphEnd = EndOfParagraph(VisibleAt(one, 2));
     CHECK(paragraphEnd.DeepEquivalent().DeprecatedNode()
           == fixture.ById(u8"d").FirstChild()->NextSibling()->FirstChild());
-    CHECK(OffsetOf(paragraphEnd) == 3);
-    CHECK(OffsetOf(StartOfParagraph(VisibleAt(three, 2))) == 0);
+    CHECK(UnitOffsetOf(paragraphEnd) == 3);
+    CHECK(UnitOffsetOf(StartOfParagraph(VisibleAt(three, 2))) == 0);
     CHECK(IsStartOfParagraph(VisibleAt(three, 0)));
     CHECK(IsEndOfParagraph(VisibleAt(three, 5)));
     CHECK(!InSameParagraph(VisibleAt(one, 1), VisibleAt(three, 1)));
@@ -132,7 +132,7 @@ namespace krys::boo::tests
     CHECK(IsStartOfDocument(documentStart));
     auto documentEnd = EndOfDocument(&one);
     CHECK(documentEnd.DeepEquivalent().DeprecatedNode() == &fixture.TextIn(u8"p"));
-    CHECK(OffsetOf(documentEnd) == 4);
+    CHECK(UnitOffsetOf(documentEnd) == 4);
     CHECK(IsEndOfDocument(documentEnd));
   }
 
@@ -140,9 +140,9 @@ namespace krys::boo::tests
   {
     UnitsFixture fixture(u8"<p id=p>One two. Three four. Five.</p>");
     auto &text = fixture.TextIn(u8"p");
-    CHECK(OffsetOf(StartOfSentence(VisibleAt(text, 12))) == 9);
-    CHECK(OffsetOf(EndOfSentence(VisibleAt(text, 12))) == 21);
-    CHECK(OffsetOf(StartOfSentence(VisibleAt(text, 3))) == 0);
+    CHECK(UnitOffsetOf(StartOfSentence(VisibleAt(text, 12))) == 9);
+    CHECK(UnitOffsetOf(EndOfSentence(VisibleAt(text, 12))) == 21);
+    CHECK(UnitOffsetOf(StartOfSentence(VisibleAt(text, 3))) == 0);
   }
 
   TEST_CASE("VisibleUnits: editable content", "[Editing][VisibleUnits]")
@@ -151,10 +151,10 @@ namespace krys::boo::tests
     auto &ab = *fixture.ById(u8"e").FirstChild();
     auto start = StartOfEditableContent(VisibleAt(ab, 2));
     CHECK(start.DeepEquivalent().DeprecatedNode() == &ab);
-    CHECK(OffsetOf(start) == 0);
+    CHECK(UnitOffsetOf(start) == 0);
     auto end = EndOfEditableContent(VisibleAt(ab, 2));
     CHECK(end.DeepEquivalent().DeprecatedNode() == fixture.ById(u8"e").LastChild()->FirstChild());
-    CHECK(OffsetOf(end) == 2);
+    CHECK(UnitOffsetOf(end) == 2);
     CHECK(IsEndOfEditableOrNonEditableContent(end) == false);
 
     // The next paragraph's start, skipping over editing boundaries (which needs an editable root).
