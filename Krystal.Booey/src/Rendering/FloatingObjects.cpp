@@ -101,7 +101,7 @@ namespace krys::boo
     return LocationOffsetOfBorderBox() - Renderer()->LocationOffset();
   }
 
-  FloatingObject *FloatingObjectSet::add(UniquePtr<FloatingObject> floatingObject) noexcept
+  FloatingObject *FloatingObjectSet::insert(UniquePtr<FloatingObject> floatingObject) noexcept
   {
     const RenderBox *renderer = floatingObject->Renderer();
     if (auto it = _index.find(renderer); it != _index.end())
@@ -114,7 +114,7 @@ namespace krys::boo
     return position->get();
   }
 
-  void FloatingObjectSet::remove(FloatingObject *floatingObject) noexcept
+  void FloatingObjectSet::erase(FloatingObject *floatingObject) noexcept
   {
     for (auto it = _index.begin(); it != _index.end(); ++it)
     {
@@ -413,7 +413,7 @@ namespace krys::boo
     FindNextFloatLogicalBottomAdapter adapter(Renderer(), logicalHeight);
     if (const FloatingObjectTree *placedFloatsTree = this->PlacedFloatsTree())
     {
-      placedFloatsTree->allOverlapsWithAdapter(adapter);
+      placedFloatsTree->AllOverlapsWithAdapter(adapter);
     }
 
     return adapter.NextShapeLogicalBottom();
@@ -424,7 +424,7 @@ namespace krys::boo
     FindNextFloatLogicalBottomAdapter adapter(Renderer(), logicalHeight);
     if (const FloatingObjectTree *placedFloatsTree = this->PlacedFloatsTree())
     {
-      placedFloatsTree->allOverlapsWithAdapter(adapter);
+      placedFloatsTree->AllOverlapsWithAdapter(adapter);
     }
 
     return adapter.NextLogicalBottom();
@@ -490,7 +490,7 @@ namespace krys::boo
     floatingObject->SetIsPlaced(true);
     if (_placedFloatsTree)
     {
-      _placedFloatsTree->add(IntervalForFloatingObject(floatingObject));
+      _placedFloatsTree->insert(IntervalForFloatingObject(floatingObject));
       floatingObject->SetIsInPlacedTree(true);
     }
   }
@@ -501,7 +501,7 @@ namespace krys::boo
 
     if (_placedFloatsTree)
     {
-      KRYS_MAYBE_UNUSED auto removed = _placedFloatsTree->remove(IntervalForFloatingObject(floatingObject));
+      KRYS_MAYBE_UNUSED auto removed = _placedFloatsTree->erase(IntervalForFloatingObject(floatingObject));
       krys_debug_assert(removed);
       floatingObject->SetIsInPlacedTree(false);
     }
@@ -515,7 +515,7 @@ namespace krys::boo
     {
       AddPlacedObject(floatingObject.get());
     }
-    return _set.add(krys::move(floatingObject));
+    return _set.insert(krys::move(floatingObject));
   }
 
   void FloatingObjects::Remove(FloatingObject *floatingObject) noexcept
@@ -526,13 +526,13 @@ namespace krys::boo
     {
       RemovePlacedObject(floatingObject);
     }
-    _set.remove(floatingObject);
+    _set.erase(floatingObject);
   }
 
   void FloatingObjects::ComputePlacedFloatsTree() noexcept
   {
     krys_debug_assert(!_placedFloatsTree);
-    if (_set.IsEmpty())
+    if (_set.empty())
     {
       return;
     }
@@ -542,7 +542,7 @@ namespace krys::boo
     {
       if (floatingObject->IsPlaced())
       {
-        _placedFloatsTree->add(IntervalForFloatingObject(floatingObject.get()));
+        _placedFloatsTree->insert(IntervalForFloatingObject(floatingObject.get()));
       }
     }
   }
@@ -564,7 +564,7 @@ namespace krys::boo
                                                                                logicalTop, fixedOffset);
     if (const FloatingObjectTree *placedFloatsTree = this->PlacedFloatsTree())
     {
-      placedFloatsTree->allOverlapsWithAdapter(adapter);
+      placedFloatsTree->AllOverlapsWithAdapter(adapter);
     }
 
     if (heightRemaining)
@@ -583,7 +583,7 @@ namespace krys::boo
                                                                                 logicalTop, fixedOffset);
     if (const FloatingObjectTree *placedFloatsTree = this->PlacedFloatsTree())
     {
-      placedFloatsTree->allOverlapsWithAdapter(adapter);
+      placedFloatsTree->AllOverlapsWithAdapter(adapter);
     }
 
     if (heightRemaining)
@@ -601,7 +601,7 @@ namespace krys::boo
       Renderer(), logicalTop, logicalTop + logicalHeight, fixedOffset);
     if (const FloatingObjectTree *placedFloatsTree = this->PlacedFloatsTree())
     {
-      placedFloatsTree->allOverlapsWithAdapter(adapter);
+      placedFloatsTree->AllOverlapsWithAdapter(adapter);
     }
 
     return adapter.Offset();
@@ -614,7 +614,7 @@ namespace krys::boo
       Renderer(), logicalTop, logicalTop + logicalHeight, fixedOffset);
     if (const FloatingObjectTree *placedFloatsTree = this->PlacedFloatsTree())
     {
-      placedFloatsTree->allOverlapsWithAdapter(adapter);
+      placedFloatsTree->AllOverlapsWithAdapter(adapter);
     }
 
     return std::min(fixedOffset, adapter.Offset());

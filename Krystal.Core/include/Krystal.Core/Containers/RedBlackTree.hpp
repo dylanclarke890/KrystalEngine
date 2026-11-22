@@ -176,27 +176,27 @@ namespace krys
       _root = nullptr;
     }
 
-    void add(const T &data) noexcept
+    void insert(const T &data) noexcept
     {
-      add(T {data});
+      insert(T {data});
     }
 
-    void add(T &&data) noexcept
+    void insert(T &&data) noexcept
     {
       InsertNode(new Node(krys::move(data)));
     }
 
     /// @brief Removes one copy of @p data.
-    /// @return Whether @p data was found in the tree.
-    bool remove(const T &data) noexcept
+    /// @return The number of copies removed (0 or 1).
+    size_t erase(const T &data) noexcept
     {
       Node *node = TreeSearch(data);
       if (node)
       {
         DeleteNode(node);
-        return true;
+        return 1;
       }
-      return false;
+      return 0;
     }
 
     KRYS_NODISCARD bool contains(const T &data) const noexcept
@@ -211,7 +211,7 @@ namespace krys
 
     /// @brief Whether the tree is a valid red-black tree: red nodes have black children, and every path to a
     /// leaf has the same number of black nodes.
-    KRYS_NODISCARD bool checkInvariants() const noexcept
+    KRYS_NODISCARD bool CheckInvariants() const noexcept
     {
       int32 blackCount;
       return CheckInvariantsFromNode(_root, blackCount);

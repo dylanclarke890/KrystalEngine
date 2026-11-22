@@ -2785,7 +2785,7 @@ namespace krys::boo
       CreateFloatingObjects();
     }
 
-    if (auto *floatingObject = _floatingObjects->Set().find(floatBox))
+    if (auto *floatingObject = _floatingObjects->Set().Find(floatBox))
     {
       return *floatingObject;
     }
@@ -2800,7 +2800,7 @@ namespace krys::boo
       return;
     }
 
-    if (auto *floatingObject = _floatingObjects->Set().find(floatBox))
+    if (auto *floatingObject = _floatingObjects->Set().Find(floatBox))
     {
       _floatingObjects->Remove(floatingObject);
     }
@@ -2970,13 +2970,13 @@ namespace krys::boo
     }
 
     const FloatingObjectSet &floatingObjectSet = _floatingObjects->Set();
-    if (floatingObjectSet.IsEmpty())
+    if (floatingObjectSet.empty())
     {
       return false;
     }
 
     // If all floats have already been positioned, then we have no work to do.
-    if (floatingObjectSet.Last()->IsPlaced())
+    if (floatingObjectSet.back()->IsPlaced())
     {
       return false;
     }
@@ -3338,7 +3338,7 @@ namespace krys::boo
       return false;
     }
 
-    auto *floatingObject = _floatingObjects->Set().find(renderer);
+    auto *floatingObject = _floatingObjects->Set().Find(renderer);
     if (!floatingObject)
     {
       return false;

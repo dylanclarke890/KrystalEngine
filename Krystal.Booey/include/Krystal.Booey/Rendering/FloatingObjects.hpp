@@ -290,18 +290,18 @@ namespace krys::boo
       return _objects.size();
     }
 
-    KRYS_NODISCARD bool IsEmpty() const noexcept
+    KRYS_NODISCARD bool empty() const noexcept
     {
       return _objects.empty();
     }
 
-    KRYS_NODISCARD const UniquePtr<FloatingObject> &Last() const noexcept
+    KRYS_NODISCARD const UniquePtr<FloatingObject> &back() const noexcept
     {
       return _objects.back();
     }
 
     /// @brief The floating object of @p renderer, or null.
-    KRYS_NODISCARD FloatingObject *find(const RenderBox &renderer) const noexcept
+    KRYS_NODISCARD FloatingObject *Find(const RenderBox &renderer) const noexcept
     {
       auto it = _index.find(&renderer);
       return it != _index.end() ? it->second->get() : nullptr;
@@ -314,9 +314,9 @@ namespace krys::boo
 
     /// @brief Adds @p floatingObject, unless its renderer already has one.
     /// @return The renderer's floating object.
-    FloatingObject *add(UniquePtr<FloatingObject> floatingObject) noexcept;
+    FloatingObject *insert(UniquePtr<FloatingObject> floatingObject) noexcept;
 
-    void remove(FloatingObject *floatingObject) noexcept;
+    void erase(FloatingObject *floatingObject) noexcept;
 
     void clear() noexcept
     {

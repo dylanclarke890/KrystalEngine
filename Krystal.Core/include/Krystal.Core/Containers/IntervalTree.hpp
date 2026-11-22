@@ -198,24 +198,24 @@ namespace krys
     };
 
     /// @brief All the intervals in the tree that overlap @p interval, sorted by the `<` operator.
-    KRYS_NODISCARD List<IntervalType> allOverlaps(const IntervalType &interval) const noexcept
+    KRYS_NODISCARD List<IntervalType> AllOverlaps(const IntervalType &interval) const noexcept
     {
       List<IntervalType> result;
       OverlapsSearchAdapter adapter(result, interval);
-      allOverlapsWithAdapter(adapter);
+      AllOverlapsWithAdapter(adapter);
       return result;
     }
 
     /// @brief Visits the intervals that may overlap `[adapter.LowValue(), adapter.HighValue()]`, in
     /// increasing order of their low endpoints, by calling `adapter.CollectIfNeeded(interval)`.
     template <typename TAdapter>
-    void allOverlapsWithAdapter(TAdapter &adapter) const noexcept
+    void AllOverlapsWithAdapter(TAdapter &adapter) const noexcept
     {
       SearchForOverlapsFrom(this->Root(), adapter);
     }
 
     /// @brief The interval with the smallest low endpoint greater than @p point.
-    KRYS_NODISCARD Maybe<IntervalType> nextIntervalAfter(const T &point) const noexcept
+    KRYS_NODISCARD Maybe<IntervalType> NextIntervalAfter(const T &point) const noexcept
     {
       auto *next = SmallestNodeGreaterThanFrom(point, this->Root());
       if (!next)
@@ -225,9 +225,9 @@ namespace krys
       return next->Data();
     }
 
-    KRYS_NODISCARD bool checkInvariants() const noexcept
+    KRYS_NODISCARD bool CheckInvariants() const noexcept
     {
-      if (!Base::checkInvariants())
+      if (!Base::CheckInvariants())
       {
         return false;
       }

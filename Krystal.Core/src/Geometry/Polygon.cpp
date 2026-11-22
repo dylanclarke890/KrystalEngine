@@ -138,14 +138,14 @@ namespace krys
 
     for (auto &edge : _edges)
     {
-      _edgeTree.add({edge.MinY(), edge.MaxY(), &edge});
+      _edgeTree.insert({edge.MinY(), edge.MaxY(), &edge});
     }
   }
 
   List<std::reference_wrapper<const PolygonEdgeF>> PolygonF::OverlappingEdges(float minY,
                                                                               float maxY) const noexcept
   {
-    auto overlappingEdgeIntervals = _edgeTree.allOverlaps({minY, maxY});
+    auto overlappingEdgeIntervals = _edgeTree.AllOverlaps({minY, maxY});
     List<std::reference_wrapper<const PolygonEdgeF>> edges;
     edges.reserve(overlappingEdgeIntervals.size());
     for (const auto &interval : overlappingEdgeIntervals)

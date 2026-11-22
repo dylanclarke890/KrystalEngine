@@ -588,7 +588,7 @@ namespace krys::boo
 
     KRYS_NODISCARD bool ContainsFloats() const noexcept override
     {
-      return _floatingObjects && !_floatingObjects->Set().IsEmpty();
+      return _floatingObjects && !_floatingObjects->Set().empty();
     }
 
     KRYS_NODISCARD bool ContainsFloat(const RenderBox &renderer) const noexcept;
