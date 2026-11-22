@@ -28,7 +28,6 @@
 #include "Krystal.Booey/CSS/Values/Units.hpp"
 #include "Krystal.Booey/CSS/Values/Value.hpp"
 #include "Krystal.Booey/CSS/Values/ValueId.hpp"
-#include "Krystal.Booey/DOM/Types/ExceptionOr.hpp"
 #include "Krystal.Booey/Graphics/Geometry/LayoutUnit.hpp"
 #include "Krystal.Core/Maths/Extras.hpp"
 #include "Krystal.Core/Memory/NeverDestroyed.hpp"
@@ -194,11 +193,6 @@ namespace krys::boo::css
       return IsRootFontRelativeLength(PrimitiveUnitType());
     }
 
-    KRYS_NODISCARD bool IsQuirkyEms() const noexcept
-    {
-      return PrimitiveType() == UnitType::QuirkyEm;
-    }
-
     KRYS_NODISCARD bool IsLength() const noexcept
     {
       return IsLength(PrimitiveType());
@@ -234,11 +228,6 @@ namespace krys::boo::css
       return UnitCategoryForType(PrimitiveType()) == UnitCategory::Time;
     }
 
-    KRYS_NODISCARD bool IsFrequency() const noexcept
-    {
-      return UnitCategoryForType(PrimitiveType()) == UnitCategory::Frequency;
-    }
-
     KRYS_NODISCARD bool IsCalculated() const noexcept
     {
       return PrimitiveUnitType() == UnitType::Calc;
@@ -247,26 +236,6 @@ namespace krys::boo::css
     KRYS_NODISCARD bool IsCalculatedPercentageWithLength() const noexcept
     {
       return PrimitiveType() == UnitType::CalcPercentageWithLength;
-    }
-
-    KRYS_NODISCARD bool IsDotsPerInch() const noexcept
-    {
-      return PrimitiveType() == UnitType::dpi;
-    }
-
-    KRYS_NODISCARD bool IsDotsPerPixel() const noexcept
-    {
-      return PrimitiveType() == UnitType::dppx;
-    }
-
-    KRYS_NODISCARD bool IsDotsPerCentimeter() const noexcept
-    {
-      return PrimitiveType() == UnitType::dpcm;
-    }
-
-    KRYS_NODISCARD bool IsX() const noexcept
-    {
-      return PrimitiveType() == UnitType::x;
     }
 
     KRYS_NODISCARD bool IsResolution() const noexcept
@@ -350,9 +319,6 @@ namespace krys::boo::css
 
     KRYS_NODISCARD UnitType PrimitiveType() const noexcept;
 
-    /// @brief Exposed for the deprecated CSSOM. Throws if conversion to `targetUnit` is not allowed.
-    KRYS_NODISCARD ExceptionOr<float> FloatValueDeprecated(UnitType targetUnit) const noexcept;
-
 #pragma region Integer (requires IsInteger())
 
     template <typename T = int64>
@@ -360,13 +326,6 @@ namespace krys::boo::css
     {
       krys_debug_assert(IsInteger());
       return Value<T>(conversionData);
-    }
-
-    template <typename T = int64>
-    KRYS_NODISCARD T ResolveAsIntegerNoConversionDataRequired() const noexcept
-    {
-      krys_debug_assert(IsInteger());
-      return ValueNoConversionDataRequired<T>();
     }
 
     template <typename T = int64>
@@ -392,13 +351,6 @@ namespace krys::boo::css
     {
       krys_debug_assert(IsNumberOrInteger());
       return Value<T>(UnitType::Number, conversionData);
-    }
-
-    template <typename T = double>
-    KRYS_NODISCARD T ResolveAsNumberNoConversionDataRequired() const noexcept
-    {
-      krys_debug_assert(IsNumberOrInteger());
-      return ValueNoConversionDataRequired<T>(UnitType::Number);
     }
 
     template <typename T = double>
@@ -438,13 +390,6 @@ namespace krys::boo::css
     {
       krys_debug_assert(IsPercentage());
       return ValueDeprecated<T>();
-    }
-
-    template <typename T = double>
-    KRYS_NODISCARD Maybe<T> ResolveAsPercentageIfNotCalculated() const noexcept
-    {
-      krys_debug_assert(IsPercentage());
-      return ValueIfNotCalculated<T>();
     }
 
 #pragma endregion
@@ -508,13 +453,6 @@ namespace krys::boo::css
     }
 
     template <typename T = double, AngleUnit Unit = UnitTraits<AngleUnit>::Canonical>
-    KRYS_NODISCARD T ResolveAsAngleNoConversionDataRequired() const noexcept
-    {
-      krys_debug_assert(IsAngle());
-      return ClampTo<T>(ComputeAngle<Unit>(PrimitiveType(), DoubleValueNoConversionDataRequired()));
-    }
-
-    template <typename T = double, AngleUnit Unit = UnitTraits<AngleUnit>::Canonical>
     KRYS_NODISCARD T ResolveAsAngleDeprecated() const noexcept
     {
       krys_debug_assert(IsAngle());
@@ -553,13 +491,6 @@ namespace krys::boo::css
     {
       krys_debug_assert(IsTime());
       return ClampTo<T>(ComputeTime<Unit>(PrimitiveType(), DoubleValue(conversionData)));
-    }
-
-    template <typename T = double, TimeUnit Unit = UnitTraits<TimeUnit>::Canonical>
-    KRYS_NODISCARD T ResolveAsTimeNoConversionDataRequired() const noexcept
-    {
-      krys_debug_assert(IsTime());
-      return ClampTo<T>(ComputeTime<Unit>(PrimitiveType(), DoubleValueNoConversionDataRequired()));
     }
 
 #pragma endregion
@@ -649,20 +580,6 @@ namespace krys::boo::css
       return ClampTo<T>(ComputeResolution<Unit>(PrimitiveType(), DoubleValue(conversionData)));
     }
 
-    template <typename T = double, ResolutionUnit Unit = UnitTraits<ResolutionUnit>::Canonical>
-    KRYS_NODISCARD T ResolveAsResolutionNoConversionDataRequired() const noexcept
-    {
-      krys_debug_assert(IsResolution());
-      return ClampTo<T>(ComputeResolution<Unit>(PrimitiveType(), DoubleValueNoConversionDataRequired()));
-    }
-
-    template <typename T = double, ResolutionUnit Unit = UnitTraits<ResolutionUnit>::Canonical>
-    KRYS_NODISCARD T ResolveAsResolutionDeprecated() const noexcept
-    {
-      krys_debug_assert(IsResolution());
-      return ClampTo<T>(ComputeResolution<Unit>(PrimitiveType(), DoubleValueDeprecated()));
-    }
-
 #pragma endregion
 
 #pragma region Flex (requires IsFlex())
@@ -672,13 +589,6 @@ namespace krys::boo::css
     {
       krys_debug_assert(IsFlex());
       return Value<T>(conversionData);
-    }
-
-    template <typename T = double>
-    KRYS_NODISCARD T ResolveAsFlexNoConversionDataRequired() const noexcept
-    {
-      krys_debug_assert(IsFlex());
-      return ValueNoConversionDataRequired<T>();
     }
 
 #pragma endregion
@@ -740,18 +650,6 @@ namespace krys::boo::css
     T ValueDividingBy100IfPercentage(const ToLengthConversionData &conversionData) const noexcept
     {
       return ClampTo<T>(DoubleValueDividingBy100IfPercentage(conversionData));
-    }
-
-    template <typename T = double>
-    KRYS_NODISCARD T ValueDividingBy100IfPercentageNoConversionDataRequired() const noexcept
-    {
-      return ClampTo<T>(DoubleValueDividingBy100IfPercentageNoConversionDataRequired());
-    }
-
-    template <typename T = double>
-    KRYS_NODISCARD T ValueDividingBy100IfPercentageDeprecated() const noexcept
-    {
-      return ClampTo<T>(DoubleValueDividingBy100IfPercentageDeprecated());
     }
 
 #pragma endregion
@@ -849,10 +747,6 @@ namespace krys::boo::css
     KRYS_NODISCARD double DoubleValueDeprecated() const noexcept;
 
     KRYS_NODISCARD double DoubleValueDividingBy100IfPercentage(const ToLengthConversionData &) const noexcept;
-
-    KRYS_NODISCARD double DoubleValueDividingBy100IfPercentageNoConversionDataRequired() const noexcept;
-
-    KRYS_NODISCARD double DoubleValueDividingBy100IfPercentageDeprecated() const noexcept;
 
     template <typename T = double>
     KRYS_NODISCARD T ValueDeprecated() const noexcept

@@ -369,17 +369,6 @@ namespace krys::boo::css
 
 #pragma endregion
 
-  ExceptionOr<float> PrimitiveValue::FloatValueDeprecated(UnitType targetUnit) const noexcept
-  {
-    auto result = DoubleValueInternalDeprecated(targetUnit);
-    if (!result)
-    {
-      return Exception(ExceptionCode::InvalidAccessError);
-    }
-
-    return ClampTo<float>(*result);
-  }
-
 #pragma region Arbitrarily converting
 
   double PrimitiveValue::DoubleValue(UnitType targetUnit,
@@ -433,37 +422,6 @@ namespace krys::boo::css
       return calcValue->PrimitiveType() == UnitType::Percentage
                ? calcValue->DoubleValue(conversionData) / 100.0
                : calcValue->DoubleValue(conversionData);
-    }
-
-    if (IsPercentage())
-    {
-      return _value.Number / 100.0;
-    }
-
-    return _value.Number;
-  }
-
-  double PrimitiveValue::DoubleValueDividingBy100IfPercentageNoConversionDataRequired() const noexcept
-  {
-    krys_debug_assert(IsNumberOrInteger() || IsPercentage());
-    krys_debug_assert(!IsCalculated());
-
-    if (IsPercentage())
-    {
-      return _value.Number / 100.0;
-    }
-
-    return _value.Number;
-  }
-
-  double PrimitiveValue::DoubleValueDividingBy100IfPercentageDeprecated() const noexcept
-  {
-    krys_debug_assert(IsNumberOrInteger() || IsPercentage());
-
-    if (auto *calcValue = CSSCalcValue())
-    {
-      return calcValue->PrimitiveType() == UnitType::Percentage ? calcValue->DoubleValueDeprecated() / 100.0
-                                                                : calcValue->DoubleValueDeprecated();
     }
 
     if (IsPercentage())
