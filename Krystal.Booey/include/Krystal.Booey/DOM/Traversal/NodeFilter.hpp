@@ -57,16 +57,17 @@ namespace krys::boo::dom
     SHOW_NOTATION,
   };
 
+  // whatToShow is a 32-bit mask whose bits past SHOW_NOTATION are unassigned but kept, so the set spans all
+  // 32 and SHOW_ALL can be 0xFFFFFFFF as the spec defines.
   consteval WhatToShowFlag MaxEnumValue(WhatToShowFlag) noexcept
   {
-    return WhatToShowFlag::SHOW_NOTATION;
+    return static_cast<WhatToShowFlag>(31);
   }
 
   using WhatToShow = EnumSet<WhatToShowFlag>;
 
   /// @see https://dom.spec.whatwg.org/#dom-nodefilter-show_all
-  constexpr WhatToShow ShowAll = WhatToShow::FromRaw(
-    static_cast<WhatToShow::StorageType>((1u << (ToUnderlying(MaxEnumValue(WhatToShowFlag {})) + 1u)) - 1u));
+  constexpr WhatToShow ShowAll = WhatToShow::FromRaw(0xFF'FF'FF'FFu);
 }
 
 namespace krys::boo

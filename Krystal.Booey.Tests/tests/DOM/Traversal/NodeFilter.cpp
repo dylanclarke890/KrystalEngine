@@ -25,7 +25,7 @@ namespace krys::boo::dom::tests
     {
       return 1ul << (std::to_underlying(type) - 1u);
     };
-    STATIC_CHECK(ShowAll.ToRaw() == 0xFFFul);
+    STATIC_CHECK(ShowAll.ToRaw() == 0xFF'FF'FF'FFul);
     STATIC_CHECK(WhatToShow {WhatToShowFlag::SHOW_ELEMENT}.ToRaw() == bit(NodeType::ELEMENT_NODE));
     STATIC_CHECK(WhatToShow {WhatToShowFlag::SHOW_ATTRIBUTE}.ToRaw() == bit(NodeType::ATTRIBUTE_NODE));
     STATIC_CHECK(WhatToShow {WhatToShowFlag::SHOW_TEXT}.ToRaw() == bit(NodeType::TEXT_NODE));
