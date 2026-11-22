@@ -31,7 +31,9 @@
 #include "Krystal.Booey/CSS/Values/ToLengthConversionData.hpp"
 #include "Krystal.Booey/CSS/Font/GenericFontFamilyNames.hpp"
 #include "Krystal.Booey/DOM/Nodes/Element.hpp"
+#include "Krystal.Booey/Graphics/Fonts/FontCache.hpp"
 #include "Krystal.Booey/Graphics/Fonts/FontCascade.hpp"
+#include "Krystal.Booey/Graphics/Fonts/FontCascadeFonts.hpp"
 #include "Krystal.Booey/Rendering/RenderView.hpp"
 #include "Krystal.Booey/Rendering/Style/RenderStyle+GettersInlines.hpp"
 #include "Krystal.Booey/Rendering/Style/RenderStyle+SettersInlines.hpp"
@@ -95,6 +97,13 @@ namespace krys::boo::css
     static MainThreadNeverDestroyed<RenderStyle> initialStyle {CreateInitialStyleWithFont()};
     static MainThreadNeverDestroyed<ToLengthConversionData> conversionData {
       *initialStyle.get(), initialStyle.get(), nullptr, nullptr};
+    // Like a document's, the initial font's fonts are made again when the font cache changes.
+    const auto &fontCascade = initialStyle.get()->GetFontCascade();
+    if (auto *fonts = fontCascade.Fonts();
+        !fonts || fonts->Generation() != FontCache::Singleton().Generation())
+    {
+      fontCascade.Update();
+    }
     return conversionData;
   }
 
