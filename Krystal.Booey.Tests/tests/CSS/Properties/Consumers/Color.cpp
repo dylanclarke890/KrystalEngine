@@ -11,7 +11,10 @@
 #include "Krystal.Booey/CSS/Values/Color/DynamicRangeLimit.hpp"
 #include "Krystal.Booey/CSS/Values/Color/DynamicRangeLimitMix.hpp"
 #include "Krystal.Booey/CSS/Values/Color/PlatformColorResolutionState.hpp"
+#include "Krystal.Booey/CSS/Values/ColorValue.hpp"
+#include "Krystal.Booey/CSS/Values/DynamicRangeLimitValue.hpp"
 #include "Krystal.Booey/CSS/Values/Primitives/NumericTypesSerialisation.hpp"
+#include "Krystal.Booey/CSS/Values/PrimitiveValue.hpp"
 #include "Krystal.Booey/CSS/Values/SerialisationContext.hpp"
 #include "Krystal.Booey/Graphics/Color/Color.hpp"
 #include "Krystal.Booey/Graphics/Color/ColorInterpolationMethod.hpp"
@@ -533,7 +536,7 @@ namespace krys::boo::css::tests
     {
       auto value = ConsumeColorValue(u8"red", context);
       REQUIRE(value);
-      CHECK(value->IsPrimitiveValue());
+      CHECK(Is<PrimitiveValue>(*value));
       CHECK(value->ValueId() == ValueId::Red);
       CHECK(CssText(*value) == "red");
     }
@@ -542,7 +545,7 @@ namespace krys::boo::css::tests
     {
       auto value = ConsumeColorValue(u8"#ff8000", context);
       REQUIRE(value);
-      CHECK(value->IsColorValue());
+      CHECK(Is<ColorValue>(*value));
       CHECK(CssText(*value) == "rgb(255, 128, 0)");
       CHECK(ConsumeColorValue(u8"#ff8000", context).get() == value.get());
     }
@@ -551,7 +554,7 @@ namespace krys::boo::css::tests
     {
       auto value = ConsumeColorValue(u8"rgb(0 128 255)", context);
       REQUIRE(value);
-      CHECK(value->IsColorValue());
+      CHECK(Is<ColorValue>(*value));
       CHECK(CssText(*value) == "rgb(0, 128, 255)");
       CHECK(ConsumeColorValue(u8"rgb(0 128 255)", context).get() == value.get());
     }
@@ -560,7 +563,7 @@ namespace krys::boo::css::tests
     {
       auto value = ConsumeColorValue(u8"light-dark(red, blue)", context);
       REQUIRE(value);
-      CHECK(value->IsColorValue());
+      CHECK(Is<ColorValue>(*value));
       CHECK(CssText(*value) == "light-dark(red, blue)");
       CHECK(ConsumeColorValue(u8"light-dark(red, blue)", context).get() != value.get());
     }
@@ -582,7 +585,7 @@ namespace krys::boo::css::tests
 
     auto value = ConsumeValue(u8"no-limit", context, consume);
     REQUIRE(value);
-    CHECK(value->IsDynamicRangeLimitValue());
+    CHECK(Is<DynamicRangeLimitValue>(*value));
     CHECK(CssText(*value) == "no-limit");
 
     CHECK_FALSE(ConsumeValue(u8"high", context, consume));

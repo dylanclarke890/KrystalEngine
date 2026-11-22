@@ -8,7 +8,7 @@ namespace krys::boo::css::tests
   TEST_CASE_METHOD(ValueFixture, "BorderImageWidthValue::Create", "[CSS][Values][BorderImageWidthValue]")
   {
     auto value = BorderImageWidthValue::Create(SideValues {Px(1.0), Px(2.0), Px(3.0), Px(4.0)}, false);
-    CHECK(value->IsBorderImageWidthValue());
+    CHECK(Is<BorderImageWidthValue>(*value));
     CHECK_FALSE(value->OverridesBorderWidths());
     CHECK(CssText(*value->Widths().Top) == "1px");
     CHECK(CssText(*value->Widths().Left) == "4px");

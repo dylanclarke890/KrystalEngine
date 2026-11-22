@@ -58,6 +58,6 @@ namespace krys::boo::css
 KRYS_SPECIALIZE_TYPE_CAST_TRAITS_BEGIN(krys::boo::css::FilterValue)
   KRYS_NODISCARD static bool IsType(const krys::boo::css::Value &value) noexcept
   {
-    return value.IsFilterValue();
+    return value.Type() == krys::boo::css::ValueType::Filter;
   }
 KRYS_SPECIALIZE_TYPE_CAST_TRAITS_END()

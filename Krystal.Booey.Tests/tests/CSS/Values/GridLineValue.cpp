@@ -30,7 +30,7 @@ namespace krys::boo::css::tests
     auto name = Name(u8"header");
     auto value = GridLineValue::Create(span, numeric, name);
 
-    CHECK(value->IsGridLineValue());
+    CHECK(Is<GridLineValue>(*value));
     CHECK(value->SpanValue() == span.get());
     CHECK(value->ProtectedSpanValue() == span);
     CHECK(value->NumericValue() == numeric.get());

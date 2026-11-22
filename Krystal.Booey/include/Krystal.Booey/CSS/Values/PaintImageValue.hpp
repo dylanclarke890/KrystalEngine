@@ -75,6 +75,6 @@ namespace krys::boo::css
 KRYS_SPECIALIZE_TYPE_CAST_TRAITS_BEGIN(krys::boo::css::PaintImageValue)
   KRYS_NODISCARD static bool IsType(const krys::boo::css::Value &value) noexcept
   {
-    return value.IsPaintImageValue();
+    return value.Type() == krys::boo::css::ValueType::PaintImage;
   }
 KRYS_SPECIALIZE_TYPE_CAST_TRAITS_END()

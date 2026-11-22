@@ -20,7 +20,7 @@ namespace krys::boo::css::tests
     SECTION("Style only")
     {
       auto value = FontStyleRangeValue::Create(PrimitiveValue::Create(ValueId::Italic));
-      CHECK(value->IsFontStyleRangeValue());
+      CHECK(Is<FontStyleRangeValue>(*value));
       CHECK(CssText(*value->FontStyleValue) == "italic");
       CHECK_FALSE(value->ObliqueValues);
     }

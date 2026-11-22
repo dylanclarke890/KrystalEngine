@@ -17,7 +17,7 @@ namespace krys::boo::css::tests
   TEST_CASE_METHOD(ValueFixture, "CrossFadeValue::Create", "[CSS][Values][CrossFadeValue]")
   {
     auto value = CrossFade(u8"a", u8"b", 50.0);
-    CHECK(value->IsCrossFadeValue());
+    CHECK(Is<CrossFadeValue>(*value));
     CHECK(value->IsImageGeneratorValue());
     CHECK(value->IsImage());
   }

@@ -87,6 +87,6 @@ namespace krys::boo::css
 KRYS_SPECIALIZE_TYPE_CAST_TRAITS_BEGIN(krys::boo::css::OffsetRotateValue)
   KRYS_NODISCARD static bool IsType(const krys::boo::css::Value &value) noexcept
   {
-    return value.IsOffsetRotateValue();
+    return value.Type() == krys::boo::css::ValueType::OffsetRotate;
   }
 KRYS_SPECIALIZE_TYPE_CAST_TRAITS_END()

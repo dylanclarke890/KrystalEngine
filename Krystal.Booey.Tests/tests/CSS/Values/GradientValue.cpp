@@ -3,6 +3,7 @@
 #include "Krystal.Booey.Tests/CSS/ColorTestUtils.hpp"
 #include "Krystal.Booey.Tests/CSS/ValueTestUtils.hpp"
 #include "Krystal.Booey/CSS/Values/Images/Gradient.hpp"
+#include "Krystal.Booey/CSS/Values/ImageValue.hpp"
 
 namespace krys::boo::css::tests
 {
@@ -39,10 +40,11 @@ namespace krys::boo::css::tests
   TEST_CASE_METHOD(ValueFixture, "GradientValue::Create", "[CSS][Values][GradientValue]")
   {
     auto value = GradientValue::Create(Linear(Vertical {keywords::Bottom {}}));
-    CHECK(value->IsGradientValue());
+    const Value &asValue = *value;
+    CHECK(Is<GradientValue>(asValue));
     CHECK(value->IsImageGeneratorValue());
     CHECK(value->IsImage());
-    CHECK_FALSE(value->IsImageValue());
+    CHECK_FALSE(Is<ImageValue>(asValue));
   }
 
   TEST_CASE_METHOD(ValueFixture, "GradientValue serialisation", "[CSS][Values][GradientValue]")

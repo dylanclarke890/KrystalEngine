@@ -24,6 +24,7 @@
  */
 
 #include "Krystal.Booey/CSS/Values/ImageSetOptionValue.hpp"
+#include "Krystal.Booey/CSS/Values/ImageValue.hpp"
 
 namespace krys::boo::css
 {
@@ -41,21 +42,21 @@ namespace krys::boo::css
 
   Ref<ImageSetOptionValue> ImageSetOptionValue::Create(Ref<Value> &&image) noexcept
   {
-    krys_debug_assert(image->IsImageValue() || image->IsImageGeneratorValue());
+    krys_debug_assert(Is<ImageValue>(*image) || image->IsImageGeneratorValue());
     return AdoptRef(*new ImageSetOptionValue(krys::move(image), PrimitiveValue::Create(1.0, UnitType::x)));
   }
 
   Ref<ImageSetOptionValue> ImageSetOptionValue::Create(Ref<Value> &&image,
                                                        Ref<PrimitiveValue> &&resolution) noexcept
   {
-    krys_debug_assert(image->IsImageValue() || image->IsImageGeneratorValue());
+    krys_debug_assert(Is<ImageValue>(*image) || image->IsImageGeneratorValue());
     return AdoptRef(*new ImageSetOptionValue(krys::move(image), krys::move(resolution)));
   }
 
   Ref<ImageSetOptionValue> ImageSetOptionValue::Create(Ref<Value> &&image, Ref<PrimitiveValue> &&resolution,
                                                        CSSOMString type) noexcept
   {
-    krys_debug_assert(image->IsImageValue() || image->IsImageGeneratorValue());
+    krys_debug_assert(Is<ImageValue>(*image) || image->IsImageGeneratorValue());
     return AdoptRef(*new ImageSetOptionValue(krys::move(image), krys::move(resolution), krys::move(type)));
   }
 

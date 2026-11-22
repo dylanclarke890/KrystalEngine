@@ -9,7 +9,7 @@ namespace krys::boo::css::tests
   TEST_CASE_METHOD(ValueFixture, "SubgridValue::Create", "[CSS][Values][SubgridValue]")
   {
     auto value = SubgridValue::Create({LineNames({u8"a"}), LineNames({u8"b", u8"c"})});
-    CHECK(value->IsSubgridValue());
+    CHECK(Is<SubgridValue>(*value));
     CHECK(value->ContainsValueList());
     REQUIRE(value->Length() == 2u);
     CHECK(CssText(*value->Item(0u)) == "[a]");

@@ -24,7 +24,7 @@ namespace krys::boo::css::tests
   TEST_CASE_METHOD(ValueFixture, "FontValue::Create", "[CSS][Values][FontValue]")
   {
     auto font = FontValue::Create();
-    CHECK(font->IsFontValue());
+    CHECK(Is<FontValue>(*font));
     CHECK_FALSE(font->Style);
     CHECK_FALSE(font->Variant);
     CHECK_FALSE(font->Weight);

@@ -10,7 +10,7 @@ namespace krys::boo::css::tests
     SECTION("Without a mask")
     {
       auto value = ReflectValue::Create(ValueId::Below, Px(5.0), nullptr);
-      CHECK(value->IsReflectValue());
+      CHECK(Is<ReflectValue>(*value));
       CHECK(value->Direction() == ValueId::Below);
       CHECK(CssText(value->Offset()) == "5px");
       CHECK(value->Mask() == nullptr);

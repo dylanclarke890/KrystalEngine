@@ -25,7 +25,7 @@ namespace krys::boo::css::tests
   TEST_CASE_METHOD(ValueFixture, "ColorSchemeValue::Create", "[CSS][Values][ColorSchemeValue]")
   {
     auto value = ColorSchemeValue::Create(Schemes({Ident(u8"light"), Ident(u8"dark")}));
-    CHECK(value->IsColorSchemeValue());
+    CHECK(Is<ColorSchemeValue>(*value));
     CHECK(value->GetColorScheme() == Schemes({Ident(u8"light"), Ident(u8"dark")}));
     CHECK_FALSE(value->GetColorScheme().IsNormal());
   }

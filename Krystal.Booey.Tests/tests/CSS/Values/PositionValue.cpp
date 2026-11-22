@@ -19,9 +19,10 @@ namespace krys::boo::css::tests
   {
     auto position = TwoComponent({keywords::Left {}}, {LengthPercentage<> {10_css_px}});
     auto value = PositionValue::Create(position);
-    CHECK(value->IsPositionValue());
-    CHECK_FALSE(value->IsPositionXValue());
-    CHECK_FALSE(value->IsPositionYValue());
+    const Value &asValue = *value;
+    CHECK(Is<PositionValue>(asValue));
+    CHECK_FALSE(Is<PositionXValue>(asValue));
+    CHECK_FALSE(Is<PositionYValue>(asValue));
     CHECK(value->GetPosition() == position);
     CHECK(CssText(*value) == "left 10px");
 
@@ -37,8 +38,9 @@ namespace krys::boo::css::tests
     PositionX position {
       FourComponentPositionHorizontal {{keywords::Right {}, LengthPercentage<> {5_css_px}}}};
     auto value = PositionXValue::Create(position);
-    CHECK(value->IsPositionXValue());
-    CHECK_FALSE(value->IsPositionValue());
+    const Value &asValue = *value;
+    CHECK(Is<PositionXValue>(asValue));
+    CHECK_FALSE(Is<PositionValue>(asValue));
     CHECK(value->GetPosition() == position);
     CHECK(CssText(*value) == "right 5px");
     CHECK(CssText(*PositionXValue::Create(PositionX {TwoComponentPositionHorizontal {keywords::XStart {}}}))
@@ -55,8 +57,9 @@ namespace krys::boo::css::tests
   {
     PositionY position {FourComponentPositionVertical {{keywords::Top {}, LengthPercentage<> {1_css_em}}}};
     auto value = PositionYValue::Create(position);
-    CHECK(value->IsPositionYValue());
-    CHECK_FALSE(value->IsPositionValue());
+    const Value &asValue = *value;
+    CHECK(Is<PositionYValue>(asValue));
+    CHECK_FALSE(Is<PositionValue>(asValue));
     CHECK(value->GetPosition() == position);
     CHECK(CssText(*value) == "top 1em");
     CHECK(CssText(*PositionYValue::Create(PositionY {TwoComponentPositionVertical {keywords::Center {}}}))

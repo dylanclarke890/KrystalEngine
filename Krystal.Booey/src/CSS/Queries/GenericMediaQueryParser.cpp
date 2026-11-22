@@ -375,7 +375,7 @@ namespace krys::boo::css::mq
           }
           return value && Is<RatioValue>(*value);
 
-        case FeatureSchema::ValueType::CustomProperty: return value && value->IsCustomPropertyValue();
+        case FeatureSchema::ValueType::CustomProperty: return value && Is<CustomPropertyValue>(*value);
       }
       krys_debug_assert_msg(false, "Unknown feature value type");
       return false;

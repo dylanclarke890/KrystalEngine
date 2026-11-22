@@ -28,7 +28,7 @@ namespace krys::boo::css::tests
   TEST_CASE_METHOD(ValueFixture, "FilterValue::Create", "[CSS][Values][FilterValue]")
   {
     auto value = FilterValue::Create(Filters({MakeBlur(2_css_px)}));
-    CHECK(value->IsFilterValue());
+    CHECK(Is<FilterValue>(*value));
     CHECK(value->GetFilter() == Filters({MakeBlur(2_css_px)}));
   }
 

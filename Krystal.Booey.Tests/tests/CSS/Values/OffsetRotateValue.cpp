@@ -20,7 +20,7 @@ namespace krys::boo::css::tests
       auto modifier = PrimitiveValue::Create(ValueId::Auto);
       auto angle = Degrees(45.0);
       auto value = OffsetRotateValue::Create(modifier, angle);
-      CHECK(value->IsOffsetRotateValue());
+      CHECK(Is<OffsetRotateValue>(*value));
       CHECK(value->Modifier() == modifier.get());
       CHECK(value->GetAngle() == angle.get());
     }

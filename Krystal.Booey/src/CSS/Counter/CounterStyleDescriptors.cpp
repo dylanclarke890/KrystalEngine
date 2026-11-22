@@ -176,13 +176,13 @@ namespace krys::boo::css
       return CounterStyleSystem::Symbolic;
     }
 
-    krys_debug_assert(system->IsValueId() || system->IsValuePairValue());
+    krys_debug_assert(system->IsValueId() || Is<ValuePair>(*system));
     auto systemKeyword = ValueId::Invalid;
     if (system->IsValueId())
     {
       systemKeyword = system->ValueId();
     }
-    else if (system->IsValuePairValue())
+    else if (Is<ValuePair>(*system))
     {
       // This value must be `fixed` or `extends`, both of which can or must have an additional component.
       systemKeyword = system->First().ValueId();
@@ -263,7 +263,7 @@ namespace krys::boo::css
     CounterStyleRanges result;
     for (const auto &rangeValue : *list)
     {
-      if (!rangeValue.IsValuePairValue())
+      if (!Is<ValuePair>(rangeValue))
       {
         return {};
       }
@@ -357,8 +357,8 @@ namespace krys::boo::css
     {
       return result;
     }
-    krys_debug_assert(systemValue->IsValueId() || systemValue->IsValuePairValue());
-    if (systemValue->IsValuePairValue())
+    krys_debug_assert(systemValue->IsValueId() || Is<ValuePair>(*systemValue));
+    if (Is<ValuePair>(*systemValue))
     {
       // This value must be `fixed` or `extends`, both of which can or must have an additional component.
       auto &secondValue = systemValue->Second();

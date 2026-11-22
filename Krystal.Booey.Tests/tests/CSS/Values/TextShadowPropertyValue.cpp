@@ -23,7 +23,7 @@ namespace krys::boo::css::tests
   {
     TextShadowProperty shadow {TextShadowProperty::List {FullTextShadow()}};
     auto value = TextShadowPropertyValue::Create(shadow);
-    CHECK(value->IsTextShadowPropertyValue());
+    CHECK(Is<TextShadowPropertyValue>(*value));
     CHECK(value->Shadow() == shadow);
   }
 

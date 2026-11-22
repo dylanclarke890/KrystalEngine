@@ -10,7 +10,7 @@ namespace krys::boo::css::tests
     SECTION("Empty")
     {
       auto value = ViewValue::Create();
-      CHECK(value->IsViewValue());
+      CHECK(Is<ViewValue>(*value));
       CHECK_FALSE(value->Axis());
       CHECK_FALSE(value->StartInset());
       CHECK_FALSE(value->EndInset());

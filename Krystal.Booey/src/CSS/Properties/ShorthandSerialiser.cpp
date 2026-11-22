@@ -681,7 +681,7 @@ namespace krys::boo::css
         // This returns false for implicit initial values that are pairs, which is OK for now.
         krys_debug_assert(index < _shorthand.Size());
         auto *value = _values[index].get();
-        return value && value->IsValuePairValue();
+        return value && Is<ValuePair>(*value);
       }
 
       void Serialise(StringBuilder &builder, const SerialisationContext &context) const noexcept
@@ -1593,7 +1593,7 @@ namespace krys::boo::css
           {
             hasAtLeastOneTrackSize = true;
           }
-          else if (!item.IsGridLineNamesValue())
+          else if (!Is<GridLineNamesValue>(item))
           {
             return false;
           }
@@ -1605,7 +1605,7 @@ namespace krys::boo::css
       Ref<Value> rowTrackSizes = ShareRef(LonghandValue(rowsIndex));
 
       // Make sure the longhands can be expressed in this version of the shorthand.
-      if (!rowTrackSizes->IsValueListValue()
+      if (!Is<ValueList>(*rowTrackSizes)
           || (!IsLonghandValueNone(columnsIndex) && !isValidExplicitTrackList(LonghandValue(columnsIndex))))
       {
         return null;

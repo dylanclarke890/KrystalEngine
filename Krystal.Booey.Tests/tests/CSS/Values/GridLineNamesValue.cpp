@@ -7,7 +7,7 @@ namespace krys::boo::css::tests
   TEST_CASE_METHOD(ValueFixture, "GridLineNamesValue::Create", "[CSS][Values][GridLineNamesValue]")
   {
     auto value = LineNames({u8"header-start", u8"main-start"});
-    CHECK(value->IsGridLineNamesValue());
+    CHECK(Is<GridLineNamesValue>(*value));
     REQUIRE(value->Names().size() == 2uz);
     CHECK(value->Names()[0uz] == u8"header-start");
     CHECK(value->Names()[1uz] == u8"main-start");

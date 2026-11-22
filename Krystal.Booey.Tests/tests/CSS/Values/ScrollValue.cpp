@@ -10,7 +10,7 @@ namespace krys::boo::css::tests
     SECTION("Empty")
     {
       auto value = ScrollValue::Create();
-      CHECK(value->IsScrollValue());
+      CHECK(Is<ScrollValue>(*value));
       CHECK_FALSE(value->Scroller());
       CHECK_FALSE(value->Axis());
     }

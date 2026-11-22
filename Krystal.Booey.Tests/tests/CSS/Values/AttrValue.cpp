@@ -18,7 +18,7 @@ namespace krys::boo::css::tests
     SECTION("Without a fallback")
     {
       auto attr = AttrValue::Create(CSSOMString {u8"data-label"});
-      CHECK(attr->IsAttrValue());
+      CHECK(Is<AttrValue>(*attr));
       CHECK(ToNarrow(attr->AttributeName()) == "data-label");
       CHECK_FALSE(attr->Fallback());
     }

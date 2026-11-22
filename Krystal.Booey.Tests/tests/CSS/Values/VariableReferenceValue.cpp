@@ -15,7 +15,7 @@ namespace krys::boo::css::tests
       auto data = MakeVariableData(u8"var(--x, 1px) solid");
       auto *dataPointer = data.get();
       auto value = VariableReferenceValue::Create(krys::move(data));
-      CHECK(value->IsVariableReferenceValue());
+      CHECK(Is<VariableReferenceValue>(*value));
       CHECK(value->HasVariableReferences());
       CHECK(&value->Data() == dataPointer);
       CHECK(&value->Context() == &value->Data().Context());

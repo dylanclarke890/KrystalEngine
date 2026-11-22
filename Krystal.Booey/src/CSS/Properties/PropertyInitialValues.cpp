@@ -40,8 +40,7 @@ namespace krys::boo::css
   {
     KRYS_NODISCARD bool IsValueIdPair(const Value &value, ValueId valueId) noexcept
     {
-      return value.IsValuePairValue() && IsValueId(value.First(), valueId)
-             && IsValueId(value.Second(), valueId);
+      return Is<ValuePair>(value) && IsValueId(value.First(), valueId) && IsValueId(value.Second(), valueId);
     }
 
     KRYS_NODISCARD bool IsNumber(const PrimitiveValue &value, double number, UnitType type) noexcept
@@ -74,7 +73,7 @@ namespace krys::boo::css
 
     KRYS_NODISCARD bool IsNumericQuad(const Value &value, double number, UnitType type) noexcept
     {
-      return value.IsQuadValue() && IsNumber(Downcast<QuadValue>(value).Sides(), number, type);
+      return Is<QuadValue>(value) && IsNumber(Downcast<QuadValue>(value).Sides(), number, type);
     }
   }
 

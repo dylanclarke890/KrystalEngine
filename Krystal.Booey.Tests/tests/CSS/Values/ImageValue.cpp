@@ -20,7 +20,7 @@ namespace krys::boo::css::tests
     {
       auto url = ImageUrl(u8"images/a.png");
       auto value = ImageValue::Create(url);
-      CHECK(value->IsImageValue());
+      CHECK(Is<ImageValue>(*value));
       CHECK(value->IsImage());
       CHECK_FALSE(value->IsImageGeneratorValue());
       CHECK(value->Url() == url);
@@ -38,7 +38,7 @@ namespace krys::boo::css::tests
     SECTION("Invalid images serialise as an empty string")
     {
       auto value = ImageValue::Create();
-      CHECK(value->IsImageValue());
+      CHECK(Is<ImageValue>(*value));
       CHECK(CssText(*value).empty());
     }
   }

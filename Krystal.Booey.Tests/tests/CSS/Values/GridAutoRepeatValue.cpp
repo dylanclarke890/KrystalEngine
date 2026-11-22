@@ -9,7 +9,7 @@ namespace krys::boo::css::tests
   TEST_CASE_METHOD(ValueFixture, "GridAutoRepeatValue::Create", "[CSS][Values][GridAutoRepeatValue]")
   {
     auto fill = GridAutoRepeatValue::Create(ValueId::AutoFill, {Px(100.0)});
-    CHECK(fill->IsGridAutoRepeatValue());
+    CHECK(Is<GridAutoRepeatValue>(*fill));
     CHECK(fill->ContainsValueList());
     CHECK(fill->AutoRepeatID() == ValueId::AutoFill);
     REQUIRE(fill->Length() == 1u);

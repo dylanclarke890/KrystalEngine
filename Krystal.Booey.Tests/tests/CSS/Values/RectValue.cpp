@@ -9,7 +9,7 @@ namespace krys::boo::css::tests
   {
     auto rect =
       RectValue::Create(SideValues {Px(1.0), Px(2.0), Px(3.0), PrimitiveValue::Create(ValueId::Auto)});
-    CHECK(rect->IsRectValue());
+    CHECK(Is<RectValue>(*rect));
     CHECK(CssText(*rect->Sides().Top) == "1px");
     CHECK(CssText(*rect->Sides().Right) == "2px");
     CHECK(CssText(*rect->Sides().Bottom) == "3px");

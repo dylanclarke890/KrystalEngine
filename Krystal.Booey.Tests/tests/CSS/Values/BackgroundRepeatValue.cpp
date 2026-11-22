@@ -8,7 +8,7 @@ namespace krys::boo::css::tests
   TEST_CASE_METHOD(ValueFixture, "BackgroundRepeatValue::Create", "[CSS][Values][BackgroundRepeatValue]")
   {
     auto value = BackgroundRepeatValue::Create(ValueId::Repeat, ValueId::Space);
-    CHECK(value->IsBackgroundRepeatValue());
+    CHECK(Is<BackgroundRepeatValue>(*value));
     CHECK(value->XValue() == ValueId::Repeat);
     CHECK(value->YValue() == ValueId::Space);
   }

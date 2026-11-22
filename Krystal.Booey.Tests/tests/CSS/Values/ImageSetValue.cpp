@@ -22,7 +22,7 @@ namespace krys::boo::css::tests
   TEST_CASE_METHOD(ValueFixture, "ImageSetValue::Create", "[CSS][Values][ImageSetValue]")
   {
     auto set = ImageSetValue::Create({Option(u8"a.png", 1.0), Option(u8"b.png", 2.0)});
-    CHECK(set->IsImageSetValue());
+    CHECK(Is<ImageSetValue>(*set));
     CHECK(set->IsImage());
     CHECK_FALSE(set->IsImageGeneratorValue());
     CHECK(set->ContainsValueList());

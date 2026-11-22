@@ -15,7 +15,7 @@ namespace krys::boo::css::tests
   TEST_CASE_METHOD(ValueFixture, "PathValue::Create", "[CSS][Values][PathValue]")
   {
     auto value = PathValue::Create(MakePath(u8"M 0 0 L 10 10"));
-    CHECK(value->IsPathValue());
+    CHECK(Is<PathValue>(*value));
     CHECK(value->GetPath() == MakePath(u8"M 0 0 L 10 10"));
   }
 

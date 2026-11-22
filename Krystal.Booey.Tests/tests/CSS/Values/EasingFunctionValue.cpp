@@ -18,7 +18,7 @@ namespace krys::boo::css::tests
   {
     EasingFunction easing {keywords::EaseIn {}};
     auto value = EasingFunctionValue::Create(easing);
-    CHECK(value->IsEasingFunctionValue());
+    CHECK(Is<EasingFunctionValue>(*value));
     CHECK(value->GetEasingFunction() == easing);
   }
 

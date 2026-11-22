@@ -15,7 +15,7 @@ namespace krys::boo::css::tests
   {
     BasicShape shape = CircleFunction {Circle {.Radius = NLP {1_css_px}}};
     auto value = BasicShapeValue::Create(shape);
-    CHECK(value->IsBasicShapeValue());
+    CHECK(Is<BasicShapeValue>(*value));
     CHECK(value->GetShape() == shape);
   }
 

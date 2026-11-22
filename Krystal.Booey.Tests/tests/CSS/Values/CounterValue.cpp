@@ -22,7 +22,7 @@ namespace krys::boo::css::tests
   {
     auto style = PrimitiveValue::Create(ValueId::UpperRoman);
     auto counter = Counters(u8".", style);
-    CHECK(counter->IsCounterValue());
+    CHECK(Is<CounterValue>(*counter));
     CHECK(counter->Identifier() == u8"item");
     CHECK(counter->Separator() == u8".");
     CHECK(counter->CounterStyle().get() == style.get());

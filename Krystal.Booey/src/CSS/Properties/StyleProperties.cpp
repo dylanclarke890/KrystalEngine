@@ -104,7 +104,7 @@ namespace krys::boo::css
       return null;
     }
 
-    if (value->IsColorValue())
+    if (Is<ColorValue>(*value))
     {
       return ColorValue::GetAbsoluteColor(*value);
     }

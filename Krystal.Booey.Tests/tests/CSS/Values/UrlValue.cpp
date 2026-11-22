@@ -19,7 +19,7 @@ namespace krys::boo::css::tests
   {
     auto url = UrlFor(u8"images/a.png");
     auto value = UrlValue::Create(url);
-    CHECK(value->IsUrlValue());
+    CHECK(Is<UrlValue>(*value));
     CHECK(value->Url() == url);
     CHECK(ToNarrow(value->StringValue()) == "images/a.png");
     CHECK(ToNarrow(value->Url().Resolved.String()) == "https://example.com/images/a.png");

@@ -161,6 +161,6 @@ namespace krys::boo::css
 KRYS_SPECIALIZE_TYPE_CAST_TRAITS_BEGIN(krys::boo::css::VariableReferenceValue)
   KRYS_NODISCARD static bool IsType(const krys::boo::css::Value &value) noexcept
   {
-    return value.IsVariableReferenceValue();
+    return value.Type() == krys::boo::css::ValueType::VariableReference;
   }
 KRYS_SPECIALIZE_TYPE_CAST_TRAITS_END()

@@ -11,7 +11,7 @@ namespace krys::boo::css::tests
     SECTION("No arguments")
     {
       auto function = FunctionValue::Create(ValueId::Rotate);
-      CHECK(function->IsFunctionValue());
+      CHECK(Is<FunctionValue>(*function));
       CHECK(function->Name() == ValueId::Rotate);
       CHECK(function->size() == 0u);
       CHECK(CssText(*function) == "rotate()");

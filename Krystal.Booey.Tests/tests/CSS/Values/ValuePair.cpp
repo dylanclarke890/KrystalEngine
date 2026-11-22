@@ -9,7 +9,7 @@ namespace krys::boo::css::tests
   {
     auto pair =
       ValuePair::Create(PrimitiveValue::Create(1.0, UnitType::px), PrimitiveValue::Create(2.0, UnitType::px));
-    CHECK(pair->IsValuePairValue());
+    CHECK(Is<ValuePair>(*pair));
     CHECK(CssText(pair->First()) == "1px");
     CHECK(CssText(pair->Second()) == "2px");
     CHECK(CssText(*pair) == "1px 2px");

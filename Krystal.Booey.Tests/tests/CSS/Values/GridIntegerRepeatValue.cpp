@@ -9,7 +9,7 @@ namespace krys::boo::css::tests
   TEST_CASE_METHOD(ValueFixture, "GridIntegerRepeatValue::Create", "[CSS][Values][GridIntegerRepeatValue]")
   {
     auto value = GridIntegerRepeatValue::Create(PrimitiveValue::CreateInteger(3.0), {Px(100.0), Px(200.0)});
-    CHECK(value->IsGridIntegerRepeatValue());
+    CHECK(Is<GridIntegerRepeatValue>(*value));
     CHECK(value->ContainsValueList());
     CHECK(CssText(value->Repetitions()) == "3");
     REQUIRE(value->Length() == 2u);

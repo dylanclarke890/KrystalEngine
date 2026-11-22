@@ -27,7 +27,7 @@ namespace krys::boo::css::tests
   TEST_CASE_METHOD(ValueFixture, "FilterImageValue::Create", "[CSS][Values][FilterImageValue]")
   {
     auto value = FilterImage(u8"a", SepiaFilter());
-    CHECK(value->IsFilterImageValue());
+    CHECK(Is<FilterImageValue>(*value));
     CHECK(value->IsImageGeneratorValue());
     CHECK(value->IsImage());
   }

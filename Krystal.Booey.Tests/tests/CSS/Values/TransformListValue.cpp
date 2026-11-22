@@ -26,11 +26,11 @@ namespace krys::boo::css::tests
     {
       auto value =
         TransformListValue::Create(ValueListBuilder {TranslateXFunction(10.0), RotateFunction(45.0)});
-      CHECK(value->IsTransformListValue());
+      CHECK(Is<TransformListValue>(*value));
       CHECK(value->ContainsValueList());
       REQUIRE(value->Length() == 2u);
-      CHECK(value->Item(0u)->IsFunctionValue());
-      CHECK(value->Item(1u)->IsFunctionValue());
+      CHECK(Is<FunctionValue>(*value->Item(0u)));
+      CHECK(Is<FunctionValue>(*value->Item(1u)));
     }
 
     SECTION("From a single value")

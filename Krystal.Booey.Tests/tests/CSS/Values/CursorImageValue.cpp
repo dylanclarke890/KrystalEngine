@@ -29,7 +29,7 @@ namespace krys::boo::css::tests
     SECTION("The original URL is the image's URL")
     {
       auto value = CursorImageValue::Create(ImageValue::Create(CursorUrl(u8"a.cur")), nullptr);
-      CHECK(value->IsCursorImageValue());
+      CHECK(Is<CursorImageValue>(*value));
       // Cursor images aren't <image>s.
       CHECK_FALSE(value->IsImage());
       CHECK_FALSE(value->IsImageGeneratorValue());
@@ -94,7 +94,7 @@ namespace krys::boo::css::tests
     auto value = CursorImageValue::Create(ImageValue::Create(CursorUrl(u8"a.cur")), HotSpot(1.0, 2.0));
     auto children = Children(*value);
     REQUIRE(children.size() == 1uz);
-    CHECK(children[0uz]->IsImageValue());
+    CHECK(Is<ImageValue>(*children[0uz]));
 
     CHECK_FALSE(value->MayDependOnBaseUrl());
   }

@@ -22,7 +22,7 @@ namespace krys::boo::css::tests
   TEST_CASE_METHOD(ValueFixture, "DynamicRangeLimitValue::Create", "[CSS][Values][DynamicRangeLimitValue]")
   {
     auto value = DynamicRangeLimitValue::Create(DynamicRangeLimit {keywords::Standard {}});
-    CHECK(value->IsDynamicRangeLimitValue());
+    CHECK(Is<DynamicRangeLimitValue>(*value));
     CHECK(value->GetDynamicRangeLimit() == DynamicRangeLimit {keywords::Standard {}});
   }
 

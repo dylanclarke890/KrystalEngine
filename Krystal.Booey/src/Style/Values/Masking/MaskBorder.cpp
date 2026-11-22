@@ -28,6 +28,7 @@
 #include "Krystal.Booey/CSS/Values/BorderImageWidthValue.hpp"
 #include "Krystal.Booey/CSS/Values/Borders/BorderImage.hpp"
 #include "Krystal.Booey/CSS/Values/ValueList.hpp"
+#include "Krystal.Booey/CSS/Values/ValuePair.hpp"
 #include "Krystal.Booey/Style/Builder/BuilderState.hpp"
 #include "Krystal.Booey/Style/Computed/ComputedStyle+InitialInlines.hpp"
 #include "Krystal.Booey/Style/Values/CSSValueConversion.hpp"
@@ -92,7 +93,7 @@ namespace krys::boo::style
           result.Outset = ConvertCSSValueToStyle<MaskBorderOutset>(state, *outset);
         }
       }
-      else if (current.IsValuePairValue())
+      else if (Is<css::ValuePair>(current))
       {
         result.Repeat = ConvertCSSValueToStyle<MaskBorderRepeat>(state, current);
       }

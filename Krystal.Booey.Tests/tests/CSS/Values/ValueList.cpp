@@ -26,7 +26,7 @@ namespace krys::boo::css::tests
     SECTION("Space-separated overloads")
     {
       auto empty = ValueList::CreateSpaceSeparated({});
-      CHECK(empty->IsValueListValue());
+      CHECK(Is<ValueList>(*empty));
       CHECK(empty->size() == 0u);
       CHECK(CssText(*empty).empty());
 

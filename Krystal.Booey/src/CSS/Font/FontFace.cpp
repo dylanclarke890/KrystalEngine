@@ -156,8 +156,8 @@ namespace krys::boo::css
         {
           return {NormalWeightValue(), NormalWeightValue()};
         }
-        krys_debug_assert(valueList->Item(0)->IsPrimitiveValue());
-        krys_debug_assert(valueList->Item(1)->IsPrimitiveValue());
+        krys_debug_assert(Is<PrimitiveValue>(*valueList->Item(0)));
+        krys_debug_assert(Is<PrimitiveValue>(*valueList->Item(1)));
         auto result0 = style::FontWeightFromCSSValueDeprecated(*valueList->Item(0));
         auto result1 = style::FontWeightFromCSSValueDeprecated(*valueList->Item(1));
         return {result0, result1};
@@ -176,8 +176,8 @@ namespace krys::boo::css
         {
           return {NormalWidthValue(), NormalWidthValue()};
         }
-        krys_debug_assert(valueList->Item(0)->IsPrimitiveValue());
-        krys_debug_assert(valueList->Item(1)->IsPrimitiveValue());
+        krys_debug_assert(Is<PrimitiveValue>(*valueList->Item(0)));
+        krys_debug_assert(Is<PrimitiveValue>(*valueList->Item(1)));
         auto result0 = style::FontStretchFromCSSValueDeprecated(*valueList->Item(0));
         auto result1 = style::FontStretchFromCSSValueDeprecated(*valueList->Item(1));
         return {result0, result1};
