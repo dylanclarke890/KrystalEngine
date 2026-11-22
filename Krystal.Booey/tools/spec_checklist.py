@@ -586,7 +586,7 @@ def GeneratePaged(spec: Spec, sections: list[Section], fragment_links_source: st
     rows = []
     for page, page_sections in pages.items():
         path = spec.page_dir / f"{page}.md"
-        path.write_text(Render(spec, page_sections, kept, page), encoding="utf-8-sig", newline="\r\n")
+        path.write_text(Render(spec, page_sections, kept, page), encoding="utf-8-sig", newline="\n")
         count = sum(len(section.algorithms) for section in page_sections)
         rows.append(f"| [{page_sections[0].title}]({spec.name}/{page}.md) | {len(page_sections)} | {count} |")
     for path in existing:
@@ -605,7 +605,7 @@ def GeneratePaged(spec: Spec, sections: list[Section], fragment_links_source: st
         "| --- | --- | --- |",
         *rows,
     ]
-    spec.output.write_text("\n".join(lines) + "\n", encoding="utf-8-sig", newline="\r\n")
+    spec.output.write_text("\n".join(lines) + "\n", encoding="utf-8-sig", newline="\n")
     print(f"{Relative(spec.output)}: {len(pages)} pages, {len(sections)} sections, {total} algorithms")
 
 
@@ -620,7 +620,7 @@ def Generate(spec: Spec, source: str | None, fragment_links: str | None = None) 
         return
     kept = ReadKept(spec.output)
     spec.output.parent.mkdir(parents=True, exist_ok=True)
-    spec.output.write_text(Render(spec, sections, kept), encoding="utf-8-sig", newline="\r\n")
+    spec.output.write_text(Render(spec, sections, kept), encoding="utf-8-sig", newline="\n")
     total = sum(len(section.algorithms) for section in sections)
     print(f"{Relative(spec.output)}: {len(sections)} sections, {total} algorithms")
 
