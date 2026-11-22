@@ -301,7 +301,7 @@ namespace krys::boo
     // we've set the provider's backing-sharing layers.
     void AddLayerNeedingRepaint(RenderLayer &layer) noexcept
     {
-      _layersPendingRepaint.add(&layer);
+      _layersPendingRepaint.insert(&layer);
     }
 
     void AddBackingSharingCandidate(RenderLayer &candidateLayer, LayoutRect candidateAbsoluteBounds,
@@ -386,7 +386,7 @@ namespace krys::boo
 
     for (auto &candidate : candidates)
     {
-      candidate.SharingLayers.remove(&endLayer);
+      candidate.SharingLayers.erase(&endLayer);
       candidate.ProviderLayer->Backing()->SetBackingSharingLayers(krys::move(candidate.SharingLayers));
     }
     _backingSharingStackingContext = nullptr;
@@ -1038,7 +1038,7 @@ namespace krys::boo
       if (auto *provider =
             backingSharingState.BackingProviderCandidateForLayer(layer, *this, overlapMap, layerExtent))
       {
-        provider->SharingLayers.add(&layer);
+        provider->SharingLayers.insert(&layer);
         compositingReason = IndirectCompositingReason::None;
         providedBackingLayer = provider->ProviderLayer;
       }
@@ -1394,7 +1394,7 @@ namespace krys::boo
     {
       auto *provider = backingSharingState.ExistingBackingProviderCandidateForLayer(layer);
       krys_assert(provider);
-      provider->SharingLayers.add(&layer);
+      provider->SharingLayers.insert(&layer);
       layerPaintsIntoProvidedBacking = true;
     }
 
@@ -1672,7 +1672,7 @@ namespace krys::boo
       layer.DisconnectFromBackingProviderLayer({UpdateBackingSharingFlags::DuringCompositingUpdate});
       for (auto &candidate : sharingState.BackingProviderCandidates())
       {
-        candidate.SharingLayers.remove(&layer);
+        candidate.SharingLayers.erase(&layer);
       }
     }
 

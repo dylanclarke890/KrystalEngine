@@ -13,7 +13,7 @@ namespace krys::boo::style::tests
       css::CommaSeparatedListHashSet<css::CustomIdentifier> result;
       for (const auto *name : names)
       {
-        result.Value.add({CSSOMStringAtom {name}});
+        result.Value.insert({CSSOMStringAtom {name}});
       }
       return result;
     }

@@ -153,7 +153,7 @@ namespace krys::ui
       {
         for (auto &type : customData.OrderedTypes())
         {
-          domTypes.add(type);
+          domTypes.insert(type);
         }
       }
     }
@@ -167,7 +167,7 @@ namespace krys::ui
 
       if (boo::Pasteboard::IsSafeTypeForDOMToReadAndWrite(format))
       {
-        domTypes.add(format);
+        domTypes.insert(format);
       }
     }
 

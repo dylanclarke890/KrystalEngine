@@ -382,7 +382,7 @@ namespace krys::boo::layout
             flexBaseAndHypotheticalMainSizeList[flexItemIndex].HypotheticalMainSize;
           continue;
         }
-        nonFrozenSet.add(flexItemIndex);
+        nonFrozenSet.insert(flexItemIndex);
       }
 
       // 3. Calculate initial free space. Sum the outer sizes of all items on the line, and subtract this from
@@ -528,14 +528,14 @@ namespace krys::boo::layout
         {
           for (auto minimimViolationIndex : minimumViolationList)
           {
-            nonFrozenSet.remove(minimimViolationIndex);
+            nonFrozenSet.erase(minimimViolationIndex);
           }
         }
         else
         {
           for (auto maximumViolationIndex : maximumViolationList)
           {
-            nonFrozenSet.remove(maximumViolationIndex);
+            nonFrozenSet.erase(maximumViolationIndex);
           }
         }
       }

@@ -25,8 +25,8 @@ namespace krys::tests
     const ListHashSet<int> expectedValues {1, 3};
     const ListHashSet<int> expectedCopy {1, 2, 3};
 
-    REQUIRE(values.remove(2));
-    REQUIRE_FALSE(values.remove(4));
+    REQUIRE(values.erase(2));
+    REQUIRE_FALSE(values.erase(4));
     REQUIRE(values == expectedValues);
     REQUIRE(copy == expectedCopy);
 
@@ -40,7 +40,7 @@ namespace krys::tests
     ListHashSet<int> values;
     for (int value : source)
     {
-      values.add(value % 2);
+      values.insert(value % 2);
     }
     const ListHashSet<int> expected {1, 0};
 
@@ -51,19 +51,66 @@ namespace krys::tests
   {
     ListHashSet<int> values {1, 2, 3};
 
-    REQUIRE_FALSE(values.appendOrMoveToLast(1).second);
+    REQUIRE_FALSE(values.AppendOrMoveToLast(1).second);
     REQUIRE(values == ListHashSet<int> {2, 3, 1});
-    REQUIRE(values.appendOrMoveToLast(4).second);
+    REQUIRE(values.AppendOrMoveToLast(4).second);
     REQUIRE(values == ListHashSet<int> {2, 3, 1, 4});
 
-    REQUIRE(values.insertBefore(values.find(1), 5).second);
+    REQUIRE(values.InsertBefore(values.find(1), 5).second);
     REQUIRE(values == ListHashSet<int> {2, 3, 5, 1, 4});
-    REQUIRE_FALSE(values.insertBefore(values.begin(), 4).second);
+    REQUIRE_FALSE(values.InsertBefore(values.begin(), 4).second);
     REQUIRE(values == ListHashSet<int> {2, 3, 5, 1, 4});
-    REQUIRE(values.insertBefore(values.end(), 6).second);
+    REQUIRE(values.InsertBefore(values.end(), 6).second);
     REQUIRE(values.back() == 6);
     REQUIRE(values.contains(5));
-    REQUIRE(values.remove(5));
+    REQUIRE(values.erase(5));
     REQUIRE(values == ListHashSet<int> {2, 3, 1, 4, 6});
+  }
+
+  TEST_CASE("ListHashSet reuses removed slots and keeps the order", "[ListHashSet]")
+  {
+    ListHashSet<int> values {1, 2, 3, 4};
+
+    REQUIRE(values.erase(2) == 1);
+    REQUIRE(values.erase(4) == 1);
+    values.insert(5);
+    values.insert(6);
+    values.insert(7);
+
+    REQUIRE(values == ListHashSet<int> {1, 3, 5, 6, 7});
+    REQUIRE(values.front() == 1);
+    REQUIRE(values.back() == 7);
+    REQUIRE(std::vector<int>(values.rbegin(), values.rend()) == std::vector {7, 6, 5, 3, 1});
+  }
+
+  TEST_CASE("ListHashSet iterators survive inserting and removing other elements", "[ListHashSet]")
+  {
+    ListHashSet<int> values {1, 2, 3};
+    auto two = values.find(2);
+
+    for (int i = 10; i < 100; ++i)
+    {
+      values.insert(i);
+    }
+    REQUIRE(values.erase(1) == 1);
+    REQUIRE(values.erase(99) == 1);
+
+    REQUIRE(*two == 2);
+    REQUIRE(*std::next(two) == 3);
+    REQUIRE(values.erase(two) == values.find(3));
+    REQUIRE(values.size() == 90);
+    REQUIRE(values.front() == 3);
+  }
+
+  TEST_CASE("ListHashSet moves leave the source empty", "[ListHashSet]")
+  {
+    ListHashSet<int> values {1, 2};
+    auto moved = krys::move(values);
+
+    REQUIRE(moved == ListHashSet<int> {1, 2});
+    REQUIRE(values.empty());
+    REQUIRE(values.begin() == values.end());
+    values.insert(3);
+    REQUIRE(values.front() == 3);
   }
 }

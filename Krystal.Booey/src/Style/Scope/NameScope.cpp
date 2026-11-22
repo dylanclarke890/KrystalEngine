@@ -58,7 +58,7 @@ namespace krys::boo::style
     css::CommaSeparatedListHashSet<css::CustomIdentifier> names;
     for (const auto &item : *list)
     {
-      names.Value.add({CSSOMStringAtom {item.StringValue()}});
+      names.Value.insert({CSSOMStringAtom {item.StringValue()}});
     }
 
     return {krys::move(names), state.StyleScopeOrdinal()};

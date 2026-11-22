@@ -281,7 +281,7 @@ namespace krys::boo::style
 
   void Styleable::AnimationWasAdded(WebAnimation &animation) const noexcept
   {
-    (void)EnsureAnimations().add(ShareRef(animation));
+    (void)EnsureAnimations().insert(ShareRef(animation));
   }
 
   namespace
@@ -317,7 +317,7 @@ namespace krys::boo::style
 
   void Styleable::AnimationWasRemoved(WebAnimation &animation) const noexcept
   {
-    (void)EnsureAnimations().remove(ShareRef(animation));
+    (void)EnsureAnimations().erase(ShareRef(animation));
 
     // Now, if we're dealing with a CSS Transition, we remove it from the running transitions map. We don't
     // need to do this for CSS Animations because their timing can be set via CSS to end, which would cause
@@ -515,9 +515,9 @@ namespace krys::boo::style
             matchingAnimation->UpdateKeyframesIfNeeded(currentStyle, afterChangeStyle, resolutionContext);
             newStyleOriginatedAnimations.push_back(
               CreateWeakPtr<StyleOriginatedAnimation>(matchingAnimation.get()));
-            (void)newAnimations.add(matchingAnimation);
+            (void)newAnimations.insert(matchingAnimation);
             // Remove the matched animation from the list of previous animations so we may not match it again.
-            (void)previousAnimations.remove(matchingAnimation);
+            (void)previousAnimations.erase(matchingAnimation);
             foundMatchingAnimation = true;
             break;
           }
@@ -528,7 +528,7 @@ namespace krys::boo::style
           auto cssAnimation = CSSAnimation::Create(*this, Animation {currentAnimation}, currentStyle,
                                                    afterChangeStyle, resolutionContext);
           newStyleOriginatedAnimations.push_back(CreateWeakPtr<StyleOriginatedAnimation>(cssAnimation.get()));
-          (void)newAnimations.add(krys::move(cssAnimation));
+          (void)newAnimations.insert(krys::move(cssAnimation));
         }
       }
     }

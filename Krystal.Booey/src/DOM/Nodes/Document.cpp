@@ -2688,7 +2688,7 @@ namespace krys::boo
   void Document::AddTopLayerElement(Element &element) noexcept
   {
     krys_assert(&element.NodeDocument() == this && !element.IsInTopLayer());
-    KRYS_MAYBE_UNUSED auto result = _topLayerElements.add(ShareRef(element));
+    KRYS_MAYBE_UNUSED auto result = _topLayerElements.insert(ShareRef(element));
     krys_assert(result.second);
   }
 
@@ -2696,8 +2696,8 @@ namespace krys::boo
   {
     krys_assert(&element.NodeDocument() == this && element.IsInTopLayer());
     Ref<Element> protectedElement = ShareRef(element);
-    _topLayerPendingRemovals.remove(protectedElement);
-    KRYS_MAYBE_UNUSED bool didRemove = _topLayerElements.remove(protectedElement);
+    _topLayerPendingRemovals.erase(protectedElement);
+    KRYS_MAYBE_UNUSED bool didRemove = _topLayerElements.erase(protectedElement);
     krys_assert(didRemove);
   }
 
@@ -2710,7 +2710,7 @@ namespace krys::boo
   void Document::AddPendingTopLayerRemoval(Element &element) noexcept
   {
     krys_assert(&element.NodeDocument() == this && element.IsInTopLayer());
-    (void)_topLayerPendingRemovals.add(ShareRef(element));
+    (void)_topLayerPendingRemovals.insert(ShareRef(element));
   }
 
   void Document::ProcessTopLayerRemovals() noexcept
@@ -2746,12 +2746,12 @@ namespace krys::boo
   void Document::AddOpenDialog(HTMLDialogElement &dialog) noexcept
   {
     krys_debug_assert(!_openDialogs.contains(ShareRef(dialog)));
-    _openDialogs.add(ShareRef(dialog));
+    _openDialogs.insert(ShareRef(dialog));
   }
 
   void Document::RemoveOpenDialog(HTMLDialogElement &dialog) noexcept
   {
-    _openDialogs.remove(ShareRef(dialog));
+    _openDialogs.erase(ShareRef(dialog));
   }
 
   // https://html.spec.whatwg.org/#run-light-dismiss-activities

@@ -71,7 +71,7 @@ namespace krys::boo
       auto &inlineFlow = Downcast<RenderInline>(Renderer());
       if (_paintInfo.OutlineObjects)
       {
-        _paintInfo.OutlineObjects->add(&inlineFlow);
+        _paintInfo.OutlineObjects->insert(&inlineFlow);
       }
       return;
     }

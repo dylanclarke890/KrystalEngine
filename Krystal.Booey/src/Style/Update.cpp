@@ -99,7 +99,7 @@ namespace krys::boo::style
     krys_debug_assert(dom::ComposedTreeAncestors(element).First() == parent);
     krys_debug_assert(!_elements.contains(ShareRefPtr<const Element>(&element)));
 
-    _roots.remove(ShareRefPtr<ContainerNode>(&element));
+    _roots.erase(ShareRefPtr<ContainerNode>(&element));
     AddPossibleRoot(parent);
 
     if (elementUpdate.MayNeedRebuildRoot)
@@ -152,7 +152,7 @@ namespace krys::boo::style
   void Update::AddSVGRendererUpdate(SVGElement &element) noexcept
   {
     auto *parent = dom::ComposedTreeAncestors(element).First();
-    _roots.remove(ShareRefPtr<ContainerNode>(&element));
+    _roots.erase(ShareRefPtr<ContainerNode>(&element));
     AddPossibleRoot(parent);
     element.SetNeedsSVGRendererUpdate(true);
   }
@@ -161,14 +161,14 @@ namespace krys::boo::style
   {
     if (!element)
     {
-      _roots.add(ShareRefPtr<ContainerNode>(_document.get()));
+      _roots.insert(ShareRefPtr<ContainerNode>(_document.get()));
       return;
     }
     if (element->NeedsSVGRendererUpdate() || _elements.contains(ShareRefPtr<const Element>(element)))
     {
       return;
     }
-    _roots.add(ShareRefPtr<ContainerNode>(element));
+    _roots.insert(ShareRefPtr<ContainerNode>(element));
   }
 
   void Update::AddPossibleRebuildRoot(Element &element, Element *parent) noexcept
@@ -178,6 +178,6 @@ namespace krys::boo::style
       return;
     }
 
-    _rebuildRoots.add(ShareRefPtr(&element));
+    _rebuildRoots.insert(ShareRefPtr(&element));
   }
 }

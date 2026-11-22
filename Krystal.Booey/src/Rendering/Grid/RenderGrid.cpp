@@ -1363,7 +1363,7 @@ namespace krys::boo
       for (auto trackIndex = autoRepeatTracksRange.Begin(); trackIndex < autoRepeatTracksRange.End();
            ++trackIndex)
       {
-        emptyTrackIndexes->add(trackIndex);
+        emptyTrackIndexes->insert(trackIndex);
       }
     }
     else
@@ -1378,7 +1378,7 @@ namespace krys::boo
           {
             emptyTrackIndexes = CreateUnique<OrderedTrackIndexSet>();
           }
-          emptyTrackIndexes->add(trackIndex);
+          emptyTrackIndexes->insert(trackIndex);
         }
       }
     }

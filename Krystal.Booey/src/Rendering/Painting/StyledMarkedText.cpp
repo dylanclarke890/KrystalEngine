@@ -305,7 +305,7 @@ namespace krys::boo
     {
       if (markedText.HighlightName != null)
       {
-        markedTextsNames.add(markedText.HighlightName);
+        markedTextsNames.insert(markedText.HighlightName);
       }
     }
 

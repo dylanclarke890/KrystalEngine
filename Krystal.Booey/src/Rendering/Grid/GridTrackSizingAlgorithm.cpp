@@ -1775,7 +1775,7 @@ namespace krys::boo
           : gridItemParent->IsSubgridRows();
       if (cachingRowSubgridsForRootGrid && gridItemParentIsSubgridRowsOfRootGrid)
       {
-        _rowSubgridsWithBaselineAlignedItems.add(gridItemParent);
+        _rowSubgridsWithBaselineAlignedItems.insert(gridItemParent);
       }
     }
   }
