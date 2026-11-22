@@ -53,7 +53,7 @@ namespace krys::boo::inline_iterator
 
   TextBoxIterator &TextBoxIterator::TraverseNextTextBox() noexcept
   {
-    SwitchOn(_box._pathVariant, [](auto &path) { path.TraverseNextTextBox(); });
+    _box._path.TraverseNextTextBox();
     return *this;
   }
 

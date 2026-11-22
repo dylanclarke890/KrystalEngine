@@ -102,8 +102,7 @@ namespace krys::boo::inline_iterator
   {
     krys_debug_assert(HasEllipsis());
 
-    auto visualRect = SwitchOn(_pathVariant, [](const auto &path)
-                               { return path.EllipsisVisualRectIgnoringBlockDirection(); });
+    auto visualRect = _path.EllipsisVisualRectIgnoringBlockDirection();
 
     // FIXME: Add pixel snapping here.
     if (adjustedForSelection == AdjustedForSelection::No)
@@ -165,12 +164,12 @@ namespace krys::boo::inline_iterator
 
   LeafBoxIterator LineBox::LineLeftmostLeafBox() const noexcept
   {
-    return SwitchOn(_pathVariant, [](const auto &path) { return LeafBoxIterator {path.FirstLeafBox()}; });
+    return LeafBoxIterator {_path.FirstLeafBox()};
   }
 
   LeafBoxIterator LineBox::LineRightmostLeafBox() const noexcept
   {
-    return SwitchOn(_pathVariant, [](const auto &path) { return LeafBoxIterator {path.LastLeafBox()}; });
+    return LeafBoxIterator {_path.LastLeafBox()};
   }
 
   LeafBoxIterator LineBox::LogicalLeftmostLeafBox() const noexcept
@@ -202,13 +201,13 @@ namespace krys::boo::inline_iterator
 
   LineBoxIterator &LineBoxIterator::TraverseNext() noexcept
   {
-    SwitchOn(_lineBox._pathVariant, [](auto &path) { path.TraverseNext(); });
+    _lineBox._path.TraverseNext();
     return *this;
   }
 
   LineBoxIterator &LineBoxIterator::TraversePrevious() noexcept
   {
-    SwitchOn(_lineBox._pathVariant, [](auto &path) { path.TraversePrevious(); });
+    _lineBox._path.TraversePrevious();
     return *this;
   }
 

@@ -103,18 +103,18 @@ namespace krys::boo::inline_iterator
       return true;
     }
 
-    return _box._pathVariant == other._box._pathVariant;
+    return _box._path == other._box._path;
   }
 
   BoxIterator &BoxIterator::TraverseLineRightwardOnLine() noexcept
   {
-    SwitchOn(_box._pathVariant, [](auto &path) { path.TraverseNextBoxOnLine(); });
+    _box._path.TraverseNextBoxOnLine();
     return *this;
   }
 
   BoxIterator &BoxIterator::TraverseLineRightwardOnLineSkippingChildren() noexcept
   {
-    SwitchOn(_box._pathVariant, [](auto &path) { path.TraverseNextBoxOnLineSkippingChildren(); });
+    _box._path.TraverseNextBoxOnLineSkippingChildren();
     return *this;
   }
 
@@ -172,8 +172,7 @@ namespace krys::boo::inline_iterator
 
   InlineBoxIterator Box::ParentInlineBox() const noexcept
   {
-    return SwitchOn(_pathVariant,
-                    [](const auto &path) { return InlineBoxIterator {path.ParentInlineBox()}; });
+    return InlineBoxIterator {_path.ParentInlineBox()};
   }
 
   RenderObjectHighlightState Box::SelectionState() const noexcept
@@ -206,13 +205,13 @@ namespace krys::boo::inline_iterator
 
   LeafBoxIterator &LeafBoxIterator::TraverseLineRightwardOnLine() noexcept
   {
-    SwitchOn(_box._pathVariant, [](auto &path) { path.TraverseNextLeafOnLine(); });
+    _box._path.TraverseNextLeafOnLine();
     return *this;
   }
 
   LeafBoxIterator &LeafBoxIterator::TraverseLineLeftwardOnLine() noexcept
   {
-    SwitchOn(_box._pathVariant, [](auto &path) { path.TraversePreviousLeafOnLine(); });
+    _box._path.TraversePreviousLeafOnLine();
     return *this;
   }
 

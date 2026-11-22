@@ -878,8 +878,8 @@ namespace krys::boo
       {
         if (auto *textBox = DynamicDowncast<inline_iterator::SVGTextBox>(box))
         {
-          ModernSVGTextBoxPainter painter(textBox->ModernPath().GetInlineContent(),
-                                          textBox->ModernPath().BoxIndex(), paintInfo, paintOffset);
+          SVGTextBoxPainter painter(textBox->ModernPath().GetInlineContent(),
+                                    textBox->ModernPath().BoxIndex(), paintInfo, paintOffset);
           painter.PaintSelectionBackground();
         }
       }
@@ -896,8 +896,8 @@ namespace krys::boo
 
       if (auto *textBox = DynamicDowncast<inline_iterator::SVGTextBox>(*box))
       {
-        ModernSVGTextBoxPainter painter(textBox->ModernPath().GetInlineContent(),
-                                        textBox->ModernPath().BoxIndex(), paintInfo, paintOffset);
+        SVGTextBoxPainter painter(textBox->ModernPath().GetInlineContent(), textBox->ModernPath().BoxIndex(),
+                                  paintInfo, paintOffset);
         painter.Paint();
       }
       else

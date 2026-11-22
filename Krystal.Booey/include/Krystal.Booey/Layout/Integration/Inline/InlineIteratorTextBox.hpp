@@ -41,48 +41,46 @@ namespace krys::boo::inline_iterator
   class TextBox : public Box
   {
   public:
-    explicit TextBox(PathVariant &&path) noexcept : Box(krys::move(path))
+    explicit TextBox(BoxModernPath path) noexcept : Box(krys::move(path))
     {
     }
 
     KRYS_NODISCARD bool HasHyphen() const noexcept
     {
-      return SwitchOn(_pathVariant, [&](const auto &path) -> decltype(auto) { return path.HasHyphen(); });
+      return _path.HasHyphen();
     }
 
     KRYS_NODISCARD utf8_stringview OriginalText() const noexcept
     {
-      return SwitchOn(_pathVariant, [&](const auto &path) -> decltype(auto) { return path.OriginalText(); });
+      return _path.OriginalText();
     }
 
     KRYS_NODISCARD uint32 Start() const noexcept
     {
-      return SwitchOn(_pathVariant, [&](const auto &path) -> decltype(auto) { return path.Start(); });
+      return _path.Start();
     }
 
     KRYS_NODISCARD uint32 End() const noexcept
     {
-      return SwitchOn(_pathVariant, [&](const auto &path) -> decltype(auto) { return path.End(); });
+      return _path.End();
     }
 
     KRYS_NODISCARD uint32 Length() const noexcept
     {
-      return SwitchOn(_pathVariant, [&](const auto &path) -> decltype(auto) { return path.Length(); });
+      return _path.Length();
     }
 
     /// @brief The part of the renderer's text the box shows, for clamping offsets to it.
     KRYS_NODISCARD TextBoxSelectableRange SelectableRange() const noexcept
     {
-      return SwitchOn(_pathVariant,
-                      [&](const auto &path) -> decltype(auto) { return path.SelectableRange(); });
+      return _path.SelectableRange();
     }
 
     KRYS_NODISCARD const FontCascade &GetFontCascade() const noexcept;
 
     KRYS_NODISCARD TextRun GetTextRun(TextRunMode mode = TextRunMode::Painting) const noexcept
     {
-      return SwitchOn(_pathVariant,
-                      [&](const auto &path) -> decltype(auto) { return path.GetTextRun(mode); });
+      return _path.GetTextRun(mode);
     }
 
     KRYS_NODISCARD const RenderText &Renderer() const noexcept;
@@ -97,7 +95,7 @@ namespace krys::boo::inline_iterator
   public:
     TextBoxIterator() noexcept = default;
 
-    explicit TextBoxIterator(Box::PathVariant &&path) noexcept : LeafBoxIterator(krys::move(path))
+    explicit TextBoxIterator(BoxModernPath path) noexcept : LeafBoxIterator(krys::move(path))
     {
     }
 

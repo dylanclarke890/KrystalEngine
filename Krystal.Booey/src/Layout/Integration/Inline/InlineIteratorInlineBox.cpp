@@ -69,14 +69,12 @@ namespace krys::boo::inline_iterator
 
   LeafBoxIterator InlineBox::FirstLeafBox() const noexcept
   {
-    return SwitchOn(_pathVariant,
-                    [](const auto &path) { return LeafBoxIterator {path.FirstLeafBoxForInlineBox()}; });
+    return LeafBoxIterator {_path.FirstLeafBoxForInlineBox()};
   }
 
   LeafBoxIterator InlineBox::LastLeafBox() const noexcept
   {
-    return SwitchOn(_pathVariant,
-                    [](const auto &path) { return LeafBoxIterator {path.LastLeafBoxForInlineBox()}; });
+    return LeafBoxIterator {_path.LastLeafBoxForInlineBox()};
   }
 
   LeafBoxIterator InlineBox::EndLeafBox() const noexcept
@@ -106,13 +104,13 @@ namespace krys::boo::inline_iterator
 
   InlineBoxIterator &InlineBoxIterator::TraverseInlineBoxLineRightward() noexcept
   {
-    SwitchOn(_box._pathVariant, [](auto &path) { path.TraverseNextInlineBox(); });
+    _box._path.TraverseNextInlineBox();
     return *this;
   }
 
   InlineBoxIterator &InlineBoxIterator::TraverseInlineBoxLineLeftward() noexcept
   {
-    SwitchOn(_box._pathVariant, [](auto &path) { path.TraversePreviousInlineBox(); });
+    _box._path.TraversePreviousInlineBox();
     return *this;
   }
 

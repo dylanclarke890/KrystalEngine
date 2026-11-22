@@ -31,7 +31,7 @@
 
 namespace krys::boo::inline_iterator
 {
-  SVGTextBox::SVGTextBox(PathVariant &&path) noexcept : TextBox(krys::move(path))
+  SVGTextBox::SVGTextBox(BoxModernPath path) noexcept : TextBox(krys::move(path))
   {
   }
 
@@ -99,11 +99,10 @@ namespace krys::boo::inline_iterator
 
   const List<SVGTextFragment> &SVGTextBox::TextFragments() const noexcept
   {
-    return SwitchOn(_pathVariant, [&](const auto &path) -> const List<SVGTextFragment> &
-                    { return path.SvgTextFragments(); });
+    return _path.SvgTextFragments();
   }
 
-  SVGTextBoxIterator::SVGTextBoxIterator(Box::PathVariant &&path) noexcept : TextBoxIterator(krys::move(path))
+  SVGTextBoxIterator::SVGTextBoxIterator(BoxModernPath path) noexcept : TextBoxIterator(krys::move(path))
   {
   }
 

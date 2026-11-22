@@ -44,7 +44,7 @@ namespace krys::boo::inline_iterator
   class InlineBox : public Box
   {
   public:
-    explicit InlineBox(PathVariant &&path) noexcept : Box(krys::move(path))
+    explicit InlineBox(BoxModernPath path) noexcept : Box(krys::move(path))
     {
     }
 
@@ -77,7 +77,7 @@ namespace krys::boo::inline_iterator
   public:
     InlineBoxIterator() noexcept = default;
 
-    explicit InlineBoxIterator(Box::PathVariant &&path) noexcept : BoxIterator(krys::move(path))
+    explicit InlineBoxIterator(BoxModernPath path) noexcept : BoxIterator(krys::move(path))
     {
     }
 

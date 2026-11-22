@@ -45,11 +45,10 @@ namespace krys::boo
 
   /// @brief Paints an SVG text box's text fragments: decorations, fill and stroke (with the SVG paint
   /// servers), and selection.
-  template <typename TTextBoxPath>
   class SVGTextBoxPainter
   {
   private:
-    const TTextBoxPath _textBox;
+    const inline_iterator::BoxModernPath _textBox;
     const RenderSVGInlineText &_renderer;
     PaintInfo &_paintInfo;
     const TextBoxSelectableRange _selectableRange;
@@ -60,7 +59,8 @@ namespace krys::boo
     LegacyRenderSVGResource *_legacyPaintingResource {nullptr};
 
   public:
-    SVGTextBoxPainter(TTextBoxPath &&, PaintInfo &, const LayoutPoint &paintOffset) noexcept;
+    SVGTextBoxPainter(const layout_integration::InlineContent &, size_t boxIndex, PaintInfo &,
+                      const LayoutPoint &paintOffset) noexcept;
 
     ~SVGTextBoxPainter() noexcept = default;
 
@@ -100,16 +100,6 @@ namespace krys::boo
     void ReleaseLegacyPaintingResource(GraphicsContext *&, const Path *) noexcept;
 
     KRYS_NODISCARD std::pair<uint32, uint32> SelectionStartEnd() const noexcept;
-  };
-
-  extern template class SVGTextBoxPainter<inline_iterator::BoxModernPath>;
-
-  /// @brief Paints an SVG text box of the inline content.
-  class ModernSVGTextBoxPainter : public SVGTextBoxPainter<inline_iterator::BoxModernPath>
-  {
-  public:
-    ModernSVGTextBoxPainter(const layout_integration::InlineContent &, size_t boxIndex, PaintInfo &,
-                            const LayoutPoint &paintOffset) noexcept;
   };
 
   KRYS_NODISCARD TextRun ConstructTextRun(utf8_stringview, text::TextDirection,
