@@ -6,6 +6,7 @@
 #include "Krystal.Image.Tests/GIFImages.hpp"
 #include "Krystal.Image.Tests/ICCImages.hpp"
 #include "Krystal.Image.Tests/JPEGImages.hpp"
+#include "Krystal.Image.Tests/PNGImages.hpp"
 #include "Krystal.Image.Tests/TestImages.hpp"
 #include <algorithm>
 #include <cstdlib>
@@ -194,9 +195,11 @@ namespace krys::img::tests
 
   TEST_CASE("ImageDecoder: decodes data as it arrives", "[ImageDecoder]")
   {
-    for (auto bytes : {images::JPEG, images::ProgressiveJPEG, images::CMYKJPEG, images::RotatedProfileJPEG,
-                       images::PNG, images::AnimatedPNG, images::GIF, images::AnimatedGIF,
-                       images::InterlacedGIF, images::NoiseGIF, images::DisposalGIF, images::WebP})
+    for (auto bytes :
+         {images::JPEG, images::ProgressiveJPEG, images::CMYKJPEG, images::RotatedProfileJPEG, images::PNG,
+          images::AnimatedPNG, images::InterlacedPNG, images::PalettePNG, images::GrayAlpha16PNG,
+          images::BlendAPNG, images::InterlacedBlendAPNG, images::BrokenAPNG, images::GIF,
+          images::AnimatedGIF, images::InterlacedGIF, images::NoiseGIF, images::DisposalGIF, images::WebP})
     {
       auto whole = Decode(bytes);
       REQUIRE(whole);
@@ -276,6 +279,84 @@ namespace krys::img::tests
     // Still GIFs loop once, as animated ones without a looping extension do.
     CHECK(decoder->GetRepetitionCount() == RepetitionCountOnce);
     CHECK(Pixels(*decoder) == List<uint32> {Red, Green, Blue, White, Black, 0u});
+  }
+
+  TEST_CASE("PNGImageDecoder: decodes interlaced, palette and 16-bit images", "[ImageDecoder]")
+  {
+    auto interlaced = Decode(images::InterlacedPNG);
+    REQUIRE(interlaced);
+    auto gradient = Pixels(*interlaced);
+    REQUIRE(gradient.size() == 9u * 9u);
+    auto mismatches = 0;
+    for (uint32 y = 0; y < 9; ++y)
+    {
+      for (uint32 x = 0; x < 9; ++x)
+      {
+        mismatches += gradient[y * 9 + x] != (0xFF'00'00'80u | (x * 28) << 16 | (y * 28) << 8);
+      }
+    }
+    CHECK(mismatches == 0);
+    CHECK_FALSE(interlaced->FrameHasAlphaAtIndex(0));
+    CHECK(interlaced->GetRepetitionCount() == RepetitionCountNone);
+
+    auto palette = Decode(images::PalettePNG);
+    REQUIRE(palette);
+    CHECK(Pixels(*palette) == List<uint32> {Red, Green, 0});
+    CHECK(palette->FrameHasAlphaAtIndex(0));
+
+    auto grayAlpha = Decode(images::GrayAlpha16PNG);
+    REQUIRE(grayAlpha);
+    CHECK(Pixels(*grayAlpha) == List<uint32> {White, 0});
+  }
+
+  TEST_CASE("PNGImageDecoder: blends and disposes of APNG frames as they ask", "[ImageDecoder]")
+  {
+    constexpr uint32 T = 0;
+    constexpr uint32 R = Red;
+    constexpr uint32 G = Green;
+    constexpr uint32 B = Blue;
+    const List<uint32> expected[] = {
+      // Red everywhere; the white default image isn't part of the animation.
+      {R, R, R, R, R, R, R, R, R, R, R, R, R, R, R, R},
+      // Green blended over the top left, its transparent pixels showing the red; then cleared.
+      {G, R, R, R, G, R, R, R, R, R, R, R, R, R, R, R},
+      // Blue over the bottom right, on the cleared top left; then restored to the previous frame.
+      {T, T, R, R, T, T, R, R, R, R, B, B, R, R, B, B},
+      // A transparent pixel replacing (3, 0), on frame 1 as it was disposed of.
+      {T, T, R, T, T, T, R, R, R, R, R, R, R, R, R, R},
+    };
+
+    // Blending an interlaced frame waits for its last pass.
+    for (auto bytes : {images::BlendAPNG, images::InterlacedBlendAPNG})
+    {
+      auto decoder = Decode(bytes);
+      REQUIRE(decoder);
+      REQUIRE(decoder->FrameCount() == 4u);
+      CHECK(decoder->GetRepetitionCount() == 2);
+      for (size_t index = 0; index < 4; ++index)
+      {
+        INFO("frame " << index);
+        CHECK(Pixels(*decoder, index) == expected[index]);
+        CHECK(decoder->FrameDurationAtIndex(index).count() == 0.1);
+      }
+      CHECK_FALSE(decoder->FrameHasAlphaAtIndex(0));
+      CHECK(decoder->FrameHasAlphaAtIndex(3));
+
+      // Cleared frames are decoded again from the frames they build on.
+      decoder->ClearFrameBufferCache(3);
+      for (size_t index : {2u, 1u, 3u})
+      {
+        INFO("frame " << index << " again");
+        CHECK(Pixels(*decoder, index) == expected[index]);
+      }
+    }
+
+    // Data out of sequence ends the animation, keeping the frames before it.
+    auto broken = Decode(images::BrokenAPNG);
+    REQUIRE(broken);
+    CHECK_FALSE(broken->Failed());
+    REQUIRE(broken->FrameCount() == 2u);
+    CHECK(Pixels(*broken, 1) == expected[1]);
   }
 
   TEST_CASE("GIFImageDecoder: decodes interlaced rows and large dictionaries", "[ImageDecoder]")

@@ -1,83 +1,34 @@
-﻿/*
- * Copyright (C) 2006 Apple Inc. All rights reserved.
- *
- * Redistribution and use in source and binary forms, with or without
- * modification, are permitted provided that the following conditions
- * are met:
- * 1. Redistributions of source code must retain the above copyright
- *    notice, this list of conditions and the following disclaimer.
- * 2. Redistributions in binary form must reproduce the above copyright
- *    notice, this list of conditions and the following disclaimer in the
- *    documentation and/or other materials provided with the distribution.
- *
- * THIS SOFTWARE IS PROVIDED BY APPLE INC. ``AS IS'' AND ANY
- * EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE
- * IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR
- * PURPOSE ARE DISCLAIMED.  IN NO EVENT SHALL APPLE INC. OR
- * CONTRIBUTORS BE LIABLE FOR ANY DIRECT, INDIRECT, INCIDENTAL, SPECIAL,
- * EXEMPLARY, OR CONSEQUENTIAL DAMAGES (INCLUDING, BUT NOT LIMITED TO,
- * PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES; LOSS OF USE, DATA, OR
- * PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND ON ANY THEORY
- * OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT
- * (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
- * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
- */
-
-#pragma once
+﻿#pragma once
 
 #include "Krystal.Core/Containers/List.hpp"
 #include "Krystal.Core/Memory/UniquePtr.hpp"
 #include "Krystal.Image/ICCProfileTransform.hpp"
 #include "Krystal.Image/ImageDecoder.hpp"
-#include <array>
-
-struct png_info_def;
-struct png_struct_def;
-struct png_unknown_chunk_t;
 
 namespace krys::img
 {
-  class PNGImageReader;
-
-  // This class decodes the PNG image format.
-  // @note libpng reports errors with longjmp, which on Windows unwinds as an exception would, so the
-  // functions its callbacks run through (the callbacks themselves and what they call) can't be noexcept.
+  /// @brief Decodes PNG and animated PNG (APNG) images as their data arrives, with libpng. Rows show as they
+  /// decode; an interlaced frame fills in pass by pass. Pixels are converted to sRGB from an embedded ICC
+  /// profile, or else corrected for the image's gamma.
+  /// @see https://www.w3.org/TR/png-3/
   class PNGImageDecoder final : public ImageDecoder
   {
-    friend class PNGImageReader;
+    class FrameReader;
+    class Parser;
+    struct FrameInfo;
 
   private:
-    UniquePtr<PNGImageReader> _reader;
-    bool _doNothingOnFailure {false};
-    uint32 _currentFrame {0};
-    png_struct_def *_png {nullptr};
-    png_info_def *_info {nullptr};
-    bool _isAnimated {false};
-    bool _frameInfo {false};
-    bool _frameIsHidden {false};
-    bool _hasInfo {false};
-    int32 _gamma {45'455};
-    // The conversion from the colour space of the image's iCCP profile, and a row converted with it.
-    ICCProfileTransform _iccTransform;
+    // The structure of the image: its header, the chunks that describe it, and each frame's placement and
+    // where its data is. Kept while the decoder lives, so a frame whose pixels were cleared can be decoded
+    // again.
+    UniquePtr<Parser> _parser;
+    // The libpng reader of the frame being decoded, kept while its data arrives.
+    UniquePtr<FrameReader> _reader;
+    // The conversion from the colour space of the image's ICC profile, and a row converted with it.
+    ICCProfileTransform _colorTransform;
     List<uint8> _transformedRow;
-    size_t _frameCount {1};
-    size_t _decodedPixelCount {0};
-    uint32 _playCount {0};
-    uint32 _totalFrames {0};
-    uint32 _sizePLTE {0};
-    uint32 _sizetRNS {0};
-    uint32 _sequenceNumber {0};
-    uint32 _width {0};
-    uint32 _height {0};
-    uint32 _xOffset {0};
-    uint32 _yOffset {0};
-    uint32 _delayNumerator {1};
-    uint32 _delayDenominator {1};
-    uint32 _dispose {0};
-    uint32 _blend {0};
-    std::array<uint8, 12 + 13> _dataIHDR {};
-    std::array<uint8, 12 + 256 * 3> _dataPLTE {};
-    std::array<uint8, 12 + 256> _datatRNS {};
+    // Whether the frame being decoded has written a pixel that isn't opaque.
+    bool _frameSawAlpha {false};
 
   public:
     KRYS_NODISCARD static Ref<ImageDecoder>
@@ -88,91 +39,46 @@ namespace krys::img
 
     ~PNGImageDecoder() noexcept override;
 
-    // ImageDecoder
     KRYS_NODISCARD utf8_string FilenameExtension() const noexcept override
     {
       return u8"png";
     }
 
-    KRYS_NODISCARD size_t FrameCount() const noexcept override
-    {
-      return _frameCount;
-    }
+    bool SetSize(const SizeI &size) noexcept override;
+
+    KRYS_NODISCARD size_t FrameCount() const noexcept override;
 
     KRYS_NODISCARD RepetitionCount GetRepetitionCount() const noexcept override;
 
     ImageDecoderFrame *FrameBufferAtIndex(size_t index) noexcept override;
 
-    // CAUTION: setFailed() deletes |m_reader|.  Be careful to avoid
-    // accessing deleted memory, especially when calling this from inside
-    // PNGImageReader!
-    bool SetFailed() noexcept override;
-
-    // Callbacks from libpng
-    void HeaderAvailable();
-
-    void RowAvailable(unsigned char *rowBuffer, unsigned rowIndex, int interlacePass);
-
-    void PngComplete();
-
-    void ReadChunks(png_unknown_chunk_t *chunk);
-
-    void FrameHeader();
-
-    /// @brief @p row of @p pixelCount decoded pixels, converted from the image's colour profile if it has
-    /// one (into a row of its own, so that interlaced rows libpng combines stay as decoded).
-    KRYS_NODISCARD unsigned char *ColorManagedRow(unsigned char *row, uint32 pixelCount) noexcept;
-
-    void Init() noexcept;
-
     void ClearFrameBufferCache(size_t clearBeforeFrame) noexcept override;
-
-    KRYS_NODISCARD bool IsComplete() const noexcept
-    {
-      if (_frameBufferCache.empty())
-      {
-        return false;
-      }
-
-      for (auto &imageFrame : _frameBufferCache)
-      {
-        if (!imageFrame.IsComplete())
-        {
-          return false;
-        }
-      }
-
-      return true;
-    }
-
-    KRYS_NODISCARD bool IsCompleteAtIndex(size_t index) const noexcept
-    {
-      return index < _frameBufferCache.size() && _frameBufferCache[index].IsComplete();
-    }
 
   private:
     PNGImageDecoder(AlphaOption, GammaAndColorProfileOption) noexcept;
 
-    void TryDecodeSize(bool allDataReceived) noexcept override
-    {
-      Decode(true, 0, allDataReceived);
-    }
+    void TryDecodeSize(bool allDataReceived) noexcept override;
 
-    // Decodes the image.  If |onlySize| is true, stops decoding after
-    // calculating the image size.  If decoding fails but there is no more
-    // data coming, sets the "decode failure" flag.
-    void Decode(bool onlySize, unsigned haltAtFrame, bool allDataReceived) noexcept;
+    /// @brief Parses the structure of what's arrived, sizing the image and the frame cache. False if the data
+    /// is malformed, which fails the decoder.
+    bool Parse(bool allDataReceived) noexcept;
 
-    void InitFrameBuffer(size_t frameIndex);
+    /// @brief The first frame to decode to be able to decode frame @p index: frames before it build on
+    /// earlier frames, unless an earlier one is complete or clears the whole image.
+    KRYS_NODISCARD size_t FirstFrameToDecode(size_t index) const noexcept;
 
-    void FrameComplete();
+    /// @brief Decodes what's arrived of frame @p index, whose predecessors are decoded. True once it's
+    /// complete.
+    bool DecodeFrame(size_t index) noexcept;
 
-    int ProcessingStart(png_unknown_chunk_t *chunk);
+    /// @brief Sets frame @p index up to be drawn into: its starting pixels are the previous frame's, disposed
+    /// of as that frame asks.
+    bool InitializeFrame(size_t index) noexcept;
 
-    int ProcessingFinish();
+    /// @brief Writes row @p y of frame @p index from @p pixels, decoded RGB or RGBA, blending them over
+    /// what's beneath if the frame asks.
+    bool WriteRow(size_t index, const uint8 *pixels, int32 y, bool hasAlphaChannel) noexcept;
 
-    void FallbackNotAnimated() noexcept;
-
-    void Clear() noexcept;
+    bool CompleteFrame(size_t index) noexcept;
   };
 }
