@@ -121,7 +121,7 @@ namespace krys::boo::style
       return FontStyleAngleFromCSSFontStyleWithAngleValueDeprecated(*fontStyleValue);
     }
 
-    auto valueID = css::GetValueId(value);
+    auto valueID = value.ValueId();
     if (valueID == css::ValueId::Normal)
     {
       return null;

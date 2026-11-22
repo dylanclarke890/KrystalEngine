@@ -361,19 +361,18 @@ namespace krys::boo::css
     if (Is<ValuePair>(*systemValue))
     {
       // This value must be `fixed` or `extends`, both of which can or must have an additional component.
-      auto &secondValue = systemValue->Second();
+      auto &secondValue = Downcast<PrimitiveValue>(systemValue->Second());
       if (system == CounterStyleSystem::Extends)
       {
         krys_debug_assert(secondValue.IsCustomIdent());
-        result.first = secondValue.IsCustomIdent() ? CounterStyleName(secondValue.CustomIdent())
+        result.first = secondValue.IsCustomIdent() ? CounterStyleName(secondValue.StringValue())
                                                    : CounterStyleName(u8"decimal"sv);
       }
       else if (system == CounterStyleSystem::Fixed)
       {
         krys_debug_assert(secondValue.IsInteger());
         result.second = secondValue.IsInteger()
-                          ? Downcast<PrimitiveValue>(secondValue)
-                              .ResolveAsInteger<int32>(ToLengthConversionData::WithoutElement())
+                          ? secondValue.ResolveAsInteger<int32>(ToLengthConversionData::WithoutElement())
                           : 1;
       }
     }

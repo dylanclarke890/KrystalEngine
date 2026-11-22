@@ -25,7 +25,6 @@
 #include "Krystal.Booey/CSS/Values/ValueSeparator.hpp"
 #include "Krystal.Booey/CSS/Values/ValueType.hpp"
 #include "Krystal.Core/Assert.hpp"
-#include "Krystal.Core/Containers/SmallList.hpp"
 #include "Krystal.Core/Macros.hpp"
 #include "Krystal.Core/Memory/RefPtr.hpp"
 #include "Krystal.Core/TypeCast.hpp"
@@ -34,20 +33,17 @@
 
 namespace krys::boo
 {
-  class CSSStyleDeclaration;
   class CachedResource;
 }
 
 namespace krys::boo::css
 {
-  class PrimitiveValue;
   class StaticValuePool;
   class ToLengthConversionData;
 
   struct ComputedStyleDependencies;
   struct SerialisationContext;
 
-  enum class PropertyId : uint16;
   enum class ValueId : uint16;
 
   namespace detail
@@ -146,9 +142,6 @@ namespace krys::boo::css
       return _refCount & RefCountFlagIsStatic;
     }
 
-    // NOTE: intentionally not virtual for performance reasons.
-    // virtual ~Value() noexcept;
-
     KRYS_NODISCARD ValueType Type() const noexcept
     {
       return _type;
@@ -184,10 +177,6 @@ namespace krys::boo::css
     /// @brief Adds the value's contents to @p seed, for deduplicating declaration blocks.
     /// @return False if the value's class has no `AddDerivedHash`, so it can't be hashed.
     KRYS_NODISCARD bool AddHash(size_t &seed) const noexcept;
-
-    /// @brief Empty URLs and fragment-only URLs should not be resolved relative to the base URL.
-    /// @see https://www.w3.org/TR/css-values-4/#local-urls
-    KRYS_NODISCARD static bool IsCSSLocalUrl(CSSOMStringView relativeUrl) noexcept;
 
     KRYS_NODISCARD static bool CustomMayDependOnBaseUrl() noexcept
     {
@@ -225,21 +214,11 @@ namespace krys::boo::css
 
 #pragma endregion
 
+    /// @brief Whether this is a `PrimitiveValue` holding a keyword.
     KRYS_NODISCARD inline bool IsValueId() const noexcept;
 
+    /// @brief The keyword of a `PrimitiveValue` holding one, otherwise `ValueId::Invalid`.
     KRYS_NODISCARD inline css::ValueId ValueId() const noexcept;
-
-    KRYS_NODISCARD inline bool IsCustomIdent() const noexcept;
-
-    KRYS_NODISCARD inline CSSOMString CustomIdent() const noexcept;
-
-    KRYS_NODISCARD inline bool IsString() const noexcept;
-
-    KRYS_NODISCARD inline CSSOMString String() const noexcept;
-
-    KRYS_NODISCARD inline bool IsInteger() const noexcept;
-
-    KRYS_NODISCARD inline int64 Integer(const ToLengthConversionData &) const noexcept;
 
     KRYS_NODISCARD inline const Value &First() const noexcept; // ValuePair
 
@@ -263,31 +242,6 @@ namespace krys::boo::css
     KRYS_NODISCARD static bool
       CustomTraverseSubresources(const Func<bool(const CachedResource &)> &func) noexcept;
   };
-
-  template <typename TValue>
-  KRYS_NODISCARD bool CompareValueList(const SmallList<Ref<TValue>> &firstVector,
-                                       const SmallList<Ref<TValue>> &secondVector) noexcept
-  {
-    size_t size = firstVector.size();
-    if (size != secondVector.size())
-    {
-      return false;
-    }
-
-    for (size_t i = 0uz; i < size; ++i)
-    {
-      const Ref<TValue> &firstPtr = firstVector[i];
-      const Ref<TValue> &secondPtr = secondVector[i];
-      if (firstPtr.get() == secondPtr.get() || firstPtr->Equals(*secondPtr))
-      {
-        continue;
-      }
-
-      return false;
-    }
-
-    return true;
-  }
 
   template <typename TValue>
   KRYS_NODISCARD bool CompareValuePtr(const RefPtr<TValue> &first, const RefPtr<TValue> &second) noexcept

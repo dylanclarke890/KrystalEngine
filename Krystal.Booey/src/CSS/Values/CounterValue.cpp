@@ -54,8 +54,9 @@ namespace krys::boo::css
 
   CSSOMString CounterValue::CustomCSSText(const SerialisationContext &) const noexcept
   {
-    bool isDecimal = _counterStyle->ValueId() == css::ValueId::Decimal
-                     || (_counterStyle->IsCustomIdent() && _counterStyle->CustomIdent() == u8"decimal");
+    auto &style = Downcast<PrimitiveValue>(*_counterStyle);
+    bool isDecimal = style.ValueId() == css::ValueId::Decimal
+                     || (style.IsCustomIdent() && style.StringValue() == u8"decimal");
     CSSOMStringView styleSeparator = isDecimal ? u8"" : u8", ";
     CSSOMString styleLiteral = isDecimal ? CSSOMString() : CounterStyleCSSText();
 
@@ -73,13 +74,14 @@ namespace krys::boo::css
 
   CSSOMString CounterValue::CounterStyleCSSText() const noexcept
   {
-    if (_counterStyle->IsValueId())
+    auto &style = Downcast<PrimitiveValue>(*_counterStyle);
+    if (style.IsValueId())
     {
-      return CSSOMString(ToString(_counterStyle->ValueId()));
+      return CSSOMString(ToString(style.ValueId()));
     }
-    if (_counterStyle->IsCustomIdent())
+    if (style.IsCustomIdent())
     {
-      return _counterStyle->CustomIdent();
+      return style.StringValue();
     }
 
     krys_debug_assert_msg(false, "A counter style is a keyword or a custom ident.");

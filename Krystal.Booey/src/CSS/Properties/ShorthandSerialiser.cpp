@@ -347,7 +347,7 @@ namespace krys::boo::css
         auto *value = property.Value();
 
         // Don't serialize if longhands have different CSS-wide keywords.
-        if (!IsGlobalKeyword(GetValueId(*value)) || value->IsImplicitInitialValue())
+        if (!IsGlobalKeyword(value->ValueId()) || value->IsImplicitInitialValue())
         {
           if (specialKeyword)
           {
@@ -363,7 +363,7 @@ namespace krys::boo::css
             return true;
           }
 
-          auto keyword = GetValueId(value);
+          auto keyword = value->ValueId();
           if (specialKeyword.value_or(keyword) != keyword)
           {
             return true;
@@ -1230,7 +1230,7 @@ namespace krys::boo::css
       bool allSpecialKeywords = true;
       for (auto &longhandValue : LonghandValues())
       {
-        auto keyword = GetValueId(longhandValue);
+        auto keyword = longhandValue.ValueId();
         if (!parse_property::IsSystemFontShorthand(keyword))
         {
           allSpecialKeywords = false;
@@ -1367,7 +1367,7 @@ namespace krys::boo::css
     {
       for (auto &value : LonghandValues())
       {
-        if (parse_property::IsSystemFontShorthand(GetValueId(value)))
+        if (parse_property::IsSystemFontShorthand(value.ValueId()))
         {
           return null;
         }
@@ -1399,10 +1399,10 @@ namespace krys::boo::css
         }
 
         auto *item = valueList->Item(0);
-        return item && IsValueId(*item, id);
+        return item && item->ValueId() == id;
       }
 
-      return IsValueId(value, id);
+      return value.ValueId() == id;
     }
 
     KRYS_NODISCARD bool GridAutoFlowContains(const Value &autoFlow, ValueId id) noexcept
@@ -1411,7 +1411,7 @@ namespace krys::boo::css
       {
         for (auto &currentValue : *valueList)
         {
-          if (IsValueId(currentValue, id))
+          if (currentValue.ValueId() == id)
           {
             return true;
           }
@@ -1420,7 +1420,7 @@ namespace krys::boo::css
         return false;
       }
 
-      return IsValueId(autoFlow, id);
+      return autoFlow.ValueId() == id;
     }
 
     Maybe<CSSOMString> ShorthandSerialiser::SerialiseGrid() const noexcept
@@ -1507,7 +1507,7 @@ namespace krys::boo::css
         return IsCustomIdentValue(trailing) && value.CssText(context) == trailing.CssText(context);
       }
 
-      return IsValueId(trailing, ValueId::Auto);
+      return trailing.ValueId() == ValueId::Auto;
     }
 
     CSSOMString ShorthandSerialiser::SerialiseGridArea() const noexcept
@@ -1634,7 +1634,7 @@ namespace krys::boo::css
             return null;
           }
 
-          if (!IsValueId(currentValue, ValueId::Auto))
+          if (currentValue.ValueId() != ValueId::Auto)
           {
             result.Append(u8' ');
             result.Append(currentValue.CssText(_serialisationContext));

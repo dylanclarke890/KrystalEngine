@@ -421,7 +421,7 @@ namespace krys::boo::style
             blendingKeyframe.AddProperty(resolvedProperty);
           }
         }
-        if (css::IsValueId(*value, css::ValueId::Revert))
+        if (value->ValueId() == css::ValueId::Revert)
         {
           hasRevert = true;
         }

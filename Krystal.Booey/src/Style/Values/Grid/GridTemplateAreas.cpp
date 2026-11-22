@@ -78,7 +78,7 @@ namespace krys::boo::style
   GridTemplateAreas CSSValueConversion<GridTemplateAreas>::operator()(BuilderState &state,
                                                                       const css::Value &value) noexcept
   {
-    if (css::IsValueId(value, css::ValueId::None))
+    if (value.ValueId() == css::ValueId::None)
     {
       return css::keywords::None {};
     }

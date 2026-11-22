@@ -549,68 +549,7 @@ KRYS_SPECIALIZE_TYPE_CAST_TRAITS_END()
 
 namespace krys::boo::css
 {
-#pragma region ValueId helpers
-
-  KRYS_NODISCARD inline ValueId GetValueId(const PrimitiveValue &value) noexcept
-  {
-    return value.ValueId();
-  }
-
-  KRYS_NODISCARD inline ValueId GetValueId(const PrimitiveValue *value) noexcept
-  {
-    return value ? GetValueId(*value) : ValueId::Invalid;
-  }
-
-  KRYS_NODISCARD inline ValueId GetValueId(const Value &value) noexcept
-  {
-    auto *primitiveValue = DynamicDowncast<PrimitiveValue>(value);
-    return primitiveValue ? GetValueId(*primitiveValue) : ValueId::Invalid;
-  }
-
-  KRYS_NODISCARD inline ValueId GetValueId(const Value *value) noexcept
-  {
-    return value ? GetValueId(*value) : ValueId::Invalid;
-  }
-
-  KRYS_NODISCARD inline bool IsValueId(const PrimitiveValue &value, ValueId id) noexcept
-  {
-    return GetValueId(value) == id;
-  }
-
-  KRYS_NODISCARD inline bool IsValueId(const PrimitiveValue *value, ValueId id) noexcept
-  {
-    return GetValueId(value) == id;
-  }
-
-  KRYS_NODISCARD inline bool IsValueId(const RefPtr<PrimitiveValue> &value, ValueId id) noexcept
-  {
-    return GetValueId(value.get()) == id;
-  }
-
-  KRYS_NODISCARD inline bool IsValueId(const Ref<PrimitiveValue> &value, ValueId id) noexcept
-  {
-    return GetValueId(value.get()) == id;
-  }
-
-  KRYS_NODISCARD inline bool IsValueId(const Value &value, ValueId id) noexcept
-  {
-    return GetValueId(value) == id;
-  }
-
-  KRYS_NODISCARD inline bool IsValueId(const Value *value, ValueId id) noexcept
-  {
-    return GetValueId(value) == id;
-  }
-
-  KRYS_NODISCARD inline bool IsValueId(const RefPtr<Value> &value, ValueId id) noexcept
-  {
-    return IsValueId(value.get(), id);
-  }
-
-  KRYS_NODISCARD inline bool IsValueId(const Ref<Value> &value, ValueId id) noexcept
-  {
-    return IsValueId(value.get(), id);
-  }
+#pragma region Value helpers
 
   KRYS_NODISCARD inline bool IsCustomIdentValue(const Value &value) noexcept
   {
@@ -632,42 +571,6 @@ namespace krys::boo::css
   {
     auto *value = DynamicDowncast<PrimitiveValue>(*this);
     return value ? value->ValueId() : css::ValueId::Invalid;
-  }
-
-  inline bool Value::IsCustomIdent() const noexcept
-  {
-    auto *value = DynamicDowncast<PrimitiveValue>(*this);
-    return value && value->IsCustomIdent();
-  }
-
-  inline CSSOMString Value::CustomIdent() const noexcept
-  {
-    krys_debug_assert(IsCustomIdent());
-    return Downcast<PrimitiveValue>(*this).StringValue();
-  }
-
-  inline bool Value::IsString() const noexcept
-  {
-    auto *value = DynamicDowncast<PrimitiveValue>(*this);
-    return value && value->IsString();
-  }
-
-  inline CSSOMString Value::String() const noexcept
-  {
-    krys_debug_assert(IsString());
-    return Downcast<PrimitiveValue>(*this).StringValue();
-  }
-
-  inline bool Value::IsInteger() const noexcept
-  {
-    auto *value = DynamicDowncast<PrimitiveValue>(*this);
-    return value && value->IsInteger();
-  }
-
-  inline int64 Value::Integer(const ToLengthConversionData &conversionData) const noexcept
-  {
-    krys_debug_assert(IsInteger());
-    return Downcast<PrimitiveValue>(*this).ResolveAsInteger(conversionData);
   }
 
 #pragma endregion

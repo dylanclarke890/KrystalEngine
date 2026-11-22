@@ -2907,7 +2907,7 @@ namespace krys::boo::style
 
     auto lineHeight = ExtractorGenerated::ExtractValue(state, css::PropertyId::LineHeight);
     auto *computedLineHeight = DynamicDowncast<css::PrimitiveValue>(lineHeight.get());
-    if (computedLineHeight && !css::IsValueId(*computedLineHeight, css::ValueId::Normal))
+    if (computedLineHeight && computedLineHeight->ValueId() != css::ValueId::Normal)
     {
       computedFont->LineHeight = ShareRefPtr(computedLineHeight);
     }
@@ -2949,7 +2949,7 @@ namespace krys::boo::style
     {
       auto value = ExtractorGenerated::ExtractValue(state, longhand);
       // We may not have a value if the longhand is disabled.
-      if (!value || css::IsValueId(value, css::ValueId::Normal))
+      if (!value || value->ValueId() == css::ValueId::Normal)
       {
         continue;
       }

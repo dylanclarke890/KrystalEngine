@@ -434,11 +434,6 @@ namespace krys::boo::css
       });
   }
 
-  bool Value::IsCSSLocalUrl(CSSOMStringView relativeUrl) noexcept
-  {
-    return relativeUrl.empty() || relativeUrl.starts_with(u8'#');
-  }
-
   CSSOMString Value::CssText(const SerialisationContext &context) const noexcept
   {
     return VisitDerived([&](auto &value) { return value.CustomCSSText(context); });

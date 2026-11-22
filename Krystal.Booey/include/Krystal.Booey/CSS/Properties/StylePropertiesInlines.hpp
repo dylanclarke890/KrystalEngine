@@ -121,7 +121,7 @@ namespace krys::boo::css
 
   inline ValueId LonghandValueId(PropertyId property, const Value &value) noexcept
   {
-    return value.IsImplicitInitialValue() ? InitialValueIdForLonghand(property) : GetValueId(value);
+    return value.IsImplicitInitialValue() ? InitialValueIdForLonghand(property) : value.ValueId();
   }
 
   inline Maybe<ValueId> LonghandValueId(PropertyId property, const Value *value) noexcept

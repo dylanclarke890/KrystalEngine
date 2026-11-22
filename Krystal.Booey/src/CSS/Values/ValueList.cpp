@@ -182,7 +182,7 @@ namespace krys::boo::css
   {
     for (auto &value : *this)
     {
-      if (css::IsValueId(value, otherValue))
+      if (value.ValueId() == otherValue)
       {
         return true;
       }

@@ -38,7 +38,7 @@ namespace krys::boo::style
   AspectRatio CSSValueConversion<AspectRatio>::operator()(BuilderState &state,
                                                           const css::Value &value) noexcept
   {
-    if (css::IsValueId(value, css::ValueId::Auto))
+    if (value.ValueId() == css::ValueId::Auto)
     {
       return css::keywords::Auto {};
     }
@@ -55,7 +55,7 @@ namespace krys::boo::style
     }
 
     const auto &value0 = (*list)[0];
-    if (!css::IsValueId(value0, css::ValueId::Auto))
+    if (value0.ValueId() != css::ValueId::Auto)
     {
       return css::keywords::Auto {};
     }

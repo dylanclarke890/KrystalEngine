@@ -600,7 +600,7 @@ namespace krys::boo::css
 
         for (auto &value : valueList)
         {
-          if (IsValueId(value, ValueId::None))
+          if (value->ValueId() == ValueId::None)
           {
             return false;
           }

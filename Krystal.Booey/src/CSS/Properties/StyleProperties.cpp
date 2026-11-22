@@ -141,8 +141,8 @@ namespace krys::boo::css
     // System fonts are represented as CSSPrimitiveValue for various font subproperties, but these must
     // serialize as the empty string. It might be better to implement this as a special CSSValue type instead
     // of turning them into null here.
-    if (reference.ShorthandId() == PropertyId::Font
-        && parse_property::IsSystemFontShorthand(GetValueId(value)))
+    if (reference.ShorthandId() == PropertyId::Font && value
+        && parse_property::IsSystemFontShorthand(value->ValueId()))
     {
       return nullptr;
     }

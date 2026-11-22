@@ -58,8 +58,7 @@ namespace krys::boo::style
       return css::keywords::Auto {};
     }
 
-    if (css::IsValueId(pair->first.get(), css::ValueId::Stable)
-        && css::IsValueId(pair->second.get(), css::ValueId::BothEdges))
+    if (pair->first->ValueId() == css::ValueId::Stable && pair->second->ValueId() == css::ValueId::BothEdges)
     {
       return {css::keywords::Stable {}, css::keywords::BothEdges {}};
     }

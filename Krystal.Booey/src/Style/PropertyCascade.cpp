@@ -339,7 +339,7 @@ namespace krys::boo::style
           return true;
         }
         if (_includedProperties.Types.contains(PropertyType::ExplicitlyInherited)
-            && css::IsValueId(*current.Value(), css::ValueId::Inherit))
+            && current.Value()->ValueId() == css::ValueId::Inherit)
         {
           return true;
         }
