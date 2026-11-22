@@ -164,12 +164,12 @@ namespace krys::boo::css
 
     KRYS_NODISCARD bool IsFontIndependentLength() const noexcept
     {
-      return IsFontIndependentLength(PrimitiveUnitType());
+      return css::IsFontIndependentLength(PrimitiveUnitType());
     }
 
     KRYS_NODISCARD bool IsFontRelativeLength() const noexcept
     {
-      return IsFontRelativeLength(PrimitiveUnitType());
+      return css::IsFontRelativeLength(PrimitiveUnitType());
     }
 
     KRYS_NODISCARD bool IsParentFontRelativeLength() const noexcept
@@ -179,12 +179,12 @@ namespace krys::boo::css
 
     KRYS_NODISCARD bool IsRootFontRelativeLength() const noexcept
     {
-      return IsRootFontRelativeLength(PrimitiveUnitType());
+      return css::IsRootFontRelativeLength(PrimitiveUnitType());
     }
 
     KRYS_NODISCARD bool IsLength() const noexcept
     {
-      return IsLength(PrimitiveType());
+      return css::IsLength(PrimitiveType());
     }
 
     KRYS_NODISCARD bool IsNumber() const noexcept
@@ -234,12 +234,12 @@ namespace krys::boo::css
 
     KRYS_NODISCARD bool IsViewportPercentageLength() const noexcept
     {
-      return IsViewportPercentageLength(PrimitiveUnitType());
+      return css::IsViewportPercentageLength(PrimitiveUnitType());
     }
 
     KRYS_NODISCARD bool IsContainerPercentageLength() const noexcept
     {
-      return IsContainerPercentageLength(PrimitiveUnitType());
+      return css::IsContainerPercentageLength(PrimitiveUnitType());
     }
 
     KRYS_NODISCARD bool IsFlex() const noexcept
@@ -248,14 +248,6 @@ namespace krys::boo::css
     }
 
     KRYS_NODISCARD bool ConversionToCanonicalUnitRequiresConversionData() const noexcept;
-
-    KRYS_NODISCARD constexpr static bool IsLength(UnitType type) noexcept
-    {
-      return type == UnitType::em || type == UnitType::ex || type == UnitType::px || type == UnitType::cm
-             || type == UnitType::mm || type == UnitType::in || type == UnitType::pt || type == UnitType::pc
-             || type == UnitType::Q || IsFontRelativeLength(type) || IsViewportPercentageLength(type)
-             || IsContainerPercentageLength(type) || type == UnitType::QuirkyEm;
-    }
 
 #pragma endregion
 
@@ -364,181 +356,40 @@ namespace krys::boo::css
 
 #pragma region Angle (requires IsAngle())
 
-    template <AngleUnit Unit, typename T = double>
-    KRYS_NODISCARD constexpr static T ComputeAngle(UnitType type, T angle) noexcept
-    {
-      if constexpr (Unit == AngleUnit::Deg)
-      {
-        switch (type)
-        {
-          case UnitType::deg:  return angle;
-          case UnitType::rad:  return rad2deg(angle);
-          case UnitType::grad: return grad2deg(angle);
-          case UnitType::turn: return turn2deg(angle);
-          default:             krys_debug_assert(false); return 0;
-        }
-      }
-      else if constexpr (Unit == AngleUnit::Rad)
-      {
-        switch (type)
-        {
-          case UnitType::deg:  return deg2rad(angle);
-          case UnitType::rad:  return angle;
-          case UnitType::grad: return grad2rad(angle);
-          case UnitType::turn: return turn2rad(angle);
-          default:             krys_debug_assert(false); return 0;
-        }
-      }
-      else if constexpr (Unit == AngleUnit::Grad)
-      {
-        switch (type)
-        {
-          case UnitType::deg:  return deg2grad(angle);
-          case UnitType::rad:  return rad2grad(angle);
-          case UnitType::grad: return angle;
-          case UnitType::turn: return turn2grad(angle);
-          default:             krys_debug_assert(false); return 0;
-        }
-      }
-      else if constexpr (Unit == AngleUnit::Turn)
-      {
-        switch (type)
-        {
-          case UnitType::deg:  return deg2turn(angle);
-          case UnitType::rad:  return rad2turn(angle);
-          case UnitType::grad: return grad2turn(angle);
-          case UnitType::turn: return angle;
-          default:             krys_debug_assert(false); return 0;
-        }
-      }
-    }
-
     template <typename T = double, AngleUnit Unit = UnitTraits<AngleUnit>::Canonical>
     KRYS_NODISCARD T ResolveAsAngle(const ToLengthConversionData &conversionData) const noexcept
     {
       krys_debug_assert(IsAngle());
-      return ClampTo<T>(ComputeAngle<Unit>(PrimitiveType(), DoubleValue(conversionData)));
+      return ClampTo<T>(
+        ConvertUnit(DoubleValue(conversionData), PrimitiveType(), ToUnitType(Unit)).value_or(0));
     }
 
 #pragma endregion
 
 #pragma region Time (requires IsTime())
 
-    template <TimeUnit Unit, typename T = double>
-    KRYS_NODISCARD constexpr static T ComputeTime(UnitType type, T value) noexcept
-    {
-      if constexpr (Unit == TimeUnit::S)
-      {
-        switch (type)
-        {
-          case UnitType::s:  return value;
-          case UnitType::ms: return value * secsPerMs;
-          default:           krys_debug_assert(false); return 0;
-        }
-      }
-      else if constexpr (Unit == TimeUnit::Ms)
-      {
-        switch (type)
-        {
-          case UnitType::s:  return value / secsPerMs;
-          case UnitType::ms: return value;
-          default:           krys_debug_assert(false); return 0;
-        }
-      }
-    }
-
     template <typename T = double, TimeUnit Unit = UnitTraits<TimeUnit>::Canonical>
     KRYS_NODISCARD T ResolveAsTime(const ToLengthConversionData &conversionData) const noexcept
     {
       krys_debug_assert(IsTime());
-      return ClampTo<T>(ComputeTime<Unit>(PrimitiveType(), DoubleValue(conversionData)));
+      return ClampTo<T>(
+        ConvertUnit(DoubleValue(conversionData), PrimitiveType(), ToUnitType(Unit)).value_or(0));
     }
 
 #pragma endregion
 
 #pragma region Frequency
 
-    template <FrequencyUnit Unit, typename T = double>
-    KRYS_NODISCARD constexpr static T ComputeFrequency(UnitType type, T value) noexcept
-    {
-      if constexpr (Unit == FrequencyUnit::Hz)
-      {
-        switch (type)
-        {
-          case UnitType::hz:  return value;
-          case UnitType::khz: return value * hertzPerKilohertz;
-          default:            krys_debug_assert(false); return 0;
-        }
-      }
-      else if constexpr (Unit == FrequencyUnit::Khz)
-      {
-        switch (type)
-        {
-          case UnitType::hz:  return value / hertzPerKilohertz;
-          case UnitType::khz: return value;
-          default:            krys_debug_assert(false); return 0;
-        }
-      }
-    }
-
 #pragma endregion
 
 #pragma region Resolution (requires IsResolution())
-
-    template <ResolutionUnit Unit, typename T = double>
-    KRYS_NODISCARD constexpr static T ComputeResolution(UnitType type, T resolution) noexcept
-    {
-      if constexpr (Unit == ResolutionUnit::Dppx)
-      {
-        switch (type)
-        {
-          case UnitType::dppx: return resolution;
-          case UnitType::x:    return resolution * dppxPerX;
-          case UnitType::dpi:  return resolution * dppxPerDpi;
-          case UnitType::dpcm: return resolution * dppxPerDpcm;
-          default:             krys_debug_assert(false); return 0;
-        }
-      }
-      else if constexpr (Unit == ResolutionUnit::X)
-      {
-        switch (type)
-        {
-          case UnitType::dppx: return resolution / dppxPerX;
-          case UnitType::x:    return resolution;
-          case UnitType::dpi:  return resolution * dppxPerDpi / dppxPerX;
-          case UnitType::dpcm: return resolution * dppxPerDpcm / dppxPerX;
-          default:             krys_debug_assert(false); return 0;
-        }
-      }
-      else if constexpr (Unit == ResolutionUnit::Dpi)
-      {
-        switch (type)
-        {
-          case UnitType::dppx: return resolution / dppxPerDpi;
-          case UnitType::x:    return resolution * dppxPerX / dppxPerDpi;
-          case UnitType::dpi:  return resolution;
-          case UnitType::dpcm: return resolution * dppxPerDpcm / dppxPerDpi;
-          default:             krys_debug_assert(false); return 0;
-        }
-      }
-      else if constexpr (Unit == ResolutionUnit::Dpcm)
-      {
-        switch (type)
-        {
-          case UnitType::dppx: return resolution / dppxPerDpcm;
-          case UnitType::x:    return resolution * dppxPerX / dppxPerDpcm;
-          case UnitType::dpi:  return resolution * dppxPerDpi / dppxPerDpcm;
-          case UnitType::dpcm: return resolution;
-          default:             krys_debug_assert(false); return 0;
-        }
-      }
-    }
 
     template <typename T = double, ResolutionUnit Unit = UnitTraits<ResolutionUnit>::Canonical>
     KRYS_NODISCARD T ResolveAsResolution(const ToLengthConversionData &conversionData) const noexcept
     {
       krys_debug_assert(IsResolution());
-      return ClampTo<T>(ComputeResolution<Unit>(PrimitiveType(), DoubleValue(conversionData)));
+      return ClampTo<T>(
+        ConvertUnit(DoubleValue(conversionData), PrimitiveType(), ToUnitType(Unit)).value_or(0));
     }
 
 #pragma endregion
@@ -629,8 +480,6 @@ namespace krys::boo::css
 
     KRYS_NODISCARD bool Equals(const PrimitiveValue &other) const noexcept;
 
-    KRYS_NODISCARD constexpr static CSSOMStringView UnitTypeString(UnitType unitType) noexcept;
-
     void CollectComputedStyleDependencies(css::ComputedStyleDependencies &dependencies) const noexcept;
 
   private:
@@ -684,9 +533,6 @@ namespace krys::boo::css
 
 #pragma endregion
 
-    KRYS_NODISCARD constexpr static Maybe<double>
-      ConversionToCanonicalUnitsScaleFactor(UnitType unitType) noexcept;
-
     KRYS_NODISCARD Maybe<double> DoubleValueInternal(UnitType targetUnit,
                                                      const ToLengthConversionData &) const noexcept;
 
@@ -699,157 +545,7 @@ namespace krys::boo::css
     KRYS_NODISCARD CSSOMString FormatNumberValue(CSSOMStringView suffix) const noexcept;
 
     KRYS_NODISCARD CSSOMString FormatIntegerValue(CSSOMStringView suffix) const noexcept;
-
-  public:
-    KRYS_NODISCARD constexpr static bool IsFontIndependentLength(UnitType type) noexcept
-    {
-      return type == UnitType::px || type == UnitType::cm || type == UnitType::mm || type == UnitType::in
-             || type == UnitType::pt || type == UnitType::pc;
-    }
-
-    KRYS_NODISCARD constexpr static bool IsRootFontRelativeLength(UnitType type) noexcept
-    {
-      return type == UnitType::rcap || type == UnitType::rch || type == UnitType::rem || type == UnitType::rex
-             || type == UnitType::ric || type == UnitType::rlh;
-    }
-
-    KRYS_NODISCARD constexpr static bool IsFontRelativeLength(UnitType type) noexcept
-    {
-      return type == UnitType::em || type == UnitType::ex || type == UnitType::lh || type == UnitType::cap
-             || type == UnitType::ch || type == UnitType::ic || type == UnitType::QuirkyEm
-             || IsRootFontRelativeLength(type);
-    }
-
-    KRYS_NODISCARD constexpr static bool IsContainerPercentageLength(UnitType type) noexcept
-    {
-      return type == UnitType::cqw || type == UnitType::cqh || type == UnitType::cqi || type == UnitType::cqb
-             || type == UnitType::cqmin || type == UnitType::cqmax;
-    }
-
-    KRYS_NODISCARD constexpr static bool IsViewportPercentageLength(UnitType type) noexcept
-    {
-      return type >= UnitType::FirstViewportCSSUnitType && type <= UnitType::LastViewportCSSUnitType;
-    }
   };
-
-  constexpr CSSOMStringView PrimitiveValue::UnitTypeString(UnitType unitType) noexcept
-  {
-    switch (unitType)
-    {
-      case UnitType::cap:                      return u8"cap";
-      case UnitType::ch:                       return u8"ch";
-      case UnitType::cm:                       return u8"cm";
-      case UnitType::cqb:                      return u8"cqb";
-      case UnitType::cqh:                      return u8"cqh";
-      case UnitType::cqi:                      return u8"cqi";
-      case UnitType::cqmax:                    return u8"cqmax";
-      case UnitType::cqmin:                    return u8"cqmin";
-      case UnitType::cqw:                      return u8"cqw";
-      case UnitType::deg:                      return u8"deg";
-      case UnitType::dpcm:                     return u8"dpcm";
-      case UnitType::dpi:                      return u8"dpi";
-      case UnitType::dppx:                     return u8"dppx";
-      case UnitType::dvb:                      return u8"dvb";
-      case UnitType::dvh:                      return u8"dvh";
-      case UnitType::dvi:                      return u8"dvi";
-      case UnitType::dvmax:                    return u8"dvmax";
-      case UnitType::dvmin:                    return u8"dvmin";
-      case UnitType::dvw:                      return u8"dvw";
-      case UnitType::em:                       return u8"em";
-      case UnitType::ex:                       return u8"ex";
-      case UnitType::fr:                       return u8"fr";
-      case UnitType::grad:                     return u8"grad";
-      case UnitType::hz:                       return u8"hz";
-      case UnitType::ic:                       return u8"ic";
-      case UnitType::in:                       return u8"in";
-      case UnitType::khz:                      return u8"khz";
-      case UnitType::lh:                       return u8"lh";
-      case UnitType::lvb:                      return u8"lvb";
-      case UnitType::lvh:                      return u8"lvh";
-      case UnitType::lvi:                      return u8"lvi";
-      case UnitType::lvmax:                    return u8"lvmax";
-      case UnitType::lvmin:                    return u8"lvmin";
-      case UnitType::lvw:                      return u8"lvw";
-      case UnitType::mm:                       return u8"mm";
-      case UnitType::ms:                       return u8"ms";
-      case UnitType::pc:                       return u8"pc";
-      case UnitType::Percentage:               return u8"%";
-      case UnitType::pt:                       return u8"pt";
-      case UnitType::px:                       return u8"px";
-      case UnitType::Q:                        return u8"q";
-      case UnitType::rad:                      return u8"rad";
-      case UnitType::rcap:                     return u8"rcap";
-      case UnitType::rch:                      return u8"rch";
-      case UnitType::rem:                      return u8"rem";
-      case UnitType::rex:                      return u8"rex";
-      case UnitType::ric:                      return u8"ric";
-      case UnitType::rlh:                      return u8"rlh";
-      case UnitType::s:                        return u8"s";
-      case UnitType::svb:                      return u8"svb";
-      case UnitType::svh:                      return u8"svh";
-      case UnitType::svi:                      return u8"svi";
-      case UnitType::svmax:                    return u8"svmax";
-      case UnitType::svmin:                    return u8"svmin";
-      case UnitType::svw:                      return u8"svw";
-      case UnitType::turn:                     return u8"turn";
-      case UnitType::vb:                       return u8"vb";
-      case UnitType::vh:                       return u8"vh";
-      case UnitType::vi:                       return u8"vi";
-      case UnitType::vmax:                     return u8"vmax";
-      case UnitType::vmin:                     return u8"vmin";
-      case UnitType::vw:                       return u8"vw";
-      case UnitType::x:                        return u8"x";
-
-      case UnitType::Calc:
-      case UnitType::CalcPercentageWithAngle:
-      case UnitType::CalcPercentageWithLength:
-      case UnitType::Dimension:
-      case UnitType::FontFamily:
-      case UnitType::Ident:
-      case UnitType::Integer:
-      case UnitType::Number:
-      case UnitType::PropertyId:
-      case UnitType::QuirkyEm:
-      case UnitType::String:
-      case UnitType::Unknown:
-      case UnitType::ValueId:
-      case UnitType::CustomIdent:              return u8"";
-    }
-
-    krys_debug_assert(false);
-    return u8"";
-  }
-
-  constexpr Maybe<double> PrimitiveValue::ConversionToCanonicalUnitsScaleFactor(UnitType unitType) noexcept
-  {
-    // FIXME: the switch can be replaced by an array of scale factors.
-    switch (unitType)
-    {
-      // These are "canonical" units in their respective categories.
-      case UnitType::px:
-      case UnitType::deg:
-      case UnitType::s:
-      case UnitType::hz:
-      case UnitType::dppx: return 1.0;
-
-      case UnitType::x:    return dppxPerX;
-      case UnitType::cm:   return pxPerCm;
-      case UnitType::dpcm: return dppxPerDpcm;
-      case UnitType::mm:   return pxPerMm;
-      case UnitType::Q:    return pxPerQ;
-      case UnitType::in:   return pxPerInch;
-      case UnitType::dpi:  return dppxPerDpi;
-      case UnitType::pt:   return pxPerPt;
-      case UnitType::pc:   return pxPerPc;
-      case UnitType::rad:  return degreesPerRadianDouble;
-      case UnitType::grad: return degreesPerGradientDouble;
-      case UnitType::turn: return degreesPerTurnDouble;
-      case UnitType::ms:   return secsPerMs;
-      case UnitType::khz:  return hertzPerKilohertz;
-
-      default:             return null;
-    }
-  }
 }
 
 KRYS_SPECIALIZE_TYPE_CAST_TRAITS_BEGIN(krys::boo::css::PrimitiveValue)

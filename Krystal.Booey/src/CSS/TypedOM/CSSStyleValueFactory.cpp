@@ -101,7 +101,7 @@ namespace krys::boo
         }
       }
       // A dimension: a unit the Typed OM can name.
-      auto unit = css::PrimitiveValue::UnitTypeString(type);
+      auto unit = css::UnitTypeString(type);
       if (unit.empty() || css::ParseUnitType(unit) != type)
       {
         return nullptr;

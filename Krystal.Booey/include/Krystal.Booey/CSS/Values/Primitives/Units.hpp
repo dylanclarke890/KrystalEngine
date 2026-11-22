@@ -28,7 +28,6 @@
 #include "Krystal.Booey/CSS/Values/Primitives/NumericCategory.hpp"
 #include "Krystal.Booey/CSS/Values/Primitives/Range.hpp"
 #include "Krystal.Booey/CSS/Values/Units.hpp"
-#include "Krystal.Booey/CSS/Values/UnitType.hpp"
 #include "Krystal.Core/Assert.hpp"
 #include "Krystal.Core/Concepts.hpp"
 #include "Krystal.Core/Enum.hpp"

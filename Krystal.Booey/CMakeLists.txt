@@ -728,9 +728,7 @@ set(KRYSTAL_BOOEY_CSS_HEADERS
   include/Krystal.Booey/CSS/Values/TransformListValue.hpp
   include/Krystal.Booey/CSS/Values/Types.hpp
   include/Krystal.Booey/CSS/Values/UnicodeRangeValue.hpp
-  include/Krystal.Booey/CSS/Values/UnitCategory.hpp
   include/Krystal.Booey/CSS/Values/Units.hpp
-  include/Krystal.Booey/CSS/Values/UnitType.hpp
   include/Krystal.Booey/CSS/Values/UrlValue.hpp
   include/Krystal.Booey/CSS/Values/Value.hpp
   include/Krystal.Booey/CSS/Values/ValueList.hpp

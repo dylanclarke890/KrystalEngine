@@ -1,7 +1,9 @@
 ﻿#include "Krystal.Booey/CSS/Values/Units.hpp"
 #include "catch2/catch_approx.hpp"
 #include "catch2/catch_test_macros.hpp"
-#include "Krystal.Booey/CSS/Values/UnitType.hpp"
+#include "Krystal.Booey.Tests/CSS/ValueTestUtils.hpp"
+
+#include <numbers>
 
 namespace krys::boo::css::tests
 {
@@ -52,7 +54,7 @@ namespace krys::boo::css::tests
     CHECK(UnitCategoryForType(UnitType::cqw) == UnitCategory::Other);
     CHECK(UnitCategoryForType(UnitType::Calc) == UnitCategory::Other);
     CHECK(UnitCategoryForType(UnitType::ValueId) == UnitCategory::Other);
-    CHECK(UnitCategoryForType(UnitType::QuirkyEm) == UnitCategory::Other);
+    CHECK(UnitCategoryForType(UnitType::QuirkyEm) == UnitCategory::FontRelativeLength);
   }
 
   TEST_CASE("UnitCategoryForType(every unit)", "[CSS][Units]")
@@ -98,29 +100,32 @@ namespace krys::boo::css::tests
   {
     CHECK(ConversionToCanonicalUnitsScaleFactor(UnitType::px) == 1.0);
     CHECK(ConversionToCanonicalUnitsScaleFactor(UnitType::in) == 96.0);
-    CHECK(ConversionToCanonicalUnitsScaleFactor(UnitType::cm) == Catch::Approx(96.0 / 2.54));
-    CHECK(ConversionToCanonicalUnitsScaleFactor(UnitType::mm) == Catch::Approx(96.0 / 25.4));
-    CHECK(ConversionToCanonicalUnitsScaleFactor(UnitType::Q) == Catch::Approx(96.0 / 101.6));
-    CHECK(ConversionToCanonicalUnitsScaleFactor(UnitType::pt) == Catch::Approx(96.0 / 72.0));
-    CHECK(ConversionToCanonicalUnitsScaleFactor(UnitType::pc) == Catch::Approx(16.0));
+    CHECK(*ConversionToCanonicalUnitsScaleFactor(UnitType::cm) == Catch::Approx(96.0 / 2.54));
+    CHECK(*ConversionToCanonicalUnitsScaleFactor(UnitType::mm) == Catch::Approx(96.0 / 25.4));
+    CHECK(*ConversionToCanonicalUnitsScaleFactor(UnitType::Q) == Catch::Approx(96.0 / 101.6));
+    CHECK(*ConversionToCanonicalUnitsScaleFactor(UnitType::pt) == Catch::Approx(96.0 / 72.0));
+    CHECK(*ConversionToCanonicalUnitsScaleFactor(UnitType::pc) == Catch::Approx(16.0));
     CHECK(ConversionToCanonicalUnitsScaleFactor(UnitType::turn) == 360.0);
-    CHECK(ConversionToCanonicalUnitsScaleFactor(UnitType::grad) == Catch::Approx(0.9));
-    CHECK(ConversionToCanonicalUnitsScaleFactor(UnitType::rad) == Catch::Approx(57.29577951));
-    CHECK(ConversionToCanonicalUnitsScaleFactor(UnitType::ms) == Catch::Approx(0.001));
+    CHECK(*ConversionToCanonicalUnitsScaleFactor(UnitType::grad) == Catch::Approx(0.9));
+    CHECK(*ConversionToCanonicalUnitsScaleFactor(UnitType::rad) == Catch::Approx(57.29577951));
+    CHECK(*ConversionToCanonicalUnitsScaleFactor(UnitType::ms) == Catch::Approx(0.001));
     CHECK(ConversionToCanonicalUnitsScaleFactor(UnitType::khz) == 1000.0);
-    CHECK(ConversionToCanonicalUnitsScaleFactor(UnitType::dpi) == Catch::Approx(1.0 / 96.0));
-    CHECK(ConversionToCanonicalUnitsScaleFactor(UnitType::dpcm) == Catch::Approx(2.54 / 96.0));
-    // Everything else is treated as already canonical.
-    CHECK(ConversionToCanonicalUnitsScaleFactor(UnitType::em) == 1.0);
-    CHECK(ConversionToCanonicalUnitsScaleFactor(UnitType::Number) == 1.0);
+    CHECK(*ConversionToCanonicalUnitsScaleFactor(UnitType::dpi) == Catch::Approx(1.0 / 96.0));
+    CHECK(*ConversionToCanonicalUnitsScaleFactor(UnitType::dpcm) == Catch::Approx(2.54 / 96.0));
+    // Units without a fixed factor have none.
+    CHECK_FALSE(ConversionToCanonicalUnitsScaleFactor(UnitType::em));
+    CHECK_FALSE(ConversionToCanonicalUnitsScaleFactor(UnitType::cqw));
+    CHECK_FALSE(ConversionToCanonicalUnitsScaleFactor(UnitType::Number));
+    CHECK_FALSE(ConversionToCanonicalUnitsScaleFactor(UnitType::fr));
+    CHECK_FALSE(ConversionToCanonicalUnitsScaleFactor(UnitType::ValueId));
   }
 
   TEST_CASE("ConversionToCanonicalUnitRequiresConversionData", "[CSS][Units]")
   {
-    // Absolute lengths other than px, and font/viewport/container relative lengths.
+    // Every length other than px.
     for (auto unit : {UnitType::cm, UnitType::mm, UnitType::Q, UnitType::in, UnitType::pt, UnitType::pc,
                       UnitType::em, UnitType::rem, UnitType::lh, UnitType::ch, UnitType::vw, UnitType::svh,
-                      UnitType::lvmin, UnitType::dvmax, UnitType::cqw, UnitType::cqmax})
+                      UnitType::lvmin, UnitType::dvmax, UnitType::cqw, UnitType::cqmax, UnitType::QuirkyEm})
     {
       INFO(static_cast<int>(unit));
       CHECK(ConversionToCanonicalUnitRequiresConversionData(unit));
@@ -128,10 +133,163 @@ namespace krys::boo::css::tests
 
     for (auto unit : {UnitType::Number, UnitType::Integer, UnitType::Percentage, UnitType::px, UnitType::deg,
                       UnitType::turn, UnitType::s, UnitType::ms, UnitType::hz, UnitType::dppx, UnitType::dpi,
-                      UnitType::fr, UnitType::Calc, UnitType::QuirkyEm, UnitType::ValueId})
+                      UnitType::fr, UnitType::Calc, UnitType::ValueId})
     {
       INFO(static_cast<int>(unit));
       CHECK_FALSE(ConversionToCanonicalUnitRequiresConversionData(unit));
     }
+  }
+
+  TEST_CASE("UnitTypeString", "[CSS][Units]")
+  {
+    CHECK(ToNarrow(UnitTypeString(UnitType::px)) == "px");
+    CHECK(ToNarrow(UnitTypeString(UnitType::Percentage)) == "%");
+    CHECK(ToNarrow(UnitTypeString(UnitType::Q)) == "q");
+    CHECK(ToNarrow(UnitTypeString(UnitType::dvmax)) == "dvmax");
+    CHECK(ToNarrow(UnitTypeString(UnitType::khz)) == "khz");
+    CHECK(ToNarrow(UnitTypeString(UnitType::x)) == "x");
+
+    // Units that don't serialise with a suffix.
+    for (auto unit : {UnitType::Number, UnitType::Integer, UnitType::Dimension, UnitType::QuirkyEm,
+                      UnitType::Calc, UnitType::String, UnitType::ValueId, UnitType::Unknown})
+    {
+      INFO(static_cast<int>(unit));
+      CHECK(UnitTypeString(unit).empty());
+    }
+  }
+
+  TEST_CASE("Units: every unit's name parses back to it", "[CSS][Units]")
+  {
+    for (size_t i = 0uz; i < (ToUnderlying(MaxEnumValue(UnitType {})) + 1uz); ++i)
+    {
+      auto unit = static_cast<UnitType>(i);
+      auto name = UnitTypeString(unit);
+      INFO(i);
+      // Every length, angle, time, frequency, resolution and flex unit has a name, but QuirkyEm.
+      auto category = UnitCategoryForType(unit);
+      if (unit != UnitType::QuirkyEm && category != UnitCategory::Number && category != UnitCategory::Other)
+      {
+        CHECK_FALSE(name.empty());
+      }
+      if (!name.empty() && unit != UnitType::Percentage)
+      {
+        CHECK(ParseUnitType(name) == unit);
+      }
+    }
+  }
+
+  TEST_CASE("IsLength", "[CSS][Units]")
+  {
+    for (auto unit :
+         {UnitType::px, UnitType::cm, UnitType::mm, UnitType::in, UnitType::pt, UnitType::pc, UnitType::Q,
+          UnitType::em, UnitType::ex, UnitType::rem, UnitType::lh, UnitType::cap, UnitType::ch, UnitType::ic,
+          UnitType::QuirkyEm, UnitType::vw, UnitType::dvi, UnitType::cqw, UnitType::cqmax})
+    {
+      INFO(static_cast<int>(unit));
+      CHECK(IsLength(unit));
+    }
+
+    for (auto unit : {UnitType::Number, UnitType::Integer, UnitType::Percentage, UnitType::deg, UnitType::s,
+                      UnitType::hz, UnitType::dppx, UnitType::fr, UnitType::Calc, UnitType::String,
+                      UnitType::ValueId, UnitType::Unknown})
+    {
+      INFO(static_cast<int>(unit));
+      CHECK_FALSE(IsLength(unit));
+    }
+  }
+
+  TEST_CASE("IsFontRelativeLength", "[CSS][Units]")
+  {
+    for (auto unit : {UnitType::em, UnitType::ex, UnitType::lh, UnitType::cap, UnitType::ch, UnitType::ic,
+                      UnitType::QuirkyEm, UnitType::rem, UnitType::rex, UnitType::rlh, UnitType::rcap,
+                      UnitType::rch, UnitType::ric})
+    {
+      INFO(static_cast<int>(unit));
+      CHECK(IsFontRelativeLength(unit));
+    }
+
+    CHECK_FALSE(IsFontRelativeLength(UnitType::px));
+    CHECK_FALSE(IsFontRelativeLength(UnitType::vw));
+    CHECK_FALSE(IsFontRelativeLength(UnitType::Percentage));
+  }
+
+  TEST_CASE("IsRootFontRelativeLength", "[CSS][Units]")
+  {
+    for (auto unit :
+         {UnitType::rem, UnitType::rex, UnitType::rlh, UnitType::rcap, UnitType::rch, UnitType::ric})
+    {
+      INFO(static_cast<int>(unit));
+      CHECK(IsRootFontRelativeLength(unit));
+    }
+
+    CHECK_FALSE(IsRootFontRelativeLength(UnitType::em));
+    CHECK_FALSE(IsRootFontRelativeLength(UnitType::lh));
+  }
+
+  TEST_CASE("IsFontIndependentLength", "[CSS][Units]")
+  {
+    for (auto unit :
+         {UnitType::px, UnitType::cm, UnitType::mm, UnitType::Q, UnitType::in, UnitType::pt, UnitType::pc})
+    {
+      INFO(static_cast<int>(unit));
+      CHECK(IsFontIndependentLength(unit));
+    }
+
+    CHECK_FALSE(IsFontIndependentLength(UnitType::em));
+  }
+
+  TEST_CASE("IsViewportPercentageLength", "[CSS][Units]")
+  {
+    for (auto unit :
+         {UnitType::vw, UnitType::vh, UnitType::vmin, UnitType::vmax, UnitType::vb, UnitType::vi,
+          UnitType::svw, UnitType::svi, UnitType::lvw, UnitType::lvi, UnitType::dvw, UnitType::dvi})
+    {
+      INFO(static_cast<int>(unit));
+      CHECK(IsViewportPercentageLength(unit));
+    }
+
+    CHECK_FALSE(IsViewportPercentageLength(UnitType::cqw));
+    CHECK_FALSE(IsViewportPercentageLength(UnitType::Percentage));
+  }
+
+  TEST_CASE("IsContainerPercentageLength", "[CSS][Units]")
+  {
+    for (auto unit :
+         {UnitType::cqw, UnitType::cqh, UnitType::cqi, UnitType::cqb, UnitType::cqmin, UnitType::cqmax})
+    {
+      INFO(static_cast<int>(unit));
+      CHECK(IsContainerPercentageLength(unit));
+    }
+
+    CHECK_FALSE(IsContainerPercentageLength(UnitType::vw));
+  }
+
+  TEST_CASE("ConvertUnit", "[CSS][Units]")
+  {
+    constexpr double pi = std::numbers::pi;
+
+    CHECK(ConvertUnit(90.0, UnitType::deg, UnitType::deg) == 90.0);
+    CHECK(*ConvertUnit(pi, UnitType::rad, UnitType::deg) == Catch::Approx(180.0));
+    CHECK(*ConvertUnit(200.0, UnitType::grad, UnitType::deg) == Catch::Approx(180.0));
+    CHECK(*ConvertUnit(0.5, UnitType::turn, UnitType::deg) == Catch::Approx(180.0));
+    CHECK(*ConvertUnit(180.0, UnitType::deg, UnitType::rad) == Catch::Approx(pi));
+    CHECK(*ConvertUnit(1.0, UnitType::turn, UnitType::rad) == Catch::Approx(2.0 * pi));
+    CHECK(*ConvertUnit(90.0, UnitType::deg, UnitType::grad) == Catch::Approx(100.0));
+    CHECK(*ConvertUnit(100.0, UnitType::grad, UnitType::turn) == Catch::Approx(0.25));
+
+    CHECK(*ConvertUnit(250.0, UnitType::ms, UnitType::s) == Catch::Approx(0.25));
+    CHECK(*ConvertUnit(1.5, UnitType::s, UnitType::ms) == Catch::Approx(1500.0));
+    CHECK(*ConvertUnit(2.0, UnitType::khz, UnitType::hz) == Catch::Approx(2000.0));
+    CHECK(*ConvertUnit(500.0, UnitType::hz, UnitType::khz) == Catch::Approx(0.5));
+
+    CHECK(*ConvertUnit(2.0, UnitType::x, UnitType::dppx) == Catch::Approx(2.0));
+    CHECK(*ConvertUnit(192.0, UnitType::dpi, UnitType::dppx) == Catch::Approx(2.0));
+    CHECK(*ConvertUnit(1.0, UnitType::dpcm, UnitType::dpi) == Catch::Approx(2.54));
+    CHECK(*ConvertUnit(1.0, UnitType::in, UnitType::cm) == Catch::Approx(2.54));
+
+    // Different quantities, and units without a fixed factor, don't convert.
+    CHECK_FALSE(ConvertUnit(1.0, UnitType::deg, UnitType::s));
+    CHECK_FALSE(ConvertUnit(1.0, UnitType::em, UnitType::px));
+    CHECK_FALSE(ConvertUnit(1.0, UnitType::Number, UnitType::Percentage));
   }
 }

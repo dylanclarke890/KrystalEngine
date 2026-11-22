@@ -73,7 +73,7 @@ namespace krys::boo
 
   CSSOMStringView CSSUnitValue::UnitSerialisation() const noexcept
   {
-    return css::PrimitiveValue::UnitTypeString(_unit);
+    return css::UnitTypeString(_unit);
   }
 
   void CSSUnitValue::Serialise(StringBuilder &builder, EnumSet<SerialisationArguments>) const noexcept
@@ -112,8 +112,8 @@ namespace krys::boo
       return nullptr;
     }
 
-    return Create(_value * css::ConversionToCanonicalUnitsScaleFactor(UnitEnum())
-                    / css::ConversionToCanonicalUnitsScaleFactor(unit),
+    return Create(_value * css::ConversionToCanonicalUnitsScaleFactor(UnitEnum()).value_or(1.0)
+                    / css::ConversionToCanonicalUnitsScaleFactor(unit).value_or(1.0),
                   unit);
   }
 
@@ -126,8 +126,8 @@ namespace krys::boo
       canonicalUnit = _unit;
     }
 
-    auto convertedValue = _value * css::ConversionToCanonicalUnitsScaleFactor(UnitEnum())
-                          / css::ConversionToCanonicalUnitsScaleFactor(canonicalUnit);
+    auto convertedValue = _value * css::ConversionToCanonicalUnitsScaleFactor(UnitEnum()).value_or(1.0)
+                          / css::ConversionToCanonicalUnitsScaleFactor(canonicalUnit).value_or(1.0);
 
     if (_unit == css::UnitType::Number)
     {

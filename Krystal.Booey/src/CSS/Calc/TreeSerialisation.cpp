@@ -730,8 +730,7 @@ namespace krys::boo::css::calc
     // 2. If root is a numeric value, or a non-math function, serialize root per the normal rules for it and
     // return the result.
 
-    FormatCSSNumberValue(builder,
-                         SerialisableNumber {root.Value, PrimitiveValue::UnitTypeString(ToUnit(root))});
+    FormatCSSNumberValue(builder, SerialisableNumber {root.Value, UnitTypeString(ToUnit(root))});
   }
 
   void SerialiseCalculationTree(StringBuilder &builder, const Symbol &root, SerialisationState &) noexcept

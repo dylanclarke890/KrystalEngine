@@ -376,8 +376,9 @@ namespace krys::boo::css::cq
                 numbers.push_back(value->ResolveAsResolution(conversionData));
                 break;
               case UnitCategory::Frequency:
-                numbers.push_back(PrimitiveValue::ComputeFrequency<FrequencyUnit::Hz>(
-                  value->PrimitiveType(), value->Value<double>(conversionData)));
+                numbers.push_back(
+                  ConvertUnit(value->Value<double>(conversionData), value->PrimitiveType(), UnitType::hz)
+                    .value_or(0));
                 break;
               default:
                 if (!value->IsLength())
