@@ -334,13 +334,18 @@ namespace krys::boo::css
   double PrimitiveValue::DoubleValue(UnitType targetUnit,
                                      const ToLengthConversionData &conversionData) const noexcept
   {
-    return DoubleValueInternal(targetUnit, conversionData).value_or(0);
+    auto unit = PrimitiveType();
+    if (unit == UnitType::Unknown)
+    {
+      return 0;
+    }
+    return ConvertUnitOrNumber(DoubleValue(conversionData), unit, targetUnit).value_or(0);
   }
 
   double PrimitiveValue::DoubleValueNoConversionDataRequired(UnitType targetUnit) const noexcept
   {
     krys_debug_assert(!IsCalculated());
-    return DoubleValueInternalWithoutConversionData(targetUnit).value_or(0);
+    return ConvertUnitOrNumber(_value.Number, _unit, targetUnit).value_or(0);
   }
 
 #pragma endregion
@@ -417,188 +422,6 @@ namespace krys::boo::css
     }
 
     return _value.Number < 0;
-  }
-
-  Maybe<double>
-    PrimitiveValue::DoubleValueInternal(UnitType targetUnit,
-                                        const ToLengthConversionData &conversionData) const noexcept
-  {
-    if ((_primitiveKind != PrimitiveKind::Number && _primitiveKind != PrimitiveKind::Calc)
-        || (_primitiveKind == PrimitiveKind::Number && _unit == UnitType::Unknown)
-        || targetUnit == UnitType::Unknown)
-    {
-      return null;
-    }
-
-    UnitType sourceUnitType = PrimitiveType();
-    if (targetUnit == sourceUnitType)
-    {
-      return DoubleValue(conversionData);
-    }
-
-    UnitCategory sourceCategory = UnitCategoryForType(sourceUnitType);
-    krys_debug_assert(sourceCategory != UnitCategory::Other);
-
-    UnitType targetUnitType = targetUnit;
-    UnitCategory targetCategory = UnitCategoryForType(targetUnitType);
-    krys_debug_assert(targetCategory != UnitCategory::Other);
-
-    // Cannot convert between unrelated unit categories if one of them is not UnitCategory::Number.
-    if (sourceCategory != targetCategory && sourceCategory != UnitCategory::Number
-        && targetCategory != UnitCategory::Number)
-    {
-      return null;
-    }
-
-    if (targetCategory == UnitCategory::Number)
-    {
-      // Cannot convert between numbers and percent.
-      if (sourceCategory == UnitCategory::Percent)
-      {
-        return null;
-      }
-
-      // We interpret conversion to UnitType::Number as conversion to a canonical unit in this value's
-      // category.
-      targetUnitType = CanonicalUnitTypeForCategory(sourceCategory);
-      if (targetUnitType == UnitType::Unknown)
-      {
-        return null;
-      }
-    }
-
-    if (sourceUnitType == UnitType::Number || sourceUnitType == UnitType::Integer)
-    {
-      // Cannot convert between numbers and percent.
-      if (targetCategory == UnitCategory::Percent)
-      {
-        return null;
-      }
-
-      // We interpret conversion from UnitType::Number in the same way as Parser::ValidUnit() while using
-      // non-strict mode.
-      sourceUnitType = CanonicalUnitTypeForCategory(targetCategory);
-      if (sourceUnitType == UnitType::Unknown)
-      {
-        return null;
-      }
-    }
-
-    double convertedValue = DoubleValue(conversionData);
-
-    // If we don't need to scale it, don't worry about if we can scale it.
-    if (sourceUnitType == targetUnitType)
-    {
-      return convertedValue;
-    }
-
-    // First convert the value from PrimitiveUnitType() to canonical type.
-    auto sourceFactor = ConversionToCanonicalUnitsScaleFactor(sourceUnitType);
-    if (!sourceFactor.has_value())
-    {
-      return null;
-    }
-    convertedValue *= *sourceFactor;
-
-    // Now convert from canonical type to the target unitType.
-    auto targetFactor = ConversionToCanonicalUnitsScaleFactor(targetUnitType);
-    if (!targetFactor.has_value())
-    {
-      return null;
-    }
-    convertedValue /= *targetFactor;
-
-    return convertedValue;
-  }
-
-  Maybe<double> PrimitiveValue::DoubleValueInternalWithoutConversionData(UnitType targetUnit) const noexcept
-  {
-    if ((_primitiveKind != PrimitiveKind::Number && _primitiveKind != PrimitiveKind::Calc)
-        || (_primitiveKind == PrimitiveKind::Number && _unit == UnitType::Unknown)
-        || targetUnit == UnitType::Unknown)
-    {
-      return null;
-    }
-
-    UnitType sourceUnitType = PrimitiveType();
-    if (targetUnit == sourceUnitType)
-    {
-      return _value.Number;
-    }
-
-    UnitCategory sourceCategory = UnitCategoryForType(sourceUnitType);
-    krys_debug_assert(sourceCategory != UnitCategory::Other);
-
-    UnitType targetUnitType = targetUnit;
-    UnitCategory targetCategory = UnitCategoryForType(targetUnitType);
-    krys_debug_assert(targetCategory != UnitCategory::Other);
-
-    // Cannot convert between unrelated unit categories if one of them is not UnitCategory::Number.
-    if (sourceCategory != targetCategory && sourceCategory != UnitCategory::Number
-        && targetCategory != UnitCategory::Number)
-    {
-      return null;
-    }
-
-    if (targetCategory == UnitCategory::Number)
-    {
-      // Cannot convert between numbers and percent.
-      if (sourceCategory == UnitCategory::Percent)
-      {
-        return null;
-      }
-
-      // We interpret conversion to UnitType::Number as conversion to a canonical unit in this value's
-      // category.
-      targetUnitType = CanonicalUnitTypeForCategory(sourceCategory);
-      if (targetUnitType == UnitType::Unknown)
-      {
-        return null;
-      }
-    }
-
-    if (sourceUnitType == UnitType::Number || sourceUnitType == UnitType::Integer)
-    {
-      // Cannot convert between numbers and percent.
-      if (targetCategory == UnitCategory::Percent)
-      {
-        return null;
-      }
-
-      // We interpret conversion from UnitType::Number in the same way as Parser::ValidUnit() while using
-      // non-strict mode.
-      sourceUnitType = CanonicalUnitTypeForCategory(targetCategory);
-      if (sourceUnitType == UnitType::Unknown)
-      {
-        return null;
-      }
-    }
-
-    double convertedValue = _value.Number;
-
-    // If we don't need to scale it, don't worry about if we can scale it.
-    if (sourceUnitType == targetUnitType)
-    {
-      return convertedValue;
-    }
-
-    // First convert the value from PrimitiveUnitType() to canonical type.
-    auto sourceFactor = ConversionToCanonicalUnitsScaleFactor(sourceUnitType);
-    if (!sourceFactor.has_value())
-    {
-      return null;
-    }
-    convertedValue *= *sourceFactor;
-
-    // Now convert from canonical type to the target unitType.
-    auto targetFactor = ConversionToCanonicalUnitsScaleFactor(targetUnitType);
-    if (!targetFactor.has_value())
-    {
-      return null;
-    }
-    convertedValue /= *targetFactor;
-
-    return convertedValue;
   }
 
   CSSOMString PrimitiveValue::StringValue() const noexcept

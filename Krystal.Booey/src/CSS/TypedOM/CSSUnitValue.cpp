@@ -107,14 +107,13 @@ namespace krys::boo
   RefPtr<CSSUnitValue> CSSUnitValue::ConvertTo(css::UnitType unit) const noexcept
   {
     // https://drafts.css-houdini.org/css-typed-om/#convert-a-cssunitvalue
-    if (css::UnitCategoryForType(UnitEnum()) != css::UnitCategoryForType(unit))
+    auto converted = css::ConvertUnit(_value, UnitEnum(), unit);
+    if (!converted)
     {
       return nullptr;
     }
 
-    return Create(_value * css::ConversionToCanonicalUnitsScaleFactor(UnitEnum()).value_or(1.0)
-                    / css::ConversionToCanonicalUnitsScaleFactor(unit).value_or(1.0),
-                  unit);
+    return Create(*converted, unit);
   }
 
   auto CSSUnitValue::ToSumValue() const noexcept -> Maybe<SumValue>

@@ -161,7 +161,7 @@ namespace krys::boo::css
 
     KRYS_NODISCARD bool IsAngle() const noexcept
     {
-      return UnitCategoryForType(PrimitiveType()) == UnitCategory::Angle;
+      return CategoryForUnitType(PrimitiveType()) == Category::Angle;
     }
 
     KRYS_NODISCARD bool IsFontIndependentLength() const noexcept
@@ -216,7 +216,7 @@ namespace krys::boo::css
 
     KRYS_NODISCARD bool IsTime() const noexcept
     {
-      return UnitCategoryForType(PrimitiveType()) == UnitCategory::Time;
+      return CategoryForUnitType(PrimitiveType()) == Category::Time;
     }
 
     KRYS_NODISCARD bool IsCalculated() const noexcept
@@ -228,7 +228,7 @@ namespace krys::boo::css
 
     KRYS_NODISCARD bool IsResolution() const noexcept
     {
-      return UnitCategoryForType(PrimitiveType()) == UnitCategory::Resolution;
+      return CategoryForUnitType(PrimitiveType()) == Category::Resolution;
     }
 
     KRYS_NODISCARD bool IsViewportPercentageLength() const noexcept
@@ -529,11 +529,6 @@ namespace krys::boo::css
     KRYS_NODISCARD double DoubleValueDividingBy100IfPercentage(const ToLengthConversionData &) const noexcept;
 
 #pragma endregion
-
-    KRYS_NODISCARD Maybe<double> DoubleValueInternal(UnitType targetUnit,
-                                                     const ToLengthConversionData &) const noexcept;
-
-    KRYS_NODISCARD Maybe<double> DoubleValueInternalWithoutConversionData(UnitType targetUnit) const noexcept;
 
     KRYS_NODISCARD bool AddDerivedHash(size_t &seed) const noexcept;
 

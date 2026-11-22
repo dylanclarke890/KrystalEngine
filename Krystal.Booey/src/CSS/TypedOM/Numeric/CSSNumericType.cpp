@@ -35,50 +35,56 @@ namespace krys::boo
   {
     // https://drafts.css-houdini.org/css-typed-om/#cssnumericvalue-create-a-type
     CSSNumericType type;
-    switch (css::UnitCategoryForType(unit))
+    auto category = css::CategoryForUnitType(unit);
+    if (!category)
     {
-      case css::UnitCategory::Number:
+      return null;
+    }
+
+    switch (*category)
+    {
+      case css::Category::Integer:
+      case css::Category::Number:
       {
         return type;
       }
-      case css::UnitCategory::Percent:
+      case css::Category::Percentage:
       {
         type.Percent = exponent;
         return type;
       }
-      case css::UnitCategory::AbsoluteLength:
-      case css::UnitCategory::FontRelativeLength:
-      case css::UnitCategory::ViewportPercentageLength:
+      case css::Category::Length:
       {
         type.Length = exponent;
         return type;
       }
-      case css::UnitCategory::Angle:
+      case css::Category::Angle:
       {
         type.Angle = exponent;
         return type;
       }
-      case css::UnitCategory::Time:
+      case css::Category::Time:
       {
         type.Time = exponent;
         return type;
       }
-      case css::UnitCategory::Frequency:
+      case css::Category::Frequency:
       {
         type.Frequency = exponent;
         return type;
       }
-      case css::UnitCategory::Resolution:
+      case css::Category::Resolution:
       {
         type.Resolution = exponent;
         return type;
       }
-      case css::UnitCategory::Flex:
+      case css::Category::Flex:
       {
         type.Flex = exponent;
         return type;
       }
-      case css::UnitCategory::Other:
+      case css::Category::LengthPercentage:
+      case css::Category::AnglePercentage:
       {
         break;
       }

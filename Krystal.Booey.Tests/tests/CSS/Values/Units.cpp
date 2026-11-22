@@ -32,53 +32,38 @@ namespace krys::boo::css::tests
     static_assert(ParseUnitType(u8"rem") == UnitType::rem);
   }
 
-  TEST_CASE("UnitCategoryForType", "[CSS][Units]")
+  TEST_CASE("CategoryForUnitType", "[CSS][Units]")
   {
-    CHECK(UnitCategoryForType(UnitType::Number) == UnitCategory::Number);
-    CHECK(UnitCategoryForType(UnitType::Integer) == UnitCategory::Number);
-    CHECK(UnitCategoryForType(UnitType::Percentage) == UnitCategory::Percent);
-    CHECK(UnitCategoryForType(UnitType::px) == UnitCategory::AbsoluteLength);
-    CHECK(UnitCategoryForType(UnitType::cm) == UnitCategory::AbsoluteLength);
-    CHECK(UnitCategoryForType(UnitType::Q) == UnitCategory::AbsoluteLength);
-    CHECK(UnitCategoryForType(UnitType::em) == UnitCategory::FontRelativeLength);
-    CHECK(UnitCategoryForType(UnitType::rem) == UnitCategory::FontRelativeLength);
-    CHECK(UnitCategoryForType(UnitType::vw) == UnitCategory::ViewportPercentageLength);
-    CHECK(UnitCategoryForType(UnitType::dvi) == UnitCategory::ViewportPercentageLength);
-    CHECK(UnitCategoryForType(UnitType::deg) == UnitCategory::Angle);
-    CHECK(UnitCategoryForType(UnitType::turn) == UnitCategory::Angle);
-    CHECK(UnitCategoryForType(UnitType::ms) == UnitCategory::Time);
-    CHECK(UnitCategoryForType(UnitType::khz) == UnitCategory::Frequency);
-    CHECK(UnitCategoryForType(UnitType::dpi) == UnitCategory::Resolution);
-    CHECK(UnitCategoryForType(UnitType::x) == UnitCategory::Resolution);
-    CHECK(UnitCategoryForType(UnitType::fr) == UnitCategory::Flex);
-    CHECK(UnitCategoryForType(UnitType::cqw) == UnitCategory::Other);
-    CHECK(UnitCategoryForType(UnitType::QuirkyEm) == UnitCategory::FontRelativeLength);
-  }
-
-  TEST_CASE("UnitCategoryForType(every unit)", "[CSS][Units]")
-  {
-    // Every unit has a category (none falls through to unreachable).
-    for (size_t i = 0uz; i < (ToUnderlying(MaxEnumValue(UnitType {})) + 1uz); ++i)
+    CHECK(CategoryForUnitType(UnitType::Number) == Category::Number);
+    CHECK(CategoryForUnitType(UnitType::Integer) == Category::Integer);
+    CHECK(CategoryForUnitType(UnitType::Percentage) == Category::Percentage);
+    for (auto unit : {UnitType::px, UnitType::Q, UnitType::em, UnitType::QuirkyEm, UnitType::rem,
+                      UnitType::vw, UnitType::dvi, UnitType::cqw})
     {
-      INFO(i);
-      auto category = UnitCategoryForType(static_cast<UnitType>(i));
-      CHECK(static_cast<size_t>(category) < (ToUnderlying(MaxEnumValue(UnitCategory {})) + 1uz));
+      INFO(static_cast<int>(unit));
+      CHECK(CategoryForUnitType(unit) == Category::Length);
     }
+    CHECK(CategoryForUnitType(UnitType::turn) == Category::Angle);
+    CHECK(CategoryForUnitType(UnitType::ms) == Category::Time);
+    CHECK(CategoryForUnitType(UnitType::khz) == Category::Frequency);
+    CHECK(CategoryForUnitType(UnitType::x) == Category::Resolution);
+    CHECK(CategoryForUnitType(UnitType::fr) == Category::Flex);
+    CHECK_FALSE(CategoryForUnitType(UnitType::Unknown));
   }
 
   TEST_CASE("CanonicalUnitTypeForCategory", "[CSS][Units]")
   {
-    CHECK(CanonicalUnitTypeForCategory(UnitCategory::Number) == UnitType::Number);
-    CHECK(CanonicalUnitTypeForCategory(UnitCategory::Percent) == UnitType::Percentage);
-    CHECK(CanonicalUnitTypeForCategory(UnitCategory::AbsoluteLength) == UnitType::px);
-    CHECK(CanonicalUnitTypeForCategory(UnitCategory::Angle) == UnitType::deg);
-    CHECK(CanonicalUnitTypeForCategory(UnitCategory::Time) == UnitType::s);
-    CHECK(CanonicalUnitTypeForCategory(UnitCategory::Frequency) == UnitType::hz);
-    CHECK(CanonicalUnitTypeForCategory(UnitCategory::Resolution) == UnitType::dppx);
-    CHECK(CanonicalUnitTypeForCategory(UnitCategory::Flex) == UnitType::fr);
-    CHECK(CanonicalUnitTypeForCategory(UnitCategory::FontRelativeLength) == UnitType::Unknown);
-    CHECK(CanonicalUnitTypeForCategory(UnitCategory::ViewportPercentageLength) == UnitType::Unknown);
-    CHECK(CanonicalUnitTypeForCategory(UnitCategory::Other) == UnitType::Unknown);
+    CHECK(CanonicalUnitTypeForCategory(Category::Integer) == UnitType::Number);
+    CHECK(CanonicalUnitTypeForCategory(Category::Number) == UnitType::Number);
+    CHECK(CanonicalUnitTypeForCategory(Category::Percentage) == UnitType::Percentage);
+    CHECK(CanonicalUnitTypeForCategory(Category::Length) == UnitType::px);
+    CHECK(CanonicalUnitTypeForCategory(Category::Angle) == UnitType::deg);
+    CHECK(CanonicalUnitTypeForCategory(Category::Time) == UnitType::s);
+    CHECK(CanonicalUnitTypeForCategory(Category::Frequency) == UnitType::hz);
+    CHECK(CanonicalUnitTypeForCategory(Category::Resolution) == UnitType::dppx);
+    CHECK(CanonicalUnitTypeForCategory(Category::Flex) == UnitType::fr);
+    CHECK(CanonicalUnitTypeForCategory(Category::LengthPercentage) == UnitType::Unknown);
+    CHECK(CanonicalUnitTypeForCategory(Category::AnglePercentage) == UnitType::Unknown);
   }
 
   TEST_CASE("CanonicalUnitTypeForUnitType", "[CSS][Units]")
@@ -91,6 +76,8 @@ namespace krys::boo::css::tests
     CHECK(CanonicalUnitTypeForUnitType(UnitType::dpi) == UnitType::dppx);
     CHECK(CanonicalUnitTypeForUnitType(UnitType::Integer) == UnitType::Number);
     CHECK(CanonicalUnitTypeForUnitType(UnitType::em) == UnitType::Unknown);
+    CHECK(CanonicalUnitTypeForUnitType(UnitType::vw) == UnitType::Unknown);
+    CHECK(CanonicalUnitTypeForUnitType(UnitType::cqw) == UnitType::Unknown);
     CHECK(CanonicalUnitTypeForUnitType(UnitType::Unknown) == UnitType::Unknown);
   }
 
@@ -163,8 +150,9 @@ namespace krys::boo::css::tests
       auto name = UnitTypeString(unit);
       INFO(i);
       // Every length, angle, time, frequency, resolution and flex unit has a name, but QuirkyEm.
-      auto category = UnitCategoryForType(unit);
-      if (unit != UnitType::QuirkyEm && category != UnitCategory::Number && category != UnitCategory::Other)
+      auto category = CategoryForUnitType(unit);
+      if (unit != UnitType::QuirkyEm && category && category != Category::Number
+          && category != Category::Integer)
       {
         CHECK_FALSE(name.empty());
       }
@@ -287,5 +275,25 @@ namespace krys::boo::css::tests
     CHECK_FALSE(ConvertUnit(1.0, UnitType::deg, UnitType::s));
     CHECK_FALSE(ConvertUnit(1.0, UnitType::em, UnitType::px));
     CHECK_FALSE(ConvertUnit(1.0, UnitType::Number, UnitType::Percentage));
+  }
+
+  TEST_CASE("ConvertUnitOrNumber", "[CSS][Units]")
+  {
+    CHECK(*ConvertUnitOrNumber(1.0, UnitType::in, UnitType::px) == Catch::Approx(96.0));
+    // A number is in the canonical unit of the other side.
+    CHECK(*ConvertUnitOrNumber(1.0, UnitType::in, UnitType::Number) == Catch::Approx(96.0));
+    CHECK(*ConvertUnitOrNumber(96.0, UnitType::Number, UnitType::in) == Catch::Approx(1.0));
+    CHECK(*ConvertUnitOrNumber(0.5, UnitType::turn, UnitType::Number) == Catch::Approx(180.0));
+    CHECK(ConvertUnitOrNumber(3.0, UnitType::Integer, UnitType::Number) == 3.0);
+    CHECK(ConvertUnitOrNumber(2.0, UnitType::fr, UnitType::Number) == 2.0);
+
+    // Numbers and percentages don't convert, nor do relative lengths and unrelated quantities.
+    CHECK_FALSE(ConvertUnitOrNumber(1.0, UnitType::Number, UnitType::Percentage));
+    CHECK_FALSE(ConvertUnitOrNumber(1.0, UnitType::Percentage, UnitType::Number));
+    CHECK_FALSE(ConvertUnitOrNumber(1.0, UnitType::em, UnitType::Number));
+    CHECK_FALSE(ConvertUnitOrNumber(1.0, UnitType::Number, UnitType::vw));
+    CHECK_FALSE(ConvertUnitOrNumber(1.0, UnitType::em, UnitType::rem));
+    CHECK_FALSE(ConvertUnitOrNumber(1.0, UnitType::deg, UnitType::px));
+    CHECK_FALSE(ConvertUnitOrNumber(1.0, UnitType::Unknown, UnitType::px));
   }
 }

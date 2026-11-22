@@ -107,34 +107,6 @@ namespace krys::boo::css
     return UnitType::fr;
   }
 
-  /// @brief The kind of quantity a unit measures, with lengths split by what they're relative to: units of
-  /// one category convert to each other, except relative lengths, which need a context to resolve.
-  enum class UnitCategory : uint8
-  {
-    /// @brief A bare number or integer.
-    Number,
-    /// @brief A percentage.
-    Percent,
-    /// @brief `px`, `cm`, `mm`, `in`, `pt`, `pc` and `Q`.
-    AbsoluteLength,
-    /// @brief Lengths relative to a font, the root's included.
-    FontRelativeLength,
-    /// @brief Lengths relative to a viewport.
-    ViewportPercentageLength,
-    Angle,
-    Time,
-    Frequency,
-    Resolution,
-    Flex,
-    /// @brief Everything else: container-relative lengths and `Unknown`.
-    Other,
-  };
-
-  consteval UnitCategory MaxEnumValue(UnitCategory) noexcept
-  {
-    return UnitCategory::Other;
-  }
-
   /// @brief What a length is relative to.
   enum class LengthBasis : uint8
   {
@@ -369,67 +341,47 @@ namespace krys::boo::css
     return IsLength(unit) && UnitInfoFor(unit).Basis == LengthBasis::Container;
   }
 
-  KRYS_NODISCARD constexpr UnitCategory UnitCategoryForType(UnitType unit) noexcept
+  /// @brief The quantity @p unit measures; null for `UnitType::Unknown`.
+  KRYS_NODISCARD constexpr Maybe<Category> CategoryForUnitType(UnitType unit) noexcept
   {
-    auto info = UnitInfoFor(unit);
-    if (!info.Quantity)
-    {
-      return UnitCategory::Other;
-    }
-    switch (*info.Quantity)
-    {
-      case Category::Integer:
-      case Category::Number:     return UnitCategory::Number;
-      case Category::Percentage: return UnitCategory::Percent;
-      case Category::Angle:      return UnitCategory::Angle;
-      case Category::Time:       return UnitCategory::Time;
-      case Category::Frequency:  return UnitCategory::Frequency;
-      case Category::Resolution: return UnitCategory::Resolution;
-      case Category::Flex:       return UnitCategory::Flex;
-      case Category::Length:
-        switch (info.Basis)
-        {
-          case LengthBasis::Absolute:  return UnitCategory::AbsoluteLength;
-          case LengthBasis::Font:
-          case LengthBasis::RootFont:  return UnitCategory::FontRelativeLength;
-          case LengthBasis::Viewport:  return UnitCategory::ViewportPercentageLength;
-          case LengthBasis::Container: return UnitCategory::Other;
-        }
-        break;
-      case Category::LengthPercentage:
-      case Category::AnglePercentage:  break;
-    }
-    krys_unreachable();
+    return UnitInfoFor(unit).Quantity;
   }
 
 #pragma endregion
 
 #pragma region Conversion
 
-  /// @brief The unit that the units of @p category convert to; `UnitType::Unknown` for relative lengths,
-  /// which only resolve with a context, and for `Other`.
-  KRYS_NODISCARD constexpr UnitType CanonicalUnitTypeForCategory(UnitCategory category) noexcept
+  /// @brief The unit that the units of @p category convert to: `UnitType::Number` for integers and numbers,
+  /// and `UnitType::Unknown` for the mixed categories.
+  KRYS_NODISCARD constexpr UnitType CanonicalUnitTypeForCategory(Category category) noexcept
   {
     switch (category)
     {
-      case UnitCategory::Number:                   return UnitType::Number;
-      case UnitCategory::Percent:                  return UnitType::Percentage;
-      case UnitCategory::AbsoluteLength:           return UnitType::px;
-      case UnitCategory::Angle:                    return UnitType::deg;
-      case UnitCategory::Time:                     return UnitType::s;
-      case UnitCategory::Frequency:                return UnitType::hz;
-      case UnitCategory::Resolution:               return UnitType::dppx;
-      case UnitCategory::Flex:                     return UnitType::fr;
-      case UnitCategory::FontRelativeLength:
-      case UnitCategory::ViewportPercentageLength:
-      case UnitCategory::Other:                    return UnitType::Unknown;
+      case Category::Integer:
+      case Category::Number:           return UnitType::Number;
+      case Category::Percentage:       return UnitType::Percentage;
+      case Category::Length:           return UnitType::px;
+      case Category::Angle:            return UnitType::deg;
+      case Category::Time:             return UnitType::s;
+      case Category::Frequency:        return UnitType::hz;
+      case Category::Resolution:       return UnitType::dppx;
+      case Category::Flex:             return UnitType::fr;
+      case Category::LengthPercentage:
+      case Category::AnglePercentage:  return UnitType::Unknown;
     }
     krys_unreachable();
   }
 
+  /// @brief The unit @p unit converts to; `UnitType::Unknown` for relative lengths, which only resolve with a
+  /// context, and for `UnitType::Unknown`.
   KRYS_NODISCARD constexpr UnitType CanonicalUnitTypeForUnitType(UnitType unit) noexcept
   {
-    return CanonicalUnitTypeForCategory(UnitCategoryForType(unit));
+    auto info = UnitInfoFor(unit);
+    if (!info.Quantity || (info.Quantity == Category::Length && info.Basis != LengthBasis::Absolute))
+    {
+      return UnitType::Unknown;
+    }
+    return CanonicalUnitTypeForCategory(*info.Quantity);
   }
 
   /// @brief The fixed factor from @p unit to its canonical unit, if it has one.
@@ -461,6 +413,38 @@ namespace krys::boo::css
       return null;
     }
     return value * *fromInfo.ScaleToCanonical / *toInfo.ScaleToCanonical;
+  }
+
+  /// @brief Like `ConvertUnit`, but a bare number stands for the canonical unit of the other side: converting
+  /// to a number gives the value in its canonical unit, and a number converts as if it were in the target's.
+  /// @note Numbers and percentages don't convert to each other.
+  KRYS_NODISCARD constexpr Maybe<double> ConvertUnitOrNumber(double value, UnitType from,
+                                                             UnitType to) noexcept
+  {
+    auto fromCategory = CategoryForUnitType(from);
+    auto toCategory = CategoryForUnitType(to);
+    if (!fromCategory || !toCategory)
+    {
+      return null;
+    }
+    auto isNumber = [](Category category)
+    {
+      return category == Category::Number || category == Category::Integer;
+    };
+    if ((isNumber(*fromCategory) && to == UnitType::Percentage)
+        || (isNumber(*toCategory) && from == UnitType::Percentage))
+    {
+      return null;
+    }
+    if (isNumber(*toCategory))
+    {
+      to = CanonicalUnitTypeForCategory(*fromCategory);
+    }
+    if (isNumber(*fromCategory))
+    {
+      from = CanonicalUnitTypeForCategory(*toCategory);
+    }
+    return ConvertUnit(value, from, to);
   }
 
 #pragma endregion
