@@ -3,6 +3,7 @@
 #include "Krystal.Core/Types/SharedBuffer.hpp"
 #include "Krystal.Image.Tests/AnimatedImages.hpp"
 #include "Krystal.Image.Tests/EXIFImages.hpp"
+#include "Krystal.Image.Tests/GIFImages.hpp"
 #include "Krystal.Image.Tests/ICCImages.hpp"
 #include "Krystal.Image.Tests/JPEGImages.hpp"
 #include "Krystal.Image.Tests/TestImages.hpp"
@@ -194,7 +195,8 @@ namespace krys::img::tests
   TEST_CASE("ImageDecoder: decodes data as it arrives", "[ImageDecoder]")
   {
     for (auto bytes : {images::JPEG, images::ProgressiveJPEG, images::CMYKJPEG, images::RotatedProfileJPEG,
-                       images::PNG, images::AnimatedPNG, images::GIF, images::AnimatedGIF, images::WebP})
+                       images::PNG, images::AnimatedPNG, images::GIF, images::AnimatedGIF,
+                       images::InterlacedGIF, images::NoiseGIF, images::DisposalGIF, images::WebP})
     {
       auto whole = Decode(bytes);
       REQUIRE(whole);
@@ -274,6 +276,77 @@ namespace krys::img::tests
     // Still GIFs loop once, as animated ones without a looping extension do.
     CHECK(decoder->GetRepetitionCount() == RepetitionCountOnce);
     CHECK(Pixels(*decoder) == List<uint32> {Red, Green, Blue, White, Black, 0u});
+  }
+
+  TEST_CASE("GIFImageDecoder: decodes interlaced rows and large dictionaries", "[ImageDecoder]")
+  {
+    auto opaque = [](uint32 r, uint32 g, uint32 b)
+    {
+      return 0xFF'00'00'00u | (r << 16) | (g << 8) | b;
+    };
+
+    auto interlaced = Decode(images::InterlacedGIF);
+    REQUIRE(interlaced);
+    auto rows = Pixels(*interlaced);
+    REQUIRE(rows.size() == 5u * 9u);
+    for (uint32 y = 0; y < 9; ++y)
+    {
+      INFO("row " << y);
+      CHECK(rows[y * 5] == opaque(y * 28, 255 - y * 28, y * 10));
+      CHECK(rows[y * 5 + 4] == opaque(y * 28, 255 - y * 28, y * 10));
+    }
+
+    // Enough codes that the LZW dictionary fills and is cleared.
+    auto noise = Decode(images::NoiseGIF);
+    REQUIRE(noise);
+    auto pixels = Pixels(*noise);
+    REQUIRE(pixels.size() == 64u * 64u);
+    auto mismatches = 0;
+    for (size_t index = 0; index < pixels.size(); ++index)
+    {
+      const auto *color = &images::NoiseGIFPalette[size_t {images::NoiseGIFIndices[index]} * 3];
+      mismatches += pixels[index] != opaque(color[0], color[1], color[2]);
+    }
+    CHECK(mismatches == 0);
+  }
+
+  TEST_CASE("GIFImageDecoder: disposes of frames as they ask", "[ImageDecoder]")
+  {
+    constexpr uint32 T = 0;
+    constexpr uint32 R = Red;
+    constexpr uint32 G = Green;
+    constexpr uint32 B = Blue;
+    constexpr uint32 W = White;
+    const List<uint32> expected[] = {
+      // Red everywhere.
+      {R, R, R, R, R, R, R, R, R, R, R, R, R, R, R, R},
+      // Green over the top left, which is then restored to the background.
+      {G, G, R, R, G, G, R, R, R, R, R, R, R, R, R, R},
+      // Blue over the bottom right, on the cleared top left; then restored to the previous frame.
+      {T, T, R, R, T, T, R, R, R, R, B, B, R, R, B, B},
+      // White at (3, 0), on frame 1 as it was disposed of: the blue is gone.
+      {T, T, R, W, T, T, R, R, R, R, R, R, R, R, R, R},
+    };
+
+    auto decoder = Decode(images::DisposalGIF);
+    REQUIRE(decoder);
+    REQUIRE(decoder->FrameCount() == 4u);
+    CHECK(decoder->GetRepetitionCount() == RepetitionCountInfinite);
+    for (size_t index = 0; index < 4; ++index)
+    {
+      INFO("frame " << index);
+      CHECK(Pixels(*decoder, index) == expected[index]);
+    }
+    CHECK_FALSE(decoder->FrameHasAlphaAtIndex(0));
+    CHECK(decoder->FrameHasAlphaAtIndex(2));
+
+    // Cleared frames are decoded again from the frames they build on.
+    decoder->ClearFrameBufferCache(3);
+    for (size_t index : {2u, 1u, 3u})
+    {
+      INFO("frame " << index << " again");
+      CHECK(Pixels(*decoder, index) == expected[index]);
+    }
   }
 
   TEST_CASE("BMPImageDecoder: decodes 24-bit pixels", "[ImageDecoder]")
