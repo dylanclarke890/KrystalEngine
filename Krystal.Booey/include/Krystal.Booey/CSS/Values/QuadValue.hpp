@@ -25,7 +25,7 @@
 
 #pragma once
 
-#include "Krystal.Booey/CSS/Values/Quad.hpp"
+#include "Krystal.Booey/CSS/Values/SideValues.hpp"
 #include "Krystal.Booey/CSS/Values/Value.hpp"
 #include "Krystal.Core/Memory/RefPtr.hpp"
 
@@ -35,42 +35,43 @@ namespace krys::boo::css
   class QuadValue final : public Value
   {
   private:
-    Quad _quad;
+    SideValues _sides;
 
-    explicit QuadValue(Quad quad) noexcept;
+    explicit QuadValue(SideValues sides) noexcept;
 
   public:
-    KRYS_NODISCARD static Ref<QuadValue> Create(Quad quad) noexcept;
+    KRYS_NODISCARD static Ref<QuadValue> Create(SideValues sides) noexcept;
 
     /// @brief All four sides are `value`.
     KRYS_NODISCARD static Ref<QuadValue> Create(const Ref<Value> &value) noexcept
     {
-      return Create(Quad {value, value, value, value});
+      return Create(SideValues::Uniform(value));
     }
 
     /// @brief `first` for top and bottom, `second` for right and left.
     KRYS_NODISCARD static Ref<QuadValue> Create(const Ref<Value> &first, const Ref<Value> &second) noexcept
     {
-      return Create(Quad {first, second, first, second});
+      return Create(SideValues {first, second, first, second});
     }
 
     /// @brief `first` for top, `second` for right and left, `third` for bottom.
     KRYS_NODISCARD static Ref<QuadValue> Create(Ref<Value> first, const Ref<Value> &second,
                                                 Ref<Value> third) noexcept
     {
-      return Create(Quad {krys::move(first), second, krys::move(third), second});
+      return Create(SideValues {krys::move(first), second, krys::move(third), second});
     }
 
     /// @brief Top, right, bottom and left.
     KRYS_NODISCARD static Ref<QuadValue> Create(Ref<Value> first, Ref<Value> second, Ref<Value> third,
                                                 Ref<Value> fourth) noexcept
     {
-      return Create(Quad {krys::move(first), krys::move(second), krys::move(third), krys::move(fourth)});
+      return Create(
+        SideValues {krys::move(first), krys::move(second), krys::move(third), krys::move(fourth)});
     }
 
-    KRYS_NODISCARD const Quad &GetQuad() const noexcept
+    KRYS_NODISCARD const SideValues &Sides() const noexcept
     {
-      return _quad;
+      return _sides;
     }
 
     KRYS_NODISCARD CSSOMString CustomCSSText(const SerialisationContext &context) const noexcept;
@@ -88,11 +89,3 @@ KRYS_SPECIALIZE_TYPE_CAST_TRAITS_BEGIN(krys::boo::css::QuadValue)
     return value.IsQuadValue();
   }
 KRYS_SPECIALIZE_TYPE_CAST_TRAITS_END()
-
-namespace krys::boo::css
-{
-  inline const Quad &Value::GetQuad() const noexcept
-  {
-    return Downcast<QuadValue>(*this).GetQuad();
-  }
-}

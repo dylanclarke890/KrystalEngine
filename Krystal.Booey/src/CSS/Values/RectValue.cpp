@@ -27,22 +27,22 @@
 
 namespace krys::boo::css
 {
-  RectValue::RectValue(Rect rect) noexcept : Value(ValueType::Rect), _rect(krys::move(rect))
+  RectValue::RectValue(SideValues sides) noexcept : Value(ValueType::Rect), _sides(krys::move(sides))
   {
   }
 
-  Ref<RectValue> RectValue::Create(Rect rect) noexcept
+  Ref<RectValue> RectValue::Create(SideValues sides) noexcept
   {
-    return AdoptRef(*new RectValue(krys::move(rect)));
+    return AdoptRef(*new RectValue(krys::move(sides)));
   }
 
   CSSOMString RectValue::CustomCSSText(const SerialisationContext &context) const noexcept
   {
-    return _rect.CssText(context);
+    return SerialiseRect(_sides, context);
   }
 
   bool RectValue::Equals(const RectValue &other) const noexcept
   {
-    return _rect.Equals(other._rect);
+    return _sides == other._sides;
   }
 }

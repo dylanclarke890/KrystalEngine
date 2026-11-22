@@ -63,10 +63,10 @@ namespace krys::boo::style
     {
       auto &slices = sliceValue->Slices();
       return MaskBorderSlice {
-        ConvertMaskBorderSliceValue(state, slices.Top()),
-        ConvertMaskBorderSliceValue(state, slices.Right()),
-        ConvertMaskBorderSliceValue(state, slices.Bottom()),
-        ConvertMaskBorderSliceValue(state, slices.Left()),
+        ConvertMaskBorderSliceValue(state, *slices.Top),
+        ConvertMaskBorderSliceValue(state, *slices.Right),
+        ConvertMaskBorderSliceValue(state, *slices.Bottom),
+        ConvertMaskBorderSliceValue(state, *slices.Left),
         sliceValue->Fill() ? Maybe<css::keywords::Fill> {css::keywords::Fill {}} : std::nullopt,
       };
     }

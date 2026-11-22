@@ -51,25 +51,23 @@ namespace krys::boo::style
       return css::keywords::Auto {};
     }
 
-    const auto *primitiveValueTop = RequiredDowncast<css::PrimitiveValue>(state, rectValue->GetRect().Top());
+    const auto *primitiveValueTop = RequiredDowncast<css::PrimitiveValue>(state, *rectValue->Sides().Top);
     if (!primitiveValueTop)
     {
       return css::keywords::Auto {};
     }
-    const auto *primitiveValueRight =
-      RequiredDowncast<css::PrimitiveValue>(state, rectValue->GetRect().Right());
+    const auto *primitiveValueRight = RequiredDowncast<css::PrimitiveValue>(state, *rectValue->Sides().Right);
     if (!primitiveValueRight)
     {
       return css::keywords::Auto {};
     }
     const auto *primitiveValueBottom =
-      RequiredDowncast<css::PrimitiveValue>(state, rectValue->GetRect().Bottom());
+      RequiredDowncast<css::PrimitiveValue>(state, *rectValue->Sides().Bottom);
     if (!primitiveValueBottom)
     {
       return css::keywords::Auto {};
     }
-    const auto *primitiveValueLeft =
-      RequiredDowncast<css::PrimitiveValue>(state, rectValue->GetRect().Left());
+    const auto *primitiveValueLeft = RequiredDowncast<css::PrimitiveValue>(state, *rectValue->Sides().Left);
     if (!primitiveValueLeft)
     {
       return css::keywords::Auto {};

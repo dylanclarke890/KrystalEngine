@@ -38,8 +38,8 @@
 #include "Krystal.Booey/CSS/Values/GridTemplateAreasValue.hpp"
 #include "Krystal.Booey/CSS/Values/PendingSubstitutionValue.hpp"
 #include "Krystal.Booey/CSS/Values/PrimitiveValue.hpp"
-#include "Krystal.Booey/CSS/Values/Quad.hpp"
 #include "Krystal.Booey/CSS/Values/SerialisationContext.hpp"
+#include "Krystal.Booey/CSS/Values/SideValues.hpp"
 #include "Krystal.Booey/CSS/Values/ValueId.hpp"
 #include "Krystal.Booey/CSS/Values/ValueList.hpp"
 #include "Krystal.Booey/CSS/Values/ValuePair.hpp"
@@ -616,8 +616,8 @@ namespace krys::boo::css
     CSSOMString ShorthandSerialiser::SerialiseQuad() const noexcept
     {
       krys_debug_assert(Length() == 4);
-      return Quad::Serialise(SerialiseLonghandValue(0), SerialiseLonghandValue(1), SerialiseLonghandValue(2),
-                             SerialiseLonghandValue(3));
+      return SerialiseSides(SerialiseLonghandValue(0), SerialiseLonghandValue(1), SerialiseLonghandValue(2),
+                            SerialiseLonghandValue(3));
     }
 
     class LayerValues
@@ -1073,7 +1073,7 @@ namespace krys::boo::css
             return null;
           }
 
-          valueText = width->Widths().CssText(_serialisationContext);
+          valueText = SerialiseSides(width->Widths(), _serialisationContext);
         }
         else
         {

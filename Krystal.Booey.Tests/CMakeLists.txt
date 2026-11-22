@@ -343,13 +343,13 @@ set(KRYSTAL_BOOEY_TESTS_CSS_SOURCES
   tests/CSS/Values/PositionValue.cpp
   tests/CSS/Values/PrimitiveValue.cpp
   tests/CSS/Values/PrimitiveValueMappings.cpp
-  tests/CSS/Values/Quad.cpp
   tests/CSS/Values/QuadValue.cpp
   tests/CSS/Values/RatioValue.cpp
   tests/CSS/Values/RayValue.cpp
   tests/CSS/Values/RectValue.cpp
   tests/CSS/Values/ReflectValue.cpp
   tests/CSS/Values/ScrollValue.cpp
+  tests/CSS/Values/SideValues.cpp
   tests/CSS/Values/SubgridValue.cpp
   tests/CSS/Values/TextShadowPropertyValue.cpp
   tests/CSS/Values/TransformListValue.cpp
