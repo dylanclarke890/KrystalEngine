@@ -146,8 +146,15 @@ namespace krys::boo::layout
 
     KRYS_NODISCARD static text::TextBreakLineBehavior LineBreakIteratorMode(LineBreak lineBreak) noexcept;
 
-    KRYS_NODISCARD static text::TextBreakIterator::ContentAnalysis
-      GetContentAnalysis(WordBreak wordBreak) noexcept;
+    /// @brief How `word-break` finds word boundaries: from the language (`auto-phrase`) or the characters.
+    enum class ContentAnalysis : bool
+    {
+      Linguistic,
+      Mechanical,
+    };
+
+    // FIXME: Linguistic analysis (ICU's `lw=phrase`) isn't passed to the line break iterator.
+    KRYS_NODISCARD static ContentAnalysis GetContentAnalysis(WordBreak wordBreak) noexcept;
 
     KRYS_NODISCARD static bool ShouldPreserveSpacesAndTabs(const Box &layoutBox) noexcept;
 

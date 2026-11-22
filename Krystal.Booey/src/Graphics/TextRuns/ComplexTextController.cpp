@@ -286,8 +286,7 @@ namespace krys::boo
           }
 
           uint32 stringLength = complexTextRun.StringLength();
-          text::CachedTextBreakIterator cursorPositionIterator(characters, {},
-                                                               text::TextBreakIterator::CaretMode {}, null);
+          text::TextBreakIterator cursorPositionIterator(characters, text::TextBreakUnit::GraphemeCluster);
           uint32 clusterStart;
           if (cursorPositionIterator.IsBoundary(hitIndex))
           {
@@ -362,7 +361,7 @@ namespace krys::boo
   }
 
   void ComplexTextController::AdvanceByCombiningCharacterSequence(
-    const text::CachedTextBreakIterator &graphemeClusterIterator, uint32 &currentIndex,
+    const text::TextBreakIterator &graphemeClusterIterator, uint32 &currentIndex,
     char32 &baseCharacter) noexcept
   {
     uint32 remainingCharacters = _end - currentIndex;
@@ -417,8 +416,8 @@ namespace krys::boo
     RefPtr<const Font> smallSynthesizedFont;
     RefPtr<const Font> halfWidthFont;
 
-    text::CachedTextBreakIterator graphemeClusterIterator(
-      baseOfString, {}, text::TextBreakIterator::CharacterMode {}, fontDescription.ComputedLocale());
+    text::TextBreakIterator graphemeClusterIterator(baseOfString, text::TextBreakUnit::GraphemeCluster,
+                                                    fontDescription.ComputedLocale());
 
     char32 baseCharacter;
     AdvanceByCombiningCharacterSequence(graphemeClusterIterator, currentIndex, baseCharacter);

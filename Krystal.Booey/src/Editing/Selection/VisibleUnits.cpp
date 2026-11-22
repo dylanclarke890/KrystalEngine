@@ -334,7 +334,7 @@ namespace krys::boo
       return {};
     }
 
-    KRYS_NODISCARD text::BreakIteratorView WordBreakIteratorForMinOffsetBoundary(
+    KRYS_NODISCARD text::TextBreakIterator WordBreakIteratorForMinOffsetBoundary(
       const VisiblePosition &visiblePosition, const inline_iterator::TextBoxIterator &textBox,
       uint32 &previousBoxLength, bool &previousBoxInDifferentLine, utf8_string &string) noexcept
     {
@@ -364,7 +364,7 @@ namespace krys::boo
       return text::WordBreakIterator(string);
     }
 
-    KRYS_NODISCARD text::BreakIteratorView
+    KRYS_NODISCARD text::TextBreakIterator
       WordBreakIteratorForMaxOffsetBoundary(const VisiblePosition &visiblePosition,
                                             const inline_iterator::TextBoxIterator &textBox,
                                             bool &nextBoxInDifferentLine, utf8_string &string) noexcept
@@ -392,7 +392,7 @@ namespace krys::boo
       return text::WordBreakIterator(string);
     }
 
-    KRYS_NODISCARD bool IsLogicalStartOfWord(text::BreakIteratorView iter, int32 position,
+    KRYS_NODISCARD bool IsLogicalStartOfWord(const text::TextBreakIterator &iter, int32 position,
                                              bool hardLineBreak) noexcept
     {
       bool boundary = hardLineBreak ? true : iter.IsBoundary(static_cast<uint32>(position));
@@ -407,7 +407,7 @@ namespace krys::boo
       return iter.IsWordBreak();
     }
 
-    KRYS_NODISCARD bool IslogicalEndOfWord(text::BreakIteratorView iter, int32 position,
+    KRYS_NODISCARD bool IslogicalEndOfWord(const text::TextBreakIterator &iter, int32 position,
                                            bool hardLineBreak) noexcept
     {
       bool boundary = iter.IsBoundary(static_cast<uint32>(position));
@@ -435,7 +435,7 @@ namespace krys::boo
       inline_iterator::LeafBoxIterator previouslyVisitedBox;
       VisiblePosition current = visiblePosition;
       Maybe<VisiblePosition> previousPosition;
-      text::BreakIteratorView iter;
+      text::TextBreakIterator iter;
 
       utf8_string string;
 

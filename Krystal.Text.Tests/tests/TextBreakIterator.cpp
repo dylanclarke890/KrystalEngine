@@ -7,11 +7,11 @@ namespace krys::text::tests
   {
     const StringAtom NoLocale = null;
 
-    KRYS_NODISCARD CachedTextBreakIterator LineBreaks(
+    KRYS_NODISCARD TextBreakIterator LineBreaks(
       utf8_stringview text, utf8_stringview priorContext = {},
       TextBreakLineBehavior behavior = TextBreakLineBehavior::Default, const StringAtom &locale = NoLocale)
     {
-      return CachedTextBreakIterator {text, priorContext, TextBreakIterator::LineMode {behavior}, locale};
+      return TextBreakIterator {text, TextBreakUnit::Line, locale, behavior, priorContext};
     }
   }
 
@@ -80,15 +80,18 @@ namespace krys::text::tests
 
   TEST_CASE("TextBreakIterator: grapheme clusters", "[Core][TextBreakIterator]")
   {
-    SECTION("Caret and character modes")
+    SECTION("Boundaries")
     {
       // e + COMBINING ACUTE ACCENT (two bytes) is one cluster.
-      utf8_stringview text = u8"e\u0301x";
-      CachedTextBreakIterator character {text, {}, TextBreakIterator::CharacterMode {}, NoLocale};
-      CHECK(character.Following(0) == 3u);
-      CHECK_FALSE(character.IsBoundary(1));
-      CachedTextBreakIterator caret {text, {}, TextBreakIterator::CaretMode {}, NoLocale};
-      CHECK(caret.Preceding(4) == 3u);
+      TextBreakIterator clusters {u8"e\u0301x", TextBreakUnit::GraphemeCluster};
+      REQUIRE(clusters);
+      CHECK(clusters.Following(0) == 3u);
+      CHECK_FALSE(clusters.IsBoundary(1));
+      CHECK(clusters.Preceding(4) == 3u);
+      CHECK(clusters.First() == 0u);
+      CHECK(clusters.Next() == 3u);
+      CHECK(clusters.Next() == 4u);
+      CHECK_FALSE(clusters.Next());
     }
 
     SECTION("Counting clusters")
@@ -106,17 +109,14 @@ namespace krys::text::tests
       CHECK(NumCodeUnitsInGraphemeClusters(u8"ae\u0301b", 9) == 5u);
     }
 
-    SECTION("Non-shared iterators")
+    SECTION("Iterators in use at once are independent")
     {
-      NonSharedCharacterBreakIterator iterator {u8"\u00E9a"};
-      REQUIRE(iterator);
-      CHECK(iterator.Next() == 2u);
-      CHECK(iterator.Next() == 3u);
-      CHECK_FALSE(iterator.Next());
-
-      NonSharedSentenceBreakIterator sentences {u8"One. Two."};
-      REQUIRE(sentences);
-      CHECK(sentences.Next() == 5u);
+      TextBreakIterator first {u8"\u00E9a", TextBreakUnit::GraphemeCluster};
+      TextBreakIterator second {u8"bcd", TextBreakUnit::GraphemeCluster};
+      CHECK(first.Next() == 2u);
+      CHECK(second.Next() == 1u);
+      CHECK(first.Next() == 3u);
+      CHECK_FALSE(first.Next());
     }
   }
 
@@ -184,9 +184,9 @@ namespace krys::text::tests
       CHECK(factory->IsBoundary(0));
       CHECK(factory->Following(0) == 4u);
 
-      factory.ResetStringAndReleaseIterator(u8"gh ij", null, TextBreakLineBehavior::Strict);
-      CHECK(factory.Mode() == TextBreakLineBehavior::Strict);
-      CHECK(factory->Following(0) == 3u);
+      // Going back to an earlier prior context makes a new iterator for it.
+      factory.GetPriorContext().Set({0, U'x'});
+      CHECK_FALSE(factory->IsBoundary(0));
     }
   }
 }

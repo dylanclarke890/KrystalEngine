@@ -1152,14 +1152,14 @@ namespace krys::boo
       return current - 1;
     }
 
-    text::CachedTextBreakIterator iterator(_text, {}, text::TextBreakIterator::CaretMode {}, null);
+    text::TextBreakIterator iterator(_text, text::TextBreakUnit::GraphemeCluster);
     auto preceding = iterator.Preceding(static_cast<uint32>(current));
     return preceding ? static_cast<int32>(*preceding) : current - 1;
   }
 
   int32 RenderText::PreviousOffsetForBackwardDeletion(int32 current) const noexcept
   {
-    text::CachedTextBreakIterator iterator(_text, {}, text::TextBreakIterator::DeleteMode {}, null);
+    text::TextBreakIterator iterator(_text, text::TextBreakUnit::GraphemeCluster);
     auto preceding = iterator.Preceding(static_cast<uint32>(current));
     return preceding ? static_cast<int32>(*preceding) : 0;
   }
@@ -1171,7 +1171,7 @@ namespace krys::boo
       return current + 1;
     }
 
-    text::CachedTextBreakIterator iterator(_text, {}, text::TextBreakIterator::CaretMode {}, null);
+    text::TextBreakIterator iterator(_text, text::TextBreakUnit::GraphemeCluster);
     auto following = iterator.Following(static_cast<uint32>(current));
     return following ? static_cast<int32>(*following) : current + 1;
   }
@@ -1575,7 +1575,7 @@ namespace krys::boo
     auto iteratorMode = layout::TextUtil::LineBreakIteratorMode(style.LineBreak());
     auto contentAnalysis = layout::TextUtil::GetContentAnalysis(style.WordBreak());
     text::CachedLineBreakIteratorFactory lineBreakIteratorFactory(
-      string, style.ComputedLocale().GetPlatform(), iteratorMode, contentAnalysis);
+      string, style.ComputedLocale().GetPlatform(), iteratorMode);
     bool needsWordSpacing = false;
     bool ignoringSpaces = false;
     bool isSpace = false;
@@ -1615,7 +1615,7 @@ namespace krys::boo
                     && style.AutoWrap();
     bool keepAllWords = style.WordBreak() == WordBreak::KeepAll;
     bool canUseLineBreakShortcut = iteratorMode == text::TextBreakLineBehavior::Default
-                                   && contentAnalysis == text::TextBreakIterator::ContentAnalysis::Mechanical;
+                                   && contentAnalysis == layout::TextUtil::ContentAnalysis::Mechanical;
 
     size_t i = 0;
     while (i < length)

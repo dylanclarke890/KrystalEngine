@@ -66,8 +66,7 @@ namespace krys::boo::layout
         auto &style = previousInlineTextItem.Style();
         auto lineBreakIteratorFactory = text::CachedLineBreakIteratorFactory {
           previousInlineTextItem.GetInlineTextBox().Content(), style.ComputedLocale().GetPlatform(),
-          TextUtil::LineBreakIteratorMode(style.LineBreak()),
-          TextUtil::GetContentAnalysis(style.WordBreak())};
+          TextUtil::LineBreakIteratorMode(style.LineBreak())};
         auto softWrapOpportunityCandidate = nextInlineTextItem.Start();
         return TextUtil::FindNextBreakablePosition(lineBreakIteratorFactory, softWrapOpportunityCandidate,
                                                    style)

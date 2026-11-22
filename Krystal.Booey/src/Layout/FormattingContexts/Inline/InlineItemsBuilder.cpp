@@ -1203,8 +1203,7 @@ namespace krys::boo::layout
     auto shouldPreserveSpacesAndTabs = TextUtil::ShouldPreserveSpacesAndTabs(inlineTextBox);
     auto shouldPreserveNewline = TextUtil::ShouldPreserveNewline(inlineTextBox);
     auto lineBreakIteratorFactory = text::CachedLineBreakIteratorFactory {
-      text, style.ComputedLocale().GetPlatform(), TextUtil::LineBreakIteratorMode(style.LineBreak()),
-      TextUtil::GetContentAnalysis(style.WordBreak())};
+      text, style.ComputedLocale().GetPlatform(), TextUtil::LineBreakIteratorMode(style.LineBreak())};
     auto currentPosition = partialContentOffset.value_or(0);
     krys_debug_assert(currentPosition <= contentLength);
 

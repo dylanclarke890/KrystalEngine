@@ -396,7 +396,7 @@ namespace krys::boo
     krys_debug_assert(startPosition <= stringView.length());
     // FIXME: Can/Should we implement this using a Shared Iterator (performance issue)
     // https://bugs.webkit.org/show_bug.cgi?id=197876
-    text::NonSharedCharacterBreakIterator iterator(stringView);
+    text::TextBreakIterator iterator(stringView, text::TextBreakUnit::GraphemeCluster);
     return iterator.Following(static_cast<uint32>(startPosition))
       .value_or(static_cast<uint32>(stringView.length()));
   }

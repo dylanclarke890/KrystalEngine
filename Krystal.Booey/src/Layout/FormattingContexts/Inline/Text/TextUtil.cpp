@@ -504,7 +504,8 @@ namespace krys::boo::layout
       return findBreakingPositionInSimpleText();
     }
 
-    auto graphemeClusterIterator = text::NonSharedCharacterBreakIterator {text.substr(startPosition, length)};
+    auto graphemeClusterIterator =
+      text::TextBreakIterator {text.substr(startPosition, length), text::TextBreakUnit::GraphemeCluster};
     auto leftSide = TextUtil::WordBreakLeft {};
     for (auto clusterStartPosition = graphemeClusterIterator.Next(); clusterStartPosition;
          clusterStartPosition = graphemeClusterIterator.Next())
@@ -538,8 +539,7 @@ namespace krys::boo::layout
     // We need at least 1 character in the current inline text item and 2 more from previous inline items.
     auto lineBreakIteratorFactory =
       text::CachedLineBreakIteratorFactory {nextContent, nextContentStyle.ComputedLocale().GetPlatform(),
-                                            TextUtil::LineBreakIteratorMode(nextContentStyle.LineBreak()),
-                                            TextUtil::GetContentAnalysis(nextContentStyle.WordBreak())};
+                                            TextUtil::LineBreakIteratorMode(nextContentStyle.LineBreak())};
     // FIXME: We should look into the entire uncommitted content for more text context.
     char32 lastCharacter = 0;
     char32 secondToLastCharacter = 0;
@@ -648,17 +648,17 @@ namespace krys::boo::layout
     return text::TextBreakLineBehavior::Default;
   }
 
-  text::TextBreakIterator::ContentAnalysis TextUtil::GetContentAnalysis(WordBreak wordBreak) noexcept
+  TextUtil::ContentAnalysis TextUtil::GetContentAnalysis(WordBreak wordBreak) noexcept
   {
     switch (wordBreak)
     {
       case WordBreak::Normal:
       case WordBreak::BreakAll:
       case WordBreak::KeepAll:
-      case WordBreak::BreakWord:  return text::TextBreakIterator::ContentAnalysis::Mechanical;
-      case WordBreak::AutoPhrase: return text::TextBreakIterator::ContentAnalysis::Linguistic;
+      case WordBreak::BreakWord:  return ContentAnalysis::Mechanical;
+      case WordBreak::AutoPhrase: return ContentAnalysis::Linguistic;
     }
-    return text::TextBreakIterator::ContentAnalysis::Mechanical;
+    return ContentAnalysis::Mechanical;
   }
 
   bool TextUtil::IsStrongDirectionalityCharacter(char32 character) noexcept
@@ -702,7 +702,8 @@ namespace krys::boo::layout
       krys_debug_assert(endOfCodePoint > startPosition);
       return endOfCodePoint - startPosition;
     }
-    auto graphemeClustersIterator = text::NonSharedCharacterBreakIterator {textContent};
+    auto graphemeClustersIterator =
+      text::TextBreakIterator {textContent, text::TextBreakUnit::GraphemeCluster};
     auto nextPosition = graphemeClustersIterator.Following(static_cast<uint32>(startPosition));
     if (!nextPosition)
     {

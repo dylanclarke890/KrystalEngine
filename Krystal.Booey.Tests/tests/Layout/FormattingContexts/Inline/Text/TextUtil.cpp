@@ -195,8 +195,7 @@ namespace krys::boo::tests
       auto next = [](utf8_stringview text, const RenderStyle &style)
       {
         auto factory = text::CachedLineBreakIteratorFactory {
-          text, style.ComputedLocale().GetPlatform(), TextUtil::LineBreakIteratorMode(style.LineBreak()),
-          TextUtil::GetContentAnalysis(style.WordBreak())};
+          text, style.ComputedLocale().GetPlatform(), TextUtil::LineBreakIteratorMode(style.LineBreak())};
         return TextUtil::FindNextBreakablePosition(factory, 0, style);
       };
       CHECK(next(u8"\u65E5\u672C \u8A9E", normal) == 3);
@@ -211,10 +210,8 @@ namespace krys::boo::tests
       CHECK(TextUtil::LineBreakIteratorMode(LineBreak::Loose) == text::TextBreakLineBehavior::Loose);
       CHECK(TextUtil::LineBreakIteratorMode(LineBreak::Normal) == text::TextBreakLineBehavior::Normal);
       CHECK(TextUtil::LineBreakIteratorMode(LineBreak::Strict) == text::TextBreakLineBehavior::Strict);
-      CHECK(TextUtil::GetContentAnalysis(WordBreak::BreakAll)
-            == text::TextBreakIterator::ContentAnalysis::Mechanical);
-      CHECK(TextUtil::GetContentAnalysis(WordBreak::AutoPhrase)
-            == text::TextBreakIterator::ContentAnalysis::Linguistic);
+      CHECK(TextUtil::GetContentAnalysis(WordBreak::BreakAll) == TextUtil::ContentAnalysis::Mechanical);
+      CHECK(TextUtil::GetContentAnalysis(WordBreak::AutoPhrase) == TextUtil::ContentAnalysis::Linguistic);
     }
   }
 
