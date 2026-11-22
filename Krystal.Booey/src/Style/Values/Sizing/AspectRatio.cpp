@@ -54,13 +54,13 @@ namespace krys::boo::style
       return css::keywords::Auto {};
     }
 
-    const auto &value0 = list->item(0);
+    const auto &value0 = (*list)[0];
     if (!css::IsValueId(value0, css::ValueId::Auto))
     {
       return css::keywords::Auto {};
     }
 
-    const auto &value1 = list->item(1);
+    const auto &value1 = (*list)[1];
     auto *ratioValue = RequiredDowncast<css::RatioValue>(state, value1);
     if (!ratioValue)
     {

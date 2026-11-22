@@ -121,7 +121,7 @@ namespace krys::boo::style
       return List->size();
     }
 
-    KRYS_NODISCARD const ValueType &item(uint32 index) const noexcept KRYS_LIFETIME_BOUND
+    KRYS_NODISCARD const ValueType &operator[](uint32 index) const noexcept KRYS_LIFETIME_BOUND
     {
       return detail_builder_checking::DowncastValue<ValueType>(*List->Item(index));
     }

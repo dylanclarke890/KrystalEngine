@@ -50,13 +50,13 @@ namespace krys::boo::style
       return css::keywords::None {};
     }
 
-    auto axis = FromCSSValue<ScrollSnapAxis>(list->item(0));
+    auto axis = FromCSSValue<ScrollSnapAxis>((*list)[0]);
 
     if (list->size() == 1)
     {
       return {axis};
     }
 
-    return {axis, FromCSSValue<ScrollSnapStrictness>(list->item(1))};
+    return {axis, FromCSSValue<ScrollSnapStrictness>((*list)[1])};
   }
 }

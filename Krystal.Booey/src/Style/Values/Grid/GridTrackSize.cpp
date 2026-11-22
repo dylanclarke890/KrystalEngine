@@ -59,13 +59,13 @@ namespace krys::boo::style
     if (function->size() == 1)
     {
       return GridTrackSize::FitContent {
-        .Parameters = ConvertCSSValueToStyle<GridTrackFitContentLength>(state, function->item(0)),
+        .Parameters = ConvertCSSValueToStyle<GridTrackFitContentLength>(state, (*function)[0]),
       };
     }
 
     return GridTrackSize::MinMax {.Parameters = {
-                                    .Min = ConvertCSSValueToStyle<GridTrackBreadth>(state, function->item(0)),
-                                    .Max = ConvertCSSValueToStyle<GridTrackBreadth>(state, function->item(1)),
+                                    .Min = ConvertCSSValueToStyle<GridTrackBreadth>(state, (*function)[0]),
+                                    .Max = ConvertCSSValueToStyle<GridTrackBreadth>(state, (*function)[1]),
                                   }};
   }
 

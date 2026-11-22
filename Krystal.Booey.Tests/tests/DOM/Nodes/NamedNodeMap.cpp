@@ -58,7 +58,7 @@ namespace krys::boo::dom::tests
     CHECK(attributes.Length() == 1uz);
   }
 
-  TEST_CASE("NamedNodeMap.item(): the attribute at the index, or null past the end",
+  TEST_CASE("NamedNodeMap[]: the attribute at the index, or null past the end",
             "[DOM][NamedNodeMap][dom:dom-namednodemap-item]")
   {
     NamedNodeMapTestData data;

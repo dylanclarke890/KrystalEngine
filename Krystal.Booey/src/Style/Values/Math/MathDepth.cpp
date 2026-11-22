@@ -44,7 +44,7 @@ namespace krys::boo::style
     {
       if (auto addFunction = RequiredListDowncast<css::FunctionValue, css::PrimitiveValue>(state, value))
       {
-        const auto &first = addFunction->item(0);
+        const auto &first = (*addFunction)[0];
         auto addend = ConvertCSSValueToStyle<MathDepth::Base>(state, first);
         return {state.ParentStyle().MathDepth().Value + addend.Value};
       }

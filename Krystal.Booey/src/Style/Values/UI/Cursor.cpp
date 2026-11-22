@@ -56,7 +56,7 @@ namespace krys::boo::style
                          | std::views::transform(
                            [&](auto index)
                            {
-                             const auto &item = list->item(static_cast<uint32>(index));
+                             const auto &item = (*list)[static_cast<uint32>(index)];
                              auto *image = RequiredDowncast<css::CursorImageValue>(state, item);
                              if (!image)
                              {
@@ -78,7 +78,7 @@ namespace krys::boo::style
                              return CursorImage {Ref<StyleImage> {krys::move(styleImage)}, hotSpot};
                            }));
 
-    return {krys::move(images), FromCSSValue<CursorType>(list->item(list->size() - 1))};
+    return {krys::move(images), FromCSSValue<CursorType>((*list)[list->size() - 1])};
   }
 
   Ref<css::Value> CSSValueCreation<CursorImage>::operator()(css::ValuePool &, const RenderStyle &style,

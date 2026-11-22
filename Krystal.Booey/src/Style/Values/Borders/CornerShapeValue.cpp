@@ -63,7 +63,7 @@ namespace krys::boo::style
       return css::keywords::Round {};
     }
 
-    const auto &superellipseDescriptor = superellipseFunction->item(0);
+    const auto &superellipseDescriptor = (*superellipseFunction)[0];
     if (superellipseDescriptor.ValueId() == css::ValueId::Infinity)
     {
       return {SuperellipseFunction {Number<css::NonNegative>(std::numeric_limits<double>::infinity())}};

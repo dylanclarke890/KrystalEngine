@@ -74,13 +74,12 @@ namespace krys::boo::style
     }
 
     auto type = list->size() > 2 ? TransformFunctionType::Translate3D : TransformFunctionType::Translate;
-    auto tx = ConvertCSSValueToStyle<TranslateTransformFunction::LengthPercentage>(state, list->item(0));
+    auto tx = ConvertCSSValueToStyle<TranslateTransformFunction::LengthPercentage>(state, (*list)[0]);
     auto ty = list->size() > 1
-                ? ConvertCSSValueToStyle<TranslateTransformFunction::LengthPercentage>(state, list->item(1))
+                ? ConvertCSSValueToStyle<TranslateTransformFunction::LengthPercentage>(state, (*list)[1])
                 : TranslateTransformFunction::LengthPercentage {0_css_px};
-    auto tz = list->size() > 2
-                ? ConvertCSSValueToStyle<TranslateTransformFunction::Length>(state, list->item(2))
-                : TranslateTransformFunction::Length {0_css_px};
+    auto tz = list->size() > 2 ? ConvertCSSValueToStyle<TranslateTransformFunction::Length>(state, (*list)[2])
+                               : TranslateTransformFunction::Length {0_css_px};
 
     return TranslateTransformFunction::Create(krys::move(tx), krys::move(ty), krys::move(tz), type);
   }

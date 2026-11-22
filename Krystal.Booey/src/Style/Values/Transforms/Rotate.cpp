@@ -64,15 +64,15 @@ namespace krys::boo::style
     // Only an angle was specified.
     if (list->size() == 1)
     {
-      return RotateTransformFunction::Create(ConvertCSSValueToStyle<Angle<>>(state, list->item(0)),
+      return RotateTransformFunction::Create(ConvertCSSValueToStyle<Angle<>>(state, (*list)[0]),
                                              TransformFunctionBase::Type::Rotate);
     }
 
     // An axis identifier and angle were specified.
     if (list->size() == 2)
     {
-      auto axis = list->item(0).ValueId();
-      auto angle = ConvertCSSValueToStyle<Angle<>>(state, list->item(1));
+      auto axis = (*list)[0].ValueId();
+      auto angle = ConvertCSSValueToStyle<Angle<>>(state, (*list)[1]);
 
       switch (axis)
       {
@@ -94,10 +94,10 @@ namespace krys::boo::style
     krys_debug_assert(list->size() == 4);
 
     // An axis vector and angle were specified.
-    auto x = ConvertCSSValueToStyle<Number<>>(state, list->item(0));
-    auto y = ConvertCSSValueToStyle<Number<>>(state, list->item(1));
-    auto z = ConvertCSSValueToStyle<Number<>>(state, list->item(2));
-    auto angle = ConvertCSSValueToStyle<Angle<>>(state, list->item(3));
+    auto x = ConvertCSSValueToStyle<Number<>>(state, (*list)[0]);
+    auto y = ConvertCSSValueToStyle<Number<>>(state, (*list)[1]);
+    auto z = ConvertCSSValueToStyle<Number<>>(state, (*list)[2]);
+    auto angle = ConvertCSSValueToStyle<Angle<>>(state, (*list)[3]);
 
     return RotateTransformFunction::Create(x, y, z, angle, TransformFunctionType::Rotate3D);
   }

@@ -59,7 +59,7 @@ namespace krys::boo::dom::tests
     REQUIRE(data.TokenList.Length() == 0uz);
   }
 
-  TEST_CASE("DOMTokenList.item(): the token at the index, or null past the end",
+  TEST_CASE("DOMTokenList[]: the token at the index, or null past the end",
             "[DOM][DOMTokenList][dom:dom-domtokenlist-item]")
   {
     DOMTokenListTestData data;

@@ -89,7 +89,7 @@ namespace krys::boo::dom::tests
     REQUIRE(data.Collection->Length() == 1uz);
   }
 
-  TEST_CASE("HTMLCollection.item(): the indexth element, or null",
+  TEST_CASE("HTMLCollection[]: the indexth element, or null",
             "[DOM][HTMLCollection][dom:dom-htmlcollection-item]")
   {
     HTMLCollectionTestData data;

@@ -121,12 +121,12 @@ namespace krys::boo::style
 
     auto zoom = state.CssToLengthConversionData().Zoom();
     return MatrixTransformFunction::Create(
-      ConvertCSSValueToStyle<Number<>>(state, function->item(0)).Value,
-      ConvertCSSValueToStyle<Number<>>(state, function->item(1)).Value,
-      ConvertCSSValueToStyle<Number<>>(state, function->item(2)).Value,
-      ConvertCSSValueToStyle<Number<>>(state, function->item(3)).Value,
-      ConvertCSSValueToStyle<Number<>>(state, function->item(4)).Value * zoom,
-      ConvertCSSValueToStyle<Number<>>(state, function->item(5)).Value * zoom);
+      ConvertCSSValueToStyle<Number<>>(state, (*function)[0]).Value,
+      ConvertCSSValueToStyle<Number<>>(state, (*function)[1]).Value,
+      ConvertCSSValueToStyle<Number<>>(state, (*function)[2]).Value,
+      ConvertCSSValueToStyle<Number<>>(state, (*function)[3]).Value,
+      ConvertCSSValueToStyle<Number<>>(state, (*function)[4]).Value * zoom,
+      ConvertCSSValueToStyle<Number<>>(state, (*function)[5]).Value * zoom);
   }
 
   KRYS_NODISCARD static RefPtr<const TransformFunctionBase>
@@ -141,22 +141,22 @@ namespace krys::boo::style
       return {};
     }
 
-    TransformationMatrix matrix(ConvertCSSValueToStyle<Number<>>(state, function->item(0)).Value,
-                                ConvertCSSValueToStyle<Number<>>(state, function->item(1)).Value,
-                                ConvertCSSValueToStyle<Number<>>(state, function->item(2)).Value,
-                                ConvertCSSValueToStyle<Number<>>(state, function->item(3)).Value,
-                                ConvertCSSValueToStyle<Number<>>(state, function->item(4)).Value,
-                                ConvertCSSValueToStyle<Number<>>(state, function->item(5)).Value,
-                                ConvertCSSValueToStyle<Number<>>(state, function->item(6)).Value,
-                                ConvertCSSValueToStyle<Number<>>(state, function->item(7)).Value,
-                                ConvertCSSValueToStyle<Number<>>(state, function->item(8)).Value,
-                                ConvertCSSValueToStyle<Number<>>(state, function->item(9)).Value,
-                                ConvertCSSValueToStyle<Number<>>(state, function->item(10)).Value,
-                                ConvertCSSValueToStyle<Number<>>(state, function->item(11)).Value,
-                                ConvertCSSValueToStyle<Number<>>(state, function->item(12)).Value,
-                                ConvertCSSValueToStyle<Number<>>(state, function->item(13)).Value,
-                                ConvertCSSValueToStyle<Number<>>(state, function->item(14)).Value,
-                                ConvertCSSValueToStyle<Number<>>(state, function->item(15)).Value);
+    TransformationMatrix matrix(ConvertCSSValueToStyle<Number<>>(state, (*function)[0]).Value,
+                                ConvertCSSValueToStyle<Number<>>(state, (*function)[1]).Value,
+                                ConvertCSSValueToStyle<Number<>>(state, (*function)[2]).Value,
+                                ConvertCSSValueToStyle<Number<>>(state, (*function)[3]).Value,
+                                ConvertCSSValueToStyle<Number<>>(state, (*function)[4]).Value,
+                                ConvertCSSValueToStyle<Number<>>(state, (*function)[5]).Value,
+                                ConvertCSSValueToStyle<Number<>>(state, (*function)[6]).Value,
+                                ConvertCSSValueToStyle<Number<>>(state, (*function)[7]).Value,
+                                ConvertCSSValueToStyle<Number<>>(state, (*function)[8]).Value,
+                                ConvertCSSValueToStyle<Number<>>(state, (*function)[9]).Value,
+                                ConvertCSSValueToStyle<Number<>>(state, (*function)[10]).Value,
+                                ConvertCSSValueToStyle<Number<>>(state, (*function)[11]).Value,
+                                ConvertCSSValueToStyle<Number<>>(state, (*function)[12]).Value,
+                                ConvertCSSValueToStyle<Number<>>(state, (*function)[13]).Value,
+                                ConvertCSSValueToStyle<Number<>>(state, (*function)[14]).Value,
+                                ConvertCSSValueToStyle<Number<>>(state, (*function)[15]).Value);
     matrix.Zoom(state.CssToLengthConversionData().Zoom());
 
     return Matrix3DTransformFunction::Create(krys::move(matrix));
@@ -179,7 +179,7 @@ namespace krys::boo::style
     auto x = 0_css_number;
     auto y = 0_css_number;
     auto z = 1_css_number;
-    auto angle = ConvertCSSValueToStyle<Angle<>>(state, function->item(0));
+    auto angle = ConvertCSSValueToStyle<Angle<>>(state, (*function)[0]);
 
     return RotateTransformFunction::Create(x, y, z, angle, TransformFunctionType::Rotate);
   }
@@ -196,10 +196,10 @@ namespace krys::boo::style
       return {};
     }
 
-    auto x = ConvertCSSValueToStyle<Number<>>(state, function->item(0));
-    auto y = ConvertCSSValueToStyle<Number<>>(state, function->item(1));
-    auto z = ConvertCSSValueToStyle<Number<>>(state, function->item(2));
-    auto angle = ConvertCSSValueToStyle<Angle<>>(state, function->item(3));
+    auto x = ConvertCSSValueToStyle<Number<>>(state, (*function)[0]);
+    auto y = ConvertCSSValueToStyle<Number<>>(state, (*function)[1]);
+    auto z = ConvertCSSValueToStyle<Number<>>(state, (*function)[2]);
+    auto angle = ConvertCSSValueToStyle<Angle<>>(state, (*function)[3]);
 
     return RotateTransformFunction::Create(x, y, z, angle, TransformFunctionType::Rotate3D);
   }
@@ -219,7 +219,7 @@ namespace krys::boo::style
     auto x = 1_css_number;
     auto y = 0_css_number;
     auto z = 0_css_number;
-    auto angle = ConvertCSSValueToStyle<Angle<>>(state, function->item(0));
+    auto angle = ConvertCSSValueToStyle<Angle<>>(state, (*function)[0]);
 
     return RotateTransformFunction::Create(x, y, z, angle, TransformFunctionType::RotateX);
   }
@@ -239,7 +239,7 @@ namespace krys::boo::style
     auto x = 0_css_number;
     auto y = 1_css_number;
     auto z = 0_css_number;
-    auto angle = ConvertCSSValueToStyle<Angle<>>(state, function->item(0));
+    auto angle = ConvertCSSValueToStyle<Angle<>>(state, (*function)[0]);
 
     return RotateTransformFunction::Create(x, y, z, angle, TransformFunctionType::RotateY);
   }
@@ -259,7 +259,7 @@ namespace krys::boo::style
     auto x = 0_css_number;
     auto y = 0_css_number;
     auto z = 1_css_number;
-    auto angle = ConvertCSSValueToStyle<Angle<>>(state, function->item(0));
+    auto angle = ConvertCSSValueToStyle<Angle<>>(state, (*function)[0]);
 
     return RotateTransformFunction::Create(x, y, z, angle, TransformFunctionType::RotateZ);
   }
@@ -278,9 +278,9 @@ namespace krys::boo::style
       return {};
     }
 
-    auto angleX = ConvertCSSValueToStyle<Angle<>>(state, function->item(0));
+    auto angleX = ConvertCSSValueToStyle<Angle<>>(state, (*function)[0]);
     auto angleY =
-      function->size() > 1 ? ConvertCSSValueToStyle<Angle<>>(state, function->item(1)) : Angle<> {0_css_deg};
+      function->size() > 1 ? ConvertCSSValueToStyle<Angle<>>(state, (*function)[1]) : Angle<> {0_css_deg};
 
     return SkewTransformFunction::Create(angleX, angleY, TransformFunctionType::Skew);
   }
@@ -297,7 +297,7 @@ namespace krys::boo::style
       return {};
     }
 
-    auto angleX = ConvertCSSValueToStyle<Angle<>>(state, function->item(0));
+    auto angleX = ConvertCSSValueToStyle<Angle<>>(state, (*function)[0]);
     auto angleY = 0_css_deg;
 
     return SkewTransformFunction::Create(angleX, angleY, TransformFunctionType::SkewX);
@@ -316,7 +316,7 @@ namespace krys::boo::style
     }
 
     auto angleX = 0_css_deg;
-    auto angleY = ConvertCSSValueToStyle<Angle<>>(state, function->item(0));
+    auto angleY = ConvertCSSValueToStyle<Angle<>>(state, (*function)[0]);
 
     return SkewTransformFunction::Create(angleX, angleY, TransformFunctionType::SkewY);
   }
@@ -335,9 +335,9 @@ namespace krys::boo::style
       return {};
     }
 
-    auto sx = ConvertCSSValueToStyle<NumberOrPercentageResolvedToNumber<>>(state, function->item(0));
+    auto sx = ConvertCSSValueToStyle<NumberOrPercentageResolvedToNumber<>>(state, (*function)[0]);
     auto sy = function->size() > 1
-                ? ConvertCSSValueToStyle<NumberOrPercentageResolvedToNumber<>>(state, function->item(1))
+                ? ConvertCSSValueToStyle<NumberOrPercentageResolvedToNumber<>>(state, (*function)[1])
                 : sx;
     auto sz = 1_css_number;
 
@@ -356,9 +356,9 @@ namespace krys::boo::style
       return {};
     }
 
-    auto sx = ConvertCSSValueToStyle<NumberOrPercentageResolvedToNumber<>>(state, function->item(0));
-    auto sy = ConvertCSSValueToStyle<NumberOrPercentageResolvedToNumber<>>(state, function->item(1));
-    auto sz = ConvertCSSValueToStyle<NumberOrPercentageResolvedToNumber<>>(state, function->item(2));
+    auto sx = ConvertCSSValueToStyle<NumberOrPercentageResolvedToNumber<>>(state, (*function)[0]);
+    auto sy = ConvertCSSValueToStyle<NumberOrPercentageResolvedToNumber<>>(state, (*function)[1]);
+    auto sz = ConvertCSSValueToStyle<NumberOrPercentageResolvedToNumber<>>(state, (*function)[2]);
 
     return ScaleTransformFunction::Create(sx, sy, sz, TransformFunctionType::Scale3D);
   }
@@ -375,7 +375,7 @@ namespace krys::boo::style
       return {};
     }
 
-    auto sx = ConvertCSSValueToStyle<NumberOrPercentageResolvedToNumber<>>(state, function->item(0));
+    auto sx = ConvertCSSValueToStyle<NumberOrPercentageResolvedToNumber<>>(state, (*function)[0]);
     auto sy = 1_css_number;
     auto sz = 1_css_number;
 
@@ -395,7 +395,7 @@ namespace krys::boo::style
     }
 
     auto sx = 1_css_number;
-    auto sy = ConvertCSSValueToStyle<NumberOrPercentageResolvedToNumber<>>(state, function->item(0));
+    auto sy = ConvertCSSValueToStyle<NumberOrPercentageResolvedToNumber<>>(state, (*function)[0]);
     auto sz = 1_css_number;
 
     return ScaleTransformFunction::Create(sx, sy, sz, TransformFunctionType::ScaleY);
@@ -415,7 +415,7 @@ namespace krys::boo::style
 
     auto sx = 1_css_number;
     auto sy = 1_css_number;
-    auto sz = ConvertCSSValueToStyle<NumberOrPercentageResolvedToNumber<>>(state, function->item(0));
+    auto sz = ConvertCSSValueToStyle<NumberOrPercentageResolvedToNumber<>>(state, (*function)[0]);
 
     return ScaleTransformFunction::Create(sx, sy, sz, TransformFunctionType::ScaleZ);
   }
@@ -434,8 +434,8 @@ namespace krys::boo::style
       return {};
     }
 
-    auto tx = ResolveAsTranslateLengthPercentage(function->item(0), state);
-    auto ty = function->size() > 1 ? ResolveAsTranslateLengthPercentage(function->item(1), state)
+    auto tx = ResolveAsTranslateLengthPercentage((*function)[0], state);
+    auto ty = function->size() > 1 ? ResolveAsTranslateLengthPercentage((*function)[1], state)
                                    : TranslateTransformFunction::LengthPercentage {0_css_px};
     auto tz = 0_css_px;
 
@@ -455,9 +455,9 @@ namespace krys::boo::style
       return {};
     }
 
-    auto tx = ResolveAsTranslateLengthPercentage(function->item(0), state);
-    auto ty = ResolveAsTranslateLengthPercentage(function->item(1), state);
-    auto tz = ResolveAsTranslateLength(function->item(2), state);
+    auto tx = ResolveAsTranslateLengthPercentage((*function)[0], state);
+    auto ty = ResolveAsTranslateLengthPercentage((*function)[1], state);
+    auto tz = ResolveAsTranslateLength((*function)[2], state);
 
     return TranslateTransformFunction::Create(krys::move(tx), krys::move(ty), krys::move(tz),
                                               TransformFunctionType::Translate3D);
@@ -475,7 +475,7 @@ namespace krys::boo::style
       return {};
     }
 
-    auto tx = ResolveAsTranslateLengthPercentage(function->item(0), state);
+    auto tx = ResolveAsTranslateLengthPercentage((*function)[0], state);
     auto ty = 0_css_px;
     auto tz = 0_css_px;
 
@@ -496,7 +496,7 @@ namespace krys::boo::style
     }
 
     auto tx = 0_css_px;
-    auto ty = ResolveAsTranslateLengthPercentage(function->item(0), state);
+    auto ty = ResolveAsTranslateLengthPercentage((*function)[0], state);
     auto tz = 0_css_px;
 
     return TranslateTransformFunction::Create(krys::move(tx), krys::move(ty), krys::move(tz),
@@ -517,7 +517,7 @@ namespace krys::boo::style
 
     auto tx = 0_css_px;
     auto ty = 0_css_px;
-    auto tz = ResolveAsTranslateLength(function->item(0), state);
+    auto tz = ResolveAsTranslateLength((*function)[0], state);
 
     return TranslateTransformFunction::Create(krys::move(tx), krys::move(ty), krys::move(tz),
                                               TransformFunctionType::TranslateZ);
@@ -537,7 +537,7 @@ namespace krys::boo::style
       return {};
     }
 
-    auto &parameter = function->item(0);
+    auto &parameter = (*function)[0];
     if (parameter.IsValueId())
     {
       krys_debug_assert(parameter.ValueId() == css::ValueId::None);
