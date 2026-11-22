@@ -4,7 +4,9 @@
 #include "Krystal.Image.Tests/AnimatedImages.hpp"
 #include "Krystal.Image.Tests/EXIFImages.hpp"
 #include "Krystal.Image.Tests/ICCImages.hpp"
+#include "Krystal.Image.Tests/JPEGImages.hpp"
 #include "Krystal.Image.Tests/TestImages.hpp"
+#include <algorithm>
 #include <cstdlib>
 
 namespace krys::img::tests
@@ -38,6 +40,41 @@ namespace krys::img::tests
         return {};
       }
       return image->Pixels->Pixels;
+    }
+
+    /// @brief Decodes @p bytes as they'd arrive over a network, @p chunkSize bytes at a time, asking for
+    /// every frame after each chunk. Sets @p sawPartialFrame if a frame was ever partly decoded.
+    KRYS_NODISCARD RefPtr<ImageDecoder> DecodeInChunks(Span<const uint8> bytes, size_t chunkSize,
+                                                       bool *sawPartialFrame = nullptr) noexcept
+    {
+      RefPtr<ImageDecoder> decoder;
+      for (size_t size = std::min(chunkSize, bytes.size());; size = std::min(size + chunkSize, bytes.size()))
+      {
+        // A new buffer each time, so the data moves as it grows, as a network buffer's may.
+        auto data = SharedBuffer::Create(bytes.first(size));
+        auto allDataReceived = size == bytes.size();
+        if (!decoder)
+        {
+          decoder =
+            ImageDecoder::Create(*data, AlphaOption::Premultiplied, GammaAndColorProfileOption::Applied);
+        }
+        if (decoder)
+        {
+          decoder->SetData(*data, allDataReceived);
+          for (size_t index = 0; index < decoder->FrameCount(); ++index)
+          {
+            auto *frame = decoder->FrameBufferAtIndex(index);
+            if (sawPartialFrame && frame && frame->IsPartial())
+            {
+              *sawPartialFrame = true;
+            }
+          }
+        }
+        if (allDataReceived)
+        {
+          return decoder;
+        }
+      }
     }
 
     /// @brief Whether each channel of @p actual is within @p tolerance of @p expected (lossy formats).
@@ -137,6 +174,50 @@ namespace krys::img::tests
     // The decoder reports the encoded size; the image applies the orientation.
     CHECK(rotated->Size() == SizeI(16, 8));
     CHECK(rotated->FrameOrientationAtIndex(0) == ImageOrientation::Orientation::OriginRightTop);
+  }
+
+  TEST_CASE("JPEGImageDecoder: decodes progressive and CMYK images", "[ImageDecoder]")
+  {
+    for (auto bytes : {images::ProgressiveJPEG, images::CMYKJPEG})
+    {
+      auto decoder = Decode(bytes);
+      REQUIRE(decoder);
+      CHECK(decoder->Size() == SizeI(16, 8));
+      auto pixels = Pixels(*decoder);
+      REQUIRE(pixels.size() == 16u * 8u);
+      CHECK_FALSE(decoder->FrameHasAlphaAtIndex(0));
+      CHECK(Near(pixels[3 * 16 + 2], Red));
+      CHECK(Near(pixels[3 * 16 + 13], Blue));
+    }
+  }
+
+  TEST_CASE("ImageDecoder: decodes data as it arrives", "[ImageDecoder]")
+  {
+    for (auto bytes : {images::JPEG, images::ProgressiveJPEG, images::CMYKJPEG, images::RotatedProfileJPEG,
+                       images::PNG, images::AnimatedPNG, images::GIF, images::AnimatedGIF, images::WebP})
+    {
+      auto whole = Decode(bytes);
+      REQUIRE(whole);
+      INFO(reinterpret_cast<const char *>(whole->FilenameExtension().c_str())
+           << ", " << bytes.size() << " bytes");
+      for (size_t chunkSize : {1, 7, 64})
+      {
+        INFO("chunks of " << chunkSize);
+        auto streamed = DecodeInChunks(bytes, chunkSize);
+        REQUIRE(streamed);
+        CHECK_FALSE(streamed->Failed());
+        REQUIRE(streamed->FrameCount() == whole->FrameCount());
+        for (size_t index = 0; index < whole->FrameCount(); ++index)
+        {
+          CHECK(Pixels(*streamed, index) == Pixels(*whole, index));
+        }
+      }
+    }
+
+    // A progressive JPEG shows its early scans before the rest arrives.
+    auto sawPartialFrame = false;
+    std::ignore = DecodeInChunks(images::ProgressiveJPEG, 32, &sawPartialFrame);
+    CHECK(sawPartialFrame);
   }
 
   TEST_CASE("ImageDecoder: EXIF resolution gives the density-corrected size",
