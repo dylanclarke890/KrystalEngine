@@ -83,6 +83,7 @@ target_sources(Krystal.Core.Tests
 	PRIVATE tests/Containers/IntervalTree.cpp
 	PRIVATE tests/Containers/ListHashSet.cpp
 	PRIVATE tests/Types/SharedBuffer.cpp
+	PRIVATE tests/Types/TypeList.cpp
 
   # Threading
 	PRIVATE tests/Threading/CancellationToken.cpp

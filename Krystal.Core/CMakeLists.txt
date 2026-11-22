@@ -291,6 +291,7 @@ target_sources(Krystal.Core
       include/Krystal.Core/Types/NTTPString.hpp
       include/Krystal.Core/Types/Pair.hpp
       include/Krystal.Core/Types/SharedBuffer.hpp
+      include/Krystal.Core/Types/TypeList.hpp
       include/Krystal.Core/Types/Variant.hpp
 
       # Utils

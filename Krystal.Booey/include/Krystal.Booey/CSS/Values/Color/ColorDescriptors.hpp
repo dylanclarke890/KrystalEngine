@@ -34,10 +34,8 @@
 #include "Krystal.Booey/Style/Values/Primitives/NumericTypes.hpp"
 #include "Krystal.Core/Colour/ColourTypes.hpp"
 #include "Krystal.Core/Types/Maybe.hpp"
+#include "Krystal.Core/Types/TypeList.hpp"
 #include "Krystal.Core/Types/Variant.hpp"
-#include <brigand/algorithms/transform.hpp>
-#include <brigand/algorithms/wrap.hpp>
-#include <brigand/sequences/list.hpp>
 
 namespace krys::boo::css
 {
@@ -56,8 +54,8 @@ namespace krys::boo::css
   template <typename... Ts>
   struct ColorComponent
   {
-    using ResultTypeList = brigand::list<Ts...>;
-    using Result = brigand::wrap<ResultTypeList, VariantOrSingle>;
+    using ResultTypeList = TypeList<Ts...>;
+    using Result = ApplyTypeList<ResultTypeList, VariantOrSingle>;
 
     /// @brief Symbol used to represent component for relative color form.
     ValueId Symbol;
@@ -93,7 +91,7 @@ namespace krys::boo::css
   using GetComponentResult = typename GetComponent<Descriptor, Index>::Result;
 
   /// @brief e.g. for GetComponentResultTypeList<ColorRGBFunction<SRGB<float>>, 2>
-  /// -> brigand::list<css::Percentage<>, css::Number<>, keywords::None>
+  /// -> TypeList<css::Percentage<>, css::Number<>, keywords::None>
   template <typename Descriptor, size_t Index>
   using GetComponentResultTypeList = typename GetComponent<Descriptor, Index>::ResultTypeList;
 
@@ -108,17 +106,16 @@ namespace krys::boo::css
   // MARK: Style resolved parse type (components are Variants with Style namespaced primitives)
 
   // e.g. for GetStyleColorParseTypeComponentTypeList<ColorRGBFunction<SRGB<float>>, 2> ->
-  // brigand::list<style::Percentage, style::Number, keywords::None>
+  // TypeList<style::Percentage, style::Number, keywords::None>
   template <typename Descriptor, size_t Index>
   using GetStyleColorParseTypeComponentTypeList =
-    brigand::transform<typename GetComponent<Descriptor, Index>::ResultTypeList,
-                       style::ToStyleMapping<brigand::_1>>;
+    TransformTypeList<typename GetComponent<Descriptor, Index>::ResultTypeList, style::ToStyleMapping>;
 
   /// @brief e.g. for GetStyleColorParseTypeComponentResult<ColorRGBFunction<SRGB<float>>, 2>
   /// -> Variant<style::Percentage, style::Number, keywords::None>
   template <typename Descriptor, size_t Index>
   using GetStyleColorParseTypeComponentResult =
-    brigand::wrap<GetStyleColorParseTypeComponentTypeList<Descriptor, Index>, VariantOrSingle>;
+    ApplyTypeList<GetStyleColorParseTypeComponentTypeList<Descriptor, Index>, VariantOrSingle>;
 
   /// @brief e.g. for StyleColorParseType<ColorRGBFunction<T>> ->
   /// std::tuple<Variant<style::Percentage, style::Number, keywords::None>, ...>
@@ -146,7 +143,7 @@ namespace krys::boo::css
   // values)
 
   /// @brief e.g. for GetCSSColorParseTypeWithCalcComponentTypeList<ColorRGBFunction<SRGB<float>>, 2> ->
-  /// brigand::list<css::Percentage<>, css::Number<>, keywords::None>
+  /// TypeList<css::Percentage<>, css::Number<>, keywords::None>
   template <typename Descriptor, size_t Index>
   using GetCSSColorParseTypeWithCalcComponentTypeList =
     typename GetComponent<Descriptor, Index>::ResultTypeList;
@@ -155,7 +152,7 @@ namespace krys::boo::css
   /// -> Variant<css::Percentage<>, css::Number<>, keywords::None>
   template <typename Descriptor, size_t Index>
   using GetCSSColorParseTypeWithCalcComponentResult =
-    brigand::wrap<GetCSSColorParseTypeWithCalcComponentTypeList<Descriptor, Index>, VariantOrSingle>;
+    ApplyTypeList<GetCSSColorParseTypeWithCalcComponentTypeList<Descriptor, Index>, VariantOrSingle>;
 
   /// @brief e.g. for CSSColorParseTypeWithCalc<ColorRGBFunction<T>>
   /// -> std::tuple<Variant<css::Percentage<>, css::Number<>, keywords::None>, ...>
@@ -188,7 +185,7 @@ namespace krys::boo::css
 
   /// @brief e.g. for GetCSSColorParseTypeWithCalcAndSymbolsComponentTypeList<ColorRGBFunction<SRGB<float>>,
   /// 2>
-  /// -> brigand::list<css::Percentage<>, css::Number<>, keywords::None, css::Symbol>
+  /// -> TypeList<css::Percentage<>, css::Number<>, keywords::None, css::Symbol>
   template <typename Descriptor, size_t Index>
   using GetCSSColorParseTypeWithCalcAndSymbolsComponentTypeList =
     PlusSymbol<typename GetComponent<Descriptor, Index>::ResultTypeList>;
@@ -197,7 +194,7 @@ namespace krys::boo::css
   // Variant<css::Percentage<>, css::Number<>, keywords::None, css::Symbol>
   template <typename Descriptor, size_t Index>
   using GetCSSColorParseTypeWithCalcAndSymbolsComponentResult =
-    brigand::wrap<GetCSSColorParseTypeWithCalcAndSymbolsComponentTypeList<Descriptor, Index>,
+    ApplyTypeList<GetCSSColorParseTypeWithCalcAndSymbolsComponentTypeList<Descriptor, Index>,
                   VariantOrSingle>;
 
   // e.g. for CSSColorParseTypeWithCalcAndSymbols<ColorRGBFunction<T>> ->
