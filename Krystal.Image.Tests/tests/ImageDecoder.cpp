@@ -3,8 +3,12 @@
 #include "Krystal.Core/Types/SharedBuffer.hpp"
 #include "Krystal.Image.Tests/AnimatedImages.hpp"
 #include "Krystal.Image.Tests/EXIFImages.hpp"
+#include "Krystal.Image.Tests/GIFImages.hpp"
 #include "Krystal.Image.Tests/ICCImages.hpp"
+#include "Krystal.Image.Tests/JPEGImages.hpp"
+#include "Krystal.Image.Tests/PNGImages.hpp"
 #include "Krystal.Image.Tests/TestImages.hpp"
+#include <algorithm>
 #include <cstdlib>
 
 namespace krys::img::tests
@@ -38,6 +42,41 @@ namespace krys::img::tests
         return {};
       }
       return image->Pixels->Pixels;
+    }
+
+    /// @brief Decodes @p bytes as they'd arrive over a network, @p chunkSize bytes at a time, asking for
+    /// every frame after each chunk. Sets @p sawPartialFrame if a frame was ever partly decoded.
+    KRYS_NODISCARD RefPtr<ImageDecoder> DecodeInChunks(Span<const uint8> bytes, size_t chunkSize,
+                                                       bool *sawPartialFrame = nullptr) noexcept
+    {
+      RefPtr<ImageDecoder> decoder;
+      for (size_t size = std::min(chunkSize, bytes.size());; size = std::min(size + chunkSize, bytes.size()))
+      {
+        // A new buffer each time, so the data moves as it grows, as a network buffer's may.
+        auto data = SharedBuffer::Create(bytes.first(size));
+        auto allDataReceived = size == bytes.size();
+        if (!decoder)
+        {
+          decoder =
+            ImageDecoder::Create(*data, AlphaOption::Premultiplied, GammaAndColorProfileOption::Applied);
+        }
+        if (decoder)
+        {
+          decoder->SetData(*data, allDataReceived);
+          for (size_t index = 0; index < decoder->FrameCount(); ++index)
+          {
+            auto *frame = decoder->FrameBufferAtIndex(index);
+            if (sawPartialFrame && frame && frame->IsPartial())
+            {
+              *sawPartialFrame = true;
+            }
+          }
+        }
+        if (allDataReceived)
+        {
+          return decoder;
+        }
+      }
     }
 
     /// @brief Whether each channel of @p actual is within @p tolerance of @p expected (lossy formats).
@@ -139,6 +178,53 @@ namespace krys::img::tests
     CHECK(rotated->FrameOrientationAtIndex(0) == ImageOrientation::Orientation::OriginRightTop);
   }
 
+  TEST_CASE("JPEGImageDecoder: decodes progressive and CMYK images", "[ImageDecoder]")
+  {
+    for (auto bytes : {images::ProgressiveJPEG, images::CMYKJPEG})
+    {
+      auto decoder = Decode(bytes);
+      REQUIRE(decoder);
+      CHECK(decoder->Size() == SizeI(16, 8));
+      auto pixels = Pixels(*decoder);
+      REQUIRE(pixels.size() == 16u * 8u);
+      CHECK_FALSE(decoder->FrameHasAlphaAtIndex(0));
+      CHECK(Near(pixels[3 * 16 + 2], Red));
+      CHECK(Near(pixels[3 * 16 + 13], Blue));
+    }
+  }
+
+  TEST_CASE("ImageDecoder: decodes data as it arrives", "[ImageDecoder]")
+  {
+    for (auto bytes :
+         {images::JPEG, images::ProgressiveJPEG, images::CMYKJPEG, images::RotatedProfileJPEG, images::PNG,
+          images::AnimatedPNG, images::InterlacedPNG, images::PalettePNG, images::GrayAlpha16PNG,
+          images::BlendAPNG, images::InterlacedBlendAPNG, images::BrokenAPNG, images::GIF,
+          images::AnimatedGIF, images::InterlacedGIF, images::NoiseGIF, images::DisposalGIF, images::WebP})
+    {
+      auto whole = Decode(bytes);
+      REQUIRE(whole);
+      INFO(reinterpret_cast<const char *>(whole->FilenameExtension().c_str())
+           << ", " << bytes.size() << " bytes");
+      for (size_t chunkSize : {1, 7, 64})
+      {
+        INFO("chunks of " << chunkSize);
+        auto streamed = DecodeInChunks(bytes, chunkSize);
+        REQUIRE(streamed);
+        CHECK_FALSE(streamed->Failed());
+        REQUIRE(streamed->FrameCount() == whole->FrameCount());
+        for (size_t index = 0; index < whole->FrameCount(); ++index)
+        {
+          CHECK(Pixels(*streamed, index) == Pixels(*whole, index));
+        }
+      }
+    }
+
+    // A progressive JPEG shows its early scans before the rest arrives.
+    auto sawPartialFrame = false;
+    std::ignore = DecodeInChunks(images::ProgressiveJPEG, 32, &sawPartialFrame);
+    CHECK(sawPartialFrame);
+  }
+
   TEST_CASE("ImageDecoder: EXIF resolution gives the density-corrected size",
             "[Platform][ImageDecoders][html:prepare-an-image-for-presentation]")
   {
@@ -193,6 +279,155 @@ namespace krys::img::tests
     // Still GIFs loop once, as animated ones without a looping extension do.
     CHECK(decoder->GetRepetitionCount() == RepetitionCountOnce);
     CHECK(Pixels(*decoder) == List<uint32> {Red, Green, Blue, White, Black, 0u});
+  }
+
+  TEST_CASE("PNGImageDecoder: decodes interlaced, palette and 16-bit images", "[ImageDecoder]")
+  {
+    auto interlaced = Decode(images::InterlacedPNG);
+    REQUIRE(interlaced);
+    auto gradient = Pixels(*interlaced);
+    REQUIRE(gradient.size() == 9u * 9u);
+    auto mismatches = 0;
+    for (uint32 y = 0; y < 9; ++y)
+    {
+      for (uint32 x = 0; x < 9; ++x)
+      {
+        mismatches += gradient[y * 9 + x] != (0xFF'00'00'80u | (x * 28) << 16 | (y * 28) << 8);
+      }
+    }
+    CHECK(mismatches == 0);
+    CHECK_FALSE(interlaced->FrameHasAlphaAtIndex(0));
+    CHECK(interlaced->GetRepetitionCount() == RepetitionCountNone);
+
+    auto palette = Decode(images::PalettePNG);
+    REQUIRE(palette);
+    CHECK(Pixels(*palette) == List<uint32> {Red, Green, 0});
+    CHECK(palette->FrameHasAlphaAtIndex(0));
+
+    auto grayAlpha = Decode(images::GrayAlpha16PNG);
+    REQUIRE(grayAlpha);
+    CHECK(Pixels(*grayAlpha) == List<uint32> {White, 0});
+  }
+
+  TEST_CASE("PNGImageDecoder: blends and disposes of APNG frames as they ask", "[ImageDecoder]")
+  {
+    constexpr uint32 T = 0;
+    constexpr uint32 R = Red;
+    constexpr uint32 G = Green;
+    constexpr uint32 B = Blue;
+    const List<uint32> expected[] = {
+      // Red everywhere; the white default image isn't part of the animation.
+      {R, R, R, R, R, R, R, R, R, R, R, R, R, R, R, R},
+      // Green blended over the top left, its transparent pixels showing the red; then cleared.
+      {G, R, R, R, G, R, R, R, R, R, R, R, R, R, R, R},
+      // Blue over the bottom right, on the cleared top left; then restored to the previous frame.
+      {T, T, R, R, T, T, R, R, R, R, B, B, R, R, B, B},
+      // A transparent pixel replacing (3, 0), on frame 1 as it was disposed of.
+      {T, T, R, T, T, T, R, R, R, R, R, R, R, R, R, R},
+    };
+
+    // Blending an interlaced frame waits for its last pass.
+    for (auto bytes : {images::BlendAPNG, images::InterlacedBlendAPNG})
+    {
+      auto decoder = Decode(bytes);
+      REQUIRE(decoder);
+      REQUIRE(decoder->FrameCount() == 4u);
+      CHECK(decoder->GetRepetitionCount() == 2);
+      for (size_t index = 0; index < 4; ++index)
+      {
+        INFO("frame " << index);
+        CHECK(Pixels(*decoder, index) == expected[index]);
+        CHECK(decoder->FrameDurationAtIndex(index).count() == 0.1);
+      }
+      CHECK_FALSE(decoder->FrameHasAlphaAtIndex(0));
+      CHECK(decoder->FrameHasAlphaAtIndex(3));
+
+      // Cleared frames are decoded again from the frames they build on.
+      decoder->ClearFrameBufferCache(3);
+      for (size_t index : {2u, 1u, 3u})
+      {
+        INFO("frame " << index << " again");
+        CHECK(Pixels(*decoder, index) == expected[index]);
+      }
+    }
+
+    // Data out of sequence ends the animation, keeping the frames before it.
+    auto broken = Decode(images::BrokenAPNG);
+    REQUIRE(broken);
+    CHECK_FALSE(broken->Failed());
+    REQUIRE(broken->FrameCount() == 2u);
+    CHECK(Pixels(*broken, 1) == expected[1]);
+  }
+
+  TEST_CASE("GIFImageDecoder: decodes interlaced rows and large dictionaries", "[ImageDecoder]")
+  {
+    auto opaque = [](uint32 r, uint32 g, uint32 b)
+    {
+      return 0xFF'00'00'00u | (r << 16) | (g << 8) | b;
+    };
+
+    auto interlaced = Decode(images::InterlacedGIF);
+    REQUIRE(interlaced);
+    auto rows = Pixels(*interlaced);
+    REQUIRE(rows.size() == 5u * 9u);
+    for (uint32 y = 0; y < 9; ++y)
+    {
+      INFO("row " << y);
+      CHECK(rows[y * 5] == opaque(y * 28, 255 - y * 28, y * 10));
+      CHECK(rows[y * 5 + 4] == opaque(y * 28, 255 - y * 28, y * 10));
+    }
+
+    // Enough codes that the LZW dictionary fills and is cleared.
+    auto noise = Decode(images::NoiseGIF);
+    REQUIRE(noise);
+    auto pixels = Pixels(*noise);
+    REQUIRE(pixels.size() == 64u * 64u);
+    auto mismatches = 0;
+    for (size_t index = 0; index < pixels.size(); ++index)
+    {
+      const auto *color = &images::NoiseGIFPalette[size_t {images::NoiseGIFIndices[index]} * 3];
+      mismatches += pixels[index] != opaque(color[0], color[1], color[2]);
+    }
+    CHECK(mismatches == 0);
+  }
+
+  TEST_CASE("GIFImageDecoder: disposes of frames as they ask", "[ImageDecoder]")
+  {
+    constexpr uint32 T = 0;
+    constexpr uint32 R = Red;
+    constexpr uint32 G = Green;
+    constexpr uint32 B = Blue;
+    constexpr uint32 W = White;
+    const List<uint32> expected[] = {
+      // Red everywhere.
+      {R, R, R, R, R, R, R, R, R, R, R, R, R, R, R, R},
+      // Green over the top left, which is then restored to the background.
+      {G, G, R, R, G, G, R, R, R, R, R, R, R, R, R, R},
+      // Blue over the bottom right, on the cleared top left; then restored to the previous frame.
+      {T, T, R, R, T, T, R, R, R, R, B, B, R, R, B, B},
+      // White at (3, 0), on frame 1 as it was disposed of: the blue is gone.
+      {T, T, R, W, T, T, R, R, R, R, R, R, R, R, R, R},
+    };
+
+    auto decoder = Decode(images::DisposalGIF);
+    REQUIRE(decoder);
+    REQUIRE(decoder->FrameCount() == 4u);
+    CHECK(decoder->GetRepetitionCount() == RepetitionCountInfinite);
+    for (size_t index = 0; index < 4; ++index)
+    {
+      INFO("frame " << index);
+      CHECK(Pixels(*decoder, index) == expected[index]);
+    }
+    CHECK_FALSE(decoder->FrameHasAlphaAtIndex(0));
+    CHECK(decoder->FrameHasAlphaAtIndex(2));
+
+    // Cleared frames are decoded again from the frames they build on.
+    decoder->ClearFrameBufferCache(3);
+    for (size_t index : {2u, 1u, 3u})
+    {
+      INFO("frame " << index << " again");
+      CHECK(Pixels(*decoder, index) == expected[index]);
+    }
   }
 
   TEST_CASE("BMPImageDecoder: decodes 24-bit pixels", "[ImageDecoder]")

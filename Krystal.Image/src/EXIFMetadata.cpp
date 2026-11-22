@@ -1,234 +1,199 @@
-﻿/*
- * Copyright (C) 2006 Apple Inc. All rights reserved.
- *
- * Portions are Copyright (C) 2001-6 mozilla.org
- *
- * Other contributors:
- *   Stuart Parmenter <stuart@mozilla.com>
- *
- * Copyright (C) 2007-2009 Torch Mobile, Inc.
- *
- * This library is free software; you can redistribute it and/or
- * modify it under the terms of the GNU Lesser General Public
- * License as published by the Free Software Foundation; either
- * version 2.1 of the License, or (at your option) any later version.
- *
- * This library is distributed in the hope that it will be useful,
- * but WITHOUT ANY WARRANTY; without even the implied warranty of
- * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU
- * Lesser General Public License for more details.
- *
- * You should have received a copy of the GNU Lesser General Public
- * License along with this library; if not, write to the Free Software
- * Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
- *
- * Alternatively, the contents of this file may be used under the terms
- * of either the Mozilla Public License Version 1.1, found at
- * http://www.mozilla.org/MPL/ (the "MPL") or the GNU General Public
- * License Version 2.0, found at http://www.fsf.org/copyleft/gpl.html
- * (the "GPL"), in which case the provisions of the MPL or the GPL are
- * applicable instead of those above.  If you wish to allow use of your
- * version of this file only under the terms of one of those two
- * licenses (the MPL or the GPL) and not to allow others to use your
- * version of this file under the LGPL, indicate your decision by
- * deletingthe provisions above and replace them with the notice and
- * other provisions required by the MPL or the GPL, as the case may be.
- * If you do not delete the provisions above, a recipient may use your
- * version of this file under any of the LGPL, the MPL or the GPL.
- */
+﻿#include "Krystal.Image/EXIFMetadata.hpp"
+#include "Krystal.Core/Containers/List.hpp"
+#include <algorithm>
 
-#include "Krystal.Image/EXIFMetadata.hpp"
+// EXIF stores its metadata as a TIFF block: a header, then image file directories (IFDs) of tagged entries.
+// See CIPA DC-008 (https://www.cipa.jp/std/documents/e/DC-008-2012_E.pdf).
 
 namespace krys::img
 {
   namespace
   {
-    constexpr uint32 ShortType = 3;
-    constexpr uint32 LongType = 4;
-    constexpr uint32 RationalType = 5;
+    enum class EntryType : uint16
+    {
+      Short = 3,
+      Long = 4,
+      Rational = 5,
+    };
 
-    constexpr uint32 OrientationTag = 0x112;
-    constexpr uint32 XResolutionTag = 0x11A;
-    constexpr uint32 YResolutionTag = 0x11B;
-    constexpr uint32 ResolutionUnitTag = 0x128;
-    constexpr uint32 ExifIFDPointerTag = 0x8769;
-    constexpr uint32 PixelXDimensionTag = 0xA002;
-    constexpr uint32 PixelYDimensionTag = 0xA003;
+    enum class Tag : uint16
+    {
+      Orientation = 0x0112,
+      XResolution = 0x011A,
+      YResolution = 0x011B,
+      ResolutionUnit = 0x0128,
+      EXIFDirectory = 0x8769,
+      PixelXDimension = 0xA002,
+      PixelYDimension = 0xA003,
+    };
 
-    constexpr uint32 InchesResolutionUnit = 2;
-    // EXIF's resolution is in points per inch, so 72 is the resolution of an image shown at its own size.
-    constexpr float DefaultResolution = 72;
+    constexpr uint32 ResolutionUnitInches = 2;
+    // The resolution, in dots per inch, of an image meant to be shown at its own pixel size.
+    constexpr float NaturalResolution = 72;
 
-    /// @brief Reads a TIFF block's integers in its byte order, within its bounds.
-    class TIFFReader
+    // A directory entry: its tag and type, how many values it has, and where its 4-byte value field is. A
+    // value that fits is stored in the field itself; a larger one is stored at the offset the field holds.
+    struct DirectoryEntry
+    {
+      uint16 TagValue;
+      uint16 Type;
+      uint32 Count;
+      size_t ValueField;
+    };
+
+    class TIFFBlock
     {
     private:
-      Span<const uint8> _data;
-      bool _isBigEndian;
+      Span<const uint8> _bytes;
+      bool _bigEndian;
 
     public:
-      TIFFReader(Span<const uint8> data, bool isBigEndian) noexcept : _data(data), _isBigEndian(isBigEndian)
+      TIFFBlock(Span<const uint8> bytes, bool bigEndian) noexcept : _bytes(bytes), _bigEndian(bigEndian)
       {
       }
 
-      KRYS_NODISCARD Maybe<uint32> Uint16(size_t offset) const noexcept
+      // The unsigned integer of @p size bytes at @p offset, if it's within the block.
+      KRYS_NODISCARD Maybe<uint32> Read(size_t offset, size_t size) const noexcept
       {
-        if (offset > _data.size() || _data.size() - offset < 2)
+        if (offset >= _bytes.size() || _bytes.size() - offset < size)
         {
           return null;
         }
-        auto *data = _data.data() + offset;
-        return _isBigEndian ? (uint32(data[0]) << 8) | data[1] : (uint32(data[1]) << 8) | data[0];
+        uint32 value = 0;
+        for (size_t index = 0; index < size; ++index)
+        {
+          auto byte = _bytes[_bigEndian ? offset + index : offset + size - 1 - index];
+          value = (value << 8) | byte;
+        }
+        return value;
       }
 
-      KRYS_NODISCARD Maybe<uint32> Uint32(size_t offset) const noexcept
+      KRYS_NODISCARD List<DirectoryEntry> Directory(size_t offset) const noexcept
       {
-        auto first = Uint16(offset);
-        auto second = Uint16(offset + 2);
-        if (!first || !second)
+        List<DirectoryEntry> entries;
+        auto count = Read(offset, 2);
+        if (!count)
         {
-          return null;
+          return entries;
         }
-        return _isBigEndian ? (*first << 16) | *second : (*second << 16) | *first;
+        constexpr size_t entrySize = 12;
+        for (size_t index = 0; index < *count; ++index)
+        {
+          auto entry = offset + 2 + index * entrySize;
+          auto tag = Read(entry, 2);
+          auto type = Read(entry + 2, 2);
+          auto valueCount = Read(entry + 4, 4);
+          if (!tag || !type || !valueCount)
+          {
+            break;
+          }
+          entries.push_back({static_cast<uint16>(*tag), static_cast<uint16>(*type), *valueCount, entry + 8});
+        }
+        return entries;
       }
 
-      /// @brief The single integer (a short or a long) of the entry at @p entry.
-      KRYS_NODISCARD Maybe<uint32> Integer(size_t entry) const noexcept
+      // The entry's value, when it's a single short or long.
+      KRYS_NODISCARD Maybe<uint32> Integer(const DirectoryEntry &entry) const noexcept
       {
-        auto type = Uint16(entry + 2);
-        if (Uint32(entry + 4) != 1u || !type)
+        if (entry.Count != 1)
         {
           return null;
         }
-        if (*type == ShortType)
+        switch (static_cast<EntryType>(entry.Type))
         {
-          return Uint16(entry + 8);
+          case EntryType::Short: return Read(entry.ValueField, 2);
+          case EntryType::Long:  return Read(entry.ValueField, 4);
+          default:               return null;
         }
-        if (*type == LongType)
-        {
-          return Uint32(entry + 8);
-        }
-        return null;
       }
 
-      /// @brief The single rational of the entry at @p entry, stored at the offset it holds.
-      KRYS_NODISCARD Maybe<float> Rational(size_t entry) const noexcept
+      // The entry's value, when it's a single rational with a nonzero denominator.
+      KRYS_NODISCARD Maybe<float> Rational(const DirectoryEntry &entry) const noexcept
       {
-        if (Uint16(entry + 2) != RationalType || Uint32(entry + 4) != 1u)
+        if (entry.Count != 1 || static_cast<EntryType>(entry.Type) != EntryType::Rational)
         {
           return null;
         }
-        auto offset = Uint32(entry + 8);
-        if (!offset)
-        {
-          return null;
-        }
-        auto numerator = Uint32(*offset);
-        auto denominator = Uint32(size_t(*offset) + 4);
+        auto offset = Read(entry.ValueField, 4);
+        auto numerator = offset ? Read(*offset, 4) : null;
+        auto denominator = offset ? Read(size_t {*offset} + 4, 4) : null;
         if (!numerator || !denominator || !*denominator)
         {
           return null;
         }
         return static_cast<float>(*numerator) / static_cast<float>(*denominator);
       }
-
-      /// @brief Calls @p function with each tag of the image file directory at @p offset, and the offset of
-      /// its entry.
-      template <typename TFunction>
-      void ForEachEntry(size_t offset, TFunction function) const noexcept
-      {
-        // An image file directory is a count of entries, then that many 12-byte entries: the tag, the type,
-        // the count, and the value or the offset to it.
-        auto count = Uint16(offset);
-        if (!count)
-        {
-          return;
-        }
-        constexpr size_t EntrySize = 12;
-        for (size_t entry = offset + 2, end = entry + *count * EntrySize; entry < end; entry += EntrySize)
-        {
-          auto tag = Uint16(entry);
-          if (!tag)
-          {
-            return;
-          }
-          function(*tag, entry);
-        }
-      }
     };
+
+    KRYS_NODISCARD const DirectoryEntry *Find(const List<DirectoryEntry> &directory, Tag tag) noexcept
+    {
+      auto entry = std::ranges::find(directory, static_cast<uint16>(tag), &DirectoryEntry::TagValue);
+      return entry == directory.end() ? nullptr : &*entry;
+    }
   }
 
   EXIFMetadata EXIFMetadata::Read(Span<const uint8> tiff, const SizeI &physicalSize) noexcept
   {
-    // A TIFF block starts with its byte order (`II`, little endian, or `MM`, big endian), 42, and the offset
-    // of its first image file directory. See https://www.cipa.jp/std/documents/e/DC-008-2012_E.pdf.
     EXIFMetadata metadata;
-    if (tiff.size() < 8 || !((tiff[0] == 'I' && tiff[1] == 'I') || (tiff[0] == 'M' && tiff[1] == 'M')))
+
+    // The header: the byte order (`II` little endian, `MM` big endian), the number 42, then the offset of
+    // the first directory.
+    if (tiff.size() < 8 || tiff[0] != tiff[1] || (tiff[0] != 'I' && tiff[0] != 'M'))
     {
       return metadata;
     }
-    TIFFReader reader(tiff, tiff[0] == 'M');
-    auto firstDirectory = reader.Uint32(4);
-    if (reader.Uint16(2) != 42u || !firstDirectory)
+    TIFFBlock block {tiff, tiff[0] == 'M'};
+    auto firstDirectoryOffset = block.Read(4, 4);
+    if (block.Read(2, 2) != 42u || !firstDirectoryOffset)
+    {
+      return metadata;
+    }
+    auto firstDirectory = block.Directory(*firstDirectoryOffset);
+
+    auto integerOf = [&](const List<DirectoryEntry> &directory, Tag tag) -> Maybe<uint32>
+    {
+      auto *entry = Find(directory, tag);
+      return entry ? block.Integer(*entry) : null;
+    };
+    auto rationalOf = [&](const List<DirectoryEntry> &directory, Tag tag) -> Maybe<float>
+    {
+      auto *entry = Find(directory, tag);
+      return entry ? block.Rational(*entry) : null;
+    };
+
+    if (auto orientation = integerOf(firstDirectory, Tag::Orientation))
+    {
+      metadata.Orientation = ImageOrientation::FromEXIFValue(static_cast<int>(*orientation));
+    }
+
+    // The preferred density-corrected dimensions are the pixel dimensions in the EXIF directory, when the
+    // resolution (in inches) scales the image's physical size to exactly them. See
+    // https://html.spec.whatwg.org/#preparing-an-image-for-presentation.
+    auto exifDirectoryOffset = integerOf(firstDirectory, Tag::EXIFDirectory);
+    if (!exifDirectoryOffset || *exifDirectoryOffset == *firstDirectoryOffset
+        || integerOf(firstDirectory, Tag::ResolutionUnit) != ResolutionUnitInches)
+    {
+      return metadata;
+    }
+    auto resolutionX = rationalOf(firstDirectory, Tag::XResolution);
+    auto resolutionY = rationalOf(firstDirectory, Tag::YResolution);
+    auto exifDirectory = block.Directory(*exifDirectoryOffset);
+    auto width = integerOf(exifDirectory, Tag::PixelXDimension);
+    auto height = integerOf(exifDirectory, Tag::PixelYDimension);
+    if (!resolutionX || !resolutionY || *resolutionX <= 0 || *resolutionY <= 0 || !width || !height || !*width
+        || !*height)
     {
       return metadata;
     }
 
-    Maybe<float> resolutionX;
-    Maybe<float> resolutionY;
-    Maybe<uint32> resolutionUnit;
-    Maybe<uint32> exifDirectory;
-    reader.ForEachEntry(*firstDirectory,
-                        [&](uint32 tag, size_t entry)
-                        {
-                          switch (tag)
-                          {
-                            case OrientationTag:
-                              if (auto value = reader.Integer(entry))
-                              {
-                                metadata.Orientation =
-                                  ImageOrientation::FromEXIFValue(static_cast<int>(*value));
-                              }
-                              break;
-                            case XResolutionTag:    resolutionX = reader.Rational(entry); break;
-                            case YResolutionTag:    resolutionY = reader.Rational(entry); break;
-                            case ResolutionUnitTag: resolutionUnit = reader.Integer(entry); break;
-                            case ExifIFDPointerTag: exifDirectory = reader.Integer(entry); break;
-                            default:                break;
-                          }
-                        });
-
-    Maybe<uint32> dimensionX;
-    Maybe<uint32> dimensionY;
-    if (exifDirectory && *exifDirectory != *firstDirectory)
+    auto scalesTo = [](int32 physical, float resolution, uint32 preferred)
     {
-      reader.ForEachEntry(*exifDirectory,
-                          [&](uint32 tag, size_t entry)
-                          {
-                            if (tag == PixelXDimensionTag)
-                            {
-                              dimensionX = reader.Integer(entry);
-                            }
-                            else if (tag == PixelYDimensionTag)
-                            {
-                              dimensionY = reader.Integer(entry);
-                            }
-                          });
-    }
-
-    // https://html.spec.whatwg.org/#preparing-an-image-for-presentation: the pixel dimensions are the
-    // preferred density-corrected dimensions when the resolution, in inches, scales the image's size to them.
-    if (!dimensionX || !dimensionY || !*dimensionX || !*dimensionY || !resolutionX || !resolutionY
-        || *resolutionX <= 0 || *resolutionY <= 0 || resolutionUnit != InchesResolutionUnit)
+      return static_cast<float>(physical) * NaturalResolution / resolution == static_cast<float>(preferred);
+    };
+    if (scalesTo(physicalSize.Width(), *resolutionX, *width)
+        && scalesTo(physicalSize.Height(), *resolutionY, *height))
     {
-      return metadata;
-    }
-    if (static_cast<float>(physicalSize.Width()) * DefaultResolution / *resolutionX
-          == static_cast<float>(*dimensionX)
-        && static_cast<float>(physicalSize.Height()) * DefaultResolution / *resolutionY
-             == static_cast<float>(*dimensionY))
-    {
-      metadata.DensityCorrectedSize = SizeI(static_cast<int32>(*dimensionX), static_cast<int32>(*dimensionY));
+      metadata.DensityCorrectedSize = SizeI {static_cast<int32>(*width), static_cast<int32>(*height)};
     }
     return metadata;
   }

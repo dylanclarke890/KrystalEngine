@@ -41,7 +41,6 @@ target_sources(Krystal.Image
       include/Krystal.Image/Decoders/BMPImageDecoder.hpp
       include/Krystal.Image/Decoders/BMPImageReader.hpp
       include/Krystal.Image/Decoders/GIFImageDecoder.hpp
-      include/Krystal.Image/Decoders/GIFImageReader.hpp
       include/Krystal.Image/Decoders/ICOImageDecoder.hpp
       include/Krystal.Image/Decoders/JPEGImageDecoder.hpp
       include/Krystal.Image/Decoders/PNGImageDecoder.hpp
@@ -60,7 +59,6 @@ target_sources(Krystal.Image
     src/Decoders/BMPImageDecoder.cpp
     src/Decoders/BMPImageReader.cpp
     src/Decoders/GIFImageDecoder.cpp
-    src/Decoders/GIFImageReader.cpp
     src/Decoders/ICOImageDecoder.cpp
     src/Decoders/JPEGImageDecoder.cpp
     src/Decoders/PNGImageDecoder.cpp

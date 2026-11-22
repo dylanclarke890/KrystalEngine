@@ -1,52 +1,28 @@
-﻿/*
- * Copyright (C) 2006 Apple Inc. All rights reserved.
- *
- * Redistribution and use in source and binary forms, with or without
- * modification, are permitted provided that the following conditions
- * are met:
- * 1. Redistributions of source code must retain the above copyright
- *    notice, this list of conditions and the following disclaimer.
- * 2. Redistributions in binary form must reproduce the above copyright
- *    notice, this list of conditions and the following disclaimer in the
- *    documentation and/or other materials provided with the distribution.
- *
- * THIS SOFTWARE IS PROVIDED BY APPLE INC. ``AS IS'' AND ANY
- * EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE
- * IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR
- * PURPOSE ARE DISCLAIMED.  IN NO EVENT SHALL APPLE INC. OR
- * CONTRIBUTORS BE LIABLE FOR ANY DIRECT, INDIRECT, INCIDENTAL, SPECIAL,
- * EXEMPLARY, OR CONSEQUENTIAL DAMAGES (INCLUDING, BUT NOT LIMITED TO,
- * PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES; LOSS OF USE, DATA, OR
- * PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND ON ANY THEORY
- * OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT
- * (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
- * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
- */
-
-#pragma once
+﻿#pragma once
 
 #include "Krystal.Core/Memory/UniquePtr.hpp"
 #include "Krystal.Image/ImageDecoder.hpp"
 
 namespace krys::img
 {
-  class GIFImageReader;
-
-  // This class decodes the GIF image format.
+  /// @brief Decodes GIF images, still and animated, as their data arrives. A frame shows what's decoded of it
+  /// so far; an interlaced first frame fills in progressively, each pass's rows standing in for the rows
+  /// below them until those arrive.
+  /// @see https://www.w3.org/Graphics/GIF/spec-gif89a.txt
   class GIFImageDecoder final : public ImageDecoder
   {
-  public:
-    enum GIFQuery : uint8
-    {
-      GIFFullQuery,
-      GIFSizeQuery,
-      GIFFrameCountQuery,
-    };
+    class LZWDecoder;
+    class Parser;
+    struct FrameInfo;
 
   private:
-    bool _currentBufferSawAlpha {false};
-    mutable RepetitionCount _repetitionCount {RepetitionCountOnce};
-    UniquePtr<GIFImageReader> _reader;
+    // The structure of the image: its size, loop count, and each frame's placement and where its data is.
+    // Kept while the decoder lives, so a frame whose pixels were cleared can be decoded again.
+    UniquePtr<Parser> _parser;
+    // The decoding state of the frame being decoded, kept while its data arrives.
+    UniquePtr<LZWDecoder> _lzw;
+    // Whether the frame being decoded has written (or skipped) a transparent pixel.
+    bool _frameSawTransparency {false};
 
   public:
     KRYS_NODISCARD static Ref<ImageDecoder>
@@ -57,57 +33,42 @@ namespace krys::img
 
     ~GIFImageDecoder() noexcept override;
 
-    // ImageDecoder
-    KRYS_NODISCARD utf8_string FilenameExtension() const noexcept final
+    KRYS_NODISCARD utf8_string FilenameExtension() const noexcept override
     {
       return u8"gif";
     }
 
-    void SetData(const SharedBuffer &data, bool allDataReceived) noexcept final;
+    bool SetSize(const SizeI &size) noexcept override;
 
-    bool SetSize(const SizeI &size) noexcept final;
+    KRYS_NODISCARD size_t FrameCount() const noexcept override;
 
-    KRYS_NODISCARD size_t FrameCount() const noexcept final;
+    KRYS_NODISCARD RepetitionCount GetRepetitionCount() const noexcept override;
 
-    KRYS_NODISCARD RepetitionCount GetRepetitionCount() const noexcept final;
+    ImageDecoderFrame *FrameBufferAtIndex(size_t index) noexcept override;
 
-    ImageDecoderFrame *FrameBufferAtIndex(size_t index) noexcept final;
-
-    // CAUTION: setFailed() deletes |m_reader|. Be careful to avoid
-    // accessing deleted memory, especially when calling this from inside
-    // GIFImageReader!
-    bool SetFailed() noexcept final;
-
-    void ClearFrameBufferCache(size_t clearBeforeFrame) noexcept final;
-
-    // Callbacks from the GIF reader.
-    bool HaveDecodedRow(unsigned frameIndex, const List<unsigned char> &rowBuffer, size_t width,
-                        size_t rowNumber, unsigned repeatCount, bool writeTransparentPixels) noexcept;
-
-    bool FrameComplete(unsigned frameIndex, unsigned frameDuration,
-                       ImageDecoderFrame::DisposalMethod disposalMethod) noexcept;
-
-    void GifComplete() noexcept;
+    void ClearFrameBufferCache(size_t clearBeforeFrame) noexcept override;
 
   private:
     GIFImageDecoder(AlphaOption, GammaAndColorProfileOption) noexcept;
 
-    void TryDecodeSize(bool allDataReceived) noexcept final
-    {
-      Decode(0, GIFSizeQuery, allDataReceived);
-    }
+    void TryDecodeSize(bool allDataReceived) noexcept override;
 
-    KRYS_NODISCARD size_t FindFirstRequiredFrameToDecode(size_t frameIndex) noexcept;
+    KRYS_NODISCARD FrameLayout LayoutOfFrame(size_t index) const noexcept override;
 
-    // If the query is GIFFullQuery, decodes the image up to (but not
-    // including) |haltAtFrame|. Otherwise, decodes as much as is needed to
-    // answer the query, ignoring bitmap data. If decoding fails but there
-    // is no more data coming, sets the "decode failure" flag.
-    void Decode(unsigned haltAtFrame, GIFQuery query, bool allDataReceived) noexcept;
+    /// @brief Parses the structure of what's arrived, sizing the image and the frame cache. False if the data
+    /// is malformed, which fails the decoder.
+    bool Parse() noexcept;
 
-    // Called to initialize the frame buffer with the given index, based on
-    // the previous frame's disposal method. Returns true on success. On
-    // failure, this will mark the image as failed.
-    bool InitFrameBuffer(unsigned frameIndex) noexcept;
+    /// @brief Decodes what's arrived of frame @p index, whose predecessors are decoded. True once it's
+    /// complete.
+    bool DecodeFrame(size_t index) noexcept;
+
+    /// @brief Sets frame @p index up to be drawn into, and resets the tracking of its alpha.
+    bool InitializeFrame(size_t index) noexcept;
+
+    bool WriteRow(size_t index, Span<const uint8> colorIndices, int32 y, int32 repeat,
+                  bool writeTransparentPixels) noexcept;
+
+    bool CompleteFrame(size_t index) noexcept;
   };
 }

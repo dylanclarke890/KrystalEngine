@@ -1,55 +1,21 @@
-﻿/*
- * Copyright (C) 2006 Apple Inc. All rights reserved.
- *
- * Portions are Copyright (C) 2001-6 mozilla.org
- *
- * Other contributors:
- *   Stuart Parmenter <stuart@mozilla.com>
- *
- * Copyright (C) 2007-2009 Torch Mobile, Inc.
- *
- * This library is free software; you can redistribute it and/or
- * modify it under the terms of the GNU Lesser General Public
- * License as published by the Free Software Foundation; either
- * version 2.1 of the License, or (at your option) any later version.
- *
- * This library is distributed in the hope that it will be useful,
- * but WITHOUT ANY WARRANTY; without even the implied warranty of
- * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU
- * Lesser General Public License for more details.
- *
- * You should have received a copy of the GNU Lesser General Public
- * License along with this library; if not, write to the Free Software
- * Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
- *
- * Alternatively, the contents of this file may be used under the terms
- * of either the Mozilla Public License Version 1.1, found at
- * http://www.mozilla.org/MPL/ (the "MPL") or the GNU General Public
- * License Version 2.0, found at http://www.fsf.org/copyleft/gpl.html
- * (the "GPL"), in which case the provisions of the MPL or the GPL are
- * applicable instead of those above.  If you wish to allow use of your
- * version of this file only under the terms of one of those two
- * licenses (the MPL or the GPL) and not to allow others to use your
- * version of this file under the LGPL, indicate your decision by
- * deletingthe provisions above and replace them with the notice and
- * other provisions required by the MPL or the GPL, as the case may be.
- * If you do not delete the provisions above, a recipient may use your
- * version of this file under any of the LGPL, the MPL or the GPL.
- */
-
-#include "Krystal.Image/Decoders/JPEGImageDecoder.hpp"
+﻿#include "Krystal.Image/Decoders/JPEGImageDecoder.hpp"
+#include "Krystal.Core/Containers/List.hpp"
+#include "Krystal.Image/EXIFMetadata.hpp"
+#include "Krystal.Image/ICCProfileTransform.hpp"
 #include <algorithm>
 #include <csetjmp>
-#include <cstdio>
-#include <cstdlib>
 #include <cstring>
+#include <tuple>
+#include <utility>
 
 extern "C"
 {
 #include <jpeglib.h>
 }
 
-// libjpeg reports errors with longjmp to the setjmp in the reader, which owns no objects with destructors.
+// libjpeg reports fatal errors through error_exit, which mustn't return: ours longjmps back to the reader. On
+// Windows, longjmp unwinds the stack as an exception would, so the functions it passes through aren't
+// noexcept.
 // clang-format off
 #pragma warning(disable : 4611) // interaction between '_setjmp' and C++ object destruction is non-portable
 #pragma warning(disable : 4324) // structure was padded due to alignment specifier (jmp_buf)
@@ -59,507 +25,433 @@ namespace krys::img
 {
   namespace
   {
-    // libjpeg-turbo writes BGRA, which is ARGB on little-endian machines.
-    KRYS_NODISCARD J_COLOR_SPACE RGBOutputColorSpace() noexcept
-    {
-      return JCS_EXT_BGRA;
-    }
-
-    KRYS_NODISCARD bool TurboSwizzled(J_COLOR_SPACE colorSpace) noexcept
-    {
-      return colorSpace == JCS_EXT_RGBA || colorSpace == JCS_EXT_BGRA;
-    }
-
-    KRYS_NODISCARD J_DCT_METHOD DctMethod() noexcept
-    {
-      return JDCT_ISLOW;
-    }
-
-    KRYS_NODISCARD J_DITHER_MODE DitherMode() noexcept
-    {
-      return JDITHER_FS;
-    }
-
-    KRYS_NODISCARD bool DoFancyUpsampling() noexcept
-    {
-      return true;
-    }
-
-    constexpr int ExifMarker = JPEG_APP0 + 1;
+    // APP1 holds EXIF metadata, and APP2 ICC profiles.
+    constexpr int EXIFMarker = JPEG_APP0 + 1;
     constexpr int ICCMarker = JPEG_APP0 + 2;
-    // An ICC APP2 block is "ICC_PROFILE\0", then its sequence number and the number of blocks.
-    constexpr size_t ICCHeaderSize = 14;
 
-    struct DecoderErrorManager
+    struct ErrorHandler : jpeg_error_mgr
     {
-      struct jpeg_error_mgr Pub; // "public" fields for IJG library
-      jmp_buf SetjmpBuffer;      // For handling catastropic errors
+      std::jmp_buf Jump;
     };
 
-    enum class JState : uint8
+    KRYS_NORETURN void ExitOnError(j_common_ptr info)
     {
-      Header, // Reading JFIF headers
-      StartDecompress,
-      DecompressProgressive, // Output progressive pixels
-      DecompressSequential,  // Output sequential pixels
-      Done,
-      Error,
-    };
+      std::longjmp(static_cast<ErrorHandler *>(info->err)->Jump, 1); // NOLINT(modernize-avoid-setjmp-longjmp)
+    }
 
-    void InitSource(j_decompress_ptr jd);
-
-    boolean FillInputBuffer(j_decompress_ptr jd);
-
-    void SkipInputData(j_decompress_ptr jd, long numBytes);
-
-    void TermSource(j_decompress_ptr jd);
-
-    void ErrorExit(j_common_ptr cinfo);
-
-    /// @brief The EXIF metadata of an image of @p size, from its first APP1 block that holds it.
-    KRYS_NODISCARD EXIFMetadata ReadEXIFMetadata(jpeg_decompress_struct *info, const SizeI &size) noexcept
+    void IgnoreMessage(j_common_ptr)
     {
-      // An EXIF APP1 block is "Exif\0", a fill byte, then the TIFF block that holds the metadata.
-      // FIXME: Possibly implement XMP and IPTC support.
-      constexpr size_t exifHeaderSize = 6;
-      for (jpeg_saved_marker_ptr marker = info->marker_list; marker; marker = marker->next)
+      // Warnings about recoverable corruption aren't worth printing.
+    }
+
+    KRYS_NODISCARD Span<const uint8> MarkerData(const jpeg_marker_struct &marker) noexcept
+    {
+      return {reinterpret_cast<const uint8 *>(marker.data), marker.data_length};
+    }
+
+    KRYS_NODISCARD bool StartsWith(Span<const uint8> data, Span<const char> prefix) noexcept
+    {
+      return data.size() >= prefix.size() && std::memcmp(data.data(), prefix.data(), prefix.size()) == 0;
+    }
+
+    // The EXIF metadata in the first APP1 marker that has it: "Exif", two zero bytes, then a TIFF block.
+    KRYS_NODISCARD EXIFMetadata ReadEXIF(const jpeg_decompress_struct &info, const SizeI &size) noexcept
+    {
+      constexpr char header[] = {'E', 'x', 'i', 'f', 0, 0};
+      for (auto *marker = info.marker_list; marker; marker = marker->next)
       {
-        const JOCTET *data = marker->data;
-        if (marker->marker != ExifMarker || marker->data_length < exifHeaderSize
-            || std::memcmp(data, "Exif\0", 5) != 0)
+        auto data = MarkerData(*marker);
+        if (marker->marker == EXIFMarker && StartsWith(data, header))
         {
-          continue;
+          return EXIFMetadata::Read(data.subspan(sizeof(header)), size);
         }
-        return EXIFMetadata::Read(Span<const uint8>(reinterpret_cast<const uint8 *>(data) + exifHeaderSize,
-                                                    marker->data_length - exifHeaderSize),
-                                  size);
       }
       return {};
     }
 
-    /// @brief The ICC profile split across the image's ICC APP2 blocks, joined in their sequence; empty if
-    /// there's none, or the blocks don't make a whole profile.
-    KRYS_NODISCARD List<uint8> ReadICCProfile(jpeg_decompress_struct *info) noexcept
+    // The ICC profile, which may be split across APP2 markers: each is "ICC_PROFILE", a zero byte, its
+    // 1-based sequence number and the number of markers, then its part of the profile. Empty when there's no
+    // profile, or the markers don't make up a whole one.
+    KRYS_NODISCARD List<uint8> ReadICCProfile(const jpeg_decompress_struct &info) noexcept
     {
-      List<jpeg_saved_marker_ptr> blocks;
-      uint32 blockCount = 0;
-      for (jpeg_saved_marker_ptr marker = info->marker_list; marker; marker = marker->next)
+      constexpr char signature[] = "ICC_PROFILE"; // With its terminating zero.
+      constexpr size_t headerSize = sizeof(signature) + 2;
+
+      List<Span<const uint8>> parts;
+      for (auto *marker = info.marker_list; marker; marker = marker->next)
       {
-        if (marker->marker != ICCMarker || marker->data_length < ICCHeaderSize
-            || std::memcmp(marker->data, "ICC_PROFILE\0", 12) != 0)
+        auto data = MarkerData(*marker);
+        if (marker->marker != ICCMarker || data.size() < headerSize || !StartsWith(data, signature))
         {
           continue;
         }
-        const uint32 count = marker->data[13];
-        if (!count || (blockCount && count != blockCount))
+        auto sequenceNumber = data[sizeof(signature)];
+        auto count = data[sizeof(signature) + 1];
+        if (!count || sequenceNumber < 1 || sequenceNumber > count
+            || (!parts.empty() && parts.size() != count))
         {
           return {};
         }
-        blockCount = count;
-        blocks.push_back(marker);
-      }
-      if (blocks.size() != blockCount)
-      {
-        return {};
+        parts.resize(count);
+        if (!parts[sequenceNumber - 1].empty())
+        {
+          return {}; // A repeated part.
+        }
+        parts[sequenceNumber - 1] = data.subspan(headerSize);
       }
 
       List<uint8> profile;
-      for (uint32 sequenceNumber = 1; sequenceNumber <= blockCount; ++sequenceNumber)
+      for (auto part : parts)
       {
-        auto block = std::ranges::find_if(blocks, [&](jpeg_saved_marker_ptr marker)
-                                          { return marker->data[12] == sequenceNumber; });
-        if (block == blocks.end())
+        if (part.empty())
         {
-          return {};
+          return {}; // A missing part.
         }
-        const uint8 *data = reinterpret_cast<const uint8 *>((*block)->data);
-        profile.insert(profile.end(), data + ICCHeaderSize, data + (*block)->data_length);
+        profile.insert(profile.end(), part.begin(), part.end());
       }
       return profile;
     }
+
+    // Adobe's inverted CMYK stores 255 - C (and so on), so with the ink scaled by the key, each RGB channel
+    // is the stored ink value times the stored key.
+    KRYS_NODISCARD uint8 InvertedCMYKChannelToRGB(uint8 ink, uint8 key) noexcept
+    {
+      return static_cast<uint8>(ink * key / 255);
+    }
   }
 
-  // Implementation of a JPEG src object that understands our state machine
-  struct DecoderSourceManager
+  class JPEGImageDecoder::Reader
   {
-    // public fields; must be first in this struct!
-    struct jpeg_source_mgr Pub;
-
-    JPEGImageReader *Decoder;
-  };
-
-  class JPEGImageReader
-  {
-    KRYS_NON_COPY_MOVABLE(JPEGImageReader);
-
-  private:
-    JPEGImageDecoder *_decoder;
-    unsigned _bufferLength {0};
-    long _bytesToSkip {0};
-    bool _decodingSizeOnly {false};
-
-    jpeg_decompress_struct _info {};
-    DecoderErrorManager _err {};
-    JState _state {JState::Header};
-
-    JSAMPARRAY _samples {nullptr};
+    KRYS_NON_COPY_MOVABLE(Reader);
 
   public:
-    explicit JPEGImageReader(JPEGImageDecoder *decoder) noexcept : _decoder(decoder)
+    enum class Result : uint8
     {
-      // We set up the normal JPEG error routines, then override error_exit.
-      _info.err = jpeg_std_error(&_err.Pub);
-      _err.Pub.error_exit = ErrorExit;
+      /// @brief It stopped at the end of the data that's arrived so far.
+      NeedsMoreData,
+      /// @brief It decoded as much as was asked for.
+      Done,
+      Failed,
+    };
 
-      // Allocate and initialize JPEG decompression object.
+  private:
+    enum class Stage : uint8
+    {
+      Header,
+      StartDecompressing,
+      SequentialRows,
+      ProgressiveScans,
+      Finishing,
+      Complete,
+    };
+
+    struct Source : jpeg_source_mgr
+    {
+      Reader *Owner;
+    };
+
+    JPEGImageDecoder &_decoder;
+    jpeg_decompress_struct _info {};
+    ErrorHandler _errors {};
+    Source _source {};
+    Stage _stage {Stage::Header};
+    // How much of the data libjpeg has been given; it may not have consumed all of it.
+    size_t _bytesGiven {0};
+    // Bytes libjpeg asked to skip beyond the end of what it was given.
+    size_t _bytesToSkip {0};
+    // Whether a progressive output pass has started, and so is resumed rather than started again.
+    bool _outputPassStarted {false};
+    bool _isCMYK {false};
+    ICCProfileTransform _profileTransform;
+    // A CMYK row as libjpeg decodes it, and as the profile converts it to RGB.
+    List<uint8> _cmykRow;
+    List<uint8> _rgbRow;
+
+  public:
+    explicit Reader(JPEGImageDecoder &decoder) noexcept : _decoder(decoder)
+    {
+      _info.err = jpeg_std_error(&_errors);
+      _errors.error_exit = ExitOnError;
+      _errors.output_message = IgnoreMessage;
       jpeg_create_decompress(&_info);
 
-      auto *src = static_cast<DecoderSourceManager *>(std::calloc(1, sizeof(DecoderSourceManager)));
-      if (!src)
+      _source.init_source = [](j_decompress_ptr) {};
+      // The reader gives libjpeg all the data it has, so when libjpeg wants more, it has to wait.
+      _source.fill_input_buffer = [](j_decompress_ptr) -> boolean
       {
-        _state = JState::Error;
-        return;
-      }
+        return FALSE;
+      };
+      _source.skip_input_data = [](j_decompress_ptr info, long count)
+      {
+        static_cast<Source *>(info->src)->Owner->Skip(static_cast<size_t>(std::max(count, 0l)));
+      };
+      _source.resync_to_restart = jpeg_resync_to_restart;
+      _source.term_source = [](j_decompress_ptr) {};
+      _source.Owner = this;
+      _info.src = &_source;
 
-      _info.src = reinterpret_cast<jpeg_source_mgr *>(src);
-
-      // Set up callback functions.
-      src->Pub.init_source = InitSource;
-      src->Pub.fill_input_buffer = FillInputBuffer;
-      src->Pub.skip_input_data = SkipInputData;
-      src->Pub.resync_to_restart = jpeg_resync_to_restart;
-      src->Pub.term_source = TermSource;
-      src->Decoder = this;
-
-      // Keep APP1 blocks, for obtaining exif data.
-      jpeg_save_markers(&_info, ExifMarker, 0xFFFF);
-      // Keep APP2 blocks, for obtaining ICC profiles.
-      if (!_decoder->IgnoresGammaAndColorProfile())
+      jpeg_save_markers(&_info, EXIFMarker, 0xFFFF);
+      if (!_decoder.IgnoresGammaAndColorProfile())
       {
         jpeg_save_markers(&_info, ICCMarker, 0xFFFF);
       }
     }
 
-    ~JPEGImageReader() noexcept
+    ~Reader() noexcept
     {
-      Close();
-    }
-
-    void Close() noexcept
-    {
-      auto *src = reinterpret_cast<DecoderSourceManager *>(_info.src);
-      std::free(src);
-      _info.src = nullptr;
-
       jpeg_destroy_decompress(&_info);
     }
 
-    void SkipBytes(long numBytes) noexcept
+    /// @brief Decodes what's arrived of @p data (the image's data so far): up to its size if @p sizeOnly,
+    /// or else as much of the image as it can.
+    Result Decode(const SharedBuffer &data, bool sizeOnly)
     {
-      auto *src = reinterpret_cast<DecoderSourceManager *>(_info.src);
-      long bytesToSkip = std::min(numBytes, static_cast<long>(src->Pub.bytes_in_buffer));
-      src->Pub.bytes_in_buffer -= static_cast<size_t>(bytesToSkip);
-      src->Pub.next_input_byte += bytesToSkip;
-
-      _bytesToSkip = std::max(numBytes - bytesToSkip, 0l);
+      GiveData(data);
+      if (setjmp(_errors.Jump)) // NOLINT(modernize-avoid-setjmp-longjmp): libjpeg's errors land here.
+      {
+        return Result::Failed;
+      }
+      return Run(sizeOnly);
     }
 
-    // NOTE: not noexcept: libjpeg's errors longjmp back to the setjmp here.
-    bool Decode(const SharedBuffer &data, bool onlySize)
+  private:
+    void GiveData(const SharedBuffer &data) noexcept
     {
-      _decodingSizeOnly = onlySize;
+      // The data may have moved as it grew, so point libjpeg at where it had got to in the new copy.
+      auto unreadStart = _bytesGiven - _source.bytes_in_buffer;
+      _source.next_input_byte = data.Data() + unreadStart;
+      _source.bytes_in_buffer = data.Size() - unreadStart;
+      _bytesGiven = data.Size();
+      Skip(std::exchange(_bytesToSkip, 0));
+    }
 
-      unsigned newByteCount = static_cast<unsigned>(data.Size()) - _bufferLength;
-      unsigned readOffset = _bufferLength - static_cast<unsigned>(_info.src->bytes_in_buffer);
+    void Skip(size_t count) noexcept
+    {
+      auto skipped = std::min(count, _source.bytes_in_buffer);
+      _source.next_input_byte += skipped;
+      _source.bytes_in_buffer -= skipped;
+      _bytesToSkip += count - skipped;
+    }
 
-      _info.src->bytes_in_buffer += newByteCount;
-      _info.src->next_input_byte = data.Data() + readOffset;
-
-      // If we still have bytes to skip, try to skip those now.
-      if (_bytesToSkip)
+    Result Run(bool sizeOnly)
+    {
+      while (true)
       {
-        SkipBytes(_bytesToSkip);
-      }
-
-      _bufferLength = static_cast<unsigned>(data.Size());
-
-      // We need to do the setjmp here. Otherwise bad things will happen
-      if (setjmp(_err.SetjmpBuffer)) // NOLINT(modernize-avoid-setjmp-longjmp): libjpeg
-      {
-        return _decoder->SetFailed();
-      }
-
-      switch (_state)
-      {
-        case JState::Header:
-          // Read file parameters with jpeg_read_header().
-          if (jpeg_read_header(&_info, TRUE) == JPEG_SUSPENDED)
-          {
-            return false; // I/O suspension.
-          }
-
-          switch (_info.jpeg_color_space)
-          {
-            case JCS_GRAYSCALE:
-            case JCS_RGB:
-            case JCS_YCbCr:
-              // libjpeg can convert GRAYSCALE and YCbCr image pixels to RGB.
-              _info.out_color_space = RGBOutputColorSpace();
-              break;
-            case JCS_CMYK:
-            case JCS_YCCK:
-              // libjpeg can convert YCCK to CMYK, but neither to RGB, so we
-              // manually convert CMKY to RGB.
-              _info.out_color_space = JCS_CMYK;
-              break;
-            default: return _decoder->SetFailed();
-          }
-
-          _state = JState::StartDecompress;
-
-          // We can fill in the size now that the header is available.
-          if (!_decoder->SetSize(
-                SizeI(static_cast<int32>(_info.image_width), static_cast<int32>(_info.image_height))))
-          {
-            return false;
-          }
-
-          _decoder->SetEXIFMetadata(ReadEXIFMetadata(
-            Info(), SizeI(static_cast<int32>(_info.image_width), static_cast<int32>(_info.image_height))));
-
-          if (!_decoder->IgnoresGammaAndColorProfile())
-          {
-            _decoder->SetICCProfile(ReadICCProfile(Info()), _info.out_color_space == JCS_CMYK
-                                                              ? ICCProfileTransform::PixelLayout::InvertedCMYK
-                                                              : ICCProfileTransform::PixelLayout::BGRA);
-          }
-
-          // Don't allocate a giant and superfluous memory buffer when the
-          // image is a sequential JPEG.
-          _info.buffered_image = jpeg_has_multiple_scans(&_info);
-
-          // Used to set up image size so arrays can be allocated.
-          jpeg_calc_output_dimensions(&_info);
-
-          // Make a one-row-high sample array that will go away when done with
-          // image. Always make it big enough to hold an RGB row. Since this
-          // uses the IJG memory manager, it must be allocated before the call
-          // to jpeg_start_compress().
-          // FIXME: note that some output color spaces do not need the samples
-          // buffer. Remove this allocation for those color spaces.
-          _samples = (*_info.mem->alloc_sarray)(reinterpret_cast<j_common_ptr>(&_info), JPOOL_IMAGE,
-                                                _info.output_width * 4, 1);
-
-          if (_decodingSizeOnly)
-          {
-            // We can stop here. Reduce our buffer length and available data.
-            _bufferLength -= static_cast<unsigned>(_info.src->bytes_in_buffer);
-            _info.src->bytes_in_buffer = 0;
-            return true;
-          }
-          [[fallthrough]];
-
-        case JState::StartDecompress:
-          // Set parameters for decompression.
-          // FIXME -- Should reset dct_method and dither mode for final pass
-          // of progressive JPEG.
-          _info.dct_method = DctMethod();
-          _info.dither_mode = DitherMode();
-          _info.do_fancy_upsampling = DoFancyUpsampling() ? TRUE : FALSE;
-          _info.enable_2pass_quant = FALSE;
-          _info.do_block_smoothing = TRUE;
-
-          // Start decompressor.
-          if (!jpeg_start_decompress(&_info))
-          {
-            return false; // I/O suspension.
-          }
-
-          // If this is a progressive JPEG ...
-          _state = (_info.buffered_image) ? JState::DecompressProgressive : JState::DecompressSequential;
-          [[fallthrough]];
-
-        case JState::DecompressSequential:
-          if (_state == JState::DecompressSequential)
-          {
-            if (!_decoder->OutputScanlines())
+        switch (_stage)
+        {
+          case Stage::Header:
+            if (jpeg_read_header(&_info, TRUE) == JPEG_SUSPENDED)
             {
-              return false; // I/O suspension.
+              return Result::NeedsMoreData;
             }
-
-            // If we've completed image output...
-            krys_debug_assert(_info.output_scanline == _info.output_height);
-            _state = JState::Done;
-          }
-          [[fallthrough]];
-
-        case JState::DecompressProgressive:
-          if (_state == JState::DecompressProgressive)
-          {
-            int status;
-            do
+            if (!ReadHeader())
             {
-              status = jpeg_consume_input(&_info);
-            } while ((status != JPEG_SUSPENDED) && (status != JPEG_REACHED_EOI));
-
-            for (;;)
-            {
-              if (!_info.output_scanline)
-              {
-                int scan = _info.input_scan_number;
-
-                // If we haven't displayed anything yet
-                // (output_scan_number == 0) and we have enough data for
-                // a complete scan, force output of the last full scan.
-                if (!_info.output_scan_number && (scan > 1) && (status != JPEG_REACHED_EOI))
-                {
-                  --scan;
-                }
-
-                if (!jpeg_start_output(&_info, scan))
-                {
-                  return false; // I/O suspension.
-                }
-              }
-
-              if (_info.output_scanline == 0xFFFFFF)
-              {
-                _info.output_scanline = 0;
-              }
-
-              // If outputScanlines() fails, it deletes |this|. Therefore,
-              // copy the decoder pointer and use it to check for failure
-              // to avoid member access in the failure case.
-              JPEGImageDecoder *decoder = _decoder;
-              if (!decoder->OutputScanlines())
-              {
-                if (decoder->Failed()) // Careful; |this| is deleted.
-                {
-                  return false;
-                }
-                if (!_info.output_scanline)
-                {
-                  // Didn't manage to read any lines - flag so we
-                  // don't call jpeg_start_output() multiple times for
-                  // the same scan.
-                  _info.output_scanline = 0xFFFFFF;
-                }
-                return false; // I/O suspension.
-              }
-
-              if (_info.output_scanline == _info.output_height)
-              {
-                if (!jpeg_finish_output(&_info))
-                {
-                  return false; // I/O suspension.
-                }
-
-                if (jpeg_input_complete(&_info) && (_info.input_scan_number == _info.output_scan_number))
-                {
-                  break;
-                }
-
-                _info.output_scanline = 0;
-              }
+              return Result::Failed;
             }
+            _stage = Stage::StartDecompressing;
+            break;
+          case Stage::StartDecompressing:
+            if (sizeOnly)
+            {
+              return Result::Done;
+            }
+            _info.dct_method = JDCT_ISLOW;
+            _info.do_fancy_upsampling = TRUE;
+            _info.do_block_smoothing = TRUE;
+            if (!jpeg_start_decompress(&_info))
+            {
+              return Result::NeedsMoreData;
+            }
+            _stage = _info.buffered_image ? Stage::ProgressiveScans : Stage::SequentialRows;
+            break;
+          case Stage::SequentialRows:
+            if (sizeOnly)
+            {
+              return Result::Done;
+            }
+            if (!WriteRows())
+            {
+              return Result::NeedsMoreData;
+            }
+            _stage = Stage::Finishing;
+            break;
+          case Stage::ProgressiveScans:
+            if (sizeOnly)
+            {
+              return Result::Done;
+            }
+            if (!WriteScans())
+            {
+              return Result::NeedsMoreData;
+            }
+            _stage = Stage::Finishing;
+            break;
+          case Stage::Finishing:
+            if (sizeOnly)
+            {
+              return Result::Done;
+            }
+            // Reads up to the end of the image.
+            if (!jpeg_finish_decompress(&_info))
+            {
+              return Result::NeedsMoreData;
+            }
+            _stage = Stage::Complete;
+            Frame().SetHasAlpha(false);
+            Frame().SetDecodingStatus(DecodingStatus::Complete);
+            break;
+          case Stage::Complete: return Result::Done;
+        }
+      }
+    }
 
-            _state = JState::Done;
-          }
-          [[fallthrough]];
-
-        case JState::Done:
-          // Finish decompression.
-          return jpeg_finish_decompress(&_info);
-
-        case JState::Error:
-          // We can get here if the constructor failed.
-          return _decoder->SetFailed();
+    // Takes what's needed from the header: the size, the colour space to decode to, the EXIF metadata and the
+    // ICC profile.
+    bool ReadHeader()
+    {
+      switch (_info.jpeg_color_space)
+      {
+        case JCS_GRAYSCALE:
+        case JCS_RGB:
+        case JCS_YCbCr:
+          // libjpeg-turbo writes BGRA straight into the image's pixels.
+          _info.out_color_space = JCS_EXT_BGRA;
+          break;
+        case JCS_CMYK:
+        case JCS_YCCK:
+          // libjpeg can't convert CMYK to RGB, so it decodes to (inverted) CMYK, and the reader converts
+          // that.
+          _info.out_color_space = JCS_CMYK;
+          _isCMYK = true;
+          break;
+        default: return false;
       }
 
+      SizeI size {static_cast<int32>(_info.image_width), static_cast<int32>(_info.image_height)};
+      if (!_decoder.SetSize(size))
+      {
+        return false;
+      }
+      _decoder.SetEXIFMetadata(ReadEXIF(_info, size));
+      if (!_decoder.IgnoresGammaAndColorProfile())
+      {
+        auto profile = ReadICCProfile(_info);
+        _profileTransform =
+          _isCMYK ? ICCProfileTransform::Create(profile, ICCProfileTransform::PixelLayout::InvertedCMYK,
+                                                ICCProfileTransform::PixelLayout::RGB)
+                  : ICCProfileTransform::Create(profile, ICCProfileTransform::PixelLayout::BGRA,
+                                                ICCProfileTransform::PixelLayout::BGRA);
+      }
+
+      // Progressive images are decoded a scan at a time, which needs their coefficients buffered; sequential
+      // ones are decoded straight to rows.
+      _info.buffered_image = jpeg_has_multiple_scans(&_info);
       return true;
     }
 
-    KRYS_NODISCARD jpeg_decompress_struct *Info() noexcept
+    KRYS_NODISCARD ImageDecoderFrame &Frame() noexcept
     {
-      return &_info;
+      return _decoder._frameBufferCache[0];
     }
 
-    KRYS_NODISCARD JSAMPARRAY Samples() const noexcept
+    // Writes rows until the output pass is complete, or libjpeg needs more data.
+    bool WriteRows()
     {
-      return _samples;
-    }
-
-    KRYS_NODISCARD JPEGImageDecoder *Decoder() noexcept
-    {
-      return _decoder;
-    }
-  };
-
-  namespace
-  {
-    // Override the standard error method in the IJG JPEG decoder code.
-    void ErrorExit(j_common_ptr cinfo)
-    {
-      // Return control to the setjmp point.
-      auto *err = reinterpret_cast<DecoderErrorManager *>(cinfo->err);
-      longjmp(err->SetjmpBuffer, -1); // NOLINT(modernize-avoid-setjmp-longjmp): libjpeg
-    }
-
-    void InitSource(j_decompress_ptr)
-    {
-    }
-
-    void SkipInputData(j_decompress_ptr jd, long numBytes)
-    {
-      auto *src = reinterpret_cast<DecoderSourceManager *>(jd->src);
-      src->Decoder->SkipBytes(numBytes);
-    }
-
-    boolean FillInputBuffer(j_decompress_ptr)
-    {
-      // Our decode step always sets things up properly, so if this method is ever
-      // called, then we have hit the end of the buffer.  A return value of false
-      // indicates that we have no data to supply yet.
-      return FALSE;
-    }
-
-    void TermSource(j_decompress_ptr jd)
-    {
-      auto *src = reinterpret_cast<DecoderSourceManager *>(jd->src);
-      src->Decoder->Decoder()->JpegComplete();
-    }
-
-    template <int TColorSpace>
-    void SetPixel(ImageDecoderFrame &buffer, uint32 &currentAddress, JSAMPARRAY samples, int column) noexcept
-    {
-      JSAMPLE *jsample = *samples + column * (TColorSpace == JCS_RGB ? 3 : 4);
-
-      switch (TColorSpace)
+      auto &frame = Frame();
+      if (frame.IsInvalid())
       {
-        case JCS_RGB:
-          buffer.BackingStore()->SetPixel(currentAddress, jsample[0], jsample[1], jsample[2], 0xFF);
-          break;
-        case JCS_CMYK:
+        if (!frame.Initialize(_decoder.Size(), _decoder._premultiplyAlpha))
         {
-          // Source is 'Inverted CMYK', output is RGB.
-          // See: http://www.easyrgb.com/math.php?MATH=M12#text12
-          // Or: http://www.ilkeratalay.com/colorspacesfaq.php#rgb
-          // From CMYK to CMY:
-          // X =   X    * (1 -   K   ) +   K  [for X = C, M, or Y]
-          // Thus, from Inverted CMYK to CMY is:
-          // X = (1-iX) * (1 - (1-iK)) + (1-iK) => 1 - iX*iK
-          // From CMY (0..1) to RGB (0..1):
-          // R = 1 - C => 1 - (1 - iC*iK) => iC*iK  [G and B similar]
-          unsigned k = jsample[3];
-          buffer.BackingStore()->SetPixel(currentAddress, static_cast<uint8>(jsample[0] * k / 255),
-                                          static_cast<uint8>(jsample[1] * k / 255),
-                                          static_cast<uint8>(jsample[2] * k / 255), 0xFF);
-          break;
+          // Fail as libjpeg's own errors do.
+          ExitOnError(reinterpret_cast<j_common_ptr>(&_info));
         }
-        default: break;
+        // What isn't decoded yet is transparent.
+        frame.SetDecodingStatus(DecodingStatus::Partial);
+        frame.SetHasAlpha(true);
+      }
+
+      auto &pixels = *frame.BackingStore();
+      auto width = _info.output_width;
+      while (_info.output_scanline < _info.output_height)
+      {
+        auto y = static_cast<int32>(_info.output_scanline);
+        if (!_isCMYK)
+        {
+          auto *row = reinterpret_cast<JSAMPLE *>(pixels.PixelsStartingAt(0, y));
+          if (jpeg_read_scanlines(&_info, &row, 1) != 1)
+          {
+            return false;
+          }
+          _profileTransform.Transform(row, row, width);
+          continue;
+        }
+
+        _cmykRow.resize(size_t {width} * 4);
+        auto *row = _cmykRow.data();
+        if (jpeg_read_scanlines(&_info, &row, 1) != 1)
+        {
+          return false;
+        }
+        auto *destination = pixels.PixelsStartingAt(0, y);
+        if (_profileTransform)
+        {
+          _rgbRow.resize(size_t {width} * 3);
+          _profileTransform.Transform(_cmykRow.data(), _rgbRow.data(), width);
+          for (uint32 x = 0; x < width; ++x)
+          {
+            const auto *rgb = &_rgbRow[x * 3];
+            pixels.SetPixel(destination[x], rgb[0], rgb[1], rgb[2], 0xFF);
+          }
+          continue;
+        }
+        for (uint32 x = 0; x < width; ++x)
+        {
+          const auto *cmyk = &_cmykRow[x * 4];
+          pixels.SetPixel(destination[x], InvertedCMYKChannelToRGB(cmyk[0], cmyk[3]),
+                          InvertedCMYKChannelToRGB(cmyk[1], cmyk[3]),
+                          InvertedCMYKChannelToRGB(cmyk[2], cmyk[3]), 0xFF);
+        }
+      }
+      return true;
+    }
+
+    // Shows each scan of a progressive image once enough has arrived, until the last one is shown.
+    bool WriteScans()
+    {
+      int status;
+      do
+      {
+        status = jpeg_consume_input(&_info);
+      } while (status != JPEG_SUSPENDED && status != JPEG_REACHED_EOI);
+
+      while (true)
+      {
+        if (!_outputPassStarted)
+        {
+          // Before anything is shown, show the last scan that's fully arrived rather than one still arriving.
+          auto scan = _info.input_scan_number;
+          if (!_info.output_scan_number && scan > 1 && status != JPEG_REACHED_EOI)
+          {
+            --scan;
+          }
+          if (!jpeg_start_output(&_info, scan))
+          {
+            return false;
+          }
+          _outputPassStarted = true;
+        }
+        if (!WriteRows() || !jpeg_finish_output(&_info))
+        {
+          return false;
+        }
+        _outputPassStarted = false;
+        if (jpeg_input_complete(&_info) && _info.input_scan_number == _info.output_scan_number)
+        {
+          return true;
+        }
       }
     }
-  }
+  };
 
   JPEGImageDecoder::JPEGImageDecoder(AlphaOption alphaOption,
                                      GammaAndColorProfileOption gammaAndColorProfileOption) noexcept
@@ -567,10 +459,7 @@ namespace krys::img
   {
   }
 
-  JPEGImageDecoder::~JPEGImageDecoder() noexcept
-  {
-    Clear();
-  }
+  JPEGImageDecoder::~JPEGImageDecoder() noexcept = default;
 
   ImageDecoderFrame *JPEGImageDecoder::FrameBufferAtIndex(size_t index) noexcept
   {
@@ -578,169 +467,42 @@ namespace krys::img
     {
       return nullptr;
     }
-
     if (_frameBufferCache.empty())
     {
       _frameBufferCache.resize(1);
     }
-
-    auto &frame = _frameBufferCache[0];
-    if (!frame.IsComplete())
+    if (!_frameBufferCache[0].IsComplete())
     {
       Decode(false, IsAllDataReceived());
     }
     return &_frameBufferCache[0];
   }
 
-  void JPEGImageDecoder::Clear() noexcept
-  {
-    _reader = nullptr;
-  }
-
-  bool JPEGImageDecoder::SetFailed() noexcept
-  {
-    Clear();
-    return ImageDecoder::SetFailed();
-  }
-
-  template <int TColorSpace>
-  bool JPEGImageDecoder::OutputScanlines(ImageDecoderFrame &buffer)
-  {
-    JSAMPARRAY samples = _reader->Samples();
-    jpeg_decompress_struct *info = _reader->Info();
-    int width = static_cast<int>(info->output_width);
-
-    while (info->output_scanline < info->output_height)
-    {
-      // jpeg_read_scanlines will increase the scanline counter, so we
-      // save the scanline before calling it.
-      int sourceY = static_cast<int>(info->output_scanline);
-      /* Request one scanline.  Returns 0 or 1 scanlines. */
-      if (jpeg_read_scanlines(info, samples, 1) != 1)
-      {
-        return false;
-      }
-
-      auto *currentAddress = buffer.BackingStore()->PixelsStartingAt(0, sourceY);
-      if (TColorSpace == JCS_CMYK && _iccTransform)
-      {
-        // The profile converts the CMYK samples to RGB.
-        _transformedRow.resize(static_cast<size_t>(width) * 3u);
-        _iccTransform.Transform(*samples, _transformedRow.data(), static_cast<uint32>(width));
-        const uint8 *rgb = _transformedRow.data();
-        for (int x = 0; x < width; ++x, ++currentAddress, rgb += 3)
-        {
-          buffer.BackingStore()->SetPixel(*currentAddress, rgb[0], rgb[1], rgb[2], 0xFF);
-        }
-        continue;
-      }
-      for (int x = 0; x < width; ++x, ++currentAddress)
-      {
-        SetPixel<TColorSpace>(buffer, *currentAddress, samples, x);
-      }
-    }
-    return true;
-  }
-
-  bool JPEGImageDecoder::OutputScanlines()
-  {
-    if (_frameBufferCache.empty())
-    {
-      return false;
-    }
-
-    // Initialize the framebuffer if needed.
-    auto &buffer = _frameBufferCache[0];
-    if (buffer.IsInvalid())
-    {
-      if (!buffer.Initialize(Size(), _premultiplyAlpha))
-      {
-        return SetFailed();
-      }
-      buffer.SetDecodingStatus(DecodingStatus::Partial);
-      // The buffer is transparent outside the decoded area while the image is
-      // loading. The completed image will be marked fully opaque in jpegComplete().
-      buffer.SetHasAlpha(true);
-    }
-
-    jpeg_decompress_struct *info = _reader->Info();
-
-    if (TurboSwizzled(info->out_color_space))
-    {
-      while (info->output_scanline < info->output_height)
-      {
-        auto *row = reinterpret_cast<unsigned char *>(
-          buffer.BackingStore()->PixelsStartingAt(0, static_cast<int32>(info->output_scanline)));
-        if (jpeg_read_scanlines(info, &row, 1) != 1)
-        {
-          return false;
-        }
-        _iccTransform.Transform(row, row, info->output_width);
-      }
-      return true;
-    }
-
-    switch (info->out_color_space)
-    {
-      // The code inside outputScanlines<int> will be executed
-      // for each pixel, so we want to avoid any extra comparisons there.
-      // That is why we use template and template specializations here so
-      // the proper code will be generated at compile time.
-      case JCS_RGB:  return OutputScanlines<JCS_RGB>(buffer);
-      case JCS_CMYK: return OutputScanlines<JCS_CMYK>(buffer);
-      default:       krys_debug_assert(false); break;
-    }
-
-    return SetFailed();
-  }
-
-  void JPEGImageDecoder::SetICCProfile(Span<const uint8> profile,
-                                       ICCProfileTransform::PixelLayout layout) noexcept
-  {
-    _iccTransform = ICCProfileTransform::Create(profile, layout,
-                                                layout == ICCProfileTransform::PixelLayout::InvertedCMYK
-                                                  ? ICCProfileTransform::PixelLayout::RGB
-                                                  : ICCProfileTransform::PixelLayout::BGRA);
-  }
-
-  void JPEGImageDecoder::JpegComplete()
-  {
-    if (_frameBufferCache.empty())
-    {
-      return;
-    }
-
-    // Hand back an appropriately sized buffer, even if the image ended up being
-    // empty.
-    auto &buffer = _frameBufferCache[0];
-    buffer.SetHasAlpha(false);
-    buffer.SetDecodingStatus(DecodingStatus::Complete);
-  }
-
-  void JPEGImageDecoder::Decode(bool onlySize, bool allDataReceived) noexcept
+  void JPEGImageDecoder::Decode(bool sizeOnly, bool allDataReceived) noexcept
   {
     if (Failed())
     {
       return;
     }
-
+    if (!sizeOnly && _frameBufferCache.empty())
+    {
+      _frameBufferCache.resize(1);
+    }
     if (!_reader)
     {
-      Clear();
-      _reader = CreateUnique<JPEGImageReader>(this);
+      _reader = CreateUnique<Reader>(*this);
     }
 
-    // If we couldn't decode the image but we've received all the data, decoding
-    // has failed.
-    if (!_reader->Decode(*_data, onlySize) && allDataReceived)
+    auto result = _reader->Decode(*_data, sizeOnly);
+    if (result == Reader::Result::Failed || Failed()
+        || (result == Reader::Result::NeedsMoreData && allDataReceived))
     {
-      (void)SetFailed();
+      _reader = nullptr;
+      std::ignore = SetFailed();
     }
-    // If we're done decoding the image, we don't need the JPEGImageReader
-    // anymore.  (If we failed, |m_reader| has already been cleared.)
-    else if (!_frameBufferCache.empty() && (_frameBufferCache[0].IsComplete()))
+    else if (!_frameBufferCache.empty() && _frameBufferCache[0].IsComplete())
     {
-      Clear();
+      _reader = nullptr;
     }
   }
 }

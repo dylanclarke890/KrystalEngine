@@ -26,10 +26,7 @@
 
 #include "Krystal.Booey/CSS/Values/Primitives/NumericTypes.hpp"
 #include "Krystal.Booey/CSS/Values/Primitives/Symbol.hpp"
-#include <brigand/algorithms/remove.hpp>
-#include <brigand/algorithms/wrap.hpp>
-#include <brigand/sequences/append.hpp>
-#include <brigand/sequences/list.hpp>
+#include "Krystal.Core/Types/TypeList.hpp"
 
 namespace krys::boo::css
 {
@@ -37,25 +34,13 @@ namespace krys::boo::css
 
   // MARK: Add/Remove Symbol
 
-  /// @brief Transform `brigand::list<css1, css2, ...>`  -> `brigand::list<css1, css2, ..., symbol>`.
-  template <typename TypeList>
-  struct PlusSymbolLazy
-  {
-    using type = brigand::append<TypeList, brigand::list<Symbol>>;
-  };
+  /// @brief Transform `TypeList<css1, css2, ...>`  -> `TypeList<css1, css2, ..., symbol>`.
+  template <typename TList>
+  using PlusSymbol = AppendToTypeList<TList, Symbol>;
 
-  template <typename TypeList>
-  using PlusSymbol = typename PlusSymbolLazy<TypeList>::type;
-
-  /// @brief Transform `brigand::list<css1, css2, ..., symbol>`  -> `brigand::list<css1, css2, ...>`.
-  template <typename TypeList>
-  struct MinusSymbolLazy
-  {
-    using type = brigand::remove_if<TypeList, IsSymbol<brigand::_1>>;
-  };
-
-  template <typename TypeList>
-  using MinusSymbol = typename MinusSymbolLazy<TypeList>::type;
+  /// @brief Transform `TypeList<css1, css2, ..., symbol>`  -> `TypeList<css1, css2, ...>`.
+  template <typename TList>
+  using MinusSymbol = RemoveTypesIf<TList, IsSymbol>;
 
   // MARK: - Symbol replacement
 
@@ -71,7 +56,7 @@ namespace krys::boo::css
   }
 
   template <typename... Ts>
-  using TypesMinusSymbol = brigand::wrap<MinusSymbol<brigand::list<Ts...>>, VariantOrSingle>;
+  using TypesMinusSymbol = ApplyTypeList<MinusSymbol<TypeList<Ts...>>, VariantOrSingle>;
 
   template <typename... Ts>
   KRYS_NODISCARD constexpr TypesMinusSymbol<Ts...> ReplaceSymbol(const Variant<Ts...> &component,

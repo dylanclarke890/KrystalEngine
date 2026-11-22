@@ -67,7 +67,6 @@
 #include "Krystal.Booey/Graphics/Color/Color.hpp"
 #include "Krystal.Booey/Graphics/Color/ColorInterpolationMethod.hpp"
 #include "Krystal.Booey/Graphics/GraphicsTypes.hpp"
-#include <brigand/algorithms/wrap.hpp>
 #include <string>
 
 namespace krys::boo::css::parse_property
@@ -125,8 +124,8 @@ namespace krys::boo::css::parse_property
     KRYS_NODISCARD Maybe<AbsoluteColorComponent<Descriptor, Index>>
       ConsumeAbsoluteComponent(TokenRange &tokens, ColorParserState &state) noexcept
     {
-      using TypeList = GetCSSColorParseTypeWithCalcComponentTypeList<Descriptor, Index>;
-      using Consumer = brigand::wrap<TypeList, MetaConsumerWrapper>;
+      using ComponentTypes = GetCSSColorParseTypeWithCalcComponentTypeList<Descriptor, Index>;
+      using Consumer = ApplyTypeList<ComponentTypes, MetaConsumerWrapper>;
 
       return Consumer::Consume(tokens, state.PropertyParserState);
     }
@@ -138,8 +137,8 @@ namespace krys::boo::css::parse_property
     {
       // Append `Symbol` to the TypeList to allow unadorned symbols from the symbol
       // table to be consumed.
-      using TypeList = GetCSSColorParseTypeWithCalcAndSymbolsComponentTypeList<Descriptor, Index>;
-      using Consumer = brigand::wrap<TypeList, MetaConsumerWrapper>;
+      using ComponentTypes = GetCSSColorParseTypeWithCalcAndSymbolsComponentTypeList<Descriptor, Index>;
+      using Consumer = ApplyTypeList<ComponentTypes, MetaConsumerWrapper>;
 
       return Consumer::Consume(tokens, state.PropertyParserState, krys::move(symbolsAllowed));
     }

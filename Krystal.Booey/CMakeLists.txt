@@ -29,10 +29,6 @@ target_compile_options(Krystal.Booey
     $<$<CXX_COMPILER_ID:MSVC>:/W4 /MP /utf-8 /bigobj>
 )
 
-# Third-party - brigand (public: the CSS value headers use it)
-find_path(BRIGAND_INCLUDE_DIRS "brigand/adapted.hpp")
-target_include_directories(Krystal.Booey PUBLIC ${BRIGAND_INCLUDE_DIRS})
-
 # Locales: date and number formatting, preferred languages
 target_link_libraries(Krystal.Booey PUBLIC Krystal.I18n)
 

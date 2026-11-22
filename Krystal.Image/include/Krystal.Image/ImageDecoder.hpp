@@ -31,6 +31,7 @@
 #include "Krystal.Core/Attributes.hpp"
 #include "Krystal.Core/Containers/List.hpp"
 #include "Krystal.Core/Geometry/Point.hpp"
+#include "Krystal.Core/Geometry/Rect.hpp"
 #include "Krystal.Core/Geometry/Size.hpp"
 #include "Krystal.Core/Macros.hpp"
 #include "Krystal.Core/Memory/RefCounted.hpp"
@@ -262,11 +263,36 @@ namespace krys::img
     }
 
   protected:
+    /// @brief Where an animation frame is drawn, and what's done with it once it's shown.
+    struct FrameLayout
+    {
+      RectI Rect;
+      ImageDecoderFrame::DisposalMethod Disposal {ImageDecoderFrame::DisposalMethod::Unspecified};
+    };
+
     ImageDecoder(AlphaOption alphaOption, GammaAndColorProfileOption gammaAndColorProfileOption) noexcept
         : _premultiplyAlpha(alphaOption == AlphaOption::Premultiplied),
           _ignoreGammaAndColorProfile(gammaAndColorProfileOption == GammaAndColorProfileOption::Ignored)
     {
     }
+
+    /// @brief The layout of frame @p index, known before it's decoded, for the animation helpers below.
+    KRYS_NODISCARD virtual FrameLayout LayoutOfFrame(size_t) const noexcept
+    {
+      return {RectI {PointI {}, Size()}};
+    }
+
+    /// @brief The first frame to decode to be able to decode frame @p index: each frame is drawn over the
+    /// frames before it, unless an earlier one is complete or clears the whole image.
+    KRYS_NODISCARD size_t FirstFrameToDecode(size_t index) const noexcept;
+
+    /// @brief Sets frame @p index up to be drawn into: its starting pixels are the previous frame's, disposed
+    /// of as that frame asks, and its alpha is theirs. Fails the decoder if that can't be done.
+    bool InitializeAnimationFrame(size_t index) noexcept;
+
+    /// @brief Clears frames before @p clearBeforeFrame, keeping the last frame and the frame the next frame
+    /// to decode starts from.
+    void ClearAnimationFrames(size_t clearBeforeFrame) noexcept;
 
   private:
     virtual void TryDecodeSize(bool allDataReceived) noexcept = 0;

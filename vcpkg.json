@@ -5,7 +5,6 @@
     "rapidjson",
     "rapidxml",
     "spdlog",
-    "brigand",
     "harfbuzz",
     "icu",
     "lcms",
