@@ -48,7 +48,7 @@ namespace krys::boo
   class SVGTextBoxPainter
   {
   private:
-    const inline_iterator::BoxModernPath _textBox;
+    const inline_iterator::InlineContentBoxPath _textBox;
     const RenderSVGInlineText &_renderer;
     PaintInfo &_paintInfo;
     const TextBoxSelectableRange _selectableRange;

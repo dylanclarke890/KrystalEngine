@@ -1744,7 +1744,7 @@ namespace krys::boo::layout_integration
       return {};
     }
 
-    return inline_iterator::LineBoxIterator {inline_iterator::LineBoxIteratorModernPath {*_inlineContent, 0}};
+    return inline_iterator::LineBoxIterator {inline_iterator::InlineContentLineBoxPath {*_inlineContent, 0}};
   }
 
   inline_iterator::LineBoxIterator LineLayout::LastLineBox() const noexcept
@@ -1756,7 +1756,7 @@ namespace krys::boo::layout_integration
 
     auto &lines = _inlineContent->DisplayContent().LineList;
     return inline_iterator::LineBoxIterator {
-      inline_iterator::LineBoxIteratorModernPath {*_inlineContent, lines.empty() ? 0 : lines.size() - 1}};
+      inline_iterator::InlineContentLineBoxPath {*_inlineContent, lines.empty() ? 0 : lines.size() - 1}};
   }
 
   LayoutRect LineLayout::FirstInlineBoxRect(const RenderInline &renderInline) const noexcept

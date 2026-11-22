@@ -59,7 +59,7 @@ namespace krys::boo::layout_integration
     }
 
     auto lineBox =
-      inline_iterator::LineBox {inline_iterator::LineBoxIteratorModernPath {_inlineContent, lineIndex}};
+      inline_iterator::LineBox {inline_iterator::InlineContentLineBoxPath {_inlineContent, lineIndex}};
     if (!lineBox.HasEllipsis())
     {
       return;

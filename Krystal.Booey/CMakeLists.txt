@@ -2346,8 +2346,8 @@ set(KRYSTAL_BOOEY_LAYOUT_HEADERS
   include/Krystal.Booey/Layout/Integration/Flex/LayoutIntegrationFlexLayout.hpp
   include/Krystal.Booey/Layout/Integration/Grid/LayoutIntegrationGridLayout.hpp
   include/Krystal.Booey/Layout/Integration/Inline/InlineIteratorBox.hpp
-  include/Krystal.Booey/Layout/Integration/Inline/InlineIteratorBoxModernPath.hpp
   include/Krystal.Booey/Layout/Integration/Inline/InlineIteratorInlineBox.hpp
+  include/Krystal.Booey/Layout/Integration/Inline/InlineIteratorInlineContentBoxPath.hpp
   include/Krystal.Booey/Layout/Integration/Inline/InlineIteratorLineBox.hpp
   include/Krystal.Booey/Layout/Integration/Inline/InlineIteratorLogicalOrderTraversal.hpp
   include/Krystal.Booey/Layout/Integration/Inline/InlineIteratorSVGTextBox.hpp

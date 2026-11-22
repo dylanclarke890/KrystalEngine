@@ -34,25 +34,25 @@
 
 namespace krys::boo::inline_iterator
 {
-  float LineBoxIteratorModernPath::ContentLogicalTopAdjustedForPrecedingLineBox() const noexcept
+  float InlineContentLineBoxPath::ContentLogicalTopAdjustedForPrecedingLineBox() const noexcept
   {
     if (FormattingContextRoot().GetWritingMode().IsLineInverted() || !_lineIndex)
     {
       return ContentLogicalTop();
     }
-    return LineBoxIteratorModernPath {*_inlineContent, _lineIndex - 1}.ContentLogicalBottom();
+    return InlineContentLineBoxPath {*_inlineContent, _lineIndex - 1}.ContentLogicalBottom();
   }
 
-  float LineBoxIteratorModernPath::ContentLogicalBottomAdjustedForFollowingLineBox() const noexcept
+  float InlineContentLineBoxPath::ContentLogicalBottomAdjustedForFollowingLineBox() const noexcept
   {
     if (!FormattingContextRoot().GetWritingMode().IsLineInverted() || _lineIndex == Lines().size() - 1)
     {
       return ContentLogicalBottom();
     }
-    return LineBoxIteratorModernPath {*_inlineContent, _lineIndex + 1}.ContentLogicalTop();
+    return InlineContentLineBoxPath {*_inlineContent, _lineIndex + 1}.ContentLogicalTop();
   }
 
-  float LineBoxIteratorModernPath::ContentLogicalLeft() const noexcept
+  float InlineContentLineBoxPath::ContentLogicalLeft() const noexcept
   {
     auto writingMode = FormattingContextRoot().GetWritingMode();
     if (writingMode.IsLogicalLeftLineLeft())
@@ -64,13 +64,13 @@ namespace krys::boo::inline_iterator
            - (GetLine().ContentLogicalLeftIgnoringInlineDirection() + GetLine().ContentLogicalWidth());
   }
 
-  BoxModernPath LineBoxIteratorModernPath::FirstLeafBox() const noexcept
+  InlineContentBoxPath InlineContentLineBoxPath::FirstLeafBox() const noexcept
   {
     if (!GetLine().BoxCount())
     {
-      return BoxModernPath {*_inlineContent};
+      return InlineContentBoxPath {*_inlineContent};
     }
-    auto runIterator = BoxModernPath {*_inlineContent, GetLine().FirstBoxIndex()};
+    auto runIterator = InlineContentBoxPath {*_inlineContent, GetLine().FirstBoxIndex()};
     if (runIterator.GetBox().IsInlineBox())
     {
       runIterator.TraverseNextLeafOnLine();
@@ -78,14 +78,14 @@ namespace krys::boo::inline_iterator
     return runIterator;
   }
 
-  BoxModernPath LineBoxIteratorModernPath::LastLeafBox() const noexcept
+  InlineContentBoxPath InlineContentLineBoxPath::LastLeafBox() const noexcept
   {
     auto boxCount = GetLine().BoxCount();
     if (!boxCount)
     {
-      return BoxModernPath {*_inlineContent};
+      return InlineContentBoxPath {*_inlineContent};
     }
-    auto runIterator = BoxModernPath {*_inlineContent, GetLine().FirstBoxIndex() + boxCount - 1};
+    auto runIterator = InlineContentBoxPath {*_inlineContent, GetLine().FirstBoxIndex() + boxCount - 1};
     if (runIterator.GetBox().IsInlineBox())
     {
       runIterator.TraversePreviousLeafOnLine();
@@ -232,7 +232,7 @@ namespace krys::boo::inline_iterator
   LineBoxIterator LineBoxFor(const layout_integration::InlineContent &inlineContent,
                              size_t lineIndex) noexcept
   {
-    return LineBoxIterator {LineBoxIteratorModernPath {inlineContent, lineIndex}};
+    return LineBoxIterator {InlineContentLineBoxPath {inlineContent, lineIndex}};
   }
 
   float PreviousLineBoxContentBottomOrBorderAndPadding(const LineBox &lineBox) noexcept

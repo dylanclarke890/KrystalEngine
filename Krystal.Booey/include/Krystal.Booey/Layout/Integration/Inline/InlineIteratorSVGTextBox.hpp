@@ -45,7 +45,7 @@ namespace krys::boo::inline_iterator
   public:
     using Key = std::pair<const RenderSVGInlineText *, uint32>;
 
-    explicit SVGTextBox(BoxModernPath path) noexcept;
+    explicit SVGTextBox(InlineContentBoxPath path) noexcept;
 
     KRYS_NODISCARD RectF CalculateBoundariesIncludingSVGTransform() const noexcept;
 
@@ -74,7 +74,7 @@ namespace krys::boo::inline_iterator
   public:
     SVGTextBoxIterator() noexcept = default;
 
-    explicit SVGTextBoxIterator(BoxModernPath path) noexcept;
+    explicit SVGTextBoxIterator(InlineContentBoxPath path) noexcept;
 
     explicit SVGTextBoxIterator(const Box &box) noexcept;
 

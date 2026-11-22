@@ -77,7 +77,7 @@ namespace krys::boo::inline_iterator
   TextBoxIterator TextBoxFor(const layout_integration::InlineContent &content, size_t boxIndex) noexcept
   {
     krys_debug_assert(content.DisplayContent().BoxList[boxIndex].IsTextOrSoftLineBreak());
-    return TextBoxIterator {BoxModernPath {content, boxIndex}};
+    return TextBoxIterator {InlineContentBoxPath {content, boxIndex}};
   }
 
   BoxRange<TextBoxIterator> TextBoxesFor(const RenderText &text) noexcept

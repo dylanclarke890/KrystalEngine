@@ -141,6 +141,6 @@ namespace krys::boo::inline_iterator
   InlineBoxIterator InlineBoxFor(const layout_integration::InlineContent &content, size_t boxIndex) noexcept
   {
     krys_debug_assert(content.DisplayContent().BoxList[boxIndex].IsInlineBox());
-    return InlineBoxIterator {BoxModernPath {content, boxIndex}};
+    return InlineBoxIterator {InlineContentBoxPath {content, boxIndex}};
   }
 }

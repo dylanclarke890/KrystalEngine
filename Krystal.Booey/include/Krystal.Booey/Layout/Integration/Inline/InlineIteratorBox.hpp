@@ -25,7 +25,7 @@
 
 #pragma once
 
-#include "Krystal.Booey/Layout/Integration/Inline/InlineIteratorBoxModernPath.hpp"
+#include "Krystal.Booey/Layout/Integration/Inline/InlineIteratorInlineContentBoxPath.hpp"
 #include "Krystal.Booey/Rendering/Selection/RenderObjectHighlightState.hpp"
 #include "Krystal.Core/Attributes.hpp"
 #include "Krystal.Core/Move.hpp"
@@ -59,10 +59,10 @@ namespace krys::boo::inline_iterator
   public:
 
   protected:
-    BoxModernPath _path;
+    InlineContentBoxPath _path;
 
   public:
-    explicit Box(BoxModernPath path) noexcept : _path(krys::move(path))
+    explicit Box(InlineContentBoxPath path) noexcept : _path(krys::move(path))
     {
     }
 
@@ -219,7 +219,7 @@ namespace krys::boo::inline_iterator
 
     KRYS_NODISCARD const inline_display::Box *GetInlineBox() const noexcept
     {
-      return &ModernPath().GetBox();
+      return &ContentPath().GetBox();
     }
 
     // Text-relative left/right
@@ -249,7 +249,7 @@ namespace krys::boo::inline_iterator
       return _path.LineIndex();
     }
 
-    KRYS_NODISCARD const BoxModernPath &ModernPath() const noexcept
+    KRYS_NODISCARD const InlineContentBoxPath &ContentPath() const noexcept
     {
       return _path;
     }
@@ -273,11 +273,11 @@ namespace krys::boo::inline_iterator
 
   public:
     /// @brief An iterator at the end.
-    BoxIterator() noexcept : _box(BoxModernPath {})
+    BoxIterator() noexcept : _box(InlineContentBoxPath {})
     {
     }
 
-    explicit BoxIterator(BoxModernPath path) noexcept : _box(krys::move(path))
+    explicit BoxIterator(InlineContentBoxPath path) noexcept : _box(krys::move(path))
     {
     }
 
@@ -328,7 +328,7 @@ namespace krys::boo::inline_iterator
   public:
     LeafBoxIterator() noexcept = default;
 
-    explicit LeafBoxIterator(BoxModernPath path) noexcept : BoxIterator(krys::move(path))
+    explicit LeafBoxIterator(InlineContentBoxPath path) noexcept : BoxIterator(krys::move(path))
     {
     }
 

@@ -31,7 +31,7 @@
 
 namespace krys::boo::inline_iterator
 {
-  SVGTextBox::SVGTextBox(BoxModernPath path) noexcept : TextBox(krys::move(path))
+  SVGTextBox::SVGTextBox(InlineContentBoxPath path) noexcept : TextBox(krys::move(path))
   {
   }
 
@@ -102,7 +102,8 @@ namespace krys::boo::inline_iterator
     return _path.SvgTextFragments();
   }
 
-  SVGTextBoxIterator::SVGTextBoxIterator(BoxModernPath path) noexcept : TextBoxIterator(krys::move(path))
+  SVGTextBoxIterator::SVGTextBoxIterator(InlineContentBoxPath path) noexcept
+      : TextBoxIterator(krys::move(path))
   {
   }
 
@@ -138,7 +139,7 @@ namespace krys::boo::inline_iterator
     {
       return {};
     }
-    return SVGTextBoxIterator {BoxModernPath {inlineContent, boxIndex}};
+    return SVGTextBoxIterator {InlineContentBoxPath {inlineContent, boxIndex}};
   }
 
   SVGTextBox::Key MakeKey(const SVGTextBox &textBox) noexcept

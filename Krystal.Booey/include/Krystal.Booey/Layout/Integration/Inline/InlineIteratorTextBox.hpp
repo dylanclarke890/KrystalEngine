@@ -41,7 +41,7 @@ namespace krys::boo::inline_iterator
   class TextBox : public Box
   {
   public:
-    explicit TextBox(BoxModernPath path) noexcept : Box(krys::move(path))
+    explicit TextBox(InlineContentBoxPath path) noexcept : Box(krys::move(path))
     {
     }
 
@@ -95,7 +95,7 @@ namespace krys::boo::inline_iterator
   public:
     TextBoxIterator() noexcept = default;
 
-    explicit TextBoxIterator(BoxModernPath path) noexcept : LeafBoxIterator(krys::move(path))
+    explicit TextBoxIterator(InlineContentBoxPath path) noexcept : LeafBoxIterator(krys::move(path))
     {
     }
 

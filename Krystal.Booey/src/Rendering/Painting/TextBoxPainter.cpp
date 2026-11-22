@@ -120,7 +120,7 @@ namespace krys::boo
     };
   }
 
-  static void BuildTextForShaping(ShapedContent &shapedContent, inline_iterator::BoxModernPath textBox,
+  static void BuildTextForShaping(ShapedContent &shapedContent, inline_iterator::InlineContentBoxPath textBox,
                                   bool needsTextBoxVisualLeft = false) noexcept
   {
     krys_debug_assert(textBox.Direction() == text::TextDirection::RTL);
@@ -220,7 +220,7 @@ namespace krys::boo
   TextBoxPainter::TextBoxPainter(const layout_integration::InlineContent &inlineContent,
                                  const inline_display::Box &box, const RenderStyle &style,
                                  PaintInfo &paintInfo, const LayoutPoint &paintOffset) noexcept
-      : _textBox(inline_iterator::BoxModernPath {inlineContent, inlineContent.IndexForBox(box)}),
+      : _textBox(inline_iterator::InlineContentBoxPath {inlineContent, inlineContent.IndexForBox(box)}),
         _renderer(Downcast<RenderText>(_textBox.Renderer())), _document(_renderer.GetDocument()),
         _style(style),
         _logicalRect(_textBox.IsHorizontal() ? _textBox.VisualRectIgnoringBlockDirection()

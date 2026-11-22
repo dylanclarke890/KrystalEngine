@@ -59,7 +59,7 @@ namespace krys::boo
 
   inline_iterator::SVGTextBoxIterator SVGTextBoxPainter::TextBoxIterator() const noexcept
   {
-    return inline_iterator::SVGTextBoxIterator {inline_iterator::BoxModernPath {_textBox}};
+    return inline_iterator::SVGTextBoxIterator {inline_iterator::InlineContentBoxPath {_textBox}};
   }
 
   const RenderBoxModelObject &SVGTextBoxPainter::ParentRenderer() const noexcept

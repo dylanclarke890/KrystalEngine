@@ -1358,8 +1358,8 @@ namespace krys::boo
         {
           continue;
         }
-        const auto &modernPath = box->ModernPath();
-        TextBoxPainter {modernPath.GetInlineContent(), modernPath.GetBox(), modernPath.GetBox().Style(),
+        const auto &contentPath = box->ContentPath();
+        TextBoxPainter {contentPath.GetInlineContent(), contentPath.GetBox(), contentPath.GetBox().Style(),
                         maskInfo, paintOffset}
           .Paint();
       }

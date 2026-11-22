@@ -37,12 +37,12 @@
 
 namespace krys::boo::inline_iterator
 {
-  const RenderText &BoxModernPath::GetRenderText() const noexcept
+  const RenderText &InlineContentBoxPath::GetRenderText() const noexcept
   {
     return Downcast<RenderText>(Renderer());
   }
 
-  TextRun BoxModernPath::GetTextRun(TextRunMode mode) const noexcept
+  TextRun InlineContentBoxPath::GetTextRun(TextRunMode mode) const noexcept
   {
     auto &style = GetBox().Style();
     auto expansion = GetBox().GetExpansion();
@@ -69,7 +69,7 @@ namespace krys::boo::inline_iterator
     return textRun;
   }
 
-  TextBoxSelectableRange BoxModernPath::SelectableRange() const noexcept
+  TextBoxSelectableRange InlineContentBoxPath::SelectableRange() const noexcept
   {
     auto &box = GetBox();
     auto &textContent = box.GetText();
@@ -192,8 +192,8 @@ namespace krys::boo::inline_iterator
 
   LineBoxIterator Box::GetLineBox() const noexcept
   {
-    const auto &path = ModernPath();
-    return LineBoxIterator {LineBoxIteratorModernPath {path.GetInlineContent(), path.GetBox().LineIndex()}};
+    const auto &path = ContentPath();
+    return LineBoxIterator {InlineContentLineBoxPath {path.GetInlineContent(), path.GetBox().LineIndex()}};
   }
 
   RectF Box::VisualRect() const noexcept
@@ -277,6 +277,6 @@ namespace krys::boo::inline_iterator
 
   LeafBoxIterator BoxFor(const layout_integration::InlineContent &content, size_t boxIndex) noexcept
   {
-    return LeafBoxIterator {BoxModernPath {content, boxIndex}};
+    return LeafBoxIterator {InlineContentBoxPath {content, boxIndex}};
   }
 }

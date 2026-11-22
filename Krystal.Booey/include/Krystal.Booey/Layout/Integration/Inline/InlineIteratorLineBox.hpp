@@ -35,7 +35,7 @@ namespace krys::boo::inline_iterator
   class LineBoxIterator;
 
   /// @brief A position in a block container's display lines.
-  class LineBoxIteratorModernPath
+  class InlineContentLineBoxPath
   {
   private:
     WeakPtr<const layout_integration::InlineContent> _inlineContent;
@@ -43,10 +43,10 @@ namespace krys::boo::inline_iterator
 
   public:
     /// @brief An iterator at the end, with no content.
-    LineBoxIteratorModernPath() noexcept = default;
+    InlineContentLineBoxPath() noexcept = default;
 
-    LineBoxIteratorModernPath(const layout_integration::InlineContent &inlineContent,
-                              size_t lineIndex) noexcept
+    InlineContentLineBoxPath(const layout_integration::InlineContent &inlineContent,
+                             size_t lineIndex) noexcept
         : _inlineContent(CreateWeakPtr(&inlineContent)), _lineIndex(lineIndex)
     {
       krys_debug_assert(lineIndex <= Lines().size());
@@ -170,8 +170,8 @@ namespace krys::boo::inline_iterator
       --_lineIndex;
     }
 
-    KRYS_NODISCARD friend bool operator==(const LineBoxIteratorModernPath &a,
-                                          const LineBoxIteratorModernPath &b) noexcept
+    KRYS_NODISCARD friend bool operator==(const InlineContentLineBoxPath &a,
+                                          const InlineContentLineBoxPath &b) noexcept
     {
       return a._inlineContent.get() == b._inlineContent.get() && a._lineIndex == b._lineIndex;
     }
@@ -181,9 +181,9 @@ namespace krys::boo::inline_iterator
       return !_inlineContent || _lineIndex == Lines().size();
     }
 
-    KRYS_NODISCARD BoxModernPath FirstLeafBox() const noexcept;
+    KRYS_NODISCARD InlineContentBoxPath FirstLeafBox() const noexcept;
 
-    KRYS_NODISCARD BoxModernPath LastLeafBox() const noexcept;
+    KRYS_NODISCARD InlineContentBoxPath LastLeafBox() const noexcept;
 
   private:
     void SetAtEnd() noexcept
@@ -210,10 +210,10 @@ namespace krys::boo::inline_iterator
   public:
 
   private:
-    LineBoxIteratorModernPath _path;
+    InlineContentLineBoxPath _path;
 
   public:
-    explicit LineBox(LineBoxIteratorModernPath path) noexcept : _path(krys::move(path))
+    explicit LineBox(InlineContentLineBoxPath path) noexcept : _path(krys::move(path))
     {
     }
 
@@ -384,11 +384,11 @@ namespace krys::boo::inline_iterator
 
   public:
     /// @brief An iterator at the end.
-    LineBoxIterator() noexcept : _lineBox(LineBoxIteratorModernPath {})
+    LineBoxIterator() noexcept : _lineBox(InlineContentLineBoxPath {})
     {
     }
 
-    explicit LineBoxIterator(LineBoxIteratorModernPath path) noexcept : _lineBox(krys::move(path))
+    explicit LineBoxIterator(InlineContentLineBoxPath path) noexcept : _lineBox(krys::move(path))
     {
     }
 
