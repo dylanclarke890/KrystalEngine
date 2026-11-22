@@ -237,46 +237,185 @@ namespace krys::detail
 
 namespace krys
 {
-#pragma region Helper Macros
-
-#define TO_EULER_ANGLE_FUNC(Convention, MatType)                                                             \
-  template <Number T>                                                                                        \
-  KRYS_NODISCARD constexpr Vector3<T> ToEuler##Convention(const MatType<T> &m) noexcept                      \
-  {                                                                                                          \
-    return detail::ExtractEuler##Convention<MatType<T>, T>(m);                                               \
+  /// @brief The XYX Euler angles of the rotation in @p m's upper-left 3x3.
+  template <Number T, int C, int R>
+  requires(C >= 3 && R >= 3)
+  KRYS_NODISCARD constexpr Vector3<T> ToEulerXYX(const Matrix<T, C, R> &m) noexcept
+  {
+    return detail::ExtractEulerXYX<Matrix<T, C, R>, T>(m);
   }
 
-#define QUATERNION_TO_EULER_ANGLE_FUNC(Convention)                                                           \
-  template <Number T>                                                                                        \
-  KRYS_NODISCARD constexpr Vector3<T> ToEuler##Convention(const Quaternion<T> &q) noexcept                   \
-  {                                                                                                          \
-    return ToEuler##Convention(q.ToMat3x3());                                                                \
+  /// @brief The XYX Euler angles of the rotation @p q.
+  template <Number T>
+  KRYS_NODISCARD constexpr Vector3<T> ToEulerXYX(const Quaternion<T> &q) noexcept
+  {
+    return ToEulerXYX(q.ToMat3x3());
   }
 
-#define TO_EULER_ANGLE_FUNCS(Convention)                                                                     \
-  TO_EULER_ANGLE_FUNC(Convention, Matrix3x3)                                                                 \
-  TO_EULER_ANGLE_FUNC(Convention, Matrix3x4)                                                                 \
-  TO_EULER_ANGLE_FUNC(Convention, Matrix4x4)                                                                 \
-  QUATERNION_TO_EULER_ANGLE_FUNC(Convention)
+  /// @brief The XZX Euler angles of the rotation in @p m's upper-left 3x3.
+  template <Number T, int C, int R>
+  requires(C >= 3 && R >= 3)
+  KRYS_NODISCARD constexpr Vector3<T> ToEulerXZX(const Matrix<T, C, R> &m) noexcept
+  {
+    return detail::ExtractEulerXZX<Matrix<T, C, R>, T>(m);
+  }
 
-#pragma endregion
+  /// @brief The XZX Euler angles of the rotation @p q.
+  template <Number T>
+  KRYS_NODISCARD constexpr Vector3<T> ToEulerXZX(const Quaternion<T> &q) noexcept
+  {
+    return ToEulerXZX(q.ToMat3x3());
+  }
 
-  TO_EULER_ANGLE_FUNCS(XYX)
-  TO_EULER_ANGLE_FUNCS(XZX)
-  TO_EULER_ANGLE_FUNCS(XYZ)
-  TO_EULER_ANGLE_FUNCS(YXY)
-  TO_EULER_ANGLE_FUNCS(YZY)
-  TO_EULER_ANGLE_FUNCS(ZXZ)
-  TO_EULER_ANGLE_FUNCS(ZYZ)
-  TO_EULER_ANGLE_FUNCS(XZY)
-  TO_EULER_ANGLE_FUNCS(YXZ)
-  TO_EULER_ANGLE_FUNCS(YZX)
-  TO_EULER_ANGLE_FUNCS(ZXY)
-  TO_EULER_ANGLE_FUNCS(ZYX)
+  /// @brief The XYZ Euler angles of the rotation in @p m's upper-left 3x3.
+  template <Number T, int C, int R>
+  requires(C >= 3 && R >= 3)
+  KRYS_NODISCARD constexpr Vector3<T> ToEulerXYZ(const Matrix<T, C, R> &m) noexcept
+  {
+    return detail::ExtractEulerXYZ<Matrix<T, C, R>, T>(m);
+  }
 
-#undef QUATERNION_TO_EULER_ANGLE_FUNC
-#undef TO_EULER_ANGLE_FUNC
-#undef TO_EULER_ANGLE_FUNCS
+  /// @brief The XYZ Euler angles of the rotation @p q.
+  template <Number T>
+  KRYS_NODISCARD constexpr Vector3<T> ToEulerXYZ(const Quaternion<T> &q) noexcept
+  {
+    return ToEulerXYZ(q.ToMat3x3());
+  }
+
+  /// @brief The YXY Euler angles of the rotation in @p m's upper-left 3x3.
+  template <Number T, int C, int R>
+  requires(C >= 3 && R >= 3)
+  KRYS_NODISCARD constexpr Vector3<T> ToEulerYXY(const Matrix<T, C, R> &m) noexcept
+  {
+    return detail::ExtractEulerYXY<Matrix<T, C, R>, T>(m);
+  }
+
+  /// @brief The YXY Euler angles of the rotation @p q.
+  template <Number T>
+  KRYS_NODISCARD constexpr Vector3<T> ToEulerYXY(const Quaternion<T> &q) noexcept
+  {
+    return ToEulerYXY(q.ToMat3x3());
+  }
+
+  /// @brief The YZY Euler angles of the rotation in @p m's upper-left 3x3.
+  template <Number T, int C, int R>
+  requires(C >= 3 && R >= 3)
+  KRYS_NODISCARD constexpr Vector3<T> ToEulerYZY(const Matrix<T, C, R> &m) noexcept
+  {
+    return detail::ExtractEulerYZY<Matrix<T, C, R>, T>(m);
+  }
+
+  /// @brief The YZY Euler angles of the rotation @p q.
+  template <Number T>
+  KRYS_NODISCARD constexpr Vector3<T> ToEulerYZY(const Quaternion<T> &q) noexcept
+  {
+    return ToEulerYZY(q.ToMat3x3());
+  }
+
+  /// @brief The ZXZ Euler angles of the rotation in @p m's upper-left 3x3.
+  template <Number T, int C, int R>
+  requires(C >= 3 && R >= 3)
+  KRYS_NODISCARD constexpr Vector3<T> ToEulerZXZ(const Matrix<T, C, R> &m) noexcept
+  {
+    return detail::ExtractEulerZXZ<Matrix<T, C, R>, T>(m);
+  }
+
+  /// @brief The ZXZ Euler angles of the rotation @p q.
+  template <Number T>
+  KRYS_NODISCARD constexpr Vector3<T> ToEulerZXZ(const Quaternion<T> &q) noexcept
+  {
+    return ToEulerZXZ(q.ToMat3x3());
+  }
+
+  /// @brief The ZYZ Euler angles of the rotation in @p m's upper-left 3x3.
+  template <Number T, int C, int R>
+  requires(C >= 3 && R >= 3)
+  KRYS_NODISCARD constexpr Vector3<T> ToEulerZYZ(const Matrix<T, C, R> &m) noexcept
+  {
+    return detail::ExtractEulerZYZ<Matrix<T, C, R>, T>(m);
+  }
+
+  /// @brief The ZYZ Euler angles of the rotation @p q.
+  template <Number T>
+  KRYS_NODISCARD constexpr Vector3<T> ToEulerZYZ(const Quaternion<T> &q) noexcept
+  {
+    return ToEulerZYZ(q.ToMat3x3());
+  }
+
+  /// @brief The XZY Euler angles of the rotation in @p m's upper-left 3x3.
+  template <Number T, int C, int R>
+  requires(C >= 3 && R >= 3)
+  KRYS_NODISCARD constexpr Vector3<T> ToEulerXZY(const Matrix<T, C, R> &m) noexcept
+  {
+    return detail::ExtractEulerXZY<Matrix<T, C, R>, T>(m);
+  }
+
+  /// @brief The XZY Euler angles of the rotation @p q.
+  template <Number T>
+  KRYS_NODISCARD constexpr Vector3<T> ToEulerXZY(const Quaternion<T> &q) noexcept
+  {
+    return ToEulerXZY(q.ToMat3x3());
+  }
+
+  /// @brief The YXZ Euler angles of the rotation in @p m's upper-left 3x3.
+  template <Number T, int C, int R>
+  requires(C >= 3 && R >= 3)
+  KRYS_NODISCARD constexpr Vector3<T> ToEulerYXZ(const Matrix<T, C, R> &m) noexcept
+  {
+    return detail::ExtractEulerYXZ<Matrix<T, C, R>, T>(m);
+  }
+
+  /// @brief The YXZ Euler angles of the rotation @p q.
+  template <Number T>
+  KRYS_NODISCARD constexpr Vector3<T> ToEulerYXZ(const Quaternion<T> &q) noexcept
+  {
+    return ToEulerYXZ(q.ToMat3x3());
+  }
+
+  /// @brief The YZX Euler angles of the rotation in @p m's upper-left 3x3.
+  template <Number T, int C, int R>
+  requires(C >= 3 && R >= 3)
+  KRYS_NODISCARD constexpr Vector3<T> ToEulerYZX(const Matrix<T, C, R> &m) noexcept
+  {
+    return detail::ExtractEulerYZX<Matrix<T, C, R>, T>(m);
+  }
+
+  /// @brief The YZX Euler angles of the rotation @p q.
+  template <Number T>
+  KRYS_NODISCARD constexpr Vector3<T> ToEulerYZX(const Quaternion<T> &q) noexcept
+  {
+    return ToEulerYZX(q.ToMat3x3());
+  }
+
+  /// @brief The ZXY Euler angles of the rotation in @p m's upper-left 3x3.
+  template <Number T, int C, int R>
+  requires(C >= 3 && R >= 3)
+  KRYS_NODISCARD constexpr Vector3<T> ToEulerZXY(const Matrix<T, C, R> &m) noexcept
+  {
+    return detail::ExtractEulerZXY<Matrix<T, C, R>, T>(m);
+  }
+
+  /// @brief The ZXY Euler angles of the rotation @p q.
+  template <Number T>
+  KRYS_NODISCARD constexpr Vector3<T> ToEulerZXY(const Quaternion<T> &q) noexcept
+  {
+    return ToEulerZXY(q.ToMat3x3());
+  }
+
+  /// @brief The ZYX Euler angles of the rotation in @p m's upper-left 3x3.
+  template <Number T, int C, int R>
+  requires(C >= 3 && R >= 3)
+  KRYS_NODISCARD constexpr Vector3<T> ToEulerZYX(const Matrix<T, C, R> &m) noexcept
+  {
+    return detail::ExtractEulerZYX<Matrix<T, C, R>, T>(m);
+  }
+
+  /// @brief The ZYX Euler angles of the rotation @p q.
+  template <Number T>
+  KRYS_NODISCARD constexpr Vector3<T> ToEulerZYX(const Quaternion<T> &q) noexcept
+  {
+    return ToEulerZYX(q.ToMat3x3());
+  }
 
   /// @brief Creates a quaternion from Euler angles using the XYX convention.
   template <Number T>

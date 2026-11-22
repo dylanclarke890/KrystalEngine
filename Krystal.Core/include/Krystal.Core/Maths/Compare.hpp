@@ -2,47 +2,95 @@
 
 #include "Krystal.Core/Attributes.hpp"
 #include "Krystal.Core/Maths/Matrix.hpp"
+#include "Krystal.Core/Maths/Traits.hpp"
 #include "Krystal.Core/Maths/Vector.hpp"
 
 namespace krys
 {
-#pragma region Helper Macros
-
-#define COMPARISON_FUNC(Type, FuncName, OP, TemplateParams)                                                  \
-  template <TemplateParams>                                                                                  \
-  KRYS_NODISCARD constexpr auto FuncName(const Type &a, const Type &b) noexcept                              \
-  {                                                                                                          \
-    return Zip(a, b, [](auto x, auto y) -> bool { return x OP y; });                                         \
-  }                                                                                                          \
-  template <TemplateParams>                                                                                  \
-  KRYS_NODISCARD constexpr bool FuncName(const Type &a, T b) noexcept                                        \
-  {                                                                                                          \
-    return AllOf(a, [&b](auto v) { return v OP b; });                                                        \
+  /// @brief Whether each component of @p a is less than the matching component of @p b.
+  template <VectorOrMatrix TValue>
+  KRYS_NODISCARD constexpr auto LessThan(const TValue &a, const TValue &b) noexcept
+  {
+    return Zip(a, b, [](auto x, auto y) -> bool { return x < y; });
   }
 
-#define MATRIX_COMPARISON_FUNC(FuncName, OP)                                                                 \
-  COMPARISON_FUNC(MATRIX_TYPE, FuncName, OP, MATRIX_TEMPLATE_PARAMS)
+  /// @brief Whether every component of @p a is less than @p b.
+  template <VectorOrMatrix TValue>
+  KRYS_NODISCARD constexpr bool LessThan(const TValue &a, typename Traits<TValue>::ComponentType b) noexcept
+  {
+    return AllOf(a, [&b](auto v) { return v < b; });
+  }
 
-#define VECTOR_COMPARISON_FUNC(FuncName, OP)                                                                 \
-  COMPARISON_FUNC(VECTOR_TYPE, FuncName, OP, VECTOR_TEMPLATE_PARAMS)
+  /// @brief Whether each component of @p a is at most the matching component of @p b.
+  template <VectorOrMatrix TValue>
+  KRYS_NODISCARD constexpr auto LessThanOrEqual(const TValue &a, const TValue &b) noexcept
+  {
+    return Zip(a, b, [](auto x, auto y) -> bool { return x <= y; });
+  }
 
-#pragma endregion
+  /// @brief Whether every component of @p a is at most @p b.
+  template <VectorOrMatrix TValue>
+  KRYS_NODISCARD constexpr bool LessThanOrEqual(const TValue &a,
+                                                typename Traits<TValue>::ComponentType b) noexcept
+  {
+    return AllOf(a, [&b](auto v) { return v <= b; });
+  }
 
-  VECTOR_COMPARISON_FUNC(LessThan, <);
-  VECTOR_COMPARISON_FUNC(LessThanOrEqual, <=);
-  VECTOR_COMPARISON_FUNC(GreaterThan, >);
-  VECTOR_COMPARISON_FUNC(GreaterThanOrEqual, >=);
-  VECTOR_COMPARISON_FUNC(Equal, ==);
-  VECTOR_COMPARISON_FUNC(NotEqual, !=);
+  /// @brief Whether each component of @p a is greater than the matching component of @p b.
+  template <VectorOrMatrix TValue>
+  KRYS_NODISCARD constexpr auto GreaterThan(const TValue &a, const TValue &b) noexcept
+  {
+    return Zip(a, b, [](auto x, auto y) -> bool { return x > y; });
+  }
 
-  MATRIX_COMPARISON_FUNC(LessThan, <);
-  MATRIX_COMPARISON_FUNC(LessThanOrEqual, <=);
-  MATRIX_COMPARISON_FUNC(GreaterThan, >);
-  MATRIX_COMPARISON_FUNC(GreaterThanOrEqual, >=);
-  MATRIX_COMPARISON_FUNC(Equal, ==);
-  MATRIX_COMPARISON_FUNC(NotEqual, !=);
+  /// @brief Whether every component of @p a is greater than @p b.
+  template <VectorOrMatrix TValue>
+  KRYS_NODISCARD constexpr bool GreaterThan(const TValue &a,
+                                            typename Traits<TValue>::ComponentType b) noexcept
+  {
+    return AllOf(a, [&b](auto v) { return v > b; });
+  }
 
-#undef COMPARISON_FUNC
-#undef MATRIX_COMPARISON_FUNC
-#undef VECTOR_COMPARISON_FUNC
+  /// @brief Whether each component of @p a is at least the matching component of @p b.
+  template <VectorOrMatrix TValue>
+  KRYS_NODISCARD constexpr auto GreaterThanOrEqual(const TValue &a, const TValue &b) noexcept
+  {
+    return Zip(a, b, [](auto x, auto y) -> bool { return x >= y; });
+  }
+
+  /// @brief Whether every component of @p a is at least @p b.
+  template <VectorOrMatrix TValue>
+  KRYS_NODISCARD constexpr bool GreaterThanOrEqual(const TValue &a,
+                                                   typename Traits<TValue>::ComponentType b) noexcept
+  {
+    return AllOf(a, [&b](auto v) { return v >= b; });
+  }
+
+  /// @brief Whether each component of @p a is equal to the matching component of @p b.
+  template <VectorOrMatrix TValue>
+  KRYS_NODISCARD constexpr auto Equal(const TValue &a, const TValue &b) noexcept
+  {
+    return Zip(a, b, [](auto x, auto y) -> bool { return x == y; });
+  }
+
+  /// @brief Whether every component of @p a is equal to @p b.
+  template <VectorOrMatrix TValue>
+  KRYS_NODISCARD constexpr bool Equal(const TValue &a, typename Traits<TValue>::ComponentType b) noexcept
+  {
+    return AllOf(a, [&b](auto v) { return v == b; });
+  }
+
+  /// @brief Whether each component of @p a is not equal to the matching component of @p b.
+  template <VectorOrMatrix TValue>
+  KRYS_NODISCARD constexpr auto NotEqual(const TValue &a, const TValue &b) noexcept
+  {
+    return Zip(a, b, [](auto x, auto y) -> bool { return x != y; });
+  }
+
+  /// @brief Whether every component of @p a is not equal to @p b.
+  template <VectorOrMatrix TValue>
+  KRYS_NODISCARD constexpr bool NotEqual(const TValue &a, typename Traits<TValue>::ComponentType b) noexcept
+  {
+    return AllOf(a, [&b](auto v) { return v != b; });
+  }
 }

@@ -303,14 +303,14 @@ namespace krys
     }
   }
 
-  template <VECTOR_TEMPLATE_PARAMS>
-  KRYS_NODISCARD constexpr auto Abs(const VECTOR_TYPE &v) noexcept
+  template <Number T, int N>
+  KRYS_NODISCARD constexpr auto Abs(const Vector<T, N> &v) noexcept
   {
     return MapEach(v, [](auto x) { return Abs(x); });
   }
 
-  template <MATRIX_TEMPLATE_PARAMS>
-  KRYS_NODISCARD constexpr auto Abs(const MATRIX_TYPE &m) noexcept
+  template <Number T, int C, int R>
+  KRYS_NODISCARD constexpr auto Abs(const Matrix<T, C, R> &m) noexcept
   {
     return MapEach(m, [](auto x) { return Abs(x); });
   }

@@ -1,6 +1,7 @@
 ﻿#include "Krystal.Core/Maths/Vector.hpp"
 #include "catch2/catch_test_macros.hpp"
 #include "catch2/matchers/catch_matchers_floating_point.hpp"
+#include "Krystal.Core/Macros.hpp"
 #include "Krystal.Core/Maths/Maths.hpp"
 #include "Krystal.Core/Move.hpp"
 
@@ -10,14 +11,14 @@ namespace krys::tests
 {
 #pragma region Test Helpers
 
-#define TEST_COPY_AND_MOVE()                                                                                 \
+#define KRYS_TEST_COPY_AND_MOVE()                                                                            \
   constexpr Vec copy(v);                                                                                     \
   REQUIRE(copy == v);                                                                                        \
   Vec moveSource(v);                                                                                         \
   const Vec move(krys::move(moveSource));                                                                    \
   REQUIRE(move == v);
 
-#define TEST_COMMON_OPERATORS()                                                                              \
+#define KRYS_TEST_COMMON_OPERATORS()                                                                         \
   REQUIRE(-v == Vec(-1));                                                                                    \
   REQUIRE(+v == v);                                                                                          \
   REQUIRE(~v == Vec(-2));                                                                                    \
@@ -60,8 +61,8 @@ namespace krys::tests
     REQUIRE(v == Vec(1));
     REQUIRE(v != Vec(2));
 
-    TEST_COPY_AND_MOVE();
-    TEST_COMMON_OPERATORS();
+    KRYS_TEST_COPY_AND_MOVE();
+    KRYS_TEST_COMMON_OPERATORS();
   }
 
   TEST_CASE("Vec2", "[Vector]")
@@ -76,8 +77,8 @@ namespace krys::tests
     REQUIRE(v == Vec(1, 1));
     REQUIRE(v != Vec(2, 1));
 
-    TEST_COPY_AND_MOVE();
-    TEST_COMMON_OPERATORS();
+    KRYS_TEST_COPY_AND_MOVE();
+    KRYS_TEST_COMMON_OPERATORS();
   }
 
   TEST_CASE("Vec3", "[Vector]")
@@ -93,8 +94,8 @@ namespace krys::tests
     REQUIRE(v == Vec(1, 1, 1));
     REQUIRE(v != Vec(2, 1, 1));
 
-    TEST_COPY_AND_MOVE();
-    TEST_COMMON_OPERATORS();
+    KRYS_TEST_COPY_AND_MOVE();
+    KRYS_TEST_COMMON_OPERATORS();
   }
 
   TEST_CASE("Vec4", "[Vector]")
@@ -111,13 +112,13 @@ namespace krys::tests
     REQUIRE(v == Vec(1, 1, 1, 1));
     REQUIRE(v != Vec(2, 1, 1, 1));
 
-    TEST_COPY_AND_MOVE();
-    TEST_COMMON_OPERATORS();
+    KRYS_TEST_COPY_AND_MOVE();
+    KRYS_TEST_COMMON_OPERATORS();
   }
 
   TEST_CASE("ForEach(Vector)", "[Vector][ForEach]")
   {
-#define DO_TEST(VecType, length)                                                                             \
+#define KRYS_DO_TEST(VecType, length)                                                                        \
   SECTION(KRYS_STRINGIFY(VecType))                                                                           \
   {                                                                                                          \
     constexpr VecType vec(1);                                                                                \
@@ -126,17 +127,17 @@ namespace krys::tests
     REQUIRE(result == VecType(length));                                                                      \
   }
 
-    DO_TEST(Vec1i, 1);
-    DO_TEST(Vec2i, 2);
-    DO_TEST(Vec3i, 3);
-    DO_TEST(Vec4i, 4);
+    KRYS_DO_TEST(Vec1i, 1);
+    KRYS_DO_TEST(Vec2i, 2);
+    KRYS_DO_TEST(Vec3i, 3);
+    KRYS_DO_TEST(Vec4i, 4);
 
-#undef DO_TEST
+#undef KRYS_DO_TEST
   }
 
   TEST_CASE("MapEach(Vector)", "[Vector][MapEach]")
   {
-#define DO_TEST(VecType)                                                                                     \
+#define KRYS_DO_TEST(VecType)                                                                                \
   SECTION(KRYS_STRINGIFY(VecType))                                                                           \
   {                                                                                                          \
     constexpr VecType vec(1);                                                                                \
@@ -144,17 +145,17 @@ namespace krys::tests
     REQUIRE(result == VecType(2));                                                                           \
   }
 
-    DO_TEST(Vec1i);
-    DO_TEST(Vec2i);
-    DO_TEST(Vec3i);
-    DO_TEST(Vec4i);
+    KRYS_DO_TEST(Vec1i);
+    KRYS_DO_TEST(Vec2i);
+    KRYS_DO_TEST(Vec3i);
+    KRYS_DO_TEST(Vec4i);
 
-#undef DO_TEST
+#undef KRYS_DO_TEST
   }
 
   TEST_CASE("ZipTwo(Vector)", "[Vector][Zip]")
   {
-#define DO_TEST(VecType)                                                                                     \
+#define KRYS_DO_TEST(VecType)                                                                                \
   SECTION(KRYS_STRINGIFY(VecType))                                                                           \
   {                                                                                                          \
     constexpr VecType a(1);                                                                                  \
@@ -163,17 +164,17 @@ namespace krys::tests
     REQUIRE(result == VecType(2));                                                                           \
   }
 
-    DO_TEST(Vec1i);
-    DO_TEST(Vec2i);
-    DO_TEST(Vec3i);
-    DO_TEST(Vec4i);
+    KRYS_DO_TEST(Vec1i);
+    KRYS_DO_TEST(Vec2i);
+    KRYS_DO_TEST(Vec3i);
+    KRYS_DO_TEST(Vec4i);
 
-#undef DO_TEST
+#undef KRYS_DO_TEST
   }
 
   TEST_CASE("ZipThree(Vector)", "[Vector][Zip]")
   {
-#define DO_TEST(VecType)                                                                                     \
+#define KRYS_DO_TEST(VecType)                                                                                \
   SECTION(KRYS_STRINGIFY(VecType))                                                                           \
   {                                                                                                          \
     constexpr VecType a(1);                                                                                  \
@@ -183,12 +184,12 @@ namespace krys::tests
     REQUIRE(result == VecType(3));                                                                           \
   }
 
-    DO_TEST(Vec1i);
-    DO_TEST(Vec2i);
-    DO_TEST(Vec3i);
-    DO_TEST(Vec4i);
+    KRYS_DO_TEST(Vec1i);
+    KRYS_DO_TEST(Vec2i);
+    KRYS_DO_TEST(Vec3i);
+    KRYS_DO_TEST(Vec4i);
 
-#undef DO_TEST
+#undef KRYS_DO_TEST
   }
 
   TEST_CASE("Sum(Vector)", "[Vector]")
@@ -324,3 +325,6 @@ namespace krys::tests
             == Vec3(0, 0, 1)); // Normal points along +Z axis
   }
 }
+
+#undef KRYS_TEST_COPY_AND_MOVE
+#undef KRYS_TEST_COMMON_OPERATORS

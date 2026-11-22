@@ -1,19 +1,20 @@
 ﻿#include "Krystal.Core/Maths/Matrix.hpp"
 #include "catch2/catch_test_macros.hpp"
+#include "Krystal.Core/Macros.hpp"
 #include "Krystal.Core/Move.hpp"
 
 namespace krys::tests
 {
 #pragma region Test Helpers
 
-#define TEST_COPY_AND_MOVE()                                                                                 \
+#define KRYS_TEST_COPY_AND_MOVE()                                                                            \
   constexpr Mat copy(m);                                                                                     \
   REQUIRE(copy == m);                                                                                        \
   Mat moveSource(m);                                                                                         \
   const Mat move(krys::move(moveSource));                                                                    \
   REQUIRE(move == m);
 
-#define TEST_COMMON_OPERATORS()                                                                              \
+#define KRYS_TEST_COMMON_OPERATORS()                                                                         \
   REQUIRE(-m == Mat(-1));                                                                                    \
   REQUIRE(+m == m);                                                                                          \
   REQUIRE(~m == Mat(-2));                                                                                    \
@@ -61,8 +62,8 @@ namespace krys::tests
     REQUIRE(m == Mat(1, 1, 1, 1));
     REQUIRE(m != Mat(2, 1, 1, 1));
 
-    TEST_COPY_AND_MOVE();
-    TEST_COMMON_OPERATORS();
+    KRYS_TEST_COPY_AND_MOVE();
+    KRYS_TEST_COMMON_OPERATORS();
 
     constexpr Mat mat(1, 2, 3, 4);
 
@@ -94,8 +95,8 @@ namespace krys::tests
     REQUIRE(m == Mat(1, 1, 1, 1, 1, 1));
     REQUIRE(m != Mat(2, 1, 1, 1, 1, 1));
 
-    TEST_COPY_AND_MOVE();
-    TEST_COMMON_OPERATORS();
+    KRYS_TEST_COPY_AND_MOVE();
+    KRYS_TEST_COMMON_OPERATORS();
 
     constexpr Mat mat({1, 2, 3}, {4, 5, 6});
 
@@ -127,8 +128,8 @@ namespace krys::tests
     REQUIRE(m == Mat(1, 1, 1, 1, 1, 1, 1, 1));
     REQUIRE(m != Mat(2, 1, 1, 1, 1, 1, 1, 1));
 
-    TEST_COPY_AND_MOVE();
-    TEST_COMMON_OPERATORS();
+    KRYS_TEST_COPY_AND_MOVE();
+    KRYS_TEST_COMMON_OPERATORS();
 
     constexpr Mat mat({1, 2, 3, 4}, {5, 6, 7, 8});
 
@@ -158,8 +159,8 @@ namespace krys::tests
     REQUIRE(m == Mat(1, 1, 1, 1, 1, 1));
     REQUIRE(m != Mat(2, 1, 1, 1, 1, 1));
 
-    TEST_COPY_AND_MOVE();
-    TEST_COMMON_OPERATORS();
+    KRYS_TEST_COPY_AND_MOVE();
+    KRYS_TEST_COMMON_OPERATORS();
 
     constexpr Mat mat({1, 2}, {3, 4}, {5, 6});
     REQUIRE(mat * Mat2x3i({7, 8, 9}, {10, 11, 12}) == Mat2x2i({76, 100}, {103, 136}));
@@ -192,8 +193,8 @@ namespace krys::tests
     REQUIRE(m == Mat(1, 1, 1, 1, 1, 1, 1, 1, 1));
     REQUIRE(m != Mat(2, 1, 1, 1, 1, 1, 1, 1, 1));
 
-    TEST_COPY_AND_MOVE();
-    TEST_COMMON_OPERATORS();
+    KRYS_TEST_COPY_AND_MOVE();
+    KRYS_TEST_COMMON_OPERATORS();
 
     constexpr Mat mat({1, 2, 3}, {4, 5, 6}, {7, 8, 9});
     REQUIRE(mat * Mat2x3i({10, 11, 12}, {13, 14, 15}) == Mat2x3i({138, 171, 204}, {174, 216, 258}));
@@ -232,8 +233,8 @@ namespace krys::tests
     REQUIRE(m == Mat(1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1));
     REQUIRE(m != Mat(2, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1));
 
-    TEST_COPY_AND_MOVE();
-    TEST_COMMON_OPERATORS();
+    KRYS_TEST_COPY_AND_MOVE();
+    KRYS_TEST_COMMON_OPERATORS();
 
     constexpr Mat mat({1, 2, 3, 4}, {5, 6, 7, 8}, {9, 10, 11, 12});
     REQUIRE(mat * Mat2x3i({13, 14, 15}, {16, 17, 18}) == Mat2x4i({218, 260, 302, 344}, {263, 314, 365, 416}));
@@ -268,8 +269,8 @@ namespace krys::tests
     REQUIRE(m == Mat(1, 1, 1, 1, 1, 1, 1, 1));
     REQUIRE(m != Mat(2, 1, 1, 1, 1, 1, 1, 1));
 
-    TEST_COPY_AND_MOVE();
-    TEST_COMMON_OPERATORS();
+    KRYS_TEST_COPY_AND_MOVE();
+    KRYS_TEST_COMMON_OPERATORS();
 
     constexpr Mat mat({1, 2}, {3, 4}, {5, 6}, {7, 8});
     REQUIRE(mat * Mat2x4i({9, 10, 11, 12}, {13, 14, 15, 16}) == Mat2x2i({178, 220}, {242, 300}));
@@ -305,8 +306,8 @@ namespace krys::tests
     REQUIRE(m == Mat(1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1));
     REQUIRE(m != Mat(2, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1));
 
-    TEST_COPY_AND_MOVE();
-    TEST_COMMON_OPERATORS();
+    KRYS_TEST_COPY_AND_MOVE();
+    KRYS_TEST_COMMON_OPERATORS();
 
     constexpr Mat mat({1, 2, 3}, {4, 5, 6}, {7, 8, 9}, {10, 11, 12});
     REQUIRE(mat * Mat2x4i({13, 14, 15, 16}, {17, 18, 19, 20}) == Mat2x3i({334, 392, 450}, {422, 496, 570}));
@@ -348,8 +349,8 @@ namespace krys::tests
     REQUIRE(m == Mat(1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1));
     REQUIRE(m != Mat(2, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1));
 
-    TEST_COPY_AND_MOVE();
-    TEST_COMMON_OPERATORS();
+    KRYS_TEST_COPY_AND_MOVE();
+    KRYS_TEST_COMMON_OPERATORS();
 
     constexpr Mat mat({1, 2, 3, 4}, {5, 6, 7, 8}, {9, 10, 11, 12}, {13, 14, 15, 16});
     REQUIRE(mat * Mat2x4i({17, 18, 19, 20}, {21, 22, 23, 24})
@@ -373,7 +374,7 @@ namespace krys::tests
 
   TEST_CASE("ForEach(Matrix)", "[Matrix][ForEach]")
   {
-#define DO_TEST(MatType, rows, cols)                                                                         \
+#define KRYS_DO_TEST(MatType, rows, cols)                                                                    \
   SECTION(KRYS_STRINGIFY(MatType))                                                                           \
   {                                                                                                          \
     constexpr MatType mat(1);                                                                                \
@@ -382,44 +383,44 @@ namespace krys::tests
     REQUIRE(result == MatType(rows * cols));                                                                 \
   }
 
-    DO_TEST(Mat2x2i, 2, 2);
-    DO_TEST(Mat2x3i, 2, 3);
-    DO_TEST(Mat2x4i, 2, 4);
-    DO_TEST(Mat3x2i, 3, 2);
-    DO_TEST(Mat3x3i, 3, 3);
-    DO_TEST(Mat3x4i, 3, 4);
-    DO_TEST(Mat4x2i, 4, 2);
-    DO_TEST(Mat4x3i, 4, 3);
-    DO_TEST(Mat4x4i, 4, 4);
+    KRYS_DO_TEST(Mat2x2i, 2, 2);
+    KRYS_DO_TEST(Mat2x3i, 2, 3);
+    KRYS_DO_TEST(Mat2x4i, 2, 4);
+    KRYS_DO_TEST(Mat3x2i, 3, 2);
+    KRYS_DO_TEST(Mat3x3i, 3, 3);
+    KRYS_DO_TEST(Mat3x4i, 3, 4);
+    KRYS_DO_TEST(Mat4x2i, 4, 2);
+    KRYS_DO_TEST(Mat4x3i, 4, 3);
+    KRYS_DO_TEST(Mat4x4i, 4, 4);
 
-#undef DO_TEST
+#undef KRYS_DO_TEST
   }
 
   TEST_CASE("MapEach(Matrix)", "[Matrix][MapEach]")
   {
-#define DO_TEST(MatType)                                                                                     \
+#define KRYS_DO_TEST(MatType)                                                                                \
   SECTION(KRYS_STRINGIFY(MatType))                                                                           \
   {                                                                                                          \
     constexpr MatType mat(1);                                                                                \
     MatType result = MapEach(mat, [](auto v) { return v + 1; });                                             \
     REQUIRE(result == MatType(2));                                                                           \
   }
-    DO_TEST(Mat2x2i);
-    DO_TEST(Mat2x3i);
-    DO_TEST(Mat2x4i);
-    DO_TEST(Mat3x2i);
-    DO_TEST(Mat3x3i);
-    DO_TEST(Mat3x4i);
-    DO_TEST(Mat4x2i);
-    DO_TEST(Mat4x3i);
-    DO_TEST(Mat4x4i);
+    KRYS_DO_TEST(Mat2x2i);
+    KRYS_DO_TEST(Mat2x3i);
+    KRYS_DO_TEST(Mat2x4i);
+    KRYS_DO_TEST(Mat3x2i);
+    KRYS_DO_TEST(Mat3x3i);
+    KRYS_DO_TEST(Mat3x4i);
+    KRYS_DO_TEST(Mat4x2i);
+    KRYS_DO_TEST(Mat4x3i);
+    KRYS_DO_TEST(Mat4x4i);
 
-#undef DO_TEST
+#undef KRYS_DO_TEST
   }
 
   TEST_CASE("ZipTwo(Matrix)", "[Matrix][Zip]")
   {
-#define DO_TEST(MatType)                                                                                     \
+#define KRYS_DO_TEST(MatType)                                                                                \
   SECTION(KRYS_STRINGIFY(MatType))                                                                           \
   {                                                                                                          \
     constexpr MatType a(1);                                                                                  \
@@ -427,22 +428,22 @@ namespace krys::tests
     MatType result = Zip(a, b, [](auto c, auto d) { return c + d; });                                        \
     REQUIRE(result == MatType(2));                                                                           \
   }
-    DO_TEST(Mat2x2i);
-    DO_TEST(Mat2x3i);
-    DO_TEST(Mat2x4i);
-    DO_TEST(Mat3x2i);
-    DO_TEST(Mat3x3i);
-    DO_TEST(Mat3x4i);
-    DO_TEST(Mat4x2i);
-    DO_TEST(Mat4x3i);
-    DO_TEST(Mat4x4i);
+    KRYS_DO_TEST(Mat2x2i);
+    KRYS_DO_TEST(Mat2x3i);
+    KRYS_DO_TEST(Mat2x4i);
+    KRYS_DO_TEST(Mat3x2i);
+    KRYS_DO_TEST(Mat3x3i);
+    KRYS_DO_TEST(Mat3x4i);
+    KRYS_DO_TEST(Mat4x2i);
+    KRYS_DO_TEST(Mat4x3i);
+    KRYS_DO_TEST(Mat4x4i);
 
-#undef DO_TEST
+#undef KRYS_DO_TEST
   }
 
   TEST_CASE("ZipThree(Matrix)", "[Matrix][Zip]")
   {
-#define DO_TEST(MatType)                                                                                     \
+#define KRYS_DO_TEST(MatType)                                                                                \
   SECTION(KRYS_STRINGIFY(MatType))                                                                           \
   {                                                                                                          \
     constexpr MatType a(1);                                                                                  \
@@ -451,17 +452,17 @@ namespace krys::tests
     MatType result = Zip(a, b, c, [](auto d, auto e, auto f) { return d + e + f; });                         \
     REQUIRE(result == MatType(3));                                                                           \
   }
-    DO_TEST(Mat2x2i);
-    DO_TEST(Mat2x3i);
-    DO_TEST(Mat2x4i);
-    DO_TEST(Mat3x2i);
-    DO_TEST(Mat3x3i);
-    DO_TEST(Mat3x4i);
-    DO_TEST(Mat4x2i);
-    DO_TEST(Mat4x3i);
-    DO_TEST(Mat4x4i);
+    KRYS_DO_TEST(Mat2x2i);
+    KRYS_DO_TEST(Mat2x3i);
+    KRYS_DO_TEST(Mat2x4i);
+    KRYS_DO_TEST(Mat3x2i);
+    KRYS_DO_TEST(Mat3x3i);
+    KRYS_DO_TEST(Mat3x4i);
+    KRYS_DO_TEST(Mat4x2i);
+    KRYS_DO_TEST(Mat4x3i);
+    KRYS_DO_TEST(Mat4x4i);
 
-#undef DO_TEST
+#undef KRYS_DO_TEST
   }
 
   TEST_CASE("Sum(Matrix)", "[Matrix]")
@@ -472,58 +473,61 @@ namespace krys::tests
 
   TEST_CASE("NoneOf(Matrix)", "[Matrix]")
   {
-#define DO_TEST(MatType)                                                                                     \
+#define KRYS_DO_TEST(MatType)                                                                                \
   REQUIRE(NoneOf(MatType(1), [](auto x) { return x == 0; }));                                                \
   REQUIRE_FALSE(NoneOf(MatType(1), [](auto x) { return x == 1; }));
 
-    DO_TEST(Mat2x2i);
-    DO_TEST(Mat2x3i);
-    DO_TEST(Mat2x4i);
-    DO_TEST(Mat3x2i);
-    DO_TEST(Mat3x3i);
-    DO_TEST(Mat3x4i);
-    DO_TEST(Mat4x2i);
-    DO_TEST(Mat4x3i);
-    DO_TEST(Mat4x4i);
+    KRYS_DO_TEST(Mat2x2i);
+    KRYS_DO_TEST(Mat2x3i);
+    KRYS_DO_TEST(Mat2x4i);
+    KRYS_DO_TEST(Mat3x2i);
+    KRYS_DO_TEST(Mat3x3i);
+    KRYS_DO_TEST(Mat3x4i);
+    KRYS_DO_TEST(Mat4x2i);
+    KRYS_DO_TEST(Mat4x3i);
+    KRYS_DO_TEST(Mat4x4i);
 
-#undef DO_TEST
+#undef KRYS_DO_TEST
   }
 
   TEST_CASE("AnyOf(Matrix)", "[Matrix]")
   {
-#define DO_TEST(MatType)                                                                                     \
+#define KRYS_DO_TEST(MatType)                                                                                \
   REQUIRE(AnyOf(MatType(1), [](auto x) { return x == 1; }));                                                 \
   REQUIRE_FALSE(AnyOf(MatType(1), [](auto x) { return x == 0; }));
 
-    DO_TEST(Mat2x2i);
-    DO_TEST(Mat2x3i);
-    DO_TEST(Mat2x4i);
-    DO_TEST(Mat3x2i);
-    DO_TEST(Mat3x3i);
-    DO_TEST(Mat3x4i);
-    DO_TEST(Mat4x2i);
-    DO_TEST(Mat4x3i);
-    DO_TEST(Mat4x4i);
+    KRYS_DO_TEST(Mat2x2i);
+    KRYS_DO_TEST(Mat2x3i);
+    KRYS_DO_TEST(Mat2x4i);
+    KRYS_DO_TEST(Mat3x2i);
+    KRYS_DO_TEST(Mat3x3i);
+    KRYS_DO_TEST(Mat3x4i);
+    KRYS_DO_TEST(Mat4x2i);
+    KRYS_DO_TEST(Mat4x3i);
+    KRYS_DO_TEST(Mat4x4i);
 
-#undef DO_TEST
+#undef KRYS_DO_TEST
   }
 
   TEST_CASE("AllOf(Matrix)", "[Matrix]")
   {
-#define DO_TEST(MatType)                                                                                     \
+#define KRYS_DO_TEST(MatType)                                                                                \
   REQUIRE(AllOf(MatType(1), [](auto x) { return x == 1; }));                                                 \
   REQUIRE_FALSE(AllOf(MatType(1), [](auto x) { return x == 0; }));
 
-    DO_TEST(Mat2x2i);
-    DO_TEST(Mat2x3i);
-    DO_TEST(Mat2x4i);
-    DO_TEST(Mat3x2i);
-    DO_TEST(Mat3x3i);
-    DO_TEST(Mat3x4i);
-    DO_TEST(Mat4x2i);
-    DO_TEST(Mat4x3i);
-    DO_TEST(Mat4x4i);
+    KRYS_DO_TEST(Mat2x2i);
+    KRYS_DO_TEST(Mat2x3i);
+    KRYS_DO_TEST(Mat2x4i);
+    KRYS_DO_TEST(Mat3x2i);
+    KRYS_DO_TEST(Mat3x3i);
+    KRYS_DO_TEST(Mat3x4i);
+    KRYS_DO_TEST(Mat4x2i);
+    KRYS_DO_TEST(Mat4x3i);
+    KRYS_DO_TEST(Mat4x4i);
 
-#undef DO_TEST
+#undef KRYS_DO_TEST
   }
 }
+
+#undef KRYS_TEST_COPY_AND_MOVE
+#undef KRYS_TEST_COMMON_OPERATORS

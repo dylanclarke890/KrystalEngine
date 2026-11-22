@@ -3,343 +3,107 @@
 #include "Krystal.Core/Assert.hpp"
 #include "Krystal.Core/Attributes.hpp"
 #include "Krystal.Core/Concepts.hpp"
-#include "Krystal.Core/Macros.hpp"
 #include "Krystal.Core/Maths/Traits.hpp"
 #include "Krystal.Core/Maths/Vector.hpp"
 #include "Krystal.Core/Numeric.hpp"
-
-#pragma region Helper Macros
-
-#define MATRIX_TEMPLATE_PARAMS krys::Number T, int C, int R
-#define MATRIX_TEMPLATE_ARGS T, C, R
-#define MATRIX_TYPE krys::Matrix<MATRIX_TEMPLATE_ARGS>
-
-#define MATRIX_STATIC_ASSERT(condition) static_assert(condition, "Unsupported matrix length.")
-
-#define MATRIX_VALID_LENGTH_CONDITION(C, R) (C > 1 && C < 5 && R > 1 && R < 5)
-
-#define MATRIX_TYPE_ALIASES(Columns, Rows)                                                                   \
-  template <Number T>                                                                                        \
-  using Matrix##Columns##x##Rows = Matrix<T, Columns, Rows>;                                                 \
-  using Mat##Columns##x##Rows = Matrix<float, Columns, Rows>;                                                \
-  using Mat##Columns##x##Rows##b = Matrix<bool, Columns, Rows>;                                              \
-  using Mat##Columns##x##Rows##f = Matrix<float, Columns, Rows>;                                             \
-  using Mat##Columns##x##Rows##d = Matrix<double, Columns, Rows>;                                            \
-  using Mat##Columns##x##Rows##i = Matrix<int, Columns, Rows>;                                               \
-  using Mat##Columns##x##Rows##u = Matrix<unsigned int, Columns, Rows>;
-
-#define MATRIX_INTROSPECTION(columns, rows)                                                                  \
-  constexpr static int Rows = rows;                                                                          \
-  constexpr static int Columns = columns;                                                                    \
-  using Type = Matrix<T, Columns, Rows>;                                                                     \
-  using ComponentType = T;                                                                                   \
-  using RowType = Vector<T, Columns>;                                                                        \
-  using ColumnType = Vector<T, Rows>;                                                                        \
-  using TransposeType = Matrix<T, Rows, Columns>;                                                            \
-                                                                                                             \
-private:                                                                                                     \
-  ColumnType _data[Columns];
-
-#define MATRIX_BINARY_OPERATOR(OP)                                                                           \
-  template <MATRIX_TEMPLATE_PARAMS>                                                                          \
-  KRYS_NODISCARD constexpr auto operator OP(const MATRIX_TYPE &lhs, const MATRIX_TYPE &rhs) noexcept         \
-  {                                                                                                          \
-    return Zip(lhs, rhs, [](auto l, auto r) { return l OP r; });                                             \
-  }                                                                                                          \
-  template <MATRIX_TEMPLATE_PARAMS>                                                                          \
-  KRYS_NODISCARD constexpr auto operator OP(const MATRIX_TYPE &lhs, T scalar) noexcept                       \
-  {                                                                                                          \
-    return MapEach(lhs, [&](auto v) { return v OP scalar; });                                                \
-  }
-
-#define MATRIX_OPERATOR_ASSIGNMENT(OP)                                                                       \
-  constexpr auto &operator KRYS_CONCAT(OP, =)(const Matrix &other) noexcept                                  \
-  {                                                                                                          \
-    *this = *this OP other;                                                                                  \
-    return *this;                                                                                            \
-  }                                                                                                          \
-  constexpr auto &operator KRYS_CONCAT(OP, =)(T scalar) noexcept                                             \
-  {                                                                                                          \
-    *this = *this OP scalar;                                                                                 \
-    return *this;                                                                                            \
-  }
-
-#define MATRIX_UNARY_OPERATOR(OP)                                                                            \
-  template <MATRIX_TEMPLATE_PARAMS>                                                                          \
-  KRYS_NODISCARD constexpr auto operator OP(const MATRIX_TYPE &rhs) noexcept                                 \
-  {                                                                                                          \
-    return MapEach(rhs, [](auto v) { return OP v; });                                                        \
-  }
-
-#define MATRIX_COMMON_MEMBER_FUNCTIONS()                                                                     \
-  constexpr Matrix() noexcept = default;                                                                     \
-  constexpr ~Matrix() noexcept = default;                                                                    \
-  constexpr Matrix(const Matrix &) noexcept = default;                                                       \
-  constexpr Matrix(Matrix &&) noexcept = default;                                                            \
-  constexpr Matrix &operator=(const Matrix &) noexcept = default;                                            \
-  constexpr Matrix &operator=(Matrix &&) noexcept = default;                                                 \
-  constexpr auto operator<=>(const Matrix &) const noexcept = default;                                       \
-  KRYS_NODISCARD constexpr ColumnType &operator[](int column) noexcept                                       \
-  {                                                                                                          \
-    krys_debug_assert(column >= 0 && column < Columns);                                                      \
-    return _data[column];                                                                                    \
-  }                                                                                                          \
-  KRYS_NODISCARD constexpr ColumnType const &operator[](int column) const noexcept                           \
-  {                                                                                                          \
-    krys_debug_assert(column >= 0 && column < Columns);                                                      \
-    return _data[column];                                                                                    \
-  }                                                                                                          \
-  MATRIX_OPERATOR_ASSIGNMENT(+)                                                                              \
-  MATRIX_OPERATOR_ASSIGNMENT(-)                                                                              \
-  MATRIX_OPERATOR_ASSIGNMENT(*)                                                                              \
-  MATRIX_OPERATOR_ASSIGNMENT(/)                                                                              \
-  MATRIX_OPERATOR_ASSIGNMENT(>>)                                                                             \
-  MATRIX_OPERATOR_ASSIGNMENT(<<)                                                                             \
-  MATRIX_OPERATOR_ASSIGNMENT(|)                                                                              \
-  MATRIX_OPERATOR_ASSIGNMENT(&)                                                                              \
-  MATRIX_OPERATOR_ASSIGNMENT(^)
-
-#pragma endregion
+#include "Krystal.Core/TypeTraits.hpp"
+#include <compare>
+#include <functional>
+#include <utility>
 
 namespace krys
 {
-  template <MATRIX_TEMPLATE_PARAMS>
-  struct Matrix;
-
-  template <Number T>
-  struct Matrix<T, 2, 2>
+  /// @brief A matrix of @p C columns and @p R rows (each 2 to 4) of type @p T, stored column by column:
+  /// `m[column][row]`.
+  template <Number T, int C, int R>
+  struct Matrix
   {
-    MATRIX_INTROSPECTION(2, 2)
+    static_assert(C >= 2 && C <= 4 && R >= 2 && R <= 4, "Matrices have 2 to 4 columns and 2 to 4 rows.");
+
+    constexpr static int Columns = C;
+    constexpr static int Rows = R;
+    using Type = Matrix<T, C, R>;
+    using ComponentType = T;
+    using RowType = Vector<T, C>;
+    using ColumnType = Vector<T, R>;
+    using TransposeType = Matrix<T, R, C>;
+
+  private:
+    ColumnType _data[C] {};
 
   public:
-    constexpr explicit Matrix(const T &value) noexcept : _data {ColumnType(value), ColumnType(value)}
-    {
-    }
+    /// @brief The zero matrix.
+    constexpr Matrix() noexcept = default;
 
-    constexpr Matrix(const ColumnType &col0, const ColumnType &col1) noexcept : _data {col0, col1}
-    {
-    }
-
-    constexpr Matrix(const T &m00, const T &m01, const T &m10, const T &m11) noexcept
-        : _data {ColumnType(m00, m01), ColumnType(m10, m11)}
-    {
-    }
-
-    MATRIX_COMMON_MEMBER_FUNCTIONS()
-  };
-
-  template <Number T>
-  struct Matrix<T, 2, 3>
-  {
-    MATRIX_INTROSPECTION(2, 3)
-
-  public:
-    constexpr explicit Matrix(T value) noexcept : _data {ColumnType(value), ColumnType(value)}
-    {
-    }
-
-    constexpr Matrix(const ColumnType &col0, const ColumnType &col1) noexcept : _data {col0, col1}
-    {
-    }
-
-    constexpr Matrix(const T &m00, const T &m01, const T &m02, const T &m10, const T &m11,
-                     const T &m12) noexcept
-        : _data {ColumnType(m00, m01, m02), ColumnType(m10, m11, m12)}
-    {
-    }
-
-    MATRIX_COMMON_MEMBER_FUNCTIONS()
-  };
-
-  template <Number T>
-  struct Matrix<T, 2, 4>
-  {
-    MATRIX_INTROSPECTION(2, 4)
-
-  public:
-    constexpr explicit Matrix(T value) noexcept : _data {ColumnType(value), ColumnType(value)}
-    {
-    }
-
-    constexpr Matrix(const ColumnType &col0, const ColumnType &col1) noexcept : _data {col0, col1}
-    {
-    }
-
-    constexpr Matrix(const T &m00, const T &m01, const T &m02, const T &m03, const T &m10, const T &m11,
-                     const T &m12, const T &m13) noexcept
-        : _data {ColumnType(m00, m01, m02, m03), ColumnType(m10, m11, m12, m13)}
-    {
-    }
-
-    MATRIX_COMMON_MEMBER_FUNCTIONS()
-  };
-
-  template <Number T>
-  struct Matrix<T, 3, 2>
-  {
-    MATRIX_INTROSPECTION(3, 2)
-
-  public:
+    /// @brief A matrix with every component set to @p value.
     constexpr explicit Matrix(T value) noexcept
-        : _data {ColumnType(value), ColumnType(value), ColumnType(value)}
+    {
+      for (auto &column : _data)
+      {
+        column = ColumnType(value);
+      }
+    }
+
+    constexpr Matrix(const ColumnType &column0, const ColumnType &column1) noexcept
+    requires(C == 2)
+        : _data {column0, column1}
     {
     }
 
-    constexpr Matrix(const ColumnType &col0, const ColumnType &col1, const ColumnType &col2) noexcept
-        : _data {col0, col1, col2}
+    constexpr Matrix(const ColumnType &column0, const ColumnType &column1, const ColumnType &column2) noexcept
+    requires(C == 3)
+        : _data {column0, column1, column2}
     {
     }
 
-    constexpr Matrix(const T &m00, const T &m01, const T &m10, const T &m11, const T &m20,
-                     const T &m21) noexcept
-        : _data {ColumnType(m00, m01), ColumnType(m10, m11), ColumnType(m20, m21)}
+    constexpr Matrix(const ColumnType &column0, const ColumnType &column1, const ColumnType &column2,
+                     const ColumnType &column3) noexcept
+    requires(C == 4)
+        : _data {column0, column1, column2, column3}
     {
     }
 
-    MATRIX_COMMON_MEMBER_FUNCTIONS()
-  };
-
-  template <Number T>
-  struct Matrix<T, 3, 3>
-  {
-    MATRIX_INTROSPECTION(3, 3)
-
-  public:
-    constexpr explicit Matrix(T value) noexcept
-        : _data {ColumnType(value), ColumnType(value), ColumnType(value)}
+    /// @brief A matrix of @p values, column by column.
+    template <ConvertibleTo<T>... TValues>
+    requires(sizeof...(TValues) == C * R)
+    constexpr Matrix(TValues... values) noexcept
     {
+      const T flat[] {static_cast<T>(values)...};
+      for (int column = 0; column < C; ++column)
+      {
+        for (int row = 0; row < R; ++row)
+        {
+          _data[column][row] = flat[column * R + row];
+        }
+      }
     }
 
-    constexpr Matrix(const ColumnType &col0, const ColumnType &col1, const ColumnType &col2) noexcept
-        : _data {col0, col1, col2}
-    {
-    }
-
-    constexpr Matrix(const T &m00, const T &m01, const T &m02, const T &m10, const T &m11, const T &m12,
-                     const T &m20, const T &m21, const T &m22) noexcept
-        : _data {ColumnType(m00, m01, m02), ColumnType(m10, m11, m12), ColumnType(m20, m21, m22)}
-    {
-    }
-
-    constexpr Matrix(const Matrix<T, 4, 4> &other) noexcept
+    /// @brief The upper-left 3x3 of @p other.
+    // A template, so that in Matrix<T, 4, 4> it isn't a (constrained-away) copy constructor.
+    template <SameType<Matrix<T, 4, 4>> TOther>
+    requires(C == 3 && R == 3)
+    constexpr Matrix(const TOther &other) noexcept
         : _data {ColumnType(other[0]), ColumnType(other[1]), ColumnType(other[2])}
     {
     }
 
-    MATRIX_COMMON_MEMBER_FUNCTIONS()
+    KRYS_NODISCARD constexpr ColumnType &operator[](int column) noexcept
+    {
+      krys_debug_assert(column >= 0 && column < C);
+      return _data[column];
+    }
+
+    KRYS_NODISCARD constexpr const ColumnType &operator[](int column) const noexcept
+    {
+      krys_debug_assert(column >= 0 && column < C);
+      return _data[column];
+    }
+
+    KRYS_NODISCARD constexpr auto operator<=>(const Matrix &) const noexcept = default;
   };
 
-  template <Number T>
-  struct Matrix<T, 3, 4>
-  {
-    MATRIX_INTROSPECTION(3, 4)
-
-  public:
-    constexpr explicit Matrix(T value) noexcept
-        : _data {ColumnType(value), ColumnType(value), ColumnType(value)}
-    {
-    }
-
-    constexpr Matrix(const ColumnType &col0, const ColumnType &col1, const ColumnType &col2) noexcept
-        : _data {col0, col1, col2}
-    {
-    }
-
-    constexpr Matrix(const T &m00, const T &m01, const T &m02, const T &m03, const T &m10, const T &m11,
-                     const T &m12, const T &m13, const T &m20, const T &m21, const T &m22,
-                     const T &m23) noexcept
-        : _data {ColumnType(m00, m01, m02, m03), ColumnType(m10, m11, m12, m13),
-                 ColumnType(m20, m21, m22, m23)}
-    {
-    }
-
-    MATRIX_COMMON_MEMBER_FUNCTIONS()
-  };
-
-  template <Number T>
-  struct Matrix<T, 4, 2>
-  {
-    MATRIX_INTROSPECTION(4, 2)
-
-  public:
-    constexpr explicit Matrix(T value) noexcept
-        : _data {ColumnType(value), ColumnType(value), ColumnType(value), ColumnType(value)}
-    {
-    }
-
-    constexpr Matrix(const ColumnType &col0, const ColumnType &col1, const ColumnType &col2,
-                     const ColumnType &col3) noexcept
-        : _data {col0, col1, col2, col3}
-    {
-    }
-
-    constexpr Matrix(const T &m00, const T &m01, const T &m10, const T &m11, const T &m20, const T &m21,
-                     const T &m30, const T &m31) noexcept
-        : _data {ColumnType(m00, m01), ColumnType(m10, m11), ColumnType(m20, m21), ColumnType(m30, m31)}
-    {
-    }
-
-    MATRIX_COMMON_MEMBER_FUNCTIONS()
-  };
-
-  template <Number T>
-  struct Matrix<T, 4, 3>
-  {
-    MATRIX_INTROSPECTION(4, 3)
-
-  public:
-    constexpr explicit Matrix(T value) noexcept
-        : _data {ColumnType(value), ColumnType(value), ColumnType(value), ColumnType(value)}
-    {
-    }
-
-    constexpr Matrix(const ColumnType &col0, const ColumnType &col1, const ColumnType &col2,
-                     const ColumnType &col3) noexcept
-        : _data {col0, col1, col2, col3}
-    {
-    }
-
-    constexpr Matrix(const T &m00, const T &m01, const T &m02, const T &m10, const T &m11, const T &m12,
-                     const T &m20, const T &m21, const T &m22, const T &m30, const T &m31,
-                     const T &m32) noexcept
-        : _data {ColumnType(m00, m01, m02), ColumnType(m10, m11, m12), ColumnType(m20, m21, m22),
-                 ColumnType(m30, m31, m32)}
-    {
-    }
-
-    MATRIX_COMMON_MEMBER_FUNCTIONS()
-  };
-
-  template <Number T>
-  struct Matrix<T, 4, 4>
-  {
-    MATRIX_INTROSPECTION(4, 4)
-
-  public:
-    constexpr explicit Matrix(T value) noexcept
-        : _data {ColumnType(value), ColumnType(value), ColumnType(value), ColumnType(value)}
-    {
-    }
-
-    constexpr Matrix(const ColumnType &col0, const ColumnType &col1, const ColumnType &col2,
-                     const ColumnType &col3) noexcept
-        : _data {col0, col1, col2, col3}
-    {
-    }
-
-    constexpr Matrix(const T &m00, const T &m01, const T &m02, const T &m03, const T &m10, const T &m11,
-                     const T &m12, const T &m13, const T &m20, const T &m21, const T &m22, const T &m23,
-                     const T &m30, const T &m31, const T &m32, const T &m33) noexcept
-        : _data {ColumnType(m00, m01, m02, m03), ColumnType(m10, m11, m12, m13),
-                 ColumnType(m20, m21, m22, m23), ColumnType(m30, m31, m32, m33)}
-    {
-    }
-
-    MATRIX_COMMON_MEMBER_FUNCTIONS()
-  };
-
-  template <MATRIX_TEMPLATE_PARAMS>
-  struct Traits<MATRIX_TYPE>
+  template <Number T, int C, int R>
+  struct Traits<Matrix<T, C, R>>
   {
     using ComponentType = T;
     constexpr static bool IsVector = false;
@@ -353,642 +117,569 @@ namespace krys
   template <typename T>
   concept MatrixType = Traits<T>::IsMatrix;
 
-  MATRIX_TYPE_ALIASES(2, 2);
-  MATRIX_TYPE_ALIASES(2, 3);
-  MATRIX_TYPE_ALIASES(2, 4);
-  MATRIX_TYPE_ALIASES(3, 2);
-  MATRIX_TYPE_ALIASES(3, 3);
-  MATRIX_TYPE_ALIASES(3, 4);
-  MATRIX_TYPE_ALIASES(4, 2);
-  MATRIX_TYPE_ALIASES(4, 3);
-  MATRIX_TYPE_ALIASES(4, 4);
+#pragma region Aliases
+
+  template <Number T>
+  using Matrix2x2 = Matrix<T, 2, 2>;
+  using Mat2x2 = Matrix<float, 2, 2>;
+  using Mat2x2b = Matrix<bool, 2, 2>;
+  using Mat2x2f = Matrix<float, 2, 2>;
+  using Mat2x2d = Matrix<double, 2, 2>;
+  using Mat2x2i = Matrix<int, 2, 2>;
+  using Mat2x2u = Matrix<unsigned int, 2, 2>;
+
+  template <Number T>
+  using Matrix2x3 = Matrix<T, 2, 3>;
+  using Mat2x3 = Matrix<float, 2, 3>;
+  using Mat2x3b = Matrix<bool, 2, 3>;
+  using Mat2x3f = Matrix<float, 2, 3>;
+  using Mat2x3d = Matrix<double, 2, 3>;
+  using Mat2x3i = Matrix<int, 2, 3>;
+  using Mat2x3u = Matrix<unsigned int, 2, 3>;
+
+  template <Number T>
+  using Matrix2x4 = Matrix<T, 2, 4>;
+  using Mat2x4 = Matrix<float, 2, 4>;
+  using Mat2x4b = Matrix<bool, 2, 4>;
+  using Mat2x4f = Matrix<float, 2, 4>;
+  using Mat2x4d = Matrix<double, 2, 4>;
+  using Mat2x4i = Matrix<int, 2, 4>;
+  using Mat2x4u = Matrix<unsigned int, 2, 4>;
+
+  template <Number T>
+  using Matrix3x2 = Matrix<T, 3, 2>;
+  using Mat3x2 = Matrix<float, 3, 2>;
+  using Mat3x2b = Matrix<bool, 3, 2>;
+  using Mat3x2f = Matrix<float, 3, 2>;
+  using Mat3x2d = Matrix<double, 3, 2>;
+  using Mat3x2i = Matrix<int, 3, 2>;
+  using Mat3x2u = Matrix<unsigned int, 3, 2>;
+
+  template <Number T>
+  using Matrix3x3 = Matrix<T, 3, 3>;
+  using Mat3x3 = Matrix<float, 3, 3>;
+  using Mat3x3b = Matrix<bool, 3, 3>;
+  using Mat3x3f = Matrix<float, 3, 3>;
+  using Mat3x3d = Matrix<double, 3, 3>;
+  using Mat3x3i = Matrix<int, 3, 3>;
+  using Mat3x3u = Matrix<unsigned int, 3, 3>;
+
+  template <Number T>
+  using Matrix3x4 = Matrix<T, 3, 4>;
+  using Mat3x4 = Matrix<float, 3, 4>;
+  using Mat3x4b = Matrix<bool, 3, 4>;
+  using Mat3x4f = Matrix<float, 3, 4>;
+  using Mat3x4d = Matrix<double, 3, 4>;
+  using Mat3x4i = Matrix<int, 3, 4>;
+  using Mat3x4u = Matrix<unsigned int, 3, 4>;
+
+  template <Number T>
+  using Matrix4x2 = Matrix<T, 4, 2>;
+  using Mat4x2 = Matrix<float, 4, 2>;
+  using Mat4x2b = Matrix<bool, 4, 2>;
+  using Mat4x2f = Matrix<float, 4, 2>;
+  using Mat4x2d = Matrix<double, 4, 2>;
+  using Mat4x2i = Matrix<int, 4, 2>;
+  using Mat4x2u = Matrix<unsigned int, 4, 2>;
+
+  template <Number T>
+  using Matrix4x3 = Matrix<T, 4, 3>;
+  using Mat4x3 = Matrix<float, 4, 3>;
+  using Mat4x3b = Matrix<bool, 4, 3>;
+  using Mat4x3f = Matrix<float, 4, 3>;
+  using Mat4x3d = Matrix<double, 4, 3>;
+  using Mat4x3i = Matrix<int, 4, 3>;
+  using Mat4x3u = Matrix<unsigned int, 4, 3>;
+
+  template <Number T>
+  using Matrix4x4 = Matrix<T, 4, 4>;
+  using Mat4x4 = Matrix<float, 4, 4>;
+  using Mat4x4b = Matrix<bool, 4, 4>;
+  using Mat4x4f = Matrix<float, 4, 4>;
+  using Mat4x4d = Matrix<double, 4, 4>;
+  using Mat4x4i = Matrix<int, 4, 4>;
+  using Mat4x4u = Matrix<unsigned int, 4, 4>;
+
   using Mat2 = Matrix<float, 2, 2>;
   using Mat3 = Matrix<float, 3, 3>;
   using Mat4 = Matrix<float, 4, 4>;
 
-  /// @brief Creates an identity matrix of the specified size.
-  template <MatrixType Mat>
-  KRYS_NODISCARD constexpr auto Identity() noexcept
+#pragma endregion
+
+  /// @brief The identity matrix of type @p TMatrix, which must be square.
+  template <MatrixType TMatrix>
+  KRYS_NODISCARD constexpr TMatrix Identity() noexcept
   {
-    constexpr int C = Traits<Mat>::Columns;
-    constexpr int R = Traits<Mat>::Rows;
-    using T = typename Traits<Mat>::ComponentType;
+    static_assert(TMatrix::Columns == TMatrix::Rows, "Only square matrices have an identity.");
 
-    MATRIX_STATIC_ASSERT(MATRIX_VALID_LENGTH_CONDITION(C, R));
-    MATRIX_STATIC_ASSERT(C == R);
-
-    if constexpr (C == 2 && R == 2)
+    TMatrix identity;
+    for (int i = 0; i < TMatrix::Columns; ++i)
     {
-      return Mat(T(1), T(0), T(0), T(1));
+      identity[i][i] = typename TMatrix::ComponentType(1);
     }
-    else if constexpr (C == 3 && R == 3)
-    {
-      return Mat(T(1), T(0), T(0), T(0), T(1), T(0), T(0), T(0), T(1));
-    }
-    else if constexpr (C == 4 && R == 4)
-    {
-      return Mat(T(1), T(0), T(0), T(0), T(0), T(1), T(0), T(0), T(0), T(0), T(1), T(0), T(0), T(0), T(0),
-                 T(1));
-    }
+    return identity;
   }
 
-  /// @brief Map each component of the matrix using the provided function.
-  template <MATRIX_TEMPLATE_PARAMS, RegularCallable<T> F>
-  KRYS_NODISCARD constexpr auto MapEach(const MATRIX_TYPE &mat, const F &func) noexcept
-  {
-    MATRIX_STATIC_ASSERT(MATRIX_VALID_LENGTH_CONDITION(C, R));
+#pragma region Component-wise algorithms
 
+  /// @brief A matrix of @p func applied to each component of @p m.
+  template <Number T, int C, int R, RegularCallable<T> F>
+  KRYS_NODISCARD constexpr auto MapEach(const Matrix<T, C, R> &m, const F &func) noexcept
+  {
     using U = invoke_result_t<F, T>;
-    using Mat = Matrix<U, C, R>;
-
-    if constexpr (C == 2)
+    return [&]<int... I>(std::integer_sequence<int, I...>)
     {
-      auto col0 = MapEach(mat[0], func);
-      auto col1 = MapEach(mat[1], func);
-      return Mat(col0, col1);
-    }
-    else if constexpr (C == 3)
-    {
-      auto col0 = MapEach(mat[0], func);
-      auto col1 = MapEach(mat[1], func);
-      auto col2 = MapEach(mat[2], func);
-      return Mat(col0, col1, col2);
-    }
-    else if constexpr (C == 4)
-    {
-      auto col0 = MapEach(mat[0], func);
-      auto col1 = MapEach(mat[1], func);
-      auto col2 = MapEach(mat[2], func);
-      auto col3 = MapEach(mat[3], func);
-      return Mat(col0, col1, col2, col3);
-    }
-    else
-    {
-      MATRIX_STATIC_ASSERT(false);
-    }
+      return Matrix<U, C, R>(MapEach(m[I], func)...);
+    }(std::make_integer_sequence<int, C> {});
   }
 
-  /// @brief Apply a function to each component of the matrix.
-  template <MATRIX_TEMPLATE_PARAMS, RegularCallable<T> F>
-  KRYS_NODISCARD constexpr void ForEach(const MATRIX_TYPE &mat, const F &func) noexcept
+  /// @brief Calls @p func with each component of @p m, column by column.
+  template <Number T, int C, int R, RegularCallable<T> F>
+  constexpr void ForEach(const Matrix<T, C, R> &m, const F &func) noexcept
   {
-    MATRIX_STATIC_ASSERT(MATRIX_VALID_LENGTH_CONDITION(C, R));
-
-    if constexpr (C == 2)
+    for (int column = 0; column < C; ++column)
     {
-      ForEach(mat[0], func);
-      ForEach(mat[1], func);
-    }
-    else if constexpr (C == 3)
-    {
-      ForEach(mat[0], func);
-      ForEach(mat[1], func);
-      ForEach(mat[2], func);
-    }
-    else if constexpr (C == 4)
-    {
-      ForEach(mat[0], func);
-      ForEach(mat[1], func);
-      ForEach(mat[2], func);
-      ForEach(mat[3], func);
-    }
-    else
-    {
-      MATRIX_STATIC_ASSERT(false);
+      ForEach(m[column], func);
     }
   }
 
-  /// @brief Zip two matrices together using the provided function.
-  template <MATRIX_TEMPLATE_PARAMS, RegularCallable<T, T> F>
-  KRYS_NODISCARD constexpr auto Zip(const MATRIX_TYPE &lhs, const MATRIX_TYPE &rhs, const F &func) noexcept
-  {
-    MATRIX_STATIC_ASSERT(MATRIX_VALID_LENGTH_CONDITION(C, R));
-
-    using U = invoke_result_t<F, T, T>;
-    using Mat = Matrix<U, C, R>;
-
-    if constexpr (C == 2)
-    {
-      auto col0 = Zip(lhs[0], rhs[0], func);
-      auto col1 = Zip(lhs[1], rhs[1], func);
-      return Mat(col0, col1);
-    }
-    else if constexpr (C == 3)
-    {
-      auto col0 = Zip(lhs[0], rhs[0], func);
-      auto col1 = Zip(lhs[1], rhs[1], func);
-      auto col2 = Zip(lhs[2], rhs[2], func);
-      return Mat(col0, col1, col2);
-    }
-    else if constexpr (C == 4)
-    {
-      auto col0 = Zip(lhs[0], rhs[0], func);
-      auto col1 = Zip(lhs[1], rhs[1], func);
-      auto col2 = Zip(lhs[2], rhs[2], func);
-      auto col3 = Zip(lhs[3], rhs[3], func);
-      return Mat(col0, col1, col2, col3);
-    }
-    else
-    {
-      MATRIX_STATIC_ASSERT(false);
-    }
-  }
-
-  /// @brief Zip three matrices together using the provided function.
-  template <MATRIX_TEMPLATE_PARAMS, RegularCallable<T, T, T> F>
-  KRYS_NODISCARD constexpr auto Zip(const MATRIX_TYPE &a, const MATRIX_TYPE &b, const MATRIX_TYPE &c,
+  /// @brief A matrix of @p func applied to each pair of components of @p lhs and @p rhs.
+  template <Number T, int C, int R, RegularCallable<T, T> F>
+  KRYS_NODISCARD constexpr auto Zip(const Matrix<T, C, R> &lhs, const Matrix<T, C, R> &rhs,
                                     const F &func) noexcept
   {
-    MATRIX_STATIC_ASSERT(MATRIX_VALID_LENGTH_CONDITION(C, R));
-
-    using U = invoke_result_t<F, T, T, T>;
-    using Mat = Matrix<U, C, R>;
-
-    if constexpr (C == 2)
+    using U = invoke_result_t<F, T, T>;
+    return [&]<int... I>(std::integer_sequence<int, I...>)
     {
-      auto col0 = Zip(a[0], b[0], c[0], func);
-      auto col1 = Zip(a[1], b[1], c[1], func);
-      return Mat(col0, col1);
-    }
-    else if constexpr (C == 3)
-    {
-      auto col0 = Zip(a[0], b[0], c[0], func);
-      auto col1 = Zip(a[1], b[1], c[1], func);
-      auto col2 = Zip(a[2], b[2], c[2], func);
-      return Mat(col0, col1, col2);
-    }
-    else if constexpr (C == 4)
-    {
-      auto col0 = Zip(a[0], b[0], c[0], func);
-      auto col1 = Zip(a[1], b[1], c[1], func);
-      auto col2 = Zip(a[2], b[2], c[2], func);
-      auto col3 = Zip(a[3], b[3], c[3], func);
-      return Mat(col0, col1, col2, col3);
-    }
-    else
-    {
-      MATRIX_STATIC_ASSERT(false);
-    }
+      return Matrix<U, C, R>(Zip(lhs[I], rhs[I], func)...);
+    }(std::make_integer_sequence<int, C> {});
   }
 
-  /// @brief Computes the sum of all components of the matrix.
-  template <MATRIX_TEMPLATE_PARAMS>
-  KRYS_NODISCARD constexpr T Sum(const MATRIX_TYPE &m) noexcept
+  /// @brief A matrix of @p func applied to each triple of components of @p a, @p b and @p c.
+  template <Number T, int C, int R, RegularCallable<T, T, T> F>
+  KRYS_NODISCARD constexpr auto Zip(const Matrix<T, C, R> &a, const Matrix<T, C, R> &b,
+                                    const Matrix<T, C, R> &c, const F &func) noexcept
+  {
+    using U = invoke_result_t<F, T, T, T>;
+    return [&]<int... I>(std::integer_sequence<int, I...>)
+    {
+      return Matrix<U, C, R>(Zip(a[I], b[I], c[I], func)...);
+    }(std::make_integer_sequence<int, C> {});
+  }
+
+  /// @brief The sum of the components of @p m.
+  template <Number T, int C, int R>
+  KRYS_NODISCARD constexpr T Sum(const Matrix<T, C, R> &m) noexcept
   {
     T sum = T(0);
-    ForEach(m, [&sum](auto val) { sum += val; });
+    ForEach(m, [&sum](T value) { sum += value; });
     return sum;
   }
 
-  /// @brief Computes the sum of all components of the matrix after applying a function to each component.
-  template <MATRIX_TEMPLATE_PARAMS, RegularCallable<T> F>
-  KRYS_NODISCARD constexpr auto Sum(const MATRIX_TYPE &m, const F &func) noexcept
+  /// @brief The sum of @p func applied to each component of @p m.
+  template <Number T, int C, int R, RegularCallable<T> F>
+  KRYS_NODISCARD constexpr auto Sum(const Matrix<T, C, R> &m, const F &func) noexcept
   {
     using U = invoke_result_t<F, T>;
 
     U sum = U(0);
-    ForEach(m, [&sum, &func](auto val) { sum += func(val); });
+    ForEach(m, [&sum, &func](T value) { sum += func(value); });
     return sum;
   }
 
-  /// @brief Checks if any of the components in `v` satisfy the predicate.
-  template <MATRIX_TEMPLATE_PARAMS, Predicate<T> Func>
-  constexpr bool AnyOf(const MATRIX_TYPE &v, const Func &predicate) noexcept
+  /// @brief Whether any component of @p m satisfies @p predicate.
+  template <Number T, int C, int R, Predicate<T> F>
+  KRYS_NODISCARD constexpr bool AnyOf(const Matrix<T, C, R> &m, const F &predicate) noexcept
   {
-    MATRIX_STATIC_ASSERT(MATRIX_VALID_LENGTH_CONDITION(C, R));
-
-    if constexpr (C == 2 && R == 2)
+    for (int column = 0; column < C; ++column)
     {
-      return predicate(v[0].x) || predicate(v[0].y) || predicate(v[1].x) || predicate(v[1].y);
-    }
-    else if constexpr (C == 2 && R == 3)
-    {
-      return predicate(v[0].x) || predicate(v[0].y) || predicate(v[0].z) || predicate(v[1].x)
-             || predicate(v[1].y) || predicate(v[1].z);
-    }
-    else if constexpr (C == 2 && R == 4)
-    {
-      return predicate(v[0].x) || predicate(v[0].y) || predicate(v[0].z) || predicate(v[0].w)
-             || predicate(v[1].x) || predicate(v[1].y) || predicate(v[1].z) || predicate(v[1].w);
-    }
-    else if constexpr (C == 3 && R == 2)
-    {
-      return predicate(v[0].x) || predicate(v[0].y) || predicate(v[1].x) || predicate(v[1].y)
-             || predicate(v[2].x) || predicate(v[2].y);
-    }
-    else if constexpr (C == 3 && R == 3)
-    {
-      return predicate(v[0].x) || predicate(v[0].y) || predicate(v[0].z) || predicate(v[1].x)
-             || predicate(v[1].y) || predicate(v[1].z) || predicate(v[2].x) || predicate(v[2].y)
-             || predicate(v[2].z);
-    }
-    else if constexpr (C == 3 && R == 4)
-    {
-      return predicate(v[0].x) || predicate(v[0].y) || predicate(v[0].z) || predicate(v[0].w)
-             || predicate(v[1].x) || predicate(v[1].y) || predicate(v[1].z) || predicate(v[1].w)
-             || predicate(v[2].x) || predicate(v[2].y) || predicate(v[2].z) || predicate(v[2].w);
-    }
-    else if constexpr (C == 4 && R == 2)
-    {
-      return predicate(v[0].x) || predicate(v[0].y) || predicate(v[1].x) || predicate(v[1].y)
-             || predicate(v[2].x) || predicate(v[2].y) || predicate(v[3].x) || predicate(v[3].y);
-    }
-    else if constexpr (C == 4 && R == 3)
-    {
-      return predicate(v[0].x) || predicate(v[0].y) || predicate(v[0].z) || predicate(v[1].x)
-             || predicate(v[1].y) || predicate(v[1].z) || predicate(v[2].x) || predicate(v[2].y)
-             || predicate(v[2].z) || predicate(v[3].x) || predicate(v[3].y) || predicate(v[3].z);
-    }
-    else if constexpr (C == 4 && R == 4)
-    {
-      return predicate(v[0].x) || predicate(v[0].y) || predicate(v[0].z) || predicate(v[0].w)
-             || predicate(v[1].x) || predicate(v[1].y) || predicate(v[1].z) || predicate(v[1].w)
-             || predicate(v[2].x) || predicate(v[2].y) || predicate(v[2].z) || predicate(v[2].w)
-             || predicate(v[3].x) || predicate(v[3].y) || predicate(v[3].z) || predicate(v[3].w);
-    }
-  }
-
-  /// @brief Checks if all of the components in `v` satisfy the predicate.
-  template <MATRIX_TEMPLATE_PARAMS, Predicate<T> Func>
-  constexpr bool AllOf(const MATRIX_TYPE &v, const Func &predicate) noexcept
-  {
-    MATRIX_STATIC_ASSERT(MATRIX_VALID_LENGTH_CONDITION(C, R));
-
-    if constexpr (C == 2 && R == 2)
-    {
-      return predicate(v[0].x) && predicate(v[0].y) && predicate(v[1].x) && predicate(v[1].y);
-    }
-    else if constexpr (C == 2 && R == 3)
-    {
-      return predicate(v[0].x) && predicate(v[0].y) && predicate(v[0].z) && predicate(v[1].x)
-             && predicate(v[1].y) && predicate(v[1].z);
-    }
-    else if constexpr (C == 2 && R == 4)
-    {
-      return predicate(v[0].x) && predicate(v[0].y) && predicate(v[0].z) && predicate(v[0].w)
-             && predicate(v[1].x) && predicate(v[1].y) && predicate(v[1].z) && predicate(v[1].w);
-    }
-    else if constexpr (C == 3 && R == 2)
-    {
-      return predicate(v[0].x) && predicate(v[0].y) && predicate(v[1].x) && predicate(v[1].y)
-             && predicate(v[2].x) && predicate(v[2].y);
-    }
-    else if constexpr (C == 3 && R == 3)
-    {
-      return predicate(v[0].x) && predicate(v[0].y) && predicate(v[0].z) && predicate(v[1].x)
-             && predicate(v[1].y) && predicate(v[1].z) && predicate(v[2].x) && predicate(v[2].y)
-             && predicate(v[2].z);
-    }
-    else if constexpr (C == 3 && R == 4)
-    {
-      return predicate(v[0].x) && predicate(v[0].y) && predicate(v[0].z) && predicate(v[0].w)
-             && predicate(v[1].x) && predicate(v[1].y) && predicate(v[1].z) && predicate(v[1].w)
-             && predicate(v[2].x) && predicate(v[2].y) && predicate(v[2].z) && predicate(v[2].w);
-    }
-    else if constexpr (C == 4 && R == 2)
-    {
-      return predicate(v[0].x) && predicate(v[0].y) && predicate(v[1].x) && predicate(v[1].y)
-             && predicate(v[2].x) && predicate(v[2].y) && predicate(v[3].x) && predicate(v[3].y);
-    }
-    else if constexpr (C == 4 && R == 3)
-    {
-      return predicate(v[0].x) && predicate(v[0].y) && predicate(v[0].z) && predicate(v[1].x)
-             && predicate(v[1].y) && predicate(v[1].z) && predicate(v[2].x) && predicate(v[2].y)
-             && predicate(v[2].z) && predicate(v[3].x) && predicate(v[3].y) && predicate(v[3].z);
-    }
-    else if constexpr (C == 4 && R == 4)
-    {
-      return predicate(v[0].x) && predicate(v[0].y) && predicate(v[0].z) && predicate(v[0].w)
-             && predicate(v[1].x) && predicate(v[1].y) && predicate(v[1].z) && predicate(v[1].w)
-             && predicate(v[2].x) && predicate(v[2].y) && predicate(v[2].z) && predicate(v[2].w)
-             && predicate(v[3].x) && predicate(v[3].y) && predicate(v[3].z) && predicate(v[3].w);
-    }
-  }
-
-  /// @brief Checks if none of the components in `v` satisfy the predicate.
-  template <MATRIX_TEMPLATE_PARAMS, Predicate<T> Func>
-  constexpr bool NoneOf(const MATRIX_TYPE &v, const Func &predicate) noexcept
-  {
-    MATRIX_STATIC_ASSERT(MATRIX_VALID_LENGTH_CONDITION(C, R));
-
-    if constexpr (C == 2 && R == 2)
-    {
-      return !predicate(v[0].x) && !predicate(v[0].y) && !predicate(v[1].x) && !predicate(v[1].y);
-    }
-    else if constexpr (C == 2 && R == 3)
-    {
-      return !predicate(v[0].x) && !predicate(v[0].y) && !predicate(v[0].z) && !predicate(v[1].x)
-             && !predicate(v[1].y) && !predicate(v[1].z);
-    }
-    else if constexpr (C == 2 && R == 4)
-    {
-      return !predicate(v[0].x) && !predicate(v[0].y) && !predicate(v[0].z) && !predicate(v[0].w)
-             && !predicate(v[1].x) && !predicate(v[1].y) && !predicate(v[1].z) && !predicate(v[1].w);
-    }
-    else if constexpr (C == 3 && R == 2)
-    {
-      return !predicate(v[0].x) && !predicate(v[0].y) && !predicate(v[1].x) && !predicate(v[1].y)
-             && !predicate(v[2].x) && !predicate(v[2].y);
-    }
-    else if constexpr (C == 3 && R == 3)
-    {
-      return !predicate(v[0].x) && !predicate(v[0].y) && !predicate(v[0].z) && !predicate(v[1].x)
-             && !predicate(v[1].y) && !predicate(v[1].z) && !predicate(v[2].x) && !predicate(v[2].y)
-             && !predicate(v[2].z);
-    }
-    else if constexpr (C == 3 && R == 4)
-    {
-      return !predicate(v[0].x) && !predicate(v[0].y) && !predicate(v[0].z) && !predicate(v[0].w)
-             && !predicate(v[1].x) && !predicate(v[1].y) && !predicate(v[1].z) && !predicate(v[1].w)
-             && !predicate(v[2].x) && !predicate(v[2].y) && !predicate(v[2].z) && !predicate(v[2].w);
-    }
-    else if constexpr (C == 4 && R == 2)
-    {
-      return !predicate(v[0].x) && !predicate(v[0].y) && !predicate(v[1].x) && !predicate(v[1].y)
-             && !predicate(v[2].x) && !predicate(v[2].y) && !predicate(v[3].x) && !predicate(v[3].y);
-    }
-    else if constexpr (C == 4 && R == 3)
-    {
-      return !predicate(v[0].x) && !predicate(v[0].y) && !predicate(v[0].z) && !predicate(v[1].x)
-             && !predicate(v[1].y) && !predicate(v[1].z) && !predicate(v[2].x) && !predicate(v[2].y)
-             && !predicate(v[2].z) && !predicate(v[3].x) && !predicate(v[3].y) && !predicate(v[3].z);
-    }
-    else if constexpr (C == 4 && R == 4)
-    {
-      return !predicate(v[0].x) && !predicate(v[0].y) && !predicate(v[0].z) && !predicate(v[0].w)
-             && !predicate(v[1].x) && !predicate(v[1].y) && !predicate(v[1].z) && !predicate(v[1].w)
-             && !predicate(v[2].x) && !predicate(v[2].y) && !predicate(v[2].z) && !predicate(v[2].w)
-             && !predicate(v[3].x) && !predicate(v[3].y) && !predicate(v[3].z) && !predicate(v[3].w);
-    }
-  }
-
-  MATRIX_BINARY_OPERATOR(+);
-  MATRIX_BINARY_OPERATOR(-);
-  MATRIX_BINARY_OPERATOR(/);
-  MATRIX_BINARY_OPERATOR(>>);
-  MATRIX_BINARY_OPERATOR(<<);
-  MATRIX_BINARY_OPERATOR(|);
-  MATRIX_BINARY_OPERATOR(&);
-  MATRIX_BINARY_OPERATOR(^);
-
-  MATRIX_UNARY_OPERATOR(-);
-  MATRIX_UNARY_OPERATOR(+);
-  MATRIX_UNARY_OPERATOR(~);
-
-  template <MATRIX_TEMPLATE_PARAMS>
-  KRYS_NODISCARD constexpr auto operator+(T scalar, const MATRIX_TYPE &mat) noexcept
-  {
-    return mat + scalar;
-  }
-
-  template <MATRIX_TEMPLATE_PARAMS>
-  KRYS_NODISCARD constexpr auto operator*(T scalar, const MATRIX_TYPE &mat) noexcept
-  {
-    return mat * scalar;
-  }
-
-  template <MATRIX_TEMPLATE_PARAMS>
-  constexpr auto operator*(const MATRIX_TYPE &lhs, const T &scalar) noexcept
-  {
-    return MapEach(lhs, [&](auto v) { return v * scalar; });
-  }
-
-  /// @brief Matrix multiplication. For component-wise multiplication, call Hadamard(lhs, rhs) instead.
-  template <MATRIX_TEMPLATE_PARAMS, int P>
-  constexpr auto operator*(const Matrix<T, C, R> &lhs, const Matrix<T, P, C> &rhs) noexcept
-  {
-    // Result has P columns and R rows (R x P).
-    Matrix<T, P, R> out {T(0)};
-
-    for (int col = 0; col < P; ++col) // column of result / rhs
-    {
-      for (int row = 0; row < R; ++row) // row of result / lhs
+      if (AnyOf(m[column], predicate))
       {
-        for (int k = 0; k < C; ++k) // inner dimension
+        return true;
+      }
+    }
+    return false;
+  }
+
+  /// @brief Whether every component of @p m satisfies @p predicate.
+  template <Number T, int C, int R, Predicate<T> F>
+  KRYS_NODISCARD constexpr bool AllOf(const Matrix<T, C, R> &m, const F &predicate) noexcept
+  {
+    for (int column = 0; column < C; ++column)
+    {
+      if (!AllOf(m[column], predicate))
+      {
+        return false;
+      }
+    }
+    return true;
+  }
+
+  /// @brief Whether no component of @p m satisfies @p predicate.
+  template <Number T, int C, int R, Predicate<T> F>
+  KRYS_NODISCARD constexpr bool NoneOf(const Matrix<T, C, R> &m, const F &predicate) noexcept
+  {
+    return !AnyOf(m, predicate);
+  }
+
+#pragma endregion
+
+#pragma region Operators
+
+  template <Number T, int C, int R>
+  KRYS_NODISCARD constexpr auto operator+(const Matrix<T, C, R> &lhs, const Matrix<T, C, R> &rhs) noexcept
+  {
+    return Zip(lhs, rhs, std::plus<> {});
+  }
+
+  template <Number T, int C, int R>
+  KRYS_NODISCARD constexpr auto operator-(const Matrix<T, C, R> &lhs, const Matrix<T, C, R> &rhs) noexcept
+  {
+    return Zip(lhs, rhs, std::minus<> {});
+  }
+
+  template <Number T, int C, int R>
+  KRYS_NODISCARD constexpr auto operator/(const Matrix<T, C, R> &lhs, const Matrix<T, C, R> &rhs) noexcept
+  {
+    return Zip(lhs, rhs, std::divides<> {});
+  }
+
+  template <Number T, int C, int R>
+  KRYS_NODISCARD constexpr auto operator>>(const Matrix<T, C, R> &lhs, const Matrix<T, C, R> &rhs) noexcept
+  {
+    return Zip(lhs, rhs, [](T l, T r) { return l >> r; });
+  }
+
+  template <Number T, int C, int R>
+  KRYS_NODISCARD constexpr auto operator<<(const Matrix<T, C, R> &lhs, const Matrix<T, C, R> &rhs) noexcept
+  {
+    return Zip(lhs, rhs, [](T l, T r) { return l << r; });
+  }
+
+  template <Number T, int C, int R>
+  KRYS_NODISCARD constexpr auto operator|(const Matrix<T, C, R> &lhs, const Matrix<T, C, R> &rhs) noexcept
+  {
+    return Zip(lhs, rhs, std::bit_or<> {});
+  }
+
+  template <Number T, int C, int R>
+  KRYS_NODISCARD constexpr auto operator&(const Matrix<T, C, R> &lhs, const Matrix<T, C, R> &rhs) noexcept
+  {
+    return Zip(lhs, rhs, std::bit_and<> {});
+  }
+
+  template <Number T, int C, int R>
+  KRYS_NODISCARD constexpr auto operator^(const Matrix<T, C, R> &lhs, const Matrix<T, C, R> &rhs) noexcept
+  {
+    return Zip(lhs, rhs, std::bit_xor<> {});
+  }
+
+  template <Number T, int C, int R>
+  KRYS_NODISCARD constexpr auto operator+(const Matrix<T, C, R> &lhs, T scalar) noexcept
+  {
+    return MapEach(lhs, [scalar](T v) { return v + scalar; });
+  }
+
+  template <Number T, int C, int R>
+  KRYS_NODISCARD constexpr auto operator-(const Matrix<T, C, R> &lhs, T scalar) noexcept
+  {
+    return MapEach(lhs, [scalar](T v) { return v - scalar; });
+  }
+
+  template <Number T, int C, int R>
+  KRYS_NODISCARD constexpr auto operator*(const Matrix<T, C, R> &lhs, T scalar) noexcept
+  {
+    return MapEach(lhs, [scalar](T v) { return v * scalar; });
+  }
+
+  template <Number T, int C, int R>
+  KRYS_NODISCARD constexpr auto operator/(const Matrix<T, C, R> &lhs, T scalar) noexcept
+  {
+    return MapEach(lhs, [scalar](T v) { return v / scalar; });
+  }
+
+  template <Number T, int C, int R>
+  KRYS_NODISCARD constexpr auto operator>>(const Matrix<T, C, R> &lhs, T scalar) noexcept
+  {
+    return MapEach(lhs, [scalar](T v) { return v >> scalar; });
+  }
+
+  template <Number T, int C, int R>
+  KRYS_NODISCARD constexpr auto operator<<(const Matrix<T, C, R> &lhs, T scalar) noexcept
+  {
+    return MapEach(lhs, [scalar](T v) { return v << scalar; });
+  }
+
+  template <Number T, int C, int R>
+  KRYS_NODISCARD constexpr auto operator|(const Matrix<T, C, R> &lhs, T scalar) noexcept
+  {
+    return MapEach(lhs, [scalar](T v) { return v | scalar; });
+  }
+
+  template <Number T, int C, int R>
+  KRYS_NODISCARD constexpr auto operator&(const Matrix<T, C, R> &lhs, T scalar) noexcept
+  {
+    return MapEach(lhs, [scalar](T v) { return v & scalar; });
+  }
+
+  template <Number T, int C, int R>
+  KRYS_NODISCARD constexpr auto operator^(const Matrix<T, C, R> &lhs, T scalar) noexcept
+  {
+    return MapEach(lhs, [scalar](T v) { return v ^ scalar; });
+  }
+
+  template <Number T, int C, int R>
+  KRYS_NODISCARD constexpr auto operator+(T scalar, const Matrix<T, C, R> &rhs) noexcept
+  {
+    return rhs + scalar;
+  }
+
+  template <Number T, int C, int R>
+  KRYS_NODISCARD constexpr auto operator*(T scalar, const Matrix<T, C, R> &rhs) noexcept
+  {
+    return rhs * scalar;
+  }
+
+  template <Number T, int C, int R>
+  KRYS_NODISCARD constexpr auto operator-(const Matrix<T, C, R> &m) noexcept
+  {
+    return MapEach(m, std::negate<> {});
+  }
+
+  template <Number T, int C, int R>
+  KRYS_NODISCARD constexpr auto operator+(const Matrix<T, C, R> &m) noexcept
+  {
+    return MapEach(m, [](T value) { return +value; });
+  }
+
+  template <Number T, int C, int R>
+  KRYS_NODISCARD constexpr auto operator~(const Matrix<T, C, R> &m) noexcept
+  {
+    return MapEach(m, std::bit_not<> {});
+  }
+
+  /// @brief The matrix product of @p lhs and @p rhs. For the component-wise product, use `Hadamard`.
+  template <Number T, int C, int R, int P>
+  KRYS_NODISCARD constexpr auto operator*(const Matrix<T, C, R> &lhs, const Matrix<T, P, C> &rhs) noexcept
+  {
+    Matrix<T, P, R> product;
+    for (int column = 0; column < P; ++column)
+    {
+      for (int row = 0; row < R; ++row)
+      {
+        for (int k = 0; k < C; ++k)
         {
-          out[col][row] += lhs[k][row] * rhs[col][k];
+          product[column][row] += lhs[k][row] * rhs[column][k];
         }
       }
     }
-
-    return out;
+    return product;
   }
 
-  /// @brief Matrix multiplication with a vector.
-  template <MATRIX_TEMPLATE_PARAMS>
-  KRYS_NODISCARD constexpr auto operator*(const Matrix<T, C, R> &lhs, const Vector<T, C> &rhs) noexcept
+  /// @brief @p v transformed by @p m.
+  template <Number T, int C, int R>
+  KRYS_NODISCARD constexpr auto operator*(const Matrix<T, C, R> &m, const Vector<T, C> &v) noexcept
   {
-    Vector<T, R> result {T(0)};
+    Vector<T, R> result;
     for (int row = 0; row < R; ++row)
     {
       for (int k = 0; k < C; ++k)
       {
-        result[row] += lhs[k][row] * rhs[k];
+        result[row] += m[k][row] * v[k];
       }
     }
     return result;
   }
 
-  /// @brief Component-wise multiplication (Hadamard product) of two matrices.
-  template <MATRIX_TEMPLATE_PARAMS>
-  KRYS_NODISCARD constexpr auto Hadamard(const MATRIX_TYPE &lhs, const MATRIX_TYPE &rhs) noexcept
+  template <Number T, int C, int R>
+  constexpr Matrix<T, C, R> &operator+=(Matrix<T, C, R> &lhs, const Matrix<T, C, R> &rhs) noexcept
   {
-    return Zip(lhs, rhs, [](auto x, auto y) { return x * y; });
+    return lhs = lhs + rhs;
   }
 
-  /// @brief Computes the transpose of `m`.
-  template <MATRIX_TEMPLATE_PARAMS>
-  KRYS_NODISCARD constexpr auto Transpose(const MATRIX_TYPE &m) noexcept
+  template <Number T, int C, int R>
+  constexpr Matrix<T, C, R> &operator-=(Matrix<T, C, R> &lhs, const Matrix<T, C, R> &rhs) noexcept
   {
-    MATRIX_STATIC_ASSERT(MATRIX_VALID_LENGTH_CONDITION(C, R));
-
-    using Mat = typename Matrix<T, C, R>::TransposeType;
-    using ColumnType = Mat::ColumnType;
-
-    if constexpr (C == 2 && R == 2)
-    {
-      return Mat(ColumnType {m[0].x, m[1].x}, ColumnType {m[0].y, m[1].y});
-    }
-    else if constexpr (C == 2 && R == 3)
-    {
-      return Mat(ColumnType {m[0].x, m[1].x}, ColumnType {m[0].y, m[1].y}, ColumnType {m[0].z, m[1].z});
-    }
-    else if constexpr (C == 2 && R == 4)
-    {
-      return Mat(ColumnType {m[0].x, m[1].x}, ColumnType {m[0].y, m[1].y}, ColumnType {m[0].z, m[1].z},
-                 ColumnType {m[0].w, m[1].w});
-    }
-    else if constexpr (C == 3 && R == 2)
-    {
-      return Mat(ColumnType {m[0].x, m[1].x, m[2].x}, ColumnType {m[0].y, m[1].y, m[2].y});
-    }
-    else if constexpr (C == 3 && R == 3)
-    {
-      return Mat(ColumnType {m[0].x, m[1].x, m[2].x}, ColumnType {m[0].y, m[1].y, m[2].y},
-                 ColumnType {m[0].z, m[1].z, m[2].z});
-    }
-    else if constexpr (C == 3 && R == 4)
-    {
-      return Mat(ColumnType {m[0].x, m[1].x, m[2].x}, ColumnType {m[0].y, m[1].y, m[2].y},
-                 ColumnType {m[0].z, m[1].z, m[2].z}, ColumnType {m[0].w, m[1].w, m[2].w});
-    }
-    else if constexpr (C == 4 && R == 2)
-    {
-      return Mat(ColumnType {m[0].x, m[1].x, m[2].x, m[3].x}, ColumnType {m[0].y, m[1].y, m[2].y, m[3].y});
-    }
-    else if constexpr (C == 4 && R == 3)
-    {
-      return Mat(ColumnType {m[0].x, m[1].x, m[2].x, m[3].x}, ColumnType {m[0].y, m[1].y, m[2].y, m[3].y},
-                 ColumnType {m[0].z, m[1].z, m[2].z, m[3].z});
-    }
-    else if constexpr (C == 4 && R == 4)
-    {
-      return Mat(ColumnType {m[0].x, m[1].x, m[2].x, m[3].x}, ColumnType {m[0].y, m[1].y, m[2].y, m[3].y},
-                 ColumnType {m[0].z, m[1].z, m[2].z, m[3].z}, ColumnType {m[0].w, m[1].w, m[2].w, m[3].w});
-    }
+    return lhs = lhs - rhs;
   }
 
-  /// @brief Computes the determinant of `m`. `m` must be a square matrix.
-  template <MATRIX_TEMPLATE_PARAMS>
-  KRYS_NODISCARD constexpr T Determinant(const MATRIX_TYPE &m) noexcept
+  /// @brief Multiplies @p lhs by @p rhs (the matrix product), which must be square.
+  template <Number T, int N>
+  constexpr Matrix<T, N, N> &operator*=(Matrix<T, N, N> &lhs, const Matrix<T, N, N> &rhs) noexcept
   {
-    MATRIX_STATIC_ASSERT(C == R);
+    return lhs = lhs * rhs;
+  }
 
-    if constexpr (C == 2 && R == 2)
+  template <Number T, int C, int R>
+  constexpr Matrix<T, C, R> &operator/=(Matrix<T, C, R> &lhs, const Matrix<T, C, R> &rhs) noexcept
+  {
+    return lhs = lhs / rhs;
+  }
+
+  template <Number T, int C, int R>
+  constexpr Matrix<T, C, R> &operator+=(Matrix<T, C, R> &lhs, identity_t<T> scalar) noexcept
+  {
+    return lhs = lhs + scalar;
+  }
+
+  template <Number T, int C, int R>
+  constexpr Matrix<T, C, R> &operator-=(Matrix<T, C, R> &lhs, identity_t<T> scalar) noexcept
+  {
+    return lhs = lhs - scalar;
+  }
+
+  template <Number T, int C, int R>
+  constexpr Matrix<T, C, R> &operator*=(Matrix<T, C, R> &lhs, identity_t<T> scalar) noexcept
+  {
+    return lhs = lhs * scalar;
+  }
+
+  template <Number T, int C, int R>
+  constexpr Matrix<T, C, R> &operator/=(Matrix<T, C, R> &lhs, identity_t<T> scalar) noexcept
+  {
+    return lhs = lhs / scalar;
+  }
+
+#pragma endregion
+
+#pragma region Linear algebra
+
+  /// @brief The component-wise (Hadamard) product of @p lhs and @p rhs.
+  template <Number T, int C, int R>
+  KRYS_NODISCARD constexpr auto Hadamard(const Matrix<T, C, R> &lhs, const Matrix<T, C, R> &rhs) noexcept
+  {
+    return Zip(lhs, rhs, std::multiplies<> {});
+  }
+
+  /// @brief The transpose of @p m.
+  template <Number T, int C, int R>
+  KRYS_NODISCARD constexpr Matrix<T, R, C> Transpose(const Matrix<T, C, R> &m) noexcept
+  {
+    Matrix<T, R, C> transpose;
+    for (int column = 0; column < C; ++column)
+    {
+      for (int row = 0; row < R; ++row)
+      {
+        transpose[row][column] = m[column][row];
+      }
+    }
+    return transpose;
+  }
+
+  /// @brief The determinant of the square matrix @p m.
+  template <Number T, int N>
+  KRYS_NODISCARD constexpr T Determinant(const Matrix<T, N, N> &m) noexcept
+  {
+    if constexpr (N == 2)
     {
       return m[0].x * m[1].y - m[0].y * m[1].x;
     }
-    else if constexpr (C == 3 && R == 3)
+    else if constexpr (N == 3)
     {
       return m[0].x * (m[1].y * m[2].z - m[2].y * m[1].z) - m[1].x * (m[0].y * m[2].z - m[2].y * m[0].z)
              + m[2].x * (m[0].y * m[1].z - m[0].z * m[1].y);
     }
-    else if constexpr (C == 4 && R == 4)
+    else
     {
-      return m[0].x
-               * Determinant(Matrix<T, 3, 3> {
-                 {m[1].y, m[1].z, m[1].w}, {m[2].y, m[2].z, m[2].w}, {m[3].y, m[3].z, m[3].w}})
-             - m[1].x
-                 * Determinant(Matrix<T, 3, 3> {
-                   {m[0].y, m[0].z, m[0].w}, {m[2].y, m[2].z, m[2].w}, {m[3].y, m[3].z, m[3].w}})
-             + m[2].x
-                 * Determinant(Matrix<T, 3, 3> {
-                   {m[0].y, m[0].z, m[0].w}, {m[1].y, m[1].z, m[1].w}, {m[3].y, m[3].z, m[3].w}})
-             - m[3].x
-                 * Determinant(Matrix<T, 3, 3> {
-                   {m[0].y, m[0].z, m[0].w}, {m[1].y, m[1].z, m[1].w}, {m[2].y, m[2].z, m[2].w}});
+      // Expansion along the first row, by the minors of the remaining three rows.
+      auto minor = [&m](int a, int b, int c)
+      {
+        return Determinant(
+          Matrix<T, 3, 3> {{m[a].y, m[a].z, m[a].w}, {m[b].y, m[b].z, m[b].w}, {m[c].y, m[c].z, m[c].w}});
+      };
+      return m[0].x * minor(1, 2, 3) - m[1].x * minor(0, 2, 3) + m[2].x * minor(0, 1, 3)
+             - m[3].x * minor(0, 1, 2);
     }
   }
 
-  /// @brief Computes the inverse of `m`.
-  template <MATRIX_TEMPLATE_PARAMS>
-  KRYS_NODISCARD constexpr auto Inverse(const MATRIX_TYPE &m) noexcept
+  /// @brief The inverse of the square matrix @p m, or its adjugate if it's singular (determinant 0).
+  template <Number T, int N>
+  KRYS_NODISCARD constexpr Matrix<T, N, N> Inverse(const Matrix<T, N, N> &m) noexcept
   {
-    MATRIX_STATIC_ASSERT(R == C);
-
-    if constexpr (C == 2 && R == 2)
+    if constexpr (N == 2)
     {
       T determinant = Determinant(m);
-      if (determinant == T(0))
-      {
-        determinant = T(1);
-      }
-
-      T oneOverDeterminant = T(1) / determinant;
-      return Matrix<T, 2, 2>(+m[1].y * oneOverDeterminant, -m[0].y * oneOverDeterminant,
-                             -m[1].x * oneOverDeterminant, +m[0].x * oneOverDeterminant);
+      T inverseDeterminant = T(1) / (determinant == T(0) ? T(1) : determinant);
+      return {m[1].y * inverseDeterminant, -m[0].y * inverseDeterminant, -m[1].x * inverseDeterminant,
+              m[0].x * inverseDeterminant};
     }
-    else if constexpr (C == 3 && R == 3)
+    else if constexpr (N == 3)
     {
       T determinant = Determinant(m);
-      if (determinant == T(0))
-      {
-        determinant = T(1);
-      }
-      T oneOverDet = T(1) / determinant;
+      T inverseDeterminant = T(1) / (determinant == T(0) ? T(1) : determinant);
+      return {(m[1].y * m[2].z - m[2].y * m[1].z) * inverseDeterminant,
+              -(m[0].y * m[2].z - m[2].y * m[0].z) * inverseDeterminant,
+              (m[0].y * m[1].z - m[1].y * m[0].z) * inverseDeterminant,
 
-      return Matrix<T, 3, 3>(+((m[1].y * m[2].z - m[2].y * m[1].z) * oneOverDet),
-                             -((m[0].y * m[2].z - m[2].y * m[0].z) * oneOverDet),
-                             +((m[0].y * m[1].z - m[1].y * m[0].z) * oneOverDet),
+              -(m[1].x * m[2].z - m[2].x * m[1].z) * inverseDeterminant,
+              (m[0].x * m[2].z - m[2].x * m[0].z) * inverseDeterminant,
+              -(m[0].x * m[1].z - m[1].x * m[0].z) * inverseDeterminant,
 
-                             -((m[1].x * m[2].z - m[2].x * m[1].z) * oneOverDet),
-                             +((m[0].x * m[2].z - m[2].x * m[0].z) * oneOverDet),
-                             -((m[0].x * m[1].z - m[1].x * m[0].z) * oneOverDet),
-
-                             +((m[1].x * m[2].y - m[2].x * m[1].y) * oneOverDet),
-                             -((m[0].x * m[2].y - m[2].x * m[0].y) * oneOverDet),
-                             +((m[0].x * m[1].y - m[1].x * m[0].y) * oneOverDet));
+              (m[1].x * m[2].y - m[2].x * m[1].y) * inverseDeterminant,
+              -(m[0].x * m[2].y - m[2].x * m[0].y) * inverseDeterminant,
+              (m[0].x * m[1].y - m[1].x * m[0].y) * inverseDeterminant};
     }
-    else if constexpr (C == 4 && R == 4)
+    else
     {
-      T A2323 = m[2].z * m[3].w - m[2].w * m[3].z;
-      T A1323 = m[2].y * m[3].w - m[2].w * m[3].y;
-      T A1223 = m[2].y * m[3].z - m[2].z * m[3].y;
-      T A0323 = m[2].x * m[3].w - m[2].w * m[3].x;
-      T A0223 = m[2].x * m[3].z - m[2].z * m[3].x;
-      T A0123 = m[2].x * m[3].y - m[2].y * m[3].x;
-      T A2313 = m[1].z * m[3].w - m[1].w * m[3].z;
-      T A1313 = m[1].y * m[3].w - m[1].w * m[3].y;
-      T A1213 = m[1].y * m[3].z - m[1].z * m[3].y;
-      T A2312 = m[1].z * m[2].w - m[1].w * m[2].z;
-      T A1312 = m[1].y * m[2].w - m[1].w * m[2].y;
-      T A1212 = m[1].y * m[2].z - m[1].z * m[2].y;
-      T A0313 = m[1].x * m[3].w - m[1].w * m[3].x;
-      T A0213 = m[1].x * m[3].z - m[1].z * m[3].x;
-      T A0312 = m[1].x * m[2].w - m[1].w * m[2].x;
-      T A0212 = m[1].x * m[2].z - m[1].z * m[2].x;
-      T A0113 = m[1].x * m[3].y - m[1].y * m[3].x;
-      T A0112 = m[1].x * m[2].y - m[1].y * m[2].x;
+      // 2x2 minors of the lower two columns (A_rrcc: rows, then columns).
+      T a2323 = m[2].z * m[3].w - m[2].w * m[3].z;
+      T a1323 = m[2].y * m[3].w - m[2].w * m[3].y;
+      T a1223 = m[2].y * m[3].z - m[2].z * m[3].y;
+      T a0323 = m[2].x * m[3].w - m[2].w * m[3].x;
+      T a0223 = m[2].x * m[3].z - m[2].z * m[3].x;
+      T a0123 = m[2].x * m[3].y - m[2].y * m[3].x;
+      T a2313 = m[1].z * m[3].w - m[1].w * m[3].z;
+      T a1313 = m[1].y * m[3].w - m[1].w * m[3].y;
+      T a1213 = m[1].y * m[3].z - m[1].z * m[3].y;
+      T a2312 = m[1].z * m[2].w - m[1].w * m[2].z;
+      T a1312 = m[1].y * m[2].w - m[1].w * m[2].y;
+      T a1212 = m[1].y * m[2].z - m[1].z * m[2].y;
+      T a0313 = m[1].x * m[3].w - m[1].w * m[3].x;
+      T a0213 = m[1].x * m[3].z - m[1].z * m[3].x;
+      T a0312 = m[1].x * m[2].w - m[1].w * m[2].x;
+      T a0212 = m[1].x * m[2].z - m[1].z * m[2].x;
+      T a0113 = m[1].x * m[3].y - m[1].y * m[3].x;
+      T a0112 = m[1].x * m[2].y - m[1].y * m[2].x;
 
-      T det = m[0].x * (m[1].y * A2323 - m[1].z * A1323 + m[1].w * A1223)
-              - m[0].y * (m[1].x * A2323 - m[1].z * A0323 + m[1].w * A0223)
-              + m[0].z * (m[1].x * A1323 - m[1].y * A0323 + m[1].w * A0123)
-              - m[0].w * (m[1].x * A1223 - m[1].y * A0223 + m[1].z * A0123);
+      T determinant = m[0].x * (m[1].y * a2323 - m[1].z * a1323 + m[1].w * a1223)
+                      - m[0].y * (m[1].x * a2323 - m[1].z * a0323 + m[1].w * a0223)
+                      + m[0].z * (m[1].x * a1323 - m[1].y * a0323 + m[1].w * a0123)
+                      - m[0].w * (m[1].x * a1223 - m[1].y * a0223 + m[1].z * a0123);
+      T d = T(1) / (determinant == T(0) ? T(1) : determinant);
 
-      if (det == T(0))
-      {
-        det = 1;
-      }
-      det = T(1) / det;
-
-      return Matrix<T, 4, 4>({det * (m[1].y * A2323 - m[1].z * A1323 + m[1].w * A1223),
-                              det * -(m[0].y * A2323 - m[0].z * A1323 + m[0].w * A1223),
-                              det * (m[0].y * A2313 - m[0].z * A1313 + m[0].w * A1213),
-                              det * -(m[0].y * A2312 - m[0].z * A1312 + m[0].w * A1212)},
-                             {det * -(m[1].x * A2323 - m[1].z * A0323 + m[1].w * A0223),
-                              det * (m[0].x * A2323 - m[0].z * A0323 + m[0].w * A0223),
-                              det * -(m[0].x * A2313 - m[0].z * A0313 + m[0].w * A0213),
-                              det * (m[0].x * A2312 - m[0].z * A0312 + m[0].w * A0212)},
-                             {det * (m[1].x * A1323 - m[1].y * A0323 + m[1].w * A0123),
-                              det * -(m[0].x * A1323 - m[0].y * A0323 + m[0].w * A0123),
-                              det * (m[0].x * A1313 - m[0].y * A0313 + m[0].w * A0113),
-                              det * -(m[0].x * A1312 - m[0].y * A0312 + m[0].w * A0112)},
-                             {det * -(m[1].x * A1223 - m[1].y * A0223 + m[1].z * A0123),
-                              det * (m[0].x * A1223 - m[0].y * A0223 + m[0].z * A0123),
-                              det * -(m[0].x * A1213 - m[0].y * A0213 + m[0].z * A0113),
-                              det * (m[0].x * A1212 - m[0].y * A0212 + m[0].z * A0112)});
+      return {{d * (m[1].y * a2323 - m[1].z * a1323 + m[1].w * a1223),
+               d * -(m[0].y * a2323 - m[0].z * a1323 + m[0].w * a1223),
+               d * (m[0].y * a2313 - m[0].z * a1313 + m[0].w * a1213),
+               d * -(m[0].y * a2312 - m[0].z * a1312 + m[0].w * a1212)},
+              {d * -(m[1].x * a2323 - m[1].z * a0323 + m[1].w * a0223),
+               d * (m[0].x * a2323 - m[0].z * a0323 + m[0].w * a0223),
+               d * -(m[0].x * a2313 - m[0].z * a0313 + m[0].w * a0213),
+               d * (m[0].x * a2312 - m[0].z * a0312 + m[0].w * a0212)},
+              {d * (m[1].x * a1323 - m[1].y * a0323 + m[1].w * a0123),
+               d * -(m[0].x * a1323 - m[0].y * a0323 + m[0].w * a0123),
+               d * (m[0].x * a1313 - m[0].y * a0313 + m[0].w * a0113),
+               d * -(m[0].x * a1312 - m[0].y * a0312 + m[0].w * a0112)},
+              {d * -(m[1].x * a1223 - m[1].y * a0223 + m[1].z * a0123),
+               d * (m[0].x * a1223 - m[0].y * a0223 + m[0].z * a0123),
+               d * -(m[0].x * a1213 - m[0].y * a0213 + m[0].z * a0113),
+               d * (m[0].x * a1212 - m[0].y * a0212 + m[0].z * a0112)}};
     }
   }
 
-  /// @brief Computes the outer product of two vectors, resulting in a matrix.
-  template <MATRIX_TEMPLATE_PARAMS>
-  constexpr auto OuterProduct(const Vector<T, R> &a, const Vector<T, C> &b) noexcept
+  /// @brief The outer product of @p a and @p b: the matrix whose column `c` is `a * b[c]`.
+  template <Number T, int C, int R>
+  KRYS_NODISCARD constexpr Matrix<T, C, R> OuterProduct(const Vector<T, R> &a, const Vector<T, C> &b) noexcept
   {
-    Matrix<T, C, R> mat;
-    for (int col = 0; col < C; ++col)
+    Matrix<T, C, R> product;
+    for (int column = 0; column < C; ++column)
     {
       for (int row = 0; row < R; ++row)
       {
-        mat[col][row] = a[row] * b[col];
+        product[column][row] = a[row] * b[column];
       }
     }
-    return mat;
+    return product;
   }
 
-#undef MATRIX_TYPE_ALIASES
-#undef MATRIX_INTROSPECTION
-#undef MATRIX_BINARY_OPERATOR
-#undef MATRIX_UNARY_OPERATOR
-#undef MATRIX_OPERATOR_ASSIGNMENT
-#undef MATRIX_COMMON_MEMBER_FUNCTIONS
+#pragma endregion
 }

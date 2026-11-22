@@ -19,4 +19,9 @@ namespace krys
     constexpr static int Rows = 0;
     constexpr static int Columns = 0;
   };
+
+  /// @brief A vector or matrix: a type whose components the component-wise algorithms (`MapEach`, `Zip`,
+  /// `AllOf` and so on) work over.
+  template <typename T>
+  concept VectorOrMatrix = Traits<T>::IsVector || Traits<T>::IsMatrix;
 }
