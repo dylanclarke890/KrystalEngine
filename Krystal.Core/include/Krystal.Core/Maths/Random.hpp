@@ -61,7 +61,7 @@ namespace krys
       return Float() * (max - min) + min;
     }
 
-    template <Number T, int N>
+    template <Number T, size_t N>
     static auto Vector()
     {
       krys::Vector<T, N> vec;
@@ -69,7 +69,7 @@ namespace krys
       return vec;
     }
 
-    template <Number T, int N>
+    template <Number T, size_t N>
     static auto Vector(float min, float max)
     {
       krys::Vector<T, N> vec;

@@ -15,9 +15,9 @@ namespace krys
     constexpr static bool IsVector = false;
     constexpr static bool IsMatrix = false;
 
-    constexpr static int TotalComponents = 0;
-    constexpr static int Rows = 0;
-    constexpr static int Columns = 0;
+    constexpr static size_t TotalComponents = 0;
+    constexpr static size_t Rows = 0;
+    constexpr static size_t Columns = 0;
   };
 
   /// @brief A vector or matrix: a type whose components the component-wise algorithms (`MapEach`, `Zip`,

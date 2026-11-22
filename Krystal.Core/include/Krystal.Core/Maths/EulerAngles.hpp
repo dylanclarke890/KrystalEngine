@@ -238,7 +238,7 @@ namespace krys::detail
 namespace krys
 {
   /// @brief The XYX Euler angles of the rotation in @p m's upper-left 3x3.
-  template <Number T, int C, int R>
+  template <Number T, size_t C, size_t R>
   requires(C >= 3 && R >= 3)
   KRYS_NODISCARD constexpr Vector3<T> ToEulerXYX(const Matrix<T, C, R> &m) noexcept
   {
@@ -253,7 +253,7 @@ namespace krys
   }
 
   /// @brief The XZX Euler angles of the rotation in @p m's upper-left 3x3.
-  template <Number T, int C, int R>
+  template <Number T, size_t C, size_t R>
   requires(C >= 3 && R >= 3)
   KRYS_NODISCARD constexpr Vector3<T> ToEulerXZX(const Matrix<T, C, R> &m) noexcept
   {
@@ -268,7 +268,7 @@ namespace krys
   }
 
   /// @brief The XYZ Euler angles of the rotation in @p m's upper-left 3x3.
-  template <Number T, int C, int R>
+  template <Number T, size_t C, size_t R>
   requires(C >= 3 && R >= 3)
   KRYS_NODISCARD constexpr Vector3<T> ToEulerXYZ(const Matrix<T, C, R> &m) noexcept
   {
@@ -283,7 +283,7 @@ namespace krys
   }
 
   /// @brief The YXY Euler angles of the rotation in @p m's upper-left 3x3.
-  template <Number T, int C, int R>
+  template <Number T, size_t C, size_t R>
   requires(C >= 3 && R >= 3)
   KRYS_NODISCARD constexpr Vector3<T> ToEulerYXY(const Matrix<T, C, R> &m) noexcept
   {
@@ -298,7 +298,7 @@ namespace krys
   }
 
   /// @brief The YZY Euler angles of the rotation in @p m's upper-left 3x3.
-  template <Number T, int C, int R>
+  template <Number T, size_t C, size_t R>
   requires(C >= 3 && R >= 3)
   KRYS_NODISCARD constexpr Vector3<T> ToEulerYZY(const Matrix<T, C, R> &m) noexcept
   {
@@ -313,7 +313,7 @@ namespace krys
   }
 
   /// @brief The ZXZ Euler angles of the rotation in @p m's upper-left 3x3.
-  template <Number T, int C, int R>
+  template <Number T, size_t C, size_t R>
   requires(C >= 3 && R >= 3)
   KRYS_NODISCARD constexpr Vector3<T> ToEulerZXZ(const Matrix<T, C, R> &m) noexcept
   {
@@ -328,7 +328,7 @@ namespace krys
   }
 
   /// @brief The ZYZ Euler angles of the rotation in @p m's upper-left 3x3.
-  template <Number T, int C, int R>
+  template <Number T, size_t C, size_t R>
   requires(C >= 3 && R >= 3)
   KRYS_NODISCARD constexpr Vector3<T> ToEulerZYZ(const Matrix<T, C, R> &m) noexcept
   {
@@ -343,7 +343,7 @@ namespace krys
   }
 
   /// @brief The XZY Euler angles of the rotation in @p m's upper-left 3x3.
-  template <Number T, int C, int R>
+  template <Number T, size_t C, size_t R>
   requires(C >= 3 && R >= 3)
   KRYS_NODISCARD constexpr Vector3<T> ToEulerXZY(const Matrix<T, C, R> &m) noexcept
   {
@@ -358,7 +358,7 @@ namespace krys
   }
 
   /// @brief The YXZ Euler angles of the rotation in @p m's upper-left 3x3.
-  template <Number T, int C, int R>
+  template <Number T, size_t C, size_t R>
   requires(C >= 3 && R >= 3)
   KRYS_NODISCARD constexpr Vector3<T> ToEulerYXZ(const Matrix<T, C, R> &m) noexcept
   {
@@ -373,7 +373,7 @@ namespace krys
   }
 
   /// @brief The YZX Euler angles of the rotation in @p m's upper-left 3x3.
-  template <Number T, int C, int R>
+  template <Number T, size_t C, size_t R>
   requires(C >= 3 && R >= 3)
   KRYS_NODISCARD constexpr Vector3<T> ToEulerYZX(const Matrix<T, C, R> &m) noexcept
   {
@@ -388,7 +388,7 @@ namespace krys
   }
 
   /// @brief The ZXY Euler angles of the rotation in @p m's upper-left 3x3.
-  template <Number T, int C, int R>
+  template <Number T, size_t C, size_t R>
   requires(C >= 3 && R >= 3)
   KRYS_NODISCARD constexpr Vector3<T> ToEulerZXY(const Matrix<T, C, R> &m) noexcept
   {
@@ -403,7 +403,7 @@ namespace krys
   }
 
   /// @brief The ZYX Euler angles of the rotation in @p m's upper-left 3x3.
-  template <Number T, int C, int R>
+  template <Number T, size_t C, size_t R>
   requires(C >= 3 && R >= 3)
   KRYS_NODISCARD constexpr Vector3<T> ToEulerZYX(const Matrix<T, C, R> &m) noexcept
   {

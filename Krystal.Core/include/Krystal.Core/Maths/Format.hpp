@@ -11,7 +11,7 @@ namespace std
 #pragma region Vector
 
   /// @brief Provides a custom formatter for vectors.
-  template <krys::Number T, int N>
+  template <krys::Number T, size_t N>
   struct formatter<krys::Vector<T, N>>
   {
     constexpr auto parse(format_parse_context &ctx)
@@ -45,7 +45,7 @@ namespace std
     }
   };
 
-  template <krys::Number T, int N>
+  template <krys::Number T, size_t N>
   ostream &operator<<(std::ostream &os, const krys::Vector<T, N> &v)
   {
     os << std::format("{}", v);
@@ -57,7 +57,7 @@ namespace std
 #pragma region Matrix
 
   /// @brief Provides a custom formatter for matrices.
-  template <krys::Number T, int C, int R>
+  template <krys::Number T, size_t C, size_t R>
   struct formatter<krys::Matrix<T, C, R>>
   {
     constexpr auto parse(format_parse_context &ctx)
@@ -123,7 +123,7 @@ namespace std
     }
   };
 
-  template <krys::Number T, int C, int R>
+  template <krys::Number T, size_t C, size_t R>
   ostream &operator<<(std::ostream &os, const krys::Matrix<T, C, R> &m)
   {
     os << std::format("{}", m);

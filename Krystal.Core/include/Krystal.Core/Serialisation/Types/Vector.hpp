@@ -5,7 +5,7 @@
 
 namespace krys
 {
-  template <typename Archive, typename T, int N>
+  template <typename Archive, typename T, size_t N>
   void Transfer(Archive &archive, Vector<T, N> &vector) noexcept
   {
     archive(serialisation::CreateNamedField("x", vector.x));

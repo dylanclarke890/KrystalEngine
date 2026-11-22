@@ -6,7 +6,7 @@
 
 namespace krys
 {
-  template <Number T, int N>
+  template <Number T, size_t N>
   struct FastHash<Vector<T, N>>
   {
     KRYS_NODISCARD size_t operator()(const Vector<T, N> &v) const noexcept
@@ -30,7 +30,7 @@ namespace krys
     }
   };
 
-  template <Number T, int C, int R>
+  template <Number T, size_t C, size_t R>
   struct FastHash<Matrix<T, C, R>>
   {
     KRYS_NODISCARD size_t operator()(const Matrix<T, C, R> &m) const noexcept

@@ -15,13 +15,13 @@ namespace krys
 {
   /// @brief A matrix of @p C columns and @p R rows (each 2 to 4) of type @p T, stored column by column:
   /// `m[column][row]`.
-  template <Number T, int C, int R>
+  template <Number T, size_t C, size_t R>
   struct Matrix
   {
     static_assert(C >= 2 && C <= 4 && R >= 2 && R <= 4, "Matrices have 2 to 4 columns and 2 to 4 rows.");
 
-    constexpr static int Columns = C;
-    constexpr static int Rows = R;
+    constexpr static size_t Columns = C;
+    constexpr static size_t Rows = R;
     using Type = Matrix<T, C, R>;
     using ComponentType = T;
     using RowType = Vector<T, C>;
@@ -69,9 +69,9 @@ namespace krys
     constexpr Matrix(TValues... values) noexcept
     {
       const T flat[] {static_cast<T>(values)...};
-      for (int column = 0; column < C; ++column)
+      for (size_t column = 0; column < C; ++column)
       {
-        for (int row = 0; row < R; ++row)
+        for (size_t row = 0; row < R; ++row)
         {
           _data[column][row] = flat[column * R + row];
         }
@@ -87,31 +87,31 @@ namespace krys
     {
     }
 
-    KRYS_NODISCARD constexpr ColumnType &operator[](int column) noexcept
+    KRYS_NODISCARD constexpr ColumnType &operator[](size_t column) noexcept
     {
-      krys_debug_assert(column >= 0 && column < C);
+      krys_debug_assert(column < C);
       return _data[column];
     }
 
-    KRYS_NODISCARD constexpr const ColumnType &operator[](int column) const noexcept
+    KRYS_NODISCARD constexpr const ColumnType &operator[](size_t column) const noexcept
     {
-      krys_debug_assert(column >= 0 && column < C);
+      krys_debug_assert(column < C);
       return _data[column];
     }
 
     KRYS_NODISCARD constexpr auto operator<=>(const Matrix &) const noexcept = default;
   };
 
-  template <Number T, int C, int R>
+  template <Number T, size_t C, size_t R>
   struct Traits<Matrix<T, C, R>>
   {
     using ComponentType = T;
     constexpr static bool IsVector = false;
     constexpr static bool IsMatrix = true;
 
-    constexpr static int TotalComponents = C * R;
-    constexpr static int Columns = C;
-    constexpr static int Rows = R;
+    constexpr static size_t TotalComponents = C * R;
+    constexpr static size_t Columns = C;
+    constexpr static size_t Rows = R;
   };
 
   template <typename T>
@@ -213,7 +213,7 @@ namespace krys
     static_assert(TMatrix::Columns == TMatrix::Rows, "Only square matrices have an identity.");
 
     TMatrix identity;
-    for (int i = 0; i < TMatrix::Columns; ++i)
+    for (size_t i = 0; i < TMatrix::Columns; ++i)
     {
       identity[i][i] = typename TMatrix::ComponentType(1);
     }
@@ -223,52 +223,52 @@ namespace krys
 #pragma region Component-wise algorithms
 
   /// @brief A matrix of @p func applied to each component of @p m.
-  template <Number T, int C, int R, RegularCallable<T> F>
+  template <Number T, size_t C, size_t R, RegularCallable<T> F>
   KRYS_NODISCARD constexpr auto MapEach(const Matrix<T, C, R> &m, const F &func) noexcept
   {
     using U = invoke_result_t<F, T>;
-    return [&]<int... I>(std::integer_sequence<int, I...>)
+    return [&]<size_t... I>(std::index_sequence<I...>)
     {
       return Matrix<U, C, R>(MapEach(m[I], func)...);
-    }(std::make_integer_sequence<int, C> {});
+    }(std::make_index_sequence<C> {});
   }
 
   /// @brief Calls @p func with each component of @p m, column by column.
-  template <Number T, int C, int R, RegularCallable<T> F>
+  template <Number T, size_t C, size_t R, RegularCallable<T> F>
   constexpr void ForEach(const Matrix<T, C, R> &m, const F &func) noexcept
   {
-    for (int column = 0; column < C; ++column)
+    for (size_t column = 0; column < C; ++column)
     {
       ForEach(m[column], func);
     }
   }
 
   /// @brief A matrix of @p func applied to each pair of components of @p lhs and @p rhs.
-  template <Number T, int C, int R, RegularCallable<T, T> F>
+  template <Number T, size_t C, size_t R, RegularCallable<T, T> F>
   KRYS_NODISCARD constexpr auto Zip(const Matrix<T, C, R> &lhs, const Matrix<T, C, R> &rhs,
                                     const F &func) noexcept
   {
     using U = invoke_result_t<F, T, T>;
-    return [&]<int... I>(std::integer_sequence<int, I...>)
+    return [&]<size_t... I>(std::index_sequence<I...>)
     {
       return Matrix<U, C, R>(Zip(lhs[I], rhs[I], func)...);
-    }(std::make_integer_sequence<int, C> {});
+    }(std::make_index_sequence<C> {});
   }
 
   /// @brief A matrix of @p func applied to each triple of components of @p a, @p b and @p c.
-  template <Number T, int C, int R, RegularCallable<T, T, T> F>
+  template <Number T, size_t C, size_t R, RegularCallable<T, T, T> F>
   KRYS_NODISCARD constexpr auto Zip(const Matrix<T, C, R> &a, const Matrix<T, C, R> &b,
                                     const Matrix<T, C, R> &c, const F &func) noexcept
   {
     using U = invoke_result_t<F, T, T, T>;
-    return [&]<int... I>(std::integer_sequence<int, I...>)
+    return [&]<size_t... I>(std::index_sequence<I...>)
     {
       return Matrix<U, C, R>(Zip(a[I], b[I], c[I], func)...);
-    }(std::make_integer_sequence<int, C> {});
+    }(std::make_index_sequence<C> {});
   }
 
   /// @brief The sum of the components of @p m.
-  template <Number T, int C, int R>
+  template <Number T, size_t C, size_t R>
   KRYS_NODISCARD constexpr T Sum(const Matrix<T, C, R> &m) noexcept
   {
     T sum = T(0);
@@ -277,7 +277,7 @@ namespace krys
   }
 
   /// @brief The sum of @p func applied to each component of @p m.
-  template <Number T, int C, int R, RegularCallable<T> F>
+  template <Number T, size_t C, size_t R, RegularCallable<T> F>
   KRYS_NODISCARD constexpr auto Sum(const Matrix<T, C, R> &m, const F &func) noexcept
   {
     using U = invoke_result_t<F, T>;
@@ -288,10 +288,10 @@ namespace krys
   }
 
   /// @brief Whether any component of @p m satisfies @p predicate.
-  template <Number T, int C, int R, Predicate<T> F>
+  template <Number T, size_t C, size_t R, Predicate<T> F>
   KRYS_NODISCARD constexpr bool AnyOf(const Matrix<T, C, R> &m, const F &predicate) noexcept
   {
-    for (int column = 0; column < C; ++column)
+    for (size_t column = 0; column < C; ++column)
     {
       if (AnyOf(m[column], predicate))
       {
@@ -302,10 +302,10 @@ namespace krys
   }
 
   /// @brief Whether every component of @p m satisfies @p predicate.
-  template <Number T, int C, int R, Predicate<T> F>
+  template <Number T, size_t C, size_t R, Predicate<T> F>
   KRYS_NODISCARD constexpr bool AllOf(const Matrix<T, C, R> &m, const F &predicate) noexcept
   {
-    for (int column = 0; column < C; ++column)
+    for (size_t column = 0; column < C; ++column)
     {
       if (!AllOf(m[column], predicate))
       {
@@ -316,7 +316,7 @@ namespace krys
   }
 
   /// @brief Whether no component of @p m satisfies @p predicate.
-  template <Number T, int C, int R, Predicate<T> F>
+  template <Number T, size_t C, size_t R, Predicate<T> F>
   KRYS_NODISCARD constexpr bool NoneOf(const Matrix<T, C, R> &m, const F &predicate) noexcept
   {
     return !AnyOf(m, predicate);
@@ -326,148 +326,148 @@ namespace krys
 
 #pragma region Operators
 
-  template <Number T, int C, int R>
+  template <Number T, size_t C, size_t R>
   KRYS_NODISCARD constexpr auto operator+(const Matrix<T, C, R> &lhs, const Matrix<T, C, R> &rhs) noexcept
   {
     return Zip(lhs, rhs, std::plus<> {});
   }
 
-  template <Number T, int C, int R>
+  template <Number T, size_t C, size_t R>
   KRYS_NODISCARD constexpr auto operator-(const Matrix<T, C, R> &lhs, const Matrix<T, C, R> &rhs) noexcept
   {
     return Zip(lhs, rhs, std::minus<> {});
   }
 
-  template <Number T, int C, int R>
+  template <Number T, size_t C, size_t R>
   KRYS_NODISCARD constexpr auto operator/(const Matrix<T, C, R> &lhs, const Matrix<T, C, R> &rhs) noexcept
   {
     return Zip(lhs, rhs, std::divides<> {});
   }
 
-  template <Number T, int C, int R>
+  template <Number T, size_t C, size_t R>
   KRYS_NODISCARD constexpr auto operator>>(const Matrix<T, C, R> &lhs, const Matrix<T, C, R> &rhs) noexcept
   {
     return Zip(lhs, rhs, [](T l, T r) { return l >> r; });
   }
 
-  template <Number T, int C, int R>
+  template <Number T, size_t C, size_t R>
   KRYS_NODISCARD constexpr auto operator<<(const Matrix<T, C, R> &lhs, const Matrix<T, C, R> &rhs) noexcept
   {
     return Zip(lhs, rhs, [](T l, T r) { return l << r; });
   }
 
-  template <Number T, int C, int R>
+  template <Number T, size_t C, size_t R>
   KRYS_NODISCARD constexpr auto operator|(const Matrix<T, C, R> &lhs, const Matrix<T, C, R> &rhs) noexcept
   {
     return Zip(lhs, rhs, std::bit_or<> {});
   }
 
-  template <Number T, int C, int R>
+  template <Number T, size_t C, size_t R>
   KRYS_NODISCARD constexpr auto operator&(const Matrix<T, C, R> &lhs, const Matrix<T, C, R> &rhs) noexcept
   {
     return Zip(lhs, rhs, std::bit_and<> {});
   }
 
-  template <Number T, int C, int R>
+  template <Number T, size_t C, size_t R>
   KRYS_NODISCARD constexpr auto operator^(const Matrix<T, C, R> &lhs, const Matrix<T, C, R> &rhs) noexcept
   {
     return Zip(lhs, rhs, std::bit_xor<> {});
   }
 
-  template <Number T, int C, int R>
+  template <Number T, size_t C, size_t R>
   KRYS_NODISCARD constexpr auto operator+(const Matrix<T, C, R> &lhs, T scalar) noexcept
   {
     return MapEach(lhs, [scalar](T v) { return v + scalar; });
   }
 
-  template <Number T, int C, int R>
+  template <Number T, size_t C, size_t R>
   KRYS_NODISCARD constexpr auto operator-(const Matrix<T, C, R> &lhs, T scalar) noexcept
   {
     return MapEach(lhs, [scalar](T v) { return v - scalar; });
   }
 
-  template <Number T, int C, int R>
+  template <Number T, size_t C, size_t R>
   KRYS_NODISCARD constexpr auto operator*(const Matrix<T, C, R> &lhs, T scalar) noexcept
   {
     return MapEach(lhs, [scalar](T v) { return v * scalar; });
   }
 
-  template <Number T, int C, int R>
+  template <Number T, size_t C, size_t R>
   KRYS_NODISCARD constexpr auto operator/(const Matrix<T, C, R> &lhs, T scalar) noexcept
   {
     return MapEach(lhs, [scalar](T v) { return v / scalar; });
   }
 
-  template <Number T, int C, int R>
+  template <Number T, size_t C, size_t R>
   KRYS_NODISCARD constexpr auto operator>>(const Matrix<T, C, R> &lhs, T scalar) noexcept
   {
     return MapEach(lhs, [scalar](T v) { return v >> scalar; });
   }
 
-  template <Number T, int C, int R>
+  template <Number T, size_t C, size_t R>
   KRYS_NODISCARD constexpr auto operator<<(const Matrix<T, C, R> &lhs, T scalar) noexcept
   {
     return MapEach(lhs, [scalar](T v) { return v << scalar; });
   }
 
-  template <Number T, int C, int R>
+  template <Number T, size_t C, size_t R>
   KRYS_NODISCARD constexpr auto operator|(const Matrix<T, C, R> &lhs, T scalar) noexcept
   {
     return MapEach(lhs, [scalar](T v) { return v | scalar; });
   }
 
-  template <Number T, int C, int R>
+  template <Number T, size_t C, size_t R>
   KRYS_NODISCARD constexpr auto operator&(const Matrix<T, C, R> &lhs, T scalar) noexcept
   {
     return MapEach(lhs, [scalar](T v) { return v & scalar; });
   }
 
-  template <Number T, int C, int R>
+  template <Number T, size_t C, size_t R>
   KRYS_NODISCARD constexpr auto operator^(const Matrix<T, C, R> &lhs, T scalar) noexcept
   {
     return MapEach(lhs, [scalar](T v) { return v ^ scalar; });
   }
 
-  template <Number T, int C, int R>
+  template <Number T, size_t C, size_t R>
   KRYS_NODISCARD constexpr auto operator+(T scalar, const Matrix<T, C, R> &rhs) noexcept
   {
     return rhs + scalar;
   }
 
-  template <Number T, int C, int R>
+  template <Number T, size_t C, size_t R>
   KRYS_NODISCARD constexpr auto operator*(T scalar, const Matrix<T, C, R> &rhs) noexcept
   {
     return rhs * scalar;
   }
 
-  template <Number T, int C, int R>
+  template <Number T, size_t C, size_t R>
   KRYS_NODISCARD constexpr auto operator-(const Matrix<T, C, R> &m) noexcept
   {
     return MapEach(m, std::negate<> {});
   }
 
-  template <Number T, int C, int R>
+  template <Number T, size_t C, size_t R>
   KRYS_NODISCARD constexpr auto operator+(const Matrix<T, C, R> &m) noexcept
   {
     return MapEach(m, [](T value) { return +value; });
   }
 
-  template <Number T, int C, int R>
+  template <Number T, size_t C, size_t R>
   KRYS_NODISCARD constexpr auto operator~(const Matrix<T, C, R> &m) noexcept
   {
     return MapEach(m, std::bit_not<> {});
   }
 
   /// @brief The matrix product of @p lhs and @p rhs. For the component-wise product, use `Hadamard`.
-  template <Number T, int C, int R, int P>
+  template <Number T, size_t C, size_t R, size_t P>
   KRYS_NODISCARD constexpr auto operator*(const Matrix<T, C, R> &lhs, const Matrix<T, P, C> &rhs) noexcept
   {
     Matrix<T, P, R> product;
-    for (int column = 0; column < P; ++column)
+    for (size_t column = 0; column < P; ++column)
     {
-      for (int row = 0; row < R; ++row)
+      for (size_t row = 0; row < R; ++row)
       {
-        for (int k = 0; k < C; ++k)
+        for (size_t k = 0; k < C; ++k)
         {
           product[column][row] += lhs[k][row] * rhs[column][k];
         }
@@ -477,13 +477,13 @@ namespace krys
   }
 
   /// @brief @p v transformed by @p m.
-  template <Number T, int C, int R>
+  template <Number T, size_t C, size_t R>
   KRYS_NODISCARD constexpr auto operator*(const Matrix<T, C, R> &m, const Vector<T, C> &v) noexcept
   {
     Vector<T, R> result;
-    for (int row = 0; row < R; ++row)
+    for (size_t row = 0; row < R; ++row)
     {
-      for (int k = 0; k < C; ++k)
+      for (size_t k = 0; k < C; ++k)
       {
         result[row] += m[k][row] * v[k];
       }
@@ -491,50 +491,50 @@ namespace krys
     return result;
   }
 
-  template <Number T, int C, int R>
+  template <Number T, size_t C, size_t R>
   constexpr Matrix<T, C, R> &operator+=(Matrix<T, C, R> &lhs, const Matrix<T, C, R> &rhs) noexcept
   {
     return lhs = lhs + rhs;
   }
 
-  template <Number T, int C, int R>
+  template <Number T, size_t C, size_t R>
   constexpr Matrix<T, C, R> &operator-=(Matrix<T, C, R> &lhs, const Matrix<T, C, R> &rhs) noexcept
   {
     return lhs = lhs - rhs;
   }
 
   /// @brief Multiplies @p lhs by @p rhs (the matrix product), which must be square.
-  template <Number T, int N>
+  template <Number T, size_t N>
   constexpr Matrix<T, N, N> &operator*=(Matrix<T, N, N> &lhs, const Matrix<T, N, N> &rhs) noexcept
   {
     return lhs = lhs * rhs;
   }
 
-  template <Number T, int C, int R>
+  template <Number T, size_t C, size_t R>
   constexpr Matrix<T, C, R> &operator/=(Matrix<T, C, R> &lhs, const Matrix<T, C, R> &rhs) noexcept
   {
     return lhs = lhs / rhs;
   }
 
-  template <Number T, int C, int R>
+  template <Number T, size_t C, size_t R>
   constexpr Matrix<T, C, R> &operator+=(Matrix<T, C, R> &lhs, identity_t<T> scalar) noexcept
   {
     return lhs = lhs + scalar;
   }
 
-  template <Number T, int C, int R>
+  template <Number T, size_t C, size_t R>
   constexpr Matrix<T, C, R> &operator-=(Matrix<T, C, R> &lhs, identity_t<T> scalar) noexcept
   {
     return lhs = lhs - scalar;
   }
 
-  template <Number T, int C, int R>
+  template <Number T, size_t C, size_t R>
   constexpr Matrix<T, C, R> &operator*=(Matrix<T, C, R> &lhs, identity_t<T> scalar) noexcept
   {
     return lhs = lhs * scalar;
   }
 
-  template <Number T, int C, int R>
+  template <Number T, size_t C, size_t R>
   constexpr Matrix<T, C, R> &operator/=(Matrix<T, C, R> &lhs, identity_t<T> scalar) noexcept
   {
     return lhs = lhs / scalar;
@@ -545,20 +545,20 @@ namespace krys
 #pragma region Linear algebra
 
   /// @brief The component-wise (Hadamard) product of @p lhs and @p rhs.
-  template <Number T, int C, int R>
+  template <Number T, size_t C, size_t R>
   KRYS_NODISCARD constexpr auto Hadamard(const Matrix<T, C, R> &lhs, const Matrix<T, C, R> &rhs) noexcept
   {
     return Zip(lhs, rhs, std::multiplies<> {});
   }
 
   /// @brief The transpose of @p m.
-  template <Number T, int C, int R>
+  template <Number T, size_t C, size_t R>
   KRYS_NODISCARD constexpr Matrix<T, R, C> Transpose(const Matrix<T, C, R> &m) noexcept
   {
     Matrix<T, R, C> transpose;
-    for (int column = 0; column < C; ++column)
+    for (size_t column = 0; column < C; ++column)
     {
-      for (int row = 0; row < R; ++row)
+      for (size_t row = 0; row < R; ++row)
       {
         transpose[row][column] = m[column][row];
       }
@@ -567,7 +567,7 @@ namespace krys
   }
 
   /// @brief The determinant of the square matrix @p m.
-  template <Number T, int N>
+  template <Number T, size_t N>
   KRYS_NODISCARD constexpr T Determinant(const Matrix<T, N, N> &m) noexcept
   {
     if constexpr (N == 2)
@@ -582,7 +582,7 @@ namespace krys
     else
     {
       // Expansion along the first row, by the minors of the remaining three rows.
-      auto minor = [&m](int a, int b, int c)
+      auto minor = [&m](size_t a, size_t b, size_t c)
       {
         return Determinant(
           Matrix<T, 3, 3> {{m[a].y, m[a].z, m[a].w}, {m[b].y, m[b].z, m[b].w}, {m[c].y, m[c].z, m[c].w}});
@@ -593,7 +593,7 @@ namespace krys
   }
 
   /// @brief The inverse of the square matrix @p m, or its adjugate if it's singular (determinant 0).
-  template <Number T, int N>
+  template <Number T, size_t N>
   KRYS_NODISCARD constexpr Matrix<T, N, N> Inverse(const Matrix<T, N, N> &m) noexcept
   {
     if constexpr (N == 2)
@@ -667,13 +667,13 @@ namespace krys
   }
 
   /// @brief The outer product of @p a and @p b: the matrix whose column `c` is `a * b[c]`.
-  template <Number T, int C, int R>
+  template <Number T, size_t C, size_t R>
   KRYS_NODISCARD constexpr Matrix<T, C, R> OuterProduct(const Vector<T, R> &a, const Vector<T, C> &b) noexcept
   {
     Matrix<T, C, R> product;
-    for (int column = 0; column < C; ++column)
+    for (size_t column = 0; column < C; ++column)
     {
-      for (int row = 0; row < R; ++row)
+      for (size_t row = 0; row < R; ++row)
       {
         product[column][row] = a[row] * b[column];
       }
