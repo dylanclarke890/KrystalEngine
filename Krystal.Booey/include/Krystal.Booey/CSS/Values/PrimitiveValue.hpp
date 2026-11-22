@@ -221,7 +221,7 @@ namespace krys::boo::css
 
     KRYS_NODISCARD bool IsCalculated() const noexcept
     {
-      return _primitiveKind == PrimitiveKind::Calc;
+      return _header.PrimitiveKind == PrimitiveKind::Calc;
     }
 
     KRYS_NODISCARD bool IsCalculatedPercentageWithLength() const noexcept;
@@ -254,7 +254,7 @@ namespace krys::boo::css
 
     KRYS_NODISCARD bool IsValueId() const noexcept
     {
-      return _primitiveKind == PrimitiveKind::ValueId;
+      return _header.PrimitiveKind == PrimitiveKind::ValueId;
     }
 
     KRYS_NODISCARD css::ValueId ValueId() const noexcept
@@ -264,7 +264,7 @@ namespace krys::boo::css
 
     KRYS_NODISCARD bool IsPropertyId() const noexcept
     {
-      return _primitiveKind == PrimitiveKind::PropertyId;
+      return _header.PrimitiveKind == PrimitiveKind::PropertyId;
     }
 
     KRYS_NODISCARD css::PropertyId PropertyId() const noexcept
@@ -274,12 +274,12 @@ namespace krys::boo::css
 
     KRYS_NODISCARD bool IsString() const noexcept
     {
-      return _primitiveKind == PrimitiveKind::String;
+      return _header.PrimitiveKind == PrimitiveKind::String;
     }
 
     KRYS_NODISCARD bool IsCustomIdent() const noexcept
     {
-      return _primitiveKind == PrimitiveKind::CustomIdent;
+      return _header.PrimitiveKind == PrimitiveKind::CustomIdent;
     }
 
     KRYS_NODISCARD CSSOMString CustomIdent() const noexcept
@@ -290,7 +290,7 @@ namespace krys::boo::css
 
     KRYS_NODISCARD bool IsFontFamily() const noexcept
     {
-      return _primitiveKind == PrimitiveKind::FontFamily;
+      return _header.PrimitiveKind == PrimitiveKind::FontFamily;
     }
 
     KRYS_NODISCARD CSSOMString StringValue() const noexcept;
@@ -487,7 +487,7 @@ namespace krys::boo::css
     // The stored unit: `Unknown` for every kind but a number, calc() included.
     KRYS_NODISCARD UnitType PrimitiveUnitType() const noexcept
     {
-      return _unit;
+      return _header.Unit;
     }
 
 #pragma region Length converting

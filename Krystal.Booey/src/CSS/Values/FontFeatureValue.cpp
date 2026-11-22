@@ -55,6 +55,6 @@ namespace krys::boo::css
 
   bool FontFeatureValue::Equals(const FontFeatureValue &other) const noexcept
   {
-    return _tag == other._tag && CompareValue(_value, other._value);
+    return _tag == other._tag && *_value == *other._value;
   }
 }

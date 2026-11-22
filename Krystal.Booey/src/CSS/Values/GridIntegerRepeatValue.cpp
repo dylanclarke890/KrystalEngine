@@ -59,6 +59,6 @@ namespace krys::boo::css
 
   bool GridIntegerRepeatValue::Equals(const GridIntegerRepeatValue &other) const noexcept
   {
-    return CompareValue(_repetitions, other._repetitions) && ItemsEqual(other);
+    return *_repetitions == *other._repetitions && ItemsEqual(other);
   }
 }

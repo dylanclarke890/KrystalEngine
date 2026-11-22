@@ -19,6 +19,7 @@
  */
 
 #include "Krystal.Booey/CSS/Values/FontValue.hpp"
+#include "Krystal.Core/Memory/PointerComparison.hpp"
 
 namespace krys::boo::css
 {
@@ -65,10 +66,10 @@ namespace krys::boo::css
 
   bool FontValue::Equals(const FontValue &other) const noexcept
   {
-    return CompareValuePtr(Style, other.Style) && CompareValuePtr(Variant, other.Variant)
-           && CompareValuePtr(Weight, other.Weight) && CompareValuePtr(Width, other.Width)
-           && CompareValuePtr(Size, other.Size) && CompareValuePtr(LineHeight, other.LineHeight)
-           && CompareValuePtr(Family, other.Family);
+    return ArePointingToEqualData(Style, other.Style) && ArePointingToEqualData(Variant, other.Variant)
+           && ArePointingToEqualData(Weight, other.Weight) && ArePointingToEqualData(Width, other.Width)
+           && ArePointingToEqualData(Size, other.Size) && ArePointingToEqualData(LineHeight, other.LineHeight)
+           && ArePointingToEqualData(Family, other.Family);
   }
 
   IterationStatus

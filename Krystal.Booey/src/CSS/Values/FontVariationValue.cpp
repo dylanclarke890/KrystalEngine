@@ -48,6 +48,6 @@ namespace krys::boo::css
 
   bool FontVariationValue::Equals(const FontVariationValue &other) const noexcept
   {
-    return _tag == other._tag && CompareValue(_value, other._value);
+    return _tag == other._tag && *_value == *other._value;
   }
 }

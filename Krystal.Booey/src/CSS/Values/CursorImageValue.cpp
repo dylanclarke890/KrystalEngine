@@ -26,6 +26,7 @@
 #include "Krystal.Booey/CSS/Values/ValuePair.hpp"
 #include "Krystal.Booey/Rendering/Style/StyleCursorImage.hpp"
 #include "Krystal.Booey/Style/Builder/BuilderState.hpp"
+#include "Krystal.Core/Memory/PointerComparison.hpp"
 
 namespace krys::boo::css
 {
@@ -66,7 +67,7 @@ namespace krys::boo::css
 
   bool CursorImageValue::Equals(const CursorImageValue &other) const noexcept
   {
-    return CompareValue(_imageValue, other._imageValue) && CompareValuePtr(_hotSpot, other._hotSpot);
+    return *_imageValue == *other._imageValue && ArePointingToEqualData(_hotSpot, other._hotSpot);
   }
 
   RefPtr<StyleCursorImage> CursorImageValue::CreateStyleImage(const style::BuilderState &state) const noexcept

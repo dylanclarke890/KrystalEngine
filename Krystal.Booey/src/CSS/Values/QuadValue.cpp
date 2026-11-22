@@ -53,6 +53,6 @@ namespace krys::boo::css
 
   bool QuadValue::CanBeCoalesced() const noexcept
   {
-    return _coalesceIdenticalValues && _sides.AreAllEqual();
+    return _header.CoalesceIdenticalValues && _sides.AreAllEqual();
   }
 }

@@ -91,10 +91,13 @@
 
 namespace krys::boo::css
 {
+  // The reference count and the packed header, with nothing else.
+  static_assert(sizeof(Value) == 8uz);
+
   template <typename Visitor>
   constexpr decltype(auto) Value::VisitDerived(Visitor &&visitor) noexcept
   {
-    switch (_type)
+    switch (_header.Type)
     {
       case ValueType::Attr:
       {
@@ -325,11 +328,6 @@ namespace krys::boo::css
     krys_unreachable();
   }
 
-  bool Value::CustomTraverseSubresources(const Func<bool(const CachedResource &)> &) noexcept
-  {
-    return false;
-  }
-
   template <typename Visitor>
   constexpr decltype(auto) Value::VisitDerived(Visitor &&visitor) const noexcept
   {
@@ -339,17 +337,50 @@ namespace krys::boo::css
 
   IterationStatus Value::VisitChildren(const Func<IterationStatus(Value &)> &func) const noexcept
   {
-    return VisitDerived([&](auto &value) { return value.CustomVisitChildren(func); });
+    return VisitDerived(
+      [&](auto &value)
+      {
+        if constexpr (requires { value.CustomVisitChildren(func); })
+        {
+          return value.CustomVisitChildren(func);
+        }
+        else
+        {
+          return IterationStatus::Continue;
+        }
+      });
   }
 
   bool Value::MayDependOnBaseUrl() const noexcept
   {
-    return VisitDerived([&](auto &value) { return value.CustomMayDependOnBaseUrl(); });
+    return VisitDerived(
+      [&](auto &value)
+      {
+        if constexpr (requires { value.CustomMayDependOnBaseUrl(); })
+        {
+          return value.CustomMayDependOnBaseUrl();
+        }
+        else
+        {
+          return false;
+        }
+      });
   }
 
   bool Value::TraverseSubresources(const Func<bool(const CachedResource &)> &handler) const noexcept
   {
-    return VisitDerived([&](auto &value) { return value.CustomTraverseSubresources(handler); });
+    return VisitDerived(
+      [&](auto &value)
+      {
+        if constexpr (requires { value.CustomTraverseSubresources(handler); })
+        {
+          return value.CustomTraverseSubresources(handler);
+        }
+        else
+        {
+          return false;
+        }
+      });
   }
 
   css::ComputedStyleDependencies Value::ComputedStyleDependencies() const noexcept
@@ -389,7 +420,7 @@ namespace krys::boo::css
 
   bool Value::Equals(const Value &other) const noexcept
   {
-    if (_type == other._type)
+    if (_header.Type == other._header.Type)
     {
       return VisitDerived(
         [&]<typename TValue>(TValue &typedThis)
@@ -417,7 +448,7 @@ namespace krys::boo::css
     // To match Equals() a single item list could have the same hash as the item.
     // FIXME: Some Style::Builder functions can only handle list values.
 
-    seed = CombineFastHashes(seed, _type);
+    seed = CombineFastHashes(seed, _header.Type);
 
     // A class hashes its contents with an `AddDerivedHash`; without one, its values aren't hashed.
     return VisitDerived(

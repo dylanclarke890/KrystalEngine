@@ -28,14 +28,14 @@ namespace krys::boo::css
 {
   ValueContainingList::ValueContainingList(ValueType type, ValueSeparator separator) noexcept : Value(type)
   {
-    _valueSeparator = separator;
+    _header.Separator = separator;
   }
 
   ValueContainingList::ValueContainingList(ValueType type, ValueSeparator separator,
                                            ValueListBuilder values) noexcept
       : Value(type)
   {
-    _valueSeparator = separator;
+    _header.Separator = separator;
 
     krys_assert(values.size() <= std::numeric_limits<uint32>::max());
     _storage.reserve(values.size());
@@ -49,7 +49,7 @@ namespace krys::boo::css
                                            Ref<Value> value) noexcept
       : Value(type)
   {
-    _valueSeparator = separator;
+    _header.Separator = separator;
     _storage.push_back(value.release());
   }
 
@@ -57,7 +57,7 @@ namespace krys::boo::css
                                            Ref<Value> value2) noexcept
       : Value(type)
   {
-    _valueSeparator = separator;
+    _header.Separator = separator;
     _storage.push_back(value1.release());
     _storage.push_back(value2.release());
   }
@@ -66,7 +66,7 @@ namespace krys::boo::css
                                            Ref<Value> value2, Ref<Value> value3) noexcept
       : Value(type)
   {
-    _valueSeparator = separator;
+    _header.Separator = separator;
     _storage.push_back(value1.release());
     _storage.push_back(value2.release());
     _storage.push_back(value3.release());
@@ -76,7 +76,7 @@ namespace krys::boo::css
                                            Ref<Value> value2, Ref<Value> value3, Ref<Value> value4) noexcept
       : Value(type)
   {
-    _valueSeparator = separator;
+    _header.Separator = separator;
     _storage.push_back(value1.release());
     _storage.push_back(value2.release());
     _storage.push_back(value3.release());

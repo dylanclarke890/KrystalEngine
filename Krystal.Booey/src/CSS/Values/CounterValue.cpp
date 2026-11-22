@@ -49,7 +49,7 @@ namespace krys::boo::css
   bool CounterValue::Equals(const CounterValue &other) const noexcept
   {
     return _identifier == other._identifier && _separator == other._separator
-           && CompareValue(_counterStyle, other._counterStyle);
+           && *_counterStyle == *other._counterStyle;
   }
 
   CSSOMString CounterValue::CustomCSSText(const SerialisationContext &) const noexcept

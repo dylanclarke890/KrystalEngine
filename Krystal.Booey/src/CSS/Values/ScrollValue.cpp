@@ -29,6 +29,7 @@
 #include "Krystal.Booey/CSS/Values/ScrollValue.hpp"
 #include "Krystal.Booey/CSS/Values/PrimitiveValue.hpp"
 #include "Krystal.Booey/CSS/Values/ValueId.hpp"
+#include "Krystal.Core/Memory/PointerComparison.hpp"
 
 namespace krys::boo::css
 {
@@ -71,6 +72,6 @@ namespace krys::boo::css
 
   bool ScrollValue::Equals(const ScrollValue &other) const noexcept
   {
-    return CompareValuePtr(_scroller, other._scroller) && CompareValuePtr(_axis, other._axis);
+    return ArePointingToEqualData(_scroller, other._scroller) && ArePointingToEqualData(_axis, other._axis);
   }
 }
