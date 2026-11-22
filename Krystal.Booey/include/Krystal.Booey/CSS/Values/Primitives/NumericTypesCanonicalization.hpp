@@ -32,7 +32,7 @@ namespace krys::boo::css
 
   KRYS_NODISCARD inline double CanonicalizeAngle(double value, AngleUnit unit) noexcept
   {
-    return ConvertAngle<AngleUnit::Deg>(value, unit);
+    return ConvertUnit<AngleUnit::Deg>(value, unit);
   }
 
   template <auto R, typename V>
@@ -47,7 +47,7 @@ namespace krys::boo::css
 
   KRYS_NODISCARD inline double CanonicalizeTime(double value, TimeUnit unit) noexcept
   {
-    return ConvertTime<TimeUnit::S>(value, unit);
+    return ConvertUnit<TimeUnit::S>(value, unit);
   }
 
   template <auto R, typename V>
@@ -62,7 +62,7 @@ namespace krys::boo::css
 
   KRYS_NODISCARD inline double CanonicalizeFrequency(double value, FrequencyUnit unit) noexcept
   {
-    return ConvertFrequency<FrequencyUnit::Hz>(value, unit);
+    return ConvertUnit<FrequencyUnit::Hz>(value, unit);
   }
 
   template <auto R, typename V>
@@ -77,7 +77,7 @@ namespace krys::boo::css
 
   KRYS_NODISCARD inline double CanonicalizeResolution(double value, ResolutionUnit unit) noexcept
   {
-    return ConvertResolution<ResolutionUnit::Dppx>(value, unit);
+    return ConvertUnit<ResolutionUnit::Dppx>(value, unit);
   }
 
   template <auto R, typename V>

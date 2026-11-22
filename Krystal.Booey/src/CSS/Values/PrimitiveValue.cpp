@@ -317,7 +317,7 @@ namespace krys::boo::css
       return calcValue->ComputeLengthPx(conversionData);
     }
 
-    auto lengthUnit = ToLengthUnit(PrimitiveType());
+    auto lengthUnit = ToUnit<LengthUnit>(PrimitiveType());
     if (!lengthUnit)
     {
       krys_debug_assert(false);
@@ -477,9 +477,8 @@ namespace krys::boo::css
 
     switch (_unit)
     {
-      case UnitType::Integer:  return FormatIntegerValue(u8"");
-      case UnitType::QuirkyEm: return FormatNumberValue(u8"em");
-      case UnitType::Unknown:  krys_debug_assert(false); return {};
+      case UnitType::Integer: return FormatIntegerValue(u8"");
+      case UnitType::Unknown: krys_debug_assert(false); return {};
       default:
         // Every remaining unit is a number with a unit suffix (Number has an empty suffix).
         return FormatNumberValue(UnitTypeString(_unit));
@@ -567,7 +566,7 @@ namespace krys::boo::css
       return;
     }
 
-    if (auto lengthUnit = ToLengthUnit(PrimitiveUnitType()))
+    if (auto lengthUnit = ToUnit<LengthUnit>(PrimitiveUnitType()))
     {
       css::CollectComputedStyleDependencies(dependencies, *lengthUnit);
     }

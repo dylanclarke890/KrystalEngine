@@ -107,18 +107,18 @@ namespace krys::boo::css::tests
 
   TEST_CASE("ConversionToCanonicalUnitRequiresConversionData", "[CSS][Units]")
   {
-    // Every length other than px.
-    for (auto unit : {UnitType::cm, UnitType::mm, UnitType::Q, UnitType::in, UnitType::pt, UnitType::pc,
-                      UnitType::em, UnitType::rem, UnitType::lh, UnitType::ch, UnitType::vw, UnitType::svh,
+    // Relative lengths, which have no fixed ratio to px.
+    for (auto unit : {UnitType::em, UnitType::rem, UnitType::lh, UnitType::ch, UnitType::vw, UnitType::svh,
                       UnitType::lvmin, UnitType::dvmax, UnitType::cqw, UnitType::cqmax, UnitType::QuirkyEm})
     {
       INFO(static_cast<int>(unit));
       CHECK(ConversionToCanonicalUnitRequiresConversionData(unit));
     }
 
-    for (auto unit : {UnitType::Number, UnitType::Integer, UnitType::Percentage, UnitType::px, UnitType::deg,
-                      UnitType::turn, UnitType::s, UnitType::ms, UnitType::hz, UnitType::dppx, UnitType::dpi,
-                      UnitType::fr, UnitType::Unknown})
+    for (auto unit :
+         {UnitType::Number, UnitType::Integer, UnitType::Percentage, UnitType::px, UnitType::cm, UnitType::mm,
+          UnitType::Q, UnitType::in, UnitType::pt, UnitType::pc, UnitType::deg, UnitType::turn, UnitType::s,
+          UnitType::ms, UnitType::hz, UnitType::dppx, UnitType::dpi, UnitType::fr, UnitType::Unknown})
     {
       INFO(static_cast<int>(unit));
       CHECK_FALSE(ConversionToCanonicalUnitRequiresConversionData(unit));
@@ -135,7 +135,9 @@ namespace krys::boo::css::tests
     CHECK(ToNarrow(UnitTypeString(UnitType::x)) == "x");
 
     // Units that don't serialise with a suffix.
-    for (auto unit : {UnitType::Number, UnitType::Integer, UnitType::QuirkyEm, UnitType::Unknown})
+    CHECK(ToNarrow(UnitTypeString(UnitType::QuirkyEm)) == "em");
+
+    for (auto unit : {UnitType::Number, UnitType::Integer, UnitType::Unknown})
     {
       INFO(static_cast<int>(unit));
       CHECK(UnitTypeString(unit).empty());
@@ -156,7 +158,7 @@ namespace krys::boo::css::tests
       {
         CHECK_FALSE(name.empty());
       }
-      if (!name.empty() && unit != UnitType::Percentage)
+      if (!name.empty() && unit != UnitType::Percentage && unit != UnitType::QuirkyEm)
       {
         CHECK(ParseUnitType(name) == unit);
       }

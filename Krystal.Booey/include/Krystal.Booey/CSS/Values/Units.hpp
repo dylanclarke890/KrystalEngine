@@ -152,8 +152,8 @@ namespace krys::boo::css
   /// @brief What's known about a unit.
   struct UnitInfo
   {
-    /// @brief The unit as it's written and serialised, in lowercase; empty for `Unknown`, numbers, integers
-    /// and `QuirkyEm`.
+    /// @brief The unit as it's written and serialised, in lowercase; empty for `Unknown`, numbers and
+    /// integers. `QuirkyEm` serialises as `em`, but is written `__qem`.
     utf8_stringview Name;
     /// @brief The quantity the unit measures; null for `Unknown`.
     Maybe<Category> Quantity;
@@ -189,7 +189,7 @@ namespace krys::boo::css
       case ch:         return {u8"ch", Length, LengthBasis::Font};
       case ic:         return {u8"ic", Length, LengthBasis::Font};
       case lh:         return {u8"lh", Length, LengthBasis::Font};
-      case QuirkyEm:   return {u8"", Length, LengthBasis::Font};
+      case QuirkyEm:   return {u8"em", Length, LengthBasis::Font};
 
       case rem:        return {u8"rem", Length, LengthBasis::RootFont};
       case rex:        return {u8"rex", Length, LengthBasis::RootFont};
@@ -286,7 +286,8 @@ namespace krys::boo::css
       auto unit = static_cast<UnitType>(i);
       auto info = UnitInfoFor(unit);
       // `%` is a token of its own, not a dimension's unit.
-      if (!info.Name.empty() && unit != UnitType::Percentage && equalsIgnoringCase(info.Name))
+      if (!info.Name.empty() && unit != UnitType::Percentage && unit != UnitType::QuirkyEm
+          && equalsIgnoringCase(info.Name))
       {
         return unit;
       }
@@ -390,11 +391,11 @@ namespace krys::boo::css
     return UnitInfoFor(unit).ScaleToCanonical;
   }
 
-  /// @brief Whether converting @p unit to its canonical unit needs a `ToLengthConversionData`: for every
-  /// length but `px`.
+  /// @brief Whether converting @p unit to its canonical unit needs a `ToLengthConversionData`: for the
+  /// lengths without a fixed factor to `px`, which are relative.
   KRYS_NODISCARD constexpr bool ConversionToCanonicalUnitRequiresConversionData(UnitType unit) noexcept
   {
-    return IsLength(unit) && unit != UnitType::px;
+    return IsLength(unit) && !UnitInfoFor(unit).ScaleToCanonical;
   }
 
   /// @brief @p value in @p from converted to @p to, through their canonical unit.
@@ -412,7 +413,7 @@ namespace krys::boo::css
     {
       return null;
     }
-    return value * *fromInfo.ScaleToCanonical / *toInfo.ScaleToCanonical;
+    return value * (*fromInfo.ScaleToCanonical / *toInfo.ScaleToCanonical);
   }
 
   /// @brief Like `ConvertUnit`, but a bare number stands for the canonical unit of the other side: converting

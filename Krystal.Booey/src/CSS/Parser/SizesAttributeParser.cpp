@@ -93,7 +93,7 @@ namespace krys::boo::css
     TokenType type = startToken.Type();
     if (type == TokenType::Dimension)
     {
-      auto lengthUnit = ToLengthUnit(ParseUnitType(startToken.Unit()));
+      auto lengthUnit = ToUnit<LengthUnit>(ParseUnitType(startToken.Unit()));
       if (!lengthUnit)
       {
         return null;

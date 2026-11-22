@@ -251,7 +251,7 @@ namespace krys::boo::css::calc
       case UnitType::cqmin:
       case UnitType::cqmax:
       {
-        return tryMakeCanonical(root.Value, *ToLengthUnit(root.Unit));
+        return tryMakeCanonical(root.Value, *ToUnit<LengthUnit>(root.Unit));
       }
 
       // <angle>

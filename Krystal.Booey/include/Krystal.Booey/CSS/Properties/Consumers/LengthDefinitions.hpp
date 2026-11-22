@@ -41,7 +41,7 @@ namespace krys::boo::css
         return null;
       }
 
-      return UnitTraits<LengthUnit>::Validate(unitType);
+      return ToUnit<LengthUnit>(unitType);
     }
 
     template <auto R, typename V>

@@ -196,10 +196,11 @@ namespace krys::boo::css::calc::tests
     REQUIRE(em);
     CHECK(em->RequiresConversionData());
 
-    // Absolute lengths other than px are zoomed, so they need conversion data too.
+    // Absolute lengths have a fixed ratio to px, and are zoomed the same way it is.
     auto in = ParseValue(u8"calc(1in + 1px)");
     REQUIRE(in);
-    CHECK(in->RequiresConversionData());
+    CHECK_FALSE(in->RequiresConversionData());
+    CHECK(Serialise(u8"calc(1in + 1px)") == "calc(97px)");
 
     auto px = ParseValue(u8"calc(1px + 1px)");
     REQUIRE(px);

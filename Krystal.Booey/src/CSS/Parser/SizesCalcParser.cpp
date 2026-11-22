@@ -163,7 +163,7 @@ namespace krys::boo::css
 
   bool SizesCalcParser::AppendLength(const Token &token) noexcept
   {
-    auto lengthUnit = ToLengthUnit(ParseUnitType(token.Unit()));
+    auto lengthUnit = ToUnit<LengthUnit>(ParseUnitType(token.Unit()));
     if (!lengthUnit)
     {
       return false;

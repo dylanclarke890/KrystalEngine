@@ -249,7 +249,7 @@ namespace krys::boo
     // excluding zoom, because the (anonymous) RenderSVGViewportContainer applies zooming
     // for the whole SVG subtree as an affine transform. Therefore any font-relative length
     // within the SVG subtree needs to exclude the 'zoom' information.
-    if (css::IsFontOrRootFontRelativeLength(unit))
+    if (css::IsFontRelativeLength(css::ToUnitType(unit)))
     {
       resolvedValue = RemoveZoomFromFontOrRootFontRelativeLength(resolvedValue, unit);
     }
@@ -271,16 +271,16 @@ namespace krys::boo
 
     float usedZoom = 1.0f;
 
-    if (css::IsFontRelativeLength(unit))
-    {
-      usedZoom = svgElement->Renderer()->Style().UsedZoom();
-    }
-    else if (css::IsRootFontRelativeLength(unit))
+    if (css::IsRootFontRelativeLength(css::ToUnitType(unit)))
     {
       if (auto *rootRenderer = svgElement->NodeDocument().DocumentElement()->Renderer())
       {
         usedZoom = rootRenderer->Style().UsedZoom();
       }
+    }
+    else if (css::IsFontRelativeLength(css::ToUnitType(unit)))
+    {
+      usedZoom = svgElement->Renderer()->Style().UsedZoom();
     }
 
     return (usedZoom != 1.0f) ? value / usedZoom : value;
@@ -307,7 +307,7 @@ namespace krys::boo
       default:
       {
         auto cssUnit = css::ToUnitType(targetUnit);
-        auto lengthUnit = css::ToLengthUnit(cssUnit);
+        auto lengthUnit = css::ToUnit<css::LengthUnit>(cssUnit);
 
         if (!lengthUnit)
         {
@@ -348,7 +348,7 @@ namespace krys::boo
       default:
       {
         auto cssUnit = css::ToUnitType(targetUnit);
-        auto lengthUnit = css::ToLengthUnit(cssUnit);
+        auto lengthUnit = css::ToUnit<css::LengthUnit>(cssUnit);
 
         if (!lengthUnit)
         {

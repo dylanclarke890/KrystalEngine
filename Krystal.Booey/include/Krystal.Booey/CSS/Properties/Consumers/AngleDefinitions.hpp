@@ -35,7 +35,7 @@ namespace krys::boo::css
     KRYS_NODISCARD constexpr static Maybe<AngleUnit> Validate(UnitType unitType, PropertyParserState &,
                                                               PropertyParserOptions) noexcept
     {
-      return UnitTraits<AngleUnit>::Validate(unitType);
+      return ToUnit<AngleUnit>(unitType);
     }
 
     template <auto R, typename V>

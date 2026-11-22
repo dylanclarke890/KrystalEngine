@@ -719,7 +719,7 @@ namespace krys::boo::css
       }
 
       auto parsedColor = StyleColorParseType<HSLFunctionLegacy> {
-        style::Angle<> {static_cast<float>(ConvertAngle<AngleUnit::Deg>(hue, angleUnit))},
+        style::Angle<> {static_cast<float>(ConvertUnit<AngleUnit::Deg>(hue, angleUnit))},
         style::Percentage<> {static_cast<float>(*saturation)},
         style::Percentage<> {static_cast<float>(*lightness)},
         style::Number<> {static_cast<float>(alpha)},
