@@ -29,12 +29,13 @@
 #include "Krystal.Booey/DOM/Types/DOMString.hpp"
 #include "Krystal.Core/Assert.hpp"
 #include "Krystal.Core/Base.hpp"
+#include "Krystal.Core/Containers/Array.hpp"
+#include "Krystal.Core/Containers/EnumSet.hpp"
+#include "Krystal.Core/Containers/SmallList.hpp"
+#include "Krystal.Core/Containers/Span.hpp"
 #include "Krystal.Core/Enum.hpp"
-#include "Krystal.Core/Types/Array.hpp"
-#include "Krystal.Core/Types/SmallList.hpp"
-#include "Krystal.Core/Types/Span.hpp"
-#include "Krystal.Core/Types/UniquePtr.hpp"
-#include "Krystal.Core/Utils/Move.hpp"
+#include "Krystal.Core/Memory/UniquePtr.hpp"
+#include "Krystal.Core/Move.hpp"
 #include "Krystal.Text/Encodings/Encode.hpp"
 #include "Krystal.Text/Encodings/UTF.hpp"
 
@@ -52,22 +53,27 @@ namespace krys::boo::html
     EndOfFile,
   };
 
-  /// @see A general-purpose enum for all attribute states defined by the HTML spec. May split this out later.
-  enum class ParsedAttributeFlags : uint8
+  consteval TokenType MaxEnumValue(TokenType) noexcept
   {
-    None = 0,
-    HasPrefix = 1 << 1,
-    IsXMLNS = 1 << 2,
-    IsXML = 1 << 3,
-    IsXLink = 1 << 4,
+    return TokenType::EndOfFile;
+  }
+
+  /// @see A general-purpose enum for all attribute states defined by the HTML spec. May split this out later.
+  enum class ParsedAttributeFlag : uint8
+  {
+    HasPrefix,
+    IsXMLNS,
+    IsXML,
+    IsXLink,
   };
-}
 
-KRYS_DEFINE_CONTIGUOUS_ENUM_TRAITS(krys::boo::html::TokenType, 7uz);
-KRYS_DEFINE_FLAGS_ENUM_TRAITS(krys::boo::html::ParsedAttributeFlags, 5uz);
+  consteval ParsedAttributeFlag MaxEnumValue(ParsedAttributeFlag) noexcept
+  {
+    return ParsedAttributeFlag::IsXLink;
+  }
 
-namespace krys::boo::html
-{
+  using ParsedAttributeFlags = EnumSet<ParsedAttributeFlag>;
+
   struct DoctypeData
   {
     SmallList<char8> PublicIdentifier;
@@ -83,7 +89,7 @@ namespace krys::boo::html
     SmallList<char8, 64u> Value;
     /// @brief Flags for the attribute, such as whether it is a foreign attribute or has a prefix. Set during
     /// AdjustForeignAttributes() in the tree builder; checked when creating elements.
-    ParsedAttributeFlags Flags {ParsedAttributeFlags::None};
+    ParsedAttributeFlags Flags {ParsedAttributeFlags {}};
 
     DOMStringView NameView() const noexcept
     {
@@ -98,7 +104,7 @@ namespace krys::boo::html
     void SetName(DOMStringView characters) noexcept
     {
       Name.clear();
-      Name.append(characters.begin(), characters.end());
+      Name.append_range(characters);
     }
   };
 
@@ -110,7 +116,7 @@ namespace krys::boo::html
     using DataBuffer = SmallList<char8, 128u>;
 
   private:
-    TokenType _type : BitCount<TokenType>() {TokenType::Uninitialized};
+    TokenType _type : EnumBitWidth<TokenType> {TokenType::Uninitialized};
 
     // For start/end tag tokens.
     bool _selfClosing : 1 {false};
@@ -206,7 +212,7 @@ namespace krys::boo::html
 
       auto encodeResult = krys::text::Encode<krys::text::UTF8>(Span<char32>(&character, 1));
       krys_debug_assert(encodeResult.Error == krys::text::EncodeError::None);
-      _doctypeData->PublicIdentifier.append(encodeResult.Output.begin(), encodeResult.Output.end());
+      _doctypeData->PublicIdentifier.append_range(encodeResult.Output);
     }
 
     void AppendToSystemIdentifier(char32 character)
@@ -216,7 +222,7 @@ namespace krys::boo::html
 
       auto encodeResult = krys::text::Encode<krys::text::UTF8>(Span<char32>(&character, 1));
       krys_debug_assert(encodeResult.Error == krys::text::EncodeError::None);
-      _doctypeData->SystemIdentifier.append(encodeResult.Output.begin(), encodeResult.Output.end());
+      _doctypeData->SystemIdentifier.append_range(encodeResult.Output);
     }
 
     KRYS_NODISCARD UniquePtr<DoctypeData> ReleaseDOCTYPEData() noexcept
@@ -301,7 +307,7 @@ namespace krys::boo::html
 
       auto encodeResult = krys::text::Encode<krys::text::UTF8>(Span<char32>(&character, 1));
       krys_debug_assert(encodeResult.Error == krys::text::EncodeError::None);
-      _currentAttribute->Name.append(encodeResult.Output.begin(), encodeResult.Output.end());
+      _currentAttribute->Name.append_range(encodeResult.Output);
     }
 
     void AppendToCurrentAttributeValue(char32 character) noexcept
@@ -311,7 +317,7 @@ namespace krys::boo::html
 
       auto encodeResult = krys::text::Encode<krys::text::UTF8>(Span<char32>(&character, 1));
       krys_debug_assert(encodeResult.Error == krys::text::EncodeError::None);
-      _currentAttribute->Value.append(encodeResult.Output.begin(), encodeResult.Output.end());
+      _currentAttribute->Value.append_range(encodeResult.Output);
     }
 
     template <size_t N>
@@ -332,7 +338,7 @@ namespace krys::boo::html
 
       auto encodeResult = krys::text::Encode<krys::text::UTF8>(characters);
       krys_debug_assert(encodeResult.Error == krys::text::EncodeError::None);
-      _currentAttribute->Value.append(encodeResult.Output.begin(), encodeResult.Output.end());
+      _currentAttribute->Value.append_range(encodeResult.Output);
     }
 
     void SetSelfClosingFlag() noexcept
@@ -391,7 +397,7 @@ namespace krys::boo::html
     void AppendToComment(stringview characters) noexcept
     {
       krys_debug_assert(_type == TokenType::Comment);
-      _data.append(characters.begin(), characters.end());
+      _data.append_range(characters);
     }
 
     void AppendToComment(Span<char32> characters) noexcept
@@ -416,7 +422,7 @@ namespace krys::boo::html
       krys_debug_assert(_type == TokenType::ProcessingInstruction);
       auto encodeResult = krys::text::Encode<krys::text::UTF8>(Span<char32>(&character, 1));
       krys_debug_assert(encodeResult.Error == krys::text::EncodeError::None);
-      _processingInstructionData.append(encodeResult.Output.begin(), encodeResult.Output.end());
+      _processingInstructionData.append_range(encodeResult.Output);
     }
 
     KRYS_NODISCARD const DataBuffer &ProcessingInstructionData() const noexcept
@@ -447,14 +453,14 @@ namespace krys::boo::html
     {
       auto encodeResult = krys::text::Encode<krys::text::UTF8>(characters);
       krys_debug_assert(encodeResult.Error == krys::text::EncodeError::None);
-      _data.append(encodeResult.Output.begin(), encodeResult.Output.end());
+      _data.append_range(encodeResult.Output);
     }
 
     void AppendToDataInternal(Span<char32> characters) noexcept
     {
       auto encodeResult = krys::text::Encode<krys::text::UTF8>(characters);
       krys_debug_assert(encodeResult.Error == krys::text::EncodeError::None);
-      _data.append(encodeResult.Output.begin(), encodeResult.Output.end());
+      _data.append_range(encodeResult.Output);
     }
   };
 }

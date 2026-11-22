@@ -31,7 +31,8 @@
 #include "Krystal.Booey/Graphics/Paths/PathImpl.hpp"
 #include "Krystal.Booey/Graphics/Paths/PathSegment.hpp"
 #include "Krystal.Booey/Graphics/Paths/WindRule.hpp"
-#include "Krystal.Core/Types/DataRef.hpp"
+#include "Krystal.Core/Containers/List.hpp"
+#include "Krystal.Core/Memory/DataRef.hpp"
 #include <variant>
 
 namespace krys
@@ -376,9 +377,6 @@ namespace krys::boo
     }
     return std::nullopt;
   }
-}
 
-namespace krys::boo
-{
   TextStream &operator<<(TextStream &ts, const Path &path) noexcept;
 }

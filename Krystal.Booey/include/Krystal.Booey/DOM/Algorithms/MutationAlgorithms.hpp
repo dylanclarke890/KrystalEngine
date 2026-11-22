@@ -2,7 +2,7 @@
 
 #include "Krystal.Booey/DOM/Types/ExceptionOr.hpp"
 #include "Krystal.Core/Attributes.hpp"
-#include "Krystal.Core/Types/Span.hpp"
+#include "Krystal.Core/Containers/Span.hpp"
 
 namespace krys::boo
 {

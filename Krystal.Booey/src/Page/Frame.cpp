@@ -80,8 +80,8 @@
 #include "Krystal.Booey/SVG/Graphics/SVGImage.hpp"
 #include "Krystal.Booey/SVG/SVGDocumentExtensions.hpp"
 #include "Krystal.Core/Assert.hpp"
-#include "Krystal.Core/Threading/NeverDestroyed.hpp"
-#include "Krystal.Core/Types/List.hpp"
+#include "Krystal.Core/Containers/List.hpp"
+#include "Krystal.Core/Memory/NeverDestroyed.hpp"
 #include "Krystal.Core/Utils/SetForScope.hpp"
 
 namespace krys::boo
@@ -413,7 +413,7 @@ namespace krys::boo
     // Steps that already ran in this update run in the next one.
     for (auto step : requestedSteps)
     {
-      if (!_renderingUpdateRemainingSteps.Contains(step))
+      if (!_renderingUpdateRemainingSteps.contains(step))
       {
         _unfulfilledRequestedSteps.Add(step);
       }
@@ -663,7 +663,7 @@ namespace krys::boo
         }
       });
     // A render-blocked document is updated once it's unblocked, or the block times out.
-    if (!_unfulfilledRequestedSteps.IsEmpty() || _skippedRenderBlockedDocument)
+    if (!_unfulfilledRequestedSteps.empty() || _skippedRenderBlockedDocument)
     {
       _unfulfilledRequestedSteps = {};
       // As any request between updates is, so the Booey client hears of it.

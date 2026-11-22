@@ -27,10 +27,11 @@
 
 #include "Krystal.Booey/CSS/Types/CSSOMString.hpp"
 #include "Krystal.Core/Attributes.hpp"
+#include "Krystal.Core/Containers/EnumSet.hpp"
+#include "Krystal.Core/Containers/List.hpp"
 #include "Krystal.Core/Enum.hpp"
-#include "Krystal.Core/Types/List.hpp"
+#include "Krystal.Core/Memory/RefPtr.hpp"
 #include "Krystal.Core/Types/Pair.hpp"
-#include "Krystal.Core/Types/RefPtr.hpp"
 
 namespace krys::boo::css
 {
@@ -107,24 +108,23 @@ namespace krys::boo::css
   /// @brief The descriptors explicitly set in a `@counter-style` rule.
   enum class CounterStyleDescriptor : uint16
   {
-    None = 0,
-    System = 1 << 0,
-    Negative = 1 << 1,
-    Prefix = 1 << 2,
-    Suffix = 1 << 3,
-    Range = 1 << 4,
-    Pad = 1 << 5,
-    Fallback = 1 << 6,
-    Symbols = 1 << 7,
-    AdditiveSymbols = 1 << 8,
-    SpeakAs = 1 << 9,
+    System,
+    Negative,
+    Prefix,
+    Suffix,
+    Range,
+    Pad,
+    Fallback,
+    Symbols,
+    AdditiveSymbols,
+    SpeakAs,
   };
-}
 
-KRYS_DEFINE_FLAGS_ENUM_TRAITS(krys::boo::css::CounterStyleDescriptor, 10uz);
+  consteval CounterStyleDescriptor MaxEnumValue(CounterStyleDescriptor) noexcept
+  {
+    return CounterStyleDescriptor::SpeakAs;
+  }
 
-namespace krys::boo::css
-{
   /// @brief The descriptors of a `@counter-style` rule.
   struct CounterStyleDescriptors
   {
@@ -141,7 +141,7 @@ namespace krys::boo::css
     CounterStyleSpeakAs SpeakAs;
     CounterStyleName ExtendsName;
     int32 FixedSystemFirstSymbolValue;
-    CounterStyleDescriptor ExplicitlySetDescriptors;
+    EnumSet<CounterStyleDescriptor> ExplicitlySetDescriptors;
     bool IsExtendedResolved {false};
 
     // Create() is preferred here rather than a custom constructor, so that the struct still classifies as an

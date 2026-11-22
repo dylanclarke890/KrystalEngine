@@ -22,10 +22,10 @@
 
 #include "Krystal.Booey/Rendering/RepaintRectCalculation.hpp"
 #include "Krystal.Core/Attributes.hpp"
+#include "Krystal.Core/Containers/EnumSet.hpp"
+#include "Krystal.Core/Containers/HashSet.hpp"
 #include "Krystal.Core/Enum.hpp"
 #include "Krystal.Core/Geometry/Rect.hpp"
-#include "Krystal.Core/Types/EnumSet.hpp"
-#include "Krystal.Core/Types/HashSet.hpp"
 
 namespace krys::boo
 {
@@ -56,18 +56,22 @@ namespace krys::boo
     ApplyToText, // used in combination with ApplyTo{Fill|Stroke}Mode
   };
 
+  consteval RenderSVGResourceMode MaxEnumValue(RenderSVGResourceMode) noexcept
+  {
+    return RenderSVGResourceMode::ApplyToText;
+  }
+
   enum class LegacyRenderSVGResourceApplyResult : uint8
   {
     ResourceApplied,
     ClipContainsRendererContent,
   };
-}
 
-KRYS_DEFINE_CONTIGUOUS_ENUM_TRAITS(krys::boo::RenderSVGResourceMode, 3uz);
-KRYS_DEFINE_CONTIGUOUS_ENUM_TRAITS(krys::boo::LegacyRenderSVGResourceApplyResult, 2uz);
+  consteval LegacyRenderSVGResourceApplyResult MaxEnumValue(LegacyRenderSVGResourceApplyResult) noexcept
+  {
+    return LegacyRenderSVGResourceApplyResult::ClipContainsRendererContent;
+  }
 
-namespace krys::boo
-{
   /// @brief A paint server, clipper, masker, marker or filter that SVG renderers apply around their painting.
   class LegacyRenderSVGResource
   {
@@ -127,6 +131,6 @@ namespace krys::boo
   KRYS_NODISCARD constexpr bool
     ResourceWasApplied(EnumSet<LegacyRenderSVGResource::ApplyResult> result) noexcept
   {
-    return result.Contains(LegacyRenderSVGResource::ApplyResult::ResourceApplied);
+    return result.contains(LegacyRenderSVGResource::ApplyResult::ResourceApplied);
   }
 }

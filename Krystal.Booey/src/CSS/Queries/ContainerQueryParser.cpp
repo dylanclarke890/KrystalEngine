@@ -67,7 +67,7 @@ namespace krys::boo::css::cq
       condition = mq::Condition {};
     }
 
-    auto requiredAxes = Axis::None;
+    EnumSet<Axis> requiredAxes;
     auto containsUnknownFeature = ContainsUnknownFeature::No;
 
     mq::TraverseFeatures(*condition,

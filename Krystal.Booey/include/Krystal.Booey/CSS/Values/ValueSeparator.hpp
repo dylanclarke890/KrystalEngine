@@ -30,6 +30,9 @@ namespace krys::boo::css
     CommaSeparator,
     SlashSeparator,
   };
-}
 
-KRYS_DEFINE_CONTIGUOUS_ENUM_TRAITS(krys::boo::css::ValueSeparator, 3uz);
+  consteval ValueSeparator MaxEnumValue(ValueSeparator) noexcept
+  {
+    return ValueSeparator::SlashSeparator;
+  }
+}

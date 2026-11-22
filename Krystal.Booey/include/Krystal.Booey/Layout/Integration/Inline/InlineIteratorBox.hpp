@@ -29,8 +29,8 @@
 #include "Krystal.Booey/Layout/Integration/Inline/InlineIteratorBoxModernPath.hpp"
 #include "Krystal.Booey/Rendering/Selection/RenderObjectHighlightState.hpp"
 #include "Krystal.Core/Attributes.hpp"
+#include "Krystal.Core/Move.hpp"
 #include "Krystal.Core/Types/Variant.hpp"
-#include "Krystal.Core/Utils/Move.hpp"
 #include "Krystal.Core/Visitor.hpp"
 #include "Krystal.Text/Bidi.hpp"
 

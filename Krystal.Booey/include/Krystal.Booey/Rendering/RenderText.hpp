@@ -27,17 +27,12 @@
 #include "Krystal.Booey/Rendering/RenderObject.hpp"
 #include "Krystal.Booey/Style/Difference.hpp"
 #include "Krystal.Core/Attributes.hpp"
+#include "Krystal.Core/Containers/HashSet.hpp"
 #include "Krystal.Core/Geometry/Rect.hpp"
 #include "Krystal.Core/Macros.hpp"
 #include "Krystal.Core/Strings/String.hpp"
 #include "Krystal.Core/TypeCast.hpp"
-#include "Krystal.Core/Types/HashSet.hpp"
 #include "Krystal.Core/Types/Maybe.hpp"
-
-namespace krys::boo
-{
-  class Text;
-}
 
 namespace krys::boo::layout
 {
@@ -48,6 +43,8 @@ namespace krys::boo
 {
   class RenderInline;
   class RenderStyle;
+  class Text;
+
   struct WordTrailingSpace;
 
   /// @brief Renders a text node (or anonymous text, such as generated content): its text, after the style's

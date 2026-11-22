@@ -24,7 +24,7 @@
 #pragma once
 
 #include "Krystal.Booey/HTML/Elements/HTMLElement.hpp"
-#include "Krystal.Core/Types/WeakPtr.hpp"
+#include "Krystal.Core/Memory/WeakPtr.hpp"
 
 namespace krys::boo
 {
@@ -80,10 +80,7 @@ namespace krys::boo
     KRYS_NODISCARD DOMString GroupLabelText() const noexcept;
 
     /// @brief The select whose list of options this optgroup is in, if any.
-    KRYS_NODISCARD HTMLSelectElement *OwnerSelectElement() const noexcept
-    {
-      return _ownerSelect.get();
-    }
+    KRYS_NODISCARD HTMLSelectElement *OwnerSelectElement() const noexcept;
 
     bool AccessKeyAction(bool sendMouseEvents) noexcept final;
 

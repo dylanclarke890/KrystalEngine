@@ -2,10 +2,10 @@
 
 #include "Krystal.Core/Attributes.hpp"
 #include "Krystal.Core/Colour/BlendMode.hpp"
+#include "Krystal.Core/Containers/Array.hpp"
+#include "Krystal.Core/Containers/List.hpp"
 #include "Krystal.Core/Geometry/Rect.hpp"
 #include "Krystal.Core/Numeric.hpp"
-#include "Krystal.Core/Types/Array.hpp"
-#include "Krystal.Core/Types/List.hpp"
 #include "Krystal.Gfx/Handles.hpp"
 
 namespace krys::gfx

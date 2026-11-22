@@ -26,8 +26,8 @@
 #pragma once
 
 #include "Krystal.Core/Attributes.hpp"
+#include "Krystal.Core/Containers/EnumSet.hpp"
 #include "Krystal.Core/Numeric.hpp"
-#include "Krystal.Core/Types/EnumSet.hpp"
 #include "Krystal.Text/Script.hpp"
 
 namespace krys::text
@@ -109,7 +109,7 @@ namespace krys::text
   /// @brief Whether @p character's general category is one of @p categories.
   KRYS_NODISCARD inline bool IsInGeneralCategory(char32 character, GeneralCategorySet categories) noexcept
   {
-    return categories.Contains(GetGeneralCategory(character));
+    return categories.contains(GetGeneralCategory(character));
   }
 
   /// @brief A character's East_Asian_Width property (UAX #11), in ICU's `UEastAsianWidth` order.

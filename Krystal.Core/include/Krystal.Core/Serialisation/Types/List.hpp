@@ -1,7 +1,7 @@
 ﻿#pragma once
 
+#include "Krystal.Core/Containers/List.hpp"
 #include "Krystal.Core/Serialisation/Builtins.hpp"
-#include "Krystal.Core/Types/List.hpp"
 
 namespace krys::serialisation
 {

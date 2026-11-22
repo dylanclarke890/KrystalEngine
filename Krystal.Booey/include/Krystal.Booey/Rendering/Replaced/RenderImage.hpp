@@ -27,7 +27,7 @@
 #include "Krystal.Booey/Rendering/Replaced/RenderImageResource.hpp"
 #include "Krystal.Booey/Rendering/Replaced/RenderReplaced.hpp"
 #include "Krystal.Core/Geometry/Size.hpp"
-#include "Krystal.Core/Types/UniquePtr.hpp"
+#include "Krystal.Core/Memory/UniquePtr.hpp"
 
 namespace krys::boo
 {

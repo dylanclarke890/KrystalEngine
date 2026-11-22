@@ -1,21 +1,19 @@
 ﻿#include <utility>
 
-#include "Krystal.Booey/DOM/Abort/AbortSignal.hpp"
 #include "Krystal.Booey/DOM/Mixins/ChildNode.hpp"
 #include "Krystal.Booey/DOM/Nodes/Attr.hpp"
 #include "Krystal.Booey/DOM/Nodes/DocumentType.hpp"
 #include "Krystal.Booey/DOM/Nodes/ShadowRoot.hpp"
 #include "Krystal.Booey/HTML/CustomElement/CustomElementReactionQueue.hpp"
-#include "Krystal.Booey/HTML/CustomElement/CustomElementRegistry.hpp"
 #include "Krystal.Booey/HTML/Elements/HTMLSlotElement.hpp"
-#include "Krystal.Core/Utils/Move.hpp"
+#include "Krystal.Core/Move.hpp"
 
 namespace krys::boo
 {
   DocumentType::DocumentType(Document &document, DOMString name, DOMString publicId,
                              DOMString systemId) noexcept
       // 1. Let doctype be the result of creating a node that implements DocumentType, given document.
-      : Node(document, dom::NodeType::DOCUMENT_TYPE_NODE, dom::NodeFlags::None),
+      : Node(document, dom::NodeType::DOCUMENT_TYPE_NODE, {}),
         // 2. Set doctype's name to name, public ID to publicId, and system ID to systemId.
         _name(krys::move(name)), _publicId(krys::move(publicId)), _systemId(krys::move(systemId))
   {

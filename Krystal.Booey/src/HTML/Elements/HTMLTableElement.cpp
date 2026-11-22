@@ -24,7 +24,10 @@
 
 #include "Krystal.Booey/HTML/Elements/HTMLTableElement.hpp"
 #include "algorithm"
+#include "Krystal.Booey/CSS/Properties/MutableStyleProperties.hpp"
 #include "Krystal.Booey/CSS/Values/ImageValue.hpp"
+#include "Krystal.Booey/CSS/Values/PrimitiveValue.hpp"
+#include "Krystal.Booey/CSS/Values/ValuePool.hpp"
 #include "Krystal.Booey/DOM/Collections/LiveHTMLCollection.hpp"
 #include "Krystal.Booey/DOM/Nodes/Document.hpp"
 #include "Krystal.Booey/HTML/Attributes/ReflectAttribute.hpp"
@@ -36,7 +39,7 @@
 #include "Krystal.Booey/HTML/Internals/PresentationalHints.hpp"
 #include "Krystal.Booey/HTML/MicroParsers/Numbers.hpp"
 #include "Krystal.Booey/Infra/StringAlgorithms.hpp"
-#include "Krystal.Core/Threading/NeverDestroyed.hpp"
+#include "Krystal.Core/Memory/NeverDestroyed.hpp"
 
 namespace krys::boo
 {
@@ -877,14 +880,14 @@ namespace krys::boo
       {
         static NeverDestroyed<Ref<css::MutableStyleProperties>> solidBorderStyle =
           CreateBorderStyle(css::ValueId::Hidden);
-        return solidBorderStyle.get().get();
+        return solidBorderStyle->get();
       }
       return nullptr;
     }
 
     static NeverDestroyed<Ref<css::MutableStyleProperties>> outsetBorderStyle =
       CreateBorderStyle(css::ValueId::Outset);
-    return outsetBorderStyle.get().get();
+    return outsetBorderStyle->get();
   }
 
   auto HTMLTableElement::GetCellBorders() const noexcept -> CellBorders
@@ -991,10 +994,10 @@ namespace krys::boo
     if (rows)
     {
       static NeverDestroyed<Ref<css::MutableStyleProperties>> rowBorderStyle = CreateGroupBorderStyle(true);
-      return rowBorderStyle.get().get();
+      return rowBorderStyle->get();
     }
     static NeverDestroyed<Ref<css::MutableStyleProperties>> columnBorderStyle = CreateGroupBorderStyle(false);
-    return columnBorderStyle.get().get();
+    return columnBorderStyle->get();
   }
 
 #pragma endregion

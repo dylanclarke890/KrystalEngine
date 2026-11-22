@@ -27,10 +27,10 @@
 
 #include "Krystal.Booey/Layout/FormattingContexts/Inline/Text/TextBreakingPositionContext.hpp"
 #include "Krystal.Core/Attributes.hpp"
+#include "Krystal.Core/Containers/HashMap.hpp"
+#include "Krystal.Core/Containers/SmallList.hpp"
 #include "Krystal.Core/Macros.hpp"
 #include "Krystal.Core/Strings/String.hpp"
-#include "Krystal.Core/Types/HashMap.hpp"
-#include "Krystal.Core/Types/SmallList.hpp"
 
 namespace krys::boo::layout
 {

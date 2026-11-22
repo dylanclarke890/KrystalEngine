@@ -26,39 +26,16 @@
 #pragma once
 
 #include "Krystal.Core/Geometry/Rect.hpp"
-#include "Krystal.Core/Hash.hpp"
+#include "Krystal.Core/Hashing/FastHash.hpp"
 
 namespace krys
 {
   template <>
-  struct DefaultHash<RectI>
+  struct FastHash<RectI>
   {
-    KRYS_NODISCARD static size_t Hash(const RectI &key) noexcept
+    KRYS_NODISCARD size_t operator()(const RectI &key) const noexcept
     {
-      return krys::Hash::Combine(key.X(), key.Y(), key.Width(), key.Height());
-    }
-
-    KRYS_NODISCARD static bool Equal(const RectI &a, const RectI &b) noexcept
-    {
-      return a == b;
-    }
-
-    constexpr static bool IsSafeToCompareToEmptyOrDeleted = true;
-  };
-
-  template <>
-  struct HashTraits<RectI> : public GenericHashTraits<RectI>
-  {
-    constexpr static bool EmptyValueIsZero = true;
-
-    constexpr static void ConstructDeletedValue(RectI &slot) noexcept
-    {
-      slot = RectI(-1, -1, -1, -1);
-    }
-
-    KRYS_NODISCARD constexpr static bool IsDeletedValue(const RectI &value) noexcept
-    {
-      return value.X() == -1 && value.Y() == -1 && value.Width() == -1 && value.Height() == -1;
+      return krys::CombineFastHashes(key.X(), key.Y(), key.Width(), key.Height());
     }
   };
 }

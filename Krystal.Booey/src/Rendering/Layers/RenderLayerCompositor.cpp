@@ -45,9 +45,9 @@
 #include "Krystal.Booey/Style/Difference.hpp"
 #include "Krystal.Booey/Style/Styleable.hpp"
 #include "Krystal.Booey/Style/Values/Backgrounds/FillLayers.hpp"
+#include "Krystal.Core/Containers/HashMap.hpp"
+#include "Krystal.Core/Containers/ListHashSet.hpp"
 #include "Krystal.Core/Strings/TextStream.hpp"
-#include "Krystal.Core/Types/HashMap.hpp"
-#include "Krystal.Core/Types/ListHashSet.hpp"
 #include "Krystal.Core/Utils/SetForScope.hpp"
 #include <algorithm>
 
@@ -301,7 +301,7 @@ namespace krys::boo
     // we've set the provider's backing-sharing layers.
     void AddLayerNeedingRepaint(RenderLayer &layer) noexcept
     {
-      _layersPendingRepaint.add(&layer);
+      _layersPendingRepaint.insert(&layer);
     }
 
     void AddBackingSharingCandidate(RenderLayer &candidateLayer, LayoutRect candidateAbsoluteBounds,
@@ -386,7 +386,7 @@ namespace krys::boo
 
     for (auto &candidate : candidates)
     {
-      candidate.SharingLayers.remove(&endLayer);
+      candidate.SharingLayers.erase(&endLayer);
       candidate.ProviderLayer->Backing()->SetBackingSharingLayers(krys::move(candidate.SharingLayers));
     }
     _backingSharingStackingContext = nullptr;
@@ -1038,7 +1038,7 @@ namespace krys::boo
       if (auto *provider =
             backingSharingState.BackingProviderCandidateForLayer(layer, *this, overlapMap, layerExtent))
       {
-        provider->SharingLayers.add(&layer);
+        provider->SharingLayers.insert(&layer);
         compositingReason = IndirectCompositingReason::None;
         providedBackingLayer = provider->ProviderLayer;
       }
@@ -1394,7 +1394,7 @@ namespace krys::boo
     {
       auto *provider = backingSharingState.ExistingBackingProviderCandidateForLayer(layer);
       krys_assert(provider);
-      provider->SharingLayers.add(&layer);
+      provider->SharingLayers.insert(&layer);
       layerPaintsIntoProvidedBacking = true;
     }
 
@@ -1481,7 +1481,7 @@ namespace krys::boo
     layer.UpdateDescendantDependentFlags();
     layer.UpdateLayerListsIfNeeded();
 
-    bool layerNeedsUpdate = !updateLevel.IsEmpty();
+    bool layerNeedsUpdate = !updateLevel.empty();
     if (layer.DescendantsNeedUpdateBackingAndHierarchyTraversal())
     {
       updateLevel.Add(UpdateLevel::AllDescendants);
@@ -1544,7 +1544,7 @@ namespace krys::boo
     bool requireDescendantTraversal =
       layer.HasDescendantNeedingUpdateBackingOrHierarchyTraversal()
       || (layer.HasCompositingDescendant()
-          && (!layerBacking || layer.NeedsCompositingLayerConnection() || !updateLevel.IsEmpty()));
+          && (!layerBacking || layer.NeedsCompositingLayerConnection() || !updateLevel.empty()));
 
     bool requiresChildRebuild =
       layerBacking && layer.NeedsCompositingLayerConnection() && !layer.HasCompositingDescendant();
@@ -1672,7 +1672,7 @@ namespace krys::boo
       layer.DisconnectFromBackingProviderLayer({UpdateBackingSharingFlags::DuringCompositingUpdate});
       for (auto &candidate : sharingState.BackingProviderCandidates())
       {
-        candidate.SharingLayers.remove(&layer);
+        candidate.SharingLayers.erase(&layer);
       }
     }
 
@@ -2751,7 +2751,7 @@ namespace krys::boo
 
     // Exclude any implicitly created layers that wrap the root contents layer, unless the caller explicitly
     // requested the true root to be included.
-    GraphicsLayer *dumpRootLayer = options.Contains(LayerTreeAsTextOptions::IncludeRootLayers)
+    GraphicsLayer *dumpRootLayer = options.contains(LayerTreeAsTextOptions::IncludeRootLayers)
                                      ? RootGraphicsLayer()
                                      : _rootContentsLayer.get();
 

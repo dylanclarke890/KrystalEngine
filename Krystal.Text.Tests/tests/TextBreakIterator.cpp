@@ -175,18 +175,18 @@ namespace krys::text::tests
       CHECK(factory.StringView() == u8"abc def");
       CHECK(factory.Mode() == TextBreakLineBehavior::Default);
       // Without a prior context, the text starts at a boundary.
-      CHECK(factory.Get().IsBoundary(0));
+      CHECK(factory->IsBoundary(0));
 
       factory.GetPriorContext().Set({0, U'x'});
-      CHECK_FALSE(factory.Get().IsBoundary(0));
+      CHECK_FALSE(factory->IsBoundary(0));
 
       factory.GetPriorContext().Set({U'x', U' '});
-      CHECK(factory.Get().IsBoundary(0));
-      CHECK(factory.Get().Following(0) == 4u);
+      CHECK(factory->IsBoundary(0));
+      CHECK(factory->Following(0) == 4u);
 
       factory.ResetStringAndReleaseIterator(u8"gh ij", null, TextBreakLineBehavior::Strict);
       CHECK(factory.Mode() == TextBreakLineBehavior::Strict);
-      CHECK(factory.Get().Following(0) == 3u);
+      CHECK(factory->Following(0) == 3u);
     }
   }
 }

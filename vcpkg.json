@@ -10,7 +10,8 @@
     "icu",
     "lcms",
     "libjpeg-turbo",
-    "magic-enum",
+    "rapidhash",
+    "unordered-dense",
     {
       "name": "libxml2",
       "default-features": false

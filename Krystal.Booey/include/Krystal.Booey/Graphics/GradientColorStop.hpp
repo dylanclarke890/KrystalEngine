@@ -40,9 +40,6 @@ namespace krys::boo
     float Offset {0};
     boo::Color Color {};
   };
-}
 
-namespace krys::boo
-{
   TextStream &operator<<(TextStream &ts, const GradientColorStop &stop) noexcept;
 }

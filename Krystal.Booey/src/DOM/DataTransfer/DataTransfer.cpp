@@ -37,8 +37,8 @@
 #include "Krystal.Booey/Page/Frame.hpp"
 #include "Krystal.Booey/Platform/Pasteboard/Pasteboard.hpp"
 #include "Krystal.Booey/Platform/Pasteboard/StaticPasteboard.hpp"
+#include "Krystal.Core/Containers/HashSet.hpp"
 #include "Krystal.Core/Strings/ASCII.hpp"
-#include "Krystal.Core/Types/HashSet.hpp"
 #include "Krystal.Net/Url.hpp"
 #include <algorithm>
 
@@ -203,11 +203,11 @@ namespace krys::boo::dom
       {
         return u8"all";
       }
-      if (isGenericMove && operationMask.Contains(DragOperation::Copy))
+      if (isGenericMove && operationMask.contains(DragOperation::Copy))
       {
         return u8"copyMove";
       }
-      if (isGenericMove && operationMask.Contains(DragOperation::Link))
+      if (isGenericMove && operationMask.contains(DragOperation::Link))
       {
         return u8"linkMove";
       }
@@ -219,11 +219,11 @@ namespace krys::boo::dom
       {
         return u8"move";
       }
-      if (operationMask.Contains(DragOperation::Copy))
+      if (operationMask.contains(DragOperation::Copy))
       {
         return u8"copy";
       }
-      if (operationMask.Contains(DragOperation::Link))
+      if (operationMask.contains(DragOperation::Link))
       {
         return u8"link";
       }
@@ -744,7 +744,7 @@ namespace krys::boo::dom
   {
     auto operationMask = DragOpFromIEOp(_dropEffect);
     krys_debug_assert(
-      (operationMask == EnumSet<DragOperation> {DragOperation::Copy} || operationMask.IsEmpty()
+      (operationMask == EnumSet<DragOperation> {DragOperation::Copy} || operationMask.empty()
        || operationMask == EnumSet<DragOperation> {DragOperation::Link}
        || operationMask == EnumSet<DragOperation> {DragOperation::Generic, DragOperation::Move}
        || operationMask.ContainsAll(AnyDragOperation())));
@@ -760,7 +760,7 @@ namespace krys::boo::dom
   void DataTransfer::SetDestinationOperationMask(EnumSet<DragOperation> operationMask) noexcept
   {
     krys_debug_assert(
-      (operationMask == EnumSet<DragOperation> {DragOperation::Copy} || operationMask.IsEmpty()
+      (operationMask == EnumSet<DragOperation> {DragOperation::Copy} || operationMask.empty()
        || operationMask == EnumSet<DragOperation> {DragOperation::Link}
        || operationMask == EnumSet<DragOperation> {DragOperation::Generic}
        || operationMask == EnumSet<DragOperation> {DragOperation::Move}

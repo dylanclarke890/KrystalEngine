@@ -48,7 +48,7 @@ namespace krys::boo::css::tests
   TEST_CASE("PrimitiveUnits(UnitType round trips)", "[CSS][Primitives][Units]")
   {
     // Every UnitType that maps to a unit maps back to itself.
-    for (size_t i = 0uz; i < EnumTraits<UnitType>::DistinctValues; ++i)
+    for (size_t i = 0uz; i < (ToUnderlying(MaxEnumValue(UnitType {})) + 1uz); ++i)
     {
       auto unitType = static_cast<UnitType>(i);
       INFO(i);

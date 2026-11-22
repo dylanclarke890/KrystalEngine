@@ -24,7 +24,7 @@
 #include "Krystal.Booey/SVG/Internals/SVGPathConsumer.hpp"
 #include "Krystal.Booey/SVG/Internals/SVGPathSegType.hpp"
 #include "Krystal.Core/Concepts.hpp"
-#include "Krystal.Core/Types/Span.hpp"
+#include "Krystal.Core/Containers/Span.hpp"
 
 namespace krys::boo
 {

@@ -1,9 +1,9 @@
 ﻿#include "Krystal.Core/IO/Streams/NativeFileStream.hpp"
 #include "catch2/catch_test_macros.hpp"
 #include "catch2/catch_tostring.hpp"
+#include "Krystal.Core/Containers/Array.hpp"
 #include "Krystal.Core/IO/Common.hpp"
 #include "Krystal.Core/IO/Path.hpp"
-#include "Krystal.Core/Types/Array.hpp"
 
 namespace krys::io::tests
 {
@@ -102,7 +102,7 @@ namespace krys::io::tests
 
     SECTION("Constructor and basic operations")
     {
-      NativeFileWriter writer(testFile, WriteFlags::Create | WriteFlags::OpenAtEnd);
+      NativeFileWriter writer(testFile, {WriteFlag::Create, WriteFlag::OpenAtEnd});
 
       REQUIRE(writer.IsOpen()); // Should open in constructor
       REQUIRE(writer.Size() == 0);
@@ -168,7 +168,7 @@ namespace krys::io::tests
 
     SECTION("Invalid directory writing")
     {
-      NativeFileWriter writer(Path("/invalid-path/test.bin"), WriteFlags::None);
+      NativeFileWriter writer(Path("/invalid-path/test.bin"), {});
       REQUIRE_FALSE(writer.IsOpen());
       REQUIRE_FALSE(writer.Open());
     }

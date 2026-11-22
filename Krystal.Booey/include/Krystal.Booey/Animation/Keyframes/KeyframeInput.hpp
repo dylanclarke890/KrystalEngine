@@ -3,7 +3,7 @@
 #include "Krystal.Booey/Animation/Keyframes/CompositeOperationOrAuto.hpp"
 #include "Krystal.Booey/Animation/Timelines/TimelineRangeOffset.hpp"
 #include "Krystal.Booey/DOM/Types/DOMString.hpp"
-#include "Krystal.Core/Types/List.hpp"
+#include "Krystal.Core/Containers/List.hpp"
 #include "Krystal.Core/Types/Pair.hpp"
 #include "Krystal.Core/Types/Variant.hpp"
 
@@ -14,8 +14,9 @@ namespace krys::boo
   /// @see https://drafts.csswg.org/web-animations-1/#dictdef-basepropertyindexedkeyframe
   struct BasePropertyIndexedKeyframe
   {
-    Variant<std::nullptr_t, List<KeyframeOffset>, double, TimelineRangeOffset, DOMString> Offset =
-      List<KeyframeOffset>();
+    // The list comes first so that the default is an empty list without an initialiser, which would need
+    // CSSNumericValue's definition wherever this header is included.
+    Variant<List<KeyframeOffset>, std::nullptr_t, double, TimelineRangeOffset, DOMString> Offset;
     Variant<List<DOMString>, DOMString> Easing = List<DOMString>();
     Variant<List<CompositeOperationOrAuto>, CompositeOperationOrAuto> Composite =
       List<CompositeOperationOrAuto>();

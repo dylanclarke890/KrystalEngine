@@ -18,12 +18,12 @@ namespace krys::boo::html
     XML,
     XMLNS,
   };
-}
 
-KRYS_DEFINE_CONTIGUOUS_ENUM_TRAITS(krys::boo::html::Namespace, 8uz);
+  consteval Namespace MaxEnumValue(Namespace) noexcept
+  {
+    return Namespace::XMLNS;
+  }
 
-namespace krys::boo::html
-{
   KRYS_NODISCARD constexpr Namespace ParseNamespace(DOMStringView name) noexcept
   {
     if (name == DOMStringAtom::Empty())

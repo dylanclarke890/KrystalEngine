@@ -25,9 +25,9 @@
 #include "Krystal.Booey/CSS/Properties/ImmutableStyleProperties.hpp"
 #include "Krystal.Booey/CSS/Properties/StylePropertiesInlines.hpp"
 #include "Krystal.Booey/CSS/Values/CustomPropertyValue.hpp"
-#include "Krystal.Core/Hash.hpp"
-#include "Krystal.Core/Threading/NeverDestroyed.hpp"
-#include "Krystal.Core/Types/HashMap.hpp"
+#include "Krystal.Core/Containers/HashMap.hpp"
+#include "Krystal.Core/Hashing/FastHash.hpp"
+#include "Krystal.Core/Memory/NeverDestroyed.hpp"
 #include <new>
 
 namespace krys::boo::css
@@ -68,7 +68,7 @@ namespace krys::boo::css
   KRYS_NODISCARD static HashMap<size_t, Ref<ImmutableStyleProperties>> &DeduplicationMap() noexcept
   {
     static NeverDestroyed<HashMap<size_t, Ref<ImmutableStyleProperties>>> map;
-    return map.get();
+    return *map;
   }
 
   Ref<ImmutableStyleProperties> ImmutableStyleProperties::CreateDeduplicating(Span<const Property> properties,
@@ -83,7 +83,7 @@ namespace krys::boo::css
 
     auto computeHash = [&]() -> size_t
     {
-      auto seed = Hash::Combine(mode);
+      auto seed = CombineFastHashes(mode);
       for (auto &property : properties)
       {
         if (!property.Value().AddHash(seed))
@@ -91,7 +91,7 @@ namespace krys::boo::css
           return 0uz;
         }
 
-        seed = Hash::Combine(seed, property.Id(), static_cast<bool>(property.Important()));
+        seed = CombineFastHashes(seed, property.Id(), static_cast<bool>(property.Important()));
       }
 
       return seed;

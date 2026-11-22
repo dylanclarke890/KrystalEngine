@@ -79,7 +79,7 @@ namespace krys::boo::style
 
     KRYS_NODISCARD constexpr bool Contains(MarginTrimSide e) const noexcept
     {
-      return _value.Contains(e);
+      return _value.contains(e);
     }
 
     KRYS_NODISCARD constexpr bool ContainsAny(EnumSet other) const noexcept
@@ -99,7 +99,7 @@ namespace krys::boo::style
 
     KRYS_NODISCARD constexpr bool IsNone() const noexcept
     {
-      return _value.IsEmpty();
+      return _value.empty();
     }
 
     template <typename... F>

@@ -37,8 +37,8 @@
 #include "Krystal.Booey/Rendering/RenderElement.hpp"
 #include "Krystal.Booey/Style/Scope/Scope.hpp"
 #include "Krystal.Booey/Style/Values/PointerEvents/TouchAction.hpp"
+#include "Krystal.Core/Move.hpp"
 #include "Krystal.Core/Types/SharedBuffer.hpp"
-#include "Krystal.Core/Utils/Move.hpp"
 #include "Krystal.Net/Url.hpp"
 #include "Krystal.UI/ColorChooserOverlay.hpp"
 #include "Krystal.UI/Compositing/GraphicsLayerTextureMapper.hpp"
@@ -241,14 +241,14 @@ namespace krys::ui
       auto &devices = _view->_pointingDevices;
       if (devices.Mouse || (!devices.Touch && devices.Pen))
       {
-        return boo::PointerCharacteristics::Fine;
+        return boo::PointerCharacteristic::Fine;
       }
-      return devices.Touch ? boo::PointerCharacteristics::Coarse : boo::PointerCharacteristics::None;
+      return devices.Touch ? boo::PointerCharacteristic::Coarse : boo::PointerCharacteristics {};
     }
 
     KRYS_NODISCARD bool HoverSupportedByPrimaryPointingDevice() const noexcept override
     {
-      return PrimaryPointingDevice() == boo::PointerCharacteristics::Fine;
+      return PrimaryPointingDevice() == boo::PointerCharacteristic::Fine;
     }
 
     KRYS_NODISCARD boo::PointerCharacteristics AllAvailablePointingDevices() const noexcept override
@@ -258,14 +258,14 @@ namespace krys::ui
         return boo::BooeyClient::AllAvailablePointingDevices();
       }
       auto &devices = _view->_pointingDevices;
-      auto characteristics = boo::PointerCharacteristics::None;
+      auto characteristics = boo::PointerCharacteristics {};
       if (devices.Mouse || devices.Pen)
       {
-        characteristics = characteristics | boo::PointerCharacteristics::Fine;
+        characteristics = characteristics | boo::PointerCharacteristic::Fine;
       }
       if (devices.Touch)
       {
-        characteristics = characteristics | boo::PointerCharacteristics::Coarse;
+        characteristics = characteristics | boo::PointerCharacteristic::Coarse;
       }
       return characteristics;
     }
@@ -1085,9 +1085,9 @@ namespace krys::ui
       return;
     }
 
-    auto &image = *_drag->Image.Get();
+    auto &image = *_drag->Image.get();
     // The image is in device pixels.
-    SizeF size(boo::DragImageSize(_drag->Image.Get()));
+    SizeF size(boo::DragImageSize(_drag->Image.get()));
     size.Scale(1 / _frame->Document()->DeviceScaleFactor());
     boo::GraphicsContextStateSaver stateSaver(context);
     if (_drag->FadeImage)
@@ -1663,8 +1663,8 @@ namespace krys::ui
           // The touch pans if `touch-action` allows its direction where it began; otherwise it's the page's.
           bool any =
             _gestureTouchActions.ContainsAny({boo::TouchAction::Auto, boo::TouchAction::Manipulation});
-          _panX = any || _gestureTouchActions.Contains(boo::TouchAction::PanX);
-          _panY = any || _gestureTouchActions.Contains(boo::TouchAction::PanY);
+          _panX = any || _gestureTouchActions.contains(boo::TouchAction::PanX);
+          _panY = any || _gestureTouchActions.contains(boo::TouchAction::PanY);
           bool horizontal = std::abs(delta.Width()) >= std::abs(delta.Height());
           _longPressTimer.Stop();
           if (horizontal ? !_panX : !_panY)
@@ -2064,8 +2064,8 @@ namespace krys::ui
     // Ctrl with a Shift key on its own chooses the direction of the text being edited, when they're let go:
     // the right Shift right to left, the left one left to right. Any other key on the way cancels it.
     bool isShift = key == pal::Key::Shift || key == pal::Key::RightShift;
-    if (isShift && modifiers.Contains(pal::KeyModifier::Control) && !modifiers.Contains(pal::KeyModifier::Alt)
-        && !modifiers.Contains(pal::KeyModifier::Meta))
+    if (isShift && modifiers.contains(pal::KeyModifier::Control) && !modifiers.contains(pal::KeyModifier::Alt)
+        && !modifiers.contains(pal::KeyModifier::Meta))
     {
       _pendingTextDirection =
         key == pal::Key::RightShift ? boo::WritingDirection::RightToLeft : boo::WritingDirection::LeftToRight;
@@ -2322,8 +2322,7 @@ namespace krys::ui
       (void)boo::html::FocusAlgorithms::SequentialNavigation(*document, FocusDirection::Forward);
       PerformMicrotaskCheckpoint();
     }
-    if (pressed(GamepadButton::LeftShoulder)
-        && !GamepadOverlayKey(pal::Key::Tab, pal::KeyModifiers {pal::KeyModifier::Shift}))
+    if (pressed(GamepadButton::LeftShoulder) && !GamepadOverlayKey(pal::Key::Tab, {pal::KeyModifier::Shift}))
     {
       GamepadInteraction(true);
       Ref document = ShareRef(Document());
@@ -2536,7 +2535,7 @@ namespace krys::ui
     /// @brief The drag's flags for @p modifiers: Ctrl makes a drop copy.
     KRYS_NODISCARD EnumSet<boo::DragApplicationFlags> DragFlags(pal::KeyModifiers modifiers) noexcept
     {
-      if (modifiers.Contains(pal::KeyModifier::Control))
+      if (modifiers.contains(pal::KeyModifier::Control))
       {
         return {boo::DragApplicationFlags::IsCopyKeyDown};
       }

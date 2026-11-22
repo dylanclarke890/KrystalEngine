@@ -24,6 +24,7 @@
 #include "Krystal.Booey/DOM/Algorithms/ElementAlgorithms.hpp"
 #include "Krystal.Booey/DOM/Algorithms/NodeAlgorithms.hpp"
 #include "Krystal.Booey/DOM/Algorithms/TextAlgorithms.hpp"
+#include "Krystal.Booey/DOM/Collections/DOMTokenList.hpp"
 #include "Krystal.Booey/HTML/Attributes/ReflectAttribute.hpp"
 
 #include "Krystal.Core/Strings/ASCII.hpp"
@@ -34,6 +35,8 @@ namespace krys::boo
       : HTMLElement(document, html::HTMLElementInterface::Script)
   {
   }
+
+  HTMLScriptElement::~HTMLScriptElement() noexcept = default;
 
 #pragma region HTMLScriptElement
 
@@ -101,9 +104,8 @@ namespace krys::boo
   {
     if (!_blocking)
     {
-      _blocking =
-        dom::ElementAlgorithms::CreateDOMTokenList(*this, u8"blocking", [](Document &, DOMStringView token)
-                                                   { return text::IsASCIICaselessEqual(token, u8"render"); });
+      _blocking = dom::DOMTokenList::Create(*this, u8"blocking", [](Document &, DOMStringView token)
+                                            { return text::IsASCIICaselessEqual(token, u8"render"); });
     }
 
     return *_blocking;

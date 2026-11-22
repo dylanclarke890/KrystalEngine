@@ -9,6 +9,9 @@ namespace krys
     Premultiplied,
     Unpremultiplied,
   };
-}
 
-KRYS_DEFINE_CONTIGUOUS_ENUM_TRAITS(krys::AlphaPremultiplication, 2uz);
+  consteval AlphaPremultiplication MaxEnumValue(AlphaPremultiplication) noexcept
+  {
+    return AlphaPremultiplication::Unpremultiplied;
+  }
+}

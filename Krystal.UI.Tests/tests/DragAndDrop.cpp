@@ -1,5 +1,4 @@
 ﻿#include "catch2/catch_test_macros.hpp"
-#include "Krystal.Booey/DOM/Collections/DOMTokenList.hpp"
 #include "Krystal.Booey/DOM/DataTransfer/DataTransfer.hpp"
 #include "Krystal.Booey/DOM/Events/DragEvent.hpp"
 #include "Krystal.Booey/DOM/Geometry/DOMRect.hpp"
@@ -356,12 +355,12 @@ namespace krys::ui::tests
     REQUIRE(view.IsDragging());
     view.MouseMoved({200, 150});
 
-    auto target =
-      device->CreateTexture({.Format = gfx::TextureFormat::RGBA8Unorm,
-                             .Width = Width,
-                             .Height = Height,
-                             .Usage = gfx::TextureUsage::RenderTarget | gfx::TextureUsage::Sampled,
-                             .DebugName = u8"Drag"});
+    auto target = device->CreateTexture(
+      {.Format = gfx::TextureFormat::RGBA8Unorm,
+       .Width = Width,
+       .Height = Height,
+       .Usage = EnumSet<gfx::TextureUsage> {gfx::TextureUsage::RenderTarget, gfx::TextureUsage::Sampled},
+       .DebugName = u8"Drag"});
     REQUIRE(target.has_value());
     device->BeginFrame();
     auto &commands = device->GetCommandBuffer();

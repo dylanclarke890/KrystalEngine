@@ -29,7 +29,7 @@
  */
 
 #include "Krystal.Net/BlobData.hpp"
-#include "Krystal.Core/Utils/Move.hpp"
+#include "Krystal.Core/Move.hpp"
 #include <filesystem>
 #include <system_error>
 

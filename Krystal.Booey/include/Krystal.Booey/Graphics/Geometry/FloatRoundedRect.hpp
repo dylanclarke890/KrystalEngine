@@ -310,9 +310,6 @@ namespace krys::boo
 
   // Snip away rectangles from corners, roughly one per step length of arc.
   KRYS_NODISCARD Region ApproximateAsRegion(const FloatRoundedRect &, unsigned stepLength = 20) noexcept;
-}
 
-namespace krys::boo
-{
   TextStream &operator<<(TextStream &ts, const FloatRoundedRect &roundedRect) noexcept;
 }

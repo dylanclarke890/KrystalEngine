@@ -50,7 +50,7 @@ namespace krys::boo
     /// @brief The value of a `filter` property's list, or of a list of filter operations.
     KRYS_NODISCARD const FilterOperation &OperationOf(const style::FilterValue &value) noexcept
     {
-      return value.Get();
+      return *value;
     }
 
     KRYS_NODISCARD const FilterOperation &OperationOf(const Ref<FilterOperation> &operation) noexcept
@@ -293,7 +293,7 @@ namespace krys::boo
     filterRenderer->SetFilterRenderingModes(preferredRenderingModes);
     // Without a mode the page prefers (there's no software rendering to fall back on), the filter can't be
     // applied.
-    if (filterRenderer->FilterRenderingModes().IsEmpty())
+    if (filterRenderer->FilterRenderingModes().empty())
     {
       return nullptr;
     }
@@ -463,7 +463,7 @@ namespace krys::boo
 
   RefPtr<FilterImage> CSSFilterRenderer::Apply(FilterImage *sourceImage, FilterResults &results) noexcept
   {
-    krys_debug_assert(FilterRenderingModes().Contains(FilterRenderingMode::Accelerated));
+    krys_debug_assert(FilterRenderingModes().contains(FilterRenderingMode::Accelerated));
 
     if (!sourceImage)
     {
@@ -487,7 +487,7 @@ namespace krys::boo
   FilterStyleVector CSSFilterRenderer::CreateFilterStyles(GraphicsContext &context,
                                                           const FilterStyle &sourceStyle) const noexcept
   {
-    krys_debug_assert(FilterRenderingModes().Contains(FilterRenderingMode::GraphicsContext));
+    krys_debug_assert(FilterRenderingModes().contains(FilterRenderingMode::GraphicsContext));
 
     FilterStyleVector styles;
     FilterStyle lastStyle = sourceStyle;
@@ -527,7 +527,7 @@ namespace krys::boo
 
     for (const auto &value : filter)
     {
-      const auto &operation = value.Get();
+      const auto &operation = *value;
       if (auto *referenceOperation = DynamicDowncast<style::ReferenceFilterOperation>(operation))
       {
         if (!IsIdentityReferenceFilter(*referenceOperation, renderer))
@@ -580,7 +580,7 @@ namespace krys::boo
 
     for (const auto &value : filter)
     {
-      const auto &operation = value.Get();
+      const auto &operation = *value;
       if (auto *referenceOperation = DynamicDowncast<style::ReferenceFilterOperation>(operation))
       {
         outsets += CalculateReferenceFilterOutsets(*referenceOperation, renderer, targetBoundingBox);

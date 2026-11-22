@@ -3,7 +3,7 @@
 #include "Krystal.Booey/DOM/Nodes/HTMLDocument.hpp"
 #include "Krystal.Booey/HTML/EventLoop/EventLoop.hpp"
 #include "Krystal.Booey/HTML/Window.hpp"
-#include "Krystal.Core/Types/Array.hpp"
+#include "Krystal.Core/Containers/Array.hpp"
 #include "Krystal.PAL/Display.hpp"
 #include "Krystal.PAL/Win32/DisplayColour.hpp"
 #include "Krystal.UI.Tests/RepaintFixture.hpp"

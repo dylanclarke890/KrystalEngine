@@ -1,5 +1,5 @@
 ﻿#include "catch2/catch_test_macros.hpp"
-#include "Krystal.Core/Utils/Move.hpp"
+#include "Krystal.Core/Move.hpp"
 #include "Krystal.Gfx.Tests/TestDevice.hpp"
 #include "Krystal.Gfx/Render2D/CoverageBlur.hpp"
 #include "Krystal.Gfx/Render2D/Renderer2D.hpp"
@@ -65,11 +65,12 @@ namespace krys::gfx::tests
         {
           _device->Destroy(_target);
         }
-        auto target = _device->CreateTexture({.Format = TextureFormat::RGBA8Unorm,
-                                              .Width = width,
-                                              .Height = height,
-                                              .Usage = TextureUsage::RenderTarget | TextureUsage::Sampled,
-                                              .DebugName = u8"Target"});
+        auto target = _device->CreateTexture(
+          {.Format = TextureFormat::RGBA8Unorm,
+           .Width = width,
+           .Height = height,
+           .Usage = EnumSet<TextureUsage> {TextureUsage::RenderTarget, TextureUsage::Sampled},
+           .DebugName = u8"Target"});
         REQUIRE(target.has_value());
         _target = *target;
         _width = width;

@@ -1,6 +1,6 @@
 ﻿#include "Krystal.Net/Url.hpp"
 #include "catch2/catch_test_macros.hpp"
-#include "Krystal.Core/Utils/Move.hpp"
+#include "Krystal.Core/Move.hpp"
 #include "Krystal.Net/UrlHash.hpp"
 #include <string>
 
@@ -517,12 +517,7 @@ namespace krys::net::tests
   {
     Url a {u8"http://example.com/"};
     Url b {u8"HTTP://EXAMPLE.COM"};
-    CHECK(DefaultHash<Url>::Equal(a, b));
-    CHECK(DefaultHash<Url>::Hash(a) == DefaultHash<Url>::Hash(b));
-
-    Url deleted {HashTableDeletedValueTag {}};
-    CHECK(HashTraits<Url>::IsDeletedValue(deleted));
-    CHECK_FALSE(HashTraits<Url>::IsDeletedValue(a));
+    CHECK(FastHash<Url> {}(a) == FastHash<Url> {}(b));
   }
 
   TEST_CASE("URL(setters)", "[URL]")

@@ -21,10 +21,8 @@
  */
 
 #include "Krystal.Booey/DOM/Nodes/ContainerNode.hpp"
-#include "Krystal.Booey/DOM/Abort/AbortSignal.hpp"
 #include "Krystal.Booey/DOM/Nodes/Document.hpp"
-#include "Krystal.Booey/HTML/CustomElement/CustomElementRegistry.hpp"
-#include "Krystal.Core/Types/List.hpp"
+#include "Krystal.Core/Containers/List.hpp"
 
 namespace krys::boo
 {
@@ -47,7 +45,7 @@ namespace krys::boo
   }
 
   ContainerNode::ContainerNode(Document &document, dom::NodeType type, dom::NodeFlags flags) noexcept
-      : Node(document, type, flags | dom::NodeFlags::IsContainerNode), _firstChild(nullptr),
+      : Node(document, type, flags | dom::NodeFlag::IsContainerNode), _firstChild(nullptr),
         _lastChild(nullptr)
   {
   }
@@ -67,7 +65,7 @@ namespace krys::boo
       child->_nextSibling = nullptr;
       child->_previousSibling = nullptr;
       child->_parentNode = nullptr;
-      child->ClearNodeFlag(dom::NodeFlags::IsConnected);
+      child->_nodeFlags.Remove(dom::NodeFlag::IsConnected);
       queue.Nodes.push_back(child);
     }
 

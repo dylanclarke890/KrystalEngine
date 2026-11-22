@@ -123,7 +123,7 @@ namespace krys::boo
   Color
     RenderThemeAdwaita::PlatformInactiveSelectionBackgroundColor(style::ColorOptions options) const noexcept
   {
-    if (HasFlag(options, style::ColorOptions::UseDarkAppearance))
+    if (options.contains(style::ColorOption::UseDarkAppearance))
     {
       return SRGBA<uint8> {255, 255, 255, 25};
     }
@@ -155,7 +155,7 @@ namespace krys::boo
   Color RenderThemeAdwaita::PlatformActiveListBoxSelectionForegroundColor(
     style::ColorOptions options) const noexcept
   {
-    return HasFlag(options, style::ColorOptions::UseDarkAppearance) ? Color::white : Color::black;
+    return options.contains(style::ColorOption::UseDarkAppearance) ? Color::white : Color::black;
   }
 
   Color RenderThemeAdwaita::PlatformInactiveListBoxSelectionForegroundColor(
@@ -176,7 +176,7 @@ namespace krys::boo
 
   Color RenderThemeAdwaita::SystemColor(ValueId cssValueID, style::ColorOptions options) const noexcept
   {
-    const bool useDarkAppearance = HasFlag(options, style::ColorOptions::UseDarkAppearance);
+    const bool useDarkAppearance = options.contains(style::ColorOption::UseDarkAppearance);
 
     switch (cssValueID)
     {
@@ -184,45 +184,45 @@ namespace krys::boo
       case ValueId::Buttontext:
         if (useDarkAppearance)
         {
-          return {ButtonTextColorDark, ColorFlags::Semantic};
+          return {ButtonTextColorDark, ColorFlag::Semantic};
         }
-        return {ButtonTextColorLight, ColorFlags::Semantic};
+        return {ButtonTextColorLight, ColorFlag::Semantic};
 
       case ValueId::Graytext:
         if (useDarkAppearance)
         {
-          return {ButtonTextDisabledColorDark, ColorFlags::Semantic};
+          return {ButtonTextDisabledColorDark, ColorFlag::Semantic};
         }
-        return {ButtonTextDisabledColorLight, ColorFlags::Semantic};
+        return {ButtonTextDisabledColorLight, ColorFlag::Semantic};
 
       case ValueId::Canvas:
         if (useDarkAppearance)
         {
-          return {SRGBA<uint8> {30, 30, 30}, ColorFlags::Semantic};
+          return {SRGBA<uint8> {30, 30, 30}, ColorFlag::Semantic};
         }
-        return {Color::white, ColorFlags::Semantic};
+        return {Color::white, ColorFlag::Semantic};
 
       case ValueId::Field:
         if (useDarkAppearance)
         {
-          return {TextFieldBackgroundColorDark, ColorFlags::Semantic};
+          return {TextFieldBackgroundColorDark, ColorFlag::Semantic};
         }
-        return {TextFieldBackgroundColorLight, ColorFlags::Semantic};
+        return {TextFieldBackgroundColorLight, ColorFlag::Semantic};
 
       case ValueId::Canvastext:
       case ValueId::Fieldtext:
       case ValueId::Text:
         if (useDarkAppearance)
         {
-          return {Color::white, ColorFlags::Semantic};
+          return {Color::white, ColorFlag::Semantic};
         }
-        return {Color::black, ColorFlags::Semantic};
+        return {Color::black, ColorFlag::Semantic};
 
       case ValueId::Highlight:
         // Hardcoded to avoid exposing a user appearance preference to the web for fingerprinting.
-        return {SRGBA<uint8> {52, 132, 228}, ColorFlags::Semantic};
+        return {SRGBA<uint8> {52, 132, 228}, ColorFlag::Semantic};
 
-      case ValueId::Highlighttext: return {Color::white, ColorFlags::Semantic};
+      case ValueId::Highlighttext: return {Color::white, ColorFlag::Semantic};
 
       default:                     return RenderTheme::SystemColor(cssValueID, options);
     }

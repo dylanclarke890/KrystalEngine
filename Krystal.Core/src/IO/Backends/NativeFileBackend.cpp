@@ -2,7 +2,7 @@
 #include "Krystal.Core/Debug.hpp"
 #include "Krystal.Core/IO/Streams/NativeFileStream.hpp"
 #include "Krystal.Core/Log/ILogger.hpp"
-#include "Krystal.Core/Utils/Move.hpp"
+#include "Krystal.Core/Move.hpp"
 #include <filesystem>
 #include <fstream>
 
@@ -93,7 +93,7 @@ namespace krys::io
         return {};
       }
 
-      if (!!(flags & FileSearchFlags::Recursive))
+      if (!!(flags & FileSearchFlag::Recursive))
       {
         return SearchFiles<true>(fullPath, flags);
       }

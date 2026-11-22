@@ -704,7 +704,7 @@ namespace krys::boo::style
 
   void RuleSetBuilder::UpdateDynamicMediaQueries() noexcept
   {
-    if (HasFlag(_mediaQueryCollector.AllDynamicDependencies, css::mq::MediaQueryDynamicDependency::Viewport))
+    if (_mediaQueryCollector.AllDynamicDependencies.contains(css::mq::MediaQueryDynamicDependency::Viewport))
     {
       _ruleSet->_hasViewportDependentMediaQueries = true;
     }
@@ -734,7 +734,7 @@ namespace krys::boo::style
     auto dynamicDependencies = Evaluator.CollectDynamicDependencies(mediaQueries);
     AllDynamicDependencies |= dynamicDependencies;
 
-    if (dynamicDependencies != css::mq::MediaQueryDynamicDependency::None)
+    if (dynamicDependencies != EnumSet<css::mq::MediaQueryDynamicDependency> {})
     {
       DynamicContextStack.push_back({.Queries = mediaQueries});
       if (CollectDynamic)

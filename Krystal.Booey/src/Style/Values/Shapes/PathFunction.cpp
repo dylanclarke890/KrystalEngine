@@ -32,11 +32,11 @@
 #include "Krystal.Booey/Style/Values/Primitives/NumericTypesConversions.hpp"
 #include "Krystal.Booey/Style/Values/Primitives/NumericTypesEvaluation.hpp"
 #include "Krystal.Booey/SVG/Internals/SVGPathUtilities.hpp"
+#include "Krystal.Core/Containers/TinyLRUCache.hpp"
 #include "Krystal.Core/Geometry/AffineTransform.hpp"
 #include "Krystal.Core/Geometry/GeometryUtilities.hpp"
 #include "Krystal.Core/Geometry/Rect.hpp"
 #include "Krystal.Core/Strings/StringBuilder.hpp"
-#include "Krystal.Core/Types/TinyLRUCache.hpp"
 
 namespace krys::boo::style
 {
@@ -87,7 +87,7 @@ namespace krys::boo::style
     static NeverDestroyed<
       TinyLRUCache<SVGPathTransformedByteStream, boo::Path, 4, TransformedByteStreamPathPolicy>>
       cache;
-    return cache.get().Get(SVGPathTransformedByteStream {stream, zoom, offset});
+    return cache->Get(SVGPathTransformedByteStream {stream, zoom, offset});
   }
 
   // MARK: - Conversion

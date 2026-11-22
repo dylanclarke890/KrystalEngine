@@ -39,7 +39,7 @@ namespace krys::boo
       : _document(ShareRefPtr(&document)), _options(options),
         _wasIgnoringSelectionChanges(document.GetEditor().IgnoreSelectionChanges())
   {
-    if (options.Contains(TemporarySelectionOption::IgnoreSelectionChanges))
+    if (options.contains(TemporarySelectionOption::IgnoreSelectionChanges))
     {
       document.GetEditor().SetIgnoreSelectionChanges(true);
     }
@@ -71,9 +71,9 @@ namespace krys::boo
       SetSelection(*_selectionToRestore, IsTemporarySelection::No);
     }
 
-    if (_options.Contains(TemporarySelectionOption::IgnoreSelectionChanges))
+    if (_options.contains(TemporarySelectionOption::IgnoreSelectionChanges))
     {
-      auto revealSelection = _options.Contains(TemporarySelectionOption::RevealSelection)
+      auto revealSelection = _options.contains(TemporarySelectionOption::RevealSelection)
                                ? Editor::RevealSelection::Yes
                                : Editor::RevealSelection::No;
       _document->GetEditor().SetIgnoreSelectionChanges(_wasIgnoringSelectionChanges, revealSelection);
@@ -86,39 +86,39 @@ namespace krys::boo
     using SetSelectionOption = FrameSelection::SetSelectionOption;
     auto options = FrameSelection::DefaultSetSelectionOptions();
 
-    if (_options.Contains(TemporarySelectionOption::UserTriggered))
+    if (_options.contains(TemporarySelectionOption::UserTriggered))
     {
       options.Add(SetSelectionOption::IsUserTriggered);
     }
 
-    if (_options.Contains(TemporarySelectionOption::DoNotSetFocus))
+    if (_options.contains(TemporarySelectionOption::DoNotSetFocus))
     {
       options.Add(SetSelectionOption::DoNotSetFocus);
     }
 
     if (isTemporarySelection == IsTemporarySelection::Yes)
     {
-      if (_options.Contains(TemporarySelectionOption::RevealSelection))
+      if (_options.contains(TemporarySelectionOption::RevealSelection))
       {
         options.Add(SetSelectionOption::RevealSelection);
       }
-      if (_options.Contains(TemporarySelectionOption::DelegateMainFrameScroll))
+      if (_options.contains(TemporarySelectionOption::DelegateMainFrameScroll))
       {
         options.Add(SetSelectionOption::DelegateMainFrameScroll);
       }
-      if (_options.Contains(TemporarySelectionOption::SmoothScroll))
+      if (_options.contains(TemporarySelectionOption::SmoothScroll))
       {
         options.Add(SetSelectionOption::SmoothScroll);
       }
-      if (_options.Contains(TemporarySelectionOption::RevealSelectionBounds))
+      if (_options.contains(TemporarySelectionOption::RevealSelectionBounds))
       {
         options.Add(SetSelectionOption::RevealSelectionBounds);
       }
-      if (_options.Contains(TemporarySelectionOption::ForceCenterScroll))
+      if (_options.contains(TemporarySelectionOption::ForceCenterScroll))
       {
         options.Add(SetSelectionOption::ForceCenterScroll);
       }
-      if (_options.Contains(TemporarySelectionOption::OnlyAllowForwardScrolling))
+      if (_options.contains(TemporarySelectionOption::OnlyAllowForwardScrolling))
       {
         options.Add(SetSelectionOption::OnlyAllowForwardScrolling);
       }
@@ -129,17 +129,17 @@ namespace krys::boo
     // The selection is brought up to date and revealed at the next rendering update, by which time a
     // temporary one is gone, so it's revealed now.
     if (isTemporarySelection == IsTemporarySelection::Yes
-        && _options.Contains(TemporarySelectionOption::RevealSelection))
+        && _options.contains(TemporarySelectionOption::RevealSelection))
     {
       _document->Selection().UpdateAndRevealSelection(
-        _options.Contains(TemporarySelectionOption::SmoothScroll) ? ScrollBehavior::Smooth
+        _options.contains(TemporarySelectionOption::SmoothScroll) ? ScrollBehavior::Smooth
                                                                   : ScrollBehavior::Instant,
-        _options.Contains(TemporarySelectionOption::RevealSelectionBounds)
+        _options.contains(TemporarySelectionOption::RevealSelectionBounds)
           ? RevealExtentOption::DoNotRevealExtent
           : RevealExtentOption::RevealExtent,
-        _options.Contains(TemporarySelectionOption::ForceCenterScroll) ? ForceCenterScroll::Yes
+        _options.contains(TemporarySelectionOption::ForceCenterScroll) ? ForceCenterScroll::Yes
                                                                        : ForceCenterScroll::No,
-        _options.Contains(TemporarySelectionOption::OnlyAllowForwardScrolling)
+        _options.contains(TemporarySelectionOption::OnlyAllowForwardScrolling)
           ? OnlyAllowForwardScrolling::Yes
           : OnlyAllowForwardScrolling::No);
     }

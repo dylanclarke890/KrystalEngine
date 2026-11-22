@@ -2697,7 +2697,7 @@ namespace krys::boo::html
 
   void CanvasRenderingContext2DBase::DidDraw(Maybe<RectF> rect, EnumSet<DidDrawOption> options) noexcept
   {
-    if (!options.Contains(DidDrawOption::PreserveCachedContents))
+    if (!options.contains(DidDrawOption::PreserveCachedContents))
     {
       _cachedContents.emplace<CachedContentsUnknown>();
     }
@@ -2727,12 +2727,12 @@ namespace krys::boo::html
       return;
     }
 
-    if (options.Contains(DidDrawOption::ApplyTransform))
+    if (options.contains(DidDrawOption::ApplyTransform))
     {
       dirtyRect = GetState().Transform.MapRect(dirtyRect);
     }
 
-    if (options.Contains(DidDrawOption::ApplyShadow) && GetState().ShadowColor.IsVisible())
+    if (options.contains(DidDrawOption::ApplyShadow) && GetState().ShadowColor.IsVisible())
     {
       // The shadow gets applied after transformation
       auto shadowRect = dirtyRect;
@@ -2776,7 +2776,7 @@ namespace krys::boo::html
     else if (entireCanvas)
     {
       EnumSet<DidDrawOption> didDrawEntireCanvasOptions {DidDrawOption::ApplyClip};
-      if (options.Contains(DidDrawOption::ApplyPostProcessing))
+      if (options.contains(DidDrawOption::ApplyPostProcessing))
       {
         didDrawEntireCanvasOptions.Add(DidDrawOption::ApplyPostProcessing);
       }

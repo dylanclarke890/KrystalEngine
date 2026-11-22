@@ -52,10 +52,10 @@ namespace krys::boo
     auto borderWidth = fieldRect.Width();
     auto borderHeight = fieldRect.Height();
     fieldRect.SetSize({zoomedArrowSize, zoomedArrowSize});
-    if (!style.States.Contains(ControlStyle::State::VerticalWritingMode))
+    if (!style.States.contains(ControlStyle::State::VerticalWritingMode))
     {
       auto centerY = (borderHeight / 2) - (zoomedArrowSize / 2);
-      if (style.States.Contains(ControlStyle::State::InlineFlippedWritingMode))
+      if (style.States.contains(ControlStyle::State::InlineFlippedWritingMode))
       {
         fieldRect.Move(MenuListButtonPadding, centerY);
       }
@@ -70,9 +70,9 @@ namespace krys::boo
       fieldRect.Move(centerX, borderHeight - (zoomedArrowSize + MenuListButtonPadding));
     }
     PaintArrow(graphicsContext, fieldRect, ArrowDirection::Down,
-               style.States.Contains(ControlStyle::State::DarkAppearance));
+               style.States.contains(ControlStyle::State::DarkAppearance));
 
-    if (style.States.Contains(ControlStyle::State::Focused))
+    if (style.States.contains(ControlStyle::State::Focused))
     {
       PaintFocus(graphicsContext, borderRect.Rect(), MenuListButtonFocusOffset, SystemFocusRingColor());
     }

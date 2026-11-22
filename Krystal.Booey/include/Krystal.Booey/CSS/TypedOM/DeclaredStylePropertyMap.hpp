@@ -26,12 +26,7 @@
 #pragma once
 
 #include "Krystal.Booey/CSS/TypedOM/StylePropertyMap.hpp"
-#include "Krystal.Core/Types/WeakPtr.hpp"
-
-namespace krys::boo
-{
-  class CSSStyleRule;
-}
+#include "Krystal.Core/Memory/WeakPtr.hpp"
 
 namespace krys::boo::css
 {
@@ -40,6 +35,8 @@ namespace krys::boo::css
 
 namespace krys::boo
 {
+  class CSSStyleRule;
+
   /// @brief A style rule's declarations (`styleMap`), as a property map.
   /// @see https://drafts.css-houdini.org/css-typed-om/#declared-stylepropertymap-objects
   class DeclaredStylePropertyMap final : public StylePropertyMap

@@ -86,7 +86,7 @@ namespace krys::boo
 
     for (const auto &value : filter)
     {
-      auto *referenceOperation = DynamicDowncast<style::ReferenceFilterOperation>(value.Get());
+      auto *referenceOperation = DynamicDowncast<style::ReferenceFilterOperation>(*value);
       if (!referenceOperation)
       {
         continue;

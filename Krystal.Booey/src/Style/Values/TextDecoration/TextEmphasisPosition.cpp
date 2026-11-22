@@ -56,7 +56,7 @@ namespace krys::boo::style
       switch (item.ValueId())
       {
         case css::ValueId::Over:
-          if (result.Contains(TextEmphasisPositionValue::Under))
+          if (result.contains(TextEmphasisPositionValue::Under))
           {
             state.SetCurrentPropertyInvalidAtComputedValueTime();
             return {TextEmphasisPositionValue::Over, TextEmphasisPositionValue::Right};
@@ -64,7 +64,7 @@ namespace krys::boo::style
           result.Value.Add(TextEmphasisPositionValue::Over);
           break;
         case css::ValueId::Under:
-          if (result.Contains(TextEmphasisPositionValue::Over))
+          if (result.contains(TextEmphasisPositionValue::Over))
           {
             state.SetCurrentPropertyInvalidAtComputedValueTime();
             return {TextEmphasisPositionValue::Over, TextEmphasisPositionValue::Right};
@@ -72,7 +72,7 @@ namespace krys::boo::style
           result.Value.Add(TextEmphasisPositionValue::Under);
           break;
         case css::ValueId::Left:
-          if (result.Contains(TextEmphasisPositionValue::Right))
+          if (result.contains(TextEmphasisPositionValue::Right))
           {
             state.SetCurrentPropertyInvalidAtComputedValueTime();
             return {TextEmphasisPositionValue::Over, TextEmphasisPositionValue::Right};
@@ -80,7 +80,7 @@ namespace krys::boo::style
           result.Value.Add(TextEmphasisPositionValue::Left);
           break;
         case css::ValueId::Right:
-          if (result.Contains(TextEmphasisPositionValue::Left))
+          if (result.contains(TextEmphasisPositionValue::Left))
           {
             state.SetCurrentPropertyInvalidAtComputedValueTime();
             return {TextEmphasisPositionValue::Over, TextEmphasisPositionValue::Right};

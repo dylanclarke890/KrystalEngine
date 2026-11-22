@@ -1,4 +1,5 @@
 ﻿#include "Krystal.Booey/DOM/Events/FormDataEvent.hpp"
+#include "Krystal.Booey/HTML/Forms/DOMFormData.hpp"
 
 namespace krys::boo
 {

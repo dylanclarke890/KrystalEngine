@@ -1,5 +1,6 @@
 ﻿#include "Krystal.Gfx.Tests/Golden.hpp"
 #include "catch2/catch_test_macros.hpp"
+#include "Krystal.Booey/DOM/Geometry/DOMRectList.hpp"
 #include "Krystal.Booey/DOM/Geometry/DOMRectReadOnly.hpp"
 #include "Krystal.Booey/DOM/Nodes/Text.hpp"
 #include "Krystal.Booey/DOM/Ranges/Position.hpp"
@@ -83,12 +84,12 @@ namespace krys::ui::tests
         setup(view, device, textures);
       }
 
-      auto target =
-        device.CreateTexture({.Format = gfx::TextureFormat::RGBA8Unorm,
-                              .Width = width,
-                              .Height = height,
-                              .Usage = gfx::TextureUsage::RenderTarget | gfx::TextureUsage::Sampled,
-                              .DebugName = u8"Golden"});
+      auto target = device.CreateTexture(
+        {.Format = gfx::TextureFormat::RGBA8Unorm,
+         .Width = width,
+         .Height = height,
+         .Usage = EnumSet<gfx::TextureUsage> {gfx::TextureUsage::RenderTarget, gfx::TextureUsage::Sampled},
+         .DebugName = u8"Golden"});
       REQUIRE(target.has_value());
       device.BeginFrame();
       auto &commands = device.GetCommandBuffer();

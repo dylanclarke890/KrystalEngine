@@ -732,16 +732,18 @@ namespace krys::boo
 
       bool canSetLineDash = false;
       auto dashArray =
-        DashArray::map(dashes,
-                       [&](const auto &dash) -> DashArrayElement
-                       {
-                         auto value = lengthContext.ValueForLength(dash, style::ZoomNeeded {}) * scaleFactor;
-                         if (value > 0)
-                         {
-                           canSetLineDash = true;
-                         }
-                         return value;
-                       });
+        DashArray(std::from_range, dashes
+                                     | std::views::transform(
+                                       [&](const auto &dash) -> DashArrayElement
+                                       {
+                                         auto value = lengthContext.ValueForLength(dash, style::ZoomNeeded {})
+                                                      * scaleFactor;
+                                         if (value > 0)
+                                         {
+                                           canSetLineDash = true;
+                                         }
+                                         return value;
+                                       }));
 
       if (canSetLineDash)
       {

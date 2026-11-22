@@ -1132,10 +1132,10 @@ namespace krys::boo
     }
 
     HitTestResult hitTestResult {LayoutPoint(point)};
-    (void)renderer->Layer()->HitTest(HitTestRequest(EnumSet<HitTestRequest::Type> {
-                                       HitTestRequest::Type::ReadOnly, HitTestRequest::Type::Active,
-                                       HitTestRequest::Type::AccessibilityHitTest}),
-                                     hitTestResult);
+    (void)renderer->Layer()->HitTest(
+      HitTestRequest({HitTestRequest::Type::ReadOnly, HitTestRequest::Type::Active,
+                      HitTestRequest::Type::AccessibilityHitTest}),
+      hitTestResult);
     Node *node = hitTestResult.InnerNode();
     if (!node)
     {

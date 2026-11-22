@@ -9,12 +9,12 @@ namespace krys::boo
     KRYS_OVERRIDE_DELETE_FOR_CHECKED_PTR(XMLDocument);
 
   protected:
-    XMLDocument(dom::DocumentFlags flags) noexcept : Document(flags | dom::DocumentFlags::IsXMLDocument)
+    XMLDocument(dom::DocumentFlags flags) noexcept : Document(flags | dom::DocumentFlag::IsXMLDocument)
     {
     }
 
   public:
-    XMLDocument() noexcept : Document(dom::DocumentFlags::IsXMLDocument)
+    XMLDocument() noexcept : Document(dom::DocumentFlag::IsXMLDocument)
     {
     }
   };

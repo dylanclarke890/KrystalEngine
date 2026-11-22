@@ -1,15 +1,15 @@
 ﻿#include "Krystal.Core/IO/VirtualFileSystem.hpp"
+#include "Krystal.Core/Containers/HashSet.hpp"
+#include "Krystal.Core/Containers/List.hpp"
 #include "Krystal.Core/Debug.hpp"
 #include "Krystal.Core/IO/IFileBackend.hpp"
 #include "Krystal.Core/IO/Path.hpp"
 #include "Krystal.Core/IO/Streams/Stream.hpp"
 #include "Krystal.Core/Log/ILogger.hpp"
-#include "Krystal.Core/Types/HashSet.hpp"
-#include "Krystal.Core/Types/List.hpp"
+#include "Krystal.Core/Memory/UniquePtr.hpp"
+#include "Krystal.Core/Move.hpp"
 #include "Krystal.Core/Types/Maybe.hpp"
 #include "Krystal.Core/Types/Pair.hpp"
-#include "Krystal.Core/Types/UniquePtr.hpp"
-#include "Krystal.Core/Utils/Move.hpp"
 #include <algorithm>
 
 namespace krys::io

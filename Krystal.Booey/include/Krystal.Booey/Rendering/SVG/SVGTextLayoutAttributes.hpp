@@ -22,9 +22,9 @@
 #pragma once
 
 #include "Krystal.Booey/Rendering/SVG/SVGTextMetrics.hpp"
+#include "Krystal.Core/Containers/HashMap.hpp"
+#include "Krystal.Core/Containers/List.hpp"
 #include "Krystal.Core/Macros.hpp"
-#include "Krystal.Core/Types/HashMap.hpp"
-#include "Krystal.Core/Types/List.hpp"
 #include <cmath>
 #include <limits>
 

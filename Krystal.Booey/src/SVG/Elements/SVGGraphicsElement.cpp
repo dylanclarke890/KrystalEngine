@@ -39,7 +39,7 @@ namespace krys::boo
                                          SVGElementInterface interface, SVGElementFlags flags,
                                          dom::NodeFlags nodeFlags) noexcept
       : SVGElement(document, krys::move(propertyRegistry), interface,
-                   flags | SVGElementFlags::IsSvgGraphicsElement, nodeFlags),
+                   flags | SVGElementFlag::IsSvgGraphicsElement, nodeFlags),
         SVGTests(this), _transform(SVGAnimatedTransformList::Create(this))
   {
     static bool didRegistration = false;

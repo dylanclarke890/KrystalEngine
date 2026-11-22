@@ -57,7 +57,7 @@ namespace krys::boo
   HTMLSummaryElement::HTMLSummaryElement(Document &document) noexcept
       : HTMLElement(document, html::HTMLElementInterface::Summary)
   {
-    SetEventTargetFlag(dom::EventTargetFlags::HasActivationBehavior);
+    _eventTargetFlags.Add(dom::EventTargetFlag::HasActivationBehavior);
   }
 
   RefPtr<HTMLDetailsElement> HTMLSummaryElement::DetailsElement() const noexcept

@@ -32,7 +32,7 @@
 #include "Krystal.Booey/CSS/Values/PrimitiveValue.hpp"
 #include "Krystal.Booey/CSS/Values/ValuePool.hpp"
 #include "Krystal.Booey/Graphics/Fonts/FontCache.hpp"
-#include "Krystal.Core/Hash.hpp"
+#include "Krystal.Core/Hashing/FastHash.hpp"
 #include <algorithm>
 
 namespace krys::boo::css
@@ -42,8 +42,8 @@ namespace krys::boo::css
   size_t
     CSSFontFaceSet::FontSelectionRequestHash::operator()(const FontSelectionRequest &request) const noexcept
   {
-    return Hash::Combine(request.Weight.RawValue(), request.Width.RawValue(), request.Slope.has_value(),
-                         request.Slope ? request.Slope->RawValue() : 0);
+    return CombineFastHashes(request.Weight.RawValue(), request.Width.RawValue(), request.Slope.has_value(),
+                             request.Slope ? request.Slope->RawValue() : 0);
   }
 
   CSSFontFaceSet::CSSFontFaceSet(CSSFontSelector *owningFontSelector) noexcept

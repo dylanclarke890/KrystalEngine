@@ -25,7 +25,7 @@
 
 #pragma once
 
-#include "Krystal.Core/Types/UniquePtr.hpp"
+#include "Krystal.Core/Memory/UniquePtr.hpp"
 #include "Krystal.Image/ImageDecoder.hpp"
 
 namespace krys::img

@@ -26,7 +26,7 @@
 #include "Krystal.Booey/DOM/Events/UIEvent.hpp"
 #include "Krystal.Booey/Input/PlatformEvent.hpp"
 #include "Krystal.Core/Attributes.hpp"
-#include "Krystal.Core/Types/EnumSet.hpp"
+#include "Krystal.Core/Containers/EnumSet.hpp"
 
 namespace krys::boo
 {
@@ -44,30 +44,30 @@ namespace krys::boo
     /// @see https://w3c.github.io/uievents/#dom-mouseevent-ctrlkey
     KRYS_NODISCARD bool CtrlKey() const noexcept
     {
-      return _modifiers.Contains(Modifier::ControlKey);
+      return _modifiers.contains(Modifier::ControlKey);
     }
 
     /// @see https://w3c.github.io/uievents/#dom-mouseevent-shiftkey
     KRYS_NODISCARD bool ShiftKey() const noexcept
     {
-      return _modifiers.Contains(Modifier::ShiftKey);
+      return _modifiers.contains(Modifier::ShiftKey);
     }
 
     /// @see https://w3c.github.io/uievents/#dom-mouseevent-altkey
     KRYS_NODISCARD bool AltKey() const noexcept
     {
-      return _modifiers.Contains(Modifier::AltKey);
+      return _modifiers.contains(Modifier::AltKey);
     }
 
     /// @see https://w3c.github.io/uievents/#dom-mouseevent-metakey
     KRYS_NODISCARD bool MetaKey() const noexcept
     {
-      return _modifiers.Contains(Modifier::MetaKey);
+      return _modifiers.contains(Modifier::MetaKey);
     }
 
     KRYS_NODISCARD bool CapsLockKey() const noexcept
     {
-      return _modifiers.Contains(Modifier::CapsLockKey);
+      return _modifiers.contains(Modifier::CapsLockKey);
     }
 
     KRYS_NODISCARD EnumSet<Modifier> ModifierKeys() const noexcept
@@ -96,7 +96,7 @@ namespace krys::boo
       }
       if (keyIdentifier == u8"AltGraph")
       {
-        return _modifiers.Contains(Modifier::AltGraphKey);
+        return _modifiers.contains(Modifier::AltGraphKey);
       }
       if (keyIdentifier == u8"CapsLock")
       {

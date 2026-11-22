@@ -49,7 +49,7 @@ namespace krys::boo::style::tests
     }
 
     /// @brief A document and style to resolve colours against.
-    struct Resolution
+    struct ColorResolution
     {
       Ref<boo::Document> Document {CreateRef<boo::Document>()};
       RenderStyle Style {RenderStyle::Create()};
@@ -89,9 +89,9 @@ namespace krys::boo::style::tests
       return ToString(boo::SerialisationForCSS(color));
     }
 
-    constexpr auto Red = SRGBA<uint8> {255, 0, 0};
+    constexpr auto SRGBRed = SRGBA<uint8> {255, 0, 0};
     constexpr auto Green = SRGBA<uint8> {0, 128, 0};
-    constexpr auto Blue = SRGBA<uint8> {0, 0, 255};
+    constexpr auto SRGBBlue = SRGBA<uint8> {0, 0, 255};
     constexpr auto White = SRGBA<uint8> {255, 255, 255};
     constexpr auto Black = SRGBA<uint8> {0, 0, 0};
   }
@@ -110,26 +110,26 @@ namespace krys::boo::style::tests
 
     SECTION("convenience constructors make resolved colours")
     {
-      CHECK(Color {boo::Color {Red}}.GetResolvedColor() == boo::Color {Red});
-      CHECK(Color {Blue}.GetResolvedColor() == boo::Color {Blue});
+      CHECK(Color {boo::Color {SRGBRed}}.GetResolvedColor() == boo::Color {SRGBRed});
+      CHECK(Color {SRGBBlue}.GetResolvedColor() == boo::Color {SRGBBlue});
       CHECK(Color {css::keywords::Transparent {}}.GetResolvedColor() == boo::Color::transparentBlack);
       CHECK(Color {css::keywords::Black {}}.GetResolvedColor() == boo::Color::black);
       CHECK(Color {css::keywords::White {}}.GetResolvedColor() == boo::Color::white);
 
-      Color resolved {Red};
+      Color resolved {SRGBRed};
       CHECK(resolved.IsResolvedColor());
       CHECK_FALSE(resolved.IsCurrentColor());
       CHECK_FALSE(resolved.IsColorMix());
       CHECK_FALSE(resolved.IsContrastColor());
       CHECK_FALSE(resolved.IsRelativeColor());
       CHECK_FALSE(resolved.ContainsCurrentColor());
-      CHECK(resolved.ResolveColor(boo::Color {Blue}) == boo::Color {Red});
+      CHECK(resolved.ResolveColor(boo::Color {SRGBBlue}) == boo::Color {SRGBRed});
     }
 
     SECTION("currentcolor resolves to the current colour")
     {
       CHECK(Color {}.ResolveColor(boo::Color {Green}) == boo::Color {Green});
-      CHECK(ResolveColor(Color {}, boo::Color {Blue}) == boo::Color {Blue});
+      CHECK(ResolveColor(Color {}, boo::Color {SRGBBlue}) == boo::Color {SRGBBlue});
     }
 
     SECTION("Markable")
@@ -137,15 +137,15 @@ namespace krys::boo::style::tests
       Markable<Color> empty;
       CHECK_FALSE(empty);
 
-      Markable<Color> value {Color {Red}};
+      Markable<Color> value {Color {SRGBRed}};
       REQUIRE(value);
-      CHECK(*value == Color {Red});
+      CHECK(*value == Color {SRGBRed});
     }
   }
 
   TEST_CASE("Style colour(conversion of resolved colours)", "[Style][Values][Color]")
   {
-    Resolution resolution;
+    ColorResolution resolution;
 
     SECTION("absolute colours resolve during conversion")
     {
@@ -155,7 +155,7 @@ namespace krys::boo::style::tests
         auto color = resolution.Convert(text);
         INFO(ToString(CSSOMString(text)));
         REQUIRE(color.IsResolvedColor());
-        CHECK(Bytes(color.GetResolvedColor()) == Red);
+        CHECK(Bytes(color.GetResolvedColor()) == SRGBRed);
       }
     }
 
@@ -176,7 +176,7 @@ namespace krys::boo::style::tests
 
       auto relative = resolution.Convert(u8"rgb(from red b g r)");
       REQUIRE(relative.IsResolvedColor());
-      CHECK(Bytes(relative.GetResolvedColor()) == Blue);
+      CHECK(Bytes(relative.GetResolvedColor()) == SRGBBlue);
 
       // Every layer is resolved, so the layers are blended now.
       auto layers = resolution.Convert(u8"color-layers(rgb(0 0 255 / 0.5), red)");
@@ -197,7 +197,7 @@ namespace krys::boo::style::tests
 
   TEST_CASE("Style colour(conversion of keywords)", "[Style][Values][Color]")
   {
-    Resolution resolution;
+    ColorResolution resolution;
     auto keyword = [&](css::ValueId id)
     {
       return resolution.Convert(css::Color {css::KeywordColor {id}});
@@ -212,19 +212,19 @@ namespace krys::boo::style::tests
     {
       CHECK(keyword(css::ValueId::InternalDocumentTextColor).GetResolvedColor() == boo::Color::black);
 
-      auto link = css::ColorFromKeyword(css::ValueId::WebkitLink, ColorOptions::None);
+      auto link = css::ColorFromKeyword(css::ValueId::WebkitLink, {});
       CHECK(keyword(css::ValueId::WebkitLink).GetResolvedColor() == link);
 
       CHECK(keyword(css::ValueId::WebkitActivelink).GetResolvedColor()
-            == css::ColorFromKeyword(css::ValueId::WebkitActivelink, ColorOptions::None));
+            == css::ColorFromKeyword(css::ValueId::WebkitActivelink, {}));
       CHECK(keyword(css::ValueId::WebkitFocusRingColor).GetResolvedColor()
-            == RenderTheme::Singleton().FocusRingColor(ColorOptions::None));
+            == RenderTheme::Singleton().FocusRingColor({}));
     }
 
     SECTION("system colours follow the style's colour scheme")
     {
-      auto light = css::ColorFromKeyword(css::ValueId::Linktext, ColorOptions::None);
-      auto dark = css::ColorFromKeyword(css::ValueId::Linktext, ColorOptions::UseDarkAppearance);
+      auto light = css::ColorFromKeyword(css::ValueId::Linktext, {});
+      auto dark = css::ColorFromKeyword(css::ValueId::Linktext, ColorOption::UseDarkAppearance);
       REQUIRE(light != dark);
 
       CHECK(keyword(css::ValueId::Linktext).GetResolvedColor() == light);
@@ -234,17 +234,17 @@ namespace krys::boo::style::tests
         null});
       CHECK(keyword(css::ValueId::Linktext).GetResolvedColor() == dark);
       CHECK(keyword(css::ValueId::WebkitLink).GetResolvedColor()
-            == css::ColorFromKeyword(css::ValueId::WebkitLink, ColorOptions::UseDarkAppearance));
+            == css::ColorFromKeyword(css::ValueId::WebkitLink, ColorOption::UseDarkAppearance));
     }
 
     SECTION("light-dark() picks by the style's colour scheme")
     {
-      CHECK(Bytes(resolution.Convert(u8"light-dark(red, blue)").GetResolvedColor()) == Red);
+      CHECK(Bytes(resolution.Convert(u8"light-dark(red, blue)").GetResolvedColor()) == SRGBRed);
 
       resolution.Style.SetColorScheme(ColorScheme {
         css::SpaceSeparatedList<css::CustomIdentifier> {css::CustomIdentifier {CSSOMStringAtom {u8"dark"}}},
         null});
-      CHECK(Bytes(resolution.Convert(u8"light-dark(red, blue)").GetResolvedColor()) == Blue);
+      CHECK(Bytes(resolution.Convert(u8"light-dark(red, blue)").GetResolvedColor()) == SRGBBlue);
 
       CHECK(resolution.Convert(u8"light-dark(currentcolor, blue)").IsResolvedColor());
       resolution.Style.SetColorScheme(ColorScheme {css::keywords::Normal {}});
@@ -254,14 +254,14 @@ namespace krys::boo::style::tests
 
   TEST_CASE("Style colour(currentcolor-dependent colours)", "[Style][Values][Color]")
   {
-    Resolution resolution;
+    ColorResolution resolution;
 
     SECTION("color-mix()")
     {
       auto color = resolution.Convert(u8"color-mix(in srgb, currentcolor 25%, blue)");
       REQUIRE(color.IsColorMix());
       CHECK(color.ContainsCurrentColor());
-      CHECK(Bytes(color.ResolveColor(boo::Color {Red})) == SRGBA<uint8> {64, 0, 191});
+      CHECK(Bytes(color.ResolveColor(boo::Color {SRGBRed})) == SRGBA<uint8> {64, 0, 191});
       CHECK(Tokenised(color) == "color-mix(in srgb, currentcolor 25%, rgb(0, 0, 255))");
 
       CHECK(Tokenised(resolution.Convert(u8"color-mix(currentcolor, blue)"))
@@ -293,7 +293,7 @@ namespace krys::boo::style::tests
       auto color = resolution.Convert(u8"rgb(from currentcolor b g r / calc(alpha / 2))");
       REQUIRE(color.IsRelativeColor());
       CHECK(color.ContainsCurrentColor());
-      CHECK(Bytes(color.ResolveColor(boo::Color {Red})) == SRGBA<uint8> {0, 0, 255, 128});
+      CHECK(Bytes(color.ResolveColor(boo::Color {SRGBRed})) == SRGBA<uint8> {0, 0, 255, 128});
       // The calc is simplified during conversion.
       CHECK(Tokenised(color) == "rgb(from currentcolor b g r / calc(0.5 * alpha))");
 
@@ -314,12 +314,12 @@ namespace krys::boo::style::tests
       auto color = resolution.Convert(u8"color-layers(rgb(0 0 255 / 0.5), currentcolor)");
       CHECK_FALSE(color.IsResolvedColor());
       CHECK(color.ContainsCurrentColor());
-      CHECK(Serialised(color.ResolveColor(boo::Color {Red})) == Serialised(layers));
+      CHECK(Serialised(color.ResolveColor(boo::Color {SRGBRed})) == Serialised(layers));
       CHECK(Tokenised(color) == "color-layers(rgba(0, 0, 255, 0.5), currentcolor)");
 
       // The parser doesn't take a blend mode yet.
       auto multiply =
-        Color {ColorLayers {.BlendMode = BlendMode::Multiply, .Colors = {Color {}, Color {Red}}}};
+        Color {ColorLayers {.BlendMode = BlendMode::Multiply, .Colors = {Color {}, Color {SRGBRed}}}};
       CHECK(Tokenised(multiply) == "color-layers(multiply, currentcolor, rgb(255, 0, 0))");
     }
 
@@ -334,7 +334,7 @@ namespace krys::boo::style::tests
 
   TEST_CASE("Style colour(copies and equality)", "[Style][Values][Color]")
   {
-    Resolution resolution;
+    ColorResolution resolution;
 
     for (auto text : {u8"color-mix(in srgb, currentcolor 25%, blue)", u8"contrast-color(currentcolor)",
                       u8"rgb(from currentcolor r g b)", u8"color-layers(currentcolor, red)"})
@@ -345,7 +345,7 @@ namespace krys::boo::style::tests
       CHECK(copy == original);
       CHECK(Tokenised(copy) == Tokenised(original));
 
-      Color assigned {Red};
+      Color assigned {SRGBRed};
       assigned = original;
       CHECK(assigned == original);
 
@@ -359,25 +359,26 @@ namespace krys::boo::style::tests
           != resolution.Convert(u8"rgb(from currentcolor g g b)"));
     CHECK(resolution.Convert(u8"rgb(from currentcolor r g b)")
           != resolution.Convert(u8"hsl(from currentcolor h s l)"));
-    CHECK(Color {Red} != Color {});
-    CHECK(Color {Red} != Color {Blue});
+    CHECK(Color {SRGBRed} != Color {});
+    CHECK(Color {SRGBRed} != Color {SRGBBlue});
   }
 
   TEST_CASE("Style colour(serialisation)", "[Style][Values][Color]")
   {
     CHECK(Tokenised(Color {}) == "currentcolor");
-    CHECK(Tokenised(Color {Red}) == "rgb(255, 0, 0)");
+    CHECK(Tokenised(Color {SRGBRed}) == "rgb(255, 0, 0)");
     CHECK(ToString(SerialisationForCSSTokenization(css::DefaultSerialisationContext(), CurrentColor {}))
           == "currentcolor");
     CHECK(ToString(SerialisationForCSSTokenization(css::DefaultSerialisationContext(),
-                                                   ResolvedColor {boo::Color {Blue}}))
+                                                   ResolvedColor {boo::Color {SRGBBlue}}))
           == "rgb(0, 0, 255)");
 
     // Computed values serialise the used colour.
     RenderStyle style {RenderStyle::Create()};
     style.SetColor(boo::Color {Green});
     CHECK(ToString(Serialise(css::DefaultSerialisationContext(), style, Color {})) == "rgb(0, 128, 0)");
-    CHECK(ToString(Serialise(css::DefaultSerialisationContext(), style, Color {Red})) == "rgb(255, 0, 0)");
+    CHECK(ToString(Serialise(css::DefaultSerialisationContext(), style, Color {SRGBRed}))
+          == "rgb(255, 0, 0)");
 
     auto cssColor = ConvertToCSS(Color {}, style);
     REQUIRE(cssColor.Resolved());
@@ -389,32 +390,32 @@ namespace krys::boo::style::tests
     RenderStyle style {RenderStyle::Create()};
     CHECK(style.Color() == boo::Color::black);
 
-    style.SetColor(boo::Color {Red});
-    CHECK(style.ColorResolvingCurrentColor(Color {}) == boo::Color {Red});
+    style.SetColor(boo::Color {SRGBRed});
+    CHECK(style.ColorResolvingCurrentColor(Color {}) == boo::Color {SRGBRed});
     CHECK(style.ColorResolvingCurrentColor(Color {Green}) == boo::Color {Green});
   }
 
   TEST_CASE("Style colour(blending)", "[Style][Values][Color]")
   {
     RenderStyle aStyle {RenderStyle::Create()};
-    aStyle.SetColor(boo::Color {Red});
+    aStyle.SetColor(boo::Color {SRGBRed});
     RenderStyle bStyle {RenderStyle::Create()};
-    bStyle.SetColor(boo::Color {Blue});
+    bStyle.SetColor(boo::Color {SRGBBlue});
 
     SECTION("equality")
     {
       CHECK(EqualsForBlending(Color {}, Color {}, aStyle, bStyle));
-      CHECK(EqualsForBlending(Color {Red}, Color {Red}, aStyle, bStyle));
-      CHECK_FALSE(EqualsForBlending(Color {Red}, Color {Blue}, aStyle, bStyle));
-      CHECK(EqualsForBlending(Color {}, Color {Red}, aStyle, bStyle));
-      CHECK_FALSE(EqualsForBlending(Color {Red}, Color {}, aStyle, bStyle));
+      CHECK(EqualsForBlending(Color {SRGBRed}, Color {SRGBRed}, aStyle, bStyle));
+      CHECK_FALSE(EqualsForBlending(Color {SRGBRed}, Color {SRGBBlue}, aStyle, bStyle));
+      CHECK(EqualsForBlending(Color {}, Color {SRGBRed}, aStyle, bStyle));
+      CHECK_FALSE(EqualsForBlending(Color {SRGBRed}, Color {}, aStyle, bStyle));
     }
 
     SECTION("can blend unless both are currentcolor")
     {
       CHECK_FALSE(CanBlend(Color {}, Color {}));
-      CHECK(CanBlend(Color {}, Color {Red}));
-      CHECK(CanBlend(Color {Red}, Color {Blue}));
+      CHECK(CanBlend(Color {}, Color {SRGBRed}));
+      CHECK(CanBlend(Color {SRGBRed}, Color {SRGBBlue}));
       CHECK(Blending<Color> {}.RequiresInterpolationForAccumulativeIteration(Color {}, Color {}));
     }
 

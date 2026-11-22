@@ -31,9 +31,9 @@
 #include "Krystal.Booey/Style/Interpolation/Interpolation.hpp"
 #include "Krystal.Booey/CSS/Properties/Property.hpp"
 #include "Krystal.Booey/DOM/Nodes/Document.hpp"
+#include "Krystal.Booey/Rendering/Style/RenderStyle+GettersInlines.hpp"
+#include "Krystal.Booey/Rendering/Style/RenderStyle+SettersInlines.hpp"
 #include "Krystal.Booey/Rendering/Style/RenderStyle.hpp"
-#include "Krystal.Booey/Rendering/Style/RenderStyleProperties+GettersInlines.hpp"
-#include "Krystal.Booey/Rendering/Style/RenderStyleProperties+SettersInlines.hpp"
 #include "Krystal.Booey/Style/CustomProperty.hpp"
 #include "Krystal.Booey/Style/CustomPropertyRegistry.hpp"
 #include "Krystal.Booey/Style/Interpolation/InterpolationClient.hpp"
@@ -161,13 +161,14 @@ namespace krys::boo::style::interpolation
       {
         auto transformListFromSyntaxValueList = [](const CustomProperty::ValueList &list)
         {
-          return TransformList {TransformList::Container::Map(
-            list.Values,
-            [&](const auto &syntaxValue)
-            {
-              krys_debug_assert(std::holds_alternative<TransformFunction>(syntaxValue));
-              return std::get<TransformFunction>(syntaxValue);
-            })};
+          return TransformList {TransformList::Container(
+            std::from_range, list.Values
+                               | std::views::transform(
+                                 [&](const auto &syntaxValue)
+                                 {
+                                   krys_debug_assert(std::holds_alternative<TransformFunction>(syntaxValue));
+                                   return std::get<TransformFunction>(syntaxValue);
+                                 }))};
         };
 
         auto fromTransformList = transformListFromSyntaxValueList(from);

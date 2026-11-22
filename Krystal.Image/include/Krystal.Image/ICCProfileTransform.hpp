@@ -1,9 +1,9 @@
 ﻿#pragma once
 
 #include "Krystal.Core/Attributes.hpp"
+#include "Krystal.Core/Containers/Span.hpp"
 #include "Krystal.Core/Macros.hpp"
 #include "Krystal.Core/Numeric.hpp"
-#include "Krystal.Core/Types/Span.hpp"
 
 namespace krys::img
 {

@@ -40,9 +40,9 @@
 #include "Krystal.Booey/Style/Values/Color/CurrentColor.hpp"
 #include "Krystal.Booey/Style/Values/Color/ResolvedColor.hpp"
 #include "Krystal.Booey/Style/Values/Types.hpp"
+#include "Krystal.Core/Memory/UniquePtr.hpp"
 #include "Krystal.Core/Strings/StringBuilder.hpp"
 #include "Krystal.Core/Types/Markable.hpp"
-#include "Krystal.Core/Types/UniquePtr.hpp"
 #include "Krystal.Core/Types/Variant.hpp"
 #include "Krystal.Core/Visitor.hpp"
 

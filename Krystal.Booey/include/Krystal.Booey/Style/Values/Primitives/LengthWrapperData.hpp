@@ -28,8 +28,8 @@
 #include "Krystal.Booey/Style/Values/Viewport/ZoomPrimitives.hpp"
 #include "Krystal.Core/Assert.hpp"
 #include "Krystal.Core/Attributes.hpp"
+#include "Krystal.Core/Memory/RefPtr.hpp"
 #include "Krystal.Core/Numeric.hpp"
-#include "Krystal.Core/Types/RefPtr.hpp"
 #include "Krystal.Core/Utils/Tags.hpp"
 #include <utility>
 
@@ -40,8 +40,6 @@ namespace krys::boo::style
     Default,
     Calculation,
     Empty,
-    HashTableEmpty,
-    HashTableDeleted,
   };
 
   enum class LengthWrapperDataEvaluationKind : uint8
@@ -73,10 +71,6 @@ namespace krys::boo::style
     LengthWrapperData(uint8 opaqueType, float value, bool hasQuirk = false) noexcept;
 
     explicit LengthWrapperData(uint8 opaqueType, Ref<calc::Value> &&) noexcept;
-
-    explicit LengthWrapperData(HashTableEmptyValueTag) noexcept;
-
-    explicit LengthWrapperData(HashTableDeletedValueTag) noexcept;
 
     LengthWrapperData(const LengthWrapperData &) noexcept;
 
@@ -172,16 +166,6 @@ namespace krys::boo::style
   {
   }
 
-  inline LengthWrapperData::LengthWrapperData(HashTableEmptyValueTag) noexcept
-      : _kind {LengthWrapperDataKind::HashTableEmpty}
-  {
-  }
-
-  inline LengthWrapperData::LengthWrapperData(HashTableDeletedValueTag) noexcept
-      : _kind {LengthWrapperDataKind::HashTableDeleted}
-  {
-  }
-
   inline LengthWrapperData::LengthWrapperData(const LengthWrapperData &other) noexcept
   {
     Initialise(other);
@@ -237,9 +221,7 @@ namespace krys::boo::style
         AddRef();
         break;
       case LengthWrapperDataKind::Default:
-      case LengthWrapperDataKind::Empty:
-      case LengthWrapperDataKind::HashTableEmpty:
-      case LengthWrapperDataKind::HashTableDeleted: _floatValue = other._floatValue; break;
+      case LengthWrapperDataKind::Empty:   _floatValue = other._floatValue; break;
     }
   }
 
@@ -256,9 +238,7 @@ namespace krys::boo::style
         _calculationValueHandle = std::exchange(other._calculationValueHandle, 0);
         break;
       case LengthWrapperDataKind::Default:
-      case LengthWrapperDataKind::Empty:
-      case LengthWrapperDataKind::HashTableEmpty:
-      case LengthWrapperDataKind::HashTableDeleted: _floatValue = other._floatValue; break;
+      case LengthWrapperDataKind::Empty:   _floatValue = other._floatValue; break;
     }
 
     other._kind = LengthWrapperDataKind::Default;

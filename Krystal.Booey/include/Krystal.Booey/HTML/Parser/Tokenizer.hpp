@@ -31,11 +31,11 @@
 #include "Krystal.Booey/HTML/Parser/Token.hpp"
 #include "Krystal.Core/Assert.hpp"
 #include "Krystal.Core/Base.hpp"
+#include "Krystal.Core/Containers/List.hpp"
+#include "Krystal.Core/Containers/SmallList.hpp"
 #include "Krystal.Core/Enum.hpp"
 #include "Krystal.Core/Numeric.hpp"
 #include "Krystal.Core/Types/Func.hpp"
-#include "Krystal.Core/Types/List.hpp"
-#include "Krystal.Core/Types/SmallList.hpp"
 #include "Krystal.Core/Utils/IsEOF.hpp"
 #include <algorithm>
 #include <ranges>
@@ -91,6 +91,11 @@ namespace krys::boo::html
     NonCharacterCharacterReference,
     ControlCharacterReference,
   };
+
+  consteval ParseError MaxEnumValue(ParseError) noexcept
+  {
+    return ParseError::ControlCharacterReference;
+  }
 
   enum class TokenizerState : uint8
   {
@@ -180,13 +185,12 @@ namespace krys::boo::html
     DecimalCharacterReference,
     NumericCharacterReferenceEnd,
   };
-}
 
-KRYS_DEFINE_CONTIGUOUS_ENUM_TRAITS(krys::boo::html::ParseError, 46uz);
-KRYS_DEFINE_CONTIGUOUS_ENUM_TRAITS(krys::boo::html::TokenizerState, 85u)
+  consteval TokenizerState MaxEnumValue(TokenizerState) noexcept
+  {
+    return TokenizerState::NumericCharacterReferenceEnd;
+  }
 
-namespace krys::boo::html
-{
   class NextTokenPtr
   {
     friend class Tokenizer;
@@ -251,8 +255,8 @@ namespace krys::boo::html
   class Tokenizer
   {
   private:
-    TokenizerState _state : BitCount<TokenizerState>() {TokenizerState::Data};
-    TokenizerState _characterReferenceReturnState : BitCount<TokenizerState>() {TokenizerState::Data};
+    TokenizerState _state : EnumBitWidth<TokenizerState> {TokenizerState::Data};
+    TokenizerState _characterReferenceReturnState : EnumBitWidth<TokenizerState> {TokenizerState::Data};
     Token _token;
     InputStream &_input;
     SmallList<char32, 32u> _appropriateEndTagName;
@@ -348,7 +352,7 @@ namespace krys::boo::html
 
     void AppendToTemporaryBuffer(const auto &characters)
     {
-      _temporaryBuffer.append(characters.begin(), characters.end());
+      _temporaryBuffer.append_range(characters);
     }
 
     void BufferCharacter(char32 character) noexcept

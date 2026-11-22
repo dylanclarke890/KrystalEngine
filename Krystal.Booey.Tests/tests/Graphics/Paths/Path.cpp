@@ -229,7 +229,7 @@ namespace krys::boo::tests
       CHECK(style.DashOffset == 2);
 
       CHECK(line.StrokeBoundingRect() == RectF(9.5f, 9.5f, 41, 1));
-      CHECK(scope.Strategy.LastStyle.Dashes.isEmpty());
+      CHECK(scope.Strategy.LastStyle.Dashes.empty());
 
       // An empty path has no stroke.
       CHECK_FALSE(Path().StrokeContains({0, 0}, applier));

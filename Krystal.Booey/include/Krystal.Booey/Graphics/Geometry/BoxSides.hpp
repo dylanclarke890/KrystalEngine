@@ -32,7 +32,7 @@
 
 #include "Krystal.Booey/Text/WritingMode.hpp"
 #include "Krystal.Core/Base.hpp"
-#include "Krystal.Core/Types/Array.hpp"
+#include "Krystal.Core/Containers/Array.hpp"
 
 namespace krys::boo
 {
@@ -42,11 +42,21 @@ namespace krys::boo
     Block,
   };
 
+  consteval LogicalBoxAxis MaxEnumValue(LogicalBoxAxis) noexcept
+  {
+    return LogicalBoxAxis::Block;
+  }
+
   enum class BoxAxis : uint8
   {
     Horizontal,
     Vertical,
   };
+
+  consteval BoxAxis MaxEnumValue(BoxAxis) noexcept
+  {
+    return BoxAxis::Vertical;
+  }
 
   enum class LogicalBoxSide : uint8
   {
@@ -66,6 +76,11 @@ namespace krys::boo
     // Add LineOver/LineUnder/LineLeft/LineRight if needed.
   };
 
+  consteval LogicalBoxSide MaxEnumValue(LogicalBoxSide) noexcept
+  {
+    return LogicalBoxSide::LogicalRight;
+  }
+
   enum class BoxSide : uint8
   {
     Top,
@@ -73,6 +88,11 @@ namespace krys::boo
     Bottom,
     Left,
   };
+
+  consteval BoxSide MaxEnumValue(BoxSide) noexcept
+  {
+    return BoxSide::Left;
+  }
 
   enum class LogicalBoxCorner : uint8
   {
@@ -83,6 +103,11 @@ namespace krys::boo
     EndEnd = 3,
   };
 
+  consteval LogicalBoxCorner MaxEnumValue(LogicalBoxCorner) noexcept
+  {
+    return LogicalBoxCorner::EndEnd;
+  }
+
   enum class BoxCorner : uint8
   {
     TopLeft = 0,
@@ -90,17 +115,12 @@ namespace krys::boo
     BottomLeft = 2,
     BottomRight = 3,
   };
-}
 
-KRYS_DEFINE_CONTIGUOUS_ENUM_TRAITS(krys::boo::LogicalBoxAxis, 2uz);
-KRYS_DEFINE_CONTIGUOUS_ENUM_TRAITS(krys::boo::BoxAxis, 2uz);
-KRYS_DEFINE_CONTIGUOUS_ENUM_TRAITS(krys::boo::LogicalBoxSide, 6uz);
-KRYS_DEFINE_CONTIGUOUS_ENUM_TRAITS(krys::boo::BoxSide, 4uz);
-KRYS_DEFINE_CONTIGUOUS_ENUM_TRAITS(krys::boo::LogicalBoxCorner, 4uz);
-KRYS_DEFINE_CONTIGUOUS_ENUM_TRAITS(krys::boo::BoxCorner, 4uz);
+  consteval BoxCorner MaxEnumValue(BoxCorner) noexcept
+  {
+    return BoxCorner::BottomRight;
+  }
 
-namespace krys::boo
-{
   constexpr Array<BoxSide, 4uz> AllBoxSides = {BoxSide::Top, BoxSide::Right, BoxSide::Bottom, BoxSide::Left};
 
   KRYS_NODISCARD constexpr BoxAxis MapAxisLogicalToPhysical(const WritingMode writingMode,

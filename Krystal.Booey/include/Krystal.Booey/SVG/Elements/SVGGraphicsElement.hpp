@@ -118,8 +118,8 @@ namespace krys::boo
 
   protected:
     SVGGraphicsElement(Document &document, UniquePtr<SVGPropertyRegistry> &&propertyRegistry,
-                       SVGElementInterface interface, SVGElementFlags flags = SVGElementFlags::None,
-                       dom::NodeFlags nodeFlags = dom::NodeFlags::None) noexcept;
+                       SVGElementInterface interface, SVGElementFlags flags = SVGElementFlags {},
+                       dom::NodeFlags nodeFlags = dom::NodeFlags {}) noexcept;
 
     void AttributeChanged(const QualifiedName &name, Maybe<DOMStringView> oldValue,
                           Maybe<DOMStringView> value) noexcept override;

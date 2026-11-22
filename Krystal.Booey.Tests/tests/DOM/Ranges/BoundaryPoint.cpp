@@ -31,7 +31,7 @@ namespace krys::boo::dom::tests
     };
 
     /// @brief The position of (a, offsetA) relative to (b, offsetB), checked to be the reverse the other way.
-    std::strong_ordering Position(Node &a, uint64 offsetA, Node &b, uint64 offsetB)
+    std::strong_ordering CompareBoundaryPoints(Node &a, uint64 offsetA, Node &b, uint64 offsetB)
     {
       auto position =
         BoundaryPoint {ShareRef(a), offsetA}.ComparePositionTo(BoundaryPoint {ShareRef(b), offsetB});
@@ -60,19 +60,19 @@ namespace krys::boo::dom::tests
             "[dom:concept-range-bp-equal][dom:concept-range-bp-after]")
   {
     PositionTestData data;
-    CHECK(Position(*data.Text, 1, *data.Text, 1) == std::strong_ordering::equal);
-    CHECK(Position(*data.Text, 1, *data.Text, 3) == std::strong_ordering::less);
-    CHECK(Position(*data.Text, 3, *data.Text, 1) == std::strong_ordering::greater);
+    CHECK(CompareBoundaryPoints(*data.Text, 1, *data.Text, 1) == std::strong_ordering::equal);
+    CHECK(CompareBoundaryPoints(*data.Text, 1, *data.Text, 3) == std::strong_ordering::less);
+    CHECK(CompareBoundaryPoints(*data.Text, 3, *data.Text, 1) == std::strong_ordering::greater);
   }
 
   TEST_CASE("Position of a boundary point: in different nodes, by tree order, whatever the offsets",
             "[DOM][BoundaryPoint][dom:concept-range-bp-position]")
   {
     PositionTestData data;
-    CHECK(Position(*data.ChildA, 1, *data.ChildB, 0) == std::strong_ordering::less);
-    CHECK(Position(*data.Text, 4, *data.ChildB, 0) == std::strong_ordering::less);
+    CHECK(CompareBoundaryPoints(*data.ChildA, 1, *data.ChildB, 0) == std::strong_ordering::less);
+    CHECK(CompareBoundaryPoints(*data.Text, 4, *data.ChildB, 0) == std::strong_ordering::less);
     // nodeB is following nodeA, so the position is the reverse of the other way round.
-    CHECK(Position(*data.ChildB, 0, *data.Text, 4) == std::strong_ordering::greater);
+    CHECK(CompareBoundaryPoints(*data.ChildB, 0, *data.Text, 4) == std::strong_ordering::greater);
   }
 
   TEST_CASE("Position of a boundary point: in an ancestor, after a descendant only if past its child",
@@ -80,14 +80,14 @@ namespace krys::boo::dom::tests
   {
     PositionTestData data;
     // The descendant is in the parent's child at index 0 (childA).
-    CHECK(Position(*data.Parent, 0, *data.Text, 2) == std::strong_ordering::less);
-    CHECK(Position(*data.Parent, 1, *data.Text, 2) == std::strong_ordering::greater);
-    CHECK(Position(*data.Parent, 2, *data.Text, 0) == std::strong_ordering::greater);
+    CHECK(CompareBoundaryPoints(*data.Parent, 0, *data.Text, 2) == std::strong_ordering::less);
+    CHECK(CompareBoundaryPoints(*data.Parent, 1, *data.Text, 2) == std::strong_ordering::greater);
+    CHECK(CompareBoundaryPoints(*data.Parent, 2, *data.Text, 0) == std::strong_ordering::greater);
     // In childB, at index 1.
-    CHECK(Position(*data.Parent, 1, *data.ChildB, 0) == std::strong_ordering::less);
-    CHECK(Position(*data.Parent, 2, *data.ChildB, 0) == std::strong_ordering::greater);
+    CHECK(CompareBoundaryPoints(*data.Parent, 1, *data.ChildB, 0) == std::strong_ordering::less);
+    CHECK(CompareBoundaryPoints(*data.Parent, 2, *data.ChildB, 0) == std::strong_ordering::greater);
     // A direct child of the ancestor.
-    CHECK(Position(*data.ChildA, 0, *data.Grandchild, 0) == std::strong_ordering::less);
-    CHECK(Position(*data.ChildA, 1, *data.Grandchild, 0) == std::strong_ordering::greater);
+    CHECK(CompareBoundaryPoints(*data.ChildA, 0, *data.Grandchild, 0) == std::strong_ordering::less);
+    CHECK(CompareBoundaryPoints(*data.ChildA, 1, *data.Grandchild, 0) == std::strong_ordering::greater);
   }
 }

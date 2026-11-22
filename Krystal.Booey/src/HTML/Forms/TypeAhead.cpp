@@ -113,14 +113,14 @@ namespace krys::boo::html
 
     int32 searchStartOffset = 1;
     utf32_string prefix;
-    if (matchMode.Contains(MatchMode::CycleFirstChar) && c == _repeatingChar)
+    if (matchMode.contains(MatchMode::CycleFirstChar) && c == _repeatingChar)
     {
       // The user is likely trying to cycle through all the items starting with this character, so just
       // search on the character.
       prefix = utf32_string(1uz, c);
       _repeatingChar = c;
     }
-    else if (matchMode.Contains(MatchMode::MatchPrefix))
+    else if (matchMode.contains(MatchMode::MatchPrefix))
     {
       prefix = _buffer;
       if (_buffer.size() > 1uz)
@@ -152,7 +152,7 @@ namespace krys::boo::html
       }
     }
 
-    if (matchMode.Contains(MatchMode::MatchIndex))
+    if (matchMode.contains(MatchMode::MatchIndex))
     {
       DOMString digits;
       for (auto bufferChar : _buffer)

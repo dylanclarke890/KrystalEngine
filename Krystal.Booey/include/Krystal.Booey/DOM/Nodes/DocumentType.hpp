@@ -3,7 +3,7 @@
 #include "Krystal.Booey/DOM/Nodes/Node.hpp"
 #include "Krystal.Booey/DOM/Types/DOMString.hpp"
 #include "Krystal.Booey/DOM/Types/NodeOrString.hpp"
-#include "Krystal.Core/Types/List.hpp"
+#include "Krystal.Core/Containers/List.hpp"
 
 namespace krys::boo::dom
 {

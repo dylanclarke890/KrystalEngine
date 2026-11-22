@@ -23,12 +23,11 @@
 
 #include "Krystal.Booey/DOM/MutationObservers/MutationObserver.hpp"
 #include "Krystal.Booey/DOM/MutationObservers/RegisteredObserver.hpp"
-#include "Krystal.Booey/DOM/MutationObservers/TransientRegisteredObserver.hpp"
 #include "Krystal.Booey/DOM/Types/DOMString.hpp"
 #include "Krystal.Core/Attributes.hpp"
-#include "Krystal.Core/Types/List.hpp"
-#include "Krystal.Core/Types/RefPtr.hpp"
-#include "Krystal.Core/Types/WeakPtr.hpp"
+#include "Krystal.Core/Containers/List.hpp"
+#include "Krystal.Core/Memory/RefPtr.hpp"
+#include "Krystal.Core/Memory/WeakPtr.hpp"
 
 namespace krys::boo
 {
@@ -41,6 +40,7 @@ namespace krys::boo::dom
   class HTMLCollection;
   class LiveCollection;
   class NodeList;
+  class TransientRegisteredObserver;
 
   /// @brief The data a node needs only some of the time, made when it's first needed; an element's is an
   /// `ElementRareData`.

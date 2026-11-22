@@ -7,13 +7,14 @@
 #include "Krystal.Booey/DOM/Mixins/NonDocumentTypeChildNode.hpp"
 #include "Krystal.Booey/HTML/Algorithms/HTMLInsertionAlgorithms.hpp"
 #include "Krystal.Booey/HTML/CustomElement/CustomElementReactionQueue.hpp"
-#include "Krystal.Core/Utils/Move.hpp"
+#include "Krystal.Booey/HTML/Sanitizer/SetHTMLOptions.hpp"
+#include "Krystal.Core/Move.hpp"
 
 namespace krys::boo
 {
   CharacterData::CharacterData(Document &document, DOMString data, dom::NodeType type,
                                dom::NodeFlags flags) noexcept
-      : Node(document, type, flags | dom::NodeFlags::IsCharacterData), _data {krys::move(data)}
+      : Node(document, type, flags | dom::NodeFlag::IsCharacterData), _data {krys::move(data)}
   {
   }
 
@@ -77,6 +78,11 @@ namespace krys::boo
     return dom::mixins::ChildNode::Remove(*this);
   }
 
+  ExceptionOr<void> CharacterData::BeforeHTML(DOMStringView html) noexcept
+  {
+    return BeforeHTML(html, {});
+  }
+
   ExceptionOr<void> CharacterData::BeforeHTML(DOMStringView html,
                                               const html::SetHTMLOptions &options) noexcept
   {
@@ -85,11 +91,21 @@ namespace krys::boo
                                                      html::FragmentParserMode::Safe);
   }
 
+  ExceptionOr<void> CharacterData::AfterHTML(DOMStringView html) noexcept
+  {
+    return AfterHTML(html, {});
+  }
+
   ExceptionOr<void> CharacterData::AfterHTML(DOMStringView html, const html::SetHTMLOptions &options) noexcept
   {
     html::CEReactionsScope ceReactions;
     return html::HTMLInsertionAlgorithms::AfterHTML(*this, html, &options.Sanitizer,
                                                     html::FragmentParserMode::Safe);
+  }
+
+  ExceptionOr<void> CharacterData::ReplaceWithHTML(DOMStringView html) noexcept
+  {
+    return ReplaceWithHTML(html, {});
   }
 
   ExceptionOr<void> CharacterData::ReplaceWithHTML(DOMStringView html,
@@ -100,6 +116,11 @@ namespace krys::boo
                                                           html::FragmentParserMode::Safe);
   }
 
+  ExceptionOr<void> CharacterData::BeforeHTMLUnsafe(DOMStringView html) noexcept
+  {
+    return BeforeHTMLUnsafe(html, {});
+  }
+
   ExceptionOr<void> CharacterData::BeforeHTMLUnsafe(DOMStringView html,
                                                     const html::SetHTMLUnsafeOptions &options) noexcept
   {
@@ -108,12 +129,22 @@ namespace krys::boo
       *this, html, options.Sanitizer ? &*options.Sanitizer : nullptr, html::FragmentParserMode::Unsafe);
   }
 
+  ExceptionOr<void> CharacterData::AfterHTMLUnsafe(DOMStringView html) noexcept
+  {
+    return AfterHTMLUnsafe(html, {});
+  }
+
   ExceptionOr<void> CharacterData::AfterHTMLUnsafe(DOMStringView html,
                                                    const html::SetHTMLUnsafeOptions &options) noexcept
   {
     html::CEReactionsScope ceReactions;
     return html::HTMLInsertionAlgorithms::AfterHTML(
       *this, html, options.Sanitizer ? &*options.Sanitizer : nullptr, html::FragmentParserMode::Unsafe);
+  }
+
+  ExceptionOr<void> CharacterData::ReplaceWithHTMLUnsafe(DOMStringView html) noexcept
+  {
+    return ReplaceWithHTMLUnsafe(html, {});
   }
 
   ExceptionOr<void> CharacterData::ReplaceWithHTMLUnsafe(DOMStringView html,

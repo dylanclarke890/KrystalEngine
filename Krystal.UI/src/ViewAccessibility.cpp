@@ -284,7 +284,7 @@ namespace krys::ui
     return view && boo::AXObjectCache::AccessibilityEnabled() ? view->Document().AxObjectCache() : nullptr;
   }
 
-  boo::AXObjectCache *ViewAccessibility::ForeignCache::Get() const noexcept
+  boo::AXObjectCache *ViewAccessibility::ForeignCache::get() const noexcept
   {
     auto *document = Document.get();
     auto *cache = document ? document->ExistingAXObjectCache() : nullptr;
@@ -317,7 +317,7 @@ namespace krys::ui
     krys_debug_assert(id <= ForeignObjectIDMask);
     // Another page's cache gets a tag the first time one of its objects is a node.
     size_t index = 0;
-    while (index < _foreignCaches.size() && _foreignCaches[index].Get() != cache)
+    while (index < _foreignCaches.size() && _foreignCaches[index].get() != cache)
     {
       ++index;
     }
@@ -428,7 +428,7 @@ namespace krys::ui
     if (node & ForeignNodeBit)
     {
       auto tag = static_cast<size_t>((node & ~ForeignNodeBit) >> ForeignTagShift);
-      auto *foreignCache = tag && tag <= _foreignCaches.size() ? _foreignCaches[tag - 1].Get() : nullptr;
+      auto *foreignCache = tag && tag <= _foreignCaches.size() ? _foreignCaches[tag - 1].get() : nullptr;
       if (foreignCache)
       {
         object = foreignCache->ObjectForID(static_cast<boo::AXId>(node & ForeignObjectIDMask));
@@ -584,7 +584,7 @@ namespace krys::ui
       actions.Add(Action::Increment);
       actions.Add(Action::Decrement);
     }
-    if (states.Contains(State::Expandable))
+    if (states.contains(State::Expandable))
     {
       actions.Add(Action::Expand);
       actions.Add(Action::Collapse);

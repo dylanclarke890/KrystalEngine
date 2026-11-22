@@ -1,18 +1,20 @@
 ﻿#pragma once
 
+#include "Krystal.Booey/CSS/Parser/ParserContext.hpp"
+#include "Krystal.Booey/CSS/Queries/MediaQueryParser.hpp"
 #include "Krystal.Booey/DOM/Nodes/Document.hpp"
 #include "Krystal.Booey/Page/Clients/BooeyClient.hpp"
 #include "Krystal.Booey/Page/Frame.hpp"
-#include "Krystal.Core/Types/UniquePtr.hpp"
+#include "Krystal.Core/Memory/UniquePtr.hpp"
 
 namespace krys::boo::css::tests
 {
   /// @brief A Booey client whose answers to the media features are the test's.
   struct MediaBooeyClient final : BooeyClient
   {
-    PointerCharacteristics Primary {PointerCharacteristics::Fine};
+    PointerCharacteristics Primary {PointerCharacteristic::Fine};
     bool PrimaryHovers {true};
-    PointerCharacteristics AllAvailable {PointerCharacteristics::Fine};
+    PointerCharacteristics AllAvailable {PointerCharacteristic::Fine};
     bool AnyHovers {true};
     SizeF Screen {1'920, 1'080};
     int32 DepthPerComponent {8};
@@ -121,4 +123,10 @@ namespace krys::boo::css::tests
       return boo::Frame::Create(krys::move(client));
     }
   };
+
+  /// @brief The media query list @p text parses to, in strict mode.
+  KRYS_NODISCARD inline mq::MediaQueryList ParseMediaQueries(utf8_stringview text)
+  {
+    return mq::MediaQueryParser::Parse(text, StrictParserContext());
+  }
 }

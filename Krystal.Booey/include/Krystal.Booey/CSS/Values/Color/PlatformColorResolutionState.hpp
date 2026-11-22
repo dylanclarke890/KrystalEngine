@@ -74,7 +74,7 @@ namespace krys::boo::css
     Maybe<ToLengthConversionData> ConversionData;
 
     // Options to pass when resolving any other keyword with css::ColorFromKeyword()
-    style::ColorOptions KeywordOptions {style::ColorOptions::None};
+    style::ColorOptions KeywordOptions {style::ColorOptions {}};
 
     // Appearance used to select from a light-dark() color function.
     // If unset, light-dark() colors will return the invalid Color.

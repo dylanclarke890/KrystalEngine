@@ -26,12 +26,12 @@
 #include "Krystal.Booey/Rendering/RenderBlock.hpp"
 #include "Krystal.Core/Attributes.hpp"
 #include "Krystal.Core/Macros.hpp"
+#include "Krystal.Core/Memory/UniquePtr.hpp"
+#include "Krystal.Core/Memory/WeakPtr.hpp"
 #include "Krystal.Core/TypeCast.hpp"
 #include "Krystal.Core/Types/Maybe.hpp"
 #include "Krystal.Core/Types/Pair.hpp"
-#include "Krystal.Core/Types/UniquePtr.hpp"
 #include "Krystal.Core/Types/Variant.hpp"
-#include "Krystal.Core/Types/WeakPtr.hpp"
 
 namespace krys::boo::layout_integration
 {
@@ -588,7 +588,7 @@ namespace krys::boo
 
     KRYS_NODISCARD bool ContainsFloats() const noexcept override
     {
-      return _floatingObjects && !_floatingObjects->Set().isEmpty();
+      return _floatingObjects && !_floatingObjects->Set().empty();
     }
 
     KRYS_NODISCARD bool ContainsFloat(const RenderBox &renderer) const noexcept;

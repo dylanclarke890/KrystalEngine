@@ -1,6 +1,6 @@
 ﻿#include "Krystal.Text/FreeTypeFace.hpp"
 #include "Krystal.Core/Assert.hpp"
-#include "Krystal.Core/Utils/Move.hpp"
+#include "Krystal.Core/Move.hpp"
 #include <algorithm>
 #include <cmath>
 #include <ft2build.h>

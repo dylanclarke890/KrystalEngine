@@ -25,8 +25,9 @@
 
 #pragma once
 
+#include "Krystal.Core/Containers/EnumSet.hpp"
 #include "Krystal.Core/Enum.hpp"
-#include "Krystal.Core/Types/RefPtr.hpp"
+#include "Krystal.Core/Memory/RefPtr.hpp"
 
 namespace krys::boo::css
 {
@@ -38,15 +39,19 @@ namespace krys::boo::css
   {
     enum class PathParsingOption : uint8
     {
-      None = 0,
-      RejectPathFillRule = 1 << 0,
-      RejectPath = 1 << 1,
+      RejectPathFillRule,
+      RejectPath,
     };
+
+    consteval PathParsingOption MaxEnumValue(PathParsingOption) noexcept
+    {
+      return PathParsingOption::RejectPath;
+    }
 
     // <basic-shape> = <circle()> | <ellipse() | <inset()> | <path()> | <polygon()> | <rect()> | <shape()> |
     // <xywh()> https://drafts.csswg.org/css-shapes/#typedef-basic-shape
     KRYS_NODISCARD RefPtr<Value> ConsumeBasicShape(TokenRange &tokens, PropertyParserState &state,
-                                                   PathParsingOption pathParsingOptions) noexcept;
+                                                   EnumSet<PathParsingOption> pathParsingOptions) noexcept;
 
     // <path()> = path( <'fill-rule'>? , <string> )
     // https://drafts.csswg.org/css-shapes/#funcdef-basic-shape-path
@@ -57,5 +62,3 @@ namespace krys::boo::css
     KRYS_NODISCARD RefPtr<Value> ConsumeShapeOutside(TokenRange &tokens, PropertyParserState &state) noexcept;
   }
 }
-
-KRYS_DEFINE_FLAGS_ENUM_TRAITS(krys::boo::css::parse_property::PathParsingOption, 3uz)

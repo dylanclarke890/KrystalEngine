@@ -29,7 +29,7 @@
 #include "Krystal.Booey/HTML/CustomElement/CustomElementFormValue.hpp"
 #include "Krystal.Booey/HTML/CustomElement/ValidityStateFlags.hpp"
 #include "Krystal.Booey/HTML/Forms/ValidatedFormListedElement.hpp"
-#include "Krystal.Core/Types/WeakPtr.hpp"
+#include "Krystal.Core/Memory/WeakPtr.hpp"
 
 namespace krys::boo
 {

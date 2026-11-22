@@ -30,8 +30,8 @@
 #include "Krystal.Booey/Style/Values/Align/GapGutter.hpp"
 #include "Krystal.Booey/Style/Values/Grid/GridTrackSize.hpp"
 #include "Krystal.Core/Attributes.hpp"
-#include "Krystal.Core/Types/HashMap.hpp"
-#include "Krystal.Core/Types/List.hpp"
+#include "Krystal.Core/Containers/HashMap.hpp"
+#include "Krystal.Core/Containers/List.hpp"
 #include "Krystal.Core/Types/Maybe.hpp"
 
 namespace krys::boo

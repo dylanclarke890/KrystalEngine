@@ -29,7 +29,7 @@
 
 #include "Krystal.Booey/Graphics/Images/SourceImage.hpp"
 #include "Krystal.Core/Geometry/AffineTransform.hpp"
-#include "Krystal.Core/RefCounted.hpp"
+#include "Krystal.Core/Memory/RefCounted.hpp"
 
 namespace krys
 {

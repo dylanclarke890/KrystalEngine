@@ -27,12 +27,12 @@
 
 #include "Krystal.Booey/Style/Change.hpp"
 #include "Krystal.Core/Attributes.hpp"
-#include "Krystal.Core/CanMakeCheckedPtr.hpp"
-#include "Krystal.Core/Types/HashMap.hpp"
-#include "Krystal.Core/Types/ListHashSet.hpp"
+#include "Krystal.Core/Containers/HashMap.hpp"
+#include "Krystal.Core/Containers/ListHashSet.hpp"
+#include "Krystal.Core/Memory/CanMakeCheckedPtr.hpp"
+#include "Krystal.Core/Memory/RefPtr.hpp"
+#include "Krystal.Core/Memory/UniquePtr.hpp"
 #include "Krystal.Core/Types/Maybe.hpp"
-#include "Krystal.Core/Types/RefPtr.hpp"
-#include "Krystal.Core/Types/UniquePtr.hpp"
 #include <limits>
 #include <utility>
 
@@ -77,8 +77,9 @@ namespace krys::boo::style
     Ref<boo::Document> _document;
     ListHashSet<RefPtr<ContainerNode>> _roots;
     ListHashSet<RefPtr<Element>> _rebuildRoots;
-    HashMap<RefPtr<const Element>, ElementUpdate> _elements;
-    HashMap<RefPtr<const Text>, TextUpdate> _texts;
+    // Node maps: the render tree updater holds element updates while it adds more.
+    NodeHashMap<RefPtr<const Element>, ElementUpdate> _elements;
+    NodeHashMap<RefPtr<const Text>, TextUpdate> _texts;
     UniquePtr<RenderStyle> _initialContainingBlockUpdate;
 
   public:

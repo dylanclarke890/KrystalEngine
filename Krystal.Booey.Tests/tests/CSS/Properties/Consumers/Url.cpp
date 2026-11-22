@@ -8,20 +8,22 @@ namespace krys::boo::css::parse_property::tests
 
   namespace
   {
-    template <AllowedUrlModifiers Allowed>
-    constexpr auto Consume = [](TokenRange &tokens, PropertyParserState &state)
+    constexpr auto UrlConsumer(AllowedUrlModifiers allowed) noexcept
     {
-      return ConsumeUrl(tokens, state, Allowed);
-    };
+      return [allowed](TokenRange &tokens, PropertyParserState &state)
+      {
+        return ConsumeUrl(tokens, state, allowed);
+      };
+    }
 
-    constexpr auto AllModifiers =
-      AllowedUrlModifiers::CrossOrigin | AllowedUrlModifiers::Integrity | AllowedUrlModifiers::ReferrerPolicy;
+    constexpr auto AllModifiers = AllowedUrlModifiers {
+      AllowedUrlModifier::CrossOrigin, AllowedUrlModifier::Integrity, AllowedUrlModifier::ReferrerPolicy};
   }
 
   TEST_CASE("parse_property(ConsumeURL)", "[CSS][Properties][Consumers]")
   {
     ParserContext context {ParserMode::HTMLStandard, net::Url(u8"https://example.com/dir/")};
-    auto consume = Consume<AllowedUrlModifiers::None>;
+    auto consume = UrlConsumer({});
 
     CHECK(ConsumeToText(u8"url(a.png)", consume, context) == "url(\"a.png\")");
     CHECK(ConsumeToText(u8"url(\"a.png\")", consume, context) == "url(\"a.png\")");
@@ -40,26 +42,26 @@ namespace krys::boo::css::parse_property::tests
   {
     ParserContext context {ParserMode::HTMLStandard, net::Url(u8"https://example.com/")};
 
-    CHECK(ConsumeToText(u8"url(\"a\" cross-origin(anonymous))", Consume<AllModifiers>, context)
+    CHECK(ConsumeToText(u8"url(\"a\" cross-origin(anonymous))", UrlConsumer(AllModifiers), context)
           == "url(\"a\" cross-origin(anonymous))");
     CHECK(ConsumeToText(u8"url(\"a\" referrer-policy(no-referrer) cross-origin(use-credentials))",
-                        Consume<AllModifiers>, context)
+                        UrlConsumer(AllModifiers), context)
           == "url(\"a\" cross-origin(use-credentials) referrer-policy(no-referrer))");
 
     // Duplicates, bad arguments and modifiers that aren't allowed here.
-    CHECK(ConsumeToText(u8"url(\"a\" cross-origin(anonymous) cross-origin(anonymous))", Consume<AllModifiers>,
-                        context)
+    CHECK(ConsumeToText(u8"url(\"a\" cross-origin(anonymous) cross-origin(anonymous))",
+                        UrlConsumer(AllModifiers), context)
           == "<null>");
-    CHECK(ConsumeToText(u8"url(\"a\" cross-origin(foo))", Consume<AllModifiers>, context) == "<null>");
-    CHECK(ConsumeToText(u8"url(\"a\" cross-origin(anonymous))", Consume<AllowedUrlModifiers::ReferrerPolicy>,
-                        context)
+    CHECK(ConsumeToText(u8"url(\"a\" cross-origin(foo))", UrlConsumer(AllModifiers), context) == "<null>");
+    CHECK(ConsumeToText(u8"url(\"a\" cross-origin(anonymous))",
+                        UrlConsumer(AllowedUrlModifier::ReferrerPolicy), context)
           == "<null>");
-    CHECK(ConsumeToText(u8"url(\"a\" foo(bar))", Consume<AllModifiers>, context) == "<null>");
+    CHECK(ConsumeToText(u8"url(\"a\" foo(bar))", UrlConsumer(AllModifiers), context) == "<null>");
 
-    CHECK(ConsumeToText(u8"url(\"a\" integrity(\"sha384-x\"))", Consume<AllModifiers>, context)
+    CHECK(ConsumeToText(u8"url(\"a\" integrity(\"sha384-x\"))", UrlConsumer(AllModifiers), context)
           == "url(\"a\" integrity(\"sha384-x\"))");
-    CHECK(ConsumeToText(u8"url(\"a\" integrity(\"\"))", Consume<AllModifiers>, context)
+    CHECK(ConsumeToText(u8"url(\"a\" integrity(\"\"))", UrlConsumer(AllModifiers), context)
           == "url(\"a\" integrity(\"\"))");
-    CHECK(ConsumeToText(u8"url(\"a\" integrity(x))", Consume<AllModifiers>, context) == "<null>");
+    CHECK(ConsumeToText(u8"url(\"a\" integrity(x))", UrlConsumer(AllModifiers), context) == "<null>");
   }
 }

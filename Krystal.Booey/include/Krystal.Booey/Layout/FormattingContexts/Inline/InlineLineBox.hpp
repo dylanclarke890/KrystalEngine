@@ -31,9 +31,9 @@
 #include "Krystal.Booey/Layout/FormattingContexts/Inline/InlineRect.hpp"
 #include "Krystal.Booey/Layout/LayoutTree/LayoutElementBox.hpp"
 #include "Krystal.Core/Attributes.hpp"
-#include "Krystal.Core/Types/EnumSet.hpp"
-#include "Krystal.Core/Types/HashMap.hpp"
-#include "Krystal.Core/Types/List.hpp"
+#include "Krystal.Core/Containers/EnumSet.hpp"
+#include "Krystal.Core/Containers/HashMap.hpp"
+#include "Krystal.Core/Containers/List.hpp"
 
 namespace krys::boo::layout
 {
@@ -93,7 +93,7 @@ namespace krys::boo::layout
 
     KRYS_NODISCARD bool HasInlineBox() const noexcept
     {
-      return _boxTypes.Contains(InlineLevelBox::Type::InlineBox);
+      return _boxTypes.contains(InlineLevelBox::Type::InlineBox);
     }
 
     KRYS_NODISCARD bool HasNonInlineBox() const noexcept
@@ -104,7 +104,7 @@ namespace krys::boo::layout
 
     KRYS_NODISCARD bool HasAtomicInlineBox() const noexcept
     {
-      return _boxTypes.Contains(InlineLevelBox::Type::AtomicInlineBox);
+      return _boxTypes.contains(InlineLevelBox::Type::AtomicInlineBox);
     }
 
     KRYS_NODISCARD InlineRect LogicalRectForTextRun(const Line::Run &run) const noexcept;

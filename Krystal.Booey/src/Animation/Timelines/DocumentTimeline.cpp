@@ -38,7 +38,7 @@
 #include "Krystal.Booey/Rendering/RenderElement.hpp"
 #include "Krystal.Booey/Rendering/Style/RenderStyle.hpp"
 #include "Krystal.Booey/Style/Styleable.hpp"
-#include "Krystal.Core/Types/HashSet.hpp"
+#include "Krystal.Core/Containers/HashSet.hpp"
 
 namespace krys::boo
 {
@@ -135,7 +135,7 @@ namespace krys::boo
   void DocumentTimeline::RemoveAnimation(WebAnimation &animation) noexcept
   {
     AnimationTimeline::RemoveAnimation(animation);
-    if (_animations.isEmpty())
+    if (_animations.empty())
     {
       ClearTickScheduleTimer();
     }
@@ -165,7 +165,7 @@ namespace krys::boo
 
   bool DocumentTimeline::ShouldRunUpdateAnimationsAndSendEventsIgnoringSuspensionState() const noexcept
   {
-    return !_animations.isEmpty() || !_pendingAnimationEvents.empty()
+    return !_animations.empty() || !_pendingAnimationEvents.empty()
            || !_acceleratedAnimationsPendingRunningStateChange.empty();
   }
 
@@ -453,7 +453,7 @@ namespace krys::boo
     }
 
     // There is no tick to schedule if we don't have any relevant animations.
-    if (_animations.isEmpty())
+    if (_animations.empty())
     {
       return;
     }

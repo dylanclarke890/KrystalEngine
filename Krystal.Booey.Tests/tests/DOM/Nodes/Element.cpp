@@ -18,32 +18,17 @@
 
 namespace krys::boo::dom::tests
 {
-  namespace
-  {
-    struct CommonTestData
-    {
-      Ref<Document> Document;
-      Ref<TestElement> Node;
-
-      CommonTestData() : Document(CreateRef<HTMLDocument>()), Node(CreateRef<TestElement>(*Document))
-      {
-      }
-    };
-
-    constexpr const char8 *TestNamespace = u8"http://example.com/ns";
-  }
-
   TEST_CASE("Node.nodeName: an Element's is its HTML-uppercased qualified name",
             "[DOM][Element][dom:dom-node-nodename]")
   {
-    CommonTestData data;
+    TestElementFixture data;
     REQUIRE(data.Node->NodeName() == u8"TEST-ELEMENT");
   }
 
   TEST_CASE("Node.nodeType: an Element is an ELEMENT_NODE",
             "[DOM][Element][dom:dom-node-nodetype][dom:dom-node-element_node]")
   {
-    CommonTestData data;
+    TestElementFixture data;
     REQUIRE(data.Node->NodeType() == NodeType::ELEMENT_NODE);
   }
 
@@ -91,7 +76,7 @@ namespace krys::boo::dom::tests
             "[DOM][Element][dom:dom-element-id][dom:dom-element-classname][dom:dom-element-slot]"
             "[dom:concept-reflect]")
   {
-    CommonTestData data;
+    TestElementFixture data;
     CHECK(data.Node->Id().empty());
     CHECK(data.Node->ClassName().empty());
     CHECK(data.Node->Slot().empty());
@@ -140,7 +125,7 @@ namespace krys::boo::dom::tests
   TEST_CASE("Element.classList: a token list of the class attribute, whose tokens are the classes",
             "[DOM][Element][dom:dom-element-classlist][dom:concept-class]")
   {
-    CommonTestData data;
+    TestElementFixture data;
     auto &classList = data.Node->ClassList();
     CHECK(&data.Node->ClassList() == &classList);
     REQUIRE(classList.Length() == 0uz);
@@ -169,7 +154,7 @@ namespace krys::boo::dom::tests
             "[DOM][Element][dom:dom-element-hasattributes][dom:dom-element-attributes]"
             "[dom:concept-element-attribute]")
   {
-    CommonTestData data;
+    TestElementFixture data;
     auto &attributes = data.Node->Attributes();
     CHECK(&data.Node->Attributes() == &attributes);
     CHECK_FALSE(data.Node->HasAttributes());
@@ -185,7 +170,7 @@ namespace krys::boo::dom::tests
   TEST_CASE("Element.getAttributeNames(): the qualified names of its attributes, in order",
             "[DOM][Element][dom:dom-element-getattributenames]")
   {
-    CommonTestData data;
+    TestElementFixture data;
     CHECK(data.Node->GetAttributeNames().empty());
     REQUIRE_FALSE(data.Node->SetAttribute(u8"b", u8"1").HasException());
     REQUIRE_FALSE(data.Node->SetAttributeNS(TestNamespace, u8"x:a", u8"2").HasException());
@@ -197,7 +182,7 @@ namespace krys::boo::dom::tests
   TEST_CASE("Element.getAttribute() and getAttributeNS(): the attribute's value, or null",
             "[DOM][Element][dom:dom-element-getattribute][dom:dom-element-getattributens]")
   {
-    CommonTestData data;
+    TestElementFixture data;
     CHECK_FALSE(data.Node->GetAttribute(u8"test-attr").has_value());
     CHECK_FALSE(data.Node->GetAttributeNS(TestNamespace, u8"test-attr").has_value());
 
@@ -212,7 +197,7 @@ namespace krys::boo::dom::tests
   TEST_CASE("Element.setAttribute(): changes the first attribute with the name, or appends one",
             "[DOM][Element][dom:dom-element-setattribute]")
   {
-    CommonTestData data;
+    TestElementFixture data;
 
     SECTION("A new attribute has no namespace or prefix")
     {
@@ -262,7 +247,7 @@ namespace krys::boo::dom::tests
   TEST_CASE("Element.setAttributeNS(): validates and extracts the name, then sets the attribute value",
             "[DOM][Element][dom:dom-element-setattributens]")
   {
-    CommonTestData data;
+    TestElementFixture data;
 
     REQUIRE_FALSE(data.Node->SetAttributeNS(TestNamespace, u8"x:a", u8"1").HasException());
     auto *attr = data.Node->GetAttributeNodeNS(TestNamespace, u8"a");
@@ -291,7 +276,7 @@ namespace krys::boo::dom::tests
   TEST_CASE("Element.removeAttribute() and removeAttributeNS(): remove the attribute, if any",
             "[DOM][Element][dom:dom-element-removeattribute][dom:dom-element-removeattributens]")
   {
-    CommonTestData data;
+    TestElementFixture data;
     REQUIRE_FALSE(data.Node->SetAttribute(u8"test-attr", u8"test-value").HasException());
     REQUIRE_FALSE(data.Node->SetAttributeNS(TestNamespace, u8"x:test-attr", u8"ns").HasException());
 
@@ -308,7 +293,7 @@ namespace krys::boo::dom::tests
   TEST_CASE("Element.toggleAttribute(): adds or removes the attribute, as force says",
             "[DOM][Element][dom:dom-element-toggleattribute]")
   {
-    CommonTestData data;
+    TestElementFixture data;
 
     auto toggle = [&](DOMStringAtom name, Maybe<bool> force)
     {
@@ -354,7 +339,7 @@ namespace krys::boo::dom::tests
             "[DOM][Element][dom:dom-element-hasattribute][dom:dom-element-hasattributens]"
             "[dom:concept-element-attribute-has]")
   {
-    CommonTestData data;
+    TestElementFixture data;
     CHECK_FALSE(data.Node->HasAttribute(u8"test-attr"));
     CHECK_FALSE(data.Node->HasAttributeNS(TestNamespace, u8"test-attr"));
 
@@ -371,7 +356,7 @@ namespace krys::boo::dom::tests
   TEST_CASE("Element.getAttributeNode() and getAttributeNodeNS(): the attribute, or null",
             "[DOM][Element][dom:dom-element-getattributenode][dom:dom-element-getattributenodens]")
   {
-    CommonTestData data;
+    TestElementFixture data;
     CHECK(data.Node->GetAttributeNode(u8"test-attr") == nullptr);
     CHECK(data.Node->GetAttributeNodeNS(TestNamespace, u8"test-attr") == nullptr);
 
@@ -390,7 +375,7 @@ namespace krys::boo::dom::tests
   TEST_CASE("Element.setAttributeNode() and setAttributeNodeNS(): set the attribute, returning the old one",
             "[DOM][Element][dom:dom-element-setattributenode][dom:dom-element-setattributenodens]")
   {
-    CommonTestData data;
+    TestElementFixture data;
     using SetAttributeNode = ExceptionOr<RefPtr<Attr>> (Element::*)(Attr &) noexcept;
     auto set =
       GENERATE(SetAttributeNode(&Element::SetAttributeNode), SetAttributeNode(&Element::SetAttributeNodeNS));
@@ -424,7 +409,7 @@ namespace krys::boo::dom::tests
   TEST_CASE("Element.removeAttributeNode(): removes and returns the attribute, if it's the element's",
             "[DOM][Element][dom:dom-element-removeattributenode]")
   {
-    CommonTestData data;
+    TestElementFixture data;
 
     SECTION("One of its attributes")
     {
@@ -514,7 +499,8 @@ namespace krys::boo::dom::tests
     CHECK(document->CreateElement(u8"div").ReleaseValue()->CustomElementRegistry() == global);
 
     auto scoped = html::CustomElementRegistry::CreateScoped();
-    auto element = document->CreateElement(u8"div", ElementCreationOptions {.CustomElementRegistry = scoped});
+    auto element =
+      document->CreateElement(u8"div", ElementCreationOptions {.CustomElementRegistry = scoped.get()});
     CHECK(element.ReleaseValue()->CustomElementRegistry() == scoped);
   }
 
@@ -621,7 +607,7 @@ namespace krys::boo::dom::tests
   TEST_CASE("Node.textContent: an Element's is its descendant text, which setting it replaces",
             "[DOM][Element][dom:dom-node-textcontent][dom:get-text-content][dom:set-text-content]")
   {
-    CommonTestData data;
+    TestElementFixture data;
     auto child = data.Document->CreateElement(u8"span").ReleaseValue();
     REQUIRE_FALSE(child->AppendChild(*data.Document->CreateTextNode(u8"b")).HasException());
     REQUIRE_FALSE(data.Node->AppendChild(*data.Document->CreateTextNode(u8"a")).HasException());

@@ -25,9 +25,9 @@
 #pragma once
 
 #include "Krystal.Core/Attributes.hpp"
+#include "Krystal.Core/Containers/EnumSet.hpp"
 #include "Krystal.Core/Enum.hpp"
 #include "Krystal.Core/Numeric.hpp"
-#include "Krystal.Core/Types/EnumSet.hpp"
 #include <compare>
 
 namespace krys::boo
@@ -76,12 +76,12 @@ namespace krys::boo::style
     ClipPath,
     WillChange,
   };
-}
 
-KRYS_DEFINE_CONTIGUOUS_ENUM_TRAITS(krys::boo::style::DifferenceContextSensitiveProperty, 6uz);
+  consteval DifferenceContextSensitiveProperty MaxEnumValue(DifferenceContextSensitiveProperty) noexcept
+  {
+    return DifferenceContextSensitiveProperty::WillChange;
+  }
 
-namespace krys::boo::style
-{
   /// @brief How much has to be updated for a renderer whose style changed.
   struct Difference
   {

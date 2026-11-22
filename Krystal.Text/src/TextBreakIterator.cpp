@@ -21,9 +21,9 @@
 
 #include "Krystal.Text/TextBreakIterator.hpp"
 #include "Krystal.Core/Assert.hpp"
+#include "Krystal.Core/Memory/NeverDestroyed.hpp"
+#include "Krystal.Core/Move.hpp"
 #include "Krystal.Core/Strings/Unicode.hpp"
-#include "Krystal.Core/Threading/NeverDestroyed.hpp"
-#include "Krystal.Core/Utils/Move.hpp"
 #include "Krystal.Core/Visitor.hpp"
 #include <algorithm>
 #include <unicode/ubrk.h>
@@ -469,7 +469,7 @@ namespace krys::text
     std::copy_n(encoded.begin(), offset, _encoded.end() - offset);
   }
 
-  CachedTextBreakIterator &CachedLineBreakIteratorFactory::Get() noexcept
+  CachedTextBreakIterator &CachedLineBreakIteratorFactory::operator*() noexcept
   {
     auto priorContext = _priorContext.Characters();
     if (!_iterator)
@@ -481,7 +481,7 @@ namespace krys::text
     else if (priorContext.data() != _cachedPriorContext)
     {
       ResetStringAndReleaseIterator(_stringView, _locale, _mode, _contentAnalysis);
-      return Get();
+      return **this;
     }
     return *_iterator;
   }

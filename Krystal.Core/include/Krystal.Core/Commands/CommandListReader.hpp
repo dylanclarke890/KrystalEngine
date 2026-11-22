@@ -4,7 +4,6 @@
 #include "Krystal.Core/Commands/CommandList.hpp"
 #include "Krystal.Core/Macros.hpp"
 #include "Krystal.Core/Numeric.hpp"
-#include "Krystal.Core/Types/Span.hpp"
 #include "Krystal.Core/Utils/ByteUtils.hpp"
 
 namespace krys

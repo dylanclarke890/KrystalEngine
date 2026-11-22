@@ -2,7 +2,7 @@
 #include "Krystal.Core/Colour/ColourConversion.hpp"
 #include "Krystal.Core/Colour/ColourInterpolation.hpp"
 #include "Krystal.Core/Concepts.hpp"
-#include "Krystal.Core/Utils/Move.hpp"
+#include "Krystal.Core/Move.hpp"
 #include "Krystal.Core/Visitor.hpp"
 #include <algorithm>
 #include <cmath>

@@ -174,7 +174,7 @@ namespace krys::boo
   {
     auto dump = [&](Change change, auto GraphicsContextState::*property)
     {
-      if (_changeFlags.Contains(change))
+      if (_changeFlags.contains(change))
       {
         ts.DumpProperty(StateChangeName(change), this->*property);
       }

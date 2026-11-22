@@ -195,7 +195,7 @@ namespace krys::boo
       auto *existingUpdate = _styleUpdate->GetElementUpdate(element);
       if (existingUpdate)
       {
-        if (existingUpdate->Changes.Contains(style::Change::Renderer))
+        if (existingUpdate->Changes.contains(style::Change::Renderer))
         {
           return false;
         }
@@ -247,7 +247,7 @@ namespace krys::boo
     while (true)
     {
       auto rebuildRoots = _styleUpdate->TakeRebuildRoots();
-      if (rebuildRoots.isEmpty())
+      if (rebuildRoots.empty())
       {
         break;
       }
@@ -305,7 +305,7 @@ namespace krys::boo
       {
         auto *textUpdate = _styleUpdate->GetTextUpdate(*text);
         bool didCreateParent =
-          GetParent().Update && GetParent().Update->Changes.Contains(style::Change::Renderer);
+          GetParent().Update && GetParent().Update->Changes.contains(style::Change::Renderer);
         bool mayNeedUpdateWhitespaceOnlyRenderer =
           RenderingParent().DidCreateOrDestroyChildRenderer && text->ContainsOnlyASCIIWhitespace();
         if (didCreateParent || textUpdate || mayNeedUpdateWhitespaceOnlyRenderer)
@@ -458,7 +458,7 @@ namespace krys::boo
 
     _builder->UpdateAfterDescendants(*renderer);
 
-    if (update && update->Changes.Contains(style::Change::Renderer))
+    if (update && update->Changes.contains(style::Change::Renderer))
     {
       element.DidAttachRenderers();
     }
@@ -498,12 +498,12 @@ namespace krys::boo
 
     bool shouldTearDownRenderers = [&]
     {
-      if (element.IsInTopLayer() && elementUpdate.Changes.Contains(style::Change::Inherited)
+      if (element.IsInTopLayer() && elementUpdate.Changes.contains(style::Change::Inherited)
           && elementUpdate.Style->IsSkippedRootOrSkippedContent())
       {
         return true;
       }
-      return elementUpdate.Changes.Contains(style::Change::Renderer)
+      return elementUpdate.Changes.contains(style::Change::Renderer)
              && (element.Renderer() || element.HasDisplayContents());
     }();
 
@@ -596,7 +596,7 @@ namespace krys::boo
 
     // FIXME: Pseudo-element styles that changed without the element's style changing
     // (pseudoStyleCacheIsInvalid), once there are generated content renderers.
-    if (elementUpdate.Changes.IsEmpty())
+    if (elementUpdate.Changes.empty())
     {
       return;
     }

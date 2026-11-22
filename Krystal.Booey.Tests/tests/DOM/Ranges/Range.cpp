@@ -14,13 +14,13 @@ namespace krys::boo::dom::tests
 {
   namespace
   {
-    struct CommonTestData
+    struct RangeTestData
     {
       Ref<Document> Document;
       Ref<TestElement> Node;
       Ref<Range> Range;
 
-      CommonTestData()
+      RangeTestData()
           : Document(CreateRef<HTMLDocument>()), Node(CreateRef<TestElement>(*Document)),
             Range(Document->CreateRange())
       {
@@ -77,7 +77,7 @@ namespace krys::boo::dom::tests
   TEST_CASE("Range.commonAncestorContainer: the common ancestor of its start and end nodes",
             "[DOM][Range][dom:dom-range-commonancestorcontainer][dom:get-the-common-ancestor]")
   {
-    CommonTestData data;
+    RangeTestData data;
 
     auto textNode1 = data.Document->CreateTextNode(u8"test1");
     auto textNode2 = data.Document->CreateTextNode(u8"test2");
@@ -99,7 +99,7 @@ namespace krys::boo::dom::tests
   {
     SECTION("InvalidNodeTypeError if node is a DocumentType")
     {
-      CommonTestData data;
+      RangeTestData data;
 
       auto doctype = data.Document->Implementation().CreateDocumentType(u8"html", u8"", u8"");
       REQUIRE_FALSE(doctype.HasException());
@@ -111,7 +111,7 @@ namespace krys::boo::dom::tests
 
     SECTION("IndexSizeError if offset is greater than the length of the node's data")
     {
-      CommonTestData data;
+      RangeTestData data;
 
       auto textNode = data.Document->CreateTextNode(u8"test");
       REQUIRE_FALSE(data.Node->AppendChild(*textNode).HasException());
@@ -123,7 +123,7 @@ namespace krys::boo::dom::tests
 
     SECTION("Set start boundary point to the given node and offset")
     {
-      CommonTestData data;
+      RangeTestData data;
 
       auto textNode = data.Document->CreateTextNode(u8"test");
       REQUIRE_FALSE(data.Node->AppendChild(*textNode).HasException());
@@ -137,7 +137,7 @@ namespace krys::boo::dom::tests
     SECTION("If the new start boundary point is after the end boundary point, set the end boundary point to "
             "be the same as the start boundary point")
     {
-      CommonTestData data;
+      RangeTestData data;
 
       auto textNode = data.Document->CreateTextNode(u8"test");
       REQUIRE_FALSE(data.Node->AppendChild(*textNode).HasException());
@@ -153,8 +153,8 @@ namespace krys::boo::dom::tests
     SECTION("If the new start boundary point is in a different root than the end boundary point, set the end "
             "boundary point to be the same as the start boundary point")
     {
-      CommonTestData data;
-      CommonTestData otherData;
+      RangeTestData data;
+      RangeTestData otherData;
 
       auto setStartResult = data.Range->SetStart(*otherData.Node, 0uz);
       REQUIRE_FALSE(setStartResult.HasException());
@@ -170,7 +170,7 @@ namespace krys::boo::dom::tests
   {
     SECTION("InvalidNodeTypeError if node is a DocumentType")
     {
-      CommonTestData data;
+      RangeTestData data;
 
       auto doctype = data.Document->Implementation().CreateDocumentType(u8"html", u8"", u8"");
       REQUIRE_FALSE(doctype.HasException());
@@ -182,7 +182,7 @@ namespace krys::boo::dom::tests
 
     SECTION("IndexSizeError if offset is greater than the length of the node's data")
     {
-      CommonTestData data;
+      RangeTestData data;
 
       auto textNode = data.Document->CreateTextNode(u8"test");
       REQUIRE_FALSE(data.Node->AppendChild(*textNode).HasException());
@@ -194,7 +194,7 @@ namespace krys::boo::dom::tests
 
     SECTION("Set end boundary point to the given node and offset")
     {
-      CommonTestData data;
+      RangeTestData data;
 
       auto textNode = data.Document->CreateTextNode(u8"test");
       REQUIRE_FALSE(data.Node->AppendChild(*textNode).HasException());
@@ -208,7 +208,7 @@ namespace krys::boo::dom::tests
     SECTION("If the new end boundary point is after the start boundary point, set the start boundary point to"
             "be the same as the end boundary point")
     {
-      CommonTestData data;
+      RangeTestData data;
 
       auto textNode = data.Document->CreateTextNode(u8"test");
       REQUIRE_FALSE(data.Node->AppendChild(*textNode).HasException());
@@ -225,8 +225,8 @@ namespace krys::boo::dom::tests
       "If the new end boundary point is in a different root than the start boundary point, set the start"
       "boundary point to be the same as the end boundary point")
     {
-      CommonTestData data;
-      CommonTestData otherData;
+      RangeTestData data;
+      RangeTestData otherData;
 
       auto setEndResult = data.Range->SetEnd(*otherData.Node, 0uz);
       REQUIRE_FALSE(setEndResult.HasException());
@@ -242,7 +242,7 @@ namespace krys::boo::dom::tests
   {
     SECTION("InvalidNodeTypeError if node is a DocumentType")
     {
-      CommonTestData data;
+      RangeTestData data;
       auto doctype = data.Document->Implementation().CreateDocumentType(u8"html", u8"", u8"");
       REQUIRE_FALSE(doctype.HasException());
       auto result = data.Range->SetStartBefore(*doctype.Value());
@@ -252,7 +252,7 @@ namespace krys::boo::dom::tests
 
     SECTION("InvalidNodeTypeError if node does not have a parent")
     {
-      CommonTestData data;
+      RangeTestData data;
 
       auto orphanNode = data.Document->CreateElement(u8"orphan");
       REQUIRE_FALSE(orphanNode.HasException());
@@ -264,7 +264,7 @@ namespace krys::boo::dom::tests
 
     SECTION("Set start boundary point to be before the given node")
     {
-      CommonTestData data;
+      RangeTestData data;
 
       auto child1 = data.Document->CreateElement(u8"child1");
       REQUIRE_FALSE(child1.HasException());
@@ -283,7 +283,7 @@ namespace krys::boo::dom::tests
     SECTION("If the new start boundary point is after the end boundary point, set the end boundary point to "
             "be the same as the start boundary point")
     {
-      CommonTestData data;
+      RangeTestData data;
 
       auto child1 = data.Document->CreateElement(u8"child1");
       auto child2 = data.Document->CreateElement(u8"child1");
@@ -308,8 +308,8 @@ namespace krys::boo::dom::tests
     SECTION("If the new start boundary point is in a different root than the end boundary point, set the end "
             "boundary point to be the same as the start boundary point")
     {
-      CommonTestData data;
-      CommonTestData otherData;
+      RangeTestData data;
+      RangeTestData otherData;
 
       auto child1 = otherData.Document->CreateElement(u8"child1");
       auto child2 = otherData.Document->CreateElement(u8"child1");
@@ -337,7 +337,7 @@ namespace krys::boo::dom::tests
   {
     SECTION("InvalidNodeTypeError if node is a DocumentType")
     {
-      CommonTestData data;
+      RangeTestData data;
 
       auto doctype = data.Document->Implementation().CreateDocumentType(u8"html", u8"", u8"");
       REQUIRE_FALSE(doctype.HasException());
@@ -349,7 +349,7 @@ namespace krys::boo::dom::tests
 
     SECTION("InvalidNodeTypeError if node does not have a parent")
     {
-      CommonTestData data;
+      RangeTestData data;
 
       auto orphanNode = data.Document->CreateElement(u8"orphan");
       REQUIRE_FALSE(orphanNode.HasException());
@@ -361,7 +361,7 @@ namespace krys::boo::dom::tests
 
     SECTION("Set end boundary point to be before the given node")
     {
-      CommonTestData data;
+      RangeTestData data;
 
       auto child1 = data.Document->CreateElement(u8"child1");
       REQUIRE_FALSE(child1.HasException());
@@ -381,7 +381,7 @@ namespace krys::boo::dom::tests
       "If the new end boundary point is after the start boundary point, set the start boundary point to "
       "be the same as the end boundary point")
     {
-      CommonTestData data;
+      RangeTestData data;
 
       auto child1 = data.Document->CreateElement(u8"child1");
       auto child2 = data.Document->CreateElement(u8"child1");
@@ -407,8 +407,8 @@ namespace krys::boo::dom::tests
       "If the new end boundary point is in a different root than the start boundary point, set the start "
       "boundary point to be the same as the end boundary point")
     {
-      CommonTestData data;
-      CommonTestData otherData;
+      RangeTestData data;
+      RangeTestData otherData;
 
       auto child1 = otherData.Document->CreateElement(u8"child1");
       auto child2 = otherData.Document->CreateElement(u8"child1");
@@ -436,7 +436,7 @@ namespace krys::boo::dom::tests
   {
     SECTION("InvalidNodeTypeError if node is a DocumentType")
     {
-      CommonTestData data;
+      RangeTestData data;
 
       auto doctype = data.Document->Implementation().CreateDocumentType(u8"html", u8"", u8"");
       REQUIRE_FALSE(doctype.HasException());
@@ -448,7 +448,7 @@ namespace krys::boo::dom::tests
 
     SECTION("InvalidNodeTypeError if node does not have a parent")
     {
-      CommonTestData data;
+      RangeTestData data;
 
       auto orphanNode = data.Document->CreateElement(u8"orphan");
       REQUIRE_FALSE(orphanNode.HasException());
@@ -460,7 +460,7 @@ namespace krys::boo::dom::tests
 
     SECTION("Set start boundary point to be before the given node")
     {
-      CommonTestData data;
+      RangeTestData data;
 
       auto child1 = data.Document->CreateElement(u8"child1");
       REQUIRE_FALSE(child1.HasException());
@@ -479,7 +479,7 @@ namespace krys::boo::dom::tests
     SECTION("If the new start boundary point is after the end boundary point, set the end boundary point to "
             "be the same as the start boundary point")
     {
-      CommonTestData data;
+      RangeTestData data;
 
       auto child1 = data.Document->CreateElement(u8"child1");
       auto child2 = data.Document->CreateElement(u8"child1");
@@ -504,8 +504,8 @@ namespace krys::boo::dom::tests
     SECTION("If the new start boundary point is in a different root than the end boundary point, set the end "
             "boundary point to be the same as the start boundary point")
     {
-      CommonTestData data;
-      CommonTestData otherData;
+      RangeTestData data;
+      RangeTestData otherData;
 
       auto child1 = otherData.Document->CreateElement(u8"child1");
       auto child2 = otherData.Document->CreateElement(u8"child1");
@@ -533,7 +533,7 @@ namespace krys::boo::dom::tests
   {
     SECTION("InvalidNodeTypeError if node is a DocumentType")
     {
-      CommonTestData data;
+      RangeTestData data;
 
       auto doctype = data.Document->Implementation().CreateDocumentType(u8"html", u8"", u8"");
       REQUIRE_FALSE(doctype.HasException());
@@ -545,7 +545,7 @@ namespace krys::boo::dom::tests
 
     SECTION("InvalidNodeTypeError if node does not have a parent")
     {
-      CommonTestData data;
+      RangeTestData data;
 
       auto orphanNode = data.Document->CreateElement(u8"orphan");
       REQUIRE_FALSE(orphanNode.HasException());
@@ -557,7 +557,7 @@ namespace krys::boo::dom::tests
 
     SECTION("Set end boundary point to be before the given node")
     {
-      CommonTestData data;
+      RangeTestData data;
 
       auto child1 = data.Document->CreateElement(u8"child1");
       REQUIRE_FALSE(child1.HasException());
@@ -577,7 +577,7 @@ namespace krys::boo::dom::tests
       "If the new end boundary point is after the start boundary point, set the start boundary point to "
       "be the same as the end boundary point")
     {
-      CommonTestData data;
+      RangeTestData data;
 
       auto child1 = data.Document->CreateElement(u8"child1");
       auto child2 = data.Document->CreateElement(u8"child1");
@@ -603,8 +603,8 @@ namespace krys::boo::dom::tests
       "If the new end boundary point is in a different root than the start boundary point, set the start "
       "boundary point to be the same as the end boundary point")
     {
-      CommonTestData data;
-      CommonTestData otherData;
+      RangeTestData data;
+      RangeTestData otherData;
 
       auto child1 = otherData.Document->CreateElement(u8"child1");
       auto child2 = otherData.Document->CreateElement(u8"child1");
@@ -629,7 +629,7 @@ namespace krys::boo::dom::tests
 
   TEST_CASE("Range.collapsed: whether its start is its end", "[DOM][Range][dom:dom-range-collapsed]")
   {
-    CommonTestData data;
+    RangeTestData data;
 
     SECTION("True if the start and end boundary points are the same")
     {
@@ -656,7 +656,7 @@ namespace krys::boo::dom::tests
   TEST_CASE("Range.collapse(): sets the end to the start, or the start to the end",
             "[DOM][Range][dom:dom-range-collapse]")
   {
-    CommonTestData data;
+    RangeTestData data;
 
     auto child1 = CreateRef<TestElement>(*data.Document);
     auto child2 = CreateRef<TestElement>(*data.Document);
@@ -694,7 +694,7 @@ namespace krys::boo::dom::tests
   TEST_CASE("Range.selectNode(): selects the node within it",
             "[DOM][Range][dom:dom-range-selectnode][dom:concept-range-select]")
   {
-    CommonTestData data;
+    RangeTestData data;
 
     SECTION("InvalidNodeTypeError if node is a DocumentType")
     {
@@ -734,7 +734,7 @@ namespace krys::boo::dom::tests
   TEST_CASE("Range.selectNodeContents(): from the start to the end of the node",
             "[DOM][Range][dom:dom-range-selectnodecontents]")
   {
-    CommonTestData data;
+    RangeTestData data;
 
     SECTION("InvalidNodeTypeError if node is a DocumentType")
     {
@@ -771,7 +771,7 @@ namespace krys::boo::dom::tests
     "Range.compareBoundaryPoints(): the position of one of its boundary points relative to another range's",
     "[DOM][Range][dom:dom-range-compareboundarypoints]")
   {
-    CommonTestData data;
+    RangeTestData data;
 
     SECTION("WrongDocumentError if otherRange is from a different document")
     {
@@ -959,7 +959,7 @@ namespace krys::boo::dom::tests
   TEST_CASE("Range.deleteContents(): removes what it contains, collapsing it",
             "[DOM][Range][dom:dom-range-deletecontents]")
   {
-    CommonTestData data;
+    RangeTestData data;
 
     SECTION("When start and end container are the same and it is a CharacterData node, deletes the content "
             "from start to end offset")
@@ -1006,7 +1006,7 @@ namespace krys::boo::dom::tests
   TEST_CASE("Range.extractContents(): moves what it contains into a fragment",
             "[DOM][Range][dom:dom-range-extractcontents][dom:concept-range-extract]")
   {
-    CommonTestData data;
+    RangeTestData data;
 
     SECTION("Collapsed range returns an empty document fragment")
     {
@@ -1084,7 +1084,7 @@ namespace krys::boo::dom::tests
   TEST_CASE("Range.cloneContents(): copies what it contains into a fragment",
             "[DOM][Range][dom:dom-range-clonecontents][dom:concept-range-clone]")
   {
-    CommonTestData data;
+    RangeTestData data;
 
     SECTION("Collapsed range returns an empty document fragment")
     {
@@ -1159,7 +1159,7 @@ namespace krys::boo::dom::tests
   TEST_CASE("Range.insertNode(): inserts the node at its start",
             "[DOM][Range][dom:dom-range-insertnode][dom:concept-range-insert]")
   {
-    CommonTestData data;
+    RangeTestData data;
     auto newNode = CreateRef<TestElement>(*data.Document);
 
     SECTION("HierarchyRequestError if start container is a ProcessingInstruction node")
@@ -1209,7 +1209,7 @@ namespace krys::boo::dom::tests
   TEST_CASE("Range.surroundContents(): moves what it contains into the new parent, which it then selects",
             "[DOM][Range][dom:dom-range-surroundcontents]")
   {
-    CommonTestData data;
+    RangeTestData data;
     auto newNode = CreateRef<TestElement>(*data.Document);
 
     SECTION("InvalidStateError if range partially contains a non-Text node")
@@ -1313,7 +1313,7 @@ namespace krys::boo::dom::tests
   TEST_CASE("Range.cloneRange(): a new live range with its start and end",
             "[DOM][Range][dom:dom-range-clonerange]")
   {
-    CommonTestData data;
+    RangeTestData data;
 
     auto child1 = CreateRef<TestElement>(*data.Document);
     auto child2 = CreateRef<TestElement>(*data.Document);
@@ -1341,7 +1341,7 @@ namespace krys::boo::dom::tests
   TEST_CASE("Range.isPointInRange(): whether the point is between its start and end, inclusive",
             "[DOM][Range][dom:dom-range-ispointinrange]")
   {
-    CommonTestData data;
+    RangeTestData data;
 
     auto child1 = CreateRef<TestElement>(*data.Document);
     auto child2 = CreateRef<TestElement>(*data.Document);
@@ -1429,7 +1429,7 @@ namespace krys::boo::dom::tests
   TEST_CASE("Range.comparePoint(): whether the point is before, in or after it",
             "[DOM][Range][dom:dom-range-comparepoint]")
   {
-    CommonTestData data;
+    RangeTestData data;
 
     auto child1 = CreateRef<TestElement>(*data.Document);
     auto child2 = CreateRef<TestElement>(*data.Document);
@@ -1510,7 +1510,7 @@ namespace krys::boo::dom::tests
   TEST_CASE("Range.intersectsNode(): whether any of the node is in it",
             "[DOM][Range][dom:dom-range-intersectsnode]")
   {
-    CommonTestData data;
+    RangeTestData data;
 
     auto child1 = CreateRef<TestElement>(*data.Document);
     auto child2 = CreateRef<TestElement>(*data.Document);
@@ -1539,7 +1539,7 @@ namespace krys::boo::dom::tests
 
   TEST_CASE("Range: its stringification is the text it contains", "[DOM][Range][dom:dom-range-stringifier]")
   {
-    CommonTestData data;
+    RangeTestData data;
 
     SECTION("When start and end container are the same and it is not a Text node, returns an empty string")
     {

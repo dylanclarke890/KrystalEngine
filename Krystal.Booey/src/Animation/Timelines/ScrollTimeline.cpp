@@ -331,7 +331,7 @@ namespace krys::boo
     // callbacks have been serviced, styles have been updated and resize observers have been run.
     // See https://github.com/w3c/csswg-drafts/issues/12120 about clarifying this.
     auto source = _source.GetStyleable();
-    if (!source || _animations.isEmpty())
+    if (!source || _animations.empty())
     {
       return;
     }

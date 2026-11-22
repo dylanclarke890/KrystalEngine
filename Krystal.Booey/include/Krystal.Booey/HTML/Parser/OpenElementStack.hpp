@@ -26,11 +26,10 @@
 
 #pragma once
 
-#include "Krystal.Booey/HTML/Elements/HTMLTableElement.hpp"
 #include "Krystal.Booey/HTML/Elements/HTMLTemplateElement.hpp"
 #include "Krystal.Booey/HTML/Parser/StackItem.hpp"
 #include "Krystal.Core/Assert.hpp"
-#include "Krystal.Core/Types/List.hpp"
+#include "Krystal.Core/Containers/List.hpp"
 
 namespace krys::boo::html
 {

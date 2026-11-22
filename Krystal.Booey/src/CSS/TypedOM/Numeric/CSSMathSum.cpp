@@ -65,15 +65,15 @@ namespace krys::boo
   void CSSMathSum::Serialise(StringBuilder &builder, EnumSet<SerialisationArguments> arguments) const noexcept
   {
     // https://drafts.css-houdini.org/css-typed-om/#calc-serialization
-    if (!arguments.Contains(SerialisationArguments::WithoutParentheses))
+    if (!arguments.contains(SerialisationArguments::WithoutParentheses))
     {
-      builder.Append(arguments.Contains(SerialisationArguments::Nested) ? u8"(" : u8"calc(");
+      builder.Append(arguments.contains(SerialisationArguments::Nested) ? u8"(" : u8"calc(");
     }
     _values->ForEach(
       [&](const CSSNumericValue &numericValue, bool first)
       {
         EnumSet<SerialisationArguments> operandSerialisationArguments {SerialisationArguments::Nested};
-        if (arguments.Contains(SerialisationArguments::WithoutParentheses))
+        if (arguments.contains(SerialisationArguments::WithoutParentheses))
         {
           operandSerialisationArguments.Add(SerialisationArguments::WithoutParentheses);
         }
@@ -89,7 +89,7 @@ namespace krys::boo
         }
         numericValue.Serialise(builder, operandSerialisationArguments);
       });
-    if (!arguments.Contains(SerialisationArguments::WithoutParentheses))
+    if (!arguments.contains(SerialisationArguments::WithoutParentheses))
     {
       builder.Append(u8')');
     }

@@ -92,6 +92,9 @@ namespace krys::boo::css
     TransformList,
     // Do not append classes here unless they derive from ValueContainingList.
   };
-}
 
-KRYS_DEFINE_CONTIGUOUS_ENUM_TRAITS(krys::boo::css::ValueType, 59uz);
+  consteval ValueType MaxEnumValue(ValueType) noexcept
+  {
+    return ValueType::TransformList;
+  }
+}

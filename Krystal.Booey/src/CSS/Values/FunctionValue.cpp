@@ -25,7 +25,7 @@
 
 #include "Krystal.Booey/CSS/Values/FunctionValue.hpp"
 #include "Krystal.Booey/CSS/Values/ValueId.hpp"
-#include "Krystal.Core/Hash.hpp"
+#include "Krystal.Core/Hashing/FastHash.hpp"
 #include "Krystal.Core/Strings/StringBuilder.hpp"
 
 namespace krys::boo::css
@@ -118,7 +118,7 @@ namespace krys::boo::css
 
   bool FunctionValue::AddDerivedHash(size_t &seed) const noexcept
   {
-    seed = Hash::Combine(seed, _name);
+    seed = CombineFastHashes(seed, _name);
     return ValueContainingList::AddDerivedHash(seed);
   }
 }

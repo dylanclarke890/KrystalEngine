@@ -458,7 +458,7 @@ namespace krys::boo::display_list
     }
 
     Maybe<packed_colour::RGBA> fillColor;
-    if (changes.Contains(GraphicsContextState::Change::FillBrush))
+    if (changes.contains(GraphicsContextState::Change::FillBrush))
     {
       fillColor = state.FillBrush().PackedColor();
       if (!fillColor)
@@ -469,7 +469,7 @@ namespace krys::boo::display_list
     }
 
     Maybe<packed_colour::RGBA> strokeColor;
-    if (changes.Contains(GraphicsContextState::Change::StrokeBrush))
+    if (changes.contains(GraphicsContextState::Change::StrokeBrush))
     {
       strokeColor = state.StrokeBrush().PackedColor();
       if (!strokeColor)
@@ -480,7 +480,7 @@ namespace krys::boo::display_list
     }
 
     Maybe<float> strokeThickness;
-    if (changes.Contains(GraphicsContextState::Change::StrokeThickness))
+    if (changes.contains(GraphicsContextState::Change::StrokeThickness))
     {
       strokeThickness = state.StrokeThickness();
     }

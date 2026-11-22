@@ -19,6 +19,10 @@
 
 namespace krys::boo::dom
 {
+  DOMImplementation::DOMImplementation(Document &document) noexcept : _document(CreateWeakRef(document))
+  {
+  }
+
   ExceptionOr<Ref<DocumentType>> DOMImplementation::CreateDocumentType(const DOMString &name,
                                                                        const DOMString &publicId,
                                                                        const DOMString &systemId) noexcept

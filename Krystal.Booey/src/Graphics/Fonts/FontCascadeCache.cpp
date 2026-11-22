@@ -31,18 +31,18 @@
 #include "Krystal.Booey/Graphics/Fonts/FontCache.hpp"
 #include "Krystal.Booey/Graphics/Fonts/FontCascadeDescription.hpp"
 #include "Krystal.Booey/Graphics/Fonts/FontSelector.hpp"
-#include "Krystal.Core/Hash.hpp"
-#include "Krystal.Core/Utils/Move.hpp"
+#include "Krystal.Core/Hashing/FastHash.hpp"
+#include "Krystal.Core/Move.hpp"
 
 namespace krys::boo
 {
   size_t FontDescriptionKeyHash::operator()(const FontDescriptionKey &key) const noexcept
   {
     auto &description = key.Description;
-    return Hash::Combine(description.ComputedSize(), static_cast<float>(description.Weight()),
-                         static_cast<int32>(description.Script()),
-                         static_cast<uint8>(description.Orientation()),
-                         static_cast<uint8>(description.VariantCaps()));
+    return CombineFastHashes(description.ComputedSize(), static_cast<float>(description.Weight()),
+                             static_cast<int32>(description.Script()),
+                             static_cast<uint8>(description.Orientation()),
+                             static_cast<uint8>(description.VariantCaps()));
   }
 
   FontFamilyName::FontFamilyName() noexcept : _name(null)
@@ -75,9 +75,9 @@ namespace krys::boo
     size_t hash = FontDescriptionKeyHash {}(key.DescriptionKey);
     for (auto &family : key.Families)
     {
-      hash = Hash::Combine(hash, family.Hash());
+      hash = CombineFastHashes(hash, family.Hash());
     }
-    return Hash::Combine(hash, key.FontSelectorId, key.FontSelectorVersion);
+    return CombineFastHashes(hash, key.FontSelectorId, key.FontSelectorVersion);
   }
 
   FontCascadeCache &FontCascadeCache::Singleton() noexcept

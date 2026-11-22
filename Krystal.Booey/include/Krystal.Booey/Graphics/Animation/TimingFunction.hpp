@@ -26,15 +26,15 @@
 
 #include "Krystal.Core/Assert.hpp"
 #include "Krystal.Core/Attributes.hpp"
+#include "Krystal.Core/Containers/List.hpp"
 #include "Krystal.Core/Maths/Easing.hpp"
+#include "Krystal.Core/Memory/NeverDestroyed.hpp"
+#include "Krystal.Core/Memory/RefCounted.hpp"
+#include "Krystal.Core/Memory/RefPtr.hpp"
 #include "Krystal.Core/Numeric.hpp"
-#include "Krystal.Core/RefCounted.hpp"
 #include "Krystal.Core/Strings/String.hpp"
-#include "Krystal.Core/Threading/NeverDestroyed.hpp"
 #include "Krystal.Core/TypeCast.hpp"
-#include "Krystal.Core/Types/List.hpp"
 #include "Krystal.Core/Types/Maybe.hpp"
-#include "Krystal.Core/Types/RefPtr.hpp"
 
 namespace krys
 {
@@ -129,7 +129,7 @@ namespace krys::boo
     KRYS_NODISCARD static const LinearTimingFunction &Identity() noexcept
     {
       static NeverDestroyed<Ref<LinearTimingFunction>> function {Create()};
-      return *function.get();
+      return **function;
     }
 
   private:
@@ -223,7 +223,7 @@ namespace krys::boo
     KRYS_NODISCARD static const CubicBezierTimingFunction &DefaultTimingFunction() noexcept
     {
       static NeverDestroyed<Ref<CubicBezierTimingFunction>> function {Create()};
-      return *function.get();
+      return **function;
     }
 
     KRYS_NODISCARD Ref<CubicBezierTimingFunction> CreateReversed() const noexcept

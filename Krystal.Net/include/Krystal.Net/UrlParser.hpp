@@ -25,10 +25,10 @@
 
 #pragma once
 
+#include "Krystal.Core/Containers/Array.hpp"
+#include "Krystal.Core/Move.hpp"
 #include "Krystal.Core/Strings/CodePointIterator.hpp"
-#include "Krystal.Core/Types/Array.hpp"
 #include "Krystal.Core/Types/Expected.hpp"
-#include "Krystal.Core/Utils/Move.hpp"
 #include "Krystal.Net/Url.hpp"
 
 namespace krys::net

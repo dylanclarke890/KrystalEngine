@@ -1,5 +1,6 @@
 ﻿#include "Krystal.Booey/CSS/Values/Types.hpp"
 #include "catch2/catch_test_macros.hpp"
+#include "Krystal.Booey.Tests/CSS/ValueTestUtils.hpp"
 #include "Krystal.Booey/CSS/Values/Primitives/Symbol.hpp"
 #include "Krystal.Booey/CSS/Values/SerialisationContext.hpp"
 #include "Krystal.Core/Strings/StringBuilder.hpp"
@@ -8,12 +9,6 @@ namespace krys::boo::css::tests
 {
   namespace
   {
-    template <typename T>
-    CSSOMString SerialiseForTest(const T &value)
-    {
-      return Serialise(DefaultSerialisationContext(), value);
-    }
-
     CustomIdentifier Ident(const char8 *name)
     {
       return CustomIdentifier {CSSOMStringAtom(name)};

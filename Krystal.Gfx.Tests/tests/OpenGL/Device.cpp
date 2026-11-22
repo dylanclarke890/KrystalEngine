@@ -1,10 +1,10 @@
 ﻿#include "Krystal.Gfx/Device.hpp"
 #include "catch2/catch_test_macros.hpp"
 #include "Krystal.Core/Concepts.hpp"
-#include "Krystal.Core/Types/Array.hpp"
-#include "Krystal.Core/Types/List.hpp"
+#include "Krystal.Core/Containers/Array.hpp"
+#include "Krystal.Core/Containers/List.hpp"
+#include "Krystal.Core/Move.hpp"
 #include "Krystal.Core/Utils/ByteUtils.hpp"
-#include "Krystal.Core/Utils/Move.hpp"
 #include "Krystal.Gfx.Tests/TestDevice.hpp"
 #include <cstring>
 
@@ -197,11 +197,12 @@ void main()
       KRYS_NODISCARD TextureHandle Target(uint32 width, uint32 height,
                                           TextureFormat format = TextureFormat::RGBA8Unorm)
       {
-        return Track(_device->CreateTexture({.Format = format,
-                                             .Width = width,
-                                             .Height = height,
-                                             .Usage = TextureUsage::RenderTarget | TextureUsage::Sampled,
-                                             .DebugName = u8"Target"}));
+        return Track(_device->CreateTexture(
+          {.Format = format,
+           .Width = width,
+           .Height = height,
+           .Usage = EnumSet<TextureUsage> {TextureUsage::RenderTarget, TextureUsage::Sampled},
+           .DebugName = u8"Target"}));
       }
 
       template <typename TFunc>

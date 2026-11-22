@@ -58,7 +58,7 @@ namespace krys::boo::style
       switch (item.ValueId())
       {
         case css::ValueId::FromFont:
-          if (result.Contains(TextUnderlinePositionValue::Under))
+          if (result.contains(TextUnderlinePositionValue::Under))
           {
             state.SetCurrentPropertyInvalidAtComputedValueTime();
             return css::keywords::Auto {};
@@ -66,7 +66,7 @@ namespace krys::boo::style
           result.Value.Add(TextUnderlinePositionValue::FromFont);
           break;
         case css::ValueId::Under:
-          if (result.Contains(TextUnderlinePositionValue::FromFont))
+          if (result.contains(TextUnderlinePositionValue::FromFont))
           {
             state.SetCurrentPropertyInvalidAtComputedValueTime();
             return css::keywords::Auto {};
@@ -74,7 +74,7 @@ namespace krys::boo::style
           result.Value.Add(TextUnderlinePositionValue::Under);
           break;
         case css::ValueId::Left:
-          if (result.Contains(TextUnderlinePositionValue::Right))
+          if (result.contains(TextUnderlinePositionValue::Right))
           {
             state.SetCurrentPropertyInvalidAtComputedValueTime();
             return css::keywords::Auto {};
@@ -82,7 +82,7 @@ namespace krys::boo::style
           result.Value.Add(TextUnderlinePositionValue::Left);
           break;
         case css::ValueId::Right:
-          if (result.Contains(TextUnderlinePositionValue::Left))
+          if (result.contains(TextUnderlinePositionValue::Left))
           {
             state.SetCurrentPropertyInvalidAtComputedValueTime();
             return css::keywords::Auto {};

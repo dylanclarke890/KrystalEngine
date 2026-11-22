@@ -79,7 +79,7 @@ namespace krys::boo::css::parse_property
     struct ColorParserState
     {
       css::PropertyParserState &PropertyParserState;
-      ColorType AllowedColorTypes;
+      EnumSet<ColorType> AllowedColorTypes;
       bool AcceptsQuirkyColor {false};
       uint32 NestingLevel {0};
 

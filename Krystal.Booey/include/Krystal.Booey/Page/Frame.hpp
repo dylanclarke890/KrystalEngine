@@ -60,18 +60,30 @@
 #include "Krystal.Booey/Page/FrameView.hpp"
 #include "Krystal.Booey/Page/RenderingUpdateStep.hpp"
 #include "Krystal.Core/Attributes.hpp"
-#include "Krystal.Core/CanMakeWeakPtr.hpp"
+#include "Krystal.Core/Containers/EnumSet.hpp"
 #include "Krystal.Core/Geometry/Size.hpp"
 #include "Krystal.Core/Macros.hpp"
-#include "Krystal.Core/RefCounted.hpp"
+#include "Krystal.Core/Memory/CanMakeWeakPtr.hpp"
+#include "Krystal.Core/Memory/RefCounted.hpp"
+#include "Krystal.Core/Memory/RefPtr.hpp"
+#include "Krystal.Core/Memory/UniquePtr.hpp"
 #include "Krystal.Core/Time/MonotonicTime.hpp"
-#include "Krystal.Core/Types/EnumSet.hpp"
 #include "Krystal.Core/Types/Func.hpp"
-#include "Krystal.Core/Types/RefPtr.hpp"
-#include "Krystal.Core/Types/UniquePtr.hpp"
 
 namespace krys::boo
 {
+  class Document;
+  class DragCaretController;
+  class DragController;
+  class GraphicsContext;
+  class PointerCaptureController;
+  class PointerLockController;
+  class PopupOpeningObserver;
+  class ScrollLatchingController;
+  class VisiblePosition;
+  class WheelEventDeltaFilter;
+  class Window;
+
   /// @brief How the frame is presented, as an application manifest's `display` member (`display-mode`).
   /// @see https://w3c.github.io/manifest/#display-modes
   enum class ApplicationDisplayMode : uint8
@@ -81,21 +93,6 @@ namespace krys::boo
     MinimalUI,
     Browser,
   };
-}
-
-namespace krys::boo
-{
-  class Document;
-  class DragCaretController;
-  class DragController;
-  class GraphicsContext;
-  class Window;
-  class PointerCaptureController;
-  class PointerLockController;
-  class PopupOpeningObserver;
-  class ScrollLatchingController;
-  class VisiblePosition;
-  class WheelEventDeltaFilter;
 
   /// @brief Shows a document in a view, and runs the rendering update that brings the document up to date
   /// before the host paints it (the specification's "update the rendering"). The host creates a frame, gives

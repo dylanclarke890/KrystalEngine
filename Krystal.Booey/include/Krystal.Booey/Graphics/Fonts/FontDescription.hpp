@@ -35,10 +35,10 @@
 #include "Krystal.Core/Attributes.hpp"
 #include "Krystal.Core/Enum.hpp"
 #include "Krystal.Core/Maths/Extras.hpp"
+#include "Krystal.Core/Move.hpp"
 #include "Krystal.Core/Numeric.hpp"
 #include "Krystal.Core/Strings/StringAtom.hpp"
 #include "Krystal.Core/Types/Maybe.hpp"
-#include "Krystal.Core/Utils/Move.hpp"
 #include "Krystal.Text/Script.hpp"
 
 namespace krys::boo
@@ -69,8 +69,8 @@ namespace krys::boo
     uint32 _nonCJKGlyphOrientation : 1 {ToUnderlying(boo::NonCJKGlyphOrientation::Mixed)};
     uint32 _widthVariant : 2 {ToUnderlying(FontWidthVariant::RegularWidth)};
     uint32 _textRendering : 2 {ToUnderlying(boo::TextRenderingMode::Auto)};
-    uint32 _script
-      : 7 {static_cast<uint32>(text::Script::Common)}; // Used to help choose an appropriate font for generic font families.
+    uint32 _script : 7 {static_cast<uint32>(
+      text::Script::Common)}; // Used to help choose an appropriate font for generic font families.
     uint32 _fontSynthesisWeight : 1 {ToUnderlying(FontSynthesisLonghandValue::Auto)};
     uint32 _fontSynthesisStyle : 1 {ToUnderlying(FontSynthesisLonghandValue::Auto)};
     uint32 _fontSynthesisCaps : 1 {ToUnderlying(FontSynthesisLonghandValue::Auto)};

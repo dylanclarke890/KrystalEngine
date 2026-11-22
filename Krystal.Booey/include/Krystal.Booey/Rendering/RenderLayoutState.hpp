@@ -30,10 +30,10 @@
 #include "Krystal.Booey/Graphics/Geometry/LayoutUnit.hpp"
 #include "Krystal.Booey/Page/FrameViewLayoutContext.hpp"
 #include "Krystal.Core/Attributes.hpp"
+#include "Krystal.Core/Containers/EnumSet.hpp"
 #include "Krystal.Core/Debug.hpp"
 #include "Krystal.Core/Enum.hpp"
 #include "Krystal.Core/Macros.hpp"
-#include "Krystal.Core/Types/EnumSet.hpp"
 #include "Krystal.Core/Types/Maybe.hpp"
 
 namespace krys::boo
@@ -269,6 +269,11 @@ namespace krys::boo
       RevealedWhenFound,
     };
 
+    friend consteval OverrideType MaxEnumValue(OverrideType) noexcept
+    {
+      return OverrideType::RevealedWhenFound;
+    }
+
   private:
     FrameViewLayoutContext &_layoutContext;
 
@@ -279,5 +284,3 @@ namespace krys::boo
     ~ContentVisibilityOverrideScope() noexcept;
   };
 }
-
-KRYS_DEFINE_CONTIGUOUS_ENUM_TRAITS(krys::boo::ContentVisibilityOverrideScope::OverrideType, 3uz);

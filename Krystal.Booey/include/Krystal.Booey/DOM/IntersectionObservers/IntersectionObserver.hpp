@@ -27,17 +27,18 @@
 
 #include "Krystal.Booey/DOM/IntersectionObservers/IntersectionObserverCallback.hpp"
 #include "Krystal.Booey/DOM/IntersectionObservers/IntersectionObserverMarginBox.hpp"
+#include "Krystal.Booey/DOM/Nodes/ContainerNode.hpp"
 #include "Krystal.Booey/DOM/Types/DOMString.hpp"
 #include "Krystal.Booey/DOM/Types/ExceptionOr.hpp"
-#include "Krystal.Core/CanMakeWeakPtr.hpp"
+#include "Krystal.Core/Containers/List.hpp"
 #include "Krystal.Core/Geometry/Rect.hpp"
 #include "Krystal.Core/Macros.hpp"
-#include "Krystal.Core/RefCounted.hpp"
-#include "Krystal.Core/Types/List.hpp"
+#include "Krystal.Core/Memory/CanMakeWeakPtr.hpp"
+#include "Krystal.Core/Memory/RefCounted.hpp"
+#include "Krystal.Core/Memory/RefPtr.hpp"
+#include "Krystal.Core/Memory/WeakPtr.hpp"
 #include "Krystal.Core/Types/Maybe.hpp"
-#include "Krystal.Core/Types/RefPtr.hpp"
 #include "Krystal.Core/Types/Variant.hpp"
-#include "Krystal.Core/Types/WeakPtr.hpp"
 
 namespace krys::boo
 {
@@ -74,7 +75,8 @@ namespace krys::boo
   /// @see https://w3c.github.io/IntersectionObserver/#dictdef-intersectionobserverinit
   struct IntersectionObserverInit
   {
-    Maybe<Variant<RefPtr<Element>, RefPtr<Document>>> Root;
+    /// @note Plain pointers: the observer takes its own reference.
+    Maybe<Variant<Element *, Document *>> Root;
     DOMString RootMargin {u8"0px"};
     DOMString ScrollMargin {u8"0px"};
     Variant<double, List<double>> Threshold {0.0};

@@ -360,12 +360,12 @@ namespace krys::boo
 
   bool RenderReplaced::ShouldPaint(PaintInfo &paintInfo, const LayoutPoint &paintOffset) noexcept
   {
-    if ((paintInfo.PaintBehavior.Contains(PaintBehavior::ExcludeSelection)) && IsSelected())
+    if ((paintInfo.PaintBehavior.contains(PaintBehavior::ExcludeSelection)) && IsSelected())
     {
       return false;
     }
 
-    if (paintInfo.PaintBehavior.Contains(PaintBehavior::ExcludeReplacedContentExceptForIFrames))
+    if (paintInfo.PaintBehavior.contains(PaintBehavior::ExcludeReplacedContentExceptForIFrames))
     {
       return false;
     }

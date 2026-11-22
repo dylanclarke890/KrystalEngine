@@ -29,18 +29,13 @@
 #pragma once
 
 #include "Krystal.Core/Attributes.hpp"
+#include "Krystal.Core/Containers/List.hpp"
+#include "Krystal.Core/Containers/Span.hpp"
 #include "Krystal.Core/Macros.hpp"
+#include "Krystal.Core/Memory/RefPtr.hpp"
+#include "Krystal.Core/Memory/WeakPtr.hpp"
 #include "Krystal.Core/Strings/String.hpp"
-#include "Krystal.Core/Types/List.hpp"
-#include "Krystal.Core/Types/RefPtr.hpp"
-#include "Krystal.Core/Types/Span.hpp"
-#include "Krystal.Core/Types/WeakPtr.hpp"
 #include "Krystal.Net/Url.hpp"
-
-namespace krys::boo
-{
-  class ImageDocument;
-}
 
 namespace krys::boo::html
 {
@@ -55,6 +50,7 @@ namespace krys::boo::xml
 namespace krys::boo
 {
   class Frame;
+  class ImageDocument;
 
   /// @brief Writes a loaded document into its frame: makes the document (and its window), gives it to the
   /// frame, and feeds its bytes to the parser.

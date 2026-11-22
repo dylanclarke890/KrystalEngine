@@ -27,13 +27,8 @@
 
 #include "Krystal.Booey/CSS/CSSOM/CSSRule.hpp"
 #include "Krystal.Core/Attributes.hpp"
+#include "Krystal.Core/Memory/RefPtr.hpp"
 #include "Krystal.Core/TypeCast.hpp"
-#include "Krystal.Core/Types/RefPtr.hpp"
-
-namespace krys::boo
-{
-  class CSSFunctionDescriptors;
-}
 
 namespace krys::boo::css
 {
@@ -42,6 +37,8 @@ namespace krys::boo::css
 
 namespace krys::boo
 {
+  class CSSFunctionDescriptors;
+
   /// @brief The declarations of an `@function` rule, exposed to scripts.
   /// @see https://drafts.csswg.org/css-mixins/#cssfunctiondeclarations
   class CSSFunctionDeclarations final : public CSSRule

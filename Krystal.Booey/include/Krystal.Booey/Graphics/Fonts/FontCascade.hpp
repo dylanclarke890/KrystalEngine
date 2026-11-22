@@ -32,12 +32,12 @@
 #include "Krystal.Booey/Graphics/Geometry/LayoutRect.hpp"
 #include "Krystal.Booey/Graphics/TextRuns/TextRun.hpp"
 #include "Krystal.Core/Attributes.hpp"
+#include "Krystal.Core/Containers/HashSet.hpp"
+#include "Krystal.Core/Containers/List.hpp"
 #include "Krystal.Core/Geometry/Point.hpp"
 #include "Krystal.Core/Geometry/Segment.hpp"
 #include "Krystal.Core/Numeric.hpp"
 #include "Krystal.Core/Strings/Unicode.hpp"
-#include "Krystal.Core/Types/HashSet.hpp"
-#include "Krystal.Core/Types/List.hpp"
 #include "Krystal.Text/CharacterProperties.hpp"
 #include <bitset>
 #include <cmath>

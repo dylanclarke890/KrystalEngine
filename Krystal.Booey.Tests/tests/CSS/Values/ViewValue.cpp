@@ -5,19 +5,6 @@
 
 namespace krys::boo::css::tests
 {
-  namespace
-  {
-    RefPtr<Value> Keyword(ValueId id)
-    {
-      return PrimitiveValue::Create(id);
-    }
-
-    RefPtr<Value> Px(double value)
-    {
-      return PrimitiveValue::Create(value, UnitType::px);
-    }
-  }
-
   TEST_CASE_METHOD(ValueFixture, "ViewValue::Create", "[CSS][Values][ViewValue]")
   {
     SECTION("Empty")
@@ -31,7 +18,7 @@ namespace krys::boo::css::tests
 
     SECTION("With an axis and insets")
     {
-      auto value = ViewValue::Create(Keyword(ValueId::X), Px(1.0), Px(2.0));
+      auto value = ViewValue::Create(IdentValue(ValueId::X), Px(1.0), Px(2.0));
       REQUIRE(value->Axis());
       REQUIRE(value->StartInset());
       REQUIRE(value->EndInset());
@@ -44,19 +31,20 @@ namespace krys::boo::css::tests
   TEST_CASE_METHOD(ValueFixture, "ViewValue serialisation", "[CSS][Values][ViewValue]")
   {
     CHECK(CssText(*ViewValue::Create()) == "view()");
-    CHECK(CssText(*ViewValue::Create(Keyword(ValueId::Inline), nullptr, nullptr)) == "view(inline)");
-    CHECK(CssText(*ViewValue::Create(Keyword(ValueId::X), Px(1.0), Px(2.0))) == "view(x 1px 2px)");
+    CHECK(CssText(*ViewValue::Create(IdentValue(ValueId::Inline), nullptr, nullptr)) == "view(inline)");
+    CHECK(CssText(*ViewValue::Create(IdentValue(ValueId::X), Px(1.0), Px(2.0))) == "view(x 1px 2px)");
     CHECK(CssText(*ViewValue::Create(nullptr, Px(1.0), nullptr)) == "view(1px)");
     CHECK(CssText(*ViewValue::Create(nullptr, Px(1.0), Px(2.0))) == "view(1px 2px)");
 
     // `block` is the default axis, so it's omitted.
-    CHECK(CssText(*ViewValue::Create(Keyword(ValueId::Block), nullptr, nullptr)) == "view()");
-    CHECK(CssText(*ViewValue::Create(Keyword(ValueId::Block), Px(1.0), nullptr)) == "view(1px)");
+    CHECK(CssText(*ViewValue::Create(IdentValue(ValueId::Block), nullptr, nullptr)) == "view()");
+    CHECK(CssText(*ViewValue::Create(IdentValue(ValueId::Block), Px(1.0), nullptr)) == "view(1px)");
 
     // A lone `auto` start inset is omitted, but kept when an end inset follows it.
-    CHECK(CssText(*ViewValue::Create(nullptr, Keyword(ValueId::Auto), nullptr)) == "view()");
-    CHECK(CssText(*ViewValue::Create(Keyword(ValueId::Y), Keyword(ValueId::Auto), nullptr)) == "view(y)");
-    CHECK(CssText(*ViewValue::Create(nullptr, Keyword(ValueId::Auto), Px(2.0))) == "view(auto 2px)");
+    CHECK(CssText(*ViewValue::Create(nullptr, IdentValue(ValueId::Auto), nullptr)) == "view()");
+    CHECK(CssText(*ViewValue::Create(IdentValue(ValueId::Y), IdentValue(ValueId::Auto), nullptr))
+          == "view(y)");
+    CHECK(CssText(*ViewValue::Create(nullptr, IdentValue(ValueId::Auto), Px(2.0))) == "view(auto 2px)");
 
     // An end inset that's the same value object as the start inset is omitted.
     RefPtr<Value> inset = Px(3.0);
@@ -65,15 +53,15 @@ namespace krys::boo::css::tests
 
   TEST_CASE_METHOD(ValueFixture, "ViewValue equality and hashing", "[CSS][Values][ViewValue]")
   {
-    auto a = ViewValue::Create(Keyword(ValueId::X), Px(1.0), Px(2.0));
-    auto b = ViewValue::Create(Keyword(ValueId::X), Px(1.0), Px(2.0));
+    auto a = ViewValue::Create(IdentValue(ValueId::X), Px(1.0), Px(2.0));
+    auto b = ViewValue::Create(IdentValue(ValueId::X), Px(1.0), Px(2.0));
 
     CHECK(*a == *b);
     CHECK(*ViewValue::Create() == *ViewValue::Create());
-    CHECK_FALSE(*a == *ViewValue::Create(Keyword(ValueId::Y), Px(1.0), Px(2.0)));
-    CHECK_FALSE(*a == *ViewValue::Create(Keyword(ValueId::X), Px(5.0), Px(2.0)));
-    CHECK_FALSE(*a == *ViewValue::Create(Keyword(ValueId::X), Px(1.0), Px(5.0)));
-    CHECK_FALSE(*a == *ViewValue::Create(Keyword(ValueId::X), Px(1.0), nullptr));
+    CHECK_FALSE(*a == *ViewValue::Create(IdentValue(ValueId::Y), Px(1.0), Px(2.0)));
+    CHECK_FALSE(*a == *ViewValue::Create(IdentValue(ValueId::X), Px(5.0), Px(2.0)));
+    CHECK_FALSE(*a == *ViewValue::Create(IdentValue(ValueId::X), Px(1.0), Px(5.0)));
+    CHECK_FALSE(*a == *ViewValue::Create(IdentValue(ValueId::X), Px(1.0), nullptr));
 
     // `ViewValue` has no hash of its own.
     size_t seed = 0uz;
@@ -84,7 +72,7 @@ namespace krys::boo::css::tests
   {
     CHECK(Children(*ViewValue::Create()).empty());
 
-    auto value = ViewValue::Create(Keyword(ValueId::X), Px(1.0), Px(2.0));
+    auto value = ViewValue::Create(IdentValue(ValueId::X), Px(1.0), Px(2.0));
     auto children = Children(*value);
     REQUIRE(children.size() == 3uz);
     CHECK(children[0uz] == value->Axis().get());

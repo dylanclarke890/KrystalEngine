@@ -325,7 +325,7 @@ namespace krys::boo
       const auto &zoomFactor = style.UsedZoomForLength();
       for (const auto &shadow : _shadow)
       {
-        if (&shadow == &_shadow.last())
+        if (&shadow == &_shadow.back())
         {
           // The last set of lines paints normally inside the clip.
           boxOrigin.Move(0, -extraOffset);
@@ -461,12 +461,12 @@ namespace krys::boo
   Color TextDecorationPainter::DecorationColor(const RenderStyle &style,
                                                EnumSet<PaintBehavior> paintBehavior) noexcept
   {
-    if (paintBehavior.Contains(PaintBehavior::ForceBlackText))
+    if (paintBehavior.contains(PaintBehavior::ForceBlackText))
     {
       return Color::black;
     }
 
-    if (paintBehavior.Contains(PaintBehavior::ForceWhiteText))
+    if (paintBehavior.contains(PaintBehavior::ForceWhiteText))
     {
       return Color::white;
     }

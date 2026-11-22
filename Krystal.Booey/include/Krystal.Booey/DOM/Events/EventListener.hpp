@@ -1,13 +1,14 @@
 ﻿#pragma once
 
+#include "Krystal.Booey/DOM/Abort/AbortAlgorithmHandle.hpp"
 #include "Krystal.Booey/DOM/Types/DOMString.hpp"
 #include "Krystal.Core/Attributes.hpp"
-#include "Krystal.Core/CanMakeWeakPtr.hpp"
-#include "Krystal.Core/RefCounted.hpp"
+#include "Krystal.Core/Memory/CanMakeWeakPtr.hpp"
+#include "Krystal.Core/Memory/RefCounted.hpp"
+#include "Krystal.Core/Memory/RefPtr.hpp"
+#include "Krystal.Core/Move.hpp"
 #include "Krystal.Core/Types/BoolOr.hpp"
 #include "Krystal.Core/Types/Maybe.hpp"
-#include "Krystal.Core/Types/RefPtr.hpp"
-#include "Krystal.Core/Utils/Move.hpp"
 
 namespace krys::boo::dom
 {
@@ -32,7 +33,9 @@ namespace krys::boo
   {
     bool Once = false;
     Maybe<bool> Passive;
-    RefPtr<AbortSignal> Signal;
+    /// @note A plain pointer: the options are only read while the listener is added, which takes its own
+    /// reference, so code that passes them around doesn't need the signal's definition.
+    AbortSignal *Signal {nullptr};
   };
 
   using AddEventListenerOptionsOrBool = BoolOr<AddEventListenerOptions>;
@@ -66,6 +69,8 @@ namespace krys::boo
     const DOMStringAtom _type;
     const RefPtr<EventListenerCallback> _callback;
     RefPtr<AbortSignal> _signal {nullptr};
+    /// @brief The abort steps the listener added to its signal, which go with it.
+    AbortAlgorithmHandle _signalAlgorithm;
     bool _removed {false};
     bool _capture {false};
     Maybe<bool> _passive;
@@ -73,11 +78,9 @@ namespace krys::boo
 
   public:
     EventListener(DOMStringAtom type, RefPtr<EventListenerCallback> &&callback,
-                  AddEventListenerOptions &&options) noexcept
-        : _type(krys::move(type)), _callback(krys::move(callback)), _signal(krys::move(options.Signal)),
-          _capture(options.Capture), _passive(options.Passive), _once(options.Once)
-    {
-    }
+                  AddEventListenerOptions &&options) noexcept;
+
+    ~EventListener() noexcept;
 
     /// @see https://dom.spec.whatwg.org/#event-listener-type
     KRYS_NODISCARD const DOMStringAtom &Type() const noexcept KRYS_LIFETIME_BOUND

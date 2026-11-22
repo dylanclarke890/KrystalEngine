@@ -6,14 +6,12 @@
 namespace krys::boo
 {
   HTMLDivElement::HTMLDivElement(Document &document) noexcept
-      : HTMLElement(document, html::HTMLElementInterface::Div, u8"div", html::HTMLElementFlags::None,
-                    dom::NodeFlags::None)
+      : HTMLElement(document, html::HTMLElementInterface::Div, u8"div", {}, dom::NodeFlags {})
   {
   }
 
   HTMLDivElement::HTMLDivElement(Document &document, dom::NodeFlags nodeFlags) noexcept
-      : HTMLElement(document, html::HTMLElementInterface::Div, u8"div", html::HTMLElementFlags::None,
-                    nodeFlags)
+      : HTMLElement(document, html::HTMLElementInterface::Div, u8"div", {}, nodeFlags)
   {
   }
 

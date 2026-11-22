@@ -30,7 +30,7 @@ namespace krys::boo::style
   // https://www.w3.org/TR/css-content-3/#propdef-quotes
   struct Quotes
   {
-    using Data = css::SpaceSeparatedRefCountedFixedVector<CSSOMString>;
+    using Data = css::SpaceSeparatedRefCountedFixedList<CSSOMString>;
 
     Quotes(css::keywords::Auto keyword) noexcept : _value {keyword}
     {

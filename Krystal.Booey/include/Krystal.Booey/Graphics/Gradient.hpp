@@ -31,8 +31,8 @@
 #include "Krystal.Booey/Graphics/GradientColorStops.hpp"
 #include "Krystal.Booey/Graphics/GraphicsTypes.hpp"
 #include "Krystal.Core/Geometry/Point.hpp"
-#include "Krystal.Core/RefCounted.hpp"
-#include "Krystal.Core/Types/RefPtr.hpp"
+#include "Krystal.Core/Memory/RefCounted.hpp"
+#include "Krystal.Core/Memory/RefPtr.hpp"
 #include "Krystal.Core/Types/Variant.hpp"
 
 namespace krys
@@ -125,9 +125,6 @@ namespace krys::boo
     Gradient(Data &&, ColourInterpolationMethod, GradientSpreadMethod, GradientColorStops &&,
              bool isTransient) noexcept;
   };
-}
 
-namespace krys::boo
-{
   TextStream &operator<<(TextStream &ts, const Gradient &gradient) noexcept;
 }

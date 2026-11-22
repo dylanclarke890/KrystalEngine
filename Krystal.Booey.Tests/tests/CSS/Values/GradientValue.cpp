@@ -1,5 +1,6 @@
 ﻿#include "Krystal.Booey/CSS/Values/GradientValue.hpp"
 #include "catch2/catch_test_macros.hpp"
+#include "Krystal.Booey.Tests/CSS/ColorTestUtils.hpp"
 #include "Krystal.Booey.Tests/CSS/ValueTestUtils.hpp"
 #include "Krystal.Booey/CSS/Values/Images/Gradient.hpp"
 
@@ -8,11 +9,6 @@ namespace krys::boo::css::tests
   namespace
   {
     using Method = GradientColorInterpolationMethod;
-
-    Color Keyword(ValueId id)
-    {
-      return Color {KeywordColor {id}};
-    }
 
     Method Standard()
     {
@@ -26,8 +22,8 @@ namespace krys::boo::css::tests
       return FunctionNotation<ValueId::LinearGradient, LinearGradient> {
         LinearGradient {.ColourInterpolationMethod = Standard(),
                         .GradientLine = krys::move(line),
-                        .Stops = {GradientLinearColorStop {.Color = Keyword(from), .Position = {}},
-                                  GradientLinearColorStop {.Color = Keyword(to), .Position = {}}}}};
+                        .Stops = {GradientLinearColorStop {.Color = ColorKeyword(from), .Position = {}},
+                                  GradientLinearColorStop {.Color = ColorKeyword(to), .Position = {}}}}};
     }
 
     Gradient RepeatingLinear(LinearGradient::GradientLineType line)
@@ -35,8 +31,8 @@ namespace krys::boo::css::tests
       return FunctionNotation<ValueId::RepeatingLinearGradient, LinearGradient> {LinearGradient {
         .ColourInterpolationMethod = Standard(),
         .GradientLine = krys::move(line),
-        .Stops = {GradientLinearColorStop {.Color = Keyword(ValueId::Red), .Position = {}},
-                  GradientLinearColorStop {.Color = Keyword(ValueId::Blue), .Position = {}}}}};
+        .Stops = {GradientLinearColorStop {.Color = ColorKeyword(ValueId::Red), .Position = {}},
+                  GradientLinearColorStop {.Color = ColorKeyword(ValueId::Blue), .Position = {}}}}};
     }
   }
 

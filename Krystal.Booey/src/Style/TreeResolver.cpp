@@ -319,7 +319,7 @@ namespace krys::boo::style
       return DescendantsToResolve::All;
     }
 
-    if (!update.Changes.IsEmpty() && existingStyle)
+    if (!update.Changes.empty() && existingStyle)
     {
       auto customPropertyInStyleContainerQueryChanged = [&]
       {
@@ -350,12 +350,12 @@ namespace krys::boo::style
       return DescendantsToResolve::Children;
     }
 
-    if (update.Changes.Contains(Change::NonInherited))
+    if (update.Changes.contains(Change::NonInherited))
     {
       return DescendantsToResolve::ChildrenWithExplicitInherit;
     }
 
-    krys_debug_assert(update.Changes.IsEmpty());
+    krys_debug_assert(update.Changes.empty());
     return DescendantsToResolve::None;
   }
 
@@ -460,7 +460,7 @@ namespace krys::boo::style
       {
         if (pseudoElementUpdate)
         {
-          if (pseudoElementUpdate->Changes.IsEmpty())
+          if (pseudoElementUpdate->Changes.empty())
           {
             return {};
           }
@@ -490,11 +490,11 @@ namespace krys::boo::style
       return pseudoElementUpdate->Changes;
     };
 
-    if (!resolveAndAddPseudoElementStyle({PseudoElementType::FirstLine}).IsEmpty())
+    if (!resolveAndAddPseudoElementStyle({PseudoElementType::FirstLine}).empty())
     {
       descendantsToResolve = DescendantsToResolve::All;
     }
-    if (!resolveAndAddPseudoElementStyle({PseudoElementType::FirstLetter}).IsEmpty())
+    if (!resolveAndAddPseudoElementStyle({PseudoElementType::FirstLetter}).empty())
     {
       descendantsToResolve = DescendantsToResolve::All;
     }
@@ -1055,7 +1055,7 @@ namespace krys::boo::style
       auto animationImpact = styleable.ApplyKeyframeEffects(
         *animatedStyle, animatedProperties, previousLastStyleChangeEventStyle.get(), resolutionContext);
 
-      if (*resolvedStyle.Style == *animatedStyle && animationImpact.IsEmpty()
+      if (*resolvedStyle.Style == *animatedStyle && animationImpact.empty()
           && previousLastStyleChangeEventStyle)
       {
         return {krys::move(resolvedStyle.Style), animationImpact};
@@ -1106,7 +1106,7 @@ namespace krys::boo::style
     auto changes =
       currentStyle ? DetermineChanges(*currentStyle, *newStyle) : EnumSet<Change> {Change::Renderer};
 
-    if (element.HasInvalidRenderer() || parentChanges.Contains(Change::Renderer))
+    if (element.HasInvalidRenderer() || parentChanges.contains(Change::Renderer))
     {
       changes.Add(Change::Renderer);
     }
@@ -1150,12 +1150,12 @@ namespace krys::boo::style
       newStyle->SetHasDisplayAffectedByAnimations();
     }
 
-    bool shouldRecompositeLayer = animationImpact.Contains(AnimationImpact::RequiresRecomposite)
+    bool shouldRecompositeLayer = animationImpact.contains(AnimationImpact::RequiresRecomposite)
                                   || element.StyleResolutionShouldRecompositeLayer();
 
     auto mayNeedRebuildRoot = [&, newStyle = newStyle.get()]
     {
-      if (changes.Contains(Change::Renderer))
+      if (changes.contains(Change::Renderer))
       {
         return true;
       }
@@ -1176,7 +1176,7 @@ namespace krys::boo::style
                                        const ResolutionContext &resolutionContext) noexcept
   {
     if (!resolvedStyle.MatchResult
-        || !resolvedStyle.MatchResult->UsedRuleTypes.Contains(UsedRuleType::StartingStyle))
+        || !resolvedStyle.MatchResult->UsedRuleTypes.contains(UsedRuleType::StartingStyle))
     {
       return nullptr;
     }
@@ -1429,11 +1429,11 @@ namespace krys::boo::style
       {
         auto canFastPathInherit = [&]
         {
-          if (parentChanges.Contains(Change::Inherited))
+          if (parentChanges.contains(Change::Inherited))
           {
             return false;
           }
-          if (!parentChanges.Contains(Change::FastPathInherited))
+          if (!parentChanges.contains(Change::FastPathInherited))
           {
             return false;
           }
@@ -1443,7 +1443,7 @@ namespace krys::boo::style
           }
           // Some non-inherited property changed along with a fast-path property and we may need to inherit it
           // too.
-          if (parentChanges.Contains(Change::NonInherited)
+          if (parentChanges.contains(Change::NonInherited)
               && existingStyle->HasExplicitlyInheritedProperties())
           {
             return false;
@@ -1626,7 +1626,7 @@ namespace krys::boo::style
           element.DidRecalcStyle(elementUpdate.Changes);
         }
         if (auto *cache = element.NodeDocument().ExistingAXObjectCache();
-            cache && !elementUpdate.Changes.IsEmpty())
+            cache && !elementUpdate.Changes.empty())
         {
           cache->OnStyleChange(element, style, elementUpdate.Style.get());
         }
@@ -2355,7 +2355,7 @@ namespace krys::boo::style
         return false;
       }
 
-      if (style.PositionVisibility().Contains(PositionVisibilityValue::AnchorsVisible))
+      if (style.PositionVisibility().contains(PositionVisibilityValue::AnchorsVisible))
       {
         // "If the box has a default anchor box but that anchor box is invisible or clipped by intervening
         // boxes, the box’s visibility property computes to force-hidden."
@@ -2364,14 +2364,14 @@ namespace krys::boo::style
           return true;
         }
       }
-      if (style.PositionVisibility().Contains(PositionVisibilityValue::NoOverflow))
+      if (style.PositionVisibility().contains(PositionVisibilityValue::NoOverflow))
       {
         if (AnchorPositionEvaluator::OverflowsInsetModifiedContainingBlock(*anchored))
         {
           return true;
         }
       }
-      if (style.PositionVisibility().Contains(PositionVisibilityValue::AnchorsValid))
+      if (style.PositionVisibility().contains(PositionVisibilityValue::AnchorsValid))
       {
         auto stateIt = _treeResolutionState.AnchorPositionedStates.find(
           {ShareRefPtr<const boo::Element>(&styleable.Element), styleable.PseudoElementIdentifier});

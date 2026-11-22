@@ -31,7 +31,7 @@
 #include "Krystal.Booey/Rendering/Style/StyleBorderImageData.hpp"
 #include "Krystal.Booey/Style/Values/Borders/BorderRadius.hpp"
 #include "Krystal.Booey/Style/Values/Borders/CornerShapeValue.hpp"
-#include "Krystal.Core/Types/DataRef.hpp"
+#include "Krystal.Core/Memory/DataRef.hpp"
 
 namespace krys::boo
 {

@@ -3,19 +3,11 @@
 #include "Krystal.Booey/DOM/Events/EventTarget.hpp"
 #include "Krystal.Booey/HTML/Attributes/EventHandlerAttributes.hpp"
 #include "Krystal.Core/Attributes.hpp"
-#include "Krystal.Core/Concepts.hpp"
+#include "Krystal.Core/Containers/List.hpp"
+#include "Krystal.Core/Memory/WeakPtr.hpp"
 #include "Krystal.Core/Numeric.hpp"
 #include "Krystal.Core/Types/Any.hpp"
 #include "Krystal.Core/Types/Func.hpp"
-#include "Krystal.Core/Types/List.hpp"
-#include "Krystal.Core/Types/WeakPtr.hpp"
-#include "Krystal.Core/TypeTraits.hpp"
-#include "Krystal.Core/Utils/Move.hpp"
-
-namespace krys::boo
-{
-  class Document;
-}
 
 namespace krys::boo::dom
 {
@@ -24,59 +16,23 @@ namespace krys::boo::dom
 
 namespace krys::boo
 {
-  /// @see https://dom.spec.whatwg.org/#abortsignal-abort-algorithms
-  class AbortAlgorithmCallback
-  {
-    using AnyCallback = Func<void(const Any &reason)>;
-
-  private:
-    uint64 _id;
-    AnyCallback _callback;
-
-    /// @brief A distinct identity for each algorithm, which copies share.
-    KRYS_NODISCARD static uint64 NextId() noexcept
-    {
-      static uint64 nextId = 0;
-      return ++nextId;
-    }
-
-  public:
-    AbortAlgorithmCallback(AnyCallback &&callback) noexcept : _id(NextId()), _callback(krys::move(callback))
-    {
-    }
-
-    template <typename Callable>
-    requires(!SameType<remove_cvref_t<Callable>, AbortAlgorithmCallback>)
-    AbortAlgorithmCallback(Callable &&callback) noexcept
-        : _id(NextId()), _callback(AnyCallback(std::forward<Callable>(callback)))
-    {
-    }
-
-    AbortAlgorithmCallback(const AbortAlgorithmCallback &other) noexcept = default;
-
-    AbortAlgorithmCallback(AbortAlgorithmCallback &&other) noexcept = default;
-
-    AbortAlgorithmCallback &operator=(const AbortAlgorithmCallback &other) noexcept = default;
-
-    AbortAlgorithmCallback &operator=(AbortAlgorithmCallback &&other) noexcept = default;
-
-    void operator()(const Any &reason) const noexcept
-    {
-      _callback(reason);
-    }
-
-    KRYS_NODISCARD bool operator==(const AbortAlgorithmCallback &other) const noexcept
-    {
-      return _id == other._id;
-    }
-  };
+  class AbortAlgorithmHandle;
+  class Document;
 
   /// @see https://dom.spec.whatwg.org/#abortsignal
   class AbortSignal : public EventTarget
   {
+    friend class AbortAlgorithmHandle;
     friend class dom::AbortAlgorithms;
 
   private:
+    /// @brief An abort algorithm, with the identity its handle removes it by.
+    struct AbortAlgorithm
+    {
+      uint64 Id;
+      Func<void(const krys::Any &reason)> Run;
+    };
+
     /// @brief A signal that depends on this one: held strongly while it has to stay alive for this signal to
     /// abort it (while it has abort event listeners or abort algorithms).
     /// @see https://dom.spec.whatwg.org/#abort-signal-garbage-collection
@@ -89,11 +45,12 @@ namespace krys::boo
     /// @see https://dom.spec.whatwg.org/#abortsignal-abort-reason
     krys::Any _reason;
     /// @see https://dom.spec.whatwg.org/#abortsignal-abort-algorithms
-    List<AbortAlgorithmCallback> _abortAlgorithms;
+    List<AbortAlgorithm> _abortAlgorithms;
     /// @see https://dom.spec.whatwg.org/#abortsignal-source-signals
     List<WeakPtr<AbortSignal>> _sourceSignals;
     /// @see https://dom.spec.whatwg.org/#abortsignal-dependent-signals
     List<DependentSignal> _dependentSignals;
+    uint64 _lastAbortAlgorithmId {0};
     uint32 _abortEventListenerCount {0};
     /// @see https://dom.spec.whatwg.org/#abortsignal-dependent
     bool _dependent {false};
@@ -147,6 +104,9 @@ namespace krys::boo
     /// @brief @p reason if it is given, otherwise a new "AbortError" `DOMException`. An empty reason
     /// (undefined) counts as not given.
     KRYS_NODISCARD static krys::Any ReasonOrAbortError(Maybe<krys::Any> reason) noexcept;
+
+    /// @brief Whether the signal still has the abort algorithm with @p id.
+    KRYS_NODISCARD bool HasAbortAlgorithm(uint64 id) const noexcept;
 
     void DidAddEventListener(const EventListener &listener) noexcept final;
 

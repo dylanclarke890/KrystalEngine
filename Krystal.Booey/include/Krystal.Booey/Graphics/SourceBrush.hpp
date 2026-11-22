@@ -29,7 +29,7 @@
 #include "Krystal.Booey/Graphics/Gradient.hpp"
 #include "Krystal.Booey/Graphics/Pattern.hpp"
 #include "Krystal.Booey/Graphics/SourceBrushLogicalGradient.hpp"
-#include "Krystal.Core/Utils/Move.hpp"
+#include "Krystal.Core/Move.hpp"
 
 namespace krys
 {

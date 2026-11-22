@@ -26,7 +26,7 @@
 #include "Krystal.Booey/Rendering/Line/RenderTextLineBoxes.hpp"
 #include "Krystal.Booey/Rendering/RenderText.hpp"
 #include "Krystal.Booey/Rendering/SVG/SVGTextLayoutAttributes.hpp"
-#include "Krystal.Core/Types/UniquePtr.hpp"
+#include "Krystal.Core/Memory/UniquePtr.hpp"
 
 namespace krys::boo
 {

@@ -26,7 +26,6 @@
 
 #pragma once
 
-#include "Krystal.Booey/DOM/Nodes/DocumentFragment.hpp"
 #include "Krystal.Booey/DOM/Nodes/Element.hpp"
 #include "Krystal.Booey/HTML/Parser/TokenAtom.hpp"
 #include "Krystal.Booey/HTML/Types/Namespace.hpp"

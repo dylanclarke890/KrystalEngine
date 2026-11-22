@@ -40,8 +40,8 @@
 #include "Krystal.Booey/SVG/Internals/SVGParserUtilities.hpp"
 #include "Krystal.Booey/SVG/SVGNames.hpp"
 #include "Krystal.Booey/SVG/SVGURIReference.hpp"
+#include "Krystal.Core/Memory/NeverDestroyed.hpp"
 #include "Krystal.Core/Strings/StringToIntegerConversion.hpp"
-#include "Krystal.Core/Threading/NeverDestroyed.hpp"
 #include <algorithm>
 #include <cmath>
 #include <limits>

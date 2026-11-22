@@ -2,9 +2,13 @@
 
 #include "Krystal.Booey/DOM/Types/DOMString.hpp"
 #include "Krystal.Booey/DOM/Types/ExceptionOr.hpp"
-#include "Krystal.Booey/DOM/Types/QualifiedName.hpp"
 #include "Krystal.Core/Attributes.hpp"
 #include "Krystal.Core/Types/Maybe.hpp"
+
+namespace krys::boo
+{
+  class QualifiedName;
+}
 
 namespace krys::boo::dom
 {

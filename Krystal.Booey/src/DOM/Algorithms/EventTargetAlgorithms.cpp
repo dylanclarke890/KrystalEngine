@@ -10,10 +10,9 @@
 #include "Krystal.Booey/DOM/Nodes/Element.hpp"
 #include "Krystal.Booey/DOM/Nodes/Node.hpp"
 #include "Krystal.Booey/DOM/Nodes/ShadowRoot.hpp"
-#include "Krystal.Booey/HTML/CustomElement/CustomElementRegistry.hpp"
 #include "Krystal.Booey/HTML/Elements/HTMLBodyElement.hpp"
 #include "Krystal.Booey/HTML/Elements/HTMLSlotElement.hpp"
-#include "Krystal.Core/Utils/Move.hpp"
+#include "Krystal.Core/Move.hpp"
 #include <ranges>
 
 namespace krys::boo::dom
@@ -152,7 +151,7 @@ namespace krys::boo::dom
     // 6. If listener's signal is non-null, then add the following abort steps to it:
     if (listener.Signal() != nullptr)
     {
-      AbortAlgorithms::Add(
+      listener._signalAlgorithm = AbortAlgorithms::Add(
         [weakListener = CreateWeakPtr(&listener), weakTarget = CreateWeakPtr(&eventTarget)](const Any &)
         {
           auto strongListener = weakListener.lock();
@@ -178,6 +177,7 @@ namespace krys::boo::dom
 
     // 2. Set listener's removed to true and remove listener from eventTarget's event listener list.
     listener._removed = true;
+    listener._signalAlgorithm.Remove(); // Its abort steps would only remove it again.
     const auto &existing = std::ranges::find_if(
       eventTarget._eventListenerList, [&](const Ref<EventListener> &l) { return l.get() == &listener; });
 

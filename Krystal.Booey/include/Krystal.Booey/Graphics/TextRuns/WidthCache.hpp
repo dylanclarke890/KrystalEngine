@@ -28,10 +28,11 @@
 #include "Krystal.Booey/Graphics/TextRuns/TextRun.hpp"
 #include "Krystal.Booey/Text/TextSpacing.hpp"
 #include "Krystal.Core/Attributes.hpp"
+#include "Krystal.Core/Containers/Array.hpp"
+#include "Krystal.Core/Containers/HashMap.hpp"
+#include "Krystal.Core/Hashing/FastHash.hpp"
 #include "Krystal.Core/Strings/CodePointIterator.hpp"
 #include "Krystal.Core/Strings/String.hpp"
-#include "Krystal.Core/Types/Array.hpp"
-#include "Krystal.Core/Types/HashMap.hpp"
 #include <algorithm>
 #include <functional>
 
@@ -79,7 +80,7 @@ namespace krys::boo
     {
       KRYS_NODISCARD size_t operator()(const SmallStringKey &key) const noexcept
       {
-        return std::hash<utf8_stringview> {}(key.Characters());
+        return FastHash<utf8_stringview> {}(key.Characters());
       }
     };
 

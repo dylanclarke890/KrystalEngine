@@ -13,11 +13,11 @@ namespace krys::boo::tests
     using Strings = List<std::string>;
     using Modifier = PlatformEvent::Modifier;
 
-    struct Recorder : EventListenerCallback
+    struct AccessKeyRecorder : EventListenerCallback
     {
       Strings &Records;
 
-      explicit Recorder(Strings &records) noexcept : Records(records)
+      explicit AccessKeyRecorder(Strings &records) noexcept : Records(records)
       {
       }
 
@@ -33,7 +33,7 @@ namespace krys::boo::tests
     struct AccessKeyFixture : EditorFixture
     {
       Strings Records;
-      Ref<EventListenerCallback> Listener {CreateRef<Recorder>(Records)};
+      Ref<EventListenerCallback> Listener {CreateRef<AccessKeyRecorder>(Records)};
 
       explicit AccessKeyFixture(utf8_stringview markup) noexcept : EditorFixture(markup)
       {
@@ -54,7 +54,7 @@ namespace krys::boo::tests
         Records.clear();
         (void)Frame->GetEventHandler().KeyEvent(PlatformKeyboardEvent(
           PlatformEvent::Type::KeyDown, utf8_string(key), utf8_string(key), utf8_string(key), u8"", u8"", 0,
-          false, false, modifiers.Contains(Modifier::AltKey), modifiers, MonotonicTime::Now()));
+          false, false, modifiers.contains(Modifier::AltKey), modifiers, MonotonicTime::Now()));
         Strings records;
         for (auto &record : Records)
         {

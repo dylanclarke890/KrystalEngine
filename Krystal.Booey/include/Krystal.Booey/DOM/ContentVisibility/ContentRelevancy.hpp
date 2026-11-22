@@ -37,6 +37,9 @@ namespace krys::boo::dom
     IsInTopLayer,
     Selected,
   };
-}
 
-KRYS_DEFINE_CONTIGUOUS_ENUM_TRAITS(krys::boo::dom::ContentRelevancy, 4uz);
+  consteval ContentRelevancy MaxEnumValue(ContentRelevancy) noexcept
+  {
+    return ContentRelevancy::Selected;
+  }
+}

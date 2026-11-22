@@ -31,7 +31,7 @@ namespace krys::boo
   }
 
   DocumentFragment::DocumentFragment(Document &document) noexcept
-      : ContainerNode(document, dom::NodeType::DOCUMENT_FRAGMENT_NODE, dom::NodeFlags::None)
+      : ContainerNode(document, dom::NodeType::DOCUMENT_FRAGMENT_NODE, {})
   {
   }
 

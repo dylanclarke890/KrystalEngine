@@ -27,9 +27,9 @@
 #pragma once
 
 #include "Krystal.Booey/Graphics/Color/Color.hpp"
+#include "Krystal.Core/Containers/Span.hpp"
 #include "Krystal.Core/Geometry/GeometryForward.hpp"
 #include "Krystal.Core/Time/MonotonicTime.hpp"
-#include "Krystal.Core/Types/Span.hpp"
 #include <chrono>
 
 namespace krys::boo

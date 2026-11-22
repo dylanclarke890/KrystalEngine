@@ -45,7 +45,7 @@
 #include "Krystal.Booey/Style/Scope/Scope.hpp"
 #include "Krystal.Booey/Style/Styleable.hpp"
 #include "Krystal.Core/Assert.hpp"
-#include "Krystal.Core/Threading/NeverDestroyed.hpp"
+#include "Krystal.Core/Memory/NeverDestroyed.hpp"
 #include "Krystal.Core/TypeCast.hpp"
 #include <algorithm>
 #include <ranges>
@@ -87,8 +87,8 @@ namespace krys::boo
     const auto &style = anchored.Style();
 
     auto compensatedAxes = style.AnchorFunctionScrollCompensatedAxes();
-    _needsXAdjustment = compensatedAxes.Contains(BoxAxis::Horizontal);
-    _needsYAdjustment = compensatedAxes.Contains(BoxAxis::Vertical);
+    _needsXAdjustment = compensatedAxes.contains(BoxAxis::Horizontal);
+    _needsYAdjustment = compensatedAxes.contains(BoxAxis::Vertical);
 
     auto containingWritingMode = anchored.Container()->Style().GetWritingMode();
     if (auto positionAreaValue = style.PositionArea().TryValue())
@@ -1464,7 +1464,7 @@ namespace krys::boo::style
     }
 
     if (!anchored.Style().PositionTryFallbacks().IsNone()
-        || anchored.Style().PositionVisibility().Contains(PositionVisibilityValue::NoOverflow))
+        || anchored.Style().PositionVisibility().contains(PositionVisibilityValue::NoOverflow))
     {
       adjuster.SetFallbackLimits(anchored);
     }
@@ -1518,12 +1518,12 @@ namespace krys::boo::style
           else
           {
             shouldBeHidden =
-              anchored->Style().PositionVisibility().Contains(PositionVisibilityValue::NoOverflow);
+              anchored->Style().PositionVisibility().contains(PositionVisibilityValue::NoOverflow);
           }
         }
       }
       if (!shouldBeHidden
-          && anchored->Style().PositionVisibility().Contains(PositionVisibilityValue::AnchorsVisible))
+          && anchored->Style().PositionVisibility().contains(PositionVisibilityValue::AnchorsVisible))
       {
         shouldBeHidden =
           AnchorPositionEvaluator::IsDefaultAnchorInvisibleOrClippedByInterveningBoxes(*anchored);
@@ -1632,7 +1632,7 @@ namespace krys::boo::style
     // an empty anchor positioning state for it so we perform the required layout interleaving.
     auto hasPositionVisibilityNoOverflow =
       GeneratesBox(style) && style.HasOutOfFlowPosition()
-      && style.PositionVisibility().Contains(PositionVisibilityValue::NoOverflow);
+      && style.PositionVisibility().contains(PositionVisibilityValue::NoOverflow);
 
     if (!shouldResolveDefaultAnchor && !hasPositionVisibilityNoOverflow)
     {

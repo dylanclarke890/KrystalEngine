@@ -50,8 +50,8 @@
 #include "Krystal.Booey/SVG/SVGDocumentExtensions.hpp"
 #include "Krystal.Booey/SVG/SVGElementRareData.hpp"
 #include "Krystal.Booey/SVG/SVGNames.hpp"
+#include "Krystal.Core/Containers/HashMap.hpp"
 #include "Krystal.Core/Geometry/AffineTransform.hpp"
-#include "Krystal.Core/Types/HashMap.hpp"
 #include <algorithm>
 
 namespace krys::boo
@@ -83,10 +83,11 @@ namespace krys::boo
   SVGElement::SVGElement(Document &document, UniquePtr<SVGPropertyRegistry> &&propertyRegistry,
                          SVGElementInterface interface, SVGElementFlags flags,
                          dom::NodeFlags nodeFlags) noexcept
-      : StyledElement(document, dom::NullQualifiedName(),
-                      dom::NodeFlags::IsSVGElement | dom::NodeFlags::HasCustomStyleResolveCallbacks
-                        | nodeFlags),
-        _flags(flags), _interface(interface),
+      : StyledElement(
+          document, dom::NullQualifiedName(),
+          dom::NodeFlags {dom::NodeFlag::IsSVGElement, dom::NodeFlag::HasCustomStyleResolveCallbacks}
+            | nodeFlags),
+        _svgElementFlags(flags), _interface(interface),
         _propertyAnimatorFactory(CreateUnique<SVGPropertyAnimatorFactory>()),
         _propertyRegistry(krys::move(propertyRegistry)), _className(SVGAnimatedString::Create(this))
   {
@@ -151,7 +152,7 @@ namespace krys::boo
     }
     // If the style changes because of a regular property change (not induced by SMIL animations themselves)
     // reset the "computed style without SMIL style properties", so the base value change gets reflected.
-    if (!change.IsEmpty() || NeedsStyleRecalc())
+    if (!change.empty() || NeedsStyleRecalc())
     {
       _svgRareData->SetNeedsOverrideComputedStyleUpdate();
     }
@@ -805,7 +806,7 @@ namespace krys::boo
 
   void SVGElement::SetAnimatedSVGAttributesAreDirty() noexcept
   {
-    SetNodeFlag(dom::NodeFlags::AnimatedSVGAttributesAreDirty);
+    _nodeFlags.Add(dom::NodeFlag::AnimatedSVGAttributesAreDirty);
   }
 
   void SVGElement::SetPresentationalHintStyleIsDirty() noexcept
@@ -1033,7 +1034,7 @@ namespace krys::boo
       instance->AddEventListener(
         listener.Type(), ShareRef(*listener.Callback()),
         AddEventListenerOptions {
-          {listener.Capture()}, listener.Once(), listener.Passive(), ShareRefPtr(listener.Signal())});
+          {listener.Capture()}, listener.Once(), listener.Passive(), listener.Signal()});
     }
   }
 
@@ -1060,7 +1061,7 @@ namespace krys::boo
   {
     StyledElement::OnChildrenChanged();
 
-    if (HasNodeFlag(dom::NodeFlags::IsParsingChildren))
+    if (_nodeFlags.contains(dom::NodeFlag::IsParsingChildren))
     {
       return;
     }

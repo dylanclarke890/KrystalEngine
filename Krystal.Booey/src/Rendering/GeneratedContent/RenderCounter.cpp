@@ -31,12 +31,12 @@
 #include "Krystal.Booey/Rendering/RenderView.hpp"
 #include "Krystal.Booey/Rendering/Style/RenderStyle+GettersInlines.hpp"
 #include "Krystal.Booey/Style/Scope/Scope.hpp"
+#include "Krystal.Core/Containers/HashMap.hpp"
+#include "Krystal.Core/Containers/List.hpp"
 #include "Krystal.Core/Maths/Extras.hpp"
+#include "Krystal.Core/Memory/UniquePtr.hpp"
+#include "Krystal.Core/Move.hpp"
 #include "Krystal.Core/Strings/StringBuilder.hpp"
-#include "Krystal.Core/Types/HashMap.hpp"
-#include "Krystal.Core/Types/List.hpp"
-#include "Krystal.Core/Types/UniquePtr.hpp"
-#include "Krystal.Core/Utils/Move.hpp"
 
 namespace krys::boo
 {
@@ -393,7 +393,7 @@ namespace krys::boo
         }
       }
 
-      bool isReset = type.Contains(CounterNode::Type::Reset);
+      bool isReset = type.contains(CounterNode::Type::Reset);
       while (currentRenderer)
       {
         auto currentCounter = ShareRefPtr(MakeCounterNode(*currentRenderer, identifier, false));

@@ -26,9 +26,9 @@
 #include "Krystal.Booey/Rendering/RenderView.hpp"
 #include "Krystal.Booey/Rendering/Style/RenderStyle+GettersInlines.hpp"
 #include "Krystal.Booey/Rendering/SVG/RenderSVGInlineText.hpp"
+#include "Krystal.Core/Containers/HashMap.hpp"
 #include "Krystal.Core/Geometry/Rect.hpp"
-#include "Krystal.Core/Threading/NeverDestroyed.hpp"
-#include "Krystal.Core/Types/HashMap.hpp"
+#include "Krystal.Core/Memory/NeverDestroyed.hpp"
 
 namespace krys::boo
 {
@@ -39,7 +39,7 @@ namespace krys::boo
     KRYS_NODISCARD LegacyInlineTextBoxOverflowMap &TextBoxesWithOverflow() noexcept
     {
       static NeverDestroyed<LegacyInlineTextBoxOverflowMap> textBoxesWithOverflow;
-      return textBoxesWithOverflow.get();
+      return *textBoxesWithOverflow;
     }
   }
 

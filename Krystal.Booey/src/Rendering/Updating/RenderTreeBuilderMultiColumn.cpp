@@ -32,7 +32,7 @@
 #include "Krystal.Booey/Rendering/RenderView.hpp"
 #include "Krystal.Booey/Rendering/Style/RenderStyle+GettersInlines.hpp"
 #include "Krystal.Booey/Rendering/Updating/RenderTreeBuilderBlock.hpp"
-#include "Krystal.Core/Types/List.hpp"
+#include "Krystal.Core/Containers/List.hpp"
 #include "Krystal.Core/Utils/SetForScope.hpp"
 
 namespace krys::boo
@@ -560,9 +560,9 @@ namespace krys::boo
   {
     // The placeholder may already have been removed, but if it hasn't, do so now.
     auto &spannerMap = flow.GetSpannerMap();
-    if (auto node = spannerMap.extract(&Downcast<RenderBox>(spanner)); node && node.mapped())
+    if (auto entry = spannerMap.extract(&Downcast<RenderBox>(spanner)); entry && entry->second)
     {
-      _builder.Destroy(*node.mapped(), canCollapseAnonymousBlock);
+      _builder.Destroy(*entry->second, canCollapseAnonymousBlock);
     }
 
     if (auto *next = spanner.NextSibling())

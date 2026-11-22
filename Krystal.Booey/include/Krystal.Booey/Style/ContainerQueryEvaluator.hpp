@@ -28,9 +28,9 @@
 #include "Krystal.Booey/CSS/Queries/GenericMediaQueryEvaluator.hpp"
 #include "Krystal.Booey/Style/Scope/ScopeOrdinal.hpp"
 #include "Krystal.Booey/Style/Update.hpp"
-#include "Krystal.Core/Types/CheckedPtr.hpp"
-#include "Krystal.Core/Types/List.hpp"
-#include "Krystal.Core/Types/RefPtr.hpp"
+#include "Krystal.Core/Containers/List.hpp"
+#include "Krystal.Core/Memory/CheckedPtr.hpp"
+#include "Krystal.Core/Memory/RefPtr.hpp"
 
 namespace krys::boo
 {
@@ -74,7 +74,7 @@ namespace krys::boo::style
     /// @brief The query container for @p element: the nearest ancestor (in the composed tree) that is a
     /// container for all of @p requiredAxes and, if @p name isn't empty, has that container name.
     KRYS_NODISCARD static RefPtr<const Element>
-      SelectContainer(css::cq::Axis requiredAxes, const CSSOMString &name, const Element &element,
+      SelectContainer(EnumSet<css::cq::Axis> requiredAxes, const CSSOMString &name, const Element &element,
                       SelectionMode selectionMode = SelectionMode::Element,
                       ScopeOrdinal scopeOrdinal = ScopeOrdinal::Element,
                       const ContainerQueryEvaluationState *evaluationState = nullptr) noexcept;

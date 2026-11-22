@@ -29,11 +29,11 @@
 #include "Krystal.Booey/Editing/Markup/Markup.hpp"
 #include "Krystal.Core/Attributes.hpp"
 #include "Krystal.Core/Concepts.hpp"
+#include "Krystal.Core/Containers/EnumSet.hpp"
+#include "Krystal.Core/Containers/HashMap.hpp"
+#include "Krystal.Core/Containers/List.hpp"
 #include "Krystal.Core/Macros.hpp"
-#include "Krystal.Core/Types/EnumSet.hpp"
-#include "Krystal.Core/Types/HashMap.hpp"
-#include "Krystal.Core/Types/List.hpp"
-#include "Krystal.Core/Types/RefPtr.hpp"
+#include "Krystal.Core/Memory/RefPtr.hpp"
 
 namespace krys::boo
 {
@@ -59,12 +59,12 @@ namespace krys::boo
     LineFeed,
     CarriageReturn,
   };
-}
 
-KRYS_DEFINE_CONTIGUOUS_ENUM_TRAITS(krys::boo::EntityMask, 8uz);
+  consteval EntityMask MaxEnumValue(EntityMask) noexcept
+  {
+    return EntityMask::CarriageReturn;
+  }
 
-namespace krys::boo
-{
   constexpr inline EnumSet<EntityMask> EntityMaskInCDATA {};
   constexpr inline EnumSet<EntityMask> EntityMaskInPCDATA {EntityMask::Amp, EntityMask::Lt, EntityMask::Gt};
   // Non-breaking space needs to be escaped in innerHTML for compatibility reason. See

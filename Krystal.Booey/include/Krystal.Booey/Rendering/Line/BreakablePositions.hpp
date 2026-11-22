@@ -22,12 +22,12 @@
 #pragma once
 
 #include "Krystal.Core/Attributes.hpp"
+#include "Krystal.Core/Containers/Array.hpp"
 #include "Krystal.Core/Numeric.hpp"
 #include "Krystal.Core/Strings/ASCII.hpp"
 #include "Krystal.Core/Strings/CodePointIterator.hpp"
 #include "Krystal.Core/Strings/String.hpp"
 #include "Krystal.Core/Strings/Unicode.hpp"
-#include "Krystal.Core/Types/Array.hpp"
 #include "Krystal.Core/Types/Maybe.hpp"
 #include "Krystal.Text/TextBreakIterator.hpp"
 
@@ -336,7 +336,7 @@ namespace krys::boo
       if (!nextBreak || *nextBreak < i)
       {
         // At the start of the string, i - 1 wraps around and the iterator lands in the prior context.
-        nextBreak = factory.Get().Following(static_cast<uint32>(i - 1));
+        nextBreak = factory->Following(static_cast<uint32>(i - 1));
       }
       // Fast forward while our behavior matches ICU.
       if (nextBreak && i < *nextBreak)

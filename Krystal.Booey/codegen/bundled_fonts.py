@@ -38,7 +38,7 @@ def generate_header() -> str:
         "",
         '#include "Krystal.Core/Attributes.hpp"',
         '#include "Krystal.Core/Numeric.hpp"',
-        '#include "Krystal.Core/Types/Span.hpp"',
+        '#include "Krystal.Core/Containers/Span.hpp"',
         "",
         "namespace krys::boo",
         "{",

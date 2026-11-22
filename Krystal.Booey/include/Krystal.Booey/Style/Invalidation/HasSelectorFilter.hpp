@@ -25,8 +25,8 @@
 #pragma once
 
 #include "Krystal.Core/Attributes.hpp"
+#include "Krystal.Core/Containers/BloomFilter.hpp"
 #include "Krystal.Core/Numeric.hpp"
-#include "Krystal.Core/Types/BloomFilter.hpp"
 #include "Krystal.Core/Types/Maybe.hpp"
 
 namespace krys::boo::css

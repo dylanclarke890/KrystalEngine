@@ -93,23 +93,17 @@ namespace krys::boo::inline_iterator
 
     KRYS_NODISCARD const InlineBox &operator*() const noexcept
     {
-      return Get();
+      return static_cast<const InlineBox &>(_box);
     }
 
     KRYS_NODISCARD const InlineBox *operator->() const noexcept
     {
-      return &Get();
+      return &**this;
     }
 
     InlineBoxIterator &TraverseInlineBoxLineRightward() noexcept;
 
     InlineBoxIterator &TraverseInlineBoxLineLeftward() noexcept;
-
-  private:
-    KRYS_NODISCARD const InlineBox &Get() const noexcept
-    {
-      return static_cast<const InlineBox &>(_box);
-    }
   };
 
   KRYS_NODISCARD InlineBoxIterator LineLeftmostInlineBoxFor(const RenderInline &renderInline) noexcept;

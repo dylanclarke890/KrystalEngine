@@ -1,5 +1,6 @@
 ﻿#include "Krystal.Booey/CSS/Queries/MediaQueryParser.hpp"
 #include "catch2/catch_test_macros.hpp"
+#include "Krystal.Booey.Tests/CSS/MediaTestUtils.hpp"
 #include "Krystal.Booey.Tests/CSS/ValueTestUtils.hpp"
 #include "Krystal.Booey/CSS/Parser/InputStream.hpp"
 #include "Krystal.Booey/CSS/Parser/Tokenizer.hpp"
@@ -11,23 +12,18 @@ namespace krys::boo::css::tests
 {
   namespace
   {
-    KRYS_NODISCARD mq::MediaQueryList Parse(utf8_stringview text)
-    {
-      return mq::MediaQueryParser::Parse(text, StrictParserContext());
-    }
-
     /// @brief Parses `text` as a media query list and serialises it, as `matchMedia(text).media` does.
     KRYS_NODISCARD std::string Roundtrip(utf8_stringview text)
     {
       StringBuilder result;
-      mq::Serialise(result, Parse(text));
+      mq::Serialise(result, ParseMediaQueries(text));
       return ToNarrow(result);
     }
 
     /// @brief The single feature of a single-query list, or null if the query isn't exactly one feature.
     KRYS_NODISCARD Maybe<mq::Feature> SingleFeature(utf8_stringview text)
     {
-      auto list = Parse(text);
+      auto list = ParseMediaQueries(text);
       if (list.size() != 1 || !list[0].Condition || list[0].Condition->Queries.size() != 1)
       {
         return {};
@@ -46,7 +42,7 @@ namespace krys::boo::css::tests
     /// @brief Whether `text` parses as a single `<general-enclosed>`: valid, but evaluates to unknown.
     KRYS_NODISCARD bool IsGeneralEnclosed(utf8_stringview text)
     {
-      auto list = Parse(text);
+      auto list = ParseMediaQueries(text);
       return list.size() == 1 && list[0].Condition && list[0].Condition->Queries.size() == 1
              && std::holds_alternative<mq::GeneralEnclosed>(list[0].Condition->Queries[0]);
     }
@@ -279,7 +275,7 @@ namespace krys::boo::css::tests
     CHECK(Roundtrip(u8"(color) and (asdf)") == "(color) and (asdf)");
     CHECK(Roundtrip(u8"not (asdf)") == "not (asdf)");
 
-    auto list = Parse(u8"foo(bar baz)");
+    auto list = ParseMediaQueries(u8"foo(bar baz)");
     REQUIRE(list.size() == 1);
     REQUIRE(list[0].Condition);
     auto *enclosed = std::get_if<mq::GeneralEnclosed>(&list[0].Condition->Queries[0]);
@@ -348,13 +344,13 @@ namespace krys::boo::css::tests
     auto &colorScheme = mq::features::PrefersColorScheme();
     CHECK(colorScheme.FeatureType == mq::FeatureSchema::Type::Discrete);
     CHECK(colorScheme.Dependencies == mq::MediaQueryDynamicDependency::Appearance);
-    CHECK(colorScheme.ValueIdentifiers.contains(ValueId::Dark));
-    CHECK_FALSE(colorScheme.ValueIdentifiers.contains(ValueId::None));
+    CHECK(std::ranges::contains(colorScheme.ValueIdentifiers, ValueId::Dark));
+    CHECK_FALSE(std::ranges::contains(colorScheme.ValueIdentifiers, ValueId::None));
   }
 
   TEST_CASE_METHOD(ValueFixture, "MediaQuery: TraverseFeatures", "[CSS][Queries][MediaQuery]")
   {
-    auto list = Parse(u8"screen and ((width > 1px) or (asdf)), (hover)");
+    auto list = ParseMediaQueries(u8"screen and ((width > 1px) or (asdf)), (hover)");
     List<std::string> names;
     mq::TraverseFeatures(
       list, [&](const mq::Feature &feature)

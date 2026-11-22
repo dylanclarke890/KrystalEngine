@@ -27,7 +27,7 @@
 #include "Krystal.Booey/CSS/Types/CSSOMString.hpp"
 #include "Krystal.Booey/Style/Scope/ScopeIdentifier.hpp"
 #include "Krystal.Core/Attributes.hpp"
-#include "Krystal.Core/Hash.hpp"
+#include "Krystal.Core/Hashing/FastHash.hpp"
 #include <functional>
 
 namespace krys::boo
@@ -71,16 +71,14 @@ namespace krys::boo::style
   };
 }
 
-namespace std
+namespace krys
 {
   template <>
-  struct hash<krys::boo::style::ResolvedScopedName>
+  struct FastHash<boo::style::ResolvedScopedName>
   {
-    size_t operator()(const krys::boo::style::ResolvedScopedName &name) const noexcept
+    KRYS_NODISCARD size_t operator()(const boo::style::ResolvedScopedName &name) const noexcept
     {
-      return krys::UnsignedIntegerPairHash(
-        hash<krys::boo::CSSOMStringAtom> {}(name.Name()),
-        hash<krys::boo::style::ScopeIdentifier> {}(name.GetScopeIdentifier()));
+      return CombineFastHashes(name.Name(), name.GetScopeIdentifier());
     }
   };
 }

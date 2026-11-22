@@ -1,5 +1,6 @@
 ﻿#pragma once
 
+#include "Krystal.Booey.Tests/StringTestUtils.hpp"
 #include "Krystal.Booey.Tests/Style/ResolverTestUtils.hpp"
 #include "Krystal.Booey/DOM/Events/EventListener.hpp"
 #include "Krystal.Booey/DOM/Events/EventNames.hpp"
@@ -12,7 +13,9 @@
 #include "Krystal.Booey/Editing/Markup/Markup.hpp"
 #include "Krystal.Booey/Editing/Selection/FrameSelection.hpp"
 #include "Krystal.Booey/HTML/Elements/HTMLBodyElement.hpp"
+#include "Krystal.Booey/Input/EventHandler.hpp"
 #include "Krystal.Booey/Input/LegacyKeyCodes.hpp"
+#include "Krystal.Booey/Input/PlatformKeyboardEvent.hpp"
 #include "Krystal.Booey/Page/Clients/BooeyClient.hpp"
 #include "Krystal.Booey/Page/Clients/EditorClient.hpp"
 #include "Krystal.Booey/Page/Frame.hpp"
@@ -26,12 +29,6 @@
 
 namespace krys::boo::tests
 {
-  /// @brief @p text as a `std::string`, which Catch2 can print.
-  KRYS_NODISCARD inline std::string Narrow(utf8_stringview text) noexcept
-  {
-    return std::string(reinterpret_cast<const char *>(text.data()), text.size());
-  }
-
   /// @brief An editor client that allows selection changes and binds Shift+Right to extending the
   /// selection.
   struct TestEditorClient final : EditorClient
@@ -468,4 +465,15 @@ namespace krys::boo::tests
       return listener;
     }
   };
+
+  /// @brief Presses @p key (a raw key down with @p identifier, @p keyCode and @p modifiers) in @p fixture's
+  /// frame.
+  /// @return Whether the page handled the key.
+  inline bool PressKey(EditorFixture &fixture, const utf8_string &key, utf8_string identifier, int32 keyCode,
+                       EnumSet<PlatformEvent::Modifier> modifiers = {}) noexcept
+  {
+    return fixture.Frame->GetEventHandler().KeyEvent(
+      PlatformKeyboardEvent(PlatformEvent::Type::RawKeyDown, u8"", u8"", key, key, krys::move(identifier),
+                            keyCode, false, false, false, modifiers, {}));
+  }
 }

@@ -27,8 +27,8 @@
 
 #include "Krystal.Core/Attributes.hpp"
 #include "Krystal.Core/Geometry/Size.hpp"
+#include "Krystal.Core/Memory/UniquePtr.hpp"
 #include "Krystal.Core/Time/Duration.hpp"
-#include "Krystal.Core/Types/UniquePtr.hpp"
 #include "Krystal.Image/ImageBackingStore.hpp"
 #include "Krystal.Image/ImageOrientation.hpp"
 #include "Krystal.Image/ImageTypes.hpp"

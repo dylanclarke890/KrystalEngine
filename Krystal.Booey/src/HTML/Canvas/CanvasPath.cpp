@@ -34,12 +34,12 @@
 
 #include "Krystal.Booey/HTML/Canvas/CanvasPath.hpp"
 #include "Krystal.Booey/Graphics/Geometry/FloatRoundedRect.hpp"
+#include "Krystal.Core/Containers/SmallList.hpp"
 #include "Krystal.Core/Geometry/AffineTransform.hpp"
 #include "Krystal.Core/Geometry/Rect.hpp"
 #include "Krystal.Core/Geometry/Size.hpp"
 #include "Krystal.Core/Maths/Extras.hpp"
 #include "Krystal.Core/Strings/StringBuilder.hpp"
-#include "Krystal.Core/Types/SmallList.hpp"
 #include "Krystal.Core/Visitor.hpp"
 #include <algorithm>
 #include <cmath>

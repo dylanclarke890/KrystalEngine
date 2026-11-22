@@ -1,5 +1,6 @@
 ﻿#include "catch2/catch_test_macros.hpp"
 #include "Krystal.Booey.Tests/Animation/AnimationTestUtils.hpp"
+#include "Krystal.Booey.Tests/Rendering/RenderTestUtils.hpp"
 #include "Krystal.Booey/DOM/Events/EventListener.hpp"
 #include "Krystal.Booey/DOM/Events/EventNames.hpp"
 #include "Krystal.Booey/HTML/Elements/HTMLElement.hpp"
@@ -45,20 +46,6 @@ namespace krys::boo::tests
       return options;
     }
 
-    KRYS_NODISCARD ScrollableArea &AreaOf(Element &element) noexcept
-    {
-      auto *area = Downcast<RenderBox>(*element.Renderer()).Layer()->GetScrollableArea();
-      REQUIRE(area);
-      return *area;
-    }
-
-    /// @brief Runs the frames that finish any smooth scroll.
-    void Finish(AnimationPageFixture &fixture) noexcept
-    {
-      fixture.Frame();
-      fixture.Frame(1'600ms);
-    }
-
     bool PressKey(AnimationPageFixture &fixture, const utf8_string &key, utf8_string identifier,
                   int32 keyCode) noexcept
     {
@@ -81,7 +68,7 @@ namespace krys::boo::tests
     {
       scroller.ScrollTo(Smooth(100));
       CHECK(scroller.ScrollTop() == 0);
-      CHECK(AreaOf(scroller).GetScrollAnimationStatus() == ScrollAnimationStatus::Animating);
+      CHECK(ScrollableAreaOf(scroller).GetScrollAnimationStatus() == ScrollAnimationStatus::Animating);
 
       fixture.Frame();
       CHECK(scroller.ScrollTop() == 0);
@@ -95,7 +82,7 @@ namespace krys::boo::tests
       // 100 pixels take a sixth of a second.
       fixture.Frame(150ms);
       CHECK(scroller.ScrollTop() == 100);
-      CHECK(AreaOf(scroller).GetScrollAnimationStatus() == ScrollAnimationStatus::NotAnimating);
+      CHECK(ScrollableAreaOf(scroller).GetScrollAnimationStatus() == ScrollAnimationStatus::NotAnimating);
       CHECK(scroll->Count == 2);
       CHECK(scrollEnd->Count == 1);
 
@@ -128,8 +115,8 @@ namespace krys::boo::tests
     SECTION("to where it already is doesn't animate")
     {
       scroller.ScrollTo(Smooth(0));
-      CHECK(AreaOf(scroller).GetScrollAnimationStatus() == ScrollAnimationStatus::NotAnimating);
-      Finish(fixture);
+      CHECK(ScrollableAreaOf(scroller).GetScrollAnimationStatus() == ScrollAnimationStatus::NotAnimating);
+      FinishScrollAnimations(fixture);
       CHECK(scroll->Count == 0);
       CHECK(scrollEnd->Count == 0);
     }
@@ -141,12 +128,12 @@ namespace krys::boo::tests
 
       scroller.SetScrollTop(100);
       CHECK(scroller.ScrollTop() == 0);
-      Finish(fixture);
+      FinishScrollAnimations(fixture);
       CHECK(scroller.ScrollTop() == 100);
 
       scroller.ScrollTo(0, 50);
       CHECK(scroller.ScrollTop() == 100);
-      Finish(fixture);
+      FinishScrollAnimations(fixture);
       CHECK(scroller.ScrollTop() == 50);
 
       SECTION("and instant overrides it")
@@ -174,7 +161,7 @@ namespace krys::boo::tests
 
       scroller.ScrollTo(Smooth(300));
       CHECK(scroller.ScrollTop() == reached);
-      Finish(fixture);
+      FinishScrollAnimations(fixture);
       CHECK(scroller.ScrollTop() == 300);
       CHECK(scrollEnd->Count == 1);
     }
@@ -186,8 +173,8 @@ namespace krys::boo::tests
       fixture.Frame(50ms);
       scroller.SetScrollTop(10);
       CHECK(scroller.ScrollTop() == 10);
-      CHECK(AreaOf(scroller).GetScrollAnimationStatus() == ScrollAnimationStatus::NotAnimating);
-      Finish(fixture);
+      CHECK(ScrollableAreaOf(scroller).GetScrollAnimationStatus() == ScrollAnimationStatus::NotAnimating);
+      FinishScrollAnimations(fixture);
       CHECK(scroller.ScrollTop() == 10);
       CHECK(scrollEnd->Count == 1);
     }
@@ -199,7 +186,7 @@ namespace krys::boo::tests
       fixture.Frame(50ms);
       auto reached = scroller.ScrollTop();
       scroller.SetScrollTop(reached);
-      Finish(fixture);
+      FinishScrollAnimations(fixture);
       CHECK(scroller.ScrollTop() == reached);
       CHECK(scrollEnd->Count == 1);
     }
@@ -208,7 +195,7 @@ namespace krys::boo::tests
     {
       scroller.ScrollTo(Smooth(100));
       scroller.ScrollTo(0, 0);
-      Finish(fixture);
+      FinishScrollAnimations(fixture);
       CHECK(scroller.ScrollTop() == 0);
     }
 
@@ -225,7 +212,7 @@ namespace krys::boo::tests
       fixture.Frame();
       fixture.SetStyle(u8"c", u8"height:150px");
       (void)fixture.Document->UpdateLayout();
-      Finish(fixture);
+      FinishScrollAnimations(fixture);
       CHECK(scroller.ScrollTop() == 50);
     }
 
@@ -234,7 +221,7 @@ namespace krys::boo::tests
       scroller.ScrollTo(Smooth(100));
       fixture.Frame();
       fixture.SetStyle(u8"s", u8"display:none");
-      Finish(fixture);
+      FinishScrollAnimations(fixture);
       CHECK(fixture.Document->View()->ScrollY() == 0);
     }
 
@@ -244,7 +231,7 @@ namespace krys::boo::tests
       auto options = Smooth(50);
       scroller.ScrollBy(options);
       CHECK(scroller.ScrollTop() == 100);
-      Finish(fixture);
+      FinishScrollAnimations(fixture);
       CHECK(scroller.ScrollTop() == 150);
     }
   }
@@ -265,7 +252,7 @@ namespace krys::boo::tests
     CHECK(fixture.Document->View()->ScrollY() == 0);
 
     // The box scrolls as far as it can, leaving the target 60 pixels down it, and the view does the rest.
-    Finish(fixture);
+    FinishScrollAnimations(fixture);
     CHECK(outer.ScrollTop() == 340);
     CHECK(fixture.Document->View()->ScrollY() == 560);
   }
@@ -289,7 +276,7 @@ namespace krys::boo::tests
       fixture.Frame(50ms);
       CHECK(view.ScrollY() > 0);
       CHECK(view.ScrollY() < 100);
-      Finish(fixture);
+      FinishScrollAnimations(fixture);
       CHECK(view.ScrollY() == 100);
       CHECK(scrollEnd->Count == 1);
     }
@@ -301,7 +288,7 @@ namespace krys::boo::tests
       fixture.Frame(50ms);
       window.ScrollTo(0, 0);
       CHECK(view.ScrollY() == 0);
-      Finish(fixture);
+      FinishScrollAnimations(fixture);
       CHECK(view.ScrollY() == 0);
       CHECK(scrollEnd->Count == 1);
     }
@@ -317,7 +304,7 @@ namespace krys::boo::tests
     {
       CHECK(PressKey(fixture, u8"ArrowDown", u8"Down", vk::Down));
       CHECK(scroller.ScrollTop() == 0);
-      Finish(fixture);
+      FinishScrollAnimations(fixture);
       CHECK(scroller.ScrollTop() == 40);
     }
 
@@ -327,7 +314,7 @@ namespace krys::boo::tests
       fixture.Frame();
       CHECK(PressKey(fixture, u8"ArrowDown", u8"Down", vk::Down));
       CHECK(PressKey(fixture, u8"ArrowDown", u8"Down", vk::Down));
-      Finish(fixture);
+      FinishScrollAnimations(fixture);
       CHECK(scroller.ScrollTop() == 120);
     }
 
@@ -357,12 +344,12 @@ namespace krys::boo::tests
     {
       CHECK(notch());
       CHECK(scroller.ScrollTop() == 0);
-      CHECK(AreaOf(scroller).GetScrollAnimationStatus() == ScrollAnimationStatus::Animating);
+      CHECK(ScrollableAreaOf(scroller).GetScrollAnimationStatus() == ScrollAnimationStatus::Animating);
       fixture.Frame();
       fixture.Frame(50ms);
       CHECK(scroller.ScrollTop() > 0);
       CHECK(scroller.ScrollTop() < 100);
-      Finish(fixture);
+      FinishScrollAnimations(fixture);
       CHECK(scroller.ScrollTop() == 100);
     }
 
@@ -372,7 +359,7 @@ namespace krys::boo::tests
       fixture.Frame();
       CHECK(notch());
       CHECK(notch());
-      Finish(fixture);
+      FinishScrollAnimations(fixture);
       CHECK(scroller.ScrollTop() == 300);
     }
 
@@ -382,7 +369,7 @@ namespace krys::boo::tests
       CHECK(notch({150, 50}));
       auto &view = *fixture.Document->View();
       CHECK(view.ScrollY() == 0);
-      Finish(fixture);
+      FinishScrollAnimations(fixture);
       CHECK(view.ScrollY() == 100);
     }
 
@@ -433,7 +420,7 @@ namespace krys::boo::tests
       CHECK(select.ScrollTop() < 2 * itemHeight);
       CHECK(scrollEnd->Count == 0);
 
-      Finish(fixture);
+      FinishScrollAnimations(fixture);
       CHECK(select.ScrollTop() == 2 * itemHeight);
       CHECK(area.GetScrollAnimationStatus() == ScrollAnimationStatus::NotAnimating);
       CHECK(scrollEnd->Count == 1);
@@ -454,7 +441,7 @@ namespace krys::boo::tests
       CHECK(area.GetScrollAnimationStatus() == ScrollAnimationStatus::Animating);
       CHECK_FALSE(listBox.ListIndexIsVisible(9));
 
-      Finish(fixture);
+      FinishScrollAnimations(fixture);
       CHECK(listBox.ListIndexIsVisible(9));
       CHECK(select.ScrollTop() == 7 * itemHeight);
     }
@@ -470,7 +457,7 @@ namespace krys::boo::tests
       CHECK(select.SelectedIndex() == 4);
       CHECK(area.GetScrollAnimationStatus() == ScrollAnimationStatus::Animating);
 
-      Finish(fixture);
+      FinishScrollAnimations(fixture);
       CHECK(select.ScrollTop() == 2 * itemHeight);
       CHECK(listBox.ListIndexIsVisible(4));
     }

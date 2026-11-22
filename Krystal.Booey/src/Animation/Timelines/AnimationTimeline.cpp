@@ -52,7 +52,7 @@ namespace krys::boo
       }
     }
 
-    if (_animations.add(ShareRef(animation)).second)
+    if (_animations.insert(ShareRef(animation)).second)
     {
       RefPtr timeline = ShareRefPtr(animation.Timeline());
       if (timeline && timeline.get() != this)
@@ -85,7 +85,7 @@ namespace krys::boo
   {
     krys_debug_assert(!animation.Timeline() || animation.Timeline() == this);
     Ref protectedAnimation = ShareRef(animation);
-    _animations.remove(protectedAnimation);
+    _animations.erase(protectedAnimation);
     if (RefPtr keyframeEffect = ShareRefPtr(animation.GetKeyframeEffect()))
     {
       if (auto styleable = keyframeEffect->TargetStyleable())
@@ -106,9 +106,9 @@ namespace krys::boo
       controller->RemoveTimeline(*this);
     }
 
-    while (!_animations.isEmpty())
+    while (!_animations.empty())
     {
-      Ref animation = _animations.first();
+      Ref animation = _animations.front();
       animation->Remove();
     }
   }

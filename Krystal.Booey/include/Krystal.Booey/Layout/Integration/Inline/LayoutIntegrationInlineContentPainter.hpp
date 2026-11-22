@@ -28,8 +28,8 @@
 #include "Krystal.Booey/Graphics/Geometry/LayoutPoint.hpp"
 #include "Krystal.Booey/Graphics/Geometry/LayoutRect.hpp"
 #include "Krystal.Core/Attributes.hpp"
+#include "Krystal.Core/Containers/ListHashSet.hpp"
 #include "Krystal.Core/Macros.hpp"
-#include "Krystal.Core/Types/ListHashSet.hpp"
 
 namespace krys::boo
 {

@@ -28,8 +28,8 @@
 #include "Krystal.Booey/Graphics/Color/Color.hpp"
 #include "Krystal.Core/Assert.hpp"
 #include "Krystal.Core/Attributes.hpp"
-#include "Krystal.Core/Hash.hpp"
-#include "Krystal.Core/Types/List.hpp"
+#include "Krystal.Core/Containers/List.hpp"
+#include "Krystal.Core/Hashing/FastHash.hpp"
 #include "Krystal.Core/Types/Maybe.hpp"
 #include "Krystal.Core/Types/Pair.hpp"
 
@@ -118,45 +118,31 @@ namespace krys::boo
 namespace krys
 {
   template <>
-  struct DefaultHash<boo::FontPaletteIndex>
+  struct FastHash<boo::FontPaletteIndex>
   {
-    constexpr static bool IsSafeToCompareToEmptyOrDeleted = true;
-
-    KRYS_NODISCARD static size_t Hash(const boo::FontPaletteIndex &index) noexcept
+    KRYS_NODISCARD size_t operator()(const boo::FontPaletteIndex &index) const noexcept
     {
       if (index.IndexType == boo::FontPaletteIndex::Type::Integer)
       {
-        return krys::Hash::Combine(index.IndexType, index.Integer);
+        return krys::CombineFastHashes(index.IndexType, index.Integer);
       }
-      return krys::Hash::Combine(index.IndexType);
-    }
-
-    KRYS_NODISCARD static bool Equal(const boo::FontPaletteIndex &a, const boo::FontPaletteIndex &b) noexcept
-    {
-      return a == b;
+      return krys::CombineFastHashes(index.IndexType);
     }
   };
 
   template <>
-  struct DefaultHash<boo::FontPaletteValues>
+  struct FastHash<boo::FontPaletteValues>
   {
-    constexpr static bool IsSafeToCompareToEmptyOrDeleted = true;
-
-    KRYS_NODISCARD static size_t Hash(const boo::FontPaletteValues &values) noexcept
+    KRYS_NODISCARD size_t operator()(const boo::FontPaletteValues &values) const noexcept
     {
       auto basePalette = values.BasePalette();
-      size_t hash = basePalette ? krys::Hash::Combine(true, *basePalette) : krys::Hash::Combine(false);
+      size_t hash =
+        basePalette ? krys::CombineFastHashes(true, *basePalette) : krys::CombineFastHashes(false);
       for (const auto &[index, color] : values.OverrideColors())
       {
-        hash = krys::Hash::Combine(hash, index, color);
+        hash = krys::CombineFastHashes(hash, index, color);
       }
       return hash;
-    }
-
-    KRYS_NODISCARD static bool Equal(const boo::FontPaletteValues &a,
-                                     const boo::FontPaletteValues &b) noexcept
-    {
-      return a == b;
     }
   };
 }

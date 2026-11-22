@@ -27,11 +27,11 @@
 
 #include "Krystal.Booey/CSS/Selectors/MutableSelector.hpp"
 #include "Krystal.Booey/CSS/Selectors/Selector.hpp"
-#include "Krystal.Core/Hash.hpp"
+#include "Krystal.Core/Containers/List.hpp"
+#include "Krystal.Core/Hashing/FastHash.hpp"
+#include "Krystal.Core/Memory/UniqueArray.hpp"
 #include "Krystal.Core/Strings/StringBuilder.hpp"
-#include "Krystal.Core/Types/List.hpp"
 #include "Krystal.Core/Types/Maybe.hpp"
-#include "Krystal.Core/Types/UniqueArray.hpp"
 
 namespace krys::boo::css
 {
@@ -181,24 +181,16 @@ namespace krys::boo::css
 namespace krys
 {
   template <>
-  struct DefaultHash<boo::css::SelectorList>
+  struct FastHash<boo::css::SelectorList>
   {
-    constexpr static bool IsSafeToCompareToEmptyOrDeleted = false;
-
-    KRYS_NODISCARD static size_t Hash(const boo::css::SelectorList &list) noexcept
+    KRYS_NODISCARD size_t operator()(const boo::css::SelectorList &list) const noexcept
     {
       size_t seed = 0;
       for (const auto &selector : list)
       {
-        seed = krys::Hash::Combine(seed, boo::css::HashComplexSelector(selector));
+        seed = krys::CombineFastHashes(seed, boo::css::HashComplexSelector(selector));
       }
       return seed;
-    }
-
-    KRYS_NODISCARD static bool Equal(const boo::css::SelectorList &a,
-                                     const boo::css::SelectorList &b) noexcept
-    {
-      return a == b;
     }
   };
 }

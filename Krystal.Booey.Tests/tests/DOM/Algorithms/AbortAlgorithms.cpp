@@ -9,28 +9,38 @@
 
 namespace krys::boo::dom::tests
 {
-  TEST_CASE("Add: appends an algorithm once, unless the signal is aborted",
+  TEST_CASE("Add: appends an algorithm, owned by the returned handle, unless the signal is aborted",
             "[AbortAlgorithms][dom:abortsignal-add]")
   {
     AbortController controller;
     int runs = 0;
-    AbortAlgorithmCallback algorithm = [&](const Any &)
+    auto count = [&](const Any &)
     {
       ++runs;
     };
 
-    SECTION("An algorithm added twice runs once")
+    SECTION("The algorithm runs once when the signal aborts, and the handle then owns none")
     {
-      AbortAlgorithms::Add(algorithm, *controller.Signal());
-      AbortAlgorithms::Add(algorithm, *controller.Signal());
+      auto algorithm = AbortAlgorithms::Add(count, *controller.Signal());
+      CHECK(algorithm);
       controller.Abort();
       CHECK(runs == 1);
+      CHECK_FALSE(algorithm);
     }
 
-    SECTION("An aborted signal doesn't take it")
+    SECTION("Each algorithm added runs, even the same function added twice")
+    {
+      auto first = AbortAlgorithms::Add(count, *controller.Signal());
+      auto second = AbortAlgorithms::Add(count, *controller.Signal());
+      controller.Abort();
+      CHECK(runs == 2);
+    }
+
+    SECTION("An aborted signal doesn't take it, and the handle owns none")
     {
       auto signal = AbortSignal::Abort();
-      AbortAlgorithms::Add(algorithm, *signal);
+      auto algorithm = AbortAlgorithms::Add(count, *signal);
+      CHECK_FALSE(algorithm);
       AbortAlgorithms::SignalAbort(*signal);
       CHECK(runs == 0);
     }
@@ -40,14 +50,46 @@ namespace krys::boo::dom::tests
   {
     AbortController controller;
     int runs = 0;
-    AbortAlgorithmCallback algorithm = [&](const Any &)
+    auto count = [&](const Any &)
     {
       ++runs;
     };
-    AbortAlgorithms::Add(algorithm, *controller.Signal());
-    AbortAlgorithms::Remove(algorithm, *controller.Signal());
-    controller.Abort();
-    CHECK(runs == 0);
+
+    SECTION("Removing it through its handle")
+    {
+      auto algorithm = AbortAlgorithms::Add(count, *controller.Signal());
+      algorithm.Remove();
+      CHECK_FALSE(algorithm);
+      controller.Abort();
+      CHECK(runs == 0);
+    }
+
+    SECTION("Destroying its handle")
+    {
+      {
+        auto algorithm = AbortAlgorithms::Add(count, *controller.Signal());
+      }
+      controller.Abort();
+      CHECK(runs == 0);
+    }
+
+    SECTION("A released algorithm stays with its signal")
+    {
+      AbortAlgorithms::Add(count, *controller.Signal()).Release();
+      controller.Abort();
+      CHECK(runs == 1);
+    }
+
+    SECTION("A handle moved from owns none, and the one moved to removes it")
+    {
+      auto algorithm = AbortAlgorithms::Add(count, *controller.Signal());
+      auto moved = krys::move(algorithm);
+      CHECK_FALSE(algorithm); // NOLINT(bugprone-use-after-move): a moved-from handle is empty.
+      CHECK(moved);
+      moved.Remove();
+      controller.Abort();
+      CHECK(runs == 0);
+    }
   }
 
   TEST_CASE("Signal abort: sets the reason once, then runs the abort steps for the signal and its dependents",
@@ -76,7 +118,7 @@ namespace krys::boo::dom::tests
     {
       auto dependent = AbortSignal::Any({ShareRef(signal)});
       List<std::string> log;
-      AbortAlgorithms::Add(
+      auto signalAlgorithm = AbortAlgorithms::Add(
         [&](const Any &)
         {
           log.emplace_back("signal algorithm");
@@ -84,7 +126,8 @@ namespace krys::boo::dom::tests
           CHECK(std::any_cast<int>(dependent->Reason()) == 7);
         },
         signal);
-      AbortAlgorithms::Add([&](const Any &) { log.emplace_back("dependent algorithm"); }, *dependent);
+      auto dependentAlgorithm =
+        AbortAlgorithms::Add([&](const Any &) { log.emplace_back("dependent algorithm"); }, *dependent);
       auto signalListener =
         signal.AddEventListener(event_names::Abort, [&](Event &) { log.emplace_back("signal event"); });
       auto dependentListener = dependent->AddEventListener(event_names::Abort, [&](Event &)
@@ -106,14 +149,14 @@ namespace krys::boo::dom::tests
 
     SECTION("Algorithms run in order, with the reason, before the event")
     {
-      AbortAlgorithms::Add(
+      auto first = AbortAlgorithms::Add(
         [&](const Any &reason)
         {
           log.emplace_back("first");
           CHECK(std::any_cast<int>(reason) == 4);
         },
         signal);
-      AbortAlgorithms::Add([&](const Any &) { log.emplace_back("second"); }, signal);
+      auto second = AbortAlgorithms::Add([&](const Any &) { log.emplace_back("second"); }, signal);
       auto listener =
         signal.AddEventListener(event_names::Abort, [&](Event &) { log.emplace_back("event"); });
 
@@ -123,15 +166,15 @@ namespace krys::boo::dom::tests
 
     SECTION("An algorithm that removes itself doesn't skip the next")
     {
-      Maybe<AbortAlgorithmCallback> self;
-      self = AbortAlgorithmCallback(
+      AbortAlgorithmHandle self;
+      self = AbortAlgorithms::Add(
         [&](const Any &)
         {
           log.emplace_back("first");
-          AbortAlgorithms::Remove(*self, signal);
-        });
-      AbortAlgorithms::Add(*self, signal);
-      AbortAlgorithms::Add([&](const Any &) { log.emplace_back("second"); }, signal);
+          self.Remove();
+        },
+        signal);
+      auto second = AbortAlgorithms::Add([&](const Any &) { log.emplace_back("second"); }, signal);
 
       controller.Abort();
       CHECK(log == List<std::string> {"first", "second"});

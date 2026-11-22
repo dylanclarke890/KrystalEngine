@@ -32,11 +32,6 @@ namespace krys::boo::tests
           .CopyAsTouchpadPan(phase, Phase::None));
     }
 
-    KRYS_NODISCARD int32 ViewY(AnimationPageFixture &fixture) noexcept
-    {
-      return fixture.TestFrame->View()->GetScrollPosition().Y();
-    }
-
     struct WheelCounter : public EventListenerCallback
     {
       int32 Count {0};

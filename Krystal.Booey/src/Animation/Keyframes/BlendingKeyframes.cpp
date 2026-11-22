@@ -30,7 +30,7 @@
 #include "Krystal.Booey/CSS/Values/CustomPropertyValue.hpp"
 #include "Krystal.Booey/CSS/Values/PrimitiveValue.hpp"
 #include "Krystal.Booey/DOM/Nodes/Element.hpp"
-#include "Krystal.Booey/Rendering/Style/RenderStyleProperties+GettersInlines.hpp"
+#include "Krystal.Booey/Rendering/Style/RenderStyle+GettersInlines.hpp"
 #include "Krystal.Booey/Style/AnchorPositionEvaluator.hpp"
 #include "Krystal.Booey/Style/Interpolation/Interpolation.hpp"
 #include "Krystal.Booey/Style/Resolver.hpp"
@@ -372,7 +372,7 @@ namespace krys::boo
           keyframe->SetKey({css::ValueId::Invalid, 0});
           return keyframe;
         }()};
-      return *rule.get();
+      return **rule;
     }
 
     KRYS_NODISCARD const css::KeyframeRule &HundredPercentKeyframe() noexcept
@@ -384,7 +384,7 @@ namespace krys::boo
           keyframe->SetKey({css::ValueId::Invalid, 1});
           return keyframe;
         }()};
-      return *rule.get();
+      return **rule;
     }
   }
 

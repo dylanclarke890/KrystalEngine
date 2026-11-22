@@ -24,8 +24,8 @@
  */
 
 #include "Krystal.Net/DataUrlDecoder.hpp"
+#include "Krystal.Core/Move.hpp"
 #include "Krystal.Core/Strings/ASCII.hpp"
-#include "Krystal.Core/Utils/Move.hpp"
 #include "Krystal.Text/Base64.hpp"
 #include <algorithm>
 

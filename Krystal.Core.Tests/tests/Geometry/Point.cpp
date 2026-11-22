@@ -217,9 +217,8 @@ namespace krys::tests
 
   TEST_CASE("PointF: hash and markable traits", "[Geometry][PointF]")
   {
-    CHECK(DefaultHash<PointF>::Hash(PointF(1.0f, 2.0f)) == DefaultHash<PointF>::Hash(PointF(1.0f, 2.0f)));
-    CHECK(DefaultHash<PointF>::Hash(PointF(1.0f, 2.0f)) != DefaultHash<PointF>::Hash(PointF(2.0f, 1.0f)));
-    CHECK(DefaultHash<PointF>::Equal(PointF(1.0f, 2.0f), PointF(1.0f, 2.0f)));
+    CHECK(FastHash<PointF> {}(PointF(1.0f, 2.0f)) == FastHash<PointF> {}(PointF(1.0f, 2.0f)));
+    CHECK(FastHash<PointF> {}(PointF(1.0f, 2.0f)) != FastHash<PointF> {}(PointF(2.0f, 1.0f)));
     CHECK(MarkableTraits<PointF>::IsEmptyValue(MarkableTraits<PointF>::EmptyValue()));
     CHECK_FALSE(MarkableTraits<PointF>::IsEmptyValue(PointF()));
   }

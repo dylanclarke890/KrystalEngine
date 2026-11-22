@@ -22,16 +22,16 @@
 #pragma once
 
 #include "Krystal.Core/Attributes.hpp"
+#include "Krystal.Core/Containers/Array.hpp"
+#include "Krystal.Core/Containers/List.hpp"
+#include "Krystal.Core/Containers/SmallList.hpp"
 #include "Krystal.Core/Macros.hpp"
+#include "Krystal.Core/Move.hpp"
 #include "Krystal.Core/Numeric.hpp"
 #include "Krystal.Core/Strings/String.hpp"
 #include "Krystal.Core/Strings/StringAtom.hpp"
-#include "Krystal.Core/Types/Array.hpp"
-#include "Krystal.Core/Types/List.hpp"
 #include "Krystal.Core/Types/Maybe.hpp"
-#include "Krystal.Core/Types/SmallList.hpp"
 #include "Krystal.Core/Types/Variant.hpp"
-#include "Krystal.Core/Utils/Move.hpp"
 
 struct UBreakIterator;
 
@@ -425,7 +425,12 @@ namespace krys::text
       return _contentAnalysis;
     }
 
-    KRYS_NODISCARD CachedTextBreakIterator &Get() noexcept;
+    KRYS_NODISCARD CachedTextBreakIterator &operator*() noexcept;
+
+    KRYS_NODISCARD CachedTextBreakIterator *operator->() noexcept
+    {
+      return &**this;
+    }
 
     void ResetStringAndReleaseIterator(utf8_stringview stringView, const StringAtom &locale,
                                        TextBreakLineBehavior mode,

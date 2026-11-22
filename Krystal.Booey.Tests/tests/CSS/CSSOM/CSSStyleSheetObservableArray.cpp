@@ -1,6 +1,7 @@
 ﻿#include "Krystal.Booey/CSS/CSSOM/CSSStyleSheetObservableArray.hpp"
 #include "catch2/catch_test_macros.hpp"
 #include "Krystal.Booey.Tests/CSS/CSSOMTestUtils.hpp"
+#include "Krystal.Booey.Tests/DOM/DOMTestUtils.hpp"
 #include "Krystal.Booey/CSS/CSSOM/StyleSheetList.hpp"
 #include "Krystal.Booey/DOM/Nodes/HTMLDocument.hpp"
 #include "Krystal.Booey/DOM/Nodes/ShadowRoot.hpp"
@@ -12,23 +13,13 @@
 
 namespace krys::boo::css::tests
 {
+  using boo::tests::ParseDocument;
+  using boo::tests::RunTasks;
+
   namespace
   {
-    KRYS_NODISCARD Ref<HTMLDocument> Parse(utf8_string &&input) noexcept
-    {
-      auto document = CreateRef<HTMLDocument>();
-      auto parser = CreateRef<html::DocumentParser>(*document);
-      parser->InputStream().Append(krys::move(input), IsEOF::Yes);
-      parser->PumpTokenizer();
-      return document;
-    }
-
-    void RunTasks() noexcept
-    {
-      html::EventLoop::Current().RunUntilIdle();
-    }
-
-    KRYS_NODISCARD Ref<CSSStyleSheet> ConstructedSheet(Document &document, const CSSOMString &text = u8"a {}")
+    KRYS_NODISCARD Ref<CSSStyleSheet> ConstructedSheetWithText(Document &document,
+                                                               const CSSOMString &text = u8"a {}")
     {
       auto sheet = CSSStyleSheet::Create(document, {});
       REQUIRE(sheet.HasValue());
@@ -53,9 +44,9 @@ namespace krys::boo::css::tests
                    "[CSS][CSSOM][CSSStyleSheetObservableArray]")
   {
     RunTasks();
-    auto document = Parse(u8"<!DOCTYPE html><body>");
+    auto document = ParseDocument(u8"<!DOCTYPE html><body>");
     auto &adopted = document->AdoptedStyleSheets();
-    auto sheet = ConstructedSheet(*document);
+    auto sheet = ConstructedSheetWithText(*document);
     REQUIRE(adopted.Length() == 0u);
     REQUIRE(sheet->IsDetached());
 
@@ -76,7 +67,7 @@ namespace krys::boo::css::tests
       RequireNotAllowed(adopted.SetSheets({contentsSheet}));
 
       auto otherDocument = CreateRef<HTMLDocument>();
-      auto otherSheet = ConstructedSheet(*otherDocument);
+      auto otherSheet = ConstructedSheetWithText(*otherDocument);
       RequireNotAllowed(adopted.SetValueAt(0, *otherSheet));
 
       // A failed replacement leaves the array as it was.
@@ -89,13 +80,13 @@ namespace krys::boo::css::tests
 
     SECTION("Setting, removing and shrinking")
     {
-      auto second = ConstructedSheet(*document);
+      auto second = ConstructedSheetWithText(*document);
       REQUIRE_FALSE(adopted.SetValueAt(0, *sheet).HasException());
       REQUIRE_FALSE(adopted.SetValueAt(1, *second).HasException());
       REQUIRE(adopted.Length() == 2u);
 
       // Replacing a sheet releases it.
-      auto third = ConstructedSheet(*document);
+      auto third = ConstructedSheetWithText(*document);
       REQUIRE_FALSE(adopted.SetValueAt(0, *third).HasException());
       REQUIRE(adopted.ValueAt(0) == third.get());
       REQUIRE_FALSE(IsAdoptedBy(*sheet, *document));
@@ -141,9 +132,9 @@ namespace krys::boo::css::tests
                    "[CSS][CSSOM][CSSStyleSheetObservableArray][Style][Scope]")
   {
     RunTasks();
-    auto document = Parse(u8"<!DOCTYPE html><style>a {}</style>");
+    auto document = ParseDocument(u8"<!DOCTYPE html><style>a {}</style>");
     auto &scope = document->StyleScope();
-    auto sheet = ConstructedSheet(*document);
+    auto sheet = ConstructedSheetWithText(*document);
 
     SECTION("After the owned sheets, in the style sheet list too")
     {
@@ -232,9 +223,9 @@ namespace krys::boo::css::tests
         RefPtr<CSSStyleSheet> otherSheet;
         WeakPtr<Document> weakDocument;
         {
-          auto otherDocument = Parse(u8"<!DOCTYPE html><body>");
+          auto otherDocument = ParseDocument(u8"<!DOCTYPE html><body>");
           weakDocument = CreateWeakPtr<Document>(otherDocument.get());
-          otherSheet = ConstructedSheet(*otherDocument);
+          otherSheet = ConstructedSheetWithText(*otherDocument);
           REQUIRE_FALSE(otherDocument->SetAdoptedStyleSheets({ShareRef(*otherSheet)}).HasException());
           REQUIRE_FALSE(otherSheet->IsDetached());
         }

@@ -511,11 +511,11 @@ namespace krys::boo::dom::tests
       auto document = CreateRef<HTMLDocument>();
       auto scoped = html::CustomElementRegistry::CreateScoped();
       auto element =
-        document->CreateElement(u8"div", ElementCreationOptions {.CustomElementRegistry = scoped})
+        document->CreateElement(u8"div", ElementCreationOptions {.CustomElementRegistry = scoped.get()})
           .ReleaseValue();
       CHECK(element->CustomElementRegistry() == scoped);
       auto result = document->CreateElement(
-        u8"div", ElementCreationOptions {.CustomElementRegistry = scoped, .Is = u8"x-a"});
+        u8"div", ElementCreationOptions {.CustomElementRegistry = scoped.get(), .Is = u8"x-a"});
       REQUIRE(result.HasException());
       CHECK(result.GetException().Code() == ExceptionCode::NotSupportedError);
     }
@@ -616,7 +616,7 @@ namespace krys::boo::dom::tests
       auto withoutRegistry = CreateRef<TestElement>(*source);
       auto scoped = html::CustomElementRegistry::CreateScoped();
       auto withScoped =
-        document->ImportNode(*withoutRegistry, ImportNodeOptions {.CustomElementRegistry = scoped})
+        document->ImportNode(*withoutRegistry, ImportNodeOptions {.CustomElementRegistry = scoped.get()})
           .ReleaseValue();
       CHECK(Downcast<Element>(*withScoped).CustomElementRegistry() == scoped);
 
@@ -624,8 +624,8 @@ namespace krys::boo::dom::tests
       CHECK(Downcast<Element>(*withGlobal).CustomElementRegistry() == global);
 
       auto otherGlobal = html::CustomElementRegistry::Create(*source);
-      auto result =
-        document->ImportNode(*withoutRegistry, ImportNodeOptions {.CustomElementRegistry = otherGlobal});
+      auto result = document->ImportNode(*withoutRegistry,
+                                         ImportNodeOptions {.CustomElementRegistry = otherGlobal.get()});
       REQUIRE(result.HasException());
       CHECK(result.GetException().Code() == ExceptionCode::NotSupportedError);
     }
@@ -742,19 +742,19 @@ namespace krys::boo::dom::tests
     auto document = CreateRef<HTMLDocument>();
     auto root = document->CreateElement(u8"div").ReleaseValue();
 
-    auto iterator = document->CreateNodeIterator(*root, WhatToShow::SHOW_ELEMENT);
+    auto iterator = document->CreateNodeIterator(*root, WhatToShowFlag::SHOW_ELEMENT);
     CHECK(&iterator->Root() == root.get());
     CHECK(&iterator->ReferenceNode() == root.get());
     CHECK(iterator->PointerBeforeReferenceNode());
-    CHECK(iterator->WhatToShow() == WhatToShow::SHOW_ELEMENT);
+    CHECK(iterator->WhatToShow() == WhatToShowFlag::SHOW_ELEMENT);
     CHECK(iterator->Filter() == nullptr);
 
-    auto walker = document->CreateTreeWalker(*root, WhatToShow::SHOW_TEXT);
+    auto walker = document->CreateTreeWalker(*root, WhatToShowFlag::SHOW_TEXT);
     CHECK(&walker->Root() == root.get());
     CHECK(&walker->CurrentNode() == root.get());
-    CHECK(walker->WhatToShow() == WhatToShow::SHOW_TEXT);
+    CHECK(walker->WhatToShow() == WhatToShowFlag::SHOW_TEXT);
 
-    CHECK(document->CreateNodeIterator(*root)->WhatToShow() == WhatToShow::SHOW_ALL);
+    CHECK(document->CreateNodeIterator(*root)->WhatToShow() == ShowAll);
   }
 
   TEST_CASE("Document.readyState: complete for a document that isn't loading",

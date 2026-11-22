@@ -45,7 +45,7 @@
 #include "Krystal.Booey/Style/Builder/Builder.hpp"
 #include "Krystal.Booey/Style/CustomProperty.hpp"
 #include "Krystal.Booey/Style/Rules/MatchResult.hpp"
-#include "Krystal.Core/Threading/NeverDestroyed.hpp"
+#include "Krystal.Core/Memory/NeverDestroyed.hpp"
 
 namespace krys::boo::css::cq
 {
@@ -79,8 +79,8 @@ namespace krys::boo::css::cq
   struct SizeFeatureSchema : public mq::FeatureSchema
   {
     SizeFeatureSchema(const CSSOMStringAtom &name, Type type, ValueType valueType,
-                      mq::MediaQueryDynamicDependency dependencies,
-                      FixedVector<ValueId> &&valueIdentifiers = {}) noexcept
+                      EnumSet<mq::MediaQueryDynamicDependency> dependencies,
+                      FixedList<ValueId> &&valueIdentifiers = {}) noexcept
         : mq::FeatureSchema(name, type, valueType, dependencies, krys::move(valueIdentifiers))
     {
     }
@@ -234,7 +234,7 @@ namespace krys::boo::css::cq
       OrientationFeatureSchema() noexcept
           : SizeFeatureSchema(u8"orientation", mq::FeatureSchema::Type::Discrete,
                               mq::FeatureSchema::ValueType::Identifier, Dependency::Viewport,
-                              FixedVector {ValueId::Portrait, ValueId::Landscape})
+                              FixedList {ValueId::Portrait, ValueId::Landscape})
       {
       }
 
@@ -256,7 +256,7 @@ namespace krys::boo::css::cq
     {
       StyleFeatureSchema() noexcept
           : mq::FeatureSchema(u8"style", mq::FeatureSchema::Type::Discrete,
-                              mq::FeatureSchema::ValueType::CustomProperty, Dependency::None)
+                              mq::FeatureSchema::ValueType::CustomProperty, {})
       {
       }
 

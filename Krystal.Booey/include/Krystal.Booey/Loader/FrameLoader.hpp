@@ -39,15 +39,9 @@
 #include "Krystal.Booey/Loader/SubstituteData.hpp"
 #include "Krystal.Core/Attributes.hpp"
 #include "Krystal.Core/Macros.hpp"
+#include "Krystal.Core/Memory/RefPtr.hpp"
+#include "Krystal.Core/Memory/UniquePtr.hpp"
 #include "Krystal.Core/Types/Maybe.hpp"
-#include "Krystal.Core/Types/RefPtr.hpp"
-#include "Krystal.Core/Types/UniquePtr.hpp"
-
-namespace krys::boo
-{
-  class Element;
-  class Event;
-}
 
 namespace krys::net
 {
@@ -59,6 +53,8 @@ namespace krys::net
 namespace krys::boo
 {
   class DocumentLoader;
+  class Element;
+  class Event;
   class FormSubmission;
   class Frame;
   class FrameLoadRequest;

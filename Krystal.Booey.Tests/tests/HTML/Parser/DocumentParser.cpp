@@ -21,10 +21,10 @@
 #include "Krystal.Booey/HTML/Parser/TreeBuilder.hpp"
 #include "Krystal.Booey/SVG/Elements/SVGElement.hpp"
 #include "Krystal.Booey/SVG/Internals/SVGElementFactory.hpp"
-#include "Krystal.Core/Types/List.hpp"
+#include "Krystal.Core/Containers/List.hpp"
+#include "Krystal.Core/Move.hpp"
 #include "Krystal.Core/Types/Maybe.hpp"
 #include "Krystal.Core/Types/Pair.hpp"
-#include "Krystal.Core/Utils/Move.hpp"
 #include <filesystem>
 
 namespace krys::boo::html::tests
@@ -317,7 +317,7 @@ namespace krys::boo::html::tests
       CHECK(equal);
     }
 
-    static void RunTest(const string &filename) noexcept
+    static void RunTreeConstructionTest(const string &filename) noexcept
     {
       static string basedir = KRYS_BOOEY_TESTS_DATA_DIR "/html-tree-builder/";
 
@@ -778,7 +778,7 @@ namespace krys::boo::html::tests
 #define EXECUTE_HTML_PARSER_TEST_CASE(FileName, Tags)                                                        \
   TEST_CASE("DocumentParser(" FileName ")", "[HTML][DocumentParser]" Tags)                                   \
   {                                                                                                          \
-    krys::boo::html::tests::RunTest(FileName);                                                               \
+    krys::boo::html::tests::RunTreeConstructionTest(FileName);                                               \
   }
 
 EXECUTE_HTML_PARSER_TEST_CASE("adoption-01.dat", "[html:adoption-agency-algorithm]");

@@ -646,7 +646,7 @@ namespace krys::boo::layout
       return true;
     }
 
-    if (_inlineDamage.Reasons().Contains(InlineDamage::Reason::StyleChange))
+    if (_inlineDamage.Reasons().contains(InlineDamage::Reason::StyleChange))
     {
       _inlineDamage.ResetLayoutPosition();
       return true;
@@ -749,7 +749,7 @@ namespace krys::boo::layout
         // Series of append operations always produces the same damage position.
         return _inlineDamage.LayoutStartPosition().has_value();
       }
-      krys_debug_assert(_inlineDamage.Reasons().IsEmpty());
+      krys_debug_assert(_inlineDamage.Reasons().empty());
       if (auto leadingInlineItemPosition = LeadingInlineItemPositionOnLastLine(_inlineItemList, displayBoxes))
       {
         auto lastLineIndex = displayBoxes.back().LineIndex();

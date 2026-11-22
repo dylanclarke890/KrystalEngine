@@ -26,7 +26,7 @@
 #include "Krystal.Booey/CSS/Values/ToLengthConversionData.hpp"
 #include "Krystal.Booey/DOM/Nodes/Document.hpp"
 #include "Krystal.Booey/DOM/Nodes/Element.hpp"
-#include "Krystal.Core/Utils/Move.hpp"
+#include "Krystal.Core/Move.hpp"
 
 namespace krys::boo::css::mq
 {
@@ -118,10 +118,10 @@ namespace krys::boo::css::mq
     return query.MediaType == _mediaType;
   }
 
-  MediaQueryDynamicDependency
+  EnumSet<MediaQueryDynamicDependency>
     MediaQueryEvaluator::CollectDynamicDependencies(const MediaQueryList &queries) const noexcept
   {
-    auto result = MediaQueryDynamicDependency::None;
+    auto result = EnumSet<MediaQueryDynamicDependency> {};
 
     for (auto &query : queries)
     {
@@ -131,15 +131,15 @@ namespace krys::boo::css::mq
     return result;
   }
 
-  MediaQueryDynamicDependency
+  EnumSet<MediaQueryDynamicDependency>
     MediaQueryEvaluator::CollectDynamicDependencies(const MediaQuery &query) const noexcept
   {
     if (!EvaluateMediaType(query))
     {
-      return MediaQueryDynamicDependency::None;
+      return {};
     }
 
-    auto result = MediaQueryDynamicDependency::None;
+    auto result = EnumSet<MediaQueryDynamicDependency> {};
 
     TraverseFeatures(query,
                      [&](const Feature &feature)

@@ -281,7 +281,7 @@ namespace krys::boo::style
 
   void Styleable::AnimationWasAdded(WebAnimation &animation) const noexcept
   {
-    (void)EnsureAnimations().add(ShareRef(animation));
+    (void)EnsureAnimations().insert(ShareRef(animation));
   }
 
   namespace
@@ -317,7 +317,7 @@ namespace krys::boo::style
 
   void Styleable::AnimationWasRemoved(WebAnimation &animation) const noexcept
   {
-    (void)EnsureAnimations().remove(ShareRef(animation));
+    (void)EnsureAnimations().erase(ShareRef(animation));
 
     // Now, if we're dealing with a CSS Transition, we remove it from the running transitions map. We don't
     // need to do this for CSS Animations because their timing can be set via CSS to end, which would cause
@@ -515,9 +515,9 @@ namespace krys::boo::style
             matchingAnimation->UpdateKeyframesIfNeeded(currentStyle, afterChangeStyle, resolutionContext);
             newStyleOriginatedAnimations.push_back(
               CreateWeakPtr<StyleOriginatedAnimation>(matchingAnimation.get()));
-            (void)newAnimations.add(matchingAnimation);
+            (void)newAnimations.insert(matchingAnimation);
             // Remove the matched animation from the list of previous animations so we may not match it again.
-            (void)previousAnimations.remove(matchingAnimation);
+            (void)previousAnimations.erase(matchingAnimation);
             foundMatchingAnimation = true;
             break;
           }
@@ -528,7 +528,7 @@ namespace krys::boo::style
           auto cssAnimation = CSSAnimation::Create(*this, Animation {currentAnimation}, currentStyle,
                                                    afterChangeStyle, resolutionContext);
           newStyleOriginatedAnimations.push_back(CreateWeakPtr<StyleOriginatedAnimation>(cssAnimation.get()));
-          (void)newAnimations.add(krys::move(cssAnimation));
+          (void)newAnimations.insert(krys::move(cssAnimation));
         }
       }
     }
@@ -1183,7 +1183,8 @@ namespace krys::boo::style
 
       for (const auto &previousTimeline : currentStyle->GetScrollTimelines())
       {
-        if (!currentTimelines.contains(previousTimeline) && previousTimeline->Source().get() == &Element)
+        if (!std::ranges::contains(currentTimelines, previousTimeline)
+            && previousTimeline->Source().get() == &Element)
         {
           previousTimeline->SetSource(nullptr);
         }
@@ -1217,7 +1218,7 @@ namespace krys::boo::style
 
       for (const auto &previousTimelineName : currentStyle->ScrollTimelineNames())
       {
-        if (!currentTimelineNames.contains(previousTimelineName))
+        if (!std::ranges::contains(currentTimelineNames, previousTimelineName))
         {
           styleOriginatedTimelinesController.UnregisterNamedTimeline(previousTimelineName.Value.Value, *this);
         }
@@ -1251,7 +1252,8 @@ namespace krys::boo::style
 
       for (const auto &previousTimeline : currentStyle->GetViewTimelines())
       {
-        if (!currentTimelines.contains(previousTimeline) && previousTimeline->Subject() == &Element)
+        if (!std::ranges::contains(currentTimelines, previousTimeline)
+            && previousTimeline->Subject() == &Element)
         {
           previousTimeline->SetSubject(nullptr);
         }
@@ -1289,7 +1291,7 @@ namespace krys::boo::style
 
       for (const auto &previousTimelineName : currentStyle->ViewTimelineNames())
       {
-        if (!currentTimelineNames.contains(previousTimelineName))
+        if (!std::ranges::contains(currentTimelineNames, previousTimelineName))
         {
           styleOriginatedTimelinesController.UnregisterNamedTimeline(previousTimelineName.Value.Value, *this);
         }

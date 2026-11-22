@@ -14,9 +14,12 @@ namespace krys::boo::html
     Loaded,
     Error,
   };
-}
 
-KRYS_DEFINE_CONTIGUOUS_ENUM_TRAITS(krys::boo::html::TrackReadyState, 4uz);
+  consteval TrackReadyState MaxEnumValue(TrackReadyState) noexcept
+  {
+    return TrackReadyState::Error;
+  }
+}
 
 namespace krys::boo
 {
@@ -26,7 +29,7 @@ namespace krys::boo
     KRYS_OVERRIDE_DELETE_FOR_CHECKED_PTR(HTMLTrackElement);
 
   private:
-    html::TrackReadyState _readyState : BitCount<html::TrackReadyState>() {html::TrackReadyState::None};
+    html::TrackReadyState _readyState : EnumBitWidth<html::TrackReadyState> {html::TrackReadyState::None};
 
   public:
     HTMLTrackElement(Document &document) noexcept;

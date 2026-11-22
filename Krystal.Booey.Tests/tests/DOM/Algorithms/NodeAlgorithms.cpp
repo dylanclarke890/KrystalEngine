@@ -654,16 +654,16 @@ namespace krys::boo::dom::tests
 
     auto copy =
       NodeAlgorithms::CloneNode(*withoutRegistry, nullptr, false, nullptr, scoped.get()).ReleaseValue();
-    CHECK(Downcast<Element>(*copy).CustomElementRegistry().get() == scoped.get());
+    CHECK(Downcast<Element>(*copy).CustomElementRegistry() == scoped.get());
 
     // An element with a registry keeps it.
     auto registry = html::CustomElementRegistry::CreateScoped();
     auto withRegistry =
-      document->CreateElement(u8"div", ElementCreationOptions {.CustomElementRegistry = registry})
+      document->CreateElement(u8"div", ElementCreationOptions {.CustomElementRegistry = registry.get()})
         .ReleaseValue();
-    REQUIRE(withRegistry->CustomElementRegistry().get() == registry.get());
+    REQUIRE(withRegistry->CustomElementRegistry() == registry.get());
     auto other =
       NodeAlgorithms::CloneNode(*withRegistry, nullptr, false, nullptr, scoped.get()).ReleaseValue();
-    CHECK(Downcast<Element>(*other).CustomElementRegistry().get() == registry.get());
+    CHECK(Downcast<Element>(*other).CustomElementRegistry() == registry.get());
   }
 }

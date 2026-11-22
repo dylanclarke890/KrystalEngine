@@ -28,21 +28,17 @@
 #pragma once
 
 #include "Krystal.Core/Attributes.hpp"
+#include "Krystal.Core/Containers/Array.hpp"
+#include "Krystal.Core/Containers/Span.hpp"
 #include "Krystal.Core/Geometry/Point.hpp"
 #include "Krystal.Core/Geometry/Size.hpp"
 #include "Krystal.Core/Maths/CompositeOperation.hpp"
 #include "Krystal.Core/Maths/Extras.hpp"
-#include "Krystal.Core/Types/Array.hpp"
 #include "Krystal.Core/Types/Maybe.hpp"
-#include "Krystal.Core/Types/Span.hpp"
 
 namespace krys
 {
   class TextStream;
-}
-
-namespace krys
-{
   class TransformationMatrix;
 
   /// @brief A 2D affine transform: a 2x2 matrix [a c; b d] plus a translation (e, f).
@@ -305,10 +301,7 @@ namespace krys
   constexpr inline AffineTransform AffineTransform::Identity {};
 
   KRYS_NODISCARD AffineTransform CreateMapBetweenRects(const RectF &source, const RectF &dest) noexcept;
-}
 
-namespace krys
-{
   TextStream &operator<<(TextStream &ts, const AffineTransform &transform) noexcept;
 
   /// @brief @p point mapped by @p transform, in double precision.

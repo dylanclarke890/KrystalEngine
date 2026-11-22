@@ -72,7 +72,7 @@ namespace krys::boo::style
 
     KRYS_NODISCARD constexpr bool Contains(TextEmphasisPositionValue e) const noexcept
     {
-      return _value.Contains(e);
+      return _value.contains(e);
     }
 
     KRYS_NODISCARD constexpr bool ContainsAny(EnumSet other) const noexcept

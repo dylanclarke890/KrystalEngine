@@ -26,6 +26,7 @@
 #include "Krystal.Booey/DOM/Nodes/Element.hpp"
 #include "Krystal.Booey/Accessibility/AXObjectCache.hpp"
 #include "Krystal.Booey/Animation/CSSAnimation.hpp"
+#include "Krystal.Booey/Animation/KeyframeAnimationOptions.hpp"
 #include "Krystal.Booey/Animation/KeyframeEffect.hpp"
 #include "Krystal.Booey/Animation/KeyframeEffectStack.hpp"
 #include "Krystal.Booey/Animation/WebAnimation.hpp"
@@ -44,6 +45,7 @@
 #include "Krystal.Booey/DOM/Algorithms/TextAlgorithms.hpp"
 #include "Krystal.Booey/DOM/Algorithms/TreeQueries.hpp"
 #include "Krystal.Booey/DOM/Collections/DatasetDOMStringMap.hpp"
+#include "Krystal.Booey/DOM/Collections/DOMTokenList.hpp"
 #include "Krystal.Booey/DOM/Collections/HTMLCollection.hpp"
 #include "Krystal.Booey/DOM/Collections/NodeList.hpp"
 #include "Krystal.Booey/DOM/Events/EventNames.hpp"
@@ -51,6 +53,7 @@
 #include "Krystal.Booey/DOM/Events/MouseEvent.hpp"
 #include "Krystal.Booey/DOM/Events/PointerEvent.hpp"
 #include "Krystal.Booey/DOM/Events/WheelEvent.hpp"
+#include "Krystal.Booey/DOM/Geometry/DOMRectList.hpp"
 #include "Krystal.Booey/DOM/Internals/ElementRareData.hpp"
 #include "Krystal.Booey/DOM/Internals/IdTargetObserverRegistry.hpp"
 #include "Krystal.Booey/DOM/Internals/PopoverData.hpp"
@@ -63,6 +66,7 @@
 #include "Krystal.Booey/DOM/Mixins/Slottable.hpp"
 #include "Krystal.Booey/DOM/Nodes/Attr.hpp"
 #include "Krystal.Booey/DOM/Nodes/DocumentFragment.hpp"
+#include "Krystal.Booey/DOM/Nodes/GetHTMLOptions.hpp"
 #include "Krystal.Booey/DOM/Nodes/HTMLDocument.hpp"
 #include "Krystal.Booey/DOM/Nodes/NamedNodeMap.hpp"
 #include "Krystal.Booey/DOM/Nodes/PseudoElement.hpp"
@@ -90,6 +94,7 @@
 #include "Krystal.Booey/HTML/Elements/HTMLSelectElement.hpp"
 #include "Krystal.Booey/HTML/Elements/HTMLTemplateElement.hpp"
 #include "Krystal.Booey/HTML/EventLoop/EventLoop.hpp"
+#include "Krystal.Booey/HTML/Sanitizer/SetHTMLOptions.hpp"
 #include "Krystal.Booey/HTML/Window.hpp"
 #include "Krystal.Booey/Infra/Namespaces.hpp"
 #include "Krystal.Booey/Infra/StringAlgorithms.hpp"
@@ -124,8 +129,8 @@
 #include "Krystal.Booey/Style/Values/Primitives/NumericTypesEvaluation.hpp"
 #include "Krystal.Booey/SVG/Elements/SVGElement.hpp"
 #include "Krystal.Core/Geometry/Quad.hpp"
+#include "Krystal.Core/Move.hpp"
 #include "Krystal.Core/Strings/ASCII.hpp"
-#include "Krystal.Core/Utils/Move.hpp"
 #include <ranges>
 
 namespace krys::boo
@@ -482,7 +487,7 @@ namespace krys::boo
       }
 
       auto documentElement = document->DocumentElement();
-      if (!documentElement || documentElement->HasNodeFlag(dom::NodeFlags::IsComputedStyleInvalid))
+      if (!documentElement || documentElement->_nodeFlags.contains(dom::NodeFlag::IsComputedStyleInvalid))
       {
         return documentElement;
       }
@@ -492,7 +497,7 @@ namespace krys::boo
       for (auto element = ShareRefPtr<const Element>(this); element;
            element = ShareRefPtr<const Element>(element->ParentElementInComposedTree()))
       {
-        if (element->HasNodeFlag(dom::NodeFlags::IsComputedStyleInvalid))
+        if (element->_nodeFlags.contains(dom::NodeFlag::IsComputedStyleInvalid))
         {
           rootmost = element;
           continue;
@@ -557,19 +562,19 @@ namespace krys::boo
       {
         auto changes = style::DetermineChanges(*existing, *style);
         changes.Remove(style::Change::NonInherited);
-        if (!changes.IsEmpty())
+        if (!changes.empty())
         {
           for (auto &child : dom::ComposedTreeChildren(*element))
           {
             if (auto *childElement = DynamicDowncast<Element>(child))
             {
-              childElement->SetNodeFlag(dom::NodeFlags::IsComputedStyleInvalid);
+              childElement->_nodeFlags.Add(dom::NodeFlag::IsComputedStyleInvalid);
             }
           }
         }
       }
       rareData.SetComputedStyle(krys::move(style));
-      element->ClearNodeFlag(dom::NodeFlags::IsComputedStyleInvalid);
+      element->_nodeFlags.Remove(dom::NodeFlag::IsComputedStyleInvalid);
 
       if (mode == ResolveComputedStyleMode::RenderedOnly && computedStyle->Display() == DisplayType::None)
       {
@@ -666,8 +671,8 @@ namespace krys::boo
 
   void Element::ResetStyleRelations() noexcept
   {
-    ClearStyleFlags(dom::NodeStyleFlags::StyleAffectedByEmpty);
-    ClearStyleFlags(dom::NodeStyleFlags::AffectedByHasWithPositionalPseudoClass);
+    _nodeStyleFlags.Remove(dom::NodeStyleFlag::StyleAffectedByEmpty);
+    _nodeStyleFlags.Remove(dom::NodeStyleFlag::AffectedByHasWithPositionalPseudoClass);
     if (!GetElementRareData())
     {
       return;
@@ -677,18 +682,20 @@ namespace krys::boo
 
   void Element::ResetChildStyleRelations() noexcept
   {
-    ClearStyleFlags(dom::NodeStyleFlags::ChildrenAffectedByFirstChildRules
-                    | dom::NodeStyleFlags::ChildrenAffectedByLastChildRules
-                    | dom::NodeStyleFlags::ChildrenAffectedByForwardPositionalRules
-                    | dom::NodeStyleFlags::ChildrenAffectedByBackwardPositionalRules);
+    _nodeStyleFlags.Remove(
+      dom::NodeStyleFlags {dom::NodeStyleFlag::ChildrenAffectedByFirstChildRules,
+                           dom::NodeStyleFlag::ChildrenAffectedByLastChildRules,
+                           dom::NodeStyleFlag::ChildrenAffectedByForwardPositionalRules,
+                           dom::NodeStyleFlag::ChildrenAffectedByBackwardPositionalRules});
   }
 
   void Element::ResetAllDescendantStyleRelations() noexcept
   {
     ResetChildStyleRelations();
 
-    ClearStyleFlags(dom::NodeStyleFlags::DescendantsAffectedByForwardPositionalRules
-                    | dom::NodeStyleFlags::DescendantsAffectedByBackwardPositionalRules);
+    _nodeStyleFlags.Remove(
+      dom::NodeStyleFlags {dom::NodeStyleFlag::DescendantsAffectedByForwardPositionalRules,
+                           dom::NodeStyleFlag::DescendantsAffectedByBackwardPositionalRules});
   }
 
   bool Element::HasDisplayContents() const noexcept
@@ -1009,7 +1016,7 @@ namespace krys::boo
     // FIXME: Ideally we would just recompute things that are actually affected by containers queries within
     // the subtree.
     Node::InvalidateStyle(style::Validity::SubtreeInvalid);
-    SetNodeFlag(dom::NodeFlags::NeedsUpdateQueryContainerDependentStyle);
+    _nodeFlags.Add(dom::NodeFlag::NeedsUpdateQueryContainerDependentStyle);
   }
 
   void Element::InvalidateForResumingQueryContainerResolution() noexcept
@@ -1031,7 +1038,7 @@ namespace krys::boo
 
   void Element::FinishParsingChildren() noexcept
   {
-    ClearNodeFlag(dom::NodeFlags::IsParsingChildren);
+    _nodeFlags.Remove(dom::NodeFlag::IsParsingChildren);
     style::ChildChangeInvalidation::InvalidateAfterFinishedParsingChildren(*this);
   }
 
@@ -1596,6 +1603,11 @@ namespace krys::boo
 
 #pragma region Animations
 
+  ExceptionOr<Ref<WebAnimation>> Element::Animate(KeyframesInput &&keyframes) noexcept
+  {
+    return Animate(krys::move(keyframes), null);
+  }
+
   ExceptionOr<Ref<WebAnimation>>
     Element::Animate(KeyframesInput &&keyframes,
                      Maybe<Variant<double, KeyframeAnimationOptions>> options) noexcept
@@ -1865,7 +1877,7 @@ namespace krys::boo
     const Maybe<style::PseudoElementIdentifier> &pseudoElementIdentifier,
     CSSAnimationCollection &&animations) noexcept
   {
-    if (animations.isEmpty() && !AnimationRareData(pseudoElementIdentifier))
+    if (animations.empty() && !AnimationRareData(pseudoElementIdentifier))
     {
       return;
     }
@@ -2022,7 +2034,7 @@ namespace krys::boo
   {
     if (_domTokenList == nullptr)
     {
-      _domTokenList = dom::ElementAlgorithms::CreateDOMTokenList(*this, u8"class");
+      _domTokenList = dom::DOMTokenList::Create(*this, u8"class");
     }
 
     return *_domTokenList;
@@ -2033,7 +2045,7 @@ namespace krys::boo
     auto &rareData = EnsureElementRareData();
     if (!rareData.PartList())
     {
-      rareData.SetPartList(dom::ElementAlgorithms::CreateDOMTokenList(*this, u8"part"));
+      rareData.SetPartList(dom::DOMTokenList::Create(*this, u8"part"));
     }
     return *rareData.PartList();
   }
@@ -2342,7 +2354,7 @@ namespace krys::boo
     // 1. Let registry be this's node document's custom element registry.
     // 2. If init["customElementRegistry"] exists, then set registry to it.
     auto registry =
-      init.CustomElementRegistry ? init.CustomElementRegistry : NodeDocument().CustomElementRegistry().get();
+      init.CustomElementRegistry ? init.CustomElementRegistry : NodeDocument().CustomElementRegistry();
 
     // 3. If registry is non-null, registry's is scoped is false, and registry is not this's node document's
     //    custom element registry, then throw a "NotSupportedError" DOMException.
@@ -2553,6 +2565,11 @@ namespace krys::boo
     return ReplaceChildrenWithFragment(*container, fragment.ReleaseValue());
   }
 
+  ExceptionOr<void> Element::SetHTML(DOMStringView html) noexcept
+  {
+    return SetHTML(html, {});
+  }
+
   ExceptionOr<void> Element::SetHTML(DOMStringView html, const html::SetHTMLOptions &options) noexcept
   {
     html::CEReactionsScope ceReactions;
@@ -2561,6 +2578,11 @@ namespace krys::boo
     return html::HTMLInsertionAlgorithms::FilterAndSetHTML(
       html::HTMLInsertionAlgorithms::TargetForHTMLInsertion(*this), html, &options.Sanitizer,
       html::FragmentParserMode::Safe);
+  }
+
+  ExceptionOr<void> Element::AppendHTML(DOMStringView html) noexcept
+  {
+    return AppendHTML(html, {});
   }
 
   ExceptionOr<void> Element::AppendHTML(DOMStringView html, const html::SetHTMLOptions &options) noexcept
@@ -2573,6 +2595,11 @@ namespace krys::boo
       html::FragmentParserMode::Safe);
   }
 
+  ExceptionOr<void> Element::PrependHTML(DOMStringView html) noexcept
+  {
+    return PrependHTML(html, {});
+  }
+
   ExceptionOr<void> Element::PrependHTML(DOMStringView html, const html::SetHTMLOptions &options) noexcept
   {
     html::CEReactionsScope ceReactions;
@@ -2581,6 +2608,11 @@ namespace krys::boo
     auto &target = html::HTMLInsertionAlgorithms::TargetForHTMLInsertion(*this);
     return html::HTMLInsertionAlgorithms::FilterAndPreInsertHTML(
       target, target.FirstChild(), html, &options.Sanitizer, html::FragmentParserMode::Safe);
+  }
+
+  ExceptionOr<void> Element::SetHTMLUnsafe(DOMStringView html) noexcept
+  {
+    return SetHTMLUnsafe(html, {});
   }
 
   ExceptionOr<void> Element::SetHTMLUnsafe(DOMStringView html,
@@ -2597,6 +2629,11 @@ namespace krys::boo
       options.Sanitizer ? &*options.Sanitizer : nullptr, html::FragmentParserMode::Unsafe);
   }
 
+  ExceptionOr<void> Element::AppendHTMLUnsafe(DOMStringView html) noexcept
+  {
+    return AppendHTMLUnsafe(html, {});
+  }
+
   ExceptionOr<void> Element::AppendHTMLUnsafe(DOMStringView html,
                                               const html::SetHTMLUnsafeOptions &options) noexcept
   {
@@ -2609,6 +2646,11 @@ namespace krys::boo
     return html::HTMLInsertionAlgorithms::FilterAndPreInsertHTML(
       html::HTMLInsertionAlgorithms::TargetForHTMLInsertion(*this), nullptr, html,
       options.Sanitizer ? &*options.Sanitizer : nullptr, html::FragmentParserMode::Unsafe);
+  }
+
+  ExceptionOr<void> Element::PrependHTMLUnsafe(DOMStringView html) noexcept
+  {
+    return PrependHTMLUnsafe(html, {});
   }
 
   ExceptionOr<void> Element::PrependHTMLUnsafe(DOMStringView html,
@@ -2626,11 +2668,21 @@ namespace krys::boo
       html::FragmentParserMode::Unsafe);
   }
 
+  ExceptionOr<void> Element::BeforeHTML(DOMStringView html) noexcept
+  {
+    return BeforeHTML(html, {});
+  }
+
   ExceptionOr<void> Element::BeforeHTML(DOMStringView html, const html::SetHTMLOptions &options) noexcept
   {
     html::CEReactionsScope ceReactions;
     return html::HTMLInsertionAlgorithms::BeforeHTML(*this, html, &options.Sanitizer,
                                                      html::FragmentParserMode::Safe);
+  }
+
+  ExceptionOr<void> Element::AfterHTML(DOMStringView html) noexcept
+  {
+    return AfterHTML(html, {});
   }
 
   ExceptionOr<void> Element::AfterHTML(DOMStringView html, const html::SetHTMLOptions &options) noexcept
@@ -2640,11 +2692,21 @@ namespace krys::boo
                                                     html::FragmentParserMode::Safe);
   }
 
+  ExceptionOr<void> Element::ReplaceWithHTML(DOMStringView html) noexcept
+  {
+    return ReplaceWithHTML(html, {});
+  }
+
   ExceptionOr<void> Element::ReplaceWithHTML(DOMStringView html, const html::SetHTMLOptions &options) noexcept
   {
     html::CEReactionsScope ceReactions;
     return html::HTMLInsertionAlgorithms::ReplaceWithHTML(*this, html, &options.Sanitizer,
                                                           html::FragmentParserMode::Safe);
+  }
+
+  ExceptionOr<void> Element::BeforeHTMLUnsafe(DOMStringView html) noexcept
+  {
+    return BeforeHTMLUnsafe(html, {});
   }
 
   ExceptionOr<void> Element::BeforeHTMLUnsafe(DOMStringView html,
@@ -2655,6 +2717,11 @@ namespace krys::boo
       *this, html, options.Sanitizer ? &*options.Sanitizer : nullptr, html::FragmentParserMode::Unsafe);
   }
 
+  ExceptionOr<void> Element::AfterHTMLUnsafe(DOMStringView html) noexcept
+  {
+    return AfterHTMLUnsafe(html, {});
+  }
+
   ExceptionOr<void> Element::AfterHTMLUnsafe(DOMStringView html,
                                              const html::SetHTMLUnsafeOptions &options) noexcept
   {
@@ -2663,12 +2730,22 @@ namespace krys::boo
       *this, html, options.Sanitizer ? &*options.Sanitizer : nullptr, html::FragmentParserMode::Unsafe);
   }
 
+  ExceptionOr<void> Element::ReplaceWithHTMLUnsafe(DOMStringView html) noexcept
+  {
+    return ReplaceWithHTMLUnsafe(html, {});
+  }
+
   ExceptionOr<void> Element::ReplaceWithHTMLUnsafe(DOMStringView html,
                                                    const html::SetHTMLUnsafeOptions &options) noexcept
   {
     html::CEReactionsScope ceReactions;
     return html::HTMLInsertionAlgorithms::ReplaceWithHTML(
       *this, html, options.Sanitizer ? &*options.Sanitizer : nullptr, html::FragmentParserMode::Unsafe);
+  }
+
+  DOMString Element::GetHTML() const noexcept
+  {
+    return GetHTML(dom::GetHTMLOptions {});
   }
 
   DOMString Element::GetHTML(dom::GetHTMLOptions options) const noexcept
@@ -3018,7 +3095,7 @@ namespace krys::boo
   void Element::SynchronizeAnimatedSVGAttributes() const noexcept
   {
     auto &svgElement = const_cast<SVGElement &>(Downcast<SVGElement>(*this));
-    svgElement.ClearNodeFlag(dom::NodeFlags::AnimatedSVGAttributesAreDirty);
+    svgElement._nodeFlags.Remove(dom::NodeFlag::AnimatedSVGAttributesAreDirty);
     svgElement.SynchronizeAllSVGAttributes();
   }
 
@@ -3183,7 +3260,7 @@ namespace krys::boo
 
     Ref<Document> document = ShareRef(NodeDocument());
     document->AddTopLayerElement(*this);
-    SetEventTargetFlag(dom::EventTargetFlags::IsInTopLayer);
+    _eventTargetFlags.Add(dom::EventTargetFlag::IsInTopLayer);
 
     document->ScheduleContentRelevancyUpdate(dom::ContentRelevancy::IsInTopLayer);
 
@@ -3232,7 +3309,7 @@ namespace krys::boo
 
     // Unable to protect the document as it may have started destruction.
     NodeDocument().RemoveTopLayerElement(*this);
-    ClearEventTargetFlag(dom::EventTargetFlags::IsInTopLayer);
+    _eventTargetFlags.Remove(dom::EventTargetFlag::IsInTopLayer);
 
     NodeDocument().ScheduleContentRelevancyUpdate(dom::ContentRelevancy::IsInTopLayer);
 
@@ -3442,7 +3519,7 @@ namespace krys::boo
   {
     if (auto relevancy = GetContentRelevancy())
     {
-      return !relevancy->IsEmpty();
+      return !relevancy->empty();
     }
     return false;
   }

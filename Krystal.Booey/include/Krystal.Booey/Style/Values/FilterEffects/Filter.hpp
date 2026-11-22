@@ -51,7 +51,7 @@ namespace krys::boo
       {
       }
 
-      KRYS_NODISCARD const FilterOperation &Get() const noexcept
+      KRYS_NODISCARD const FilterOperation &operator*() const noexcept
       {
         return *Value;
       }

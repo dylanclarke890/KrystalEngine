@@ -25,6 +25,7 @@
  */
 
 #include "Krystal.Booey/HTML/CloseWatcher/CloseWatcher.hpp"
+#include "Krystal.Booey/DOM/Abort/AbortSignal.hpp"
 #include "Krystal.Booey/DOM/Algorithms/AbortAlgorithms.hpp"
 #include "Krystal.Booey/DOM/Algorithms/EventDispatcher.hpp"
 #include "Krystal.Booey/DOM/Events/Event.hpp"
@@ -75,7 +76,7 @@ namespace krys::boo::html
     };
 
     // 3. If options["signal"] exists:
-    if (RefPtr<AbortSignal> signal = options.Signal)
+    if (auto *signal = options.Signal)
     {
       // 3.1. If options["signal"] is aborted, then destroy closeWatcher.
       if (signal->Aborted())
@@ -86,16 +87,15 @@ namespace krys::boo::html
       // 3.2. Add the following steps to options["signal"]: Destroy closeWatcher.
       else
       {
-        watcher->_signal = signal;
-        AbortAlgorithmCallback algorithm = [weakWatcher = CreateWeakPtr(watcher.get())](const Any &)
-        {
-          if (auto strongWatcher = weakWatcher.lock())
+        watcher->_signalAlgorithm = dom::AbortAlgorithms::Add(
+          [weakWatcher = CreateWeakPtr(watcher.get())](const Any &)
           {
-            strongWatcher->Destroy();
-          }
-        };
-        dom::AbortAlgorithms::Add(algorithm, *signal);
-        watcher->_signalAlgorithm = krys::move(algorithm);
+            if (auto strongWatcher = weakWatcher.lock())
+            {
+              strongWatcher->Destroy();
+            }
+          },
+          *signal);
       }
     }
 
@@ -217,9 +217,6 @@ namespace krys::boo::html
 
     _active = false;
 
-    if (_signal && _signalAlgorithm)
-    {
-      dom::AbortAlgorithms::Remove(*_signalAlgorithm, *_signal);
-    }
+    _signalAlgorithm.Remove();
   }
 }

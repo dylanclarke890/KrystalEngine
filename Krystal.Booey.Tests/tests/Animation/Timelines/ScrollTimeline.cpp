@@ -3,6 +3,7 @@
 #include "catch2/catch_test_macros.hpp"
 #include "Krystal.Booey.Tests/Animation/AnimationTestUtils.hpp"
 #include "Krystal.Booey.Tests/CSS/ValueTestUtils.hpp"
+#include "Krystal.Booey/Animation/KeyframeAnimationOptions.hpp"
 #include "Krystal.Booey/Animation/KeyframeEffect.hpp"
 #include "Krystal.Booey/Animation/WebAnimation.hpp"
 #include "Krystal.Booey/CSS/TypedOM/CSSUnitValue.hpp"
@@ -18,31 +19,6 @@ namespace krys::boo::tests
       u8"<!DOCTYPE html><style>body{margin:0}#scroller{overflow:scroll;width:100px;height:100px;"
       u8"scrollbar-width:none}#content{width:300px;height:300px}</style>"
       u8"<div id=scroller><div id=content><div id=box></div></div></div>";
-
-    KRYS_NODISCARD double Percentage(const Maybe<WebAnimationTime> &time) noexcept
-    {
-      REQUIRE(time);
-      REQUIRE(time->Percentage());
-      return *time->Percentage();
-    }
-
-    KRYS_NODISCARD KeyframesInput Fade() noexcept
-    {
-      InputKeyframe from;
-      from.Properties = {{u8"opacity", u8"0"}};
-      InputKeyframe to;
-      to.Properties = {{u8"opacity", u8"1"}};
-      return List<InputKeyframe> {krys::move(from), krys::move(to)};
-    }
-
-    /// @brief Scrolls `#scroller` to @p top, and runs a rendering update so its timelines catch up.
-    void ScrollTo(AnimationPageFixture &fixture, int32 top, int32 left = 0) noexcept
-    {
-      auto &scroller = fixture.ById(u8"scroller");
-      scroller.SetScrollTop(top);
-      scroller.SetScrollLeft(left);
-      fixture.TestFrame->UpdateRendering();
-    }
   }
 
   TEST_CASE_METHOD(css::tests::ValueFixture, "ScrollTimeline: progress from a scroller",
@@ -124,7 +100,7 @@ namespace krys::boo::tests
 
     KeyframeAnimationOptions options;
     options.Timeline = ShareRefPtr<AnimationTimeline>(timeline.get());
-    auto result = fixture.ById(u8"box").Animate(Fade(), options);
+    auto result = fixture.ById(u8"box").Animate(FadeKeyframes(), options);
     REQUIRE(result.HasValue());
     auto animation = result.ReleaseValue();
 

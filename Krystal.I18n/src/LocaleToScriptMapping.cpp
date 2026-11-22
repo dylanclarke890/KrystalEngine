@@ -30,7 +30,7 @@
  */
 
 #include "Krystal.I18n/LocaleToScriptMapping.hpp"
-#include "Krystal.Core/Types/Array.hpp"
+#include "Krystal.Core/Containers/Array.hpp"
 #include "Krystal.Core/Types/Pair.hpp"
 #include "Krystal.Text/Script.hpp"
 #include <algorithm>

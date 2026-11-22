@@ -1,7 +1,7 @@
 ﻿#include "Krystal.Core/Utils/ScopedProfiler.hpp"
 #include "Krystal.Core/Log/ILogger.hpp"
+#include "Krystal.Core/Move.hpp"
 #include "Krystal.Core/Time/Duration.hpp"
-#include "Krystal.Core/Utils/Move.hpp"
 #include <chrono>
 
 namespace krys

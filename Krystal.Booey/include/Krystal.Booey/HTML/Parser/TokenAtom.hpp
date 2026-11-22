@@ -26,12 +26,11 @@
 
 #pragma once
 
-#include "Krystal.Booey/DOM/Algorithms/NameValidation.hpp"
 #include "Krystal.Booey/DOM/Types/DOMString.hpp"
 #include "Krystal.Booey/HTML/Parser/Token.hpp"
 #include "Krystal.Core/Assert.hpp"
+#include "Krystal.Core/Move.hpp"
 #include "Krystal.Core/Numeric.hpp"
-#include "Krystal.Core/Utils/Move.hpp"
 
 namespace krys::boo::html
 {
@@ -40,7 +39,7 @@ namespace krys::boo::html
     friend class TreeBuilder;
 
   private:
-    TokenType _type : BitCount<TokenType>();
+    TokenType _type : EnumBitWidth<TokenType>;
 
     bool _isSelfClosing : 1 {false};
     bool _selfClosingTagAcknowledged : 1 {false};

@@ -1,29 +1,4 @@
 ﻿/*
- * Copyright (C) 2019-2025 Apple Inc. All rights reserved.
- *
- * Redistribution and use in source and binary forms, with or without
- * modification, are permitted provided that the following conditions
- * are met:
- * 1. Redistributions of source code must retain the above copyright
- *    notice, this list of conditions and the following disclaimer.
- * 2. Redistributions in binary form must reproduce the above copyright
- *    notice, this list of conditions and the following disclaimer in the
- *    documentation and/or other materials provided with the distribution.
- *
- * THIS SOFTWARE IS PROVIDED BY APPLE INC. AND ITS CONTRIBUTORS ``AS IS''
- * AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO,
- * THE IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR
- * PURPOSE ARE DISCLAIMED. IN NO EVENT SHALL APPLE INC. OR ITS CONTRIBUTORS
- * BE LIABLE FOR ANY DIRECT, INDIRECT, INCIDENTAL, SPECIAL, EXEMPLARY, OR
- * CONSEQUENTIAL DAMAGES (INCLUDING, BUT NOT LIMITED TO, PROCUREMENT OF
- * SUBSTITUTE GOODS OR SERVICES; LOSS OF USE, DATA, OR PROFITS; OR BUSINESS
- * INTERRUPTION) HOWEVER CAUSED AND ON ANY THEORY OF LIABILITY, WHETHER IN
- * CONTRACT, STRICT LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE)
- * ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF
- * THE POSSIBILITY OF SUCH DAMAGE.
- */
-
-/*
  * Copyright (C) 2008, 2009, 2011 Apple Inc. All rights reserved.
  * Copyright (C) 2008 Nuanti Ltd.
  *
@@ -51,6 +26,30 @@
  * (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF
  * THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
+/*
+ * Copyright (C) 2019-2025 Apple Inc. All rights reserved.
+ *
+ * Redistribution and use in source and binary forms, with or without
+ * modification, are permitted provided that the following conditions
+ * are met:
+ * 1. Redistributions of source code must retain the above copyright
+ *    notice, this list of conditions and the following disclaimer.
+ * 2. Redistributions in binary form must reproduce the above copyright
+ *    notice, this list of conditions and the following disclaimer in the
+ *    documentation and/or other materials provided with the distribution.
+ *
+ * THIS SOFTWARE IS PROVIDED BY APPLE INC. AND ITS CONTRIBUTORS ``AS IS''
+ * AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO,
+ * THE IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR
+ * PURPOSE ARE DISCLAIMED. IN NO EVENT SHALL APPLE INC. OR ITS CONTRIBUTORS
+ * BE LIABLE FOR ANY DIRECT, INDIRECT, INCIDENTAL, SPECIAL, EXEMPLARY, OR
+ * CONSEQUENTIAL DAMAGES (INCLUDING, BUT NOT LIMITED TO, PROCUREMENT OF
+ * SUBSTITUTE GOODS OR SERVICES; LOSS OF USE, DATA, OR PROFITS; OR BUSINESS
+ * INTERRUPTION) HOWEVER CAUSED AND ON ANY THEORY OF LIABILITY, WHETHER IN
+ * CONTRACT, STRICT LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE)
+ * ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF
+ * THE POSSIBILITY OF SUCH DAMAGE.
+ */
 
 #pragma once
 
@@ -59,22 +58,28 @@
 #include "Krystal.Booey/Editing/CharacterRange.hpp"
 #include "Krystal.Booey/Editing/Selection/VisiblePosition.hpp"
 #include "Krystal.Booey/Graphics/Geometry/LayoutRect.hpp"
-#include "Krystal.Core/CanMakeWeakPtr.hpp"
+#include "Krystal.Core/Containers/List.hpp"
 #include "Krystal.Core/Enum.hpp"
-#include "Krystal.Core/RefCounted.hpp"
+#include "Krystal.Core/Memory/CanMakeWeakPtr.hpp"
+#include "Krystal.Core/Memory/RefCounted.hpp"
+#include "Krystal.Core/Memory/RefPtr.hpp"
 #include "Krystal.Core/Strings/String.hpp"
 #include "Krystal.Core/TypeCast.hpp"
 #include "Krystal.Core/Types/Func.hpp"
-#include "Krystal.Core/Types/List.hpp"
 #include "Krystal.Core/Types/Maybe.hpp"
 #include "Krystal.Core/Types/Pair.hpp"
-#include "Krystal.Core/Types/RefPtr.hpp"
 
 namespace krys::boo
 {
+  class AXObject;
+  class AXObjectCache;
   class Document;
   class Element;
+  class Frame;
+  class FrameView;
   class Node;
+  class RenderObject;
+  class RenderStyle;
 
   /// @brief Why an accessibility object is being detached from its cache.
   enum class AXDetachmentType : uint8
@@ -84,6 +89,11 @@ namespace krys::boo
     ElementChanged,
   };
 
+  consteval AXDetachmentType MaxEnumValue(AXDetachmentType) noexcept
+  {
+    return AXDetachmentType::ElementChanged;
+  }
+
   /// @brief Whether an object must be in the tree, must be left out, or is left to the usual rules.
   enum class AXObjectInclusion : uint8
   {
@@ -91,6 +101,11 @@ namespace krys::boo
     IgnoreObject,
     DefaultBehavior,
   };
+
+  consteval AXObjectInclusion MaxEnumValue(AXObjectInclusion) noexcept
+  {
+    return AXObjectInclusion::DefaultBehavior;
+  }
 
   /// @brief A checkbox's, radio button's or toggle button's state.
   enum class AXButtonState : uint8
@@ -100,6 +115,11 @@ namespace krys::boo
     Mixed,
   };
 
+  consteval AXButtonState MaxEnumValue(AXButtonState) noexcept
+  {
+    return AXButtonState::Mixed;
+  }
+
   /// @brief Which way a slider, scroll bar, list and so on runs.
   enum class AXOrientation : uint8
   {
@@ -107,6 +127,11 @@ namespace krys::boo
     Vertical,
     Horizontal,
   };
+
+  consteval AXOrientation MaxEnumValue(AXOrientation) noexcept
+  {
+    return AXOrientation::Horizontal;
+  }
 
   /// @brief How one object relates to another (each relation has its reverse, such as `LabeledBy` and
   /// `LabelFor`): set up by ARIA's relation attributes, a label's control, and a cell's headers.
@@ -132,22 +157,11 @@ namespace krys::boo
     OwnedBy,
     OwnerFor,
   };
-}
 
-KRYS_DEFINE_CONTIGUOUS_ENUM_TRAITS(krys::boo::AXDetachmentType, 3uz);
-KRYS_DEFINE_CONTIGUOUS_ENUM_TRAITS(krys::boo::AXObjectInclusion, 3uz);
-KRYS_DEFINE_CONTIGUOUS_ENUM_TRAITS(krys::boo::AXButtonState, 3uz);
-KRYS_DEFINE_CONTIGUOUS_ENUM_TRAITS(krys::boo::AXOrientation, 3uz);
-KRYS_DEFINE_CONTIGUOUS_ENUM_TRAITS(krys::boo::AXRelation, 19uz);
-
-namespace krys::boo
-{
-  class AXObject;
-  class AXObjectCache;
-  class Frame;
-  class FrameView;
-  class RenderObject;
-  class RenderStyle;
+  consteval AXRelation MaxEnumValue(AXRelation) noexcept
+  {
+    return AXRelation::OwnerFor;
+  }
 
   /// @brief An accessibility object's identifier, unique within its cache.
   enum class AXId : uint64

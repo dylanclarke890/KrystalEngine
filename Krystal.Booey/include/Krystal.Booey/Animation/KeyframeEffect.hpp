@@ -34,19 +34,14 @@
 #include "Krystal.Booey/Animation/Timelines/TimelineRangeOffset.hpp"
 #include "Krystal.Booey/CSS/Properties/MutableStyleProperties.hpp"
 #include "Krystal.Booey/Graphics/Animation/IterationCompositeOperation.hpp"
+#include "Krystal.Booey/Graphics/Layers/GraphicsLayerAnimation.hpp"
 #include "Krystal.Booey/Style/Interpolation/InterpolationClient.hpp"
 #include "Krystal.Booey/Style/PseudoElementIdentifier.hpp"
 #include "Krystal.Booey/Style/Styleable.hpp"
+#include "Krystal.Core/Containers/EnumSet.hpp"
+#include "Krystal.Core/Containers/HashMap.hpp"
 #include "Krystal.Core/Maths/CompositeOperation.hpp"
-#include "Krystal.Core/Types/EnumSet.hpp"
-#include "Krystal.Core/Types/HashMap.hpp"
 #include "Krystal.Core/Types/Pair.hpp"
-
-namespace krys::boo
-{
-  class Document;
-  class Element;
-}
 
 namespace krys::boo::style
 {
@@ -56,6 +51,8 @@ namespace krys::boo::style
 
 namespace krys::boo
 {
+  class Document;
+  class Element;
   class ViewTimeline;
 
   /// @brief An animation effect that animates properties of an element, or of one of its pseudo-elements,

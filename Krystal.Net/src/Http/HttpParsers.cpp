@@ -31,8 +31,8 @@
  */
 
 #include "Krystal.Net/Http/HttpParsers.hpp"
+#include "Krystal.Core/Containers/Array.hpp"
 #include "Krystal.Core/Strings/ASCII.hpp"
-#include "Krystal.Core/Types/Array.hpp"
 
 namespace krys::net::http
 {

@@ -1,14 +1,16 @@
 ﻿#pragma once
 
 #include "Krystal.Booey/DOM/Nodes/DocumentFragment.hpp"
-#include "Krystal.Booey/DOM/Nodes/HTMLDocument.hpp"
 #include "Krystal.Booey/HTML/Parser/InputStream.hpp"
 #include "Krystal.Booey/HTML/Parser/OpenElementStack.hpp"
-#include "Krystal.Booey/HTML/Parser/Token.hpp"
-#include "Krystal.Booey/HTML/Parser/TokenAtom.hpp"
 #include "Krystal.Booey/HTML/Parser/Tokenizer.hpp"
 #include "Krystal.Booey/HTML/Parser/TreeBuilder.hpp"
 #include "Krystal.Core/Macros.hpp"
+
+namespace krys::boo
+{
+  class HTMLDocument;
+}
 
 namespace krys::boo::html
 {

@@ -21,7 +21,6 @@
 
 #pragma once
 
-#include "Krystal.Booey/Graphics/GradientColorStops.hpp"
 #include "Krystal.Booey/SVG/Elements/SVGElement.hpp"
 #include "Krystal.Booey/SVG/Properties/SVGAnimatedPropertyImpl.hpp"
 #include "Krystal.Booey/SVG/SVGTransformList.hpp"
@@ -30,6 +29,8 @@
 
 namespace krys::boo
 {
+  class GradientColorStops;
+
   enum SVGSpreadMethodType : uint8
   {
     SVGSpreadMethodUnknown = 0,

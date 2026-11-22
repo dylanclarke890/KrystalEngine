@@ -42,6 +42,11 @@ namespace krys::boo::css
     UASheet,
   };
 
+  consteval ParserMode MaxEnumValue(ParserMode) noexcept
+  {
+    return ParserMode::UASheet;
+  }
+
   KRYS_NODISCARD constexpr ParserMode StrictToParserMode(bool inStrictMode) noexcept
   {
     return inStrictMode ? ParserMode::HTMLStandard : ParserMode::HTMLQuirks;
@@ -62,5 +67,3 @@ namespace krys::boo::css
     return mode == ParserMode::SVGAttribute;
   }
 }
-
-KRYS_DEFINE_CONTIGUOUS_ENUM_TRAITS(krys::boo::css::ParserMode, 4uz);

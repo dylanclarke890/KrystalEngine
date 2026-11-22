@@ -1,6 +1,7 @@
 ﻿#include "Krystal.Booey/Style/Rules/RuleSet.hpp"
 #include "catch2/catch_test_macros.hpp"
 #include "Krystal.Booey.Tests/CSS/ValueTestUtils.hpp"
+#include "Krystal.Booey.Tests/Style/StyleTestUtils.hpp"
 #include "Krystal.Booey/CSS/Parser/ParserContext.hpp"
 #include "Krystal.Booey/CSS/Queries/MediaQueryEvaluator.hpp"
 #include "Krystal.Booey/CSS/Selectors/Selector.hpp"
@@ -15,14 +16,6 @@ namespace krys::boo::style::tests
 
   namespace
   {
-    KRYS_NODISCARD Ref<css::StyleSheetContents> ParseSheet(utf8_stringview text)
-    {
-      css::ParserContext context(css::ParserMode::HTMLStandard);
-      auto sheet = css::StyleSheetContents::Create(context);
-      sheet->ParseString(CSSOMString(text));
-      return sheet;
-    }
-
     /// @brief The rule set of @p sheet, built for a screen.
     KRYS_NODISCARD Ref<RuleSet> Build(const css::StyleSheetContents &sheet)
     {
@@ -52,11 +45,6 @@ namespace krys::boo::style::tests
         }
       }
       return texts;
-    }
-
-    KRYS_NODISCARD CSSOMStringAtom Atom(utf8_stringview string)
-    {
-      return CSSOMStringAtom(string);
     }
 
     /// @brief The only rule data in @p ruleSet whose selector is @p text, in any bucket.
@@ -279,9 +267,9 @@ namespace krys::boo::style::tests
       auto sheet = ParseSheet(u8"@starting-style { .a {} } .b {}");
       auto ruleSet = Build(*sheet);
       REQUIRE(
-        ruleSet->ClassRules(Atom(u8"a"))->front().UsedRuleTypes().Contains(UsedRuleType::StartingStyle));
+        ruleSet->ClassRules(Atom(u8"a"))->front().UsedRuleTypes().contains(UsedRuleType::StartingStyle));
       REQUIRE_FALSE(
-        ruleSet->ClassRules(Atom(u8"b"))->front().UsedRuleTypes().Contains(UsedRuleType::StartingStyle));
+        ruleSet->ClassRules(Atom(u8"b"))->front().UsedRuleTypes().contains(UsedRuleType::StartingStyle));
       REQUIRE(ruleSet->Features().HasStartingStyleRules);
     }
   }

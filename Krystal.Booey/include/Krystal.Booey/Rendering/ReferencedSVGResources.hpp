@@ -28,16 +28,11 @@
 #include "Krystal.Booey/DOM/Types/DOMString.hpp"
 #include "Krystal.Booey/HTML/Types/TagName.hpp"
 #include "Krystal.Core/Attributes.hpp"
-#include "Krystal.Core/Types/HashMap.hpp"
-#include "Krystal.Core/Types/List.hpp"
-#include "Krystal.Core/Types/RefPtr.hpp"
-#include "Krystal.Core/Types/UniquePtr.hpp"
+#include "Krystal.Core/Containers/HashMap.hpp"
+#include "Krystal.Core/Containers/List.hpp"
+#include "Krystal.Core/Memory/RefPtr.hpp"
+#include "Krystal.Core/Memory/UniquePtr.hpp"
 #include <utility>
-
-namespace krys::boo
-{
-  class Document;
-}
 
 namespace krys::boo::dom
 {
@@ -53,6 +48,7 @@ namespace krys::boo::style
 namespace krys::boo
 {
   class CSSSVGResourceElementClient;
+  class Document;
   class LegacyRenderSVGResourceClipper;
   class LegacyRenderSVGResourceContainer;
   class RenderElement;

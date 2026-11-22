@@ -31,8 +31,8 @@
 #include "Krystal.Booey/Style/Values/Sizing/MaximumSize.hpp"
 #include "Krystal.Booey/Style/Values/Sizing/MinimumSize.hpp"
 #include "Krystal.Booey/Style/Values/Sizing/PreferredSize.hpp"
-#include "Krystal.Core/RefCounted.hpp"
-#include "Krystal.Core/Types/RefPtr.hpp"
+#include "Krystal.Core/Memory/RefCounted.hpp"
+#include "Krystal.Core/Memory/RefPtr.hpp"
 
 namespace krys::boo
 {

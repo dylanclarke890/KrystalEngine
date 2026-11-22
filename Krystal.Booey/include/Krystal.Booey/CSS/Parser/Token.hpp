@@ -37,9 +37,9 @@
 #include "Krystal.Booey/CSS/Types/CSSOMString.hpp"
 #include "Krystal.Booey/CSS/Values/ValueId.hpp"
 #include "Krystal.Core/Assert.hpp"
+#include "Krystal.Core/Containers/SmallList.hpp"
 #include "Krystal.Core/Strings/String.hpp"
 #include "Krystal.Core/Strings/StringBuilder.hpp"
-#include "Krystal.Core/Types/SmallList.hpp"
 #include "Krystal.Text/Encodings/Encode.hpp"
 #include "Krystal.Text/Encodings/UTF.hpp"
 
@@ -55,12 +55,12 @@ namespace krys::boo::css
     constexpr static ValueIdStorage UncachedValueId = std::numeric_limits<ValueIdStorage>::max();
     static_assert(TotalValueKeywords < UncachedValueId);
 
-    TokenType _type : BitCount<TokenType>() {TokenType::Uninitialized};
-    BlockTokenType _blockType : BitCount<BlockTokenType>() {BlockTokenType::None};
-    HashTokenType _hashType : BitCount<HashTokenType>() {HashTokenType::Unrestricted};
+    TokenType _type : EnumBitWidth<TokenType> {TokenType::Uninitialized};
+    BlockTokenType _blockType : EnumBitWidth<BlockTokenType> {BlockTokenType::None};
+    HashTokenType _hashType : EnumBitWidth<HashTokenType> {HashTokenType::Unrestricted};
     css::NumericValueType _numericValueType
-      : BitCount<css::NumericValueType>() {css::NumericValueType::Integer};
-    NumericSignChar _numericSignChar : BitCount<NumericSignChar>() {NumericSignChar::Missing};
+      : EnumBitWidth<css::NumericValueType> {css::NumericValueType::Integer};
+    NumericSignChar _numericSignChar : EnumBitWidth<NumericSignChar> {NumericSignChar::Missing};
     double _numericValue {0.0};
     char32 _delimiter {0};
     char32 _unicodeRangeStart {0};
@@ -233,7 +233,7 @@ namespace krys::boo::css
       SmallList<char8, 32uz> unit(_codePoints.begin() + _originalTextLength, _codePoints.end());
       AppendDataInternal(text);
       _originalTextLength = static_cast<uint32>(_codePoints.size());
-      _codePoints.append(unit.begin(), unit.end());
+      _codePoints.append_range(unit);
     }
 
     /// @brief The text the token was tokenized from (see the setter).
@@ -313,7 +313,7 @@ namespace krys::boo::css
 
       auto encodeResult = krys::text::Encode<krys::text::UTF8>(codePoints);
       krys_debug_assert(encodeResult.Error == krys::text::EncodeError::None);
-      _codePoints.append(encodeResult.Output.begin(), encodeResult.Output.end());
+      _codePoints.append_range(encodeResult.Output);
     }
   };
 }

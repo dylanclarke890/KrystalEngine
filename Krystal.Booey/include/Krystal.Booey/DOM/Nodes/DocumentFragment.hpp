@@ -2,14 +2,8 @@
 
 #include "Krystal.Booey/DOM/Nodes/ContainerNode.hpp"
 #include "Krystal.Booey/DOM/Types/NodeOrString.hpp"
-#include "Krystal.Core/Types/UniquePtr.hpp"
-#include "Krystal.Core/Types/WeakPtr.hpp"
-
-namespace krys::boo
-{
-  class Document;
-  class Element;
-}
+#include "Krystal.Core/Memory/UniquePtr.hpp"
+#include "Krystal.Core/Memory/WeakPtr.hpp"
 
 namespace krys::boo::dom
 {
@@ -18,6 +12,9 @@ namespace krys::boo::dom
 
 namespace krys::boo
 {
+  class Document;
+  class Element;
+
   /// @see https://dom.spec.whatwg.org/#interface-documentfragment
   class DocumentFragment : public ContainerNode
   {

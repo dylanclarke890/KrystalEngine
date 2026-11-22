@@ -25,7 +25,7 @@ namespace krys
 
 namespace krys::boo
 {
-  using LayoutPoint = Point<LayoutUnit>;
-  using LayoutRect = Rect<LayoutUnit>;
-  using LayoutSize = Size<LayoutUnit>;
+  using LayoutPoint = krys::Point<LayoutUnit>;
+  using LayoutRect = krys::Rect<LayoutUnit>;
+  using LayoutSize = krys::Size<LayoutUnit>;
 }

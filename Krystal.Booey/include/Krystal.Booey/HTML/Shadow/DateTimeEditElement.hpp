@@ -28,8 +28,8 @@
 
 #include "Krystal.Booey/HTML/Shadow/DateTimeFieldElement.hpp"
 #include "Krystal.Booey/Platform/DateComponents.hpp"
-#include "Krystal.Core/Types/SmallList.hpp"
-#include "Krystal.Core/Types/Span.hpp"
+#include "Krystal.Core/Containers/SmallList.hpp"
+#include "Krystal.Core/Containers/Span.hpp"
 
 namespace krys::boo::html
 {

@@ -963,7 +963,7 @@ namespace krys::boo
     bool isPrinting = GetDocument().Printing();
     bool hasSelection = !isPrinting && SelectionState() != RenderObject::HighlightState::None;
     bool shouldPaintSelectionHighlight =
-      !paintInfo.PaintBehavior.Contains(PaintBehavior::SkipSelectionHighlight);
+      !paintInfo.PaintBehavior.contains(PaintBehavior::SkipSelectionHighlight);
 
     PaintInfo childPaintInfo(paintInfo);
     childPaintInfo.UpdateSubtreePaintRootForChildren(this);

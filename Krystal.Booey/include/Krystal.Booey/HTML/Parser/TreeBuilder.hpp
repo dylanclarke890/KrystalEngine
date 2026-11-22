@@ -27,7 +27,6 @@
 #pragma once
 
 #include "Krystal.Booey/DOM/Nodes/Document.hpp"
-#include "Krystal.Booey/DOM/Nodes/DocumentFragment.hpp"
 #include "Krystal.Booey/DOM/Nodes/Element.hpp"
 #include "Krystal.Booey/HTML/Elements/HTMLFormElement.hpp"
 #include "Krystal.Booey/HTML/Elements/HTMLHeadElement.hpp"
@@ -35,16 +34,17 @@
 #include "Krystal.Booey/HTML/Parser/OpenElementStack.hpp"
 #include "Krystal.Booey/HTML/Parser/StackItem.hpp"
 #include "Krystal.Booey/HTML/Parser/TokenAtom.hpp"
-#include "Krystal.Booey/HTML/Parser/Tokenizer.hpp"
 #include "Krystal.Booey/HTML/Sanitizer/SanitizerAlgorithms.hpp"
 #include "Krystal.Booey/HTML/Sanitizer/SanitizerConfig.hpp"
+#include "Krystal.Core/Containers/HashMap.hpp"
+#include "Krystal.Core/Containers/List.hpp"
 #include "Krystal.Core/Enum.hpp"
-#include "Krystal.Core/Types/HashMap.hpp"
-#include "Krystal.Core/Types/List.hpp"
 #include "Krystal.Core/Types/Maybe.hpp"
 
 namespace krys::boo::html
 {
+  class Tokenizer;
+
   enum class InsertionMode : uint8
   {
     Initial,
@@ -70,6 +70,11 @@ namespace krys::boo::html
     AfterAfterFrameset,
   };
 
+  consteval InsertionMode MaxEnumValue(InsertionMode) noexcept
+  {
+    return InsertionMode::AfterAfterFrameset;
+  }
+
   /// @see https://html.spec.whatwg.org/multipage/parsing.html#parser-scripting-mode
   enum class ParserScriptingMode : uint8
   {
@@ -78,13 +83,12 @@ namespace krys::boo::html
     Inert,
     Fragment,
   };
-}
 
-KRYS_DEFINE_CONTIGUOUS_ENUM_TRAITS(krys::boo::html::InsertionMode, 21u)
-KRYS_DEFINE_CONTIGUOUS_ENUM_TRAITS(krys::boo::html::ParserScriptingMode, 4u)
+  consteval ParserScriptingMode MaxEnumValue(ParserScriptingMode) noexcept
+  {
+    return ParserScriptingMode::Fragment;
+  }
 
-namespace krys::boo::html
-{
   /// @see https://html.spec.whatwg.org/multipage/parsing.html#special
   KRYS_NODISCARD constexpr bool IsSpecialElement(TagName tagName, Namespace tagNamespace) noexcept
   {
@@ -270,13 +274,13 @@ namespace krys::boo::html
     Tokenizer &_tokenizer;
 
     /// @see https://html.spec.whatwg.org/multipage/syntax.html#insertion-mode
-    InsertionMode _insertionMode : BitCount<InsertionMode>() {InsertionMode::Initial};
+    InsertionMode _insertionMode : EnumBitWidth<InsertionMode> {InsertionMode::Initial};
 
     /// @see https://html.spec.whatwg.org/multipage/syntax.html#original-insertion-mode
-    InsertionMode _originalInsertionMode : BitCount<InsertionMode>() {InsertionMode::Initial};
+    InsertionMode _originalInsertionMode : EnumBitWidth<InsertionMode> {InsertionMode::Initial};
 
     /// @see https://html.spec.whatwg.org/#scripting-mode
-    ParserScriptingMode _scriptingMode : BitCount<ParserScriptingMode>() {ParserScriptingMode::Normal};
+    ParserScriptingMode _scriptingMode : EnumBitWidth<ParserScriptingMode> {ParserScriptingMode::Normal};
 
     /// @see https://html.spec.whatwg.org/multipage/parsing.html#frameset-ok-flag
     bool _framesetOk : 1 {true};

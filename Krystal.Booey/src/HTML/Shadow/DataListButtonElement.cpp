@@ -36,7 +36,7 @@
 namespace krys::boo::html
 {
   DataListButtonElement::DataListButtonElement(Document &document, DataListButtonOwner &owner) noexcept
-      : HTMLDivElement(document, dom::NodeFlags::HasCustomStyleResolveCallbacks), _owner(&owner)
+      : HTMLDivElement(document, dom::NodeFlag::HasCustomStyleResolveCallbacks), _owner(&owner)
   {
   }
 

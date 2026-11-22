@@ -27,7 +27,7 @@
 
 #include "Krystal.Booey/DOM/Ranges/SimpleRange.hpp"
 #include "Krystal.Booey/Platform/Pasteboard/Pasteboard.hpp"
-#include "Krystal.Core/Types/WeakPtr.hpp"
+#include "Krystal.Core/Memory/WeakPtr.hpp"
 #include <utility>
 
 namespace krys::boo

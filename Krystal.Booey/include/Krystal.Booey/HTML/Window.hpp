@@ -32,26 +32,17 @@
 #include "Krystal.Booey/DOM/Scheduling/ScriptedAnimationController.hpp"
 #include "Krystal.Booey/DOM/Types/DOMHighResTimeStamp.hpp"
 #include "Krystal.Booey/DOM/Types/DOMString.hpp"
-#include "Krystal.Booey/DOM/Types/ExceptionOr.hpp"
 #include "Krystal.Booey/HTML/Attributes/EventHandlerAttributes.hpp"
 #include "Krystal.Booey/Page/Scrolling/ScrollOptions.hpp"
 #include "Krystal.Booey/Platform/Scrolling/ScrollTypes.hpp"
 #include "Krystal.Core/Attributes.hpp"
+#include "Krystal.Core/Containers/List.hpp"
 #include "Krystal.Core/Macros.hpp"
+#include "Krystal.Core/Memory/RefPtr.hpp"
+#include "Krystal.Core/Memory/WeakPtr.hpp"
 #include "Krystal.Core/Numeric.hpp"
-#include "Krystal.Core/Types/List.hpp"
 #include "Krystal.Core/Types/Maybe.hpp"
-#include "Krystal.Core/Types/RefPtr.hpp"
 #include "Krystal.Core/Types/Variant.hpp"
-#include "Krystal.Core/Types/WeakPtr.hpp"
-
-namespace krys::boo
-{
-  class CSSStyleDeclaration;
-  class Document;
-  class Element;
-  class MediaQueryList;
-}
 
 namespace krys::boo::dom
 {
@@ -67,8 +58,12 @@ namespace krys::boo::html
 
 namespace krys::boo
 {
+  class CSSStyleDeclaration;
   class DOMSelection;
+  class Document;
+  class Element;
   class Frame;
+  class MediaQueryList;
   class VisualViewport;
 
   /// @brief A document's window: the global object of the document a frame shows, which the window events

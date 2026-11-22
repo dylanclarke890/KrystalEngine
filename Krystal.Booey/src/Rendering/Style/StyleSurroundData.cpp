@@ -21,7 +21,7 @@
 
 #include "Krystal.Booey/Rendering/Style/StyleSurroundData.hpp"
 
-#include "Krystal.Core/Threading/NeverDestroyed.hpp"
+#include "Krystal.Core/Memory/NeverDestroyed.hpp"
 
 namespace krys::boo
 {

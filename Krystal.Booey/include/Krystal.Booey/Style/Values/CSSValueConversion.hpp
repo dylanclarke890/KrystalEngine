@@ -154,8 +154,10 @@ namespace krys::boo::style
       if (auto *list = DynamicDowncast<css::ValueList>(value);
           list && list->Separator() == css::ValueSeparator::SpaceSeparator)
       {
-        return css::SpaceSeparatedEnumSet<T>::Map(*list, [&](const css::Value &element)
-                                                  { return ConvertCSSValueToStyle<T>(state, element); });
+        return css::SpaceSeparatedEnumSet<T>(
+          std::from_range, *list
+                             | std::views::transform([&](const css::Value &element)
+                                                     { return ConvertCSSValueToStyle<T>(state, element); }));
       }
       return {ConvertCSSValueToStyle<T>(state, value)};
     }
@@ -171,8 +173,10 @@ namespace krys::boo::style
       if (auto *list = DynamicDowncast<css::ValueList>(value);
           list && list->Separator() == css::ValueSeparator::CommaSeparator)
       {
-        return css::CommaSeparatedEnumSet<T>::Map(*list, [&](const css::Value &element)
-                                                  { return ConvertCSSValueToStyle<T>(state, element); });
+        return css::CommaSeparatedEnumSet<T>(
+          std::from_range, *list
+                             | std::views::transform([&](const css::Value &element)
+                                                     { return ConvertCSSValueToStyle<T>(state, element); }));
       }
       return {ConvertCSSValueToStyle<T>(state, value)};
     }
@@ -187,8 +191,10 @@ namespace krys::boo::style
     {
       if (auto *list = DynamicDowncast<css::ValueList>(value))
       {
-        return css::SpaceSeparatedListHashSet<T>::map(*list, [&](const css::Value &element)
-                                                      { return ConvertCSSValueToStyle<T>(state, element); });
+        return css::SpaceSeparatedListHashSet<T>(
+          std::from_range, *list
+                             | std::views::transform([&](const css::Value &element)
+                                                     { return ConvertCSSValueToStyle<T>(state, element); }));
       }
       return {ConvertCSSValueToStyle<T>(state, value)};
     }
@@ -203,8 +209,10 @@ namespace krys::boo::style
     {
       if (auto *list = DynamicDowncast<css::ValueList>(value))
       {
-        return css::CommaSeparatedListHashSet<T>::map(*list, [&](const css::Value &element)
-                                                      { return ConvertCSSValueToStyle<T>(state, element); });
+        return css::CommaSeparatedListHashSet<T>(
+          std::from_range, *list
+                             | std::views::transform([&](const css::Value &element)
+                                                     { return ConvertCSSValueToStyle<T>(state, element); }));
       }
       return {ConvertCSSValueToStyle<T>(state, value)};
     }
@@ -220,9 +228,11 @@ namespace krys::boo::style
       if (auto *list = DynamicDowncast<css::ValueList>(value);
           list && list->Separator() == css::ValueSeparator::SpaceSeparator)
       {
-        return css::SpaceSeparatedFixedList<StyleType>::map(
-          *list,
-          [&](const css::Value &element) { return ConvertCSSValueToStyle<StyleType>(state, element); });
+        return css::SpaceSeparatedFixedList<StyleType>(
+          std::from_range,
+          *list
+            | std::views::transform([&](const css::Value &element)
+                                    { return ConvertCSSValueToStyle<StyleType>(state, element); }));
       }
       return {ConvertCSSValueToStyle<StyleType>(state, value)};
     }
@@ -238,9 +248,11 @@ namespace krys::boo::style
       if (auto *list = DynamicDowncast<css::ValueList>(value);
           list && list->Separator() == css::ValueSeparator::CommaSeparator)
       {
-        return css::CommaSeparatedFixedList<StyleType>::map(
-          *list,
-          [&](const css::Value &element) { return ConvertCSSValueToStyle<StyleType>(state, element); });
+        return css::CommaSeparatedFixedList<StyleType>(
+          std::from_range,
+          *list
+            | std::views::transform([&](const css::Value &element)
+                                    { return ConvertCSSValueToStyle<StyleType>(state, element); }));
       }
       return {ConvertCSSValueToStyle<StyleType>(state, value)};
     }

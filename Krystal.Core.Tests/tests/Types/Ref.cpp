@@ -1,6 +1,6 @@
-﻿#include "Krystal.Core/RefCounted.hpp"
-#include "Krystal.Core/Types/RefPtr.hpp"
-#include "Krystal.Core/Utils/Move.hpp"
+﻿#include "Krystal.Core/Memory/RefCounted.hpp"
+#include "Krystal.Core/Memory/RefPtr.hpp"
+#include "Krystal.Core/Move.hpp"
 
 #include "catch2/catch_test_macros.hpp"
 

@@ -1,9 +1,9 @@
 ﻿#pragma once
 
 #include "Krystal.Core/Attributes.hpp"
+#include "Krystal.Core/Containers/Array.hpp"
 #include "Krystal.Core/Geometry/AffineTransform.hpp"
 #include "Krystal.Core/Maths/Vector.hpp"
-#include "Krystal.Core/Types/Array.hpp"
 
 namespace krys::gfx
 {

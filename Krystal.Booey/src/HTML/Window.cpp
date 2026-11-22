@@ -57,7 +57,7 @@ namespace krys::boo
   }
 
   boo::Window::Window(boo::Document &document) noexcept
-      : EventTarget(dom::EventTargetFlags::IsWindow), _document(CreateWeakPtr(&document)),
+      : EventTarget(dom::EventTargetFlag::IsWindow), _document(CreateWeakPtr(&document)),
         _timeOrigin(html::EventLoop::Current().Now()),
         _lastActivationTimestamp(std::numeric_limits<dom::DOMHighResTimeStamp>::infinity()),
         _lastHistoryActionActivationTimestamp(std::numeric_limits<dom::DOMHighResTimeStamp>::infinity())

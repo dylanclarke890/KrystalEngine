@@ -28,11 +28,11 @@
 #include "Krystal.Booey/CSS/Values/ToLengthConversionData.hpp"
 #include "Krystal.Booey/CSS/Values/ValuePool.hpp"
 #include "Krystal.Booey/Style/Values/Primitives/LengthResolution.hpp"
-#include "Krystal.Core/Hash.hpp"
+#include "Krystal.Core/Containers/HashMap.hpp"
+#include "Krystal.Core/Hashing/FastHash.hpp"
 #include "Krystal.Core/Maths/Extras.hpp"
+#include "Krystal.Core/Memory/NeverDestroyed.hpp"
 #include "Krystal.Core/Strings/StringBuilder.hpp"
-#include "Krystal.Core/Threading/NeverDestroyed.hpp"
-#include "Krystal.Core/Types/HashMap.hpp"
 #include <algorithm>
 #include <charconv>
 
@@ -65,7 +65,7 @@ namespace krys::boo::css
     KRYS_NODISCARD HashMap<const PrimitiveValue *, CSSOMString> &SerialisedPrimitiveValues() noexcept
     {
       static NeverDestroyed<HashMap<const PrimitiveValue *, CSSOMString>> map;
-      return map.get();
+      return *map;
     }
 
     KRYS_NODISCARD PrimitiveValue *ValueFromPool(Span<AlignedStorage<PrimitiveValue>> pool,
@@ -814,22 +814,22 @@ namespace krys::boo::css
 
   bool PrimitiveValue::AddDerivedHash(size_t &seed) const noexcept
   {
-    seed = Hash::Combine(seed, PrimitiveUnitType());
+    seed = CombineFastHashes(seed, PrimitiveUnitType());
 
     switch (PrimitiveUnitType())
     {
       case UnitType::Unknown:                  break;
-      case UnitType::PropertyId:               seed = Hash::Combine(seed, _value.PropertyId); break;
-      case UnitType::ValueId:                  seed = Hash::Combine(seed, _value.ValueId); break;
+      case UnitType::PropertyId:               seed = CombineFastHashes(seed, _value.PropertyId); break;
+      case UnitType::ValueId:                  seed = CombineFastHashes(seed, _value.ValueId); break;
       case UnitType::String:
       case UnitType::CustomIdent:
-      case UnitType::FontFamily:               seed = Hash::Combine(seed, _value.String->Hash()); break;
-      case UnitType::Attr:                     seed = Hash::Combine(seed, _value.Attr); break;
-      case UnitType::Calc:                     seed = Hash::Combine(seed, _value.Calc); break;
+      case UnitType::FontFamily:               seed = CombineFastHashes(seed, _value.String->Hash()); break;
+      case UnitType::Attr:                     seed = CombineFastHashes(seed, _value.Attr); break;
+      case UnitType::Calc:                     seed = CombineFastHashes(seed, _value.Calc); break;
       case UnitType::Ident:
       case UnitType::CalcPercentageWithAngle:
       case UnitType::CalcPercentageWithLength: krys_debug_assert(false); return false;
-      default:                                 seed = Hash::Combine(seed, _value.Number); break;
+      default:                                 seed = CombineFastHashes(seed, _value.Number); break;
     }
 
     return true;

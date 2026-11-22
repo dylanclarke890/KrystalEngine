@@ -42,6 +42,7 @@
 #include "Krystal.Booey/HTML/Elements/HTMLHRElement.hpp"
 #include "Krystal.Booey/HTML/Elements/HTMLLegendElement.hpp"
 #include "Krystal.Booey/Layout/LayoutTree/LayoutBox.hpp"
+#include "Krystal.Booey/Page/Frame.hpp"
 #include "Krystal.Booey/Page/FrameView.hpp"
 #include "Krystal.Booey/Page/FrameViewLayoutContext.hpp"
 #include "Krystal.Booey/Page/Scrolling/ScrollAnchoringController.hpp"
@@ -70,10 +71,10 @@
 #include "Krystal.Booey/Rendering/Style/RenderStyle+GettersInlines.hpp"
 #include "Krystal.Booey/Rendering/SVG/Legacy/LegacyRenderSVGRoot.hpp"
 #include "Krystal.Booey/Rendering/SVG/SVGRenderSupport.hpp"
+#include "Krystal.Core/Containers/HashSet.hpp"
 #include "Krystal.Core/Geometry/AffineTransform.hpp"
 #include "Krystal.Core/Geometry/Quad.hpp"
 #include "Krystal.Core/Geometry/Rect.hpp"
-#include "Krystal.Core/Types/HashSet.hpp"
 
 namespace krys::boo
 {
@@ -82,7 +83,7 @@ namespace krys::boo
       : _node(node), _typeFlags(Is<Document>(node) ? (typeFlags | TypeFlag::IsAnonymous) : typeFlags),
         _type(type), _typeSpecificFlags(typeSpecificFlags)
   {
-    krys_debug_assert(!typeFlags.Contains(TypeFlag::IsAnonymous));
+    krys_debug_assert(!typeFlags.contains(TypeFlag::IsAnonymous));
     if (auto *renderView = node.NodeDocument().GetRenderView())
     {
       renderView->DidCreateRenderer();
@@ -333,9 +334,9 @@ namespace krys::boo
   bool RenderObject::UsesBoundaryCaching() const noexcept
   {
     return (_typeSpecificFlags.GetKind() == TypeSpecificFlags::Kind::Replaced
-            && _typeSpecificFlags.ReplacedFlags().Contains(ReplacedFlag::UsesBoundaryCaching))
+            && _typeSpecificFlags.ReplacedFlags().contains(ReplacedFlag::UsesBoundaryCaching))
            || (_typeSpecificFlags.GetKind() == TypeSpecificFlags::Kind::SVGModelObject
-               && _typeSpecificFlags.SVGFlags().Contains(SVGModelObjectFlag::UsesBoundaryCaching));
+               && _typeSpecificFlags.SVGFlags().contains(SVGModelObjectFlag::UsesBoundaryCaching));
   }
 
   RectF RenderObject::ObjectBoundingBox() const noexcept
@@ -972,7 +973,7 @@ namespace krys::boo
     auto centerPoint = LayoutPoint(transformState.MappedPoint());
     if (auto *parentAsBox = DynamicDowncast<RenderBox>(*parent))
     {
-      if (mode.Contains(MapCoordinatesMode::ApplyContainerFlip))
+      if (mode.contains(MapCoordinatesMode::ApplyContainerFlip))
       {
         if (parentAsBox->GetWritingMode().IsBlockFlipped())
         {
@@ -1053,10 +1054,10 @@ namespace krys::boo
                                             const LayoutSize &offsetInContainer,
                                             bool containerSkipped) const noexcept
   {
-    bool preserve3D = mode.Contains(MapCoordinatesMode::UseTransforms) && ParticipatesInPreserve3D();
+    bool preserve3D = mode.contains(MapCoordinatesMode::UseTransforms) && ParticipatesInPreserve3D();
     auto accumulation = preserve3D ? TransformState::TransformAccumulation::AccumulateTransform
                                    : TransformState::TransformAccumulation::FlattenTransform;
-    if (mode.Contains(MapCoordinatesMode::UseTransforms) && ShouldUseTransformFromContainer(container))
+    if (mode.contains(MapCoordinatesMode::UseTransforms) && ShouldUseTransformFromContainer(container))
     {
       TransformationMatrix matrix;
       GetTransformFromContainer(offsetInContainer, matrix);
@@ -1172,7 +1173,7 @@ namespace krys::boo
       auto textQuads = renderer->AbsoluteQuadsForRange(static_cast<uint32>(offsetRange.Start),
                                                        static_cast<uint32>(offsetRange.End), behavior);
 
-      if (behavior.Contains(RenderObject::BoundingRectBehavior::RespectClipping))
+      if (behavior.contains(RenderObject::BoundingRectBehavior::RespectClipping))
       {
         auto absoluteClippedOverflowRect = RectF(renderer->AbsoluteClippedOverflowRectForRepaint());
         List<RectF> rects;
@@ -1213,7 +1214,7 @@ namespace krys::boo
 
       (void)range.Start.GetDocument().UpdateLayoutIgnorePendingStylesheets();
 
-      bool useVisibleBounds = behavior.Contains(RenderObject::BoundingRectBehavior::UseVisibleBounds);
+      bool useVisibleBounds = behavior.contains(RenderObject::BoundingRectBehavior::UseVisibleBounds);
 
       HashSet<const Element *> selectedElementsSet;
       for (auto &node : dom::IntersectingNodesWithDeprecatedZeroOffsetStartQuirk(range))
@@ -1297,7 +1298,7 @@ namespace krys::boo
         }
       }
 
-      if (behavior.Contains(RenderObject::BoundingRectBehavior::IgnoreTinyRects))
+      if (behavior.contains(RenderObject::BoundingRectBehavior::IgnoreTinyRects))
       {
         std::erase_if(rects, [](const RectF &rect) { return rect.Area() <= 1; });
       }
@@ -1904,7 +1905,7 @@ namespace krys::boo
         adjustedRects, container, context);
       if (isEmpty)
       {
-        if (context.Options.Contains(VisibleRectContext::Option::UseEdgeInclusiveIntersection))
+        if (context.Options.contains(VisibleRectContext::Option::UseEdgeInclusiveIntersection))
         {
           return null;
         }

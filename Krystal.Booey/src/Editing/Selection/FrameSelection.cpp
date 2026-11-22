@@ -408,7 +408,7 @@ namespace krys::boo
       SetNodeFlags(_selection, false);
       _selection = newSelection;
       SetNodeFlags(_selection, true);
-      UpdateOrDisassociateLiveRange(options.Contains(SetSelectionOption::MaintainLiveRange));
+      UpdateOrDisassociateLiveRange(options.contains(SetSelectionOption::MaintainLiveRange));
       return false;
     }
 
@@ -425,11 +425,11 @@ namespace krys::boo
     }
     krys_debug_assert(document->Frame());
 
-    if (options.Contains(SetSelectionOption::CloseTyping))
+    if (options.contains(SetSelectionOption::CloseTyping))
     {
       TypingCommand::CloseTyping(*document);
     }
-    if (options.Contains(SetSelectionOption::ClearTypingStyle))
+    if (options.contains(SetSelectionOption::ClearTypingStyle))
     {
       ClearTypingStyle();
     }
@@ -438,7 +438,7 @@ namespace krys::boo
     SetNodeFlags(_selection, false);
     _selection = newSelection;
     SetNodeFlags(_selection, true);
-    UpdateOrDisassociateLiveRange(options.Contains(SetSelectionOption::MaintainLiveRange));
+    UpdateOrDisassociateLiveRange(options.contains(SetSelectionOption::MaintainLiveRange));
 
     // Selection offsets should increase when LF is inserted before the caret in InsertLineBreakCommand. See
     // <https://webkit.org/b/56061>.
@@ -449,7 +449,7 @@ namespace krys::boo
     if (textControl)
     {
       shouldScheduleSelectionChangeEvent =
-        textControl->SelectionChanged(options.Contains(SetSelectionOption::FireSelectEvent));
+        textControl->SelectionChanged(options.contains(SetSelectionOption::FireSelectEvent));
     }
 
     if (!willMutateSelection)
@@ -459,7 +459,7 @@ namespace krys::boo
 
     SetCaretRectNeedsUpdate();
 
-    if (!newSelection.IsNone() && !options.Contains(SetSelectionOption::DoNotSetFocus))
+    if (!newSelection.IsNone() && !options.contains(SetSelectionOption::DoNotSetFocus))
     {
       auto *oldFocusedElement = document->FocusedElement();
       SetFocusedElementIfNeeded(options);
@@ -477,7 +477,7 @@ namespace krys::boo
     // Always clear the x position used for vertical arrow navigation.
     // It will be restored by the vertical arrow navigation code if necessary.
     _xPosForVerticalArrowNavigation = null;
-    if (!options.Contains(SetSelectionOption::DoNotNotifyEditorClients))
+    if (!options.contains(SetSelectionOption::DoNotNotifyEditorClients))
     {
       document->GetEditor().RespondToChangedSelection(oldSelection, options);
     }
@@ -513,15 +513,15 @@ namespace krys::boo
       return;
     }
 
-    if (options.Contains(SetSelectionOption::RevealSelectionUpToMainFrame))
+    if (options.contains(SetSelectionOption::RevealSelectionUpToMainFrame))
     {
       _selectionRevealMode = SelectionRevealMode::RevealUpToMainFrame;
     }
-    else if (options.Contains(SetSelectionOption::RevealSelection))
+    else if (options.contains(SetSelectionOption::RevealSelection))
     {
       _selectionRevealMode = SelectionRevealMode::Reveal;
     }
-    else if (options.Contains(SetSelectionOption::DelegateMainFrameScroll))
+    else if (options.contains(SetSelectionOption::DelegateMainFrameScroll))
     {
       _selectionRevealMode = SelectionRevealMode::DelegateMainFrameScroll;
     }
@@ -552,18 +552,18 @@ namespace krys::boo
       return;
     }
 
-    if (!options.Contains(SetSelectionOption::IsUserTriggered))
+    if (!options.contains(SetSelectionOption::IsUserTriggered))
     {
       return;
     }
 
     UpdateAndRevealSelection(
-      options.Contains(SetSelectionOption::SmoothScroll) ? ScrollBehavior::Smooth : ScrollBehavior::Instant,
-      options.Contains(SetSelectionOption::RevealSelectionBounds) ? RevealExtentOption::DoNotRevealExtent
+      options.contains(SetSelectionOption::SmoothScroll) ? ScrollBehavior::Smooth : ScrollBehavior::Instant,
+      options.contains(SetSelectionOption::RevealSelectionBounds) ? RevealExtentOption::DoNotRevealExtent
                                                                   : RevealExtentOption::RevealExtent,
-      options.Contains(SetSelectionOption::ForceCenterScroll) ? ForceCenterScroll::Yes
+      options.contains(SetSelectionOption::ForceCenterScroll) ? ForceCenterScroll::Yes
                                                               : ForceCenterScroll::No,
-      options.Contains(SetSelectionOption::OnlyAllowForwardScrolling) ? OnlyAllowForwardScrolling::Yes
+      options.contains(SetSelectionOption::OnlyAllowForwardScrolling) ? OnlyAllowForwardScrolling::Yes
                                                                       : OnlyAllowForwardScrolling::No);
   }
 
@@ -2661,7 +2661,7 @@ namespace krys::boo
   void FrameSelection::UpdateCaretVisibility(ShouldUpdateAppearance doAppearanceUpdate) noexcept
   {
     auto visibility =
-      _caretVisibilitySuppressionReasons.IsEmpty() ? CaretVisibility::Visible : CaretVisibility::Hidden;
+      _caretVisibilitySuppressionReasons.empty() ? CaretVisibility::Visible : CaretVisibility::Hidden;
 
     if (GetCaretVisibility() == visibility)
     {
@@ -2693,7 +2693,7 @@ namespace krys::boo
       if (auto *focusable = html::FocusAlgorithms::ClickFocusableInclusiveAncestor(*target))
       {
         dom::FocusOptions focusOptions;
-        if (options.Contains(SetSelectionOption::ForBindings))
+        if (options.contains(SetSelectionOption::ForBindings))
         {
           focusOptions.Trigger = dom::FocusTrigger::Bindings;
         }

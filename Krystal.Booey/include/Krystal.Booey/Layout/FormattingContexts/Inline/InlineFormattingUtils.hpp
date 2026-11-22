@@ -35,8 +35,8 @@
 #include "Krystal.Booey/Layout/FormattingContexts/Inline/LineLayoutResult.hpp"
 #include "Krystal.Booey/Text/WritingMode.hpp"
 #include "Krystal.Core/Attributes.hpp"
+#include "Krystal.Core/Containers/Span.hpp"
 #include "Krystal.Core/Types/Maybe.hpp"
-#include "Krystal.Core/Types/Span.hpp"
 
 namespace krys::boo
 {

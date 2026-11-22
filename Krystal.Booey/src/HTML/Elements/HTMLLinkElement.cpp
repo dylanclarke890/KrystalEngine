@@ -31,6 +31,7 @@
 #include "Krystal.Booey/DOM/Algorithms/ElementAlgorithms.hpp"
 #include "Krystal.Booey/DOM/Algorithms/EventDispatcher.hpp"
 #include "Krystal.Booey/DOM/Algorithms/TreeQueries.hpp"
+#include "Krystal.Booey/DOM/Collections/DOMTokenList.hpp"
 #include "Krystal.Booey/DOM/Events/EventNames.hpp"
 #include "Krystal.Booey/DOM/Nodes/Document.hpp"
 #include "Krystal.Booey/HTML/Algorithms/RenderBlocking.hpp"
@@ -43,8 +44,8 @@
 #include "Krystal.Booey/Page/FrameView.hpp"
 #include "Krystal.Booey/Style/ResolveForDocument.hpp"
 #include "Krystal.Booey/Style/Scope/Scope.hpp"
+#include "Krystal.Core/Memory/NeverDestroyed.hpp"
 #include "Krystal.Core/Strings/ASCII.hpp"
-#include "Krystal.Core/Threading/NeverDestroyed.hpp"
 
 namespace krys::boo
 {
@@ -805,15 +806,14 @@ namespace krys::boo
   {
     if (!_relList)
     {
-      _relList = dom::ElementAlgorithms::CreateDOMTokenList(
-        *this, u8"rel",
-        // The link types Booey processes.
-        [](Document &, DOMStringView token)
-        {
-          return text::IsASCIICaselessEqual(token, u8"stylesheet")
-                 || text::IsASCIICaselessEqual(token, u8"alternate")
-                 || text::IsASCIICaselessEqual(token, u8"icon");
-        });
+      _relList = dom::DOMTokenList::Create(*this, u8"rel",
+                                           // The link types Booey processes.
+                                           [](Document &, DOMStringView token)
+                                           {
+                                             return text::IsASCIICaselessEqual(token, u8"stylesheet")
+                                                    || text::IsASCIICaselessEqual(token, u8"alternate")
+                                                    || text::IsASCIICaselessEqual(token, u8"icon");
+                                           });
     }
 
     return *_relList;
@@ -863,7 +863,7 @@ namespace krys::boo
   {
     if (!_sizes)
     {
-      _sizes = dom::ElementAlgorithms::CreateDOMTokenList(*this, u8"sizes");
+      _sizes = dom::DOMTokenList::Create(*this, u8"sizes");
     }
 
     return *_sizes;
@@ -903,9 +903,8 @@ namespace krys::boo
   {
     if (!_blocking)
     {
-      _blocking =
-        dom::ElementAlgorithms::CreateDOMTokenList(*this, u8"blocking", [](Document &, DOMStringView token)
-                                                   { return text::IsASCIICaselessEqual(token, u8"render"); });
+      _blocking = dom::DOMTokenList::Create(*this, u8"blocking", [](Document &, DOMStringView token)
+                                            { return text::IsASCIICaselessEqual(token, u8"render"); });
     }
 
     return *_blocking;

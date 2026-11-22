@@ -25,13 +25,7 @@
 #pragma once
 
 #include "Krystal.Booey/HTML/Elements/HTMLElement.hpp"
-#include "Krystal.Core/Types/WeakPtr.hpp"
-
-namespace krys::boo
-{
-  class HTMLFormElement;
-  class HTMLSelectElement;
-}
+#include "Krystal.Core/Memory/WeakPtr.hpp"
 
 namespace krys::boo::html
 {
@@ -44,6 +38,9 @@ namespace krys::boo::html
 
 namespace krys::boo
 {
+  class HTMLFormElement;
+  class HTMLSelectElement;
+
   /// @see https://html.spec.whatwg.org/#htmloptionelement
   class HTMLOptionElement : public HTMLElement
   {

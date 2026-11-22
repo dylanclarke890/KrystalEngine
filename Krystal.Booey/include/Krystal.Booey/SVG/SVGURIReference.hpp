@@ -26,14 +26,8 @@
 #include "Krystal.Booey/SVG/Properties/SVGAnimatedString.hpp"
 #include "Krystal.Core/Attributes.hpp"
 #include "Krystal.Core/Macros.hpp"
+#include "Krystal.Core/Memory/RefPtr.hpp"
 #include "Krystal.Core/Types/Maybe.hpp"
-#include "Krystal.Core/Types/RefPtr.hpp"
-
-namespace krys::boo
-{
-  class Document;
-  class Element;
-}
 
 namespace krys::boo::dom
 {
@@ -48,7 +42,10 @@ namespace krys::boo::style
 
 namespace krys::boo
 {
+  class Document;
+  class Element;
   class SVGElement;
+
   template <typename TOwner, typename... TBaseTypes>
   class SVGPropertyOwnerRegistry;
 
@@ -84,11 +81,11 @@ namespace krys::boo
 
     KRYS_NODISCARD static TargetElementResult
       TargetElementFromIRIString(DOMStringView iri, const dom::DocumentOrShadowRoot &treeScope,
-                                 const RefPtr<Document> &externalDocument = nullptr) noexcept;
+                                 Document *externalDocument = nullptr) noexcept;
 
     KRYS_NODISCARD static TargetElementResult
       TargetElementFromIRIString(const style::Url &iri, const dom::DocumentOrShadowRoot &treeScope,
-                                 const RefPtr<Document> &externalDocument = nullptr) noexcept;
+                                 Document *externalDocument = nullptr) noexcept;
 
     KRYS_NODISCARD static bool IsExternalURIReference(DOMStringView uri, const Document &document) noexcept;
 

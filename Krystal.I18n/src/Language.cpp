@@ -24,8 +24,8 @@
  */
 
 #include "Krystal.I18n/Language.hpp"
+#include "Krystal.Core/Move.hpp"
 #include "Krystal.Core/Strings/ASCII.hpp"
-#include "Krystal.Core/Utils/Move.hpp"
 #include "Krystal.I18n/Locale.hpp"
 
 namespace krys::i18n

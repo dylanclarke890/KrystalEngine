@@ -48,7 +48,7 @@
 #include "Krystal.Booey/Rendering/SVG/Legacy/LegacyRenderSVGResourceContainer.hpp"
 #include "Krystal.Booey/Style/Scope/Scope.hpp"
 #include "Krystal.Booey/SVG/Elements/SVGElement.hpp"
-#include "Krystal.Core/Types/HashMap.hpp"
+#include "Krystal.Core/Containers/HashMap.hpp"
 #include <algorithm>
 
 namespace krys::boo::dom
@@ -249,8 +249,8 @@ namespace krys::boo::dom
   List<WeakPtr<SVGElement>> DocumentOrShadowRoot::RemovePendingSVGResource(const DOMStringAtom &id) noexcept
   {
     auto &pendingResources = GetSVGResourcesMap().PendingResources;
-    auto node = pendingResources.extract(id);
-    return node ? krys::move(node.mapped()) : WeakSVGElementSet {};
+    auto entry = pendingResources.extract(id);
+    return entry ? krys::move(entry->second) : WeakSVGElementSet {};
   }
 
   void DocumentOrShadowRoot::MarkPendingSVGResourcesForRemoval(const DOMStringAtom &id) noexcept
@@ -303,8 +303,8 @@ namespace krys::boo::dom
   }
 
   DocumentOrShadowRoot::DocumentOrShadowRoot(ContainerNode &rootNode,
-                                             RefPtr<html::CustomElementRegistry> &&registry) noexcept
-      : _rootNode(rootNode), _customElementRegistry(krys::move(registry)),
+                                             html::CustomElementRegistry *registry) noexcept
+      : _rootNode(rootNode), _customElementRegistry(ShareRefPtr(registry)),
         _idTargetObserverRegistry(CreateUnique<dom::IdTargetObserverRegistry>()),
         _radioButtonGroups(CreateUnique<html::RadioButtonGroups>())
   {
@@ -423,15 +423,6 @@ namespace krys::boo::dom
   }
 
 #pragma region DocumentOrShadowRoot Mixin (DOM)
-
-  RefPtr<html::CustomElementRegistry> DocumentOrShadowRoot::CustomElementRegistry() const noexcept
-  {
-    // 1. If this is a document, then return this's custom element registry.
-    // 2. Assert: this is a ShadowRoot node.
-    // 3. Return this's custom element registry.
-    // Documents and shadow roots keep their registry here alike.
-    return _customElementRegistry;
-  }
 
   void DocumentOrShadowRoot::SetCustomElementRegistry(RefPtr<html::CustomElementRegistry> &&registry) noexcept
   {

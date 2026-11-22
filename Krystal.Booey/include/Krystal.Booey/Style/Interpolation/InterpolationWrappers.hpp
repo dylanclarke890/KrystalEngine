@@ -34,16 +34,16 @@
   #error "Please do not include this file anywhere except from generated code."
 #endif
 
+#include "Krystal.Booey/Rendering/Style/RenderStyle+GettersInlines.hpp"
+#include "Krystal.Booey/Rendering/Style/RenderStyle+SettersInlines.hpp"
 #include "Krystal.Booey/Rendering/Style/RenderStyle.hpp"
-#include "Krystal.Booey/Rendering/Style/RenderStyleProperties+GettersInlines.hpp"
-#include "Krystal.Booey/Rendering/Style/RenderStyleProperties+SettersInlines.hpp"
 #include "Krystal.Booey/Style/Interpolation/InterpolationContext.hpp"
 #include "Krystal.Booey/Style/Interpolation/InterpolationFunctions.hpp"
 #include "Krystal.Booey/Style/Interpolation/InterpolationWrapperBase.hpp"
 #include "Krystal.Booey/Style/Values/Primitives/LengthWrapperBlending.hpp"
 #include "Krystal.Booey/Style/Values/Primitives/NumericTypesBlending.hpp"
 #include "Krystal.Booey/Style/Values/Types.hpp"
-#include "Krystal.Core/Types/List.hpp"
+#include "Krystal.Core/Containers/List.hpp"
 #include <algorithm>
 
 namespace krys::boo::style::interpolation

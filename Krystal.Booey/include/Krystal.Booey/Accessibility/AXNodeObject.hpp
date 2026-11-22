@@ -30,9 +30,9 @@
 
 #include "Krystal.Booey/Accessibility/AXObject.hpp"
 #include "Krystal.Booey/HTML/Types/TagName.hpp"
-#include "Krystal.Core/Types/Span.hpp"
-#include "Krystal.Core/Types/UniquePtr.hpp"
-#include "Krystal.Core/Types/WeakPtr.hpp"
+#include "Krystal.Core/Containers/Span.hpp"
+#include "Krystal.Core/Memory/UniquePtr.hpp"
+#include "Krystal.Core/Memory/WeakPtr.hpp"
 
 namespace krys::boo
 {

@@ -21,9 +21,9 @@
 
 #pragma once
 
-#include "Krystal.Core/Types/HashMap.hpp"
-#include "Krystal.Core/Types/List.hpp"
-#include "Krystal.Core/Types/SmallList.hpp"
+#include "Krystal.Core/Containers/HashMap.hpp"
+#include "Krystal.Core/Containers/List.hpp"
+#include "Krystal.Core/Containers/SmallList.hpp"
 #include "Krystal.Text/Bidi.hpp"
 #include "Krystal.Text/BidiContext.hpp"
 #include "Krystal.Text/BidiRunList.hpp"

@@ -1,9 +1,9 @@
 ﻿#include "Krystal.Gfx/Render2D/Renderer2D.hpp"
 #include "catch2/catch_test_macros.hpp"
-#include "Krystal.Core/Types/Array.hpp"
-#include "Krystal.Core/Types/List.hpp"
-#include "Krystal.Core/Types/Span.hpp"
-#include "Krystal.Core/Utils/Move.hpp"
+#include "Krystal.Core/Containers/Array.hpp"
+#include "Krystal.Core/Containers/List.hpp"
+#include "Krystal.Core/Containers/Span.hpp"
+#include "Krystal.Core/Move.hpp"
 #include "Krystal.Gfx.Tests/TestDevice.hpp"
 #include "Krystal.Gfx/Render2D/PathRasteriser.hpp"
 #include <algorithm>
@@ -98,11 +98,12 @@ namespace krys::gfx::tests
         {
           _device->Destroy(_target);
         }
-        auto target = _device->CreateTexture({.Format = format,
-                                              .Width = width,
-                                              .Height = height,
-                                              .Usage = TextureUsage::RenderTarget | TextureUsage::Sampled,
-                                              .DebugName = u8"Target"});
+        auto target = _device->CreateTexture(
+          {.Format = format,
+           .Width = width,
+           .Height = height,
+           .Usage = EnumSet<TextureUsage> {TextureUsage::RenderTarget, TextureUsage::Sampled},
+           .DebugName = u8"Target"});
         REQUIRE(target.has_value());
         _target = *target;
         _width = width;
@@ -2800,11 +2801,12 @@ namespace krys::gfx::tests
                    "[Gfx][Render2D][GPU]")
   {
     UseTarget(4u, 4u);
-    auto offscreen = _device->CreateTexture({.Format = TextureFormat::RGBA8Unorm,
-                                             .Width = 2u,
-                                             .Height = 2u,
-                                             .Usage = TextureUsage::RenderTarget | TextureUsage::Sampled,
-                                             .DebugName = u8"Offscreen"});
+    auto offscreen = _device->CreateTexture(
+      {.Format = TextureFormat::RGBA8Unorm,
+       .Width = 2u,
+       .Height = 2u,
+       .Usage = EnumSet<TextureUsage> {TextureUsage::RenderTarget, TextureUsage::Sampled},
+       .DebugName = u8"Offscreen"});
     REQUIRE(offscreen.has_value());
     _images.push_back(*offscreen);
     auto other = Renderer2D::Create(*_device);

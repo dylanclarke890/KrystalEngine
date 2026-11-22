@@ -27,7 +27,7 @@
 #include "Krystal.Booey/Platform/Pasteboard/DragData.hpp"
 #include "Krystal.Booey/Platform/Pasteboard/PasteboardStrategy.hpp"
 #include "Krystal.Booey/Platform/PlatformStrategies.hpp"
-#include "Krystal.Core/Types/ListHashSet.hpp"
+#include "Krystal.Core/Containers/ListHashSet.hpp"
 #include "Krystal.Image/ImageDecoder.hpp"
 #include <algorithm>
 #include <array>
@@ -455,22 +455,22 @@ namespace krys::boo
         {
           for (auto &type : customData.OrderedTypes())
           {
-            types.add(type);
+            types.insert(type);
           }
         }
       }
 
       if (_selectionData->HasText())
       {
-        types.add(u8"text/plain");
+        types.insert(u8"text/plain");
       }
       if (_selectionData->HasMarkup())
       {
-        types.add(u8"text/html");
+        types.insert(u8"text/html");
       }
       if (_selectionData->HasURIList())
       {
-        types.add(u8"text/uri-list");
+        types.insert(u8"text/uri-list");
       }
 
       return List<utf8_string>(types.begin(), types.end());

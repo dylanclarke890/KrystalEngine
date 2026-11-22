@@ -4,12 +4,15 @@
 #include "Krystal.Booey/Animation/Events/AnimationEventBase.hpp"
 #include "Krystal.Booey/Animation/Events/CSSAnimationEvent.hpp"
 #include "Krystal.Booey/Animation/Events/CSSTransitionEvent.hpp"
+#include "Krystal.Booey/Animation/KeyframeEffect.hpp"
+#include "Krystal.Booey/Animation/WebAnimation.hpp"
 #include "Krystal.Booey/DOM/Events/EventListener.hpp"
 #include "Krystal.Booey/DOM/Nodes/Element.hpp"
 #include "Krystal.Booey/DOM/Nodes/HTMLDocument.hpp"
 #include "Krystal.Booey/HTML/EventLoop/EventLoop.hpp"
 #include "Krystal.Booey/HTML/Parser/DocumentParser.hpp"
 #include "Krystal.Booey/Page/Frame.hpp"
+#include "Krystal.Booey/Page/FrameView.hpp"
 #include "Krystal.Booey/Rendering/RenderElement.hpp"
 #include "Krystal.Booey/Style/Scope/Scope.hpp"
 #include <string>
@@ -114,4 +117,44 @@ namespace krys::boo::tests
       }
     }
   };
+
+  /// @brief Keyframes that fade opacity in from 0 to 1.
+  KRYS_NODISCARD inline KeyframesInput FadeKeyframes() noexcept
+  {
+    InputKeyframe from;
+    from.Properties = {{u8"opacity", u8"0"}};
+    InputKeyframe to;
+    to.Properties = {{u8"opacity", u8"1"}};
+    return List<InputKeyframe> {krys::move(from), krys::move(to)};
+  }
+
+  /// @brief The percentage @p time holds, which it must.
+  KRYS_NODISCARD inline double Percentage(const Maybe<WebAnimationTime> &time) noexcept
+  {
+    REQUIRE(time);
+    REQUIRE(time->Percentage());
+    return *time->Percentage();
+  }
+
+  /// @brief Scrolls `#scroller` to @p top and @p left, and runs a rendering update so its timelines catch up.
+  inline void ScrollTo(AnimationPageFixture &fixture, int32 top, int32 left = 0) noexcept
+  {
+    auto &scroller = fixture.ById(u8"scroller");
+    scroller.SetScrollTop(top);
+    scroller.SetScrollLeft(left);
+    fixture.TestFrame->UpdateRendering();
+  }
+
+  /// @brief The vertical scroll position of @p fixture's frame view.
+  KRYS_NODISCARD inline int32 ViewY(AnimationPageFixture &fixture) noexcept
+  {
+    return fixture.TestFrame->View()->GetScrollPosition().Y();
+  }
+
+  /// @brief Runs two frames, 1.6 seconds apart, so that smooth scroll animations finish.
+  inline void FinishScrollAnimations(AnimationPageFixture &fixture) noexcept
+  {
+    fixture.Frame();
+    fixture.Frame(std::chrono::milliseconds(1'600));
+  }
 }

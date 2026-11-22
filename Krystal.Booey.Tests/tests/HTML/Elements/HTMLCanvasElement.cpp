@@ -2,6 +2,7 @@
 #include "catch2/catch_test_macros.hpp"
 #include "Krystal.Booey.Tests/HTML/FakeEngineTexture.hpp"
 #include "Krystal.Booey.Tests/Loader/PageInFrameFixture.hpp"
+#include "Krystal.Booey.Tests/StringTestUtils.hpp"
 #include "Krystal.Booey/HTML/Algorithms/FocusAlgorithms.hpp"
 #include "Krystal.Booey/HTML/Canvas/CanvasRenderingContext2D.hpp"
 #include "Krystal.Booey/HTML/Canvas/EngineTextureRenderingContext.hpp"
@@ -21,17 +22,6 @@ namespace krys::boo::tests
         return Downcast<HTMLCanvasElement>(ById(id));
       }
     };
-
-    KRYS_NODISCARD size_t Count(const utf8_string &text, utf8_stringview part) noexcept
-    {
-      size_t count = 0;
-      for (auto position = text.find(part); position != utf8_string::npos;
-           position = text.find(part, position + 1))
-      {
-        ++count;
-      }
-      return count;
-    }
   }
 
   TEST_CASE("HTMLCanvasElement: the width and height and the canvas's size",

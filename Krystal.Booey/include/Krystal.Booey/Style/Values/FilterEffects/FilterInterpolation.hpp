@@ -92,15 +92,16 @@ namespace krys::boo::style
       auto fromLength = from.size();
       auto toLength = to.size();
 
-      return FilterList {FilterList::Container::createWithSizeFromGenerator(fromLength + toLength,
-                                                                            [&](auto index)
-                                                                            {
-                                                                              if (index < fromLength)
-                                                                              {
-                                                                                return from[index];
-                                                                              }
-                                                                              return to[index - fromLength];
-                                                                            })};
+      return FilterList {FilterList::Container(std::from_range, std::views::iota(0uz, fromLength + toLength)
+                                                                  | std::views::transform(
+                                                                    [&](auto index)
+                                                                    {
+                                                                      if (index < fromLength)
+                                                                      {
+                                                                        return from[index];
+                                                                      }
+                                                                      return to[index - fromLength];
+                                                                    }))};
     }
 
     if (context.IsDiscrete)
@@ -113,47 +114,49 @@ namespace krys::boo::style
     auto toLength = to.size();
     auto maxLength = std::max(fromLength, toLength);
 
-    return FilterList {FilterList::Container::createWithSizeFromGenerator(
-      maxLength,
-      [&](auto index)
-      {
-        RefPtr<FilterOperation> fromOp =
-          index < fromLength ? RefPtr<FilterOperation> {from[index].Value} : nullptr;
-        RefPtr<FilterOperation> toOp = index < toLength ? RefPtr<FilterOperation> {to[index].Value} : nullptr;
+    return FilterList {FilterList::Container(
+      std::from_range, std::views::iota(0uz, maxLength)
+                         | std::views::transform(
+                           [&](auto index)
+                           {
+                             RefPtr<FilterOperation> fromOp =
+                               index < fromLength ? RefPtr<FilterOperation> {from[index].Value} : nullptr;
+                             RefPtr<FilterOperation> toOp =
+                               index < toLength ? RefPtr<FilterOperation> {to[index].Value} : nullptr;
 
-        RefPtr<FilterOperation> blendedOp;
-        if (toOp)
-        {
-          blendedOp = toOp->Blend(fromOp.get(), context);
-        }
-        else if (fromOp)
-        {
-          blendedOp = fromOp->Blend(nullptr, context, true);
-        }
+                             RefPtr<FilterOperation> blendedOp;
+                             if (toOp)
+                             {
+                               blendedOp = toOp->Blend(fromOp.get(), context);
+                             }
+                             else if (fromOp)
+                             {
+                               blendedOp = fromOp->Blend(nullptr, context, true);
+                             }
 
-        if (blendedOp)
-        {
-          return FilterValue {Ref<FilterOperation> {krys::move(blendedOp)}};
-        }
+                             if (blendedOp)
+                             {
+                               return FilterValue {Ref<FilterOperation> {krys::move(blendedOp)}};
+                             }
 
-        if (context.Progress > 0.5)
-        {
-          if (toOp)
-          {
-            return FilterValue {Ref<FilterOperation> {krys::move(toOp)}};
-          }
+                             if (context.Progress > 0.5)
+                             {
+                               if (toOp)
+                               {
+                                 return FilterValue {Ref<FilterOperation> {krys::move(toOp)}};
+                               }
 
-          return FilterValue {PassthroughFilterOperation::Create()};
-        }
-        else
-        {
-          if (fromOp)
-          {
-            return FilterValue {Ref<FilterOperation> {krys::move(fromOp)}};
-          }
+                               return FilterValue {PassthroughFilterOperation::Create()};
+                             }
+                             else
+                             {
+                               if (fromOp)
+                               {
+                                 return FilterValue {Ref<FilterOperation> {krys::move(fromOp)}};
+                               }
 
-          return FilterValue {PassthroughFilterOperation::Create()};
-        }
-      })};
+                               return FilterValue {PassthroughFilterOperation::Create()};
+                             }
+                           }))};
   }
 }

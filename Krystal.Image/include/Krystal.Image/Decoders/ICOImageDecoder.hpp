@@ -30,7 +30,7 @@
 
 #pragma once
 
-#include "Krystal.Core/Types/UniquePtr.hpp"
+#include "Krystal.Core/Memory/UniquePtr.hpp"
 #include "Krystal.Image/Decoders/BMPImageReader.hpp"
 
 namespace krys::img

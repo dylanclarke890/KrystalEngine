@@ -309,15 +309,15 @@ namespace krys::boo
                                                                  EnumSet<OverrideType> overrideTypes) noexcept
       : _layoutContext(layoutContext)
   {
-    if (overrideTypes.Contains(OverrideType::Hidden))
+    if (overrideTypes.contains(OverrideType::Hidden))
     {
       layoutContext.SetIsVisiblityHiddenIgnored(true);
     }
-    if (overrideTypes.Contains(OverrideType::Auto))
+    if (overrideTypes.contains(OverrideType::Auto))
     {
       layoutContext.SetIsVisiblityAutoIgnored(true);
     }
-    if (overrideTypes.Contains(OverrideType::RevealedWhenFound))
+    if (overrideTypes.contains(OverrideType::RevealedWhenFound))
     {
       layoutContext.SetIsRevealedWhenFoundIgnored(true);
     }

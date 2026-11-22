@@ -1,5 +1,5 @@
 ﻿#include "Krystal.PAL/Win32/UIAutomation.hpp"
-#include "Krystal.Core/Utils/Move.hpp"
+#include "Krystal.Core/Move.hpp"
 
 #include <ole2.h>
 #include <uiautomation.h>
@@ -168,7 +168,7 @@ namespace krys::pal::win32
         case Role::TabList:
         case Role::Table:
         case Role::Menu:    return true;
-        default:            return node.States.Contains(AccessibilityState::MultiSelectable);
+        default:            return node.States.contains(AccessibilityState::MultiSelectable);
       }
     }
 
@@ -179,18 +179,18 @@ namespace krys::pal::win32
       switch (pattern)
       {
         case UIA_InvokePatternId:
-          return node.Actions.Contains(AccessibilityAction::Press) && !isToggle
+          return node.Actions.contains(AccessibilityAction::Press) && !isToggle
                  && node.Role != Role::RadioButton && node.Role != Role::ComboBox;
         case UIA_TogglePatternId: return isToggle;
         case UIA_ValuePatternId:
           return node.Role == Role::Edit || node.Role == Role::ComboBox
-                 || (node.Actions.Contains(AccessibilityAction::SetValue) && !node.Range);
+                 || (node.Actions.contains(AccessibilityAction::SetValue) && !node.Range);
         case UIA_RangeValuePatternId:     return node.Range.has_value();
-        case UIA_ExpandCollapsePatternId: return node.States.Contains(AccessibilityState::Expandable);
+        case UIA_ExpandCollapsePatternId: return node.States.contains(AccessibilityState::Expandable);
         case UIA_SelectionItemPatternId:
-          return node.States.Contains(AccessibilityState::Selectable) || node.Role == Role::RadioButton;
+          return node.States.contains(AccessibilityState::Selectable) || node.Role == Role::RadioButton;
         case UIA_SelectionPatternId:  return IsSelectionContainer(node);
-        case UIA_ScrollItemPatternId: return node.Actions.Contains(AccessibilityAction::ScrollIntoView);
+        case UIA_ScrollItemPatternId: return node.Actions.contains(AccessibilityAction::ScrollIntoView);
         case UIA_TextPatternId:       return node.Role == Role::Edit || node.Role == Role::Document;
         default:                      return false;
       }
@@ -600,13 +600,13 @@ namespace krys::pal::win32
           break;
         case UIA_FrameworkIdPropertyId:
         case UIA_ProviderDescriptionPropertyId: SetString(*value, u8"Krystal"); break;
-        case UIA_IsKeyboardFocusablePropertyId: SetBool(*value, states.Contains(State::Focusable)); break;
-        case UIA_HasKeyboardFocusPropertyId:    SetBool(*value, states.Contains(State::Focused)); break;
-        case UIA_IsEnabledPropertyId:           SetBool(*value, !states.Contains(State::Disabled)); break;
-        case UIA_IsOffscreenPropertyId:         SetBool(*value, states.Contains(State::Offscreen)); break;
-        case UIA_IsPasswordPropertyId:          SetBool(*value, states.Contains(State::Protected)); break;
-        case UIA_IsRequiredForFormPropertyId:   SetBool(*value, states.Contains(State::Required)); break;
-        case UIA_IsDataValidForFormPropertyId:  SetBool(*value, !states.Contains(State::Invalid)); break;
+        case UIA_IsKeyboardFocusablePropertyId: SetBool(*value, states.contains(State::Focusable)); break;
+        case UIA_HasKeyboardFocusPropertyId:    SetBool(*value, states.contains(State::Focused)); break;
+        case UIA_IsEnabledPropertyId:           SetBool(*value, !states.contains(State::Disabled)); break;
+        case UIA_IsOffscreenPropertyId:         SetBool(*value, states.contains(State::Offscreen)); break;
+        case UIA_IsPasswordPropertyId:          SetBool(*value, states.contains(State::Protected)); break;
+        case UIA_IsRequiredForFormPropertyId:   SetBool(*value, states.contains(State::Required)); break;
+        case UIA_IsDataValidForFormPropertyId:  SetBool(*value, !states.contains(State::Invalid)); break;
         case UIA_IsDialogPropertyId:            SetBool(*value, info->Role == AccessibilityRole::Dialog); break;
         case UIA_IsControlElementPropertyId:
         case UIA_IsContentElementPropertyId:    SetBool(*value, true); break;
@@ -939,8 +939,8 @@ namespace krys::pal::win32
       return Read(readOnly,
                   [](const AccessibilityNode &info)
                   {
-                    return static_cast<BOOL>(!info.Actions.Contains(AccessibilityAction::SetValue)
-                                             || info.States.Contains(AccessibilityState::ReadOnly));
+                    return static_cast<BOOL>(!info.Actions.contains(AccessibilityAction::SetValue)
+                                             || info.States.contains(AccessibilityState::ReadOnly));
                   });
     }
 
@@ -1011,7 +1011,7 @@ namespace krys::pal::win32
       // A radio button is selected by checking it.
       if (info->Role == AccessibilityRole::RadioButton)
       {
-        return info->States.Contains(AccessibilityState::Checked) ? S_OK
+        return info->States.contains(AccessibilityState::Checked) ? S_OK
                                                                   : Perform(AccessibilityAction::Press);
       }
       return Perform(AccessibilityAction::Select);
@@ -1088,7 +1088,7 @@ namespace krys::pal::win32
     IFACEMETHODIMP get_CanSelectMultiple(BOOL *multiple) noexcept override
     {
       return Read(multiple, [](const AccessibilityNode &info)
-                  { return static_cast<BOOL>(info.States.Contains(AccessibilityState::MultiSelectable)); });
+                  { return static_cast<BOOL>(info.States.contains(AccessibilityState::MultiSelectable)); });
     }
 
     IFACEMETHODIMP get_IsSelectionRequired(BOOL *required) noexcept override
@@ -1106,27 +1106,27 @@ namespace krys::pal::win32
   private:
     KRYS_NODISCARD static ::ToggleState ToggleState(const AccessibilityNode &info) noexcept
     {
-      if (info.States.Contains(AccessibilityState::Mixed))
+      if (info.States.contains(AccessibilityState::Mixed))
       {
         return ToggleState_Indeterminate;
       }
-      return info.States.Contains(AccessibilityState::Checked) ? ToggleState_On : ToggleState_Off;
+      return info.States.contains(AccessibilityState::Checked) ? ToggleState_On : ToggleState_Off;
     }
 
     KRYS_NODISCARD static ::ExpandCollapseState ExpandCollapseState(const AccessibilityNode &info) noexcept
     {
-      if (!info.States.Contains(AccessibilityState::Expandable))
+      if (!info.States.contains(AccessibilityState::Expandable))
       {
         return ExpandCollapseState_LeafNode;
       }
-      return info.States.Contains(AccessibilityState::Expanded) ? ExpandCollapseState_Expanded
+      return info.States.contains(AccessibilityState::Expanded) ? ExpandCollapseState_Expanded
                                                                 : ExpandCollapseState_Collapsed;
     }
 
     KRYS_NODISCARD static bool IsSelected(const AccessibilityNode &info) noexcept
     {
-      return info.Role == AccessibilityRole::RadioButton ? info.States.Contains(AccessibilityState::Checked)
-                                                         : info.States.Contains(AccessibilityState::Selected);
+      return info.Role == AccessibilityRole::RadioButton ? info.States.contains(AccessibilityState::Checked)
+                                                         : info.States.contains(AccessibilityState::Selected);
     }
 
     KRYS_NODISCARD static double SmallChange(const AccessibilityNode &info) noexcept
@@ -1384,7 +1384,7 @@ namespace krys::pal::win32
       }
       if (attribute == UIA_IsReadOnlyAttributeId)
       {
-        SetBool(*value, !info->States.Contains(AccessibilityState::Editable));
+        SetBool(*value, !info->States.contains(AccessibilityState::Editable));
         return S_OK;
       }
       // The value of the first run in the range, unless another run in it differs.
@@ -2069,7 +2069,7 @@ namespace krys::pal::win32
         break;
       case AccessibilityEvent::SelectedChanged:
         raiseProperty(UIA_SelectionItemIsSelectedPropertyId);
-        ::UiaRaiseAutomationEvent(provider, info->States.Contains(AccessibilityState::Selected)
+        ::UiaRaiseAutomationEvent(provider, info->States.contains(AccessibilityState::Selected)
                                               ? UIA_SelectionItem_ElementSelectedEventId
                                               : UIA_SelectionItem_ElementRemovedFromSelectionEventId);
         break;

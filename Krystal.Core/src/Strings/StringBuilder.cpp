@@ -1,6 +1,6 @@
 #include "Krystal.Core/Strings/StringBuilder.hpp"
+#include "Krystal.Core/Containers/Array.hpp"
 #include "Krystal.Core/Strings/Unicode.hpp"
-#include "Krystal.Core/Types/Array.hpp"
 #include <charconv>
 #include <cmath>
 #include <cstdlib>

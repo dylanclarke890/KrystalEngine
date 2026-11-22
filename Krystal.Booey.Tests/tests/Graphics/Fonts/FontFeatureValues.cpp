@@ -55,7 +55,7 @@ namespace krys::boo::tests
       auto a = FontFeatureValues::Create();
       auto b = FontFeatureValues::Create();
       CHECK(*a == *b);
-      CHECK(DefaultHash<FontFeatureValues>::Hash(*a) == DefaultHash<FontFeatureValues>::Hash(*b));
+      CHECK(FastHash<FontFeatureValues> {}(*a) == FastHash<FontFeatureValues> {}(*b));
 
       // Insertion order doesn't matter.
       auto tag = [](int i)
@@ -74,11 +74,11 @@ namespace krys::boo::tests
         b->Styleset()[tag(i)] = {static_cast<uint32>(i)};
       }
       CHECK(*a == *b);
-      CHECK(DefaultHash<FontFeatureValues>::Hash(*a) == DefaultHash<FontFeatureValues>::Hash(*b));
+      CHECK(FastHash<FontFeatureValues> {}(*a) == FastHash<FontFeatureValues> {}(*b));
 
       b->Styleset()[u8"taga0"] = {99u};
       CHECK_FALSE(*a == *b);
-      CHECK(DefaultHash<FontFeatureValues>::Hash(*a) != DefaultHash<FontFeatureValues>::Hash(*b));
+      CHECK(FastHash<FontFeatureValues> {}(*a) != FastHash<FontFeatureValues> {}(*b));
 
       // The same tag in a different block differs.
       auto c = FontFeatureValues::Create();
@@ -86,7 +86,7 @@ namespace krys::boo::tests
       c->Swash()[u8"x"] = {1u};
       d->Ornaments()[u8"x"] = {1u};
       CHECK_FALSE(*c == *d);
-      CHECK(DefaultHash<FontFeatureValues>::Hash(*c) != DefaultHash<FontFeatureValues>::Hash(*d));
+      CHECK(FastHash<FontFeatureValues> {}(*c) != FastHash<FontFeatureValues> {}(*d));
     }
   }
 }

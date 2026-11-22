@@ -72,11 +72,11 @@ namespace krys::boo::css
     return (id >= ValueId::Activeborder && id <= ValueId::Windowtext) || id == ValueId::Menu;
   }
 
-  bool IsColorKeyword(ValueId id, ColorType allowedColorTypes) noexcept
+  bool IsColorKeyword(ValueId id, EnumSet<ColorType> allowedColorTypes) noexcept
   {
-    return (HasFlag(allowedColorTypes, ColorType::Absolute) && IsAbsoluteColorKeyword(id))
-           || (HasFlag(allowedColorTypes, ColorType::Current) && IsCurrentColorKeyword(id))
-           || (HasFlag(allowedColorTypes, ColorType::System) && IsSystemColorKeyword(id));
+    return (allowedColorTypes.contains(ColorType::Absolute) && IsAbsoluteColorKeyword(id))
+           || (allowedColorTypes.contains(ColorType::Current) && IsCurrentColorKeyword(id))
+           || (allowedColorTypes.contains(ColorType::System) && IsSystemColorKeyword(id));
   }
 
   bool IsColorKeyword(ValueId id) noexcept

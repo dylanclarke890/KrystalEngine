@@ -1,7 +1,7 @@
 ﻿#pragma once
 
 #include "Krystal.Core/Base.hpp"
-#include "Krystal.Core/Types/Array.hpp"
+#include "Krystal.Core/Containers/Array.hpp"
 #include "Krystal.Text/Encodings/EncodingId.hpp"
 #include <ranges>
 

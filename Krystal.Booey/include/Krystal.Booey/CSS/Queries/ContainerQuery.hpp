@@ -32,7 +32,7 @@
 namespace krys::boo::css::cq
 {
   /// @brief The axes a container must support size queries on for the feature to be evaluated.
-  KRYS_NODISCARD Axis RequiredAxesForFeature(const mq::Feature &feature) noexcept;
+  KRYS_NODISCARD EnumSet<Axis> RequiredAxesForFeature(const mq::Feature &feature) noexcept;
 
   enum class ContainsUnknownFeature : bool
   {
@@ -45,7 +45,7 @@ namespace krys::boo::css::cq
   {
     CSSOMStringAtom Name {null};
     mq::Condition Condition;
-    Axis RequiredAxes {Axis::None};
+    EnumSet<Axis> RequiredAxes;
     cq::ContainsUnknownFeature ContainsUnknownFeature {cq::ContainsUnknownFeature::No};
   };
 

@@ -97,7 +97,7 @@ namespace krys::boo::tests
     auto &b = fixture.Primitive(u8"b");
     CHECK(b.Y().ValueAsString() == u8"0%");
     CHECK(b.Height().ValueAsString() == u8"100%");
-    CHECK(b.EffectGeometryFlags().IsEmpty());
+    CHECK(b.EffectGeometryFlags().empty());
   }
 
   TEST_CASE("SVGFilterPrimitiveStandardAttributes: inputs are named by in and in2",

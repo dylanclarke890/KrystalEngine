@@ -1,10 +1,10 @@
 ﻿#pragma once
 
 #include "Krystal.Core/Attributes.hpp"
+#include "Krystal.Core/Containers/EnumSet.hpp"
 #include "Krystal.Core/Geometry/Size.hpp"
-#include "Krystal.Core/RefCounted.hpp"
-#include "Krystal.Core/Types/EnumSet.hpp"
-#include "Krystal.Core/Types/RefPtr.hpp"
+#include "Krystal.Core/Memory/RefCounted.hpp"
+#include "Krystal.Core/Memory/RefPtr.hpp"
 #include "Krystal.Gfx/Device.hpp"
 
 namespace krys::ui
@@ -45,7 +45,7 @@ namespace krys::ui
 
     KRYS_NODISCARD bool IsOpaque() const noexcept
     {
-      return !_flags.Contains(Flags::SupportsAlpha);
+      return !_flags.contains(Flags::SupportsAlpha);
     }
 
     /// @brief The texture, invalid when it couldn't be created.

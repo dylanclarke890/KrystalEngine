@@ -57,4 +57,10 @@ namespace krys::boo::css::tests
     ParserContext context {ParserMode::HTMLStandard};
     return ConsumeToText(css, consumer, context);
   }
+
+  /// @brief A parser context in @p mode whose base URL is `https://example.com/dir/`.
+  KRYS_NODISCARD inline ParserContext ContextWithBaseUrl(ParserMode mode = ParserMode::HTMLStandard)
+  {
+    return ParserContext {mode, net::Url(u8"https://example.com/dir/")};
+  }
 }

@@ -88,7 +88,7 @@ namespace krys::boo
     SRGBA<uint8> toggleBorderColor;
     SRGBA<uint8> toggleBorderHoverColor;
 
-    if (style.States.Contains(ControlStyle::State::DarkAppearance))
+    if (style.States.contains(ControlStyle::State::DarkAppearance))
     {
       toggleBorderColor = ToggleBorderColorDark;
       toggleBorderHoverColor = ToggleBorderHoveredColorDark;
@@ -104,7 +104,7 @@ namespace krys::boo
       RelativeLuminance(accentColor) > 0.5 ? Color(SRGBA<uint8> {0, 0, 0, 204}) : Color::white;
     Color accentHoverColor = BlendSourceOver(accentColor, foregroundColor.ColorWithAlphaMultipliedBy(0.1f));
 
-    if (!style.States.Contains(ControlStyle::State::Enabled))
+    if (!style.States.contains(ControlStyle::State::Enabled))
     {
       graphicsContext.BeginTransparencyLayer(static_cast<float>(DisabledOpacity));
     }
@@ -116,8 +116,8 @@ namespace krys::boo
     {
       path.AddRoundedRect(fieldRect, corner);
       graphicsContext.SetFillRule(WindRule::NonZero);
-      if (style.States.Contains(ControlStyle::State::Hovered)
-          && style.States.Contains(ControlStyle::State::Enabled))
+      if (style.States.contains(ControlStyle::State::Hovered)
+          && style.States.contains(ControlStyle::State::Enabled))
       {
         graphicsContext.SetFillColor(accentHoverColor);
       }
@@ -132,7 +132,7 @@ namespace krys::boo
       graphicsContext.Translate(fieldRect.X(), fieldRect.Y());
       graphicsContext.Scale(SizeF(static_cast<float>(fieldRect.Width() / ToggleSize),
                                   static_cast<float>(fieldRect.Height() / ToggleSize)));
-      if (style.States.Contains(ControlStyle::State::Indeterminate))
+      if (style.States.contains(ControlStyle::State::Indeterminate))
       {
         path.AddRoundedRect(RectF(2, 5, 10, 4), corner);
       }
@@ -153,8 +153,8 @@ namespace krys::boo
     else
     {
       path.AddRoundedRect(fieldRect, corner);
-      if (style.States.Contains(ControlStyle::State::Hovered)
-          && style.States.Contains(ControlStyle::State::Enabled))
+      if (style.States.contains(ControlStyle::State::Hovered)
+          && style.States.contains(ControlStyle::State::Enabled))
       {
         graphicsContext.SetFillColor(toggleBorderHoverColor);
       }
@@ -172,12 +172,12 @@ namespace krys::boo
       graphicsContext.FillPath(path);
     }
 
-    if (style.States.Contains(ControlStyle::State::Focused))
+    if (style.States.contains(ControlStyle::State::Focused))
     {
       PaintFocus(graphicsContext, borderRect.Rect(), ToggleFocusOffset, FocusColor(accentColor));
     }
 
-    if (!style.States.Contains(ControlStyle::State::Enabled))
+    if (!style.States.contains(ControlStyle::State::Enabled))
     {
       graphicsContext.EndTransparencyLayer();
     }
@@ -193,7 +193,7 @@ namespace krys::boo
     SRGBA<uint8> toggleBorderColor;
     SRGBA<uint8> toggleBorderHoverColor;
 
-    if (style.States.Contains(ControlStyle::State::DarkAppearance))
+    if (style.States.contains(ControlStyle::State::DarkAppearance))
     {
       toggleBorderColor = ToggleBorderColorDark;
       toggleBorderHoverColor = ToggleBorderHoveredColorDark;
@@ -209,7 +209,7 @@ namespace krys::boo
       RelativeLuminance(accentColor) > 0.5 ? Color(SRGBA<uint8> {0, 0, 0, 204}) : Color::white;
     Color accentHoverColor = BlendSourceOver(accentColor, foregroundColor.ColorWithAlphaMultipliedBy(0.1f));
 
-    if (!style.States.Contains(ControlStyle::State::Enabled))
+    if (!style.States.contains(ControlStyle::State::Enabled))
     {
       graphicsContext.BeginTransparencyLayer(static_cast<float>(DisabledOpacity));
     }
@@ -220,8 +220,8 @@ namespace krys::boo
     {
       path.AddEllipseInRect(fieldRect);
       graphicsContext.SetFillRule(WindRule::NonZero);
-      if (style.States.Contains(ControlStyle::State::Hovered)
-          && style.States.Contains(ControlStyle::State::Enabled))
+      if (style.States.contains(ControlStyle::State::Hovered)
+          && style.States.contains(ControlStyle::State::Enabled))
       {
         graphicsContext.SetFillColor(accentHoverColor);
       }
@@ -240,8 +240,8 @@ namespace krys::boo
     else
     {
       path.AddEllipseInRect(fieldRect);
-      if (style.States.Contains(ControlStyle::State::Hovered)
-          && style.States.Contains(ControlStyle::State::Enabled))
+      if (style.States.contains(ControlStyle::State::Hovered)
+          && style.States.contains(ControlStyle::State::Enabled))
       {
         graphicsContext.SetFillColor(toggleBorderHoverColor);
       }
@@ -258,13 +258,13 @@ namespace krys::boo
       graphicsContext.FillPath(path);
     }
 
-    if (style.States.Contains(ControlStyle::State::Focused))
+    if (style.States.contains(ControlStyle::State::Focused))
     {
       PaintFocus(graphicsContext, borderRect.Rect(), ToggleFocusOffset, FocusColor(accentColor),
                  PaintRounded::Yes);
     }
 
-    if (!style.States.Contains(ControlStyle::State::Enabled))
+    if (!style.States.contains(ControlStyle::State::Enabled))
     {
       graphicsContext.EndTransparencyLayer();
     }

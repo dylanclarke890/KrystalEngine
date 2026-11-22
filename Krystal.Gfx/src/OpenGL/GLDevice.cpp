@@ -1,7 +1,7 @@
 ﻿#include "Krystal.Gfx/OpenGL/GLDevice.hpp"
 #include "Krystal.Core/Commands/CommandListReader.hpp"
 #include "Krystal.Core/Log/ILogger.hpp"
-#include "Krystal.Core/Utils/Move.hpp"
+#include "Krystal.Core/Move.hpp"
 #include "Krystal.Gfx/OpenGL/GLMappings.hpp"
 #include <cstring>
 #include <format>
@@ -1261,8 +1261,8 @@ namespace krys::gfx::opengl
                           MapBlendFactor(blend.SourceAlpha), MapBlendFactor(blend.DestinationAlpha));
       glBlendEquationSeparate(MapBlendOp(blend.ColourOp), MapBlendOp(blend.AlphaOp));
       glColorMask(
-        HasFlag(blend.WriteMask, ColourWriteMask::Red), HasFlag(blend.WriteMask, ColourWriteMask::Green),
-        HasFlag(blend.WriteMask, ColourWriteMask::Blue), HasFlag(blend.WriteMask, ColourWriteMask::Alpha));
+        blend.WriteMask.contains(ColourChannel::Red), blend.WriteMask.contains(ColourChannel::Green),
+        blend.WriteMask.contains(ColourChannel::Blue), blend.WriteMask.contains(ColourChannel::Alpha));
       _state.Blend = blend;
     }
 

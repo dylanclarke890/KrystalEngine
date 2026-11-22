@@ -26,8 +26,8 @@
 
 #pragma once
 
-#include "Krystal.Core/Types/List.hpp"
-#include "Krystal.Core/Types/UniquePtr.hpp"
+#include "Krystal.Core/Containers/List.hpp"
+#include "Krystal.Core/Memory/UniquePtr.hpp"
 #include "Krystal.Image/ICCProfileTransform.hpp"
 #include "Krystal.Image/ImageDecoder.hpp"
 

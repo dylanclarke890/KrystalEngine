@@ -8,12 +8,12 @@ namespace krys::boo::dom::tests
 {
   namespace
   {
-    struct CommonTestData
+    struct ProcessingInstructionTestData
     {
       Ref<Document> Document;
       Ref<ProcessingInstruction> Node;
 
-      CommonTestData(DOMString &&target, DOMString &&value)
+      ProcessingInstructionTestData(DOMString &&target, DOMString &&value)
           : Document(CreateRef<boo::Document>()),
             Node(*Document->CreateProcessingInstruction(krys::move(target), krys::move(value)))
       {
@@ -52,7 +52,7 @@ namespace krys::boo::dom::tests
             "[DOM][ProcessingInstruction][dom:update-attributes-from-data][dom:concept-pi-attribute-map]"
             "[dom:get-a-processing-instruction-attribute][dom:concept-cd-replace]")
   {
-    CommonTestData data(u8"x", u8"b=\"2\" a='1 &amp; 2'");
+    ProcessingInstructionTestData data(u8"x", u8"b=\"2\" a='1 &amp; 2'");
     CHECK(data.Node->GetAttributeNames() == List<DOMString> {u8"b", u8"a"});
     CHECK(data.Node->GetAttribute(u8"a") == u8"1 & 2");
     CHECK_FALSE(data.Node->GetAttribute(u8"c").has_value());
@@ -75,7 +75,7 @@ namespace krys::boo::dom::tests
             "[DOM][ProcessingInstruction][dom:update-data-from-attributes]"
             "[dom:dom-processinginstruction-setattribute]")
   {
-    CommonTestData data(u8"x", u8"  a = '1'  ");
+    ProcessingInstructionTestData data(u8"x", u8"  a = '1'  ");
 
     auto observer = CreateRef<MutationObserver>([](const List<Ref<MutationRecord>> &, MutationObserver &) {});
     REQUIRE_FALSE(
@@ -122,7 +122,7 @@ namespace krys::boo::dom::tests
             "[dom:dom-processinginstruction-getattributenames][dom:dom-processinginstruction-getattribute]"
             "[dom:dom-processinginstruction-hasattribute]")
   {
-    CommonTestData data(u8"x", u8"");
+    ProcessingInstructionTestData data(u8"x", u8"");
     CHECK_FALSE(data.Node->HasAttributes());
     CHECK(data.Node->GetAttributeNames().empty());
 
@@ -139,7 +139,7 @@ namespace krys::boo::dom::tests
   TEST_CASE("ProcessingInstruction.removeAttribute(): removes it, and updates the data",
             "[DOM][ProcessingInstruction][dom:dom-processinginstruction-removeattribute]")
   {
-    CommonTestData data(u8"x", u8"a='1' b='2'");
+    ProcessingInstructionTestData data(u8"x", u8"a='1' b='2'");
     data.Node->RemoveAttribute(u8"a");
     CHECK(data.Node->Data() == u8"b=\"2\"");
     CHECK(data.Node->GetAttributeNames() == List<DOMString> {u8"b"});
@@ -153,7 +153,7 @@ namespace krys::boo::dom::tests
   TEST_CASE("ProcessingInstruction.toggleAttribute(): adds or removes it, as force says",
             "[DOM][ProcessingInstruction][dom:dom-processinginstruction-toggleattribute]")
   {
-    CommonTestData data(u8"x", u8"");
+    ProcessingInstructionTestData data(u8"x", u8"");
     auto toggle = [&](DOMStringView name, Maybe<bool> force)
     {
       auto result = data.Node->ToggleAttribute(name, force);
@@ -181,7 +181,7 @@ namespace krys::boo::dom::tests
   TEST_CASE("Clone a single node: a processing instruction's copy has its target, data and attributes",
             "[DOM][ProcessingInstruction][dom:clone-a-single-node]")
   {
-    CommonTestData data(u8"x", u8"a='1'");
+    ProcessingInstructionTestData data(u8"x", u8"a='1'");
     auto clone = data.Node->CloneNode(false).ReleaseValue();
     auto &copy = Downcast<ProcessingInstruction>(*clone);
     CHECK(copy.Target() == u8"x");
@@ -192,14 +192,14 @@ namespace krys::boo::dom::tests
   TEST_CASE("Node.nodeName: a ProcessingInstruction's is its target",
             "[DOM][ProcessingInstruction][dom:dom-node-nodename]")
   {
-    CommonTestData data(u8"test-target", u8"Hello, world!");
+    ProcessingInstructionTestData data(u8"test-target", u8"Hello, world!");
     REQUIRE(data.Node->NodeName() == u8"test-target");
   }
 
   TEST_CASE("Node.nodeType: a ProcessingInstruction is a PROCESSING_INSTRUCTION_NODE",
             "[DOM][ProcessingInstruction][dom:dom-node-nodetype][dom:dom-node-processing_instruction_node]")
   {
-    CommonTestData data(u8"test-target", u8"Hello, world!");
+    ProcessingInstructionTestData data(u8"test-target", u8"Hello, world!");
     REQUIRE(data.Node->NodeType() == NodeType::PROCESSING_INSTRUCTION_NODE);
   }
 }

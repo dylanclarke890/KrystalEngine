@@ -87,7 +87,7 @@ namespace krys::boo::html::tests
 
     CustomElementRegistry &Registry() const noexcept
     {
-      auto *registry = Document->CustomElementRegistry().get(); // The document keeps it alive.
+      auto *registry = Document->CustomElementRegistry(); // The document keeps it alive.
       return *registry;
     }
 

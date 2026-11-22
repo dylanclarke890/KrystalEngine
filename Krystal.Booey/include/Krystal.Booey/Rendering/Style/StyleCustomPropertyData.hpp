@@ -24,11 +24,11 @@
 
 #include "Krystal.Booey/CSS/Types/CSSOMString.hpp"
 #include "Krystal.Booey/Style/CustomProperty.hpp"
-#include "Krystal.Core/RefCounted.hpp"
+#include "Krystal.Core/Containers/HashMap.hpp"
+#include "Krystal.Core/Memory/RefCounted.hpp"
+#include "Krystal.Core/Memory/RefPtr.hpp"
 #include "Krystal.Core/Types/Func.hpp"
-#include "Krystal.Core/Types/HashMap.hpp"
 #include "Krystal.Core/Types/IterationStatus.hpp"
-#include "Krystal.Core/Types/RefPtr.hpp"
 
 namespace krys::boo::style
 {

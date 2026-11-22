@@ -1,24 +1,37 @@
 ﻿#pragma once
 
+#include "Krystal.Core/Containers/EnumSet.hpp"
 #include "Krystal.Core/Enum.hpp"
 #include "Krystal.Core/IO/Path.hpp"
 #include "Krystal.Core/Numeric.hpp"
 
 namespace krys::io
 {
-  enum class ReadFlags : uint8
+  enum class ReadFlag : uint8
   {
-    None = 0,
-    OpenAtEnd = 1 << 0, // Open the file and move the read position to the end
+    OpenAtEnd, // Open the file and move the read position to the end
   };
 
-  enum class WriteFlags : uint8
+  consteval ReadFlag MaxEnumValue(ReadFlag) noexcept
   {
-    None = 0,
-    Create = 1 << 0,    // Create the file if it does not exist
-    Truncate = 1 << 1,  // Truncate the file to zero length if it already exists
-    OpenAtEnd = 1 << 2, // Open the file and move the write position to the end
+    return ReadFlag::OpenAtEnd;
+  }
+
+  using ReadFlags = EnumSet<ReadFlag>;
+
+  enum class WriteFlag : uint8
+  {
+    Create,    // Create the file if it does not exist
+    Truncate,  // Truncate the file to zero length if it already exists
+    OpenAtEnd, // Open the file and move the write position to the end
   };
+
+  consteval WriteFlag MaxEnumValue(WriteFlag) noexcept
+  {
+    return WriteFlag::OpenAtEnd;
+  }
+
+  using WriteFlags = EnumSet<WriteFlag>;
 
   /// @brief Specifies the reference point used to obtain the new position in a stream.
   enum class SeekOrigin : uint8
@@ -46,6 +59,3 @@ namespace krys::io
     bool IsReadOnly = false;
   };
 }
-
-KRYS_DEFINE_FLAGS_ENUM_TRAITS(krys::io::ReadFlags, 2u)
-KRYS_DEFINE_FLAGS_ENUM_TRAITS(krys::io::WriteFlags, 4u)

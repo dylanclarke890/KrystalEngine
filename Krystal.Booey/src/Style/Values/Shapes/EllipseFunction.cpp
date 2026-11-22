@@ -30,9 +30,9 @@
 #include "Krystal.Booey/Style/Values/Primitives/NumericTypesBlending.hpp"
 #include "Krystal.Booey/Style/Values/Primitives/NumericTypesEvaluation.hpp"
 #include "Krystal.Booey/Style/Values/Primitives/Position.hpp"
+#include "Krystal.Core/Containers/TinyLRUCache.hpp"
 #include "Krystal.Core/Geometry/GeometryUtilities.hpp"
 #include "Krystal.Core/Geometry/Rect.hpp"
-#include "Krystal.Core/Types/TinyLRUCache.hpp"
 
 namespace krys::boo::style
 {
@@ -57,7 +57,7 @@ namespace krys::boo::style
   static const boo::Path &CachedEllipsePath(const RectF &rect)
   {
     static NeverDestroyed<TinyLRUCache<RectF, boo::Path, 4, EllipsePathPolicy>> cache;
-    return cache.get().Get(rect);
+    return cache->Get(rect);
   }
 
   // MARK: - Path Generation

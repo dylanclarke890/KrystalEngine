@@ -31,6 +31,7 @@
 
 #pragma once
 
+#include "Krystal.Booey/Graphics/Geometry/LayoutPoint.hpp"
 #include "Krystal.Booey/HTML/Elements/HTMLDivElement.hpp"
 #include "Krystal.Core/Geometry/Point.hpp"
 

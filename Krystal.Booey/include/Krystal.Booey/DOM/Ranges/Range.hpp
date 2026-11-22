@@ -25,7 +25,6 @@
 #pragma once
 
 #include "Krystal.Booey/DOM/Geometry/DOMRect.hpp"
-#include "Krystal.Booey/DOM/Geometry/DOMRectList.hpp"
 #include "Krystal.Booey/DOM/Ranges/AbstractRange.hpp"
 #include "Krystal.Booey/DOM/Ranges/BoundaryPoint.hpp"
 #include "Krystal.Booey/DOM/Types/SmallNodeList.hpp"
@@ -34,6 +33,8 @@
 
 namespace krys::boo::dom
 {
+  class DOMRectList;
+
   /// @see https://dom.spec.whatwg.org/#dom-range-compareboundarypoints
   enum class BoundaryPointComparator
   {
@@ -42,9 +43,12 @@ namespace krys::boo::dom
     EndToEnd,
     EndToStart,
   };
-}
 
-KRYS_DEFINE_CONTIGUOUS_ENUM_TRAITS(krys::boo::dom::BoundaryPointComparator, 4u)
+  consteval BoundaryPointComparator MaxEnumValue(BoundaryPointComparator) noexcept
+  {
+    return BoundaryPointComparator::EndToStart;
+  }
+}
 
 namespace krys::boo
 {

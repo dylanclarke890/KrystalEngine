@@ -21,7 +21,7 @@
 #pragma once
 
 #include "Krystal.Core/Geometry/Rect.hpp"
-#include "Krystal.Core/RefCounted.hpp"
+#include "Krystal.Core/Memory/RefCounted.hpp"
 
 namespace krys::boo
 {

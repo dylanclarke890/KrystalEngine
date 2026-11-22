@@ -31,8 +31,8 @@
 #include "Krystal.Booey/Style/Values/Primitives/NumericTypesBlending.hpp"
 #include "Krystal.Booey/SVG/Elements/SVGGeometryElement.hpp"
 #include "Krystal.Booey/SVG/Elements/SVGPathElement.hpp"
+#include "Krystal.Core/Move.hpp"
 #include "Krystal.Core/TypeCast.hpp"
-#include "Krystal.Core/Utils/Move.hpp"
 
 namespace krys::boo
 {

@@ -1,8 +1,8 @@
 ﻿#pragma once
 
+#include "Krystal.Core/Containers/List.hpp"
+#include "Krystal.Core/Containers/Span.hpp"
 #include "Krystal.Core/Events/EventManager.hpp"
-#include "Krystal.Core/Types/List.hpp"
-#include "Krystal.Core/Types/Span.hpp"
 #include "Krystal.PAL/Events.hpp"
 #include "Krystal.PAL/Input/Gamepad.hpp"
 #include "Krystal.PAL/Input/Keyboard.hpp"

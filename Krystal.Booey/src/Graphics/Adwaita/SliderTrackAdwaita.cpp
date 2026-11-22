@@ -62,7 +62,7 @@ namespace krys::boo
     }
 
     SRGBA<uint8> sliderTrackBackgroundColor;
-    if (style.States.Contains(ControlStyle::State::DarkAppearance))
+    if (style.States.contains(ControlStyle::State::DarkAppearance))
     {
       sliderTrackBackgroundColor = SliderTrackBackgroundColorDark;
     }
@@ -71,7 +71,7 @@ namespace krys::boo
       sliderTrackBackgroundColor = SliderTrackBackgroundColorLight;
     }
 
-    if (!style.States.Contains(ControlStyle::State::Enabled))
+    if (!style.States.contains(ControlStyle::State::Enabled))
     {
       graphicsContext.BeginTransparencyLayer(static_cast<float>(DisabledOpacity));
     }
@@ -90,7 +90,7 @@ namespace krys::boo
     if (isHorizontal)
     {
       float offset = rangeRect.Width() * static_cast<float>(sliderTrackPart.ThumbPosition());
-      if (style.States.Contains(ControlStyle::State::InlineFlippedWritingMode))
+      if (style.States.contains(ControlStyle::State::InlineFlippedWritingMode))
       {
         rangeRect.Move(rangeRect.Width() - offset, 0);
         rangeRect.SetWidth(offset);
@@ -107,7 +107,7 @@ namespace krys::boo
     else
     {
       float offset = rangeRect.Height() * static_cast<float>(sliderTrackPart.ThumbPosition());
-      if (style.States.Contains(ControlStyle::State::VerticalWritingMode))
+      if (style.States.contains(ControlStyle::State::VerticalWritingMode))
       {
         rangeRect.SetHeight(offset);
         corners.SetTopLeft(corner);
@@ -129,7 +129,7 @@ namespace krys::boo
 
     sliderTrackPart.DrawTicks(graphicsContext, borderRect.Rect(), style);
 
-    if (style.States.Contains(ControlStyle::State::Focused))
+    if (style.States.contains(ControlStyle::State::Focused))
     {
       // Sliders support accent-color, so we want to color their focus rings too
       Color focusRingColor =
@@ -137,7 +137,7 @@ namespace krys::boo
       PaintFocus(graphicsContext, fieldRect, SliderTrackFocusOffset, focusRingColor, PaintRounded::Yes);
     }
 
-    if (!style.States.Contains(ControlStyle::State::Enabled))
+    if (!style.States.contains(ControlStyle::State::Enabled))
     {
       graphicsContext.EndTransparencyLayer();
     }

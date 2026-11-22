@@ -230,12 +230,12 @@ namespace krys::ui
         return pooled.Texture;
       }
     }
-    auto texture =
-      _device.CreateTexture({.Format = gfx::TextureFormat::RGBA8Unorm,
-                             .Width = width,
-                             .Height = height,
-                             .Usage = gfx::TextureUsage::RenderTarget | gfx::TextureUsage::Sampled,
-                             .DebugName = u8"UI.ImageBuffer"});
+    auto texture = _device.CreateTexture(
+      {.Format = gfx::TextureFormat::RGBA8Unorm,
+       .Width = width,
+       .Height = height,
+       .Usage = EnumSet<gfx::TextureUsage> {gfx::TextureUsage::RenderTarget, gfx::TextureUsage::Sampled},
+       .DebugName = u8"UI.ImageBuffer"});
     if (!texture)
     {
       return {};

@@ -32,7 +32,7 @@ namespace krys::boo
   {
     if (auto itr = _itemsLayoutRequirements.find(&gridItem); itr != _itemsLayoutRequirements.end())
     {
-      return itr->second.Contains(layoutRequirement);
+      return itr->second.contains(layoutRequirement);
     }
     return false;
   }

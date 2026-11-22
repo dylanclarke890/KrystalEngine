@@ -26,9 +26,9 @@
 #include "Krystal.Booey/CSS/Counter/CounterStyle.hpp"
 #include "Krystal.Booey/CSS/Counter/CounterStyleRegistry.hpp"
 #include "Krystal.Core/Assert.hpp"
+#include "Krystal.Core/Containers/Array.hpp"
+#include "Krystal.Core/Move.hpp"
 #include "Krystal.Core/Strings/Unicode.hpp"
-#include "Krystal.Core/Types/Array.hpp"
-#include "Krystal.Core/Utils/Move.hpp"
 #include "Krystal.Text/Encodings/UTF.hpp"
 #include "Krystal.Text/TextBreakIterator.hpp"
 #include <cmath>
@@ -617,7 +617,7 @@ namespace krys::boo::css
 
     auto isExplicitlySet = [&](CounterStyleDescriptor descriptor)
     {
-      return HasFlag(ExplicitlySetDescriptors(), descriptor);
+      return ExplicitlySetDescriptors().contains(descriptor);
     };
 
     SetSystem(extendedCounterStyle.System());

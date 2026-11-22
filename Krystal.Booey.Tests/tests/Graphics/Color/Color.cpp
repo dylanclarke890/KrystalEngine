@@ -168,7 +168,7 @@ namespace krys::boo::tests
   {
     auto hash = [](const Color &color)
     {
-      return DefaultHash<Color>::Hash(color);
+      return FastHash<Color> {}(color);
     };
 
     {
@@ -187,22 +187,6 @@ namespace krys::boo::tests
     Color rgb1 {ConvertColour<SRGBA<float>>(componentBytes)};
     Color rgb2 {componentBytes};
     CHECK(hash(rgb1) != hash(rgb2));
-  }
-
-  TEST_CASE("Color: hash traits", "[Graphics][Color]")
-  {
-    auto empty = HashTraits<Color>::EmptyValue();
-    CHECK(HashTraits<Color>::IsEmptyValue(empty));
-    CHECK_FALSE(empty.IsValid());
-    CHECK_FALSE(HashTraits<Color>::IsDeletedValue(empty));
-
-    Color deleted;
-    HashTraits<Color>::ConstructDeletedValue(deleted);
-    CHECK(HashTraits<Color>::IsDeletedValue(deleted));
-    CHECK_FALSE(HashTraits<Color>::IsEmptyValue(deleted));
-
-    CHECK_FALSE(HashTraits<Color>::IsEmptyValue(Color {Color::red}));
-    CHECK_FALSE(HashTraits<Color>::IsDeletedValue(Color {Color::red}));
   }
 
   TEST_CASE("Color: move construction", "[Graphics][Color]")
@@ -332,7 +316,7 @@ namespace krys::boo::tests
     CHECK(EqualIgnoringSemanticColor(inlineSemantic, inlineColor));
     CHECK(EqualIgnoringSemanticColor(inlineColor, inlineColor));
     CHECK_FALSE(
-      EqualIgnoringSemanticColor(inlineColor, Color {Color::red, ColorFlags::UseColorFunctionSerialisation}));
+      EqualIgnoringSemanticColor(inlineColor, Color {Color::red, ColorFlag::UseColorFunctionSerialisation}));
 
     Color outOfLine {SRGBA<float> {1, 0, 0, 1}};
     Color outOfLineSemantic = outOfLine.SemanticColor();

@@ -49,9 +49,11 @@ namespace krys::boo::style
       return css::keywords::None {};
     }
 
-    return TransformList {
-      TransformList::Container::map(*transformList, [&](auto &transform)
-                                    { return ConvertCSSValueToStyle<TransformFunction>(state, transform); })};
+    return TransformList {TransformList::Container(
+      std::from_range,
+      *transformList
+        | std::views::transform([&](auto &transform)
+                                { return ConvertCSSValueToStyle<TransformFunction>(state, transform); }))};
   }
 
   Ref<css::Value> CSSValueCreation<Transform>::operator()(css::ValuePool &pool, const RenderStyle &style,
@@ -83,7 +85,7 @@ namespace krys::boo::style
   {
     KRYS_NODISCARD Transform TransformFromBlendedList(TransformList &&list) noexcept
     {
-      if (list.isEmpty())
+      if (list.empty())
       {
         return css::keywords::None {};
       }

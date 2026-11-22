@@ -24,7 +24,7 @@
  */
 
 #include "Krystal.Booey/Rendering/Style/StyleCustomPropertyData.hpp"
-#include "Krystal.Core/Types/SmallList.hpp"
+#include "Krystal.Core/Containers/SmallList.hpp"
 
 namespace krys::boo::style
 {

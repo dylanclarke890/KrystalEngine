@@ -379,8 +379,8 @@ namespace krys::boo
   UniquePtr<RenderBoxFragmentInfo>
     RenderFragmentContainer::TakeRenderBoxFragmentInfo(const RenderBox &box) noexcept
   {
-    auto node = _renderBoxFragmentInfo.extract(&box);
-    return node ? krys::move(node.mapped()) : nullptr;
+    auto entry = _renderBoxFragmentInfo.extract(&box);
+    return entry ? krys::move(entry->second) : nullptr;
   }
 
   void RenderFragmentContainer::RemoveRenderBoxFragmentInfo(const RenderBox &box) noexcept

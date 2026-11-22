@@ -28,10 +28,12 @@
 
 #include "Krystal.Core/Assert.hpp"
 #include "Krystal.Core/Attributes.hpp"
-#include "Krystal.Core/Hash.hpp"
-#include "Krystal.Core/Types/Array.hpp"
-#include "Krystal.Core/Types/List.hpp"
-#include "Krystal.Core/Types/Span.hpp"
+#include "Krystal.Core/Containers/Array.hpp"
+#include "Krystal.Core/Containers/List.hpp"
+#include "Krystal.Core/Containers/Span.hpp"
+#include "Krystal.Core/Hashing/FastHash.hpp"
+#include "Krystal.Core/Memory/ForbidHeapAllocation.hpp"
+#include "Krystal.Core/Move.hpp"
 #include "Krystal.Core/Utils/Tags.hpp"
 #include <memory>
 
@@ -52,46 +54,19 @@ namespace krys::boo
   /// @brief Hashes a `FontTag` as the big-endian integer its four characters spell.
   struct FourCharacterTagHash
   {
-    constexpr static bool IsSafeToCompareToEmptyOrDeleted = true;
-
     KRYS_NODISCARD static size_t Hash(const FontTag &tag) noexcept
     {
       uint32 integer = (static_cast<uint32>(static_cast<uint8>(tag[0])) << 24)
                        | (static_cast<uint32>(static_cast<uint8>(tag[1])) << 16)
                        | (static_cast<uint32>(static_cast<uint8>(tag[2])) << 8)
                        | static_cast<uint32>(static_cast<uint8>(tag[3]));
-      return DefaultHash<uint32>::Hash(integer);
-    }
-
-    KRYS_NODISCARD static bool Equal(const FontTag &a, const FontTag &b) noexcept
-    {
-      return a == b;
+      return FastHash<uint32> {}(integer);
     }
 
     // Lets `HashMap` hash `FontTag` keys.
     KRYS_NODISCARD size_t operator()(const FontTag &tag) const noexcept
     {
       return Hash(tag);
-    }
-  };
-
-  /// @brief Hash table traits for `FontTag` keys: all zeros is empty, all `0xFF` is deleted.
-  struct FourCharacterTagHashTraits : public HashTraits<FontTag>
-  {
-  private:
-    constexpr static char ff = static_cast<char>(0xFF);
-
-  public:
-    constexpr static bool EmptyValueIsZero = true;
-
-    static void ConstructDeletedValue(FontTag &slot) noexcept
-    {
-      new (NotNullTag {}, std::addressof(slot)) FontTag({{ff, ff, ff, ff}});
-    }
-
-    KRYS_NODISCARD static bool IsDeletedValue(const FontTag &value) noexcept
-    {
-      return value == FontTag({{ff, ff, ff, ff}});
     }
   };
 
@@ -163,7 +138,7 @@ namespace krys::boo
 
     KRYS_NODISCARD bool operator==(const FontTaggedSettings &) const noexcept = default;
 
-    KRYS_NODISCARD bool isEmpty() const noexcept
+    KRYS_NODISCARD bool empty() const noexcept
     {
       return !size();
     }
@@ -202,17 +177,11 @@ namespace krys::boo
 namespace krys
 {
   template <typename T>
-  struct DefaultHash<boo::FontTaggedSetting<T>>
+  struct FastHash<boo::FontTaggedSetting<T>>
   {
-    KRYS_NODISCARD static size_t Hash(const boo::FontTaggedSetting<T> &setting) noexcept
+    KRYS_NODISCARD size_t operator()(const boo::FontTaggedSetting<T> &setting) const noexcept
     {
-      return krys::Hash::Combine(boo::FourCharacterTagHash::Hash(setting.Tag()), setting.Value());
-    }
-
-    KRYS_NODISCARD static bool Equal(const boo::FontTaggedSetting<T> &a,
-                                     const boo::FontTaggedSetting<T> &b) noexcept
-    {
-      return a == b;
+      return krys::CombineFastHashes(boo::FourCharacterTagHash::Hash(setting.Tag()), setting.Value());
     }
   };
 }

@@ -6,7 +6,8 @@
 namespace krys::boo
 {
   CommandEvent::CommandEvent(DOMStringAtom type, const CommandEventInit &eventInitDict) noexcept
-      : Event(krys::move(type), eventInitDict), _source(eventInitDict.Source), _command(eventInitDict.Command)
+      : Event(krys::move(type), eventInitDict), _source(ShareRefPtr(eventInitDict.Source)),
+        _command(eventInitDict.Command)
   {
   }
 

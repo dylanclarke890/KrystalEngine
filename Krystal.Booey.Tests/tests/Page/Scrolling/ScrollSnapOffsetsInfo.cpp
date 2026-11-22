@@ -1,5 +1,6 @@
 ﻿#include "catch2/catch_test_macros.hpp"
 #include "Krystal.Booey.Tests/Animation/AnimationTestUtils.hpp"
+#include "Krystal.Booey.Tests/Rendering/RenderTestUtils.hpp"
 #include "Krystal.Booey/HTML/Elements/HTMLElement.hpp"
 #include "Krystal.Booey/HTML/Window.hpp"
 #include "Krystal.Booey/Input/EventHandler.hpp"
@@ -37,19 +38,6 @@ namespace krys::boo::tests
                          u8"white-space:nowrap;")
              + utf8_string(scrollerStyle) + u8"}.i{height:100px;scroll-snap-align:start}</style><div id=s>"
              + item + item + item + item + item + u8"</div>";
-    }
-
-    KRYS_NODISCARD ScrollableArea &AreaOf(boo::Element &element) noexcept
-    {
-      auto *area = Downcast<RenderBox>(*element.Renderer()).Layer()->GetScrollableArea();
-      REQUIRE(area);
-      return *area;
-    }
-
-    void Finish(AnimationPageFixture &fixture) noexcept
-    {
-      fixture.Frame();
-      fixture.Frame(1'600ms);
     }
 
     bool Wheel(AnimationPageFixture &fixture, float deltaY) noexcept
@@ -96,7 +84,7 @@ namespace krys::boo::tests
       options.Behavior = ScrollBehavior::Smooth;
       scroller.ScrollTo(options);
       CHECK(scroller.ScrollTop() == 0);
-      Finish(fixture);
+      FinishScrollAnimations(fixture);
       CHECK(scroller.ScrollTop() == 100);
     }
 
@@ -114,7 +102,7 @@ namespace krys::boo::tests
       CHECK(scroller.ScrollTop() == 0);
       fixture.Frame();
       CHECK(Wheel(fixture, -10));
-      Finish(fixture);
+      FinishScrollAnimations(fixture);
       CHECK(scroller.ScrollTop() == 200);
     }
 
@@ -125,7 +113,7 @@ namespace krys::boo::tests
       CHECK(handler.KeyEvent(PlatformKeyboardEvent(PlatformEvent::Type::RawKeyDown, u8"", u8"", u8"ArrowDown",
                                                    u8"ArrowDown", u8"Down", vk::Down, false, false, false, {},
                                                    {})));
-      Finish(fixture);
+      FinishScrollAnimations(fixture);
       CHECK(scroller.ScrollTop() == 100);
     }
 
@@ -145,7 +133,7 @@ namespace krys::boo::tests
 
       fixture.TestFrame->GetEventHandler().DidEndGestureScroll();
       CHECK(scroller.ScrollTop() == 80);
-      Finish(fixture);
+      FinishScrollAnimations(fixture);
       CHECK(scroller.ScrollTop() == 100);
     }
 
@@ -160,11 +148,11 @@ namespace krys::boo::tests
       // The fingers flicked: the content coasts on, still free.
       CHECK_FALSE(TouchpadPan(fixture, Phase::None, Phase::Began, 0));
       CHECK(TouchpadPan(fixture, Phase::None, Phase::Changed, -20));
-      Finish(fixture);
+      FinishScrollAnimations(fixture);
       CHECK(scroller.ScrollTop() == 80);
 
       CHECK_FALSE(TouchpadPan(fixture, Phase::None, Phase::Ended, 0));
-      Finish(fixture);
+      FinishScrollAnimations(fixture);
       CHECK(scroller.ScrollTop() == 100);
     }
 
@@ -174,17 +162,17 @@ namespace krys::boo::tests
       CHECK(TouchpadPan(fixture, Phase::Began, Phase::None, -30));
       CHECK(scroller.ScrollTop() == 30);
       CHECK_FALSE(TouchpadPan(fixture, Phase::Ended, Phase::None, 0));
-      Finish(fixture);
+      FinishScrollAnimations(fixture);
       CHECK(scroller.ScrollTop() == 0);
     }
 
     SECTION("letting go of a scrollbar's thumb snaps")
     {
-      auto &area = AreaOf(scroller);
+      auto &area = ScrollableAreaOf(scroller);
       area.ScrollToOffsetWithoutAnimation(ScrollOffset(0, 130));
       CHECK(scroller.ScrollTop() == 130);
       area.DoPostThumbMoveSnapping(ScrollbarOrientation::Vertical);
-      Finish(fixture);
+      FinishScrollAnimations(fixture);
       CHECK(scroller.ScrollTop() == 100);
     }
 

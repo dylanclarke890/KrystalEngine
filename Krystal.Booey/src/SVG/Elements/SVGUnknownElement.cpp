@@ -28,8 +28,7 @@
 namespace krys::boo
 {
   SVGUnknownElement::SVGUnknownElement(Document &document) noexcept
-      : SVGElement(document, SVGElementInterface::Unknown, SVGElementFlags::None,
-                   dom::NodeFlags::IsUnknownElement)
+      : SVGElement(document, SVGElementInterface::Unknown, {}, dom::NodeFlag::IsUnknownElement)
   {
   }
 }

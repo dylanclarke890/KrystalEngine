@@ -1,8 +1,8 @@
 ﻿#include "Krystal.Core/Types/SharedBuffer.hpp"
 #include "catch2/catch_test_macros.hpp"
+#include "Krystal.Core/Containers/Array.hpp"
+#include "Krystal.Core/Containers/List.hpp"
 #include "Krystal.Core/TypeCast.hpp"
-#include "Krystal.Core/Types/Array.hpp"
-#include "Krystal.Core/Types/List.hpp"
 
 namespace krys::tests
 {
@@ -47,7 +47,6 @@ namespace krys::tests
   {
     SharedBufferBuilder builder;
     CHECK(builder.IsNull());
-    CHECK_FALSE(builder);
 
     builder.Append(Bytes({1, 2}));
     builder.Append(Span<const uint8>());

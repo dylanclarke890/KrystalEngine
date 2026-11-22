@@ -25,7 +25,7 @@
 
 #pragma once
 
-#include "Krystal.Booey/CSS/Queries/MediaQuery.hpp"
+#include "Krystal.Booey/CSS/Queries/MediaQueryForward.hpp"
 #include "Krystal.Booey/DOM/Types/USVString.hpp"
 #include "Krystal.Booey/HTML/Elements/HTMLElement.hpp"
 
@@ -48,6 +48,8 @@ namespace krys::boo
 
   public:
     HTMLSourceElement(Document &document) noexcept;
+
+    ~HTMLSourceElement() noexcept override;
 
 #pragma region HTMLSourceElement - https://html.spec.whatwg.org/#htmlsourceelement
 

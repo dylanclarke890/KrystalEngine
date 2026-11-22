@@ -29,7 +29,7 @@
 
 #include "Krystal.Booey/CSS/Values/FilterEffects/Filter.hpp"
 #include "Krystal.Booey/CSS/Values/Value.hpp"
-#include "Krystal.Core/Types/RefPtr.hpp"
+#include "Krystal.Core/Memory/RefPtr.hpp"
 
 namespace krys::boo
 {

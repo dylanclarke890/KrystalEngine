@@ -24,7 +24,7 @@
 #include "Krystal.Booey/Rendering/SVG/SVGTextChunkBuilder.hpp"
 #include "Krystal.Booey/Rendering/SVG/SVGTextFragment.hpp"
 #include "Krystal.Booey/Rendering/SVG/SVGTextLayoutAttributes.hpp"
-#include "Krystal.Core/Types/List.hpp"
+#include "Krystal.Core/Containers/List.hpp"
 
 namespace krys::boo
 {

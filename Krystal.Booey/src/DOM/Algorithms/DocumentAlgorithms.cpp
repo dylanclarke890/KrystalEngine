@@ -24,7 +24,8 @@ namespace krys::boo::dom
     // the base Document class also has a public constructor. In that case 'IsXMLDocument' is not set but it
     // should be treated as an 'xml' doc as per the spec. A 'html' type document will always be created via
     // the HTMLDocument class.
-    return document.HasDocumentFlag(DocumentFlags::IsXMLDocument) || document._flags == DocumentFlags::None;
+    return document._documentFlags.contains(DocumentFlag::IsXMLDocument)
+           || document._documentFlags == DocumentFlags {};
   }
 
   ExceptionOr<ElementCreationOptions>
@@ -142,7 +143,7 @@ namespace krys::boo::dom
           auto &shadowRootInclusiveDescendant = Downcast<ShadowRoot>(inclusiveDescendant);
           auto registry = shadowRootInclusiveDescendant.CustomElementRegistry();
           if ((registry == nullptr && !shadowRootInclusiveDescendant._keepCustomElementRegistryNull)
-              || html::CustomElementAlgorithms::IsGlobalCustomElementRegistry(registry.get()))
+              || html::CustomElementAlgorithms::IsGlobalCustomElementRegistry(registry))
           {
             shadowRootInclusiveDescendant._customElementRegistry = documentEffectiveGlobalRegistry;
           }
@@ -175,7 +176,7 @@ namespace krys::boo::dom
             if (registry != nullptr || parent == nullptr
                 || TreeQueries::IsExclusiveDocumentFragmentNode(*parent))
             {
-              newRegistry = document.CustomElementRegistry().get();
+              newRegistry = document.CustomElementRegistry();
             }
             // 3c.ii.C. Otherwise, set registry to the result of looking up a custom element registry given
             //          inclusiveDescendant's parent.

@@ -34,7 +34,7 @@
 #include "Krystal.Booey/Style/Values/Masking/MaskMode.hpp"
 #include "Krystal.Booey/Style/Values/Primitives/CoordinatedValueListValue.hpp"
 #include "Krystal.Booey/Style/Values/Primitives/Position.hpp"
-#include "Krystal.Core/Types/RefPtr.hpp"
+#include "Krystal.Core/Memory/RefPtr.hpp"
 #include <tuple>
 
 namespace krys::boo

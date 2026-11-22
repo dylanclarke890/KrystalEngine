@@ -1,6 +1,7 @@
 ﻿#include "Krystal.Booey/Rendering/Layers/RenderLayerScrollableArea.hpp"
 #include "catch2/catch_test_macros.hpp"
 #include "Krystal.Booey.Tests/Rendering/PaintTestUtils.hpp"
+#include "Krystal.Booey.Tests/Rendering/RenderTestUtils.hpp"
 #include "Krystal.Booey.Tests/Style/ResolverTestUtils.hpp"
 #include "Krystal.Booey/HTML/EventLoop/EventLoop.hpp"
 #include "Krystal.Booey/Input/EventHandler.hpp"
@@ -20,11 +21,6 @@ namespace krys::boo::tests
 
   namespace
   {
-    KRYS_NODISCARD RenderBox &BoxOf(ResolverFixture &fixture, DOMStringView id)
-    {
-      return Downcast<RenderBox>(*fixture.ById(id).Renderer());
-    }
-
     KRYS_NODISCARD RenderLayerScrollableArea *ScrollableAreaOf(ResolverFixture &fixture, DOMStringView id)
     {
       auto *layer = BoxOf(fixture, id).Layer();

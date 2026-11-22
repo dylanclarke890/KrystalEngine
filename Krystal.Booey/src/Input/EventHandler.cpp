@@ -520,8 +520,7 @@ namespace krys::boo
       return false;
     }
     MouseEventWithHitTestResults mouseEvent = document->PrepareMouseEvent(
-      HitTestRequest(EnumSet<HitTestRequest::Type> {HitTestRequest::Type::Active,
-                                                    HitTestRequest::Type::DisallowUserAgentShadowContent}),
+      HitTestRequest({HitTestRequest::Type::Active, HitTestRequest::Type::DisallowUserAgentShadowContent}),
       documentPoint, platformMouseEvent);
 
     if (!mouseEvent.TargetNode())
@@ -847,8 +846,7 @@ namespace krys::boo
     }
 
     MouseEventWithHitTestResults mouseEvent = PrepareMouseEvent(
-      HitTestRequest(EnumSet<HitTestRequest::Type> {HitTestRequest::Type::Release,
-                                                    HitTestRequest::Type::DisallowUserAgentShadowContent}),
+      HitTestRequest({HitTestRequest::Type::Release, HitTestRequest::Type::DisallowUserAgentShadowContent}),
       platformMouseEvent);
 
     // FIXME: Mouse capture.
@@ -1310,7 +1308,7 @@ namespace krys::boo
       // :focus-visible. Just typing a modifier key is not considered user interaction with the page, but
       // Shift + a (or Caps Lock + a) is considered an interaction.
       bool userHasInteractedViaKeyword =
-        keydown->ModifierKeys().IsEmpty()
+        keydown->ModifierKeys().empty()
         || ((keydown->ShiftKey() || keydown->CapsLockKey()) && !initialKeyEvent.Text().empty());
 
       if (element.Focused() && userHasInteractedViaKeyword)
@@ -1397,8 +1395,8 @@ namespace krys::boo
   {
     using Modifier = PlatformEvent::Modifier;
     auto modifiers = event.Modifiers();
-    if (!modifiers.Contains(Modifier::AltKey) || modifiers.Contains(Modifier::ControlKey)
-        || modifiers.Contains(Modifier::MetaKey))
+    if (!modifiers.contains(Modifier::AltKey) || modifiers.contains(Modifier::ControlKey)
+        || modifiers.contains(Modifier::MetaKey))
     {
       return false;
     }
@@ -1875,9 +1873,8 @@ namespace krys::boo
     bool shiftKey = _lastPlatformMouseEvent.ShiftKey();
 
     HitTestResult result {LayoutPoint(view->WindowToContents(*_lastKnownMousePosition))};
-    document->HitTest(HitTestRequest(EnumSet<HitTestRequest::Type> {
-                        HitTestRequest::Type::ReadOnly, HitTestRequest::Type::AllowFrameScrollbars}),
-                      result);
+    document->HitTest(
+      HitTestRequest({HitTestRequest::Type::ReadOnly, HitTestRequest::Type::AllowFrameScrollbars}), result);
 
     UpdateCursor(*view, result, shiftKey);
   }
@@ -2127,10 +2124,9 @@ namespace krys::boo
     if (RefPtr<boo::Document> document = ShareRefPtr(_frame.Document()))
     {
       HitTestResult result {LayoutPoint(windowPoint)};
-      (void)document->HitTest(
-        HitTestRequest(EnumSet<HitTestRequest::Type> {HitTestRequest::Type::ReadOnly,
-                                                      HitTestRequest::Type::DisallowUserAgentShadowContent}),
-        result);
+      (void)document->HitTest(HitTestRequest({HitTestRequest::Type::ReadOnly,
+                                              HitTestRequest::Type::DisallowUserAgentShadowContent}),
+                              result);
       return result.GetScrollbar();
     }
     return false;
@@ -2196,8 +2192,8 @@ namespace krys::boo
         if (scrollableArea && scrollableArea->ScrollShouldClearLatchedState())
         {
           // Web developer is controlling scrolling, so don't attempt to latch.
-          if (handling.Contains(EventHandling::DispatchedToDOM)
-              && handling.Contains(EventHandling::DefaultPrevented))
+          if (handling.contains(EventHandling::DispatchedToDOM)
+              && handling.contains(EventHandling::DefaultPrevented))
           {
             ClearLatchedState();
           }
@@ -2784,8 +2780,7 @@ namespace krys::boo
     const auto flooredEventPosition = FlooredPointI(event.Position());
     LayoutPoint viewportPos {view->WindowToContents(flooredEventPosition)};
     MouseEventWithHitTestResults mouseEvent = doc->PrepareMouseEvent(
-      HitTestRequest(EnumSet<HitTestRequest::Type> {HitTestRequest::Type::Active,
-                                                    HitTestRequest::Type::DisallowUserAgentShadowContent}),
+      HitTestRequest({HitTestRequest::Type::Active, HitTestRequest::Type::DisallowUserAgentShadowContent}),
       PointD(viewportPos), event);
 
     // Do not show context menus when clicking on scrollbars.
@@ -3822,8 +3817,7 @@ namespace krys::boo
     (void)UpdateDragSourceActionsAllowed();
     HitTestResult result(LayoutPoint(view->WindowToContents(FlooredPointI(event.Position()))));
     document->HitTest(
-      HitTestRequest(EnumSet<HitTestRequest::Type> {HitTestRequest::Type::ReadOnly,
-                                                    HitTestRequest::Type::DisallowUserAgentShadowContent}),
+      HitTestRequest({HitTestRequest::Type::ReadOnly, HitTestRequest::Type::DisallowUserAgentShadowContent}),
       result);
     DragState state;
     auto *targetElement = result.TargetElement();
@@ -3916,8 +3910,7 @@ namespace krys::boo
     }
 
     MouseEventWithHitTestResults mouseEvent = PrepareMouseEvent(
-      HitTestRequest(EnumSet<HitTestRequest::Type> {HitTestRequest::Type::ReadOnly,
-                                                    HitTestRequest::Type::DisallowUserAgentShadowContent}),
+      HitTestRequest({HitTestRequest::Type::ReadOnly, HitTestRequest::Type::DisallowUserAgentShadowContent}),
       event);
 
     RefPtr<Element> newTarget;
@@ -4088,8 +4081,7 @@ namespace krys::boo
     // Send a hit test request so that RenderLayer gets a chance to update the :hover and :active
     // pseudoclasses.
     (void)PrepareMouseEvent(
-      HitTestRequest(EnumSet<HitTestRequest::Type> {HitTestRequest::Type::Release,
-                                                    HitTestRequest::Type::DisallowUserAgentShadowContent}),
+      HitTestRequest({HitTestRequest::Type::Release, HitTestRequest::Type::DisallowUserAgentShadowContent}),
       event);
 
     if (ShouldDispatchEventsToDragSourceElement())
@@ -4159,14 +4151,13 @@ namespace krys::boo
     // Careful that the drag starting logic stays in sync with EventMayStartDrag().
     if (_mouseDownMayStartDrag && !DraggedElement())
     {
-      dragState.ShouldDispatchEvents = UpdateDragSourceActionsAllowed().Contains(DragSourceAction::DHTML);
+      dragState.ShouldDispatchEvents = UpdateDragSourceActionsAllowed().contains(DragSourceAction::DHTML);
 
       // Try to find an element that wants to be dragged.
       HitTestResult result(_mouseDownContentsPosition);
-      frame->Document()->HitTest(
-        HitTestRequest(EnumSet<HitTestRequest::Type> {HitTestRequest::Type::ReadOnly,
-                                                      HitTestRequest::Type::DisallowUserAgentShadowContent}),
-        result);
+      frame->Document()->HitTest(HitTestRequest({HitTestRequest::Type::ReadOnly,
+                                                 HitTestRequest::Type::DisallowUserAgentShadowContent}),
+                                 result);
       SetDragStateSource(frame->GetDragController()
                            .DraggableElement(frame.get(), result.TargetElement(),
                                              RoundedPointI(_mouseDownContentsPosition), dragState)
@@ -4178,18 +4169,18 @@ namespace krys::boo
       }
       else
       {
-        _dragMayStartSelectionInstead = dragState.Type.Contains(DragSourceAction::Selection);
+        _dragMayStartSelectionInstead = dragState.Type.contains(DragSourceAction::Selection);
       }
     }
 
     // For drags starting in the selection, the user must wait between the mousedown and mousedrag,
     // or else we bail on the dragging stuff and allow selection to occur
     if (_mouseDownMayStartDrag && _dragMayStartSelectionInstead
-        && dragState.Type.Contains(DragSourceAction::Selection)
+        && dragState.Type.contains(DragSourceAction::Selection)
         && event.Event().Timestamp() - _mouseDownTimestamp < TextDragDelay)
     {
       krys_debug_assert(event.Event().GetType() == PlatformEvent::Type::MouseMoved);
-      if (dragState.Type.Contains(DragSourceAction::Image))
+      if (dragState.Type.contains(DragSourceAction::Image))
       {
         // ... unless the mouse is over an image, then we start dragging just the image
         dragState.Type = DragSourceAction::Image;
@@ -4221,7 +4212,7 @@ namespace krys::boo
 
     if (!dragState.Type.HasExactlyOneBitSet())
     {
-      krys_debug_assert(dragState.Type.Contains(DragSourceAction::Selection));
+      krys_debug_assert(dragState.Type.contains(DragSourceAction::Selection));
       dragState.Type = DragSourceAction::Selection;
     }
 

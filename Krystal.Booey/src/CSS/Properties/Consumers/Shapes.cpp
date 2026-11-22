@@ -414,12 +414,12 @@ namespace krys::boo::css::parse_property
   }
 
   KRYS_NODISCARD static Maybe<Path>
-    ConsumeBasicShapePathFunctionParameters(TokenRange &args, PathParsingOption options) noexcept
+    ConsumeBasicShapePathFunctionParameters(TokenRange &args, EnumSet<PathParsingOption> options) noexcept
   {
     // <path()> = path( <'fill-rule'>? , <string> )
     // https://drafts.csswg.org/css-shapes/#funcdef-basic-shape-path
 
-    if (HasFlag(options, PathParsingOption::RejectPath))
+    if (options.contains(PathParsingOption::RejectPath))
     {
       return null;
     }
@@ -427,7 +427,7 @@ namespace krys::boo::css::parse_property
     auto fillRule = PeekFillRule(args);
     if (fillRule)
     {
-      if (HasFlag(options, PathParsingOption::RejectPathFillRule))
+      if (options.contains(PathParsingOption::RejectPathFillRule))
       {
         return null;
       }
@@ -1209,7 +1209,7 @@ namespace krys::boo::css::parse_property
   // MARK: - <basic-shape>
 
   RefPtr<Value> ConsumeBasicShape(TokenRange &tokens, PropertyParserState &state,
-                                  PathParsingOption options) noexcept
+                                  EnumSet<PathParsingOption> options) noexcept
   {
     // <basic-shape> = <circle()> | <ellipse() | <inset()> | <path()> | <polygon()> | <rect()> | <shape()> |
     // <xywh()>
@@ -1283,7 +1283,7 @@ namespace krys::boo::css::parse_property
     }
 
     auto args = ConsumeFunction(tokens);
-    auto result = ConsumeBasicShapePathFunctionParameters(args, PathParsingOption::None);
+    auto result = ConsumeBasicShapePathFunctionParameters(args, {});
     if (!result || !args.IsAtEnd())
     {
       return nullptr;

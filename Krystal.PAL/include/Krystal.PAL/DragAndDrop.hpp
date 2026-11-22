@@ -1,10 +1,10 @@
 ﻿#pragma once
 
+#include "Krystal.Core/Containers/EnumSet.hpp"
+#include "Krystal.Core/Containers/List.hpp"
 #include "Krystal.Core/Enum.hpp"
 #include "Krystal.Core/Numeric.hpp"
 #include "Krystal.Core/Strings/String.hpp"
-#include "Krystal.Core/Types/EnumSet.hpp"
-#include "Krystal.Core/Types/List.hpp"
 #include "Krystal.Core/Types/Maybe.hpp"
 #include "Krystal.PAL/Input/KeyModifiers.hpp"
 
@@ -20,12 +20,12 @@ namespace krys::pal
     /// @brief The target takes a link to it.
     Link,
   };
-}
 
-KRYS_DEFINE_CONTIGUOUS_ENUM_TRAITS(krys::pal::DropOperation, 3uz)
+  consteval DropOperation MaxEnumValue(DropOperation) noexcept
+  {
+    return DropOperation::Link;
+  }
 
-namespace krys::pal
-{
   using DropOperations = EnumSet<DropOperation>;
 
   /// @brief What's dragged over a window from another application, in the formats Krystal reads.

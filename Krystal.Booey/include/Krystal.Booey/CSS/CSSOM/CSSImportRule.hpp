@@ -24,14 +24,9 @@
 #include "Krystal.Booey/CSS/CSSOM/CSSRule.hpp"
 #include "Krystal.Booey/CSS/Queries/MediaQuery.hpp"
 #include "Krystal.Core/Attributes.hpp"
+#include "Krystal.Core/Memory/RefPtr.hpp"
 #include "Krystal.Core/TypeCast.hpp"
 #include "Krystal.Core/Types/Maybe.hpp"
-#include "Krystal.Core/Types/RefPtr.hpp"
-
-namespace krys::boo
-{
-  class MediaList;
-}
 
 namespace krys::boo::css
 {
@@ -40,6 +35,8 @@ namespace krys::boo::css
 
 namespace krys::boo
 {
+  class MediaList;
+
   /// @brief An `@import` rule, exposed to scripts.
   /// @see https://drafts.csswg.org/cssom/#the-cssimportrule-interface
   class CSSImportRule final : public CSSRule

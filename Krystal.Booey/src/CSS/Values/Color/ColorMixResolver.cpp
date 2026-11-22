@@ -126,10 +126,10 @@ namespace krys::boo::css
         mixedColor.Alpha *= static_cast<float>(*mixPercentages.AlphaMultiplier / 100.0);
       }
 
-      auto flags = ColorFlags::UseColorFunctionSerialisation;
+      ColorFlags flags {ColorFlag::UseColorFunctionSerialisation};
       if (color1.IsSemantic() || color2.IsSemantic())
       {
-        flags = flags | ColorFlags::Semantic;
+        flags.Add(ColorFlag::Semantic);
       }
 
       return {mixedColor, flags};

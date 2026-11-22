@@ -1,5 +1,6 @@
 ﻿#include "Krystal.Booey/DOM/Collections/LiveCollection.hpp"
 #include "catch2/catch_test_macros.hpp"
+#include "Krystal.Booey/DOM/Collections/DOMTokenList.hpp"
 #include "Krystal.Booey/DOM/Collections/HTMLCollection.hpp"
 #include "Krystal.Booey/DOM/Collections/LiveHTMLCollection.hpp"
 #include "Krystal.Booey/DOM/Collections/NodeList.hpp"

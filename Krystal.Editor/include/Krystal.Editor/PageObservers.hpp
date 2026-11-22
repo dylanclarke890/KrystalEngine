@@ -10,9 +10,9 @@
 #include "Krystal.Booey/DOM/ResizeObservers/ResizeObserver.hpp"
 #include "Krystal.Booey/DOM/ResizeObservers/ResizeObserverEntry.hpp"
 #include "Krystal.Booey/DOM/ResizeObservers/ResizeObserverSize.hpp"
+#include "Krystal.Core/Containers/List.hpp"
 #include "Krystal.Core/Macros.hpp"
-#include "Krystal.Core/Types/List.hpp"
-#include "Krystal.Core/Types/WeakPtr.hpp"
+#include "Krystal.Core/Memory/WeakPtr.hpp"
 #include <cmath>
 #include <format>
 

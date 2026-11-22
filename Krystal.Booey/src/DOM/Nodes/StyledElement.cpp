@@ -75,8 +75,8 @@ namespace krys::boo
 
   void StyledElement::SynchronizeStyleAttributeInternal() noexcept
   {
-    krys_debug_assert(HasNodeFlag(dom::NodeFlags::StyleAttributeIsDirty));
-    ClearNodeFlag(dom::NodeFlags::StyleAttributeIsDirty);
+    krys_debug_assert(_nodeFlags.contains(dom::NodeFlag::StyleAttributeIsDirty));
+    _nodeFlags.Remove(dom::NodeFlag::StyleAttributeIsDirty);
     if (const auto *inlineStyle = InlineStyle())
     {
       SetSynchronizedLazyAttribute(u8"style", inlineStyle->AsText(css::DefaultSerialisationContext()));
@@ -87,7 +87,7 @@ namespace krys::boo
   {
     if (const auto *inlineStyle = InlineStyle())
     {
-      ClearNodeFlag(dom::NodeFlags::StyleAttributeIsDirty);
+      _nodeFlags.Remove(dom::NodeFlag::StyleAttributeIsDirty);
       auto newValue = inlineStyle->AsText(css::DefaultSerialisationContext());
       auto oldValue = GetAttribute(u8"style");
       style::AttributeChangeInvalidation styleInvalidation(*this, QualifiedName {null, null, u8"style"},
@@ -258,14 +258,14 @@ namespace krys::boo
       SetInlineStyleFromString(*newStyleString);
     }
 
-    ClearNodeFlag(dom::NodeFlags::StyleAttributeIsDirty);
+    _nodeFlags.Remove(dom::NodeFlag::StyleAttributeIsDirty);
 
     Node::InvalidateStyle(style::Validity::InlineStyleInvalid);
   }
 
   void StyledElement::DirtyStyleAttribute() noexcept
   {
-    SetNodeFlag(dom::NodeFlags::StyleAttributeIsDirty);
+    _nodeFlags.Add(dom::NodeFlag::StyleAttributeIsDirty);
 
     if (StyleResolver().RuleSets().GetSelectorsForStyleAttribute() != style::SelectorsForStyleAttribute::None)
     {
@@ -275,7 +275,7 @@ namespace krys::boo
 
   void StyledElement::InvalidateStyleAttribute() noexcept
   {
-    SetNodeFlag(dom::NodeFlags::StyleAttributeIsDirty);
+    _nodeFlags.Add(dom::NodeFlag::StyleAttributeIsDirty);
 
     // Inline style invalidation optimization does not work if there are selectors targeting the style
     // attribute as some rule may start or stop matching.

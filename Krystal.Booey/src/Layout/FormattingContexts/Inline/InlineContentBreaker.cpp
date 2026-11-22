@@ -667,7 +667,7 @@ namespace krys::boo::layout
         return Result {Result::Action::Keep, IsEndOfLine::No};
       }
       auto breakBehavior = WordBreakBehavior(style, {});
-      if (breakBehavior.IsEmpty())
+      if (breakBehavior.empty())
       {
         return Result {Result::Action::Keep, IsEndOfLine::No};
       }
@@ -707,20 +707,20 @@ namespace krys::boo::layout
     auto lineHasRoomForContent = availableWidth > 0;
 
     auto breakRules = WordBreakBehavior(style, lineStatus.HasWrapOpportunityAtPreviousPosition);
-    if (breakRules.IsEmpty())
+    if (breakRules.empty())
     {
       return {};
     }
 
     auto &fontCascade = style.GetFontCascade();
-    if (breakRules.Contains(WordBreakRule::AtArbitraryPositionWithinWords))
+    if (breakRules.contains(WordBreakRule::AtArbitraryPositionWithinWords))
     {
       auto tryBreakingAtArbitraryPositionWithinWords = [&]() -> Maybe<PartialRun>
       {
         // Breaking is allowed within “words”: specifically, in addition to soft wrap opportunities allowed
         // for normal, any typographic letter units It does not affect rules governing the soft wrap
         // opportunities created by white space. Hyphenation is not applied.
-        krys_debug_assert(!breakRules.Contains(WordBreakRule::AtHyphenationOpportunities));
+        krys_debug_assert(!breakRules.contains(WordBreakRule::AtHyphenationOpportunities));
         if (inlineTextItem.IsWhitespace())
         {
           // AtArbitraryPositionWithinWords does not affect the breaking opportunities around whitespace.
@@ -802,7 +802,7 @@ namespace krys::boo::layout
       return tryBreakingAtArbitraryPositionWithinWords();
     }
 
-    if (breakRules.Contains(WordBreakRule::AtHyphenationOpportunities))
+    if (breakRules.contains(WordBreakRule::AtHyphenationOpportunities))
     {
       auto tryBreakingAtHyphenationOpportunity = [&]() -> Maybe<PartialRun>
       {
@@ -849,7 +849,7 @@ namespace krys::boo::layout
       }
     }
 
-    if (breakRules.Contains(WordBreakRule::AtArbitraryPosition))
+    if (breakRules.contains(WordBreakRule::AtArbitraryPosition))
     {
       auto tryBreakingAtArbitraryPosition = [&]() -> Maybe<PartialRun>
       {
@@ -1062,7 +1062,7 @@ namespace krys::boo::layout
 
     auto &style = runs.front().Item.Style();
     if (!WordBreakBehavior(style, lineStatus.HasWrapOpportunityAtPreviousPosition)
-           .Contains(WordBreakRule::AtHyphenationOpportunities))
+           .contains(WordBreakRule::AtHyphenationOpportunities))
     {
       return {};
     }

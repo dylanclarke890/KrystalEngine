@@ -30,18 +30,18 @@
 #include "Krystal.Booey/Graphics/Paths/Path.hpp"
 #include "Krystal.Booey/Text/TextFlags.hpp"
 #include "Krystal.Core/Attributes.hpp"
-#include "Krystal.Core/CanMakeWeakPtr.hpp"
+#include "Krystal.Core/Containers/HashMap.hpp"
+#include "Krystal.Core/Containers/List.hpp"
+#include "Krystal.Core/Containers/SmallList.hpp"
+#include "Krystal.Core/Containers/Span.hpp"
 #include "Krystal.Core/Geometry/Rect.hpp"
 #include "Krystal.Core/Macros.hpp"
-#include "Krystal.Core/RefCounted.hpp"
+#include "Krystal.Core/Memory/CanMakeWeakPtr.hpp"
+#include "Krystal.Core/Memory/RefCounted.hpp"
+#include "Krystal.Core/Memory/RefPtr.hpp"
+#include "Krystal.Core/Memory/UniquePtr.hpp"
 #include "Krystal.Core/Strings/String.hpp"
-#include "Krystal.Core/Types/HashMap.hpp"
-#include "Krystal.Core/Types/List.hpp"
 #include "Krystal.Core/Types/Maybe.hpp"
-#include "Krystal.Core/Types/RefPtr.hpp"
-#include "Krystal.Core/Types/SmallList.hpp"
-#include "Krystal.Core/Types/Span.hpp"
-#include "Krystal.Core/Types/UniquePtr.hpp"
 #include "Krystal.Text/HarfBuzz.hpp"
 
 namespace krys::text
@@ -440,4 +440,26 @@ namespace krys::boo
 
     KRYS_NODISCARD float PlatformWidthForGlyph(Glyph glyph) const noexcept;
   };
+
+  inline GlyphData::GlyphData(boo::Glyph glyph, const boo::Font *font,
+                              boo::ColorGlyphType colorGlyphType) noexcept
+      : Glyph(glyph), ColorGlyphType(colorGlyphType), Font(CreateWeakPtr(font))
+  {
+  }
+
+  inline GlyphPage::GlyphPage(const boo::Font &font) noexcept : _font(CreateWeakPtr(&font))
+  {
+  }
+
+  inline GlyphData GlyphPage::GlyphDataForIndex(uint32 index) const noexcept
+  {
+    Glyph glyph = GlyphForIndex(index);
+    auto colorGlyphType = ColorGlyphTypeForIndex(index);
+    return GlyphData(glyph, glyph ? _font.get() : nullptr, colorGlyphType);
+  }
+
+  inline const Font &GlyphPage::GetFont() const noexcept
+  {
+    return *_font;
+  }
 }

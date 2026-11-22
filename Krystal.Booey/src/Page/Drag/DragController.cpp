@@ -212,23 +212,23 @@ namespace krys::boo
       {
         return DragOperation::Copy;
       }
-      if (sourceOperationMask.IsEmpty())
+      if (sourceOperationMask.empty())
       {
         return null;
       }
-      if (sourceOperationMask.Contains(DragOperation::Move))
+      if (sourceOperationMask.contains(DragOperation::Move))
       {
         return DragOperation::Move;
       }
-      if (sourceOperationMask.Contains(DragOperation::Generic))
+      if (sourceOperationMask.contains(DragOperation::Generic))
       {
         return DragController::PlatformGenericDragOperation();
       }
-      if (sourceOperationMask.Contains(DragOperation::Copy))
+      if (sourceOperationMask.contains(DragOperation::Copy))
       {
         return DragOperation::Copy;
       }
-      if (sourceOperationMask.Contains(DragOperation::Link))
+      if (sourceOperationMask.contains(DragOperation::Link))
       {
         return DragOperation::Link;
       }
@@ -355,7 +355,7 @@ namespace krys::boo
 
   bool DragController::IsCopyKeyDown(const DragData &dragData) noexcept
   {
-    return dragData.Flags().Contains(DragApplicationFlags::IsCopyKeyDown);
+    return dragData.Flags().contains(DragApplicationFlags::IsCopyKeyDown);
   }
 
   bool DragController::DragIsMove(FrameSelection &selection, const DragData &dragData) noexcept
@@ -411,7 +411,7 @@ namespace krys::boo
 
     DisallowFileAccessIfNeeded(dragData);
 
-    if (_dragDestinationActionMask.Contains(DragDestinationAction::DHTML)
+    if (_dragDestinationActionMask.contains(DragDestinationAction::DHTML)
         && DragIsHandledByDocument(_dragHandlingMethod))
     {
       Client().WillPerformDragDestinationAction(DragDestinationAction::DHTML, dragData);
@@ -430,7 +430,7 @@ namespace krys::boo
       }
     }
 
-    if (_dragDestinationActionMask.Contains(DragDestinationAction::Edit) && ConcludeEditDrag(dragData))
+    if (_dragDestinationActionMask.contains(DragDestinationAction::Edit) && ConcludeEditDrag(dragData))
     {
       Client().DidConcludeEditDrag();
       _documentUnderMouse = nullptr;
@@ -475,7 +475,7 @@ namespace krys::boo
                                                      : nullptr);
 
     _dragDestinationActionMask = dragData.DragDestinationActionMask();
-    if (_dragDestinationActionMask.IsEmpty())
+    if (_dragDestinationActionMask.empty())
     {
       ClearDragCaret(); // FIXME: Why not call MouseMovedIntoDocument(nullptr)?
       return null;
@@ -512,7 +512,7 @@ namespace krys::boo
     }
 
     bool isHandlingDrag = false;
-    if (destinationActionMask.Contains(DragDestinationAction::DHTML))
+    if (destinationActionMask.contains(DragDestinationAction::DHTML))
     {
       isHandlingDrag = TryDHTMLDrag(frame, dragData, dragOperation);
       // Do not continue if _documentUnderMouse has been reset by TryDHTMLDrag.
@@ -541,7 +541,7 @@ namespace krys::boo
       return DragHandlingMethod::NonDefault;
     }
 
-    if (destinationActionMask.Contains(DragDestinationAction::Edit) && CanProcessDrag(dragData))
+    if (destinationActionMask.contains(DragDestinationAction::Edit) && CanProcessDrag(dragData))
     {
       if (dragData.ContainsColor())
       {
@@ -886,8 +886,8 @@ namespace krys::boo
       return nullptr;
     }
 
-    RefPtr<Element> selectionDragElement = state.Type.Contains(DragSourceAction::Selection)
-                                               && _dragSourceAction.Contains(DragSourceAction::Selection)
+    RefPtr<Element> selectionDragElement = state.Type.contains(DragSourceAction::Selection)
+                                               && _dragSourceAction.contains(DragSourceAction::Selection)
                                              ? ShareRefPtr(startElement)
                                              : nullptr;
 
@@ -901,7 +901,7 @@ namespace krys::boo
       }
 
       UserDrag dragMode = renderer->Style().UserDrag();
-      if (_dragSourceAction.Contains(DragSourceAction::DHTML) && dragMode == UserDrag::Element)
+      if (_dragSourceAction.contains(DragSourceAction::DHTML) && dragMode == UserDrag::Element)
       {
         state.Type = DragSourceAction::DHTML;
         return ShareRefPtr(element);
@@ -909,13 +909,13 @@ namespace krys::boo
       if (dragMode == UserDrag::Auto)
       {
         if (auto *image = DynamicDowncast<HTMLImageElement>(*element);
-            image && _dragSourceAction.Contains(DragSourceAction::Image)
+            image && _dragSourceAction.contains(DragSourceAction::Image)
             && ImageElementIsDraggable(*image, *sourceFrame))
         {
           state.Type.Add(DragSourceAction::Image);
           return ShareRefPtr(element);
         }
-        if (_dragSourceAction.Contains(DragSourceAction::Link) && IsDraggableLink(*element))
+        if (_dragSourceAction.contains(DragSourceAction::Link) && IsDraggableLink(*element))
         {
           state.Type.Add(DragSourceAction::Link);
           return ShareRefPtr(element);
@@ -955,14 +955,14 @@ namespace krys::boo
 
     auto *image = GetImage(element);
     auto imageUrl = hitTestResult->AbsoluteImageUrl();
-    if (actionMask.Contains(DragSourceAction::Image) && !imageUrl.IsEmpty() && image && !image->IsNull())
+    if (actionMask.contains(DragSourceAction::Image) && !imageUrl.IsEmpty() && image && !image->IsNull())
     {
       editor.WriteImageToPasteboard(pasteboard, element, imageUrl, {});
       return;
     }
 
     auto linkUrl = hitTestResult->AbsoluteLinkUrl();
-    if (actionMask.Contains(DragSourceAction::Link) && !linkUrl.IsEmpty())
+    if (actionMask.contains(DragSourceAction::Link) && !linkUrl.IsEmpty())
     {
       editor.CopyUrl(linkUrl, SimplifyWhiteSpace(hitTestResult->TextContent()), pasteboard);
     }
@@ -1095,7 +1095,7 @@ namespace krys::boo
     }
 
     if (!imageUrl.IsEmpty() && image && !image->IsNull()
-        && _dragSourceAction.Contains(DragSourceAction::Image))
+        && _dragSourceAction.contains(DragSourceAction::Image))
     {
       if (hasData == HasNonDefaultPasteboardData::No)
       {
@@ -1123,7 +1123,7 @@ namespace krys::boo
       return true;
     }
 
-    if (!linkUrl.IsEmpty() && _dragSourceAction.Contains(DragSourceAction::Link))
+    if (!linkUrl.IsEmpty() && _dragSourceAction.contains(DragSourceAction::Link))
     {
       utf8_string textContentWithSimplifiedWhiteSpace = SimplifyWhiteSpace(hitTestResult->TextContent());
 
@@ -1156,10 +1156,10 @@ namespace krys::boo
         dragImage = DragImage {dragImageRef};
         if (dragImage)
         {
-          _dragOffset = DragOffsetForLinkDragImage(dragImage.Get());
+          _dragOffset = DragOffsetForLinkDragImage(dragImage.get());
           dragLoc = PointI(dragOrigin.X() + _dragOffset.X(), dragOrigin.Y() + _dragOffset.Y());
           dragImage =
-            DragImage {PlatformAdjustDragImageForDeviceScaleFactor(dragImage.Get(), deviceScaleFactor)};
+            DragImage {PlatformAdjustDragImageForDeviceScaleFactor(dragImage.get(), deviceScaleFactor)};
         }
       }
 
@@ -1169,7 +1169,7 @@ namespace krys::boo
 
     if (state.Type == EnumSet<boo::DragSourceAction> {DragSourceAction::DHTML} && dragImage)
     {
-      krys_debug_assert(_dragSourceAction.Contains(DragSourceAction::DHTML));
+      krys_debug_assert(_dragSourceAction.contains(DragSourceAction::DHTML));
       Client().WillPerformDragSourceAction(DragSourceAction::DHTML, dragOrigin, *dataTransfer);
       DoSystemDrag(krys::move(dragImage), dragLoc, dragOrigin, src, state);
       return true;
@@ -1198,11 +1198,11 @@ namespace krys::boo
     if (image && !layoutRect.IsEmpty() && ShouldUseCachedImageForDragImage(*image)
         && (dragImage = DragImage {CreateDragImageFromImage(image, orientation)}))
     {
-      dragImage = DragImage {FitDragImageToMaxSize(dragImage.Get(), layoutRect.Size(), MaxDragImageSize())};
-      SizeI fittedSize = DragImageSize(dragImage.Get());
+      dragImage = DragImage {FitDragImageToMaxSize(dragImage.get(), layoutRect.Size(), MaxDragImageSize())};
+      SizeI fittedSize = DragImageSize(dragImage.get());
 
-      dragImage = DragImage {PlatformAdjustDragImageForDeviceScaleFactor(dragImage.Get(), deviceScaleFactor)};
-      dragImage = DragImage {DissolveDragImageToFraction(dragImage.Get(), DragImageAlpha)};
+      dragImage = DragImage {PlatformAdjustDragImageForDeviceScaleFactor(dragImage.get(), deviceScaleFactor)};
+      dragImage = DragImage {DissolveDragImageToFraction(dragImage.get(), DragImageAlpha)};
 
       // Properly orient the drag image and orient it differently if it's smaller than the original.
       float scale = fittedSize.Width() / static_cast<float>(layoutRect.Width());
@@ -1221,9 +1221,9 @@ namespace krys::boo
         if (dragImage)
         {
           dragImage =
-            DragImage {PlatformAdjustDragImageForDeviceScaleFactor(dragImage.Get(), deviceScaleFactor)};
+            DragImage {PlatformAdjustDragImageForDeviceScaleFactor(dragImage.get(), deviceScaleFactor)};
           scaledOrigin =
-            PointI(DragIconRightInset - DragImageSize(dragImage.Get()).Width(), DragIconBottomInset);
+            PointI(DragIconRightInset - DragImageSize(dragImage.get()).Width(), DragIconBottomInset);
         }
       }
     }
@@ -1271,7 +1271,7 @@ namespace krys::boo
         }
         else
         {
-          dragPreviewSize = DragImageSize(item.Image.Get());
+          dragPreviewSize = DragImageSize(item.Image.get());
           dragPreviewSize.Scale(1 / frame.Document()->DeviceScaleFactor());
         }
         item.DragPreviewFrameInRootViewCoordinates = {item.DragLocationInWindowCoordinates, dragPreviewSize};

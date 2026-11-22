@@ -37,7 +37,7 @@
 #include "Krystal.Booey/HTML/Elements/HTMLSlotElement.hpp"
 #include "Krystal.Booey/Infra/StringAlgorithms.hpp"
 #include "Krystal.Booey/Style/Invalidation/PseudoClassChangeInvalidation.hpp"
-#include "Krystal.Core/Types/UniquePtr.hpp"
+#include "Krystal.Core/Memory/UniquePtr.hpp"
 
 namespace krys::boo
 {
@@ -47,6 +47,11 @@ namespace krys::boo
   }
 
 #pragma region HTMLOptGroupElement
+
+  HTMLSelectElement *HTMLOptGroupElement::OwnerSelectElement() const noexcept
+  {
+    return _ownerSelect.get();
+  }
 
   bool HTMLOptGroupElement::Disabled() const noexcept
   {

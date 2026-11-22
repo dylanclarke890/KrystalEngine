@@ -1,9 +1,9 @@
 ﻿#pragma once
 
 #include "Krystal.Core/Attributes.hpp"
+#include "Krystal.Core/Memory/RefPtr.hpp"
 #include "Krystal.Core/Types/Any.hpp"
 #include "Krystal.Core/Types/Maybe.hpp"
-#include "Krystal.Core/Types/RefPtr.hpp"
 
 namespace krys::boo::dom
 {
@@ -24,7 +24,7 @@ namespace krys::boo
     Ref<AbortSignal> _signal;
 
   public:
-    ~AbortController() noexcept = default;
+    ~AbortController() noexcept;
 
 #pragma region Abort Controller - https://dom.spec.whatwg.org/#abortcontroller
 

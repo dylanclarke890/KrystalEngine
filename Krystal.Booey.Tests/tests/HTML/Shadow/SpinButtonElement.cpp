@@ -1,6 +1,7 @@
 ﻿#include "Krystal.Booey/HTML/Shadow/SpinButtonElement.hpp"
 #include "catch2/catch_test_macros.hpp"
 #include "Krystal.Booey.Tests/Editing/EditorTestUtils.hpp"
+#include "Krystal.Booey.Tests/Input/InputTestUtils.hpp"
 #include "Krystal.Booey/DOM/Events/EventNames.hpp"
 #include "Krystal.Booey/DOM/Nodes/Document.hpp"
 #include "Krystal.Booey/HTML/Elements/HTMLInputElement.hpp"
@@ -11,18 +12,6 @@
 
 namespace krys::boo::tests
 {
-  namespace
-  {
-    KRYS_NODISCARD PlatformMouseEvent MouseEvent(PlatformEvent::Type type, PointI position) noexcept
-    {
-      PointD point(position.X(), position.Y());
-      int32 clickCount = type == PlatformEvent::Type::MousePressed ? 1 : 0;
-      return PlatformMouseEvent(
-        point, point, type == PlatformEvent::Type::MouseMoved ? MouseButton::None : MouseButton::Left, type,
-        clickCount, {}, MonotonicTime::Now());
-    }
-  }
-
   TEST_CASE_METHOD(css::tests::ValueFixture, "SpinButtonElement: number fields step with their spin button",
                    "[HTML][SpinButtonElement]")
   {
@@ -42,29 +31,29 @@ namespace krys::boo::tests
     PointI lower(bounds.X() + bounds.Width() / 2, bounds.MaxY() - bounds.Height() / 4);
 
     // Moving over the upper half and pressing steps up, and focuses the field; the lower half steps down.
-    (void)handler.MouseMoved(MouseEvent(PlatformEvent::Type::MouseMoved, upper));
+    (void)handler.MouseMoved(MouseEventAt(PlatformEvent::Type::MouseMoved, upper));
     CHECK(spinButton.GetUpDownState() == html::SpinButtonElement::UpDownState::Up);
-    (void)handler.HandleMousePressEvent(MouseEvent(PlatformEvent::Type::MousePressed, upper));
-    (void)handler.HandleMouseReleaseEvent(MouseEvent(PlatformEvent::Type::MouseReleased, upper));
+    (void)handler.HandleMousePressEvent(MouseEventAt(PlatformEvent::Type::MousePressed, upper));
+    (void)handler.HandleMouseReleaseEvent(MouseEventAt(PlatformEvent::Type::MouseReleased, upper));
     CHECK(number.Value() == u8"6");
     CHECK(fixture.Document->FocusedElement() == &number);
 
-    (void)handler.MouseMoved(MouseEvent(PlatformEvent::Type::MouseMoved, lower));
+    (void)handler.MouseMoved(MouseEventAt(PlatformEvent::Type::MouseMoved, lower));
     CHECK(spinButton.GetUpDownState() == html::SpinButtonElement::UpDownState::Down);
-    (void)handler.HandleMousePressEvent(MouseEvent(PlatformEvent::Type::MousePressed, lower));
-    (void)handler.HandleMouseReleaseEvent(MouseEvent(PlatformEvent::Type::MouseReleased, lower));
-    (void)handler.HandleMousePressEvent(MouseEvent(PlatformEvent::Type::MousePressed, lower));
-    (void)handler.HandleMouseReleaseEvent(MouseEvent(PlatformEvent::Type::MouseReleased, lower));
+    (void)handler.HandleMousePressEvent(MouseEventAt(PlatformEvent::Type::MousePressed, lower));
+    (void)handler.HandleMouseReleaseEvent(MouseEventAt(PlatformEvent::Type::MouseReleased, lower));
+    (void)handler.HandleMousePressEvent(MouseEventAt(PlatformEvent::Type::MousePressed, lower));
+    (void)handler.HandleMouseReleaseEvent(MouseEventAt(PlatformEvent::Type::MouseReleased, lower));
     CHECK(number.Value() == u8"4");
 
     // Leaving it releases the capture; a read-only field doesn't step.
-    (void)handler.MouseMoved(MouseEvent(PlatformEvent::Type::MouseMoved, {bounds.X() - 40, bounds.Y()}));
+    (void)handler.MouseMoved(MouseEventAt(PlatformEvent::Type::MouseMoved, {bounds.X() - 40, bounds.Y()}));
     CHECK(spinButton.GetUpDownState() == html::SpinButtonElement::UpDownState::Indeterminate);
     number.SetAttribute(u8"readonly", u8"");
     (void)fixture.Document->UpdateLayout();
-    (void)handler.MouseMoved(MouseEvent(PlatformEvent::Type::MouseMoved, upper));
-    (void)handler.HandleMousePressEvent(MouseEvent(PlatformEvent::Type::MousePressed, upper));
-    (void)handler.HandleMouseReleaseEvent(MouseEvent(PlatformEvent::Type::MouseReleased, upper));
+    (void)handler.MouseMoved(MouseEventAt(PlatformEvent::Type::MouseMoved, upper));
+    (void)handler.HandleMousePressEvent(MouseEventAt(PlatformEvent::Type::MousePressed, upper));
+    (void)handler.HandleMouseReleaseEvent(MouseEventAt(PlatformEvent::Type::MouseReleased, upper));
     CHECK(number.Value() == u8"4");
   }
 
@@ -84,14 +73,14 @@ namespace krys::boo::tests
     PointI upper(bounds.X() + bounds.Width() / 2, bounds.Y() + bounds.Height() / 4);
 
     // Pressing the spin button captures the mouse until it's released.
-    (void)handler.MouseMoved(MouseEvent(PlatformEvent::Type::MouseMoved, upper));
-    (void)handler.HandleMousePressEvent(MouseEvent(PlatformEvent::Type::MousePressed, upper));
+    (void)handler.MouseMoved(MouseEventAt(PlatformEvent::Type::MouseMoved, upper));
+    (void)handler.HandleMousePressEvent(MouseEventAt(PlatformEvent::Type::MousePressed, upper));
     CHECK(number.Value() == u8"6");
 
     // Hiding the field mid-press releases it, so moves go to what's under the mouse.
     number.SetAttribute(u8"style", u8"display:none");
     (void)fixture.Document->UpdateLayout();
-    (void)handler.MouseMoved(MouseEvent(PlatformEvent::Type::MouseMoved, {bounds.X(), 10}));
+    (void)handler.MouseMoved(MouseEventAt(PlatformEvent::Type::MouseMoved, {bounds.X(), 10}));
     CHECK(moves->Count == 1);
   }
 
@@ -111,8 +100,8 @@ namespace krys::boo::tests
     auto bounds = spinButton.GetRenderBox()->AbsoluteBoundingBoxRect();
     PointI upper(bounds.X() + bounds.Width() / 2, bounds.Y() + bounds.Height() / 4);
 
-    (void)handler.MouseMoved(MouseEvent(PlatformEvent::Type::MouseMoved, upper));
-    (void)handler.HandleMousePressEvent(MouseEvent(PlatformEvent::Type::MousePressed, upper));
+    (void)handler.MouseMoved(MouseEventAt(PlatformEvent::Type::MouseMoved, upper));
+    (void)handler.HandleMousePressEvent(MouseEventAt(PlatformEvent::Type::MousePressed, upper));
     CHECK(number.Value() == u8"6");
     CHECK(spinButton.GetUpDownState() == html::SpinButtonElement::UpDownState::Up);
 
@@ -120,7 +109,7 @@ namespace krys::boo::tests
     // mouse.
     Downcast<RenderMenuList>(*fixture.ById(u8"select").Renderer()).ShowPopup();
     CHECK(spinButton.GetUpDownState() == html::SpinButtonElement::UpDownState::Indeterminate);
-    (void)handler.MouseMoved(MouseEvent(PlatformEvent::Type::MouseMoved, {bounds.X(), bounds.MaxY() + 10}));
+    (void)handler.MouseMoved(MouseEventAt(PlatformEvent::Type::MouseMoved, {bounds.X(), bounds.MaxY() + 10}));
     CHECK(moves->Count == 1);
 
     // Another popup after the release finds nothing to release.

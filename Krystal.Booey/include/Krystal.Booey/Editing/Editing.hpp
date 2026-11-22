@@ -34,16 +34,8 @@
 #include "Krystal.Booey/Text/WritingMode.hpp"
 #include "Krystal.Core/Attributes.hpp"
 #include "Krystal.Core/Geometry/Rect.hpp"
+#include "Krystal.Core/Memory/RefPtr.hpp"
 #include "Krystal.Core/Strings/String.hpp"
-#include "Krystal.Core/Types/RefPtr.hpp"
-
-namespace krys::boo
-{
-  class ContainerNode;
-  class Document;
-  class Element;
-  class Node;
-}
 
 namespace krys::boo::dom
 {
@@ -52,7 +44,11 @@ namespace krys::boo::dom
 
 namespace krys::boo
 {
+  class ContainerNode;
+  class Document;
+  class Element;
   class HTMLElement;
+  class Node;
   class RenderBlock;
   class RenderObject;
   class VisiblePosition;

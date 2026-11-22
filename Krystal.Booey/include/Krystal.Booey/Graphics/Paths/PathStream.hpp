@@ -27,10 +27,10 @@
 
 #include "Krystal.Booey/Graphics/Paths/PathImpl.hpp"
 #include "Krystal.Booey/Graphics/Paths/PathSegment.hpp"
-#include "Krystal.Core/Types/DataRef.hpp"
+#include "Krystal.Core/Memory/DataRef.hpp"
 
-#include "Krystal.Core/RefCounted.hpp"
-#include "Krystal.Core/Types/List.hpp"
+#include "Krystal.Core/Containers/List.hpp"
+#include "Krystal.Core/Memory/RefCounted.hpp"
 
 namespace krys::boo
 {

@@ -27,12 +27,12 @@
 
 #include "Krystal.Booey/CSS/Types/CSSOMString.hpp"
 #include "Krystal.Core/Attributes.hpp"
-#include "Krystal.Core/Hash.hpp"
-#include "Krystal.Core/RefCounted.hpp"
-#include "Krystal.Core/Types/HashMap.hpp"
-#include "Krystal.Core/Types/List.hpp"
+#include "Krystal.Core/Containers/HashMap.hpp"
+#include "Krystal.Core/Containers/List.hpp"
+#include "Krystal.Core/Hashing/FastHash.hpp"
+#include "Krystal.Core/Memory/RefCounted.hpp"
+#include "Krystal.Core/Memory/RefPtr.hpp"
 #include "Krystal.Core/Types/Pair.hpp"
-#include "Krystal.Core/Types/RefPtr.hpp"
 
 namespace krys::boo
 {
@@ -159,19 +159,11 @@ namespace krys::boo
 namespace krys
 {
   template <>
-  struct DefaultHash<boo::FontFeatureValues>
+  struct FastHash<boo::FontFeatureValues>
   {
-    constexpr static bool IsSafeToCompareToEmptyOrDeleted = false;
-
-    KRYS_NODISCARD static size_t Hash(const boo::FontFeatureValues &values) noexcept
+    KRYS_NODISCARD size_t operator()(const boo::FontFeatureValues &values) const noexcept
     {
       return values.Hash();
-    }
-
-    KRYS_NODISCARD static bool Equal(const boo::FontFeatureValues &a,
-                                     const boo::FontFeatureValues &b) noexcept
-    {
-      return a == b;
     }
   };
 }

@@ -30,9 +30,9 @@
 #include "Krystal.Booey/Text/TextFlags.hpp"
 #include "Krystal.Booey/Text/WritingMode.hpp"
 #include "Krystal.Core/Attributes.hpp"
+#include "Krystal.Core/Containers/EnumSet.hpp"
 #include "Krystal.Core/Geometry/Rect.hpp"
 #include "Krystal.Core/Strings/String.hpp"
-#include "Krystal.Core/Types/EnumSet.hpp"
 #include "Krystal.Core/Types/Maybe.hpp"
 #include "Krystal.Text/Bidi.hpp"
 
@@ -172,7 +172,7 @@ namespace krys::boo::inline_display
       float HorizontalExpansion {0};
     };
 
-    enum class PositionWithinInlineLevelBox : bool
+    enum class PositionWithinInlineLevelBox : uint8
     {
       First,
       Last,
@@ -203,8 +203,8 @@ namespace krys::boo::inline_display
         : _layoutBox(&layoutBox), _unflippedVisualRect(physicalRect), _inkOverflow(inkOverflow),
           _lineIndex(static_cast<uint32>(lineIndex)), _horizontalExpansion(expansion.HorizontalExpansion),
           _expansionBehavior(expansion.Behavior), _bidiLevel(bidiLevel), _type(type), _hasContent(hasContent),
-          _isFirstForLayoutBox(positionWithinInlineLevelBox.Contains(PositionWithinInlineLevelBox::First)),
-          _isLastForLayoutBox(positionWithinInlineLevelBox.Contains(PositionWithinInlineLevelBox::Last)),
+          _isFirstForLayoutBox(positionWithinInlineLevelBox.contains(PositionWithinInlineLevelBox::First)),
+          _isLastForLayoutBox(positionWithinInlineLevelBox.contains(PositionWithinInlineLevelBox::Last)),
           _isFullyTruncated(isFullyTruncated), _isFirstFormattedLine(isFirstFormattedLine),
           _text(text ? krys::move(*text) : Text {})
     {

@@ -53,6 +53,7 @@
 #include "Krystal.Booey/Rendering/SVG/RenderSVGGradientStop.hpp"
 #include "Krystal.Booey/Rendering/SVG/RenderSVGInlineText.hpp"
 #include "Krystal.Booey/Rendering/SVG/RenderSVGText.hpp"
+#include "Krystal.Booey/Style/Computed/ComputedStyle+InitialInlines.hpp"
 #include "Krystal.Booey/Style/Values/FilterEffects/Filter.hpp"
 #include "Krystal.Booey/SVG/Elements/SVGCircleElement.hpp"
 #include "Krystal.Booey/SVG/Elements/SVGEllipseElement.hpp"
@@ -226,8 +227,11 @@ namespace krys::boo
       SVGLengthContext lengthContext(&shape);
       double dashOffset = lengthContext.ValueForLength(style.StrokeDashOffset(), style::ZoomNeeded {});
       double strokeWidth = lengthContext.ValueForLength(style.StrokeWidth(), style::ZoomNeeded {});
-      auto dashArray = DashArray::map(style.StrokeDashArray(), [&](const auto &length) -> DashArrayElement
-                                      { return lengthContext.ValueForLength(length, style::ZoomNeeded {}); });
+      auto dashArray = DashArray(
+        std::from_range,
+        style.StrokeDashArray()
+          | std::views::transform([&](const auto &length) -> DashArrayElement
+                                  { return lengthContext.ValueForLength(length, style::ZoomNeeded {}); }));
 
       WriteIfNotDefault(ts, u8"opacity", style.StrokeOpacity().Value.Value, 1.0f);
       WriteIfNotDefault(ts, u8"stroke width", strokeWidth, 1.0);
@@ -235,7 +239,7 @@ namespace krys::boo
       WriteIfNotDefault(ts, u8"line cap", style.CapStyle(), LineCap::Butt);
       WriteIfNotDefault(ts, u8"line join", style.JoinStyle(), LineJoin::Miter);
       WriteIfNotDefault(ts, u8"dash offset", dashOffset, 0.0);
-      if (!dashArray.isEmpty())
+      if (!dashArray.empty())
       {
         WriteNameValuePair(ts, u8"dash array", dashArray);
       }
@@ -303,7 +307,7 @@ namespace krys::boo
     TextStream &WritePositionAndStyle(TextStream &ts, const RenderElement &renderer,
                                       EnumSet<RenderAsTextFlag> behavior = {}) noexcept
     {
-      if (behavior.Contains(RenderAsTextFlag::ShowSVGGeometry))
+      if (behavior.contains(RenderAsTextFlag::ShowSVGGeometry))
       {
         if (auto *box = DynamicDowncast<RenderBox>(renderer))
         {
@@ -394,7 +398,7 @@ namespace krys::boo
 
       ts << object.RenderName();
 
-      if (behavior.Contains(RenderAsTextFlag::ShowAddresses))
+      if (behavior.contains(RenderAsTextFlag::ShowAddresses))
       {
         ts << ' ' << static_cast<const void *>(&object);
       }
@@ -770,7 +774,7 @@ namespace krys::boo
       if (filterOperations.size() == 1)
       {
         if (auto *referenceFilterOperation =
-              DynamicDowncast<style::ReferenceFilterOperation>(filterOperations.begin()->Get()))
+              DynamicDowncast<style::ReferenceFilterOperation>(**filterOperations.begin()))
         {
           auto id = referenceFilterOperation->Fragment();
           if (auto *filter = GetRenderSVGResourceById<LegacyRenderSVGResourceFilter>(

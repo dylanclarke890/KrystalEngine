@@ -31,11 +31,11 @@
 #include "Krystal.Booey/Rendering/Style/RenderStyleConstants.hpp"
 #include "Krystal.Booey/Text/WritingMode.hpp"
 #include "Krystal.Core/Attributes.hpp"
-#include "Krystal.Core/Types/CheckedPtr.hpp"
-#include "Krystal.Core/Types/EnumSet.hpp"
-#include "Krystal.Core/Types/List.hpp"
+#include "Krystal.Core/Containers/EnumSet.hpp"
+#include "Krystal.Core/Containers/List.hpp"
+#include "Krystal.Core/Memory/CheckedPtr.hpp"
+#include "Krystal.Core/Memory/RefPtr.hpp"
 #include "Krystal.Core/Types/Maybe.hpp"
-#include "Krystal.Core/Types/RefPtr.hpp"
 
 namespace krys::boo::layout
 {
@@ -137,7 +137,7 @@ namespace krys::boo::layout
     using List = krys::List<Item>;
 
   private:
-    enum class PositionType : bool
+    enum class PositionType : uint8
     {
       Start,
       End,
@@ -179,12 +179,12 @@ namespace krys::boo::layout
 
     KRYS_NODISCARD bool HasStartPositioned() const noexcept
     {
-      return _positionTypes.Contains(PositionType::Start);
+      return _positionTypes.contains(PositionType::Start);
     }
 
     KRYS_NODISCARD bool HasEndPositioned() const noexcept
     {
-      return _positionTypes.Contains(PositionType::End);
+      return _positionTypes.contains(PositionType::End);
     }
 
     KRYS_NODISCARD Maybe<LayoutUnit> HighestPositionOnBlockAxis() const noexcept;

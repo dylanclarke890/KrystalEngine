@@ -35,8 +35,8 @@
 #include "Krystal.Booey/Style/Values/Primitives/NumericTypesConversions.hpp"
 #include "Krystal.Booey/Style/Values/Primitives/NumericTypesEvaluation.hpp"
 #include "Krystal.Booey/Style/Values/Primitives/NumericTypesSerialisation.hpp"
+#include "Krystal.Core/Memory/NeverDestroyed.hpp"
 #include "Krystal.Core/Strings/StringBuilder.hpp"
-#include "Krystal.Core/Threading/NeverDestroyed.hpp"
 #include <ranges>
 
 namespace krys::boo::style
@@ -93,8 +93,10 @@ namespace krys::boo::style
       shadow->Shadow(), [&](const css::keywords::None &) -> TextShadows { return css::keywords::None {}; },
       [&](const typename css::TextShadowProperty::List &list) -> TextShadows
       {
-        return TextShadows::List::map(list | std::views::reverse, [&](const css::TextShadow &element)
-                                      { return ConvertToStyle(element, state); });
+        return TextShadows::List(std::from_range,
+                                 (list | std::views::reverse)
+                                   | std::views::transform([&](const css::TextShadow &element)
+                                                           { return ConvertToStyle(element, state); }));
       });
   }
 
@@ -130,7 +132,7 @@ namespace krys::boo::style
         .Location = {{0}, {0}},
         .Blur = {0},
       }};
-      return defaultShadowData.get();
+      return *defaultShadowData;
     }
   };
 

@@ -25,7 +25,7 @@
 #include "Krystal.Booey/Rendering/HitTesting/HitTestSource.hpp"
 #include "Krystal.Core/Assert.hpp"
 #include "Krystal.Core/Attributes.hpp"
-#include "Krystal.Core/Types/EnumSet.hpp"
+#include "Krystal.Core/Containers/EnumSet.hpp"
 
 namespace krys::boo
 {
@@ -71,8 +71,8 @@ namespace krys::boo
     {
       krys_debug_assert(!type.ContainsAll(
         {Type::DisallowUserAgentShadowContentExceptForImageOverlays, Type::DisallowUserAgentShadowContent}));
-      krys_debug_assert(!type.Contains(Type::IncludeAllElementsUnderPoint)
-                        || type.Contains(Type::CollectMultipleElements));
+      krys_debug_assert(!type.contains(Type::IncludeAllElementsUnderPoint)
+                        || type.contains(Type::CollectMultipleElements));
       (void)type;
     }
 
@@ -89,42 +89,42 @@ namespace krys::boo
 
     KRYS_NODISCARD bool ReadOnly() const noexcept
     {
-      return _type.Contains(Type::ReadOnly);
+      return _type.contains(Type::ReadOnly);
     }
 
     KRYS_NODISCARD bool Active() const noexcept
     {
-      return _type.Contains(Type::Active);
+      return _type.contains(Type::Active);
     }
 
     KRYS_NODISCARD bool Move() const noexcept
     {
-      return _type.Contains(Type::Move);
+      return _type.contains(Type::Move);
     }
 
     KRYS_NODISCARD bool Release() const noexcept
     {
-      return _type.Contains(Type::Release);
+      return _type.contains(Type::Release);
     }
 
     KRYS_NODISCARD bool IgnoreCSSPointerEventsProperty() const noexcept
     {
-      return _type.Contains(Type::IgnoreCSSPointerEventsProperty);
+      return _type.contains(Type::IgnoreCSSPointerEventsProperty);
     }
 
     KRYS_NODISCARD bool IgnoreClipping() const noexcept
     {
-      return _type.Contains(Type::IgnoreClipping);
+      return _type.contains(Type::IgnoreClipping);
     }
 
     KRYS_NODISCARD bool SVGClipContent() const noexcept
     {
-      return _type.Contains(Type::SVGClipContent);
+      return _type.contains(Type::SVGClipContent);
     }
 
     KRYS_NODISCARD bool TouchEvent() const noexcept
     {
-      return _type.Contains(Type::TouchEvent);
+      return _type.contains(Type::TouchEvent);
     }
 
     KRYS_NODISCARD bool MouseEvent() const noexcept
@@ -134,32 +134,32 @@ namespace krys::boo
 
     KRYS_NODISCARD bool PenEvent() const noexcept
     {
-      return _type.Contains(Type::PenEvent);
+      return _type.contains(Type::PenEvent);
     }
 
     KRYS_NODISCARD bool DisallowsUserAgentShadowContent() const noexcept
     {
-      return _type.Contains(Type::DisallowUserAgentShadowContent);
+      return _type.contains(Type::DisallowUserAgentShadowContent);
     }
 
     KRYS_NODISCARD bool DisallowsUserAgentShadowContentExceptForImageOverlays() const noexcept
     {
-      return _type.Contains(Type::DisallowUserAgentShadowContentExceptForImageOverlays);
+      return _type.contains(Type::DisallowUserAgentShadowContentExceptForImageOverlays);
     }
 
     KRYS_NODISCARD bool AllowsFrameScrollbars() const noexcept
     {
-      return _type.Contains(Type::AllowFrameScrollbars);
+      return _type.contains(Type::AllowFrameScrollbars);
     }
 
     KRYS_NODISCARD bool AllowsChildFrameContent() const noexcept
     {
-      return _type.Contains(Type::AllowChildFrameContent);
+      return _type.contains(Type::AllowChildFrameContent);
     }
 
     KRYS_NODISCARD bool AllowsVisibleChildFrameContent() const noexcept
     {
-      return _type.Contains(Type::AllowVisibleChildFrameContentOnly);
+      return _type.contains(Type::AllowVisibleChildFrameContentOnly);
     }
 
     KRYS_NODISCARD bool AllowsAnyFrameContent() const noexcept
@@ -169,17 +169,17 @@ namespace krys::boo
 
     KRYS_NODISCARD bool IsChildFrameHitTest() const noexcept
     {
-      return _type.Contains(Type::ChildFrameHitTest);
+      return _type.contains(Type::ChildFrameHitTest);
     }
 
     KRYS_NODISCARD bool ResultIsElementList() const noexcept
     {
-      return _type.Contains(Type::CollectMultipleElements);
+      return _type.contains(Type::CollectMultipleElements);
     }
 
     KRYS_NODISCARD bool IncludesAllElementsUnderPoint() const noexcept
     {
-      return _type.Contains(Type::IncludeAllElementsUnderPoint);
+      return _type.contains(Type::IncludeAllElementsUnderPoint);
     }
 
     KRYS_NODISCARD bool UserTriggered() const noexcept
@@ -189,7 +189,7 @@ namespace krys::boo
 
     KRYS_NODISCARD bool IsForFixedContainerSampling() const noexcept
     {
-      return _type.Contains(Type::ForFixedContainerSampling);
+      return _type.contains(Type::ForFixedContainerSampling);
     }
 
     // Convenience functions

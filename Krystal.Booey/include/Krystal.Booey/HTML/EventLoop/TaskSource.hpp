@@ -48,6 +48,9 @@ namespace krys::boo::html
     /// @brief The user agent's own asynchronous work.
     InternalAsyncTask,
   };
-}
 
-KRYS_DEFINE_CONTIGUOUS_ENUM_TRAITS(krys::boo::html::TaskSource, 7uz);
+  consteval TaskSource MaxEnumValue(TaskSource) noexcept
+  {
+    return TaskSource::InternalAsyncTask;
+  }
+}

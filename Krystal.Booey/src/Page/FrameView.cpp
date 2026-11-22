@@ -77,8 +77,8 @@
 #include "Krystal.Booey/SVG/Elements/SVGSvgElement.hpp"
 #include "Krystal.Booey/SVG/SVGDocument.hpp"
 #include "Krystal.Core/Assert.hpp"
+#include "Krystal.Core/Memory/NeverDestroyed.hpp"
 #include "Krystal.Core/Strings/ASCII.hpp"
-#include "Krystal.Core/Threading/NeverDestroyed.hpp"
 #include "Krystal.Core/Utils/SetForScope.hpp"
 #include "Krystal.Net/UrlParser.hpp"
 
@@ -1033,7 +1033,7 @@ namespace krys::boo
   void FrameView::PaintScrollbars(GraphicsContext &context, const RectI &rect) noexcept
   {
     // Flattened paints (snapshots) paint the scrollbars into the contents, though they have layers.
-    const bool flattening = _paintBehavior.Contains(PaintBehavior::FlattenCompositingLayers);
+    const bool flattening = _paintBehavior.contains(PaintBehavior::FlattenCompositingLayers);
     if (_horizontalScrollbar && (flattening || !LayerForHorizontalScrollbar()))
     {
       _horizontalScrollbar->Paint(context, rect);
@@ -2242,7 +2242,7 @@ namespace krys::boo
 
     auto fixedRect = GetPossiblyFixedRectToExpose(visibleRect, exposeRect, true, alignX, alignY);
     auto scrollRect = GetPossiblyFixedRectToExpose(visibleRect, exposeRect, false, alignX, alignY);
-    if (isFixed.Contains(BoxAxis::Horizontal))
+    if (isFixed.contains(BoxAxis::Horizontal))
     {
       return {fixedRect.X(), scrollRect.Y(), fixedRect.Width(), scrollRect.Height()};
     }

@@ -30,19 +30,20 @@
 #include "Krystal.Booey/Page/FrameView.hpp"
 #include "Krystal.Booey/Rendering/RenderView.hpp"
 #include "Krystal.Booey/Rendering/Style/RenderStyle+GettersInlines.hpp"
-#include "Krystal.Core/Threading/NeverDestroyed.hpp"
+#include "Krystal.Core/Containers/SmallList.hpp"
+#include "Krystal.Core/Memory/NeverDestroyed.hpp"
 #include "Krystal.Core/Types/Func.hpp"
-#include "Krystal.Core/Types/SmallList.hpp"
 
 namespace krys::boo::css::mq::features
 {
   using Dependency = MediaQueryDynamicDependency;
+  using Dependencies = EnumSet<MediaQueryDynamicDependency>;
 
   struct BooleanSchema : public FeatureSchema
   {
     using ValueFunction = Func<bool(const FeatureEvaluationContext &)>;
 
-    BooleanSchema(const CSSOMStringAtom &name, MediaQueryDynamicDependency dependencies,
+    BooleanSchema(const CSSOMStringAtom &name, EnumSet<MediaQueryDynamicDependency> dependencies,
                   ValueFunction &&valueFunction) noexcept
         : FeatureSchema(name, FeatureSchema::Type::Discrete, FeatureSchema::ValueType::Integer, dependencies),
           _valueFunction(krys::move(valueFunction))
@@ -65,7 +66,7 @@ namespace krys::boo::css::mq::features
   {
     using ValueFunction = Func<int32(const FeatureEvaluationContext &)>;
 
-    IntegerSchema(const CSSOMStringAtom &name, MediaQueryDynamicDependency dependencies,
+    IntegerSchema(const CSSOMStringAtom &name, EnumSet<MediaQueryDynamicDependency> dependencies,
                   ValueFunction &&valueFunction) noexcept
         : FeatureSchema(name, FeatureSchema::Type::Range, FeatureSchema::ValueType::Integer, dependencies),
           _valueFunction(krys::move(valueFunction))
@@ -88,7 +89,7 @@ namespace krys::boo::css::mq::features
   {
     using ValueFunction = Func<LayoutUnit(const FeatureEvaluationContext &)>;
 
-    LengthSchema(const CSSOMStringAtom &name, MediaQueryDynamicDependency dependencies,
+    LengthSchema(const CSSOMStringAtom &name, EnumSet<MediaQueryDynamicDependency> dependencies,
                  ValueFunction &&valueFunction) noexcept
         : FeatureSchema(name, FeatureSchema::Type::Range, FeatureSchema::ValueType::Length, dependencies),
           _valueFunction(krys::move(valueFunction))
@@ -111,7 +112,7 @@ namespace krys::boo::css::mq::features
   {
     using ValueFunction = Func<SizeF(const FeatureEvaluationContext &)>;
 
-    RatioSchema(const CSSOMStringAtom &name, MediaQueryDynamicDependency dependencies,
+    RatioSchema(const CSSOMStringAtom &name, EnumSet<MediaQueryDynamicDependency> dependencies,
                 ValueFunction &&valueFunction) noexcept
         : FeatureSchema(name, FeatureSchema::Type::Range, FeatureSchema::ValueType::Ratio, dependencies),
           _valueFunction(krys::move(valueFunction))
@@ -134,7 +135,7 @@ namespace krys::boo::css::mq::features
   {
     using ValueFunction = Func<float(const FeatureEvaluationContext &)>;
 
-    ResolutionSchema(const CSSOMStringAtom &name, MediaQueryDynamicDependency dependencies,
+    ResolutionSchema(const CSSOMStringAtom &name, EnumSet<MediaQueryDynamicDependency> dependencies,
                      ValueFunction &&valueFunction) noexcept
         : FeatureSchema(name, FeatureSchema::Type::Range, FeatureSchema::ValueType::Resolution, dependencies),
           _valueFunction(krys::move(valueFunction))
@@ -159,8 +160,9 @@ namespace krys::boo::css::mq::features
   {
     using ValueFunction = Func<MatchingIdentifiers(const FeatureEvaluationContext &)>;
 
-    IdentifierSchema(const CSSOMStringAtom &name, FixedVector<ValueId> &&valueIdentifiers,
-                     MediaQueryDynamicDependency dependencies, ValueFunction &&valueFunction) noexcept
+    IdentifierSchema(const CSSOMStringAtom &name, FixedList<ValueId> &&valueIdentifiers,
+                     EnumSet<MediaQueryDynamicDependency> dependencies,
+                     ValueFunction &&valueFunction) noexcept
         : FeatureSchema(name, FeatureSchema::Type::Discrete, FeatureSchema::ValueType::Identifier,
                         dependencies, krys::move(valueIdentifiers)),
           _valueFunction(krys::move(valueFunction))
@@ -173,7 +175,7 @@ namespace krys::boo::css::mq::features
       auto valueIds = _valueFunction(context);
       for (auto valueId : valueIds)
       {
-        krys_debug_assert(ValueIdentifiers.contains(valueId));
+        krys_debug_assert(std::ranges::contains(ValueIdentifiers, valueId));
         if (EvaluateIdentifierFeature(feature, valueId, context.ConversionData) == EvaluationResult::True)
         {
           return EvaluationResult::True;
@@ -234,11 +236,11 @@ namespace krys::boo::css::mq::features
     IdentifiersForPointerCharacteristics(PointerCharacteristics pointerCharacteristics) noexcept
   {
     MatchingIdentifiers identifiers;
-    if (HasFlag(pointerCharacteristics, PointerCharacteristics::Fine))
+    if (pointerCharacteristics.contains(PointerCharacteristic::Fine))
     {
       identifiers.push_back(ValueId::Fine);
     }
-    if (HasFlag(pointerCharacteristics, PointerCharacteristics::Coarse))
+    if (pointerCharacteristics.contains(PointerCharacteristic::Coarse))
     {
       identifiers.push_back(ValueId::Coarse);
     }
@@ -254,7 +256,7 @@ namespace krys::boo::css::mq::features
   KRYS_NODISCARD static const IdentifierSchema &AnyHoverFeatureSchema() noexcept
   {
     static MainThreadNeverDestroyed<IdentifierSchema> schema {
-      u8"any-hover", FixedVector {ValueId::None, ValueId::Hover}, Dependency::None, [](auto &context)
+      u8"any-hover", FixedList {ValueId::None, ValueId::Hover}, Dependencies {}, [](auto &context)
       {
         bool isSupported = BooeyClientOf(context).HoverSupportedByAnyAvailablePointingDevice();
         return MatchingIdentifiers {isSupported ? ValueId::Hover : ValueId::None};
@@ -265,7 +267,7 @@ namespace krys::boo::css::mq::features
   KRYS_NODISCARD static const IdentifierSchema &AnyPointerFeatureSchema() noexcept
   {
     static MainThreadNeverDestroyed<IdentifierSchema> schema {
-      u8"any-pointer", FixedVector {ValueId::None, ValueId::Fine, ValueId::Coarse}, Dependency::None,
+      u8"any-pointer", FixedList {ValueId::None, ValueId::Fine, ValueId::Coarse}, Dependencies {},
       [](auto &context)
       { return IdentifiersForPointerCharacteristics(BooeyClientOf(context).AllAvailablePointingDevices()); }};
     return schema;
@@ -285,7 +287,7 @@ namespace krys::boo::css::mq::features
   KRYS_NODISCARD static const IntegerSchema &ColorFeatureSchema() noexcept
   {
     static MainThreadNeverDestroyed<IntegerSchema> schema {
-      u8"color", Dependency::None,
+      u8"color", Dependencies {},
       [](auto &context) { return BooeyClientOf(context).ScreenDepthPerComponent(); }};
     return schema;
   }
@@ -293,7 +295,7 @@ namespace krys::boo::css::mq::features
   KRYS_NODISCARD static const IdentifierSchema &ColorGamutFeatureSchema() noexcept
   {
     static MainThreadNeverDestroyed<IdentifierSchema> schema {
-      u8"color-gamut", FixedVector {ValueId::SRGB, ValueId::P3, ValueId::Rec2020}, Dependency::None,
+      u8"color-gamut", FixedList {ValueId::SRGB, ValueId::P3, ValueId::Rec2020}, Dependencies {},
       [](auto &context)
       {
         MatchingIdentifiers identifiers {ValueId::SRGB};
@@ -312,14 +314,14 @@ namespace krys::boo::css::mq::features
 
   KRYS_NODISCARD static const IntegerSchema &ColorIndexFeatureSchema() noexcept
   {
-    static MainThreadNeverDestroyed<IntegerSchema> schema {u8"color-index", Dependency::None,
+    static MainThreadNeverDestroyed<IntegerSchema> schema {u8"color-index", Dependencies {},
                                                            [](auto &) { return 0; }};
     return schema;
   }
 
   KRYS_NODISCARD static const RatioSchema &DeviceAspectRatioFeatureSchema() noexcept
   {
-    static MainThreadNeverDestroyed<RatioSchema> schema {u8"device-aspect-ratio", Dependency::None,
+    static MainThreadNeverDestroyed<RatioSchema> schema {u8"device-aspect-ratio", Dependencies {},
                                                          [](auto &context)
                                                          { return BooeyClientOf(context).ScreenSize(); }};
     return schema;
@@ -328,7 +330,7 @@ namespace krys::boo::css::mq::features
   KRYS_NODISCARD static const LengthSchema &DeviceHeightFeatureSchema() noexcept
   {
     static MainThreadNeverDestroyed<LengthSchema> schema {
-      u8"device-height", Dependency::None,
+      u8"device-height", Dependencies {},
       [](auto &context) { return LayoutUnit {BooeyClientOf(context).ScreenSize().Height()}; }};
     return schema;
   }
@@ -336,7 +338,7 @@ namespace krys::boo::css::mq::features
   KRYS_NODISCARD static const LengthSchema &DeviceWidthFeatureSchema() noexcept
   {
     static MainThreadNeverDestroyed<LengthSchema> schema {
-      u8"device-width", Dependency::None,
+      u8"device-width", Dependencies {},
       [](auto &context) { return LayoutUnit {BooeyClientOf(context).ScreenSize().Width()}; }};
     return schema;
   }
@@ -344,7 +346,7 @@ namespace krys::boo::css::mq::features
   KRYS_NODISCARD static const IdentifierSchema &DynamicRangeFeatureSchema() noexcept
   {
     static MainThreadNeverDestroyed<IdentifierSchema> schema {
-      u8"dynamic-range", FixedVector {ValueId::Standard, ValueId::High}, Dependency::None, [](auto &context)
+      u8"dynamic-range", FixedList {ValueId::Standard, ValueId::High}, Dependencies {}, [](auto &context)
       {
         MatchingIdentifiers identifiers {ValueId::Standard};
         if (BooeyClientOf(context).ScreenSupportsHighDynamicRange())
@@ -359,14 +361,14 @@ namespace krys::boo::css::mq::features
   KRYS_NODISCARD static const IdentifierSchema &ForcedColorsFeatureSchema() noexcept
   {
     static MainThreadNeverDestroyed<IdentifierSchema> schema {
-      u8"forced-colors", FixedVector {ValueId::None, ValueId::Active}, Dependency::None,
+      u8"forced-colors", FixedList {ValueId::None, ValueId::Active}, Dependencies {},
       [](auto &) { return MatchingIdentifiers {ValueId::None}; }};
     return schema;
   }
 
   KRYS_NODISCARD static const BooleanSchema &GridFeatureSchema() noexcept
   {
-    static MainThreadNeverDestroyed<BooleanSchema> schema {u8"grid", Dependency::None,
+    static MainThreadNeverDestroyed<BooleanSchema> schema {u8"grid", Dependencies {},
                                                            [](auto &) { return false; }};
     return schema;
   }
@@ -389,7 +391,7 @@ namespace krys::boo::css::mq::features
   KRYS_NODISCARD static const IdentifierSchema &HoverFeatureSchema() noexcept
   {
     static MainThreadNeverDestroyed<IdentifierSchema> schema {
-      u8"hover", FixedVector {ValueId::None, ValueId::Hover}, Dependency::None, [](auto &context)
+      u8"hover", FixedList {ValueId::None, ValueId::Hover}, Dependencies {}, [](auto &context)
       {
         bool isSupported = BooeyClientOf(context).HoverSupportedByPrimaryPointingDevice();
         return MatchingIdentifiers {isSupported ? ValueId::Hover : ValueId::None};
@@ -400,7 +402,7 @@ namespace krys::boo::css::mq::features
   KRYS_NODISCARD static const IdentifierSchema &InvertedColorsFeatureSchema() noexcept
   {
     static MainThreadNeverDestroyed<IdentifierSchema> schema {
-      u8"inverted-colors", FixedVector {ValueId::None, ValueId::Inverted}, Dependency::Accessibility,
+      u8"inverted-colors", FixedList {ValueId::None, ValueId::Inverted}, Dependency::Accessibility,
       [](auto &context)
       {
         bool isInverted = BooeyClientOf(context).ColorsAreInverted();
@@ -423,7 +425,7 @@ namespace krys::boo::css::mq::features
   KRYS_NODISCARD static const IdentifierSchema &OrientationFeatureSchema() noexcept
   {
     static MainThreadNeverDestroyed<IdentifierSchema> schema {
-      u8"orientation", FixedVector {ValueId::Landscape, ValueId::Portrait}, Dependency::Viewport,
+      u8"orientation", FixedList {ValueId::Landscape, ValueId::Portrait}, Dependency::Viewport,
       [](auto &context)
       {
         auto layoutSize = ViewOf(context).GetLayoutSize();
@@ -437,7 +439,7 @@ namespace krys::boo::css::mq::features
   KRYS_NODISCARD static const IdentifierSchema &PointerFeatureSchema() noexcept
   {
     static MainThreadNeverDestroyed<IdentifierSchema> schema {
-      u8"pointer", FixedVector {ValueId::None, ValueId::Fine, ValueId::Coarse}, Dependency::None,
+      u8"pointer", FixedList {ValueId::None, ValueId::Fine, ValueId::Coarse}, Dependencies {},
       [](auto &context)
       { return IdentifiersForPointerCharacteristics(BooeyClientOf(context).PrimaryPointingDevice()); }};
     return schema;
@@ -446,8 +448,7 @@ namespace krys::boo::css::mq::features
   KRYS_NODISCARD static const IdentifierSchema &PrefersContrastFeatureSchema() noexcept
   {
     static MainThreadNeverDestroyed<IdentifierSchema> schema {
-      u8"prefers-contrast",
-      FixedVector {ValueId::NoPreference, ValueId::More, ValueId::Less, ValueId::Custom},
+      u8"prefers-contrast", FixedList {ValueId::NoPreference, ValueId::More, ValueId::Less, ValueId::Custom},
       Dependency::Accessibility, [](auto &context)
       {
         bool userPrefersContrast = BooeyClientOf(context).UserPrefersContrast();
@@ -459,7 +460,7 @@ namespace krys::boo::css::mq::features
   KRYS_NODISCARD static const IdentifierSchema &PrefersReducedMotionFeatureSchema() noexcept
   {
     static MainThreadNeverDestroyed<IdentifierSchema> schema {
-      u8"prefers-reduced-motion", FixedVector {ValueId::NoPreference, ValueId::Reduce},
+      u8"prefers-reduced-motion", FixedList {ValueId::NoPreference, ValueId::Reduce},
       Dependency::Accessibility, [](auto &context)
       {
         bool userPrefersReducedMotion = BooeyClientOf(context).UserPrefersReducedMotion();
@@ -471,14 +472,14 @@ namespace krys::boo::css::mq::features
   KRYS_NODISCARD static const ResolutionSchema &ResolutionFeatureSchema() noexcept
   {
     static MainThreadNeverDestroyed<ResolutionSchema> schema {
-      u8"resolution", Dependency::None, [](auto &context) { return DeviceScaleFactor(context); }};
+      u8"resolution", Dependencies {}, [](auto &context) { return DeviceScaleFactor(context); }};
     return schema;
   }
 
   KRYS_NODISCARD static const IdentifierSchema &ScanFeatureSchema() noexcept
   {
     static MainThreadNeverDestroyed<IdentifierSchema> schema {
-      u8"scan", FixedVector {ValueId::Interlace, ValueId::Progressive}, Dependency::None,
+      u8"scan", FixedList {ValueId::Interlace, ValueId::Progressive}, Dependencies {},
       [](auto &) { return MatchingIdentifiers {}; }};
     return schema;
   }
@@ -486,7 +487,7 @@ namespace krys::boo::css::mq::features
   KRYS_NODISCARD static const IdentifierSchema &ScriptingFeatureSchema() noexcept
   {
     static MainThreadNeverDestroyed<IdentifierSchema> schema {
-      u8"scripting", FixedVector {ValueId::None, ValueId::InitialOnly, ValueId::Enabled}, Dependency::None,
+      u8"scripting", FixedList {ValueId::None, ValueId::InitialOnly, ValueId::Enabled}, Dependencies {},
       [](auto &)
       {
         // Scripting is always enabled: the application plays the part of scripts.
@@ -498,8 +499,7 @@ namespace krys::boo::css::mq::features
   KRYS_NODISCARD static const IdentifierSchema &UpdateFeatureSchema() noexcept
   {
     static MainThreadNeverDestroyed<IdentifierSchema> schema {
-      u8"update", FixedVector {ValueId::None, ValueId::Slow, ValueId::Fast}, Dependency::None,
-      [](auto &context)
+      u8"update", FixedList {ValueId::None, ValueId::Slow, ValueId::Fast}, Dependencies {}, [](auto &context)
       {
         if (ViewOf(context).MediaType() == PrintAtom())
         {
@@ -531,8 +531,8 @@ namespace krys::boo::css::mq::features
   {
     static MainThreadNeverDestroyed<IdentifierSchema> schema {
       u8"display-mode",
-      FixedVector {ValueId::Fullscreen, ValueId::Standalone, ValueId::MinimalUi, ValueId::Browser},
-      Dependency::None, [](auto &context)
+      FixedList {ValueId::Fullscreen, ValueId::Standalone, ValueId::MinimalUi, ValueId::Browser},
+      Dependencies {}, [](auto &context)
       {
         auto identifier = [&]
         {
@@ -555,7 +555,7 @@ namespace krys::boo::css::mq::features
   KRYS_NODISCARD static const IdentifierSchema &OverflowBlockFeatureSchema() noexcept
   {
     static MainThreadNeverDestroyed<IdentifierSchema> schema {
-      u8"overflow-block", FixedVector {ValueId::None, ValueId::Scroll, ValueId::Paged}, Dependency::None,
+      u8"overflow-block", FixedList {ValueId::None, ValueId::Scroll, ValueId::Paged}, Dependencies {},
       [](auto &context)
       {
         // FIXME: Match none when scrollEnabled is set to false by UIKit.
@@ -568,7 +568,7 @@ namespace krys::boo::css::mq::features
   KRYS_NODISCARD static const IdentifierSchema &OverflowInlineFeatureSchema() noexcept
   {
     static MainThreadNeverDestroyed<IdentifierSchema> schema {
-      u8"overflow-inline", FixedVector {ValueId::None, ValueId::Scroll}, Dependency::None, [](auto &)
+      u8"overflow-inline", FixedList {ValueId::None, ValueId::Scroll}, Dependencies {}, [](auto &)
       {
         // FIXME: Match none when scrollEnabled is set to false by UIKit.
         return MatchingIdentifiers {ValueId::Scroll};
@@ -579,7 +579,7 @@ namespace krys::boo::css::mq::features
   KRYS_NODISCARD static const IdentifierSchema &PrefersColorSchemeFeatureSchema() noexcept
   {
     static MainThreadNeverDestroyed<IdentifierSchema> schema {
-      u8"prefers-color-scheme", FixedVector {ValueId::Light, ValueId::Dark}, Dependency::Appearance,
+      u8"prefers-color-scheme", FixedList {ValueId::Light, ValueId::Dark}, Dependency::Appearance,
       [](auto &context)
       {
         auto *frame = FrameOf(context);

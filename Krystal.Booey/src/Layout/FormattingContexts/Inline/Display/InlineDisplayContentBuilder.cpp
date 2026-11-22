@@ -37,8 +37,8 @@
 #include "Krystal.Booey/Rendering/Style/RenderStyle+GettersInlines.hpp"
 #include "Krystal.Booey/Style/InlineTextBoxStyle.hpp"
 #include "Krystal.Booey/Style/Values/Borders/Shadow.hpp"
+#include "Krystal.Core/Containers/HashSet.hpp"
 #include "Krystal.Core/Strings/Unicode.hpp"
-#include "Krystal.Core/Types/HashSet.hpp"
 #include "Krystal.Text/Bidi.hpp"
 
 #include <algorithm>

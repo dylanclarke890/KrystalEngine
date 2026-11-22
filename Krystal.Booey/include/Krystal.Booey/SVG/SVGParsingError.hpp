@@ -36,6 +36,9 @@ namespace krys::boo
     ParsingFailed,
     ForbiddenNegativeValue,
   };
-}
 
-KRYS_DEFINE_CONTIGUOUS_ENUM_TRAITS(krys::boo::SVGParsingError, 3uz);
+  consteval SVGParsingError MaxEnumValue(SVGParsingError) noexcept
+  {
+    return SVGParsingError::ForbiddenNegativeValue;
+  }
+}

@@ -26,8 +26,8 @@
 #pragma once
 
 #include "Krystal.Booey/Platform/Pasteboard/Pasteboard.hpp"
+#include "Krystal.Core/Containers/HashSet.hpp"
 #include "Krystal.Core/TypeCast.hpp"
-#include "Krystal.Core/Types/HashSet.hpp"
 
 namespace krys::boo
 {

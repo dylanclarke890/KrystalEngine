@@ -2,8 +2,8 @@
 
 #include "Krystal.Booey/DOM/Ranges/BoundaryPoint.hpp"
 #include "Krystal.Booey/DOM/Ranges/SimpleRange.hpp"
+#include "Krystal.Core/Memory/RefCounted.hpp"
 #include "Krystal.Core/Numeric.hpp"
-#include "Krystal.Core/RefCounted.hpp"
 
 namespace krys::boo
 {

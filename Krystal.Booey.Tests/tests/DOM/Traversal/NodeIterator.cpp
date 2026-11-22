@@ -1,7 +1,7 @@
 ﻿#include "Krystal.Booey/DOM/Traversal/NodeIterator.hpp"
 #include "catch2/catch_test_macros.hpp"
+#include "Krystal.Booey.Tests/DOM/DOMTestUtils.hpp"
 #include "Krystal.Booey.Tests/DOM/TestElement.hpp"
-#include "Krystal.Booey/DOM/Abort/AbortSignal.hpp"
 #include "Krystal.Booey/DOM/Nodes/Attr.hpp"
 #include "Krystal.Booey/DOM/Nodes/Element.hpp"
 #include "Krystal.Booey/DOM/Nodes/HTMLDocument.hpp"
@@ -9,40 +9,18 @@
 #include "Krystal.Booey/DOM/Nodes/ShadowRoot.hpp"
 #include "Krystal.Booey/DOM/Nodes/Text.hpp"
 #include "Krystal.Booey/DOM/Traversal/NodeFilter.hpp"
-#include "Krystal.Booey/HTML/CustomElement/CustomElementRegistry.hpp"
 #include "Krystal.Booey/HTML/Elements/HTMLSlotElement.hpp"
 
 namespace krys::boo::dom::tests
 {
-  namespace
-  {
-    struct CommonTestData
-    {
-      Ref<Document> Document;
-      Ref<TestElement> Node;
-
-      CommonTestData() : Document(CreateRef<HTMLDocument>()), Node(CreateRef<TestElement>(*Document))
-      {
-      }
-    };
-
-    class TextNodeFilter : public NodeFilter
-    {
-    public:
-      KRYS_NODISCARD ExceptionOr<FilterResult> AcceptNode(const Node &node) const noexcept override
-      {
-        return node.NodeType() == NodeType::TEXT_NODE ? FilterResult::FILTER_ACCEPT
-                                                      : FilterResult::FILTER_REJECT;
-      }
-    };
-  }
+  using boo::tests::TextNodeFilter;
 
   TEST_CASE("NodeIterator.root: its root",
             "[DOM][NodeIterator][dom:interface-nodeiterator][dom:dom-nodeiterator-root]")
   {
-    CommonTestData data;
+    TestElementFixture data;
 
-    auto nodeIterator = data.Document->CreateNodeIterator(*data.Node, WhatToShow::SHOW_ALL, nullptr);
+    auto nodeIterator = data.Document->CreateNodeIterator(*data.Node, ShowAll, nullptr);
     REQUIRE(&nodeIterator->Root() == data.Node);
   }
 
@@ -51,9 +29,9 @@ namespace krys::boo::dom::tests
     "[DOM][NodeIterator][dom:dom-nodeiterator-referencenode][dom:dom-nodeiterator-pointerbeforereferencenode]"
     "[dom:nodeiterator-reference][dom:node-pointer][dom:node-pointer-node][dom:node-pointer-pointer-before]")
   {
-    CommonTestData data;
+    TestElementFixture data;
 
-    auto nodeIterator = data.Document->CreateNodeIterator(*data.Node, WhatToShow::SHOW_ALL, nullptr);
+    auto nodeIterator = data.Document->CreateNodeIterator(*data.Node, ShowAll, nullptr);
     REQUIRE(&nodeIterator->ReferenceNode() == data.Node);
     REQUIRE(nodeIterator->PointerBeforeReferenceNode());
   }
@@ -62,11 +40,11 @@ namespace krys::boo::dom::tests
             "[DOM][NodeIterator][dom:dom-nodeiterator-nextnode][dom:dom-nodeiterator-previousnode]"
             "[dom:concept-nodeiterator-traverse][dom:iterator-collection]")
   {
-    CommonTestData data;
+    TestElementFixture data;
 
     SECTION("root with no children")
     {
-      auto nodeIterator = data.Document->CreateNodeIterator(*data.Node, WhatToShow::SHOW_ALL, nullptr);
+      auto nodeIterator = data.Document->CreateNodeIterator(*data.Node, ShowAll, nullptr);
 
       auto nextNodeResult = nodeIterator->NextNode();
       REQUIRE_FALSE(nextNodeResult.HasException());
@@ -95,7 +73,7 @@ namespace krys::boo::dom::tests
       REQUIRE_FALSE(data.Node->AppendChild(*sibling1.Value()).HasException());
       REQUIRE_FALSE(data.Node->AppendChild(*sibling2.Value()).HasException());
 
-      auto nodeIterator = data.Document->CreateNodeIterator(*data.Node, WhatToShow::SHOW_ALL, nullptr);
+      auto nodeIterator = data.Document->CreateNodeIterator(*data.Node, ShowAll, nullptr);
 
       auto nextNodeResult = nodeIterator->NextNode();
       REQUIRE_FALSE(nextNodeResult.HasException());
@@ -140,13 +118,13 @@ namespace krys::boo::dom::tests
   TEST_CASE("NodeIterator traversal: nothing precedes the root, even when it has a previous sibling",
             "[DOM][NodeIterator][dom:concept-nodeiterator-traverse]")
   {
-    CommonTestData data;
+    TestElementFixture data;
     auto parent = CreateRef<TestElement>(*data.Document);
     auto sibling = CreateRef<TestElement>(*data.Document);
     REQUIRE_FALSE(parent->AppendChild(*sibling).HasException());
     REQUIRE_FALSE(parent->AppendChild(*data.Node).HasException());
 
-    auto nodeIterator = data.Document->CreateNodeIterator(*data.Node, WhatToShow::SHOW_ALL, nullptr);
+    auto nodeIterator = data.Document->CreateNodeIterator(*data.Node, ShowAll, nullptr);
     auto previousNodeResult = nodeIterator->PreviousNode();
     REQUIRE_FALSE(previousNodeResult.HasException());
     CHECK(previousNodeResult.Value() == nullptr);
@@ -156,7 +134,7 @@ namespace krys::boo::dom::tests
   TEST_CASE("NodeIterator traversal: only nodes its filter accepts are returned",
             "[DOM][NodeIterator][dom:concept-nodeiterator-traverse][dom:dom-nodeiterator-filter]")
   {
-    CommonTestData data;
+    TestElementFixture data;
     auto sibling1 = data.Document->CreateElement(u8"sibling1");
     REQUIRE_FALSE(sibling1.HasException());
 
@@ -165,7 +143,7 @@ namespace krys::boo::dom::tests
     REQUIRE_FALSE(data.Node->AppendChild(*sibling2).HasException());
 
     RefPtr<NodeFilter> filter = CreateRefPtr<TextNodeFilter>();
-    auto nodeIterator = data.Document->CreateNodeIterator(*data.Node, WhatToShow::SHOW_ALL, RefPtr {filter});
+    auto nodeIterator = data.Document->CreateNodeIterator(*data.Node, ShowAll, RefPtr {filter});
     CHECK(nodeIterator->Filter() == filter.get());
 
     auto nextNodeResult = nodeIterator->NextNode();
@@ -195,7 +173,7 @@ namespace krys::boo::dom::tests
   TEST_CASE("NodeIterator traversal: only nodes its whatToShow shows are returned",
             "[DOM][NodeIterator][dom:concept-nodeiterator-traverse][dom:dom-nodeiterator-whattoshow]")
   {
-    CommonTestData data;
+    TestElementFixture data;
     auto sibling1 = data.Document->CreateElement(u8"sibling1");
     REQUIRE_FALSE(sibling1.HasException());
 
@@ -203,8 +181,8 @@ namespace krys::boo::dom::tests
     REQUIRE_FALSE(data.Node->AppendChild(*sibling1.Value()).HasException());
     REQUIRE_FALSE(data.Node->AppendChild(*sibling2).HasException());
 
-    auto nodeIterator = data.Document->CreateNodeIterator(*data.Node, WhatToShow::SHOW_TEXT);
-    CHECK(nodeIterator->WhatToShow() == WhatToShow::SHOW_TEXT);
+    auto nodeIterator = data.Document->CreateNodeIterator(*data.Node, WhatToShowFlag::SHOW_TEXT);
+    CHECK(nodeIterator->WhatToShow() == WhatToShowFlag::SHOW_TEXT);
 
     auto nextNodeResult = nodeIterator->NextNode();
     REQUIRE_FALSE(nextNodeResult.HasException());
@@ -405,7 +383,7 @@ namespace krys::boo::dom::tests
   {
     AdjustTestData data;
     auto filter = CreateRef<CallbackNodeFilter>();
-    auto iterator = data.Document->CreateNodeIterator(*data.Div, WhatToShow::SHOW_ALL, filter);
+    auto iterator = data.Document->CreateNodeIterator(*data.Div, ShowAll, filter);
     List<const Node *> seen;
     filter->Callback = [&](const Node &node)
     {
@@ -441,7 +419,7 @@ namespace krys::boo::dom::tests
     AdjustTestData data;
     auto filter = CreateRef<CallbackNodeFilter>();
     filter->Result = FilterResult::FILTER_ACCEPT;
-    auto iterator = data.Document->CreateNodeIterator(*data.U, WhatToShow::SHOW_ALL, filter);
+    auto iterator = data.Document->CreateNodeIterator(*data.U, ShowAll, filter);
     filter->Callback = [](const Node &) {};
     REQUIRE(iterator->NextNode().ReleaseValue() == data.U.get());
 

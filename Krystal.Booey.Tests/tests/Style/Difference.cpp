@@ -43,7 +43,7 @@ namespace krys::boo::style::tests
     SECTION("Equal styles")
     {
       CHECK(difference(u8"plain", u8"plain2") == DifferenceResult::Equal);
-      CHECK(difference(u8"plain", u8"plain2").ContextSensitiveProperties.IsEmpty());
+      CHECK(difference(u8"plain", u8"plain2").ContextSensitiveProperties.empty());
       CHECK(difference(u8"plain", u8"plain") == Difference {});
     }
 
@@ -65,7 +65,7 @@ namespace krys::boo::style::tests
       CHECK(difference(u8"plain", u8"rotated") == DifferenceResult::Layout);
       auto diff = difference(u8"rotated", u8"rotated2");
       CHECK(diff == DifferenceResult::Equal);
-      CHECK(diff.ContextSensitiveProperties.Contains(DifferenceContextSensitiveProperty::Transform));
+      CHECK(diff.ContextSensitiveProperties.contains(DifferenceContextSensitiveProperty::Transform));
     }
 
     SECTION("Moving an absolutely positioned box only needs out-of-flow movement")

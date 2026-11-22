@@ -1,10 +1,12 @@
 ﻿#pragma once
 
+#include "Krystal.Booey/CSS/Values/GridLineNamesValue.hpp"
 #include "Krystal.Booey/CSS/Values/ImageValue.hpp"
+#include "Krystal.Booey/CSS/Values/PrimitiveValue.hpp"
 #include "Krystal.Booey/CSS/Values/SerialisationContext.hpp"
 #include "Krystal.Booey/CSS/Values/Value.hpp"
 #include "Krystal.Booey/CSS/Values/ValuePool.hpp"
-#include "Krystal.Core/Types/List.hpp"
+#include "Krystal.Core/Containers/List.hpp"
 #include <string>
 
 namespace krys::boo::css::tests
@@ -48,5 +50,30 @@ namespace krys::boo::css::tests
         return IterationStatus::Continue;
       });
     return children;
+  }
+
+  /// @brief @p value serialised with the default context.
+  template <typename T>
+  KRYS_NODISCARD CSSOMString SerialiseForTest(const T &value)
+  {
+    return Serialise(DefaultSerialisationContext(), value);
+  }
+
+  /// @brief A length of @p value pixels.
+  KRYS_NODISCARD inline Ref<PrimitiveValue> Px(double value) noexcept
+  {
+    return PrimitiveValue::Create(value, UnitType::px);
+  }
+
+  /// @brief The keyword @p id as a value.
+  KRYS_NODISCARD inline Ref<PrimitiveValue> IdentValue(ValueId id) noexcept
+  {
+    return PrimitiveValue::Create(id);
+  }
+
+  /// @brief A list of grid line names.
+  KRYS_NODISCARD inline Ref<GridLineNamesValue> LineNames(List<CSSOMString> names)
+  {
+    return GridLineNamesValue::Create(names);
   }
 }

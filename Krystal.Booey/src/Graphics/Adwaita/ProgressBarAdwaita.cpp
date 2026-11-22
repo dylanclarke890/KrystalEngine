@@ -58,7 +58,7 @@ namespace krys::boo
     GraphicsContextStateSaver stateSaver(graphicsContext);
 
     SRGBA<uint8> progressBarBackgroundColor;
-    if (style.States.Contains(ControlStyle::State::DarkAppearance))
+    if (style.States.contains(ControlStyle::State::DarkAppearance))
     {
       progressBarBackgroundColor = ProgressBarBackgroundColorDark;
     }
@@ -76,7 +76,7 @@ namespace krys::boo
     graphicsContext.FillPath(path);
     path.Clear();
 
-    bool isVertical = style.States.Contains(ControlStyle::State::VerticalWritingMode);
+    bool isVertical = style.States.contains(ControlStyle::State::VerticalWritingMode);
     auto setPrimarySize = [&fieldRect, isVertical](float size)
     {
       if (isVertical)
@@ -113,7 +113,7 @@ namespace krys::boo
     if (isDeterminate)
     {
       auto progressSize = getPrimarySize() * static_cast<float>(progressBarPart.Position());
-      if (style.States.Contains(ControlStyle::State::InlineFlippedWritingMode))
+      if (style.States.contains(ControlStyle::State::InlineFlippedWritingMode))
       {
         movePrimaryAxis(getPrimarySize() - progressSize);
       }

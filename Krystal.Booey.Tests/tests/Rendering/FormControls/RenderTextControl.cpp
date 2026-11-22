@@ -1,6 +1,7 @@
 ﻿#include "Krystal.Booey/Rendering/FormControls/RenderTextControl.hpp"
 #include "catch2/catch_test_macros.hpp"
 #include "Krystal.Booey.Tests/Editing/EditorTestUtils.hpp"
+#include "Krystal.Booey.Tests/Input/InputTestUtils.hpp"
 #include "Krystal.Booey.Tests/Layout/LayoutTestUtils.hpp"
 #include "Krystal.Booey.Tests/Style/ResolverTestUtils.hpp"
 #include "Krystal.Booey/DOM/MutationObservers/MutationObserver.hpp"
@@ -16,19 +17,8 @@
 
 namespace krys::boo::layout::tests
 {
+  using boo::tests::MouseEventAt;
   using style::tests::ResolverFixture;
-
-  namespace
-  {
-    KRYS_NODISCARD PlatformMouseEvent MouseEvent(PlatformEvent::Type type, PointI position) noexcept
-    {
-      PointD point(position.X(), position.Y());
-      int32 clickCount = type == PlatformEvent::Type::MousePressed ? 1 : 0;
-      return PlatformMouseEvent(
-        point, point, type == PlatformEvent::Type::MouseMoved ? MouseButton::None : MouseButton::Left, type,
-        clickCount, {}, MonotonicTime::Now());
-    }
-  }
 
   TEST_CASE_METHOD(css::tests::ValueFixture, "RenderTextControl: fields and text areas",
                    "[Rendering][RenderTextControl]")
@@ -74,14 +64,14 @@ layer at (447,18) size 51x10
     auto &handler = fixture.Frame->GetEventHandler();
 
     // The text starts 3 pixels in (the border and padding); a click on the border goes to the inner text.
-    (void)handler.HandleMousePressEvent(MouseEvent(PlatformEvent::Type::MousePressed, {24, 8}));
-    (void)handler.HandleMouseReleaseEvent(MouseEvent(PlatformEvent::Type::MouseReleased, {24, 8}));
+    (void)handler.HandleMousePressEvent(MouseEventAt(PlatformEvent::Type::MousePressed, {24, 8}));
+    (void)handler.HandleMouseReleaseEvent(MouseEventAt(PlatformEvent::Type::MouseReleased, {24, 8}));
     CHECK(fixture.Document->FocusedElement() == &field);
     CHECK(field.SelectionStart() == 2);
     CHECK(field.SelectionEnd() == 2);
 
-    (void)handler.HandleMousePressEvent(MouseEvent(PlatformEvent::Type::MousePressed, {1, 8}));
-    (void)handler.HandleMouseReleaseEvent(MouseEvent(PlatformEvent::Type::MouseReleased, {1, 8}));
+    (void)handler.HandleMousePressEvent(MouseEventAt(PlatformEvent::Type::MousePressed, {1, 8}));
+    (void)handler.HandleMouseReleaseEvent(MouseEventAt(PlatformEvent::Type::MouseReleased, {1, 8}));
     CHECK(field.SelectionStart() == 0);
   }
 
@@ -99,10 +89,10 @@ layer at (447,18) size 51x10
     CHECK(layer->IsPointInResizeControl({95, 45}));
     CHECK_FALSE(layer->IsPointInResizeControl({50, 25}));
     CHECK(handler.CurrentMouseCursor().GetType() != Cursor::Type::SouthEastResize);
-    (void)handler.MouseMoved(MouseEvent(PlatformEvent::Type::MouseMoved, {95, 45}));
+    (void)handler.MouseMoved(MouseEventAt(PlatformEvent::Type::MouseMoved, {95, 45}));
     CHECK(handler.CurrentMouseCursor().GetType() == Cursor::Type::SouthEastResize);
 
-    (void)handler.HandleMousePressEvent(MouseEvent(PlatformEvent::Type::MousePressed, {95, 45}));
+    (void)handler.HandleMousePressEvent(MouseEventAt(PlatformEvent::Type::MousePressed, {95, 45}));
     CHECK(layer->InResizeMode());
 
     // Each move changes the style attribute once, however many of its properties change.
@@ -117,11 +107,11 @@ layer at (447,18) size 51x10
         }
       });
     REQUIRE_FALSE(observer->Observe(box, {.Attributes = true, .AttributeOldValue = true}).HasException());
-    (void)handler.MouseMoved(MouseEvent(PlatformEvent::Type::MouseMoved, {125, 35}));
+    (void)handler.MouseMoved(MouseEventAt(PlatformEvent::Type::MouseMoved, {125, 35}));
     html::EventLoop::Current().PerformMicrotaskCheckpoint();
     REQUIRE(oldValues.size() == 1u);
     CHECK(oldValues[0] == u8"overflow:auto;resize:both;width:100px;height:50px;min-height:40px");
-    (void)handler.HandleMouseReleaseEvent(MouseEvent(PlatformEvent::Type::MouseReleased, {125, 35}));
+    (void)handler.HandleMouseReleaseEvent(MouseEventAt(PlatformEvent::Type::MouseReleased, {125, 35}));
     CHECK_FALSE(layer->InResizeMode());
 
     // It's wider, and no shorter than its minimum height.

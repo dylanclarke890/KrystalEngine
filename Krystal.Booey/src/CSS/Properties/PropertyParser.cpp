@@ -303,7 +303,7 @@ namespace krys::boo::css
 
     if (!parseSuccess)
     {
-      parsedProperties.truncate(initialParsedPropertiesSize);
+      parsedProperties.erase(parsedProperties.begin() + initialParsedPropertiesSize, parsedProperties.end());
     }
 
     return parseSuccess;
@@ -577,9 +577,10 @@ namespace krys::boo::css
         }
         case CustomPropertySyntax::Type::Image:
         {
-          return parse_property::ConsumeImage(range, state,
-                                              parse_property::AllowedImageType::UrlFunction
-                                                | parse_property::AllowedImageType::GeneratedImage);
+          return parse_property::ConsumeImage(
+            range, state,
+            EnumSet<parse_property::AllowedImageType> {parse_property::AllowedImageType::UrlFunction,
+                                                       parse_property::AllowedImageType::GeneratedImage});
         }
         case CustomPropertySyntax::Type::Url:
         {

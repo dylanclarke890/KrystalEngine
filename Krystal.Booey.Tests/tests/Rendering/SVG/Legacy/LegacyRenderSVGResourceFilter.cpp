@@ -1,6 +1,7 @@
 ﻿#include "Krystal.Booey/Rendering/SVG/Legacy/LegacyRenderSVGResourceFilter.hpp"
 #include "catch2/catch_test_macros.hpp"
 #include "Krystal.Booey.Tests/Rendering/PaintTestUtils.hpp"
+#include "Krystal.Booey.Tests/StringTestUtils.hpp"
 #include "Krystal.Booey.Tests/Style/ResolverTestUtils.hpp"
 #include "Krystal.Booey/Rendering/Layers/RenderLayer.hpp"
 #include "Krystal.Booey/Rendering/RenderLayerModelObject.hpp"
@@ -16,11 +17,6 @@ namespace krys::boo::tests
 
   namespace
   {
-    KRYS_NODISCARD bool Contains(utf8_stringview text, utf8_stringview part) noexcept
-    {
-      return text.contains(part);
-    }
-
     constexpr const char8_t *FilteredShape =
       u8R"html(<!DOCTYPE html><body style="margin: 0"><svg width=200 height=100>)html"
       u8R"html(<filter id=f x=0 y=0 width=1 height=1><feOffset dx=2 dy=3 /></filter>)html"

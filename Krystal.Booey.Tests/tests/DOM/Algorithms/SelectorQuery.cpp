@@ -1,5 +1,6 @@
 ﻿#include "Krystal.Booey/DOM/Algorithms/SelectorQuery.hpp"
 #include "catch2/catch_test_macros.hpp"
+#include "Krystal.Booey.Tests/DOM/DOMTestUtils.hpp"
 #include "Krystal.Booey/DOM/Collections/NodeList.hpp"
 #include "Krystal.Booey/DOM/Nodes/DocumentFragment.hpp"
 #include "Krystal.Booey/DOM/Nodes/HTMLDocument.hpp"
@@ -10,24 +11,11 @@
 
 namespace krys::boo::dom::tests
 {
+  using boo::tests::ById;
+  using boo::tests::ParseDocument;
+
   namespace
   {
-    KRYS_NODISCARD Ref<HTMLDocument> Parse(utf8_string &&input) noexcept
-    {
-      auto document = CreateRef<HTMLDocument>();
-      auto parser = CreateRef<html::DocumentParser>(*document);
-      parser->InputStream().Append(krys::move(input), IsEOF::Yes);
-      parser->PumpTokenizer();
-      return document;
-    }
-
-    KRYS_NODISCARD Element &ById(Document &document, DOMStringView id)
-    {
-      auto element = document.GetElementById(id);
-      REQUIRE(element);
-      return *element;
-    }
-
     /// @brief The IDs of the elements in @p list, space-separated.
     KRYS_NODISCARD DOMString Ids(const NodeList &list)
     {
@@ -65,8 +53,9 @@ namespace krys::boo::dom::tests
   TEST_CASE("Scope-match: querySelector and querySelectorAll match descendants of the node against its tree",
             "[DOM][SelectorQuery][dom:scope-match-a-selectors-string]")
   {
-    auto document = Parse(u8"<!DOCTYPE html><div id=a class=x><p id=b class=x></p><span id=c title=t></span>"
-                          u8"<p id=d><em id=e class='y x'></em></p></div><p id=f></p>");
+    auto document =
+      ParseDocument(u8"<!DOCTYPE html><div id=a class=x><p id=b class=x></p><span id=c title=t></span>"
+                    u8"<p id=d><em id=e class='y x'></em></p></div><p id=f></p>");
     auto &a = ById(*document, u8"a");
 
     SECTION("Fast paths and the general path find the same elements in tree order")
@@ -151,7 +140,7 @@ namespace krys::boo::dom::tests
   TEST_CASE("Scope-match: a fragment or shadow root is the parent of its top-level elements for :scope",
             "[DOM][SelectorQuery][dom:scope-match-a-selectors-string]")
   {
-    auto document = Parse(u8"<!DOCTYPE html><div id=host></div>");
+    auto document = ParseDocument(u8"<!DOCTYPE html><div id=host></div>");
     auto fragment = document->CreateDocumentFragment();
     auto first = document->CreateElement(u8"i").ReleaseValue();
     REQUIRE_FALSE(first->SetAttribute(u8"id", u8"i1").HasException());
@@ -173,7 +162,7 @@ namespace krys::boo::dom::tests
   TEST_CASE("Scope-match: an invalid selector throws a SyntaxError",
             "[DOM][SelectorQuery][dom:scope-match-a-selectors-string]")
   {
-    auto document = Parse(u8"<!DOCTYPE html><p id=p></p>");
+    auto document = ParseDocument(u8"<!DOCTYPE html><p id=p></p>");
     auto &p = ById(*document, u8"p");
 
     auto requireSyntaxError = [](const auto &result)
@@ -191,7 +180,7 @@ namespace krys::boo::dom::tests
 
   TEST_CASE("SelectorQuery: queries are cached", "[DOM][SelectorQuery]")
   {
-    auto document = Parse(u8"<!DOCTYPE html><p id=p></p>");
+    auto document = ParseDocument(u8"<!DOCTYPE html><p id=p></p>");
     auto first = document->SelectorQueryForString(u8"p > em");
     auto second = document->SelectorQueryForString(u8"p > em");
     REQUIRE(first.HasValue());
@@ -199,7 +188,7 @@ namespace krys::boo::dom::tests
     REQUIRE(&first.Value() == &second.Value());
 
     // A quirks mode document parses with a different context, so it gets its own query.
-    auto quirks = Parse(u8"<p id=p></p>");
+    auto quirks = ParseDocument(u8"<p id=p></p>");
     auto other = quirks->SelectorQueryForString(u8"p > em");
     REQUIRE(other.HasValue());
     REQUIRE(&other.Value() != &first.Value());

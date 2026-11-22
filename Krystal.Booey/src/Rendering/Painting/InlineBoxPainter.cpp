@@ -34,7 +34,7 @@
 #include "Krystal.Booey/Rendering/RenderInline.hpp"
 #include "Krystal.Booey/Rendering/RenderView.hpp"
 #include "Krystal.Booey/Rendering/Style/RenderStyle+GettersInlines.hpp"
-#include "Krystal.Core/Utils/Move.hpp"
+#include "Krystal.Core/Move.hpp"
 #include <ranges>
 
 namespace krys::boo
@@ -71,7 +71,7 @@ namespace krys::boo
       auto &inlineFlow = Downcast<RenderInline>(Renderer());
       if (_paintInfo.OutlineObjects)
       {
-        _paintInfo.OutlineObjects->add(&inlineFlow);
+        _paintInfo.OutlineObjects->insert(&inlineFlow);
       }
       return;
     }
@@ -239,7 +239,7 @@ namespace krys::boo
     bool pushTransparencyLayer = false;
     bool compositedMask = Renderer().HasLayer() && Renderer().Layer()->HasCompositedMask();
     bool flattenCompositingLayers =
-      Renderer().View().FrameView().GetPaintBehavior().Contains(PaintBehavior::FlattenCompositingLayers);
+      Renderer().View().FrameView().GetPaintBehavior().contains(PaintBehavior::FlattenCompositingLayers);
     CompositeOperator compositeOp = CompositeOperator::SourceOver;
     if (!compositedMask || flattenCompositingLayers)
     {

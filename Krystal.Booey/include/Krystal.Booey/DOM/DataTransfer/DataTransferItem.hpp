@@ -33,10 +33,10 @@
 
 #include "Krystal.Booey/DOM/Types/DOMString.hpp"
 #include "Krystal.Core/Attributes.hpp"
-#include "Krystal.Core/RefCounted.hpp"
+#include "Krystal.Core/Memory/RefCounted.hpp"
+#include "Krystal.Core/Memory/RefPtr.hpp"
+#include "Krystal.Core/Memory/WeakPtr.hpp"
 #include "Krystal.Core/Types/Func.hpp"
-#include "Krystal.Core/Types/RefPtr.hpp"
-#include "Krystal.Core/Types/WeakPtr.hpp"
 
 namespace krys::boo
 {
@@ -79,10 +79,7 @@ namespace krys::boo::dom
     KRYS_NODISCARD static Ref<DataTransferItem> Create(WeakPtr<DataTransferItemList> &&list,
                                                        DOMStringView type, Ref<File> &&file) noexcept;
 
-    KRYS_NODISCARD RefPtr<File> GetFile() const noexcept
-    {
-      return _file;
-    }
+    KRYS_NODISCARD RefPtr<File> GetFile() const noexcept;
 
     /// @brief Detaches the item from its list, after which it has no type and gives no data.
     void ClearListAndPutIntoDisabledMode() noexcept;

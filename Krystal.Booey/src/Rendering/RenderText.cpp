@@ -2156,10 +2156,10 @@ namespace krys::boo
                                                 EnumSet<BoundingRectBehavior> behavior,
                                                 bool *wasFixed) const noexcept
   {
-    bool useSelectionHeight = behavior.Contains(BoundingRectBehavior::UseSelectionHeight);
-    bool ignoreEmptyTextSelections = behavior.Contains(BoundingRectBehavior::IgnoreEmptyTextSelections);
+    bool useSelectionHeight = behavior.contains(BoundingRectBehavior::UseSelectionHeight);
+    bool ignoreEmptyTextSelections = behavior.contains(BoundingRectBehavior::IgnoreEmptyTextSelections);
     bool computeIndividualCharacterRects =
-      behavior.Contains(BoundingRectBehavior::ComputeIndividualCharacterRects);
+      behavior.contains(BoundingRectBehavior::ComputeIndividualCharacterRects);
 
     // Work around signed/unsigned issues: callers pass the largest offset to mean "all the way to the end".
     start = std::min(start, static_cast<uint32>(std::numeric_limits<int32>::max()));

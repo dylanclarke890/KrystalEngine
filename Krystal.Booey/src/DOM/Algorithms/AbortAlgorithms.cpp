@@ -11,26 +11,30 @@ namespace krys::boo::dom
     SignalAbort(*controller._signal, krys::move(reason));
   }
 
-  void AbortAlgorithms::Add(const AbortAlgorithmCallback &algorithm, AbortSignal &signal) noexcept
+  AbortAlgorithmHandle AbortAlgorithms::Add(Func<void(const krys::Any &reason)> algorithm,
+                                            AbortSignal &signal) noexcept
   {
     // 1. If signal is aborted, then return.
     if (signal.Aborted())
     {
-      return;
+      return {};
     }
 
     // 2. Append algorithm to signal's abort algorithms.
-    if (!std::ranges::contains(signal._abortAlgorithms, algorithm))
-    {
-      signal._abortAlgorithms.push_back(algorithm);
-    }
+    auto id = ++signal._lastAbortAlgorithmId;
+    signal._abortAlgorithms.push_back({.Id = id, .Run = krys::move(algorithm)});
     signal.UpdateHeldBySources();
+    return {signal, id};
   }
 
-  void AbortAlgorithms::Remove(const AbortAlgorithmCallback &algorithm, AbortSignal &signal) noexcept
+  void AbortAlgorithms::Remove(AbortSignal &signal, uint64 id) noexcept
   {
-    std::erase(signal._abortAlgorithms, algorithm);
-    signal.UpdateHeldBySources();
+    // Remove algorithm from signal's abort algorithms.
+    if (std::erase_if(signal._abortAlgorithms, [id](const auto &algorithm) { return algorithm.Id == id; })
+        > 0)
+    {
+      signal.UpdateHeldBySources();
+    }
   }
 
   void AbortAlgorithms::SignalAbort(AbortSignal &signal, Maybe<krys::Any> reason) noexcept
@@ -97,7 +101,7 @@ namespace krys::boo::dom
     // The list is emptied first, as an algorithm may remove itself.
     for (const auto &algorithm : std::exchange(signal._abortAlgorithms, {}))
     {
-      algorithm(signal.Reason());
+      algorithm.Run(signal.Reason());
     }
 
     // 3. Fire an event named abort at signal.

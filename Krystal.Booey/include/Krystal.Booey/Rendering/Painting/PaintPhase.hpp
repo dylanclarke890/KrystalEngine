@@ -25,6 +25,7 @@
 
 #pragma once
 
+#include "Krystal.Core/Containers/EnumSet.hpp"
 #include "Krystal.Core/Enum.hpp"
 
 namespace krys::boo
@@ -40,21 +41,26 @@ namespace krys::boo
 
   enum class PaintPhase : uint16
   {
-    BlockBackground = 0,
-    ChildBlockBackground = 1 << 0,
-    ChildBlockBackgrounds = 1 << 1,
-    Float = 1 << 2,
-    Foreground = 1 << 3,
-    Outline = 1 << 4,
-    ChildOutlines = 1 << 5,
-    SelfOutline = 1 << 6,
-    Selection = 1 << 7,
-    CollapsedTableBorders = 1 << 8,
-    TextClip = 1 << 9,
-    Mask = 1 << 10,
-    ClippingMask = 1 << 11,
-    EventRegion = 1 << 12,
+    BlockBackground,
+    ChildBlockBackground,
+    ChildBlockBackgrounds,
+    Float,
+    Foreground,
+    Outline,
+    ChildOutlines,
+    SelfOutline,
+    Selection,
+    CollapsedTableBorders,
+    TextClip,
+    Mask,
+    ClippingMask,
+    EventRegion,
   };
+
+  consteval PaintPhase MaxEnumValue(PaintPhase) noexcept
+  {
+    return PaintPhase::EventRegion;
+  }
 
   enum class PaintBehavior : uint32
   {
@@ -86,7 +92,9 @@ namespace krys::boo
     DrawsHDRContent,
     DraggableSnapshot,
   };
-}
 
-KRYS_DEFINE_FLAGS_ENUM_TRAITS(krys::boo::PaintPhase, 14uz)
-KRYS_DEFINE_CONTIGUOUS_ENUM_TRAITS(krys::boo::PaintBehavior, 23uz)
+  consteval PaintBehavior MaxEnumValue(PaintBehavior) noexcept
+  {
+    return PaintBehavior::DraggableSnapshot;
+  }
+}

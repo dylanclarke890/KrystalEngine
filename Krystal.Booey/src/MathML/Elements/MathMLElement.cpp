@@ -62,7 +62,7 @@ namespace krys::boo
 
   MathMLElement::MathMLElement(Document &document, MathMLElementInterface interface,
                                dom::NodeFlags nodeFlags) noexcept
-      : StyledElement(document, dom::NullQualifiedName(), nodeFlags | dom::NodeFlags::IsMathMLElement),
+      : StyledElement(document, dom::NullQualifiedName(), nodeFlags | dom::NodeFlag::IsMathMLElement),
         _interface(interface)
   {
   }

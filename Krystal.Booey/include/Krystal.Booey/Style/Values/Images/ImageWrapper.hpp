@@ -26,8 +26,8 @@
 
 #include "Krystal.Booey/Rendering/Style/StyleImage.hpp"
 #include "Krystal.Booey/Style/Values/Types.hpp"
+#include "Krystal.Core/Memory/PointerComparison.hpp"
 #include "Krystal.Core/Strings/StringBuilder.hpp"
-#include "Krystal.Core/Utils/PointerComparison.hpp"
 
 namespace krys::boo::style
 {

@@ -80,8 +80,7 @@ namespace krys::boo::tests
     CHECK(dark == FontPalette {FontPalette::Type::Dark, null});
     CHECK(FontPalette {FontPalette::Type::Custom, u8"--a"}
           != FontPalette {FontPalette::Type::Custom, u8"--b"});
-    CHECK(DefaultHash<FontPalette>::Hash(dark)
-          == DefaultHash<FontPalette>::Hash({FontPalette::Type::Dark, null}));
+    CHECK(FastHash<FontPalette> {}(dark) == FastHash<FontPalette> {}({FontPalette::Type::Dark, null}));
   }
 
   TEST_CASE("FontDescription", "[Graphics][FontDescription]")

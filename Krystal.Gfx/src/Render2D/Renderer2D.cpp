@@ -1,8 +1,8 @@
 ﻿#include "Krystal.Gfx/Render2D/Renderer2D.hpp"
 #include "Krystal.Core/Assert.hpp"
 #include "Krystal.Core/Log/ILogger.hpp"
+#include "Krystal.Core/Move.hpp"
 #include "Krystal.Core/Types/Pair.hpp"
-#include "Krystal.Core/Utils/Move.hpp"
 #include "Krystal.Core/Visitor.hpp"
 #include "Krystal.Gfx/Render2D/Dashing.hpp"
 #include <algorithm>
@@ -2579,11 +2579,12 @@ void main()
     // New textures round up to 64 pixels, so slightly different layers can reuse them.
     const uint32 roundedWidth = (width + 63u) / 64u * 64u;
     const uint32 roundedHeight = (height + 63u) / 64u * 64u;
-    auto texture = _device->CreateTexture({.Format = _target.Format,
-                                           .Width = roundedWidth,
-                                           .Height = roundedHeight,
-                                           .Usage = TextureUsage::RenderTarget | TextureUsage::Sampled,
-                                           .DebugName = u8"Render2D.Layer"});
+    auto texture = _device->CreateTexture(
+      {.Format = _target.Format,
+       .Width = roundedWidth,
+       .Height = roundedHeight,
+       .Usage = EnumSet<TextureUsage> {TextureUsage::RenderTarget, TextureUsage::Sampled},
+       .DebugName = u8"Render2D.Layer"});
     krys_debug_assert_msg(texture.has_value(), "Couldn't create a layer texture.");
     if (!texture)
     {

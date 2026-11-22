@@ -29,14 +29,15 @@
 #include "Krystal.Booey/CSS/Values/Value.hpp"
 #include "Krystal.Booey/CSS/Values/ValueId.hpp"
 #include "Krystal.Booey/Rendering/RenderElement.hpp"
+#include "Krystal.Core/Containers/EnumSet.hpp"
+#include "Krystal.Core/Containers/FixedList.hpp"
+#include "Krystal.Core/Containers/List.hpp"
 #include "Krystal.Core/Enum.hpp"
-#include "Krystal.Core/Types/CheckedPtr.hpp"
-#include "Krystal.Core/Types/FixedVector.hpp"
-#include "Krystal.Core/Types/List.hpp"
+#include "Krystal.Core/Memory/CheckedPtr.hpp"
+#include "Krystal.Core/Memory/RefPtr.hpp"
+#include "Krystal.Core/Memory/WeakPtr.hpp"
 #include "Krystal.Core/Types/Maybe.hpp"
-#include "Krystal.Core/Types/RefPtr.hpp"
 #include "Krystal.Core/Types/Variant.hpp"
-#include "Krystal.Core/Types/WeakPtr.hpp"
 #include "Krystal.Core/Visitor.hpp"
 
 namespace krys::boo
@@ -146,11 +147,15 @@ namespace krys::boo::css::mq
 
   enum class MediaQueryDynamicDependency : uint8
   {
-    None = 0,
-    Viewport = 1 << 0,
-    Appearance = 1 << 1,
-    Accessibility = 1 << 2,
+    Viewport,
+    Appearance,
+    Accessibility,
   };
+
+  consteval MediaQueryDynamicDependency MaxEnumValue(MediaQueryDynamicDependency) noexcept
+  {
+    return MediaQueryDynamicDependency::Accessibility;
+  }
 
   /// @brief What a feature is evaluated against.
   struct FeatureEvaluationContext
@@ -184,8 +189,8 @@ namespace krys::boo::css::mq
     CSSOMStringAtom Name;
     Type FeatureType;
     ValueType FeatureValueType;
-    MediaQueryDynamicDependency Dependencies;
-    FixedVector<ValueId> ValueIdentifiers;
+    EnumSet<MediaQueryDynamicDependency> Dependencies;
+    FixedList<ValueId> ValueIdentifiers;
 
     KRYS_NODISCARD virtual EvaluationResult Evaluate(const Feature &,
                                                      const FeatureEvaluationContext &) const noexcept
@@ -200,8 +205,8 @@ namespace krys::boo::css::mq
     }
 
     FeatureSchema(CSSOMStringAtom name, Type type, ValueType valueType,
-                  MediaQueryDynamicDependency dependencies,
-                  FixedVector<ValueId> valueIdentifiers = {}) noexcept
+                  EnumSet<MediaQueryDynamicDependency> dependencies,
+                  FixedList<ValueId> valueIdentifiers = {}) noexcept
         : Name(krys::move(name)), FeatureType(type), FeatureValueType(valueType), Dependencies(dependencies),
           ValueIdentifiers(krys::move(valueIdentifiers))
     {
@@ -256,5 +261,3 @@ namespace krys::boo::css::mq
     }
   }
 }
-
-KRYS_DEFINE_FLAGS_ENUM_TRAITS(krys::boo::css::mq::MediaQueryDynamicDependency, 3uz);

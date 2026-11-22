@@ -29,17 +29,11 @@
 #include "Krystal.Core/Attributes.hpp"
 #include "Krystal.Core/Geometry/Rect.hpp"
 #include "Krystal.Core/Macros.hpp"
+#include "Krystal.Core/Memory/UniquePtr.hpp"
 #include "Krystal.Core/Time/MonotonicTime.hpp"
 #include "Krystal.Core/TypeCast.hpp"
 #include "Krystal.Core/Types/Pair.hpp"
-#include "Krystal.Core/Types/UniquePtr.hpp"
 #include "Krystal.Image/ImageOrientation.hpp"
-
-namespace krys::boo
-{
-  class ContainerNode;
-  class Element;
-}
 
 namespace krys::boo::layout
 {
@@ -54,25 +48,29 @@ namespace krys::boo::style
 
 namespace krys::boo
 {
+  class BlendingKeyframes;
+  class ContainerNode;
+  class Element;
+  class GraphicsLayerAnimation;
+  class RenderBlock;
+  class RenderBoxModelObject;
+  class RenderLayer;
+  class StyleImage;
+
+  struct PaintInfo;
+
   enum class RenderElementConstructBlockLevelRendererFor : uint8
   {
     Inline,
     ListItem,
     TableOrTablePart,
   };
-}
 
-KRYS_DEFINE_CONTIGUOUS_ENUM_TRAITS(krys::boo::RenderElementConstructBlockLevelRendererFor, 3uz);
-
-namespace krys::boo
-{
-  class BlendingKeyframes;
-  class GraphicsLayerAnimation;
-  struct PaintInfo;
-  class RenderBlock;
-  class RenderBoxModelObject;
-  class RenderLayer;
-  class StyleImage;
+  consteval RenderElementConstructBlockLevelRendererFor
+    MaxEnumValue(RenderElementConstructBlockLevelRendererFor) noexcept
+  {
+    return RenderElementConstructBlockLevelRendererFor::TableOrTablePart;
+  }
 
   /// @brief A renderer with its own style: an element's, or an anonymous box's.
   class RenderElement : public RenderObject

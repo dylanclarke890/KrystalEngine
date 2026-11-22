@@ -28,7 +28,7 @@
 
 #include "Krystal.Booey/Graphics/Images/GeneratedImage.hpp"
 #include "Krystal.Booey/Style/Values/Primitives/Url.hpp"
-#include "Krystal.Core/Types/WeakPtr.hpp"
+#include "Krystal.Core/Memory/WeakPtr.hpp"
 
 namespace krys::boo
 {

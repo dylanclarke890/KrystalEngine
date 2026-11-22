@@ -1,12 +1,10 @@
 ﻿#include "Krystal.Booey/DOM/Algorithms/IteratorAlgorithms.hpp"
-#include "Krystal.Booey/DOM/Abort/AbortSignal.hpp"
 #include "Krystal.Booey/DOM/Algorithms/TreeQueries.hpp"
 #include "Krystal.Booey/DOM/Iterators/SubtreeRanges.hpp"
 #include "Krystal.Booey/DOM/Nodes/Attr.hpp"
 #include "Krystal.Booey/DOM/Nodes/ShadowRoot.hpp"
 #include "Krystal.Booey/DOM/Traversal/NodeIterator.hpp"
 #include "Krystal.Booey/DOM/Traversal/TreeWalker.hpp"
-#include "Krystal.Booey/HTML/CustomElement/CustomElementRegistry.hpp"
 #include "Krystal.Booey/HTML/Elements/HTMLSlotElement.hpp"
 
 namespace krys::boo::dom
@@ -26,7 +24,7 @@ namespace krys::boo::dom
     // 3. If the nth bit (where 0 is the least significant bit) of traverser’s whatToShow is not set, then
     // return
     //    FILTER_SKIP.
-    auto whatToShow = static_cast<underlying_t<WhatToShow>>(traverser.WhatToShow());
+    auto whatToShow = traverser.WhatToShow().ToRaw();
     if ((whatToShow & (1u << n)) == 0u)
     {
       return FilterResult::FILTER_SKIP;

@@ -1,12 +1,10 @@
 ﻿#include "Krystal.Booey/DOM/Collections/DOMTokenList.hpp"
 #include "catch2/catch_test_macros.hpp"
-#include "Krystal.Booey/DOM/Abort/AbortSignal.hpp"
 #include "Krystal.Booey/DOM/Nodes/Attr.hpp"
 #include "Krystal.Booey/DOM/Nodes/Document.hpp"
 #include "Krystal.Booey/DOM/Nodes/Element.hpp"
 #include "Krystal.Booey/DOM/Nodes/HTMLDocument.hpp"
 #include "Krystal.Booey/DOM/Nodes/ShadowRoot.hpp"
-#include "Krystal.Booey/HTML/CustomElement/CustomElementRegistry.hpp"
 #include "Krystal.Booey/HTML/Elements/HTMLAnchorElement.hpp"
 #include "Krystal.Booey/HTML/Elements/HTMLAreaElement.hpp"
 #include "Krystal.Booey/HTML/Elements/HTMLElement.hpp"
@@ -27,13 +25,13 @@ namespace krys::boo::dom::tests
 {
   namespace
   {
-    struct CommonTestData
+    struct DOMTokenListTestData
     {
       Ref<Document> Document;
       Ref<Element> Element;
       DOMTokenList &TokenList;
 
-      CommonTestData()
+      DOMTokenListTestData()
           : Document(CreateRef<boo::Document>()), Element(Document->CreateElement(u8"div").Value()),
             TokenList(Element->ClassList())
       {
@@ -45,7 +43,7 @@ namespace krys::boo::dom::tests
     "DOMTokenList.length: the size of its token set",
     "[DOM][DOMTokenList][dom:interface-domtokenlist][dom:dom-domtokenlist-length][dom:concept-dtl-tokens]")
   {
-    CommonTestData data;
+    DOMTokenListTestData data;
     REQUIRE(data.TokenList.Length() == 0uz);
 
     REQUIRE_FALSE(data.TokenList.Add(u8"foo").HasException());
@@ -61,10 +59,10 @@ namespace krys::boo::dom::tests
     REQUIRE(data.TokenList.Length() == 0uz);
   }
 
-  TEST_CASE("DOMTokenList.item(): the token at the index, or null past the end",
+  TEST_CASE("DOMTokenList[]: the token at the index, or null past the end",
             "[DOM][DOMTokenList][dom:dom-domtokenlist-item]")
   {
-    CommonTestData data;
+    DOMTokenListTestData data;
 
     REQUIRE_FALSE(data.TokenList.Item(0).has_value());
     REQUIRE_FALSE(data.TokenList.Item(1).has_value());
@@ -80,7 +78,7 @@ namespace krys::boo::dom::tests
 
   TEST_CASE("DOMTokenList: its indexed getter is item()", "[DOM][DOMTokenList][dom:dom-domtokenlist-item]")
   {
-    CommonTestData data;
+    DOMTokenListTestData data;
 
     REQUIRE_FALSE(data.TokenList[0].has_value());
     REQUIRE_FALSE(data.TokenList[1].has_value());
@@ -97,7 +95,7 @@ namespace krys::boo::dom::tests
   TEST_CASE("DOMTokenList.contains(): whether the token is in its token set",
             "[DOM][DOMTokenList][dom:dom-domtokenlist-contains]")
   {
-    CommonTestData data;
+    DOMTokenListTestData data;
 
     REQUIRE_FALSE(data.TokenList.Contains(u8"foo"));
     REQUIRE_FALSE(data.TokenList.Contains(u8"bar"));
@@ -114,7 +112,7 @@ namespace krys::boo::dom::tests
   TEST_CASE("DOMTokenList.add(): appends each token not already in it, then updates the attribute",
             "[DOM][DOMTokenList][dom:dom-domtokenlist-add][dom:concept-dtl-update]")
   {
-    CommonTestData data;
+    DOMTokenListTestData data;
 
     SECTION("Happy path")
     {
@@ -154,7 +152,7 @@ namespace krys::boo::dom::tests
   TEST_CASE("DOMTokenList.remove(): removes each token, then updates the attribute",
             "[DOM][DOMTokenList][dom:dom-domtokenlist-remove][dom:concept-dtl-update]")
   {
-    CommonTestData data;
+    DOMTokenListTestData data;
 
     SECTION("Happy path")
     {
@@ -188,7 +186,7 @@ namespace krys::boo::dom::tests
   TEST_CASE("DOMTokenList.toggle(): removes or appends the token, or as force says",
             "[DOM][DOMTokenList][dom:dom-domtokenlist-toggle]")
   {
-    CommonTestData data;
+    DOMTokenListTestData data;
 
     SECTION("Happy path")
     {
@@ -238,7 +236,7 @@ namespace krys::boo::dom::tests
   TEST_CASE("DOMTokenList.replace(): replaces the token with the new one",
             "[DOM][DOMTokenList][dom:dom-domtokenlist-replace]")
   {
-    CommonTestData data;
+    DOMTokenListTestData data;
 
     SECTION("Happy path")
     {
@@ -283,7 +281,7 @@ namespace krys::boo::dom::tests
   TEST_CASE("DOMTokenList.value: gets and sets its attribute value",
             "[DOM][DOMTokenList][dom:dom-domtokenlist-value][dom:concept-dtl-serialize]")
   {
-    CommonTestData data;
+    DOMTokenListTestData data;
     REQUIRE(data.TokenList.Value().empty());
     REQUIRE_FALSE(data.TokenList.Add(u8"foo").HasException());
     REQUIRE_FALSE(data.TokenList.Add(u8"bar").HasException());
@@ -298,7 +296,7 @@ namespace krys::boo::dom::tests
             "[DOM][DOMTokenList][dom:dom-domtokenlist-supports][dom:concept-domtokenlist-validation]"
             "[dom:concept-supported-tokens]")
   {
-    CommonTestData data;
+    DOMTokenListTestData data;
     auto supports = data.TokenList.Supports(u8"foo");
     REQUIRE(supports.HasException());
     CHECK(supports.GetException().Code() == ExceptionCode::TypeError);
@@ -450,7 +448,7 @@ namespace krys::boo::dom::tests
   TEST_CASE("DOMTokenList.replace(): a new token already in the set takes the place of the first of the two",
             "[DOM][DOMTokenList][dom:dom-domtokenlist-replace]")
   {
-    CommonTestData data;
+    DOMTokenListTestData data;
     data.TokenList.Value(u8"a b c");
 
     SECTION("After the token: the token's place")
@@ -489,7 +487,7 @@ namespace krys::boo::dom::tests
   TEST_CASE("DOMTokenList update steps: an absent attribute stays absent while the token set is empty",
             "[DOM][DOMTokenList][dom:concept-dtl-update]")
   {
-    CommonTestData data;
+    DOMTokenListTestData data;
     REQUIRE_FALSE(data.TokenList.Remove(u8"a").HasException());
     CHECK_FALSE(data.Element->HasAttribute(u8"class"));
     CHECK_FALSE(data.TokenList.Toggle(u8"a", false).ReleaseValue());
@@ -506,7 +504,7 @@ namespace krys::boo::dom::tests
   TEST_CASE("DOMTokenList.value: its serialize steps give the attribute value, unparsed",
             "[DOM][DOMTokenList][dom:dom-domtokenlist-value][dom:concept-dtl-serialize]")
   {
-    CommonTestData data;
+    DOMTokenListTestData data;
     data.TokenList.Value(u8" b  a b ");
     CHECK(data.TokenList.Value() == u8" b  a b ");
     CHECK(data.TokenList.Length() == 2uz);

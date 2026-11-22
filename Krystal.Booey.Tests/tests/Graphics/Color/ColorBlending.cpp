@@ -33,7 +33,7 @@ namespace krys::boo::tests
     CHECK(BlendWithWhite(SRGBA<uint8> {1, 2, 3, 4}) == Color {SRGBA<uint8> {1, 2, 3, 4}});
 
     // The semantic flag is kept.
-    CHECK(BlendWithWhite(Color {Color::red, ColorFlags::Semantic}).IsSemantic());
+    CHECK(BlendWithWhite(Color {Color::red, ColorFlag::Semantic}).IsSemantic());
   }
 
   TEST_CASE("ColorBlending: Blend", "[Graphics][Color][Blending]")

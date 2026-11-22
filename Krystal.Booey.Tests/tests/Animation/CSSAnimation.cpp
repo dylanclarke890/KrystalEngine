@@ -33,7 +33,7 @@ namespace krys::boo::tests
       {
         auto &animations = ById(id).AnimationsCreatedByMarkup(null);
         REQUIRE(animations.size() == 1);
-        return *animations.first();
+        return *animations.front();
       }
     };
 

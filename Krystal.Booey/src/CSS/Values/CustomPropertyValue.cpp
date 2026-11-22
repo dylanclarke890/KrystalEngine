@@ -26,7 +26,7 @@
 
 #include "Krystal.Booey/CSS/Values/CustomPropertyValue.hpp"
 #include "Krystal.Booey/CSS/Values/ValueId.hpp"
-#include "Krystal.Core/Threading/NeverDestroyed.hpp"
+#include "Krystal.Core/Memory/NeverDestroyed.hpp"
 #include "Krystal.Core/Visitor.hpp"
 
 namespace krys::boo::css
@@ -35,7 +35,7 @@ namespace krys::boo::css
   {
     static NeverDestroyed<Ref<VariableData>> empty {
       VariableData::Create(css::TokenRange(Span<const Token> {}))};
-    return CreateSyntaxAll(name, Ref {empty.get()});
+    return CreateSyntaxAll(name, Ref {*empty});
   }
 
   Ref<CustomPropertyValue> CustomPropertyValue::CreateUnresolved(const CSSOMStringAtom &name,
@@ -133,7 +133,7 @@ namespace krys::boo::css
     }
 
     krys_debug_assert(!IsVariableReference());
-    return emptyTokens.get();
+    return *emptyTokens;
   }
 
   Ref<const VariableData> CustomPropertyValue::AsVariableData() const noexcept

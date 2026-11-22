@@ -24,16 +24,20 @@
 #pragma once
 
 #include "Krystal.Booey/DOM/Events/EventPathItem.hpp"
+#include "Krystal.Booey/DOM/Events/EventTarget.hpp"
 #include "Krystal.Booey/DOM/Types/DOMHighResTimeStamp.hpp"
 #include "Krystal.Booey/DOM/Types/DOMString.hpp"
+#include "Krystal.Core/Containers/List.hpp"
 #include "Krystal.Core/Enum.hpp"
-#include "Krystal.Core/RefCounted.hpp"
+#include "Krystal.Core/Memory/RefCounted.hpp"
+#include "Krystal.Core/Memory/RefPtr.hpp"
 #include "Krystal.Core/Time/MonotonicTime.hpp"
-#include "Krystal.Core/Types/List.hpp"
-#include "Krystal.Core/Types/RefPtr.hpp"
 
 namespace krys::boo::dom
 {
+  class EventDispatcher;
+  class EventFactory;
+
   /// @see https://dom.spec.whatwg.org/#dom-event-eventphase
   enum class EventPhaseType : uint8
   {
@@ -46,24 +50,18 @@ namespace krys::boo::dom
     /// @see https://dom.spec.whatwg.org/#dom-event-bubbling_phase
     BUBBLING_PHASE = 3,
   };
-}
 
-KRYS_DEFINE_CONTIGUOUS_ENUM_TRAITS(krys::boo::dom::EventPhaseType, 4u)
+  consteval EventPhaseType MaxEnumValue(EventPhaseType) noexcept
+  {
+    return EventPhaseType::BUBBLING_PHASE;
+  }
+}
 
 namespace krys::boo
 {
   class Document;
-}
-
-namespace krys::boo::dom
-{
-  class EventDispatcher;
-  class EventFactory;
-}
-
-namespace krys::boo
-{
   class EventTarget;
+  class ShadowRoot;
 
   /// @see https://dom.spec.whatwg.org/#dictdef-eventinit
   struct EventInit
@@ -94,7 +92,7 @@ namespace krys::boo
     MonotonicTime::duration _createTime {};
     /// @see https://dom.spec.whatwg.org/#event-path
     List<dom::EventPathItem> _path;
-    dom::EventPhaseType _eventPhase : BitCount<dom::EventPhaseType>() {dom::EventPhaseType::NONE};
+    dom::EventPhaseType _eventPhase : EnumBitWidth<dom::EventPhaseType> {dom::EventPhaseType::NONE};
     bool _isTrusted : 1 {false};
     bool _bubbles : 1 {false};
     bool _cancellable : 1 {false};

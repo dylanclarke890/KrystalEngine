@@ -40,7 +40,7 @@ namespace krys::ui
       WeakPtr<boo::Document> Document;
       const boo::AXObjectCache *Cache {nullptr};
 
-      KRYS_NODISCARD boo::AXObjectCache *Get() const noexcept;
+      KRYS_NODISCARD boo::AXObjectCache *get() const noexcept;
     };
 
   private:

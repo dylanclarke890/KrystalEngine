@@ -1,5 +1,6 @@
 ﻿#include "Krystal.Booey/Rendering/FloatingObjects.hpp"
 #include "catch2/catch_test_macros.hpp"
+#include "Krystal.Booey.Tests/Rendering/RenderTestUtils.hpp"
 #include "Krystal.Booey.Tests/Style/ResolverTestUtils.hpp"
 #include "Krystal.Booey/Rendering/RenderBlockFlow.hpp"
 #include "Krystal.Booey/Rendering/RenderTreeAsText.hpp"
@@ -14,11 +15,6 @@ namespace krys::boo::tests
     {
       return ExternalRepresentation(fixture.Frame.get(),
                                     {RenderAsTextFlag::ShowAllLayers, RenderAsTextFlag::ShowIDAndClass});
-    }
-
-    KRYS_NODISCARD RenderBox &BoxOf(ResolverFixture &fixture, DOMStringView id) noexcept
-    {
-      return Downcast<RenderBox>(*fixture.ById(id).Renderer());
     }
 
     KRYS_NODISCARD RenderBlockFlow &BlockOf(ResolverFixture &fixture, DOMStringView id) noexcept

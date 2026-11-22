@@ -146,10 +146,7 @@ namespace krys::boo::tests
     CHECK(!image->IsSelected());
     CHECK(image->LocalSelectionRect().IsEmpty());
   }
-}
 
-namespace krys::boo::tests
-{
   TEST_CASE("RenderSelection: painting", "[Rendering][RenderSelection]")
   {
     RenderSelectionFixture fixture(u8"<style>::selection{background:#00FF00;color:#FF0000}</style>"
@@ -178,20 +175,17 @@ namespace krys::boo::tests
     // Active: the accent colour at 30%, made translucent so that it looks the same over white; the text keeps
     // its colour (Adwaita has no selection foreground colours).
     auto &theme = RenderTheme::Singleton();
-    auto activeBackground =
-      SerialisationForRenderTreeAsText(theme.ActiveSelectionBackgroundColor(style::ColorOptions::None));
-    auto overWhite =
-      BlendSourceOver(Color::white, theme.ActiveSelectionBackgroundColor(style::ColorOptions::None))
-        .ToColorTypeLossy<SRGBA<uint8>>()
-        .Resolved();
+    auto activeBackground = SerialisationForRenderTreeAsText(theme.ActiveSelectionBackgroundColor({}));
+    auto overWhite = BlendSourceOver(Color::white, theme.ActiveSelectionBackgroundColor({}))
+                       .ToColorTypeLossy<SRGBA<uint8>>()
+                       .Resolved();
     CHECK(std::abs(static_cast<int32>(overWhite.Blue) - 247) <= 2);
     CHECK(std::abs(static_cast<int32>(overWhite.Red) - 194) <= 2);
     CHECK(active.contains(u8"(color " + activeBackground + u8")"));
 
     fixture.Document->SetFocusedAndActive(false);
     auto inactive = fixture.Painted();
-    auto inactiveBackground =
-      SerialisationForRenderTreeAsText(theme.InactiveSelectionBackgroundColor(style::ColorOptions::None));
+    auto inactiveBackground = SerialisationForRenderTreeAsText(theme.InactiveSelectionBackgroundColor({}));
     CHECK_FALSE(inactive.contains(activeBackground));
     CHECK(inactive.contains(u8"(color " + inactiveBackground + u8")"));
   }

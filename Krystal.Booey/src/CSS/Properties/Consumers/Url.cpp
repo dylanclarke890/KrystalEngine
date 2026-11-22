@@ -97,7 +97,7 @@ namespace krys::boo::css::parse_property
           {
             case ValueId::CrossOrigin:
             {
-              if (!HasFlag(allowedUrlModifiers, AllowedUrlModifiers::CrossOrigin))
+              if (!allowedUrlModifiers.contains(AllowedUrlModifier::CrossOrigin))
               {
                 return {};
               }
@@ -121,7 +121,7 @@ namespace krys::boo::css::parse_property
             }
             case ValueId::Integrity:
             {
-              if (!HasFlag(allowedUrlModifiers, AllowedUrlModifiers::Integrity))
+              if (!allowedUrlModifiers.contains(AllowedUrlModifier::Integrity))
               {
                 return {};
               }
@@ -151,7 +151,7 @@ namespace krys::boo::css::parse_property
             }
             case ValueId::ReferrerPolicy:
             {
-              if (!HasFlag(allowedUrlModifiers, AllowedUrlModifiers::ReferrerPolicy))
+              if (!allowedUrlModifiers.contains(AllowedUrlModifier::ReferrerPolicy))
               {
                 return {};
               }

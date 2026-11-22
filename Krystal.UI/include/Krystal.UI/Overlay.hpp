@@ -2,7 +2,7 @@
 
 #include "Krystal.Core/Geometry/Point.hpp"
 #include "Krystal.Core/Geometry/Rect.hpp"
-#include "Krystal.Core/RefCounted.hpp"
+#include "Krystal.Core/Memory/RefCounted.hpp"
 #include "Krystal.Core/Strings/String.hpp"
 #include "Krystal.PAL/Input/KeyModifiers.hpp"
 #include "Krystal.PAL/Input/Keys.hpp"

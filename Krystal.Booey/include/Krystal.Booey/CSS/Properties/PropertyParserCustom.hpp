@@ -112,7 +112,7 @@
 #include "Krystal.Booey/CSS/Values/ValueList.hpp"
 #include "Krystal.Booey/CSS/Values/ValuePair.hpp"
 #include "Krystal.Core/Types/Maybe.hpp"
-#include "Krystal.Core/Utils/ZippedRange.hpp"
+#include <ranges>
 
 namespace krys::boo::css
 {
@@ -1291,8 +1291,8 @@ namespace krys::boo::css
           else
           {
             SmallList<CSSOMString> combinedLineNames;
-            combinedLineNames.append(previousLineNames->Names().begin(), previousLineNames->Names().end());
-            combinedLineNames.append(lineNames->Names().begin(), lineNames->Names().end());
+            combinedLineNames.append_range(previousLineNames->Names());
+            combinedLineNames.append_range(lineNames->Names());
             templateRows.back() = GridLineNamesValue::Create(combinedLineNames);
           }
         }
@@ -1814,7 +1814,7 @@ namespace krys::boo::css
       guard.Commit();
 
       auto shorthandProperties = shorthand.Properties();
-      for (auto [value, longhand] : zippedRange(values, shorthandProperties.first(values.size())))
+      for (auto &&[value, longhand] : std::views::zip(values, shorthandProperties.first(values.size())))
       {
         result.AddPropertyForCurrentShorthand(state, longhand, krys::move(value), IsImplicit::Yes);
       }

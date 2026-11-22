@@ -1,5 +1,6 @@
 ﻿#pragma once
 
+#include "Krystal.Core/Containers/EnumSet.hpp"
 #include "Krystal.Core/Enum.hpp"
 #include "Krystal.Core/Numeric.hpp"
 #include "Krystal.Core/Strings/String.hpp"
@@ -19,12 +20,16 @@ namespace krys::gfx
   /// @brief What a texture can be used as.
   enum class TextureUsage : uint8
   {
-    None = 0,
-    Sampled = 1 << 0,
-    RenderTarget = 1 << 1,
-    DepthStencil = 1 << 2,
-    Storage = 1 << 3,
+    Sampled,
+    RenderTarget,
+    DepthStencil,
+    Storage,
   };
+
+  consteval TextureUsage MaxEnumValue(TextureUsage) noexcept
+  {
+    return TextureUsage::Storage;
+  }
 
   struct TextureDesc
   {
@@ -38,7 +43,7 @@ namespace krys::gfx
     uint32 Layers {1u};
     uint32 MipLevels {1u};
     uint32 Samples {1u};
-    TextureUsage Usage {TextureUsage::Sampled};
+    EnumSet<TextureUsage> Usage {TextureUsage::Sampled};
     utf8_stringview DebugName;
   };
 
@@ -76,5 +81,3 @@ namespace krys::gfx
     return levels;
   }
 }
-
-KRYS_DEFINE_FLAGS_ENUM_TRAITS(krys::gfx::TextureUsage, 4uz)

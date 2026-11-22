@@ -28,13 +28,8 @@
 
 #include "Krystal.Booey/DOM/Events/UIEvent.hpp"
 #include "Krystal.Core/Attributes.hpp"
+#include "Krystal.Core/Memory/RefPtr.hpp"
 #include "Krystal.Core/TypeCast.hpp"
-#include "Krystal.Core/Types/RefPtr.hpp"
-
-namespace krys::boo
-{
-  class DocumentFragment;
-}
 
 namespace krys::boo::dom
 {
@@ -55,6 +50,8 @@ namespace krys::boo::dom
 
 namespace krys::boo
 {
+  class DocumentFragment;
+
   /// @brief The text an edit inserts (`textInput`): typed, pasted or dropped, which listeners can cancel
   /// before the editor inserts it.
   /// @note Legacy.

@@ -1,12 +1,12 @@
 ﻿#include "Krystal.Booey/DOM/Nodes/Attr.hpp"
 #include "Krystal.Booey/DOM/Algorithms/ElementAlgorithms.hpp"
 #include "Krystal.Booey/DOM/Nodes/Element.hpp"
+#include "Krystal.Booey/HTML/CustomElement/CustomElementReactionQueue.hpp"
 
 namespace krys::boo
 {
   Attr::Attr(Document &document, const QualifiedName &qualifiedName, DOMString value) noexcept
-      : Node(document, dom::NodeType::ATTRIBUTE_NODE, dom::NodeFlags::None), _name {qualifiedName},
-        _value {krys::move(value)}
+      : Node(document, dom::NodeType::ATTRIBUTE_NODE, {}), _name {qualifiedName}, _value {krys::move(value)}
   {
     // 1. Let attribute be the result of creating a node that implements Attr, given document.
     // 2. Set attribute's namespace to namespace, namespace prefix to prefix, local name to localName, and
@@ -22,6 +22,31 @@ namespace krys::boo
     }
 
     return _value;
+  }
+
+  Element *Attr::OwnerElement() const noexcept
+  {
+    return _ownerElement.get();
+  }
+
+  void Attr::Value(DOMString value) noexcept
+  {
+    html::CEReactionsScope ceReactions;
+    SetExistingAttributeValue(*this, krys::move(value));
+  }
+
+  ExceptionOr<void> Attr::NodeValue(DOMString value) noexcept
+  {
+    html::CEReactionsScope ceReactions;
+    SetExistingAttributeValue(*this, krys::move(value));
+    return {};
+  }
+
+  ExceptionOr<void> Attr::TextContent(DOMString value) noexcept
+  {
+    html::CEReactionsScope ceReactions;
+    SetExistingAttributeValue(*this, krys::move(value));
+    return {};
   }
 
   void Attr::SetExistingAttributeValue(Attr &attribute, DOMString value) noexcept

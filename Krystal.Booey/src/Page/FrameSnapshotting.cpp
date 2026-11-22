@@ -84,13 +84,13 @@ namespace krys::boo
     (void)document->UpdateLayout();
 
     FrameView::SelectionInSnapshot shouldIncludeSelection = FrameView::IncludeSelection;
-    if (options.Flags.Contains(SnapshotFlags::ExcludeSelectionHighlighting))
+    if (options.Flags.contains(SnapshotFlags::ExcludeSelectionHighlighting))
     {
       shouldIncludeSelection = FrameView::ExcludeSelection;
     }
 
     FrameView::CoordinateSpaceForSnapshot coordinateSpace = FrameView::DocumentCoordinates;
-    if (options.Flags.Contains(SnapshotFlags::InViewCoordinates))
+    if (options.Flags.contains(SnapshotFlags::InViewCoordinates))
     {
       coordinateSpace = FrameView::ViewCoordinates;
     }
@@ -98,35 +98,35 @@ namespace krys::boo
     ScopedFramePaintingState state(frame, nullptr);
 
     auto paintBehavior = state.PaintBehavior;
-    if (options.Flags.Contains(SnapshotFlags::ForceBlackText))
+    if (options.Flags.contains(SnapshotFlags::ForceBlackText))
     {
       paintBehavior.Add(PaintBehavior::ForceBlackText);
     }
-    if (options.Flags.Contains(SnapshotFlags::PaintSelectionOnly))
+    if (options.Flags.contains(SnapshotFlags::PaintSelectionOnly))
     {
       paintBehavior.Add(PaintBehavior::SelectionOnly);
     }
-    if (options.Flags.Contains(SnapshotFlags::PaintSelectionAndBackgroundsOnly))
+    if (options.Flags.contains(SnapshotFlags::PaintSelectionAndBackgroundsOnly))
     {
       paintBehavior.Add(PaintBehavior::SelectionAndBackgroundsOnly);
     }
-    if (options.Flags.Contains(SnapshotFlags::PaintEverythingExcludingSelection))
+    if (options.Flags.contains(SnapshotFlags::PaintEverythingExcludingSelection))
     {
       paintBehavior.Add(PaintBehavior::ExcludeSelection);
     }
-    if (options.Flags.Contains(SnapshotFlags::ExcludeReplacedContentExceptForIFrames))
+    if (options.Flags.contains(SnapshotFlags::ExcludeReplacedContentExceptForIFrames))
     {
       paintBehavior.Add(PaintBehavior::ExcludeReplacedContentExceptForIFrames);
     }
-    if (options.Flags.Contains(SnapshotFlags::ExcludeText))
+    if (options.Flags.contains(SnapshotFlags::ExcludeText))
     {
       paintBehavior.Add(PaintBehavior::ExcludeText);
     }
-    if (options.Flags.Contains(SnapshotFlags::FixedAndStickyLayersOnly))
+    if (options.Flags.contains(SnapshotFlags::FixedAndStickyLayersOnly))
     {
       paintBehavior.Add(PaintBehavior::FixedAndStickyLayersOnly);
     }
-    if (options.Flags.Contains(SnapshotFlags::DraggableElement))
+    if (options.Flags.contains(SnapshotFlags::DraggableElement))
     {
       paintBehavior.Add(PaintBehavior::DraggableSnapshot);
     }
@@ -135,12 +135,12 @@ namespace krys::boo
     frame.View()->SetPaintBehavior(paintBehavior);
 
     float scaleFactor = document->DeviceScaleFactor();
-    if (options.Flags.Contains(SnapshotFlags::PaintWith3xBaseScale))
+    if (options.Flags.contains(SnapshotFlags::PaintWith3xBaseScale))
     {
       scaleFactor = 3;
     }
 
-    if (options.Flags.Contains(SnapshotFlags::PaintWithIntegralScaleFactor))
+    if (options.Flags.contains(SnapshotFlags::PaintWithIntegralScaleFactor))
     {
       scaleFactor = std::ceil(scaleFactor);
     }

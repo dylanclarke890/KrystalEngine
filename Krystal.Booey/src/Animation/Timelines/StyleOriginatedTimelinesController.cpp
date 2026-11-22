@@ -297,7 +297,7 @@ namespace krys::boo
           {
             if (timelineName->Value == name)
             {
-              cssAnimationsWithMatchingTimelineName.add(ShareRef(*cssAnimation));
+              cssAnimationsWithMatchingTimelineName.insert(ShareRef(*cssAnimation));
             }
           }
         }
@@ -332,12 +332,9 @@ namespace krys::boo
     for (auto it = _nameToTimelineMap.begin(); it != _nameToTimelineMap.end();)
     {
       auto &timelines = it->second;
-      std::erase_if(timelines,
-                    [](const Ref<ScrollTimeline> &timeline)
-                    {
-                      return timeline->IsInactiveStyleOriginatedTimeline()
-                             && timeline->RelevantAnimations().isEmpty();
-                    });
+      std::erase_if(
+        timelines, [](const Ref<ScrollTimeline> &timeline)
+        { return timeline->IsInactiveStyleOriginatedTimeline() && timeline->RelevantAnimations().empty(); });
       if (timelines.empty())
       {
         it = _nameToTimelineMap.erase(it);
@@ -554,7 +551,7 @@ namespace krys::boo
               timeline->ClearTimelineScopeDeclaredElement();
               // Make sure to track this time to be unregistered in a separate step as it would modify the map
               // we're currently iterating over.
-              namedTimelinesToUnregister.add(timeline);
+              namedTimelinesToUnregister.insert(timeline);
             }
           }
         }
@@ -614,7 +611,7 @@ namespace krys::boo
         auto &timeline = timelines[i];
         if (OriginatingElement(timeline) == style::WeakStyleable(styleable))
         {
-          _removedTimelines.add(timeline);
+          _removedTimelines.insert(timeline);
           timelines.erase(timelines.begin() + static_cast<std::ptrdiff_t>(i--));
         }
       }

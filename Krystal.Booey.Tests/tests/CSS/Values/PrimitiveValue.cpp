@@ -114,7 +114,7 @@ namespace krys::boo::css::tests
   TEST_CASE("PrimitiveValue::UnitTypeString(every dimension)", "[CSS][PrimitiveValue]")
   {
     // Every length, angle, time, frequency, resolution and flex unit has a suffix.
-    for (size_t i = 0uz; i < EnumTraits<UnitType>::DistinctValues; ++i)
+    for (size_t i = 0uz; i < (ToUnderlying(MaxEnumValue(UnitType {})) + 1uz); ++i)
     {
       auto unit = static_cast<UnitType>(i);
       auto category = UnitCategoryForType(unit);

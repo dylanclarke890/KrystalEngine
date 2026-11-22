@@ -27,19 +27,19 @@
 #pragma once
 
 #include "Krystal.Core/Attributes.hpp"
+#include "Krystal.Core/Containers/List.hpp"
+#include "Krystal.Core/Containers/SmallList.hpp"
+#include "Krystal.Core/Containers/Span.hpp"
 #include "Krystal.Core/Macros.hpp"
+#include "Krystal.Core/Memory/RefCounted.hpp"
+#include "Krystal.Core/Memory/RefPtr.hpp"
+#include "Krystal.Core/Move.hpp"
 #include "Krystal.Core/Numeric.hpp"
-#include "Krystal.Core/RefCounted.hpp"
 #include "Krystal.Core/Strings/String.hpp"
 #include "Krystal.Core/TypeCast.hpp"
 #include "Krystal.Core/Types/Func.hpp"
-#include "Krystal.Core/Types/List.hpp"
 #include "Krystal.Core/Types/Maybe.hpp"
-#include "Krystal.Core/Types/RefPtr.hpp"
-#include "Krystal.Core/Types/SmallList.hpp"
-#include "Krystal.Core/Types/Span.hpp"
 #include "Krystal.Core/Types/Variant.hpp"
-#include "Krystal.Core/Utils/Move.hpp"
 #include <memory>
 
 namespace krys
@@ -328,11 +328,6 @@ namespace krys
     void Append(List<uint8> data) noexcept;
 
     void AppendSpans(Span<const Span<const uint8>> spans) noexcept;
-
-    KRYS_NODISCARD explicit operator bool() const noexcept
-    {
-      return !IsNull();
-    }
 
     KRYS_NODISCARD bool IsNull() const noexcept
     {

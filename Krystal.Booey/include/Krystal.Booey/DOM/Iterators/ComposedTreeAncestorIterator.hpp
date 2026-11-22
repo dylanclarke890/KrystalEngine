@@ -30,7 +30,7 @@
 #include "Krystal.Booey/DOM/Nodes/Element.hpp"
 #include "Krystal.Booey/DOM/Nodes/ShadowRoot.hpp"
 #include "Krystal.Booey/HTML/Elements/HTMLSlotElement.hpp"
-#include "Krystal.Core/Types/CheckedPtr.hpp"
+#include "Krystal.Core/Memory/CheckedPtr.hpp"
 
 namespace krys::boo::dom
 {
@@ -72,11 +72,6 @@ namespace krys::boo::dom
     {
       _current = ShareCheckedPtr(TraverseParent(_current.get()));
       return *this;
-    }
-
-    KRYS_NODISCARD Element &Get() const noexcept
-    {
-      return *_current;
     }
 
   private:
@@ -139,7 +134,7 @@ namespace krys::boo::dom
       {
         return nullptr;
       }
-      return &it.Get();
+      return &*it;
     }
   };
 

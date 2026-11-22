@@ -49,16 +49,15 @@
 #include "Krystal.Booey/HTML/Canvas/CanvasTextBaseline.hpp"
 #include "Krystal.Booey/HTML/Canvas/CanvasTextRendering.hpp"
 #include "Krystal.Booey/HTML/Canvas/ImageSmoothingQuality.hpp"
-#include "Krystal.Booey/HTML/ImageData/ImageDataSettings.hpp"
 #include "Krystal.Booey/Style/Values/FilterEffects/Filter.hpp"
+#include "Krystal.Core/Containers/EnumSet.hpp"
+#include "Krystal.Core/Containers/List.hpp"
+#include "Krystal.Core/Containers/SmallList.hpp"
 #include "Krystal.Core/Geometry/AffineTransform.hpp"
 #include "Krystal.Core/Geometry/Rect.hpp"
 #include "Krystal.Core/Geometry/Size.hpp"
+#include "Krystal.Core/Memory/UniquePtr.hpp"
 #include "Krystal.Core/Time/Timer.hpp"
-#include "Krystal.Core/Types/EnumSet.hpp"
-#include "Krystal.Core/Types/List.hpp"
-#include "Krystal.Core/Types/SmallList.hpp"
-#include "Krystal.Core/Types/UniquePtr.hpp"
 #include "Krystal.Image/ImageOrientation.hpp"
 
 namespace krys::boo
@@ -88,6 +87,7 @@ namespace krys::boo::html
   class CanvasGradient;
   class CanvasPattern;
   class ImageData;
+  struct ImageDataSettings;
   class Path2D;
   class TextMetrics;
 

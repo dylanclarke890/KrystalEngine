@@ -30,7 +30,7 @@
 
 namespace krys::boo::css::cq
 {
-  Axis RequiredAxesForFeature(const mq::Feature &feature) noexcept
+  EnumSet<Axis> RequiredAxesForFeature(const mq::Feature &feature) noexcept
   {
     if (feature.Schema == &features::Width())
     {
@@ -50,9 +50,9 @@ namespace krys::boo::css::cq
     }
     if (feature.Schema == &features::AspectRatio() || feature.Schema == &features::Orientation())
     {
-      return Axis::Inline | Axis::Block;
+      return {Axis::Inline, Axis::Block};
     }
-    return Axis::None;
+    return {};
   }
 
   void Serialise(StringBuilder &builder, const ContainerQuery &query) noexcept

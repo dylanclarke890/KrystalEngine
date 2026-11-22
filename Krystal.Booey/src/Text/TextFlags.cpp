@@ -25,8 +25,8 @@
 
 #include "Krystal.Booey/Text/TextFlags.hpp"
 #include "Krystal.Booey/Graphics/Fonts/FontFeatureValues.hpp"
+#include "Krystal.Core/Containers/Span.hpp"
 #include "Krystal.Core/Strings/TextStream.hpp"
-#include "Krystal.Core/Types/Span.hpp"
 
 namespace krys::boo
 {
@@ -238,34 +238,35 @@ namespace krys::boo
 
 namespace krys
 {
-  size_t
-    DefaultHash<boo::FontVariantAlternatesValues>::Hash(const boo::FontVariantAlternatesValues &key) noexcept
+  size_t FastHash<boo::FontVariantAlternatesValues>::operator()(
+    const boo::FontVariantAlternatesValues &key) const noexcept
   {
     auto hashString = [](const Maybe<boo::CSSOMString> &string) -> size_t
     {
-      return string ? krys::Hash::Combine(true, *string) : krys::Hash::Combine(false);
+      return string ? krys::CombineFastHashes(true, *string) : krys::CombineFastHashes(false);
     };
     auto hashList = [](const List<boo::CSSOMString> &list) -> size_t
     {
       size_t seed = list.size();
       for (const auto &string : list)
       {
-        seed = krys::Hash::Combine(seed, string);
+        seed = krys::CombineFastHashes(seed, string);
       }
       return seed;
     };
-    return krys::Hash::Combine(key.HistoricalForms, hashString(key.Stylistic), hashList(key.Styleset),
-                               hashList(key.CharacterVariant), hashString(key.Swash),
-                               hashString(key.Ornaments), hashString(key.Annotation));
+    return krys::CombineFastHashes(key.HistoricalForms, hashString(key.Stylistic), hashList(key.Styleset),
+                                   hashList(key.CharacterVariant), hashString(key.Swash),
+                                   hashString(key.Ornaments), hashString(key.Annotation));
   }
 
-  size_t DefaultHash<boo::FontVariantAlternates>::Hash(const boo::FontVariantAlternates &key) noexcept
+  size_t
+    FastHash<boo::FontVariantAlternates>::operator()(const boo::FontVariantAlternates &key) const noexcept
   {
     if (key.IsNormal())
     {
-      return krys::Hash::Combine(false);
+      return krys::CombineFastHashes(false);
     }
-    return krys::Hash::Combine(true, key.GetValues());
+    return krys::CombineFastHashes(true, key.GetValues());
   }
 }
 

@@ -25,7 +25,7 @@ namespace krys::boo::css
 {
   PropertyId PropertyMetadata::ShorthandId() const noexcept
   {
-    if (!HasFlag(Flags, PropertyFlag::SetFromShorthand))
+    if (!Flags.contains(PropertyFlag::SetFromShorthand))
     {
       return PropertyId::Invalid;
     }

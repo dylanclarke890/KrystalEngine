@@ -16,7 +16,7 @@ namespace krys::boo::css::tests
       return BoxShadow {.Location = {x, y}};
     }
 
-    KRYS_NODISCARD BoxShadow FullShadow() noexcept
+    KRYS_NODISCARD BoxShadow FullBoxShadow() noexcept
     {
       return BoxShadow {.Color = Color {KeywordColor {ValueId::Red}},
                         .Location = {L {1_css_px}, L {2_css_px}},
@@ -28,7 +28,7 @@ namespace krys::boo::css::tests
 
   TEST_CASE_METHOD(ValueFixture, "BoxShadowPropertyValue::Create", "[CSS][Values][BoxShadowPropertyValue]")
   {
-    BoxShadowProperty shadow {BoxShadowProperty::List {FullShadow()}};
+    BoxShadowProperty shadow {BoxShadowProperty::List {FullBoxShadow()}};
     auto value = BoxShadowPropertyValue::Create(shadow);
     CHECK(value->IsBoxShadowPropertyValue());
     CHECK(value->Shadow() == shadow);
@@ -38,15 +38,16 @@ namespace krys::boo::css::tests
                    "[CSS][Values][BoxShadowPropertyValue]")
   {
     CHECK(CssText(*BoxShadowPropertyValue::Create(BoxShadowProperty {keywords::None {}})) == "none");
-    CHECK(CssText(*BoxShadowPropertyValue::Create(
-            BoxShadowProperty {BoxShadowProperty::List {Shadow(L {1_css_px}, L {2_css_px}), FullShadow()}}))
+    CHECK(CssText(*BoxShadowPropertyValue::Create(BoxShadowProperty {
+            BoxShadowProperty::List {Shadow(L {1_css_px}, L {2_css_px}), FullBoxShadow()}}))
           == "1px 2px, red 1px 2px 3px 4px inset");
   }
 
   TEST_CASE_METHOD(ValueFixture, "BoxShadowPropertyValue equality", "[CSS][Values][BoxShadowPropertyValue]")
   {
-    auto a = BoxShadowPropertyValue::Create(BoxShadowProperty {BoxShadowProperty::List {FullShadow()}});
-    CHECK(*a == *BoxShadowPropertyValue::Create(BoxShadowProperty {BoxShadowProperty::List {FullShadow()}}));
+    auto a = BoxShadowPropertyValue::Create(BoxShadowProperty {BoxShadowProperty::List {FullBoxShadow()}});
+    CHECK(*a
+          == *BoxShadowPropertyValue::Create(BoxShadowProperty {BoxShadowProperty::List {FullBoxShadow()}}));
     CHECK_FALSE(*a
                 == *BoxShadowPropertyValue::Create(
                   BoxShadowProperty {BoxShadowProperty::List {Shadow(L {1_css_px}, L {2_css_px})}}));
@@ -57,7 +58,7 @@ namespace krys::boo::css::tests
                    "[CSS][Values][BoxShadowPropertyValue]")
   {
     CHECK(
-      Children(*BoxShadowPropertyValue::Create(BoxShadowProperty {BoxShadowProperty::List {FullShadow()}}))
+      Children(*BoxShadowPropertyValue::Create(BoxShadowProperty {BoxShadowProperty::List {FullBoxShadow()}}))
         .empty());
   }
 }

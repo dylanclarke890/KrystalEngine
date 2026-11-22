@@ -30,8 +30,8 @@
 #include "Krystal.Booey/Graphics/Filters/FilterResults.hpp"
 #include "Krystal.Booey/Graphics/ImageBuffers/ImageBuffer.hpp"
 #include "Krystal.Core/Colour/ColourTextStream.hpp"
+#include "Krystal.Core/Move.hpp"
 #include "Krystal.Core/Strings/TextStream.hpp"
-#include "Krystal.Core/Utils/Move.hpp"
 
 namespace krys::boo::display_list
 {
@@ -600,7 +600,7 @@ namespace krys::boo::display_list
 
   void ClipToImageBuffer::Dump(TextStream &ts, EnumSet<AsTextFlag> flags) const noexcept
   {
-    if (flags.Contains(AsTextFlag::IncludeResourceIdentifiers))
+    if (flags.contains(AsTextFlag::IncludeResourceIdentifiers))
     {
       ts.DumpProperty(u8"image-buffer-identifier", _imageBuffer->GetRenderingResourceIdentifier());
     }
@@ -642,7 +642,7 @@ namespace krys::boo::display_list
 
   void DrawFilteredImageBuffer::Dump(TextStream &ts, EnumSet<AsTextFlag> flags) const noexcept
   {
-    if (flags.Contains(AsTextFlag::IncludeResourceIdentifiers))
+    if (flags.contains(AsTextFlag::IncludeResourceIdentifiers))
     {
       if (_sourceImage)
       {
@@ -680,7 +680,7 @@ namespace krys::boo::display_list
 
   void DrawImageBuffer::Dump(TextStream &ts, EnumSet<AsTextFlag> flags) const noexcept
   {
-    if (flags.Contains(AsTextFlag::IncludeResourceIdentifiers))
+    if (flags.contains(AsTextFlag::IncludeResourceIdentifiers))
     {
       ts.DumpProperty(u8"image-buffer-identifier", _imageBuffer->GetRenderingResourceIdentifier());
     }
@@ -716,7 +716,7 @@ namespace krys::boo::display_list
 
   void DrawNativeImage::Dump(TextStream &ts, EnumSet<AsTextFlag> flags) const noexcept
   {
-    if (flags.Contains(AsTextFlag::IncludeResourceIdentifiers))
+    if (flags.contains(AsTextFlag::IncludeResourceIdentifiers))
     {
       ts.DumpProperty(u8"image-identifier", _image->GetRenderingResourceIdentifier());
     }
@@ -756,7 +756,7 @@ namespace krys::boo::display_list
 
   void DrawPatternNativeImage::Dump(TextStream &ts, EnumSet<AsTextFlag> flags) const noexcept
   {
-    if (flags.Contains(AsTextFlag::IncludeResourceIdentifiers))
+    if (flags.contains(AsTextFlag::IncludeResourceIdentifiers))
     {
       ts.DumpProperty(u8"image-identifier", _image->GetRenderingResourceIdentifier());
     }
@@ -800,7 +800,7 @@ namespace krys::boo::display_list
 
   void DrawPatternImageBuffer::Dump(TextStream &ts, EnumSet<AsTextFlag> flags) const noexcept
   {
-    if (flags.Contains(AsTextFlag::IncludeResourceIdentifiers))
+    if (flags.contains(AsTextFlag::IncludeResourceIdentifiers))
     {
       ts.DumpProperty(u8"image-identifier", _imageBuffer->GetRenderingResourceIdentifier());
     }

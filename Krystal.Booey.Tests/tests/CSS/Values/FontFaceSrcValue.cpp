@@ -20,10 +20,7 @@ namespace krys::boo::css::tests
     STATIC_REQUIRE(CssTextFromFontTech(FontTechnology::Variations) == u8"variations");
     STATIC_REQUIRE(CssTextFromFontTech(FontTechnology::Invalid).empty());
   }
-}
 
-namespace krys::boo::css::tests
-{
   namespace
   {
     CSSUrl FontUrl(utf8_stringview url)

@@ -27,8 +27,8 @@
 
 #include "Krystal.Booey/Graphics/ImageBuffers/PixelBufferFormat.hpp"
 #include "Krystal.Core/Assert.hpp"
+#include "Krystal.Core/Containers/Span.hpp"
 #include "Krystal.Core/Geometry/GeometryForward.hpp"
-#include "Krystal.Core/Types/Span.hpp"
 
 namespace krys::boo
 {

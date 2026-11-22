@@ -23,14 +23,13 @@
 
 #pragma once
 
-#include "Krystal.Booey/DOM/Collections/DOMTokenList.hpp"
 #include "Krystal.Booey/DOM/Events/EventSender.hpp"
 #include "Krystal.Booey/DOM/Types/USVString.hpp"
 #include "Krystal.Booey/HTML/Elements/HTMLElement.hpp"
 #include "Krystal.Booey/Loader/Cache/CachedCSSStyleSheet.hpp"
 #include "Krystal.Booey/Loader/Cache/CachedResourceHandle.hpp"
 #include "Krystal.Booey/Loader/Cache/CachedStyleSheetClient.hpp"
-#include "Krystal.Core/Types/WeakPtr.hpp"
+#include "Krystal.Core/Memory/WeakPtr.hpp"
 
 namespace krys::boo
 {
@@ -47,6 +46,11 @@ namespace krys::boo::css
 namespace krys::boo::style
 {
   class Scope;
+}
+
+namespace krys::boo::dom
+{
+  class DOMTokenList;
 }
 
 namespace krys::boo::html

@@ -26,7 +26,7 @@
 #pragma once
 
 #include "Krystal.Booey/CSS/TypedOM/StylePropertyMapReadOnly.hpp"
-#include "Krystal.Core/Types/WeakPtr.hpp"
+#include "Krystal.Core/Memory/WeakPtr.hpp"
 
 namespace krys::boo
 {

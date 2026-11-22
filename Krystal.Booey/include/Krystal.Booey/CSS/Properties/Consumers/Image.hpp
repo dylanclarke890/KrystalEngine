@@ -24,22 +24,25 @@
 
 #pragma once
 
+#include "Krystal.Core/Containers/EnumSet.hpp"
 #include "Krystal.Core/Enum.hpp"
-#include "Krystal.Core/Types/RefPtr.hpp"
+#include "Krystal.Core/Memory/RefPtr.hpp"
 
 namespace krys::boo::css::parse_property
 {
   enum class AllowedImageType
   {
-    None = 0,
-    UrlFunction = 1 << 0,
-    RawStringAsUrl = 1 << 1,
-    ImageSet = 1 << 2,
-    GeneratedImage = 1 << 3,
+    UrlFunction,
+    RawStringAsUrl,
+    ImageSet,
+    GeneratedImage,
   };
-}
 
-KRYS_DEFINE_FLAGS_ENUM_TRAITS(krys::boo::css::parse_property::AllowedImageType, 5uz)
+  consteval AllowedImageType MaxEnumValue(AllowedImageType) noexcept
+  {
+    return AllowedImageType::GeneratedImage;
+  }
+}
 
 namespace krys::boo::css
 {
@@ -54,14 +57,14 @@ namespace krys::boo::css
 
     KRYS_NODISCARD RefPtr<Value>
       ConsumeImage(TokenRange &tokens, PropertyParserState &state,
-                   AllowedImageType allowedImageTypes = AllowedImageType::UrlFunction
-                                                        | AllowedImageType::ImageSet
-                                                        | AllowedImageType::GeneratedImage) noexcept;
+                   EnumSet<AllowedImageType> allowedImageTypes = EnumSet<AllowedImageType> {
+                     AllowedImageType::UrlFunction, AllowedImageType::ImageSet,
+                     AllowedImageType::GeneratedImage}) noexcept;
 
     KRYS_NODISCARD RefPtr<Value>
       ConsumeImageOrNone(TokenRange &tokens, PropertyParserState &state,
-                         AllowedImageType allowedImageTypes = AllowedImageType::UrlFunction
-                                                              | AllowedImageType::ImageSet
-                                                              | AllowedImageType::GeneratedImage) noexcept;
+                         EnumSet<AllowedImageType> allowedImageTypes = EnumSet<AllowedImageType> {
+                           AllowedImageType::UrlFunction, AllowedImageType::ImageSet,
+                           AllowedImageType::GeneratedImage}) noexcept;
   }
 }

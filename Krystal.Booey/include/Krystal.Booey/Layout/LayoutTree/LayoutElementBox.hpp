@@ -28,12 +28,12 @@
 #include "Krystal.Booey/Graphics/Geometry/LayoutSize.hpp"
 #include "Krystal.Booey/Layout/LayoutTree/LayoutBox.hpp"
 #include "Krystal.Core/Attributes.hpp"
+#include "Krystal.Core/Containers/EnumSet.hpp"
 #include "Krystal.Core/Macros.hpp"
+#include "Krystal.Core/Memory/UniquePtr.hpp"
 #include "Krystal.Core/TypeCast.hpp"
-#include "Krystal.Core/Types/EnumSet.hpp"
 #include "Krystal.Core/Types/Maybe.hpp"
 #include "Krystal.Core/Types/Pair.hpp"
-#include "Krystal.Core/Types/UniquePtr.hpp"
 
 namespace krys::boo
 {
@@ -50,7 +50,7 @@ namespace krys::boo::layout
     KRYS_OVERRIDE_DELETE_FOR_CHECKED_PTR(ElementBox);
 
   public:
-    enum class ListMarkerAttribute : bool
+    enum class ListMarkerAttribute : uint8
     {
       Image,
       Outside,
@@ -173,12 +173,12 @@ namespace krys::boo::layout
 
     KRYS_NODISCARD bool IsListMarkerImage() const noexcept
     {
-      return _replacedData && _replacedData->ListMarkerAttributes.Contains(ListMarkerAttribute::Image);
+      return _replacedData && _replacedData->ListMarkerAttributes.contains(ListMarkerAttribute::Image);
     }
 
     KRYS_NODISCARD bool IsListMarkerOutside() const noexcept
     {
-      return _replacedData && _replacedData->ListMarkerAttributes.Contains(ListMarkerAttribute::Outside);
+      return _replacedData && _replacedData->ListMarkerAttributes.contains(ListMarkerAttribute::Outside);
     }
 
     // FIXME: This is temporary until after list marker content is accessible by IFC (webkit.org/b/294342)

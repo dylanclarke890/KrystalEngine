@@ -63,7 +63,7 @@
 #include "Krystal.Booey/Rendering/RenderElement.hpp"
 #include "Krystal.Booey/Rendering/Style/RenderStyle.hpp"
 #include "Krystal.Booey/XML/XMLDocumentParser.hpp"
-#include "Krystal.Core/Utils/Move.hpp"
+#include "Krystal.Core/Move.hpp"
 #include "Krystal.Text/UnicodeHelpers.hpp"
 #include <algorithm>
 #include <ranges>
@@ -1409,11 +1409,11 @@ namespace krys::boo
     {
       auto &document = contextElement.NodeDocument();
       if (Is<HTMLDocument>(document)
-          || parserContentPolicy.Contains(dom::ParserContentPolicy::AlwaysParseAsHTML))
+          || parserContentPolicy.contains(dom::ParserContentPolicy::AlwaysParseAsHTML))
       {
         return ParseHTMLIntoFragment(
           markup, contextElement,
-          parserContentPolicy.Contains(dom::ParserContentPolicy::AllowDeclarativeShadowRoots));
+          parserContentPolicy.contains(dom::ParserContentPolicy::AllowDeclarativeShadowRoots));
       }
 
       Ref<DocumentFragment> fragment = document.CreateDocumentFragment();
@@ -1646,6 +1646,13 @@ namespace krys::boo
     // We use a fake body element here to trick the HTML parser into using the InBody insertion mode.
     auto fakeBody = CreateHTMLElement(document, u8"body");
     return ParseHTMLIntoFragment(markup, *fakeBody);
+  }
+
+  utf8_string SerializeFragment(const Node &node, SerializedNodes root, List<Ref<Node>> *nodes,
+                                ResolveUrls resolveUrls, Maybe<SerializationSyntax> serializationSyntax,
+                                SerializeShadowRoots serializeShadowRoots) noexcept
+  {
+    return SerializeFragment(node, root, nodes, resolveUrls, serializationSyntax, serializeShadowRoots, {});
   }
 
   utf8_string SerializeFragment(const Node &node, SerializedNodes root, List<Ref<Node>> *nodes,

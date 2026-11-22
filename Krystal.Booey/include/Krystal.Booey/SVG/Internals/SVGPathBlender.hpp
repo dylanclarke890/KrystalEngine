@@ -22,11 +22,6 @@
 
 #include "Krystal.Booey/SVG/Internals/SVGPathConsumer.hpp"
 
-namespace krys::boo
-{
-  class SVGPathSource;
-}
-
 namespace krys::boo::svg
 {
   enum class FloatBlendMode : bool
@@ -38,6 +33,8 @@ namespace krys::boo::svg
 
 namespace krys::boo
 {
+  class SVGPathSource;
+
   /// @brief Interpolates or adds two SVG paths segment by segment, or checks whether they can be.
   class SVGPathBlender
   {

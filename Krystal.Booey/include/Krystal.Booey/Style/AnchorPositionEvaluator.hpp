@@ -36,17 +36,17 @@
 #include "Krystal.Booey/Style/Scope/ScopedName.hpp"
 #include "Krystal.Booey/Text/WritingMode.hpp"
 #include "Krystal.Core/Attributes.hpp"
-#include "Krystal.Core/Hash.hpp"
-#include "Krystal.Core/Types/CheckedPtr.hpp"
-#include "Krystal.Core/Types/HashMap.hpp"
-#include "Krystal.Core/Types/HashSet.hpp"
-#include "Krystal.Core/Types/List.hpp"
+#include "Krystal.Core/Containers/HashMap.hpp"
+#include "Krystal.Core/Containers/HashSet.hpp"
+#include "Krystal.Core/Containers/List.hpp"
+#include "Krystal.Core/Hashing/FastHash.hpp"
+#include "Krystal.Core/Memory/CheckedPtr.hpp"
+#include "Krystal.Core/Memory/RefPtr.hpp"
+#include "Krystal.Core/Memory/UniquePtr.hpp"
+#include "Krystal.Core/Memory/WeakPtr.hpp"
 #include "Krystal.Core/Types/Maybe.hpp"
 #include "Krystal.Core/Types/Pair.hpp"
-#include "Krystal.Core/Types/RefPtr.hpp"
-#include "Krystal.Core/Types/UniquePtr.hpp"
 #include "Krystal.Core/Types/Variant.hpp"
-#include "Krystal.Core/Types/WeakPtr.hpp"
 
 namespace krys::boo
 {
@@ -205,8 +205,7 @@ namespace krys::boo::style
   {
     KRYS_NODISCARD size_t operator()(const AnchorPositionedKey &key) const noexcept
     {
-      auto pseudoHash = key.second ? DefaultHash<PseudoElementIdentifier>::Hash(*key.second) : 0uz;
-      return UnsignedIntegerPairHash(std::hash<const boo::Element *> {}(key.first.get()), pseudoHash);
+      return CombineFastHashes(key.first.get(), key.second);
     }
   };
 

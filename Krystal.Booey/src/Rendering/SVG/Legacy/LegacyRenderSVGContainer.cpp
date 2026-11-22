@@ -312,7 +312,7 @@ namespace krys::boo
     }
 
     // Accessibility wants to return SVG containers, if appropriate.
-    if (request.GetType().Contains(HitTestRequest::Type::AccessibilityHitTest)
+    if (request.GetType().contains(HitTestRequest::Type::AccessibilityHitTest)
         && ObjectBoundingBox().Contains(localPoint))
     {
       UpdateHitTestResult(result, LayoutPoint(localPoint));

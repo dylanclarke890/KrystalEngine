@@ -1,6 +1,7 @@
 ﻿#include "Krystal.Booey/Rendering/PositionedLayoutConstraints.hpp"
 #include "catch2/catch_test_macros.hpp"
 #include "Krystal.Booey.Tests/Layout/LayoutTestUtils.hpp"
+#include "Krystal.Booey.Tests/Rendering/RenderTestUtils.hpp"
 #include "Krystal.Booey.Tests/Style/ResolverTestUtils.hpp"
 #include "Krystal.Booey/Rendering/RenderBlock.hpp"
 #include "Krystal.Booey/Rendering/RenderTreeAsText.hpp"
@@ -12,7 +13,7 @@ namespace krys::boo::tests
 
   namespace
   {
-    constexpr const char8 *Markup = u8R"html(<!DOCTYPE html><style>
+    constexpr const char8 *PositionedMarkup = u8R"html(<!DOCTYPE html><style>
       body { margin: 0 }
       #cb { position: relative; width: 400px; height: 300px; border: 5px solid; padding: 10px }
       #tl { position: absolute; top: 10px; left: 20px; width: 50px; height: 40px }
@@ -25,11 +26,6 @@ namespace krys::boo::tests
       #fixed { position: fixed; bottom: 0; right: 0; width: 10px; height: 10px }
     </style><body><div id=cb><div id=tl></div><div id=br></div><div id=stretch></div><div id=center></div><div style="height:20px"></div><div id=static></div><div id=shrink><div style="width:70px;height:5px"></div></div><div id=align></div></div><div id=fixed></div></body>)html";
 
-    KRYS_NODISCARD RenderBox &BoxOf(ResolverFixture &fixture, DOMStringView id) noexcept
-    {
-      return Downcast<RenderBox>(*fixture.ById(id).Renderer());
-    }
-
     KRYS_NODISCARD bool HasOutOfFlowBox(const RenderBlock &block, const RenderBox &box) noexcept
     {
       auto *boxes = block.OutOfFlowBoxes();
@@ -40,7 +36,7 @@ namespace krys::boo::tests
   TEST_CASE_METHOD(css::tests::ValueFixture, "PositionedLayoutConstraints: out-of-flow layout",
                    "[Rendering][PositionedLayoutConstraints]")
   {
-    ResolverFixture fixture {Markup};
+    ResolverFixture fixture {PositionedMarkup};
 
     // Insets, auto margins and alignment resolve against the containing block's padding box; boxes without
     // insets take their static position; boxes with auto widths shrink to fit; fixed boxes are contained by

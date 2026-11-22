@@ -29,11 +29,11 @@
 #include "Krystal.Booey/Graphics/Fonts/FontTaggedSettings.hpp"
 #include "Krystal.Booey/Text/TextFlags.hpp"
 #include "Krystal.Core/Attributes.hpp"
+#include "Krystal.Core/Containers/List.hpp"
+#include "Krystal.Core/Memory/RefPtr.hpp"
 #include "Krystal.Core/Numeric.hpp"
 #include "Krystal.Core/Strings/String.hpp"
-#include "Krystal.Core/Types/List.hpp"
 #include "Krystal.Core/Types/Maybe.hpp"
-#include "Krystal.Core/Types/RefPtr.hpp"
 #include "Krystal.Core/Utils/Tags.hpp"
 #include "Krystal.Text/FreeTypeFace.hpp"
 #include "Krystal.Text/HarfBuzz.hpp"
@@ -58,15 +58,12 @@ namespace krys::boo
     bool _syntheticBold {false};
     bool _syntheticOblique {false};
     bool _isColorBitmapFont {false};
-    bool _isHashTableDeletedValue {false};
     FontFeatureSettings _fontFaceFeatures;
     RefPtr<FontFeatureValues> _fontFeatureValues;
     uint32 _paletteIndex {0};
     List<FontPaletteValues::OverriddenColor> _paletteOverrides;
 
   public:
-    explicit FontPlatformData(HashTableDeletedValueTag) noexcept;
-
     FontPlatformData() noexcept;
 
     FontPlatformData(Ref<text::FreeTypeFace> face, float size, bool syntheticBold, bool syntheticOblique,
@@ -181,11 +178,6 @@ namespace krys::boo
     KRYS_NODISCARD size_t Hash() const noexcept;
 
     KRYS_NODISCARD bool operator==(const FontPlatformData &other) const noexcept;
-
-    KRYS_NODISCARD bool IsHashTableDeletedValue() const noexcept
-    {
-      return _isHashTableDeletedValue;
-    }
 
     KRYS_NODISCARD static bool IsEmoji() noexcept
     {

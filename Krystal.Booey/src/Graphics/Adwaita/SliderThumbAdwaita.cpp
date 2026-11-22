@@ -50,7 +50,7 @@ namespace krys::boo
     SRGBA<uint8> sliderThumbBackgroundDisabledColor;
     SRGBA<uint8> sliderThumbBorderColor;
 
-    if (style.States.Contains(ControlStyle::State::DarkAppearance))
+    if (style.States.contains(ControlStyle::State::DarkAppearance))
     {
       sliderThumbBackgroundColor = SliderThumbBackgroundColorDark;
       sliderThumbBackgroundHoveredColor = SliderThumbBackgroundHoveredColorDark;
@@ -71,8 +71,8 @@ namespace krys::boo
     fieldRect.Inflate(-SliderThumbBorderSize);
     path.AddEllipseInRect(fieldRect);
     graphicsContext.SetFillRule(WindRule::EvenOdd);
-    if (style.States.Contains(ControlStyle::State::Enabled)
-        && style.States.Contains(ControlStyle::State::Pressed))
+    if (style.States.contains(ControlStyle::State::Enabled)
+        && style.States.contains(ControlStyle::State::Pressed))
     {
       graphicsContext.SetFillColor(AccentColor(style));
     }
@@ -85,11 +85,11 @@ namespace krys::boo
 
     path.AddEllipseInRect(fieldRect);
     graphicsContext.SetFillRule(WindRule::NonZero);
-    if (!style.States.Contains(ControlStyle::State::Enabled))
+    if (!style.States.contains(ControlStyle::State::Enabled))
     {
       graphicsContext.SetFillColor(sliderThumbBackgroundDisabledColor);
     }
-    else if (style.States.Contains(ControlStyle::State::Hovered))
+    else if (style.States.contains(ControlStyle::State::Hovered))
     {
       graphicsContext.SetFillColor(sliderThumbBackgroundHoveredColor);
     }

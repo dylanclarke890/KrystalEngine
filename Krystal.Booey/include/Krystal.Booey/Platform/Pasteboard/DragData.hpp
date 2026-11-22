@@ -28,12 +28,12 @@
 #include "Krystal.Booey/Input/PlatformEvent.hpp"
 #include "Krystal.Booey/Page/Drag/DragActions.hpp"
 #include "Krystal.Core/Attributes.hpp"
+#include "Krystal.Core/Containers/EnumSet.hpp"
+#include "Krystal.Core/Containers/List.hpp"
 #include "Krystal.Core/Enum.hpp"
 #include "Krystal.Core/Geometry/Point.hpp"
 #include "Krystal.Core/Numeric.hpp"
 #include "Krystal.Core/Strings/String.hpp"
-#include "Krystal.Core/Types/EnumSet.hpp"
-#include "Krystal.Core/Types/List.hpp"
 
 namespace krys::boo
 {
@@ -46,12 +46,12 @@ namespace krys::boo
     HasAttachedSheet,
     IsCopyKeyDown,
   };
-}
 
-KRYS_DEFINE_CONTIGUOUS_ENUM_TRAITS(krys::boo::DragApplicationFlags, 4uz);
+  consteval DragApplicationFlags MaxEnumValue(DragApplicationFlags) noexcept
+  {
+    return DragApplicationFlags::IsCopyKeyDown;
+  }
 
-namespace krys::boo
-{
   /// @brief A drag over a page, as the host reports it: the data dragged, where the cursor is, and what the
   /// source allows a drop to do with it.
   /// @note The data dragged is the host's, which outlives the drag data.

@@ -53,7 +53,7 @@
 
 namespace krys::boo::style
 {
-  static_assert(PublicPseudoIDBits == AllPublicPseudoElementTypes.Size());
+  static_assert(PublicPseudoIDBits == AllPublicPseudoElementTypes.size());
   static_assert(!(static_cast<unsigned>(maxTextTransformValue) >> TextTransformBits));
 
   // Value zero is used to indicate no pseudo-element.
@@ -181,7 +181,7 @@ namespace krys::boo::style
     {
       auto &properties = const_cast<DataRef<CustomPropertyData> &>(data->CustomProperties);
       auto &otherProperties = otherData->CustomProperties;
-      if (properties.Ptr() == otherProperties.Ptr() || *properties != *otherProperties)
+      if (properties.get() == otherProperties.get() || *properties != *otherProperties)
       {
         return;
       }

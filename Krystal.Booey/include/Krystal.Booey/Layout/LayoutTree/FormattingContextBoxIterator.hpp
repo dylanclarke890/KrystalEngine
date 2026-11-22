@@ -53,7 +53,7 @@ namespace krys::boo::layout
 
     FormattingContextBoxIterator &operator++() noexcept
     {
-      if (Get().EstablishesFormattingContext())
+      if ((*this)->EstablishesFormattingContext())
       {
         TraverseNextSkippingChildren();
       }

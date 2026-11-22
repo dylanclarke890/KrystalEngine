@@ -27,17 +27,8 @@
 #include "Krystal.Booey/HTML/Elements/HTMLElement.hpp"
 #include "Krystal.Booey/HTML/Forms/FormAssociatedElement.hpp"
 #include "Krystal.Booey/Loader/ImageLoader.hpp"
-#include "Krystal.Core/Types/UniquePtr.hpp"
-#include "Krystal.Core/Types/WeakPtr.hpp"
-
-namespace krys::boo
-{
-  class CachedImage;
-  class HTMLMapElement;
-  class HTMLPictureElement;
-  class HTMLSourceElement;
-  class Image;
-}
+#include "Krystal.Core/Memory/UniquePtr.hpp"
+#include "Krystal.Core/Memory/WeakPtr.hpp"
 
 namespace krys::boo::html
 {
@@ -47,6 +38,12 @@ namespace krys::boo::html
 
 namespace krys::boo
 {
+  class CachedImage;
+  class HTMLMapElement;
+  class HTMLPictureElement;
+  class HTMLSourceElement;
+  class Image;
+
   /// @see https://html.spec.whatwg.org/#htmlimageelement
   // FIXME: decode(), the legacy Image()
   // constructor, and re-selecting the source when the media queries it depends on change.
@@ -70,14 +67,7 @@ namespace krys::boo
       return false;
     }
 
-    KRYS_NODISCARD bool CanStartSelection() const noexcept override
-    {
-      if (ShadowRoot())
-      {
-        return HTMLElement::CanStartSelection();
-      }
-      return false;
-    }
+    KRYS_NODISCARD bool CanStartSelection() const noexcept override;
 
     HTMLImageElement(Document &document) noexcept;
 

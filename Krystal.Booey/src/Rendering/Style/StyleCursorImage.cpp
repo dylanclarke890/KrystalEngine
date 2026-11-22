@@ -27,7 +27,7 @@
 #include "Krystal.Booey/CSS/Values/PrimitiveValue.hpp"
 #include "Krystal.Booey/CSS/Values/ValuePair.hpp"
 #include "Krystal.Booey/Rendering/Style/StyleImageSet.hpp"
-#include "Krystal.Core/Utils/PointerComparison.hpp"
+#include "Krystal.Core/Memory/PointerComparison.hpp"
 
 namespace krys::boo
 {

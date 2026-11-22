@@ -3,6 +3,7 @@
 #include "Krystal.Booey.Tests/CSS/ValueTestUtils.hpp"
 #include "Krystal.Booey.Tests/Loader/PageInFrameFixture.hpp"
 #include "Krystal.Booey.Tests/Loader/TestLoader.hpp"
+#include "Krystal.Booey.Tests/StringTestUtils.hpp"
 #include "Krystal.Booey/DOM/Events/Event.hpp"
 #include "Krystal.Booey/DOM/Events/EventListener.hpp"
 #include "Krystal.Booey/DOM/Nodes/HTMLDocument.hpp"
@@ -34,17 +35,6 @@ namespace krys::boo::tests
         return Downcast<HTMLImageElement>(ById(id));
       }
     };
-
-    KRYS_NODISCARD size_t Count(const utf8_string &text, utf8_stringview part) noexcept
-    {
-      size_t count = 0;
-      for (auto position = text.find(part); position != utf8_string::npos;
-           position = text.find(part, position + 1))
-      {
-        ++count;
-      }
-      return count;
-    }
 
     /// @brief Counts the `decode()` promises fulfilled, and keeps the messages of those rejected.
     struct DecodeResults

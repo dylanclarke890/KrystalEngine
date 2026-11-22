@@ -1,5 +1,6 @@
 ﻿#include "Krystal.Booey/DOM/Internals/TreeScopeOrderedMap.hpp"
 #include "catch2/catch_test_macros.hpp"
+#include "Krystal.Booey.Tests/DOM/DOMTestUtils.hpp"
 #include "Krystal.Booey/DOM/Collections/NodeList.hpp"
 #include "Krystal.Booey/DOM/Nodes/DocumentFragment.hpp"
 #include "Krystal.Booey/DOM/Nodes/HTMLDocument.hpp"
@@ -10,18 +11,11 @@
 
 namespace krys::boo::dom::tests
 {
+  using boo::tests::ParseDocument;
+
   namespace
   {
     using Strings = List<std::string>;
-
-    KRYS_NODISCARD Ref<HTMLDocument> Parse(utf8_string &&input) noexcept
-    {
-      auto document = CreateRef<HTMLDocument>();
-      auto parser = CreateRef<html::DocumentParser>(*document);
-      parser->InputStream().Append(krys::move(input), IsEOF::Yes);
-      parser->PumpTokenizer();
-      return document;
-    }
 
     /// @brief The ID, or else the class, of each element matching @p selectors.
     template <typename TRoot>
@@ -42,7 +36,7 @@ namespace krys::boo::dom::tests
       return names;
     }
 
-    KRYS_NODISCARD Ref<Element> Create(Document &document, DOMStringView id)
+    KRYS_NODISCARD Ref<Element> ElementWithId(Document &document, DOMStringView id)
     {
       auto element = document.CreateElement(u8"div").ReleaseValue();
       element->Id(DOMString(id));
@@ -52,7 +46,7 @@ namespace krys::boo::dom::tests
 
   TEST_CASE("TreeScopeOrderedMap: the first element with an ID in tree order", "[DOM][TreeScopeOrderedMap]")
   {
-    auto document = Parse(u8"<!DOCTYPE html><body><div id=a></div><div id=b></div>");
+    auto document = ParseDocument(u8"<!DOCTYPE html><body><div id=a></div><div id=b></div>");
     auto &body = *document->Body();
     auto a = document->GetElementById(u8"a");
     auto b = document->GetElementById(u8"b");
@@ -61,11 +55,11 @@ namespace krys::boo::dom::tests
 
     SECTION("an element that comes first takes over, and the next follows when it goes")
     {
-      auto second = Create(*document, u8"a");
+      auto second = ElementWithId(*document, u8"a");
       REQUIRE_FALSE(body.AppendChild(*second).HasException());
       CHECK(document->GetElementById(u8"a") == a);
 
-      auto first = Create(*document, u8"a");
+      auto first = ElementWithId(*document, u8"a");
       REQUIRE_FALSE(body.InsertBefore(*first, a.get()).HasException());
       CHECK(document->GetElementById(u8"a") == first);
 
@@ -98,8 +92,8 @@ namespace krys::boo::dom::tests
 
     SECTION("a subtree enters and leaves as one")
     {
-      auto parent = Create(*document, u8"parent");
-      auto child = Create(*document, u8"child");
+      auto parent = ElementWithId(*document, u8"parent");
+      auto child = ElementWithId(*document, u8"child");
       REQUIRE_FALSE(parent->AppendChild(*child).HasException());
       CHECK(document->GetElementById(u8"child") == nullptr);
 
@@ -118,7 +112,7 @@ namespace krys::boo::dom::tests
 
     SECTION("moving an element changes which is first")
     {
-      auto second = Create(*document, u8"a");
+      auto second = ElementWithId(*document, u8"a");
       REQUIRE_FALSE(body.AppendChild(*second).HasException());
       CHECK(document->GetElementById(u8"a") == a);
       REQUIRE_FALSE(body.MoveBefore(*second, a.get()).HasException());
@@ -128,7 +122,7 @@ namespace krys::boo::dom::tests
     SECTION("a fragment and an element's subtree aren't in the map")
     {
       auto fragment = document->CreateDocumentFragment();
-      auto inFragment = Create(*document, u8"f");
+      auto inFragment = ElementWithId(*document, u8"f");
       REQUIRE_FALSE(fragment->AppendChild(*inFragment).HasException());
       CHECK(fragment->GetElementById(u8"f") == inFragment);
       CHECK(document->GetElementById(u8"f") == nullptr);
@@ -144,14 +138,14 @@ namespace krys::boo::dom::tests
 
   TEST_CASE("TreeScopeOrderedMap: each shadow tree has its own IDs", "[DOM][TreeScopeOrderedMap]")
   {
-    auto document = Parse(u8"<!DOCTYPE html><body><div id=host></div><div id=outside></div>");
+    auto document = ParseDocument(u8"<!DOCTYPE html><body><div id=host></div><div id=outside></div>");
     auto host = document->GetElementById(u8"host");
     auto outside = document->GetElementById(u8"outside");
     REQUIRE(host);
     REQUIRE(outside);
     auto shadow = host->AttachShadow({.Mode = ShadowRootMode::Open}).ReleaseValue();
 
-    auto inside = Create(*document, u8"inside");
+    auto inside = ElementWithId(*document, u8"inside");
     REQUIRE_FALSE(shadow->AppendChild(*inside).HasException());
     CHECK(shadow->GetElementById(u8"inside") == inside);
     CHECK(document->GetElementById(u8"inside") == nullptr);
@@ -166,7 +160,7 @@ namespace krys::boo::dom::tests
 
       // A tree whose host isn't connected has IDs of its own too.
       REQUIRE_FALSE(document->Body()->RemoveChild(*host).HasException());
-      auto added = Create(*document, u8"added");
+      auto added = ElementWithId(*document, u8"added");
       REQUIRE_FALSE(shadow->AppendChild(*added).HasException());
       CHECK(shadow->GetElementById(u8"added") == added);
     }
@@ -192,11 +186,12 @@ namespace krys::boo::dom::tests
 
   TEST_CASE("SelectorDataList: finding elements by ID", "[DOM][TreeScopeOrderedMap][SelectorQuery]")
   {
-    auto document = Parse(u8"<!DOCTYPE html><body>"
-                          u8"<div id=a class=x><p id=b class=y></p><p class=in-a></p></div>"
-                          u8"<p id=c class=y></p><span class=after></span>"
-                          u8"<div id=empty-attr></div><div id='' class=blank></div>"
-                          u8"<p id=dup class=first-dup></p><div><p id=dup class=second-dup></p></div>");
+    auto document =
+      ParseDocument(u8"<!DOCTYPE html><body>"
+                    u8"<div id=a class=x><p id=b class=y></p><p class=in-a></p></div>"
+                    u8"<p id=c class=y></p><span class=after></span>"
+                    u8"<div id=empty-attr></div><div id='' class=blank></div>"
+                    u8"<p id=dup class=first-dup></p><div><p id=dup class=second-dup></p></div>");
     auto a = document->GetElementById(u8"a");
     REQUIRE(a);
 
@@ -300,7 +295,7 @@ namespace krys::boo::dom::tests
     SECTION("outside a tree scope, elements are still found")
     {
       auto fragment = document->CreateDocumentFragment();
-      auto inFragment = Create(*document, u8"f");
+      auto inFragment = ElementWithId(*document, u8"f");
       REQUIRE_FALSE(fragment->AppendChild(*inFragment).HasException());
       CHECK(Query(*fragment, u8"#f") == Strings {"f"});
 
@@ -313,7 +308,7 @@ namespace krys::boo::dom::tests
   TEST_CASE("SelectorDataList: IDs match without case in quirks mode",
             "[DOM][TreeScopeOrderedMap][SelectorQuery]")
   {
-    auto quirks = Parse(u8"<body><div id=Mixed><p class=y></p></div>");
+    auto quirks = ParseDocument(u8"<body><div id=Mixed><p class=y></p></div>");
     REQUIRE(quirks->InQuirksMode());
     CHECK(Query(*quirks, u8"#Mixed") == Strings {"Mixed"});
     CHECK(Query(*quirks, u8"#mixed") == Strings {"Mixed"});
@@ -323,7 +318,7 @@ namespace krys::boo::dom::tests
     CHECK(Query(*quirks, u8"[id=mixed]").empty());
     CHECK(quirks->GetElementById(u8"mixed") == nullptr);
 
-    auto noQuirks = Parse(u8"<!DOCTYPE html><body><div id=Mixed><p class=y></p></div>");
+    auto noQuirks = ParseDocument(u8"<!DOCTYPE html><body><div id=Mixed><p class=y></p></div>");
     CHECK(Query(*noQuirks, u8"#mixed").empty());
     CHECK(Query(*noQuirks, u8"#mixed .y").empty());
   }

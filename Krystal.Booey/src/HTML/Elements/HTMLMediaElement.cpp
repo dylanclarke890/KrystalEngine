@@ -30,7 +30,7 @@
 namespace krys::boo
 {
   HTMLMediaElement::HTMLMediaElement(Document &document, html::HTMLElementInterface interface) noexcept
-      : HTMLElement(document, interface, html::HTMLElementFlags::IsMediaElement)
+      : HTMLElement(document, interface, html::HTMLElementFlag::IsMediaElement)
   {
   }
 

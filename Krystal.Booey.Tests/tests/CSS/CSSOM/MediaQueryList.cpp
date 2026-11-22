@@ -2,6 +2,7 @@
 #include "catch2/catch_test_macros.hpp"
 #include "Krystal.Booey.Tests/CSS/MediaTestUtils.hpp"
 #include "Krystal.Booey.Tests/CSS/ValueTestUtils.hpp"
+#include "Krystal.Booey.Tests/DOM/DOMTestUtils.hpp"
 #include "Krystal.Booey/CSS/CSSOM/MediaQueryListEvent.hpp"
 #include "Krystal.Booey/CSS/Queries/MediaQueryMatcher.hpp"
 #include "Krystal.Booey/DOM/Events/EventListener.hpp"
@@ -13,17 +14,10 @@
 
 namespace krys::boo::css::tests
 {
+  using boo::tests::ParseDocument;
+
   namespace
   {
-    KRYS_NODISCARD Ref<HTMLDocument> Parse(utf8_string &&input) noexcept
-    {
-      auto document = CreateRef<HTMLDocument>();
-      auto parser = CreateRef<html::DocumentParser>(*document);
-      parser->InputStream().Append(krys::move(input), IsEOF::Yes);
-      parser->PumpTokenizer();
-      return document;
-    }
-
     /// @brief What a `change` event carried.
     struct ChangeRecord
     {
@@ -62,7 +56,7 @@ namespace krys::boo::css::tests
     /// @brief A parsed document, evaluated against an 800x600 screen view in a page on a 1920x1080 screen.
     struct MatchMediaFixture : ValueFixture
     {
-      Ref<HTMLDocument> Document {Parse(u8"<!DOCTYPE html><p>")};
+      Ref<HTMLDocument> Document {ParseDocument(u8"<!DOCTYPE html><p>")};
       MediaFrame Media {*Document};
       Ref<boo::Frame> Frame {ShareRef(Media.Frame())};
 

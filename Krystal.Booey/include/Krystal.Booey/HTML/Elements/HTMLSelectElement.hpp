@@ -29,14 +29,8 @@
 #include "Krystal.Booey/HTML/Elements/HTMLFormControlElement.hpp"
 #include "Krystal.Booey/HTML/Elements/HTMLOptionElement.hpp"
 #include "Krystal.Booey/HTML/Forms/TypeAhead.hpp"
+#include "Krystal.Core/Memory/WeakPtr.hpp"
 #include "Krystal.Core/Types/Variant.hpp"
-#include "Krystal.Core/Types/WeakPtr.hpp"
-
-namespace krys::boo
-{
-  class HTMLOptGroupElement;
-  class KeyboardEvent;
-}
 
 namespace krys::boo::dom
 {
@@ -50,6 +44,9 @@ namespace krys::boo::html
 
 namespace krys::boo
 {
+  class HTMLOptGroupElement;
+  class KeyboardEvent;
+
   /// @see https://html.spec.whatwg.org/#htmlselectelement
   class HTMLSelectElement : public HTMLFormControlElement, private html::TypeAheadDataSource
   {

@@ -26,7 +26,7 @@
 #pragma once
 
 #include "Krystal.Core/Attributes.hpp"
-#include "Krystal.Core/Hash.hpp"
+#include "Krystal.Core/Hashing/FastHash.hpp"
 #include "Krystal.Core/Numeric.hpp"
 #include "Krystal.Core/Strings/StringAtom.hpp"
 
@@ -60,21 +60,15 @@ namespace krys::boo
 namespace krys
 {
   template <>
-  struct DefaultHash<boo::FontPalette>
+  struct FastHash<boo::FontPalette>
   {
-    KRYS_NODISCARD static size_t Hash(const boo::FontPalette &palette) noexcept
+    KRYS_NODISCARD size_t operator()(const boo::FontPalette &palette) const noexcept
     {
       if (palette.PaletteType == boo::FontPalette::Type::Custom)
       {
-        return krys::Hash::Combine(static_cast<uint8>(palette.PaletteType),
-                                   std::hash<StringAtom> {}(palette.Identifier));
+        return krys::CombineFastHashes(static_cast<uint8>(palette.PaletteType), palette.Identifier);
       }
-      return DefaultHash<uint8>::Hash(static_cast<uint8>(palette.PaletteType));
-    }
-
-    KRYS_NODISCARD static bool Equal(const boo::FontPalette &a, const boo::FontPalette &b) noexcept
-    {
-      return a == b;
+      return FastHash<uint8> {}(static_cast<uint8>(palette.PaletteType));
     }
   };
 }

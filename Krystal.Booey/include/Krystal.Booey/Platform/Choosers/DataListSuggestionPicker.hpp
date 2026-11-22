@@ -25,7 +25,7 @@
 
 #pragma once
 
-#include "Krystal.Core/RefCounted.hpp"
+#include "Krystal.Core/Memory/RefCounted.hpp"
 #include "Krystal.Core/Strings/String.hpp"
 
 namespace krys::boo

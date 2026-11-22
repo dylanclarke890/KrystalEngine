@@ -1136,11 +1136,12 @@ void main()
     // New textures round up to 64 pixels, so slightly different nodes can reuse them.
     const uint32 roundedWidth = (width + 63u) / 64u * 64u;
     const uint32 roundedHeight = (height + 63u) / 64u * 64u;
-    auto texture = _device->CreateTexture({.Format = Format,
-                                           .Width = roundedWidth,
-                                           .Height = roundedHeight,
-                                           .Usage = TextureUsage::RenderTarget | TextureUsage::Sampled,
-                                           .DebugName = u8"Render2D.Filter"});
+    auto texture = _device->CreateTexture(
+      {.Format = Format,
+       .Width = roundedWidth,
+       .Height = roundedHeight,
+       .Usage = EnumSet<TextureUsage> {TextureUsage::RenderTarget, TextureUsage::Sampled},
+       .DebugName = u8"Render2D.Filter"});
     if (!texture)
     {
       KRYS_LOG_ERROR("Render2D: {}", texture.error());

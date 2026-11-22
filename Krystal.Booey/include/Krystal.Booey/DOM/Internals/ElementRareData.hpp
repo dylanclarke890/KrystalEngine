@@ -28,14 +28,14 @@
 #include "Krystal.Booey/Graphics/Geometry/LayoutUnit.hpp"
 #include "Krystal.Booey/HTML/CustomElement/CustomStateSet.hpp"
 #include "Krystal.Booey/Style/PseudoElementIdentifier.hpp"
+#include "Krystal.Core/Containers/EnumSet.hpp"
+#include "Krystal.Core/Containers/HashMap.hpp"
+#include "Krystal.Core/Containers/List.hpp"
 #include "Krystal.Core/Geometry/Point.hpp"
-#include "Krystal.Core/Types/EnumSet.hpp"
-#include "Krystal.Core/Types/HashMap.hpp"
-#include "Krystal.Core/Types/List.hpp"
+#include "Krystal.Core/Memory/RefPtr.hpp"
+#include "Krystal.Core/Memory/UniquePtr.hpp"
+#include "Krystal.Core/Memory/WeakPtr.hpp"
 #include "Krystal.Core/Types/Maybe.hpp"
-#include "Krystal.Core/Types/RefPtr.hpp"
-#include "Krystal.Core/Types/UniquePtr.hpp"
-#include "Krystal.Core/Types/WeakPtr.hpp"
 
 namespace krys::boo
 {
@@ -77,7 +77,7 @@ namespace krys::boo::dom
     {
       KRYS_NODISCARD size_t operator()(const Maybe<style::PseudoElementIdentifier> &identifier) const noexcept
       {
-        return identifier ? DefaultHash<style::PseudoElementIdentifier>::Hash(*identifier) + 1 : 0;
+        return identifier ? FastHash<style::PseudoElementIdentifier> {}(*identifier) + 1 : 0;
       }
     };
 
@@ -144,15 +144,9 @@ namespace krys::boo::dom
 
     void SetPopoverData(UniquePtr<PopoverData> &&popoverData) noexcept;
 
-    KRYS_NODISCARD Element *InvokedPopover() const noexcept
-    {
-      return _invokedPopover.get();
-    }
+    KRYS_NODISCARD Element *InvokedPopover() const noexcept;
 
-    void SetInvokedPopover(Element *element) noexcept
-    {
-      _invokedPopover = CreateWeakPtr(element);
-    }
+    void SetInvokedPopover(Element *element) noexcept;
 
     KRYS_NODISCARD ExplicitlySetAttrElementsMap &GetExplicitlySetAttrElementsMap() noexcept
     {

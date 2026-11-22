@@ -77,13 +77,13 @@ namespace krys::boo::style
         return false;
       }
 
-      if (a.NonInheritedData().MiscData.Ptr() != b.NonInheritedData().MiscData.Ptr()
+      if (a.NonInheritedData().MiscData.get() != b.NonInheritedData().MiscData.get()
           && a.NonInheritedData().MiscData->BoxShadow != b.NonInheritedData().MiscData->BoxShadow)
       {
         return true;
       }
 
-      if (a.NonInheritedData().BackgroundData.Ptr() != b.NonInheritedData().BackgroundData.Ptr())
+      if (a.NonInheritedData().BackgroundData.get() != b.NonInheritedData().BackgroundData.get())
       {
         auto aHasOutlineInVisualOverflow = a.HasOutlineInVisualOverflow();
         auto bHasOutlineInVisualOverflow = b.HasOutlineInVisualOverflow();
@@ -107,7 +107,7 @@ namespace krys::boo::style
       }
 
       if (&a.NonInheritedData() != &b.NonInheritedData()
-          && a.NonInheritedData().RareData.Ptr() != b.NonInheritedData().RareData.Ptr())
+          && a.NonInheritedData().RareData.get() != b.NonInheritedData().RareData.get())
       {
         if (a.NonInheritedData().RareData->TextDecorationStyle
               != b.NonInheritedData().RareData->TextDecorationStyle
@@ -235,7 +235,7 @@ namespace krys::boo::style
       return true;
     }
 
-    if (a.Transform.Ptr() != b.Transform.Ptr())
+    if (a.Transform.get() != b.Transform.get())
     {
       if (a.Transform->HasTransform() != b.Transform->HasTransform())
       {
@@ -474,7 +474,7 @@ namespace krys::boo::style
 
     if (&a.NonInheritedData() != &b.NonInheritedData())
     {
-      if (a.NonInheritedData().BoxData.Ptr() != b.NonInheritedData().BoxData.Ptr())
+      if (a.NonInheritedData().BoxData.get() != b.NonInheritedData().BoxData.get())
       {
         if (a.NonInheritedData().BoxData->Width != b.NonInheritedData().BoxData->Width
             || a.NonInheritedData().BoxData->MinWidth != b.NonInheritedData().BoxData->MinWidth
@@ -503,7 +503,7 @@ namespace krys::boo::style
         }
       }
 
-      if (a.NonInheritedData().SurroundData.Ptr() != b.NonInheritedData().SurroundData.Ptr())
+      if (a.NonInheritedData().SurroundData.get() != b.NonInheritedData().SurroundData.get())
       {
         if (a.NonInheritedData().SurroundData->Margin != b.NonInheritedData().SurroundData->Margin)
         {
@@ -555,14 +555,14 @@ namespace krys::boo::style
 
     if (&a.NonInheritedData() != &b.NonInheritedData())
     {
-      if (a.NonInheritedData().MiscData.Ptr() != b.NonInheritedData().MiscData.Ptr()
+      if (a.NonInheritedData().MiscData.get() != b.NonInheritedData().MiscData.get()
           && MiscDataChangeRequiresLayout(*a.NonInheritedData().MiscData, *b.NonInheritedData().MiscData,
                                           changedContextSensitiveProperties))
       {
         return true;
       }
 
-      if (a.NonInheritedData().RareData.Ptr() != b.NonInheritedData().RareData.Ptr()
+      if (a.NonInheritedData().RareData.get() != b.NonInheritedData().RareData.get()
           && RareDataChangeRequiresLayout(*a.NonInheritedData().RareData, *b.NonInheritedData().RareData,
                                           changedContextSensitiveProperties))
       {
@@ -765,7 +765,7 @@ namespace krys::boo::style
 
     if (&a.NonInheritedData() != &b.NonInheritedData())
     {
-      if (a.NonInheritedData().BoxData.Ptr() != b.NonInheritedData().BoxData.Ptr())
+      if (a.NonInheritedData().BoxData.get() != b.NonInheritedData().BoxData.get())
       {
         if (a.NonInheritedData().BoxData->UsedZIndex() != b.NonInheritedData().BoxData->UsedZIndex())
         {
@@ -775,7 +775,7 @@ namespace krys::boo::style
 
       if (a.Position() != PositionType::Static)
       {
-        if (a.NonInheritedData().RareData.Ptr() != b.NonInheritedData().RareData.Ptr())
+        if (a.NonInheritedData().RareData.get() != b.NonInheritedData().RareData.get())
         {
           if (a.NonInheritedData().RareData->Clip != b.NonInheritedData().RareData->Clip)
           {
@@ -785,7 +785,7 @@ namespace krys::boo::style
         }
       }
 
-      if (a.NonInheritedData().MiscData.Ptr() != b.NonInheritedData().MiscData.Ptr()
+      if (a.NonInheritedData().MiscData.get() != b.NonInheritedData().MiscData.get()
           && MiscDataChangeRequiresLayerRepaint(*a.NonInheritedData().MiscData,
                                                 *b.NonInheritedData().MiscData,
                                                 changedContextSensitiveProperties))
@@ -793,7 +793,7 @@ namespace krys::boo::style
         return true;
       }
 
-      if (a.NonInheritedData().RareData.Ptr() != b.NonInheritedData().RareData.Ptr()
+      if (a.NonInheritedData().RareData.get() != b.NonInheritedData().RareData.get()
           && RareDataChangeRequiresLayerRepaint(*a.NonInheritedData().RareData,
                                                 *b.NonInheritedData().RareData,
                                                 changedContextSensitiveProperties))
@@ -1084,7 +1084,7 @@ namespace krys::boo::style
     if (currentColorDiffers || &a.NonInheritedData() != &b.NonInheritedData())
     {
       if (currentColorDiffers
-          || a.NonInheritedData().BackgroundData.Ptr() != b.NonInheritedData().BackgroundData.Ptr())
+          || a.NonInheritedData().BackgroundData.get() != b.NonInheritedData().BackgroundData.get())
       {
         if (!IsEquivalentForPainting(*a.NonInheritedData().BackgroundData,
                                      *b.NonInheritedData().BackgroundData, currentColorDiffers))
@@ -1094,7 +1094,7 @@ namespace krys::boo::style
       }
 
       if (currentColorDiffers
-          || a.NonInheritedData().SurroundData.Ptr() != b.NonInheritedData().SurroundData.Ptr())
+          || a.NonInheritedData().SurroundData.get() != b.NonInheritedData().SurroundData.get())
       {
         if (!IsEquivalentForPainting(a.NonInheritedData().SurroundData->Border,
                                      b.NonInheritedData().SurroundData->Border, currentColorDiffers))
@@ -1106,14 +1106,14 @@ namespace krys::boo::style
 
     if (&a.NonInheritedData() != &b.NonInheritedData())
     {
-      if (a.NonInheritedData().MiscData.Ptr() != b.NonInheritedData().MiscData.Ptr()
+      if (a.NonInheritedData().MiscData.get() != b.NonInheritedData().MiscData.get()
           && MiscDataChangeRequiresRepaint(*a.NonInheritedData().MiscData, *b.NonInheritedData().MiscData,
                                            changedContextSensitiveProperties))
       {
         return true;
       }
 
-      if (a.NonInheritedData().RareData.Ptr() != b.NonInheritedData().RareData.Ptr()
+      if (a.NonInheritedData().RareData.get() != b.NonInheritedData().RareData.get()
           && RareDataChangeRequiresRepaint(*a.NonInheritedData().RareData, *b.NonInheritedData().RareData,
                                            changedContextSensitiveProperties))
       {
@@ -1182,7 +1182,7 @@ namespace krys::boo::style
     }
 
     if (&a.NonInheritedData() != &b.NonInheritedData()
-        && a.NonInheritedData().RareData.Ptr() != b.NonInheritedData().RareData.Ptr())
+        && a.NonInheritedData().RareData.get() != b.NonInheritedData().RareData.get())
     {
       if (a.UsedTransformStyle3D() != b.UsedTransformStyle3D()
           || a.NonInheritedData().RareData->BackfaceVisibility
@@ -1266,7 +1266,7 @@ namespace krys::boo::style
 
     if (isComposited && ChangeRequiresLayerRepaint(a, b, changedContextSensitiveProperties))
     {
-      return changedContextSensitiveProperties.Contains(DifferenceContextSensitiveProperty::ClipRect);
+      return changedContextSensitiveProperties.contains(DifferenceContextSensitiveProperty::ClipRect);
     }
 
     return false;
@@ -1278,7 +1278,7 @@ namespace krys::boo::style
 
     if (!colorDiffers
         && (&a.NonInheritedData() == &b.NonInheritedData()
-            || a.NonInheritedData().SurroundData.Ptr() == b.NonInheritedData().SurroundData.Ptr()
+            || a.NonInheritedData().SurroundData.get() == b.NonInheritedData().SurroundData.get()
             || a.NonInheritedData().SurroundData->Border == b.NonInheritedData().SurroundData->Border))
     {
       return true;

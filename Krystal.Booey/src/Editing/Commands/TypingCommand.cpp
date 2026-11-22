@@ -164,14 +164,14 @@ namespace krys::boo
                                TextCompositionType compositionType) noexcept
       : TextInsertionBaseCommand(document,
                                  EditActionForTypingCommand(commandType, granularity, compositionType,
-                                                            options.Contains(Option::IsAutocompletion))),
+                                                            options.contains(Option::IsAutocompletion))),
         _commandType(commandType), _textToInsert(textToInsert), _currentTextToInsert(textToInsert),
-        _selectInsertedText(options.Contains(Option::SelectInsertedText)),
-        _smartDelete(options.Contains(Option::SmartDelete)), _granularity(granularity),
-        _compositionType(compositionType), _shouldAddToKillRing(options.Contains(Option::AddsToKillRing)),
-        _isAutocompletion(options.Contains(Option::IsAutocompletion)),
-        _shouldRetainAutocorrectionIndicator(options.Contains(Option::RetainAutocorrectionIndicator)),
-        _shouldPreventSpellChecking(options.Contains(Option::PreventSpellChecking))
+        _selectInsertedText(options.contains(Option::SelectInsertedText)),
+        _smartDelete(options.contains(Option::SmartDelete)), _granularity(granularity),
+        _compositionType(compositionType), _shouldAddToKillRing(options.contains(Option::AddsToKillRing)),
+        _isAutocompletion(options.contains(Option::IsAutocompletion)),
+        _shouldRetainAutocorrectionIndicator(options.contains(Option::RetainAutocorrectionIndicator)),
+        _shouldPreventSpellChecking(options.contains(Option::PreventSpellChecking))
   {
     _currentTypingEditAction = EditingAction();
     UpdatePreservesTypingStyle(_commandType);
@@ -203,10 +203,10 @@ namespace krys::boo
     if (auto lastTypingCommand = LastTypingCommandIfStillOpenForTyping(document))
     {
       dom::EventQueueScope eventQueue;
-      lastTypingCommand->SetIsAutocompletion(options.Contains(Option::IsAutocompletion));
+      lastTypingCommand->SetIsAutocompletion(options.contains(Option::IsAutocompletion));
       lastTypingCommand->SetCompositionType(compositionType);
-      lastTypingCommand->SetShouldPreventSpellChecking(options.Contains(Option::PreventSpellChecking));
-      lastTypingCommand->DeleteSelection(options.Contains(Option::SmartDelete));
+      lastTypingCommand->SetShouldPreventSpellChecking(options.contains(Option::PreventSpellChecking));
+      lastTypingCommand->DeleteSelection(options.contains(Option::SmartDelete));
       return;
     }
 
@@ -222,10 +222,10 @@ namespace krys::boo
       {
         dom::EventQueueScope eventQueue;
         UpdateSelectionIfDifferentFromCurrentSelection(lastTypingCommand.get(), document);
-        lastTypingCommand->SetIsAutocompletion(options.Contains(Option::IsAutocompletion));
+        lastTypingCommand->SetIsAutocompletion(options.contains(Option::IsAutocompletion));
         lastTypingCommand->SetCompositionType(TextCompositionType::None);
-        lastTypingCommand->SetShouldPreventSpellChecking(options.Contains(Option::PreventSpellChecking));
-        lastTypingCommand->DeleteKeyPressed(granularity, options.Contains(Option::AddsToKillRing));
+        lastTypingCommand->SetShouldPreventSpellChecking(options.contains(Option::PreventSpellChecking));
+        lastTypingCommand->DeleteKeyPressed(granularity, options.contains(Option::AddsToKillRing));
         return;
       }
     }
@@ -243,10 +243,10 @@ namespace krys::boo
       {
         dom::EventQueueScope eventQueue;
         UpdateSelectionIfDifferentFromCurrentSelection(lastTypingCommand.get(), document);
-        lastTypingCommand->SetIsAutocompletion(options.Contains(Option::IsAutocompletion));
+        lastTypingCommand->SetIsAutocompletion(options.contains(Option::IsAutocompletion));
         lastTypingCommand->SetCompositionType(TextCompositionType::None);
-        lastTypingCommand->SetShouldPreventSpellChecking(options.Contains(Option::PreventSpellChecking));
-        lastTypingCommand->ForwardDeleteKeyPressed(granularity, options.Contains(Option::AddsToKillRing));
+        lastTypingCommand->SetShouldPreventSpellChecking(options.contains(Option::PreventSpellChecking));
+        lastTypingCommand->ForwardDeleteKeyPressed(granularity, options.contains(Option::AddsToKillRing));
         return;
       }
     }
@@ -300,14 +300,14 @@ namespace krys::boo
         lastTypingCommand->SetEndingSelection(selectionForInsertion);
       }
 
-      lastTypingCommand->SetIsAutocompletion(options.Contains(Option::IsAutocompletion));
+      lastTypingCommand->SetIsAutocompletion(options.contains(Option::IsAutocompletion));
       lastTypingCommand->SetCompositionType(compositionType);
       lastTypingCommand->SetShouldRetainAutocorrectionIndicator(
-        options.Contains(Option::RetainAutocorrectionIndicator));
-      lastTypingCommand->SetShouldPreventSpellChecking(options.Contains(Option::PreventSpellChecking));
+        options.contains(Option::RetainAutocorrectionIndicator));
+      lastTypingCommand->SetShouldPreventSpellChecking(options.contains(Option::PreventSpellChecking));
       lastTypingCommand->SetTriggeringEventIsUntrusted(triggeringEventIsUntrusted);
       lastTypingCommand->InsertTextAndNotifyAccessibility(newText,
-                                                          options.Contains(Option::SelectInsertedText));
+                                                          options.contains(Option::SelectInsertedText));
       return;
     }
 
@@ -322,10 +322,10 @@ namespace krys::boo
     if (auto lastTypingCommand = LastTypingCommandIfStillOpenForTyping(document))
     {
       dom::EventQueueScope eventQueue;
-      lastTypingCommand->SetIsAutocompletion(options.Contains(Option::IsAutocompletion));
+      lastTypingCommand->SetIsAutocompletion(options.contains(Option::IsAutocompletion));
       lastTypingCommand->SetCompositionType(TextCompositionType::None);
       lastTypingCommand->SetShouldRetainAutocorrectionIndicator(
-        options.Contains(Option::RetainAutocorrectionIndicator));
+        options.contains(Option::RetainAutocorrectionIndicator));
       lastTypingCommand->InsertLineBreakAndNotifyAccessibility();
       return;
     }
@@ -338,10 +338,10 @@ namespace krys::boo
     if (auto lastTypingCommand = LastTypingCommandIfStillOpenForTyping(document))
     {
       dom::EventQueueScope eventQueue;
-      lastTypingCommand->SetIsAutocompletion(options.Contains(Option::IsAutocompletion));
+      lastTypingCommand->SetIsAutocompletion(options.contains(Option::IsAutocompletion));
       lastTypingCommand->SetCompositionType(TextCompositionType::None);
       lastTypingCommand->SetShouldRetainAutocorrectionIndicator(
-        options.Contains(Option::RetainAutocorrectionIndicator));
+        options.contains(Option::RetainAutocorrectionIndicator));
       lastTypingCommand->InsertParagraphSeparatorAndNotifyAccessibility();
       return;
     }

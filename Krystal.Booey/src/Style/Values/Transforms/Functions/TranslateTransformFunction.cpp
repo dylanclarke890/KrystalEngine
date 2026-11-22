@@ -29,7 +29,7 @@
 #include "Krystal.Booey/Style/Values/Primitives/NumericTypesEvaluation.hpp"
 
 #include "Krystal.Booey/Graphics/Transforms/TranslateTransformOperation.hpp"
-#include "Krystal.Core/Utils/Move.hpp"
+#include "Krystal.Core/Move.hpp"
 
 namespace krys::boo::style
 {

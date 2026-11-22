@@ -1,9 +1,34 @@
-﻿#pragma once
+﻿/*
+ * Copyright (C) 2021-2023 Apple Inc. All rights reserved.
+ *
+ * Redistribution and use in source and binary forms, with or without
+ * modification, are permitted provided that the following conditions
+ * are met:
+ *
+ * 1.  Redistributions of source code must retain the above copyright
+ *     notice, this list of conditions and the following disclaimer.
+ * 2.  Redistributions in binary form must reproduce the above copyright
+ *     notice, this list of conditions and the following disclaimer in the
+ *     documentation and/or other materials provided with the distribution.
+ *
+ * THIS SOFTWARE IS PROVIDED BY APPLE AND ITS CONTRIBUTORS "AS IS" AND ANY
+ * EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE IMPLIED
+ * WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE ARE
+ * DISCLAIMED. IN NO EVENT SHALL APPLE OR ITS CONTRIBUTORS BE LIABLE FOR ANY
+ * DIRECT, INDIRECT, INCIDENTAL, SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES
+ * (INCLUDING, BUT NOT LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES;
+ * LOSS OF USE, DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND
+ * ON ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT
+ * (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF
+ * THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
+ */
+
+#pragma once
 
 #include "Krystal.Core/Assert.hpp"
 #include "Krystal.Core/Colour/AlphaPremultiplication.hpp"
 #include "Krystal.Core/Colour/ColourTypes.hpp"
-#include "Krystal.Core/Hash.hpp"
+#include "Krystal.Core/Hashing/FastHash.hpp"
 #include "Krystal.Core/Strings/String.hpp"
 #include "Krystal.Core/Types/Variant.hpp"
 #include "Krystal.Core/Visitor.hpp"
@@ -184,14 +209,11 @@ namespace krys
       ColourSpace;
     krys::AlphaPremultiplication AlphaPremultiplication;
   };
-}
 
-namespace krys
-{
   template <>
-  struct DefaultHash<krys::ColourInterpolationMethod>
+  struct FastHash<krys::ColourInterpolationMethod>
   {
-    KRYS_NODISCARD static size_t Hash(const krys::ColourInterpolationMethod &method) noexcept
+    KRYS_NODISCARD size_t operator()(const krys::ColourInterpolationMethod &method) const noexcept
     {
       return krys::SwitchOn(
         method.ColourSpace,
@@ -200,22 +222,16 @@ namespace krys
           if constexpr (MethodColourSpace::ColourType::Model::CoordinateSystem
                         == krys::ColourSpaceCoordinateSystem::CylindricalPolar)
           {
-            return krys::Hash::Combine(method.AlphaPremultiplication,
-                                       methodColorSpace.InterpolationColourSpace,
-                                       methodColorSpace.HueInterpolationMethod);
+            return krys::CombineFastHashes(method.AlphaPremultiplication,
+                                           methodColorSpace.InterpolationColourSpace,
+                                           methodColorSpace.HueInterpolationMethod);
           }
           else
           {
-            return krys::Hash::Combine(method.AlphaPremultiplication,
-                                       methodColorSpace.InterpolationColourSpace);
+            return krys::CombineFastHashes(method.AlphaPremultiplication,
+                                           methodColorSpace.InterpolationColourSpace);
           }
         });
-    }
-
-    KRYS_NODISCARD static bool Equal(const krys::ColourInterpolationMethod &a,
-                                     const krys::ColourInterpolationMethod &b) noexcept
-    {
-      return a == b;
     }
   };
 }

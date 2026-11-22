@@ -25,10 +25,10 @@ namespace krys::boo::style
     }
 
     // A missing third value is the same as the second.
-    auto word = ConvertCSSValueToStyle<HyphenateLimitEdge>(state, list->item(0));
-    auto before = list->size() > 1 ? ConvertCSSValueToStyle<HyphenateLimitEdge>(state, list->item(1))
+    auto word = ConvertCSSValueToStyle<HyphenateLimitEdge>(state, (*list)[0]);
+    auto before = list->size() > 1 ? ConvertCSSValueToStyle<HyphenateLimitEdge>(state, (*list)[1])
                                    : HyphenateLimitEdge {css::keywords::Auto {}};
-    auto after = list->size() > 2 ? ConvertCSSValueToStyle<HyphenateLimitEdge>(state, list->item(2)) : before;
+    auto after = list->size() > 2 ? ConvertCSSValueToStyle<HyphenateLimitEdge>(state, (*list)[2]) : before;
     return {word, before, after};
   }
 }

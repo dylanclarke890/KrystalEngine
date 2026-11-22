@@ -29,9 +29,9 @@
 #include "Krystal.Booey/Graphics/Fonts/FontPaletteValues.hpp"
 #include "Krystal.Booey/Graphics/Fonts/FontSelectionAlgorithm.hpp"
 #include "Krystal.Booey/Graphics/Fonts/FontTaggedSettings.hpp"
-#include "Krystal.Core/RefCounted.hpp"
-#include "Krystal.Core/Types/RefPtr.hpp"
-#include "Krystal.Core/Utils/Move.hpp"
+#include "Krystal.Core/Memory/RefCounted.hpp"
+#include "Krystal.Core/Memory/RefPtr.hpp"
+#include "Krystal.Core/Move.hpp"
 
 namespace krys::boo
 {
@@ -106,7 +106,7 @@ namespace krys::boo
                         RefPtr<FontFeatureValues> fontFeatureValues, float sizeAdjust) noexcept
         : _fontFaceCapabilities(fontFaceCapabilities)
     {
-      if (!fontFaceFeatures.isEmpty() || fontPaletteValues
+      if (!fontFaceFeatures.empty() || fontPaletteValues
           || (fontFeatureValues && !fontFeatureValues->IsEmpty()) || sizeAdjust != 1.0f)
       {
         _rareData = FontCreationContextRareData::Create(fontFaceFeatures, fontPaletteValues,

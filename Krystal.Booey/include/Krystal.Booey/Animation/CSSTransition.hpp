@@ -27,7 +27,7 @@
 
 #include "Krystal.Booey/Animation/StyleOriginatedAnimation.hpp"
 #include "Krystal.Booey/Style/Values/Transitions/Transition.hpp"
-#include "Krystal.Core/Types/UniquePtr.hpp"
+#include "Krystal.Core/Memory/UniquePtr.hpp"
 
 namespace krys::boo
 {

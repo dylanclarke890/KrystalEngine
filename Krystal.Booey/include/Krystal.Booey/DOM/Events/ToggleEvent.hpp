@@ -3,7 +3,7 @@
 #include "Krystal.Booey/DOM/Events/Event.hpp"
 #include "Krystal.Booey/DOM/Types/DOMString.hpp"
 #include "Krystal.Core/Attributes.hpp"
-#include "Krystal.Core/Types/RefPtr.hpp"
+#include "Krystal.Core/Memory/RefPtr.hpp"
 
 namespace krys::boo
 {
@@ -14,7 +14,8 @@ namespace krys::boo
   {
     DOMString OldState;
     DOMString NewState;
-    RefPtr<Element> Source;
+    /// @note A plain pointer: the event takes its own reference.
+    Element *Source {nullptr};
   };
 
   /// @brief Fired at a dialog, popover or details element as it opens or closes (`toggle`), or before

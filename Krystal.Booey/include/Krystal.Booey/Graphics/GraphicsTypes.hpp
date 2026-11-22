@@ -29,8 +29,8 @@
 #include "Krystal.Booey/Graphics/Paths/WindRule.hpp"
 #include "Krystal.Core/Colour/BlendMode.hpp"
 #include "Krystal.Core/Colour/GradientSpreadMethod.hpp"
+#include "Krystal.Core/Containers/EnumSet.hpp"
 #include "Krystal.Core/Enum.hpp"
-#include "Krystal.Core/Types/EnumSet.hpp"
 
 namespace krys
 {
@@ -141,12 +141,12 @@ namespace krys::boo
     Fill,
     Stroke,
   };
-}
 
-KRYS_DEFINE_CONTIGUOUS_ENUM_TRAITS(krys::boo::TextDrawingMode, 2uz);
+  consteval TextDrawingMode MaxEnumValue(TextDrawingMode) noexcept
+  {
+    return TextDrawingMode::Stroke;
+  }
 
-namespace krys::boo
-{
   using TextDrawingModeFlags = EnumSet<TextDrawingMode>;
 
   enum TextBaseline
@@ -180,10 +180,7 @@ namespace krys::boo
   /// @return False, leaving both as they are, if @p name is neither.
   bool ParseCompositeAndBlendOperator(utf8_stringview name, CompositeOperator &op,
                                       BlendMode &blendOp) noexcept;
-}
 
-namespace krys::boo
-{
   TextStream &operator<<(TextStream &ts, CompositeOperator op) noexcept;
 
   TextStream &operator<<(TextStream &ts, CompositeMode compositeMode) noexcept;

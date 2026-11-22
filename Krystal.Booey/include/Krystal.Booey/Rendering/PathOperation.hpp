@@ -36,7 +36,7 @@
 #include "Krystal.Booey/Style/Values/Motion/RayFunction.hpp"
 #include "Krystal.Booey/Style/Values/Primitives/Url.hpp"
 #include "Krystal.Booey/Style/Values/Shapes/BasicShape.hpp"
-#include "Krystal.Core/RefCounted.hpp"
+#include "Krystal.Core/Memory/RefCounted.hpp"
 #include "Krystal.Core/TypeCast.hpp"
 
 namespace krys::boo

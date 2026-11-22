@@ -22,9 +22,9 @@
 #include "Krystal.Booey/Rendering/SVG/SVGTextLayoutAttributes.hpp"
 #include "Krystal.Booey/Rendering/SVG/SVGTextMetricsBuilder.hpp"
 #include "Krystal.Booey/SVG/Elements/SVGTextPositioningElement.hpp"
+#include "Krystal.Core/Containers/List.hpp"
 #include "Krystal.Core/Macros.hpp"
-#include "Krystal.Core/Types/CheckedPtr.hpp"
-#include "Krystal.Core/Types/List.hpp"
+#include "Krystal.Core/Memory/CheckedPtr.hpp"
 
 namespace krys::boo
 {

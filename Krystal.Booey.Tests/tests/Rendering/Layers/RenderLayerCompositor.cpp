@@ -194,7 +194,7 @@ namespace krys::boo::tests
       {
         auto &animations = ById(id).AnimationsCreatedByMarkup(null);
         REQUIRE(animations.size() == 1);
-        auto *effect = animations.first()->GetKeyframeEffect();
+        auto *effect = animations.front()->GetKeyframeEffect();
         REQUIRE(effect);
         return *effect;
       }
@@ -380,7 +380,7 @@ namespace krys::boo::tests
     auto &scroller = fixture.LayerOf(u8"scroller");
     REQUIRE(scroller.IsComposited());
     CHECK(
-      fixture.Compositor().ReasonsForCompositing(scroller).Contains(CompositingReason::OverflowScrolling));
+      fixture.Compositor().ReasonsForCompositing(scroller).contains(CompositingReason::OverflowScrolling));
     CHECK(scroller.UsesCompositedScrolling());
     auto &backing = *scroller.Backing();
     REQUIRE(backing.HasScrollingLayer());
@@ -463,7 +463,7 @@ namespace krys::boo::tests
         u8"<div style='height:400px'></div>");
       auto &header = fixture.LayerOf(u8"header");
       REQUIRE(header.IsComposited());
-      CHECK(fixture.Compositor().ReasonsForCompositing(header).Contains(CompositingReason::PositionFixed));
+      CHECK(fixture.Compositor().ReasonsForCompositing(header).contains(CompositingReason::PositionFixed));
       auto &backing = *header.Backing();
       REQUIRE(backing.ViewportAnchorLayer());
 
@@ -507,13 +507,13 @@ namespace krys::boo::tests
       u8"<div style=height:400px></div>");
     auto &header = fixture.LayerOf(u8"header");
     REQUIRE(header.IsComposited());
-    CHECK(fixture.Compositor().ReasonsForCompositing(header).Contains(CompositingReason::PositionSticky));
+    CHECK(fixture.Compositor().ReasonsForCompositing(header).contains(CompositingReason::PositionSticky));
     REQUIRE(header.Backing()->ViewportAnchorLayer());
 
     // Stuck to the view, with no scrolling coordinator: it repaints as the view scrolls instead.
     CHECK_FALSE(fixture.Compositor()
                   .ReasonsForCompositing(fixture.LayerOf(u8"page-header"))
-                  .Contains(CompositingReason::PositionSticky));
+                  .contains(CompositingReason::PositionSticky));
 
     // Scrolling the box keeps the header at its top, without repainting it.
     auto &graphicsLayer = static_cast<CompositingTestLayer &>(*header.Backing()->GetGraphicsLayer());
@@ -562,7 +562,7 @@ namespace krys::boo::tests
     fixture.Frame->UpdateRendering();
     auto &layer = fixture.LayerOf(u8"canvas");
     REQUIRE(layer.IsComposited());
-    CHECK(fixture.Compositor().ReasonsForCompositing(layer).Contains(CompositingReason::Canvas));
+    CHECK(fixture.Compositor().ReasonsForCompositing(layer).contains(CompositingReason::Canvas));
     CHECK(fixture.GraphicsLayerOf(u8"canvas").Delegate == nullptr);
 
     // Its texture's delegate is the layer's contents, placed by object-fit, and nothing else is painted.

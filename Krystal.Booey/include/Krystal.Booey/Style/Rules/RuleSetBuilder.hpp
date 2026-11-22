@@ -25,10 +25,10 @@
 #include "Krystal.Booey/CSS/Queries/GenericMediaQueryTypes.hpp"
 #include "Krystal.Booey/CSS/Queries/MediaQuery.hpp"
 #include "Krystal.Booey/Style/Rules/RuleSet.hpp"
+#include "Krystal.Core/Containers/HashMap.hpp"
+#include "Krystal.Core/Containers/HashSet.hpp"
+#include "Krystal.Core/Containers/List.hpp"
 #include "Krystal.Core/Macros.hpp"
-#include "Krystal.Core/Types/HashMap.hpp"
-#include "Krystal.Core/Types/HashSet.hpp"
-#include "Krystal.Core/Types/List.hpp"
 
 namespace krys::boo::css
 {
@@ -57,12 +57,12 @@ namespace krys::boo::style
     {
       KRYS_NODISCARD size_t operator()(const css::CascadeLayerName &name) const noexcept
       {
-        size_t seed = name.size();
-        for (auto &segment : name)
+        size_t hash = FastHash<size_t> {}(name.size());
+        for (const auto &segment : name)
         {
-          seed ^= std::hash<CSSOMStringAtom> {}(segment) + 0x9E'37'79'B9 + (seed << 6) + (seed >> 2);
+          hash = CombineFastHashes(hash, segment);
         }
-        return seed;
+        return hash;
       }
     };
 
@@ -80,7 +80,7 @@ namespace krys::boo::style
       bool CollectDynamic {false};
       List<DynamicContext> DynamicContextStack;
       List<RuleSet::DynamicMediaQueryRules> DynamicMediaQueryRules;
-      css::mq::MediaQueryDynamicDependency AllDynamicDependencies {};
+      EnumSet<css::mq::MediaQueryDynamicDependency> AllDynamicDependencies {};
 
       KRYS_NODISCARD bool PushAndEvaluate(const css::mq::MediaQueryList &mediaQueries) noexcept;
 

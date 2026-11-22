@@ -25,7 +25,7 @@
 
 #include "Krystal.Booey/Layout/FormattingContexts/Grid/PlacedGridItem.hpp"
 #include "Krystal.Booey/Layout/FormattingContexts/Grid/UnplacedGridItem.hpp"
-#include "Krystal.Core/Utils/Move.hpp"
+#include "Krystal.Core/Move.hpp"
 
 namespace krys::boo::layout
 {

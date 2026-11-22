@@ -28,7 +28,7 @@ namespace krys::boo::css::tests
     }
 
     KRYS_NODISCARD UniquePtr<MutableSelector> WithArguments(UniquePtr<MutableSelector> selector,
-                                                            FixedVector<CSSOMStringAtom> arguments) noexcept
+                                                            FixedList<CSSOMStringAtom> arguments) noexcept
     {
       selector->SetArgumentList(krys::move(arguments));
       return selector;
@@ -37,9 +37,9 @@ namespace krys::boo::css::tests
 
   TEST_CASE("Selector(enum traits)", "[CSS][Selectors][Selector]")
   {
-    STATIC_CHECK(EnumTraits<SelectorMatch>::DistinctValues == 17uz);
-    STATIC_CHECK(EnumTraits<SelectorRelation>::DistinctValues == 8uz);
-    STATIC_CHECK(EnumTraits<PseudoElementType>::DistinctValues == 13uz);
+    STATIC_CHECK((ToUnderlying(MaxEnumValue(SelectorMatch {})) + 1uz) == 17uz);
+    STATIC_CHECK((ToUnderlying(MaxEnumValue(SelectorRelation {})) + 1uz) == 8uz);
+    STATIC_CHECK((ToUnderlying(MaxEnumValue(PseudoElementType {})) + 1uz) == 13uz);
     STATIC_CHECK(ToUnderlying(SelectorMatch::ForgivingUnknownNestContaining) == 16u);
     STATIC_CHECK(ToUnderlying(SelectorRelation::ShadowSlotted) == 7u);
   }
@@ -475,7 +475,6 @@ namespace krys::boo::css::tests
     };
     CHECK(withList(u8"p") == withList(u8"p"));
     CHECK(!(withList(u8"p") == withList(u8"q")));
-    CHECK(DefaultHash<SelectorList>::Hash(withList(u8"p"))
-          == DefaultHash<SelectorList>::Hash(withList(u8"p")));
+    CHECK(FastHash<SelectorList> {}(withList(u8"p")) == FastHash<SelectorList> {}(withList(u8"p")));
   }
 }

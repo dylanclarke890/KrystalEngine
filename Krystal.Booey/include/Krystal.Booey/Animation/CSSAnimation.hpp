@@ -29,8 +29,8 @@
 #include "Krystal.Booey/Animation/Timing/OptionalEffectTiming.hpp"
 #include "Krystal.Booey/Style/Scope/ScopedName.hpp"
 #include "Krystal.Booey/Style/Values/Animations/Animation.hpp"
+#include "Krystal.Core/Containers/EnumSet.hpp"
 #include "Krystal.Core/Enum.hpp"
-#include "Krystal.Core/Types/EnumSet.hpp"
 
 namespace krys::boo
 {
@@ -52,12 +52,12 @@ namespace krys::boo
     RangeStart,
     RangeEnd,
   };
-}
 
-KRYS_DEFINE_CONTIGUOUS_ENUM_TRAITS(krys::boo::CSSAnimationProperty, 13uz);
+  consteval CSSAnimationProperty MaxEnumValue(CSSAnimationProperty) noexcept
+  {
+    return CSSAnimationProperty::RangeEnd;
+  }
 
-namespace krys::boo
-{
   /// @brief An animation created by an element's `animation` properties from an `@keyframes` rule.
   /// @see https://drafts.csswg.org/css-animations-2/#cssanimation
   class CSSAnimation final : public StyleOriginatedAnimation

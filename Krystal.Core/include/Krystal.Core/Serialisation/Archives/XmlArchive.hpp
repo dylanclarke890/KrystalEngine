@@ -1,14 +1,14 @@
 ﻿#pragma once
 
+#include "Krystal.Core/Containers/Array.hpp"
+#include "Krystal.Core/Containers/List.hpp"
+#include "Krystal.Core/Containers/Span.hpp"
+#include "Krystal.Core/Containers/Stack.hpp"
 #include "Krystal.Core/IO/Streams/Stream.hpp"
 #include "Krystal.Core/Macros.hpp"
 #include "Krystal.Core/Serialisation/Archives/BaseArchive.hpp"
 #include "Krystal.Core/Serialisation/Builtins.hpp"
 #include "Krystal.Core/Serialisation/Concepts.hpp"
-#include "Krystal.Core/Types/Array.hpp"
-#include "Krystal.Core/Types/List.hpp"
-#include "Krystal.Core/Types/Span.hpp"
-#include "Krystal.Core/Types/Stack.hpp"
 #include "rapidxml/rapidxml.hpp"
 #include "rapidxml/rapidxml_print.hpp"
 #include <format>

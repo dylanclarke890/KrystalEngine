@@ -25,9 +25,9 @@
 
 #pragma once
 
+#include "Krystal.Core/Containers/EnumSet.hpp"
 #include "Krystal.Core/Enum.hpp"
 #include "Krystal.Core/Numeric.hpp"
-#include "Krystal.Core/Types/EnumSet.hpp"
 
 namespace krys::boo
 {
@@ -65,7 +65,10 @@ namespace krys::boo
     EntersSkippedContentRelevantToUser,
   };
 
+  consteval TextIteratorBehavior MaxEnumValue(TextIteratorBehavior) noexcept
+  {
+    return TextIteratorBehavior::EntersSkippedContentRelevantToUser;
+  }
+
   using TextIteratorBehaviors = EnumSet<TextIteratorBehavior>;
 }
-
-KRYS_DEFINE_CONTIGUOUS_ENUM_TRAITS(krys::boo::TextIteratorBehavior, 15u);

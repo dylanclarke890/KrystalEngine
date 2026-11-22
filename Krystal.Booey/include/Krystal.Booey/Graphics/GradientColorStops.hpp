@@ -27,7 +27,7 @@
 
 #include "Krystal.Booey/Graphics/GradientColorStop.hpp"
 #include "Krystal.Core/Assert.hpp"
-#include "Krystal.Core/Types/SmallList.hpp"
+#include "Krystal.Core/Containers/SmallList.hpp"
 #include <algorithm>
 
 namespace krys
@@ -141,9 +141,6 @@ namespace krys::boo
       return std::ranges::is_sorted(_stops, {}, &GradientColorStop::Offset);
     }
   };
-}
 
-namespace krys::boo
-{
   TextStream &operator<<(TextStream &ts, const GradientColorStops &stops) noexcept;
 }

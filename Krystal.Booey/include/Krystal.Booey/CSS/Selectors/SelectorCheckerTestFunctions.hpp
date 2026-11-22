@@ -30,7 +30,7 @@
 #include "Krystal.Booey/DOM/Types/DOMString.hpp"
 #include "Krystal.Booey/Text/WritingMode.hpp"
 #include "Krystal.Core/Attributes.hpp"
-#include "Krystal.Core/Types/FixedVector.hpp"
+#include "Krystal.Core/Containers/FixedList.hpp"
 
 namespace krys::boo
 {
@@ -86,7 +86,7 @@ namespace krys::boo::css
 
   /// @see https://drafts.csswg.org/selectors/#the-lang-pseudo
   KRYS_NODISCARD bool MatchesLangPseudoClass(const Element &element,
-                                             const FixedVector<PossiblyQuotedIdentifier> &langList) noexcept;
+                                             const FixedList<PossiblyQuotedIdentifier> &langList) noexcept;
 
   /// @see https://drafts.csswg.org/selectors/#the-dir-pseudo
   KRYS_NODISCARD bool MatchesDirPseudoClass(const Element &element, const CSSOMStringAtom &argument) noexcept;

@@ -1,7 +1,7 @@
 ﻿#pragma once
 
 #include "Krystal.Booey/Graphics/Images/PlatformImage.hpp"
-#include "Krystal.Core/CanMakeWeakPtr.hpp"
+#include "Krystal.Core/Memory/CanMakeWeakPtr.hpp"
 #include "Krystal.UI/Compositing/PlatformLayerDisplayDelegate.hpp"
 #include "Krystal.UI/EngineTexture.hpp"
 #include "Krystal.UI/TextureImage.hpp"

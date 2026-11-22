@@ -24,11 +24,10 @@
 
 #include "Krystal.Booey/DOM/Types/USVString.hpp"
 #include "Krystal.Booey/Graphics/Geometry/LayoutPoint.hpp"
-#include "Krystal.Booey/Graphics/Geometry/LayoutSize.hpp"
 #include "Krystal.Booey/Graphics/Paths/Path.hpp"
 #include "Krystal.Booey/HTML/Elements/HTMLElement.hpp"
 #include "Krystal.Booey/HTML/Mixins/UrlDecomposition.hpp"
-#include "Krystal.Core/Types/List.hpp"
+#include "Krystal.Core/Containers/List.hpp"
 #include "Krystal.Core/Types/Maybe.hpp"
 
 namespace krys::boo
@@ -59,6 +58,8 @@ namespace krys::boo
 
   public:
     HTMLAreaElement(Document &document) noexcept;
+
+    ~HTMLAreaElement() noexcept override;
 
     /// @brief Whether the area is the whole image (`shape=default`).
     KRYS_NODISCARD bool IsDefault() const noexcept

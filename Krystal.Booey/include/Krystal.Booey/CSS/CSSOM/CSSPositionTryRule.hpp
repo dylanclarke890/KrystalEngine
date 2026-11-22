@@ -27,13 +27,8 @@
 
 #include "Krystal.Booey/CSS/CSSOM/CSSRule.hpp"
 #include "Krystal.Core/Attributes.hpp"
+#include "Krystal.Core/Memory/RefPtr.hpp"
 #include "Krystal.Core/TypeCast.hpp"
-#include "Krystal.Core/Types/RefPtr.hpp"
-
-namespace krys::boo
-{
-  class CSSPositionTryDescriptors;
-}
 
 namespace krys::boo::css
 {
@@ -42,6 +37,8 @@ namespace krys::boo::css
 
 namespace krys::boo
 {
+  class CSSPositionTryDescriptors;
+
   /// @brief An `@position-try` rule, exposed to scripts.
   /// @see https://drafts.csswg.org/css-anchor-position/#interfaces
   class CSSPositionTryRule final : public CSSRule

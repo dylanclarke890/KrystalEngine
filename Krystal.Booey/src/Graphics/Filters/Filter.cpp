@@ -86,7 +86,7 @@ namespace krys::boo
   {
     _filterRenderingModes = SupportedFilterRenderingModes(preferredFilterRenderingModes);
     // There's no software rendering, so some mode the page prefers must be supported.
-    krys_debug_assert(!_filterRenderingModes.IsEmpty());
+    krys_debug_assert(!_filterRenderingModes.empty());
   }
 
   RefPtr<FilterImage> Filter::Apply(ImageBuffer *sourceImage, const RectF &sourceImageRect,

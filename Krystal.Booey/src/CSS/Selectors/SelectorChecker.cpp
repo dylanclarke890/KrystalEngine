@@ -578,7 +578,7 @@ namespace krys::boo::css
 
     if (requestedPseudoElement)
     {
-      return collectedPseudoElements.Contains(requestedPseudoElement->Type);
+      return collectedPseudoElements.contains(requestedPseudoElement->Type);
     }
 
     if (collectedPseudoElements)
@@ -708,7 +708,7 @@ namespace krys::boo::css
     if (relation != SelectorRelation::Compounding)
     {
       if (context.RequestedPseudoElement
-          && !collectedPseudoElements.Contains(context.RequestedPseudoElement->Type))
+          && !collectedPseudoElements.contains(context.RequestedPseudoElement->Type))
       {
         return MatchResult::Fails(MatchOutcome::SelectorFailsCompletely);
       }
@@ -828,7 +828,7 @@ namespace krys::boo::css
       case SelectorRelation::Compounding:
       {
         // a selector is invalid if something follows a pseudo-element
-        nextContext.HasSelectionPseudo = collectedPseudoElements.Contains(PseudoElementType::Selection);
+        nextContext.HasSelectionPseudo = collectedPseudoElements.contains(PseudoElementType::Selection);
 
         if ((context.IsMatchElement || checkingContext.ResolvingMode == Mode::CollectingRules)
             && collectedPseudoElements && !nextContext.HasSelectionPseudo)
@@ -1479,7 +1479,7 @@ namespace krys::boo::css
             return false;
           }
           const auto *levels = selector.IntegerList();
-          if (!levels || levels->isEmpty())
+          if (!levels || levels->empty())
           {
             return true;
           }

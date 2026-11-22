@@ -93,13 +93,11 @@ namespace krys::boo::tests
       alternates.ValuesRef().Ornaments = CSSOMString {u8"o"};
       CHECK_FALSE(alternates.IsNormal());
       CHECK(alternates != normal);
-      CHECK(DefaultHash<FontVariantAlternates>::Hash(alternates)
-            != DefaultHash<FontVariantAlternates>::Hash(normal));
+      CHECK(FastHash<FontVariantAlternates> {}(alternates) != FastHash<FontVariantAlternates> {}(normal));
 
       auto copy = alternates;
       CHECK(copy == alternates);
-      CHECK(DefaultHash<FontVariantAlternates>::Hash(copy)
-            == DefaultHash<FontVariantAlternates>::Hash(alternates));
+      CHECK(FastHash<FontVariantAlternates> {}(copy) == FastHash<FontVariantAlternates> {}(alternates));
     }
 
     SECTION("Expansion behaviour")

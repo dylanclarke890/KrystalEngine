@@ -23,7 +23,7 @@
 
 #pragma once
 
-#include "Krystal.Core/Types/CheckedPtr.hpp"
+#include "Krystal.Core/Memory/CheckedPtr.hpp"
 #include "Krystal.Text/Bidi.hpp"
 #include "Krystal.Text/BidiResolver.hpp"
 

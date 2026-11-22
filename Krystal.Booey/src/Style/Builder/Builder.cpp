@@ -74,8 +74,7 @@ namespace krys::boo::style
 
   size_t Builder::RollbackCascadeKeyHash::operator()(const RollbackCascadeKey &key) const noexcept
   {
-    return std::hash<uint64> {}((static_cast<uint64>(key.Origin) << 62)
-                                ^ (static_cast<uint64>(key.ScopeOrdinal) << 32) ^ key.CascadeLayerPriority);
+    return CombineFastHashes(key.Origin, key.ScopeOrdinal, key.CascadeLayerPriority);
   }
 
   Builder::Builder(RenderStyle &style, BuilderContext &&context, const MatchResult &matchResult,

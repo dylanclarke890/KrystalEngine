@@ -76,6 +76,7 @@
 #include "Krystal.Booey/DOM/Internals/ElementFactory.hpp"
 #include "Krystal.Booey/DOM/Internals/PopoverData.hpp"
 #include "Krystal.Booey/DOM/Internals/UserActionElementSet.hpp"
+#include "Krystal.Booey/DOM/Internals/VisibilityChangeClient.hpp"
 #include "Krystal.Booey/DOM/IntersectionObservers/IntersectionObserver.hpp"
 #include "Krystal.Booey/DOM/Iterators/ComposedTreeIterator.hpp"
 #include "Krystal.Booey/DOM/Iterators/SubtreeRanges.hpp"
@@ -91,6 +92,7 @@
 #include "Krystal.Booey/DOM/Nodes/ProcessingInstruction.hpp"
 #include "Krystal.Booey/DOM/Nodes/Text.hpp"
 #include "Krystal.Booey/DOM/Ranges/Range.hpp"
+#include "Krystal.Booey/DOM/Ranges/StaticRange.hpp"
 #include "Krystal.Booey/DOM/ResizeObservers/ResizeObserver.hpp"
 #include "Krystal.Booey/DOM/ResizeObservers/ResizeObserverEntry.hpp"
 #include "Krystal.Booey/DOM/Traversal/TreeWalker.hpp"
@@ -132,6 +134,7 @@
 #include "Krystal.Booey/HTML/Images/LazyLoadImageObserver.hpp"
 #include "Krystal.Booey/HTML/Parser/DocumentParser.hpp"
 #include "Krystal.Booey/HTML/Sanitizer/SanitizerAlgorithms.hpp"
+#include "Krystal.Booey/HTML/Sanitizer/SetHTMLOptions.hpp"
 #include "Krystal.Booey/HTML/Window.hpp"
 #include "Krystal.Booey/Infra/Namespaces.hpp"
 #include "Krystal.Booey/Infra/StringAlgorithms.hpp"
@@ -178,9 +181,9 @@
 #include "Krystal.Booey/SVG/SVGDocumentExtensions.hpp"
 #include "Krystal.Booey/Text/EncodingRegistry.hpp"
 #include "Krystal.Booey/XML/XMLDocumentParser.hpp"
+#include "Krystal.Core/Containers/HashSet.hpp"
 #include "Krystal.Core/Strings/ASCII.hpp"
 #include "Krystal.Core/Strings/StringBuilder.hpp"
-#include "Krystal.Core/Types/HashSet.hpp"
 #include "Krystal.Core/Utils/ScopeExit.hpp"
 #include "Krystal.Core/Utils/SetForScope.hpp"
 #include "Krystal.Core/Utils/Tags.hpp"
@@ -254,10 +257,10 @@ namespace krys::boo
 
   Document::Document(dom::DocumentFlags flags) noexcept : Document()
   {
-    SetDocumentFlag(flags);
+    _documentFlags.Add(flags);
 
     // An HTML document is a text/html one, however it's made.
-    if (HasDocumentFlag(dom::DocumentFlags::IsHTMLDocument))
+    if (_documentFlags.contains(dom::DocumentFlag::IsHTMLDocument))
     {
       _contentType = u8"text/html";
     }
@@ -266,7 +269,7 @@ namespace krys::boo
 #pragma region Document (DOM)
 
   Document::Document() noexcept
-      : ContainerNode(*this, dom::NodeType::DOCUMENT_NODE, dom::NodeFlags::IsContainerNode),
+      : ContainerNode(*this, dom::NodeType::DOCUMENT_NODE, dom::NodeFlag::IsContainerNode),
         DocumentOrShadowRoot(static_cast<ContainerNode &>(*this)), _url(net::AboutBlankUrl()), _baseUrl(_url),
         _settings(ShareRef(Settings::Default())),
         _userActionElements(CreateUnique<dom::UserActionElementSet>()),
@@ -276,7 +279,7 @@ namespace krys::boo
   {
     // Set this's origin to the origin of current global object's associated Document. (Skipped: documents
     // have no origin.)
-    SetNodeFlag(dom::NodeFlags::IsConnected);
+    _nodeFlags.Add(dom::NodeFlag::IsConnected);
     _styleScope = CreateUnique<style::Scope>(*this);
     _selection = CreateUnique<FrameSelection>(this);
     _editor = CreateUnique<boo::Editor>(*this);
@@ -371,7 +374,7 @@ namespace krys::boo
     // first.
     while (!_topLayerElements.empty())
     {
-      Ref<Element> element = _topLayerElements.last();
+      Ref<Element> element = _topLayerElements.back();
       element->RemoveFromTopLayer();
     }
     _openDialogs.clear();
@@ -585,7 +588,7 @@ namespace krys::boo
     bool subtree = false;
 
     // 3. Let registry be null.
-    RefPtr<html::CustomElementRegistry> registry = nullptr;
+    html::CustomElementRegistry *registry = nullptr;
 
     // 4. If options is a boolean, then set subtree to options.
     if (std::holds_alternative<bool>(options))
@@ -620,7 +623,7 @@ namespace krys::boo
     // 7. Return the result of cloning a node given node with document set to this, subtree set to subtree,
     // and
     //    fallbackRegistry set to registry.
-    return dom::NodeAlgorithms::CloneNode(node, this, subtree, nullptr, registry.get());
+    return dom::NodeAlgorithms::CloneNode(node, this, subtree, nullptr, registry);
   }
 
   ExceptionOr<Ref<Node>> Document::AdoptNode(Node &node) noexcept
@@ -850,6 +853,11 @@ namespace krys::boo
   }
 
   // https://html.spec.whatwg.org/#dom-parsehtmlunsafe
+  ExceptionOr<Ref<Document>> Document::ParseHTMLUnsafe(Document &context, DOMStringView markup) noexcept
+  {
+    return ParseHTMLUnsafe(context, markup, {});
+  }
+
   ExceptionOr<Ref<Document>> Document::ParseHTMLUnsafe(Document &context, DOMStringView markup,
                                                        html::ParseHTMLUnsafeOptions options) noexcept
   {
@@ -875,6 +883,11 @@ namespace krys::boo
   }
 
   // https://html.spec.whatwg.org/#dom-parsehtml
+  ExceptionOr<Ref<Document>> Document::ParseHTML(Document &context, DOMStringView html) noexcept
+  {
+    return ParseHTML(context, html, {});
+  }
+
   ExceptionOr<Ref<Document>> Document::ParseHTML(Document &context, DOMStringView html,
                                                  const html::SetHTMLOptions &options) noexcept
   {
@@ -2368,7 +2381,7 @@ namespace krys::boo
   dom::DidUpdateAnyContentRelevancy Document::UpdateRelevancyOfContentVisibilityElements(
     UpdateLayoutIfContentVisibilityChanged updateLayout) noexcept
   {
-    if (_contentRelevancyUpdate.IsEmpty() || !IsObservingContentVisibilityTargets())
+    if (_contentRelevancyUpdate.empty() || !IsObservingContentVisibilityTargets())
     {
       return dom::DidUpdateAnyContentRelevancy::No;
     }
@@ -2646,6 +2659,11 @@ namespace krys::boo
     }
   }
 
+  Element *Document::CSSTarget() const noexcept
+  {
+    return _cssTarget.get();
+  }
+
   void Document::SetCSSTarget(Element *newTarget) noexcept
   {
     if (_cssTarget.get() == newTarget)
@@ -2670,7 +2688,7 @@ namespace krys::boo
   void Document::AddTopLayerElement(Element &element) noexcept
   {
     krys_assert(&element.NodeDocument() == this && !element.IsInTopLayer());
-    KRYS_MAYBE_UNUSED auto result = _topLayerElements.add(ShareRef(element));
+    KRYS_MAYBE_UNUSED auto result = _topLayerElements.insert(ShareRef(element));
     krys_assert(result.second);
   }
 
@@ -2678,8 +2696,8 @@ namespace krys::boo
   {
     krys_assert(&element.NodeDocument() == this && element.IsInTopLayer());
     Ref<Element> protectedElement = ShareRef(element);
-    _topLayerPendingRemovals.remove(protectedElement);
-    KRYS_MAYBE_UNUSED bool didRemove = _topLayerElements.remove(protectedElement);
+    _topLayerPendingRemovals.erase(protectedElement);
+    KRYS_MAYBE_UNUSED bool didRemove = _topLayerElements.erase(protectedElement);
     krys_assert(didRemove);
   }
 
@@ -2692,7 +2710,7 @@ namespace krys::boo
   void Document::AddPendingTopLayerRemoval(Element &element) noexcept
   {
     krys_assert(&element.NodeDocument() == this && element.IsInTopLayer());
-    (void)_topLayerPendingRemovals.add(ShareRef(element));
+    (void)_topLayerPendingRemovals.insert(ShareRef(element));
   }
 
   void Document::ProcessTopLayerRemovals() noexcept
@@ -2728,12 +2746,12 @@ namespace krys::boo
   void Document::AddOpenDialog(HTMLDialogElement &dialog) noexcept
   {
     krys_debug_assert(!_openDialogs.contains(ShareRef(dialog)));
-    _openDialogs.add(ShareRef(dialog));
+    _openDialogs.insert(ShareRef(dialog));
   }
 
   void Document::RemoveOpenDialog(HTMLDialogElement &dialog) noexcept
   {
-    _openDialogs.remove(ShareRef(dialog));
+    _openDialogs.erase(ShareRef(dialog));
   }
 
   // https://html.spec.whatwg.org/#run-light-dismiss-activities
@@ -2846,7 +2864,7 @@ namespace krys::boo
       }
 
       // 6d. Let topmostDialog be the last element of document's open dialogs list.
-      Ref<HTMLDialogElement> topmostDialog = _openDialogs.last();
+      Ref<HTMLDialogElement> topmostDialog = _openDialogs.back();
 
       // 6e. If ancestor is topmostDialog, then return.
       if (ancestor.get() == topmostDialog.get())
@@ -2993,6 +3011,11 @@ namespace krys::boo
       // 8b. Run the hide popover algorithm given popover, focusPreviousElement, false, false, and null.
       (void)(*popover)->HidePopoverInternal(focusPreviousElement, dom::FireEvents::No, false, nullptr);
     }
+  }
+
+  HTMLElement *Document::HintStackParent() const noexcept
+  {
+    return _hintStackParent.get();
   }
 
   void Document::SetHintStackParent(HTMLElement *element) noexcept
@@ -4411,7 +4434,7 @@ namespace krys::boo
     bool oldIgnore = _ignorePendingStylesheets;
     auto restoreIgnorePendingStylesheets = MakeScopeExit([&] { _ignorePendingStylesheets = oldIgnore; });
 
-    if (layoutOptions.Contains(dom::LayoutOptions::IgnorePendingStylesheets))
+    if (layoutOptions.contains(dom::LayoutOptions::IgnorePendingStylesheets))
     {
       if (!HaveStylesheetsLoaded())
       {
@@ -4487,24 +4510,24 @@ namespace krys::boo
         };
 
         auto isSkippedContentStale = markRendererDirtyIfNeeded(*rootForLayout);
-        if (layoutOptions.Contains(dom::LayoutOptions::TreatContentVisibilityHiddenAsVisible))
+        if (layoutOptions.contains(dom::LayoutOptions::TreatContentVisibilityHiddenAsVisible))
         {
           for (auto &descendant : DescendantsOfType<RenderObject>(*rootForLayout))
           {
             isSkippedContentStale |= markRendererDirtyIfNeeded(descendant);
           }
         }
-        else if (layoutOptions.Contains(dom::LayoutOptions::TreatContentVisibilityAutoAsVisible)
-                 || layoutOptions.Contains(dom::LayoutOptions::TreatRevealedWhenFoundAsVisible))
+        else if (layoutOptions.contains(dom::LayoutOptions::TreatContentVisibilityAutoAsVisible)
+                 || layoutOptions.contains(dom::LayoutOptions::TreatRevealedWhenFoundAsVisible))
         {
           for (auto &descendant : DescendantsOfType<RenderObject>(*rootForLayout))
           {
             // FIXME: While 'c-v: auto' is used 'hidden' inside 'c-v: hidden' we could entirly skip hidden
             // subtrees here.
             auto shouldLayoutSkippedContent =
-              (layoutOptions.Contains(dom::LayoutOptions::TreatContentVisibilityAutoAsVisible)
+              (layoutOptions.contains(dom::LayoutOptions::TreatContentVisibilityAutoAsVisible)
                && descendant.Style().UsedContentVisibility() == ContentVisibility::Auto)
-              || (layoutOptions.Contains(dom::LayoutOptions::TreatRevealedWhenFoundAsVisible)
+              || (layoutOptions.contains(dom::LayoutOptions::TreatRevealedWhenFoundAsVisible)
                   && descendant.Style().AutoRevealsWhenFound());
 
             if (shouldLayoutSkippedContent)
@@ -4523,15 +4546,15 @@ namespace krys::boo
         {
           auto types = EnumSet<ContentVisibilityOverrideScope::OverrideType> {};
 
-          if (layoutOptions.Contains(dom::LayoutOptions::TreatContentVisibilityHiddenAsVisible))
+          if (layoutOptions.contains(dom::LayoutOptions::TreatContentVisibilityHiddenAsVisible))
           {
             types.Add(ContentVisibilityOverrideScope::OverrideType::Hidden);
           }
-          if (layoutOptions.Contains(dom::LayoutOptions::TreatContentVisibilityAutoAsVisible))
+          if (layoutOptions.contains(dom::LayoutOptions::TreatContentVisibilityAutoAsVisible))
           {
             types.Add(ContentVisibilityOverrideScope::OverrideType::Auto);
           }
-          if (layoutOptions.Contains(dom::LayoutOptions::TreatRevealedWhenFoundAsVisible))
+          if (layoutOptions.contains(dom::LayoutOptions::TreatRevealedWhenFoundAsVisible))
           {
             types.Add(ContentVisibilityOverrideScope::OverrideType::RevealedWhenFound);
           }
@@ -4551,7 +4574,7 @@ namespace krys::boo
 
       result = didRunLayout ? UpdateLayoutResult::ChangesDone : result;
 
-      if (layoutOptions.Contains(dom::LayoutOptions::UpdateCompositingLayers)
+      if (layoutOptions.contains(dom::LayoutOptions::UpdateCompositingLayers)
           && layoutContext.UpdateCompositingLayersAfterLayoutIfNeeded())
       {
         result = UpdateLayoutResult::ChangesDone;
@@ -4849,7 +4872,7 @@ namespace krys::boo
     return HasPendingStyleRecalc() && _needsFullStyleRebuild;
   }
 
-  const FixedVector<css::PropertyId> &Document::ExposedComputedCSSPropertyIds() noexcept
+  const FixedList<css::PropertyId> &Document::ExposedComputedCSSPropertyIds() noexcept
   {
     if (!_exposedComputedCSSPropertyIds.has_value())
     {
@@ -4955,7 +4978,7 @@ namespace krys::boo
         auto documentChanges = _initialContainingBlockStyle
                                  ? style::DetermineChanges(newStyle, *_initialContainingBlockStyle)
                                  : EnumSet<style::Change> {style::Change::Renderer};
-        if (!documentChanges.IsEmpty())
+        if (!documentChanges.empty())
         {
           _initialContainingBlockStyle = RenderStyle::ClonePtr(newStyle);
           // The used style may end up differing from the computed style due to propagation of properties from
@@ -5202,7 +5225,7 @@ namespace krys::boo
   {
     auto colorScheme = ResolvedColorScheme(style);
 
-    if (colorScheme.Contains(boo::ColorScheme::Dark) && !colorScheme.Contains(boo::ColorScheme::Light))
+    if (colorScheme.contains(boo::ColorScheme::Dark) && !colorScheme.contains(boo::ColorScheme::Light))
     {
       return true;
     }
@@ -5218,7 +5241,7 @@ namespace krys::boo
       return pageUsesDarkAppearance;
     }
 
-    if (colorScheme.Contains(boo::ColorScheme::Dark))
+    if (colorScheme.contains(boo::ColorScheme::Dark))
     {
       return pageUsesDarkAppearance;
     }
@@ -5228,14 +5251,14 @@ namespace krys::boo
 
   style::ColorOptions Document::StyleColorOptions(const RenderStyle *style) const noexcept
   {
-    auto options = style::ColorOptions::None;
+    auto options = style::ColorOptions {};
     if (GetSettings().UseSystemAppearance)
     {
-      options |= style::ColorOptions::UseSystemAppearance;
+      options |= style::ColorOption::UseSystemAppearance;
     }
     if (UseDarkAppearance(style))
     {
-      options |= style::ColorOptions::UseDarkAppearance;
+      options |= style::ColorOption::UseDarkAppearance;
     }
     return options;
   }
@@ -5306,7 +5329,7 @@ namespace krys::boo
                              });
 
     // If the value was just "only", that is synonymous for "only light".
-    if (colorScheme.IsEmpty() && !allowsTransformations)
+    if (colorScheme.empty() && !allowsTransformations)
     {
       colorScheme.Add(boo::ColorScheme::Light);
     }

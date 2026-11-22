@@ -2435,12 +2435,10 @@ class Term:
 
 class BuiltinSchema:
     class StringParameter:
-        def __init__(self, name, *, mappings: dict[str, str] | None = None, default=None, separator=", "):
+        def __init__(self, name, *, mappings: dict[str, str] | None = None, default=None):
             self.name = name
             self.mappings = mappings
             self.default = default
-            # Joins the mapped values of a parameter given several (e.g. " | " for a set of flags).
-            self.separator = separator
 
     class RangeParameter:
         def __init__(self, name):
@@ -2498,7 +2496,7 @@ class BuiltinSchema:
                                         f"'{parameter}' passed to <{self.entry.name.name}> does not match any of the supported mappings. Supported mappings are {', '.join(quote_iterable(descriptor.mappings.keys()))}."
                                     )
 
-                            self.parameter_map[descriptor.name] = descriptor.separator.join(
+                            self.parameter_map[descriptor.name] = ", ".join(
                                 map(lambda x: descriptor.mappings[x], parameter.value)
                             )
                         else:
@@ -2531,7 +2529,7 @@ class BuiltinSchema:
                     if descriptor.name in self.parameter_map:
                         self.results[descriptor.name] = self.parameter_map[descriptor.name]
                     elif descriptor.mappings and descriptor.default:
-                        self.results[descriptor.name] = descriptor.separator.join(
+                        self.results[descriptor.name] = ", ".join(
                             map(
                                 lambda x: descriptor.mappings[x],
                                 (descriptor.default if isinstance(descriptor.default, list) else [descriptor.default]),
@@ -2611,9 +2609,9 @@ ALLOWED_IMAGE_TYPES_MAPPINGS = {
     "generated": "AllowedImageType::GeneratedImage",
 }
 ALLOWED_URL_MODIFIER_MAPPINGS = {
-    "crossorigin": "AllowedUrlModifiers::CrossOrigin",
-    "integrity": "AllowedUrlModifiers::Integrity",
-    "referrerpolicy": "AllowedUrlModifiers::ReferrerPolicy",
+    "crossorigin": "AllowedUrlModifier::CrossOrigin",
+    "integrity": "AllowedUrlModifier::Integrity",
+    "referrerpolicy": "AllowedUrlModifier::ReferrerPolicy",
 }
 
 
@@ -2652,7 +2650,6 @@ class ReferenceTerm:
                 "allowed-types",
                 mappings=ALLOWED_COLOR_TYPES_MAPPINGS,
                 default=["absolute", "current", "system"],
-                separator=" | ",
             ),
         ),
         BuiltinSchema.Entry(
@@ -2661,7 +2658,6 @@ class ReferenceTerm:
                 "allowed-types",
                 mappings=ALLOWED_IMAGE_TYPES_MAPPINGS,
                 default=["url", "image-set", "generated"],
-                separator=" | ",
             ),
         ),
         BuiltinSchema.Entry("string"),
@@ -4781,8 +4777,8 @@ class TermGeneratorReferenceTerm(TermGenerator):
                 return f"ConsumeColor({range_string}, {state_string}, {{.AllowedColorTypes = {{}}}})"
             elif isinstance(builtin, BuiltinImageConsumer):  # type: ignore
                 if builtin.allowed_types:
-                    return f"ConsumeImage({range_string}, {state_string}, {builtin.allowed_types})"
-                return f"ConsumeImage({range_string}, {state_string}, AllowedImageType::None)"
+                    return f"ConsumeImage({range_string}, {state_string}, {{{builtin.allowed_types}}})"
+                return f"ConsumeImage({range_string}, {state_string}, {{}})"
             elif isinstance(builtin, BuiltinCustomIdentConsumer):  # type: ignore
                 if builtin.excluding:
                     return f"ConsumeCustomIdentExcluding({range_string}, {{{ ', '.join(ValueKeywordName(id).id for id in builtin.excluding)}}})"
@@ -7455,8 +7451,8 @@ class GeneratePropertyId:
                 headers=[
                     "Krystal.Booey/CSS/Types/CSSOMString.hpp",
                     "Krystal.Core/Base.hpp",
-                    "Krystal.Core/Types/Array.hpp",
-                    "Krystal.Core/Types/Span.hpp",
+                    "Krystal.Core/Containers/Array.hpp",
+                    "Krystal.Core/Containers/Span.hpp",
                 ],
             )
 
@@ -7468,30 +7464,11 @@ class GeneratePropertyId:
                 self._generate_property_id_hpp_property_constants(to=writer)
                 self._generate_property_id_hpp_property_settings(to=writer)
                 self._generate_property_id_hpp_declarations(to=writer)
-            writer.newline()
-
-            with writer.namespace(namespace="krys"):
-                writer.write_block("""\
-                  template<>
-                  struct DefaultHash<::krys::boo::css::PropertyId>
-                  {
-                    constexpr static bool IsSafeToCompareToEmptyOrDeleted = true;
-
-                    KRYS_NODISCARD constexpr static size_t Hash(::krys::boo::css::PropertyId id) noexcept
-                    {
-                      return IntegerHash<uint16>::Hash(static_cast<uint16>(id));
-                    }
-
-                    KRYS_NODISCARD constexpr static bool Equal(::krys::boo::css::PropertyId a, ::krys::boo::css::PropertyId b) noexcept
-                    {
-                      return a == b;
-                    }
-                  };""")
-            writer.newline()
-
-            writer.write(
-                f"KRYS_DEFINE_CONTIGUOUS_ENUM_TRAITS(::krys::boo::css::PropertyId, ::krys::boo::css::TotalPropertyIdValues);"
-            )
+                writer.newline()
+                writer.write("consteval PropertyId MaxEnumValue(PropertyId) noexcept")
+                writer.write("{")
+                writer.write("  return static_cast<PropertyId>(TotalPropertyIdValues - 1);")
+                writer.write("}")
             writer.newline()
 
             with writer.namespace(namespace="std"):
@@ -7937,7 +7914,7 @@ class GeneratePropertyId:
                     "Krystal.Booey/CSS/Values/ValueId.hpp",
                     "Krystal.Booey/Page/Settings.hpp",
                     "Krystal.Core/Strings/ASCII.hpp",
-                    "Krystal.Core/Types/SmallList.hpp",
+                    "Krystal.Core/Containers/SmallList.hpp",
                     "Krystal.Core/Strings/String.hpp",
                 ],
             )
@@ -8329,7 +8306,7 @@ class GeneratePropertyId:
                 with to.indent():
                     for i, expression in enumerate(rest):
                         to.write(f"| {expression}" + (";" if i == len(rest) - 1 else ""))
-                to.write(f"return DefaultHash<uint64>::Hash(bits);")
+                to.write(f"return FastHash<uint64> {{}}(bits);")
         to.newline()
 
     def _generate_valid_keywords_for_property(self, *, to: Writer):
@@ -8594,7 +8571,7 @@ class GeneratePropertyParsing:
                 headers=[
                     "Krystal.Booey/CSS/Properties/PropertyId.hpp",
                     "Krystal.Booey/CSS/Values/ValueId.hpp",
-                    "Krystal.Core/Types/RefPtr.hpp",
+                    "Krystal.Core/Memory/RefPtr.hpp",
                 ],
             )
 
@@ -8951,7 +8928,7 @@ class GeneratePropertyShorthandFunctions:
                 for_header="Krystal.Booey/CSS/Properties/PropertyShorthandFunctions.hpp",
                 headers=[
                     "Krystal.Booey/CSS/Properties/PropertyShorthand.hpp",
-                    "Krystal.Core/Types/Array.hpp",
+                    "Krystal.Core/Containers/Array.hpp",
                 ],
             )
 
@@ -9600,8 +9577,8 @@ class GenerateStyleInterpolationWrapperMap:
                 generator_name=GENERATOR_NAME,
                 headers=[
                     "Krystal.Booey/CSS/Properties/PropertyId.hpp",
-                    "Krystal.Core/Types/Array.hpp",
-                    "Krystal.Core/Threading/NeverDestroyed.hpp",
+                    "Krystal.Core/Containers/Array.hpp",
+                    "Krystal.Core/Memory/NeverDestroyed.hpp",
                 ],
             )
 
@@ -9618,7 +9595,7 @@ class GenerateStyleInterpolationWrapperMap:
                 for_header="Krystal.Booey/Style/Interpolation/InterpolationWrapperMap.hpp",
                 headers=[
                     "Krystal.Booey/CSS/Properties/PropertyShorthand.hpp",
-                    "Krystal.Core/Types/List.hpp",
+                    "Krystal.Core/Containers/List.hpp",
                 ],
             )
 
@@ -9647,7 +9624,7 @@ class GenerateStyleInterpolationWrapperMap:
               KRYS_NODISCARD static WrapperMap &Singleton() noexcept
               {
                 static NeverDestroyed<WrapperMap> map;
-                return map.get();
+                return *map;
               }
 
               /// @brief The wrapper of @p id, or null if it isn't animatable.
@@ -11470,7 +11447,7 @@ class GenerateStyleChangedAnimatablePropertiesGenerated:
                 child_value_getter = f"{child.name}"
 
                 # For "data" nodes, first check if both point to the same object.
-                to.write(f"if (a.{child_value_getter}.Ptr() != b.{child_value_getter}.Ptr())")
+                to.write(f"if (a.{child_value_getter}.get() != b.{child_value_getter}.get())")
                 with to.indent():
                     to.write(
                         f"{child_function_name}(*a.{child_value_getter}, *b.{child_value_getter}, changingProperties);"

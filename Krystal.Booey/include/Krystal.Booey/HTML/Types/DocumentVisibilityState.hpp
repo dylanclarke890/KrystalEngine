@@ -10,6 +10,9 @@ namespace krys::boo::html
     Visible,
     Hidden,
   };
-}
 
-KRYS_DEFINE_CONTIGUOUS_ENUM_TRAITS(krys::boo::html::DocumentVisibilityState, 2uz);
+  consteval DocumentVisibilityState MaxEnumValue(DocumentVisibilityState) noexcept
+  {
+    return DocumentVisibilityState::Hidden;
+  }
+}

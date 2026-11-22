@@ -26,22 +26,16 @@
 
 #pragma once
 
+#include "Krystal.Booey/Accessibility/AXObjectCache.hpp"
 #include "Krystal.Booey/DOM/Ranges/Position.hpp"
 #include "Krystal.Booey/DOM/Types/DOMString.hpp"
 #include "Krystal.Booey/Editing/Commands/EditCommand.hpp"
 #include "Krystal.Booey/Editing/Commands/UndoStep.hpp"
 #include "Krystal.Booey/Editing/Selection/VisiblePosition.hpp"
 #include "Krystal.Core/Attributes.hpp"
-#include "Krystal.Core/CanMakeWeakPtr.hpp"
-#include "Krystal.Core/Types/List.hpp"
+#include "Krystal.Core/Containers/List.hpp"
+#include "Krystal.Core/Memory/CanMakeWeakPtr.hpp"
 #include "Krystal.Core/Types/Maybe.hpp"
-
-namespace krys::boo
-{
-  class ContainerNode;
-  class Element;
-  class Text;
-}
 
 namespace krys::boo::dom
 {
@@ -51,7 +45,10 @@ namespace krys::boo::dom
 
 namespace krys::boo
 {
+  class ContainerNode;
   class EditingStyle;
+  class Element;
+  class Text;
 
   /// @brief A whitespace run rebalancing replaced in a text node. A no-break space is two bytes and a space
   /// one, so the run's length can change while its characters stay as many.

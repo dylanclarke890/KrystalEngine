@@ -58,7 +58,7 @@ namespace krys::boo::style
       {
         case css::ValueId::First: result.Value.Add(HangingPunctuationValue::First); break;
         case css::ValueId::ForceEnd:
-          if (result.Value.Contains(HangingPunctuationValue::AllowEnd))
+          if (result.Value.contains(HangingPunctuationValue::AllowEnd))
           {
             state.SetCurrentPropertyInvalidAtComputedValueTime();
             return css::keywords::None {};
@@ -66,7 +66,7 @@ namespace krys::boo::style
           result.Value.Add(HangingPunctuationValue::ForceEnd);
           break;
         case css::ValueId::AllowEnd:
-          if (result.Value.Contains(HangingPunctuationValue::ForceEnd))
+          if (result.Value.contains(HangingPunctuationValue::ForceEnd))
           {
             state.SetCurrentPropertyInvalidAtComputedValueTime();
             return css::keywords::None {};

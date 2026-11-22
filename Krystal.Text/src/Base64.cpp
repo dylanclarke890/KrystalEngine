@@ -45,7 +45,7 @@ namespace krys
       {
         ++equalsSignCount;
         // There should never be more than 2 padding characters.
-        if (options.Contains(Base64DecodeOption::ValidatePadding) && equalsSignCount > 2)
+        if (options.contains(Base64DecodeOption::ValidatePadding) && equalsSignCount > 2)
         {
           return null;
         }
@@ -62,7 +62,7 @@ namespace krys
         }
         destination.push_back(decoded);
       }
-      else if (!options.Contains(Base64DecodeOption::IgnoreWhitespace) || !text::IsASCIIWhitespace(c))
+      else if (!options.contains(Base64DecodeOption::IgnoreWhitespace) || !text::IsASCIIWhitespace(c))
       {
         return null;
       }
@@ -80,7 +80,7 @@ namespace krys
 
     // There should be no padding if the length is a multiple of 4. The decoded characters and the padding
     // are counted, rather than the input, so that ignored whitespace doesn't count.
-    if (options.Contains(Base64DecodeOption::ValidatePadding) && equalsSignCount
+    if (options.contains(Base64DecodeOption::ValidatePadding) && equalsSignCount
         && (outLength + equalsSignCount) % 4)
     {
       return null;

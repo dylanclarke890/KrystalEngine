@@ -1,4 +1,6 @@
 ﻿#include "catch2/catch_test_macros.hpp"
+#include "Krystal.Booey.Tests/DOM/DOMTestUtils.hpp"
+#include "Krystal.Booey.Tests/Input/InputTestUtils.hpp"
 #include "Krystal.Booey.Tests/Rendering/PaintTestUtils.hpp"
 #include "Krystal.Booey/DOM/Events/EventListener.hpp"
 #include "Krystal.Booey/DOM/Events/PointerEvent.hpp"
@@ -19,26 +21,13 @@ namespace krys::boo::tests
   {
     using Strings = List<std::string>;
 
-    KRYS_NODISCARD std::string Name(const EventTarget *target)
-    {
-      auto *node = DynamicDowncast<Node>(target);
-      auto *element = node ? DynamicDowncast<Element>(*node) : nullptr;
-      if (!element)
-      {
-        return node ? "document" : "null";
-      }
-      auto id = element->GetAttribute(u8"id").value_or(DOMString());
-      auto name = id.empty() ? element->LocalName().View() : DOMStringView(id);
-      return std::string(name.begin(), name.end());
-    }
-
     /// @brief Records the events it handles as `type:target`, with the pointer id after a pointer event's
     /// type (`pointerdown3`) and the lengths of a touch event's lists after its type (`touchstart[1,1,1]`).
-    struct Recorder : public EventListenerCallback
+    struct PointerRecorder : public EventListenerCallback
     {
       List<std::string> &Records;
 
-      explicit Recorder(List<std::string> &records) noexcept : Records(records)
+      explicit PointerRecorder(List<std::string> &records) noexcept : Records(records)
       {
       }
 
@@ -55,23 +44,7 @@ namespace krys::boo::tests
                   + std::to_string(touchEvent->TargetTouches()->Length()) + ","
                   + std::to_string(touchEvent->ChangedTouches()->Length()) + "]";
         }
-        Records.push_back(type + ":" + Name(event.Target().get()));
-      }
-    };
-
-    /// @brief Calls @p action when it handles an event.
-    template <typename TAction>
-    struct ActionListener : public EventListenerCallback
-    {
-      TAction Action;
-
-      explicit ActionListener(TAction action) noexcept : Action(krys::move(action))
-      {
-      }
-
-      void HandleEvent(Event &event) noexcept override
-      {
-        Action(event);
+        Records.push_back(type + ":" + TargetName(event.Target().get()));
       }
     };
 
@@ -87,7 +60,7 @@ namespace krys::boo::tests
       {
         (void)Document->UpdateLayout();
         // Capturing at the document sees the events that don't bubble too.
-        Ref<EventListenerCallback> recorder = CreateRef<Recorder>(Records);
+        Ref<EventListenerCallback> recorder = CreateRef<PointerRecorder>(Records);
         for (auto type :
              {u8"pointerover", u8"pointerout", u8"pointerenter", u8"pointerleave", u8"pointerdown",
               u8"pointermove", u8"pointerup", u8"pointercancel", u8"gotpointercapture",
@@ -139,7 +112,7 @@ namespace krys::boo::tests
       template <typename TAction>
       void On(EventTarget &target, utf8_stringview type, TAction action) noexcept
       {
-        Ref<EventListenerCallback> listener = CreateRef<ActionListener<TAction>>(krys::move(action));
+        Ref<EventListenerCallback> listener = CreateRef<FunctionListener>(krys::move(action));
         target.AddEventListener(DOMStringAtom(type), krys::move(listener), false);
       }
     };
@@ -367,7 +340,7 @@ namespace krys::boo::tests
       {
         ++calls;
       };
-      Ref<EventListenerCallback> listener = CreateRef<ActionListener<decltype(action)>>(action);
+      Ref<EventListenerCallback> listener = CreateRef<FunctionListener>(action);
       target.AddEventListener(DOMStringAtom(type), krys::move(listener), false);
     };
 

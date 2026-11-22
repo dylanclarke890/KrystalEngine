@@ -1,5 +1,6 @@
 ﻿#include "Krystal.Booey/CSS/Values/Shapes/PathFunction.hpp"
 #include "catch2/catch_test_macros.hpp"
+#include "Krystal.Booey.Tests/CSS/ValueTestUtils.hpp"
 #include "Krystal.Booey/CSS/Values/Primitives/NumericTypesComputedStyleDependencies.hpp"
 #include "Krystal.Booey/CSS/Values/Primitives/NumericTypesSerialisation.hpp"
 #include "Krystal.Booey/CSS/Values/Primitives/NumericTypesValueVisitation.hpp"
@@ -9,12 +10,6 @@ namespace krys::boo::css::tests
 {
   namespace
   {
-    template <typename T>
-    CSSOMString SerialiseForTest(const T &value)
-    {
-      return Serialise(DefaultSerialisationContext(), value);
-    }
-
     PathFunction MakePath(CSSOMStringView d, Maybe<FillRule> fillRule = {})
     {
       return PathFunction {Path {.FillRule = krys::move(fillRule), .Data = {SVGPathByteStream(d)}}};

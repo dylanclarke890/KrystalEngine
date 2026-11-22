@@ -748,7 +748,7 @@ namespace krys::boo::layout
     // applicable.
     HashMap<InlineLevelBox *, TextUtil::EnclosingAscentDescent> inlineBoxBoundsMap;
 
-    if (lineBoxContain.Contains(style::WebkitLineBoxContainValue::InlineBox))
+    if (lineBoxContain.contains(style::WebkitLineBoxContainValue::InlineBox))
     {
       for (auto &inlineLevelBox : lineBox.NonRootInlineLevelBoxes())
       {
@@ -764,7 +764,7 @@ namespace krys::boo::layout
       }
     }
 
-    if (lineBoxContain.Contains(style::WebkitLineBoxContainValue::Font))
+    if (lineBoxContain.contains(style::WebkitLineBoxContainValue::Font))
     {
       // Assign font based layout bounds to all inline boxes.
       auto ensureFontMetricsBasedHeight = [&](InlineLevelBox &inlineBox)
@@ -809,7 +809,7 @@ namespace krys::boo::layout
                                                        : TextUtil::ShouldUseSimpleGlyphOverflowCodePath::No);
     };
 
-    if (lineBoxContain.Contains(style::WebkitLineBoxContainValue::Glyphs))
+    if (lineBoxContain.contains(style::WebkitLineBoxContainValue::Glyphs))
     {
       // Compute text content (glyphs) hugging inline box layout bounds.
       for (auto &run : GetLineLayoutResult().Runs)
@@ -830,7 +830,7 @@ namespace krys::boo::layout
       }
     }
 
-    if (lineBoxContain.Contains(style::WebkitLineBoxContainValue::InitialLetter))
+    if (lineBoxContain.contains(style::WebkitLineBoxContainValue::InitialLetter))
     {
       // Initial letter contain is based on the font metrics cap geometry and we hug descent.
       auto &rootInlineBox = lineBox.RootInlineBox();
@@ -867,7 +867,7 @@ namespace krys::boo::layout
       // "line-box-container: block" The extended block progression dimension of the root inline box must fit
       // within the line box.
       auto mayShrinkLineBox = inlineBox->IsRootInlineBox()
-                                ? !lineBoxContain.Contains(style::WebkitLineBoxContainValue::Block)
+                                ? !lineBoxContain.contains(style::WebkitLineBoxContainValue::Block)
                                 : true;
       auto ascent = mayShrinkLineBox
                       ? enclosingAscentDescentForInlineBox.Ascent
@@ -1000,9 +1000,9 @@ namespace krys::boo::layout
     auto textBoxTrim = GetBlockLayoutState().GetTextBoxTrim();
     auto textBoxEdge = EffectiveTextBoxEdge(rootInlineBox, GetBlockLayoutState());
     auto shouldTrimBlockStartOfLineBox =
-      IsFirstFormattedLine() && textBoxTrim.Contains(BlockLayoutState::TextBoxTrimSide::Start);
+      IsFirstFormattedLine() && textBoxTrim.contains(BlockLayoutState::TextBoxTrimSide::Start);
     auto shouldTrimBlockEndOfLineBox =
-      IsLastLine() && textBoxTrim.Contains(BlockLayoutState::TextBoxTrimSide::End);
+      IsLastLine() && textBoxTrim.contains(BlockLayoutState::TextBoxTrimSide::End);
     if (!shouldTrimBlockStartOfLineBox && !shouldTrimBlockEndOfLineBox)
     {
       return lineBoxLogicalHeight;

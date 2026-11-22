@@ -44,7 +44,7 @@ namespace krys::boo::html
                                 style::PseudoClassChangeInvalidation::AnyValue);
     }
 
-    return _states.add(state).second;
+    return _states.insert(state).second;
   }
 
   bool CustomStateSet::Delete(const DOMStringAtom &state) noexcept
@@ -56,7 +56,7 @@ namespace krys::boo::html
                                 style::PseudoClassChangeInvalidation::AnyValue);
     }
 
-    return _states.remove(state);
+    return _states.erase(state) != 0;
   }
 
   void CustomStateSet::Clear() noexcept
@@ -79,5 +79,10 @@ namespace krys::boo::html
   size_t CustomStateSet::Size() const noexcept
   {
     return _states.size();
+  }
+
+  Ref<CustomStateSet> CustomStateSet::Create(Element &element) noexcept
+  {
+    return CreateRef<CustomStateSet>(element);
   }
 }

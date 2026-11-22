@@ -34,25 +34,17 @@
 #include "Krystal.Booey/Platform/Scrolling/ScrollAlignment.hpp"
 #include "Krystal.Booey/Platform/Scrolling/ScrollTypes.hpp"
 #include "Krystal.Core/Attributes.hpp"
+#include "Krystal.Core/Containers/EnumSet.hpp"
 #include "Krystal.Core/Enum.hpp"
 #include "Krystal.Core/Geometry/Rect.hpp"
 #include "Krystal.Core/Macros.hpp"
-#include "Krystal.Core/Types/EnumSet.hpp"
+#include "Krystal.Core/Memory/RefPtr.hpp"
+#include "Krystal.Core/Memory/UniquePtr.hpp"
 #include "Krystal.Core/Types/Maybe.hpp"
-#include "Krystal.Core/Types/RefPtr.hpp"
-#include "Krystal.Core/Types/UniquePtr.hpp"
 
 namespace krys::boo::css
 {
   class MutableStyleProperties;
-}
-
-namespace krys::boo
-{
-  class CharacterData;
-  class Document;
-  class Element;
-  class Node;
 }
 
 namespace krys::boo::dom
@@ -62,6 +54,18 @@ namespace krys::boo::dom
 
 namespace krys::boo
 {
+  class CharacterData;
+  class Color;
+  class Document;
+  class EditingStyle;
+  class Element;
+  class Frame;
+  class GraphicsContext;
+  class Node;
+  class RenderBlock;
+  class RenderStyle;
+  class RenderView;
+
   enum class UserTriggered : bool
   {
     No,
@@ -79,6 +83,11 @@ namespace krys::boo
     IsNotFocusedOrActive,
     TextPlaceholderIsShowing,
   };
+
+  consteval CaretVisibilitySuppressionReason MaxEnumValue(CaretVisibilitySuppressionReason) noexcept
+  {
+    return CaretVisibilitySuppressionReason::TextPlaceholderIsShowing;
+  }
 
   enum class RevealExtentOption : bool
   {
@@ -121,20 +130,11 @@ namespace krys::boo
     MaintainLiveRange,
     OnlyAllowForwardScrolling,
   };
-}
 
-KRYS_DEFINE_CONTIGUOUS_ENUM_TRAITS(krys::boo::FrameSelectionSetSelectionOption, 17uz);
-KRYS_DEFINE_CONTIGUOUS_ENUM_TRAITS(krys::boo::CaretVisibilitySuppressionReason, 2uz);
-
-namespace krys::boo
-{
-  class Color;
-  class EditingStyle;
-  class Frame;
-  class GraphicsContext;
-  class RenderBlock;
-  class RenderStyle;
-  class RenderView;
+  consteval FrameSelectionSetSelectionOption MaxEnumValue(FrameSelectionSetSelectionOption) noexcept
+  {
+    return FrameSelectionSetSelectionOption::OnlyAllowForwardScrolling;
+  }
 
   /// @brief A caret's rect, local to the block that paints it, and whether it's shown.
   class CaretBase

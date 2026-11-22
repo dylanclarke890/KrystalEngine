@@ -44,7 +44,7 @@ namespace krys::boo::dom::tests
     {
       auto result = DocumentAlgorithms::FlattenElementCreationOptions(u8"x-a", *document);
       REQUIRE_FALSE(result.HasException());
-      CHECK(result.Value().CustomElementRegistry.get() == global.get());
+      CHECK(result.Value().CustomElementRegistry == global.get());
       CHECK(result.Value().Is == null);
     }
 
@@ -53,20 +53,21 @@ namespace krys::boo::dom::tests
       auto result =
         DocumentAlgorithms::FlattenElementCreationOptions(ElementCreationOptions {.Is = u8"x-a"}, *document);
       REQUIRE_FALSE(result.HasException());
-      CHECK(result.Value().CustomElementRegistry.get() == global.get());
+      CHECK(result.Value().CustomElementRegistry == global.get());
       CHECK(result.Value().Is == u8"x-a");
     }
 
     SECTION("3b. a scoped registry, but not with an is value")
     {
       auto result = DocumentAlgorithms::FlattenElementCreationOptions(
-        ElementCreationOptions {.CustomElementRegistry = scoped}, *document);
+        ElementCreationOptions {.CustomElementRegistry = scoped.get()}, *document);
       REQUIRE_FALSE(result.HasException());
-      CHECK(result.Value().CustomElementRegistry.get() == scoped.get());
+      CHECK(result.Value().CustomElementRegistry == scoped.get());
 
-      CHECK(Throws(DocumentAlgorithms::FlattenElementCreationOptions(
-                     ElementCreationOptions {.CustomElementRegistry = scoped, .Is = u8"x-a"}, *document),
-                   ExceptionCode::NotSupportedError));
+      CHECK(
+        Throws(DocumentAlgorithms::FlattenElementCreationOptions(
+                 ElementCreationOptions {.CustomElementRegistry = scoped.get(), .Is = u8"x-a"}, *document),
+               ExceptionCode::NotSupportedError));
     }
 
     SECTION("3c. another document's global registry")
@@ -74,10 +75,10 @@ namespace krys::boo::dom::tests
       auto other = CreateRef<HTMLDocument>();
       auto otherGlobal = html::CustomElementRegistry::Create(*other);
       CHECK(Throws(DocumentAlgorithms::FlattenElementCreationOptions(
-                     ElementCreationOptions {.CustomElementRegistry = otherGlobal}, *document),
+                     ElementCreationOptions {.CustomElementRegistry = otherGlobal.get()}, *document),
                    ExceptionCode::NotSupportedError));
       CHECK_FALSE(DocumentAlgorithms::FlattenElementCreationOptions(
-                    ElementCreationOptions {.CustomElementRegistry = global}, *document)
+                    ElementCreationOptions {.CustomElementRegistry = global.get()}, *document)
                     .HasException());
     }
   }
@@ -101,11 +102,12 @@ namespace krys::boo::dom::tests
     CHECK(Throws(document->CreateElementNS(u8"urn:x", u8"1a"), ExceptionCode::InvalidCharacterError));
     CHECK(Throws(document->CreateElementNS(null, u8"p:a"), ExceptionCode::NamespaceError));
     CHECK(Throws(document->CreateElementNS(u8"urn:x", u8"xml:a"), ExceptionCode::NamespaceError));
-    CHECK(Throws(document->CreateElementNS(
-                   u8"urn:x", u8"a",
-                   ElementCreationOptions {
-                     .CustomElementRegistry = html::CustomElementRegistry::CreateScoped(), .Is = u8"x-a"}),
-                 ExceptionCode::NotSupportedError));
+    CHECK(
+      Throws(document->CreateElementNS(
+               u8"urn:x", u8"a",
+               ElementCreationOptions {
+                 .CustomElementRegistry = html::CustomElementRegistry::CreateScoped().get(), .Is = u8"x-a"}),
+             ExceptionCode::NotSupportedError));
   }
 
   TEST_CASE(
@@ -166,23 +168,23 @@ namespace krys::boo::dom::tests
       REQUIRE(withoutRegistry->CustomElementRegistry() == nullptr);
       REQUIRE_FALSE(DocumentAlgorithms::AdoptNode(*element, *document).HasException());
       REQUIRE_FALSE(DocumentAlgorithms::AdoptNode(*withoutRegistry, *document).HasException());
-      CHECK(element->CustomElementRegistry().get() == global.get());
-      CHECK(withoutRegistry->CustomElementRegistry().get() == global.get());
+      CHECK(element->CustomElementRegistry() == global.get());
+      CHECK(withoutRegistry->CustomElementRegistry() == global.get());
     }
 
     SECTION("3c.ii. a scoped registry is kept")
     {
       auto element =
-        oldDocument->CreateElement(u8"div", ElementCreationOptions {.CustomElementRegistry = scoped})
+        oldDocument->CreateElement(u8"div", ElementCreationOptions {.CustomElementRegistry = scoped.get()})
           .ReleaseValue();
       REQUIRE_FALSE(DocumentAlgorithms::AdoptNode(*element, *document).HasException());
-      CHECK(element->CustomElementRegistry().get() == scoped.get());
+      CHECK(element->CustomElementRegistry() == scoped.get());
     }
 
     SECTION("3c.ii.C. without a registry, under a parent with a scoped one, it stays without")
     {
       auto parent =
-        oldDocument->CreateElement(u8"div", ElementCreationOptions {.CustomElementRegistry = scoped})
+        oldDocument->CreateElement(u8"div", ElementCreationOptions {.CustomElementRegistry = scoped.get()})
           .ReleaseValue();
       auto child = CreateRef<TestElement>(*oldDocument);
       REQUIRE_FALSE(parent->AppendChild(*child).HasException());
@@ -196,22 +198,21 @@ namespace krys::boo::dom::tests
       auto child = CreateRef<TestElement>(*oldDocument);
       REQUIRE_FALSE(fragment->AppendChild(*child).HasException());
       REQUIRE_FALSE(DocumentAlgorithms::AdoptNode(*fragment, *document).HasException());
-      CHECK(child->CustomElementRegistry().get() == global.get());
+      CHECK(child->CustomElementRegistry() == global.get());
     }
 
     SECTION("3b. a shadow root with a global registry, or none it needn't keep")
     {
       auto host = oldDocument->CreateElement(u8"div").ReleaseValue();
       auto shadow = host->AttachShadow({}).ReleaseValue();
-      REQUIRE(
-        html::CustomElementAlgorithms::IsGlobalCustomElementRegistry(shadow->CustomElementRegistry().get()));
+      REQUIRE(html::CustomElementAlgorithms::IsGlobalCustomElementRegistry(shadow->CustomElementRegistry()));
       REQUIRE_FALSE(DocumentAlgorithms::AdoptNode(*host, *document).HasException());
-      CHECK(shadow->CustomElementRegistry().get() == global.get());
+      CHECK(shadow->CustomElementRegistry() == global.get());
 
       auto scopedHost = oldDocument->CreateElement(u8"div").ReleaseValue();
       auto scopedShadow = scopedHost->AttachShadow({.CustomElementRegistry = scoped.get()}).ReleaseValue();
       REQUIRE_FALSE(DocumentAlgorithms::AdoptNode(*scopedHost, *document).HasException());
-      CHECK(scopedShadow->CustomElementRegistry().get() == scoped.get());
+      CHECK(scopedShadow->CustomElementRegistry() == scoped.get());
     }
 
     SECTION("effective global custom element registry: a global registry, else null")

@@ -1,5 +1,6 @@
 ﻿#include "Krystal.Booey/DOM/Traversal/TreeWalker.hpp"
 #include "catch2/catch_test_macros.hpp"
+#include "Krystal.Booey.Tests/DOM/DOMTestUtils.hpp"
 #include "Krystal.Booey.Tests/DOM/TestElement.hpp"
 #include "Krystal.Booey/DOM/Nodes/Element.hpp"
 #include "Krystal.Booey/DOM/Nodes/HTMLDocument.hpp"
@@ -8,35 +9,14 @@
 
 namespace krys::boo::dom::tests
 {
-  namespace
-  {
-    struct CommonTestData
-    {
-      Ref<Document> Document;
-      Ref<TestElement> Node;
-
-      CommonTestData() : Document(CreateRef<HTMLDocument>()), Node(CreateRef<TestElement>(*Document))
-      {
-      }
-    };
-
-    class TextNodeFilter : public NodeFilter
-    {
-    public:
-      KRYS_NODISCARD ExceptionOr<FilterResult> AcceptNode(const Node &node) const noexcept override
-      {
-        return node.NodeType() == NodeType::TEXT_NODE ? FilterResult::FILTER_ACCEPT
-                                                      : FilterResult::FILTER_REJECT;
-      }
-    };
-  }
+  using boo::tests::TextNodeFilter;
 
   TEST_CASE(
     "TreeWalker.root and currentNode: its root, where it starts",
     "[DOM][TreeWalker][dom:interface-treewalker][dom:dom-treewalker-root][dom:dom-treewalker-currentnode]")
   {
-    CommonTestData data;
-    auto treeWalker = data.Document->CreateTreeWalker(*data.Node, WhatToShow::SHOW_ALL, nullptr);
+    TestElementFixture data;
+    auto treeWalker = data.Document->CreateTreeWalker(*data.Node, ShowAll, nullptr);
     REQUIRE(&treeWalker->Root() == data.Node);
     REQUIRE(&treeWalker->CurrentNode() == data.Node);
   }
@@ -46,14 +26,14 @@ namespace krys::boo::dom::tests
             "treewalker-nextsibling]"
             "[dom:dom-treewalker-previoussibling][dom:dom-treewalker-parentnode]")
   {
-    CommonTestData data;
+    TestElementFixture data;
     auto child1 = CreateRef<TestElement>(*data.Document);
     auto child2 = CreateRef<TestElement>(*data.Document);
 
     REQUIRE_FALSE(data.Node->AppendChild(*child1).HasException());
     REQUIRE_FALSE(data.Node->AppendChild(*child2).HasException());
 
-    auto treeWalker = data.Document->CreateTreeWalker(*data.Node, WhatToShow::SHOW_ALL, nullptr);
+    auto treeWalker = data.Document->CreateTreeWalker(*data.Node, ShowAll, nullptr);
     REQUIRE(&treeWalker->CurrentNode() == data.Node);
 
     auto firstChild = treeWalker->FirstChild();
@@ -86,14 +66,14 @@ namespace krys::boo::dom::tests
             "[DOM][TreeWalker][dom:dom-treewalker-filter][dom:concept-traverse-children][dom:concept-"
             "traverse-siblings]")
   {
-    CommonTestData data;
+    TestElementFixture data;
 
     auto textNode = CreateRef<krys::boo::Text>(*data.Document, u8"Hello, World!");
 
     REQUIRE_FALSE(data.Node->AppendChild(*textNode).HasException());
 
     auto filter = CreateRef<TextNodeFilter>();
-    auto treeWalker = data.Document->CreateTreeWalker(*data.Node, WhatToShow::SHOW_ALL, filter);
+    auto treeWalker = data.Document->CreateTreeWalker(*data.Node, ShowAll, filter);
     CHECK(treeWalker->Filter() == filter.get());
 
     auto firstChild = treeWalker->FirstChild();
@@ -110,7 +90,7 @@ namespace krys::boo::dom::tests
   TEST_CASE("TreeWalker traversal: only nodes its whatToShow shows are returned",
             "[DOM][TreeWalker][dom:dom-treewalker-whattoshow][dom:concept-traverse-children]")
   {
-    CommonTestData data;
+    TestElementFixture data;
 
     auto elementNode = CreateRef<TestElement>(*data.Document);
     auto textNode = CreateRef<krys::boo::Text>(*data.Document, u8"Hello, World!");
@@ -118,8 +98,8 @@ namespace krys::boo::dom::tests
     REQUIRE_FALSE(data.Node->AppendChild(*elementNode).HasException());
     REQUIRE_FALSE(data.Node->AppendChild(*textNode).HasException());
 
-    auto treeWalker = data.Document->CreateTreeWalker(*data.Node, WhatToShow::SHOW_ELEMENT, nullptr);
-    CHECK(treeWalker->WhatToShow() == WhatToShow::SHOW_ELEMENT);
+    auto treeWalker = data.Document->CreateTreeWalker(*data.Node, WhatToShowFlag::SHOW_ELEMENT, nullptr);
+    CHECK(treeWalker->WhatToShow() == WhatToShowFlag::SHOW_ELEMENT);
 
     auto firstChild = treeWalker->FirstChild();
     REQUIRE(firstChild.HasValue());
@@ -181,7 +161,7 @@ namespace krys::boo::dom::tests
 
     Ref<TreeWalker> CreateWalker(WalkTestData &data, Node &root, Func<FilterResult(const Node &)> function)
     {
-      return data.Document->CreateTreeWalker(root, WhatToShow::SHOW_ALL,
+      return data.Document->CreateTreeWalker(root, ShowAll,
                                              CreateRefPtr<FunctionNodeFilter>(krys::move(function)));
     }
   }

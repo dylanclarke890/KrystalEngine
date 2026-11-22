@@ -27,7 +27,7 @@
 
 #include "Krystal.Booey/CSS/Values/Aggregates.hpp"
 #include "Krystal.Booey/Style/Values/Primitives/NumericTypes.hpp"
-#include "Krystal.Core/Types/UniquePtr.hpp"
+#include "Krystal.Core/Memory/UniquePtr.hpp"
 
 namespace krys::boo::css
 {

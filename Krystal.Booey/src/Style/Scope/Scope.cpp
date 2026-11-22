@@ -56,8 +56,8 @@
 #include "Krystal.Booey/Style/Styleable.hpp"
 #include "Krystal.Booey/SVG/Elements/SVGStyleElement.hpp"
 #include "Krystal.Core/Assert.hpp"
-#include "Krystal.Core/Hash.hpp"
-#include "Krystal.Core/Utils/Move.hpp"
+#include "Krystal.Core/Hashing/FastHash.hpp"
+#include "Krystal.Core/Move.hpp"
 #include <algorithm>
 #include <utility>
 
@@ -147,10 +147,10 @@ namespace krys::boo::style
 
   size_t Scope::ResolverSharingKeyHash::operator()(const ResolverSharingKey &key) const noexcept
   {
-    size_t seed = Hash::Combine(std::get<1>(key), std::get<2>(key));
+    size_t seed = CombineFastHashes(std::get<1>(key), std::get<2>(key));
     for (auto &contents : std::get<0>(key))
     {
-      seed = Hash::Combine(seed, contents.get());
+      seed = CombineFastHashes(seed, contents.get());
     }
     return seed;
   }

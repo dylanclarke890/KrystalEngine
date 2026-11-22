@@ -1,6 +1,6 @@
 ﻿#include "Krystal.Core/Threading/TaskInbox.hpp"
 #include "Krystal.Core/Assert.hpp"
-#include "Krystal.Core/Utils/Move.hpp"
+#include "Krystal.Core/Move.hpp"
 
 namespace krys
 {

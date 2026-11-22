@@ -27,9 +27,9 @@
 #include "Krystal.Core/Attributes.hpp"
 #include "Krystal.Core/Geometry/TransformationMatrix.hpp"
 #include "Krystal.Core/Macros.hpp"
+#include "Krystal.Core/Memory/UniquePtr.hpp"
 #include "Krystal.Core/TypeCast.hpp"
 #include "Krystal.Core/Types/Maybe.hpp"
-#include "Krystal.Core/Types/UniquePtr.hpp"
 
 namespace krys::boo
 {

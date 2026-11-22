@@ -26,9 +26,9 @@
 
 #include "Krystal.Booey/Graphics/Paths/Path.hpp"
 #include "Krystal.Booey/Style/Values/Primitives/NumericTypesEvaluation.hpp"
+#include "Krystal.Core/Containers/TinyLRUCache.hpp"
 #include "Krystal.Core/Geometry/GeometryUtilities.hpp"
 #include "Krystal.Core/Geometry/Rect.hpp"
-#include "Krystal.Core/Types/TinyLRUCache.hpp"
 
 namespace krys::boo::style
 {
@@ -53,7 +53,7 @@ namespace krys::boo::style
   static const boo::Path &CachedRoundedInsetPath(const FloatRoundedRect &rect)
   {
     static NeverDestroyed<TinyLRUCache<FloatRoundedRect, boo::Path, 4, RoundedInsetPathPolicy>> cache;
-    return cache.get().Get(rect);
+    return cache->Get(rect);
   }
 
   // MARK: - Path

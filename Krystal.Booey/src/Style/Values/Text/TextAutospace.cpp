@@ -55,7 +55,7 @@ namespace krys::boo::style
 
     if (list->size() == 1)
     {
-      switch (const auto &first = list->item(0); first.ValueId())
+      switch (const auto &first = (*list)[0]; first.ValueId())
       {
         case css::ValueId::Normal:           return css::keywords::Normal {};
         case css::ValueId::Auto:             return css::keywords::Auto {};
@@ -67,16 +67,16 @@ namespace krys::boo::style
     }
     if (list->size() == 2)
     {
-      switch (const auto &first = list->item(0); first.ValueId())
+      switch (const auto &first = (*list)[0]; first.ValueId())
       {
         case css::ValueId::IdeographAlpha:
-          if (const auto &second = list->item(1); second.ValueId() == css::ValueId::IdeographNumeric)
+          if (const auto &second = (*list)[1]; second.ValueId() == css::ValueId::IdeographNumeric)
           {
             return {css::keywords::IdeographAlpha {}, css::keywords::IdeographNumeric {}};
           }
           break;
         case css::ValueId::IdeographNumeric:
-          if (const auto &second = list->item(1); second.ValueId() == css::ValueId::IdeographAlpha)
+          if (const auto &second = (*list)[1]; second.ValueId() == css::ValueId::IdeographAlpha)
           {
             return {css::keywords::IdeographAlpha {}, css::keywords::IdeographNumeric {}};
           }

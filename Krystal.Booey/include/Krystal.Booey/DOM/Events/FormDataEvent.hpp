@@ -1,9 +1,13 @@
 ﻿#pragma once
 
 #include "Krystal.Booey/DOM/Events/Event.hpp"
-#include "Krystal.Booey/HTML/Forms/DOMFormData.hpp"
 #include "Krystal.Core/Attributes.hpp"
-#include "Krystal.Core/Types/RefPtr.hpp"
+#include "Krystal.Core/Memory/RefPtr.hpp"
+
+namespace krys::boo::html
+{
+  class DOMFormData;
+}
 
 namespace krys::boo
 {

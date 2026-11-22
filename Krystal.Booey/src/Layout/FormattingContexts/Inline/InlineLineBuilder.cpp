@@ -1721,7 +1721,7 @@ namespace krys::boo::layout
           std::max<InlineLayoutUnit>(candidateContentHeight, styleToUse.ComputedLineHeight());
       }
       else if (inlineItem.IsAtomicInlineBox()
-               && lineBoxContain.Contains(style::WebkitLineBoxContainValue::Replaced))
+               && lineBoxContain.contains(style::WebkitLineBoxContainValue::Replaced))
       {
         candidateContentHeight =
           std::max(candidateContentHeight,
@@ -2070,7 +2070,7 @@ namespace krys::boo::layout
 
     auto lineHasContent = _line.HasContentOrListMarker();
     auto verticalPositionHasFloatOrInlineContent =
-      lineHasContent || IsLineConstrainedByFloat() || !constraints.ConstrainedSideSet.IsEmpty();
+      lineHasContent || IsLineConstrainedByFloat() || !constraints.ConstrainedSideSet.empty();
     auto lineBreakingResult = InlineContentBreaker::Result {Action::Keep, IsEndOfLine::No, {}, {}};
 
     if (auto minimumRequiredWidth = continuousInlineContent.MinimumRequiredWidth();

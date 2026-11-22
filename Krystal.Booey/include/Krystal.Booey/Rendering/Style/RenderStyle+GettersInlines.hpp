@@ -553,7 +553,7 @@ namespace krys::boo
 
   inline bool RenderStyle::HasScrollTimelines() const noexcept
   {
-    return !GetScrollTimelines().isEmpty() || !ScrollTimelineNames().IsNone();
+    return !GetScrollTimelines().empty() || !ScrollTimelineNames().IsNone();
   }
 
   inline bool RenderStyle::HasSnapPosition() const noexcept
@@ -628,7 +628,7 @@ namespace krys::boo
 
   inline bool RenderStyle::HasViewTimelines() const noexcept
   {
-    return !GetViewTimelines().isEmpty() || !ViewTimelineNames().IsNone();
+    return !GetViewTimelines().empty() || !ViewTimelineNames().IsNone();
   }
 
   inline bool RenderStyle::HasVisibleBorder() const noexcept

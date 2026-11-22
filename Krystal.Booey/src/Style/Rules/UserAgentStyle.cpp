@@ -43,7 +43,7 @@
 #include "Krystal.Booey/Style/Rules/RuleSet.hpp"
 #include "Krystal.Booey/Style/Rules/RuleSetBuilder.hpp"
 #include "Krystal.Booey/SVG/Elements/SVGElement.hpp"
-#include "Krystal.Core/Threading/NeverDestroyed.hpp"
+#include "Krystal.Core/Memory/NeverDestroyed.hpp"
 #include "Krystal.Core/TypeCast.hpp"
 
 namespace krys::boo::style

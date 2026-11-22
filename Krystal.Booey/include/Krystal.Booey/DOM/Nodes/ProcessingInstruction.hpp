@@ -28,14 +28,9 @@
 #include "Krystal.Booey/Loader/Cache/CachedStyleSheetClient.hpp"
 #include "Krystal.Booey/XML/PseudoAttributes.hpp"
 #include "Krystal.Core/Attributes.hpp"
+#include "Krystal.Core/Containers/List.hpp"
 #include "Krystal.Core/TypeCast.hpp"
-#include "Krystal.Core/Types/List.hpp"
 #include "Krystal.Core/Types/Maybe.hpp"
-
-namespace krys::boo
-{
-  class CSSStyleSheet;
-}
 
 namespace krys::boo::dom
 {
@@ -45,6 +40,8 @@ namespace krys::boo::dom
 
 namespace krys::boo
 {
+  class CSSStyleSheet;
+
   /// @brief A processing instruction (`<?target data?>`), whose data holds pseudo-attributes.
   /// @see https://dom.spec.whatwg.org/#interface-processinginstruction
   class ProcessingInstruction : public CharacterData, private CachedStyleSheetClient

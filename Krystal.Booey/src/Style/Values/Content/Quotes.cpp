@@ -100,6 +100,8 @@ namespace krys::boo::style
       return css::keywords::Auto {};
     }
 
-    return Quotes::Data::map(*list, [](const css::PrimitiveValue &item) { return item.StringValue(); });
+    return Quotes::Data(
+      std::from_range,
+      *list | std::views::transform([](const css::PrimitiveValue &item) { return item.StringValue(); }));
   }
 }

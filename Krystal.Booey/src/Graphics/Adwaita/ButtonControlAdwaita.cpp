@@ -57,7 +57,7 @@ namespace krys::boo
     SRGBA<uint8> buttonBackgroundHoveredColor;
     SRGBA<uint8> buttonBackgroundPressedColor;
 
-    if (style.States.Contains(ControlStyle::State::DarkAppearance))
+    if (style.States.contains(ControlStyle::State::DarkAppearance))
     {
       buttonBorderColor = ButtonBorderColorDark;
       buttonBackgroundColor = ButtonBackgroundColorDark;
@@ -72,7 +72,7 @@ namespace krys::boo
       buttonBackgroundPressedColor = ButtonBackgroundPressedColorLight;
     }
 
-    if (!style.States.Contains(ControlStyle::State::Enabled))
+    if (!style.States.contains(ControlStyle::State::Enabled))
     {
       graphicsContext.BeginTransparencyLayer(static_cast<float>(DisabledOpacity));
     }
@@ -91,12 +91,12 @@ namespace krys::boo
 
     path.AddRoundedRect(fieldRect, corner);
     graphicsContext.SetFillRule(WindRule::NonZero);
-    if (style.States.Contains(ControlStyle::State::Pressed))
+    if (style.States.contains(ControlStyle::State::Pressed))
     {
       graphicsContext.SetFillColor(buttonBackgroundPressedColor);
     }
-    else if (style.States.Contains(ControlStyle::State::Enabled)
-             && style.States.Contains(ControlStyle::State::Hovered))
+    else if (style.States.contains(ControlStyle::State::Enabled)
+             && style.States.contains(ControlStyle::State::Hovered))
     {
       graphicsContext.SetFillColor(buttonBackgroundHoveredColor);
     }
@@ -106,12 +106,12 @@ namespace krys::boo
     }
     graphicsContext.FillPath(path);
 
-    if (style.States.Contains(ControlStyle::State::Focused))
+    if (style.States.contains(ControlStyle::State::Focused))
     {
       PaintFocus(graphicsContext, borderRect.Rect(), ButtonFocusOffset, SystemFocusRingColor());
     }
 
-    if (!style.States.Contains(ControlStyle::State::Enabled))
+    if (!style.States.contains(ControlStyle::State::Enabled))
     {
       graphicsContext.EndTransparencyLayer();
     }

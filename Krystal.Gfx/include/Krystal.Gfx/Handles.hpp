@@ -1,6 +1,7 @@
 ﻿#pragma once
 
 #include "Krystal.Core/Attributes.hpp"
+#include "Krystal.Core/Hashing/FastHash.hpp"
 #include "Krystal.Core/Numeric.hpp"
 #include <compare>
 #include <functional>
@@ -51,14 +52,14 @@ namespace krys::gfx
   using SwapchainHandle = Handle<struct SwapchainTag>;
 }
 
-namespace std
+namespace krys
 {
   template <typename TTag>
-  struct hash<krys::gfx::Handle<TTag>>
+  struct FastHash<gfx::Handle<TTag>>
   {
-    size_t operator()(const krys::gfx::Handle<TTag> &handle) const noexcept
+    KRYS_NODISCARD size_t operator()(const gfx::Handle<TTag> &handle) const noexcept
     {
-      return std::hash<krys::uint32> {}(handle.Value);
+      return FastHash<uint32> {}(handle.Value);
     }
   };
 }

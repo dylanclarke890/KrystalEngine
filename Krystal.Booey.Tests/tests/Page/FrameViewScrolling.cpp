@@ -1,4 +1,5 @@
 ﻿#include "catch2/catch_test_macros.hpp"
+#include "Krystal.Booey.Tests/Input/InputTestUtils.hpp"
 #include "Krystal.Booey.Tests/Loader/PageInFrameFixture.hpp"
 #include "Krystal.Booey.Tests/Rendering/PaintTestUtils.hpp"
 #include "Krystal.Booey/DOM/Events/Event.hpp"
@@ -109,29 +110,19 @@ namespace krys::boo::tests
 
     using Strings = List<std::string>;
 
-    KRYS_NODISCARD PlatformMouseEvent MouseEvent(PlatformEvent::Type type, PointI position,
-                                                 MouseButton button = MouseButton::Left) noexcept
-    {
-      PointD point(position.X(), position.Y());
-      int32 clickCount = type == PlatformEvent::Type::MousePressed ? 1 : 0;
-      return PlatformMouseEvent(point, point,
-                                type == PlatformEvent::Type::MouseMoved ? MouseButton::None : button, type,
-                                clickCount, {}, MonotonicTime::Now());
-    }
-
     void Move(EventHandler &handler, PointI position) noexcept
     {
-      (void)handler.MouseMoved(MouseEvent(PlatformEvent::Type::MouseMoved, position));
+      (void)handler.MouseMoved(MouseEventAt(PlatformEvent::Type::MouseMoved, position));
     }
 
     void Press(EventHandler &handler, PointI position) noexcept
     {
-      (void)handler.HandleMousePressEvent(MouseEvent(PlatformEvent::Type::MousePressed, position));
+      (void)handler.HandleMousePressEvent(MouseEventAt(PlatformEvent::Type::MousePressed, position));
     }
 
     void Release(EventHandler &handler, PointI position) noexcept
     {
-      (void)handler.HandleMouseReleaseEvent(MouseEvent(PlatformEvent::Type::MouseReleased, position));
+      (void)handler.HandleMouseReleaseEvent(MouseEventAt(PlatformEvent::Type::MouseReleased, position));
     }
 
     /// @brief A wheel event at @p position scrolling by @p delta pixels (the DOM's sense: positive is down

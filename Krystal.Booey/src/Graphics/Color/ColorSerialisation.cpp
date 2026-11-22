@@ -28,10 +28,10 @@
 #include "Krystal.Booey/Graphics/Color/Color.hpp"
 #include "Krystal.Core/Assert.hpp"
 #include "Krystal.Core/Colour/ColourNormalization.hpp"
+#include "Krystal.Core/Containers/Array.hpp"
 #include "Krystal.Core/Maths/Extras.hpp"
 #include "Krystal.Core/Strings/ASCII.hpp"
 #include "Krystal.Core/Strings/StringBuilder.hpp"
-#include "Krystal.Core/Types/Array.hpp"
 #include <charconv>
 #include <cmath>
 

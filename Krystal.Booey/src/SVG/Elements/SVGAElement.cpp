@@ -48,7 +48,7 @@ namespace krys::boo
       : SVGGraphicsElement(document, CreateUnique<PropertyRegistry>(*this), SVGElementInterface::A),
         SVGURIReference(this), _target(SVGAnimatedString::Create(this))
   {
-    SetEventTargetFlag(dom::EventTargetFlags::HasActivationBehavior);
+    _eventTargetFlags.Add(dom::EventTargetFlag::HasActivationBehavior);
 
     static bool didRegistration = false;
     if (!didRegistration) KRYS_UNLIKELY
@@ -228,20 +228,19 @@ namespace krys::boo
   {
     if (!_relList)
     {
-      _relList =
-        dom::ElementAlgorithms::CreateDOMTokenList(*this, SVGNames::RelAttr().LocalName(),
-                                                   [](Document &, DOMStringView token)
-                                                   {
-                                                     return text::IsASCIICaselessEqual(token, u8"noreferrer")
-                                                            || text::IsASCIICaselessEqual(token, u8"noopener")
-                                                            || text::IsASCIICaselessEqual(token, u8"opener");
-                                                   });
+      _relList = dom::DOMTokenList::Create(*this, SVGNames::RelAttr().LocalName(),
+                                           [](Document &, DOMStringView token)
+                                           {
+                                             return text::IsASCIICaselessEqual(token, u8"noreferrer")
+                                                    || text::IsASCIICaselessEqual(token, u8"noopener")
+                                                    || text::IsASCIICaselessEqual(token, u8"opener");
+                                           });
     }
     return *_relList;
   }
 
   bool SVGAElement::HasRel(SVGALinkRelation relation) const noexcept
   {
-    return _linkRelations.Contains(relation);
+    return _linkRelations.contains(relation);
   }
 }

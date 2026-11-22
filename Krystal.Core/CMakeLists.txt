@@ -3,6 +3,7 @@ add_library(Krystal.Core STATIC)
 target_link_libraries(Krystal.Core 
   PUBLIC
     llvm
+    unordered_dense::unordered_dense
 
   PRIVATE
     RapidJSON rapidjson
@@ -27,6 +28,9 @@ target_compile_options(Krystal.Core
     $<$<CXX_COMPILER_ID:MSVC>:/W4 /MP /utf-8>
 )
 
+# Third-party - unordered_dense (header-only; public, since HashMap and HashSet are built on it)
+find_package(unordered_dense CONFIG REQUIRED)
+
 # Third-party - RapidJSON
 find_package(RapidJSON CONFIG REQUIRED)
 
@@ -36,6 +40,10 @@ find_package(spdlog CONFIG REQUIRED)
 # Third-party - RapidXML
 find_path(RAPIDXML_INCLUDE_DIRS "rapidxml/rapidxml.hpp")
 target_include_directories(Krystal.Core PRIVATE ${RAPIDXML_INCLUDE_DIRS})
+
+# Third-party - rapidhash (header-only; public, since the hashers inline it)
+find_path(RAPIDHASH_INCLUDE_DIRS "rapidhash.h" REQUIRED)
+target_include_directories(Krystal.Core PUBLIC ${RAPIDHASH_INCLUDE_DIRS})
 
 target_precompile_headers(Krystal.Core PRIVATE
   <chrono>
@@ -52,7 +60,7 @@ target_precompile_headers(Krystal.Core PRIVATE
   <utility>
   <vector>
   "include/Krystal.Core/Base.hpp"
-  "include/Krystal.Core/Types/IntrusivePtr.hpp"
+  "include/Krystal.Core/Memory/IntrusivePtr.hpp"
   "include/Krystal.Core/Maths/Matrix.hpp"
   "include/Krystal.Core/Maths/Quaternion.hpp"
   "include/Krystal.Core/Maths/Vector.hpp"
@@ -69,16 +77,16 @@ target_sources(Krystal.Core
       include/Krystal.Core/Atomics.hpp
       include/Krystal.Core/Attributes.hpp
       include/Krystal.Core/Base.hpp
-      include/Krystal.Core/CanMakeCheckedPtr.hpp
-      include/Krystal.Core/CanMakeWeakPtr.hpp
       include/Krystal.Core/Concepts.hpp
       include/Krystal.Core/Debug.hpp
       include/Krystal.Core/Endian.hpp
       include/Krystal.Core/Enum.hpp
-      include/Krystal.Core/Hash.hpp
+      include/Krystal.Core/Hashing/FastHash.hpp
+      include/Krystal.Core/Hashing/HashAlgorithm.hpp
+      include/Krystal.Core/Hashing/StableHash.hpp
       include/Krystal.Core/Macros.hpp
+      include/Krystal.Core/Move.hpp
       include/Krystal.Core/Numeric.hpp
-      include/Krystal.Core/RefCounted.hpp
       include/Krystal.Core/TriState.hpp
       include/Krystal.Core/TypeCast.hpp
       include/Krystal.Core/TypeTraits.hpp
@@ -108,11 +116,28 @@ target_sources(Krystal.Core
       include/Krystal.Core/Commands/CommandListReader.hpp
       include/Krystal.Core/Commands/CommandType.hpp
 
+      # Containers
+      include/Krystal.Core/Containers/Array.hpp
+      include/Krystal.Core/Containers/BloomFilter.hpp
+      include/Krystal.Core/Containers/EnumSet.hpp
+      include/Krystal.Core/Containers/FixedList.hpp
+      include/Krystal.Core/Containers/HashMap.hpp
+      include/Krystal.Core/Containers/HashSet.hpp
+      include/Krystal.Core/Containers/IntervalTree.hpp
+      include/Krystal.Core/Containers/List.hpp
+      include/Krystal.Core/Containers/ListHashSet.hpp
+      include/Krystal.Core/Containers/Queue.hpp
+      include/Krystal.Core/Containers/RedBlackTree.hpp
+      include/Krystal.Core/Containers/RefCountedFixedList.hpp
+      include/Krystal.Core/Containers/SmallList.hpp
+      include/Krystal.Core/Containers/Span.hpp
+      include/Krystal.Core/Containers/Stack.hpp
+      include/Krystal.Core/Containers/TinyLRUCache.hpp
+
       # Detection
       include/Krystal.Core/Detection/AddressSpaceBitSize.hpp
       include/Krystal.Core/Detection/Compiler.hpp
       include/Krystal.Core/Detection/CPU.hpp
-      include/Krystal.Core/Detection/NumberOfCores.hpp
       include/Krystal.Core/Detection/OS.hpp
 
       # Events
@@ -179,6 +204,33 @@ target_sources(Krystal.Core
       include/Krystal.Core/Maths/UnitBezier.hpp
       include/Krystal.Core/Maths/Vector.hpp
 
+      # Memory
+      include/Krystal.Core/Memory/AlignedStorage.hpp
+      include/Krystal.Core/Memory/AllowCompactPointers.hpp
+      include/Krystal.Core/Memory/CanMakeCheckedPtr.hpp
+      include/Krystal.Core/Memory/CanMakeWeakPtr.hpp
+      include/Krystal.Core/Memory/CheckedPtr.hpp
+      include/Krystal.Core/Memory/CompactPtrTuple.hpp
+      include/Krystal.Core/Memory/CompactRefPtrTuple.hpp
+      include/Krystal.Core/Memory/CompactUniquePtrTuple.hpp
+      include/Krystal.Core/Memory/DataRef.hpp
+      include/Krystal.Core/Memory/ForbidHeapAllocation.hpp
+      include/Krystal.Core/Memory/InlineWeakPtr.hpp
+      include/Krystal.Core/Memory/IntrusivePtr.hpp
+      include/Krystal.Core/Memory/NeverDestroyed.hpp
+      include/Krystal.Core/Memory/Packed.hpp
+      include/Krystal.Core/Memory/PointerComparison.hpp
+      include/Krystal.Core/Memory/RefCounted.hpp
+      include/Krystal.Core/Memory/RefPtr.hpp
+      include/Krystal.Core/Memory/TaggedPtr.hpp
+      include/Krystal.Core/Memory/ThreadSafeWeakPtr.hpp
+      include/Krystal.Core/Memory/UnalignedAccess.hpp
+      include/Krystal.Core/Memory/UniqueArray.hpp
+      include/Krystal.Core/Memory/UniquePtr.hpp
+      include/Krystal.Core/Memory/WeakPtr.hpp
+      include/Krystal.Core/Memory/WeakPtrFactory.hpp
+      include/Krystal.Core/Memory/WeakPtrImpl.hpp
+
       # Serialisation
       include/Krystal.Core/Serialisation/Access.hpp
       include/Krystal.Core/Serialisation/Builtins.hpp
@@ -214,7 +266,6 @@ target_sources(Krystal.Core
       include/Krystal.Core/Threading/JobSystem.hpp
       include/Krystal.Core/Threading/MainThread.hpp
       include/Krystal.Core/Threading/ManualWorkQueue.hpp
-      include/Krystal.Core/Threading/NeverDestroyed.hpp
       include/Krystal.Core/Threading/TaskInbox.hpp
       include/Krystal.Core/Threading/Thread.hpp
       include/Krystal.Core/Threading/WorkQueue.hpp
@@ -227,65 +278,27 @@ target_sources(Krystal.Core
 
       # Types
       include/Krystal.Core/Types/Any.hpp
-      include/Krystal.Core/Types/Array.hpp
       include/Krystal.Core/Types/BoolOr.hpp
-      include/Krystal.Core/Types/CheckedPtr.hpp
-      include/Krystal.Core/Types/CompactPtrTuple.hpp
-      include/Krystal.Core/Types/CompactRefPtrTuple.hpp
-      include/Krystal.Core/Types/CompactUniquePtrTuple.hpp
-      include/Krystal.Core/Types/BloomFilter.hpp
       include/Krystal.Core/Types/CompactVariant.hpp
-      include/Krystal.Core/Types/DataRef.hpp
       include/Krystal.Core/Types/Decimal.hpp
       include/Krystal.Core/Types/Expected.hpp
-      include/Krystal.Core/Types/FixedVector.hpp
       include/Krystal.Core/Types/Func.hpp
-      include/Krystal.Core/Types/HashMap.hpp
-      include/Krystal.Core/Types/HashSet.hpp
-      include/Krystal.Core/Types/InlineWeakPtr.hpp
-      include/Krystal.Core/Types/IntrusivePtr.hpp
-      include/Krystal.Core/Types/List.hpp
-      include/Krystal.Core/Types/ListHashSet.hpp
-      include/Krystal.Core/Types/RedBlackTree.hpp
-      include/Krystal.Core/Types/IntervalTree.hpp
       include/Krystal.Core/Types/IterationStatus.hpp
       include/Krystal.Core/Types/Markable.hpp
       include/Krystal.Core/Types/Maybe.hpp
       include/Krystal.Core/Types/NTTPMaybe.hpp
       include/Krystal.Core/Types/Null.hpp
       include/Krystal.Core/Types/NTTPString.hpp
-      include/Krystal.Core/Types/Packed.hpp
       include/Krystal.Core/Types/Pair.hpp
-      include/Krystal.Core/Types/Queue.hpp
-      include/Krystal.Core/Types/RefCountedFixedVector.hpp
-      include/Krystal.Core/Types/RefPtr.hpp
       include/Krystal.Core/Types/SharedBuffer.hpp
-      include/Krystal.Core/Types/SmallList.hpp
-      include/Krystal.Core/Types/Span.hpp
-      include/Krystal.Core/Types/Stack.hpp
-      include/Krystal.Core/Types/TaggedPtr.hpp
-      include/Krystal.Core/Types/TinyLRUCache.hpp
-      include/Krystal.Core/Types/ThreadSafeWeakPtr.hpp
-      include/Krystal.Core/Types/UniqueArray.hpp
-      include/Krystal.Core/Types/UniquePtr.hpp
       include/Krystal.Core/Types/Variant.hpp
-      include/Krystal.Core/Types/WeakPtr.hpp
-      include/Krystal.Core/Types/WeakPtrFactory.hpp
-      include/Krystal.Core/Types/WeakPtrImpl.hpp
 
       # Utils
-      include/Krystal.Core/Utils/AlignedStorage.hpp
-      include/Krystal.Core/Utils/AllowCompactPointers.hpp
       include/Krystal.Core/Utils/Apply.hpp
       include/Krystal.Core/Utils/ByteUtils.hpp
-      include/Krystal.Core/Utils/ForbidHeapAllocation.hpp
-      include/Krystal.Core/Utils/GetPtrHelper.hpp
-      include/Krystal.Core/Utils/IndexedRange.hpp
       include/Krystal.Core/Utils/IsEOF.hpp
-      include/Krystal.Core/Utils/Move.hpp
       include/Krystal.Core/Utils/NestingLevelIncrementer.hpp
       include/Krystal.Core/Utils/NativeHandle.hpp
-      include/Krystal.Core/Utils/PointerComparison.hpp
       include/Krystal.Core/Utils/ScopeExit.hpp
       include/Krystal.Core/Utils/ScopedProfiler.hpp
       include/Krystal.Core/Utils/SetForScope.hpp
@@ -293,9 +306,6 @@ target_sources(Krystal.Core
       include/Krystal.Core/Utils/StringId.hpp
       include/Krystal.Core/Utils/StrongOrder.hpp
       include/Krystal.Core/Utils/Tags.hpp
-      include/Krystal.Core/Utils/UnalignedAccess.hpp
-      include/Krystal.Core/Utils/ZippedRange.hpp
-      include/Krystal.Core/Utils/ZipTuple.hpp
 
   PRIVATE
     # Colour
@@ -304,7 +314,6 @@ target_sources(Krystal.Core
     src/Colour/ColourTextStream.cpp
 
     # Detection
-    src/Detection/NumberOfCores.cpp
     
     # Events
     src/Events/EventManager.cpp

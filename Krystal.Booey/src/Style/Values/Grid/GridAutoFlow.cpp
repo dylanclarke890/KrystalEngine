@@ -53,13 +53,13 @@ namespace krys::boo::style
       return css::keywords::Normal {};
     }
 
-    const auto &first = list->item(0);
+    const auto &first = (*list)[0];
     switch (first.ValueId())
     {
       case css::ValueId::Row:
         if (list->size() == 2)
         {
-          const auto &second = list->item(1);
+          const auto &second = (*list)[1];
           switch (second.ValueId())
           {
             case css::ValueId::Dense: return {css::keywords::Row {}, css::keywords::Dense {}};
@@ -70,7 +70,7 @@ namespace krys::boo::style
       case css::ValueId::Column:
         if (list->size() == 2)
         {
-          const auto &second = list->item(1);
+          const auto &second = (*list)[1];
           switch (second.ValueId())
           {
             case css::ValueId::Dense: return {css::keywords::Column {}, css::keywords::Dense {}};
@@ -81,7 +81,7 @@ namespace krys::boo::style
       case css::ValueId::Dense:
         if (list->size() == 2)
         {
-          const auto &second = list->item(1);
+          const auto &second = (*list)[1];
           switch (second.ValueId())
           {
             case css::ValueId::Row:    return {css::keywords::Row {}, css::keywords::Dense {}};

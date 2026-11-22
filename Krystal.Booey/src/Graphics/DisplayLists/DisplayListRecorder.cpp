@@ -36,7 +36,7 @@ namespace krys::boo::display_list
                      const AffineTransform &initialCTM) noexcept
       : GraphicsContext(isDeferred, state), _initialClip(initialCTM.MapRect(initialClip))
   {
-    krys_debug_assert(state.Changes().IsEmpty());
+    krys_debug_assert(state.Changes().empty());
     _stateStack.push_back({state, initialCTM, initialCTM.MapRect(initialClip)});
   }
 
@@ -69,7 +69,7 @@ namespace krys::boo::display_list
       {
         auto changes = state.Changes();
         changes.Remove(changeIndex.ToChange());
-        return changes.IsEmpty();
+        return changes.empty();
       }());
     CurrentState().State.MergeSingleChange(state, changeIndex, CurrentState().LastDrawingState);
     state.DidApplyChanges();

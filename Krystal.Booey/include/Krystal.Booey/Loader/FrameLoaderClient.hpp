@@ -33,8 +33,8 @@
 #include "Krystal.Booey/Loader/FrameLoaderTypes.hpp"
 #include "Krystal.Booey/Loader/Icons/LinkIcon.hpp"
 #include "Krystal.Core/Attributes.hpp"
+#include "Krystal.Core/Containers/Span.hpp"
 #include "Krystal.Core/Macros.hpp"
-#include "Krystal.Core/Types/Span.hpp"
 #include "Krystal.Net/Url.hpp"
 
 namespace krys::net

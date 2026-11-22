@@ -21,8 +21,8 @@
 #pragma once
 
 #include "Krystal.Booey/SVG/SVGFitToViewBox.hpp"
-#include "Krystal.Core/RefCounted.hpp"
-#include "Krystal.Core/Types/WeakPtr.hpp"
+#include "Krystal.Core/Memory/RefCounted.hpp"
+#include "Krystal.Core/Memory/WeakPtr.hpp"
 
 namespace krys::boo
 {

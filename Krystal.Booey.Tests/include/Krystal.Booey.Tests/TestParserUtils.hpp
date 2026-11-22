@@ -2,9 +2,9 @@
 
 #include "catch2/catch_test_macros.hpp"
 #include "Krystal.Booey/DOM/Types/DOMString.hpp"
-#include "Krystal.Core/Types/List.hpp"
+#include "Krystal.Core/Containers/List.hpp"
+#include "Krystal.Core/Move.hpp"
 #include "Krystal.Core/Types/Maybe.hpp"
-#include "Krystal.Core/Utils/Move.hpp"
 #include <format>
 #include <fstream>
 

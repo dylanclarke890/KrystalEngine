@@ -61,12 +61,11 @@ namespace krys::boo::style
       return css::keywords::None {};
     }
 
-    auto sx = ConvertCSSValueToStyle<NumberOrPercentageResolvedToNumber<>>(state, list->item(0));
-    auto sy = list->size() > 1
-                ? ConvertCSSValueToStyle<NumberOrPercentageResolvedToNumber<>>(state, list->item(1))
-                : sx;
+    auto sx = ConvertCSSValueToStyle<NumberOrPercentageResolvedToNumber<>>(state, (*list)[0]);
+    auto sy =
+      list->size() > 1 ? ConvertCSSValueToStyle<NumberOrPercentageResolvedToNumber<>>(state, (*list)[1]) : sx;
     auto sz = list->size() > 2
-                ? ConvertCSSValueToStyle<NumberOrPercentageResolvedToNumber<>>(state, list->item(2))
+                ? ConvertCSSValueToStyle<NumberOrPercentageResolvedToNumber<>>(state, (*list)[2])
                 : NumberOrPercentageResolvedToNumber<> {1_css_number};
 
     return ScaleTransformFunction::Create(sx, sy, sz, TransformFunctionType::Scale);

@@ -30,14 +30,14 @@
 #include "Krystal.Booey/Style/Builder/BuilderChecking.hpp"
 #include "Krystal.Booey/Style/Builder/BuilderState.hpp"
 #include "Krystal.Booey/Style/Values/Primitives/LengthWrapperCSSValueConversion.hpp"
-#include "Krystal.Core/Threading/NeverDestroyed.hpp"
+#include "Krystal.Core/Memory/NeverDestroyed.hpp"
 
 namespace krys::boo::style
 {
   const ViewTimelineInsetItem &ViewTimelineInsetDefaulter::operator()() const noexcept
   {
     static NeverDestroyed<ViewTimelineInsetItem> staticValue {css::keywords::Auto {}};
-    return staticValue.get();
+    return *staticValue;
   }
 
   // MARK: - Conversion
@@ -96,8 +96,10 @@ namespace krys::boo::style
       return css::keywords::Auto {};
     }
 
-    return ViewTimelineInsetList::Map(
-      *list, [&](const auto &element) -> ViewTimelineInsetItem
-      { return ConvertCSSValueToStyle<ViewTimelineInsetItem>(state, element); });
+    return ViewTimelineInsetList(
+      std::from_range,
+      *list
+        | std::views::transform([&](const auto &element) -> ViewTimelineInsetItem
+                                { return ConvertCSSValueToStyle<ViewTimelineInsetItem>(state, element); }));
   }
 }

@@ -27,10 +27,10 @@
 
 #include "Krystal.Booey/Editing/Selection/VisibleSelection.hpp"
 #include "Krystal.Core/Attributes.hpp"
+#include "Krystal.Core/Containers/EnumSet.hpp"
 #include "Krystal.Core/Macros.hpp"
-#include "Krystal.Core/Types/EnumSet.hpp"
+#include "Krystal.Core/Memory/RefPtr.hpp"
 #include "Krystal.Core/Types/Maybe.hpp"
-#include "Krystal.Core/Types/RefPtr.hpp"
 
 namespace krys::boo
 {
@@ -52,12 +52,12 @@ namespace krys::boo
     ForceCenterScroll,
     OnlyAllowForwardScrolling,
   };
-}
 
-KRYS_DEFINE_CONTIGUOUS_ENUM_TRAITS(krys::boo::TemporarySelectionOption, 10uz);
+  consteval TemporarySelectionOption MaxEnumValue(TemporarySelectionOption) noexcept
+  {
+    return TemporarySelectionOption::OnlyAllowForwardScrolling;
+  }
 
-namespace krys::boo
-{
   /// @brief Selects something for as long as it lives (to reveal it, say), then restores the selection.
   class TemporarySelectionChange
   {

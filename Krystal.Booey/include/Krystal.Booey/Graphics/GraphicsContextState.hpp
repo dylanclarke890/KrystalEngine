@@ -29,7 +29,7 @@
 #include "Krystal.Booey/Graphics/GraphicsTypes.hpp"
 #include "Krystal.Booey/Graphics/Paths/WindRule.hpp"
 #include "Krystal.Booey/Graphics/SourceBrush.hpp"
-#include "Krystal.Core/Types/EnumSet.hpp"
+#include "Krystal.Core/Containers/EnumSet.hpp"
 
 namespace krys
 {
@@ -62,12 +62,12 @@ namespace krys::boo
     ShadowsIgnoreTransforms,
     DrawLuminanceMask,
   };
-}
 
-KRYS_DEFINE_CONTIGUOUS_ENUM_TRAITS(krys::boo::GraphicsContextStateChange, 16uz);
+  consteval GraphicsContextStateChange MaxEnumValue(GraphicsContextStateChange) noexcept
+  {
+    return GraphicsContextStateChange::DrawLuminanceMask;
+  }
 
-namespace krys::boo
-{
   /// @brief A graphics context's drawing state, with the changes made to it since they were last applied.
   class GraphicsContextState
   {

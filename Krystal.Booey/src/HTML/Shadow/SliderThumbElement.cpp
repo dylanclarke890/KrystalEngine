@@ -186,7 +186,7 @@ namespace krys::boo::html
 #pragma region SliderThumbElement
 
   SliderThumbElement::SliderThumbElement(Document &document) noexcept
-      : HTMLDivElement(document, dom::NodeFlags::HasCustomStyleResolveCallbacks)
+      : HTMLDivElement(document, dom::NodeFlag::HasCustomStyleResolveCallbacks)
   {
   }
 
@@ -454,7 +454,7 @@ namespace krys::boo::html
 #pragma region SliderContainerElement
 
   SliderContainerElement::SliderContainerElement(Document &document) noexcept
-      : HTMLDivElement(document, dom::NodeFlags::HasCustomStyleResolveCallbacks)
+      : HTMLDivElement(document, dom::NodeFlag::HasCustomStyleResolveCallbacks)
   {
     // The container takes touches, which are only dispatched in documents with listeners for them.
     document.AddListenerTypeIfNeeded(event_names::TouchStart);

@@ -72,13 +72,13 @@ namespace krys::boo
                                 EnumSet<SerialisationArguments> arguments) const noexcept
   {
     // https://drafts.css-houdini.org/css-typed-om/#calc-serialization
-    if (!arguments.Contains(SerialisationArguments::WithoutParentheses))
+    if (!arguments.contains(SerialisationArguments::WithoutParentheses))
     {
-      builder.Append(arguments.Contains(SerialisationArguments::Nested) ? u8"(" : u8"calc(");
+      builder.Append(arguments.contains(SerialisationArguments::Nested) ? u8"(" : u8"calc(");
     }
     builder.Append(u8"1 / ");
     _value->Serialise(builder, arguments);
-    if (!arguments.Contains(SerialisationArguments::WithoutParentheses))
+    if (!arguments.contains(SerialisationArguments::WithoutParentheses))
     {
       builder.Append(u8')');
     }

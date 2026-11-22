@@ -31,7 +31,6 @@
 #include "Krystal.Core/Strings/StringBuilder.hpp"
 #include "Krystal.Core/Types/Markable.hpp"
 #include "Krystal.Core/Types/Maybe.hpp"
-#include "Krystal.Core/Utils/ZipTuple.hpp"
 #include <tuple>
 #include <utility>
 
@@ -397,7 +396,9 @@ namespace krys::boo::style
                                      // NOLINTNEXTLINE(cppcoreguidelines-missing-std-forward)
                                      const RenderStyle &style, Rest &&...rest) noexcept
     {
-      return Result::map(value, [&](const auto &x) { return ConvertToCSS(x, style, rest...); });
+      return Result(
+        std::from_range,
+        value | std::views::transform([&](const auto &x) { return ConvertToCSS(x, style, rest...); }));
     }
   };
 
@@ -413,7 +414,9 @@ namespace krys::boo::style
                                      // NOLINTNEXTLINE(cppcoreguidelines-missing-std-forward)
                                      const RenderStyle &style, Rest &&...rest) noexcept
     {
-      return Result::map(value, [&](const auto &x) { return ConvertToCSS(x, style, rest...); });
+      return Result(
+        std::from_range,
+        value | std::views::transform([&](const auto &x) { return ConvertToCSS(x, style, rest...); }));
     }
   };
 
@@ -680,7 +683,8 @@ namespace krys::boo::style
                                      // NOLINTNEXTLINE(cppcoreguidelines-missing-std-forward)
                                      Rest &&...rest) noexcept
     {
-      return Result::map(value, [&](const auto &x) { return ConvertToStyle(x, rest...); });
+      return Result(std::from_range,
+                    value | std::views::transform([&](const auto &x) { return ConvertToStyle(x, rest...); }));
     }
   };
 
@@ -696,7 +700,8 @@ namespace krys::boo::style
                                      // NOLINTNEXTLINE(cppcoreguidelines-missing-std-forward)
                                      Rest &&...rest) noexcept
     {
-      return Result::map(value, [&](const auto &x) { return ConvertToStyle(x, rest...); });
+      return Result(std::from_range,
+                    value | std::views::transform([&](const auto &x) { return ConvertToStyle(x, rest...); }));
     }
   };
 
@@ -1740,13 +1745,50 @@ namespace krys::boo::style
     return null;
   }
 
+  namespace detail
+  {
+    /// @brief Whether @p predicate holds for each pair of corresponding elements of @p a and @p b.
+    template <typename TTupleLike>
+    KRYS_NODISCARD constexpr bool AllOfTuplePairs(const TTupleLike &a, const TTupleLike &b,
+                                                  const auto &predicate) noexcept
+    {
+      using std::get;
+      return [&]<size_t... I>(std::index_sequence<I...>)
+      {
+        return (predicate(get<I>(a), get<I>(b)) && ...);
+      }(std::make_index_sequence<std::tuple_size_v<TTupleLike>> {});
+    }
+
+    /// @brief Whether @p predicate holds for any pair of corresponding elements of @p a and @p b.
+    template <typename TTupleLike>
+    KRYS_NODISCARD constexpr bool AnyOfTuplePairs(const TTupleLike &a, const TTupleLike &b,
+                                                  const auto &predicate) noexcept
+    {
+      using std::get;
+      return [&]<size_t... I>(std::index_sequence<I...>)
+      {
+        return (predicate(get<I>(a), get<I>(b)) || ...);
+      }(std::make_index_sequence<std::tuple_size_v<TTupleLike>> {});
+    }
+
+    /// @brief A `TTupleLike` built from @p transform of each pair of corresponding elements of @p a and @p b.
+    template <typename TTupleLike>
+    KRYS_NODISCARD constexpr TTupleLike TransformTuplePairs(const TTupleLike &a, const TTupleLike &b,
+                                                            const auto &transform) noexcept
+    {
+      using std::get;
+      return [&]<size_t... I>(std::index_sequence<I...>)
+      {
+        return TTupleLike {transform(get<I>(a), get<I>(b))...};
+      }(std::make_index_sequence<std::tuple_size_v<TTupleLike>> {});
+    }
+  }
+
   template <typename StyleType>
   KRYS_NODISCARD auto EqualsForBlendingOnTupleLike(const StyleType &a, const StyleType &b) noexcept -> bool
   {
-    return krys::apply(
-      [&](const auto &...pair)
-      { return (krys::boo::style::EqualsForBlending(std::get<0>(pair), std::get<1>(pair)) && ...); },
-      ZipTuple(a, b));
+    return detail::AllOfTuplePairs(a, b, [&](const auto &x, const auto &y)
+                                   { return krys::boo::style::EqualsForBlending(x, y); });
   }
 
   template <typename StyleType>
@@ -1754,31 +1796,23 @@ namespace krys::boo::style
                                                    const RenderStyle &aStyle,
                                                    const RenderStyle &bStyle) noexcept -> bool
   {
-    return krys::apply(
-      [&](const auto &...pair)
-      {
-        return (krys::boo::style::EqualsForBlending(std::get<0>(pair), std::get<1>(pair), aStyle, bStyle)
-                && ...);
-      },
-      ZipTuple(a, b));
+    return detail::AllOfTuplePairs(a, b, [&](const auto &x, const auto &y)
+                                   { return krys::boo::style::EqualsForBlending(x, y, aStyle, bStyle); });
   }
 
   template <typename StyleType>
   KRYS_NODISCARD auto CanBlendOnTupleLike(const StyleType &a, const StyleType &b) noexcept -> bool
   {
-    return krys::apply([&](const auto &...pair)
-                       { return (krys::boo::style::CanBlend(std::get<0>(pair), std::get<1>(pair)) && ...); },
-                       ZipTuple(a, b));
+    return detail::AllOfTuplePairs(a, b, [&](const auto &x, const auto &y)
+                                   { return krys::boo::style::CanBlend(x, y); });
   }
 
   template <typename StyleType>
   KRYS_NODISCARD auto CanBlendOnTupleLike(const StyleType &a, const StyleType &b, const RenderStyle &aStyle,
                                           const RenderStyle &bStyle) noexcept -> bool
   {
-    return krys::apply(
-      [&](const auto &...pair)
-      { return (krys::boo::style::CanBlend(std::get<0>(pair), std::get<1>(pair), aStyle, bStyle) && ...); },
-      ZipTuple(a, b));
+    return detail::AllOfTuplePairs(a, b, [&](const auto &x, const auto &y)
+                                   { return krys::boo::style::CanBlend(x, y, aStyle, bStyle); });
   }
 
   template <typename StyleType>
@@ -1786,14 +1820,9 @@ namespace krys::boo::style
                                                                                const StyleType &b) noexcept
     -> bool
   {
-    return krys::apply(
-      [&](const auto &...pair)
-      {
-        return (krys::boo::style::RequiresInterpolationForAccumulativeIteration(std::get<0>(pair),
-                                                                                std::get<1>(pair))
-                || ...);
-      },
-      ZipTuple(a, b));
+    return detail::AnyOfTuplePairs(
+      a, b, [&](const auto &x, const auto &y)
+      { return krys::boo::style::RequiresInterpolationForAccumulativeIteration(x, y); });
   }
 
   template <typename StyleType>
@@ -1802,37 +1831,25 @@ namespace krys::boo::style
                                                              const RenderStyle &aStyle,
                                                              const RenderStyle &bStyle) noexcept -> bool
   {
-    return krys::apply(
-      [&](const auto &...pair)
-      {
-        return (krys::boo::style::RequiresInterpolationForAccumulativeIteration(
-                  std::get<0>(pair), std::get<1>(pair), aStyle, bStyle)
-                || ...);
-      },
-      ZipTuple(a, b));
+    return detail::AnyOfTuplePairs(
+      a, b, [&](const auto &x, const auto &y)
+      { return krys::boo::style::RequiresInterpolationForAccumulativeIteration(x, y, aStyle, bStyle); });
   }
 
   template <typename StyleType>
   KRYS_NODISCARD auto BlendOnTupleLike(const StyleType &a, const StyleType &b, const auto &context) noexcept
     -> StyleType
   {
-    return krys::apply(
-      [&](const auto &...pair)
-      { return StyleType {krys::boo::style::Blend(std::get<0>(pair), std::get<1>(pair), context)...}; },
-      ZipTuple(a, b));
+    return detail::TransformTuplePairs(a, b, [&](const auto &x, const auto &y)
+                                       { return krys::boo::style::Blend(x, y, context); });
   }
 
   template <typename StyleType>
   KRYS_NODISCARD auto BlendOnTupleLike(const StyleType &a, const StyleType &b, const RenderStyle &aStyle,
                                        const RenderStyle &bStyle, const auto &context) noexcept -> StyleType
   {
-    return krys::apply(
-      [&](const auto &...pair)
-      {
-        return StyleType {
-          krys::boo::style::Blend(std::get<0>(pair), std::get<1>(pair), aStyle, bStyle, context)...};
-      },
-      ZipTuple(a, b));
+    return detail::TransformTuplePairs(a, b, [&](const auto &x, const auto &y)
+                                       { return krys::boo::style::Blend(x, y, aStyle, bStyle, context); });
   }
 
   // Constrained for `TreatAsOptionalLike`.

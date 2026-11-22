@@ -5,170 +5,74 @@
 #include "Krystal.Core/Numeric.hpp"
 #include "Krystal.Core/TypeTraits.hpp"
 #include <bit>
-#include <utility>
+
+// An enum describes its range with hooks declared beside it, in its namespace (or as friends of the class
+// it's nested in), which are found by argument-dependent lookup:
+//
+//   consteval E MaxEnumValue(E) noexcept;   // Its highest enumerator, for EnumSet and EnumBitWidth.
+//   consteval E MinEnumValue(E) noexcept;   // Its lowest, where that isn't 0.
+//
+// Without MaxEnumValue an EnumSet takes 64 bits; without MinEnumValue the lowest value is taken to be 0.
 
 namespace krys
 {
-  template <typename TEnum>
-  struct EnumTraits
-  {
-    /// @brief Total number of distinct values defined in the enum.
-    constexpr static underlying_t<TEnum> DistinctValues = static_cast<underlying_t<TEnum>>(0uz);
-
-    /// @brief True if the enum values are contiguous from 0 to the highest distinct value.
-    constexpr static bool Contiguous = false;
-
-    /// @brief True if the enum is used as a bitfield (flags), with each distinct value being a power of two.
-    constexpr static bool BitwiseFlags = false;
+  /// @brief Whether @p E declares its highest enumerator with a `MaxEnumValue` hook.
+  template <typename E>
+  concept HasMaxEnumValue = IsEnum<E> && requires {
+    { MaxEnumValue(E {}) } -> SameType<E>;
   };
 
-// Helper to define enum traits for enums.
-#define KRYS_SPECIALIZE_ENUM_TRAITS_BEGIN(EnumName)                                                          \
-  namespace krys                                                                                             \
-  {                                                                                                          \
-    template <>                                                                                              \
-    struct EnumTraits<EnumName>                                                                              \
-    {
-#define KRYS_SPECIALIZE_ENUM_TRAITS_END()                                                                    \
-  }                                                                                                          \
-  ;                                                                                                          \
-  }
-
-// Helper to define enum traits for contiguous enums.
-#define KRYS_DEFINE_ENUM_TRAITS(EnumName, DistinctValuesCount, IsContiguous, IsBitwiseFlags)                 \
-  KRYS_SPECIALIZE_ENUM_TRAITS_BEGIN(EnumName)                                                                \
-    constexpr static underlying_t<EnumName> DistinctValues = DistinctValuesCount;                            \
-    constexpr static bool Contiguous = IsContiguous;                                                         \
-    constexpr static bool BitwiseFlags = IsBitwiseFlags;                                                     \
-  KRYS_SPECIALIZE_ENUM_TRAITS_END()
-
-// Helper to define enum traits for enums.
-#define KRYS_DEFINE_CONTIGUOUS_ENUM_TRAITS(EnumName, DistinctValuesCount)                                    \
-  KRYS_DEFINE_ENUM_TRAITS(EnumName, DistinctValuesCount, true, false)
-
-// Helper to define enum traits for bitwise flag enums.
-#define KRYS_DEFINE_FLAGS_ENUM_TRAITS(EnumName, DistinctValuesCount)                                         \
-  KRYS_DEFINE_ENUM_TRAITS(EnumName, DistinctValuesCount, true, true)
-
-  template <typename TEnum>
-  concept ContiguousEnum = IsEnum<TEnum> && EnumTraits<TEnum>::Contiguous;
-
-  template <typename TEnum>
-  concept BitwiseFlagsEnum = IsEnum<TEnum> && EnumTraits<TEnum>::BitwiseFlags;
-
-  /// @brief Count of bits needed to store every distinct value of the enum.
-  template <typename TEnum>
-  KRYS_NODISCARD consteval uint8 BitCount() noexcept
+  namespace detail
   {
-    using Traits = EnumTraits<TEnum>;
-    static_assert(Traits::DistinctValues > 0u, "BitCount(): must have EnumTraits::DistinctValues > 0");
-    static_assert(Traits::Contiguous, "BitCount(): must have EnumTraits::Contiguous = true");
+    template <typename E>
+    concept HasMinEnumValue = IsEnum<E> && requires {
+      { MinEnumValue(E {}) } -> SameType<E>;
+    };
 
-    if constexpr (Traits::BitwiseFlags)
+    /// @brief The lowest value of @p E, as an `int64`: its `MinEnumValue`, or 0.
+    template <typename E>
+    KRYS_NODISCARD consteval int64 MinEnumUnderlying() noexcept
     {
-      return Traits::DistinctValues;
+      if constexpr (HasMinEnumValue<E>)
+      {
+        return static_cast<int64>(ToUnderlying(MinEnumValue(E {})));
+      }
+      else
+      {
+        return 0;
+      }
     }
-    else
+
+    /// @brief The highest value of @p E, as an `int64`.
+    template <HasMaxEnumValue E>
+    KRYS_NODISCARD consteval int64 MaxEnumUnderlying() noexcept
     {
-      return static_cast<uint8>(
-        std::bit_width(static_cast<underlying_t<TEnum>>((Traits::DistinctValues - 1uz))));
+      constexpr auto max = static_cast<int64>(ToUnderlying(MaxEnumValue(E {})));
+      static_assert(max >= MinEnumUnderlying<E>(),
+                    "MaxEnumValue is below MinEnumValue (or below 0 without one)");
+      return max;
+    }
+
+    template <HasMaxEnumValue E>
+    KRYS_NODISCARD consteval uint8 EnumBitWidth() noexcept
+    {
+      constexpr int64 min = MinEnumUnderlying<E>();
+      constexpr int64 max = MaxEnumUnderlying<E>();
+      if constexpr (min >= 0)
+      {
+        return static_cast<uint8>(std::bit_width(static_cast<uint64>(max)));
+      }
+      else
+      {
+        static_assert(Signed<underlying_t<E>>, "An enum with negative values needs a signed underlying type");
+        const auto magnitude = std::bit_width(static_cast<uint64>(max > 0 ? max : 0));
+        const auto negativeMagnitude = std::bit_width(static_cast<uint64>(~min));
+        return static_cast<uint8>(1 + (magnitude > negativeMagnitude ? magnitude : negativeMagnitude));
+      }
     }
   }
 
-  template <BitwiseFlagsEnum TEnum>
-  KRYS_NODISCARD constexpr TEnum operator|(TEnum lhs, TEnum rhs) noexcept
-  {
-    using U = underlying_t<TEnum>;
-    return static_cast<TEnum>(static_cast<U>(lhs) | static_cast<U>(rhs));
-  }
-
-  template <Integral T, BitwiseFlagsEnum TEnum>
-  KRYS_NODISCARD constexpr T operator|(T lhs, TEnum rhs) noexcept
-  {
-    using U = underlying_t<TEnum>;
-    return static_cast<T>(lhs | static_cast<U>(rhs));
-  }
-
-  template <BitwiseFlagsEnum TEnum>
-  constexpr TEnum &operator|=(TEnum &lhs, TEnum rhs) noexcept
-  {
-    lhs = lhs | rhs;
-    return lhs;
-  }
-
-  template <Integral T, BitwiseFlagsEnum TEnum>
-  constexpr T &operator|=(T &lhs, TEnum rhs) noexcept
-  {
-    lhs = lhs | rhs;
-    return lhs;
-  }
-
-  template <BitwiseFlagsEnum TEnum>
-  KRYS_NODISCARD constexpr TEnum operator&(TEnum lhs, TEnum rhs) noexcept
-  {
-    using U = underlying_t<TEnum>;
-    return static_cast<TEnum>(static_cast<U>(lhs) & static_cast<U>(rhs));
-  }
-
-  template <Integral T, BitwiseFlagsEnum TEnum>
-  KRYS_NODISCARD constexpr T operator&(T lhs, TEnum rhs) noexcept
-  {
-    using U = underlying_t<TEnum>;
-    return static_cast<T>(lhs & static_cast<U>(rhs));
-  }
-
-  template <BitwiseFlagsEnum TEnum>
-  constexpr TEnum &operator&=(TEnum &lhs, TEnum rhs) noexcept
-  {
-    lhs = lhs & rhs;
-    return lhs;
-  }
-
-  template <Integral T, BitwiseFlagsEnum TEnum>
-  constexpr T &operator&=(T &lhs, TEnum rhs) noexcept
-  {
-    lhs = lhs & rhs;
-    return lhs;
-  }
-
-  template <BitwiseFlagsEnum TEnum>
-  KRYS_NODISCARD constexpr TEnum operator~(TEnum value) noexcept
-  {
-    using U = underlying_t<TEnum>;
-    return static_cast<TEnum>(~static_cast<U>(value));
-  }
-
-  template <BitwiseFlagsEnum TEnum>
-  KRYS_NODISCARD constexpr TEnum operator^(TEnum lhs, TEnum rhs) noexcept
-  {
-    using U = underlying_t<TEnum>;
-    return static_cast<TEnum>(static_cast<U>(lhs) ^ static_cast<U>(rhs));
-  }
-
-  template <Integral T, BitwiseFlagsEnum TEnum>
-  KRYS_NODISCARD constexpr T operator^(T lhs, TEnum rhs) noexcept
-  {
-    using U = underlying_t<TEnum>;
-    return static_cast<T>(lhs ^ static_cast<U>(rhs));
-  }
-
-  template <BitwiseFlagsEnum TEnum>
-  constexpr TEnum &operator^=(TEnum &lhs, TEnum rhs) noexcept
-  {
-    lhs = lhs ^ rhs;
-    return lhs;
-  }
-
-  template <BitwiseFlagsEnum TEnum>
-  KRYS_NODISCARD constexpr bool operator!(TEnum value) noexcept
-  {
-    return ToUnderlying<TEnum>(value) == 0;
-  }
-
-  template <BitwiseFlagsEnum TEnum>
-  KRYS_NODISCARD constexpr bool HasFlag(TEnum value, TEnum flag) noexcept
-  {
-    using U = underlying_t<TEnum>;
-    return (static_cast<U>(value) & static_cast<U>(flag)) == static_cast<U>(flag);
-  }
+  /// @brief The width a bit-field needs to hold any value of @p E.
+  template <HasMaxEnumValue E>
+  constexpr uint8 EnumBitWidth = detail::EnumBitWidth<E>();
 }

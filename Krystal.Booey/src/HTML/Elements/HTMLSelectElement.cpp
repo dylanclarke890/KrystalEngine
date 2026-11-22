@@ -1556,7 +1556,7 @@ namespace krys::boo
 
   void HTMLSelectElement::SelectOption(int32 optionIndex, SelectOptionFlags flags) noexcept
   {
-    bool shouldDeselect = !_multiple || flags.Contains(SelectOptionFlag::DeselectOtherOptions);
+    bool shouldDeselect = !_multiple || flags.contains(SelectOptionFlag::DeselectOtherOptions);
 
     auto &items = ListItems();
     int32 listIndex = OptionToListIndex(optionIndex);
@@ -1590,7 +1590,7 @@ namespace krys::boo
     }
 
     // Picking an option sends select update notifications, which update the selectedcontent elements.
-    if (flags.Contains(SelectOptionFlag::UserDriven))
+    if (flags.contains(SelectOptionFlag::UserDriven))
     {
       html::FormControlAlgorithms::UpdateDescendantSelectedContents(*this);
     }
@@ -1608,8 +1608,8 @@ namespace krys::boo
 
     if (UsesMenuList())
     {
-      _isProcessingUserDrivenChange = flags.Contains(SelectOptionFlag::UserDriven);
-      if (flags.Contains(SelectOptionFlag::DispatchChangeEvent))
+      _isProcessingUserDrivenChange = flags.contains(SelectOptionFlag::UserDriven);
+      if (flags.contains(SelectOptionFlag::DispatchChangeEvent))
       {
         DispatchChangeEventForMenuList();
       }

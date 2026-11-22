@@ -67,8 +67,8 @@
 #include "Krystal.Booey/Rendering/RenderElement.hpp"
 #include "Krystal.Booey/Style/Invalidation/PseudoClassChangeInvalidation.hpp"
 #include "Krystal.Booey/Text/WritingMode.hpp"
+#include "Krystal.Core/Containers/EnumSet.hpp"
 #include "Krystal.Core/Strings/ASCII.hpp"
-#include "Krystal.Core/Types/EnumSet.hpp"
 #include <array>
 
 namespace krys::boo::html
@@ -179,37 +179,37 @@ namespace krys::boo::html
 
   bool InputType::IsTextButton() const noexcept
   {
-    return TextButtonTypes.Contains(_type);
+    return TextButtonTypes.contains(_type);
   }
 
   bool InputType::IsTextField() const noexcept
   {
-    return TextFieldTypes.Contains(_type);
+    return TextFieldTypes.contains(_type);
   }
 
   bool InputType::IsTextType() const noexcept
   {
-    return TextTypes.Contains(_type);
+    return TextTypes.contains(_type);
   }
 
   bool InputType::IsCheckable() const noexcept
   {
-    return CheckableTypes.Contains(_type);
+    return CheckableTypes.contains(_type);
   }
 
   bool InputType::IsSteppable() const noexcept
   {
-    return SteppableTypes.Contains(_type);
+    return SteppableTypes.contains(_type);
   }
 
   bool InputType::SupportsValidation() const noexcept
   {
-    return !NonValidatingTypes.Contains(_type);
+    return !NonValidatingTypes.contains(_type);
   }
 
   bool InputType::HasActivationBehavior() const noexcept
   {
-    return ActivationBehaviorTypes.Contains(_type);
+    return ActivationBehaviorTypes.contains(_type);
   }
 
   bool InputType::IsValidValue(DOMStringView value) const noexcept

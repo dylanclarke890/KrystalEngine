@@ -1,22 +1,14 @@
 ﻿#include "Krystal.Booey/DOM/Iterators/ComposedTreeIterator.hpp"
 #include "catch2/catch_test_macros.hpp"
+#include "Krystal.Booey.Tests/DOM/DOMTestUtils.hpp"
 #include "Krystal.Booey.Tests/Style/ResolverTestUtils.hpp"
 #include "Krystal.Booey/DOM/Iterators/ComposedTreeAncestorIterator.hpp"
 #include "Krystal.Booey/DOM/Nodes/ShadowRoot.hpp"
 
 namespace krys::boo::dom::tests
 {
+  using boo::tests::CreateElement;
   using style::tests::ResolverFixture;
-
-  namespace
-  {
-    KRYS_NODISCARD Ref<Element> Create(Document &document, DOMStringAtom localName)
-    {
-      auto element = document.CreateElement(krys::move(localName));
-      REQUIRE_FALSE(element.HasException());
-      return element.ReleaseValue();
-    }
-  }
 
   TEST_CASE_METHOD(css::tests::ValueFixture, "ComposedTreeIterator", "[DOM][ComposedTree]")
   {
@@ -24,8 +16,8 @@ namespace krys::boo::dom::tests
       u8R"(<!DOCTYPE html><body><div id=host><span id=a></span><b id=unassigned slot=x></b>text</div><p id=after></p>)");
     auto &host = *document->GetElementById(u8"host");
     auto shadow = host.AttachShadow({}).ReleaseValue();
-    auto inner = Create(*document, u8"i");
-    auto slot = Create(*document, u8"slot");
+    auto inner = CreateElement(*document, u8"i");
+    auto slot = CreateElement(*document, u8"slot");
     REQUIRE_FALSE(shadow->AppendChild(*inner).HasException());
     REQUIRE_FALSE(shadow->AppendChild(*slot).HasException());
 

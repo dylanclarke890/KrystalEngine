@@ -1,12 +1,14 @@
 ﻿#pragma once
 
-#include "Krystal.Booey/HTML/Canvas/EngineTexture.hpp"
 #include "Krystal.Booey/HTML/Canvas/GPUBasedCanvasRenderingContext.hpp"
 #include "Krystal.Core/Geometry/Rect.hpp"
+#include "Krystal.Core/Strings/String.hpp"
 #include "Krystal.Core/Types/Maybe.hpp"
 
 namespace krys::boo::html
 {
+  class EngineTexture;
+
   /// @brief A canvas context that shows a texture the host draws (`getContext("krystal-texture")`).
   /// @note The canvas's `width` and `height` are its natural size, whatever the texture's; the texture is
   /// scaled to it. A host that wants them to match resizes its texture when the canvas resizes.
@@ -19,6 +21,8 @@ namespace krys::boo::html
     constexpr static utf8_stringview ContextType = u8"krystal-texture";
 
     explicit EngineTextureRenderingContext(CanvasBase &canvas) noexcept;
+
+    ~EngineTextureRenderingContext() noexcept override;
 
     /// @brief Shows @p texture, or nothing if it's null.
     void SetTexture(RefPtr<EngineTexture> texture) noexcept;

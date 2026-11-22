@@ -3,6 +3,7 @@
 #include "Krystal.Booey.Tests/Loader/PageInFrameFixture.hpp"
 #include "Krystal.Booey.Tests/Loader/TestLoader.hpp"
 #include "Krystal.Booey.Tests/Rendering/PaintTestUtils.hpp"
+#include "Krystal.Booey.Tests/StringTestUtils.hpp"
 #include "Krystal.Booey/DOM/Nodes/Document.hpp"
 #include "Krystal.Booey/Graphics/Images/BitmapImage.hpp"
 #include "Krystal.Booey/Graphics/Images/Image.hpp"
@@ -20,12 +21,6 @@ namespace krys::boo::tests
 {
   namespace
   {
-    /// @brief @p text as a `std::string`, which Catch can print.
-    KRYS_NODISCARD std::string Narrow(utf8_stringview text) noexcept
-    {
-      return std::string(text.begin(), text.end());
-    }
-
     // 400x400 decodes to 640KB, over the 500KB that makes a still image large for decoding.
     constexpr uint8 LargePNG[] = {
       137, 80,  78,  71,  13,  10,  26,  10,  0,   0,   0,   13,  73,  72,  68,  82,  0,   0,   1,   144, 0,

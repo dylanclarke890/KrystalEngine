@@ -51,33 +51,34 @@ namespace krys::boo::style
       return css::keywords::Auto {};
     }
 
-    auto images = CursorImageList::createWithSizeFromGenerator(
-      list->size() - 1,
-      [&](auto index)
-      {
-        const auto &item = list->item(static_cast<uint32>(index));
-        auto *image = RequiredDowncast<css::CursorImageValue>(state, item);
-        if (!image)
-        {
-          return CursorImage {StyleInvalidImage::Create()};
-        }
+    auto images = CursorImageList(
+      std::from_range, std::views::iota(0uz, list->size() - 1)
+                         | std::views::transform(
+                           [&](auto index)
+                           {
+                             const auto &item = (*list)[static_cast<uint32>(index)];
+                             auto *image = RequiredDowncast<css::CursorImageValue>(state, item);
+                             if (!image)
+                             {
+                               return CursorImage {StyleInvalidImage::Create()};
+                             }
 
-        auto styleImage = image->CreateStyleImage(state);
-        if (!styleImage)
-        {
-          state.SetCurrentPropertyInvalidAtComputedValueTime();
-          return CursorImage {StyleInvalidImage::Create()};
-        }
+                             auto styleImage = image->CreateStyleImage(state);
+                             if (!styleImage)
+                             {
+                               state.SetCurrentPropertyInvalidAtComputedValueTime();
+                               return CursorImage {StyleInvalidImage::Create()};
+                             }
 
-        // Point outside the image is how we tell the cursor machinery there is no hot spot, and it should
-        // generate one (done in the Cursor class).
-        // FIXME: Would it be better to extend the concept of "no hot spot" deeper, into CursorImage and
-        // beyond, rather than using -1/-1 for it?
-        auto hotSpot = styleImage->HotSpot().value_or(PointI {-1, -1});
-        return CursorImage {Ref<StyleImage> {krys::move(styleImage)}, hotSpot};
-      });
+                             // Point outside the image is how we tell the cursor machinery there is no hot
+                             // spot, and it should generate one (done in the Cursor class).
+                             // FIXME: Would it be better to extend the concept of "no hot spot" deeper, into
+                             // CursorImage and beyond, rather than using -1/-1 for it?
+                             auto hotSpot = styleImage->HotSpot().value_or(PointI {-1, -1});
+                             return CursorImage {Ref<StyleImage> {krys::move(styleImage)}, hotSpot};
+                           }));
 
-    return {krys::move(images), FromCSSValue<CursorType>(list->item(list->size() - 1))};
+    return {krys::move(images), FromCSSValue<CursorType>((*list)[list->size() - 1])};
   }
 
   Ref<css::Value> CSSValueCreation<CursorImage>::operator()(css::ValuePool &, const RenderStyle &style,

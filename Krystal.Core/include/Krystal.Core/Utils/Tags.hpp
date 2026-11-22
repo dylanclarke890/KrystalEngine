@@ -13,12 +13,4 @@ namespace krys
   struct EmptyTag
   {
   };
-
-  struct HashTableDeletedValueTag
-  {
-  };
-
-  struct HashTableEmptyValueTag
-  {
-  };
 }

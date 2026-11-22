@@ -121,12 +121,12 @@ namespace krys::ui::tests
       /// @brief Flushes the tree, paints what's dirty of its layers and composites it.
       KRYS_NODISCARD GoldenImage Composite(GraphicsLayerTextureMapper &root)
       {
-        auto target =
-          Device->CreateTexture({.Format = gfx::TextureFormat::RGBA8Unorm,
-                                 .Width = Width,
-                                 .Height = Height,
-                                 .Usage = gfx::TextureUsage::RenderTarget | gfx::TextureUsage::Sampled,
-                                 .DebugName = u8"Compositing"});
+        auto target = Device->CreateTexture(
+          {.Format = gfx::TextureFormat::RGBA8Unorm,
+           .Width = Width,
+           .Height = Height,
+           .Usage = EnumSet<gfx::TextureUsage> {gfx::TextureUsage::RenderTarget, gfx::TextureUsage::Sampled},
+           .DebugName = u8"Compositing"});
         REQUIRE(target.has_value());
 
         const RectI viewRect(0, 0, static_cast<int32>(Width), static_cast<int32>(Height));

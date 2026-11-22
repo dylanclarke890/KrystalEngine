@@ -29,8 +29,8 @@
 #include "Krystal.Booey/Graphics/Fonts/FontCascadeCache.hpp"
 #include "Krystal.Booey/Graphics/Fonts/FontPaletteValues.hpp"
 #include "Krystal.Booey/Graphics/Fonts/FontRanges.hpp"
-#include "Krystal.Core/Types/HashMap.hpp"
-#include "Krystal.Core/Types/SmallList.hpp"
+#include "Krystal.Core/Containers/HashMap.hpp"
+#include "Krystal.Core/Containers/SmallList.hpp"
 
 namespace krys::boo::css
 {

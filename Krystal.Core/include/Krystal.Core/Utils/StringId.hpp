@@ -1,7 +1,8 @@
 ﻿#pragma once
 
 #include "Krystal.Core/Attributes.hpp"
-#include "Krystal.Core/Hash.hpp"
+#include "Krystal.Core/Hashing/FastHash.hpp"
+#include "Krystal.Core/Hashing/StableHash.hpp"
 #include "Krystal.Core/Strings/String.hpp"
 #include <xhash>
 
@@ -24,14 +25,14 @@ namespace krys
 
     /// @brief Constructs a `StringId` with the given string to hash.
     /// @param text The string to hash.
-    explicit constexpr StringId(const string &text) noexcept : _hash(fnv1a32(text.c_str(), text.size()))
+    explicit constexpr StringId(const string &text) noexcept : _hash(Fnv1a32(text))
     {
     }
 
     /// @brief Constructs a `StringId` with the given string to hash.
     /// @param text The string to hash.
     /// @param size The size of the string to hash.
-    constexpr StringId(const char *text, size_t size) noexcept : _hash(fnv1a32(text, size))
+    constexpr StringId(const char *text, size_t size) noexcept : _hash(Fnv1a32(stringview(text, size)))
     {
     }
 
@@ -59,20 +60,13 @@ namespace krys
   {
     return StringId(s, count);
   }
-}
 
-namespace std
-{
-  /// @brief Hash function for `krys::StringId`.
   template <>
-  struct hash<krys::StringId>
+  struct FastHash<StringId>
   {
-    /// @brief Computes the hash of a `krys::StringId`.
-    /// @param id The `krys::StringId` to hash.
-    /// @return The hash value.
-    KRYS_NODISCARD size_t operator()(const krys::StringId &id) const noexcept
+    KRYS_NODISCARD size_t operator()(StringId id) const noexcept
     {
-      return static_cast<size_t>(id);
+      return FastHash<uint32> {}(static_cast<uint32>(id));
     }
   };
 }

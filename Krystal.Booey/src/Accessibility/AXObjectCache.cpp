@@ -78,6 +78,7 @@
 #include "Krystal.Booey/Rendering/RenderElement.hpp"
 #include "Krystal.Booey/Rendering/RenderObject.hpp"
 #include "Krystal.Booey/Rendering/RenderView.hpp"
+#include "Krystal.Booey/Style/Values/Color/Opacity.hpp"
 #include "Krystal.Booey/SVG/Elements/SVGElement.hpp"
 #include "Krystal.Core/Utils/SetForScope.hpp"
 #include <utility>
@@ -571,11 +572,11 @@ namespace krys::boo
     {
       _scrollViewID = null;
     }
-    _deferredChildrenChangedList.remove(id);
-    _changedLiveRegions.remove(id);
-    _deferredRendererChangedList.remove(id);
-    _deferredRecomputeTableIsExposedList.remove(id);
-    _deferredRecomputeTableCellSlotsList.remove(id);
+    _deferredChildrenChangedList.erase(id);
+    _changedLiveRegions.erase(id);
+    _deferredRendererChangedList.erase(id);
+    _deferredRecomputeTableIsExposedList.erase(id);
+    _deferredRecomputeTableCellSlotsList.erase(id);
   }
 
   void AXObjectCache::Remove(RenderObject &renderer) noexcept
@@ -588,7 +589,7 @@ namespace krys::boo
         if (object->SetRendererIfNeeded(nullptr))
         {
           // The object still needs updating for the renderer it lost.
-          _deferredRendererChangedList.add(object->ObjectID());
+          _deferredRendererChangedList.insert(object->ObjectID());
         }
       }
       return;
@@ -619,13 +620,13 @@ namespace krys::boo
       Remove(*renderer);
     }
 
-    _deferredTextChangedList.remove(&node);
+    _deferredTextChangedList.erase(&node);
     if (auto *element = DynamicDowncast<boo::Element>(node))
     {
-      _deferredRecomputeIsIgnoredList.remove(element);
-      _deferredSelectedChildrenChangedList.remove(element);
-      _deferredElementAddedOrRemovedList.remove(element);
-      _deferredModalChangedList.remove(element);
+      _deferredRecomputeIsIgnoredList.erase(element);
+      _deferredSelectedChildrenChangedList.erase(element);
+      _deferredElementAddedOrRemovedList.erase(element);
+      _deferredModalChangedList.erase(element);
       std::erase(_modalElements, element);
       if (_currentModalElement == element)
       {
@@ -686,7 +687,7 @@ namespace krys::boo
     {
       return;
     }
-    _deferredElementAddedOrRemovedList.add(element);
+    _deferredElementAddedOrRemovedList.insert(element);
     if (IsModalElement(*element))
     {
       DeferModalChange(*element);
@@ -848,7 +849,7 @@ namespace krys::boo
 
   void AXObjectCache::DeferModalChange(boo::Element &element) noexcept
   {
-    _deferredModalChangedList.add(&element);
+    _deferredModalChangedList.insert(&element);
     StartPerformCacheUpdateTimer();
   }
 
@@ -902,7 +903,7 @@ namespace krys::boo
   void AXObjectCache::PostLiveRegionChangeNotification(AXObject &object) noexcept
   {
     // A region can change many times in one task (each child added, say): it's told once.
-    _changedLiveRegions.add(object.ObjectID());
+    _changedLiveRegions.insert(object.ObjectID());
     if (!_notificationPostTimer.IsActive())
     {
       _notificationPostTimer.StartOneShot({});
@@ -935,7 +936,7 @@ namespace krys::boo
     {
       return;
     }
-    _deferredChildrenChangedList.add(object->ObjectID());
+    _deferredChildrenChangedList.insert(object->ObjectID());
 
     // Adding or removing rows can make a layout table a data table or the other way round.
     auto *element = object->GetElement();
@@ -959,13 +960,13 @@ namespace krys::boo
     {
       return;
     }
-    _deferredRecomputeTableIsExposedList.add(object->ObjectID());
+    _deferredRecomputeTableIsExposedList.insert(object->ObjectID());
     StartPerformCacheUpdateTimer();
   }
 
   void AXObjectCache::DeferRecomputeTableCellSlots(AXNodeObject &table) noexcept
   {
-    _deferredRecomputeTableCellSlotsList.add(table.ObjectID());
+    _deferredRecomputeTableCellSlotsList.insert(table.ObjectID());
     StartPerformCacheUpdateTimer();
   }
 
@@ -1059,7 +1060,7 @@ namespace krys::boo
   {
     // Handling a change can defer another (an object's ignored state changing), so repeat until none are
     // left.
-    while (!_deferredChildrenChangedList.isEmpty())
+    while (!_deferredChildrenChangedList.empty())
     {
       auto deferred = std::exchange(_deferredChildrenChangedList, {});
       List<Ref<AXObject>> objects;
@@ -1112,7 +1113,7 @@ namespace krys::boo
     {
       return;
     }
-    _deferredRecomputeIsIgnoredList.add(element);
+    _deferredRecomputeIsIgnoredList.insert(element);
     StartPerformCacheUpdateTimer();
   }
 
@@ -1179,7 +1180,7 @@ namespace krys::boo
     };
     auto recomputeParentTableProperties = [this, &element](EnumSet<TableProperty> properties)
     {
-      if (!properties.Contains(TableProperty::CellSlots))
+      if (!properties.contains(TableProperty::CellSlots))
       {
         // Only non-ARIA tables (ARIA ones are always exposed) can change whether they're exposed.
         if (IsHTMLTablePart(element))
@@ -1202,7 +1203,7 @@ namespace krys::boo
       }
       if (auto *parentTable = DynamicDowncast<AXNodeObject>(object->ParentTable()))
       {
-        if (properties.Contains(TableProperty::Exposed) && !parentTable->IsAriaTable())
+        if (properties.contains(TableProperty::Exposed) && !parentTable->IsAriaTable())
         {
           DeferRecomputeTableIsExposed(parentTable->GetElement());
         }
@@ -1734,7 +1735,7 @@ namespace krys::boo
     {
       targets.clear();
     }
-    targets.add(targetID);
+    targets.insert(targetID);
     _relationTargets.insert(targetID);
 
     if (relation == AXRelation::OwnerFor)
@@ -1867,7 +1868,7 @@ namespace krys::boo
     }
     auto targetIDs = krys::move(targets->second);
     relations->second.erase(targets);
-    bool removedRelation = !targetIDs.isEmpty();
+    bool removedRelation = !targetIDs.empty();
 
     if (auto symmetric = SymmetricRelation(relation); symmetric != AXRelation::None)
     {
@@ -1934,7 +1935,7 @@ namespace krys::boo
     }
     if (auto targets = relations->second.find(relation); targets != relations->second.end())
     {
-      targets->second.remove(targetID);
+      targets->second.erase(targetID);
     }
   }
 
@@ -2285,7 +2286,7 @@ namespace krys::boo
     }
     if (RendererNeedsDeferredUpdate(*node->Renderer()))
     {
-      _deferredTextChangedList.add(node);
+      _deferredTextChangedList.insert(node);
       StartPerformCacheUpdateTimer();
       return;
     }
@@ -2365,7 +2366,7 @@ namespace krys::boo
     }
     if (RendererNeedsDeferredUpdate(*select.Renderer()))
     {
-      _deferredSelectedChildrenChangedList.add(&select);
+      _deferredSelectedChildrenChangedList.insert(&select);
       StartPerformCacheUpdateTimer();
       return;
     }
@@ -2662,7 +2663,7 @@ namespace krys::boo
     {
       if (object->SetRendererIfNeeded(node.Renderer()))
       {
-        _deferredRendererChangedList.add(object->ObjectID());
+        _deferredRendererChangedList.insert(object->ObjectID());
         StartPerformCacheUpdateTimer();
       }
     }
@@ -2762,7 +2763,7 @@ namespace krys::boo
     {
       if (auto *object = IsHTMLElementNamed(*child, u8"summary") ? Get(*child) : nullptr)
       {
-        _deferredRendererChangedList.add(object->ObjectID());
+        _deferredRendererChangedList.insert(object->ObjectID());
         StartPerformCacheUpdateTimer();
       }
     }

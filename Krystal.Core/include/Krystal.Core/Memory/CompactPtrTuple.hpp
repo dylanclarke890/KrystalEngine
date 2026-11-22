@@ -1,0 +1,410 @@
+﻿/*
+ * Copyright (C) 2018 Yusuke Suzuki <utatane.tea@gmail.com>.
+ * Copyright (C) 2020 Apple Inc. All rights reserved.
+ *
+ * Redistribution and use in source and binary forms, with or without
+ * modification, are permitted provided that the following conditions
+ * are met:
+ * 1. Redistributions of source code must retain the above copyright
+ *    notice, this list of conditions and the following disclaimer.
+ * 2. Redistributions in binary form must reproduce the above copyright
+ *    notice, this list of conditions and the following disclaimer in the
+ *    documentation and/or other materials provided with the distribution.
+ *
+ * THIS SOFTWARE IS PROVIDED BY APPLE INC. ``AS IS'' AND ANY
+ * EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE
+ * IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR
+ * PURPOSE ARE DISCLAIMED.  IN NO EVENT SHALL APPLE INC. OR
+ * CONTRIBUTORS BE LIABLE FOR ANY DIRECT, INDIRECT, INCIDENTAL, SPECIAL,
+ * EXEMPLARY, OR CONSEQUENTIAL DAMAGES (INCLUDING, BUT NOT LIMITED TO,
+ * PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES; LOSS OF USE, DATA, OR
+ * PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND ON ANY THEORY
+ * OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT
+ * (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
+ * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
+ */
+
+#pragma once
+
+#include "Krystal.Core/Attributes.hpp"
+#include "Krystal.Core/Concepts.hpp"
+#include "Krystal.Core/Detection/AddressSpaceBitSize.hpp"
+#include "Krystal.Core/Detection/OS.hpp"
+#include "Krystal.Core/Memory/AllowCompactPointers.hpp"
+#include "Krystal.Core/Move.hpp"
+#include "Krystal.Core/Numeric.hpp"
+#include "Krystal.Core/TypeTraits.hpp"
+#include <bit>
+
+#if KRYS_OS(DARWIN)
+  #include <mach/vm_param.h>
+#endif
+
+namespace krys
+{
+  template <typename T>
+  class CompactPtr
+  {
+    static_assert(krys::AllowsCompactPointers<T *>());
+
+    template <typename X>
+    friend class CompactPtr;
+
+  public:
+    using storage_type = uintptr_t;
+
+    constexpr static bool Is32Bit = false;
+    constexpr static bool IsCompactedType = true;
+
+  private:
+    // 0x16 (encoded as 1) is within the first unmapped page for nullptr. Thus, it never appears.
+    constexpr static storage_type DeletedStorageValue = 1;
+
+    storage_type _ptr {0};
+
+  public:
+    KRYS_ALWAYS_INLINE constexpr CompactPtr() noexcept = default;
+
+    KRYS_ALWAYS_INLINE constexpr ~CompactPtr() noexcept = default;
+
+    KRYS_ALWAYS_INLINE constexpr CompactPtr(std::nullptr_t) noexcept
+    {
+    }
+
+    KRYS_ALWAYS_INLINE constexpr CompactPtr(T *ptr) noexcept
+    {
+      set(ptr);
+    }
+
+    KRYS_ALWAYS_INLINE constexpr CompactPtr(const CompactPtr &other) noexcept = default;
+
+    template <typename X>
+    KRYS_ALWAYS_INLINE constexpr CompactPtr(const CompactPtr<X> &other) noexcept : _ptr(other._ptr)
+    {
+      static_assert(ConvertibleTo<X *, T *>);
+    }
+
+    KRYS_ALWAYS_INLINE constexpr CompactPtr(CompactPtr &&other) noexcept
+    {
+      swap(other);
+    }
+
+    template <typename X>
+    // NOLINTNEXTLINE(cppcoreguidelines-rvalue-reference-param-not-moved): taken over by exchange.
+    KRYS_ALWAYS_INLINE constexpr CompactPtr(CompactPtr<X> &&other) noexcept : _ptr(other._ptr)
+    {
+      static_assert(ConvertibleTo<X *, T *>);
+      std::exchange(other._ptr, 0);
+    }
+
+    constexpr T &operator*() const noexcept
+    {
+      return *get();
+    }
+
+    KRYS_ALWAYS_INLINE constexpr T *operator->() const noexcept
+    {
+      return get();
+    }
+
+    constexpr bool operator!() const noexcept
+    {
+      return !get();
+    }
+
+    explicit constexpr operator bool() const noexcept
+    {
+      return !!get();
+    }
+
+    constexpr CompactPtr<T> &operator=(std::nullptr_t) noexcept
+    {
+      exchange(nullptr);
+      return *this;
+    }
+
+    constexpr CompactPtr<T> &operator=(const CompactPtr &other) noexcept
+    {
+      if (&other == this)
+      {
+        return *this;
+      }
+
+      CompactPtr copy(other);
+      swap(copy);
+      return *this;
+    }
+
+    template <typename X>
+    constexpr CompactPtr<T> &operator=(const CompactPtr<X> &other) noexcept
+    {
+      static_assert(ConvertibleTo<X *, T *>);
+      CompactPtr copy(other);
+      swap(copy);
+      return *this;
+    }
+
+    constexpr CompactPtr<T> &operator=(T *optr) noexcept
+    {
+      CompactPtr copy(optr);
+      swap(copy);
+      return *this;
+    }
+
+    constexpr CompactPtr<T> &operator=(CompactPtr &&other) noexcept
+    {
+      CompactPtr moved(krys::move(other));
+      swap(moved);
+      return *this;
+    }
+
+    template <typename X>
+    constexpr CompactPtr<T> &operator=(CompactPtr<X> &&other) noexcept
+    {
+      static_assert(ConvertibleTo<X *, T *>);
+      CompactPtr moved(krys::move(other));
+      swap(moved);
+      return *this;
+    }
+
+    constexpr T *get() const noexcept
+    {
+      return Decode(_ptr);
+    }
+
+    constexpr void set(T *ptr) noexcept
+    {
+      _ptr = Encode(ptr);
+    }
+
+    template <class U>
+    constexpr T *exchange(U &&newValue) noexcept
+    {
+      T *oldValue = get();
+      set(std::forward<U>(newValue));
+      return oldValue;
+    }
+
+    constexpr void swap(std::nullptr_t) noexcept
+    {
+      set(nullptr);
+    }
+
+    constexpr void swap(CompactPtr &other) noexcept
+    {
+      std::swap(_ptr, other._ptr);
+    }
+
+    template <typename TOther>
+    requires(TOther::IsCompactedType)
+    constexpr void swap(TOther &other) noexcept
+    {
+      T *t1 = get();
+      T *t2 = other.get();
+      set(t2);
+      other.set(t1);
+    }
+
+    constexpr void swap(T *&t2) noexcept
+    {
+      T *t1 = get();
+      std::swap(t1, t2);
+      set(t1);
+    }
+
+    constexpr static KRYS_ALWAYS_INLINE storage_type Encode(T *ptr) noexcept
+    {
+      uintptr_t intPtr = std::bit_cast<uintptr_t>(ptr);
+      return intPtr;
+    }
+
+    constexpr static KRYS_ALWAYS_INLINE T *Decode(storage_type ptr) noexcept
+    {
+      return std::bit_cast<T *>(ptr);
+    }
+
+    template <typename U>
+    friend constexpr bool operator==(const CompactPtr &a, const CompactPtr<U> &b) noexcept
+    {
+      return a._ptr == b._ptr;
+    }
+
+    constexpr storage_type GetStorage() const noexcept
+    {
+      return _ptr;
+    }
+  };
+
+  template <typename T, typename U>
+  constexpr bool operator==(const CompactPtr<T> &a, U *b) noexcept
+  {
+    return a.get() == b;
+  }
+
+  template <typename T>
+  struct CompactPtrTraits
+  {
+    using storage_type = CompactPtr<T>;
+
+    constexpr static bool Is32Bit = storage_type::Is32Bit;
+
+    template <typename U>
+    // NOLINTNEXTLINE(cppcoreguidelines-missing-std-forward): a pointer, copied either way.
+    KRYS_ALWAYS_INLINE constexpr static T *exchange(storage_type &ptr, U &&newValue) noexcept
+    {
+      return ptr.exchange(newValue);
+    }
+
+    template <typename Other>
+    KRYS_NODISCARD KRYS_ALWAYS_INLINE constexpr static void swap(storage_type &a, Other &b) noexcept
+    {
+      a.swap(b);
+    }
+
+    KRYS_NODISCARD KRYS_ALWAYS_INLINE constexpr static T *unwrap(const storage_type &ptr) noexcept
+    {
+      return ptr.get();
+    }
+  };
+
+  template <typename T>
+  concept CompactablePtr = IsPointer<T> && krys::AllowsCompactPointers<T>();
+
+  template <typename T>
+  concept IntegralOrEnum = Integral<T> || IsEnum<T>;
+
+  /// @brief Folds a pointer and 2 bytes value into 8 bytes in both 32bit and 64bit architectures.
+  /// @note We are assuming 48bit pointers for 64bit architectures. 32bit architecture just has a pair of
+  /// bytes and a pointer, which should be 8 bytes.
+  template <CompactablePtr TPtr, IntegralOrEnum TData>
+  class CompactPtrTuple final
+  {
+    using TUnsigned = make_unsigned_t<conditional_t<SameType<TData, bool>, uint8, TData>>;
+    static_assert(sizeof(TData) <= 2 && sizeof(TUnsigned) == sizeof(TData));
+
+    template <CompactablePtr, IntegralOrEnum>
+    friend class CompactPtrTuple;
+
+  private:
+#if KRYS_ADDRESS_SPACE(64)
+    uint64 _data {0u};
+#else
+    TPtr _ptr {nullptr};
+    TData _data {0};
+#endif
+
+  public:
+    CompactPtrTuple() = default;
+
+    friend bool operator==(const CompactPtrTuple &, const CompactPtrTuple &) = default;
+
+#if KRYS_ADDRESS_SPACE(64)
+
+  public:
+    constexpr static uint8 MaxPtrBits = 48;
+    static_assert(KRYS_EFFECTIVE_ADDRESS_WIDTH <= MaxPtrBits);
+
+    constexpr static uint64_t PtrMask = (1ull << MaxPtrBits) - 1;
+
+    CompactPtrTuple(TPtr ptr, TData data) noexcept : _data(Encode(ptr, data))
+    {
+      krys_assert(this->Data() == data);
+      krys_assert(this->get() == ptr);
+    }
+
+    template <typename TOther>
+    requires(CompactablePtr<TOther> && ConvertibleTo<TOther, TPtr>)
+    // NOLINTNEXTLINE(cppcoreguidelines-rvalue-reference-param-not-moved): taken over by exchange.
+    CompactPtrTuple(CompactPtrTuple<TOther, TData> &&other) noexcept : _data {std::exchange(other._data, {})}
+    {
+    }
+
+    KRYS_NODISCARD constexpr TPtr get() const noexcept
+    {
+      return std::bit_cast<TPtr>(_data & PtrMask);
+    }
+
+    constexpr void SetPtr(TPtr ptr) noexcept
+    {
+      _data = Encode(ptr, Data());
+      krys_assert(this->get() == ptr);
+    }
+
+    KRYS_NODISCARD constexpr TData Data() const noexcept
+    {
+      return DecodeData(_data);
+    }
+
+    constexpr void SetData(TData data) noexcept
+    {
+      _data = Encode(get(), data);
+      krys_assert(this->Data() == data);
+    }
+
+    KRYS_NODISCARD constexpr uint64 data() const noexcept
+    {
+      return _data;
+    }
+
+    constexpr void swap(CompactPtrTuple &other) noexcept
+    {
+      std::swap(_data, other._data);
+    }
+
+  private:
+    KRYS_NODISCARD constexpr static uint64 EncodeData(TData data) noexcept
+    {
+      return static_cast<uint64>(static_cast<TUnsigned>(data)) << MaxPtrBits;
+    }
+
+    KRYS_NODISCARD constexpr static TData DecodeData(uint64_t value) noexcept
+    {
+      return static_cast<TData>(static_cast<TUnsigned>(value >> MaxPtrBits));
+    }
+
+    KRYS_NODISCARD constexpr static uint64 Encode(TPtr pointer, TData data) noexcept
+    {
+      return std::bit_cast<uint64>(pointer) | EncodeData(data);
+    }
+#else
+
+  public:
+    constexpr CompactPtrTuple(TPtr ptr, TData TData) noexcept : _ptr(ptr), _data(TData)
+    {
+    }
+
+    template <IsPointer TOther>
+    requires(ConvertibleTo<TOther, TPtr>)
+    constexpr CompactPtrTuple(CompactPtrTuple<TOther, TData> &&other) noexcept
+        : _ptr {std::exchange(other._ptr, {})}, _data {std::exchange(other._data, {})}
+    {
+    }
+
+    KRYS_NODISCARD constexpr TPtr get() const noexcept
+    {
+      return _ptr;
+    }
+
+    constexpr void SetPtr(TPtr pointer) noexcept
+    {
+      _ptr = pointer;
+    }
+
+    KRYS_NODISCARD constexpr TData Data() const noexcept
+    {
+      return _data;
+    }
+
+    constexpr void SetData(TData data) noexcept
+    {
+      _data = data;
+    }
+
+    constexpr void swap(CompactPtrTuple &other) noexcept
+    {
+      std::swap(_ptr, other._ptr);
+      std::swap(_data, other._data);
+    }
+#endif
+  };
+}

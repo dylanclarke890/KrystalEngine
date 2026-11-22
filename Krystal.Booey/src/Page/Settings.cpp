@@ -1,5 +1,5 @@
 ﻿#include "Krystal.Booey/Page/Settings.hpp"
-#include "Krystal.Core/Threading/NeverDestroyed.hpp"
+#include "Krystal.Core/Memory/NeverDestroyed.hpp"
 
 namespace krys::boo
 {
@@ -11,6 +11,6 @@ namespace krys::boo
   Settings &Settings::Default() noexcept
   {
     static MainThreadNeverDestroyed<Ref<Settings>> settings(Create());
-    return *settings.get();
+    return **settings;
   }
 }

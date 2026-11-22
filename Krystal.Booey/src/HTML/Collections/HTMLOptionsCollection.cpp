@@ -49,6 +49,11 @@ namespace krys::boo::html
     return _selectElement->SetItem(index, option);
   }
 
+  ExceptionOr<void> HTMLOptionsCollection::Add(const OptionOrOptGroupElement &element) noexcept
+  {
+    return Add(element, null);
+  }
+
   ExceptionOr<void> HTMLOptionsCollection::Add(const OptionOrOptGroupElement &element,
                                                const Maybe<HTMLElementOrInt> &before) noexcept
   {

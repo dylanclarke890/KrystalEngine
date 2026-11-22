@@ -29,9 +29,8 @@
 #include "Krystal.Booey/CSS/Values/Value.hpp"
 #include "Krystal.Booey/Graphics/Geometry/BoxSides.hpp"
 #include "Krystal.Booey/Text/WritingMode.hpp"
-#include "Krystal.Core/Types/RefPtr.hpp"
-#include "Krystal.Core/Types/SmallList.hpp"
-#include "Krystal.Core/Types/Span.hpp"
+#include "Krystal.Core/Containers/Span.hpp"
+#include "Krystal.Core/Memory/RefPtr.hpp"
 
 namespace krys::boo::css
 {
@@ -48,8 +47,8 @@ namespace krys::boo::css
 
   struct PropertyMetadata
   {
-    PropertyId Id : BitCount<PropertyId>() {PropertyId::Invalid};
-    PropertyFlag Flags : BitCount<PropertyFlag>() {PropertyFlag::None};
+    PropertyId Id : EnumBitWidth<PropertyId> {PropertyId::Invalid};
+    EnumSet<PropertyFlag> Flags;
 
     /// @brief The index into the shorthands vector that this property was set from, if `SetFromShorthand`
     /// flag is set and there is ambiguity (i.e. multiple shorthands set the same property). If there is no
@@ -86,17 +85,17 @@ namespace krys::boo::css
 
       if (important == IsImportant::Yes)
       {
-        _metadata.Flags = _metadata.Flags | PropertyFlag::Important;
+        _metadata.Flags.Add(PropertyFlag::Important);
       }
 
       if (implicit == IsImplicit::Yes)
       {
-        _metadata.Flags = _metadata.Flags | PropertyFlag::Implicit;
+        _metadata.Flags.Add(PropertyFlag::Implicit);
       }
 
       if (setFromShorthand == IsSetFromShorthand::Yes)
       {
-        _metadata.Flags = _metadata.Flags | PropertyFlag::SetFromShorthand;
+        _metadata.Flags.Add(PropertyFlag::SetFromShorthand);
       }
     }
 
@@ -112,17 +111,17 @@ namespace krys::boo::css
 
     KRYS_NODISCARD IsImportant Important() const noexcept
     {
-      return IsImportant(HasFlag(_metadata.Flags, PropertyFlag::Important));
+      return IsImportant(_metadata.Flags.contains(PropertyFlag::Important));
     }
 
     KRYS_NODISCARD IsImplicit Implicit() const noexcept
     {
-      return IsImplicit(HasFlag(_metadata.Flags, PropertyFlag::Implicit));
+      return IsImplicit(_metadata.Flags.contains(PropertyFlag::Implicit));
     }
 
     KRYS_NODISCARD IsSetFromShorthand SetFromShorthand() const noexcept
     {
-      return IsSetFromShorthand(HasFlag(_metadata.Flags, PropertyFlag::SetFromShorthand));
+      return IsSetFromShorthand(_metadata.Flags.contains(PropertyFlag::SetFromShorthand));
     }
 
     KRYS_NODISCARD uint8 ShorthandIndex() const noexcept

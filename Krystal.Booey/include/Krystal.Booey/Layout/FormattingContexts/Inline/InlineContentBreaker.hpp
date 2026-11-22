@@ -28,9 +28,9 @@
 #include "Krystal.Booey/Layout/FormattingContexts/FormattingConstraints.hpp"
 #include "Krystal.Booey/Layout/LayoutUnits.hpp"
 #include "Krystal.Core/Attributes.hpp"
-#include "Krystal.Core/Types/EnumSet.hpp"
+#include "Krystal.Core/Containers/EnumSet.hpp"
+#include "Krystal.Core/Containers/SmallList.hpp"
 #include "Krystal.Core/Types/Maybe.hpp"
-#include "Krystal.Core/Types/SmallList.hpp"
 
 namespace krys::boo
 {

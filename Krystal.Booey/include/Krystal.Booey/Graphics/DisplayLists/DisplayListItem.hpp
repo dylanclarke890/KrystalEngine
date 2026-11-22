@@ -25,8 +25,8 @@
 
 #pragma once
 
+#include "Krystal.Core/Containers/EnumSet.hpp"
 #include "Krystal.Core/Enum.hpp"
-#include "Krystal.Core/Types/EnumSet.hpp"
 #include "Krystal.Core/Types/Variant.hpp"
 
 namespace krys
@@ -120,12 +120,12 @@ namespace krys::boo::display_list
     IncludePlatformOperations,
     IncludeResourceIdentifiers,
   };
-}
 
-KRYS_DEFINE_CONTIGUOUS_ENUM_TRAITS(krys::boo::display_list::AsTextFlag, 2uz);
+  consteval AsTextFlag MaxEnumValue(AsTextFlag) noexcept
+  {
+    return AsTextFlag::IncludeResourceIdentifiers;
+  }
 
-namespace krys::boo::display_list
-{
   void ApplyItem(GraphicsContext &, const Item &) noexcept;
 
   KRYS_NODISCARD bool ShouldDumpItem(const Item &, EnumSet<AsTextFlag>) noexcept;

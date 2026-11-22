@@ -68,7 +68,7 @@ namespace krys::boo
     KRYS_MAYBE_UNUSED EnumSet<RenderSVGResourceMode> resourceMode) noexcept -> EnumSet<ApplyResult>
   {
     krys_debug_assert(context);
-    krys_debug_assert(resourceMode.IsEmpty());
+    krys_debug_assert(resourceMode.empty());
 
     bool missingMaskerData = !_masker.contains(&renderer);
     if (missingMaskerData)

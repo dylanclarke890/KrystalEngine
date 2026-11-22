@@ -2,15 +2,15 @@
 
 #include "Krystal.Core/Attributes.hpp"
 #include "Krystal.Core/Concepts.hpp"
+#include "Krystal.Core/Containers/List.hpp"
 #include "Krystal.Core/IO/Common.hpp"
 #include "Krystal.Core/IO/IFileBackend.hpp"
 #include "Krystal.Core/IO/Path.hpp"
 #include "Krystal.Core/IO/Streams/Stream.hpp"
 #include "Krystal.Core/Macros.hpp"
-#include "Krystal.Core/Types/List.hpp"
+#include "Krystal.Core/Memory/UniquePtr.hpp"
 #include "Krystal.Core/Types/Maybe.hpp"
 #include "Krystal.Core/Types/Pair.hpp"
-#include "Krystal.Core/Types/UniquePtr.hpp"
 
 namespace krys::io
 {
@@ -98,7 +98,7 @@ namespace krys::io
     /// @param directory The directory to search.
     /// @param flags Flags to control the search behavior.
     KRYS_NODISCARD List<VFSFileEntry> SearchFiles(const Path &directory,
-                                                  FileSearchFlags flags = FileSearchFlags::None) const;
+                                                  FileSearchFlags flags = FileSearchFlags {}) const;
 
     /// @returns The first backend that matches the given path.
     KRYS_NODISCARD Maybe<Pair<Path, IFileBackend *>> GetBackend(const Path &path) const noexcept;

@@ -1,7 +1,7 @@
 ﻿#include "Krystal.Text/CaseMapping.hpp"
+#include "Krystal.Core/Containers/Array.hpp"
 #include "Krystal.Core/Strings/CodePointIterator.hpp"
 #include "Krystal.Core/Strings/Unicode.hpp"
-#include "Krystal.Core/Types/Array.hpp"
 #include <string>
 #include <unicode/ucasemap.h>
 #include <unicode/uchar.h>

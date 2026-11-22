@@ -31,7 +31,7 @@
 
 #include "Krystal.Booey/DOM/MutationObservers/EmptyNodeMutationRecord.hpp"
 #include "Krystal.Booey/DOM/Collections/StaticNodeList.hpp"
-#include "Krystal.Core/Utils/Move.hpp"
+#include "Krystal.Core/Move.hpp"
 
 namespace krys::boo::dom
 {
@@ -59,5 +59,10 @@ namespace krys::boo::dom
     }
 
     return _removedNodes;
+  }
+
+  Ref<Node> EmptyNodeMutationRecord::Target() const noexcept
+  {
+    return _target;
   }
 }

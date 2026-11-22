@@ -2579,7 +2579,7 @@ Status: reviewed (2026-10-31)
 ### [7.1. Interface DOMTokenList](https://dom.spec.whatwg.org/#interface-domtokenlist)
 
 Status: reviewed (2026-10-31)
-> DOMTokenList is `DOM/Collections/DOMTokenList.hpp`. Its token set is parsed from the attribute when next read after the attribute changes (`AssociatedAttributeValueChanged`, called from the owner's attribute change steps). An element's supported tokens are the `IsSupportedTokenFunction` given to `ElementAlgorithms::CreateDOMTokenList`, empty when its attribute defines none.
+> DOMTokenList is `DOM/Collections/DOMTokenList.hpp`. Its token set is parsed from the attribute when next read after the attribute changes (`AssociatedAttributeValueChanged`, called from the owner's attribute change steps). An element's supported tokens are the `IsSupportedTokenFunction` given to `DOMTokenList::Create`, empty when its attribute defines none.
 <!-- definitions: concept-dtl-tokens domtokenlist-element domtokenlist-attribute-name concept-supported-tokens -->
 
 - [x] [validation steps (DOMTokenList)](https://dom.spec.whatwg.org/#concept-domtokenlist-validation) — A DOMTokenList object set’s validation steps for a given token are:

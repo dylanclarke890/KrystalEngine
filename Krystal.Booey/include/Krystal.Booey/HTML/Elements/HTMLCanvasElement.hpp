@@ -32,12 +32,7 @@
 #include "Krystal.Booey/HTML/Canvas/CanvasRenderingContext.hpp"
 #include "Krystal.Booey/HTML/Canvas/CanvasRenderingContext2DSettings.hpp"
 #include "Krystal.Booey/HTML/Elements/HTMLElement.hpp"
-#include "Krystal.Core/Types/UniquePtr.hpp"
-
-namespace krys::boo
-{
-  class GraphicsContext;
-}
+#include "Krystal.Core/Memory/UniquePtr.hpp"
 
 namespace krys::boo::html
 {
@@ -47,6 +42,8 @@ namespace krys::boo::html
 
 namespace krys::boo
 {
+  class GraphicsContext;
+
   /// @brief A `<canvas>`: a replaced element whose pixels a rendering context draws. Its children are
   /// fallback content, which isn't rendered.
   /// @see https://html.spec.whatwg.org/#htmlcanvaselement

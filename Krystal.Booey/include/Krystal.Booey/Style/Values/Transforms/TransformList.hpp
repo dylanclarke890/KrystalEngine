@@ -79,9 +79,9 @@ namespace krys::boo
         return _value.rend();
       }
 
-      KRYS_NODISCARD bool isEmpty() const noexcept
+      KRYS_NODISCARD bool empty() const noexcept
       {
-        return _value.isEmpty();
+        return _value.empty();
       }
 
       KRYS_NODISCARD size_t size() const noexcept

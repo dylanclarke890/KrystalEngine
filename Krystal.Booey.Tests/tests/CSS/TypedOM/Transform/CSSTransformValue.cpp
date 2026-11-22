@@ -1,5 +1,6 @@
 ﻿#include "Krystal.Booey/CSS/TypedOM/Transform/CSSTransformValue.hpp"
 #include "catch2/catch_test_macros.hpp"
+#include "Krystal.Booey.Tests/CSS/TypedOMTestUtils.hpp"
 #include "Krystal.Booey.Tests/CSS/ValueTestUtils.hpp"
 #include "Krystal.Booey/CSS/DOMMatrix/DOMMatrix.hpp"
 #include "Krystal.Booey/CSS/TypedOM/CSSNumericFactory.hpp"
@@ -22,20 +23,13 @@ namespace krys::boo::css::tests
     using Factory = CSSNumericFactory;
 
     template <typename T>
-    KRYS_NODISCARD Ref<T> Value(ExceptionOr<Ref<T>> result)
-    {
-      REQUIRE(result.HasValue());
-      return result.ReleaseValue();
-    }
-
-    template <typename T>
     KRYS_NODISCARD ExceptionCode Error(const ExceptionOr<T> &result)
     {
       REQUIRE(result.HasException());
       return result.GetException().Code();
     }
 
-    KRYS_NODISCARD std::string Text(const CSSTransformComponent &component)
+    KRYS_NODISCARD std::string ComponentText(const CSSTransformComponent &component)
     {
       return ToNarrow(component.ToString());
     }
@@ -50,15 +44,15 @@ namespace krys::boo::css::tests
 
   TEST_CASE_METHOD(ValueFixture, "CSSTranslate", "[CSS][TypedOM][css-typed-om:csstranslate]")
   {
-    auto translate = Value(CSSTranslate::Create(Factory::Px(10), Factory::Percent(50)));
+    auto translate = RequireValue(CSSTranslate::Create(Factory::Px(10), Factory::Percent(50)));
     CHECK(translate->Is2D());
-    CHECK(Text(*translate) == "translate(10px, 50%)");
+    CHECK(ComponentText(*translate) == "translate(10px, 50%)");
     // A percentage has no matrix.
     CHECK(Error(translate->ToMatrix()) == ExceptionCode::TypeError);
 
-    auto translate3d = Value(CSSTranslate::Create(Factory::Px(1), Factory::Px(2), Factory::Px(3)));
+    auto translate3d = RequireValue(CSSTranslate::Create(Factory::Px(1), Factory::Px(2), Factory::Px(3)));
     CHECK_FALSE(translate3d->Is2D());
-    CHECK(Text(*translate3d) == "translate3d(1px, 2px, 3px)");
+    CHECK(ComponentText(*translate3d) == "translate3d(1px, 2px, 3px)");
     CHECK(Matrix(*translate3d)->M43() == 3);
 
     CHECK(Error(CSSTranslate::Create(Factory::Px(1), Factory::Deg(1))) == ExceptionCode::TypeError);
@@ -72,68 +66,68 @@ namespace krys::boo::css::tests
 
   TEST_CASE_METHOD(ValueFixture, "CSSRotate", "[CSS][TypedOM][css-typed-om:cssrotate]")
   {
-    auto rotate = Value(CSSRotate::Create(Factory::Deg(90)));
+    auto rotate = RequireValue(CSSRotate::Create(Factory::Deg(90)));
     CHECK(rotate->Is2D());
-    CHECK(Text(*rotate) == "rotate(90deg)");
+    CHECK(ComponentText(*rotate) == "rotate(90deg)");
     CHECK(Matrix(*rotate)->B() == 1);
 
-    auto rotate3d = Value(CSSRotate::Create(1.0, 0.0, 0.0, Factory::Deg(90)));
+    auto rotate3d = RequireValue(CSSRotate::Create(1.0, 0.0, 0.0, Factory::Deg(90)));
     CHECK_FALSE(rotate3d->Is2D());
-    CHECK(Text(*rotate3d) == "rotate3d(1, 0, 0, 90deg)");
+    CHECK(ComponentText(*rotate3d) == "rotate3d(1, 0, 0, 90deg)");
 
     CHECK(Error(CSSRotate::Create(Factory::Px(1))) == ExceptionCode::TypeError);
     CHECK(Error(rotate->SetX(RefPtr<CSSNumericValue>(Factory::Px(1)))) == ExceptionCode::TypeError);
     CHECK(Error(rotate->SetAngle(Factory::Px(1))) == ExceptionCode::TypeError);
     // Setting is2D changes the serialisation.
     rotate->SetIs2D(false);
-    CHECK(Text(*rotate) == "rotate3d(0, 0, 1, 90deg)");
+    CHECK(ComponentText(*rotate) == "rotate3d(0, 0, 1, 90deg)");
   }
 
   TEST_CASE_METHOD(ValueFixture, "CSSScale", "[CSS][TypedOM][css-typed-om:cssscale]")
   {
-    auto scale = Value(CSSScale::Create(2.0, 3.0));
-    CHECK(Text(*scale) == "scale(2, 3)");
+    auto scale = RequireValue(CSSScale::Create(2.0, 3.0));
+    CHECK(ComponentText(*scale) == "scale(2, 3)");
     auto matrix = Matrix(*scale);
     CHECK(matrix->A() == 2);
     CHECK(matrix->D() == 3);
-    CHECK(Text(*Value(CSSScale::Create(1.0, 2.0, CSSNumberish {3.0}))) == "scale3d(1, 2, 3)");
+    CHECK(ComponentText(*RequireValue(CSSScale::Create(1.0, 2.0, CSSNumberish {3.0}))) == "scale3d(1, 2, 3)");
     CHECK(Error(CSSScale::Create(RefPtr<CSSNumericValue>(Factory::Px(1)), 1.0)) == ExceptionCode::TypeError);
     CHECK(Error(scale->SetZ(RefPtr<CSSNumericValue>(Factory::Px(1)))) == ExceptionCode::TypeError);
   }
 
   TEST_CASE_METHOD(ValueFixture, "CSSSkew, CSSSkewX and CSSSkewY", "[CSS][TypedOM][css-typed-om:cssskew]")
   {
-    auto skew = Value(CSSSkew::Create(Factory::Deg(10), Factory::Deg(0)));
+    auto skew = RequireValue(CSSSkew::Create(Factory::Deg(10), Factory::Deg(0)));
     // A zero ay is left out.
-    CHECK(Text(*skew) == "skew(10deg)");
+    CHECK(ComponentText(*skew) == "skew(10deg)");
     CHECK_FALSE(skew->SetAy(Factory::Deg(5)).HasException());
-    CHECK(Text(*skew) == "skew(10deg, 5deg)");
+    CHECK(ComponentText(*skew) == "skew(10deg, 5deg)");
     // A skew is always 2D.
     skew->SetIs2D(false);
     CHECK(skew->Is2D());
     CHECK(Error(CSSSkew::Create(Factory::Px(1), Factory::Deg(0))) == ExceptionCode::TypeError);
 
-    auto skewX = Value(CSSSkewX::Create(Factory::Deg(45)));
-    CHECK(Text(*skewX) == "skewX(45deg)");
+    auto skewX = RequireValue(CSSSkewX::Create(Factory::Deg(45)));
+    CHECK(ComponentText(*skewX) == "skewX(45deg)");
     CHECK(Matrix(*skewX)->C() > 0.99);
-    CHECK(Text(*Value(CSSSkewY::Create(Factory::Deg(45)))) == "skewY(45deg)");
+    CHECK(ComponentText(*RequireValue(CSSSkewY::Create(Factory::Deg(45)))) == "skewY(45deg)");
     CHECK(Error(CSSSkewY::Create(Factory::Px(1))) == ExceptionCode::TypeError);
   }
 
   TEST_CASE_METHOD(ValueFixture, "CSSPerspective", "[CSS][TypedOM][css-typed-om:cssperspective]")
   {
-    auto perspective = Value(CSSPerspective::Create(RefPtr<CSSNumericValue>(Factory::Px(10))));
+    auto perspective = RequireValue(CSSPerspective::Create(RefPtr<CSSNumericValue>(Factory::Px(10))));
     CHECK_FALSE(perspective->Is2D());
-    CHECK(Text(*perspective) == "perspective(10px)");
+    CHECK(ComponentText(*perspective) == "perspective(10px)");
     CHECK(Matrix(*perspective)->M34() == -0.1);
 
     // A negative length is serialised in a calc().
-    CHECK(Text(*Value(CSSPerspective::Create(RefPtr<CSSNumericValue>(Factory::Px(-5)))))
+    CHECK(ComponentText(*RequireValue(CSSPerspective::Create(RefPtr<CSSNumericValue>(Factory::Px(-5)))))
           == "perspective(calc(-5px))");
 
     // `none` matches in any case, and keeps the case it was given.
-    auto none = Value(CSSPerspective::Create(CSSOMString(u8"NONE")));
-    CHECK(Text(*none) == "perspective(NONE)");
+    auto none = RequireValue(CSSPerspective::Create(CSSOMString(u8"NONE")));
+    CHECK(ComponentText(*none) == "perspective(NONE)");
     CHECK(Matrix(*none)->IsIdentity());
 
     CHECK(Error(CSSPerspective::Create(CSSOMString(u8"auto"))) == ExceptionCode::TypeError);
@@ -147,19 +141,20 @@ namespace krys::boo::css::tests
       DOMMatrixReadOnly::Create(TransformationMatrix(1, 2, 3, 4, 5, 6), DOMMatrixReadOnly::Is2D::Yes);
     auto component = CSSMatrixComponent::Create(*matrix);
     CHECK(component->Is2D());
-    CHECK(Text(*component) == "matrix(1, 2, 3, 4, 5, 6)");
+    CHECK(ComponentText(*component) == "matrix(1, 2, 3, 4, 5, 6)");
     CHECK(Matrix(*component)->E() == 5);
 
     auto component3d = CSSMatrixComponent::Create(*matrix, {.Is2D = false});
-    CHECK(Text(*component3d) == "matrix3d(1, 2, 0, 0, 3, 4, 0, 0, 0, 0, 1, 0, 5, 6, 0, 1)");
+    CHECK(ComponentText(*component3d) == "matrix3d(1, 2, 0, 0, 3, 4, 0, 0, 0, 0, 1, 0, 5, 6, 0, 1)");
   }
 
   TEST_CASE_METHOD(ValueFixture, "CSSTransformValue", "[CSS][TypedOM][css-typed-om:csstransformvalue]")
   {
     CHECK(Error(CSSTransformValue::Create(List<Ref<CSSTransformComponent>> {})) == ExceptionCode::TypeError);
 
-    auto value = Value(CSSTransformValue::Create(
-      {Value(CSSTranslate::Create(Factory::Px(10), Factory::Px(20))), Value(CSSScale::Create(2.0, 2.0))}));
+    auto value = RequireValue(
+      CSSTransformValue::Create({RequireValue(CSSTranslate::Create(Factory::Px(10), Factory::Px(20))),
+                                 RequireValue(CSSScale::Create(2.0, 2.0))}));
     CHECK(value->Length() == 2);
     CHECK(value->Is2D());
     CHECK(ToNarrow(value->ToString()) == "translate(10px, 20px) scale(2, 2)");
@@ -171,9 +166,10 @@ namespace krys::boo::css::tests
     CHECK(matrix.Value()->F() == 20);
 
     CHECK_FALSE(value->Item(2));
-    CHECK(value->SetItem(2, Value(CSSRotate::Create(1.0, 0.0, 0.0, Factory::Deg(10)))).HasValue());
+    CHECK(value->SetItem(2, RequireValue(CSSRotate::Create(1.0, 0.0, 0.0, Factory::Deg(10)))).HasValue());
     CHECK_FALSE(value->Is2D());
-    CHECK(Error(value->SetItem(4, Value(CSSSkewX::Create(Factory::Deg(1))))) == ExceptionCode::RangeError);
+    CHECK(Error(value->SetItem(4, RequireValue(CSSSkewX::Create(Factory::Deg(1)))))
+          == ExceptionCode::RangeError);
 
     // It converts back to a transform list.
     auto cssValue = value->ToCSSValue();

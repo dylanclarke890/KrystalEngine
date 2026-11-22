@@ -34,8 +34,8 @@
 #include "Krystal.Booey/Style/Values/Primitives/NumericTypesConversions.hpp"
 #include "Krystal.Booey/Style/Values/Primitives/NumericTypesEvaluation.hpp"
 #include "Krystal.Booey/Style/Values/Primitives/NumericTypesSerialisation.hpp"
+#include "Krystal.Core/Memory/NeverDestroyed.hpp"
 #include "Krystal.Core/Strings/StringBuilder.hpp"
-#include "Krystal.Core/Threading/NeverDestroyed.hpp"
 #include <ranges>
 
 namespace krys::boo::style
@@ -95,8 +95,10 @@ namespace krys::boo::style
       shadow->Shadow(), [&](const css::keywords::None &) -> BoxShadows { return css::keywords::None {}; },
       [&](const typename css::BoxShadowProperty::List &list) -> BoxShadows
       {
-        return BoxShadows::List::map(list | std::views::reverse, [&](const css::BoxShadow &element)
-                                     { return ConvertToStyle(element, state); });
+        return BoxShadows::List(std::from_range,
+                                (list | std::views::reverse)
+                                  | std::views::transform([&](const css::BoxShadow &element)
+                                                          { return ConvertToStyle(element, state); }));
       });
   }
 
@@ -155,7 +157,7 @@ namespace krys::boo::style
                    .Spread = {0},
                    .Inset = css::keywords::Inset {}}};
 
-      return IsInset(shadowToMatch) ? defaultInsetShadowData.get() : defaultShadowData.get();
+      return IsInset(shadowToMatch) ? *defaultInsetShadowData : *defaultShadowData;
     }
   };
 

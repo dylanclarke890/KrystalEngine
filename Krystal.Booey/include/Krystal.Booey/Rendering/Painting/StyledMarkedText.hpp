@@ -29,7 +29,7 @@
 #include "Krystal.Booey/Rendering/Painting/TextDecorationPainter.hpp"
 #include "Krystal.Booey/Rendering/Painting/TextPaintStyle.hpp"
 #include "Krystal.Booey/Style/Values/TextDecoration/TextShadow.hpp"
-#include "Krystal.Core/Utils/Move.hpp"
+#include "Krystal.Core/Move.hpp"
 
 namespace krys::boo
 {

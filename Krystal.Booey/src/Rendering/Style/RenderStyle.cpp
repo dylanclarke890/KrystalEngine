@@ -51,7 +51,7 @@
 #include "Krystal.Booey/Style/Values/TextDecoration/TextDecorationLine.hpp"
 #include "Krystal.Booey/Style/Values/Transforms/Functions/ScaleTransformFunction.hpp"
 #include "Krystal.Core/Maths/Extras.hpp"
-#include "Krystal.Core/Threading/NeverDestroyed.hpp"
+#include "Krystal.Core/Memory/NeverDestroyed.hpp"
 #include <algorithm>
 
 namespace krys::boo
@@ -77,7 +77,7 @@ namespace krys::boo
   RenderStyle &RenderStyle::DefaultStyleSingleton() noexcept
   {
     static NeverDestroyed<RenderStyle> style {CreateDefaultStyle};
-    return style.get();
+    return *style;
   }
 
   RenderStyle RenderStyle::Create() noexcept
@@ -167,8 +167,8 @@ namespace krys::boo
       return false;
     }
 
-    if (_computedStyle._nonInheritedData->BoxData.Ptr()
-        != other->_computedStyle._nonInheritedData->BoxData.Ptr())
+    if (_computedStyle._nonInheritedData->BoxData.get()
+        != other->_computedStyle._nonInheritedData->BoxData.get())
     {
       if (_computedStyle._nonInheritedData->BoxData->Width
             != other->_computedStyle._nonInheritedData->BoxData->Width
@@ -197,8 +197,8 @@ namespace krys::boo
       return true;
     }
 
-    if (_computedStyle._nonInheritedData->SurroundData.Ptr()
-        && other->_computedStyle._nonInheritedData->SurroundData.Ptr()
+    if (_computedStyle._nonInheritedData->SurroundData.get()
+        && other->_computedStyle._nonInheritedData->SurroundData.get()
         && _computedStyle._nonInheritedData->SurroundData
              != other->_computedStyle._nonInheritedData->SurroundData)
     {
@@ -341,8 +341,8 @@ namespace krys::boo
         // FIXME: This should depend on locale.
         static const NeverDestroyed<const CSSOMStringAtom> hyphenMinusString {u8"-"};
         static const NeverDestroyed<const CSSOMStringAtom> hyphenString {u8"\u2010"};
-        return GetFontCascade().PrimaryFont()->GlyphForCharacter(U'\u2010') ? hyphenString.get()
-                                                                            : hyphenMinusString.get();
+        return GetFontCascade().PrimaryFont()->GlyphForCharacter(U'\u2010') ? *hyphenString
+                                                                            : *hyphenMinusString;
       },
       [](const CSSOMStringAtom &string) -> const CSSOMStringAtom & { return string; });
   }

@@ -37,6 +37,9 @@ namespace krys::boo
     /// @brief Load every resource again, as reloading a page does (so edited files load again).
     Reload,
   };
-}
 
-KRYS_DEFINE_CONTIGUOUS_ENUM_TRAITS(krys::boo::CachePolicy, 2uz);
+  consteval CachePolicy MaxEnumValue(CachePolicy) noexcept
+  {
+    return CachePolicy::Reload;
+  }
+}

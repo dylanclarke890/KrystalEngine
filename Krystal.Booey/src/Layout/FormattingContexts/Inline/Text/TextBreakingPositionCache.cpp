@@ -25,7 +25,8 @@
 
 #include "Krystal.Booey/Layout/FormattingContexts/Inline/Text/TextBreakingPositionCache.hpp"
 #include "Krystal.Booey/Rendering/Style/RenderStyle+GettersInlines.hpp"
-#include "Krystal.Core/Threading/NeverDestroyed.hpp"
+#include "Krystal.Core/Hashing/FastHash.hpp"
+#include "Krystal.Core/Memory/NeverDestroyed.hpp"
 
 namespace krys::boo::layout
 {
@@ -46,8 +47,7 @@ namespace krys::boo::layout
 
   size_t TextBreakingPositionCache::KeyHash::operator()(const Key &key) const noexcept
   {
-    return Hash::Combine(std::hash<utf8_stringview> {}(key.Text),
-                         DefaultHash<TextBreakingPositionContext>::Hash(key.Context));
+    return CombineFastHashes(key.Text, FastHash<TextBreakingPositionContext> {}(key.Context));
   }
 
   TextBreakingPositionCache &TextBreakingPositionCache::Singleton() noexcept

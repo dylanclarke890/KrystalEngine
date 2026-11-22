@@ -29,26 +29,18 @@
 #include "Krystal.Booey/CSS/Types/CSSOMString.hpp"
 #include "Krystal.Booey/DOM/Types/ExceptionOr.hpp"
 #include "Krystal.Core/Attributes.hpp"
+#include "Krystal.Core/Containers/EnumSet.hpp"
+#include "Krystal.Core/Containers/List.hpp"
 #include "Krystal.Core/Enum.hpp"
-#include "Krystal.Core/RefCounted.hpp"
+#include "Krystal.Core/Memory/RefCounted.hpp"
+#include "Krystal.Core/Memory/RefPtr.hpp"
 #include "Krystal.Core/Strings/StringBuilder.hpp"
 #include "Krystal.Core/TypeCast.hpp"
-#include "Krystal.Core/Types/EnumSet.hpp"
-#include "Krystal.Core/Types/List.hpp"
-#include "Krystal.Core/Types/RefPtr.hpp"
 
 namespace krys::boo
 {
   class Document;
-}
 
-namespace krys::boo::css
-{
-  class Value;
-}
-
-namespace krys::boo
-{
   /// @brief The kinds of Typed OM values.
   enum class CSSStyleValueType : uint8
   {
@@ -78,6 +70,8 @@ namespace krys::boo
 
 namespace krys::boo::css
 {
+  class Value;
+
   KRYS_NODISCARD constexpr bool IsCSSNumericValue(CSSStyleValueType type) noexcept
   {
     switch (type)
@@ -192,12 +186,12 @@ namespace krys::boo
     Nested,
     WithoutParentheses,
   };
-}
 
-KRYS_DEFINE_CONTIGUOUS_ENUM_TRAITS(krys::boo::SerialisationArguments, 2uz);
+  consteval SerialisationArguments MaxEnumValue(SerialisationArguments) noexcept
+  {
+    return SerialisationArguments::WithoutParentheses;
+  }
 
-namespace krys::boo
-{
   /// @brief A CSS value as the Typed OM represents it.
   /// @see https://drafts.css-houdini.org/css-typed-om/#cssstylevalue
   class CSSStyleValue : public RefCounted<CSSStyleValue>

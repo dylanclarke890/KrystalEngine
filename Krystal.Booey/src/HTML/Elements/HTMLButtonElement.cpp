@@ -36,8 +36,8 @@
 #include "Krystal.Booey/HTML/Forms/DOMFormData.hpp"
 #include "Krystal.Booey/Rendering/FormControls/RenderButton.hpp"
 #include "Krystal.Booey/Rendering/Style/RenderStyle+GettersInlines.hpp"
+#include "Krystal.Core/Containers/Array.hpp"
 #include "Krystal.Core/Strings/ASCII.hpp"
-#include "Krystal.Core/Types/Array.hpp"
 
 namespace krys::boo
 {
@@ -63,7 +63,7 @@ namespace krys::boo
   HTMLButtonElement::HTMLButtonElement(Document &document) noexcept
       : HTMLFormControlElement(document, html::HTMLElementInterface::Button)
   {
-    SetEventTargetFlag(dom::EventTargetFlags::HasActivationBehavior);
+    _eventTargetFlags.Add(dom::EventTargetFlag::HasActivationBehavior);
   }
 
   RenderPtr<RenderElement> HTMLButtonElement::CreateElementRenderer(RenderStyle &&style) noexcept
@@ -392,7 +392,7 @@ namespace krys::boo
     init.Bubbles = false;
     init.Cancelable = true;
     init.Composed = true;
-    init.Source = ShareRefPtr<boo::Element>(this);
+    init.Source = this;
     init.Command = commandRaw.value_or(DOMString());
 
     auto event = CommandEvent::Create(event_names::Command, init, true);

@@ -28,14 +28,9 @@
 #include "Krystal.Booey/CSS/TypedOM/CSSStyleValue.hpp"
 #include "Krystal.Booey/CSS/TypedOM/Numeric/CSSNumericType.hpp"
 #include "Krystal.Booey/DOM/Types/ExceptionOr.hpp"
-#include "Krystal.Core/Types/HashMap.hpp"
-#include "Krystal.Core/Types/List.hpp"
+#include "Krystal.Core/Containers/HashMap.hpp"
+#include "Krystal.Core/Containers/List.hpp"
 #include "Krystal.Core/Types/Variant.hpp"
-
-namespace krys::boo
-{
-  class Document;
-}
 
 namespace krys::boo::css::calc
 {
@@ -49,6 +44,7 @@ namespace krys::boo
   class CSSMathSum;
   class CSSNumericValue;
   class CSSUnitValue;
+  class Document;
 
   /// @brief A number, or a numeric value.
   /// @see https://drafts.css-houdini.org/css-typed-om/#typedefdef-cssnumberish

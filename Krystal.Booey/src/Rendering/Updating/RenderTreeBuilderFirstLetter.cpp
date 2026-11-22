@@ -234,7 +234,7 @@ namespace krys::boo
       return;
     }
 
-    if (!style::DetermineChanges(firstLetter->Style(), *pseudoStyle).Contains(style::Change::Renderer))
+    if (!style::DetermineChanges(firstLetter->Style(), *pseudoStyle).contains(style::Change::Renderer))
     {
       firstLetter->SetStyle(krys::move(*pseudoStyle));
       return;

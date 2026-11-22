@@ -1,7 +1,7 @@
 ﻿#pragma once
 
+#include "Krystal.Core/Containers/Span.hpp"
 #include "Krystal.Core/Numeric.hpp"
-#include "Krystal.Core/Types/Span.hpp"
 
 // Generated with Pillow: 2x2 animations of solid frames, red, green then blue, 100ms each. The GIF, APNG and
 // WebP repeat forever; the once GIF has the first two frames and no loop extension, so it plays once.

@@ -34,7 +34,7 @@
 #include "Krystal.Booey/HTML/ImageData/ImageDataArray.hpp"
 #include "Krystal.Booey/HTML/ImageData/ImageDataSettings.hpp"
 #include "Krystal.Core/Geometry/Size.hpp"
-#include "Krystal.Core/RefCounted.hpp"
+#include "Krystal.Core/Memory/RefCounted.hpp"
 
 namespace krys
 {

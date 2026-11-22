@@ -119,7 +119,7 @@ namespace krys::boo::layout
                                                                const RenderStyle &lineBoxStyle) const noexcept
   {
     krys_debug_assert(floatBox.IsFloatingPositioned());
-    if (!floatBox.Style().LineBoxContain().Contains(style::WebkitLineBoxContainValue::InitialLetter))
+    if (!floatBox.Style().LineBoxContain().contains(style::WebkitLineBoxContainValue::InitialLetter))
     {
       return {};
     }

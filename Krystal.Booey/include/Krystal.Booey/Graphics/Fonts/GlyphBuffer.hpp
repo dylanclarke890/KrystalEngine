@@ -32,9 +32,9 @@
 #include "Krystal.Booey/Graphics/Fonts/GlyphBufferMembers.hpp"
 #include "Krystal.Core/Assert.hpp"
 #include "Krystal.Core/Attributes.hpp"
+#include "Krystal.Core/Containers/SmallList.hpp"
+#include "Krystal.Core/Containers/Span.hpp"
 #include "Krystal.Core/Types/Maybe.hpp"
-#include "Krystal.Core/Types/SmallList.hpp"
-#include "Krystal.Core/Types/Span.hpp"
 #include <limits>
 #include <utility>
 
@@ -294,11 +294,11 @@ namespace krys::boo
 
     void Shrink(uint32 truncationPoint) noexcept
     {
-      _fonts.truncate(truncationPoint);
-      _glyphs.truncate(truncationPoint);
-      _advances.truncate(truncationPoint);
-      _origins.truncate(truncationPoint);
-      _offsetsInString.truncate(truncationPoint);
+      _fonts.resize(truncationPoint);
+      _glyphs.resize(truncationPoint);
+      _advances.resize(truncationPoint);
+      _origins.resize(truncationPoint);
+      _offsetsInString.resize(truncationPoint);
     }
 
     /*

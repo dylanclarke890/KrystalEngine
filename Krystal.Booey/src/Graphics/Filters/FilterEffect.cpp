@@ -152,7 +152,7 @@ namespace krys::boo
   UniquePtr<FilterEffectApplier> FilterEffect::CreateApplier(const Filter &filter,
                                                              const FilterResults &results) const noexcept
   {
-    if (filter.FilterRenderingModes().Contains(FilterRenderingMode::Accelerated))
+    if (filter.FilterRenderingModes().contains(FilterRenderingMode::Accelerated))
     {
       return results.CreateAcceleratedApplier(*this);
     }
@@ -232,7 +232,7 @@ namespace krys::boo
                                               const FilterStyle &input,
                                               const Maybe<FilterEffectGeometry> &geometry) const noexcept
   {
-    krys_debug_assert(filter.FilterRenderingModes().Contains(FilterRenderingMode::GraphicsContext));
+    krys_debug_assert(filter.FilterRenderingModes().contains(FilterRenderingMode::GraphicsContext));
 
     auto primitiveSubregion =
       CalculatePrimitiveSubregion(filter, Span<const RectF> {&input.PrimitiveSubregion, 1u}, geometry);

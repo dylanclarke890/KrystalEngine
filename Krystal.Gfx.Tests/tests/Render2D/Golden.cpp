@@ -1,6 +1,6 @@
 ﻿#include "Krystal.Gfx.Tests/Golden.hpp"
 #include "catch2/catch_test_macros.hpp"
-#include "Krystal.Core/Utils/Move.hpp"
+#include "Krystal.Core/Move.hpp"
 #include "Krystal.Gfx.Tests/TestDevice.hpp"
 #include "Krystal.Gfx/Render2D/Renderer2D.hpp"
 #include <cmath>
@@ -339,11 +339,12 @@ namespace krys::gfx::tests
 
     KRYS_NODISCARD GoldenImage Render(Device &device, Renderer2D &renderer, const Scene &scene)
     {
-      auto target = device.CreateTexture({.Format = TextureFormat::RGBA8Unorm,
-                                          .Width = scene.Width,
-                                          .Height = scene.Height,
-                                          .Usage = TextureUsage::RenderTarget | TextureUsage::Sampled,
-                                          .DebugName = u8"Golden"});
+      auto target = device.CreateTexture(
+        {.Format = TextureFormat::RGBA8Unorm,
+         .Width = scene.Width,
+         .Height = scene.Height,
+         .Usage = EnumSet<TextureUsage> {TextureUsage::RenderTarget, TextureUsage::Sampled},
+         .DebugName = u8"Golden"});
       REQUIRE(target.has_value());
       device.BeginFrame();
       auto &commands = device.GetCommandBuffer();

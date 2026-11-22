@@ -30,7 +30,7 @@
 #include "Krystal.Booey/Style/Values/Backgrounds/LineWidth.hpp"
 #include "Krystal.Booey/Style/Values/Multicol/ColumnCount.hpp"
 #include "Krystal.Booey/Style/Values/Multicol/ColumnWidth.hpp"
-#include "Krystal.Core/RefCounted.hpp"
+#include "Krystal.Core/Memory/RefCounted.hpp"
 
 namespace krys::boo
 {

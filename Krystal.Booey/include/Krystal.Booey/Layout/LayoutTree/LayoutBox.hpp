@@ -29,16 +29,16 @@
 #include "Krystal.Booey/Rendering/Style/RenderStyle.hpp"
 #include "Krystal.Booey/Text/WritingMode.hpp"
 #include "Krystal.Core/Attributes.hpp"
-#include "Krystal.Core/CanMakeCheckedPtr.hpp"
+#include "Krystal.Core/Containers/EnumSet.hpp"
+#include "Krystal.Core/Containers/HashMap.hpp"
 #include "Krystal.Core/Macros.hpp"
+#include "Krystal.Core/Memory/CanMakeCheckedPtr.hpp"
+#include "Krystal.Core/Memory/CheckedPtr.hpp"
+#include "Krystal.Core/Memory/RefPtr.hpp"
+#include "Krystal.Core/Memory/UniquePtr.hpp"
+#include "Krystal.Core/Memory/WeakPtr.hpp"
 #include "Krystal.Core/TypeCast.hpp"
-#include "Krystal.Core/Types/CheckedPtr.hpp"
-#include "Krystal.Core/Types/EnumSet.hpp"
-#include "Krystal.Core/Types/HashMap.hpp"
 #include "Krystal.Core/Types/Maybe.hpp"
-#include "Krystal.Core/Types/RefPtr.hpp"
-#include "Krystal.Core/Types/UniquePtr.hpp"
-#include "Krystal.Core/Types/WeakPtr.hpp"
 
 namespace krys::boo
 {
@@ -228,7 +228,7 @@ namespace krys::boo::layout
 
     KRYS_NODISCARD bool IsInitialContainingBlock() const noexcept
     {
-      return BaseTypeFlags().Contains(InitialContainingBlockFlag);
+      return BaseTypeFlags().contains(InitialContainingBlockFlag);
     }
 
     KRYS_NODISCARD bool IsLayoutContainmentBox() const noexcept;
@@ -379,12 +379,12 @@ namespace krys::boo::layout
 
     KRYS_NODISCARD bool IsElementBox() const noexcept
     {
-      return BaseTypeFlags().Contains(ElementBoxFlag);
+      return BaseTypeFlags().contains(ElementBoxFlag);
     }
 
     KRYS_NODISCARD bool IsInlineTextBox() const noexcept
     {
-      return BaseTypeFlags().Contains(InlineTextBoxFlag);
+      return BaseTypeFlags().contains(InlineTextBoxFlag);
     }
 
     KRYS_NODISCARD bool IsPaddingApplicable() const noexcept;

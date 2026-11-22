@@ -32,9 +32,9 @@
 
 #include "Krystal.Booey/CSS/Types/CSSOMString.hpp"
 #include "Krystal.Booey/CSS/Values/Value.hpp"
-#include "Krystal.Core/Types/FixedVector.hpp"
-#include "Krystal.Core/Types/RefPtr.hpp"
-#include "Krystal.Core/Types/Span.hpp"
+#include "Krystal.Core/Containers/FixedList.hpp"
+#include "Krystal.Core/Containers/Span.hpp"
+#include "Krystal.Core/Memory/RefPtr.hpp"
 
 namespace krys::boo::css
 {
@@ -42,7 +42,7 @@ namespace krys::boo::css
   class GridLineNamesValue final : public Value
   {
   private:
-    FixedVector<CSSOMString> _names;
+    FixedList<CSSOMString> _names;
 
     explicit GridLineNamesValue(Span<const CSSOMString> names) noexcept;
 
@@ -51,7 +51,7 @@ namespace krys::boo::css
 
     KRYS_NODISCARD Span<const CSSOMString> Names() const noexcept
     {
-      return _names.span();
+      return _names;
     }
 
     KRYS_NODISCARD CSSOMString CustomCSSText(const SerialisationContext &context) const noexcept;

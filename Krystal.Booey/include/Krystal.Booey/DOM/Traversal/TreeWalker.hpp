@@ -2,7 +2,12 @@
 
 #include "Krystal.Booey/DOM/Traversal/NodeFilter.hpp"
 #include "Krystal.Booey/DOM/Traversal/TraversalBase.hpp"
-#include "Krystal.Core/RefCounted.hpp"
+#include "Krystal.Core/Memory/RefCounted.hpp"
+
+namespace krys::boo
+{
+  class Document;
+}
 
 namespace krys::boo::dom
 {

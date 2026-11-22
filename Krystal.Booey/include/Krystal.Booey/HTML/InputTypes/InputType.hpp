@@ -39,9 +39,9 @@
 #include "Krystal.Booey/Platform/DateComponents.hpp"
 #include "Krystal.Booey/Rendering/RenderPtr.hpp"
 #include "Krystal.Core/Enum.hpp"
-#include "Krystal.Core/RefCounted.hpp"
+#include "Krystal.Core/Memory/RefCounted.hpp"
+#include "Krystal.Core/Memory/RefPtr.hpp"
 #include "Krystal.Core/Types/Decimal.hpp"
-#include "Krystal.Core/Types/RefPtr.hpp"
 
 namespace krys::boo
 {
@@ -61,8 +61,9 @@ namespace krys::boo
 namespace krys::boo::html
 {
   class DOMFormData;
-  struct InputElementClickState;
   class TextControlInnerTextElement;
+
+  struct InputElementClickState;
 
   enum class WasSetByJavaScript : bool
   {
@@ -95,12 +96,12 @@ namespace krys::boo::html
     Week,
     Text,
   };
-}
 
-KRYS_DEFINE_CONTIGUOUS_ENUM_TRAITS(krys::boo::html::InputTypeKind, 22uz);
+  consteval InputTypeKind MaxEnumValue(InputTypeKind) noexcept
+  {
+    return InputTypeKind::Text;
+  }
 
-namespace krys::boo::html
-{
   /// @brief The type-specific part of an input element: its value's rules, validity, form data, events,
   /// user agent shadow tree and renderer. Only HTMLInputElement uses it.
   // FIXME: The switch control, and the types' own focus rules

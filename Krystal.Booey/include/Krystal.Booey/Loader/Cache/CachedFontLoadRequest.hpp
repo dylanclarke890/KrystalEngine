@@ -26,11 +26,12 @@
 
 #pragma once
 
+#include "Krystal.Booey/Graphics/Fonts/Font.hpp"
 #include "Krystal.Booey/Loader/Cache/CachedFont.hpp"
 #include "Krystal.Booey/Loader/Cache/CachedFontClient.hpp"
 #include "Krystal.Booey/Loader/Cache/CachedResourceHandle.hpp"
 #include "Krystal.Booey/Loader/FontLoadRequest.hpp"
-#include "Krystal.Core/Types/WeakPtr.hpp"
+#include "Krystal.Core/Memory/WeakPtr.hpp"
 #include <utility>
 
 namespace krys::boo

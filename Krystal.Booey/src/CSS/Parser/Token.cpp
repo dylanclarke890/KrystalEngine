@@ -29,9 +29,9 @@
 
 #include "Krystal.Booey/CSS/Parser/Token.hpp"
 #include "Krystal.Booey/CSS/CSSOM/Markup.hpp"
+#include "Krystal.Core/Containers/Array.hpp"
 #include "Krystal.Core/Strings/HexNumber.hpp"
 #include "Krystal.Core/Strings/StringBuilder.hpp"
-#include "Krystal.Core/Types/Array.hpp"
 #include <algorithm>
 #include <charconv>
 #include <cmath>
@@ -51,7 +51,7 @@ namespace krys::boo::css
         }
       }
 
-      Array<bool, EnumTraits<TokenType>::DistinctValues> Buffer {};
+      Array<bool, (ToUnderlying(MaxEnumValue(TokenType {})) + 1uz)> Buffer {};
     };
 
     // Spaces and tabs are counted as spaces, and newlines kept, as the original whitespace is serialised for

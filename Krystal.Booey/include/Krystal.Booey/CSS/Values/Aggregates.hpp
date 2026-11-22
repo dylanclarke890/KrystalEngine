@@ -31,19 +31,21 @@
 #include "Krystal.Booey/Graphics/Geometry/RectCorners.hpp"
 #include "Krystal.Booey/Graphics/Geometry/RectEdges.hpp"
 #include "Krystal.Core/Attributes.hpp"
+#include "Krystal.Core/Containers/EnumSet.hpp"
+#include "Krystal.Core/Containers/FixedList.hpp"
+#include "Krystal.Core/Containers/ListHashSet.hpp"
+#include "Krystal.Core/Containers/RefCountedFixedList.hpp"
+#include "Krystal.Core/Containers/SmallList.hpp"
 #include "Krystal.Core/Enum.hpp"
-#include "Krystal.Core/Types/EnumSet.hpp"
-#include "Krystal.Core/Types/FixedVector.hpp"
-#include "Krystal.Core/Types/ListHashSet.hpp"
+#include "Krystal.Core/Hashing/FastHash.hpp"
+#include "Krystal.Core/Memory/PointerComparison.hpp"
+#include "Krystal.Core/Memory/UniquePtr.hpp"
 #include "Krystal.Core/Types/Markable.hpp"
 #include "Krystal.Core/Types/Maybe.hpp"
-#include "Krystal.Core/Types/RefCountedFixedVector.hpp"
-#include "Krystal.Core/Types/SmallList.hpp"
-#include "Krystal.Core/Types/UniquePtr.hpp"
 #include "Krystal.Core/Types/Variant.hpp"
 #include "Krystal.Core/Utils/Apply.hpp"
-#include "Krystal.Core/Utils/PointerComparison.hpp"
 #include "Krystal.Core/Visitor.hpp"
+#include <algorithm>
 #include <functional>
 #include <initializer_list>
 #include <ranges>
@@ -563,6 +565,12 @@ namespace krys::boo::css
     {
     }
 
+    template <std::ranges::input_range TRange>
+    SpaceSeparatedList(std::from_range_t, TRange &&range) noexcept
+        : Value(std::from_range, std::forward<TRange>(range))
+    {
+    }
+
     const_iterator begin() const noexcept
     {
       return Value.begin();
@@ -598,50 +606,6 @@ namespace krys::boo::css
       return Value[i];
     }
 
-    template <typename SizedRange, typename Mapper>
-    // NOLINTNEXTLINE(cppcoreguidelines-missing-std-forward): iterated in place, never forwarded.
-    static SpaceSeparatedList map(SizedRange &&range, Mapper mapper)
-    {
-      Container result;
-      if constexpr (std::ranges::sized_range<SizedRange>)
-      {
-        result.reserve(std::ranges::size(range));
-      }
-      for (auto &&item : range)
-      {
-        result.emplace_back(std::invoke(mapper, item));
-      }
-      return SpaceSeparatedList {krys::move(result)};
-    }
-
-    bool contains(const auto &item) const
-    {
-      return std::ranges::find(Value, item) != Value.end();
-    }
-
-    bool containsIf(const auto &predicate) const
-    {
-      return std::ranges::find_if(Value, predicate) != Value.end();
-    }
-
-    template <typename Mapper>
-    auto map(Mapper mapper) const
-    {
-      using Result = std::remove_cvref_t<std::invoke_result_t<Mapper, const T &>>;
-      SmallList<Result, inlineCapacity> result;
-      result.reserve(Value.size());
-      for (const auto &item : Value)
-      {
-        result.emplace_back(std::invoke(mapper, item));
-      }
-      return result;
-    }
-
-    bool isEmpty() const noexcept
-    {
-      return empty();
-    }
-
     bool operator==(const SpaceSeparatedList &) const noexcept = default;
   };
 
@@ -674,6 +638,12 @@ namespace krys::boo::css
     }
 
     CommaSeparatedList(Container &&container) noexcept : Value {krys::move(container)}
+    {
+    }
+
+    template <std::ranges::input_range TRange>
+    CommaSeparatedList(std::from_range_t, TRange &&range) noexcept
+        : Value(std::from_range, std::forward<TRange>(range))
     {
     }
 
@@ -712,50 +682,6 @@ namespace krys::boo::css
       return Value[i];
     }
 
-    template <typename SizedRange, typename Mapper>
-    // NOLINTNEXTLINE(cppcoreguidelines-missing-std-forward): iterated in place, never forwarded.
-    static CommaSeparatedList map(SizedRange &&range, Mapper mapper)
-    {
-      Container result;
-      if constexpr (std::ranges::sized_range<SizedRange>)
-      {
-        result.reserve(std::ranges::size(range));
-      }
-      for (auto &&item : range)
-      {
-        result.emplace_back(std::invoke(mapper, item));
-      }
-      return CommaSeparatedList {krys::move(result)};
-    }
-
-    bool contains(const auto &item) const
-    {
-      return std::ranges::find(Value, item) != Value.end();
-    }
-
-    bool containsIf(const auto &predicate) const
-    {
-      return std::ranges::find_if(Value, predicate) != Value.end();
-    }
-
-    template <typename Mapper>
-    auto map(Mapper mapper) const
-    {
-      using Result = std::remove_cvref_t<std::invoke_result_t<Mapper, const T &>>;
-      SmallList<Result, inlineCapacity> result;
-      result.reserve(Value.size());
-      for (const auto &item : Value)
-      {
-        result.emplace_back(std::invoke(mapper, item));
-      }
-      return result;
-    }
-
-    bool isEmpty() const noexcept
-    {
-      return empty();
-    }
-
     KRYS_NODISCARD bool operator==(const CommaSeparatedList &) const noexcept = default;
   };
 
@@ -789,16 +715,10 @@ namespace krys::boo::css
     {
     }
 
-    template <typename SizedRange, typename Mapper>
-    // NOLINTNEXTLINE(cppcoreguidelines-missing-std-forward): iterated in place, never forwarded.
-    static SpaceSeparatedListHashSet map(SizedRange &&range, Mapper mapper)
+    template <std::ranges::input_range TRange>
+    SpaceSeparatedListHashSet(std::from_range_t, TRange &&range) noexcept
+        : Value(std::from_range, std::forward<TRange>(range))
     {
-      Container result;
-      for (auto &&item : range)
-      {
-        result.add(std::invoke(mapper, item));
-      }
-      return SpaceSeparatedListHashSet {krys::move(result)};
     }
 
     const_iterator begin() const noexcept
@@ -811,9 +731,9 @@ namespace krys::boo::css
       return Value.end();
     }
 
-    bool isEmpty() const noexcept
+    bool empty() const noexcept
     {
-      return Value.isEmpty();
+      return Value.empty();
     }
 
     size_t size() const noexcept
@@ -860,16 +780,10 @@ namespace krys::boo::css
     {
     }
 
-    template <typename SizedRange, typename Mapper>
-    // NOLINTNEXTLINE(cppcoreguidelines-missing-std-forward): iterated in place, never forwarded.
-    static CommaSeparatedListHashSet map(SizedRange &&range, Mapper mapper)
+    template <std::ranges::input_range TRange>
+    CommaSeparatedListHashSet(std::from_range_t, TRange &&range) noexcept
+        : Value(std::from_range, std::forward<TRange>(range))
     {
-      Container result;
-      for (auto &&item : range)
-      {
-        result.add(std::invoke(mapper, item));
-      }
-      return CommaSeparatedListHashSet {krys::move(result)};
     }
 
     const_iterator begin() const noexcept
@@ -882,9 +796,9 @@ namespace krys::boo::css
       return Value.end();
     }
 
-    bool isEmpty() const noexcept
+    bool empty() const noexcept
     {
-      return Value.isEmpty();
+      return Value.empty();
     }
 
     size_t size() const noexcept
@@ -914,7 +828,7 @@ namespace krys::boo::css
   template <typename T>
   struct SpaceSeparatedFixedList
   {
-    using Container = krys::FixedVector<T>;
+    using Container = krys::FixedList<T>;
     using const_iterator = typename Container::const_iterator;
     using const_reverse_iterator = typename Container::const_reverse_iterator;
     using value_type = typename Container::value_type;
@@ -929,27 +843,14 @@ namespace krys::boo::css
     {
     }
 
+    template <std::ranges::input_range TRange>
+    SpaceSeparatedFixedList(std::from_range_t, TRange &&range) noexcept
+        : Value(std::from_range, std::forward<TRange>(range))
+    {
+    }
+
     SpaceSeparatedFixedList(T &&element) : Value {krys::move(element)}
     {
-    }
-
-    template <typename SizedRange, typename Mapper>
-    static SpaceSeparatedFixedList map(SizedRange &&range, KRYS_NOESCAPE Mapper mapper)
-    {
-      return Container::map(std::forward<SizedRange>(range), std::forward<Mapper>(mapper));
-    }
-
-    template <typename SizedRange, typename Mapper>
-    static SpaceSeparatedFixedList Map(SizedRange &&range, Mapper mapper)
-    {
-      return map(std::forward<SizedRange>(range), std::forward<Mapper>(mapper));
-    }
-
-    template <std::invocable<size_t> Generator>
-    static SpaceSeparatedFixedList createWithSizeFromGenerator(size_t size,
-                                                               KRYS_NOESCAPE Generator &&generator)
-    {
-      return Container::createWithSizeFromGenerator(size, std::forward<Generator>(generator));
     }
 
     const_iterator begin() const KRYS_LIFETIME_BOUND
@@ -972,9 +873,9 @@ namespace krys::boo::css
       return Value.rend();
     }
 
-    bool isEmpty() const
+    bool empty() const
     {
-      return Value.isEmpty();
+      return Value.empty();
     }
 
     size_t size() const
@@ -987,32 +888,14 @@ namespace krys::boo::css
       return Value[i];
     }
 
-    const T &first() const KRYS_LIFETIME_BOUND
+    const T &front() const KRYS_LIFETIME_BOUND
     {
-      return Value.first();
+      return Value.front();
     }
 
-    const T &last() const KRYS_LIFETIME_BOUND
+    const T &back() const KRYS_LIFETIME_BOUND
     {
-      return Value.last();
-    }
-
-    bool contains(const auto &x) const
-    {
-      return Value.contains(x);
-    }
-
-    template <typename Predicate>
-    requires std::predicate<Predicate, const value_type &>
-    bool containsIf(KRYS_NOESCAPE const Predicate &f) const
-    {
-      return Value.containsIf(f);
-    }
-
-    template <typename F>
-    decltype(auto) map(F &&functor) const
-    {
-      return Value.map(std::forward<F>(functor));
+      return Value.back();
     }
 
     bool operator==(const SpaceSeparatedFixedList &) const = default;
@@ -1031,7 +914,7 @@ namespace krys::boo::css
   template <typename T>
   struct CommaSeparatedFixedList
   {
-    using Container = krys::FixedVector<T>;
+    using Container = krys::FixedList<T>;
     using const_iterator = typename Container::const_iterator;
     using const_reverse_iterator = typename Container::const_reverse_iterator;
     using value_type = typename Container::value_type;
@@ -1046,27 +929,14 @@ namespace krys::boo::css
     {
     }
 
+    template <std::ranges::input_range TRange>
+    CommaSeparatedFixedList(std::from_range_t, TRange &&range) noexcept
+        : Value(std::from_range, std::forward<TRange>(range))
+    {
+    }
+
     CommaSeparatedFixedList(T &&element) : Value {krys::move(element)}
     {
-    }
-
-    template <typename SizedRange, typename Mapper>
-    static CommaSeparatedFixedList map(SizedRange &&range, KRYS_NOESCAPE Mapper mapper)
-    {
-      return Container::map(std::forward<SizedRange>(range), std::forward<Mapper>(mapper));
-    }
-
-    template <typename SizedRange, typename Mapper>
-    static CommaSeparatedFixedList Map(SizedRange &&range, Mapper mapper)
-    {
-      return map(std::forward<SizedRange>(range), std::forward<Mapper>(mapper));
-    }
-
-    template <std::invocable<size_t> Generator>
-    static CommaSeparatedFixedList createWithSizeFromGenerator(size_t size,
-                                                               KRYS_NOESCAPE Generator &&generator)
-    {
-      return Container::createWithSizeFromGenerator(size, std::forward<Generator>(generator));
     }
 
     const_iterator begin() const KRYS_LIFETIME_BOUND
@@ -1089,9 +959,9 @@ namespace krys::boo::css
       return Value.rend();
     }
 
-    bool isEmpty() const
+    bool empty() const
     {
-      return Value.isEmpty();
+      return Value.empty();
     }
 
     size_t size() const
@@ -1104,32 +974,14 @@ namespace krys::boo::css
       return Value[i];
     }
 
-    const T &first() const KRYS_LIFETIME_BOUND
+    const T &front() const KRYS_LIFETIME_BOUND
     {
-      return Value.first();
+      return Value.front();
     }
 
-    const T &last() const KRYS_LIFETIME_BOUND
+    const T &back() const KRYS_LIFETIME_BOUND
     {
-      return Value.last();
-    }
-
-    bool contains(const auto &x) const
-    {
-      return Value.contains(x);
-    }
-
-    template <typename Predicate>
-    requires std::predicate<Predicate, const value_type &>
-    bool containsIf(KRYS_NOESCAPE const Predicate &f) const
-    {
-      return Value.containsIf(f);
-    }
-
-    template <typename F>
-    decltype(auto) map(F &&functor) const
-    {
-      return Value.map(std::forward<F>(functor));
+      return Value.back();
     }
 
     bool operator==(const CommaSeparatedFixedList &) const = default;
@@ -1147,37 +999,30 @@ namespace krys::boo::css
   // Wraps a variable (though known at construction) number of elements of a single type in a reference
   // counted container, semantically marking them as serializing as "space separated".
   template <typename T>
-  struct SpaceSeparatedRefCountedFixedVector
+  struct SpaceSeparatedRefCountedFixedList
   {
-    using Container = krys::RefCountedFixedVector<T>;
+    using Container = krys::RefCountedFixedList<T>;
     using const_iterator = typename Container::const_iterator;
     using const_reverse_iterator = typename Container::const_reverse_iterator;
     using value_type = typename Container::value_type;
 
-    SpaceSeparatedRefCountedFixedVector(T &&value) : Value {Container::create(krys::move(value))}
+    SpaceSeparatedRefCountedFixedList(T &&value) : Value {Container::Create(krys::move(value))}
     {
     }
 
-    SpaceSeparatedRefCountedFixedVector(std::initializer_list<T> initializerList)
-        : Value {Container::create(initializerList)}
+    SpaceSeparatedRefCountedFixedList(std::initializer_list<T> initializerList)
+        : Value {Container::Create(initializerList)}
     {
     }
 
-    SpaceSeparatedRefCountedFixedVector(Ref<Container> &&value) : Value {krys::move(value)}
+    SpaceSeparatedRefCountedFixedList(Ref<Container> &&value) : Value {krys::move(value)}
     {
     }
 
-    template <typename SizedRange, typename Mapper>
-    static SpaceSeparatedRefCountedFixedVector map(SizedRange &&range, KRYS_NOESCAPE Mapper mapper)
+    template <std::ranges::forward_range TRange>
+    SpaceSeparatedRefCountedFixedList(std::from_range_t, TRange &&range) noexcept
+        : Value {Container::Create(std::from_range, std::forward<TRange>(range))}
     {
-      return Container::map(std::forward<SizedRange>(range), std::forward<Mapper>(mapper));
-    }
-
-    template <std::invocable<size_t> Generator>
-    static SpaceSeparatedRefCountedFixedVector
-      createWithSizeFromGenerator(size_t size, KRYS_NOESCAPE Generator &&generator)
-    {
-      return Container::createWithSizeFromGenerator(size, std::forward<Generator>(generator));
     }
 
     const_iterator begin() const KRYS_LIFETIME_BOUND
@@ -1200,9 +1045,9 @@ namespace krys::boo::css
       return Value->rend();
     }
 
-    bool isEmpty() const
+    bool empty() const
     {
-      return Value->isEmpty();
+      return Value->empty();
     }
 
     size_t size() const
@@ -1215,17 +1060,17 @@ namespace krys::boo::css
       return (*Value)[i];
     }
 
-    const T &first() const KRYS_LIFETIME_BOUND
+    const T &front() const KRYS_LIFETIME_BOUND
     {
-      return Value->first();
+      return Value->front();
     }
 
-    const T &last() const KRYS_LIFETIME_BOUND
+    const T &back() const KRYS_LIFETIME_BOUND
     {
-      return Value->last();
+      return Value->back();
     }
 
-    bool operator==(const SpaceSeparatedRefCountedFixedVector &other) const
+    bool operator==(const SpaceSeparatedRefCountedFixedList &other) const
     {
       return ArePointingToEqualData(Value, other.Value);
     }
@@ -1234,45 +1079,38 @@ namespace krys::boo::css
   };
 
   template <typename T>
-  constexpr inline auto TreatAsRangeLike<SpaceSeparatedRefCountedFixedVector<T>> = true;
+  constexpr inline auto TreatAsRangeLike<SpaceSeparatedRefCountedFixedList<T>> = true;
   template <typename T>
-  constexpr inline auto SerialisationSeparator<SpaceSeparatedRefCountedFixedVector<T>> =
+  constexpr inline auto SerialisationSeparator<SpaceSeparatedRefCountedFixedList<T>> =
     SerialisationSeparatorType::Space;
 
   // Wraps a variable (though known at construction) number of elements of a single type in a reference
   // counted container, semantically marking them as serializing as "comma separated".
   template <typename T>
-  struct CommaSeparatedRefCountedFixedVector
+  struct CommaSeparatedRefCountedFixedList
   {
-    using Container = krys::RefCountedFixedVector<T>;
+    using Container = krys::RefCountedFixedList<T>;
     using const_iterator = typename Container::const_iterator;
     using const_reverse_iterator = typename Container::const_reverse_iterator;
     using value_type = typename Container::value_type;
 
-    CommaSeparatedRefCountedFixedVector(T &&value) : Value {Container::create(krys::move(value))}
+    CommaSeparatedRefCountedFixedList(T &&value) : Value {Container::Create(krys::move(value))}
     {
     }
 
-    CommaSeparatedRefCountedFixedVector(std::initializer_list<T> initializerList)
-        : Value {Container::create(initializerList)}
+    CommaSeparatedRefCountedFixedList(std::initializer_list<T> initializerList)
+        : Value {Container::Create(initializerList)}
     {
     }
 
-    CommaSeparatedRefCountedFixedVector(Ref<Container> &&value) : Value {krys::move(value)}
+    CommaSeparatedRefCountedFixedList(Ref<Container> &&value) : Value {krys::move(value)}
     {
     }
 
-    template <typename SizedRange, typename Mapper>
-    static CommaSeparatedRefCountedFixedVector map(SizedRange &&range, KRYS_NOESCAPE Mapper mapper)
+    template <std::ranges::forward_range TRange>
+    CommaSeparatedRefCountedFixedList(std::from_range_t, TRange &&range) noexcept
+        : Value {Container::Create(std::from_range, std::forward<TRange>(range))}
     {
-      return Container::map(std::forward<SizedRange>(range), std::forward<Mapper>(mapper));
-    }
-
-    template <std::invocable<size_t> Generator>
-    static CommaSeparatedRefCountedFixedVector
-      createWithSizeFromGenerator(size_t size, KRYS_NOESCAPE Generator &&generator)
-    {
-      return Container::createWithSizeFromGenerator(size, std::forward<Generator>(generator));
     }
 
     const_iterator begin() const KRYS_LIFETIME_BOUND
@@ -1295,9 +1133,9 @@ namespace krys::boo::css
       return Value->rend();
     }
 
-    bool isEmpty() const
+    bool empty() const
     {
-      return Value->isEmpty();
+      return Value->empty();
     }
 
     size_t size() const
@@ -1310,17 +1148,17 @@ namespace krys::boo::css
       return (*Value)[i];
     }
 
-    const T &first() const KRYS_LIFETIME_BOUND
+    const T &front() const KRYS_LIFETIME_BOUND
     {
-      return Value->first();
+      return Value->front();
     }
 
-    const T &last() const KRYS_LIFETIME_BOUND
+    const T &back() const KRYS_LIFETIME_BOUND
     {
-      return Value->last();
+      return Value->back();
     }
 
-    bool operator==(const CommaSeparatedRefCountedFixedVector &other) const
+    bool operator==(const CommaSeparatedRefCountedFixedList &other) const
     {
       return ArePointingToEqualData(Value, other.Value);
     }
@@ -1329,9 +1167,9 @@ namespace krys::boo::css
   };
 
   template <typename T>
-  constexpr inline auto TreatAsRangeLike<CommaSeparatedRefCountedFixedVector<T>> = true;
+  constexpr inline auto TreatAsRangeLike<CommaSeparatedRefCountedFixedList<T>> = true;
   template <typename T>
-  constexpr inline auto SerialisationSeparator<CommaSeparatedRefCountedFixedVector<T>> =
+  constexpr inline auto SerialisationSeparator<CommaSeparatedRefCountedFixedList<T>> =
     SerialisationSeparatorType::Comma;
 
 #pragma region SpaceSeparatedTuple
@@ -1897,7 +1735,7 @@ namespace krys::boo::css
   public:
     ListOrNone(List list) : _value {krys::move(list)}
     {
-      krys_assert(!_value.isEmpty());
+      krys_assert(!_value.empty());
     }
 
     ListOrNone(keywords::None) : _value {}
@@ -1924,14 +1762,14 @@ namespace krys::boo::css
       return _value.rend();
     }
 
-    KRYS_NODISCARD const value_type &first() const noexcept
+    KRYS_NODISCARD const value_type &front() const noexcept
     {
-      return _value.first();
+      return _value.front();
     }
 
-    KRYS_NODISCARD const value_type &last() const noexcept
+    KRYS_NODISCARD const value_type &back() const noexcept
     {
-      return _value.last();
+      return _value.back();
     }
 
     KRYS_NODISCARD size_t size() const noexcept
@@ -1944,26 +1782,16 @@ namespace krys::boo::css
       return _value[i];
     }
 
-    KRYS_NODISCARD bool contains(const auto &item) const noexcept
-    {
-      return _value.contains(item);
-    }
-
-    KRYS_NODISCARD bool containsIf(const auto &predicate) const noexcept
-    {
-      return _value.containsIf(predicate);
-    }
-
     bool operator==(const ListOrNone &) const = default;
 
     KRYS_NODISCARD bool IsNone() const noexcept
     {
-      return _value.isEmpty();
+      return _value.empty();
     }
 
     KRYS_NODISCARD bool IsList() const noexcept
     {
-      return !_value.isEmpty();
+      return !_value.empty();
     }
 
     template <typename... F>
@@ -2082,21 +1910,9 @@ namespace krys::boo::css
       return IsDefault() ? defaulter() : Value[i];
     }
 
-    bool contains(const auto &x) const noexcept
-    {
-      return IsDefault() ? (x == defaulter()) : Value.contains(x);
-    }
-
-    template <typename Predicate>
-    requires std::predicate<Predicate, const value_type &>
-    bool containsIf(const Predicate &f) const noexcept
-    {
-      return IsDefault() ? f(defaulter()) : Value.containsIf(f);
-    }
-
     bool IsDefault() const noexcept
     {
-      return Value.isEmpty();
+      return Value.empty();
     }
 
     bool operator==(const ListOrDefault &) const noexcept = default;
@@ -2139,7 +1955,7 @@ namespace krys::boo::css
 
     ListOrNull(List &&list) noexcept : _value {krys::move(list)}
     {
-      krys_assert(!_value.isEmpty());
+      krys_assert(!_value.empty());
     }
 
     ListOrNull(std::nullopt_t) noexcept : _value {}
@@ -2170,14 +1986,14 @@ namespace krys::boo::css
       return _value.rend();
     }
 
-    KRYS_NODISCARD const value_type &first() const noexcept
+    KRYS_NODISCARD const value_type &front() const noexcept
     {
-      return _value.first();
+      return _value.front();
     }
 
-    KRYS_NODISCARD const value_type &last() const noexcept
+    KRYS_NODISCARD const value_type &back() const noexcept
     {
-      return _value.last();
+      return _value.back();
     }
 
     KRYS_NODISCARD size_t size() const
@@ -2190,28 +2006,16 @@ namespace krys::boo::css
       return _value[i];
     }
 
-    KRYS_NODISCARD bool contains(const auto &x) const
-    {
-      return _value.contains(x);
-    }
-
-    template <typename Predicate>
-    requires std::predicate<Predicate, const value_type &>
-    KRYS_NODISCARD bool containsIf(const Predicate &f) const
-    {
-      return _value.containsIf(f);
-    }
-
     KRYS_NODISCARD bool operator==(const ListOrNull &) const = default;
 
     KRYS_NODISCARD bool IsNull() const
     {
-      return _value.isEmpty();
+      return _value.empty();
     }
 
     KRYS_NODISCARD bool IsList() const
     {
-      return !_value.isEmpty();
+      return !_value.empty();
     }
 
     KRYS_NODISCARD const List *TryList() const noexcept
@@ -2227,7 +2031,7 @@ namespace krys::boo::css
 
     explicit operator bool() const
     {
-      return !_value.isEmpty();
+      return !_value.empty();
     }
 
     const List *operator->() const noexcept
@@ -2263,7 +2067,7 @@ namespace krys::boo::css
 
     constexpr EnumSetOrKeywordBase(EnumSet list) noexcept : _value {krys::move(list)}
     {
-      krys_assert(!_value.IsEmpty());
+      krys_assert(!_value.empty());
     }
 
     constexpr EnumSetOrKeywordBase(Keyword) noexcept : _value {}
@@ -2293,9 +2097,9 @@ namespace krys::boo::css
       return _value.ToRaw();
     }
 
-    KRYS_NODISCARD constexpr bool Contains(value_type e) const noexcept
+    KRYS_NODISCARD constexpr bool contains(value_type e) const noexcept
     {
-      return _value.Contains(e);
+      return _value.contains(e);
     }
 
     // The set's queries take the set it wraps, if it wraps one.
@@ -2336,26 +2140,21 @@ namespace krys::boo::css
       return _value.end();
     }
 
-    KRYS_NODISCARD constexpr size_t Size() const noexcept
+    KRYS_NODISCARD constexpr size_t size() const noexcept
     {
-      return _value.Size();
-    }
-
-    KRYS_NODISCARD constexpr bool Contains(const auto &x) const noexcept
-    {
-      return _value.Contains(x);
+      return _value.size();
     }
 
     constexpr bool operator==(const EnumSetOrKeywordBase &) const noexcept = default;
 
     KRYS_NODISCARD constexpr bool IsKeyword() const noexcept
     {
-      return _value.IsEmpty();
+      return _value.empty();
     }
 
     KRYS_NODISCARD constexpr bool IsEnumSet() const noexcept
     {
-      return !_value.IsEmpty();
+      return !_value.empty();
     }
 
     KRYS_NODISCARD constexpr const EnumSet *TryEnumSet() const noexcept
@@ -2492,17 +2291,10 @@ namespace krys::boo::css
     {
     }
 
-    template <typename SizedRange, typename Mapper>
-    // NOLINTNEXTLINE(cppcoreguidelines-missing-std-forward): iterated in place, never forwarded.
-    KRYS_NODISCARD static SpaceSeparatedEnumSet Map(SizedRange &&range, Mapper mapper) noexcept
+    template <std::ranges::input_range TRange>
+    constexpr SpaceSeparatedEnumSet(std::from_range_t, TRange &&range) noexcept
+        : Value(std::from_range, std::forward<TRange>(range))
     {
-      Container result;
-      for (auto &&Value : range)
-      {
-        result.Add(mapper(Value));
-      }
-
-      return result;
     }
 
     KRYS_NODISCARD constexpr static SpaceSeparatedEnumSet FromRaw(StorageType rawValue) noexcept
@@ -2525,19 +2317,19 @@ namespace krys::boo::css
       return Value.end();
     }
 
-    KRYS_NODISCARD constexpr bool IsEmpty() const noexcept
+    KRYS_NODISCARD constexpr bool empty() const noexcept
     {
-      return Value.IsEmpty();
+      return Value.empty();
     }
 
-    KRYS_NODISCARD constexpr size_t Size() const noexcept
+    KRYS_NODISCARD constexpr size_t size() const noexcept
     {
-      return Value.Size();
+      return Value.size();
     }
 
-    KRYS_NODISCARD constexpr bool Contains(T e) const noexcept
+    KRYS_NODISCARD constexpr bool contains(T e) const noexcept
     {
-      return Value.Contains(e);
+      return Value.contains(e);
     }
 
     KRYS_NODISCARD constexpr bool ContainsAny(Container other) const noexcept
@@ -2608,17 +2400,10 @@ namespace krys::boo::css
     {
     }
 
-    template <typename SizedRange, typename Mapper>
-    // NOLINTNEXTLINE(cppcoreguidelines-missing-std-forward): iterated in place, never forwarded.
-    KRYS_NODISCARD constexpr static CommaSeparatedEnumSet Map(SizedRange &&range, Mapper mapper) noexcept
+    template <std::ranges::input_range TRange>
+    constexpr CommaSeparatedEnumSet(std::from_range_t, TRange &&range) noexcept
+        : Value(std::from_range, std::forward<TRange>(range))
     {
-      Container result;
-      for (auto &&Value : range)
-      {
-        result.Add(mapper(Value));
-      }
-
-      return result;
     }
 
     KRYS_NODISCARD constexpr static CommaSeparatedEnumSet FromRaw(StorageType rawValue) noexcept
@@ -2641,19 +2426,19 @@ namespace krys::boo::css
       return Value.end();
     }
 
-    KRYS_NODISCARD constexpr bool IsEmpty() const noexcept
+    KRYS_NODISCARD constexpr bool empty() const noexcept
     {
-      return Value.IsEmpty();
+      return Value.empty();
     }
 
-    KRYS_NODISCARD constexpr size_t Size() const noexcept
+    KRYS_NODISCARD constexpr size_t size() const noexcept
     {
-      return Value.Size();
+      return Value.size();
     }
 
-    KRYS_NODISCARD constexpr bool Contains(T e) const noexcept
+    KRYS_NODISCARD constexpr bool contains(T e) const noexcept
     {
-      return Value.Contains(e);
+      return Value.contains(e);
     }
 
     KRYS_NODISCARD constexpr bool ContainsAny(Container other) const noexcept
@@ -2730,19 +2515,19 @@ namespace krys
       return {null};
     }
   };
+
+  template <>
+  struct FastHash<boo::css::CustomIdentifier>
+  {
+    KRYS_NODISCARD size_t operator()(const boo::css::CustomIdentifier &identifier) const noexcept
+    {
+      return FastHash<boo::CSSOMStringAtom> {}(identifier.Value);
+    }
+  };
 }
 
 namespace std
 {
-  template <>
-  struct hash<krys::boo::css::CustomIdentifier>
-  {
-    size_t operator()(const krys::boo::css::CustomIdentifier &identifier) const noexcept
-    {
-      return hash<krys::boo::CSSOMStringAtom> {}(identifier.Value);
-    }
-  };
-
   template <krys::boo::css::ValueId C, typename T>
   class tuple_size<krys::boo::css::FunctionNotation<C, T>> : public std::integral_constant<size_t, 1>
   {

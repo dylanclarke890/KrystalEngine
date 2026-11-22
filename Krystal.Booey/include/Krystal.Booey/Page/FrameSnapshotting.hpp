@@ -30,12 +30,12 @@
 #pragma once
 
 #include "Krystal.Core/Attributes.hpp"
+#include "Krystal.Core/Containers/EnumSet.hpp"
+#include "Krystal.Core/Containers/List.hpp"
 #include "Krystal.Core/Enum.hpp"
 #include "Krystal.Core/Geometry/GeometryForward.hpp"
+#include "Krystal.Core/Memory/RefPtr.hpp"
 #include "Krystal.Core/Numeric.hpp"
-#include "Krystal.Core/Types/EnumSet.hpp"
-#include "Krystal.Core/Types/List.hpp"
-#include "Krystal.Core/Types/RefPtr.hpp"
 
 namespace krys::boo
 {
@@ -61,12 +61,12 @@ namespace krys::boo
     FixedAndStickyLayersOnly,
     DraggableElement,
   };
-}
 
-KRYS_DEFINE_CONTIGUOUS_ENUM_TRAITS(krys::boo::SnapshotFlags, 14uz)
+  consteval SnapshotFlags MaxEnumValue(SnapshotFlags) noexcept
+  {
+    return SnapshotFlags::DraggableElement;
+  }
 
-namespace krys::boo
-{
   /// @brief How a snapshot is taken.
   /// FIXME: The pixel format and colour space, with bitmap image buffers.
   struct SnapshotOptions

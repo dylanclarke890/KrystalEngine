@@ -1,19 +1,22 @@
 ﻿#pragma once
 
+#include "Krystal.Core/Containers/EnumSet.hpp"
 #include "Krystal.Core/Enum.hpp"
 
 namespace krys::boo
 {
   enum class PropertyFlag : uint8
   {
-    None = 0,
     /// @brief Whether or not the property is important (i.e. has the `!important` flag).
-    Important = 1 << 0,
+    Important,
     /// @brief Whether or not the property was implicitly set as the result of a shorthand.
-    Implicit = 1 << 1,
+    Implicit,
     /// @brief Whether or not the property was set as the result of a shorthand.
-    SetFromShorthand = 1 << 2,
+    SetFromShorthand,
   };
-}
 
-KRYS_DEFINE_FLAGS_ENUM_TRAITS(krys::boo::PropertyFlag, 4uz);
+  consteval PropertyFlag MaxEnumValue(PropertyFlag) noexcept
+  {
+    return PropertyFlag::SetFromShorthand;
+  }
+}

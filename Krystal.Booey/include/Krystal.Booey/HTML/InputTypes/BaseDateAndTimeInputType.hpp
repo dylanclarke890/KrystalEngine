@@ -35,7 +35,7 @@
 #include "Krystal.Booey/HTML/Shadow/DateTimeEditElement.hpp"
 #include "Krystal.Booey/Platform/Choosers/DateTimeChooser.hpp"
 #include "Krystal.Booey/Platform/Choosers/DateTimeChooserClient.hpp"
-#include "Krystal.Core/Types/EnumSet.hpp"
+#include "Krystal.Core/Containers/EnumSet.hpp"
 #include "Krystal.I18n/DateTimeFormat.hpp"
 
 namespace krys::boo

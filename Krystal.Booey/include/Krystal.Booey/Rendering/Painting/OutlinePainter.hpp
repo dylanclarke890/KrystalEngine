@@ -28,8 +28,8 @@
 #include "Krystal.Booey/Style/Values/Borders/BorderRadius.hpp"
 #include "Krystal.Booey/Text/WritingMode.hpp"
 #include "Krystal.Core/Attributes.hpp"
+#include "Krystal.Core/Containers/List.hpp"
 #include "Krystal.Core/Geometry/Rect.hpp"
-#include "Krystal.Core/Types/List.hpp"
 
 namespace krys::boo
 {

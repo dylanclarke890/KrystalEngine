@@ -27,14 +27,9 @@
 
 #include "Krystal.Booey/CSS/TypedOM/CSSStyleValue.hpp"
 #include "Krystal.Booey/DOM/Types/ExceptionOr.hpp"
-#include "Krystal.Core/Types/List.hpp"
+#include "Krystal.Core/Containers/List.hpp"
 #include "Krystal.Core/Types/Maybe.hpp"
 #include "Krystal.Core/Types/Variant.hpp"
-
-namespace krys::boo
-{
-  class CSSVariableReferenceValue;
-}
 
 namespace krys::boo::css
 {
@@ -43,6 +38,8 @@ namespace krys::boo::css
 
 namespace krys::boo
 {
+  class CSSVariableReferenceValue;
+
   /// @brief A segment of an unparsed value: a string, or a variable reference.
   /// @see https://drafts.css-houdini.org/css-typed-om/#typedefdef-cssunparsedsegment
   using CSSUnparsedSegment = Variant<CSSOMString, RefPtr<CSSVariableReferenceValue>>;

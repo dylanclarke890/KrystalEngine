@@ -3,8 +3,8 @@
 #include "Krystal.Booey/DOM/Types/DOMString.hpp"
 #include "Krystal.Core/Attributes.hpp"
 #include "Krystal.Core/Enum.hpp"
-#include "Krystal.Core/RefCounted.hpp"
-#include "Krystal.Core/Types/RefPtr.hpp"
+#include "Krystal.Core/Memory/RefCounted.hpp"
+#include "Krystal.Core/Memory/RefPtr.hpp"
 
 namespace krys::boo::dom
 {
@@ -16,9 +16,12 @@ namespace krys::boo::dom
     Attributes,
     CharacterData,
   };
-}
 
-KRYS_DEFINE_CONTIGUOUS_ENUM_TRAITS(krys::boo::dom::MutationRecordType, 3uz);
+  consteval MutationRecordType MaxEnumValue(MutationRecordType) noexcept
+  {
+    return MutationRecordType::CharacterData;
+  }
+}
 
 namespace krys::boo
 {
@@ -51,16 +54,10 @@ namespace krys::boo::dom
     KRYS_NODISCARD virtual RefPtr<NodeList> RemovedNodes() const noexcept = 0;
 
     /// @see https://dom.spec.whatwg.org/#dom-mutationrecord-previoussibling
-    KRYS_NODISCARD virtual RefPtr<Node> PreviousSibling() const noexcept
-    {
-      return nullptr;
-    }
+    KRYS_NODISCARD virtual RefPtr<Node> PreviousSibling() const noexcept;
 
     /// @see https://dom.spec.whatwg.org/#dom-mutationrecord-nextsibling
-    KRYS_NODISCARD virtual RefPtr<Node> NextSibling() const noexcept
-    {
-      return nullptr;
-    }
+    KRYS_NODISCARD virtual RefPtr<Node> NextSibling() const noexcept;
 
     /// @see https://dom.spec.whatwg.org/#dom-mutationrecord-attributename
     KRYS_NODISCARD virtual const DOMStringAtom &AttributeName() const noexcept KRYS_LIFETIME_BOUND

@@ -29,16 +29,9 @@
 #include "Krystal.Booey/DOM/Events/UIEvent.hpp"
 #include "Krystal.Booey/Input/MouseEventTypes.hpp"
 #include "Krystal.Core/Attributes.hpp"
+#include "Krystal.Core/Containers/List.hpp"
+#include "Krystal.Core/Memory/RefPtr.hpp"
 #include "Krystal.Core/Numeric.hpp"
-#include "Krystal.Core/Types/List.hpp"
-#include "Krystal.Core/Types/RefPtr.hpp"
-
-namespace krys::boo
-{
-  class Element;
-  class Node;
-  class PlatformMouseEvent;
-}
 
 namespace krys::boo::dom
 {
@@ -50,6 +43,10 @@ namespace krys::boo::dom
 
 namespace krys::boo
 {
+  class Element;
+  class Node;
+  class PlatformMouseEvent;
+
   /// @see https://w3c.github.io/uievents/#dictdef-mouseeventinit
   struct MouseEventInit : EventModifierInit
   {

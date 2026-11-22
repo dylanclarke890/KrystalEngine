@@ -10,6 +10,13 @@
 
 namespace krys::boo
 {
+  dom::NamedNodeMap::NamedNodeMap(Element &associatedElement) noexcept
+      : _associatedElement(ShareCheckedRef(associatedElement))
+  {
+  }
+
+  dom::NamedNodeMap::~NamedNodeMap() noexcept = default;
+
   size_t dom::NamedNodeMap::Length() const noexcept
   {
     // Return the attribute list's size.

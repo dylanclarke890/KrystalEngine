@@ -87,7 +87,7 @@
 #include "Krystal.Booey/CSS/Values/ViewValue.hpp"
 #include "Krystal.Booey/DOM/Events/EventTarget.hpp"
 #include "Krystal.Core/Assert.hpp"
-#include "Krystal.Core/Hash.hpp"
+#include "Krystal.Core/Hashing/FastHash.hpp"
 
 namespace krys::boo::css
 {
@@ -417,14 +417,14 @@ namespace krys::boo::css
     // To match Equals() a single item list could have the same hash as the item.
     // FIXME: Some Style::Builder functions can only handle list values.
 
-    seed = Hash::Combine(seed, _type);
+    seed = CombineFastHashes(seed, _type);
 
     return VisitDerived([&](auto &typedThis) { return typedThis.AddDerivedHash(seed); });
   }
 
   bool Value::AddDerivedHash(size_t &seed) const noexcept
   {
-    seed = Hash::Combine(seed, this);
+    seed = CombineFastHashes(seed, this);
     return false;
   }
 

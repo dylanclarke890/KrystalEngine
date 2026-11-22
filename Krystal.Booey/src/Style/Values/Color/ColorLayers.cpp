@@ -57,8 +57,10 @@ namespace krys::boo::style
   {
     ColorResolutionStateNester nester {state};
 
-    auto colors = css::CommaSeparatedList<Color>::map(unresolved.Colors, [&](const auto &color) -> Color
-                                                      { return ToStyleColor(color, state); });
+    auto colors = css::CommaSeparatedList<Color>(
+      std::from_range,
+      unresolved.Colors
+        | std::views::transform([&](const auto &color) -> Color { return ToStyleColor(color, state); }));
 
     if (!std::ranges::all_of(colors, [](const auto &color) { return color.IsResolvedColor(); }))
     {

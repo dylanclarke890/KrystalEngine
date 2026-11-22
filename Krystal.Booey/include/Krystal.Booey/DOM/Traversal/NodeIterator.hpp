@@ -1,12 +1,13 @@
 ﻿#pragma once
 
 #include "Krystal.Booey/DOM/Traversal/TraversalBase.hpp"
-#include "Krystal.Core/RefCounted.hpp"
+#include "Krystal.Core/Memory/RefCounted.hpp"
+#include "Krystal.Core/Memory/RefPtr.hpp"
 #include "Krystal.Core/Types/Maybe.hpp"
-#include "Krystal.Core/Types/RefPtr.hpp"
 
 namespace krys::boo
 {
+  class Document;
   class Node;
 }
 

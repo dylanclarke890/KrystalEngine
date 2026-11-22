@@ -142,7 +142,7 @@ namespace krys::boo
         descendantSet = CreateUnique<TrackedRendererListHashSet>();
       }
 
-      bool added = descendantSet->add(&descendant).second;
+      bool added = descendantSet->insert(&descendant).second;
       if (!added)
       {
         krys_debug_assert(s_percentHeightContainerMap->contains(&descendant));
@@ -183,8 +183,8 @@ namespace krys::boo
         }
         auto &descendantSet = descendantsMapIterator->second;
         krys_debug_assert(descendantSet->contains(&descendant));
-        descendantSet->remove(&descendant);
-        if (descendantSet->isEmpty())
+        descendantSet->erase(&descendant);
+        if (descendantSet->empty())
         {
           s_percentHeightDescendantsMap->erase(descendantsMapIterator);
         }
@@ -242,7 +242,7 @@ namespace krys::boo
         {
           if (auto *descendants = PositionedRenderers(*previous->second))
           {
-            descendants->remove(&outOfFlowDescendant);
+            descendants->erase(&outOfFlowDescendant);
           }
         }
 
@@ -253,15 +253,15 @@ namespace krys::boo
         }
 
         auto isNewEntry = false;
-        if (!Is<RenderView>(containingBlock) || descendants->isEmpty())
+        if (!Is<RenderView>(containingBlock) || descendants->empty())
         {
-          isNewEntry = descendants->add(&outOfFlowDescendant).second;
+          isNewEntry = descendants->insert(&outOfFlowDescendant).second;
         }
         else if (outOfFlowDescendant.IsFixedPositioned()
                  || dom::IsInTopLayerOrBackdrop(outOfFlowDescendant.Style(),
                                                 outOfFlowDescendant.GetElement()))
         {
-          isNewEntry = descendants->appendOrMoveToLast(&outOfFlowDescendant).second;
+          isNewEntry = descendants->AppendOrMoveToLast(&outOfFlowDescendant).second;
         }
         else
         {
@@ -275,11 +275,11 @@ namespace krys::boo
             {
               if ((*it)->IsFixedPositioned())
               {
-                isNewEntry = descendants->insertBefore(it, &outOfFlowDescendant).second;
+                isNewEntry = descendants->InsertBefore(it, &outOfFlowDescendant).second;
                 return;
               }
             }
-            isNewEntry = descendants->appendOrMoveToLast(&outOfFlowDescendant).second;
+            isNewEntry = descendants->AppendOrMoveToLast(&outOfFlowDescendant).second;
           };
           ensureLayoutDepentBoxPosition();
         }
@@ -313,8 +313,8 @@ namespace krys::boo
         auto *descendant = const_cast<RenderBox *>(&outOfFlowDescendant);
         krys_debug_assert(descendants->contains(descendant));
 
-        descendants->remove(descendant);
-        if (descendants->isEmpty())
+        descendants->erase(descendant);
+        if (descendants->empty())
         {
           _descendantsMap.erase(descendantsIterator);
         }
@@ -864,11 +864,11 @@ namespace krys::boo
   {
     auto textDirection = text::TextDirection::LTR;
     bool directionalOverride = false;
-    if (flags.Contains(TextRunFlag::RespectDirection))
+    if (flags.contains(TextRunFlag::RespectDirection))
     {
       textDirection = style.GetWritingMode().BidiDirection();
     }
-    if (flags.Contains(TextRunFlag::RespectDirectionOverride))
+    if (flags.contains(TextRunFlag::RespectDirectionOverride))
     {
       directionalOverride = IsOverride(style.UnicodeBidi());
     }
@@ -2382,7 +2382,7 @@ namespace krys::boo
     if (auto *transaction =
           View().FrameView().LayoutContext().UpdateScrollInfoAfterLayoutTransactionIfExists())
     {
-      transaction->Blocks.remove(this);
+      transaction->Blocks.erase(this);
     }
   }
 
@@ -2395,7 +2395,8 @@ namespace krys::boo
       auto shouldUpdate = hasNonVisibleOverflow || HasControlClip();
       if (shouldUpdate)
       {
-        View().FrameView().LayoutContext().UpdateScrollInfoAfterLayoutTransactionIfExists()->Blocks.add(this);
+        View().FrameView().LayoutContext().UpdateScrollInfoAfterLayoutTransactionIfExists()->Blocks.insert(
+          this);
         return;
       }
     }
@@ -2498,7 +2499,7 @@ namespace krys::boo
         return false;
       }
 
-      if (paintInfo.PaintBehavior.Contains(PaintBehavior::CompositedOverflowScrollContent) && HasLayer()
+      if (paintInfo.PaintBehavior.contains(PaintBehavior::CompositedOverflowScrollContent) && HasLayer()
           && Layer()->UsesCompositedScrolling())
       {
         return false;

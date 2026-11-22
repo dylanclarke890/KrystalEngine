@@ -35,18 +35,18 @@ namespace krys::boo::tests
   {
     using Change = GraphicsContextState::Change;
     GraphicsContextState state;
-    CHECK(state.Changes().IsEmpty());
+    CHECK(state.Changes().empty());
 
     SECTION("Setting a property to its value isn't a change")
     {
       state.SetFillColor(Color::black);
       state.SetAlpha(1);
-      CHECK(state.Changes().IsEmpty());
+      CHECK(state.Changes().empty());
       state.SetAlpha(0.5f);
       state.SetStrokeThickness(2);
       CHECK(state.Changes() == GraphicsContextState::ChangeFlags {Change::Alpha, Change::StrokeThickness});
       state.DidApplyChanges();
-      CHECK(state.Changes().IsEmpty());
+      CHECK(state.Changes().empty());
     }
 
     SECTION("Merging all changes copies every property that differs")
@@ -85,7 +85,7 @@ namespace krys::boo::tests
       other.SetAlpha(1);
       state.MergeLastChanges(other, lastDrawn);
       CHECK(state.Alpha() == 1);
-      CHECK(state.Changes().IsEmpty());
+      CHECK(state.Changes().empty());
     }
 
     SECTION("Repurposing as initial forgets the changes")
@@ -93,9 +93,9 @@ namespace krys::boo::tests
       state.SetAlpha(0.5f);
       auto clone = state.Clone(GraphicsContextState::Purpose::SaveRestore);
       CHECK(clone.GetPurpose() == GraphicsContextState::Purpose::SaveRestore);
-      CHECK(!clone.Changes().IsEmpty());
+      CHECK(!clone.Changes().empty());
       clone.Repurpose(GraphicsContextState::Purpose::Initial);
-      CHECK(clone.Changes().IsEmpty());
+      CHECK(clone.Changes().empty());
       CHECK(clone.Alpha() == 0.5f);
     }
   }

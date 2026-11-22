@@ -77,7 +77,7 @@
 #include "Krystal.Core/Concepts.hpp"
 #include "Krystal.Core/Geometry/GeometryForward.hpp"
 #include "Krystal.Core/Geometry/Size.hpp"
-#include "Krystal.Core/Hash.hpp"
+#include "Krystal.Core/Hashing/FastHash.hpp"
 #include "Krystal.Core/Maths/Extras.hpp"
 #include "Krystal.Core/Numeric.hpp"
 #include "Krystal.Core/Types/Markable.hpp"
@@ -446,16 +446,11 @@ namespace krys
   TextStream &operator<<(TextStream &ts, const PointF &value) noexcept;
 
   template <>
-  struct DefaultHash<PointF>
+  struct FastHash<PointF>
   {
-    KRYS_NODISCARD static size_t Hash(const PointF &point) noexcept
+    KRYS_NODISCARD size_t operator()(const PointF &point) const noexcept
     {
-      return krys::Hash::Combine(point.X(), point.Y());
-    }
-
-    KRYS_NODISCARD static bool Equal(const PointF &a, const PointF &b) noexcept
-    {
-      return a == b;
+      return krys::CombineFastHashes(point.X(), point.Y());
     }
   };
 

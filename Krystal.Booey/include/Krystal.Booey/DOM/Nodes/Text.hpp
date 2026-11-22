@@ -26,15 +26,8 @@
 #include "Krystal.Booey/DOM/Types/ExceptionOr.hpp"
 #include "Krystal.Booey/Rendering/RenderPtr.hpp"
 #include "Krystal.Core/Attributes.hpp"
-#include "Krystal.Core/Types/RefPtr.hpp"
-#include "Krystal.Core/Types/WeakPtr.hpp"
-
-namespace krys::boo
-{
-  class HTMLSlotElement;
-  class RenderStyle;
-  class RenderText;
-}
+#include "Krystal.Core/Memory/RefPtr.hpp"
+#include "Krystal.Core/Memory/WeakPtr.hpp"
 
 namespace krys::boo::dom
 {
@@ -44,6 +37,9 @@ namespace krys::boo::dom
 namespace krys::boo
 {
   class Document;
+  class HTMLSlotElement;
+  class RenderStyle;
+  class RenderText;
 
   /// @brief A node of text: an exclusive Text node, or the CDATASection that derives from it.
   /// @see https://dom.spec.whatwg.org/#interface-text

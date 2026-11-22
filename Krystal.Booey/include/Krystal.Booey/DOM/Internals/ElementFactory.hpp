@@ -2,11 +2,12 @@
 
 #include "Krystal.Booey/DOM/Types/DOMString.hpp"
 #include "Krystal.Booey/DOM/Types/QualifiedName.hpp"
+#include "Krystal.Booey/HTML/Elements/HTMLElement.hpp"
 #include "Krystal.Booey/Infra/Namespaces.hpp"
 #include "Krystal.Core/Attributes.hpp"
+#include "Krystal.Core/Memory/RefPtr.hpp"
 #include "Krystal.Core/TypeCast.hpp"
 #include "Krystal.Core/Types/Maybe.hpp"
-#include "Krystal.Core/Types/RefPtr.hpp"
 
 namespace krys::boo
 {
@@ -22,7 +23,9 @@ namespace krys::boo::html
 
 namespace krys::boo::dom
 {
-  using CustomElementRegistryOrDefault = Maybe<RefPtr<html::CustomElementRegistry>>;
+  /// @brief A registry (null for none), or "default" when empty. A plain pointer: creating an element only
+  /// reads it, and the element takes its own reference.
+  using CustomElementRegistryOrDefault = Maybe<html::CustomElementRegistry *>;
   constexpr auto DefaultCustomElementRegistry = null;
 
   class ElementFactory

@@ -40,10 +40,10 @@
 #include "Krystal.Booey/Page/Settings.hpp"
 #include "Krystal.Booey/Style/Scope/Scope.hpp"
 #include "Krystal.Core/Assert.hpp"
-#include "Krystal.Core/Hash.hpp"
+#include "Krystal.Core/Containers/Array.hpp"
+#include "Krystal.Core/Hashing/FastHash.hpp"
+#include "Krystal.Core/Memory/NeverDestroyed.hpp"
 #include "Krystal.Core/Strings/ASCII.hpp"
-#include "Krystal.Core/Threading/NeverDestroyed.hpp"
-#include "Krystal.Core/Types/Array.hpp"
 #include "Krystal.Core/Utils/SetForScope.hpp"
 #include <algorithm>
 
@@ -63,7 +63,7 @@ namespace krys::boo::css
 
   size_t CSSFontSelector::PaletteKeyHash::operator()(const PaletteKey &key) const noexcept
   {
-    return Hash::Combine(std::hash<StringAtom> {}(key.Family), std::hash<StringAtom> {}(key.Name));
+    return CombineFastHashes(key.Family, key.Name);
   }
 
   CSSFontSelector::CSSFontSelector(Document &document) noexcept
@@ -386,7 +386,7 @@ namespace krys::boo::css
     static const NeverDestroyed<FontPaletteValues> emptyFontPaletteValues;
     if (description.GetFontPalette().PaletteType != FontPalette::Type::Custom)
     {
-      return emptyFontPaletteValues.get();
+      return *emptyFontPaletteValues;
     }
 
     const StringAtom &paletteName = description.GetFontPalette().Identifier;
@@ -394,7 +394,7 @@ namespace krys::boo::css
     auto iterator = _paletteMap.find(PaletteKey {familyName, paletteName});
     if (iterator == _paletteMap.end())
     {
-      return emptyFontPaletteValues.get();
+      return *emptyFontPaletteValues;
     }
 
     return iterator->second;

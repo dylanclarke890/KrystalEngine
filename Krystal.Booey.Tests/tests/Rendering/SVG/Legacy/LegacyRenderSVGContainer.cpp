@@ -1,5 +1,6 @@
 ﻿#include "Krystal.Booey/Rendering/SVG/Legacy/LegacyRenderSVGContainer.hpp"
 #include "catch2/catch_test_macros.hpp"
+#include "Krystal.Booey.Tests/Rendering/SVG/LegacySVGTestUtils.hpp"
 #include "Krystal.Booey.Tests/Style/ResolverTestUtils.hpp"
 #include "Krystal.Booey/Rendering/SVG/Legacy/LegacyRenderSVGHiddenContainer.hpp"
 #include "Krystal.Booey/Rendering/SVG/Legacy/LegacyRenderSVGRoot.hpp"
@@ -16,25 +17,6 @@ namespace krys::boo::tests
   namespace
   {
     // The renderers' overrides are private; tests call them through RenderObject.
-    KRYS_NODISCARD const RenderObject &AsObject(const RenderObject &renderer) noexcept
-    {
-      return renderer;
-    }
-
-    KRYS_NODISCARD Element &ElementById(Document &document, DOMStringView id) noexcept
-    {
-      auto element = document.GetElementById(id);
-      krys_assert(element);
-      return *element;
-    }
-
-    template <typename T>
-    KRYS_NODISCARD T &RendererById(Document &document, DOMStringView id) noexcept
-    {
-      auto *renderer = ElementById(document, id).Renderer();
-      krys_assert(renderer);
-      return Downcast<T>(*renderer);
-    }
   }
 
   TEST_CASE_METHOD(css::tests::ValueFixture, "LegacyRenderSVGContainer: transforms",
@@ -68,9 +50,8 @@ namespace krys::boo::tests
     CHECK(AsObject(w).LocalToParentTransform() == AffineTransform(3, 0, 0, 1.5, 1, 2));
 
     // Changing the attributes lays the containers out again.
-    REQUIRE_FALSE(
-      ElementById(*fixture.Document, u8"g").SetAttribute(u8"transform", u8"rotate(90)").HasException());
-    REQUIRE_FALSE(ElementById(*fixture.Document, u8"v").SetAttribute(u8"x", u8"15").HasException());
+    REQUIRE_FALSE(ById(*fixture.Document, u8"g").SetAttribute(u8"transform", u8"rotate(90)").HasException());
+    REQUIRE_FALSE(ById(*fixture.Document, u8"v").SetAttribute(u8"x", u8"15").HasException());
     (void)fixture.Document->UpdateLayout();
     CHECK(g.LocalToParentTransform() == AffineTransform::CreateRotation(90));
     CHECK(AsObject(v).LocalToParentTransform() == AffineTransform(4, 0, 0, 4, 20, 6));
@@ -109,7 +90,7 @@ namespace krys::boo::tests
 
     auto &inner = RendererById<LegacyRenderSVGContainer>(*fixture.Document, u8"inner");
     CHECK(static_cast<RenderObject *>(SVGRenderSupport::FindTreeRootObject(inner))
-          == ElementById(*fixture.Document, u8"s").Renderer());
+          == ById(*fixture.Document, u8"s").Renderer());
 
     // The first layout updated every transform on the way to the root.
     CHECK(SVGRenderSupport::TransformToRootChanged(&inner));

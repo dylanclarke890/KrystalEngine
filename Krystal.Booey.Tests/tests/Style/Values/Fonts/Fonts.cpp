@@ -68,7 +68,7 @@ namespace krys::boo::style::tests
 
   TEST_CASE_METHOD(BuilderFixture, "Style FontFeatureSettings", "[Style][Values][Fonts]")
   {
-    CHECK(Convert<FontFeatureSettings>(PropertyId::FontFeatureSettings, u8"normal").Platform().isEmpty());
+    CHECK(Convert<FontFeatureSettings>(PropertyId::FontFeatureSettings, u8"normal").Platform().empty());
 
     auto settings = Convert<FontFeatureSettings>(PropertyId::FontFeatureSettings, u8"\"liga\" 0, \"kern\"");
     REQUIRE(settings.Platform().size() == 2);
@@ -80,7 +80,7 @@ namespace krys::boo::style::tests
     CHECK(Created(settings) == "\"kern\", \"liga\" 0");
     CHECK(Serialised(FontFeatureSettings {css::keywords::Normal {}}) == "normal");
 
-    CHECK(ConvertSystemFont<FontFeatureSettings>(*State).Platform().isEmpty());
+    CHECK(ConvertSystemFont<FontFeatureSettings>(*State).Platform().empty());
   }
 
   TEST_CASE_METHOD(BuilderFixture, "Style FontVariationSettings", "[Style][Values][Fonts]")

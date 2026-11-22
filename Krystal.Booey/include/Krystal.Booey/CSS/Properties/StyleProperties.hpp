@@ -24,10 +24,10 @@
 #include "Krystal.Booey/CSS/Properties/Property.hpp"
 #include "Krystal.Booey/CSS/Types/CSSOMString.hpp"
 #include "Krystal.Booey/Graphics/Color/Color.hpp"
-#include "Krystal.Core/RefCounted.hpp"
+#include "Krystal.Core/Containers/Span.hpp"
+#include "Krystal.Core/Memory/RefCounted.hpp"
 #include "Krystal.Core/Types/Func.hpp"
 #include "Krystal.Core/Types/Maybe.hpp"
-#include "Krystal.Core/Types/Span.hpp"
 #include <iterator>
 
 namespace krys::boo
@@ -86,12 +86,12 @@ namespace krys::boo::css
 
       KRYS_NODISCARD bool IsImportant() const noexcept
       {
-        return HasFlag(_metadata.Flags, PropertyFlag::Important);
+        return _metadata.Flags.contains(PropertyFlag::Important);
       }
 
       KRYS_NODISCARD bool IsImplicit() const noexcept
       {
-        return HasFlag(_metadata.Flags, PropertyFlag::Implicit);
+        return _metadata.Flags.contains(PropertyFlag::Implicit);
       }
 
       KRYS_NODISCARD CSSOMString CssName() const noexcept;

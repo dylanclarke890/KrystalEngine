@@ -54,7 +54,7 @@ namespace krys::io::tests
       auto path = Path("data.bin");
       REQUIRE(backend.CreateFile(path, true));
 
-      auto writer = backend.GetWriter(path, WriteFlags::None);
+      auto writer = backend.GetWriter(path, {});
       REQUIRE(writer != nullptr);
       REQUIRE(writer->IsOpen());
 
@@ -62,7 +62,7 @@ namespace krys::io::tests
       REQUIRE(writer->Write(data));
       writer->Close();
 
-      auto reader = backend.GetReader(path, ReadFlags::None);
+      auto reader = backend.GetReader(path, {});
       REQUIRE(reader != nullptr);
       REQUIRE(reader->IsOpen());
 
@@ -78,13 +78,13 @@ namespace krys::io::tests
       std::ofstream(testDir + "/subdir/file2.txt").close();
 
       {
-        auto entries = backend.SearchFiles(Path(""), FileSearchFlags::None);
+        auto entries = backend.SearchFiles(Path(""), {});
         REQUIRE(entries.size() == 1); // file1.txt
         REQUIRE(entries[0].RelativePath.Filename().ToString() == "file1.txt");
       }
 
       {
-        auto entries = backend.SearchFiles(Path(""), FileSearchFlags::Recursive);
+        auto entries = backend.SearchFiles(Path(""), FileSearchFlag::Recursive);
         REQUIRE(entries.size() == 2); // file1.txt and file2.txt
         REQUIRE(std::any_of(entries.begin(), entries.end(), [](const auto &e)
                             { return e.RelativePath.Filename().ToString() == "file1.txt"; }));

@@ -37,8 +37,8 @@
 #include "Krystal.Booey/HTML/Elements/HTMLElement.hpp"
 #include "Krystal.Core/Assert.hpp"
 #include "Krystal.Core/Concepts.hpp"
-#include "Krystal.Core/Hash.hpp"
-#include "Krystal.Core/Threading/NeverDestroyed.hpp"
+#include "Krystal.Core/Hashing/FastHash.hpp"
+#include "Krystal.Core/Memory/NeverDestroyed.hpp"
 #include "Krystal.Core/TypeCast.hpp"
 
 namespace krys::boo::dom
@@ -124,7 +124,7 @@ namespace krys::boo::dom
       // Bailout if we need to synchronize attributes.
       static const DOMStringAtom styleAttr(u8"style");
       static NeverDestroyed<const QualifiedName> styleName(null, null, styleAttr);
-      if (NameMatchesFilter(styleName.get(), attribute.NamespacePrefix(), attribute.LocalNameLower(),
+      if (NameMatchesFilter(*styleName, attribute.NamespacePrefix(), attribute.LocalNameLower(),
                             attribute.NamespaceURI()))
       {
         return false;
@@ -548,9 +548,8 @@ namespace krys::boo::dom
   size_t SelectorQueryCache::KeyHash::operator()(const Key &key) const noexcept
   {
     auto &context = key.second;
-    return Hash::Combine(std::hash<DOMString> {}(key.first), context.Mode,
-                         context.thumbAndTrackPseudoElementsEnabled,
-                         context.webkitMediaTextTrackDisplayQuirkEnabled);
+    return CombineFastHashes(key.first, context.Mode, context.thumbAndTrackPseudoElementsEnabled,
+                             context.webkitMediaTextTrackDisplayQuirkEnabled);
   }
 
   SelectorQueryCache &SelectorQueryCache::Singleton() noexcept

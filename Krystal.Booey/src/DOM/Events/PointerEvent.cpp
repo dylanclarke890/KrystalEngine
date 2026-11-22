@@ -28,7 +28,7 @@
 #include "Krystal.Core/Assert.hpp"
 #include "Krystal.Core/Debug.hpp"
 #include "Krystal.Core/Maths/Extras.hpp"
-#include "Krystal.Core/Utils/Move.hpp"
+#include "Krystal.Core/Move.hpp"
 #include <algorithm>
 #include <cmath>
 #include <numbers>
@@ -584,5 +584,15 @@ namespace krys::boo
     }
 
     return AdjustedCoordinateForType(OffsetLocation().Y());
+  }
+
+  RefPtr<Node> PointerEvent::ToElement() const noexcept
+  {
+    return nullptr;
+  }
+
+  RefPtr<Node> PointerEvent::FromElement() const noexcept
+  {
+    return nullptr;
   }
 }

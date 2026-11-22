@@ -641,7 +641,7 @@ namespace krys::boo::css::parse_property
 
     // https://drafts.csswg.org/css-fonts-4/#typedef-font-src
 
-    auto location = ConsumeUrlRaw(tokens, state, AllowedUrlModifiers::None);
+    auto location = ConsumeUrlRaw(tokens, state, {});
     if (!location)
     {
       return nullptr;

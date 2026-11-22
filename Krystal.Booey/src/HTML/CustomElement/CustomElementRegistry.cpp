@@ -54,7 +54,7 @@ namespace krys::boo::html
       {
         auto *element = DynamicDowncast<Element>(descendant);
         if (element != nullptr && element->IsCustomElementUpgradeCandidate()
-            && element->CustomElementRegistry().get() == &registry
+            && element->CustomElementRegistry() == &registry
             && element->TagQualifiedName().LocalName() == elementInterface.Name().LocalName()
             && element->NamespaceURI() == elementInterface.Name().NamespaceURI())
         {
@@ -67,7 +67,7 @@ namespace krys::boo::html
     /// element that can be upgraded is).
     void UpgradeElementIfPossible(CustomElementRegistry &registry, Element &element) noexcept
     {
-      if (element.IsCustomElementUpgradeCandidate() && element.CustomElementRegistry().get() == &registry)
+      if (element.IsCustomElementUpgradeCandidate() && element.CustomElementRegistry() == &registry)
       {
         CustomElementReactionQueue::TryToUpgradeElement(element);
       }
@@ -288,7 +288,7 @@ namespace krys::boo::html
 
     // 1. If this's is scoped is false and either root is a Document node or root's node document's custom
     //    element registry is not this, then throw a "NotSupportedError" DOMException.
-    if (!IsScoped() && (Is<boo::Document>(root) || this != root.NodeDocument().CustomElementRegistry().get()))
+    if (!IsScoped() && (Is<boo::Document>(root) || this != root.NodeDocument().CustomElementRegistry()))
     {
       return Exception {ExceptionCode::NotSupportedError};
     }

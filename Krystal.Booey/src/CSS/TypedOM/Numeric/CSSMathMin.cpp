@@ -63,7 +63,7 @@ namespace krys::boo
   void CSSMathMin::Serialise(StringBuilder &builder, EnumSet<SerialisationArguments> arguments) const noexcept
   {
     // https://drafts.css-houdini.org/css-typed-om/#calc-serialization
-    if (!arguments.Contains(SerialisationArguments::WithoutParentheses))
+    if (!arguments.contains(SerialisationArguments::WithoutParentheses))
     {
       builder.Append(u8"min(");
     }
@@ -77,7 +77,7 @@ namespace krys::boo
         numericValue.Serialise(builder,
                                {SerialisationArguments::Nested, SerialisationArguments::WithoutParentheses});
       });
-    if (!arguments.Contains(SerialisationArguments::WithoutParentheses))
+    if (!arguments.contains(SerialisationArguments::WithoutParentheses))
     {
       builder.Append(u8')');
     }

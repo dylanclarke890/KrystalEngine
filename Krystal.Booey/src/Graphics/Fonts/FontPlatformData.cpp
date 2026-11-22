@@ -25,17 +25,13 @@
 #include "Krystal.Booey/Graphics/Fonts/FontDescription.hpp"
 #include "Krystal.Booey/Graphics/Fonts/FontSizeAdjust.hpp"
 #include "Krystal.Booey/Rendering/Style/RenderStyleConstants.hpp"
-#include "Krystal.Core/Hash.hpp"
+#include "Krystal.Core/Hashing/FastHash.hpp"
 #include "Krystal.Core/Strings/StringBuilder.hpp"
 #include <hb-ot.h>
 #include <hb.h>
 
 namespace krys::boo
 {
-  FontPlatformData::FontPlatformData(HashTableDeletedValueTag) noexcept : _isHashTableDeletedValue(true)
-  {
-  }
-
   FontPlatformData::FontPlatformData() noexcept = default;
 
   FontPlatformData::FontPlatformData(Ref<text::FreeTypeFace> face, float size, bool syntheticBold,
@@ -201,17 +197,15 @@ namespace krys::boo
 
   size_t FontPlatformData::Hash() const noexcept
   {
-    return Hash::Combine(static_cast<const void *>(_face.get()), _size, static_cast<uint8>(_orientation),
-                         static_cast<uint8>(_widthVariant), static_cast<uint8>(_textRenderingMode),
-                         _syntheticBold, _syntheticOblique, _isHashTableDeletedValue, _paletteIndex,
-                         _paletteOverrides.size(), _fontFaceFeatures.size(),
-                         static_cast<const void *>(_fontFeatureValues.get()));
+    return CombineFastHashes(static_cast<const void *>(_face.get()), _size, static_cast<uint8>(_orientation),
+                             static_cast<uint8>(_widthVariant), static_cast<uint8>(_textRenderingMode),
+                             _syntheticBold, _syntheticOblique, _paletteIndex, _paletteOverrides.size(),
+                             _fontFaceFeatures.size(), static_cast<const void *>(_fontFeatureValues.get()));
   }
 
   bool FontPlatformData::operator==(const FontPlatformData &other) const noexcept
   {
-    return _face == other._face && _isHashTableDeletedValue == other._isHashTableDeletedValue
-           && _size == other._size && _syntheticBold == other._syntheticBold
+    return _face == other._face && _size == other._size && _syntheticBold == other._syntheticBold
            && _syntheticOblique == other._syntheticOblique && _isColorBitmapFont == other._isColorBitmapFont
            && _orientation == other._orientation && _widthVariant == other._widthVariant
            && _textRenderingMode == other._textRenderingMode && _paletteIndex == other._paletteIndex

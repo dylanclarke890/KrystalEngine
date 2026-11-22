@@ -23,7 +23,7 @@
 #include "Krystal.Booey/Rendering/SVG/SVGTextLayoutAttributes.hpp"
 #include "Krystal.Booey/Rendering/SVG/SVGTextMetrics.hpp"
 #include "Krystal.Core/Macros.hpp"
-#include "Krystal.Core/Types/WeakPtr.hpp"
+#include "Krystal.Core/Memory/WeakPtr.hpp"
 #include <tuple>
 
 namespace krys::boo

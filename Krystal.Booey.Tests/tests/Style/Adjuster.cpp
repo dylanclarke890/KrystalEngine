@@ -2,6 +2,7 @@
 #include "catch2/catch_test_macros.hpp"
 #include "Krystal.Booey.Tests/CSS/RuleTestUtils.hpp"
 #include "Krystal.Booey.Tests/CSS/ValueTestUtils.hpp"
+#include "Krystal.Booey.Tests/DOM/DOMTestUtils.hpp"
 #include "Krystal.Booey.Tests/Style/BuilderTestUtils.hpp"
 #include "Krystal.Booey/DOM/Nodes/HTMLDocument.hpp"
 #include "Krystal.Booey/HTML/Elements/HTMLBodyElement.hpp"
@@ -18,20 +19,13 @@
 
 namespace krys::boo::style::tests
 {
+  using boo::tests::ParseDocument;
+
   namespace
   {
-    KRYS_NODISCARD Ref<HTMLDocument> Parse(utf8_string &&input) noexcept
-    {
-      auto document = CreateRef<HTMLDocument>();
-      auto parser = CreateRef<html::DocumentParser>(*document);
-      parser->InputStream().Append(krys::move(input), IsEOF::Yes);
-      parser->PumpTokenizer();
-      return document;
-    }
-
     struct AdjusterFixture : css::tests::ValueFixture
     {
-      Ref<HTMLDocument> Document {Parse(u8R"(<!DOCTYPE html><body><div id=parent>
+      Ref<HTMLDocument> Document {ParseDocument(u8R"(<!DOCTYPE html><body><div id=parent>
         <div id=div></div><span id=span></span><img id=img><table id=table></table><ruby id=ruby></ruby>
         <textarea id=textarea></textarea><input id=password type=PassWord><marquee id=marquee></marquee>
         <legend id=legend></legend><rt id=rt></rt>
@@ -449,19 +443,19 @@ namespace krys::boo::style::tests
 
     auto root = Build(u8"");
     CHECK_FALSE(Adjuster::AdjustEventListenerRegionTypesForRootStyle(*root, *Document));
-    CHECK(root->EventListenerRegionTypes().IsEmpty());
+    CHECK(root->EventListenerRegionTypes().empty());
   }
 
   TEST_CASE_METHOD(AdjusterFixture, "Change: determining changes", "[Style][Change]")
   {
     auto base = Build(u8"display: block; color: red");
-    CHECK(DetermineChanges(*base, *Build(u8"display: block; color: red")).IsEmpty());
+    CHECK(DetermineChanges(*base, *Build(u8"display: block; color: red")).empty());
 
     // Colour is inherited through the fast path.
     CHECK(DetermineChanges(*base, *Build(u8"display: block; color: blue"))
           == EnumSet<Change> {Change::FastPathInherited});
     CHECK(DetermineChanges(*base, *Build(u8"display: block; color: red; font-size: 30px"))
-            .Contains(Change::Inherited));
+            .contains(Change::Inherited));
     CHECK(DetermineChanges(*base, *Build(u8"display: block; color: red; margin-top: 3px"))
           == EnumSet<Change> {Change::NonInherited});
 
@@ -469,11 +463,11 @@ namespace krys::boo::style::tests
     CHECK(DetermineChanges(*base, *Build(u8"display: inline; color: red"))
           == EnumSet<Change> {Change::NonInherited, Change::Renderer});
     CHECK(DetermineChanges(*base, *Build(u8"display: block; color: red; column-span: all"))
-            .Contains(Change::Renderer));
+            .contains(Change::Renderer));
 
     // Query container changes affect descendants.
     CHECK(DetermineChanges(*base, *Build(u8"display: block; color: red; container-type: size"))
-            .Contains(Change::Container));
+            .contains(Change::Container));
 
     CHECK(InheritedChanges() == EnumSet<Change> {Change::Inherited, Change::FastPathInherited});
   }

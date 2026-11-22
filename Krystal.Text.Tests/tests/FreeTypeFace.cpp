@@ -1,6 +1,6 @@
 ﻿#include "Krystal.Text/FreeTypeFace.hpp"
 #include "catch2/catch_test_macros.hpp"
-#include "Krystal.Core/Utils/Move.hpp"
+#include "Krystal.Core/Move.hpp"
 #include <cstring>
 #include <filesystem>
 #include <freetype/freetype.h>

@@ -21,11 +21,12 @@
 #pragma once
 
 #include "Krystal.Booey/SVG/Elements/SVGElement.hpp"
-#include "Krystal.Booey/SVG/Elements/SVGPathElement.hpp"
 #include "Krystal.Booey/SVG/SVGURIReference.hpp"
 
 namespace krys::boo
 {
+  class SVGPathElement;
+
   /// @brief The `<mpath>` element: references the `<path>` its parent `<animateMotion>` moves along.
   /// @see https://svgwg.org/specs/animations/#MPathElement
   class SVGMPathElement final : public SVGElement, public SVGURIReference

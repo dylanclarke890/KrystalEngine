@@ -26,6 +26,8 @@
 
 namespace krys::boo
 {
+  class QualifiedName;
+
   /// @brief A document whose type is "html", with the content type text/html.
   /// @see https://dom.spec.whatwg.org/#html-document
   class HTMLDocument : public Document
@@ -33,12 +35,12 @@ namespace krys::boo
     KRYS_OVERRIDE_DELETE_FOR_CHECKED_PTR(HTMLDocument);
 
   public:
-    HTMLDocument() noexcept : Document(dom::DocumentFlags::IsHTMLDocument)
+    HTMLDocument() noexcept : Document(dom::DocumentFlag::IsHTMLDocument)
     {
     }
 
     explicit HTMLDocument(dom::DocumentFlags flags) noexcept
-        : Document(flags | dom::DocumentFlags::IsHTMLDocument)
+        : Document(flags | dom::DocumentFlag::IsHTMLDocument)
     {
     }
 

@@ -26,9 +26,9 @@
 #pragma once
 
 #include "Krystal.Booey/DOM/Types/DOMString.hpp"
-#include "Krystal.Core/RefCounted.hpp"
-#include "Krystal.Core/Types/ListHashSet.hpp"
-#include "Krystal.Core/Types/WeakPtr.hpp"
+#include "Krystal.Core/Containers/ListHashSet.hpp"
+#include "Krystal.Core/Memory/RefCounted.hpp"
+#include "Krystal.Core/Memory/WeakPtr.hpp"
 
 namespace krys::boo
 {
@@ -50,10 +50,7 @@ namespace krys::boo::html
 
     ~CustomStateSet() noexcept;
 
-    KRYS_NODISCARD static Ref<CustomStateSet> Create(Element &element) noexcept
-    {
-      return CreateRef<CustomStateSet>(element);
-    }
+    KRYS_NODISCARD static Ref<CustomStateSet> Create(Element &element) noexcept;
 
     /// @return Whether @p state wasn't in the set.
     bool Add(const DOMStringAtom &state) noexcept;

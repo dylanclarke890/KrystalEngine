@@ -69,8 +69,8 @@
 #include "Krystal.Booey/CSS/Values/VariableData.hpp"
 #include "Krystal.Booey/DOM/Nodes/Document.hpp"
 #include "Krystal.Booey/HTML/Elements/HTMLElement.hpp"
+#include "Krystal.Core/Containers/HashSet.hpp"
 #include "Krystal.Core/Strings/ASCII.hpp"
-#include "Krystal.Core/Types/HashSet.hpp"
 #include "Krystal.Core/Utils/NestingLevelIncrementer.hpp"
 #include <bitset>
 
@@ -1594,7 +1594,7 @@ namespace krys::boo::css
     krys_debug_assert(TopContext().ParsedRules.empty());
 
     // All the current callers support declarations so the no-declarations case is not implemented.
-    krys_debug_assert(blockAllowedRules.Contains(BlockAllowedRule::Declarations));
+    krys_debug_assert(blockAllowedRules.contains(BlockAllowedRule::Declarations));
 
     auto consumeUntilSemicolon = [&]
     {
@@ -1642,7 +1642,7 @@ namespace krys::boo::css
 
       auto consumeNestedRuleOrInvalidSyntax = [&]
       {
-        if (blockAllowedRules.Contains(BlockAllowedRule::QualifiedRules))
+        if (blockAllowedRules.contains(BlockAllowedRule::QualifiedRules))
         {
           krys_debug_assert(IsStyleNestedContext());
           // For block, we try to consume a qualified rule (~= a style rule).
@@ -1693,7 +1693,7 @@ namespace krys::boo::css
         }
         case TokenType::AtKeyword:
         {
-          if (blockAllowedRules.Contains(BlockAllowedRule::AtRules))
+          if (blockAllowedRules.contains(BlockAllowedRule::AtRules))
           {
             auto allowedRules = ruleType == RuleType::Function ? AllowedRules::ConditionalGroupRules
                                                                : AllowedRules::RegularRules;

@@ -101,10 +101,6 @@ namespace krys::boo::style::tests
     CHECK(fixed.MinimumValueForLengthWrapperDataWithLazyMaximum<float, float>(
             LengthWrapperDataEvaluationKind::Flag, [] { return 50.0f; }, ZoomNeeded {})
           == 0.0f);
-
-    LengthWrapperData empty {HashTableEmptyValueTag {}};
-    LengthWrapperData deleted {HashTableDeletedValueTag {}};
-    CHECK(empty.Type() == 0);
   }
 
   TEST_CASE("Style LengthWrapperBase", "[Style][LengthWrapper]")

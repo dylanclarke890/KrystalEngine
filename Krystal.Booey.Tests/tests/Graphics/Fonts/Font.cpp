@@ -8,7 +8,7 @@ namespace krys::boo::tests
 {
   namespace
   {
-    KRYS_NODISCARD text::FreeTypeFace &Ahem()
+    KRYS_NODISCARD text::FreeTypeFace &AhemFace()
     {
       auto &database = FontDatabase::Singleton();
       (void)database.AddFontFile(std::filesystem::path {KRYS_BOOEY_TESTS_DATA_DIR} / "fonts" / "Ahem.ttf");
@@ -28,7 +28,7 @@ namespace krys::boo::tests
   {
     SECTION("Ahem")
     {
-      auto font = CreateFont(Ahem(), 16);
+      auto font = CreateFont(AhemFace(), 16);
       auto &metrics = font->GetFontMetrics();
       CHECK(metrics.UnitsPerEm() == 1'000u);
       CHECK(metrics.Ascent() == Catch::Approx(12.8f));
@@ -68,7 +68,7 @@ namespace krys::boo::tests
 
   TEST_CASE("Font: glyphs", "[Graphics][Font]")
   {
-    auto font = CreateFont(Ahem(), 16);
+    auto font = CreateFont(AhemFace(), 16);
 
     auto data = font->GlyphDataForCharacter(U'a');
     CHECK(data.Glyph == 67);
@@ -109,7 +109,7 @@ namespace krys::boo::tests
 
   TEST_CASE("Font: code point support", "[Graphics][Font]")
   {
-    auto font = CreateFont(Ahem(), 16);
+    auto font = CreateFont(AhemFace(), 16);
     CHECK(font->SupportsCodePoint(U'a'));
     CHECK_FALSE(font->SupportsCodePoint(U'\u0628'));
     // Support for format characters is the font's own, not the ZERO WIDTH SPACE replacement.
@@ -126,7 +126,7 @@ namespace krys::boo::tests
   {
     SECTION("Synthetic bold keeps the glyphs' advances")
     {
-      auto font = CreateFont(Ahem(), 16, true);
+      auto font = CreateFont(AhemFace(), 16, true);
       CHECK(font->PlatformData().SyntheticBold());
       CHECK(font->SyntheticBoldOffset() == 0);
       CHECK(font->WidthForGlyph(58) == 16);
@@ -135,7 +135,7 @@ namespace krys::boo::tests
 
     SECTION("Synthetic oblique slants the ink")
     {
-      auto font = CreateFont(Ahem(), 16, false, true);
+      auto font = CreateFont(AhemFace(), 16, false, true);
       auto bounds = font->BoundsForGlyph(58);
       CHECK(bounds.Width() > 16);
       CHECK(font->WidthForGlyph(58) == 16);
@@ -143,7 +143,7 @@ namespace krys::boo::tests
 
     SECTION("Derived fonts")
     {
-      auto font = CreateFont(Ahem(), 20);
+      auto font = CreateFont(AhemFace(), 20);
       FontDescription description;
       auto *smallCaps = font->SmallCapsFont(description);
       REQUIRE(smallCaps);
@@ -165,9 +165,9 @@ namespace krys::boo::tests
 
     SECTION("Platform data")
     {
-      FontPlatformData data {ShareRef(Ahem()), 16, false, false};
-      CHECK(data == FontPlatformData {ShareRef(Ahem()), 16, false, false});
-      CHECK(data.Hash() == FontPlatformData {ShareRef(Ahem()), 16, false, false}.Hash());
+      FontPlatformData data {ShareRef(AhemFace()), 16, false, false};
+      CHECK(data == FontPlatformData {ShareRef(AhemFace()), 16, false, false});
+      CHECK(data.Hash() == FontPlatformData {ShareRef(AhemFace()), 16, false, false}.Hash());
       CHECK_FALSE(data == FontPlatformData::CloneWithSize(data, 12));
       CHECK(FontPlatformData::CloneWithSize(data, 12).Size() == 12);
       CHECK(FontPlatformData::CloneWithSyntheticOblique(data, true).SyntheticOblique());
@@ -176,7 +176,6 @@ namespace krys::boo::tests
       CHECK(data.FamilyName() == u8"Ahem");
       CHECK(data.Description() == u8"Ahem 16px");
       CHECK_FALSE(FontPlatformData {}.Face());
-      CHECK(FontPlatformData {HashTableDeletedValueTag {}}.IsHashTableDeletedValue());
       CHECK(Font::CreateSystemFallbackFontPlaceholder()->IsSystemFontFallbackPlaceholder());
       CHECK(Font::Create(data)->Description() == u8"Ahem 16px");
     }
@@ -184,7 +183,7 @@ namespace krys::boo::tests
 
   TEST_CASE("Font: glyph paths", "[Graphics][Font]")
   {
-    auto font = CreateFont(Ahem(), 16);
+    auto font = CreateFont(AhemFace(), 16);
     auto glyph = font->GlyphForCharacter(U'X');
 
     // Ahem's glyphs are squares on the em box: 0.8em above the baseline and 0.2em below.
@@ -200,12 +199,12 @@ namespace krys::boo::tests
     CHECK(font->PathForGlyph(glyph).BoundingRect() == bounds);
 
     // Synthetic oblique slants the outline to the right as it rises.
-    auto oblique = CreateFont(Ahem(), 16, false, true)->PathForGlyph(glyph).BoundingRect();
+    auto oblique = CreateFont(AhemFace(), 16, false, true)->PathForGlyph(glyph).BoundingRect();
     CHECK(oblique.Width() > 16.f);
     CHECK(oblique.Height() == Catch::Approx(16.f));
 
     // Synthetic bold makes it larger all round.
-    auto bold = CreateFont(Ahem(), 16, true)->PathForGlyph(glyph).BoundingRect();
+    auto bold = CreateFont(AhemFace(), 16, true)->PathForGlyph(glyph).BoundingRect();
     CHECK(bold.Width() > 16.f);
     CHECK(bold.Height() > 16.f);
 

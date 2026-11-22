@@ -26,12 +26,12 @@
 
 #include "Krystal.Net/Url.hpp"
 #include "Krystal.Core/Assert.hpp"
+#include "Krystal.Core/Containers/Array.hpp"
 #include "Krystal.Core/Detection/OS.hpp"
+#include "Krystal.Core/Memory/NeverDestroyed.hpp"
+#include "Krystal.Core/Move.hpp"
 #include "Krystal.Core/Strings/ASCII.hpp"
 #include "Krystal.Core/Strings/CodePointIterator.hpp"
-#include "Krystal.Core/Threading/NeverDestroyed.hpp"
-#include "Krystal.Core/Types/Array.hpp"
-#include "Krystal.Core/Utils/Move.hpp"
 #include "Krystal.Net/UrlParser.hpp"
 #include "Krystal.Text/IDNA.hpp"
 #include <algorithm>
@@ -334,10 +334,6 @@ namespace krys::net
     _queryEnd = 0;
   }
 
-  Url::Url(HashTableDeletedValueTag) noexcept : _isNull(false), _isHashTableDeletedValue(true)
-  {
-  }
-
   Url::Url(const Url &base, utf8_stringview relative) noexcept
   {
     *this = UrlParser(relative, base).Result();
@@ -351,10 +347,10 @@ namespace krys::net
   Url::Url(Url &&other) noexcept
       : _string(krys::move(other._string)), _isValid(other._isValid),
         _protocolIsInHttpFamily(other._protocolIsInHttpFamily), _hasOpaquePath(other._hasOpaquePath),
-        _isNull(other._isNull), _isHashTableDeletedValue(other._isHashTableDeletedValue),
-        _portLength(other._portLength), _schemeEnd(other._schemeEnd), _userStart(other._userStart),
-        _userEnd(other._userEnd), _passwordEnd(other._passwordEnd), _hostEnd(other._hostEnd),
-        _pathAfterLastSlash(other._pathAfterLastSlash), _pathEnd(other._pathEnd), _queryEnd(other._queryEnd)
+        _isNull(other._isNull), _portLength(other._portLength), _schemeEnd(other._schemeEnd),
+        _userStart(other._userStart), _userEnd(other._userEnd), _passwordEnd(other._passwordEnd),
+        _hostEnd(other._hostEnd), _pathAfterLastSlash(other._pathAfterLastSlash), _pathEnd(other._pathEnd),
+        _queryEnd(other._queryEnd)
   {
     other._isValid = false;
   }
@@ -367,7 +363,6 @@ namespace krys::net
     _protocolIsInHttpFamily = other._protocolIsInHttpFamily;
     _hasOpaquePath = other._hasOpaquePath;
     _isNull = other._isNull;
-    _isHashTableDeletedValue = other._isHashTableDeletedValue;
     _portLength = other._portLength;
     _schemeEnd = other._schemeEnd;
     _userStart = other._userStart;

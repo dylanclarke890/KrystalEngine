@@ -26,7 +26,7 @@
 
 #include "Krystal.Booey/CSS/Queries/GenericMediaQueryEvaluator.hpp"
 #include "Krystal.Booey/CSS/Queries/MediaQuery.hpp"
-#include "Krystal.Core/Types/WeakPtr.hpp"
+#include "Krystal.Core/Memory/WeakPtr.hpp"
 
 namespace krys::boo
 {
@@ -58,10 +58,10 @@ namespace krys::boo::css::mq
 
     KRYS_NODISCARD bool EvaluateMediaType(const MediaQuery &query) const noexcept;
 
-    KRYS_NODISCARD MediaQueryDynamicDependency
+    KRYS_NODISCARD EnumSet<MediaQueryDynamicDependency>
       CollectDynamicDependencies(const MediaQueryList &queries) const noexcept;
 
-    KRYS_NODISCARD MediaQueryDynamicDependency
+    KRYS_NODISCARD EnumSet<MediaQueryDynamicDependency>
       CollectDynamicDependencies(const MediaQuery &query) const noexcept;
 
     KRYS_NODISCARD bool IsPrintMedia() const noexcept;

@@ -22,9 +22,9 @@
 
 #include "Krystal.Booey/CSS/Values/Value.hpp"
 #include "Krystal.Booey/CSS/Values/ValueListBuilder.hpp"
+#include "Krystal.Core/Containers/SmallList.hpp"
+#include "Krystal.Core/Memory/RefPtr.hpp"
 #include "Krystal.Core/Strings/StringBuilder.hpp"
-#include "Krystal.Core/Types/RefPtr.hpp"
-#include "Krystal.Core/Types/SmallList.hpp"
 #include <iterator>
 #include <ranges>
 
@@ -60,7 +60,7 @@ namespace krys::boo::css
     struct iterator
     {
       using iterator_category = std::forward_iterator_tag;
-      using value_type = const Value &;
+      using value_type = Value;
       using difference_type = ptrdiff_t;
       using pointer = const Value *;
       using reference = const Value &;

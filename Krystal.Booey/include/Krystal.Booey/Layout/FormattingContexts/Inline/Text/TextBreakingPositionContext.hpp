@@ -28,7 +28,7 @@
 #include "Krystal.Booey/Rendering/Style/RenderStyleConstants.hpp"
 #include "Krystal.Booey/Text/TextFlags.hpp"
 #include "Krystal.Core/Attributes.hpp"
-#include "Krystal.Core/Hash.hpp"
+#include "Krystal.Core/Hashing/FastHash.hpp"
 #include "Krystal.Core/Strings/StringAtom.hpp"
 
 namespace krys::boo
@@ -84,12 +84,12 @@ namespace krys::boo::layout
 namespace krys
 {
   template <>
-  struct DefaultHash<boo::layout::TextBreakingPositionContext>
+  struct FastHash<boo::layout::TextBreakingPositionContext>
   {
-    KRYS_NODISCARD static size_t Hash(const boo::layout::TextBreakingPositionContext &context) noexcept
+    KRYS_NODISCARD size_t operator()(const boo::layout::TextBreakingPositionContext &context) const noexcept
     {
-      return Hash::Combine(context.WhitespaceCollapseBehavior, context.OverflowWrap, context.LineBreak,
-                           context.WordBreak, context.Locale);
+      return CombineFastHashes(context.WhitespaceCollapseBehavior, context.OverflowWrap, context.LineBreak,
+                               context.WordBreak, context.Locale);
     }
   };
 }

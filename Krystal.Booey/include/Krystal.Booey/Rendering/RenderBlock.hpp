@@ -26,10 +26,10 @@
 #include "Krystal.Booey/Rendering/Painting/GapRects.hpp"
 #include "Krystal.Booey/Rendering/RenderBox.hpp"
 #include "Krystal.Core/Attributes.hpp"
+#include "Krystal.Core/Containers/EnumSet.hpp"
+#include "Krystal.Core/Containers/ListHashSet.hpp"
 #include "Krystal.Core/Macros.hpp"
 #include "Krystal.Core/TypeCast.hpp"
-#include "Krystal.Core/Types/EnumSet.hpp"
-#include "Krystal.Core/Types/ListHashSet.hpp"
 #include "Krystal.Core/Types/Pair.hpp"
 
 namespace krys::boo
@@ -151,7 +151,7 @@ namespace krys::boo
     KRYS_NODISCARD bool HasOutOfFlowBoxes() const noexcept
     {
       auto *renderers = OutOfFlowBoxes();
-      return renderers && !renderers->isEmpty();
+      return renderers && !renderers->empty();
     }
 
     KRYS_NODISCARD bool IsContainingBlockAncestorFor(RenderObject &renderer) const noexcept;
@@ -206,7 +206,7 @@ namespace krys::boo
     KRYS_NODISCARD bool HasPercentHeightDescendants() const noexcept
     {
       auto *renderers = PercentHeightDescendants();
-      return renderers && !renderers->isEmpty();
+      return renderers && !renderers->empty();
     }
 
     KRYS_NODISCARD static bool HasPercentHeightContainerMap() noexcept;

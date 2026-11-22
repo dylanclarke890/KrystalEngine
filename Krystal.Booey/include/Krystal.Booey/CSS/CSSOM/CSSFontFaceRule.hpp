@@ -23,13 +23,8 @@
 
 #include "Krystal.Booey/CSS/CSSOM/CSSRule.hpp"
 #include "Krystal.Core/Attributes.hpp"
+#include "Krystal.Core/Memory/RefPtr.hpp"
 #include "Krystal.Core/TypeCast.hpp"
-#include "Krystal.Core/Types/RefPtr.hpp"
-
-namespace krys::boo
-{
-  class CSSFontFaceDescriptors;
-}
 
 namespace krys::boo::css
 {
@@ -38,6 +33,8 @@ namespace krys::boo::css
 
 namespace krys::boo
 {
+  class CSSFontFaceDescriptors;
+
   /// @brief An `@font-face` rule, exposed to scripts.
   /// @see https://drafts.csswg.org/css-fonts/#cssfontfacerule
   class CSSFontFaceRule final : public CSSRule

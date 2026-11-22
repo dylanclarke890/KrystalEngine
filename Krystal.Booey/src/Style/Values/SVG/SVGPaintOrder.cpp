@@ -74,12 +74,12 @@ namespace krys::boo::style
       return css::keywords::Normal {};
     }
 
-    switch (const auto &first = list->item(0); first.ValueId())
+    switch (const auto &first = (*list)[0]; first.ValueId())
     {
       case css::ValueId::Fill:
         if (list->size() > 1)
         {
-          switch (const auto &second = list->item(1); second.ValueId())
+          switch (const auto &second = (*list)[1]; second.ValueId())
           {
             case css::ValueId::Markers: return {css::keywords::Fill {}, css::keywords::Markers {}};
             default:                    state.SetCurrentPropertyInvalidAtComputedValueTime(); return css::keywords::Normal {};
@@ -89,7 +89,7 @@ namespace krys::boo::style
       case css::ValueId::Stroke:
         if (list->size() > 1)
         {
-          switch (const auto &second = list->item(1); second.ValueId())
+          switch (const auto &second = (*list)[1]; second.ValueId())
           {
             case css::ValueId::Markers: return {css::keywords::Stroke {}, css::keywords::Markers {}};
             default:                    state.SetCurrentPropertyInvalidAtComputedValueTime(); return css::keywords::Normal {};
@@ -99,7 +99,7 @@ namespace krys::boo::style
       case css::ValueId::Markers:
         if (list->size() > 1)
         {
-          switch (const auto &second = list->item(1); second.ValueId())
+          switch (const auto &second = (*list)[1]; second.ValueId())
           {
             case css::ValueId::Stroke: return {css::keywords::Markers {}, css::keywords::Stroke {}};
             default:                   state.SetCurrentPropertyInvalidAtComputedValueTime(); return css::keywords::Normal {};

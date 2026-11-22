@@ -83,7 +83,9 @@ namespace krys::boo::style
       }
     }
 
-    return SVGStrokeDasharrayList::createWithSizeFromGenerator(
-      resultLength, [&](auto i) { return style::Blend(a[i % aLength], b[i % bLength], context); });
+    return SVGStrokeDasharrayList(
+      std::from_range, std::views::iota(0uz, resultLength)
+                         | std::views::transform(
+                           [&](auto i) { return style::Blend(a[i % aLength], b[i % bLength], context); }));
   }
 }

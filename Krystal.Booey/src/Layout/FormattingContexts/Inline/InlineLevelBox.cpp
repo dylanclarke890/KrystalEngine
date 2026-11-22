@@ -58,8 +58,8 @@ namespace krys::boo::layout
         // Normally we set inline box's has-content state as we come across child content, but ruby
         // annotations are not visible to inline layout.
         _hasContent(layoutBox.IsRubyBase() && layoutBox.AssociatedRubyAnnotationBox()),
-        _isFirstWithinLayoutBox(positionWithinLayoutBox.Contains(PositionWithinLayoutBox::First)),
-        _isLastWithinLayoutBox(positionWithinLayoutBox.Contains(PositionWithinLayoutBox::Last)), _type(type),
+        _isFirstWithinLayoutBox(positionWithinLayoutBox.contains(PositionWithinLayoutBox::First)),
+        _isLastWithinLayoutBox(positionWithinLayoutBox.contains(PositionWithinLayoutBox::Last)), _type(type),
         _style({&style.GetFontCascade().MetricsOfPrimaryFont(), &style.LineHeight(), style.TextBoxTrim(),
                 style.TextBoxEdge(), style.LineFitEdge(), style.UsedZoomForLength(), style.LineBoxContain(),
                 InlineLayoutUnit(style.GetFontCascade().GetFontDescription().ComputedSize()),
@@ -137,7 +137,7 @@ namespace krys::boo::layout
 
     if (IsAtomicInlineBox())
     {
-      return lineBoxContain.Contains(Value::Replaced);
+      return lineBoxContain.contains(Value::Replaced);
     }
 
     if (IsInlineBox())

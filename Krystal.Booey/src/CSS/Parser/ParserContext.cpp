@@ -27,8 +27,8 @@
 #include "Krystal.Booey/CSS/Values/ValuePool.hpp"
 #include "Krystal.Booey/DOM/Nodes/HTMLDocument.hpp"
 #include "Krystal.Booey/Page/Settings.hpp"
-#include "Krystal.Core/Threading/NeverDestroyed.hpp"
-#include "Krystal.Core/Utils/Move.hpp"
+#include "Krystal.Core/Memory/NeverDestroyed.hpp"
+#include "Krystal.Core/Move.hpp"
 
 namespace krys::boo::css
 {
@@ -98,6 +98,6 @@ namespace krys::boo::css
       | static_cast<uint32>(colorLayersEnabled) << 6
       | static_cast<uint32>(cssInternalAutoBaseParsingEnabled) << 7
       | static_cast<uint32>(webkitMediaTextTrackDisplayQuirkEnabled) << 8;
-    return krys::Hash::Combine(BaseUrl, Charset, PropertySettings, Mode, bits);
+    return krys::CombineFastHashes(BaseUrl, Charset, PropertySettings, Mode, bits);
   }
 }

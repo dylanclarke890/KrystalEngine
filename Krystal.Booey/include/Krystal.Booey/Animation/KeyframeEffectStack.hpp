@@ -28,16 +28,11 @@
 #include "Krystal.Booey/Animation/WebAnimationTypes.hpp"
 #include "Krystal.Booey/Style/Values/Animations/Animations.hpp"
 #include "Krystal.Core/Attributes.hpp"
-#include "Krystal.Core/Types/EnumSet.hpp"
+#include "Krystal.Core/Containers/EnumSet.hpp"
+#include "Krystal.Core/Containers/HashSet.hpp"
+#include "Krystal.Core/Containers/List.hpp"
+#include "Krystal.Core/Memory/WeakPtr.hpp"
 #include "Krystal.Core/Types/Func.hpp"
-#include "Krystal.Core/Types/HashSet.hpp"
-#include "Krystal.Core/Types/List.hpp"
-#include "Krystal.Core/Types/WeakPtr.hpp"
-
-namespace krys::boo
-{
-  class Document;
-}
 
 namespace krys::boo::style
 {
@@ -46,8 +41,10 @@ namespace krys::boo::style
 
 namespace krys::boo
 {
+  class Document;
   class KeyframeEffect;
   class RenderStyle;
+
   struct Settings;
 
   /// @brief The relevant keyframe effects targeting an element, or one of its pseudo-elements, sorted by

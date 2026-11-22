@@ -1,6 +1,6 @@
 ﻿#include "Krystal.Booey/CSS/Parser/KeywordLookup.hpp"
 #include "catch2/catch_test_macros.hpp"
-#include "Krystal.Core/Hash.hpp"
+#include "Krystal.Core/Hashing/FastHash.hpp"
 
 namespace krys::boo::css::tests
 {
@@ -77,12 +77,10 @@ namespace krys::boo::css::tests
 
   TEST_CASE("PropertyId and ValueId hashes", "[CSS][KeywordLookup]")
   {
-    CHECK(Hash::Combine(PropertyId::Color) == Hash::Combine(PropertyId::Color));
-    CHECK(Hash::Combine(PropertyId::Color) != Hash::Combine(PropertyId::MarginTop));
-    CHECK(DefaultHash<PropertyId>::Equal(PropertyId::Color, PropertyId::Color));
+    CHECK(CombineFastHashes(PropertyId::Color) == CombineFastHashes(PropertyId::Color));
+    CHECK(CombineFastHashes(PropertyId::Color) != CombineFastHashes(PropertyId::MarginTop));
 
-    CHECK(Hash::Combine(ValueId::Auto) == Hash::Combine(ValueId::Auto));
-    CHECK(Hash::Combine(ValueId::Auto) != Hash::Combine(ValueId::None));
-    CHECK(!DefaultHash<ValueId>::Equal(ValueId::Auto, ValueId::None));
+    CHECK(CombineFastHashes(ValueId::Auto) == CombineFastHashes(ValueId::Auto));
+    CHECK(CombineFastHashes(ValueId::Auto) != CombineFastHashes(ValueId::None));
   }
 }

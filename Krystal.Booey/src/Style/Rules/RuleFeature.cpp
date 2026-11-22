@@ -573,7 +573,7 @@ namespace krys::boo::style
       collectSelectorList(scopeRule->ScopeEnd());
     }
 
-    if (ruleData.UsedRuleTypes().Contains(UsedRuleType::StartingStyle))
+    if (ruleData.UsedRuleTypes().contains(UsedRuleType::StartingStyle))
     {
       HasStartingStyleRules = true;
     }

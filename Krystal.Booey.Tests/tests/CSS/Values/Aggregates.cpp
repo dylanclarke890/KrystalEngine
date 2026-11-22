@@ -1,6 +1,6 @@
 ﻿#include "Krystal.Booey/CSS/Values/Aggregates.hpp"
 #include "catch2/catch_test_macros.hpp"
-#include "Krystal.Core/Types/List.hpp"
+#include "Krystal.Core/Containers/List.hpp"
 
 namespace krys::boo::css::tests
 {
@@ -11,9 +11,12 @@ namespace krys::boo::css::tests
     C,
     D,
   };
-}
 
-KRYS_DEFINE_CONTIGUOUS_ENUM_TRAITS(krys::boo::css::tests::TestFlag, 4uz);
+  consteval TestFlag MaxEnumValue(TestFlag) noexcept
+  {
+    return TestFlag::D;
+  }
+}
 
 // Types defined through the conformance macros, which other value headers use at namespace/global scope.
 namespace krys::boo::css::tests
@@ -285,20 +288,20 @@ namespace krys::boo::css::tests
   {
     SpaceSeparatedList<int> list {1, 2, 3};
     CHECK(list.size() == 3);
-    CHECK_FALSE(list.isEmpty());
+    CHECK_FALSE(list.empty());
     CHECK(list[1] == 2);
-    CHECK(list.contains(3));
-    CHECK_FALSE(list.contains(4));
-    CHECK(list.containsIf([](int x) { return x > 2; }));
+    CHECK(std::ranges::contains(list, 3));
+    CHECK_FALSE(std::ranges::contains(list, 4));
+    CHECK(std::ranges::any_of(list, [](int x) { return x > 2; }));
     CHECK(ToList(list) == List<int> {1, 2, 3});
     CHECK(List<int>(list.rbegin(), list.rend()) == List<int> {3, 2, 1});
     CHECK(list == SpaceSeparatedList<int> {1, 2, 3});
-    CHECK(SpaceSeparatedList<int> {}.isEmpty());
+    CHECK(SpaceSeparatedList<int> {}.empty());
 
-    auto doubled = list.map([](int x) { return x * 2; });
-    CHECK(ToList(doubled) == List<int> {2, 4, 6});
+    CHECK(ToList(list | std::views::transform([](int x) { return x * 2; })) == List<int> {2, 4, 6});
 
-    auto mapped = CommaSeparatedList<int>::map(List<int> {4, 5}, [](int x) { return x + 1; });
+    auto mapped = CommaSeparatedList<int>(
+      std::from_range, List<int> {4, 5} | std::views::transform([](int x) { return x + 1; }));
     CHECK(ToList(mapped) == List<int> {5, 6});
   }
 
@@ -306,19 +309,21 @@ namespace krys::boo::css::tests
   {
     SpaceSeparatedFixedList<int> list {1, 2, 3};
     CHECK(list.size() == 3);
-    CHECK_FALSE(list.isEmpty());
-    CHECK(list.first() == 1);
-    CHECK(list.last() == 3);
+    CHECK_FALSE(list.empty());
+    CHECK(list.front() == 1);
+    CHECK(list.back() == 3);
     CHECK(list[1] == 2);
-    CHECK(list.contains(2));
-    CHECK(list.containsIf([](int x) { return x == 3; }));
+    CHECK(std::ranges::contains(list, 2));
+    CHECK(std::ranges::any_of(list, [](int x) { return x == 3; }));
     CHECK(ToList(list) == List<int> {1, 2, 3});
 
-    auto mapped = CommaSeparatedFixedList<int>::map(List<int> {1, 2}, [](int x) { return x * 10; });
+    auto mapped = CommaSeparatedFixedList<int>(
+      std::from_range, List<int> {1, 2} | std::views::transform([](int x) { return x * 10; }));
     CHECK(ToList(mapped) == List<int> {10, 20});
 
-    auto generated = SpaceSeparatedFixedList<int>::createWithSizeFromGenerator(
-      3, [](size_t i) { return static_cast<int>(i); });
+    auto generated = SpaceSeparatedFixedList<int>(
+      std::from_range,
+      std::views::iota(0uz, 3uz) | std::views::transform([](size_t i) { return static_cast<int>(i); }));
     CHECK(ToList(generated) == List<int> {0, 1, 2});
   }
 
@@ -331,9 +336,10 @@ namespace krys::boo::css::tests
     // Insertion ordered, duplicates dropped.
     CHECK(ToList(set) == List<int> {3, 1, 2});
 
-    auto mapped = CommaSeparatedListHashSet<int>::map(List<int> {1, 2, 1}, [](int x) { return x * 2; });
+    auto mapped = CommaSeparatedListHashSet<int>(
+      std::from_range, List<int> {1, 2, 1} | std::views::transform([](int x) { return x * 2; }));
     CHECK(ToList(mapped) == List<int> {2, 4});
-    CHECK(CommaSeparatedListHashSet<int> {}.isEmpty());
+    CHECK(CommaSeparatedListHashSet<int> {}.empty());
   }
 
   TEST_CASE("Aggregates(ListOrNone)", "[CSS][Aggregates]")
@@ -356,8 +362,8 @@ namespace krys::boo::css::tests
           == 2);
 
     ListOrNone<CommaSeparatedFixedList<int>> fixed {CommaSeparatedFixedList<int> {4, 5}};
-    CHECK(fixed.first() == 4);
-    CHECK(fixed.last() == 5);
+    CHECK(fixed.front() == 4);
+    CHECK(fixed.back() == 5);
   }
 
   TEST_CASE("Aggregates(ListOrDefault)", "[CSS][Aggregates]")
@@ -368,16 +374,16 @@ namespace krys::boo::css::tests
     CHECK(defaulted.IsDefault());
     CHECK(defaulted.size() == 1);
     CHECK(defaulted[0] == 7);
-    CHECK(defaulted.contains(7));
-    CHECK_FALSE(defaulted.contains(1));
-    CHECK(defaulted.containsIf([](int x) { return x == 7; }));
+    CHECK(std::ranges::contains(defaulted, 7));
+    CHECK_FALSE(std::ranges::contains(defaulted, 1));
+    CHECK(std::ranges::any_of(defaulted, [](int x) { return x == 7; }));
     CHECK(ToList(defaulted) == List<int> {7});
 
     Type list {CommaSeparatedList<int> {1, 2}};
     CHECK_FALSE(list.IsDefault());
     CHECK(list.size() == 2);
-    CHECK(list.contains(2));
-    CHECK_FALSE(list.contains(7));
+    CHECK(std::ranges::contains(list, 2));
+    CHECK_FALSE(std::ranges::contains(list, 7));
     CHECK(ToList(list) == List<int> {1, 2});
   }
 
@@ -388,18 +394,18 @@ namespace krys::boo::css::tests
     CHECK_FALSE(empty.IsList());
     CHECK_FALSE(static_cast<bool>(empty));
     CHECK(empty.TryList() == nullptr);
-    CHECK(empty.GetList().isEmpty());
+    CHECK(empty.GetList().empty());
 
     ListOrNull<SpaceSeparatedFixedList<int>> list {SpaceSeparatedFixedList<int> {1, 2, 3}};
     CHECK(list.IsList());
     CHECK(static_cast<bool>(list));
     REQUIRE(list.TryList() != nullptr);
     CHECK(list.size() == 3);
-    CHECK(list.first() == 1);
-    CHECK(list.last() == 3);
+    CHECK(list.front() == 1);
+    CHECK(list.back() == 3);
     CHECK(list[1] == 2);
-    CHECK(list.contains(3));
-    CHECK(list.containsIf([](int x) { return x == 1; }));
+    CHECK(std::ranges::contains(list, 3));
+    CHECK(std::ranges::any_of(list, [](int x) { return x == 1; }));
     CHECK(list->size() == 3);
     CHECK(ToList(list) == List<int> {1, 2, 3});
     CHECK(list == ListOrNull<SpaceSeparatedFixedList<int>> {SpaceSeparatedFixedList<int> {1, 2, 3}});
@@ -414,9 +420,9 @@ namespace krys::boo::css::tests
 
     TestEnumSetOrNone set {TestFlag::A, TestFlag::C};
     CHECK(set.IsEnumSet());
-    CHECK(set.Size() == 2);
-    CHECK(set.Contains(TestFlag::A));
-    CHECK_FALSE(set.Contains(TestFlag::B));
+    CHECK(set.size() == 2);
+    CHECK(set.contains(TestFlag::A));
+    CHECK_FALSE(set.contains(TestFlag::B));
     CHECK(set.ContainsAny({TestFlag::B, TestFlag::C}));
     CHECK(set.ContainsAll({TestFlag::A, TestFlag::C}));
     CHECK_FALSE(set.ContainsOnly({TestFlag::A}));
@@ -426,7 +432,7 @@ namespace krys::boo::css::tests
     CHECK(TestEnumSetOrNone::FromRaw(0).IsKeyword());
 
     CHECK(
-      set.SwitchOn([](keywords::None) { return 0uz; }, [](const EnumSet<TestFlag> &s) { return s.Size(); })
+      set.SwitchOn([](keywords::None) { return 0uz; }, [](const EnumSet<TestFlag> &s) { return s.size(); })
       == 2uz);
   }
 
@@ -449,9 +455,9 @@ namespace krys::boo::css::tests
   TEST_CASE("Aggregates(enum sets)", "[CSS][Aggregates]")
   {
     SpaceSeparatedEnumSet<TestFlag> set {TestFlag::A, TestFlag::D};
-    CHECK(set.Size() == 2);
-    CHECK_FALSE(set.IsEmpty());
-    CHECK(set.Contains(TestFlag::D));
+    CHECK(set.size() == 2);
+    CHECK_FALSE(set.empty());
+    CHECK(set.contains(TestFlag::D));
     CHECK(set.ContainsAny({TestFlag::A}));
     CHECK(set.ContainsAll({TestFlag::A, TestFlag::D}));
     CHECK(set.ContainsOnly({TestFlag::A, TestFlag::B, TestFlag::D}));
@@ -463,8 +469,9 @@ namespace krys::boo::css::tests
     CHECK((set - other) == SpaceSeparatedEnumSet<TestFlag> {TestFlag::A});
     CHECK((set ^ other) == SpaceSeparatedEnumSet<TestFlag> {TestFlag::A, TestFlag::B});
 
-    auto mapped =
-      CommaSeparatedEnumSet<TestFlag>::Map(List<int> {1, 2}, [](int x) { return static_cast<TestFlag>(x); });
+    auto mapped = CommaSeparatedEnumSet<TestFlag>(
+      std::from_range,
+      List<int> {1, 2} | std::views::transform([](int x) { return static_cast<TestFlag>(x); }));
     CHECK(mapped == CommaSeparatedEnumSet<TestFlag> {TestFlag::B, TestFlag::C});
   }
 

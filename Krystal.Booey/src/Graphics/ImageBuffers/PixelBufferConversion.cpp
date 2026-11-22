@@ -26,8 +26,8 @@
 #include "Krystal.Booey/Graphics/ImageBuffers/PixelBufferConversion.hpp"
 #include "Krystal.Core/Colour/ColourConversion.hpp"
 #include "Krystal.Core/Colour/ColourTypes.hpp"
+#include "Krystal.Core/Containers/Array.hpp"
 #include "Krystal.Core/Geometry/Size.hpp"
-#include "Krystal.Core/Types/Array.hpp"
 #include <algorithm>
 #include <cmath>
 #include <cstring>

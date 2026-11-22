@@ -21,7 +21,7 @@ namespace krys::pal
     float _deltaX {0}, _deltaY {0};
     float _scrollDelta {0};
     float _horizontalScrollDelta {0};
-    MouseButton _pressed {MouseButton::None}, _released {MouseButton::None}, _held {MouseButton::None};
+    EnumSet<MouseButton> _pressed, _released, _held;
 
   public:
     /// @brief Constructs a `Mouse`.

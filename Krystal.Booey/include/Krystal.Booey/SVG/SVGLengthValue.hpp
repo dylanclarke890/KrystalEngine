@@ -52,6 +52,11 @@ namespace krys::boo
     Ch,
   };
 
+  consteval SVGLengthType MaxEnumValue(SVGLengthType) noexcept
+  {
+    return SVGLengthType::Ch;
+  }
+
   enum class SVGLengthMode : uint8
   {
     Width,
@@ -59,11 +64,21 @@ namespace krys::boo
     Other,
   };
 
+  consteval SVGLengthMode MaxEnumValue(SVGLengthMode) noexcept
+  {
+    return SVGLengthMode::Other;
+  }
+
   enum class SVGLengthNegativeValuesMode : uint8
   {
     Allow,
     Forbid,
   };
+
+  consteval SVGLengthNegativeValuesMode MaxEnumValue(SVGLengthNegativeValuesMode) noexcept
+  {
+    return SVGLengthNegativeValuesMode::Forbid;
+  }
 }
 
 namespace krys::boo::svg
@@ -134,7 +149,3 @@ namespace krys::boo
     KRYS_NODISCARD friend bool operator==(const SVGLengthValue &, const SVGLengthValue &) noexcept = default;
   };
 }
-
-KRYS_DEFINE_CONTIGUOUS_ENUM_TRAITS(krys::boo::SVGLengthType, 13uz);
-KRYS_DEFINE_CONTIGUOUS_ENUM_TRAITS(krys::boo::SVGLengthMode, 3uz);
-KRYS_DEFINE_CONTIGUOUS_ENUM_TRAITS(krys::boo::SVGLengthNegativeValuesMode, 2uz);

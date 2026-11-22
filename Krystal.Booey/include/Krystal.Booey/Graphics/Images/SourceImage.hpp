@@ -27,8 +27,8 @@
 
 #include "Krystal.Booey/Graphics/RenderingResourceIdentifier.hpp"
 #include "Krystal.Core/Geometry/Size.hpp"
+#include "Krystal.Core/Memory/RefPtr.hpp"
 #include "Krystal.Core/Types/Maybe.hpp"
-#include "Krystal.Core/Types/RefPtr.hpp"
 #include "Krystal.Core/Types/Variant.hpp"
 
 namespace krys::boo

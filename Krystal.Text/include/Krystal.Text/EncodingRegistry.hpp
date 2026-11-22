@@ -1,9 +1,9 @@
 ﻿#pragma once
 
+#include "Krystal.Core/Containers/HashMap.hpp"
+#include "Krystal.Core/Containers/SmallList.hpp"
+#include "Krystal.Core/Memory/UniquePtr.hpp"
 #include "Krystal.Core/Strings/String.hpp"
-#include "Krystal.Core/Types/HashMap.hpp"
-#include "Krystal.Core/Types/SmallList.hpp"
-#include "Krystal.Core/Types/UniquePtr.hpp"
 #include "Krystal.Text/Encodings/Base.hpp"
 #include "Krystal.Text/ICodec.hpp"
 

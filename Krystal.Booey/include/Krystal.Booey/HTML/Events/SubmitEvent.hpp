@@ -2,7 +2,7 @@
 
 #include "Krystal.Booey/DOM/Events/Event.hpp"
 #include "Krystal.Core/Attributes.hpp"
-#include "Krystal.Core/Types/RefPtr.hpp"
+#include "Krystal.Core/Memory/RefPtr.hpp"
 
 namespace krys::boo
 {
@@ -11,7 +11,7 @@ namespace krys::boo
   /// @see https://html.spec.whatwg.org/#submiteventinit
   struct SubmitEventInit : EventInit
   {
-    RefPtr<HTMLElement> Submitter;
+    HTMLElement *Submitter {nullptr};
   };
 
   /// @brief The `submit` event, with the button that submitted the form.

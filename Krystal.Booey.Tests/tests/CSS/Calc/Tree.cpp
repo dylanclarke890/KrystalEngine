@@ -234,9 +234,6 @@ namespace krys::boo::css::calc::tests
     CHECK_FALSE(a == named);
     CHECK(RandomCachingKeyHash::Hash(a) == RandomCachingKeyHash::Hash(a));
 
-    CHECK(HashTraits<RandomCachingKey>::IsEmptyValue(HashTraits<RandomCachingKey>::EmptyValue()));
-    CHECK(RandomCachingKey {HashTableDeletedValueTag {}}.IsHashTableDeletedValue());
-
     auto map = RandomCachingKeyMap::Create();
     auto first = map->LookupCSSRandomBaseValue(a);
     CHECK(first >= 0.0);

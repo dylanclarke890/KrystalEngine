@@ -24,7 +24,7 @@
  */
 
 #include "Krystal.Booey/CSS/Values/ValuePair.hpp"
-#include "Krystal.Core/Hash.hpp"
+#include "Krystal.Core/Hashing/FastHash.hpp"
 
 namespace krys::boo::css
 {
@@ -84,7 +84,7 @@ namespace krys::boo::css
 
   bool ValuePair::AddDerivedHash(size_t &seed) const noexcept
   {
-    seed = Hash::Combine(seed, _valueSeparator, _coalesceIdenticalValues);
+    seed = CombineFastHashes(seed, _valueSeparator, _coalesceIdenticalValues);
     return _first->AddHash(seed) && _second->AddHash(seed);
   }
 }

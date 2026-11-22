@@ -34,7 +34,7 @@
 #include "Krystal.Booey/SVG/SVGNames.hpp"
 #include "Krystal.Booey/SVG/SVGPoint.hpp"
 #include "Krystal.Booey/SVG/SVGRect.hpp"
-#include "Krystal.Core/Threading/NeverDestroyed.hpp"
+#include "Krystal.Core/Memory/NeverDestroyed.hpp"
 #include <algorithm>
 
 namespace krys::boo
@@ -43,7 +43,7 @@ namespace krys::boo
                                                UniquePtr<SVGPropertyRegistry> &&propertyRegistry,
                                                SVGElementInterface interface, SVGElementFlags flags) noexcept
       : SVGGraphicsElement(document, krys::move(propertyRegistry), interface,
-                           flags | SVGElementFlags::IsSvgTextContentElement),
+                           flags | SVGElementFlag::IsSvgTextContentElement),
         _textLength(SVGAnimatedLength::Create(this, SVGLengthMode::Other)),
         _lengthAdjust(SVGAnimatedEnumeration::Create(this, SVGLengthAdjustSpacing))
   {
@@ -255,7 +255,7 @@ namespace krys::boo
   SVGAnimatedLength &SVGTextContentElement::TextLengthAnimated() noexcept
   {
     static NeverDestroyed<SVGLengthValue> defaultTextLength(SVGLengthMode::Other);
-    if (_textLength->BaseVal()->Value() == defaultTextLength.get())
+    if (_textLength->BaseVal()->Value() == *defaultTextLength)
     {
       _textLength->BaseVal()->Value() = SVGLengthValue {GetComputedTextLength(), SVGLengthType::Number};
     }

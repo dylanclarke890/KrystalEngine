@@ -1,6 +1,7 @@
 ﻿#include "Krystal.Booey/HTML/Elements/HTMLDetailsElement.hpp"
 #include "catch2/catch_test_macros.hpp"
 #include "Krystal.Booey.Tests/Loader/NavigationTestUtils.hpp"
+#include "Krystal.Booey.Tests/StringTestUtils.hpp"
 #include "Krystal.Booey/DOM/Algorithms/SlotAlgorithms.hpp"
 #include "Krystal.Booey/DOM/Events/Event.hpp"
 #include "Krystal.Booey/DOM/Events/EventListenerHandle.hpp"
@@ -19,15 +20,11 @@
 
 namespace krys::boo::html::tests
 {
+  using boo::tests::Narrow;
   using boo::tests::NavigationFixture;
 
   namespace
   {
-    KRYS_NODISCARD std::string Narrow(DOMStringView string)
-    {
-      return std::string(reinterpret_cast<const char *>(string.data()), string.size());
-    }
-
     /// @brief Records toggle events, as `"<id>:<old>><new>"`.
     struct ToggleLog
     {

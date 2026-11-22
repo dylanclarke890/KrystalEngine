@@ -1,10 +1,12 @@
 ﻿#include "Krystal.Booey/Rendering/FormControls/RenderListBox.hpp"
 #include "catch2/catch_test_macros.hpp"
 #include "Krystal.Booey.Tests/Editing/EditorTestUtils.hpp"
+#include "Krystal.Booey.Tests/Input/InputTestUtils.hpp"
 #include "Krystal.Booey.Tests/Layout/LayoutTestUtils.hpp"
 #include "Krystal.Booey.Tests/Rendering/PaintTestUtils.hpp"
 #include "Krystal.Booey/DOM/Collections/HTMLCollection.hpp"
 #include "Krystal.Booey/DOM/Events/EventNames.hpp"
+#include "Krystal.Booey/DOM/Geometry/DOMRectList.hpp"
 #include "Krystal.Booey/HTML/Elements/HTMLOptionElement.hpp"
 #include "Krystal.Booey/HTML/Elements/HTMLSelectElement.hpp"
 #include "Krystal.Booey/Input/EventHandler.hpp"
@@ -16,33 +18,19 @@
 
 namespace krys::boo::layout::tests
 {
+  using boo::tests::DragMouseEvent;
   using boo::tests::EditorFixture;
+  using boo::tests::PressKey;
 
   namespace
   {
-    KRYS_NODISCARD PlatformMouseEvent MouseEvent(PlatformEvent::Type type, PointI position,
-                                                 EnumSet<PlatformEvent::Modifier> modifiers = {}) noexcept
-    {
-      PointD point(position.X(), position.Y());
-      int32 clickCount = type == PlatformEvent::Type::MousePressed ? 1 : 0;
-      return PlatformMouseEvent(point, point, MouseButton::Left, type, clickCount, modifiers,
-                                MonotonicTime::Now());
-    }
-
     void Click(EventHandler &handler, PointI position,
                EnumSet<PlatformEvent::Modifier> modifiers = {}) noexcept
     {
-      (void)handler.HandleMousePressEvent(MouseEvent(PlatformEvent::Type::MousePressed, position, modifiers));
+      (void)handler.HandleMousePressEvent(
+        DragMouseEvent(PlatformEvent::Type::MousePressed, position, modifiers));
       (void)handler.HandleMouseReleaseEvent(
-        MouseEvent(PlatformEvent::Type::MouseReleased, position, modifiers));
-    }
-
-    bool PressKey(EditorFixture &fixture, const utf8_string &key, utf8_string identifier, int32 keyCode,
-                  EnumSet<PlatformEvent::Modifier> modifiers = {}) noexcept
-    {
-      return fixture.Frame->GetEventHandler().KeyEvent(
-        PlatformKeyboardEvent(PlatformEvent::Type::RawKeyDown, u8"", u8"", key, key, krys::move(identifier),
-                              keyCode, false, false, false, modifiers, {}));
+        DragMouseEvent(PlatformEvent::Type::MouseReleased, position, modifiers));
     }
 
     bool Wheel(EventHandler &handler, PointI position, float deltaY) noexcept

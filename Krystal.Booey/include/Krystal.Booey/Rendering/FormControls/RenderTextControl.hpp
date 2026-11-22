@@ -24,11 +24,6 @@
 #include "Krystal.Booey/Rendering/RenderBlockFlow.hpp"
 #include "Krystal.Booey/Rendering/RenderFlexibleBox.hpp"
 
-namespace krys::boo
-{
-  class HTMLTextFormControlElement;
-}
-
 namespace krys::boo::html
 {
   class TextControlInnerTextElement;
@@ -36,6 +31,8 @@ namespace krys::boo::html
 
 namespace krys::boo
 {
+  class HTMLTextFormControlElement;
+
   /// @brief The renderer of a text control: a text field or a text area, sized by its `size` or its `cols`
   /// and `rows`, holding its user agent shadow tree.
   class RenderTextControl : public RenderBlockFlow

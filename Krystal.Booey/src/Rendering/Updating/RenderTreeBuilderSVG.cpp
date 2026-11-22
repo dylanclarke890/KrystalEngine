@@ -33,7 +33,7 @@
 #include "Krystal.Booey/Rendering/Updating/RenderTreeBuilderBlock.hpp"
 #include "Krystal.Booey/Rendering/Updating/RenderTreeBuilderBlockFlow.hpp"
 #include "Krystal.Booey/Rendering/Updating/RenderTreeBuilderInline.hpp"
-#include "Krystal.Core/Types/SmallList.hpp"
+#include "Krystal.Core/Containers/SmallList.hpp"
 
 namespace krys::boo
 {

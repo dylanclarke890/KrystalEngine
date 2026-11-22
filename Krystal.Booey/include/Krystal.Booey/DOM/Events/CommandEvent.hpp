@@ -3,7 +3,7 @@
 #include "Krystal.Booey/DOM/Events/Event.hpp"
 #include "Krystal.Booey/DOM/Types/DOMString.hpp"
 #include "Krystal.Core/Attributes.hpp"
-#include "Krystal.Core/Types/RefPtr.hpp"
+#include "Krystal.Core/Memory/RefPtr.hpp"
 
 namespace krys::boo
 {
@@ -12,7 +12,8 @@ namespace krys::boo
   /// @see https://html.spec.whatwg.org/#commandeventinit
   struct CommandEventInit : EventInit
   {
-    RefPtr<Element> Source;
+    /// @note A plain pointer: the event takes its own reference.
+    Element *Source {nullptr};
     DOMString Command;
   };
 

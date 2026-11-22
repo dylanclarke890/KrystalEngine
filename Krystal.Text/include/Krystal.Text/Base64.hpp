@@ -1,13 +1,13 @@
 ﻿#pragma once
 
 #include "Krystal.Core/Attributes.hpp"
+#include "Krystal.Core/Containers/EnumSet.hpp"
+#include "Krystal.Core/Containers/List.hpp"
+#include "Krystal.Core/Containers/Span.hpp"
 #include "Krystal.Core/Enum.hpp"
 #include "Krystal.Core/Numeric.hpp"
 #include "Krystal.Core/Strings/String.hpp"
-#include "Krystal.Core/Types/EnumSet.hpp"
-#include "Krystal.Core/Types/List.hpp"
 #include "Krystal.Core/Types/Maybe.hpp"
-#include "Krystal.Core/Types/Span.hpp"
 
 namespace krys
 {
@@ -18,12 +18,12 @@ namespace krys
     /// @brief ASCII whitespace in the input is skipped.
     IgnoreWhitespace,
   };
-}
 
-KRYS_DEFINE_CONTIGUOUS_ENUM_TRAITS(krys::Base64DecodeOption, 2uz);
+  consteval Base64DecodeOption MaxEnumValue(Base64DecodeOption) noexcept
+  {
+    return Base64DecodeOption::IgnoreWhitespace;
+  }
 
-namespace krys
-{
   /// @brief Decodes base64 (the standard alphabet, `+` and `/`); null if @p input isn't valid base64.
   /// @note Valid input is a multiple of four characters, less one or two at the end, or padded with `=`.
   KRYS_NODISCARD Maybe<List<uint8>> Base64Decode(Span<const uint8> input,

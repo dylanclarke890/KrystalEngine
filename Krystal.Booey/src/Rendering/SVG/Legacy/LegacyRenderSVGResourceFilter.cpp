@@ -90,7 +90,7 @@ namespace krys::boo
     KRYS_MAYBE_UNUSED EnumSet<RenderSVGResourceMode> resourceMode) noexcept -> EnumSet<ApplyResult>
   {
     krys_debug_assert(context);
-    krys_debug_assert(resourceMode.IsEmpty());
+    krys_debug_assert(resourceMode.empty());
 
     if (auto it = _rendererFilterDataMap.find(&renderer); it != _rendererFilterDataMap.end())
     {
@@ -208,7 +208,7 @@ namespace krys::boo
     const RenderElement *) noexcept
   {
     krys_debug_assert(context);
-    krys_debug_assert(resourceMode.IsEmpty());
+    krys_debug_assert(resourceMode.empty());
 
     auto findResult = _rendererFilterDataMap.find(&renderer);
     if (findResult == _rendererFilterDataMap.end())

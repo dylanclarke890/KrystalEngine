@@ -1,5 +1,6 @@
 ﻿#include "Krystal.Booey/Editing/Editor.hpp"
 #include "catch2/catch_test_macros.hpp"
+#include "Krystal.Booey.Tests/DOM/DOMTestUtils.hpp"
 #include "Krystal.Booey.Tests/Editing/EditorTestUtils.hpp"
 #include "Krystal.Booey/DOM/DataTransfer/DataTransfer.hpp"
 #include "Krystal.Booey/DOM/Events/ClipboardEvent.hpp"
@@ -297,21 +298,6 @@ namespace krys::boo::tests
 
   namespace
   {
-    /// @brief Calls a function with each event it handles.
-    struct FunctionListener final : EventListenerCallback
-    {
-      Func<void(Event &)> Function;
-
-      explicit FunctionListener(Func<void(Event &)> &&function) noexcept : Function(krys::move(function))
-      {
-      }
-
-      void HandleEvent(Event &event) noexcept override
-      {
-        Function(event);
-      }
-    };
-
     void ListenWith(EditorFixture &fixture, utf8_stringview type, Func<void(Event &)> &&function) noexcept
     {
       fixture.Document->AddEventListener(

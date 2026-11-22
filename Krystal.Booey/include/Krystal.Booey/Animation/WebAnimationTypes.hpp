@@ -27,9 +27,10 @@
 
 #include "Krystal.Booey/CSS/Properties/PropertyId.hpp"
 #include "Krystal.Booey/CSS/Types/CSSOMString.hpp"
+#include "Krystal.Core/Containers/HashSet.hpp"
+#include "Krystal.Core/Containers/Span.hpp"
 #include "Krystal.Core/Enum.hpp"
-#include "Krystal.Core/Types/HashSet.hpp"
-#include "Krystal.Core/Types/Span.hpp"
+#include "Krystal.Core/Hashing/FastHash.hpp"
 #include "Krystal.Core/Types/Variant.hpp"
 #include <bitset>
 #include <functional>
@@ -44,6 +45,11 @@ namespace krys::boo
     RequiresRecomposite,
     ForcesStackingContext,
   };
+
+  consteval AnimationImpact MaxEnumValue(AnimationImpact) noexcept
+  {
+    return AnimationImpact::ForcesStackingContext;
+  }
 
   enum class UseCachedCurrentTime : bool
   {
@@ -71,9 +77,9 @@ namespace krys::boo
     {
       if (const auto *id = std::get_if<css::PropertyId>(&property))
       {
-        return DefaultHash<css::PropertyId>::Hash(*id);
+        return FastHash<css::PropertyId> {}(*id);
       }
-      return std::hash<CSSOMStringAtom> {}(std::get<CSSOMStringAtom>(property));
+      return FastHash<CSSOMStringAtom> {}(std::get<CSSOMStringAtom>(property));
     }
   };
 
@@ -104,5 +110,3 @@ namespace krys::boo
     }
   };
 }
-
-KRYS_DEFINE_CONTIGUOUS_ENUM_TRAITS(krys::boo::AnimationImpact, 2uz);

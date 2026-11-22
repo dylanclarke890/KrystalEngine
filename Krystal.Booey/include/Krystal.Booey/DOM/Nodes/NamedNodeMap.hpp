@@ -3,11 +3,11 @@
 #include "Krystal.Booey/DOM/Types/DOMString.hpp"
 #include "Krystal.Booey/DOM/Types/ExceptionOr.hpp"
 #include "Krystal.Core/Attributes.hpp"
+#include "Krystal.Core/Containers/List.hpp"
+#include "Krystal.Core/Memory/CheckedPtr.hpp"
+#include "Krystal.Core/Memory/RefPtr.hpp"
+#include "Krystal.Core/Memory/WeakPtr.hpp"
 #include "Krystal.Core/Numeric.hpp"
-#include "Krystal.Core/Types/CheckedPtr.hpp"
-#include "Krystal.Core/Types/List.hpp"
-#include "Krystal.Core/Types/RefPtr.hpp"
-#include "Krystal.Core/Types/WeakPtr.hpp"
 #include <algorithm>
 
 namespace krys::boo
@@ -29,12 +29,11 @@ namespace krys::boo::dom
     /// @see https://dom.spec.whatwg.org/#concept-namednodemap-element
     CheckedRef<Element> _associatedElement;
 
-    explicit NamedNodeMap(Element &associatedElement) noexcept
-        : _associatedElement(ShareCheckedRef(associatedElement))
-    {
-    }
+    explicit NamedNodeMap(Element &associatedElement) noexcept;
 
   public:
+    ~NamedNodeMap() noexcept;
+
 #pragma region NamedNodeMap - https://dom.spec.whatwg.org/#namednodemap
 
     /// @see https://dom.spec.whatwg.org/#dom-namednodemap-length

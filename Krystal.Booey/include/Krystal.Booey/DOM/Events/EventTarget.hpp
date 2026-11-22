@@ -4,37 +4,39 @@
 #include "Krystal.Booey/DOM/Events/EventListenerHandle.hpp"
 #include "Krystal.Booey/DOM/Types/DOMString.hpp"
 #include "Krystal.Booey/DOM/Types/ExceptionOr.hpp"
-#include "Krystal.Core/CanMakeWeakPtr.hpp"
+#include "Krystal.Core/Containers/EnumSet.hpp"
+#include "Krystal.Core/Containers/List.hpp"
+#include "Krystal.Core/Containers/SmallList.hpp"
+#include "Krystal.Core/Containers/Span.hpp"
 #include "Krystal.Core/Enum.hpp"
-#include "Krystal.Core/RefCounted.hpp"
+#include "Krystal.Core/Memory/CanMakeWeakPtr.hpp"
+#include "Krystal.Core/Memory/RefCounted.hpp"
+#include "Krystal.Core/Memory/RefPtr.hpp"
+#include "Krystal.Core/Memory/UniquePtr.hpp"
 #include "Krystal.Core/Types/Func.hpp"
-#include "Krystal.Core/Types/List.hpp"
-#include "Krystal.Core/Types/RefPtr.hpp"
-#include "Krystal.Core/Types/SmallList.hpp"
-#include "Krystal.Core/Types/Span.hpp"
-#include "Krystal.Core/Types/UniquePtr.hpp"
-
-namespace krys::boo::dom
-{
-  /// @brief Various flags for optimizing event target checks.
-  enum class EventTargetFlags : uint8
-  {
-    None = 0,
-    IsNode = 1 << 0,
-    IsWindow = 1 << 1,
-    HasActivationBehavior = 1 << 2,
-    HasLegacyPreActivationBehavior = 1 << 3,
-    HasLegacyCanceledActivationBehavior = 1 << 4,
-    IsInTopLayer = 1 << 5,
-  };
-}
-
-KRYS_DEFINE_FLAGS_ENUM_TRAITS(krys::boo::dom::EventTargetFlags, 7u)
 
 namespace krys::boo::dom
 {
   class EventDispatcher;
   class EventTargetAlgorithms;
+
+  /// @brief Various flags for optimizing event target checks.
+  enum class EventTargetFlag : uint8
+  {
+    IsNode,
+    IsWindow,
+    HasActivationBehavior,
+    HasLegacyPreActivationBehavior,
+    HasLegacyCanceledActivationBehavior,
+    IsInTopLayer,
+  };
+
+  consteval EventTargetFlag MaxEnumValue(EventTargetFlag) noexcept
+  {
+    return EventTargetFlag::IsInTopLayer;
+  }
+
+  using EventTargetFlags = EnumSet<EventTargetFlag>;
 }
 
 namespace krys::boo
@@ -47,9 +49,10 @@ namespace krys::boo
     friend class dom::EventDispatcher;
     friend class dom::EventTargetAlgorithms;
 
-  private:
-    dom::EventTargetFlags _flags : BitCount<dom::EventTargetFlags>() {dom::EventTargetFlags::None};
+  protected:
+    dom::EventTargetFlags _eventTargetFlags;
 
+  private:
     /// @see https://dom.spec.whatwg.org/#eventtarget-event-listener-list
     SmallList<Ref<EventListener>> _eventListenerList;
 
@@ -67,7 +70,7 @@ namespace krys::boo
     UniquePtr<List<EventHandler>> _eventHandlers;
 
   protected:
-    EventTarget(dom::EventTargetFlags flags) noexcept : _flags(flags)
+    EventTarget(dom::EventTargetFlags flags) noexcept : _eventTargetFlags(flags)
     {
     }
 
@@ -183,7 +186,7 @@ namespace krys::boo
     /// @see https://dom.spec.whatwg.org/#eventtarget-activation-behavior
     KRYS_NODISCARD bool HasActivationBehavior() const noexcept
     {
-      return HasFlag(_flags, dom::EventTargetFlags::HasActivationBehavior);
+      return _eventTargetFlags.contains(dom::EventTargetFlag::HasActivationBehavior);
     }
 
     /// @see https://dom.spec.whatwg.org/#eventtarget-activation-behavior
@@ -195,7 +198,7 @@ namespace krys::boo
     /// @see https://dom.spec.whatwg.org/#eventtarget-legacy-pre-activation-behavior
     KRYS_NODISCARD bool HasLegacyPreActivationBehavior() const noexcept
     {
-      return HasFlag(_flags, dom::EventTargetFlags::HasLegacyPreActivationBehavior);
+      return _eventTargetFlags.contains(dom::EventTargetFlag::HasLegacyPreActivationBehavior);
     }
 
     /// @see https://dom.spec.whatwg.org/#eventtarget-legacy-pre-activation-behavior
@@ -207,7 +210,7 @@ namespace krys::boo
     /// @see https://dom.spec.whatwg.org/#eventtarget-legacy-canceled-activation-behavior
     KRYS_NODISCARD bool HasLegacyCanceledActivationBehavior() const noexcept
     {
-      return HasFlag(_flags, dom::EventTargetFlags::HasLegacyCanceledActivationBehavior);
+      return _eventTargetFlags.contains(dom::EventTargetFlag::HasLegacyCanceledActivationBehavior);
     }
 
     /// @see https://dom.spec.whatwg.org/#eventtarget-legacy-canceled-activation-behavior
@@ -224,32 +227,17 @@ namespace krys::boo
 
     KRYS_NODISCARD bool IsNode() const noexcept
     {
-      return HasEventTargetFlag(dom::EventTargetFlags::IsNode);
+      return _eventTargetFlags.contains(dom::EventTargetFlag::IsNode);
     }
 
     KRYS_NODISCARD bool IsWindow() const noexcept
     {
-      return HasEventTargetFlag(dom::EventTargetFlags::IsWindow);
+      return _eventTargetFlags.contains(dom::EventTargetFlag::IsWindow);
     }
 
 #pragma endregion
 
 #pragma region EventTarget Flags
-
-    KRYS_NODISCARD bool HasEventTargetFlag(dom::EventTargetFlags flags) const noexcept
-    {
-      return HasFlag(_flags, flags);
-    }
-
-    void SetEventTargetFlag(dom::EventTargetFlags flags) noexcept
-    {
-      _flags = _flags | flags;
-    }
-
-    void ClearEventTargetFlag(dom::EventTargetFlags flags) noexcept
-    {
-      _flags = _flags & ~flags;
-    }
 
 #pragma endregion
   };

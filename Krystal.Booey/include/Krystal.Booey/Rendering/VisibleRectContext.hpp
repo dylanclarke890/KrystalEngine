@@ -26,8 +26,8 @@
 
 #include "Krystal.Booey/DOM/IntersectionObservers/IntersectionObserverMarginBox.hpp"
 #include "Krystal.Booey/Rendering/RepaintRectCalculation.hpp"
+#include "Krystal.Core/Containers/EnumSet.hpp"
 #include "Krystal.Core/Enum.hpp"
-#include "Krystal.Core/Types/EnumSet.hpp"
 #include "Krystal.Core/Types/Maybe.hpp"
 
 namespace krys::boo
@@ -41,12 +41,12 @@ namespace krys::boo
     ApplyContainerClip,
     CalculateAccurateRepaintRect,
   };
-}
 
-KRYS_DEFINE_CONTIGUOUS_ENUM_TRAITS(krys::boo::VisibleRectContextOption, 5uz);
+  consteval VisibleRectContextOption MaxEnumValue(VisibleRectContextOption) noexcept
+  {
+    return VisibleRectContextOption::CalculateAccurateRepaintRect;
+  }
 
-namespace krys::boo
-{
   /// @brief The state of mapping a rect up to a container, through `ComputeVisibleRectsInContainer`.
   struct VisibleRectContext
   {
@@ -62,7 +62,7 @@ namespace krys::boo
 
     KRYS_NODISCARD RepaintRectCalculation GetRepaintRectCalculation() const noexcept
     {
-      return Options.Contains(Option::CalculateAccurateRepaintRect) ? RepaintRectCalculation::Accurate
+      return Options.contains(Option::CalculateAccurateRepaintRect) ? RepaintRectCalculation::Accurate
                                                                     : RepaintRectCalculation::Fast;
     }
   };

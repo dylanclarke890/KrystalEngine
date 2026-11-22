@@ -1,8 +1,8 @@
 ﻿#include "Krystal.Core/Time/Timer.hpp"
 #include "catch2/catch_test_macros.hpp"
+#include "Krystal.Core/Containers/List.hpp"
+#include "Krystal.Core/Memory/UniquePtr.hpp"
 #include "Krystal.Core/Time/ThreadTimers.hpp"
-#include "Krystal.Core/Types/List.hpp"
-#include "Krystal.Core/Types/UniquePtr.hpp"
 #include <thread>
 
 namespace krys::tests

@@ -30,22 +30,12 @@
 #include "Krystal.Booey/DOM/Types/ExceptionOr.hpp"
 #include "Krystal.Booey/Editing/Markup/HTMLInterchange.hpp"
 #include "Krystal.Core/Attributes.hpp"
-#include "Krystal.Core/Types/EnumSet.hpp"
+#include "Krystal.Core/Containers/EnumSet.hpp"
+#include "Krystal.Core/Containers/HashMap.hpp"
+#include "Krystal.Core/Containers/List.hpp"
+#include "Krystal.Core/Memory/RefPtr.hpp"
 #include "Krystal.Core/Types/Func.hpp"
-#include "Krystal.Core/Types/HashMap.hpp"
-#include "Krystal.Core/Types/List.hpp"
 #include "Krystal.Core/Types/Maybe.hpp"
-#include "Krystal.Core/Types/RefPtr.hpp"
-
-namespace krys::boo
-{
-  class ContainerNode;
-  class Document;
-  class DocumentFragment;
-  class Element;
-  class Node;
-  class ShadowRoot;
-}
 
 namespace krys::boo::dom
 {
@@ -55,7 +45,13 @@ namespace krys::boo::dom
 
 namespace krys::boo
 {
+  class ContainerNode;
+  class Document;
+  class DocumentFragment;
+  class Element;
   class Frame;
+  class Node;
+  class ShadowRoot;
   class VisibleSelection;
 
   enum class ResolveUrls : uint8
@@ -199,11 +195,17 @@ namespace krys::boo
   };
 
   /// @see https://html.spec.whatwg.org/#serialising-html-fragments
+  KRYS_NODISCARD utf8_string SerializeFragment(const Node &node, SerializedNodes root, List<Ref<Node>> *nodes,
+                                               ResolveUrls resolveUrls,
+                                               Maybe<SerializationSyntax> serializationSyntax,
+                                               SerializeShadowRoots serializeShadowRoots,
+                                               List<Ref<ShadowRoot>> &&explicitShadowRoots) noexcept;
+
+  /// @brief The same, with no explicit shadow roots.
   KRYS_NODISCARD utf8_string SerializeFragment(
     const Node &node, SerializedNodes root, List<Ref<Node>> *nodes = nullptr,
     ResolveUrls resolveUrls = ResolveUrls::No, Maybe<SerializationSyntax> serializationSyntax = null,
-    SerializeShadowRoots serializeShadowRoots = SerializeShadowRoots::Explicit,
-    List<Ref<ShadowRoot>> &&explicitShadowRoots = {}) noexcept;
+    SerializeShadowRoots serializeShadowRoots = SerializeShadowRoots::Explicit) noexcept;
 
   /// @brief Serializes @p node as the markup getters (`innerHTML`, `outerHTML`) do: as HTML in an HTML
   /// document, and otherwise as XML that must be well-formed.

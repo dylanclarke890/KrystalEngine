@@ -27,8 +27,8 @@
 #pragma once
 
 #include "Krystal.Booey/Style/Values/FilterEffects/Filter.hpp"
-#include "Krystal.Core/RefCounted.hpp"
-#include "Krystal.Core/Types/RefPtr.hpp"
+#include "Krystal.Core/Memory/RefCounted.hpp"
+#include "Krystal.Core/Memory/RefPtr.hpp"
 
 namespace krys::boo
 {

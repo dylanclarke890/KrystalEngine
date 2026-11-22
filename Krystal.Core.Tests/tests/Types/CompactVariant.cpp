@@ -1,7 +1,7 @@
 ﻿#include "Krystal.Core/Types/CompactVariant.hpp"
 #include "catch2/catch_test_macros.hpp"
-#include "Krystal.Core/Types/UniquePtr.hpp"
-#include "Krystal.Core/Utils/Move.hpp"
+#include "Krystal.Core/Memory/UniquePtr.hpp"
+#include "Krystal.Core/Move.hpp"
 #include <bit>
 #include <string>
 

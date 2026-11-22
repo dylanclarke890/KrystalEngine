@@ -34,7 +34,7 @@
 #include "Krystal.Booey/Rendering/RenderElement.hpp"
 #include "Krystal.Booey/SVG/Graphics/SVGImage.hpp"
 #include "Krystal.Booey/SVG/Graphics/SVGImageForContainer.hpp"
-#include "Krystal.Core/Utils/PointerComparison.hpp"
+#include "Krystal.Core/Memory/PointerComparison.hpp"
 
 namespace krys::boo
 {

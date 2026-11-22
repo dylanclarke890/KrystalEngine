@@ -257,8 +257,8 @@ namespace krys::boo::style
       return false;
     }
 
-    if (matchedProperties.UsedRuleTypes.Contains(UsedRuleType::StartingStyle)
-        && !_includedProperties.Types.Contains(PropertyType::StartingStyle))
+    if (matchedProperties.UsedRuleTypes.contains(UsedRuleType::StartingStyle)
+        && !_includedProperties.Types.contains(PropertyType::StartingStyle))
     {
       return false;
     }
@@ -312,7 +312,7 @@ namespace krys::boo::style
         }
 
         if (matchedProperties.IsCacheable == IsCacheable::Partially
-            && _includedProperties.Types.Contains(PropertyType::NonCacheable))
+            && _includedProperties.Types.contains(PropertyType::NonCacheable))
         {
           return true;
         }
@@ -323,7 +323,7 @@ namespace krys::boo::style
           return true;
         }
 
-        if (_includedProperties.Types.Contains(PropertyType::AfterAnimation))
+        if (_includedProperties.Types.contains(PropertyType::AfterAnimation))
         {
           if (ShouldApplyAfterAnimation(current))
           {
@@ -334,16 +334,16 @@ namespace krys::boo::style
         }
 
         bool currentIsInherited = css::Property::IsInheritedProperty(current.Id());
-        if (_includedProperties.Types.Contains(PropertyType::Inherited) && currentIsInherited)
+        if (_includedProperties.Types.contains(PropertyType::Inherited) && currentIsInherited)
         {
           return true;
         }
-        if (_includedProperties.Types.Contains(PropertyType::ExplicitlyInherited)
+        if (_includedProperties.Types.contains(PropertyType::ExplicitlyInherited)
             && css::IsValueId(*current.Value(), css::ValueId::Inherit))
         {
           return true;
         }
-        if (_includedProperties.Types.Contains(PropertyType::NonInherited) && !currentIsInherited)
+        if (_includedProperties.Types.contains(PropertyType::NonInherited) && !currentIsInherited)
         {
           return true;
         }
@@ -401,7 +401,7 @@ namespace krys::boo::style
 
       // "Important declarations from all origins take precedence over animations."
       // https://drafts.csswg.org/css-cascade-5/#importance
-      return _includedProperties.Types.Contains(PropertyType::AfterAnimation) && property.IsImportant();
+      return _includedProperties.Types.contains(PropertyType::AfterAnimation) && property.IsImportant();
     }
 
     // If we are animating custom properties they may affect other properties so we need to re-resolve them.

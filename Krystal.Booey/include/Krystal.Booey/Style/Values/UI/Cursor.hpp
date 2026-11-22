@@ -43,7 +43,7 @@ namespace krys::boo::style
     KRYS_NODISCARD bool operator==(const CursorImage &) const noexcept = default;
   };
 
-  using CursorImageList = css::CommaSeparatedRefCountedFixedVector<CursorImage>;
+  using CursorImageList = css::CommaSeparatedRefCountedFixedList<CursorImage>;
 
   // <'cursor'> = <cursor-image>#? <cursor-predefined>
   // https://drafts.csswg.org/css-ui-4/#propdef-cursor

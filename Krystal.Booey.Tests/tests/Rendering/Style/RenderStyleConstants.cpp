@@ -12,7 +12,7 @@ namespace krys::boo::tests
     {
       CHECK(ParentPseudoElement(PseudoElementType::FirstLetter) == PseudoElementType::FirstLine);
       CHECK_FALSE(ParentPseudoElement(PseudoElementType::Before));
-      CHECK(AllPseudoElementTypes.Contains(PseudoElementType::Marker));
+      CHECK(AllPseudoElementTypes.contains(PseudoElementType::Marker));
     }
 
     SECTION("Clip boxes")
