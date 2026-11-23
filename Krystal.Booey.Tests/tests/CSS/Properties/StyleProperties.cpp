@@ -57,6 +57,34 @@ namespace krys::boo::css::tests
       CHECK(AsText(ParseDeclarations(u8"margin: var(--x) 1px")) == "margin: var(--x) 1px;");
     }
 
+    SECTION("Every shorthand that can be written is")
+    {
+      CHECK(AsText(ParseDeclarations(
+              u8"column-rule-width: 2px; column-rule-style: dotted; column-rule-color: blue"))
+            == "column-rule: 2px dotted blue;");
+      CHECK(AsText(ParseDeclarations(u8"columns: 2 100px")) == "columns: 100px 2;");
+      CHECK(AsText(ParseDeclarations(u8"container: a / size")) == "container: a / size;");
+      CHECK(AsText(ParseDeclarations(u8"font-synthesis: weight style")) == "font-synthesis: weight style;");
+      CHECK(AsText(ParseDeclarations(u8"grid-area: 1 / 2 / 3 / 4")) == "grid-area: 1 / 2 / 3 / 4;");
+      CHECK(AsText(ParseDeclarations(u8"grid-row: span 2 / a")) == "grid-row: span 2 / a;");
+      CHECK(AsText(ParseDeclarations(u8"offset: 10px 20px")) == "offset: 10px 20px;");
+      CHECK(AsText(ParseDeclarations(u8"text-emphasis: filled circle red"))
+            == "text-emphasis: filled circle red;");
+      CHECK(AsText(ParseDeclarations(u8"font-variant: small-caps")) == "font-variant: small-caps;");
+      CHECK(AsText(ParseDeclarations(u8"font-variant: none")) == "font-variant: none;");
+      CHECK(AsText(ParseDeclarations(u8"mask: url(a.png) luminance")) == "mask: url(\"a.png\") luminance;");
+      // mask-position's longhands are internal, so they mustn't be written out.
+      CHECK(AsText(ParseDeclarations(u8"mask-position: left top, right bottom"))
+            == "mask-position: left top, right bottom;");
+    }
+
+    SECTION("A shorthand that can't express its longhands isn't used")
+    {
+      // font-variant: none sets only the ligatures to none.
+      CHECK(AsText(ParseDeclarations(u8"font-variant: none; font-variant-caps: small-caps"))
+              .starts_with("font-variant-ligatures: none; font-variant-caps: small-caps;"));
+    }
+
     SECTION("Legacy shorthands aren't used")
     {
       CHECK(AsText(ParseDeclarations(u8"break-after: page")) == "break-after: page;");

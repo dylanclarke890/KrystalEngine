@@ -43,27 +43,6 @@ namespace krys::boo::css
         // text-decoration-skip-ink, its only longhand, is better supported on its own.
         case PropertyId::TextDecorationSkip: return false;
 
-        // FIXME: more mask nonsense.
-        case PropertyId::Mask:
-        {
-          return longhand != PropertyId::MaskComposite && longhand != PropertyId::MaskMode
-                 && longhand != PropertyId::MaskSize;
-        }
-
-        // FIXME: If font-variant-ligatures is none, this depends on the value of the longhand.
-        case PropertyId::FontVariant:
-        // FIXME: These shorthands are avoided for unknown legacy reasons, probably shouldn't be avoided.
-        case PropertyId::ColumnRule:
-        case PropertyId::Columns:
-        case PropertyId::Container:
-        case PropertyId::FontSynthesis:
-        case PropertyId::GridArea:
-        case PropertyId::GridColumn:
-        case PropertyId::GridRow:
-        case PropertyId::MaskPosition:
-        case PropertyId::Offset:
-        case PropertyId::TextEmphasis:  return false;
-
         default:                        return true;
       }
     }
