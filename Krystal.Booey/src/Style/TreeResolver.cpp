@@ -1312,7 +1312,7 @@ namespace krys::boo::style
                                 DescendantsToResolve descendantsToResolve,
                                 style::IsInDisplayNoneTree isInDisplayNoneTree) noexcept
   {
-    GetScope().SelectorMatchingState.SelectorFilter.PushParent(&element);
+    GetScope().SelectorMatchingState.SelectorFilter.PushParent(element);
     if (style.ContainerType() != ContainerType::Normal)
     {
       GetScope().SelectorMatchingState.ContainerQueryEvaluationState.SizeQueryContainers.push_back(
