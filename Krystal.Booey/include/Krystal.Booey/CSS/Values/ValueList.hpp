@@ -1,62 +1,32 @@
-﻿/*
- * (C) 1999-2003 Lars Knoll (knoll@kde.org)
- * Copyright (C) 2004-2022 Apple Inc. All rights reserved.
- *
- * This library is free software; you can redistribute it and/or
- * modify it under the terms of the GNU Library General Public
- * License as published by the Free Software Foundation; either
- * version 2 of the License, or (at your option) any later version.
- *
- * This library is distributed in the hope that it will be useful,
- * but WITHOUT ANY WARRANTY; without even the implied warranty of
- * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU
- * Library General Public License for more details.
- *
- * You should have received a copy of the GNU Library General Public License
- * along with this library; see the file COPYING.LIB.  If not, write to
- * the Free Software Foundation, Inc., 51 Franklin Street, Fifth Floor,
- * Boston, MA 02110-1301, USA.
- */
-
-#pragma once
+﻿#pragma once
 
 #include "Krystal.Booey/CSS/Values/Value.hpp"
 #include "Krystal.Booey/CSS/Values/ValueListBuilder.hpp"
-#include "Krystal.Core/Containers/SmallList.hpp"
+#include "Krystal.Core/Concepts.hpp"
 #include "Krystal.Core/Memory/RefPtr.hpp"
-#include "Krystal.Core/Strings/StringBuilder.hpp"
 #include <iterator>
 #include <ranges>
+#include <utility>
+
+namespace krys
+{
+  class StringBuilder;
+}
 
 namespace krys::boo::css
 {
-  /// @brief Base for values that hold a list of values (`ValueList`, `FunctionValue`, ...).
+  /// @brief The base of the values made of a sequence of values with a separator between them: `ValueList`,
+  /// `FunctionValue`'s arguments, `TransformListValue` and the grid and image-set lists.
+  /// @details It's a read-only range of `const Value &`.
   class ValueContainingList : public Value
   {
     friend class Value;
 
   private:
-    SmallList<const Value *, ValueListBuilderInlineCapacity> _storage;
-
-  protected:
-    ValueContainingList(ValueType type, ValueSeparator separator) noexcept;
-
-    ValueContainingList(ValueType type, ValueSeparator separator, ValueListBuilder values) noexcept;
-
-    ValueContainingList(ValueType type, ValueSeparator separator, Ref<Value> value) noexcept;
-
-    ValueContainingList(ValueType type, ValueSeparator separator, Ref<Value> value1,
-                        Ref<Value> value2) noexcept;
-
-    ValueContainingList(ValueType type, ValueSeparator separator, Ref<Value> value1, Ref<Value> value2,
-                        Ref<Value> value3) noexcept;
-
-    ValueContainingList(ValueType type, ValueSeparator separator, Ref<Value> value1, Ref<Value> value2,
-                        Ref<Value> value3, Ref<Value> value4) noexcept;
-
-    ~ValueContainingList() noexcept;
+    ValueListBuilder _values;
 
   public:
+    /// @brief Walks the values in order.
     struct iterator
     {
       using iterator_category = std::forward_iterator_tag;
@@ -65,112 +35,146 @@ namespace krys::boo::css
       using pointer = const Value *;
       using reference = const Value &;
 
+      const Ref<Value> *Position {nullptr};
+
       KRYS_NODISCARD const Value &operator*() const noexcept
       {
-        return (*List)[Index];
+        return **Position;
       }
 
       iterator &operator++() noexcept
       {
-        ++Index;
+        ++Position;
         return *this;
       }
 
       iterator operator++(int) noexcept
       {
-        auto result = *this;
-        ++*this;
-        return result;
+        auto previous = *this;
+        ++Position;
+        return previous;
       }
 
-      KRYS_NODISCARD constexpr bool operator==(const iterator &other) const noexcept
-      {
-        return Index == other.Index;
-      }
-
-      const ValueContainingList *List {nullptr};
-      uint32 Index {0u};
+      KRYS_NODISCARD constexpr bool operator==(const iterator &other) const noexcept = default;
     };
 
     using const_iterator = iterator;
 
     KRYS_NODISCARD uint32 size() const noexcept
     {
-      return static_cast<uint32>(_storage.size());
+      return static_cast<uint32>(_values.size());
     }
 
+    /// @pre @p index < `size()`.
     KRYS_NODISCARD const Value &operator[](uint32 index) const noexcept KRYS_LIFETIME_BOUND
     {
       krys_debug_assert(index < size());
-      return *_storage[index];
+      return *_values[index];
     }
 
     KRYS_NODISCARD iterator begin() const noexcept KRYS_LIFETIME_BOUND
     {
-      return {this, 0u};
+      return {_values.data()};
     }
 
     KRYS_NODISCARD iterator end() const noexcept KRYS_LIFETIME_BOUND
     {
-      return {this, size()};
+      return {_values.data() + _values.size()};
     }
-
-    KRYS_NODISCARD bool HasValue(const Value &value) const noexcept;
-
-    KRYS_NODISCARD bool HasValue(css::ValueId value) const noexcept;
-
-    void SerialiseItems(StringBuilder &builder, const SerialisationContext &context) const noexcept;
-
-    KRYS_NODISCARD CSSOMString SerialiseItems(const SerialisationContext &context) const noexcept;
-
-    KRYS_NODISCARD bool ItemsEqual(const ValueContainingList &other) const noexcept;
-
-    KRYS_NODISCARD bool ContainsSingleEqualItem(const Value &other) const noexcept;
 
     using Value::Separator;
 
-    KRYS_NODISCARD bool CustomTraverseSubresources(
-      KRYS_NOESCAPE const Func<bool(const CachedResource &)> &handler) const noexcept;
+    /// @brief Whether one of the values equals @p value.
+    KRYS_NODISCARD bool HasValue(const Value &value) const noexcept;
 
-    KRYS_NODISCARD ValueListBuilder CopyValues() const noexcept;
+    /// @brief Whether one of the values is the keyword @p keyword.
+    KRYS_NODISCARD bool HasValue(css::ValueId keyword) const noexcept;
+
+    /// @brief A builder holding the same values, to make a changed copy from.
+    KRYS_NODISCARD ValueListBuilder CopyValues() const noexcept
+    {
+      return _values;
+    }
+
+    /// @brief Appends the values' text to @p builder, with the separator between them.
+    void SerialiseItems(StringBuilder &builder, const SerialisationContext &context) const noexcept;
+
+    /// @brief The values' text, with the separator between them.
+    KRYS_NODISCARD CSSOMString SerialiseItems(const SerialisationContext &context) const noexcept;
+
+    /// @brief Whether both hold equal values in the same order; the separators aren't compared.
+    KRYS_NODISCARD bool ItemsEqual(const ValueContainingList &other) const noexcept;
+
+    /// @brief Whether this holds exactly one value, equal to @p other.
+    KRYS_NODISCARD bool ContainsSingleEqualItem(const Value &other) const noexcept;
 
     KRYS_NODISCARD IterationStatus
       CustomVisitChildren(KRYS_NOESCAPE const Func<IterationStatus(Value &)> &func) const noexcept;
 
+    KRYS_NODISCARD bool CustomTraverseSubresources(
+      KRYS_NOESCAPE const Func<bool(const CachedResource &)> &handler) const noexcept;
+
   protected:
+    ValueContainingList(ValueType type, ValueSeparator separator, ValueListBuilder values) noexcept;
+
+    /// @brief Holds @p values, of which there may be none.
+    template <ConvertibleTo<Ref<Value>>... TValues>
+    ValueContainingList(ValueType type, ValueSeparator separator, TValues &&...values) noexcept
+        : ValueContainingList(type, separator, MakeBuilder(std::forward<TValues>(values)...))
+    {
+    }
+
+    /// @brief A builder holding @p values.
+    template <ConvertibleTo<Ref<Value>>... TValues>
+    KRYS_NODISCARD static ValueListBuilder MakeBuilder(TValues &&...values) noexcept
+    {
+      ValueListBuilder builder;
+      builder.reserve(sizeof...(values));
+      (builder.push_back(Ref<Value>(std::forward<TValues>(values))), ...);
+      return builder;
+    }
+
     KRYS_NODISCARD bool AddDerivedHash(size_t &seed) const noexcept;
   };
 
-  static_assert(std::ranges::range<ValueContainingList>);
+  static_assert(std::ranges::forward_range<ValueContainingList>);
 
-  /// @brief A list of values separated by spaces, commas or slashes.
+  /// @brief A list of values separated by spaces, commas or slashes, such as the layers of
+  /// `background-image` or the parts of `border-image-slice / width`.
+  /// @see https://www.w3.org/TR/css-values-4/#component-combinators
   class ValueList final : public ValueContainingList
   {
   private:
     ValueList(ValueSeparator separator, ValueListBuilder values) noexcept;
 
-    ValueList(ValueSeparator separator, Ref<Value> value1, Ref<Value> value2) noexcept;
-
-    ValueList(ValueSeparator separator, Ref<Value> value1, Ref<Value> value2, Ref<Value> value3) noexcept;
-
   public:
     KRYS_NODISCARD static Ref<ValueList> Create(ValueSeparator separator, ValueListBuilder values) noexcept;
 
-    KRYS_NODISCARD static Ref<ValueList> CreateCommaSeparated(ValueListBuilder values) noexcept;
-
     KRYS_NODISCARD static Ref<ValueList> CreateSpaceSeparated(ValueListBuilder values) noexcept;
 
-    KRYS_NODISCARD static Ref<ValueList> CreateSpaceSeparated(Ref<Value> value1, Ref<Value> value2) noexcept;
-
-    KRYS_NODISCARD static Ref<ValueList> CreateSpaceSeparated(Ref<Value> value1, Ref<Value> value2,
-                                                              Ref<Value> value3) noexcept;
+    KRYS_NODISCARD static Ref<ValueList> CreateCommaSeparated(ValueListBuilder values) noexcept;
 
     KRYS_NODISCARD static Ref<ValueList> CreateSlashSeparated(ValueListBuilder values) noexcept;
 
-    KRYS_NODISCARD static Ref<ValueList> CreateSlashSeparated(Ref<Value> value1, Ref<Value> value2) noexcept;
+    /// @brief A space-separated list of the values given.
+    template <ConvertibleTo<Ref<Value>>... TValues>
+    requires(sizeof...(TValues) >= 2uz)
+    KRYS_NODISCARD static Ref<ValueList> CreateSpaceSeparated(TValues &&...values) noexcept
+    {
+      return CreateSpaceSeparated(MakeBuilder(std::forward<TValues>(values)...));
+    }
+
+    /// @brief A slash-separated list of the values given.
+    template <ConvertibleTo<Ref<Value>>... TValues>
+    requires(sizeof...(TValues) >= 2uz)
+    KRYS_NODISCARD static Ref<ValueList> CreateSlashSeparated(TValues &&...values) noexcept
+    {
+      return CreateSlashSeparated(MakeBuilder(std::forward<TValues>(values)...));
+    }
 
     KRYS_NODISCARD CSSOMString CustomCSSText(const SerialisationContext &context) const noexcept;
 
+    /// @brief Whether both have the same separator and equal values in the same order.
     KRYS_NODISCARD bool Equals(const ValueList &other) const noexcept;
   };
 }

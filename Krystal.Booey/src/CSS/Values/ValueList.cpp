@@ -1,143 +1,98 @@
-﻿/*
- * (C) 1999-2003 Lars Knoll (knoll@kde.org)
- * Copyright (C) 2004-2022 Apple Inc. All rights reserved.
- *
- * This library is free software; you can redistribute it and/or
- * modify it under the terms of the GNU Library General Public
- * License as published by the Free Software Foundation; either
- * version 2 of the License, or (at your option) any later version.
- *
- * This library is distributed in the hope that it will be useful,
- * but WITHOUT ANY WARRANTY; without even the implied warranty of
- * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU
- * Library General Public License for more details.
- *
- * You should have received a copy of the GNU Library General Public License
- * along with this library; see the file COPYING.LIB.  If not, write to
- * the Free Software Foundation, Inc., 51 Franklin Street, Fifth Floor,
- * Boston, MA 02110-1301, USA.
- */
-
-#include "Krystal.Booey/CSS/Values/ValueList.hpp"
+﻿#include "Krystal.Booey/CSS/Values/ValueList.hpp"
 #include "Krystal.Booey/CSS/Values/PrimitiveValue.hpp"
 #include "Krystal.Core/Hashing/FastHash.hpp"
 #include "Krystal.Core/Strings/StringBuilder.hpp"
+#include <algorithm>
 #include <limits>
 
 namespace krys::boo::css
 {
-  ValueContainingList::ValueContainingList(ValueType type, ValueSeparator separator) noexcept : Value(type)
-  {
-    _header.Separator = separator;
-  }
+#pragma region ValueContainingList
 
   ValueContainingList::ValueContainingList(ValueType type, ValueSeparator separator,
                                            ValueListBuilder values) noexcept
-      : Value(type)
+      : Value(type), _values(krys::move(values))
   {
+    // size() and indexing are in uint32.
+    krys_assert(_values.size() <= std::numeric_limits<uint32>::max());
     _header.Separator = separator;
-
-    krys_assert(values.size() <= std::numeric_limits<uint32>::max());
-    _storage.reserve(values.size());
-    for (auto &value : values)
-    {
-      _storage.push_back(value.release());
-    }
   }
 
-  ValueContainingList::ValueContainingList(ValueType type, ValueSeparator separator,
-                                           Ref<Value> value) noexcept
-      : Value(type)
+  bool ValueContainingList::HasValue(const Value &value) const noexcept
   {
-    _header.Separator = separator;
-    _storage.push_back(value.release());
+    return std::ranges::any_of(*this, [&](const Value &item) { return item == value; });
   }
 
-  ValueContainingList::ValueContainingList(ValueType type, ValueSeparator separator, Ref<Value> value1,
-                                           Ref<Value> value2) noexcept
-      : Value(type)
+  bool ValueContainingList::HasValue(css::ValueId keyword) const noexcept
   {
-    _header.Separator = separator;
-    _storage.push_back(value1.release());
-    _storage.push_back(value2.release());
+    return std::ranges::any_of(*this, [&](const Value &item) { return item.ValueId() == keyword; });
   }
 
-  ValueContainingList::ValueContainingList(ValueType type, ValueSeparator separator, Ref<Value> value1,
-                                           Ref<Value> value2, Ref<Value> value3) noexcept
-      : Value(type)
+  void ValueContainingList::SerialiseItems(StringBuilder &builder,
+                                           const SerialisationContext &context) const noexcept
   {
-    _header.Separator = separator;
-    _storage.push_back(value1.release());
-    _storage.push_back(value2.release());
-    _storage.push_back(value3.release());
-  }
-
-  ValueContainingList::ValueContainingList(ValueType type, ValueSeparator separator, Ref<Value> value1,
-                                           Ref<Value> value2, Ref<Value> value3, Ref<Value> value4) noexcept
-      : Value(type)
-  {
-    _header.Separator = separator;
-    _storage.push_back(value1.release());
-    _storage.push_back(value2.release());
-    _storage.push_back(value3.release());
-    _storage.push_back(value4.release());
-  }
-
-  ValueContainingList::~ValueContainingList() noexcept
-  {
+    bool isFirst = true;
     for (auto &value : *this)
     {
-      value.SubRef();
+      if (!isFirst)
+      {
+        builder.Append(ToCssText(Separator()));
+      }
+      isFirst = false;
+      builder.Append(value.CssText(context));
     }
   }
+
+  CSSOMString ValueContainingList::SerialiseItems(const SerialisationContext &context) const noexcept
+  {
+    StringBuilder builder;
+    SerialiseItems(builder, context);
+    return krys::move(builder).ToString();
+  }
+
+  bool ValueContainingList::ItemsEqual(const ValueContainingList &other) const noexcept
+  {
+    return std::ranges::equal(*this, other);
+  }
+
+  bool ValueContainingList::ContainsSingleEqualItem(const Value &other) const noexcept
+  {
+    return size() == 1u && (*this)[0u] == other;
+  }
+
+  IterationStatus ValueContainingList::CustomVisitChildren(
+    KRYS_NOESCAPE const Func<IterationStatus(Value &)> &func) const noexcept
+  {
+    for (auto &value : _values)
+    {
+      if (func(*value) == IterationStatus::Done)
+      {
+        return IterationStatus::Done;
+      }
+    }
+    return IterationStatus::Continue;
+  }
+
+  bool ValueContainingList::CustomTraverseSubresources(
+    KRYS_NOESCAPE const Func<bool(const CachedResource &)> &handler) const noexcept
+  {
+    return std::ranges::any_of(*this,
+                               [&](const Value &value) { return value.TraverseSubresources(handler); });
+  }
+
+  bool ValueContainingList::AddDerivedHash(size_t &seed) const noexcept
+  {
+    seed = CombineFastHashes(seed, Separator());
+    return std::ranges::all_of(*this, [&](const Value &value) { return value.AddHash(seed); });
+  }
+
+#pragma endregion
+
+#pragma region ValueList
 
   ValueList::ValueList(ValueSeparator separator, ValueListBuilder values) noexcept
       : ValueContainingList(ValueType::ValueList, separator, krys::move(values))
   {
-  }
-
-  ValueList::ValueList(ValueSeparator separator, Ref<Value> value1, Ref<Value> value2) noexcept
-      : ValueContainingList(ValueType::ValueList, separator, krys::move(value1), krys::move(value2))
-  {
-  }
-
-  ValueList::ValueList(ValueSeparator separator, Ref<Value> value1, Ref<Value> value2,
-                       Ref<Value> value3) noexcept
-      : ValueContainingList(ValueType::ValueList, separator, krys::move(value1), krys::move(value2),
-                            krys::move(value3))
-  {
-  }
-
-  Ref<ValueList> ValueList::CreateCommaSeparated(ValueListBuilder values) noexcept
-  {
-    return AdoptRef(*new ValueList(ValueSeparator::Comma, krys::move(values)));
-  }
-
-  Ref<ValueList> ValueList::CreateSlashSeparated(ValueListBuilder values) noexcept
-  {
-    return AdoptRef(*new ValueList(ValueSeparator::Slash, krys::move(values)));
-  }
-
-  Ref<ValueList> ValueList::CreateSlashSeparated(Ref<Value> value1, Ref<Value> value2) noexcept
-  {
-    return AdoptRef(*new ValueList(ValueSeparator::Slash, krys::move(value1), krys::move(value2)));
-  }
-
-  Ref<ValueList> ValueList::CreateSpaceSeparated(ValueListBuilder values) noexcept
-  {
-    return AdoptRef(*new ValueList(ValueSeparator::Space, krys::move(values)));
-  }
-
-  Ref<ValueList> ValueList::CreateSpaceSeparated(Ref<Value> value1, Ref<Value> value2) noexcept
-  {
-    return AdoptRef(*new ValueList(ValueSeparator::Space, krys::move(value1), krys::move(value2)));
-  }
-
-  Ref<ValueList> ValueList::CreateSpaceSeparated(Ref<Value> value1, Ref<Value> value2,
-                                                 Ref<Value> value3) noexcept
-  {
-    return AdoptRef(
-      *new ValueList(ValueSeparator::Space, krys::move(value1), krys::move(value2), krys::move(value3)));
   }
 
   Ref<ValueList> ValueList::Create(ValueSeparator separator, ValueListBuilder values) noexcept
@@ -145,61 +100,19 @@ namespace krys::boo::css
     return AdoptRef(*new ValueList(separator, krys::move(values)));
   }
 
-  bool ValueContainingList::HasValue(const Value &otherValue) const noexcept
+  Ref<ValueList> ValueList::CreateSpaceSeparated(ValueListBuilder values) noexcept
   {
-    for (auto &value : *this)
-    {
-      if (value.Equals(otherValue))
-      {
-        return true;
-      }
-    }
-    return false;
+    return Create(ValueSeparator::Space, krys::move(values));
   }
 
-  bool ValueContainingList::HasValue(css::ValueId otherValue) const noexcept
+  Ref<ValueList> ValueList::CreateCommaSeparated(ValueListBuilder values) noexcept
   {
-    for (auto &value : *this)
-    {
-      if (value.ValueId() == otherValue)
-      {
-        return true;
-      }
-    }
-    return false;
+    return Create(ValueSeparator::Comma, krys::move(values));
   }
 
-  ValueListBuilder ValueContainingList::CopyValues() const noexcept
+  Ref<ValueList> ValueList::CreateSlashSeparated(ValueListBuilder values) noexcept
   {
-    ValueListBuilder result;
-    result.reserve(size());
-    for (auto &value : *this)
-    {
-      result.push_back(ShareRef(const_cast<Value &>(value)));
-    }
-    return result;
-  }
-
-  void ValueContainingList::SerialiseItems(StringBuilder &builder,
-                                           const SerialisationContext &context) const noexcept
-  {
-    bool first = true;
-    for (auto &value : *this)
-    {
-      if (!first)
-      {
-        builder.Append(ToCssText(Separator()));
-      }
-      first = false;
-      builder.Append(value.CssText(context));
-    }
-  }
-
-  CSSOMString ValueContainingList::SerialiseItems(const SerialisationContext &context) const noexcept
-  {
-    StringBuilder result;
-    SerialiseItems(result, context);
-    return krys::move(result).ToString();
+    return Create(ValueSeparator::Slash, krys::move(values));
   }
 
   CSSOMString ValueList::CustomCSSText(const SerialisationContext &context) const noexcept
@@ -207,70 +120,10 @@ namespace krys::boo::css
     return SerialiseItems(context);
   }
 
-  bool ValueContainingList::ItemsEqual(const ValueContainingList &other) const noexcept
-  {
-    uint32 size = this->size();
-    if (size != other.size())
-    {
-      return false;
-    }
-    for (uint32 i = 0u; i < size; ++i)
-    {
-      if (!(*this)[i].Equals(other[i]))
-      {
-        return false;
-      }
-    }
-    return true;
-  }
-
   bool ValueList::Equals(const ValueList &other) const noexcept
   {
     return Separator() == other.Separator() && ItemsEqual(other);
   }
 
-  bool ValueContainingList::ContainsSingleEqualItem(const Value &other) const noexcept
-  {
-    return size() == 1u && (*this)[0u].Equals(other);
-  }
-
-  bool ValueContainingList::AddDerivedHash(size_t &seed) const noexcept
-  {
-    seed = CombineFastHashes(seed, Separator());
-
-    for (auto &item : *this)
-    {
-      if (!item.AddHash(seed))
-      {
-        return false;
-      }
-    }
-    return true;
-  }
-
-  bool ValueContainingList::CustomTraverseSubresources(
-    KRYS_NOESCAPE const Func<bool(const CachedResource &)> &handler) const noexcept
-  {
-    for (auto &value : *this)
-    {
-      if (value.TraverseSubresources(handler))
-      {
-        return true;
-      }
-    }
-    return false;
-  }
-
-  IterationStatus ValueContainingList::CustomVisitChildren(
-    KRYS_NOESCAPE const Func<IterationStatus(Value &)> &func) const noexcept
-  {
-    for (auto &value : *this)
-    {
-      if (func(const_cast<Value &>(value)) == IterationStatus::Done)
-      {
-        return IterationStatus::Done;
-      }
-    }
-    return IterationStatus::Continue;
-  }
+#pragma endregion
 }
