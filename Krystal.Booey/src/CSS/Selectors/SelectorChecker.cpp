@@ -641,8 +641,8 @@ namespace krys::boo::css
       {
         case SelectorPseudoElement::UserAgentPart:
         {
-          // In functional pseudo class, custom pseudo elements are always disabled.
-          // FIXME: We should accept custom pseudo elements inside :is()/:matches().
+          // :is() and the other logical combinations can't match pseudo-elements; one gets into their
+          // arguments only through nesting resolution, which must then match nothing.
           if (context.InFunctionalPseudoClass)
           {
             return MatchResult::Fails(MatchOutcome::SelectorFailsCompletely);
@@ -931,9 +931,8 @@ namespace krys::boo::css
     {
       // :host doesn't combine with anything except pseudo elements.
       bool isPseudoElement = selector.Match() == SelectorMatch::PseudoElement;
-      // FIXME: We do not support combining :host with :not() functional pseudoclass. Combination with
-      // functional pseudoclass has been allowed for the useful :is(:host) ; but combining with :not() doesn't
-      // sound useful like :host():not(:not(:host)) https://bugs.webkit.org/show_bug.cgi?id=283062
+      // FIXME: :host combined with :not(), which depends on how logical combinations match a featureless
+      // element (https://drafts.csswg.org/selectors/#featureless).
       bool isNotPseudoClass =
         selector.Match() == SelectorMatch::PseudoClass && selector.PseudoClass() == SelectorPseudoClass::Not;
 

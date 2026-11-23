@@ -159,9 +159,6 @@ namespace krys::boo::css
     KRYS_NODISCARD bool Match(const Selector &selector, const Element &element,
                               CheckingContext &checkingContext) const noexcept;
 
-    KRYS_NODISCARD bool MatchHostPseudoClass(const Selector &selector, const Element &element,
-                                             CheckingContext &checkingContext) const noexcept;
-
     KRYS_NODISCARD static bool IsCommonPseudoClassSelector(const Selector *selector) noexcept;
 
     KRYS_NODISCARD static bool AttributeSelectorMatches(const Element &element,
@@ -170,6 +167,9 @@ namespace krys::boo::css
                                                         const Selector &selector) noexcept;
 
   private:
+    KRYS_NODISCARD bool MatchHostPseudoClass(const Selector &selector, const Element &element,
+                                             CheckingContext &checkingContext) const noexcept;
+
     KRYS_NODISCARD MatchResult
       MatchRecursively(CheckingContext &checkingContext, LocalContext &context,
                        EnumSet<PseudoElementType> &collectedPseudoElements) const noexcept;
