@@ -36,7 +36,6 @@
 #include "Krystal.Booey/CSS/Properties/PropertyShorthand.hpp"
 #include "Krystal.Booey/CSS/Properties/PropertyShorthandFunctions.hpp"
 #include "Krystal.Booey/CSS/Values/Aggregates.hpp"
-#include "Krystal.Booey/CSS/Values/FontValue.hpp"
 #include "Krystal.Booey/CSS/Values/GridAutoRepeatValue.hpp"
 #include "Krystal.Booey/CSS/Values/GridIntegerRepeatValue.hpp"
 #include "Krystal.Booey/CSS/Values/GridLineNamesValue.hpp"
@@ -2894,43 +2893,45 @@ namespace krys::boo::style
              && description.VariationSettings().empty();
     };
 
-    auto computedFont = css::FontValue::Create();
-
+    // `[style] [variant] [weight] [width] size [/ line-height] family`, leaving out the parts that are
+    // `normal`; nothing at all if a longhand the shorthand resets has a value it can't express.
+    css::ValueListBuilder parts;
     if (!propertiesResetByShorthandAreExpressible())
     {
-      return computedFont;
+      return css::ValueList::CreateSpaceSeparated(krys::move(parts));
+    }
+
+    if (*fontStyle != css::ValueId::Normal)
+    {
+      parts.push_back(css::PrimitiveValue::Create(*fontStyle));
+    }
+    if (description.VariantCaps() == FontVariantCaps::Small)
+    {
+      parts.push_back(css::PrimitiveValue::Create(css::ValueId::SmallCaps));
+    }
+    if (float weight = description.Weight(); weight != 400)
+    {
+      parts.push_back(css::PrimitiveValue::Create(weight));
+    }
+    if (*fontWidth != css::ValueId::Normal)
+    {
+      parts.push_back(css::PrimitiveValue::Create(*fontWidth));
     }
 
     auto size = CreateCSSValue(state.Pool, state.Style, Length<> {description.ComputedSize()});
-    computedFont->Size = DynamicDowncast<css::PrimitiveValue>(krys::move(size));
-
     auto lineHeight = ExtractorGenerated::ExtractValue(state, css::PropertyId::LineHeight);
     auto *computedLineHeight = DynamicDowncast<css::PrimitiveValue>(lineHeight.get());
     if (computedLineHeight && computedLineHeight->ValueId() != css::ValueId::Normal)
     {
-      computedFont->LineHeight = ShareRefPtr(computedLineHeight);
+      parts.push_back(css::ValueList::CreateSlashSeparated(krys::move(size), ShareRef(*computedLineHeight)));
+    }
+    else
+    {
+      parts.push_back(krys::move(size));
     }
 
-    if (description.VariantCaps() == FontVariantCaps::Small)
-    {
-      computedFont->Variant = css::PrimitiveValue::Create(css::ValueId::SmallCaps);
-    }
-    if (float weight = description.Weight(); weight != 400)
-    {
-      computedFont->Weight = css::PrimitiveValue::Create(weight);
-    }
-    if (*fontWidth != css::ValueId::Normal)
-    {
-      computedFont->Width = css::PrimitiveValue::Create(*fontWidth);
-    }
-    if (*fontStyle != css::ValueId::Normal)
-    {
-      computedFont->Style = css::PrimitiveValue::Create(*fontStyle);
-    }
-
-    computedFont->Family = CreateCSSValue(state.Pool, state.Style, state.Style.FontFamily());
-
-    return computedFont;
+    parts.push_back(CreateCSSValue(state.Pool, state.Style, state.Style.FontFamily()));
+    return css::ValueList::CreateSpaceSeparated(krys::move(parts));
   }
 
   inline void

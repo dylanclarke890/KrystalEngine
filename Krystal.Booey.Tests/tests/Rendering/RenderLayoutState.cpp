@@ -1,6 +1,7 @@
 ﻿#include "Krystal.Booey/Rendering/RenderLayoutState.hpp"
 #include "catch2/catch_test_macros.hpp"
 #include "Krystal.Booey.Tests/CSS/ValueTestUtils.hpp"
+#include "Krystal.Booey.Tests/Rendering/RenderTestUtils.hpp"
 #include "Krystal.Booey.Tests/Style/ResolverTestUtils.hpp"
 #include "Krystal.Booey/DOM/Nodes/Document.hpp"
 #include "Krystal.Booey/Page/Frame.hpp"
@@ -11,17 +12,6 @@
 namespace krys::boo::tests
 {
   using style::tests::ResolverFixture;
-
-  namespace
-  {
-    KRYS_NODISCARD RenderBox &LaidOutBoxOf(ResolverFixture &fixture, DOMStringView id)
-    {
-      (void)fixture.Document->UpdateLayout();
-      auto *box = DynamicDowncast<RenderBox>(fixture.ById(id).Renderer());
-      REQUIRE(box);
-      return *box;
-    }
-  }
 
   // The layout state caches the paint offset of the boxes being laid out, so mapping them to absolute
   // coordinates during layout agrees with mapping them through their containers.

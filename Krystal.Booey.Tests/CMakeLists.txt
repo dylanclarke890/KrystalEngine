@@ -324,7 +324,6 @@ set(KRYSTAL_BOOEY_TESTS_CSS_SOURCES
   tests/CSS/Values/FontFeatureValue.cpp
   tests/CSS/Values/FontStyleRangeValue.cpp
   tests/CSS/Values/FontStyleWithAngleValue.cpp
-  tests/CSS/Values/FontValue.cpp
   tests/CSS/Values/FontVariationValue.cpp
   tests/CSS/Values/FunctionValue.cpp
   tests/CSS/Values/GradientValue.cpp

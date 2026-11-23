@@ -656,7 +656,6 @@ set(KRYSTAL_BOOEY_CSS_HEADERS
   include/Krystal.Booey/CSS/Values/FontFeatureValue.hpp
   include/Krystal.Booey/CSS/Values/FontStyleRangeValue.hpp
   include/Krystal.Booey/CSS/Values/FontStyleWithAngleValue.hpp
-  include/Krystal.Booey/CSS/Values/FontValue.hpp
   include/Krystal.Booey/CSS/Values/FontVariationValue.hpp
   include/Krystal.Booey/CSS/Values/FunctionValue.hpp
   include/Krystal.Booey/CSS/Values/GlobalKeyword.hpp
@@ -976,7 +975,6 @@ set(KRYSTAL_BOOEY_CSS_SOURCES
   src/CSS/Values/FontFeatureValue.cpp
   src/CSS/Values/FontStyleRangeValue.cpp
   src/CSS/Values/FontStyleWithAngleValue.cpp
-  src/CSS/Values/FontValue.cpp
   src/CSS/Values/FontVariationValue.cpp
   src/CSS/Values/FunctionValue.cpp
   src/CSS/Values/GradientValue.cpp

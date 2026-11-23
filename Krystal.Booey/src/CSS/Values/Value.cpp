@@ -49,7 +49,6 @@
 #include "Krystal.Booey/CSS/Values/FontFeatureValue.hpp"
 #include "Krystal.Booey/CSS/Values/FontStyleRangeValue.hpp"
 #include "Krystal.Booey/CSS/Values/FontStyleWithAngleValue.hpp"
-#include "Krystal.Booey/CSS/Values/FontValue.hpp"
 #include "Krystal.Booey/CSS/Values/FontVariationValue.hpp"
 #include "Krystal.Booey/CSS/Values/FunctionValue.hpp"
 #include "Krystal.Booey/CSS/Values/GradientValue.hpp"
@@ -162,10 +161,6 @@ namespace krys::boo::css
       case ValueType::Filter:
       {
         return std::invoke(std::forward<Visitor>(visitor), Downcast<FilterValue>(*this));
-      }
-      case ValueType::Font:
-      {
-        return std::invoke(std::forward<Visitor>(visitor), Downcast<FontValue>(*this));
       }
       case ValueType::FontFaceSrcLocal:
       {

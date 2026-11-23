@@ -23,7 +23,6 @@ namespace krys::boo::css
     EasingFunction,
     Filter,
     FilterImage,
-    Font,
     FontFaceSrcLocal,
     FontFaceSrcResource,
     FontFeature,

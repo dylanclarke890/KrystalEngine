@@ -92,10 +92,13 @@ namespace krys::boo::style::tests
       #a { margin: 1px 2px; padding: 3px; border-radius: 1px 2px; gap: 4px 5px; flex-flow: column wrap;
            border: 2px solid rgb(255, 0, 0); text-decoration: underline; overflow: hidden scroll;
            columns: 3; font: italic 12px/2 serif }
-      #b { border-top: 1px solid; border-bottom: 2px solid; flex-flow: row wrap }
-    </style><div id=a></div><div id=b></div>)"};
+      #b { border-top: 1px solid; border-bottom: 2px solid; flex-flow: row wrap;
+           font: italic small-caps bold condensed 10px "a b", serif }
+      #c { font: 10px serif; font-kerning: none }
+    </style><div id=a></div><div id=b></div><div id=c></div>)"};
     Extractor ea {&fixture.ById(u8"a")};
     Extractor eb {&fixture.ById(u8"b")};
+    Extractor ec {&fixture.ById(u8"c")};
 
     CHECK(Computed(ea, css::PropertyId::Margin) == "1px 2px");
     CHECK(Computed(ea, css::PropertyId::Padding) == "3px");
@@ -107,6 +110,9 @@ namespace krys::boo::style::tests
     CHECK(Computed(ea, css::PropertyId::Overflow) == "hidden scroll");
     CHECK(Computed(ea, css::PropertyId::Columns) == "3");
     CHECK(Computed(ea, css::PropertyId::Font) == "italic 12px / 24px serif");
+    CHECK(Computed(eb, css::PropertyId::Font) == "italic small-caps 700 condensed 10px \"a b\", serif");
+    // font-kerning isn't part of the shorthand's text, so a value other than auto leaves it empty.
+    CHECK(Computed(ec, css::PropertyId::Font).empty());
 
     // A border whose sides differ has no shorthand value.
     CHECK(Computed(eb, css::PropertyId::Border).empty());
