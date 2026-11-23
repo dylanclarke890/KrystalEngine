@@ -46,7 +46,7 @@ namespace krys::boo::css
       setFromShorthand = IsSetFromShorthand::Yes;
       if (shorthands.size() > 1uz)
       {
-        shorthandIndex = static_cast<uint8>(IndexOfShorthandForLonghand(currentShorthand, shorthands));
+        shorthandIndex = IndexOfShorthandForLonghand(currentShorthand, shorthands);
       }
     }
 

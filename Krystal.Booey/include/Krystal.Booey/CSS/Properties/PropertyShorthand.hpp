@@ -1,25 +1,4 @@
-﻿/*
- * (C) 1999-2003 Lars Knoll (knoll@kde.org)
- * Copyright (C) 2004, 2005, 2006, 2008, 2013 Apple Inc. All rights reserved.
- * Copyright (C) 2013 Intel Corporation. All rights reserved.
- *
- * This library is free software; you can redistribute it and/or
- * modify it under the terms of the GNU Library General Public
- * License as published by the Free Software Foundation; either
- * version 2 of the License, or (at your option) any later version.
- *
- * This library is distributed in the hope that it will be useful,
- * but WITHOUT ANY WARRANTY; without even the implied warranty of
- * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU
- * Library General Public License for more details.
- *
- * You should have received a copy of the GNU Library General Public License
- * along with this library; see the file COPYING.LIB.  If not, write to
- * the Free Software Foundation, Inc., 51 Franklin Street, Fifth Floor,
- * Boston, MA 02110-1301, USA.
- */
-
-#pragma once
+﻿#pragma once
 
 #include "Krystal.Booey/CSS/Properties/PropertyId.hpp"
 #include "Krystal.Booey/CSS/Properties/PropertyShorthandFunctions.hpp"
@@ -28,64 +7,70 @@
 
 namespace krys::boo::css
 {
-  /// @brief Represents a shorthand property and the longhand properties it expands into.
-  /// @example `margin` expands into `margin-top`, `margin-left`, `margin-bottom`, `margin-right`.
+  /// @brief A shorthand property and the longhands it sets, such as `margin` and its four sides.
+  /// @see https://drafts.csswg.org/css-cascade-5/#shorthand-property
   class PropertyShorthand
   {
   private:
-    PropertyId _shorthandId {PropertyId::Invalid};
-    Span<const PropertyId> _properties;
+    PropertyId _id {PropertyId::Invalid};
+    Span<const PropertyId> _longhands;
 
   public:
+    /// @brief No shorthand, with no longhands: what `ShorthandForProperty` gives a longhand.
     PropertyShorthand() noexcept = default;
 
-    template <size_t NumProperties>
-    PropertyShorthand(PropertyId id, Span<const PropertyId, NumProperties> properties) noexcept
-        : _shorthandId(id), _properties(properties)
+    /// @param longhands A fixed-size array that outlives the shorthand, usually a static one.
+    template <size_t Count>
+    requires(Count != std::dynamic_extent)
+    PropertyShorthand(PropertyId id, Span<const PropertyId, Count> longhands) noexcept
+        : _id(id), _longhands(longhands)
     {
-      static_assert(NumProperties != std::dynamic_extent);
     }
 
     KRYS_NODISCARD const PropertyId *begin() const noexcept
     {
-      return std::to_address(_properties.begin());
+      return _longhands.data();
     }
 
     KRYS_NODISCARD const PropertyId *end() const noexcept
     {
-      return std::to_address(_properties.end());
+      return _longhands.data() + _longhands.size();
     }
 
+    /// @brief The number of longhands.
     KRYS_NODISCARD size_t Size() const noexcept
     {
-      return _properties.size();
+      return _longhands.size();
     }
 
     KRYS_NODISCARD PropertyId Id() const noexcept
     {
-      return _shorthandId;
+      return _id;
     }
 
+    /// @brief The longhands, in the order the shorthand's definition lists them, which serialisation follows.
     KRYS_NODISCARD Span<const PropertyId> Properties() const noexcept
     {
-      return _properties;
+      return _longhands;
     }
   };
 
-  /// @brief Custom PropertyShorthand function.
+  /// @brief `transition`'s longhands in the order its parser tries them.
+  /// @note `<single-transition-property>` takes any `<custom-ident>`, so it's tried last, or a keyword such
+  /// as `ease` would be read as a property name; the first `<time>` is the duration, so the delay follows it.
+  /// @see https://drafts.csswg.org/css-transitions-2/#transition-shorthand-property
   KRYS_NODISCARD PropertyShorthand TransitionShorthandForParsing() noexcept;
 
-  /// @brief Returns an empty value if the property is not a shorthand.
-  /// @note The implementation is generated in PropertyShorthandFunctions.cpp.
+  /// @brief The shorthand @p id, or an empty one if @p id is a longhand. Generated.
   KRYS_NODISCARD PropertyShorthand ShorthandForProperty(PropertyId id) noexcept;
 
   using PropertyShorthandList = SmallList<PropertyShorthand, MaxShorthandsForLonghand>;
 
-  /// @brief Returns the list of shorthands for a given longhand.
-  /// @note The implementation is generated in PropertyShorthandFunctions.cpp.
+  /// @brief The shorthands that set longhand @p id, starting with `all` if it's one. Generated.
   KRYS_NODISCARD PropertyShorthandList MatchingShorthandsForLonghand(PropertyId id) noexcept;
 
-  /// @brief Finds the index of `shorthandId` in `shorthands`, which must contain it.
-  KRYS_NODISCARD uint32 IndexOfShorthandForLonghand(PropertyId shorthandId,
-                                                    const PropertyShorthandList &shorthands) noexcept;
+  /// @brief Where @p shorthandId is in @p shorthands, which must contain it.
+  /// @return The value for `PropertyMetadata::ShorthandIndex`.
+  KRYS_NODISCARD uint8 IndexOfShorthandForLonghand(PropertyId shorthandId,
+                                                   const PropertyShorthandList &shorthands) noexcept;
 }
