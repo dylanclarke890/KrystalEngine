@@ -38,7 +38,6 @@ namespace krys::boo::css::tests
     {
       auto option = ImageSetOptionValue::Create(Image(u8"a.png"), X(2.0));
       CHECK(CssText(option->Resolution()) == "2x");
-      CHECK(option->ProtectedResolution().get() == &option->Resolution());
       CHECK_FALSE(option->Type());
       CHECK(CssText(*option) == "url(\"a.png\") 2x");
     }

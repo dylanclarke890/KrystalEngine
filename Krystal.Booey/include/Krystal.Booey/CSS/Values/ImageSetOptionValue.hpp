@@ -68,11 +68,6 @@ namespace krys::boo::css
       return *_resolution;
     }
 
-    KRYS_NODISCARD Ref<PrimitiveValue> ProtectedResolution() const noexcept
-    {
-      return _resolution;
-    }
-
     void SetResolution(Ref<PrimitiveValue> &&resolution) noexcept;
 
     /// @brief The `type()` MIME type, if one was given.

@@ -24,6 +24,7 @@
  */
 
 #include "Krystal.Booey/CSS/Values/GridLineValue.hpp"
+#include "Krystal.Core/Memory/PointerComparison.hpp"
 
 namespace krys::boo::css
 {
@@ -76,28 +77,8 @@ namespace krys::boo::css
 
   bool GridLineValue::Equals(const GridLineValue &other) const noexcept
   {
-    auto equals = [](PrimitiveValue *value, PrimitiveValue *otherValue)
-    {
-      if ((!value && otherValue) || (value && !otherValue))
-      {
-        return false;
-      }
-      return (!value && !otherValue) || value->Equals(*otherValue);
-    };
-
-    if (!equals(ProtectedSpanValue().get(), other.ProtectedSpanValue().get()))
-    {
-      return false;
-    }
-    if (!equals(ProtectedNumericValue().get(), other.ProtectedNumericValue().get()))
-    {
-      return false;
-    }
-    if (!equals(ProtectedGridLineName().get(), other.ProtectedGridLineName().get()))
-    {
-      return false;
-    }
-
-    return true;
+    return ArePointingToEqualData(_spanValue, other._spanValue)
+           && ArePointingToEqualData(_numericValue, other._numericValue)
+           && ArePointingToEqualData(_gridLineName, other._gridLineName);
   }
 }

@@ -62,8 +62,6 @@ namespace krys::boo::css
       return _counterStyle;
     }
 
-    KRYS_NODISCARD CSSOMString CounterStyleCSSText() const noexcept;
-
     KRYS_NODISCARD CSSOMString CustomCSSText(const SerialisationContext &context) const noexcept;
 
     KRYS_NODISCARD bool Equals(const CounterValue &other) const noexcept;
@@ -77,6 +75,9 @@ namespace krys::boo::css
       }
       return IterationStatus::Continue;
     }
+
+  private:
+    KRYS_NODISCARD CSSOMString CounterStyleCSSText() const noexcept;
   };
 }
 
