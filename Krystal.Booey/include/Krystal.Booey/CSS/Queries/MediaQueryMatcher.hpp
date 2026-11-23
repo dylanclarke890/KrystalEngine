@@ -1,34 +1,13 @@
-﻿/*
- * Copyright (C) 2010 Nokia Corporation and/or its subsidiary(-ies)
- *
- *  This library is free software; you can redistribute it and/or
- *  modify it under the terms of the GNU Library General Public
- *  License as published by the Free Software Foundation; either
- *  version 2 of the License, or (at your option) any later version.
- *
- *  This library is distributed in the hope that it will be useful,
- *  but WITHOUT ANY WARRANTY; without even the implied warranty of
- *  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU
- *  Library General Public License for more details.
- *
- *  You should have received a copy of the GNU Library General Public License
- *  along with this library; see the file COPYING.LIB.  If not, write to
- *  the Free Software Foundation, Inc., 51 Franklin Street, Fifth Floor,
- *  Boston, MA 02110-1301, USA.
- */
-
-#pragma once
+﻿#pragma once
 
 #include "Krystal.Booey/CSS/Queries/MediaQuery.hpp"
 #include "Krystal.Booey/CSS/Types/CSSOMString.hpp"
-#include "Krystal.Core/Attributes.hpp"
+#include "Krystal.Core/Base.hpp"
 #include "Krystal.Core/Containers/List.hpp"
-#include "Krystal.Core/Macros.hpp"
 #include "Krystal.Core/Memory/RefCounted.hpp"
 #include "Krystal.Core/Memory/RefPtr.hpp"
 #include "Krystal.Core/Memory/UniquePtr.hpp"
 #include "Krystal.Core/Memory/WeakPtr.hpp"
-#include "Krystal.Core/Numeric.hpp"
 
 namespace krys::boo
 {
@@ -39,8 +18,8 @@ namespace krys::boo
 
 namespace krys::boo::css
 {
-  /// @brief Evaluates a document's `MediaQueryList`s whenever it's needed and dispatches `change` events on
-  /// the ones whose query has changed. `MediaQueryList`s are evaluated in the order in which they were added.
+  /// @brief A document's `MediaQueryList`s: it creates them for `matchMedia()` and, each time the rendering
+  /// is updated, re-evaluates them in the order they were created and fires `change` at those that changed.
   class MediaQueryMatcher final : public RefCounted<MediaQueryMatcher>
   {
     KRYS_NON_COPY_MOVABLE(MediaQueryMatcher);
@@ -48,11 +27,10 @@ namespace krys::boo::css
   private:
     WeakPtr<Document> _document;
     List<WeakPtr<MediaQueryList>> _mediaQueryLists;
-
-    // This value is incremented at style selector changes.
-    // It is used to avoid evaluating queries more then once and to make sure
-    // that a media query result change is notified exactly once.
-    uint32 _evaluationRound {1};
+    /// @brief How many times `EvaluateAll` has run. A list compares it with the round it was last evaluated
+    /// in, to tell whether its `matches` is current, and with the round it last changed in, to tell whether
+    /// it needs a `change` event.
+    uint32 _evaluationRound {1u};
 
     explicit MediaQueryMatcher(Document &document) noexcept;
 
@@ -61,8 +39,10 @@ namespace krys::boo::css
 
     KRYS_NODISCARD static Ref<MediaQueryMatcher> Create(Document &document) noexcept;
 
+    /// @brief Forgets the document and detaches the lists, which keep their last `matches`.
     void DocumentDestroyed() noexcept;
 
+    /// @brief Adds a new list, which must not already have been added.
     void AddMediaQueryList(MediaQueryList &list) noexcept;
 
     void RemoveMediaQueryList(MediaQueryList &list) noexcept;
@@ -76,14 +56,20 @@ namespace krys::boo::css
       return _evaluationRound;
     }
 
+    /// @brief Starts a new round, re-evaluating every list and firing `change` at those whose `matches`
+    /// changed.
+    /// @see https://drafts.csswg.org/cssom-view/#evaluate-media-queries-and-report-changes
     void EvaluateAll() noexcept;
 
+    /// @brief Whether @p queries match the document now; false if it has no document element or frame.
     KRYS_NODISCARD bool Evaluate(const mq::MediaQueryList &queries) const noexcept;
 
     /// @brief The document's media type, or null if it has no view.
     KRYS_NODISCARD CSSOMStringAtom MediaType() const noexcept;
 
   private:
+    /// @brief The document element's style from the user agent's rules alone, which media features such as
+    /// `em` lengths resolve against; null without a document element or frame.
     KRYS_NODISCARD UniquePtr<RenderStyle> DocumentElementUserAgentStyle() const noexcept;
   };
 }
