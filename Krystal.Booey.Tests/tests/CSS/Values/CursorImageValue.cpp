@@ -17,7 +17,7 @@ namespace krys::boo::css::tests
                           ParserContext {ParserMode::HTMLStandard, net::Url {u8"https://example.com/"}});
     }
 
-    RefPtr<Value> HotSpot(double x, double y)
+    RefPtr<ValuePair> HotSpot(double x, double y)
     {
       return ValuePair::Create(PrimitiveValue::Create(x, UnitType::Number),
                                PrimitiveValue::Create(y, UnitType::Number));
@@ -51,7 +51,7 @@ namespace krys::boo::css::tests
 
   TEST_CASE_METHOD(ValueFixture, "CursorImageValue equality", "[CSS][Values][CursorImageValue]")
   {
-    auto make = [](utf8_stringview url, RefPtr<Value> hotSpot)
+    auto make = [](utf8_stringview url, RefPtr<ValuePair> hotSpot)
     {
       return CursorImageValue::Create(ImageValue::Create(CursorUrl(url)), krys::move(hotSpot));
     };
@@ -74,11 +74,15 @@ namespace krys::boo::css::tests
 
   TEST_CASE_METHOD(ValueFixture, "CursorImageValue children", "[CSS][Values][CursorImageValue]")
   {
-    // Only the image is visited, not the hot spot.
+    // The image, then the hot spot.
     auto value = CursorImageValue::Create(ImageValue::Create(CursorUrl(u8"a.cur")), HotSpot(1.0, 2.0));
     auto children = Children(*value);
-    REQUIRE(children.size() == 1uz);
+    REQUIRE(children.size() == 2uz);
     CHECK(Is<ImageValue>(*children[0uz]));
+    CHECK(Is<ValuePair>(*children[1uz]));
+
+    CHECK(Children(*CursorImageValue::Create(ImageValue::Create(CursorUrl(u8"a.cur")), nullptr)).size()
+          == 1uz);
 
     CHECK_FALSE(value->MayDependOnBaseUrl());
   }

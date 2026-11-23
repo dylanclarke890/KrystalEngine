@@ -76,7 +76,7 @@ namespace krys::boo
 
   Ref<css::Value> StyleCursorImage::ComputedStyleValue(const RenderStyle &style) const noexcept
   {
-    RefPtr<css::Value> hotSpot;
+    RefPtr<css::ValuePair> hotSpot;
     if (_hotSpot)
     {
       hotSpot = css::ValuePair::CreateNonCoalescing(css::PrimitiveValue::Create(_hotSpot->X()),
