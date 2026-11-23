@@ -71,6 +71,9 @@ namespace krys::boo::css::tests
       CHECK(AsText(ParseDeclarations(u8"text-emphasis: filled circle red"))
             == "text-emphasis: filled circle red;");
       CHECK(AsText(ParseDeclarations(u8"font-variant: small-caps")) == "font-variant: small-caps;");
+      CHECK(AsText(ParseDeclarations(u8"font: 12px Arial")) == "font: 12px Arial;");
+      CHECK(AsText(ParseDeclarations(u8"font: bold 12px/1.5 Arial; color: red"))
+            == "font: bold 12px / 1.5 Arial; color: red;");
       CHECK(AsText(ParseDeclarations(u8"font-variant: none")) == "font-variant: none;");
       CHECK(AsText(ParseDeclarations(u8"mask: url(a.png) luminance")) == "mask: url(\"a.png\") luminance;");
       // mask-position's longhands are internal, so they mustn't be written out.

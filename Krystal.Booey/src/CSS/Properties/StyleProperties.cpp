@@ -30,10 +30,6 @@ namespace krys::boo::css
       krys_debug_assert(IsLonghand(longhand));
       switch (shorthand)
       {
-        // Editing can't handle the font shorthand yet.
-        // NOLINTNEXTLINE(bugprone-branch-clone): the cases are grouped by reason.
-        case PropertyId::Font:               return false;
-
         // Legacy shorthands are for parsing only.
         // https://drafts.csswg.org/css-cascade-5/#legacy-shorthand
         case PropertyId::PageBreakAfter:
