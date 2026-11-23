@@ -83,10 +83,8 @@ namespace krys::boo::css::tests
       CHECK(AsText(rule->Properties()) == "color: red; width: 1px;");
     }
 
-    SECTION("SetProperties and AdoptSelectorList")
+    SECTION("WrapperAdoptSelectorList")
     {
-      rule->SetProperties(ImmutableDeclarations(u8"width: 2px"));
-      CHECK(AsText(rule->Properties()) == "width: 2px;");
       rule->WrapperAdoptSelectorList(ParseSelectors(u8"#x"));
       CHECK(SelectorsText(rule->GetSelectorList()) == "#x");
     }

@@ -207,14 +207,14 @@ namespace krys::boo::css
     KRYS_NODISCARD Ref<Rule> Copy() const noexcept;
 
     /// @brief Creates the CSSOM wrapper exposing this rule to scripts.
-    KRYS_NODISCARD Ref<CSSRule> CreateCSSOMWrapper(CSSStyleSheet &parentSheet) const noexcept;
+    KRYS_NODISCARD Ref<CSSRule> CreateCSSOMWrapper(CSSStyleSheet &parentSheet) noexcept;
 
-    KRYS_NODISCARD Ref<CSSRule> CreateCSSOMWrapper(CSSGroupingRule &parentRule) const noexcept;
+    KRYS_NODISCARD Ref<CSSRule> CreateCSSOMWrapper(CSSGroupingRule &parentRule) noexcept;
 
-    KRYS_NODISCARD Ref<CSSRule> CreateCSSOMWrapper(CSSStyleRule &parentRule) const noexcept;
+    KRYS_NODISCARD Ref<CSSRule> CreateCSSOMWrapper(CSSStyleRule &parentRule) noexcept;
 
-    // This is only needed to support getMatchedCSSRules.
-    KRYS_NODISCARD Ref<CSSRule> CreateCSSOMWrapper() const noexcept;
+    /// @brief Creates a CSSOM wrapper with no parent style sheet or rule.
+    KRYS_NODISCARD Ref<CSSRule> CreateCSSOMWrapper() noexcept;
 
   protected:
     void operator delete(Rule *rule, std::destroying_delete_t) noexcept;
@@ -232,8 +232,7 @@ namespace krys::boo::css
     void InvalidateResolvedSelectorListRecursively() noexcept;
 
   private:
-    KRYS_NODISCARD Ref<CSSRule> CreateCSSOMWrapper(CSSStyleSheet *parentSheet,
-                                                   CSSRule *parentRule) const noexcept;
+    KRYS_NODISCARD Ref<CSSRule> CreateCSSOMWrapper(CSSStyleSheet *parentSheet, CSSRule *parentRule) noexcept;
 
     template <typename Visitor>
     constexpr decltype(auto) VisitDerived(Visitor &&) noexcept;
@@ -315,8 +314,6 @@ namespace krys::boo::css
     }
 
     KRYS_NODISCARD static uint32 AverageSizeInBytes() noexcept;
-
-    void SetProperties(Ref<StyleProperties> &&properties) noexcept;
 
   private:
     KRYS_NODISCARD static Ref<StyleRule> CreateForSplitting(const List<const Selector *> &selectors,

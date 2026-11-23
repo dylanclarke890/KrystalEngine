@@ -206,31 +206,29 @@ namespace krys::boo::css
       });
   }
 
-  Ref<CSSRule> Rule::CreateCSSOMWrapper(CSSStyleSheet &parentSheet) const noexcept
+  Ref<CSSRule> Rule::CreateCSSOMWrapper(CSSStyleSheet &parentSheet) noexcept
   {
     return CreateCSSOMWrapper(&parentSheet, nullptr);
   }
 
-  Ref<CSSRule> Rule::CreateCSSOMWrapper(CSSGroupingRule &parentRule) const noexcept
+  Ref<CSSRule> Rule::CreateCSSOMWrapper(CSSGroupingRule &parentRule) noexcept
   {
     return CreateCSSOMWrapper(nullptr, &parentRule);
   }
 
-  Ref<CSSRule> Rule::CreateCSSOMWrapper(CSSStyleRule &parentRule) const noexcept
+  Ref<CSSRule> Rule::CreateCSSOMWrapper(CSSStyleRule &parentRule) noexcept
   {
     return CreateCSSOMWrapper(nullptr, &parentRule);
   }
 
-  Ref<CSSRule> Rule::CreateCSSOMWrapper() const noexcept
+  Ref<CSSRule> Rule::CreateCSSOMWrapper() noexcept
   {
     return CreateCSSOMWrapper(nullptr, nullptr);
   }
 
-  Ref<CSSRule> Rule::CreateCSSOMWrapper(CSSStyleSheet *parentSheet, CSSRule *parentRule) const noexcept
+  Ref<CSSRule> Rule::CreateCSSOMWrapper(CSSStyleSheet *parentSheet, CSSRule *parentRule) noexcept
   {
-    // FIXME: const_cast is required here because a wrapper for a style rule can be used to *modify* the style
-    // rule's selector; use of const in the style system is thus inaccurate.
-    auto wrapper = const_cast<Rule &>(*this).VisitDerived(
+    auto wrapper = VisitDerived(
       [&]<typename TRule>(TRule &rule) -> Ref<CSSRule>
       {
         if constexpr (SameType<TRule, StyleRule> || SameType<TRule, StyleRuleWithNesting>)
@@ -403,11 +401,6 @@ namespace krys::boo::css
   Ref<StyleRule> StyleRule::Copy() const noexcept
   {
     return AdoptRef(*new StyleRule(*this));
-  }
-
-  void StyleRule::SetProperties(Ref<StyleProperties> &&properties) noexcept
-  {
-    _properties = krys::move(properties);
   }
 
   MutableStyleProperties &StyleRule::MutableProperties() noexcept
