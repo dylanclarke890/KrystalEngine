@@ -35,6 +35,7 @@
 #include "Krystal.Booey/CSS/Properties/Property.hpp"
 #include "Krystal.Booey/CSS/Properties/PropertyParserState.hpp"
 #include "Krystal.Booey/CSS/Properties/PropertyParsing.hpp"
+#include "Krystal.Booey/CSS/Properties/PropertyQueries.hpp"
 #include "Krystal.Booey/CSS/Properties/PropertyShorthand.hpp"
 #include "Krystal.Booey/CSS/Rules/RuleType.hpp"
 #include "Krystal.Booey/CSS/Values/Color/ColorDescriptors.hpp"
@@ -1330,10 +1331,10 @@ namespace krys::boo::css
       }
     }
 
-    if (Property::IsColorProperty(property))
+    if (IsColorProperty(property))
     {
       auto context = state.Context;
-      if (!Property::AcceptsQuirkyColor(property))
+      if (!AcceptsQuirkyColor(property))
       {
         context.Mode = ParserMode::HTMLStandard;
       }

@@ -35,6 +35,7 @@
 #include "Krystal.Booey/CSS/Parser/ParserContext.hpp"
 #include "Krystal.Booey/CSS/Properties/MutableStyleProperties.hpp"
 #include "Krystal.Booey/CSS/Properties/Property.hpp"
+#include "Krystal.Booey/CSS/Properties/PropertyQueries.hpp"
 #include "Krystal.Booey/CSS/Properties/PropertyShorthand.hpp"
 #include "Krystal.Booey/CSS/Values/SerialisationContext.hpp"
 #include "Krystal.Booey/CSS/Values/ValuePool.hpp"
@@ -2210,7 +2211,7 @@ namespace krys::boo
             return false;
           }
           auto resolvedCSSProperty =
-            css::Property::ResolveDirectionAwareProperty(propertyId, animatedStyle->GetWritingMode());
+            css::ResolveDirectionAwareProperty(propertyId, animatedStyle->GetWritingMode());
           return inlineStyle->SetProperty(resolvedCSSProperty, string, parserContext);
         },
         [&](const CSSOMStringAtom &customProperty)

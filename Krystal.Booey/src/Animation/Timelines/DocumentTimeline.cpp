@@ -31,6 +31,7 @@
 #include "Krystal.Booey/Animation/Timelines/AnimationTimelinesController.hpp"
 #include "Krystal.Booey/Animation/WebAnimation.hpp"
 #include "Krystal.Booey/CSS/Properties/Property.hpp"
+#include "Krystal.Booey/CSS/Properties/PropertyQueries.hpp"
 #include "Krystal.Booey/DOM/Algorithms/TreeQueries.hpp"
 #include "Krystal.Booey/DOM/Events/EventNames.hpp"
 #include "Krystal.Booey/DOM/Nodes/Document.hpp"
@@ -312,7 +313,7 @@ namespace krys::boo
     {
       if (const auto *propertyId = std::get_if<css::PropertyId>(&property))
       {
-        return css::Property::ResolveDirectionAwareProperty(*propertyId, style.GetWritingMode());
+        return css::ResolveDirectionAwareProperty(*propertyId, style.GetWritingMode());
       }
       return property;
     };

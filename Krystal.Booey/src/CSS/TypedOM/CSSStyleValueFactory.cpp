@@ -36,6 +36,7 @@
 #include "Krystal.Booey/CSS/Parser/Tokenizer.hpp"
 #include "Krystal.Booey/CSS/Properties/MutableStyleProperties.hpp"
 #include "Krystal.Booey/CSS/Properties/Property.hpp"
+#include "Krystal.Booey/CSS/Properties/PropertyQueries.hpp"
 #include "Krystal.Booey/CSS/Properties/StylePropertiesInlines.hpp"
 #include "Krystal.Booey/CSS/TypedOM/CSSImageValue.hpp"
 #include "Krystal.Booey/CSS/TypedOM/CSSKeywordValue.hpp"
@@ -231,7 +232,7 @@ namespace krys::boo
     List<Ref<css::Value>> values;
     if (auto value = result.ReleaseValue())
     {
-      if (css::Property::IsListValuedProperty(propertyId))
+      if (css::IsListValuedProperty(propertyId))
       {
         if (auto *list = DynamicDowncast<css::ValueContainingList>(*value))
         {
@@ -362,7 +363,7 @@ namespace krys::boo
         return Exception {ExceptionCode::TypeError};
       }
       if ((valueList->size() == 1 && MayConvertValueListToSingleValue(property))
-          || (property && css::Property::IsListValuedProperty(*property)))
+          || (property && css::IsListValuedProperty(*property)))
       {
         return ReifyValue(document, (*valueList)[0], property);
       }

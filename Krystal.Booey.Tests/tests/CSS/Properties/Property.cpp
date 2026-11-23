@@ -2,6 +2,7 @@
 #include "catch2/catch_test_macros.hpp"
 #include "Krystal.Booey.Tests/CSS/ValueTestUtils.hpp"
 #include "Krystal.Booey/CSS/Properties/ParsedPropertyList.hpp"
+#include "Krystal.Booey/CSS/Properties/PropertyQueries.hpp"
 #include "Krystal.Booey/CSS/Values/PrimitiveValue.hpp"
 
 namespace krys::boo::css::tests
@@ -15,7 +16,7 @@ namespace krys::boo::css::tests
       CHECK(property.Important() == IsImportant::No);
       CHECK(property.Implicit() == IsImplicit::No);
       CHECK(property.SetFromShorthand() == IsSetFromShorthand::No);
-      CHECK(property.ShorthandIndex() == 0u);
+      CHECK(property.Metadata().ShorthandIndex == 0u);
       CHECK(property.ShorthandId() == PropertyId::Invalid);
       CHECK(CssText(property.Value()) == "red");
     }
@@ -35,7 +36,7 @@ namespace krys::boo::css::tests
       Property fromMargin(PropertyId::MarginTop, PrimitiveValue::Create(0.0), IsImportant::No, IsImplicit::No,
                           IsSetFromShorthand::Yes, 1u);
       CHECK(fromMargin.SetFromShorthand() == IsSetFromShorthand::Yes);
-      CHECK(fromMargin.ShorthandIndex() == 1u);
+      CHECK(fromMargin.Metadata().ShorthandIndex == 1u);
       CHECK(fromMargin.ShorthandId() == PropertyId::Margin);
 
       Property fromAll(PropertyId::MarginTop, PrimitiveValue::Create(0.0), IsImportant::No, IsImplicit::No,
@@ -77,24 +78,24 @@ namespace krys::boo::css::tests
   {
     SECTION("IsDirectionAwareProperty")
     {
-      CHECK(Property::IsDirectionAwareProperty(PropertyId::MarginInlineStart));
-      CHECK_FALSE(Property::IsDirectionAwareProperty(PropertyId::MarginLeft));
-      CHECK_FALSE(Property::IsDirectionAwareProperty(PropertyId::Color));
+      CHECK(IsLogicalPropertyGroupLogicalProperty(PropertyId::MarginInlineStart));
+      CHECK_FALSE(IsLogicalPropertyGroupLogicalProperty(PropertyId::MarginLeft));
+      CHECK_FALSE(IsLogicalPropertyGroupLogicalProperty(PropertyId::Color));
     }
 
     SECTION("IsListValuedProperty")
     {
-      CHECK(Property::IsListValuedProperty(PropertyId::BackgroundImage));
-      CHECK(Property::IsListValuedProperty(PropertyId::Custom));
-      CHECK_FALSE(Property::IsListValuedProperty(PropertyId::Color));
+      CHECK(IsListValuedProperty(PropertyId::BackgroundImage));
+      CHECK(IsListValuedProperty(PropertyId::Custom));
+      CHECK_FALSE(IsListValuedProperty(PropertyId::Color));
     }
 
     SECTION("IsSizingProperty")
     {
-      CHECK(Property::IsSizingProperty(PropertyId::Width));
-      CHECK(Property::IsSizingProperty(PropertyId::MaxHeight));
-      CHECK(Property::IsSizingProperty(PropertyId::MinInlineSize));
-      CHECK_FALSE(Property::IsSizingProperty(PropertyId::Margin));
+      CHECK(IsSizingProperty(PropertyId::Width));
+      CHECK(IsSizingProperty(PropertyId::MaxHeight));
+      CHECK(IsSizingProperty(PropertyId::MinInlineSize));
+      CHECK_FALSE(IsSizingProperty(PropertyId::Margin));
     }
   }
 }

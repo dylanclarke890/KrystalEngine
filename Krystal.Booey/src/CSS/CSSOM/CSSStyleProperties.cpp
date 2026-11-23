@@ -30,6 +30,7 @@
 #include "Krystal.Booey/CSS/Parser/ParserContext.hpp"
 #include "Krystal.Booey/CSS/Properties/MutableStyleProperties.hpp"
 #include "Krystal.Booey/CSS/Properties/Property.hpp"
+#include "Krystal.Booey/CSS/Properties/PropertyQueries.hpp"
 #include "Krystal.Booey/CSS/StyleSheets/StyleSheetContents.hpp"
 #include "Krystal.Booey/CSS/Values/SerialisationContext.hpp"
 #include "Krystal.Booey/DOM/Nodes/Document.hpp"
@@ -464,7 +465,7 @@ namespace krys::boo
     bool parsingDescriptor =
       parserContext.EnclosingRuleType && *parserContext.EnclosingRuleType != css::RuleType::Style;
     return css::IsExposed(property, &parserContext.PropertySettings)
-           && (!css::Property::IsDescriptorOnly(property) || parsingDescriptor);
+           && (!css::IsDescriptorOnly(property) || parsingDescriptor);
   }
 
   css::StyleSheetContents *PropertySetCSSStyleProperties::ContextStyleSheet() const noexcept

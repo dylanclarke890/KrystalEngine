@@ -30,6 +30,7 @@
 
 #include "Krystal.Booey/Style/Interpolation/Interpolation.hpp"
 #include "Krystal.Booey/CSS/Properties/Property.hpp"
+#include "Krystal.Booey/CSS/Properties/PropertyQueries.hpp"
 #include "Krystal.Booey/DOM/Nodes/Document.hpp"
 #include "Krystal.Booey/Rendering/Style/RenderStyle+GettersInlines.hpp"
 #include "Krystal.Booey/Rendering/Style/RenderStyle+SettersInlines.hpp"
@@ -76,7 +77,7 @@ namespace krys::boo::style::interpolation
                        from.Color(),
                        to.Color(),
                        client};
-      if (!css::Property::AnimationUsesNonNormalizedDiscreteInterpolation(property))
+      if (!css::AnimationUsesNonNormalizedDiscreteInterpolation(property))
       {
         context.NormalizeProgress();
       }
@@ -303,20 +304,18 @@ namespace krys::boo::style::interpolation
   bool IsAdditiveOrCumulative(const AnimatableCSSProperty &property) noexcept
   {
     return std::visit(
-      krys::CreateVisitor(
-        [](css::PropertyId propertyId)
-        { return !css::Property::AnimationUsesNonAdditiveOrCumulativeInterpolation(propertyId); },
-        [](const CSSOMStringAtom &) { return true; }),
+      krys::CreateVisitor([](css::PropertyId propertyId)
+                          { return !css::AnimationUsesNonAdditiveOrCumulativeInterpolation(propertyId); },
+                          [](const CSSOMStringAtom &) { return true; }),
       property);
   }
 
   bool IsAccelerated(const AnimatableCSSProperty &property, const Settings &settings) noexcept
   {
-    return std::visit(
-      krys::CreateVisitor([&](css::PropertyId propertyId)
-                          { return css::Property::AnimationIsAccelerated(propertyId, settings); },
-                          [](const CSSOMStringAtom &) { return false; }),
-      property);
+    return std::visit(krys::CreateVisitor([&](css::PropertyId propertyId)
+                                          { return css::AnimationIsAccelerated(propertyId, settings); },
+                                          [](const CSSOMStringAtom &) { return false; }),
+                      property);
   }
 
   bool CanInterpolate(const AnimatableCSSProperty &property) noexcept

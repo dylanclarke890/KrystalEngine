@@ -33,6 +33,7 @@
 #include "Krystal.Booey/CSS/Font/CSSFontSelector.hpp"
 #include "Krystal.Booey/CSS/Font/GenericFontFamilyNames.hpp"
 #include "Krystal.Booey/CSS/Properties/MutableStyleProperties.hpp"
+#include "Krystal.Booey/CSS/Properties/PropertyQueries.hpp"
 #include "Krystal.Booey/CSS/Properties/StylePropertiesInlines.hpp"
 #include "Krystal.Booey/CSS/Rules/KeyframeRule.hpp"
 #include "Krystal.Booey/CSS/Rules/Rule.hpp"
@@ -401,14 +402,14 @@ namespace krys::boo::style
       // The animation-composition and animation-timing-function within keyframes are special
       // because they are not animated; they just describe the composite operation and timing
       // function between this keyframe and the next.
-      if (css::Property::IsDirectionAwareProperty(unresolvedProperty))
+      if (css::IsLogicalPropertyGroupLogicalProperty(unresolvedProperty))
       {
         blendingKeyframe.SetContainsDirectionAwareProperty(true);
       }
       if (const auto *value = propertyReference.Value())
       {
         auto resolvedProperty =
-          css::Property::ResolveDirectionAwareProperty(unresolvedProperty, elementStyle.GetWritingMode());
+          css::ResolveDirectionAwareProperty(unresolvedProperty, elementStyle.GetWritingMode());
         if (resolvedProperty != css::PropertyId::AnimationTimingFunction
             && resolvedProperty != css::PropertyId::AnimationComposition)
         {

@@ -125,11 +125,6 @@ namespace krys::boo::css
       return IsSetFromShorthand(_metadata.Flags.contains(PropertyFlag::SetFromShorthand));
     }
 
-    KRYS_NODISCARD uint8 ShorthandIndex() const noexcept
-    {
-      return _metadata.ShorthandIndex;
-    }
-
     KRYS_NODISCARD css::Value &Value() noexcept
     {
       return *_value;
@@ -153,101 +148,5 @@ namespace krys::boo::css
       }
       return _value->Equals(*other._value);
     }
-
-    KRYS_NODISCARD static bool IsDirectionAwareProperty(PropertyId id) noexcept
-    {
-      return IsLogicalPropertyGroupLogicalProperty(id);
-    }
-
-    KRYS_NODISCARD static bool IsListValuedProperty(PropertyId id) noexcept
-    {
-      return ListValuedPropertySeparator(id).has_value() || id == PropertyId::Custom;
-    }
-
-    KRYS_NODISCARD static PropertyId ResolveDirectionAwareProperty(PropertyId id,
-                                                                   WritingMode writingMode) noexcept;
-
-    KRYS_NODISCARD static PropertyId UnresolvePhysicalProperty(PropertyId id,
-                                                               WritingMode writingMode) noexcept;
-
-    /// @brief Checks if a property is a sizing property
-    /// @see https://drafts.csswg.org/css-sizing-3/#sizing-property
-    KRYS_NODISCARD static bool IsSizingProperty(PropertyId id) noexcept
-    {
-      return IsSizeProperty(id) || IsMaxSizeProperty(id) || IsMinSizeProperty(id);
-    }
-
-    KRYS_NODISCARD static bool IsInheritedProperty(PropertyId id) noexcept;
-
-    KRYS_NODISCARD static bool IsColorProperty(PropertyId id) noexcept;
-
-    KRYS_NODISCARD static bool IsBorderColorProperty(PropertyId id) noexcept;
-
-    KRYS_NODISCARD static bool IsBorderRadiusProperty(PropertyId id) noexcept;
-
-    KRYS_NODISCARD static bool IsBorderStyleProperty(PropertyId id) noexcept;
-
-    KRYS_NODISCARD static bool IsBorderWidthProperty(PropertyId id) noexcept;
-
-    KRYS_NODISCARD static bool IsCornerShapeProperty(PropertyId id) noexcept;
-
-    KRYS_NODISCARD static bool IsContainIntrinsicSizeProperty(PropertyId id) noexcept;
-
-    KRYS_NODISCARD static bool IsInsetProperty(PropertyId id) noexcept;
-
-    KRYS_NODISCARD static bool IsMinSizeProperty(PropertyId id) noexcept;
-
-    KRYS_NODISCARD static bool IsMaxSizeProperty(PropertyId id) noexcept;
-
-    KRYS_NODISCARD static bool IsOverflowProperty(PropertyId id) noexcept;
-
-    KRYS_NODISCARD static bool IsOverscrollBehaviorProperty(PropertyId id) noexcept;
-
-    KRYS_NODISCARD static bool IsScrollMarginProperty(PropertyId id) noexcept;
-
-    KRYS_NODISCARD static bool IsScrollPaddingProperty(PropertyId id) noexcept;
-
-    KRYS_NODISCARD static bool IsSizeProperty(PropertyId id) noexcept;
-
-    KRYS_NODISCARD static bool IsMarginProperty(PropertyId id) noexcept;
-
-    KRYS_NODISCARD static bool IsPaddingProperty(PropertyId id) noexcept;
-
-    KRYS_NODISCARD static bool DisablesNativeAppearance(PropertyId id) noexcept;
-
-    /// @brief The separator between a list-valued property's items, or null if @p id isn't one.
-    KRYS_NODISCARD static Maybe<ValueSeparator> ListValuedPropertySeparator(PropertyId id) noexcept;
-
-    KRYS_NODISCARD static bool AllowsNumberOrIntegerInput(PropertyId id) noexcept;
-
-    KRYS_NODISCARD static bool IsInLogicalPropertyGroup(PropertyId id) noexcept;
-
-    KRYS_NODISCARD static bool
-      AreInSameLogicalPropertyGroupWithDifferentMappingLogic(PropertyId id1, PropertyId id2) noexcept;
-
-    KRYS_NODISCARD static bool IsDescriptorOnly(PropertyId id) noexcept;
-
-    KRYS_NODISCARD static bool AcceptsQuirkyColor(PropertyId id) noexcept;
-
-    KRYS_NODISCARD static bool AcceptsQuirkyLength(PropertyId id) noexcept;
-
-    KRYS_NODISCARD static bool AcceptsQuirkyAngle(PropertyId id) noexcept;
-
-    KRYS_NODISCARD static bool AnimationUsesNonAdditiveOrCumulativeInterpolation(PropertyId id) noexcept;
-
-    KRYS_NODISCARD static bool AnimationUsesNonNormalizedDiscreteInterpolation(PropertyId id) noexcept;
-
-    KRYS_NODISCARD static bool AnimationIsAccelerated(PropertyId id, const Settings &settings) noexcept;
-
-    /// @brief The colour properties, whose visited link values depend on the link state.
-    KRYS_NODISCARD static Span<const PropertyId> ColorProperties() noexcept;
-
-    /// @brief The physical properties logical properties resolve to, which depend on the writing mode.
-    KRYS_NODISCARD static Span<const PropertyId> PhysicalProperties() noexcept;
-
-    KRYS_NODISCARD static Span<const ValueId> ValidKeywordsForProperty(PropertyId id) noexcept;
-
-    KRYS_NODISCARD static bool IsKeywordValidForPropertyValues(PropertyId id, ValueId keyword,
-                                                               const ParserContext &context) noexcept;
   };
 }

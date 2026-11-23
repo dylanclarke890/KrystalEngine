@@ -7433,6 +7433,8 @@ class GeneratePropertyId:
 
     def generate(self):
         self._generate_property_id_hpp()
+        self._generate_property_queries_hpp()
+        self._generate_property_queries_cpp()
         self._generate_property_id_gperf()
         run_gperf(
             gperf_executable=self.generation_context.gperf_executable,
@@ -7440,6 +7442,268 @@ class GeneratePropertyId:
             output_cpp_dir=os.path.join(self.generation_context.output_cpp_dir, "CSS/Properties"),
             remove_gperf_file=True,
         )
+
+    # region PropertyQueries.hpp and PropertyQueries.cpp
+
+    def _generate_property_queries_hpp(self):
+        groups = [
+            (name, PropertyName.convert_name_to_id(name))
+            for name, _ in sorted(
+                self.generation_context.properties_and_descriptors.style_properties.logical_property_groups.items(),
+                key=lambda x: x[0],
+            )
+        ]
+        with open(self.generation_context.output_hpp_path("Krystal.Booey/CSS/Properties/PropertyQueries.hpp"), "w") as output_file:
+            writer = Writer(output_file)
+            writer.hpp_prelude(
+                generator_name=GENERATOR_NAME,
+                headers=[
+                    "Krystal.Booey/CSS/Properties/PropertyId.hpp",
+                    "Krystal.Booey/CSS/Values/ValueId.hpp",
+                    "Krystal.Booey/CSS/Values/ValueSeparator.hpp",
+                    "Krystal.Core/Containers/Span.hpp",
+                    "Krystal.Core/Types/Maybe.hpp",
+                ],
+            )
+
+            with writer.namespace(namespace="krys::boo"):
+                writer.write("class WritingMode;")
+                writer.newline()
+                writer.write("struct Settings;")
+            writer.newline()
+
+            with writer.namespace(namespace="krys::boo::css"):
+                writer.write("struct ParserContext;")
+                writer.newline()
+                writer.write_block("""\
+                    /// @brief Whether @p id is inherited by default.
+                    /// @see https://drafts.csswg.org/css-cascade-5/#inherited-property
+                    KRYS_NODISCARD bool IsInheritedProperty(PropertyId id) noexcept;
+
+                    /// @brief Whether @p id takes a colour.
+                    KRYS_NODISCARD bool IsColorProperty(PropertyId id) noexcept;
+
+                    /// @brief The separator between a list-valued property's items, or null if @p id isn't one.
+                    KRYS_NODISCARD Maybe<ValueSeparator> ListValuedPropertySeparator(PropertyId id) noexcept;
+
+                    /// @brief Whether @p id takes a list of items, as custom properties do.
+                    /// @see https://drafts.css-houdini.org/css-typed-om-1/#list-valued-property
+                    KRYS_NODISCARD inline bool IsListValuedProperty(PropertyId id) noexcept
+                    {
+                      return ListValuedPropertySeparator(id).has_value() || id == PropertyId::Custom;
+                    }
+
+                    /// @brief Whether @p id's grammar takes a bare `<number>` or `<integer>`.
+                    KRYS_NODISCARD bool AllowsNumberOrIntegerInput(PropertyId id) noexcept;
+
+                    /// @brief Whether an author value for @p id turns off an element's native appearance.
+                    /// @see https://drafts.csswg.org/css-ui-4/#appearance-disabling-property
+                    KRYS_NODISCARD bool DisablesNativeAppearance(PropertyId id) noexcept;""")
+                for name, group_id in groups:
+                    writer.newline()
+                    writer.write(f"/// @brief Whether @p id is in the `{name}` logical property group, or is a shorthand for one that is.")
+                    writer.write(f"KRYS_NODISCARD bool Is{group_id}Property(PropertyId id) noexcept;")
+                writer.newline()
+                writer.write_block("""\
+                    /// @brief Whether @p id is a sizing property.
+                    /// @see https://drafts.csswg.org/css-sizing-3/#sizing-property
+                    KRYS_NODISCARD inline bool IsSizingProperty(PropertyId id) noexcept
+                    {
+                      return IsSizeProperty(id) || IsMinSizeProperty(id) || IsMaxSizeProperty(id);
+                    }
+
+                    /// @brief Whether @p id is in a logical property group.
+                    /// @see https://drafts.csswg.org/css-logical-1/#logical-property-group
+                    KRYS_NODISCARD bool IsInLogicalPropertyGroup(PropertyId id) noexcept;
+
+                    /// @brief Whether @p a and @p b are in the same logical property group, one logical and the other physical.
+                    KRYS_NODISCARD bool AreInSameLogicalPropertyGroupWithDifferentMappingLogic(PropertyId a, PropertyId b) noexcept;
+
+                    /// @brief The physical property logical property @p id maps to in @p writingMode, or @p id if it isn't logical.
+                    KRYS_NODISCARD PropertyId ResolveDirectionAwareProperty(PropertyId id, WritingMode writingMode) noexcept;
+
+                    /// @brief The logical property that maps to physical property @p id in @p writingMode, or @p id if it isn't physical.
+                    KRYS_NODISCARD PropertyId UnresolvePhysicalProperty(PropertyId id, WritingMode writingMode) noexcept;
+
+                    /// @brief Whether @p id is a descriptor that isn't also a property.
+                    KRYS_NODISCARD bool IsDescriptorOnly(PropertyId id) noexcept;
+
+                    /// @brief Whether @p id takes a hex colour without its `#` in quirks mode.
+                    /// @see https://quirks.spec.whatwg.org/#the-hashless-hex-color-quirk
+                    KRYS_NODISCARD bool AcceptsQuirkyColor(PropertyId id) noexcept;
+
+                    /// @brief Whether @p id takes a length without its unit in quirks mode.
+                    /// @see https://quirks.spec.whatwg.org/#the-unitless-length-quirk
+                    KRYS_NODISCARD bool AcceptsQuirkyLength(PropertyId id) noexcept;
+
+                    /// @brief Whether @p id takes an angle without its unit in quirks mode.
+                    KRYS_NODISCARD bool AcceptsQuirkyAngle(PropertyId id) noexcept;
+
+                    /// @brief Whether @p id interpolates without additive or accumulative composition.
+                    KRYS_NODISCARD bool AnimationUsesNonAdditiveOrCumulativeInterpolation(PropertyId id) noexcept;
+
+                    /// @brief Whether @p id interpolates discretely at its non-normalised progress.
+                    KRYS_NODISCARD bool AnimationUsesNonNormalizedDiscreteInterpolation(PropertyId id) noexcept;
+
+                    /// @brief Whether animations of @p id can run off the main thread.
+                    KRYS_NODISCARD bool AnimationIsAccelerated(PropertyId id, const Settings &settings) noexcept;
+
+                    /// @brief The physical properties logical properties resolve to, which depend on the writing mode.
+                    KRYS_NODISCARD Span<const PropertyId> PhysicalProperties() noexcept;
+
+                    /// @brief The keywords @p id's grammar lists.
+                    KRYS_NODISCARD Span<const ValueId> ValidKeywordsForProperty(PropertyId id) noexcept;
+
+                    /// @brief Whether @p keyword is one of @p id's keywords and enabled in @p context.
+                    KRYS_NODISCARD bool IsKeywordValidForPropertyValues(PropertyId id, ValueId keyword, const ParserContext &context) noexcept;""")
+
+    def _generate_property_queries_cpp(self):
+        with open(self.generation_context.output_cpp_path("CSS/Properties/PropertyQueries.cpp"), "w") as output_file:
+            writer = Writer(output_file)
+            writer.cpp_prelude(
+                generator_name=GENERATOR_NAME,
+                for_header="Krystal.Booey/CSS/Properties/PropertyQueries.hpp",
+                headers=[
+                    "Krystal.Booey/CSS/Parser/ParserContext.hpp",
+                    "Krystal.Booey/Graphics/Geometry/BoxSides.hpp",
+                    "Krystal.Booey/Page/Settings.hpp",
+                    "Krystal.Booey/Text/WritingMode.hpp",
+                ],
+                system_headers=["algorithm"],
+            )
+
+            with writer.namespace(namespace="krys::boo::css"):
+                self._generate_is_inherited_property(to=writer)
+
+                self.generation_context.generate_property_id_switch_function_bool(
+                    to=writer,
+                    signature="bool IsColorProperty(PropertyId id) noexcept",
+                    iterable=(p for p in self.properties_and_descriptors.style_properties.all if p.codegen_properties.color_property),
+                )
+
+                self.generation_context.generate_property_id_switch_function(
+                    to=writer,
+                    signature="Maybe<ValueSeparator> ListValuedPropertySeparator(PropertyId id) noexcept",
+                    iterable=(
+                        p for p in self.properties_and_descriptors.style_properties.all if p.codegen_properties.separator
+                    ),
+                    mapping=lambda p: "return ValueSeparator::{};".format(
+                        {" ": "Space", ",": "Comma", "/": "Slash"}[p.codegen_properties.separator[0]]
+                    ),
+                    default="break;",
+                    epilogue="return null;",
+                )
+
+                self.generation_context.generate_property_id_switch_function_bool(
+                    to=writer,
+                    signature="bool AllowsNumberOrIntegerInput(PropertyId id) noexcept",
+                    iterable=(
+                        p
+                        for p in self.properties_and_descriptors.style_properties.all
+                        if self._property_matches_number_or_integer(p)
+                    )
+                )
+
+                self.generation_context.generate_property_id_switch_function_bool(
+                    to=writer,
+                    signature="bool DisablesNativeAppearance(PropertyId id) noexcept",
+                    iterable=(
+                        p
+                        for p in self.properties_and_descriptors.style_properties.all
+                        if p.codegen_properties.disables_native_appearance
+                    )
+                )
+
+                for group_name, property_group in sorted(
+                    self.generation_context.properties_and_descriptors.style_properties.logical_property_groups.items(),
+                    key=lambda x: x[0],
+                ):
+                    properties = set()
+                    for kind in ["logical", "physical"]:
+                        for property in property_group[kind].values():
+                            properties.add(property)
+                            if (
+                                property
+                                in self.generation_context.properties_and_descriptors.style_properties.shorthand_by_longhand
+                            ):
+                                properties.add(
+                                    self.generation_context.properties_and_descriptors.style_properties.shorthand_by_longhand[
+                                        property
+                                    ]
+                                )
+
+                    group_id = PropertyName.convert_name_to_id(group_name)
+                    self.generation_context.generate_property_id_switch_function_bool(
+                        to=writer,
+                        signature=f"bool Is{group_id}Property(PropertyId id) noexcept",
+                        iterable=sorted(properties, key=lambda x: x.name),
+                    )
+
+                self.generation_context.generate_property_id_switch_function_bool(
+                    to=writer,
+                    signature="bool IsInLogicalPropertyGroup(PropertyId id) noexcept",
+                    iterable=self.properties_and_descriptors.style_properties.all_in_logical_property_group,
+                )
+
+                self._generate_are_in_same_logical_property_group_with_different_mappings_logic(to=writer)
+
+                self._generate_physical_logical_conversion_function(
+                    to=writer,
+                    signature="PropertyId ResolveDirectionAwareProperty(PropertyId id, WritingMode writingMode) noexcept",
+                    source="logical",
+                    destination="physical",
+                    resolver_enum_prefix="LogicalBox",
+                )
+
+                self._generate_physical_logical_conversion_function(
+                    to=writer,
+                    signature="PropertyId UnresolvePhysicalProperty(PropertyId id, WritingMode writingMode) noexcept",
+                    source="physical",
+                    destination="logical",
+                    resolver_enum_prefix="Box",
+                )
+
+                self.generation_context.generate_property_id_switch_function_bool(
+                    to=writer,
+                    signature="bool IsDescriptorOnly(PropertyId id) noexcept",
+                    iterable=self.properties_and_descriptors.all_descriptor_only,
+                )
+
+                self.generation_context.generate_property_id_switch_function_bool(
+                    to=writer,
+                    signature="bool AcceptsQuirkyColor(PropertyId id) noexcept",
+                    iterable=(
+                        p
+                        for p in self.properties_and_descriptors.style_properties.all
+                        if p.codegen_properties.accepts_quirky_color
+                    ),
+                )
+
+                self.generation_context.generate_property_id_switch_function_bool(
+                    to=writer,
+                    signature="bool AcceptsQuirkyLength(PropertyId id) noexcept",
+                    iterable=(
+                        p
+                        for p in self.properties_and_descriptors.style_properties.all
+                        if p.codegen_properties.accepts_quirky_length
+                    ),
+                )
+
+                self.generation_context.generate_property_id_switch_function_bool(
+                    to=writer,
+                    signature="bool AcceptsQuirkyAngle(PropertyId id) noexcept",
+                    iterable=(
+                        p
+                        for p in self.properties_and_descriptors.style_properties.all
+                        if p.codegen_properties.accepts_quirky_angle
+                    ),
+                )
+
+                self._generate_animation_property_functions(to=writer)
+                self._generate_property_lists(to=writer)
+                self._generate_valid_keywords_for_property(to=writer)
+
+    # endregion
 
     # region PropertyId.hpp
 
@@ -7748,14 +8012,6 @@ class GeneratePropertyId:
             )
 
             self._generate_is_exposed_functions(to=writer)
-            self._generate_is_inherited_property(to=writer)
-
-            self.generation_context.generate_property_id_switch_function_bool(
-                to=writer,
-                signature="bool Property::IsColorProperty(PropertyId id) noexcept",
-                iterable=(p for p in self.properties_and_descriptors.style_properties.all if p.codegen_properties.color_property),
-            )
-
             self.generation_context.generate_property_id_switch_function(
                 to=writer,
                 signature="PropertyId CascadeAliasProperty(PropertyId id) noexcept",
@@ -7768,140 +8024,9 @@ class GeneratePropertyId:
                 default="return id;",
             )
 
-            physical_properties = []
-            for _, property_group in sorted(
-                self.generation_context.properties_and_descriptors.style_properties.logical_property_groups.items(),
-                key=lambda x: x[0],
-            ):
-                kind = property_group["kind"]
-                destinations = LogicalPropertyGroup.logical_property_group_resolvers["physical"][kind]
-                for property in [property_group["physical"][a_destination] for a_destination in destinations]:
-                    physical_properties.append(property)
-
-            self.generation_context.generate_property_id_switch_function(
-                to=writer,
-                signature="Maybe<ValueSeparator> Property::ListValuedPropertySeparator(PropertyId id) noexcept",
-                iterable=(
-                    p for p in self.properties_and_descriptors.style_properties.all if p.codegen_properties.separator
-                ),
-                mapping=lambda p: "return ValueSeparator::{};".format(
-                    {" ": "Space", ",": "Comma", "/": "Slash"}[p.codegen_properties.separator[0]]
-                ),
-                default="break;",
-                epilogue="return null;",
-            )
-
-            self.generation_context.generate_property_id_switch_function_bool(
-                to=writer,
-                signature="bool Property::AllowsNumberOrIntegerInput(PropertyId id) noexcept",
-                iterable=(
-                    p
-                    for p in self.properties_and_descriptors.style_properties.all
-                    if self._property_matches_number_or_integer(p)
-                )
-            )
-
-            self.generation_context.generate_property_id_switch_function_bool(
-                to=writer,
-                signature="bool Property::DisablesNativeAppearance(PropertyId id) noexcept",
-                iterable=(
-                    p
-                    for p in self.properties_and_descriptors.style_properties.all
-                    if p.codegen_properties.disables_native_appearance
-                )
-            )
-
-            for group_name, property_group in sorted(
-                self.generation_context.properties_and_descriptors.style_properties.logical_property_groups.items(),
-                key=lambda x: x[0],
-            ):
-                properties = set()
-                for kind in ["logical", "physical"]:
-                    for property in property_group[kind].values():
-                        properties.add(property)
-                        if (
-                            property
-                            in self.generation_context.properties_and_descriptors.style_properties.shorthand_by_longhand
-                        ):
-                            properties.add(
-                                self.generation_context.properties_and_descriptors.style_properties.shorthand_by_longhand[
-                                    property
-                                ]
-                            )
-
-                group_id = PropertyName.convert_name_to_id(group_name)
-                self.generation_context.generate_property_id_switch_function_bool(
-                    to=writer,
-                    signature=f"bool Property::Is{group_id}Property(PropertyId id) noexcept",
-                    iterable=sorted(properties, key=lambda x: x.name),
-                )
-
-            self.generation_context.generate_property_id_switch_function_bool(
-                to=writer,
-                signature="bool Property::IsInLogicalPropertyGroup(PropertyId id) noexcept",
-                iterable=self.properties_and_descriptors.style_properties.all_in_logical_property_group,
-            )
-
-            self._generate_are_in_same_logical_property_group_with_different_mappings_logic(to=writer)
-
-            self._generate_physical_logical_conversion_function(
-                to=writer,
-                signature="PropertyId Property::ResolveDirectionAwareProperty(PropertyId id, WritingMode writingMode) noexcept",
-                source="logical",
-                destination="physical",
-                resolver_enum_prefix="LogicalBox",
-            )
-
-            self._generate_physical_logical_conversion_function(
-                to=writer,
-                signature="PropertyId Property::UnresolvePhysicalProperty(PropertyId id, WritingMode writingMode) noexcept",
-                source="physical",
-                destination="logical",
-                resolver_enum_prefix="Box",
-            )
-
-            self.generation_context.generate_property_id_switch_function_bool(
-                to=writer,
-                signature="bool Property::IsDescriptorOnly(PropertyId id) noexcept",
-                iterable=self.properties_and_descriptors.all_descriptor_only,
-            )
-
-            self.generation_context.generate_property_id_switch_function_bool(
-                to=writer,
-                signature="bool Property::AcceptsQuirkyColor(PropertyId id) noexcept",
-                iterable=(
-                    p
-                    for p in self.properties_and_descriptors.style_properties.all
-                    if p.codegen_properties.accepts_quirky_color
-                ),
-            )
-
-            self.generation_context.generate_property_id_switch_function_bool(
-                to=writer,
-                signature="bool Property::AcceptsQuirkyLength(PropertyId id) noexcept",
-                iterable=(
-                    p
-                    for p in self.properties_and_descriptors.style_properties.all
-                    if p.codegen_properties.accepts_quirky_length
-                ),
-            )
-
-            self.generation_context.generate_property_id_switch_function_bool(
-                to=writer,
-                signature="bool Property::AcceptsQuirkyAngle(PropertyId id) noexcept",
-                iterable=(
-                    p
-                    for p in self.properties_and_descriptors.style_properties.all
-                    if p.codegen_properties.accepts_quirky_angle
-                ),
-            )
-
-            self._generate_animation_property_functions(to=writer)
-            self._generate_property_lists(to=writer)
             self._generate_css_property_settings_constructor(to=writer)
             self._generate_css_property_settings_operator_equal(to=writer)
             self._generate_css_property_settings_hash(to=writer)
-            self._generate_valid_keywords_for_property(to=writer)
 
             writer.write("}")  # closes namespace krys::boo
 
@@ -7912,7 +8037,6 @@ class GeneratePropertyId:
                 generator_name=GENERATOR_NAME,
                 headers=[
                     "Krystal.Booey/CSS/Parser/ParserContext.hpp",
-                    "Krystal.Booey/CSS/Properties/Property.hpp",
                     "Krystal.Booey/CSS/Values/ValueId.hpp",
                     "Krystal.Booey/Page/Settings.hpp",
                     "Krystal.Core/Strings/ASCII.hpp",
@@ -8123,7 +8247,7 @@ class GeneratePropertyId:
         to.newline()
 
         to.write_block("""\
-            bool Property::IsInheritedProperty(PropertyId id) noexcept
+            bool IsInheritedProperty(PropertyId id) noexcept
             {
               krys_debug_assert(static_cast<size_t>(id) < TotalPropertyIdValues);
               krys_debug_assert(id != PropertyId::Invalid);
@@ -8133,7 +8257,7 @@ class GeneratePropertyId:
 
     def _generate_are_in_same_logical_property_group_with_different_mappings_logic(self, *, to: Writer):
         with to.function_block(
-            signature="bool Property::AreInSameLogicalPropertyGroupWithDifferentMappingLogic(PropertyId id1, PropertyId id2) noexcept",
+            signature="bool AreInSameLogicalPropertyGroupWithDifferentMappingLogic(PropertyId id1, PropertyId id2) noexcept",
         ):
             with to.switch_block(expr="id1"):
                 for group_name, property_group in sorted(
@@ -8166,7 +8290,7 @@ class GeneratePropertyId:
     def _generate_animation_property_functions(self, *, to: Writer):
         self.generation_context.generate_property_id_switch_function_bool(
             to=to,
-            signature="bool Property::AnimationUsesNonAdditiveOrCumulativeInterpolation(PropertyId id) noexcept",
+            signature="bool AnimationUsesNonAdditiveOrCumulativeInterpolation(PropertyId id) noexcept",
             iterable=(
                 p
                 for p in self.properties_and_descriptors.style_properties.all
@@ -8176,7 +8300,7 @@ class GeneratePropertyId:
 
         self.generation_context.generate_property_id_switch_function_bool(
             to=to,
-            signature="bool Property::AnimationUsesNonNormalizedDiscreteInterpolation(PropertyId id) noexcept",
+            signature="bool AnimationUsesNonNormalizedDiscreteInterpolation(PropertyId id) noexcept",
             iterable=(
                 p
                 for p in self.properties_and_descriptors.style_properties.all
@@ -8186,7 +8310,7 @@ class GeneratePropertyId:
 
         self.generation_context.generate_property_id_switch_function(
             to=to,
-            signature="bool Property::AnimationIsAccelerated(PropertyId id, [[maybe_unused]] const Settings &settings) noexcept",
+            signature="bool AnimationIsAccelerated(PropertyId id, KRYS_MAYBE_UNUSED const Settings &settings) noexcept",
             iterable=(
                 p
                 for p in self.properties_and_descriptors.style_properties.all
@@ -8206,11 +8330,6 @@ class GeneratePropertyId:
                 to.write("};")
                 to.write("return properties;")
 
-        write_list(
-            "Span<const PropertyId> Property::ColorProperties() noexcept",
-            [p for p in self.properties_and_descriptors.style_properties.all if p.codegen_properties.color_property],
-        )
-
         physical_properties = []
         for _, property_group in sorted(
             self.generation_context.properties_and_descriptors.style_properties.logical_property_groups.items(),
@@ -8222,14 +8341,14 @@ class GeneratePropertyId:
                 physical_properties.append(property)
 
         write_list(
-            "Span<const PropertyId> Property::PhysicalProperties() noexcept",
+            "Span<const PropertyId> PhysicalProperties() noexcept",
             sorted(list(set(physical_properties)), key=lambda x: x.id),
         )
 
     def _unused_all_accelerated_animation_properties(self, *, to: Writer):
         # FIXME: The accelerated animation properties, once there are accelerated animations.
         with to.function_block(
-            signature="Span<const PropertyId> Property::AllAcceleratedAnimationProperties([[maybe_unused]] const Settings &settings) noexcept",
+            signature="Span<const PropertyId> AllAcceleratedAnimationProperties(KRYS_MAYBE_UNUSED const Settings &settings) noexcept",
         ):
             to.write("constexpr static Array propertiesExcludingThreadedOnly {")
             with to.indent():
@@ -8355,7 +8474,7 @@ class GeneratePropertyId:
                     all_properties_with_values.append((prop, keyword_values, array_name))
 
         with to.function_block(
-            signature="Span<const ValueId> Property::ValidKeywordsForProperty(PropertyId id) noexcept"
+            signature="Span<const ValueId> ValidKeywordsForProperty(PropertyId id) noexcept"
         ):
             with to.switch_block(expr="id"):
                 for prop, keyword_values, array_name in all_properties_with_values:
@@ -8416,7 +8535,7 @@ class GeneratePropertyId:
 
         # Generate the main IsKeywordValidForPropertyValues switch function
         with to.function_block(
-            signature="bool Property::IsKeywordValidForPropertyValues(PropertyId id, ValueId keyword, const ParserContext &context) noexcept",
+            signature="bool IsKeywordValidForPropertyValues(PropertyId id, ValueId keyword, const ParserContext &context) noexcept",
         ):
             with to.switch_block(expr="id"):
                 for prop, keyword_values, array_name in all_properties_with_values:
@@ -9495,7 +9614,7 @@ class GenerateStyleExtractorGenerated:
             signature="RefPtr<css::Value> ExtractorGenerated::ExtractValue(ExtractorState &extractorState, css::PropertyId id) noexcept",
             skipped="return nullptr;",
             logical=[
-                "return ExtractValue(extractorState, css::Property::ResolveDirectionAwareProperty(id, extractorState.Style.GetWritingMode()));"
+                "return ExtractValue(extractorState, css::ResolveDirectionAwareProperty(id, extractorState.Style.GetWritingMode()));"
             ],
             shorthand=lambda scope, property: [f"return {scope}::Extract{property.id_without_prefix}Shorthand(extractorState);"],
             longhand=lambda scope, property: [f"return {scope}::Extract{property.id_without_prefix}(extractorState);"],
@@ -9510,7 +9629,7 @@ class GenerateStyleExtractorGenerated:
             signature="void ExtractorGenerated::ExtractValueSerialisation(ExtractorState &extractorState, StringBuilder &builder, const css::SerialisationContext &context, css::PropertyId id) noexcept",
             skipped="return;",
             logical=[
-                "ExtractValueSerialisation(extractorState, builder, context, css::Property::ResolveDirectionAwareProperty(id, extractorState.Style.GetWritingMode()));",
+                "ExtractValueSerialisation(extractorState, builder, context, css::ResolveDirectionAwareProperty(id, extractorState.Style.GetWritingMode()));",
                 "return;",
             ],
             shorthand=lambda scope, property: [

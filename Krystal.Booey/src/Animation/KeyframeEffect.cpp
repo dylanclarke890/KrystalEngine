@@ -37,6 +37,7 @@
 #include "Krystal.Booey/CSS/Properties/Consumers/Easing.hpp"
 #include "Krystal.Booey/CSS/Properties/ImmutableStyleProperties.hpp"
 #include "Krystal.Booey/CSS/Properties/Property.hpp"
+#include "Krystal.Booey/CSS/Properties/PropertyQueries.hpp"
 #include "Krystal.Booey/CSS/Properties/PropertyShorthand.hpp"
 #include "Krystal.Booey/CSS/Rules/KeyframeRule.hpp"
 #include "Krystal.Booey/CSS/TypedOM/CSSNumericFactory.hpp"
@@ -408,7 +409,7 @@ namespace krys::boo
       {
         for (auto longhand : css::ShorthandForProperty(property))
         {
-          if (css::Property::IsDirectionAwareProperty(longhand))
+          if (css::IsLogicalPropertyGroupLogicalProperty(longhand))
           {
             return true;
           }
@@ -434,7 +435,7 @@ namespace krys::boo
         {
           cssProperty = css::PropertyId::Invalid;
         }
-        auto resolvedCSSProperty = css::Property::ResolveDirectionAwareProperty(cssProperty, WritingMode());
+        auto resolvedCSSProperty = css::ResolveDirectionAwareProperty(cssProperty, WritingMode());
         AnimatableCSSProperty animatableProperty = resolvedCSSProperty;
         if (cssProperty == css::PropertyId::Custom)
         {
@@ -2690,7 +2691,7 @@ namespace krys::boo
       {
         for (const auto &[property, value] : keyframe.StyleStrings)
         {
-          if (css::Property::IsDirectionAwareProperty(property))
+          if (css::IsLogicalPropertyGroupLogicalProperty(property))
           {
             return true;
           }

@@ -27,6 +27,7 @@
 #include "Krystal.Booey/Style/Interpolation/ChangedAnimatableProperties.hpp"
 #include "Krystal.Booey/Animation/WebAnimationTypes.hpp"
 #include "Krystal.Booey/CSS/Properties/Property.hpp"
+#include "Krystal.Booey/CSS/Properties/PropertyQueries.hpp"
 #include "Krystal.Booey/Rendering/Style/RenderStyle+GettersInlines.hpp"
 #include "Krystal.Booey/Rendering/Style/RenderStyle.hpp"
 #include "Krystal.Booey/Style/Interpolation/ChangedAnimatablePropertiesGenerated.hpp"
@@ -46,7 +47,7 @@ namespace krys::boo::style
     // properties.
     if (a.GetWritingMode() != b.GetWritingMode())
     {
-      changingProperties.Merge(css::Property::PhysicalProperties());
+      changingProperties.Merge(css::PhysicalProperties());
       if (a.GetWritingMode().IsVerticalTypographic() != b.GetWritingMode().IsVerticalTypographic())
       {
         changingProperties.Set(css::PropertyId::TextEmphasisStyle);

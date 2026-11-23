@@ -42,6 +42,7 @@
 #include "Krystal.Booey/CSS/Properties/Consumers/SymbolDefinitions.hpp"
 #include "Krystal.Booey/CSS/Properties/Property.hpp"
 #include "Krystal.Booey/CSS/Properties/PropertyParserState.hpp"
+#include "Krystal.Booey/CSS/Properties/PropertyQueries.hpp"
 #include "Krystal.Booey/CSS/Values/Color/AbsoluteColor.hpp"
 #include "Krystal.Booey/CSS/Values/Color/AbsoluteColorResolver.hpp"
 #include "Krystal.Booey/CSS/Values/Color/Color.hpp"
@@ -86,7 +87,7 @@ namespace krys::boo::css::parse_property
                        const ColorParsingOptions &options) noexcept
           : PropertyParserState {propertyParserState}, AllowedColorTypes {options.AllowedColorTypes},
             AcceptsQuirkyColor {propertyParserState.Context.Mode == ParserMode::HTMLQuirks
-                                && Property::AcceptsQuirkyColor(propertyParserState.CurrentProperty)}
+                                && css::AcceptsQuirkyColor(propertyParserState.CurrentProperty)}
       {
       }
     };
