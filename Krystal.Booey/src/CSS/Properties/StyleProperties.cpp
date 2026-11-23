@@ -1,26 +1,4 @@
-﻿/**
- * (C) 1999-2003 Lars Knoll (knoll@kde.org)
- * Copyright (C) 2004-2023 Apple Inc. All rights reserved.
- * Copyright (C) 2011 Research In Motion Limited. All rights reserved.
- * Copyright (C) 2013 Intel Corporation. All rights reserved.
- *
- * This library is free software; you can redistribute it and/or
- * modify it under the terms of the GNU Library General Public
- * License as published by the Free Software Foundation; either
- * version 2 of the License, or (at your option) any later version.
- *
- * This library is distributed in the hope that it will be useful,
- * but WITHOUT ANY WARRANTY; without even the implied warranty of
- * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU
- * Library General Public License for more details.
- *
- * You should have received a copy of the GNU Library General Public License
- * along with this library; see the file COPYING.LIB.  If not, write to
- * the Free Software Foundation, Inc., 51 Franklin Street, Fifth Floor,
- * Boston, MA 02110-1301, USA.
- */
-
-#include "Krystal.Booey/CSS/Properties/StyleProperties.hpp"
+﻿#include "Krystal.Booey/CSS/Properties/StyleProperties.hpp"
 #include "Krystal.Booey/CSS/Properties/Consumers/Color.hpp"
 #include "Krystal.Booey/CSS/Properties/Consumers/Font.hpp"
 #include "Krystal.Booey/CSS/Properties/PropertyId.hpp"
@@ -37,62 +15,144 @@
 #include "Krystal.Booey/CSS/Values/ValueList.hpp"
 #include "Krystal.Booey/Graphics/Color/Color.hpp"
 #include "Krystal.Core/Types/IterationStatus.hpp"
+#include <algorithm>
 #include <bitset>
 
 namespace krys::boo::css
 {
-  Ref<ImmutableStyleProperties> StyleProperties::ImmutableCopyIfNeeded() const noexcept
+  namespace
   {
-    if (_isMutable)
+    /// @brief Whether `AsText` may write @p longhand as part of @p shorthand.
+    KRYS_NODISCARD constexpr bool CanSerialiseLonghandAsPartOf(PropertyId shorthand,
+                                                               PropertyId longhand) noexcept
     {
-      return Downcast<MutableStyleProperties>(*this).ImmutableDeduplicatedCopy();
+      krys_debug_assert(IsShorthand(shorthand));
+      krys_debug_assert(IsLonghand(longhand));
+      switch (shorthand)
+      {
+        // Editing can't handle the font shorthand yet.
+        // NOLINTNEXTLINE(bugprone-branch-clone): the cases are grouped by reason.
+        case PropertyId::Font:               return false;
+
+        // Legacy shorthands are for parsing only.
+        // https://drafts.csswg.org/css-cascade-5/#legacy-shorthand
+        case PropertyId::PageBreakAfter:
+        case PropertyId::PageBreakBefore:
+        case PropertyId::PageBreakInside:    return false;
+
+        // text-decoration-skip-ink, its only longhand, is better supported on its own.
+        case PropertyId::TextDecorationSkip: return false;
+
+        // FIXME: more mask nonsense.
+        case PropertyId::Mask:
+        {
+          return longhand != PropertyId::MaskComposite && longhand != PropertyId::MaskMode
+                 && longhand != PropertyId::MaskSize;
+        }
+
+        // FIXME: If font-variant-ligatures is none, this depends on the value of the longhand.
+        case PropertyId::FontVariant:
+        // FIXME: These shorthands are avoided for unknown legacy reasons, probably shouldn't be avoided.
+        case PropertyId::ColumnRule:
+        case PropertyId::Columns:
+        case PropertyId::Container:
+        case PropertyId::FontSynthesis:
+        case PropertyId::GridArea:
+        case PropertyId::GridColumn:
+        case PropertyId::GridRow:
+        case PropertyId::MaskPosition:
+        case PropertyId::Offset:
+        case PropertyId::TextEmphasis:  return false;
+
+        default:                        return true;
+      }
     }
 
-    return ShareRef(const_cast<ImmutableStyleProperties &>(Downcast<ImmutableStyleProperties>(*this)));
+    /// @brief The shorthands `AsText` tries for @p property's declaration, preferred first.
+    KRYS_NODISCARD SmallList<PropertyId, MaxShorthandsForLonghand>
+      ShorthandsToTry(const StyleProperties::PropertyReference &property) noexcept
+    {
+      SmallList<PropertyId, MaxShorthandsForLonghand> shorthands;
+      // A shorthand with a var() keeps its text until substitution, and only it can be written.
+      if (const auto *pending = DynamicDowncast<PendingSubstitutionValue>(property.Value()))
+      {
+        shorthands.push_back(pending->ShorthandPropertyId());
+        return shorthands;
+      }
+      for (const auto &shorthand : MatchingShorthandsForLonghand(property.Id()))
+      {
+        if (CanSerialiseLonghandAsPartOf(shorthand.Id(), property.Id()))
+        {
+          shorthands.push_back(shorthand.Id());
+        }
+      }
+      return shorthands;
+    }
   }
 
   CSSOMString SerialiseLonghandValue(const SerialisationContext &context, PropertyId property,
                                      const Value &value) noexcept
   {
-    // Longhands set by mask and background shorthands can have comma-separated lists with implicit initial
-    // values in them. We need to serialize those lists with the actual values, not as "initial". Doing this
-    // for all CSSValueList with comma separators is better than checking the property is one of those
-    // longhands. Serializing this way is harmless for other properties; those won't have any implicit initial
-    // values.
-    if (auto *list = DynamicDowncast<ValueList>(value); list && list->Separator() == ValueSeparator::Comma)
+    // A comma-separated list from a shorthand (a background's layers, say) can hold implicit initial values.
+    // Any property's comma-separated list is handled, as only those lists have them.
+    if (const auto *list = DynamicDowncast<ValueList>(value);
+        list && list->Separator() == ValueSeparator::Comma)
     {
       CSSOMString result;
-      CSSOMStringView separator = u8"";
-      for (auto &individualValue : *list)
+      for (const auto &item : *list)
       {
-        result.append(std::exchange(separator, u8", "));
-        result.append(SerialiseLonghandValue(context, property, individualValue));
+        if (!result.empty())
+        {
+          result.append(u8", ");
+        }
+        result.append(SerialiseLonghandValue(context, property, item));
       }
-
       return result;
     }
-
-    return value.IsImplicitInitialValue() ? CSSOMString(InitialValueTextForLonghand(property))
-                                          : value.CssText(context);
+    if (value.IsImplicitInitialValue())
+    {
+      return CSSOMString(InitialValueTextForLonghand(property));
+    }
+    return value.CssText(context);
   }
 
-  inline CSSOMString StyleProperties::SerialiseLonghandValue(const SerialisationContext &context,
-                                                             PropertyId property) const noexcept
+  CSSOMString StyleProperties::SerialiseLonghandValue(const SerialisationContext &context,
+                                                      PropertyId property) const noexcept
   {
     return css::SerialiseLonghandValue(context, property, GetPropertyCSSValue(property).get());
   }
 
-  inline Maybe<CSSOMString> StyleProperties::SerialiseShorthandValue(const SerialisationContext &context,
-                                                                     PropertyId property) const noexcept
+  Maybe<CSSOMString> StyleProperties::SerialiseShorthandValue(const SerialisationContext &context,
+                                                              PropertyId property) const noexcept
   {
     return css::SerialiseShorthandValue(context, *this, property);
   }
 
+  RefPtr<Value> StyleProperties::GetPropertyCSSValue(PropertyId property) const noexcept
+  {
+    auto index = FindPropertyIndex(property);
+    if (!index)
+    {
+      return nullptr;
+    }
+    auto declaration = PropertyAt(*index);
+    const auto *value = declaration.Value();
+    // A system font (`font: menu`) sets its longhands to its keyword, which they mustn't serialise as.
+    if (declaration.ShorthandId() == PropertyId::Font && value
+        && parse_property::IsSystemFontShorthand(value->ValueId()))
+    {
+      return nullptr;
+    }
+    return ShareRefPtr(const_cast<Value *>(value));
+  }
+
   CSSOMString StyleProperties::GetPropertyValue(PropertyId property) const noexcept
   {
-    return IsLonghand(property)
-             ? SerialiseLonghandValue(DefaultSerialisationContext(), property)
-             : SerialiseShorthandValue(DefaultSerialisationContext(), property).value_or(u8"");
+    if (IsLonghand(property))
+    {
+      return SerialiseLonghandValue(DefaultSerialisationContext(), property);
+    }
+    return SerialiseShorthandValue(DefaultSerialisationContext(), property).value_or(CSSOMString());
   }
 
   Maybe<boo::Color> StyleProperties::PropertyAsColor(PropertyId property) const noexcept
@@ -102,14 +162,13 @@ namespace krys::boo::css
     {
       return null;
     }
-
     if (Is<ColorValue>(*value))
     {
       return ColorValue::GetAbsoluteColor(*value);
     }
-
-    auto serialisationString = css::SerialiseLonghandValue(DefaultSerialisationContext(), property, *value);
-    return parse_property::DeprecatedParseColorRawWithoutContext(serialisationString);
+    // Other colours, such as named ones, are parsed from their text.
+    return parse_property::DeprecatedParseColorRawWithoutContext(
+      css::SerialiseLonghandValue(DefaultSerialisationContext(), property, *value));
   }
 
   Maybe<ValueId> StyleProperties::PropertyAsValueId(PropertyId property) const noexcept
@@ -117,229 +176,142 @@ namespace krys::boo::css
     return LonghandValueId(property, GetPropertyCSSValue(property).get());
   }
 
-  CSSOMString StyleProperties::GetCustomPropertyValue(CSSOMStringView propertyName) const noexcept
-  {
-    if (auto value = GetCustomPropertyCSSValue(propertyName))
-    {
-      return value->CssText(DefaultSerialisationContext());
-    }
-
-    return CSSOMString();
-  }
-
-  RefPtr<Value> StyleProperties::GetPropertyCSSValue(PropertyId property) const noexcept
-  {
-    auto foundPropertyIndex = FindPropertyIndex(property);
-    if (!foundPropertyIndex)
-    {
-      return nullptr;
-    }
-
-    auto reference = PropertyAt(*foundPropertyIndex);
-    auto *value = reference.Value();
-    // System fonts are represented as CSSPrimitiveValue for various font subproperties, but these must
-    // serialize as the empty string. It might be better to implement this as a special CSSValue type instead
-    // of turning them into null here.
-    if (reference.ShorthandId() == PropertyId::Font && value
-        && parse_property::IsSystemFontShorthand(value->ValueId()))
-    {
-      return nullptr;
-    }
-
-    return ShareRefPtr(const_cast<Value *>(value));
-  }
-
-  RefPtr<Value> StyleProperties::GetCustomPropertyCSSValue(CSSOMStringView propertyName) const noexcept
-  {
-    auto foundPropertyIndex = FindCustomPropertyIndex(propertyName);
-    if (!foundPropertyIndex)
-    {
-      return nullptr;
-    }
-
-    return ShareRefPtr(const_cast<Value *>(PropertyAt(*foundPropertyIndex).Value()));
-  }
-
   bool StyleProperties::PropertyIsImportant(PropertyId property) const noexcept
   {
     if (IsLonghand(property))
     {
-      auto foundPropertyIndex = FindPropertyIndex(property);
-      if (foundPropertyIndex)
-      {
-        return PropertyAt(*foundPropertyIndex).IsImportant();
-      }
-
-      return false;
+      auto index = FindPropertyIndex(property);
+      return index && PropertyAt(*index).IsImportant();
     }
+    auto shorthand = ShorthandForProperty(property);
+    krys_debug_assert(shorthand.Size());
+    return std::ranges::all_of(shorthand, [&](PropertyId longhand) { return PropertyIsImportant(longhand); });
+  }
 
-    krys_debug_assert(ShorthandForProperty(property).Size());
-    for (auto longhand : ShorthandForProperty(property))
+  RefPtr<Value> StyleProperties::GetCustomPropertyCSSValue(CSSOMStringView propertyName) const noexcept
+  {
+    auto index = FindCustomPropertyIndex(propertyName);
+    if (!index)
     {
-      if (!PropertyIsImportant(longhand))
-      {
-        return false;
-      }
+      return nullptr;
     }
+    return ShareRefPtr(const_cast<Value *>(PropertyAt(*index).Value()));
+  }
 
-    return true;
+  CSSOMString StyleProperties::GetCustomPropertyValue(CSSOMStringView propertyName) const noexcept
+  {
+    auto value = GetCustomPropertyCSSValue(propertyName);
+    return value ? value->CssText(DefaultSerialisationContext()) : CSSOMString();
   }
 
   bool StyleProperties::CustomPropertyIsImportant(CSSOMStringView propertyName) const noexcept
   {
-    auto foundPropertyIndex = FindCustomPropertyIndex(propertyName);
-    if (foundPropertyIndex)
+    auto index = FindCustomPropertyIndex(propertyName);
+    return index && PropertyAt(*index).IsImportant();
+  }
+
+  Ref<MutableStyleProperties> StyleProperties::MutableCopy() const noexcept
+  {
+    return AdoptRef(*new MutableStyleProperties(*this));
+  }
+
+  Ref<ImmutableStyleProperties> StyleProperties::ImmutableCopyIfNeeded() const noexcept
+  {
+    if (_isMutable)
     {
-      return PropertyAt(*foundPropertyIndex).IsImportant();
+      return Downcast<MutableStyleProperties>(*this).ImmutableDeduplicatedCopy();
     }
-
-    return false;
+    return ShareRef(const_cast<ImmutableStyleProperties &>(Downcast<ImmutableStyleProperties>(*this)));
   }
 
-  CSSOMStringAtom StyleProperties::AsTextAtom(const SerialisationContext &context) const noexcept
+  Ref<MutableStyleProperties>
+    StyleProperties::CopyProperties(Span<const PropertyId> properties) const noexcept
   {
-    return CSSOMStringAtom(AsText(context));
-  }
-
-  KRYS_NODISCARD constexpr static bool CanUseShorthandForLonghand(PropertyId shorthandId,
-                                                                  PropertyId longhandId) noexcept
-  {
-    krys_debug_assert(IsShorthand(shorthandId));
-    krys_debug_assert(IsLonghand(longhandId));
-    switch (shorthandId)
+    List<Property> copied;
+    for (auto property : properties)
     {
-      // We are not yet using the font shorthand here because our editing code is currently incompatible.
-      // NOLINTNEXTLINE(bugprone-branch-clone): the cases are grouped by reason.
-      case PropertyId::Font:               return false;
-
-      // Avoid legacy shorthands according to https://www.w3.org/TR/css-cascade-5/#legacy-shorthand
-      case PropertyId::PageBreakAfter:
-      case PropertyId::PageBreakBefore:
-      case PropertyId::PageBreakInside:    return false;
-
-      // No other browser currently supports text-decoration-skip, so it's currently more web
-      // compatible to avoid collapsing text-decoration-skip-ink, its only longhand.
-      case PropertyId::TextDecorationSkip: return false;
-
-      // FIXME: more mask nonsense.
-      case PropertyId::Mask:
+      if (auto value = GetPropertyCSSValue(property))
       {
-        return longhandId != PropertyId::MaskComposite && longhandId != PropertyId::MaskMode
-               && longhandId != PropertyId::MaskSize;
+        copied.emplace_back(property, krys::move(value));
       }
-
-      // FIXME: If font-variant-ligatures is none, this depends on the value of the longhand.
-      case PropertyId::FontVariant:
-      // FIXME: These shorthands are avoided for unknown legacy reasons, probably shouldn't be avoided.
-      case PropertyId::ColumnRule:
-      case PropertyId::Columns:
-      case PropertyId::Container:
-      case PropertyId::FontSynthesis:
-      case PropertyId::GridArea:
-      case PropertyId::GridColumn:
-      case PropertyId::GridRow:
-      case PropertyId::MaskPosition:
-      case PropertyId::Offset:
-      case PropertyId::TextEmphasis:  return false;
-
-      default:                        return true;
     }
+    return MutableStyleProperties::Create(krys::move(copied));
   }
 
   CSSOMString StyleProperties::AsText(const SerialisationContext &context) const noexcept
   {
-    CSSOMString result;
-
-    constexpr auto shorthandPropertyCount =
+    constexpr auto shorthandCount =
       static_cast<size_t>(LastShorthandProperty) - static_cast<size_t>(FirstShorthandProperty) + 1uz;
-    std::bitset<shorthandPropertyCount> shorthandPropertyUsed;
-    std::bitset<shorthandPropertyCount> shorthandPropertyAppeared;
+    auto shorthandIndex = [](PropertyId shorthand)
+    {
+      krys_debug_assert(IsShorthand(shorthand));
+      return static_cast<size_t>(shorthand) - static_cast<size_t>(FirstShorthandProperty);
+    };
+    // Shorthands written so far, whose longhands are then skipped, and those tried, which aren't tried again.
+    std::bitset<shorthandCount> written;
+    std::bitset<shorthandCount> tried;
 
-    auto numDecls = 0u;
+    CSSOMString result;
     for (auto property : *this)
     {
-      auto propertyId = property.Id();
-      krys_debug_assert(IsLonghand(propertyId) || propertyId == PropertyId::Custom);
-      SmallList<PropertyId, MaxShorthandsForLonghand> shorthands;
+      krys_debug_assert(IsLonghand(property.Id()) || property.Id() == PropertyId::Custom);
 
-      if (auto *substitutionValue = DynamicDowncast<PendingSubstitutionValue>(property.Value()))
-      {
-        shorthands.push_back(substitutionValue->ShorthandPropertyId());
-      }
-      else
-      {
-        for (auto &shorthand : MatchingShorthandsForLonghand(propertyId))
-        {
-          if (CanUseShorthandForLonghand(shorthand.Id(), propertyId))
-          {
-            shorthands.push_back(shorthand.Id());
-          }
-        }
-      }
-
+      auto name = property.Id();
       Maybe<CSSOMString> value;
-      bool alreadyUsedShorthand = false;
-      for (auto &shorthandPropertyId : shorthands)
+      bool coveredByWrittenShorthand = false;
+      for (auto shorthand : ShorthandsToTry(property))
       {
-        krys_debug_assert(IsShorthand(shorthandPropertyId));
-        auto shorthandPropertyIndex =
-          static_cast<size_t>(shorthandPropertyId) - static_cast<size_t>(FirstShorthandProperty);
-
-        krys_debug_assert(shorthandPropertyIndex < shorthandPropertyUsed.size());
-        if (shorthandPropertyUsed[shorthandPropertyIndex])
+        auto index = shorthandIndex(shorthand);
+        if (written[index])
         {
-          alreadyUsedShorthand = true;
+          coveredByWrittenShorthand = true;
           break;
         }
-
-        if (shorthandPropertyAppeared[shorthandPropertyIndex])
+        if (tried[index])
         {
           continue;
         }
-
-        shorthandPropertyAppeared.set(shorthandPropertyIndex);
-
-        value = SerialiseShorthandValue(context, shorthandPropertyId);
+        tried.set(index);
+        // Null when the longhands can't be written as this shorthand, such as when some aren't declared.
+        value = SerialiseShorthandValue(context, shorthand);
         if (value)
         {
-          propertyId = shorthandPropertyId;
-          shorthandPropertyUsed.set(shorthandPropertyIndex);
+          name = shorthand;
+          written.set(index);
           break;
         }
       }
-
-      if (alreadyUsedShorthand)
+      if (coveredByWrittenShorthand)
       {
         continue;
       }
 
-      if (!value)
-      {
-        value = css::SerialiseLonghandValue(context, propertyId, *property.Value());
-      }
-
-      if (numDecls++)
+      if (!result.empty())
       {
         result.push_back(u8' ');
       }
-
-      if (propertyId == PropertyId::Custom)
+      if (name == PropertyId::Custom)
       {
         result.append(Downcast<CustomPropertyValue>(*property.Value()).Name().View());
       }
       else
       {
-        result.append(ToString(propertyId));
+        result.append(ToString(name));
       }
-
       result.append(u8": ");
-      result.append(*value);
-      result.append(property.IsImportant() ? u8" !important" : u8"");
+      result.append(value ? *value : css::SerialiseLonghandValue(context, name, *property.Value()));
+      if (property.IsImportant())
+      {
+        result.append(u8" !important");
+      }
       result.push_back(u8';');
     }
-
-    krys_debug_assert(!numDecls ^ !result.empty());
     return result;
+  }
+
+  CSSOMStringAtom StyleProperties::AsTextAtom(const SerialisationContext &context) const noexcept
+  {
+    return CSSOMStringAtom(AsText(context));
   }
 
   bool StyleProperties::TraverseSubresources(
@@ -352,80 +324,49 @@ namespace krys::boo::css
         return true;
       }
     }
-
     return false;
   }
 
   bool StyleProperties::MayDependOnBaseUrl() const noexcept
   {
-    bool result = false;
-    Func<IterationStatus(Value &)> func = [&](Value &value) -> IterationStatus
+    Func<IterationStatus(Value &)> visit = [&](Value &value) -> IterationStatus
     {
       if (value.MayDependOnBaseUrl())
       {
-        result = true;
         return IterationStatus::Done;
       }
-
-      return value.VisitChildren(func);
+      return value.VisitChildren(visit);
     };
-
     for (auto property : *this)
     {
-      if (func(*property.Value()) == IterationStatus::Done)
+      if (visit(*property.Value()) == IterationStatus::Done)
       {
-        return result;
+        return true;
       }
     }
-
     return false;
   }
 
-  bool StyleProperties::PropertyMatches(PropertyId property, const Value *propertyValue) const noexcept
+  bool StyleProperties::PropertyMatches(PropertyId property, const Value *value) const noexcept
   {
-    auto foundPropertyIndex = FindPropertyIndex(property);
-    if (!foundPropertyIndex)
-    {
-      return false;
-    }
-
-    return PropertyAt(*foundPropertyIndex).Value()->Equals(*propertyValue);
-  }
-
-  Ref<MutableStyleProperties> StyleProperties::MutableCopy() const noexcept
-  {
-    return AdoptRef(*new MutableStyleProperties(*this));
-  }
-
-  Ref<MutableStyleProperties>
-    StyleProperties::CopyProperties(Span<const PropertyId> properties) const noexcept
-  {
-    List<Property> list;
-    for (auto property : properties)
-    {
-      if (auto value = GetPropertyCSSValue(property))
-      {
-        list.emplace_back(property, krys::move(value));
-      }
-    }
-
-    return MutableStyleProperties::Create(krys::move(list));
+    auto index = FindPropertyIndex(property);
+    return index && PropertyAt(*index).Value()->Equals(*value);
   }
 
   size_t StyleProperties::AverageSizeInBytes() noexcept
   {
-    // Please update this if the storage scheme changes so that this longer reflects the actual size.
+    // Keep this in step with ImmutableStyleProperties' storage.
     return ImmutableStyleProperties::ObjectSize(4u);
   }
 
-  // See the function above if you need to update this.
+  // A block is a reference count and one word of bit-fields; AverageSizeInBytes assumes as much.
   struct SameSizeAsStyleProperties : public RefCounted<SameSizeAsStyleProperties>
   {
-    uint32 Bitfield;
+    uint32 BitFields;
   };
 
   static_assert(sizeof(StyleProperties) == sizeof(SameSizeAsStyleProperties),
-                "style property set should stay small");
+                "StyleProperties should stay small");
 
   CSSOMString StyleProperties::PropertyReference::CssName() const noexcept
   {
@@ -433,7 +374,6 @@ namespace krys::boo::css
     {
       return Downcast<CustomPropertyValue>(*Value()).Name().ToString();
     }
-
     return CSSOMString(ToString(Id()));
   }
 }

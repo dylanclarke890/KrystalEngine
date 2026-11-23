@@ -81,7 +81,7 @@ namespace krys::boo::css
 
     KRYS_NODISCARD Iterator<ImmutableStyleProperties> begin() const noexcept KRYS_LIFETIME_BOUND
     {
-      return {*this};
+      return Iterator<ImmutableStyleProperties>(*this);
     }
 
     KRYS_NODISCARD constexpr static std::nullptr_t end() noexcept
