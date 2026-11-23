@@ -53,11 +53,6 @@ namespace krys::boo::css
     KRYS_NODISCARD static Ref<CursorImageValue> Create(Ref<Value> &&imageValue, RefPtr<Value> &&hotSpot,
                                                        Url &&originalUrl) noexcept;
 
-    KRYS_NODISCARD const Url &OriginalUrl() const noexcept
-    {
-      return _originalUrl;
-    }
-
     KRYS_NODISCARD CSSOMString CustomCSSText(const SerialisationContext &context) const noexcept;
 
     KRYS_NODISCARD bool Equals(const CursorImageValue &other) const noexcept;

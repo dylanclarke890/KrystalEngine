@@ -26,31 +26,15 @@ namespace krys::boo::css::tests
 
   TEST_CASE_METHOD(ValueFixture, "CursorImageValue::Create", "[CSS][Values][CursorImageValue]")
   {
-    SECTION("The original URL is the image's URL")
-    {
-      auto value = CursorImageValue::Create(ImageValue::Create(CursorUrl(u8"a.cur")), nullptr);
-      CHECK(Is<CursorImageValue>(*value));
-      // Cursor images aren't <image>s.
-      CHECK_FALSE(value->IsImage());
-      CHECK_FALSE(value->IsImageGeneratorValue());
-      CHECK(value->OriginalUrl() == CursorUrl(u8"a.cur"));
-    }
+    auto value = CursorImageValue::Create(ImageValue::Create(CursorUrl(u8"a.cur")), nullptr);
+    CHECK(Is<CursorImageValue>(*value));
+    // Cursor images aren't <image>s.
+    CHECK_FALSE(value->IsImage());
+    CHECK_FALSE(value->IsImageGeneratorValue());
 
-    SECTION("Values other than images have no original URL")
-    {
-      auto value =
-        CursorImageValue::Create(CrossFadeValue::Create(TestImage(u8"a"), TestImage(u8"b"),
-                                                        PrimitiveValue::Create(0.5, UnitType::Number)),
-                                 nullptr);
-      CHECK(value->OriginalUrl().IsNone());
-    }
-
-    SECTION("With an explicit original URL")
-    {
-      auto value =
-        CursorImageValue::Create(ImageValue::Create(CursorUrl(u8"a.cur")), nullptr, CursorUrl(u8"b.cur"));
-      CHECK(value->OriginalUrl() == CursorUrl(u8"b.cur"));
-    }
+    // The original URL is only observable through the style image; see the style Cursor test.
+    CHECK(Is<CursorImageValue>(
+      *CursorImageValue::Create(ImageValue::Create(CursorUrl(u8"a.cur")), nullptr, CursorUrl(u8"b.cur"))));
   }
 
   TEST_CASE_METHOD(ValueFixture, "CursorImageValue serialisation", "[CSS][Values][CursorImageValue]")

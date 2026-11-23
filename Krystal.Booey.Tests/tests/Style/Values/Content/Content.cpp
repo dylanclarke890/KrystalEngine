@@ -90,6 +90,11 @@ namespace krys::boo::style::tests
     // No hot spot.
     CHECK((*cursor.Images)[1].HotSpot == PointI {-1, -1});
     CHECK((*cursor.Images)[0].Image->IsCursorImage());
+    // The cursor image keeps the URL it was given, for checking its protocol.
+    CHECK_FALSE((*cursor.Images)[0].Image->UsesDataProtocol());
+    auto dataCursor = Convert<Cursor>(PropertyId::Cursor, u8"url(data:image/png;base64,AAAA), auto");
+    REQUIRE(dataCursor.Images);
+    CHECK((*dataCursor.Images)[0].Image->UsesDataProtocol());
     CHECK(Serialised(cursor)
           == "url(\"https://example.com/a.png\") 3 4, url(\"https://example.com/b.png\"), auto");
   }
