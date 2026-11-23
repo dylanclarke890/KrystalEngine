@@ -64,23 +64,19 @@ namespace krys::boo::css
     /// state so that it costs them no space.
     struct Header
     {
+      // Ordered to pack into three bytes.
       ValueType Type : EnumBitWidth<ValueType>;
-      /// @brief A value of the static pool, which outlives every reference to it.
-      bool IsStatic : 1 {false};
-      /// @brief The `initial` a declaration block fills in for a longhand that a shorthand left out.
-      bool IsImplicitInitialValue : 1 {false};
-      /// @brief Whether `PrimitiveValue` has stored this value's serialisation.
-      mutable bool HasCachedCssText : 1 {false};
-
-      // Used by PrimitiveValue.
+      /// @brief Used by the lists, `ValuePair` and `QuadValue`.
+      ValueSeparator Separator : EnumBitWidth<ValueSeparator> {ValueSeparator::Space};
+      /// @brief Used by `PrimitiveValue`.
       detail::PrimitiveKind PrimitiveKind
         : EnumBitWidth<detail::PrimitiveKind> {detail::PrimitiveKind::Number};
-      UnitType Unit : EnumBitWidth<UnitType> {UnitType::Unknown};
-
-      // Used by the lists, ValuePair and QuadValue.
-      ValueSeparator Separator : EnumBitWidth<ValueSeparator> {ValueSeparator::Space};
-      /// @brief Whether a pair or quad of equal values serialises as one value.
+      /// @brief The `initial` a declaration block fills in for a longhand that a shorthand left out.
+      bool IsImplicitInitialValue : 1 {false};
+      /// @brief Used by `ValuePair` and `QuadValue`: whether equal values serialise as one.
       bool CoalesceIdenticalValues : 1 {true};
+      /// @brief Used by `PrimitiveValue`.
+      UnitType Unit : EnumBitWidth<UnitType> {UnitType::Unknown};
     };
 
   private:
@@ -89,18 +85,31 @@ namespace krys::boo::css
   protected:
     Header _header;
 
+  private:
+    // A value of the static pool: never destroyed and never counted, so threads can share it without writing
+    // to it.
+    bool _isStatic {false};
+
   public:
     // Reference counting, for Ref and RefPtr.
 
     void AddRef() const noexcept
     {
-      ++_refCount;
+      if (!_isStatic)
+      {
+        ++_refCount;
+      }
     }
 
     void SubRef() const noexcept
     {
+      if (_isStatic)
+      {
+        return;
+      }
+
       krys_debug_assert(_refCount > 0u);
-      if (--_refCount == 0u && !_header.IsStatic)
+      if (--_refCount == 0u)
       {
         delete const_cast<Value *>(this);
       }
@@ -118,7 +127,7 @@ namespace krys::boo::css
 
     KRYS_NODISCARD bool IsStatic() const noexcept
     {
-      return _header.IsStatic;
+      return _isStatic;
     }
 
     // The class and its flags.
@@ -250,7 +259,7 @@ namespace krys::boo::css
     /// @brief Marks a value of the static pool, so that it is never destroyed.
     void MakeStatic() noexcept
     {
-      _header.IsStatic = true;
+      _isStatic = true;
     }
 
     /// @brief Destroys the value as its own class, found from its `ValueType`.

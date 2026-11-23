@@ -28,10 +28,8 @@
 #include "Krystal.Booey/CSS/Values/ToLengthConversionData.hpp"
 #include "Krystal.Booey/CSS/Values/ValuePool.hpp"
 #include "Krystal.Booey/Style/Values/Primitives/LengthResolution.hpp"
-#include "Krystal.Core/Containers/HashMap.hpp"
 #include "Krystal.Core/Hashing/FastHash.hpp"
 #include "Krystal.Core/Maths/Extras.hpp"
-#include "Krystal.Core/Memory/NeverDestroyed.hpp"
 #include "Krystal.Core/Strings/StringBuilder.hpp"
 #include <algorithm>
 #include <charconv>
@@ -40,12 +38,6 @@ namespace krys::boo::css
 {
   namespace
   {
-    KRYS_NODISCARD HashMap<const PrimitiveValue *, CSSOMString> &SerialisedPrimitiveValues() noexcept
-    {
-      static NeverDestroyed<HashMap<const PrimitiveValue *, CSSOMString>> map;
-      return *map;
-    }
-
     KRYS_NODISCARD PrimitiveValue *ValueFromPool(Span<AlignedStorage<PrimitiveValue>> pool,
                                                  double value) noexcept
     {
@@ -130,12 +122,6 @@ namespace krys::boo::css
       case PrimitiveKind::Number:
       case PrimitiveKind::PropertyId:
       case PrimitiveKind::ValueId:     break;
-    }
-
-    if (_header.HasCachedCssText)
-    {
-      krys_debug_assert(SerialisedPrimitiveValues().contains(this));
-      SerialisedPrimitiveValues().erase(this);
     }
   }
 
@@ -495,20 +481,7 @@ namespace krys::boo::css
     {
       case PrimitiveKind::ValueId:    return CSSOMString(ToLower(_value.ValueId));
       case PrimitiveKind::PropertyId: return CSSOMString(ToString(_value.PropertyId));
-      default:
-      {
-        auto &map = SerialisedPrimitiveValues();
-        krys_debug_assert(map.contains(this) == _header.HasCachedCssText);
-        if (_header.HasCachedCssText)
-        {
-          return map.at(this);
-        }
-
-        CSSOMString serialisedValue = SerialiseInternal(context);
-        _header.HasCachedCssText = true;
-        map.emplace(this, serialisedValue);
-        return serialisedValue;
-      }
+      default:                        return SerialiseInternal(context);
     }
   }
 

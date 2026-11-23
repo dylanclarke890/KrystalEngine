@@ -91,7 +91,7 @@
 
 namespace krys::boo::css
 {
-  // The reference count and the packed header, with nothing else.
+  // The reference count, the packed header and the static flag, with nothing else.
   static_assert(sizeof(Value) == 8uz);
 
   template <typename Visitor>
