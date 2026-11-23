@@ -89,7 +89,7 @@ namespace krys::boo::style
                         primitiveValue.ResolveAsLength(conversionData), style::MinValueForCssLength,
                         style::MaxValueForCssLength),
                     },
-                    primitiveValue.PrimitiveType() == css::UnitType::QuirkyEm};
+                    primitiveValue.Unit() == css::UnitType::QuirkyEm};
         }
 
         if (primitiveValue.IsPercentage())

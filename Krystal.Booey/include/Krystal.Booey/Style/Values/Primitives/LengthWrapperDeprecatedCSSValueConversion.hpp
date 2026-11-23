@@ -55,17 +55,17 @@ namespace krys::boo::style
           {
             return T {typename T::Fixed {
                         css::ClampToRange<T::Fixed::Range, float>(
-                          primitiveValue.ResolveAsLengthNoConversionDataRequired(),
-                          style::MinValueForCssLength, style::MaxValueForCssLength),
+                          primitiveValue.ResolveAsLengthWithoutConversionData(), style::MinValueForCssLength,
+                          style::MaxValueForCssLength),
                       },
-                      primitiveValue.PrimitiveType() == css::UnitType::QuirkyEm};
+                      primitiveValue.Unit() == css::UnitType::QuirkyEm};
           }
 
           if (primitiveValue.IsPercentage())
           {
             return T {typename T::Percentage {
               css::ClampToRange<T::Percentage::Range, float>(
-                primitiveValue.ResolveAsPercentageNoConversionDataRequired()),
+                primitiveValue.ResolveAsPercentageWithoutConversionData()),
             }};
           }
 
@@ -79,7 +79,7 @@ namespace krys::boo::style
                         primitiveValue.ResolveAsLength(*conversionData), style::MinValueForCssLength,
                         style::MaxValueForCssLength),
                     },
-                    primitiveValue.PrimitiveType() == css::UnitType::QuirkyEm};
+                    primitiveValue.Unit() == css::UnitType::QuirkyEm};
         }
 
         if (primitiveValue.IsPercentage())

@@ -1285,7 +1285,7 @@ namespace krys::boo::css
           return null;
         }
 
-        auto keyword = FontWidthKeyword(widthValue.ResolveAsPercentageNoConversionDataRequired<double>());
+        auto keyword = FontWidthKeyword(widthValue.ResolveAsPercentageWithoutConversionData<double>());
         if (!keyword)
         {
           return null;
@@ -1829,7 +1829,7 @@ namespace krys::boo::css
           return false;
         }
 
-        auto percentageValue = value.ResolveAsPercentageNoConversionDataRequired<double>();
+        auto percentageValue = value.ResolveAsPercentageWithoutConversionData<double>();
         if (type == style::SingleAnimationRangeType::Start)
         {
           return percentageValue == 0;

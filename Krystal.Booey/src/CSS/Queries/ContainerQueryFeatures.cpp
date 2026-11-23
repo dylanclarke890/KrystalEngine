@@ -349,7 +349,7 @@ namespace krys::boo::css::cq
             return Category::Number;
           }
           // A calc() mixing a percentage with a length has no unit, and compares with nothing.
-          return CategoryForUnitType(value.PrimitiveType()).value_or(Category::LengthPercentage);
+          return CategoryForUnitType(value.Unit()).value_or(Category::LengthPercentage);
         };
 
         // A unitless zero is a zero length when compared against lengths.
@@ -377,7 +377,7 @@ namespace krys::boo::css::cq
               case Category::Resolution: numbers.push_back(value->ResolveAsResolution(conversionData)); break;
               case Category::Frequency:
                 numbers.push_back(
-                  ConvertUnit(value->Value<double>(conversionData), value->PrimitiveType(), UnitType::hz)
+                  ConvertUnit(value->Resolve<double>(conversionData), value->Unit(), UnitType::hz)
                     .value_or(0));
                 break;
               default:

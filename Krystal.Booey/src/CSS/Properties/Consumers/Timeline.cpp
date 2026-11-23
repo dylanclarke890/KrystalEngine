@@ -183,7 +183,7 @@ namespace krys::boo::css::parse_property
         return false;
       }
 
-      auto percentageValue = value.ResolveAsPercentageNoConversionDataRequired();
+      auto percentageValue = value.ResolveAsPercentageWithoutConversionData();
       if (type == style::SingleAnimationRangeType::Start)
       {
         return percentageValue == 0;

@@ -68,9 +68,10 @@ namespace krys::boo::css
 
   RefPtr<StyleImage> CrossFadeValue::CreateStyleImage(const style::BuilderState &state) const noexcept
   {
-    return StyleCrossfadeImage::Create(
-      state.CreateStyleImage(*_fromValueOrNone), state.CreateStyleImage(*_toValueOrNone),
-      std::clamp(_percentageValue->ValueDividingBy100IfPercentage<double>(state.CssToLengthConversionData()),
-                 0.0, 1.0));
+    return StyleCrossfadeImage::Create(state.CreateStyleImage(*_fromValueOrNone),
+                                       state.CreateStyleImage(*_toValueOrNone),
+                                       std::clamp(_percentageValue->ResolveDividingBy100IfPercentage<double>(
+                                                    state.CssToLengthConversionData()),
+                                                  0.0, 1.0));
   }
 }

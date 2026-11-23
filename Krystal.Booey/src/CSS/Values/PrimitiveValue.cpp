@@ -210,7 +210,7 @@ namespace krys::boo::css
 
 #pragma endregion
 
-  UnitType PrimitiveValue::PrimitiveType() const noexcept
+  UnitType PrimitiveValue::Unit() const noexcept
   {
     if (auto *calcValue = CalcValue())
     {
@@ -223,7 +223,7 @@ namespace krys::boo::css
   {
     if (!IsCalc())
     {
-      return css::IsFontIndependentLength(PrimitiveUnitType());
+      return css::IsFontIndependentLength(StoredUnit());
     }
 
     auto dependencies = ComputedStyleDependencies();
@@ -235,7 +235,7 @@ namespace krys::boo::css
   {
     if (!IsCalc())
     {
-      return css::IsFontRelativeLength(PrimitiveUnitType());
+      return css::IsFontRelativeLength(StoredUnit());
     }
 
     // Only font-relative units add properties: font-size, and line-height for `lh` and `rlh`.
@@ -257,7 +257,7 @@ namespace krys::boo::css
   {
     if (!IsCalc())
     {
-      return css::IsRootFontRelativeLength(PrimitiveUnitType());
+      return css::IsRootFontRelativeLength(StoredUnit());
     }
 
     return !ComputedStyleDependencies().RootProperties.empty();
@@ -333,7 +333,7 @@ namespace krys::boo::css
       return calcValue->ComputeLengthPx(conversionData);
     }
 
-    auto lengthUnit = ToUnit<LengthUnit>(PrimitiveType());
+    auto lengthUnit = ToUnit<LengthUnit>(Unit());
     if (!lengthUnit)
     {
       krys_debug_assert(false);
@@ -347,18 +347,18 @@ namespace krys::boo::css
 
 #pragma region Arbitrarily converting
 
-  double PrimitiveValue::DoubleValue(UnitType targetUnit,
-                                     const ToLengthConversionData &conversionData) const noexcept
+  double PrimitiveValue::ResolveDouble(UnitType targetUnit,
+                                       const ToLengthConversionData &conversionData) const noexcept
   {
-    auto unit = PrimitiveType();
+    auto unit = Unit();
     if (unit == UnitType::Unknown)
     {
       return 0;
     }
-    return ConvertUnitOrNumber(DoubleValue(conversionData), unit, targetUnit).value_or(0);
+    return ConvertUnitOrNumber(ResolveDouble(conversionData), unit, targetUnit).value_or(0);
   }
 
-  double PrimitiveValue::DoubleValueNoConversionDataRequired(UnitType targetUnit) const noexcept
+  double PrimitiveValue::ResolveDoubleWithoutConversionData(UnitType targetUnit) const noexcept
   {
     krys_debug_assert(!IsCalc());
     return ConvertUnitOrNumber(_value.Number, _header.Unit, targetUnit).value_or(0);
@@ -368,7 +368,7 @@ namespace krys::boo::css
 
 #pragma region Non-converting
 
-  double PrimitiveValue::DoubleValue(const ToLengthConversionData &conversionData) const noexcept
+  double PrimitiveValue::ResolveDouble(const ToLengthConversionData &conversionData) const noexcept
   {
     if (auto *calcValue = CalcValue())
     {
@@ -378,7 +378,7 @@ namespace krys::boo::css
     return _value.Number;
   }
 
-  double PrimitiveValue::DoubleValueDividingBy100IfPercentage(
+  double PrimitiveValue::ResolveDoubleDividingBy100IfPercentage(
     const ToLengthConversionData &conversionData) const noexcept
   {
     krys_debug_assert(IsNumberOrInteger() || IsPercentage());
@@ -570,7 +570,7 @@ namespace krys::boo::css
       return;
     }
 
-    if (auto lengthUnit = ToUnit<LengthUnit>(PrimitiveUnitType()))
+    if (auto lengthUnit = ToUnit<LengthUnit>(StoredUnit()))
     {
       css::CollectComputedStyleDependencies(dependencies, *lengthUnit);
     }

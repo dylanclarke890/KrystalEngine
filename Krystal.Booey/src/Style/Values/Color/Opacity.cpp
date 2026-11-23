@@ -40,7 +40,7 @@ namespace krys::boo::style
       return 1.0f;
     }
 
-    auto opacity = primitiveValue->ValueDividingBy100IfPercentage<float>(state.CssToLengthConversionData());
+    auto opacity = primitiveValue->ResolveDividingBy100IfPercentage<float>(state.CssToLengthConversionData());
     return css::ClampToRange<Opacity::Number::Range, Opacity::Number::ResolvedValueType>(opacity);
   }
 }

@@ -82,17 +82,17 @@ namespace krys::boo
     /// @see https://drafts.css-houdini.org/css-typed-om/#reify-a-numeric-value
     KRYS_NODISCARD RefPtr<CSSStyleValue> ReifyNumericValue(const css::PrimitiveValue &value) noexcept
     {
-      auto type = value.PrimitiveType();
+      auto type = value.Unit();
       switch (type)
       {
         case css::UnitType::Number:
         case css::UnitType::Integer:
         {
-          return CSSUnitValue::Create(value.ValueNoConversionDataRequired<double>(), css::UnitType::Number);
+          return CSSUnitValue::Create(value.ResolveWithoutConversionData<double>(), css::UnitType::Number);
         }
         case css::UnitType::Percentage:
         {
-          return CSSUnitValue::Create(value.ValueNoConversionDataRequired<double>(),
+          return CSSUnitValue::Create(value.ResolveWithoutConversionData<double>(),
                                       css::UnitType::Percentage);
         }
         default:
@@ -106,7 +106,7 @@ namespace krys::boo
       {
         return nullptr;
       }
-      return CSSUnitValue::Create(value.ValueNoConversionDataRequired<double>(), type);
+      return CSSUnitValue::Create(value.ResolveWithoutConversionData<double>(), type);
     }
 
     /// @brief @p value, the value of a list or none property, as `none` if it's that, or a generic style
