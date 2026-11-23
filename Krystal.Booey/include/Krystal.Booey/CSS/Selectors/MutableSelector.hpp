@@ -1,24 +1,4 @@
-﻿/*
- * Copyright (C) 2003 Lars Knoll (knoll@kde.org)
- * Copyright (C) 2004, 2005, 2006, 2008, 2009, 2010, 2014 Apple Inc. All rights reserved.
- *
- * This library is free software; you can redistribute it and/or
- * modify it under the terms of the GNU Library General Public
- * License as published by the Free Software Foundation; either
- * version 2 of the License, or (at your option) any later version.
- *
- * This library is distributed in the hope that it will be useful,
- * but WITHOUT ANY WARRANTY; without even the implied warranty of
- * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU
- * Library General Public License for more details.
- *
- * You should have received a copy of the GNU Library General Public License
- * along with this library; see the file COPYING.LIB.  If not, write to
- * the Free Software Foundation, Inc., 51 Franklin Street, Fifth Floor,
- * Boston, MA 02110-1301, USA.
- */
-
-#pragma once
+﻿#pragma once
 
 #include "Krystal.Booey/CSS/Selectors/Selector.hpp"
 #include "Krystal.Core/Containers/List.hpp"
@@ -31,8 +11,10 @@ namespace krys::boo::css
   class MutableSelector;
   using MutableSelectorList = List<UniquePtr<MutableSelector>>;
 
-  /// @brief A simple selector and the chain of simple selectors preceding it, as built by the parser. A
-  /// SelectorList flattens these into its array.
+  /// @brief The selector parser's working form of a complex selector: a simple selector and, through
+  /// `PrecedingComplexSelectorComponent`, the ones to its left, each with the relation (combinator or
+  /// compounding) that joins it to the one on its left. A `SelectorList` flattens finished chains into its
+  /// array.
   class MutableSelector
   {
   private:
@@ -40,25 +22,31 @@ namespace krys::boo::css
     UniquePtr<MutableSelector> _precedingComplexSelectorComponent;
 
   public:
+    /// @brief Selects the constructor that copies one simple selector without its chain.
     struct SimpleSelectorTag
     {
     };
 
+    /// @brief An empty simple selector, for the parser to fill in.
     MutableSelector() noexcept;
 
-    /// @brief Recursively copies the selector chain.
+    /// @brief A copy of @p selector and the chain to its left.
     explicit MutableSelector(const Selector &selector) noexcept;
 
-    /// @brief Only copies the simple selector.
+    /// @brief A copy of @p selector alone.
     MutableSelector(const Selector &selector, SimpleSelectorTag) noexcept;
 
+    /// @brief A type selector.
     explicit MutableSelector(const QualifiedName &tagQualifiedName) noexcept;
 
     ~MutableSelector() noexcept;
 
+    /// @brief The pseudo-class `:name`, or a legacy pseudo-element written with one colon; null if it's
+    /// unknown or disabled.
     KRYS_NODISCARD static UniquePtr<MutableSelector>
       ParsePseudoClassSelector(CSSOMStringView name, const SelectorParserContext &context) noexcept;
 
+    /// @brief The pseudo-element `::name`, or null if it's unknown or disabled.
     KRYS_NODISCARD static UniquePtr<MutableSelector>
       ParsePseudoElementSelector(CSSOMStringView name, const SelectorParserContext &context) noexcept;
 
@@ -137,6 +125,7 @@ namespace krys::boo::css
       _selector->SetPseudoClass(type);
     }
 
+    /// @brief Sets the arguments of a functional pseudo-class, such as `:is()`, to @p selectorVector.
     void AdoptSelectorVector(MutableSelectorList &&selectorVector) noexcept;
 
     void SetArgumentList(FixedList<CSSOMStringAtom> list) noexcept;
@@ -157,6 +146,7 @@ namespace krys::boo::css
       return _selector->PseudoClass();
     }
 
+    /// @brief Whether this simple selector, or one in its arguments, matches a pseudo-element.
     KRYS_NODISCARD bool MatchesPseudoElement() const noexcept;
 
     KRYS_NODISCARD bool IsHostPseudoClass() const noexcept
@@ -164,14 +154,15 @@ namespace krys::boo::css
       return _selector->IsHostPseudoClass();
     }
 
+    /// @brief Whether the chain contains `&`.
     KRYS_NODISCARD bool HasExplicitNestingParent() const noexcept;
 
+    /// @brief Whether the chain contains `:scope`.
     KRYS_NODISCARD bool HasExplicitPseudoClassScope() const noexcept;
 
-    // FIXME: "slotted" was removed here for now, since it leads to a combinator connection of
-    // ShadowDescendant, and the current shadow DOM code doesn't expect this. When we do fix this issue, make
-    // sure to patch the namespace prependTag code to remove the slotted special case, since it will be
-    // covered by this function once again.
+    /// @brief Whether this is a pseudo-element in an element's shadow tree (`::part()`, `::slotted()`, a
+    /// user agent part or `::cue`). It's matched across a shadow combinator from its host, which the parser
+    /// adds, along with a universal selector to carry it when nothing precedes the pseudo-element.
     KRYS_NODISCARD bool NeedsImplicitShadowCombinatorForMatching() const noexcept
     {
       return Match() == SelectorMatch::PseudoElement
@@ -181,6 +172,7 @@ namespace krys::boo::css
                  || PseudoElement() == SelectorPseudoElement::Slotted);
     }
 
+    /// @brief The simple selector to the left of this one, or null if it's the leftmost.
     KRYS_NODISCARD MutableSelector *PrecedingComplexSelectorComponent() const noexcept
     {
       return _precedingComplexSelectorComponent.get();
@@ -190,6 +182,8 @@ namespace krys::boo::css
 
     KRYS_NODISCARD const MutableSelector *LeftmostSimpleSelector() const noexcept;
 
+    /// @brief Whether the chain is a relative selector starting with a combinator other than a descendant
+    /// one, such as `> a` in `:has(> a)`.
     KRYS_NODISCARD bool StartsWithExplicitCombinator() const noexcept;
 
     void SetPrecedingComplexSelectorComponent(UniquePtr<MutableSelector> selector) noexcept
@@ -197,14 +191,36 @@ namespace krys::boo::css
       _precedingComplexSelectorComponent = krys::move(selector);
     }
 
+    /// @brief Puts @p selector to the left of the chain, joined by @p relation.
     void PrependComplexSelectorComponent(SelectorRelation relation,
                                          UniquePtr<MutableSelector> selector) noexcept;
 
+    /// @brief Puts @p selector to the left of a relative selector, joined by its leading combinator, or by a
+    /// descendant combinator if it has none.
     void PrependComplexSelectorComponentAsRelative(UniquePtr<MutableSelector> selector) noexcept;
 
+    /// @brief Makes a type selector for @p tagQualifiedName this compound's last simple selector, moving the
+    /// current one to its left.
+    /// @param tagIsForNamespaceRule Whether the type selector only carries the default namespace.
     void AppendTagInComplexSelector(const QualifiedName &tagQualifiedName,
                                     bool tagIsForNamespaceRule = false) noexcept;
 
+    /// @brief Detaches and returns the chain to the left, leaving this simple selector compounding.
     KRYS_NODISCARD UniquePtr<MutableSelector> ReleaseFromComplexSelector() noexcept;
+
+  private:
+    /// @brief Whether @p predicate holds for any simple selector in the chain.
+    template <typename TPredicate>
+    KRYS_NODISCARD bool AnyInChain(TPredicate predicate) const noexcept
+    {
+      for (const auto *selector = this; selector; selector = selector->PrecedingComplexSelectorComponent())
+      {
+        if (predicate(*selector->_selector))
+        {
+          return true;
+        }
+      }
+      return false;
+    }
   };
 }
