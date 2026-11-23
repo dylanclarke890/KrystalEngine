@@ -56,19 +56,35 @@
 
 namespace krys::boo::css
 {
+  /// @brief Where matching has got to: the simple selector being checked, the element it's checked
+  /// against, and what the combinators crossed so far allow.
   struct SelectorChecker::LocalContext
   {
     const Selector *CurrentSelector;
     const boo::Element *Element;
+    /// @brief The rightmost simple selector of the compound being checked.
     const Selector *FirstSelectorOfTheFragment;
+    /// @brief The pseudo-element asked for, until a combinator is crossed.
     Maybe<style::PseudoElementIdentifier> RequestedPseudoElement;
+    /// @brief Whether `Element` is the one being matched, not an ancestor or sibling reached through a
+    /// combinator.
     bool IsMatchElement {true};
+    /// @brief Whether `Element` is the one being matched or a sibling reached from it, rather than an
+    /// ancestor; it decides whether positional style relations are recorded for the parent's children or
+    /// its descendants.
     bool IsSubjectOrAdjacentElement {true};
+    /// @brief Whether the selector is an argument of a functional pseudo-class.
     bool InFunctionalPseudoClass {false};
+    /// @brief Whether a pseudo-element can match here: only in the rightmost compound, and not in arguments.
     bool PseudoElementEffective {true};
+    /// @brief Whether the compound so far has `::selection`, which, unlike other pseudo-elements, may be
+    /// followed by more of the compound.
     bool HasSelectionPseudo {false};
+    /// @brief Whether `Element` is a shadow host seen from inside its shadow tree, where it's featureless
+    /// and only `:host` (or `:scope`, `:is(:host)`) matches.
     bool MustMatchHostPseudoClass {false};
     bool MatchedHostPseudoClass {false};
+    /// @brief Whether the selector is inside an odd number of `:not()`s.
     bool IsNegation {false};
 
     LocalContext(const Selector &selector, const boo::Element &element,
@@ -96,9 +112,28 @@ namespace krys::boo::css
       return !dom::TreeQueries::NextElementSibling(element);
     }
 
+    /// @brief How many of @p element's previous (or, if @p forward, next) element siblings satisfy
+    /// @p predicate.
+    template <typename TPredicate>
+    KRYS_NODISCARD int32 CountSiblings(const Element &element, bool forward, TPredicate predicate) noexcept
+    {
+      int32 count = 0;
+      for (const auto *sibling = forward ? dom::TreeQueries::NextElementSibling(element)
+                                         : dom::TreeQueries::PreviousElementSibling(element);
+           sibling; sibling = forward ? dom::TreeQueries::NextElementSibling(*sibling)
+                                      : dom::TreeQueries::PreviousElementSibling(*sibling))
+      {
+        if (predicate(*sibling))
+        {
+          ++count;
+        }
+      }
+      return count;
+    }
+
     KRYS_NODISCARD bool IsFirstOfType(const Element &element, const QualifiedName &type) noexcept
     {
-      for (auto *sibling = dom::TreeQueries::PreviousElementSibling(element); sibling;
+      for (const auto *sibling = dom::TreeQueries::PreviousElementSibling(element); sibling;
            sibling = dom::TreeQueries::PreviousElementSibling(*sibling))
       {
         if (sibling->TagQualifiedName() == type)
@@ -111,7 +146,7 @@ namespace krys::boo::css
 
     KRYS_NODISCARD bool IsLastOfType(const Element &element, const QualifiedName &type) noexcept
     {
-      for (auto *sibling = dom::TreeQueries::NextElementSibling(element); sibling;
+      for (const auto *sibling = dom::TreeQueries::NextElementSibling(element); sibling;
            sibling = dom::TreeQueries::NextElementSibling(*sibling))
       {
         if (sibling->TagQualifiedName() == type)
@@ -125,14 +160,13 @@ namespace krys::boo::css
     KRYS_NODISCARD int32 CountElementsBefore(const Element &element) noexcept
     {
       int32 count = 0;
-      for (auto *sibling = dom::TreeQueries::PreviousElementSibling(element); sibling;
+      for (const auto *sibling = dom::TreeQueries::PreviousElementSibling(element); sibling;
            sibling = dom::TreeQueries::PreviousElementSibling(*sibling))
       {
-        auto index = sibling->ChildIndex();
-        if (index)
+        // A sibling whose index style resolution has recorded saves counting the rest.
+        if (auto index = sibling->ChildIndex())
         {
-          count += static_cast<int32>(index);
-          break;
+          return count + static_cast<int32>(index);
         }
         ++count;
       }
@@ -141,66 +175,44 @@ namespace krys::boo::css
 
     KRYS_NODISCARD int32 CountElementsOfTypeBefore(const Element &element, const QualifiedName &type) noexcept
     {
-      int32 count = 0;
-      for (auto *sibling = dom::TreeQueries::PreviousElementSibling(element); sibling;
-           sibling = dom::TreeQueries::PreviousElementSibling(*sibling))
-      {
-        if (sibling->TagQualifiedName() == type)
-        {
-          ++count;
-        }
-      }
-      return count;
+      return CountSiblings(element, false,
+                           [&](const Element &sibling) { return sibling.TagQualifiedName() == type; });
     }
 
     KRYS_NODISCARD int32 CountElementsAfter(const Element &element) noexcept
     {
-      int32 count = 0;
-      for (auto *sibling = dom::TreeQueries::NextElementSibling(element); sibling;
-           sibling = dom::TreeQueries::NextElementSibling(*sibling))
-      {
-        ++count;
-      }
-      return count;
+      return CountSiblings(element, true, [](const Element &) { return true; });
     }
 
     KRYS_NODISCARD int32 CountElementsOfTypeAfter(const Element &element, const QualifiedName &type) noexcept
     {
-      int32 count = 0;
-      for (auto *sibling = dom::TreeQueries::NextElementSibling(element); sibling;
-           sibling = dom::TreeQueries::NextElementSibling(*sibling))
-      {
-        if (sibling->TagQualifiedName() == type)
-        {
-          ++count;
-        }
-      }
-      return count;
+      return CountSiblings(element, true,
+                           [&](const Element &sibling) { return sibling.TagQualifiedName() == type; });
     }
 
+    /// @brief @p context moved to its element's parent for a child or descendant combinator: from a shadow
+    /// tree's top-level element, the shadow host, which then must match `:host`; from the host itself,
+    /// nothing, as the host has no ancestors inside its shadow tree.
     KRYS_NODISCARD SelectorChecker::LocalContext
       LocalContextForParent(const SelectorChecker::LocalContext &context) noexcept
     {
-      SelectorChecker::LocalContext updatedContext(context);
-      updatedContext.IsMatchElement = false;
-      updatedContext.IsSubjectOrAdjacentElement = false;
-
-      if (updatedContext.MustMatchHostPseudoClass)
+      SelectorChecker::LocalContext parentContext(context);
+      parentContext.IsMatchElement = false;
+      parentContext.IsSubjectOrAdjacentElement = false;
+      if (parentContext.MustMatchHostPseudoClass)
       {
-        updatedContext.Element = nullptr;
-        return updatedContext;
+        parentContext.Element = nullptr;
       }
-
-      // Move to the shadow host if the parent is the shadow root and mark that we must match :host
-      if (auto *shadowRoot = DynamicDowncast<ShadowRoot>(context.Element->ParentNode()))
+      else if (auto *shadowRoot = DynamicDowncast<ShadowRoot>(context.Element->ParentNode()))
       {
-        updatedContext.Element = shadowRoot->Host();
-        updatedContext.MustMatchHostPseudoClass = true;
-        return updatedContext;
+        parentContext.Element = shadowRoot->Host();
+        parentContext.MustMatchHostPseudoClass = true;
       }
-
-      updatedContext.Element = context.Element->ParentElement();
-      return updatedContext;
+      else
+      {
+        parentContext.Element = context.Element->ParentElement();
+      }
+      return parentContext;
     }
 
     /// @brief Whether @p element is a top-level element of a virtual scoping root (the document fragment or
@@ -218,7 +230,6 @@ namespace krys::boo::css
       {
         return false;
       }
-
       for (const auto *simple = &selector; simple->IsScopePseudoClass();)
       {
         const auto *preceding = simple->PrecedingComplexSelectorComponent();
@@ -262,10 +273,6 @@ namespace krys::boo::css
       {
         return value.find(search, start);
       }
-      if (search.size() > value.size())
-      {
-        return DOMStringView::npos;
-      }
       for (size_t i = start; i + search.size() <= value.size(); ++i)
       {
         if (text::IsASCIICaselessEqual(value.substr(i, search.size()), search))
@@ -276,157 +283,89 @@ namespace krys::boo::css
       return DOMStringView::npos;
     }
 
+    /// @brief Whether @p value is one of the whitespace-separated words of @p list.
+    KRYS_NODISCARD bool ListIncludes(DOMStringView list, DOMStringView value, bool caseSensitive) noexcept
+    {
+      for (size_t at = Find(list, value, 0, caseSensitive); at != DOMStringView::npos;
+           at = Find(list, value, at + 1, caseSensitive))
+      {
+        const size_t end = at + value.size();
+        if ((at == 0 || text::IsASCIIWhitespace(list[at - 1]))
+            && (end == list.size() || text::IsASCIIWhitespace(list[end])))
+        {
+          return true;
+        }
+      }
+      return false;
+    }
+
+    // https://drafts.csswg.org/selectors/#attribute-selectors
     KRYS_NODISCARD bool AttributeValueMatches(DOMStringView value, SelectorMatch match,
                                               DOMStringView selectorValue, bool caseSensitive) noexcept
     {
       switch (match)
       {
-        case SelectorMatch::AttributeExists: break;
+        case SelectorMatch::AttributeExists: return true;
         case SelectorMatch::AttributeEquals:
-          if (caseSensitive ? selectorValue != value : !text::IsASCIICaselessEqual(selectorValue, value))
-          {
-            return false;
-          }
-          break;
+          return caseSensitive ? selectorValue == value : text::IsASCIICaselessEqual(selectorValue, value);
         case SelectorMatch::AttributeIncludes:
-        {
-          // Ignore empty selectors or selectors containing spaces.
-          if (selectorValue.empty()
-              || std::ranges::any_of(selectorValue, [](char8 c) { return text::IsASCIIWhitespace(c); }))
-          {
-            return false;
-          }
-
-          size_t startSearchAt = 0;
-          while (true)
-          {
-            size_t foundPos = Find(value, selectorValue, startSearchAt, caseSensitive);
-            if (foundPos == DOMStringView::npos)
-            {
-              return false;
-            }
-            if (!foundPos || text::IsASCIIWhitespace(value[foundPos - 1]))
-            {
-              size_t endStr = foundPos + selectorValue.size();
-              if (endStr == value.size() || text::IsASCIIWhitespace(value[endStr]))
-              {
-                break; // We found a match.
-              }
-            }
-
-            // No match. Keep looking.
-            startSearchAt = foundPos + 1;
-          }
-          break;
-        }
+          // A value that is empty or has whitespace can't be one of the words.
+          return !selectorValue.empty()
+                 && std::ranges::none_of(selectorValue, [](char8 c) { return text::IsASCIIWhitespace(c); })
+                 && ListIncludes(value, selectorValue, caseSensitive);
+        // The substring forms never match an empty value.
         case SelectorMatch::AttributeSubstring:
-        {
-          bool valueContainsSelectorValue =
-            Find(value, selectorValue, 0, caseSensitive) != DOMStringView::npos;
-
-          if (!valueContainsSelectorValue || selectorValue.empty())
-          {
-            return false;
-          }
-
-          break;
-        }
+          return !selectorValue.empty()
+                 && Find(value, selectorValue, 0, caseSensitive) != DOMStringView::npos;
         case SelectorMatch::AttributePrefix:
-          if (selectorValue.empty())
-          {
-            return false;
-          }
-          if (!StartsWith(value, selectorValue, caseSensitive))
-          {
-            return false;
-          }
-          break;
+          return !selectorValue.empty() && StartsWith(value, selectorValue, caseSensitive);
         case SelectorMatch::AttributeSuffix:
-          if (selectorValue.empty())
-          {
-            return false;
-          }
-          if (!EndsWith(value, selectorValue, caseSensitive))
-          {
-            return false;
-          }
-          break;
+          return !selectorValue.empty() && EndsWith(value, selectorValue, caseSensitive);
         case SelectorMatch::AttributeDash:
-          if (value.size() < selectorValue.size())
-          {
-            return false;
-          }
-          if (!StartsWith(value, selectorValue, caseSensitive))
-          {
-            return false;
-          }
-          // It they start the same, check for exact match or following '-':
-          if (value.size() != selectorValue.size() && value[selectorValue.size()] != u8'-')
-          {
-            return false;
-          }
-          break;
+          return StartsWith(value, selectorValue, caseSensitive)
+                 && (value.size() == selectorValue.size() || value[selectorValue.size()] == u8'-');
         default: krys_debug_assert(false); return false;
       }
-
-      return true;
     }
 
+    /// @brief Whether attribute @p name matches a selector's name: the same local name, and the same
+    /// namespace unless the selector's prefix is `*`.
     KRYS_NODISCARD bool NameMatchesFilter(const QualifiedName &name, const CSSOMStringAtom &filterPrefix,
                                           const CSSOMStringAtom &filterLocalName,
                                           const CSSOMStringAtom &filterNamespaceURI) noexcept
     {
-      if (filterLocalName != name.LocalName())
-      {
-        return false;
-      }
-      return filterPrefix == dom::StarAtom() || filterNamespaceURI == name.NamespaceURI();
+      return filterLocalName == name.LocalName()
+             && (filterPrefix == dom::StarAtom() || filterNamespaceURI == name.NamespaceURI());
     }
 
     KRYS_NODISCARD bool AnyAttributeMatches(const Element &element, const Selector &selector,
                                             const QualifiedName &selectorAttr, bool caseSensitive) noexcept
     {
-      bool isHTML = IsHTMLElementInHTMLDocument(element);
-      auto &localName = isHTML ? selectorAttr.LocalNameLower() : selectorAttr.LocalName();
-      for (auto &attribute : element.AttributeList())
-      {
-        if (!NameMatchesFilter(attribute->GetQualifiedName(), selectorAttr.NamespacePrefix(), localName,
-                               selectorAttr.NamespaceURI()))
-        {
-          continue;
-        }
-
-        if (AttributeValueMatches(attribute->Value(), selector.Match(), selector.Value().View(),
-                                  caseSensitive))
-        {
-          return true;
-        }
-      }
-
-      return false;
+      // HTML elements' attribute names are lowercase in an HTML document, and selectors match them so.
+      const auto &localName =
+        IsHTMLElementInHTMLDocument(element) ? selectorAttr.LocalNameLower() : selectorAttr.LocalName();
+      return std::ranges::any_of(element.AttributeList(),
+                                 [&](const auto &attribute)
+                                 {
+                                   return NameMatchesFilter(attribute->GetQualifiedName(),
+                                                            selectorAttr.NamespacePrefix(), localName,
+                                                            selectorAttr.NamespaceURI())
+                                          && AttributeValueMatches(attribute->Value(), selector.Match(),
+                                                                   selector.Value().View(), caseSensitive);
+                                 });
     }
 
+    /// @brief Whether `:hover` or `:active` may match an element that isn't a link, which the
+    /// [quirk](https://quirks.spec.whatwg.org/#the-active-and-hover-quirk) forbids for a compound of only
+    /// `:hover`, `:active` and the universal selector, outside a functional pseudo-class's arguments.
     KRYS_NODISCARD bool
       CanMatchHoverOrActiveInQuirksMode(const SelectorChecker::LocalContext &context) noexcept
     {
-      // For quirks mode, follow this: http://quirks.spec.whatwg.org/#the-:active-and-:hover-quirk
-      // In quirks mode, a compound selector 'selector' that matches the following conditions must not match
-      // elements that would not also match the ':any-link' selector.
-      //
-      //    selector uses the ':active' or ':hover' pseudo-classes.
-      //    selector does not use a type selector.
-      //    selector does not use an attribute selector.
-      //    selector does not use an ID selector.
-      //    selector does not use a class selector.
-      //    selector does not use a pseudo-class selector other than ':active' and ':hover'.
-      //    selector does not use a pseudo-element selector.
-      //    selector is not part of an argument to a functional pseudo-class or pseudo-element.
       if (context.InFunctionalPseudoClass)
       {
         return true;
       }
-
-      for (auto *selector = context.FirstSelectorOfTheFragment; selector;
+      for (const auto *selector = context.FirstSelectorOfTheFragment; selector;
            selector = selector->PrecedingComplexSelectorComponent())
       {
         switch (selector->Match())
@@ -438,14 +377,12 @@ namespace krys::boo::css
             }
             break;
           case SelectorMatch::PseudoClass:
-          {
-            auto pseudoClass = selector->PseudoClass();
-            if (pseudoClass != SelectorPseudoClass::Hover && pseudoClass != SelectorPseudoClass::Active)
+            if (selector->PseudoClass() != SelectorPseudoClass::Hover
+                && selector->PseudoClass() != SelectorPseudoClass::Active)
             {
               return true;
             }
             break;
-          }
           case SelectorMatch::Id:
           case SelectorMatch::Class:
           case SelectorMatch::AttributeEquals:
@@ -462,15 +399,13 @@ namespace krys::boo::css
           case SelectorMatch::ForgivingUnknown:
           case SelectorMatch::ForgivingUnknownNestContaining: krys_debug_assert(false); break;
         }
-
-        auto relation = selector->Relation();
-        if (relation == SelectorRelation::ShadowDescendant
-            || relation == SelectorRelation::ShadowPartDescendant)
+        // A pseudo-element after the compound makes it not only :hover and :active.
+        if (selector->Relation() == SelectorRelation::ShadowDescendant
+            || selector->Relation() == SelectorRelation::ShadowPartDescendant)
         {
           return true;
         }
-
-        if (relation != SelectorRelation::Compounding)
+        if (selector->Relation() != SelectorRelation::Compounding)
         {
           return false;
         }
@@ -478,24 +413,21 @@ namespace krys::boo::css
       return false;
     }
 
+    // https://drafts.csswg.org/selectors/#type-selectors
     KRYS_NODISCARD bool TagMatches(const Element &element, const Selector &simpleSelector) noexcept
     {
-      auto &tagQName = simpleSelector.TagQualifiedName();
-
-      if (tagQName == dom::AnyQualifiedName())
+      const auto &name = simpleSelector.TagQualifiedName();
+      if (name == dom::AnyQualifiedName())
       {
         return true;
       }
-
-      auto &localName =
-        IsHTMLElementInHTMLDocument(element) ? simpleSelector.TagLocalNameLower() : tagQName.LocalName();
-
+      const auto &localName =
+        IsHTMLElementInHTMLDocument(element) ? simpleSelector.TagLocalNameLower() : name.LocalName();
       if (localName != dom::StarAtom() && localName != element.LocalName())
       {
         return false;
       }
-      auto &namespaceURI = tagQName.NamespaceURI();
-      return namespaceURI == dom::StarAtom() || namespaceURI == element.NamespaceURI();
+      return name.NamespaceURI() == dom::StarAtom() || name.NamespaceURI() == element.NamespaceURI();
     }
 
     /// @brief The tokens of the element's `part` attribute.
@@ -525,30 +457,44 @@ namespace krys::boo::css
       }
       return names;
     }
-  }
 
-  static inline void AddStyleRelation(SelectorChecker::CheckingContext &checkingContext,
-                                      const Element &element, style::Relation::Type type,
-                                      uint32 value = 1) noexcept
-  {
-    krys_debug_assert(value == 1 || type == style::Relation::NthChildIndex
-                      || type == style::Relation::AffectedByEmpty);
-    if (checkingContext.ResolvingMode != SelectorChecker::Mode::ResolvingStyle)
+    /// @brief Whether an attribute selector compares values case-sensitively: not with the `i` flag, and,
+    /// under @p htmlRules, not for an HTML attribute whose values HTML compares without case (unless the
+    /// `s` flag says otherwise).
+    KRYS_NODISCARD bool IsCaseSensitiveAttributeMatch(const Selector &selector, bool htmlRules) noexcept
     {
-      return;
-    }
-    if (type == style::Relation::AffectsNextSibling && !checkingContext.StyleRelations.empty())
-    {
-      auto &last = checkingContext.StyleRelations.back();
-      if (last.RelationType == style::Relation::AffectsNextSibling
-          && last.Element == dom::TreeQueries::NextElementSibling(element))
+      if (selector.IsAttributeValueMatchingCaseInsensitive())
       {
-        ++last.Value;
-        last.Element = &element;
+        return false;
+      }
+      return !htmlRules || selector.IsAttributeValueMatchingCaseSensitive()
+             || HTMLDocument::IsCaseSensitiveAttribute(selector.Attribute());
+    }
+
+    /// @brief Records that @p element's style depends on others' in the way @p type says, when resolving
+    /// style. Runs of `AffectsNextSibling` on consecutive siblings are merged into one, counted.
+    void AddStyleRelation(SelectorChecker::CheckingContext &checkingContext, const Element &element,
+                          style::Relation::Type type, uint32 value = 1) noexcept
+    {
+      krys_debug_assert(value == 1 || type == style::Relation::NthChildIndex
+                        || type == style::Relation::AffectedByEmpty);
+      if (checkingContext.ResolvingMode != SelectorChecker::Mode::ResolvingStyle)
+      {
         return;
       }
+      if (type == style::Relation::AffectsNextSibling && !checkingContext.StyleRelations.empty())
+      {
+        auto &last = checkingContext.StyleRelations.back();
+        if (last.RelationType == style::Relation::AffectsNextSibling
+            && last.Element == dom::TreeQueries::NextElementSibling(element))
+        {
+          ++last.Value;
+          last.Element = &element;
+          return;
+        }
+      }
+      checkingContext.StyleRelations.emplace_back(element, type, value);
     }
-    checkingContext.StyleRelations.emplace_back(element, type, value);
   }
 
   SelectorChecker::SelectorChecker(const Document &document) noexcept
@@ -559,38 +505,35 @@ namespace krys::boo::css
   bool SelectorChecker::Match(const Selector &selector, const Element &element,
                               CheckingContext &checkingContext) const noexcept
   {
-    auto &requestedPseudoElement = checkingContext.RequestedPseudoElement();
+    const auto &requestedPseudoElement = checkingContext.RequestedPseudoElement();
     LocalContext context(selector, element, requestedPseudoElement);
-
     if (checkingContext.StyleScopeOrdinal == style::ScopeOrdinal::Shadow)
     {
+      // A rule from the element's own shadow tree sees it as a featureless host.
       krys_debug_assert(dom::TreeQueries::GetShadowRoot(element));
-      // Rules coming from the element's shadow tree must match :host pseudo class.
       context.MustMatchHostPseudoClass = true;
     }
 
     EnumSet<PseudoElementType> collectedPseudoElements;
-    MatchResult result = MatchRecursively(checkingContext, context, collectedPseudoElements);
+    auto result = MatchRecursively(checkingContext, context, collectedPseudoElements);
     if (result.Outcome != MatchOutcome::SelectorMatches)
     {
       return false;
     }
-
     if (requestedPseudoElement)
     {
       return collectedPseudoElements.contains(requestedPseudoElement->Type);
     }
-
-    if (collectedPseudoElements)
+    if (!collectedPseudoElements)
     {
-      if (checkingContext.ResolvingMode == Mode::ResolvingStyle)
-      {
-        checkingContext.PublicPseudoElements = collectedPseudoElements;
-      }
-
-      return checkingContext.ResolvingMode == Mode::StyleInvalidation || result.Type == MatchType::Element;
+      return true;
     }
-    return true;
+    // Matching the element for one of its pseudo-elements tells style resolution to resolve that too.
+    if (checkingContext.ResolvingMode == Mode::ResolvingStyle)
+    {
+      checkingContext.PublicPseudoElements = collectedPseudoElements;
+    }
+    return checkingContext.ResolvingMode == Mode::StyleInvalidation || result.Type == MatchType::Element;
   }
 
   bool SelectorChecker::MatchHostPseudoClass(const Selector &selector, const Element &element,
@@ -600,154 +543,124 @@ namespace krys::boo::css
     {
       return false;
     }
-
-    if (auto *selectorList = selector.SubSelectors())
+    // :host(<compound>) also needs the host to match the compound.
+    if (const auto *selectorList = selector.SubSelectors())
     {
       krys_debug_assert(selectorList->SelectorCount() == 1);
       LocalContext context(*selectorList->FirstSelectorComponent(), element, null);
       context.InFunctionalPseudoClass = true;
       context.PseudoElementEffective = false;
       EnumSet<PseudoElementType> ignoredPseudoElements;
-      if (MatchRecursively(checkingContext, context, ignoredPseudoElements).Outcome
-          != MatchOutcome::SelectorMatches)
-      {
-        return false;
-      }
+      return MatchRecursively(checkingContext, context, ignoredPseudoElements).Outcome
+             == MatchOutcome::SelectorMatches;
     }
     return true;
   }
 
-  // Recursive check of selectors and combinators
-  // It can return 4 different values:
-  // * SelectorMatches          - the selector matches the element e
-  // * SelectorFailsLocally     - the selector fails for the element e
-  // * SelectorFailsAllSiblings - the selector fails for e and any sibling of e
-  // * SelectorFailsCompletely  - the selector fails for e and any sibling or ancestor of e
   auto SelectorChecker::MatchRecursively(CheckingContext &checkingContext, LocalContext &context,
                                          EnumSet<PseudoElementType> &collectedPseudoElements) const noexcept
     -> MatchResult
   {
-    MatchType matchType = MatchType::Element;
-
-    // The first selector has to match.
+    auto matchType = MatchType::Element;
     if (!CheckOne(checkingContext, context, matchType))
     {
       return MatchResult::Fails(MatchOutcome::SelectorFailsLocally);
     }
 
-    if (context.CurrentSelector->Match() == SelectorMatch::PseudoElement)
+    if (context.CurrentSelector->MatchesPseudoElement())
     {
-      switch (context.CurrentSelector->PseudoElement())
+      if (context.CurrentSelector->PseudoElement() == SelectorPseudoElement::UserAgentPart)
       {
-        case SelectorPseudoElement::UserAgentPart:
+        // :is() and the other logical combinations can't match pseudo-elements; one gets into their
+        // arguments only through nesting resolution, which must then match nothing.
+        if (context.InFunctionalPseudoClass)
         {
-          // :is() and the other logical combinations can't match pseudo-elements; one gets into their
-          // arguments only through nesting resolution, which must then match nothing.
-          if (context.InFunctionalPseudoClass)
-          {
-            return MatchResult::Fails(MatchOutcome::SelectorFailsCompletely);
-          }
-          if (auto *root = dom::TreeQueries::ContainingShadowRoot(*context.Element))
-          {
-            if (root->Mode() != dom::ShadowRootMode::UserAgent)
-            {
-              return MatchResult::Fails(MatchOutcome::SelectorFailsLocally);
-            }
-
-            if (context.Element->UserAgentPart() != context.CurrentSelector->Value())
-            {
-              return MatchResult::Fails(MatchOutcome::SelectorFailsLocally);
-            }
-          }
-          else
-          {
-            return MatchResult::Fails(MatchOutcome::SelectorFailsLocally);
-          }
-          break;
+          return MatchResult::Fails(MatchOutcome::SelectorFailsCompletely);
         }
-        default:
+        // A user agent part is an element in a user agent shadow tree, with that part name.
+        const auto *root = dom::TreeQueries::ContainingShadowRoot(*context.Element);
+        if (!root || root->Mode() != dom::ShadowRootMode::UserAgent
+            || context.Element->UserAgentPart() != context.CurrentSelector->Value())
         {
-          if (!context.PseudoElementEffective)
-          {
-            return MatchResult::Fails(MatchOutcome::SelectorFailsCompletely);
-          }
-
-          if (checkingContext.ResolvingMode == Mode::QueryingRules)
-          {
-            return MatchResult::Fails(MatchOutcome::SelectorFailsCompletely);
-          }
-
-          if (auto type = Selector::StylePseudoElementTypeFor(context.CurrentSelector->PseudoElement()))
-          {
-            collectedPseudoElements.Add(*type);
-          }
-          matchType = MatchType::VirtualPseudoElementOnly;
-          break;
+          return MatchResult::Fails(MatchOutcome::SelectorFailsLocally);
         }
+      }
+      else
+      {
+        // Other pseudo-elements match only in the rightmost compound, and never in a query.
+        if (!context.PseudoElementEffective || checkingContext.ResolvingMode == Mode::QueryingRules)
+        {
+          return MatchResult::Fails(MatchOutcome::SelectorFailsCompletely);
+        }
+        if (auto type = Selector::StylePseudoElementTypeFor(context.CurrentSelector->PseudoElement()))
+        {
+          collectedPseudoElements.Add(*type);
+        }
+        matchType = MatchType::VirtualPseudoElementOnly;
       }
     }
 
-    // The rest of the selectors has to match
-    auto relation = context.CurrentSelector->Relation();
-
-    // Prepare next selector
-    const Selector *leftSelector = context.CurrentSelector->PrecedingComplexSelectorComponent();
+    const auto relation = context.CurrentSelector->Relation();
+    const auto *leftSelector = context.CurrentSelector->PrecedingComplexSelectorComponent();
     if (!leftSelector)
     {
       if (context.MustMatchHostPseudoClass && !context.MatchedHostPseudoClass)
       {
         return MatchResult::Fails(MatchOutcome::SelectorFailsCompletely);
       }
-
       return MatchResult::Matches(matchType);
     }
 
     LocalContext nextContext(context);
     nextContext.CurrentSelector = leftSelector;
-
     if (relation != SelectorRelation::Compounding)
     {
+      // Crossing a combinator: the requested pseudo-element must have been found in the rightmost compound.
       if (context.RequestedPseudoElement
           && !collectedPseudoElements.contains(context.RequestedPseudoElement->Type))
       {
         return MatchResult::Fails(MatchOutcome::SelectorFailsCompletely);
       }
-
       nextContext.RequestedPseudoElement = null;
-
-      bool allowMultiplePseudoElements = relation == SelectorRelation::ShadowDescendant;
-      // Virtual pseudo element is only effective in the rightmost fragment.
-      if (!allowMultiplePseudoElements)
+      // Pseudo-elements only match in the rightmost compound, except across a shadow descendant combinator.
+      if (relation != SelectorRelation::ShadowDescendant)
       {
         nextContext.PseudoElementEffective = false;
       }
-
       nextContext.IsMatchElement = false;
+      nextContext.FirstSelectorOfTheFragment = leftSelector;
     }
+
+    // Matches the rest of the selector against nextContext's element. Pseudo-elements can't match there.
+    const auto matchLeft = [&]
+    {
+      EnumSet<PseudoElementType> ignoredPseudoElements;
+      auto result = MatchRecursively(checkingContext, nextContext, ignoredPseudoElements);
+      krys_debug_assert(!nextContext.PseudoElementEffective && !ignoredPseudoElements);
+      return result;
+    };
+    const auto isFinal = [](const MatchResult &result)
+    {
+      return result.Outcome == MatchOutcome::SelectorMatches
+             || result.Outcome == MatchOutcome::SelectorFailsCompletely;
+    };
 
     switch (relation)
     {
       case SelectorRelation::Descendant:
-        nextContext.FirstSelectorOfTheFragment = nextContext.CurrentSelector;
+        // Try each ancestor in turn, until one matches or none can.
         while (true)
         {
           if (MatchesVirtualScopingRootAsParent(checkingContext, *nextContext.Element, *leftSelector))
           {
             return MatchResult::Matches(matchType);
           }
-
           nextContext = LocalContextForParent(nextContext);
           if (!nextContext.Element)
           {
             return MatchResult::Fails(MatchOutcome::SelectorFailsCompletely);
           }
-
-          EnumSet<PseudoElementType> ignoredPseudoElements;
-          MatchResult result = MatchRecursively(checkingContext, nextContext, ignoredPseudoElements);
-          krys_debug_assert(!nextContext.PseudoElementEffective && !ignoredPseudoElements);
-
-          if (result.Outcome == MatchOutcome::SelectorMatches
-              || result.Outcome == MatchOutcome::SelectorFailsCompletely)
+          if (auto result = matchLeft(); isFinal(result))
           {
             return MatchResult::UpdateWithMatchType(result, matchType);
           }
@@ -764,139 +677,94 @@ namespace krys::boo::css
         {
           return MatchResult::Fails(MatchOutcome::SelectorFailsCompletely);
         }
-        nextContext.FirstSelectorOfTheFragment = nextContext.CurrentSelector;
-        EnumSet<PseudoElementType> ignoredPseudoElements;
-        MatchResult result = MatchRecursively(checkingContext, nextContext, ignoredPseudoElements);
-        krys_debug_assert(!nextContext.PseudoElementEffective && !ignoredPseudoElements);
-
-        if (result.Outcome == MatchOutcome::SelectorMatches
-            || result.Outcome == MatchOutcome::SelectorFailsCompletely)
-        {
-          return MatchResult::UpdateWithMatchType(result, matchType);
-        }
-        return MatchResult::Fails(MatchOutcome::SelectorFailsAllSiblings);
+        // A sibling has the same parent, so it fails too.
+        auto result = matchLeft();
+        return isFinal(result) ? MatchResult::UpdateWithMatchType(result, matchType)
+                               : MatchResult::Fails(MatchOutcome::SelectorFailsAllSiblings);
       }
 
       case SelectorRelation::NextSibling:
       {
-        auto siblingRelation = context.IsMatchElement ? style::Relation::AffectedByPreviousSibling
-                                                      : style::Relation::DescendantsAffectedByPreviousSibling;
-        AddStyleRelation(checkingContext, *context.Element, siblingRelation);
-
+        AddStyleRelation(checkingContext, *context.Element,
+                         context.IsMatchElement ? style::Relation::AffectedByPreviousSibling
+                                                : style::Relation::DescendantsAffectedByPreviousSibling);
         auto *previousElement = dom::TreeQueries::PreviousElementSibling(*context.Element);
         if (!previousElement)
         {
           return MatchResult::Fails(MatchOutcome::SelectorFailsAllSiblings);
         }
-
         AddStyleRelation(checkingContext, *previousElement, style::Relation::AffectsNextSibling);
-
         nextContext.Element = previousElement;
-        nextContext.FirstSelectorOfTheFragment = nextContext.CurrentSelector;
-        EnumSet<PseudoElementType> ignoredPseudoElements;
-        MatchResult result = MatchRecursively(checkingContext, nextContext, ignoredPseudoElements);
-        krys_debug_assert(!nextContext.PseudoElementEffective && !ignoredPseudoElements);
-
-        return MatchResult::UpdateWithMatchType(result, matchType);
+        return MatchResult::UpdateWithMatchType(matchLeft(), matchType);
       }
+
       case SelectorRelation::SubsequentSibling:
       {
-        auto siblingRelation = context.IsMatchElement ? style::Relation::AffectedByPreviousSibling
-                                                      : style::Relation::DescendantsAffectedByPreviousSibling;
-        AddStyleRelation(checkingContext, *context.Element, siblingRelation);
-
-        nextContext.Element = dom::TreeQueries::PreviousElementSibling(*context.Element);
-        nextContext.FirstSelectorOfTheFragment = nextContext.CurrentSelector;
-        for (; nextContext.Element;
+        AddStyleRelation(checkingContext, *context.Element,
+                         context.IsMatchElement ? style::Relation::AffectedByPreviousSibling
+                                                : style::Relation::DescendantsAffectedByPreviousSibling);
+        // Try each previous sibling in turn, until one matches or none can.
+        for (nextContext.Element = dom::TreeQueries::PreviousElementSibling(*context.Element);
+             nextContext.Element;
              nextContext.Element = dom::TreeQueries::PreviousElementSibling(*nextContext.Element))
         {
           AddStyleRelation(checkingContext, *nextContext.Element, style::Relation::AffectsNextSibling);
-
-          EnumSet<PseudoElementType> ignoredPseudoElements;
-          MatchResult result = MatchRecursively(checkingContext, nextContext, ignoredPseudoElements);
-          krys_debug_assert(!nextContext.PseudoElementEffective && !ignoredPseudoElements);
-
-          if (result.Outcome == MatchOutcome::SelectorMatches
-              || result.Outcome == MatchOutcome::SelectorFailsAllSiblings
-              || result.Outcome == MatchOutcome::SelectorFailsCompletely)
+          if (auto result = matchLeft();
+              isFinal(result) || result.Outcome == MatchOutcome::SelectorFailsAllSiblings)
           {
             return MatchResult::UpdateWithMatchType(result, matchType);
           }
         }
         return MatchResult::Fails(MatchOutcome::SelectorFailsAllSiblings);
       }
+
       case SelectorRelation::Compounding:
       {
-        // a selector is invalid if something follows a pseudo-element
+        // Nothing may follow a pseudo-element in a compound, except `::selection`.
         nextContext.HasSelectionPseudo = collectedPseudoElements.contains(PseudoElementType::Selection);
-
         if ((context.IsMatchElement || checkingContext.ResolvingMode == Mode::CollectingRules)
             && collectedPseudoElements && !nextContext.HasSelectionPseudo)
         {
           return MatchResult::Fails(MatchOutcome::SelectorFailsCompletely);
         }
-
-        MatchResult result = MatchRecursively(checkingContext, nextContext, collectedPseudoElements);
-
-        return MatchResult::UpdateWithMatchType(result, matchType);
+        return MatchResult::UpdateWithMatchType(
+          MatchRecursively(checkingContext, nextContext, collectedPseudoElements), matchType);
       }
+
+      // The shadow combinators continue matching at a host or slot in the tree the rule came from.
       case SelectorRelation::ShadowDescendant:
-      {
-        auto *host = dom::TreeQueries::ShadowHost(*context.Element);
-        if (!host)
-        {
-          return MatchResult::Fails(MatchOutcome::SelectorFailsCompletely);
-        }
-
-        nextContext.Element = host;
-        nextContext.FirstSelectorOfTheFragment = nextContext.CurrentSelector;
-        nextContext.IsSubjectOrAdjacentElement = false;
-        EnumSet<PseudoElementType> ignoredPseudoElements;
-        MatchResult result = MatchRecursively(checkingContext, nextContext, ignoredPseudoElements);
-
-        return MatchResult::UpdateWithMatchType(result, matchType);
-      }
       case SelectorRelation::ShadowPartDescendant:
-      {
-        // Continue matching in the scope where this rule came from.
-        auto *host = checkingContext.StyleScopeOrdinal == style::ScopeOrdinal::Element
-                       ? dom::TreeQueries::ShadowHost(*context.Element)
-                       : style::HostForScopeOrdinal(*context.Element, checkingContext.StyleScopeOrdinal);
-        if (!host)
-        {
-          return MatchResult::Fails(MatchOutcome::SelectorFailsCompletely);
-        }
-
-        nextContext.Element = host;
-        nextContext.FirstSelectorOfTheFragment = nextContext.CurrentSelector;
-        nextContext.IsSubjectOrAdjacentElement = false;
-        // ::part rules from the element's own scope can only match if they apply to :host.
-        nextContext.MustMatchHostPseudoClass =
-          checkingContext.StyleScopeOrdinal == style::ScopeOrdinal::Element;
-        EnumSet<PseudoElementType> ignoredPseudoElements;
-        MatchResult result = MatchRecursively(checkingContext, nextContext, ignoredPseudoElements);
-
-        return MatchResult::UpdateWithMatchType(result, matchType);
-      }
       case SelectorRelation::ShadowSlotted:
       {
-        // We continue matching in the scope where this rule came from.
-        auto *slot = style::AssignedSlotForScopeOrdinal(*context.Element, checkingContext.StyleScopeOrdinal);
-        if (!slot)
+        const Element *next = nullptr;
+        if (relation == SelectorRelation::ShadowDescendant)
+        {
+          next = dom::TreeQueries::ShadowHost(*context.Element);
+        }
+        else if (relation == SelectorRelation::ShadowPartDescendant)
+        {
+          next = checkingContext.StyleScopeOrdinal == style::ScopeOrdinal::Element
+                   ? dom::TreeQueries::ShadowHost(*context.Element)
+                   : style::HostForScopeOrdinal(*context.Element, checkingContext.StyleScopeOrdinal);
+          // ::part() rules from the element's own scope can only match if they apply to :host.
+          nextContext.MustMatchHostPseudoClass =
+            checkingContext.StyleScopeOrdinal == style::ScopeOrdinal::Element;
+        }
+        else
+        {
+          next = style::AssignedSlotForScopeOrdinal(*context.Element, checkingContext.StyleScopeOrdinal);
+        }
+        if (!next)
         {
           return MatchResult::Fails(MatchOutcome::SelectorFailsCompletely);
         }
-
-        nextContext.Element = slot;
-        nextContext.FirstSelectorOfTheFragment = nextContext.CurrentSelector;
+        nextContext.Element = next;
         nextContext.IsSubjectOrAdjacentElement = false;
         EnumSet<PseudoElementType> ignoredPseudoElements;
-        MatchResult result = MatchRecursively(checkingContext, nextContext, ignoredPseudoElements);
-
-        return MatchResult::UpdateWithMatchType(result, matchType);
+        return MatchResult::UpdateWithMatchType(
+          MatchRecursively(checkingContext, nextContext, ignoredPseudoElements), matchType);
       }
     }
-
     krys_debug_assert(false);
     return MatchResult::Fails(MatchOutcome::SelectorFailsCompletely);
   }
@@ -906,19 +774,16 @@ namespace krys::boo::css
                                                  const Selector &selector) noexcept
   {
     krys_debug_assert(selector.IsAttributeSelector());
-    auto &selectorAttribute = selector.Attribute();
-    bool isHTML = IsHTMLElementInHTMLDocument(element);
-    auto &selectorName = isHTML ? selectorAttribute.LocalNameLower() : selectorAttribute.LocalName();
+    const auto &selectorAttribute = selector.Attribute();
+    const bool isHTML = IsHTMLElementInHTMLDocument(element);
+    const auto &selectorName = isHTML ? selectorAttribute.LocalNameLower() : selectorAttribute.LocalName();
     if (!NameMatchesFilter(attributeName, selectorAttribute.NamespacePrefix(), selectorName,
                            selectorAttribute.NamespaceURI()))
     {
       return false;
     }
-    bool caseSensitive = !selector.IsAttributeValueMatchingCaseInsensitive()
-                         && !(isHTML && !selector.IsAttributeValueMatchingCaseSensitive()
-                              && !HTMLDocument::IsCaseSensitiveAttribute(selector.Attribute()));
     return AttributeValueMatches(attributeValue.View(), selector.Match(), selector.Value().View(),
-                                 caseSensitive);
+                                 IsCaseSensitiveAttributeMatch(selector, isHTML));
   }
 
   bool SelectorChecker::CheckOne(CheckingContext &checkingContext, LocalContext &context,

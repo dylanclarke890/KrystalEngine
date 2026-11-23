@@ -1,31 +1,4 @@
-﻿/*
- * Copyright (C) 1999 Lars Knoll (knoll@kde.org)
- *           (C) 2004-2005 Allan Sandfeld Jensen (kde@carewolf.com)
- * Copyright (C) 2006, 2007 Nicholas Shanks (webkit@nickshanks.com)
- * Copyright (C) 2005-2016 Apple Inc. All rights reserved.
- * Copyright (C) 2007 Alexey Proskuryakov <ap@webkit.org>
- * Copyright (C) 2007, 2008 Eric Seidel <eric@webkit.org>
- * Copyright (C) 2008, 2009 Torch Mobile Inc. All rights reserved. (http://www.torchmobile.com/)
- * Copyright (c) 2011, Code Aurora Forum. All rights reserved.
- * Copyright (C) Research In Motion Limited 2011. All rights reserved.
- *
- * This library is free software; you can redistribute it and/or
- * modify it under the terms of the GNU Library General Public
- * License as published by the Free Software Foundation; either
- * version 2 of the License, or (at your option) any later version.
- *
- * This library is distributed in the hope that it will be useful,
- * but WITHOUT ANY WARRANTY; without even the implied warranty of
- * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU
- * Library General Public License for more details.
- *
- * You should have received a copy of the GNU Library General Public License
- * along with this library; see the file COPYING.LIB.  If not, write to
- * the Free Software Foundation, Inc., 51 Franklin Street, Fifth Floor,
- * Boston, MA 02110-1301, USA.
- */
-
-#pragma once
+﻿#pragma once
 
 #include "Krystal.Booey/CSS/Selectors/Selector.hpp"
 #include "Krystal.Booey/Rendering/Style/RenderStyleConstants.hpp"
@@ -57,21 +30,29 @@ namespace krys::boo::css
   class ScopeRule;
   class SelectorList;
 
-  /// @brief Matches selectors against elements.
+  /// @brief Decides whether an element
+  /// [matches](https://drafts.csswg.org/selectors/#match-a-complex-selector-against-an-element) a complex
+  /// selector, checking it right to left and moving to the ancestors or siblings each combinator asks for.
+  /// When resolving style, it also records how the element's style depends on others, for invalidation.
   class SelectorChecker
   {
     KRYS_NON_COPYABLE(SelectorChecker);
 
+    /// @brief How a selector failed, which tells a combinator's search how far to keep looking.
     enum class MatchOutcome
     {
       SelectorMatches,
+      /// @brief It fails for this element.
       SelectorFailsLocally,
+      /// @brief It fails for this element and its siblings, so a sibling combinator can stop.
       SelectorFailsAllSiblings,
+      /// @brief It fails for this element, its siblings and its ancestors, so any search can stop.
       SelectorFailsCompletely,
     };
 
     enum class MatchType
     {
+      /// @brief Only one of the element's pseudo-elements matches, not the element itself.
       VirtualPseudoElementOnly,
       Element,
     };
@@ -86,6 +67,12 @@ namespace krys::boo::css
         return {MatchOutcome::SelectorMatches, matchType};
       }
 
+      KRYS_NODISCARD static MatchResult Fails(MatchOutcome outcome) noexcept
+      {
+        return {outcome, MatchType::Element};
+      }
+
+      /// @brief @p result, made pseudo-element-only if @p matchType is.
       KRYS_NODISCARD static MatchResult UpdateWithMatchType(MatchResult result, MatchType matchType) noexcept
       {
         if (matchType == MatchType::VirtualPseudoElementOnly)
@@ -94,23 +81,24 @@ namespace krys::boo::css
         }
         return result;
       }
-
-      KRYS_NODISCARD static MatchResult Fails(MatchOutcome outcome) noexcept
-      {
-        return {outcome, MatchType::Element};
-      }
     };
 
   public:
+    /// @brief Why selectors are being matched, which decides what's recorded and what can match.
     enum class Mode : uint8
     {
+      /// @brief Resolving an element's style, recording its style relations.
       ResolvingStyle = 0,
+      /// @brief Collecting the rules that match an element or one of its pseudo-elements, rather than
+      /// resolving its style.
       CollectingRules,
+      /// @brief Checking whether a change affects the element's style.
       StyleInvalidation,
-      // This is used for querySelector() API
+      /// @brief A query such as `querySelector()` or `matches()`, which pseudo-elements never match.
       QueryingRules,
     };
 
+    /// @brief The inputs of a match, and what it records.
     struct CheckingContext
     {
       const Mode ResolvingMode;
@@ -120,22 +108,34 @@ namespace krys::boo::css
 
     public:
       List<CSSOMStringAtom> ClassList;
+      /// @brief What `:scope` matches: the scoping root of a query, or of an `@scope` rule.
       RefPtr<const ContainerNode> Scope;
+      /// @brief The element a relative selector in `:has()` is anchored to.
       const Element *HasScope {nullptr};
+      /// @brief Whether the `:has()` anchor matches any element, as when checking whether a child change
+      /// affects a `:has()`.
       bool MatchesAllHasScopes {false};
+      /// @brief Which tree, relative to the element's, the rule being matched came from.
       style::ScopeOrdinal StyleScopeOrdinal {style::ScopeOrdinal::Element};
+      /// @brief Caches of `:has()` results shared across matches, if any.
       style::SelectorMatchingState *SelectorMatchingState {nullptr};
 
-      // FIXME: It would be nicer to have a separate object for return values.
+      // FIXME: The outputs below would be clearer in a separate object from the inputs above.
+
+      /// @brief How the element's style depends on other elements', recorded when resolving style.
       style::Relations StyleRelations;
+      /// @brief The pseudo-elements a match against the element found, which style resolution then resolves.
       EnumSet<PseudoElementType> PublicPseudoElements;
+      /// @brief Whether a `:has()` anchor was reached.
       bool MatchedInsideScope {false};
+      /// @brief Whether `:has()` must fail, as it does inside another `:has()`'s arguments.
       bool DisallowHasPseudoClass {false};
 
       explicit CheckingContext(Mode resolvingMode) noexcept : ResolvingMode(resolvingMode)
       {
       }
 
+      /// @brief Matches against the element's @p pseudoElementIdentifier rather than the element.
       void SetRequestedPseudoElement(style::PseudoElementIdentifier pseudoElementIdentifier) noexcept
       {
         _requestedPseudoElement = krys::move(pseudoElementIdentifier);
@@ -156,31 +156,43 @@ namespace krys::boo::css
   public:
     explicit SelectorChecker(const Document &document) noexcept;
 
+    /// @brief Whether @p element matches the complex selector whose rightmost simple selector is @p selector.
     KRYS_NODISCARD bool Match(const Selector &selector, const Element &element,
                               CheckingContext &checkingContext) const noexcept;
 
+    /// @brief Whether @p selector is `:link`, `:any-link`, `:visited` or `:focus`.
     KRYS_NODISCARD static bool IsCommonPseudoClassSelector(const Selector *selector) noexcept;
 
+    /// @brief Whether attribute selector @p selector matches @p element's attribute @p attributeName with
+    /// value @p attributeValue.
     KRYS_NODISCARD static bool AttributeSelectorMatches(const Element &element,
                                                         const QualifiedName &attributeName,
                                                         const CSSOMStringAtom &attributeValue,
                                                         const Selector &selector) noexcept;
 
   private:
+    /// @brief Whether @p element is a shadow host that matches `:host` or `:host(<compound>)` @p selector.
     KRYS_NODISCARD bool MatchHostPseudoClass(const Selector &selector, const Element &element,
                                              CheckingContext &checkingContext) const noexcept;
 
+    /// @brief Checks @p context's simple selector against its element, then the rest of the complex
+    /// selector, following its combinators.
+    /// @param collectedPseudoElements Gains the pseudo-elements the rightmost compound matched.
     KRYS_NODISCARD MatchResult
       MatchRecursively(CheckingContext &checkingContext, LocalContext &context,
                        EnumSet<PseudoElementType> &collectedPseudoElements) const noexcept;
 
+    /// @brief Whether @p context's simple selector matches its element.
+    /// @param matchType Set to pseudo-element-only if the selector only matched a pseudo-element.
     KRYS_NODISCARD bool CheckOne(CheckingContext &checkingContext, LocalContext &context,
                                  MatchType &matchType) const noexcept;
 
+    /// @brief Whether @p element matches any of @p selectorList, a functional pseudo-class's arguments.
     KRYS_NODISCARD bool MatchSelectorList(CheckingContext &checkingContext, const LocalContext &context,
                                           const Element &element,
                                           const SelectorList &selectorList) const noexcept;
 
+    /// @brief Whether @p element matches `:has()` @p hasSelector.
     KRYS_NODISCARD bool MatchHasPseudoClass(CheckingContext &checkingContext, const Element &element,
                                             const Selector &hasSelector) const noexcept;
   };
@@ -191,8 +203,13 @@ namespace krys::boo::css
     {
       return false;
     }
-    auto pseudoType = selector->PseudoClass();
-    return pseudoType == SelectorPseudoClass::Link || pseudoType == SelectorPseudoClass::AnyLink
-           || pseudoType == SelectorPseudoClass::Visited || pseudoType == SelectorPseudoClass::Focus;
+    switch (selector->PseudoClass())
+    {
+      case SelectorPseudoClass::Link:
+      case SelectorPseudoClass::AnyLink:
+      case SelectorPseudoClass::Visited:
+      case SelectorPseudoClass::Focus:   return true;
+      default:                           return false;
+    }
   }
 }
