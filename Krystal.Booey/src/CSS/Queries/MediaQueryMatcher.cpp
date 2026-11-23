@@ -126,7 +126,7 @@ namespace krys::boo::css
     return MediaQueryList::Create(*this, krys::move(queries), matches);
   }
 
-  void MediaQueryMatcher::EvaluateAll(EventMode eventMode) noexcept
+  void MediaQueryMatcher::EvaluateAll() noexcept
   {
     krys_debug_assert(_document);
 
@@ -145,7 +145,7 @@ namespace krys::boo::css
     {
       if (auto protectedList = ShareRefPtr(list.get()))
       {
-        protectedList->Evaluate(evaluator, eventMode);
+        protectedList->Evaluate(evaluator);
         if (!_document)
         {
           break;

@@ -45,13 +45,6 @@ namespace krys::boo::css
   {
     KRYS_NON_COPY_MOVABLE(MediaQueryMatcher);
 
-  public:
-    enum class EventMode : uint8
-    {
-      Schedule,
-      DispatchNow,
-    };
-
   private:
     WeakPtr<Document> _document;
     List<WeakPtr<MediaQueryList>> _mediaQueryLists;
@@ -83,7 +76,7 @@ namespace krys::boo::css
       return _evaluationRound;
     }
 
-    void EvaluateAll(EventMode eventMode) noexcept;
+    void EvaluateAll() noexcept;
 
     KRYS_NODISCARD bool Evaluate(const mq::MediaQueryList &queries) const noexcept;
 

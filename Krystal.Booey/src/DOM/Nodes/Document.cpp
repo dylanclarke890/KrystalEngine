@@ -5413,7 +5413,7 @@ namespace krys::boo
       return;
     }
 
-    _mediaQueryMatcher->EvaluateAll(css::MediaQueryMatcher::EventMode::DispatchNow);
+    _mediaQueryMatcher->EvaluateAll();
   }
 
   ExceptionOr<dom::SelectorQuery &>

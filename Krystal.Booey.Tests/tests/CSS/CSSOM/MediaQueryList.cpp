@@ -189,17 +189,6 @@ namespace krys::boo::css::tests
       REQUIRE(records.empty());
     }
 
-    SECTION("A scheduled change is reported at the next dispatch")
-    {
-      Resize(400);
-      Document->GetMediaQueryMatcher().EvaluateAll(MediaQueryMatcher::EventMode::Schedule);
-      REQUIRE(records.empty());
-      REQUIRE_FALSE(wide->Matches());
-
-      Document->EvaluateMediaQueriesAndReportChanges();
-      REQUIRE(records.size() == 2u);
-    }
-
     SECTION("Removed listeners and released lists get nothing")
     {
       narrow->RemoveListener(recorder);

@@ -31,7 +31,6 @@ namespace krys::boo
     uint32 _evaluatedRound;
     uint32 _changedRound;
     // Whether a change awaits a `change` event.
-    bool _needsChangeEvent {false};
 
     MediaQueryList(css::MediaQueryMatcher &matcher, css::mq::MediaQueryList &&mediaQueries,
                    bool matches) noexcept;
@@ -65,8 +64,7 @@ namespace krys::boo
     /// @brief Evaluates the queries with @p evaluator if they haven't been this round, and fires a `change`
     /// event for a change if @p eventMode says to dispatch now; otherwise the event waits for a later round.
     /// @see https://drafts.csswg.org/cssom-view/#evaluate-media-queries-and-report-changes
-    void Evaluate(css::mq::MediaQueryEvaluator &evaluator,
-                  css::MediaQueryMatcher::EventMode eventMode) noexcept;
+    void Evaluate(css::mq::MediaQueryEvaluator &evaluator) noexcept;
 
     /// @brief Stops using the matcher, whose document is going; the list keeps the result it last had.
     void DetachFromMatcher() noexcept;
