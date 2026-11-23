@@ -49,17 +49,15 @@ namespace krys::boo::css
     KRYS_ENABLE_COMPACT_POINTERS;
 
   private:
-    RuleType _type : 5;
-    bool _hasDocumentSecurityOrigin : 1;
+    RuleType _type;
 
   protected:
-    explicit Rule(RuleType type, bool hasDocumentSecurityOrigin = false) noexcept
-        : _type(type), _hasDocumentSecurityOrigin(hasDocumentSecurityOrigin)
+    explicit Rule(RuleType type) noexcept : _type(type)
     {
     }
 
-    Rule(const Rule &other) noexcept
-        : _type(other._type), _hasDocumentSecurityOrigin(other._hasDocumentSecurityOrigin)
+    // A copy starts with its own reference count.
+    Rule(const Rule &other) noexcept : _type(other._type)
     {
     }
 
@@ -207,12 +205,6 @@ namespace krys::boo::css
   protected:
     void operator delete(Rule *rule, std::destroying_delete_t) noexcept;
 
-    /// @brief Whether the rule came from a sheet of the document's own origin.
-    KRYS_NODISCARD bool HasDocumentSecurityOrigin() const noexcept
-    {
-      return _hasDocumentSecurityOrigin;
-    }
-
     /// @brief Lets a subclass sharing its base's constructor set its own type.
     void SetType(RuleType type) noexcept
     {
@@ -245,8 +237,7 @@ namespace krys::boo::css
     SelectorList _selectorList;
 
   protected:
-    StyleRule(Ref<StyleProperties> properties, bool hasDocumentSecurityOrigin,
-              SelectorList selectors) noexcept;
+    StyleRule(Ref<StyleProperties> properties, SelectorList selectors) noexcept;
 
     StyleRule(const StyleRule &other) noexcept;
 
@@ -254,7 +245,6 @@ namespace krys::boo::css
     ~StyleRule() noexcept;
 
     KRYS_NODISCARD static Ref<StyleRule> Create(Ref<StyleProperties> properties,
-                                                bool hasDocumentSecurityOrigin,
                                                 SelectorList selectors) noexcept;
 
     KRYS_NODISCARD Ref<StyleRule> Copy() const noexcept;
@@ -272,8 +262,6 @@ namespace krys::boo::css
 
     /// @brief The declarations, first replaced by a mutable copy if they aren't mutable.
     KRYS_NODISCARD MutableStyleProperties &MutableProperties() noexcept;
-
-    using Rule::HasDocumentSecurityOrigin;
 
     /// @brief Whether the parser split this rule from one with too many selector components.
     KRYS_NODISCARD bool IsSplitRule() const noexcept
@@ -316,8 +304,7 @@ namespace krys::boo::css
   private:
     /// @brief A rule matching the complex selectors whose components are @p selectors, rightmost first.
     KRYS_NODISCARD static Ref<StyleRule> CreateForSplitting(const List<const Selector *> &selectors,
-                                                            Ref<StyleProperties> properties,
-                                                            bool hasDocumentSecurityOrigin) noexcept;
+                                                            Ref<StyleProperties> properties) noexcept;
   };
 
   /// @brief A style rule with [nested rules](https://drafts.csswg.org/css-nesting-1/). It keeps the selectors
@@ -329,8 +316,8 @@ namespace krys::boo::css
     List<Ref<Rule>> _nestedRules;
     SelectorList _originalSelectorList;
 
-    StyleRuleWithNesting(Ref<StyleProperties> properties, bool hasDocumentSecurityOrigin,
-                         SelectorList selectors, List<Ref<Rule>> nestedRules) noexcept;
+    StyleRuleWithNesting(Ref<StyleProperties> properties, SelectorList selectors,
+                         List<Ref<Rule>> nestedRules) noexcept;
 
     explicit StyleRuleWithNesting(StyleRule &&rule) noexcept;
 
@@ -340,10 +327,8 @@ namespace krys::boo::css
   public:
     ~StyleRuleWithNesting() noexcept;
 
-    KRYS_NODISCARD static Ref<StyleRuleWithNesting> Create(Ref<StyleProperties> properties,
-                                                           bool hasDocumentSecurityOrigin,
-                                                           SelectorList selectors,
-                                                           List<Ref<Rule>> nestedRules) noexcept;
+    KRYS_NODISCARD static Ref<StyleRuleWithNesting>
+      Create(Ref<StyleProperties> properties, SelectorList selectors, List<Ref<Rule>> nestedRules) noexcept;
 
     /// @brief A nesting rule with @p rule's declarations and selectors, to which nested rules are being
     /// added.

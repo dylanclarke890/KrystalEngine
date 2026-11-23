@@ -1575,13 +1575,12 @@ namespace krys::boo::css
         // don't need the CSS Nesting features.
         if (nestedRules.empty() && !selectorList.HasExplicitNestingParent() && !IsStyleNestedContext())
         {
-          styleRule = StyleRule::Create(krys::move(properties), _context.HasDocumentSecurityOrigin,
-                                        krys::move(selectorList));
+          styleRule = StyleRule::Create(krys::move(properties), krys::move(selectorList));
         }
         else
         {
-          styleRule = StyleRuleWithNesting::Create(krys::move(properties), _context.HasDocumentSecurityOrigin,
-                                                   krys::move(selectorList), krys::move(nestedRules));
+          styleRule = StyleRuleWithNesting::Create(krys::move(properties), krys::move(selectorList),
+                                                   krys::move(nestedRules));
         }
       });
 

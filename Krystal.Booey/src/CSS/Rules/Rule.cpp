@@ -291,10 +291,8 @@ namespace krys::boo::css
 
 #pragma region StyleRule
 
-  StyleRule::StyleRule(Ref<StyleProperties> properties, bool hasDocumentSecurityOrigin,
-                       SelectorList selectors) noexcept
-      : Rule(RuleType::Style, hasDocumentSecurityOrigin), _properties(krys::move(properties)),
-        _selectorList(krys::move(selectors))
+  StyleRule::StyleRule(Ref<StyleProperties> properties, SelectorList selectors) noexcept
+      : Rule(RuleType::Style), _properties(krys::move(properties)), _selectorList(krys::move(selectors))
   {
   }
 
@@ -306,10 +304,9 @@ namespace krys::boo::css
 
   StyleRule::~StyleRule() noexcept = default;
 
-  Ref<StyleRule> StyleRule::Create(Ref<StyleProperties> properties, bool hasDocumentSecurityOrigin,
-                                   SelectorList selectors) noexcept
+  Ref<StyleRule> StyleRule::Create(Ref<StyleProperties> properties, SelectorList selectors) noexcept
   {
-    return AdoptRef(*new StyleRule(krys::move(properties), hasDocumentSecurityOrigin, krys::move(selectors)));
+    return AdoptRef(*new StyleRule(krys::move(properties), krys::move(selectors)));
   }
 
   Ref<StyleRule> StyleRule::Copy() const noexcept
@@ -334,8 +331,7 @@ namespace krys::boo::css
   }
 
   Ref<StyleRule> StyleRule::CreateForSplitting(const List<const Selector *> &selectors,
-                                               Ref<StyleProperties> properties,
-                                               bool hasDocumentSecurityOrigin) noexcept
+                                               Ref<StyleProperties> properties) noexcept
   {
     krys_assert(!selectors.empty());
     auto selectorArray = CreateUniqueArray<Selector>(selectors.size());
@@ -344,8 +340,7 @@ namespace krys::boo::css
       new (NotNullTag {}, &selectorArray[i]) Selector(*selectors[i]);
     }
     selectorArray[selectors.size() - 1].SetLastInSelectorList();
-    auto styleRule =
-      Create(krys::move(properties), hasDocumentSecurityOrigin, SelectorList(krys::move(selectorArray)));
+    auto styleRule = Create(krys::move(properties), SelectorList(krys::move(selectorArray)));
     styleRule->MarkAsSplitRule();
     return styleRule;
   }
@@ -359,8 +354,7 @@ namespace krys::boo::css
     // The pieces share the declarations.
     const auto split = [&](const List<const Selector *> &components)
     {
-      rules.push_back(CreateForSplitting(components, ShareRef(const_cast<StyleProperties &>(Properties())),
-                                         HasDocumentSecurityOrigin()));
+      rules.push_back(CreateForSplitting(components, ShareRef(const_cast<StyleProperties &>(Properties()))));
     };
 
     List<const Selector *> pendingComponents;
@@ -396,11 +390,11 @@ namespace krys::boo::css
 
 #pragma region StyleRuleWithNesting
 
-  StyleRuleWithNesting::StyleRuleWithNesting(Ref<StyleProperties> properties, bool hasDocumentSecurityOrigin,
-                                             SelectorList selectors, List<Ref<Rule>> nestedRules) noexcept
+  StyleRuleWithNesting::StyleRuleWithNesting(Ref<StyleProperties> properties, SelectorList selectors,
+                                             List<Ref<Rule>> nestedRules) noexcept
       // The selectors are resolved when a rule set is built from the sheet.
-      : StyleRule(krys::move(properties), hasDocumentSecurityOrigin, {}),
-        _nestedRules(krys::move(nestedRules)), _originalSelectorList(krys::move(selectors))
+      : StyleRule(krys::move(properties), {}), _nestedRules(krys::move(nestedRules)),
+        _originalSelectorList(krys::move(selectors))
   {
     SetType(RuleType::StyleWithNesting);
   }
@@ -420,12 +414,11 @@ namespace krys::boo::css
   StyleRuleWithNesting::~StyleRuleWithNesting() noexcept = default;
 
   Ref<StyleRuleWithNesting> StyleRuleWithNesting::Create(Ref<StyleProperties> properties,
-                                                         bool hasDocumentSecurityOrigin,
                                                          SelectorList selectors,
                                                          List<Ref<Rule>> nestedRules) noexcept
   {
-    return AdoptRef(*new StyleRuleWithNesting(krys::move(properties), hasDocumentSecurityOrigin,
-                                              krys::move(selectors), krys::move(nestedRules)));
+    return AdoptRef(
+      *new StyleRuleWithNesting(krys::move(properties), krys::move(selectors), krys::move(nestedRules)));
   }
 
   Ref<StyleRuleWithNesting> StyleRuleWithNesting::Create(StyleRule &&rule) noexcept
@@ -449,7 +442,7 @@ namespace krys::boo::css
 #pragma region NestedDeclarationsRule
 
   NestedDeclarationsRule::NestedDeclarationsRule(Ref<StyleProperties> properties) noexcept
-      : StyleRule(krys::move(properties), false, {})
+      : StyleRule(krys::move(properties), {})
   {
     SetType(RuleType::NestedDeclarations);
   }

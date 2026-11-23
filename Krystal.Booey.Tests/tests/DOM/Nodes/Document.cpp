@@ -191,7 +191,6 @@ namespace krys::boo::dom::tests
       REQUIRE(context.BaseUrl == u8"https://example.com/dir/sub/");
       REQUIRE(context.Mode == css::ParserMode::HTMLQuirks);
       REQUIRE(context.IsHTMLDocument);
-      REQUIRE(context.HasDocumentSecurityOrigin);
 
       REQUIRE(Parse(u8"<!DOCTYPE html>")->CssParserContext().Mode == css::ParserMode::HTMLStandard);
     }

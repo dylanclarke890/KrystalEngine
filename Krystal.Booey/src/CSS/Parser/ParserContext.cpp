@@ -70,7 +70,6 @@ namespace krys::boo::css
     Charset = charset;
     Mode = document.InQuirksMode() ? ParserMode::HTMLQuirks : ParserMode::HTMLStandard;
     IsHTMLDocument = Is<HTMLDocument>(document);
-    HasDocumentSecurityOrigin = true;
 
     auto &settings = document.GetSettings();
     useSystemAppearance = settings.UseSystemAppearance;
@@ -90,14 +89,13 @@ namespace krys::boo::css
 
   size_t ParserContext::Hash() const noexcept
   {
-    uint32 bits =
-      static_cast<uint32>(IsHTMLDocument) << 0 | static_cast<uint32>(HasDocumentSecurityOrigin) << 1
-      | static_cast<uint32>(useSystemAppearance) << 2 | static_cast<uint32>(springTimingFunctionEnabled) << 3
-      | static_cast<uint32>(cssTransformStyleSeparatedEnabled) << 4
-      | static_cast<uint32>(thumbAndTrackPseudoElementsEnabled) << 5
-      | static_cast<uint32>(colorLayersEnabled) << 6
-      | static_cast<uint32>(cssInternalAutoBaseParsingEnabled) << 7
-      | static_cast<uint32>(webkitMediaTextTrackDisplayQuirkEnabled) << 8;
+    uint32 bits = static_cast<uint32>(IsHTMLDocument) << 0 | static_cast<uint32>(useSystemAppearance) << 1
+                  | static_cast<uint32>(springTimingFunctionEnabled) << 2
+                  | static_cast<uint32>(cssTransformStyleSeparatedEnabled) << 3
+                  | static_cast<uint32>(thumbAndTrackPseudoElementsEnabled) << 4
+                  | static_cast<uint32>(colorLayersEnabled) << 5
+                  | static_cast<uint32>(cssInternalAutoBaseParsingEnabled) << 6
+                  | static_cast<uint32>(webkitMediaTextTrackDisplayQuirkEnabled) << 7;
     return krys::CombineFastHashes(BaseUrl, Charset, PropertySettings, Mode, bits);
   }
 }

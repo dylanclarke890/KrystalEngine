@@ -131,10 +131,10 @@ namespace krys::boo::css::tests
       CHECK(second.IsLastRuleInSplitRule());
 
       // Nested rules with too many components are dropped.
-      sheet->ParserAppendRule(StyleRuleWithNesting::Create(ImmutableDeclarations(u8"color: red"), false,
+      sheet->ParserAppendRule(StyleRuleWithNesting::Create(ImmutableDeclarations(u8"color: red"),
                                                            ParseSelectors(ManySelectors(8'193)), {}));
       CHECK(sheet->ChildRules().size() == 2);
-      sheet->ParserAppendRule(StyleRuleWithNesting::Create(ImmutableDeclarations(u8"color: red"), false,
+      sheet->ParserAppendRule(StyleRuleWithNesting::Create(ImmutableDeclarations(u8"color: red"),
                                                            ParseSelectors(ManySelectors(8'192)), {}));
       CHECK(sheet->ChildRules().size() == 3);
     }
@@ -240,7 +240,7 @@ namespace krys::boo::css::tests
     {
       CHECK_FALSE(sheet->WrapperInsertRule(CreateStyleRule(ManySelectors(8'193), u8"color: red"), 0));
       CHECK_FALSE(
-        sheet->WrapperInsertRule(StyleRuleWithNesting::Create(ImmutableDeclarations(u8"color: red"), false,
+        sheet->WrapperInsertRule(StyleRuleWithNesting::Create(ImmutableDeclarations(u8"color: red"),
                                                               ParseSelectors(ManySelectors(8'193)), {}),
                                  0));
       CHECK(sheet->IsEmpty());
@@ -271,7 +271,7 @@ namespace krys::boo::css::tests
   {
     auto sheet = StyleSheetContents::Create();
     auto nested =
-      StyleRuleWithNesting::Create(ImmutableDeclarations(u8"color: red"), false, ParseSelectors(u8".a"),
+      StyleRuleWithNesting::Create(ImmutableDeclarations(u8"color: red"), ParseSelectors(u8".a"),
                                    {NestedDeclarationsRule::Create(ImmutableDeclarations(u8"width: 1px"))});
     auto media = MediaRule::Create(mq::MediaQueryParser::Parse(u8"print", StrictParserContext()),
                                    {CreateStyleRule(u8".b", u8"background-image: url(a.png)")});

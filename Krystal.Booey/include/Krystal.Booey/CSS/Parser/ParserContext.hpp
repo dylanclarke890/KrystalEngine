@@ -52,9 +52,6 @@ namespace krys::boo::css
     Maybe<RuleType> EnclosingRuleType;
     bool IsHTMLDocument : 1 {false};
 
-    // This is only needed to support getMatchedCSSRules.
-    bool HasDocumentSecurityOrigin : 1 {false};
-
     bool useSystemAppearance : 1 {false};
     bool shouldIgnoreImportRules : 1 {false};
 
