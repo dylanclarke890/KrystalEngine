@@ -60,7 +60,7 @@ namespace krys::boo::style::tests
       {
         if (auto *styleRule = DynamicDowncast<css::StyleRule>(*rule))
         {
-          if (!styleRule->Properties().PropertyCount())
+          if (!styleRule->Properties().size())
           {
             empty.push_back(ToNarrow(styleRule->GetSelectorList().SelectorsText()));
           }

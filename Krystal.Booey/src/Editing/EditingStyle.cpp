@@ -1058,7 +1058,7 @@ namespace krys::boo
     {
       return TriState::True;
     }
-    if (difference->PropertyCount() == _mutableStyle->PropertyCount())
+    if (difference->size() == _mutableStyle->size())
     {
       return TriState::False;
     }

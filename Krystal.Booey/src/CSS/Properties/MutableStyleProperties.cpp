@@ -400,7 +400,7 @@ namespace krys::boo::css
 
   Maybe<uint32> MutableStyleProperties::FindPropertyIndex(PropertyId property) const noexcept
   {
-    for (auto n = PropertyCount(); n--;)
+    for (auto n = size(); n--;)
     {
       if (_propertyVector[n].Id() == property)
       {
@@ -413,7 +413,7 @@ namespace krys::boo::css
 
   Maybe<uint32> MutableStyleProperties::FindCustomPropertyIndex(CSSOMStringView propertyName) const noexcept
   {
-    for (auto n = PropertyCount(); n--;)
+    for (auto n = size(); n--;)
     {
       auto &property = _propertyVector[n];
       if (property.Id() == PropertyId::Custom)

@@ -62,7 +62,7 @@ namespace krys::boo
   size_t DeclaredStylePropertyMap::Size() const noexcept
   {
     auto *styleRule = GetStyleRule();
-    return styleRule ? styleRule->Properties().PropertyCount() : 0;
+    return styleRule ? styleRule->Properties().size() : 0;
   }
 
   auto DeclaredStylePropertyMap::Entries() const noexcept -> List<Entry>

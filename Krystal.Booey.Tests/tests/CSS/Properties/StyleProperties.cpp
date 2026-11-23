@@ -117,12 +117,15 @@ namespace krys::boo::css::tests
 
     SECTION("Shorthand and implicit flags")
     {
-      CHECK(ToNarrow(properties->GetPropertyShorthand(PropertyId::MarginTop)) == "margin");
-      CHECK(properties->GetPropertyShorthand(PropertyId::Color).empty());
-      CHECK(properties->GetPropertyShorthand(PropertyId::Width).empty());
-      CHECK_FALSE(properties->IsPropertyImplicit(PropertyId::MarginTop));
-      CHECK(properties->IsPropertyImplicit(PropertyId::BackgroundImage));
-      CHECK_FALSE(properties->IsPropertyImplicit(PropertyId::BackgroundColor));
+      auto declaration = [&](PropertyId id)
+      {
+        return properties->PropertyAt(*properties->FindPropertyIndex(id));
+      };
+      CHECK(declaration(PropertyId::MarginTop).ShorthandId() == PropertyId::Margin);
+      CHECK(declaration(PropertyId::Color).ShorthandId() == PropertyId::Invalid);
+      CHECK(declaration(PropertyId::MarginTop).ToProperty().Implicit() == IsImplicit::No);
+      CHECK(declaration(PropertyId::BackgroundImage).ToProperty().Implicit() == IsImplicit::Yes);
+      CHECK(declaration(PropertyId::BackgroundColor).ToProperty().Implicit() == IsImplicit::No);
     }
 
     SECTION("Values")
@@ -147,13 +150,10 @@ namespace krys::boo::css::tests
       REQUIRE(index);
       auto reference = properties->PropertyAt(*index);
       CHECK(ToNarrow(reference.CssName()) == "color");
-      CHECK(ToNarrow(reference.CssText(DefaultSerialisationContext())) == "color: red;");
       CHECK(reference.ToProperty().Id() == PropertyId::Color);
 
       auto custom = properties->FindCustomPropertyIndex(u8"--foo");
       REQUIRE(custom);
-      CHECK(ToNarrow(properties->PropertyAt(*custom).CssText(DefaultSerialisationContext()))
-            == "--foo: bar !important;");
       CHECK(ToNarrow(properties->PropertyAt(*custom).CssName()) == "--foo");
     }
 
@@ -166,8 +166,7 @@ namespace krys::boo::css::tests
         ++count;
       }
 
-      CHECK(count == properties->PropertyCount());
-      CHECK(properties->size() == properties->PropertyCount());
+      CHECK(count == properties->size());
       CHECK_FALSE(properties->empty());
     }
   }
@@ -177,11 +176,16 @@ namespace krys::boo::css::tests
   {
     auto properties = ParseDeclarations(u8"margin-block: 1px; padding-inline: 2px; "
                                         u8"overscroll-behavior: contain; contain-intrinsic-size: 10px");
-    CHECK_FALSE(properties->IsPropertyImplicit(PropertyId::MarginBlockStart));
-    CHECK(properties->IsPropertyImplicit(PropertyId::MarginBlockEnd));
-    CHECK(properties->IsPropertyImplicit(PropertyId::PaddingInlineEnd));
-    CHECK(properties->IsPropertyImplicit(PropertyId::OverscrollBehaviorY));
-    CHECK(properties->IsPropertyImplicit(PropertyId::ContainIntrinsicHeight));
+    auto isImplicit = [&](PropertyId id)
+    {
+      return properties->PropertyAt(*properties->FindPropertyIndex(id)).ToProperty().Implicit()
+             == IsImplicit::Yes;
+    };
+    CHECK_FALSE(isImplicit(PropertyId::MarginBlockStart));
+    CHECK(isImplicit(PropertyId::MarginBlockEnd));
+    CHECK(isImplicit(PropertyId::PaddingInlineEnd));
+    CHECK(isImplicit(PropertyId::OverscrollBehaviorY));
+    CHECK(isImplicit(PropertyId::ContainIntrinsicHeight));
   }
 
   TEST_CASE_METHOD(ValueFixture, "StyleProperties::MayDependOnBaseURL", "[CSS][Properties][StyleProperties]")
@@ -190,7 +194,6 @@ namespace krys::boo::css::tests
     CHECK(ParseDeclarations(u8"color: red; background: blue url(a.png)")->MayDependOnBaseUrl());
     CHECK_FALSE(ParseDeclarations(u8"background-image: url(#a)")->MayDependOnBaseUrl());
     CHECK_FALSE(ParseDeclarations(u8"color: red; width: 1px")->MayDependOnBaseUrl());
-    CHECK_FALSE(ParseDeclarations(u8"color: red")->HasCSSOMWrapper());
   }
 
   TEST_CASE_METHOD(ValueFixture, "MutableStyleProperties::SetProperty", "[CSS][Properties][StyleProperties]")
@@ -279,7 +282,7 @@ namespace krys::boo::css::tests
     {
       auto immutable = properties->ImmutableCopy();
       CHECK_FALSE(immutable->IsMutable());
-      CHECK(immutable->PropertyCount() == properties->PropertyCount());
+      CHECK(immutable->size() == properties->size());
       CHECK(AsText(immutable) == AsText(properties));
       CHECK(immutable->PropertyIsImportant(PropertyId::Color));
       CHECK(ToNarrow(immutable->GetCustomPropertyValue(u8"--foo")) == "bar");

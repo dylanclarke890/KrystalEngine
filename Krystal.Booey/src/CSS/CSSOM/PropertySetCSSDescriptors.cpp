@@ -59,7 +59,7 @@ namespace krys::boo
 
   CSSOMString PropertySetCSSDescriptors::Item(uint32 i) const noexcept
   {
-    for (auto j = 0u; j <= i && j < _propertySet->PropertyCount(); j++)
+    for (auto j = 0u; j <= i && j < _propertySet->size(); j++)
     {
       if (!IsExposed(_propertySet->PropertyAt(j).Id()))
       {
@@ -67,7 +67,7 @@ namespace krys::boo
       }
     }
 
-    if (i >= _propertySet->PropertyCount())
+    if (i >= _propertySet->size())
     {
       return {};
     }

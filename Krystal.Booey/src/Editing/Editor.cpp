@@ -1123,7 +1123,7 @@ namespace krys::boo
 
   void Editor::ApplyStyleToSelection(const css::StyleProperties *style, EditAction editingAction) noexcept
   {
-    if (!style || !style->PropertyCount() || !CanEditRichly())
+    if (!style || !style->size() || !CanEditRichly())
     {
       return;
     }
@@ -1133,7 +1133,7 @@ namespace krys::boo
   void Editor::ApplyParagraphStyleToSelection(const css::StyleProperties *style,
                                               EditAction editingAction) noexcept
   {
-    if (!style || !style->PropertyCount() || !CanEditRichly())
+    if (!style || !style->size() || !CanEditRichly())
     {
       return;
     }

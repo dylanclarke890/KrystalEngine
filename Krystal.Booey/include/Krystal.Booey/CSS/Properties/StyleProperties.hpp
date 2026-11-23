@@ -89,14 +89,7 @@ namespace krys::boo::css
         return _metadata.Flags.contains(PropertyFlag::Important);
       }
 
-      KRYS_NODISCARD bool IsImplicit() const noexcept
-      {
-        return _metadata.Flags.contains(PropertyFlag::Implicit);
-      }
-
       KRYS_NODISCARD CSSOMString CssName() const noexcept;
-
-      KRYS_NODISCARD CSSOMString CssText(const SerialisationContext &context) const noexcept;
 
       KRYS_NODISCARD const css::Value *Value() const noexcept
       {
@@ -147,11 +140,11 @@ namespace krys::boo::css
 
       KRYS_NODISCARD bool operator==(std::nullptr_t) const noexcept
       {
-        return _index >= _properties.PropertyCount();
+        return _index >= _properties.size();
       }
     };
 
-    KRYS_NODISCARD inline uint32 PropertyCount() const noexcept;
+    KRYS_NODISCARD inline uint32 size() const noexcept;
 
     KRYS_NODISCARD inline bool empty() const noexcept;
 
@@ -167,8 +160,6 @@ namespace krys::boo::css
       return nullptr;
     }
 
-    KRYS_NODISCARD inline uint32 size() const noexcept;
-
     KRYS_NODISCARD RefPtr<css::Value> GetPropertyCSSValue(PropertyId property) const noexcept;
 
     KRYS_NODISCARD CSSOMString GetPropertyValue(PropertyId property) const noexcept;
@@ -178,10 +169,6 @@ namespace krys::boo::css
     KRYS_NODISCARD Maybe<ValueId> PropertyAsValueId(PropertyId property) const noexcept;
 
     KRYS_NODISCARD bool PropertyIsImportant(PropertyId property) const noexcept;
-
-    KRYS_NODISCARD CSSOMStringView GetPropertyShorthand(PropertyId property) const noexcept;
-
-    KRYS_NODISCARD bool IsPropertyImplicit(PropertyId property) const noexcept;
 
     KRYS_NODISCARD RefPtr<css::Value> GetCustomPropertyCSSValue(CSSOMStringView propertyName) const noexcept;
 
@@ -205,8 +192,6 @@ namespace krys::boo::css
 
     KRYS_NODISCARD CSSOMStringAtom AsTextAtom(const SerialisationContext &context) const noexcept;
 
-    KRYS_NODISCARD bool HasCSSOMWrapper() const noexcept;
-
     KRYS_NODISCARD bool IsMutable() const noexcept
     {
       return _isMutable;
@@ -219,10 +204,6 @@ namespace krys::boo::css
 
     KRYS_NODISCARD static size_t AverageSizeInBytes() noexcept;
 
-#if KRYS_DEBUG
-    void ShowStyle() const noexcept;
-#endif
-
     KRYS_NODISCARD bool PropertyMatches(PropertyId property, const css::Value *value) const noexcept;
 
     KRYS_NODISCARD inline Maybe<uint32> FindPropertyIndex(PropertyId property) const noexcept;
@@ -230,8 +211,6 @@ namespace krys::boo::css
     KRYS_NODISCARD inline Maybe<uint32> FindCustomPropertyIndex(CSSOMStringView propertyName) const noexcept;
 
   private:
-    KRYS_NODISCARD CSSOMString AsTextInternal(const SerialisationContext &context) const noexcept;
-
     KRYS_NODISCARD CSSOMString SerialiseLonghandValue(const SerialisationContext &context,
                                                       PropertyId property) const noexcept;
 

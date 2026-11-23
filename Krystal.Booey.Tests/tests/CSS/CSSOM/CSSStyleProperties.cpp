@@ -140,11 +140,9 @@ namespace krys::boo::css::tests
   TEST_CASE("CSSStyleProperties: a declaration block's own wrapper", "[CSS][CSSOM][CSSStyleProperties]")
   {
     auto properties = ParseDeclarations(u8"color: red; margin: 1px");
-    CHECK_FALSE(properties->HasCSSOMWrapper());
     CHECK(properties->CssStyleProperties() == nullptr);
 
     auto &style = properties->EnsureCSSStyleProperties();
-    CHECK(properties->HasCSSOMWrapper());
     CHECK(&style == properties->CssStyleProperties());
     CHECK(&style == &properties->EnsureCSSStyleProperties());
     CHECK(style.ParentRule() == nullptr);

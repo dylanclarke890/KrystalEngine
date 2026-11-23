@@ -340,7 +340,7 @@ namespace krys::boo::css::tests
       CHECK(AsText(Downcast<FontFaceRule>(*sheet->RuleAt(0)).Properties())
             == "font-family: Foo; font-weight: bold;");
       // !important isn't allowed in @font-face.
-      CHECK(Downcast<FontFaceRule>(*sheet->RuleAt(1)).Properties().PropertyCount() == 0);
+      CHECK(Downcast<FontFaceRule>(*sheet->RuleAt(1)).Properties().size() == 0);
     }
 
     SECTION("@page is an unknown at-rule")
@@ -565,7 +565,7 @@ namespace krys::boo::css::tests
     // !important isn't allowed in a keyframe.
     auto important = Parser::ParseKeyframeRule(u8"from { opacity: 0 !important }", context);
     REQUIRE(important);
-    CHECK(important->Properties().PropertyCount() == 0);
+    CHECK(important->Properties().size() == 0);
   }
 
   TEST_CASE_METHOD(ValueFixture, "Parser::ParseNestedDeclarations", "[CSS][Parser]")
@@ -639,7 +639,7 @@ namespace krys::boo::css::tests
       CHECK(properties->SetCustomProperty(CSSOMString(u8"--x"), CSSOMString(u8" 1px 2px "), context));
       CHECK(ToNarrow(properties->GetCustomPropertyValue(u8"--x")) == "1px 2px");
       CHECK(properties->SetCustomProperty(CSSOMString(u8"--x"), CSSOMString(), context));
-      CHECK(properties->PropertyCount() == 0);
+      CHECK(properties->size() == 0);
     }
 
     SECTION("ParseDeclaration")
@@ -651,7 +651,7 @@ namespace krys::boo::css::tests
       CHECK_FALSE(properties->ParseDeclaration(
         CSSOMString(u8"color: red; color: blue !important; color: green; --a: 1; --a: 2"), context));
       CHECK(properties->ParseDeclaration(CSSOMString(u8""), context));
-      CHECK(properties->PropertyCount() == 0);
+      CHECK(properties->size() == 0);
     }
   }
 }

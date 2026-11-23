@@ -64,14 +64,14 @@ namespace krys::boo::css
     KRYS_NODISCARD static Ref<ImmutableStyleProperties> CreateDeduplicating(Span<const Property> properties,
                                                                             css::ParserMode mode) noexcept;
 
-    KRYS_NODISCARD uint32 PropertyCount() const noexcept
+    KRYS_NODISCARD uint32 size() const noexcept
     {
       return _arraySize;
     }
 
     KRYS_NODISCARD bool empty() const noexcept
     {
-      return !PropertyCount();
+      return !size();
     }
 
     KRYS_NODISCARD PropertyReference PropertyAt(uint32 index) const noexcept KRYS_LIFETIME_BOUND
@@ -89,11 +89,6 @@ namespace krys::boo::css
       return nullptr;
     }
 
-    KRYS_NODISCARD uint32 size() const noexcept
-    {
-      return PropertyCount();
-    }
-
     KRYS_NODISCARD Maybe<uint32> FindPropertyIndex(PropertyId property) const noexcept;
 
     KRYS_NODISCARD Maybe<uint32> FindCustomPropertyIndex(CSSOMStringView propertyName) const noexcept;
@@ -108,13 +103,12 @@ namespace krys::boo::css
       return Span<PackedPtr<const css::Value>>(
         std::bit_cast<PackedPtr<const css::Value> *>(std::bit_cast<const uint8 *>(MetadataSpan().data())
                                                      + (_arraySize * sizeof(PropertyMetadata))),
-        PropertyCount());
+        size());
     }
 
     KRYS_NODISCARD Span<const PropertyMetadata> MetadataSpan() const noexcept
     {
-      return Span<const PropertyMetadata>(reinterpret_cast<const PropertyMetadata *>(&_storage),
-                                          PropertyCount());
+      return Span<const PropertyMetadata>(reinterpret_cast<const PropertyMetadata *>(&_storage), size());
     }
   };
 

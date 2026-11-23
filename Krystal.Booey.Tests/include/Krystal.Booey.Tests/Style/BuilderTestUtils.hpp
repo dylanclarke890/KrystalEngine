@@ -90,7 +90,7 @@ namespace krys::boo::style::tests
       declaration += value;
       auto properties = css::MutableStyleProperties::Create(css::ParserMode::HTMLStandard);
       css::tests::AddDeclaration(*properties, declaration, ParseContext());
-      krys_assert_msg(properties->PropertyCount(), "The value doesn't parse");
+      krys_assert_msg(properties->size(), "The value doesn't parse");
 
       auto matched = MatchResult::Create();
       matched->AuthorDeclarations.push_back(

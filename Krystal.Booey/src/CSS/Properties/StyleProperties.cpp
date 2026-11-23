@@ -38,7 +38,6 @@
 #include "Krystal.Booey/Graphics/Color/Color.hpp"
 #include "Krystal.Core/Types/IterationStatus.hpp"
 #include <bitset>
-#include <print>
 
 namespace krys::boo::css
 {
@@ -197,36 +196,9 @@ namespace krys::boo::css
     return false;
   }
 
-  CSSOMStringView StyleProperties::GetPropertyShorthand(PropertyId property) const noexcept
-  {
-    auto foundPropertyIndex = FindPropertyIndex(property);
-    if (!foundPropertyIndex)
-    {
-      return {};
-    }
-
-    return ToString(PropertyAt(*foundPropertyIndex).ShorthandId());
-  }
-
-  bool StyleProperties::IsPropertyImplicit(PropertyId property) const noexcept
-  {
-    auto foundPropertyIndex = FindPropertyIndex(property);
-    if (!foundPropertyIndex)
-    {
-      return false;
-    }
-
-    return PropertyAt(*foundPropertyIndex).IsImplicit();
-  }
-
-  CSSOMString StyleProperties::AsText(const SerialisationContext &context) const noexcept
-  {
-    return AsTextInternal(context);
-  }
-
   CSSOMStringAtom StyleProperties::AsTextAtom(const SerialisationContext &context) const noexcept
   {
-    return CSSOMStringAtom(AsTextInternal(context));
+    return CSSOMStringAtom(AsText(context));
   }
 
   KRYS_NODISCARD constexpr static bool CanUseShorthandForLonghand(PropertyId shorthandId,
@@ -274,7 +246,7 @@ namespace krys::boo::css
     }
   }
 
-  CSSOMString StyleProperties::AsTextInternal(const SerialisationContext &context) const noexcept
+  CSSOMString StyleProperties::AsText(const SerialisationContext &context) const noexcept
   {
     CSSOMString result;
 
@@ -370,12 +342,6 @@ namespace krys::boo::css
     return result;
   }
 
-  bool StyleProperties::HasCSSOMWrapper() const noexcept
-  {
-    const auto *mutableProperties = DynamicDowncast<MutableStyleProperties>(*this);
-    return mutableProperties && mutableProperties->_cssomWrapper;
-  }
-
   bool StyleProperties::TraverseSubresources(
     KRYS_NOESCAPE const Func<bool(const CachedResource &)> &handler) const noexcept
   {
@@ -461,14 +427,6 @@ namespace krys::boo::css
   static_assert(sizeof(StyleProperties) == sizeof(SameSizeAsStyleProperties),
                 "style property set should stay small");
 
-#if KRYS_DEBUG
-  void StyleProperties::ShowStyle() const noexcept
-  {
-    auto text = AsText(DefaultSerialisationContext());
-    std::println(stderr, "{}", std::string_view(reinterpret_cast<const char *>(text.data()), text.size()));
-  }
-#endif
-
   CSSOMString StyleProperties::PropertyReference::CssName() const noexcept
   {
     if (Id() == PropertyId::Custom)
@@ -477,11 +435,5 @@ namespace krys::boo::css
     }
 
     return CSSOMString(ToString(Id()));
-  }
-
-  CSSOMString StyleProperties::PropertyReference::CssText(const SerialisationContext &context) const noexcept
-  {
-    return CssName() + u8": " + css::SerialiseLonghandValue(context, Id(), *_value)
-           + (IsImportant() ? u8" !important;" : u8";");
   }
 }
