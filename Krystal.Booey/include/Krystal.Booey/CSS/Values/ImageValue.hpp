@@ -1,24 +1,4 @@
-﻿/*
- * (C) 1999-2003 Lars Knoll (knoll@kde.org)
- * Copyright (C) 2004-2021 Apple Inc. All rights reserved.
- *
- * This library is free software; you can redistribute it and/or
- * modify it under the terms of the GNU Library General Public
- * License as published by the Free Software Foundation; either
- * version 2 of the License, or (at your option) any later version.
- *
- * This library is distributed in the hope that it will be useful,
- * but WITHOUT ANY WARRANTY; without even the implied warranty of
- * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the GNU
- * Library General Public License for more details.
- *
- * You should have received a copy of the GNU Library General Public License
- * along with this library; see the file COPYING.LIB.  If not, write to
- * the Free Software Foundation, Inc., 51 Franklin Street, Fifth Floor,
- * Boston, MA 02110-1301, USA.
- */
-
-#pragma once
+﻿#pragma once
 
 #include "Krystal.Booey/CSS/Types/CSSOMString.hpp"
 #include "Krystal.Booey/CSS/Values/Primitives/Url.hpp"
@@ -31,8 +11,9 @@ namespace krys::boo
 {
   class CachedImage;
   class CachedResourceLoader;
-  struct ResourceLoaderOptions;
   class StyleImage;
+
+  struct ResourceLoaderOptions;
 }
 
 namespace krys::boo::style
@@ -42,68 +23,97 @@ namespace krys::boo::style
 
 namespace krys::boo::css
 {
-  /// @brief An image referenced by a `url()`.
+  /// @brief An image named by a `url()`, which loads the first time it's asked for.
+  /// @details Copies made for another resolved URL keep a link back to the value they came from, and share
+  /// its loaded image: loading through either one fills in both.
+  /// @see https://www.w3.org/TR/css-images-4/#url-notation
   class ImageValue final : public Value
   {
   private:
     CSSUrl _location;
     CachedResourceHandle<CachedImage> _cachedImage;
-    // Set once the image is asked for, even if it couldn't be (a null handle).
-    bool _didRequestImage {false};
-    CSSOMStringAtom _initiatorType {null};
+    /// @brief The value this one was copied from for another resolved URL.
     RefPtr<ImageValue> _unresolvedValue;
+    /// @brief What asked for the image, as Resource Timing reports it: `css` unless an element did.
+    /// @see https://w3c.github.io/resource-timing/#dom-performanceresourcetiming-initiatortype
+    CSSOMStringAtom _initiatorType;
+    /// @brief Set once the image has been requested, even if the request failed and left no image.
+    bool _didRequestImage {false};
+    /// @brief Set for the value standing for an image that can't be shown, which has no URL.
     bool _isInvalid {false};
-
-    ImageValue() noexcept;
-
-    ImageValue(CSSUrl &&location, CSSOMStringAtom &&initiatorType) noexcept;
 
   public:
     ~ImageValue() noexcept;
 
-    KRYS_NODISCARD static Ref<ImageValue> Create() noexcept;
-
+    /// @param initiatorType The element that asked for the image, such as `body` for its `background`
+    /// attribute; null for `css`.
     KRYS_NODISCARD static Ref<ImageValue> Create(CSSUrl location,
                                                  CSSOMStringAtom initiatorType = null) noexcept;
 
-    KRYS_NODISCARD static Ref<ImageValue> Create(net::Url imageUrl,
-                                                 CSSOMStringAtom initiatorType = null) noexcept;
+    /// @brief An image at an already-resolved URL, which is also its text.
+    /// @param initiatorType As for the other `Create`.
+    KRYS_NODISCARD static Ref<ImageValue> Create(net::Url url, CSSOMStringAtom initiatorType = null) noexcept;
 
+    /// @brief The computed value of an image that can't be shown; it serialises as nothing.
+    KRYS_NODISCARD static Ref<ImageValue> CreateInvalid() noexcept;
+
+    /// @brief This value, or a copy at @p resolvedUrl if that differs from this one's.
     KRYS_NODISCARD Ref<ImageValue> CopyForComputedStyle(const CSSUrl &resolvedUrl) const noexcept;
 
-    KRYS_NODISCARD CachedImage *LoadImage(CachedResourceLoader &loader,
-                                          const ResourceLoaderOptions &options) noexcept;
-
-    KRYS_NODISCARD CachedImage *GetCachedImage() const noexcept;
-
-    // Take care when using this, and read https://drafts.csswg.org/css-values/#relative-urls
+    /// @brief The URL as written and as resolved.
+    /// @note A relative URL resolves against the style sheet's base URL, which may not be the document's.
+    /// @see https://www.w3.org/TR/css-values-4/#relative-urls
     KRYS_NODISCARD const CSSUrl &Url() const noexcept
     {
       return _location;
     }
 
+    /// @brief Requests the image the first time, with @p options and the URL's modifiers.
+    /// @return The image, or null if it couldn't be requested.
+    KRYS_NODISCARD CachedImage *LoadImage(CachedResourceLoader &loader,
+                                          const ResourceLoaderOptions &options) noexcept;
+
+    /// @brief The image, or null if it hasn't been requested or couldn't be.
+    KRYS_NODISCARD CachedImage *GetCachedImage() const noexcept;
+
+    /// @brief The style image for this value, at its URL resolved against @p state's document.
+    KRYS_NODISCARD RefPtr<StyleImage> CreateStyleImage(const style::BuilderState &state) const noexcept;
+
+    // The Value operations.
+
     KRYS_NODISCARD CSSOMString CustomCSSText(const SerialisationContext &context) const noexcept;
+
+    /// @brief Whether both have the same URL, with the same modifiers.
+    KRYS_NODISCARD bool Equals(const ImageValue &other) const noexcept;
+
+    KRYS_NODISCARD bool CustomMayDependOnBaseUrl() const noexcept;
 
     KRYS_NODISCARD bool CustomTraverseSubresources(
       KRYS_NOESCAPE const Func<bool(const CachedResource &)> &handler) const noexcept;
 
-    KRYS_NODISCARD bool CustomMayDependOnBaseUrl() const noexcept;
-
-    KRYS_NODISCARD bool Equals(const ImageValue &other) const noexcept;
-
-    KRYS_NODISCARD RefPtr<StyleImage> CreateStyleImage(const style::BuilderState &state) const noexcept;
-
     KRYS_NODISCARD IterationStatus
       CustomVisitChildren(KRYS_NOESCAPE const Func<IterationStatus(Value &)> &func) const noexcept
     {
-      if (_unresolvedValue)
-      {
-        if (func(*_unresolvedValue) == IterationStatus::Done)
-        {
-          return IterationStatus::Done;
-        }
-      }
-      return IterationStatus::Continue;
+      return _unresolvedValue ? func(*_unresolvedValue) : IterationStatus::Continue;
+    }
+
+  private:
+    ImageValue(CSSUrl location, CSSOMStringAtom initiatorType) noexcept;
+
+    /// @brief Selects the constructor of `CreateInvalid`.
+    struct InvalidTag
+    {
+    };
+
+    explicit ImageValue(InvalidTag) noexcept;
+
+    /// @brief A copy at @p location that shares this value's image and links back to it.
+    KRYS_NODISCARD Ref<ImageValue> CopyWithLocation(CSSUrl location) const noexcept;
+
+    /// @brief This value for a holder that will load its image, which writes to it.
+    KRYS_NODISCARD Ref<ImageValue> ShareForLoading() const noexcept
+    {
+      return ShareRef(const_cast<ImageValue &>(*this));
     }
   };
 }

@@ -37,7 +37,7 @@ namespace krys::boo::css::tests
 
     SECTION("Invalid images serialise as an empty string")
     {
-      auto value = ImageValue::Create();
+      auto value = ImageValue::CreateInvalid();
       CHECK(Is<ImageValue>(*value));
       CHECK(CssText(*value).empty());
     }
@@ -86,7 +86,7 @@ namespace krys::boo::css::tests
     CHECK(ImageValue::Create(ImageUrl(u8"a.png"))->MayDependOnBaseUrl());
     CHECK_FALSE(ImageValue::Create(ImageUrl(u8"#image"))->MayDependOnBaseUrl());
     CHECK_FALSE(ImageValue::Create(ImageUrl(u8"data:image/png;base64,AAAA"))->MayDependOnBaseUrl());
-    CHECK_FALSE(ImageValue::Create()->MayDependOnBaseUrl());
+    CHECK_FALSE(ImageValue::CreateInvalid()->MayDependOnBaseUrl());
 
     // No image is loaded, so there are no subresources.
     bool called = false;
