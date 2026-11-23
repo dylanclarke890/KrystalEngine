@@ -75,9 +75,15 @@ namespace krys::boo::css
     // The assumption is that nearly all of of them are atoms that would exist anyway.
     uint32 size = sizeof(*this);
 
-    // FIXME: This ignores the children of media and region rules.
-    // Most rules are StyleRules.
-    size += RuleCount() * StyleRule::AverageSizeInBytes();
+    // Every rule is counted as a style rule, as most are, nested ones (in @media, say) included.
+    auto ruleCount = RuleCount() - static_cast<uint32>(_childRules.size());
+    std::ignore = TraverseRulesInList(_childRules,
+                                      [&](const Rule &)
+                                      {
+                                        ++ruleCount;
+                                        return false;
+                                      });
+    size += ruleCount * StyleRule::AverageSizeInBytes();
 
     for (const auto &importRule : _importRules)
     {

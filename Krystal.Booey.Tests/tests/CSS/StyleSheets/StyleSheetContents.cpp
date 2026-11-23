@@ -374,6 +374,18 @@ namespace krys::boo::css::tests
     CHECK(sheet->EstimatedSizeInBytes() >= sizeof(StyleSheetContents) + 3 * StyleRule::AverageSizeInBytes());
   }
 
+  TEST_CASE_METHOD(ValueFixture, "StyleSheetContents::EstimatedSizeInBytes counts nested rules",
+                   "[CSS][StyleSheetContents]")
+  {
+    auto empty = StyleSheetContents::Create();
+    empty->ParseString(u8"@media screen { }");
+    auto nested = StyleSheetContents::Create();
+    nested->ParseString(u8"@media screen { .a { color: red } .b { color: red } .c { .d & { color: red } } }");
+    // .a, .b, .c and the rule nested in .c.
+    CHECK(nested->EstimatedSizeInBytes()
+          == empty->EstimatedSizeInBytes() + 4 * StyleRule::AverageSizeInBytes());
+  }
+
   TEST_CASE_METHOD(ValueFixture, "StyleSheetContents::Copy", "[CSS][StyleSheetContents]")
   {
     auto sheet = StyleSheetContents::Create();
