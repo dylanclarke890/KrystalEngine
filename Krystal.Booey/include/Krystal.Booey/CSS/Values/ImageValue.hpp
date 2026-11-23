@@ -31,7 +31,6 @@ namespace krys::boo
 {
   class CachedImage;
   class CachedResourceLoader;
-  class RenderElement;
   struct ResourceLoaderOptions;
   class StyleImage;
 }
@@ -72,8 +71,6 @@ namespace krys::boo::css
 
     KRYS_NODISCARD Ref<ImageValue> CopyForComputedStyle(const CSSUrl &resolvedUrl) const noexcept;
 
-    KRYS_NODISCARD bool IsPending() const noexcept;
-
     KRYS_NODISCARD CachedImage *LoadImage(CachedResourceLoader &loader,
                                           const ResourceLoaderOptions &options) noexcept;
 
@@ -93,8 +90,6 @@ namespace krys::boo::css
     KRYS_NODISCARD bool CustomMayDependOnBaseUrl() const noexcept;
 
     KRYS_NODISCARD bool Equals(const ImageValue &other) const noexcept;
-
-    KRYS_NODISCARD bool KnownToBeOpaque(const RenderElement &renderer) const noexcept;
 
     KRYS_NODISCARD RefPtr<StyleImage> CreateStyleImage(const style::BuilderState &state) const noexcept;
 

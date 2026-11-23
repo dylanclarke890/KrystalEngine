@@ -72,11 +72,6 @@ namespace krys::boo::css
     return result;
   }
 
-  bool ImageValue::IsPending() const noexcept
-  {
-    return !_didRequestImage;
-  }
-
   CachedImage *ImageValue::LoadImage(CachedResourceLoader &loader,
                                      const ResourceLoaderOptions &options) noexcept
   {
@@ -111,11 +106,6 @@ namespace krys::boo::css
   CachedImage *ImageValue::GetCachedImage() const noexcept
   {
     return _cachedImage.get();
-  }
-
-  bool ImageValue::KnownToBeOpaque(const RenderElement &renderer) const noexcept
-  {
-    return _cachedImage && _cachedImage->CurrentFrameKnownToBeOpaque(&renderer);
   }
 
   bool ImageValue::CustomTraverseSubresources(
