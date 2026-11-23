@@ -19,4 +19,6 @@ namespace krys::boo
   {
     return PropertyFlag::SetFromShorthand;
   }
+
+  using PropertyFlags = EnumSet<PropertyFlag>;
 }

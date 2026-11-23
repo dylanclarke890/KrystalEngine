@@ -45,7 +45,7 @@ namespace krys::boo::css::tests
       return ToNarrow(color.ColorFunctionText());
     }
 
-    KRYS_NODISCARD CSSColorPercent Numeric(Ref<CSSUnitValue> value)
+    KRYS_NODISCARD CSSColorPercent AsColorPercent(Ref<CSSUnitValue> value)
     {
       return RefPtr<CSSNumericValue>(krys::move(value));
     }
@@ -69,27 +69,27 @@ namespace krys::boo::css::tests
           == "NONE");
     CHECK(CSSColorValue::RectifyCSSColorPercent(CSSOMString(u8"auto")).GetException().Code()
           == ExceptionCode::SyntaxError);
-    CHECK(CSSColorValue::RectifyCSSColorAngle(Numeric(Factory::Px(1))).GetException().Code()
+    CHECK(CSSColorValue::RectifyCSSColorAngle(AsColorPercent(Factory::Px(1))).GetException().Code()
           == ExceptionCode::SyntaxError);
   }
 
   TEST_CASE_METHOD(ValueFixture, "CSSColorValue: colour functions",
                    "[CSS][TypedOM][css-typed-om:csscolorvalue]")
   {
-    auto rgb = RequireValue(CSSRGB::Create(0.5, Numeric(Factory::Number(255)), CSSOMString(u8"none")));
+    auto rgb = RequireValue(CSSRGB::Create(0.5, AsColorPercent(Factory::Number(255)), CSSOMString(u8"none")));
     CHECK(Function(*rgb) == "rgb(50% 255 none / 100%)");
     CHECK(ComponentText(rgb->R()) == "50%");
     CHECK(ComponentText(rgb->G()) == "255");
     CHECK(ComponentText(rgb->B()) == "none");
     CHECK(ComponentText(rgb->Alpha()) == "100%");
-    CHECK(rgb->SetR(Numeric(Factory::Px(1))).GetException().Code() == ExceptionCode::SyntaxError);
+    CHECK(rgb->SetR(AsColorPercent(Factory::Px(1))).GetException().Code() == ExceptionCode::SyntaxError);
     CHECK(Is<CSSColorValue>(static_cast<const CSSStyleValue &>(*rgb)));
 
     auto hsl = RequireValue(CSSHSL::Create(30.0, 0.5, 0.25));
     CHECK(Function(*hsl) == "hsl(30deg 50% 25% / 100%)");
     CHECK(ComponentText(hsl->H()) == "30deg");
     CHECK(ComponentText(hsl->L()) == "25%");
-    CHECK(hsl->SetS(Numeric(Factory::Number(1))).HasException());
+    CHECK(hsl->SetS(AsColorPercent(Factory::Number(1))).HasException());
 
     auto hwb = RequireValue(CSSHWB::Create(Factory::Deg(30), 0.2, 0.3));
     CHECK(Function(*hwb) == "hwb(30deg 20% 30% / 100%)");
@@ -116,8 +116,8 @@ namespace krys::boo::css::tests
                    "CSSColorValue: colour values serialise, and become CSS values, as their functions",
                    "[CSS][TypedOM][css-typed-om:csscolorvalue]")
   {
-    auto rgb =
-      RequireValue(CSSRGB::Create(1.0, Numeric(Factory::Number(0)), Numeric(Factory::Number(0)), 0.5));
+    auto rgb = RequireValue(
+      CSSRGB::Create(1.0, AsColorPercent(Factory::Number(0)), AsColorPercent(Factory::Number(0)), 0.5));
     CHECK(ToNarrow(rgb->ToString()) == "rgba(255, 0, 0, 0.5)");
     CHECK(rgb->ToCSSValue());
     auto lab = RequireValue(CSSLab::Create(0.5, 20.0, CSSOMString(u8"none")));

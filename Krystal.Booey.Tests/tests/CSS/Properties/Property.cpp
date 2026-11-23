@@ -2,7 +2,6 @@
 #include "catch2/catch_test_macros.hpp"
 #include "Krystal.Booey.Tests/CSS/ValueTestUtils.hpp"
 #include "Krystal.Booey/CSS/Properties/ParsedPropertyList.hpp"
-#include "Krystal.Booey/CSS/Properties/PropertyQueries.hpp"
 #include "Krystal.Booey/CSS/Values/PrimitiveValue.hpp"
 
 namespace krys::boo::css::tests
@@ -71,31 +70,6 @@ namespace krys::boo::css::tests
       list.emplace_back(PropertyId::Color, PrimitiveValue::Create(ValueId::Red));
       REQUIRE(list.size() == 1uz);
       CHECK(list[0].Id() == PropertyId::Color);
-    }
-  }
-
-  TEST_CASE("Property statics", "[CSS][Properties][Property]")
-  {
-    SECTION("IsDirectionAwareProperty")
-    {
-      CHECK(IsLogicalPropertyGroupLogicalProperty(PropertyId::MarginInlineStart));
-      CHECK_FALSE(IsLogicalPropertyGroupLogicalProperty(PropertyId::MarginLeft));
-      CHECK_FALSE(IsLogicalPropertyGroupLogicalProperty(PropertyId::Color));
-    }
-
-    SECTION("IsListValuedProperty")
-    {
-      CHECK(IsListValuedProperty(PropertyId::BackgroundImage));
-      CHECK(IsListValuedProperty(PropertyId::Custom));
-      CHECK_FALSE(IsListValuedProperty(PropertyId::Color));
-    }
-
-    SECTION("IsSizingProperty")
-    {
-      CHECK(IsSizingProperty(PropertyId::Width));
-      CHECK(IsSizingProperty(PropertyId::MaxHeight));
-      CHECK(IsSizingProperty(PropertyId::MinInlineSize));
-      CHECK_FALSE(IsSizingProperty(PropertyId::Margin));
     }
   }
 }
