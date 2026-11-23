@@ -1,25 +1,4 @@
-﻿/*
- * (C) 1999-2003 Lars Knoll (knoll@kde.org)
- * Copyright (C) 2004-2023 Apple Inc. All rights reserved.
- * Copyright (C) 2007 Alexey Proskuryakov <ap@webkit.org>
- *
- * This library is free software; you can redistribute it and/or
- * modify it under the terms of the GNU Library General Public
- * License as published by the Free Software Foundation; either
- * version 2 of the License, or (at your option) any later version.
- *
- * This library is distributed in the hope that it will be useful,
- * but WITHOUT ANY WARRANTY; without even the implied warranty of
- * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU
- * Library General Public License for more details.
- *
- * You should have received a copy of the GNU Library General Public License
- * along with this library; see the file COPYING.LIB.  If not, write to
- * the Free Software Foundation, Inc., 51 Franklin Street, Fifth Floor,
- * Boston, MA 02110-1301, USA.
- */
-
-#pragma once
+﻿#pragma once
 
 #include "Krystal.Booey/CSS/Properties/PropertyId.hpp"
 #include "Krystal.Booey/CSS/Types/CSSOMString.hpp"
@@ -41,110 +20,128 @@ namespace krys::boo::css
 {
   class ToLengthConversionData;
 
+  /// @brief A value with no parts: a keyword, a property name, a number with its unit, a string, a custom
+  /// identifier, a font family name or a `calc()`.
+  /// @details Keywords, and the whole numbers 0 to 255 in `px`, `%` or no unit, come from the static pool.
+  /// The quantity checks (`IsLength`, `IsAngle`, ...) and the `ResolveAs` functions see a `calc()` as the
+  /// quantity it resolves to; `IsPx` and the font checks look at the units written.
+  /// @see https://www.w3.org/TR/css-values-4/
   class PrimitiveValue final : public Value
   {
     friend class StaticValuePool;
-    friend class ValuePool;
     friend class Value;
 
     using PrimitiveKind = detail::PrimitiveKind;
 
   private:
-    union ValueUnion
+    // Chosen by `_header.PrimitiveKind`; a number's unit is `_header.Unit`. `String` and `Calc` each hold a
+    // reference, released by the destructor.
+    union Payload
     {
       css::PropertyId PropertyId;
       css::ValueId ValueId;
       double Number;
       StringAtomStorage String;
       const calc::Value *Calc;
-    } _value;
-
-    struct CreateImplicitInitialValueTag
-    {
-    };
-
-    constexpr static CreateImplicitInitialValueTag CreateImplicitInitialValue {};
-
-#pragma region Constructors
-
-    explicit PrimitiveValue(css::PropertyId property) noexcept;
-
-    PrimitiveValue(const CSSOMString &value, PrimitiveKind kind) noexcept;
-
-    PrimitiveValue(double value, UnitType unit) noexcept;
-
-    explicit PrimitiveValue(Ref<calc::Value> value) noexcept;
-
-    PrimitiveValue(StaticValueTag, css::ValueId keyword) noexcept;
-
-    PrimitiveValue(StaticValueTag, double value, UnitType unit) noexcept;
-
-    PrimitiveValue(StaticValueTag, CreateImplicitInitialValueTag) noexcept;
-
-#pragma endregion
+    } _payload;
 
   public:
     ~PrimitiveValue() noexcept;
 
-#pragma region Static Creation
+    // Creation.
 
-    KRYS_NODISCARD static Ref<PrimitiveValue> Create(double value) noexcept;
+    /// @brief A number in @p unit.
+    KRYS_NODISCARD static Ref<PrimitiveValue> Create(double value, UnitType unit = UnitType::Number) noexcept;
 
-    KRYS_NODISCARD static Ref<PrimitiveValue> Create(double value, UnitType unit) noexcept;
-
+    /// @brief An `<integer>`.
     KRYS_NODISCARD static Ref<PrimitiveValue> CreateInteger(double value) noexcept;
 
     KRYS_NODISCARD static Ref<PrimitiveValue> Create(Ref<calc::Value> value) noexcept;
 
+    /// @brief A keyword, from the static pool.
     /// @note Defined in ValuePool.hpp.
-    KRYS_NODISCARD static inline Ref<PrimitiveValue> Create(css::ValueId identifier) noexcept;
+    KRYS_NODISCARD static inline Ref<PrimitiveValue> Create(css::ValueId keyword) noexcept;
 
+    /// @brief A property's name, as `transition-property` and `will-change` take.
     KRYS_NODISCARD static Ref<PrimitiveValue> Create(css::PropertyId property) noexcept;
 
+    /// @brief A `<string>`.
     KRYS_NODISCARD static Ref<PrimitiveValue> Create(const CSSOMString &value) noexcept;
 
-    KRYS_NODISCARD static Ref<PrimitiveValue> Create(const CSSOMStringAtom &value) noexcept;
+    /// @brief A `<string>`.
+    KRYS_NODISCARD static Ref<PrimitiveValue> Create(CSSOMStringAtom value) noexcept;
 
     KRYS_NODISCARD static Ref<PrimitiveValue> CreateCustomIdent(const CSSOMString &value) noexcept;
 
-    KRYS_NODISCARD static Ref<PrimitiveValue> CreateCustomIdent(const CSSOMStringAtom &value) noexcept;
+    KRYS_NODISCARD static Ref<PrimitiveValue> CreateCustomIdent(CSSOMStringAtom value) noexcept;
 
+    /// @brief A font family's name, serialised as identifiers where it can be and as a string otherwise.
     KRYS_NODISCARD static Ref<PrimitiveValue> CreateFontFamily(const CSSOMString &value) noexcept;
 
+    /// @brief The `initial` that a declaration block gives a longhand its shorthand left out.
     /// @note Defined in ValuePool.hpp.
     KRYS_NODISCARD static inline PrimitiveValue &ImplicitInitialValue() noexcept;
 
-#pragma endregion
+    // What it holds.
 
-#pragma region Unit Checks
-
-    // The quantity checks (IsLength, IsAngle, ...) see a calc() as the quantity it resolves to. The font
-    // checks look at the lengths inside it, and IsPx at the written unit, which a calc() never has.
-
-    KRYS_NODISCARD bool IsAngle() const noexcept
+    KRYS_NODISCARD bool IsValueId() const noexcept
     {
-      return CategoryForUnitType(Unit()) == Category::Angle;
+      return _header.PrimitiveKind == PrimitiveKind::ValueId;
     }
 
-    /// @brief Whether this is an absolute length, which nothing but zoom affects; a calc() is if all its
-    /// lengths are.
-    KRYS_NODISCARD bool IsFontIndependentLength() const noexcept;
-
-    /// @brief Whether this is a length relative to a font, the root's included; a calc() is if any of its
-    /// lengths is.
-    KRYS_NODISCARD bool IsFontRelativeLength() const noexcept;
-
-    /// @brief Whether this depends on the parent's font size: a percentage, or a length relative to the
-    /// element's own font; a calc() is if any of its parts is.
-    KRYS_NODISCARD bool IsParentFontRelativeLength() const noexcept;
-
-    /// @brief Whether this is a length relative to the root's font; a calc() is if any of its lengths is.
-    KRYS_NODISCARD bool IsRootFontRelativeLength() const noexcept;
-
-    KRYS_NODISCARD bool IsLength() const noexcept
+    /// @brief The keyword, or `ValueId::Invalid` if this isn't one.
+    KRYS_NODISCARD css::ValueId ValueId() const noexcept
     {
-      return css::IsLength(Unit());
+      return IsValueId() ? _payload.ValueId : css::ValueId::Invalid;
     }
+
+    KRYS_NODISCARD bool IsPropertyId() const noexcept
+    {
+      return _header.PrimitiveKind == PrimitiveKind::PropertyId;
+    }
+
+    /// @brief The property, or `PropertyId::Invalid` if this isn't one.
+    KRYS_NODISCARD css::PropertyId PropertyId() const noexcept
+    {
+      return IsPropertyId() ? _payload.PropertyId : css::PropertyId::Invalid;
+    }
+
+    KRYS_NODISCARD bool IsString() const noexcept
+    {
+      return _header.PrimitiveKind == PrimitiveKind::String;
+    }
+
+    KRYS_NODISCARD bool IsCustomIdent() const noexcept
+    {
+      return _header.PrimitiveKind == PrimitiveKind::CustomIdent;
+    }
+
+    KRYS_NODISCARD bool IsFontFamily() const noexcept
+    {
+      return _header.PrimitiveKind == PrimitiveKind::FontFamily;
+    }
+
+    /// @brief The text of a string, custom identifier or font family, or the name of a keyword or property;
+    /// empty for a number or `calc()`.
+    KRYS_NODISCARD CSSOMString StringValue() const noexcept;
+
+    KRYS_NODISCARD bool IsCalc() const noexcept
+    {
+      return _header.PrimitiveKind == PrimitiveKind::Calc;
+    }
+
+    /// @brief The `calc()`, or null if this isn't one.
+    KRYS_NODISCARD const calc::Value *CalcValue() const noexcept
+    {
+      return IsCalc() ? _payload.Calc : nullptr;
+    }
+
+    // Its unit.
+
+    /// @brief The unit of a number, or the canonical unit of what a `calc()` resolves to (`px` for a
+    /// length); `UnitType::Unknown` for the other kinds, and for a `calc()` mixing a percentage with another
+    /// quantity.
+    KRYS_NODISCARD UnitType Unit() const noexcept;
 
     KRYS_NODISCARD bool IsNumber() const noexcept
     {
@@ -166,23 +163,20 @@ namespace krys::boo::css
       return Unit() == UnitType::Percentage;
     }
 
-    /// @brief Whether this is a number written in `px`; never a calc().
-    KRYS_NODISCARD bool IsPx() const noexcept
+    KRYS_NODISCARD bool IsLength() const noexcept
     {
-      return StoredUnit() == UnitType::px;
+      return css::IsLength(Unit());
+    }
+
+    KRYS_NODISCARD bool IsAngle() const noexcept
+    {
+      return CategoryForUnitType(Unit()) == Category::Angle;
     }
 
     KRYS_NODISCARD bool IsTime() const noexcept
     {
       return CategoryForUnitType(Unit()) == Category::Time;
     }
-
-    KRYS_NODISCARD bool IsCalc() const noexcept
-    {
-      return _header.PrimitiveKind == PrimitiveKind::Calc;
-    }
-
-    KRYS_NODISCARD bool IsCalcPercentageWithLength() const noexcept;
 
     KRYS_NODISCARD bool IsResolution() const noexcept
     {
@@ -194,55 +188,58 @@ namespace krys::boo::css
       return Unit() == UnitType::fr;
     }
 
-#pragma endregion
+    /// @brief Whether this is a `calc()` adding a percentage to a length, such as `calc(50% - 1em)`.
+    KRYS_NODISCARD bool IsCalcPercentageWithLength() const noexcept;
 
-#pragma region Keywords, Properties and Strings
-
-    KRYS_NODISCARD bool IsValueId() const noexcept
+    /// @brief Whether this is a number written in `px`; never a `calc()`.
+    KRYS_NODISCARD bool IsPx() const noexcept
     {
-      return _header.PrimitiveKind == PrimitiveKind::ValueId;
+      return StoredUnit() == UnitType::px;
     }
 
-    KRYS_NODISCARD css::ValueId ValueId() const noexcept
+    /// @brief Whether this is an absolute length, which nothing but zoom affects; a `calc()` is if all its
+    /// lengths are.
+    KRYS_NODISCARD bool IsFontIndependentLength() const noexcept;
+
+    /// @brief Whether this is a length relative to a font, the root's included; a `calc()` is if any of its
+    /// lengths is.
+    KRYS_NODISCARD bool IsFontRelativeLength() const noexcept;
+
+    /// @brief Whether this depends on the parent's font size: a percentage, or a length relative to the
+    /// element's own font; a `calc()` is if any of its parts is.
+    KRYS_NODISCARD bool IsParentFontRelativeLength() const noexcept;
+
+    /// @brief Whether this is a length relative to the root's font; a `calc()` is if any of its lengths is.
+    KRYS_NODISCARD bool IsRootFontRelativeLength() const noexcept;
+
+    // Its sign, as written. A calc() isn't range-checked when it's parsed, and its sign isn't known until it
+    // is resolved, so these are null for one.
+    // https://www.w3.org/TR/css-values-4/#calc-range
+
+    KRYS_NODISCARD Maybe<bool> IsZero() const noexcept
     {
-      return IsValueId() ? _value.ValueId : css::ValueId::Invalid;
+      return IsCalc() ? Maybe<bool> {} : Maybe<bool> {_payload.Number == 0.0};
     }
 
-    KRYS_NODISCARD bool IsPropertyId() const noexcept
+    KRYS_NODISCARD Maybe<bool> IsOne() const noexcept
     {
-      return _header.PrimitiveKind == PrimitiveKind::PropertyId;
+      return IsCalc() ? Maybe<bool> {} : Maybe<bool> {_payload.Number == 1.0};
     }
 
-    KRYS_NODISCARD css::PropertyId PropertyId() const noexcept
+    KRYS_NODISCARD Maybe<bool> IsPositive() const noexcept
     {
-      return IsPropertyId() ? _value.PropertyId : css::PropertyId::Invalid;
+      return IsCalc() ? Maybe<bool> {} : Maybe<bool> {_payload.Number > 0.0};
     }
 
-    KRYS_NODISCARD bool IsString() const noexcept
+    KRYS_NODISCARD Maybe<bool> IsNegative() const noexcept
     {
-      return _header.PrimitiveKind == PrimitiveKind::String;
+      return IsCalc() ? Maybe<bool> {} : Maybe<bool> {_payload.Number < 0.0};
     }
 
-    KRYS_NODISCARD bool IsCustomIdent() const noexcept
-    {
-      return _header.PrimitiveKind == PrimitiveKind::CustomIdent;
-    }
+    // Resolving. Each `ResolveAs` function needs the matching quantity check to hold, and converts to that
+    // quantity's canonical unit, or the one given. Results are clamped to @p T's range.
 
-    KRYS_NODISCARD bool IsFontFamily() const noexcept
-    {
-      return _header.PrimitiveKind == PrimitiveKind::FontFamily;
-    }
-
-    KRYS_NODISCARD CSSOMString StringValue() const noexcept;
-
-#pragma endregion
-
-    /// @brief The unit of a number, or of the number a calc() resolves to; `UnitType::Unknown` for the other
-    /// kinds of value, and for a calc() mixing a percentage with a length or angle.
-    KRYS_NODISCARD UnitType Unit() const noexcept;
-
-#pragma region Integer (requires IsInteger())
-
+    /// @pre `IsInteger()`.
     template <typename T = int64>
     KRYS_NODISCARD T ResolveAsInteger(const ToLengthConversionData &conversionData) const noexcept
     {
@@ -250,6 +247,8 @@ namespace krys::boo::css
       return Resolve<T>(conversionData);
     }
 
+    /// @brief The integer as written, or null for a `calc()`.
+    /// @pre `IsInteger()`.
     template <typename T = int64>
     KRYS_NODISCARD Maybe<T> ResolveAsIntegerIfNotCalc() const noexcept
     {
@@ -257,10 +256,7 @@ namespace krys::boo::css
       return ValueIfNotCalc<T>();
     }
 
-#pragma endregion
-
-#pragma region Number (requires IsNumberOrInteger())
-
+    /// @pre `IsNumberOrInteger()`.
     template <typename T = double>
     KRYS_NODISCARD T ResolveAsNumber(const ToLengthConversionData &conversionData) const noexcept
     {
@@ -268,6 +264,8 @@ namespace krys::boo::css
       return Resolve<T>(UnitType::Number, conversionData);
     }
 
+    /// @brief The number as written, or null for a `calc()`.
+    /// @pre `IsNumberOrInteger()`.
     template <typename T = double>
     KRYS_NODISCARD Maybe<T> ResolveAsNumberIfNotCalc() const noexcept
     {
@@ -275,10 +273,8 @@ namespace krys::boo::css
       return ValueIfNotCalc<T>();
     }
 
-#pragma endregion
-
-#pragma region Percentage (requires IsPercentage())
-
+    /// @brief The percentage, as 50 for `50%`.
+    /// @pre `IsPercentage()`.
     template <typename T = double>
     KRYS_NODISCARD T ResolveAsPercentage(const ToLengthConversionData &conversionData) const noexcept
     {
@@ -286,6 +282,7 @@ namespace krys::boo::css
       return Resolve<T>(conversionData);
     }
 
+    /// @pre `IsPercentage()`, and this isn't a `calc()`.
     template <typename T = double>
     KRYS_NODISCARD T ResolveAsPercentageWithoutConversionData() const noexcept
     {
@@ -293,10 +290,7 @@ namespace krys::boo::css
       return ResolveWithoutConversionData<T>();
     }
 
-#pragma endregion
-
-#pragma region Angle (requires IsAngle())
-
+    /// @pre `IsAngle()`.
     template <typename T = double, AngleUnit TUnit = UnitTraits<AngleUnit>::Canonical>
     KRYS_NODISCARD T ResolveAsAngle(const ToLengthConversionData &conversionData) const noexcept
     {
@@ -304,10 +298,7 @@ namespace krys::boo::css
       return ClampTo<T>(ConvertUnit(ResolveDouble(conversionData), Unit(), ToUnitType(TUnit)).value_or(0));
     }
 
-#pragma endregion
-
-#pragma region Time (requires IsTime())
-
+    /// @pre `IsTime()`.
     template <typename T = double, TimeUnit TUnit = UnitTraits<TimeUnit>::Canonical>
     KRYS_NODISCARD T ResolveAsTime(const ToLengthConversionData &conversionData) const noexcept
     {
@@ -315,10 +306,7 @@ namespace krys::boo::css
       return ClampTo<T>(ConvertUnit(ResolveDouble(conversionData), Unit(), ToUnitType(TUnit)).value_or(0));
     }
 
-#pragma endregion
-
-#pragma region Resolution (requires IsResolution())
-
+    /// @pre `IsResolution()`.
     template <typename T = double, ResolutionUnit TUnit = UnitTraits<ResolutionUnit>::Canonical>
     KRYS_NODISCARD T ResolveAsResolution(const ToLengthConversionData &conversionData) const noexcept
     {
@@ -326,10 +314,7 @@ namespace krys::boo::css
       return ClampTo<T>(ConvertUnit(ResolveDouble(conversionData), Unit(), ToUnitType(TUnit)).value_or(0));
     }
 
-#pragma endregion
-
-#pragma region Flex (requires IsFlex())
-
+    /// @pre `IsFlex()`.
     template <typename T = double>
     KRYS_NODISCARD T ResolveAsFlex(const ToLengthConversionData &conversionData) const noexcept
     {
@@ -337,15 +322,14 @@ namespace krys::boo::css
       return Resolve<T>(conversionData);
     }
 
-#pragma endregion
-
-#pragma region Length (requires IsLength())
-
-    /// @note Specialised for int64, uint64, int32, uint32, int16, uint16, float, double and LayoutUnit in
-    /// PrimitiveValue.cpp.
+    /// @brief The length in CSS pixels. Integer types take it through `style::RoundForImpreciseConversion`.
+    /// @pre `IsLength()`.
+    /// @note Instantiated in PrimitiveValue.cpp for the 16-, 32- and 64-bit integers, `float`, `double` and
+    /// `LayoutUnit`.
     template <typename T = double>
     KRYS_NODISCARD T ResolveAsLength(const ToLengthConversionData &conversionData) const noexcept;
 
+    /// @pre `IsLength()` with an absolute unit, and this isn't a `calc()`.
     template <typename T = double>
     KRYS_NODISCARD T ResolveAsLengthWithoutConversionData() const noexcept
     {
@@ -353,26 +337,23 @@ namespace krys::boo::css
       return ResolveWithoutConversionData<T>(UnitType::px);
     }
 
-#pragma endregion
-
-#pragma region Non-converting
-
+    /// @brief The number in its own unit, unconverted.
     template <typename T = double>
     KRYS_NODISCARD T Resolve(const ToLengthConversionData &conversionData) const noexcept
     {
       return ClampTo<T>(ResolveDouble(conversionData));
     }
 
+    /// @brief The number in its own unit, unconverted.
+    /// @pre This isn't a `calc()`.
     template <typename T = double>
     KRYS_NODISCARD T ResolveWithoutConversionData() const noexcept
     {
       return ClampTo<T>(ResolveDoubleWithoutConversionData());
     }
 
-#pragma endregion
-
-#pragma region Divides value by 100 if percentage
-
+    /// @brief A number, or a percentage as a fraction (0.5 for `50%`).
+    /// @pre `IsNumberOrInteger()` or `IsPercentage()`.
     template <typename T = double>
     KRYS_NODISCARD
     T ResolveDividingBy100IfPercentage(const ToLengthConversionData &conversionData) const noexcept
@@ -380,22 +361,7 @@ namespace krys::boo::css
       return ClampTo<T>(ResolveDoubleDividingBy100IfPercentage(conversionData));
     }
 
-#pragma endregion
-
-    // These return null for calc, for which range checking is not done at parse time:
-    // <https://www.w3.org/TR/css3-values/#calc-range>.
-    KRYS_NODISCARD Maybe<bool> IsZero() const noexcept;
-
-    KRYS_NODISCARD Maybe<bool> IsOne() const noexcept;
-
-    KRYS_NODISCARD Maybe<bool> IsPositive() const noexcept;
-
-    KRYS_NODISCARD Maybe<bool> IsNegative() const noexcept;
-
-    KRYS_NODISCARD const calc::Value *CalcValue() const noexcept
-    {
-      return IsCalc() ? _value.Calc : nullptr;
-    }
+    // The Value operations.
 
     KRYS_NODISCARD CSSOMString CustomCSSText(const SerialisationContext &context) const noexcept;
 
@@ -404,23 +370,53 @@ namespace krys::boo::css
     void CollectComputedStyleDependencies(css::ComputedStyleDependencies &dependencies) const noexcept;
 
   private:
-    // The stored unit: `Unknown` for every kind but a number, calc() included.
+    /// @brief Selects the constructor of `ImplicitInitialValue()`.
+    struct CreateImplicitInitialValueTag
+    {
+    };
+
+    constexpr static CreateImplicitInitialValueTag CreateImplicitInitialValue {};
+
+    PrimitiveValue(double value, UnitType unit) noexcept;
+
+    explicit PrimitiveValue(css::PropertyId property) noexcept;
+
+    /// @pre @p kind is `String`, `CustomIdent` or `FontFamily`.
+    PrimitiveValue(CSSOMStringAtom value, PrimitiveKind kind) noexcept;
+
+    explicit PrimitiveValue(Ref<calc::Value> value) noexcept;
+
+    PrimitiveValue(StaticValueTag, css::ValueId keyword) noexcept;
+
+    PrimitiveValue(StaticValueTag, double value, UnitType unit) noexcept;
+
+    PrimitiveValue(StaticValueTag, CreateImplicitInitialValueTag) noexcept;
+
+    /// @brief The unit written: a number's, and `Unknown` for every other kind, `calc()` included.
     KRYS_NODISCARD UnitType StoredUnit() const noexcept
     {
       return _header.Unit;
     }
 
-#pragma region Length converting
+    KRYS_NODISCARD double ResolveDouble(const ToLengthConversionData &conversionData) const noexcept;
+
+    /// @brief The number converted to @p targetUnit, or 0 if it can't be.
+    KRYS_NODISCARD double ResolveDouble(UnitType targetUnit,
+                                        const ToLengthConversionData &conversionData) const noexcept;
+
+    KRYS_NODISCARD double ResolveDoubleWithoutConversionData() const noexcept
+    {
+      krys_debug_assert(!IsCalc());
+      return _payload.Number;
+    }
+
+    /// @brief The number converted to @p targetUnit, or 0 if it can't be.
+    KRYS_NODISCARD double ResolveDoubleWithoutConversionData(UnitType targetUnit) const noexcept;
+
+    KRYS_NODISCARD double
+      ResolveDoubleDividingBy100IfPercentage(const ToLengthConversionData &conversionData) const noexcept;
 
     KRYS_NODISCARD double ResolveAsLengthDouble(const ToLengthConversionData &conversionData) const noexcept;
-
-#pragma endregion
-
-#pragma region Arbitrarily converting
-
-    KRYS_NODISCARD double ResolveDouble(UnitType targetUnit, const ToLengthConversionData &) const noexcept;
-
-    KRYS_NODISCARD double ResolveDoubleWithoutConversionData(UnitType targetUnit) const noexcept;
 
     template <typename T = double>
     KRYS_NODISCARD T Resolve(UnitType targetUnit, const ToLengthConversionData &conversionData) const noexcept
@@ -434,41 +430,21 @@ namespace krys::boo::css
       return ClampTo<T>(ResolveDoubleWithoutConversionData(targetUnit));
     }
 
-#pragma endregion
-
-#pragma region Non-converting
-
-    KRYS_NODISCARD double ResolveDouble(const ToLengthConversionData &) const noexcept;
-
-    KRYS_NODISCARD double ResolveDoubleWithoutConversionData() const noexcept
-    {
-      krys_debug_assert(!IsCalc());
-      return _value.Number;
-    }
-
-    KRYS_NODISCARD double
-      ResolveDoubleDividingBy100IfPercentage(const ToLengthConversionData &) const noexcept;
-
     template <typename T = double>
     KRYS_NODISCARD Maybe<T> ValueIfNotCalc() const noexcept
     {
-      if (IsCalc())
-      {
-        return null;
-      }
-
-      return static_cast<T>(_value.Number);
+      return IsCalc() ? Maybe<T> {} : Maybe<T> {static_cast<T>(_payload.Number)};
     }
 
-#pragma endregion
+    /// @brief The text of a string, custom identifier or font family.
+    KRYS_NODISCARD utf8_stringview StringView() const noexcept
+    {
+      return _payload.String->View();
+    }
+
+    KRYS_NODISCARD CSSOMString SerialiseNumber() const noexcept;
 
     KRYS_NODISCARD bool AddDerivedHash(size_t &seed) const noexcept;
-
-    KRYS_NODISCARD CSSOMString SerialiseInternal(const SerialisationContext &) const noexcept;
-
-    KRYS_NODISCARD CSSOMString FormatNumberValue(CSSOMStringView suffix) const noexcept;
-
-    KRYS_NODISCARD CSSOMString FormatIntegerValue(CSSOMStringView suffix) const noexcept;
   };
 }
 
