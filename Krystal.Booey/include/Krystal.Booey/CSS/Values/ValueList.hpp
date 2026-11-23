@@ -134,27 +134,6 @@ namespace krys::boo::css
 
     KRYS_NODISCARD ValueListBuilder CopyValues() const noexcept;
 
-    // Consider removing these functions and having callers use size() and operator[] instead.
-    KRYS_NODISCARD uint32 Length() const noexcept
-    {
-      return size();
-    }
-
-    KRYS_NODISCARD const Value *Item(uint32 index) const noexcept KRYS_LIFETIME_BOUND
-    {
-      return index < size() ? &(*this)[index] : nullptr;
-    }
-
-    KRYS_NODISCARD RefPtr<const Value> ProtectedItem(uint32 index) const noexcept
-    {
-      return ShareRefPtr(Item(index));
-    }
-
-    KRYS_NODISCARD const Value *ItemWithoutBoundsCheck(uint32 index) const noexcept KRYS_LIFETIME_BOUND
-    {
-      return &(*this)[index];
-    }
-
     KRYS_NODISCARD IterationStatus
       CustomVisitChildren(KRYS_NOESCAPE const Func<IterationStatus(Value &)> &func) const noexcept;
 
@@ -174,12 +153,8 @@ namespace krys::boo::css
 
     ValueList(ValueSeparator separator, Ref<Value> value1, Ref<Value> value2, Ref<Value> value3) noexcept;
 
-    ValueList(ValueSeparator separator, Ref<Value> value1, Ref<Value> value2, Ref<Value> value3,
-              Ref<Value> value4) noexcept;
-
   public:
-    /// @param separator `','`, `'/'` or `' '`.
-    KRYS_NODISCARD static Ref<ValueList> Create(char32 separator, ValueListBuilder values) noexcept;
+    KRYS_NODISCARD static Ref<ValueList> Create(ValueSeparator separator, ValueListBuilder values) noexcept;
 
     KRYS_NODISCARD static Ref<ValueList> CreateCommaSeparated(ValueListBuilder values) noexcept;
 
@@ -189,9 +164,6 @@ namespace krys::boo::css
 
     KRYS_NODISCARD static Ref<ValueList> CreateSpaceSeparated(Ref<Value> value1, Ref<Value> value2,
                                                               Ref<Value> value3) noexcept;
-
-    KRYS_NODISCARD static Ref<ValueList> CreateSpaceSeparated(Ref<Value> value1, Ref<Value> value2,
-                                                              Ref<Value> value3, Ref<Value> value4) noexcept;
 
     KRYS_NODISCARD static Ref<ValueList> CreateSlashSeparated(ValueListBuilder values) noexcept;
 

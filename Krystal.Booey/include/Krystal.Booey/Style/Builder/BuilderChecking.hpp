@@ -123,7 +123,7 @@ namespace krys::boo::style
 
     KRYS_NODISCARD const ValueType &operator[](uint32 index) const noexcept KRYS_LIFETIME_BOUND
     {
-      return detail_builder_checking::DowncastValue<ValueType>(*List->Item(index));
+      return detail_builder_checking::DowncastValue<ValueType>((*List)[index]);
     }
 
     KRYS_NODISCARD TypedRequiredListIterator<ValueType> begin() const noexcept KRYS_LIFETIME_BOUND

@@ -35,7 +35,7 @@ namespace krys::boo::css
 {
   CSSOMString SubgridValue::CustomCSSText(const SerialisationContext &context) const noexcept
   {
-    if (!Length())
+    if (!size())
     {
       return CSSOMString(u8"subgrid");
     }

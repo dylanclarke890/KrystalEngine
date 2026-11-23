@@ -94,7 +94,7 @@ namespace krys::boo
   ExceptionOr<Ref<CSSPerspective>> CSSPerspective::Create(const css::FunctionValue &function,
                                                           Document &document) noexcept
   {
-    if (function.Name() != css::ValueId::Perspective || function.Length() != 1)
+    if (function.Name() != css::ValueId::Perspective || function.size() != 1)
     {
       return Exception {ExceptionCode::TypeError};
     }

@@ -52,6 +52,12 @@ namespace krys::boo
       {
         return values[0]->ToCSSValueWithProperty(property);
       }
+      auto separator = css::Property::ListValuedPropertySeparator(property);
+      if (!separator)
+      {
+        return nullptr;
+      }
+
       css::ValueListBuilder list;
       for (const auto &value : values)
       {
@@ -60,7 +66,7 @@ namespace krys::boo
           list.push_back(Ref<css::Value>(krys::move(cssValue)));
         }
       }
-      return css::ValueList::Create(css::Property::ListValuedPropertySeparator(property), krys::move(list));
+      return css::ValueList::Create(*separator, krys::move(list));
     }
 
     /// @brief The property @p property names, if it's one that's exposed in @p document.
@@ -248,8 +254,9 @@ namespace krys::boo
       list.push_back(Ref<css::Value>(krys::move(cssValue)));
     }
 
-    if (!SetProperty(propertyId, css::ValueList::Create(
-                                   css::Property::ListValuedPropertySeparator(propertyId), krys::move(list))))
+    // IsListValuedProperty was checked above, and custom properties were turned away.
+    auto separator = *css::Property::ListValuedPropertySeparator(propertyId);
+    if (!SetProperty(propertyId, css::ValueList::Create(separator, krys::move(list))))
     {
       return Exception {ExceptionCode::TypeError};
     }

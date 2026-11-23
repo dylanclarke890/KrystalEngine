@@ -357,11 +357,11 @@ namespace krys::boo
     else if (const auto *valueList = DynamicDowncast<css::ValueList>(value))
     {
       // A list of one item is that item, and a list-valued property's list is its first item.
-      if (!valueList->Length())
+      if (!valueList->size())
       {
         return Exception {ExceptionCode::TypeError};
       }
-      if ((valueList->Length() == 1 && MayConvertValueListToSingleValue(property))
+      if ((valueList->size() == 1 && MayConvertValueListToSingleValue(property))
           || (property && css::Property::IsListValuedProperty(*property)))
       {
         return ReifyValue(document, (*valueList)[0], property);

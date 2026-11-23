@@ -108,13 +108,6 @@ namespace krys::boo::css
   {
   }
 
-  ValueList::ValueList(ValueSeparator separator, Ref<Value> value1, Ref<Value> value2, Ref<Value> value3,
-                       Ref<Value> value4) noexcept
-      : ValueContainingList(ValueType::ValueList, separator, krys::move(value1), krys::move(value2),
-                            krys::move(value3), krys::move(value4))
-  {
-  }
-
   Ref<ValueList> ValueList::CreateCommaSeparated(ValueListBuilder values) noexcept
   {
     return AdoptRef(*new ValueList(ValueSeparator::Comma, krys::move(values)));
@@ -147,23 +140,9 @@ namespace krys::boo::css
       *new ValueList(ValueSeparator::Space, krys::move(value1), krys::move(value2), krys::move(value3)));
   }
 
-  Ref<ValueList> ValueList::CreateSpaceSeparated(Ref<Value> value1, Ref<Value> value2, Ref<Value> value3,
-                                                 Ref<Value> value4) noexcept
+  Ref<ValueList> ValueList::Create(ValueSeparator separator, ValueListBuilder values) noexcept
   {
-    return AdoptRef(*new ValueList(ValueSeparator::Space, krys::move(value1), krys::move(value2),
-                                   krys::move(value3), krys::move(value4)));
-  }
-
-  Ref<ValueList> ValueList::Create(char32 separator, ValueListBuilder values) noexcept
-  {
-    switch (separator)
-    {
-      case U',': return CreateCommaSeparated(krys::move(values));
-      case U'/': return CreateSlashSeparated(krys::move(values));
-      case U' ': return CreateSpaceSeparated(krys::move(values));
-      default:   break;
-    }
-    krys_unreachable();
+    return AdoptRef(*new ValueList(separator, krys::move(values)));
   }
 
   bool ValueContainingList::HasValue(const Value &otherValue) const noexcept

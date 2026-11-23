@@ -319,8 +319,8 @@ namespace krys::boo::css
     if (auto *list = DynamicDowncast<ValueList>(*value))
     {
       krys_debug_assert(list->size() == 2);
-      result.Prefix = SymbolFromValue(list->Item(0));
-      result.Suffix = SymbolFromValue(list->Item(1));
+      result.Prefix = SymbolFromValue(&(*list)[0]);
+      result.Suffix = SymbolFromValue(&(*list)[1]);
       result.HasSuffix = true;
     }
     else

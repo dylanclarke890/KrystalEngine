@@ -48,7 +48,7 @@ namespace krys::boo::style
   {
     if (const auto *list = DynamicDowncast<css::ValueList>(value))
     {
-      const auto *firstValue = list->Item(0);
+      const auto *firstValue = &(*list)[0];
       auto *urlValue = RequiredDowncast<css::UrlValue>(state, *firstValue);
       if (!urlValue)
       {
@@ -62,7 +62,7 @@ namespace krys::boo::style
         return url;
       }
 
-      const auto *secondItem = list->Item(1);
+      const auto *secondItem = &(*list)[1];
       if (const auto *primitiveValue = DynamicDowncast<css::PrimitiveValue>(secondItem))
       {
         switch (primitiveValue->ValueId())
@@ -77,7 +77,7 @@ namespace krys::boo::style
         }
       }
 
-      return SVGPaint::UrlColor {url, ConvertCSSValueToStyle<Color>(state, *list->Item(1))};
+      return SVGPaint::UrlColor {url, ConvertCSSValueToStyle<Color>(state, (*list)[1])};
     }
 
     if (const auto *urlValue = DynamicDowncast<css::UrlValue>(value))

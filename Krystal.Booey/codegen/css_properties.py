@@ -7780,13 +7780,15 @@ class GeneratePropertyId:
 
             self.generation_context.generate_property_id_switch_function(
                 to=writer,
-                signature="char32 Property::ListValuedPropertySeparator(PropertyId id) noexcept",
+                signature="Maybe<ValueSeparator> Property::ListValuedPropertySeparator(PropertyId id) noexcept",
                 iterable=(
                     p for p in self.properties_and_descriptors.style_properties.all if p.codegen_properties.separator
                 ),
-                mapping=lambda p: f"return '{ p.codegen_properties.separator[0] }';",
+                mapping=lambda p: "return ValueSeparator::{};".format(
+                    {" ": "Space", ",": "Comma", "/": "Slash"}[p.codegen_properties.separator[0]]
+                ),
                 default="break;",
-                epilogue="return '\\0';",
+                epilogue="return null;",
             )
 
             self.generation_context.generate_property_id_switch_function_bool(

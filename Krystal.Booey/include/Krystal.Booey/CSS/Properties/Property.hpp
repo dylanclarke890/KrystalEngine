@@ -31,6 +31,7 @@
 #include "Krystal.Booey/Text/WritingMode.hpp"
 #include "Krystal.Core/Containers/Span.hpp"
 #include "Krystal.Core/Memory/RefPtr.hpp"
+#include "Krystal.Core/Types/Maybe.hpp"
 
 namespace krys::boo::css
 {
@@ -160,7 +161,7 @@ namespace krys::boo::css
 
     KRYS_NODISCARD static bool IsListValuedProperty(PropertyId id) noexcept
     {
-      return ListValuedPropertySeparator(id) != 0 || id == PropertyId::Custom;
+      return ListValuedPropertySeparator(id).has_value() || id == PropertyId::Custom;
     }
 
     KRYS_NODISCARD static PropertyId ResolveDirectionAwareProperty(PropertyId id,
@@ -214,7 +215,8 @@ namespace krys::boo::css
 
     KRYS_NODISCARD static bool DisablesNativeAppearance(PropertyId id) noexcept;
 
-    KRYS_NODISCARD static char32 ListValuedPropertySeparator(PropertyId id) noexcept;
+    /// @brief The separator between a list-valued property's items, or null if @p id isn't one.
+    KRYS_NODISCARD static Maybe<ValueSeparator> ListValuedPropertySeparator(PropertyId id) noexcept;
 
     KRYS_NODISCARD static bool AllowsNumberOrIntegerInput(PropertyId id) noexcept;
 

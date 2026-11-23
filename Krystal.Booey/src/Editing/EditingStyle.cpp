@@ -1799,11 +1799,11 @@ namespace krys::boo
         return primitiveValue->StringValue();
       }
       auto *list = DynamicDowncast<css::ValueList>(value);
-      if (!list || list->Length() != 1)
+      if (!list || list->size() != 1)
       {
         return {};
       }
-      auto *item = DynamicDowncast<css::PrimitiveValue>(list->Item(0));
+      auto *item = DynamicDowncast<css::PrimitiveValue>(&(*list)[0]);
       return item ? item->StringValue() : DOMString();
     }
   }
@@ -2502,7 +2502,7 @@ namespace krys::boo
     void SetTextDecorationProperty(css::MutableStyleProperties &style,
                                    const css::ValueList &newTextDecoration, PropertyId propertyID) noexcept
     {
-      if (newTextDecoration.Length())
+      if (newTextDecoration.size())
       {
         auto isImportant = css::IsImportant(style.PropertyIsImportant(
           propertyID == PropertyId::TextDecoration ? PropertyId::TextDecorationLine : propertyID));
@@ -2613,9 +2613,9 @@ namespace krys::boo
         return;
       }
       auto newTextDecoration = textDecoration->CopyValues();
-      for (uint32 i = 0; i < refTextDecorationList->Length(); ++i)
+      for (uint32 i = 0; i < refTextDecorationList->size(); ++i)
       {
-        (void)RemoveAll(newTextDecoration, *refTextDecorationList->Item(i));
+        (void)RemoveAll(newTextDecoration, (*refTextDecorationList)[i]);
       }
       SetTextDecorationProperty(style, *css::ValueList::CreateSpaceSeparated(krys::move(newTextDecoration)),
                                 propertyID);

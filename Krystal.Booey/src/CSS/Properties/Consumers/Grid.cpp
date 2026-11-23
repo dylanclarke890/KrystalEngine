@@ -237,7 +237,7 @@ namespace krys::boo::css::parse_property
     }
 
     auto &function = Downcast<FunctionValue>(value);
-    if (function.Name() == ValueId::FitContent || function.Length() < 2)
+    if (function.Name() == ValueId::FitContent || function.size() < 2)
     {
       return false;
     }

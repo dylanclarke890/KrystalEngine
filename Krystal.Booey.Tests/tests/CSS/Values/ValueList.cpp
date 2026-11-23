@@ -9,11 +9,11 @@ namespace krys::boo::css::tests
 {
   TEST_CASE_METHOD(ValueFixture, "ValueList::Create", "[CSS][Values][ValueList]")
   {
-    SECTION("Separator characters")
+    SECTION("Separators")
     {
-      auto comma = ValueList::Create(U',', ValueListBuilder {Px(1.0), Px(2.0)});
-      auto slash = ValueList::Create(U'/', ValueListBuilder {Px(1.0), Px(2.0)});
-      auto space = ValueList::Create(U' ', ValueListBuilder {Px(1.0), Px(2.0)});
+      auto comma = ValueList::Create(ValueSeparator::Comma, ValueListBuilder {Px(1.0), Px(2.0)});
+      auto slash = ValueList::Create(ValueSeparator::Slash, ValueListBuilder {Px(1.0), Px(2.0)});
+      auto space = ValueList::Create(ValueSeparator::Space, ValueListBuilder {Px(1.0), Px(2.0)});
 
       CHECK(comma->Separator() == ValueSeparator::Comma);
       CHECK(slash->Separator() == ValueSeparator::Slash);
@@ -33,8 +33,6 @@ namespace krys::boo::css::tests
       CHECK(CssText(*ValueList::CreateSpaceSeparated({Px(1.0)})) == "1px");
       CHECK(CssText(*ValueList::CreateSpaceSeparated(Px(1.0), Px(2.0))) == "1px 2px");
       CHECK(CssText(*ValueList::CreateSpaceSeparated(Px(1.0), Px(2.0), Px(3.0))) == "1px 2px 3px");
-      CHECK(CssText(*ValueList::CreateSpaceSeparated(Px(1.0), Px(2.0), Px(3.0), Px(4.0)))
-            == "1px 2px 3px 4px");
       CHECK(CssText(*ValueList::CreateSpaceSeparated(
               ValueListBuilder {Px(1.0), Px(2.0), Px(3.0), Px(4.0), Px(5.0)}))
             == "1px 2px 3px 4px 5px");
@@ -65,16 +63,9 @@ namespace krys::boo::css::tests
     auto list = ValueList::CreateSpaceSeparated(Px(1.0), PrimitiveValue::Create(ValueId::Auto), Px(3.0));
 
     CHECK(list->size() == 3u);
-    CHECK(list->Length() == 3u);
     CHECK(CssText((*list)[0u]) == "1px");
     CHECK(CssText((*list)[1u]) == "auto");
     CHECK(CssText((*list)[2u]) == "3px");
-
-    CHECK(list->Item(1u) == &(*list)[1u]);
-    CHECK(list->Item(3u) == nullptr);
-    CHECK(list->ItemWithoutBoundsCheck(2u) == &(*list)[2u]);
-    CHECK(list->ProtectedItem(0u).get() == &(*list)[0u]);
-    CHECK(list->ProtectedItem(3u).get() == nullptr);
 
     SECTION("Iteration")
     {

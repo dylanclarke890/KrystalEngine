@@ -2030,8 +2030,7 @@ namespace krys::boo::style
 
     auto layerItem = [&](const css::Value &value, size_t i) -> Ref<css::Value>
     {
-      const auto &item =
-        layerCount == 1 ? value : *Downcast<css::ValueList>(value).Item(static_cast<uint32>(i));
+      const auto &item = layerCount == 1 ? value : Downcast<css::ValueList>(value)[static_cast<uint32>(i)];
       return ShareRef(const_cast<css::Value &>(item));
     };
 
@@ -2045,12 +2044,12 @@ namespace krys::boo::style
       }
       for (size_t j = 0; j < propertiesBeforeSlashSeparator.Size(); j++)
       {
-        beforeList.push_back(layerItem(*before->Item(static_cast<uint32>(j)), i));
+        beforeList.push_back(layerItem((*before)[static_cast<uint32>(j)], i));
       }
       css::ValueListBuilder afterList;
       for (size_t j = 0; j < propertiesAfterSlashSeparator.Size(); j++)
       {
-        afterList.push_back(layerItem(*after->Item(static_cast<uint32>(j)), i));
+        afterList.push_back(layerItem((*after)[static_cast<uint32>(j)], i));
       }
       auto list =
         css::ValueList::CreateSlashSeparated(css::ValueList::CreateSpaceSeparated(krys::move(beforeList)),
@@ -2541,7 +2540,7 @@ namespace krys::boo::style
     Ref<css::ValueList> endValue = createRangeValue(range.End);
     bool endValueEqualsStart = startValue->Equals(*endValue);
 
-    if (startValue->Length())
+    if (startValue->size())
     {
       list.push_back(krys::move(startValue));
     }
@@ -2549,7 +2548,7 @@ namespace krys::boo::style
     bool isNormal = range.End.IsNormal();
     bool isDefaultAndSameNameAsStart =
       range.Start.GetName() == range.End.GetName() && range.End.HasDefaultOffset();
-    if (endValue->Length() && !endValueEqualsStart && !isNormal && !isDefaultAndSameNameAsStart)
+    if (endValue->size() && !endValueEqualsStart && !isNormal && !isDefaultAndSameNameAsStart)
     {
       list.push_back(krys::move(endValue));
     }

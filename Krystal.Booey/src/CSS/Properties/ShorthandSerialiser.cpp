@@ -733,7 +733,7 @@ namespace krys::boo::css
       if (auto *valueList = DynamicDowncast<ValueList>(LonghandValue(0)))
       {
         numberOfItemsForCoordinatingListBaseProperty =
-          std::max(valueList->Length(), numberOfItemsForCoordinatingListBaseProperty);
+          std::max(valueList->size(), numberOfItemsForCoordinatingListBaseProperty);
       }
 
       // Now go through all longhands and ensure we repeat items earlier in the list
@@ -750,14 +750,14 @@ namespace krys::boo::css
           {
             auto *valueInList = [&]() -> const Value *
             {
-              if (auto *specifiedValue = valueList->Item(listItemIndex))
+              if (listItemIndex < valueList->size())
               {
-                return specifiedValue;
+                return &(*valueList)[listItemIndex];
               }
 
               if (auto numberOfItemsInList = valueList->size())
               {
-                return valueList->Item(listItemIndex % numberOfItemsInList);
+                return &(*valueList)[listItemIndex % numberOfItemsInList];
               }
 
               return nullptr;
@@ -785,7 +785,7 @@ namespace krys::boo::css
       {
         if (auto *valueList = DynamicDowncast<ValueList>(value))
         {
-          numLayers = std::max(valueList->Length(), numLayers);
+          numLayers = std::max(valueList->size(), numLayers);
         }
       }
 
@@ -799,7 +799,7 @@ namespace krys::boo::css
           auto &value = LonghandValue(j);
           if (auto *valueList = DynamicDowncast<ValueList>(value))
           {
-            layerValues.Set(j, valueList->Item(i));
+            layerValues.Set(j, i < valueList->size() ? &(*valueList)[i] : nullptr);
           }
           else
           {
@@ -1398,8 +1398,7 @@ namespace krys::boo::css
           return false;
         }
 
-        auto *item = valueList->Item(0);
-        return item && item->ValueId() == id;
+        return (*valueList)[0u].ValueId() == id;
       }
 
       return value.ValueId() == id;
@@ -1893,14 +1892,14 @@ namespace krys::boo::css
         StringBuilder result;
         for (auto i = 0u; i < startList->size(); i++)
         {
-          auto *start = startList->Item(i);
+          auto *start = &(*startList)[i];
           auto *startPair = DynamicDowncast<ValuePair>(*start);
           auto startId = startPair ? startPair->First().ValueId() : start->ValueId();
 
           auto serialisedStart =
             SerialiseSingleAnimationRange(*start, style::SingleAnimationRangeType::Start);
           auto serialisedEnd =
-            SerialiseSingleAnimationRange(*endList->Item(i), style::SingleAnimationRangeType::End, startId);
+            SerialiseSingleAnimationRange((*endList)[i], style::SingleAnimationRangeType::End, startId);
           result.Append(serialisedStart);
           if (!serialisedEnd.empty())
           {

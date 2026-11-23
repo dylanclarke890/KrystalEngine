@@ -28,7 +28,7 @@ namespace krys::boo::style::tests
       auto parsed = fixture.Parse(property, value);
       fixture.ResetState();
       const auto *list = DynamicDowncast<css::ValueList>(*parsed);
-      const auto &layer = list ? *list->Item(0) : *parsed;
+      const auto &layer = list ? (*list)[0] : *parsed;
       return ConvertCSSValueToStyle<T>(*fixture.State, layer);
     }
   }
