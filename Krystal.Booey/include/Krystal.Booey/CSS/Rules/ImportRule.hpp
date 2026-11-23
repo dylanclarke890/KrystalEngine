@@ -1,25 +1,4 @@
-﻿/*
- * (C) 1999-2003 Lars Knoll (knoll@kde.org)
- * (C) 2002-2003 Dirk Mueller (mueller@kde.org)
- * Copyright (C) 2002-2022 Apple Inc. All rights reserved.
- *
- * This library is free software; you can redistribute it and/or
- * modify it under the terms of the GNU Library General Public
- * License as published by the Free Software Foundation; either
- * version 2 of the License, or (at your option) any later version.
- *
- * This library is distributed in the hope that it will be useful,
- * but WITHOUT ANY WARRANTY; without even the implied warranty of
- * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU
- * Library General Public License for more details.
- *
- * You should have received a copy of the GNU Library General Public License
- * along with this library; see the file COPYING.LIB.  If not, write to
- * the Free Software Foundation, Inc., 51 Franklin Street, Fifth Floor,
- * Boston, MA 02110-1301, USA.
- */
-
-#pragma once
+﻿#pragma once
 
 #include "Krystal.Booey/CSS/Queries/MediaQuery.hpp"
 #include "Krystal.Booey/CSS/Rules/Rule.hpp"
@@ -29,11 +8,14 @@
 
 namespace krys::boo::css
 {
-  /// @brief `@import`.
+  /// @brief An `@import` rule: the URL of a style sheet to load and include, and the media, cascade layer and
+  /// `supports()` condition it applies under.
+  /// @see https://drafts.csswg.org/css-cascade-5/#at-import
   // FIXME: User style sheets' imports (requestUserCSSStyleSheet), once there are user style sheets.
   class ImportRule final : public Rule
   {
   public:
+    /// @brief The `supports()` condition, as written, and whether it held when the rule was parsed.
     struct SupportsCondition
     {
       CSSOMString Text;
@@ -41,8 +23,8 @@ namespace krys::boo::css
     };
 
   private:
-    // NOTE: We put the CachedStyleSheetClient in a member instead of inheriting from it
-    // to avoid adding a vptr to ImportRule.
+    /// @brief Hears the cached sheet arrive. It's a member rather than a base of `ImportRule` so that rules,
+    /// which have no virtual functions, don't gain a vtable pointer.
     class ImportedStyleSheetClient final : public CachedStyleSheetClient
     {
     private:
@@ -59,36 +41,40 @@ namespace krys::boo::css
         _ownerRule.SetCSSStyleSheet(href, baseUrl, charset, sheet);
       }
     };
+
     friend class ImportedStyleSheetClient;
 
     StyleSheetContents *_parentStyleSheet {nullptr};
     ImportedStyleSheetClient _styleSheetClient;
-
     CSSOMString _href;
     mq::MediaQueryList _mediaQueries;
+    /// @brief The imported sheet, once it has loaded and been parsed.
     RefPtr<StyleSheetContents> _styleSheet;
     Maybe<CascadeLayerName> _cascadeLayerName;
     CachedResourceHandle<CachedCSSStyleSheet> _cachedSheet;
+    /// @brief Whether the sheet has been requested and hasn't arrived.
     bool _loading {false};
-    ImportRule::SupportsCondition _supportsCondition;
+    SupportsCondition _supportsCondition;
 
-    ImportRule(CSSOMString href, mq::MediaQueryList &&mediaQueries,
-               Maybe<CascadeLayerName> &&cascadeLayerName,
-               ImportRule::SupportsCondition &&supportsCondition) noexcept;
+    ImportRule(CSSOMString href, mq::MediaQueryList mediaQueries, Maybe<CascadeLayerName> cascadeLayerName,
+               SupportsCondition supportsCondition) noexcept;
 
+    /// @brief Parses the sheet that has arrived and tells the parent sheet whether it loaded.
     void SetCSSStyleSheet(const utf8_string &href, const net::Url &baseUrl, utf8_stringview charset,
                           const CachedCSSStyleSheet *cachedStyleSheet) noexcept;
 
   public:
     ~ImportRule() noexcept;
 
-    KRYS_NODISCARD static Ref<ImportRule> Create(const CSSOMString &href, mq::MediaQueryList &&mediaQueries,
-                                                 Maybe<CascadeLayerName> &&cascadeLayerName,
-                                                 ImportRule::SupportsCondition &&supportsCondition) noexcept;
+    KRYS_NODISCARD static Ref<ImportRule> Create(CSSOMString href, mq::MediaQueryList mediaQueries,
+                                                 Maybe<CascadeLayerName> cascadeLayerName,
+                                                 SupportsCondition supportsCondition) noexcept;
 
-    /// @attention Import rules are never copied.
+    /// @brief Never called: a sheet with imports isn't cached, so it's never copied. It exists for
+    /// `Rule::Copy`, which needs every rule type to have one.
     KRYS_NODISCARD static Ref<ImportRule> Copy() noexcept;
 
+    /// @brief The sheet the rule is in, or null if it isn't in one.
     KRYS_NODISCARD StyleSheetContents *ParentStyleSheet() const noexcept
     {
       return _parentStyleSheet;
@@ -105,18 +91,22 @@ namespace krys::boo::css
       _parentStyleSheet = nullptr;
     }
 
+    /// @brief Stops waiting for the sheet, so the parent sheet can finish loading without it.
     void CancelLoad() noexcept;
 
+    /// @brief The URL as written.
     KRYS_NODISCARD CSSOMString Href() const noexcept
     {
       return _href;
     }
 
+    /// @brief The imported sheet, or null until it has loaded.
     KRYS_NODISCARD StyleSheetContents *StyleSheet() const noexcept
     {
       return _styleSheet.get();
     }
 
+    /// @brief Whether the sheet, or one it imports, is still loading.
     KRYS_NODISCARD bool IsLoading() const noexcept;
 
     KRYS_NODISCARD const mq::MediaQueryList &MediaQueries() const noexcept
@@ -124,13 +114,16 @@ namespace krys::boo::css
       return _mediaQueries;
     }
 
-    void SetMediaQueries(mq::MediaQueryList &&queries) noexcept
+    void SetMediaQueries(mq::MediaQueryList queries) noexcept
     {
       _mediaQueries = krys::move(queries);
     }
 
+    /// @brief Fetches the sheet, unless the rule isn't in a document's sheet or would import itself.
+    /// @see https://drafts.csswg.org/css-cascade-5/#fetch-an-import
     void RequestStyleSheet() noexcept;
 
+    /// @brief The cached resource being loaded or loaded, or null if none was requested.
     KRYS_NODISCARD const CachedCSSStyleSheet *CachedStyleSheet() const noexcept
     {
       return _cachedSheet.get();
