@@ -325,6 +325,17 @@ namespace krys::boo::css
     _namespaceRules.clear();
     _childRules.clear();
     ClearCharsetRule();
+    RebuildNamespaces();
+  }
+
+  void StyleSheetContents::RebuildNamespaces() noexcept
+  {
+    _namespaces.clear();
+    _defaultNamespace = dom::StarAtom();
+    for (const auto &rule : _namespaceRules)
+    {
+      ParserAddNamespace(rule->Prefix(), rule->Uri());
+    }
   }
 
   void StyleSheetContents::ParserSetEncodingFromCharsetRule(const CSSOMString &encoding) noexcept
@@ -425,12 +436,8 @@ namespace krys::boo::css
       }
 
       _namespaceRules.insert(_namespaceRules.begin() + childVectorIndex, ShareRef(*namespaceRule));
-
-      // For now to be compatible with IE and Firefox if a namespace rule with the same
-      // prefix is added, it overwrites previous ones.
-      // FIXME: The eventual correct behavior would be to ensure that the last value in
-      // the list wins.
-      ParserAddNamespace(namespaceRule->Prefix(), namespaceRule->Uri());
+      // The rule may go before another declaring the same prefix, which still wins.
+      RebuildNamespaces();
       return true;
     }
     if (Is<NamespaceRule>(*rule))
@@ -490,6 +497,7 @@ namespace krys::boo::css
         return false;
       }
       _namespaceRules.erase(_namespaceRules.begin() + childVectorIndex);
+      RebuildNamespaces();
       return true;
     }
     childVectorIndex -= _namespaceRules.size();

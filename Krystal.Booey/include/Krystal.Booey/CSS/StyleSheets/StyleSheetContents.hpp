@@ -322,5 +322,8 @@ namespace krys::boo::css
 
   private:
     void ClearCharsetRule() noexcept;
+
+    /// @brief Derives the namespaces from the `@namespace` rules, the last declaration of a prefix winning.
+    void RebuildNamespaces() noexcept;
   };
 }

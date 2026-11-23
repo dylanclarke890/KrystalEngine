@@ -143,13 +143,16 @@ namespace krys::boo::css::tests
     {
       auto import = Import(u8"a.css");
       sheet->ParserAppendRule(Ref<ImportRule>(import));
+      sheet->ParserAppendRule(Namespace(u8"a", u8"urn:a"));
       sheet->ParserAppendRule(CreateStyleRule(u8".a", u8"color: red"));
+      REQUIRE(sheet->NamespaceURIFromPrefix(u8"a") == u8"urn:a");
       sheet->ParserSetEncodingFromCharsetRule(u8"utf-8");
       CHECK(sheet->EncodingFromCharsetRule() == u8"utf-8");
       sheet->ClearRules();
       CHECK(sheet->IsEmpty());
       CHECK(sheet->EncodingFromCharsetRule().empty());
       CHECK(import->ParentStyleSheet() == nullptr);
+      CHECK(sheet->NamespaceURIFromPrefix(u8"a") == null);
     }
   }
 
@@ -174,9 +177,25 @@ namespace krys::boo::css::tests
     {
       CHECK(sheet->WrapperInsertRule(Namespace(u8"a", u8"urn:a"), 0));
       CHECK(sheet->NamespaceURIFromPrefix(u8"a") == u8"urn:a");
-      // A later namespace rule with the same prefix replaces the URI.
-      CHECK(sheet->WrapperInsertRule(Namespace(u8"a", u8"urn:b"), 0));
+      // The last declaration of a prefix wins, wherever it was inserted.
+      CHECK(sheet->WrapperInsertRule(Namespace(u8"a", u8"urn:b"), 1));
       CHECK(sheet->NamespaceURIFromPrefix(u8"a") == u8"urn:b");
+      CHECK(sheet->WrapperInsertRule(Namespace(u8"a", u8"urn:c"), 0));
+      CHECK(sheet->NamespaceURIFromPrefix(u8"a") == u8"urn:b");
+      CHECK(sheet->WrapperInsertRule(Namespace({}, u8"urn:d"), 0));
+      CHECK(sheet->DefaultNamespace() == u8"urn:d");
+
+      // Deleting a declaration undeclares it, uncovering the one before it.
+      CHECK(sheet->WrapperDeleteRule(3));
+      CHECK(sheet->NamespaceURIFromPrefix(u8"a") == u8"urn:a");
+      CHECK(sheet->WrapperDeleteRule(0));
+      CHECK(sheet->DefaultNamespace() == dom::StarAtom());
+      CHECK(sheet->WrapperDeleteRule(1));
+      CHECK(sheet->WrapperDeleteRule(0));
+      CHECK(sheet->NamespaceURIFromPrefix(u8"a") == null);
+
+      CHECK(sheet->WrapperInsertRule(Namespace(u8"a", u8"urn:a"), 0));
+      CHECK(sheet->WrapperInsertRule(Namespace(u8"a", u8"urn:b"), 1));
       CHECK(sheet->WrapperInsertRule(CreateStyleRule(u8".a", u8"color: red"), 2));
       // Not once there are other rules.
       CHECK_FALSE(sheet->WrapperInsertRule(Namespace(u8"c", u8"urn:c"), 2));
