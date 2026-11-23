@@ -207,11 +207,6 @@ namespace krys::boo::css
     return _styleBuilderState.get();
   }
 
-  CheckedPtr<style::BuilderState> ToLengthConversionData::ProtectedStyleBuilderState() const noexcept
-  {
-    return _styleBuilderState;
-  }
-
   bool ToLengthConversionData::EvaluationTimeZoomEnabled() const noexcept
   {
     krys_debug_assert(_style);

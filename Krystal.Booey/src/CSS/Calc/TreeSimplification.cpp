@@ -586,8 +586,8 @@ namespace krys::boo::css::calc
       return null;
     }
 
-    return CreateChild(Number {
-      .Value = static_cast<double>(options.ConversionData->ProtectedStyleBuilderState()->SiblingCount())});
+    return CreateChild(
+      Number {.Value = static_cast<double>(options.ConversionData->StyleBuilderState()->SiblingCount())});
   }
 
   Maybe<Child> Simplify(SiblingIndex &, const SimplificationOptions &options) noexcept
@@ -601,8 +601,8 @@ namespace krys::boo::css::calc
       return null;
     }
 
-    return CreateChild(Number {
-      .Value = static_cast<double>(options.ConversionData->ProtectedStyleBuilderState()->SiblingIndex())});
+    return CreateChild(
+      Number {.Value = static_cast<double>(options.ConversionData->StyleBuilderState()->SiblingIndex())});
   }
 
   Maybe<Child> Simplify(Sum &root, const SimplificationOptions &options) noexcept
@@ -1576,7 +1576,7 @@ namespace krys::boo::css::calc
             {
               return null;
             }
-            return options.ConversionData->ProtectedStyleBuilderState()->LookupCSSRandomBaseValue(
+            return options.ConversionData->StyleBuilderState()->LookupCSSRandomBaseValue(
               RandomCachingKey {sharingOptions.Identifier}, sharingOptions.ElementShared);
           },
           [&](const Random::SharingFixed &sharingFixed) -> Maybe<double>
@@ -1645,7 +1645,7 @@ namespace krys::boo::css::calc
 
       if (!anchor.Fallback)
       {
-        options.ConversionData->ProtectedStyleBuilderState()->SetCurrentPropertyInvalidAtComputedValueTime();
+        options.ConversionData->StyleBuilderState()->SetCurrentPropertyInvalidAtComputedValueTime();
       }
 
       // Replace the anchor node with the fallback node.
@@ -1661,7 +1661,7 @@ namespace krys::boo::css::calc
       return null;
     }
 
-    auto builderState = options.ConversionData->ProtectedStyleBuilderState();
+    auto builderState = options.ConversionData->StyleBuilderState();
 
     Maybe<style::ScopedName> anchorSizeScopedName;
     if (anchorSize.ElementName != null)
@@ -1677,7 +1677,7 @@ namespace krys::boo::css::calc
     {
       if (!anchorSize.Fallback)
       {
-        options.ConversionData->ProtectedStyleBuilderState()->SetCurrentPropertyInvalidAtComputedValueTime();
+        options.ConversionData->StyleBuilderState()->SetCurrentPropertyInvalidAtComputedValueTime();
       }
 
       return std::exchange(anchorSize.Fallback, Maybe<Child> {});

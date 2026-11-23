@@ -181,7 +181,5 @@ namespace krys::boo::css
     void SetUsesContainerUnits() const noexcept;
 
     KRYS_NODISCARD style::BuilderState *StyleBuilderState() const noexcept;
-
-    KRYS_NODISCARD CheckedPtr<style::BuilderState> ProtectedStyleBuilderState() const noexcept;
   };
 }

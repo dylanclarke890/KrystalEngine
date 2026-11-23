@@ -520,7 +520,7 @@ namespace krys::boo::style
       // NOTE: Simplification is needed here for the case of the user using the Typed CSSOM
       // to explicitly specify a CSSMath* value for a specified value.
 
-      Ref<css::calc::Value> simplifiedCalc = value.ProtectedCalc()->CopySimplified(rest...);
+      Ref<css::calc::Value> simplifiedCalc = value.Calc().CopySimplified(rest...);
 
       // FIXME: This ASSERT and the following extra cases for the dimension and Category::Percentage
       // should go away once the typed CSSOM learns to set the correct category when creating internal

@@ -202,7 +202,7 @@ namespace krys::boo::css::calc
       return null;
     }
 
-    return options.ConversionData->ProtectedStyleBuilderState()->SiblingCount();
+    return options.ConversionData->StyleBuilderState()->SiblingCount();
   }
 
   Maybe<double> Evaluate(const SiblingIndex &, const EvaluationOptions &options) noexcept
@@ -216,7 +216,7 @@ namespace krys::boo::css::calc
       return null;
     }
 
-    return options.ConversionData->ProtectedStyleBuilderState()->SiblingIndex();
+    return options.ConversionData->StyleBuilderState()->SiblingIndex();
   }
 
   Maybe<double> Evaluate(const IndirectNode<Sum> &root, const EvaluationOptions &options) noexcept
@@ -279,7 +279,7 @@ namespace krys::boo::css::calc
           return null;
         }
 
-        return options.ConversionData->ProtectedStyleBuilderState()->LookupCSSRandomBaseValue(
+        return options.ConversionData->StyleBuilderState()->LookupCSSRandomBaseValue(
           RandomCachingKey {sharingOptions.Identifier}, sharingOptions.ElementShared);
       },
       [&](const Random::SharingFixed &sharingFixed) -> Maybe<double>
@@ -287,10 +287,7 @@ namespace krys::boo::css::calc
         return sharingFixed.Value.SwitchOn(
           [&](const css::Number<css::ClosedUnitRange>::Raw &raw) -> Maybe<double> { return raw.Value; },
           [&](const css::Number<css::ClosedUnitRange>::Calc &calc) -> Maybe<double>
-          {
-            return calc.Evaluate(css::Category::Number,
-                                 *options.ConversionData->ProtectedStyleBuilderState());
-          });
+          { return calc.Evaluate(css::Category::Number, *options.ConversionData->StyleBuilderState()); });
       });
     if (!randomBaseValue)
     {
@@ -320,7 +317,7 @@ namespace krys::boo::css::calc
 
     if (!result)
     {
-      options.ConversionData->ProtectedStyleBuilderState()->SetCurrentPropertyInvalidAtComputedValueTime();
+      options.ConversionData->StyleBuilderState()->SetCurrentPropertyInvalidAtComputedValueTime();
     }
 
     return result;
@@ -334,7 +331,7 @@ namespace krys::boo::css::calc
       return null;
     }
 
-    auto builderState = options.ConversionData->ProtectedStyleBuilderState();
+    auto builderState = options.ConversionData->StyleBuilderState();
 
     Maybe<style::ScopedName> anchorSizeScopedName;
     if (anchorSize->ElementName != null)
@@ -353,7 +350,7 @@ namespace krys::boo::css::calc
 
     if (!result)
     {
-      options.ConversionData->ProtectedStyleBuilderState()->SetCurrentPropertyInvalidAtComputedValueTime();
+      options.ConversionData->StyleBuilderState()->SetCurrentPropertyInvalidAtComputedValueTime();
     }
 
     return result;
@@ -405,7 +402,7 @@ namespace krys::boo::css::calc
 
   Maybe<double> EvaluateWithoutFallback(const Anchor &anchor, const EvaluationOptions &options) noexcept
   {
-    auto builderState = options.ConversionData->ProtectedStyleBuilderState();
+    auto builderState = options.ConversionData->StyleBuilderState();
 
     auto side = krys::SwitchOn(
       anchor.Side, [&](const Child &percentage) -> style::AnchorPositionEvaluator::Side

@@ -267,7 +267,7 @@ namespace krys::boo::style
     if (conversionData.EvaluationTimeZoomEnabled()
         && conversionData.RangeZoomOption() == css::RangeZoomOptions::Unzoomed)
     {
-      if (auto builderState = conversionData.ProtectedStyleBuilderState())
+      if (auto builderState = conversionData.StyleBuilderState())
       {
         auto textZoom = builderState->ZoomWithTextZoomFactor();
         return value * textZoom;
