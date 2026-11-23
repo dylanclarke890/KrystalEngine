@@ -1011,7 +1011,8 @@ namespace krys::boo::css
     }
     return MatchingValue == other.MatchingValue && SerialisingValue == other.SerialisingValue
            && NthA == other.NthA && NthB == other.NthB && Attribute == other.Attribute
-           && Argument == other.Argument && ArgumentList == other.ArgumentList && LangList == other.LangList;
+           && Argument == other.Argument && ArgumentList == other.ArgumentList && LangList == other.LangList
+           && IntegerList == other.IntegerList;
   }
 
 #pragma endregion

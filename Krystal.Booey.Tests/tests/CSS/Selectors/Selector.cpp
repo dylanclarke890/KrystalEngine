@@ -469,7 +469,17 @@ namespace krys::boo::css::tests
       return B::List(B::PseudoClass(SelectorPseudoClass::Is, B::MutableList(B::Class(name))));
     };
     CHECK(withList(u8"p") == withList(u8"p"));
-    CHECK(!(withList(u8"p") == withList(u8"q")));
+    CHECK_FALSE(withList(u8"p") == withList(u8"q"));
     CHECK(FastHash<SelectorList> {}(withList(u8"p")) == FastHash<SelectorList> {}(withList(u8"p")));
+
+    // :heading()'s levels count.
+    auto heading = [](int32 level)
+    {
+      auto selector = B::PseudoClass(SelectorPseudoClass::Heading);
+      selector->SetIntegerList(FixedList<int32> {level});
+      return B::List(krys::move(selector));
+    };
+    CHECK(heading(1) == heading(1));
+    CHECK_FALSE(heading(1) == heading(2));
   }
 }
