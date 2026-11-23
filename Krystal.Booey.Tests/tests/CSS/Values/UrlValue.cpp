@@ -8,7 +8,7 @@ namespace krys::boo::css::tests
 {
   namespace
   {
-    KRYS_NODISCARD CSSUrl UrlFor(const CSSOMString &specified) noexcept
+    KRYS_NODISCARD Url UrlFor(const CSSOMString &specified) noexcept
     {
       return *CompleteUrl(specified,
                           ParserContext {ParserMode::HTMLStandard, net::Url {u8"https://example.com/"}});

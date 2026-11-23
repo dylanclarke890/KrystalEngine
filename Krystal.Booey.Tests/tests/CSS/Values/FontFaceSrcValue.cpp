@@ -23,7 +23,7 @@ namespace krys::boo::css::tests
 
   namespace
   {
-    CSSUrl FontUrl(utf8_stringview url)
+    Url FontUrl(utf8_stringview url)
     {
       return *CompleteUrl(CSSOMString {url},
                           ParserContext {ParserMode::HTMLStandard, net::Url {u8"https://example.com/"}});
@@ -80,7 +80,7 @@ namespace krys::boo::css::tests
     CHECK_FALSE(Is<FontFaceSrcLocalValue>(asValue));
     CHECK_FALSE(value->IsEmpty());
 
-    CHECK(FontFaceSrcResourceValue::Create(CSSUrl::None(), {}, {})->IsEmpty());
+    CHECK(FontFaceSrcResourceValue::Create(Url::None(), {}, {})->IsEmpty());
   }
 
   TEST_CASE_METHOD(ValueFixture, "FontFaceSrcResourceValue serialisation",

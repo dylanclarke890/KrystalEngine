@@ -30,7 +30,7 @@ namespace krys::boo::css
   class ImageValue final : public Value
   {
   private:
-    CSSUrl _location;
+    css::Url _location;
     CachedResourceHandle<CachedImage> _cachedImage;
     /// @brief The value this one was copied from for another resolved URL.
     RefPtr<ImageValue> _unresolvedValue;
@@ -47,7 +47,7 @@ namespace krys::boo::css
 
     /// @param initiatorType The element that asked for the image, such as `body` for its `background`
     /// attribute; null for `css`.
-    KRYS_NODISCARD static Ref<ImageValue> Create(CSSUrl location,
+    KRYS_NODISCARD static Ref<ImageValue> Create(css::Url location,
                                                  CSSOMStringAtom initiatorType = null) noexcept;
 
     /// @brief An image at an already-resolved URL, which is also its text.
@@ -58,12 +58,12 @@ namespace krys::boo::css
     KRYS_NODISCARD static Ref<ImageValue> CreateInvalid() noexcept;
 
     /// @brief This value, or a copy at @p resolvedUrl if that differs from this one's.
-    KRYS_NODISCARD Ref<ImageValue> CopyForComputedStyle(const CSSUrl &resolvedUrl) const noexcept;
+    KRYS_NODISCARD Ref<ImageValue> CopyForComputedStyle(const css::Url &resolvedUrl) const noexcept;
 
     /// @brief The URL as written and as resolved.
     /// @note A relative URL resolves against the style sheet's base URL, which may not be the document's.
     /// @see https://www.w3.org/TR/css-values-4/#relative-urls
-    KRYS_NODISCARD const CSSUrl &Url() const noexcept
+    KRYS_NODISCARD const css::Url &Url() const noexcept
     {
       return _location;
     }
@@ -98,7 +98,7 @@ namespace krys::boo::css
     }
 
   private:
-    ImageValue(CSSUrl location, CSSOMStringAtom initiatorType) noexcept;
+    ImageValue(css::Url location, CSSOMStringAtom initiatorType) noexcept;
 
     /// @brief Selects the constructor of `CreateInvalid`.
     struct InvalidTag
@@ -108,7 +108,7 @@ namespace krys::boo::css
     explicit ImageValue(InvalidTag) noexcept;
 
     /// @brief A copy at @p location that shares this value's image and links back to it.
-    KRYS_NODISCARD Ref<ImageValue> CopyWithLocation(CSSUrl location) const noexcept;
+    KRYS_NODISCARD Ref<ImageValue> CopyWithLocation(css::Url location) const noexcept;
 
     /// @brief This value for a holder that will load its image, which writes to it.
     KRYS_NODISCARD Ref<ImageValue> ShareForLoading() const noexcept

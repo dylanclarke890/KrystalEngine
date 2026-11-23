@@ -33,19 +33,19 @@ namespace krys::boo::css
   Ref<CursorImageValue> CursorImageValue::Create(Ref<Value> &&value, RefPtr<Value> &&hotSpot) noexcept
   {
     auto *imageValue = DynamicDowncast<ImageValue>(value.get());
-    auto originalUrl = imageValue ? imageValue->Url() : CSSUrl::None();
+    auto originalUrl = imageValue ? imageValue->Url() : Url::None();
     return AdoptRef(*new CursorImageValue(krys::move(value), krys::move(hotSpot), krys::move(originalUrl)));
   }
 
   Ref<CursorImageValue> CursorImageValue::Create(Ref<Value> &&imageValue, RefPtr<Value> &&hotSpot,
-                                                 CSSUrl &&originalUrl) noexcept
+                                                 Url &&originalUrl) noexcept
   {
     return AdoptRef(
       *new CursorImageValue(krys::move(imageValue), krys::move(hotSpot), krys::move(originalUrl)));
   }
 
   CursorImageValue::CursorImageValue(Ref<Value> &&imageValue, RefPtr<Value> &&hotSpot,
-                                     CSSUrl &&originalUrl) noexcept
+                                     Url &&originalUrl) noexcept
       : Value(ValueType::CursorImage), _originalUrl(krys::move(originalUrl)),
         _imageValue(krys::move(imageValue)), _hotSpot(krys::move(hotSpot))
   {

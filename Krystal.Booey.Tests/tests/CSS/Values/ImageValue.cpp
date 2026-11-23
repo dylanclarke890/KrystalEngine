@@ -7,7 +7,7 @@ namespace krys::boo::css::tests
 {
   namespace
   {
-    CSSUrl ImageUrl(utf8_stringview url)
+    Url ImageUrl(utf8_stringview url)
     {
       return *CompleteUrl(CSSOMString {url},
                           ParserContext {ParserMode::HTMLStandard, net::Url {u8"https://example.com/"}});

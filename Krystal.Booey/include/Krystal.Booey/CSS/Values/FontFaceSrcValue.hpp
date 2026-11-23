@@ -108,18 +108,18 @@ namespace krys::boo::css
   class FontFaceSrcResourceValue final : public Value
   {
   private:
-    CSSUrl _location;
+    Url _location;
     CSSOMString _format;
     List<FontTechnology> _technologies;
     CachedResourceHandle<CachedFont> _cachedFont;
 
-    FontFaceSrcResourceValue(CSSUrl &&location, CSSOMString &&format,
+    FontFaceSrcResourceValue(Url &&location, CSSOMString &&format,
                              List<FontTechnology> &&technologies) noexcept;
 
   public:
     ~FontFaceSrcResourceValue() noexcept;
 
-    KRYS_NODISCARD static Ref<FontFaceSrcResourceValue> Create(CSSUrl location, CSSOMString format,
+    KRYS_NODISCARD static Ref<FontFaceSrcResourceValue> Create(Url location, CSSOMString format,
                                                                List<FontTechnology> &&technologies) noexcept;
 
     KRYS_NODISCARD bool IsEmpty() const noexcept

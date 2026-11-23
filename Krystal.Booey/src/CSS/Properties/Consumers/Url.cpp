@@ -51,8 +51,8 @@ namespace krys::boo::css::parse_property
   // <referrer-policy-modifier> = referrer-policy( no-referrer | no-referrer-when-downgrade | same-origin |
   // origin | strict-origin | origin-when-cross-origin | strict-origin-when-cross-origin | unsafe-url)
 
-  Maybe<CSSUrl> ConsumeUrlRaw(TokenRange &tokens, PropertyParserState &state,
-                              AllowedUrlModifiers allowedUrlModifiers) noexcept
+  Maybe<Url> ConsumeUrlRaw(TokenRange &tokens, PropertyParserState &state,
+                           AllowedUrlModifiers allowedUrlModifiers) noexcept
   {
     auto &token = tokens.Peek();
     if (token.Type() == TokenType::Url)

@@ -40,20 +40,20 @@ namespace krys::boo::css
   class CursorImageValue final : public Value
   {
   private:
-    CSSUrl _originalUrl;
+    Url _originalUrl;
     const Ref<Value> _imageValue;
     const RefPtr<Value> _hotSpot;
 
-    CursorImageValue(Ref<Value> &&imageValue, RefPtr<Value> &&hotSpot, CSSUrl &&originalUrl) noexcept;
+    CursorImageValue(Ref<Value> &&imageValue, RefPtr<Value> &&hotSpot, Url &&originalUrl) noexcept;
 
   public:
     KRYS_NODISCARD static Ref<CursorImageValue> Create(Ref<Value> &&imageValue,
                                                        RefPtr<Value> &&hotSpot) noexcept;
 
     KRYS_NODISCARD static Ref<CursorImageValue> Create(Ref<Value> &&imageValue, RefPtr<Value> &&hotSpot,
-                                                       CSSUrl &&originalUrl) noexcept;
+                                                       Url &&originalUrl) noexcept;
 
-    KRYS_NODISCARD const CSSUrl &OriginalUrl() const noexcept
+    KRYS_NODISCARD const Url &OriginalUrl() const noexcept
     {
       return _originalUrl;
     }

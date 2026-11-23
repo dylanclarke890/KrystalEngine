@@ -8,7 +8,7 @@
 
 namespace krys::boo::css
 {
-  ImageValue::ImageValue(CSSUrl location, CSSOMStringAtom initiatorType) noexcept
+  ImageValue::ImageValue(css::Url location, CSSOMStringAtom initiatorType) noexcept
       : Value(ValueType::Image), _location(krys::move(location)),
         _initiatorType(initiatorType.View().empty()
                          ? CSSOMStringAtom(CachedResourceRequestInitiatorTypes::CSS)
@@ -22,7 +22,7 @@ namespace krys::boo::css
 
   ImageValue::~ImageValue() noexcept = default;
 
-  Ref<ImageValue> ImageValue::Create(CSSUrl location, CSSOMStringAtom initiatorType) noexcept
+  Ref<ImageValue> ImageValue::Create(css::Url location, CSSOMStringAtom initiatorType) noexcept
   {
     return AdoptRef(*new ImageValue(krys::move(location), krys::move(initiatorType)));
   }
@@ -30,7 +30,7 @@ namespace krys::boo::css
   Ref<ImageValue> ImageValue::Create(net::Url url, CSSOMStringAtom initiatorType) noexcept
   {
     CSSOMString text {url.String()};
-    return Create(CSSUrl {.Specified = krys::move(text), .Resolved = krys::move(url), .Modifiers = {}},
+    return Create(css::Url {.Specified = krys::move(text), .Resolved = krys::move(url), .Modifiers = {}},
                   krys::move(initiatorType));
   }
 
@@ -39,7 +39,7 @@ namespace krys::boo::css
     return AdoptRef(*new ImageValue(InvalidTag {}));
   }
 
-  Ref<ImageValue> ImageValue::CopyWithLocation(CSSUrl location) const noexcept
+  Ref<ImageValue> ImageValue::CopyWithLocation(css::Url location) const noexcept
   {
     auto copy = Create(krys::move(location), _initiatorType);
     copy->_cachedImage = _cachedImage;
@@ -48,7 +48,7 @@ namespace krys::boo::css
     return copy;
   }
 
-  Ref<ImageValue> ImageValue::CopyForComputedStyle(const CSSUrl &resolvedUrl) const noexcept
+  Ref<ImageValue> ImageValue::CopyForComputedStyle(const css::Url &resolvedUrl) const noexcept
   {
     return resolvedUrl == _location ? ShareForLoading() : CopyWithLocation(resolvedUrl);
   }

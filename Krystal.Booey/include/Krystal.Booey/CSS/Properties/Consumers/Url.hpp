@@ -51,7 +51,7 @@ namespace krys::boo::css
   class TokenRange;
   class Value;
 
-  struct CSSUrl;
+  struct Url;
   struct PropertyParserState;
 
   namespace parse_property
@@ -59,8 +59,8 @@ namespace krys::boo::css
     // MARK: <url>
     // https://drafts.csswg.org/css-values/#urls
 
-    KRYS_NODISCARD Maybe<CSSUrl> ConsumeUrlRaw(TokenRange &tokens, PropertyParserState &state,
-                                               AllowedUrlModifiers allowed) noexcept;
+    KRYS_NODISCARD Maybe<Url> ConsumeUrlRaw(TokenRange &tokens, PropertyParserState &state,
+                                            AllowedUrlModifiers allowed) noexcept;
 
     KRYS_NODISCARD RefPtr<Value> ConsumeUrl(TokenRange &tokens, PropertyParserState &state,
                                             AllowedUrlModifiers allowed) noexcept;

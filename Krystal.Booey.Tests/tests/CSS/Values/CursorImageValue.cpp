@@ -11,7 +11,7 @@ namespace krys::boo::css::tests
 {
   namespace
   {
-    CSSUrl CursorUrl(utf8_stringview url)
+    Url CursorUrl(utf8_stringview url)
     {
       return *CompleteUrl(CSSOMString {url},
                           ParserContext {ParserMode::HTMLStandard, net::Url {u8"https://example.com/"}});
