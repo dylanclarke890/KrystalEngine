@@ -212,6 +212,8 @@ namespace krys::boo::css
   {
     friend class MutableSelector;
     friend class SelectorList;
+    // Builds the selector arrays of the rules it splits into.
+    friend class StyleRule;
 
     struct RareData : public RefCounted<RareData>
     {
@@ -424,16 +426,6 @@ namespace krys::boo::css
 
     KRYS_NODISCARD int32 NthB() const noexcept;
 
-    KRYS_NODISCARD bool HasDescendantRelation() const noexcept
-    {
-      return Relation() == SelectorRelation::Descendant;
-    }
-
-    KRYS_NODISCARD bool HasDescendantOrChildRelation() const noexcept
-    {
-      return Relation() == SelectorRelation::Child || HasDescendantRelation();
-    }
-
     KRYS_NODISCARD SelectorPseudoClass PseudoClass() const noexcept
     {
       krys_debug_assert(Match() == SelectorMatch::PseudoClass);
@@ -450,8 +442,6 @@ namespace krys::boo::css
     {
       return Match() == SelectorMatch::PseudoElement;
     }
-
-    KRYS_NODISCARD bool IsSiblingSelector() const noexcept;
 
     KRYS_NODISCARD bool IsAttributeSelector() const noexcept;
 
@@ -482,12 +472,6 @@ namespace krys::boo::css
     KRYS_NODISCARD bool IsLastInComplexSelector() const noexcept
     {
       return _flags.contains(SelectorFlag::IsLastInComplexSelector);
-    }
-
-    // FIXME: This should ideally be private, but StyleRule uses it.
-    void SetLastInSelectorList() noexcept
-    {
-      SetFlag(SelectorFlag::IsLastInSelectorList, true);
     }
 
     /// @brief Whether this selector is not author/UA written.
@@ -549,6 +533,11 @@ namespace krys::boo::css
     void SetImplicit() noexcept
     {
       SetFlag(SelectorFlag::IsImplicit, true);
+    }
+
+    void SetLastInSelectorList() noexcept
+    {
+      SetFlag(SelectorFlag::IsLastInSelectorList, true);
     }
 
     void CreateRareData() noexcept;
@@ -615,12 +604,6 @@ namespace krys::boo::css
     krys_debug_assert(IsAttributeSelector());
     krys_debug_assert(HasRareData());
     return _data.Rare->Attribute;
-  }
-
-  inline bool Selector::IsSiblingSelector() const noexcept
-  {
-    return Relation() == SelectorRelation::NextSibling || Relation() == SelectorRelation::SubsequentSibling
-           || (Match() == SelectorMatch::PseudoClass && PseudoClassIsRelativeToSiblings(PseudoClass()));
   }
 
   inline bool Selector::IsAttributeSelector() const noexcept

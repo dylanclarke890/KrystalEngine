@@ -333,8 +333,6 @@ namespace krys::boo::css::tests
     CHECK(b->PrecedingCompoundSelectorComponent() == nullptr);
 
     CHECK(b->Relation() == SelectorRelation::Child);
-    CHECK(b->HasDescendantOrChildRelation());
-    CHECK(!b->HasDescendantRelation());
     CHECK(p->TagQualifiedName().LocalName() == u8"p");
     CHECK(p->TagLocalNameLower() == u8"p");
     CHECK(a->Value() == u8"a");
@@ -342,11 +340,8 @@ namespace krys::boo::css::tests
 
   TEST_CASE("Selector(queries)", "[CSS][Selectors][Selector]")
   {
-    auto sibling = B::List(B::Combine(B::Type(u8"a"), SelectorRelation::NextSibling, B::Type(u8"b")));
-    CHECK(sibling.FirstSelectorComponent()->IsSiblingSelector());
-    CHECK(
-      B::List(B::PseudoClass(SelectorPseudoClass::FirstChild)).FirstSelectorComponent()->IsSiblingSelector());
-    CHECK(!B::List(B::PseudoClass(SelectorPseudoClass::Root)).FirstSelectorComponent()->IsSiblingSelector());
+    CHECK(PseudoClassIsRelativeToSiblings(SelectorPseudoClass::FirstChild));
+    CHECK(!PseudoClassIsRelativeToSiblings(SelectorPseudoClass::Root));
     CHECK(IsTreeStructuralPseudoClass(SelectorPseudoClass::Root));
     CHECK(!IsTreeStructuralPseudoClass(SelectorPseudoClass::Hover));
     CHECK(IsLogicalCombinationPseudoClass(SelectorPseudoClass::Where));
