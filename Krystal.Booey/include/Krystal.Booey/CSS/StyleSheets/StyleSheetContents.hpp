@@ -62,7 +62,6 @@ namespace krys::boo::css
 
     CSSOMString _originalUrl;
 
-    CSSOMString _encodingFromCharsetRule;
     List<Ref<LayerRule>> _layerRulesBeforeImportRules;
     List<Ref<ImportRule>> _importRules;
     List<Ref<NamespaceRule>> _namespaceRules;
@@ -75,7 +74,6 @@ namespace krys::boo::css
     bool _hasSyntacticallyValidCSSHeader {true};
     bool _didLoadErrorOccur {false};
     bool _isMutable {false};
-    mutable bool _hasResolvedNesting {false};
     mutable Maybe<bool> _hasNestingRulesCache;
     uint32 _inMemoryCacheCount {0};
 
@@ -124,8 +122,6 @@ namespace krys::boo::css
     /// @brief Whether a parsed sheet can be used again: none of its subresources failed.
     KRYS_NODISCARD bool SubresourcesAllowReuse() const noexcept;
 
-    KRYS_NODISCARD bool IsLoadingSubresources() const noexcept;
-
     KRYS_NODISCARD bool IsCacheable() const noexcept;
 
     KRYS_NODISCARD bool IsCacheableWithNoBaseUrlDependency() const noexcept;
@@ -137,8 +133,6 @@ namespace krys::boo::css
     void StartLoadingDynamicSheet() noexcept;
 
     KRYS_NODISCARD StyleSheetContents *RootStyleSheet() const noexcept;
-
-    KRYS_NODISCARD Node *SingleOwnerNode() const noexcept;
 
     KRYS_NODISCARD Document *SingleOwnerDocument() const noexcept;
 
@@ -153,11 +147,6 @@ namespace krys::boo::css
     }
 
     KRYS_NODISCARD bool MayDependOnBaseUrl() const noexcept;
-
-    /// @brief Calls @p handler on every rule (the imported sheets' too, after each import rule) until it
-    /// returns true.
-    /// @return Whether @p handler returned true.
-    bool TraverseRules(KRYS_NOESCAPE const Func<bool(const Rule &)> &handler) const noexcept;
 
     /// @brief Calls @p handler on every resource the rules load until it returns true.
     /// @return Whether @p handler returned true.
@@ -178,23 +167,11 @@ namespace krys::boo::css
       _hasSyntacticallyValidCSSHeader = value;
     }
 
-    KRYS_NODISCARD bool HasSyntacticallyValidCSSHeader() const noexcept
-    {
-      return _hasSyntacticallyValidCSSHeader;
-    }
-
     void ParserAddNamespace(const CSSOMStringAtom &prefix, const CSSOMStringAtom &uri) noexcept;
 
     void ParserAppendRule(Ref<Rule> &&rule) noexcept;
 
-    void ParserSetEncodingFromCharsetRule(const CSSOMString &encoding) noexcept;
-
     void ClearRules() noexcept;
-
-    KRYS_NODISCARD CSSOMString EncodingFromCharsetRule() const noexcept
-    {
-      return _encodingFromCharsetRule;
-    }
 
     KRYS_NODISCARD const List<Ref<LayerRule>> &LayerRulesBeforeImportRules() const noexcept
     {
@@ -287,8 +264,6 @@ namespace krys::boo::css
       _isMutable = true;
     }
 
-    KRYS_NODISCARD bool HasNestingRules() const noexcept;
-
     void ClearHasNestingRulesCache() noexcept
     {
       _hasNestingRulesCache = {};
@@ -310,20 +285,18 @@ namespace krys::boo::css
       _didLoadErrorOccur = true;
     }
 
-    KRYS_NODISCARD bool HasResolvedNesting() const noexcept
-    {
-      return _hasResolvedNesting;
-    }
-
-    void SetHasResolvedNesting(bool value) const noexcept
-    {
-      _hasResolvedNesting = value;
-    }
-
   private:
-    void ClearCharsetRule() noexcept;
-
     /// @brief Derives the namespaces from the `@namespace` rules, the last declaration of a prefix winning.
     void RebuildNamespaces() noexcept;
+
+    KRYS_NODISCARD Node *SingleOwnerNode() const noexcept;
+
+    /// @brief Calls @p handler with each rule, imported sheets' and nested ones included, until it returns
+    /// true.
+    /// @return Whether @p handler returned true.
+    bool TraverseRules(KRYS_NOESCAPE const Func<bool(const Rule &)> &handler) const noexcept;
+
+    /// @brief Whether a style rule has nested rules, which make the sheet uncacheable. Cached.
+    KRYS_NODISCARD bool HasNestingRules() const noexcept;
   };
 }

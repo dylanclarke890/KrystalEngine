@@ -106,10 +106,9 @@ namespace krys::boo::css
 
   // NOLINTNEXTLINE(bugprone-copy-constructor-init): a copy starts with its own reference and weak counts.
   StyleSheetContents::StyleSheetContents(const StyleSheetContents &other) noexcept
-      : _originalUrl(other._originalUrl), _encodingFromCharsetRule(other._encodingFromCharsetRule),
-        _namespaces(other._namespaces), _defaultNamespace(other._defaultNamespace),
-        _isUserStyleSheet(other._isUserStyleSheet), _loadCompleted(true),
-        _hasSyntacticallyValidCSSHeader(other._hasSyntacticallyValidCSSHeader),
+      : _originalUrl(other._originalUrl), _namespaces(other._namespaces),
+        _defaultNamespace(other._defaultNamespace), _isUserStyleSheet(other._isUserStyleSheet),
+        _loadCompleted(true), _hasSyntacticallyValidCSSHeader(other._hasSyntacticallyValidCSSHeader),
         _hasNestingRulesCache(other._hasNestingRulesCache), _parserContext(other._parserContext)
   {
     krys_debug_assert(other.IsCacheable());
@@ -167,13 +166,10 @@ namespace krys::boo::css
 
   bool StyleSheetContents::IsCacheable() const noexcept
   {
-    // FIXME: Support copying import rules.
-    if (!_importRules.empty())
-    {
-      return false;
-    }
-    // FIXME: Support cached stylesheets in import rules.
-    if (_ownerRule)
+    // Sheets with imports, and imported sheets, aren't cached: copying one would mean copying its import
+    // rules' loads and clients.
+    // FIXME: Work out how to cache them.
+    if (!_importRules.empty() || _ownerRule)
     {
       return false;
     }
@@ -314,11 +310,6 @@ namespace krys::boo::css
     return static_cast<uint32>(result);
   }
 
-  void StyleSheetContents::ClearCharsetRule() noexcept
-  {
-    _encodingFromCharsetRule.clear();
-  }
-
   void StyleSheetContents::ClearRules() noexcept
   {
     for (auto &importRule : _importRules)
@@ -330,7 +321,6 @@ namespace krys::boo::css
     _importRules.clear();
     _namespaceRules.clear();
     _childRules.clear();
-    ClearCharsetRule();
     RebuildNamespaces();
   }
 
@@ -342,13 +332,6 @@ namespace krys::boo::css
     {
       ParserAddNamespace(rule->Prefix(), rule->Uri());
     }
-  }
-
-  void StyleSheetContents::ParserSetEncodingFromCharsetRule(const CSSOMString &encoding) noexcept
-  {
-    // Parser enforces that there is ever only one @charset.
-    krys_debug_assert(_encodingFromCharsetRule.empty());
-    _encodingFromCharsetRule = encoding;
   }
 
   bool StyleSheetContents::WrapperInsertRule(Ref<Rule> &&rule, uint32 index) noexcept
@@ -414,7 +397,7 @@ namespace krys::boo::css
       _importRules.insert(_importRules.begin() + childVectorIndex, ShareRef(*importRule));
       _importRules[childVectorIndex]->SetParentStyleSheet(this);
       _importRules[childVectorIndex]->RequestStyleSheet();
-      // FIXME: Stylesheet doesn't actually change meaningfully before the imported sheets are loaded.
+      // Reported as a change, though nothing applies until the import loads, which reports another.
       return true;
     }
     // Inserting @import rule after a non-import rule is not allowed.
@@ -579,11 +562,6 @@ namespace krys::boo::css
     bool hasFailedOrExpiredResources =
       TraverseSubresources([](const CachedResource &resource) { return resource.LoadFailedOrCanceled(); });
     return !hasFailedOrExpiredResources;
-  }
-
-  bool StyleSheetContents::IsLoadingSubresources() const noexcept
-  {
-    return TraverseSubresources([](const CachedResource &resource) { return resource.IsLoading(); });
   }
 
   bool StyleSheetContents::IsLoading() const noexcept

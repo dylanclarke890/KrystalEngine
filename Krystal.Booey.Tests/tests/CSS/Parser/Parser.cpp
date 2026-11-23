@@ -87,7 +87,9 @@ namespace krys::boo::css::tests
     auto sheet = ParseSheet(u8"a, b > c { color: red; margin: 0 }\n.x{color:blue!important;color:green}");
 
     REQUIRE(sheet->RuleCount() == 2);
-    CHECK(sheet->HasSyntacticallyValidCSSHeader());
+    // A sheet whose first rule is valid can be cached.
+    sheet->CheckLoaded();
+    CHECK(sheet->IsCacheable());
 
     auto &first = StyleAt(*sheet, 0);
     CHECK(first.Type() == RuleType::Style);
@@ -114,7 +116,9 @@ namespace krys::boo::css::tests
       auto sheet = ParseSheet(u8"a:unknown-pseudo { color: red } b { color: blue }");
       REQUIRE(sheet->RuleCount() == 1);
       CHECK(SelectorsText(StyleAt(*sheet, 0).GetSelectorList()) == "b");
-      CHECK_FALSE(sheet->HasSyntacticallyValidCSSHeader());
+      // A sheet whose first rule isn't valid may not be CSS at all, so it isn't cached.
+      sheet->CheckLoaded();
+      CHECK_FALSE(sheet->IsCacheable());
     }
 
     SECTION("Unknown at-rules are skipped")
@@ -156,7 +160,6 @@ namespace krys::boo::css::tests
     {
       auto sheet = ParseSheet(u8"@charset \"utf-8\"; @import \"a.css\";");
       CHECK(RuleTypes(*sheet) == List<RuleType> {RuleType::Import});
-      CHECK(sheet->HasSyntacticallyValidCSSHeader());
     }
 
     SECTION("@import and @namespace after a style rule are dropped")
@@ -472,7 +475,6 @@ namespace krys::boo::css::tests
       CHECK(SelectorsText(Downcast<StyleRuleWithNesting>(*rule.NestedRules()[1]).OriginalSelectorList())
             == "& b");
       CHECK(AsText(Downcast<NestedDeclarationsRule>(*rule.NestedRules()[2]).Properties()) == "margin: 0px;");
-      CHECK(sheet->HasNestingRules());
     }
 
     SECTION("A plain style rule isn't a nesting rule")

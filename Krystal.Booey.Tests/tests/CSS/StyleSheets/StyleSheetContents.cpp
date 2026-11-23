@@ -146,11 +146,8 @@ namespace krys::boo::css::tests
       sheet->ParserAppendRule(Namespace(u8"a", u8"urn:a"));
       sheet->ParserAppendRule(CreateStyleRule(u8".a", u8"color: red"));
       REQUIRE(sheet->NamespaceURIFromPrefix(u8"a") == u8"urn:a");
-      sheet->ParserSetEncodingFromCharsetRule(u8"utf-8");
-      CHECK(sheet->EncodingFromCharsetRule() == u8"utf-8");
       sheet->ClearRules();
       CHECK(sheet->IsEmpty());
-      CHECK(sheet->EncodingFromCharsetRule().empty());
       CHECK(import->ParentStyleSheet() == nullptr);
       CHECK(sheet->NamespaceURIFromPrefix(u8"a") == null);
     }
@@ -282,29 +279,6 @@ namespace krys::boo::css::tests
     sheet->ParserAppendRule(Ref<Rule>(media));
     sheet->ParserAppendRule(Ref<Rule>(nested));
 
-    SECTION("TraverseRules visits nested and group children")
-    {
-      List<RuleType> visited;
-      CHECK_FALSE(sheet->TraverseRules(
-        [&](const Rule &rule)
-        {
-          visited.push_back(rule.Type());
-          return false;
-        }));
-      CHECK(visited
-            == List<RuleType> {RuleType::Import, RuleType::Media, RuleType::Style, RuleType::StyleWithNesting,
-                               RuleType::NestedDeclarations});
-
-      uint32 count = 0;
-      CHECK(sheet->TraverseRules(
-        [&](const Rule &rule)
-        {
-          ++count;
-          return rule.IsMediaRule();
-        }));
-      CHECK(count == 2);
-    }
-
     SECTION("MayDependOnBaseURL")
     {
       CHECK(sheet->MayDependOnBaseUrl());
@@ -321,12 +295,12 @@ namespace krys::boo::css::tests
 
     SECTION("HasNestingRules and caching")
     {
-      CHECK(sheet->HasNestingRules());
+      // A nesting rule makes the sheet uncacheable.
+      sheet->CheckLoaded();
       CHECK_FALSE(sheet->IsCacheable());
 
       auto plain = StyleSheetContents::Create();
       plain->ParserAppendRule(CreateStyleRule(u8".a", u8"color: red"));
-      CHECK_FALSE(plain->HasNestingRules());
       // Not loaded yet.
       CHECK_FALSE(plain->IsCacheable());
       plain->CheckLoaded();
@@ -392,13 +366,11 @@ namespace krys::boo::css::tests
     sheet->ParserAppendRule(LayerStatement(u8"a"));
     auto rule = CreateStyleRule(u8".a", u8"color: red");
     sheet->ParserAppendRule(Ref<Rule>(rule));
-    sheet->ParserSetEncodingFromCharsetRule(u8"utf-8");
     sheet->CheckLoaded();
 
     auto copy = sheet->Copy();
     CHECK(copy->RuleCount() == 2);
     CHECK(copy->LoadCompleted());
-    CHECK(copy->EncodingFromCharsetRule() == u8"utf-8");
     CHECK(copy->ChildRules()[0].get() != rule.get());
     CHECK(copy->LayerRulesBeforeImportRules()[0].get() != sheet->LayerRulesBeforeImportRules()[0].get());
     CHECK(AsText(Downcast<StyleRule>(*copy->ChildRules()[0]).Properties()) == "color: red;");
@@ -417,9 +389,5 @@ namespace krys::boo::css::tests
     CHECK(sheet->Clients() == List<CSSStyleSheet *> {client});
     sheet->UnregisterClient(client);
     CHECK(sheet->Clients().empty());
-
-    CHECK_FALSE(sheet->HasResolvedNesting());
-    sheet->SetHasResolvedNesting(true);
-    CHECK(sheet->HasResolvedNesting());
   }
 }

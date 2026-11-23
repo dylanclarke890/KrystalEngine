@@ -567,7 +567,6 @@ namespace krys::boo
   {
     krys_debug_assert(_contents->IsMutable());
     krys_debug_assert(_contents->HasOneClient());
-    _contents->SetHasResolvedNesting(false);
     ForEachStyleScope(
       [&](style::Scope &scope)
       {
