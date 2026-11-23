@@ -7377,9 +7377,6 @@ class GenerateInitialValues:
     def _generate_property_initial_values_generated_inlines_hpp_initial_value_for_longhand(self, *, to: Writer):
         initial_value_to_property_list: dict[InitialValue, list] = {}
         for property in self.generation_context.properties_and_descriptors.style_properties.all_non_shorthands:
-            if property.codegen_properties.internal_only:
-                continue
-
             if property.initial is None:
                 to.write_if(
                     self.generation_context.verbose,

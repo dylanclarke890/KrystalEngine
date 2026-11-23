@@ -89,6 +89,13 @@ namespace krys::boo::css::tests
       CHECK(ValueOf(pending, PropertyId::MarginTop).empty());
     }
 
+    SECTION("A shorthand's implicit internal longhands")
+    {
+      // mask leaves mask-position's internal longhands at their initial value.
+      auto mask = ParseDeclarations(u8"mask: url(a.png) luminance");
+      CHECK(ValueOf(mask, PropertyId::MaskPosition) == "0% 0%");
+    }
+
     SECTION("System fonts")
     {
       auto font = ParseDeclarations(u8"font: caption");
