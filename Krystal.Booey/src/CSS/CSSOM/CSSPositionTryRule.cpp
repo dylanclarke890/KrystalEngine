@@ -46,18 +46,13 @@ namespace krys::boo
     return AdoptRef(*new CSSPositionTryRule(rule, parent));
   }
 
-  Ref<css::PositionTryRule> CSSPositionTryRule::ProtectedPositionTryRule() const noexcept
-  {
-    return _positionTryRule;
-  }
-
   CSSOMString CSSPositionTryRule::CssText() const noexcept
   {
     StringBuilder builder;
     builder.Append(u8"@position-try ", Name().View(), u8" {");
 
-    auto properties = _positionTryRule->ProtectedProperties();
-    if (auto declarations = properties->AsText(css::DefaultSerialisationContext()); !declarations.empty())
+    if (auto declarations = _positionTryRule->Properties().AsText(css::DefaultSerialisationContext());
+        !declarations.empty())
     {
       builder.Append(u8" ", declarations, u8' ');
     }
@@ -75,7 +70,7 @@ namespace krys::boo
     _positionTryRule = ShareRef(Downcast<css::PositionTryRule>(rule));
     if (auto propertiesCSSOMWrapper = _propertiesCSSOMWrapper)
     {
-      propertiesCSSOMWrapper->Reattach(*ProtectedPositionTryRule()->ProtectedMutableProperties());
+      propertiesCSSOMWrapper->Reattach(_positionTryRule->MutableProperties());
     }
   }
 
@@ -86,10 +81,10 @@ namespace krys::boo
 
   CSSPositionTryDescriptors &CSSPositionTryRule::Style() noexcept
   {
-    auto mutableProperties = ShareRef(ProtectedPositionTryRule()->MutableProperties());
+    auto &mutableProperties = _positionTryRule->MutableProperties();
     if (!_propertiesCSSOMWrapper)
     {
-      _propertiesCSSOMWrapper = CSSPositionTryDescriptors::Create(*mutableProperties, *this);
+      _propertiesCSSOMWrapper = CSSPositionTryDescriptors::Create(mutableProperties, *this);
     }
     return *_propertiesCSSOMWrapper;
   }

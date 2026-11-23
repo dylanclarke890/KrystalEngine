@@ -109,15 +109,10 @@ namespace krys::boo::css
         return const_cast<css::Value *>(_value);
       }
 
-      KRYS_NODISCARD Ref<css::Value> ProtectedValue() const noexcept
-      {
-        return ShareRef(const_cast<css::Value &>(*_value));
-      }
-
       // FIXME: Remove this.
       KRYS_NODISCARD Property ToProperty() const noexcept
       {
-        return Property(_metadata, ProtectedValue());
+        return Property(_metadata, ShareRef(const_cast<css::Value &>(*_value)));
       }
     };
 

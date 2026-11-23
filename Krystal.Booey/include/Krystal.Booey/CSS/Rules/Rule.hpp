@@ -277,8 +277,6 @@ namespace krys::boo::css
       return *_properties;
     }
 
-    KRYS_NODISCARD Ref<const StyleProperties> ProtectedProperties() const noexcept;
-
     KRYS_NODISCARD MutableStyleProperties &MutableProperties() noexcept;
 
     KRYS_NODISCARD bool IsSplitRule() const noexcept

@@ -63,7 +63,7 @@ namespace krys::boo::style
         [&](const typename LengthPercentage<R, V>::Calc &calculation) -> Result
         {
           return css::UnevaluatedCalc<css::LengthPercentageRaw<R, V>> {
-            css::calc::Value::Create(*calculation.ProtectedCalculation(), style)};
+            css::calc::Value::Create(calculation.Calculation(), style)};
         },
         [&]<css::ValueId Id>(const css::KeywordValueConstant<Id> &identifier) -> Result
         { return ConvertToCSS(identifier, style); });

@@ -2123,7 +2123,7 @@ namespace krys::boo::style
           {
             return nullptr;
           }
-          return rule->ProtectedProperties();
+          return ShareRef(rule->Properties());
         });
     };
 

@@ -90,7 +90,7 @@ namespace krys::boo
         return;
       }
 
-      Ref element = styleable->ProtectedElement();
+      Ref element = ShareRef(styleable->Element);
       if (!element->NodeDocument().InStyleRecalc())
       {
         element->InvalidateStyleForAnimation();
@@ -1906,7 +1906,7 @@ namespace krys::boo
     RefPtr<Element> protector;
     if (previousTargetStyleable)
     {
-      protector = previousTargetStyleable->ProtectedElement();
+      protector = ShareRef(previousTargetStyleable->Element);
     }
 
     _target = krys::move(newTarget);

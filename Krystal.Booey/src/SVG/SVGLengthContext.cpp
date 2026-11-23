@@ -444,7 +444,7 @@ namespace krys::boo
 
   Maybe<css::ToLengthConversionData> SVGLengthContext::CssConversionData() const noexcept
   {
-    auto element = ProtectedContext();
+    auto element = ShareRefPtr(Context());
     if (!element)
     {
       return {};
@@ -469,14 +469,14 @@ namespace krys::boo
     };
   }
 
-  RefPtr<const SVGElement> SVGLengthContext::ProtectedContext() const noexcept
+  const SVGElement *SVGLengthContext::Context() const noexcept
   {
-    return ShareRefPtr(static_cast<const SVGElement *>(_context.get()));
+    return _context.get();
   }
 
   ExceptionOr<float> SVGLengthContext::ConvertValueFromUserUnitsToEXS(float value) const noexcept
   {
-    auto *style = RenderStyleForLengthResolving(ProtectedContext().get());
+    auto *style = RenderStyleForLengthResolving(Context());
     if (!style)
     {
       return Exception {ExceptionCode::NotSupportedError};
@@ -495,7 +495,7 @@ namespace krys::boo
 
   ExceptionOr<float> SVGLengthContext::ConvertValueFromEXSToUserUnits(float value) const noexcept
   {
-    auto *style = RenderStyleForLengthResolving(ProtectedContext().get());
+    auto *style = RenderStyleForLengthResolving(Context());
     if (!style)
     {
       return Exception {ExceptionCode::NotSupportedError};
@@ -533,7 +533,7 @@ namespace krys::boo
     // any length within the SVG subtree needs to exclude the 'zoom' information.
     if (_context->IsOutermostSVGSVGElement())
     {
-      return Downcast<SVGSvgElement>(*ProtectedContext()).CurrentViewportSizeExcludingZoom();
+      return Downcast<SVGSvgElement>(*Context()).CurrentViewportSizeExcludingZoom();
     }
 
     // Take size from nearest SVGSVGElement, skipping over <symbol> elements.

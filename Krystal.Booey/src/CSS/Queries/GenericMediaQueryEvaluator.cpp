@@ -85,7 +85,7 @@ namespace krys::boo::css::mq
       return EvaluationResult::True;
     }
 
-    auto expressionSize = ComputeLength(comparison->ProtectedValue().get(), conversionData);
+    auto expressionSize = ComputeLength(comparison->Value.get(), conversionData);
     if (!expressionSize)
     {
       return EvaluationResult::Unknown;

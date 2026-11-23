@@ -415,8 +415,7 @@ namespace krys::boo::style
     KRYS_NODISCARD typename css::AnglePercentage<R, V>::Calc
       operator()(const UnevaluatedCalc<css::AnglePercentage<R, V>> &value, const RenderStyle &style) noexcept
     {
-      return typename css::AnglePercentage<R, V>::Calc {
-        css::calc::Value::Create(*value.ProtectedCalculation(), style)};
+      return typename css::AnglePercentage<R, V>::Calc {css::calc::Value::Create(value.Calculation(), style)};
     }
   };
 
@@ -426,8 +425,8 @@ namespace krys::boo::style
     KRYS_NODISCARD typename css::LengthPercentage<R, V>::Calc
       operator()(const UnevaluatedCalc<css::LengthPercentage<R, V>> &value, const RenderStyle &style) noexcept
     {
-      return typename css::LengthPercentage<R, V>::Calc {
-        css::calc::Value::Create(*value.ProtectedCalculation(), style)};
+      return
+        typename css::LengthPercentage<R, V>::Calc {css::calc::Value::Create(value.Calculation(), style)};
     }
   };
 
@@ -446,7 +445,7 @@ namespace krys::boo::style
         [&](const typename AnglePercentage<R, V>::Calc &calculation) -> css::AnglePercentage<R, V>
         {
           return typename css::AnglePercentage<R, V>::Calc {
-            css::calc::Value::Create(*calculation.ProtectedCalculation(), style)};
+            css::calc::Value::Create(calculation.Calculation(), style)};
         });
     }
   };
@@ -476,7 +475,7 @@ namespace krys::boo::style
         [&](const typename LengthPercentage<R, V>::Calc &calculation) -> css::LengthPercentage<R, V>
         {
           return typename css::LengthPercentage<R, V>::Calc {
-            css::calc::Value::Create(*calculation.ProtectedCalculation(), style)};
+            css::calc::Value::Create(calculation.Calculation(), style)};
         });
     }
   };

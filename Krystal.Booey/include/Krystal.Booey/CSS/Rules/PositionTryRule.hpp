@@ -58,11 +58,7 @@ namespace krys::boo::css
       return *_properties;
     }
 
-    KRYS_NODISCARD Ref<StyleProperties> ProtectedProperties() const noexcept;
-
     KRYS_NODISCARD MutableStyleProperties &MutableProperties() noexcept;
-
-    KRYS_NODISCARD Ref<MutableStyleProperties> ProtectedMutableProperties() noexcept;
   };
 }
 

@@ -27,7 +27,7 @@ namespace krys::boo::css::tests
       CHECK_FALSE(rule.SupportsText());
       CHECK(rule.Media().Length() == 0);
       CHECK(rule.GetStyleSheet() == nullptr);
-      CHECK_FALSE(rule.ProtectedStyleSheet());
+      CHECK_FALSE(rule.GetStyleSheet());
       CHECK(RuleText(rule) == "@import url(\"a.css\");");
     }
 

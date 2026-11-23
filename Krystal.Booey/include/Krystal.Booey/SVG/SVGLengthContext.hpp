@@ -151,7 +151,7 @@ namespace krys::boo
 
     KRYS_NODISCARD Maybe<css::ToLengthConversionData> CssConversionData() const noexcept;
 
-    KRYS_NODISCARD RefPtr<const SVGElement> ProtectedContext() const noexcept;
+    KRYS_NODISCARD const SVGElement *Context() const noexcept;
 
     template <typename TSize>
     KRYS_NODISCARD float ValueForSizeType(const TSize &, style::ZoomFactor usedZoom,

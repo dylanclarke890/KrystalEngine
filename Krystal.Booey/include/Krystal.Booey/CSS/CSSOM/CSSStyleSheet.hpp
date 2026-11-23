@@ -295,8 +295,6 @@ namespace krys::boo
       return *_contents;
     }
 
-    KRYS_NODISCARD Ref<css::StyleSheetContents> ProtectedContents() noexcept;
-
     void DetachFromDocument() noexcept
     {
       ClearOwnerNode();

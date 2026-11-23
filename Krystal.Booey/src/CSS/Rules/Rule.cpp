@@ -405,11 +405,6 @@ namespace krys::boo::css
     return AdoptRef(*new StyleRule(*this));
   }
 
-  Ref<const StyleProperties> StyleRule::ProtectedProperties() const noexcept
-  {
-    return _properties;
-  }
-
   void StyleRule::SetProperties(Ref<StyleProperties> &&properties) noexcept
   {
     _properties = krys::move(properties);

@@ -132,13 +132,13 @@ namespace krys::boo::css::mq
         SerialiseIdentifier(name, builder);
 
         builder.Append(u8": ");
-        builder.Append(feature.RightComparison->ProtectedValue()->CssText(DefaultSerialisationContext()));
+        builder.Append(feature.RightComparison->Value->CssText(DefaultSerialisationContext()));
         break;
 
       case Syntax::Range:
         if (feature.LeftComparison)
         {
-          builder.Append(feature.LeftComparison->ProtectedValue()->CssText(DefaultSerialisationContext()));
+          builder.Append(feature.LeftComparison->Value->CssText(DefaultSerialisationContext()));
           serialiseRangeComparisonOperator(feature.LeftComparison->Op);
         }
 
@@ -147,7 +147,7 @@ namespace krys::boo::css::mq
         if (feature.RightComparison)
         {
           serialiseRangeComparisonOperator(feature.RightComparison->Op);
-          builder.Append(feature.RightComparison->ProtectedValue()->CssText(DefaultSerialisationContext()));
+          builder.Append(feature.RightComparison->Value->CssText(DefaultSerialisationContext()));
         }
         break;
     }

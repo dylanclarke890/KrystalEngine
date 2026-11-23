@@ -1749,7 +1749,7 @@ namespace krys::boo
       if (mode == CSSPropertyOverrideMode::OverrideValues
           || (mode == CSSPropertyOverrideMode::DoNotOverrideValues && !value))
       {
-        mutableStyle.SetProperty(property.Id(), property.ProtectedValue(),
+        mutableStyle.SetProperty(property.Id(), ShareRef(*property.Value()),
                                  css::IsImportant(property.IsImportant()));
       }
     }

@@ -634,11 +634,6 @@ namespace krys::boo
     }
   }
 
-  Ref<css::StyleSheetContents> CSSStyleSheet::ProtectedContents() noexcept
-  {
-    return _contents;
-  }
-
   CSSOMString CSSStyleSheet::CssText(const css::SerialisationContext &context) noexcept
   {
     // The rules' serialisations, separated by spaces.

@@ -140,7 +140,7 @@ namespace krys::boo
 
     if (IsOutOfLine())
     {
-      return {ProtectedAsOutOfLine(), Space(), ColorFlag::Semantic};
+      return {ShareRef(AsOutOfLine()), Space(), ColorFlag::Semantic};
     }
 
     return {AsInline(), ColorFlag::Semantic};
@@ -157,7 +157,7 @@ namespace krys::boo
   {
     if (IsOutOfLine())
     {
-      return {Space(), ResolveColourComponents(ProtectedAsOutOfLine()->ResolvedComponents())};
+      return {Space(), ResolveColourComponents(AsOutOfLine().ResolvedComponents())};
     }
 
     return {ColourSpace::SRGB, AsColourComponents(ConvertColour<SRGBA<float>>(AsInline()).Resolved())};
