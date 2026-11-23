@@ -118,33 +118,28 @@ namespace krys::boo::css
 
 #pragma region Unit Checks
 
-    // FIXME: Some of these use PrimitiveUnitType() and some use PrimitiveType(). Many that use
-    // PrimitiveUnitType() are likely broken with calc().
+    // The quantity checks (IsLength, IsAngle, ...) see a calc() as the quantity it resolves to. The font
+    // checks look at the lengths inside it, and IsPx at the written unit, which a calc() never has.
 
     KRYS_NODISCARD bool IsAngle() const noexcept
     {
       return CategoryForUnitType(PrimitiveType()) == Category::Angle;
     }
 
-    KRYS_NODISCARD bool IsFontIndependentLength() const noexcept
-    {
-      return css::IsFontIndependentLength(PrimitiveUnitType());
-    }
+    /// @brief Whether this is an absolute length, which nothing but zoom affects; a calc() is if all its
+    /// lengths are.
+    KRYS_NODISCARD bool IsFontIndependentLength() const noexcept;
 
-    KRYS_NODISCARD bool IsFontRelativeLength() const noexcept
-    {
-      return css::IsFontRelativeLength(PrimitiveUnitType());
-    }
+    /// @brief Whether this is a length relative to a font, the root's included; a calc() is if any of its
+    /// lengths is.
+    KRYS_NODISCARD bool IsFontRelativeLength() const noexcept;
 
-    KRYS_NODISCARD bool IsParentFontRelativeLength() const noexcept
-    {
-      return IsPercentage() || (IsFontRelativeLength() && !IsRootFontRelativeLength());
-    }
+    /// @brief Whether this depends on the parent's font size: a percentage, or a length relative to the
+    /// element's own font; a calc() is if any of its parts is.
+    KRYS_NODISCARD bool IsParentFontRelativeLength() const noexcept;
 
-    KRYS_NODISCARD bool IsRootFontRelativeLength() const noexcept
-    {
-      return css::IsRootFontRelativeLength(PrimitiveUnitType());
-    }
+    /// @brief Whether this is a length relative to the root's font; a calc() is if any of its lengths is.
+    KRYS_NODISCARD bool IsRootFontRelativeLength() const noexcept;
 
     KRYS_NODISCARD bool IsLength() const noexcept
     {
@@ -171,9 +166,10 @@ namespace krys::boo::css
       return PrimitiveType() == UnitType::Percentage;
     }
 
+    /// @brief Whether this is a number written in `px`; never a calc().
     KRYS_NODISCARD bool IsPx() const noexcept
     {
-      return PrimitiveType() == UnitType::px;
+      return PrimitiveUnitType() == UnitType::px;
     }
 
     KRYS_NODISCARD bool IsTime() const noexcept
@@ -181,12 +177,12 @@ namespace krys::boo::css
       return CategoryForUnitType(PrimitiveType()) == Category::Time;
     }
 
-    KRYS_NODISCARD bool IsCalculated() const noexcept
+    KRYS_NODISCARD bool IsCalc() const noexcept
     {
       return _header.PrimitiveKind == PrimitiveKind::Calc;
     }
 
-    KRYS_NODISCARD bool IsCalculatedPercentageWithLength() const noexcept;
+    KRYS_NODISCARD bool IsCalcPercentageWithLength() const noexcept;
 
     KRYS_NODISCARD bool IsResolution() const noexcept
     {
@@ -255,10 +251,10 @@ namespace krys::boo::css
     }
 
     template <typename T = int64>
-    KRYS_NODISCARD Maybe<T> ResolveAsIntegerIfNotCalculated() const noexcept
+    KRYS_NODISCARD Maybe<T> ResolveAsIntegerIfNotCalc() const noexcept
     {
       krys_debug_assert(IsInteger());
-      return ValueIfNotCalculated<T>();
+      return ValueIfNotCalc<T>();
     }
 
 #pragma endregion
@@ -273,10 +269,10 @@ namespace krys::boo::css
     }
 
     template <typename T = double>
-    KRYS_NODISCARD Maybe<T> ResolveAsNumberIfNotCalculated() const noexcept
+    KRYS_NODISCARD Maybe<T> ResolveAsNumberIfNotCalc() const noexcept
     {
       krys_debug_assert(IsNumberOrInteger());
-      return ValueIfNotCalculated<T>();
+      return ValueIfNotCalc<T>();
     }
 
 #pragma endregion
@@ -401,7 +397,7 @@ namespace krys::boo::css
 
     KRYS_NODISCARD const calc::Value *CalcValue() const noexcept
     {
-      return IsCalculated() ? _value.Calc : nullptr;
+      return IsCalc() ? _value.Calc : nullptr;
     }
 
     KRYS_NODISCARD CSSOMString CustomCSSText(const SerialisationContext &context) const noexcept;
@@ -449,16 +445,16 @@ namespace krys::boo::css
 
     KRYS_NODISCARD double DoubleValueNoConversionDataRequired() const noexcept
     {
-      krys_debug_assert(!IsCalculated());
+      krys_debug_assert(!IsCalc());
       return _value.Number;
     }
 
     KRYS_NODISCARD double DoubleValueDividingBy100IfPercentage(const ToLengthConversionData &) const noexcept;
 
     template <typename T = double>
-    KRYS_NODISCARD Maybe<T> ValueIfNotCalculated() const noexcept
+    KRYS_NODISCARD Maybe<T> ValueIfNotCalc() const noexcept
     {
-      if (IsCalculated())
+      if (IsCalc())
       {
         return null;
       }

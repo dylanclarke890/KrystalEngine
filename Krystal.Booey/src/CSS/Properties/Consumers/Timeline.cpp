@@ -178,7 +178,7 @@ namespace krys::boo::css::parse_property
 
     auto IsDefault = [&](auto &value)
     {
-      if (!value.IsPercentage() || value.IsCalculated())
+      if (!value.IsPercentage() || value.IsCalc())
       {
         return false;
       }

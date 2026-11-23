@@ -263,7 +263,7 @@ namespace krys::boo::style
         return typename StyleType::Percentage {
           css::ClampToRange<R, V>(value.ResolveAsPercentage<V>(conversionData))};
       }
-      if (value.IsCalculatedPercentageWithLength())
+      if (value.IsCalcPercentageWithLength())
       {
         return typename StyleType::Calc {
           value.CalcValue()->CreateCalculationValue(conversionData, css::SymbolTable {})};

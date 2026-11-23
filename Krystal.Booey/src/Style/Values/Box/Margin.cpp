@@ -93,7 +93,7 @@ namespace krys::boo::style
       }};
     }
 
-    if (primitiveValue.IsCalculatedPercentageWithLength())
+    if (primitiveValue.IsCalcPercentageWithLength())
     {
       return MarginEdge {typename MarginEdge::Calc {
         primitiveValue.CalcValue()->CreateCalculationValue(conversionData, css::SymbolTable {})}};

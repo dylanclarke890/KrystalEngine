@@ -46,7 +46,7 @@ namespace krys::boo::style
         auto conversionData = DeprecatedLengthConversionCreateCSSToLengthConversionData(element);
         if (!conversionData)
         {
-          if (primitiveValue.IsCalculated())
+          if (primitiveValue.IsCalc())
           {
             return null;
           }
@@ -90,7 +90,7 @@ namespace krys::boo::style
           }};
         }
 
-        if (primitiveValue.IsCalculatedPercentageWithLength())
+        if (primitiveValue.IsCalcPercentageWithLength())
         {
           return T {typename T::Calc {
             primitiveValue.CalcValue()->CreateCalculationValue(*conversionData, css::SymbolTable {})}};

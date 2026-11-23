@@ -1280,7 +1280,7 @@ namespace krys::boo::css
       if (widthKeyword == ValueId::Invalid)
       {
         auto &widthValue = Downcast<PrimitiveValue>(LonghandValue(widthIndex));
-        if (widthValue.IsCalculated() || !widthValue.IsPercentage())
+        if (widthValue.IsCalc() || !widthValue.IsPercentage())
         {
           return null;
         }
@@ -1571,8 +1571,8 @@ namespace krys::boo::css
 
         if (const auto *primitiveValue = DynamicDowncast<PrimitiveValue>(value))
         {
-          return primitiveValue->IsLength() || primitiveValue->IsPercentage()
-                 || primitiveValue->IsCalculated() || primitiveValue->IsFlex();
+          return primitiveValue->IsLength() || primitiveValue->IsPercentage() || primitiveValue->IsCalc()
+                 || primitiveValue->IsFlex();
         }
 
         return false;
@@ -1824,7 +1824,7 @@ namespace krys::boo::css
     {
       auto isDefault = [](const PrimitiveValue &value, style::SingleAnimationRangeType type)
       {
-        if (!value.IsPercentage() || value.IsCalculated())
+        if (!value.IsPercentage() || value.IsCalc())
         {
           return false;
         }
@@ -1840,7 +1840,7 @@ namespace krys::boo::css
 
       auto isRangeOffset = [](const PrimitiveValue &value)
       {
-        return value.IsLength() || value.IsPercentage() || value.IsCalculatedPercentageWithLength();
+        return value.IsLength() || value.IsPercentage() || value.IsCalcPercentageWithLength();
       };
 
       if (auto *pair = DynamicDowncast<ValuePair>(value))

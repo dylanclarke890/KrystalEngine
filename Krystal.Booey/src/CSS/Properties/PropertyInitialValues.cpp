@@ -46,7 +46,7 @@ namespace krys::boo::css
 
     KRYS_NODISCARD bool IsNumber(const PrimitiveValue &value, double number, UnitType type) noexcept
     {
-      return value.PrimitiveType() == type && !value.IsCalculated()
+      return value.PrimitiveType() == type && !value.IsCalc()
              && value.ValueNoConversionDataRequired<double>() == number;
     }
 

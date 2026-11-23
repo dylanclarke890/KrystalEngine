@@ -78,7 +78,7 @@ namespace krys::boo::style
       }};
     }
 
-    if (primitiveValue->IsCalculatedPercentageWithLength())
+    if (primitiveValue->IsCalcPercentageWithLength())
     {
       return WordSpacing {typename WordSpacing::Calc {
         primitiveValue->CalcValue()->CreateCalculationValue(conversionData, css::SymbolTable {})}};

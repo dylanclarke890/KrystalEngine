@@ -219,7 +219,51 @@ namespace krys::boo::css
     return _header.Unit;
   }
 
-  bool PrimitiveValue::IsCalculatedPercentageWithLength() const noexcept
+  bool PrimitiveValue::IsFontIndependentLength() const noexcept
+  {
+    if (!IsCalc())
+    {
+      return css::IsFontIndependentLength(PrimitiveUnitType());
+    }
+
+    auto dependencies = ComputedStyleDependencies();
+    return IsLength() && dependencies.Properties.empty() && dependencies.RootProperties.empty()
+           && !dependencies.ViewportDimensions && !dependencies.ContainerDimensions && !dependencies.Anchors;
+  }
+
+  bool PrimitiveValue::IsFontRelativeLength() const noexcept
+  {
+    if (!IsCalc())
+    {
+      return css::IsFontRelativeLength(PrimitiveUnitType());
+    }
+
+    // Only font-relative units add properties: font-size, and line-height for `lh` and `rlh`.
+    auto dependencies = ComputedStyleDependencies();
+    return !dependencies.Properties.empty() || !dependencies.RootProperties.empty();
+  }
+
+  bool PrimitiveValue::IsParentFontRelativeLength() const noexcept
+  {
+    if (!IsCalc())
+    {
+      return IsPercentage() || (IsFontRelativeLength() && !IsRootFontRelativeLength());
+    }
+
+    return IsPercentage() || IsCalcPercentageWithLength() || !ComputedStyleDependencies().Properties.empty();
+  }
+
+  bool PrimitiveValue::IsRootFontRelativeLength() const noexcept
+  {
+    if (!IsCalc())
+    {
+      return css::IsRootFontRelativeLength(PrimitiveUnitType());
+    }
+
+    return !ComputedStyleDependencies().RootProperties.empty();
+  }
+
+  bool PrimitiveValue::IsCalcPercentageWithLength() const noexcept
   {
     auto *calcValue = CalcValue();
     return calcValue && calcValue->IsPercentageWithLength();
@@ -316,7 +360,7 @@ namespace krys::boo::css
 
   double PrimitiveValue::DoubleValueNoConversionDataRequired(UnitType targetUnit) const noexcept
   {
-    krys_debug_assert(!IsCalculated());
+    krys_debug_assert(!IsCalc());
     return ConvertUnitOrNumber(_value.Number, _header.Unit, targetUnit).value_or(0);
   }
 
@@ -358,7 +402,7 @@ namespace krys::boo::css
 
   Maybe<bool> PrimitiveValue::IsZero() const noexcept
   {
-    if (IsCalculated())
+    if (IsCalc())
     {
       return null;
     }
@@ -368,7 +412,7 @@ namespace krys::boo::css
 
   Maybe<bool> PrimitiveValue::IsOne() const noexcept
   {
-    if (IsCalculated())
+    if (IsCalc())
     {
       return null;
     }
@@ -378,7 +422,7 @@ namespace krys::boo::css
 
   Maybe<bool> PrimitiveValue::IsPositive() const noexcept
   {
-    if (IsCalculated())
+    if (IsCalc())
     {
       return null;
     }
@@ -388,7 +432,7 @@ namespace krys::boo::css
 
   Maybe<bool> PrimitiveValue::IsNegative() const noexcept
   {
-    if (IsCalculated())
+    if (IsCalc())
     {
       return null;
     }

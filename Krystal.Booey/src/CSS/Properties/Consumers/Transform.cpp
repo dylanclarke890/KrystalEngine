@@ -291,7 +291,7 @@ namespace krys::boo::css::parse_property
     // If we have a calc() or non-zero y value, we can directly add it to the list. We only
     // want to add a zero y value if a non-zero z value is specified.
     // Always include 0% in serialization per-spec.
-    bool haveNonZeroY = y->IsCalculated() || y->IsPercentage() || !*y->IsZero();
+    bool haveNonZeroY = y->IsCalc() || y->IsPercentage() || !*y->IsZero();
 
     if (tokens.IsAtEnd())
     {
@@ -310,7 +310,7 @@ namespace krys::boo::css::parse_property
     }
 
     // If the z value is a zero value and not a percent value, we have nothing left to add to the list.
-    bool haveNonZeroZ = z && (z->IsCalculated() || z->IsPercentage() || !*z->IsZero());
+    bool haveNonZeroZ = z && (z->IsCalc() || z->IsPercentage() || !*z->IsZero());
 
     if (!haveNonZeroY && !haveNonZeroZ)
     {
@@ -502,8 +502,8 @@ namespace krys::boo::css::parse_property
 
     tokens.DiscardWhitespace();
 
-    auto xValue = x->ResolveAsNumberIfNotCalculated();
-    auto yValue = y->ResolveAsNumberIfNotCalculated();
+    auto xValue = x->ResolveAsNumberIfNotCalc();
+    auto yValue = y->ResolveAsNumberIfNotCalc();
 
     if (tokens.IsAtEnd())
     {
@@ -521,7 +521,7 @@ namespace krys::boo::css::parse_property
       return nullptr;
     }
 
-    auto zValue = z->ResolveAsNumberIfNotCalculated();
+    auto zValue = z->ResolveAsNumberIfNotCalc();
 
     if (zValue != 1.0)
     {

@@ -2,6 +2,8 @@
 #include "catch2/catch_approx.hpp"
 #include "catch2/catch_test_macros.hpp"
 #include "Krystal.Booey.Tests/CSS/ValueTestUtils.hpp"
+#include "Krystal.Booey/CSS/Parser/ParserContext.hpp"
+#include "Krystal.Booey/CSS/Properties/PropertyParser.hpp"
 #include "Krystal.Booey/CSS/Values/ToLengthConversionData.hpp"
 #include <numbers>
 
@@ -60,5 +62,52 @@ namespace krys::boo::css::tests
     CHECK(hashOf(PrimitiveValue::Create(ValueId::Auto)) != hashOf(PrimitiveValue::Create(ValueId::None)));
     CHECK(hashOf(PrimitiveValue::Create(CSSOMString(u8"a")))
           == hashOf(PrimitiveValue::Create(CSSOMString(u8"a"))));
+  }
+
+  TEST_CASE_METHOD(ValueFixture, "PrimitiveValue: font relativity", "[CSS][PrimitiveValue]")
+  {
+    auto parseFontSize = [](utf8_stringview css) -> Ref<PrimitiveValue>
+    {
+      ParserContext context {ParserMode::HTMLStandard};
+      auto value =
+        PropertyParser::ParseStylePropertyLonghand(PropertyId::FontSize, CSSOMString(css), context);
+      REQUIRE(value);
+      return ShareRef(Downcast<PrimitiveValue>(*value));
+    };
+
+    SECTION("Written units")
+    {
+      CHECK(PrimitiveValue::Create(2.0, UnitType::in)->IsFontIndependentLength());
+      CHECK_FALSE(PrimitiveValue::Create(2.0, UnitType::vw)->IsFontIndependentLength());
+      CHECK(PrimitiveValue::Create(2.0, UnitType::em)->IsParentFontRelativeLength());
+      CHECK(PrimitiveValue::Create(2.0, UnitType::Percentage)->IsParentFontRelativeLength());
+      CHECK(PrimitiveValue::Create(2.0, UnitType::rem)->IsRootFontRelativeLength());
+      CHECK_FALSE(PrimitiveValue::Create(2.0, UnitType::rem)->IsParentFontRelativeLength());
+      CHECK(PrimitiveValue::Create(2.0, UnitType::px)->IsPx());
+    }
+
+    SECTION("calc() looks at its lengths")
+    {
+      auto absolute = parseFontSize(u8"calc(1px + 1in)");
+      REQUIRE(absolute->IsCalc());
+      CHECK(absolute->IsFontIndependentLength());
+      CHECK_FALSE(absolute->IsFontRelativeLength());
+      CHECK_FALSE(absolute->IsParentFontRelativeLength());
+      CHECK_FALSE(absolute->IsPx());
+
+      auto em = parseFontSize(u8"calc(2em + 1px)");
+      CHECK_FALSE(em->IsFontIndependentLength());
+      CHECK(em->IsFontRelativeLength());
+      CHECK(em->IsParentFontRelativeLength());
+      CHECK_FALSE(em->IsRootFontRelativeLength());
+
+      auto rem = parseFontSize(u8"calc(2rem + 1px)");
+      CHECK(rem->IsFontRelativeLength());
+      CHECK(rem->IsRootFontRelativeLength());
+      CHECK_FALSE(rem->IsParentFontRelativeLength());
+
+      CHECK(parseFontSize(u8"calc(50% + 1px)")->IsParentFontRelativeLength());
+      CHECK_FALSE(parseFontSize(u8"calc(10vw + 1px)")->IsFontIndependentLength());
+    }
   }
 }

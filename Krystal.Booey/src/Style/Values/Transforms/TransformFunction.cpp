@@ -77,7 +77,7 @@ namespace krys::boo::style
       return TranslateTransformFunction::LengthPercentage::Percentage {
         primitiveValue.ResolveAsPercentage<float>(conversionData)};
     }
-    if (primitiveValue.IsCalculated())
+    if (primitiveValue.IsCalc())
     {
       return TranslateTransformFunction::LengthPercentage::Calc {
         primitiveValue.CalcValue()->CreateCalculationValue(conversionData, css::SymbolTable {})};

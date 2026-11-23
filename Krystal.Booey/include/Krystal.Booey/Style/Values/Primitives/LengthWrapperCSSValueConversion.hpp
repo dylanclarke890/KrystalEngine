@@ -100,7 +100,7 @@ namespace krys::boo::style
           }};
         }
 
-        if (primitiveValue.IsCalculatedPercentageWithLength())
+        if (primitiveValue.IsCalcPercentageWithLength())
         {
           return T {typename T::Calc {
             primitiveValue.CalcValue()->CreateCalculationValue(conversionData, css::SymbolTable {})}};

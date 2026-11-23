@@ -2517,7 +2517,7 @@ namespace krys::boo::css
           {
             auto IsRangeOffset = [](auto &value)
             {
-              return value.IsLength() || value.IsPercentage() || value.IsCalculatedPercentageWithLength();
+              return value.IsLength() || value.IsPercentage() || value.IsCalcPercentageWithLength();
             };
 
             if (auto *primitiveValue = DynamicDowncast<PrimitiveValue>(value);

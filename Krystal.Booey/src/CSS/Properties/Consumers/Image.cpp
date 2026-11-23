@@ -826,7 +826,7 @@ namespace krys::boo::css
 
       if (value->IsNumber())
       {
-        if (auto numberValue = value->ResolveAsNumberIfNotCalculated();
+        if (auto numberValue = value->ResolveAsNumberIfNotCalc();
             numberValue && (*numberValue < 0 || *numberValue > 1))
         {
           value = PrimitiveValue::Create(ClampTo<double>(*numberValue, 0.0, 1.0));

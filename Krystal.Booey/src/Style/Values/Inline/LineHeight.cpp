@@ -77,7 +77,7 @@ namespace krys::boo::style
       return style::ZoomFactor {conversionData.Zoom(), state.Style().DeviceScaleFactor()};
     };
 
-    if (primitiveValue.IsLength() || primitiveValue.IsCalculatedPercentageWithLength())
+    if (primitiveValue.IsLength() || primitiveValue.IsCalcPercentageWithLength())
     {
       double fixedValue = 0;
       if (primitiveValue.IsLength())

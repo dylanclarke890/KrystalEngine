@@ -45,7 +45,7 @@ namespace krys::boo::css
     result.push_back(u8'"');
     // Omit the value if it's `1` as `1` is implied by default.
     if (auto *primitiveValue = DynamicDowncast<PrimitiveValue>(_value.get());
-        !(primitiveValue && primitiveValue->ResolveAsIntegerIfNotCalculated<int>() == 1))
+        !(primitiveValue && primitiveValue->ResolveAsIntegerIfNotCalc<int>() == 1))
     {
       result.push_back(u8' ');
       result.append(_value->CssText(context));

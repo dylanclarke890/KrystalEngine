@@ -429,7 +429,7 @@ namespace krys::boo::css::parse_property
     else
     {
       auto maxRepetitions = static_cast<int64>(style::GridPosition::Max() / numberOfTracks);
-      if (auto repetitionsInteger = repetitions->ResolveAsIntegerIfNotCalculated();
+      if (auto repetitionsInteger = repetitions->ResolveAsIntegerIfNotCalc();
           repetitionsInteger && repetitionsInteger > maxRepetitions)
       {
         repetitions = PrimitiveValue::CreateInteger(static_cast<double>(maxRepetitions));
@@ -457,7 +457,7 @@ namespace krys::boo::css::parse_property
       {
         return false;
       }
-      if (auto repetitionsInteger = repetitions->ResolveAsIntegerIfNotCalculated();
+      if (auto repetitionsInteger = repetitions->ResolveAsIntegerIfNotCalc();
           repetitionsInteger && repetitionsInteger > style::GridPosition::Max())
       {
         repetitions = PrimitiveValue::CreateInteger(style::GridPosition::Max());

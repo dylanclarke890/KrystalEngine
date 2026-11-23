@@ -90,7 +90,7 @@ namespace krys::boo
         auto parsedValue =
           css::PrimitiveValueResolver<css::LengthPercentage<>>::ConsumeAndResolve(tokenRange, parserState);
 
-        if (!parsedValue || parsedValue->IsCalculated())
+        if (!parsedValue || parsedValue->IsCalc())
         {
           return Exception(ExceptionCode::SyntaxError, u8"Failed to construct 'IntersectionObserver': "
                                                          + marginName
