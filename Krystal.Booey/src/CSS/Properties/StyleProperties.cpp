@@ -339,7 +339,8 @@ namespace krys::boo::css
     };
     for (auto property : *this)
     {
-      if (visit(*property.Value()) == IterationStatus::Done)
+      const auto &value = *property.Value();
+      if (value.MayDependOnBaseUrl() || value.VisitChildren(visit) == IterationStatus::Done)
       {
         return true;
       }

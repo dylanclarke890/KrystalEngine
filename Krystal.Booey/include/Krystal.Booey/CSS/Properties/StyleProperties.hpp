@@ -82,12 +82,6 @@ namespace krys::boo::css
         return _value;
       }
 
-      // FIXME: We should try to remove this mutable overload.
-      KRYS_NODISCARD css::Value *Value() noexcept
-      {
-        return const_cast<css::Value *>(_value);
-      }
-
       // FIXME: Remove this.
       KRYS_NODISCARD Property ToProperty() const noexcept
       {
