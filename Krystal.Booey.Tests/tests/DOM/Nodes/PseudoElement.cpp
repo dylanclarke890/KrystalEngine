@@ -127,4 +127,27 @@ namespace krys::boo::dom::tests
       CHECK_FALSE(a->AfterPseudoElement());
     }
   }
+
+  TEST_CASE_METHOD(css::tests::ValueFixture,
+                   "PseudoElement: rules nested under a pseudo-element match nothing", "[DOM][PseudoElement]")
+  {
+    // `&` can't represent a pseudo-element, so `& {}` under `#a::before` (an `:is(#a::before)`) matches
+    // neither the element nor its ::before.
+    ResolverFixture fixture {u8R"(<!DOCTYPE html><style>
+      div::before { content: "x"; color: blue }
+      #a::before { & { color: red } }
+      #b::before { :root & { color: red } }
+      #c::before { & { & { color: red } } }
+    </style><div id=a></div><div id=b></div><div id=c></div>)"};
+    fixture.Document->UpdateStyleIfNeeded();
+
+    for (auto id : {u8"a", u8"b", u8"c"})
+    {
+      auto *before = fixture.ById(id).BeforePseudoElement();
+      REQUIRE(before);
+      REQUIRE(before->Renderer());
+      CHECK(before->Renderer()->Style().Color() == Blue);
+      CHECK(fixture.ById(id).Renderer()->Style().Color() != Red);
+    }
+  }
 }

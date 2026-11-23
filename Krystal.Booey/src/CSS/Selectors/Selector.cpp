@@ -1138,18 +1138,6 @@ namespace krys::boo::css
         return true;
       }
 
-      // FIXME: This is probably unneeded as functional pseudo-classes can't contain valid pseudo elements.
-      if (const auto *selectorList = selector->SubSelectors())
-      {
-        for (const auto &subSelector : *selectorList)
-        {
-          if (ComplexSelectorCanMatchPseudoElement(subSelector))
-          {
-            return true;
-          }
-        }
-      }
-
       selector = selector->PrecedingComplexSelectorComponent();
     } while (selector);
     return false;
