@@ -276,7 +276,7 @@ namespace krys::boo
     if (const auto *primitiveValue = DynamicDowncast<css::PrimitiveValue>(value))
     {
       // https://drafts.css-houdini.org/css-typed-om/#reify-a-math-expression
-      if (const auto *calcValue = primitiveValue->CSSCalcValue())
+      if (const auto *calcValue = primitiveValue->CalcValue())
       {
         auto result = CSSNumericValue::ReifyMathExpression(calcValue->GetTree());
         if (result.HasException())

@@ -28,6 +28,7 @@
 #include "Krystal.Booey/CSS/Calc/Value.hpp"
 #include "Krystal.Booey/CSS/Values/PrimitiveValue.hpp"
 #include "Krystal.Booey/Style/Builder/BuilderChecking.hpp"
+#include "Krystal.Booey/Style/Values/Primitives/LengthResolution.hpp"
 #include "Krystal.Booey/Style/Values/Primitives/LengthWrapper.hpp"
 #include "Krystal.Booey/Style/Values/Primitives/NumericTypesConversions.hpp"
 
@@ -83,12 +84,12 @@ namespace krys::boo::style
 
         if (primitiveValue.IsLength())
         {
-          return T {
-            typename T::Fixed {
-              css::ClampToRange<T::Fixed::Range, float>(primitiveValue.ResolveAsLength(conversionData),
-                                                        css::MinValueForCssLength, css::MaxValueForCssLength),
-            },
-            primitiveValue.PrimitiveType() == css::UnitType::QuirkyEm};
+          return T {typename T::Fixed {
+                      css::ClampToRange<T::Fixed::Range, float>(
+                        primitiveValue.ResolveAsLength(conversionData), style::MinValueForCssLength,
+                        style::MaxValueForCssLength),
+                    },
+                    primitiveValue.PrimitiveType() == css::UnitType::QuirkyEm};
         }
 
         if (primitiveValue.IsPercentage())
@@ -101,8 +102,8 @@ namespace krys::boo::style
 
         if (primitiveValue.IsCalculatedPercentageWithLength())
         {
-          return T {typename T::Calc {primitiveValue.ProtectedCSSCalcValue()->CreateCalculationValue(
-            conversionData, css::SymbolTable {})}};
+          return T {typename T::Calc {
+            primitiveValue.CalcValue()->CreateCalculationValue(conversionData, css::SymbolTable {})}};
         }
 
         krys_debug_assert_msg(false, "Unexpected length-percentage value");

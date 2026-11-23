@@ -33,6 +33,7 @@
 #include "Krystal.Booey/CSS/Values/ToLengthConversionData.hpp"
 #include "Krystal.Booey/Style/Builder/BuilderState.hpp"
 #include "Krystal.Booey/Style/Calc/Value.hpp"
+#include "Krystal.Booey/Style/Values/Primitives/LengthResolution.hpp"
 #include "Krystal.Booey/Style/Values/Primitives/NumericTypes.hpp"
 #include "Krystal.Core/Assert.hpp"
 #include "Krystal.Core/Attributes.hpp"
@@ -193,7 +194,7 @@ namespace krys::boo::style
   KRYS_NODISCARD constexpr Integer<R, V> Canonicalize(const css::IntegerRaw<R, V> &raw,
                                                       css::NoConversionDataRequiredTag, Rest &&...) noexcept
   {
-    return {css::RoundForImpreciseConversion<V>(raw.Value)};
+    return {style::RoundForImpreciseConversion<V>(raw.Value)};
   }
 
   template <auto R, typename V, typename... Rest>

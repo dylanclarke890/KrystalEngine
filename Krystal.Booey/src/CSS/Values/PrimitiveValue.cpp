@@ -33,6 +33,7 @@
 #include "Krystal.Core/Strings/StringBuilder.hpp"
 #include <algorithm>
 #include <charconv>
+#include <cmath>
 
 namespace krys::boo::css
 {
@@ -211,7 +212,7 @@ namespace krys::boo::css
 
   UnitType PrimitiveValue::PrimitiveType() const noexcept
   {
-    if (auto *calcValue = CSSCalcValue())
+    if (auto *calcValue = CalcValue())
     {
       return calcValue->PrimitiveType();
     }
@@ -220,23 +221,8 @@ namespace krys::boo::css
 
   bool PrimitiveValue::IsCalculatedPercentageWithLength() const noexcept
   {
-    auto *calcValue = CSSCalcValue();
+    auto *calcValue = CalcValue();
     return calcValue && calcValue->IsPercentageWithLength();
-  }
-
-  RefPtr<const calc::Value> PrimitiveValue::ProtectedCSSCalcValue() const noexcept
-  {
-    return ShareRefPtr(CSSCalcValue());
-  }
-
-  bool PrimitiveValue::ConversionToCanonicalUnitRequiresConversionData() const noexcept
-  {
-    if (IsCalculated())
-    {
-      return _value.Calc->RequiresConversionData();
-    }
-
-    return css::ConversionToCanonicalUnitRequiresConversionData(PrimitiveType());
   }
 
 #pragma region Length converting
@@ -244,37 +230,37 @@ namespace krys::boo::css
   template <>
   int64 PrimitiveValue::ResolveAsLength(const ToLengthConversionData &conversionData) const noexcept
   {
-    return RoundForImpreciseConversion<int64>(ResolveAsLengthDouble(conversionData));
+    return style::RoundForImpreciseConversion<int64>(ResolveAsLengthDouble(conversionData));
   }
 
   template <>
   uint64 PrimitiveValue::ResolveAsLength(const ToLengthConversionData &conversionData) const noexcept
   {
-    return RoundForImpreciseConversion<uint64>(ResolveAsLengthDouble(conversionData));
+    return style::RoundForImpreciseConversion<uint64>(ResolveAsLengthDouble(conversionData));
   }
 
   template <>
   int32 PrimitiveValue::ResolveAsLength(const ToLengthConversionData &conversionData) const noexcept
   {
-    return RoundForImpreciseConversion<int32>(ResolveAsLengthDouble(conversionData));
+    return style::RoundForImpreciseConversion<int32>(ResolveAsLengthDouble(conversionData));
   }
 
   template <>
   uint32 PrimitiveValue::ResolveAsLength(const ToLengthConversionData &conversionData) const noexcept
   {
-    return RoundForImpreciseConversion<uint32>(ResolveAsLengthDouble(conversionData));
+    return style::RoundForImpreciseConversion<uint32>(ResolveAsLengthDouble(conversionData));
   }
 
   template <>
   int16 PrimitiveValue::ResolveAsLength(const ToLengthConversionData &conversionData) const noexcept
   {
-    return RoundForImpreciseConversion<int16>(ResolveAsLengthDouble(conversionData));
+    return style::RoundForImpreciseConversion<int16>(ResolveAsLengthDouble(conversionData));
   }
 
   template <>
   uint16 PrimitiveValue::ResolveAsLength(const ToLengthConversionData &conversionData) const noexcept
   {
-    return RoundForImpreciseConversion<uint16>(ResolveAsLengthDouble(conversionData));
+    return style::RoundForImpreciseConversion<uint16>(ResolveAsLengthDouble(conversionData));
   }
 
   template <>
@@ -297,7 +283,7 @@ namespace krys::boo::css
 
   double PrimitiveValue::ResolveAsLengthDouble(const ToLengthConversionData &conversionData) const noexcept
   {
-    if (auto *calcValue = CSSCalcValue())
+    if (auto *calcValue = CalcValue())
     {
       // The multiplier and factor is applied to each value in the calc expression individually.
       return calcValue->ComputeLengthPx(conversionData);
@@ -340,7 +326,7 @@ namespace krys::boo::css
 
   double PrimitiveValue::DoubleValue(const ToLengthConversionData &conversionData) const noexcept
   {
-    if (auto *calcValue = CSSCalcValue())
+    if (auto *calcValue = CalcValue())
     {
       return calcValue->DoubleValue(conversionData);
     }
@@ -353,7 +339,7 @@ namespace krys::boo::css
   {
     krys_debug_assert(IsNumberOrInteger() || IsPercentage());
 
-    if (auto *calcValue = CSSCalcValue())
+    if (auto *calcValue = CalcValue())
     {
       return calcValue->PrimitiveType() == UnitType::Percentage
                ? calcValue->DoubleValue(conversionData) / 100.0
@@ -446,7 +432,7 @@ namespace krys::boo::css
   {
     switch (_header.PrimitiveKind)
     {
-      case PrimitiveKind::Calc:       return ProtectedCSSCalcValue()->CssText(context);
+      case PrimitiveKind::Calc:       return _value.Calc->CssText(context);
       case PrimitiveKind::FontFamily: return SerialiseFontFamily(CSSOMString(_value.String->View()));
       case PrimitiveKind::String:     return SerialiseString(CSSOMString(_value.String->View()));
       case PrimitiveKind::CustomIdent:
@@ -500,7 +486,7 @@ namespace krys::boo::css
       case PrimitiveKind::CustomIdent:
       case PrimitiveKind::FontFamily:
         return _value.String == other._value.String; // Interned, so equal iff same atom.
-      case PrimitiveKind::Calc: return ProtectedCSSCalcValue()->Equals(*other.ProtectedCSSCalcValue());
+      case PrimitiveKind::Calc: return _value.Calc->Equals(*other._value.Calc);
       case PrimitiveKind::Number:
         return _header.Unit != UnitType::Unknown && _value.Number == other._value.Number;
     }
@@ -534,7 +520,7 @@ namespace krys::boo::css
   void PrimitiveValue::CollectComputedStyleDependencies(
     css::ComputedStyleDependencies &dependencies) const noexcept
   {
-    if (auto *calcValue = CSSCalcValue())
+    if (auto *calcValue = CalcValue())
     {
       calcValue->CollectComputedStyleDependencies(dependencies);
       return;

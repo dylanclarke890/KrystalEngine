@@ -26,6 +26,7 @@
 
 #include "Krystal.Booey/Style/Builder/BuilderChecking.hpp"
 #include "Krystal.Booey/Style/Builder/BuilderState.hpp"
+#include "Krystal.Booey/Style/Values/Primitives/LengthResolution.hpp"
 #include "Krystal.Booey/Style/Values/Primitives/LengthWrapperCSSValueConversion.hpp"
 
 namespace krys::boo::style
@@ -63,8 +64,8 @@ namespace krys::boo::style
     {
       return WordSpacing {typename WordSpacing::Fixed {
                             css::ClampToRange<WordSpacing::Fixed::Range, float>(
-                              primitiveValue->ResolveAsLength(conversionData), css::MinValueForCssLength,
-                              css::MaxValueForCssLength),
+                              primitiveValue->ResolveAsLength(conversionData), style::MinValueForCssLength,
+                              style::MaxValueForCssLength),
                           },
                           primitiveValue->PrimitiveType() == css::UnitType::QuirkyEm};
     }
@@ -79,9 +80,8 @@ namespace krys::boo::style
 
     if (primitiveValue->IsCalculatedPercentageWithLength())
     {
-      return WordSpacing {
-        typename WordSpacing::Calc {primitiveValue->ProtectedCSSCalcValue()->CreateCalculationValue(
-          conversionData, css::SymbolTable {})}};
+      return WordSpacing {typename WordSpacing::Calc {
+        primitiveValue->CalcValue()->CreateCalculationValue(conversionData, css::SymbolTable {})}};
     }
 
     state.SetCurrentPropertyInvalidAtComputedValueTime();

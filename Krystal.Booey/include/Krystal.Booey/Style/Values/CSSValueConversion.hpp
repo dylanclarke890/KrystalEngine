@@ -93,7 +93,7 @@ namespace krys::boo::style
         state.SetCurrentPropertyInvalidAtComputedValueTime();
         return {.Value = CSSOMStringAtom::Empty()};
       }
-      return {.Value = CSSOMStringAtom {value.CustomIdent()}};
+      return {.Value = CSSOMStringAtom {value.StringValue()}};
     }
 
     KRYS_NODISCARD css::CustomIdentifier operator()(BuilderState &state, const css::Value &value) noexcept

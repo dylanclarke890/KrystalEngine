@@ -266,7 +266,7 @@ namespace krys::boo::style
       if (value.IsCalculatedPercentageWithLength())
       {
         return typename StyleType::Calc {
-          value.ProtectedCSSCalcValue()->CreateCalculationValue(conversionData, css::SymbolTable {})};
+          value.CalcValue()->CreateCalculationValue(conversionData, css::SymbolTable {})};
       }
       return
         typename StyleType::Dimension {css::ClampToRange<R, V>(value.ResolveAsLength<V>(conversionData))};

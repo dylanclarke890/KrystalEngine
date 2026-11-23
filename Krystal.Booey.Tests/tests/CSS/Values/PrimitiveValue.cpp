@@ -7,19 +7,6 @@
 
 namespace krys::boo::css::tests
 {
-  TEST_CASE("RoundForImpreciseConversion", "[CSS][PrimitiveValue]")
-  {
-    CHECK(RoundForImpreciseConversion<int32>(44.99998) == 45);
-    CHECK(RoundForImpreciseConversion<int32>(44.5) == 44);
-    CHECK(RoundForImpreciseConversion<int32>(-44.99998) == -45);
-    CHECK(RoundForImpreciseConversion<uint16>(1e9) == 0);
-    CHECK(RoundForImpreciseConversion<int16>(-1e9) == 0);
-
-    CHECK(RoundForImpreciseConversion<float>(44.995) == 45.0f);
-    CHECK(RoundForImpreciseConversion<float>(44.5) == 44.5f);
-    CHECK(RoundForImpreciseConversion<float>(-44.995) == -45.0f);
-  }
-
   TEST_CASE_METHOD(ValueFixture, "PrimitiveValue::ResolveAsLength", "[CSS][PrimitiveValue]")
   {
     auto conversionData = ToLengthConversionData {};

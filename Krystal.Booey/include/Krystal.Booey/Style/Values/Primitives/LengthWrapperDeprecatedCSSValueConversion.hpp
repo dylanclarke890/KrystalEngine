@@ -25,6 +25,7 @@
 #pragma once
 
 #include "Krystal.Booey/DOM/Nodes/Element.hpp"
+#include "Krystal.Booey/Style/Values/Primitives/LengthResolution.hpp"
 #include "Krystal.Booey/Style/Values/Primitives/LengthWrapperCSSValueConversion.hpp"
 
 namespace krys::boo::style
@@ -54,8 +55,8 @@ namespace krys::boo::style
           {
             return T {typename T::Fixed {
                         css::ClampToRange<T::Fixed::Range, float>(
-                          primitiveValue.ResolveAsLengthNoConversionDataRequired(), css::MinValueForCssLength,
-                          css::MaxValueForCssLength),
+                          primitiveValue.ResolveAsLengthNoConversionDataRequired(),
+                          style::MinValueForCssLength, style::MaxValueForCssLength),
                       },
                       primitiveValue.PrimitiveType() == css::UnitType::QuirkyEm};
           }
@@ -73,12 +74,12 @@ namespace krys::boo::style
 
         if (primitiveValue.IsLength())
         {
-          return T {
-            typename T::Fixed {
-              css::ClampToRange<T::Fixed::Range, float>(primitiveValue.ResolveAsLength(*conversionData),
-                                                        css::MinValueForCssLength, css::MaxValueForCssLength),
-            },
-            primitiveValue.PrimitiveType() == css::UnitType::QuirkyEm};
+          return T {typename T::Fixed {
+                      css::ClampToRange<T::Fixed::Range, float>(
+                        primitiveValue.ResolveAsLength(*conversionData), style::MinValueForCssLength,
+                        style::MaxValueForCssLength),
+                    },
+                    primitiveValue.PrimitiveType() == css::UnitType::QuirkyEm};
         }
 
         if (primitiveValue.IsPercentage())
@@ -91,8 +92,8 @@ namespace krys::boo::style
 
         if (primitiveValue.IsCalculatedPercentageWithLength())
         {
-          return T {typename T::Calc {primitiveValue.ProtectedCSSCalcValue()->CreateCalculationValue(
-            *conversionData, css::SymbolTable {})}};
+          return T {typename T::Calc {
+            primitiveValue.CalcValue()->CreateCalculationValue(*conversionData, css::SymbolTable {})}};
         }
 
         return null;

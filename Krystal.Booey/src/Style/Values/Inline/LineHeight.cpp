@@ -32,6 +32,7 @@
 #include "Krystal.Booey/CSS/Properties/Consumers/Font.hpp"
 #include "Krystal.Booey/Style/Builder/BuilderChecking.hpp"
 #include "Krystal.Booey/Style/Builder/BuilderState.hpp"
+#include "Krystal.Booey/Style/Values/Primitives/LengthResolution.hpp"
 #include "Krystal.Booey/Style/Values/Primitives/LengthWrapperBlending.hpp"
 #include "Krystal.Booey/Style/Values/Primitives/LengthWrapperCSSValueConversion.hpp"
 #include "Krystal.Booey/Style/Values/Primitives/NumericTypesCSSValueConversion.hpp"
@@ -85,7 +86,7 @@ namespace krys::boo::style
       }
       else
       {
-        fixedValue = primitiveValue.ProtectedCSSCalcValue()
+        fixedValue = primitiveValue.CalcValue()
                        ->CreateCalculationValue(conversionData, css::SymbolTable {})
                        ->Evaluate(state.Style().GetFontDescription().ComputedSizeForRangeZoomOption(
                                     conversionData.RangeZoomOption()),
@@ -98,7 +99,7 @@ namespace krys::boo::style
       }
 
       return LineHeight::Fixed {css::ClampToRange<LineHeight::Fixed::Range, float>(
-        fixedValue, css::MinValueForCssLength, css::MaxValueForCssLength)};
+        fixedValue, style::MinValueForCssLength, style::MaxValueForCssLength)};
     }
 
     // Line-height percentages need to inherit as if they were Fixed pixel values. In the example:
@@ -115,7 +116,7 @@ namespace krys::boo::style
         (state.Style().GetFontDescription().ComputedSizeForRangeZoomOption(conversionData.RangeZoomOption())
          * primitiveValue.ResolveAsPercentage<int>(conversionData) * textZoom)
           / 100.0,
-        css::MinValueForCssLength, css::MaxValueForCssLength)};
+        style::MinValueForCssLength, style::MaxValueForCssLength)};
     }
 
     if (primitiveValue.IsNumber())

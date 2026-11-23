@@ -348,7 +348,7 @@ namespace krys::boo::css::parse_property
     SmallList<CSSOMString, 4> lineNames;
     while (auto lineName = ConsumeCustomIdentForGridLine(rangeCopy))
     {
-      lineNames.push_back(lineName->CustomIdent());
+      lineNames.push_back(lineName->StringValue());
     }
 
     if (rangeCopy.ConsumeIncludingWhitespace().Type() != TokenType::CloseSquare)

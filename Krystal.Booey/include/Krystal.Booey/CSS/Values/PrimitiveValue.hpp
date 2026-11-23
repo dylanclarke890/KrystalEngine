@@ -27,14 +27,10 @@
 #include "Krystal.Booey/CSS/Values/Units.hpp"
 #include "Krystal.Booey/CSS/Values/Value.hpp"
 #include "Krystal.Booey/CSS/Values/ValueId.hpp"
-#include "Krystal.Booey/Graphics/Geometry/LayoutUnit.hpp"
 #include "Krystal.Core/Maths/Extras.hpp"
-#include "Krystal.Core/Memory/NeverDestroyed.hpp"
 #include "Krystal.Core/Memory/RefPtr.hpp"
 #include "Krystal.Core/Strings/StringAtom.hpp"
 #include "Krystal.Core/Types/Maybe.hpp"
-#include <cmath>
-#include <limits>
 
 namespace krys::boo::css::calc
 {
@@ -45,44 +41,10 @@ namespace krys::boo::css
 {
   class ToLengthConversionData;
 
-  // Max/min values for CSS, needs to slightly smaller/larger than the true max/min values to allow for
-  // rounding without overflowing. Subtract two (rather than one) to allow for values to be converted to float
-  // and back without exceeding the LayoutUnit::max.
-  constexpr float MaxValueForCssLength = static_cast<float>(IntMaxForLayoutUnit - 2);
-  constexpr float MinValueForCssLength = static_cast<float>(IntMinForLayoutUnit + 2);
-
-  /// @brief Dimension calculations are imprecise, often resulting in values of e.g. 44.99998. We need to
-  /// round if we're really close to the next integer value.
-  template <typename T>
-  KRYS_NODISCARD inline T RoundForImpreciseConversion(double value) noexcept
-  {
-    value += (value < 0) ? -0.01 : +0.01;
-    return ((value > std::numeric_limits<T>::max()) || (value < std::numeric_limits<T>::min()))
-             ? 0
-             : static_cast<T>(value);
-  }
-
-  template <>
-  KRYS_NODISCARD inline float RoundForImpreciseConversion(double value) noexcept
-  {
-    double ceiledValue = std::ceil(value);
-    double proximityToNextInt = ceiledValue - value;
-    if (proximityToNextInt <= 0.01 && value > 0)
-    {
-      return static_cast<float>(ceiledValue);
-    }
-    if (proximityToNextInt >= 0.99 && value < 0)
-    {
-      return static_cast<float>(std::floor(value));
-    }
-    return static_cast<float>(value);
-  }
-
   class PrimitiveValue final : public Value
   {
     friend class StaticValuePool;
     friend class ValuePool;
-    friend LazyNeverDestroyed<PrimitiveValue>;
     friend class Value;
 
     using PrimitiveKind = detail::PrimitiveKind;
@@ -231,22 +193,10 @@ namespace krys::boo::css
       return CategoryForUnitType(PrimitiveType()) == Category::Resolution;
     }
 
-    KRYS_NODISCARD bool IsViewportPercentageLength() const noexcept
-    {
-      return css::IsViewportPercentageLength(PrimitiveUnitType());
-    }
-
-    KRYS_NODISCARD bool IsContainerPercentageLength() const noexcept
-    {
-      return css::IsContainerPercentageLength(PrimitiveUnitType());
-    }
-
     KRYS_NODISCARD bool IsFlex() const noexcept
     {
       return PrimitiveType() == UnitType::fr;
     }
-
-    KRYS_NODISCARD bool ConversionToCanonicalUnitRequiresConversionData() const noexcept;
 
 #pragma endregion
 
@@ -280,12 +230,6 @@ namespace krys::boo::css
     KRYS_NODISCARD bool IsCustomIdent() const noexcept
     {
       return _header.PrimitiveKind == PrimitiveKind::CustomIdent;
-    }
-
-    KRYS_NODISCARD CSSOMString CustomIdent() const noexcept
-    {
-      krys_debug_assert(IsCustomIdent());
-      return StringValue();
     }
 
     KRYS_NODISCARD bool IsFontFamily() const noexcept
@@ -379,10 +323,6 @@ namespace krys::boo::css
 
 #pragma endregion
 
-#pragma region Frequency
-
-#pragma endregion
-
 #pragma region Resolution (requires IsResolution())
 
     template <typename T = double, ResolutionUnit Unit = UnitTraits<ResolutionUnit>::Canonical>
@@ -436,17 +376,6 @@ namespace krys::boo::css
       return ClampTo<T>(DoubleValueNoConversionDataRequired());
     }
 
-    template <typename T = double>
-    KRYS_NODISCARD Maybe<T> ValueIfNotCalculated() const noexcept
-    {
-      if (IsCalculated())
-      {
-        return null;
-      }
-
-      return static_cast<T>(_value.Number);
-    }
-
 #pragma endregion
 
 #pragma region Divides value by 100 if percentage
@@ -470,12 +399,10 @@ namespace krys::boo::css
 
     KRYS_NODISCARD Maybe<bool> IsNegative() const noexcept;
 
-    KRYS_NODISCARD const calc::Value *CSSCalcValue() const noexcept
+    KRYS_NODISCARD const calc::Value *CalcValue() const noexcept
     {
       return IsCalculated() ? _value.Calc : nullptr;
     }
-
-    KRYS_NODISCARD RefPtr<const calc::Value> ProtectedCSSCalcValue() const noexcept;
 
     KRYS_NODISCARD CSSOMString CustomCSSText(const SerialisationContext &context) const noexcept;
 
@@ -527,6 +454,17 @@ namespace krys::boo::css
     }
 
     KRYS_NODISCARD double DoubleValueDividingBy100IfPercentage(const ToLengthConversionData &) const noexcept;
+
+    template <typename T = double>
+    KRYS_NODISCARD Maybe<T> ValueIfNotCalculated() const noexcept
+    {
+      if (IsCalculated())
+      {
+        return null;
+      }
+
+      return static_cast<T>(_value.Number);
+    }
 
 #pragma endregion
 

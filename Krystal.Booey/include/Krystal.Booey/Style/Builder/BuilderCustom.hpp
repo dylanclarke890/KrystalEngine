@@ -1610,7 +1610,7 @@ namespace krys::boo::style
       }
       else if (primitiveValue->IsCalculatedPercentageWithLength())
       {
-        size = static_cast<float>(primitiveValue->CSSCalcValue()
+        size = static_cast<float>(primitiveValue->CalcValue()
                                     ->CreateCalculationValue(conversionData, css::SymbolTable {})
                                     ->Evaluate(parentSize, style::ZoomNeeded {}));
       }

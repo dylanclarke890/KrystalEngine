@@ -56,9 +56,9 @@ namespace krys::boo::style::tests
     CHECK(Canonicalize(css::FlexRaw<> {2}, Token) == Flex<> {2});
     CHECK(Canonicalize(css::LengthRaw<> {css::LengthUnit::In, 1}, Token) == Length<> {96.0f});
     CHECK(Canonicalize(css::LengthRaw<> {css::LengthUnit::Px, 1e20}, Token)
-          == Length<> {css::MaxValueForCssLength});
+          == Length<> {style::MaxValueForCssLength});
     CHECK(Canonicalize(css::LengthRaw<> {css::LengthUnit::Px, -1e20}, Token)
-          == Length<> {css::MinValueForCssLength});
+          == Length<> {style::MinValueForCssLength});
 
     const css::ToLengthConversionData conversionData;
     CHECK(Canonicalize(css::LengthRaw<> {css::LengthUnit::Cm, 2.54}, conversionData).UnresolvedValue()
