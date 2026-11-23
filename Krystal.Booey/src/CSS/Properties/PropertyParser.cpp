@@ -335,22 +335,7 @@ namespace krys::boo::css
     InputStream inputStream {CSSOMString(string)};
     Tokenizer tokenizer(inputStream);
     std::ignore = tokenizer.PumpTokenizer();
-
-    auto range = tokenizer.Tokens();
-    range.DiscardWhitespace();
-
-    if (auto value = ConsumeGlobalKeywordValue(range))
-    {
-      return value;
-    }
-
-    auto value = PropertyParsing::ParseStylePropertyLonghand(range, property, state);
-    if (!value || !range.IsAtEnd())
-    {
-      return nullptr;
-    }
-
-    return value;
+    return ParseStylePropertyLonghand(property, tokenizer.Tokens(), context);
   }
 
   RefPtr<Value> PropertyParser::ParseStylePropertyLonghand(PropertyId property, TokenRange range,

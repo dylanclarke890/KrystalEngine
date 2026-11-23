@@ -1,35 +1,9 @@
-﻿/*
- * Copyright (C) 2003 Lars Knoll (knoll@kde.org)
- * Copyright (C) 2004 - 2021 Apple Inc. All rights reserved.
- * Copyright (C) 2008 Eric Seidel <eric@webkit.org>
- * Copyright (C) 2009 - 2010  Torch Mobile (Beijing) Co. Ltd. All rights reserved.
- * Copyright (C) 2025 Samuel Weinig <sam@webkit.org>
- *
- * This library is free software; you can redistribute it and/or
- * modify it under the terms of the GNU Library General Public
- * License as published by the Free Software Foundation; either
- * version 2 of the License, or (at your option) any later version.
- *
- * This library is distributed in the hope that it will be useful,
- * but WITHOUT ANY WARRANTY; without even the implied warranty of
- * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU
- * Library General Public License for more details.
- *
- * You should have received a copy of the GNU Library General Public License
- * along with this library; see the file COPYING.LIB.  If not, write to
- * the Free Software Foundation, Inc., 51 Franklin Street, Fifth Floor,
- * Boston, MA 02110-1301, USA.
- */
+﻿#pragma once
 
-#pragma once
-
-#include "Krystal.Booey/CSS/Parser/KeywordLookup.hpp"
 #include "Krystal.Booey/CSS/Properties/ParsedPropertyList.hpp"
 #include "Krystal.Booey/CSS/Properties/PropertyId.hpp"
 #include "Krystal.Booey/CSS/Properties/Types/IsImportant.hpp"
-#include "Krystal.Booey/CSS/Values/ValueId.hpp"
-#include "Krystal.Core/Base.hpp"
-#include "Krystal.Core/Containers/SmallList.hpp"
+#include "Krystal.Booey/CSS/Types/CSSOMString.hpp"
 #include "Krystal.Core/Memory/RefPtr.hpp"
 #include "Krystal.Core/Types/Maybe.hpp"
 #include "Krystal.Core/Types/Variant.hpp"
@@ -42,56 +16,70 @@ namespace krys::boo::style
 
 namespace krys::boo::css
 {
-  class Property;
   class TokenRange;
   class Value;
 
   struct ComputedStyleDependencies;
   struct CustomPropertySyntax;
   struct ParserContext;
-  struct PropertyParserState;
 
   enum class GlobalKeyword : uint8;
   enum class RuleType : uint8;
 
-  class PropertyParser
+  /// @brief Parses the values of declarations: properties, descriptors and registered custom properties.
+  struct PropertyParser
   {
-  public:
-    // Parses any CSS property or descriptor. If successful, the result will be appended to the `result`
-    // SmallList and the function will return true, otherwise, the function will return false and the `result`
-    // SmallList will be unmodified.
+    /// @brief Parses @p tokens as the value of property or descriptor @p id in a @p ruleType rule, appending
+    /// the declarations it sets (a shorthand's longhands, for one) to @p result.
+    /// @return Whether it parsed; if not, @p result is as it was.
     KRYS_NODISCARD static bool ParseValue(PropertyId id, IsImportant isImportant, TokenRange tokens,
                                           const ParserContext &context, ParsedPropertyList &result,
                                           RuleType ruleType) noexcept;
 
-    // Parses a longhand style property.
+    /// @brief Parses @p str as the value of longhand style property @p id, or a CSS-wide keyword.
+    /// @return The value, or null if @p str isn't one.
     KRYS_NODISCARD static RefPtr<Value> ParseStylePropertyLonghand(PropertyId id, const CSSOMString &str,
                                                                    const ParserContext &context) noexcept;
 
+    /// @brief Parses @p tokens as the value of longhand style property @p id, or a CSS-wide keyword.
+    /// @return The value, or null if @p tokens aren't one.
     KRYS_NODISCARD static RefPtr<Value> ParseStylePropertyLonghand(PropertyId id, TokenRange tokens,
                                                                    const ParserContext &context) noexcept;
 
-    // Parses a @counter-style descriptor.
+    /// @brief Parses @p str as the value of `@counter-style` descriptor @p id.
+    /// @return The value, or null if @p str isn't one.
     KRYS_NODISCARD static RefPtr<Value> ParseCounterStyleDescriptor(PropertyId id, const CSSOMString &str,
                                                                     const ParserContext &context) noexcept;
 
+    /// @brief Parses @p tokens as the `initial-value` of registered custom property @p name.
+    /// @return The computed initial value, or null if @p tokens don't match the syntax or are a CSS-wide
+    /// keyword.
+    /// @see https://drafts.css-houdini.org/css-properties-values-api-1/#initial-value-descriptor
     KRYS_NODISCARD static RefPtr<const style::CustomProperty> ParseTypedCustomPropertyInitialValue(
-      const CSSOMStringAtom &str, const CustomPropertySyntax &customPropertySyntax, TokenRange tokens,
+      const CSSOMStringAtom &name, const CustomPropertySyntax &customPropertySyntax, TokenRange tokens,
       style::BuilderState &state, const ParserContext &context) noexcept;
 
+    /// @brief Parses @p tokens as a value of registered custom property @p name, at computed-value time.
+    /// @return The computed value or a CSS-wide keyword, or null if @p tokens match neither.
+    /// @see https://drafts.css-houdini.org/css-properties-values-api-1/#calculation-of-computed-values
     KRYS_NODISCARD static Maybe<Variant<Ref<const style::CustomProperty>, GlobalKeyword>>
       ParseTypedCustomPropertyValue(const CSSOMStringAtom &name,
                                     const CustomPropertySyntax &customPropertySyntax, TokenRange tokens,
                                     style::BuilderState &state, const ParserContext &context) noexcept;
 
+    /// @brief What computing @p tokens, parsed with @p customPropertySyntax, depends on, such as `em` on the
+    /// font size; nothing if they don't match it.
     KRYS_NODISCARD static ComputedStyleDependencies
       CollectParsedCustomPropertyValueDependencies(const CustomPropertySyntax &customPropertySyntax,
                                                    TokenRange tokens, const ParserContext &context) noexcept;
 
+    /// @brief Whether @p tokens match @p customPropertySyntax.
     KRYS_NODISCARD static bool
       IsValidCustomPropertyValueForSyntax(const CustomPropertySyntax &customPropertySyntax, TokenRange tokens,
                                           const ParserContext &context) noexcept;
 
+    /// @brief The CSS-wide keyword @p tokens consist of, if they do.
+    /// @see https://drafts.csswg.org/css-values-4/#common-keywords
     KRYS_NODISCARD static Maybe<GlobalKeyword> ParseGlobalKeyword(TokenRange tokens) noexcept;
   };
 }
