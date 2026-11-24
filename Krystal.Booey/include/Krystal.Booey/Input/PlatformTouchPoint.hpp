@@ -1,23 +1,4 @@
-﻿/*
-    Copyright (C) 2009 Nokia Corporation and/or its subsidiary(-ies)
-
-    This library is free software; you can redistribute it and/or
-    modify it under the terms of the GNU Library General Public
-    License as published by the Free Software Foundation; either
-    version 2 of the License, or (at your option) any later version.
-
-    This library is distributed in the hope that it will be useful,
-    but WITHOUT ANY WARRANTY; without even the implied warranty of
-    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU
-    Library General Public License for more details.
-
-    You should have received a copy of the GNU Library General Public License
-    along with this library; see the file COPYING.LIB.  If not, write to
-    the Free Software Foundation, Inc., 51 Franklin Street, Fifth Floor,
-    Boston, MA 02110-1301, USA.
-*/
-
-#pragma once
+﻿#pragma once
 
 #include "Krystal.Core/Attributes.hpp"
 #include "Krystal.Core/Geometry/Point.hpp"
@@ -30,14 +11,20 @@ namespace krys::boo
   class PlatformTouchPoint
   {
   public:
+    /// @brief What happened to a touch since the last touch event.
     enum State : uint8
     {
+      /// @brief Lifted from the screen.
       TouchReleased,
+      /// @brief Put down on the screen.
       TouchPressed,
       TouchMoved,
+      /// @brief Unchanged: it's in the event because every touch on the screen is.
       TouchStationary,
+      /// @brief Ended without being lifted, when the host says it was interrupted.
       TouchCancelled,
-      TouchStateEnd, // Placeholder: must remain the last item.
+      /// @brief The number of states, not a state; it stays last.
+      TouchStateEnd,
     };
 
   protected:
@@ -51,7 +38,6 @@ namespace krys::boo
     float _force {0};
 
   public:
-    // This is necessary for us to be able to build synthetic events.
     PlatformTouchPoint() noexcept = default;
 
     /// @param id Identifies the touch while it's down: the host's touches on the screen have distinct ids,

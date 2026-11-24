@@ -1,24 +1,4 @@
-﻿/*
-   Copyright (C) 2000 Simon Hausmann <hausmann@kde.org>
-   Copyright (C) 2006 Apple Inc. All rights reserved.
-
-   This library is free software; you can redistribute it and/or
-   modify it under the terms of the GNU Library General Public
-   License as published by the Free Software Foundation; either
-   version 2 of the License, or (at your option) any later version.
-
-   This library is distributed in the hope that it will be useful,
-   but WITHOUT ANY WARRANTY; without even the implied warranty of
-   MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU
-   Library General Public License for more details.
-
-   You should have received a copy of the GNU Library General Public License
-   along with this library; see the file COPYING.LIB.  If not, write to
-   the Free Software Foundation, Inc., 51 Franklin Street, Fifth Floor,
-   Boston, MA 02110-1301, USA.
-*/
-
-#pragma once
+﻿#pragma once
 
 #include "Krystal.Booey/Input/PlatformMouseEvent.hpp"
 #include "Krystal.Booey/Rendering/HitTesting/HitTestResult.hpp"
@@ -27,7 +7,8 @@
 
 namespace krys::boo
 {
-  /// @brief A mouse event with what it hit.
+  /// @brief A mouse event together with the result of hit testing its point, as the event handler passes
+  /// them around.
   class MouseEventWithHitTestResults
   {
   private:
@@ -50,21 +31,25 @@ namespace krys::boo
       return _hitTestResult;
     }
 
+    /// @brief The point in the coordinates of the hit node's renderer.
     KRYS_NODISCARD LayoutPoint LocalPoint() const noexcept
     {
       return _hitTestResult.LocalPoint();
     }
 
+    /// @brief Whether the point is over a link.
     KRYS_NODISCARD bool IsOverLink() const noexcept
     {
       return _hitTestResult.IsOverLink();
     }
 
+    /// @brief The innermost node hit.
     KRYS_NODISCARD Node *TargetNode() const noexcept
     {
       return _hitTestResult.TargetNode();
     }
 
+    /// @brief The scrollbar the point is over, if any.
     KRYS_NODISCARD Scrollbar *GetScrollbar() const noexcept
     {
       return _hitTestResult.GetScrollbar();
