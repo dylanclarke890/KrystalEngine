@@ -1,27 +1,4 @@
-﻿/*
- * Copyright (C) 1999 Lars Knoll (knoll@kde.org)
- *           (C) 1999 Antti Koivisto (koivisto@kde.org)
- *           (C) 2001 Peter Kelly (pmk@post.com)
- *           (C) 2001 Dirk Mueller (mueller@kde.org)
- * Copyright (C) 2004-2018 Apple Inc. All rights reserved.
- *
- * This library is free software; you can redistribute it and/or
- * modify it under the terms of the GNU Library General Public
- * License as published by the Free Software Foundation; either
- * version 2 of the License, or (at your option) any later version.
- *
- * This library is distributed in the hope that it will be useful,
- * but WITHOUT ANY WARRANTY; without even the implied warranty of
- * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU
- * Library General Public License for more details.
- *
- * You should have received a copy of the GNU Library General Public License
- * along with this library; see the file COPYING.LIB.  If not, write to
- * the Free Software Foundation, Inc., 51 Franklin Street, Fifth Floor,
- * Boston, MA 02110-1301, USA.
- */
-
-#include "Krystal.Booey/DOM/Nodes/StyledElement.hpp"
+﻿#include "Krystal.Booey/DOM/Nodes/StyledElement.hpp"
 #include "Krystal.Booey/CSS/CSSOM/CSSStyleProperties.hpp"
 #include "Krystal.Booey/CSS/Parser/Parser.hpp"
 #include "Krystal.Booey/CSS/Parser/ParserContext.hpp"
@@ -68,9 +45,60 @@ namespace krys::boo
 
 #pragma endregion
 
-  const css::StyleProperties *StyledElement::InlineStyle() const noexcept
+#pragma region The style attribute
+
+  void StyledElement::OnAttributeChanged(const DOMStringAtom &localName, Maybe<DOMStringView> oldValue,
+                                         Maybe<DOMStringView> value,
+                                         const DOMStringAtom &namespaceURI) noexcept
   {
-    return _inlineStyle.get();
+    Element::OnAttributeChanged(localName, oldValue, value, namespaceURI);
+    if (oldValue == value)
+    {
+      return;
+    }
+    if (localName == u8"style" && namespaceURI == null)
+    {
+      StyleAttributeChanged(value);
+    }
+    else if (HasPresentationalHintsForAttribute(localName, namespaceURI))
+    {
+      _presentationalHintStyleIsDirty = true;
+      InvalidateStyleInternal();
+    }
+  }
+
+  void StyledElement::StyleAttributeChanged(Maybe<DOMStringView> newStyleString) noexcept
+  {
+    // SPEC-VIOLATION(CSP): the style attribute's value is parsed without asking the Content Security Policy
+    // whether inline styles are allowed.
+    if (!newStyleString)
+    {
+      EnsureMutableInlineStyle()->Clear();
+    }
+    else
+    {
+      SetInlineStyleFromString(*newStyleString);
+    }
+
+    // The attribute is the source now, so there's nothing to write back.
+    _nodeFlags.Remove(dom::NodeFlag::StyleAttributeIsDirty);
+    Node::InvalidateStyle(style::Validity::InlineStyleInvalid);
+  }
+
+  void StyledElement::SetInlineStyleFromString(DOMStringView newStyleString) noexcept
+  {
+    // A style already made mutable (it has a CSSOM wrapper, or was changed) is reparsed in place, so the
+    // wrapper stays valid. Otherwise the text is parsed into a new immutable block, which the matched
+    // declarations cache can keep (ElementRuleCollector only caches an immutable inline style).
+    if (auto *mutableStyleProperties = DynamicDowncast<css::MutableStyleProperties>(_inlineStyle.get()))
+    {
+      mutableStyleProperties->ParseDeclaration(CSSOMString(newStyleString),
+                                               css::ParserContext(NodeDocument()));
+    }
+    else
+    {
+      _inlineStyle = css::Parser::ParseInlineStyleDeclaration(newStyleString, *this);
+    }
   }
 
   void StyledElement::SynchronizeStyleAttributeInternal() noexcept
@@ -97,10 +125,56 @@ namespace krys::boo
     }
   }
 
+  void StyledElement::DirtyStyleAttribute() noexcept
+  {
+    _nodeFlags.Add(dom::NodeFlag::StyleAttributeIsDirty);
+
+    // A selector that tests the style attribute needs its text now to match.
+    if (StyleResolver().RuleSets().GetSelectorsForStyleAttribute() != style::SelectorsForStyleAttribute::None)
+    {
+      SynchronizeStyleAttributeWithInvalidation();
+    }
+  }
+
+  void StyledElement::InvalidateStyleAttribute() noexcept
+  {
+    _nodeFlags.Add(dom::NodeFlag::StyleAttributeIsDirty);
+
+    // Only the inline style needs recomputing, unless a selector tests the style attribute: then a rule
+    // may start or stop matching the element.
+    auto selectorsForStyleAttribute = StyleResolver().RuleSets().GetSelectorsForStyleAttribute();
+    auto validity = selectorsForStyleAttribute == style::SelectorsForStyleAttribute::None
+                      ? style::Validity::InlineStyleInvalid
+                      : style::Validity::ElementInvalid;
+    Node::InvalidateStyle(validity);
+
+    if (auto *svgElement = DynamicDowncast<SVGElement>(*this))
+    {
+      svgElement->InvalidateInstances();
+    }
+
+    // A selector that tests it on some other element than its subject (`[style] ~ div`) affects other
+    // elements, which only the invalidation for the attribute's change finds.
+    if (selectorsForStyleAttribute == style::SelectorsForStyleAttribute::NonSubjectPosition)
+    {
+      SynchronizeStyleAttributeWithInvalidation();
+    }
+  }
+
+#pragma endregion
+
+#pragma region Inline style
+
+  const css::StyleProperties *StyledElement::InlineStyle() const noexcept
+  {
+    return _inlineStyle.get();
+  }
+
   Ref<css::MutableStyleProperties> StyledElement::EnsureMutableInlineStyle() noexcept
   {
     if (!_inlineStyle)
     {
+      // Strict for an HTML element in a standards-mode document, as parsing the attribute's text is.
       auto mutableProperties = css::MutableStyleProperties::Create(
         css::StrictToParserMode(IsHTMLElement() && !NodeDocument().InQuirksMode()));
       _inlineStyle = mutableProperties;
@@ -115,24 +189,92 @@ namespace krys::boo
     return mutableProperties;
   }
 
-  void StyledElement::OnAttributeChanged(const DOMStringAtom &localName, Maybe<DOMStringView> oldValue,
-                                         Maybe<DOMStringView> value,
-                                         const DOMStringAtom &namespaceURI) noexcept
+  bool StyledElement::SetInlineStyleProperty(css::PropertyId property, css::ValueId identifier,
+                                             css::IsImportant important) noexcept
   {
-    Element::OnAttributeChanged(localName, oldValue, value, namespaceURI);
-    if (oldValue != value)
-    {
-      if (localName == u8"style" && namespaceURI == null)
-      {
-        StyleAttributeChanged(value);
-      }
-      else if (HasPresentationalHintsForAttribute(localName, namespaceURI))
-      {
-        _presentationalHintStyleIsDirty = true;
-        InvalidateStyleInternal();
-      }
-    }
+    EnsureMutableInlineStyle()->SetProperty(property, css::PrimitiveValue::Create(identifier), important);
+    InvalidateStyleAttribute();
+    return true;
   }
+
+  bool StyledElement::SetInlineStyleProperty(css::PropertyId property, double value, css::UnitType unit,
+                                             css::IsImportant important) noexcept
+  {
+    EnsureMutableInlineStyle()->SetProperty(property, css::PrimitiveValue::Create(value, unit), important);
+    InvalidateStyleAttribute();
+    return true;
+  }
+
+  bool StyledElement::SetInlineStyleProperty(css::PropertyId property, const CSSOMString &value,
+                                             css::IsImportant important, bool *didFailParsing) noexcept
+  {
+    bool changed = EnsureMutableInlineStyle()->SetProperty(
+      property, value, css::ParserContext(NodeDocument()), important, didFailParsing);
+    if (changed)
+    {
+      InvalidateStyleAttribute();
+    }
+    return changed;
+  }
+
+  bool StyledElement::SetInlineStyleProperty(css::PropertyId property, Ref<css::Value> &&value,
+                                             css::IsImportant important) noexcept
+  {
+    EnsureMutableInlineStyle()->SetProperty(property, krys::move(value), important);
+    InvalidateStyleAttribute();
+    return true;
+  }
+
+  bool StyledElement::SetInlineStyleCustomProperty(Ref<css::Value> &&customPropertyValue,
+                                                   css::IsImportant important) noexcept
+  {
+    EnsureMutableInlineStyle()->AddParsedProperty(
+      css::Property(css::PropertyId::Custom, krys::move(customPropertyValue), important));
+    InvalidateStyleAttribute();
+    return true;
+  }
+
+  bool StyledElement::RemoveInlineStyleProperty(css::PropertyId property) noexcept
+  {
+    if (!InlineStyle())
+    {
+      return false;
+    }
+    bool changed = EnsureMutableInlineStyle()->RemoveProperty(property);
+    if (changed)
+    {
+      InvalidateStyleAttribute();
+    }
+    return changed;
+  }
+
+  bool StyledElement::RemoveInlineStyleCustomProperty(const CSSOMStringAtom &property) noexcept
+  {
+    if (!InlineStyle())
+    {
+      return false;
+    }
+    bool changed = EnsureMutableInlineStyle()->RemoveCustomProperty(property.View());
+    if (changed)
+    {
+      InvalidateStyleAttribute();
+    }
+    return changed;
+  }
+
+  void StyledElement::RemoveAllInlineStyleProperties() noexcept
+  {
+    if (!InlineStyle() || InlineStyle()->empty())
+    {
+      return;
+    }
+    EnsureMutableInlineStyle()->Clear();
+    InvalidateStyleAttribute();
+  }
+
+#pragma endregion
+
+#pragma region Presentational hints
 
   const css::ImmutableStyleProperties *StyledElement::PresentationalHintStyle() const noexcept
   {
@@ -150,6 +292,8 @@ namespace krys::boo
 
   void StyledElement::RebuildPresentationalHintStyle() noexcept
   {
+    // Hints are parsed in SVG attribute mode for SVG elements, and in quirks mode otherwise, whatever the
+    // document's mode.
     bool isSVG = IsSVGElement();
     auto style = css::MutableStyleProperties::Create(isSVG ? css::ParserMode::SVGAttribute
                                                            : css::ParserMode::HTMLQuirks);
@@ -167,39 +311,27 @@ namespace krys::boo
       return;
     }
 
-    auto shouldDeduplicate = [&]
+    // Identical hint styles are shared, unless the element is an SVG one positioned by a non-zero x, y, cx
+    // or cy, which other elements are unlikely to share.
+    const auto isWorthDeduplicating = [&]
     {
-      auto hasNonZeroProperty = [&](css::PropertyId property)
+      if (!isSVG)
+      {
+        return true;
+      }
+      for (auto property : {css::PropertyId::X, css::PropertyId::Y, css::PropertyId::Cx, css::PropertyId::Cy})
       {
         auto value = style->GetPropertyCSSValue(property);
         auto *primitiveValue = DynamicDowncast<css::PrimitiveValue>(value.get());
-        return primitiveValue && !primitiveValue->IsZero().value_or(false);
-      };
-      if (isSVG)
-      {
-        // SVG style tends to have unique x/y properties. Don't spend effort trying to deduplicate them.
-        if (hasNonZeroProperty(css::PropertyId::X))
-        {
-          return false;
-        }
-        if (hasNonZeroProperty(css::PropertyId::Y))
-        {
-          return false;
-        }
-        if (hasNonZeroProperty(css::PropertyId::Cx))
-        {
-          return false;
-        }
-        if (hasNonZeroProperty(css::PropertyId::Cy))
+        if (primitiveValue && !primitiveValue->IsZero().value_or(false))
         {
           return false;
         }
       }
       return true;
     }();
-
     _presentationalHintStyle =
-      shouldDeduplicate ? style->ImmutableDeduplicatedCopy() : style->ImmutableCopy();
+      isWorthDeduplicating ? style->ImmutableDeduplicatedCopy() : style->ImmutableCopy();
   }
 
   void StyledElement::AddPropertyToPresentationalHintStyle(css::MutableStyleProperties &style,
@@ -230,159 +362,5 @@ namespace krys::boo
     style.SetProperty(property, krys::move(value));
   }
 
-  void StyledElement::SetInlineStyleFromString(DOMStringView newStyleString) noexcept
-  {
-    // We reconstruct the property set instead of mutating if there is no CSSOM wrapper.
-    // This makes wrapperless property sets immutable and so cacheable.
-    if (auto *mutableStyleProperties = DynamicDowncast<css::MutableStyleProperties>(_inlineStyle.get()))
-    {
-      mutableStyleProperties->ParseDeclaration(CSSOMString(newStyleString),
-                                               css::ParserContext(NodeDocument()));
-    }
-    else
-    {
-      _inlineStyle = css::Parser::ParseInlineStyleDeclaration(newStyleString, *this);
-    }
-  }
-
-  void StyledElement::StyleAttributeChanged(Maybe<DOMStringView> newStyleString) noexcept
-  {
-    // SPEC-VIOLATION(CSP): the style attribute's value is parsed without asking the Content Security Policy
-    // whether inline styles are allowed.
-    if (!newStyleString)
-    {
-      EnsureMutableInlineStyle()->Clear();
-    }
-    else
-    {
-      SetInlineStyleFromString(*newStyleString);
-    }
-
-    _nodeFlags.Remove(dom::NodeFlag::StyleAttributeIsDirty);
-
-    Node::InvalidateStyle(style::Validity::InlineStyleInvalid);
-  }
-
-  void StyledElement::DirtyStyleAttribute() noexcept
-  {
-    _nodeFlags.Add(dom::NodeFlag::StyleAttributeIsDirty);
-
-    if (StyleResolver().RuleSets().GetSelectorsForStyleAttribute() != style::SelectorsForStyleAttribute::None)
-    {
-      SynchronizeStyleAttributeWithInvalidation();
-    }
-  }
-
-  void StyledElement::InvalidateStyleAttribute() noexcept
-  {
-    _nodeFlags.Add(dom::NodeFlag::StyleAttributeIsDirty);
-
-    // Inline style invalidation optimization does not work if there are selectors targeting the style
-    // attribute as some rule may start or stop matching.
-    auto selectorsForStyleAttribute = StyleResolver().RuleSets().GetSelectorsForStyleAttribute();
-    auto validity = selectorsForStyleAttribute == style::SelectorsForStyleAttribute::None
-                      ? style::Validity::InlineStyleInvalid
-                      : style::Validity::ElementInvalid;
-
-    Node::InvalidateStyle(validity);
-
-    if (auto *svgElement = DynamicDowncast<SVGElement>(*this))
-    {
-      svgElement->InvalidateInstances();
-    }
-
-    // In the rare case of selectors like "[style] ~ div" we need to synchronize immediately to invalidate.
-    if (selectorsForStyleAttribute == style::SelectorsForStyleAttribute::NonSubjectPosition)
-    {
-      SynchronizeStyleAttributeWithInvalidation();
-    }
-  }
-
-  void StyledElement::InlineStyleChanged() noexcept
-  {
-    InvalidateStyleAttribute();
-  }
-
-  bool StyledElement::SetInlineStyleProperty(css::PropertyId property, css::ValueId identifier,
-                                             css::IsImportant important) noexcept
-  {
-    EnsureMutableInlineStyle()->SetProperty(property, css::PrimitiveValue::Create(identifier), important);
-    InlineStyleChanged();
-    return true;
-  }
-
-  bool StyledElement::SetInlineStyleProperty(css::PropertyId property, double value, css::UnitType unit,
-                                             css::IsImportant important) noexcept
-  {
-    EnsureMutableInlineStyle()->SetProperty(property, css::PrimitiveValue::Create(value, unit), important);
-    InlineStyleChanged();
-    return true;
-  }
-
-  bool StyledElement::SetInlineStyleProperty(css::PropertyId property, Ref<css::Value> &&value,
-                                             css::IsImportant important) noexcept
-  {
-    EnsureMutableInlineStyle()->SetProperty(property, krys::move(value), important);
-    InlineStyleChanged();
-    return true;
-  }
-
-  bool StyledElement::SetInlineStyleProperty(css::PropertyId property, const CSSOMString &value,
-                                             css::IsImportant important, bool *didFailParsing) noexcept
-  {
-    bool changes = EnsureMutableInlineStyle()->SetProperty(
-      property, value, css::ParserContext(NodeDocument()), important, didFailParsing);
-    if (changes)
-    {
-      InlineStyleChanged();
-    }
-    return changes;
-  }
-
-  bool StyledElement::SetInlineStyleCustomProperty(Ref<css::Value> &&customPropertyValue,
-                                                   css::IsImportant important) noexcept
-  {
-    EnsureMutableInlineStyle()->AddParsedProperty(
-      css::Property(css::PropertyId::Custom, krys::move(customPropertyValue), important));
-    InlineStyleChanged();
-    return true;
-  }
-
-  bool StyledElement::RemoveInlineStyleProperty(css::PropertyId property) noexcept
-  {
-    if (!InlineStyle())
-    {
-      return false;
-    }
-    bool changes = EnsureMutableInlineStyle()->RemoveProperty(property);
-    if (changes)
-    {
-      InlineStyleChanged();
-    }
-    return changes;
-  }
-
-  bool StyledElement::RemoveInlineStyleCustomProperty(const CSSOMStringAtom &property) noexcept
-  {
-    if (!InlineStyle())
-    {
-      return false;
-    }
-    bool changes = EnsureMutableInlineStyle()->RemoveCustomProperty(property.View());
-    if (changes)
-    {
-      InlineStyleChanged();
-    }
-    return changes;
-  }
-
-  void StyledElement::RemoveAllInlineStyleProperties() noexcept
-  {
-    if (!InlineStyle() || InlineStyle()->empty())
-    {
-      return;
-    }
-    EnsureMutableInlineStyle()->Clear();
-    InlineStyleChanged();
-  }
+#pragma endregion
 }
