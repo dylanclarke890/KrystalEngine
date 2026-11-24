@@ -593,6 +593,33 @@ namespace krys::ui::tests
     CHECK_FALSE(tree.Node(plum));
     CHECK_FALSE(tree.Node(popup));
   }
+
+  TEST_CASE("View: a popup's items keep their options' accessible names", "[UI][Accessibility]")
+  {
+    View view({400, 300});
+    view.LoadHTML(u8"<!DOCTYPE html><style>body { margin: 0; font: 16px sans-serif }</style>"
+                  u8"<select id=menu aria-label=Fruit><option aria-label='Green apple'>Apple</option>"
+                  u8"<option>Plum</option></select>");
+    WaitForLoad(view);
+    view.UpdateRendering();
+
+    AccessibilityWindow window;
+    view.AttachAccessibility(window, {0, 0});
+    auto &tree = *window.Tree;
+    auto root = tree.Root();
+    auto menu = FindByName(tree, root, u8"Fruit");
+    REQUIRE(menu != 0);
+
+    REQUIRE(tree.PerformAction(menu, pal::AccessibilityAction::Press));
+    auto *overlay = view.ShownOverlay();
+    REQUIRE(overlay);
+    view.UpdateRendering();
+    auto popup = tree.Children(root).back();
+    // An option's aria-label names its item, as it names the option; one without keeps its text.
+    CHECK(FindByName(tree, popup, u8"Green apple") != 0);
+    CHECK(FindByName(tree, popup, u8"Plum") != 0);
+    overlay->Hide();
+  }
 #ifdef _WIN32
   namespace
   {

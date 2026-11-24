@@ -212,6 +212,14 @@ namespace krys::ui
         AppendEscaped(html, toolTip);
         html += u8"\"";
       }
+      // The option's accessible name, where it isn't its text.
+      auto accessibilityText = _client->ItemAccessibilityText(index);
+      if (!accessibilityText.empty())
+      {
+        html += u8" aria-label=\"";
+        AppendEscaped(html, accessibilityText);
+        html += u8"\"";
+      }
       html += u8">";
       auto text = _client->ItemText(index);
       AppendEscaped(html, text.empty() ? utf8_stringview(u8" ") : utf8_stringview(text));
