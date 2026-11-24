@@ -60,6 +60,7 @@ namespace krys::boo
     VersionError,
     OperationError,
     NotAllowedError,
+    OptOutError,
 
     // Simple exceptions (https://webidl.spec.whatwg.org/#idl-exceptions).
     RangeError,
