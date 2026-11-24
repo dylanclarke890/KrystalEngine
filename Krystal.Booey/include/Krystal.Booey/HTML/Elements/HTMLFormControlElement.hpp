@@ -209,8 +209,6 @@ namespace krys::boo
 
     void DisabledStateChanged() noexcept override;
 
-    void ReadOnlyStateChanged() noexcept override;
-
     virtual void RequiredStateChanged() noexcept;
 
     /// @brief Losing the focus hides the control's validation message.

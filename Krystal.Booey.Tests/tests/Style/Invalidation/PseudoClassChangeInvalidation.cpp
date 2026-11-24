@@ -264,4 +264,38 @@ namespace krys::boo::style::tests
       CHECK(height() == "5px");
     }
   }
+
+  TEST_CASE_METHOD(css::tests::ValueFixture, "PseudoClassChangeInvalidation: :has() of form control states",
+                   "[Style][Invalidation]")
+  {
+    ResolverFixture fixture {u8R"(<!DOCTYPE html><style>
+      div:has(input:in-range), div:has(option:disabled) { color: rgb(0, 0, 255) }
+    </style><body>
+      <div id=d><input id=i type=number min=0 max=10 value=5></div>
+      <div id=e><select id=s><option id=o>a</option></select></div>
+    </body>)"};
+    auto &document = *fixture.Document;
+    document.UpdateStyleIfNeeded();
+
+    SECTION("readonly bars an input from :in-range")
+    {
+      // Chrome: the div stops matching.
+      auto &d = fixture.ById(u8"d");
+      REQUIRE(IsBlue(d));
+      REQUIRE_FALSE(fixture.ById(u8"i").SetAttribute(u8"readonly", u8"").HasException());
+      document.UpdateStyleIfNeeded();
+      CHECK_FALSE(IsBlue(d));
+    }
+
+    SECTION("A disabled select disables its options")
+    {
+      // Chrome: the div starts matching.
+      auto &e = fixture.ById(u8"e");
+      REQUIRE_FALSE(IsBlue(e));
+      REQUIRE_FALSE(fixture.ById(u8"s").SetAttribute(u8"disabled", u8"").HasException());
+      document.UpdateStyleIfNeeded();
+      CHECK(fixture.ById(u8"o").Matches(u8":disabled").ReleaseValue());
+      CHECK(IsBlue(e));
+    }
+  }
 }

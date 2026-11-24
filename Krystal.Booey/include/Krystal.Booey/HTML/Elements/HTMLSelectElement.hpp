@@ -375,6 +375,9 @@ namespace krys::boo
 
     void DisabledStateChanged() noexcept final;
 
+    void WillChangeDisabledState(
+      bool newDisabled, List<UniquePtr<style::PseudoClassChangeInvalidation>> &invalidations) noexcept final;
+
     void DidAddUserAgentShadowRoot(boo::ShadowRoot &root) noexcept final;
 
   private:

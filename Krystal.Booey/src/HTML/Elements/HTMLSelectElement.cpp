@@ -63,6 +63,7 @@
 #include "Krystal.Booey/Rendering/FormControls/RenderMenuList.hpp"
 #include "Krystal.Booey/Rendering/RenderElement.hpp"
 #include "Krystal.Booey/Rendering/RenderTheme.hpp"
+#include "Krystal.Booey/Style/Invalidation/PseudoClassChangeInvalidation.hpp"
 #include "Krystal.Text/CharacterProperties.hpp"
 #include <climits>
 
@@ -728,11 +729,27 @@ namespace krys::boo
   void HTMLSelectElement::DisabledStateChanged() noexcept
   {
     HTMLFormControlElement::DisabledStateChanged();
+  }
 
-    // The options and optgroups in a disabled select are actually disabled, which :disabled and :enabled
-    // match.
-    // FIXME: Use PseudoClassChangeInvalidation instead for :has() support and more efficiency.
-    InvalidateStyleForSubtree();
+  void HTMLSelectElement::WillChangeDisabledState(
+    bool newDisabled, List<UniquePtr<style::PseudoClassChangeInvalidation>> &invalidations) noexcept
+  {
+    // The options and optgroups are actually disabled while the select is, unless they're disabled anyway.
+    // https://html.spec.whatwg.org/#concept-element-disabled
+    for (auto &weakItem : ListItems())
+    {
+      auto *item = weakItem.get();
+      if (!item || !(Is<HTMLOptionElement>(*item) || Is<HTMLOptGroupElement>(*item))
+          || item->IsDisabledFormControl())
+      {
+        continue;
+      }
+      invalidations.push_back(CreateUnique<style::PseudoClassChangeInvalidation>(
+        *item, std::initializer_list<Pair<css::SelectorPseudoClass, bool>> {
+                 {css::SelectorPseudoClass::Disabled, newDisabled},
+                 {css::SelectorPseudoClass::Enabled, !newDisabled},
+               }));
+    }
   }
 
   void HTMLSelectElement::OnAttributeChanged(const DOMStringAtom &localName, Maybe<DOMStringView> oldValue,

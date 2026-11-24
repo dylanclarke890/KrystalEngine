@@ -183,15 +183,6 @@ namespace krys::boo
     }
   }
 
-  void HTMLFormControlElement::ReadOnlyStateChanged() noexcept
-  {
-    html::ValidatedFormListedElement::ReadOnlyStateChanged();
-
-    // Some input pseudo-classes, like :in-range and :out-of-range, depend on the readonly state.
-    // FIXME: Use PseudoClassChangeInvalidation instead for :has() support and more efficiency.
-    InvalidateStyleForSubtree();
-  }
-
   void HTMLFormControlElement::RequiredStateChanged() noexcept
   {
     UpdateValidity();
