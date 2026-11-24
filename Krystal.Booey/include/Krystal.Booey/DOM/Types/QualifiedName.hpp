@@ -36,7 +36,6 @@ namespace krys::boo
     DOMStringAtom _namespacePrefix {null};
     DOMStringAtom _localName {null};
     DOMStringAtom _localNameLower {null};
-    mutable DOMStringAtom _localNameUpper {null};
 
   public:
     QualifiedNameStorage(DOMStringAtom namespaceURI, DOMStringAtom prefix, DOMStringAtom localName,
@@ -101,8 +100,6 @@ namespace krys::boo
     {
       return _storage->_localNameLower;
     }
-
-    KRYS_NODISCARD const DOMStringAtom &LocalNameUpper() const noexcept;
 
     /// @see https://dom.spec.whatwg.org/#concept-attribute-qualified-name
     KRYS_NODISCARD DOMString Name() const noexcept

@@ -55,14 +55,4 @@ namespace krys::boo
           krys::move(namespaceURI), krys::move(prefix), krys::move(localName), tagName, tagNamespace))
   {
   }
-
-  KRYS_NODISCARD const DOMStringAtom &QualifiedName::LocalNameUpper() const noexcept
-  {
-    if (_storage->_localNameUpper == null)
-    {
-      _storage->_localNameUpper = _storage->_localName.ToASCIIUpper();
-    }
-
-    return _storage->_localNameUpper;
-  }
 }
