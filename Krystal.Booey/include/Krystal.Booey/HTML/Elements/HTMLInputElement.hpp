@@ -1,28 +1,4 @@
-﻿/*
- * Copyright (C) 1999 Lars Knoll (knoll@kde.org)
- *           (C) 1999 Antti Koivisto (koivisto@kde.org)
- *           (C) 2000 Dirk Mueller (mueller@kde.org)
- * Copyright (C) 2004-2025 Apple Inc. All rights reserved.
- * Copyright (C) 2012 Samsung Electronics. All rights reserved.
- *
- * This library is free software; you can redistribute it and/or
- * modify it under the terms of the GNU Library General Public
- * License as published by the Free Software Foundation; either
- * version 2 of the License, or (at your option) any later version.
- *
- * This library is distributed in the hope that it will be useful,
- * but WITHOUT ANY WARRANTY; without even the implied warranty of
- * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU
- * Library General Public License for more details.
- *
- * You should have received a copy of the GNU Library General Public License
- * along with this library; see the file COPYING.LIB.  If not, write to
- * the Free Software Foundation, Inc., 51 Franklin Street, Fifth Floor,
- * Boston, MA 02110-1301, USA.
- *
- */
-
-#pragma once
+﻿#pragma once
 
 #include "Krystal.Booey/DOM/Types/USVString.hpp"
 #include "Krystal.Booey/HTML/Elements/HTMLTextFormControlElement.hpp"
@@ -185,6 +161,7 @@ namespace krys::boo
       return _canReceiveDroppedFiles;
     }
 
+    /// @brief Sets whether a file input is a drop target for the files being dragged, updating its look.
     void SetCanReceiveDroppedFiles(bool canReceiveDroppedFiles) noexcept;
 
     /// @brief A file input's text for its files, given with them by the host's chooser.
@@ -237,6 +214,7 @@ namespace krys::boo
       SetIndeterminate(value);
     }
 
+    /// @brief Sets the indeterminate flag, restyling :indeterminate.
     void SetIndeterminate(bool newValue) noexcept;
 
     /// @brief The datalist giving the input's suggestions (its suggestions source element): the `list`
@@ -442,7 +420,7 @@ namespace krys::boo
 
 #pragma endregion
 
-    // For ValidityState
+    // The validity states.
     KRYS_NODISCARD bool HasBadInput() const noexcept final;
 
     KRYS_NODISCARD bool PatternMismatch() const noexcept final;
@@ -472,6 +450,7 @@ namespace krys::boo
     /// @brief Sets @p step to the allowed value step, if there is one.
     KRYS_NODISCARD bool GetAllowedValueStep(Decimal *step) const noexcept;
 
+    /// @brief The type's minimum, maximum, step and step base, for stepping and validation.
     KRYS_NODISCARD html::StepRange CreateStepRange(html::AnyStepHandling anyStepHandling) const noexcept;
 
     /// @brief Whether the user can step the value up and down.
@@ -479,10 +458,13 @@ namespace krys::boo
     /// one does nothing, as in Chrome.
     bool AccessKeyAction(bool sendMouseEvents) noexcept override;
 
+    /// @brief Whether the type has a step (the number, range, date and time types).
     KRYS_NODISCARD bool IsSteppable() const noexcept;
 
+    /// @brief Whether the input's type is a button with a text label (submit, reset or button).
     KRYS_NODISCARD bool IsTextButton() const noexcept;
 
+    /// @brief Whether the input's type is `radio`.
     KRYS_NODISCARD bool IsRadioButton() const noexcept;
 
     KRYS_NODISCARD bool IsTextField() const noexcept final;
@@ -491,24 +473,34 @@ namespace krys::boo
 
     KRYS_NODISCARD bool DirAutoUsesValue() const noexcept final;
 
+    /// @brief Whether the input's type is `search`.
     KRYS_NODISCARD bool IsSearchField() const noexcept;
 
+    /// @brief Whether the input's type is `hidden`.
     KRYS_NODISCARD bool IsInputTypeHidden() const noexcept;
 
+    /// @brief Whether the input's type is `password`.
     KRYS_NODISCARD bool IsPasswordField() const noexcept;
 
+    /// @brief Whether the input's type is `checkbox`.
     KRYS_NODISCARD bool IsCheckbox() const noexcept;
 
+    /// @brief Whether the input's type is `range`.
     KRYS_NODISCARD bool IsRangeControl() const noexcept;
 
+    /// @brief Whether the input's type is `color`.
     KRYS_NODISCARD bool IsColorControl() const noexcept;
 
+    /// @brief Whether the input's type is one with a text value (text, search, url, tel, email or password).
     KRYS_NODISCARD bool IsTextType() const noexcept;
 
+    /// @brief Whether the input's type is `email`.
     KRYS_NODISCARD bool IsEmailField() const noexcept;
 
+    /// @brief Whether the input's type is `file`.
     KRYS_NODISCARD bool IsFileUpload() const noexcept;
 
+    /// @brief Whether the input's type is `image`.
     KRYS_NODISCARD bool IsImageButton() const noexcept;
 
     /// @brief The loader of an image button's image, if the element has been one.
@@ -517,47 +509,64 @@ namespace krys::boo
       return _imageLoader.get();
     }
 
+    /// @brief The image button's image loader, made on first use.
     KRYS_NODISCARD html::HTMLImageLoader &EnsureImageLoader() noexcept;
 
     /// @brief An image button's label when it shows no image: the `alt` attribute, or else the `title` or
     /// `value` attribute, or else a default.
     KRYS_NODISCARD DOMString AltText() const noexcept;
 
+    /// @brief Whether the input's type is `number`.
     KRYS_NODISCARD bool IsNumberField() const noexcept;
 
     KRYS_NODISCARD bool IsSubmitButton() const noexcept final;
 
+    /// @brief Whether the input's type is `tel`.
     KRYS_NODISCARD bool IsTelephoneField() const noexcept;
 
+    /// @brief Whether the input's type is `url`.
     KRYS_NODISCARD bool IsUrlField() const noexcept;
 
+    /// @brief Whether the input's type is `date`.
     KRYS_NODISCARD bool IsDateField() const noexcept;
 
+    /// @brief Whether the input's type is `datetime-local`.
     KRYS_NODISCARD bool IsDateTimeLocalField() const noexcept;
 
+    /// @brief Whether the input's type is `month`.
     KRYS_NODISCARD bool IsMonthField() const noexcept;
 
+    /// @brief Whether the input's type is `time`.
     KRYS_NODISCARD bool IsTimeField() const noexcept;
 
+    /// @brief Whether the input's type is `week`.
     KRYS_NODISCARD bool IsWeekField() const noexcept;
 
+    /// @brief Which date or time the type holds, or none.
     KRYS_NODISCARD DateComponentsType DateType() const noexcept;
 
+    /// @brief Whether :checked matches: a checked checkbox or radio button.
     KRYS_NODISCARD bool MatchesCheckedPseudoClass() const noexcept;
 
     KRYS_NODISCARD bool MatchesIndeterminatePseudoClass() const noexcept final;
 
+    /// @brief Sets whether the checked attribute is present, restyling a checkbox's or radio button's
+    /// :default.
     void SetDefaultCheckedState(bool isDefaultChecked) noexcept;
 
     /// @brief Whether @p value would be a valid value; not for types without a string value (checkboxes and
     /// radio buttons).
     KRYS_NODISCARD bool IsValidValue(DOMStringView value) const noexcept;
 
+    /// @brief Whether the value was set (by the user or the API) rather than taken from the attribute.
+    /// @see https://html.spec.whatwg.org/#concept-fe-dirty
     KRYS_NODISCARD bool HasDirtyValue() const noexcept
     {
       return _valueIfDirty.has_value();
     }
 
+    /// @brief @p value as the type's value sanitization algorithm leaves it.
+    /// @see https://html.spec.whatwg.org/#value-sanitization-algorithm
     KRYS_NODISCARD Maybe<DOMString> SanitizeValue(Maybe<DOMStringView> value) const noexcept;
 
     /// @brief The value as the input shows it.
@@ -570,18 +579,21 @@ namespace krys::boo
 
     void SetActivatedSubmit(bool flag) noexcept final;
 
+    /// @brief The maximum length, capped by the engine's own limit.
     KRYS_NODISCARD uint32 EffectiveMaxLength() const noexcept;
 
     /// @brief The radio buttons in this one's group, in tree order.
     KRYS_NODISCARD krys::List<Ref<HTMLInputElement>> RadioButtonGroup() const noexcept;
 
+    /// @brief The checked button of the radio button's group, if any.
     KRYS_NODISCARD RefPtr<HTMLInputElement> CheckedRadioButtonForGroup() const noexcept;
 
     /// @brief The groups this radio button is in: its form's, or its tree's; null if it isn't a radio button
     /// or is in neither.
     KRYS_NODISCARD html::RadioButtonGroups *RadioButtonGroups() const noexcept;
 
-    // Functions for InputType classes.
+    /// @brief Sets the dirty value to @p sanitizedValue, as the type's value setting does; it's modified by
+    /// the user unless no events are fired.
     void SetValueInternal(DOMStringView sanitizedValue, html::TextFieldEventBehavior eventBehavior) noexcept;
 
     /// @brief Takes the text the user edited as the value (dirty, and modified by the user).
@@ -599,6 +611,7 @@ namespace krys::boo
     /// @brief Creates the type's shadow tree, which inserting the element into a document left pending.
     void UpdateUserAgentShadowTree() noexcept override;
 
+    /// @brief The parts of the type's shadow tree, where it has them.
     KRYS_NODISCARD HTMLElement *ContainerElement() const noexcept;
 
     KRYS_NODISCARD HTMLElement *InnerBlockElement() const noexcept;
@@ -632,8 +645,10 @@ namespace krys::boo
     /// @return Whether the size includes the field's decorations.
     KRYS_NODISCARD bool SizeShouldIncludeDecoration(int32 &preferredSize) const noexcept;
 
+    /// @brief The width the type's decorations (buttons beside the text) take in a field @p inputWidth wide.
     KRYS_NODISCARD float DecorationWidth(float inputWidth) const noexcept;
 
+    /// @brief Whether the input is a text field.
     KRYS_NODISCARD bool CanHaveSelection() const noexcept
     {
       return IsTextField();
@@ -766,6 +781,7 @@ namespace krys::boo
     /// @brief The value, or null if the type has none (no dirty value, value attribute or fallback).
     KRYS_NODISCARD Maybe<DOMString> ValueOrNull() const noexcept;
 
+    /// @brief Whether `minlength` and `maxlength` apply (to the types with a text value).
     KRYS_NODISCARD bool SupportsMinLength() const noexcept
     {
       return IsTextType();
@@ -776,25 +792,37 @@ namespace krys::boo
       return IsTextType();
     }
 
+    /// @brief Whether @p value is too short or too long; only a value the user changed can be, unless
+    /// @p check says not to look.
     KRYS_NODISCARD bool TooShort(DOMStringView value, NeedsToCheckDirtyFlag check) const noexcept;
 
     KRYS_NODISCARD bool TooLong(DOMStringView value, NeedsToCheckDirtyFlag check) const noexcept;
 
+    /// @brief Changes the input's type to the one the attribute names, carrying the value between the value
+    /// modes.
+    /// @see https://html.spec.whatwg.org/#the-input-element:concept-input-type-change
     void UpdateType(DOMStringView typeAttributeValue) noexcept;
 
+    /// @brief Updates what follows the type: its activation behaviour, the renderer, the shadow tree and the
+    /// style.
     void RunPostTypeUpdateTasks() noexcept;
 
+    /// @brief Puts the caret where focusing a text field puts it, without a kept selection to restore.
     void SetDefaultSelectionAfterFocus(dom::SelectionRestorationMode restorationMode,
                                        SelectionRevealMode revealMode) noexcept;
 
+    /// @brief Restyles a text field with an ellipsis as it gains or loses the focus.
     void InvalidateStyleOnFocusChangeIfNeeded() noexcept;
 
+    /// @brief Takes a new `maxlength` or `minlength`, updating the validity.
     void MaxLengthAttributeChanged(Maybe<DOMStringView> newValue) noexcept;
 
     void MinLengthAttributeChanged(Maybe<DOMStringView> newValue) noexcept;
 
+    /// @brief Sanitizes the value again, as the type or an attribute it depends on changed.
     void UpdateValueIfNeeded() noexcept;
 
+    /// @brief Adds the radio button to its group, or removes it.
     void AddToRadioButtonGroup() noexcept;
 
     /// @brief Watches the element the `list` attribute names, while the input is connected.

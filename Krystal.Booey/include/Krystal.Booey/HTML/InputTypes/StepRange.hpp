@@ -1,24 +1,4 @@
-﻿/*
- * Copyright (C) 2006, 2007, 2008, 2009, 2010 Apple Inc. All rights reserved.
- *
- * This library is free software; you can redistribute it and/or
- * modify it under the terms of the GNU Library General Public
- * License as published by the Free Software Foundation; either
- * version 2 of the License, or (at your option) any later version.
- *
- * This library is distributed in the hope that it will be useful,
- * but WITHOUT ANY WARRANTY; without even the implied warranty of
- * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU
- * Library General Public License for more details.
- *
- * You should have received a copy of the GNU Library General Public License
- * along with this library; see the file COPYING.LIB.  If not, write to
- * the Free Software Foundation, Inc., 51 Franklin Street, Fifth Floor,
- * Boston, MA 02110-1301, USA.
- *
- */
-
-#pragma once
+﻿#pragma once
 
 #include "Krystal.Booey/DOM/Types/DOMString.hpp"
 #include "Krystal.Core/Types/Decimal.hpp"
@@ -55,6 +35,7 @@ namespace krys::boo::html
       int StepScaleFactor {1};
       StepValueShouldBe StepValueShouldBe {StepValueShouldBeReal};
 
+      /// @brief The type's default step, scaled to its units.
       KRYS_NODISCARD Decimal DefaultValue() const noexcept
       {
         return Decimal(DefaultStep * StepScaleFactor);
@@ -84,23 +65,31 @@ namespace krys::boo::html
               const Decimal &maximum, const Decimal &step, const StepDescription &stepDescription,
               IsReversible isReversible = IsReversible::No) noexcept;
 
+    /// @brief How far a value can be from a step and still match it: a float's precision of the step, for
+    /// types with real steps.
     KRYS_NODISCARD Decimal AcceptableError() const noexcept;
 
+    /// @brief @p newValue rounded to a step, unless @p currentValue was off the step already or @p newValue
+    /// is 1e21 or more.
     KRYS_NODISCARD Decimal AlignValueForStep(const Decimal &currentValue,
                                              const Decimal &newValue) const noexcept;
 
+    /// @brief @p value clamped to the range and rounded to a step, staying in the range.
     KRYS_NODISCARD Decimal ClampValue(const Decimal &value) const noexcept;
 
+    /// @brief Whether there's an allowed value step (step isn't `any`).
     KRYS_NODISCARD bool HasStep() const noexcept
     {
       return _hasStep;
     }
 
+    /// @brief Whether the type has a minimum or maximum.
     KRYS_NODISCARD bool HasRangeLimitations() const noexcept
     {
       return _hasRangeLimitations;
     }
 
+    /// @brief The range's maximum and minimum.
     KRYS_NODISCARD Decimal Maximum() const noexcept
     {
       return _maximum;
@@ -111,12 +100,17 @@ namespace krys::boo::html
       return _minimum;
     }
 
+    /// @brief The largest value in the range that's on a step, or NaN if there's none.
     KRYS_NODISCARD Decimal StepSnappedMaximum() const noexcept;
 
+    /// @brief The allowed value step from the step attribute, scaled to the type's units; NaN for `any`
+    /// (unless @p anyStepHandling defaults it) and the default for an invalid one.
+    /// @see https://html.spec.whatwg.org/#concept-input-step
     KRYS_NODISCARD static Decimal ParseStep(AnyStepHandling anyStepHandling,
                                             const StepDescription &stepDescription,
                                             Maybe<DOMStringView> stepString) noexcept;
 
+    /// @brief The step, its base, and the type's units per step value.
     KRYS_NODISCARD Decimal Step() const noexcept
     {
       return _step;
@@ -132,8 +126,10 @@ namespace krys::boo::html
       return _stepDescription.StepScaleFactor;
     }
 
+    /// @brief Whether @p valueForCheck isn't on a step.
     KRYS_NODISCARD bool StepMismatch(const Decimal &valueForCheck) const noexcept;
 
+    /// @brief Whether the maximum may be below the minimum (a time range across midnight).
     KRYS_NODISCARD bool IsReversibleRange() const noexcept
     {
       return _isReversible;
@@ -162,6 +158,7 @@ namespace krys::boo::html
     }
 
   private:
+    /// @brief @p value rounded to the nearest step from @p base.
     KRYS_NODISCARD Decimal RoundByStep(const Decimal &value, const Decimal &base) const noexcept;
   };
 }

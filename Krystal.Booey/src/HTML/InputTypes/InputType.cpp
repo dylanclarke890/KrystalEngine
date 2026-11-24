@@ -1,31 +1,4 @@
-﻿/*
- * Copyright (C) 1999 Lars Knoll (knoll@kde.org)
- *           (C) 1999 Antti Koivisto (koivisto@kde.org)
- *           (C) 2001 Dirk Mueller (mueller@kde.org)
- * Copyright (C) 2004-2022 Apple Inc. All rights reserved.
- *           (C) 2006 Alexey Proskuryakov (ap@nypop.com)
- * Copyright (C) 2007 Samuel Weinig (sam@webkit.org)
- * Copyright (C) 2009-2015 Google Inc. All rights reserved.
- * Copyright (C) 2012 Samsung Electronics. All rights reserved.
- *
- * This library is free software; you can redistribute it and/or
- * modify it under the terms of the GNU Library General Public
- * License as published by the Free Software Foundation; either
- * version 2 of the License, or (at your option) any later version.
- *
- * This library is distributed in the hope that it will be useful,
- * but WITHOUT ANY WARRANTY; without even the implied warranty of
- * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU
- * Library General Public License for more details.
- *
- * You should have received a copy of the GNU Library General Public License
- * along with this library; see the file COPYING.LIB.  If not, write to
- * the Free Software Foundation, Inc., 51 Franklin Street, Fifth Floor,
- * Boston, MA 02110-1301, USA.
- *
- */
-
-#include "Krystal.Booey/HTML/InputTypes/InputType.hpp"
+﻿#include "Krystal.Booey/HTML/InputTypes/InputType.hpp"
 #include "Krystal.Booey/Accessibility/AXObjectCache.hpp"
 #include "Krystal.Booey/DOM/Algorithms/ElementTextDirection.hpp"
 #include "Krystal.Booey/DOM/Events/Event.hpp"
@@ -222,7 +195,7 @@ namespace krys::boo::html
   bool InputType::IsFormDataAppendable() const noexcept
   {
     krys_debug_assert(Element());
-    // There is no form data unless there's a name for non-image types.
+    // Only a named control appends an entry (an image button names its coordinates otherwise).
     return !Element()->Name().empty();
   }
 
@@ -241,7 +214,6 @@ namespace krys::boo::html
   bool InputType::AppendFormData(DOMFormData &formData) const noexcept
   {
     krys_debug_assert(Element());
-    // Always successful.
     auto &input = *Element();
     formData.Append(input.Name(), input.Value());
     return true;
@@ -275,7 +247,7 @@ namespace krys::boo::html
 
   bool InputType::SupportsRequired() const noexcept
   {
-    // Almost all validatable types support @required.
+    // `required` applies to the types that take part in validation, unless a type says otherwise.
     return SupportsValidation();
   }
 
@@ -615,40 +587,13 @@ namespace krys::boo::html
 
   void InputType::StepUpFromRenderer(int n) noexcept
   {
-    // The differences from stepUp()/stepDown():
-    //
-    // Difference 1: the current value
-    // If the current value is not a number, including empty, the current value is assumed as 0.
-    //   * If 0 is in-range, and matches to step value
-    //     - The value should be the +step if n > 0
-    //     - The value should be the -step if n < 0
-    //     If -step or +step is out of range, new value should be 0.
-    //   * If 0 is smaller than the minimum value
-    //     - The value should be the minimum value for any n
-    //   * If 0 is larger than the maximum value
-    //     - The value should be the maximum value for any n
-    //   * If 0 is in-range, but not matched to step value
-    //     - The value should be the larger matched value nearest to 0 if n > 0
-    //       e.g. <input type=number min=-100 step=3> -> 2
-    //     - The value should be the smaller matched value nearest to 0 if n < 0
-    //       e.g. <input type=number min=-100 step=3> -> -1
-    //   As for date/datetime-local/month/time/week types, the current value is assumed as "the current local
-    //   date/time". As for datetime type, the current value is assumed as "the current date/time in UTC".
-    // If the current value is smaller than the minimum value:
-    //  - The value should be the minimum value if n > 0
-    //  - Nothing should happen if n < 0
-    // If the current value is larger than the maximum value:
-    //  - The value should be the maximum value if n < 0
-    //  - Nothing should happen if n > 0
-    //
-    // Difference 2: clamping steps
-    // If the current value is not matched to step value:
-    // - The value should be the larger matched value nearest to 0 if n > 0
-    //   e.g. <input type=number value=3 min=-100 step=3> -> 5
-    // - The value should be the smaller matched value nearest to 0 if n < 0
-    //   e.g. <input type=number value=3 min=-100 step=3> -> 2
-    //
-    // n is assumed as -n if step < 0.
+    // Stepping from the user's controls (arrow keys, spin buttons) differs from stepUp() and stepDown():
+    // - A value that isn't a number starts from the type's default (0, or now for the date and time types),
+    //   moved back into the range if a step from it would leave it.
+    // - Below the range, stepping up goes to the minimum; above it, stepping down goes to the maximum. The
+    //   other direction does nothing.
+    // - A value off the step goes to the step next to it in the direction of the stepping.
+    // A negative step reverses the direction.
 
     krys_debug_assert(IsSteppable());
     if (!IsSteppable())
@@ -999,12 +944,8 @@ namespace krys::boo::html
     bool isAnyStep = text::IsASCIICaselessEqual(DOMStringView(stepString), u8"any");
     if (!isAnyStep && stepRange.StepMismatch(current))
     {
-      // Snap-to-step / clamping steps
-      // If the current value is not matched to step value:
-      // - The value should be the larger matched value nearest to 0 if count > 0
-      //   e.g. <input type=number value=3 min=-100 step=3> -> 5
-      // - The value should be the smaller matched value nearest to 0 if count < 0
-      //   e.g. <input type=number value=3 min=-100 step=3> -> 2
+      // A value off the step goes to the step next to it in the direction of the stepping, and that counts as
+      // one of the steps.
       krys_debug_assert(!step.IsZero());
       if (count < 0)
       {
@@ -1052,7 +993,7 @@ namespace krys::boo::html
     }
 
     // 11. Let value as string be the result of running the algorithm to convert a number to a string, as
-    // defined for the input element's type attribute's current state, on value.
+    //     defined for the input element's type attribute's current state, on value.
     // 12. Set the value of the element to value as string.
     Ref<InputType> protectedThis = ShareRef(*this);
     return SetValueAsDecimal(newValue, eventBehavior);

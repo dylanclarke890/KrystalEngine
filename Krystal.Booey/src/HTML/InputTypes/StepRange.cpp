@@ -1,24 +1,4 @@
-﻿/*
- * Copyright (C) 2006-2024 Apple Inc. All rights reserved.
- *
- * This library is free software; you can redistribute it and/or
- * modify it under the terms of the GNU Library General Public
- * License as published by the Free Software Foundation; either
- * version 2 of the License, or (at your option) any later version.
- *
- * This library is distributed in the hope that it will be useful,
- * but WITHOUT ANY WARRANTY; without even the implied warranty of
- * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU
- * Library General Public License for more details.
- *
- * You should have received a copy of the GNU Library General Public License
- * along with this library; see the file COPYING.LIB.  If not, write to
- * the Free Software Foundation, Inc., 51 Franklin Street, Fifth Floor,
- * Boston, MA 02110-1301, USA.
- *
- */
-
-#include "Krystal.Booey/HTML/InputTypes/StepRange.hpp"
+﻿#include "Krystal.Booey/HTML/InputTypes/StepRange.hpp"
 #include "Krystal.Booey/HTML/Parser/ParserIdioms.hpp"
 #include "Krystal.Core/Strings/ASCII.hpp"
 #include <algorithm>
@@ -67,7 +47,7 @@ namespace krys::boo::html
     {
       return inRangeValue;
     }
-    // Rounds inRangeValue to stepBase + N * step.
+    // To the nearest step: the step base plus a multiple of the step.
     const Decimal roundedValue = RoundByStep(inRangeValue, _stepBase);
     const Decimal clampedValue = roundedValue > _maximum
                                    ? roundedValue - _step
@@ -107,12 +87,12 @@ namespace krys::boo::html
     {
       case StepValueShouldBeReal: step *= Decimal(stepDescription.StepScaleFactor); break;
       case ParsedStepValueShouldBeInteger:
-        // For date, month, and week, the parsed value should be an integer for some types.
+        // A whole number of steps for date, month and week.
         step = std::max(step.Round(), Decimal(1));
         step *= Decimal(stepDescription.StepScaleFactor);
         break;
       case ScaledStepValueShouldBeInteger:
-        // For datetime, datetime-local, time, the result should be an integer.
+        // A whole number of milliseconds for datetime-local and time.
         step *= Decimal(stepDescription.StepScaleFactor);
         step = std::max(step.Round(), Decimal(1));
         break;
@@ -172,11 +152,10 @@ namespace krys::boo::html
     {
       return false;
     }
-    // The computation follows HTML5 4.10.7.2.10 `The step attribute' :
-    // ... that number subtracted from the step base is not an integral multiple of the allowed value step,
-    // the element is suffering from a step mismatch.
+    // A value that's not a multiple of the step from the step base mismatches it.
+    // https://html.spec.whatwg.org/#concept-input-step-mismatch
     const Decimal remainder = (value - _step * (value / _step).Round()).Abs();
-    // Accepts errors in lower fractional part which IEEE 754 single-precision can't represent.
+    // Within a float's precision of a multiple, it matches (see AcceptableError).
     const Decimal computedAcceptableError = AcceptableError();
     return computedAcceptableError < remainder && remainder < (_step - computedAcceptableError);
   }
