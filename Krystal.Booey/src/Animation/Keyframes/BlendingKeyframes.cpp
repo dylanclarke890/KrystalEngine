@@ -251,18 +251,19 @@ namespace krys::boo
         return;
       }
 
+      // Any keyframe's dependency makes the animation depend on the size.
       if (keyframe.AnimatesProperty(AnimatableCSSProperty {css::PropertyId::Transform}))
       {
         auto [isWidthDependent, isHeightDependent] = style->Transform().ComputeSizeDependencies();
-        _hasWidthDependentTransform = isWidthDependent;
-        _hasHeightDependentTransform = isHeightDependent;
+        _hasWidthDependentTransform |= isWidthDependent;
+        _hasHeightDependentTransform |= isHeightDependent;
       }
 
       if (keyframe.AnimatesProperty(AnimatableCSSProperty {css::PropertyId::Translate}))
       {
         auto [isWidthDependent, isHeightDependent] = style->Translate().ComputeSizeDependencies();
-        _hasWidthDependentTransform = isWidthDependent;
-        _hasHeightDependentTransform = isHeightDependent;
+        _hasWidthDependentTransform |= isWidthDependent;
+        _hasHeightDependentTransform |= isHeightDependent;
       }
     };
 
