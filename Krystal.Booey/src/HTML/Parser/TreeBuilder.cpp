@@ -501,8 +501,7 @@ namespace krys::boo::html
         switch (stackElement->TagName())
         {
           // 4. If node is a td or th element and last is false, then switch the insertion mode to "in cell"
-          // and
-          //    return.
+          //    and return.
           case TagName::td:
           case TagName::th:
           {
@@ -588,8 +587,7 @@ namespace krys::boo::html
               _insertionMode = InsertionMode::BeforeHead;
             }
             // 14b. Otherwise, the head element pointer is not null, switch the insertion mode to "after head"
-            // and
-            //      return.
+            //      and return.
             else
             {
               _insertionMode = InsertionMode::AfterHead;
@@ -1218,8 +1216,7 @@ namespace krys::boo::html
             InHeadMode(krys::move(token));
 
             // 4. Remove the node pointed to by the head element pointer from the stack of open elements. (It
-            // might
-            //    not be the current node at this point.)
+            //    might not be the current node at this point.)
             _openElementStack.Remove(*_head);
 
             return;
@@ -3711,9 +3708,8 @@ namespace krys::boo::html
     auto *previousSibling = beforeSibling ? beforeSibling->PreviousSibling() : parent->LastChild();
 
     // 5. If previousSibling is a Text node, then append data to previousSibling's data. Otherwise, let text
-    // be
-    //    the result of creating a text node given targetParent's node document and data, and insert text into
-    //    targetParent before referenceChild.
+    //    be the result of creating a text node given targetParent's node document and data, and insert text
+    //    into targetParent before referenceChild.
     if (Is<Text>(previousSibling))
     {
       auto &textNode = Downcast<Text>(*previousSibling);
@@ -4216,8 +4212,7 @@ namespace krys::boo::html
 
     // 13a.v. Let slotAssignment be "named".
     // 13a.vi. If template's shadowrootslotassignment attribute is in the Manual state, then set
-    // slotAssignment
-    //         to "manual".
+    //         slotAssignment to "manual".
     auto slotAssignment = dom::SlotAssignmentMode::Named;
     if (auto value = templateElement.GetAttribute(u8"shadowrootslotassignment");
         value && infra::StringAlgorithms::ASCIICaseInsensitiveMatch(*value, u8"manual"))
@@ -4319,8 +4314,7 @@ namespace krys::boo::html
                                                  bool onlyAddToElementStack) noexcept
   {
     // 1. Let element be the result of creating an element for the token given token, namespace, and the
-    // target
-    //    parent of the appropriate place for inserting a node.
+    //    target parent of the appropriate place for inserting a node.
     auto [parent, beforeSibling] = AppropriatePlaceToInsertNode();
     auto element = CreateElement(token.Name(), namespaceURI, token.Attributes(), *parent);
 
@@ -4330,8 +4324,7 @@ namespace krys::boo::html
     element->BeginParsingChildren();
 
     // 2. If onlyAddToElementStack is false, then run insert an element at the adjusted insertion location
-    // with
-    //    element.
+    //    with element.
     if (!onlyAddToElementStack)
     {
       InsertElementAtAdjustedInsertionLocation(*element);
@@ -5201,8 +5194,7 @@ namespace krys::boo::html
         node = newElement.get();
 
         // 4p.vii. If bookmarkMoved is false, then move the aforementioned bookmark to be immediately after
-        // the
-        //         new node in the list of active formatting elements, and set bookmarkMoved to true.
+        //         the new node in the list of active formatting elements, and set bookmarkMoved to true.
         if (!bookmarkMoved)
         {
           _activeFormattingElements.MoveBookmarkAfter(bookmark, *nodeFormattingEntry);

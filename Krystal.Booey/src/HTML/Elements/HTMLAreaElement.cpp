@@ -206,8 +206,7 @@ namespace krys::boo
         if (_coords.size() >= 3)
         {
           // 7. If the shape attribute represents the circle state, and the third number in the list is less
-          // than
-          //    or equal to zero, then the shape is empty; return.
+          //    than or equal to zero, then the shape is empty; return.
           auto radius = static_cast<float>(_coords[2]);
           if (radius > 0)
           {

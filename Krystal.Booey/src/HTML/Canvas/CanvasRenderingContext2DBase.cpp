@@ -614,9 +614,8 @@ namespace krys::boo::html
   void CanvasRenderingContext2DBase::SetLineDash(const List<double> &dash) noexcept
   {
     // 1. If any value in segments is not finite (e.g. an Infinity or a NaN value), or if any value is
-    // negative
-    //    (less than zero), then return (without throwing an exception; user agents could show a message on a
-    //    developer console, as that would be helpful for debugging).
+    //    negative (less than zero), then return (without throwing an exception; user agents could show a
+    //    message on a developer console, as that would be helpful for debugging).
     if (!LineDashSequenceIsValid(dash))
     {
       return;
@@ -627,8 +626,7 @@ namespace krys::boo::html
     ModifiableState().LineDash = dash;
 
     // 2. If the number of elements in segments is odd, then let segments be the concatenation of two copies
-    // of
-    //    segments.
+    //    of segments.
     if (dash.size() % 2)
     {
       auto &lineDash = ModifiableState().LineDash;
@@ -1723,8 +1721,7 @@ namespace krys::boo::html
   {
     // 4. If repetition is the empty string, then set it to "repeat".
     // 5. If repetition is not identical to one of "repeat", "repeat-x", "repeat-y", or "no-repeat", then
-    // throw
-    //    a "SyntaxError" DOMException.
+    //    throw a "SyntaxError" DOMException.
     // (Before steps 1 to 3, which check the usability of image.)
     bool repeatX, repeatY;
     if (!CanvasPattern::ParseRepetitionType(repetition, repeatX, repeatY))

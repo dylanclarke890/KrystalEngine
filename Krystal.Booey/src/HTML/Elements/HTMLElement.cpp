@@ -620,15 +620,13 @@ namespace krys::boo
       while (position < input.size())
       {
         // 4a. Collect a sequence of code points that are not U+000A LF or U+000D CR from input given
-        // position,
-        //     and set text to the result.
+        //     position, and set text to the result.
         auto end = std::min(input.find_first_of(u8"\r\n", position), input.size());
         auto text = input.substr(position, end - position);
         position = end;
 
         // 4b. If text is not the empty string, then append a new Text node whose data is text and node
-        // document
-        //     is document to fragment.
+        //     document is document to fragment.
         if (!text.empty())
         {
           (void)fragment->AppendChild(*document.CreateTextNode(DOMString(text)));
@@ -639,8 +637,7 @@ namespace krys::boo
         while (position < input.size() && (input[position] == u8'\n' || input[position] == u8'\r'))
         {
           // 4c.i. If the code point at position is U+000D CR and the next code point is U+000A LF, then
-          // advance
-          //       position to the next code point in input.
+          //       advance position to the next code point in input.
           if (input[position] == u8'\r' && position + 1 < input.size() && input[position + 1] == u8'\n')
           {
             ++position;
@@ -708,8 +705,8 @@ namespace krys::boo
     // 4. Remove any items from results that are the empty string.
     // 5. Remove any runs of consecutive required line break count items at the start or end of results.
     // 6. Replace each remaining run of consecutive required line break count items with a string consisting
-    // of
-    //    as many U+000A LF code points as the maximum of the values in the required line break count items.
+    //    of as many U+000A LF code points as the maximum of the values in the required line break count
+    //    items.
     // 7. Return the concatenation of the string items in results.
     // (The text iterator walks the rendered text, approximating the rendered text collection steps.)
     return PlainText(dom::MakeRangeSelectingNodeContents(self));
@@ -1024,10 +1021,9 @@ namespace krys::boo
     };
 
     // 9. If the result of firing an event named beforetoggle, using ToggleEvent, with the cancelable
-    // attribute
-    //    initialized to true, the oldState attribute initialized to "closed", the newState attribute
-    //    initialized to "open", and the source attribute initialized to source at element is false, then run
-    //    cleanupShowingSteps and return.
+    //    attribute initialized to true, the oldState attribute initialized to "closed", the newState
+    //    attribute initialized to "open", and the source attribute initialized to source at element is false,
+    //    then run cleanupShowingSteps and return.
     if (!FirePopoverBeforeToggleEvent(dom::ToggleState::Closed, dom::ToggleState::Open, true, source))
     {
       cleanupShowingSteps();
@@ -1114,9 +1110,8 @@ namespace krys::boo
       // 15j. Otherwise: set element's opened in popover mode to "hint".
       GetPopoverData()->SetOpenedInPopoverMode(effectiveType);
       // 15k. Set element's popover close watcher to the result of establishing a close watcher given
-      // element's
-      //      relevant global object, with: cancelAction being to return true; closeAction being to hide a
-      //      popover given element, true, true, false, and null; getEnabledState being to return true.
+      //      element's relevant global object, with: cancelAction being to return true; closeAction being to
+      //      hide a popover given element, true, true, false, and null; getEnabledState being to return true.
       if (document->Window())
       {
         auto weakThis = CreateWeakPtr(this);
@@ -1232,8 +1227,7 @@ namespace krys::boo
     //    otherwise false.
     bool autoPopoverListContainsElement = ListContains(document->ShowingAutoPopoverList(), *this);
     // 10. Let hintPopoverListContainsElement be true if document's showing hint popover list contains
-    // element;
-    //     otherwise false.
+    //     element; otherwise false.
     bool hintPopoverListContainsElement = ListContains(document->ShowingHintPopoverList(), *this);
 
     // 11. If element's opened in popover mode is "auto" or "hint":
@@ -2125,8 +2119,8 @@ namespace krys::boo
     digitBuffer.push_back('0');
 
     // 11. Split input into three strings of equal code point length, to obtain three components. Let length
-    // be
-    //     the code point length that all of those components have (one third the code point length of input).
+    //     be the code point length that all of those components have (one third the code point length of
+    //     input).
     // 15. Let result be a CSS color.
     // 16. Interpret the first component as a hexadecimal number; let the red component of result be the
     //     resulting number.

@@ -205,8 +205,7 @@ namespace krys::boo
   {
     // https://drafts.css-houdini.org/css-typed-om/#dom-csstransformvalue-tomatrix
     // 1. Let matrix be a new DOMMatrix, initialized to the identity matrix, with its is2D internal slot set
-    // to
-    //    true.
+    //    to true.
     TransformationMatrix matrix;
     auto is2D = css::DOMMatrixReadOnly::Is2D::Yes;
     // 2. For each transform in this's values to iterate over:

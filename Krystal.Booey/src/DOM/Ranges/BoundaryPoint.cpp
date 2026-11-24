@@ -49,8 +49,7 @@ namespace krys::boo::dom
     }
 
     // 3. If nodeA is following nodeB, then if the position of (nodeB, offsetB) relative to (nodeA, offsetA)
-    // is
-    //    before, return after, and if it is after, return before.
+    //    is before, return after, and if it is after, return before.
     if (TreeQueries::IsFollowing(a, b))
     {
       return StrongOrder::Reverse(other.ComparePositionTo(*this));

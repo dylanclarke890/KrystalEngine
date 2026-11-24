@@ -854,9 +854,8 @@ namespace krys::boo
       // to the containing block
       // 2. adjust the final static position with the containing block's border
       // 3. pick x or y depending on what direction we are actually interested in (note that it's always the
-      // block directon from the
-      //    candidate box's point of view but it could very well be the inline distance from the containing
-      //    block's point of view.)
+      //    block directon from the candidate box's point of view but it could very well be the inline
+      //    distance from the containing block's point of view.)
 
       auto initialStaticPosition = [&]
       {

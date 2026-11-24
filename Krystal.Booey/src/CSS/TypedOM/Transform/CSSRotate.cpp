@@ -73,9 +73,8 @@ namespace krys::boo
       return Exception {ExceptionCode::TypeError};
     }
     // 2. Return a new CSSRotate with its angle internal slot set to angle, its x and y internal slots set to
-    // new
-    //    unit values of (0, "number"), its z internal slot set to a new unit value of (1, "number"), and its
-    //    is2D internal slot set to true.
+    //    new unit values of (0, "number"), its z internal slot set to a new unit value of (1, "number"), and
+    //    its is2D internal slot set to true.
     return AdoptRef(*new CSSRotate(true, CSSNumericFactory::Number(0), CSSNumericFactory::Number(0),
                                    CSSNumericFactory::Number(1), krys::move(angle)));
   }

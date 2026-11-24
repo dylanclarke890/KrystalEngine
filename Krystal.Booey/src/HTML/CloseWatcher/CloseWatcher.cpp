@@ -111,8 +111,7 @@ namespace krys::boo::html
     krys_debug_assert(document.IsFullyActive());
 
     // 2. Let closeWatcher be a new close watcher, with window window, cancel action cancelAction, close
-    // action
-    //    closeAction, is running cancel action false, get enabled state getEnabledState.
+    //    action closeAction, is running cancel action false, get enabled state getEnabledState.
     // 3. Let manager be window's close watcher manager.
     // 4.-6. (CloseWatcherManager::Add.)
     // 7. Return closeWatcher.

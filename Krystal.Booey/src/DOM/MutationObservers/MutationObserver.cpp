@@ -22,8 +22,7 @@ namespace krys::boo::dom
     MutationObserverInit options = initOptions;
 
     // 1. If either options["attributeOldValue"] or options["attributeFilter"] exists, and
-    // options["attributes"]
-    //    does not exist, then set options["attributes"] to true.
+    //    options["attributes"] does not exist, then set options["attributes"] to true.
     if ((options.AttributeOldValue.has_value() || options.AttributeFilter.has_value())
         && !options.Attributes.has_value())
     {
@@ -38,8 +37,7 @@ namespace krys::boo::dom
     }
 
     // 3. If none of options["childList"], options["attributes"], and options["characterData"] is true, then
-    // throw
-    //    a TypeError.
+    //    throw a TypeError.
     if (!options.ChildList && !options.Attributes.value_or(false) && !options.CharacterData.value_or(false))
     {
       return Exception {ExceptionCode::TypeError};
@@ -65,8 +63,7 @@ namespace krys::boo::dom
     }
 
     // 7. Let registered be the registered observer in target's registered observer list that is not a
-    // transient
-    //    registered observer and whose observer is this, if any; otherwise null.
+    //    transient registered observer and whose observer is this, if any; otherwise null.
     for (auto &registered : target.RegisteredObservers())
     {
       // 8. If registered is non-null:
@@ -91,8 +88,7 @@ namespace krys::boo::dom
 
     // 9. Otherwise:
     // 9a. Append a new registered observer whose observer is this and options is options to target's
-    // registered
-    //     observer list.
+    //     registered observer list.
     auto registered = CreateRef<RegisteredObserver>(ShareRef(*this), options);
     target.RegisteredObservers().emplace_back(krys::move(registered));
 
@@ -105,8 +101,7 @@ namespace krys::boo::dom
   void MutationObserver::Disconnect() noexcept
   {
     // 1. For each node of this's node list: remove any registered observer from node's registered observer
-    // list
-    //    for which this is the observer.
+    //    list for which this is the observer.
     for (auto &n : _nodes)
     {
       if (auto node = n.lock())

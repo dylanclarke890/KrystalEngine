@@ -123,8 +123,7 @@ namespace krys::boo
     html::CEReactionsScope ceReactions;
 
     // 1. If this's default value override is null, then string replace all with the given value within this
-    // and
-    //    return.
+    //    and return.
     if (!_defaultValueOverride)
     {
       (void)dom::NodeAlgorithms::StringReplaceAll(krys::move(value), *this);

@@ -2149,12 +2149,10 @@ namespace krys::boo
   void HTMLInputElement::LegacyPreActivationBehavior(Event &event) noexcept
   {
     // 1. If this element's type attribute is in the Checkbox state, then set this element's checkedness to
-    // its
-    //    opposite value (i.e. true if it is false, false if it is true) and set this element's
+    //    its opposite value (i.e. true if it is false, false if it is true) and set this element's
     //    indeterminateness to false.
     // 2. If this element's type attribute is in the Radio Button state, then get a reference to the element
-    // in
-    //    this element's radio button group that has its checkedness set to true, if any, and then set this
+    //    in this element's radio button group that has its checkedness set to true, if any, and then set this
     //    element's checkedness to true.
     // (The checkbox and radio input types' WillDispatchClick, which remember the state to restore.)
     _clickHandlingState = {};
@@ -2216,11 +2214,11 @@ namespace krys::boo
     //    element's indeterminateness back to the values they had before the legacy-pre-activation behavior
     //    was run.
     // 2. If this element's type attribute is in the Radio Button state, then if the element to which a
-    // reference
-    //    was obtained in the legacy-pre-activation behavior, if any, is still in what is now this element's
-    //    radio button group, if it still has one, and if so, set that element's checkedness to true; or else,
-    //    if there was no such element, or that element is no longer in this element's radio button group, or
-    //    if this element no longer has a radio button group, set this element's checkedness to false.
+    //    reference was obtained in the legacy-pre-activation behavior, if any, is still in what is now this
+    //    element's radio button group, if it still has one, and if so, set that element's checkedness to
+    //    true; or else, if there was no such element, or that element is no longer in this element's radio
+    //    button group, or if this element no longer has a radio button group, set this element's checkedness
+    //    to false.
     // (The checkbox and radio input types' DidDispatchClick, for a canceled click.)
     Ref<html::InputType> protectedInputType = ShareRef(*_inputType);
     if (std::exchange(_clickHandlingState.Stateful, false))

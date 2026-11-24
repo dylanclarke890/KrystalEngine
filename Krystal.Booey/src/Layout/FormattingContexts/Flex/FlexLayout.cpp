@@ -419,9 +419,9 @@ namespace krys::boo::layout
         }
 
         // b. Calculate the remaining free space as for initial free space, above. If the sum of the unfrozen
-        // flex items' flex factors
-        //    is less than one, multiply the initial free space by this sum. If the magnitude of this value is
-        //    less than the magnitude of the remaining free space, use this as the remaining free space.
+        //    flex items' flex factors is less than one, multiply the initial free space by this sum. If the
+        //    magnitude of this value is less than the magnitude of the remaining free space, use this as the
+        //    remaining free space.
         auto freeSpace = computedFreeSpace();
         auto adjustFreeSpaceWithFlexFactors = [&]
         {
@@ -485,9 +485,9 @@ namespace krys::boo::layout
         }
 
         // d. Fix min/max violations. Clamp each non-frozen item's target main size by its used min and max
-        // main sizes and floor
-        //    its content-box size at zero. If the item's target main size was made smaller by this, it's a
-        //    max violation. If the item's target main size was made larger by this, it's a min violation.
+        //    main sizes and floor its content-box size at zero. If the item's target main size was made
+        //    smaller by this, it's a max violation. If the item's target main size was made larger by this,
+        //    it's a min violation.
         auto totalViolation = LayoutUnit {};
         minimumViolationList.clear();
         maximumViolationList.clear();
@@ -515,8 +515,7 @@ namespace krys::boo::layout
         }
 
         // e. Freeze over-flexed items. The total violation is the sum of the adjustments from the previous
-        // step
-        //    sum(clamped size - unclamped size). If the total violation is:
+        //    step sum(clamped size - unclamped size). If the total violation is:
         //      Zero : Freeze all items.
         //      Positive: Freeze all the items with min violations.
         //      Negative: Freeze all the items with max violations.

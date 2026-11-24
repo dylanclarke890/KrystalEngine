@@ -413,8 +413,7 @@ namespace krys::boo
 
     // 1. Let selects be the result of update an option's nearest ancestor select given removedNode.
     // 2. For each select of selects: queue a microtask to update a select's descendant selectedcontent
-    // elements
-    //    given select.
+    //    elements given select.
     if (RefPtr<HTMLSelectElement> oldSelect = UpdateOwnerSelect(); oldSelect && _isSelected)
     {
       html::FormControlAlgorithms::QueueUpdateDescendantSelectedContents(*oldSelect);
@@ -428,8 +427,7 @@ namespace krys::boo
 
     // 1. Let selects be the result of update an option's nearest ancestor select given movedNode.
     // 2. For each select of selects: queue a microtask to update a select's descendant selectedcontent
-    // elements
-    //    given select.
+    //    elements given select.
     RefPtr<HTMLSelectElement> oldSelect = UpdateOwnerSelect();
     if (oldSelect && _isSelected)
     {

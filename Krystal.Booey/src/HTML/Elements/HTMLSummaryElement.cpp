@@ -76,8 +76,7 @@ namespace krys::boo
 
     // 2. Let parent be this summary element's parent.
     // 3. If the open attribute is present on parent, then remove it. Otherwise, set parent's open attribute
-    // to
-    //    the empty string.
+    //    to the empty string.
     if (auto details = DetailsElement())
     {
       details->ToggleOpen();

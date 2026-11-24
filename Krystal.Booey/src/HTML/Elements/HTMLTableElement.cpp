@@ -165,8 +165,7 @@ namespace krys::boo
     auto head = html::CreateTableElement<HTMLTableSectionElement>(NodeDocument(), u8"thead");
 
     // 3. Insert thead immediately before the first element child of this that is neither a caption element
-    // nor
-    //    a colgroup element, if any; otherwise insert thead at the end of this.
+    //    nor a colgroup element, if any; otherwise insert thead at the end of this.
     (void)THead(RefPtr<HTMLTableSectionElement>(head));
 
     // 4. Return thead.
@@ -261,8 +260,7 @@ namespace krys::boo
     auto body = html::CreateTableElement<HTMLTableSectionElement>(NodeDocument(), u8"tbody");
 
     // 2. Insert tbody immediately after the last tbody element child of this, if any; otherwise insert tbody
-    // at
-    //    the end of this.
+    //    at the end of this.
     auto *lastBody = LastBody();
     (void)InsertBefore(*body, lastBody ? lastBody->NextSibling() : nullptr);
 
@@ -297,8 +295,7 @@ namespace krys::boo
   ExceptionOr<Ref<HTMLTableRowElement>> HTMLTableElement::InsertRow(int32 index) noexcept
   {
     // 1. If index is less than −1 or greater than the number of elements in the rows collection, then throw
-    // an
-    //    "IndexSizeError" DOMException.
+    //    an "IndexSizeError" DOMException.
     // (Greater is found while walking the rows.)
     if (index < -1)
     {
@@ -346,8 +343,7 @@ namespace krys::boo
     else
     {
       // 4. Otherwise, if the rows collection has zero elements in it, then append tr to the last tbody
-      // element
-      //    in this.
+      //    element in this.
       // (The last tbody child, as in browsers.)
       parent = ShareRefPtr<ContainerNode>(LastBody());
 
@@ -387,8 +383,7 @@ namespace krys::boo
     RefPtr<HTMLTableRowElement> row;
 
     // 2. If index is −1, then remove the last element in the rows collection from its parent, or do nothing
-    // if
-    //    the rows collection is empty.
+    //    if the rows collection is empty.
     if (index == -1)
     {
       row = ShareRefPtr(html::HTMLTableRowsCollection::LastRow(*this));

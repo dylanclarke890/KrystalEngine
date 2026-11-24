@@ -236,8 +236,7 @@ namespace krys::boo
   void HTMLSelectElement::CloneSelectedOptionIntoSelectButton() noexcept
   {
     // 1. Let option be the first element of select's option list whose selectedness is set to true, if such
-    // an
-    //    element exists; otherwise null.
+    //    an element exists; otherwise null.
     auto *option = FirstSelectedOption();
     // 2. Let text be the empty string.
     // 3. If option is not null, then set text to option's label.
@@ -647,8 +646,7 @@ namespace krys::boo
     }
 
     // 6. Let parent be reference's parent node if reference is not null; otherwise the select element on
-    // which
-    //    this is rooted.
+    //    which this is rooted.
     Ref<ContainerNode> parent =
       reference ? ShareRef(*reference->ParentNode()) : ShareRef<ContainerNode>(*this);
 
@@ -960,8 +958,7 @@ namespace krys::boo
     int64 delta = static_cast<int64>(index) - static_cast<int64>(length);
 
     // 4. If delta is greater than 0, then append new option elements to the select element on which
-    // collection
-    //    is rooted given delta.
+    //    collection is rooted given delta.
     if (delta > 0)
     {
       // An index past the limit the length setter has does nothing, as in other browsers.
@@ -1360,8 +1357,7 @@ namespace krys::boo
   void HTMLSelectElement::ResetSelectedness(bool hasChanged) noexcept
   {
     // 1. If the result of running the selectedness setting algorithm given select is true, then set
-    // hasChanged
-    //    to true.
+    //    hasChanged to true.
     // (Running it while finding the list of options again, and comparing the selected option.)
     RefPtr<HTMLOptionElement> previouslySelected = ShareRefPtr(FirstSelectedOption());
     SetRecalcListItems();
@@ -1524,8 +1520,7 @@ namespace krys::boo
     // 2. For each option of select's list of options:
     // 2a. Set option's selectedness to false.
     // 2b. If firstMatchingOption is null and option's index is equal to value, then set firstMatchingOption
-    // to
-    //     option.
+    //     to option.
     // 3. If firstMatchingOption is not null, then set firstMatchingOption's selectedness to true and set
     //    firstMatchingOption's dirtiness to true.
     SelectOption(index, {SelectOptionFlag::DeselectOtherOptions, SelectOptionFlag::MakeOptionDirty});
@@ -1723,8 +1718,7 @@ namespace krys::boo
     if (oldMultiple != _multiple)
     {
       // 1. If the multiple attribute was removed, then set the selectedness of all but the first option
-      // element
-      //    with its selectedness set to true in select's list of options to false.
+      //    element with its selectedness set to true in select's list of options to false.
       if (oldSelectedIndex >= 0)
       {
         SelectOption(oldSelectedIndex, {SelectOptionFlag::DeselectOtherOptions});
@@ -1780,8 +1774,7 @@ namespace krys::boo
       option->ResetDirtiness();
 
       // 2a. If optionElement has a selected attribute, then set optionElement's selectedness to true;
-      // otherwise
-      //     set it to false.
+      //     otherwise set it to false.
       // 3. Run the selectedness setting algorithm given selectElement.
       // (Both at once, keeping the last selected option and the first enabled one.)
       if (option->HasAttribute(u8"selected"))

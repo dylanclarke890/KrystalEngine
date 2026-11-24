@@ -92,8 +92,7 @@ namespace krys::boo::html
     }
 
     // 4. Place a new stop on the gradient, at offset offset relative to the whole gradient, and whose color
-    // is
-    //    parsed color.
+    //    is parsed color.
     _gradient->AddColorStop({static_cast<float>(value), krys::move(color)});
     return {};
   }

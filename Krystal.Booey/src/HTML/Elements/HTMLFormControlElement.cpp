@@ -335,8 +335,7 @@ namespace krys::boo
     }
     // 7. Otherwise:
     // 7a. Let validity be the result of running check popover validity given popover, false, and null. If
-    // this
-    //     throws an exception, catch it, and let validity be false.
+    //     this throws an exception, catch it, and let validity be false.
     // 7b. If validity is true, then run show popover given popover, false, and node.
     // (Show popover checks the validity first, and doesn't throw.)
     else

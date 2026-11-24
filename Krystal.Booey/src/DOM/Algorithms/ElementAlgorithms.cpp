@@ -449,8 +449,7 @@ namespace krys::boo::dom
       // 4a. Let currentShadowRoot be element's shadow root.
       auto &currentShadowRoot = element._shadowRoot;
       // 4b. If any of the following are true: currentShadowRoot's declarative is false; or
-      // currentShadowRoot's
-      //     mode is not mode, then throw a "NotSupportedError" DOMException.
+      //     currentShadowRoot's mode is not mode, then throw a "NotSupportedError" DOMException.
       if (!currentShadowRoot->_declarative || currentShadowRoot->Mode() != mode)
       {
         return Exception {ExceptionCode::NotSupportedError};

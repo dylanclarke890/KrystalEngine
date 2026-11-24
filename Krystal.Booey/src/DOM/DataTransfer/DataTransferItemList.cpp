@@ -132,9 +132,8 @@ namespace krys::boo::dom
   {
     // 1. If the DataTransferItemList object is not in the read/write mode, return null.
     // 2. If the first argument to the method is a File: Add an item to the drag data store item list whose
-    // kind
-    //    is File, whose type string is the type of the File, converted to ASCII lowercase, and whose data is
-    //    the same as the File's data.
+    //    kind is File, whose type string is the type of the File, converted to ASCII lowercase, and whose
+    //    data is the same as the File's data.
     // (A File's type is already lowercase.)
     // 3. Determine the value of the indexed property corresponding to the newly added item, and return that
     //    value (a newly created DataTransferItem object).

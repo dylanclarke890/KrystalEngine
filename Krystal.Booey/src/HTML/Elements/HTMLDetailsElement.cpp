@@ -196,8 +196,7 @@ namespace krys::boo
           // 2. If element does not have a name attribute, or its name attribute is the empty string, then
           //    return.
           // 3. Let groupMembers be a list of elements, containing all elements in element's details name
-          // group
-          //    except for element, in tree order.
+          //    group except for element, in tree order.
           // 4. For each element otherElement of groupMembers:
           // 4a. If the open attribute is set on otherElement:
           // 4a.i. Assert: otherElement is the only element in groupMembers that has the open attribute set.

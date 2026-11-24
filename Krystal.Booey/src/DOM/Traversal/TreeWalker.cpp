@@ -21,8 +21,7 @@ namespace krys::boo::dom
       node = ShareRefPtr(node->ParentNode());
 
       // 2b. If node is non-null and filtering node within this returns FILTER_ACCEPT, then set this’s current
-      // to node
-      //     and return node.
+      //     to node and return node.
       if (node)
       {
         auto filterResult = IteratorAlgorithms::FilterNode(*this, *node);
@@ -122,8 +121,7 @@ namespace krys::boo::dom
       node = ShareRefPtr(node->ParentNode());
 
       // 2e. If the return value of filtering node within this is FILTER_ACCEPT, then set this’s current to
-      // node and
-      //     return node.
+      //     node and return node.
       auto result = IteratorAlgorithms::FilterNode(*this, *node);
       if (result.HasException())
       {

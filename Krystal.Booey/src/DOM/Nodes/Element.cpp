@@ -3365,8 +3365,7 @@ namespace krys::boo
     auto index = ancestorIndex(ParentElementInComposedTree());
     // 6. Let sourceAncestorIndex be -1.
     // 7. If source is not null, then set sourceAncestorIndex to the index of the last item in
-    // combinedPopovers
-    //    of which source is a flat tree descendant, otherwise -1.
+    //    combinedPopovers of which source is a flat tree descendant, otherwise -1.
     // (Or source itself, as other engines have it.)
     // 8. Let ancestorIndex be the maximum of popoverAncestorIndex and sourceAncestorIndex.
     if (source)

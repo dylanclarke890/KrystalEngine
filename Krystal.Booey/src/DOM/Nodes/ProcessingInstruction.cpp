@@ -132,8 +132,7 @@ namespace krys::boo
     }
 
     // 4. If force is not given or is false, remove attributes[name], update data from attributes given this,
-    // and
-    //    then return false.
+    //    and then return false.
     if (!force.has_value() || !*force)
     {
       _attributeMap.erase(it);
@@ -157,8 +156,7 @@ namespace krys::boo
     _attributeMap.clear();
 
     // 2. Let result be the parsing result of invoking the rules for parsing pseudo-attributes from a string
-    // given
-    //    pi's data.
+    //    given pi's data.
     auto result = xml::ParsePseudoAttributes(Data());
 
     // 3. If result is an error, then return.

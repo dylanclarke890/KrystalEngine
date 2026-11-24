@@ -521,9 +521,8 @@ namespace krys::boo
     void OnInsert() noexcept override
     {
       // 1. If insertedNode is an element whose namespace is the HTML namespace, and this standard defines
-      // HTML
-      //    element insertion steps for insertedNode's local name, then run the corresponding HTML element
-      //    insertion steps given insertedNode.
+      //    HTML element insertion steps for insertedNode's local name, then run the corresponding HTML
+      //    element insertion steps given insertedNode.
       // (Elements with insertion steps override this, and the autofocus insertion steps run for all of them.)
       html::FocusAlgorithms::AutofocusInsertionSteps(*this);
 
@@ -555,8 +554,7 @@ namespace krys::boo
       // (Elements with removing steps override this.)
 
       // 4. If removedNode is a form-associated element with a non-null form owner and removedNode and its
-      // form
-      //    owner are no longer in the same tree, then reset the form owner of removedNode.
+      //    form owner are no longer in the same tree, then reset the form owner of removedNode.
       // (In FormAssociatedElement::ElementRemovedFromAncestor.)
 
       // 5. If removedNode's popover attribute is not in the No Popover state, then run the hide popover

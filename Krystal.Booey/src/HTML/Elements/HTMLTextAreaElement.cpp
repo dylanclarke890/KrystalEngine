@@ -389,8 +389,8 @@ namespace krys::boo
     // 1. Let oldAPIValue be this element's API value.
     // 2. Set this element's raw value to the new value.
     // 4. If the new API value is different from oldAPIValue, then move the text entry cursor position to the
-    // end
-    //    of the text control, unselecting any selected text and resetting the selection direction to "none".
+    //    end of the text control, unselecting any selected text and resetting the selection direction to
+    //    "none".
     // (SetValueCommon.)
     SetValueCommon(value, eventBehavior, selection);
 

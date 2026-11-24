@@ -22,8 +22,7 @@ namespace krys::boo::dom
     auto n = static_cast<underlying_t<NodeType>>(node.NodeType()) - 1u;
 
     // 3. If the nth bit (where 0 is the least significant bit) of traverser’s whatToShow is not set, then
-    // return
-    //    FILTER_SKIP.
+    //    return FILTER_SKIP.
     auto whatToShow = traverser.WhatToShow().ToRaw();
     if ((whatToShow & (1u << n)) == 0u)
     {
@@ -40,9 +39,8 @@ namespace krys::boo::dom
     traverser.IsActive(true);
 
     // 6. Let result be the return value of call a user object’s operation with traverser’s filter,
-    // "acceptNode",
-    //    and « node ». If this throws an exception, then set traverser’s is active to false and rethrow the
-    //    exception.
+    //    "acceptNode", and « node ». If this throws an exception, then set traverser’s is active to false and
+    //    rethrow the exception.
     auto result = traverser.Filter()->AcceptNode(node);
 
     // 7. Set traverser’s is active to false.
@@ -55,13 +53,11 @@ namespace krys::boo::dom
   void IteratorAlgorithms::PreRemove(NodeIterator &nodeIterator, const Node &toBeRemovedNode) noexcept
   {
     // 1. Set nodeIterator’s reference to the result of adjusting a node pointer given nodeIterator’s
-    // reference,
-    //    nodeIterator, and toBeRemovedNode.
+    //    reference, nodeIterator, and toBeRemovedNode.
     nodeIterator._reference = AdjustNodePointer(nodeIterator._reference, nodeIterator, toBeRemovedNode);
 
     // 2. If nodeIterator’s candidate reference is non-null, then set nodeIterator’s candidate reference to
-    // the
-    //    result of adjusting a node pointer given nodeIterator’s candidate reference, nodeIterator, and
+    //    the result of adjusting a node pointer given nodeIterator’s candidate reference, nodeIterator, and
     //    toBeRemovedNode.
     if (nodeIterator._candidateReference)
     {
@@ -75,8 +71,7 @@ namespace krys::boo::dom
                                                     const Node &toBeRemovedNode) noexcept
   {
     // 1. If toBeRemovedNode is not an inclusive ancestor of nodePointer’s node, or toBeRemovedNode is an
-    // inclusive
-    //    ancestor of nodeIterator’s root, then return nodePointer.
+    //    inclusive ancestor of nodeIterator’s root, then return nodePointer.
     if (!TreeQueries::IsInclusiveAncestor(toBeRemovedNode, *nodePointer.Node)
         || TreeQueries::IsInclusiveAncestor(toBeRemovedNode, nodeIterator.Root()))
     {
@@ -87,9 +82,8 @@ namespace krys::boo::dom
     if (nodePointer.PointerBefore)
     {
       // 2a. Let next be toBeRemovedNode’s first following node that is an inclusive descendant of
-      // nodeIterator’s
-      //     root and is not an inclusive descendant of toBeRemovedNode, if there is such a node; otherwise
-      //     null.
+      //     nodeIterator’s root and is not an inclusive descendant of toBeRemovedNode, if there is such a
+      //     node; otherwise null.
       Node *next = TreeQueries::NextSkippingChildren(toBeRemovedNode, &nodeIterator.Root());
 
       // 2b. If next is non-null, then return (next, true).
@@ -100,8 +94,7 @@ namespace krys::boo::dom
     }
 
     // 3. Let newNode be toBeRemovedNode’s parent, if toBeRemovedNode’s previous sibling is null; otherwise
-    // the
-    //    inclusive descendant of toBeRemovedNode’s previous sibling that appears last in tree order.
+    //    the inclusive descendant of toBeRemovedNode’s previous sibling that appears last in tree order.
     Node *newNode = toBeRemovedNode.PreviousSibling()
                       ? TreeQueries::DeepLastChild(*toBeRemovedNode.PreviousSibling())
                       : toBeRemovedNode.ParentNode();
@@ -188,8 +181,7 @@ namespace krys::boo::dom
       Ref<Node> node = candidate.Node;
 
       // 3d. Let filterResult be the result of filtering node within iterator. If this throws an exception,
-      // then set
-      //     iterator’s candidate reference to null and rethrow that exception.
+      //     then set iterator’s candidate reference to null and rethrow that exception.
       auto filterResult = FilterNode(iterator, *node);
       if (filterResult.HasException())
       {
@@ -332,8 +324,7 @@ namespace krys::boo::dom
         sibling = ShareRefPtr(type == TraversalNextOrPrev::Next ? node->FirstChild() : node->LastChild());
 
         // 3b.v. If result is FILTER_REJECT or sibling is null, then set sibling to node’s next sibling if
-        // type is
-        //       "next"; otherwise to node’s previous sibling.
+        //       type is "next"; otherwise to node’s previous sibling.
         if (result.Value() == FilterResult::FILTER_REJECT || !sibling)
         {
           sibling =

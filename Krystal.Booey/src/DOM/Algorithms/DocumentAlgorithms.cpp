@@ -59,8 +59,7 @@ namespace krys::boo::dom
       }
 
       // 3c. If registry is non-null, registry's is scoped is false, and registry is not document's custom
-      // element
-      //     registry, then throw a "NotSupportedError" DOMException.
+      //     element registry, then throw a "NotSupportedError" DOMException.
       if (result.CustomElementRegistry != nullptr && !result.CustomElementRegistry->IsScoped()
           && result.CustomElementRegistry != document.CustomElementRegistry())
       {
@@ -116,8 +115,7 @@ namespace krys::boo::dom
     }
 
     // 3. If document is not oldDocument, then for each inclusiveDescendant of node's shadow-including
-    // inclusive
-    //    descendants, in shadow-including tree order:
+    //    inclusive descendants, in shadow-including tree order:
     // (Steps 3a to 3c run for every node first, then 3c.iii, then 3d, so the adopting steps see the whole
     // subtree moved.)
     if (&document != &oldDocument)

@@ -84,8 +84,7 @@ namespace krys::boo::dom
     agent.MutationObserverMicrotaskQueued = false;
 
     // 2. Let notifyList be the result of sorting the surrounding agent's pending mutation observers in
-    // ascending
-    //    order, with a being less than b if a's creation index is less than b's creation index.
+    //    ascending order, with a being less than b if a's creation index is less than b's creation index.
     // 3. Empty the surrounding agent's pending mutation observers.
     auto notifyList = std::exchange(agent.PendingMutationObservers, {});
     std::ranges::sort(notifyList, {},
@@ -116,8 +115,7 @@ namespace krys::boo::dom
 
     // https://dom.spec.whatwg.org/#eventdef-htmlslotelement-slotchange
     // 7. For each slot of signalSet: fire an event named slotchange, with its bubbles attribute set to true,
-    // at
-    //    slot.
+    //    at slot.
     for (auto &slot : signalSet)
     {
       (void)EventDispatcher::FireEvent<Event>(event_names::SlotChange, *slot, EventInit {.Bubbles = true});
@@ -145,8 +143,7 @@ namespace krys::boo::dom
       // 1c. Let source be registered's source if registered is a transient registered observer; otherwise
       //     registered.
       // 1d. If node's registered observer list contains a transient registered observer whose source is
-      // source,
-      //     then continue.
+      //     source, then continue.
       auto &transients = node.TransientRegisteredObservers();
       if (std::ranges::any_of(transients, [&](const Ref<TransientRegisteredObserver> &transient)
                               { return transient->Source().get() == &source; }))
@@ -155,8 +152,7 @@ namespace krys::boo::dom
       }
 
       // 1e. Append a new transient registered observer whose observer is observer, options is source's
-      // options,
-      //     and source is source to node's registered observer list.
+      //     options, and source is source to node's registered observer list.
       transients.push_back(
         CreateRef<TransientRegisteredObserver>(Ref {observer}, source.Options(), ShareRef(source)));
 

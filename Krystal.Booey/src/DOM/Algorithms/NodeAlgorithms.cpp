@@ -36,8 +36,7 @@ namespace krys::boo::dom
     RefPtr<Text> node;
 
     // 2. If string is not the empty string, then set node to the result of creating a text node given
-    // parent's
-    //    node document and string.
+    //    parent's node document and string.
     if (!string.empty())
     {
       node = CreateRef<Text>(parent.NodeDocument(), krys::move(string));
@@ -76,9 +75,8 @@ namespace krys::boo::dom
     }
 
     // 5. If subtree is true, then for each child of node's children, in tree order: clone a node given child
-    // with
-    //    document set to document, subtree set to subtree, parent set to copy, and fallbackRegistry set to
-    //    fallbackRegistry.
+    //    with document set to document, subtree set to subtree, parent set to copy, and fallbackRegistry set
+    //    to fallbackRegistry.
     if (subtree)
     {
       if (auto *containerNode = DynamicDowncast<ContainerNode>(node))
@@ -177,8 +175,7 @@ namespace krys::boo::dom
       }
 
       // 2d. Set copy to the result of creating an element, given document, node's local name, node's
-      // namespace,
-      //     node's namespace prefix, node's is value, false, and registry.
+      //     namespace, node's namespace prefix, node's is value, false, and registry.
       copy = ElementFactory::Create(document, element->_qualifiedName, element->_is, false, registry);
 
       // 2e. For each attribute of node's attribute list:
@@ -193,8 +190,7 @@ namespace krys::boo::dom
       }
     }
     // 3. Otherwise, if node is a document, set copy to the result of creating a document that implements the
-    // same
-    //    interfaces as node, given document's relevant realm.
+    //    same interfaces as node, given document's relevant realm.
     else if (Is<Document>(node))
     {
       auto &doc = Downcast<Document>(node);
@@ -222,8 +218,7 @@ namespace krys::boo::dom
       // 5. Fulfill these additional requirements, switching on the interface node implements:
       // Document:
       // 5a. Set copy's encoding, content type, URL, origin, type, mode, and allow declarative shadow roots,
-      // to
-      //     those of node. (Skipped origin: documents have no origin.)
+      //     to those of node. (Skipped origin: documents have no origin.)
       auto &docCopy = Downcast<Document>(*copy);
       docCopy._documentFlags = doc._documentFlags;
       docCopy._contentType = doc._contentType;
@@ -234,8 +229,7 @@ namespace krys::boo::dom
       docCopy.SetSettings(ShareRef(doc.GetSettings()));
 
       // 5b. (Skipped: documents have no base URL override; the copy's base URL comes from its URL and its
-      // base
-      //     element.)
+      //     base element.)
 
       // 5c. If node's custom element registry's is scoped is true, then set copy's custom element registry to
       //     node's custom element registry.
@@ -245,8 +239,7 @@ namespace krys::boo::dom
       }
     }
     // 4. Otherwise, set copy to the result of creating a node that implements the same interfaces as node,
-    // given
-    //    document.
+    //    given document.
     // 5. Fulfill these additional requirements, switching on the interface node implements:
     // DocumentType: Set copy's name, public ID, and system ID to those of node.
     else if (Is<DocumentType>(node))
@@ -469,8 +462,7 @@ namespace krys::boo::dom
     }
 
     // 3. If element's parent element is non-null, then return the result of running locate a namespace prefix
-    // on
-    //    that element using namespace.
+    //    on that element using namespace.
     const Element *parentElement = element.ParentElement();
     if (parentElement != nullptr)
     {
@@ -508,8 +500,7 @@ namespace krys::boo::dom
         }
 
         // 4. If it has an attribute whose namespace is the XMLNS namespace, namespace prefix is "xmlns", and
-        // local
-        //    name is prefix, or if prefix is null and it has an attribute whose namespace is the XMLNS
+        //    local name is prefix, or if prefix is null and it has an attribute whose namespace is the XMLNS
         //    namespace, namespace prefix is null, and local name is "xmlns", then return its value if it is
         //    not the empty string, and null otherwise.
         for (auto &attribute : element._attributes)
@@ -589,16 +580,14 @@ namespace krys::boo::dom
                                                            const DOMStringAtom &qualifiedName) noexcept
   {
     // 1. If qualifiedName is U+002A (*), then return an HTMLCollection rooted at root, whose filter matches
-    // only
-    //    descendant elements.
+    //    only descendant elements.
     if (qualifiedName == u8"*")
     {
       return CreateRef<LiveHTMLCollection>(root, [](const Element &) { return true; });
     }
 
     // 2. Otherwise, if root's node document is an HTML document, return an HTMLCollection rooted at root,
-    // whose
-    //    filter matches the following descendant elements:
+    //    whose filter matches the following descendant elements:
     //    - Whose namespace is the HTML namespace and whose qualified name is qualifiedName, in ASCII
     //    lowercase.
     //    - Whose namespace is not the HTML namespace and whose qualified name is qualifiedName.
@@ -686,9 +675,8 @@ namespace krys::boo::dom
     }
 
     // 3. Return an HTMLCollection rooted at root, whose filter matches descendant elements that have all
-    // their
-    //    classes in classes. The comparisons for the classes must be done in an ASCII case-insensitive manner
-    //    if root's node document's mode is "quirks"; otherwise in an identical to manner.
+    //    their classes in classes. The comparisons for the classes must be done in an ASCII case-insensitive
+    //    manner if root's node document's mode is "quirks"; otherwise in an identical to manner.
     if (isQuirksMode)
     {
       return CreateRef<LiveHTMLCollection>(

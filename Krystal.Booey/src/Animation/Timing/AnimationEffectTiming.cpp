@@ -524,8 +524,7 @@ namespace krys::boo
         // 2. If the current direction is forwards, let going forwards be true, otherwise it is false.
         bool goingForwards = currentDirection == ComputedDirection::Forwards;
         // 3. The before flag is set if the animation effect is in the before phase and going forwards is
-        // true;
-        //    or if the animation effect is in the after phase and going forwards is false.
+        //    true; or if the animation effect is in the after phase and going forwards is false.
         if ((phase == AnimationEffectPhase::Before && goingForwards)
             || (phase == AnimationEffectPhase::After && !goingForwards))
         {
@@ -533,8 +532,7 @@ namespace krys::boo
         }
 
         // 3. Return the result of evaluating the animation effect’s timing function passing directed progress
-        // as
-        //    the input progress value and before flag as the before flag.
+        //    as the input progress value and before flag as the before flag.
         auto transformProgressDuration = [&]()
         {
           if (auto time = IterationDuration.Time())

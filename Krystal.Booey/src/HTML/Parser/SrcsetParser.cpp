@@ -223,9 +223,8 @@ namespace krys::boo::html
       {
         // 2a. If the image source has a pixel density descriptor, continue to the next image source.
         // 2b. Otherwise, if the image source has a width descriptor, replace the width descriptor with a
-        // pixel
-        //     density descriptor with a value of the width descriptor value divided by source size and a unit
-        //     of x.
+        //     pixel density descriptor with a value of the width descriptor value divided by source size and
+        //     a unit of x.
         // (The src attribute's source is then ignored: a source set has no default source with widths.)
         if (candidate.ResourceWidth > 0)
         {
@@ -267,9 +266,8 @@ namespace krys::boo::html
 
       size_t winner = i;
       // 1. If an entry b in sourceSet has the same associated pixel density descriptor as an earlier entry a
-      // in
-      //    sourceSet, then remove entry b. Repeat this step until none of the entries in sourceSet have the
-      //    same associated pixel density descriptor as an earlier entry.
+      //    in sourceSet, then remove entry b. Repeat this step until none of the entries in sourceSet have
+      //    the same associated pixel density descriptor as an earlier entry.
       // (Of the entries with the winning density, the earliest wins.)
       while ((i > 0) && (imageCandidates[--i].Density == winningDensity))
       {

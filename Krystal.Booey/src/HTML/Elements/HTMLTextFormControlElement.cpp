@@ -272,8 +272,7 @@ namespace krys::boo
     // 2. Let end be the value of this element's selectionEnd attribute.
     // 3. If end is less than the given value, set end to the given value.
     // 4. Set the selection range with the given value, end, and the value of this element's
-    // selectionDirection
-    //    attribute.
+    //    selectionDirection attribute.
     SetSelectionRange(start, std::max(start, SelectionEnd()), SelectionDirection());
   }
 
@@ -281,8 +280,7 @@ namespace krys::boo
   void HTMLTextFormControlElement::SetSelectionEnd(uint32 end) noexcept
   {
     // 2. Set the selection range with the value of this element's selectionStart attribute, the given value,
-    // and
-    //    the value of this element's selectionDirection attribute.
+    //    and the value of this element's selectionDirection attribute.
     // (A start past the end is the end, as setting the selection range makes it.)
     SetSelectionRange(std::min(end, SelectionStart()), end, SelectionDirection());
   }
@@ -362,8 +360,7 @@ namespace krys::boo
     // 5. If start is greater than the length of the relevant value of the text control, then set it to the
     //    length of the relevant value of the text control.
     // 6. If end is greater than the length of the relevant value of the text control, then set it to the
-    // length
-    //    of the relevant value of the text control.
+    //    length of the relevant value of the text control.
     start = SnapToCharacterStart(text, std::min(start, textLength));
     end = SnapToCharacterStart(text, std::min(end, textLength));
 
@@ -441,8 +438,7 @@ namespace krys::boo
                                                      html::ForBindings forBindings) noexcept
   {
     // 4. If direction is not identical to either "backward" or "forward", or if the direction argument was
-    // not
-    //    given, set direction to "none".
+    //    not given, set direction to "none".
     auto direction = html::TextFieldSelectionDirection::SelectionHasNoDirection;
     if (directionString == u8"forward")
     {
@@ -454,9 +450,8 @@ namespace krys::boo
     }
 
     // 3. Set the selection of the text control to the sequence of code units within the relevant value
-    // starting
-    //    with the code unit at the startth position (in logical order) and ending with the code unit at the
-    //    (end-1)th position.
+    //    starting with the code unit at the startth position (in logical order) and ending with the code unit
+    //    at the (end-1)th position.
     // 5. Set the selection direction of the text control to direction.
     // 6. If the previous steps caused the selection of the text control to be modified (in either extent or
     //    direction), then queue an element task on the user interaction task source given the element to fire

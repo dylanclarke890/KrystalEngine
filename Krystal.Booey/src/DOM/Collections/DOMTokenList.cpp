@@ -91,8 +91,7 @@ namespace krys::boo::dom
   void DOMTokenList::UpdateSteps() noexcept
   {
     // 1. If get an attribute by namespace and local name given null, set’s attribute name, and set’s element
-    // returns
-    //    null and set’s token set is empty, then return.
+    //    returns null and set’s token set is empty, then return.
     auto attr = ElementAlgorithms::GetAttributeByNamespace(null, _attributeName, *_element);
     if (attr == nullptr && _tokens.empty())
     {
@@ -100,8 +99,7 @@ namespace krys::boo::dom
     }
 
     // 2. Set an attribute value given set’s element, set’s attribute name, and the result of running the
-    // ordered set
-    //    serializer for set’s token set.
+    //    ordered set serializer for set’s token set.
     SetForScope inAttributeUpdate(_inUpdateAssociatedAttributeFromTokens, true);
     ElementAlgorithms::SetAttributeValue(*_element, _attributeName, OrderedSet::Serialiser(_tokens));
   }
@@ -178,8 +176,7 @@ namespace krys::boo::dom
     // 3. If this’s token set[token] exists:
     if (std::ranges::contains(Tokens(), token))
     {
-      // 3a. If force is either not given or is false, then remove token from this’s token set, run the
-      // update
+      // 3a. If force is either not given or is false, then remove token from this’s token set, run the update
       //     steps and return false.
       if (!force.value_or(false))
       {
@@ -196,8 +193,7 @@ namespace krys::boo::dom
     }
 
     // 4. Otherwise, if force not given or is true, append token to this’s token set, run the update steps,
-    // and
-    //    return true.
+    //    and return true.
     if (force.value_or(true))
     {
       Tokens().emplace_back(token);

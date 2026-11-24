@@ -96,8 +96,7 @@ namespace krys::boo
       }
 
       // 6. Collect a sequence of code points that are ASCII digits from input given position, and let digits
-      // be
-      //    the resulting sequence.
+      //    be the resulting sequence.
       auto digitsStart = position;
       while (position < input.size() && text::IsASCIIDigit(input[position]))
       {
@@ -123,8 +122,7 @@ namespace krys::boo
       }
 
       // 9. If mode is relative-plus, then increment value by 3. If mode is relative-minus, then let value be
-      // the
-      //    result of subtracting value from 3.
+      //    the result of subtracting value from 3.
       if (mode == RelativePlus)
       {
         value += 3;

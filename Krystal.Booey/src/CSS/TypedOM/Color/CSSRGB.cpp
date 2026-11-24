@@ -131,8 +131,7 @@ namespace krys::boo
     // 1. If val is a double, replace it with a new unit value of (val * 100, "percent").
     // 2. If val is a CSSNumericValue that matches <number> or <percentage>, return val.
     // 3. If val is a DOMString or CSSKeywordValue, rectify a keywordish value from it; if its value is an
-    // ASCII
-    //    case-insensitive match for "none", return it.
+    //    ASCII case-insensitive match for "none", return it.
     // 4. Throw a SyntaxError.
     if (auto *numeric = std::get_if<RefPtr<CSSNumericValue>>(&component))
     {

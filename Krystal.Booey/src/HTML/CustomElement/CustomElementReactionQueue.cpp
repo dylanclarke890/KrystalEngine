@@ -235,8 +235,7 @@ namespace krys::boo::html
     krys_debug_assert(element.IsCustomElementUpgradeCandidate());
 
     // 1. Let definition be the result of looking up a custom element definition given element's custom
-    // element
-    //    registry, element's namespace, element's local name, and element's is value.
+    //    element registry, element's namespace, element's local name, and element's is value.
     auto registry = element.CustomElementRegistry();
     if (registry == nullptr)
     {

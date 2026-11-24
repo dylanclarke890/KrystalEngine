@@ -107,8 +107,7 @@ namespace krys::boo::dom
       if (originalEndContainer == &characterData)
       {
         // 9. For each live range whose end node is node and end offset is greater than offset but less than
-        // or
-        //    equal to offset + count: set its end offset to offset.
+        //    or equal to offset + count: set its end offset to offset.
         if (originalEndOffset > offset && originalEndOffset <= offset + count)
         {
           range->_end.Offset = offset;

@@ -349,8 +349,7 @@ namespace krys::boo::html
       }
 
       // 13c. If the character indicated by position is a U+0065 LATIN SMALL LETTER E character (e) or a
-      // U+0045
-      //      LATIN CAPITAL LETTER E character (E), skip the remainder of these substeps.
+      //      U+0045 LATIN CAPITAL LETTER E character (E), skip the remainder of these substeps.
       if (!IsFloatingPointExponentMarker(*position))
       {
         // 13d. Fraction loop: Multiply divisor by ten.
@@ -467,8 +466,7 @@ namespace krys::boo::html
                                                     { return !isSpaceOrDelimiter(c) && !isNumberStart(c); });
 
       // 5b. Collect a sequence of code points that are not ASCII whitespace, U+002C COMMA, or U+003B
-      // SEMICOLON
-      //     characters from input given position, and let unparsed number be the result.
+      //     SEMICOLON characters from input given position, and let unparsed number be the result.
       auto unparsedNumber = infra::StringAlgorithms::CollectCodePointSequence(
         input, position, [&](char8 c) { return !isSpaceOrDelimiter(c); });
 

@@ -176,13 +176,11 @@ namespace krys::boo
     }
 
     // 2. Let s be the string from the character immediately after the first U+0023 NUMBER SIGN character in
-    // the
-    //    string being parsed up to the end of that string.
+    //    the string being parsed up to the end of that string.
     auto name = value.substr(numberSign + 1);
 
     // 3. Return the first element of type type in scope's tree, in tree order, that has an id or name
-    // attribute
-    //    whose value is s, or null if there is no such element.
+    //    attribute whose value is s, or null if there is no such element.
     // The tree scope maps them; a tree outside one has to look.
     if (IsConnected() || IsInShadowTree())
     {
@@ -700,8 +698,7 @@ namespace krys::boo
       auto &queries = source->ParsedMediaAttribute(document);
 
       // 5f. If child has a media attribute, and its value does not match the environment, continue to the
-      // next
-      //     child.
+      //     next child.
       // FIXME: Remember the queries that depend on the viewport, to select again when they change.
       if (!evaluator.Evaluate(queries))
       {

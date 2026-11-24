@@ -158,9 +158,8 @@ namespace krys::boo::css
       range.Discard();
 
       // 3b. If the last component value in unparsed size is a valid non-negative <source-size-value>, then
-      // set
-      //     size to its value and remove the component value from unparsed size. Any CSS function other than
-      //     the math functions is invalid. Otherwise, there is a parse error; continue.
+      //     set size to its value and remove the component value from unparsed size. Any CSS function other
+      //     than the math functions is invalid. Otherwise, there is a parse error; continue.
       auto length = CalculateLengthInPixels(lengthTokenStart.RangeUntil(lengthTokenEnd));
       if (!length)
       {
@@ -175,8 +174,8 @@ namespace krys::boo::css
       // 3d.ii. If size is not auto, then return size. Otherwise, continue.
       // (An empty media condition matches.)
       // 3e. Parse the remaining component values in unparsed size as a <media-condition>. If it does not
-      // parse
-      //     correctly, or it does parse correctly but the <media-condition> evaluates to false, continue.
+      //     parse correctly, or it does parse correctly but the <media-condition> evaluates to false,
+      //     continue.
       auto mediaCondition =
         mq::MediaQueryParser::ParseCondition(mediaConditionStart.RangeUntil(lengthTokenStart), context);
       if (!mediaCondition)

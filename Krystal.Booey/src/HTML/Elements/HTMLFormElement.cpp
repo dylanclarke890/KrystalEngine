@@ -454,8 +454,7 @@ namespace krys::boo
     }
 
     // 1. Statically validate the constraints of form, and let unhandled invalid controls be the list of
-    // elements
-    //    returned if the result was negative.
+    //    elements returned if the result was negative.
     // 2. If the result was positive, then return that result.
     List<Ref<HTMLElement>> unhandledInvalidControls;
     if (!CheckInvalidControlsAndCollectUnhandled(unhandledInvalidControls))

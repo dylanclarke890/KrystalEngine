@@ -544,8 +544,7 @@ namespace krys::boo
     // 4. If name is the empty string or an ASCII case-insensitive match for "_self", then set chosen to
     //    currentNavigable.
     // 5. Otherwise, if name is an ASCII case-insensitive match for "_parent", set chosen to
-    // currentNavigable's
-    //    parent, if any, and currentNavigable otherwise.
+    //    currentNavigable's parent, if any, and currentNavigable otherwise.
     // 6. Otherwise, if name is an ASCII case-insensitive match for "_top", set chosen to currentNavigable's
     //    traversable navigable.
     // (The frame has no parent, and is its traversable navigable.)
