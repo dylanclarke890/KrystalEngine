@@ -1,27 +1,4 @@
-﻿/*
- * Copyright (C) 1999 Lars Knoll (knoll@kde.org)
- *           (C) 1999 Antti Koivisto (koivisto@kde.org)
- *           (C) 2001 Dirk Mueller (mueller@kde.org)
- * Copyright (C) 2003, 2010, 2013 Apple Inc. All rights reserved.
- *           (C) 2007 Rob Buis (buis@kde.org)
- *
- * This library is free software; you can redistribute it and/or
- * modify it under the terms of the GNU Library General Public
- * License as published by the Free Software Foundation; either
- * version 2 of the License, or (at your option) any later version.
- *
- * This library is distributed in the hope that it will be useful,
- * but WITHOUT ANY WARRANTY; without even the implied warranty of
- * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU
- * Library General Public License for more details.
- *
- * You should have received a copy of the GNU Library General Public License
- * along with this library; see the file COPYING.LIB.  If not, write to
- * the Free Software Foundation, Inc., 51 Franklin Street, Fifth Floor,
- * Boston, MA 02110-1301, USA.
- */
-
-#include "Krystal.Booey/HTML/Elements/HTMLStyleElement.hpp"
+﻿#include "Krystal.Booey/HTML/Elements/HTMLStyleElement.hpp"
 #include "Krystal.Booey/CSS/CSSOM/CSSStyleSheet.hpp"
 #include "Krystal.Booey/CSS/Queries/MediaQuery.hpp"
 #include "Krystal.Booey/CSS/Queries/MediaQueryEvaluator.hpp"
@@ -38,7 +15,6 @@
 #include "Krystal.Booey/Page/FrameView.hpp"
 #include "Krystal.Booey/Style/ResolveForDocument.hpp"
 #include "Krystal.Booey/Style/Scope/Scope.hpp"
-
 #include "Krystal.Core/Strings/ASCII.hpp"
 
 namespace krys::boo
@@ -52,15 +28,6 @@ namespace krys::boo
   {
     _styleSheetOwner.ClearDocumentData(*this);
   }
-
-#pragma region LinkStyle
-
-  CSSStyleSheet *HTMLStyleElement::Sheet() const noexcept
-  {
-    return _styleSheetOwner.Sheet();
-  }
-
-#pragma endregion
 
 #pragma region HTMLStyleElement
 
@@ -98,10 +65,10 @@ namespace krys::boo
   {
     if (!_blocking)
     {
+      // `render` is the only supported blocking token.
       _blocking = dom::DOMTokenList::Create(*this, u8"blocking", [](Document &, DOMStringView token)
                                             { return text::IsASCIICaselessEqual(token, u8"render"); });
     }
-
     return *_blocking;
   }
 
@@ -121,6 +88,15 @@ namespace krys::boo
 
 #pragma endregion
 
+#pragma region LinkStyle
+
+  CSSStyleSheet *HTMLStyleElement::Sheet() const noexcept
+  {
+    return _styleSheetOwner.Sheet();
+  }
+
+#pragma endregion
+
 #pragma region Extension Hooks
 
   void HTMLStyleElement::OnAttributeChanged(const DOMStringAtom &localName, Maybe<DOMStringView> oldValue,
@@ -133,21 +109,24 @@ namespace krys::boo
       return;
     }
 
-    // The token lists follow their attributes.
-    if (localName == u8"blocking" && _blocking)
+    if (localName == u8"blocking")
     {
-      _blocking->AssociatedAttributeValueChanged();
-    }
-    // An element that's no longer potentially render-blocking stops blocking rendering.
-    if (localName == u8"blocking" && !html::RenderBlocking::HasRenderBlockingToken(*this)
-        && !_createdByParser)
-    {
-      UnblockRendering();
+      if (_blocking)
+      {
+        _blocking->AssociatedAttributeValueChanged();
+      }
+      // An element that's no longer potentially render-blocking stops blocking rendering.
+      if (!html::RenderBlocking::HasRenderBlockingToken(*this) && !_createdByParser)
+      {
+        UnblockRendering();
+      }
+      return;
     }
 
     auto newValue = value ? DOMStringAtom(*value) : null;
     if (localName == u8"title")
     {
+      // Only a sheet in a document tree takes the element's title.
       if (auto *sheet = Sheet(); sheet && !dom::TreeQueries::IsInShadowTree(*this))
       {
         sheet->SetTitle(newValue.ToString());
@@ -156,6 +135,7 @@ namespace krys::boo
     else if (localName == u8"media")
     {
       _styleSheetOwner.SetMedia(newValue);
+      // An existing sheet only needs its media queries swapped; otherwise the update runs again.
       if (auto *sheet = Sheet())
       {
         sheet->SetMediaQueries(
@@ -172,6 +152,7 @@ namespace krys::boo
     }
     else if (localName == u8"type")
     {
+      // The type decides whether there's a sheet at all.
       _styleSheetOwner.SetContentType(newValue);
       _styleSheetOwner.ChildrenChanged(*this);
       if (auto *scope = _styleSheetOwner.StyleScope())
@@ -186,7 +167,8 @@ namespace krys::boo
     HTMLElement::OnInsert();
     if (IsConnected())
     {
-      // The parser inserts the elements it makes before their children.
+      // The parser connects an element before adding its children, so one with children still to come
+      // is the parser's.
       _createdByParser = !IsFinishedParsingChildren();
       _styleSheetOwner.InsertedIntoDocument(*this);
     }
@@ -239,24 +221,26 @@ namespace krys::boo
     // 4b. Otherwise, fire an event named error at element.
     // 4c. If element contributes a script-blocking style sheet: (Skipped: nothing waits for scripts.)
     // 4d. Unblock rendering on element.
-    // (Unblocked now rather than in the task, so a sheet without critical subresources, which is processed as
-    // it's parsed, never holds back rendering; see DIFFERENCES.md.)
+    // (Done now rather than in the task, so a sheet with nothing to load, which is processed as it's
+    // parsed, never holds rendering back; see DIFFERENCES.md.)
     UnblockRendering();
     html::EventLoop::Current().QueueTask(
-      html::TaskSource::Networking, NodeDocument(), [element = ShareRef(*this), loaded = success]
-      { dom::EventDispatcher::FireEvent(loaded ? event_names::Load : event_names::Error, *element); });
+      html::TaskSource::Networking, NodeDocument(), [element = ShareRef(*this), success]
+      { dom::EventDispatcher::FireEvent(success ? event_names::Load : event_names::Error, *element); });
   }
 
+  // https://html.spec.whatwg.org/#potentially-render-blocking
   void HTMLStyleElement::PotentiallyBlockRendering(const css::mq::MediaQueryList &mediaQueries) noexcept
   {
     // An element is potentially render-blocking if its blocking tokens set contains "render", or if it is
-    // implicitly potentially render-blocking: a style element is if the parser made it.
-    // https://html.spec.whatwg.org/#potentially-render-blocking
+    // implicitly potentially render-blocking, as a style element is when the parser made it.
     if (!html::RenderBlocking::HasRenderBlockingToken(*this) && !_createdByParser)
     {
       return;
     }
 
+    // Its media must match the environment, which is resolved against the document's style when it has a
+    // render tree.
     auto &document = NodeDocument();
     if (!mediaQueries.empty())
     {
