@@ -173,4 +173,24 @@ namespace krys::boo::dom::tests
       CHECK(down->ClientX() == 16);
     }
   }
+
+  TEST_CASE_METHOD(css::tests::ValueFixture, "MouseEvent: offsets follow the target's transforms",
+                   "[DOM][MouseEvent][cssom-view:dom-mouseevent-offsetx]")
+  {
+    boo::tests::PaintFixture fixture {
+      u8"<!DOCTYPE html><style>body{margin:0}"
+      u8"#p{position:absolute;left:100px;top:100px;transform:scale(2);transform-origin:0 0}"
+      u8"#box{width:50px;height:50px;border:5px solid}</style><div id=p><div id=box></div></div>"};
+    (void)fixture.Document->UpdateLayout();
+    auto &box = fixture.ById(u8"box");
+    Ref<OffsetRecorder> recorder = CreateRef<OffsetRecorder>();
+    box.AddEventListener(u8"mousedown", recorder, false);
+
+    PlatformMouseEvent platform(PointD(130, 140), PointD(130, 140), MouseButton::Left,
+                                PlatformEvent::Type::MousePressed, 1, {}, MonotonicTime::Now(), 1, PointD());
+    (void)box.DispatchMouseEvent(platform, u8"mousedown", 1);
+    // Chrome: 10, 15, the point in the scaled box's own coordinates; the specification ignores transforms.
+    CHECK(recorder->OffsetX == 10);
+    CHECK(recorder->OffsetY == 15);
+  }
 }

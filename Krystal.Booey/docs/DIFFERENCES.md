@@ -57,6 +57,7 @@ Record a difference here when you make one, and remove it when Booey comes back 
 - `Document::CreateEvent` throws `NotSupportedError` for `devicemotionevent` and `deviceorientationevent`, whose interfaces don't exist, and `storageevent`, as there's no Web storage. A `customevent` is a `CustomEvent<RefPtr<SerializedScriptValue>>`, its detail standing for `any`.
 - Shadow roots' reference targets (`ShadowRoot::ReferenceTarget`, `shadowrootreferencetarget`) follow the open pull requests whatwg/dom#1353 and whatwg/html#10995 rather than a published specification, as Chrome ships them. Serialising a declarative shadow root escapes the `shadowrootreferencetarget` value like any other attribute value, which the pull request leaves out.
 - There's no Fullscreen API (`requestFullscreen()`, `fullscreenElement`, `:fullscreen`, `::backdrop` for it): without script, a host that wants an element to fill the screen makes the window fullscreen and lays the page out for it itself.
+- `MouseEvent`'s `offsetX` and `offsetY` are in the target's own coordinates, with the transforms on it and its ancestors applied, as in Chrome; CSSOM View says to ignore them.
 
 ### From Chrome
 
