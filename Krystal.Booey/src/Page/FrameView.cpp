@@ -477,18 +477,6 @@ namespace krys::boo
     return true;
   }
 
-  void FrameView::EnterCompositingMode() noexcept
-  {
-    if (auto *renderView = GetRenderViewForUpdate())
-    {
-      renderView->Compositor().EnableCompositingMode();
-      if (!_layoutContext.NeedsLayout())
-      {
-        renderView->Compositor().ScheduleCompositingLayerUpdate();
-      }
-    }
-  }
-
   bool FrameView::UsesCompositedScrolling() const noexcept
   {
     auto *renderView = GetRenderViewForUpdate();
@@ -501,12 +489,6 @@ namespace krys::boo
       }
     }
 
-    return false;
-  }
-
-  bool FrameView::IsEnclosedInCompositingLayer() noexcept
-  {
-    // FIXME: Frames inside frames (the owner renderer's repaint container), once there are any.
     return false;
   }
 
@@ -2828,16 +2810,6 @@ namespace krys::boo
     }
 
     _maintainScrollPositionAnchor = nullptr;
-    if (_lastUserScrollType == userScrollType)
-    {
-      return;
-    }
-    _lastUserScrollType = userScrollType;
-
-    if (userScrollType == UserScrollType::Explicit)
-    {
-      _wasEverScrolledExplicitlyByUser = true;
-    }
   }
 
   void FrameView::ScheduleScrollEvent() noexcept

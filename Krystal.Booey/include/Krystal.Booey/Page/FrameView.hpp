@@ -155,8 +155,6 @@ namespace krys::boo
     WeakPtr<ContainerNode> _scheduledMaintainScrollPositionAnchor;
     bool _scheduledToScrollToAnchor {false};
     /// @brief How the user last scrolled the view, if they did.
-    Maybe<UserScrollType> _lastUserScrollType;
-    bool _wasEverScrolledExplicitlyByUser {false};
     SizeI _contentsSize;
     bool _inUpdateScrollbars {false};
     uint32 _prohibitsScrollingWhenChangingContentSizeCount {0};
@@ -203,11 +201,6 @@ namespace krys::boo
     void Show() noexcept;
 
     void Hide() noexcept;
-
-    KRYS_NODISCARD bool IsSelfVisible() const noexcept
-    {
-      return _selfVisible;
-    }
 
     /// @brief Whether the view is actually visible.
     KRYS_NODISCARD bool IsVisible() const noexcept
@@ -348,11 +341,6 @@ namespace krys::boo
 
     /// @brief Returns true if the flush was completed.
     bool FlushCompositingState() noexcept;
-
-    // Sometimes (for plug-ins) we need to eagerly go into compositing mode.
-    void EnterCompositingMode() noexcept;
-
-    KRYS_NODISCARD static bool IsEnclosedInCompositingLayer() noexcept;
 
     /// @brief Whether the view's contents scroll in a composited layer (the render view's).
     KRYS_NODISCARD bool UsesCompositedScrolling() const noexcept;
@@ -776,11 +764,6 @@ namespace krys::boo
 
     void RemoveViewportConstrainedObject(const RenderLayerModelObject &object) noexcept;
 
-    KRYS_NODISCARD bool HasViewportConstrainedObjects() const noexcept
-    {
-      return !_viewportConstrainedObjects.empty();
-    }
-
     /// @brief Whether scrolling repaints the whole view rather than moving the painted contents.
     KRYS_NODISCARD bool UseSlowRepaints() const noexcept;
 
@@ -840,11 +823,6 @@ namespace krys::boo
 
     void SetBaseBackgroundColor(const boo::Color &backgroundColor) noexcept;
 
-    KRYS_NODISCARD bool HasOpaqueBackground() const noexcept
-    {
-      return !_isTransparent && _baseBackgroundColor.IsOpaque();
-    }
-
     void SetContentIsOpaque(bool contentIsOpaque) noexcept
     {
       _contentIsOpaque = contentIsOpaque;
@@ -874,11 +852,6 @@ namespace krys::boo
 
     void SetOverrideSizeForCSSSmallViewportUnits(OverrideViewportSize size) noexcept;
 
-    KRYS_NODISCARD Maybe<OverrideViewportSize> OverrideSizeForCSSSmallViewportUnits() const noexcept
-    {
-      return _smallViewportSizeOverride;
-    }
-
     void SetSizeForCSSSmallViewportUnits(SizeF size) noexcept;
 
     void ClearSizeOverrideForCSSSmallViewportUnits() noexcept;
@@ -886,11 +859,6 @@ namespace krys::boo
     KRYS_NODISCARD SizeF SizeForCSSSmallViewportUnits() const noexcept;
 
     void SetOverrideSizeForCSSLargeViewportUnits(OverrideViewportSize size) noexcept;
-
-    KRYS_NODISCARD Maybe<OverrideViewportSize> OverrideSizeForCSSLargeViewportUnits() const noexcept
-    {
-      return _largeViewportSizeOverride;
-    }
 
     void SetSizeForCSSLargeViewportUnits(SizeF size) noexcept;
 
@@ -913,18 +881,6 @@ namespace krys::boo
 
     /// @brief Cancels a scroll to the focused element that hasn't happened yet.
     void CancelScheduledScrolls() noexcept;
-
-    /// @brief Whether the user scrolled the view (since the view was made, or its last user scroll type was
-    /// cleared).
-    KRYS_NODISCARD bool WasScrolledByUser() const noexcept
-    {
-      return _lastUserScrollType.has_value();
-    }
-
-    KRYS_NODISCARD bool WasEverScrolledExplicitlyByUser() const noexcept
-    {
-      return _wasEverScrolledExplicitlyByUser;
-    }
 
     /// @brief Notes how the user last scrolled the view (null to clear it), which stops the view keeping the
     /// fragment or the focused element in view; a programmatic scroll isn't the user's.
