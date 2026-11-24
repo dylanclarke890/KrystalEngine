@@ -17,15 +17,15 @@ SHEETS = {
     "QuirksUserAgentStyleSheet": "quirks.css",
     "SVGUserAgentStyleSheet": "svg.css",
     "MathMLUserAgentStyleSheet": "mathml.css",
-    "MathMLCoreExtrasUserAgentStyleSheet": "mathmlCoreExtras.css",
-    "MathMLFontSizeMathUserAgentStyleSheet": "mathmlFontSizeMath.css",
-    "CounterStylesUserAgentStyleSheet": "counterStyles.css",
+    "MathMLCoreExtrasUserAgentStyleSheet": "mathml-core-extras.css",
+    "MathMLFontSizeMathUserAgentStyleSheet": "mathml-font-size-math.css",
+    "CounterStylesUserAgentStyleSheet": "counter-styles.css",
     "PopoverUserAgentStyleSheet": "popover.css",
-    "HorizontalFormControlsUserAgentStyleSheet": "horizontalFormControls.css",
-    "ThemeAdwaitaUserAgentStyleSheet": "themeAdwaita.css",
-    "MeterElementShadowUserAgentStyleSheet": "meterElementShadow.css",
-    "DetailsElementShadowUserAgentStyleSheet": "detailsElementShadow.css",
-    "MarqueeElementShadowUserAgentStyleSheet": "marqueeElementShadow.css",
+    "HorizontalFormControlsUserAgentStyleSheet": "horizontal-form-controls.css",
+    "ThemeAdwaitaUserAgentStyleSheet": "theme-adwaita.css",
+    "MeterElementShadowUserAgentStyleSheet": "meter-element-shadow.css",
+    "DetailsElementShadowUserAgentStyleSheet": "details-element-shadow.css",
+    "MarqueeElementShadowUserAgentStyleSheet": "marquee-element-shadow.css",
 }
 
 

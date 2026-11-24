@@ -203,7 +203,7 @@ Status: reviewed (2026-11-02)
 #### [15.5.5 The details and summary elements](https://html.spec.whatwg.org/#the-details-and-summary-elements)
 
 Status: reviewed (2026-11-02)
-> `html.css` and `detailsElementShadow.css`, with `HTMLDetailsElement`'s shadow tree.
+> `html.css` and `details-element-shadow.css`, with `HTMLDetailsElement`'s shadow tree.
 <!-- definitions: default-summary -->
 
 #### [15.5.6 The input element as a text entry widget](https://html.spec.whatwg.org/#the-input-element-as-a-text-entry-widget)
@@ -251,12 +251,12 @@ Status: reviewed (2026-11-02)
 #### [15.5.13 The marquee element](https://html.spec.whatwg.org/#the-marquee-element-2)
 
 Status: reviewed (2026-11-02)
-> `html.css`, `marqueeElementShadow.css`, and `HTMLMarqueeElement::ContinueAnimation`, which moves the contents with a Web Animation of the shadow tree's mover, as Chrome does (see `DIFFERENCES.md`).
+> `html.css`, `marquee-element-shadow.css`, and `HTMLMarqueeElement::ContinueAnimation`, which moves the contents with a Web Animation of the shadow tree's mover, as Chrome does (see `DIFFERENCES.md`).
 
 #### [15.5.14 The meter element](https://html.spec.whatwg.org/#the-meter-element-2)
 
 Status: reviewed (2026-11-02)
-> `meterElementShadow.css` and `RenderMeter`.
+> `meter-element-shadow.css` and `RenderMeter`.
 
 #### [15.5.15 The progress element](https://html.spec.whatwg.org/#the-progress-element-2)
 
