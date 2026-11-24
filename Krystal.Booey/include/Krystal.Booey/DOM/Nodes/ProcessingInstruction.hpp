@@ -1,26 +1,4 @@
-﻿/*
- * Copyright (C) 2000 Peter Kelly (pmk@post.com)
- * Copyright (C) 2006-2018 Apple Inc. All rights reserved.
- * Copyright (C) 2013 Samsung Electronics. All rights reserved.
- *
- * This library is free software; you can redistribute it and/or
- * modify it under the terms of the GNU Library General Public
- * License as published by the Free Software Foundation; either
- * version 2 of the License, or (at your option) any later version.
- *
- * This library is distributed in the hope that it will be useful,
- * but WITHOUT ANY WARRANTY; without even the implied warranty of
- * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU
- * Library General Public License for more details.
- *
- * You should have received a copy of the GNU Library General Public License
- * along with this library; see the file COPYING.LIB.  If not, write to
- * the Free Software Foundation, Inc., 51 Franklin Street, Fifth Floor,
- * Boston, MA 02110-1301, USA.
- *
- */
-
-#pragma once
+﻿#pragma once
 
 #include "Krystal.Booey/DOM/Nodes/CharacterData.hpp"
 #include "Krystal.Booey/DOM/Types/DOMString.hpp"
@@ -57,10 +35,14 @@ namespace krys::boo
     /// @brief The pseudo-attributes, in order, kept in step with the data.
     /// @see https://dom.spec.whatwg.org/#concept-pi-attribute-map
     List<xml::PseudoAttribute> _attributeMap;
+    // An xml-stylesheet's title and media pseudo-attributes, given to its sheet once it arrives.
     DOMString _title;
     DOMString _media;
+    /// @brief The load of the sheet, until it arrives.
     CachedResourceHandle<CachedCSSStyleSheet> _cachedSheet;
+    /// @see https://drafts.csswg.org/cssom/#associated-css-style-sheet
     RefPtr<CSSStyleSheet> _sheet;
+    /// @brief Whether the document is waiting for the sheet.
     bool _loading {false};
     bool _alternate {false};
     bool _createdByParser {false};
@@ -133,6 +115,8 @@ namespace krys::boo
 
 #pragma endregion
 
+    /// @brief Marks a processing instruction the parser made, which the style scope can add to the end of its
+    /// sheets rather than work out its place in the tree.
     void SetCreatedByParser(bool createdByParser) noexcept
     {
       _createdByParser = createdByParser;
@@ -144,8 +128,10 @@ namespace krys::boo
       return _isCSS;
     }
 
-    /// @brief Loads the sheet an `xml-stylesheet` processing instruction (a child of the document) links to.
-    /// @see https://www.w3.org/TR/xml-stylesheet/
+    /// @brief Loads the sheet an `xml-stylesheet` processing instruction (a child of the document) links to,
+    /// when it's connected or its data changes.
+    /// @see
+    /// https://drafts.csswg.org/cssom/#requirements-on-user-agents-implementing-the-xml-stylesheet-processing-instruction
     void CheckStyleSheet() noexcept;
 
   protected:
@@ -162,13 +148,16 @@ namespace krys::boo
     /// @see https://dom.spec.whatwg.org/#update-data-from-attributes
     void UpdateDataFromAttributes() noexcept;
 
+    /// @brief Makes the sheet from what arrived, with the title, media and alternate flag.
     void SetCSSStyleSheet(const utf8_string &href, const net::Url &baseUrl, utf8_stringview charset,
                           const CachedCSSStyleSheet *) noexcept override;
 
+    /// @brief Whether the sheet or one of its imports is still loading.
     KRYS_NODISCARD bool IsLoading() const noexcept;
 
     bool SheetLoaded() noexcept override;
 
+    /// @brief Parses the text that arrived into the sheet, ending the load.
     void ParseStyleSheet(const utf8_string &sheet) noexcept;
   };
 }

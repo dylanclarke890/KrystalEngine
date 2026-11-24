@@ -1,25 +1,4 @@
-﻿/*
- * Copyright (C) 2000 Peter Kelly (pmk@post.com)
- * Copyright (C) 2006-2025 Apple Inc. All rights reserved.
- * Copyright (C) 2013 Samsung Electronics. All rights reserved.
- *
- * This library is free software; you can redistribute it and/or
- * modify it under the terms of the GNU Library General Public
- * License as published by the Free Software Foundation; either
- * version 2 of the License, or (at your option) any later version.
- *
- * This library is distributed in the hope that it will be useful,
- * but WITHOUT ANY WARRANTY; without even the implied warranty of
- * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU
- * Library General Public License for more details.
- *
- * You should have received a copy of the GNU Library General Public License
- * along with this library; see the file COPYING.LIB.  If not, write to
- * the Free Software Foundation, Inc., 51 Franklin Street, Fifth Floor,
- * Boston, MA 02110-1301, USA.
- */
-
-#include "Krystal.Booey/DOM/Nodes/ProcessingInstruction.hpp"
+﻿#include "Krystal.Booey/DOM/Nodes/ProcessingInstruction.hpp"
 #include "Krystal.Booey/CSS/CSSOM/CSSStyleSheet.hpp"
 #include "Krystal.Booey/CSS/Parser/ParserContext.hpp"
 #include "Krystal.Booey/CSS/Queries/MediaQueryParser.hpp"
@@ -240,6 +219,7 @@ namespace krys::boo
 
   ProcessingInstruction::~ProcessingInstruction() noexcept
   {
+    // The sheet and the load may outlive the node, so they let go of it.
     if (RefPtr<CSSStyleSheet> sheet = _sheet)
     {
       sheet->ClearOwnerNode();
@@ -263,83 +243,85 @@ namespace krys::boo
 
   void ProcessingInstruction::CheckStyleSheet() noexcept
   {
+    // Only an xml-stylesheet processing instruction that's a child of a document in a frame links a sheet;
+    // as in Chrome, that includes one after the root element (see DIFFERENCES.md).
     Ref<Document> document = ShareRef(NodeDocument());
-    if (_target == u8"xml-stylesheet" && document->Frame() && ParentNode() == document.get())
+    if (_target != u8"xml-stylesheet" || !document->Frame() || ParentNode() != document.get())
     {
-      // see http://www.w3.org/TR/xml-stylesheet/
-      // ### support stylesheet included in a fragment of this (or another) document
-      // The pseudo-attributes are the attribute map; it's empty if the data didn't parse.
-      if (!HasAttributes())
-      {
-        return;
-      }
-      auto get = [&](utf8_stringview name)
-      {
-        return GetAttribute(name).value_or(DOMString());
-      };
-      auto type = get(u8"type");
+      return;
+    }
 
-      _isCSS = type.empty() || type == u8"text/css";
-      if (!_isCSS)
-      {
-        return;
-      }
+    // The pseudo-attributes are the attribute map, which is empty if the data didn't parse.
+    if (!HasAttributes())
+    {
+      return;
+    }
 
-      auto href = get(u8"href");
-      auto alternate = get(u8"alternate");
-      _alternate = alternate == u8"yes";
-      _title = get(u8"title");
-      _media = get(u8"media");
+    auto pseudoAttribute = [&](utf8_stringview name)
+    {
+      return GetAttribute(name).value_or(DOMString());
+    };
 
-      if (_alternate && _title.empty())
-      {
-        return;
-      }
+    // Only CSS is supported, which is what a sheet without a type is taken to be.
+    auto type = pseudoAttribute(u8"type");
+    _isCSS = type.empty() || type == u8"text/css";
+    if (!_isCSS)
+    {
+      return;
+    }
 
-      // A sheet in the document itself (`#id`) isn't loaded, as in Chrome.
-      if (href.size() > 1 && href[0] == u8'#')
-      {
-        return;
-      }
+    auto href = pseudoAttribute(u8"href");
+    _alternate = pseudoAttribute(u8"alternate") == u8"yes";
+    _title = pseudoAttribute(u8"title");
+    _media = pseudoAttribute(u8"media");
 
-      {
-        if (CachedResourceHandle cachedSheet = std::exchange(_cachedSheet, nullptr))
-        {
-          cachedSheet->RemoveClient(*this);
-        }
+    // An alternate sheet can only be chosen by its title.
+    if (_alternate && _title.empty())
+    {
+      return;
+    }
 
-        if (!_loading)
-        {
-          _loading = true;
-          document->StyleScope().AddPendingSheet(*this);
-        }
+    // A sheet in the document itself (`#id`) isn't loaded, as in Chrome.
+    if (href.size() > 1 && href[0] == u8'#')
+    {
+      return;
+    }
 
-        krys_debug_assert(!_cachedSheet);
+    // This load replaces any earlier one, and the document waits for the sheet until it arrives.
+    if (CachedResourceHandle cachedSheet = std::exchange(_cachedSheet, nullptr))
+    {
+      cachedSheet->RemoveClient(*this);
+    }
 
-        // Style sheets are UTF-8 only, whatever the charset pseudo-attribute says (see DIFFERENCES.md).
-        CachedResourceRequest request(net::ResourceRequest(document->CompleteUrl(href)),
-                                      CachedResourceLoader::DefaultCachedResourceOptions());
-        request.SetCharset(get(u8"charset"));
+    if (!_loading)
+    {
+      _loading = true;
+      document->StyleScope().AddPendingSheet(*this);
+    }
 
-        auto requested = document->GetCachedResourceLoader().RequestCSSStyleSheet(krys::move(request));
-        _cachedSheet = requested ? *requested : CachedResourceHandle<CachedCSSStyleSheet>();
-        if (CachedResourceHandle cachedSheet = _cachedSheet)
-        {
-          cachedSheet->AddClient(*this);
-        }
-        else
-        {
-          // The request may have been denied if (for example) the stylesheet is local and the document is
-          // remote.
-          _loading = false;
-          document->StyleScope().RemovePendingSheet(*this);
-        }
-      }
+    // Style sheets are UTF-8 only, whatever the charset pseudo-attribute says (see DIFFERENCES.md). An empty
+    // href resolves to the document itself, which is loaded as the sheet, as in Chrome.
+    CachedResourceRequest request(net::ResourceRequest(document->CompleteUrl(href)),
+                                  CachedResourceLoader::DefaultCachedResourceOptions());
+    request.SetCharset(pseudoAttribute(u8"charset"));
+
+    auto requested = document->GetCachedResourceLoader().RequestCSSStyleSheet(krys::move(request));
+    _cachedSheet = requested ? *requested : CachedResourceHandle<CachedCSSStyleSheet>();
+    if (CachedResourceHandle cachedSheet = _cachedSheet)
+    {
+      cachedSheet->AddClient(*this);
+    }
+    else
+    {
+      // The loader refused the request, so there's nothing to wait for.
+      _loading = false;
+      document->StyleScope().RemovePendingSheet(*this);
     }
   }
 
   bool ProcessingInstruction::IsLoading() const noexcept
   {
+    // Loading until the sheet has arrived and its own imports have loaded.
     if (_loading)
     {
       return true;
@@ -349,6 +331,7 @@ namespace krys::boo
 
   bool ProcessingInstruction::SheetLoaded() noexcept
   {
+    // Once nothing is loading, the document stops waiting for the sheet.
     if (!IsLoading())
     {
       auto &styleScope = NodeDocument().StyleScope();
@@ -385,9 +368,6 @@ namespace krys::boo
 
     _sheet = krys::move(cssSheet);
 
-    // We don't need the cross-origin security check here because we are
-    // getting the sheet text in "strict" mode. This enforces a valid CSS MIME
-    // type.
     ParseStyleSheet(sheet->SheetText().value_or(utf8_string()));
   }
 
@@ -406,6 +386,8 @@ namespace krys::boo
     styleSheet->Contents().CheckLoaded();
   }
 
+  // The style scope tracks the instruction while it's connected; its sheet is checked once it's connected and
+  // dropped when it's removed.
   void ProcessingInstruction::OnInsert() noexcept
   {
     CharacterData::OnInsert();
