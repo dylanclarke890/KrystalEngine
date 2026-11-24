@@ -1,29 +1,4 @@
-﻿/*
- * Copyright (C) 1999 Lars Knoll (knoll@kde.org)
- *           (C) 1999 Antti Koivisto (koivisto@kde.org)
- *           (C) 2001 Dirk Mueller (mueller@kde.org)
- * Copyright (C) 2004-2022 Apple Inc. All rights reserved.
- *           (C) 2006 Alexey Proskuryakov (ap@nypop.com)
- * Copyright (C) 2007 Samuel Weinig (sam@webkit.org)
- *
- * This library is free software; you can redistribute it and/or
- * modify it under the terms of the GNU Library General Public
- * License as published by the Free Software Foundation; either
- * version 2 of the License, or (at your option) any later version.
- *
- * This library is distributed in the hope that it will be useful,
- * but WITHOUT ANY WARRANTY; without even the implied warranty of
- * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU
- * Library General Public License for more details.
- *
- * You should have received a copy of the GNU Library General Public License
- * along with this library; see the file COPYING.LIB.  If not, write to
- * the Free Software Foundation, Inc., 51 Franklin Street, Fifth Floor,
- * Boston, MA 02110-1301, USA.
- *
- */
-
-#include "Krystal.Booey/HTML/Elements/HTMLTextAreaElement.hpp"
+﻿#include "Krystal.Booey/HTML/Elements/HTMLTextAreaElement.hpp"
 #include "Krystal.Booey/Accessibility/AXObjectCache.hpp"
 #include "Krystal.Booey/DOM/Algorithms/TextAlgorithms.hpp"
 #include "Krystal.Booey/DOM/Events/BeforeTextInsertedEvent.hpp"
@@ -116,9 +91,7 @@ namespace krys::boo
     }
     else
     {
-      // If this is the first focus, set a caret at the beginning of the text.
-      // This matches some browsers' behavior; see bug 11746 Comment #15.
-      // http://bugs.webkit.org/show_bug.cgi?id=11746#c15
+      // Without a kept selection to restore, the caret goes to the start.
       SetSelectionRange(0, 0, html::TextFieldSelectionDirection::SelectionHasNoDirection, revealMode);
     }
   }
@@ -157,7 +130,7 @@ namespace krys::boo
     {
       NodeDocument().GetEditor().TextDidChangeInTextArea(*this);
     }
-    // When typing in a textarea, childrenChanged is not called, so we need to force the directionality check.
+    // Typing changes the value without changing the text area's children, so its direction is checked here.
     if (SelfOrPrecedingNodesAffectDirAuto())
     {
       UpdateEffectiveTextDirection();
@@ -181,11 +154,8 @@ namespace krys::boo
       return;
     }
 
-    // selectionLength represents the selection length of this text field to be
-    // removed by this insertion.
-    // If the text field has no focus, we don't need to take account of the
-    // selection length. The selection is the source of text drag-and-drop in
-    // that case, and nothing in the text field will be removed.
+    // The insertion replaces the selection, if the text area is focused; otherwise the selection is the
+    // source of a drag and nothing is replaced.
     auto selectionRange = Focused() ? NodeDocument().Selection().Selection().ToNormalizedRange() : null;
     size_t selectionLength = selectionRange ? ComputeLengthForAPIValue(PlainText(*selectionRange)) : 0;
     krys_debug_assert(currentLength >= selectionLength);
@@ -412,12 +382,10 @@ namespace krys::boo
                                            html::TextControlSetValueSelection selection) noexcept
   {
     _wasModifiedByUser = false;
-    // Code elsewhere normalizes line endings added by the user via the keyboard or pasting.
-    // We normalize line endings coming from JavaScript here.
+    // The API's value gets its line breaks normalized; the user's edits are normalized as they're made.
     auto normalizedValue = infra::StringAlgorithms::NormalizeNewlines(newValue);
 
-    // Return early because we don't want to move the caret or trigger other side effects
-    // when the value isn't changing. This matches Firefox behavior, at least.
+    // An unchanged value leaves the caret where it is.
     if (normalizedValue == Value())
     {
       return;
@@ -447,8 +415,7 @@ namespace krys::boo
       }
       else
       {
-        // We don't change text selection here but need to update caret to
-        // the end of the text value except for initialize.
+        // Unfocused, the kept selection moves to the end.
         CacheSelection(endOfString, endOfString, html::TextFieldSelectionDirection::SelectionHasNoDirection);
       }
     }
@@ -531,7 +498,7 @@ namespace krys::boo
       return false;
     }
 
-    // The empty string is excluded from tooShort validation.
+    // An empty value is never too short.
     size_t length = !value ? LengthForAPIValue(Value()) : ComputeLengthForAPIValue(*value);
     return length > 0 && length < static_cast<size_t>(min);
   }
@@ -684,7 +651,7 @@ namespace krys::boo
     {
       if (localName == u8"align")
       {
-        // Don't map 'align' attribute.  This matches what Firefox, Opera and IE do.
+        // A text area's align has no presentational hint.
         return false;
       }
       if (localName == u8"wrap")

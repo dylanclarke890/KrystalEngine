@@ -1,28 +1,4 @@
-﻿/*
- * Copyright (C) 1999 Lars Knoll (knoll@kde.org)
- *           (C) 1999 Antti Koivisto (koivisto@kde.org)
- *           (C) 2000 Dirk Mueller (mueller@kde.org)
- * Copyright (C) 2004-2018 Apple Inc. All rights reserved.
- * Copyright (C) 2009, 2010, 2011 Google Inc. All rights reserved.
- *
- * This library is free software; you can redistribute it and/or
- * modify it under the terms of the GNU Library General Public
- * License as published by the Free Software Foundation; either
- * version 2 of the License, or (at your option) any later version.
- *
- * This library is distributed in the hope that it will be useful,
- * but WITHOUT ANY WARRANTY; without even the implied warranty of
- * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU
- * Library General Public License for more details.
- *
- * You should have received a copy of the GNU Library General Public License
- * along with this library; see the file COPYING.LIB.  If not, write to
- * the Free Software Foundation, Inc., 51 Franklin Street, Fifth Floor,
- * Boston, MA 02110-1301, USA.
- *
- */
-
-#pragma once
+﻿#pragma once
 
 #include "Krystal.Booey/HTML/Elements/HTMLFormControlElement.hpp"
 #include "Krystal.Booey/Platform/Scrolling/ScrollTypes.hpp"
@@ -126,8 +102,10 @@ namespace krys::boo
     /// user can select in the control from its border or padding).
     void ForwardEvent(Event &event) noexcept;
 
+    /// @brief The shadow tree element that shows the placeholder, if there is one.
     KRYS_NODISCARD virtual HTMLElement *PlaceholderElement() const noexcept = 0;
 
+    /// @brief Converts between a position in the inner text and an index in the value.
     KRYS_NODISCARD int32 IndexForVisiblePosition(const VisiblePosition &position) const noexcept;
 
     KRYS_NODISCARD VisiblePosition VisiblePositionForIndex(int32 index) const noexcept;
@@ -142,6 +120,8 @@ namespace krys::boo
     /// @see https://html.spec.whatwg.org/#dom-textarea/input-selectiondirection
     KRYS_NODISCARD DOMStringView SelectionDirection() const noexcept;
 
+    /// @brief Sets one end, or the direction, of the selection, keeping the rest.
+    /// @see https://html.spec.whatwg.org/#dom-textarea/input-selectionstart
     void SetSelectionStart(uint32 start) noexcept;
 
     void SetSelectionEnd(uint32 end) noexcept;
@@ -172,19 +152,24 @@ namespace krys::boo
                            SelectionRevealMode revealMode = SelectionRevealMode::DoNotReveal,
                            html::ForBindings forBindings = html::ForBindings::No) noexcept;
 
+    /// @brief Queues a `selectionchange` event at the control, unless one is queued already.
     void ScheduleSelectionChangeEvent() noexcept;
 
+    /// @brief The direction of the frame's selection in the control, or the cached one.
     KRYS_NODISCARD html::TextFieldSelectionDirection ComputeSelectionDirection() const noexcept;
 
     /// @brief The cached selection as a range in the inner text, or nothing if there's none.
     KRYS_NODISCARD Maybe<dom::SimpleRange> Selection() const noexcept;
 
+    /// @brief The selected part of the value.
     KRYS_NODISCARD DOMString SelectedText() const noexcept;
 
     void DispatchFormControlChangeEvent() noexcept final;
 
+    /// @brief Queues `select` and `selectionchange` events at the control.
     void ScheduleSelectEvent() noexcept;
 
+    /// @brief The control's value, and its setter.
     KRYS_NODISCARD virtual DOMString Value() const noexcept = 0;
 
     /// @brief Whether the control's auto directionality comes from its value rather than its text.
@@ -197,6 +182,8 @@ namespace krys::boo
                html::TextControlSetValueSelection selection =
                  html::TextControlSetValueSelection::SetSelectionToEnd) noexcept = 0;
 
+    /// @brief The shadow tree element the value is edited in, if the shadow tree exists; the second form
+    /// makes the shadow tree first.
     KRYS_NODISCARD virtual RefPtr<html::TextControlInnerTextElement> InnerTextElement() const noexcept = 0;
 
     virtual RefPtr<html::TextControlInnerTextElement>
@@ -210,6 +197,7 @@ namespace krys::boo
     /// @return Whether the cached selection changed.
     bool SelectionChanged(bool shouldFireSelectEvent) noexcept;
 
+    /// @brief Whether the value last changed by the user's editing (rather than from the API).
     KRYS_NODISCARD bool LastChangeWasUserEdit() const noexcept;
 
     /// @brief Replaces the inner text with @p value (with a `<br>` after a trailing line break).
@@ -218,8 +206,10 @@ namespace krys::boo
     /// @brief The inner text: its text, with a line break for each `<br>` but a trailing one.
     KRYS_NODISCARD DOMString InnerTextValue() const noexcept;
 
+    /// @brief Whether the user can edit the value: the control isn't disabled or read-only.
     KRYS_NODISCARD virtual bool IsInnerTextElementEditable() const noexcept;
 
+    /// @brief Whether the control can show a placeholder.
     KRYS_NODISCARD virtual bool SupportsPlaceholder() const noexcept = 0;
 
     /// @brief Whether the placeholder is shown, as `:placeholder-shown` matches.
@@ -228,6 +218,7 @@ namespace krys::boo
       return _isPlaceholderVisible;
     }
 
+    /// @brief Shows or hides the placeholder, restyling :placeholder-shown.
     void UpdatePlaceholderVisibility() noexcept;
 
     /// @brief The directionality the `dirname` attribute submits: "ltr" or "rtl".
@@ -236,19 +227,24 @@ namespace krys::boo
     /// @brief The length of @p text in UTF-16 code units, as script measures strings.
     KRYS_NODISCARD static size_t LengthForAPIValue(DOMStringView text) noexcept;
 
+    /// @brief Records the value as of the last change event, to know whether the next one fires.
     void SetTextAsOfLastFormControlChangeEvent(DOMString text) noexcept
     {
       _textAsOfLastFormControlChangeEvent = krys::move(text);
     }
 
   private:
+    /// @brief Whether the placeholder should show: the control supports one, its value is empty and its
+    /// placeholder isn't (line breaks aside).
     KRYS_NODISCARD bool PlaceholderShouldBeVisible() const noexcept;
 
   protected:
     HTMLTextFormControlElement(Document &document, html::HTMLElementInterface interface) noexcept;
 
+    /// @brief Whether the placeholder attribute is missing or only line breaks.
     KRYS_NODISCARD bool IsPlaceholderEmpty() const noexcept;
 
+    /// @brief Updates the placeholder element's text from the attribute.
     virtual void UpdatePlaceholderText() noexcept = 0;
 
     void DisabledStateChanged() noexcept override;
@@ -260,26 +256,35 @@ namespace krys::boo
       return true;
     }
 
+    /// @brief Makes the inner text editable or not, as the control's disabled or read-only state changes.
     void UpdateInnerTextElementEditability() noexcept;
 
+    /// @brief Keeps the selection, for the selection APIs while the control isn't focused.
+    /// @return Whether it changed.
     bool CacheSelection(uint32 start, uint32 end, html::TextFieldSelectionDirection direction) noexcept;
 
+    /// @brief Selects the kept selection again (as the control is focused), firing `select` if it changed.
     void RestoreCachedSelection(SelectionRevealMode revealMode) noexcept;
 
+    /// @brief Whether a selection has been kept.
     KRYS_NODISCARD bool HasCachedSelection() const noexcept
     {
       return _hasCachedSelection;
     }
 
+    /// @brief The start and end of the frame's selection in the control, or the kept ones.
     KRYS_NODISCARD uint32 ComputeSelectionStart() const noexcept;
 
     KRYS_NODISCARD uint32 ComputeSelectionEnd() const noexcept;
 
+    /// @brief Called after the user edited the inner text.
     virtual void SubtreeHasChanged() noexcept = 0;
 
     /// @brief The value with a line break where each line wraps, for `wrap="hard"`.
     KRYS_NODISCARD DOMString ValueWithHardLineBreaks() const noexcept;
 
+    /// @brief Gives the inner text's style what it takes from the control's: its direction, bidi, field
+    /// sizing and so on.
     static void AdjustInnerTextStyle(const RenderStyle &parentStyle, RenderStyle &textBlockStyle) noexcept;
 
     void OnInsert() noexcept override;
@@ -290,16 +295,15 @@ namespace krys::boo
 
     void DispatchBlurEvent(EventTarget *relatedTarget) noexcept override;
 
-    // Returns true if user-editable value is empty. Used to check placeholder visibility.
+    /// @brief Whether the value the user edits is empty, which shows the placeholder.
     KRYS_NODISCARD virtual bool IsEmptyValue() const noexcept = 0;
 
-    // Called in DispatchFocusEvent(), after placeholder process, before calling parent's
-    // DispatchFocusEvent().
+    /// @brief Called as the control gains or loses the focus: after the placeholder's update, before the
+    /// focus or blur event.
     virtual void HandleFocusEvent(Node * /* oldFocusedNode */) noexcept
     {
     }
 
-    // Called in DispatchBlurEvent(), after placeholder process, before calling parent's DispatchBlurEvent().
     virtual void HandleBlurEvent() noexcept
     {
     }
@@ -307,11 +311,13 @@ namespace krys::boo
     void OnAttributeChanged(const DOMStringAtom &localName, Maybe<DOMStringView> oldValue,
                             Maybe<DOMStringView> value, const DOMStringAtom &namespaceURI) noexcept override;
 
+    /// @brief Records that the value changed from the API.
     void SetLastChangeWasNotUserEdit() noexcept
     {
       _lastChangeWasUserEdit = false;
     }
 
+    /// @brief Keeps the parsed `maxlength` and `minlength` attributes (-1 for none).
     void InternalSetMaxLength(int32 maxLength) noexcept
     {
       _maxLength = maxLength;
@@ -326,6 +332,7 @@ namespace krys::boo
     KRYS_NODISCARD static int32 ParseLengthAttribute(Maybe<DOMStringView> value) noexcept;
 
   private:
+    /// @brief The index in the value of a position in the inner text.
     KRYS_NODISCARD uint32 IndexForPosition(const dom::Position &position) const noexcept;
   };
 }

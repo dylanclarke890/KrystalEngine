@@ -1,29 +1,4 @@
-﻿/*
- * Copyright (C) 1999 Lars Knoll (knoll@kde.org)
- *           (C) 1999 Antti Koivisto (koivisto@kde.org)
- *           (C) 2001 Dirk Mueller (mueller@kde.org)
- * Copyright (C) 2004-2022 Apple Inc. All rights reserved.
- *           (C) 2006 Alexey Proskuryakov (ap@nypop.com)
- * Copyright (C) 2014 Google Inc. All rights reserved.
- *
- * This library is free software; you can redistribute it and/or
- * modify it under the terms of the GNU Library General Public
- * License as published by the Free Software Foundation; either
- * version 2 of the License, or (at your option) any later version.
- *
- * This library is distributed in the hope that it will be useful,
- * but WITHOUT ANY WARRANTY; without even the implied warranty of
- * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU
- * Library General Public License for more details.
- *
- * You should have received a copy of the GNU Library General Public License
- * along with this library; see the file COPYING.LIB.  If not, write to
- * the Free Software Foundation, Inc., 51 Franklin Street, Fifth Floor,
- * Boston, MA 02110-1301, USA.
- *
- */
-
-#include "Krystal.Booey/HTML/Elements/HTMLTextFormControlElement.hpp"
+﻿#include "Krystal.Booey/HTML/Elements/HTMLTextFormControlElement.hpp"
 #include "Krystal.Booey/Accessibility/AXObjectCache.hpp"
 #include "Krystal.Booey/CSS/Selectors/SelectorCheckerTestFunctions.hpp"
 #include "Krystal.Booey/DOM/Algorithms/ElementTextDirection.hpp"
@@ -115,7 +90,7 @@ namespace krys::boo
 
     void StripTrailingNewline(DOMString &result) noexcept
     {
-      // Remove one trailing newline; there's always one that's collapsed out by rendering.
+      // The <br> after a trailing line break, there so the empty last line renders, isn't in the value.
       if (!result.empty() && result.back() == u8'\n')
       {
         result.pop_back();
@@ -206,7 +181,7 @@ namespace krys::boo
     {
       UpdatePlaceholderVisibility();
     }
-    // Match the order in Document::setFocusedElement.
+    // The control's own blur handling runs before the blur event, as focus handling runs before focus.
     HandleBlurEvent();
     HTMLFormControlElement::DispatchBlurEvent(relatedTarget);
   }
@@ -243,8 +218,7 @@ namespace krys::boo
 
   bool HTMLTextFormControlElement::PlaceholderShouldBeVisible() const noexcept
   {
-    // This function is used by the style resolver to match the :placeholder-shown pseudo class.
-    // Since it is used for styling, it must not use any value depending on the style.
+    // Selector matching (:placeholder-shown) uses this, so it can't depend on the style.
     return SupportsPlaceholder() && IsEmptyValue() && !IsPlaceholderEmpty();
   }
 
@@ -401,7 +375,7 @@ namespace krys::boo
     }
     else
     {
-      // Default is "preserve".
+      // "preserve", the default.
       int64 delta = static_cast<int64>(replacementLength) - (end - start);
 
       if (newSelectionStart > end)
@@ -497,7 +471,7 @@ namespace krys::boo
         return CacheSelection(start, end, direction);
       }
 
-      // Cache selection if neither selection or focus is on the input.
+      // The selection is only kept while the frame's selection isn't in the control.
       if (frame && html::EnclosingTextFormControl(document->Selection().Selection().Start()) != this)
       {
         return CacheSelection(start, end, direction);
@@ -506,7 +480,7 @@ namespace krys::boo
       // Layout is brought up to date, as the inner text's renderer is read below.
       document->UpdateLayoutIgnorePendingStylesheets();
 
-      // Cache selection if renderer is invisible.
+      // Or while the control isn't visible.
       if (auto *renderer = Renderer())
       {
         if (renderer->Style().Visibility() == Visibility::Hidden || !innerText->GetRenderBox()
@@ -1031,8 +1005,7 @@ namespace krys::boo
   void HTMLTextFormControlElement::AdjustInnerTextStyle(const RenderStyle &parentStyle,
                                                         RenderStyle &textBlockStyle) noexcept
   {
-    // The inner block, if present, always has its direction set to LTR,
-    // so we need to inherit the direction and unicode-bidi style from the element.
+    // The inner text's direction and bidi come from the control.
     textBlockStyle.SetDirection(parentStyle.GetWritingMode().ComputedTextDirection());
     textBlockStyle.SetUnicodeBidi(parentStyle.UnicodeBidi());
 
