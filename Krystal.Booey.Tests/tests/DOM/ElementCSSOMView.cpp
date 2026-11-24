@@ -1,4 +1,5 @@
 ﻿#include "catch2/catch_test_macros.hpp"
+#include "catch2/generators/catch_generators.hpp"
 #include "Krystal.Booey.Tests/Layout/LayoutTestUtils.hpp"
 #include "Krystal.Booey.Tests/Style/ResolverTestUtils.hpp"
 #include "Krystal.Booey/DOM/Geometry/DOMRect.hpp"
@@ -139,6 +140,52 @@ namespace krys::boo::dom::tests
       auto &root = *fixture.Document->DocumentElement();
       CHECK(root.ClientWidth() == 800);
       CHECK(root.ClientHeight() == 600);
+    }
+  }
+
+  TEST_CASE_METHOD(css::tests::ValueFixture, "Element: CSSOM View geometry under zoom and table captions",
+                   "[DOM][Element][CSSOMView]")
+  {
+    ResolverFixture fixture {layout::tests::AhemDocument(
+      u8R"(
+        body { margin: 0 }
+        .box { margin-left: 10px; width: 5px; height: 5px }
+        table { border-spacing: 0; border-collapse: collapse }
+        td { width: 50px; height: 20px; padding: 0 }
+        caption { height: 10px }
+      )",
+      u8R"(<div style="zoom: 2"><div id=a class=box style="zoom: 2"></div></div>)"
+      u8R"(<div style="zoom: 2"><div style="zoom: 0.5"><div id=b class=box></div></div></div>)"
+      u8R"(<div style="zoom: 2"><div id=c class=box style="zoom: 0.5"></div></div>)"
+      u8R"(<div id=d class=box style="zoom: 2"></div>)"
+      u8R"(<table id=t><caption>c</caption><tr><td></td></tr></table>)")};
+
+    SECTION("Offsets are in the element's own unzoomed pixels, however its zooms nest")
+    {
+      // Chrome: 10 and 5 for each. Page zoom changes none of them: they're in CSS pixels.
+      bool pageZoomed = GENERATE(false, true);
+      CAPTURE(pageZoomed);
+      if (pageZoomed)
+      {
+        fixture.Frame->SetPageZoomFactor(2);
+      }
+      for (auto id : {u8"a", u8"b", u8"c", u8"d"})
+      {
+        CAPTURE(css::tests::ToNarrow(id));
+        auto &box = fixture.ById(id);
+        CHECK(box.OffsetLeft() == 10);
+        CHECK(box.OffsetWidth() == 5);
+      }
+    }
+
+    SECTION("A table's client rect covers its caption")
+    {
+      // Chrome: one rect over the caption and the table, 50 by 30; CSSOM View gives each its own rect.
+      auto &table = fixture.ById(u8"t");
+      auto top = table.GetBoundingClientRect()->Y();
+      auto rects = table.GetClientRects();
+      REQUIRE(rects->Length() == 1u);
+      CHECK(RectIs(*rects->Item(0), 0, top, 50, 30));
     }
   }
 

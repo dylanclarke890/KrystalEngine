@@ -3936,34 +3936,6 @@ namespace krys::boo
       return ScrollAlignment::AlignToEdgeIfNeeded;
     }
 
-    KRYS_NODISCARD double LocalZoomForRenderer(const RenderElement &renderer) noexcept
-    {
-      // FIXME: This does the wrong thing if two opposing zooms are in effect and canceled each
-      // other out, but the alternative is that we'd have to crawl up the whole render tree every
-      // time (or store an additional bit in the RenderStyle to indicate that a zoom was specified).
-      double zoomFactor = 1;
-      if (renderer.Style().UsedZoom() != 1)
-      {
-        // Need to find the nearest enclosing RenderElement that set up
-        // a differing zoom, and then we divide our result by it to eliminate the zoom.
-        const RenderElement *prev = &renderer;
-        for (const RenderElement *curr = prev->Parent(); curr; curr = curr->Parent())
-        {
-          if (curr->Style().UsedZoom() != prev->Style().UsedZoom())
-          {
-            zoomFactor = style::Evaluate<double>(prev->Style().Zoom());
-            break;
-          }
-          prev = curr;
-        }
-        if (prev->IsRenderView())
-        {
-          zoomFactor = style::Evaluate<double>(prev->Style().Zoom());
-        }
-      }
-      return zoomFactor;
-    }
-
     enum class LegacyCSSOMElementMetricsRoundingStrategy : bool
     {
       Round,
@@ -3982,8 +3954,9 @@ namespace krys::boo
     KRYS_NODISCARD int32 AdjustOffsetForZoomAndSubpixelLayout(const RenderBoxModelObject &renderer,
                                                               const LayoutUnit &offset) noexcept
     {
+      // The offsets are in the element's own CSS pixels: its used zoom, page zoom included, is divided out.
       auto offsetLeft = LayoutUnit(RoundToInt(offset));
-      double zoomFactor = LocalZoomForRenderer(renderer);
+      double zoomFactor = renderer.Style().UsedZoom();
       if (zoomFactor == 1)
       {
         return ConvertToNonSubpixelValue(offsetLeft.ToDouble(),
