@@ -203,8 +203,6 @@ namespace krys::boo
 
     BlendingKeyframes &operator=(BlendingKeyframes &&) noexcept = default;
 
-    KRYS_NODISCARD bool operator==(const BlendingKeyframes &other) const noexcept;
-
     KRYS_NODISCARD const KeyframesIdentifier &Identifier() const noexcept
     {
       return _identifier;

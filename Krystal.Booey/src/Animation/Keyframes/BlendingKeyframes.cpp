@@ -68,28 +68,6 @@ namespace krys::boo
     _usesAnchorFunctions = false;
   }
 
-  bool BlendingKeyframes::operator==(const BlendingKeyframes &o) const noexcept
-  {
-    if (_keyframes.size() != o._keyframes.size())
-    {
-      return false;
-    }
-
-    for (size_t i = 0; i < _keyframes.size(); ++i)
-    {
-      if (_keyframes[i].Offset() != o._keyframes[i].Offset())
-      {
-        return false;
-      }
-      if (_keyframes[i].Style() != o._keyframes[i].Style())
-      {
-        return false;
-      }
-    }
-
-    return true;
-  }
-
   const StringAtom &BlendingKeyframes::KeyframesName() const noexcept
   {
     if (const auto *name = std::get_if<StringAtom>(&_identifier))
