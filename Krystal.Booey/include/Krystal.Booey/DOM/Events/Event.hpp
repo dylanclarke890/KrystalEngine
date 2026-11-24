@@ -288,12 +288,8 @@ namespace krys::boo
       _defaultHandled = true;
     }
 
-    /// @brief Whether no default event handler runs for the event (a key an input method handled).
-    KRYS_NODISCARD bool IsDefaultEventHandlerIgnored() const noexcept
-    {
-      return _isDefaultEventHandlerIgnored;
-    }
-
+    /// @brief Keeps every default event handler from running for the event, as for a key an input method
+    /// handled.
     void SetIsDefaultEventHandlerIgnored() noexcept
     {
       _isDefaultEventHandlerIgnored = true;
