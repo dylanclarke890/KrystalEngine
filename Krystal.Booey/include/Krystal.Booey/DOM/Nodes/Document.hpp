@@ -402,8 +402,7 @@ namespace krys::boo
     // root the document is.
     List<WeakPtr<IntersectionObserver>> _intersectionObservers;
     UniquePtr<IntersectionObserverData> _intersectionObserverData;
-    // Collection of canvas contexts that need periodic work in "PrepareCanvasesForDisplayOrFlush" phase of
-    // the rendering update.
+    // The canvas contexts with work to do in the rendering update's canvas preparation step.
     List<WeakPtr<html::CanvasRenderingContext>> _canvasContextsToPrepare;
     UniquePtr<SVGDocumentExtensions> _svgExtensions;
     // The intersection observer that loads the lazily loaded images, made on first use.
