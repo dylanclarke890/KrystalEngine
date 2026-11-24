@@ -16,7 +16,8 @@ namespace krys::boo::tests
     }
   }
 
-  TEST_CASE("ScrollAlignment: the rect to expose", "[Platform][ScrollAlignment]")
+  TEST_CASE("ScrollAlignment: the rect to expose",
+            "[Platform][ScrollAlignment][cssom-view:determine-the-scroll-into-view-position]")
   {
     const auto &ifNeeded = ScrollAlignment::AlignToEdgeIfNeeded;
     const auto &centerIfNeeded = ScrollAlignment::AlignCenterIfNeeded;
@@ -58,6 +59,22 @@ namespace krys::boo::tests
       auto alignX = ifNeeded;
       alignX.DisableLegacyHorizontalVisibilityThreshold();
       CHECK(Reveal(wide, alignX, ifNeeded) == LayoutPoint(20_lu, 0_lu));
+    }
+
+    SECTION("A rect bigger than the visible bounds")
+    {
+      auto alignX = ifNeeded;
+      alignX.DisableLegacyHorizontalVisibilityThreshold();
+
+      // Its end edge sticking out aligns its start edge...
+      CHECK(Reveal(LayoutRect(50_lu, 30_lu, 200_lu, 100_lu), alignX, ifNeeded) == LayoutPoint(50_lu, 30_lu));
+
+      // ...and its start edge sticking out aligns its end edge.
+      CHECK(Reveal(LayoutRect(-150_lu, -100_lu, 200_lu, 120_lu), alignX, ifNeeded)
+            == LayoutPoint(-50_lu, -30_lu));
+
+      // Sticking out at both ends, it doesn't scroll.
+      CHECK(Reveal(LayoutRect(-10_lu, -10_lu, 200_lu, 100_lu), alignX, ifNeeded) == LayoutPoint());
     }
 
     SECTION("Visibility check rect")

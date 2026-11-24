@@ -116,10 +116,12 @@ namespace krys::boo
       }
     }
 
-    // If we're trying to align to the closest edge, and the exposeRect is further right
-    // than the visibleBounds, and not bigger than the visible area, then align with the right.
-    if (scrollX == Behavior::AlignToClosestEdge && exposeRect.MaxX() > visibleBounds.MaxX()
-        && exposeRect.Width() < visibleBounds.Width())
+    // https://drafts.csswg.org/cssom-view-1/#determine-the-scroll-into-view-position (inline is "nearest")
+    // The right edge is aligned when it's outside and the rect is narrower, or when the left edge is outside
+    // and the rect is wider.
+    if (scrollX == Behavior::AlignToClosestEdge
+        && ((exposeRect.MaxX() > visibleBounds.MaxX() && exposeRect.Width() < visibleBounds.Width())
+            || (exposeRect.X() < visibleBounds.X() && exposeRect.Width() > visibleBounds.Width())))
     {
       scrollX = Behavior::AlignRight;
     }
@@ -178,10 +180,12 @@ namespace krys::boo
       }
     }
 
-    // If we're trying to align to the closest edge, and the exposeRect is further down
-    // than the visibleBounds, and not bigger than the visible area, then align with the bottom.
-    if (scrollY == Behavior::AlignToClosestEdge && exposeRect.MaxY() > visibleBounds.MaxY()
-        && exposeRect.Height() < visibleBounds.Height())
+    // https://drafts.csswg.org/cssom-view-1/#determine-the-scroll-into-view-position (block is "nearest")
+    // The bottom edge is aligned when it's outside and the rect is shorter, or when the top edge is outside
+    // and the rect is taller.
+    if (scrollY == Behavior::AlignToClosestEdge
+        && ((exposeRect.MaxY() > visibleBounds.MaxY() && exposeRect.Height() < visibleBounds.Height())
+            || (exposeRect.Y() < visibleBounds.Y() && exposeRect.Height() > visibleBounds.Height())))
     {
       scrollY = Behavior::AlignBottom;
     }
