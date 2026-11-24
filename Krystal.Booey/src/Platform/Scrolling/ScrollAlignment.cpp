@@ -1,47 +1,4 @@
-﻿/*
- * Copyright (C) 2006, 2007, 2008, 2016 Apple Inc. All rights reserved.
- *
- * Portions are Copyright (C) 1998 Netscape Communications Corporation.
- *
- * Other contributors:
- *   Robert O'Callahan <roc+@cs.cmu.edu>
- *   David Baron <dbaron@fas.harvard.edu>
- *   Christian Biesinger <cbiesinger@web.de>
- *   Randall Jesup <rjesup@wgate.com>
- *   Roland Mainz <roland.mainz@informatik.med.uni-giessen.de>
- *   Josh Soref <timeless@mac.com>
- *   Boris Zbarsky <bzbarsky@mit.edu>
- *
- * This library is free software; you can redistribute it and/or
- * modify it under the terms of the GNU Lesser General Public
- * License as published by the Free Software Foundation; either
- * version 2.1 of the License, or (at your option) any later version.
- *
- * This library is distributed in the hope that it will be useful,
- * but WITHOUT ANY WARRANTY; without even the implied warranty of
- * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU
- * Lesser General Public License for more details.
- *
- * You should have received a copy of the GNU Lesser General Public
- * License along with this library; if not, write to the Free Software
- * Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
- *
- * Alternatively, the contents of this file may be used under the terms
- * of either the Mozilla Public License Version 1.1, found at
- * http://www.mozilla.org/MPL/ (the "MPL") or the GNU General Public
- * License Version 2.0, found at http://www.fsf.org/copyleft/gpl.html
- * (the "GPL"), in which case the provisions of the MPL or the GPL are
- * applicable instead of those above.  If you wish to allow use of your
- * version of this file only under the terms of one of those two
- * licenses (the MPL or the GPL) and not to allow others to use your
- * version of this file under the LGPL, indicate your decision by
- * deletingthe provisions above and replace them with the notice and
- * other provisions required by the MPL or the GPL, as the case may be.
- * If you do not delete the provisions above, a recipient may use your
- * version of this file under any of the LGPL, the MPL or the GPL.
- */
-
-#include "Krystal.Booey/Platform/Scrolling/ScrollAlignment.hpp"
+﻿#include "Krystal.Booey/Platform/Scrolling/ScrollAlignment.hpp"
 #include <algorithm>
 
 namespace krys::boo
@@ -69,147 +26,91 @@ namespace krys::boo
   const ScrollAlignment ScrollAlignment::AlignBottomAlways = {Behavior::AlignBottom, Behavior::AlignBottom,
                                                               Behavior::AlignBottom};
 
+  namespace
+  {
+    /// @brief One axis of a rect: where it starts and how long it is.
+    struct ScrollAxisSpan
+    {
+      LayoutUnit Start;
+      LayoutUnit Length;
+
+      KRYS_NODISCARD LayoutUnit End() const noexcept
+      {
+        return Start + Length;
+      }
+    };
+
+    /// @brief Where the visible span should start along one axis so @p expose is placed as @p alignment asks.
+    /// @param endBehavior The behaviour that aligns the end edge on this axis (right or bottom).
+    /// @param visibleThreshold How much of @p expose showing counts as all of it, if anything.
+    /// @param roundCenterUp Whether centring rounds the half-difference up to a whole pixel.
+    KRYS_NODISCARD LayoutUnit ScrollPositionForAxis(ScrollAxisSpan visible, ScrollAxisSpan expose,
+                                                    ScrollAxisSpan visibilityCheck,
+                                                    const ScrollAlignment &alignment, Behavior endBehavior,
+                                                    Maybe<LayoutUnit> visibleThreshold,
+                                                    bool roundCenterUp) noexcept
+    {
+      auto behavior = alignment.RectHidden;
+      if (visibilityCheck.End() >= visible.Start && visibilityCheck.Start <= visible.End())
+      {
+        auto shown = std::max(LayoutUnit(),
+                              std::min(visible.End(), expose.End()) - std::max(visible.Start, expose.Start));
+        if (shown == expose.Length || shown == visible.Length
+            || (visibleThreshold && shown >= *visibleThreshold))
+        {
+          behavior = alignment.RectVisible;
+        }
+        else if (shown > 0)
+        {
+          behavior = alignment.RectPartial;
+        }
+      }
+
+      // https://drafts.csswg.org/cssom-view-1/#determine-the-scroll-into-view-position ("nearest")
+      // The end edge is aligned when it's outside and the rect is smaller than the visible span, or when the
+      // start edge is outside and the rect is bigger; otherwise the start edge is.
+      if (behavior == Behavior::AlignToClosestEdge
+          && ((expose.End() > visible.End() && expose.Length < visible.Length)
+              || (expose.Start < visible.Start && expose.Length > visible.Length)))
+      {
+        behavior = endBehavior;
+      }
+
+      if (behavior == Behavior::NoScroll)
+      {
+        return visible.Start;
+      }
+      if (behavior == endBehavior)
+      {
+        return expose.End() - visible.Length;
+      }
+      if (behavior == Behavior::AlignCenter)
+      {
+        auto half = (expose.Length - visible.Length) / 2;
+        return expose.Start + (roundCenterUp ? LayoutUnit(half.Ceil()) : half);
+      }
+      // Start edges, and the other axis's end edges, which mean nothing on this one.
+      return expose.Start;
+    }
+  }
+
   LayoutRect GetRectToExposeForScrollIntoView(const LayoutRect &visibleBounds, const LayoutRect &exposeRect,
                                               const ScrollAlignment &alignX, const ScrollAlignment &alignY,
                                               const Maybe<LayoutRect> visibilityCheckRect) noexcept
   {
+    // At least this much of a rect showing horizontally counts as all of it, while the threshold is enabled.
     constexpr int32 MinIntersectForReveal = 32;
 
-    auto scrollX = alignX.GetHiddenBehavior();
-
-    bool intersectsInX = false;
-    if (visibilityCheckRect)
-    {
-      intersectsInX =
-        visibilityCheckRect->MaxX() >= visibleBounds.X() && visibilityCheckRect->X() <= visibleBounds.MaxX();
-    }
-    else
-    {
-      intersectsInX = exposeRect.MaxX() >= visibleBounds.X() && exposeRect.X() <= visibleBounds.MaxX();
-    }
-
-    // Determine the appropriate X behavior.
-    if (intersectsInX)
-    {
-      auto intersectWidth = std::max(LayoutUnit(), std::min(visibleBounds.MaxX(), exposeRect.MaxX())
-                                                     - std::max(visibleBounds.X(), exposeRect.X()));
-
-      if (intersectWidth == exposeRect.Width()
-          || (alignX.LegacyHorizontalVisibilityThresholdEnabled() && intersectWidth >= MinIntersectForReveal)
-          || intersectWidth == visibleBounds.Width())
-      {
-        // If the rectangle is fully visible, use the specified visible behavior.
-        // If the rectangle is partially visible, but over a certain threshold,
-        // then treat it as fully visible to avoid unnecessary horizontal scrolling.
-        // The same if the rect is bigger than the visible area.
-        scrollX = alignX.GetVisibleBehavior();
-      }
-      else if (intersectWidth > 0)
-      {
-        // If the rectangle is partially visible, but not above the minimum threshold, use the specified
-        // partial behavior
-        scrollX = alignX.GetPartialBehavior();
-      }
-      else
-      {
-        scrollX = alignX.GetHiddenBehavior();
-      }
-    }
-
-    // https://drafts.csswg.org/cssom-view-1/#determine-the-scroll-into-view-position (inline is "nearest")
-    // The right edge is aligned when it's outside and the rect is narrower, or when the left edge is outside
-    // and the rect is wider.
-    if (scrollX == Behavior::AlignToClosestEdge
-        && ((exposeRect.MaxX() > visibleBounds.MaxX() && exposeRect.Width() < visibleBounds.Width())
-            || (exposeRect.X() < visibleBounds.X() && exposeRect.Width() > visibleBounds.Width())))
-    {
-      scrollX = Behavior::AlignRight;
-    }
-
-    // Given the X behavior, compute the X coordinate.
-    LayoutUnit x;
-    if (scrollX == Behavior::NoScroll)
-    {
-      x = visibleBounds.X();
-    }
-    else if (scrollX == Behavior::AlignRight)
-    {
-      x = exposeRect.MaxX() - visibleBounds.Width();
-    }
-    else if (scrollX == Behavior::AlignCenter)
-    {
-      x = exposeRect.X() + (exposeRect.Width() - visibleBounds.Width()) / 2;
-    }
-    else
-    {
-      x = exposeRect.X();
-    }
-
-    auto scrollY = alignY.GetHiddenBehavior();
-
-    bool intersectsInY = false;
-    if (visibilityCheckRect)
-    {
-      intersectsInY =
-        visibilityCheckRect->MaxY() >= visibleBounds.Y() && visibilityCheckRect->Y() <= visibleBounds.MaxY();
-    }
-    else
-    {
-      intersectsInY = exposeRect.MaxY() >= visibleBounds.Y() && exposeRect.Y() <= visibleBounds.MaxY();
-    }
-
-    // Determine the appropriate Y behavior.
-    if (intersectsInY)
-    {
-      auto intersectHeight = std::max(LayoutUnit(), std::min(visibleBounds.MaxY(), exposeRect.MaxY())
-                                                      - std::max(visibleBounds.Y(), exposeRect.Y()));
-      if (intersectHeight == exposeRect.Height() || intersectHeight == visibleBounds.Height())
-      {
-        // If the rectangle is fully visible, or bigger than the visible area, use the specified visible
-        // behavior.
-        scrollY = alignY.GetVisibleBehavior();
-      }
-      else if (intersectHeight > 0)
-      {
-        // If the rectangle is partially visible, use the specified partial behavior
-        scrollY = alignY.GetPartialBehavior();
-      }
-      else
-      {
-        scrollY = alignY.GetHiddenBehavior();
-      }
-    }
-
-    // https://drafts.csswg.org/cssom-view-1/#determine-the-scroll-into-view-position (block is "nearest")
-    // The bottom edge is aligned when it's outside and the rect is shorter, or when the top edge is outside
-    // and the rect is taller.
-    if (scrollY == Behavior::AlignToClosestEdge
-        && ((exposeRect.MaxY() > visibleBounds.MaxY() && exposeRect.Height() < visibleBounds.Height())
-            || (exposeRect.Y() < visibleBounds.Y() && exposeRect.Height() > visibleBounds.Height())))
-    {
-      scrollY = Behavior::AlignBottom;
-    }
-
-    // Given the Y behavior, compute the Y coordinate.
-    LayoutUnit y;
-    if (scrollY == Behavior::NoScroll)
-    {
-      y = visibleBounds.Y();
-    }
-    else if (scrollY == Behavior::AlignBottom)
-    {
-      y = exposeRect.MaxY() - visibleBounds.Height();
-    }
-    else if (scrollY == Behavior::AlignCenter)
-    {
-      auto halfHeight = (exposeRect.Height() - visibleBounds.Height()) / 2;
-      y = exposeRect.Y() + LayoutUnit(halfHeight.Ceil());
-    }
-    else
-    {
-      y = exposeRect.Y();
-    }
-
+    const auto &checkRect = visibilityCheckRect ? *visibilityCheckRect : exposeRect;
+    auto x = ScrollPositionForAxis(
+      {visibleBounds.X(), visibleBounds.Width()}, {exposeRect.X(), exposeRect.Width()},
+      {checkRect.X(), checkRect.Width()}, alignX, Behavior::AlignRight,
+      alignX.EnableLegacyHorizontalVisibilityThreshold ? Maybe<LayoutUnit>(LayoutUnit(MinIntersectForReveal))
+                                                       : null,
+      false);
+    auto y = ScrollPositionForAxis({visibleBounds.Y(), visibleBounds.Height()},
+                                   {exposeRect.Y(), exposeRect.Height()}, {checkRect.Y(), checkRect.Height()},
+                                   alignY, Behavior::AlignBottom, null, true);
     return LayoutRect(LayoutPoint(x, y), visibleBounds.Size());
   }
 }
