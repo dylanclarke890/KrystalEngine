@@ -78,33 +78,6 @@ namespace krys::boo
     }
   }
 
-  SelectionData::SelectionData(utf8_stringview text, utf8_stringview markup, const net::Url &url,
-                               utf8_stringview uriList, RefPtr<SharedBuffer> &&customData,
-                               bool canSmartReplace) noexcept
-  {
-    if (!text.empty())
-    {
-      SetText(text);
-    }
-    if (!markup.empty())
-    {
-      SetMarkup(markup);
-    }
-    if (!url.IsEmpty())
-    {
-      SetUrl(url, {});
-    }
-    if (!uriList.empty())
-    {
-      SetURIList(uriList);
-    }
-    if (customData)
-    {
-      _customData = krys::move(customData);
-    }
-    SetCanSmartReplace(canSmartReplace);
-  }
-
   void SelectionData::SetText(utf8_stringview text) noexcept
   {
     _text = ReplaceNonBreakingSpaceWithSpace(text);

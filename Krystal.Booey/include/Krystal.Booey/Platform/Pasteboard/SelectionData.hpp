@@ -46,9 +46,6 @@ namespace krys::boo
   public:
     SelectionData() noexcept = default;
 
-    SelectionData(utf8_stringview text, utf8_stringview markup, const net::Url &url, utf8_stringview uriList,
-                  RefPtr<SharedBuffer> &&customData, bool canSmartReplace) noexcept;
-
     /// @brief Sets the text, with no-break spaces made spaces.
     void SetText(utf8_stringview text) noexcept;
 
