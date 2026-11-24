@@ -122,6 +122,7 @@ namespace krys::boo
     /// image's frame, once it's decoded, is shown in.
     HashSet<const CachedImageClient *> _clientsWaitingForAsyncDecoding;
     bool _shouldPaintBrokenImage {true};
+    bool _allowsOrientationOverride {true};
 
   public:
     explicit CachedImage(CachedResourceRequest &&) noexcept;
@@ -151,6 +152,19 @@ namespace krys::boo
     KRYS_NODISCARD bool CanRender(const RenderElement *renderer, float multiplier) noexcept
     {
       return !ErrorOccurred() && !ImageSizeForRenderer(renderer, multiplier).IsEmpty();
+    }
+
+    /// @brief Whether `image-orientation` may override the orientation the image's data gives it: not for a
+    /// load that failed (or was canceled), unless it's a data URL.
+    /// @note The renderers don't consult it yet (see `RenderElement::GetImageOrientation`).
+    KRYS_NODISCARD bool AllowsOrientationOverride() const noexcept
+    {
+      return _allowsOrientationOverride;
+    }
+
+    void SetAllowsOrientationOverride(bool allowsOrientationOverride) noexcept
+    {
+      _allowsOrientationOverride = allowsOrientationOverride;
     }
 
     void SetContainerContextForClient(const CachedImageClient &, const LayoutSize &, float,

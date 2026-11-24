@@ -459,6 +459,7 @@ namespace krys::boo
     }
 
     _image = nullptr;
+    _allowsOrientationOverride = true;
   }
 
   void CachedImage::UpdateBufferInternal(const SharedBuffer &data) noexcept
@@ -532,6 +533,7 @@ namespace krys::boo
     }
 
     SetLoading(false);
+    SetAllowsOrientationOverride(!LoadFailedOrCanceled() || _image->SourceUrl().ProtocolIsData());
 
     NotifyObservers();
     CachedResource::FinishLoading(data);
