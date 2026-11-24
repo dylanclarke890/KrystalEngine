@@ -175,7 +175,8 @@ audio:not([controls]) {
     display: none !important;
 }
 
-/* heading elements */
+/* https://html.spec.whatwg.org/#sections-and-headings. Headings are styled by element, not by their computed
+   heading level with :heading() as in the specification (see DIFFERENCES.md). */
 
 h1 {
     display: block;
@@ -224,7 +225,7 @@ h6 {
     font-weight: bold;
 }
 
-/* tables */
+/* https://html.spec.whatwg.org/#tables-2 */
 
 table {
     display: table;
@@ -252,7 +253,7 @@ tfoot {
     border-color: inherit;
 }
 
-/* for tables without table section elements (can happen with XHTML or dynamically created tables) */
+/* A row straight in a table, with no section around it. */
 table > tr {
     vertical-align: middle;
 }
@@ -276,6 +277,7 @@ td, th {
     vertical-align: inherit;
 }
 
+/* A header cell is centred unless its parent's alignment isn't the initial one. */
 th {
     font-weight: bold;
     text-align: -internal-th-center;
@@ -286,12 +288,12 @@ caption {
     text-align: -internal-center;
 }
 
-/* for table elements with form inside following rules should apply */
+/* Only in HTML documents. */
 :is(table, thead, tbody, tfoot, tr) > form:-internal-html-document {
     display: none !important;
 }
 
-/* lists */
+/* https://html.spec.whatwg.org/#lists */
 
 ul, menu, dir {
     display: block;
@@ -338,9 +340,9 @@ dt {
     display: block;
 }
 
-/* FIXME: this should also match ::before::marker and ::after::marker but we don't support
-   this yet. When we do, we can remove the code specific to ::before and ::after in
-   RenderListItem::computeMarkerStyle(), see bugs.webkit.org/b/218897. */
+/* https://drafts.csswg.org/css-lists-3/#marker-properties, with text-indent, which it doesn't set.
+   FIXME: Match ::before::marker and ::after::marker too, as it does, once they're supported; until then
+   RenderListItem::ComputeMarkerStyle() gives those markers these properties itself. */
 ::marker {
     unicode-bidi: isolate;
     font-variant-numeric: tabular-nums;
