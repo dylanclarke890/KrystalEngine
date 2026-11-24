@@ -1,26 +1,4 @@
-﻿/*
-    Copyright (C) 1998 Lars Knoll (knoll@mpi-hd.mpg.de)
-    Copyright (C) 2001 Dirk Mueller <mueller@kde.org>
-    Copyright (C) 2006 Samuel Weinig (sam.weinig@gmail.com)
-    Copyright (C) 2004, 2005, 2006, 2007 Apple Inc. All rights reserved.
-
-    This library is free software; you can redistribute it and/or
-    modify it under the terms of the GNU Library General Public
-    License as published by the Free Software Foundation; either
-    version 2 of the License, or (at your option) any later version.
-
-    This library is distributed in the hope that it will be useful,
-    but WITHOUT ANY WARRANTY; without even the implied warranty of
-    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU
-    Library General Public License for more details.
-
-    You should have received a copy of the GNU Library General Public License
-    along with this library; see the file COPYING.LIB.  If not, write to
-    the Free Software Foundation, Inc., 51 Franklin Street, Fifth Floor,
-    Boston, MA 02110-1301, USA.
-*/
-
-#pragma once
+﻿#pragma once
 
 #include "Krystal.Booey/Graphics/Images/ImageTypes.hpp"
 #include "Krystal.Booey/Loader/Cache/CachedResourceClient.hpp"
@@ -44,6 +22,7 @@ namespace krys::boo
   public:
     ~CachedImageClient() noexcept override = default;
 
+    /// @brief Its client kind.
     KRYS_NODISCARD static CachedResourceClientType ExpectedType() noexcept
     {
       return ImageType;
@@ -54,39 +33,40 @@ namespace krys::boo
       return ExpectedType();
     }
 
-    // Called whenever a frame of an image changes because we got more data from the network.
-    // If not null, the RectI is the changed rect of the image.
+    /// @brief Called when the image changes (more data, a failure); the rectangle, if given, is the part that
+    /// did.
     virtual void ImageChanged(CachedImage *, const RectI * = nullptr) noexcept
     {
     }
 
+    /// @brief Whether the image's decoded data may be dropped while the client uses it.
     KRYS_NODISCARD virtual bool CanDestroyDecodedData() const noexcept
     {
       return true;
     }
 
-    // Called when a new decoded frame for a large image is available or when an animated image is ready to
-    // advance to the next frame.
+    /// @brief Called when a frame decoded off the main thread is ready, or an animation is ready for its next
+    /// frame.
+    /// @return Whether the client shows the image in the viewport: an animation nobody sees stops.
     virtual VisibleInViewportState ImageFrameAvailable(CachedImage &, ImageAnimatingState,
                                                        const RectI *) noexcept;
 
-    KRYS_NODISCARD virtual VisibleInViewportState ImageVisibleInViewport(const boo::Document &) const noexcept
-    {
-      return VisibleInViewportState::No;
-    }
-
+    /// @brief Called after the client is removed from the image.
     virtual void DidRemoveCachedImageClient(CachedImage &) noexcept
     {
     }
 
+    /// @brief Called when the image's content changes without new data (an SVG image's document).
     virtual void ImageContentChanged(CachedImage &) noexcept
     {
     }
 
+    /// @brief Called when the image needs a rendering update (to advance an animation).
     virtual void ScheduleRenderingUpdateForImage(CachedImage &) noexcept
     {
     }
 
+    /// @brief Whether the image may animate for the client.
     KRYS_NODISCARD virtual bool AllowsAnimation() const noexcept
     {
       return true;

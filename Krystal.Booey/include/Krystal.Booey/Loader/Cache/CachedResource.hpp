@@ -1,26 +1,4 @@
-﻿/*
-    Copyright (C) 1998 Lars Knoll (knoll@mpi-hd.mpg.de)
-    Copyright (C) 2001 Dirk Mueller <mueller@kde.org>
-    Copyright (C) 2006 Samuel Weinig (sam.weinig@gmail.com)
-    Copyright (C) 2004-2025 Apple Inc. All rights reserved.
-
-    This library is free software; you can redistribute it and/or
-    modify it under the terms of the GNU Library General Public
-    License as published by the Free Software Foundation; either
-    version 2 of the License, or (at your option) any later version.
-
-    This library is distributed in the hope that it will be useful,
-    but WITHOUT ANY WARRANTY; without even the implied warranty of
-    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU
-    Library General Public License for more details.
-
-    You should have received a copy of the GNU Library General Public License
-    along with this library; see the file COPYING.LIB.  If not, write to
-    the Free Software Foundation, Inc., 51 Franklin Street, Fifth Floor,
-    Boston, MA 02110-1301, USA.
-*/
-
-#pragma once
+﻿#pragma once
 
 #include "Krystal.Booey/Loader/Cache/CachedResourceHandle.hpp"
 #include "Krystal.Booey/Loader/LoaderStrategy.hpp"
@@ -31,7 +9,6 @@
 #include "Krystal.Core/Memory/RefCounted.hpp"
 #include "Krystal.Core/Time/MonotonicTime.hpp"
 #include "Krystal.Core/Time/Timer.hpp"
-#include "Krystal.Core/Types/Func.hpp"
 #include "Krystal.Core/Types/SharedBuffer.hpp"
 #include "Krystal.Net/ResourceError.hpp"
 #include "Krystal.Net/ResourceRequest.hpp"
@@ -47,9 +24,9 @@ namespace krys::boo
   template <typename>
   class CachedResourceClientWalker;
 
-  // A resource that is held in the cache. Classes who want to use this object should derive
-  // from CachedResourceClient, to get the function calls in case the requested data has arrived.
-  // This class also does the actual communication with the loader strategy to obtain the resource.
+  /// @brief A loaded (or loading) resource, shared through the memory cache by the documents that use it.
+  /// It loads itself through the host's loader strategy (or decodes a data URL), and tells its clients
+  /// (`CachedResourceClient`) when it's done.
   /// @note Reference counted: handles (`CachedResourceHandle`) and the memory cache keep a resource alive.
   class CachedResource : public RefCounted<CachedResource>, public CanMakeWeakPtr<CachedResource>
   {
@@ -75,9 +52,9 @@ namespace krys::boo
 
     enum Status : uint8
     {
-      Unknown, // let cache decide what to do with it
-      Pending, // only partially loaded
-      Cached,  // regular case
+      Unknown, // Not loading yet (an image waits to be asked for).
+      Pending, // Loading.
+      Cached,  // Loaded.
       LoadError,
       DecodeError,
     };
@@ -94,30 +71,36 @@ namespace krys::boo
     uint32 _encodedSize {0};
     uint32 _decodedSize {0};
     Timer _decodedDataDeletionTimer;
-    MonotonicTime::duration _lastDecodedAccessTime {}; // Used as a "thrash guard" in the cache
+    // When the decoded data was last used: pruning leaves recently used data alone.
+    MonotonicTime::duration _lastDecodedAccessTime {};
     utf8_string _initiatorType;
-    uint32 _accessCount {0};
     Type _type;
     Status _status {Pending};
     bool _inCache {false};
     bool _loading {false};
+    bool _ignoreForRequestCount {false};
     /// @brief The loader whose request count the load is in, until it's done.
     WeakPtr<CachedResourceLoader> _requestCountingLoader;
-    List<Func<void()>> _loadedCallbacks;
 
   public:
     CachedResource(CachedResourceRequest, Type) noexcept;
 
     virtual ~CachedResource() noexcept;
 
+    /// @brief Starts loading for @p loader's document, which waits for it: a data URL is decoded here, and
+    /// anything else goes to the host's loader strategy. The result comes back as a networking task.
     virtual void Load(CachedResourceLoader &) noexcept;
 
+    /// @brief Takes the data received so far.
     virtual void UpdateBuffer(const SharedBuffer &) noexcept;
 
+    /// @brief Takes the loaded data (null if there's none), ends the load and tells the clients.
     virtual void FinishLoading(const SharedBuffer *) noexcept;
 
+    /// @brief Ends the load with an error status, dropping the data, and tells the clients.
     virtual void Error(Status) noexcept;
 
+    /// @brief The network error the load failed with, if it did.
     void SetResourceError(const net::ResourceError &error) noexcept
     {
       _error = error;
@@ -128,6 +111,7 @@ namespace krys::boo
       return _error;
     }
 
+    /// @brief The request, and its URL.
     KRYS_NODISCARD const net::ResourceRequest &GetResourceRequest() const noexcept
     {
       return _resourceRequest;
@@ -138,11 +122,13 @@ namespace krys::boo
       return _resourceRequest.Url();
     }
 
+    /// @brief What kind of resource it is.
     KRYS_NODISCARD Type GetType() const noexcept
     {
       return _type;
     }
 
+    /// @brief The response's MIME type and expected length (-1 if unknown).
     KRYS_NODISCARD utf8_string MimeType() const noexcept
     {
       return Response().MimeType();
@@ -153,10 +139,13 @@ namespace krys::boo
       return Response().ExpectedContentLength();
     }
 
+    /// @brief Adds or removes a client (a client can be added more than once, and is removed as often).
+    /// A resource without clients is dead: its decoded data can go, and the cache may evict it.
     void AddClient(CachedResourceClient &) noexcept;
 
     void RemoveClient(CachedResourceClient &) noexcept;
 
+    /// @brief Whether the resource has any clients, or @p client.
     KRYS_NODISCARD bool HasClients() const noexcept
     {
       return !_clients.empty();
@@ -167,8 +156,10 @@ namespace krys::boo
       return _clients.contains(const_cast<CachedResourceClient *>(&client));
     }
 
+    /// @brief Called after a client is added: one added once the load is over is told so at once.
     virtual void DidAddClient(CachedResourceClient &) noexcept;
 
+    /// @brief Called after a client is removed, and after the last one is.
     virtual void DidRemoveClient(CachedResourceClient &) noexcept
     {
     }
@@ -177,13 +168,17 @@ namespace krys::boo
     {
     }
 
+    /// @brief Starts the timer that drops the decoded data of a dead resource, if the memory cache sets one
+    /// (`MemoryCache::SetDeadDecodedDataDeletionInterval`).
     void DestroyDecodedDataIfNeeded() noexcept;
 
+    /// @brief How many distinct clients the resource has.
     KRYS_NODISCARD uint32 NumberOfClients() const noexcept
     {
       return static_cast<uint32>(_clients.size());
     }
 
+    /// @brief The load's status.
     KRYS_NODISCARD Status GetStatus() const noexcept
     {
       return _status;
@@ -194,6 +189,8 @@ namespace krys::boo
       _status = status;
     }
 
+    /// @brief The memory the resource is counted as using in the cache: its encoded data, its decoded data
+    /// and an estimate of its own overhead.
     KRYS_NODISCARD uint32 Size() const noexcept
     {
       return EncodedSize() + DecodedSize() + OverheadSize();
@@ -211,12 +208,7 @@ namespace krys::boo
 
     KRYS_NODISCARD uint32 OverheadSize() const noexcept;
 
-    // FIXME. Method name is inaccurate. Loading might not have started yet.
-    KRYS_NODISCARD bool IsLoaded() const noexcept
-    {
-      return !_loading;
-    }
-
+    /// @brief Whether the resource is loading (false both before its load starts and after it ends).
     KRYS_NODISCARD bool IsLoading() const noexcept
     {
       return _loading;
@@ -224,120 +216,129 @@ namespace krys::boo
 
     void SetLoading(bool) noexcept;
 
+    /// @brief Whether the load hasn't started yet (an image waiting to be asked for).
     KRYS_NODISCARD virtual bool StillNeedsLoad() const noexcept
     {
       return false;
     }
 
-    void WhenLoaded(Func<void()> &&) noexcept;
+    /// @brief Whether it's an image.
+    /// @brief Whether the load leaves its document's load event alone (a lazy image, an icon).
+    KRYS_NODISCARD bool IgnoreForRequestCount() const noexcept
+    {
+      return _ignoreForRequestCount;
+    }
 
     KRYS_NODISCARD bool IsImage() const noexcept
     {
       return GetType() == Type::ImageResource;
     }
 
-    KRYS_NODISCARD uint32 AccessCount() const noexcept
-    {
-      return _accessCount;
-    }
-
-    void IncreaseAccessCount() noexcept
-    {
-      _accessCount++;
-    }
-
-    // Computes the status of an object after loading.
+    /// @brief Marks a load that ended without an error as cached.
     void Finish() noexcept;
 
-    // Called by the cache if the object has been removed from the cache
-    // while still being referenced. This means the object should delete itself
-    // if the number of clients observing it ever drops to 0.
+    /// @brief Records whether the memory cache holds the resource; one it doesn't lives only as long as its
+    /// handles.
     void SetInCache(bool inCache) noexcept
     {
       _inCache = inCache;
     }
 
+    /// @brief Whether the memory cache holds the resource.
     KRYS_NODISCARD bool InCache() const noexcept
     {
       return _inCache;
     }
 
+    /// @brief The loaded data, if it's kept.
     KRYS_NODISCARD SharedBuffer *ResourceBuffer() const noexcept
     {
       return _data.get();
     }
 
+    /// @brief Takes the load's response (which a type may inspect), and its setter.
     virtual void ResponseReceived(net::ResourceResponse &&) noexcept;
 
     void SetResponse(net::ResourceResponse &&) noexcept;
 
+    /// @brief The load's response.
     KRYS_NODISCARD const net::ResourceResponse &Response() const noexcept
     {
       return _response;
     }
 
+    /// @brief What asked for the resource, as Resource Timing reports it: an element's local name, or `css`.
     KRYS_NODISCARD const utf8_string &InitiatorType() const noexcept
     {
       return _initiatorType;
     }
 
+    /// @brief Whether the load or the decoding failed.
     KRYS_NODISCARD bool ErrorOccurred() const noexcept
     {
       return _status == LoadError || _status == DecodeError;
     }
 
+    /// @brief Whether the load failed with a network error.
     KRYS_NODISCARD bool LoadFailedOrCanceled() const noexcept
     {
       return !_error.IsNull();
     }
 
+    /// @brief Whether the data is kept as it arrives.
     KRYS_NODISCARD DataBufferingPolicy GetDataBufferingPolicy() const noexcept
     {
       return _options.DataBuffering;
     }
 
+    /// @brief Whether the resource may go in the memory cache, by its load options.
     KRYS_NODISCARD bool AllowsCaching() const noexcept
     {
       return _options.Caching == CachingPolicy::AllowCaching
              || _options.Caching == CachingPolicy::AllowCachingMainResourcePrefetch;
     }
 
+    /// @brief The load options.
     KRYS_NODISCARD const ResourceLoaderOptions &Options() const noexcept
     {
       return _options;
     }
 
+    /// @brief Drops the decoded data (an image's bitmaps, a style sheet's parsed rules), keeping what it's
+    /// decoded from.
     virtual void DestroyDecodedData() noexcept
     {
     }
 
   protected:
+    /// @brief Sets the size of the encoded or decoded data, updating the memory cache's totals.
     void SetEncodedSize(uint32) noexcept;
 
     void SetDecodedSize(uint32) noexcept;
 
+    /// @brief Records that the decoded data was used, which makes it the cache's most recently used.
     void DidAccessDecodedData(MonotonicTime::duration timeStamp) noexcept;
 
-    net::ResourceResponse &MutableResponse() noexcept
-    {
-      return _response;
-    }
-
+    /// @brief Stops or restarts the timer that drops a dead resource's decoded data.
     void StopDecodedDataDeletionTimer() noexcept;
 
     void RestartDecodedDataDeletionTimer() noexcept;
 
   private:
+    /// @brief Tells the clients the load is over, if it is.
     virtual void CheckNotify() noexcept;
 
+    /// @brief Fails a load that couldn't start.
     void FailBeforeStarting() noexcept;
 
+    /// @brief Drops the decoded data, as its timer fired.
     void DecodedDataDeletionTimerFired() noexcept;
 
     /// @brief What upstream's subresource loader does when a load ends: hands the response and data to the
     /// resource, or its error.
     void DidFinishLoad(LoadResult) noexcept;
 
+    /// @brief Ends the load with its result: the response and data, or the error.
     void ApplyLoadResult(LoadResult) noexcept;
 
     /// @brief The load is done: it leaves its loader's request count, which may let the document finish

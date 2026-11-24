@@ -1,27 +1,4 @@
-﻿/*
-    Copyright (C) 1998 Lars Knoll (knoll@mpi-hd.mpg.de)
-    Copyright (C) 2001 Dirk Mueller (mueller@kde.org)
-    Copyright (C) 2002 Waldo Bastian (bastian@kde.org)
-    Copyright (C) 2006 Samuel Weinig (sam.weinig@gmail.com)
-    Copyright (C) 2004-2025 Apple Inc. All rights reserved.
-
-    This library is free software; you can redistribute it and/or
-    modify it under the terms of the GNU Library General Public
-    License as published by the Free Software Foundation; either
-    version 2 of the License, or (at your option) any later version.
-
-    This library is distributed in the hope that it will be useful,
-    but WITHOUT ANY WARRANTY; without even the implied warranty of
-    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU
-    Library General Public License for more details.
-
-    You should have received a copy of the GNU Library General Public License
-    along with this library; see the file COPYING.LIB.  If not, write to
-    the Free Software Foundation, Inc., 51 Franklin Street, Fifth Floor,
-    Boston, MA 02110-1301, USA.
-*/
-
-#include "Krystal.Booey/Loader/Cache/CachedResource.hpp"
+﻿#include "Krystal.Booey/Loader/Cache/CachedResource.hpp"
 #include "Krystal.Booey/HTML/EventLoop/EventLoop.hpp"
 #include "Krystal.Booey/Loader/Cache/CachedResourceClient.hpp"
 #include "Krystal.Booey/Loader/Cache/CachedResourceClientWalker.hpp"
@@ -37,7 +14,8 @@ namespace krys::boo
   CachedResource::CachedResource(CachedResourceRequest request, Type type) noexcept
       : _options(request.Options()),
         _decodedDataDeletionTimer(*this, &CachedResource::DecodedDataDeletionTimerFired),
-        _initiatorType(request.InitiatorType()), _type(type)
+        _initiatorType(request.InitiatorType()), _type(type),
+        _ignoreForRequestCount(request.IgnoreForRequestCount())
   {
     _resourceRequest = request.ReleaseResourceRequest();
   }
@@ -46,12 +24,6 @@ namespace krys::boo
   {
     krys_debug_assert(!HasClients());
     krys_debug_assert(!InCache());
-
-    auto callbacks = std::exchange(_loadedCallbacks, {});
-    for (auto &callback : callbacks)
-    {
-      callback();
-    }
   }
 
   void CachedResource::FailBeforeStarting() noexcept
@@ -216,21 +188,6 @@ namespace krys::boo
   void CachedResource::SetLoading(bool b) noexcept
   {
     _loading = b;
-    if (_loading)
-    {
-      return;
-    }
-    auto callbacks = std::exchange(_loadedCallbacks, {});
-    for (auto &callback : callbacks)
-    {
-      callback();
-    }
-  }
-
-  void CachedResource::WhenLoaded(Func<void()> &&callback) noexcept
-  {
-    krys_debug_assert(_loading);
-    _loadedCallbacks.push_back(krys::move(callback));
   }
 
   void CachedResource::SetResponse(net::ResourceResponse &&newResponse) noexcept
@@ -258,7 +215,7 @@ namespace krys::boo
   {
     StopDecodedDataDeletionTimer();
 
-    // FIXME: Make calls to notifyFinished async
+    // A client added once the load is over is told so at once.
     if (!IsLoading() && !StillNeedsLoad())
     {
       client.NotifyFinished(*this);
@@ -334,7 +291,6 @@ namespace krys::boo
 
     if (AllowsCaching() && InCache())
     {
-      // Update the cache's size totals.
       MemoryCache::Singleton().AdjustSize(HasClients(), delta);
     }
   }

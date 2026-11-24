@@ -1,27 +1,4 @@
-﻿/*
-    Copyright (C) 1998 Lars Knoll (knoll@mpi-hd.mpg.de)
-    Copyright (C) 2001 Dirk Mueller (mueller@kde.org)
-    Copyright (C) 2002 Waldo Bastian (bastian@kde.org)
-    Copyright (C) 2006 Samuel Weinig (sam.weinig@gmail.com)
-    Copyright (C) 2004-2025 Apple Inc. All rights reserved.
-
-    This library is free software; you can redistribute it and/or
-    modify it under the terms of the GNU Library General Public
-    License as published by the Free Software Foundation; either
-    version 2 of the License, or (at your option) any later version.
-
-    This library is distributed in the hope that it will be useful,
-    but WITHOUT ANY WARRANTY; without even the implied warranty of
-    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU
-    Library General Public License for more details.
-
-    You should have received a copy of the GNU Library General Public License
-    along with this library; see the file COPYING.LIB.  If not, write to
-    the Free Software Foundation, Inc., 51 Franklin Street, Fifth Floor,
-    Boston, MA 02110-1301, USA.
-*/
-
-#include "Krystal.Booey/Loader/Cache/CachedImage.hpp"
+﻿#include "Krystal.Booey/Loader/Cache/CachedImage.hpp"
 #include "Krystal.Booey/Graphics/Images/BitmapImage.hpp"
 #include "Krystal.Booey/Graphics/Images/BrokenImageIcon.hpp"
 #include "Krystal.Booey/HTML/EventLoop/EventLoop.hpp"
@@ -61,14 +38,7 @@ namespace krys::boo
     {
       _settings = ShareRef(document->GetSettings());
     }
-    if (loader.ShouldPerformImageLoad(Url()))
-    {
-      CachedResource::Load(loader);
-    }
-    else
-    {
-      SetLoading(false);
-    }
+    CachedResource::Load(loader);
   }
 
   void CachedImage::DidAddClient(CachedResourceClient &client) noexcept
@@ -133,9 +103,6 @@ namespace krys::boo
   {
     if (ErrorOccurred() && _shouldPaintBrokenImage)
     {
-      // Returning the 1x broken image is non-ideal, but we cannot reliably access the appropriate
-      // deviceScaleFactor from here. It is critical that callers use CachedImage::brokenImage()
-      // when they need the real, deviceScaleFactor-appropriate broken image icon.
       return BrokenImage(1).first;
     }
 
@@ -151,9 +118,6 @@ namespace krys::boo
   {
     if (ErrorOccurred() && _shouldPaintBrokenImage)
     {
-      // Returning the 1x broken image is non-ideal, but we cannot reliably access the appropriate
-      // deviceScaleFactor from here. It is critical that callers use CachedImage::brokenImage()
-      // when they need the real, deviceScaleFactor-appropriate broken image icon.
       return BrokenImage(1).first;
     }
 
@@ -238,7 +202,7 @@ namespace krys::boo
       return imageSize;
     }
 
-    // Don't let images that have a width/height >= 1 shrink below 1 when zoomed.
+    // Zooming out doesn't take a dimension below 1 unless it's 0.
     LayoutSize minimumSize(imageSize.Width() > 0 ? 1 : 0, imageSize.Height() > 0 ? 1 : 0);
     imageSize.ClampToMinimumSize(minimumSize);
 
@@ -272,7 +236,6 @@ namespace krys::boo
 
   void CachedImage::CreateImage() noexcept
   {
-    // Create the image if it doesn't yet exist.
     if (_image)
     {
       return;
@@ -289,7 +252,7 @@ namespace krys::boo
         _svgImageCache = CreateUnique<SVGImageCache>(svgImage);
       }
 
-      // Send queued container size requests.
+      // The container sizes asked for before there was an image.
       if (image->UsesContainerSize())
       {
         for (auto &[client, context] : _pendingContainerContextRequests)
@@ -476,9 +439,7 @@ namespace krys::boo
     SetEncodedSize(static_cast<uint32>(_data->Size()));
     CreateImage();
 
-    // Have the image update its data from its internal buffer. Decoding the image data
-    // will be delayed until info (like size or specific image frames) are queried which
-    // usually happens when the observers are repainted.
+    // The image takes the data; it decodes it only when asked for its size or a frame, usually as it's drawn.
     img::EncodedDataStatus encodedDataStatus = UpdateImageData(false);
 
     if (encodedDataStatus > img::EncodedDataStatus::Error
@@ -489,7 +450,7 @@ namespace krys::boo
 
     if (encodedDataStatus == img::EncodedDataStatus::Error || _image->IsNull())
     {
-      // Image decoding failed. Either we need more image data or the image data is malformed.
+      // The data isn't an image.
       Error(ErrorOccurred() ? GetStatus() : DecodeError);
       if (InCache())
       {
@@ -498,7 +459,7 @@ namespace krys::boo
       return;
     }
 
-    // Tell our observers to try to draw.
+    // The clients can draw what there is.
     NotifyObservers();
   }
 
@@ -530,7 +491,7 @@ namespace krys::boo
 
     if (encodedDataStatus == img::EncodedDataStatus::Error || !_image || _image->IsNull())
     {
-      // Image decoding failed; the image data is malformed.
+      // The data isn't an image.
       Error(ErrorOccurred() ? GetStatus() : DecodeError);
       if (InCache())
       {
@@ -626,11 +587,6 @@ namespace krys::boo
     return true;
   }
 
-  bool CachedImage::IsClientWaitingForAsyncDecoding(const CachedImageClient &client) const noexcept
-  {
-    return _clientsWaitingForAsyncDecoding.contains(&client);
-  }
-
   void CachedImage::AddClientWaitingForAsyncDecoding(CachedImageClient &client) noexcept
   {
     krys_debug_assert(client.ResourceClientType() == CachedImageClient::ExpectedType());
@@ -640,12 +596,8 @@ namespace krys::boo
     }
     if (!HasClient(client))
     {
-      // If the <html> element does not have its own background specified, painting the root box
-      // renderer uses the style of the <body> element, see RenderView::rendererForRootBackground().
-      // In this case, the client we are asked to add is the root box renderer. Since we can't add
-      // a client to _clientsWaitingForAsyncDecoding unless it is one of the clients, we are going
-      // to cancel the repaint optimization we do in ImageFrameAvailable() by adding
-      // all the clients to _clientsWaitingForAsyncDecoding.
+      // Not one of the image's clients: the root's renderer, painting the body's background image. As only
+      // clients can wait, they all do, so the root is repainted with them.
       CachedResourceClientWalker<CachedImageClient> walker(*this);
       while (auto *other = walker.Next())
       {
@@ -671,7 +623,7 @@ namespace krys::boo
 
     while (auto *client = walker.Next())
     {
-      // All the clients of animated images have to be notified. The new frame has to be drawn in all of them.
+      // An animation's new frame goes to every client; a decoded frame only to the clients waiting for it.
       if (animatingState == ImageAnimatingState::No && !_clientsWaitingForAsyncDecoding.contains(client))
       {
         continue;

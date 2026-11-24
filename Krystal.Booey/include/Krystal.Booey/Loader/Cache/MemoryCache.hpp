@@ -1,28 +1,4 @@
-﻿/*
-    Copyright (C) 1998 Lars Knoll (knoll@mpi-hd.mpg.de)
-    Copyright (C) 2001 Dirk Mueller <mueller@kde.org>
-    Copyright (C) 2004, 2005, 2006, 2007, 2008 Apple Inc. All rights reserved.
-
-    This library is free software; you can redistribute it and/or
-    modify it under the terms of the GNU Library General Public
-    License as published by the Free Software Foundation; either
-    version 2 of the License, or (at your option) any later version.
-
-    This library is distributed in the hope that it will be useful,
-    but WITHOUT ANY WARRANTY; without even the implied warranty of
-    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU
-    Library General Public License for more details.
-
-    You should have received a copy of the GNU Library General Public License
-    along with this library; see the file COPYING.LIB.  If not, write to
-    the Free Software Foundation, Inc., 51 Franklin Street, Fifth Floor,
-    Boston, MA 02110-1301, USA.
-
-    This class provides all functionality needed for loading images, style sheets and html
-    pages from the web. It has a memory cache for these objects.
-*/
-
-#pragma once
+﻿#pragma once
 
 #include "Krystal.Booey/Loader/Cache/CachedResource.hpp"
 #include "Krystal.Core/Containers/HashMap.hpp"
@@ -32,17 +8,12 @@
 
 namespace krys::boo
 {
-  // This cache holds subresources used by Web pages: images, scripts, stylesheets, etc.
-  // The cache keeps a flexible but bounded window of dead resources that grows/shrinks
-  // depending on the live resource load. Here's an example of cache growth over time,
-  // with a min dead resource capacity of 25% and a max dead resource capacity of 50%:
-
-  // |-----|                              Dead: -
-  // |----------|                         Live: +
-  // --|----------|                         Cache boundary: | (objects outside this mark have been evicted)
-  // --|----------++++++++++|
-  // -------|-----+++++++++++++++|
-  // -------|-----+++++++++++++++|+++++
+  /// @brief The process-wide cache of the resources documents load (images, style sheets, fonts, SVG
+  /// documents), by URL, so documents share them and don't load them again.
+  ///
+  /// A resource with clients is live; one without is dead. The capacity is shared: dead resources get what
+  /// live ones leave, kept between a minimum and a maximum. Pruning drops the decoded data of the least
+  /// recently used resources, live ones too, and evicts dead ones, until the sizes fit.
   /// @note Resources are kept in one list, least recently accessed first, rather than in lists by size and
   /// access count; live resources (those with clients) aren't kept in a list of their own.
   class MemoryCache final
@@ -60,11 +31,11 @@ namespace krys::boo
     uint32 _maxDeadCapacity {DefaultCacheCapacity};
     MonotonicTime::duration _deadDecodedDataDeletionInterval {};
 
-    uint32 _liveSize {0}; // The number of bytes currently consumed by "live" resources in the cache.
-    uint32 _deadSize {0}; // The number of bytes currently consumed by "dead" resources in the cache.
+    // The bytes the cache's live and dead resources take.
+    uint32 _liveSize {0};
+    uint32 _deadSize {0};
 
-    // A URL-based map of all resources that are in the cache (including the freshest version of objects that
-    // are currently being referenced by a Web page).
+    // The cached resources by URL (without an HTTP URL's fragment).
     HashMap<utf8_string, Ref<CachedResource>> _resources;
     // The resources in the cache, least recently accessed first.
     List<CachedResource *> _lruList;
@@ -72,54 +43,52 @@ namespace krys::boo
     Timer _pruneTimer;
 
   public:
+    /// @brief The cache.
     KRYS_NODISCARD static MemoryCache &Singleton() noexcept;
 
+    /// @brief The cached resource for the request's URL, if there is one.
     KRYS_NODISCARD CachedResource *ResourceForRequest(const net::ResourceRequest &) noexcept;
 
+    /// @brief Adds a resource (unless the cache is off) or removes one.
+    /// @return Whether it was added.
     bool Add(CachedResource &) noexcept;
 
     void Remove(CachedResource &) noexcept;
 
+    /// @brief Whether the cache ignores the URL's fragment, as it does an HTTP(S) URL's, and the URL without
+    /// it.
     KRYS_NODISCARD static bool ShouldRemoveFragmentIdentifier(const net::Url &) noexcept;
 
     KRYS_NODISCARD static net::Url RemoveFragmentIdentifierIfNeeded(const net::Url &) noexcept;
 
-    void ForEachResource(KRYS_NOESCAPE const Func<void(CachedResource &)> &) noexcept;
-
-    void DestroyDecodedDataForAllImages() noexcept;
-
-    // Sets the cache's memory capacities, in bytes. These will hold only approximately,
-    // since the decoded cost of resources like scripts and stylesheets is not known.
-    //  - minDeadBytes: The maximum number of bytes that dead resources should consume when the cache is under
-    //  pressure.
-    //  - maxDeadBytes: The maximum number of bytes that dead resources should consume when the cache is not
-    //  under pressure.
-    //  - totalBytes: The maximum number of bytes that the cache should consume overall.
+    /// @brief Sets the capacities in bytes, and prunes to them. They're approximate: decoded data is sized by
+    /// estimate.
+    /// @param minDeadBytes What dead resources may keep however full the cache is with live ones.
+    /// @param maxDeadBytes What dead resources may take at most.
+    /// @param totalBytes What the cache may take altogether.
     void SetCapacities(uint32 minDeadBytes, uint32 maxDeadBytes, uint32 totalBytes) noexcept;
 
-    // Turn the cache on and off.  Disabling the cache will remove all resources from the cache.  They may
-    // still live on if they are referenced by some Web page though.
+    /// @brief Turns the cache off (evicting everything; resources in use live on with their users) or on.
     void SetDisabled(bool) noexcept;
 
+    /// @brief Whether the cache is off.
     KRYS_NODISCARD bool Disabled() const noexcept
     {
       return _disabled;
     }
 
+    /// @brief Evicts every resource.
     void EvictResources() noexcept;
 
+    /// @brief Prunes if the cache is over capacity: now, or in a task (once for any number of calls).
     void Prune() noexcept;
 
     void PruneSoon() noexcept;
 
+    /// @brief The bytes the resources take, and the dead ones.
     KRYS_NODISCARD uint32 Size() const noexcept
     {
       return _liveSize + _deadSize;
-    }
-
-    KRYS_NODISCARD uint32 LiveSize() const noexcept
-    {
-      return _liveSize;
     }
 
     KRYS_NODISCARD uint32 DeadSize() const noexcept
@@ -127,6 +96,8 @@ namespace krys::boo
       return _deadSize;
     }
 
+    /// @brief How long a resource without clients keeps its decoded data before dropping it; zero (the
+    /// default) keeps it until pruning.
     void SetDeadDecodedDataDeletionInterval(MonotonicTime::duration interval) noexcept
     {
       _deadDecodedDataDeletionInterval = interval;
@@ -137,18 +108,22 @@ namespace krys::boo
       return _deadDecodedDataDeletionInterval;
     }
 
-    // Called to adjust the cache totals when a resource changes size.
+    /// @brief Adds @p delta to the live or dead total, as a resource's size changes.
     void AdjustSize(bool live, int64 delta) noexcept;
 
+    /// @brief Moves a resource's size between the live and dead totals, as it gains its first client or loses
+    /// its last.
     void AddToLiveResourcesSize(CachedResource &) noexcept;
 
     void RemoveFromLiveResourcesSize(CachedResource &) noexcept;
 
+    /// @brief Makes the resource the most recently used.
     void ResourceAccessed(CachedResource &) noexcept;
 
-    // pruneDead*() - Flush decoded and encoded data from resources not referenced by Web pages.
-    // pruneLive*() - Flush decoded data from resources still referenced by Web pages.
-    void PruneDeadResources() noexcept; // Automatically decide how much to prune.
+    /// @brief Prunes dead resources (their decoded data, then the resources) or live ones (their decoded data
+    /// only, if it hasn't been used for a second) to a little under their capacity, or to @p targetSize; 0
+    /// prunes all it can.
+    void PruneDeadResources() noexcept;
 
     void PruneLiveResources(bool shouldDestroyDecodedDataForAllLiveResources = false) noexcept;
 
@@ -160,12 +135,16 @@ namespace krys::boo
   private:
     MemoryCache() noexcept;
 
+    /// @brief The capacity for live resources: what the dead resources' capacity leaves.
     KRYS_NODISCARD uint32 LiveCapacity() const noexcept;
 
+    /// @brief The capacity for dead resources: what live ones leave, between the minimum and the maximum.
     KRYS_NODISCARD uint32 DeadCapacity() const noexcept;
 
+    /// @brief Whether the cache is over its capacity, or its dead resources over their maximum.
     KRYS_NODISCARD bool NeedsPruning() const noexcept;
 
+    /// @brief Takes the resource out of the use order.
     void RemoveFromLRUList(CachedResource &) noexcept;
   };
 }

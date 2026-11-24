@@ -1,25 +1,4 @@
-﻿/*
- * Copyright (C) 1999 Lars Knoll (knoll@kde.org)
- *           (C) 1999 Antti Koivisto (koivisto@kde.org)
- * Copyright (C) 2004-2025 Apple Inc. All rights reserved.
- *
- * This library is free software; you can redistribute it and/or
- * modify it under the terms of the GNU Library General Public
- * License as published by the Free Software Foundation; either
- * version 2 of the License, or (at your option) any later version.
- *
- * This library is distributed in the hope that it will be useful,
- * but WITHOUT ANY WARRANTY; without even the implied warranty of
- * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU
- * Library General Public License for more details.
- *
- * You should have received a copy of the GNU Library General Public License
- * along with this library; see the file COPYING.LIB.  If not, write to
- * the Free Software Foundation, Inc., 51 Franklin Street, Fifth Floor,
- * Boston, MA 02110-1301, USA.
- */
-
-#include "Krystal.Booey/Loader/ImageLoader.hpp"
+﻿#include "Krystal.Booey/Loader/ImageLoader.hpp"
 #include "Krystal.Booey/DOM/Algorithms/EventDispatcher.hpp"
 #include "Krystal.Booey/DOM/Events/EventNames.hpp"
 #include "Krystal.Booey/DOM/Nodes/Document.hpp"
@@ -130,8 +109,7 @@ namespace krys::boo
   {
     ClearImageWithoutConsideringPendingLoadEvent();
 
-    // Only consider updating the protection ref-count of the Element immediately before returning
-    // from this function as doing so might result in the destruction of this ImageLoader.
+    // Last, as letting the element go may destroy this loader.
     UpdatedHasPendingEvent();
   }
 
@@ -158,8 +136,7 @@ namespace krys::boo
 
   void ImageLoader::UpdateFromElement(RelevantMutation relevantMutation) noexcept
   {
-    // If we're not making renderers for the page, then don't load images. We don't want to slow
-    // down the raw HTML parsing case by loading images we don't intend to display.
+    // Only a document that renders loads its images.
     Ref element = ShareRef(_element);
     Ref document = ShareRef(element->NodeDocument());
     if (!document->HasLivingRenderTree())
@@ -169,21 +146,20 @@ namespace krys::boo
 
     auto attr = element->ImageSourceUrl();
 
-    // Avoid loading a URL we already failed to load.
+    // The source that failed last isn't tried again until it's set again.
     if (!_failedLoadUrl.empty() && attr == _failedLoadUrl)
     {
       return;
     }
 
-    // Do not load any image if the 'src' attribute is missing or if it is
-    // an empty string.
+    // A missing source, or one that's only whitespace, loads nothing.
     CachedResourceHandle<CachedImage> newImage;
     if (attr && !ContainsOnlyASCIIWhitespace(*attr))
     {
       ResourceLoaderOptions options = CachedResourceLoader::DefaultCachedResourceOptions();
       auto *imageElement = DynamicDowncast<HTMLImageElement>(element.get());
 
-      // Use URL from original request for same URL loads in order to preserve the original base URL.
+      // The same source keeps the URL it resolved to, though the base URL may have changed since.
       net::Url imageUrl;
       if (_image && *attr == _pendingUrl)
       {
@@ -233,10 +209,8 @@ namespace krys::boo
         newImage = requested ? *requested : CachedResourceHandle<CachedImage>();
       }
 
-      // If we do not have an image here, it means that a cross-site
-      // violation occurred, or that the image was blocked via Content
-      // Security Policy, or the page is being dismissed. Trigger an
-      // error event if the page is not being dismissed.
+      // The request failed at once: no frame, an invalid URL, one an SVG image may not load, or a load that
+      // failed straight away.
       // FIXME: Don't fire it while the page is being dismissed, once there's page dismissal.
       if (!newImage)
       {
@@ -274,11 +248,8 @@ namespace krys::boo
         _hasPendingLoadEvent = false;
       }
 
-      // Cancel error events that belong to the previous load, which is now cancelled by changing the src
-      // attribute. If newImage is null and _hasPendingErrorEvent is true, we know the error event has been
-      // just posted by this load and we should not cancel the event.
-      // FIXME: If both previous load and this one got blocked with an error, we can receive one error event
-      // instead of two.
+      // The previous load's pending error is canceled by a new image. Without one, this load failed too, and
+      // the one pending error stands for both: only the last of several updates fires.
       if (_hasPendingErrorEvent && newImage)
       {
         LoadEventSender().CancelEvent(*this, ErrorEventName());
@@ -308,8 +279,7 @@ namespace krys::boo
           html::LazyLoadImageObserver::Observe(_element);
         }
 
-        // If newImage is cached, AddClient() will result in the load event
-        // being queued to fire.
+        // A cached image that has loaded finishes at once, which queues the load event.
         newImage->AddClient(*this);
       }
       else
@@ -329,8 +299,7 @@ namespace krys::boo
       imageResource->ResetAnimation();
     }
 
-    // Only consider updating the protection ref-count of the Element immediately before returning
-    // from this function as doing so might result in the destruction of this ImageLoader.
+    // Last, as letting the element go may destroy this loader.
     UpdatedHasPendingEvent();
   }
 
@@ -396,8 +365,7 @@ namespace krys::boo
 
       krys_debug_assert(!_hasPendingLoadEvent);
 
-      // Only consider updating the protection ref-count of the Element immediately before returning
-      // from this function as doing so might result in the destruction of this ImageLoader.
+      // Last, as letting the element go may destroy this loader.
       UpdatedHasPendingEvent();
       return;
     }
@@ -411,8 +379,7 @@ namespace krys::boo
         RejectDecodePromises(u8"Loading was canceled.");
       }
       _hasPendingLoadEvent = false;
-      // Only consider updating the protection ref-count of the Element immediately before returning
-      // from this function as doing so might result in the destruction of this ImageLoader.
+      // Last, as letting the element go may destroy this loader.
       UpdatedHasPendingEvent();
       return;
     }
@@ -505,7 +472,7 @@ namespace krys::boo
       return nullptr;
     }
 
-    // We don't return style generated image because it doesn't belong to the ImageLoader.
+    // Generated content's image isn't the element's.
     if (auto *renderImage = DynamicDowncast<RenderImage>(*renderer);
         renderImage && !renderImage->IsGeneratedContent())
     {
@@ -529,9 +496,7 @@ namespace krys::boo
       return;
     }
 
-    // Only update the renderer if it doesn't have an image or if what we have
-    // is a complete image. This prevents flickering in the case where a dynamic
-    // change is happening between two images.
+    // The renderer keeps the old image until the new one is complete, so switching doesn't flicker.
     CachedImage *cachedImage = imageResource->GetCachedImage();
     if (_image != cachedImage && (_imageComplete || !cachedImage))
     {
@@ -553,10 +518,7 @@ namespace krys::boo
 
   void ImageLoader::UpdatedHasPendingEvent() noexcept
   {
-    // If an Element that does image loading is removed from the DOM the load/error event for the image is
-    // still observable. As long as the ImageLoader is actively loading, the Element itself needs to be ref'ed
-    // to keep it from being destroyed by DOM manipulation or garbage collection. If such an Element wishes
-    // for the load to stop when removed from the DOM it needs to stop the ImageLoader explicitly.
+    // A removed element's load or error event can still be heard, so it stays alive until it fires.
     bool wasProtected = _elementIsProtected;
     _elementIsProtected = HasPendingActivity();
     if (wasProtected == _elementIsProtected)
@@ -589,8 +551,7 @@ namespace krys::boo
 
   bool ImageLoader::HasPendingActivity() const noexcept
   {
-    // Because of lazy image loading, an image's load may be deferred indefinitely. To avoid leaking the
-    // element, we only protect it once the load has actually started.
+    // A lazy load may never start, so it keeps the element alive only once it has.
     bool imageWillBeLoadedLater = _image && !_image->IsLoading() && _image->StillNeedsLoad();
     return (_hasPendingLoadEvent && !imageWillBeLoadedLater) || _hasPendingErrorEvent;
   }
@@ -625,8 +586,7 @@ namespace krys::boo
       DispatchLoadEvent();
     }
 
-    // Only consider updating the protection ref-count of the Element immediately before returning
-    // from this function as doing so might result in the destruction of this ImageLoader.
+    // Last, as letting the element go may destroy this loader.
     UpdatedHasPendingEvent();
   }
 
@@ -643,8 +603,7 @@ namespace krys::boo
       (void)dom::EventDispatcher::FireEvent(event_names::Error, _element);
     }
 
-    // Only consider updating the protection ref-count of the Element immediately before returning
-    // from this function as doing so might result in the destruction of this ImageLoader.
+    // Last, as letting the element go may destroy this loader.
     UpdatedHasPendingEvent();
   }
 

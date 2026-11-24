@@ -208,6 +208,31 @@ namespace krys::boo::tests
     CHECK(fixture.Image(u8"nocand").Complete());
   }
 
+  TEST_CASE("HTMLImageElement: failing src changes in a row fire one error",
+            "[HTML][HTMLImageElement][html:update-the-image-data]")
+  {
+    LoaderFixture loader;
+    ImageFixture fixture(u8"<img id=empties><img id=invalids><img id=emptyinvalid><img id=invalidempty>");
+    // Only the last run of "update the image data" gets past awaiting a stable state.
+    auto changeSrc = [&](DOMStringView id, DOMStringView first, DOMStringView second)
+    {
+      auto events = LoadEvents::ListenTo(fixture.ById(id));
+      REQUIRE_FALSE(fixture.Image(id).SetAttribute(u8"src", DOMString(first)).HasException());
+      REQUIRE_FALSE(fixture.Image(id).SetAttribute(u8"src", DOMString(second)).HasException());
+      return events;
+    };
+    auto empties = changeSrc(u8"empties", u8"", u8"");
+    auto invalids = changeSrc(u8"invalids", u8"http://[a", u8"http://[b");
+    auto emptyInvalid = changeSrc(u8"emptyinvalid", u8"", u8"http://[b");
+    auto invalidEmpty = changeSrc(u8"invalidempty", u8"http://[a", u8"");
+    RunNetworkingTasks();
+
+    CHECK(empties->Errors == 1);
+    CHECK(invalids->Errors == 1);
+    CHECK(emptyInvalid->Errors == 1);
+    CHECK(invalidEmpty->Errors == 1);
+  }
+
   TEST_CASE("HTMLImageElement: sizes from the width and height attributes, and object-fit",
             "[HTML][HTMLImageElement]")
   {

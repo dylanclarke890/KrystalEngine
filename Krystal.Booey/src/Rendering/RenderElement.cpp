@@ -2247,16 +2247,6 @@ namespace krys::boo
     return isVisible ? VisibleInViewportState::Yes : VisibleInViewportState::No;
   }
 
-  VisibleInViewportState RenderElement::ImageVisibleInViewport(const Document &document) const noexcept
-  {
-    if (&GetDocument() != &document)
-    {
-      return VisibleInViewportState::No;
-    }
-
-    return IsVisibleInViewport() ? VisibleInViewportState::Yes : VisibleInViewportState::No;
-  }
-
   bool RenderElement::AllowsAnimation() const noexcept
   {
     auto *frame = GetDocument().Frame();

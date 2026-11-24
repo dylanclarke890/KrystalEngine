@@ -1471,12 +1471,6 @@ namespace krys::boo
     return _renderer.ImageFrameAvailable(image, state, rect);
   }
 
-  VisibleInViewportState
-    RenderObject::CachedImageListener::ImageVisibleInViewport(const Document &document) const noexcept
-  {
-    return _renderer.ImageVisibleInViewport(document);
-  }
-
   void RenderObject::CachedImageListener::DidRemoveCachedImageClient(CachedImage &image) noexcept
   {
     _renderer.DidRemoveCachedImageClient(image);

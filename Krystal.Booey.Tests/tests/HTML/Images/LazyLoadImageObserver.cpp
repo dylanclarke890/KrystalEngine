@@ -6,6 +6,7 @@
 #include "Krystal.Booey/DOM/Nodes/HTMLDocument.hpp"
 #include "Krystal.Booey/HTML/Elements/HTMLImageElement.hpp"
 #include "Krystal.Booey/HTML/Window.hpp"
+#include "Krystal.Booey/Loader/Cache/CachedResourceLoader.hpp"
 #include "Krystal.Booey/Page/Frame.hpp"
 #include "Krystal.Image.Tests/TestImages.hpp"
 
@@ -128,6 +129,29 @@ namespace krys::boo::tests
     CHECK(b.Complete());
     CHECK(bEvents->Loads == 1);
     CHECK_FALSE(lazyObserver.IsObserved(b));
+  }
+
+  TEST_CASE("LazyLoadImageObserver: a lazy image doesn't delay the load event",
+            "[HTML][LazyLoadImageObserver][html:update-the-image-data]")
+  {
+    LoaderFixture loader;
+    loader.Strategy.Resources[u8"file:///a.png"] = img::tests::images::PNG;
+    loader.Strategy.Resources[u8"file:///b.png"] = img::tests::images::PNG;
+    loader.Strategy.Defer = true;
+
+    LazyImageFixture fixture(
+      u8"<img id=lazy loading=lazy src='file:///a.png'><img id=eager src='file:///b.png'>");
+    fixture.UpdateRendering();
+    CHECK(loader.Strategy.Requests == List<utf8_string> {u8"file:///b.png", u8"file:///a.png"});
+
+    // 24. Let delay load event be true if the img's lazy loading attribute is in the Eager state, ...
+    // Both are loading, but only the eager one counts.
+    CHECK(fixture.Document->GetCachedResourceLoader().RequestCount() == 1);
+
+    loader.Strategy.CompleteDeferred();
+    RunNetworkingTasks();
+    CHECK(fixture.Document->GetCachedResourceLoader().RequestCount() == 0);
+    CHECK(fixture.Image(u8"lazy").Complete());
   }
 
   TEST_CASE("LazyLoadImageObserver: images in a scroller load within a scrollport of it",

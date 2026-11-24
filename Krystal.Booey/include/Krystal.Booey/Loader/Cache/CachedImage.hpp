@@ -1,26 +1,4 @@
-﻿/*
-    Copyright (C) 1998 Lars Knoll (knoll@mpi-hd.mpg.de)
-    Copyright (C) 2001 Dirk Mueller <mueller@kde.org>
-    Copyright (C) 2006 Samuel Weinig (sam.weinig@gmail.com)
-    Copyright (C) 2004-2025 Apple Inc. All rights reserved.
-
-    This library is free software; you can redistribute it and/or
-    modify it under the terms of the GNU Library General Public
-    License as published by the Free Software Foundation; either
-    version 2 of the License, or (at your option) any later version.
-
-    This library is distributed in the hope that it will be useful,
-    but WITHOUT ANY WARRANTY; without even the implied warranty of
-    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU
-    Library General Public License for more details.
-
-    You should have received a copy of the GNU Library General Public License
-    along with this library; see the file COPYING.LIB.  If not, write to
-    the Free Software Foundation, Inc., 51 Franklin Street, Fifth Floor,
-    Boston, MA 02110-1301, USA.
-*/
-
-#pragma once
+﻿#pragma once
 
 #include "Krystal.Booey/Graphics/Geometry/LayoutSize.hpp"
 #include "Krystal.Booey/Graphics/Images/Image.hpp"
@@ -54,11 +32,13 @@ namespace krys::boo
       HashSet<CachedImage *> _cachedImages;
 
     public:
+      /// @brief An observer for @p image's image.
       KRYS_NODISCARD static Ref<CachedImageObserver> Create(CachedImage &image) noexcept
       {
         return AdoptRef(*new CachedImageObserver(image));
       }
 
+      /// @brief The cached images sharing the image.
       KRYS_NODISCARD HashSet<CachedImage *> &CachedImages() noexcept
       {
         return _cachedImages;
@@ -72,7 +52,8 @@ namespace krys::boo
     private:
       explicit CachedImageObserver(CachedImage &) noexcept;
 
-      // ImageObserver API
+      // The image's observer calls: each goes to the cached images sharing the image, and the queries are
+      // answered by the first.
       KRYS_NODISCARD net::Url SourceUrl() const noexcept override;
 
       KRYS_NODISCARD utf8_string MimeType() const noexcept override;
@@ -125,53 +106,64 @@ namespace krys::boo
     bool _allowsOrientationOverride {true};
 
   public:
+    /// @brief An image for the request, waiting to be asked to load.
     explicit CachedImage(CachedResourceRequest &&) noexcept;
 
     ~CachedImage() noexcept override;
 
-    KRYS_NODISCARD Image *
-      GetImage() const noexcept; // Returns the nullImage() if the image is not available yet.
+    /// @brief The image to draw: the broken image icon if the load failed, the null image until there's an
+    /// image, else the image (for a renderer, an SVG image's copy sized for it).
+    KRYS_NODISCARD Image *GetImage() const noexcept;
 
-    KRYS_NODISCARD Image *ImageForRenderer(const RenderObject *) noexcept; // Returns the nullImage() if the
-                                                                           // image is not available yet.
+    KRYS_NODISCARD Image *ImageForRenderer(const RenderObject *) noexcept;
 
+    /// @brief Whether an image has been made from the data.
     KRYS_NODISCARD bool HasImage() const noexcept
     {
       return static_cast<bool>(_image);
     }
 
+    /// @brief Whether the current frame of the image drawn for the renderer is known to be opaque, and
+    /// whether it's fully decoded.
     KRYS_NODISCARD bool CurrentFrameKnownToBeOpaque(const RenderElement *) noexcept;
 
     KRYS_NODISCARD bool CurrentFrameIsComplete(const RenderElement *) noexcept;
 
-    // Returns an image and the image's resolution scale factor.
+    /// @brief The broken image icon and its scale factor (1: it's drawn as shapes, at any scale).
     KRYS_NODISCARD static Pair<Image *, float> BrokenImage(float deviceScaleFactor) noexcept;
 
+    /// @brief Whether the load failed and the broken image icon is drawn instead.
     KRYS_NODISCARD bool WillPaintBrokenImage() const noexcept;
 
+    /// @brief Whether there's something to draw for the renderer: no error, and a size.
     KRYS_NODISCARD bool CanRender(const RenderElement *renderer, float multiplier) noexcept
     {
       return !ErrorOccurred() && !ImageSizeForRenderer(renderer, multiplier).IsEmpty();
     }
 
-    void SetAllowsOrientationOverride(bool b) noexcept
-    {
-      _allowsOrientationOverride = b;
-    }
-
+    /// @brief Whether `image-orientation` may override the orientation the image's data gives it: not for a
+    /// load that failed (or was canceled), unless it's a data URL.
+    /// @note The renderers don't consult it yet (see `RenderElement::GetImageOrientation`).
     KRYS_NODISCARD bool AllowsOrientationOverride() const noexcept
     {
       return _allowsOrientationOverride;
     }
 
+    void SetAllowsOrientationOverride(bool allowsOrientationOverride) noexcept
+    {
+      _allowsOrientationOverride = allowsOrientationOverride;
+    }
+
+    /// @brief Gives an image sized by its container (an SVG image) the client's container size, zoom and URL;
+    /// kept until there's an image.
     void SetContainerContextForClient(const CachedImageClient &, const LayoutSize &, float,
                                       const net::Url &) noexcept;
-
-    KRYS_NODISCARD bool IsClientWaitingForAsyncDecoding(const CachedImageClient &) const noexcept;
 
     /// @brief Remembers that @p client drew nothing while the frame decodes, so it's told when it's decoded.
     void AddClientWaitingForAsyncDecoding(CachedImageClient &) noexcept;
 
+    /// @brief Whether the image takes its size from its container (an SVG image), and whether its width or
+    /// height is relative to it.
     KRYS_NODISCARD bool UsesImageContainerSize() const noexcept
     {
       return _image && _image->UsesContainerSize();
@@ -197,17 +189,20 @@ namespace krys::boo
       IntrinsicSize,
     };
 
+    /// @brief The image's size for the renderer: as used (an SVG image's for that renderer) or natural,
+    /// oriented as the renderer's style says.
     KRYS_NODISCARD SizeF ImageSizeForRenderer(const RenderElement *renderer,
                                               SizeType = UsedSize) const noexcept;
 
-    // This method takes a zoom multiplier that can be used to increase the natural size of the image by the
-    // zoom. It returns the size of the complete image.
+    /// @brief The same, scaled by the zoom @p multiplier (but not a relative width or height), and kept at
+    /// least 1 in a dimension that isn't 0; the second form doesn't keep it.
     KRYS_NODISCARD LayoutSize ImageSizeForRenderer(const RenderElement *, float multiplier,
                                                    SizeType = UsedSize) const noexcept;
 
     KRYS_NODISCARD LayoutSize UnclampedImageSizeForRenderer(const RenderElement *renderer, float multiplier,
                                                             SizeType = UsedSize) const noexcept;
 
+    /// @brief The image's natural width, height and ratio, where it has them.
     void ComputeIntrinsicDimensions(float &intrinsicWidth, float &intrinsicHeight,
                                     SizeF &intrinsicRatio) noexcept;
 
@@ -218,19 +213,23 @@ namespace krys::boo
       return !ErrorOccurred() && GetStatus() == Unknown && !IsLoading();
     }
 
+    /// @brief Whether @p image (if it's this one's) may animate: every client allows it.
     KRYS_NODISCARD bool AllowsAnimation(const Image &) const noexcept;
 
     /// @brief Whether a client showing the image is drawn with the dark appearance.
     KRYS_NODISCARD bool UseSystemDarkAppearance() const noexcept;
 
   private:
+    /// @brief Drops the image and its data's size, as a load fails or starts again.
     void Clear() noexcept;
 
+    /// @brief Makes the image, if there isn't one, giving it the container sizes asked for so far.
     void CreateImage() noexcept;
 
+    /// @brief Lets the image go, leaving its observer if this was its last user.
     void ClearImage() noexcept;
 
-    // If not null, changeRect is the changed part of the image.
+    /// @brief Tells the clients the image changed; @p changeRect, if given, is the part that did.
     void NotifyObservers(const RectI *changeRect = nullptr) noexcept;
 
     void DidAddClient(CachedResourceClient &) noexcept final;
@@ -241,12 +240,15 @@ namespace krys::boo
 
     void DestroyDecodedData() noexcept override;
 
+    /// @brief Gives the image the data so far, or all of it.
     img::EncodedDataStatus UpdateImageData(bool allDataReceived) noexcept;
 
     void Error(CachedResource::Status) noexcept override;
 
     void ResponseReceived(net::ResourceResponse &&) noexcept override;
 
+    /// @brief The image observer's calls, for this cached image: each does nothing unless the image is this
+    /// one's, and tells the clients what concerns them.
     void EncodedDataStatusChanged(const Image &, img::EncodedDataStatus) noexcept;
 
     void DecodedSizeChanged(const Image &, int64 delta) noexcept;
@@ -264,6 +266,7 @@ namespace krys::boo
 
     void ScheduleRenderingUpdate(const Image &) noexcept;
 
+    /// @brief Takes the data so far, failing the load if it can't be an image.
     void UpdateBufferInternal(const SharedBuffer &) noexcept;
   };
 }

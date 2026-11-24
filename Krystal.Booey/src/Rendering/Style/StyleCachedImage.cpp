@@ -224,7 +224,7 @@ namespace krys::boo
     {
       return false;
     }
-    return _cachedImage->IsLoaded();
+    return !_cachedImage->IsLoading();
   }
 
   bool StyleCachedImage::ErrorOccurred() const noexcept
