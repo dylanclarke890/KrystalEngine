@@ -1,27 +1,4 @@
-﻿/*
- * Copyright (C) 2001 Peter Kelly (pmk@post.com)
- * Copyright (C) 2001 Tobias Anton (anton@stud.fbi.fh-darmstadt.de)
- * Copyright (C) 2006 Samuel Weinig (sam.weinig@gmail.com)
- * Copyright (C) 2003, 2004, 2005, 2006, 2008, 2013 Apple Inc. All rights reserved.
- *
- * This library is free software; you can redistribute it and/or
- * modify it under the terms of the GNU Library General Public
- * License as published by the Free Software Foundation; either
- * version 2 of the License, or (at your option) any later version.
- *
- * This library is distributed in the hope that it will be useful,
- * but WITHOUT ANY WARRANTY; without even the implied warranty of
- * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU
- * Library General Public License for more details.
- *
- * You should have received a copy of the GNU Library General Public License
- * along with this library; see the file COPYING.LIB.  If not, write to
- * the Free Software Foundation, Inc., 51 Franklin Street, Fifth Floor,
- * Boston, MA 02110-1301, USA.
- *
- */
-
-#pragma once
+﻿#pragma once
 
 #include "Krystal.Booey/DOM/Events/UIEvent.hpp"
 #include "Krystal.Booey/Input/PlatformEvent.hpp"
@@ -30,8 +7,9 @@
 
 namespace krys::boo
 {
-  /// @brief A user interface event that knows which modifier keys were held: the base of mouse and keyboard
-  /// events.
+  /// @brief The base of the events that carry the state of the modifier keys: mouse (and so wheel and
+  /// pointer) events and keyboard events.
+  /// @see https://w3c.github.io/uievents/#dictdef-eventmodifierinit
   class UIEventWithKeyState : public UIEvent
   {
   public:
@@ -65,119 +43,105 @@ namespace krys::boo
       return _modifiers.contains(Modifier::MetaKey);
     }
 
+    /// @brief Whether caps lock was on; the same as `GetModifierState("CapsLock")`.
     KRYS_NODISCARD bool CapsLockKey() const noexcept
     {
       return _modifiers.contains(Modifier::CapsLockKey);
     }
 
+    /// @brief Every modifier the event carries.
     KRYS_NODISCARD EnumSet<Modifier> ModifierKeys() const noexcept
     {
       return _modifiers;
     }
 
+    /// @brief Whether the modifier named by the key value @p key was active.
     /// @see https://w3c.github.io/pointerevents/#dom-mouseevent-getmodifierstate
     KRYS_NODISCARD bool GetModifierState(DOMStringView key) const noexcept
     {
-      if (key == u8"Control")
+      struct NamedModifier
       {
-        return CtrlKey();
-      }
-      if (key == u8"Shift")
+        DOMStringView Key;
+        Modifier Value;
+      };
+
+      constexpr static NamedModifier modifiers[] {
+        {u8"Alt", Modifier::AltKey},           {u8"AltGraph", Modifier::AltGraphKey},
+        {u8"CapsLock", Modifier::CapsLockKey}, {u8"Control", Modifier::ControlKey},
+        {u8"Meta", Modifier::MetaKey},         {u8"Shift", Modifier::ShiftKey},
+      };
+      for (const auto &modifier : modifiers)
       {
-        return ShiftKey();
-      }
-      if (key == u8"Alt")
-      {
-        return AltKey();
-      }
-      if (key == u8"Meta")
-      {
-        return MetaKey();
-      }
-      if (key == u8"AltGraph")
-      {
-        return _modifiers.contains(Modifier::AltGraphKey);
-      }
-      if (key == u8"CapsLock")
-      {
-        return CapsLockKey();
+        if (modifier.Key == key)
+        {
+          return _modifiers.contains(modifier.Value);
+        }
       }
       // FIXME: The specification also has Fn, FnLock, Hyper, NumLock, Super, ScrollLock, Symbol, SymbolLock.
       return false;
     }
 
   protected:
+    /// @brief An event with the modifiers of a platform event.
     UIEventWithKeyState(DOMStringAtom type, const UIEventInit &eventInitDict,
                         EnumSet<Modifier> modifiers) noexcept
         : UIEvent(krys::move(type), eventInitDict), _modifiers(modifiers)
     {
     }
 
+    /// @brief An event with the modifiers of an `EventModifierInit`.
     UIEventWithKeyState(DOMStringAtom type, const EventModifierInit &initializer) noexcept
-        : UIEvent(krys::move(type), initializer), _modifiers(ModifiersFromInitializer(initializer))
+        : UIEvent(krys::move(type), initializer),
+          _modifiers(
+            KeyModifiers(initializer.CtrlKey, initializer.AltKey, initializer.ShiftKey, initializer.MetaKey))
     {
-    }
-
-    void SetModifierKeys(bool ctrlKey, bool altKey, bool shiftKey, bool metaKey) noexcept
-    {
-      EnumSet<Modifier> result;
-      if (ctrlKey)
-      {
-        result.Add(Modifier::ControlKey);
-      }
-      if (altKey)
-      {
-        result.Add(Modifier::AltKey);
-      }
-      if (shiftKey)
-      {
-        result.Add(Modifier::ShiftKey);
-      }
-      if (metaKey)
-      {
-        result.Add(Modifier::MetaKey);
-      }
-      _modifiers = result;
-    }
-
-  private:
-    KRYS_NODISCARD static EnumSet<Modifier>
-      ModifiersFromInitializer(const EventModifierInit &initializer) noexcept
-    {
-      EnumSet<Modifier> result;
-      if (initializer.CtrlKey)
-      {
-        result.Add(Modifier::ControlKey);
-      }
-      if (initializer.AltKey)
-      {
-        result.Add(Modifier::AltKey);
-      }
-      if (initializer.ShiftKey)
-      {
-        result.Add(Modifier::ShiftKey);
-      }
-      if (initializer.MetaKey)
-      {
-        result.Add(Modifier::MetaKey);
-      }
       if (initializer.ModifierAltGraph)
       {
-        result.Add(Modifier::AltGraphKey);
+        _modifiers.Add(Modifier::AltGraphKey);
       }
       if (initializer.ModifierCapsLock)
       {
-        result.Add(Modifier::CapsLockKey);
+        _modifiers.Add(Modifier::CapsLockKey);
       }
-      return result;
+    }
+
+    /// @brief Replaces the modifiers with the four that the legacy `init*Event` methods take.
+    void SetModifierKeys(bool ctrlKey, bool altKey, bool shiftKey, bool metaKey) noexcept
+    {
+      _modifiers = KeyModifiers(ctrlKey, altKey, shiftKey, metaKey);
+    }
+
+  private:
+    KRYS_NODISCARD static EnumSet<Modifier> KeyModifiers(bool ctrlKey, bool altKey, bool shiftKey,
+                                                         bool metaKey) noexcept
+    {
+      EnumSet<Modifier> modifiers;
+      if (ctrlKey)
+      {
+        modifiers.Add(Modifier::ControlKey);
+      }
+      if (altKey)
+      {
+        modifiers.Add(Modifier::AltKey);
+      }
+      if (shiftKey)
+      {
+        modifiers.Add(Modifier::ShiftKey);
+      }
+      if (metaKey)
+      {
+        modifiers.Add(Modifier::MetaKey);
+      }
+      return modifiers;
     }
   };
 }
 
 namespace krys::boo::dom
 {
-  /// @brief The first keyboard or mouse event in the chain of events from @p event through their underlying
-  /// events (a simulated click's key press), if any.
+  /// @brief The nearest event, starting from @p event and following underlying events, that carries modifier
+  /// keys (a keyboard or mouse event): a click simulated for a key press finds the key press. Null if there
+  /// is none.
   KRYS_NODISCARD inline UIEventWithKeyState *FindEventWithKeyState(Event *event) noexcept
   {
     for (auto *current = event; current; current = current->UnderlyingEvent())
