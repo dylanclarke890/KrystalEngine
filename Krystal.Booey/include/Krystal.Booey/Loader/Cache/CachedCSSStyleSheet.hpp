@@ -17,6 +17,9 @@ namespace krys::boo
   class CachedCSSStyleSheet final : public CachedResource
   {
   private:
+    /// @brief The charset the request asked for. Unused while sheets are UTF-8 only; kept for when other
+    /// encodings are supported.
+    utf8_string _charset;
     /// @brief The text, decoded while the clients are told the load finished, and dropped after.
     Maybe<utf8_string> _decodedSheetText;
     RefPtr<css::StyleSheetContents> _parsedStyleSheetCache;

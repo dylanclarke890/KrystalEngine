@@ -35,7 +35,7 @@ namespace krys::boo
   }
 
   CachedCSSStyleSheet::CachedCSSStyleSheet(const CachedResourceRequest &request) noexcept
-      : CachedResource(CachedResourceRequest(request), Type::CSSStyleSheet)
+      : CachedResource(CachedResourceRequest(request), Type::CSSStyleSheet), _charset(request.Charset())
   {
   }
 
