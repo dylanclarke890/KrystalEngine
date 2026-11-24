@@ -929,11 +929,6 @@ namespace krys::boo
       return _nodeFlags.contains(dom::NodeFlag::IsShadowRoot);
     }
 
-    KRYS_NODISCARD bool IsUnknownElement() const noexcept
-    {
-      return _nodeFlags.contains(dom::NodeFlag::IsUnknownElement);
-    }
-
     KRYS_NODISCARD bool IsHTMLElement() const noexcept
     {
       return _nodeFlags.contains(dom::NodeFlag::IsHTMLElement);
@@ -976,12 +971,6 @@ namespace krys::boo
     KRYS_NODISCARD bool IsSVGUnknownElement() const noexcept
     {
       return _nodeFlags.contains(dom::NodeFlag::IsSVGElement)
-             && _nodeFlags.contains(dom::NodeFlag::IsUnknownElement);
-    }
-
-    KRYS_NODISCARD bool IsMathMLUnknownElement() const noexcept
-    {
-      return _nodeFlags.contains(dom::NodeFlag::IsMathMLElement)
              && _nodeFlags.contains(dom::NodeFlag::IsUnknownElement);
     }
 
