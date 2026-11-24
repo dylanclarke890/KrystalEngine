@@ -118,8 +118,8 @@ namespace krys::boo::dom::tests
   {
     boo::tests::PaintFixture fixture {
       u8"<!DOCTYPE html><style>body{margin:0}</style>"
-      u8"<div id=box style=margin-left:20px;margin-top:10px;width:50px;height:50px;"
-      u8"position:relative;border:5px solid></div>"};
+      u8"<div id=box style=\"margin-left:20px;margin-top:10px;width:50px;height:50px;"
+      u8"position:relative;border:5px solid\"></div>"};
     (void)fixture.Document->UpdateLayout();
     auto &box = fixture.ById(u8"box");
 
@@ -150,13 +150,14 @@ namespace krys::boo::dom::tests
         == 4);
     }
 
-    SECTION("offsets are relative to the target's border box, layer positions to its layer")
+    SECTION("offsets are relative to the target's padding edge, layer positions to its layer's border box")
     {
       Ref<OffsetRecorder> recorder = CreateRef<OffsetRecorder>();
       box.AddEventListener(u8"mousedown", recorder, false);
       (void)box.DispatchMouseEvent(platform, u8"mousedown", 1);
-      CHECK(recorder->OffsetX == 13);
-      CHECK(recorder->OffsetY == 17);
+      // Chrome: 8, 12 (the padding edge is inside the 5px border at 25, 15).
+      CHECK(recorder->OffsetX == 8);
+      CHECK(recorder->OffsetY == 12);
       CHECK(recorder->LayerX == 12);
       CHECK(recorder->LayerY == 17);
       CHECK(recorder->PageX == 32);

@@ -29,6 +29,7 @@
 #include "Krystal.Booey/Page/Frame.hpp"
 #include "Krystal.Booey/Page/FrameView.hpp"
 #include "Krystal.Booey/Rendering/Layers/RenderLayer.hpp"
+#include "Krystal.Booey/Rendering/RenderBox.hpp"
 #include "Krystal.Booey/Rendering/RenderObject.hpp"
 #include <cmath>
 
@@ -185,6 +186,12 @@ namespace krys::boo
         PointF(static_cast<float>(_absoluteLocation.X()), static_cast<float>(_absoluteLocation.Y())),
         {MapCoordinatesMode::UseTransforms});
       _offsetLocation = PointD(local.X(), local.Y());
+      // The offsets are from the padding edge, inside the border.
+      // https://drafts.csswg.org/cssom-view/#dom-mouseevent-offsetx
+      if (auto *box = DynamicDowncast<RenderBox>(*renderer))
+      {
+        _offsetLocation -= SizeD(box->BorderLeft().ToDouble(), box->BorderTop().ToDouble());
+      }
       float scaleFactor = 1 / DocumentToAbsoluteScaleFactor();
       if (scaleFactor != 1.0f)
       {
