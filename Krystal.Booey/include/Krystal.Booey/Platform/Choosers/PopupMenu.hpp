@@ -1,24 +1,4 @@
-﻿/*
- * Copyright (C) 2010 Nokia Corporation and/or its subsidiary(-ies).
- *
- * This library is free software; you can redistribute it and/or
- * modify it under the terms of the GNU Library General Public
- * License as published by the Free Software Foundation; either
- * version 2 of the License, or (at your option) any later version.
- *
- * This library is distributed in the hope that it will be useful,
- * but WITHOUT ANY WARRANTY; without even the implied warranty of
- * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU
- * Library General Public License for more details.
- *
- * You should have received a copy of the GNU Library General Public License
- * along with this library; see the file COPYING.LIB.  If not, write to
- * the Free Software Foundation, Inc., 51 Franklin Street, Fifth Floor,
- * Boston, MA 02110-1301, USA.
- *
- */
-
-#pragma once
+﻿#pragma once
 
 #include "Krystal.Core/Geometry/Rect.hpp"
 #include "Krystal.Core/Memory/RefCounted.hpp"
@@ -27,7 +7,9 @@ namespace krys::boo
 {
   class FrameView;
 
-  /// @brief A menu the host shows for a menu list: its options, below or above the control.
+  /// @brief The open list of a menu list (a drop-down `<select>`), made by the host
+  /// (`BooeyClient::CreatePopupMenu`) and drawn however it likes. It reads the items from its
+  /// PopupMenuClient and tells it what the user chose.
   class PopupMenu : public RefCounted<PopupMenu>
   {
   public:
@@ -37,9 +19,10 @@ namespace krys::boo
     /// item at @p selectedIndex chosen.
     virtual void Show(const RectI &rect, FrameView &view, int32 selectedIndex) noexcept = 0;
 
+    /// @brief Closes the menu; the client is told through PopupMenuClient::PopupDidHide.
     virtual void Hide() noexcept = 0;
 
-    /// @brief Updates the menu's items from its client.
+    /// @brief Reads the items from the client again, as they changed while the menu was open.
     virtual void UpdateFromElement() noexcept = 0;
 
     /// @brief Forgets the client, which is going away.
