@@ -1,29 +1,4 @@
-﻿/*
- * Copyright (C) 2000 Peter Kelly (pmk@post.com)
- * Copyright (C) 2005-2017 Apple Inc. All rights reserved.
- * Copyright (C) 2006 Alexey Proskuryakov (ap@webkit.org)
- * Copyright (C) 2007 Samuel Weinig (sam@webkit.org)
- * Copyright (C) 2008 Nokia Corporation and/or its subsidiary(-ies)
- * Copyright (C) 2008 Holger Hans Peter Freyther
- * Copyright (C) 2008 Torch Mobile Inc. All rights reserved. (http://www.torchmobile.com/)
- *
- * This library is free software; you can redistribute it and/or
- * modify it under the terms of the GNU Library General Public
- * License as published by the Free Software Foundation; either
- * version 2 of the License, or (at your option) any later version.
- *
- * This library is distributed in the hope that it will be useful,
- * but WITHOUT ANY WARRANTY; without even the implied warranty of
- * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU
- * Library General Public License for more details.
- *
- * You should have received a copy of the GNU Library General Public License
- * along with this library; see the file COPYING.LIB.  If not, write to
- * the Free Software Foundation, Inc., 51 Franklin Street, Fifth Floor,
- * Boston, MA 02110-1301, USA.
- */
-
-#include "Krystal.Booey/XML/XMLDocumentParser.hpp"
+﻿#include "Krystal.Booey/XML/XMLDocumentParser.hpp"
 #include "Krystal.Booey/DOM/Algorithms/MutationAlgorithms.hpp"
 #include "Krystal.Booey/DOM/Nodes/Attr.hpp"
 #include "Krystal.Booey/DOM/Nodes/Document.hpp"
@@ -37,38 +12,45 @@ namespace krys::boo::xml
 {
   namespace
   {
+    /// @brief How deep elements may nest before parsing stops with a fatal error.
     constexpr size_t MaxXMLTreeDepth = 5'000;
-  }
 
-  void XMLDocumentParser::PushCurrentNode(ContainerNode *n) noexcept
-  {
-    krys_debug_assert(n);
-    krys_debug_assert(_currentNode);
-    _currentNodeStack.push_back(std::exchange(_currentNode, ShareRefPtr(n)));
-    if (_currentNodeStack.size() > MaxXMLTreeDepth)
+    /// @brief The namespaces in scope on a fragment's context element.
+    struct XMLParsingNamespaces
     {
-      HandleError(XMLErrors::Type::Fatal, "Excessive node nesting.", TextPosition());
+      DOMStringAtom DefaultNamespace {null};
+      HashMap<DOMStringAtom, DOMStringAtom> PrefixNamespaces;
+    };
+
+    KRYS_NODISCARD XMLParsingNamespaces FindXMLParsingNamespaces(Element *contextElement) noexcept
+    {
+      if (!contextElement)
+      {
+        return {};
+      }
+
+      XMLParsingNamespaces result;
+      result.DefaultNamespace = contextElement->LookupNamespaceURI(null);
+      for (auto *element = contextElement; element; element = element->ParentElement())
+      {
+        if (!element->HasAttributes())
+        {
+          continue;
+        }
+        for (auto &attribute : element->AttributeList())
+        {
+          // A declaration nearer the context element hides an ancestor's for the same prefix.
+          if (attribute->Prefix() == infra::namespace_prefixes::XMLNS)
+          {
+            result.PrefixNamespaces.try_emplace(attribute->LocalName(), DOMStringAtom(attribute->Value()));
+          }
+        }
+      }
+      return result;
     }
   }
 
-  void XMLDocumentParser::PopCurrentNode() noexcept
-  {
-    if (!_currentNode)
-    {
-      return;
-    }
-    krys_debug_assert(!_currentNodeStack.empty());
-
-    _currentNode = krys::move(_currentNodeStack.back());
-    _currentNodeStack.pop_back();
-  }
-
-  void XMLDocumentParser::ClearCurrentNodeStack() noexcept
-  {
-    _currentNode = nullptr;
-    _leafTextNode = nullptr;
-    _currentNodeStack.clear();
-  }
+#pragma region Parsing
 
   void XMLDocumentParser::Append(DOMString source) noexcept
   {
@@ -76,80 +58,23 @@ namespace krys::boo::xml
     {
       return;
     }
-
     DoWrite(source);
   }
 
-  void XMLDocumentParser::HandleError(XMLErrors::Type type, const char *m, SourceLocation position) noexcept
+  void XMLDocumentParser::Finish() noexcept
   {
-    if (!_xmlErrors)
-    {
-      _xmlErrors = CreateUnique<XMLErrors>(*Document());
-    }
-    _xmlErrors->HandleError(type, m, position);
-    if (type != XMLErrors::Type::Warning)
-    {
-      _sawError = true;
-    }
-    if (type == XMLErrors::Type::Fatal)
-    {
-      StopParsing();
-    }
-  }
-
-  void XMLDocumentParser::CreateLeafTextNode() noexcept
-  {
-    if (_leafTextNode)
-    {
-      return;
-    }
-
-    krys_debug_assert(_bufferedText.empty());
-    _leafTextNode = CreateRef<Text>(_currentNode->NodeDocument(), DOMString());
-    if (RefPtr<ContainerNode> currentNode = _currentNode)
-    {
-      (void)dom::MutationAlgorithms::Append(*_leafTextNode, *currentNode);
-    }
-  }
-
-  bool XMLDocumentParser::UpdateLeafTextNode() noexcept
-  {
-    if (IsStopped())
-    {
-      return false;
-    }
-
-    if (!_leafTextNode)
-    {
-      return true;
-    }
-
-    RefPtr<Text> leafTextNode = _leafTextNode;
-    (void)leafTextNode->AppendData(krys::move(_bufferedText));
-    _bufferedText.clear();
-
-    _leafTextNode = nullptr;
-
-    // Check again whether the parser is stopped, since what appending the data ran might have detached this
-    // parser.
-    return !IsStopped();
-  }
-
-  void XMLDocumentParser::Detach() noexcept
-  {
-    ClearCurrentNodeStack();
-    DocumentParser::Detach();
+    krys_debug_assert(!IsStopped());
+    Ref<XMLDocumentParser> protectedThis = ShareRef(*this);
+    End();
   }
 
   void XMLDocumentParser::End() noexcept
   {
-    // XMLDocumentParserLibxml2 will do bad things to the document if DoEnd() is called.
+    // Ending touches the document and its loader, which a fragment's parser has no business with.
     krys_debug_assert(!_parsingFragment);
 
     DoEnd();
-
-    // DoEnd() call above can detach the parser and null out its document.
-    // In that case, we just bail out.
+    // Ending can detach the parser, taking its document away.
     if (IsDetached())
     {
       return;
@@ -178,57 +103,10 @@ namespace krys::boo::xml
     document->FinishedParsing();
   }
 
-  void XMLDocumentParser::Finish() noexcept
+  void XMLDocumentParser::Detach() noexcept
   {
-    krys_debug_assert(!IsStopped());
-
-    Ref<XMLDocumentParser> protectedThis = ShareRef(*this);
-    End();
-  }
-
-  void XMLDocumentParser::InsertErrorMessageBlock() noexcept
-  {
-    krys_debug_assert(_xmlErrors);
-    _xmlErrors->InsertErrorMessageBlock();
-  }
-
-  namespace
-  {
-    struct XMLParsingNamespaces
-    {
-      DOMStringAtom DefaultNamespace {null};
-      HashMap<DOMStringAtom, DOMStringAtom> PrefixNamespaces;
-    };
-
-    KRYS_NODISCARD XMLParsingNamespaces FindXMLParsingNamespaces(Element *contextElement) noexcept
-    {
-      if (!contextElement)
-      {
-        return {};
-      }
-
-      XMLParsingNamespaces result;
-
-      result.DefaultNamespace = contextElement->LookupNamespaceURI(null);
-
-      for (auto *element = contextElement; element; element = element->ParentElement())
-      {
-        if (!element->HasAttributes())
-        {
-          continue;
-        }
-        for (auto &attribute : element->AttributeList())
-        {
-          // A declaration nearer the context element hides an ancestor's for the same prefix.
-          if (attribute->Prefix() == infra::namespace_prefixes::XMLNS)
-          {
-            result.PrefixNamespaces.try_emplace(attribute->LocalName(), DOMStringAtom(attribute->Value()));
-          }
-        }
-      }
-
-      return result;
-    }
+    ClearCurrentNodeStack();
+    DocumentParser::Detach();
   }
 
   bool XMLDocumentParser::ParseDocumentFragment(DOMStringView chunk, DocumentFragment &fragment,
@@ -240,15 +118,112 @@ namespace krys::boo::xml
     }
 
     // https://html.spec.whatwg.org/#xml-fragment-parsing-algorithm
-    // (The parser declares the namespaces in scope on the context element rather than parsing it, and
-    // checks well-formedness as it parses the input into the fragment.)
+    // (Rather than feeding the parser the context element's start and end tags, the parser starts with the
+    // namespaces in scope on it declared, and parses the input straight into the fragment, checking it's
+    // well formed as it goes.)
     auto namespaces = FindXMLParsingNamespaces(contextElement);
     auto parser = XMLDocumentParser::Create(fragment, krys::move(namespaces.PrefixNamespaces),
                                             namespaces.DefaultNamespace);
     bool wellFormed = parser->AppendFragmentSource(chunk);
-    // Do not call Finish(). The Finish() and DoEnd() implementations touch the main document and loader and
-    // can cause crashes in the fragment case.
-    parser->Detach();  // Allows ~DocumentParser to assert it was detached before destruction.
-    return wellFormed; // AppendFragmentSource()'s wellFormed is more permissive than Document's.
+    // Not Finish(): ending touches the document and its loader. Detaching is what a parser must do before
+    // it's destroyed.
+    parser->Detach();
+    return wellFormed;
   }
+
+#pragma endregion
+
+#pragma region Errors
+
+  void XMLDocumentParser::HandleError(XMLErrors::Type type, const char *message,
+                                      SourceLocation position) noexcept
+  {
+    if (!_xmlErrors)
+    {
+      _xmlErrors = CreateUnique<XMLErrors>(*Document());
+    }
+    _xmlErrors->HandleError(type, message, position);
+    if (type != XMLErrors::Type::Warning)
+    {
+      _sawError = true;
+    }
+    if (type == XMLErrors::Type::Fatal)
+    {
+      StopParsing();
+    }
+  }
+
+  void XMLDocumentParser::InsertErrorMessageBlock() noexcept
+  {
+    krys_debug_assert(_xmlErrors);
+    _xmlErrors->InsertErrorMessageBlock();
+  }
+
+#pragma endregion
+
+#pragma region The tree being built
+
+  void XMLDocumentParser::PushCurrentNode(ContainerNode *node) noexcept
+  {
+    krys_debug_assert(node);
+    krys_debug_assert(_currentNode);
+    _currentNodeStack.push_back(std::exchange(_currentNode, ShareRefPtr(node)));
+    if (_currentNodeStack.size() > MaxXMLTreeDepth)
+    {
+      HandleError(XMLErrors::Type::Fatal, "Excessive node nesting.", TextPosition());
+    }
+  }
+
+  void XMLDocumentParser::PopCurrentNode() noexcept
+  {
+    if (!_currentNode)
+    {
+      return;
+    }
+    krys_debug_assert(!_currentNodeStack.empty());
+    _currentNode = krys::move(_currentNodeStack.back());
+    _currentNodeStack.pop_back();
+  }
+
+  void XMLDocumentParser::ClearCurrentNodeStack() noexcept
+  {
+    _currentNode = nullptr;
+    _leafTextNode = nullptr;
+    _currentNodeStack.clear();
+  }
+
+  void XMLDocumentParser::CreateLeafTextNode() noexcept
+  {
+    if (_leafTextNode)
+    {
+      return;
+    }
+    krys_debug_assert(_bufferedText.empty());
+    _leafTextNode = CreateRef<Text>(_currentNode->NodeDocument(), DOMString());
+    if (RefPtr<ContainerNode> currentNode = _currentNode)
+    {
+      (void)dom::MutationAlgorithms::Append(*_leafTextNode, *currentNode);
+    }
+  }
+
+  bool XMLDocumentParser::UpdateLeafTextNode() noexcept
+  {
+    if (IsStopped())
+    {
+      return false;
+    }
+    if (!_leafTextNode)
+    {
+      return true;
+    }
+
+    RefPtr<Text> leafTextNode = _leafTextNode;
+    (void)leafTextNode->AppendData(krys::move(_bufferedText));
+    _bufferedText.clear();
+    _leafTextNode = nullptr;
+    // What appending the text ran may have stopped the parser.
+    return !IsStopped();
+  }
+
+#pragma endregion
 }
