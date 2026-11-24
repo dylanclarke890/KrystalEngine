@@ -395,12 +395,6 @@ input {
     cursor: auto;
 }
 
-@media (prefers-dark-interface) {
-    input {
-        background-color: transparent;
-    }
-}
-
 input[type="search"] {
     box-sizing: border-box;
 }
@@ -435,12 +429,7 @@ input:is([type="date"], [type="time"], [type="datetime-local"], [type="month"], 
     overflow: hidden;
     outline: none;
     font-variant-numeric: tabular-nums;
-    /* FIXME: Font features should be defined in a @font-feature-values rule, so that the feature setting is only applied to the system font. */
-    /* "ss03" enables the raised colon separator on the system font. */
-    font-feature-settings: "ss03";
 }
-
-/* FIXME: Styling inner elements of the date control should be specific to input[type="date"]. */
 
 input::-webkit-datetime-edit {
     display: inline-block;
@@ -830,8 +819,6 @@ output {
     display: inline;
 }
 
-/* form validation message bubble */
-
 /* meter */
 
 meter {
@@ -966,7 +953,6 @@ area:any-link {
 }
 
 /* HTML5 ruby elements */
-/* Note that text-tracks.css contains a subset of this ruby styling for WebVTT elements. It should be kept in sync. */
 ruby {
     display: ruby;
 }
