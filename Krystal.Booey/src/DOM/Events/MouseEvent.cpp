@@ -44,11 +44,6 @@ namespace krys::boo
     {
       return static_cast<int16>(button == MouseButton::None ? MouseButton::Left : button);
     }
-
-    KRYS_NODISCARD RefPtr<Node> AsNode(RefPtr<EventTarget> target) noexcept
-    {
-      return DynamicDowncast<Node>(krys::move(target));
-    }
   }
 
   bool dom::IsAnyClick(const DOMStringAtom &eventType) noexcept
@@ -225,25 +220,5 @@ namespace krys::boo
       return 0;
     }
     return static_cast<uint32>(_button + 1);
-  }
-
-  RefPtr<Node> MouseEvent::ToElement() const noexcept
-  {
-    // MSIE extension - "the object toward which the user is moving the mouse pointer"
-    if (Type() == event_names::MouseOut || Type() == event_names::MouseLeave)
-    {
-      return AsNode(RelatedTarget());
-    }
-    return AsNode(Target());
-  }
-
-  RefPtr<Node> MouseEvent::FromElement() const noexcept
-  {
-    // MSIE extension - "object from which activation or the mouse pointer is exiting during the event" (huh?)
-    if (Type() == event_names::MouseOut || Type() == event_names::MouseLeave)
-    {
-      return AsNode(Target());
-    }
-    return AsNode(RelatedTarget());
   }
 }

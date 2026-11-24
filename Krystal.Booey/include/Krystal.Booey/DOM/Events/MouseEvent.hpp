@@ -165,12 +165,6 @@ namespace krys::boo
       return _relatedTarget;
     }
 
-    /// @note Legacy: the node the pointer moved to.
-    KRYS_NODISCARD virtual RefPtr<Node> ToElement() const noexcept;
-
-    /// @note Legacy: the node the pointer moved from.
-    KRYS_NODISCARD virtual RefPtr<Node> FromElement() const noexcept;
-
     /// @note Legacy: the button, counted from one, or zero if none was pressed.
     KRYS_NODISCARD uint32 Which() const noexcept;
 

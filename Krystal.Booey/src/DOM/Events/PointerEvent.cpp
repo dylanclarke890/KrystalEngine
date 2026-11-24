@@ -585,14 +585,4 @@ namespace krys::boo
 
     return AdjustedCoordinateForType(OffsetLocation().Y());
   }
-
-  RefPtr<Node> PointerEvent::ToElement() const noexcept
-  {
-    return nullptr;
-  }
-
-  RefPtr<Node> PointerEvent::FromElement() const noexcept
-  {
-    return nullptr;
-  }
 }

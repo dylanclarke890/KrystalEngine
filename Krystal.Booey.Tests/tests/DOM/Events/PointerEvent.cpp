@@ -90,15 +90,6 @@ namespace krys::boo::dom::tests
       CHECK(eventRef->TiltY() == 45);
       CHECK(eventRef->AzimuthAngle() == Catch::Approx(std::numbers::pi / 4));
     }
-
-    SECTION("legacy elements are null")
-    {
-      PointerEventInit init;
-      auto eventRef = CreateRef<PointerEvent>(u8"pointerover", init);
-      auto &event = *eventRef;
-      CHECK_FALSE(event.ToElement());
-      CHECK_FALSE(event.FromElement());
-    }
   }
 
   TEST_CASE("PointerEvent: from a mouse event", "[DOM][PointerEvent]")
