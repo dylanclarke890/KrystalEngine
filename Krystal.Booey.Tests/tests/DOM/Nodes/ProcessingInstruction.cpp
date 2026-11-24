@@ -1,8 +1,8 @@
 ﻿#include "Krystal.Booey/DOM/Nodes/ProcessingInstruction.hpp"
 #include "catch2/catch_test_macros.hpp"
-#include "Krystal.Booey/DOM/MutationObservers/MutationObserver.hpp"
-#include "Krystal.Booey/DOM/MutationObservers/MutationRecord.hpp"
 #include "Krystal.Booey/DOM/Nodes/Document.hpp"
+#include "Krystal.Booey/DOM/Observers/Mutation/MutationObserver.hpp"
+#include "Krystal.Booey/DOM/Observers/Mutation/MutationRecord.hpp"
 
 namespace krys::boo::dom::tests
 {

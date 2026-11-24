@@ -416,7 +416,6 @@ set(KRYSTAL_BOOEY_TESTS_DOM_SOURCES
   tests/DOM/Internals/QualifiedNameCache.cpp
   tests/DOM/Internals/TreeScopeOrderedMap.cpp
   tests/DOM/Internals/UserActionElementSet.cpp
-  tests/DOM/IntersectionObservers/IntersectionObserver.cpp
   tests/DOM/Iterators/ComposedTreeIterator.cpp
   tests/DOM/Mixins/ARIAMixin.cpp
   tests/DOM/Mixins/ChildNode.cpp
@@ -425,8 +424,6 @@ set(KRYSTAL_BOOEY_TESTS_DOM_SOURCES
   tests/DOM/Mixins/NonElementParentNode.cpp
   tests/DOM/Mixins/ParentNode.cpp
   tests/DOM/Mixins/Slottable.cpp
-  tests/DOM/MutationObservers/MutationObserver.cpp
-  tests/DOM/MutationObservers/MutationRecord.cpp
   tests/DOM/Nodes/Attr.cpp
   tests/DOM/Nodes/CDATASection.cpp
   tests/DOM/Nodes/CharacterData.cpp
@@ -444,13 +441,16 @@ set(KRYSTAL_BOOEY_TESTS_DOM_SOURCES
   tests/DOM/Nodes/ShadowRoot.cpp
   tests/DOM/Nodes/StyledElement.cpp
   tests/DOM/Nodes/Text.cpp
+  tests/DOM/Observers/Intersection/IntersectionObserver.cpp
+  tests/DOM/Observers/Mutation/MutationObserver.cpp
+  tests/DOM/Observers/Mutation/MutationRecord.cpp
+  tests/DOM/Observers/Resize/ResizeObserver.cpp
   tests/DOM/Ranges/AbstractRange.cpp
   tests/DOM/Ranges/BoundaryPoint.cpp
   tests/DOM/Ranges/Position.cpp
   tests/DOM/Ranges/Range.cpp
   tests/DOM/Ranges/SimpleRange.cpp
   tests/DOM/Ranges/StaticRange.cpp
-  tests/DOM/ResizeObservers/ResizeObserver.cpp
   tests/DOM/Scheduling/DocumentTimer.cpp
   tests/DOM/Traversal/NodeFilter.cpp
   tests/DOM/Traversal/NodeIterator.cpp

@@ -1074,7 +1074,7 @@ Status: reviewed (2026-10-31)
 #### [4.3.3. Interface MutationRecord](https://dom.spec.whatwg.org/#interface-mutationrecord)
 
 Status: reviewed (2026-10-31)
-> `MutationRecord` (`MutationRecord.hpp`) has a subclass per type in `DOM/MutationObservers/`; attribute and character data records create their empty `addedNodes` and `removedNodes` lists when first asked, and keep them.
+> `MutationRecord` (`MutationRecord.hpp`) has a subclass per type in `DOM/Observers/Mutation/`; attribute and character data records create their empty `addedNodes` and `removedNodes` lists when first asked, and keep them.
 <!-- definitions: dom-mutationrecord-target dom-mutationrecord-addednodes dom-mutationrecord-removednodes dom-mutationrecord-previoussibling dom-mutationrecord-nextsibling dom-mutationrecord-attributename dom-mutationrecord-attributenamespace dom-mutationrecord-oldvalue -->
 
 - [x] [MutationRecord.type](https://dom.spec.whatwg.org/#dom-mutationrecord-type) — The type, target, addedNodes, removedNodes, previousSibling, nextSibling, attributeName, attributeNamespace, and oldValue attributes must return the values they were initialized to.
