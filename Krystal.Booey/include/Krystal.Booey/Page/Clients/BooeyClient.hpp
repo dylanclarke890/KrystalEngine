@@ -1,25 +1,4 @@
-﻿/*
- * Copyright (C) 2006-2025 Apple, Inc. All rights reserved.
- * Copyright (C) 2010 Nokia Corporation and/or its subsidiary(-ies).
- * Copyright (C) 2012 Samsung Electronics. All rights reserved.
- *
- * This library is free software; you can redistribute it and/or
- * modify it under the terms of the GNU Library General Public
- * License as published by the Free Software Foundation; either
- * version 2 of the License, or (at your option) any later version.
- *
- * This library is distributed in the hope that it will be useful,
- * but WITHOUT ANY WARRANTY; without even the implied warranty of
- * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU
- * Library General Public License for more details.
- *
- * You should have received a copy of the GNU Library General Public License
- * along with this library; see the file COPYING.LIB.  If not, write to
- * the Free Software Foundation, Inc., 51 Franklin Street, Fifth Floor,
- * Boston, MA 02110-1301, USA.
- */
-
-#pragma once
+﻿#pragma once
 
 #include "Krystal.Booey/DOM/Types/DOMString.hpp"
 #include "Krystal.Booey/Input/PointerCharacteristics.hpp"
@@ -54,7 +33,9 @@ namespace krys::boo
   class PopupMenuClient;
   class SVGImageElement;
 
-  /// @brief What a page asks of its host: the window's side of the page, and its graphics.
+  /// @brief What a page asks of its host: repainting and rendering updates, the pickers and popups its
+  /// controls open, accessibility notifications, the screen and pointing devices media features describe,
+  /// pointer lock, and its graphics layers and buffers. Every member has a default for a host without it.
   // FIXME: The rest of the Booey client: tooltips, cursors, scrolling the host's view, search popups and the
   // other compositing hooks (layer flushes, compositing triggers, display refresh monitors), once there are
   // any.
@@ -123,7 +104,7 @@ namespace krys::boo
     {
     }
 
-    /// @brief Pass nullptr as the GraphicsLayer to detach the root layer.
+    /// @brief Gives the host @p frame's root graphics layer to composite, or null to take it away.
     virtual void AttachRootGraphicsLayer(Frame &, GraphicsLayer *) noexcept = 0;
 
     /// @brief The factory the page's graphics layers come from; null when the host doesn't composite, so the
@@ -148,19 +129,21 @@ namespace krys::boo
       return nullptr;
     }
 
-    /// @brief Whether a menu list's items are shown left to right regardless of their direction.
+    /// @brief Whether the host's popup shows the items without their CSS direction and alignment, so a menu
+    /// list shows its text left aligned, in the text's own direction, to match.
     KRYS_NODISCARD virtual bool SelectItemWritingDirectionIsNatural() const noexcept
     {
       return false;
     }
 
-    /// @brief Whether a menu list's text is aligned in its selected option's direction.
+    /// @brief Whether a menu list's text takes its selected option's direction (and `unicode-bidi`), aligned
+    /// to the start of the menu list's own direction.
     KRYS_NODISCARD virtual bool SelectItemAlignmentFollowsMenuWritingDirection() const noexcept
     {
       return true;
     }
 
-    /// @brief The options of the focused select changed, for a host showing them in its own picker.
+    /// @brief Called when the focused select's options change, for a host showing them in its own picker.
     virtual void FocusedSelectElementDidChangeOptions(const HTMLSelectElement &) noexcept
     {
     }
@@ -250,9 +233,10 @@ namespace krys::boo
       return false;
     }
 
-    // MARK: - Media features
-    // What the media features evaluate against, besides the page and its view. When an answer changes, the
-    // host calls `Page::UpdateStyleAfterChangeInEnvironment`.
+#pragma region The screen and pointing devices
+
+    // Most of these are what media features evaluate against, besides the page and its view. When an answer
+    // changes, the host calls `Page::UpdateStyleAfterChangeInEnvironment`.
 
     /// @brief What the primary pointing device can do (`pointer`).
     KRYS_NODISCARD virtual PointerCharacteristics PrimaryPointingDevice() const noexcept
@@ -357,6 +341,8 @@ namespace krys::boo
     {
       return false;
     }
+
+#pragma endregion
 
     /// @brief The page asks to lock the pointer: the host hides the cursor, keeps it where it is and reports
     /// the mouse's movement, then calls @p completionHandler with whether it did; a host that doesn't
