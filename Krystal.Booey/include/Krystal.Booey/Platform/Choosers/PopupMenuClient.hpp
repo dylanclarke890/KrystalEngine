@@ -23,7 +23,6 @@
 
 #include "Krystal.Booey/Graphics/Geometry/LayoutUnit.hpp"
 #include "Krystal.Booey/Platform/Choosers/PopupMenuStyle.hpp"
-#include "Krystal.Core/Assert.hpp"
 #include "Krystal.Core/Strings/String.hpp"
 
 namespace krys::boo
@@ -36,15 +35,7 @@ namespace krys::boo
 
     virtual void ValueChanged(uint32 listIndex, bool fireEvents = true) noexcept = 0;
 
-    virtual void SelectionChanged(uint32 listIndex, bool fireEvents = true) noexcept = 0;
-
-    virtual void SelectionCleared() noexcept = 0;
-
     KRYS_NODISCARD virtual utf8_string ItemText(uint32 listIndex) const noexcept = 0;
-
-    KRYS_NODISCARD virtual utf8_string ItemLabel(uint32 listIndex) const noexcept = 0;
-
-    KRYS_NODISCARD virtual utf8_string ItemIcon(uint32 listIndex) const noexcept = 0;
 
     KRYS_NODISCARD virtual utf8_string ItemToolTip(uint32 listIndex) const noexcept = 0;
 
@@ -55,10 +46,6 @@ namespace krys::boo
     KRYS_NODISCARD virtual PopupMenuStyle ItemStyle(uint32 listIndex) const noexcept = 0;
 
     KRYS_NODISCARD virtual PopupMenuStyle MenuStyle() const noexcept = 0;
-
-    KRYS_NODISCARD virtual int32 ClientInsetLeft() const noexcept = 0;
-
-    KRYS_NODISCARD virtual int32 ClientInsetRight() const noexcept = 0;
 
     KRYS_NODISCARD virtual LayoutUnit ClientPaddingLeft() const noexcept = 0;
 
@@ -76,24 +63,6 @@ namespace krys::boo
 
     KRYS_NODISCARD virtual bool ItemIsSelected(uint32 listIndex) const noexcept = 0;
 
-    KRYS_NODISCARD virtual bool ShouldPopOver() const noexcept = 0;
-
     virtual void SetTextFromItem(uint32 listIndex) noexcept = 0;
-
-    virtual void ListBoxSelectItem(int32 listIndex, bool allowMultiplySelections, bool shift,
-                                   bool fireOnChangeNow = true) noexcept
-    {
-      (void)listIndex;
-      (void)allowMultiplySelections;
-      (void)shift;
-      (void)fireOnChangeNow;
-      krys_debug_assert_msg(false, "Not reached");
-    }
-
-    KRYS_NODISCARD virtual bool Multiple() const noexcept
-    {
-      krys_debug_assert_msg(false, "Not reached");
-      return false;
-    }
   };
 }
