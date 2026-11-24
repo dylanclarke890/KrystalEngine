@@ -115,7 +115,7 @@ namespace krys::boo::tests
     CHECK_FALSE(Contains(fixture.Painted(), u8"native-image"));
   }
 
-  TEST_CASE("CachedCSSStyleSheet: a nosniff response is a sheet only if it says it's CSS",
+  TEST_CASE("CachedCSSStyleSheet: a response is a sheet only if its type is CSS or missing",
             "[Loader][CachedResourceLoader]")
   {
     LoaderFixture loader;
@@ -130,23 +130,24 @@ namespace krys::boo::tests
     serve(u8"https://example.com/plain.css", u8"text/plain", false);
     serve(u8"https://example.com/nosniff-plain.css", u8"text/plain", true);
     serve(u8"https://example.com/nosniff.css", u8"text/css", true);
+    serve(u8"https://example.com/upper.css", u8"TEXT/CSS", false);
+    serve(u8"https://example.com/untyped.css", u8"", false);
 
     PaintFixture fixture(u8"<!DOCTYPE html>");
-    auto sheetText = [&](utf8_stringview url)
+    auto isSheet = [&](utf8_stringview url)
     {
       auto sheet = fixture.Document->GetCachedResourceLoader().RequestCSSStyleSheet(
         CachedResourceRequest(net::ResourceRequest(net::Url(url))));
       REQUIRE(sheet);
       RunNetworkingTasks();
-      bool hasValidMimeType = true;
-      auto text = (*sheet)->SheetText(CachedCSSStyleSheet::MimeTypeCheckHint::Lax, &hasValidMimeType);
-      return Pair<bool, bool>(text.has_value(), hasValidMimeType);
+      return (*sheet)->SheetText().has_value();
     };
 
-    // A lax check takes any type, unless the response says not to sniff.
-    CHECK(sheetText(u8"https://example.com/plain.css") == Pair<bool, bool>(true, true));
-    CHECK(sheetText(u8"https://example.com/nosniff-plain.css") == Pair<bool, bool>(false, false));
-    CHECK(sheetText(u8"https://example.com/nosniff.css") == Pair<bool, bool>(true, true));
+    CHECK_FALSE(isSheet(u8"https://example.com/plain.css"));
+    CHECK_FALSE(isSheet(u8"https://example.com/nosniff-plain.css"));
+    CHECK(isSheet(u8"https://example.com/nosniff.css"));
+    CHECK(isSheet(u8"https://example.com/upper.css"));
+    CHECK(isSheet(u8"https://example.com/untyped.css"));
   }
 
   TEST_CASE("CachedResourceLoader: data URLs load without the host", "[Loader][CachedResourceLoader]")

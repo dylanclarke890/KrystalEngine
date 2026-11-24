@@ -58,7 +58,7 @@ namespace krys::boo
   }
 
   CachedCSSStyleSheet::CachedCSSStyleSheet(const CachedResourceRequest &request) noexcept
-      : CachedResource(CachedResourceRequest(request), Type::CSSStyleSheet), _charset(request.Charset())
+      : CachedResource(CachedResourceRequest(request), Type::CSSStyleSheet)
   {
   }
 
@@ -90,14 +90,10 @@ namespace krys::boo
     return u8"UTF-8";
   }
 
-  Maybe<utf8_string> CachedCSSStyleSheet::SheetText(MimeTypeCheckHint mimeTypeCheckHint,
-                                                    bool *hasValidMimeType,
-                                                    bool *hasHttpStatusOK) const noexcept
+  Maybe<utf8_string> CachedCSSStyleSheet::SheetText() const noexcept
   {
-    // Ensure hasValidMIMEType and hasHTTPStatusOK always get set (even if the data is null or empty) — which
-    // in turn ensures that if the MIME type isn't text/css or the HTTP status isn't an OK status, we never
-    // load the resource. https://html.spec.whatwg.org/#link-type-stylesheet:process-the-linked-resource
-    if (!CanUseSheet(mimeTypeCheckHint, hasValidMimeType, hasHttpStatusOK))
+    // https://html.spec.whatwg.org/#link-type-stylesheet:process-the-linked-resource
+    if (!CanUseSheet())
     {
       return null;
     }
@@ -164,8 +160,7 @@ namespace krys::boo
            || text::IsASCIICaselessEqual(ResponseMimeType(), u8"text/css");
   }
 
-  bool CachedCSSStyleSheet::CanUseSheet(MimeTypeCheckHint mimeTypeCheckHint, bool *hasValidMimeType,
-                                        bool *hasHttpStatusOK) const noexcept
+  bool CachedCSSStyleSheet::CanUseSheet() const noexcept
   {
     if (ErrorOccurred())
     {
@@ -178,25 +173,12 @@ namespace krys::boo
     if (Response().Url().ProtocolIsInHttpFamily() && Response().HttpStatusCode()
         && !Response().IsSuccessful())
     {
-      if (hasHttpStatusOK)
-      {
-        *hasHttpStatusOK = false;
-      }
       return false;
     }
 
     if (!MimeTypeAllowedByNosniff())
     {
-      if (hasValidMimeType)
-      {
-        *hasValidMimeType = false;
-      }
       return false;
-    }
-
-    if (mimeTypeCheckHint == MimeTypeCheckHint::Lax)
-    {
-      return true;
     }
 
     // This check exactly matches Firefox. Note that we grab the Content-Type header directly because we want
@@ -205,16 +187,9 @@ namespace krys::boo
     //
     // This code defaults to allowing the stylesheet for non-HTTP protocols so folks can use standards mode
     // for local HTML documents.
-    // FIXME: Types that aren't valid content types (isValidContentType) are allowed too, once there's a
-    // content type parser.
     auto mimeType = ResponseMimeType();
-    bool typeOK = mimeType.empty() || text::IsASCIICaselessEqual(mimeType, u8"text/css")
-                  || text::IsASCIICaselessEqual(mimeType, u8"application/x-unknown-content-type");
-    if (hasValidMimeType)
-    {
-      *hasValidMimeType = typeOK;
-    }
-    return typeOK;
+    return mimeType.empty() || text::IsASCIICaselessEqual(mimeType, u8"text/css")
+           || text::IsASCIICaselessEqual(mimeType, u8"application/x-unknown-content-type");
   }
 
   void CachedCSSStyleSheet::DestroyDecodedData() noexcept

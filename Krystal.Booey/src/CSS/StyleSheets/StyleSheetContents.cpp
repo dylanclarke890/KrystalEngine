@@ -142,12 +142,8 @@ namespace krys::boo::css
   bool StyleSheetContents::ParseAuthorStyleSheet(const CachedCSSStyleSheet *cachedStyleSheet) noexcept
   {
     // The type is checked strictly in quirks mode too (see DIFFERENCES.md).
-    bool hasValidMimeType = true;
-    bool hasHttpStatusOK = true;
-    auto sheetText = cachedStyleSheet->SheetText(CachedCSSStyleSheet::MimeTypeCheckHint::Strict,
-                                                 &hasValidMimeType, &hasHttpStatusOK);
-    krys_debug_assert((hasValidMimeType && hasHttpStatusOK) || !sheetText);
-    if (!hasHttpStatusOK || !hasValidMimeType || !sheetText)
+    auto sheetText = cachedStyleSheet->SheetText();
+    if (!sheetText)
     {
       return false;
     }
