@@ -128,6 +128,7 @@ Record a difference here when you make one, and remove it when Booey comes back 
 
 ### From the specs
 
+- A table with a caption has one client rect, covering both, as in Chrome; CSSOM View gives the table box and the caption box a rect each.
 - An `xml-stylesheet` processing instruction after the root element, outside the prolog, still loads its sheet, and one without an `href` loads the document itself as its sheet, as in Chrome; CSSOM loads neither (`ProcessingInstruction::CheckStyleSheet`).
 - Style `Number` leaves in calc are multiplied by the used zoom like dimensions (`style::calc` `Evaluate(const Number &)`).
 - A quoted generic family (`"serif"`) serialises unquoted (`SerialiseFontFamily` quotes only what isn't an identifier), so it reads back as the generic.

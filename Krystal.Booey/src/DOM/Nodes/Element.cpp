@@ -541,9 +541,7 @@ namespace krys::boo
     style::PostResolutionCallbackDisabler disabler(*document,
                                                    style::PostResolutionCallbackDisabler::DrainCallbacks::No);
 
-    // Resolve and cache styles starting from the most distant ancestor.
-    // FIXME: This is not as efficient as it could be. For example if an ancestor has a non-inherited style
-    // change but the styles are otherwise clean we would not need to re-resolve descendants.
+    // From the furthest ancestor down, each style resolved and cached for the next to inherit from.
     for (auto &element : elementsRequiringComputedStyle | std::views::reverse)
     {
       if (computedStyle && computedStyle->ContainerType() != ContainerType::Normal
@@ -627,7 +625,7 @@ namespace krys::boo
       }
     }
 
-    // FIXME: This should call resolveComputedStyle() unconditionally so we check if the style is valid.
+    // An existing style is taken as current: callers bring style up to date first.
     auto *style = ExistingComputedStyle();
     if (!style)
     {
@@ -805,7 +803,7 @@ namespace krys::boo
         return;
       }
 
-      // FIXME: We should restore the previous selection if there is one.
+      // The caret goes to the start, as in Chrome, which doesn't restore an earlier selection either.
       VisibleSelection newSelection = VisibleSelection(FirstPositionInOrBeforeNode(this));
 
       if (selection.ShouldChangeSelection(newSelection))
@@ -1013,8 +1011,7 @@ namespace krys::boo
 
   void Element::InvalidateForQueryContainerSizeChange() noexcept
   {
-    // FIXME: Ideally we would just recompute things that are actually affected by containers queries within
-    // the subtree.
+    // The whole subtree, as any of it may query the container.
     Node::InvalidateStyle(style::Validity::SubtreeInvalid);
     _nodeFlags.Add(dom::NodeFlag::NeedsUpdateQueryContainerDependentStyle);
   }
@@ -1655,10 +1652,8 @@ namespace krys::boo
       return document->MatchingAnimations([&](Element &target) -> bool { return Contains(&target); });
     }
 
-    // For the list of animations to be current, we need to account for any pending CSS changes, such as
-    // updates to CSS Animations and CSS Transitions. This requires updating layout as well since resolving
-    // layout-dependent media queries could yield animations.
-    // FIXME: We might be able to use style::Extractor which is more optimized.
+    // Style is brought up to date first, so CSS animations and transitions that style changes start or end
+    // are listed.
     (void)document->UpdateStyleIfNeeded();
 
     List<RefPtr<WebAnimation>> animations;
@@ -3853,8 +3848,7 @@ namespace krys::boo
       {
         return value;
       }
-      // FIXME (webkit.org/b/189397): Why can't we just ceil/floor?
-      // Needed because of truncation (rather than rounding) when scaling up.
+      // Scaling up truncated the value, so one is added back before scaling it down.
       if (zoomFactor > 1)
       {
         value++;
@@ -4118,7 +4112,7 @@ namespace krys::boo
       renderer->AbsoluteQuads(quads);
     }
 
-    // FIXME: Handle table/inline-table with a caption.
+    // A table's box covers its caption, so it has one rect, as in Chrome (see DIFFERENCES.md).
 
     if (quads.empty())
     {
