@@ -57,10 +57,8 @@ namespace krys::boo
         TextInserted,
         TextRemoved,
         TextChanged,
-        AllChildrenRemoved,
         NonContentsChildRemoved,
         NonContentsChildInserted,
-        AllChildrenReplaced,
       };
 
       /// @brief The parser appends to elements whose children it's still parsing; everything else is the API.
@@ -68,22 +66,12 @@ namespace krys::boo
       {
         Parser,
         API,
-        Clone,
-      };
-
-      enum class AffectsElements : uint8
-      {
-        Unknown,
-        No,
-        Yes,
       };
 
       ChildChange::Type ChangeType;
-      Element *SiblingChanged;
       Element *PreviousSiblingElement;
       Element *NextSiblingElement;
       ChildChange::Source ChangeSource;
-      ChildChange::AffectsElements ChangeAffectsElements;
 
       KRYS_NODISCARD bool IsInsertion() const noexcept
       {
@@ -91,12 +79,10 @@ namespace krys::boo
         {
           case ChildChange::Type::ElementInserted:
           case ChildChange::Type::TextInserted:
-          case ChildChange::Type::NonContentsChildInserted:
-          case ChildChange::Type::AllChildrenReplaced:      return true;
+          case ChildChange::Type::NonContentsChildInserted: return true;
           case ChildChange::Type::ElementRemoved:
           case ChildChange::Type::TextRemoved:
           case ChildChange::Type::TextChanged:
-          case ChildChange::Type::AllChildrenRemoved:
           case ChildChange::Type::NonContentsChildRemoved:  return false;
         }
         return false;

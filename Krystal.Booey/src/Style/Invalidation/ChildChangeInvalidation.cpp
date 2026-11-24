@@ -272,8 +272,7 @@ namespace krys::boo::style
       });
 
     // :empty is affected by text changes.
-    if (_childChange.ChangeType == ChildChange::Type::TextRemoved
-        || _childChange.ChangeType == ChildChange::Type::AllChildrenRemoved)
+    if (_childChange.ChangeType == ChildChange::Type::TextRemoved)
     {
       InvalidateForChangedElement(ParentElement(), matchingHasSelectors,
                                   ChangedElementRelation::SelfOrDescendant);
@@ -434,7 +433,7 @@ namespace krys::boo::style
   template <typename TFunction>
   void ChildChangeInvalidation::TraverseRemovedElements(TFunction function) noexcept
   {
-    if (_childChange.IsInsertion() && _childChange.ChangeType != ChildChange::Type::AllChildrenReplaced)
+    if (_childChange.IsInsertion())
     {
       return;
     }
@@ -500,11 +499,6 @@ namespace krys::boo::style
   template <typename TFunction>
   void ChildChangeInvalidation::TraverseRemainingExistingSiblings(TFunction function) noexcept
   {
-    if (_childChange.IsInsertion() && _childChange.ChangeType == ChildChange::Type::AllChildrenReplaced)
-    {
-      return;
-    }
-
     for (RefPtr<Element> child = ShareRefPtr(_childChange.PreviousSiblingElement); child;
          child = ShareRefPtr(dom::TreeQueries::PreviousElementSibling(*child)))
     {

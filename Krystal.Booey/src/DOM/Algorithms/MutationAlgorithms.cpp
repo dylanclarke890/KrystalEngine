@@ -84,14 +84,11 @@ namespace krys::boo::dom
 
       auto *beforeChildElement = DynamicDowncast<Element>(beforeChild);
       return {changeType,
-              DynamicDowncast<Element>(child),
               beforeChild ? TreeQueries::PreviousElementSibling(*beforeChild)
                           : TreeQueries::LastElementChild(parent),
               !beforeChild || beforeChildElement ? beforeChildElement
                                                  : TreeQueries::NextElementSibling(*beforeChild),
-              ChildChangeSource(parent),
-              changeType == ChildChange::Type::ElementInserted ? ChildChange::AffectsElements::Yes
-                                                               : ChildChange::AffectsElements::No};
+              ChildChangeSource(parent)};
     }
 
     KRYS_NODISCARD ChildChange MakeChildChangeForRemoval(ContainerNode &parent, Node &childToRemove) noexcept
@@ -109,13 +106,8 @@ namespace krys::boo::dom
         return ChildChange::Type::NonContentsChildRemoved;
       }();
 
-      return {changeType,
-              DynamicDowncast<Element>(childToRemove),
-              TreeQueries::PreviousElementSibling(childToRemove),
-              TreeQueries::NextElementSibling(childToRemove),
-              ChildChangeSource(parent),
-              changeType == ChildChange::Type::ElementRemoved ? ChildChange::AffectsElements::Yes
-                                                              : ChildChange::AffectsElements::No};
+      return {changeType, TreeQueries::PreviousElementSibling(childToRemove),
+              TreeQueries::NextElementSibling(childToRemove), ChildChangeSource(parent)};
     }
 
     /// @brief Invalidates the style that inserting or removing @p child affects, before the change (when
