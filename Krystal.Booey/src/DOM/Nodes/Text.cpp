@@ -1,25 +1,4 @@
-﻿/*
- * Copyright (C) 1999 Lars Knoll (knoll@kde.org)
- *           (C) 1999 Antti Koivisto (koivisto@kde.org)
- * Copyright (C) 2003-2018 Apple Inc. All rights reserved.
- *
- * This library is free software; you can redistribute it and/or
- * modify it under the terms of the GNU Library General Public
- * License as published by the Free Software Foundation; either
- * version 2 of the License, or (at your option) any later version.
- *
- * This library is distributed in the hope that it will be useful,
- * but WITHOUT ANY WARRANTY; without even the implied warranty of
- * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU
- * Library General Public License for more details.
- *
- * You should have received a copy of the GNU Library General Public License
- * along with this library; see the file COPYING.LIB.  If not, write to
- * the Free Software Foundation, Inc., 51 Franklin Street, Fifth Floor,
- * Boston, MA 02110-1301, USA.
- */
-
-#include "Krystal.Booey/DOM/Nodes/Text.hpp"
+﻿#include "Krystal.Booey/DOM/Nodes/Text.hpp"
 #include "Krystal.Booey/DOM/Algorithms/TextAlgorithms.hpp"
 #include "Krystal.Booey/DOM/Mixins/Slottable.hpp"
 #include "Krystal.Booey/DOM/Nodes/Document.hpp"
@@ -92,6 +71,7 @@ namespace krys::boo
 
   namespace
   {
+    /// @brief Whether @p text is in SVG content (not in a `foreignObject`), where it's laid out as SVG text.
     KRYS_NODISCARD bool IsSVGText(const Text &text) noexcept
     {
       krys_debug_assert(text.ParentNode());
@@ -107,6 +87,7 @@ namespace krys::boo
       return CreateRenderer<RenderSVGInlineText>(*this, Data());
     }
 
+    // Text in a `text-combine-upright` box is squeezed into one character's space.
     if (style.HasTextCombine())
     {
       return CreateRenderer<RenderCombineText>(*this, Data());
@@ -122,6 +103,7 @@ namespace krys::boo
       return;
     }
 
+    // A renderer that's going to be rebuilt will get the new text anyway.
     if (HasInvalidRenderer())
     {
       return;
