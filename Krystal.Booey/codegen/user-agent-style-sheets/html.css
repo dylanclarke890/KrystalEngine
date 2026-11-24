@@ -1,24 +1,6 @@
 ﻿/*
- * The default style sheet used to render HTML.
- *
- * Copyright (C) 2000 Lars Knoll (knoll@kde.org)
- * Copyright (C) 2003-2025 Apple Inc. All rights reserved.
- *
- * This library is free software; you can redistribute it and/or
- * modify it under the terms of the GNU Library General Public
- * License as published by the Free Software Foundation; either
- * version 2 of the License, or (at your option) any later version.
- *
- * This library is distributed in the hope that it will be useful,
- * but WITHOUT ANY WARRANTY; without even the implied warranty of
- * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU
- * Library General Public License for more details.
- *
- * You should have received a copy of the GNU Library General Public License
- * along with this library; see the file COPYING.LIB.  If not, write to
- * the Free Software Foundation, Inc., 51 Franklin Street, Fifth Floor,
- * Boston, MA 02110-1301, USA.
- *
+ * The default style of HTML elements, after the HTML specification's rendering section
+ * (https://html.spec.whatwg.org/multipage/rendering.html), and the internal parts of the form controls.
  */
 
 @namespace "http://www.w3.org/1999/xhtml";
@@ -698,8 +680,8 @@ input[type="color"]::-webkit-color-swatch {
     flex: 1;
 }
 
-/* https://html.spec.whatwg.org/#the-select-element-2. -internal-auto-base() takes its second value when the select has a base
-   appearance, and its first otherwise. */
+/* https://html.spec.whatwg.org/#the-select-element-2. -internal-auto-base() takes its second value when
+   the select has a base appearance, and its first otherwise. */
 select {
     box-sizing: border-box;
     appearance: auto;
@@ -887,7 +869,7 @@ progress::-webkit-progress-value {
     box-sizing: border-box;
 }
 
-/* inline elements */
+/* https://html.spec.whatwg.org/#phrasing-content-3 */
 
 u, ins {
     text-decoration: underline;
@@ -905,6 +887,7 @@ tt, code, kbd, samp {
     font-family: monospace;
 }
 
+/* https://html.spec.whatwg.org/#flow-content-3 */
 pre, xmp, plaintext, listing {
     display: block;
     font-family: monospace;
@@ -913,6 +896,7 @@ pre, xmp, plaintext, listing {
     margin-inline: 0;
 }
 
+/* The colours are the system's highlight for marked text (see DIFFERENCES.md). */
 mark {
     background-color: Mark;
     color: MarkText;
@@ -930,6 +914,7 @@ s, strike, del {
     text-decoration: line-through;
 }
 
+/* sub and sup keep the inherited line height (see DIFFERENCES.md). */
 sub {
     vertical-align: sub;
     font-size: smaller;
@@ -944,13 +929,14 @@ nobr {
     white-space: nowrap;
 }
 
-/* states */
+/* Focus rings and links (https://html.spec.whatwg.org/#phrasing-content-3). */
 
 :focus-visible {
     outline: auto 5px -webkit-focus-ring-color;
 }
 
-/* Read-only text fields do not show a focus ring but do still receive focus */
+/* No ring on the root, the body or embedded content, nor on a read-only text field, which still takes
+   focus. */
 html:focus-visible, body:focus-visible, input[readonly]:focus, embed:focus-visible, iframe:focus-visible, object:focus-visible {
     outline: none;
 }
@@ -978,7 +964,7 @@ area:any-link {
     cursor: pointer;
 }
 
-/* HTML5 ruby elements */
+/* https://html.spec.whatwg.org/#phrasing-content-3 */
 ruby {
     display: ruby;
 }
@@ -999,7 +985,7 @@ ruby > rp {
     display: none;
 }
 
-/* Avoid wrapping children of implicit ruby bases. We don't support <rb> or <rbc>, avoid giving them any behaviors. */
+/* The text in a ruby's implicit bases doesn't wrap. rb and rbc are left alone. */
 ruby > :not(rb, rbc, ruby) {
     white-space: nowrap;
 }
@@ -1020,7 +1006,6 @@ details[open] > summary:first-of-type {
     list-style-type: disclosure-open;
 }
 
-/* other elements */
 
 frameset, frame {
     display: block;
@@ -1030,10 +1015,12 @@ frameset {
     border-color: inherit;
 }
 
+/* https://html.spec.whatwg.org/#embedded-content-rendering-rules */
 iframe {
     border: 2px inset;
 }
 
+/* https://html.spec.whatwg.org/#bidi-rendering */
 hr, bdi, output {
     unicode-bidi: isolate;
 }
@@ -1044,11 +1031,12 @@ bdo, bdo[dir] {
     unicode-bidi: isolate-override;
 }
 
+/* https://html.spec.whatwg.org/#flow-content-3 */
 slot {
     display: contents;
 }
 
-/* noscript support */
+/* Scripting is always on: the application plays the part of scripts. */
 
 @media (scripting) {
     noscript {
@@ -1056,10 +1044,10 @@ slot {
     }
 }
 
-/* Default support for "Smart Invert" where all content color except media is inverted. */
-/* https://drafts.csswg.org/mediaqueries-5/#inverted */
+/* https://drafts.csswg.org/mediaqueries-5/#inverted: when the host inverts the colours, images and
+   video are inverted back. */
 @media (inverted-colors) {
-    img:not(picture>img), picture, video { filter: invert(100%); } /* Images and videos double-inverted. */
+    img:not(picture>img), picture, video { filter: invert(100%); }
 }
 
 /* https://drafts.csswg.org/css-text-decor-4/#text-decoration-skipping */
@@ -1068,7 +1056,7 @@ ins, del {
 }
 
 /* https://drafts.csswg.org/css-text-decor-4/#default-stylesheet */
-/* set language-appropriate default emphasis mark position */
+/* The emphasis marks' and the underline's side for Chinese, Japanese, Korean and Mongolian text. */
 :root:lang(zh), [lang|=zh] {
     text-emphasis-position: under right;
 }
@@ -1076,7 +1064,6 @@ ins, del {
     text-emphasis-position: over right;
 }
 
-/* set language-appropriate default underline position */
 :root:lang(ja), [lang|=ja],
 :root:lang(mn), [lang|=mn],
 :root:lang(ko), [lang|=ko] {
