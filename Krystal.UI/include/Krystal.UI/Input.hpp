@@ -32,9 +32,6 @@ namespace krys::ui::input
     /// value is the text they type.
     /// @see https://w3c.github.io/uievents-key/
     utf8_stringview NamedKey;
-    /// @brief The legacy key identifier of a key that doesn't type text (`Enter`, `U+0009`); empty for keys
-    /// identified by their text.
-    utf8_stringview KeyIdentifier;
     /// @brief The Windows virtual key code, with the side for modifiers (`LShift`, `RControl`).
     int32 LegacyKeyCode {0};
     bool IsKeypad {false};

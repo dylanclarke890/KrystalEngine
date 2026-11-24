@@ -76,29 +76,29 @@ namespace krys::boo
     }
 
     /// @see https://w3c.github.io/uievents/#dom-mouseevent-getmodifierstate
-    KRYS_NODISCARD bool GetModifierState(DOMStringView keyIdentifier) const noexcept
+    KRYS_NODISCARD bool GetModifierState(DOMStringView key) const noexcept
     {
-      if (keyIdentifier == u8"Control")
+      if (key == u8"Control")
       {
         return CtrlKey();
       }
-      if (keyIdentifier == u8"Shift")
+      if (key == u8"Shift")
       {
         return ShiftKey();
       }
-      if (keyIdentifier == u8"Alt")
+      if (key == u8"Alt")
       {
         return AltKey();
       }
-      if (keyIdentifier == u8"Meta")
+      if (key == u8"Meta")
       {
         return MetaKey();
       }
-      if (keyIdentifier == u8"AltGraph")
+      if (key == u8"AltGraph")
       {
         return _modifiers.contains(Modifier::AltGraphKey);
       }
-      if (keyIdentifier == u8"CapsLock")
+      if (key == u8"CapsLock")
       {
         return CapsLockKey();
       }

@@ -106,8 +106,8 @@ namespace krys::boo::tests
       bool Press(const utf8_string &key, utf8_string code = {}, int32 keyCode = 0) noexcept
       {
         return Frame->GetEventHandler().KeyEvent(PlatformKeyboardEvent(PlatformEvent::Type::RawKeyDown, u8"",
-                                                                       u8"", key, krys::move(code), key,
-                                                                       keyCode, false, false, false, {}, {}));
+                                                                       u8"", key, krys::move(code), keyCode,
+                                                                       false, false, false, {}, {}));
       }
 
       /// @brief Types @p text, a character, as the host does after its key down, at @p seconds.
@@ -116,7 +116,7 @@ namespace krys::boo::tests
         auto c = static_cast<int32>(static_cast<char8>(text[0]));
         auto timestamp = std::chrono::duration_cast<MonotonicTime::duration>(std::chrono::seconds(seconds));
         return Frame->GetEventHandler().KeyEvent(PlatformKeyboardEvent(
-          PlatformEvent::Type::Char, text, text, text, u8"", u8"", c, false, false, false, {}, timestamp));
+          PlatformEvent::Type::Char, text, text, text, u8"", c, false, false, false, {}, timestamp));
       }
     };
 

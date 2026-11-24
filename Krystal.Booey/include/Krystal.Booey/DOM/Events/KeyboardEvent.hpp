@@ -46,8 +46,6 @@ namespace krys::boo
     bool Repeat {false};
     bool IsComposing {false};
 
-    // Legacy.
-    DOMString KeyIdentifier;
     /// @see https://w3c.github.io/uievents/#dom-keyboardeventinit-charcode
     uint32 CharCode {0};
     /// @see https://w3c.github.io/uievents/#dom-keyboardeventinit-keycode
@@ -77,7 +75,6 @@ namespace krys::boo
     UniquePtr<PlatformKeyboardEvent> _underlyingPlatformEvent;
     DOMString _key;
     DOMString _code;
-    DOMString _keyIdentifier;
     uint32 _location {DOM_KEY_LOCATION_STANDARD};
     bool _repeat {false};
     bool _isComposing {false};
@@ -97,8 +94,8 @@ namespace krys::boo
     /// @note Legacy.
     /// @see https://w3c.github.io/uievents/#dom-keyboardevent-initkeyboardevent
     void InitKeyboardEvent(DOMStringAtom type, bool canBubble, bool cancelable, Window *view,
-                           DOMStringView keyIdentifier, uint32 location, bool ctrlKey, bool altKey,
-                           bool shiftKey, bool metaKey) noexcept;
+                           DOMStringView key, uint32 location, bool ctrlKey, bool altKey, bool shiftKey,
+                           bool metaKey) noexcept;
 
     /// @see https://w3c.github.io/uievents/#dom-keyboardevent-key
     KRYS_NODISCARD const DOMString &Key() const noexcept
@@ -110,11 +107,6 @@ namespace krys::boo
     KRYS_NODISCARD const DOMString &Code() const noexcept
     {
       return _code;
-    }
-
-    KRYS_NODISCARD const DOMString &KeyIdentifier() const noexcept
-    {
-      return _keyIdentifier;
     }
 
     /// @see https://w3c.github.io/uievents/#dom-keyboardevent-location

@@ -484,8 +484,8 @@ namespace krys::boo::tests
     auto listener = fixture.ById(u8"top").AddEventListener(
       u8"mousemove", [&](Event &event) { shiftKey = Downcast<MouseEvent>(event).ShiftKey(); });
     (void)fixture.Handler().KeyEvent(
-      PlatformKeyboardEvent(PlatformEvent::Type::KeyDown, u8"", u8"", u8"Shift", u8"ShiftLeft", u8"", 16,
-                            false, false, false, {PlatformEvent::Modifier::ShiftKey}, MonotonicTime::Now()));
+      PlatformKeyboardEvent(PlatformEvent::Type::KeyDown, u8"", u8"", u8"Shift", u8"ShiftLeft", 16, false,
+                            false, false, {PlatformEvent::Modifier::ShiftKey}, MonotonicTime::Now()));
     fixture.View().SetScrollPosition({0, 0});
     fixture.Frame(250ms);
     CHECK(fixture.Handler().ElementUnderMouse() == &fixture.ById(u8"top"));

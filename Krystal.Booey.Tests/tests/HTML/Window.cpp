@@ -497,8 +497,8 @@ namespace krys::boo::tests
     {
       auto key = [](utf8_string name)
       {
-        return PlatformKeyboardEvent(PlatformEvent::Type::KeyDown, u8"", u8"", krys::move(name), u8"", u8"",
-                                     0, false, false, false, {}, MonotonicTime::Now());
+        return PlatformKeyboardEvent(PlatformEvent::Type::KeyDown, u8"", u8"", krys::move(name), u8"", 0,
+                                     false, false, false, {}, MonotonicTime::Now());
       };
       (void)handler.KeyEvent(key(u8"Escape"));
       CHECK_FALSE(window.HasStickyActivation());

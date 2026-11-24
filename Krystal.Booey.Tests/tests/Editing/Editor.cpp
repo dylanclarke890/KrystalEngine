@@ -389,7 +389,7 @@ namespace krys::boo::tests
     {
       return fixture.Frame->GetEventHandler().KeyEvent(
         PlatformKeyboardEvent(PlatformEvent::Type::RawKeyDown, u8"", u8"", u8"ArrowRight", u8"ArrowRight",
-                              u8"Right", keyCode, false, false, false, modifiers, MonotonicTime::Now()));
+                              keyCode, false, false, false, modifiers, MonotonicTime::Now()));
     };
 
     CHECK(key(vk::Right, {PlatformEvent::Modifier::ShiftKey}));

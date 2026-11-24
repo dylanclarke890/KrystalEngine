@@ -260,8 +260,8 @@ namespace krys::boo::tests
     {
       fixture.Deactivate();
       (void)fixture.Handler().KeyEvent(PlatformKeyboardEvent(Type::KeyDown, u8"", u8"", u8"Escape",
-                                                             u8"Escape", u8"U+001B", 27, false, false, false,
-                                                             {}, MonotonicTime::Now()));
+                                                             u8"Escape", 27, false, false, false, {},
+                                                             MonotonicTime::Now()));
       fixture.Run();
       CHECK(fixture.Client->Unlocks == 1);
       CHECK(fixture.Take() == Strings {"pointerlockchange:document"});

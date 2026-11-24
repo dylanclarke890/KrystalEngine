@@ -165,8 +165,8 @@ namespace krys::boo::tests
                                                   const utf8_string &text, int32 keyCode,
                                                   EnumSet<PlatformEvent::Modifier> modifiers = {}) noexcept
     {
-      return PlatformKeyboardEvent(type, text, text, krys::move(key), u8"", u8"", keyCode, false, false,
-                                   false, modifiers, MonotonicTime::Now());
+      return PlatformKeyboardEvent(type, text, text, krys::move(key), u8"", keyCode, false, false, false,
+                                   modifiers, MonotonicTime::Now());
     }
   }
 
@@ -492,9 +492,8 @@ namespace krys::boo::tests
     {
       auto tab = [&](EnumSet<PlatformEvent::Modifier> modifiers = {})
       {
-        return handler.KeyEvent(PlatformKeyboardEvent(Type::KeyDown, u8"", u8"", u8"Tab", u8"Tab", u8"U+0009",
-                                                      vk::Tab, false, false, false, modifiers,
-                                                      MonotonicTime::Now()));
+        return handler.KeyEvent(PlatformKeyboardEvent(Type::KeyDown, u8"", u8"", u8"Tab", u8"Tab", vk::Tab,
+                                                      false, false, false, modifiers, MonotonicTime::Now()));
       };
       CHECK(tab());
       CHECK(fixture.Document->FocusedElement() == &box);
@@ -516,12 +515,11 @@ namespace krys::boo::tests
     {
       fixture.Document->GetSettings().SpatialNavigationEnabled = true;
       fixture.Document->DesignMode(u8"on");
+      CHECK_FALSE(handler.KeyEvent(PlatformKeyboardEvent(Type::KeyDown, u8"", u8"", u8"Tab", u8"Tab", vk::Tab,
+                                                         false, false, false, {}, MonotonicTime::Now())));
       CHECK_FALSE(
-        handler.KeyEvent(PlatformKeyboardEvent(Type::KeyDown, u8"", u8"", u8"Tab", u8"Tab", u8"U+0009",
-                                               vk::Tab, false, false, false, {}, MonotonicTime::Now())));
-      CHECK_FALSE(handler.KeyEvent(PlatformKeyboardEvent(Type::KeyDown, u8"", u8"", u8"ArrowDown",
-                                                         u8"ArrowDown", u8"Down", vk::Down, false, false,
-                                                         false, {}, MonotonicTime::Now())));
+        handler.KeyEvent(PlatformKeyboardEvent(Type::KeyDown, u8"", u8"", u8"ArrowDown", u8"ArrowDown",
+                                               vk::Down, false, false, false, {}, MonotonicTime::Now())));
       CHECK(fixture.Document->FocusedElement() == fixture.Document->DocumentElement());
       fixture.Document->GetSettings().SpatialNavigationEnabled = false;
     }
@@ -537,9 +535,9 @@ namespace krys::boo::tests
       (void)clicks.Release(100, 30);
       REQUIRE(ElementName(clicks.Handler().ElementUnderMouse()) == "plain");
       CHECK(clicks.Document->SequentialFocusNavigationStartingPoint() == &clicks.ById(u8"plain"));
-      CHECK(clicks.Handler().KeyEvent(PlatformKeyboardEvent(Type::KeyDown, u8"", u8"", u8"Tab", u8"Tab",
-                                                            u8"U+0009", vk::Tab, false, false, false, {},
-                                                            MonotonicTime::Now())));
+      CHECK(
+        clicks.Handler().KeyEvent(PlatformKeyboardEvent(Type::KeyDown, u8"", u8"", u8"Tab", u8"Tab", vk::Tab,
+                                                        false, false, false, {}, MonotonicTime::Now())));
       CHECK(clicks.Document->FocusedElement() == &clicks.ById(u8"two"));
     }
 
@@ -552,7 +550,7 @@ namespace krys::boo::tests
       auto pressTab = [&]
       {
         return clicks.Handler().KeyEvent(PlatformKeyboardEvent(Type::KeyDown, u8"", u8"", u8"Tab", u8"Tab",
-                                                               u8"U+0009", vk::Tab, false, false, false, {},
+                                                               vk::Tab, false, false, false, {},
                                                                MonotonicTime::Now()));
       };
       auto &card = clicks.ById(u8"card");
@@ -827,9 +825,8 @@ namespace krys::boo::tests
 
       SECTION("a key stops it, and is swallowed")
       {
-        CHECK(fixture.Handler().KeyEvent(PlatformKeyboardEvent(PlatformEvent::Type::RawKeyDown, u8"", u8"",
-                                                               u8"a", u8"KeyA", u8"U+0041", 65, false, false,
-                                                               false, {}, {})));
+        CHECK(fixture.Handler().KeyEvent(PlatformKeyboardEvent(
+          PlatformEvent::Type::RawKeyDown, u8"", u8"", u8"a", u8"KeyA", 65, false, false, false, {}, {})));
         CHECK_FALSE(fixture.Handler().PanScrollInProgress());
       }
 

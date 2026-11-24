@@ -53,8 +53,8 @@ namespace krys::boo::tests
       {
         Records.clear();
         (void)Frame->GetEventHandler().KeyEvent(PlatformKeyboardEvent(
-          PlatformEvent::Type::KeyDown, utf8_string(key), utf8_string(key), utf8_string(key), u8"", u8"", 0,
-          false, false, modifiers.contains(Modifier::AltKey), modifiers, MonotonicTime::Now()));
+          PlatformEvent::Type::KeyDown, utf8_string(key), utf8_string(key), utf8_string(key), u8"", 0, false,
+          false, modifiers.contains(Modifier::AltKey), modifiers, MonotonicTime::Now()));
         Strings records;
         for (auto &record : Records)
         {

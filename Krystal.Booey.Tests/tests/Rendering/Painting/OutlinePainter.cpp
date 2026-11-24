@@ -86,9 +86,9 @@ namespace krys::boo::tests
     CHECK(fixture.Painted().contains(u8"(rects [at (2,2) size 32x51])"));
 
     // Moving with the control key held moves the active item without selecting it, and rings the item.
-    (void)fixture.Frame->GetEventHandler().KeyEvent(PlatformKeyboardEvent(
-      PlatformEvent::Type::RawKeyDown, u8"", u8"", u8"ArrowDown", u8"ArrowDown", u8"Down", vk::Down, false,
-      false, false, {PlatformEvent::Modifier::ControlKey}, {}));
+    (void)fixture.Frame->GetEventHandler().KeyEvent(
+      PlatformKeyboardEvent(PlatformEvent::Type::RawKeyDown, u8"", u8"", u8"ArrowDown", u8"ArrowDown",
+                            vk::Down, false, false, false, {PlatformEvent::Modifier::ControlKey}, {}));
     CHECK(select.ActiveSelectionEndListIndex() == 0);
     CHECK(select.SelectedIndex() == -1);
     CHECK(fixture.Painted().contains(u8"(rects [at (3,3) size 9x14])"));

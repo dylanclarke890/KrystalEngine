@@ -100,9 +100,8 @@ namespace krys::boo
 
   KeyboardEvent::KeyboardEvent(DOMStringAtom type, const KeyboardEventInit &initializer) noexcept
       : UIEventWithKeyState(krys::move(type), initializer), _key(initializer.Key), _code(initializer.Code),
-        _keyIdentifier(initializer.KeyIdentifier), _location(initializer.Location),
-        _repeat(initializer.Repeat), _isComposing(initializer.IsComposing), _charCode(initializer.CharCode),
-        _keyCode(initializer.KeyCode), _which(initializer.Which)
+        _location(initializer.Location), _repeat(initializer.Repeat), _isComposing(initializer.IsComposing),
+        _charCode(initializer.CharCode), _keyCode(initializer.KeyCode), _which(initializer.Which)
   {
   }
 
@@ -110,8 +109,7 @@ namespace krys::boo
                                const PlatformKeyboardEvent &key) noexcept
       : UIEventWithKeyState(krys::move(type), eventInitDict, key.Modifiers()),
         _underlyingPlatformEvent(CreateUnique<PlatformKeyboardEvent>(key)), _key(key.Key()),
-        _code(key.Code()), _keyIdentifier(key.KeyIdentifier()), _location(LocationCodeForKey(key)),
-        _repeat(key.IsAutoRepeat())
+        _code(key.Code()), _location(LocationCodeForKey(key)), _repeat(key.IsAutoRepeat())
   {
     _isTrusted = true;
     _createTime = key.Timestamp();
@@ -130,8 +128,8 @@ namespace krys::boo
   }
 
   void KeyboardEvent::InitKeyboardEvent(DOMStringAtom type, bool canBubble, bool cancelable, Window *view,
-                                        DOMStringView keyIdentifier, uint32 location, bool ctrlKey,
-                                        bool altKey, bool shiftKey, bool metaKey) noexcept
+                                        DOMStringView key, uint32 location, bool ctrlKey, bool altKey,
+                                        bool shiftKey, bool metaKey) noexcept
   {
     if (_dispatched)
     {
@@ -140,7 +138,7 @@ namespace krys::boo
 
     InitUIEvent(krys::move(type), canBubble, cancelable, view, 0);
 
-    _keyIdentifier = DOMString(keyIdentifier);
+    _key = DOMString(key);
     _location = location;
 
     SetModifierKeys(ctrlKey, altKey, shiftKey, metaKey);
@@ -152,7 +150,6 @@ namespace krys::boo
     _underlyingPlatformEvent = nullptr;
     _which = null;
     _code.clear();
-    _key.clear();
   }
 
   int32 KeyboardEvent::KeyCode() const noexcept

@@ -64,8 +64,8 @@ namespace krys::boo::html::tests
     void PressEscape(boo::Frame &frame) noexcept
     {
       (void)frame.GetEventHandler().KeyEvent(PlatformKeyboardEvent(PlatformEvent::Type::KeyDown, u8"", u8"",
-                                                                   u8"Escape", u8"", u8"", 0, false, false,
-                                                                   false, {}, MonotonicTime::Now()));
+                                                                   u8"Escape", u8"", 0, false, false, false,
+                                                                   {}, MonotonicTime::Now()));
     }
 
     KRYS_NODISCARD bool Matches(const boo::Element &element, DOMStringView selector)

@@ -162,29 +162,27 @@ layer at (0,0) size 400x23
 
     // Space shows the popup too; losing the focus hides it.
     CHECK(fixture.Document->FocusedElement() == &select);
-    (void)fixture.Frame->GetEventHandler().KeyEvent(PlatformKeyboardEvent(PlatformEvent::Type::Char, u8" ",
-                                                                          u8" ", u8" ", u8"Space", u8"U+0020",
-                                                                          ' ', false, false, false, {}, {}));
+    (void)fixture.Frame->GetEventHandler().KeyEvent(PlatformKeyboardEvent(
+      PlatformEvent::Type::Char, u8" ", u8" ", u8" ", u8"Space", ' ', false, false, false, {}, {}));
     CHECK(menuList.PopupIsVisible());
     select.Blur();
     CHECK_FALSE(menuList.PopupIsVisible());
 
     // The arrow keys change the selection without the popup.
-    CHECK_FALSE(PressKey(fixture, u8"ArrowUp", u8"Up", vk::Up));
+    CHECK_FALSE(PressKey(fixture, u8"ArrowUp", vk::Up));
     CHECK(select.SelectedIndex() == 2);
     select.Focus();
-    CHECK(PressKey(fixture, u8"ArrowUp", u8"Up", vk::Up));
+    CHECK(PressKey(fixture, u8"ArrowUp", vk::Up));
     CHECK(select.SelectedIndex() == 0);
     CHECK(changes->Count == 2);
 
     SECTION("Replacing the document while the popup is up disconnects it")
     {
       select.Focus();
-      CHECK(PressKey(fixture, u8"ArrowDown", u8"Down", vk::Down));
+      CHECK(PressKey(fixture, u8"ArrowDown", vk::Down));
       REQUIRE(select.SelectedIndex() == 2);
-      (void)fixture.Frame->GetEventHandler().KeyEvent(
-        PlatformKeyboardEvent(PlatformEvent::Type::Char, u8" ", u8" ", u8" ", u8"Space", u8"U+0020", ' ',
-                              false, false, false, {}, {}));
+      (void)fixture.Frame->GetEventHandler().KeyEvent(PlatformKeyboardEvent(
+        PlatformEvent::Type::Char, u8" ", u8" ", u8" ", u8"Space", ' ', false, false, false, {}, {}));
       REQUIRE(client.Popup);
       auto &shown = *client.Popup;
       REQUIRE(shown.Visible);

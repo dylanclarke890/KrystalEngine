@@ -58,6 +58,10 @@ Record a difference here when you make one, and remove it when Booey comes back 
 - Shadow roots' reference targets (`ShadowRoot::ReferenceTarget`, `shadowrootreferencetarget`) follow the open pull requests whatwg/dom#1353 and whatwg/html#10995 rather than a published specification, as Chrome ships them. Serialising a declarative shadow root escapes the `shadowrootreferencetarget` value like any other attribute value, which the pull request leaves out.
 - There's no Fullscreen API (`requestFullscreen()`, `fullscreenElement`, `:fullscreen`, `::backdrop` for it): without script, a host that wants an element to fill the screen makes the window fullscreen and lays the page out for it itself.
 
+### From Chrome
+
+- `initKeyboardEvent()` sets `key` from its fifth argument, as UI Events says; Chrome ignores the argument, leaving `key` empty.
+
 ## HTML parser
 
 ### From the specs

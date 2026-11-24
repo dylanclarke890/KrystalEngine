@@ -30,7 +30,7 @@ namespace krys::boo::tests
     // The next button in the group is focused, checked and scrolled to the nearest edge of the view.
     (void)fixture.Frame->GetEventHandler().KeyEvent(
       PlatformKeyboardEvent(PlatformEvent::Type::RawKeyDown, u8"", u8"", u8"ArrowDown", u8"ArrowDown",
-                            u8"Down", vk::Down, false, false, false, {}, {}));
+                            vk::Down, false, false, false, {}, {}));
     CHECK(fixture.Document->FocusedElement() == &second);
     CHECK(second.Checked());
     auto scrollY = fixture.Frame->View()->GetScrollPosition().Y();

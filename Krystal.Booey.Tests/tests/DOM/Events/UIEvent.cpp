@@ -131,11 +131,11 @@ namespace krys::boo::tests
 
       using Type = PlatformEvent::Type;
       (void)fixture.Frame->GetEventHandler().KeyEvent(
-        PlatformKeyboardEvent(Type::RawKeyDown, u8"", u8"", u8"Shift", u8"ShiftLeft", u8"", vk::Shift, false,
-                              false, false, {}, MonotonicTime::Now()));
+        PlatformKeyboardEvent(Type::RawKeyDown, u8"", u8"", u8"Shift", u8"ShiftLeft", vk::Shift, false, false,
+                              false, {}, MonotonicTime::Now()));
       (void)fixture.Frame->GetEventHandler().KeyEvent(
-        PlatformKeyboardEvent(Type::KeyUp, u8"", u8"", u8"Shift", u8"ShiftLeft", u8"", vk::Shift, false,
-                              false, false, {}, MonotonicTime::Now()));
+        PlatformKeyboardEvent(Type::KeyUp, u8"", u8"", u8"Shift", u8"ShiftLeft", vk::Shift, false, false,
+                              false, {}, MonotonicTime::Now()));
       all({"keydown", "keyup"});
 
       auto &text = fixture.TextIn(u8"editable");

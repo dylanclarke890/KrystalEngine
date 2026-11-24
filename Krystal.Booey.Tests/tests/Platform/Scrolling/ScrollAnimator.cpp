@@ -46,12 +46,10 @@ namespace krys::boo::tests
       return options;
     }
 
-    bool PressKey(AnimationPageFixture &fixture, const utf8_string &key, utf8_string identifier,
-                  int32 keyCode) noexcept
+    bool PressKey(AnimationPageFixture &fixture, const utf8_string &key, int32 keyCode) noexcept
     {
-      return fixture.TestFrame->GetEventHandler().KeyEvent(
-        PlatformKeyboardEvent(PlatformEvent::Type::RawKeyDown, u8"", u8"", key, key, krys::move(identifier),
-                              keyCode, false, false, false, {}, {}));
+      return fixture.TestFrame->GetEventHandler().KeyEvent(PlatformKeyboardEvent(
+        PlatformEvent::Type::RawKeyDown, u8"", u8"", key, key, keyCode, false, false, false, {}, {}));
     }
   }
 
@@ -302,7 +300,7 @@ namespace krys::boo::tests
 
     SECTION("an arrow key")
     {
-      CHECK(PressKey(fixture, u8"ArrowDown", u8"Down", vk::Down));
+      CHECK(PressKey(fixture, u8"ArrowDown", vk::Down));
       CHECK(scroller.ScrollTop() == 0);
       FinishScrollAnimations(fixture);
       CHECK(scroller.ScrollTop() == 40);
@@ -310,10 +308,10 @@ namespace krys::boo::tests
 
     SECTION("presses in quick succession add up")
     {
-      CHECK(PressKey(fixture, u8"ArrowDown", u8"Down", vk::Down));
+      CHECK(PressKey(fixture, u8"ArrowDown", vk::Down));
       fixture.Frame();
-      CHECK(PressKey(fixture, u8"ArrowDown", u8"Down", vk::Down));
-      CHECK(PressKey(fixture, u8"ArrowDown", u8"Down", vk::Down));
+      CHECK(PressKey(fixture, u8"ArrowDown", vk::Down));
+      CHECK(PressKey(fixture, u8"ArrowDown", vk::Down));
       FinishScrollAnimations(fixture);
       CHECK(scroller.ScrollTop() == 120);
     }
@@ -322,7 +320,7 @@ namespace krys::boo::tests
     {
       auto &settings = fixture.Document->GetSettings();
       settings.ScrollAnimatorEnabled = false;
-      CHECK(PressKey(fixture, u8"ArrowDown", u8"Down", vk::Down));
+      CHECK(PressKey(fixture, u8"ArrowDown", vk::Down));
       CHECK(scroller.ScrollTop() == 40);
       settings.ScrollAnimatorEnabled = true;
     }
@@ -436,7 +434,7 @@ namespace krys::boo::tests
     SECTION("the keys reveal the selection smoothly")
     {
       select.Focus();
-      CHECK(PressKey(fixture, u8"End", u8"End", vk::End));
+      CHECK(PressKey(fixture, u8"End", vk::End));
       CHECK(select.SelectedIndex() == 9);
       CHECK(area.GetScrollAnimationStatus() == ScrollAnimationStatus::Animating);
       CHECK_FALSE(listBox.ListIndexIsVisible(9));
@@ -451,7 +449,7 @@ namespace krys::boo::tests
       select.Focus();
       for (int32 press = 0; press < 5; ++press)
       {
-        CHECK(PressKey(fixture, u8"ArrowDown", u8"Down", vk::Down));
+        CHECK(PressKey(fixture, u8"ArrowDown", vk::Down));
       }
       // Revealing the new selection doesn't cut the smooth scroll short.
       CHECK(select.SelectedIndex() == 4);
