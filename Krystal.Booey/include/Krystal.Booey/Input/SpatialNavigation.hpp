@@ -1,24 +1,4 @@
-﻿/*
- * Copyright (C) 2009 Nokia Corporation and/or its subsidiary(-ies)
- * Copyright (C) 2009 Antonio Gomes <tonikitoo@webkit.org>
- *
- * This library is free software; you can redistribute it and/or
- * modify it under the terms of the GNU Library General Public
- * License as published by the Free Software Foundation; either
- * version 2 of the License, or (at your option) any later version.
- *
- * This library is distributed in the hope that it will be useful,
- * but WITHOUT ANY WARRANTY; without even the implied warranty of
- * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU
- * Library General Public License for more details.
- *
- * You should have received a copy of the GNU Library General Public License
- * along with this library; see the file COPYING.LIB.  If not, write to
- * the Free Software Foundation, Inc., 51 Franklin Street, Fifth Floor,
- * Boston, MA 02110-1301, USA.
- */
-
-#pragma once
+﻿#pragma once
 
 #include "Krystal.Booey/DOM/Nodes/FocusOptions.hpp"
 #include "Krystal.Booey/Graphics/Geometry/LayoutRect.hpp"
@@ -35,58 +15,22 @@ namespace krys::boo
   class HTMLAreaElement;
   class Node;
 
+  /// @brief A candidate's distance before it's measured: further than any measured one.
   KRYS_NODISCARD constexpr inline int64 MaxDistance() noexcept
   {
     return std::numeric_limits<int64>::max();
   }
 
-  // Spatially speaking, two given elements in a web page can be:
-  // 1) Fully aligned: There is a full intersection between the rects, either
-  //    vertically or horizontally.
-  //
-  // * Horizontally       * Vertically
-  //    _
-  //   |_|                   _ _ _ _ _ _
-  //   |_|...... _          |_|_|_|_|_|_|
-  //   |_|      |_|         .       .
-  //   |_|......|_|   OR    .       .
-  //   |_|      |_|         .       .
-  //   |_|......|_|          _ _ _ _
-  //   |_|                  |_|_|_|_|
-  //
-  //
-  // 2) Partially aligned: There is a partial intersection between the rects, either
-  //    vertically or horizontally.
-  //
-  // * Horizontally       * Vertically
-  //    _                   _ _ _ _ _
-  //   |_|                 |_|_|_|_|_|
-  //   |_|.... _      OR           . .
-  //   |_|    |_|                  . .
-  //   |_|....|_|                  ._._ _
-  //          |_|                  |_|_|_|
-  //          |_|
-  //
-  // 3) Or, otherwise, not aligned at all.
-  //
-  // * Horizontally       * Vertically
-  //         _              _ _ _ _
-  //        |_|            |_|_|_|_|
-  //        |_|                    .
-  //        |_|                     .
-  //       .          OR             .
-  //    _ .                           ._ _ _ _ _
-  //   |_|                            |_|_|_|_|_|
-  //   |_|
-  //   |_|
-  //
-  // "Totally Aligned" elements are preferable candidates to move
-  // focus to over "Partially Aligned" ones, that on its turns are
-  // more preferable than "Not Aligned".
+  /// @brief How a candidate's rect lines up with the starting rect, across the direction of navigation (their
+  /// rows when moving left or right, their columns when moving up or down). A better alignment wins over a
+  /// nearer candidate.
   enum class RectsAlignment : uint8
   {
+    /// @brief They don't overlap across the direction, or they're more than a screen apart.
     None = 0,
+    /// @brief They overlap, but not fully.
     Partial,
+    /// @brief One's middle falls within the other, or they share a start or end edge.
     Full,
   };
 
@@ -94,20 +38,25 @@ namespace krys::boo
   /// the starting rect.
   struct FocusCandidate
   {
-    // We handle differently visibleNode and FocusableNode to properly handle the areas of imagemaps,
-    // where visibleNode would represent the image element and focusableNode would represent the area element.
-    // In all other cases, visibleNode and focusableNode are one and the same.
+    /// @brief The element drawn: the image for an image map's area, otherwise the focusable element.
     WeakPtr<Element> VisibleNode;
+    /// @brief The element that would get focus.
     WeakPtr<Element> FocusableNode;
+    /// @brief The nearest box around it that can scroll in the direction of navigation, or its document.
     WeakPtr<ContainerNode> EnclosingScrollableBox;
+    /// @brief How far it is from the starting rect, weighing distance across the direction more.
     int64 Distance {MaxDistance()};
     RectsAlignment Alignment {RectsAlignment::None};
+    /// @brief Its rect in document coordinates, without borders.
     LayoutRect Rect;
+    /// @brief Whether it's outside its document's viewport.
     bool IsOffscreen {false};
+    /// @brief Whether it's still outside the viewport after scrolling a line in the direction of navigation.
     bool IsOffscreenAfterScrolling {true};
 
     FocusCandidate() noexcept = default;
 
+    /// @brief @p element as a candidate for moving in @p direction; null if it isn't rendered.
     FocusCandidate(Element *element, dom::FocusDirection direction) noexcept;
 
     KRYS_NODISCARD bool IsNull() const noexcept
@@ -121,38 +70,58 @@ namespace krys::boo
   KRYS_NODISCARD bool HasOffscreenRect(const Node &node,
                                        dom::FocusDirection direction = dom::FocusDirection::None) noexcept;
 
+  /// @brief Scrolls @p frame's view a line in @p direction.
+  /// @return Whether it could scroll.
   bool ScrollInDirection(Frame *frame, dom::FocusDirection direction) noexcept;
 
+  /// @brief Scrolls @p container (a document's view, or a scrollable box) a line in @p direction.
+  /// @return Whether it could scroll.
   bool ScrollInDirection(const ContainerNode &container, dom::FocusDirection direction) noexcept;
 
+  /// @brief Whether @p container has more to scroll to in @p direction.
   KRYS_NODISCARD bool CanScrollInDirection(const ContainerNode &container,
                                            dom::FocusDirection direction) noexcept;
 
+  /// @brief Whether @p frame's view has more to scroll to in @p direction.
   KRYS_NODISCARD bool CanScrollInDirection(const Frame *frame, dom::FocusDirection direction) noexcept;
 
+  /// @brief Whether an offscreen @p candidate could be scrolled into view in @p direction: no box up to its
+  /// scrollable box clips it away in that direction, and that box can scroll.
   KRYS_NODISCARD bool CanBeScrolledIntoView(dom::FocusDirection direction,
                                             const FocusCandidate &candidate) noexcept;
 
+  /// @brief Whether both candidates are inline boxes (not areas) in the same containing block whose rects
+  /// overlap: moving up or down between them is moving along a line.
   KRYS_NODISCARD bool AreElementsOnSameLine(const FocusCandidate &firstCandidate,
                                             const FocusCandidate &secondCandidate) noexcept;
 
+  /// @brief Whether @p candidate lies at least partly in @p direction from @p current.
   KRYS_NODISCARD bool IsValidCandidate(dom::FocusDirection direction, const FocusCandidate &current,
                                        FocusCandidate &candidate) noexcept;
 
+  /// @brief Sets @p candidate's distance and alignment from @p current, if it lies in @p direction.
   void DistanceDataForNode(dom::FocusDirection direction, const FocusCandidate &current,
                            FocusCandidate &candidate) noexcept;
 
+  /// @brief The nearest ancestor of @p container that can scroll in @p direction, or its document; null for
+  /// a document.
   KRYS_NODISCARD ContainerNode *
     ScrollableEnclosingBoxOrParentFrameForNodeInDirection(dom::FocusDirection direction,
                                                           ContainerNode &container) noexcept;
 
+  /// @brief @p containerNode's rect in document coordinates (a document's is its visible content rect),
+  /// with or without its borders.
   KRYS_NODISCARD LayoutRect NodeRectInAbsoluteCoordinates(const ContainerNode &containerNode,
                                                           bool ignoreBorder = false) noexcept;
 
+  /// @brief A strip @p width thick along the edge of @p startingRect that navigation in @p direction moves
+  /// away from, to start from when nothing focused is on screen.
   KRYS_NODISCARD LayoutRect VirtualRectForDirection(dom::FocusDirection direction,
                                                     const LayoutRect &startingRect,
                                                     LayoutUnit width = LayoutUnit()) noexcept;
 
+  /// @brief An image map area's rect, flattened to a 1px strip along the edge that navigation in
+  /// @p direction moves away from, so overlapping areas don't hide each other.
   KRYS_NODISCARD LayoutRect VirtualRectForAreaElementAndDirection(HTMLAreaElement *area,
                                                                   dom::FocusDirection direction) noexcept;
 }
