@@ -1,24 +1,4 @@
-﻿/*
- * Copyright (C) 2005-2017 Apple Inc. All rights reserved.
- *
- * This library is free software; you can redistribute it and/or
- * modify it under the terms of the GNU Library General Public
- * License as published by the Free Software Foundation; either
- * version 2 of the License, or (at your option) any later version.
- *
- * This library is distributed in the hope that it will be useful,
- * but WITHOUT ANY WARRANTY; without even the implied warranty of
- * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU
- * Library General Public License for more details.
- *
- * You should have received a copy of the GNU Library General Public License
- * along with this library; see the file COPYING.LIB.  If not, write to
- * the Free Software Foundation, Inc., 51 Franklin Street, Fifth Floor,
- * Boston, MA 02110-1301, USA.
- *
- */
-
-#pragma once
+﻿#pragma once
 
 #include "Krystal.Booey/DOM/Types/DOMString.hpp"
 #include "Krystal.Booey/HTML/Types/Namespace.hpp"
@@ -28,6 +8,8 @@
 
 namespace krys::boo
 {
+  /// @brief What a `QualifiedName` names, shared by all the equal names through `QualifiedNameCache`, which
+  /// forgets it when the last one goes.
   struct QualifiedNameStorage : public RefCounted<QualifiedNameStorage>
   {
     html::TagName _tagName {html::TagName::Unknown};
@@ -57,6 +39,8 @@ namespace krys::boo
     }
   };
 
+  /// @brief A namespace, prefix and local name, as elements and attributes are named. Equal names share one
+  /// storage, so comparing two is comparing pointers.
   /// @see https://dom.spec.whatwg.org/#concept-element-qualified-name
   class QualifiedName
   {
@@ -64,18 +48,23 @@ namespace krys::boo
     RefPtr<QualifiedNameStorage> _storage {nullptr};
 
   public:
+    /// @brief The name for @p namespaceURI, @p prefix and @p localName (an empty namespace is none); a new
+    /// name's tag and namespace are worked out from them.
     QualifiedName(DOMStringAtom namespaceURI, DOMStringAtom prefix, DOMStringAtom localName) noexcept;
 
+    /// @brief The name with its tag and namespace given rather than worked out.
     QualifiedName(DOMStringAtom namespaceURI, DOMStringAtom prefix, DOMStringAtom localName,
                   html::TagName tagName, html::Namespace tagNamespace) noexcept;
 
     QualifiedName(const QualifiedName &other) noexcept = default;
 
+    /// @brief The known element this names, for fast checks (`Unknown` for others).
     KRYS_NODISCARD html::TagName TagName() const noexcept
     {
       return _storage->_tagName;
     }
 
+    /// @brief The namespace as an enum.
     KRYS_NODISCARD html::Namespace Namespace() const noexcept
     {
       return _storage->_namespace;
@@ -96,6 +85,7 @@ namespace krys::boo
       return _storage->_localName;
     }
 
+    /// @brief The local name in ASCII lowercase, as HTML matches names case-insensitively.
     KRYS_NODISCARD const DOMStringAtom &LocalNameLower() const noexcept
     {
       return _storage->_localNameLower;
@@ -112,6 +102,7 @@ namespace krys::boo
       return NamespacePrefix().ToString() + u8":" + LocalName().ToString();
     }
 
+    /// @brief The shared storage, which identifies the name (for hashing).
     KRYS_NODISCARD QualifiedNameStorage *get() const noexcept
     {
       return _storage.get();
@@ -138,11 +129,13 @@ namespace krys::boo
 
 namespace krys::boo::dom
 {
+  /// @brief The empty name, for no name.
   KRYS_NODISCARD inline QualifiedName NullQualifiedName() noexcept
   {
     return QualifiedName(null, null, null, html::TagName::Unknown, html::Namespace::None);
   }
 
+  /// @brief `*|*`, which a selector uses to match any name.
   KRYS_NODISCARD inline QualifiedName AnyQualifiedName() noexcept
   {
     return QualifiedName(StarAtom(), null, StarAtom(), html::TagName::Unknown, html::Namespace::Unknown);
