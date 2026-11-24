@@ -116,16 +116,6 @@ namespace krys::boo::xml
       return XMLDocumentParserScope::CurrentCachedResourceLoader() ? 1 : 0;
     }
 
-    void SwitchToUTF8(xmlParserCtxtPtr ctxt) noexcept
-    {
-      // Hack around libxml2's lack of encoding overide support by manually
-      // resetting the encoding to UTF-8 before every chunk. Otherwise libxml
-      // will detect <?xml version="1.0" encoding="<encoding name>"?> blocks
-      // and switch encodings, causing the parse to fail.
-      // FIXME: Can we just use XML_PARSE_IGNORE_ENC now?
-      xmlSwitchEncoding(ctxt, XML_CHAR_ENCODING_UTF8);
-    }
-
     KRYS_NODISCARD bool ShouldAllowExternalLoad(const net::Url &url) noexcept
     {
       utf8_stringview urlString = url.String();
@@ -235,10 +225,8 @@ namespace krys::boo::xml
     xmlParserCtxtPtr parser = xmlCreatePushParserCtxt(handlers, nullptr, nullptr, 0, nullptr);
     parser->_private = userData;
 
-    // Substitute entities.
-    xmlCtxtUseOptions(parser, XML_PARSE_NOENT | XML_PARSE_HUGE);
-
-    SwitchToUTF8(parser);
+    // Substitute entities. The text is UTF-8, whatever an XML declaration says (see DIFFERENCES.md).
+    xmlCtxtUseOptions(parser, XML_PARSE_NOENT | XML_PARSE_HUGE | XML_PARSE_IGNORE_ENC);
 
     return AdoptRef(*new XMLParserContext(parser));
   }
@@ -262,7 +250,7 @@ namespace krys::boo::xml
 
     // Substitute entities.
     // FIXME: Why is XML_PARSE_NODICT needed? This is different from what CreateStringParser does.
-    xmlCtxtUseOptions(parser, XML_PARSE_NODICT | XML_PARSE_NOENT | XML_PARSE_HUGE);
+    xmlCtxtUseOptions(parser, XML_PARSE_NODICT | XML_PARSE_NOENT | XML_PARSE_HUGE | XML_PARSE_IGNORE_ENC);
 
     parser->_private = userData;
 
@@ -317,7 +305,7 @@ namespace krys::boo::xml
     // Protect the libxml context from deletion during a callback
     RefPtr<XMLParserContext> context = _context;
 
-    // libXML throws an error if you try to switch the encoding for an empty string.
+    // An empty string has nothing to parse.
     if (!parseString.empty())
     {
       // What runs under xmlParseChunk may cause the parser to detach; keep this alive until this function is
@@ -326,7 +314,6 @@ namespace krys::boo::xml
 
       XMLDocumentParserScope scope(&Document()->GetCachedResourceLoader());
 
-      SwitchToUTF8(context->Context());
       xmlParseChunk(context->Context(), reinterpret_cast<const char *>(parseString.data()),
                     static_cast<int>(parseString.size()), 0);
     }
@@ -870,7 +857,6 @@ namespace krys::boo::xml
     void StartDocumentHandler(void *closure)
     {
       auto ctxt = static_cast<xmlParserCtxt *>(closure);
-      SwitchToUTF8(ctxt);
       GetParser(closure)->StartDocument(ctxt->version, ctxt->encoding, ctxt->standalone);
       xmlSAX2StartDocument(closure);
     }
