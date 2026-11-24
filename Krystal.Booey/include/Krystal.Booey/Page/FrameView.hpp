@@ -129,7 +129,6 @@ namespace krys::boo
     RefPtr<Node> _nodeToDraw;
     bool _isPainting {false};
     bool _isTransparent {false};
-    bool _contentIsOpaque {false};
     ScrollPosition _scrollPosition;
     Maybe<PointI> _panScrollIconPosition;
     /// @brief What needs painting again, in the view's coordinates, since the host last took it.
@@ -822,11 +821,6 @@ namespace krys::boo
     }
 
     void SetBaseBackgroundColor(const boo::Color &backgroundColor) noexcept;
-
-    void SetContentIsOpaque(bool contentIsOpaque) noexcept
-    {
-      _contentIsOpaque = contentIsOpaque;
-    }
 
     /// @brief The view's media type (`screen` by default).
     KRYS_NODISCARD const CSSOMStringAtom &MediaType() const noexcept
