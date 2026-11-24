@@ -1,31 +1,4 @@
 ﻿/*
- * Copyright (C) 1998, 1999 Torben Weis <weis@kde.org>
- *                     1999-2001 Lars Knoll <knoll@kde.org>
- *                     1999-2001 Antti Koivisto <koivisto@kde.org>
- *                     2000-2001 Simon Hausmann <hausmann@kde.org>
- *                     2000-2001 Dirk Mueller <mueller@kde.org>
- *                     2000 Stefan Schimanski <1Stein@gmx.de>
- * Copyright (C) 2004-2025 Apple Inc. All rights reserved.
- * Copyright (C) 2008 Nokia Corporation and/or its subsidiary(-ies)
- * Copyright (C) 2008 Eric Seidel <eric@webkit.org>
- *
- * This library is free software; you can redistribute it and/or
- * modify it under the terms of the GNU Library General Public
- * License as published by the Free Software Foundation; either
- * version 2 of the License, or (at your option) any later version.
- *
- * This library is distributed in the hope that it will be useful,
- * but WITHOUT ANY WARRANTY; without even the implied warranty of
- * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU
- * Library General Public License for more details.
- *
- * You should have received a copy of the GNU Library General Public License
- * along with this library; see the file COPYING.LIB.  If not, write to
- * the Free Software Foundation, Inc., 51 Franklin Street, Fifth Floor,
- * Boston, MA 02110-1301, USA.
- */
-
-/*
  * Copyright (C) 2006-2025 Apple Inc. All rights reserved.
  * Copyright (C) 2008 Torch Mobile Inc. All rights reserved. (http://www.torchmobile.com/)
  *
@@ -100,7 +73,7 @@ namespace krys::boo
   /// environment. Something that changes what the frame shows schedules a rendering update; the host runs it
   /// at its next rendering opportunity.
   /// @note FIXME: Only what layout, style and navigation within a document need: no frame tree, scripting or
-  /// printing. The rest of WebKit's page: the focus controller, the rest of WebKit's `Chrome`, page overlays.
+  /// printing, focus controller or page overlays.
   /// @see https://html.spec.whatwg.org/#update-the-rendering
   class Frame final : public RefCounted<Frame>, public CanMakeWeakPtr<Frame>
   {
@@ -255,11 +228,11 @@ namespace krys::boo
       return _textZoomFactor;
     }
 
+    /// @brief Changes the page zoom, and restyles the document (laying it out again if it has been).
     void SetPageZoomFactor(float factor) noexcept;
 
+    /// @brief Changes the text zoom, and restyles the document (laying it out again if it has been).
     void SetTextZoomFactor(float factor) noexcept;
-
-    void SetPageAndTextZoomFactors(float pageZoomFactor, float textZoomFactor) noexcept;
 
     /// @brief How much the frame's content is scaled: the page scale.
     KRYS_NODISCARD float FrameScaleFactor() const noexcept
@@ -320,13 +293,6 @@ namespace krys::boo
     {
       return _scriptedAnimationsSuspended;
     }
-
-    void SuspendScriptedAnimations() noexcept;
-
-    void ResumeScriptedAnimations() noexcept;
-
-    /// @brief Resumes the paused animated images visible in the frame's view.
-    void ResumeAnimatingImages() noexcept;
 
     /// @brief The frame's pointers and the elements capturing them.
     KRYS_NODISCARD PointerCaptureController &GetPointerCaptureController() const noexcept
@@ -449,23 +415,41 @@ namespace krys::boo
     /// @brief Brings the style and layout of the frame's document up to date.
     void LayoutIfNeeded(EnumSet<dom::LayoutOptions> layoutOptions = {}) noexcept;
 
-    void ForEachDocument(const Func<void(boo::Document &)> &functor) const noexcept;
-
     /// @brief Restyles every frame's document (UpdateStyleAfterChangeInEnvironment), after a change in the
     /// environment they all share, such as the theme's colours.
     static void UpdateStyleForAllFramesAfterGlobalChangeInEnvironment() noexcept;
 
+  private:
+    void SetPageAndTextZoomFactors(float pageZoomFactor, float textZoomFactor) noexcept;
+
+    /// @brief Holds the documents' animation frame callbacks, while the frame is hidden.
+    void SuspendScriptedAnimations() noexcept;
+
+    void ResumeScriptedAnimations() noexcept;
+
+    /// @brief Resumes the paused animated images visible in the frame's view.
+    void ResumeAnimatingImages() noexcept;
+
+    /// @brief Calls @p functor for the frame's document, if it has one. (There's no frame tree, so there are
+    /// no others.)
+    void ForEachDocument(const Func<void(boo::Document &)> &functor) const noexcept;
+
     /// @brief Calls @p functor for each document that's rendered: not render-blocked ones.
     void ForEachRenderableDocument(const Func<void(boo::Document &)> &functor) const noexcept;
 
-  private:
+    /// @brief Marks a step of the rendering update done, and runs it for each renderable document.
     void RunProcessingStep(RenderingUpdateStep step,
                            const Func<void(boo::Document &)> &perDocumentFunction) noexcept;
 
+    /// @brief The work after the update's last layout and before painting: the cursor, the selection's
+    /// appearance and highlights.
     void DoAfterUpdateRendering() noexcept;
 
+    /// @brief Flushes the composited layers' changes, then ends the update.
     void FinalizeRenderingUpdate() noexcept;
 
+    /// @brief Ends the update: deletes the renderers destroyed during it, and schedules the next one if a
+    /// step was asked for after it ran or a render-blocked document was skipped.
     void RenderingUpdateCompleted() noexcept;
   };
 }
