@@ -149,13 +149,6 @@ namespace krys::boo
                                { return keyframe.Style()->UsesContainerUnits(); });
   }
 
-  void BlendingKeyframes::AddProperty(const AnimatableCSSProperty &property) noexcept
-  {
-    krys_debug_assert(!std::holds_alternative<css::PropertyId>(property)
-                      || std::get<css::PropertyId>(property) != css::PropertyId::Custom);
-    _properties.insert(property);
-  }
-
   bool BlendingKeyframes::ContainsProperty(const AnimatableCSSProperty &property) const noexcept
   {
     return _properties.contains(property);

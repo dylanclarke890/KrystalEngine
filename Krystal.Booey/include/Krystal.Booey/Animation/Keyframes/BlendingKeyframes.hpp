@@ -215,8 +215,6 @@ namespace krys::boo
 
     void Insert(BlendingKeyframe &&keyframe) noexcept;
 
-    void AddProperty(const AnimatableCSSProperty &property) noexcept;
-
     KRYS_NODISCARD bool ContainsProperty(const AnimatableCSSProperty &property) const noexcept;
 
     KRYS_NODISCARD const AnimatableCSSPropertySet &Properties() const noexcept
