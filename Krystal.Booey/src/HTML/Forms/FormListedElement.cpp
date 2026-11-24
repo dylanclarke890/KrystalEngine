@@ -1,28 +1,4 @@
-﻿/*
- * Copyright (C) 1999 Lars Knoll (knoll@kde.org)
- *           (C) 1999 Antti Koivisto (koivisto@kde.org)
- *           (C) 2001 Dirk Mueller (mueller@kde.org)
- * Copyright (C) 2004-2024 Apple Inc. All rights reserved.
- *           (C) 2006 Alexey Proskuryakov (ap@nypop.com)
- *
- * This library is free software; you can redistribute it and/or
- * modify it under the terms of the GNU Library General Public
- * License as published by the Free Software Foundation; either
- * version 2 of the License, or (at your option) any later version.
- *
- * This library is distributed in the hope that it will be useful,
- * but WITHOUT ANY WARRANTY; without even the implied warranty of
- * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU
- * Library General Public License for more details.
- *
- * You should have received a copy of the GNU Library General Public License
- * along with this library; see the file COPYING.LIB.  If not, write to
- * the Free Software Foundation, Inc., 51 Franklin Street, Fifth Floor,
- * Boston, MA 02110-1301, USA.
- *
- */
-
-#include "Krystal.Booey/HTML/Forms/FormListedElement.hpp"
+﻿#include "Krystal.Booey/HTML/Forms/FormListedElement.hpp"
 #include "Krystal.Booey/DOM/Algorithms/TreeQueries.hpp"
 #include "Krystal.Booey/DOM/Internals/IdTargetObserver.hpp"
 #include "Krystal.Booey/DOM/Internals/IdTargetObserverRegistry.hpp"
@@ -157,7 +133,7 @@ namespace krys::boo::html
       return;
     }
 
-    // We are no longer in the same tree as our form owner so clear our owner.
+    // An element that left its form owner's tree loses it.
     if (!*formHasSameRootNode)
     {
       SetForm(nullptr);
@@ -220,10 +196,8 @@ namespace krys::boo::html
     auto &element = AsHTMLElement();
     if (!value)
     {
-      // The form attribute removed. We need to reset form owner here.
-      // Instead of SetForm(FindAssociatedForm(element, Form())), this effectively performs
-      // SetForm(FindAssociatedForm(element, nullptr)), as the current form is obsolete and can't be used as a
-      // fallback.
+      // Without a form attribute, the form owner is the nearest form ancestor; the old owner, which the
+      // attribute chose, isn't kept.
       SetForm(HTMLFormElement::FindClosestFormAncestor(element));
       _formAttributeTargetObserver = nullptr;
     }

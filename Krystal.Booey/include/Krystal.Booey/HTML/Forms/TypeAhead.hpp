@@ -44,6 +44,7 @@ namespace krys::boo::html
   public:
     virtual ~TypeAheadDataSource() noexcept = default;
 
+    /// @brief The selected option's index (or -1), the number of options, and an option's text.
     KRYS_NODISCARD virtual int32 IndexOfSelectedOption() const noexcept = 0;
 
     KRYS_NODISCARD virtual int32 OptionCount() const noexcept = 0;

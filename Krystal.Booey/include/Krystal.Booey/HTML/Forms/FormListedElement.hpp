@@ -1,27 +1,4 @@
-﻿/*
- * Copyright (C) 1999 Lars Knoll (knoll@kde.org)
- *           (C) 1999 Antti Koivisto (koivisto@kde.org)
- *           (C) 2000 Dirk Mueller (mueller@kde.org)
- * Copyright (C) 2004, 2005, 2006, 2007, 2008, 2009, 2010 Apple Inc. All rights reserved.
- *
- * This library is free software; you can redistribute it and/or
- * modify it under the terms of the GNU Library General Public
- * License as published by the Free Software Foundation; either
- * version 2 of the License, or (at your option) any later version.
- *
- * This library is distributed in the hope that it will be useful,
- * but WITHOUT ANY WARRANTY; without even the implied warranty of
- * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU
- * Library General Public License for more details.
- *
- * You should have received a copy of the GNU Library General Public License
- * along with this library; see the file COPYING.LIB.  If not, write to
- * the Free Software Foundation, Inc., 51 Franklin Street, Fifth Floor,
- * Boston, MA 02110-1301, USA.
- *
- */
-
-#pragma once
+﻿#pragma once
 
 #include "Krystal.Booey/DOM/Types/DOMString.hpp"
 #include "Krystal.Booey/HTML/Forms/FormAssociatedElement.hpp"
@@ -54,8 +31,11 @@ namespace krys::boo::html
     /// @see https://html.spec.whatwg.org/#dom-cva-validity
     KRYS_NODISCARD ValidityState Validity() noexcept;
 
+    /// @brief Whether the element takes part in constraint validation (a ValidatedFormListedElement).
     KRYS_NODISCARD virtual bool IsValidatedFormListedElement() const noexcept = 0;
 
+    /// @brief Whether the form's `elements` lists it (an image button isn't listed).
+    /// @see https://html.spec.whatwg.org/#dom-form-elements
     KRYS_NODISCARD virtual bool IsEnumeratable() const noexcept = 0;
 
     /// @brief The `name` attribute's value, or the empty string if there isn't one (the `name` IDL attribute
@@ -74,10 +54,11 @@ namespace krys::boo::html
 
     void ResetFormOwner() noexcept final;
 
+    /// @brief Drops the form owner if the element isn't in the tree the form left (rooted at @p formRoot).
     void FormOwnerRemovedFromTree(const Node &formRoot) noexcept;
 
-    // The ValidityState attributes. The implementations of patternMismatch, rangeOverflow, rangeUnderflow,
-    // stepMismatch, tooShort, tooLong and valueMissing must call WillValidate.
+    // The validity states (ValidityState's attributes). Overrides of patternMismatch, rangeOverflow,
+    // rangeUnderflow, stepMismatch, tooShort, tooLong and valueMissing check WillValidate.
     KRYS_NODISCARD bool BadInput() const noexcept
     {
       return HasBadInput();
@@ -106,13 +87,16 @@ namespace krys::boo::html
     /// @see https://html.spec.whatwg.org/#dom-cva-validationmessage
     KRYS_NODISCARD virtual DOMString ValidationMessage() const noexcept;
 
+    /// @brief Whether the element suffers from none of the validity states.
     KRYS_NODISCARD virtual bool ComputeValidity() const noexcept;
 
     /// @see https://html.spec.whatwg.org/#dom-cva-setcustomvalidity
     virtual void SetCustomValidity(DOMStringView error) noexcept;
 
+    /// @brief Resets the form owner, as the element the form attribute names changed.
     void FormAttributeTargetChanged() noexcept;
 
+    /// @brief The element as each of its listed element bases.
     KRYS_NODISCARD virtual FormListedElement *AsFormListedElement() noexcept = 0;
 
     KRYS_NODISCARD virtual ValidatedFormListedElement *AsValidatedFormListedElement() noexcept = 0;
@@ -127,31 +111,38 @@ namespace krys::boo::html
     /// @brief Sets the custom validity error message as it is.
     virtual void SetCustomValidationMessage(DOMStringView message) noexcept;
 
+    /// @brief Drops the form owner.
     void ClearForm() noexcept
     {
       SetForm(nullptr);
     }
 
+    /// @brief Observes the form attribute's element in the new document.
     void DidMoveToNewDocument() noexcept;
 
     void ElementInsertedIntoAncestor(boo::Element &element, bool connectedToDocument) noexcept override;
 
     void ElementRemovedFromAncestor(boo::Element &element, bool disconnectedFromDocument) noexcept override;
 
+    /// @brief Handles a change to the attributes listed elements share (`form`).
     void ParseAttribute(const DOMStringAtom &localName, Maybe<DOMStringView> value) noexcept;
 
+    /// @brief Resets the form owner for a new `form` attribute, observing the element it names.
     void ParseFormAttribute(Maybe<DOMStringView> value) noexcept;
 
     // A class that overrides WillChangeForm() or DidChangeForm() must clear its form in its destructor.
+    /// @brief Called before and after the form owner changes.
     virtual void WillChangeForm() noexcept;
 
     virtual void DidChangeForm() noexcept;
 
+    /// @brief The custom validity error message, as `setCustomValidity()` set it.
     KRYS_NODISCARD DOMString CustomValidationMessage() const noexcept;
 
   private:
     void SetFormInternal(HTMLFormElement *newForm) noexcept final;
 
+    /// @brief Observes the element the form attribute names, to reset the form owner when it changes.
     void ResetFormAttributeTargetObserver() noexcept;
   };
 
@@ -163,15 +154,19 @@ namespace krys::boo::html
     FormListedElement &_element;
 
   public:
+    /// @brief The validity states of @p element.
     explicit ValidityState(FormListedElement &element) noexcept : _element(element)
     {
     }
 
+    /// @brief The element whose validity this is.
     KRYS_NODISCARD HTMLElement &Element() const noexcept
     {
       return _element.AsHTMLElement();
     }
 
+    /// @brief The validity states, each as its ValidityState attribute; `Valid` when none applies.
+    /// @see https://html.spec.whatwg.org/#validitystate
     KRYS_NODISCARD bool ValueMissing() const noexcept
     {
       return _element.ValueMissing();
