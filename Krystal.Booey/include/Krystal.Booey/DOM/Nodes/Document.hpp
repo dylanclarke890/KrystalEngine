@@ -136,7 +136,6 @@ namespace krys::boo::dom
   class SelectorQuery;
   class TreeWalker;
   class UserActionElementSet;
-  class VisibilityChangeClient;
 
   enum class DidUpdateAnyContentRelevancy : bool;
   enum class FireEvents : bool;
@@ -441,7 +440,6 @@ namespace krys::boo
     bool _deferResizeEventForVisibilityChange {false};
     // Set as the document is unloaded: it's hidden from then on, whatever its page's visibility.
     bool _visibilityHiddenDueToDismissal {false};
-    List<WeakPtr<dom::VisibilityChangeClient>> _visibilityStateCallbackClients;
     /// @brief Whether the document's parser is running (a document a frame loads).
     bool _parsing {false};
     /// @see https://html.spec.whatwg.org/#page-showing
@@ -692,17 +690,8 @@ namespace krys::boo
       _allowDeclarativeShadowRoots = allow;
     }
 
-    // FIXME: Check - do we need to implement these?
     // resource metadata management - https://html.spec.whatwg.org/#resource-metadata-management
-
-    /// @see https://html.spec.whatwg.org/#dom-document-domain
-    // attribute USVString domain;
-
-    /// @see https://html.spec.whatwg.org/#dom-document-referrer
-    // readonly attribute USVString referrer;
-
-    /// @see https://html.spec.whatwg.org/#dom-document-cookie
-    // attribute USVString cookie;
+    // (No domain, referrer or cookie: origins and HTTP semantics aren't planned; see OVERVIEW.md.)
 
     /// @brief When the document's source was last modified, in the user's local time zone, as
     /// `MM/DD/YYYY hh:mm:ss`.
@@ -898,16 +887,9 @@ namespace krys::boo
     /// @see https://html.spec.whatwg.org/#update-the-visibility-state
     void SetVisibilityHiddenDueToDismissal() noexcept;
 
-    /// @brief Fires `visibilitychange` in a task and tells the registered clients, as the page is shown or
-    /// hidden.
+    /// @brief Fires `visibilitychange` in a task, as the page is shown or hidden.
     /// @see https://html.spec.whatwg.org/#update-the-visibility-state
     void VisibilityStateChanged() noexcept;
-
-    /// @brief Tells @p client whenever the document's visibility state changes, until it's unregistered or
-    /// destroyed.
-    void RegisterForVisibilityStateChangedCallbacks(dom::VisibilityChangeClient &client) noexcept;
-
-    void UnregisterForVisibilityStateChangedCallbacks(dom::VisibilityChangeClient &client) noexcept;
 
     // special event handler IDL attributes that only apply to Document objects
     KRYS_DECLARE_EVENT_HANDLER(ReadyStateChange, u8"readystatechange")
@@ -1384,12 +1366,7 @@ namespace krys::boo
     /// @brief Whether the style sheets that block rendering have loaded (or are being ignored).
     KRYS_NODISCARD bool HaveStylesheetsLoaded() const noexcept;
 
-    /// @brief Whether the fragment is scrolled to once the pending style sheets have loaded.
-    KRYS_NODISCARD bool GotoAnchorNeededAfterStylesheetsLoad() const noexcept
-    {
-      return _gotoAnchorNeededAfterStylesheetsLoad;
-    }
-
+    /// @brief Sets whether the fragment is scrolled to once the pending style sheets have loaded.
     void SetGotoAnchorNeededAfterStylesheetsLoad(bool value) noexcept
     {
       _gotoAnchorNeededAfterStylesheetsLoad = value;
@@ -1455,8 +1432,6 @@ namespace krys::boo
     /// @brief Resolves style if anything needs resolving.
     /// @return Whether style was resolved.
     bool UpdateStyleIfNeeded() noexcept;
-
-    bool UpdateStyleIfNeededIgnoringPendingStylesheets() noexcept;
 
     /// @brief Whether an element's style, or the style sheets, need updating.
     KRYS_NODISCARD bool NeedsStyleRecalc() const noexcept;
@@ -1562,7 +1537,8 @@ namespace krys::boo
       _parsing = parsing;
     }
 
-    /// @brief Whether something other than a load delays the document's load event.
+    /// @brief Whether something other than a load delays the document's load event: nothing does yet; media
+    /// elements will while they fetch (their delaying-the-load-event flag).
     KRYS_NODISCARD bool IsDelayingLoadEvent() const noexcept
     {
       return _loadEventDelayCount != 0;

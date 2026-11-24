@@ -1130,7 +1130,6 @@ set(KRYSTAL_BOOEY_DOM_HEADERS
   include/Krystal.Booey/DOM/Internals/PopoverData.hpp
   include/Krystal.Booey/DOM/Internals/QualifiedNameCache.hpp
   include/Krystal.Booey/DOM/Internals/UserActionElementSet.hpp
-  include/Krystal.Booey/DOM/Internals/VisibilityChangeClient.hpp
   include/Krystal.Booey/DOM/IntersectionObservers/IntersectionObserver.hpp
   include/Krystal.Booey/DOM/IntersectionObservers/IntersectionObserverCallback.hpp
   include/Krystal.Booey/DOM/IntersectionObservers/IntersectionObserverEntry.hpp

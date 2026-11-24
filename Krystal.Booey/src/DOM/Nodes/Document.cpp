@@ -76,7 +76,6 @@
 #include "Krystal.Booey/DOM/Internals/ElementFactory.hpp"
 #include "Krystal.Booey/DOM/Internals/PopoverData.hpp"
 #include "Krystal.Booey/DOM/Internals/UserActionElementSet.hpp"
-#include "Krystal.Booey/DOM/Internals/VisibilityChangeClient.hpp"
 #include "Krystal.Booey/DOM/IntersectionObservers/IntersectionObserver.hpp"
 #include "Krystal.Booey/DOM/Iterators/ComposedTreeIterator.hpp"
 #include "Krystal.Booey/DOM/Iterators/SubtreeRanges.hpp"
@@ -2102,14 +2101,7 @@ namespace krys::boo
     // 5. (Skipped: there are no view transitions.)
     // 6. Run any page visibility change steps which may be defined in other specifications, with visibility
     //    state and document.
-    auto clients = _visibilityStateCallbackClients;
-    for (auto &client : clients)
-    {
-      if (auto *protectedClient = client.get())
-      {
-        protectedClient->VisibilityStateChanged();
-      }
-    }
+    //    (None of the specifications Booey implements defines any.)
 
     // 7. Fire an event named visibilitychange at document, with its bubbles attribute initialized to true.
     (void)dom::EventDispatcher::DispatchToTarget(*Event::Create(event_names::VisibilityChange, true, false),
@@ -2145,27 +2137,6 @@ namespace krys::boo
           protectedThis->ScheduleRenderingUpdate(RenderingUpdateStep::Resize);
         }
       });
-
-    auto clients = _visibilityStateCallbackClients;
-    for (auto &client : clients)
-    {
-      if (auto *protectedClient = client.get())
-      {
-        protectedClient->VisibilityStateChanged();
-      }
-    }
-  }
-
-  void Document::RegisterForVisibilityStateChangedCallbacks(dom::VisibilityChangeClient &client) noexcept
-  {
-    std::erase_if(_visibilityStateCallbackClients, [](const auto &weakClient) { return !weakClient; });
-    _visibilityStateCallbackClients.push_back(CreateWeakPtr(&client));
-  }
-
-  void Document::UnregisterForVisibilityStateChangedCallbacks(dom::VisibilityChangeClient &client) noexcept
-  {
-    std::erase_if(_visibilityStateCallbackClients,
-                  [&](const auto &weakClient) { return !weakClient || weakClient.get() == &client; });
   }
 
   CachedResourceLoader &Document::GetCachedResourceLoader() const noexcept
@@ -5125,20 +5096,6 @@ namespace krys::boo
 
     ResolveStyle();
     return true;
-  }
-
-  bool Document::UpdateStyleIfNeededIgnoringPendingStylesheets() noexcept
-  {
-    SetForScope ignorePendingStylesheets(_ignorePendingStylesheets, true);
-    // FIXME: This should just invalidate elements with missing styles.
-    if (_hasNodesWithMissingStyle)
-    {
-      ScheduleFullStyleRebuild();
-    }
-
-    (void)UpdateRelevancyOfContentVisibilityElements();
-
-    return UpdateStyleIfNeeded();
   }
 
   UniquePtr<RenderStyle> Document::StyleForElementIgnoringPendingStylesheets(
