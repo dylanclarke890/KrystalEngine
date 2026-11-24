@@ -213,8 +213,8 @@ namespace krys::boo::xml
     }
   };
 
-  /// @brief libxml2's external entity loader while an XMLDocumentParserScope is active: loads only what
-  /// Booey allows, through libxml2's own loader.
+  /// @brief libxml2's external entity loader while an XMLDocumentParserScope is active: refuses every load,
+  /// as there are no network loads.
   _xmlParserInput *ExternalEntityLoader(const char *url, const char *id, _xmlParserCtxt *) noexcept;
 
   /// @brief Sets libxml2 up for Booey, once.
