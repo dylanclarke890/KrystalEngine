@@ -40,11 +40,6 @@ namespace krys::boo
     return std::numeric_limits<int64>::max();
   }
 
-  KRYS_NODISCARD constexpr inline int32 FudgeFactor() noexcept
-  {
-    return 2;
-  }
-
   // Spatially speaking, two given elements in a web page can be:
   // 1) Fully aligned: There is a full intersection between the rects, either
   //    vertically or horizontally.
@@ -119,13 +114,6 @@ namespace krys::boo
     {
       return !VisibleNode;
     }
-
-    KRYS_NODISCARD bool InScrollableContainer() const noexcept
-    {
-      return VisibleNode && EnclosingScrollableBox;
-    }
-
-    KRYS_NODISCARD boo::Document *Document() const noexcept;
   };
 
   /// @brief Whether @p node is outside the viewport of its document (after scrolling a line in @p direction,
@@ -160,8 +148,6 @@ namespace krys::boo
 
   KRYS_NODISCARD LayoutRect NodeRectInAbsoluteCoordinates(const ContainerNode &containerNode,
                                                           bool ignoreBorder = false) noexcept;
-
-  KRYS_NODISCARD LayoutRect FrameRectInAbsoluteCoordinates(Frame *frame) noexcept;
 
   KRYS_NODISCARD LayoutRect VirtualRectForDirection(dom::FocusDirection direction,
                                                     const LayoutRect &startingRect,
