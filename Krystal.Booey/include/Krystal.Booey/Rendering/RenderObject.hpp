@@ -496,11 +496,6 @@ namespace krys::boo
     virtual VisibleInViewportState ImageFrameAvailable(CachedImage &, ImageAnimatingState,
                                                        const RectI *) noexcept;
 
-    KRYS_NODISCARD virtual VisibleInViewportState ImageVisibleInViewport(const Document &) const noexcept
-    {
-      return VisibleInViewportState::No;
-    }
-
     virtual void DidRemoveCachedImageClient(CachedImage &) noexcept
     {
     }
@@ -752,8 +747,6 @@ namespace krys::boo
 
       VisibleInViewportState ImageFrameAvailable(CachedImage &, ImageAnimatingState,
                                                  const RectI *) noexcept final;
-
-      KRYS_NODISCARD VisibleInViewportState ImageVisibleInViewport(const Document &) const noexcept final;
 
       void DidRemoveCachedImageClient(CachedImage &) noexcept final;
 

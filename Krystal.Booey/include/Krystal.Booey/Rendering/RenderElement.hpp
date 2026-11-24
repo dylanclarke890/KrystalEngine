@@ -316,8 +316,6 @@ namespace krys::boo
     VisibleInViewportState ImageFrameAvailable(CachedImage &, ImageAnimatingState,
                                                const RectI *) noexcept override;
 
-    KRYS_NODISCARD VisibleInViewportState ImageVisibleInViewport(const Document &) const noexcept override;
-
     void DidRemoveCachedImageClient(CachedImage &) noexcept override;
 
     KRYS_NODISCARD const RenderStyle &FirstLineStyle() const noexcept;
