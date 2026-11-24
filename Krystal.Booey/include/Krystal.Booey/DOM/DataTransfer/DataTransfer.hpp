@@ -221,8 +221,6 @@ namespace krys::boo::dom
 
     KRYS_NODISCARD bool HasFileOfType(DOMStringView type) noexcept;
 
-    KRYS_NODISCARD bool HasStringOfType(Document &document, DOMStringView type) const noexcept;
-
     KRYS_NODISCARD Pasteboard &GetPasteboard() noexcept
     {
       return *_pasteboard;
