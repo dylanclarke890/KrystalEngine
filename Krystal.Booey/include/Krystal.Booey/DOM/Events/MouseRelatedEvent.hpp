@@ -1,27 +1,4 @@
-﻿/*
- * Copyright (C) 2001 Peter Kelly (pmk@post.com)
- * Copyright (C) 2001 Tobias Anton (anton@stud.fbi.fh-darmstadt.de)
- * Copyright (C) 2006 Samuel Weinig (sam.weinig@gmail.com)
- * Copyright (C) 2003, 2004, 2005, 2006, 2013 Apple Inc. All rights reserved.
- *
- * This library is free software; you can redistribute it and/or
- * modify it under the terms of the GNU Library General Public
- * License as published by the Free Software Foundation; either
- * version 2 of the License, or (at your option) any later version.
- *
- * This library is distributed in the hope that it will be useful,
- * but WITHOUT ANY WARRANTY; without even the implied warranty of
- * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU
- * Library General Public License for more details.
- *
- * You should have received a copy of the GNU Library General Public License
- * along with this library; see the file COPYING.LIB.  If not, write to
- * the Free Software Foundation, Inc., 51 Franklin Street, Fifth Floor,
- * Boston, MA 02110-1301, USA.
- *
- */
-
-#pragma once
+﻿#pragma once
 
 #include "Krystal.Booey/DOM/Events/UIEventWithKeyState.hpp"
 #include "Krystal.Booey/Graphics/Geometry/LayoutPoint.hpp"
@@ -34,11 +11,14 @@ namespace krys::boo
   class FrameView;
   struct MouseEventInit;
 
-  /// @brief An event at a point on the screen: its coordinates in the screen, the viewport, the page, the
-  /// target and its layer.
+  /// @brief The base of the events at a point (mouse, wheel, pointer and touch-driven ones), which give that
+  /// point in several coordinate spaces: the screen, the viewport (client), the document (page), the target's
+  /// padding box (offset) and its layer.
   class MouseRelatedEvent : public UIEventWithKeyState
   {
   public:
+    /// @brief Whether the event stands in for another (a click for a key press, say), so it isn't really at
+    /// a point: its offsets are 0.
     enum class Simulated : bool
     {
       No,
@@ -49,11 +29,14 @@ namespace krys::boo
     RefPtr<boo::FrameView> _view;
     double _movementX {0};
     double _movementY {0};
+    /// @brief Where the host put the event, in its window.
     PointD _windowLocation;
     PointD _screenLocation;
     PointD _clientLocation;
     PointD _pageLocation;
+    /// @brief The page location with the page's zoom applied, in the render tree's coordinates.
     PointD _absoluteLocation;
+    // The layer and offset locations depend on the target, so they're worked out when first read.
     mutable LayoutPoint _layerLocation;
     mutable PointD _offsetLocation;
     /// @brief The target the relative position was computed for, if it's cached.
@@ -69,6 +52,7 @@ namespace krys::boo
     /// @see https://w3c.github.io/pointerevents/#dom-mouseevent-screeny
     KRYS_NODISCARD virtual double ScreenY() const noexcept;
 
+    /// @brief The unrounded screen coordinates.
     KRYS_NODISCARD const PointD &ScreenLocation() const noexcept
     {
       return _screenLocation;
@@ -80,6 +64,7 @@ namespace krys::boo
     /// @see https://w3c.github.io/pointerevents/#dom-mouseevent-clienty
     KRYS_NODISCARD virtual double ClientY() const noexcept;
 
+    /// @brief The unrounded client coordinates.
     KRYS_NODISCARD const PointD &ClientLocation() const noexcept
     {
       return _clientLocation;
@@ -97,15 +82,17 @@ namespace krys::boo
       return _movementY;
     }
 
+    /// @brief Where the host put a trusted event, in its window's coordinates.
     KRYS_NODISCARD const PointD &WindowLocation() const noexcept
     {
       return _windowLocation;
     }
 
-    /// @note Non-standard.
+    /// @brief The point relative to the target's nearest enclosing layer.
+    /// @see https://w3c.github.io/pointerevents/#dom-mouseevent-layerx
     KRYS_NODISCARD int32 LayerX() const noexcept;
 
-    /// @note Non-standard.
+    /// @see https://w3c.github.io/pointerevents/#dom-mouseevent-layery
     KRYS_NODISCARD int32 LayerY() const noexcept;
 
     /// @see https://drafts.csswg.org/cssom-view/#dom-mouseevent-offsetx
@@ -114,6 +101,7 @@ namespace krys::boo
     /// @see https://drafts.csswg.org/cssom-view/#dom-mouseevent-offsety
     KRYS_NODISCARD virtual double OffsetY() const noexcept;
 
+    /// @brief See `Simulated`.
     KRYS_NODISCARD bool IsSimulated() const noexcept
     {
       return _isSimulated;
@@ -137,6 +125,7 @@ namespace krys::boo
       return ClientY();
     }
 
+    /// @brief See `_absoluteLocation`: the point to map into a renderer's coordinates (`AbsoluteToLocal`).
     KRYS_NODISCARD const PointD &AbsoluteLocation() const noexcept
     {
       return _absoluteLocation;
@@ -146,12 +135,15 @@ namespace krys::boo
     KRYS_NODISCARD boo::FrameView *FrameView() const noexcept;
 
   protected:
+    /// @brief A trusted event the host put at @p windowLocation in @p view.
     MouseRelatedEvent(DOMStringAtom type, const UIEventInit &eventInitDict, boo::FrameView *view,
                       const PointD &screenLocation, const PointD &windowLocation, double movementX,
                       double movementY, EnumSet<Modifier> modifiers, Simulated isSimulated) noexcept;
 
+    /// @brief An event from a page's `MouseEventInit`.
     MouseRelatedEvent(DOMStringAtom type, const MouseEventInit &initializer) noexcept;
 
+    /// @brief Puts the event at @p clientLocation, working out its page and absolute locations from it.
     void InitCoordinates(const PointD &clientLocation) noexcept;
 
     /// @brief Makes the frame view the one of the event's view, after that changed.
@@ -177,8 +169,10 @@ namespace krys::boo
       return _offsetLocation;
     }
 
+    /// @brief Works out the offset and layer locations for the current target.
     void ComputeRelativePosition() const noexcept;
 
+    /// @brief Whether the offset and layer locations were worked out for the current target.
     KRYS_NODISCARD bool HasCachedRelativePosition() const noexcept;
 
   private:
@@ -186,7 +180,7 @@ namespace krys::boo
 
     void InitCoordinates() noexcept;
 
-    void ComputePageLocation() noexcept;
+    void ComputeAbsoluteLocation() noexcept;
 
     KRYS_NODISCARD float DocumentToAbsoluteScaleFactor() const noexcept;
   };

@@ -1,26 +1,4 @@
-﻿/*
- * Copyright (C) 2001 Peter Kelly (pmk@post.com)
- * Copyright (C) 2001 Tobias Anton (anton@stud.fbi.fh-darmstadt.de)
- * Copyright (C) 2006 Samuel Weinig (sam.weinig@gmail.com)
- * Copyright (C) 2003, 2005, 2006, 2008, 2013 Apple Inc. All rights reserved.
- *
- * This library is free software; you can redistribute it and/or
- * modify it under the terms of the GNU Library General Public
- * License as published by the Free Software Foundation; either
- * version 2 of the License, or (at your option) any later version.
- *
- * This library is distributed in the hope that it will be useful,
- * but WITHOUT ANY WARRANTY; without even the implied warranty of
- * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU
- * Library General Public License for more details.
- *
- * You should have received a copy of the GNU Library General Public License
- * along with this library; see the file COPYING.LIB.  If not, write to
- * the Free Software Foundation, Inc., 51 Franklin Street, Fifth Floor,
- * Boston, MA 02110-1301, USA.
- */
-
-#include "Krystal.Booey/DOM/Events/MouseRelatedEvent.hpp"
+﻿#include "Krystal.Booey/DOM/Events/MouseRelatedEvent.hpp"
 #include "Krystal.Booey/DOM/Events/EventNames.hpp"
 #include "Krystal.Booey/DOM/Events/MouseEvent.hpp"
 #include "Krystal.Booey/DOM/Nodes/Document.hpp"
@@ -37,20 +15,19 @@ namespace krys::boo
 {
   namespace
   {
+    /// @brief Whether events of @p eventType keep their movement; the others' is 0.
     KRYS_NODISCARD bool IsMoveEventType(const DOMStringAtom &eventType) noexcept
     {
       return eventType == event_names::MouseMove || eventType == event_names::PointerMove
              || eventType == event_names::PointerRawUpdate || eventType == event_names::TouchMove;
     }
 
+    /// @brief A coordinate with infinities and NaN as 0.
     KRYS_NODISCARD double FiniteValue(double value) noexcept
     {
       return std::isfinite(value) ? value : 0;
     }
-  }
 
-  namespace
-  {
     KRYS_NODISCARD boo::FrameView *FrameViewOf(const Window *window) noexcept
     {
       auto *frame = window ? window->Frame() : nullptr;
@@ -96,6 +73,8 @@ namespace krys::boo
 
   void MouseRelatedEvent::Init(bool isSimulated, const PointD &windowLocation) noexcept
   {
+    // A simulated event stays at 0; a real one goes from the window to the view's contents, the document and
+    // the viewport.
     if (!isSimulated && _view)
     {
       PointD absolutePoint = _view->WindowToContents(windowLocation);
@@ -114,19 +93,16 @@ namespace krys::boo
 
   void MouseRelatedEvent::InitCoordinates() noexcept
   {
-    // Set up initial values for coordinates.
-    // Correct values are computed lazily, see ComputeRelativePosition.
+    // The page location stands in for the target-relative ones until they're worked out for a target.
     _layerLocation = LayoutPoint(_pageLocation);
     _offsetLocation = _pageLocation;
 
-    ComputePageLocation();
+    ComputeAbsoluteLocation();
     _relativePositionTarget = nullptr;
   }
 
   void MouseRelatedEvent::InitCoordinates(const PointD &clientLocation) noexcept
   {
-    // Set up initial values for coordinates.
-    // Correct values are computed lazily, see ComputeRelativePosition.
     SizeD documentToClientOffset;
     if (_view)
     {
@@ -139,7 +115,7 @@ namespace krys::boo
     _layerLocation = LayoutPoint(_pageLocation);
     _offsetLocation = _pageLocation;
 
-    ComputePageLocation();
+    ComputeAbsoluteLocation();
     _relativePositionTarget = nullptr;
   }
 
@@ -152,7 +128,7 @@ namespace krys::boo
     return 1;
   }
 
-  void MouseRelatedEvent::ComputePageLocation() noexcept
+  void MouseRelatedEvent::ComputeAbsoluteLocation() noexcept
   {
     _absoluteLocation = _pageLocation.Scaled(DocumentToAbsoluteScaleFactor());
   }
@@ -172,22 +148,20 @@ namespace krys::boo
       return;
     }
 
-    // Compute coordinates that are based on the target.
     _layerLocation = LayoutPoint(_pageLocation);
     _offsetLocation = _pageLocation;
 
-    // Must have an updated render tree for this math to work correctly.
+    // The target's boxes have to be where they'll be drawn.
     (void)targetNode->NodeDocument().UpdateLayoutIgnorePendingStylesheets();
 
-    // Adjust offsetLocation to be relative to the target's position.
+    // The offset is from the target's padding box, in the document's (unzoomed) coordinates.
+    // https://drafts.csswg.org/cssom-view/#dom-mouseevent-offsetx
     if (auto *renderer = targetNode->Renderer())
     {
       auto local = renderer->AbsoluteToLocal(
         PointF(static_cast<float>(_absoluteLocation.X()), static_cast<float>(_absoluteLocation.Y())),
         {MapCoordinatesMode::UseTransforms});
       _offsetLocation = PointD(local.X(), local.Y());
-      // The offsets are from the padding edge, inside the border.
-      // https://drafts.csswg.org/cssom-view/#dom-mouseevent-offsetx
       if (auto *box = DynamicDowncast<RenderBox>(*renderer))
       {
         _offsetLocation -= SizeD(box->BorderLeft().ToDouble(), box->BorderTop().ToDouble());
@@ -199,9 +173,9 @@ namespace krys::boo
       }
     }
 
-    // Adjust layerLocation to be relative to the layer.
-    // FIXME: event.layerX and event.layerY are poorly defined, and probably don't always correspond to
-    // RenderLayer offsets (https://bugs.webkit.org/show_bug.cgi?id=21868).
+    // The layer location is from the nearest render layer of the target, or of its nearest ancestor with a
+    // renderer. Render layers are roughly the positioned boxes and stacking contexts that Pointer Events
+    // measures layerX and layerY from.
     RefPtr<Node> node = targetNode;
     while (node && !node->Renderer())
     {
@@ -277,31 +251,25 @@ namespace krys::boo
     return std::floor(_pageLocation.Y());
   }
 
+  // The screen and client coordinates are floored to whole pixels, as Chrome gives them.
+
   double MouseRelatedEvent::ScreenX() const noexcept
   {
-    // FIXME: Determine whether or not we should restrict the range of this value
-    // now that screenX is a double instead of an integer.
     return std::floor(FiniteValue(_screenLocation.X()));
   }
 
   double MouseRelatedEvent::ScreenY() const noexcept
   {
-    // FIXME: Determine whether or not we should restrict the range of this value
-    // now that screenY is a double instead of an integer.
     return std::floor(FiniteValue(_screenLocation.Y()));
   }
 
   double MouseRelatedEvent::ClientX() const noexcept
   {
-    // FIXME: Determine whether or not we should restrict the range of this value
-    // now that clientX is a double instead of an integer.
     return std::floor(FiniteValue(_clientLocation.X()));
   }
 
   double MouseRelatedEvent::ClientY() const noexcept
   {
-    // FIXME: Determine whether or not we should restrict the range of this value
-    // now that clientY is a double instead of an integer.
     return std::floor(FiniteValue(_clientLocation.Y()));
   }
 }
