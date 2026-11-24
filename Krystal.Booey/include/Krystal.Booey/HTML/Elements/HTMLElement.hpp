@@ -1,26 +1,4 @@
-﻿/*
- * Copyright (C) 1999 Lars Knoll (knoll@kde.org)
- *           (C) 1999 Antti Koivisto (koivisto@kde.org)
- * Copyright (C) 2004-2018 Apple Inc. All rights reserved.
- *
- * This library is free software; you can redistribute it and/or
- * modify it under the terms of the GNU Library General Public
- * License as published by the Free Software Foundation; either
- * version 2 of the License, or (at your option) any later version.
- *
- * This library is distributed in the hope that it will be useful,
- * but WITHOUT ANY WARRANTY; without even the implied warranty of
- * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU
- * Library General Public License for more details.
- *
- * You should have received a copy of the GNU Library General Public License
- * along with this library; see the file COPYING.LIB.  If not, write to
- * the Free Software Foundation, Inc., 51 Franklin Street, Fifth Floor,
- * Boston, MA 02110-1301, USA.
- *
- */
-
-#pragma once
+﻿#pragma once
 
 #include "Krystal.Booey/DOM/Events/ToggleEventTask.hpp"
 #include "Krystal.Booey/DOM/Internals/PopoverData.hpp"
@@ -449,32 +427,44 @@ namespace krys::boo
     /// @param value The `border` attribute's value, or null if there isn't one.
     KRYS_NODISCARD uint32 ParseBorderWidthAttribute(Maybe<DOMStringView> value) const noexcept;
 
+    /// @brief Maps a `border` attribute to a solid border of its width.
     void ApplyBorderAttributeToStyle(DOMStringView value, css::MutableStyleProperties &style) noexcept;
 
+    /// @brief Maps an image-like element's `align` attribute to `vertical-align`, or to `float` for left and
+    /// right.
+    /// @see https://html.spec.whatwg.org/#attributes-for-embedded-content-and-images
     void ApplyAlignmentAttributeToStyle(DOMStringView alignment, css::MutableStyleProperties &style) noexcept;
 
+    /// @brief Maps `width` and `height` attributes to `aspect-ratio: auto w / h`, if both are numbers of
+    /// pixels.
+    /// @see https://html.spec.whatwg.org/#map-to-the-aspect-ratio-property-(using-dimension-rules)
     void ApplyAspectRatioFromWidthAndHeightAttributesToStyle(DOMStringView widthAttribute,
                                                              DOMStringView heightAttribute,
                                                              css::MutableStyleProperties &style) noexcept;
 
+    /// @brief As above, for a canvas's attributes, which are non-negative integers.
+    /// @see https://html.spec.whatwg.org/#map-to-the-aspect-ratio-property
     void ApplyAspectRatioWithoutDimensionalRulesFromWidthAndHeightAttributesToStyle(
       DOMStringView widthAttribute, DOMStringView heightAttribute,
       css::MutableStyleProperties &style) noexcept;
 
-    // https://www.w3.org/TR/html4/sgml/dtd.html#Length, including pixel and percentage values.
+    /// @brief Maps a dimension attribute (a number of pixels or a percentage) to @p property.
+    /// @see https://html.spec.whatwg.org/#maps-to-the-dimension-property
     void AddHTMLLengthToStyle(css::MutableStyleProperties &style, css::PropertyId property,
                               DOMStringView value,
                               AllowZeroValue allowZeroValue = AllowZeroValue::Yes) noexcept;
 
-    // https://www.w3.org/TR/html4/sgml/dtd.html#MultiLength, including pixel, percentage, and relative
-    // values.
+    /// @brief Maps a dimension attribute that may also be a relative length (`2*`) to @p property.
     void AddHTMLMultiLengthToStyle(css::MutableStyleProperties &style, css::PropertyId property,
                                    DOMStringView value) noexcept;
 
-    // https://www.w3.org/TR/html4/sgml/dtd.html#Pixels, including pixel value.
+    /// @brief Maps a dimension attribute that's a number of pixels (not a percentage) to @p property.
+    /// @see https://html.spec.whatwg.org/#maps-to-the-pixel-length-property
     void AddHTMLPixelsToStyle(css::MutableStyleProperties &style, css::PropertyId property,
                               DOMStringView value) noexcept;
 
+    /// @brief Maps a legacy color attribute to @p property, if it parses.
+    /// @see https://html.spec.whatwg.org/#rules-for-parsing-a-legacy-colour-value
     static void AddHTMLColorToStyle(css::MutableStyleProperties &style, css::PropertyId property,
                                     DOMStringView attributeValue) noexcept;
 
@@ -596,6 +586,7 @@ namespace krys::boo
       return false;
     }
 
+    /// @brief Whether the element is one of these parts of an input's shadow tree.
     KRYS_NODISCARD virtual bool IsSearchFieldResultsButtonElement() const noexcept
     {
       return false;
@@ -618,6 +609,7 @@ namespace krys::boo
 
 #pragma region Form Controls
 
+    /// @brief The element as a form-associated, listed or validated listed element, or null if it isn't one.
     KRYS_NODISCARD virtual html::FormAssociatedElement *AsFormAssociatedElement() noexcept
     {
       return nullptr;
@@ -662,6 +654,8 @@ namespace krys::boo
 
   protected:
 #pragma region Type Checks
+
+    // Each IsHTMLXElement says whether the element's interface is HTMLXElement.
 
     /// @brief Whether the element is a form control: a button, fieldset, input, output, select or textarea.
     KRYS_NODISCARD bool IsFormControlElement() const noexcept
@@ -1073,14 +1067,17 @@ namespace krys::boo
       Yes,
     };
 
+    /// @brief Maps a dimension attribute to @p property, allowing the forms the parameters say.
     void AddHTMLLengthToStyle(css::MutableStyleProperties &style, css::PropertyId property,
                               DOMStringView value, AllowPercentage allowPercentage,
                               UseCSSPXAsUnitType useCSSPX, IsMultiLength isMultiLength,
                               AllowZeroValue allowZeroValue = AllowZeroValue::Yes) noexcept;
 
+    /// @brief Sets `aspect-ratio: auto width / height`.
     static void AddParsedWidthAndHeightToAspectRatioList(double width, double height,
                                                          css::MutableStyleProperties &style) noexcept;
 
+    /// @brief Maps a `lang` attribute to the locale the style uses (auto for an empty one).
     void MapLanguageAttributeToLocale(DOMStringView value, css::MutableStyleProperties &style) noexcept;
 
     /// @brief Whether the popover can be shown (@p expectedToBeShowing false) or hidden: false if it already
@@ -1103,6 +1100,8 @@ namespace krys::boo
     /// @brief Sets the popover's trigger, which becomes its invoked popover's invoker.
     void SetInvoker(HTMLElement *invoker) noexcept;
 
+    /// @brief Follows a change to the `popover` attribute, hiding the popover if it's showing.
+    /// @see https://html.spec.whatwg.org/#the-popover-attribute
     void PopoverAttributeChanged(Maybe<DOMStringView> value) noexcept;
   };
 }

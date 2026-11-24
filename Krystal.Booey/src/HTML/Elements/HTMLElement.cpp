@@ -1,29 +1,4 @@
-﻿/*
- * Copyright (C) 1999 Lars Knoll (knoll@kde.org)
- *           (C) 1999 Antti Koivisto (koivisto@kde.org)
- * Copyright (C) 2004-2025 Apple Inc. All rights reserved.
- * Copyright (C) 2021-2024 Google Inc. All rights reserved.
- * Copyright (C) 2009 Torch Mobile Inc. All rights reserved. (http://www.torchmobile.com/)
- * Copyright (C) 2011 Motorola Mobility. All rights reserved.
- *
- * This library is free software; you can redistribute it and/or
- * modify it under the terms of the GNU Library General Public
- * License as published by the Free Software Foundation; either
- * version 2 of the License, or (at your option) any later version.
- *
- * This library is distributed in the hope that it will be useful,
- * but WITHOUT ANY WARRANTY; without even the implied warranty of
- * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU
- * Library General Public License for more details.
- *
- * You should have received a copy of the GNU Library General Public License
- * along with this library; see the file COPYING.LIB.  If not, write to
- * the Free Software Foundation, Inc., 51 Franklin Street, Fifth Floor,
- * Boston, MA 02110-1301, USA.
- *
- */
-
-#include "Krystal.Booey/HTML/Elements/HTMLElement.hpp"
+﻿#include "Krystal.Booey/HTML/Elements/HTMLElement.hpp"
 #include "Krystal.Booey/Accessibility/AXObjectCache.hpp"
 #include "Krystal.Booey/CSS/CSSOM/Markup.hpp"
 #include "Krystal.Booey/CSS/Parser/ParserFastPaths.hpp"
@@ -1712,13 +1687,13 @@ namespace krys::boo
   {
     if (!value.empty())
     {
-      // Have to quote so the locale id is treated as a string instead of as a CSS keyword.
+      // A string, so that the language isn't read as a keyword.
       AddPropertyToPresentationalHintStyle(style, css::PropertyId::InternalLocale,
                                            css::SerialiseString(CSSOMString(value)));
     }
     else
     {
-      // The empty string means the language is explicitly unknown.
+      // An empty lang says the language is unknown.
       AddPropertyToPresentationalHintStyle(style, css::PropertyId::InternalLocale, css::ValueId::Auto);
     }
   }
@@ -1856,7 +1831,7 @@ namespace krys::boo
     }
     else if (localName == u8"lang")
     {
-      // xml:lang has a higher priority than lang.
+      // xml:lang wins over lang.
       if (!HasAttributeNS(infra::namespaces::XML, u8"lang"))
       {
         MapLanguageAttributeToLocale(value, style);
@@ -1914,8 +1889,7 @@ namespace krys::boo
   void HTMLElement::ApplyAlignmentAttributeToStyle(DOMStringView alignment,
                                                    css::MutableStyleProperties &style) noexcept
   {
-    // Vertical alignment with respect to the current baseline of the text
-    // right or left means floating images.
+    // Most keywords align vertically; left and right float the element.
     auto floatValue = css::ValueId::Invalid;
     auto verticalAlignValue = css::ValueId::Invalid;
 
@@ -2081,7 +2055,7 @@ namespace krys::boo
     // The "#" is removed before truncating, so 128 digits follow it, as in other browsers.
     constexpr size_t maxColorLength = 128;
 
-    // We'll pad the buffer with two extra 0s later, so reserve two more than the max.
+    // Room for the two 0s step 10 may add.
     SmallList<char8, maxColorLength + 2> digitBuffer;
 
     size_t i = 0;
