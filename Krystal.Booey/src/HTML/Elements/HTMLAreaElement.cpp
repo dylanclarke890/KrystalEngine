@@ -151,31 +151,6 @@ namespace krys::boo
     return GetRegion(IsDefault() ? elementSize : _lastSize);
   }
 
-  Path HTMLAreaElement::ComputePath(const RenderElement &renderer) const noexcept
-  {
-    // FIXME: This doesn't work correctly with transforms.
-    PointF absPos = renderer.LocalToAbsolute();
-
-    // Default should default to the size of the containing object.
-    LayoutSize size = _lastSize;
-    if (IsDefault())
-    {
-      size = renderer.OutlineBoundsForRepaint(nullptr).Size();
-    }
-
-    auto path = GetRegion(size);
-    float zoomFactor = renderer.Style().UsedZoom();
-    if (zoomFactor != 1.0f)
-    {
-      AffineTransform zoomTransform;
-      zoomTransform.Scale(zoomFactor);
-      path.Transform(zoomTransform);
-    }
-
-    path.Translate(ToSizeF(absPos));
-    return path;
-  }
-
   LayoutRect HTMLAreaElement::ComputeRect(const RenderObject *renderer) const noexcept
   {
     if (!renderer)
@@ -188,7 +163,26 @@ namespace krys::boo
       krys_debug_assert(false);
       return {};
     }
-    return EnclosingLayoutRect(ComputePath(Downcast<RenderElement>(*renderer)).FastBoundingRect());
+    auto &element = Downcast<RenderElement>(*renderer);
+
+    // The default area covers the whole image.
+    LayoutSize size = _lastSize;
+    if (IsDefault())
+    {
+      size = element.OutlineBoundsForRepaint(nullptr).Size();
+    }
+
+    // The shape's bounds in the image's coordinates (its coordinates are in CSS pixels, so they're zoomed),
+    // mapped through the image's transforms.
+    auto path = GetRegion(size);
+    float zoomFactor = element.Style().UsedZoom();
+    if (zoomFactor != 1.0f)
+    {
+      AffineTransform zoomTransform;
+      zoomTransform.Scale(zoomFactor);
+      path.Transform(zoomTransform);
+    }
+    return EnclosingLayoutRect(element.LocalToAbsoluteQuad(QuadF(path.FastBoundingRect())).BoundingBox());
   }
 
   // Obtaining the shape an area layers onto its image:

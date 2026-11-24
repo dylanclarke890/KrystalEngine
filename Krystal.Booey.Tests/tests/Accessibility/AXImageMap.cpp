@@ -35,6 +35,20 @@ namespace krys::boo::ax::tests
     CHECK(page.Object(u8"plain").Role() == AXRole::Generic);
   }
 
+  TEST_CASE("AXImageMap: an area's frame follows the image's transform", "[Accessibility][AXImageMap]")
+  {
+    AXFixture page(u8"<img id=image usemap=#map width=100 height=100 alt=Shapes"
+                   u8" style='transform: translateX(200px) scale(2); transform-origin: 0 0'>"
+                   u8"<map name=map><area id=first href=#first shape=rect coords=0,0,50,50 alt=First></map>");
+
+    auto image = page.Object(u8"image").ElementRect();
+    auto rect = page.Object(u8"first").ElementRect();
+    CHECK(rect.X() == image.X());
+    CHECK(rect.Y() == image.Y());
+    CHECK(rect.Width() == 100);
+    CHECK(rect.Height() == 100);
+  }
+
   TEST_CASE("AXImageMap: a focused area is the image's child", "[Accessibility][AXImageMap]")
   {
     AXFixture page(u8"<img id=image usemap=#map width=100 height=100 alt=Shapes>"

@@ -55,7 +55,6 @@
 #include "Krystal.Booey/HTML/Elements/HTMLHeadingElement.hpp"
 #include "Krystal.Booey/HTML/Elements/HTMLImageElement.hpp"
 #include "Krystal.Booey/HTML/Elements/HTMLInputElement.hpp"
-#include "Krystal.Booey/HTML/Elements/HTMLMapElement.hpp"
 #include "Krystal.Booey/HTML/Elements/HTMLOptionElement.hpp"
 #include "Krystal.Booey/HTML/Elements/HTMLSelectElement.hpp"
 #include "Krystal.Booey/HTML/Elements/HTMLSummaryElement.hpp"
@@ -3870,15 +3869,9 @@ namespace krys::boo
     // An area's rect is its shape's, in its image.
     if (auto *area = DynamicDowncast<HTMLAreaElement>(GetNode()))
     {
-      for (auto *ancestor = area->ParentElement(); ancestor; ancestor = ancestor->ParentElement())
-      {
-        if (Is<HTMLMapElement>(*ancestor))
-        {
-          auto *renderer = ancestor->Renderer();
-          return renderer ? area->ComputeRect(renderer) : LayoutRect();
-        }
-      }
-      return {};
+      auto image = area->ImageElement();
+      auto *renderer = image ? image->Renderer() : nullptr;
+      return renderer ? area->ComputeRect(renderer) : LayoutRect();
     }
     // A display: contents element covers its children.
     if (auto *element = GetElement(); element && element->HasDisplayContents())
