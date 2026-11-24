@@ -180,8 +180,7 @@ namespace krys::boo::xml
 
   void XMLDocumentParser::Finish() noexcept
   {
-    // FIXME: We should assert(!IsStopped()) here, since it does not make sense to call any methods on
-    // DocumentParser once it's been stopped.
+    krys_debug_assert(!IsStopped());
 
     Ref<XMLDocumentParser> protectedThis = ShareRef(*this);
     End();
