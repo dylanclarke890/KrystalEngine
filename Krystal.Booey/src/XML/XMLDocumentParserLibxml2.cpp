@@ -51,7 +51,6 @@
 #include "Krystal.Core/Move.hpp"
 #include "Krystal.Core/Strings/ASCII.hpp"
 #include "Krystal.Core/Strings/StringBuilder.hpp"
-#include "Krystal.Net/Url.hpp"
 #include <algorithm>
 #include <cstdio>
 #include <cstring>
@@ -116,50 +115,6 @@ namespace krys::boo::xml
       return XMLDocumentParserScope::CurrentCachedResourceLoader() ? 1 : 0;
     }
 
-    KRYS_NODISCARD bool ShouldAllowExternalLoad(const net::Url &url) noexcept
-    {
-      utf8_stringview urlString = url.String();
-
-      auto startsWithIgnoringASCIICase = [&](utf8_stringview prefix)
-      {
-        return urlString.size() >= prefix.size()
-               && text::IsASCIICaselessEqual(urlString.substr(0, prefix.size()), prefix);
-      };
-      auto endsWithIgnoringASCIICase = [&](utf8_stringview suffix)
-      {
-        return urlString.size() >= suffix.size()
-               && text::IsASCIICaselessEqual(urlString.substr(urlString.size() - suffix.size()), suffix);
-      };
-
-      // On non-Windows platforms libxml asks for this URL, the "XML_XML_DEFAULT_CATALOG", on initialization.
-      if (urlString == u8"file:///etc/xml/catalog")
-      {
-        return false;
-      }
-
-      // On Windows, libxml computes a URL relative to where its DLL resides.
-      if (startsWithIgnoringASCIICase(u8"file:///") && endsWithIgnoringASCIICase(u8"/etc/catalog"))
-      {
-        return false;
-      }
-
-      // The most common DTD. There isn't much point in hammering www.w3c.org by requesting this for every
-      // XHTML document.
-      if (startsWithIgnoringASCIICase(u8"http://www.w3.org/tr/xhtml"))
-      {
-        return false;
-      }
-
-      // Similarly, there isn't much point in requesting the SVG DTD.
-      if (startsWithIgnoringASCIICase(u8"http://www.w3.org/graphics/svg"))
-      {
-        return false;
-      }
-
-      // External entities and DTDs aren't loaded: there are no network loads.
-      return false;
-    }
-
     void *OpenFunc(const char *) noexcept
     {
       krys_debug_assert(XMLDocumentParserScope::CurrentCachedResourceLoader());
@@ -187,18 +142,12 @@ namespace krys::boo::xml
       return 0;
     }
 
-    xmlExternalEntityLoader defaultEntityLoader {nullptr};
   }
 
-  xmlParserInputPtr ExternalEntityLoader(const char *url, const char *id, xmlParserCtxtPtr context) noexcept
+  xmlParserInputPtr ExternalEntityLoader(const char *, const char *, xmlParserCtxtPtr) noexcept
   {
-    if (!ShouldAllowExternalLoad(
-          net::Url(DOMStringView(reinterpret_cast<const char8 *>(url), std::strlen(url)))))
-    {
-      return nullptr;
-    }
-    krys_assert_msg(defaultEntityLoader, "Missing call to InitializeXMLParser()");
-    return defaultEntityLoader(url, id, context);
+    // External entities and DTDs aren't loaded: there are no network loads.
+    return nullptr;
   }
 
   void InitializeXMLParser() noexcept
@@ -212,9 +161,6 @@ namespace krys::boo::xml
     xmlInitParser();
     xmlRegisterInputCallbacks(MatchFunc, OpenFunc, ReadFunc, CloseFunc);
     xmlRegisterOutputCallbacks(MatchFunc, OpenFunc, WriteFunc, CloseFunc);
-    defaultEntityLoader = xmlGetExternalEntityLoader();
-    krys_assert_msg(defaultEntityLoader != ExternalEntityLoader,
-                    "XMLDocumentParserScope was created too early");
   }
 
   Ref<XMLParserContext> XMLParserContext::CreateStringParser(xmlSAXHandlerPtr handlers,
