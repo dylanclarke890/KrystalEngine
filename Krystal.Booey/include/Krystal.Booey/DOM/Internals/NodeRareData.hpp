@@ -1,7 +1,7 @@
 ﻿#pragma once
 
-#include "Krystal.Booey/DOM/MutationObservers/MutationObserver.hpp"
-#include "Krystal.Booey/DOM/MutationObservers/RegisteredObserver.hpp"
+#include "Krystal.Booey/DOM/Observers/Mutation/MutationObserver.hpp"
+#include "Krystal.Booey/DOM/Observers/Mutation/RegisteredObserver.hpp"
 #include "Krystal.Booey/DOM/Types/DOMString.hpp"
 #include "Krystal.Core/Attributes.hpp"
 #include "Krystal.Core/Containers/List.hpp"

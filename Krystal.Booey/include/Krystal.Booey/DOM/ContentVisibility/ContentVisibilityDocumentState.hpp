@@ -26,7 +26,7 @@
 #pragma once
 
 #include "Krystal.Booey/DOM/ContentVisibility/ContentRelevancy.hpp"
-#include "Krystal.Booey/DOM/IntersectionObservers/IntersectionObserver.hpp"
+#include "Krystal.Booey/DOM/Observers/Intersection/IntersectionObserver.hpp"
 #include "Krystal.Core/Attributes.hpp"
 #include "Krystal.Core/Containers/EnumSet.hpp"
 #include "Krystal.Core/Containers/HashMap.hpp"

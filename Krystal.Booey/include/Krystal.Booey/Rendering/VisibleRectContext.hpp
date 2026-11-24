@@ -24,7 +24,7 @@
 
 #pragma once
 
-#include "Krystal.Booey/DOM/IntersectionObservers/IntersectionObserverMarginBox.hpp"
+#include "Krystal.Booey/DOM/Observers/Intersection/IntersectionObserverMarginBox.hpp"
 #include "Krystal.Booey/Rendering/RepaintRectCalculation.hpp"
 #include "Krystal.Core/Containers/EnumSet.hpp"
 #include "Krystal.Core/Enum.hpp"
