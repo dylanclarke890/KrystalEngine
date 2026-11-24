@@ -1,24 +1,4 @@
-﻿/*
- * Copyright (C) 2010 Nokia Corporation and/or its subsidiary(-ies).
- *
- * This library is free software; you can redistribute it and/or
- * modify it under the terms of the GNU Library General Public
- * License as published by the Free Software Foundation; either
- * version 2 of the License, or (at your option) any later version.
- *
- * This library is distributed in the hope that it will be useful,
- * but WITHOUT ANY WARRANTY; without even the implied warranty of
- * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU
- * Library General Public License for more details.
- *
- * You should have received a copy of the GNU Library General Public License
- * along with this library; see the file COPYING.LIB.  If not, write to
- * the Free Software Foundation, Inc., 51 Franklin Street, Fifth Floor,
- * Boston, MA 02110-1301, USA.
- *
- */
-
-#include "Krystal.Booey/Accessibility/AXProgressIndicator.hpp"
+﻿#include "Krystal.Booey/Accessibility/AXProgressIndicator.hpp"
 #include "Krystal.Booey/DOM/Nodes/Element.hpp"
 #include "Krystal.Booey/HTML/Elements/HTMLMeterElement.hpp"
 #include "Krystal.Booey/HTML/Elements/HTMLProgressElement.hpp"
@@ -51,19 +31,18 @@ namespace krys::boo
 
   bool AXProgressIndicator::IsIndeterminate() const noexcept
   {
-    // A progress element with no value is indeterminate.
-    if (auto *progress = ProgressElement())
-    {
-      return !progress->HasAttribute(u8"value");
-    }
-    return false;
+    // A progress bar with no value is indeterminate (https://html.spec.whatwg.org/#the-progress-element).
+    auto *progress = ProgressElement();
+    return progress && !progress->HasAttribute(u8"value");
   }
 
   float AXProgressIndicator::ValueForRange() const noexcept
   {
-    if (auto *progress = ProgressElement(); progress && progress->Position() >= 0)
+    // An indeterminate progress bar has a position of -1
+    // (https://html.spec.whatwg.org/#dom-progress-position).
+    if (auto *progress = ProgressElement())
     {
-      return static_cast<float>(progress->Value());
+      return progress->Position() >= 0 ? static_cast<float>(progress->Value()) : 0;
     }
     if (auto *meter = MeterElement())
     {
@@ -87,24 +66,19 @@ namespace krys::boo
 
   float AXProgressIndicator::MinValueForRange() const noexcept
   {
-    if (auto *meter = MeterElement())
-    {
-      return static_cast<float>(meter->Min());
-    }
-    return 0;
+    auto *meter = MeterElement();
+    return meter ? static_cast<float>(meter->Min()) : 0;
   }
 
   DOMString AXProgressIndicator::ValueDescription() const noexcept
   {
     auto description = AXRenderObject::ValueDescription();
-    if (!description.empty())
+    if (description.empty())
     {
-      return description;
-    }
-    // A meter's value text is its content (WebKit adds the gauge region on Cocoa only; Chrome doesn't).
-    if (auto *meter = MeterElement())
-    {
-      return meter->TextContent().value_or(DOMString {});
+      if (auto *meter = MeterElement())
+      {
+        return meter->TextContent().value_or(DOMString {});
+      }
     }
     return description;
   }
