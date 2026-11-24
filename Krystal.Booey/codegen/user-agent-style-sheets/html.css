@@ -23,24 +23,28 @@
 
 @namespace "http://www.w3.org/1999/xhtml";
 
+/* https://html.spec.whatwg.org/#the-page: the text takes the colour scheme's colour. */
 html {
     display: block;
     color: CanvasText;
 }
 
-/* children of the <head> element all have display:none as below */
-area, base, basefont, datalist, head, link, meta, noembed, noframes,
-param, rp, script, style, template, title {
+/* https://html.spec.whatwg.org/#hidden-elements */
+area, base, basefont, datalist, head, link, meta, noembed,
+noframes, param, rp, script, style, template, title {
     display: none;
 }
 
-/* generic block-level elements */
-
+/* https://html.spec.whatwg.org/#the-page: the margins are 8px unless the body's attributes say otherwise. */
 body {
     display: block;
     margin: 8px;
 }
 
+/* https://html.spec.whatwg.org/#flow-content-3 */
+
+/* A paragraph's block margins are quirky: in quirks mode they collapse away at the top and bottom of a cell
+   or body (https://html.spec.whatwg.org/#margin-collapsing-quirks). */
 p {
     display: block;
     margin-block: 1__qem;
@@ -51,6 +55,7 @@ address, article, aside, div, footer, header, hgroup, main, nav, search, section
     display: block;
 }
 
+/* https://html.spec.whatwg.org/#the-marquee-element-2 */
 marquee {
     display: inline-block;
     text-align: initial;
@@ -73,6 +78,7 @@ figure {
     margin-inline: 40px;
 }
 
+/* https://html.spec.whatwg.org/#phrasing-content-3 */
 q {
     display: inline;
 }
@@ -85,12 +91,13 @@ q::after {
     content: close-quote;
 }
 
+/* Centres its text and its blocks (https://html.spec.whatwg.org/#align-descendants). */
 center {
     display: block;
-    /* special centering to be able to emulate the html4/netscape behaviour */
     text-align: -internal-center;
 }
 
+/* https://html.spec.whatwg.org/#the-hr-element-2 */
 hr {
     display: block;
     overflow: hidden;
@@ -101,24 +108,24 @@ hr {
     border-width: 1px;
 }
 
+/* https://html.spec.whatwg.org/#phrasing-content-3 */
 abbr[title], acronym[title] {
     text-decoration: dotted underline;
 }
 
-/* ::backdrop */
-
+/* https://drafts.csswg.org/css-position-4/#backdrop */
 ::backdrop {
     display: block;
     position: fixed;
     inset: 0;
 }
 
+/* https://html.spec.whatwg.org/#flow-content-3: a popover's backdrop doesn't take clicks. */
 :popover-open::backdrop {
     pointer-events: none !important;
 }
 
-/* dialog */
-
+/* https://html.spec.whatwg.org/#flow-content-3 */
 dialog {
     position: absolute;
     inset-inline: 0;
@@ -136,6 +143,7 @@ dialog[open] {
     display: block;
 }
 
+/* Not in the specification: visibility: visible. */
 dialog:modal {
     position: fixed;
     overflow: auto;
@@ -149,13 +157,15 @@ dialog::backdrop {
     background: rgba(0, 0, 0, 0.1);
 }
 
-/* media elements */
-
+/* https://html.spec.whatwg.org/#embedded-content-rendering-rules. Not in the specification: 'content' can't
+   replace a video. */
 video {
     object-fit: contain;
     content: normal !important;
 }
 
+/* An audio element with controls is a replaced element about one line high; without them it's never
+   rendered, whatever the author's style. */
 audio {
     width: 200px;
     height: 25px;
