@@ -2091,7 +2091,7 @@ namespace krys::boo
   {
     if (RefPtr<FrameView> view = ShareRefPtr(_frame.View()))
     {
-      view->SetLastUserScrollType(FrameView::UserScrollType::Explicit);
+      view->DidUserScroll(FrameView::UserScrollType::Explicit);
     }
   }
 

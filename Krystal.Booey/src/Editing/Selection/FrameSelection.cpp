@@ -686,7 +686,7 @@ namespace krys::boo
     // the selection rect could intersect more than just that.
     if (auto *view = _document->Frame() ? _document->Frame()->View() : nullptr)
     {
-      view->SetLastUserScrollType(FrameView::UserScrollType::Implicit);
+      view->DidUserScroll(FrameView::UserScrollType::Implicit);
     }
     ScrollRectToVisibleOptions options;
     options.RevealMode = revealSelectionOptions.RevealMode;

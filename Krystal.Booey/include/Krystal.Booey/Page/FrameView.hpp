@@ -1,28 +1,4 @@
-﻿/*
-   Copyright (C) 1997 Martin Jones (mjones@kde.org)
-             (C) 1998 Waldo Bastian (bastian@kde.org)
-             (C) 1998, 1999 Torben Weis (weis@kde.org)
-             (C) 1999 Lars Knoll (knoll@kde.org)
-             (C) 1999 Antti Koivisto (koivisto@kde.org)
-   Copyright (C) 2004-2019 Apple Inc. All rights reserved.
-
-   This library is free software; you can redistribute it and/or
-   modify it under the terms of the GNU Library General Public
-   License as published by the Free Software Foundation; either
-   version 2 of the License, or (at your option) any later version.
-
-   This library is distributed in the hope that it will be useful,
-   but WITHOUT ANY WARRANTY; without even the implied warranty of
-   MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU
-   Library General Public License for more details.
-
-   You should have received a copy of the GNU Library General Public License
-   along with this library; see the file COPYING.LIB.  If not, write to
-   the Free Software Foundation, Inc., 51 Franklin Street, Fifth Floor,
-   Boston, MA 02110-1301, USA.
-*/
-
-#pragma once
+﻿#pragma once
 
 #include "Krystal.Booey/CSS/Types/CSSOMString.hpp"
 #include "Krystal.Booey/DOM/Nodes/ContainerNode.hpp"
@@ -126,7 +102,7 @@ namespace krys::boo
     FrameViewLayoutContext _layoutContext;
     EnumSet<PaintBehavior> _paintBehavior;
     boo::Color _baseBackgroundColor {boo::Color::white};
-    RefPtr<Node> _nodeToDraw;
+    RefPtr<Node> _subtreeToPaint;
     bool _isPainting {false};
     bool _isTransparent {false};
     ScrollPosition _scrollPosition;
@@ -199,6 +175,7 @@ namespace krys::boo
     /// main frame's view with it.
     void Show() noexcept;
 
+    /// @brief Hides the view, as Show shows it.
     void Hide() noexcept;
 
     /// @brief Whether the view is actually visible.
@@ -247,6 +224,7 @@ namespace krys::boo
       return _frameRect.Height();
     }
 
+    /// @brief Changes the frame rect's size, keeping its location.
     void Resize(const SizeI &size) noexcept;
 
     /// @brief The size content is laid out at: the fixed layout size if the view uses it, or else the visible
@@ -263,6 +241,7 @@ namespace krys::boo
       return GetLayoutSize().Height();
     }
 
+    /// @brief The size content is laid out at while the view uses fixed layout (empty for the view's size).
     KRYS_NODISCARD SizeI FixedLayoutSize() const noexcept
     {
       return _fixedLayoutSize;
@@ -270,11 +249,14 @@ namespace krys::boo
 
     void SetFixedLayoutSize(const SizeI &newSize) noexcept;
 
+    /// @brief Whether content is laid out at the fixed layout size rather than the view's.
     KRYS_NODISCARD bool UseFixedLayout() const noexcept
     {
       return _useFixedLayout;
     }
 
+    /// @brief Whether a renderer in the view has had a flipped block direction (`vertical-rl`), so flipping
+    /// must be taken into account when mapping between their coordinates.
     KRYS_NODISCARD bool HasFlippedBlockRenderers() const noexcept
     {
       return _hasFlippedBlockRenderers;
@@ -314,6 +296,7 @@ namespace krys::boo
       return _extendedBackgroundRect.has_value();
     }
 
+    /// @brief The rect the root background is painted over while it's extended; empty otherwise.
     KRYS_NODISCARD RectI ExtendedBackgroundRectForPainting() const noexcept
     {
       return _extendedBackgroundRect.value_or(RectI());
@@ -323,6 +306,7 @@ namespace krys::boo
 
     void InvalidateScrollbar(Scrollbar &scrollbar, const RectI &rect) noexcept override;
 
+    /// @brief Repaints @p rect of the scroll corner, in its layer if it has one.
     void InvalidateScrollCorner(const RectI &rect) noexcept;
 
     void PaintScrollCorner(GraphicsContext &context, const RectI &cornerRect) noexcept;
@@ -334,8 +318,10 @@ namespace krys::boo
 
 #pragma region Compositing
 
+    /// @brief Tells the compositor a style recalculation is starting.
     void WillRecalcStyle() noexcept;
 
+    /// @brief Tells the compositor whether the view is in a window.
     void SetIsInWindow(bool isInWindow) noexcept;
 
     /// @brief Returns true if the flush was completed.
@@ -344,20 +330,27 @@ namespace krys::boo
     /// @brief Whether the view's contents scroll in a composited layer (the render view's).
     KRYS_NODISCARD bool UsesCompositedScrolling() const noexcept;
 
+    /// @brief Schedules an update of the root layer's compositing configuration (as after the view's
+    /// transparency changes), if the page composites.
     void SetNeedsCompositingConfigurationUpdate() noexcept;
 
     void SetNeedsCompositingGeometryUpdate() noexcept;
 
+    /// @brief Schedules an update of every layer's backing and of the layer hierarchy, if the page
+    /// composites.
     void SetDescendantsNeedUpdateBackingAndHierarchyTraversal() noexcept;
 
+    /// @brief The scrollbars' and scroll corner's composited layers, if the page composites.
     KRYS_NODISCARD GraphicsLayer *LayerForHorizontalScrollbar() const noexcept;
 
     KRYS_NODISCARD GraphicsLayer *LayerForVerticalScrollbar() const noexcept;
 
     KRYS_NODISCARD GraphicsLayer *LayerForScrollCorner() const noexcept;
 
+    /// @brief Moves the scrollbar and scroll corner layers to where the scrollbars are.
     void PositionScrollbarLayers() noexcept;
 
+    /// @brief Whether the view draws its own scrollbars (always: there's no host scroll view).
     KRYS_NODISCARD static bool ManagesScrollbars() noexcept
     {
       return true;
@@ -367,6 +360,7 @@ namespace krys::boo
     /// invalid when there isn't enough information.
     KRYS_NODISCARD boo::Color DocumentBackgroundColor() const noexcept;
 
+    /// @brief The space a scrollbar (or a gutter on both edges) takes on the left of the contents.
     KRYS_NODISCARD int32 InsetForLeftScrollbarSpace() const noexcept;
 
     /// @brief The root's `scrollbar-gutter`, which the view's scrollbars keep space by.
@@ -381,13 +375,16 @@ namespace krys::boo
 
     KRYS_NODISCARD bool IsHorizontalWritingMode() const noexcept override;
 
+    /// @brief Where the root content layer goes in the view: offset by the scroll origin.
     KRYS_NODISCARD PointF PositionForRootContentLayer() const noexcept;
 
     KRYS_NODISCARD LayoutRect
       FixedScrollableAreaBoundsInflatedForScrolling(const LayoutRect &uninflatedBounds) const noexcept;
 
+    /// @brief Updates the composited layers after a scroll, as fixed and sticky ones move.
     void UpdateCompositingLayersAfterScrolling() noexcept;
 
+    /// @brief Tells the compositor a scrollbar came or went, so its layers follow.
     void AddedOrRemovedScrollbar() noexcept;
 
     /// @brief The render view, for the updates that change it (its compositor).
@@ -484,6 +481,7 @@ namespace krys::boo
     /// no visual viewport, page scale, header or rubber-banding).
     KRYS_NODISCARD LayoutPoint ScrollPositionForFixedPosition() const noexcept;
 
+    /// @brief The scroll position fixed position content is laid out against.
     KRYS_NODISCARD LayoutPoint ScrollPositionRespectingCustomFixedPosition() const noexcept
     {
       return ScrollPositionForFixedPosition();
@@ -587,6 +585,7 @@ namespace krys::boo
     /// @brief Whether the root's writing mode is horizontal (its blocks stack vertically).
     KRYS_NODISCARD bool IsVerticalDocument() const noexcept;
 
+    /// @brief Whether the document's block direction is flipped (`vertical-rl`).
     KRYS_NODISCARD bool IsFlippedDocument() const noexcept;
 
     KRYS_NODISCARD bool IsScrollableOrRubberbandable() const noexcept override
@@ -649,6 +648,8 @@ namespace krys::boo
       return _scrollAnchoringController.get();
     }
 
+    /// @brief Adds (or with Dequeue removes) @p scrollableArea to those whose scroll anchors are adjusted
+    /// after the next layout.
     void QueueScrollableAreaForScrollAnchoringUpdate(ScrollableArea &scrollableArea) noexcept;
 
     void DequeueScrollableAreaForScrollAnchoringUpdate(ScrollableArea &scrollableArea) noexcept;
@@ -714,6 +715,7 @@ namespace krys::boo
     /// @brief Shows the icon marking the start of pan scrolling, centred on @p iconPosition (in the window).
     void AddPanScrollIcon(const PointI &iconPosition) noexcept;
 
+    /// @brief Hides the pan scroll icon, if it's shown.
     void RemovePanScrollIcon() noexcept;
 
     /// @brief Damages @p rect of the contents (in the contents' coordinates): the host paints it again.
@@ -743,6 +745,8 @@ namespace krys::boo
     /// @see `HostWindow::scroll`.
     KRYS_NODISCARD Maybe<ScrolledContents> TakeScrolledContents() noexcept;
 
+    /// @brief The renderers (with fixed backgrounds) that make scrolling repaint the whole view rather than
+    /// move its painted contents.
     void AddSlowRepaintObject(const RenderElement &renderer) noexcept;
 
     void RemoveSlowRepaintObject(const RenderElement &renderer) noexcept;
@@ -759,6 +763,7 @@ namespace krys::boo
       return _slowRepaintObjects;
     }
 
+    /// @brief Fixed and sticky position renderers, which stay put or move differently as the view scrolls.
     void AddViewportConstrainedObject(const RenderLayerModelObject &object) noexcept;
 
     void RemoveViewportConstrainedObject(const RenderLayerModelObject &object) noexcept;
@@ -767,12 +772,11 @@ namespace krys::boo
     KRYS_NODISCARD bool UseSlowRepaints() const noexcept;
 
     /// @brief Paints the document's render view over @p dirtyRect, in the contents' coordinates; only the
-    /// node to draw and its descendants, if there's one. Overlay scrollbars paint last, over the content.
+    /// subtree to paint, if there's one. Overlay scrollbars paint last, over the content.
     void PaintContents(GraphicsContext &, const RectI &dirtyRect) noexcept;
 
     /// @brief Paints only @p node and its descendants from now on, or everything if it's null.
-    // FIXME: change this to use the subtreePaint terminology.
-    void SetNodeToDraw(Node *node) noexcept;
+    void SetSubtreeToPaint(Node *node) noexcept;
 
     enum SelectionInSnapshot
     {
@@ -807,6 +811,7 @@ namespace krys::boo
       return _isPainting;
     }
 
+    /// @brief Whether the view paints no base background colour, letting the host's show through.
     KRYS_NODISCARD bool IsTransparent() const noexcept
     {
       return _isTransparent;
@@ -820,6 +825,8 @@ namespace krys::boo
       return _baseBackgroundColor;
     }
 
+    /// @brief Sets the base background colour (white for an invalid colour), which also decides the overlay
+    /// scrollbars' style.
     void SetBaseBackgroundColor(const boo::Color &backgroundColor) noexcept;
 
     /// @brief The view's media type (`screen` by default).
@@ -831,6 +838,9 @@ namespace krys::boo
     /// @brief Sets the view's media type, and re-evaluates the document's style sheets if it changed.
     void SetMediaType(const CSSOMStringAtom &mediaType) noexcept;
 
+    /// @brief Overrides the size the default viewport units are percentages of; a size may give only its
+    /// width or height. The Set...Size functions give both, and Clear... goes back to the view's own. The
+    /// same goes for the small and large units.
     void SetOverrideSizeForCSSDefaultViewportUnits(OverrideViewportSize size) noexcept;
 
     KRYS_NODISCARD Maybe<OverrideViewportSize> OverrideSizeForCSSDefaultViewportUnits() const noexcept
@@ -881,9 +891,10 @@ namespace krys::boo
     /// @brief Cancels a scroll to the focused element that hasn't happened yet.
     void CancelScheduledScrolls() noexcept;
 
-    /// @brief Notes how the user last scrolled the view (null to clear it), which stops the view keeping the
-    /// fragment or the focused element in view; a programmatic scroll isn't the user's.
-    void SetLastUserScrollType(Maybe<UserScrollType> userScrollType) noexcept;
+    /// @brief Tells the view the user scrolled it: it cancels a pending scroll to the focused element and,
+    /// unless a programmatic scroll is under way, stops keeping the fragment or focused element in view (and,
+    /// with a @p userScrollType, stops scrolling to the fragment once the style sheets load).
+    void DidUserScroll(Maybe<UserScrollType> userScrollType) noexcept;
 
     /// @brief Scrolls to the fragment of @p url: makes the element it indicates the document's target and
     /// scrolls it into view (the top of the document for `#top` or an empty fragment), and focuses it.
@@ -933,6 +944,7 @@ namespace krys::boo
     /// page zoom) if given, or else the page zoom.
     KRYS_NODISCARD float DocumentToAbsoluteScaleFactor(Maybe<float> usedZoom = null) const noexcept;
 
+    /// @brief The inverse of DocumentToAbsoluteScaleFactor, and the conversions with it.
     KRYS_NODISCARD float AbsoluteToDocumentScaleFactor(Maybe<float> usedZoom = null) const noexcept;
 
     KRYS_NODISCARD RectF AbsoluteToDocumentRect(RectF rect, Maybe<float> usedZoom = null) const noexcept;
@@ -1041,6 +1053,8 @@ namespace krys::boo
     /// @p repaintOnUnsuppress.
     void SetScrollbarsSuppressed(bool suppressed, bool repaintOnUnsuppress = false) noexcept;
 
+    /// @brief Whether the scrollbars are hidden and left alone, as for the first layout and while the view is
+    /// cleared for a new document.
     KRYS_NODISCARD bool ScrollbarsSuppressed() const noexcept
     {
       return _scrollbarsSuppressed;

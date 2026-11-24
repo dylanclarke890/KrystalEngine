@@ -63,7 +63,7 @@ namespace krys::boo
       {
         Frame.View()->SetPaintBehavior(PaintBehavior);
         Frame.View()->SetBaseBackgroundColor(BackgroundColor);
-        Frame.View()->SetNodeToDraw(nullptr);
+        Frame.View()->SetSubtreeToPaint(nullptr);
       }
     };
   }
@@ -199,7 +199,7 @@ namespace krys::boo
     ScopedFramePaintingState state(frame, &node);
 
     frame.View()->SetBaseBackgroundColor(Color::transparentBlack);
-    frame.View()->SetNodeToDraw(&node);
+    frame.View()->SetSubtreeToPaint(&node);
 
     LayoutRect topLevelRect;
     return SnapshotFrameRect(frame, SnappedRectI(node.Renderer()->PaintingRootRect(topLevelRect)),
