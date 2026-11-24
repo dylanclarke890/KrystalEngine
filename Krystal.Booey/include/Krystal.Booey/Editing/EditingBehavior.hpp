@@ -75,13 +75,6 @@ namespace krys::boo
       return _type == EditingBehaviorType::Mac || _type == EditingBehaviorType::iOS;
     }
 
-    // On Mac, style is considered present when present at the beginning of selection. On other platforms,
-    // style has to be present throughout the selection.
-    KRYS_NODISCARD constexpr bool ShouldToggleStyleBasedOnStartOfSelection() const noexcept
-    {
-      return _type == EditingBehaviorType::Mac || _type == EditingBehaviorType::iOS;
-    }
-
     // Standard Mac behavior when extending to a boundary is grow the selection rather than leaving the base
     // in place and moving the extent. Matches NSTextView.
     KRYS_NODISCARD constexpr bool ShouldAlwaysGrowSelectionWhenExtendingToBoundary() const noexcept
@@ -93,18 +86,6 @@ namespace krys::boo
     KRYS_NODISCARD constexpr bool ShouldSelectOnContextualMenuClick() const noexcept
     {
       return _type == EditingBehaviorType::Mac;
-    }
-
-    // On Linux, should be able to get and insert spelling suggestions without selecting the misspelled word.
-    KRYS_NODISCARD constexpr bool ShouldAllowSpellingSuggestionsWithoutSelection() const noexcept
-    {
-      return _type == EditingBehaviorType::Unix;
-    }
-
-    // On Mac and Windows, pressing backspace (when it isn't handled otherwise) should navigate back.
-    KRYS_NODISCARD constexpr bool ShouldNavigateBackOnBackspace() const noexcept
-    {
-      return _type != EditingBehaviorType::Unix;
     }
 
     // On Mac, selecting backwards by word/line from the middle of a word/line, and then going
@@ -128,18 +109,6 @@ namespace krys::boo
     KRYS_NODISCARD constexpr bool ShouldSelectTrailingWhitespaceOnDoubleClick() const noexcept
     {
       return _type == EditingBehaviorType::Windows;
-    }
-
-    // On iOS the last entered character in a secure filed is shown momentarily, removing and adding back the
-    // space when deleting password cause space been showed insecurely.
-    KRYS_NODISCARD constexpr bool ShouldRebalanceWhiteSpacesInSecureField() const noexcept
-    {
-      return _type != EditingBehaviorType::iOS;
-    }
-
-    KRYS_NODISCARD constexpr bool ShouldSelectBasedOnDictionaryLookup() const noexcept
-    {
-      return _type == EditingBehaviorType::Mac || _type == EditingBehaviorType::iOS;
     }
 
     // Linux and Windows always extend selections from the extent endpoint.
