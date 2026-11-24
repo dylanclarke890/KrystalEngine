@@ -64,19 +64,11 @@ namespace krys::boo
     // Simple exceptions (https://webidl.spec.whatwg.org/#idl-exceptions).
     RangeError,
     TypeError,
-    JSSyntaxError, // Different from DOM SYNTAX_ERR.
-
-    // Non-standard error.
-    StackOverflowError,
-    OutOfMemoryError,
-
-    // Used to indicate to the bindings that a JS exception was thrown below and it should be propagated.
-    ExistingExceptionError,
   };
 
   consteval ExceptionCode MaxEnumValue(ExceptionCode) noexcept
   {
-    return ExceptionCode::ExistingExceptionError;
+    return ExceptionCode::TypeError;
   }
 
   class Exception
