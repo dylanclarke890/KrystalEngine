@@ -1,31 +1,4 @@
-﻿/*
- * Copyright (C) 2000 Peter Kelly <pmk@post.com>
- * Copyright (C) 2005-2025 Apple Inc. All rights reserved.
- * Copyright (C) 2006 Alexey Proskuryakov <ap@webkit.org>
- * Copyright (C) 2007 Samuel Weinig <sam@webkit.org>
- * Copyright (C) 2008 Nokia Corporation and/or its subsidiary(-ies)
- * Copyright (C) 2008 Holger Hans Peter Freyther
- * Copyright (C) 2008, 2009 Torch Mobile Inc. All rights reserved. (http://www.torchmobile.com/)
- * Copyright (C) 2010 Patrick Gansterer <paroga@paroga.com>
- * Copyright (C) 2013 Samsung Electronics. All rights reserved.
- *
- * This library is free software; you can redistribute it and/or
- * modify it under the terms of the GNU Library General Public
- * License as published by the Free Software Foundation; either
- * version 2 of the License, or (at your option) any later version.
- *
- * This library is distributed in the hope that it will be useful,
- * but WITHOUT ANY WARRANTY; without even the implied warranty of
- * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU
- * Library General Public License for more details.
- *
- * You should have received a copy of the GNU Library General Public License
- * along with this library; see the file COPYING.LIB.  If not, write to
- * the Free Software Foundation, Inc., 51 Franklin Street, Fifth Floor,
- * Boston, MA 02110-1301, USA.
- */
-
-#include "Krystal.Booey/DOM/Algorithms/ElementAlgorithms.hpp"
+﻿#include "Krystal.Booey/DOM/Algorithms/ElementAlgorithms.hpp"
 #include "Krystal.Booey/DOM/Algorithms/MutationAlgorithms.hpp"
 #include "Krystal.Booey/DOM/Algorithms/NameValidation.hpp"
 #include "Krystal.Booey/DOM/Internals/ElementFactory.hpp"
@@ -63,8 +36,11 @@
 
 namespace krys::boo::xml
 {
+#pragma region libxml2 set-up
+
   namespace
   {
+    /// @brief What libxml2 is handed as an open file: every read of it is empty.
     int globalDescriptor = 0;
     bool didInitializeXMLParser = false;
 
@@ -109,9 +85,7 @@ namespace krys::boo::xml
 
     int MatchFunc(const char *) noexcept
     {
-      // Only match loads initiated due to uses of libxml2 from within XMLDocumentParser to avoid
-      // interfering with client applications that also use libxml2.
-      // http://bugs.webkit.org/show_bug.cgi?id=17353
+      // Only loads asked for while Booey's parser runs, so an application's own use of libxml2 is left alone.
       return XMLDocumentParserScope::CurrentCachedResourceLoader() ? 1 : 0;
     }
 
@@ -126,14 +100,12 @@ namespace krys::boo::xml
     int ReadFunc(void *context, char *, int) noexcept
     {
       (void)context;
-      // Do 0-byte reads in case of a null descriptor
       krys_debug_assert(context == &globalDescriptor);
       return 0;
     }
 
     int WriteFunc(void *, const char *, int) noexcept
     {
-      // Always just do 0-byte writes
       return 0;
     }
 
@@ -141,7 +113,6 @@ namespace krys::boo::xml
     {
       return 0;
     }
-
   }
 
   xmlParserInputPtr ExternalEntityLoader(const char *, const char *, xmlParserCtxtPtr) noexcept
@@ -171,13 +142,13 @@ namespace krys::boo::xml
     xmlParserCtxtPtr parser = xmlCreatePushParserCtxt(handlers, nullptr, nullptr, 0, nullptr);
     parser->_private = userData;
 
-    // Substitute entities. The text is UTF-8, whatever an XML declaration says (see DIFFERENCES.md).
+    // Entities are replaced by their text, and the text is UTF-8 whatever an XML declaration says (see
+    // DIFFERENCES.md).
     xmlCtxtUseOptions(parser, XML_PARSE_NOENT | XML_PARSE_HUGE | XML_PARSE_IGNORE_ENC);
 
     return AdoptRef(*new XMLParserContext(parser));
   }
 
-  // Chunk should be encoded in UTF-8
   RefPtr<XMLParserContext> XMLParserContext::CreateMemoryParser(xmlSAXHandlerPtr handlers, void *userData,
                                                                 const utf8_string &chunk) noexcept
   {
@@ -194,8 +165,8 @@ namespace krys::boo::xml
 
     std::memcpy(parser->sax, handlers, sizeof(xmlSAXHandler));
 
-    // Substitute entities.
-    // FIXME: Why is XML_PARSE_NODICT needed? This is different from what CreateStringParser does.
+    // As for a document, but without libxml2's name dictionary.
+    // FIXME: Find out whether XML_PARSE_NODICT is needed: a document's parser doesn't use it.
     xmlCtxtUseOptions(parser, XML_PARSE_NODICT | XML_PARSE_NOENT | XML_PARSE_HUGE | XML_PARSE_IGNORE_ENC);
 
     parser->_private = userData;
@@ -203,7 +174,9 @@ namespace krys::boo::xml
     return AdoptRef(*new XMLParserContext(parser));
   }
 
-  // --------------------------------
+#pragma endregion
+
+#pragma region Parsing
 
   bool XMLDocumentParser::SupportsXMLVersion(DOMStringView version) noexcept
   {
@@ -235,7 +208,7 @@ namespace krys::boo::xml
 
   XMLDocumentParser::~XMLDocumentParser() noexcept
   {
-    // The XMLDocumentParser will always be detached before being destroyed.
+    // A parser is always detached before it's destroyed.
     krys_debug_assert(_currentNodeStack.empty());
     krys_debug_assert(!_currentNode);
   }
@@ -248,14 +221,12 @@ namespace krys::boo::xml
       InitializeParserContext();
     }
 
-    // Protect the libxml context from deletion during a callback
+    // Kept alive through the callbacks, which may detach the parser and drop its context.
     RefPtr<XMLParserContext> context = _context;
 
     // An empty string has nothing to parse.
     if (!parseString.empty())
     {
-      // What runs under xmlParseChunk may cause the parser to detach; keep this alive until this function is
-      // done.
       Ref<XMLDocumentParser> protectedThis = ShareRef(*this);
 
       XMLDocumentParserScope scope(&Document()->GetCachedResourceLoader());
@@ -357,6 +328,10 @@ namespace krys::boo::xml
     }
   }
 
+#pragma endregion
+
+#pragma region SAX callbacks
+
   void XMLDocumentParser::StartElementNs(const xmlChar *xmlLocalName, const xmlChar *xmlPrefix,
                                          const xmlChar *xmlURI, int numNamespaces,
                                          const xmlChar **libxmlNamespaces, int numAttributes, int,
@@ -404,8 +379,7 @@ namespace krys::boo::xml
     Maybe<html::CustomElementReactionStack> customElementReactionStack;
     if (willConstructCustomElement) KRYS_UNLIKELY
     {
-      // FIXME: Increment the document's throw-on-dynamic-markup-insertion counter, once there's
-      // document.write().
+      // (The throw-on-dynamic-markup-insertion counter isn't kept: there's no document.write().)
       html::EventLoop::Current().PerformMicrotaskCheckpoint();
       customElementReactionStack.emplace();
     }
@@ -419,13 +393,7 @@ namespace krys::boo::xml
     auto newElement =
       dom::ElementFactory::Create(document, qName, null, willConstructCustomElement, registry);
 
-    if (!handledAttributes)
-    {
-      SetAttributes(*newElement, prefixedAttributes);
-      StopParsing();
-      return;
-    }
-
+    // The attributes that were valid are set even when parsing stops at one that isn't.
     SetAttributes(*newElement, prefixedAttributes);
     if (!success)
     {
@@ -438,7 +406,8 @@ namespace krys::boo::xml
     newElement->BeginParsingChildren();
 
     (void)dom::MutationAlgorithms::Append(*newElement, *_currentNode);
-    if (!_currentNode) // What the insertion ran may have removed the current node.
+    // What inserting it ran may have taken the current node away.
+    if (!_currentNode)
     {
       return;
     }
@@ -460,7 +429,7 @@ namespace krys::boo::xml
       return;
     }
 
-    // What runs can detach the parser. Make sure this is not released before the end of this method.
+    // Finishing the element can detach the parser.
     Ref<XMLDocumentParser> protectedThis = ShareRef(*this);
 
     if (!UpdateLeafTextNode())
@@ -695,9 +664,8 @@ namespace krys::boo::xml
       va_end(args);
     }
 
-    // Using a static entity and marking it XML_INTERNAL_PREDEFINED_ENTITY is
-    // a hack to avoid malloc/free. Using a global variable like this could cause trouble
-    // if libxml implementation details were to change
+    // One static entity and buffer serve every lookup, so nothing is allocated or freed. That relies on
+    // libxml2 not holding on to an entity from one lookup to the next.
     Array<xmlChar, 9> sharedXHTMLEntityResult = {};
 
     KRYS_NODISCARD xmlEntityPtr SharedXHTMLEntity() noexcept
@@ -737,8 +705,7 @@ namespace krys::boo::xml
       }
 
       size_t entityLengthInUTF8 = 0;
-      // Unlike HTML parser, XML parser parses the content of named
-      // entities. So we need to escape '&' and '<'.
+      // libxml2 parses an entity's text as markup, so a `&` or `<` in it is given as a character reference.
       auto setResult = [&](utf8_stringview result)
       {
         std::ranges::copy(result, sharedXHTMLEntityResult.begin());
@@ -767,7 +734,7 @@ namespace krys::boo::xml
         krys_debug_assert(utf8.size() < sharedXHTMLEntityResult.size());
         setResult(utf8);
       }
-      // Even though we must pass the length, libxml expects the entity string to be null terminated.
+      // libxml2 takes the length but also expects the text null terminated.
       sharedXHTMLEntityResult[entityLengthInUTF8] = '\0';
 
       xmlEntityPtr entity = SharedXHTMLEntity();
@@ -820,6 +787,8 @@ namespace krys::boo::xml
       xmlSAX2InternalSubset(closure, name, externalID, systemID);
     }
 
+    // A doctype with one of the XHTML public identifiers gives the document HTML's named character references
+    // (https://html.spec.whatwg.org/#parsing-xhtml-documents).
     void ExternalSubsetHandler(void *closure, const xmlChar *, const xmlChar *externalId, const xmlChar *)
     {
       auto extId = ToStringView(externalId);
@@ -833,17 +802,20 @@ namespace krys::boo::xml
           || (extId == u8"-//WAPFORUM//DTD XHTML Mobile 1.1//EN")
           || (extId == u8"-//WAPFORUM//DTD XHTML Mobile 1.2//EN"))
       {
-        GetParser(closure)->SetIsXHTMLDocument(true); // controls if we replace entities or not.
+        GetParser(closure)->SetIsXHTMLDocument(true);
       }
     }
 
     void IgnorableWhitespaceHandler(void *, const xmlChar *, int)
     {
-      // nothing to do, but we need this to work around a crasher
-      // http://bugzilla.gnome.org/show_bug.cgi?id=172255
-      // http://bugs.webkit.org/show_bug.cgi?id=5792
+      // Whitespace libxml2 reports as ignorable (in content a DTD makes element-only) isn't added to the
+      // tree.
     }
   }
+
+#pragma endregion
+
+#pragma region Parser set-up and end
 
   void XMLDocumentParser::InitializeParserContext(const utf8_string &chunk) noexcept
   {
@@ -887,7 +859,7 @@ namespace krys::boo::xml
     {
       if (_context)
       {
-        // Tell libxml we're done.
+        // The last, empty, chunk ends the parse.
         {
           XMLDocumentParserScope scope(&Document()->GetCachedResourceLoader());
           xmlParseChunk(Context(), nullptr, 0, 1);
@@ -943,9 +915,12 @@ namespace krys::boo::xml
     }
     XMLDocumentParserScope scope(&Document()->GetCachedResourceLoader());
     xmlParseContent(Context());
-    EndDocument(); // Close any open text nodes.
+    // Adds the text still buffered.
+    EndDocument();
 
-    // No error if the chunk is well formed or it is not but we have no error.
+    // libxml2 can find a fragment not well formed without reporting an error; only a reported one counts.
     return Context()->wellFormed || !xmlCtxtGetLastError(Context());
   }
+
+#pragma endregion
 }
