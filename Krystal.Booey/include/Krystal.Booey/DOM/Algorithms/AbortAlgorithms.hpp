@@ -1,9 +1,9 @@
 ﻿#pragma once
 
+#include "Krystal.Booey/DOM/Types/Exception.hpp"
 #include "Krystal.Core/Containers/List.hpp"
 #include "Krystal.Core/Memory/RefPtr.hpp"
 #include "Krystal.Core/Numeric.hpp"
-#include "Krystal.Core/Types/Any.hpp"
 #include "Krystal.Core/Types/Func.hpp"
 #include "Krystal.Core/Types/Maybe.hpp"
 
@@ -25,17 +25,17 @@ namespace krys::boo::dom
 
   public:
     /// @see https://dom.spec.whatwg.org/#abortcontroller-signal-abort
-    static void SignalAbort(AbortController &controller, Maybe<krys::Any> reason = null) noexcept;
+    static void SignalAbort(AbortController &controller, Maybe<Exception> reason = null) noexcept;
 
     /// @brief Adds @p algorithm to @p signal's abort algorithms, owned by the returned handle: destroying the
     /// handle removes it, unless it was released to the signal.
     /// @return A handle that owns no algorithm if @p signal is aborted.
     /// @see https://dom.spec.whatwg.org/#abortsignal-add
-    static AbortAlgorithmHandle Add(Func<void(const krys::Any &reason)> algorithm,
+    static AbortAlgorithmHandle Add(Func<void(const Exception &reason)> algorithm,
                                     AbortSignal &signal) noexcept;
 
     /// @see https://dom.spec.whatwg.org/#abortsignal-signal-abort
-    static void SignalAbort(AbortSignal &signal, Maybe<krys::Any> reason = null) noexcept;
+    static void SignalAbort(AbortSignal &signal, Maybe<Exception> reason = null) noexcept;
 
     /// @see https://dom.spec.whatwg.org/#run-the-abort-steps
     static void RunAbortSteps(AbortSignal &signal) noexcept;

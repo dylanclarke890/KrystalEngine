@@ -152,7 +152,7 @@ namespace krys::boo::dom
     if (listener.Signal() != nullptr)
     {
       listener._signalAlgorithm = AbortAlgorithms::Add(
-        [weakListener = CreateWeakPtr(&listener), weakTarget = CreateWeakPtr(&eventTarget)](const Any &)
+        [weakListener = CreateWeakPtr(&listener), weakTarget = CreateWeakPtr(&eventTarget)](const Exception &)
         {
           auto strongListener = weakListener.lock();
           auto strongTarget = weakTarget.lock();

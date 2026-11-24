@@ -88,7 +88,7 @@ namespace krys::boo::html
       else
       {
         watcher->_signalAlgorithm = dom::AbortAlgorithms::Add(
-          [weakWatcher = CreateWeakPtr(watcher.get())](const Any &)
+          [weakWatcher = CreateWeakPtr(watcher.get())](const Exception &)
           {
             if (auto strongWatcher = weakWatcher.lock())
             {

@@ -277,7 +277,6 @@ target_sources(Krystal.Core
       include/Krystal.Core/Time/Timer.hpp
 
       # Types
-      include/Krystal.Core/Types/Any.hpp
       include/Krystal.Core/Types/BoolOr.hpp
       include/Krystal.Core/Types/CompactVariant.hpp
       include/Krystal.Core/Types/Decimal.hpp

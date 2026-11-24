@@ -1,9 +1,9 @@
 ﻿#pragma once
 
+#include "Krystal.Booey/DOM/Types/Exception.hpp"
 #include "Krystal.Core/Attributes.hpp"
 #include "Krystal.Core/Macros.hpp"
 #include "Krystal.Core/Memory/RefPtr.hpp"
-#include "Krystal.Core/Types/Any.hpp"
 #include "Krystal.Core/Types/Maybe.hpp"
 
 namespace krys::boo::dom
@@ -40,7 +40,7 @@ namespace krys::boo
     }
 
     /// @see https://dom.spec.whatwg.org/#dom-abortcontroller-abort
-    void Abort(Maybe<::krys::Any> reason = null) noexcept;
+    void Abort(Maybe<Exception> reason = null) noexcept;
 
 #pragma endregion
   };

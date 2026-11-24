@@ -19,25 +19,16 @@ namespace krys::boo::dom::tests
     {
       auto signal = AbortSignal::Abort();
       REQUIRE(signal->Aborted());
-      auto *reason = std::any_cast<Exception>(&signal->Reason());
+      const auto &reason = signal->Reason();
       REQUIRE(reason);
       CHECK(reason->Code() == ExceptionCode::AbortError);
     }
 
     SECTION("With a reason")
     {
-      auto signal = AbortSignal::Abort(Any(42));
+      auto signal = AbortSignal::Abort(Exception(ExceptionCode::AbortError, u8"42"));
       REQUIRE(signal->Aborted());
-      CHECK(std::any_cast<int>(signal->Reason()) == 42);
-    }
-
-    SECTION("An empty reason (undefined) counts as not given")
-    {
-      auto signal = AbortSignal::Abort(Any());
-      REQUIRE(signal->Aborted());
-      auto *reason = std::any_cast<Exception>(&signal->Reason());
-      REQUIRE(reason);
-      CHECK(reason->Code() == ExceptionCode::AbortError);
+      CHECK(signal->Reason()->Message() == u8"42");
     }
   }
 
@@ -58,7 +49,7 @@ namespace krys::boo::dom::tests
     // After the timeout, a task on the timer task source aborts it with a "TimeoutError".
     loop.Run(loop.Now() + 1ms);
     REQUIRE(signal->Aborted());
-    auto *reason = std::any_cast<Exception>(&signal->Reason());
+    const auto &reason = signal->Reason();
     REQUIRE(reason);
     CHECK(reason->Code() == ExceptionCode::TimeoutError);
   }
@@ -72,10 +63,11 @@ namespace krys::boo::dom::tests
 
     SECTION("Already aborted if one of the signals is, with the first aborted one's reason")
     {
-      auto signal =
-        AbortSignal::Any({ShareRef(first.Signal()), AbortSignal::Abort(Any(1)), AbortSignal::Abort(Any(2))});
+      auto signal = AbortSignal::Any({ShareRef(first.Signal()),
+                                      AbortSignal::Abort(Exception(ExceptionCode::AbortError, u8"1")),
+                                      AbortSignal::Abort(Exception(ExceptionCode::AbortError, u8"2"))});
       REQUIRE(signal->Aborted());
-      CHECK(std::any_cast<int>(signal->Reason()) == 1);
+      CHECK(signal->Reason()->Message() == u8"1");
     }
 
     SECTION("With no signals, it never aborts")
@@ -89,12 +81,12 @@ namespace krys::boo::dom::tests
       auto signal = AbortSignal::Any({ShareRef(first.Signal()), ShareRef(second.Signal())});
       CHECK_FALSE(signal->Aborted());
 
-      second.Abort(Any(2));
+      second.Abort(Exception(ExceptionCode::AbortError, u8"2"));
       REQUIRE(signal->Aborted());
-      CHECK(std::any_cast<int>(signal->Reason()) == 2);
+      CHECK(signal->Reason()->Message() == u8"2");
 
-      first.Abort(Any(1));
-      CHECK(std::any_cast<int>(signal->Reason()) == 2);
+      first.Abort(Exception(ExceptionCode::AbortError, u8"1"));
+      CHECK(signal->Reason()->Message() == u8"2");
     }
 
     SECTION("A signal given twice is a source once")
@@ -111,10 +103,10 @@ namespace krys::boo::dom::tests
       auto inner = AbortSignal::Any({ShareRef(first.Signal())});
       auto outer = AbortSignal::Any({inner});
       CHECK_FALSE(outer->Aborted());
-      first.Abort(Any(3));
+      first.Abort(Exception(ExceptionCode::AbortError, u8"3"));
       CHECK(inner->Aborted());
       REQUIRE(outer->Aborted());
-      CHECK(std::any_cast<int>(outer->Reason()) == 3);
+      CHECK(outer->Reason()->Message() == u8"3");
     }
   }
 
@@ -126,22 +118,14 @@ namespace krys::boo::dom::tests
     auto &signal = controller.Signal();
     CHECK_FALSE(signal.Aborted());
     CHECK_FALSE(signal.Reason().has_value());
-    CHECK_NOTHROW(signal.ThrowIfAborted());
+    CHECK_FALSE(signal.ThrowIfAborted().HasException());
 
-    controller.Abort(Any(5));
+    controller.Abort(Exception(ExceptionCode::AbortError, u8"5"));
     CHECK(signal.Aborted());
 
-    bool thrown = false;
-    try
-    {
-      signal.ThrowIfAborted();
-    }
-    catch (const krys::Any &reason)
-    {
-      thrown = true;
-      CHECK(std::any_cast<int>(reason) == 5);
-    }
-    CHECK(thrown);
+    auto result = signal.ThrowIfAborted();
+    REQUIRE(result.HasException());
+    CHECK(result.GetException().Message() == u8"5");
   }
 
   TEST_CASE("AbortSignal.onabort: an event handler for the abort event",
@@ -217,7 +201,7 @@ namespace krys::boo::dom::tests
       {
         auto dependent = AbortSignal::Any({ShareRef(source)});
         weakDependent = CreateWeakPtr(dependent.get());
-        algorithm = AbortAlgorithms::Add([&](const Any &) { aborted = true; }, *dependent);
+        algorithm = AbortAlgorithms::Add([&](const Exception &) { aborted = true; }, *dependent);
       }
       REQUIRE(weakDependent);
 
@@ -301,27 +285,34 @@ namespace krys::boo::dom::tests
     // An API that takes a signal checks it before it starts, and stops with its reason when it's aborted.
     struct Amazingness
     {
-      Maybe<int> RejectedWith;
+      Maybe<Exception> RejectedWith;
       EventListenerHandle Listener;
 
-      void Start(AbortSignal &signal)
+      ExceptionOr<void> Start(AbortSignal &signal)
       {
-        signal.ThrowIfAborted();
-        Listener = signal.AddEventListener(event_names::Abort, [this, &signal](Event &)
-                                           { RejectedWith = std::any_cast<int>(signal.Reason()); });
+        if (auto result = signal.ThrowIfAborted(); result.HasException())
+        {
+          return result;
+        }
+        Listener = signal.AddEventListener(event_names::Abort,
+                                           [this, &signal](Event &) { RejectedWith = signal.Reason(); });
+        return {};
       }
     };
 
     AbortController controller;
     Amazingness amazingness;
-    REQUIRE_NOTHROW(amazingness.Start(controller.Signal()));
+    REQUIRE_FALSE(amazingness.Start(controller.Signal()).HasException());
     CHECK_FALSE(amazingness.RejectedWith.has_value());
 
-    controller.Abort(Any {42});
-    CHECK(amazingness.RejectedWith == 42);
+    controller.Abort(Exception(ExceptionCode::AbortError, u8"42"));
+    REQUIRE(amazingness.RejectedWith);
+    CHECK(amazingness.RejectedWith->Message() == u8"42");
 
-    // Started after the abort, it throws the reason straight away.
+    // Started after the abort, it fails with the reason straight away.
     Amazingness late;
-    CHECK_THROWS_AS(late.Start(controller.Signal()), Any);
+    auto result = late.Start(controller.Signal());
+    REQUIRE(result.HasException());
+    CHECK(result.GetException().Message() == u8"42");
   }
 }

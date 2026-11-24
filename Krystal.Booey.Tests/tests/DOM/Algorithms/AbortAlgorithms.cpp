@@ -14,7 +14,7 @@ namespace krys::boo::dom::tests
   {
     AbortController controller;
     int runs = 0;
-    auto count = [&](const Any &)
+    auto count = [&](const Exception &)
     {
       ++runs;
     };
@@ -50,7 +50,7 @@ namespace krys::boo::dom::tests
   {
     AbortController controller;
     int runs = 0;
-    auto count = [&](const Any &)
+    auto count = [&](const Exception &)
     {
       ++runs;
     };
@@ -98,20 +98,11 @@ namespace krys::boo::dom::tests
     AbortController controller;
     auto &signal = controller.Signal();
 
-    SECTION("An empty reason (undefined) counts as not given")
-    {
-      AbortAlgorithms::SignalAbort(signal, Any());
-      REQUIRE(signal.Aborted());
-      auto *reason = std::any_cast<Exception>(&signal.Reason());
-      REQUIRE(reason);
-      CHECK(reason->Code() == ExceptionCode::AbortError);
-    }
-
     SECTION("An aborted signal keeps its reason")
     {
-      AbortAlgorithms::SignalAbort(signal, Any(1));
-      AbortAlgorithms::SignalAbort(signal, Any(2));
-      CHECK(std::any_cast<int>(signal.Reason()) == 1);
+      AbortAlgorithms::SignalAbort(signal, Exception(ExceptionCode::AbortError, u8"1"));
+      AbortAlgorithms::SignalAbort(signal, Exception(ExceptionCode::AbortError, u8"2"));
+      CHECK(signal.Reason()->Message() == u8"1");
     }
 
     SECTION("Dependents are aborted before the signal's abort steps and run theirs after")
@@ -119,21 +110,21 @@ namespace krys::boo::dom::tests
       auto dependent = AbortSignal::Any({ShareRef(signal)});
       List<std::string> log;
       auto signalAlgorithm = AbortAlgorithms::Add(
-        [&](const Any &)
+        [&](const Exception &)
         {
           log.emplace_back("signal algorithm");
           CHECK(dependent->Aborted());
-          CHECK(std::any_cast<int>(dependent->Reason()) == 7);
+          CHECK(dependent->Reason()->Message() == u8"7");
         },
         signal);
       auto dependentAlgorithm =
-        AbortAlgorithms::Add([&](const Any &) { log.emplace_back("dependent algorithm"); }, *dependent);
+        AbortAlgorithms::Add([&](const Exception &) { log.emplace_back("dependent algorithm"); }, *dependent);
       auto signalListener =
         signal.AddEventListener(event_names::Abort, [&](Event &) { log.emplace_back("signal event"); });
       auto dependentListener = dependent->AddEventListener(event_names::Abort, [&](Event &)
                                                            { log.emplace_back("dependent event"); });
 
-      AbortAlgorithms::SignalAbort(signal, Any(7));
+      AbortAlgorithms::SignalAbort(signal, Exception(ExceptionCode::AbortError, u8"7"));
       CHECK(
         log
         == List<std::string> {"signal algorithm", "signal event", "dependent algorithm", "dependent event"});
@@ -150,17 +141,17 @@ namespace krys::boo::dom::tests
     SECTION("Algorithms run in order, with the reason, before the event")
     {
       auto first = AbortAlgorithms::Add(
-        [&](const Any &reason)
+        [&](const Exception &reason)
         {
           log.emplace_back("first");
-          CHECK(std::any_cast<int>(reason) == 4);
+          CHECK(reason.Message() == u8"4");
         },
         signal);
-      auto second = AbortAlgorithms::Add([&](const Any &) { log.emplace_back("second"); }, signal);
+      auto second = AbortAlgorithms::Add([&](const Exception &) { log.emplace_back("second"); }, signal);
       auto listener =
         signal.AddEventListener(event_names::Abort, [&](Event &) { log.emplace_back("event"); });
 
-      controller.Abort(Any(4));
+      controller.Abort(Exception(ExceptionCode::AbortError, u8"4"));
       CHECK(log == List<std::string> {"first", "second", "event"});
     }
 
@@ -168,13 +159,13 @@ namespace krys::boo::dom::tests
     {
       AbortAlgorithmHandle self;
       self = AbortAlgorithms::Add(
-        [&](const Any &)
+        [&](const Exception &)
         {
           log.emplace_back("first");
           self.Remove();
         },
         signal);
-      auto second = AbortAlgorithms::Add([&](const Any &) { log.emplace_back("second"); }, signal);
+      auto second = AbortAlgorithms::Add([&](const Exception &) { log.emplace_back("second"); }, signal);
 
       controller.Abort();
       CHECK(log == List<std::string> {"first", "second"});

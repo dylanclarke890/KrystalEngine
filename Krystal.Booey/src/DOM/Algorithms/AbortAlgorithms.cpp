@@ -6,12 +6,12 @@
 
 namespace krys::boo::dom
 {
-  void AbortAlgorithms::SignalAbort(AbortController &controller, Maybe<krys::Any> reason) noexcept
+  void AbortAlgorithms::SignalAbort(AbortController &controller, Maybe<Exception> reason) noexcept
   {
     SignalAbort(*controller._signal, krys::move(reason));
   }
 
-  AbortAlgorithmHandle AbortAlgorithms::Add(Func<void(const krys::Any &reason)> algorithm,
+  AbortAlgorithmHandle AbortAlgorithms::Add(Func<void(const Exception &reason)> algorithm,
                                             AbortSignal &signal) noexcept
   {
     // 1. If signal is aborted, then return.
@@ -37,7 +37,7 @@ namespace krys::boo::dom
     }
   }
 
-  void AbortAlgorithms::SignalAbort(AbortSignal &signal, Maybe<krys::Any> reason) noexcept
+  void AbortAlgorithms::SignalAbort(AbortSignal &signal, Maybe<Exception> reason) noexcept
   {
     // 1. If signal is aborted, then return.
     if (signal.Aborted())
@@ -101,7 +101,7 @@ namespace krys::boo::dom
     // The list is emptied first, as an algorithm may remove itself.
     for (const auto &algorithm : std::exchange(signal._abortAlgorithms, {}))
     {
-      algorithm.Run(signal.Reason());
+      algorithm.Run(*signal._reason);
     }
 
     // 3. Fire an event named abort at signal.
@@ -120,7 +120,7 @@ namespace krys::boo::dom
     {
       if (signal->Aborted())
       {
-        resultSignal->_reason = signal->Reason();
+        resultSignal->_reason = signal->_reason;
         return resultSignal;
       }
     }

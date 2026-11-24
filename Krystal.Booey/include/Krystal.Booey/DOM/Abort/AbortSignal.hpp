@@ -1,13 +1,15 @@
 ﻿#pragma once
 
 #include "Krystal.Booey/DOM/Events/EventTarget.hpp"
+#include "Krystal.Booey/DOM/Types/Exception.hpp"
+#include "Krystal.Booey/DOM/Types/ExceptionOr.hpp"
 #include "Krystal.Booey/HTML/Attributes/EventHandlerAttributes.hpp"
 #include "Krystal.Core/Attributes.hpp"
 #include "Krystal.Core/Containers/List.hpp"
 #include "Krystal.Core/Memory/WeakPtr.hpp"
 #include "Krystal.Core/Numeric.hpp"
-#include "Krystal.Core/Types/Any.hpp"
 #include "Krystal.Core/Types/Func.hpp"
+#include "Krystal.Core/Types/Maybe.hpp"
 
 namespace krys::boo::dom
 {
@@ -30,7 +32,7 @@ namespace krys::boo
     struct AbortAlgorithm
     {
       uint64 Id;
-      Func<void(const krys::Any &reason)> Run;
+      Func<void(const Exception &reason)> Run;
     };
 
     /// @brief A signal that depends on this one: held strongly while it has to stay alive for this signal to
@@ -43,7 +45,7 @@ namespace krys::boo
     };
 
     /// @see https://dom.spec.whatwg.org/#abortsignal-abort-reason
-    krys::Any _reason;
+    Maybe<Exception> _reason;
     /// @see https://dom.spec.whatwg.org/#abortsignal-abort-algorithms
     List<AbortAlgorithm> _abortAlgorithms;
     /// @see https://dom.spec.whatwg.org/#abortsignal-source-signals
@@ -59,7 +61,7 @@ namespace krys::boo
 #pragma region Abort Signal - https://dom.spec.whatwg.org/#abortsignal
 
     /// @see https://dom.spec.whatwg.org/#dom-abortsignal-abort
-    static Ref<AbortSignal> Abort(Maybe<Any> reason = null) noexcept;
+    static Ref<AbortSignal> Abort(Maybe<Exception> reason = null) noexcept;
 
     /// @brief A signal that aborts once @p document, standing in for the global, has been active for
     /// @p milliseconds.
@@ -76,21 +78,21 @@ namespace krys::boo
       return _reason.has_value();
     }
 
+    /// @brief The abort reason, or nothing (the spec's undefined) if the signal isn't aborted.
     /// @see https://dom.spec.whatwg.org/#dom-abortsignal-reason
-    KRYS_NODISCARD const krys::Any &Reason() const noexcept
+    KRYS_NODISCARD const Maybe<Exception> &Reason() const noexcept
     {
       return _reason;
     }
 
-    /// @note The reason is thrown as a C++ exception (a `krys::Any`), since `ExceptionOr` can only hold a
-    /// `DOMException`.
     /// @see https://dom.spec.whatwg.org/#dom-abortsignal-throwifaborted
-    void ThrowIfAborted() const
+    KRYS_NODISCARD ExceptionOr<void> ThrowIfAborted() const noexcept
     {
       if (Aborted())
       {
-        throw krys::Any(Reason());
+        return Exception(*_reason);
       }
+      return {};
     }
 
     /// @see https://dom.spec.whatwg.org/#dom-abortsignal-onabort
@@ -101,9 +103,8 @@ namespace krys::boo
 #pragma endregion
 
   private:
-    /// @brief @p reason if it is given, otherwise a new "AbortError" `DOMException`. An empty reason
-    /// (undefined) counts as not given.
-    KRYS_NODISCARD static krys::Any ReasonOrAbortError(Maybe<krys::Any> reason) noexcept;
+    /// @brief @p reason if it is given, otherwise a new "AbortError" `DOMException`.
+    KRYS_NODISCARD static Exception ReasonOrAbortError(Maybe<Exception> reason) noexcept;
 
     /// @brief Whether the signal still has the abort algorithm with @p id.
     KRYS_NODISCARD bool HasAbortAlgorithm(uint64 id) const noexcept;

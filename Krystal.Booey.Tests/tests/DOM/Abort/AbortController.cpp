@@ -31,7 +31,7 @@ namespace krys::boo::dom::tests
     {
       controller.Abort();
       REQUIRE(controller.Signal().Aborted());
-      auto *reason = std::any_cast<Exception>(&controller.Signal().Reason());
+      const auto &reason = controller.Signal().Reason();
       REQUIRE(reason);
       REQUIRE(reason->Code() == ExceptionCode::AbortError);
       REQUIRE(aborts == 1);
@@ -39,23 +39,23 @@ namespace krys::boo::dom::tests
 
     SECTION("With a reason")
     {
-      controller.Abort(Any(42));
-      REQUIRE(std::any_cast<int>(controller.Signal().Reason()) == 42);
+      controller.Abort(Exception(ExceptionCode::AbortError, u8"42"));
+      REQUIRE(controller.Signal().Reason()->Message() == u8"42");
     }
 
     SECTION("Only once")
     {
-      controller.Abort(Any(1));
-      controller.Abort(Any(2));
-      REQUIRE(std::any_cast<int>(controller.Signal().Reason()) == 1);
+      controller.Abort(Exception(ExceptionCode::AbortError, u8"1"));
+      controller.Abort(Exception(ExceptionCode::AbortError, u8"2"));
+      REQUIRE(controller.Signal().Reason()->Message() == u8"1");
       REQUIRE(aborts == 1);
     }
 
     SECTION("Signal abort on the controller does the same")
     {
-      AbortAlgorithms::SignalAbort(controller, Any(7));
+      AbortAlgorithms::SignalAbort(controller, Exception(ExceptionCode::AbortError, u8"7"));
       REQUIRE(controller.Signal().Aborted());
-      REQUIRE(std::any_cast<int>(controller.Signal().Reason()) == 7);
+      REQUIRE(controller.Signal().Reason()->Message() == u8"7");
       REQUIRE(aborts == 1);
     }
   }

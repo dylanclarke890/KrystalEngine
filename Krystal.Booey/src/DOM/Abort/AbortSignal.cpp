@@ -8,7 +8,7 @@
 
 namespace krys::boo
 {
-  Ref<AbortSignal> AbortSignal::Abort(Maybe<::krys::Any> reason) noexcept
+  Ref<AbortSignal> AbortSignal::Abort(Maybe<Exception> reason) noexcept
   {
     // 1. Let signal be a new AbortSignal object.
     auto signal = CreateRef<AbortSignal>();
@@ -49,9 +49,9 @@ namespace krys::boo
     return dom::AbortAlgorithms::CreateDependentAbortSignal(signals);
   }
 
-  krys::Any AbortSignal::ReasonOrAbortError(Maybe<krys::Any> reason) noexcept
+  Exception AbortSignal::ReasonOrAbortError(Maybe<Exception> reason) noexcept
   {
-    if (reason && reason->has_value())
+    if (reason)
     {
       return krys::move(*reason);
     }
