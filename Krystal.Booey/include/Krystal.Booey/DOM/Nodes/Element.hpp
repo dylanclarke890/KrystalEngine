@@ -413,12 +413,6 @@ namespace krys::boo
     /// @see https://dom.spec.whatwg.org/#dom-element-matches
     KRYS_NODISCARD ExceptionOr<bool> Matches(DOMStringView selectors) const noexcept;
 
-    /// @see https://dom.spec.whatwg.org/#dom-element-webkitmatchesselector
-    KRYS_NODISCARD ExceptionOr<bool> WebkitMatchesSelector(DOMStringView selectors) const noexcept
-    {
-      return Matches(selectors);
-    }
-
     /// @see https://dom.spec.whatwg.org/#dom-element-getelementsbytagname
     KRYS_NODISCARD Ref<dom::HTMLCollection> GetElementsByTagName(DOMStringAtom qualifiedName) noexcept;
 

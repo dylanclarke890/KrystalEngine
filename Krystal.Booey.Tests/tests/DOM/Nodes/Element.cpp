@@ -533,7 +533,7 @@ namespace krys::boo::dom::tests
 
     CHECK(p->Matches(u8"div > p").ReleaseValue());
     CHECK_FALSE(p->Matches(u8"section > p").ReleaseValue());
-    CHECK(p->WebkitMatchesSelector(u8"section p:only-child").ReleaseValue());
+    CHECK(p->Matches(u8"section p:only-child").ReleaseValue());
 
     for (auto invalid : {u8"", u8"a >", u8":unknown-pseudo"})
     {
