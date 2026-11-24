@@ -663,8 +663,7 @@ namespace krys::boo::html
 
     StepRange stepRange(CreateStepRange(AnyStepHandling::Default));
 
-    // FIXME: Not any changes after stepping, even if it is an invalid value, may be better.
-    // (e.g. Stepping-up for <input type="number" value="foo" step="any" /> => "foo")
+    // Without an allowed value step (step=any), there's nothing to step by.
     if (!stepRange.HasStep())
     {
       return;

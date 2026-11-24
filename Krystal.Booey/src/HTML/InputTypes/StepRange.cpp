@@ -42,7 +42,8 @@ namespace krys::boo::html
 
   Decimal StepRange::AcceptableError() const noexcept
   {
-    // FIXME: We should use DBL_MANT_DIG instead of FLT_MANT_DIG regarding to HTML5 specification.
+    // A value within a float's precision of a step matches it: the specification gives no tolerance, and
+    // Chrome uses this one.
     static const Decimal twoPowerOfFloatMantissaBits(Decimal::Positive, 0, uint64 {1} << FLT_MANT_DIG);
     return _stepDescription.StepValueShouldBe == StepValueShouldBeReal ? _step / twoPowerOfFloatMantissaBits
                                                                        : Decimal(0);

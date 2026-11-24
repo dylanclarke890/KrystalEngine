@@ -798,12 +798,10 @@ namespace krys::boo
 
     if (localName == u8"border")
     {
-      // FIXME: This attribute is a mess.
       _borderAttr = ParseBorderWidthAttribute(value);
     }
     else if (localName == u8"frame")
     {
-      // FIXME: This attribute is a mess.
       bool borderTop;
       bool borderRight;
       bool borderBottom;

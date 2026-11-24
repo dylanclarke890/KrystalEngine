@@ -519,8 +519,7 @@ namespace krys::boo
       return;
     }
 
-    // FIXME: Submitting forms with several fields that block implicit submission
-    // (Settings::allowMultiElementImplicitSubmission), for older apps.
+    // Without a submit button, only a form with a single field that blocks implicit submission submits.
     if (fromImplicitSubmissionTrigger && submissionTriggerCount == 1)
     {
       SubmitIfPossible(&event);

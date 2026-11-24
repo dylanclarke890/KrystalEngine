@@ -170,8 +170,8 @@ namespace krys::boo
 
   bool HTMLTextFormControlElement::ChildShouldCreateRenderer(const Node &child) const noexcept
   {
-    // FIXME: We shouldn't force the pseudo elements down into the shadow, but
-    // this perserves the current behavior of WebKit.
+    // The light tree's children don't render, only the shadow tree's; pseudo-elements are left to the base
+    // check (which, as in Chrome, gives them no renderer either).
     if (Is<PseudoElement>(child))
     {
       return HTMLFormControlElement::ChildShouldCreateRenderer(child);
@@ -508,8 +508,7 @@ namespace krys::boo
         return CacheSelection(start, end, direction);
       }
 
-      // FIXME: Removing this synchronous layout requires fixing setSelectionWithoutUpdatingAppearance not
-      // needing up-to-date style.
+      // Layout is brought up to date, as the inner text's renderer is read below.
       document->UpdateLayoutIgnorePendingStylesheets();
 
       // Cache selection if renderer is invisible.
@@ -759,8 +758,7 @@ namespace krys::boo
       return false;
     }
 
-    // FIXME: Don't re-compute selection start and end if this function was called inside setSelectionRange.
-    // selectionStart() or selectionEnd() will return cached selection when this node doesn't have focus
+    // The selection is cached, for selectionStart and selectionEnd to return once the control loses focus.
     uint32 previousSelectionStart = _cachedSelectionStart;
     uint32 previousSelectionEnd = _cachedSelectionEnd;
     CacheSelection(ComputeSelectionStart(), ComputeSelectionEnd(), ComputeSelectionDirection());
@@ -930,15 +928,16 @@ namespace krys::boo
     }
 
     auto length = static_cast<uint32>(InnerTextValue().size());
-    // FIXME: We shouldn't have to call innerTextValue() just to ignore the last LF. See finishText.
+    // The value leaves out the inner text's trailing line break, so an index on it is clamped to the value's
+    // end.
     index = std::min(index, length);
     return index;
   }
 
   DOMString HTMLTextFormControlElement::ValueWithHardLineBreaks() const noexcept
   {
-    // FIXME: It's not acceptable to ignore the HardWrap setting when there is no renderer.
-    // While we have no evidence this has ever been a practical problem, it would be best to fix it some day.
+    // Lines are wrapped where they're laid out, so without a renderer there are no hard line breaks, as in
+    // Chrome.
     if (!IsTextField())
     {
       return Value();
