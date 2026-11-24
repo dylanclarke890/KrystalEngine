@@ -786,87 +786,296 @@ namespace krys::boo::css
                                  IsCaseSensitiveAttributeMatch(selector, isHTML));
   }
 
+  namespace
+  {
+    /// @brief Records @p type on @p element's parent, if it's an element.
+    void AddParentStyleRelation(SelectorChecker::CheckingContext &checkingContext, const Element &element,
+                                style::Relation::Type type) noexcept
+    {
+      if (auto *parentElement = DynamicDowncast<Element>(element.ParentNode()))
+      {
+        AddStyleRelation(checkingContext, *parentElement, type);
+      }
+    }
+
+    /// @brief Records on the element's parent that its children's (or, for an element reached through a
+    /// descendant combinator, its descendants') styles depend on their position, counted from the start or
+    /// (if @p backward) the end.
+    void AddPositionalStyleRelation(SelectorChecker::CheckingContext &checkingContext,
+                                    const SelectorChecker::LocalContext &context, bool backward) noexcept
+    {
+      if (backward)
+      {
+        AddParentStyleRelation(checkingContext, *context.Element,
+                               context.IsSubjectOrAdjacentElement
+                                 ? style::Relation::ChildrenAffectedByBackwardPositionalRules
+                                 : style::Relation::DescendantsAffectedByBackwardPositionalRules);
+      }
+      else
+      {
+        AddParentStyleRelation(checkingContext, *context.Element,
+                               context.IsSubjectOrAdjacentElement
+                                 ? style::Relation::ChildrenAffectedByForwardPositionalRules
+                                 : style::Relation::DescendantsAffectedByForwardPositionalRules);
+      }
+    }
+
+    /// @brief Whether the parent is still being parsed, so that later siblings may yet arrive and anything
+    /// counted from the end can't match.
+    KRYS_NODISCARD bool ParentIsParsingChildren(const Element &element) noexcept
+    {
+      const auto *parentElement = DynamicDowncast<Element>(element.ParentNode());
+      return parentElement && !parentElement->IsFinishedParsingChildren();
+    }
+
+    // https://drafts.csswg.org/selectors/#the-empty-pseudo
+    KRYS_NODISCARD bool MatchesEmpty(SelectorChecker::CheckingContext &checkingContext,
+                                     const Element &element) noexcept
+    {
+      bool empty = true;
+      for (const auto *node = element.FirstChild(); node; node = node->NextSibling())
+      {
+        const auto *text = DynamicDowncast<Text>(*node);
+        if (Is<Element>(*node) || (text && !text->Data().empty()))
+        {
+          empty = false;
+          break;
+        }
+      }
+      AddStyleRelation(checkingContext, element, style::Relation::AffectedByEmpty, empty);
+      return empty;
+    }
+
+    // https://drafts.csswg.org/selectors/#the-first-child-pseudo
+    KRYS_NODISCARD bool MatchesFirstChild(SelectorChecker::CheckingContext &checkingContext,
+                                          const Element &element) noexcept
+    {
+      AddParentStyleRelation(checkingContext, element, style::Relation::ChildrenAffectedByFirstChildRules);
+      if (!IsFirstChildElement(element))
+      {
+        return false;
+      }
+      AddStyleRelation(checkingContext, element, style::Relation::FirstChild);
+      return true;
+    }
+
+    // https://drafts.csswg.org/selectors/#the-last-child-pseudo
+    KRYS_NODISCARD bool MatchesLastChild(SelectorChecker::CheckingContext &checkingContext,
+                                         const Element &element) noexcept
+    {
+      AddParentStyleRelation(checkingContext, element, style::Relation::ChildrenAffectedByLastChildRules);
+      if (ParentIsParsingChildren(element) || !IsLastChildElement(element))
+      {
+        return false;
+      }
+      AddStyleRelation(checkingContext, element, style::Relation::LastChild);
+      return true;
+    }
+
+    // https://drafts.csswg.org/selectors/#the-only-child-pseudo
+    KRYS_NODISCARD bool MatchesOnlyChild(SelectorChecker::CheckingContext &checkingContext,
+                                         const Element &element) noexcept
+    {
+      AddParentStyleRelation(checkingContext, element, style::Relation::ChildrenAffectedByFirstChildRules);
+      AddParentStyleRelation(checkingContext, element, style::Relation::ChildrenAffectedByLastChildRules);
+      const bool firstChild = IsFirstChildElement(element);
+      const bool onlyChild = firstChild && IsLastChildElement(element) && !ParentIsParsingChildren(element);
+      if (firstChild)
+      {
+        AddStyleRelation(checkingContext, element, style::Relation::FirstChild);
+      }
+      if (onlyChild)
+      {
+        AddStyleRelation(checkingContext, element, style::Relation::LastChild);
+      }
+      return onlyChild;
+    }
+
+    // https://drafts.csswg.org/selectors/#typed-child-index
+    KRYS_NODISCARD bool MatchesFirstOfType(SelectorChecker::CheckingContext &checkingContext,
+                                           const SelectorChecker::LocalContext &context) noexcept
+    {
+      AddPositionalStyleRelation(checkingContext, context, false);
+      return IsFirstOfType(*context.Element, context.Element->TagQualifiedName());
+    }
+
+    KRYS_NODISCARD bool MatchesLastOfType(SelectorChecker::CheckingContext &checkingContext,
+                                          const SelectorChecker::LocalContext &context) noexcept
+    {
+      AddPositionalStyleRelation(checkingContext, context, true);
+      return !ParentIsParsingChildren(*context.Element)
+             && IsLastOfType(*context.Element, context.Element->TagQualifiedName());
+    }
+
+    KRYS_NODISCARD bool MatchesOnlyOfType(SelectorChecker::CheckingContext &checkingContext,
+                                          const SelectorChecker::LocalContext &context) noexcept
+    {
+      // FIXME: This walks all the element's siblings each time it's checked, which is slow.
+      AddPositionalStyleRelation(checkingContext, context, false);
+      AddPositionalStyleRelation(checkingContext, context, true);
+      const auto &element = *context.Element;
+      return !ParentIsParsingChildren(element) && IsFirstOfType(element, element.TagQualifiedName())
+             && IsLastOfType(element, element.TagQualifiedName());
+    }
+
+    // https://drafts.csswg.org/selectors/#the-nth-of-type-pseudo
+    KRYS_NODISCARD bool MatchesNthOfType(SelectorChecker::CheckingContext &checkingContext,
+                                         const SelectorChecker::LocalContext &context,
+                                         const Selector &selector) noexcept
+    {
+      AddPositionalStyleRelation(checkingContext, context, false);
+      const auto &element = *context.Element;
+      return selector.MatchNth(1 + CountElementsOfTypeBefore(element, element.TagQualifiedName()));
+    }
+
+    // https://drafts.csswg.org/selectors/#the-nth-last-of-type-pseudo
+    KRYS_NODISCARD bool MatchesNthLastOfType(SelectorChecker::CheckingContext &checkingContext,
+                                             const SelectorChecker::LocalContext &context,
+                                             const Selector &selector) noexcept
+    {
+      AddPositionalStyleRelation(checkingContext, context, true);
+      const auto &element = *context.Element;
+      return !ParentIsParsingChildren(element)
+             && selector.MatchNth(1 + CountElementsOfTypeAfter(element, element.TagQualifiedName()));
+    }
+
+    // https://drafts.csswg.org/selectors-5/#headings
+    KRYS_NODISCARD bool MatchesHeading(const Element &element, const Selector &selector) noexcept
+    {
+      const auto *heading = DynamicDowncast<HTMLHeadingElement>(element);
+      if (!heading)
+      {
+        return false;
+      }
+      const auto *levels = selector.IntegerList();
+      return !levels || levels->empty()
+             || std::ranges::contains(*levels, static_cast<int32>(heading->ComputedHeadingLevel()));
+    }
+
+    // https://html.spec.whatwg.org/#selector-open
+    KRYS_NODISCARD bool MatchesOpen(const Element &element) noexcept
+    {
+      if (Is<HTMLDetailsElement>(element) || Is<HTMLDialogElement>(element))
+      {
+        return element.HasAttribute(u8"open");
+      }
+      if (const auto *select = DynamicDowncast<HTMLSelectElement>(element))
+      {
+        const auto *menuList = DynamicDowncast<RenderMenuList>(select->Renderer());
+        return (menuList && menuList->PopupIsVisible()) || select->IsPickerOpen();
+      }
+      if (const auto *input = DynamicDowncast<HTMLInputElement>(element))
+      {
+        return input->IsPresentingAttachedView();
+      }
+      return false;
+    }
+
+    /// @brief @p element's part names as the tree a rule comes from sees them: mapped through the
+    /// `exportparts` of each shadow root between the element and that tree.
+    KRYS_NODISCARD List<CSSOMStringAtom>
+      PartNamesInRuleScope(const SelectorChecker::CheckingContext &checkingContext,
+                           const Element &element) noexcept
+    {
+      auto names = PartNames(element);
+      if (checkingContext.StyleScopeOrdinal == style::ScopeOrdinal::Element)
+      {
+        return names;
+      }
+      const auto *ruleScopeHost = style::HostForScopeOrdinal(element, checkingContext.StyleScopeOrdinal);
+      List<CSSOMStringAtom> translated;
+      for (const auto &name : names)
+      {
+        List<CSSOMStringAtom> mapped {name};
+        for (const auto *shadowRoot = dom::TreeQueries::ContainingShadowRoot(element);
+             shadowRoot && shadowRoot->Host() != ruleScopeHost && !mapped.empty();
+             shadowRoot = dom::TreeQueries::ContainingShadowRoot(*shadowRoot->Host()))
+        {
+          List<CSSOMStringAtom> next;
+          const auto &partMappings = shadowRoot->GetPartMappings();
+          for (const auto &mappedName : mapped)
+          {
+            if (auto it = partMappings.find(mappedName); it != partMappings.end())
+            {
+              next.insert(next.end(), it->second.begin(), it->second.end());
+            }
+          }
+          mapped = krys::move(next);
+        }
+        translated.insert(translated.end(), mapped.begin(), mapped.end());
+      }
+      return translated;
+    }
+  }
+
   bool SelectorChecker::CheckOne(CheckingContext &checkingContext, LocalContext &context,
                                  MatchType &matchType) const noexcept
   {
-    const boo::Element &element = *context.Element;
-    const Selector &selector = *context.CurrentSelector;
+    const auto &element = *context.Element;
+    const auto &selector = *context.CurrentSelector;
 
     if (context.MustMatchHostPseudoClass)
     {
-      // :host doesn't combine with anything except pseudo elements.
-      bool isPseudoElement = selector.Match() == SelectorMatch::PseudoElement;
+      // A featureless host matches only :host, :scope (when it's the scoping root), a logical combination
+      // containing those, and pseudo-elements.
       // FIXME: :host combined with :not(), which depends on how logical combinations match a featureless
       // element (https://drafts.csswg.org/selectors/#featureless).
-      bool isNotPseudoClass =
+      const bool isNotPseudoClass =
         selector.Match() == SelectorMatch::PseudoClass && selector.PseudoClass() == SelectorPseudoClass::Not;
-
-      // We can early return when we know it's neither :host, :scope (which can match when the scoping root is
-      // the shadow host), a compound :is(:host) , a pseudo-element.
-      if (!selector.IsHostPseudoClass() && !isPseudoElement && !selector.IsScopePseudoClass()
+      if (!selector.IsHostPseudoClass() && !selector.MatchesPseudoElement() && !selector.IsScopePseudoClass()
           && (!selector.SubSelectors() || isNotPseudoClass))
       {
         return false;
       }
     }
 
-    if (selector.Match() == SelectorMatch::Type)
+    switch (selector.Match())
     {
-      return TagMatches(element, selector);
+      case SelectorMatch::Type:  return TagMatches(element, selector);
+      case SelectorMatch::Class: return element.HasClassName(selector.Value().View());
+      case SelectorMatch::Id:
+        krys_debug_assert(selector.Value() != null);
+        return element.IdForStyleResolution() == selector.Value().View();
+      case SelectorMatch::AttributeExists:
+      case SelectorMatch::AttributeEquals:
+      case SelectorMatch::AttributeDash:
+      case SelectorMatch::AttributeIncludes:
+      case SelectorMatch::AttributePrefix:
+      case SelectorMatch::AttributeSuffix:
+      case SelectorMatch::AttributeSubstring:
+        return element.HasAttributes()
+               && AnyAttributeMatches(
+                 element, selector, selector.Attribute(),
+                 IsCaseSensitiveAttributeMatch(selector, _documentIsHTML && Is<HTMLElement>(element)));
+      // Unparseable selectors match nothing, nor does an `&` that had no parent rule to resolve to.
+      case SelectorMatch::ForgivingUnknown:
+      case SelectorMatch::ForgivingUnknownNestContaining:
+      case SelectorMatch::NestingParent:                  return false;
+      case SelectorMatch::HasScope:
+        checkingContext.MatchedInsideScope = true;
+        return &element == checkingContext.HasScope || checkingContext.MatchesAllHasScopes;
+      case SelectorMatch::PseudoClass:   return CheckPseudoClass(checkingContext, context, matchType);
+      case SelectorMatch::PseudoElement: return CheckPseudoElement(checkingContext, context);
+      case SelectorMatch::None:          return true;
     }
+    return true;
+  }
 
-    if (selector.Match() == SelectorMatch::Class)
-    {
-      return element.HasClassName(selector.Value().View());
-    }
+  bool SelectorChecker::CheckPseudoClass(CheckingContext &checkingContext, LocalContext &context,
+                                         MatchType &matchType) const noexcept
+  {
+    const auto &element = *context.Element;
+    const auto &selector = *context.CurrentSelector;
 
-    if (selector.Match() == SelectorMatch::Id)
+    switch (selector.PseudoClass())
     {
-      krys_debug_assert(selector.Value() != null);
-      return element.IdForStyleResolution() == selector.Value().View();
-    }
+#pragma region Logical combinations
 
-    if (selector.IsAttributeSelector())
-    {
-      if (!element.HasAttributes())
+      // https://drafts.csswg.org/selectors/#negation
+      case SelectorPseudoClass::Not:
       {
-        return false;
-      }
-
-      auto &attr = selector.Attribute();
-      bool caseSensitive =
-        !selector.IsAttributeValueMatchingCaseInsensitive()
-        && !(_documentIsHTML && Is<HTMLElement>(element) && !selector.IsAttributeValueMatchingCaseSensitive()
-             && !HTMLDocument::IsCaseSensitiveAttribute(attr));
-
-      return AnyAttributeMatches(element, selector, attr, caseSensitive);
-    }
-
-    if (selector.Match() == SelectorMatch::ForgivingUnknown
-        || selector.Match() == SelectorMatch::ForgivingUnknownNestContaining)
-    {
-      return false;
-    }
-
-    if (selector.Match() == SelectorMatch::NestingParent)
-    {
-      return false;
-    }
-
-    if (selector.Match() == SelectorMatch::HasScope)
-    {
-      checkingContext.MatchedInsideScope = true;
-      return &element == checkingContext.HasScope || checkingContext.MatchesAllHasScopes;
-    }
-
-    if (selector.Match() == SelectorMatch::PseudoClass)
-    {
-      // Handle :not up front.
-      if (selector.PseudoClass() == SelectorPseudoClass::Not)
-      {
-        const SelectorList *selectorList = selector.SubSelectors();
-
-        for (auto &subselector : *selectorList)
+        const auto *selectorList = selector.SubSelectors();
+        for (const auto &subselector : *selectorList)
         {
           LocalContext subcontext(context);
           subcontext.IsNegation = !context.IsNegation;
@@ -875,7 +1084,6 @@ namespace krys::boo::css
           subcontext.CurrentSelector = &subselector;
           subcontext.FirstSelectorOfTheFragment = selectorList->FirstSelectorComponent();
           EnumSet<PseudoElementType> ignoredPseudoElements;
-
           if (MatchRecursively(checkingContext, subcontext, ignoredPseudoElements).Outcome
               == MatchOutcome::SelectorMatches)
           {
@@ -886,623 +1094,327 @@ namespace krys::boo::css
         return true;
       }
 
-      // Normal element pseudo class checking.
-      switch (selector.PseudoClass())
+      // https://drafts.csswg.org/selectors/#matches and #zero-matches
+      case SelectorPseudoClass::Is:
+      case SelectorPseudoClass::Where:
       {
-          // Pseudo classes:
-        case SelectorPseudoClass::Not: krys_debug_assert(false); break; // Already handled up above.
-        case SelectorPseudoClass::Empty:
+        krys_debug_assert(selector.SubSelectors());
+        bool matched = false;
+        auto localMatchType = MatchType::VirtualPseudoElementOnly;
+        for (const auto &subselector : *selector.SubSelectors())
         {
-          bool result = true;
-          for (auto *node = element.FirstChild(); node; node = node->NextSibling())
+          LocalContext subcontext(context);
+          subcontext.InFunctionalPseudoClass = true;
+          subcontext.CurrentSelector = &subselector;
+          subcontext.FirstSelectorOfTheFragment = &subselector;
+          subcontext.RequestedPseudoElement = null;
+          EnumSet<PseudoElementType> subCollectedPseudoElements;
+          auto result = MatchRecursively(checkingContext, subcontext, subCollectedPseudoElements);
+          context.MatchedHostPseudoClass |= subcontext.MatchedHostPseudoClass;
+          // An argument matching through a pseudo-element doesn't count: these can't match pseudo-elements.
+          if (subCollectedPseudoElements || result.Outcome != MatchOutcome::SelectorMatches)
           {
-            if (Is<Element>(*node))
-            {
-              result = false;
-              break;
-            }
-            if (auto *textNode = DynamicDowncast<Text>(*node))
-            {
-              if (!textNode->Data().empty())
-              {
-                result = false;
-                break;
-              }
-            }
+            continue;
           }
-          AddStyleRelation(checkingContext, *context.Element, style::Relation::AffectedByEmpty, result);
+          matched = true;
+          if (result.Type == MatchType::Element)
+          {
+            localMatchType = MatchType::Element;
+          }
+        }
+        if (matched)
+        {
+          matchType = localMatchType;
+        }
+        return matched;
+      }
 
-          return result;
-        }
-        case SelectorPseudoClass::FirstChild:
-        {
-          // first-child matches the first child that is an element
-          bool isFirstChild = IsFirstChildElement(element);
-          if (auto *parentElement = DynamicDowncast<Element>(element.ParentNode()))
-          {
-            AddStyleRelation(checkingContext, *parentElement,
-                             style::Relation::ChildrenAffectedByFirstChildRules);
-          }
-          if (!isFirstChild)
-          {
-            break;
-          }
-          AddStyleRelation(checkingContext, element, style::Relation::FirstChild);
-          return true;
-        }
-        case SelectorPseudoClass::FirstOfType:
-        {
-          // first-of-type matches the first element of its type
-          if (auto *parentElement = DynamicDowncast<Element>(element.ParentNode()))
-          {
-            auto relation = context.IsSubjectOrAdjacentElement
-                              ? style::Relation::ChildrenAffectedByForwardPositionalRules
-                              : style::Relation::DescendantsAffectedByForwardPositionalRules;
-            AddStyleRelation(checkingContext, *parentElement, relation);
-          }
-          return IsFirstOfType(element, element.TagQualifiedName());
-        }
-        case SelectorPseudoClass::LastChild:
-        {
-          // last-child matches the last child that is an element
-          bool isLastChild = IsLastChildElement(element);
-          if (auto *parentElement = DynamicDowncast<Element>(element.ParentNode()))
-          {
-            if (!parentElement->IsFinishedParsingChildren())
-            {
-              isLastChild = false;
-            }
-            AddStyleRelation(checkingContext, *parentElement,
-                             style::Relation::ChildrenAffectedByLastChildRules);
-          }
-          if (!isLastChild)
-          {
-            break;
-          }
-          AddStyleRelation(checkingContext, element, style::Relation::LastChild);
-          return true;
-        }
-        case SelectorPseudoClass::LastOfType:
-        {
-          // last-of-type matches the last element of its type
-          if (auto *parentElement = DynamicDowncast<Element>(element.ParentNode()))
-          {
-            auto relation = context.IsSubjectOrAdjacentElement
-                              ? style::Relation::ChildrenAffectedByBackwardPositionalRules
-                              : style::Relation::DescendantsAffectedByBackwardPositionalRules;
-            AddStyleRelation(checkingContext, *parentElement, relation);
-            if (!parentElement->IsFinishedParsingChildren())
-            {
-              return false;
-            }
-          }
-          return IsLastOfType(element, element.TagQualifiedName());
-        }
-        case SelectorPseudoClass::OnlyChild:
-        {
-          bool firstChild = IsFirstChildElement(element);
-          bool onlyChild = firstChild && IsLastChildElement(element);
-          if (auto *parentElement = DynamicDowncast<Element>(element.ParentNode()))
-          {
-            AddStyleRelation(checkingContext, *parentElement,
-                             style::Relation::ChildrenAffectedByFirstChildRules);
-            AddStyleRelation(checkingContext, *parentElement,
-                             style::Relation::ChildrenAffectedByLastChildRules);
-            if (!parentElement->IsFinishedParsingChildren())
-            {
-              onlyChild = false;
-            }
-          }
-          if (firstChild)
-          {
-            AddStyleRelation(checkingContext, element, style::Relation::FirstChild);
-          }
-          if (onlyChild)
-          {
-            AddStyleRelation(checkingContext, element, style::Relation::LastChild);
-          }
-          return onlyChild;
-        }
-        case SelectorPseudoClass::OnlyOfType:
-        {
-          // FIXME: This selector is very slow.
-          if (auto *parentElement = DynamicDowncast<Element>(element.ParentNode()))
-          {
-            auto forwardRelation = context.IsSubjectOrAdjacentElement
-                                     ? style::Relation::ChildrenAffectedByForwardPositionalRules
-                                     : style::Relation::DescendantsAffectedByForwardPositionalRules;
-            AddStyleRelation(checkingContext, *parentElement, forwardRelation);
-            auto backwardRelation = context.IsSubjectOrAdjacentElement
-                                      ? style::Relation::ChildrenAffectedByBackwardPositionalRules
-                                      : style::Relation::DescendantsAffectedByBackwardPositionalRules;
-            AddStyleRelation(checkingContext, *parentElement, backwardRelation);
+      // https://drafts.csswg.org/selectors/#relational
+      case SelectorPseudoClass::Has:
+        return std::ranges::any_of(*selector.SubSelectors(), [&](const Selector &hasSelector)
+                                   { return MatchHasPseudoClass(checkingContext, element, hasSelector); });
 
-            if (!parentElement->IsFinishedParsingChildren())
-            {
-              return false;
-            }
-          }
-          return IsFirstOfType(element, element.TagQualifiedName())
-                 && IsLastOfType(element, element.TagQualifiedName());
-        }
-        case SelectorPseudoClass::Is:
-        case SelectorPseudoClass::Where:
+#pragma endregion
+
+#pragma region Tree-structural
+
+      case SelectorPseudoClass::Root:
+        return &element == dom::TreeQueries::DocumentElement(element.NodeDocument());
+      case SelectorPseudoClass::Empty:       return MatchesEmpty(checkingContext, element);
+      case SelectorPseudoClass::FirstChild:  return MatchesFirstChild(checkingContext, element);
+      case SelectorPseudoClass::LastChild:   return MatchesLastChild(checkingContext, element);
+      case SelectorPseudoClass::OnlyChild:   return MatchesOnlyChild(checkingContext, element);
+      case SelectorPseudoClass::FirstOfType: return MatchesFirstOfType(checkingContext, context);
+      case SelectorPseudoClass::LastOfType:  return MatchesLastOfType(checkingContext, context);
+      case SelectorPseudoClass::OnlyOfType:  return MatchesOnlyOfType(checkingContext, context);
+      case SelectorPseudoClass::NthOfType:   return MatchesNthOfType(checkingContext, context, selector);
+      case SelectorPseudoClass::NthLastOfType:
+        return MatchesNthLastOfType(checkingContext, context, selector);
+
+      // https://drafts.csswg.org/selectors/#the-nth-child-pseudo
+      case SelectorPseudoClass::NthChild:
+      {
+        AddPositionalStyleRelation(checkingContext, context, false);
+        // `:nth-child(An+B of S)` counts only the siblings matching S, and the element must match it too.
+        const auto *selectorList = selector.SubSelectors();
+        if (selectorList && !MatchSelectorList(checkingContext, context, element, *selectorList))
         {
-          bool hasMatchedAnything = false;
-
-          MatchType localMatchType = MatchType::VirtualPseudoElementOnly;
-          krys_debug_assert(selector.SubSelectors());
-          for (auto &subselector : *selector.SubSelectors())
-          {
-            LocalContext subcontext(context);
-            subcontext.InFunctionalPseudoClass = true;
-            subcontext.PseudoElementEffective = context.PseudoElementEffective;
-            subcontext.CurrentSelector = &subselector;
-            subcontext.FirstSelectorOfTheFragment = &subselector;
-            subcontext.RequestedPseudoElement = null;
-            EnumSet<PseudoElementType> localCollectedPseudoElements;
-            MatchResult result = MatchRecursively(checkingContext, subcontext, localCollectedPseudoElements);
-            context.MatchedHostPseudoClass |= subcontext.MatchedHostPseudoClass;
-
-            // Pseudo elements are not valid inside :is()/:matches()
-            // They should also have a specificity of 0 (Selector::SimpleSelectorSpecificity)
-            if (localCollectedPseudoElements)
-            {
-              continue;
-            }
-
-            if (result.Outcome == MatchOutcome::SelectorMatches)
-            {
-              if (result.Type == MatchType::Element)
-              {
-                localMatchType = MatchType::Element;
-              }
-
-              hasMatchedAnything = true;
-            }
-          }
-          if (hasMatchedAnything)
-          {
-            matchType = localMatchType;
-          }
-          return hasMatchedAnything;
-        }
-        case SelectorPseudoClass::Has:
-        {
-          for (auto &hasSelector : *selector.SubSelectors())
-          {
-            if (MatchHasPseudoClass(checkingContext, element, hasSelector))
-            {
-              return true;
-            }
-          }
           return false;
         }
-        case SelectorPseudoClass::PlaceholderShown: return IsPlaceholderShown(element);
-        case SelectorPseudoClass::NthChild:
+        int32 position = 1;
+        if (selectorList)
         {
-          if (auto *parentElement = DynamicDowncast<Element>(element.ParentNode()))
+          for (const auto *sibling = dom::TreeQueries::PreviousElementSibling(element); sibling;
+               sibling = dom::TreeQueries::PreviousElementSibling(*sibling))
           {
-            auto relation = context.IsSubjectOrAdjacentElement
-                              ? style::Relation::ChildrenAffectedByForwardPositionalRules
-                              : style::Relation::DescendantsAffectedByForwardPositionalRules;
-            AddStyleRelation(checkingContext, *parentElement, relation);
+            position += MatchSelectorList(checkingContext, context, *sibling, *selectorList);
           }
+        }
+        else
+        {
+          position += CountElementsBefore(element);
+          AddStyleRelation(checkingContext, element, style::Relation::NthChildIndex,
+                           static_cast<uint32>(position));
+        }
+        return selector.MatchNth(position);
+      }
 
-          if (const SelectorList *selectorList = selector.SubSelectors())
+      // https://drafts.csswg.org/selectors/#the-nth-last-child-pseudo
+      case SelectorPseudoClass::NthLastChild:
+      {
+        const auto *selectorList = selector.SubSelectors();
+        if (const auto *parentElement = DynamicDowncast<Element>(element.ParentNode()))
+        {
+          if (selectorList)
           {
             if (!MatchSelectorList(checkingContext, context, element, *selectorList))
             {
               return false;
             }
-          }
-
-          int32 count = 1;
-          if (const SelectorList *selectorList = selector.SubSelectors())
-          {
-            for (auto *sibling = dom::TreeQueries::PreviousElementSibling(element); sibling;
-                 sibling = dom::TreeQueries::PreviousElementSibling(*sibling))
-            {
-              if (MatchSelectorList(checkingContext, context, *sibling, *selectorList))
-              {
-                ++count;
-              }
-            }
+            AddStyleRelation(checkingContext, *parentElement,
+                             style::Relation::ChildrenAffectedByBackwardPositionalRules);
           }
           else
           {
-            count += CountElementsBefore(element);
-            AddStyleRelation(checkingContext, element, style::Relation::NthChildIndex,
-                             static_cast<uint32>(count));
+            AddPositionalStyleRelation(checkingContext, context, true);
           }
-
-          if (selector.MatchNth(count))
-          {
-            return true;
-          }
-          break;
-        }
-        case SelectorPseudoClass::NthOfType:
-        {
-          if (auto *parentElement = DynamicDowncast<Element>(element.ParentNode()))
-          {
-            auto relation = context.IsSubjectOrAdjacentElement
-                              ? style::Relation::ChildrenAffectedByForwardPositionalRules
-                              : style::Relation::DescendantsAffectedByForwardPositionalRules;
-            AddStyleRelation(checkingContext, *parentElement, relation);
-          }
-
-          int32 count = 1 + CountElementsOfTypeBefore(element, element.TagQualifiedName());
-          if (selector.MatchNth(count))
-          {
-            return true;
-          }
-          break;
-        }
-        case SelectorPseudoClass::NthLastChild:
-        {
-          if (auto *parentElement = DynamicDowncast<Element>(element.ParentNode()))
-          {
-            if (const SelectorList *selectorList = selector.SubSelectors())
-            {
-              if (!MatchSelectorList(checkingContext, context, element, *selectorList))
-              {
-                return false;
-              }
-
-              AddStyleRelation(checkingContext, *parentElement,
-                               style::Relation::ChildrenAffectedByBackwardPositionalRules);
-            }
-            else
-            {
-              auto relation = context.IsSubjectOrAdjacentElement
-                                ? style::Relation::ChildrenAffectedByBackwardPositionalRules
-                                : style::Relation::DescendantsAffectedByBackwardPositionalRules;
-              AddStyleRelation(checkingContext, *parentElement, relation);
-            }
-            if (!parentElement->IsFinishedParsingChildren())
-            {
-              return false;
-            }
-          }
-
-          int32 count = 1;
-          if (const SelectorList *selectorList = selector.SubSelectors())
-          {
-            for (auto *sibling = dom::TreeQueries::NextElementSibling(element); sibling;
-                 sibling = dom::TreeQueries::NextElementSibling(*sibling))
-            {
-              if (MatchSelectorList(checkingContext, context, *sibling, *selectorList))
-              {
-                ++count;
-              }
-            }
-          }
-          else
-          {
-            count += CountElementsAfter(element);
-          }
-
-          return selector.MatchNth(count);
-        }
-        case SelectorPseudoClass::NthLastOfType:
-        {
-          if (auto *parentElement = DynamicDowncast<Element>(element.ParentNode()))
-          {
-            auto relation = context.IsSubjectOrAdjacentElement
-                              ? style::Relation::ChildrenAffectedByBackwardPositionalRules
-                              : style::Relation::DescendantsAffectedByBackwardPositionalRules;
-            AddStyleRelation(checkingContext, *parentElement, relation);
-
-            if (!parentElement->IsFinishedParsingChildren())
-            {
-              return false;
-            }
-          }
-          int32 count = 1 + CountElementsOfTypeAfter(element, element.TagQualifiedName());
-          return selector.MatchNth(count);
-        }
-        case SelectorPseudoClass::Target:
-          if (&element == element.NodeDocument().CSSTarget())
-          {
-            return true;
-          }
-          break;
-        case SelectorPseudoClass::Autofill:
-          // There's no autofill (see OVERVIEW.md), so it never matches.
-          return false;
-        case SelectorPseudoClass::AnyLink:
-        case SelectorPseudoClass::Link:
-          // There's no history, so every link is unvisited.
-          return IsLink(element);
-        case SelectorPseudoClass::Visited:      return false;
-        case SelectorPseudoClass::Focus:        return MatchesFocusPseudoClass(element);
-        case SelectorPseudoClass::FocusVisible: return MatchesFocusVisiblePseudoClass(element);
-        case SelectorPseudoClass::FocusWithin:  return MatchesFocusWithinPseudoClass(element);
-        case SelectorPseudoClass::Hover:
-          if (_strictParsing || IsLink(element) || CanMatchHoverOrActiveInQuirksMode(context))
-          {
-            if (element.Hovered())
-            {
-              return true;
-            }
-          }
-          break;
-        case SelectorPseudoClass::Active:
-          if (_strictParsing || IsLink(element) || CanMatchHoverOrActiveInQuirksMode(context))
-          {
-            if (element.Active())
-            {
-              return true;
-            }
-          }
-          break;
-        case SelectorPseudoClass::Enabled:       return MatchesEnabledPseudoClass(element);
-        case SelectorPseudoClass::Default:       return MatchesDefaultPseudoClass(element);
-        case SelectorPseudoClass::Disabled:      return MatchesDisabledPseudoClass(element);
-        case SelectorPseudoClass::ReadOnly:      return MatchesReadOnlyPseudoClass(element);
-        case SelectorPseudoClass::ReadWrite:     return MatchesReadWritePseudoClass(element);
-        case SelectorPseudoClass::Optional:      return IsOptionalFormControl(element);
-        case SelectorPseudoClass::Required:      return IsRequiredFormControl(element);
-        case SelectorPseudoClass::Valid:         return element.MatchesValidPseudoClass();
-        case SelectorPseudoClass::Invalid:       return element.MatchesInvalidPseudoClass();
-        case SelectorPseudoClass::InRange:       return element.IsInRange();
-        case SelectorPseudoClass::OutOfRange:    return element.IsOutOfRange();
-        case SelectorPseudoClass::UserValid:     return element.MatchesUserValidPseudoClass();
-        case SelectorPseudoClass::UserInvalid:   return element.MatchesUserInvalidPseudoClass();
-        case SelectorPseudoClass::Checked:       return IsChecked(element);
-        case SelectorPseudoClass::Indeterminate: return MatchesIndeterminatePseudoClass(element);
-        case SelectorPseudoClass::Root:
-          if (&element == dom::TreeQueries::DocumentElement(element.NodeDocument()))
-          {
-            return true;
-          }
-          break;
-        case SelectorPseudoClass::Lang:
-          krys_debug_assert(selector.LangList() && selector.LangList()->size());
-          return MatchesLangPseudoClass(element, *selector.LangList());
-        // NOLINTBEGIN(bugprone-branch-clone): each group has its own FIXME.
-        case SelectorPseudoClass::Fullscreen:
-        case SelectorPseudoClass::PictureInPicture:
-          // FIXME: Fullscreen and picture-in-picture.
-          return false;
-        case SelectorPseudoClass::Future:
-        case SelectorPseudoClass::Past:
-          // FIXME: WebVTT cues.
-          return false;
-        case SelectorPseudoClass::Playing:
-        case SelectorPseudoClass::Paused:
-        case SelectorPseudoClass::Seeking:
-        case SelectorPseudoClass::Buffering:
-        case SelectorPseudoClass::Stalled:
-        case SelectorPseudoClass::Muted:
-        case SelectorPseudoClass::VolumeLocked:
-          // FIXME: Media element playback state.
-          return false;
-          // NOLINTEND(bugprone-branch-clone)
-
-        case SelectorPseudoClass::Scope:
-        {
-          // During style invalidation, we don't collect the @scope rules.
-          if (checkingContext.ResolvingMode == Mode::StyleInvalidation)
-          {
-            return !context.IsNegation;
-          }
-
-          // A virtual scoping root (a document fragment or shadow root) matches no element; the child and
-          // descendant combinators match `:scope` against it (MatchesVirtualScopingRootAsParent).
-          const Node *contextualReferenceNode = !checkingContext.Scope
-                                                  ? dom::TreeQueries::DocumentElement(element.NodeDocument())
-                                                  : static_cast<const Node *>(checkingContext.Scope.get());
-          auto match = &element == contextualReferenceNode;
-          if (!match)
+          if (!parentElement->IsFinishedParsingChildren())
           {
             return false;
           }
-
-          if (dom::TreeQueries::GetShadowRoot(element))
-          {
-            context.MatchedHostPseudoClass = true;
-          }
-
-          return true;
         }
-        case SelectorPseudoClass::State: return element.HasCustomState(selector.Argument());
-        case SelectorPseudoClass::Host:
+        int32 position = 1;
+        if (selectorList)
         {
-          if (!context.MustMatchHostPseudoClass)
+          for (const auto *sibling = dom::TreeQueries::NextElementSibling(element); sibling;
+               sibling = dom::TreeQueries::NextElementSibling(*sibling))
           {
-            return false;
+            position += MatchSelectorList(checkingContext, context, *sibling, *selectorList);
           }
-          if (!MatchHostPseudoClass(selector, element, checkingContext))
-          {
-            return false;
-          }
-          context.MatchedHostPseudoClass = true;
-          return true;
         }
-        case SelectorPseudoClass::Defined: return IsDefinedElement(element);
-
-        case SelectorPseudoClass::Dir:     return MatchesDirPseudoClass(element, selector.Argument());
-
-        case SelectorPseudoClass::Modal:
+        else
         {
-          // FIXME: Fullscreen elements, once there are any.
-          auto *dialog = DynamicDowncast<HTMLDialogElement>(element);
-          return dialog && dialog->IsModal();
+          position += CountElementsAfter(element);
         }
-
-        case SelectorPseudoClass::PopoverOpen: return element.IsPopoverShowing();
-
-        // https://drafts.csswg.org/selectors-5/#headings
-        case SelectorPseudoClass::Heading:
-        {
-          auto *heading = DynamicDowncast<HTMLHeadingElement>(element);
-          if (!heading)
-          {
-            return false;
-          }
-          const auto *levels = selector.IntegerList();
-          if (!levels || levels->empty())
-          {
-            return true;
-          }
-          return std::ranges::contains(*levels, static_cast<int32>(heading->ComputedHeadingLevel()));
-        }
-
-        // https://html.spec.whatwg.org/#selector-open
-        case SelectorPseudoClass::Open:
-        {
-          if (Is<HTMLDetailsElement>(element) || Is<HTMLDialogElement>(element))
-          {
-            return element.HasAttribute(u8"open");
-          }
-          if (auto *select = DynamicDowncast<HTMLSelectElement>(element))
-          {
-            auto *menuList = DynamicDowncast<RenderMenuList>(select->Renderer());
-            return (menuList && menuList->PopupIsVisible()) || select->IsPickerOpen();
-          }
-          if (auto *input = DynamicDowncast<HTMLInputElement>(element))
-          {
-            return input->IsPresentingAttachedView();
-          }
-          return false;
-        }
-
-        case SelectorPseudoClass::InternalSelectBaseContents:
-        {
-          auto *select = DynamicDowncast<HTMLSelectElement>(element);
-          return select && select->ContentsUseBaseAppearance();
-        }
-
-        case SelectorPseudoClass::InternalHtmlDocument: return Is<HTMLDocument>(element.NodeDocument());
+        return selector.MatchNth(position);
       }
-      return false;
-    }
 
-    if (selector.Match() == SelectorMatch::PseudoElement)
-    {
-      auto &requestedPseudoElement = checkingContext.RequestedPseudoElement();
-      switch (selector.PseudoElement())
+#pragma endregion
+
+#pragma region Location and user action
+
+      // There's no history, so every link is unvisited.
+      case SelectorPseudoClass::AnyLink:
+      case SelectorPseudoClass::Link:         return IsLink(element);
+      case SelectorPseudoClass::Visited:      return false;
+      case SelectorPseudoClass::Target:       return &element == element.NodeDocument().CSSTarget();
+      case SelectorPseudoClass::Focus:        return MatchesFocusPseudoClass(element);
+      case SelectorPseudoClass::FocusVisible: return MatchesFocusVisiblePseudoClass(element);
+      case SelectorPseudoClass::FocusWithin:  return MatchesFocusWithinPseudoClass(element);
+      case SelectorPseudoClass::Hover:
+        return (_strictParsing || IsLink(element) || CanMatchHoverOrActiveInQuirksMode(context))
+               && element.Hovered();
+      case SelectorPseudoClass::Active:
+        return (_strictParsing || IsLink(element) || CanMatchHoverOrActiveInQuirksMode(context))
+               && element.Active();
+
+#pragma endregion
+
+#pragma region Input
+
+      // There's no autofill (see OVERVIEW.md), so it never matches.
+      case SelectorPseudoClass::Autofill:         return false;
+      case SelectorPseudoClass::Enabled:          return MatchesEnabledPseudoClass(element);
+      case SelectorPseudoClass::Disabled:         return MatchesDisabledPseudoClass(element);
+      case SelectorPseudoClass::ReadOnly:         return MatchesReadOnlyPseudoClass(element);
+      case SelectorPseudoClass::ReadWrite:        return MatchesReadWritePseudoClass(element);
+      case SelectorPseudoClass::PlaceholderShown: return IsPlaceholderShown(element);
+      case SelectorPseudoClass::Default:          return MatchesDefaultPseudoClass(element);
+      case SelectorPseudoClass::Checked:          return IsChecked(element);
+      case SelectorPseudoClass::Indeterminate:    return MatchesIndeterminatePseudoClass(element);
+      case SelectorPseudoClass::Valid:            return element.MatchesValidPseudoClass();
+      case SelectorPseudoClass::Invalid:          return element.MatchesInvalidPseudoClass();
+      case SelectorPseudoClass::InRange:          return element.IsInRange();
+      case SelectorPseudoClass::OutOfRange:       return element.IsOutOfRange();
+      case SelectorPseudoClass::Required:         return IsRequiredFormControl(element);
+      case SelectorPseudoClass::Optional:         return IsOptionalFormControl(element);
+      case SelectorPseudoClass::UserValid:        return element.MatchesUserValidPseudoClass();
+      case SelectorPseudoClass::UserInvalid:      return element.MatchesUserInvalidPseudoClass();
+
+#pragma endregion
+
+#pragma region Linguistic
+
+      case SelectorPseudoClass::Dir: return MatchesDirPseudoClass(element, selector.Argument());
+      case SelectorPseudoClass::Lang:
+        krys_debug_assert(selector.LangList() && !selector.LangList()->empty());
+        return MatchesLangPseudoClass(element, *selector.LangList());
+
+#pragma endregion
+
+#pragma region Element state
+
+      case SelectorPseudoClass::Defined:     return IsDefinedElement(element);
+      case SelectorPseudoClass::State:       return element.HasCustomState(selector.Argument());
+      case SelectorPseudoClass::PopoverOpen: return element.IsPopoverShowing();
+      case SelectorPseudoClass::Open:        return MatchesOpen(element);
+      case SelectorPseudoClass::Heading:     return MatchesHeading(element, selector);
+      case SelectorPseudoClass::Modal:
       {
-        case SelectorPseudoElement::Cue:
-        {
-          LocalContext subcontext(context);
+        // FIXME: Fullscreen elements, once there are any.
+        const auto *dialog = DynamicDowncast<HTMLDialogElement>(element);
+        return dialog && dialog->IsModal();
+      }
+      // NOLINTBEGIN(bugprone-branch-clone): each group has its own FIXME.
+      case SelectorPseudoClass::Fullscreen:
+      case SelectorPseudoClass::PictureInPicture:
+        // FIXME: Fullscreen and picture-in-picture.
+        return false;
+      case SelectorPseudoClass::Future:
+      case SelectorPseudoClass::Past:
+        // FIXME: WebVTT cues.
+        return false;
+      case SelectorPseudoClass::Playing:
+      case SelectorPseudoClass::Paused:
+      case SelectorPseudoClass::Seeking:
+      case SelectorPseudoClass::Buffering:
+      case SelectorPseudoClass::Stalled:
+      case SelectorPseudoClass::Muted:
+      case SelectorPseudoClass::VolumeLocked:
+        // FIXME: Media element playback state.
+        return false;
+        // NOLINTEND(bugprone-branch-clone)
 
-          for (auto &subselector : *context.CurrentSelector->SubSelectors())
-          {
-            subcontext.CurrentSelector = &subselector;
-            subcontext.FirstSelectorOfTheFragment = &subselector;
-            subcontext.InFunctionalPseudoClass = true;
-            subcontext.PseudoElementEffective = false;
-            EnumSet<PseudoElementType> ignoredPseudoElements;
-            if (MatchRecursively(checkingContext, subcontext, ignoredPseudoElements).Outcome
-                == MatchOutcome::SelectorMatches)
-            {
-              return true;
-            }
-          }
+#pragma endregion
+
+#pragma region Scoping
+
+      // https://drafts.csswg.org/selectors/#the-scope-pseudo
+      case SelectorPseudoClass::Scope:
+      {
+        // Invalidation doesn't track @scope rules, so :scope is assumed to match (or, negated, not to).
+        if (checkingContext.ResolvingMode == Mode::StyleInvalidation)
+        {
+          return !context.IsNegation;
+        }
+        // A virtual scoping root (a document fragment or shadow root) matches no element; the child and
+        // descendant combinators match `:scope` against it (MatchesVirtualScopingRootAsParent).
+        const Node *scopingRoot = checkingContext.Scope
+                                    ? static_cast<const Node *>(checkingContext.Scope.get())
+                                    : dom::TreeQueries::DocumentElement(element.NodeDocument());
+        if (&element != scopingRoot)
+        {
           return false;
         }
-        case SelectorPseudoElement::Slotted:
+        // A shadow host that is the scoping root is matched as if by :host.
+        if (dom::TreeQueries::GetShadowRoot(element))
         {
-          if (!dom::SlotAlgorithms::GetAssignedSlot(*context.Element))
-          {
-            return false;
-          }
-          // ::slotted matches after flattening so it can't match an active <slot>.
-          if (Is<HTMLSlotElement>(*context.Element)
-              && dom::TreeQueries::ContainingShadowRoot(*context.Element))
-          {
-            return false;
-          }
-          auto *subselector = context.CurrentSelector->SubSelectors()->FirstSelectorComponent();
-          LocalContext subcontext(context);
-          subcontext.CurrentSelector = subselector;
-          subcontext.FirstSelectorOfTheFragment = subselector;
-          subcontext.PseudoElementEffective = false;
-          subcontext.InFunctionalPseudoClass = true;
-          EnumSet<PseudoElementType> ignoredPseudoElements;
-          return MatchRecursively(checkingContext, subcontext, ignoredPseudoElements).Outcome
-                 == MatchOutcome::SelectorMatches;
+          context.MatchedHostPseudoClass = true;
         }
-        case SelectorPseudoElement::Part:
+        return true;
+      }
+
+      // https://drafts.csswg.org/css-scoping-1/#host-selector
+      case SelectorPseudoClass::Host:
+        if (!context.MustMatchHostPseudoClass || !MatchHostPseudoClass(selector, element, checkingContext))
         {
-          auto appendTranslatedPartNameToRuleScope =
-            [&](List<CSSOMStringAtom> &translatedPartNames, const CSSOMStringAtom &partName)
-          {
-            if (checkingContext.StyleScopeOrdinal == style::ScopeOrdinal::Element)
-            {
-              translatedPartNames.push_back(partName);
-              return;
-            }
+          return false;
+        }
+        context.MatchedHostPseudoClass = true;
+        return true;
 
-            auto *ruleScopeHost =
-              style::HostForScopeOrdinal(*context.Element, checkingContext.StyleScopeOrdinal);
+#pragma endregion
 
-            List<CSSOMStringAtom> mappedNames {partName};
-            for (auto *shadowRoot = dom::TreeQueries::ContainingShadowRoot(element); shadowRoot;
-                 shadowRoot = dom::TreeQueries::ContainingShadowRoot(*shadowRoot->Host()))
-            {
-              // Apply mappings up to the scope the rules are coming from.
-              if (shadowRoot->Host() == ruleScopeHost)
-              {
-                break;
-              }
+#pragma region Internal
 
-              List<CSSOMStringAtom> newMappedNames;
-              const auto &partMappings = shadowRoot->GetPartMappings();
-              for (auto &name : mappedNames)
-              {
-                if (auto it = partMappings.find(name); it != partMappings.end())
-                {
-                  newMappedNames.insert(newMappedNames.end(), it->second.begin(), it->second.end());
-                }
-              }
-              mappedNames = krys::move(newMappedNames);
+      case SelectorPseudoClass::InternalSelectBaseContents:
+      {
+        const auto *select = DynamicDowncast<HTMLSelectElement>(element);
+        return select && select->ContentsUseBaseAppearance();
+      }
+      case SelectorPseudoClass::InternalHtmlDocument: return Is<HTMLDocument>(element.NodeDocument());
 
-              if (mappedNames.empty())
-              {
-                break;
-              }
-            }
-            translatedPartNames.insert(translatedPartNames.end(), mappedNames.begin(), mappedNames.end());
-          };
+#pragma endregion
+    }
+    return false;
+  }
 
-          List<CSSOMStringAtom> translatedPartNames;
-          for (auto &partName : PartNames(element))
-          {
-            appendTranslatedPartNameToRuleScope(translatedPartNames, partName);
-          }
+  bool SelectorChecker::CheckPseudoElement(CheckingContext &checkingContext,
+                                           LocalContext &context) const noexcept
+  {
+    const auto &element = *context.Element;
+    const auto &selector = *context.CurrentSelector;
 
-          krys_debug_assert(selector.ArgumentList());
+    // Matches @p subselector against the element, as a functional pseudo-element's argument.
+    const auto argumentMatches = [&](const Selector &subselector)
+    {
+      LocalContext subcontext(context);
+      subcontext.CurrentSelector = &subselector;
+      subcontext.FirstSelectorOfTheFragment = &subselector;
+      subcontext.InFunctionalPseudoClass = true;
+      subcontext.PseudoElementEffective = false;
+      EnumSet<PseudoElementType> ignoredPseudoElements;
+      return MatchRecursively(checkingContext, subcontext, ignoredPseudoElements).Outcome
+             == MatchOutcome::SelectorMatches;
+    };
 
-          for (auto &part : *selector.ArgumentList())
-          {
-            if (std::ranges::find(translatedPartNames, part) == translatedPartNames.end())
-            {
-              return false;
-            }
-          }
+    switch (selector.PseudoElement())
+    {
+      case SelectorPseudoElement::Cue: return std::ranges::any_of(*selector.SubSelectors(), argumentMatches);
+
+      // https://drafts.csswg.org/css-scoping-1/#slotted-pseudo
+      case SelectorPseudoElement::Slotted:
+        // It matches the flattened tree, where a slot in a shadow tree has been replaced by what's in it.
+        if (!dom::SlotAlgorithms::GetAssignedSlot(element)
+            || (Is<HTMLSlotElement>(element) && dom::TreeQueries::ContainingShadowRoot(element)))
+        {
+          return false;
+        }
+        return argumentMatches(*selector.SubSelectors()->FirstSelectorComponent());
+
+      // https://drafts.csswg.org/css-shadow-parts-1/#part
+      case SelectorPseudoElement::Part:
+      {
+        krys_debug_assert(selector.ArgumentList());
+        const auto partNames = PartNamesInRuleScope(checkingContext, element);
+        return std::ranges::all_of(*selector.ArgumentList(), [&](const CSSOMStringAtom &part)
+                                   { return std::ranges::contains(partNames, part); });
+      }
+
+      case SelectorPseudoElement::Highlight:
+      {
+        // Without a request, it matches so the element is marked as having the pseudo-element.
+        const auto &requestedPseudoElement = checkingContext.RequestedPseudoElement();
+        if (!requestedPseudoElement)
+        {
           return true;
         }
-
-        case SelectorPseudoElement::Highlight:
-          // Always matches when not specifically requested so it gets added to the collectedPseudoElements.
-          if (!requestedPseudoElement)
-          {
-            return true;
-          }
-          if (requestedPseudoElement->Type != PseudoElementType::Highlight || !selector.ArgumentList())
-          {
-            return false;
-          }
-          return (*selector.ArgumentList())[0] == requestedPseudoElement->NameArgument;
-
-        default: return true;
+        return requestedPseudoElement->Type == PseudoElementType::Highlight && selector.ArgumentList()
+               && (*selector.ArgumentList())[0] == requestedPseudoElement->NameArgument;
       }
+
+      default: return true;
     }
-    return true;
   }
 
   bool SelectorChecker::MatchSelectorList(CheckingContext &checkingContext, const LocalContext &context,

@@ -187,6 +187,14 @@ namespace krys::boo::css
     KRYS_NODISCARD bool CheckOne(CheckingContext &checkingContext, LocalContext &context,
                                  MatchType &matchType) const noexcept;
 
+    /// @brief Whether @p context's pseudo-class matches its element.
+    KRYS_NODISCARD bool CheckPseudoClass(CheckingContext &checkingContext, LocalContext &context,
+                                         MatchType &matchType) const noexcept;
+
+    /// @brief Whether @p context's pseudo-element, or its arguments, match its element.
+    KRYS_NODISCARD bool CheckPseudoElement(CheckingContext &checkingContext,
+                                           LocalContext &context) const noexcept;
+
     /// @brief Whether @p element matches any of @p selectorList, a functional pseudo-class's arguments.
     KRYS_NODISCARD bool MatchSelectorList(CheckingContext &checkingContext, const LocalContext &context,
                                           const Element &element,
