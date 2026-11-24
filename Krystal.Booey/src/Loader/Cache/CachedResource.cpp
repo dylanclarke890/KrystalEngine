@@ -237,7 +237,7 @@ namespace krys::boo
   {
     StopDecodedDataDeletionTimer();
 
-    // FIXME: Make calls to notifyFinished async
+    // A client added once the load is over is told so at once.
     if (!IsLoading() && !StillNeedsLoad())
     {
       client.NotifyFinished(*this);

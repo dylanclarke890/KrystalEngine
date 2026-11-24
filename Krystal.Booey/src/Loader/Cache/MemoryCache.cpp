@@ -148,7 +148,7 @@ namespace krys::boo
     for (auto *resource : List<CachedResource *>(_lruList))
     {
       CachedResourceHandle<CachedResource> current(resource);
-      if (!current->HasClients() || !current->IsLoaded() || !current->DecodedSize())
+      if (!current->HasClients() || current->IsLoading() || !current->DecodedSize())
       {
         continue;
       }
@@ -214,7 +214,7 @@ namespace krys::boo
         continue;
       }
 
-      if (!resource->HasClients() && resource->IsLoaded())
+      if (!resource->HasClients() && !resource->IsLoading())
       {
         resource->DestroyDecodedData();
 

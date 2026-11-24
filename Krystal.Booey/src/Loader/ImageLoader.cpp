@@ -274,11 +274,8 @@ namespace krys::boo
         _hasPendingLoadEvent = false;
       }
 
-      // Cancel error events that belong to the previous load, which is now cancelled by changing the src
-      // attribute. If newImage is null and _hasPendingErrorEvent is true, we know the error event has been
-      // just posted by this load and we should not cancel the event.
-      // FIXME: If both previous load and this one got blocked with an error, we can receive one error event
-      // instead of two.
+      // The previous load's pending error is canceled by a new image. Without one, this load failed too, and
+      // the one pending error stands for both: only the last of several updates fires.
       if (_hasPendingErrorEvent && newImage)
       {
         LoadEventSender().CancelEvent(*this, ErrorEventName());

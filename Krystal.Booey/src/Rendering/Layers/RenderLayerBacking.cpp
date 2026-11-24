@@ -3394,7 +3394,7 @@ namespace krys::boo
     }
 
     // We have to wait until the image is fully loaded before setting it on the layer.
-    if (!cachedImage->IsLoaded())
+    if (cachedImage->IsLoading())
     {
       return;
     }

@@ -208,12 +208,6 @@ namespace krys::boo
 
     KRYS_NODISCARD uint32 OverheadSize() const noexcept;
 
-    // FIXME. Method name is inaccurate. Loading might not have started yet.
-    KRYS_NODISCARD bool IsLoaded() const noexcept
-    {
-      return !_loading;
-    }
-
     KRYS_NODISCARD bool IsLoading() const noexcept
     {
       return _loading;
