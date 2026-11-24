@@ -59,13 +59,21 @@ namespace krys::boo
 
   void BlendingKeyframes::Clear() noexcept
   {
+    // Everything but the name: the analysis goes with the keyframes it came from.
     _keyframes.clear();
     _properties.clear();
+    _explicitToProperties.clear();
+    _explicitFromProperties.clear();
     _propertiesSetToInherit.clear();
     _propertiesSetToCurrentColor.clear();
     _usesRelativeFontWeight = false;
     _containsCSSVariableReferences = false;
     _usesAnchorFunctions = false;
+    _hasWidthDependentTransform = false;
+    _hasHeightDependentTransform = false;
+    _hasDiscreteTransformInterval = false;
+    _hasExplicitlyInheritedKeyframeProperty = false;
+    _hasKeyframeNotUsingRangeOffset = false;
   }
 
   const StringAtom &BlendingKeyframes::KeyframesName() const noexcept
