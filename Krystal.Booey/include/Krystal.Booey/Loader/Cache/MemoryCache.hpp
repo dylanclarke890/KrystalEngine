@@ -84,10 +84,6 @@ namespace krys::boo
 
     KRYS_NODISCARD static net::Url RemoveFragmentIdentifierIfNeeded(const net::Url &) noexcept;
 
-    void ForEachResource(KRYS_NOESCAPE const Func<void(CachedResource &)> &) noexcept;
-
-    void DestroyDecodedDataForAllImages() noexcept;
-
     // Sets the cache's memory capacities, in bytes. These will hold only approximately,
     // since the decoded cost of resources like scripts and stylesheets is not known.
     //  - minDeadBytes: The maximum number of bytes that dead resources should consume when the cache is under
@@ -115,11 +111,6 @@ namespace krys::boo
     KRYS_NODISCARD uint32 Size() const noexcept
     {
       return _liveSize + _deadSize;
-    }
-
-    KRYS_NODISCARD uint32 LiveSize() const noexcept
-    {
-      return _liveSize;
     }
 
     KRYS_NODISCARD uint32 DeadSize() const noexcept

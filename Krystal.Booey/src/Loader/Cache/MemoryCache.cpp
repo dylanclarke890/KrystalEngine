@@ -131,35 +131,6 @@ namespace krys::boo
     PruneLiveResourcesToSize(targetSize, shouldDestroyDecodedDataForAllLiveResources);
   }
 
-  void MemoryCache::ForEachResource(KRYS_NOESCAPE const Func<void(CachedResource &)> &function) noexcept
-  {
-    List<Ref<CachedResource>> resources;
-    resources.reserve(_resources.size());
-    for (const auto &[url, resource] : _resources)
-    {
-      resources.push_back(resource);
-    }
-    for (auto &resource : resources)
-    {
-      function(*resource);
-    }
-  }
-
-  void MemoryCache::DestroyDecodedDataForAllImages() noexcept
-  {
-    ForEachResource(
-      [](CachedResource &resource)
-      {
-        if (auto *cachedImage = DynamicDowncast<CachedImage>(resource))
-        {
-          if (auto *image = cachedImage->GetImage())
-          {
-            image->DestroyDecodedData();
-          }
-        }
-      });
-  }
-
   void MemoryCache::PruneLiveResourcesToSize(uint32 targetSize,
                                              bool shouldDestroyDecodedDataForAllLiveResources) noexcept
   {
@@ -313,12 +284,7 @@ namespace krys::boo
   {
     krys_debug_assert(resource.InCache());
 
-    // Need to make sure to remove before we increase the access count, since
-    // the queue will possibly change.
     RemoveFromLRUList(resource);
-
-    // Add to our access count.
-    resource.IncreaseAccessCount();
 
     // Now insert into the new queue.
     _lruList.push_back(&resource);

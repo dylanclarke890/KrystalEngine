@@ -84,8 +84,6 @@ namespace krys::boo
     WeakPtr<boo::Document> _document;
     int32 _requestCount {0};
     Timer _garbageCollectDocumentResourcesTimer;
-    bool _autoLoadImages {true};
-    bool _imagesEnabled {true};
 
   public:
     KRYS_NODISCARD static Ref<CachedResourceLoader> Create(boo::Document *document) noexcept
@@ -122,24 +120,6 @@ namespace krys::boo
     {
       return _documentResources;
     }
-
-    KRYS_NODISCARD bool AutoLoadImages() const noexcept
-    {
-      return _autoLoadImages;
-    }
-
-    void SetAutoLoadImages(bool) noexcept;
-
-    KRYS_NODISCARD bool ImagesEnabled() const noexcept
-    {
-      return _imagesEnabled;
-    }
-
-    void SetImagesEnabled(bool) noexcept;
-
-    KRYS_NODISCARD bool ShouldDeferImageLoad(const net::Url &) const noexcept;
-
-    KRYS_NODISCARD bool ShouldPerformImageLoad(const net::Url &) const noexcept;
 
     KRYS_NODISCARD boo::Frame *Frame() const noexcept; // Can be null
 
@@ -182,9 +162,5 @@ namespace krys::boo
     KRYS_NODISCARD RevalidationPolicy DetermineRevalidationPolicy(boo::CachedResource::Type,
                                                                   boo::CachedResource *existingResource,
                                                                   ImageLoading) const noexcept;
-
-    KRYS_NODISCARD ImageLoading ClientDefersImage(const net::Url &) const noexcept;
-
-    void ReloadImagesIfNotDeferred() noexcept;
   };
 }

@@ -46,12 +46,6 @@ namespace krys::boo
   {
     krys_debug_assert(!HasClients());
     krys_debug_assert(!InCache());
-
-    auto callbacks = std::exchange(_loadedCallbacks, {});
-    for (auto &callback : callbacks)
-    {
-      callback();
-    }
   }
 
   void CachedResource::FailBeforeStarting() noexcept
@@ -216,21 +210,6 @@ namespace krys::boo
   void CachedResource::SetLoading(bool b) noexcept
   {
     _loading = b;
-    if (_loading)
-    {
-      return;
-    }
-    auto callbacks = std::exchange(_loadedCallbacks, {});
-    for (auto &callback : callbacks)
-    {
-      callback();
-    }
-  }
-
-  void CachedResource::WhenLoaded(Func<void()> &&callback) noexcept
-  {
-    krys_debug_assert(_loading);
-    _loadedCallbacks.push_back(krys::move(callback));
   }
 
   void CachedResource::SetResponse(net::ResourceResponse &&newResponse) noexcept

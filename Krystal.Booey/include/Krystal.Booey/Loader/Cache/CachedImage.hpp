@@ -122,7 +122,6 @@ namespace krys::boo
     /// image's frame, once it's decoded, is shown in.
     HashSet<const CachedImageClient *> _clientsWaitingForAsyncDecoding;
     bool _shouldPaintBrokenImage {true};
-    bool _allowsOrientationOverride {true};
 
   public:
     explicit CachedImage(CachedResourceRequest &&) noexcept;
@@ -154,20 +153,8 @@ namespace krys::boo
       return !ErrorOccurred() && !ImageSizeForRenderer(renderer, multiplier).IsEmpty();
     }
 
-    void SetAllowsOrientationOverride(bool b) noexcept
-    {
-      _allowsOrientationOverride = b;
-    }
-
-    KRYS_NODISCARD bool AllowsOrientationOverride() const noexcept
-    {
-      return _allowsOrientationOverride;
-    }
-
     void SetContainerContextForClient(const CachedImageClient &, const LayoutSize &, float,
                                       const net::Url &) noexcept;
-
-    KRYS_NODISCARD bool IsClientWaitingForAsyncDecoding(const CachedImageClient &) const noexcept;
 
     /// @brief Remembers that @p client drew nothing while the frame decodes, so it's told when it's decoded.
     void AddClientWaitingForAsyncDecoding(CachedImageClient &) noexcept;

@@ -66,11 +66,6 @@ namespace krys::boo
       return ExpectedType();
     }
 
-    KRYS_NODISCARD virtual bool ShouldMarkAsReferenced() const noexcept
-    {
-      return true;
-    }
-
   protected:
     CachedResourceClient() noexcept = default;
   };

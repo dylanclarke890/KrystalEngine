@@ -31,7 +31,6 @@
 #include "Krystal.Core/Memory/RefCounted.hpp"
 #include "Krystal.Core/Time/MonotonicTime.hpp"
 #include "Krystal.Core/Time/Timer.hpp"
-#include "Krystal.Core/Types/Func.hpp"
 #include "Krystal.Core/Types/SharedBuffer.hpp"
 #include "Krystal.Net/ResourceError.hpp"
 #include "Krystal.Net/ResourceRequest.hpp"
@@ -96,14 +95,12 @@ namespace krys::boo
     Timer _decodedDataDeletionTimer;
     MonotonicTime::duration _lastDecodedAccessTime {}; // Used as a "thrash guard" in the cache
     utf8_string _initiatorType;
-    uint32 _accessCount {0};
     Type _type;
     Status _status {Pending};
     bool _inCache {false};
     bool _loading {false};
     /// @brief The loader whose request count the load is in, until it's done.
     WeakPtr<CachedResourceLoader> _requestCountingLoader;
-    List<Func<void()>> _loadedCallbacks;
 
   public:
     CachedResource(CachedResourceRequest, Type) noexcept;
@@ -229,21 +226,9 @@ namespace krys::boo
       return false;
     }
 
-    void WhenLoaded(Func<void()> &&) noexcept;
-
     KRYS_NODISCARD bool IsImage() const noexcept
     {
       return GetType() == Type::ImageResource;
-    }
-
-    KRYS_NODISCARD uint32 AccessCount() const noexcept
-    {
-      return _accessCount;
-    }
-
-    void IncreaseAccessCount() noexcept
-    {
-      _accessCount++;
     }
 
     // Computes the status of an object after loading.
@@ -317,11 +302,6 @@ namespace krys::boo
     void SetDecodedSize(uint32) noexcept;
 
     void DidAccessDecodedData(MonotonicTime::duration timeStamp) noexcept;
-
-    net::ResourceResponse &MutableResponse() noexcept
-    {
-      return _response;
-    }
 
     void StopDecodedDataDeletionTimer() noexcept;
 

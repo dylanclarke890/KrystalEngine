@@ -119,10 +119,6 @@ namespace krys::boo
   ResourceErrorOr<CachedResourceHandle<CachedImage>>
     CachedResourceLoader::RequestImage(CachedResourceRequest &&request, ImageLoading imageLoading) noexcept
   {
-    if (imageLoading == ImageLoading::Immediate)
-    {
-      imageLoading = ClientDefersImage(request.GetResourceRequest().Url());
-    }
     auto resource = RequestResource(CachedResource::Type::ImageResource, krys::move(request), imageLoading);
     if (!resource)
     {
@@ -394,73 +390,6 @@ namespace krys::boo
     (void)type;
     auto policy = frame->Loader().SubresourceCachePolicy();
     return policy != CachePolicy::Use ? policy : frame->SubresourceCachePolicy();
-  }
-
-  void CachedResourceLoader::SetAutoLoadImages(bool enable) noexcept
-  {
-    if (enable == _autoLoadImages)
-    {
-      return;
-    }
-
-    _autoLoadImages = enable;
-
-    if (!_autoLoadImages)
-    {
-      return;
-    }
-
-    ReloadImagesIfNotDeferred();
-  }
-
-  void CachedResourceLoader::SetImagesEnabled(bool enable) noexcept
-  {
-    if (enable == _imagesEnabled)
-    {
-      return;
-    }
-
-    _imagesEnabled = enable;
-
-    if (!_imagesEnabled)
-    {
-      return;
-    }
-
-    ReloadImagesIfNotDeferred();
-  }
-
-  ImageLoading CachedResourceLoader::ClientDefersImage(const net::Url &) const noexcept
-  {
-    return _imagesEnabled ? ImageLoading::Immediate : ImageLoading::DeferredUntilVisible;
-  }
-
-  bool CachedResourceLoader::ShouldPerformImageLoad(const net::Url &url) const noexcept
-  {
-    return _autoLoadImages || url.ProtocolIsData();
-  }
-
-  bool CachedResourceLoader::ShouldDeferImageLoad(const net::Url &url) const noexcept
-  {
-    return ClientDefersImage(url) == ImageLoading::DeferredUntilVisible || !ShouldPerformImageLoad(url);
-  }
-
-  void CachedResourceLoader::ReloadImagesIfNotDeferred() noexcept
-  {
-    List<CachedResourceHandle<CachedResource>> resources;
-    for (auto &[url, resource] : _documentResources)
-    {
-      resources.push_back(resource);
-    }
-    for (auto &resource : resources)
-    {
-      auto *image = DynamicDowncast<CachedImage>(*resource);
-      if (image && resource->StillNeedsLoad()
-          && ClientDefersImage(resource->Url()) == ImageLoading::Immediate)
-      {
-        image->Load(*this);
-      }
-    }
   }
 
   // Garbage collecting m_documentResources is a workaround for the

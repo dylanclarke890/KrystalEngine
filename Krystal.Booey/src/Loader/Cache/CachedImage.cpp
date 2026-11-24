@@ -61,14 +61,7 @@ namespace krys::boo
     {
       _settings = ShareRef(document->GetSettings());
     }
-    if (loader.ShouldPerformImageLoad(Url()))
-    {
-      CachedResource::Load(loader);
-    }
-    else
-    {
-      SetLoading(false);
-    }
+    CachedResource::Load(loader);
   }
 
   void CachedImage::DidAddClient(CachedResourceClient &client) noexcept
@@ -466,7 +459,6 @@ namespace krys::boo
     }
 
     _image = nullptr;
-    _allowsOrientationOverride = true;
   }
 
   void CachedImage::UpdateBufferInternal(const SharedBuffer &data) noexcept
@@ -540,7 +532,6 @@ namespace krys::boo
     }
 
     SetLoading(false);
-    SetAllowsOrientationOverride(!LoadFailedOrCanceled() || _image->SourceUrl().ProtocolIsData());
 
     NotifyObservers();
     CachedResource::FinishLoading(data);
@@ -624,11 +615,6 @@ namespace krys::boo
     }
 
     return true;
-  }
-
-  bool CachedImage::IsClientWaitingForAsyncDecoding(const CachedImageClient &client) const noexcept
-  {
-    return _clientsWaitingForAsyncDecoding.contains(&client);
   }
 
   void CachedImage::AddClientWaitingForAsyncDecoding(CachedImageClient &client) noexcept
