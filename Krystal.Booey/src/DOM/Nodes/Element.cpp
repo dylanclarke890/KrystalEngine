@@ -1450,17 +1450,6 @@ namespace krys::boo
     }
   }
 
-  void Element::SetHasTentativeFocus(bool value) noexcept
-  {
-    // Tentative focus is used when trying to set the focus on a new element.
-    for (auto *ancestor = ParentElementInComposedTree(); ancestor;
-         ancestor = ancestor->ParentElementInComposedTree())
-    {
-      krys_debug_assert(ancestor->HasFocusWithin() != value);
-      NodeDocument().UserActionElements().SetHasFocusWithin(*ancestor, value);
-    }
-  }
-
   void Element::SetHovered(bool value, style::InvalidationScope invalidationScope, HitTestRequest) noexcept
   {
     if (value == Hovered())
@@ -1580,13 +1569,6 @@ namespace krys::boo
         return;
       }
     }
-  }
-
-  bool Element::HasFlagsSetDuringStylingOfChildren() const noexcept
-  {
-    return ChildrenAffectedByFirstChildRules() || ChildrenAffectedByLastChildRules()
-           || ChildrenAffectedByForwardPositionalRules() || DescendantsAffectedByForwardPositionalRules()
-           || ChildrenAffectedByBackwardPositionalRules() || DescendantsAffectedByBackwardPositionalRules();
   }
 
   uint32 Element::ChildIndex() const noexcept

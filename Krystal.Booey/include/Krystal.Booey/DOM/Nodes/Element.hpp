@@ -1335,9 +1335,6 @@ namespace krys::boo
       return _nodeStyleFlags.contains(dom::NodeStyleFlag::AffectedByHasWithPositionalPseudoClass);
     }
 
-    /// @brief Whether selector matching set a flag on the element while matching its children.
-    KRYS_NODISCARD bool HasFlagsSetDuringStylingOfChildren() const noexcept;
-
     /// @brief The element's index among its parent's element children, plus one, as cached by selector
     /// matching; zero if it isn't known.
     KRYS_NODISCARD uint32 ChildIndex() const noexcept;
@@ -1800,9 +1797,6 @@ namespace krys::boo
     void SetHasFocusVisible(bool value) noexcept;
 
     void SetHasFocusWithin(bool value) noexcept;
-
-    /// @brief Gives the element's composed tree ancestors focus within while its focusability is checked.
-    void SetHasTentativeFocus(bool value) noexcept;
 
     /// @brief Clears the element's hover and active state, moving the document's hovered element and active
     /// chain to its ancestors, before its renderer goes.
