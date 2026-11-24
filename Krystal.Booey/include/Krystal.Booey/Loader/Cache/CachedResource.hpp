@@ -78,6 +78,7 @@ namespace krys::boo
     Status _status {Pending};
     bool _inCache {false};
     bool _loading {false};
+    bool _ignoreForRequestCount {false};
     /// @brief The loader whose request count the load is in, until it's done.
     WeakPtr<CachedResourceLoader> _requestCountingLoader;
 
@@ -222,6 +223,12 @@ namespace krys::boo
     }
 
     /// @brief Whether it's an image.
+    /// @brief Whether the load leaves its document's load event alone (a lazy image, an icon).
+    KRYS_NODISCARD bool IgnoreForRequestCount() const noexcept
+    {
+      return _ignoreForRequestCount;
+    }
+
     KRYS_NODISCARD bool IsImage() const noexcept
     {
       return GetType() == Type::ImageResource;

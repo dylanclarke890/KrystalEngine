@@ -14,7 +14,8 @@ namespace krys::boo
   CachedResource::CachedResource(CachedResourceRequest request, Type type) noexcept
       : _options(request.Options()),
         _decodedDataDeletionTimer(*this, &CachedResource::DecodedDataDeletionTimerFired),
-        _initiatorType(request.InitiatorType()), _type(type)
+        _initiatorType(request.InitiatorType()), _type(type),
+        _ignoreForRequestCount(request.IgnoreForRequestCount())
   {
     _resourceRequest = request.ReleaseResourceRequest();
   }

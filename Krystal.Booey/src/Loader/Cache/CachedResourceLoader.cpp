@@ -291,14 +291,21 @@ namespace krys::boo
     return resource;
   }
 
-  void CachedResourceLoader::IncrementRequestCount(const CachedResource &) noexcept
+  void CachedResourceLoader::IncrementRequestCount(const CachedResource &resource) noexcept
   {
-    // FIXME: Loads that don't delay the load event (ignoreForRequestCount), once there are any.
+    if (resource.IgnoreForRequestCount())
+    {
+      return;
+    }
     ++_requestCount;
   }
 
-  void CachedResourceLoader::DecrementRequestCount(const CachedResource &) noexcept
+  void CachedResourceLoader::DecrementRequestCount(const CachedResource &resource) noexcept
   {
+    if (resource.IgnoreForRequestCount())
+    {
+      return;
+    }
     --_requestCount;
     krys_debug_assert(_requestCount >= 0);
   }
