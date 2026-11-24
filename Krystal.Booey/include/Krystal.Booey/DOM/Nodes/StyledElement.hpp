@@ -92,9 +92,6 @@ namespace krys::boo
     bool SetInlineStyleProperty(css::PropertyId property, css::ValueId identifier,
                                 css::IsImportant important = css::IsImportant::No) noexcept;
 
-    bool SetInlineStyleProperty(css::PropertyId property, css::PropertyId identifier,
-                                css::IsImportant important = css::IsImportant::No) noexcept;
-
     bool SetInlineStyleProperty(css::PropertyId property, double value, css::UnitType unit,
                                 css::IsImportant important = css::IsImportant::No) noexcept;
 
@@ -104,9 +101,6 @@ namespace krys::boo
 
     bool SetInlineStyleProperty(css::PropertyId property, Ref<css::Value> &&value,
                                 css::IsImportant important = css::IsImportant::No) noexcept;
-
-    bool SetInlineStyleCustomProperty(const CSSOMStringAtom &property, const CSSOMString &value,
-                                      css::IsImportant important = css::IsImportant::No) noexcept;
 
     bool SetInlineStyleCustomProperty(Ref<css::Value> &&customPropertyValue,
                                       css::IsImportant important = css::IsImportant::No) noexcept;

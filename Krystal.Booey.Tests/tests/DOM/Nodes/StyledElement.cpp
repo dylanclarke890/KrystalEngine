@@ -7,6 +7,8 @@
 #include "Krystal.Booey/CSS/Properties/ImmutableStyleProperties.hpp"
 #include "Krystal.Booey/CSS/Properties/MutableStyleProperties.hpp"
 #include "Krystal.Booey/CSS/Properties/PropertyId.hpp"
+#include "Krystal.Booey/CSS/Values/CustomPropertyValue.hpp"
+#include "Krystal.Booey/CSS/Values/GlobalKeyword.hpp"
 #include "Krystal.Booey/CSS/Values/SerialisationContext.hpp"
 #include "Krystal.Booey/CSS/Values/Units.hpp"
 #include "Krystal.Booey/CSS/Values/ValueId.hpp"
@@ -328,8 +330,10 @@ namespace krys::boo::dom::tests
     REQUIRE(element->SetInlineStyleProperty(css::PropertyId::Display, css::ValueId::None));
     REQUIRE(element->SetInlineStyleProperty(css::PropertyId::Width, 10.0, css::UnitType::px));
     REQUIRE(element->SetInlineStyleProperty(css::PropertyId::Color, CSSOMString(u8"red")));
-    REQUIRE(element->SetInlineStyleCustomProperty(u8"--x", u8"1", css::IsImportant::Yes));
-    REQUIRE(StyleAttribute(*element) == "display: none; width: 10px; color: red; --x: 1 !important;");
+    REQUIRE(element->SetInlineStyleCustomProperty(
+      css::CustomPropertyValue::CreateWithGlobalKeyword(u8"--x", css::GlobalKeyword::Initial),
+      css::IsImportant::Yes));
+    REQUIRE(StyleAttribute(*element) == "display: none; width: 10px; color: red; --x: initial !important;");
 
     bool didFailParsing = false;
     REQUIRE_FALSE(element->SetInlineStyleProperty(css::PropertyId::Color, CSSOMString(u8"nonsense"),

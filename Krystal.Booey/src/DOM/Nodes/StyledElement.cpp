@@ -311,14 +311,6 @@ namespace krys::boo
     return true;
   }
 
-  bool StyledElement::SetInlineStyleProperty(css::PropertyId property, css::PropertyId identifier,
-                                             css::IsImportant important) noexcept
-  {
-    EnsureMutableInlineStyle()->SetProperty(property, css::PrimitiveValue::Create(identifier), important);
-    InlineStyleChanged();
-    return true;
-  }
-
   bool StyledElement::SetInlineStyleProperty(css::PropertyId property, double value, css::UnitType unit,
                                              css::IsImportant important) noexcept
   {
@@ -340,18 +332,6 @@ namespace krys::boo
   {
     bool changes = EnsureMutableInlineStyle()->SetProperty(
       property, value, css::ParserContext(NodeDocument()), important, didFailParsing);
-    if (changes)
-    {
-      InlineStyleChanged();
-    }
-    return changes;
-  }
-
-  bool StyledElement::SetInlineStyleCustomProperty(const CSSOMStringAtom &property, const CSSOMString &value,
-                                                   css::IsImportant important) noexcept
-  {
-    bool changes = EnsureMutableInlineStyle()->SetCustomProperty(
-      property.ToString(), value, css::ParserContext(NodeDocument()), important);
     if (changes)
     {
       InlineStyleChanged();
