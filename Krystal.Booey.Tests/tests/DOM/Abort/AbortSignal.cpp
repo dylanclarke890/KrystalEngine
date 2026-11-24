@@ -73,7 +73,7 @@ namespace krys::boo::dom::tests
     SECTION("Already aborted if one of the signals is, with the first aborted one's reason")
     {
       auto signal =
-        AbortSignal::Any({ShareRef(*first.Signal()), AbortSignal::Abort(Any(1)), AbortSignal::Abort(Any(2))});
+        AbortSignal::Any({ShareRef(first.Signal()), AbortSignal::Abort(Any(1)), AbortSignal::Abort(Any(2))});
       REQUIRE(signal->Aborted());
       CHECK(std::any_cast<int>(signal->Reason()) == 1);
     }
@@ -86,7 +86,7 @@ namespace krys::boo::dom::tests
 
     SECTION("Aborts with the reason of the signal that aborts")
     {
-      auto signal = AbortSignal::Any({ShareRef(*first.Signal()), ShareRef(*second.Signal())});
+      auto signal = AbortSignal::Any({ShareRef(first.Signal()), ShareRef(second.Signal())});
       CHECK_FALSE(signal->Aborted());
 
       second.Abort(Any(2));
@@ -99,7 +99,7 @@ namespace krys::boo::dom::tests
 
     SECTION("A signal given twice is a source once")
     {
-      auto signal = AbortSignal::Any({ShareRef(*first.Signal()), ShareRef(*first.Signal())});
+      auto signal = AbortSignal::Any({ShareRef(first.Signal()), ShareRef(first.Signal())});
       int aborts = 0;
       auto listener = signal->AddEventListener(event_names::Abort, [&](Event &) { ++aborts; });
       first.Abort();
@@ -108,7 +108,7 @@ namespace krys::boo::dom::tests
 
     SECTION("A dependent of a dependent follows the first one's sources")
     {
-      auto inner = AbortSignal::Any({ShareRef(*first.Signal())});
+      auto inner = AbortSignal::Any({ShareRef(first.Signal())});
       auto outer = AbortSignal::Any({inner});
       CHECK_FALSE(outer->Aborted());
       first.Abort(Any(3));
@@ -123,7 +123,7 @@ namespace krys::boo::dom::tests
             "[dom:dom-abortsignal-throwifaborted]")
   {
     AbortController controller;
-    auto &signal = *controller.Signal();
+    auto &signal = controller.Signal();
     CHECK_FALSE(signal.Aborted());
     CHECK_FALSE(signal.Reason().has_value());
     CHECK_NOTHROW(signal.ThrowIfAborted());
@@ -149,7 +149,7 @@ namespace krys::boo::dom::tests
             "[dom:eventdef-abortsignal-abort]")
   {
     AbortController controller;
-    auto &signal = *controller.Signal();
+    auto &signal = controller.Signal();
     CHECK_FALSE(signal.OnAbort());
 
     int calls = 0;
@@ -173,7 +173,7 @@ namespace krys::boo::dom::tests
             "[DOM][AbortSignal][dom:abort-signal-garbage-collection]")
   {
     AbortController controller;
-    auto &source = *controller.Signal();
+    auto &source = controller.Signal();
 
     SECTION("A dependent with an abort listener lives while its source can abort it")
     {
@@ -241,7 +241,7 @@ namespace krys::boo::dom::tests
       EventListenerHandle handle;
       {
         AbortController other;
-        auto dependent = AbortSignal::Any({ShareRef(*other.Signal())});
+        auto dependent = AbortSignal::Any({ShareRef(other.Signal())});
         weakDependent = CreateWeakPtr(dependent.get());
         handle = dependent->AddEventListener(event_names::Abort, [](Event &) {});
       }
@@ -314,7 +314,7 @@ namespace krys::boo::dom::tests
 
     AbortController controller;
     Amazingness amazingness;
-    REQUIRE_NOTHROW(amazingness.Start(*controller.Signal()));
+    REQUIRE_NOTHROW(amazingness.Start(controller.Signal()));
     CHECK_FALSE(amazingness.RejectedWith.has_value());
 
     controller.Abort(Any {42});
@@ -322,6 +322,6 @@ namespace krys::boo::dom::tests
 
     // Started after the abort, it throws the reason straight away.
     Amazingness late;
-    CHECK_THROWS_AS(late.Start(*controller.Signal()), Any);
+    CHECK_THROWS_AS(late.Start(controller.Signal()), Any);
   }
 }

@@ -21,7 +21,7 @@ namespace krys::boo::dom::tests
 
     SECTION("The algorithm runs once when the signal aborts, and the handle then owns none")
     {
-      auto algorithm = AbortAlgorithms::Add(count, *controller.Signal());
+      auto algorithm = AbortAlgorithms::Add(count, controller.Signal());
       CHECK(algorithm);
       controller.Abort();
       CHECK(runs == 1);
@@ -30,8 +30,8 @@ namespace krys::boo::dom::tests
 
     SECTION("Each algorithm added runs, even the same function added twice")
     {
-      auto first = AbortAlgorithms::Add(count, *controller.Signal());
-      auto second = AbortAlgorithms::Add(count, *controller.Signal());
+      auto first = AbortAlgorithms::Add(count, controller.Signal());
+      auto second = AbortAlgorithms::Add(count, controller.Signal());
       controller.Abort();
       CHECK(runs == 2);
     }
@@ -57,7 +57,7 @@ namespace krys::boo::dom::tests
 
     SECTION("Removing it through its handle")
     {
-      auto algorithm = AbortAlgorithms::Add(count, *controller.Signal());
+      auto algorithm = AbortAlgorithms::Add(count, controller.Signal());
       algorithm.Remove();
       CHECK_FALSE(algorithm);
       controller.Abort();
@@ -67,7 +67,7 @@ namespace krys::boo::dom::tests
     SECTION("Destroying its handle")
     {
       {
-        auto algorithm = AbortAlgorithms::Add(count, *controller.Signal());
+        auto algorithm = AbortAlgorithms::Add(count, controller.Signal());
       }
       controller.Abort();
       CHECK(runs == 0);
@@ -75,14 +75,14 @@ namespace krys::boo::dom::tests
 
     SECTION("A released algorithm stays with its signal")
     {
-      AbortAlgorithms::Add(count, *controller.Signal()).Release();
+      AbortAlgorithms::Add(count, controller.Signal()).Release();
       controller.Abort();
       CHECK(runs == 1);
     }
 
     SECTION("A handle moved from owns none, and the one moved to removes it")
     {
-      auto algorithm = AbortAlgorithms::Add(count, *controller.Signal());
+      auto algorithm = AbortAlgorithms::Add(count, controller.Signal());
       auto moved = krys::move(algorithm);
       CHECK_FALSE(algorithm); // NOLINT(bugprone-use-after-move): a moved-from handle is empty.
       CHECK(moved);
@@ -96,7 +96,7 @@ namespace krys::boo::dom::tests
             "[AbortAlgorithms][dom:abortsignal-signal-abort]")
   {
     AbortController controller;
-    auto &signal = *controller.Signal();
+    auto &signal = controller.Signal();
 
     SECTION("An empty reason (undefined) counts as not given")
     {
@@ -144,7 +144,7 @@ namespace krys::boo::dom::tests
             "[AbortAlgorithms][dom:run-the-abort-steps][dom:abortsignal-abort-algorithms]")
   {
     AbortController controller;
-    auto &signal = *controller.Signal();
+    auto &signal = controller.Signal();
     List<std::string> log;
 
     SECTION("Algorithms run in order, with the reason, before the event")

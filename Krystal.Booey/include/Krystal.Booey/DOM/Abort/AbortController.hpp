@@ -1,6 +1,7 @@
 ﻿#pragma once
 
 #include "Krystal.Core/Attributes.hpp"
+#include "Krystal.Core/Macros.hpp"
 #include "Krystal.Core/Memory/RefPtr.hpp"
 #include "Krystal.Core/Types/Any.hpp"
 #include "Krystal.Core/Types/Maybe.hpp"
@@ -18,6 +19,7 @@ namespace krys::boo
   class AbortController
   {
     friend class dom::AbortAlgorithms;
+    KRYS_NON_COPY_MOVABLE(AbortController);
 
   private:
     /// @see https://dom.spec.whatwg.org/#abortcontroller-signal
@@ -32,9 +34,9 @@ namespace krys::boo
     AbortController() noexcept;
 
     /// @see https://dom.spec.whatwg.org/#dom-abortcontroller-signal
-    KRYS_NODISCARD AbortSignal *Signal() const noexcept
+    KRYS_NODISCARD AbortSignal &Signal() const noexcept
     {
-      return _signal.get();
+      return *_signal;
     }
 
     /// @see https://dom.spec.whatwg.org/#dom-abortcontroller-abort

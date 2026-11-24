@@ -59,13 +59,13 @@ namespace krys::boo::dom::tests
       AddEventListenerOptions given = WithCapture(true);
       given.Once = true;
       given.Passive = false;
-      given.Signal = controller.Signal();
+      given.Signal = &controller.Signal();
 
       auto options = EventTargetAlgorithms::FlattenMoreOptions(given);
       REQUIRE(options.Capture);
       REQUIRE(options.Once);
       REQUIRE(options.Passive == false);
-      REQUIRE(options.Signal == controller.Signal());
+      REQUIRE(options.Signal == &controller.Signal());
     }
   }
 
@@ -117,7 +117,7 @@ namespace krys::boo::dom::tests
       AbortController controller;
       controller.Abort();
       AddEventListenerOptions options;
-      options.Signal = controller.Signal();
+      options.Signal = &controller.Signal();
       REQUIRE_FALSE(EventTargetAlgorithms::AddEventListener(*target, *Listener(click, callback, options)));
       REQUIRE(target->EventListeners().empty());
     }
@@ -152,7 +152,7 @@ namespace krys::boo::dom::tests
     {
       AbortController controller;
       AddEventListenerOptions options;
-      options.Signal = controller.Signal();
+      options.Signal = &controller.Signal();
       auto listener = Listener(click, callback, options);
       REQUIRE(EventTargetAlgorithms::AddEventListener(*target, *listener));
       controller.Abort();

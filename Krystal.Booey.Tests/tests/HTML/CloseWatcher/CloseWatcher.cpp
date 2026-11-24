@@ -97,13 +97,13 @@ namespace krys::boo::html::tests
     SECTION("A signal destroys it as it aborts")
     {
       AbortController controller;
-      auto signalled = CloseWatcher::Create(document, {.Signal = controller.Signal()}).ReleaseValue();
+      auto signalled = CloseWatcher::Create(document, {.Signal = &controller.Signal()}).ReleaseValue();
       CHECK(signalled->IsActive());
       controller.Abort();
       CHECK_FALSE(signalled->IsActive());
 
       // An aborted signal gives an inactive watcher.
-      auto aborted = CloseWatcher::Create(document, {.Signal = controller.Signal()}).ReleaseValue();
+      auto aborted = CloseWatcher::Create(document, {.Signal = &controller.Signal()}).ReleaseValue();
       CHECK_FALSE(aborted->IsActive());
     }
 

@@ -13,12 +13,11 @@ namespace krys::boo::dom::tests
             "[DOM][AbortController][dom:dom-abortcontroller-abortcontroller][dom:dom-abortcontroller-signal]")
   {
     AbortController controller;
-    REQUIRE(controller.Signal());
-    REQUIRE_FALSE(controller.Signal()->Aborted());
-    REQUIRE(controller.Signal() == controller.Signal());
+    REQUIRE_FALSE(controller.Signal().Aborted());
+    REQUIRE(&controller.Signal() == &controller.Signal());
 
     AbortController other;
-    REQUIRE(other.Signal() != controller.Signal());
+    REQUIRE(&other.Signal() != &controller.Signal());
   }
 
   TEST_CASE("AbortController.abort(): signals abort on its signal, with the reason if given",
@@ -26,13 +25,13 @@ namespace krys::boo::dom::tests
   {
     AbortController controller;
     int aborts = 0;
-    auto listener = controller.Signal()->AddEventListener(event_names::Abort, [&](Event &) { ++aborts; });
+    auto listener = controller.Signal().AddEventListener(event_names::Abort, [&](Event &) { ++aborts; });
 
     SECTION("Without a reason, an AbortError")
     {
       controller.Abort();
-      REQUIRE(controller.Signal()->Aborted());
-      auto *reason = std::any_cast<Exception>(&controller.Signal()->Reason());
+      REQUIRE(controller.Signal().Aborted());
+      auto *reason = std::any_cast<Exception>(&controller.Signal().Reason());
       REQUIRE(reason);
       REQUIRE(reason->Code() == ExceptionCode::AbortError);
       REQUIRE(aborts == 1);
@@ -41,22 +40,22 @@ namespace krys::boo::dom::tests
     SECTION("With a reason")
     {
       controller.Abort(Any(42));
-      REQUIRE(std::any_cast<int>(controller.Signal()->Reason()) == 42);
+      REQUIRE(std::any_cast<int>(controller.Signal().Reason()) == 42);
     }
 
     SECTION("Only once")
     {
       controller.Abort(Any(1));
       controller.Abort(Any(2));
-      REQUIRE(std::any_cast<int>(controller.Signal()->Reason()) == 1);
+      REQUIRE(std::any_cast<int>(controller.Signal().Reason()) == 1);
       REQUIRE(aborts == 1);
     }
 
     SECTION("Signal abort on the controller does the same")
     {
       AbortAlgorithms::SignalAbort(controller, Any(7));
-      REQUIRE(controller.Signal()->Aborted());
-      REQUIRE(std::any_cast<int>(controller.Signal()->Reason()) == 7);
+      REQUIRE(controller.Signal().Aborted());
+      REQUIRE(std::any_cast<int>(controller.Signal().Reason()) == 7);
       REQUIRE(aborts == 1);
     }
   }

@@ -154,7 +154,7 @@ namespace krys::boo::dom::tests
 
       AbortController controller;
       AddEventListenerOptions options;
-      options.Signal = controller.Signal();
+      options.Signal = &controller.Signal();
       target->AddEventListener(event_names::Load, Ref<EventListenerCallback> {imgFetched}, options);
       controller.Abort();
       REQUIRE_FALSE(target->DispatchEvent(*CreateRef<Event>(event_names::Load)).HasException());
