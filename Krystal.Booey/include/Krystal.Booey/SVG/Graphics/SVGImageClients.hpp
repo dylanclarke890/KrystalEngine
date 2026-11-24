@@ -61,14 +61,14 @@ namespace krys::boo
 
   private:
     /// @brief The image, unless it's gone or being destroyed (its internal page is cleared first).
-    KRYS_NODISCARD RefPtr<SVGImage> ProtectedImage() const noexcept
+    KRYS_NODISCARD SVGImage *LiveImage() const noexcept
     {
       auto *image = _image.get();
       if (!image || !image->InternalFrame())
       {
         return nullptr;
       }
-      return ShareRefPtr(image);
+      return image;
     }
 
     void AttachRootGraphicsLayer(Frame &, GraphicsLayer *) noexcept final
@@ -77,7 +77,7 @@ namespace krys::boo
 
     void DidFinishLoadingImageForSVGImage(SVGImageElement &) noexcept final
     {
-      RefPtr<SVGImage> image = ProtectedImage();
+      RefPtr<SVGImage> image = ShareRefPtr(LiveImage());
       if (!image)
       {
         return;
@@ -91,7 +91,7 @@ namespace krys::boo
 
     void InvalidateContentsAndRootView(const RectI &rect) noexcept final
     {
-      RefPtr<SVGImage> image = ProtectedImage();
+      RefPtr<SVGImage> image = ShareRefPtr(LiveImage());
       if (!image)
       {
         return;
@@ -109,7 +109,7 @@ namespace krys::boo
 
     bool ScheduleRenderingUpdate() noexcept final
     {
-      RefPtr<SVGImage> image = ProtectedImage();
+      RefPtr<SVGImage> image = ShareRefPtr(LiveImage());
       if (!image)
       {
         return true;

@@ -33,6 +33,7 @@
 #include "Krystal.Booey/Rendering/Style/DropShadowFilterOperationWithStyleColor.hpp"
 #include "Krystal.Booey/Style/Builder/BuilderState.hpp"
 #include "Krystal.Booey/Style/Values/Color/Color.hpp"
+#include "Krystal.Booey/Style/Values/Primitives/LengthResolution.hpp"
 #include "Krystal.Booey/Style/Values/Primitives/NumericTypesConversions.hpp"
 
 namespace krys::boo::style
@@ -55,12 +56,12 @@ namespace krys::boo::style
                                                             const BuilderState &state) noexcept
   {
     const auto &zoomFactor = state.Style().UsedZoomForLength();
-    int x = css::RoundForImpreciseConversion<int>(
+    int x = style::RoundForImpreciseConversion<int>(
       ConvertToStyle(get<0>(filter.Location), state).ResolveZoom(zoomFactor));
-    int y = css::RoundForImpreciseConversion<int>(
+    int y = style::RoundForImpreciseConversion<int>(
       ConvertToStyle(get<1>(filter.Location), state).ResolveZoom(zoomFactor));
     int stdDeviation = filter.StdDeviation
-                         ? css::RoundForImpreciseConversion<int>(
+                         ? style::RoundForImpreciseConversion<int>(
                              ConvertToStyle(*filter.StdDeviation, state).ResolveZoom(zoomFactor))
                          : 0;
     auto color = filter.Color ? ToStyleColor(*filter.Color, state) : style::Color {CurrentColor {}};

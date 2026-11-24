@@ -33,6 +33,7 @@
 #include "Krystal.Booey/CSS/Values/FontStyleRangeValue.hpp"
 #include "Krystal.Booey/CSS/Values/PrimitiveValue.hpp"
 #include "Krystal.Booey/CSS/Values/PrimitiveValueMappings.hpp"
+#include "Krystal.Booey/CSS/Values/ToLengthConversionData.hpp"
 #include "Krystal.Booey/CSS/Values/UnicodeRangeValue.hpp"
 #include "Krystal.Booey/CSS/Values/ValueList.hpp"
 #include "Krystal.Booey/DOM/Nodes/Document.hpp"
@@ -150,15 +151,15 @@ namespace krys::boo::css
     {
       if (const auto *valueList = DynamicDowncast<ValueList>(value))
       {
-        krys_debug_assert(valueList->Length() == 2);
-        if (valueList->Length() != 2)
+        krys_debug_assert(valueList->size() == 2);
+        if (valueList->size() != 2)
         {
           return {NormalWeightValue(), NormalWeightValue()};
         }
-        krys_debug_assert(valueList->Item(0)->IsPrimitiveValue());
-        krys_debug_assert(valueList->Item(1)->IsPrimitiveValue());
-        auto result0 = style::FontWeightFromCSSValueDeprecated(*valueList->Item(0));
-        auto result1 = style::FontWeightFromCSSValueDeprecated(*valueList->Item(1));
+        krys_debug_assert(Is<PrimitiveValue>((*valueList)[0]));
+        krys_debug_assert(Is<PrimitiveValue>((*valueList)[1]));
+        auto result0 = style::FontWeightFromCSSValueDeprecated((*valueList)[0]);
+        auto result1 = style::FontWeightFromCSSValueDeprecated((*valueList)[1]);
         return {result0, result1};
       }
 
@@ -170,15 +171,15 @@ namespace krys::boo::css
     {
       if (const auto *valueList = DynamicDowncast<ValueList>(value))
       {
-        krys_debug_assert(valueList->Length() == 2);
-        if (valueList->Length() != 2)
+        krys_debug_assert(valueList->size() == 2);
+        if (valueList->size() != 2)
         {
           return {NormalWidthValue(), NormalWidthValue()};
         }
-        krys_debug_assert(valueList->Item(0)->IsPrimitiveValue());
-        krys_debug_assert(valueList->Item(1)->IsPrimitiveValue());
-        auto result0 = style::FontStretchFromCSSValueDeprecated(*valueList->Item(0));
-        auto result1 = style::FontStretchFromCSSValueDeprecated(*valueList->Item(1));
+        krys_debug_assert(Is<PrimitiveValue>((*valueList)[0]));
+        krys_debug_assert(Is<PrimitiveValue>((*valueList)[1]));
+        auto result0 = style::FontStretchFromCSSValueDeprecated((*valueList)[0]);
+        auto result1 = style::FontStretchFromCSSValueDeprecated((*valueList)[1]);
         return {result0, result1};
       }
 
@@ -206,12 +207,11 @@ namespace krys::boo::css
         return FontSelectionRange {ItalicValue()};
       }
       krys_debug_assert(keyword == ValueId::Oblique);
-      auto length = rangeValue->ObliqueValues->Length();
+      auto length = rangeValue->ObliqueValues->size();
       krys_debug_assert(length == 1 || length == 2);
       auto angleAtIndex = [rangeValue](uint32 index)
       {
-        return style::FontStyleAngleFromCSSValueDeprecated(
-          *rangeValue->ObliqueValues->ItemWithoutBoundsCheck(index));
+        return style::FontStyleAngleFromCSSValueDeprecated((*rangeValue->ObliqueValues)[index]);
       };
       if (length == 1)
       {
@@ -304,7 +304,8 @@ namespace krys::boo::css
         const auto &feature = Downcast<FontFeatureValue>(rangeValue);
         if (const auto *primitiveValue = DynamicDowncast<PrimitiveValue>(feature.GetValue()))
         {
-          settings.insert({feature.Tag(), primitiveValue->ResolveAsIntegerDeprecated<int>()});
+          settings.insert({feature.Tag(), primitiveValue->ResolveAsInteger<int>(
+                                            css::ToLengthConversionData::WithoutElement())});
         }
       }
     }
@@ -324,7 +325,8 @@ namespace krys::boo::css
     MutableProperties().SetProperty(PropertyId::SizeAdjust, ShareRef(value));
 
     const auto &sizeAdjustValue = Downcast<PrimitiveValue>(value);
-    auto sizeAdjust = sizeAdjustValue.ResolveAsPercentageDeprecated<float>() / 100;
+    auto sizeAdjust =
+      sizeAdjustValue.ResolveAsPercentage<float>(css::ToLengthConversionData::WithoutElement()) / 100;
 
     if (_sizeAdjust == sizeAdjust)
     {

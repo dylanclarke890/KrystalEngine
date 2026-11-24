@@ -8,7 +8,7 @@ namespace krys::boo::css::tests
   TEST_CASE_METHOD(ValueFixture, "FontFeatureValue::Create", "[CSS][Values][FontFeatureValue]")
   {
     auto value = FontFeatureValue::Create(FontFeatureTag("liga"), PrimitiveValue::CreateInteger(0.0));
-    CHECK(value->IsFontFeatureValue());
+    CHECK(Is<FontFeatureValue>(*value));
     CHECK(value->Tag() == FontTag {'l', 'i', 'g', 'a'});
     CHECK(CssText(value->GetValue()) == "0");
   }

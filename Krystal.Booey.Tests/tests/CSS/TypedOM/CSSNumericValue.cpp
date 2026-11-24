@@ -62,6 +62,8 @@ namespace krys::boo::css::tests
     CHECK(StyleValueText(*percent) == "50%");
     CHECK(percent->Type().Percent == 1);
     CHECK(Factory::Number(3)->Type().MatchesNumber());
+    // Container units are lengths like the others.
+    CHECK(Factory::Cqw(1)->Type().Length == 1);
 
     CHECK(NumericError(CSSUnitValue::Create(1, u8"lemon")) == ExceptionCode::TypeError);
     CHECK(CSSUnitValue::ParseUnit(u8"lemon") == UnitType::Unknown);
@@ -74,6 +76,11 @@ namespace krys::boo::css::tests
     CHECK(NumericError(Factory::Px(1)->To(u8"deg")) == ExceptionCode::TypeError);
     CHECK(NumericError(Factory::Px(1)->To(u8"lemon")) == ExceptionCode::SyntaxError);
     CHECK_FALSE(Factory::Em(1)->ConvertTo(UnitType::px));
+    // Relative lengths have no fixed ratio, even to each other.
+    CHECK_FALSE(Factory::Em(1)->ConvertTo(UnitType::rem));
+    auto ems = Factory::Em(2)->ConvertTo(UnitType::em);
+    REQUIRE(ems);
+    CHECK(ems->Value() == 2);
 
     CHECK(Numeric(Factory::Px(1))->Equals(*Factory::Px(1)));
     CHECK_FALSE(Numeric(Factory::Px(1))->Equals(*Factory::Px(2)));

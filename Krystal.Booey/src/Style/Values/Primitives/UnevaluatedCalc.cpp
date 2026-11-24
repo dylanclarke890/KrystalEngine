@@ -52,9 +52,9 @@ namespace krys::boo::style
 
   UnevaluatedCalcBase::~UnevaluatedCalcBase() noexcept = default;
 
-  Ref<calc::Value> UnevaluatedCalcBase::ProtectedCalculation() const noexcept
+  calc::Value &UnevaluatedCalcBase::Calculation() const noexcept
   {
-    return _calc;
+    return *_calc;
   }
 
   bool UnevaluatedCalcBase::Equal(const UnevaluatedCalcBase &other) const noexcept

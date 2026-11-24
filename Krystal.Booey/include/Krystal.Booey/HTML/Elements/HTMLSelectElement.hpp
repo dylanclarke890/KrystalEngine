@@ -392,7 +392,7 @@ namespace krys::boo
 
     /// @brief Moves the focus between the selectable options for an arrow, Home, End or page key.
     /// @see https://html.spec.whatwg.org/#focus-another-option
-    void FocusOptionForKey(DOMStringView keyIdentifier) noexcept;
+    void FocusOptionForKey(DOMStringView key) noexcept;
 
     /// @see https://html.spec.whatwg.org/#append-new-option-elements
     ExceptionOr<void> AppendNewOptionElements(uint32 count) noexcept;

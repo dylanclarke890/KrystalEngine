@@ -39,7 +39,7 @@ namespace krys::boo::style
   ScrollbarColor CSSValueConversion<ScrollbarColor>::operator()(BuilderState &state,
                                                                 const css::Value &value) noexcept
   {
-    if (css::IsValueId(value, css::ValueId::Auto))
+    if (value.ValueId() == css::ValueId::Auto)
     {
       return css::keywords::Auto {};
     }

@@ -118,7 +118,7 @@ namespace krys::boo::css
     {
       KRYS_NODISCARD bool operator()(const auto &value) noexcept
       {
-        return value.ProtectedCalc()->RequiresConversionData();
+        return value.Calc().RequiresConversionData();
       }
     };
 

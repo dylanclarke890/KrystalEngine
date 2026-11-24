@@ -1,28 +1,4 @@
-﻿/*
- * Copyright (C) 1999 Lars Knoll (knoll@kde.org)
- *           (C) 1999 Antti Koivisto (koivisto@kde.org)
- *           (C) 2001 Dirk Mueller (mueller@kde.org)
- * Copyright (C) 2004-2025 Apple Inc. All rights reserved.
- * Copyright (C) 2008 Nokia Corporation and/or its subsidiary(-ies)
- * Copyright (C) 2009 Torch Mobile Inc. All rights reserved. (http://www.torchmobile.com/)
- *
- * This library is free software; you can redistribute it and/or
- * modify it under the terms of the GNU Library General Public
- * License as published by the Free Software Foundation; either
- * version 2 of the License, or (at your option) any later version.
- *
- * This library is distributed in the hope that it will be useful,
- * but WITHOUT ANY WARRANTY; without even the implied warranty of
- * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU
- * Library General Public License for more details.
- *
- * You should have received a copy of the GNU Library General Public License
- * along with this library; see the file COPYING.LIB.  If not, write to
- * the Free Software Foundation, Inc., 51 Franklin Street, Fifth Floor,
- * Boston, MA 02110-1301, USA.
- */
-
-#include "Krystal.Booey/DOM/Nodes/Node.hpp"
+﻿#include "Krystal.Booey/DOM/Nodes/Node.hpp"
 #include "Krystal.Booey/Accessibility/AXObjectCache.hpp"
 #include "Krystal.Booey/CSS/Selectors/SelectorCheckerTestFunctions.hpp"
 #include "Krystal.Booey/DOM/Algorithms/LiveRangeUpdater.hpp"
@@ -857,12 +833,7 @@ namespace krys::boo
       ComputeEditabilityFromComputedStyle(const RenderStyle &style,
                                           Node::UserSelectAllTreatment treatment) noexcept
     {
-      // Ideally we'd call ASSERT(!needsStyleRecalc()) here, but
-      // ContainerNode::setFocus() calls invalidateStyleForSubtree(), so the assertion
-      // would fire in the middle of Document::setFocusedElement().
-
-      // Elements with user-select: all style are considered atomic
-      // therefore non editable.
+      // `user-select: all` content is selected as one unit, so editing treats it as read-only.
       if (treatment == Node::UserSelectAllTreatment::NotEditable && style.UsedUserSelect() == UserSelect::All)
       {
         return Node::Editability::ReadOnly;
@@ -889,6 +860,7 @@ namespace krys::boo
 
     Ref document = ShareRef(NodeDocument());
 
+    // In a shadow tree, the `contenteditable` attributes decide rather than style.
     if (IsInShadowTree())
     {
       return HTMLElement::EditabilityFromContentEditableAttr(*this);
@@ -901,6 +873,8 @@ namespace krys::boo
       document->UpdateStyleIfNeeded();
     }
 
+    // The style given, or the document's, or that of the node's element (a text node's is its parent's in the
+    // composed tree), resolved for the purpose if the element has none.
     auto *style = [&]() -> const RenderStyle *
     {
       if (incomingStyle)
@@ -1011,8 +985,7 @@ namespace krys::boo
     {
       const RenderStyle &style = renderer->Style();
 
-      // We allow selections to begin within an element that has user-select: none set,
-      // but if the element is draggable then dragging should take priority over selection.
+      // A selection can start in `user-select: none` content, but on a draggable element, dragging wins.
       if (style.UserDrag() == UserDrag::Element && style.UsedUserSelect() == UserSelect::None)
       {
         return false;
@@ -1074,7 +1047,7 @@ namespace krys::boo
 
       for (; it != end; ++it)
       {
-        // Iterator skips over shadow roots.
+        // The composed tree ancestors skip shadow roots, so a host marks its own.
         if (auto *shadowRoot = dom::TreeQueries::GetShadowRoot(*it))
         {
           shadowRoot->SetChildNeedsStyleRecalc();
@@ -1097,7 +1070,8 @@ namespace krys::boo
       return;
     }
 
-    // FIXME: This should eventually be an ASSERT.
+    // The render tree update is applying style, and drops what it invalidates itself: anchored elements as an
+    // anchor's renderer restyles, and elements whose animations it cancels as it tears renderers down.
     if (NodeDocument().InRenderTreeUpdate())
     {
       return;
@@ -1108,6 +1082,7 @@ namespace krys::boo
       _nodeFlags.Add(dom::NodeFlag::IsComputedStyleInvalid);
     }
 
+    // An invalid node's ancestors are already marked, except for a node just inserted.
     bool markAncestors =
       StyleValidity() == style::Validity::Valid || mode == style::InvalidationMode::InsertedIntoAncestor;
 
@@ -1175,6 +1150,8 @@ namespace krys::boo
       return depth;
     }
 
+    /// @brief The nearest common inclusive ancestor of two nodes, and the children of it that contain each
+    /// (null for a node that is the common ancestor).
     struct AncestorAndChildren
     {
       const Node *CommonAncestor;
@@ -1186,15 +1163,13 @@ namespace krys::boo
     KRYS_NODISCARD AncestorAndChildren CommonInclusiveAncestorAndChildren(const Node &a,
                                                                           const Node &b) noexcept
     {
-      // This check isn't needed for correctness, but it is cheap and likely to be
-      // common enough to be worth optimizing so we don't have to walk to the root.
       if (&a == &b)
       {
         return {&a, nullptr, nullptr};
       }
-      // FIXME: Could optimize cases where nodes are both in the same shadow tree.
-      // FIXME: Could optimize cases where nodes are in different documents to quickly return false.
-      // FIXME: Could optimize cases where one node is connected and the other is not to quickly return false.
+
+      // The deeper node climbs to the other's depth, then both climb together until they meet. The nodes
+      // they were at just before are the common ancestor's children that hold them.
       auto [depthA, depthB] = std::make_tuple(Depth<treeType>(a), Depth<treeType>(b));
       auto [x, y, difference] = depthA >= depthB ? std::make_tuple(&a, &b, depthA - depthB)
                                                  : std::make_tuple(&b, &a, depthB - depthA);
@@ -1269,6 +1244,7 @@ namespace krys::boo
     {
       return std::partial_ordering::greater;
     }
+    // Under a host, its shadow root comes before its children; a host has only one shadow root.
     bool isShadowRootA = Is<ShadowRoot>(*result.DistinctAncestorA);
     bool isShadowRootB = Is<ShadowRoot>(*result.DistinctAncestorB);
     if (isShadowRootA || isShadowRootB)

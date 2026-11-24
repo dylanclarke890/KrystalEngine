@@ -1,25 +1,4 @@
-﻿/*
- * Copyright (C) 1999-2003 Lars Knoll (knoll@kde.org)
- *               1999 Waldo Bastian (bastian@kde.org)
- * Copyright (C) 2004-2022 Apple Inc. All rights reserved.
- *
- * This library is free software; you can redistribute it and/or
- * modify it under the terms of the GNU Library General Public
- * License as published by the Free Software Foundation; either
- * version 2 of the License, or (at your option) any later version.
- *
- * This library is distributed in the hope that it will be useful,
- * but WITHOUT ANY WARRANTY; without even the implied warranty of
- * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU
- * Library General Public License for more details.
- *
- * You should have received a copy of the GNU Library General Public License
- * along with this library; see the file COPYING.LIB.  If not, write to
- * the Free Software Foundation, Inc., 51 Franklin Street, Fifth Floor,
- * Boston, MA 02110-1301, USA.
- */
-
-#pragma once
+﻿#pragma once
 
 #include "Krystal.Booey/CSS/Selectors/SelectorEnums.hpp"
 #include "Krystal.Booey/CSS/Types/CSSOMString.hpp"
@@ -41,45 +20,39 @@ namespace krys::boo::css
 
   struct SelectorParserContext;
 
+  /// @brief What a simple selector tests.
   enum class SelectorMatch : uint8
   {
     None = 0,
-    /// @brief Matches the type (i.e. tag name) of the element. Includes the universal selector `*`.
+    /// @brief A [type selector](https://drafts.csswg.org/selectors/#type-selectors), or `*`.
     Type,
-    /// @brief Matches the ID of the element.
+    /// @brief An ID selector, `#id`.
     Id,
-    /// @brief Matches the class of the element.
+    /// @brief A class selector, `.class`.
     Class,
-    /// @brief Matches a pseudo-class of the element.
     PseudoClass,
-    /// @brief Matches a pseudo-element of the element.
     PseudoElement,
-    /// @brief Matches an element when it has a specific attribute, regardless of the value of that attribute.
+    /// @brief `[attr]`.
     AttributeExists,
-    /// @brief Matches an element when it has a specific attribute with a specific value.
+    /// @brief `[attr=value]`.
     AttributeEquals,
-    /// @brief Matches an element when it has an attribute whose value either exactly matches or begins with a
-    /// specific value immediately followed by "-" (U+002D).
+    /// @brief `[attr|=value]`: the value, or the value followed by `-`.
     AttributeDash,
-    /// @brief Matches an element when it has an attribute whose value is a whitespace-separated list of
-    /// words, one of which is exactly a specific value.
+    /// @brief `[attr~=value]`: one of the whitespace-separated words.
     AttributeIncludes,
-    /// @brief Matches an element when it has an attribute whose value starts with a specific value.
+    /// @brief `[attr^=value]`.
     AttributePrefix,
-    /// @brief Matches an element when it has an attribute whose value ends with a specific value.
+    /// @brief `[attr$=value]`.
     AttributeSuffix,
-    /// @brief Matches an element when it has an attribute whose value contains a specific value.
+    /// @brief `[attr*=value]`.
     AttributeSubstring,
-    /// @brief Matches a nesting selector of the element.
+    /// @brief The [nesting selector](https://drafts.csswg.org/css-nesting-1/#nest-selector), `&`.
     NestingParent,
-    /// @brief Matches the :has() scope of the element.
+    /// @brief The anchor element of a relative selector in `:has()`, which the parser adds on its left.
     HasScope,
-    /// @brief The selector is invalid or not supported. This is used for forgiving parsing of selectors that
-    /// are not supported by the browser but need to be preserved for serialization.
+    /// @brief An unparseable selector in a forgiving selector list, kept as text to be serialised.
     ForgivingUnknown,
-    /// @brief The selector is invalid or not supported but contains a nesting combinator (&). This is used
-    /// for forgiving parsing of selectors that are not supported by the browser but need to be preserved for
-    /// serialization.
+    /// @brief Like `ForgivingUnknown`, for text containing `&`.
     ForgivingUnknownNestContaining,
   };
 
@@ -88,28 +61,27 @@ namespace krys::boo::css
     return SelectorMatch::ForgivingUnknownNestContaining;
   }
 
-  /// @brief The relationship between two selectors in a SelectorList. From the perspective of the second
-  /// (rightmost) selector, so the relationship of `p` in the selector `div > p` is `SelectorRelation::Child`,
-  /// and the relationship of `p` in the selector `div p` is `SelectorRelation::Descendant` (`div` does not
-  /// have a relationship to any selector in both cases).
+  /// @brief The combinator joining a simple selector to the one on its left: in `div > p`, `p`'s relation is
+  /// `Child`. A complex selector's leftmost simple selector has no left neighbour, so its relation is unused,
+  /// except in relative selectors, where it holds the leading combinator.
   enum class SelectorRelation : uint8
   {
-    /// @brief The selector forms a compound selector with the preceding selector. (e.g. `div.class`).
+    /// @brief None: they're in the same compound selector, as in `div.class`.
     Compounding,
-    /// @brief The selector is a direct child of the preceding selector. (e.g. `div > p`).
+    /// @brief `>`.
     Child,
-    /// @brief The selector is a descendant of the preceding selector. (e.g. `div p`).
+    /// @brief Whitespace.
     Descendant,
-    /// @brief The selector is the direct next sibling of the preceding selector. (e.g. `div + p`).
+    /// @brief `+`.
     NextSibling,
-    /// @brief The selector is one of the following siblings of the preceding selector. (e.g. `div ~ p`).
+    /// @brief `~`.
     SubsequentSibling,
-    /// @brief The selector is in the shadow tree of the preceding selector's element.
+    /// @brief Implicit, before a pseudo-element in the shadow tree of the left side's element, such as a
+    /// user agent part.
     ShadowDescendant,
-    /// @brief The selector is a part (`::part()`) exposed by the shadow tree of the preceding selector's
-    /// element.
+    /// @brief Implicit, before `::part()`.
     ShadowPartDescendant,
-    /// @brief The selector is slotted (`::slotted()`) into the preceding selector's element.
+    /// @brief Implicit, before `::slotted()`.
     ShadowSlotted,
   };
 
@@ -120,23 +92,23 @@ namespace krys::boo::css
 
   enum class SelectorFlag : uint8
   {
-    /// @brief Set when an attribute selector has a case-insensitive matching flag (e.g. `[attr=value i]`).
+    /// @brief An attribute selector with the `i` flag.
     CaseInsensitiveAttributeValueMatching,
-    /// @brief Set when a selector is the last selector in a selector list.
+    /// @brief The last simple selector of a `SelectorList`'s array.
     IsLastInSelectorList,
-    /// @brief Set when a selector is the first component of a complex selector (e.g. `div` in `div > p`).
+    /// @brief A complex selector's leftmost simple selector (`div` in `div > p`), which ends it in the array.
     IsFirstInComplexSelector,
-    /// @brief Set when a selector is the last component of a complex selector (e.g. `p` in `div > p`).
+    /// @brief A complex selector's rightmost simple selector (`p` in `div > p`), which starts it in the
+    /// array.
     IsLastInComplexSelector,
-    /// @brief Set when a selector has rare data.
+    /// @brief The selector keeps its data in a `RareData`.
     HasRareData,
-    /// @brief Set when the type selector is for a namespace rule (e.g. `@namespace svg
-    /// url(http://www.w3.org/2000/svg);`).
+    /// @brief A type selector added only to carry the default namespace, which isn't serialised.
     TagIsForNamespaceRule,
-    /// @brief Set when a selector is implicit (it isn't written by a UA or author but is implied by the
-    /// CSSOM, e.g. `:root`).
+    /// @brief A selector the parser added rather than the author, which isn't serialised and adds no
+    /// specificity.
     IsImplicit,
-    /// @brief Set when an attribute selector has a case-sensitive matching flag (e.g. `[attr=value s]`).
+    /// @brief An attribute selector with the `s` flag.
     CaseSensitiveAttributeValueMatching,
   };
 
@@ -145,8 +117,7 @@ namespace krys::boo::css
     return SelectorFlag::CaseSensitiveAttributeValueMatching;
   }
 
-  /// @brief An attribute selector's case flag.
-  /// @see https://drafts.csswg.org/selectors/#attribute-case
+  /// @brief An attribute selector's [case flag](https://drafts.csswg.org/selectors/#attribute-case).
   enum class AttributeCaseFlag : uint8
   {
     /// @brief None: the attribute's own rule applies, which for some in HTML is to ignore case.
@@ -163,12 +134,15 @@ namespace krys::boo::css
     Yes,
   };
 
+  /// @brief Whether an ID or class selector matches its value lowercased, as in quirks mode.
   enum class MatchLowercase : bool
   {
     No,
     Yes,
   };
 
+  /// @brief An identifier that may have been written as a string, as `:lang()`'s arguments can be; it's
+  /// serialised as it was written.
   struct PossiblyQuotedIdentifier
   {
     CSSOMStringAtom Identifier {null};
@@ -194,53 +168,51 @@ namespace krys::boo
 
 namespace krys::boo::css
 {
+  /// @brief What each kind of simple selector adds to a selector's packed
+  /// [specificity](https://drafts.csswg.org/selectors/#specificity-rules), a byte per component.
   enum class SelectorSpecificityIncrement : uint32
   {
+    /// @brief An ID.
     ClassA = 0x10000,
+    /// @brief A class, attribute or pseudo-class.
     ClassB = 0x100,
+    /// @brief A type or pseudo-element.
     ClassC = 1,
   };
 
-  /// @brief Represents a simple CSS selector that is part of a SelectorList and may be part of a more
-  /// complex selector. For optimisation purposes it does not store a pointer to its preceding selector
-  /// component but instead relies on the knowledge that it is stored in a flattened array and can access its
-  /// preceding selector component using pointer arithmetic. Various flags in `SelectorFlag` are used to
-  /// determine the boundaries of the complex selectors within the selector list and the selector list itself.
-  /// @note The preceding selector component is the next selector in memory, not the previous one. (e.g.
-  /// `div > p` is stored as `p` followed by `div` in memory, with `p` having a relation of `Child` to `div`).
+  /// @brief A simple selector, in a `SelectorList`'s array of them.
+  /// @note A complex selector is stored rightmost first, so `div > p` is `p` (relation `Child`) followed by
+  /// `div`, and the simple selector on a selector's left is the next one in the array. Flags mark where each
+  /// complex selector, and the list, ends.
   class Selector
   {
     friend class MutableSelector;
     friend class SelectorList;
+    // Builds the selector arrays of the rules it splits into.
+    friend class StyleRule;
 
+    /// @brief The data of selectors that need more than a value: attribute selectors, those with arguments
+    /// and those whose matching and serialised values differ.
     struct RareData : public RefCounted<RareData>
     {
-      // For quirks mode, class and id are case-insensitive. In the case where uppercase letters are used in
-      // quirks mode, |MatchingValue| holds the lowercase class/id and |SerialisingValue| holds the original
-      // string.
+      /// @brief The value an ID or class matches, lowercased in quirks mode.
       CSSOMStringAtom MatchingValue {null};
+      /// @brief The value as written.
       CSSOMStringAtom SerialisingValue {null};
-
-      // Used for :nth-*
+      /// @brief `An+B`'s A and B, for `:nth-*()`.
       int32 NthA {0};
       int32 NthB {0};
-
-      // Used for attribute selector
       QualifiedName Attribute;
-
-      // Used for :contains and :nth-*
+      /// @brief `:dir()`'s and `:state()`'s argument, or `:nth-*()`'s `An+B`, serialised.
       CSSOMStringAtom Argument {null};
-
-      // Used for ::highlight and ::part arguments.
+      /// @brief `::highlight()`'s and `::part()`'s arguments.
       FixedList<CSSOMStringAtom> ArgumentList;
-
-      // Used for :lang arguments.
+      /// @brief `:lang()`'s arguments.
       FixedList<PossiblyQuotedIdentifier> LangList;
-
-      // Used for :heading() levels.
+      /// @brief `:heading()`'s levels.
       FixedList<int32> IntegerList;
-
-      // Used for :is(), :not(), :has(), :where(), :host(), :nth-*(... of) and ::slotted().
+      /// @brief The selector list argument of `:is()`, `:where()`, `:not()`, `:has()`, `:host()`,
+      /// `:nth-*(… of S)`, `::slotted()` and `::cue()`.
       UniquePtr<SelectorList> SubSelectors;
 
       explicit RareData(const CSSOMStringAtom &value) noexcept;
@@ -251,9 +223,8 @@ namespace krys::boo::css
 
       KRYS_NODISCARD bool Equals(const RareData &other) const noexcept;
 
+      /// @brief Whether the element at 1-based position @p count matches `An+B`.
       KRYS_NODISCARD bool MatchNth(int32 count) const noexcept;
-
-      KRYS_NODISCARD Ref<RareData> DeepCopy() const noexcept;
     };
 
   public:
@@ -271,6 +242,8 @@ namespace krys::boo::css
 
     using VisitFunc = Func<bool(const Selector &)>;
 
+    /// @brief Selects the constructor that copies a selector for a `MutableSelector`, clearing its position
+    /// flags.
     struct MutableSelectorCopyTag
     {
     };
@@ -283,6 +256,7 @@ namespace krys::boo::css
     EnumSet<SelectorFlag> _flags {SelectorFlag::IsFirstInComplexSelector,
                                   SelectorFlag::IsLastInComplexSelector};
 
+    // A type selector's name, a rare data's, or otherwise the value; each holds a reference.
     union DataUnion
     {
       StringAtomStorage Value {nullptr};
@@ -293,10 +267,13 @@ namespace krys::boo::css
   public:
     Selector() noexcept = default;
 
+    /// @brief A copy, with its own copy of any rare data.
     Selector(const Selector &other) noexcept;
 
     Selector(const Selector &other, MutableSelectorCopyTag) noexcept;
 
+    /// @brief A type selector.
+    /// @param tagIsForNamespaceRule Whether it only carries the default namespace.
     explicit Selector(const QualifiedName &name, bool tagIsForNamespaceRule = false) noexcept;
 
     Selector &operator=(const Selector &) = delete;
@@ -305,27 +282,38 @@ namespace krys::boo::css
 
     ~Selector() noexcept;
 
-    /// @brief Re-creates the selector text from the selector's data.
+    /// @brief Serialises the complex selector this is the rightmost simple selector of, followed by
+    /// @p separator and @p rightSide (which `SelectorText` passes itself as it recurses leftward).
     KRYS_NODISCARD CSSOMString SelectorText(CSSOMStringView separator = {},
                                             CSSOMStringView rightSide = {}) const noexcept;
 
+    /// @brief The complex selector's specificity, packed as in `SelectorSpecificityIncrement`.
     KRYS_NODISCARD uint32 ComputeSpecificity() const noexcept;
 
+    /// @brief The complex selector's specificity as (A, B, C).
     KRYS_NODISCARD Array<uint8, 3> ComputeSpecificityTuple() const noexcept;
 
+    /// @brief Calls @p func with the simple selectors of the complex selector, breadth first, until it
+    /// returns true.
+    /// @param visitFunctionalPseudoClasses Whether to visit the selectors in selector list arguments too.
+    /// @param visitOnlySubject Whether to stop at the end of the rightmost compound selector.
+    /// @return Whether @p func returned true.
     bool VisitSimpleSelectors(
       const VisitFunc &func,
       VisitFunctionalPseudoClasses visitFunctionalPseudoClasses = VisitFunctionalPseudoClasses::No,
       VisitOnlySubject visitOnlySubject = VisitOnlySubject::No) const noexcept;
 
+    /// @brief Whether the complex selector contains `&`, arguments included.
     KRYS_NODISCARD bool HasExplicitNestingParent() const noexcept;
 
+    /// @brief Whether the complex selector contains `:scope`, arguments included.
     KRYS_NODISCARD bool HasExplicitPseudoClassScope() const noexcept;
 
+    /// @brief Whether the complex selector contains `:scope`, arguments excluded.
     KRYS_NODISCARD bool HasScope() const noexcept;
 
-    /// @brief Maps from the selector pseudo-element type to the style type. Only pseudo-elements that are not
-    /// element-backed have a type in style.
+    /// @brief The style's pseudo-element type for @p pseudoElement, if it has one. Element-backed
+    /// pseudo-elements, which are styled as the elements they are, don't.
     KRYS_NODISCARD static Maybe<PseudoElementType>
       StylePseudoElementTypeFor(SelectorPseudoElement pseudoElement) noexcept;
 
@@ -335,6 +323,7 @@ namespace krys::boo::css
     KRYS_NODISCARD static inline bool IsPseudoElementEnabled(SelectorPseudoElement type, CSSOMStringView name,
                                                              const SelectorParserContext &context) noexcept;
 
+    /// @brief The pseudo-element named @p name (without its colons), if it's known and enabled.
     KRYS_NODISCARD static Maybe<SelectorPseudoElement>
       ParsePseudoElementName(CSSOMStringView name, const SelectorParserContext &context) noexcept;
 
@@ -346,32 +335,49 @@ namespace krys::boo::css
 
     KRYS_NODISCARD static inline bool PseudoElementMayHaveArgument(SelectorPseudoElement type) noexcept;
 
+    /// @brief @p type's name, with its colon.
     KRYS_NODISCARD static inline CSSOMStringView
       SelectorTextForPseudoClass(SelectorPseudoClass type) noexcept;
 
 #pragma region Traversal
 
-    /// @brief Selectors are kept in an array by SelectorList. The left component of the selector is the next
-    /// item in the array.
+    /// @brief The simple selector on the left, the next in the array, or null if this is the leftmost.
     KRYS_NODISCARD const Selector *PrecedingComplexSelectorComponent() const noexcept
     {
       return IsFirstInComplexSelector() ? nullptr : this + 1;
     }
 
+    /// @brief The leftmost simple selector of this one's compound selector.
     KRYS_NODISCARD const Selector *FirstInCompoundSelector() const noexcept;
 
+    /// @brief The rightmost simple selector of this one's compound selector.
     KRYS_NODISCARD const Selector *LastInCompoundSelector() const noexcept;
 
+    /// @brief The simple selector on the left if it's in the same compound selector, or null.
     KRYS_NODISCARD const Selector *PrecedingCompoundSelectorComponent() const noexcept;
 
 #pragma endregion
+
+#pragma region Data
+
+    KRYS_NODISCARD SelectorMatch Match() const noexcept
+    {
+      return _match;
+    }
+
+    KRYS_NODISCARD SelectorRelation Relation() const noexcept
+    {
+      return _relation;
+    }
 
     KRYS_NODISCARD const QualifiedName &TagQualifiedName() const noexcept;
 
     KRYS_NODISCARD const CSSOMStringAtom &TagLocalNameLower() const noexcept;
 
+    /// @brief The value to match: an ID, class, attribute value, or a pseudo-element's name.
     KRYS_NODISCARD const CSSOMStringAtom &Value() const noexcept;
 
+    /// @brief The value as written, which differs from `Value` when quirks mode lowercases it.
     KRYS_NODISCARD const CSSOMStringAtom &SerialisingValue() const noexcept;
 
     KRYS_NODISCARD const QualifiedName &Attribute() const noexcept;
@@ -381,12 +387,13 @@ namespace krys::boo::css
       return HasRareData() ? _data.Rare->Argument : CSSOMStringAtom::Null();
     }
 
-    /// @brief Whether the selector's `s` flag makes it match case-sensitively, whatever the attribute.
+    /// @brief Whether the `s` flag makes the selector match case-sensitively, whatever the attribute.
     KRYS_NODISCARD bool IsAttributeValueMatchingCaseSensitive() const noexcept
     {
       return _flags.contains(SelectorFlag::CaseSensitiveAttributeValueMatching);
     }
 
+    /// @brief Whether the `i` flag makes the selector match case-insensitively.
     KRYS_NODISCARD bool IsAttributeValueMatchingCaseInsensitive() const noexcept
     {
       return _flags.contains(SelectorFlag::CaseInsensitiveAttributeValueMatching);
@@ -402,12 +409,13 @@ namespace krys::boo::css
       return HasRareData() ? &_data.Rare->LangList : nullptr;
     }
 
-    /// @brief The integers of `:heading()`.
+    /// @brief The levels of `:heading()`.
     KRYS_NODISCARD const FixedList<int32> *IntegerList() const noexcept
     {
       return HasRareData() ? &_data.Rare->IntegerList : nullptr;
     }
 
+    /// @brief The selector list argument, if the selector has one.
     KRYS_NODISCARD const SelectorList *SubSelectors() const noexcept
     {
       return HasRareData() ? _data.Rare->SubSelectors.get() : nullptr;
@@ -418,21 +426,12 @@ namespace krys::boo::css
       return HasRareData() ? _data.Rare->SubSelectors.get() : nullptr;
     }
 
+    /// @brief Whether the element at 1-based position @p count matches this `:nth-*()`'s `An+B`.
     KRYS_NODISCARD bool MatchNth(int32 count) const noexcept;
 
     KRYS_NODISCARD int32 NthA() const noexcept;
 
     KRYS_NODISCARD int32 NthB() const noexcept;
-
-    KRYS_NODISCARD bool HasDescendantRelation() const noexcept
-    {
-      return Relation() == SelectorRelation::Descendant;
-    }
-
-    KRYS_NODISCARD bool HasDescendantOrChildRelation() const noexcept
-    {
-      return Relation() == SelectorRelation::Child || HasDescendantRelation();
-    }
 
     KRYS_NODISCARD SelectorPseudoClass PseudoClass() const noexcept
     {
@@ -446,28 +445,20 @@ namespace krys::boo::css
       return static_cast<SelectorPseudoElement>(_pseudoType);
     }
 
+#pragma endregion
+
+#pragma region Queries
+
     KRYS_NODISCARD bool MatchesPseudoElement() const noexcept
     {
       return Match() == SelectorMatch::PseudoElement;
     }
-
-    KRYS_NODISCARD bool IsSiblingSelector() const noexcept;
 
     KRYS_NODISCARD bool IsAttributeSelector() const noexcept;
 
     KRYS_NODISCARD bool IsHostPseudoClass() const noexcept;
 
     KRYS_NODISCARD bool IsScopePseudoClass() const noexcept;
-
-    KRYS_NODISCARD SelectorRelation Relation() const noexcept
-    {
-      return _relation;
-    }
-
-    KRYS_NODISCARD SelectorMatch Match() const noexcept
-    {
-      return _match;
-    }
 
     KRYS_NODISCARD bool IsLastInSelectorList() const noexcept
     {
@@ -484,20 +475,17 @@ namespace krys::boo::css
       return _flags.contains(SelectorFlag::IsLastInComplexSelector);
     }
 
-    // FIXME: This should ideally be private, but StyleRule uses it.
-    void SetLastInSelectorList() noexcept
-    {
-      SetFlag(SelectorFlag::IsLastInSelectorList, true);
-    }
-
-    /// @brief Whether this selector is not author/UA written.
+    /// @brief Whether the parser added this selector rather than the author.
     KRYS_NODISCARD bool IsImplicit() const noexcept
     {
       return _flags.contains(SelectorFlag::IsImplicit);
     }
 
-    /// @brief Relation and selector list bits are ignored.
+    /// @brief Whether the two simple selectors test the same thing; their relations and positions are
+    /// ignored.
     KRYS_NODISCARD bool SimpleSelectorEqual(const Selector &other) const noexcept;
+
+#pragma endregion
 
   private:
     KRYS_NODISCARD bool HasRareData() const noexcept
@@ -551,45 +539,70 @@ namespace krys::boo::css
       SetFlag(SelectorFlag::IsImplicit, true);
     }
 
+    void SetLastInSelectorList() noexcept
+    {
+      SetFlag(SelectorFlag::IsLastInSelectorList, true);
+    }
+
+    /// @brief Moves the value into a new `RareData`, if the selector has none.
     void CreateRareData() noexcept;
   };
 
+  /// @brief Whether the complex selector ending at @p complexSelector has a pseudo-element.
   KRYS_NODISCARD bool ComplexSelectorCanMatchPseudoElement(const Selector &complexSelector) noexcept;
 
+  /// @brief Whether the rightmost compound selector has pseudo-elements, all of them `::slotted()`,
+  /// `::part()` or user agent parts.
   KRYS_NODISCARD bool
     ComplexSelectorMatchesElementBackedPseudoElement(const Selector &complexSelector) noexcept;
 
-  /// @brief In the IgnoreNonElementBackedPseudoElements mode `.foo::before` and `.foo` compare equal.
   enum class ComplexSelectorsEqualMode : bool
   {
     Full,
+    /// @brief Skips pseudo-elements that aren't element-backed, so `.foo::before` and `.foo` compare equal.
     IgnoreNonElementBackedPseudoElements,
   };
 
+  /// @brief Whether two complex selectors are the same, relations included.
   KRYS_NODISCARD bool
     ComplexSelectorsEqual(const Selector &a, const Selector &b,
                           ComplexSelectorsEqualMode mode = ComplexSelectorsEqualMode::Full) noexcept;
 
-  /// @brief Hashes a complex selector consistently with ComplexSelectorsEqual in the same @p mode.
+  /// @brief A hash of a complex selector, equal for selectors `ComplexSelectorsEqual` in the same @p mode.
   KRYS_NODISCARD size_t
     HashComplexSelector(const Selector &complexSelector,
                         ComplexSelectorsEqualMode mode = ComplexSelectorsEqualMode::Full) noexcept;
 
+  /// @brief Whether @p type depends on the element's siblings (the child-indexed and typed child-indexed
+  /// pseudo-classes, and `:empty`).
   KRYS_NODISCARD constexpr bool PseudoClassIsRelativeToSiblings(SelectorPseudoClass type) noexcept
   {
-    return type == SelectorPseudoClass::Empty || type == SelectorPseudoClass::FirstChild
-           || type == SelectorPseudoClass::FirstOfType || type == SelectorPseudoClass::LastChild
-           || type == SelectorPseudoClass::LastOfType || type == SelectorPseudoClass::OnlyChild
-           || type == SelectorPseudoClass::OnlyOfType || type == SelectorPseudoClass::NthChild
-           || type == SelectorPseudoClass::NthOfType || type == SelectorPseudoClass::NthLastChild
-           || type == SelectorPseudoClass::NthLastOfType;
+    switch (type)
+    {
+      case SelectorPseudoClass::Empty:
+      case SelectorPseudoClass::FirstChild:
+      case SelectorPseudoClass::FirstOfType:
+      case SelectorPseudoClass::LastChild:
+      case SelectorPseudoClass::LastOfType:
+      case SelectorPseudoClass::OnlyChild:
+      case SelectorPseudoClass::OnlyOfType:
+      case SelectorPseudoClass::NthChild:
+      case SelectorPseudoClass::NthOfType:
+      case SelectorPseudoClass::NthLastChild:
+      case SelectorPseudoClass::NthLastOfType: return true;
+      default:                                 return false;
+    }
   }
 
+  /// @brief Whether @p type is a [tree-structural
+  /// pseudo-class](https://drafts.csswg.org/selectors/#structural-pseudos).
   KRYS_NODISCARD constexpr bool IsTreeStructuralPseudoClass(SelectorPseudoClass type) noexcept
   {
     return PseudoClassIsRelativeToSiblings(type) || type == SelectorPseudoClass::Root;
   }
 
+  /// @brief Whether @p pseudoClass is a [logical
+  /// combination](https://drafts.csswg.org/selectors/#logical-combination).
   KRYS_NODISCARD constexpr bool IsLogicalCombinationPseudoClass(SelectorPseudoClass pseudoClass) noexcept
   {
     switch (pseudoClass)
@@ -597,17 +610,13 @@ namespace krys::boo::css
       case SelectorPseudoClass::Is:
       case SelectorPseudoClass::Where:
       case SelectorPseudoClass::Not:
-      case SelectorPseudoClass::Has:
-      {
-        return true;
-      }
-      default:
-      {
-        return false;
-      }
+      case SelectorPseudoClass::Has:   return true;
+      default:                         return false;
     }
   }
 
+  /// @brief Whether @p pseudoElement is an [element-backed
+  /// pseudo-element](https://drafts.csswg.org/css-pseudo-4/#element-backed), one that is a real element.
   KRYS_NODISCARD bool IsElementBackedPseudoElement(SelectorPseudoElement pseudoElement) noexcept;
 
   inline const QualifiedName &Selector::Attribute() const noexcept
@@ -617,40 +626,40 @@ namespace krys::boo::css
     return _data.Rare->Attribute;
   }
 
-  inline bool Selector::IsSiblingSelector() const noexcept
-  {
-    return Relation() == SelectorRelation::NextSibling || Relation() == SelectorRelation::SubsequentSibling
-           || (Match() == SelectorMatch::PseudoClass && PseudoClassIsRelativeToSiblings(PseudoClass()));
-  }
-
   inline bool Selector::IsAttributeSelector() const noexcept
   {
-    return Match() == SelectorMatch::AttributeEquals || Match() == SelectorMatch::AttributeExists
-           || Match() == SelectorMatch::AttributeIncludes || Match() == SelectorMatch::AttributeDash
-           || Match() == SelectorMatch::AttributeSubstring || Match() == SelectorMatch::AttributePrefix
-           || Match() == SelectorMatch::AttributeSuffix;
+    switch (Match())
+    {
+      case SelectorMatch::AttributeExists:
+      case SelectorMatch::AttributeEquals:
+      case SelectorMatch::AttributeDash:
+      case SelectorMatch::AttributeIncludes:
+      case SelectorMatch::AttributePrefix:
+      case SelectorMatch::AttributeSuffix:
+      case SelectorMatch::AttributeSubstring: return true;
+      default:                                return false;
+    }
   }
 
   inline void Selector::SetValue(const CSSOMStringAtom &value, MatchLowercase matchLowercase) noexcept
   {
     krys_debug_assert(Match() != SelectorMatch::Type);
     auto matchingValue = matchLowercase == MatchLowercase::Yes ? value.ToASCIILower() : value;
+    // The two values only need rare data when they differ.
     if (!HasRareData() && matchingValue != value)
     {
       CreateRareData();
     }
-
-    if (!HasRareData())
+    if (HasRareData())
     {
-      // Copy before releasing the old value, which `value` may be.
-      auto storage = CSSOMStringAtom(value).LeakStorage();
-      CSSOMStringAtom::DerefStorage(_data.Value);
-      _data.Value = storage;
+      _data.Rare->MatchingValue = krys::move(matchingValue);
+      _data.Rare->SerialisingValue = value;
       return;
     }
-
-    _data.Rare->MatchingValue = matchingValue;
-    _data.Rare->SerialisingValue = value;
+    // Take the new reference before releasing the old, which `value` may be.
+    auto storage = CSSOMStringAtom(value).LeakStorage();
+    CSSOMStringAtom::DerefStorage(_data.Value);
+    _data.Value = storage;
   }
 
   inline Selector::~Selector() noexcept
@@ -677,7 +686,7 @@ namespace krys::boo::css
   inline const QualifiedName &Selector::TagQualifiedName() const noexcept
   {
     krys_debug_assert(Match() == SelectorMatch::Type);
-    // QualifiedName is just a pointer to its storage, so the cast below is safe.
+    // A QualifiedName is only a pointer to its storage.
     return *reinterpret_cast<const QualifiedName *>(&_data.TagQualifiedName);
   }
 
@@ -693,8 +702,7 @@ namespace krys::boo::css
     {
       return _data.Rare->MatchingValue;
     }
-
-    // An atom is just a pointer to its interned string, so the cast below is safe.
+    // An atom is only a pointer to its interned string.
     return *reinterpret_cast<const CSSOMStringAtom *>(&_data.Value);
   }
 
@@ -705,8 +713,6 @@ namespace krys::boo::css
     {
       return _data.Rare->SerialisingValue;
     }
-
-    // An atom is just a pointer to its interned string, so the cast below is safe.
     return *reinterpret_cast<const CSSOMStringAtom *>(&_data.Value);
   }
 }

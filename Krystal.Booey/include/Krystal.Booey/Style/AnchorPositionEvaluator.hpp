@@ -25,6 +25,7 @@
 #pragma once
 
 #include "Krystal.Booey/CSS/Properties/Property.hpp"
+#include "Krystal.Booey/CSS/Properties/PropertyQueries.hpp"
 #include "Krystal.Booey/CSS/Values/ValueId.hpp"
 #include "Krystal.Booey/Graphics/Geometry/BoxSides.hpp"
 #include "Krystal.Booey/Graphics/Geometry/LayoutPoint.hpp"
@@ -249,7 +250,7 @@ namespace krys::boo::style
     /// @brief Whether @p property takes `anchor()`: the inset properties.
     KRYS_NODISCARD static bool PropertyAllowsAnchorFunction(css::PropertyId property) noexcept
     {
-      return css::Property::IsInsetProperty(property);
+      return css::IsInsetProperty(property);
     }
 
     KRYS_NODISCARD static Maybe<double> Evaluate(BuilderState &, Maybe<ScopedName> elementName,
@@ -258,8 +259,8 @@ namespace krys::boo::style
     /// @brief Whether @p property takes `anchor-size()`: the sizing, inset and margin properties.
     KRYS_NODISCARD static bool PropertyAllowsAnchorSizeFunction(css::PropertyId property) noexcept
     {
-      return css::Property::IsSizingProperty(property) || css::Property::IsInsetProperty(property)
-             || css::Property::IsMarginProperty(property);
+      return css::IsSizingProperty(property) || css::IsInsetProperty(property)
+             || css::IsMarginProperty(property);
     }
 
     KRYS_NODISCARD static Maybe<double> EvaluateSize(BuilderState &, Maybe<ScopedName> elementName,

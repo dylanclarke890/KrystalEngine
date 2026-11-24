@@ -1,25 +1,4 @@
-﻿/*
- * Copyright (C) 1999 Antti Koivisto (koivisto@kde.org)
- * Copyright (C) 2004-2025 Apple Inc. All rights reserved.
- *
- * This library is free software; you can redistribute it and/or
- * modify it under the terms of the GNU Library General Public
- * License as published by the Free Software Foundation; either
- * version 2 of the License, or (at your option) any later version.
- *
- * This library is distributed in the hope that it will be useful,
- * but WITHOUT ANY WARRANTY; without even the implied warranty of
- * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU
- * Library General Public License for more details.
- *
- * You should have received a copy of the GNU Library General Public License
- * along with this library; see the file COPYING.LIB.  If not, write to
- * the Free Software Foundation, Inc., 51 Franklin Street, Fifth Floor,
- * Boston, MA 02110-1301, USA.
- *
- */
-
-#include "Krystal.Booey/Animation/Keyframes/BlendingKeyframes.hpp"
+﻿#include "Krystal.Booey/Animation/Keyframes/BlendingKeyframes.hpp"
 #include "Krystal.Booey/Animation/CSSAnimation.hpp"
 #include "Krystal.Booey/Animation/KeyframeEffect.hpp"
 #include "Krystal.Booey/CSS/Properties/MutableStyleProperties.hpp"
@@ -38,6 +17,44 @@
 
 namespace krys::boo
 {
+  namespace
+  {
+    /// @brief An empty keyframe rule at @p key, which the style of an implicit keyframe is resolved from.
+    KRYS_NODISCARD Ref<css::KeyframeRule> EmptyKeyframeRule(double key) noexcept
+    {
+      auto keyframe = css::KeyframeRule::Create(css::MutableStyleProperties::Create());
+      keyframe->SetKey({css::ValueId::Invalid, key});
+      return keyframe;
+    }
+
+    KRYS_NODISCARD const css::KeyframeRule &ZeroPercentKeyframe() noexcept
+    {
+      static NeverDestroyed<Ref<css::KeyframeRule>> rule {EmptyKeyframeRule(0)};
+      return **rule;
+    }
+
+    KRYS_NODISCARD const css::KeyframeRule &HundredPercentKeyframe() noexcept
+    {
+      static NeverDestroyed<Ref<css::KeyframeRule>> rule {EmptyKeyframeRule(1)};
+      return **rule;
+    }
+
+    /// @brief The properties in @p all that aren't in @p excluded.
+    KRYS_NODISCARD AnimatableCSSPropertySet PropertiesNotIn(const AnimatableCSSPropertySet &all,
+                                                            const AnimatableCSSPropertySet &excluded) noexcept
+    {
+      AnimatableCSSPropertySet difference;
+      for (const auto &property : all)
+      {
+        if (!excluded.contains(property))
+        {
+          difference.insert(property);
+        }
+      }
+      return difference;
+    }
+  }
+
   Maybe<CompositeOperation> KeyframeRuleCompositeOperation(const css::KeyframeRule &keyframe) noexcept
   {
     auto value = keyframe.Properties().GetPropertyCSSValue(css::PropertyId::AnimationComposition);
@@ -45,7 +62,6 @@ namespace krys::boo
     {
       return null;
     }
-
     switch (value->ValueId())
     {
       case css::ValueId::Add:        return CompositeOperation::Add;
@@ -55,39 +71,54 @@ namespace krys::boo
     }
   }
 
-  BlendingKeyframes::~BlendingKeyframes() noexcept = default;
+#pragma region BlendingKeyframe
 
-  void BlendingKeyframes::Clear() noexcept
+  BlendingKeyframe::BlendingKeyframe(KeyframeOffset &&offset, UniquePtr<RenderStyle> &&style) noexcept
+      : _specifiedOffset(krys::move(offset)), _style(krys::move(style))
   {
-    _keyframes.clear();
-    _properties.clear();
-    _propertiesSetToInherit.clear();
-    _propertiesSetToCurrentColor.clear();
-    _usesRelativeFontWeight = false;
-    _containsCSSVariableReferences = false;
-    _usesAnchorFunctions = false;
+    // A range offset is resolved later, against the timeline.
+    if (!UsesRangeOffset())
+    {
+      _computedOffset = _specifiedOffset.Value;
+    }
   }
 
-  bool BlendingKeyframes::operator==(const BlendingKeyframes &o) const noexcept
+  BlendingKeyframe::BlendingKeyframe(const BlendingKeyframe &source) noexcept
+      : _specifiedOffset(source._specifiedOffset), _computedOffset(source._computedOffset),
+        _properties(source._properties), _style(RenderStyle::ClonePtr(*source.Style())),
+        _timingFunction(source._timingFunction), _compositeOperation(source._compositeOperation),
+        _containsDirectionAwareProperty(source._containsDirectionAwareProperty)
   {
-    if (_keyframes.size() != o._keyframes.size())
-    {
-      return false;
-    }
+  }
 
-    for (size_t i = 0; i < _keyframes.size(); ++i)
-    {
-      if (_keyframes[i].Offset() != o._keyframes[i].Offset())
-      {
-        return false;
-      }
-      if (_keyframes[i].Style() != o._keyframes[i].Style())
-      {
-        return false;
-      }
-    }
+  bool BlendingKeyframe::AnimatesProperty(KeyframeInterpolation::Property property) const noexcept
+  {
+    return _properties.contains(property);
+  }
 
-    return true;
+  void BlendingKeyframe::AddProperty(const AnimatableCSSProperty &property) noexcept
+  {
+    krys_debug_assert(!std::holds_alternative<css::PropertyId>(property)
+                      || std::get<css::PropertyId>(property) != css::PropertyId::Custom);
+    _properties.insert(property);
+  }
+
+  bool BlendingKeyframe::UsesRangeOffset() const noexcept
+  {
+    return _specifiedOffset.Name != style::SingleAnimationRangeName::Omitted
+           && _specifiedOffset.Name != style::SingleAnimationRangeName::Normal;
+  }
+
+#pragma endregion
+
+#pragma region BlendingKeyframes
+
+  BlendingKeyframes::~BlendingKeyframes() noexcept = default;
+
+  uint64 BlendingKeyframes::NextAnonymousIdentifier() noexcept
+  {
+    static uint64 numericIdentifier = 0;
+    return ++numericIdentifier;
   }
 
   const StringAtom &BlendingKeyframes::KeyframesName() const noexcept
@@ -99,6 +130,23 @@ namespace krys::boo
     return StringAtom::Null();
   }
 
+  const utf8_string &BlendingKeyframes::AcceleratedAnimationName() const noexcept
+  {
+    if (_acceleratedAnimationName.empty())
+    {
+      if (const auto *name = std::get_if<StringAtom>(&_identifier))
+      {
+        _acceleratedAnimationName = utf8_string(name->View());
+      }
+      else
+      {
+        auto numericName = std::format("keyframe-effect-{}", std::get<uint64>(_identifier));
+        _acceleratedAnimationName = utf8_string(numericName.begin(), numericName.end());
+      }
+    }
+    return _acceleratedAnimationName;
+  }
+
   void BlendingKeyframes::Insert(BlendingKeyframe &&keyframe) noexcept
   {
     if (!keyframe.UsesRangeOffset() && (keyframe.Offset() < 0 || keyframe.Offset() > 1))
@@ -108,32 +156,14 @@ namespace krys::boo
 
     AnalyzeKeyframe(keyframe);
 
-    size_t i = 0;
-    for (; i < _keyframes.size(); ++i)
-    {
-      if (_keyframes[i].Offset() > keyframe.Offset())
-      {
-        break;
-      }
-    }
-
-    // Insert before the first keyframe with a greater offset.
-    auto inserted = _keyframes.insert(_keyframes.begin() + static_cast<ptrdiff_t>(i), krys::move(keyframe));
+    // After the keyframes at the same offset, so they keep their order.
+    auto position = std::ranges::find_if(_keyframes, [&](const BlendingKeyframe &existing)
+                                         { return existing.Offset() > keyframe.Offset(); });
+    auto inserted = _keyframes.insert(position, krys::move(keyframe));
     for (const auto &property : inserted->Properties())
     {
       _properties.insert(property);
     }
-  }
-
-  bool BlendingKeyframes::HasImplicitKeyframes() const noexcept
-  {
-    return Size() && (_keyframes[0].Offset() || _keyframes[Size() - 1].Offset() != 1);
-  }
-
-  bool BlendingKeyframes::HasImplicitKeyframeForProperty(const AnimatableCSSProperty &property) const noexcept
-  {
-    return HasImplicitKeyframes()
-           && (!_explicitFromProperties.contains(property) || !_explicitToProperties.contains(property));
   }
 
   void BlendingKeyframes::CopyKeyframes(const BlendingKeyframes &other) noexcept
@@ -143,6 +173,40 @@ namespace krys::boo
       auto copy = keyframe;
       Insert(krys::move(copy));
     }
+  }
+
+  void BlendingKeyframes::Clear() noexcept
+  {
+    // Everything but the name: the analysis goes with the keyframes it came from.
+    _keyframes.clear();
+    _properties.clear();
+    _explicitToProperties.clear();
+    _explicitFromProperties.clear();
+    _propertiesSetToInherit.clear();
+    _propertiesSetToCurrentColor.clear();
+    _usesRelativeFontWeight = false;
+    _containsCSSVariableReferences = false;
+    _usesAnchorFunctions = false;
+    _hasWidthDependentTransform = false;
+    _hasHeightDependentTransform = false;
+    _hasDiscreteTransformInterval = false;
+    _hasExplicitlyInheritedKeyframeProperty = false;
+    _hasKeyframeNotUsingRangeOffset = false;
+  }
+
+  void BlendingKeyframes::UpdatedComputedOffsets(
+    KRYS_NOESCAPE const Func<double(const BlendingKeyframe::KeyframeOffset &)> &callback) noexcept
+  {
+    for (auto &keyframe : _keyframes)
+    {
+      keyframe.SetComputedOffset(callback(keyframe.SpecifiedOffset()));
+    }
+    std::ranges::stable_sort(_keyframes, {}, &BlendingKeyframe::Offset);
+  }
+
+  bool BlendingKeyframes::ContainsProperty(const AnimatableCSSProperty &property) const noexcept
+  {
+    return _properties.contains(property);
   }
 
   bool BlendingKeyframes::ContainsAnimatableCSSProperty() const noexcept
@@ -157,22 +221,157 @@ namespace krys::boo
                                { return keyframe.ContainsDirectionAwareProperty(); });
   }
 
+#pragma endregion
+
+#pragma region Implicit keyframes
+
+  bool BlendingKeyframes::HasImplicitKeyframes() const noexcept
+  {
+    return Size() && (_keyframes[0].Offset() || _keyframes[Size() - 1].Offset() != 1);
+  }
+
+  bool BlendingKeyframes::HasImplicitKeyframeForProperty(const AnimatableCSSProperty &property) const noexcept
+  {
+    return HasImplicitKeyframes()
+           && (!_explicitFromProperties.contains(property) || !_explicitToProperties.contains(property));
+  }
+
+  void BlendingKeyframes::FillImplicitKeyframes(const KeyframeEffect &effect,
+                                                const RenderStyle &underlyingStyle) noexcept
+  {
+    if (IsEmpty())
+    {
+      return;
+    }
+
+    krys_debug_assert(effect.Target());
+    auto element = ShareRef(*effect.Target());
+    if (!element->IsConnected())
+    {
+      return;
+    }
+    auto &styleResolver = element->StyleResolver();
+
+    // Every property a keyframe sets is expected at 0% and at 100%; those missing there are implicit.
+    AnimatableCSSPropertySet expectedExplicitProperties;
+    for (const auto &keyframe : _keyframes)
+    {
+      if (keyframe.HasResolvedOffset())
+      {
+        expectedExplicitProperties.insert(keyframe.Properties().begin(), keyframe.Properties().end());
+      }
+    }
+
+    // An existing 0% or 100% keyframe takes the implicit values if it's at a plain offset and has no timing
+    // function of its own, or (for a CSS animation) the one its keyframes default to.
+    auto canTakeImplicitValues = [&](const BlendingKeyframe &keyframe)
+    {
+      if (keyframe.UsesRangeOffset())
+      {
+        return false;
+      }
+      auto *timingFunction = keyframe.GetTimingFunction();
+      if (!timingFunction)
+      {
+        return true;
+      }
+      if (auto *cssAnimation = DynamicDowncast<CSSAnimation>(effect.Animation()))
+      {
+        // The default is the animation's keyframes' default timing function if it has one, and `ease`
+        // otherwise.
+        if (const auto &animationTimingFunction =
+              cssAnimation->BackingStyleAnimation().DefaultTimingFunctionForKeyframes())
+        {
+          return timingFunction == animationTimingFunction->Value.get();
+        }
+        return timingFunction == &CubicBezierTimingFunction::DefaultTimingFunction();
+      }
+      return false;
+    };
+
+    // Gives @p implicitProperties their underlying values at @p key: in @p existingKeyframe if there's one
+    // that can take them, or else in a new keyframe resolved from @p keyframeRule.
+    auto addImplicitKeyframe = [&](double key, const AnimatableCSSPropertySet &implicitProperties,
+                                   const css::KeyframeRule &keyframeRule, BlendingKeyframe *existingKeyframe)
+    {
+      if (existingKeyframe)
+      {
+        krys_debug_assert(existingKeyframe->Style());
+        auto keyframeStyle = RenderStyle::ClonePtr(*existingKeyframe->Style());
+        for (const auto &property : implicitProperties)
+        {
+          style::interpolation::Interpolate(property, *keyframeStyle, underlyingStyle, underlyingStyle, 1,
+                                            krys::CompositeOperation::Replace, effect);
+          existingKeyframe->AddProperty(property);
+        }
+        existingKeyframe->SetStyle(krys::move(keyframeStyle));
+        return;
+      }
+
+      BlendingKeyframe blendingKeyframe(key, nullptr);
+      blendingKeyframe.SetStyle(
+        styleResolver.StyleForKeyframe(*element, underlyingStyle, {nullptr}, keyframeRule, blendingKeyframe));
+      for (const auto &property : implicitProperties)
+      {
+        blendingKeyframe.AddProperty(property);
+      }
+      // A CSS animation's keyframes replace by default (https://drafts.csswg.org/css-animations-2/#keyframes,
+      // step 2).
+      if (effect.Animation() && Is<CSSAnimation>(*effect.Animation()))
+      {
+        blendingKeyframe.SetCompositeOperation(krys::CompositeOperation::Replace);
+      }
+      Insert(krys::move(blendingKeyframe));
+    };
+
+    // The properties the keyframes at @p isAtKey's offsets set, and the first of them that can take the
+    // implicit values.
+    auto explicitPropertiesAt = [&](auto isAtKey)
+    {
+      AnimatableCSSPropertySet explicitProperties;
+      BlendingKeyframe *implicitKeyframe = nullptr;
+      for (auto &keyframe : _keyframes)
+      {
+        if (!isAtKey(keyframe.Offset()))
+        {
+          continue;
+        }
+        explicitProperties.insert(keyframe.Properties().begin(), keyframe.Properties().end());
+        if (!implicitKeyframe && canTakeImplicitValues(keyframe))
+        {
+          implicitKeyframe = &keyframe;
+        }
+      }
+      return Pair<AnimatableCSSPropertySet, BlendingKeyframe *>(krys::move(explicitProperties),
+                                                                implicitKeyframe);
+    };
+
+    auto [zeroExplicitProperties, zeroKeyframe] =
+      explicitPropertiesAt([](double offset) { return offset <= 0; });
+    if (auto implicitProperties = PropertiesNotIn(expectedExplicitProperties, zeroExplicitProperties);
+        !implicitProperties.empty())
+    {
+      addImplicitKeyframe(0, implicitProperties, ZeroPercentKeyframe(), zeroKeyframe);
+    }
+
+    // After the 0% keyframe's added, as adding it moves the keyframes.
+    auto [oneExplicitProperties, oneKeyframe] =
+      explicitPropertiesAt([](double offset) { return offset >= 1; });
+    if (auto implicitProperties = PropertiesNotIn(expectedExplicitProperties, oneExplicitProperties);
+        !implicitProperties.empty())
+    {
+      addImplicitKeyframe(1, implicitProperties, HundredPercentKeyframe(), oneKeyframe);
+    }
+  }
+
+#pragma endregion
+
+#pragma region Dependencies
+
   bool BlendingKeyframes::UsesContainerUnits() const noexcept
   {
     return std::ranges::any_of(_keyframes, [](const BlendingKeyframe &keyframe)
                                { return keyframe.Style()->UsesContainerUnits(); });
-  }
-
-  void BlendingKeyframes::AddProperty(const AnimatableCSSProperty &property) noexcept
-  {
-    krys_debug_assert(!std::holds_alternative<css::PropertyId>(property)
-                      || std::get<css::PropertyId>(property) != css::PropertyId::Custom);
-    _properties.insert(property);
-  }
-
-  bool BlendingKeyframes::ContainsProperty(const AnimatableCSSProperty &property) const noexcept
-  {
-    return _properties.contains(property);
   }
 
   bool BlendingKeyframes::UsesRelativeFontWeight() const noexcept
@@ -217,31 +416,27 @@ namespace krys::boo
 
       if (const auto *primitiveValue = DynamicDowncast<css::PrimitiveValue>(*cssValue))
       {
-        auto propertyID = propertyReference.Id();
+        auto propertyId = propertyReference.Id();
         auto valueId = primitiveValue->ValueId();
-
         if (valueId == css::ValueId::Inherit)
         {
-          _propertiesSetToInherit.insert(propertyID);
+          _propertiesSetToInherit.insert(propertyId);
         }
         else if (valueId == css::ValueId::Currentcolor)
         {
-          _propertiesSetToCurrentColor.insert(propertyID);
+          _propertiesSetToCurrentColor.insert(propertyId);
         }
-        else if (!_usesRelativeFontWeight && propertyID == css::PropertyId::FontWeight
+        else if (!_usesRelativeFontWeight && propertyId == css::PropertyId::FontWeight
                  && (valueId == css::ValueId::Bolder || valueId == css::ValueId::Lighter))
         {
           _usesRelativeFontWeight = true;
         }
 
-        if (style::AnchorPositionEvaluator::PropertyAllowsAnchorFunction(propertyID)
-            || style::AnchorPositionEvaluator::PropertyAllowsAnchorSizeFunction(propertyID))
+        if ((style::AnchorPositionEvaluator::PropertyAllowsAnchorFunction(propertyId)
+             || style::AnchorPositionEvaluator::PropertyAllowsAnchorSizeFunction(propertyId))
+            && cssValue->ComputedStyleDependencies().Anchors)
         {
-          auto dependencies = cssValue->ComputedStyleDependencies();
-          if (dependencies.Anchors)
-          {
-            _usesAnchorFunctions = true;
-          }
+          _usesAnchorFunctions = true;
         }
       }
       else if (const auto *customPropertyValue = DynamicDowncast<css::CustomPropertyValue>(*cssValue))
@@ -266,327 +461,49 @@ namespace krys::boo
       return;
     }
 
-    auto analyzeSizeDependentTransform = [&]
+    // Any keyframe's dependency makes the animation depend on the size.
+    if (!_hasWidthDependentTransform || !_hasHeightDependentTransform)
     {
-      if (_hasWidthDependentTransform && _hasHeightDependentTransform)
-      {
-        return;
-      }
-
       if (keyframe.AnimatesProperty(AnimatableCSSProperty {css::PropertyId::Transform}))
       {
         auto [isWidthDependent, isHeightDependent] = style->Transform().ComputeSizeDependencies();
-        _hasWidthDependentTransform = isWidthDependent;
-        _hasHeightDependentTransform = isHeightDependent;
+        _hasWidthDependentTransform |= isWidthDependent;
+        _hasHeightDependentTransform |= isHeightDependent;
       }
-
       if (keyframe.AnimatesProperty(AnimatableCSSProperty {css::PropertyId::Translate}))
       {
         auto [isWidthDependent, isHeightDependent] = style->Translate().ComputeSizeDependencies();
-        _hasWidthDependentTransform = isWidthDependent;
-        _hasHeightDependentTransform = isHeightDependent;
-      }
-    };
-
-    auto analyzeDiscreteTransformInterval = [&]
-    {
-      if (!_hasDiscreteTransformInterval
-          && keyframe.AnimatesProperty(AnimatableCSSProperty {css::PropertyId::Transform}))
-      {
-        _hasDiscreteTransformInterval = style->Transform().ContainsNonInvertibleMatrix({});
-      }
-    };
-
-    auto analyzeExplicitlyInheritedKeyframeProperty = [&]
-    {
-      if (!_hasExplicitlyInheritedKeyframeProperty)
-      {
-        _hasExplicitlyInheritedKeyframeProperty = style->HasExplicitlyInheritedProperties();
-      }
-    };
-
-    auto analyzeKeyframeForExplicitProperties = [&]
-    {
-      const auto &properties = keyframe.Properties();
-      if (!keyframe.Offset())
-      {
-        _explicitFromProperties.insert(properties.begin(), properties.end());
-      }
-      if (keyframe.Offset() == 1)
-      {
-        _explicitToProperties.insert(properties.begin(), properties.end());
-      }
-    };
-
-    auto analyzeKeyframeRangeOffset = [&]
-    {
-      if (!_hasKeyframeNotUsingRangeOffset)
-      {
-        _hasKeyframeNotUsingRangeOffset = !keyframe.UsesRangeOffset();
-      }
-    };
-
-    analyzeSizeDependentTransform();
-    analyzeDiscreteTransformInterval();
-    analyzeExplicitlyInheritedKeyframeProperty();
-    analyzeKeyframeForExplicitProperties();
-    analyzeKeyframeRangeOffset();
-  }
-
-  void BlendingKeyframes::UpdatedComputedOffsets(
-    KRYS_NOESCAPE const Func<double(const BlendingKeyframe::KeyframeOffset &)> &callback) noexcept
-  {
-    for (auto &keyframe : _keyframes)
-    {
-      keyframe.SetComputedOffset(callback(keyframe.SpecifiedOffset()));
-    }
-
-    std::ranges::stable_sort(_keyframes, {}, &BlendingKeyframe::Offset);
-  }
-
-  const utf8_string &BlendingKeyframes::AcceleratedAnimationName() const noexcept
-  {
-    if (_acceleratedAnimationName.empty())
-    {
-      if (const auto *name = std::get_if<StringAtom>(&_identifier))
-      {
-        _acceleratedAnimationName = utf8_string(name->View());
-      }
-      else
-      {
-        auto numericName = std::format("keyframe-effect-{}", std::get<uint64>(_identifier));
-        _acceleratedAnimationName = utf8_string(numericName.begin(), numericName.end());
-      }
-    }
-    return _acceleratedAnimationName;
-  }
-
-  namespace
-  {
-    KRYS_NODISCARD const css::KeyframeRule &ZeroPercentKeyframe() noexcept
-    {
-      static NeverDestroyed<Ref<css::KeyframeRule>> rule {
-        []
-        {
-          auto keyframe = css::KeyframeRule::Create(css::MutableStyleProperties::Create());
-          keyframe->SetKey({css::ValueId::Invalid, 0});
-          return keyframe;
-        }()};
-      return **rule;
-    }
-
-    KRYS_NODISCARD const css::KeyframeRule &HundredPercentKeyframe() noexcept
-    {
-      static NeverDestroyed<Ref<css::KeyframeRule>> rule {
-        []
-        {
-          auto keyframe = css::KeyframeRule::Create(css::MutableStyleProperties::Create());
-          keyframe->SetKey({css::ValueId::Invalid, 1});
-          return keyframe;
-        }()};
-      return **rule;
-    }
-  }
-
-  void BlendingKeyframes::FillImplicitKeyframes(const KeyframeEffect &effect,
-                                                const RenderStyle &underlyingStyle) noexcept
-  {
-    if (IsEmpty())
-    {
-      return;
-    }
-
-    krys_debug_assert(effect.Target());
-    auto element = ShareRef(*effect.Target());
-    if (!element->IsConnected())
-    {
-      return;
-    }
-
-    auto &styleResolver = element->StyleResolver();
-
-    // We need to establish which properties are implicit for 0% and 100%.
-    // We start each list off with the full list of properties, and see if
-    // any 0% and 100% keyframes specify them.
-    AnimatableCSSPropertySet expectedExplicitProperties;
-    AnimatableCSSPropertySet zeroKeyframeExplicitProperties;
-
-    BlendingKeyframe *implicitZeroKeyframe = nullptr;
-
-    auto isSuitableKeyframeForImplicitValues = [&](const BlendingKeyframe &keyframe)
-    {
-      if (keyframe.UsesRangeOffset())
-      {
-        return false;
-      }
-
-      auto *timingFunction = keyframe.GetTimingFunction();
-
-      // If there is no timing function set on the keyframe, then it uses the element's
-      // timing function, which makes this keyframe suitable.
-      if (!timingFunction)
-      {
-        return true;
-      }
-
-      if (auto *cssAnimation = DynamicDowncast<CSSAnimation>(effect.Animation()))
-      {
-        const auto &animationWideTimingFunction =
-          cssAnimation->BackingStyleAnimation().DefaultTimingFunctionForKeyframes();
-        // If we're dealing with a CSS Animation and if that CSS Animation's backing animation
-        // has a default timing function set, then if that keyframe's timing function matches,
-        // that keyframe is suitable.
-        if (animationWideTimingFunction)
-        {
-          return timingFunction == animationWideTimingFunction->Value.get();
-        }
-        // Otherwise, the keyframe will be suitable if its timing function matches the default.
-        return timingFunction == &CubicBezierTimingFunction::DefaultTimingFunction();
-      }
-
-      return false;
-    };
-
-    for (auto &keyframe : _keyframes)
-    {
-      if (keyframe.Offset() <= 0)
-      {
-        for (const auto &property : keyframe.Properties())
-        {
-          zeroKeyframeExplicitProperties.insert(property);
-        }
-        if (!implicitZeroKeyframe && isSuitableKeyframeForImplicitValues(keyframe))
-        {
-          implicitZeroKeyframe = &keyframe;
-        }
-      }
-      if (keyframe.HasResolvedOffset())
-      {
-        expectedExplicitProperties.insert(keyframe.Properties().begin(), keyframe.Properties().end());
+        _hasWidthDependentTransform |= isWidthDependent;
+        _hasHeightDependentTransform |= isHeightDependent;
       }
     }
 
-    auto addImplicitKeyframe = [&](double key, const AnimatableCSSPropertySet &implicitProperties,
-                                   const css::KeyframeRule &keyframeRule,
-                                   BlendingKeyframe *existingImplicitBlendingKeyframe)
+    if (!_hasDiscreteTransformInterval
+        && keyframe.AnimatesProperty(AnimatableCSSProperty {css::PropertyId::Transform}))
     {
-      // If we're provided an existing implicit keyframe, we need to add all the styles for the implicit
-      // properties.
-      if (existingImplicitBlendingKeyframe)
-      {
-        krys_debug_assert(existingImplicitBlendingKeyframe->Style());
-        auto keyframeStyle = RenderStyle::ClonePtr(*existingImplicitBlendingKeyframe->Style());
-        for (const auto &property : implicitProperties)
-        {
-          style::interpolation::Interpolate(property, *keyframeStyle, underlyingStyle, underlyingStyle, 1,
-                                            krys::CompositeOperation::Replace, effect);
-          existingImplicitBlendingKeyframe->AddProperty(property);
-        }
-        existingImplicitBlendingKeyframe->SetStyle(krys::move(keyframeStyle));
-        return;
-      }
-
-      // Otherwise we create a new keyframe.
-      BlendingKeyframe blendingKeyframe(key, nullptr);
-      blendingKeyframe.SetStyle(
-        styleResolver.StyleForKeyframe(*element, underlyingStyle, {nullptr}, keyframeRule, blendingKeyframe));
-      for (const auto &property : implicitProperties)
-      {
-        blendingKeyframe.AddProperty(property);
-      }
-      // Step 2 of https://drafts.csswg.org/css-animations-2/#keyframes defines the
-      // default composite property as "replace" for CSS Animations.
-      if (effect.Animation() && Is<CSSAnimation>(*effect.Animation()))
-      {
-        blendingKeyframe.SetCompositeOperation(krys::CompositeOperation::Replace);
-      }
-      Insert(krys::move(blendingKeyframe));
-    };
-
-    auto differenceWith = [](const AnimatableCSSPropertySet &all, const AnimatableCSSPropertySet &excluded)
-    {
-      AnimatableCSSPropertySet difference;
-      for (const auto &property : all)
-      {
-        if (!excluded.contains(property))
-        {
-          difference.insert(property);
-        }
-      }
-      return difference;
-    };
-
-    auto zeroKeyframeImplicitProperties =
-      differenceWith(expectedExplicitProperties, zeroKeyframeExplicitProperties);
-    if (!zeroKeyframeImplicitProperties.empty())
-    {
-      addImplicitKeyframe(0, zeroKeyframeImplicitProperties, ZeroPercentKeyframe(), implicitZeroKeyframe);
+      _hasDiscreteTransformInterval = style->Transform().ContainsNonInvertibleMatrix({});
     }
 
-    AnimatableCSSPropertySet oneKeyframeExplicitProperties;
-    BlendingKeyframe *implicitOneKeyframe = nullptr;
-
-    for (auto &keyframe : _keyframes)
+    if (!_hasExplicitlyInheritedKeyframeProperty)
     {
-      if (keyframe.Offset() >= 1)
-      {
-        for (const auto &property : keyframe.Properties())
-        {
-          oneKeyframeExplicitProperties.insert(property);
-        }
-        if (!implicitOneKeyframe && isSuitableKeyframeForImplicitValues(keyframe))
-        {
-          implicitOneKeyframe = &keyframe;
-        }
-      }
+      _hasExplicitlyInheritedKeyframeProperty = style->HasExplicitlyInheritedProperties();
     }
 
-    auto oneKeyframeImplicitProperties =
-      differenceWith(expectedExplicitProperties, oneKeyframeExplicitProperties);
-    if (!oneKeyframeImplicitProperties.empty())
+    const auto &properties = keyframe.Properties();
+    if (!keyframe.Offset())
     {
-      addImplicitKeyframe(1, oneKeyframeImplicitProperties, HundredPercentKeyframe(), implicitOneKeyframe);
+      _explicitFromProperties.insert(properties.begin(), properties.end());
+    }
+    if (keyframe.Offset() == 1)
+    {
+      _explicitToProperties.insert(properties.begin(), properties.end());
+    }
+
+    if (!_hasKeyframeNotUsingRangeOffset)
+    {
+      _hasKeyframeNotUsingRangeOffset = !keyframe.UsesRangeOffset();
     }
   }
 
-  uint64 BlendingKeyframes::NextAnonymousIdentifier() noexcept
-  {
-    static uint64 numericIdentifier = 0;
-    return ++numericIdentifier;
-  }
-
-  BlendingKeyframe::BlendingKeyframe(KeyframeOffset &&offset, UniquePtr<RenderStyle> &&style) noexcept
-      : _specifiedOffset(krys::move(offset)), _style(krys::move(style))
-  {
-    if (!UsesRangeOffset())
-    {
-      _computedOffset = _specifiedOffset.Value;
-    }
-  }
-
-  BlendingKeyframe::BlendingKeyframe(const BlendingKeyframe &source) noexcept
-      : _specifiedOffset(source._specifiedOffset), _computedOffset(source._computedOffset),
-        _properties(source._properties), _style(RenderStyle::ClonePtr(*source.Style())),
-        _timingFunction(source._timingFunction), _compositeOperation(source._compositeOperation),
-        _containsDirectionAwareProperty(source._containsDirectionAwareProperty)
-  {
-  }
-
-  void BlendingKeyframe::AddProperty(const AnimatableCSSProperty &property) noexcept
-  {
-    krys_debug_assert(!std::holds_alternative<css::PropertyId>(property)
-                      || std::get<css::PropertyId>(property) != css::PropertyId::Custom);
-    _properties.insert(property);
-  }
-
-  bool BlendingKeyframe::AnimatesProperty(KeyframeInterpolation::Property property) const noexcept
-  {
-    return _properties.contains(property);
-  }
-
-  bool BlendingKeyframe::UsesRangeOffset() const noexcept
-  {
-    return _specifiedOffset.Name != style::SingleAnimationRangeName::Omitted
-           && _specifiedOffset.Name != style::SingleAnimationRangeName::Normal;
-  }
+#pragma endregion
 }

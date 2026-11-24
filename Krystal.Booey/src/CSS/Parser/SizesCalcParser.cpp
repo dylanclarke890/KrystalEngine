@@ -30,7 +30,7 @@
 #include "Krystal.Booey/CSS/Parser/SizesCalcParser.hpp"
 #include "Krystal.Booey/CSS/Parser/SizesAttributeParser.hpp"
 #include "Krystal.Booey/CSS/Values/Primitives/Units.hpp"
-#include "Krystal.Booey/CSS/Values/UnitType.hpp"
+#include "Krystal.Booey/CSS/Values/Units.hpp"
 #include "Krystal.Core/Maths/Extras.hpp"
 #include <algorithm>
 
@@ -163,7 +163,7 @@ namespace krys::boo::css
 
   bool SizesCalcParser::AppendLength(const Token &token) noexcept
   {
-    auto lengthUnit = ToLengthUnit(ParseUnitType(token.Unit()));
+    auto lengthUnit = ToUnit<LengthUnit>(ParseUnitType(token.Unit()));
     if (!lengthUnit)
     {
       return false;

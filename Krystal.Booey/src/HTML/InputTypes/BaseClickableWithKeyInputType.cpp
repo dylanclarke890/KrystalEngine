@@ -39,7 +39,7 @@ namespace krys::boo::html
     BaseClickableWithKeyInputType::HandleKeydownEvent(HTMLInputElement &element,
                                                       KeyboardEvent &event) noexcept
   {
-    if (event.KeyIdentifier() == u8"U+0020")
+    if (event.Key() == u8" ")
     {
       element.SetActive(true);
       // No SetDefaultHandled(): a keypress follows only if the keydown isn't handled.
@@ -67,7 +67,7 @@ namespace krys::boo::html
 
   void BaseClickableWithKeyInputType::HandleKeyupEvent(InputType &inputType, KeyboardEvent &event) noexcept
   {
-    if (event.KeyIdentifier() != u8"U+0020")
+    if (event.Key() != u8" ")
     {
       return;
     }

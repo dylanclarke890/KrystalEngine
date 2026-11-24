@@ -471,7 +471,7 @@ namespace krys::boo::style
         for (auto *ancestor : ancestors | std::views::reverse)
         {
           InvalidateIfNeeded(*ancestor, &selectorMatchingState);
-          selectorMatchingState.SelectorFilter.PushParent(ancestor);
+          selectorMatchingState.SelectorFilter.PushParent(*ancestor);
         }
         break;
       }
@@ -526,7 +526,7 @@ namespace krys::boo::style
             InvalidateIfNeeded(*sibling, &selectorMatchingState);
           }
 
-          selectorMatchingState.SelectorFilter.PushParent(elementOrAncestor);
+          selectorMatchingState.SelectorFilter.PushParent(*elementOrAncestor);
         }
         break;
       }
@@ -543,7 +543,7 @@ namespace krys::boo::style
         selectorMatchingState.SelectorFilter.ParentStackReserveInitialCapacity(ancestors.size());
         for (auto *ancestor : ancestors | std::views::reverse)
         {
-          selectorMatchingState.SelectorFilter.PushParent(ancestor);
+          selectorMatchingState.SelectorFilter.PushParent(*ancestor);
           forEachChild(*ancestor, [&](Element &ancestorChild)
                        { InvalidateIfNeeded(ancestorChild, &selectorMatchingState); });
         }

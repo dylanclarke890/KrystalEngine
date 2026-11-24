@@ -567,7 +567,6 @@ namespace krys::boo
   {
     krys_debug_assert(_contents->IsMutable());
     krys_debug_assert(_contents->HasOneClient());
-    _contents->SetHasResolvedNesting(false);
     ForEachStyleScope(
       [&](style::Scope &scope)
       {
@@ -632,11 +631,6 @@ namespace krys::boo
         rule->Reattach(*_contents->RuleAt(index));
       }
     }
-  }
-
-  Ref<css::StyleSheetContents> CSSStyleSheet::ProtectedContents() noexcept
-  {
-    return _contents;
   }
 
   CSSOMString CSSStyleSheet::CssText(const css::SerialisationContext &context) noexcept

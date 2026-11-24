@@ -990,7 +990,7 @@ namespace krys::boo::style
 
     if (auto *primitiveValue = DynamicDowncast<css::PrimitiveValue>(value))
     {
-      if (primitiveValue->IsFontRelativeLength() || primitiveValue->IsCalculated())
+      if (primitiveValue->IsFontRelativeLength() || primitiveValue->IsCalc())
       {
         builderState.UpdateFont();
       }
@@ -1608,9 +1608,9 @@ namespace krys::boo::style
       {
         size = (primitiveValue->ResolveAsPercentage<float>(conversionData) * parentSize) / 100.0f;
       }
-      else if (primitiveValue->IsCalculatedPercentageWithLength())
+      else if (primitiveValue->IsCalcPercentageWithLength())
       {
-        size = static_cast<float>(primitiveValue->CSSCalcValue()
+        size = static_cast<float>(primitiveValue->CalcValue()
                                     ->CreateCalculationValue(conversionData, css::SymbolTable {})
                                     ->Evaluate(parentSize, style::ZoomNeeded {}));
       }

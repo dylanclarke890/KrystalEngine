@@ -38,6 +38,7 @@
 #include "Krystal.Booey/CSS/Values/Primitives/NumericTypesEvaluateCalc.hpp"
 #include "Krystal.Booey/CSS/Values/PrimitiveValue.hpp"
 #include "Krystal.Booey/CSS/Values/PrimitiveValueMappings.hpp"
+#include "Krystal.Booey/CSS/Values/ToLengthConversionData.hpp"
 #include "Krystal.Booey/DOM/Nodes/Document.hpp"
 #include "Krystal.Booey/Graphics/Fonts/FontCascade.hpp"
 #include "Krystal.Booey/Page/Settings.hpp"
@@ -57,7 +58,8 @@ namespace krys::boo::style
 
     if (primitiveValue.IsNumber())
     {
-      return FontSelectionValue(std::clamp(primitiveValue.ResolveAsNumberDeprecated<float>(), 1.0f, 1000.0f));
+      return FontSelectionValue(std::clamp(
+        primitiveValue.ResolveAsNumber<float>(css::ToLengthConversionData::WithoutElement()), 1.0f, 1000.0f));
     }
 
     krys_debug_assert(primitiveValue.IsValueId());
@@ -79,7 +81,8 @@ namespace krys::boo::style
 
     if (primitiveValue.IsPercentage())
     {
-      return FontSelectionValue::ClampFloat(primitiveValue.ResolveAsPercentageDeprecated<float>());
+      return FontSelectionValue::ClampFloat(
+        primitiveValue.ResolveAsPercentage<float>(css::ToLengthConversionData::WithoutElement()));
     }
 
     krys_debug_assert(primitiveValue.IsValueId());
@@ -96,7 +99,8 @@ namespace krys::boo::style
 
   FontSelectionValue FontStyleAngleFromCSSValueDeprecated(const css::Value &value) noexcept
   {
-    return NormalizedFontItalicValue(Downcast<css::PrimitiveValue>(value).ResolveAsAngleDeprecated<float>());
+    return NormalizedFontItalicValue(Downcast<css::PrimitiveValue>(value).ResolveAsAngle<float>(
+      css::ToLengthConversionData::WithoutElement()));
   }
 
   Maybe<FontSelectionValue>
@@ -117,7 +121,7 @@ namespace krys::boo::style
       return FontStyleAngleFromCSSFontStyleWithAngleValueDeprecated(*fontStyleValue);
     }
 
-    auto valueID = css::GetValueId(value);
+    auto valueID = value.ValueId();
     if (valueID == css::ValueId::Normal)
     {
       return null;

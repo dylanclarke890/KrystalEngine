@@ -50,14 +50,14 @@ namespace krys::boo::css::calc
       },
       [&](const NonCanonicalDimension &root)
       {
-        if (auto lengthUnit = css::ToLengthUnit(root.Unit))
+        if (auto lengthUnit = css::ToUnit<LengthUnit>(root.Unit))
         {
           css::CollectComputedStyleDependencies(dependencies, *lengthUnit);
         }
       },
       [&](const Symbol &root)
       {
-        if (auto lengthUnit = css::ToLengthUnit(root.Unit))
+        if (auto lengthUnit = css::ToUnit<LengthUnit>(root.Unit))
         {
           css::CollectComputedStyleDependencies(dependencies, *lengthUnit);
         }

@@ -61,7 +61,7 @@ namespace krys::boo::css::tests
 
   TEST_CASE("CSSURL(None)", "[CSS][Primitives][URL]")
   {
-    CHECK(CSSUrl::None().IsNone());
+    CHECK(Url::None().IsNone());
 
     // `url("")` isn't `none`.
     auto empty = CompleteUrl(u8"", ContextWithBase(u8"https://example.com/"));

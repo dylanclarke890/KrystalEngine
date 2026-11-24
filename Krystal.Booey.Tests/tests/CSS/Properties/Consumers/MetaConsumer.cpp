@@ -72,7 +72,7 @@ namespace krys::boo::css::tests
     auto number = MetaConsumer<Number<All>>::Consume(range, state);
     REQUIRE(number);
     REQUIRE(number->IsCalc());
-    CHECK(number->GetCalc()->ProtectedCalc()->DoubleValue(NoConversionDataRequiredTag {}) == 6.0);
+    CHECK(number->GetCalc()->Calc().DoubleValue(NoConversionDataRequiredTag {}) == 6.0);
 
     // A failed calc() leaves the range untouched.
     CHECK_FALSE(MetaConsumer<Number<All>>::Consume(range, state));

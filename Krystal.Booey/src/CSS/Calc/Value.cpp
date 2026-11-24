@@ -34,7 +34,7 @@
 #include "Krystal.Booey/CSS/Calc/TreeComputedStyleDependencies.hpp"
 #include "Krystal.Booey/CSS/Calc/TreeSerialisation.hpp"
 #include "Krystal.Booey/CSS/Values/Primitives/NumericCategory.hpp"
-#include "Krystal.Booey/CSS/Values/UnitType.hpp"
+#include "Krystal.Booey/CSS/Values/Units.hpp"
 #include <algorithm>
 #include <cmath>
 
@@ -52,11 +52,14 @@ namespace krys::boo::css::calc
 
   Value::~Value() noexcept = default;
 
+  bool Value::IsPercentageWithLength() const noexcept
+  {
+    return _category == css::Category::LengthPercentage && _tree.Type.PercentHint
+           && !krys::HoldsAlternative<Percentage>(_tree.Root);
+  }
+
   UnitType Value::PrimitiveType() const noexcept
   {
-    // This returns the UnitType associated with the value returned by DoubleValue, or, if
-    // UnitType::CalcPercentageWithLength, that a call to CreateCalculationValue() is needed.
-
     switch (_category)
     {
       case css::Category::Integer:
@@ -107,7 +110,7 @@ namespace krys::boo::css::calc
           return UnitType::Percentage;
         }
 
-        return UnitType::CalcPercentageWithLength;
+        return UnitType::Unknown;
       }
       case css::Category::AnglePercentage:
       {
@@ -121,7 +124,7 @@ namespace krys::boo::css::calc
           return UnitType::Percentage;
         }
 
-        return UnitType::CalcPercentageWithAngle;
+        return UnitType::Unknown;
       }
     }
 

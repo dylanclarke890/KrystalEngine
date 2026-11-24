@@ -229,7 +229,7 @@ namespace krys::boo::html
   {
     if (auto *keyboardEvent = DynamicDowncast<KeyboardEvent>(event))
     {
-      if (keyboardEvent->KeyIdentifier() == u8"U+0020" && _editControlOwner)
+      if (keyboardEvent->Key() == u8" " && _editControlOwner)
       {
         // Forward space keypresses to the owner to activate the date picker.
         _editControlOwner->DidReceiveSpaceKeyFromControl();

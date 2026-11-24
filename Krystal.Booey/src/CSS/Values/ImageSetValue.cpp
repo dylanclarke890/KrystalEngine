@@ -37,21 +37,21 @@ namespace krys::boo::css
   }
 
   ImageSetValue::ImageSetValue(ValueListBuilder builder) noexcept
-      : ValueContainingList(ValueType::ImageSet, ValueSeparator::CommaSeparator, krys::move(builder))
+      : ValueContainingList(ValueType::ImageSet, ValueSeparator::Comma, krys::move(builder))
   {
   }
 
   CSSOMString ImageSetValue::CustomCSSText(const SerialisationContext &context) const noexcept
   {
     CSSOMString result {u8"image-set("};
-    for (uint32 i = 0u; i < Length(); ++i)
+    for (uint32 i = 0u; i < size(); ++i)
     {
       if (i > 0u)
       {
         result.append(u8", ");
       }
-      krys_debug_assert(Is<ImageSetOptionValue>(Item(i)));
-      result.append(Item(i)->CssText(context));
+      krys_debug_assert(Is<ImageSetOptionValue>((*this)[i]));
+      result.append((*this)[i].CssText(context));
     }
     result.push_back(u8')');
     return result;
@@ -59,13 +59,13 @@ namespace krys::boo::css
 
   RefPtr<StyleImage> ImageSetValue::CreateStyleImage(const style::BuilderState &state) const noexcept
   {
-    auto length = this->Length();
+    auto length = this->size();
 
     List<ImageWithScale> images;
     images.reserve(length);
     for (uint32 i = 0; i < length; ++i)
     {
-      const auto &option = Downcast<ImageSetOptionValue>(*Item(i));
+      const auto &option = Downcast<ImageSetOptionValue>((*this)[i]);
       images.push_back(ImageWithScale {
         state.CreateStyleImage(option.Image()),
         option.Resolution().ResolveAsResolution<float>(state.CssToLengthConversionData()), option.Type()});

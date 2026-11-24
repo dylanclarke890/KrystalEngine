@@ -122,7 +122,5 @@ namespace krys::boo
                                                   css::IsImportant important) noexcept;
 
     KRYS_NODISCARD css::ParserContext CssParserContext() const noexcept;
-
-    KRYS_NODISCARD Ref<css::MutableStyleProperties> ProtectedPropertySet() const noexcept;
   };
 }

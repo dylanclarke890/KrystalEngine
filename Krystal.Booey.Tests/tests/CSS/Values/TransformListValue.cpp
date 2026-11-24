@@ -26,18 +26,18 @@ namespace krys::boo::css::tests
     {
       auto value =
         TransformListValue::Create(ValueListBuilder {TranslateXFunction(10.0), RotateFunction(45.0)});
-      CHECK(value->IsTransformListValue());
+      CHECK(Is<TransformListValue>(*value));
       CHECK(value->ContainsValueList());
-      REQUIRE(value->Length() == 2u);
-      CHECK(value->Item(0u)->IsFunctionValue());
-      CHECK(value->Item(1u)->IsFunctionValue());
+      REQUIRE(value->size() == 2u);
+      CHECK(Is<FunctionValue>((*value)[0u]));
+      CHECK(Is<FunctionValue>((*value)[1u]));
     }
 
     SECTION("From a single value")
     {
       auto value = TransformListValue::Create(TranslateXFunction(10.0));
-      REQUIRE(value->Length() == 1u);
-      CHECK(CssText(*value->Item(0u)) == "translateX(10px)");
+      REQUIRE(value->size() == 1u);
+      CHECK(CssText((*value)[0u]) == "translateX(10px)");
     }
   }
 
@@ -79,7 +79,7 @@ namespace krys::boo::css::tests
       TransformListValue::Create(ValueListBuilder {TranslateXFunction(10.0), RotateFunction(45.0)});
     auto children = Children(*value);
     REQUIRE(children.size() == 2uz);
-    CHECK(children[0uz] == value->Item(0u));
-    CHECK(children[1uz] == value->Item(1u));
+    CHECK(children[0uz] == &(*value)[0u]);
+    CHECK(children[1uz] == &(*value)[1u]);
   }
 }

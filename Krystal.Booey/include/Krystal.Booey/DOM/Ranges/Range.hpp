@@ -1,28 +1,4 @@
-﻿/*
- * (C) 1999 Lars Knoll (knoll@kde.org)
- * (C) 2000 Gunnstein Lye (gunnstein@netcom.no)
- * (C) 2000 Frederik Holljen (frederik.holljen@hig.no)
- * (C) 2001 Peter Kelly (pmk@post.com)
- * Copyright (C) 2004-2020 Apple Inc. All rights reserved.
- *
- * This library is free software; you can redistribute it and/or
- * modify it under the terms of the GNU Library General Public
- * License as published by the Free Software Foundation; either
- * version 2 of the License, or (at your option) any later version.
- *
- * This library is distributed in the hope that it will be useful,
- * but WITHOUT ANY WARRANTY; without even the implied warranty of
- * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU
- * Library General Public License for more details.
- *
- * You should have received a copy of the GNU Library General Public License
- * along with this library; see the file COPYING.LIB.  If not, write to
- * the Free Software Foundation, Inc., 51 Franklin Street, Fifth Floor,
- * Boston, MA 02110-1301, USA.
- *
- */
-
-#pragma once
+﻿#pragma once
 
 #include "Krystal.Booey/DOM/Geometry/DOMRect.hpp"
 #include "Krystal.Booey/DOM/Ranges/AbstractRange.hpp"
@@ -154,9 +130,11 @@ namespace krys::boo::dom
     /// @see https://dom.spec.whatwg.org/#dom-range-stringifier
     KRYS_NODISCARD ExceptionOr<DOMString> ToString() const noexcept;
 
+    /// @brief The border boxes of the elements the range selects, and the boxes of its text.
     /// @see https://drafts.csswg.org/cssom-view/#dom-range-getclientrects
     KRYS_NODISCARD Ref<DOMRectList> GetClientRects() const noexcept;
 
+    /// @brief The union of the client rects, ignoring empty ones.
     /// @see https://drafts.csswg.org/cssom-view/#dom-range-getboundingclientrect
     KRYS_NODISCARD Ref<DOMRect> GetBoundingClientRect() const noexcept;
 
@@ -174,13 +152,16 @@ namespace krys::boo::dom
 
 #pragma endregion
 
-    /// @brief Whether the document's selection is this range, so setting its boundary points sets the
-    /// selection.
+    /// @brief Whether this is the range associated with its document's selection, so changing its boundary
+    /// points changes the selection too.
+    /// @see https://w3c.github.io/selection-api/#definition
     KRYS_NODISCARD bool IsAssociatedWithSelection() const noexcept
     {
       return _isAssociatedWithSelection;
     }
 
+    /// @brief Called by the selection as it takes this range as its own, or lets it go. A range is let go of
+    /// before it's destroyed.
     void DidAssociateWithSelection() noexcept
     {
       _isAssociatedWithSelection = true;
@@ -194,6 +175,8 @@ namespace krys::boo::dom
   private:
     bool _isAssociatedWithSelection {false};
 
+    /// @brief Brings the document's selection up to date with the range's new boundary points, if it's the
+    /// selection's range.
     void UpdateAssociatedSelection() noexcept;
 
     /// @see https://dom.spec.whatwg.org/#concept-range-bp-set

@@ -58,6 +58,7 @@
 #include "Krystal.Booey/CSS/Properties/PropertyParserResult.hpp"
 #include "Krystal.Booey/CSS/Properties/PropertyParserState.hpp"
 #include "Krystal.Booey/CSS/Properties/PropertyParsing.hpp"
+#include "Krystal.Booey/CSS/Properties/PropertyQueries.hpp"
 #include "Krystal.Booey/CSS/Properties/PropertyShorthand.hpp"
 #include "Krystal.Booey/CSS/Rules/RuleType.hpp"
 #include "Krystal.Booey/CSS/Values/ComputedStyleDependencies.hpp"
@@ -334,22 +335,7 @@ namespace krys::boo::css
     InputStream inputStream {CSSOMString(string)};
     Tokenizer tokenizer(inputStream);
     std::ignore = tokenizer.PumpTokenizer();
-
-    auto range = tokenizer.Tokens();
-    range.DiscardWhitespace();
-
-    if (auto value = ConsumeGlobalKeywordValue(range))
-    {
-      return value;
-    }
-
-    auto value = PropertyParsing::ParseStylePropertyLonghand(range, property, state);
-    if (!value || !range.IsAtEnd())
-    {
-      return nullptr;
-    }
-
-    return value;
+    return ParseStylePropertyLonghand(property, tokenizer.Tokens(), context);
   }
 
   RefPtr<Value> PropertyParser::ParseStylePropertyLonghand(PropertyId property, TokenRange range,
@@ -754,7 +740,7 @@ namespace krys::boo::css
   bool ConsumeStyleProperty(TokenRange &range, const ParserContext &context, PropertyId property,
                             IsImportant important, RuleType ruleType, PropertyParserResult &result) noexcept
   {
-    if (Property::IsDescriptorOnly(property))
+    if (IsDescriptorOnly(property))
     {
       return false;
     }
@@ -930,10 +916,10 @@ namespace krys::boo::css
   // Checks whether a CSS property is allowed in @position-try.
   KRYS_NODISCARD static bool PropertyAllowedInPositionTryRule(PropertyId property) noexcept
   {
-    return Property::IsInsetProperty(property) || Property::IsMarginProperty(property)
-           || Property::IsSizingProperty(property) || property == PropertyId::AlignSelf
-           || property == PropertyId::JustifySelf || property == PropertyId::PlaceSelf
-           || property == PropertyId::PositionAnchor || property == PropertyId::PositionArea;
+    return IsInsetProperty(property) || IsMarginProperty(property) || IsSizingProperty(property)
+           || property == PropertyId::AlignSelf || property == PropertyId::JustifySelf
+           || property == PropertyId::PlaceSelf || property == PropertyId::PositionAnchor
+           || property == PropertyId::PositionArea;
   }
 
   bool ConsumePositionTryDescriptor(TokenRange &range, const ParserContext &context, PropertyId property,

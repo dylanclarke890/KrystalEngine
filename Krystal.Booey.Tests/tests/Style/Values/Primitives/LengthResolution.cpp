@@ -10,6 +10,19 @@ namespace krys::boo::style::tests
 {
   using css::LengthUnit;
 
+  TEST_CASE("RoundForImpreciseConversion", "[Style][LengthResolution]")
+  {
+    CHECK(RoundForImpreciseConversion<int32>(44.99998) == 45);
+    CHECK(RoundForImpreciseConversion<int32>(44.5) == 44);
+    CHECK(RoundForImpreciseConversion<int32>(-44.99998) == -45);
+    CHECK(RoundForImpreciseConversion<uint16>(1e9) == 0);
+    CHECK(RoundForImpreciseConversion<int16>(-1e9) == 0);
+
+    CHECK(RoundForImpreciseConversion<float>(44.995) == 45.0f);
+    CHECK(RoundForImpreciseConversion<float>(44.5) == 44.5f);
+    CHECK(RoundForImpreciseConversion<float>(-44.995) == -45.0f);
+  }
+
   TEST_CASE("ComputeUnzoomedNonCalcLengthDouble", "[Style][LengthResolution]")
   {
     auto compute = [](double value, LengthUnit unit)

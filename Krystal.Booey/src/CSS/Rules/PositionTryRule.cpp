@@ -35,7 +35,7 @@ namespace krys::boo::css
   }
 
   PositionTryRule::PositionTryRule(const PositionTryRule &other) noexcept
-      : Rule(other), _name(other._name), _properties(other.ProtectedProperties()->MutableCopy())
+      : Rule(other), _name(other._name), _properties(other.Properties().MutableCopy())
   {
   }
 
@@ -52,11 +52,6 @@ namespace krys::boo::css
     return AdoptRef(*new PositionTryRule(*this));
   }
 
-  Ref<StyleProperties> PositionTryRule::ProtectedProperties() const noexcept
-  {
-    return _properties;
-  }
-
   MutableStyleProperties &PositionTryRule::MutableProperties() noexcept
   {
     if (!Is<MutableStyleProperties>(*_properties))
@@ -64,10 +59,5 @@ namespace krys::boo::css
       _properties = _properties->MutableCopy();
     }
     return Downcast<MutableStyleProperties>(*_properties);
-  }
-
-  Ref<MutableStyleProperties> PositionTryRule::ProtectedMutableProperties() noexcept
-  {
-    return ShareRef(MutableProperties());
   }
 }

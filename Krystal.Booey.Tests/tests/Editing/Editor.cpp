@@ -2,6 +2,7 @@
 #include "catch2/catch_test_macros.hpp"
 #include "Krystal.Booey.Tests/DOM/DOMTestUtils.hpp"
 #include "Krystal.Booey.Tests/Editing/EditorTestUtils.hpp"
+#include "Krystal.Booey/CSS/CSSOM/CSSStyleDeclaration.hpp"
 #include "Krystal.Booey/DOM/DataTransfer/DataTransfer.hpp"
 #include "Krystal.Booey/DOM/Events/ClipboardEvent.hpp"
 #include "Krystal.Booey/DOM/Events/EventListener.hpp"
@@ -12,11 +13,14 @@
 #include "Krystal.Booey/DOM/Nodes/DOMImplementation.hpp"
 #include "Krystal.Booey/DOM/Nodes/Text.hpp"
 #include "Krystal.Booey/DOM/Nodes/XMLDocument.hpp"
+#include "Krystal.Booey/Editing/Commands/ApplyStyleCommand.hpp"
 #include "Krystal.Booey/Editing/Commands/UndoStep.hpp"
+#include "Krystal.Booey/Editing/EditingStyle.hpp"
 #include "Krystal.Booey/Editing/Selection/FrameSelection.hpp"
 #include "Krystal.Booey/FileAPI/FileList.hpp"
 #include "Krystal.Booey/HTML/Algorithms/FocusAlgorithms.hpp"
 #include "Krystal.Booey/HTML/Elements/HTMLInputElement.hpp"
+#include "Krystal.Booey/HTML/Window.hpp"
 #include "Krystal.Booey/Infra/Namespaces.hpp"
 #include "Krystal.Booey/Input/EventHandler.hpp"
 #include "Krystal.Booey/Input/LegacyKeyCodes.hpp"
@@ -272,6 +276,108 @@ namespace krys::boo::tests
     }
   }
 
+  TEST_CASE_METHOD(css::tests::ValueFixture, "Editor: pasted text keeps the font it was copied with",
+                   "[Editing][Editor]")
+  {
+    EditorFixture fixture(u8"<style>#s { font: italic bold 20px serif }</style>"
+                          u8"<p><span id=s>styled</span></p><div id=e contenteditable>ab</div>");
+    auto &editor = fixture.GetEditor();
+    fixture.Select(fixture.TextIn(u8"s"), 0, 6);
+    editor.Copy();
+    REQUIRE(Narrow(fixture.Pasteboard.Markup).contains("styled"));
+
+    fixture.SetCaret(fixture.TextIn(u8"e"), 1);
+    editor.Paste();
+    auto &root = fixture.ById(u8"e");
+
+    // The pasted text is the one text node containing it, under whichever element carries its style.
+    Element *styled = nullptr;
+    Func<void(Node &)> find = [&](Node &node)
+    {
+      if (auto *text = DynamicDowncast<Text>(node); text && Narrow(text->Data()) == "styled")
+      {
+        styled = text->ParentElement();
+      }
+      for (auto *child = node.FirstChild(); child; child = child->NextSibling())
+      {
+        find(*child);
+      }
+    };
+    find(root);
+    REQUIRE(styled);
+    auto style = fixture.Document->Window()->GetComputedStyle(*styled);
+    auto value = [&](utf8_stringview property)
+    {
+      return Narrow(style->GetPropertyValue(CSSOMString(property)));
+    };
+    CHECK(value(u8"font-style") == "italic");
+    CHECK(value(u8"font-weight") == "700");
+    CHECK(value(u8"font-size") == "20px");
+    CHECK(value(u8"font-family") == "serif");
+  }
+
+  TEST_CASE_METHOD(css::tests::ValueFixture, "Editor: editing text styled with the font shorthand",
+                   "[Editing][Editor]")
+  {
+    EditorFixture fixture(
+      u8"<div id=e contenteditable><span id=s style=\"font: italic bold 20px serif\">styled</span>"
+      u8"</div><div id=t contenteditable>ab</div>");
+    auto &editor = fixture.GetEditor();
+    auto computed = [&](Element &element, utf8_stringview property)
+    {
+      return Narrow(
+        fixture.Document->Window()->GetComputedStyle(element)->GetPropertyValue(CSSOMString(property)));
+    };
+    // The element holding the text "styled" under @p root, wherever editing has moved it.
+    auto styledIn = [](Node &root)
+    {
+      Element *found = nullptr;
+      Func<void(Node &)> find = [&](Node &node)
+      {
+        if (auto *text = DynamicDowncast<Text>(node); text && Narrow(text->Data()) == "styled")
+        {
+          found = text->ParentElement();
+        }
+        for (auto *child = node.FirstChild(); child; child = child->NextSibling())
+        {
+          find(*child);
+        }
+      };
+      find(root);
+      return found;
+    };
+
+    SECTION("Copying and pasting it keeps its font")
+    {
+      fixture.Select(fixture.TextIn(u8"s"), 0, 6);
+      editor.Copy();
+      fixture.SetCaret(fixture.TextIn(u8"t"), 1);
+      editor.Paste();
+      auto &target = fixture.ById(u8"t");
+      auto *pasted = styledIn(target);
+      REQUIRE(pasted);
+      CHECK(computed(*pasted, u8"font-style") == "italic");
+      CHECK(computed(*pasted, u8"font-weight") == "700");
+      CHECK(computed(*pasted, u8"font-size") == "20px");
+      CHECK(computed(*pasted, u8"font-family") == "serif");
+    }
+
+    SECTION("Restyling it changes only the property applied")
+    {
+      fixture.Select(fixture.TextIn(u8"s"), 0, 6);
+      auto normal = EditingStyle::Create(css::PropertyId::FontWeight, css::ValueId::Normal);
+      ApplyStyleCommand::Create(*fixture.Document, normal.get(), EditAction::Bold)->Apply();
+      auto &root = fixture.ById(u8"e");
+      (void)root;
+      auto *element = styledIn(root);
+      REQUIRE(element);
+      CHECK(computed(*element, u8"font-weight") == "400");
+      CHECK(computed(*element, u8"font-style") == "italic");
+      CHECK(computed(*element, u8"font-size") == "20px");
+      CHECK(computed(*element, u8"font-family") == "serif");
+    }
+  }
+
   TEST_CASE_METHOD(css::tests::ValueFixture, "Editor: keys go to the editor client first",
                    "[Editing][Editor]")
   {
@@ -283,7 +389,7 @@ namespace krys::boo::tests
     {
       return fixture.Frame->GetEventHandler().KeyEvent(
         PlatformKeyboardEvent(PlatformEvent::Type::RawKeyDown, u8"", u8"", u8"ArrowRight", u8"ArrowRight",
-                              u8"Right", keyCode, false, false, false, modifiers, MonotonicTime::Now()));
+                              keyCode, false, false, false, modifiers, MonotonicTime::Now()));
     };
 
     CHECK(key(vk::Right, {PlatformEvent::Modifier::ShiftKey}));

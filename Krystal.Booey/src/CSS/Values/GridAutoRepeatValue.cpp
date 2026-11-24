@@ -36,7 +36,7 @@
 namespace krys::boo::css
 {
   GridAutoRepeatValue::GridAutoRepeatValue(bool isAutoFit, ValueListBuilder builder) noexcept
-      : ValueContainingList(ValueType::GridAutoRepeat, ValueSeparator::SpaceSeparator, krys::move(builder)),
+      : ValueContainingList(ValueType::GridAutoRepeat, ValueSeparator::Space, krys::move(builder)),
         _isAutoFit(isAutoFit)
   {
   }

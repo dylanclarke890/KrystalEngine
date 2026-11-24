@@ -62,11 +62,6 @@ namespace krys::boo
     return _styleSheet.get();
   }
 
-  RefPtr<CSSStyleSheet> CSSImportRule::ProtectedStyleSheet() const noexcept
-  {
-    return ShareRefPtr(GetStyleSheet());
-  }
-
   Maybe<CSSOMString> CSSImportRule::LayerName() const noexcept
   {
     const auto &name = _rule->GetCascadeLayerName();
@@ -124,7 +119,7 @@ namespace krys::boo
 
   void CSSImportRule::GetChildStyleSheets(HashSet<RefPtr<CSSStyleSheet>> &childStyleSheets) noexcept
   {
-    auto sheet = ProtectedStyleSheet();
+    auto sheet = ShareRefPtr(GetStyleSheet());
     if (sheet && childStyleSheets.insert(sheet).second)
     {
       sheet->GetChildStyleSheets(childStyleSheets);

@@ -56,7 +56,7 @@ namespace krys::boo::style
 
         if (value.IsCalculated())
         {
-          return value._value.ProtectedCalculationValue()->CopyRoot();
+          return value._value.CalculationValue().CopyRoot();
         }
 
         krys_debug_assert(value.IsFixed());
@@ -70,7 +70,7 @@ namespace krys::boo::style
           return false;
         }
 
-        auto treeDepth = calc::ComputeDepth(value._value.ProtectedCalculationValue()->GetTree());
+        auto treeDepth = calc::ComputeDepth(value._value.CalculationValue().GetTree());
         return treeDepth > MaximumBlendTreeDepth;
       };
 

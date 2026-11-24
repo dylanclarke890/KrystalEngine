@@ -25,8 +25,11 @@
 #pragma once
 
 #include "Krystal.Booey/CSS/Values/Primitives/Range.hpp"
+#include "Krystal.Booey/Graphics/Geometry/LayoutUnit.hpp"
 #include "Krystal.Core/Attributes.hpp"
+#include "Krystal.Core/Maths/Extras.hpp"
 #include "Krystal.Core/Numeric.hpp"
+#include <cmath>
 
 namespace krys::boo
 {
@@ -45,6 +48,42 @@ namespace krys::boo::css
 
 namespace krys::boo::style
 {
+  /// @brief The range of lengths style keeps: two inside `LayoutUnit`'s, so that rounding a length, or a
+  /// round trip through `float`, can't take it outside.
+  constexpr float MaxValueForCssLength = static_cast<float>(IntMaxForLayoutUnit - 2);
+  constexpr float MinValueForCssLength = static_cast<float>(IntMinForLayoutUnit + 2);
+
+  /// @brief Converts a resolved length to an integer, moving it 0.01 away from zero first so that the
+  /// leftovers of unit conversion (44.99998) truncate to the whole number they stand for.
+  /// @return 0 if the length doesn't fit in @p T.
+  template <typename T>
+  KRYS_NODISCARD constexpr T RoundForImpreciseConversion(double value) noexcept
+  {
+    double nudged = value < 0.0 ? value - 0.01 : value + 0.01;
+    if (nudged > static_cast<double>(Limits<T>::max()) || nudged < static_cast<double>(Limits<T>::min()))
+    {
+      return T {};
+    }
+    return static_cast<T>(nudged);
+  }
+
+  /// @brief Converts a resolved length to `float`, keeping its fraction unless it lies within 0.01 inside a
+  /// whole number, which it then becomes.
+  template <>
+  KRYS_NODISCARD inline float RoundForImpreciseConversion(double value) noexcept
+  {
+    double distanceBelowCeiling = std::ceil(value) - value;
+    if (value > 0.0 && distanceBelowCeiling <= 0.01)
+    {
+      return static_cast<float>(std::ceil(value));
+    }
+    if (value < 0.0 && distanceBelowCeiling >= 0.99)
+    {
+      return static_cast<float>(std::floor(value));
+    }
+    return static_cast<float>(value);
+  }
+
   // FIXME: These functions have odd names and invariants and could use improvements.
 
   // NOTE: `ComputeUnzoomedNonCalcLengthDouble` has the following restrictions:

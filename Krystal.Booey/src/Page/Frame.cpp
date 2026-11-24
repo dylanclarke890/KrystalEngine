@@ -1,52 +1,4 @@
-﻿/*
- * Copyright (C) 1998, 1999 Torben Weis <weis@kde.org>
- *                     1999 Lars Knoll <knoll@kde.org>
- *                     1999 Antti Koivisto <koivisto@kde.org>
- *                     2000 Simon Hausmann <hausmann@kde.org>
- *                     2000 Stefan Schimanski <1Stein@gmx.de>
- *                     2001 George Staikos <staikos@kde.org>
- * Copyright (C) 2004-2025 Apple Inc. All rights reserved.
- * Copyright (C) 2005 Alexey Proskuryakov <ap@nypop.com>
- * Copyright (C) 2008 Nokia Corporation and/or its subsidiary(-ies)
- * Copyright (C) 2008 Eric Seidel <eric@webkit.org>
- * Copyright (C) 2008 Google Inc.
- *
- * This library is free software; you can redistribute it and/or
- * modify it under the terms of the GNU Library General Public
- * License as published by the Free Software Foundation; either
- * version 2 of the License, or (at your option) any later version.
- *
- * This library is distributed in the hope that it will be useful,
- * but WITHOUT ANY WARRANTY; without even the implied warranty of
- * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU
- * Library General Public License for more details.
- *
- * You should have received a copy of the GNU Library General Public License
- * along with this library; see the file COPYING.LIB.  If not, write to
- * the Free Software Foundation, Inc., 51 Franklin Street, Fifth Floor,
- * Boston, MA 02110-1301, USA.
- */
-
-/*
- * Copyright (C) 2006-2025 Apple Inc. All rights reserved.
- * Copyright (C) 2008 Torch Mobile Inc. All rights reserved. (http://www.torchmobile.com/)
- *
- * This library is free software; you can redistribute it and/or
- * modify it under the terms of the GNU Library General Public
- * License as published by the Free Software Foundation; either
- * version 2 of the License, or (at your option) any later version.
- * This library is distributed in the hope that it will be useful,
- * but WITHOUT ANY WARRANTY; without even the implied warranty of
- * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU
- * Library General Public License for more details.
- *
- * You should have received a copy of the GNU Library General Public License
- * along with this library; see the file COPYING.LIB.  If not, write to
- * the Free Software Foundation, Inc., 51 Franklin Street, Fifth Floor,
- * Boston, MA 02110-1301, USA.
- */
-
-#include "Krystal.Booey/Page/Frame.hpp"
+﻿#include "Krystal.Booey/Page/Frame.hpp"
 #include "Krystal.Booey/Animation/Timelines/AnimationTimelinesController.hpp"
 #include "Krystal.Booey/CSS/Queries/MediaQuery.hpp"
 #include "Krystal.Booey/DOM/Events/EventNames.hpp"
@@ -287,8 +239,8 @@ namespace krys::boo
 
     _document = newDocument;
 
-    // Don't use _document because it can be overwritten and we want to guarantee
-    // that the document is not destroyed during this function call.
+    // newDocument rather than _document, which what this runs could replace, and which alone wouldn't keep
+    // the document alive.
     if (newDocument)
     {
       newDocument->DidBecomeCurrentDocumentInFrame(*this);
@@ -368,7 +320,7 @@ namespace krys::boo
           document->ResolveStyle(boo::Document::ResolveStyleType::Rebuild);
         }
 
-        // Transform change on RenderView doesn't trigger repaint on non-composited contents.
+        // The render view's new transform doesn't repaint what isn't composited by itself.
         view->InvalidateRect(RectI(LayoutRect::InfiniteRect()));
 
         DeviceOrPageScaleFactorChanged();
@@ -481,7 +433,7 @@ namespace krys::boo
   {
     Ref protectedThis = ShareRef(*this);
 
-    // This function is not reentrant, e.g. a requestAnimationFrame callback may force a rendering update.
+    // An update asked for during one (from an animation frame callback, say) only brings layout up to date.
     if (_renderingUpdateDepth)
     {
       LayoutIfNeeded({dom::LayoutOptions::UpdateCompositingLayers});
@@ -631,8 +583,8 @@ namespace krys::boo
 
   void Frame::DoAfterUpdateRendering() noexcept
   {
-    // Code here should do once-per-frame work that needs to be done before painting, and requires
-    // layout to be up-to-date. It should not run script, trigger layout, or dirty layout.
+    // Once-per-update work that needs layout up to date, before painting. It mustn't dirty style or layout:
+    // nothing lays out again after it.
     RunProcessingStep(RenderingUpdateStep::CursorUpdate,
                       [](boo::Document &document)
                       {
@@ -653,7 +605,7 @@ namespace krys::boo
   void Frame::RenderingUpdateCompleted() noexcept
   {
     _renderingUpdateRemainingSteps = {};
-    // The renderers destroyed during the update are deleted once it's over (upstream: when the page is idle).
+    // The renderers destroyed during the update are deleted once it's over.
     ForEachDocument(
       [](boo::Document &document)
       {
@@ -771,8 +723,7 @@ namespace krys::boo
 
   void Frame::ResumeAnimatingImages() noexcept
   {
-    // Drawing models which cache painted content while out-of-window require that we repaint animated images
-    // to kickstart the animation loop.
+    // An animated image only moves on to its next frame as it's drawn, so the visible ones are repainted.
     if (RefPtr<FrameView> view = _view)
     {
       view->ResumeVisibleImageAnimations();

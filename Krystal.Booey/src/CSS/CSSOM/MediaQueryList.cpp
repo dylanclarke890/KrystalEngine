@@ -42,8 +42,6 @@ namespace krys::boo
 
   bool MediaQueryList::Matches() noexcept
   {
-    // FIXME: Re-evaluate viewport-dependent queries after updating the owner document's layout once documents
-    // can be nested in frames.
     if (_matcher && _evaluatedRound != _matcher->EvaluationRound())
     {
       SetMatches(_matcher->Evaluate(_mediaQueries));
@@ -71,17 +69,14 @@ namespace krys::boo
     }
   }
 
-  void MediaQueryList::Evaluate(css::mq::MediaQueryEvaluator &evaluator,
-                                css::MediaQueryMatcher::EventMode eventMode) noexcept
+  void MediaQueryList::Evaluate(css::mq::MediaQueryEvaluator &evaluator) noexcept
   {
     krys_assert(_matcher);
     if (_evaluatedRound != _matcher->EvaluationRound())
     {
       SetMatches(evaluator.Evaluate(_mediaQueries));
     }
-    // A change this round needs an event, as does one whose event was put off.
-    _needsChangeEvent = _needsChangeEvent || _changedRound == _matcher->EvaluationRound();
-    if (!_needsChangeEvent || eventMode == css::MediaQueryMatcher::EventMode::Schedule)
+    if (_changedRound != _matcher->EvaluationRound())
     {
       return;
     }
@@ -94,7 +89,6 @@ namespace krys::boo
     init.Media = Media();
     init.Matches = _matches;
     dom::EventDispatcher::FireEvent<MediaQueryListEvent>(event_names::Change, *this, init);
-    _needsChangeEvent = false;
   }
 
   void MediaQueryList::DetachFromMatcher() noexcept

@@ -137,8 +137,8 @@ namespace krys::boo::html
       return ShouldCallBaseEventHandler::Yes;
     }
 
-    const auto &key = event.KeyIdentifier();
-    if (key != u8"Up" && key != u8"Down" && key != u8"Left" && key != u8"Right")
+    const auto &key = event.Key();
+    if (key != u8"ArrowUp" && key != u8"ArrowDown" && key != u8"ArrowLeft" && key != u8"ArrowRight")
     {
       return ShouldCallBaseEventHandler::Yes;
     }
@@ -154,7 +154,7 @@ namespace krys::boo::html
     {
       return ShouldCallBaseEventHandler::Yes;
     }
-    bool forward = key == u8"Down" || key == u8"Right";
+    bool forward = key == u8"ArrowDown" || key == u8"ArrowRight";
 
     // We can only stay within the form's children if the form hasn't been demoted to a leaf because of
     // malformed HTML.
@@ -198,7 +198,7 @@ namespace krys::boo::html
 
   void RadioInputType::HandleKeyupEvent(KeyboardEvent &event) noexcept
   {
-    if (event.KeyIdentifier() != u8"U+0020")
+    if (event.Key() != u8" ")
     {
       return;
     }

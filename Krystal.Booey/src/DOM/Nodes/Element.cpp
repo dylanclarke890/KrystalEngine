@@ -1,29 +1,4 @@
-﻿/*
- * Copyright (C) 1999 Lars Knoll (knoll@kde.org)
- *           (C) 1999 Antti Koivisto (koivisto@kde.org)
- *           (C) 2001 Peter Kelly (pmk@post.com)
- *           (C) 2001 Dirk Mueller (mueller@kde.org)
- *           (C) 2007 David Smith (catfish.man@gmail.com)
- * Copyright (C) 2004-2025 Apple Inc. All rights reserved.
- *           (C) 2007 Eric Seidel (eric@webkit.org)
- *
- * This library is free software; you can redistribute it and/or
- * modify it under the terms of the GNU Library General Public
- * License as published by the Free Software Foundation; either
- * version 2 of the License, or (at your option) any later version.
- *
- * This library is distributed in the hope that it will be useful,
- * but WITHOUT ANY WARRANTY; without even the implied warranty of
- * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU
- * Library General Public License for more details.
- *
- * You should have received a copy of the GNU Library General Public License
- * along with this library; see the file COPYING.LIB.  If not, write to
- * the Free Software Foundation, Inc., 51 Franklin Street, Fifth Floor,
- * Boston, MA 02110-1301, USA.
- */
-
-#include "Krystal.Booey/DOM/Nodes/Element.hpp"
+﻿#include "Krystal.Booey/DOM/Nodes/Element.hpp"
 #include "Krystal.Booey/Accessibility/AXObjectCache.hpp"
 #include "Krystal.Booey/Animation/CSSAnimation.hpp"
 #include "Krystal.Booey/Animation/KeyframeAnimationOptions.hpp"
@@ -471,10 +446,11 @@ namespace krys::boo
 
     bool isInDisplayNoneTree = false;
 
-    // Traverse the ancestor chain to find the rootmost element that has invalid computed style.
+    // The furthest ancestor whose computed style is out of date, which resolution starts from.
     auto rootmostInvalidElement = [&]() -> RefPtr<const Element>
     {
-      // In ResolveComputedStyleMode::RenderedOnly case we check for display:none ancestors.
+      // With current style there's nothing to resolve, unless the caller wants only rendered elements and
+      // so needs to know about display: none ancestors.
       if (mode != ResolveComputedStyleMode::RenderedOnly && !document->HasPendingStyleRecalc()
           && ExistingComputedStyle())
       {
@@ -511,7 +487,7 @@ namespace krys::boo
         if (mode == ResolveComputedStyleMode::RenderedOnly && existing->Display() == DisplayType::None)
         {
           isInDisplayNoneTree = true;
-          // Invalid ancestor style may still affect this display:none style.
+          // Nothing below a display: none element is rendered, so only out-of-date ancestors above it count.
           rootmost = nullptr;
         }
       }
@@ -541,15 +517,13 @@ namespace krys::boo
     style::PostResolutionCallbackDisabler disabler(*document,
                                                    style::PostResolutionCallbackDisabler::DrainCallbacks::No);
 
-    // Resolve and cache styles starting from the most distant ancestor.
-    // FIXME: This is not as efficient as it could be. For example if an ancestor has a non-inherited style
-    // change but the styles are otherwise clean we would not need to re-resolve descendants.
+    // From the furthest ancestor down, each style resolved and cached for the next to inherit from.
     for (auto &element : elementsRequiringComputedStyle | std::views::reverse)
     {
       if (computedStyle && computedStyle->ContainerType() != ContainerType::Normal
           && mode != ResolveComputedStyleMode::Editability)
       {
-        // If we find a query container we need to bail out and do full style update to resolve it.
+        // Container queries are only resolved by a full style update, so one is done instead.
         if (document->UpdateStyleIfNeeded())
         {
           return ComputedStyle();
@@ -627,7 +601,7 @@ namespace krys::boo
       }
     }
 
-    // FIXME: This should call resolveComputedStyle() unconditionally so we check if the style is valid.
+    // An existing style is taken as current: callers bring style up to date first.
     auto *style = ExistingComputedStyle();
     if (!style)
     {
@@ -720,10 +694,9 @@ namespace krys::boo
 
   void Element::StoreDisplayContentsOrNoneStyle(UniquePtr<RenderStyle> style) noexcept
   {
-    // This is used by RenderTreeBuilder to store the style for Elements with display:{contents|none}.
-    // Normally style is held in renderers but display:contents doesn't generate one.
-    // This is kept distinct from ElementRareData::computedStyle() which can update outside style resolution.
-    // This way renderOrDisplayContentsStyle() always returns consistent styles matching the rendering state.
+    // The render tree builder keeps the style of a display: contents or display: none element here, as it has
+    // no renderer to hold it. It's apart from the computed style, which can change outside style resolution,
+    // so it always matches what's rendered.
     krys_debug_assert(
       style && (style->Display() == DisplayType::Contents || style->Display() == DisplayType::None));
     krys_debug_assert(!Renderer() || IsPseudoElement());
@@ -805,7 +778,7 @@ namespace krys::boo
         return;
       }
 
-      // FIXME: We should restore the previous selection if there is one.
+      // The caret goes to the start, as in Chrome, which doesn't restore an earlier selection either.
       VisibleSelection newSelection = VisibleSelection(FirstPositionInOrBeforeNode(this));
 
       if (selection.ShouldChangeSelection(newSelection))
@@ -1013,8 +986,7 @@ namespace krys::boo
 
   void Element::InvalidateForQueryContainerSizeChange() noexcept
   {
-    // FIXME: Ideally we would just recompute things that are actually affected by containers queries within
-    // the subtree.
+    // The whole subtree, as any of it may query the container.
     Node::InvalidateStyle(style::Validity::SubtreeInvalid);
     _nodeFlags.Add(dom::NodeFlag::NeedsUpdateQueryContainerDependentStyle);
   }
@@ -1204,12 +1176,10 @@ namespace krys::boo
       }
     }
 
-    // The document should not receive dblclick for non-primary buttons.
+    // The second click of a double click is followed by dblclick. Only the primary button fires click, so
+    // only it double clicks.
     if (mouseEvent->Type() == event_names::Click && mouseEvent->Detail() == 2)
     {
-      // Special case: If it's a double click event, we also send the dblclick event. This is not part
-      // of the DOM specs, but is used for compatibility with the ondblclick="" attribute. This is treated
-      // as a separate event in other DOM-compliant browsers like Firefox, and so we do the same.
       Ref<MouseEvent> doubleClickEvent =
         MouseEvent::Create(event_names::DblClick, mouseEvent->Bubbles(), mouseEvent->Cancelable(), true,
                            html::EventLoop::Current().Now(), mouseEvent->FrameView(), mouseEvent->Detail(),
@@ -1238,11 +1208,8 @@ namespace krys::boo
       WheelEvent::Create(platformEvent, NodeDocument().View(),
                          isCancelable ? WheelEvent::IsCancelable::Yes : WheelEvent::IsCancelable::No);
 
-    // Events with no deltas are important because they convey platform information about scroll gestures
-    // and momentum beginning or ending. However, those events should not be sent to the DOM since some
-    // websites will break. They need to be dispatched because dispatching them will call into the default
-    // event handler, and our platform code will correctly handle the phase changes. Calling stopPropagation()
-    // will prevent the event from being sent to the DOM, but will still call the default event handler.
+    // A wheel event without deltas only marks a gesture or its momentum starting or ending. The page doesn't
+    // hear it (it's stopped before any listener), but the default event handler still sees the phase change.
     if (platformEvent.Delta().IsZero())
     {
       event->StopPropagation();
@@ -1406,7 +1373,8 @@ namespace krys::boo
       *this, {{css::SelectorPseudoClass::Focus, value}, {css::SelectorPseudoClass::FocusVisible, value}});
     NodeDocument().UserActionElements().SetFocused(*this, value);
 
-    // Shadow host with a slot that contain focused element is not considered focused.
+    // Each shadow root above the element records that it holds the focused element, and its host restyles, as
+    // the host's :focus depends on it.
     for (auto *root = dom::TreeQueries::ContainingShadowRoot(*this); root;
          root = dom::TreeQueries::ContainingShadowRoot(*root->Host()))
     {
@@ -1447,17 +1415,6 @@ namespace krys::boo
       style::PseudoClassChangeInvalidation styleInvalidation(*this, css::SelectorPseudoClass::FocusWithin,
                                                              value);
       NodeDocument().UserActionElements().SetHasFocusWithin(*this, value);
-    }
-  }
-
-  void Element::SetHasTentativeFocus(bool value) noexcept
-  {
-    // Tentative focus is used when trying to set the focus on a new element.
-    for (auto *ancestor = ParentElementInComposedTree(); ancestor;
-         ancestor = ancestor->ParentElementInComposedTree())
-    {
-      krys_debug_assert(ancestor->HasFocusWithin() != value);
-      NodeDocument().UserActionElements().SetHasFocusWithin(*ancestor, value);
     }
   }
 
@@ -1508,7 +1465,8 @@ namespace krys::boo
     {
       return false;
     }
-    // If :has() is present a change in an element may affect elements outside its subtree.
+    // With :has() in use, a change can restyle elements outside the subtree, so an invalid subtree isn't
+    // enough to know nothing else needs resolving.
     if (StyleValidity() >= style::Validity::SubtreeInvalid
         && !style::Scope::ForNode(*this).UsesHasPseudoClass())
     {
@@ -1580,13 +1538,6 @@ namespace krys::boo
         return;
       }
     }
-  }
-
-  bool Element::HasFlagsSetDuringStylingOfChildren() const noexcept
-  {
-    return ChildrenAffectedByFirstChildRules() || ChildrenAffectedByLastChildRules()
-           || ChildrenAffectedByForwardPositionalRules() || DescendantsAffectedByForwardPositionalRules()
-           || ChildrenAffectedByBackwardPositionalRules() || DescendantsAffectedByBackwardPositionalRules();
   }
 
   uint32 Element::ChildIndex() const noexcept
@@ -1664,19 +1615,16 @@ namespace krys::boo
 
   List<RefPtr<WebAnimation>> Element::GetAnimations(const Maybe<GetAnimationsOptions> &options) noexcept
   {
-    // If we are to return animations in the subtree, we can get all of the document's animations and filter
-    // animations targeting that are not registered on this element, one of its pseudo elements or a child's
-    // pseudo element.
+    // For the subtree, the document's animations whose targets (or their pseudo-elements' elements) are in
+    // it.
     Ref document = ShareRef(NodeDocument());
     if (options && options->Subtree)
     {
       return document->MatchingAnimations([&](Element &target) -> bool { return Contains(&target); });
     }
 
-    // For the list of animations to be current, we need to account for any pending CSS changes, such as
-    // updates to CSS Animations and CSS Transitions. This requires updating layout as well since resolving
-    // layout-dependent media queries could yield animations.
-    // FIXME: We might be able to use style::Extractor which is more optimized.
+    // Style is brought up to date first, so CSS animations and transitions that style changes start or end
+    // are listed.
     (void)document->UpdateStyleIfNeeded();
 
     List<RefPtr<WebAnimation>> animations;
@@ -2421,7 +2369,7 @@ namespace krys::boo
 
   void Element::SetUserAgentPart(const DOMStringAtom &part) noexcept
   {
-    // We may set the useragentpart attribute on elements before appending them to the shadow tree.
+    // It may be set before the element goes into its user agent shadow tree.
     krys_debug_assert(!IsConnected() || IsInUserAgentShadowTree());
     (void)SetAttribute(u8"useragentpart", part.ToString());
   }
@@ -2550,8 +2498,9 @@ namespace krys::boo
       container = ShareRef<ContainerNode>(*templateElement->Content());
     }
 
-    // Parsing empty string creates additional elements only inside <html> container
-    // https://html.spec.whatwg.org/multipage/parsing.html#parsing-main-inhtml
+    // An empty string only parses to new elements in an <html> element (which gets a head and a body); in
+    // anything else it just removes the children.
+    // https://html.spec.whatwg.org/#parsing-main-inhtml
     if (markup.empty() && !Is<HTMLHtmlElement>(*container))
     {
       return dom::MutationAlgorithms::ReplaceAll(nullptr, *container);
@@ -2781,9 +2730,9 @@ namespace krys::boo
   {
     html::CEReactionsScope ceReactions;
 
-    // The specification allows setting outerHTML on an Element whose parent is a DocumentFragment and Gecko
-    // supports this.
-    // https://w3c.github.io/DOM-Parsing/#dom-element-outerhtml
+    // An element without a parent element: nothing happens without a parent, a Document parent throws, and
+    // so does a DocumentFragment one, as in Chrome (see DIFFERENCES.md).
+    // https://html.spec.whatwg.org/#dom-element-outerhtml
     RefPtr<Element> parent = ShareRefPtr(ParentElement());
     if (!parent) KRYS_UNLIKELY
     {
@@ -2809,7 +2758,7 @@ namespace krys::boo
       return result.ReleaseException();
     }
 
-    // The following is not part of the specification but matches Blink's behavior as of June 2021.
+    // Not in the specification: the text nodes that end up next to each other are merged, as in Chrome.
     if (auto *nodeText = next ? DynamicDowncast<Text>(next->PreviousSibling()) : nullptr)
     {
       if (auto result = MergeWithNextTextNode(*nodeText); result.HasException())
@@ -3264,7 +3213,7 @@ namespace krys::boo
 
     document->ScheduleContentRelevancyUpdate(dom::ContentRelevancy::IsInTopLayer);
 
-    // Invalidate inert state
+    // Being in the top layer changes what's inert, so the element and the root restyle.
     InvalidateStyleInternal();
     if (RefPtr<Element> documentElement = document->DocumentElement())
     {
@@ -3293,9 +3242,7 @@ namespace krys::boo
 
     ForEachRenderLayer(*this, [](RenderLayer &layer) { layer.EstablishesTopLayerWillChange(); });
 
-    // We need to call Styleable::FromRenderer() while this element is still contained in
-    // Document::TopLayerElements(), since Styleable::FromRenderer() relies on this to
-    // find the backdrop's associated element.
+    // A ::backdrop's element is found through the top layer, so this runs before the element leaves it.
     if (auto *renderer = Renderer())
     {
       if (auto *backdrop = renderer->BackdropRenderer())
@@ -3307,13 +3254,13 @@ namespace krys::boo
       }
     }
 
-    // Unable to protect the document as it may have started destruction.
+    // The document isn't protected: it may already be being destroyed.
     NodeDocument().RemoveTopLayerElement(*this);
     _eventTargetFlags.Remove(dom::EventTargetFlag::IsInTopLayer);
 
     NodeDocument().ScheduleContentRelevancyUpdate(dom::ContentRelevancy::IsInTopLayer);
 
-    // Invalidate inert state
+    // Being in the top layer changes what's inert, so the element and the root restyle.
     InvalidateStyleInternal();
     if (RefPtr<Element> documentElement = NodeDocument().DocumentElement())
     {
@@ -3871,8 +3818,7 @@ namespace krys::boo
       {
         return value;
       }
-      // FIXME (webkit.org/b/189397): Why can't we just ceil/floor?
-      // Needed because of truncation (rather than rounding) when scaling up.
+      // Scaling up truncated the value, so one is added back before scaling it down.
       if (zoomFactor > 1)
       {
         value++;
@@ -3954,34 +3900,6 @@ namespace krys::boo
       return ScrollAlignment::AlignToEdgeIfNeeded;
     }
 
-    KRYS_NODISCARD double LocalZoomForRenderer(const RenderElement &renderer) noexcept
-    {
-      // FIXME: This does the wrong thing if two opposing zooms are in effect and canceled each
-      // other out, but the alternative is that we'd have to crawl up the whole render tree every
-      // time (or store an additional bit in the RenderStyle to indicate that a zoom was specified).
-      double zoomFactor = 1;
-      if (renderer.Style().UsedZoom() != 1)
-      {
-        // Need to find the nearest enclosing RenderElement that set up
-        // a differing zoom, and then we divide our result by it to eliminate the zoom.
-        const RenderElement *prev = &renderer;
-        for (const RenderElement *curr = prev->Parent(); curr; curr = curr->Parent())
-        {
-          if (curr->Style().UsedZoom() != prev->Style().UsedZoom())
-          {
-            zoomFactor = style::Evaluate<double>(prev->Style().Zoom());
-            break;
-          }
-          prev = curr;
-        }
-        if (prev->IsRenderView())
-        {
-          zoomFactor = style::Evaluate<double>(prev->Style().Zoom());
-        }
-      }
-      return zoomFactor;
-    }
-
     enum class LegacyCSSOMElementMetricsRoundingStrategy : bool
     {
       Round,
@@ -4000,8 +3918,9 @@ namespace krys::boo
     KRYS_NODISCARD int32 AdjustOffsetForZoomAndSubpixelLayout(const RenderBoxModelObject &renderer,
                                                               const LayoutUnit &offset) noexcept
     {
+      // The offsets are in the element's own CSS pixels: its used zoom, page zoom included, is divided out.
       auto offsetLeft = LayoutUnit(RoundToInt(offset));
-      double zoomFactor = LocalZoomForRenderer(renderer);
+      double zoomFactor = renderer.Style().UsedZoom();
       if (zoomFactor == 1)
       {
         return ConvertToNonSubpixelValue(offsetLeft.ToDouble(),
@@ -4163,7 +4082,7 @@ namespace krys::boo
       renderer->AbsoluteQuads(quads);
     }
 
-    // FIXME: Handle table/inline-table with a caption.
+    // A table's box covers its caption, so it has one rect, as in Chrome (see DIFFERENCES.md).
 
     if (quads.empty())
     {
@@ -4655,16 +4574,9 @@ namespace krys::boo
       {
         clientWidth += IntrinsicBorderForFieldsetOf(*renderer);
       }
-      // clientWidth/Height is the visual portion of the box content, not including
-      // borders or scroll bars, but includes padding. And per
-      // https://www.w3.org/TR/CSS2/tables.html#model,
-      // table wrapper box is a principal block box that contains the table box
-      // itself and any caption boxes, and table grid box is a block-level box that
-      // contains the table's internal table boxes. When table's border is specified
-      // in CSS, the border is added to table grid box, not table wrapper box.
-      // There's no table wrapper box, and we are supposed to retrieve clientWidth/Height
-      // from table wrapper box, not table grid box. So when we retrieve
-      // clientWidth/Height, it includes table's border size.
+      // A table's client size is its wrapper box's, which holds the table's border and padding inside it:
+      // the table renderer stands for both boxes, so they're added back.
+      // https://www.w3.org/TR/CSS2/tables.html#model
       if (renderer->IsRenderTable())
       {
         if (renderer->Style().BoxSizing() == BoxSizing::ContentBox)

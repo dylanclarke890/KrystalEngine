@@ -76,6 +76,6 @@ namespace krys::boo::css
 KRYS_SPECIALIZE_TYPE_CAST_TRAITS_BEGIN(krys::boo::css::FontFeatureValue)
   KRYS_NODISCARD static bool IsType(const krys::boo::css::Value &value) noexcept
   {
-    return value.IsFontFeatureValue();
+    return value.Type() == krys::boo::css::ValueType::FontFeature;
   }
 KRYS_SPECIALIZE_TYPE_CAST_TRAITS_END()

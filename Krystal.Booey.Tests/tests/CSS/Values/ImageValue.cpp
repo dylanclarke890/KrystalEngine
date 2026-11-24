@@ -7,7 +7,7 @@ namespace krys::boo::css::tests
 {
   namespace
   {
-    CSSUrl ImageUrl(utf8_stringview url)
+    Url ImageUrl(utf8_stringview url)
     {
       return *CompleteUrl(CSSOMString {url},
                           ParserContext {ParserMode::HTMLStandard, net::Url {u8"https://example.com/"}});
@@ -20,7 +20,7 @@ namespace krys::boo::css::tests
     {
       auto url = ImageUrl(u8"images/a.png");
       auto value = ImageValue::Create(url);
-      CHECK(value->IsImageValue());
+      CHECK(Is<ImageValue>(*value));
       CHECK(value->IsImage());
       CHECK_FALSE(value->IsImageGeneratorValue());
       CHECK(value->Url() == url);
@@ -37,8 +37,8 @@ namespace krys::boo::css::tests
 
     SECTION("Invalid images serialise as an empty string")
     {
-      auto value = ImageValue::Create();
-      CHECK(value->IsImageValue());
+      auto value = ImageValue::CreateInvalid();
+      CHECK(Is<ImageValue>(*value));
       CHECK(CssText(*value).empty());
     }
   }
@@ -86,7 +86,7 @@ namespace krys::boo::css::tests
     CHECK(ImageValue::Create(ImageUrl(u8"a.png"))->MayDependOnBaseUrl());
     CHECK_FALSE(ImageValue::Create(ImageUrl(u8"#image"))->MayDependOnBaseUrl());
     CHECK_FALSE(ImageValue::Create(ImageUrl(u8"data:image/png;base64,AAAA"))->MayDependOnBaseUrl());
-    CHECK_FALSE(ImageValue::Create()->MayDependOnBaseUrl());
+    CHECK_FALSE(ImageValue::CreateInvalid()->MayDependOnBaseUrl());
 
     // No image is loaded, so there are no subresources.
     bool called = false;

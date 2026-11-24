@@ -167,7 +167,7 @@ namespace krys::boo::css
       return;
     }
 
-    if (!srcList->Length())
+    if (!srcList->size())
     {
       return;
     }

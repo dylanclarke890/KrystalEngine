@@ -27,7 +27,7 @@ namespace krys::boo::css::tests
   {
     auto map = MapFromRows({{u8"head", u8"head"}, {u8"nav", u8"main"}});
     auto value = GridTemplateAreasValue::Create(GridTemplateAreas {map});
-    CHECK(value->IsGridTemplateAreasValue());
+    CHECK(Is<GridTemplateAreasValue>(*value));
     CHECK(value->Areas() == GridTemplateAreas {map});
     CHECK(value->Areas().Map.RowCount == 2);
     CHECK(value->Areas().Map.ColumnCount == 2);

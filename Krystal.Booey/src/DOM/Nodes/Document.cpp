@@ -1,31 +1,4 @@
-﻿/*
- * Copyright (C) 1999 Lars Knoll (knoll@kde.org)
- *           (C) 1999 Antti Koivisto (koivisto@kde.org)
- *           (C) 2001 Dirk Mueller (mueller@kde.org)
- *           (C) 2006 Alexey Proskuryakov (ap@webkit.org)
- * Copyright (C) 2004-2025 Apple Inc. All rights reserved.
- * Copyright (C) 2008, 2009 Torch Mobile Inc. All rights reserved. (http://www.torchmobile.com/)
- * Copyright (C) 2008-2014 Google Inc. All rights reserved.
- * Copyright (C) 2010 Nokia Corporation and/or its subsidiary(-ies)
- * Copyright (C) Research In Motion Limited 2010-2011. All rights reserved.
- *
- * This library is free software; you can redistribute it and/or
- * modify it under the terms of the GNU Library General Public
- * License as published by the Free Software Foundation; either
- * version 2 of the License, or (at your option) any later version.
- *
- * This library is distributed in the hope that it will be useful,
- * but WITHOUT ANY WARRANTY; without even the implied warranty of
- * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU
- * Library General Public License for more details.
- *
- * You should have received a copy of the GNU Library General Public License
- * along with this library; see the file COPYING.LIB.  If not, write to
- * the Free Software Foundation, Inc., 51 Franklin Street, Fifth Floor,
- * Boston, MA 02110-1301, USA.
- */
-
-#include "Krystal.Booey/DOM/Nodes/Document.hpp"
+﻿#include "Krystal.Booey/DOM/Nodes/Document.hpp"
 #include "Krystal.Booey/Accessibility/AXObjectCache.hpp"
 #include "Krystal.Booey/Animation/CSSAnimation.hpp"
 #include "Krystal.Booey/Animation/KeyframeEffect.hpp"
@@ -76,7 +49,6 @@
 #include "Krystal.Booey/DOM/Internals/ElementFactory.hpp"
 #include "Krystal.Booey/DOM/Internals/PopoverData.hpp"
 #include "Krystal.Booey/DOM/Internals/UserActionElementSet.hpp"
-#include "Krystal.Booey/DOM/Internals/VisibilityChangeClient.hpp"
 #include "Krystal.Booey/DOM/IntersectionObservers/IntersectionObserver.hpp"
 #include "Krystal.Booey/DOM/Iterators/ComposedTreeIterator.hpp"
 #include "Krystal.Booey/DOM/Iterators/SubtreeRanges.hpp"
@@ -299,7 +271,7 @@ namespace krys::boo
         }
       }
       _intersectionObserverData->Observers.clear();
-      // Document cannot be a target.
+      // A document can be an observer's root, but is never observed.
       krys_debug_assert(_intersectionObserverData->Registrations.empty());
     }
 
@@ -1709,23 +1681,20 @@ namespace krys::boo
       RefPtr<Element> targetElement = ShareRefPtr(result.TargetElement());
       if (auto *frame = Frame())
       {
-        // Before we dispatch a new mouse event, we must run the Process Pending Capture Element steps as
-        // defined in https://w3c.github.io/pointerevents/#process-pending-pointer-capture.
+        // Pending pointer capture is processed before the event is dispatched.
+        // https://w3c.github.io/pointerevents/#process-pending-pointer-capture
         auto &pointerCaptureController = frame->GetPointerCaptureController();
         RefPtr<Element> previousCaptureElement =
           ShareRefPtr(pointerCaptureController.PointerCaptureElement(this, event.PointerId()));
         pointerCaptureController.ProcessPendingPointerCapture(event.PointerId());
         RefPtr<Element> captureElement =
           ShareRefPtr(pointerCaptureController.PointerCaptureElement(this, event.PointerId()));
-        // If the capture element has changed while running the Process Pending Capture Element steps then
-        // we need to indicate that when calling UpdateHoverActiveState to be sure that the :active and :hover
-        // element chains are updated.
+        // A change of capture lets hover and active move off the chain frozen when the button went down.
         if (previousCaptureElement != captureElement)
         {
           captureElementChanged = CaptureChange::Yes;
         }
-        // If we have a capture element, we must target it instead of what would normally hit-test for this
-        // event.
+        // A captured pointer's events target the capture element, not what's under the pointer.
         if (captureElement)
         {
           targetElement = krys::move(captureElement);
@@ -1756,7 +1725,7 @@ namespace krys::boo
     RefPtr<Element> oldActiveElement = _activeElement;
     if (oldActiveElement && !request.Active())
     {
-      // We are clearing the :active chain because the mouse has been released.
+      // The button was released: the active chain is cleared.
       for (RefPtr<Element> currentElement = oldActiveElement; currentElement;
            currentElement = ShareRefPtr(currentElement->ParentElementInComposedTree()))
       {
@@ -1770,8 +1739,7 @@ namespace krys::boo
       RefPtr<Element> newActiveElement = innerElementInDocument;
       if (!oldActiveElement && newActiveElement && request.Active() && !request.TouchMove())
       {
-        // We are setting the :active chain and freezing it. If future moves happen, they
-        // will need to reference this chain.
+        // The button went down: the chain above the element becomes active, and stays fixed while it's held.
         for (RenderElement *current = newActiveElement->Renderer(); current; current = current->Parent())
         {
           auto *element = current->GetElement();
@@ -1785,27 +1753,23 @@ namespace krys::boo
         _activeElement = newActiveElement;
       }
     }
-    // If the mouse has just been pressed, set :active on the chain. Those (and only those)
-    // nodes should remain :active until the mouse is released.
+    // Only the press that made the chain sets :active; it holds until the release.
     bool allowActiveChanges = !oldActiveElement && _activeElement;
 
-    // If the mouse is down and if this is a mouse move event, we want to restrict changes in
-    // :hover/:active to only apply to elements that are in the :active chain that we froze
-    // at the time the mouse went down, unless the capture element changed.
+    // A move with the button held only changes :hover and :active within the active chain, unless the capture
+    // changed.
     bool mustBeInActiveChain =
       request.Active() && request.Move() && captureElementChanged == CaptureChange::No;
 
     RefPtr<Element> oldHoveredElement = krys::move(_hoveredElement);
 
-    // A touch release does not set a new hover target; clearing the element we're working with
-    // will clear the chain of hovered elements all the way to the top of the tree.
+    // A lifted touch hovers nothing, so the whole hover chain is cleared.
     if (request.TouchRelease())
     {
       innerElementInDocument = nullptr;
     }
 
-    // Check to see if the hovered Element has changed.
-    // If it hasn't, we do not need to do anything.
+    // The hovered element is the nearest rendered one, from the target up.
     RefPtr<Element> newHoveredElement = innerElementInDocument;
     while (newHoveredElement && !HasRenderer(*newHoveredElement))
     {
@@ -1865,7 +1829,7 @@ namespace krys::boo
       style::PseudoClassChangeInvalidation styleInvalidation {*elements.back(), pseudoClass, value,
                                                               style::InvalidationScope::Descendants};
 
-      // We need to do descendant invalidation for each shadow tree separately as the style is per-scope.
+      // Style is resolved per tree scope, so each shadow tree's descendants are invalidated separately.
       List<UniquePtr<style::PseudoClassChangeInvalidation>> shadowDescendantStyleInvalidations;
       for (auto &element : elements)
       {
@@ -2102,14 +2066,7 @@ namespace krys::boo
     // 5. (Skipped: there are no view transitions.)
     // 6. Run any page visibility change steps which may be defined in other specifications, with visibility
     //    state and document.
-    auto clients = _visibilityStateCallbackClients;
-    for (auto &client : clients)
-    {
-      if (auto *protectedClient = client.get())
-      {
-        protectedClient->VisibilityStateChanged();
-      }
-    }
+    //    (None of the specifications Booey implements defines any.)
 
     // 7. Fire an event named visibilitychange at document, with its bubbles attribute initialized to true.
     (void)dom::EventDispatcher::DispatchToTarget(*Event::Create(event_names::VisibilityChange, true, false),
@@ -2145,27 +2102,6 @@ namespace krys::boo
           protectedThis->ScheduleRenderingUpdate(RenderingUpdateStep::Resize);
         }
       });
-
-    auto clients = _visibilityStateCallbackClients;
-    for (auto &client : clients)
-    {
-      if (auto *protectedClient = client.get())
-      {
-        protectedClient->VisibilityStateChanged();
-      }
-    }
-  }
-
-  void Document::RegisterForVisibilityStateChangedCallbacks(dom::VisibilityChangeClient &client) noexcept
-  {
-    std::erase_if(_visibilityStateCallbackClients, [](const auto &weakClient) { return !weakClient; });
-    _visibilityStateCallbackClients.push_back(CreateWeakPtr(&client));
-  }
-
-  void Document::UnregisterForVisibilityStateChangedCallbacks(dom::VisibilityChangeClient &client) noexcept
-  {
-    std::erase_if(_visibilityStateCallbackClients,
-                  [&](const auto &weakClient) { return !weakClient || weakClient.get() == &client; });
   }
 
   CachedResourceLoader &Document::GetCachedResourceLoader() const noexcept
@@ -2221,13 +2157,13 @@ namespace krys::boo
 
       context->SetIsInPreparationForDisplayOrFlush(false);
 
-      // Some canvas contexts hold memory that should be periodically freed.
+      // Contexts with deferred drawing flush it, which frees what it held.
       if (context->HasDeferredOperations())
       {
         context->FlushDeferredOperations();
       }
 
-      // Some canvases need to do work when rendering has finished but before their content is composited.
+      // Canvases that ask for it are prepared after rendering and before their content is composited.
       if (auto *htmlCanvas = DynamicDowncast<HTMLCanvasElement>(*canvas))
       {
         if (htmlCanvas->NeedsPreparationForDisplay())
@@ -2509,8 +2445,8 @@ namespace krys::boo
   {
     if (_renderView)
     {
-      // Per spec, this is recorded when ResizeObserver events are determined and delivered.
-      // See https://drafts.csswg.org/css-anchor-position-1/#last-successful-position-option.
+      // Recorded where the resize observations are gathered, as the specification says.
+      // https://drafts.csswg.org/css-anchor-position-1/#last-successful-position-option
       auto lastSuccessfulPositionOptionMap =
         style::AnchorPositionEvaluator::RecordLastSuccessfulPositionOptions(_renderView->PositionTryBoxes());
       StyleScope().SetLastSuccessfulPositionOptionIndexMap(krys::move(lastSuccessfulPositionOptionMap));
@@ -2525,8 +2461,8 @@ namespace krys::boo
     while (true)
     {
       frame.LayoutIfNeeded();
-      // If we have determined a change because of visibility we need to get up-to-date layout before
-      // reporting any values to resize observers.
+      // A first content-visibility determination that changed something needs layout again before sizes are
+      // observed.
       if (_contentVisibilityDocumentState
           && _contentVisibilityDocumentState->DetermineInitialVisibleContentVisibility()
                == dom::HadInitialVisibleContentVisibilityDetermination::Yes)
@@ -2534,7 +2470,7 @@ namespace krys::boo
         continue;
       }
 
-      // Start check resize observers;
+      // On the first round, the observations behind contain-intrinsic-size: auto's remembered sizes.
       if (!resizeObserverDepth
           && GatherResizeObservationsForContainIntrinsicSize() != ResizeObserver::MaxElementDepth())
       {
@@ -2553,7 +2489,7 @@ namespace krys::boo
     {
       SetHasSkippedResizeObservations(false);
       // (The loop error isn't reported, as there's no script error reporting.)
-      // Starting a new schedule the next round of notify.
+      // The skipped observations get another rendering update.
       ScheduleRenderingUpdate({RenderingUpdateStep::ResizeObservations});
     }
   }
@@ -2592,7 +2528,8 @@ namespace krys::boo
       frameView->ServiceScrollAnimations(html::EventLoop::Current().Now());
     }
 
-    // FIXME: The order of dispatching is not specified: https://github.com/WICG/visual-viewport/issues/66.
+    // The order of the elements' and the visual viewport's events isn't specified
+    // (https://github.com/WICG/visual-viewport/issues/66).
     auto currentTargets = std::exchange(_pendingScrollEventTargets, {});
     for (auto &[target, type] : currentTargets)
     {
@@ -2640,7 +2577,8 @@ namespace krys::boo
       return;
     }
 
-    // FIXME: The order of dispatching is not specified: https://github.com/WICG/visual-viewport/issues/65.
+    // The order of the window's and the visual viewport's events isn't specified
+    // (https://github.com/WICG/visual-viewport/issues/65).
     if (_needsDOMWindowResizeEvent)
     {
       _needsDOMWindowResizeEvent = false;
@@ -3194,9 +3132,8 @@ namespace krys::boo
       {
         continue;
       }
-      // Quirks mode, ASCII case-insensitive comparison of names.
-      // FIXME: This behavior is not mentioned in the HTML specification. We should either remove this or get
-      // this into the specification.
+      // Not in the specification: in quirks mode, names match ASCII case-insensitively, as in Chrome (see
+      // DIFFERENCES.md).
       if (InQuirksMode() ? text::IsASCIICaselessEqual(DOMStringView(*anchorName), name) : *anchorName == name)
       {
         return anchor;
@@ -3737,7 +3674,7 @@ namespace krys::boo
     DispatchWindowLoadEvent();
     DispatchPageshowEvent(false);
 
-    // An event handler may have removed the frame.
+    // A load or pageshow listener may have removed the frame.
     if (!Frame())
     {
       return;
@@ -3755,7 +3692,7 @@ namespace krys::boo
 
     UpdateStyleIfNeeded();
 
-    // Always do a layout after loading if needed.
+    // The view is laid out after loading if it's empty or out of date.
     RefPtr<FrameView> view = ShareRefPtr(View());
     if (view && GetRenderView() && (!GetRenderView()->FirstChild() || GetRenderView()->NeedsLayout()))
     {
@@ -4024,7 +3961,7 @@ namespace krys::boo
     // The document may have been styled without a render view; the rebuild gives the new one its style.
     _initialContainingBlockStyle = nullptr;
 
-    // FIXME: It would be better if we could pass the resolved document style directly here.
+    // The view gets a blank style here; the rebuild below gives it the document's.
     _renderView = CreateRenderer<boo::RenderView>(*this, RenderStyle::Create());
     Node::SetRenderer(_renderView.get());
 
@@ -4079,10 +4016,10 @@ namespace krys::boo
       RenderTreeUpdater::TearDownRenderers(*documentElement);
     }
 
-    // FIXME: RenderObject::view() uses m_renderView and we can't null it before destruction is completed
+    // The view stays set while it's destroyed, as renderers find it through the document.
     {
       RenderTreeBuilder builder(*_renderView);
-      // FIXME: This is a workaround for leftover content (see webkit.org/b/182547).
+      // Anything the teardown missed goes with the view (none does in the tests).
       while (_renderView->FirstChild())
       {
         builder.Destroy(*_renderView->FirstChild());
@@ -4439,7 +4376,8 @@ namespace krys::boo
       if (!HaveStylesheetsLoaded())
       {
         _ignorePendingStylesheets = true;
-        // FIXME: This should just invalidate elements with missing styles.
+        // Elements left unstyled while a sheet was pending need styles now. Which ones isn't recorded, so
+        // the whole document is rebuilt.
         if (_hasNodesWithMissingStyle)
         {
           ScheduleFullStyleRebuild();
@@ -4456,7 +4394,7 @@ namespace krys::boo
     RefPtr<FrameView> frameView = ShareRefPtr(View());
     if (frameView && frameView->LayoutContext().IsInRenderTreeLayout())
     {
-      // View layout should not be re-entrant.
+      // Layout doesn't nest.
       krys_debug_assert_msg(false, "layout isn't re-entrant");
       return UpdateLayoutResult::NoChange;
     }
@@ -4522,8 +4460,6 @@ namespace krys::boo
         {
           for (auto &descendant : DescendantsOfType<RenderObject>(*rootForLayout))
           {
-            // FIXME: While 'c-v: auto' is used 'hidden' inside 'c-v: hidden' we could entirly skip hidden
-            // subtrees here.
             auto shouldLayoutSkippedContent =
               (layoutOptions.contains(dom::LayoutOptions::TreatContentVisibilityAutoAsVisible)
                && descendant.Style().UsedContentVisibility() == ContentVisibility::Auto)
@@ -4884,7 +4820,7 @@ namespace krys::boo
         {
           continue;
         }
-        // If the standard property is exposed no need to expose the alias.
+        // An alias isn't listed when its standard property is.
         if (auto standard = css::CascadeAliasProperty(property);
             standard != property && css::IsExposed(standard, settings))
         {
@@ -4939,10 +4875,6 @@ namespace krys::boo
       return;
     }
 
-    // FIXME: We should update style on our ancestor chain before proceeding, however doing so at
-    // the time this comment was originally written caused several tests to crash.
-
-    // FIXME: Do this user agent shadow tree update per tree scope.
     auto pendingUserAgentShadowTreeUpdates = _elementsWithPendingUserAgentShadowTreeUpdates;
     for (auto &weakElement : pendingUserAgentShadowTreeUpdates)
     {
@@ -4970,7 +4902,7 @@ namespace krys::boo
 
       if (type == ResolveStyleType::Rebuild)
       {
-        // This may get set again during style resolve.
+        // Style resolution sets it again if it leaves elements unstyled.
         _hasNodesWithMissingStyle = false;
 
         auto newStyle = style::ResolveForDocument(*this);
@@ -5127,20 +5059,6 @@ namespace krys::boo
     return true;
   }
 
-  bool Document::UpdateStyleIfNeededIgnoringPendingStylesheets() noexcept
-  {
-    SetForScope ignorePendingStylesheets(_ignorePendingStylesheets, true);
-    // FIXME: This should just invalidate elements with missing styles.
-    if (_hasNodesWithMissingStyle)
-    {
-      ScheduleFullStyleRebuild();
-    }
-
-    (void)UpdateRelevancyOfContentVisibilityElements();
-
-    return UpdateStyleIfNeeded();
-  }
-
   UniquePtr<RenderStyle> Document::StyleForElementIgnoringPendingStylesheets(
     Element &element, const RenderStyle *parentStyle,
     const Maybe<style::PseudoElementIdentifier> &pseudoElementIdentifier) noexcept
@@ -5269,14 +5187,14 @@ namespace krys::boo
     size_t length = colorScheme.size();
     for (size_t i = 0; i < length;)
     {
-      // Skip to first non-separator.
+      // The next keyword's start, after whitespace.
       while (i < length && text::IsASCIIWhitespace(colorScheme[i]))
       {
         ++i;
       }
       size_t keyBegin = i;
 
-      // Skip to first separator.
+      // Its end, at whitespace.
       while (i < length && !text::IsASCIIWhitespace(colorScheme[i]))
       {
         ++i;
@@ -5328,7 +5246,7 @@ namespace krys::boo
                                }
                              });
 
-    // If the value was just "only", that is synonymous for "only light".
+    // A lone `only` is taken as `only light`.
     if (colorScheme.empty() && !allowsTransformations)
     {
       colorScheme.Add(boo::ColorScheme::Light);
@@ -5413,7 +5331,7 @@ namespace krys::boo
       return;
     }
 
-    _mediaQueryMatcher->EvaluateAll(css::MediaQueryMatcher::EventMode::DispatchNow);
+    _mediaQueryMatcher->EvaluateAll();
   }
 
   ExceptionOr<dom::SelectorQuery &>
@@ -5479,7 +5397,7 @@ namespace krys::boo
 
   namespace
   {
-    // See https://www.w3.org/TR/cssom-view-1/#potentially-scrollable.
+    // https://drafts.csswg.org/cssom-view/#potentially-scrollable
     KRYS_NODISCARD bool IsBodyPotentiallyScrollable(Document &document, HTMLBodyElement &body) noexcept
     {
       // An element is potentially scrollable if all of the following conditions are true:
@@ -5488,8 +5406,8 @@ namespace krys::boo
       //   overflow-x or overflow-y properties is not visible.
       // - The element's used value of the overflow-x or overflow-y properties is not visible.
       //
-      // FIXME: We should use RenderObject::hasNonVisibleOverflow() instead of Element::computedStyle() but
-      // the used values are currently not correctly updated. See https://webkit.org/b/182292.
+      // The computed values serve: once the root's overflow isn't visible, the body's doesn't propagate to
+      // the viewport, so its computed value is its used one.
       auto documentElement = document.DocumentElement();
       if (!body.Renderer() || !documentElement)
       {
@@ -5521,7 +5439,7 @@ namespace krys::boo
 
   RefPtr<Element> Document::ScrollingElement() noexcept
   {
-    // See https://drafts.csswg.org/cssom-view/#dom-document-scrollingelement.
+    // https://drafts.csswg.org/cssom-view/#dom-document-scrollingelement
     // The scrollingElement attribute, on getting, must run these steps:
     // 1. If the Document is in quirks mode, follow these substeps:
     if (InQuirksMode())

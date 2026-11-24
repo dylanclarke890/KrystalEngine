@@ -74,7 +74,7 @@ namespace krys::boo
   size_t InlineStylePropertyMap::Size() const noexcept
   {
     const auto *inlineStyle = _element ? _element->InlineStyle() : nullptr;
-    return inlineStyle ? inlineStyle->PropertyCount() : 0;
+    return inlineStyle ? inlineStyle->size() : 0;
   }
 
   auto InlineStylePropertyMap::Entries() const noexcept -> List<Entry>

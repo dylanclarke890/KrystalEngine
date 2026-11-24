@@ -106,20 +106,20 @@ namespace krys::boo::css
 KRYS_SPECIALIZE_TYPE_CAST_TRAITS_BEGIN(krys::boo::css::PositionValue)
   KRYS_NODISCARD static bool IsType(const krys::boo::css::Value &value) noexcept
   {
-    return value.IsPositionValue();
+    return value.Type() == krys::boo::css::ValueType::Position;
   }
 KRYS_SPECIALIZE_TYPE_CAST_TRAITS_END()
 
 KRYS_SPECIALIZE_TYPE_CAST_TRAITS_BEGIN(krys::boo::css::PositionXValue)
   KRYS_NODISCARD static bool IsType(const krys::boo::css::Value &value) noexcept
   {
-    return value.IsPositionXValue();
+    return value.Type() == krys::boo::css::ValueType::PositionX;
   }
 KRYS_SPECIALIZE_TYPE_CAST_TRAITS_END()
 
 KRYS_SPECIALIZE_TYPE_CAST_TRAITS_BEGIN(krys::boo::css::PositionYValue)
   KRYS_NODISCARD static bool IsType(const krys::boo::css::Value &value) noexcept
   {
-    return value.IsPositionYValue();
+    return value.Type() == krys::boo::css::ValueType::PositionY;
   }
 KRYS_SPECIALIZE_TYPE_CAST_TRAITS_END()

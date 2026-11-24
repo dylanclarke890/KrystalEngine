@@ -32,8 +32,8 @@ namespace krys::boo::css
 {
   // MARK: - Serialisation
 
-  void Serialiser<CSSUrl>::operator()(StringBuilder &builder, const SerialisationContext &context,
-                                      const CSSUrl &value) noexcept
+  void Serialiser<Url>::operator()(StringBuilder &builder, const SerialisationContext &context,
+                                   const Url &value) noexcept
   {
     // https://drafts.csswg.org/cssom/#serialize-a-url
 
@@ -67,27 +67,27 @@ namespace krys::boo::css
 
   namespace
   {
-    CSSUrl CompleteUrl(const CSSOMString &string, const net::Url &baseUrl) noexcept
+    Url CompleteUrl(const CSSOMString &string, const net::Url &baseUrl) noexcept
     {
       if (string.empty() || string.starts_with(u8'#'))
       {
-        return CSSUrl {.Specified = string, .Resolved = net::Url {string}, .Modifiers = {}};
+        return Url {.Specified = string, .Resolved = net::Url {string}, .Modifiers = {}};
       }
       if (baseUrl.IsNull() || baseUrl.IsAboutBlank())
       {
-        return CSSUrl {.Specified = string, .Resolved = net::Url {}, .Modifiers = {}};
+        return Url {.Specified = string, .Resolved = net::Url {}, .Modifiers = {}};
       }
-      return CSSUrl {.Specified = string, .Resolved = net::Url {baseUrl, string}, .Modifiers = {}};
+      return Url {.Specified = string, .Resolved = net::Url {baseUrl, string}, .Modifiers = {}};
     }
   }
 
-  Maybe<CSSUrl> CompleteUrl(const CSSOMString &string, const ParserContext &context) noexcept
+  Maybe<Url> CompleteUrl(const CSSOMString &string, const ParserContext &context) noexcept
   {
     // Upstream also rejects non-`data:` URLs in WebVTT mode, which isn't supported.
     return CompleteUrl(string, context.BaseUrl);
   }
 
-  CSSUrl Resolve(CSSUrl &&url) noexcept
+  Url Resolve(Url &&url) noexcept
   {
     if (url.Resolved.IsNull())
     {
@@ -96,7 +96,7 @@ namespace krys::boo::css
     return krys::move(url);
   }
 
-  bool MayDependOnBaseUrl(const CSSUrl &url) noexcept
+  bool MayDependOnBaseUrl(const Url &url) noexcept
   {
     return !url.Specified.empty() && !url.Specified.starts_with(u8'#') && !url.Resolved.ProtocolIsData();
   }

@@ -46,6 +46,18 @@ namespace krys::boo
 {
   namespace
   {
+    /// @brief How far each of two partly overlapping rects is shrunk, on every side, so a slight overlap
+    /// doesn't stop one lying in a direction from the other.
+    KRYS_NODISCARD constexpr int32 FudgeFactor() noexcept
+    {
+      return 2;
+    }
+
+    KRYS_NODISCARD LayoutRect FrameRectInAbsoluteCoordinates(Frame *frame) noexcept
+    {
+      return LayoutRect(frame->View()->VisibleContentRect());
+    }
+
     bool AreRectsFullyAligned(dom::FocusDirection, const LayoutRect &, const LayoutRect &) noexcept;
 
     bool AreRectsPartiallyAligned(dom::FocusDirection, const LayoutRect &, const LayoutRect &) noexcept;
@@ -391,11 +403,6 @@ namespace krys::boo
     IsOffscreenAfterScrolling = HasOffscreenRect(*VisibleNode, direction);
   }
 
-  boo::Document *FocusCandidate::Document() const noexcept
-  {
-    return VisibleNode ? &VisibleNode->NodeDocument() : nullptr;
-  }
-
   // Checks if |node| is offscreen the visible area (viewport) of its container
   // document. In case it is, one can scroll in direction or take any different
   // desired action later on.
@@ -639,11 +646,6 @@ namespace krys::boo
     }
 
     return {};
-  }
-
-  LayoutRect FrameRectInAbsoluteCoordinates(Frame *frame) noexcept
-  {
-    return LayoutRect(frame->View()->VisibleContentRect());
   }
 
   bool AreElementsOnSameLine(const FocusCandidate &firstCandidate,

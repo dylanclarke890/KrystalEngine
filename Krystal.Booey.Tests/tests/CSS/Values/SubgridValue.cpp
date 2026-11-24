@@ -9,11 +9,11 @@ namespace krys::boo::css::tests
   TEST_CASE_METHOD(ValueFixture, "SubgridValue::Create", "[CSS][Values][SubgridValue]")
   {
     auto value = SubgridValue::Create({LineNames({u8"a"}), LineNames({u8"b", u8"c"})});
-    CHECK(value->IsSubgridValue());
+    CHECK(Is<SubgridValue>(*value));
     CHECK(value->ContainsValueList());
-    REQUIRE(value->Length() == 2u);
-    CHECK(CssText(*value->Item(0u)) == "[a]");
-    CHECK(CssText(*value->Item(1u)) == "[b c]");
+    REQUIRE(value->size() == 2u);
+    CHECK(CssText((*value)[0u]) == "[a]");
+    CHECK(CssText((*value)[1u]) == "[b c]");
   }
 
   TEST_CASE_METHOD(ValueFixture, "SubgridValue serialisation", "[CSS][Values][SubgridValue]")
@@ -54,7 +54,7 @@ namespace krys::boo::css::tests
     auto value = SubgridValue::Create({LineNames({u8"a"}), LineNames({u8"b"})});
     auto children = Children(*value);
     REQUIRE(children.size() == 2uz);
-    CHECK(children[0uz] == value->Item(0u));
-    CHECK(children[1uz] == value->Item(1u));
+    CHECK(children[0uz] == &(*value)[0u]);
+    CHECK(children[1uz] == &(*value)[1u]);
   }
 }

@@ -108,18 +108,18 @@ namespace krys::boo::css
   class FontFaceSrcResourceValue final : public Value
   {
   private:
-    CSSUrl _location;
+    Url _location;
     CSSOMString _format;
     List<FontTechnology> _technologies;
     CachedResourceHandle<CachedFont> _cachedFont;
 
-    FontFaceSrcResourceValue(CSSUrl &&location, CSSOMString &&format,
+    FontFaceSrcResourceValue(Url &&location, CSSOMString &&format,
                              List<FontTechnology> &&technologies) noexcept;
 
   public:
     ~FontFaceSrcResourceValue() noexcept;
 
-    KRYS_NODISCARD static Ref<FontFaceSrcResourceValue> Create(CSSUrl location, CSSOMString format,
+    KRYS_NODISCARD static Ref<FontFaceSrcResourceValue> Create(Url location, CSSOMString format,
                                                                List<FontTechnology> &&technologies) noexcept;
 
     KRYS_NODISCARD bool IsEmpty() const noexcept
@@ -145,13 +145,13 @@ namespace krys::boo::css
 KRYS_SPECIALIZE_TYPE_CAST_TRAITS_BEGIN(krys::boo::css::FontFaceSrcLocalValue)
   KRYS_NODISCARD static bool IsType(const krys::boo::css::Value &value) noexcept
   {
-    return value.IsFontFaceSrcLocalValue();
+    return value.Type() == krys::boo::css::ValueType::FontFaceSrcLocal;
   }
 KRYS_SPECIALIZE_TYPE_CAST_TRAITS_END()
 
 KRYS_SPECIALIZE_TYPE_CAST_TRAITS_BEGIN(krys::boo::css::FontFaceSrcResourceValue)
   KRYS_NODISCARD static bool IsType(const krys::boo::css::Value &value) noexcept
   {
-    return value.IsFontFaceSrcResourceValue();
+    return value.Type() == krys::boo::css::ValueType::FontFaceSrcResource;
   }
 KRYS_SPECIALIZE_TYPE_CAST_TRAITS_END()

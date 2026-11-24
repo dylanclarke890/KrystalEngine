@@ -11,7 +11,7 @@ namespace krys::boo::dom::tests
                                              bool isKeypad = false,
                                              EnumSet<PlatformEvent::Modifier> modifiers = {}) noexcept
     {
-      return PlatformKeyboardEvent(type, text, text, krys::move(key), krys::move(code), u8"", keyCode, true,
+      return PlatformKeyboardEvent(type, text, text, krys::move(key), krys::move(code), keyCode, true,
                                    isKeypad, false, modifiers, MonotonicTime::Now());
     }
   }
@@ -57,17 +57,16 @@ namespace krys::boo::dom::tests
 
     SECTION("initKeyboardEvent")
     {
-      event->InitKeyboardEvent(u8"keyup", false, true, nullptr, u8"U+0041",
-                               KeyboardEvent::DOM_KEY_LOCATION_LEFT, true, false, false, true);
+      event->InitKeyboardEvent(u8"keyup", false, true, nullptr, u8"a", KeyboardEvent::DOM_KEY_LOCATION_LEFT,
+                               true, false, false, true);
       CHECK(event->Type() == u8"keyup");
       CHECK_FALSE(event->Bubbles());
       CHECK(event->Cancelable());
-      CHECK(event->KeyIdentifier() == u8"U+0041");
+      CHECK(event->Key() == u8"a");
       CHECK(event->Location() == KeyboardEvent::DOM_KEY_LOCATION_LEFT);
       CHECK(event->CtrlKey());
       CHECK(event->MetaKey());
       CHECK_FALSE(event->ShiftKey());
-      CHECK(event->Key().empty());
       CHECK_FALSE(event->Repeat());
       CHECK(event->KeyCode() == 0);
       CHECK(event->CharCode() == 0);
@@ -122,20 +121,20 @@ namespace krys::boo::dom::tests
 
     SECTION("a combined key down splits into keydown and keypress")
     {
-      PlatformKeyboardEvent combined(PlatformEvent::Type::KeyDown, u8"a", u8"a", u8"a", u8"KeyA", u8"U+0041",
-                                     'A', false, false, false, {}, MonotonicTime::Now());
+      PlatformKeyboardEvent combined(PlatformEvent::Type::KeyDown, u8"a", u8"a", u8"a", u8"KeyA", 'A', false,
+                                     false, false, {}, MonotonicTime::Now());
       auto rawKeyDown = combined;
       rawKeyDown.DisambiguateKeyDownEvent(PlatformEvent::Type::RawKeyDown);
       CHECK(rawKeyDown.GetType() == PlatformEvent::Type::RawKeyDown);
       CHECK(rawKeyDown.Text().empty());
       CHECK(rawKeyDown.UnmodifiedText().empty());
-      CHECK(rawKeyDown.KeyIdentifier() == u8"U+0041");
+      CHECK(rawKeyDown.Key() == u8"a");
       CHECK(rawKeyDown.LegacyKeyCode() == 'A');
 
       auto keyPress = combined;
       keyPress.DisambiguateKeyDownEvent(PlatformEvent::Type::Char);
       CHECK(keyPress.Text() == u8"a");
-      CHECK(keyPress.KeyIdentifier().empty());
+      CHECK(keyPress.Key() == u8"a");
       // A char has no key code, though the keypress's keydown does.
       CHECK(keyPress.LegacyKeyCode() == 0);
       CHECK(keyPress.LegacyKeyCodeWithoutKeyPressOverride() == 'A');

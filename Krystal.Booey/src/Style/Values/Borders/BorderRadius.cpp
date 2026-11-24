@@ -72,7 +72,7 @@ namespace krys::boo::style
   BorderRadiusValue CSSValueConversion<BorderRadiusValue>::operator()(BuilderState &state,
                                                                       const css::Value &value) noexcept
   {
-    if (!value.IsValuePairValue())
+    if (!Is<css::ValuePair>(value))
     {
       return {0_css_px, 0_css_px};
     }

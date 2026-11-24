@@ -1,24 +1,4 @@
-﻿/*
- * (C) 1999-2003 Lars Knoll (knoll@kde.org)
- * Copyright (C) 2004, 2006, 2007, 2008, 2009, 2010, 2012 Apple Inc. All rights reserved.
- *
- * This library is free software; you can redistribute it and/or
- * modify it under the terms of the GNU Library General Public
- * License as published by the Free Software Foundation; either
- * version 2 of the License, or (at your option) any later version.
- *
- * This library is distributed in the hope that it will be useful,
- * but WITHOUT ANY WARRANTY; without even the implied warranty of
- * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU
- * Library General Public License for more details.
- *
- * You should have received a copy of the GNU Library General Public License
- * along with this library; see the file COPYING.LIB.  If not, write to
- * the Free Software Foundation, Inc., 51 Franklin Street, Fifth Floor,
- * Boston, MA 02110-1301, USA.
- */
-
-#pragma once
+﻿#pragma once
 
 #include "Krystal.Booey/CSS/Parser/ParserContext.hpp"
 #include "Krystal.Booey/CSS/Types/CSSOMString.hpp"
@@ -49,152 +29,114 @@ namespace krys::boo::css
   class NamespaceRule;
   class Rule;
 
-  /// @brief The parsed contents of a style sheet: its rules and namespaces, shared between the CSSStyleSheet
-  /// objects that use it.
+  /// @brief A parsed style sheet: its rules, the namespaces they declare, and the state of its imports. The
+  /// CSSOM [`CSSStyleSheet`](https://drafts.csswg.org/cssom/#cssstylesheet) objects using it are its
+  /// clients; an unmodified sheet can be shared between several, and kept in the memory cache.
+  /// @note The rules are held in four lists, in the order a style sheet allows them: layer statements before
+  /// any import, then imports, then namespaces, then the rest. `RuleAt` indexes them as one list.
   class StyleSheetContents final : public RefCounted<StyleSheetContents>,
                                    public CanMakeWeakPtr<StyleSheetContents>
   {
     friend class boo::CSSStyleSheet;
-    using PrefixNamespaceURIMap = HashMap<CSSOMStringAtom, CSSOMStringAtom>;
+    using PrefixNamespaceUriMap = HashMap<CSSOMStringAtom, CSSOMStringAtom>;
 
   private:
     ImportRule *_ownerRule {nullptr};
-
     CSSOMString _originalUrl;
+    ParserContext _parserContext;
 
-    CSSOMString _encodingFromCharsetRule;
     List<Ref<LayerRule>> _layerRulesBeforeImportRules;
     List<Ref<ImportRule>> _importRules;
     List<Ref<NamespaceRule>> _namespaceRules;
     List<Ref<Rule>> _childRules;
-    PrefixNamespaceURIMap _namespaces;
+
+    PrefixNamespaceUriMap _namespaces;
     CSSOMStringAtom _defaultNamespace;
 
-    bool _isUserStyleSheet;
+    bool _isUserStyleSheet {false};
     bool _loadCompleted {false};
     bool _hasSyntacticallyValidCSSHeader {true};
     bool _didLoadErrorOccur {false};
     bool _isMutable {false};
-    mutable bool _hasResolvedNesting {false};
     mutable Maybe<bool> _hasNestingRulesCache;
     uint32 _inMemoryCacheCount {0};
-
-    ParserContext _parserContext;
 
     List<CSSStyleSheet *> _clients;
 
     StyleSheetContents(ImportRule *ownerRule, CSSOMString originalUrl, ParserContext context) noexcept;
 
+    /// @brief A copy of a cacheable sheet, with copies of its rules, for a client that will modify it.
     StyleSheetContents(const StyleSheetContents &other) noexcept;
 
   public:
     ~StyleSheetContents() noexcept;
 
+    /// @brief An empty sheet with a standards-mode parser context.
     KRYS_NODISCARD static Ref<StyleSheetContents> Create() noexcept;
 
-    KRYS_NODISCARD static Ref<StyleSheetContents> Create(const ParserContext &context) noexcept;
+    KRYS_NODISCARD static Ref<StyleSheetContents> Create(ParserContext context) noexcept;
 
-    KRYS_NODISCARD static Ref<StyleSheetContents> Create(const CSSOMString &originalUrl,
-                                                         const ParserContext &context) noexcept;
+    KRYS_NODISCARD static Ref<StyleSheetContents> Create(CSSOMString originalUrl,
+                                                         ParserContext context) noexcept;
 
-    KRYS_NODISCARD static Ref<StyleSheetContents>
-      Create(ImportRule *ownerRule, const CSSOMString &originalUrl, const ParserContext &context) noexcept;
+    /// @brief The sheet an `@import` rule loads.
+    KRYS_NODISCARD static Ref<StyleSheetContents> Create(ImportRule *ownerRule, CSSOMString originalUrl,
+                                                         ParserContext context) noexcept;
+
+    /// @brief A copy for a client to modify; only a cacheable sheet can be copied.
+    KRYS_NODISCARD Ref<StyleSheetContents> Copy() const noexcept;
+
+#pragma region Parsing
 
     KRYS_NODISCARD const ParserContext &GetParserContext() const noexcept
     {
       return _parserContext;
     }
 
-    KRYS_NODISCARD const CSSOMStringAtom &DefaultNamespace() const noexcept
+    /// @brief The URL relative URLs in the sheet resolve against.
+    KRYS_NODISCARD const net::Url &BaseUrl() const noexcept
     {
-      return _defaultNamespace;
+      return _parserContext.BaseUrl;
     }
 
-    KRYS_NODISCARD CSSOMStringAtom NamespaceURIFromPrefix(const CSSOMStringAtom &prefix) const noexcept;
-
-    /// @brief Parses @p sheetText into this sheet.
-    bool ParseString(const CSSOMString &sheetText) noexcept;
-
-    /// @brief Parses the text of a loaded sheet into this sheet.
-    /// @return False if the sheet can't be used (a load error, or a type that isn't CSS).
-    bool ParseAuthorStyleSheet(const CachedCSSStyleSheet *cachedStyleSheet) noexcept;
-
-    void NotifyLoadedSheet(const CachedCSSStyleSheet *sheet) noexcept;
-
-    /// @brief Whether a parsed sheet can be used again: none of its subresources failed.
-    KRYS_NODISCARD bool SubresourcesAllowReuse() const noexcept;
-
-    KRYS_NODISCARD bool IsLoadingSubresources() const noexcept;
-
-    KRYS_NODISCARD bool IsCacheable() const noexcept;
-
-    KRYS_NODISCARD bool IsCacheableWithNoBaseUrlDependency() const noexcept;
-
-    KRYS_NODISCARD bool IsLoading() const noexcept;
-
-    void CheckLoaded() noexcept;
-
-    void StartLoadingDynamicSheet() noexcept;
-
-    KRYS_NODISCARD StyleSheetContents *RootStyleSheet() const noexcept;
-
-    KRYS_NODISCARD Node *SingleOwnerNode() const noexcept;
-
-    KRYS_NODISCARD Document *SingleOwnerDocument() const noexcept;
-
+    /// @brief The encoding the sheet was decoded with, if one was given.
     KRYS_NODISCARD utf8_stringview Charset() const noexcept
     {
       return _parserContext.Charset;
     }
 
-    KRYS_NODISCARD bool LoadCompleted() const noexcept
+    /// @brief The URL the sheet was first requested from, before any redirects.
+    KRYS_NODISCARD CSSOMString OriginalUrl() const noexcept
     {
-      return _loadCompleted;
+      return _originalUrl;
     }
 
-    KRYS_NODISCARD bool MayDependOnBaseUrl() const noexcept;
+    /// @brief Parses @p sheetText, appending its rules.
+    bool ParseString(const CSSOMString &sheetText) noexcept;
 
-    /// @brief Calls @p handler on every rule (the imported sheets' too, after each import rule) until it
-    /// returns true.
-    /// @return Whether @p handler returned true.
-    bool TraverseRules(KRYS_NOESCAPE const Func<bool(const Rule &)> &handler) const noexcept;
+    /// @brief Parses the text of a fetched sheet, appending its rules.
+    /// @return False, parsing nothing, if the response can't be used: it failed, or its type isn't CSS.
+    bool ParseAuthorStyleSheet(const CachedCSSStyleSheet *cachedStyleSheet) noexcept;
 
-    /// @brief Calls @p handler on every resource the rules load until it returns true.
-    /// @return Whether @p handler returned true.
-    bool TraverseSubresources(KRYS_NOESCAPE const Func<bool(const CachedResource &)> &handler) const noexcept;
+    /// @brief Appends a rule the parser produced. A style rule with more selector components than a
+    /// `style::RuleData` holds is split into several.
+    void ParserAppendRule(Ref<Rule> rule) noexcept;
 
-    void SetIsUserStyleSheet(bool value) noexcept
-    {
-      _isUserStyleSheet = value;
-    }
+    /// @brief Declares @p prefix (or, if it's null, the default namespace) as @p uri.
+    void ParserAddNamespace(const CSSOMStringAtom &prefix, const CSSOMStringAtom &uri) noexcept;
 
-    KRYS_NODISCARD bool IsUserStyleSheet() const noexcept
-    {
-      return _isUserStyleSheet;
-    }
-
+    /// @brief Records whether the first rule parsed; a sheet without a valid one may not be CSS at all.
     void SetHasSyntacticallyValidCSSHeader(bool value) noexcept
     {
       _hasSyntacticallyValidCSSHeader = value;
     }
 
-    KRYS_NODISCARD bool HasSyntacticallyValidCSSHeader() const noexcept
-    {
-      return _hasSyntacticallyValidCSSHeader;
-    }
+    /// @brief Releases unused capacity once parsing is done.
+    void ShrinkToFit() noexcept;
 
-    void ParserAddNamespace(const CSSOMStringAtom &prefix, const CSSOMStringAtom &uri) noexcept;
+#pragma endregion
 
-    void ParserAppendRule(Ref<Rule> &&rule) noexcept;
-
-    void ParserSetEncodingFromCharsetRule(const CSSOMString &encoding) noexcept;
-
-    void ClearRules() noexcept;
-
-    KRYS_NODISCARD CSSOMString EncodingFromCharsetRule() const noexcept
-    {
-      return _encodingFromCharsetRule;
-    }
+#pragma region Rules
 
     KRYS_NODISCARD const List<Ref<LayerRule>> &LayerRulesBeforeImportRules() const noexcept
     {
@@ -211,34 +153,10 @@ namespace krys::boo::css
       return _namespaceRules;
     }
 
+    /// @brief The rules after the namespace rules.
     KRYS_NODISCARD const List<Ref<Rule>> &ChildRules() const noexcept
     {
       return _childRules;
-    }
-
-    KRYS_NODISCARD StyleSheetContents *ParentStyleSheet() const noexcept;
-
-    KRYS_NODISCARD ImportRule *OwnerRule() const noexcept
-    {
-      return _ownerRule;
-    }
-
-    void ClearOwnerRule() noexcept
-    {
-      _ownerRule = nullptr;
-    }
-
-    /// @note This is the URL that started the redirect chain that led to this style sheet. This property
-    /// probably isn't useful for much except the JavaScript binding (which needs to use this value for
-    /// security).
-    KRYS_NODISCARD CSSOMString OriginalUrl() const noexcept
-    {
-      return _originalUrl;
-    }
-
-    KRYS_NODISCARD const net::Url &BaseUrl() const noexcept
-    {
-      return _parserContext.BaseUrl;
     }
 
     KRYS_NODISCARD bool IsEmpty() const noexcept
@@ -252,16 +170,133 @@ namespace krys::boo::css
     /// namespace rules, then the other rules.
     KRYS_NODISCARD Rule *RuleAt(uint32 index) const noexcept;
 
-    /// @brief A rough size estimate for the memory cache.
-    KRYS_NODISCARD uint32 EstimatedSizeInBytes() const noexcept;
+    /// @brief Removes every rule, detaching the import rules from the sheet.
+    void ClearRules() noexcept;
 
+    /// @brief Inserts @p rule at @p index for the CSSOM's
+    /// [insert a CSS rule](https://drafts.csswg.org/cssom/#insert-a-css-rule).
     /// @return False, inserting nothing, if @p rule isn't allowed at @p index.
-    bool WrapperInsertRule(Ref<Rule> &&rule, uint32 index) noexcept;
+    bool WrapperInsertRule(Ref<Rule> rule, uint32 index) noexcept;
 
-    /// @return False, deleting nothing, if the rule at @p index can't be deleted.
+    /// @brief Removes the rule at @p index for the CSSOM's
+    /// [remove a CSS rule](https://drafts.csswg.org/cssom/#remove-a-css-rule).
+    /// @return False, removing nothing, if the rule at @p index can't be removed.
     bool WrapperDeleteRule(uint32 index) noexcept;
 
-    KRYS_NODISCARD Ref<StyleSheetContents> Copy() const noexcept;
+    /// @brief Whether a rule's declarations may hold a URL, which resolves against the base URL.
+    KRYS_NODISCARD bool MayDependOnBaseUrl() const noexcept;
+
+    /// @brief Calls @p handler on every resource the rules load until it returns true.
+    /// @return Whether @p handler returned true.
+    bool TraverseSubresources(KRYS_NOESCAPE const Func<bool(const CachedResource &)> &handler) const noexcept;
+
+    /// @brief Forgets whether the sheet has nesting rules, after a client changed a nested rule list.
+    void ClearHasNestingRulesCache() noexcept
+    {
+      _hasNestingRulesCache = {};
+    }
+
+#pragma endregion
+
+#pragma region Namespaces
+
+    /// @brief The [default namespace](https://drafts.csswg.org/css-namespaces/#default-namespace), or `*`
+    /// if none is declared.
+    KRYS_NODISCARD const CSSOMStringAtom &DefaultNamespace() const noexcept
+    {
+      return _defaultNamespace;
+    }
+
+    /// @brief The namespace @p prefix is declared as, or null if it isn't.
+    KRYS_NODISCARD CSSOMStringAtom NamespaceURIFromPrefix(const CSSOMStringAtom &prefix) const noexcept;
+
+#pragma endregion
+
+#pragma region Imports and loading
+
+    /// @brief The `@import` rule that loaded the sheet, if any.
+    KRYS_NODISCARD ImportRule *OwnerRule() const noexcept
+    {
+      return _ownerRule;
+    }
+
+    void ClearOwnerRule() noexcept
+    {
+      _ownerRule = nullptr;
+    }
+
+    /// @brief The sheet whose `@import` rule loaded this one, if any.
+    KRYS_NODISCARD StyleSheetContents *ParentStyleSheet() const noexcept;
+
+    /// @brief The sheet at the top of the import chain.
+    KRYS_NODISCARD StyleSheetContents *RootStyleSheet() const noexcept;
+
+    /// @brief The document of the node owning the root sheet, if it has one client with an owner node.
+    KRYS_NODISCARD Document *SingleOwnerDocument() const noexcept;
+
+    /// @brief Whether a user, rather than the page, supplied the sheet. Imported sheets inherit it.
+    KRYS_NODISCARD bool IsUserStyleSheet() const noexcept
+    {
+      return _isUserStyleSheet;
+    }
+
+    void SetIsUserStyleSheet(bool value) noexcept
+    {
+      _isUserStyleSheet = value;
+    }
+
+    /// @brief Whether an imported sheet is still loading.
+    KRYS_NODISCARD bool IsLoading() const noexcept;
+
+    KRYS_NODISCARD bool LoadCompleted() const noexcept
+    {
+      return _loadCompleted;
+    }
+
+    /// @brief Once no import is loading, marks the sheet loaded and tells its parent sheet or owner node.
+    void CheckLoaded() noexcept;
+
+    /// @brief Tells the owner node that an import has started loading after the sheet was parsed.
+    void StartLoadingDynamicSheet() noexcept;
+
+    /// @brief Records that an imported sheet arrived, noting whether it failed or was blocked by nosniff.
+    void NotifyLoadedSheet(const CachedCSSStyleSheet *sheet) noexcept;
+
+    void SetLoadErrorOccured() noexcept
+    {
+      _didLoadErrorOccur = true;
+    }
+
+#pragma endregion
+
+#pragma region Caching
+
+    /// @brief Whether the sheet can be shared through the memory cache: it's loaded, unmodified, error-free,
+    /// with a valid first rule, and has no imports and no nesting rules.
+    KRYS_NODISCARD bool IsCacheable() const noexcept;
+
+    /// @brief Whether the sheet is cacheable and its rules don't depend on its base URL, so it can be shared
+    /// between sheets with different base URLs.
+    KRYS_NODISCARD bool IsCacheableWithNoBaseUrlDependency() const noexcept;
+
+    /// @brief Whether a cached sheet can be reused: none of the resources it loads failed.
+    KRYS_NODISCARD bool SubresourcesAllowReuse() const noexcept;
+
+    /// @brief A rough size for the memory cache's budget.
+    KRYS_NODISCARD uint32 EstimatedSizeInBytes() const noexcept;
+
+    KRYS_NODISCARD bool IsInMemoryCache() const noexcept
+    {
+      return _inMemoryCacheCount;
+    }
+
+    void AddedToMemoryCache() noexcept;
+
+    void RemovedFromMemoryCache() noexcept;
+
+#pragma endregion
+
+#pragma region Clients
 
     void RegisterClient(CSSStyleSheet *sheet) noexcept;
 
@@ -277,6 +312,7 @@ namespace krys::boo::css
       return _clients;
     }
 
+    /// @brief Whether a client has modified, or is about to modify, the sheet, which then isn't shared.
     KRYS_NODISCARD bool IsMutable() const noexcept
     {
       return _isMutable;
@@ -287,40 +323,21 @@ namespace krys::boo::css
       _isMutable = true;
     }
 
-    KRYS_NODISCARD bool HasNestingRules() const noexcept;
-
-    void ClearHasNestingRulesCache() noexcept
-    {
-      _hasNestingRulesCache = {};
-    }
-
-    KRYS_NODISCARD bool IsInMemoryCache() const noexcept
-    {
-      return _inMemoryCacheCount;
-    }
-
-    void AddedToMemoryCache() noexcept;
-
-    void RemovedFromMemoryCache() noexcept;
-
-    void ShrinkToFit() noexcept;
-
-    void SetLoadErrorOccured() noexcept
-    {
-      _didLoadErrorOccur = true;
-    }
-
-    KRYS_NODISCARD bool HasResolvedNesting() const noexcept
-    {
-      return _hasResolvedNesting;
-    }
-
-    void SetHasResolvedNesting(bool value) const noexcept
-    {
-      _hasResolvedNesting = value;
-    }
+#pragma endregion
 
   private:
-    void ClearCharsetRule() noexcept;
+    /// @brief Derives the namespaces from the `@namespace` rules, the last declaration of a prefix winning.
+    void RebuildNamespaces() noexcept;
+
+    /// @brief The owner node of the root sheet's only client, if it has one.
+    KRYS_NODISCARD Node *SingleOwnerNode() const noexcept;
+
+    /// @brief Calls @p handler with each rule, imported sheets' and nested ones included, until it returns
+    /// true.
+    /// @return Whether @p handler returned true.
+    bool TraverseRules(KRYS_NOESCAPE const Func<bool(const Rule &)> &handler) const noexcept;
+
+    /// @brief Whether a style rule has nested rules, which make the sheet uncacheable. Cached.
+    KRYS_NODISCARD bool HasNestingRules() const noexcept;
   };
 }

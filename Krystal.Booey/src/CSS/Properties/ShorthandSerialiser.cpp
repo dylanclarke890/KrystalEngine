@@ -347,7 +347,7 @@ namespace krys::boo::css
         auto *value = property.Value();
 
         // Don't serialize if longhands have different CSS-wide keywords.
-        if (!IsGlobalKeyword(GetValueId(*value)) || value->IsImplicitInitialValue())
+        if (!IsGlobalKeyword(value->ValueId()) || value->IsImplicitInitialValue())
         {
           if (specialKeyword)
           {
@@ -363,7 +363,7 @@ namespace krys::boo::css
             return true;
           }
 
-          auto keyword = GetValueId(value);
+          auto keyword = value->ValueId();
           if (specialKeyword.value_or(keyword) != keyword)
           {
             return true;
@@ -681,7 +681,7 @@ namespace krys::boo::css
         // This returns false for implicit initial values that are pairs, which is OK for now.
         krys_debug_assert(index < _shorthand.Size());
         auto *value = _values[index].get();
-        return value && value->IsValuePairValue();
+        return value && Is<ValuePair>(*value);
       }
 
       void Serialise(StringBuilder &builder, const SerialisationContext &context) const noexcept
@@ -733,7 +733,7 @@ namespace krys::boo::css
       if (auto *valueList = DynamicDowncast<ValueList>(LonghandValue(0)))
       {
         numberOfItemsForCoordinatingListBaseProperty =
-          std::max(valueList->Length(), numberOfItemsForCoordinatingListBaseProperty);
+          std::max(valueList->size(), numberOfItemsForCoordinatingListBaseProperty);
       }
 
       // Now go through all longhands and ensure we repeat items earlier in the list
@@ -750,14 +750,14 @@ namespace krys::boo::css
           {
             auto *valueInList = [&]() -> const Value *
             {
-              if (auto *specifiedValue = valueList->Item(listItemIndex))
+              if (listItemIndex < valueList->size())
               {
-                return specifiedValue;
+                return &(*valueList)[listItemIndex];
               }
 
               if (auto numberOfItemsInList = valueList->size())
               {
-                return valueList->Item(listItemIndex % numberOfItemsInList);
+                return &(*valueList)[listItemIndex % numberOfItemsInList];
               }
 
               return nullptr;
@@ -785,7 +785,7 @@ namespace krys::boo::css
       {
         if (auto *valueList = DynamicDowncast<ValueList>(value))
         {
-          numLayers = std::max(valueList->Length(), numLayers);
+          numLayers = std::max(valueList->size(), numLayers);
         }
       }
 
@@ -799,7 +799,7 @@ namespace krys::boo::css
           auto &value = LonghandValue(j);
           if (auto *valueList = DynamicDowncast<ValueList>(value))
           {
-            layerValues.Set(j, valueList->Item(i));
+            layerValues.Set(j, i < valueList->size() ? &(*valueList)[i] : nullptr);
           }
           else
           {
@@ -1230,7 +1230,7 @@ namespace krys::boo::css
       bool allSpecialKeywords = true;
       for (auto &longhandValue : LonghandValues())
       {
-        auto keyword = GetValueId(longhandValue);
+        auto keyword = longhandValue.ValueId();
         if (!parse_property::IsSystemFontShorthand(keyword))
         {
           allSpecialKeywords = false;
@@ -1280,12 +1280,12 @@ namespace krys::boo::css
       if (widthKeyword == ValueId::Invalid)
       {
         auto &widthValue = Downcast<PrimitiveValue>(LonghandValue(widthIndex));
-        if (widthValue.IsCalculated() || !widthValue.IsPercentage())
+        if (widthValue.IsCalc() || !widthValue.IsPercentage())
         {
           return null;
         }
 
-        auto keyword = FontWidthKeyword(widthValue.ResolveAsPercentageNoConversionDataRequired<double>());
+        auto keyword = FontWidthKeyword(widthValue.ResolveAsPercentageWithoutConversionData<double>());
         if (!keyword)
         {
           return null;
@@ -1367,7 +1367,7 @@ namespace krys::boo::css
     {
       for (auto &value : LonghandValues())
       {
-        if (parse_property::IsSystemFontShorthand(GetValueId(value)))
+        if (parse_property::IsSystemFontShorthand(value.ValueId()))
         {
           return null;
         }
@@ -1398,11 +1398,10 @@ namespace krys::boo::css
           return false;
         }
 
-        auto *item = valueList->Item(0);
-        return item && IsValueId(*item, id);
+        return (*valueList)[0u].ValueId() == id;
       }
 
-      return IsValueId(value, id);
+      return value.ValueId() == id;
     }
 
     KRYS_NODISCARD bool GridAutoFlowContains(const Value &autoFlow, ValueId id) noexcept
@@ -1411,7 +1410,7 @@ namespace krys::boo::css
       {
         for (auto &currentValue : *valueList)
         {
-          if (IsValueId(currentValue, id))
+          if (currentValue.ValueId() == id)
           {
             return true;
           }
@@ -1420,7 +1419,7 @@ namespace krys::boo::css
         return false;
       }
 
-      return IsValueId(autoFlow, id);
+      return autoFlow.ValueId() == id;
     }
 
     Maybe<CSSOMString> ShorthandSerialiser::SerialiseGrid() const noexcept
@@ -1502,12 +1501,12 @@ namespace krys::boo::css
     KRYS_NODISCARD bool CanOmitTrailingGridAreaValue(const Value &value, const Value &trailing,
                                                      const SerialisationContext &context) noexcept
     {
-      if (IsCustomIdentValue(value))
+      if (value.IsCustomIdent())
       {
-        return IsCustomIdentValue(trailing) && value.CssText(context) == trailing.CssText(context);
+        return trailing.IsCustomIdent() && value.CssText(context) == trailing.CssText(context);
       }
 
-      return IsValueId(trailing, ValueId::Auto);
+      return trailing.ValueId() == ValueId::Auto;
     }
 
     CSSOMString ShorthandSerialiser::SerialiseGridArea() const noexcept
@@ -1571,8 +1570,8 @@ namespace krys::boo::css
 
         if (const auto *primitiveValue = DynamicDowncast<PrimitiveValue>(value))
         {
-          return primitiveValue->IsLength() || primitiveValue->IsPercentage()
-                 || primitiveValue->IsCalculated() || primitiveValue->IsFlex();
+          return primitiveValue->IsLength() || primitiveValue->IsPercentage() || primitiveValue->IsCalc()
+                 || primitiveValue->IsFlex();
         }
 
         return false;
@@ -1593,7 +1592,7 @@ namespace krys::boo::css
           {
             hasAtLeastOneTrackSize = true;
           }
-          else if (!item.IsGridLineNamesValue())
+          else if (!Is<GridLineNamesValue>(item))
           {
             return false;
           }
@@ -1605,7 +1604,7 @@ namespace krys::boo::css
       Ref<Value> rowTrackSizes = ShareRef(LonghandValue(rowsIndex));
 
       // Make sure the longhands can be expressed in this version of the shorthand.
-      if (!rowTrackSizes->IsValueListValue()
+      if (!Is<ValueList>(*rowTrackSizes)
           || (!IsLonghandValueNone(columnsIndex) && !isValidExplicitTrackList(LonghandValue(columnsIndex))))
       {
         return null;
@@ -1634,7 +1633,7 @@ namespace krys::boo::css
             return null;
           }
 
-          if (!IsValueId(currentValue, ValueId::Auto))
+          if (currentValue.ValueId() != ValueId::Auto)
           {
             result.Append(u8' ');
             result.Append(currentValue.CssText(_serialisationContext));
@@ -1824,12 +1823,12 @@ namespace krys::boo::css
     {
       auto isDefault = [](const PrimitiveValue &value, style::SingleAnimationRangeType type)
       {
-        if (!value.IsPercentage() || value.IsCalculated())
+        if (!value.IsPercentage() || value.IsCalc())
         {
           return false;
         }
 
-        auto percentageValue = value.ResolveAsPercentageNoConversionDataRequired<double>();
+        auto percentageValue = value.ResolveAsPercentageWithoutConversionData<double>();
         if (type == style::SingleAnimationRangeType::Start)
         {
           return percentageValue == 0;
@@ -1840,7 +1839,7 @@ namespace krys::boo::css
 
       auto isRangeOffset = [](const PrimitiveValue &value)
       {
-        return value.IsLength() || value.IsPercentage() || value.IsCalculatedPercentageWithLength();
+        return value.IsLength() || value.IsPercentage() || value.IsCalcPercentageWithLength();
       };
 
       if (auto *pair = DynamicDowncast<ValuePair>(value))
@@ -1893,14 +1892,14 @@ namespace krys::boo::css
         StringBuilder result;
         for (auto i = 0u; i < startList->size(); i++)
         {
-          auto *start = startList->Item(i);
+          auto *start = &(*startList)[i];
           auto *startPair = DynamicDowncast<ValuePair>(*start);
           auto startId = startPair ? startPair->First().ValueId() : start->ValueId();
 
           auto serialisedStart =
             SerialiseSingleAnimationRange(*start, style::SingleAnimationRangeType::Start);
           auto serialisedEnd =
-            SerialiseSingleAnimationRange(*endList->Item(i), style::SingleAnimationRangeType::End, startId);
+            SerialiseSingleAnimationRange((*endList)[i], style::SingleAnimationRangeType::End, startId);
           result.Append(serialisedStart);
           if (!serialisedEnd.empty())
           {

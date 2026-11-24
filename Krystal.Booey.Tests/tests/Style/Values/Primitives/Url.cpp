@@ -13,7 +13,7 @@ namespace krys::boo::style::tests
       Document->SetUrl(net::Url {u8"https://example.com/dir/page.html"});
       auto url = ConvertCSSValueToStyle<Url>(
         *State,
-        *css::UrlValue::Create(css::CSSUrl {.Specified = u8"image.png", .Resolved = {}, .Modifiers = {}}));
+        *css::UrlValue::Create(css::Url {.Specified = u8"image.png", .Resolved = {}, .Modifiers = {}}));
       CHECK(url.Resolved.String() == u8"https://example.com/dir/image.png");
       CHECK_FALSE(IsInvalid());
     }
@@ -22,8 +22,8 @@ namespace krys::boo::style::tests
     {
       auto resolved = net::Url {u8"https://example.org/sheet/image.png"};
       auto url = ConvertCSSValueToStyle<Url>(
-        *State, *css::UrlValue::Create(
-                  css::CSSUrl {.Specified = u8"image.png", .Resolved = resolved, .Modifiers = {}}));
+        *State,
+        *css::UrlValue::Create(css::Url {.Specified = u8"image.png", .Resolved = resolved, .Modifiers = {}}));
       CHECK(url.Resolved == resolved);
     }
 

@@ -28,6 +28,7 @@
 #include "Krystal.Booey/CSS/Values/BorderImageWidthValue.hpp"
 #include "Krystal.Booey/CSS/Values/Borders/BorderImage.hpp"
 #include "Krystal.Booey/CSS/Values/ValueList.hpp"
+#include "Krystal.Booey/CSS/Values/ValuePair.hpp"
 #include "Krystal.Booey/Style/Builder/BuilderState.hpp"
 #include "Krystal.Booey/Style/Computed/ComputedStyle+InitialInlines.hpp"
 #include "Krystal.Booey/Style/Values/CSSValueConversion.hpp"
@@ -79,20 +80,24 @@ namespace krys::boo::style
       }
       else if (const auto *slashList = DynamicDowncast<css::ValueList>(current))
       {
-        if (const auto *slashSlice = DynamicDowncast<css::BorderImageSliceValue>(slashList->Item(0)))
+        // `slice / width / outset`, of which the later parts may be left out.
+        auto size = slashList->size();
+        if (const auto *slashSlice =
+              size > 0u ? DynamicDowncast<css::BorderImageSliceValue>((*slashList)[0u]) : nullptr)
         {
           result.Slice = ConvertCSSValueToStyle<MaskBorderSlice>(state, *slashSlice);
         }
-        if (const auto *width = DynamicDowncast<css::BorderImageWidthValue>(slashList->Item(1)))
+        if (const auto *width =
+              size > 1u ? DynamicDowncast<css::BorderImageWidthValue>((*slashList)[1u]) : nullptr)
         {
           result.Width = ConvertCSSValueToStyle<MaskBorderWidth>(state, *width);
         }
-        if (const auto *outset = slashList->Item(2))
+        if (size > 2u)
         {
-          result.Outset = ConvertCSSValueToStyle<MaskBorderOutset>(state, *outset);
+          result.Outset = ConvertCSSValueToStyle<MaskBorderOutset>(state, (*slashList)[2u]);
         }
       }
-      else if (current.IsValuePairValue())
+      else if (Is<css::ValuePair>(current))
       {
         result.Repeat = ConvertCSSValueToStyle<MaskBorderRepeat>(state, current);
       }

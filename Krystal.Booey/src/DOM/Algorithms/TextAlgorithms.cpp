@@ -42,9 +42,8 @@ namespace krys::boo::dom
       // The change to the parent's children that style invalidation sees.
       auto *parent = node.ParentNode();
       ContainerNode::ChildChange childChange {
-        ContainerNode::ChildChange::Type::TextChanged, nullptr,
-        TreeQueries::PreviousElementSibling(node),     TreeQueries::NextElementSibling(node),
-        ContainerNode::ChildChange::Source::API,       ContainerNode::ChildChange::AffectsElements::No};
+        ContainerNode::ChildChange::Type::TextChanged, TreeQueries::PreviousElementSibling(node),
+        TreeQueries::NextElementSibling(node), ContainerNode::ChildChange::Source::API};
       Maybe<style::ChildChangeInvalidation> styleInvalidation;
       if (parent)
       {

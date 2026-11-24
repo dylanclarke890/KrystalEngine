@@ -102,8 +102,6 @@ namespace krys::boo::style
 
     KRYS_NODISCARD calc::Value &CalculationValue() const noexcept;
 
-    KRYS_NODISCARD Ref<calc::Value> ProtectedCalculationValue() const noexcept;
-
     KRYS_NODISCARD bool IsKnownZero(LengthWrapperDataEvaluationKind) const noexcept;
 
     KRYS_NODISCARD bool IsKnownPositive(LengthWrapperDataEvaluationKind) const noexcept;

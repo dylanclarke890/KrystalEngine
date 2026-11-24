@@ -36,6 +36,7 @@
 #include "Krystal.Booey/CSS/Parser/Tokenizer.hpp"
 #include "Krystal.Booey/CSS/Properties/MutableStyleProperties.hpp"
 #include "Krystal.Booey/CSS/Properties/Property.hpp"
+#include "Krystal.Booey/CSS/Properties/PropertyQueries.hpp"
 #include "Krystal.Booey/CSS/Properties/StylePropertiesInlines.hpp"
 #include "Krystal.Booey/CSS/TypedOM/CSSImageValue.hpp"
 #include "Krystal.Booey/CSS/TypedOM/CSSKeywordValue.hpp"
@@ -82,17 +83,17 @@ namespace krys::boo
     /// @see https://drafts.css-houdini.org/css-typed-om/#reify-a-numeric-value
     KRYS_NODISCARD RefPtr<CSSStyleValue> ReifyNumericValue(const css::PrimitiveValue &value) noexcept
     {
-      auto type = value.PrimitiveType();
+      auto type = value.Unit();
       switch (type)
       {
         case css::UnitType::Number:
         case css::UnitType::Integer:
         {
-          return CSSUnitValue::Create(value.ValueNoConversionDataRequired<double>(), css::UnitType::Number);
+          return CSSUnitValue::Create(value.ResolveWithoutConversionData<double>(), css::UnitType::Number);
         }
         case css::UnitType::Percentage:
         {
-          return CSSUnitValue::Create(value.ValueNoConversionDataRequired<double>(),
+          return CSSUnitValue::Create(value.ResolveWithoutConversionData<double>(),
                                       css::UnitType::Percentage);
         }
         default:
@@ -101,12 +102,12 @@ namespace krys::boo
         }
       }
       // A dimension: a unit the Typed OM can name.
-      auto unit = css::PrimitiveValue::UnitTypeString(type);
+      auto unit = css::UnitTypeString(type);
       if (unit.empty() || css::ParseUnitType(unit) != type)
       {
         return nullptr;
       }
-      return CSSUnitValue::Create(value.ValueNoConversionDataRequired<double>(), type);
+      return CSSUnitValue::Create(value.ResolveWithoutConversionData<double>(), type);
     }
 
     /// @brief @p value, the value of a list or none property, as `none` if it's that, or a generic style
@@ -231,7 +232,7 @@ namespace krys::boo
     List<Ref<css::Value>> values;
     if (auto value = result.ReleaseValue())
     {
-      if (css::Property::IsListValuedProperty(propertyId))
+      if (css::IsListValuedProperty(propertyId))
       {
         if (auto *list = DynamicDowncast<css::ValueContainingList>(*value))
         {
@@ -276,7 +277,7 @@ namespace krys::boo
     if (const auto *primitiveValue = DynamicDowncast<css::PrimitiveValue>(value))
     {
       // https://drafts.css-houdini.org/css-typed-om/#reify-a-math-expression
-      if (const auto *calcValue = primitiveValue->CSSCalcValue())
+      if (const auto *calcValue = primitiveValue->CalcValue())
       {
         auto result = CSSNumericValue::ReifyMathExpression(calcValue->GetTree());
         if (result.HasException())
@@ -357,12 +358,12 @@ namespace krys::boo
     else if (const auto *valueList = DynamicDowncast<css::ValueList>(value))
     {
       // A list of one item is that item, and a list-valued property's list is its first item.
-      if (!valueList->Length())
+      if (!valueList->size())
       {
         return Exception {ExceptionCode::TypeError};
       }
-      if ((valueList->Length() == 1 && MayConvertValueListToSingleValue(property))
-          || (property && css::Property::IsListValuedProperty(*property)))
+      if ((valueList->size() == 1 && MayConvertValueListToSingleValue(property))
+          || (property && css::IsListValuedProperty(*property)))
       {
         return ReifyValue(document, (*valueList)[0], property);
       }

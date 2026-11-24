@@ -50,7 +50,7 @@ namespace krys::boo::html
 
   void CheckboxInputType::HandleKeyupEvent(KeyboardEvent &event) noexcept
   {
-    if (event.KeyIdentifier() != u8"U+0020")
+    if (event.Key() != u8" ")
     {
       return;
     }

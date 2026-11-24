@@ -35,8 +35,7 @@ namespace krys::boo::css
 {
   GridIntegerRepeatValue::GridIntegerRepeatValue(Ref<PrimitiveValue> repetitions,
                                                  ValueListBuilder builder) noexcept
-      : ValueContainingList(ValueType::GridIntegerRepeat, ValueSeparator::SpaceSeparator,
-                            krys::move(builder)),
+      : ValueContainingList(ValueType::GridIntegerRepeat, ValueSeparator::Space, krys::move(builder)),
         _repetitions(krys::move(repetitions))
   {
   }
@@ -60,6 +59,6 @@ namespace krys::boo::css
 
   bool GridIntegerRepeatValue::Equals(const GridIntegerRepeatValue &other) const noexcept
   {
-    return CompareValue(_repetitions, other._repetitions) && ItemsEqual(other);
+    return *_repetitions == *other._repetitions && ItemsEqual(other);
   }
 }

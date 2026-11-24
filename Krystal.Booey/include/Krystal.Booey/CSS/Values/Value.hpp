@@ -1,110 +1,115 @@
-﻿/*
- * (C) 1999-2003 Lars Knoll (knoll@kde.org)
- * Copyright (C) 2004-2023 Apple Inc. All rights reserved.
- *
- * This library is free software; you can redistribute it and/or
- * modify it under the terms of the GNU Library General Public
- * License as published by the Free Software Foundation; either
- * version 2 of the License, or (at your option) any later version.
- *
- * This library is distributed in the hope that it will be useful,
- * but WITHOUT ANY WARRANTY; without even the implied warranty of
- * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU
- * Library General Public License for more details.
- *
- * You should have received a copy of the GNU Library General Public License
- * along with this library; see the file COPYING.LIB.  If not, write to
- * the Free Software Foundation, Inc., 51 Franklin Street, Fifth Floor,
- * Boston, MA 02110-1301, USA.
- */
-
-#pragma once
+﻿#pragma once
 
 #include "Krystal.Booey/CSS/Types/CSSOMString.hpp"
-#include "Krystal.Booey/CSS/Values/UnitCategory.hpp"
-#include "Krystal.Booey/CSS/Values/UnitType.hpp"
+#include "Krystal.Booey/CSS/Values/Units.hpp"
 #include "Krystal.Booey/CSS/Values/ValueSeparator.hpp"
 #include "Krystal.Booey/CSS/Values/ValueType.hpp"
 #include "Krystal.Core/Assert.hpp"
-#include "Krystal.Core/Containers/SmallList.hpp"
 #include "Krystal.Core/Macros.hpp"
 #include "Krystal.Core/Memory/RefPtr.hpp"
 #include "Krystal.Core/TypeCast.hpp"
 #include "Krystal.Core/Types/Func.hpp"
 #include "Krystal.Core/Types/IterationStatus.hpp"
+#include <new>
 
 namespace krys::boo
 {
-  class CSSStyleDeclaration;
   class CachedResource;
 }
 
 namespace krys::boo::css
 {
-  class PrimitiveValue;
   class StaticValuePool;
   class ToLengthConversionData;
 
   struct ComputedStyleDependencies;
   struct SerialisationContext;
 
-  enum class PropertyId : uint16;
   enum class ValueId : uint16;
 
+  namespace detail
+  {
+    /// @brief What a `PrimitiveValue` holds. A number's unit is kept beside it; the other kinds have none.
+    enum class PrimitiveKind : uint8
+    {
+      Number,
+      String,
+      CustomIdent,
+      FontFamily,
+      PropertyId,
+      ValueId,
+      Calc,
+    };
+
+    consteval PrimitiveKind MaxEnumValue(PrimitiveKind) noexcept
+    {
+      return PrimitiveKind::Calc;
+    }
+  }
+
+  /// @brief A CSS value: specified, computed or declared, as parsed from a style sheet or built by code.
+  /// @details Values are reference counted and immutable once built. There are no virtual functions: each
+  /// class has a `ValueType`, and the operations below switch on it to call the class's own version
+  /// (`CustomCSSText`, `Equals`, and the optional `AddDerivedHash`, `CustomVisitChildren`,
+  /// `CustomMayDependOnBaseUrl` and `CustomTraverseSubresources`). Destruction dispatches the same way.
+  /// @see https://www.w3.org/TR/css-values-4/
   class Value
   {
     friend class StaticValuePool;
 
     KRYS_NON_COPYABLE(Value);
 
-  public:
-    KRYS_TYPE_CAST_TRAITS_ACCESS();
-
-  private:
-    // The count goes up and down in steps of two, leaving the lowest bit to mark static values, whose count
-    // never reaches zero.
-    constexpr static uint32 RefCountFlagIsStatic = 1u;
-    constexpr static uint32 RefCountIncrement = 2u;
-
-    mutable uint32 _refCount {RefCountIncrement};
-
   protected:
-    ValueType _type : EnumBitWidth<ValueType>;
-
-    UnitType _unit : EnumBitWidth<UnitType> {UnitType::Unknown};
-    ValueSeparator _valueSeparator : EnumBitWidth<ValueSeparator> {ValueSeparator::SpaceSeparator};
-    bool _isImplicitInitialValue : 1 {false};
-    mutable bool _hasCachedCSSText : 1 {false};
-    // Whether a `ValuePair` or `QuadValue` serialises as one value when its values serialise the same. Kept
-    // in the bit fields so it never costs them space of their own.
-    bool _coalesceIdenticalValues : 1 {true};
-
-    explicit Value(ValueType type) noexcept : _type(type)
+    /// @brief Packed state: the class's tag and flags, and room that some classes use for their own
+    /// state so that it costs them no space.
+    struct Header
     {
-    }
-
-    struct StaticValueTag
-    {
+      // Ordered to pack into three bytes.
+      ValueType Type : EnumBitWidth<ValueType>;
+      /// @brief Used by the lists, `ValuePair` and `QuadValue`.
+      ValueSeparator Separator : EnumBitWidth<ValueSeparator> {ValueSeparator::Space};
+      /// @brief Used by `PrimitiveValue`.
+      detail::PrimitiveKind PrimitiveKind
+        : EnumBitWidth<detail::PrimitiveKind> {detail::PrimitiveKind::Number};
+      /// @brief The `initial` a declaration block fills in for a longhand that a shorthand left out.
+      bool IsImplicitInitialValue : 1 {false};
+      /// @brief Used by `ValuePair` and `QuadValue`: whether equal values serialise as one.
+      bool CoalesceIdenticalValues : 1 {true};
+      /// @brief Used by `PrimitiveValue`.
+      UnitType Unit : EnumBitWidth<UnitType> {UnitType::Unknown};
     };
 
-    constexpr static StaticValueTag StaticValue {};
+  private:
+    mutable uint32 _refCount {1u};
 
-    /// @brief Marks a value of the static value pool, which is never destroyed.
-    void MakeStatic() noexcept
-    {
-      _refCount |= RefCountFlagIsStatic;
-    }
+  protected:
+    Header _header;
+
+  private:
+    // A value of the static pool: never destroyed and never counted, so threads can share it without writing
+    // to it.
+    bool _isStatic {false};
 
   public:
+    // Reference counting, for Ref and RefPtr.
+
     void AddRef() const noexcept
     {
-      _refCount += RefCountIncrement;
+      if (!_isStatic)
+      {
+        ++_refCount;
+      }
     }
 
     void SubRef() const noexcept
     {
-      krys_debug_assert(_refCount >= RefCountIncrement);
-      if (_refCount -= RefCountIncrement; !_refCount)
+      if (_isStatic)
+      {
+        return;
+      }
+
+      krys_debug_assert(_refCount > 0u);
+      if (--_refCount == 0u)
       {
         delete const_cast<Value *>(this);
       }
@@ -112,34 +117,81 @@ namespace krys::boo::css
 
     KRYS_NODISCARD bool HasOneRef() const noexcept
     {
-      return GetRefCount() == 1u;
+      return _refCount == 1u;
     }
 
     KRYS_NODISCARD uint32 GetRefCount() const noexcept
     {
-      return _refCount / RefCountIncrement;
+      return _refCount;
     }
 
     KRYS_NODISCARD bool IsStatic() const noexcept
     {
-      return _refCount & RefCountFlagIsStatic;
+      return _isStatic;
     }
 
-    // NOTE: intentionally not virtual for performance reasons.
-    // virtual ~Value() noexcept;
+    // The class and its flags.
 
     KRYS_NODISCARD ValueType Type() const noexcept
     {
-      return _type;
+      return _header.Type;
     }
 
     KRYS_NODISCARD bool IsImplicitInitialValue() const noexcept
     {
-      return _isImplicitInitialValue;
+      return _header.IsImplicitInitialValue;
     }
 
-    KRYS_NODISCARD IterationStatus VisitChildren(const Func<IterationStatus(Value &)> &) const noexcept;
+    /// @brief Whether this is an `<image>`: a URL image, an `image-set()` or a generated image.
+    /// @see https://www.w3.org/TR/css-images-4/#image-values
+    KRYS_NODISCARD bool IsImage() const noexcept
+    {
+      return _header.Type == ValueType::Image || _header.Type == ValueType::ImageSet
+             || IsImageGeneratorValue();
+    }
 
+    /// @brief Whether this is an image drawn from a description rather than loaded: a gradient, `paint()`,
+    /// `cross-fade()` or `filter()`.
+    KRYS_NODISCARD bool IsImageGeneratorValue() const noexcept
+    {
+      switch (_header.Type)
+      {
+        case ValueType::CrossFade:
+        case ValueType::FilterImage:
+        case ValueType::Gradient:
+        case ValueType::PaintImage:  return true;
+        default:                     return false;
+      }
+    }
+
+    /// @brief Whether the class derives from `ValueContainingList`.
+    KRYS_NODISCARD bool ContainsValueList() const noexcept
+    {
+      switch (_header.Type)
+      {
+        case ValueType::Function:
+        case ValueType::GridAutoRepeat:
+        case ValueType::GridIntegerRepeat:
+        case ValueType::ImageSet:
+        case ValueType::Subgrid:
+        case ValueType::TransformList:
+        case ValueType::ValueList:         return true;
+        default:                           return false;
+      }
+    }
+
+    /// @brief Whether this is a `var()` reference, or a longhand waiting for its shorthand's.
+    KRYS_NODISCARD bool HasVariableReferences() const noexcept
+    {
+      return _header.Type == ValueType::VariableReference || _header.Type == ValueType::PendingSubstitution;
+    }
+
+    // Serialisation, comparison and hashing.
+
+    /// @see https://www.w3.org/TR/cssom-1/#serialize-a-css-value
+    KRYS_NODISCARD CSSOMString CssText(const SerialisationContext &context) const noexcept;
+
+    /// @brief Whether the values are of the same class and equal, or one is a list holding just the other.
     KRYS_NODISCARD bool Equals(const Value &other) const noexcept;
 
     KRYS_NODISCARD bool operator==(const Value &other) const noexcept
@@ -147,427 +199,83 @@ namespace krys::boo::css
       return Equals(other);
     }
 
-    void CollectComputedStyleDependencies(css::ComputedStyleDependencies &dependencies) const noexcept;
+    /// @brief Adds the value's contents to @p seed, for deduplicating declaration blocks.
+    /// @return False if the value's class has no `AddDerivedHash`, so it can't be hashed.
+    KRYS_NODISCARD bool AddHash(size_t &seed) const noexcept;
 
+    // What computing the value needs.
+
+    /// @brief The properties and environment the value needs to be computed, such as `font-size` for `em`.
     KRYS_NODISCARD css::ComputedStyleDependencies ComputedStyleDependencies() const noexcept;
 
-    KRYS_NODISCARD bool CanResolveDependenciesWith(const ToLengthConversionData &) const noexcept;
+    void CollectComputedStyleDependencies(css::ComputedStyleDependencies &dependencies) const noexcept;
 
-    KRYS_NODISCARD CSSOMString CssText(const SerialisationContext &context) const noexcept;
+    /// @brief Whether @p conversionData has everything the value's dependencies need.
+    KRYS_NODISCARD bool
+      CanResolveDependenciesWith(const ToLengthConversionData &conversionData) const noexcept;
 
+    /// @brief Whether the value holds a URL that would resolve differently against another base URL.
+    KRYS_NODISCARD bool MayDependOnBaseUrl() const noexcept;
+
+    // Walking.
+
+    /// @brief Calls @p func with each value this one is made of, until it returns `Done`.
+    KRYS_NODISCARD IterationStatus VisitChildren(const Func<IterationStatus(Value &)> &func) const noexcept;
+
+    /// @brief Calls @p handler with each loaded resource the value uses, until it returns true.
+    /// @return True if @p handler did.
     KRYS_NODISCARD bool
       TraverseSubresources(const Func<bool(const CachedResource &)> &handler) const noexcept;
 
-    KRYS_NODISCARD bool MayDependOnBaseUrl() const noexcept;
+    // Shortcuts into PrimitiveValue and ValuePair, defined with them.
 
-    /// @brief Returns false if the hash is computed from the Value pointer instead of the underlying values.
-    KRYS_NODISCARD bool AddHash(size_t &seed) const noexcept;
-
-    /// @brief Empty URLs and fragment-only URLs should not be resolved relative to the base URL.
-    /// @see https://www.w3.org/TR/css-values-4/#local-urls
-    KRYS_NODISCARD static bool IsCSSLocalUrl(CSSOMStringView relativeUrl) noexcept;
-
-    KRYS_NODISCARD static CSSOMStringView SeparatorCSSText(ValueSeparator separator) noexcept;
-
-    KRYS_NODISCARD static bool CustomMayDependOnBaseUrl() noexcept
-    {
-      return false;
-    }
-
-    KRYS_NODISCARD static IterationStatus CustomVisitChildren(const Func<IterationStatus(Value &)> &) noexcept
-    {
-      return IterationStatus::Continue;
-    }
-
-#pragma region Type Checks
-
-    KRYS_NODISCARD bool IsAttrValue() const noexcept
-    {
-      return _type == ValueType::Attr;
-    }
-
-    KRYS_NODISCARD bool IsBackgroundRepeatValue() const noexcept
-    {
-      return _type == ValueType::BackgroundRepeat;
-    }
-
-    KRYS_NODISCARD bool IsBasicShapeValue() const noexcept
-    {
-      return _type == ValueType::BasicShape;
-    }
-
-    KRYS_NODISCARD bool IsBorderImageSliceValue() const noexcept
-    {
-      return _type == ValueType::BorderImageSlice;
-    }
-
-    KRYS_NODISCARD bool IsBorderImageWidthValue() const noexcept
-    {
-      return _type == ValueType::BorderImageWidth;
-    }
-
-    KRYS_NODISCARD bool IsBoxShadowPropertyValue() const noexcept
-    {
-      return _type == ValueType::BoxShadowProperty;
-    }
-
-    KRYS_NODISCARD bool IsColorValue() const noexcept
-    {
-      return _type == ValueType::Color;
-    }
-
-    KRYS_NODISCARD bool IsColorSchemeValue() const noexcept
-    {
-      return _type == ValueType::ColorScheme;
-    }
-
-    KRYS_NODISCARD bool IsCounterValue() const noexcept
-    {
-      return _type == ValueType::Counter;
-    }
-
-    KRYS_NODISCARD bool IsCrossFadeValue() const noexcept
-    {
-      return _type == ValueType::CrossFade;
-    }
-
-    KRYS_NODISCARD bool IsCursorImageValue() const noexcept
-    {
-      return _type == ValueType::CursorImage;
-    }
-
-    KRYS_NODISCARD bool IsCustomPropertyValue() const noexcept
-    {
-      return _type == ValueType::CustomProperty;
-    }
-
-    KRYS_NODISCARD bool IsDynamicRangeLimitValue() const noexcept
-    {
-      return _type == ValueType::DynamicRangeLimit;
-    }
-
-    KRYS_NODISCARD bool IsEasingFunctionValue() const noexcept
-    {
-      return _type == ValueType::EasingFunction;
-    }
-
-    KRYS_NODISCARD bool IsFilterImageValue() const noexcept
-    {
-      return _type == ValueType::FilterImage;
-    }
-
-    KRYS_NODISCARD bool IsFilterValue() const noexcept
-    {
-      return _type == ValueType::Filter;
-    }
-
-    KRYS_NODISCARD bool IsFontValue() const noexcept
-    {
-      return _type == ValueType::Font;
-    }
-
-    KRYS_NODISCARD bool IsFontFaceSrcLocalValue() const noexcept
-    {
-      return _type == ValueType::FontFaceSrcLocal;
-    }
-
-    KRYS_NODISCARD bool IsFontFaceSrcResourceValue() const noexcept
-    {
-      return _type == ValueType::FontFaceSrcResource;
-    }
-
-    KRYS_NODISCARD bool IsFontFeatureValue() const noexcept
-    {
-      return _type == ValueType::FontFeature;
-    }
-
-    KRYS_NODISCARD bool IsFontStyleRangeValue() const noexcept
-    {
-      return _type == ValueType::FontStyleRange;
-    }
-
-    KRYS_NODISCARD bool IsFontStyleWithAngleValue() const noexcept
-    {
-      return _type == ValueType::FontStyleWithAngle;
-    }
-
-    KRYS_NODISCARD bool IsFontVariationValue() const noexcept
-    {
-      return _type == ValueType::FontVariation;
-    }
-
-    KRYS_NODISCARD bool IsFunctionValue() const noexcept
-    {
-      return _type == ValueType::Function;
-    }
-
-    KRYS_NODISCARD bool IsGradientValue() const noexcept
-    {
-      return _type == ValueType::Gradient;
-    }
-
-    KRYS_NODISCARD bool IsGridAutoRepeatValue() const noexcept
-    {
-      return _type == ValueType::GridAutoRepeat;
-    }
-
-    KRYS_NODISCARD bool IsGridIntegerRepeatValue() const noexcept
-    {
-      return _type == ValueType::GridIntegerRepeat;
-    }
-
-    KRYS_NODISCARD bool IsGridLineValue() const noexcept
-    {
-      return _type == ValueType::GridLine;
-    }
-
-    KRYS_NODISCARD bool IsGridLineNamesValue() const noexcept
-    {
-      return _type == ValueType::GridLineNames;
-    }
-
-    KRYS_NODISCARD bool IsGridTemplateAreasValue() const noexcept
-    {
-      return _type == ValueType::GridTemplateAreas;
-    }
-
-    KRYS_NODISCARD bool IsImageValue() const noexcept
-    {
-      return _type == ValueType::Image;
-    }
-
-    KRYS_NODISCARD bool IsImageSetValue() const noexcept
-    {
-      return _type == ValueType::ImageSet;
-    }
-
-    KRYS_NODISCARD bool IsImageSetOptionValue() const noexcept
-    {
-      return _type == ValueType::ImageSetOption;
-    }
-
-    KRYS_NODISCARD bool IsOffsetRotateValue() const noexcept
-    {
-      return _type == ValueType::OffsetRotate;
-    }
-
-    KRYS_NODISCARD bool IsPaintImageValue() const noexcept
-    {
-      return _type == ValueType::PaintImage;
-    }
-
-    KRYS_NODISCARD bool IsPathValue() const noexcept
-    {
-      return _type == ValueType::Path;
-    }
-
-    KRYS_NODISCARD bool IsPendingSubstitutionValue() const noexcept
-    {
-      return _type == ValueType::PendingSubstitution;
-    }
-
-    KRYS_NODISCARD bool IsPositionValue() const noexcept
-    {
-      return _type == ValueType::Position;
-    }
-
-    KRYS_NODISCARD bool IsPositionXValue() const noexcept
-    {
-      return _type == ValueType::PositionX;
-    }
-
-    KRYS_NODISCARD bool IsPositionYValue() const noexcept
-    {
-      return _type == ValueType::PositionY;
-    }
-
-    KRYS_NODISCARD bool IsPrimitiveValue() const noexcept
-    {
-      return _type == ValueType::Primitive;
-    }
-
-    KRYS_NODISCARD bool IsQuadValue() const noexcept
-    {
-      return _type == ValueType::Quad;
-    }
-
-    KRYS_NODISCARD bool IsRatioValue() const noexcept
-    {
-      return _type == ValueType::Ratio;
-    }
-
-    KRYS_NODISCARD bool IsRayValue() const noexcept
-    {
-      return _type == ValueType::Ray;
-    }
-
-    KRYS_NODISCARD bool IsRectValue() const noexcept
-    {
-      return _type == ValueType::Rect;
-    }
-
-    KRYS_NODISCARD bool IsReflectValue() const noexcept
-    {
-      return _type == ValueType::Reflect;
-    }
-
-    KRYS_NODISCARD bool IsScrollValue() const noexcept
-    {
-      return _type == ValueType::Scroll;
-    }
-
-    KRYS_NODISCARD bool IsSubgridValue() const noexcept
-    {
-      return _type == ValueType::Subgrid;
-    }
-
-    KRYS_NODISCARD bool IsTextShadowPropertyValue() const noexcept
-    {
-      return _type == ValueType::TextShadowProperty;
-    }
-
-    KRYS_NODISCARD bool IsTransformListValue() const noexcept
-    {
-      return _type == ValueType::TransformList;
-    }
-
-    KRYS_NODISCARD bool IsUnicodeRangeValue() const noexcept
-    {
-      return _type == ValueType::UnicodeRange;
-    }
-
-    KRYS_NODISCARD bool IsUrlValue() const noexcept
-    {
-      return _type == ValueType::Url;
-    }
-
-    KRYS_NODISCARD bool IsValueListValue() const noexcept
-    {
-      return _type == ValueType::ValueList;
-    }
-
-    KRYS_NODISCARD bool IsValuePairValue() const noexcept
-    {
-      return _type == ValueType::ValuePair;
-    }
-
-    KRYS_NODISCARD bool IsVariableReferenceValue() const noexcept
-    {
-      return _type == ValueType::VariableReference;
-    }
-
-    KRYS_NODISCARD bool IsViewValue() const noexcept
-    {
-      return _type == ValueType::View;
-    }
-
-    KRYS_NODISCARD bool HasVariableReferences() const noexcept
-    {
-      return IsVariableReferenceValue() || IsPendingSubstitutionValue();
-    }
-
-    KRYS_NODISCARD bool IsImageGeneratorValue() const noexcept
-    {
-      return _type >= ValueType::PaintImage && _type <= ValueType::Gradient;
-    }
-
-    /// @brief True for all image-like values except CursorImageValues; these are the values that correspond
-    /// to the CSS <image> production.
-    KRYS_NODISCARD bool IsImage() const noexcept
-    {
-      return IsImageValue() || IsImageSetValue() || IsImageGeneratorValue();
-    }
-
-    KRYS_NODISCARD bool ContainsValueList() const noexcept
-    {
-      return _type >= ValueType::ValueList;
-    }
-
-#pragma endregion
-
+    /// @brief Whether this is a `PrimitiveValue` holding a keyword.
     KRYS_NODISCARD inline bool IsValueId() const noexcept;
 
+    /// @brief The keyword of a `PrimitiveValue` holding one, otherwise `ValueId::Invalid`.
     KRYS_NODISCARD inline css::ValueId ValueId() const noexcept;
 
+    /// @brief Whether this is a `PrimitiveValue` holding a custom identifier.
     KRYS_NODISCARD inline bool IsCustomIdent() const noexcept;
 
-    KRYS_NODISCARD inline CSSOMString CustomIdent() const noexcept;
+    /// @pre This is a `ValuePair`.
+    KRYS_NODISCARD inline const Value &First() const noexcept;
 
-    KRYS_NODISCARD inline bool IsString() const noexcept;
-
-    KRYS_NODISCARD inline CSSOMString String() const noexcept;
-
-    KRYS_NODISCARD inline bool IsInteger() const noexcept;
-
-    KRYS_NODISCARD inline int64 Integer(const ToLengthConversionData &) const noexcept;
-
-    KRYS_NODISCARD inline int64 IntegerDeprecated() const noexcept;
-
-    KRYS_NODISCARD inline const Value &First() const noexcept; // ValuePair
-
-    KRYS_NODISCARD inline const Value &Second() const noexcept; // ValuePair
+    /// @pre This is a `ValuePair`.
+    KRYS_NODISCARD inline const Value &Second() const noexcept;
 
   protected:
-    void operator delete(Value *, std::destroying_delete_t) noexcept;
+    explicit Value(ValueType type) noexcept : _header {.Type = type}
+    {
+    }
+
+    /// @brief Selects the constructors of the static pool's values.
+    struct StaticValueTag
+    {
+    };
+
+    constexpr static StaticValueTag StaticValue {};
+
+    /// @brief Marks a value of the static pool, so that it is never destroyed.
+    void MakeStatic() noexcept
+    {
+      _isStatic = true;
+    }
+
+    /// @brief Destroys the value as its own class, found from its `ValueType`.
+    void operator delete(Value *value, std::destroying_delete_t) noexcept;
 
     KRYS_NODISCARD ValueSeparator Separator() const noexcept
     {
-      return _valueSeparator;
-    }
-
-    KRYS_NODISCARD CSSOMStringView SeparatorCSSText() const noexcept
-    {
-      return SeparatorCSSText(Separator());
+      return _header.Separator;
     }
 
   private:
+    /// @brief Calls @p visitor with this value as its own class.
     template <typename Visitor>
-    constexpr decltype(auto) VisitDerived(Visitor &&) noexcept;
+    constexpr decltype(auto) VisitDerived(Visitor &&visitor) noexcept;
 
     template <typename Visitor>
-    constexpr decltype(auto) VisitDerived(Visitor &&) const noexcept;
-
-    KRYS_NODISCARD static bool
-      CustomTraverseSubresources(const Func<bool(const CachedResource &)> &func) noexcept;
-
-    // FIXME: Add custom hash functions for all derived classes and remove this function.
-    KRYS_NODISCARD bool AddDerivedHash(size_t &seed) const noexcept;
+    constexpr decltype(auto) VisitDerived(Visitor &&visitor) const noexcept;
   };
-
-  template <typename TValue>
-  KRYS_NODISCARD bool CompareValueList(const SmallList<Ref<TValue>> &firstVector,
-                                       const SmallList<Ref<TValue>> &secondVector) noexcept
-  {
-    size_t size = firstVector.size();
-    if (size != secondVector.size())
-    {
-      return false;
-    }
-
-    for (size_t i = 0uz; i < size; ++i)
-    {
-      const Ref<TValue> &firstPtr = firstVector[i];
-      const Ref<TValue> &secondPtr = secondVector[i];
-      if (firstPtr.get() == secondPtr.get() || firstPtr->Equals(*secondPtr))
-      {
-        continue;
-      }
-
-      return false;
-    }
-
-    return true;
-  }
-
-  template <typename TValue>
-  KRYS_NODISCARD bool CompareValuePtr(const RefPtr<TValue> &first, const RefPtr<TValue> &second) noexcept
-  {
-    return first ? second && first->Equals(*second) : !second;
-  }
-
-  template <typename TValue>
-  KRYS_NODISCARD bool CompareValue(const Ref<TValue> &first, const Ref<TValue> &second) noexcept
-  {
-    return first->Equals(*second);
-  }
 }

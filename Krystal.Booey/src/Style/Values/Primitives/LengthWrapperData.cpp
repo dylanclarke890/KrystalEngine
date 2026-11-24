@@ -41,11 +41,6 @@ namespace krys::boo::style
     return calc::ValueMap::CalculationValues().Get(_calculationValueHandle);
   }
 
-  Ref<calc::Value> LengthWrapperData::ProtectedCalculationValue() const noexcept
-  {
-    return ShareRef(CalculationValue());
-  }
-
   void LengthWrapperData::AddRef() const noexcept
   {
     krys_debug_assert(_kind == LengthWrapperDataKind::Calculation);
@@ -61,7 +56,7 @@ namespace krys::boo::style
   float LengthWrapperData::NonNanCalculatedValue(float maxValue, const ZoomFactor &usedZoom) const noexcept
   {
     krys_debug_assert(_kind == LengthWrapperDataKind::Calculation);
-    float result = static_cast<float>(ProtectedCalculationValue()->Evaluate(maxValue, usedZoom));
+    float result = static_cast<float>(CalculationValue().Evaluate(maxValue, usedZoom));
     if (std::isnan(result))
     {
       return 0;
@@ -73,7 +68,7 @@ namespace krys::boo::style
   float LengthWrapperData::NonNanCalculatedValue(float maxValue, const ZoomNeeded &token) const noexcept
   {
     krys_debug_assert(_kind == LengthWrapperDataKind::Calculation);
-    float result = static_cast<float>(ProtectedCalculationValue()->Evaluate(maxValue, token));
+    float result = static_cast<float>(CalculationValue().Evaluate(maxValue, token));
     if (std::isnan(result))
     {
       return 0;

@@ -69,9 +69,6 @@ namespace krys::boo::css::tests
       CHECK(SelectorsText(rule->GetSelectorList()) == ".a, .b > .c");
       CHECK(AsText(rule->Properties()) == "color: red;");
       CHECK_FALSE(rule->Properties().IsMutable());
-      CHECK_FALSE(rule->HasDocumentSecurityOrigin());
-      CHECK(StyleRule::Create(ImmutableDeclarations(u8"color: red"), true, ParseSelectors(u8".a"))
-              ->HasDocumentSecurityOrigin());
     }
 
     SECTION("MutableProperties makes the declarations mutable once")
@@ -83,10 +80,8 @@ namespace krys::boo::css::tests
       CHECK(AsText(rule->Properties()) == "color: red; width: 1px;");
     }
 
-    SECTION("SetProperties and AdoptSelectorList")
+    SECTION("WrapperAdoptSelectorList")
     {
-      rule->SetProperties(ImmutableDeclarations(u8"width: 2px"));
-      CHECK(AsText(rule->Properties()) == "width: 2px;");
       rule->WrapperAdoptSelectorList(ParseSelectors(u8"#x"));
       CHECK(SelectorsText(rule->GetSelectorList()) == "#x");
     }
@@ -148,10 +143,10 @@ namespace krys::boo::css::tests
   TEST_CASE_METHOD(ValueFixture, "StyleRuleWithNesting", "[CSS][Rules][Rule]")
   {
     auto child =
-      StyleRuleWithNesting::Create(ImmutableDeclarations(u8"width: 1px"), false, ParseSelectors(u8".c"), {});
+      StyleRuleWithNesting::Create(ImmutableDeclarations(u8"width: 1px"), ParseSelectors(u8".c"), {});
     auto declarations = NestedDeclarationsRule::Create(ImmutableDeclarations(u8"height: 1px"));
-    auto rule = StyleRuleWithNesting::Create(ImmutableDeclarations(u8"color: red"), false,
-                                             ParseSelectors(u8".a"), Rules({child, declarations}));
+    auto rule = StyleRuleWithNesting::Create(ImmutableDeclarations(u8"color: red"), ParseSelectors(u8".a"),
+                                             Rules({child, declarations}));
 
     CHECK(rule->Type() == RuleType::StyleWithNesting);
     CHECK(rule->IsStyleRule());
@@ -289,7 +284,7 @@ namespace krys::boo::css::tests
       auto sheet = StyleSheetContents::Create();
       auto rule = ScopeRule::Create(ParseSelectors(u8".start"), ParseSelectors(u8".end"),
                                     Rules({StyleRuleWithNesting::Create(ImmutableDeclarations(u8"color: red"),
-                                                                        false, ParseSelectors(u8".a"), {})}));
+                                                                        ParseSelectors(u8".a"), {})}));
       CHECK(rule->Type() == RuleType::Scope);
       CHECK(rule->IsScopeRule());
       CHECK(rule->IsGroupRule());
@@ -313,14 +308,14 @@ namespace krys::boo::css::tests
 
     SECTION("Invalidation reaches the children of group rules")
     {
-      auto nested = StyleRuleWithNesting::Create(ImmutableDeclarations(u8"color: red"), false,
-                                                 ParseSelectors(u8".n"), {});
+      auto nested =
+        StyleRuleWithNesting::Create(ImmutableDeclarations(u8"color: red"), ParseSelectors(u8".n"), {});
       nested->AdoptSelectorList(ParseSelectors(u8".resolved"));
       auto scope = ScopeRule::Create(ParseSelectors(u8".s"), {}, Rules({nested}));
       scope->SetScopeStart(ParseSelectors(u8".s"));
       auto media =
         MediaRule::Create(mq::MediaQueryParser::Parse(u8"print", StrictParserContext()), Rules({scope}));
-      auto parent = StyleRuleWithNesting::Create(ImmutableDeclarations(u8"color: red"), false,
+      auto parent = StyleRuleWithNesting::Create(ImmutableDeclarations(u8"color: red"),
                                                  ParseSelectors(u8".p"), Rules({media}));
 
       parent->WrapperAdoptOriginalSelectorList(ParseSelectors(u8".q"));

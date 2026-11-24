@@ -436,17 +436,6 @@ namespace krys::boo
     select.OptionSelectedByUser(select.ListToOptionIndex(static_cast<int32>(listIndex)), fireOnChange);
   }
 
-  void RenderMenuList::ListBoxSelectItem(int32 listIndex, bool allowMultiplySelections, bool shift,
-                                         bool fireOnChangeNow) noexcept
-  {
-    SelectElement().ListBoxSelectItem(listIndex, allowMultiplySelections, shift, fireOnChangeNow);
-  }
-
-  bool RenderMenuList::Multiple() const noexcept
-  {
-    return SelectElement().Multiple();
-  }
-
   void RenderMenuList::DidSetSelectedIndex(int32 listIndex) noexcept
   {
     DidUpdateActiveOption(SelectElement().ListToOptionIndex(listIndex));
@@ -493,16 +482,6 @@ namespace krys::boo
     }
 
     return ApplyTextTransform(Style(), krys::move(itemString));
-  }
-
-  utf8_string RenderMenuList::ItemLabel(uint32) const noexcept
-  {
-    return {};
-  }
-
-  utf8_string RenderMenuList::ItemIcon(uint32) const noexcept
-  {
-    return {};
   }
 
   utf8_string RenderMenuList::ItemAccessibilityText(uint32 listIndex) const noexcept
@@ -646,16 +625,6 @@ namespace krys::boo
       Style().GetWritingMode().BidiDirection(), IsOverride(Style().UnicodeBidi()),
       PopupMenuStyle::BackgroundColorType::DefaultBackgroundColor, PopupMenuStyle::PopupMenuType::SelectPopup,
       RenderTheme::Singleton().PopupMenuSize(styleToUse, absBounds));
-  }
-
-  int32 RenderMenuList::ClientInsetLeft() const noexcept
-  {
-    return 0;
-  }
-
-  int32 RenderMenuList::ClientInsetRight() const noexcept
-  {
-    return 0;
   }
 
   LayoutUnit RenderMenuList::ClientPaddingLeft() const noexcept

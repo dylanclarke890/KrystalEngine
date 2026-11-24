@@ -93,7 +93,7 @@ namespace krys::boo::style
         state.SetCurrentPropertyInvalidAtComputedValueTime();
         return {.Value = CSSOMStringAtom::Empty()};
       }
-      return {.Value = CSSOMStringAtom {value.CustomIdent()}};
+      return {.Value = CSSOMStringAtom {value.StringValue()}};
     }
 
     KRYS_NODISCARD css::CustomIdentifier operator()(BuilderState &state, const css::Value &value) noexcept
@@ -152,7 +152,7 @@ namespace krys::boo::style
                                                             const css::Value &value) noexcept
     {
       if (auto *list = DynamicDowncast<css::ValueList>(value);
-          list && list->Separator() == css::ValueSeparator::SpaceSeparator)
+          list && list->Separator() == css::ValueSeparator::Space)
       {
         return css::SpaceSeparatedEnumSet<T>(
           std::from_range, *list
@@ -171,7 +171,7 @@ namespace krys::boo::style
                                                             const css::Value &value) noexcept
     {
       if (auto *list = DynamicDowncast<css::ValueList>(value);
-          list && list->Separator() == css::ValueSeparator::CommaSeparator)
+          list && list->Separator() == css::ValueSeparator::Comma)
       {
         return css::CommaSeparatedEnumSet<T>(
           std::from_range, *list
@@ -226,7 +226,7 @@ namespace krys::boo::style
                                                                       const css::Value &value) noexcept
     {
       if (auto *list = DynamicDowncast<css::ValueList>(value);
-          list && list->Separator() == css::ValueSeparator::SpaceSeparator)
+          list && list->Separator() == css::ValueSeparator::Space)
       {
         return css::SpaceSeparatedFixedList<StyleType>(
           std::from_range,
@@ -246,7 +246,7 @@ namespace krys::boo::style
                                                                       const css::Value &value) noexcept
     {
       if (auto *list = DynamicDowncast<css::ValueList>(value);
-          list && list->Separator() == css::ValueSeparator::CommaSeparator)
+          list && list->Separator() == css::ValueSeparator::Comma)
       {
         return css::CommaSeparatedFixedList<StyleType>(
           std::from_range,

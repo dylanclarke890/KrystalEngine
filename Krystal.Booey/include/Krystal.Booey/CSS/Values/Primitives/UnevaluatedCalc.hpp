@@ -83,7 +83,11 @@ namespace krys::boo::css
 
     ~UnevaluatedCalcBase() noexcept;
 
-    KRYS_NODISCARD Ref<calc::Value> ProtectedCalc() const noexcept;
+    /// @brief The calc() tree. Calc values don't change once built, so holders share it with `ShareRef`.
+    KRYS_NODISCARD calc::Value &Calc() const noexcept
+    {
+      return *_calc;
+    }
 
     KRYS_NODISCARD calc::Value &LeakRef() noexcept;
 

@@ -52,7 +52,7 @@ namespace krys::boo::css::tests
     auto range = tokens.Tokenizer.Tokens();
     auto value = PrimitiveValueResolver<Length<>>::ConsumeAndResolve(range, state);
     REQUIRE(value);
-    CHECK(value->IsCalculated());
+    CHECK(value->IsCalc());
     CHECK(CssText(*value) == "calc(1em + 1px)");
   }
 

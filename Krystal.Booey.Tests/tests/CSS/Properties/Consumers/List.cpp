@@ -5,6 +5,8 @@
 #include "Krystal.Booey/CSS/Parser/InputStream.hpp"
 #include "Krystal.Booey/CSS/Parser/Tokenizer.hpp"
 #include "Krystal.Booey/CSS/Properties/Consumers/Ident.hpp"
+#include "Krystal.Booey/CSS/Values/PrimitiveValue.hpp"
+#include "Krystal.Booey/CSS/Values/ValueList.hpp"
 
 namespace krys::boo::css::parse_property::tests
 {
@@ -67,14 +69,14 @@ namespace krys::boo::css::parse_property::tests
     auto single =
       ConsumeListSeparatedBy<',', OneOrMore, ListOptimization::SingleValue>(range, ConsumeIdentValue);
     REQUIRE(single);
-    CHECK(single->IsPrimitiveValue());
+    CHECK(Is<PrimitiveValue>(*single));
 
     Tokens many {u8"a, b"};
     range = many.Tokenizer.Tokens();
     auto list =
       ConsumeListSeparatedBy<',', OneOrMore, ListOptimization::SingleValue>(range, ConsumeIdentValue);
     REQUIRE(list);
-    CHECK(list->IsValueListValue());
+    CHECK(Is<ValueList>(*list));
     CHECK(CssText(*list) == "a, b");
   }
 }

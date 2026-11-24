@@ -68,10 +68,10 @@ namespace krys::boo
     {
     }
 
-    /// @brief A key the field passes on, by its key identifier: "Up", "Down", "Enter" or "U+001B" (Escape).
-    virtual void HandleKeydownWithIdentifier(utf8_stringview identifier) noexcept
+    /// @brief A key the field passes on, by its `key` value: "ArrowUp", "ArrowDown", "Enter" or "Escape".
+    virtual void HandleKeyDown(utf8_stringview key) noexcept
     {
-      (void)identifier;
+      (void)key;
     }
 
     /// @brief Shows the client's current suggestions, or hides the list if there are none.

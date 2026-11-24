@@ -80,9 +80,9 @@ namespace krys::boo::css::tests
     };
 
     SelectorFilter filter;
-    REQUIRE(filter.ParentStackIsEmpty());
+    REQUIRE(filter.ParentStackIsConsistent(nullptr));
     filter.PushParentInitializingIfNeeded(section);
-    REQUIRE_FALSE(filter.ParentStackIsEmpty());
+    REQUIRE_FALSE(filter.ParentStackIsConsistent(nullptr));
     REQUIRE(filter.ParentStackIsConsistent(&section));
     REQUIRE_FALSE(filter.ParentStackIsConsistent(&outer));
 
@@ -99,7 +99,7 @@ namespace krys::boo::css::tests
     // Nothing to reject on.
     REQUIRE_FALSE(rejects(filter, u8"p"));
 
-    filter.PushParent(&leaf);
+    filter.PushParent(leaf);
     REQUIRE_FALSE(rejects(filter, u8"#leaf span"));
     filter.PopParent();
     REQUIRE(rejects(filter, u8"#leaf span"));
@@ -109,7 +109,7 @@ namespace krys::boo::css::tests
     REQUIRE(rejects(filter, u8"section p"));
 
     filter.PopParentsUntil(nullptr);
-    REQUIRE(filter.ParentStackIsEmpty());
+    REQUIRE(filter.ParentStackIsConsistent(nullptr));
     REQUIRE(filter.ParentStackIsConsistent(document.get()));
     REQUIRE(rejects(filter, u8"div p"));
   }

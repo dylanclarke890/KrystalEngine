@@ -22,14 +22,10 @@ namespace krys::boo::css::tests
   {
     auto style = PrimitiveValue::Create(ValueId::UpperRoman);
     auto counter = Counters(u8".", style);
-    CHECK(counter->IsCounterValue());
+    CHECK(Is<CounterValue>(*counter));
     CHECK(counter->Identifier() == u8"item");
     CHECK(counter->Separator() == u8".");
     CHECK(counter->CounterStyle().get() == style.get());
-    CHECK(ToNarrow(counter->CounterStyleCSSText()) == "upper-roman");
-    CHECK(
-      ToNarrow(Counter(PrimitiveValue::CreateCustomIdent(CSSOMString {u8"my-style"}))->CounterStyleCSSText())
-      == "my-style");
   }
 
   TEST_CASE_METHOD(ValueFixture, "CounterValue serialisation", "[CSS][Values][CounterValue]")

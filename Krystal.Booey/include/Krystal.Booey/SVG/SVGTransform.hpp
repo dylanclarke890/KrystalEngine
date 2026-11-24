@@ -72,7 +72,7 @@ namespace krys::boo
 
     ~SVGTransform() noexcept override
     {
-      _value.ProtectedMatrix()->Detach();
+      _value.Matrix().Detach();
     }
 
     KRYS_NODISCARD Ref<SVGTransform> Clone() const noexcept
@@ -93,11 +93,6 @@ namespace krys::boo
     KRYS_NODISCARD SVGMatrix &Matrix() noexcept
     {
       return _value.Matrix();
-    }
-
-    KRYS_NODISCARD Ref<SVGMatrix> ProtectedMatrix() noexcept
-    {
-      return ShareRef(Matrix());
     }
 
     ExceptionOr<void> SetMatrix(css::DOMMatrix2DInit matrixInit) noexcept
@@ -202,14 +197,14 @@ namespace krys::boo
     {
       Base::Attach(owner, access);
       // Reattach the SVGMatrix to the SVGTransformValue with the new SVGPropertyAccess.
-      _value.ProtectedMatrix()->Reattach(this, access);
+      _value.Matrix().Reattach(this, access);
     }
 
     void Detach() noexcept override
     {
       Base::Detach();
       // Reattach the SVGMatrix to the SVGTransformValue with the SVGPropertyAccess::ReadWrite.
-      _value.ProtectedMatrix()->Reattach(this, Access());
+      _value.Matrix().Reattach(this, Access());
     }
 
   private:
@@ -222,7 +217,7 @@ namespace krys::boo
 
     SVGTransform(SVGTransformValue &&value) noexcept : Base(krys::move(value))
     {
-      _value.ProtectedMatrix()->Attach(this, SVGPropertyAccess::ReadWrite);
+      _value.Matrix().Attach(this, SVGPropertyAccess::ReadWrite);
     }
 
     KRYS_NODISCARD SVGPropertyOwner *Owner() const noexcept override

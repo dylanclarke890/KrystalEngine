@@ -27,7 +27,7 @@ namespace krys::boo::css::tests
   TEST_CASE_METHOD(ValueFixture, "PaintImageValue::Create", "[CSS][Values][PaintImageValue]")
   {
     auto value = PaintImageValue::Create(u8"checkerboard", Arguments(u8""));
-    CHECK(value->IsPaintImageValue());
+    CHECK(Is<PaintImageValue>(*value));
     CHECK(value->IsImageGeneratorValue());
     CHECK(value->IsImage());
     CHECK(value->Name() == u8"checkerboard");

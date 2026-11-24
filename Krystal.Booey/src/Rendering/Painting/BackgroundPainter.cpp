@@ -528,8 +528,6 @@ namespace krys::boo
       {
         baseBgColorUsage = BaseBackgroundColorSkip;
       }
-
-      View().FrameView().SetContentIsOpaque(isOpaqueRoot);
     }
 
     // Paint the color first underneath all images, culled if background image occludes it.

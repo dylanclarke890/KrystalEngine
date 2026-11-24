@@ -1,25 +1,4 @@
-﻿/*
- * Copyright (C) 2008, 2009, 2010, 2014, 2016 Apple Inc. All rights reserved.
- * Copyright (C) 2008 David Smith <catfish.man@gmail.com>
- *
- * This library is free software; you can redistribute it and/or
- * modify it under the terms of the GNU Library General Public
- * License as published by the Free Software Foundation; either
- * version 2 of the License, or (at your option) any later version.
- *
- * This library is distributed in the hope that it will be useful,
- * but WITHOUT ANY WARRANTY; without even the implied warranty of
- * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU
- * Library General Public License for more details.
- *
- * You should have received a copy of the GNU Library General Public License
- * along with this library; see the file COPYING.LIB.  If not, write to
- * the Free Software Foundation, Inc., 51 Franklin Street, Fifth Floor,
- * Boston, MA 02110-1301, USA.
- *
- */
-
-#pragma once
+﻿#pragma once
 
 #include "Krystal.Booey/CSS/Calc/RandomCachingKeyMap.hpp"
 #include "Krystal.Booey/DOM/ContentVisibility/ContentRelevancy.hpp"
@@ -71,8 +50,11 @@ namespace krys::boo::dom
   /// @see https://html.spec.whatwg.org/#explicitly-set-attr-elements
   using ExplicitlySetAttrElementListsMap = HashMap<DOMStringAtom, List<WeakPtr<Element>>>;
 
+  /// @brief The data an element needs only some of the time, made when it's first needed
+  /// (`Element::EnsureElementRareData`).
   class ElementRareData : public NodeRareData
   {
+    /// @brief Hashes a pseudo-element, or the element itself (null).
     struct PseudoElementIdentifierHash
     {
       KRYS_NODISCARD size_t operator()(const Maybe<style::PseudoElementIdentifier> &identifier) const noexcept
@@ -116,6 +98,8 @@ namespace krys::boo::dom
 
     ~ElementRareData() noexcept override;
 
+    /// @brief The element's custom element reaction queue, once a reaction has been enqueued for it.
+    /// @see https://html.spec.whatwg.org/#custom-element-reaction-queue
     KRYS_NODISCARD html::CustomElementReactionQueue *CustomElementReactionQueue() const noexcept
     {
       return _customElementReactionQueue.get();
@@ -123,6 +107,7 @@ namespace krys::boo::dom
 
     void SetCustomElementReactionQueue(UniquePtr<html::CustomElementReactionQueue> &&queue) noexcept;
 
+    /// @brief The state and behaviour of a custom element, once it's been defined.
     KRYS_NODISCARD html::CustomElement *CustomElement() const noexcept
     {
       return _customElement.get();
@@ -130,13 +115,15 @@ namespace krys::boo::dom
 
     void SetCustomElement(UniquePtr<html::CustomElement> &&customElement) noexcept;
 
+    /// @brief The custom element's states, made when first asked for (`Element::EnsureCustomStateSet`).
     KRYS_NODISCARD html::CustomStateSet *CustomStateSet() const noexcept
     {
       return _customStateSet.get();
     }
 
-    void SetCustomStateSet(RefPtr<html::CustomStateSet> &&customStateSet) noexcept;
+    void SetCustomStateSet(RefPtr<html::CustomStateSet> customStateSet) noexcept;
 
+    /// @brief The state of the element's `popover` attribute.
     KRYS_NODISCARD PopoverData *GetPopoverData() const noexcept
     {
       return _popoverData.get();
@@ -144,10 +131,12 @@ namespace krys::boo::dom
 
     void SetPopoverData(UniquePtr<PopoverData> &&popoverData) noexcept;
 
+    /// @brief The popover the element (a button) showed and is still the popover trigger of, if any.
     KRYS_NODISCARD Element *InvokedPopover() const noexcept;
 
     void SetInvokedPopover(Element *element) noexcept;
 
+    /// @brief See `ExplicitlySetAttrElementsMap` and `ExplicitlySetAttrElementListsMap`.
     KRYS_NODISCARD ExplicitlySetAttrElementsMap &GetExplicitlySetAttrElementsMap() noexcept
     {
       return _explicitlySetAttrElementsMap;
@@ -158,6 +147,7 @@ namespace krys::boo::dom
       return _explicitlySetAttrElementListsMap;
     }
 
+    /// @brief The intersection observers observing the element, and those rooted at it.
     KRYS_NODISCARD IntersectionObserverData *GetIntersectionObserverData() const noexcept
     {
       return _intersectionObserverData.get();
@@ -165,6 +155,7 @@ namespace krys::boo::dom
 
     void SetIntersectionObserverData(UniquePtr<IntersectionObserverData> &&data) noexcept;
 
+    /// @brief The resize observers observing the element.
     KRYS_NODISCARD ResizeObserverData *GetResizeObserverData() const noexcept
     {
       return _resizeObserverData.get();
@@ -204,6 +195,8 @@ namespace krys::boo::dom
 
     void SetComputedStyleMap(Ref<StylePropertyMapReadOnly> map) noexcept;
 
+    /// @brief The element's last remembered size in each axis, for `contain-intrinsic-size: auto`.
+    /// @see https://drafts.csswg.org/css-sizing-4/#last-remembered
     KRYS_NODISCARD Maybe<LayoutUnit> LastRememberedLogicalWidth() const noexcept
     {
       return _lastRememberedLogicalWidth;
@@ -234,6 +227,8 @@ namespace krys::boo::dom
       _lastRememberedLogicalHeight = null;
     }
 
+    /// @brief Why the element is relevant to the user, once its relevancy has been determined.
+    /// @see https://drafts.csswg.org/css-contain/#relevant-to-the-user
     KRYS_NODISCARD const Maybe<EnumSet<ContentRelevancy>> &GetContentRelevancy() const noexcept
     {
       return _contentRelevancy;
@@ -273,6 +268,7 @@ namespace krys::boo::dom
 
     void SetDisplayContentsOrNoneStyle(UniquePtr<RenderStyle> style) noexcept;
 
+    /// @brief The element's `::before` and `::after` pseudo-elements, or null where it has none.
     KRYS_NODISCARD PseudoElement *BeforePseudoElement() const noexcept
     {
       return _beforePseudoElement.get();
@@ -283,8 +279,9 @@ namespace krys::boo::dom
       return _afterPseudoElement.get();
     }
 
-    void SetBeforePseudoElement(RefPtr<PseudoElement> &&pseudoElement) noexcept;
+    void SetBeforePseudoElement(RefPtr<PseudoElement> pseudoElement) noexcept;
 
+    /// @brief The scroll position of the element's layer, kept while the element has no renderer.
     KRYS_NODISCARD PointI SavedLayerScrollPosition() const noexcept
     {
       return _savedLayerScrollPosition;
@@ -295,7 +292,7 @@ namespace krys::boo::dom
       _savedLayerScrollPosition = position;
     }
 
-    void SetAfterPseudoElement(RefPtr<PseudoElement> &&pseudoElement) noexcept;
+    void SetAfterPseudoElement(RefPtr<PseudoElement> pseudoElement) noexcept;
 
     /// @brief The `random()` base values of the element (or one of its pseudo-elements).
     KRYS_NODISCARD Ref<css::calc::RandomCachingKeyMap>
@@ -310,6 +307,7 @@ namespace krys::boo::dom
       return it->second;
     }
 
+    /// @brief Whether the element or a pseudo-element has `random()` base values or animation state.
     KRYS_NODISCARD bool HasRandomCachingKeyMap() const noexcept
     {
       return !_randomCachingKeyMaps.empty();
@@ -324,6 +322,7 @@ namespace krys::boo::dom
     KRYS_NODISCARD ElementAnimationRareData *
       AnimationRareData(const Maybe<style::PseudoElementIdentifier> &pseudoElementIdentifier) const noexcept;
 
+    /// @brief The animation state of the element (or one of its pseudo-elements), made if it has none.
     KRYS_NODISCARD ElementAnimationRareData &
       EnsureAnimationRareData(const Maybe<style::PseudoElementIdentifier> &pseudoElementIdentifier) noexcept;
   };

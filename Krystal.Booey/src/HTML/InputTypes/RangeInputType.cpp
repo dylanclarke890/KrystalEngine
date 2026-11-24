@@ -116,7 +116,7 @@ namespace krys::boo::html
       return ShouldCallBaseEventHandler::Yes;
     }
 
-    const auto &key = event.KeyIdentifier();
+    const auto &key = event.Key();
 
     const Decimal current = ParseToNumberOrNaN(element->Value());
     krys_debug_assert(current.IsFinite());
@@ -138,19 +138,19 @@ namespace krys::boo::html
     }
 
     Decimal newValue;
-    if (key == u8"Up")
+    if (key == u8"ArrowUp")
     {
       newValue = current + step;
     }
-    else if (key == u8"Down")
+    else if (key == u8"ArrowDown")
     {
       newValue = current - step;
     }
-    else if (key == u8"Left")
+    else if (key == u8"ArrowLeft")
     {
       newValue = isVertical ? current + step : current - step;
     }
-    else if (key == u8"Right")
+    else if (key == u8"ArrowRight")
     {
       newValue = isVertical ? current - step : current + step;
     }

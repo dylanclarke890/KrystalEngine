@@ -26,6 +26,7 @@
 
 #include "Krystal.Booey/CSS/Properties/Consumers/MetaConsumerDefinitions.hpp"
 #include "Krystal.Booey/CSS/Properties/Property.hpp"
+#include "Krystal.Booey/CSS/Properties/PropertyQueries.hpp"
 #include "Krystal.Booey/CSS/Values/Primitives/NumericTypesCanonicalization.hpp"
 
 namespace krys::boo::css
@@ -35,7 +36,7 @@ namespace krys::boo::css
     KRYS_NODISCARD constexpr static Maybe<AngleUnit> Validate(UnitType unitType, PropertyParserState &,
                                                               PropertyParserOptions) noexcept
     {
-      return UnitTraits<AngleUnit>::Validate(unitType);
+      return ToUnit<AngleUnit>(unitType);
     }
 
     template <auto R, typename V>
@@ -64,7 +65,7 @@ namespace krys::boo::css
         return true;
       }
 
-      return mode == ParserMode::HTMLQuirks && Property::AcceptsQuirkyAngle(state.CurrentProperty);
+      return mode == ParserMode::HTMLQuirks && AcceptsQuirkyAngle(state.CurrentProperty);
     }
   };
 

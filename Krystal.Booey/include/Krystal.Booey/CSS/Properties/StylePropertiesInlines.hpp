@@ -52,14 +52,14 @@ namespace krys::boo::css
     return Downcast<ImmutableStyleProperties>(*this).PropertyAt(index);
   }
 
-  inline uint32 StyleProperties::PropertyCount() const noexcept
+  inline uint32 StyleProperties::size() const noexcept
   {
     if (_isMutable)
     {
-      return Downcast<MutableStyleProperties>(*this).PropertyCount();
+      return Downcast<MutableStyleProperties>(*this).size();
     }
 
-    return Downcast<ImmutableStyleProperties>(*this).PropertyCount();
+    return Downcast<ImmutableStyleProperties>(*this).size();
   }
 
   inline void StyleProperties::SubRef() const noexcept
@@ -105,12 +105,7 @@ namespace krys::boo::css
 
   inline bool StyleProperties::empty() const noexcept
   {
-    return !PropertyCount();
-  }
-
-  inline uint32 StyleProperties::size() const noexcept
-  {
-    return PropertyCount();
+    return !size();
   }
 
   inline CSSOMString SerialiseLonghandValue(const SerialisationContext &context, PropertyId property,
@@ -121,7 +116,7 @@ namespace krys::boo::css
 
   inline ValueId LonghandValueId(PropertyId property, const Value &value) noexcept
   {
-    return value.IsImplicitInitialValue() ? InitialValueIdForLonghand(property) : GetValueId(value);
+    return value.IsImplicitInitialValue() ? InitialValueIdForLonghand(property) : value.ValueId();
   }
 
   inline Maybe<ValueId> LonghandValueId(PropertyId property, const Value *value) noexcept

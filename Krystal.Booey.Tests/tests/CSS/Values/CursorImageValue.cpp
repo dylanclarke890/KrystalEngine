@@ -11,13 +11,13 @@ namespace krys::boo::css::tests
 {
   namespace
   {
-    CSSUrl CursorUrl(utf8_stringview url)
+    Url CursorUrl(utf8_stringview url)
     {
       return *CompleteUrl(CSSOMString {url},
                           ParserContext {ParserMode::HTMLStandard, net::Url {u8"https://example.com/"}});
     }
 
-    RefPtr<Value> HotSpot(double x, double y)
+    RefPtr<ValuePair> HotSpot(double x, double y)
     {
       return ValuePair::Create(PrimitiveValue::Create(x, UnitType::Number),
                                PrimitiveValue::Create(y, UnitType::Number));
@@ -26,31 +26,15 @@ namespace krys::boo::css::tests
 
   TEST_CASE_METHOD(ValueFixture, "CursorImageValue::Create", "[CSS][Values][CursorImageValue]")
   {
-    SECTION("The original URL is the image's URL")
-    {
-      auto value = CursorImageValue::Create(ImageValue::Create(CursorUrl(u8"a.cur")), nullptr);
-      CHECK(value->IsCursorImageValue());
-      // Cursor images aren't <image>s.
-      CHECK_FALSE(value->IsImage());
-      CHECK_FALSE(value->IsImageGeneratorValue());
-      CHECK(value->OriginalUrl() == CursorUrl(u8"a.cur"));
-    }
+    auto value = CursorImageValue::Create(ImageValue::Create(CursorUrl(u8"a.cur")), nullptr);
+    CHECK(Is<CursorImageValue>(*value));
+    // Cursor images aren't <image>s.
+    CHECK_FALSE(value->IsImage());
+    CHECK_FALSE(value->IsImageGeneratorValue());
 
-    SECTION("Values other than images have no original URL")
-    {
-      auto value =
-        CursorImageValue::Create(CrossFadeValue::Create(TestImage(u8"a"), TestImage(u8"b"),
-                                                        PrimitiveValue::Create(0.5, UnitType::Number)),
-                                 nullptr);
-      CHECK(value->OriginalUrl().IsNone());
-    }
-
-    SECTION("With an explicit original URL")
-    {
-      auto value =
-        CursorImageValue::Create(ImageValue::Create(CursorUrl(u8"a.cur")), nullptr, CursorUrl(u8"b.cur"));
-      CHECK(value->OriginalUrl() == CursorUrl(u8"b.cur"));
-    }
+    // The original URL is only observable through the style image; see the style Cursor test.
+    CHECK(Is<CursorImageValue>(
+      *CursorImageValue::Create(ImageValue::Create(CursorUrl(u8"a.cur")), nullptr, CursorUrl(u8"b.cur"))));
   }
 
   TEST_CASE_METHOD(ValueFixture, "CursorImageValue serialisation", "[CSS][Values][CursorImageValue]")
@@ -67,7 +51,7 @@ namespace krys::boo::css::tests
 
   TEST_CASE_METHOD(ValueFixture, "CursorImageValue equality", "[CSS][Values][CursorImageValue]")
   {
-    auto make = [](utf8_stringview url, RefPtr<Value> hotSpot)
+    auto make = [](utf8_stringview url, RefPtr<ValuePair> hotSpot)
     {
       return CursorImageValue::Create(ImageValue::Create(CursorUrl(url)), krys::move(hotSpot));
     };
@@ -90,11 +74,15 @@ namespace krys::boo::css::tests
 
   TEST_CASE_METHOD(ValueFixture, "CursorImageValue children", "[CSS][Values][CursorImageValue]")
   {
-    // Only the image is visited, not the hot spot.
+    // The image, then the hot spot.
     auto value = CursorImageValue::Create(ImageValue::Create(CursorUrl(u8"a.cur")), HotSpot(1.0, 2.0));
     auto children = Children(*value);
-    REQUIRE(children.size() == 1uz);
-    CHECK(children[0uz]->IsImageValue());
+    REQUIRE(children.size() == 2uz);
+    CHECK(Is<ImageValue>(*children[0uz]));
+    CHECK(Is<ValuePair>(*children[1uz]));
+
+    CHECK(Children(*CursorImageValue::Create(ImageValue::Create(CursorUrl(u8"a.cur")), nullptr)).size()
+          == 1uz);
 
     CHECK_FALSE(value->MayDependOnBaseUrl());
   }

@@ -860,7 +860,7 @@ namespace krys::boo
       }
       // FIXME: It seems wrong to rely only on the difference of properties set, and not on which properties
       // are set.
-      else if (newInlineStyle->Style()->PropertyCount() != inlineStyle->PropertyCount())
+      else if (newInlineStyle->Style()->size() != inlineStyle->size())
       {
         SetNodeAttribute(*element, u8"style",
                          newInlineStyle->Style()->AsText(css::DefaultSerialisationContext()));

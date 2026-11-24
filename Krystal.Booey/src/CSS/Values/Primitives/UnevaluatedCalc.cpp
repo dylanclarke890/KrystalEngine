@@ -56,11 +56,6 @@ namespace krys::boo::css
 
   UnevaluatedCalcBase::~UnevaluatedCalcBase() noexcept = default;
 
-  Ref<calc::Value> UnevaluatedCalcBase::ProtectedCalc() const noexcept
-  {
-    return _calc;
-  }
-
   calc::Value &UnevaluatedCalcBase::LeakRef() noexcept
   {
     return *_calc.release();
@@ -68,23 +63,23 @@ namespace krys::boo::css
 
   bool UnevaluatedCalcBase::Equal(const UnevaluatedCalcBase &other) const noexcept
   {
-    return ProtectedCalc()->Equals(*other._calc);
+    return _calc->Equals(*other._calc);
   }
 
   bool UnevaluatedCalcBase::RequiresConversionData() const noexcept
   {
-    return ProtectedCalc()->RequiresConversionData();
+    return _calc->RequiresConversionData();
   }
 
   void UnevaluatedCalcBase::SerialisationForCSS(StringBuilder &builder,
                                                 const SerialisationContext &context) const noexcept
   {
-    builder.Append(ProtectedCalc()->CssText(context));
+    builder.Append(_calc->CssText(context));
   }
 
   void UnevaluatedCalcBase::CollectComputedStyleDependencies(
     ComputedStyleDependencies &dependencies) const noexcept
   {
-    ProtectedCalc()->CollectComputedStyleDependencies(dependencies);
+    _calc->CollectComputedStyleDependencies(dependencies);
   }
 }

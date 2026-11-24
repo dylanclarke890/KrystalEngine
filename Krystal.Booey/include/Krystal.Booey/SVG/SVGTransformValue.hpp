@@ -121,11 +121,6 @@ namespace krys::boo
       return *_matrix;
     }
 
-    KRYS_NODISCARD Ref<SVGMatrix> ProtectedMatrix() const noexcept
-    {
-      return _matrix;
-    }
-
     KRYS_NODISCARD float Angle() const noexcept
     {
       return _angle;
@@ -146,7 +141,7 @@ namespace krys::boo
       _type = SVG_TRANSFORM_MATRIX;
       _angle = 0;
       _rotationCenter = {};
-      ProtectedMatrix()->SetValue(matrix);
+      Matrix().SetValue(matrix);
     }
 
     void MatrixDidChange() noexcept

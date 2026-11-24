@@ -86,6 +86,6 @@ namespace krys::boo::css
 KRYS_SPECIALIZE_TYPE_CAST_TRAITS_BEGIN(krys::boo::css::QuadValue)
   KRYS_NODISCARD static bool IsType(const krys::boo::css::Value &value) noexcept
   {
-    return value.IsQuadValue();
+    return value.Type() == krys::boo::css::ValueType::Quad;
   }
 KRYS_SPECIALIZE_TYPE_CAST_TRAITS_END()

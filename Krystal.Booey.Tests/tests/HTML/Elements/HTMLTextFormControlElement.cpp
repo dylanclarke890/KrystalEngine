@@ -236,7 +236,7 @@ namespace krys::boo::tests
       (void)editor.InsertText(u8"-", nullptr);
       CHECK(Narrow(number.Value()) == "12");
 
-      CHECK(PressKey(fixture, u8"ArrowUp", u8"Up", vk::Up));
+      CHECK(PressKey(fixture, u8"ArrowUp", vk::Up));
       CHECK(Narrow(number.Value()) == "13");
     }
 
@@ -424,7 +424,7 @@ namespace krys::boo::tests
     SECTION("Escape clears the field")
     {
       search.Focus();
-      CHECK(PressKey(fixture, u8"Escape", u8"U+001B", vk::Escape));
+      CHECK(PressKey(fixture, u8"Escape", vk::Escape));
       CHECK(search.Value().empty());
     }
   }

@@ -30,7 +30,7 @@ namespace krys::boo::css::tests
   {
     BoxShadowProperty shadow {BoxShadowProperty::List {FullBoxShadow()}};
     auto value = BoxShadowPropertyValue::Create(shadow);
-    CHECK(value->IsBoxShadowPropertyValue());
+    CHECK(Is<BoxShadowPropertyValue>(*value));
     CHECK(value->Shadow() == shadow);
   }
 

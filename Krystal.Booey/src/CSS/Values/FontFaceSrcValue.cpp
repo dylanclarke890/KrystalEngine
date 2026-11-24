@@ -60,7 +60,7 @@ namespace krys::boo::css
     return _fontFaceName == other._fontFaceName;
   }
 
-  FontFaceSrcResourceValue::FontFaceSrcResourceValue(CSSUrl &&location, CSSOMString &&format,
+  FontFaceSrcResourceValue::FontFaceSrcResourceValue(Url &&location, CSSOMString &&format,
                                                      List<FontTechnology> &&technologies) noexcept
       : Value(ValueType::FontFaceSrcResource), _location(Resolve(krys::move(location))),
         _format(krys::move(format)), _technologies(krys::move(technologies))
@@ -69,7 +69,7 @@ namespace krys::boo::css
 
   FontFaceSrcResourceValue::~FontFaceSrcResourceValue() noexcept = default;
 
-  Ref<FontFaceSrcResourceValue> FontFaceSrcResourceValue::Create(CSSUrl location, CSSOMString format,
+  Ref<FontFaceSrcResourceValue> FontFaceSrcResourceValue::Create(Url location, CSSOMString format,
                                                                  List<FontTechnology> &&technologies) noexcept
   {
     return AdoptRef(

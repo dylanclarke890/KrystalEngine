@@ -7,7 +7,7 @@ namespace krys::boo::css::tests
   TEST_CASE_METHOD(ValueFixture, "UnicodeRangeValue::Create", "[CSS][Values][UnicodeRangeValue]")
   {
     auto value = UnicodeRangeValue::Create(U'\x0025', U'\x00FF');
-    CHECK(value->IsUnicodeRangeValue());
+    CHECK(Is<UnicodeRangeValue>(*value));
     CHECK(value->From() == U'\x0025');
     CHECK(value->To() == U'\x00FF');
   }

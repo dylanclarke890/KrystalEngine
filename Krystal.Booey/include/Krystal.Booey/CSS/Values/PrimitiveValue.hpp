@@ -1,42 +1,15 @@
-﻿/*
- * (C) 1999-2003 Lars Knoll (knoll@kde.org)
- * Copyright (C) 2004-2023 Apple Inc. All rights reserved.
- * Copyright (C) 2007 Alexey Proskuryakov <ap@webkit.org>
- *
- * This library is free software; you can redistribute it and/or
- * modify it under the terms of the GNU Library General Public
- * License as published by the Free Software Foundation; either
- * version 2 of the License, or (at your option) any later version.
- *
- * This library is distributed in the hope that it will be useful,
- * but WITHOUT ANY WARRANTY; without even the implied warranty of
- * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU
- * Library General Public License for more details.
- *
- * You should have received a copy of the GNU Library General Public License
- * along with this library; see the file COPYING.LIB.  If not, write to
- * the Free Software Foundation, Inc., 51 Franklin Street, Fifth Floor,
- * Boston, MA 02110-1301, USA.
- */
-
-#pragma once
+﻿#pragma once
 
 #include "Krystal.Booey/CSS/Properties/PropertyId.hpp"
 #include "Krystal.Booey/CSS/Types/CSSOMString.hpp"
-#include "Krystal.Booey/CSS/Values/AttrValue.hpp"
 #include "Krystal.Booey/CSS/Values/Primitives/Units.hpp"
 #include "Krystal.Booey/CSS/Values/Units.hpp"
 #include "Krystal.Booey/CSS/Values/Value.hpp"
 #include "Krystal.Booey/CSS/Values/ValueId.hpp"
-#include "Krystal.Booey/DOM/Types/ExceptionOr.hpp"
-#include "Krystal.Booey/Graphics/Geometry/LayoutUnit.hpp"
 #include "Krystal.Core/Maths/Extras.hpp"
-#include "Krystal.Core/Memory/NeverDestroyed.hpp"
 #include "Krystal.Core/Memory/RefPtr.hpp"
 #include "Krystal.Core/Strings/StringAtom.hpp"
 #include "Krystal.Core/Types/Maybe.hpp"
-#include <cmath>
-#include <limits>
 
 namespace krys::boo::css::calc
 {
@@ -47,171 +20,137 @@ namespace krys::boo::css
 {
   class ToLengthConversionData;
 
-  // Max/min values for CSS, needs to slightly smaller/larger than the true max/min values to allow for
-  // rounding without overflowing. Subtract two (rather than one) to allow for values to be converted to float
-  // and back without exceeding the LayoutUnit::max.
-  constexpr float MaxValueForCssLength = static_cast<float>(IntMaxForLayoutUnit - 2);
-  constexpr float MinValueForCssLength = static_cast<float>(IntMinForLayoutUnit + 2);
-
-  /// @brief Dimension calculations are imprecise, often resulting in values of e.g. 44.99998. We need to
-  /// round if we're really close to the next integer value.
-  template <typename T>
-  KRYS_NODISCARD inline T RoundForImpreciseConversion(double value) noexcept
-  {
-    value += (value < 0) ? -0.01 : +0.01;
-    return ((value > std::numeric_limits<T>::max()) || (value < std::numeric_limits<T>::min()))
-             ? 0
-             : static_cast<T>(value);
-  }
-
-  template <>
-  KRYS_NODISCARD inline float RoundForImpreciseConversion(double value) noexcept
-  {
-    double ceiledValue = std::ceil(value);
-    double proximityToNextInt = ceiledValue - value;
-    if (proximityToNextInt <= 0.01 && value > 0)
-    {
-      return static_cast<float>(ceiledValue);
-    }
-    if (proximityToNextInt >= 0.99 && value < 0)
-    {
-      return static_cast<float>(std::floor(value));
-    }
-    return static_cast<float>(value);
-  }
-
+  /// @brief A value with no parts: a keyword, a property name, a number with its unit, a string, a custom
+  /// identifier, a font family name or a `calc()`.
+  /// @details Keywords, and the whole numbers 0 to 255 in `px`, `%` or no unit, come from the static pool.
+  /// The quantity checks (`IsLength`, `IsAngle`, ...) and the `ResolveAs` functions see a `calc()` as the
+  /// quantity it resolves to; `IsPx` and the font checks look at the units written.
+  /// @see https://www.w3.org/TR/css-values-4/
   class PrimitiveValue final : public Value
   {
     friend class StaticValuePool;
-    friend class ValuePool;
-    friend LazyNeverDestroyed<PrimitiveValue>;
     friend class Value;
 
+    using PrimitiveKind = detail::PrimitiveKind;
+
   private:
-    union ValueUnion
+    // Chosen by `_header.PrimitiveKind`; a number's unit is `_header.Unit`. `String` and `Calc` each hold a
+    // reference, released by the destructor.
+    union Payload
     {
       css::PropertyId PropertyId;
       css::ValueId ValueId;
       double Number;
       StringAtomStorage String;
       const calc::Value *Calc;
-      const AttrValue *Attr;
-    } _value;
-
-    struct CreateImplicitInitialValueTag
-    {
-    };
-
-    constexpr static CreateImplicitInitialValueTag CreateImplicitInitialValue {};
-
-#pragma region Constructors
-
-    explicit PrimitiveValue(css::PropertyId property) noexcept;
-
-    PrimitiveValue(const CSSOMString &value, UnitType unit) noexcept;
-
-    PrimitiveValue(double value, UnitType unit) noexcept;
-
-    explicit PrimitiveValue(Ref<calc::Value> value) noexcept;
-
-    explicit PrimitiveValue(Ref<AttrValue> attr) noexcept;
-
-    PrimitiveValue(StaticValueTag, css::ValueId keyword) noexcept;
-
-    PrimitiveValue(StaticValueTag, double value, UnitType unit) noexcept;
-
-    PrimitiveValue(StaticValueTag, CreateImplicitInitialValueTag) noexcept;
-
-#pragma endregion
+    } _payload;
 
   public:
     ~PrimitiveValue() noexcept;
 
-#pragma region Static Creation
+    // Creation.
 
-    KRYS_NODISCARD static Ref<PrimitiveValue> Create(double value) noexcept;
+    /// @brief A number in @p unit.
+    KRYS_NODISCARD static Ref<PrimitiveValue> Create(double value, UnitType unit = UnitType::Number) noexcept;
 
-    KRYS_NODISCARD static Ref<PrimitiveValue> Create(double value, UnitType unit) noexcept;
-
+    /// @brief An `<integer>`.
     KRYS_NODISCARD static Ref<PrimitiveValue> CreateInteger(double value) noexcept;
 
     KRYS_NODISCARD static Ref<PrimitiveValue> Create(Ref<calc::Value> value) noexcept;
 
-    KRYS_NODISCARD static Ref<PrimitiveValue> Create(Ref<AttrValue> value) noexcept;
-
+    /// @brief A keyword, from the static pool.
     /// @note Defined in ValuePool.hpp.
-    KRYS_NODISCARD static inline Ref<PrimitiveValue> Create(css::ValueId identifier) noexcept;
+    KRYS_NODISCARD static inline Ref<PrimitiveValue> Create(css::ValueId keyword) noexcept;
 
+    /// @brief A property's name, as `transition-property` and `will-change` take.
     KRYS_NODISCARD static Ref<PrimitiveValue> Create(css::PropertyId property) noexcept;
 
+    /// @brief A `<string>`.
     KRYS_NODISCARD static Ref<PrimitiveValue> Create(const CSSOMString &value) noexcept;
 
-    KRYS_NODISCARD static Ref<PrimitiveValue> Create(const CSSOMStringAtom &value) noexcept;
+    /// @brief A `<string>`.
+    KRYS_NODISCARD static Ref<PrimitiveValue> Create(CSSOMStringAtom value) noexcept;
 
     KRYS_NODISCARD static Ref<PrimitiveValue> CreateCustomIdent(const CSSOMString &value) noexcept;
 
-    KRYS_NODISCARD static Ref<PrimitiveValue> CreateCustomIdent(const CSSOMStringAtom &value) noexcept;
+    KRYS_NODISCARD static Ref<PrimitiveValue> CreateCustomIdent(CSSOMStringAtom value) noexcept;
 
+    /// @brief A font family's name, serialised as identifiers where it can be and as a string otherwise.
     KRYS_NODISCARD static Ref<PrimitiveValue> CreateFontFamily(const CSSOMString &value) noexcept;
 
+    /// @brief The `initial` that a declaration block gives a longhand its shorthand left out.
     /// @note Defined in ValuePool.hpp.
     KRYS_NODISCARD static inline PrimitiveValue &ImplicitInitialValue() noexcept;
 
-#pragma endregion
+    // What it holds.
 
-#pragma region Unit Checks
-
-    // FIXME: Some of these use PrimitiveUnitType() and some use PrimitiveType(). Many that use
-    // PrimitiveUnitType() are likely broken with calc().
-
-    KRYS_NODISCARD bool IsAngle() const noexcept
+    KRYS_NODISCARD bool IsValueId() const noexcept
     {
-      return UnitCategoryForType(PrimitiveType()) == UnitCategory::Angle;
+      return _header.PrimitiveKind == PrimitiveKind::ValueId;
     }
 
-    KRYS_NODISCARD bool IsAttr() const noexcept
+    /// @brief The keyword, or `ValueId::Invalid` if this isn't one.
+    KRYS_NODISCARD css::ValueId ValueId() const noexcept
     {
-      return PrimitiveUnitType() == UnitType::Attr;
+      return IsValueId() ? _payload.ValueId : css::ValueId::Invalid;
     }
 
-    KRYS_NODISCARD bool IsFontIndependentLength() const noexcept
+    KRYS_NODISCARD bool IsPropertyId() const noexcept
     {
-      return IsFontIndependentLength(PrimitiveUnitType());
+      return _header.PrimitiveKind == PrimitiveKind::PropertyId;
     }
 
-    KRYS_NODISCARD bool IsFontRelativeLength() const noexcept
+    /// @brief The property, or `PropertyId::Invalid` if this isn't one.
+    KRYS_NODISCARD css::PropertyId PropertyId() const noexcept
     {
-      return IsFontRelativeLength(PrimitiveUnitType());
+      return IsPropertyId() ? _payload.PropertyId : css::PropertyId::Invalid;
     }
 
-    KRYS_NODISCARD bool IsParentFontRelativeLength() const noexcept
+    KRYS_NODISCARD bool IsString() const noexcept
     {
-      return IsPercentage() || (IsFontRelativeLength() && !IsRootFontRelativeLength());
+      return _header.PrimitiveKind == PrimitiveKind::String;
     }
 
-    KRYS_NODISCARD bool IsRootFontRelativeLength() const noexcept
+    KRYS_NODISCARD bool IsCustomIdent() const noexcept
     {
-      return IsRootFontRelativeLength(PrimitiveUnitType());
+      return _header.PrimitiveKind == PrimitiveKind::CustomIdent;
     }
 
-    KRYS_NODISCARD bool IsQuirkyEms() const noexcept
+    KRYS_NODISCARD bool IsFontFamily() const noexcept
     {
-      return PrimitiveType() == UnitType::QuirkyEm;
+      return _header.PrimitiveKind == PrimitiveKind::FontFamily;
     }
 
-    KRYS_NODISCARD bool IsLength() const noexcept
+    /// @brief The text of a string, custom identifier or font family, or the name of a keyword or property;
+    /// empty for a number or `calc()`.
+    KRYS_NODISCARD CSSOMString StringValue() const noexcept;
+
+    KRYS_NODISCARD bool IsCalc() const noexcept
     {
-      return IsLength(PrimitiveType());
+      return _header.PrimitiveKind == PrimitiveKind::Calc;
     }
+
+    /// @brief The `calc()`, or null if this isn't one.
+    KRYS_NODISCARD const calc::Value *CalcValue() const noexcept
+    {
+      return IsCalc() ? _payload.Calc : nullptr;
+    }
+
+    // Its unit.
+
+    /// @brief The unit of a number, or the canonical unit of what a `calc()` resolves to (`px` for a
+    /// length); `UnitType::Unknown` for the other kinds, and for a `calc()` mixing a percentage with another
+    /// quantity.
+    KRYS_NODISCARD UnitType Unit() const noexcept;
 
     KRYS_NODISCARD bool IsNumber() const noexcept
     {
-      return PrimitiveType() == UnitType::Number;
+      return Unit() == UnitType::Number;
     }
 
     KRYS_NODISCARD bool IsInteger() const noexcept
     {
-      return PrimitiveType() == UnitType::Integer;
+      return Unit() == UnitType::Integer;
     }
 
     KRYS_NODISCARD bool IsNumberOrInteger() const noexcept
@@ -221,896 +160,303 @@ namespace krys::boo::css
 
     KRYS_NODISCARD bool IsPercentage() const noexcept
     {
-      return PrimitiveType() == UnitType::Percentage;
+      return Unit() == UnitType::Percentage;
     }
 
-    KRYS_NODISCARD bool IsPx() const noexcept
+    KRYS_NODISCARD bool IsLength() const noexcept
     {
-      return PrimitiveType() == UnitType::px;
+      return css::IsLength(Unit());
+    }
+
+    KRYS_NODISCARD bool IsAngle() const noexcept
+    {
+      return CategoryForUnitType(Unit()) == Category::Angle;
     }
 
     KRYS_NODISCARD bool IsTime() const noexcept
     {
-      return UnitCategoryForType(PrimitiveType()) == UnitCategory::Time;
-    }
-
-    KRYS_NODISCARD bool IsFrequency() const noexcept
-    {
-      return UnitCategoryForType(PrimitiveType()) == UnitCategory::Frequency;
-    }
-
-    KRYS_NODISCARD bool IsCalculated() const noexcept
-    {
-      return PrimitiveUnitType() == UnitType::Calc;
-    }
-
-    KRYS_NODISCARD bool IsCalculatedPercentageWithLength() const noexcept
-    {
-      return PrimitiveType() == UnitType::CalcPercentageWithLength;
-    }
-
-    KRYS_NODISCARD bool IsDotsPerInch() const noexcept
-    {
-      return PrimitiveType() == UnitType::dpi;
-    }
-
-    KRYS_NODISCARD bool IsDotsPerPixel() const noexcept
-    {
-      return PrimitiveType() == UnitType::dppx;
-    }
-
-    KRYS_NODISCARD bool IsDotsPerCentimeter() const noexcept
-    {
-      return PrimitiveType() == UnitType::dpcm;
-    }
-
-    KRYS_NODISCARD bool IsX() const noexcept
-    {
-      return PrimitiveType() == UnitType::x;
+      return CategoryForUnitType(Unit()) == Category::Time;
     }
 
     KRYS_NODISCARD bool IsResolution() const noexcept
     {
-      return UnitCategoryForType(PrimitiveType()) == UnitCategory::Resolution;
-    }
-
-    KRYS_NODISCARD bool IsViewportPercentageLength() const noexcept
-    {
-      return IsViewportPercentageLength(PrimitiveUnitType());
-    }
-
-    KRYS_NODISCARD bool IsContainerPercentageLength() const noexcept
-    {
-      return IsContainerPercentageLength(PrimitiveUnitType());
+      return CategoryForUnitType(Unit()) == Category::Resolution;
     }
 
     KRYS_NODISCARD bool IsFlex() const noexcept
     {
-      return PrimitiveType() == UnitType::fr;
+      return Unit() == UnitType::fr;
     }
 
-    KRYS_NODISCARD bool ConversionToCanonicalUnitRequiresConversionData() const noexcept;
+    /// @brief Whether this is a `calc()` adding a percentage to a length, such as `calc(50% - 1em)`.
+    KRYS_NODISCARD bool IsCalcPercentageWithLength() const noexcept;
 
-    KRYS_NODISCARD constexpr static bool IsLength(UnitType type) noexcept
+    /// @brief Whether this is a number written in `px`; never a `calc()`.
+    KRYS_NODISCARD bool IsPx() const noexcept
     {
-      return type == UnitType::em || type == UnitType::ex || type == UnitType::px || type == UnitType::cm
-             || type == UnitType::mm || type == UnitType::in || type == UnitType::pt || type == UnitType::pc
-             || type == UnitType::Q || IsFontRelativeLength(type) || IsViewportPercentageLength(type)
-             || IsContainerPercentageLength(type) || type == UnitType::QuirkyEm;
+      return StoredUnit() == UnitType::px;
     }
 
-#pragma endregion
+    /// @brief Whether this is an absolute length, which nothing but zoom affects; a `calc()` is if all its
+    /// lengths are.
+    KRYS_NODISCARD bool IsFontIndependentLength() const noexcept;
 
-#pragma region Keywords, Properties and Strings
+    /// @brief Whether this is a length relative to a font, the root's included; a `calc()` is if any of its
+    /// lengths is.
+    KRYS_NODISCARD bool IsFontRelativeLength() const noexcept;
 
-    KRYS_NODISCARD bool IsValueId() const noexcept
+    /// @brief Whether this depends on the parent's font size: a percentage, or a length relative to the
+    /// element's own font; a `calc()` is if any of its parts is.
+    KRYS_NODISCARD bool IsParentFontRelativeLength() const noexcept;
+
+    /// @brief Whether this is a length relative to the root's font; a `calc()` is if any of its lengths is.
+    KRYS_NODISCARD bool IsRootFontRelativeLength() const noexcept;
+
+    // Its sign, as written. A calc() isn't range-checked when it's parsed, and its sign isn't known until it
+    // is resolved, so these are null for one.
+    // https://www.w3.org/TR/css-values-4/#calc-range
+
+    KRYS_NODISCARD Maybe<bool> IsZero() const noexcept
     {
-      return PrimitiveUnitType() == UnitType::ValueId;
+      return IsCalc() ? Maybe<bool> {} : Maybe<bool> {_payload.Number == 0.0};
     }
 
-    KRYS_NODISCARD css::ValueId ValueId() const noexcept
+    KRYS_NODISCARD Maybe<bool> IsOne() const noexcept
     {
-      return IsValueId() ? _value.ValueId : css::ValueId::Invalid;
+      return IsCalc() ? Maybe<bool> {} : Maybe<bool> {_payload.Number == 1.0};
     }
 
-    KRYS_NODISCARD bool IsPropertyId() const noexcept
+    KRYS_NODISCARD Maybe<bool> IsPositive() const noexcept
     {
-      return PrimitiveUnitType() == UnitType::PropertyId;
+      return IsCalc() ? Maybe<bool> {} : Maybe<bool> {_payload.Number > 0.0};
     }
 
-    KRYS_NODISCARD css::PropertyId PropertyId() const noexcept
+    KRYS_NODISCARD Maybe<bool> IsNegative() const noexcept
     {
-      return IsPropertyId() ? _value.PropertyId : css::PropertyId::Invalid;
+      return IsCalc() ? Maybe<bool> {} : Maybe<bool> {_payload.Number < 0.0};
     }
 
-    KRYS_NODISCARD bool IsString() const noexcept
-    {
-      return PrimitiveUnitType() == UnitType::String;
-    }
+    // Resolving. Each `ResolveAs` function needs the matching quantity check to hold, and converts to that
+    // quantity's canonical unit, or the one given. Results are clamped to @p T's range.
 
-    KRYS_NODISCARD bool IsCustomIdent() const noexcept
-    {
-      return PrimitiveUnitType() == UnitType::CustomIdent;
-    }
-
-    KRYS_NODISCARD CSSOMString CustomIdent() const noexcept
-    {
-      krys_debug_assert(IsCustomIdent());
-      return StringValue();
-    }
-
-    KRYS_NODISCARD bool IsFontFamily() const noexcept
-    {
-      return PrimitiveUnitType() == UnitType::FontFamily;
-    }
-
-    KRYS_NODISCARD CSSOMString StringValue() const noexcept;
-
-#pragma endregion
-
-    KRYS_NODISCARD UnitType PrimitiveType() const noexcept;
-
-    /// @brief Exposed for the deprecated CSSOM. Throws if conversion to `targetUnit` is not allowed.
-    KRYS_NODISCARD ExceptionOr<float> FloatValueDeprecated(UnitType targetUnit) const noexcept;
-
-#pragma region Integer (requires IsInteger())
-
+    /// @pre `IsInteger()`.
     template <typename T = int64>
     KRYS_NODISCARD T ResolveAsInteger(const ToLengthConversionData &conversionData) const noexcept
     {
       krys_debug_assert(IsInteger());
-      return Value<T>(conversionData);
+      return Resolve<T>(conversionData);
     }
 
+    /// @brief The integer as written, or null for a `calc()`.
+    /// @pre `IsInteger()`.
     template <typename T = int64>
-    KRYS_NODISCARD T ResolveAsIntegerNoConversionDataRequired() const noexcept
+    KRYS_NODISCARD Maybe<T> ResolveAsIntegerIfNotCalc() const noexcept
     {
       krys_debug_assert(IsInteger());
-      return ValueNoConversionDataRequired<T>();
+      return ValueIfNotCalc<T>();
     }
 
-    template <typename T = int64>
-    KRYS_NODISCARD T ResolveAsIntegerDeprecated() const noexcept
-    {
-      krys_debug_assert(IsInteger());
-      return ValueDeprecated<T>();
-    }
-
-    template <typename T = int64>
-    KRYS_NODISCARD Maybe<T> ResolveAsIntegerIfNotCalculated() const noexcept
-    {
-      krys_debug_assert(IsInteger());
-      return ValueIfNotCalculated<T>();
-    }
-
-#pragma endregion
-
-#pragma region Number (requires IsNumberOrInteger())
-
+    /// @pre `IsNumberOrInteger()`.
     template <typename T = double>
     KRYS_NODISCARD T ResolveAsNumber(const ToLengthConversionData &conversionData) const noexcept
     {
       krys_debug_assert(IsNumberOrInteger());
-      return Value<T>(UnitType::Number, conversionData);
+      return Resolve<T>(UnitType::Number, conversionData);
     }
 
+    /// @brief The number as written, or null for a `calc()`.
+    /// @pre `IsNumberOrInteger()`.
     template <typename T = double>
-    KRYS_NODISCARD T ResolveAsNumberNoConversionDataRequired() const noexcept
+    KRYS_NODISCARD Maybe<T> ResolveAsNumberIfNotCalc() const noexcept
     {
       krys_debug_assert(IsNumberOrInteger());
-      return ValueNoConversionDataRequired<T>(UnitType::Number);
+      return ValueIfNotCalc<T>();
     }
 
-    template <typename T = double>
-    KRYS_NODISCARD T ResolveAsNumberDeprecated() const noexcept
-    {
-      krys_debug_assert(IsNumberOrInteger());
-      return ValueDeprecated<T>(UnitType::Number);
-    }
-
-    template <typename T = double>
-    KRYS_NODISCARD Maybe<T> ResolveAsNumberIfNotCalculated() const noexcept
-    {
-      krys_debug_assert(IsNumberOrInteger());
-      return ValueIfNotCalculated<T>();
-    }
-
-#pragma endregion
-
-#pragma region Percentage (requires IsPercentage())
-
+    /// @brief The percentage, as 50 for `50%`.
+    /// @pre `IsPercentage()`.
     template <typename T = double>
     KRYS_NODISCARD T ResolveAsPercentage(const ToLengthConversionData &conversionData) const noexcept
     {
       krys_debug_assert(IsPercentage());
-      return Value<T>(conversionData);
+      return Resolve<T>(conversionData);
     }
 
+    /// @pre `IsPercentage()`, and this isn't a `calc()`.
     template <typename T = double>
-    KRYS_NODISCARD T ResolveAsPercentageNoConversionDataRequired() const noexcept
+    KRYS_NODISCARD T ResolveAsPercentageWithoutConversionData() const noexcept
     {
       krys_debug_assert(IsPercentage());
-      return ValueNoConversionDataRequired<T>();
+      return ResolveWithoutConversionData<T>();
     }
 
-    template <typename T = double>
-    KRYS_NODISCARD T ResolveAsPercentageDeprecated() const noexcept
-    {
-      krys_debug_assert(IsPercentage());
-      return ValueDeprecated<T>();
-    }
-
-    template <typename T = double>
-    KRYS_NODISCARD Maybe<T> ResolveAsPercentageIfNotCalculated() const noexcept
-    {
-      krys_debug_assert(IsPercentage());
-      return ValueIfNotCalculated<T>();
-    }
-
-#pragma endregion
-
-#pragma region Angle (requires IsAngle())
-
-    template <AngleUnit Unit, typename T = double>
-    KRYS_NODISCARD constexpr static T ComputeAngle(UnitType type, T angle) noexcept
-    {
-      if constexpr (Unit == AngleUnit::Deg)
-      {
-        switch (type)
-        {
-          case UnitType::deg:  return angle;
-          case UnitType::rad:  return rad2deg(angle);
-          case UnitType::grad: return grad2deg(angle);
-          case UnitType::turn: return turn2deg(angle);
-          default:             krys_debug_assert(false); return 0;
-        }
-      }
-      else if constexpr (Unit == AngleUnit::Rad)
-      {
-        switch (type)
-        {
-          case UnitType::deg:  return deg2rad(angle);
-          case UnitType::rad:  return angle;
-          case UnitType::grad: return grad2rad(angle);
-          case UnitType::turn: return turn2rad(angle);
-          default:             krys_debug_assert(false); return 0;
-        }
-      }
-      else if constexpr (Unit == AngleUnit::Grad)
-      {
-        switch (type)
-        {
-          case UnitType::deg:  return deg2grad(angle);
-          case UnitType::rad:  return rad2grad(angle);
-          case UnitType::grad: return angle;
-          case UnitType::turn: return turn2grad(angle);
-          default:             krys_debug_assert(false); return 0;
-        }
-      }
-      else if constexpr (Unit == AngleUnit::Turn)
-      {
-        switch (type)
-        {
-          case UnitType::deg:  return deg2turn(angle);
-          case UnitType::rad:  return rad2turn(angle);
-          case UnitType::grad: return grad2turn(angle);
-          case UnitType::turn: return angle;
-          default:             krys_debug_assert(false); return 0;
-        }
-      }
-    }
-
-    template <typename T = double, AngleUnit Unit = UnitTraits<AngleUnit>::Canonical>
+    /// @pre `IsAngle()`.
+    template <typename T = double, AngleUnit TUnit = UnitTraits<AngleUnit>::Canonical>
     KRYS_NODISCARD T ResolveAsAngle(const ToLengthConversionData &conversionData) const noexcept
     {
       krys_debug_assert(IsAngle());
-      return ClampTo<T>(ComputeAngle<Unit>(PrimitiveType(), DoubleValue(conversionData)));
+      return ClampTo<T>(ConvertUnit(ResolveDouble(conversionData), Unit(), ToUnitType(TUnit)).value_or(0));
     }
 
-    template <typename T = double, AngleUnit Unit = UnitTraits<AngleUnit>::Canonical>
-    KRYS_NODISCARD T ResolveAsAngleNoConversionDataRequired() const noexcept
-    {
-      krys_debug_assert(IsAngle());
-      return ClampTo<T>(ComputeAngle<Unit>(PrimitiveType(), DoubleValueNoConversionDataRequired()));
-    }
-
-    template <typename T = double, AngleUnit Unit = UnitTraits<AngleUnit>::Canonical>
-    KRYS_NODISCARD T ResolveAsAngleDeprecated() const noexcept
-    {
-      krys_debug_assert(IsAngle());
-      return ClampTo<T>(ComputeAngle<Unit>(PrimitiveType(), DoubleValueDeprecated()));
-    }
-
-#pragma endregion
-
-#pragma region Time (requires IsTime())
-
-    template <TimeUnit Unit, typename T = double>
-    KRYS_NODISCARD constexpr static T ComputeTime(UnitType type, T value) noexcept
-    {
-      if constexpr (Unit == TimeUnit::S)
-      {
-        switch (type)
-        {
-          case UnitType::s:  return value;
-          case UnitType::ms: return value * secsPerMs;
-          default:           krys_debug_assert(false); return 0;
-        }
-      }
-      else if constexpr (Unit == TimeUnit::Ms)
-      {
-        switch (type)
-        {
-          case UnitType::s:  return value / secsPerMs;
-          case UnitType::ms: return value;
-          default:           krys_debug_assert(false); return 0;
-        }
-      }
-    }
-
-    template <typename T = double, TimeUnit Unit = UnitTraits<TimeUnit>::Canonical>
+    /// @pre `IsTime()`.
+    template <typename T = double, TimeUnit TUnit = UnitTraits<TimeUnit>::Canonical>
     KRYS_NODISCARD T ResolveAsTime(const ToLengthConversionData &conversionData) const noexcept
     {
       krys_debug_assert(IsTime());
-      return ClampTo<T>(ComputeTime<Unit>(PrimitiveType(), DoubleValue(conversionData)));
+      return ClampTo<T>(ConvertUnit(ResolveDouble(conversionData), Unit(), ToUnitType(TUnit)).value_or(0));
     }
 
-    template <typename T = double, TimeUnit Unit = UnitTraits<TimeUnit>::Canonical>
-    KRYS_NODISCARD T ResolveAsTimeNoConversionDataRequired() const noexcept
-    {
-      krys_debug_assert(IsTime());
-      return ClampTo<T>(ComputeTime<Unit>(PrimitiveType(), DoubleValueNoConversionDataRequired()));
-    }
-
-#pragma endregion
-
-#pragma region Frequency
-
-    template <FrequencyUnit Unit, typename T = double>
-    KRYS_NODISCARD constexpr static T ComputeFrequency(UnitType type, T value) noexcept
-    {
-      if constexpr (Unit == FrequencyUnit::Hz)
-      {
-        switch (type)
-        {
-          case UnitType::hz:  return value;
-          case UnitType::khz: return value * hertzPerKilohertz;
-          default:            krys_debug_assert(false); return 0;
-        }
-      }
-      else if constexpr (Unit == FrequencyUnit::Khz)
-      {
-        switch (type)
-        {
-          case UnitType::hz:  return value / hertzPerKilohertz;
-          case UnitType::khz: return value;
-          default:            krys_debug_assert(false); return 0;
-        }
-      }
-    }
-
-#pragma endregion
-
-#pragma region Resolution (requires IsResolution())
-
-    template <ResolutionUnit Unit, typename T = double>
-    KRYS_NODISCARD constexpr static T ComputeResolution(UnitType type, T resolution) noexcept
-    {
-      if constexpr (Unit == ResolutionUnit::Dppx)
-      {
-        switch (type)
-        {
-          case UnitType::dppx: return resolution;
-          case UnitType::x:    return resolution * dppxPerX;
-          case UnitType::dpi:  return resolution * dppxPerDpi;
-          case UnitType::dpcm: return resolution * dppxPerDpcm;
-          default:             krys_debug_assert(false); return 0;
-        }
-      }
-      else if constexpr (Unit == ResolutionUnit::X)
-      {
-        switch (type)
-        {
-          case UnitType::dppx: return resolution / dppxPerX;
-          case UnitType::x:    return resolution;
-          case UnitType::dpi:  return resolution * dppxPerDpi / dppxPerX;
-          case UnitType::dpcm: return resolution * dppxPerDpcm / dppxPerX;
-          default:             krys_debug_assert(false); return 0;
-        }
-      }
-      else if constexpr (Unit == ResolutionUnit::Dpi)
-      {
-        switch (type)
-        {
-          case UnitType::dppx: return resolution / dppxPerDpi;
-          case UnitType::x:    return resolution * dppxPerX / dppxPerDpi;
-          case UnitType::dpi:  return resolution;
-          case UnitType::dpcm: return resolution * dppxPerDpcm / dppxPerDpi;
-          default:             krys_debug_assert(false); return 0;
-        }
-      }
-      else if constexpr (Unit == ResolutionUnit::Dpcm)
-      {
-        switch (type)
-        {
-          case UnitType::dppx: return resolution / dppxPerDpcm;
-          case UnitType::x:    return resolution * dppxPerX / dppxPerDpcm;
-          case UnitType::dpi:  return resolution * dppxPerDpi / dppxPerDpcm;
-          case UnitType::dpcm: return resolution;
-          default:             krys_debug_assert(false); return 0;
-        }
-      }
-    }
-
-    template <typename T = double, ResolutionUnit Unit = UnitTraits<ResolutionUnit>::Canonical>
+    /// @pre `IsResolution()`.
+    template <typename T = double, ResolutionUnit TUnit = UnitTraits<ResolutionUnit>::Canonical>
     KRYS_NODISCARD T ResolveAsResolution(const ToLengthConversionData &conversionData) const noexcept
     {
       krys_debug_assert(IsResolution());
-      return ClampTo<T>(ComputeResolution<Unit>(PrimitiveType(), DoubleValue(conversionData)));
+      return ClampTo<T>(ConvertUnit(ResolveDouble(conversionData), Unit(), ToUnitType(TUnit)).value_or(0));
     }
 
-    template <typename T = double, ResolutionUnit Unit = UnitTraits<ResolutionUnit>::Canonical>
-    KRYS_NODISCARD T ResolveAsResolutionNoConversionDataRequired() const noexcept
-    {
-      krys_debug_assert(IsResolution());
-      return ClampTo<T>(ComputeResolution<Unit>(PrimitiveType(), DoubleValueNoConversionDataRequired()));
-    }
-
-    template <typename T = double, ResolutionUnit Unit = UnitTraits<ResolutionUnit>::Canonical>
-    KRYS_NODISCARD T ResolveAsResolutionDeprecated() const noexcept
-    {
-      krys_debug_assert(IsResolution());
-      return ClampTo<T>(ComputeResolution<Unit>(PrimitiveType(), DoubleValueDeprecated()));
-    }
-
-#pragma endregion
-
-#pragma region Flex (requires IsFlex())
-
+    /// @pre `IsFlex()`.
     template <typename T = double>
     KRYS_NODISCARD T ResolveAsFlex(const ToLengthConversionData &conversionData) const noexcept
     {
       krys_debug_assert(IsFlex());
-      return Value<T>(conversionData);
+      return Resolve<T>(conversionData);
     }
 
-    template <typename T = double>
-    KRYS_NODISCARD T ResolveAsFlexNoConversionDataRequired() const noexcept
-    {
-      krys_debug_assert(IsFlex());
-      return ValueNoConversionDataRequired<T>();
-    }
-
-#pragma endregion
-
-#pragma region Length (requires IsLength())
-
-    /// @note Specialised for int64, uint64, int32, uint32, int16, uint16, float, double and LayoutUnit in
-    /// PrimitiveValue.cpp.
+    /// @brief The length in CSS pixels. Integer types take it through `style::RoundForImpreciseConversion`.
+    /// @pre `IsLength()`.
+    /// @note Instantiated in PrimitiveValue.cpp for the 16-, 32- and 64-bit integers, `float`, `double` and
+    /// `LayoutUnit`.
     template <typename T = double>
     KRYS_NODISCARD T ResolveAsLength(const ToLengthConversionData &conversionData) const noexcept;
 
+    /// @pre `IsLength()` with an absolute unit, and this isn't a `calc()`.
     template <typename T = double>
-    KRYS_NODISCARD T ResolveAsLengthNoConversionDataRequired() const noexcept
+    KRYS_NODISCARD T ResolveAsLengthWithoutConversionData() const noexcept
     {
       krys_debug_assert(IsLength());
-      return ValueNoConversionDataRequired<T>(UnitType::px);
+      return ResolveWithoutConversionData<T>(UnitType::px);
     }
 
+    /// @brief The number in its own unit, unconverted.
     template <typename T = double>
-    KRYS_NODISCARD T ResolveAsLengthDeprecated() const noexcept
+    KRYS_NODISCARD T Resolve(const ToLengthConversionData &conversionData) const noexcept
     {
-      krys_debug_assert(IsLength());
-      return ValueDeprecated<T>(UnitType::px);
+      return ClampTo<T>(ResolveDouble(conversionData));
     }
 
-#pragma endregion
-
-#pragma region Non-converting
-
+    /// @brief The number in its own unit, unconverted.
+    /// @pre This isn't a `calc()`.
     template <typename T = double>
-    KRYS_NODISCARD T Value(const ToLengthConversionData &conversionData) const noexcept
+    KRYS_NODISCARD T ResolveWithoutConversionData() const noexcept
     {
-      return ClampTo<T>(DoubleValue(conversionData));
+      return ClampTo<T>(ResolveDoubleWithoutConversionData());
     }
 
-    template <typename T = double>
-    KRYS_NODISCARD T ValueNoConversionDataRequired() const noexcept
-    {
-      return ClampTo<T>(DoubleValueNoConversionDataRequired());
-    }
-
-    template <typename T = double>
-    KRYS_NODISCARD Maybe<T> ValueIfNotCalculated() const noexcept
-    {
-      if (IsCalculated())
-      {
-        return null;
-      }
-
-      return static_cast<T>(_value.Number);
-    }
-
-#pragma endregion
-
-#pragma region Divides value by 100 if percentage
-
+    /// @brief A number, or a percentage as a fraction (0.5 for `50%`).
+    /// @pre `IsNumberOrInteger()` or `IsPercentage()`.
     template <typename T = double>
     KRYS_NODISCARD
-    T ValueDividingBy100IfPercentage(const ToLengthConversionData &conversionData) const noexcept
+    T ResolveDividingBy100IfPercentage(const ToLengthConversionData &conversionData) const noexcept
     {
-      return ClampTo<T>(DoubleValueDividingBy100IfPercentage(conversionData));
+      return ClampTo<T>(ResolveDoubleDividingBy100IfPercentage(conversionData));
     }
 
-    template <typename T = double>
-    KRYS_NODISCARD T ValueDividingBy100IfPercentageNoConversionDataRequired() const noexcept
-    {
-      return ClampTo<T>(DoubleValueDividingBy100IfPercentageNoConversionDataRequired());
-    }
-
-    template <typename T = double>
-    KRYS_NODISCARD T ValueDividingBy100IfPercentageDeprecated() const noexcept
-    {
-      return ClampTo<T>(DoubleValueDividingBy100IfPercentageDeprecated());
-    }
-
-#pragma endregion
-
-    // These return null for calc, for which range checking is not done at parse time:
-    // <https://www.w3.org/TR/css3-values/#calc-range>.
-    KRYS_NODISCARD Maybe<bool> IsZero() const noexcept;
-
-    KRYS_NODISCARD Maybe<bool> IsOne() const noexcept;
-
-    KRYS_NODISCARD Maybe<bool> IsPositive() const noexcept;
-
-    KRYS_NODISCARD Maybe<bool> IsNegative() const noexcept;
-
-    KRYS_NODISCARD const calc::Value *CSSCalcValue() const noexcept
-    {
-      return IsCalculated() ? _value.Calc : nullptr;
-    }
-
-    KRYS_NODISCARD RefPtr<const calc::Value> ProtectedCSSCalcValue() const noexcept;
-
-    KRYS_NODISCARD const AttrValue *CSSAttrValue() const noexcept
-    {
-      return IsAttr() ? _value.Attr : nullptr;
-    }
-
-    KRYS_NODISCARD RefPtr<const AttrValue> ProtectedCSSAttrValue() const noexcept
-    {
-      return ShareRefPtr(CSSAttrValue());
-    }
+    // The Value operations.
 
     KRYS_NODISCARD CSSOMString CustomCSSText(const SerialisationContext &context) const noexcept;
 
     KRYS_NODISCARD bool Equals(const PrimitiveValue &other) const noexcept;
 
-    KRYS_NODISCARD constexpr static CSSOMStringView UnitTypeString(UnitType unitType) noexcept;
-
     void CollectComputedStyleDependencies(css::ComputedStyleDependencies &dependencies) const noexcept;
 
   private:
-    KRYS_NODISCARD UnitType PrimitiveUnitType() const noexcept
+    /// @brief Selects the constructor of `ImplicitInitialValue()`.
+    struct CreateImplicitInitialValueTag
     {
-      return _unit;
+    };
+
+    constexpr static CreateImplicitInitialValueTag CreateImplicitInitialValue {};
+
+    PrimitiveValue(double value, UnitType unit) noexcept;
+
+    explicit PrimitiveValue(css::PropertyId property) noexcept;
+
+    /// @pre @p kind is `String`, `CustomIdent` or `FontFamily`.
+    PrimitiveValue(CSSOMStringAtom value, PrimitiveKind kind) noexcept;
+
+    explicit PrimitiveValue(Ref<calc::Value> value) noexcept;
+
+    PrimitiveValue(StaticValueTag, css::ValueId keyword) noexcept;
+
+    PrimitiveValue(StaticValueTag, double value, UnitType unit) noexcept;
+
+    PrimitiveValue(StaticValueTag, CreateImplicitInitialValueTag) noexcept;
+
+    /// @brief The unit written: a number's, and `Unknown` for every other kind, `calc()` included.
+    KRYS_NODISCARD UnitType StoredUnit() const noexcept
+    {
+      return _header.Unit;
     }
 
-    void SetPrimitiveUnitType(UnitType type) noexcept
+    KRYS_NODISCARD double ResolveDouble(const ToLengthConversionData &conversionData) const noexcept;
+
+    /// @brief The number converted to @p targetUnit, or 0 if it can't be.
+    KRYS_NODISCARD double ResolveDouble(UnitType targetUnit,
+                                        const ToLengthConversionData &conversionData) const noexcept;
+
+    KRYS_NODISCARD double ResolveDoubleWithoutConversionData() const noexcept
     {
-      _unit = type;
+      krys_debug_assert(!IsCalc());
+      return _payload.Number;
     }
 
-#pragma region Length converting
+    /// @brief The number converted to @p targetUnit, or 0 if it can't be.
+    KRYS_NODISCARD double ResolveDoubleWithoutConversionData(UnitType targetUnit) const noexcept;
+
+    KRYS_NODISCARD double
+      ResolveDoubleDividingBy100IfPercentage(const ToLengthConversionData &conversionData) const noexcept;
 
     KRYS_NODISCARD double ResolveAsLengthDouble(const ToLengthConversionData &conversionData) const noexcept;
 
-#pragma endregion
-
-#pragma region Arbitrarily converting
-
-    KRYS_NODISCARD double DoubleValue(UnitType targetUnit, const ToLengthConversionData &) const noexcept;
-
-    KRYS_NODISCARD double DoubleValueNoConversionDataRequired(UnitType targetUnit) const noexcept;
-
-    KRYS_NODISCARD double DoubleValueDeprecated(UnitType targetUnit) const noexcept;
-
     template <typename T = double>
-    KRYS_NODISCARD T Value(UnitType targetUnit, const ToLengthConversionData &conversionData) const noexcept
+    KRYS_NODISCARD T Resolve(UnitType targetUnit, const ToLengthConversionData &conversionData) const noexcept
     {
-      return ClampTo<T>(DoubleValue(targetUnit, conversionData));
+      return ClampTo<T>(ResolveDouble(targetUnit, conversionData));
     }
 
     template <typename T = double>
-    KRYS_NODISCARD T ValueNoConversionDataRequired(UnitType targetUnit) const noexcept
+    KRYS_NODISCARD T ResolveWithoutConversionData(UnitType targetUnit) const noexcept
     {
-      return ClampTo<T>(DoubleValueNoConversionDataRequired(targetUnit));
+      return ClampTo<T>(ResolveDoubleWithoutConversionData(targetUnit));
     }
 
     template <typename T = double>
-    KRYS_NODISCARD T ValueDeprecated(UnitType targetUnit) const noexcept
+    KRYS_NODISCARD Maybe<T> ValueIfNotCalc() const noexcept
     {
-      return ClampTo<T>(DoubleValueDeprecated(targetUnit));
+      return IsCalc() ? Maybe<T> {} : Maybe<T> {static_cast<T>(_payload.Number)};
     }
 
-#pragma endregion
-
-#pragma region Non-converting
-
-    KRYS_NODISCARD double DoubleValue(const ToLengthConversionData &) const noexcept;
-
-    KRYS_NODISCARD double DoubleValueNoConversionDataRequired() const noexcept
+    /// @brief The text of a string, custom identifier or font family.
+    KRYS_NODISCARD utf8_stringview StringView() const noexcept
     {
-      krys_debug_assert(!IsCalculated());
-      return _value.Number;
+      return _payload.String->View();
     }
 
-    KRYS_NODISCARD double DoubleValueDeprecated() const noexcept;
-
-    KRYS_NODISCARD double DoubleValueDividingBy100IfPercentage(const ToLengthConversionData &) const noexcept;
-
-    KRYS_NODISCARD double DoubleValueDividingBy100IfPercentageNoConversionDataRequired() const noexcept;
-
-    KRYS_NODISCARD double DoubleValueDividingBy100IfPercentageDeprecated() const noexcept;
-
-    template <typename T = double>
-    KRYS_NODISCARD T ValueDeprecated() const noexcept
-    {
-      return ClampTo<T>(DoubleValueDeprecated());
-    }
-
-#pragma endregion
-
-    KRYS_NODISCARD constexpr static Maybe<double>
-      ConversionToCanonicalUnitsScaleFactor(UnitType unitType) noexcept;
-
-    KRYS_NODISCARD Maybe<double> DoubleValueInternal(UnitType targetUnit,
-                                                     const ToLengthConversionData &) const noexcept;
-
-    KRYS_NODISCARD Maybe<double> DoubleValueInternalDeprecated(UnitType targetUnit) const noexcept;
+    KRYS_NODISCARD CSSOMString SerialiseNumber() const noexcept;
 
     KRYS_NODISCARD bool AddDerivedHash(size_t &seed) const noexcept;
-
-    KRYS_NODISCARD CSSOMString SerialiseInternal(const SerialisationContext &) const noexcept;
-
-    KRYS_NODISCARD CSSOMString FormatNumberValue(CSSOMStringView suffix) const noexcept;
-
-    KRYS_NODISCARD CSSOMString FormatIntegerValue(CSSOMStringView suffix) const noexcept;
-
-  public:
-    KRYS_NODISCARD constexpr static bool IsFontIndependentLength(UnitType type) noexcept
-    {
-      return type == UnitType::px || type == UnitType::cm || type == UnitType::mm || type == UnitType::in
-             || type == UnitType::pt || type == UnitType::pc;
-    }
-
-    KRYS_NODISCARD constexpr static bool IsRootFontRelativeLength(UnitType type) noexcept
-    {
-      return type == UnitType::rcap || type == UnitType::rch || type == UnitType::rem || type == UnitType::rex
-             || type == UnitType::ric || type == UnitType::rlh;
-    }
-
-    KRYS_NODISCARD constexpr static bool IsFontRelativeLength(UnitType type) noexcept
-    {
-      return type == UnitType::em || type == UnitType::ex || type == UnitType::lh || type == UnitType::cap
-             || type == UnitType::ch || type == UnitType::ic || type == UnitType::QuirkyEm
-             || IsRootFontRelativeLength(type);
-    }
-
-    KRYS_NODISCARD constexpr static bool IsContainerPercentageLength(UnitType type) noexcept
-    {
-      return type == UnitType::cqw || type == UnitType::cqh || type == UnitType::cqi || type == UnitType::cqb
-             || type == UnitType::cqmin || type == UnitType::cqmax;
-    }
-
-    KRYS_NODISCARD constexpr static bool IsViewportPercentageLength(UnitType type) noexcept
-    {
-      return type >= UnitType::FirstViewportCSSUnitType && type <= UnitType::LastViewportCSSUnitType;
-    }
   };
-
-  constexpr CSSOMStringView PrimitiveValue::UnitTypeString(UnitType unitType) noexcept
-  {
-    switch (unitType)
-    {
-      case UnitType::cap:                      return u8"cap";
-      case UnitType::ch:                       return u8"ch";
-      case UnitType::cm:                       return u8"cm";
-      case UnitType::cqb:                      return u8"cqb";
-      case UnitType::cqh:                      return u8"cqh";
-      case UnitType::cqi:                      return u8"cqi";
-      case UnitType::cqmax:                    return u8"cqmax";
-      case UnitType::cqmin:                    return u8"cqmin";
-      case UnitType::cqw:                      return u8"cqw";
-      case UnitType::deg:                      return u8"deg";
-      case UnitType::dpcm:                     return u8"dpcm";
-      case UnitType::dpi:                      return u8"dpi";
-      case UnitType::dppx:                     return u8"dppx";
-      case UnitType::dvb:                      return u8"dvb";
-      case UnitType::dvh:                      return u8"dvh";
-      case UnitType::dvi:                      return u8"dvi";
-      case UnitType::dvmax:                    return u8"dvmax";
-      case UnitType::dvmin:                    return u8"dvmin";
-      case UnitType::dvw:                      return u8"dvw";
-      case UnitType::em:                       return u8"em";
-      case UnitType::ex:                       return u8"ex";
-      case UnitType::fr:                       return u8"fr";
-      case UnitType::grad:                     return u8"grad";
-      case UnitType::hz:                       return u8"hz";
-      case UnitType::ic:                       return u8"ic";
-      case UnitType::in:                       return u8"in";
-      case UnitType::khz:                      return u8"khz";
-      case UnitType::lh:                       return u8"lh";
-      case UnitType::lvb:                      return u8"lvb";
-      case UnitType::lvh:                      return u8"lvh";
-      case UnitType::lvi:                      return u8"lvi";
-      case UnitType::lvmax:                    return u8"lvmax";
-      case UnitType::lvmin:                    return u8"lvmin";
-      case UnitType::lvw:                      return u8"lvw";
-      case UnitType::mm:                       return u8"mm";
-      case UnitType::ms:                       return u8"ms";
-      case UnitType::pc:                       return u8"pc";
-      case UnitType::Percentage:               return u8"%";
-      case UnitType::pt:                       return u8"pt";
-      case UnitType::px:                       return u8"px";
-      case UnitType::Q:                        return u8"q";
-      case UnitType::rad:                      return u8"rad";
-      case UnitType::rcap:                     return u8"rcap";
-      case UnitType::rch:                      return u8"rch";
-      case UnitType::rem:                      return u8"rem";
-      case UnitType::rex:                      return u8"rex";
-      case UnitType::ric:                      return u8"ric";
-      case UnitType::rlh:                      return u8"rlh";
-      case UnitType::s:                        return u8"s";
-      case UnitType::svb:                      return u8"svb";
-      case UnitType::svh:                      return u8"svh";
-      case UnitType::svi:                      return u8"svi";
-      case UnitType::svmax:                    return u8"svmax";
-      case UnitType::svmin:                    return u8"svmin";
-      case UnitType::svw:                      return u8"svw";
-      case UnitType::turn:                     return u8"turn";
-      case UnitType::vb:                       return u8"vb";
-      case UnitType::vh:                       return u8"vh";
-      case UnitType::vi:                       return u8"vi";
-      case UnitType::vmax:                     return u8"vmax";
-      case UnitType::vmin:                     return u8"vmin";
-      case UnitType::vw:                       return u8"vw";
-      case UnitType::x:                        return u8"x";
-
-      case UnitType::Attr:
-      case UnitType::Calc:
-      case UnitType::CalcPercentageWithAngle:
-      case UnitType::CalcPercentageWithLength:
-      case UnitType::Dimension:
-      case UnitType::FontFamily:
-      case UnitType::Ident:
-      case UnitType::Integer:
-      case UnitType::Number:
-      case UnitType::PropertyId:
-      case UnitType::QuirkyEm:
-      case UnitType::String:
-      case UnitType::Unknown:
-      case UnitType::ValueId:
-      case UnitType::CustomIdent:              return u8"";
-    }
-
-    krys_debug_assert(false);
-    return u8"";
-  }
-
-  constexpr Maybe<double> PrimitiveValue::ConversionToCanonicalUnitsScaleFactor(UnitType unitType) noexcept
-  {
-    // FIXME: the switch can be replaced by an array of scale factors.
-    switch (unitType)
-    {
-      // These are "canonical" units in their respective categories.
-      case UnitType::px:
-      case UnitType::deg:
-      case UnitType::s:
-      case UnitType::hz:
-      case UnitType::dppx: return 1.0;
-
-      case UnitType::x:    return dppxPerX;
-      case UnitType::cm:   return pxPerCm;
-      case UnitType::dpcm: return dppxPerDpcm;
-      case UnitType::mm:   return pxPerMm;
-      case UnitType::Q:    return pxPerQ;
-      case UnitType::in:   return pxPerInch;
-      case UnitType::dpi:  return dppxPerDpi;
-      case UnitType::pt:   return pxPerPt;
-      case UnitType::pc:   return pxPerPc;
-      case UnitType::rad:  return degreesPerRadianDouble;
-      case UnitType::grad: return degreesPerGradientDouble;
-      case UnitType::turn: return degreesPerTurnDouble;
-      case UnitType::ms:   return secsPerMs;
-      case UnitType::khz:  return hertzPerKilohertz;
-
-      default:             return null;
-    }
-  }
 }
 
 KRYS_SPECIALIZE_TYPE_CAST_TRAITS_BEGIN(krys::boo::css::PrimitiveValue)
   KRYS_NODISCARD static bool IsType(const krys::boo::css::Value &value) noexcept
   {
-    return value.IsPrimitiveValue();
+    return value.Type() == krys::boo::css::ValueType::Primitive;
   }
 KRYS_SPECIALIZE_TYPE_CAST_TRAITS_END()
 
 namespace krys::boo::css
 {
-#pragma region ValueId helpers
-
-  KRYS_NODISCARD inline ValueId GetValueId(const PrimitiveValue &value) noexcept
-  {
-    return value.ValueId();
-  }
-
-  KRYS_NODISCARD inline ValueId GetValueId(const PrimitiveValue *value) noexcept
-  {
-    return value ? GetValueId(*value) : ValueId::Invalid;
-  }
-
-  KRYS_NODISCARD inline ValueId GetValueId(const Value &value) noexcept
-  {
-    auto *primitiveValue = DynamicDowncast<PrimitiveValue>(value);
-    return primitiveValue ? GetValueId(*primitiveValue) : ValueId::Invalid;
-  }
-
-  KRYS_NODISCARD inline ValueId GetValueId(const Value *value) noexcept
-  {
-    return value ? GetValueId(*value) : ValueId::Invalid;
-  }
-
-  KRYS_NODISCARD inline bool IsValueId(const PrimitiveValue &value, ValueId id) noexcept
-  {
-    return GetValueId(value) == id;
-  }
-
-  KRYS_NODISCARD inline bool IsValueId(const PrimitiveValue *value, ValueId id) noexcept
-  {
-    return GetValueId(value) == id;
-  }
-
-  KRYS_NODISCARD inline bool IsValueId(const RefPtr<PrimitiveValue> &value, ValueId id) noexcept
-  {
-    return GetValueId(value.get()) == id;
-  }
-
-  KRYS_NODISCARD inline bool IsValueId(const Ref<PrimitiveValue> &value, ValueId id) noexcept
-  {
-    return GetValueId(value.get()) == id;
-  }
-
-  KRYS_NODISCARD inline bool IsValueId(const Value &value, ValueId id) noexcept
-  {
-    return GetValueId(value) == id;
-  }
-
-  KRYS_NODISCARD inline bool IsValueId(const Value *value, ValueId id) noexcept
-  {
-    return GetValueId(value) == id;
-  }
-
-  KRYS_NODISCARD inline bool IsValueId(const RefPtr<Value> &value, ValueId id) noexcept
-  {
-    return IsValueId(value.get(), id);
-  }
-
-  KRYS_NODISCARD inline bool IsValueId(const Ref<Value> &value, ValueId id) noexcept
-  {
-    return IsValueId(value.get(), id);
-  }
-
-  KRYS_NODISCARD inline bool IsCustomIdentValue(const Value &value) noexcept
-  {
-    auto *primitiveValue = DynamicDowncast<PrimitiveValue>(value);
-    return primitiveValue && primitiveValue->IsCustomIdent();
-  }
-
-#pragma endregion
-
 #pragma region Value inline definitions
 
   inline bool Value::IsValueId() const noexcept
@@ -1129,42 +475,6 @@ namespace krys::boo::css
   {
     auto *value = DynamicDowncast<PrimitiveValue>(*this);
     return value && value->IsCustomIdent();
-  }
-
-  inline CSSOMString Value::CustomIdent() const noexcept
-  {
-    krys_debug_assert(IsCustomIdent());
-    return Downcast<PrimitiveValue>(*this).StringValue();
-  }
-
-  inline bool Value::IsString() const noexcept
-  {
-    auto *value = DynamicDowncast<PrimitiveValue>(*this);
-    return value && value->IsString();
-  }
-
-  inline CSSOMString Value::String() const noexcept
-  {
-    krys_debug_assert(IsString());
-    return Downcast<PrimitiveValue>(*this).StringValue();
-  }
-
-  inline bool Value::IsInteger() const noexcept
-  {
-    auto *value = DynamicDowncast<PrimitiveValue>(*this);
-    return value && value->IsInteger();
-  }
-
-  inline int64 Value::Integer(const ToLengthConversionData &conversionData) const noexcept
-  {
-    krys_debug_assert(IsInteger());
-    return Downcast<PrimitiveValue>(*this).ResolveAsInteger(conversionData);
-  }
-
-  inline int64 Value::IntegerDeprecated() const noexcept
-  {
-    krys_debug_assert(IsInteger());
-    return Downcast<PrimitiveValue>(*this).ResolveAsIntegerDeprecated();
   }
 
 #pragma endregion

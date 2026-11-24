@@ -75,7 +75,7 @@ namespace krys::boo::style
         : Element(CreateWeakPtr(&element)), UnadjustedStyle(krys::move(unadjustedStyle)),
           InlineStyle(ShareRef(inlineStyle))
     {
-      OriginalInlineProperties.reserve(inlineStyle.PropertyCount());
+      OriginalInlineProperties.reserve(inlineStyle.size());
       for (auto property : inlineStyle)
       {
         OriginalInlineProperties.push_back(
@@ -104,7 +104,7 @@ namespace krys::boo::style
     // require resetting the removed property to initial value in the style builder.
 
     auto size = entry.OriginalInlineProperties.size();
-    if (size != inlineStyle.PropertyCount())
+    if (size != inlineStyle.size())
     {
       return false;
     }

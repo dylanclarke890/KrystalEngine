@@ -30,6 +30,7 @@
 #include "Krystal.Booey/Style/Builder/Builder.hpp"
 #include "Krystal.Booey/CSS/Properties/Property.hpp"
 #include "Krystal.Booey/CSS/Properties/PropertyParser.hpp"
+#include "Krystal.Booey/CSS/Properties/PropertyQueries.hpp"
 #include "Krystal.Booey/CSS/Properties/RegisteredCustomProperty.hpp"
 #include "Krystal.Booey/CSS/Values/ComputedStyleDependencies.hpp"
 #include "Krystal.Booey/CSS/Values/CustomPropertyValue.hpp"
@@ -364,9 +365,9 @@ namespace krys::boo::style
     valueToApply = ResolveVariableReferences(id, *valueToApply);
     auto &style = _state->Style();
 
-    if (css::Property::IsDirectionAwareProperty(id))
+    if (css::IsLogicalPropertyGroupLogicalProperty(id))
     {
-      auto newId = css::Property::ResolveDirectionAwareProperty(id, style.GetWritingMode());
+      auto newId = css::ResolveDirectionAwareProperty(id, style.GetWritingMode());
       krys_debug_assert(newId != id);
       return ApplyProperty(newId, *valueToApply, cascadeOrigin);
     }
@@ -421,7 +422,7 @@ namespace krys::boo::style
 
     auto isInheritedProperty = [&]
     {
-      return css::Property::IsInheritedProperty(id);
+      return css::IsInheritedProperty(id);
     };
 
     auto unsetValueType = [&]
@@ -592,10 +593,11 @@ namespace krys::boo::style
       return ShareRef(value);
     }
 
-    const auto *result = _state->Style().Appearance() == StyleAppearance::Base
-                             || _state->Style().Appearance() == StyleAppearance::BaseSelect
-                           ? functionValue->Item(1)
-                           : functionValue->Item(0);
+    auto index = _state->Style().Appearance() == StyleAppearance::Base
+                     || _state->Style().Appearance() == StyleAppearance::BaseSelect
+                   ? 1u
+                   : 0u;
+    const auto *result = index < functionValue->size() ? &(*functionValue)[index] : nullptr;
 
     if (!result)
     {

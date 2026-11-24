@@ -1,23 +1,4 @@
-﻿/*
- * Copyright (C) 2010 Nokia Corporation and/or its subsidiary(-ies)
- *
- *  This library is free software; you can redistribute it and/or
- *  modify it under the terms of the GNU Library General Public
- *  License as published by the Free Software Foundation; either
- *  version 2 of the License, or (at your option) any later version.
- *
- *  This library is distributed in the hope that it will be useful,
- *  but WITHOUT ANY WARRANTY; without even the implied warranty of
- *  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU
- *  Library General Public License for more details.
- *
- *  You should have received a copy of the GNU Library General Public License
- *  along with this library; see the file COPYING.LIB.  If not, write to
- *  the Free Software Foundation, Inc., 51 Franklin Street, Fifth Floor,
- *  Boston, MA 02110-1301, USA.
- */
-
-#include "Krystal.Booey/CSS/Queries/MediaQueryMatcher.hpp"
+﻿#include "Krystal.Booey/CSS/Queries/MediaQueryMatcher.hpp"
 #include "Krystal.Booey/CSS/CSSOM/MediaQueryList.hpp"
 #include "Krystal.Booey/CSS/Queries/MediaQueryEvaluator.hpp"
 #include "Krystal.Booey/CSS/Queries/MediaQueryParser.hpp"
@@ -28,7 +9,6 @@
 #include "Krystal.Booey/Style/ResolvedStyle.hpp"
 #include "Krystal.Booey/Style/Resolver.hpp"
 #include "Krystal.Booey/Style/Scope/Scope.hpp"
-#include "Krystal.Core/Assert.hpp"
 #include <algorithm>
 #include <utility>
 
@@ -48,43 +28,68 @@ namespace krys::boo::css
   void MediaQueryMatcher::DocumentDestroyed() noexcept
   {
     _document = nullptr;
-    auto mediaQueryLists = std::exchange(_mediaQueryLists, {});
-    for (auto &mediaQueryList : mediaQueryLists)
+    for (auto &list : std::exchange(_mediaQueryLists, {}))
     {
-      if (mediaQueryList)
+      if (list)
       {
-        mediaQueryList->DetachFromMatcher();
+        list->DetachFromMatcher();
       }
     }
   }
 
-  CSSOMStringAtom MediaQueryMatcher::MediaType() const noexcept
+  void MediaQueryMatcher::AddMediaQueryList(MediaQueryList &list) noexcept
   {
-    if (!_document || !_document->Frame() || !_document->Frame()->View())
-    {
-      return null;
-    }
-
-    return _document->Frame()->View()->MediaType();
+    krys_debug_assert(
+      std::ranges::none_of(_mediaQueryLists, [&](const auto &added) { return added.get() == &list; }));
+    _mediaQueryLists.push_back(CreateWeakPtr(&list));
   }
 
-  UniquePtr<RenderStyle> MediaQueryMatcher::DocumentElementUserAgentStyle() const noexcept
+  void MediaQueryMatcher::RemoveMediaQueryList(MediaQueryList &list) noexcept
   {
-    if (!_document || !_document->Frame())
+    auto found =
+      std::ranges::find_if(_mediaQueryLists, [&](const auto &added) { return added.get() == &list; });
+    if (found != _mediaQueryLists.end())
+    {
+      _mediaQueryLists.erase(found);
+    }
+  }
+
+  RefPtr<MediaQueryList> MediaQueryMatcher::MatchMedia(CSSOMStringView query) noexcept
+  {
+    if (!_document)
     {
       return nullptr;
     }
+    auto queries = mq::MediaQueryParser::Parse(query, _document->CssParserContext());
+    bool matches = Evaluate(queries);
+    return MediaQueryList::Create(*this, krys::move(queries), matches);
+  }
 
-    if (!_document->DocumentElement())
+  void MediaQueryMatcher::EvaluateAll() noexcept
+  {
+    krys_debug_assert(_document);
+    ++_evaluationRound;
+
+    auto style = DocumentElementUserAgentStyle();
+    if (!style)
     {
-      return nullptr;
+      return;
     }
+    mq::MediaQueryEvaluator evaluator {MediaType(), *_document, style.get()};
 
-    return _document->StyleScope()
-      .GetResolver()
-      .StyleForElement(*_document->DocumentElement(), {_document->InitialContainingBlockStyle()},
-                       RuleMatchingBehavior::MatchOnlyUserAgentRules)
-      .Style;
+    // A change listener can add or remove lists, or destroy the document.
+    auto lists = _mediaQueryLists;
+    for (auto &weakList : lists)
+    {
+      if (auto list = ShareRefPtr(weakList.get()))
+      {
+        list->Evaluate(evaluator);
+        if (!_document)
+        {
+          return;
+        }
+      }
+    }
   }
 
   bool MediaQueryMatcher::Evaluate(const mq::MediaQueryList &queries) const noexcept
@@ -97,60 +102,25 @@ namespace krys::boo::css
     return mq::MediaQueryEvaluator {MediaType(), *_document, style.get()}.Evaluate(queries);
   }
 
-  void MediaQueryMatcher::AddMediaQueryList(MediaQueryList &list) noexcept
+  CSSOMStringAtom MediaQueryMatcher::MediaType() const noexcept
   {
-    krys_debug_assert(std::ranges::none_of(_mediaQueryLists, [&](const WeakPtr<MediaQueryList> &existing)
-                                           { return existing.get() == &list; }));
-    _mediaQueryLists.push_back(CreateWeakPtr(&list));
-  }
-
-  void MediaQueryMatcher::RemoveMediaQueryList(MediaQueryList &list) noexcept
-  {
-    auto it = std::ranges::find_if(_mediaQueryLists, [&](const WeakPtr<MediaQueryList> &existing)
-                                   { return existing.get() == &list; });
-    if (it != _mediaQueryLists.end())
+    if (!_document || !_document->Frame() || !_document->Frame()->View())
     {
-      _mediaQueryLists.erase(it);
+      return null;
     }
+    return _document->Frame()->View()->MediaType();
   }
 
-  RefPtr<MediaQueryList> MediaQueryMatcher::MatchMedia(CSSOMStringView query) noexcept
+  UniquePtr<RenderStyle> MediaQueryMatcher::DocumentElementUserAgentStyle() const noexcept
   {
-    if (!_document)
+    if (!_document || !_document->Frame() || !_document->DocumentElement())
     {
       return nullptr;
     }
-
-    auto queries = mq::MediaQueryParser::Parse(query, _document->CssParserContext());
-    bool matches = Evaluate(queries);
-    return MediaQueryList::Create(*this, krys::move(queries), matches);
-  }
-
-  void MediaQueryMatcher::EvaluateAll(EventMode eventMode) noexcept
-  {
-    krys_debug_assert(_document);
-
-    ++_evaluationRound;
-
-    auto style = DocumentElementUserAgentStyle();
-    if (!style)
-    {
-      return;
-    }
-
-    mq::MediaQueryEvaluator evaluator {MediaType(), *_document, style.get()};
-
-    auto mediaQueryLists = _mediaQueryLists;
-    for (auto &list : mediaQueryLists)
-    {
-      if (auto protectedList = ShareRefPtr(list.get()))
-      {
-        protectedList->Evaluate(evaluator, eventMode);
-        if (!_document)
-        {
-          break;
-        }
-      }
-    }
+    return _document->StyleScope()
+      .GetResolver()
+      .StyleForElement(*_document->DocumentElement(), {_document->InitialContainingBlockStyle()},
+                       RuleMatchingBehavior::MatchOnlyUserAgentRules)
+      .Style;
   }
 }

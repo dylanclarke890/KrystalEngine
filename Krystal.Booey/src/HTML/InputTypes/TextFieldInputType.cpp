@@ -250,11 +250,11 @@ namespace krys::boo::html
       return ShouldCallBaseEventHandler::Yes;
     }
     // The suggestion list's keys go to it.
-    auto key = event.KeyIdentifier();
+    auto key = event.Key();
     if (auto picker = _suggestionPicker;
-        picker && (key == u8"Enter" || key == u8"Up" || key == u8"Down" || key == u8"U+001B"))
+        picker && (key == u8"Enter" || key == u8"ArrowUp" || key == u8"ArrowDown" || key == u8"Escape"))
     {
-      picker->HandleKeydownWithIdentifier(key);
+      picker->HandleKeyDown(key);
       event.SetDefaultHandled();
     }
     if (element->NodeDocument().Frame()
@@ -277,12 +277,12 @@ namespace krys::boo::html
     {
       return;
     }
-    auto key = event.KeyIdentifier();
-    if (key == u8"Up")
+    auto key = event.Key();
+    if (key == u8"ArrowUp")
     {
       StepUpFromRenderer(1);
     }
-    else if (key == u8"Down")
+    else if (key == u8"ArrowDown")
     {
       StepUpFromRenderer(-1);
     }

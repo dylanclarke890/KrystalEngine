@@ -1,28 +1,4 @@
-﻿/*
- * Copyright (C) 1999 Lars Knoll (knoll@kde.org)
- *           (C) 1999 Antti Koivisto (koivisto@kde.org)
- *           (C) 2001 Peter Kelly (pmk@post.com)
- *           (C) 2001 Dirk Mueller (mueller@kde.org)
- * Copyright (C) 2003-2018 Apple Inc. All rights reserved.
- *
- * This library is free software; you can redistribute it and/or
- * modify it under the terms of the GNU Library General Public
- * License as published by the Free Software Foundation; either
- * version 2 of the License, or (at your option) any later version.
- *
- * This library is distributed in the hope that it will be useful,
- * but WITHOUT ANY WARRANTY; without even the implied warranty of
- * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU
- * Library General Public License for more details.
- *
- * You should have received a copy of the GNU Library General Public License
- * along with this library; see the file COPYING.LIB.  If not, write to
- * the Free Software Foundation, Inc., 51 Franklin Street, Fifth Floor,
- * Boston, MA 02110-1301, USA.
- *
- */
-
-#pragma once
+﻿#pragma once
 
 #include "Krystal.Booey/CSS/Properties/Types/IsImportant.hpp"
 #include "Krystal.Booey/CSS/Types/CSSOMString.hpp"
@@ -35,7 +11,6 @@ namespace krys::boo::css
   class MutableStyleProperties;
   class StyleProperties;
   class Value;
-
   enum class PropertyId : uint16;
   enum class UnitType : uint8;
   enum class ValueId : uint16;
@@ -46,9 +21,11 @@ namespace krys::boo
   class CSSStyleProperties;
   class StylePropertyMap;
 
-  /// @brief An element with an inline style: an element that includes `ElementCSSInlineStyle` (HTML, SVG and
-  /// MathML elements). The inline style is parsed from the `style` attribute, and changes made through
-  /// `Style()` are written back to the attribute lazily.
+  /// @brief An element with an inline style: one that includes `ElementCSSInlineStyle` (HTML, SVG and
+  /// MathML elements). It also gathers the style its presentational attributes map to.
+  /// @note The inline style is parsed from the `style` attribute. A change made through `Style()`,
+  /// `AttributeStyleMap()` or the setters below only marks the attribute out of date; its text is written
+  /// when the attribute is next read, or straight away if a selector that tests `style` needs it.
   /// @see https://drafts.csswg.org/cssom/#the-elementcssinlinestyle-mixin
   class StyledElement : public Element
   {
@@ -57,8 +34,12 @@ namespace krys::boo
     friend class Element;
 
   private:
+    /// @brief The declarations from the `style` attribute: immutable (and shareable) until something
+    /// changes them, then mutable.
     RefPtr<css::StyleProperties> _inlineStyle;
+    /// @brief The declarations the presentational attributes map to, or null if they map to none.
     RefPtr<const css::ImmutableStyleProperties> _presentationalHintStyle;
+    /// @brief Whether `_presentationalHintStyle` needs rebuilding before it's next read.
     bool _presentationalHintStyleIsDirty {false};
 
   protected:
@@ -79,45 +60,59 @@ namespace krys::boo
 
 #pragma endregion
 
-    /// @brief The declaration block parsed from the `style` attribute, if there is one.
+#pragma region Inline style
+
+    /// @brief The inline style's declarations, or null if the element has none yet.
     KRYS_NODISCARD const css::StyleProperties *InlineStyle() const noexcept;
 
-    /// @brief Marks the `style` attribute as out of date after a change to the inline style that the
-    /// attribute's text doesn't reflect yet.
+    /// @brief Marks the `style` attribute out of date after the CSSOM changed the inline style in a way that
+    /// doesn't affect the element's style.
     void DirtyStyleAttribute() noexcept;
 
-    /// @brief Marks the `style` attribute as out of date after the inline style's properties changed.
+    /// @brief Marks the `style` attribute out of date after the inline style's declarations changed, and
+    /// invalidates the element's style.
     void InvalidateStyleAttribute() noexcept;
 
+    /// @brief Sets @p property to the keyword @p identifier.
+    /// @return true.
     bool SetInlineStyleProperty(css::PropertyId property, css::ValueId identifier,
                                 css::IsImportant important = css::IsImportant::No) noexcept;
 
-    bool SetInlineStyleProperty(css::PropertyId property, css::PropertyId identifier,
-                                css::IsImportant important = css::IsImportant::No) noexcept;
-
+    /// @brief Sets @p property to @p value in @p unit.
+    /// @return true.
     bool SetInlineStyleProperty(css::PropertyId property, double value, css::UnitType unit,
                                 css::IsImportant important = css::IsImportant::No) noexcept;
 
+    /// @brief Sets @p property to @p value, parsed in the document's context.
+    /// @param didFailParsing Set to whether @p value failed to parse, if given.
+    /// @return Whether the inline style changed.
     bool SetInlineStyleProperty(css::PropertyId property, const CSSOMString &value,
                                 css::IsImportant important = css::IsImportant::No,
                                 bool *didFailParsing = nullptr) noexcept;
 
+    /// @brief Sets @p property to the already parsed @p value.
+    /// @return true.
     bool SetInlineStyleProperty(css::PropertyId property, Ref<css::Value> &&value,
                                 css::IsImportant important = css::IsImportant::No) noexcept;
 
-    bool SetInlineStyleCustomProperty(const CSSOMStringAtom &property, const CSSOMString &value,
-                                      css::IsImportant important = css::IsImportant::No) noexcept;
-
+    /// @brief Sets a custom property to @p customPropertyValue, a `CustomPropertyValue` naming it.
+    /// @return true.
     bool SetInlineStyleCustomProperty(Ref<css::Value> &&customPropertyValue,
                                       css::IsImportant important = css::IsImportant::No) noexcept;
 
+    /// @return Whether the inline style had @p property.
     bool RemoveInlineStyleProperty(css::PropertyId property) noexcept;
 
+    /// @return Whether the inline style had the custom @p property.
     bool RemoveInlineStyleCustomProperty(const CSSOMStringAtom &property) noexcept;
 
     void RemoveAllInlineStyleProperties() noexcept;
 
-    /// @brief The declarations the element's presentational attributes map to, rebuilt when one changes.
+#pragma endregion
+
+#pragma region Presentational hints
+
+    /// @brief The declarations the element's presentational attributes map to, rebuilt after one changes.
     /// @see https://html.spec.whatwg.org/#presentational-hints
     KRYS_NODISCARD const css::ImmutableStyleProperties *PresentationalHintStyle() const noexcept;
 
@@ -128,6 +123,8 @@ namespace krys::boo
     {
       return nullptr;
     }
+
+#pragma endregion
 
   protected:
     /// @brief Adds the declarations the attribute maps to, if it's a presentational attribute of the element.
@@ -158,17 +155,21 @@ namespace krys::boo
       return false;
     }
 
+    /// @brief Adds the hint @p property: @p identifier to @p style.
     static void AddPropertyToPresentationalHintStyle(css::MutableStyleProperties &style,
                                                      css::PropertyId property,
                                                      css::ValueId identifier) noexcept;
 
+    /// @brief Adds the hint @p property: @p value in @p unit to @p style.
     static void AddPropertyToPresentationalHintStyle(css::MutableStyleProperties &style,
                                                      css::PropertyId property, double value,
                                                      css::UnitType unit) noexcept;
 
+    /// @brief Adds the hint @p property: @p value, parsed in the document's context, to @p style.
     void AddPropertyToPresentationalHintStyle(css::MutableStyleProperties &style, css::PropertyId property,
                                               const CSSOMString &value) noexcept;
 
+    /// @brief Adds the hint @p property: @p value to @p style.
     static void AddPropertyToPresentationalHintStyle(css::MutableStyleProperties &style,
                                                      css::PropertyId property,
                                                      Ref<css::Value> &&value) noexcept;
@@ -176,6 +177,8 @@ namespace krys::boo
     /// @brief Marks the presentational hints out of date, for a change that isn't an attribute change.
     void InvalidatePresentationalHintStyle() noexcept;
 
+    /// @brief Reparses the inline style when `style` changes, and marks the hints out of date when a
+    /// presentational attribute does.
     void OnAttributeChanged(const DOMStringAtom &localName, Maybe<DOMStringView> oldValue,
                             Maybe<DOMStringView> value, const DOMStringAtom &namespaceURI) noexcept override;
 
@@ -187,12 +190,13 @@ namespace krys::boo
     /// that select on it.
     void SynchronizeStyleAttributeWithInvalidation() noexcept;
 
+    /// @brief Replaces the inline style with the `style` attribute's new value, or empties it if the
+    /// attribute was removed.
     void StyleAttributeChanged(Maybe<DOMStringView> newStyleString) noexcept;
-
-    void InlineStyleChanged() noexcept;
 
     void SetInlineStyleFromString(DOMStringView newStyleString) noexcept;
 
+    /// @brief The inline style, made mutable (copying a shared immutable one) or created empty.
     KRYS_NODISCARD Ref<css::MutableStyleProperties> EnsureMutableInlineStyle() noexcept;
 
     void RebuildPresentationalHintStyle() noexcept;

@@ -1,24 +1,4 @@
-﻿/*
- * (C) 1999-2003 Lars Knoll (knoll@kde.org)
- * Copyright (C) 2004-2025 Apple Inc. All rights reserved.
- *
- * This library is free software; you can redistribute it and/or
- * modify it under the terms of the GNU Library General Public
- * License as published by the Free Software Foundation; either
- * version 2 of the License, or (at your option) any later version.
- *
- * This library is distributed in the hope that it will be useful,
- * but WITHOUT ANY WARRANTY; without even the implied warranty of
- * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU
- * Library General Public License for more details.
- *
- * You should have received a copy of the GNU Library General Public License
- * along with this library; see the file COPYING.LIB.  If not, write to
- * the Free Software Foundation, Inc., 51 Franklin Street, Fifth Floor,
- * Boston, MA 02110-1301, USA.
- */
-
-#include "Krystal.Booey/CSS/Values/ImageValue.hpp"
+﻿#include "Krystal.Booey/CSS/Values/ImageValue.hpp"
 #include "Krystal.Booey/CSS/Values/Types.hpp"
 #include "Krystal.Booey/DOM/Nodes/Document.hpp"
 #include "Krystal.Booey/Loader/Cache/CachedImage.hpp"
@@ -28,82 +8,74 @@
 
 namespace krys::boo::css
 {
-  ImageValue::ImageValue() noexcept : Value(ValueType::Image), _isInvalid(true)
+  ImageValue::ImageValue(css::Url location, CSSOMStringAtom initiatorType) noexcept
+      : Value(ValueType::Image), _location(krys::move(location)),
+        _initiatorType(initiatorType.View().empty()
+                         ? CSSOMStringAtom(CachedResourceRequestInitiatorTypes::CSS)
+                         : krys::move(initiatorType))
   {
   }
 
-  ImageValue::ImageValue(CSSUrl &&location, CSSOMStringAtom &&initiatorType) noexcept
-      : Value(ValueType::Image), _location(krys::move(location)), _initiatorType(krys::move(initiatorType))
+  ImageValue::ImageValue(InvalidTag) noexcept : Value(ValueType::Image), _isInvalid(true)
   {
   }
 
   ImageValue::~ImageValue() noexcept = default;
 
-  Ref<ImageValue> ImageValue::Create() noexcept
-  {
-    return AdoptRef(*new ImageValue);
-  }
-
-  Ref<ImageValue> ImageValue::Create(CSSUrl location, CSSOMStringAtom initiatorType) noexcept
+  Ref<ImageValue> ImageValue::Create(css::Url location, CSSOMStringAtom initiatorType) noexcept
   {
     return AdoptRef(*new ImageValue(krys::move(location), krys::move(initiatorType)));
   }
 
-  Ref<ImageValue> ImageValue::Create(net::Url imageUrl, CSSOMStringAtom initiatorType) noexcept
+  Ref<ImageValue> ImageValue::Create(net::Url url, CSSOMStringAtom initiatorType) noexcept
   {
-    CSSOMString specified {imageUrl.String()};
-    return Create(
-      CSSUrl {.Specified = krys::move(specified), .Resolved = krys::move(imageUrl), .Modifiers = {}},
-      krys::move(initiatorType));
+    CSSOMString text {url.String()};
+    return Create(css::Url {.Specified = krys::move(text), .Resolved = krys::move(url), .Modifiers = {}},
+                  krys::move(initiatorType));
   }
 
-  Ref<ImageValue> ImageValue::CopyForComputedStyle(const CSSUrl &resolvedUrl) const noexcept
+  Ref<ImageValue> ImageValue::CreateInvalid() noexcept
   {
-    if (resolvedUrl == _location)
-    {
-      return ShareRef(const_cast<ImageValue &>(*this));
-    }
-
-    auto result = Create(resolvedUrl);
-    result->_cachedImage = _cachedImage;
-    result->_didRequestImage = _didRequestImage;
-    result->_initiatorType = _initiatorType;
-    result->_unresolvedValue = ShareRefPtr(const_cast<ImageValue *>(this));
-    return result;
+    return AdoptRef(*new ImageValue(InvalidTag {}));
   }
 
-  bool ImageValue::IsPending() const noexcept
+  Ref<ImageValue> ImageValue::CopyWithLocation(css::Url location) const noexcept
   {
-    return !_didRequestImage;
+    auto copy = Create(krys::move(location), _initiatorType);
+    copy->_cachedImage = _cachedImage;
+    copy->_didRequestImage = _didRequestImage;
+    copy->_unresolvedValue = ShareForLoading();
+    return copy;
+  }
+
+  Ref<ImageValue> ImageValue::CopyForComputedStyle(const css::Url &resolvedUrl) const noexcept
+  {
+    return resolvedUrl == _location ? ShareForLoading() : CopyWithLocation(resolvedUrl);
   }
 
   CachedImage *ImageValue::LoadImage(CachedResourceLoader &loader,
                                      const ResourceLoaderOptions &options) noexcept
   {
-    if (!_didRequestImage)
+    if (_didRequestImage)
     {
-      krys_debug_assert(loader.GetDocument());
+      return _cachedImage.get();
+    }
 
-      ResourceLoaderOptions loadOptions = options;
-      ApplyModifiersToLoaderOptions(_location.Modifiers, loadOptions);
+    krys_debug_assert(loader.GetDocument());
+    ResourceLoaderOptions loadOptions = options;
+    ApplyModifiersToLoaderOptions(_location.Modifiers, loadOptions);
 
-      CachedResourceRequest request(net::ResourceRequest(_location.Resolved), loadOptions);
-      if (_initiatorType.View().empty())
-      {
-        request.SetInitiatorType(CachedResourceRequestInitiatorTypes::CSS);
-      }
-      else
-      {
-        request.SetInitiatorType(_initiatorType.View());
-      }
-      auto requested = loader.RequestImage(krys::move(request));
-      _cachedImage = requested ? *requested : CachedResourceHandle<CachedImage>();
-      _didRequestImage = true;
-      for (auto *imageValue = this; (imageValue = imageValue->_unresolvedValue.get());)
-      {
-        imageValue->_cachedImage = _cachedImage;
-        imageValue->_didRequestImage = true;
-      }
+    CachedResourceRequest request(net::ResourceRequest(_location.Resolved), loadOptions);
+    request.SetInitiatorType(_initiatorType.View());
+    auto requested = loader.RequestImage(krys::move(request));
+    _cachedImage = requested ? *requested : CachedResourceHandle<CachedImage>();
+    _didRequestImage = true;
+
+    // The values this one was copied from share the request, so none of them makes another.
+    for (auto *original = _unresolvedValue.get(); original; original = original->_unresolvedValue.get())
+    {
+      original->_cachedImage = _cachedImage;
+      original->_didRequestImage = true;
     }
     return _cachedImage.get();
   }
@@ -113,20 +85,25 @@ namespace krys::boo::css
     return _cachedImage.get();
   }
 
-  bool ImageValue::KnownToBeOpaque(const RenderElement &renderer) const noexcept
+  RefPtr<StyleImage> ImageValue::CreateStyleImage(const style::BuilderState &state) const noexcept
   {
-    return _cachedImage && _cachedImage->CurrentFrameKnownToBeOpaque(&renderer);
+    auto styleLocation = style::ConvertToStyle(_location, state);
+    if (styleLocation.Resolved == _location.Resolved)
+    {
+      return StyleCachedImage::Create(krys::move(styleLocation), ShareForLoading());
+    }
+
+    // FIXME: The URL resolves differently only for an inline style with a relative URL, parsed in a
+    // document without a base URL, on an element since moved to a document with one. Re-parsing such styles
+    // when the element moves would make this copy unnecessary.
+    auto location = _location;
+    location.Resolved = styleLocation.Resolved;
+    return StyleCachedImage::Create(krys::move(styleLocation), CopyWithLocation(krys::move(location)));
   }
 
-  bool ImageValue::CustomTraverseSubresources(
-    KRYS_NOESCAPE const Func<bool(const CachedResource &)> &handler) const noexcept
+  CSSOMString ImageValue::CustomCSSText(const SerialisationContext &context) const noexcept
   {
-    return _cachedImage && handler(*_cachedImage);
-  }
-
-  bool ImageValue::CustomMayDependOnBaseUrl() const noexcept
-  {
-    return css::MayDependOnBaseUrl(_location);
+    return _isInvalid ? CSSOMString {} : Serialise(context, _location);
   }
 
   bool ImageValue::Equals(const ImageValue &other) const noexcept
@@ -134,34 +111,14 @@ namespace krys::boo::css
     return _location == other._location;
   }
 
-  CSSOMString ImageValue::CustomCSSText(const SerialisationContext &context) const noexcept
+  bool ImageValue::CustomMayDependOnBaseUrl() const noexcept
   {
-    if (_isInvalid)
-    {
-      return {};
-    }
-    return Serialise(context, _location);
+    return css::MayDependOnBaseUrl(_location);
   }
 
-  RefPtr<StyleImage> ImageValue::CreateStyleImage(const style::BuilderState &state) const noexcept
+  bool ImageValue::CustomTraverseSubresources(
+    KRYS_NOESCAPE const Func<bool(const CachedResource &)> &handler) const noexcept
   {
-    auto styleLocation = style::ConvertToStyle(_location, state);
-    if (styleLocation.Resolved == _location.Resolved)
-    {
-      return StyleCachedImage::Create(krys::move(styleLocation), ShareRef(const_cast<ImageValue &>(*this)));
-    }
-
-    // FIXME: This case can only happen when a element from a document with no baseURL has an inline style
-    // with a relative image URL in it and has been moved to a document with a non-null baseURL. Instead of
-    // re-resolving in this case, moved elements with this kind of inline style should have their inline style
-    // re-parsed.
-    auto newLocation = _location;
-    newLocation.Resolved = styleLocation.Resolved;
-    auto result = Create(krys::move(newLocation));
-    result->_cachedImage = _cachedImage;
-    result->_didRequestImage = _didRequestImage;
-    result->_initiatorType = _initiatorType;
-    result->_unresolvedValue = ShareRefPtr(const_cast<ImageValue *>(this));
-    return StyleCachedImage::Create(krys::move(styleLocation), krys::move(result));
+    return _cachedImage && handler(*_cachedImage);
   }
 }

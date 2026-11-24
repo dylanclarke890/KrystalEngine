@@ -41,7 +41,7 @@ namespace krys::boo::style
 
   KRYS_NODISCARD inline calc::Child CopyCalculation(const Calc auto &value) noexcept
   {
-    return value.ProtectedCalculation()->CopyRoot();
+    return value.Calculation().CopyRoot();
   }
 
   template <auto R, typename V>

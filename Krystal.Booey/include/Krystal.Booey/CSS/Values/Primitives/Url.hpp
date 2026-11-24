@@ -35,14 +35,14 @@ namespace krys::boo::css
 
   /// @brief A `<url>`: the URL as written, the URL resolved against the base URL, and its modifiers.
   // https://drafts.csswg.org/css-values-4/#url-value
-  struct CSSUrl
+  struct Url
   {
     CSSOMString Specified;
     net::Url Resolved;
     UrlModifiers Modifiers;
 
     /// @brief The absence of a URL (e.g. for `none`).
-    KRYS_NODISCARD static CSSUrl None() noexcept
+    KRYS_NODISCARD static Url None() noexcept
     {
       return {.Specified = {}, .Resolved = {}, .Modifiers = {}};
     }
@@ -53,11 +53,11 @@ namespace krys::boo::css
       return Specified.empty() && Resolved.IsNull();
     }
 
-    KRYS_NODISCARD bool operator==(const CSSUrl &) const noexcept = default;
+    KRYS_NODISCARD bool operator==(const Url &) const noexcept = default;
   };
 
   template <size_t I>
-  KRYS_NODISCARD const auto &get(const CSSUrl &value) noexcept
+  KRYS_NODISCARD const auto &get(const Url &value) noexcept
   {
     if constexpr (!I)
     {
@@ -74,20 +74,19 @@ namespace krys::boo::css
   }
 
   template <>
-  struct Serialiser<CSSUrl>
+  struct Serialiser<Url>
   {
-    void operator()(StringBuilder &builder, const SerialisationContext &context,
-                    const CSSUrl &value) noexcept;
+    void operator()(StringBuilder &builder, const SerialisationContext &context, const Url &value) noexcept;
   };
 
   /// @brief Resolves `string` against the context's base URL. Empty and fragment-only URLs aren't resolved
   /// against the base URL, and nothing is resolved against a null or `about:blank` base URL.
-  KRYS_NODISCARD Maybe<CSSUrl> CompleteUrl(const CSSOMString &string, const ParserContext &context) noexcept;
+  KRYS_NODISCARD Maybe<Url> CompleteUrl(const CSSOMString &string, const ParserContext &context) noexcept;
 
   /// @brief Parses the specified URL as an absolute URL if it wasn't resolved against a base URL.
-  KRYS_NODISCARD CSSUrl Resolve(CSSUrl &&url) noexcept;
+  KRYS_NODISCARD Url Resolve(Url &&url) noexcept;
 
-  KRYS_NODISCARD bool MayDependOnBaseUrl(const CSSUrl &url) noexcept;
+  KRYS_NODISCARD bool MayDependOnBaseUrl(const Url &url) noexcept;
 }
 
-KRYS_DEFINE_TUPLE_LIKE_CONFORMANCE(krys::boo::css::CSSUrl, 3)
+KRYS_DEFINE_TUPLE_LIKE_CONFORMANCE(krys::boo::css::Url, 3)

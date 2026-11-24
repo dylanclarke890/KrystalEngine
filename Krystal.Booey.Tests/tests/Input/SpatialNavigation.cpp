@@ -53,12 +53,11 @@ namespace krys::boo::tests
         Downcast<HTMLElement>(ById(id)).Focus();
       }
 
-      bool Key(utf8_string key, utf8_string keyIdentifier, int32 keyCode,
-               EnumSet<PlatformEvent::Modifier> modifiers = {}) noexcept
+      bool Key(utf8_string key, int32 keyCode, EnumSet<PlatformEvent::Modifier> modifiers = {}) noexcept
       {
-        return Frame->GetEventHandler().KeyEvent(PlatformKeyboardEvent(
-          PlatformEvent::Type::KeyDown, u8"", u8"", krys::move(key), u8"", krys::move(keyIdentifier), keyCode,
-          false, false, false, modifiers, MonotonicTime::Now()));
+        return Frame->GetEventHandler().KeyEvent(
+          PlatformKeyboardEvent(PlatformEvent::Type::KeyDown, u8"", u8"", krys::move(key), u8"", keyCode,
+                                false, false, false, modifiers, MonotonicTime::Now()));
       }
     };
 
@@ -229,19 +228,19 @@ namespace krys::boo::tests
                                  + u8"<div style=height:1000px></div>"};
       fixture.Focus(u8"a");
       ScrollAnimatorOff animatorOff {fixture.Document->GetSettings()};
-      CHECK(fixture.Key(u8"ArrowDown", u8"Down", vk::Down));
+      CHECK(fixture.Key(u8"ArrowDown", vk::Down));
       CHECK(fixture.Focused() == "a");
       CHECK(fixture.Frame->View()->GetScrollPosition() == ScrollPosition(0, 40));
       fixture.Frame->View()->SetScrollPosition({});
 
       SpatialNavigationOn on {fixture.Document->GetSettings()};
-      CHECK(fixture.Key(u8"ArrowDown", u8"Down", vk::Down));
+      CHECK(fixture.Key(u8"ArrowDown", vk::Down));
       CHECK(fixture.Focused() == "b");
       CHECK(fixture.Frame->View()->GetScrollPosition() == ScrollPosition());
-      CHECK(fixture.Key(u8"ArrowUp", u8"Up", vk::Up));
+      CHECK(fixture.Key(u8"ArrowUp", vk::Up));
       CHECK(fixture.Focused() == "a");
       // Not with modifiers.
-      CHECK_FALSE(fixture.Key(u8"ArrowDown", u8"Down", vk::Down, {PlatformEvent::Modifier::ShiftKey}));
+      CHECK_FALSE(fixture.Key(u8"ArrowDown", vk::Down, {PlatformEvent::Modifier::ShiftKey}));
       CHECK(fixture.Focused() == "a");
     }
 
@@ -251,7 +250,7 @@ namespace krys::boo::tests
                                  u8"<input type=radio name=r id=two style=display:block>"};
       fixture.Focus(u8"one");
       SpatialNavigationOn on {fixture.Document->GetSettings()};
-      CHECK(fixture.Key(u8"ArrowDown", u8"Down", vk::Down));
+      CHECK(fixture.Key(u8"ArrowDown", vk::Down));
       CHECK(fixture.Focused() == "two");
       CHECK(Downcast<HTMLInputElement>(fixture.ById(u8"one")).Checked());
       CHECK_FALSE(Downcast<HTMLInputElement>(fixture.ById(u8"two")).Checked());
@@ -264,13 +263,13 @@ namespace krys::boo::tests
       auto &list = Downcast<HTMLSelectElement>(fixture.ById(u8"list"));
       list.Focus();
       SpatialNavigationOn on {fixture.Document->GetSettings()};
-      CHECK(fixture.Key(u8"ArrowDown", u8"Down", vk::Down));
+      CHECK(fixture.Key(u8"ArrowDown", vk::Down));
       CHECK(list.SelectedIndex() == 0);
-      CHECK(fixture.Key(u8"ArrowDown", u8"Down", vk::Down));
+      CHECK(fixture.Key(u8"ArrowDown", vk::Down));
       CHECK(list.SelectedIndex() == 1);
       CHECK(fixture.Focused() == "list");
       // At the last option, Down moves the focus on.
-      CHECK(fixture.Key(u8"ArrowDown", u8"Down", vk::Down));
+      CHECK(fixture.Key(u8"ArrowDown", vk::Down));
       CHECK(fixture.Focused() == "after");
     }
   }

@@ -90,7 +90,7 @@ namespace krys::boo
         auto parsedValue =
           css::PrimitiveValueResolver<css::LengthPercentage<>>::ConsumeAndResolve(tokenRange, parserState);
 
-        if (!parsedValue || parsedValue->IsCalculated())
+        if (!parsedValue || parsedValue->IsCalc())
         {
           return Exception(ExceptionCode::SyntaxError, u8"Failed to construct 'IntersectionObserver': "
                                                          + marginName
@@ -100,7 +100,7 @@ namespace krys::boo
         if (parsedValue->IsPercentage())
         {
           return IntersectionObserverMarginEdge {IntersectionObserverMarginEdge::Percentage {
-            parsedValue->ResolveAsPercentageNoConversionDataRequired<float>()}};
+            parsedValue->ResolveAsPercentageWithoutConversionData<float>()}};
         }
 
         // FIXME: This should support all absolute length units, not just px.
@@ -110,7 +110,7 @@ namespace krys::boo
         if (parsedValue->IsPx())
         {
           return IntersectionObserverMarginEdge {IntersectionObserverMarginEdge::Fixed {
-            parsedValue->ResolveAsLengthNoConversionDataRequired<float>()}};
+            parsedValue->ResolveAsLengthWithoutConversionData<float>()}};
         }
 
         return Exception(ExceptionCode::SyntaxError, u8"Failed to construct 'IntersectionObserver': "

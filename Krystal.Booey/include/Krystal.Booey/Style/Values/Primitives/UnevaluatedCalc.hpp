@@ -60,7 +60,8 @@ namespace krys::boo::style
 
     ~UnevaluatedCalcBase() noexcept;
 
-    KRYS_NODISCARD Ref<calc::Value> ProtectedCalculation() const noexcept;
+    /// @brief The calculation. It doesn't change once built, so holders share it with `ShareRef`.
+    KRYS_NODISCARD calc::Value &Calculation() const noexcept;
 
     KRYS_NODISCARD bool Equal(const UnevaluatedCalcBase &) const noexcept;
   };

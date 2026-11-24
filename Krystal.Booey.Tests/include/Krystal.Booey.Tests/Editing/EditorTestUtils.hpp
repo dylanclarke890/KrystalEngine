@@ -468,15 +468,13 @@ namespace krys::boo::tests
     }
   };
 
-  /// @brief Presses @p key (a raw key down with @p identifier, @p keyCode and @p modifiers) in @p fixture's
-  /// frame.
+  /// @brief Presses @p key (a raw key down with @p keyCode and @p modifiers) in @p fixture's frame.
   /// @return Whether the page handled the key.
-  inline bool PressKey(EditorFixture &fixture, const utf8_string &key, utf8_string identifier, int32 keyCode,
+  inline bool PressKey(EditorFixture &fixture, const utf8_string &key, int32 keyCode,
                        EnumSet<PlatformEvent::Modifier> modifiers = {}) noexcept
   {
-    return fixture.Frame->GetEventHandler().KeyEvent(
-      PlatformKeyboardEvent(PlatformEvent::Type::RawKeyDown, u8"", u8"", key, key, krys::move(identifier),
-                            keyCode, false, false, false, modifiers, {}));
+    return fixture.Frame->GetEventHandler().KeyEvent(PlatformKeyboardEvent(
+      PlatformEvent::Type::RawKeyDown, u8"", u8"", key, key, keyCode, false, false, false, modifiers, {}));
   }
 
   /// @brief The `<input>` element with id @p id in @p fixture's document.

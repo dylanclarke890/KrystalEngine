@@ -23,7 +23,7 @@ namespace krys::boo::css::tests
 
   namespace
   {
-    CSSUrl FontUrl(utf8_stringview url)
+    Url FontUrl(utf8_stringview url)
     {
       return *CompleteUrl(CSSOMString {url},
                           ParserContext {ParserMode::HTMLStandard, net::Url {u8"https://example.com/"}});
@@ -33,8 +33,9 @@ namespace krys::boo::css::tests
   TEST_CASE_METHOD(ValueFixture, "FontFaceSrcLocalValue::Create", "[CSS][Values][FontFaceSrcLocalValue]")
   {
     auto value = FontFaceSrcLocalValue::Create(u8"Helvetica Neue");
-    CHECK(value->IsFontFaceSrcLocalValue());
-    CHECK_FALSE(value->IsFontFaceSrcResourceValue());
+    const Value &asValue = *value;
+    CHECK(Is<FontFaceSrcLocalValue>(asValue));
+    CHECK_FALSE(Is<FontFaceSrcResourceValue>(asValue));
     CHECK_FALSE(value->IsImage());
     CHECK_FALSE(value->IsEmpty());
     CHECK(value->FontFaceName() == u8"Helvetica Neue");
@@ -74,11 +75,12 @@ namespace krys::boo::css::tests
   {
     auto value =
       FontFaceSrcResourceValue::Create(FontUrl(u8"a.woff2"), u8"woff2", {FontTechnology::Variations});
-    CHECK(value->IsFontFaceSrcResourceValue());
-    CHECK_FALSE(value->IsFontFaceSrcLocalValue());
+    const Value &asValue = *value;
+    CHECK(Is<FontFaceSrcResourceValue>(asValue));
+    CHECK_FALSE(Is<FontFaceSrcLocalValue>(asValue));
     CHECK_FALSE(value->IsEmpty());
 
-    CHECK(FontFaceSrcResourceValue::Create(CSSUrl::None(), {}, {})->IsEmpty());
+    CHECK(FontFaceSrcResourceValue::Create(Url::None(), {}, {})->IsEmpty());
   }
 
   TEST_CASE_METHOD(ValueFixture, "FontFaceSrcResourceValue serialisation",

@@ -29,6 +29,7 @@
 #include "Krystal.Booey/CSS/Values/ViewValue.hpp"
 #include "Krystal.Booey/CSS/Values/PrimitiveValue.hpp"
 #include "Krystal.Booey/CSS/Values/ValueId.hpp"
+#include "Krystal.Core/Memory/PointerComparison.hpp"
 
 namespace krys::boo::css
 {
@@ -83,7 +84,8 @@ namespace krys::boo::css
 
   bool ViewValue::Equals(const ViewValue &other) const noexcept
   {
-    return CompareValuePtr(_axis, other._axis) && CompareValuePtr(_startInset, other._startInset)
-           && CompareValuePtr(_endInset, other._endInset);
+    return ArePointingToEqualData(_axis, other._axis)
+           && ArePointingToEqualData(_startInset, other._startInset)
+           && ArePointingToEqualData(_endInset, other._endInset);
   }
 }

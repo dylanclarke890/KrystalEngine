@@ -1770,7 +1770,6 @@ namespace krys::ui::tests
     auto tab = input::Describe(pal::Key::Tab);
     CHECK(tab.Code == u8"Tab");
     CHECK(tab.NamedKey == u8"Tab");
-    CHECK(tab.KeyIdentifier == u8"U+0009");
     CHECK(tab.LegacyKeyCode == boo::vk::Tab);
     CHECK(input::Describe(pal::Key::Num4).Code == u8"Digit4");
     CHECK(input::Describe(pal::Key::Num4).LegacyKeyCode == '4');
@@ -1791,9 +1790,8 @@ namespace krys::ui::tests
     CHECK(input::Describe(pal::Key::NumLock).Code == u8"NumLock");
     CHECK_FALSE(input::Describe(pal::Key::NumLock).IsKeypad);
 
-    // A key that types text has a key identifier from it.
+    // A key that types text has that text as its key.
     auto a = input::KeyboardEvent(boo::PlatformEvent::Type::KeyDown, pal::Key::A, {}, {u8"a", u8"a"}, false);
-    CHECK(a.KeyIdentifier() == u8"U+0041");
     CHECK(a.Key() == u8"a");
 
     // A dead key types nothing, so its key is "Dead", whatever the key would type unmodified; its release
@@ -1801,7 +1799,6 @@ namespace krys::ui::tests
     auto dead = input::KeyboardEvent(boo::PlatformEvent::Type::KeyDown, pal::Key::Quote, {},
                                      {.Text = {}, .UnmodifiedText = u8"'", .DeadKey = true}, false);
     CHECK(dead.Key() == u8"Dead");
-    CHECK(dead.KeyIdentifier() == u8"Unidentified");
     CHECK(dead.Code() == u8"Quote");
     auto deadUp =
       input::KeyboardEvent(boo::PlatformEvent::Type::KeyUp, pal::Key::Quote, {}, {}, false, u8"Dead");

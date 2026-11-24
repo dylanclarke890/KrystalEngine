@@ -32,7 +32,7 @@ namespace krys::boo::css
     KRYS_NODISCARD static RefPtr<PrimitiveValue> Resolve(const Calc auto &value,
                                                          PropertyParserOptions = {}) noexcept
     {
-      return PrimitiveValue::Create(value.ProtectedCalc());
+      return PrimitiveValue::Create(ShareRef(value.Calc()));
     }
 
     KRYS_NODISCARD static RefPtr<PrimitiveValue> Resolve(Numeric auto value,

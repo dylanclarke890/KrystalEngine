@@ -34,7 +34,7 @@ namespace krys::boo::css
     KRYS_NODISCARD constexpr static Maybe<FrequencyUnit> Validate(UnitType unitType, PropertyParserState &,
                                                                   PropertyParserOptions) noexcept
     {
-      return UnitTraits<FrequencyUnit>::Validate(unitType);
+      return ToUnit<FrequencyUnit>(unitType);
     }
 
     template <auto R, typename V>

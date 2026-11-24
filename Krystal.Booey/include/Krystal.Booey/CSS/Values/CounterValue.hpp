@@ -62,8 +62,6 @@ namespace krys::boo::css
       return _counterStyle;
     }
 
-    KRYS_NODISCARD CSSOMString CounterStyleCSSText() const noexcept;
-
     KRYS_NODISCARD CSSOMString CustomCSSText(const SerialisationContext &context) const noexcept;
 
     KRYS_NODISCARD bool Equals(const CounterValue &other) const noexcept;
@@ -77,12 +75,15 @@ namespace krys::boo::css
       }
       return IterationStatus::Continue;
     }
+
+  private:
+    KRYS_NODISCARD CSSOMString CounterStyleCSSText() const noexcept;
   };
 }
 
 KRYS_SPECIALIZE_TYPE_CAST_TRAITS_BEGIN(krys::boo::css::CounterValue)
   KRYS_NODISCARD static bool IsType(const krys::boo::css::Value &value) noexcept
   {
-    return value.IsCounterValue();
+    return value.Type() == krys::boo::css::ValueType::Counter;
   }
 KRYS_SPECIALIZE_TYPE_CAST_TRAITS_END()

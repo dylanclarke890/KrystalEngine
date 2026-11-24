@@ -35,6 +35,7 @@
 
 #include "Krystal.Booey/CSS/Calc/RandomCachingKey.hpp"
 #include "Krystal.Booey/CSS/Properties/Property.hpp"
+#include "Krystal.Booey/CSS/Properties/PropertyQueries.hpp"
 #include "Krystal.Booey/CSS/Values/CrossFadeValue.hpp"
 #include "Krystal.Booey/CSS/Values/CursorImageValue.hpp"
 #include "Krystal.Booey/CSS/Values/FilterImageValue.hpp"
@@ -371,7 +372,7 @@ namespace krys::boo::style
       {
         return false;
       }
-      if (!css::Property::DisablesNativeAppearance(propertyID))
+      if (!css::DisablesNativeAppearance(propertyID))
       {
         return false;
       }

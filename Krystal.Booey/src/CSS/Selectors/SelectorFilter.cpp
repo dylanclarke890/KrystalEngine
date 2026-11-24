@@ -1,32 +1,4 @@
-﻿/*
- * Copyright (C) 1999 Lars Knoll (knoll@kde.org)
- *           (C) 2004-2005 Allan Sandfeld Jensen (kde@carewolf.com)
- * Copyright (C) 2006, 2007 Nicholas Shanks (webkit@nickshanks.com)
- * Copyright (C) 2005, 2006, 2007, 2008, 2009, 2010, 2011 Apple Inc. All rights reserved.
- * Copyright (C) 2007 Alexey Proskuryakov <ap@webkit.org>
- * Copyright (C) 2007, 2008 Eric Seidel <eric@webkit.org>
- * Copyright (C) 2008, 2009 Torch Mobile Inc. All rights reserved. (http://www.torchmobile.com/)
- * Copyright (c) 2011, Code Aurora Forum. All rights reserved.
- * Copyright (C) Research In Motion Limited 2011. All rights reserved.
- * Copyright (C) 2012 Google Inc. All rights reserved.
- *
- * This library is free software; you can redistribute it and/or
- * modify it under the terms of the GNU Library General Public
- * License as published by the Free Software Foundation; either
- * version 2 of the License, or (at your option) any later version.
- *
- * This library is distributed in the hope that it will be useful,
- * but WITHOUT ANY WARRANTY; without even the implied warranty of
- * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU
- * Library General Public License for more details.
- *
- * You should have received a copy of the GNU Library General Public License
- * along with this library; see the file COPYING.LIB.  If not, write to
- * the Free Software Foundation, Inc., 51 Franklin Street, Fifth Floor,
- * Boston, MA 02110-1301, USA.
- */
-
-#include "Krystal.Booey/CSS/Selectors/SelectorFilter.hpp"
+﻿#include "Krystal.Booey/CSS/Selectors/SelectorFilter.hpp"
 #include "Krystal.Booey/CSS/Selectors/Selector.hpp"
 #include "Krystal.Booey/CSS/Selectors/SelectorList.hpp"
 #include "Krystal.Booey/DOM/Nodes/Attr.hpp"
@@ -34,18 +6,17 @@
 #include "Krystal.Booey/DOM/Nodes/Element.hpp"
 #include "Krystal.Booey/DOM/Nodes/ShadowRoot.hpp"
 #include "Krystal.Booey/HTML/Elements/HTMLElement.hpp"
-#include "Krystal.Core/Assert.hpp"
 #include "Krystal.Core/Hashing/FastHash.hpp"
 #include "Krystal.Core/TypeCast.hpp"
-#include <functional>
+#include <algorithm>
 #include <tuple>
 
 namespace krys::boo::css
 {
   namespace
   {
-    // Salt to separate otherwise identical string hashes so a class-selector like .article won't match
-    // <article> elements.
+    // All kinds of identifier share the filter. Multiplying each kind's hashes by its own prime keeps them
+    // apart, so an ancestor's `<article>` doesn't satisfy `.article`.
     enum : uint32
     {
       TagNameSalt = 13,
@@ -54,14 +25,16 @@ namespace krys::boo::css
       AttributeSalt = 23,
     };
 
-    /// @brief A non-zero hash of @p identifier (zero ends a `SelectorFilter::Hashes`).
+    /// @brief A non-zero hash of @p identifier, as zero ends a `SelectorFilter::Hashes`.
     KRYS_NODISCARD uint32 IdentifierHash(const CSSOMStringAtom &identifier) noexcept
     {
       const size_t hash = FastHash<CSSOMStringAtom> {}(identifier);
-      const auto result = static_cast<uint32>(hash ^ (hash >> 32));
-      return result ? result : 0x80'00'00'00u;
+      const auto folded = static_cast<uint32>(hash ^ (hash >> 32));
+      return folded ? folded : 0x80'00'00'00u;
     }
 
+    /// @brief Whether attribute @p name is left out of the filter. `id` and `class` are hashed as IDs and
+    /// classes instead, and `style` isn't hashed at all.
     KRYS_NODISCARD bool IsExcludedAttribute(const CSSOMStringAtom &name) noexcept
     {
       return name.View() == u8"class" || name.View() == u8"id" || name.View() == u8"style";
@@ -72,27 +45,23 @@ namespace krys::boo::css
                                                       SmallList<uint32, 4> &identifierHashes) noexcept
   {
     identifierHashes.push_back(IdentifierHash(element.TagQualifiedName().LocalNameLower()) * TagNameSalt);
-
-    auto id = element.IdForStyleResolution();
-    if (!id.empty())
+    if (auto id = element.IdForStyleResolution(); !id.empty())
     {
       identifierHashes.push_back(IdentifierHash(CSSOMStringAtom(krys::move(id))) * IdSalt);
     }
-
-    for (auto &className : element.ClassNames())
+    for (const auto &className : element.ClassNames())
     {
       identifierHashes.push_back(IdentifierHash(className) * ClassSalt);
     }
-
-    for (auto &attribute : element.AttributeList())
+    for (const auto &attribute : element.AttributeList())
     {
-      auto &attributeName = Is<HTMLElement>(element) ? attribute->GetQualifiedName().LocalName()
-                                                     : attribute->GetQualifiedName().LocalNameLower();
-      if (IsExcludedAttribute(attributeName))
+      // HTML elements' attribute names are already lowercase; selectors' are compared lowercased.
+      const auto &name = Is<HTMLElement>(element) ? attribute->GetQualifiedName().LocalName()
+                                                  : attribute->GetQualifiedName().LocalNameLower();
+      if (!IsExcludedAttribute(name))
       {
-        continue;
+        identifierHashes.push_back(IdentifierHash(name) * AttributeSalt);
       }
-      identifierHashes.push_back(IdentifierHash(attributeName) * AttributeSalt);
     }
   }
 
@@ -113,23 +82,20 @@ namespace krys::boo::css
       ancestors.push_back(ancestor);
     }
     _parentStack.reserve(_parentStack.capacity() + ancestors.size());
-    for (size_t i = ancestors.size(); i--;)
+    for (auto i = ancestors.size(); i--;)
     {
-      PushParent(ancestors[i]);
+      PushParent(*ancestors[i]);
     }
   }
 
-  void SelectorFilter::PushParent(const boo::Element *parent) noexcept
+  void SelectorFilter::PushParent(const boo::Element &parent) noexcept
   {
-    krys_debug_assert(_parentStack.empty() || _parentStack.back().Element == parent->ParentElement());
-    krys_debug_assert(!_parentStack.empty() || !parent->ParentElement());
+    krys_debug_assert(_parentStack.empty() || _parentStack.back().Element == parent.ParentElement());
+    krys_debug_assert(!_parentStack.empty() || !parent.ParentElement());
 
-    _parentStack.push_back(ParentStackFrame {.Element = parent});
-    ParentStackFrame &parentFrame = _parentStack.back();
-    // Mix tags, class names and ids into some sort of weird bouillabaisse.
-    // The filter is used for fast rejection of child and descendant selectors.
-    CollectElementIdentifierHashes(*parent, parentFrame.IdentifierHashes);
-    for (auto hash : parentFrame.IdentifierHashes)
+    auto &frame = _parentStack.emplace_back(ParentStackFrame {.Element = &parent});
+    CollectElementIdentifierHashes(parent, frame.IdentifierHashes);
+    for (auto hash : frame.IdentifierHashes)
     {
       _ancestorIdentifierFilter.Add(hash);
     }
@@ -142,20 +108,20 @@ namespace krys::boo::css
       InitializeParentStack(parent);
       return;
     }
-    PushParent(&parent);
+    PushParent(parent);
   }
 
   void SelectorFilter::PopParent() noexcept
   {
     krys_debug_assert(!_parentStack.empty());
-    const ParentStackFrame &parentFrame = _parentStack.back();
-    for (auto hash : parentFrame.IdentifierHashes)
+    for (auto hash : _parentStack.back().IdentifierHashes)
     {
       _ancestorIdentifierFilter.Remove(hash);
     }
     _parentStack.pop_back();
     if (_parentStack.empty())
     {
+      // Every hash added has been removed; clearing also resets any counter that overflowed.
       krys_debug_assert(_ancestorIdentifierFilter.LikelyEmpty());
       _ancestorIdentifierFilter.Clear();
     }
@@ -163,12 +129,8 @@ namespace krys::boo::css
 
   void SelectorFilter::PopParentsUntil(const boo::Element *parent) noexcept
   {
-    while (!_parentStack.empty())
+    while (!_parentStack.empty() && (!parent || _parentStack.back().Element != parent))
     {
-      if (parent && _parentStack.back().Element == parent)
-      {
-        return;
-      }
       PopParent();
     }
   }
@@ -191,14 +153,11 @@ namespace krys::boo::css
         }
         break;
       case SelectorMatch::Type:
-      {
-        auto &tagLowercaseLocalName = selector.TagLocalNameLower();
-        if (tagLowercaseLocalName != dom::StarAtom())
+        if (const auto &name = selector.TagLocalNameLower(); name != dom::StarAtom())
         {
-          collectedHashes.Tags.push_back(IdentifierHash(tagLowercaseLocalName) * TagNameSalt);
+          collectedHashes.Tags.push_back(IdentifierHash(name) * TagNameSalt);
         }
         break;
-      }
       case SelectorMatch::AttributeEquals:
       case SelectorMatch::AttributeExists:
       case SelectorMatch::AttributeIncludes:
@@ -206,30 +165,24 @@ namespace krys::boo::css
       case SelectorMatch::AttributeSubstring:
       case SelectorMatch::AttributePrefix:
       case SelectorMatch::AttributeSuffix:
-      {
-        auto &attributeName = selector.Attribute().LocalNameLower();
-        if (!IsExcludedAttribute(attributeName))
+        if (const auto &name = selector.Attribute().LocalNameLower(); !IsExcludedAttribute(name))
         {
-          collectedHashes.Attributes.push_back(IdentifierHash(attributeName) * AttributeSalt);
+          collectedHashes.Attributes.push_back(IdentifierHash(name) * AttributeSalt);
+        }
+        break;
+      case SelectorMatch::PseudoClass:
+      {
+        // With one argument, :is() and :where() require what it requires. With several, the ancestor needs
+        // only one argument's identifiers, which a single hash can't say.
+        auto pseudoClass = selector.PseudoClass();
+        if ((pseudoClass == SelectorPseudoClass::Is || pseudoClass == SelectorPseudoClass::Where)
+            && selector.SubSelectors()->SelectorCount() == 1)
+        {
+          CollectSelectorHashes(collectedHashes, *selector.SubSelectors()->FirstSelectorComponent(),
+                                IncludeRightmost::Yes);
         }
         break;
       }
-      case SelectorMatch::PseudoClass:
-        switch (selector.PseudoClass())
-        {
-          case SelectorPseudoClass::Is:
-          case SelectorPseudoClass::Where:
-            // We can use the filter in the trivial case of single argument :is()/:where().
-            // Supporting the multiargument case would require more than one hash.
-            if (selector.SubSelectors()->SelectorCount() == 1)
-            {
-              CollectSelectorHashes(collectedHashes, *selector.SubSelectors()->FirstSelectorComponent(),
-                                    IncludeRightmost::Yes);
-            }
-            break;
-          default: break;
-        }
-        break;
       default: break;
     }
   }
@@ -238,7 +191,8 @@ namespace krys::boo::css
                                              const Selector &rightmostSelector,
                                              IncludeRightmost includeRightmost) noexcept
   {
-    auto [selector, relation, skipOverSubselectors] = [&]
+    // Without the rightmost compound (the element itself), collecting starts at the compound before it.
+    auto [selector, relation, skipping] = [&]
     {
       if (includeRightmost == IncludeRightmost::No)
       {
@@ -250,11 +204,13 @@ namespace krys::boo::css
 
     for (; selector; selector = selector->PrecedingComplexSelectorComponent())
     {
-      // Only collect identifiers that match ancestors.
+      // Only compounds reached through descendant and child combinators describe ancestors; one reached
+      // through a sibling or shadow combinator describes another element, so it's skipped until the next
+      // descendant or child combinator.
       switch (relation)
       {
         case SelectorRelation::Compounding:
-          if (!skipOverSubselectors)
+          if (!skipping)
           {
             CollectSimpleSelectorHash(collectedHashes, *selector);
           }
@@ -263,10 +219,10 @@ namespace krys::boo::css
         case SelectorRelation::SubsequentSibling:
         case SelectorRelation::ShadowDescendant:
         case SelectorRelation::ShadowPartDescendant:
-        case SelectorRelation::ShadowSlotted:        skipOverSubselectors = true; break;
+        case SelectorRelation::ShadowSlotted:        skipping = true; break;
         case SelectorRelation::Descendant:
         case SelectorRelation::Child:
-          skipOverSubselectors = false;
+          skipping = false;
           CollectSimpleSelectorHash(collectedHashes, *selector);
           break;
       }
@@ -277,54 +233,26 @@ namespace krys::boo::css
   SelectorFilter::Hashes SelectorFilter::ChooseSelectorHashesForFilter(
     const CollectedSelectorHashes &collectedSelectorHashes) noexcept
   {
-    Hashes resultHashes {};
-    uint32 index = 0;
-    auto addIfNew = [&](uint32 hash)
+    Hashes chosen {};
+    size_t count = 0;
+    // The rarer a kind of identifier, the more often its absence rejects a selector.
+    for (const auto *kind : {&collectedSelectorHashes.Ids, &collectedSelectorHashes.Attributes,
+                             &collectedSelectorHashes.Classes, &collectedSelectorHashes.Tags})
     {
-      for (uint32 i = 0; i < index; ++i)
+      for (auto hash : *kind)
       {
-        if (resultHashes[i] == hash)
+        if (std::ranges::find(chosen.begin(), chosen.begin() + count, hash) != chosen.begin() + count)
         {
-          return;
+          continue;
+        }
+        chosen[count++] = hash;
+        if (count == chosen.size())
+        {
+          return chosen;
         }
       }
-      resultHashes[index++] = hash;
-    };
-
-    auto copyHashes = [&](auto &hashes)
-    {
-      for (auto hash : hashes)
-      {
-        addIfNew(hash);
-        if (index == resultHashes.size())
-        {
-          return true;
-        }
-      }
-      return false;
-    };
-
-    // There is a limited number of slots. Prefer more specific selector types.
-    if (copyHashes(collectedSelectorHashes.Ids))
-    {
-      return resultHashes;
     }
-    if (copyHashes(collectedSelectorHashes.Attributes))
-    {
-      return resultHashes;
-    }
-    if (copyHashes(collectedSelectorHashes.Classes))
-    {
-      return resultHashes;
-    }
-    if (copyHashes(collectedSelectorHashes.Tags))
-    {
-      return resultHashes;
-    }
-
-    // Null-terminate if not full.
-    resultHashes[index] = 0;
-    return resultHashes;
+    return chosen;
   }
 
   SelectorFilter::Hashes SelectorFilter::CollectHashes(const Selector &selector) noexcept

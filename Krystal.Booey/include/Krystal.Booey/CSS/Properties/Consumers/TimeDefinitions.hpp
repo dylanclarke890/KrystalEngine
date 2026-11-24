@@ -34,7 +34,7 @@ namespace krys::boo::css
     KRYS_NODISCARD constexpr static Maybe<TimeUnit> Validate(UnitType unitType, PropertyParserState &,
                                                              PropertyParserOptions) noexcept
     {
-      return UnitTraits<TimeUnit>::Validate(unitType);
+      return ToUnit<TimeUnit>(unitType);
     }
 
     template <auto R, typename V>

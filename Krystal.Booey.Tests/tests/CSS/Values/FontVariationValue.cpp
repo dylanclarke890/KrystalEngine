@@ -10,7 +10,7 @@ namespace krys::boo::css::tests
   {
     auto value =
       FontVariationValue::Create(FontFeatureTag("wght"), PrimitiveValue::Create(700.0, UnitType::Number));
-    CHECK(value->IsFontVariationValue());
+    CHECK(Is<FontVariationValue>(*value));
     CHECK(value->Tag() == FontTag {'w', 'g', 'h', 't'});
     CHECK(CssText(value->GetValue()) == "700");
   }

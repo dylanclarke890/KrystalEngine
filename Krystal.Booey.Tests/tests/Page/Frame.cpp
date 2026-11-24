@@ -185,6 +185,20 @@ namespace krys::boo::tests
       CHECK(scrolls == 2);
       CHECK_FALSE(frame.IsRenderingUpdateScheduled());
     }
+
+    SECTION("a style change during the update is laid out by it")
+    {
+      // The request carries no steps; the update's last layout takes the change in, so none is left over.
+      Ref<EventListenerCallback> restyler = CreateRef<Listener>(
+        [&](Event &) { (void)fixture.ById(u8"top").SetAttribute(u8"style", u8"height:80px"); });
+      fixture.Document->AddEventListener(u8"scroll", Ref {restyler}, false);
+
+      fixture.View().SetScrollPosition({0, 100});
+      frame.UpdateRendering();
+      CHECK_FALSE(fixture.Document->HasPendingStyleRecalc());
+      CHECK_FALSE(fixture.View().LayoutContext().NeedsLayout());
+      CHECK_FALSE(frame.IsRenderingUpdateScheduled());
+    }
   }
 
   TEST_CASE_METHOD(
@@ -470,8 +484,8 @@ namespace krys::boo::tests
     auto listener = fixture.ById(u8"top").AddEventListener(
       u8"mousemove", [&](Event &event) { shiftKey = Downcast<MouseEvent>(event).ShiftKey(); });
     (void)fixture.Handler().KeyEvent(
-      PlatformKeyboardEvent(PlatformEvent::Type::KeyDown, u8"", u8"", u8"Shift", u8"ShiftLeft", u8"", 16,
-                            false, false, false, {PlatformEvent::Modifier::ShiftKey}, MonotonicTime::Now()));
+      PlatformKeyboardEvent(PlatformEvent::Type::KeyDown, u8"", u8"", u8"Shift", u8"ShiftLeft", 16, false,
+                            false, false, {PlatformEvent::Modifier::ShiftKey}, MonotonicTime::Now()));
     fixture.View().SetScrollPosition({0, 0});
     fixture.Frame(250ms);
     CHECK(fixture.Handler().ElementUnderMouse() == &fixture.ById(u8"top"));

@@ -27,6 +27,7 @@
 #include "Krystal.Booey/CSS/Parser/KeywordLookup.hpp"
 #include "Krystal.Booey/CSS/Parser/ParserContext.hpp"
 #include "Krystal.Booey/CSS/Properties/Property.hpp"
+#include "Krystal.Booey/CSS/Properties/PropertyQueries.hpp"
 #include "Krystal.Booey/CSS/TypedOM/CSSUnparsedValue.hpp"
 #include "Krystal.Booey/CSS/Values/PrimitiveValue.hpp"
 #include "Krystal.Booey/CSS/Values/QuadValue.hpp"
@@ -52,6 +53,12 @@ namespace krys::boo
       {
         return values[0]->ToCSSValueWithProperty(property);
       }
+      auto separator = css::ListValuedPropertySeparator(property);
+      if (!separator)
+      {
+        return nullptr;
+      }
+
       css::ValueListBuilder list;
       for (const auto &value : values)
       {
@@ -60,7 +67,7 @@ namespace krys::boo
           list.push_back(Ref<css::Value>(krys::move(cssValue)));
         }
       }
-      return css::ValueList::Create(css::Property::ListValuedPropertySeparator(property), krys::move(list));
+      return css::ValueList::Create(*separator, krys::move(list));
     }
 
     /// @brief The property @p property names, if it's one that's exposed in @p document.
@@ -117,7 +124,7 @@ namespace krys::boo
       return Exception {ExceptionCode::TypeError};
     }
 
-    if (!css::Property::IsListValuedProperty(propertyId) && values.size() > 1)
+    if (!css::IsListValuedProperty(propertyId) && values.size() > 1)
     {
       return Exception {ExceptionCode::TypeError};
     }
@@ -166,7 +173,7 @@ namespace krys::boo
     // The parser may convert numbers to lengths, which the Typed OM doesn't allow.
     if (const auto *primitiveValue = DynamicDowncast<css::PrimitiveValue>(*value);
         primitiveValue && (primitiveValue->IsNumber() || primitiveValue->IsInteger())
-        && !css::Property::AllowsNumberOrIntegerInput(propertyId))
+        && !css::AllowsNumberOrIntegerInput(propertyId))
     {
       return Exception {ExceptionCode::TypeError};
     }
@@ -208,7 +215,7 @@ namespace krys::boo
       return Exception {ExceptionCode::TypeError};
     }
     auto propertyId = ExposedPropertyId(*document, property);
-    if (propertyId == css::PropertyId::Invalid || !css::Property::IsListValuedProperty(propertyId))
+    if (propertyId == css::PropertyId::Invalid || !css::IsListValuedProperty(propertyId))
     {
       return Exception {ExceptionCode::TypeError};
     }
@@ -248,8 +255,9 @@ namespace krys::boo
       list.push_back(Ref<css::Value>(krys::move(cssValue)));
     }
 
-    if (!SetProperty(propertyId, css::ValueList::Create(
-                                   css::Property::ListValuedPropertySeparator(propertyId), krys::move(list))))
+    // IsListValuedProperty was checked above, and custom properties were turned away.
+    auto separator = *css::ListValuedPropertySeparator(propertyId);
+    if (!SetProperty(propertyId, css::ValueList::Create(separator, krys::move(list))))
     {
       return Exception {ExceptionCode::TypeError};
     }

@@ -39,19 +39,19 @@ namespace krys::boo::css
   class UrlValue final : public Value
   {
   private:
-    CSSUrl _url;
+    css::Url _url;
 
-    explicit UrlValue(CSSUrl &&url) noexcept : Value(ValueType::Url), _url {krys::move(url)}
+    explicit UrlValue(css::Url &&url) noexcept : Value(ValueType::Url), _url {krys::move(url)}
     {
     }
 
   public:
-    KRYS_NODISCARD static Ref<UrlValue> Create(CSSUrl url) noexcept
+    KRYS_NODISCARD static Ref<UrlValue> Create(css::Url url) noexcept
     {
       return AdoptRef(*new UrlValue(krys::move(url)));
     }
 
-    KRYS_NODISCARD const CSSUrl &Url() const noexcept
+    KRYS_NODISCARD const css::Url &Url() const noexcept
     {
       return _url;
     }
@@ -73,6 +73,6 @@ namespace krys::boo::css
 KRYS_SPECIALIZE_TYPE_CAST_TRAITS_BEGIN(krys::boo::css::UrlValue)
   KRYS_NODISCARD static bool IsType(const krys::boo::css::Value &value) noexcept
   {
-    return value.IsUrlValue();
+    return value.Type() == krys::boo::css::ValueType::Url;
   }
 KRYS_SPECIALIZE_TYPE_CAST_TRAITS_END()

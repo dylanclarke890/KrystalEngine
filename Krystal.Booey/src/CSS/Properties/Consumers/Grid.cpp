@@ -237,7 +237,7 @@ namespace krys::boo::css::parse_property
     }
 
     auto &function = Downcast<FunctionValue>(value);
-    if (function.Name() == ValueId::FitContent || function.Length() < 2)
+    if (function.Name() == ValueId::FitContent || function.size() < 2)
     {
       return false;
     }
@@ -348,7 +348,7 @@ namespace krys::boo::css::parse_property
     SmallList<CSSOMString, 4> lineNames;
     while (auto lineName = ConsumeCustomIdentForGridLine(rangeCopy))
     {
-      lineNames.push_back(lineName->CustomIdent());
+      lineNames.push_back(lineName->StringValue());
     }
 
     if (rangeCopy.ConsumeIncludingWhitespace().Type() != TokenType::CloseSquare)
@@ -429,7 +429,7 @@ namespace krys::boo::css::parse_property
     else
     {
       auto maxRepetitions = static_cast<int64>(style::GridPosition::Max() / numberOfTracks);
-      if (auto repetitionsInteger = repetitions->ResolveAsIntegerIfNotCalculated();
+      if (auto repetitionsInteger = repetitions->ResolveAsIntegerIfNotCalc();
           repetitionsInteger && repetitionsInteger > maxRepetitions)
       {
         repetitions = PrimitiveValue::CreateInteger(static_cast<double>(maxRepetitions));
@@ -457,7 +457,7 @@ namespace krys::boo::css::parse_property
       {
         return false;
       }
-      if (auto repetitionsInteger = repetitions->ResolveAsIntegerIfNotCalculated();
+      if (auto repetitionsInteger = repetitions->ResolveAsIntegerIfNotCalc();
           repetitionsInteger && repetitionsInteger > style::GridPosition::Max())
       {
         repetitions = PrimitiveValue::CreateInteger(style::GridPosition::Max());

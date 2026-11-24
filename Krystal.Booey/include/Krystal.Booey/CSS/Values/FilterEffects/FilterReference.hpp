@@ -33,7 +33,7 @@ namespace krys::boo::css
   // https://drafts.fxtf.org/filter-effects/#typedef-filter-url
   struct FilterReference
   {
-    CSSUrl Url;
+    Url Url;
 
     KRYS_NODISCARD bool operator==(const FilterReference &) const noexcept = default;
   };

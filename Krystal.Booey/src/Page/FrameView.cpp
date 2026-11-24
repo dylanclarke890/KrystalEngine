@@ -1,30 +1,4 @@
-﻿/*
- * Copyright (C) 1998, 1999 Torben Weis <weis@kde.org>
- *                     1999 Lars Knoll <knoll@kde.org>
- *                     1999 Antti Koivisto <koivisto@kde.org>
- *                     2000 Dirk Mueller <mueller@kde.org>
- * Copyright (C) 2004-2025 Apple Inc. All rights reserved.
- *           (C) 2006 Graham Dennis (graham.dennis@gmail.com)
- *           (C) 2006 Alexey Proskuryakov (ap@nypop.com)
- * Copyright (C) 2009 Google Inc. All rights reserved.
- *
- * This library is free software; you can redistribute it and/or
- * modify it under the terms of the GNU Library General Public
- * License as published by the Free Software Foundation; either
- * version 2 of the License, or (at your option) any later version.
- *
- * This library is distributed in the hope that it will be useful,
- * but WITHOUT ANY WARRANTY; without even the implied warranty of
- * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU
- * Library General Public License for more details.
- *
- * You should have received a copy of the GNU Library General Public License
- * along with this library; see the file COPYING.LIB.  If not, write to
- * the Free Software Foundation, Inc., 51 Franklin Street, Fifth Floor,
- * Boston, MA 02110-1301, USA.
- */
-
-#include "Krystal.Booey/Page/FrameView.hpp"
+﻿#include "Krystal.Booey/Page/FrameView.hpp"
 #include "Krystal.Booey/Accessibility/AXObjectCache.hpp"
 #include "Krystal.Booey/CSS/Queries/MediaQuery.hpp"
 #include "Krystal.Booey/DOM/Algorithms/FindRevealAlgorithms.hpp"
@@ -335,7 +309,7 @@ namespace krys::boo
     }
     else
     {
-      // We need to repaint the entire backing store.
+      // Nothing can be moved: all of it is painted again.
       ScrollContentsSlowPath(updateRect);
     }
 
@@ -362,7 +336,7 @@ namespace krys::boo
 
     bool isCompositedContentLayer = UsesCompositedScrolling();
 
-    // Get the rects of the fixed objects visible in the rectToScroll
+    // The rects of the fixed objects showing in rectToScroll, which stay put while the rest moves.
     Region regionToUpdate;
     for (const auto *renderer : _viewportConstrainedObjects)
     {
@@ -375,7 +349,7 @@ namespace krys::boo
         continue;
       }
 
-      // Fixed items should always have layers.
+      // A fixed object always has a layer.
       krys_debug_assert(renderer->HasLayer());
       auto *layer = renderer->Layer();
       if (!layer)
@@ -387,19 +361,18 @@ namespace krys::boo
           || layer->GetViewportConstrainedNotCompositedReason()
                == RenderLayer::NotCompositedForNoVisibleContent)
       {
-        // Don't invalidate for invisible fixed layers.
+        // An invisible fixed layer has nothing to paint.
         continue;
       }
 
       if (layer->HasAncestorWithFilterOutsets())
       {
-        // If the fixed layer has a blur/drop-shadow filter applied on at least one of its parents, we cannot
-        // scroll using the fast path, otherwise the outsets of the filter will be moved around the page.
+        // A blur or drop shadow on an ancestor paints outside the fixed layer, and moving the contents would
+        // carry that around the page: the whole view is painted again instead.
         return false;
       }
 
-      // FIXME: use pixel snapping instead of enclosing when ScrollView has finished transitioning from
-      // RectI to Float/LayoutRect.
+      // The repaint rects are whole pixels, so the layer's rect is enclosed rather than snapped.
       RectI updateRect = EnclosingRectI(layer->RepaintRectIncludingNonCompositingDescendants());
       updateRect = ContentsToView(updateRect);
       if (!isCompositedContentLayer)
@@ -412,10 +385,9 @@ namespace krys::boo
       }
     }
 
-    // 1) scroll
+    // Move the contents, then paint what the fixed objects leave behind and cover.
     ScrollHostContents(scrollDelta, rectToScroll);
 
-    // 2) update the area of fixed objects that has been invalidated
     for (auto updateRect : regionToUpdate.Rects())
     {
       RectI scrolledRect = updateRect;
@@ -462,11 +434,10 @@ namespace krys::boo
     auto *renderView = GetRenderViewForUpdate();
     if (!renderView)
     {
-      return true; // We don't want to keep trying to update layers if we have no renderer.
+      return true; // Without a render view there's nothing to flush, now or later.
     }
 
-    // If we sync compositing layers when a layout is pending, we may cause painting of compositing layer
-    // content to occur before layout has happened, which will cause paintContents() to bail.
+    // Flushing before a pending layout would paint the layers' contents unlaid out; the next update flushes.
     if (_layoutContext.NeedsLayout())
     {
       return false;
@@ -475,18 +446,6 @@ namespace krys::boo
     renderView->Compositor().FlushPendingLayerChanges();
 
     return true;
-  }
-
-  void FrameView::EnterCompositingMode() noexcept
-  {
-    if (auto *renderView = GetRenderViewForUpdate())
-    {
-      renderView->Compositor().EnableCompositingMode();
-      if (!_layoutContext.NeedsLayout())
-      {
-        renderView->Compositor().ScheduleCompositingLayerUpdate();
-      }
-    }
   }
 
   bool FrameView::UsesCompositedScrolling() const noexcept
@@ -501,12 +460,6 @@ namespace krys::boo
       }
     }
 
-    return false;
-  }
-
-  bool FrameView::IsEnclosedInCompositingLayer() noexcept
-  {
-    // FIXME: Frames inside frames (the owner renderer's repaint container), once there are any.
     return false;
   }
 
@@ -645,11 +598,8 @@ namespace krys::boo
 
   boo::Color FrameView::DocumentBackgroundColor() const noexcept
   {
-    // <https://bugs.webkit.org/show_bug.cgi?id=59540> We blend the background color of the document and the
-    // body against the base background color of the frame view. Background images are unfortunately
-    // impractical to include.
-
-    // Return invalid Color objects whenever there is insufficient information.
+    // The root's and the body's background colours over the view's base colour; background images aren't
+    // taken into account. An invalid colour when there's nothing to go on.
     // FIXME: The fullscreen document and element, once there's fullscreen.
     auto *backgroundDocument = Frame().Document();
     if (!backgroundDocument)
@@ -660,7 +610,6 @@ namespace krys::boo
     auto *htmlElement = backgroundDocument->DocumentElement().get();
     auto *bodyElement = backgroundDocument->BodyOrFrameset();
 
-    // Start with invalid colors.
     boo::Color htmlBackgroundColor;
     boo::Color bodyBackgroundColor;
     if (htmlElement && htmlElement->Renderer())
@@ -688,10 +637,7 @@ namespace krys::boo
       return BlendSourceOver(BaseBackgroundColor(), bodyBackgroundColor);
     }
 
-    // We take the aggregate of the base background color the <html> background color, and the <body>
-    // background color to find the document color. The addition of the base background color is not
-    // technically part of the document background, but it otherwise poses problems when the aggregate is not
-    // a fully opaque color.
+    // The base colour isn't the document's, but without it a translucent document colour would be no use.
     return BlendSourceOver(BlendSourceOver(BaseBackgroundColor(), htmlBackgroundColor), bodyBackgroundColor);
   }
 
@@ -819,8 +765,8 @@ namespace krys::boo
 
   void FrameView::RepaintSlowRepaintObjects() noexcept
   {
-    // Renderers with fixed backgrounds may be in compositing layers, so we need to explicitly
-    // repaint them after scrolling.
+    // Fixed backgrounds don't move with the contents, so their renderers are painted again after a scroll,
+    // composited or not.
     for (const auto *renderer : _slowRepaintObjects)
     {
       renderer->RepaintSlowRepaintObject();
@@ -829,8 +775,8 @@ namespace krys::boo
 
   bool FrameView::UseSlowRepaints() const noexcept
   {
-    // The host moves the page's own pixels, so the contents needn't be opaque, and there's no window to blit
-    // into (m_contentIsOpaque, m_cannotBlitToWindow, overlapping).
+    // Only the slow repaint objects decide it: the host moves the page's own pixels, so neither opaque
+    // contents nor a window to copy into come into it.
     // FIXME: Frames in frames use their parent's, once there are any.
     return HasSlowRepaintObjects();
   }
@@ -967,7 +913,7 @@ namespace krys::boo
       PaintContents(context, documentDirtyRect);
     }
 
-    // Now paint the scrollbars.
+    // Then the scrollbars, over the contents.
     if (!_scrollbarsSuppressed && (_horizontalScrollbar || _verticalScrollbar))
     {
       GraphicsContextStateSaver stateSaver(context);
@@ -1368,8 +1314,7 @@ namespace krys::boo
     {
       return true;
     }
-    // Overlay scrollbars over a dark page are light, as WebKit's; classic ones keep their appearance, as
-    // Chrome's.
+    // Overlay scrollbars over a dark page are light; classic ones keep their appearance, as Chrome's do.
     return ScrollbarTheme::Theme().UsesOverlayScrollbars()
            && GetScrollbarOverlayStyle() == ScrollbarOverlayStyle::Light;
   }
@@ -1507,12 +1452,11 @@ namespace krys::boo
   void FrameView::ApplyOverflowToViewport(const RenderElement &renderer, ScrollbarMode &hMode,
                                           ScrollbarMode &vMode) const noexcept
   {
-    // Handle the overflow:hidden/scroll case for the body/html elements.  WinIE treats overflow:hidden and
-    // overflow:scroll on <body> as applying to the document's scrollbars.  The CSS2.1 draft states that HTML
-    // UAs should use the <html> or <body> element and XML/XHTML UAs should use the root element.
+    // The overflow propagated to the viewport (from the root, or from an HTML body when the root's is
+    // visible) gives the view's scrollbar modes.
+    // https://drafts.csswg.org/css-overflow-3/#overflow-propagation
 
-    // To combat the inability to scroll on a page with overflow:hidden on the root when scaled, disregard
-    // hidden when there is a frameScaleFactor that is greater than one on the main frame.
+    // A page scaled up must still scroll to show what the scale pushed out of view, whatever its overflow.
     bool overrideHidden = Frame().FrameScaleFactor() > 1;
 
     Overflow overflowX = renderer.Style().OverflowX();
@@ -1525,7 +1469,7 @@ namespace krys::boo
       case Overflow::Scroll: hMode = ScrollbarMode::AlwaysOn; break;
       case Overflow::Auto:   hMode = ScrollbarMode::Auto; break;
       default:
-        // Don't set it at all.
+        // Visible leaves the mode as it is.
         break;
     }
 
@@ -1542,7 +1486,6 @@ namespace krys::boo
   void FrameView::CalculateScrollbarModesForLayout(ScrollbarMode &hMode, ScrollbarMode &vMode,
                                                    ScrollbarModesCalculationStrategy strategy) const noexcept
   {
-    // FIXME: The viewport renderer type.
     if (_canHaveScrollbars || strategy == ScrollbarModesCalculationStrategy::RulesFromWebContentOnly)
     {
       hMode = ScrollbarMode::Auto;
@@ -1584,8 +1527,7 @@ namespace krys::boo
 
     if (Is<HTMLBodyElement>(*bodyOrFrameset) && rootRenderer)
     {
-      // It's sufficient to just check the X overflow, since it's illegal to have visible in only one
-      // direction.
+      // Overflow is visible in both axes or in neither, so one axis tells.
       if (rootRenderer->EffectiveOverflowX() == Overflow::Visible && Is<HTMLHtmlElement>(*documentElement))
       {
         if (auto *bodyRenderer = bodyOrFrameset->Renderer())
@@ -1648,7 +1590,7 @@ namespace krys::boo
         _verticalScrollbar->Invalidate();
       }
 
-      // Invalidate the scroll corner too on unsuppress.
+      // The scroll corner was hidden with the scrollbars, so it's painted again too.
       InvalidateRect(ScrollCornerRect());
     }
   }
@@ -1660,7 +1602,7 @@ namespace krys::boo
 
   void FrameView::Clear() noexcept
   {
-    // reset(), of what the view keeps.
+    // What the view keeps of the document goes with it.
     _lastViewportSize = SizeI();
     _lastUsedZoomFactor = 1;
     _layoutContext.ResetFirstLayoutFlag();
@@ -1753,17 +1695,13 @@ namespace krys::boo
 
   bool FrameView::IsScrollable() const noexcept
   {
-    // Check for:
-    // 1) If there an actual overflow.
-    // 2) display:none or visibility:hidden set to self or inherited.
-    // 3) overflow{-x,-y}: hidden;
-    // 4) scrolling: no;
+    // Scrollable once laid out, when the contents overflow the view in an axis the root's overflow lets
+    // scroll.
     if (!_layoutContext.DidFirstLayout())
     {
       return false;
     }
 
-    // Covers #1
     SizeI totalContentsSize = TotalContentsSize();
     SizeI visibleContentSize = VisibleContentRect().Size();
     if (totalContentsSize.Height() <= visibleContentSize.Height()
@@ -1772,7 +1710,6 @@ namespace krys::boo
       return false;
     }
 
-    // Cover #3 and #4.
     ScrollbarMode horizontalMode;
     ScrollbarMode verticalMode;
     CalculateScrollbarModesForLayout(horizontalMode, verticalMode,
@@ -1803,8 +1740,8 @@ namespace krys::boo
     _isPainting = true;
     auto paintBehavior = _paintBehavior;
 
-    // _nodeToDraw is used to draw only one element (and its descendants)
-    RenderObject *renderer = _nodeToDraw ? _nodeToDraw->Renderer() : nullptr;
+    // Only the subtree being painted on its own (SetSubtreeToPaint), if there is one.
+    RenderObject *renderer = _subtreeToPaint ? _subtreeToPaint->Renderer() : nullptr;
     RenderLayer *rootLayer = renderView->Layer();
     rootLayer->Paint(context, LayoutRect(dirtyRect), LayoutSize(), _paintBehavior, renderer);
     if (auto *scrollableRootLayer = rootLayer->GetScrollableArea();
@@ -1817,9 +1754,9 @@ namespace krys::boo
     _isPainting = false;
   }
 
-  void FrameView::SetNodeToDraw(Node *node) noexcept
+  void FrameView::SetSubtreeToPaint(Node *node) noexcept
   {
-    _nodeToDraw = ShareRefPtr(node);
+    _subtreeToPaint = ShareRefPtr(node);
   }
 
   // Booey has one frame: its selection is the only one to clear and restore.
@@ -1834,15 +1771,13 @@ namespace krys::boo
     }
     (void)document->UpdateLayout();
 
-    // Cache paint behavior and set a new behavior appropriate for snapshots.
+    // Snapshots flatten the composited layers into the contents.
     auto oldBehavior = GetPaintBehavior();
     auto snapshotBehavior = oldBehavior;
     snapshotBehavior.Add({PaintBehavior::FlattenCompositingLayers, PaintBehavior::Snapshotting});
     SetPaintBehavior(snapshotBehavior);
 
-    // If the snapshot should exclude selection, then we'll clear the current selection
-    // in the render tree only. This will allow us to restore the selection from the DOM
-    // after we paint the snapshot.
+    // Leaving out the selection clears it from the render tree only, so the DOM's brings it back after.
     if (shouldPaintSelection == ExcludeSelection)
     {
       if (auto *renderView = document->GetRenderView())
@@ -1857,18 +1792,15 @@ namespace krys::boo
     }
     else
     {
-      // A snapshot in ViewCoordinates will include a scrollbar, and the snapshot will contain
-      // whatever content the document is currently scrolled to.
+      // As the view shows it: scrolled where it is, with its scrollbars.
       Paint(context, imageRect);
     }
 
-    // Restore selection.
     if (shouldPaintSelection == ExcludeSelection)
     {
       document->Selection().UpdateAppearance();
     }
 
-    // Restore cached paint behavior.
     SetPaintBehavior(oldBehavior);
   }
 
@@ -1876,9 +1808,8 @@ namespace krys::boo
   {
     if (auto *document = Frame().Document())
     {
-      // FIXME: Find a more appropriate way of handling potential recursive layouts when the viewport is
-      // resized to accommodate the content but the content always overflows the viewport. See
-      // webkit.org/b/165781.
+      // Not while a fixed layout view adjusts to its laid-out contents: viewport units following that
+      // change could change the contents again, and the layouts go round and round.
       if (_layoutContext.GetLayoutPhase() != FrameViewLayoutContext::LayoutPhase::InViewSizeAdjust
           || !UseFixedLayout())
       {
@@ -1889,7 +1820,6 @@ namespace krys::boo
     // FIXME: Update the layout viewport, once there's a visual viewport.
     _layoutContext.SetNeedsLayoutAfterViewConfigurationChange();
 
-    // ScrollView::availableContentSizeChanged.
     ScrollableArea::AvailableContentSizeChanged(reason);
     if (reason != AvailableSizeChangeReason::ScrollbarsChanged)
     {
@@ -1946,9 +1876,9 @@ namespace krys::boo
     }
   }
 
-  SizeF FrameView::SizeForCSSDefaultViewportUnits() const noexcept
+  SizeF FrameView::SizeForCSSDefaultViewportUnits(const RenderStyle *rootStyle) const noexcept
   {
-    return CalculateSizeForCSSViewportUnitsOverride(_defaultViewportSizeOverride);
+    return CalculateSizeForCSSViewportUnitsOverride(_defaultViewportSizeOverride, rootStyle);
   }
 
   void FrameView::ClearSizeOverrideForCSSSmallViewportUnits() noexcept
@@ -1985,9 +1915,9 @@ namespace krys::boo
     }
   }
 
-  SizeF FrameView::SizeForCSSSmallViewportUnits() const noexcept
+  SizeF FrameView::SizeForCSSSmallViewportUnits(const RenderStyle *rootStyle) const noexcept
   {
-    return CalculateSizeForCSSViewportUnitsOverride(_smallViewportSizeOverride);
+    return CalculateSizeForCSSViewportUnitsOverride(_smallViewportSizeOverride, rootStyle);
   }
 
   void FrameView::ClearSizeOverrideForCSSLargeViewportUnits() noexcept
@@ -2024,13 +1954,37 @@ namespace krys::boo
     }
   }
 
-  SizeF FrameView::SizeForCSSLargeViewportUnits() const noexcept
+  SizeF FrameView::SizeForCSSLargeViewportUnits(const RenderStyle *rootStyle) const noexcept
   {
-    return CalculateSizeForCSSViewportUnitsOverride(_largeViewportSizeOverride);
+    return CalculateSizeForCSSViewportUnitsOverride(_largeViewportSizeOverride, rootStyle);
   }
 
-  SizeF
-    FrameView::CalculateSizeForCSSViewportUnitsOverride(Maybe<OverrideViewportSize> override) const noexcept
+  SizeF FrameView::ScrollbarSpaceForCSSViewportUnits(const RenderStyle *rootStyle) const noexcept
+  {
+    if (!rootStyle)
+    {
+      auto *document = Frame().Document();
+      auto *documentElement = document ? dom::TreeQueries::DocumentElement(*document) : nullptr;
+      auto *rootRenderer = documentElement ? documentElement->Renderer() : nullptr;
+      rootStyle = rootRenderer ? &rootRenderer->Style() : nullptr;
+    }
+    auto &theme = ScrollbarTheme::Theme();
+    if (!rootStyle || theme.UsesOverlayScrollbars())
+    {
+      return {};
+    }
+
+    // A vertical scrollbar takes width, a horizontal one height. The body's overflow, which can give the
+    // viewport its scrollbars, doesn't count.
+    auto thickness = static_cast<float>(
+      theme.ScrollbarThickness(style::ToPlatform<style::ScrollbarWidth> {}(rootStyle->ScrollbarWidth())));
+    bool vertical = rootStyle->OverflowY() == Overflow::Scroll || !rootStyle->ScrollbarGutter().IsAuto();
+    bool horizontal = rootStyle->OverflowX() == Overflow::Scroll;
+    return {vertical ? thickness : 0.f, horizontal ? thickness : 0.f};
+  }
+
+  SizeF FrameView::CalculateSizeForCSSViewportUnitsOverride(Maybe<OverrideViewportSize> override,
+                                                            const RenderStyle *rootStyle) const noexcept
   {
     OverrideViewportSize viewportSize;
 
@@ -2038,7 +1992,7 @@ namespace krys::boo
     {
       viewportSize = *override;
 
-      // auto-size overrides the width only, so we can't always bail out early here.
+      // An override may give only one of the sizes; the view gives the other.
       if (viewportSize.Width && viewportSize.Height)
       {
         return {*viewportSize.Width, *viewportSize.Height};
@@ -2053,17 +2007,16 @@ namespace krys::boo
       return {*viewportSize.Width, *viewportSize.Height};
     }
 
-    // FIXME: the value returned should take into account the value of the overflow
-    // property on the root element.
-    auto visibleContentSizeIncludingScrollbars = VisibleContentRect().Size();
-    viewportSize.Width =
-      viewportSize.Width.value_or(static_cast<float>(visibleContentSizeIncludingScrollbars.Width()));
-    viewportSize.Height =
-      viewportSize.Height.value_or(static_cast<float>(visibleContentSizeIncludingScrollbars.Height()));
+    // https://drafts.csswg.org/css-values-4/#viewport-relative-lengths
+    // The units assume there are no scrollbars, but for those the root always shows or keeps room for.
+    auto visibleContentSizeIncludingScrollbars =
+      SizeF(VisibleContentRectIncludingScrollbars().Size()) - ScrollbarSpaceForCSSViewportUnits(rootStyle);
+    viewportSize.Width = viewportSize.Width.value_or(visibleContentSizeIncludingScrollbars.Width());
+    viewportSize.Height = viewportSize.Height.value_or(visibleContentSizeIncludingScrollbars.Height());
     return {*viewportSize.Width, *viewportSize.Height};
   }
 
-  SizeF FrameView::SizeForCSSDynamicViewportUnits() const noexcept
+  SizeF FrameView::SizeForCSSDynamicViewportUnits(const RenderStyle *rootStyle) const noexcept
   {
     // FIXME: The layout viewport override rect comes first, once there's a layout viewport.
 
@@ -2072,7 +2025,8 @@ namespace krys::boo
       return SizeF(FixedLayoutSize());
     }
 
-    return SizeF(UnobscuredContentRect().Size());
+    return SizeF(VisibleContentRectIncludingScrollbars().Size())
+           - ScrollbarSpaceForCSSViewportUnits(rootStyle);
   }
 
   namespace
@@ -2144,8 +2098,8 @@ namespace krys::boo
       return false;
     }
 
-    // FIXME: It would be nice to use RenderLayer::enclosingScrollableLayer here, but that seems to skip
-    // overflow:hidden layers.
+    // Every containing block layer, not only the scrollable ones: an overflow: hidden box can be scrolled
+    // programmatically too.
     auto adjustedRect = absoluteRect;
     auto adjustedOptions = options;
     EnumSet<BoxAxis> isFixed =
@@ -2162,7 +2116,7 @@ namespace krys::boo
           adjustedOptions.VisibilityCheckRect->SetLocation(adjustedRect.Location());
         }
       }
-      // FIXME: Make scroll adjustments work for more than just fixedpos elements.
+      // FIXME: Scroll anchoring adjustments for what isn't fixed position.
       if (insideFixed)
       {
         AdjustForScrollByAnchor(layer->Renderer(), isFixed);
@@ -2187,13 +2141,11 @@ namespace krys::boo
 
     auto viewRect = LayoutRect(VisibleContentRect());
 
-    // Move the target rect into "scrollView contents" coordinates.
+    // Into the view's contents coordinates.
     auto targetRect = absoluteRect;
     targetRect.Move(0, HeaderHeight());
 
-    // scroll-padding applies to the scroll container, but expand the rectangle that we want to expose in
-    // order simulate padding the scroll container. This rectangle is passed up the tree of scrolling elements
-    // to ensure that the padding on this scroll container is maintained.
+    // The root's scroll-padding narrows the view; growing the target by it has the same effect.
     auto *document = Frame().Document();
     auto *element = document ? dom::TreeQueries::DocumentElement(*document) : nullptr;
     if (auto *renderBox = element ? DynamicDowncast<RenderBox>(element->Renderer()) : nullptr)
@@ -2204,7 +2156,7 @@ namespace krys::boo
     LayoutRect revealRect =
       GetPossiblyFixedRectToExpose(viewRect, targetRect, isFixed, options.AlignX, options.AlignY);
 
-    // Avoid scrolling to the rounded value of revealRect.location() if we don't actually need to scroll
+    // No scroll at all when the rect is already where it should be, not even one to its rounded position.
     if (revealRect != viewRect
         && (options.OnlyAllowForward == OnlyAllowForwardScrolling::No || revealRect.Y() > viewRect.Y()))
     {
@@ -2259,14 +2211,13 @@ namespace krys::boo
       return GetRectToExposeForScrollIntoView(visibleRect, exposeRect, alignX, alignY);
     }
 
-    // If the element is inside position:fixed and we're not scaled, no amount of scrolling is going to move
-    // things around.
+    // Something fixed doesn't move with the scroll position unless the page is scaled.
     if (FrameScaleFactor() == 1)
     {
       return visibleRect;
     }
 
-    // FIXME: Shouldn't this return visibleRect as well?
+    // Scaled, scrolling the scaled contents can bring it into view.
     // FIXME: The visual viewport's case (visualViewportEnabled), once there are visual viewports.
     return GetRectToExposeForScrollIntoView(visibleRect, exposeRect, alignX, alignY);
   }
@@ -2274,7 +2225,7 @@ namespace krys::boo
   ScrollPosition FrameView::MaximumScrollPosition() const noexcept
   {
     ScrollPosition maximumPosition = ScrollableArea::MaximumScrollPosition();
-    // FIXME: can this be moved into the base class?
+    // Contents smaller than the view leave nothing to scroll to: the maximum isn't below the origin.
     maximumPosition.ClampNegativeToZero();
     return maximumPosition;
   }
@@ -2430,7 +2381,6 @@ namespace krys::boo
       return;
     }
 
-    // ScrollView::setScrollPosition.
     bool stoppedAnimation = StopAnimatedScroll();
     auto newScrollPosition =
       options.Clamping == ScrollClamping::Clamped ? AdjustScrollPositionWithinRange(position) : position;
@@ -2470,9 +2420,8 @@ namespace krys::boo
 
     bool scrollbarCanTakeSpace = CanShowNonOverlayScrollbars();
 
-    // If we came in here with the view already needing a layout then do that first. (This will be the common
-    // case, e.g., when the page changes due to window resizing for example). This layout will not re-enter
-    // updateScrollbars and does not count towards our max layout pass total.
+    // A layout that's due (after a resize, say) comes first. It doesn't come back here, or count as one of
+    // the passes.
     if (!_scrollbarsSuppressed && scrollbarCanTakeSpace)
     {
       SetForScope inUpdateScrollbarsScope(_inUpdateScrollbars, true);
@@ -2533,8 +2482,7 @@ namespace krys::boo
       bool needAnotherPass = false;
       if (scrollbarCanTakeSpace)
       {
-        // If we ever turn one scrollbar off, do not turn the other one on. Never ever try to both gain/lose a
-        // scrollbar in the same pass.
+        // Once one scrollbar goes, the other doesn't come; and no pass both adds and removes one.
         if (!_updateScrollbarsPass && docSize.Width() <= fullVisibleSize.Width()
             && docSize.Height() <= fullVisibleSize.Height())
         {
@@ -2611,8 +2559,7 @@ namespace krys::boo
         SizeI newDocSize = TotalContentsSize();
         if (newDocSize == docSize)
         {
-          // The layout with the new scroll state had no impact on the document's overall size, so
-          // updateScrollbars didn't get called. Recur manually.
+          // The layout left the document's size as it was, so nothing called back here: go round again.
           UpdateScrollbars(desiredPosition);
         }
         --_updateScrollbarsPass;
@@ -2624,8 +2571,7 @@ namespace krys::boo
       AddedOrRemovedScrollbar();
     }
 
-    // Set up the range (and page step/line step), but only do this if we're not in a nested call (to avoid
-    // doing it multiple times).
+    // The scrollbars' ranges and steps are set once, by the outermost call.
     if (_updateScrollbarsPass)
     {
       return;
@@ -2699,7 +2645,7 @@ namespace krys::boo
 
     scrollToPosition(desiredPosition);
 
-    // Make sure the scrollbar offsets are up to date.
+    // The scrollbars show the new position.
     if (_horizontalScrollbar)
     {
       _horizontalScrollbar->OffsetDidChange();
@@ -2785,12 +2731,11 @@ namespace krys::boo
   {
     if (!Frame().View())
     {
-      // The frame is being destroyed.
+      // The frame is going away.
       return;
     }
 
-    // When the viewport contents changes (scroll, resize, style recalc, layout, ...),
-    // check if we should resume animated images.
+    // What's in view changed (a scroll, resize, restyle or layout): animated images that came into view play.
     ResumeVisibleImageAnimations(VisibleContentRect());
   }
 
@@ -2813,7 +2758,7 @@ namespace krys::boo
     }
   }
 
-  void FrameView::SetLastUserScrollType(Maybe<UserScrollType> userScrollType) noexcept
+  void FrameView::DidUserScroll(Maybe<UserScrollType> userScrollType) noexcept
   {
     CancelScheduledScrolls();
     if (CurrentScrollType() == ScrollType::Programmatic)
@@ -2828,16 +2773,6 @@ namespace krys::boo
     }
 
     _maintainScrollPositionAnchor = nullptr;
-    if (_lastUserScrollType == userScrollType)
-    {
-      return;
-    }
-    _lastUserScrollType = userScrollType;
-
-    if (userScrollType == UserScrollType::Explicit)
-    {
-      _wasEverScrolledExplicitlyByUser = true;
-    }
   }
 
   void FrameView::ScheduleScrollEvent() noexcept
@@ -3020,9 +2955,8 @@ namespace krys::boo
     {
       return;
     }
-    // FIXME: We should not need to go through the layout process since selection update does not change
-    // dimension/geometry. However we can't tell at this point if the tree is stable yet, so let's just
-    // schedule a root only layout for now.
+    // A selection change changes no geometry, but whether the render tree is settled isn't known here, so
+    // the update rides on a layout of the root.
     LayoutContext().SetNeedsLayoutAfterViewConfigurationChange();
   }
 
@@ -3103,7 +3037,7 @@ namespace krys::boo
 
   bool FrameView::ScrollToAnchorFragment(DOMStringView fragmentIdentifier) noexcept
   {
-    // If our URL has no ref, then we have no place we need to jump to.
+    // Without a fragment there's nowhere to scroll to.
     if (!fragmentIdentifier.data())
     {
       return false;
@@ -3134,7 +3068,7 @@ namespace krys::boo
         {
           return true;
         }
-        // If SVG failed to scrollToAnchor() and anchorElement is null, no other scrolling will be possible.
+        // An SVG fragment that isn't a view or an element has nothing else to scroll to.
         if (!anchorElement)
         {
           return false;
@@ -3144,7 +3078,7 @@ namespace krys::boo
     else if (!anchorElement
              && !(fragmentIdentifier.empty() || text::IsASCIICaselessEqual(fragmentIdentifier, u8"top")))
     {
-      // Implement the rule that "" and "top" both mean top of page as in other browsers.
+      // Only an empty fragment or "top" is the top of the document (step 3 of the indicated part).
       return false;
     }
 
@@ -3194,11 +3128,9 @@ namespace krys::boo
       Frame().Document()->UpdateContentRelevancyForScrollIfNeeded(*element);
     }
 
-    // We need to update the layout before scrolling, otherwise we could really mess things up if an anchor
-    // scroll comes at a bad moment.
+    // The anchor's position is only known once style and layout are up to date.
     auto &document = *Frame().Document();
     document.UpdateStyleIfNeeded();
-    // Only do a layout if changes have occurred that make it necessary.
     auto *renderView = GetRenderView();
     if (renderView && renderView->NeedsLayout())
     {
@@ -3357,8 +3289,8 @@ namespace krys::boo
       }
     }
 
-    // Scroll nested layers and frames to reveal the anchor.
-    // Align to the top and to the closest side (this matches other browsers).
+    // Every scroller up from the anchor scrolls to reveal it,
+    // aligned to the top and to the nearest side, as the spec's block "start" and inline "nearest".
     auto &renderer = *anchorNode->Renderer();
     ScrollRectToVisibleOptions options;
     auto writingMode = renderer.GetWritingMode();
@@ -3472,7 +3404,7 @@ namespace krys::boo
     auto clientOrigin =
       -SizeF(static_cast<float>(VisibleContentRect().X()), static_cast<float>(VisibleContentRect().Y()));
 
-    // Layout and visual viewports are affected by page zoom, so we need to factor that out.
+    // Client coordinates are unzoomed and unscaled: the page zoom and scale are divided out.
     return clientOrigin.Scaled(1 / (Frame().PageZoomFactor() * Frame().FrameScaleFactor()));
   }
 
@@ -3552,17 +3484,14 @@ namespace krys::boo
     krys_assert(Frame().Document());
     auto &document = *Frame().Document();
 
-    // If CSS target was set previously, we want to set it to 0, recalc
-    // and possibly repaint because :target pseudo class may have been
-    // set (see bug 11321).
+    // Nothing is :target any more.
     document.SetCSSTarget(nullptr);
 
     if (Is<SVGDocument>(document))
     {
       if (auto rootElement = SVGRootElement(document))
       {
-        // We need to update the layout before resetScrollAnchor(), otherwise we
-        // could really mess things up if resetting the anchor comes at a bad moment.
+        // Style first, so resetting the SVG view sees it up to date.
         (void)document.UpdateStyleIfNeeded();
         rootElement->ResetScrollAnchor();
       }

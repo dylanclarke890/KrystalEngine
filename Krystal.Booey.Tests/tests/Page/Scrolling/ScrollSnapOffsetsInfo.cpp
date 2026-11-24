@@ -111,8 +111,7 @@ namespace krys::boo::tests
       Downcast<HTMLElement>(scroller).Focus();
       auto &handler = fixture.TestFrame->GetEventHandler();
       CHECK(handler.KeyEvent(PlatformKeyboardEvent(PlatformEvent::Type::RawKeyDown, u8"", u8"", u8"ArrowDown",
-                                                   u8"ArrowDown", u8"Down", vk::Down, false, false, false, {},
-                                                   {})));
+                                                   u8"ArrowDown", vk::Down, false, false, false, {}, {})));
       FinishScrollAnimations(fixture);
       CHECK(scroller.ScrollTop() == 100);
     }

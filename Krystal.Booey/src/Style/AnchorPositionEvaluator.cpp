@@ -24,6 +24,7 @@
 
 #include "Krystal.Booey/Style/AnchorPositionEvaluator.hpp"
 
+#include "Krystal.Booey/CSS/Properties/PropertyQueries.hpp"
 #include "Krystal.Booey/DOM/Internals/PopoverData.hpp"
 #include "Krystal.Booey/DOM/Nodes/Document.hpp"
 #include "Krystal.Booey/DOM/Nodes/Element.hpp"
@@ -1027,7 +1028,7 @@ namespace krys::boo::style
     {
       // "For sizing properties, change the specified axis in anchor-size() functions to maintain the same
       // relative relationship to the new direction that they had to the old."
-      if (css::Property::IsSizingProperty(propertyID))
+      if (css::IsSizingProperty(propertyID))
       {
         auto swapDimensions = std::ranges::contains(fallback->Tactics, PositionTryFallbackTactic::FlipStart);
         if (swapDimensions)
@@ -1740,7 +1741,7 @@ namespace krys::boo::style
 
   static css::PropertyId FlipStart(css::PropertyId propertyID, WritingMode writingMode) noexcept
   {
-    auto logicalProperty = css::Property::UnresolvePhysicalProperty(propertyID, writingMode);
+    auto logicalProperty = css::UnresolvePhysicalProperty(propertyID, writingMode);
 
     auto flippedLogical = [&]
     {
@@ -1765,13 +1766,13 @@ namespace krys::boo::style
         default:                                 return propertyID;
       }
     };
-    return css::Property::ResolveDirectionAwareProperty(flippedLogical(), writingMode);
+    return css::ResolveDirectionAwareProperty(flippedLogical(), writingMode);
   }
 
   css::PropertyId AnchorPositionEvaluator::ResolvePositionTryFallbackProperty(
     css::PropertyId propertyID, WritingMode writingMode, const BuilderPositionTryFallback &fallback) noexcept
   {
-    krys_debug_assert(!css::Property::IsDirectionAwareProperty(propertyID));
+    krys_debug_assert(!css::IsLogicalPropertyGroupLogicalProperty(propertyID));
 
     for (auto tactic : fallback.Tactics)
     {

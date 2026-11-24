@@ -1,22 +1,4 @@
-﻿/*
- *  Copyright (C) 2006-2020 Apple Inc. All rights reserved.
- *
- *  This library is free software; you can redistribute it and/or
- *  modify it under the terms of the GNU Lesser General Public
- *  License as published by the Free Software Foundation; either
- *  version 2 of the License, or (at your option) any later version.
- *
- *  This library is distributed in the hope that it will be useful,
- *  but WITHOUT ANY WARRANTY; without even the implied warranty of
- *  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU
- *  Lesser General Public License for more details.
- *
- *  You should have received a copy of the GNU Lesser General Public
- *  License along with this library; if not, write to the Free Software
- *  Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
- */
-
-#pragma once
+﻿#pragma once
 
 #include "Krystal.Core/Attributes.hpp"
 #include "Krystal.Core/Enum.hpp"
@@ -25,10 +7,12 @@
 
 namespace krys::boo
 {
-  /// @see https://webidl.spec.whatwg.org/#idl-DOMException-error-names.
+  /// @brief What went wrong: a `DOMException`'s name, or one of the two simple exceptions.
+  /// @see https://webidl.spec.whatwg.org/#idl-DOMException-error-names
   enum class ExceptionCode : uint8
   {
-    IndexSizeError, // Deprecated. Use RangeError instead.
+    /// @note Deprecated: `RangeError` replaces it.
+    IndexSizeError,
     HierarchyRequestError,
     WrongDocumentError,
     InvalidCharacterError,
@@ -40,12 +24,16 @@ namespace krys::boo
     SyntaxError,
     InvalidModificationError,
     NamespaceError,
-    InvalidAccessError, // Deprecated. use NotAllowedError instead.
-    TypeMismatchError,  // Deprecated. Use TypeError instead.
+    /// @note Deprecated: `TypeError` replaces it for bad arguments, `NotSupportedError` for unsupported
+    /// operations and `NotAllowedError` for refused requests.
+    InvalidAccessError,
+    /// @note Deprecated: `TypeError` replaces it.
+    TypeMismatchError,
     SecurityError,
     NetworkError,
     AbortError,
     UrlMismatchError,
+    /// @note Deprecated: the `QuotaExceededError` interface derived from `DOMException` replaces it.
     QuotaExceededError,
     TimeoutError,
     InvalidNodeTypeError,
@@ -60,25 +48,22 @@ namespace krys::boo
     VersionError,
     OperationError,
     NotAllowedError,
+    OptOutError,
 
-    // Simple exceptions (https://webidl.spec.whatwg.org/#idl-exceptions).
+    /// @brief The simple exceptions Booey throws, which are ECMAScript errors rather than `DOMException`s.
+    /// @see https://webidl.spec.whatwg.org/#dfn-simple-exception
     RangeError,
     TypeError,
-    JSSyntaxError, // Different from DOM SYNTAX_ERR.
-
-    // Non-standard error.
-    StackOverflowError,
-    OutOfMemoryError,
-
-    // Used to indicate to the bindings that a JS exception was thrown below and it should be propagated.
-    ExistingExceptionError,
   };
 
   consteval ExceptionCode MaxEnumValue(ExceptionCode) noexcept
   {
-    return ExceptionCode::ExistingExceptionError;
+    return ExceptionCode::TypeError;
   }
 
+  /// @brief An exception an algorithm throws, as the error of an `ExceptionOr`: its code and an optional
+  /// message for whoever reads it.
+  /// @see https://webidl.spec.whatwg.org/#idl-exceptions
   class Exception
   {
   private:

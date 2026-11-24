@@ -1,25 +1,4 @@
-﻿/*
- * (C) 1999-2003 Lars Knoll (knoll@kde.org)
- * (C) 2002-2003 Dirk Mueller (mueller@kde.org)
- * Copyright (C) 2002-2022 Apple Inc. All rights reserved.
- *
- * This library is free software; you can redistribute it and/or
- * modify it under the terms of the GNU Library General Public
- * License as published by the Free Software Foundation; either
- * version 2 of the License, or (at your option) any later version.
- *
- * This library is distributed in the hope that it will be useful,
- * but WITHOUT ANY WARRANTY; without even the implied warranty of
- * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU
- * Library General Public License for more details.
- *
- * You should have received a copy of the GNU Library General Public License
- * along with this library; see the file COPYING.LIB.  If not, write to
- * the Free Software Foundation, Inc., 51 Franklin Street, Fifth Floor,
- * Boston, MA 02110-1301, USA.
- */
-
-#include "Krystal.Booey/CSS/Rules/Rule.hpp"
+﻿#include "Krystal.Booey/CSS/Rules/Rule.hpp"
 #include "Krystal.Booey/CSS/CSSOM/CSSContainerRule.hpp"
 #include "Krystal.Booey/CSS/CSSOM/CSSCounterStyleRule.hpp"
 #include "Krystal.Booey/CSS/CSSOM/CSSFontFaceRule.hpp"
@@ -58,6 +37,7 @@ namespace krys::boo::css
 {
   namespace
   {
+    /// @brief @p properties, first replaced by a mutable copy if they aren't mutable.
     KRYS_NODISCARD MutableStyleProperties &EnsureMutable(Ref<StyleProperties> &properties) noexcept
     {
       if (!Is<MutableStyleProperties>(*properties))
@@ -66,130 +46,77 @@ namespace krys::boo::css
       }
       return Downcast<MutableStyleProperties>(*properties);
     }
+
+    /// @brief Copies of @p rules.
+    KRYS_NODISCARD List<Ref<Rule>> CopyRules(const List<Ref<Rule>> &rules) noexcept
+    {
+      List<Ref<Rule>> copies;
+      copies.reserve(rules.size());
+      for (const auto &rule : rules)
+      {
+        copies.push_back(rule->Copy());
+      }
+      return copies;
+    }
   }
 
 #pragma region Rule
 
-  template <typename Visitor>
-  constexpr decltype(auto) Rule::VisitDerived(Visitor &&visitor) noexcept
+  template <typename TVisitor>
+  constexpr decltype(auto) Rule::VisitDerived(TVisitor &&visitor) noexcept
   {
+    const auto visit = [&]<typename TRule>() -> decltype(auto)
+    {
+      return std::invoke(std::forward<TVisitor>(visitor), static_cast<TRule &>(*this));
+    };
+
     switch (Type())
     {
-      case RuleType::Style:
-      {
-        return std::invoke(std::forward<Visitor>(visitor), static_cast<StyleRule &>(*this));
-      }
-      case RuleType::StyleWithNesting:
-      {
-        return std::invoke(std::forward<Visitor>(visitor), static_cast<StyleRuleWithNesting &>(*this));
-      }
-      case RuleType::NestedDeclarations:
-      {
-        return std::invoke(std::forward<Visitor>(visitor), static_cast<NestedDeclarationsRule &>(*this));
-      }
-      case RuleType::FontFace:
-      {
-        return std::invoke(std::forward<Visitor>(visitor), static_cast<FontFaceRule &>(*this));
-      }
-      case RuleType::FontFeatureValues:
-      {
-        return std::invoke(std::forward<Visitor>(visitor), static_cast<FontFeatureValuesRule &>(*this));
-      }
-      case RuleType::FontFeatureValuesBlock:
-      {
-        return std::invoke(std::forward<Visitor>(visitor), static_cast<FontFeatureValuesBlockRule &>(*this));
-      }
-      case RuleType::FontPaletteValues:
-      {
-        return std::invoke(std::forward<Visitor>(visitor), static_cast<FontPaletteValuesRule &>(*this));
-      }
-      case RuleType::Media:
-      {
-        return std::invoke(std::forward<Visitor>(visitor), static_cast<MediaRule &>(*this));
-      }
-      case RuleType::Supports:
-      {
-        return std::invoke(std::forward<Visitor>(visitor), static_cast<SupportsRule &>(*this));
-      }
-      case RuleType::Import:
-      {
-        return std::invoke(std::forward<Visitor>(visitor), static_cast<ImportRule &>(*this));
-      }
-      case RuleType::Keyframes:
-      {
-        return std::invoke(std::forward<Visitor>(visitor), static_cast<KeyframesRule &>(*this));
-      }
-      case RuleType::Namespace:
-      {
-        return std::invoke(std::forward<Visitor>(visitor), static_cast<NamespaceRule &>(*this));
-      }
-      case RuleType::Keyframe:
-      {
-        return std::invoke(std::forward<Visitor>(visitor), static_cast<KeyframeRule &>(*this));
-      }
-      case RuleType::Charset:
-      {
-        return std::invoke(std::forward<Visitor>(visitor), static_cast<CharsetRule &>(*this));
-      }
-      case RuleType::CounterStyle:
-      {
-        return std::invoke(std::forward<Visitor>(visitor), static_cast<CounterStyleRule &>(*this));
-      }
+      case RuleType::Style:                  return visit.template operator()<StyleRule>();
+      case RuleType::StyleWithNesting:       return visit.template operator()<StyleRuleWithNesting>();
+      case RuleType::NestedDeclarations:     return visit.template operator()<NestedDeclarationsRule>();
+      case RuleType::FontFace:               return visit.template operator()<FontFaceRule>();
+      case RuleType::FontFeatureValues:      return visit.template operator()<FontFeatureValuesRule>();
+      case RuleType::FontFeatureValuesBlock: return visit.template operator()<FontFeatureValuesBlockRule>();
+      case RuleType::FontPaletteValues:      return visit.template operator()<FontPaletteValuesRule>();
+      case RuleType::Media:                  return visit.template operator()<MediaRule>();
+      case RuleType::Supports:               return visit.template operator()<SupportsRule>();
+      case RuleType::Import:                 return visit.template operator()<ImportRule>();
+      case RuleType::Keyframes:              return visit.template operator()<KeyframesRule>();
+      case RuleType::Namespace:              return visit.template operator()<NamespaceRule>();
+      case RuleType::Keyframe:               return visit.template operator()<KeyframeRule>();
+      case RuleType::Charset:                return visit.template operator()<CharsetRule>();
+      case RuleType::CounterStyle:           return visit.template operator()<CounterStyleRule>();
       case RuleType::LayerBlock:
-      case RuleType::LayerStatement:
-      {
-        return std::invoke(std::forward<Visitor>(visitor), static_cast<LayerRule &>(*this));
-      }
-      case RuleType::Container:
-      {
-        return std::invoke(std::forward<Visitor>(visitor), static_cast<ContainerRule &>(*this));
-      }
-      case RuleType::Property:
-      {
-        return std::invoke(std::forward<Visitor>(visitor), static_cast<PropertyRule &>(*this));
-      }
-      case RuleType::Scope:
-      {
-        return std::invoke(std::forward<Visitor>(visitor), static_cast<ScopeRule &>(*this));
-      }
-      case RuleType::StartingStyle:
-      {
-        return std::invoke(std::forward<Visitor>(visitor), static_cast<StartingStyleRule &>(*this));
-      }
-      case RuleType::PositionTry:
-      {
-        return std::invoke(std::forward<Visitor>(visitor), static_cast<PositionTryRule &>(*this));
-      }
-      case RuleType::Function:
-      {
-        return std::invoke(std::forward<Visitor>(visitor), static_cast<FunctionRule &>(*this));
-      }
-      case RuleType::FunctionDeclarations:
-      {
-        return std::invoke(std::forward<Visitor>(visitor), static_cast<FunctionDeclarationsRule &>(*this));
-      }
-      case RuleType::Margin:
-      {
-        break;
-      }
+      case RuleType::LayerStatement:         return visit.template operator()<LayerRule>();
+      case RuleType::Container:              return visit.template operator()<ContainerRule>();
+      case RuleType::Property:               return visit.template operator()<PropertyRule>();
+      case RuleType::Scope:                  return visit.template operator()<ScopeRule>();
+      case RuleType::StartingStyle:          return visit.template operator()<StartingStyleRule>();
+      case RuleType::PositionTry:            return visit.template operator()<PositionTryRule>();
+      case RuleType::Function:               return visit.template operator()<FunctionRule>();
+      case RuleType::FunctionDeclarations:   return visit.template operator()<FunctionDeclarationsRule>();
+      // No margin rules are parsed (there's no paged media); the type only fills the CSSOM's numbering.
+      case RuleType::Margin:                 break;
     }
     krys_unreachable();
   }
 
-  template <typename Visitor>
-  constexpr decltype(auto) Rule::VisitDerived(Visitor &&visitor) const noexcept
+  template <typename TVisitor>
+  constexpr decltype(auto) Rule::VisitDerived(TVisitor &&visitor) const noexcept
   {
     return const_cast<Rule &>(*this).VisitDerived(
-      [&](auto &value) { return std::invoke(std::forward<Visitor>(visitor), std::as_const(value)); });
+      [&](auto &rule) -> decltype(auto)
+      { return std::invoke(std::forward<TVisitor>(visitor), std::as_const(rule)); });
   }
 
   void Rule::operator delete(Rule *rule, std::destroying_delete_t) noexcept
   {
     rule->VisitDerived(
-      []<typename TRule>(TRule &rule)
+      []<typename TRule>(TRule &derived)
       {
-        std::destroy_at(&rule);
-        ::operator delete(&rule);
+        std::destroy_at(&derived);
+        ::operator delete(&derived);
       });
   }
 
@@ -198,39 +125,35 @@ namespace krys::boo::css
     return VisitDerived(
       []<typename TRule>(const TRule &rule) -> Ref<Rule>
       {
-        // Check at compile time for a mistake where this function would call itself, leading to infinite
-        // recursion. We can do this with the types of pointers to member functions because they include the
-        // type of the class.
+        // A class without its own Copy would find this one and recurse forever.
         static_assert(!SameType<decltype(&TRule::Copy), decltype(&Rule::Copy)>);
         return rule.Copy();
       });
   }
 
-  Ref<CSSRule> Rule::CreateCSSOMWrapper(CSSStyleSheet &parentSheet) const noexcept
+  Ref<CSSRule> Rule::CreateCSSOMWrapper(CSSStyleSheet &parentSheet) noexcept
   {
     return CreateCSSOMWrapper(&parentSheet, nullptr);
   }
 
-  Ref<CSSRule> Rule::CreateCSSOMWrapper(CSSGroupingRule &parentRule) const noexcept
+  Ref<CSSRule> Rule::CreateCSSOMWrapper(CSSGroupingRule &parentRule) noexcept
   {
     return CreateCSSOMWrapper(nullptr, &parentRule);
   }
 
-  Ref<CSSRule> Rule::CreateCSSOMWrapper(CSSStyleRule &parentRule) const noexcept
+  Ref<CSSRule> Rule::CreateCSSOMWrapper(CSSStyleRule &parentRule) noexcept
   {
     return CreateCSSOMWrapper(nullptr, &parentRule);
   }
 
-  Ref<CSSRule> Rule::CreateCSSOMWrapper() const noexcept
+  Ref<CSSRule> Rule::CreateCSSOMWrapper() noexcept
   {
     return CreateCSSOMWrapper(nullptr, nullptr);
   }
 
-  Ref<CSSRule> Rule::CreateCSSOMWrapper(CSSStyleSheet *parentSheet, CSSRule *parentRule) const noexcept
+  Ref<CSSRule> Rule::CreateCSSOMWrapper(CSSStyleSheet *parentSheet, CSSRule *parentRule) noexcept
   {
-    // FIXME: const_cast is required here because a wrapper for a style rule can be used to *modify* the style
-    // rule's selector; use of const in the style system is thus inaccurate.
-    auto wrapper = const_cast<Rule &>(*this).VisitDerived(
+    auto wrapper = VisitDerived(
       [&]<typename TRule>(TRule &rule) -> Ref<CSSRule>
       {
         if constexpr (SameType<TRule, StyleRule> || SameType<TRule, StyleRuleWithNesting>)
@@ -329,7 +252,6 @@ namespace krys::boo::css
     {
       wrapper->SetParentRule(parentRule);
     }
-
     return wrapper;
   }
 
@@ -350,17 +272,13 @@ namespace krys::boo::css
         {
           rule.AdoptSelectorList({});
         }
-        else if constexpr (SameType<TRule, ScopeRule>)
+        else if constexpr (BaseOf<GroupRule, TRule>)
         {
-          rule.SetScopeStart({});
-          rule.SetScopeEnd({});
-          for (auto &child : rule.ChildRules())
+          if constexpr (SameType<TRule, ScopeRule>)
           {
-            child->InvalidateResolvedSelectorListRecursively();
+            rule.SetScopeStart({});
+            rule.SetScopeEnd({});
           }
-        }
-        else if constexpr (std::is_base_of_v<GroupRule, TRule>)
-        {
           for (auto &child : rule.ChildRules())
           {
             child->InvalidateResolvedSelectorListRecursively();
@@ -373,16 +291,8 @@ namespace krys::boo::css
 
 #pragma region StyleRule
 
-  uint32 StyleRule::AverageSizeInBytes() noexcept
-  {
-    return static_cast<uint32>(sizeof(StyleRule) + sizeof(css::Selector)
-                               + StyleProperties::AverageSizeInBytes() + sizeof(List<Ref<Rule>>));
-  }
-
-  StyleRule::StyleRule(Ref<StyleProperties> &&properties, bool hasDocumentSecurityOrigin,
-                       SelectorList &&selectors) noexcept
-      : Rule(RuleType::Style, hasDocumentSecurityOrigin), _properties(krys::move(properties)),
-        _selectorList(krys::move(selectors))
+  StyleRule::StyleRule(Ref<StyleProperties> properties, SelectorList selectors) noexcept
+      : Rule(RuleType::Style), _properties(krys::move(properties)), _selectorList(krys::move(selectors))
   {
   }
 
@@ -394,10 +304,9 @@ namespace krys::boo::css
 
   StyleRule::~StyleRule() noexcept = default;
 
-  Ref<StyleRule> StyleRule::Create(Ref<StyleProperties> &&properties, bool hasDocumentSecurityOrigin,
-                                   SelectorList &&selectors) noexcept
+  Ref<StyleRule> StyleRule::Create(Ref<StyleProperties> properties, SelectorList selectors) noexcept
   {
-    return AdoptRef(*new StyleRule(krys::move(properties), hasDocumentSecurityOrigin, krys::move(selectors)));
+    return AdoptRef(*new StyleRule(krys::move(properties), krys::move(selectors)));
   }
 
   Ref<StyleRule> StyleRule::Copy() const noexcept
@@ -405,39 +314,33 @@ namespace krys::boo::css
     return AdoptRef(*new StyleRule(*this));
   }
 
-  Ref<const StyleProperties> StyleRule::ProtectedProperties() const noexcept
-  {
-    return _properties;
-  }
-
-  void StyleRule::SetProperties(Ref<StyleProperties> &&properties) noexcept
-  {
-    _properties = krys::move(properties);
-  }
-
   MutableStyleProperties &StyleRule::MutableProperties() noexcept
   {
     return EnsureMutable(_properties);
   }
 
-  void StyleRule::WrapperAdoptSelectorList(SelectorList &&selectors) noexcept
+  void StyleRule::WrapperAdoptSelectorList(SelectorList selectors) noexcept
   {
     AdoptSelectorList(krys::move(selectors));
   }
 
-  Ref<StyleRule> StyleRule::CreateForSplitting(const List<const css::Selector *> &selectors,
-                                               Ref<StyleProperties> &&properties,
-                                               bool hasDocumentSecurityOrigin) noexcept
+  uint32 StyleRule::AverageSizeInBytes() noexcept
+  {
+    return static_cast<uint32>(sizeof(StyleRule) + sizeof(Selector) + StyleProperties::AverageSizeInBytes()
+                               + sizeof(List<Ref<Rule>>));
+  }
+
+  Ref<StyleRule> StyleRule::CreateForSplitting(const List<const Selector *> &selectors,
+                                               Ref<StyleProperties> properties) noexcept
   {
     krys_assert(!selectors.empty());
-    auto selectorListArray = CreateUniqueArray<css::Selector>(selectors.size());
+    auto selectorArray = CreateUniqueArray<Selector>(selectors.size());
     for (size_t i = 0uz; i < selectors.size(); ++i)
     {
-      new (NotNullTag {}, &selectorListArray[i]) css::Selector(*selectors[i]);
+      new (NotNullTag {}, &selectorArray[i]) Selector(*selectors[i]);
     }
-    selectorListArray[selectors.size() - 1].SetLastInSelectorList();
-    auto styleRule = StyleRule::Create(krys::move(properties), hasDocumentSecurityOrigin,
-                                       SelectorList(krys::move(selectorListArray)));
+    selectorArray[selectors.size() - 1].SetLastInSelectorList();
+    auto styleRule = Create(krys::move(properties), SelectorList(krys::move(selectorArray)));
     styleRule->MarkAsSplitRule();
     return styleRule;
   }
@@ -448,42 +351,38 @@ namespace krys::boo::css
     krys_debug_assert(GetSelectorList().ComponentCount() > maxCount);
 
     List<Ref<StyleRule>> rules;
-    List<const css::Selector *> componentsSinceLastSplit;
-
-    for (const auto &selector : GetSelectorList())
+    // The pieces share the declarations.
+    const auto split = [&](const List<const Selector *> &components)
     {
-      List<const css::Selector *> componentsInThisSelector;
-      for (const auto *component = &selector; component;
+      rules.push_back(CreateForSplitting(components, ShareRef(const_cast<StyleProperties &>(Properties()))));
+    };
+
+    List<const Selector *> pendingComponents;
+    for (const auto &complexSelector : GetSelectorList())
+    {
+      List<const Selector *> components;
+      for (const auto *component = &complexSelector; component;
            component = component->PrecedingComplexSelectorComponent())
       {
-        componentsInThisSelector.push_back(component);
+        components.push_back(component);
       }
-
-      if (componentsInThisSelector.size() + componentsSinceLastSplit.size() > maxCount
-          && !componentsSinceLastSplit.empty())
+      // Complex selectors are kept whole, so a piece only exceeds the limit if one complex selector does.
+      if (!pendingComponents.empty() && pendingComponents.size() + components.size() > maxCount)
       {
-        rules.push_back(CreateForSplitting(componentsSinceLastSplit,
-                                           ShareRef(const_cast<StyleProperties &>(Properties())),
-                                           HasDocumentSecurityOrigin()));
-        componentsSinceLastSplit.clear();
+        split(pendingComponents);
+        pendingComponents.clear();
       }
-
-      componentsSinceLastSplit.insert(componentsSinceLastSplit.end(), componentsInThisSelector.begin(),
-                                      componentsInThisSelector.end());
+      pendingComponents.insert(pendingComponents.end(), components.begin(), components.end());
     }
-
-    if (!componentsSinceLastSplit.empty())
+    if (!pendingComponents.empty())
     {
-      rules.push_back(CreateForSplitting(componentsSinceLastSplit,
-                                         ShareRef(const_cast<StyleProperties &>(Properties())),
-                                         HasDocumentSecurityOrigin()));
+      split(pendingComponents);
     }
 
     if (!rules.empty())
     {
       rules.back()->MarkAsLastRuleInSplitRule();
     }
-
     return rules;
   }
 
@@ -491,12 +390,11 @@ namespace krys::boo::css
 
 #pragma region StyleRuleWithNesting
 
-  StyleRuleWithNesting::StyleRuleWithNesting(Ref<StyleProperties> &&properties,
-                                             bool hasDocumentSecurityOrigin, SelectorList &&selectors,
-                                             List<Ref<Rule>> &&nestedRules) noexcept
-      // Actual selectors will be resolved later, at RuleSetBuilder time.
-      : StyleRule(krys::move(properties), hasDocumentSecurityOrigin, {}),
-        _nestedRules(krys::move(nestedRules)), _originalSelectorList(krys::move(selectors))
+  StyleRuleWithNesting::StyleRuleWithNesting(Ref<StyleProperties> properties, SelectorList selectors,
+                                             List<Ref<Rule>> nestedRules) noexcept
+      // The selectors are resolved when a rule set is built from the sheet.
+      : StyleRule(krys::move(properties), {}), _nestedRules(krys::move(nestedRules)),
+        _originalSelectorList(krys::move(selectors))
   {
     SetType(RuleType::StyleWithNesting);
   }
@@ -508,24 +406,19 @@ namespace krys::boo::css
   }
 
   StyleRuleWithNesting::StyleRuleWithNesting(const StyleRuleWithNesting &other) noexcept
-      : StyleRule(other), _originalSelectorList(other._originalSelectorList)
+      : StyleRule(other), _nestedRules(CopyRules(other._nestedRules)),
+        _originalSelectorList(other._originalSelectorList)
   {
-    _nestedRules.reserve(other._nestedRules.size());
-    for (const auto &rule : other._nestedRules)
-    {
-      _nestedRules.push_back(rule->Copy());
-    }
   }
 
   StyleRuleWithNesting::~StyleRuleWithNesting() noexcept = default;
 
-  Ref<StyleRuleWithNesting> StyleRuleWithNesting::Create(Ref<StyleProperties> &&properties,
-                                                         bool hasDocumentSecurityOrigin,
-                                                         SelectorList &&selectors,
-                                                         List<Ref<Rule>> &&nestedRules) noexcept
+  Ref<StyleRuleWithNesting> StyleRuleWithNesting::Create(Ref<StyleProperties> properties,
+                                                         SelectorList selectors,
+                                                         List<Ref<Rule>> nestedRules) noexcept
   {
-    return AdoptRef(*new StyleRuleWithNesting(krys::move(properties), hasDocumentSecurityOrigin,
-                                              krys::move(selectors), krys::move(nestedRules)));
+    return AdoptRef(
+      *new StyleRuleWithNesting(krys::move(properties), krys::move(selectors), krys::move(nestedRules)));
   }
 
   Ref<StyleRuleWithNesting> StyleRuleWithNesting::Create(StyleRule &&rule) noexcept
@@ -538,7 +431,7 @@ namespace krys::boo::css
     return AdoptRef(*new StyleRuleWithNesting(*this));
   }
 
-  void StyleRuleWithNesting::WrapperAdoptOriginalSelectorList(SelectorList &&selectors) noexcept
+  void StyleRuleWithNesting::WrapperAdoptOriginalSelectorList(SelectorList selectors) noexcept
   {
     _originalSelectorList = krys::move(selectors);
     InvalidateResolvedSelectorListRecursively();
@@ -548,15 +441,15 @@ namespace krys::boo::css
 
 #pragma region NestedDeclarationsRule
 
-  NestedDeclarationsRule::NestedDeclarationsRule(Ref<StyleProperties> &&properties) noexcept
-      : StyleRule(krys::move(properties), false, {})
+  NestedDeclarationsRule::NestedDeclarationsRule(Ref<StyleProperties> properties) noexcept
+      : StyleRule(krys::move(properties), {})
   {
     SetType(RuleType::NestedDeclarations);
   }
 
   NestedDeclarationsRule::NestedDeclarationsRule(const NestedDeclarationsRule &other) noexcept = default;
 
-  Ref<NestedDeclarationsRule> NestedDeclarationsRule::Create(Ref<StyleProperties> &&properties) noexcept
+  Ref<NestedDeclarationsRule> NestedDeclarationsRule::Create(Ref<StyleProperties> properties) noexcept
   {
     return AdoptRef(*new NestedDeclarationsRule(krys::move(properties)));
   }
@@ -570,7 +463,7 @@ namespace krys::boo::css
 
 #pragma region FontFaceRule
 
-  FontFaceRule::FontFaceRule(Ref<StyleProperties> &&properties) noexcept
+  FontFaceRule::FontFaceRule(Ref<StyleProperties> properties) noexcept
       : Rule(RuleType::FontFace), _properties(krys::move(properties))
   {
   }
@@ -582,7 +475,7 @@ namespace krys::boo::css
 
   FontFaceRule::~FontFaceRule() noexcept = default;
 
-  Ref<FontFaceRule> FontFaceRule::Create(Ref<StyleProperties> &&properties) noexcept
+  Ref<FontFaceRule> FontFaceRule::Create(Ref<StyleProperties> properties) noexcept
   {
     return AdoptRef(*new FontFaceRule(krys::move(properties)));
   }
@@ -602,20 +495,20 @@ namespace krys::boo::css
 #pragma region FontPaletteValuesRule
 
   FontPaletteValuesRule::FontPaletteValuesRule(
-    CSSOMStringAtom name, List<CSSOMStringAtom> &&fontFamilies, Maybe<FontPaletteIndex> basePalette,
-    List<boo::FontPaletteValues::OverriddenColor> &&overrideColors) noexcept
+    CSSOMStringAtom name, List<CSSOMStringAtom> fontFamilies, Maybe<FontPaletteIndex> basePalette,
+    List<boo::FontPaletteValues::OverriddenColor> overrideColors) noexcept
       : Rule(RuleType::FontPaletteValues), _name(krys::move(name)), _fontFamilies(krys::move(fontFamilies)),
         _fontPaletteValues(basePalette, krys::move(overrideColors))
   {
   }
 
   Ref<FontPaletteValuesRule>
-    FontPaletteValuesRule::Create(const CSSOMStringAtom &name, List<CSSOMStringAtom> &&fontFamilies,
+    FontPaletteValuesRule::Create(CSSOMStringAtom name, List<CSSOMStringAtom> fontFamilies,
                                   Maybe<FontPaletteIndex> basePalette,
-                                  List<boo::FontPaletteValues::OverriddenColor> &&overrideColors) noexcept
+                                  List<boo::FontPaletteValues::OverriddenColor> overrideColors) noexcept
   {
-    return AdoptRef(
-      *new FontPaletteValuesRule(name, krys::move(fontFamilies), basePalette, krys::move(overrideColors)));
+    return AdoptRef(*new FontPaletteValuesRule(krys::move(name), krys::move(fontFamilies), basePalette,
+                                               krys::move(overrideColors)));
   }
 
   Ref<FontPaletteValuesRule> FontPaletteValuesRule::Copy() const noexcept
@@ -628,16 +521,15 @@ namespace krys::boo::css
 #pragma region FontFeatureValuesBlockRule
 
   FontFeatureValuesBlockRule::FontFeatureValuesBlockRule(boo::FontFeatureValuesType type,
-                                                         const List<FontFeatureValuesTag> &tags) noexcept
-      : Rule(RuleType::FontFeatureValuesBlock), _type(type), _tags(tags)
+                                                         List<FontFeatureValuesTag> tags) noexcept
+      : Rule(RuleType::FontFeatureValuesBlock), _type(type), _tags(krys::move(tags))
   {
   }
 
-  Ref<FontFeatureValuesBlockRule>
-    FontFeatureValuesBlockRule::Create(boo::FontFeatureValuesType type,
-                                       const List<FontFeatureValuesTag> &tags) noexcept
+  Ref<FontFeatureValuesBlockRule> FontFeatureValuesBlockRule::Create(boo::FontFeatureValuesType type,
+                                                                     List<FontFeatureValuesTag> tags) noexcept
   {
-    return AdoptRef(*new FontFeatureValuesBlockRule(type, tags));
+    return AdoptRef(*new FontFeatureValuesBlockRule(type, krys::move(tags)));
   }
 
   Ref<FontFeatureValuesBlockRule> FontFeatureValuesBlockRule::Copy() const noexcept
@@ -649,16 +541,16 @@ namespace krys::boo::css
 
 #pragma region FontFeatureValuesRule
 
-  FontFeatureValuesRule::FontFeatureValuesRule(const List<CSSOMStringAtom> &fontFamilies,
-                                               Ref<boo::FontFeatureValues> &&value) noexcept
-      : Rule(RuleType::FontFeatureValues), _fontFamilies(fontFamilies), _value(krys::move(value))
+  FontFeatureValuesRule::FontFeatureValuesRule(List<CSSOMStringAtom> fontFamilies,
+                                               Ref<boo::FontFeatureValues> value) noexcept
+      : Rule(RuleType::FontFeatureValues), _fontFamilies(krys::move(fontFamilies)), _value(krys::move(value))
   {
   }
 
-  Ref<FontFeatureValuesRule> FontFeatureValuesRule::Create(const List<CSSOMStringAtom> &fontFamilies,
-                                                           Ref<boo::FontFeatureValues> &&values) noexcept
+  Ref<FontFeatureValuesRule> FontFeatureValuesRule::Create(List<CSSOMStringAtom> fontFamilies,
+                                                           Ref<boo::FontFeatureValues> value) noexcept
   {
-    return AdoptRef(*new FontFeatureValuesRule(fontFamilies, krys::move(values)));
+    return AdoptRef(*new FontFeatureValuesRule(krys::move(fontFamilies), krys::move(value)));
   }
 
   Ref<FontFeatureValuesRule> FontFeatureValuesRule::Copy() const noexcept
@@ -670,21 +562,17 @@ namespace krys::boo::css
 
 #pragma region GroupRule
 
-  GroupRule::GroupRule(RuleType type, List<Ref<Rule>> &&childRules) noexcept
+  GroupRule::GroupRule(RuleType type, List<Ref<Rule>> childRules) noexcept
       : Rule(type), _childRules(krys::move(childRules))
   {
   }
 
-  GroupRule::GroupRule(const GroupRule &other) noexcept : Rule(other)
+  GroupRule::GroupRule(const GroupRule &other) noexcept
+      : Rule(other), _childRules(CopyRules(other._childRules))
   {
-    _childRules.reserve(other._childRules.size());
-    for (const auto &rule : other._childRules)
-    {
-      _childRules.push_back(rule->Copy());
-    }
   }
 
-  void GroupRule::WrapperInsertRule(uint32 index, Ref<Rule> &&rule) noexcept
+  void GroupRule::WrapperInsertRule(uint32 index, Ref<Rule> rule) noexcept
   {
     _childRules.insert(_childRules.begin() + index, krys::move(rule));
   }
@@ -698,14 +586,14 @@ namespace krys::boo::css
 
 #pragma region MediaRule
 
-  MediaRule::MediaRule(mq::MediaQueryList &&mediaQueries, List<Ref<Rule>> &&childRules) noexcept
+  MediaRule::MediaRule(mq::MediaQueryList mediaQueries, List<Ref<Rule>> childRules) noexcept
       : GroupRule(RuleType::Media, krys::move(childRules)), _mediaQueries(krys::move(mediaQueries))
   {
   }
 
   MediaRule::MediaRule(const MediaRule &other) noexcept = default;
 
-  Ref<MediaRule> MediaRule::Create(mq::MediaQueryList &&mediaQueries, List<Ref<Rule>> &&childRules) noexcept
+  Ref<MediaRule> MediaRule::Create(mq::MediaQueryList mediaQueries, List<Ref<Rule>> childRules) noexcept
   {
     return AdoptRef(*new MediaRule(krys::move(mediaQueries), krys::move(childRules)));
   }
@@ -720,16 +608,16 @@ namespace krys::boo::css
 #pragma region SupportsRule
 
   SupportsRule::SupportsRule(CSSOMString conditionText, bool conditionIsSupported,
-                             List<Ref<Rule>> &&rules) noexcept
+                             List<Ref<Rule>> rules) noexcept
       : GroupRule(RuleType::Supports, krys::move(rules)), _conditionText(krys::move(conditionText)),
         _conditionIsSupported(conditionIsSupported)
   {
   }
 
-  Ref<SupportsRule> SupportsRule::Create(const CSSOMString &conditionText, bool conditionIsSupported,
-                                         List<Ref<Rule>> &&rules) noexcept
+  Ref<SupportsRule> SupportsRule::Create(CSSOMString conditionText, bool conditionIsSupported,
+                                         List<Ref<Rule>> rules) noexcept
   {
-    return AdoptRef(*new SupportsRule(conditionText, conditionIsSupported, krys::move(rules)));
+    return AdoptRef(*new SupportsRule(krys::move(conditionText), conditionIsSupported, krys::move(rules)));
   }
 
   Ref<SupportsRule> SupportsRule::Copy() const noexcept
@@ -741,22 +629,22 @@ namespace krys::boo::css
 
 #pragma region LayerRule
 
-  LayerRule::LayerRule(List<CascadeLayerName> &&nameList) noexcept
-      : GroupRule(RuleType::LayerStatement, List<Ref<Rule>> {}), _nameVariant(krys::move(nameList))
+  LayerRule::LayerRule(List<CascadeLayerName> nameList) noexcept
+      : GroupRule(RuleType::LayerStatement, {}), _nameVariant(krys::move(nameList))
   {
   }
 
-  LayerRule::LayerRule(CascadeLayerName &&name, List<Ref<Rule>> &&rules) noexcept
+  LayerRule::LayerRule(CascadeLayerName name, List<Ref<Rule>> rules) noexcept
       : GroupRule(RuleType::LayerBlock, krys::move(rules)), _nameVariant(krys::move(name))
   {
   }
 
-  Ref<LayerRule> LayerRule::CreateStatement(List<CascadeLayerName> &&nameList) noexcept
+  Ref<LayerRule> LayerRule::CreateStatement(List<CascadeLayerName> nameList) noexcept
   {
     return AdoptRef(*new LayerRule(krys::move(nameList)));
   }
 
-  Ref<LayerRule> LayerRule::CreateBlock(CascadeLayerName &&name, List<Ref<Rule>> &&rules) noexcept
+  Ref<LayerRule> LayerRule::CreateBlock(CascadeLayerName name, List<Ref<Rule>> rules) noexcept
   {
     return AdoptRef(*new LayerRule(krys::move(name), krys::move(rules)));
   }
@@ -770,13 +658,13 @@ namespace krys::boo::css
 
 #pragma region ContainerRule
 
-  ContainerRule::ContainerRule(cq::ContainerQueryList &&queries, List<Ref<Rule>> &&rules) noexcept
+  ContainerRule::ContainerRule(cq::ContainerQueryList queries, List<Ref<Rule>> rules) noexcept
       : GroupRule(RuleType::Container, krys::move(rules)), _containerQueries(krys::move(queries))
   {
     krys_debug_assert(!_containerQueries.empty());
   }
 
-  Ref<ContainerRule> ContainerRule::Create(cq::ContainerQueryList &&queries, List<Ref<Rule>> &&rules) noexcept
+  Ref<ContainerRule> ContainerRule::Create(cq::ContainerQueryList queries, List<Ref<Rule>> rules) noexcept
   {
     return AdoptRef(*new ContainerRule(krys::move(queries), krys::move(rules)));
   }
@@ -790,12 +678,12 @@ namespace krys::boo::css
 
 #pragma region PropertyRule
 
-  PropertyRule::PropertyRule(PropertyRule::Descriptor &&descriptor) noexcept
+  PropertyRule::PropertyRule(Descriptor descriptor) noexcept
       : Rule(RuleType::Property), _descriptor(krys::move(descriptor))
   {
   }
 
-  Ref<PropertyRule> PropertyRule::Create(PropertyRule::Descriptor &&descriptor) noexcept
+  Ref<PropertyRule> PropertyRule::Create(Descriptor descriptor) noexcept
   {
     return AdoptRef(*new PropertyRule(krys::move(descriptor)));
   }
@@ -809,7 +697,7 @@ namespace krys::boo::css
 
 #pragma region ScopeRule
 
-  ScopeRule::ScopeRule(SelectorList &&scopeStart, SelectorList &&scopeEnd, List<Ref<Rule>> &&rules) noexcept
+  ScopeRule::ScopeRule(SelectorList scopeStart, SelectorList scopeEnd, List<Ref<Rule>> rules) noexcept
       : GroupRule(RuleType::Scope, krys::move(rules)), _originalScopeStart(krys::move(scopeStart)),
         _originalScopeEnd(krys::move(scopeEnd))
   {
@@ -819,8 +707,8 @@ namespace krys::boo::css
 
   ScopeRule::~ScopeRule() noexcept = default;
 
-  Ref<ScopeRule> ScopeRule::Create(SelectorList &&scopeStart, SelectorList &&scopeEnd,
-                                   List<Ref<Rule>> &&rules) noexcept
+  Ref<ScopeRule> ScopeRule::Create(SelectorList scopeStart, SelectorList scopeEnd,
+                                   List<Ref<Rule>> rules) noexcept
   {
     return AdoptRef(*new ScopeRule(krys::move(scopeStart), krys::move(scopeEnd), krys::move(rules)));
   }
@@ -844,12 +732,12 @@ namespace krys::boo::css
 
 #pragma region StartingStyleRule
 
-  StartingStyleRule::StartingStyleRule(List<Ref<Rule>> &&rules) noexcept
+  StartingStyleRule::StartingStyleRule(List<Ref<Rule>> rules) noexcept
       : GroupRule(RuleType::StartingStyle, krys::move(rules))
   {
   }
 
-  Ref<StartingStyleRule> StartingStyleRule::Create(List<Ref<Rule>> &&rules) noexcept
+  Ref<StartingStyleRule> StartingStyleRule::Create(List<Ref<Rule>> rules) noexcept
   {
     return AdoptRef(*new StartingStyleRule(krys::move(rules)));
   }
@@ -886,9 +774,9 @@ namespace krys::boo::css
   {
   }
 
-  Ref<NamespaceRule> NamespaceRule::Create(const CSSOMStringAtom &prefix, const CSSOMStringAtom &uri) noexcept
+  Ref<NamespaceRule> NamespaceRule::Create(CSSOMStringAtom prefix, CSSOMStringAtom uri) noexcept
   {
-    return AdoptRef(*new NamespaceRule(prefix, uri));
+    return AdoptRef(*new NamespaceRule(krys::move(prefix), krys::move(uri)));
   }
 
   Ref<NamespaceRule> NamespaceRule::Copy() const noexcept

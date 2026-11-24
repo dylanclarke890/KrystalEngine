@@ -8,23 +8,6 @@ namespace krys::ui::input
 {
   namespace
   {
-    /// @brief The legacy key identifier of a key that types @p text: `U+` and its first character in hex,
-    /// with ASCII letters in upper case.
-    KRYS_NODISCARD utf8_string KeyIdentifierForText(utf8_stringview text) noexcept
-    {
-      if (text.empty())
-      {
-        return u8"Unidentified";
-      }
-      auto codePoint =
-        static_cast<uint32>(text::DecodeUTF8(Span<const char8>(text.data(), text.size())).CodePoint);
-      if (codePoint >= 'a' && codePoint <= 'z')
-      {
-        codePoint -= 'a' - 'A';
-      }
-      auto identifier = std::format("U+{:04X}", codePoint);
-      return utf8_string(identifier.begin(), identifier.end());
-    }
   }
 
   KeyDescription Describe(pal::Key key) noexcept
@@ -61,16 +44,13 @@ namespace krys::ui::input
                                                 u8"F8",  u8"F9",  u8"F10", u8"F11", u8"F12", u8"F13", u8"F14",
                                                 u8"F15", u8"F16", u8"F17", u8"F18", u8"F19", u8"F20"};
       auto index = static_cast<int32>(key) - static_cast<int32>(Key::F1);
-      return {.Code = names[index],
-              .NamedKey = names[index],
-              .KeyIdentifier = names[index],
-              .LegacyKeyCode = boo::vk::F1 + index};
+      return {.Code = names[index], .NamedKey = names[index], .LegacyKeyCode = boo::vk::F1 + index};
     }
 
-    auto named = [](utf8_stringview code, utf8_stringview name, utf8_stringview identifier, int32 keyCode,
+    auto named = [](utf8_stringview code, utf8_stringview name, int32 keyCode,
                     bool isKeypad = false) -> KeyDescription
     {
-      return {code, name, identifier, keyCode, isKeypad};
+      return {code, name, keyCode, isKeypad};
     };
     auto typing = [](utf8_stringview code, int32 keyCode, bool isKeypad = false) -> KeyDescription
     {
@@ -99,47 +79,44 @@ namespace krys::ui::input
       // No Windows key code: numeric keypads on Windows have no equals.
       case Key::KeypadEquals:   return typing(u8"NumpadEqual", 0, true);
       // Numpad 5 without Num Lock.
-      case Key::KeypadClear:    return named(u8"Numpad5", u8"Clear", u8"Clear", boo::vk::Clear, true);
-      case Key::KeypadEnter:    return named(u8"NumpadEnter", u8"Enter", u8"Enter", boo::vk::Return, true);
+      case Key::KeypadClear:    return named(u8"Numpad5", u8"Clear", boo::vk::Clear, true);
+      case Key::KeypadEnter:    return named(u8"NumpadEnter", u8"Enter", boo::vk::Return, true);
       case Key::Return:
-      case Key::Enter:          return named(u8"Enter", u8"Enter", u8"Enter", boo::vk::Return);
-      case Key::Tab:            return named(u8"Tab", u8"Tab", u8"U+0009", boo::vk::Tab);
+      case Key::Enter:          return named(u8"Enter", u8"Enter", boo::vk::Return);
+      case Key::Tab:            return named(u8"Tab", u8"Tab", boo::vk::Tab);
       // Backspace (named after the Mac key).
-      case Key::Del:            return named(u8"Backspace", u8"Backspace", u8"U+0008", boo::vk::Back);
+      case Key::Del:            return named(u8"Backspace", u8"Backspace", boo::vk::Back);
       // Standard says that DEL becomes U+007F.
-      case Key::ForwardDelete:  return named(u8"Delete", u8"Delete", u8"U+007F", boo::vk::Delete);
-      case Key::Escape:         return named(u8"Escape", u8"Escape", u8"U+001B", boo::vk::Escape);
-      case Key::Command:        return named(u8"MetaLeft", u8"Meta", u8"Meta", boo::vk::LWin);
-      case Key::Shift:          return named(u8"ShiftLeft", u8"Shift", u8"Shift", boo::vk::LShift);
-      case Key::RightShift:     return named(u8"ShiftRight", u8"Shift", u8"Shift", boo::vk::RShift);
-      case Key::CapsLock:       return named(u8"CapsLock", u8"CapsLock", u8"CapsLock", boo::vk::Capital);
-      case Key::Option:         return named(u8"AltLeft", u8"Alt", u8"Alt", boo::vk::LMenu);
-      case Key::RightOption:    return named(u8"AltRight", u8"Alt", u8"Alt", boo::vk::RMenu);
-      case Key::Control:        return named(u8"ControlLeft", u8"Control", u8"Control", boo::vk::LControl);
-      case Key::RightControl:   return named(u8"ControlRight", u8"Control", u8"Control", boo::vk::RControl);
-      case Key::Function:       return named(u8"Fn", u8"Fn", u8"Fn", 0);
-      case Key::VolumeUp:       return named(u8"AudioVolumeUp", u8"AudioVolumeUp", u8"VolumeUp", boo::vk::VolumeUp);
-      case Key::VolumeDown:
-        return named(u8"AudioVolumeDown", u8"AudioVolumeDown", u8"VolumeDown", boo::vk::VolumeDown);
-      case Key::Mute:
-        return named(u8"AudioVolumeMute", u8"AudioVolumeMute", u8"VolumeMute", boo::vk::VolumeMute);
-      case Key::Help:       return named(u8"Help", u8"Help", u8"Help", boo::vk::Help);
-      case Key::Home:       return named(u8"Home", u8"Home", u8"Home", boo::vk::Home);
-      case Key::End:        return named(u8"End", u8"End", u8"End", boo::vk::End);
-      case Key::PageUp:     return named(u8"PageUp", u8"PageUp", u8"PageUp", boo::vk::Prior);
-      case Key::PageDown:   return named(u8"PageDown", u8"PageDown", u8"PageDown", boo::vk::Next);
-      case Key::LeftArrow:  return named(u8"ArrowLeft", u8"ArrowLeft", u8"Left", boo::vk::Left);
-      case Key::RightArrow: return named(u8"ArrowRight", u8"ArrowRight", u8"Right", boo::vk::Right);
-      case Key::DownArrow:  return named(u8"ArrowDown", u8"ArrowDown", u8"Down", boo::vk::Down);
-      case Key::UpArrow:    return named(u8"ArrowUp", u8"ArrowUp", u8"Up", boo::vk::Up);
-      case Key::Insert:     return named(u8"Insert", u8"Insert", u8"Insert", boo::vk::Insert);
-      case Key::PrintScreen:
-        return named(u8"PrintScreen", u8"PrintScreen", u8"PrintScreen", boo::vk::Snapshot);
-      case Key::Pause:       return named(u8"Pause", u8"Pause", u8"Pause", boo::vk::Pause);
-      case Key::ScrollLock:  return named(u8"ScrollLock", u8"ScrollLock", u8"Scroll", boo::vk::Scroll);
-      case Key::NumLock:     return named(u8"NumLock", u8"NumLock", u8"NumLock", boo::vk::NumLock);
-      case Key::ContextMenu: return named(u8"ContextMenu", u8"ContextMenu", u8"Apps", boo::vk::Apps);
-      default:               return named({}, u8"Unidentified", u8"Unidentified", 0);
+      case Key::ForwardDelete:  return named(u8"Delete", u8"Delete", boo::vk::Delete);
+      case Key::Escape:         return named(u8"Escape", u8"Escape", boo::vk::Escape);
+      case Key::Command:        return named(u8"MetaLeft", u8"Meta", boo::vk::LWin);
+      case Key::Shift:          return named(u8"ShiftLeft", u8"Shift", boo::vk::LShift);
+      case Key::RightShift:     return named(u8"ShiftRight", u8"Shift", boo::vk::RShift);
+      case Key::CapsLock:       return named(u8"CapsLock", u8"CapsLock", boo::vk::Capital);
+      case Key::Option:         return named(u8"AltLeft", u8"Alt", boo::vk::LMenu);
+      case Key::RightOption:    return named(u8"AltRight", u8"Alt", boo::vk::RMenu);
+      case Key::Control:        return named(u8"ControlLeft", u8"Control", boo::vk::LControl);
+      case Key::RightControl:   return named(u8"ControlRight", u8"Control", boo::vk::RControl);
+      case Key::Function:       return named(u8"Fn", u8"Fn", 0);
+      case Key::VolumeUp:       return named(u8"AudioVolumeUp", u8"AudioVolumeUp", boo::vk::VolumeUp);
+      case Key::VolumeDown:     return named(u8"AudioVolumeDown", u8"AudioVolumeDown", boo::vk::VolumeDown);
+      case Key::Mute:           return named(u8"AudioVolumeMute", u8"AudioVolumeMute", boo::vk::VolumeMute);
+      case Key::Help:           return named(u8"Help", u8"Help", boo::vk::Help);
+      case Key::Home:           return named(u8"Home", u8"Home", boo::vk::Home);
+      case Key::End:            return named(u8"End", u8"End", boo::vk::End);
+      case Key::PageUp:         return named(u8"PageUp", u8"PageUp", boo::vk::Prior);
+      case Key::PageDown:       return named(u8"PageDown", u8"PageDown", boo::vk::Next);
+      case Key::LeftArrow:      return named(u8"ArrowLeft", u8"ArrowLeft", boo::vk::Left);
+      case Key::RightArrow:     return named(u8"ArrowRight", u8"ArrowRight", boo::vk::Right);
+      case Key::DownArrow:      return named(u8"ArrowDown", u8"ArrowDown", boo::vk::Down);
+      case Key::UpArrow:        return named(u8"ArrowUp", u8"ArrowUp", boo::vk::Up);
+      case Key::Insert:         return named(u8"Insert", u8"Insert", boo::vk::Insert);
+      case Key::PrintScreen:    return named(u8"PrintScreen", u8"PrintScreen", boo::vk::Snapshot);
+      case Key::Pause:          return named(u8"Pause", u8"Pause", boo::vk::Pause);
+      case Key::ScrollLock:     return named(u8"ScrollLock", u8"ScrollLock", boo::vk::Scroll);
+      case Key::NumLock:        return named(u8"NumLock", u8"NumLock", boo::vk::NumLock);
+      case Key::ContextMenu:    return named(u8"ContextMenu", u8"ContextMenu", boo::vk::Apps);
+      default:                  return named({}, u8"Unidentified", 0);
     }
   }
 
@@ -245,19 +222,12 @@ namespace krys::ui::input
       keyValue = u8"Unidentified";
     }
 
-    utf8_string keyIdentifier = !description.KeyIdentifier.empty() ? utf8_string(description.KeyIdentifier)
-                                : text.DeadKey
-                                  ? utf8_string(u8"Unidentified")
-                                  : KeyIdentifierForText(!text.UnmodifiedText.empty() ? text.UnmodifiedText
-                                                         : !text.Text.empty()         ? text.Text
-                                                                                      : keyValue);
-
     // Alt combinations are system keys, as on Windows.
     bool isSystemKey = modifiers.contains(pal::KeyModifier::Alt);
     return boo::PlatformKeyboardEvent(type, text.Text, text.UnmodifiedText, krys::move(keyValue),
-                                      utf8_string(description.Code), krys::move(keyIdentifier),
-                                      description.LegacyKeyCode, isAutoRepeat, description.IsKeypad,
-                                      isSystemKey, ToBooey(modifiers), boo::html::EventLoop::Current().Now());
+                                      utf8_string(description.Code), description.LegacyKeyCode, isAutoRepeat,
+                                      description.IsKeypad, isSystemKey, ToBooey(modifiers),
+                                      boo::html::EventLoop::Current().Now());
   }
 
   namespace
@@ -269,7 +239,7 @@ namespace krys::ui::input
       InputMethodPlatformKeyboardEvent(const utf8_string &text,
                                        Maybe<List<boo::CompositionUnderline>> underlines,
                                        uint32 selectionStart, uint32 selectionLength) noexcept
-          : PlatformKeyboardEvent(Type::KeyDown, text, text, u8"Unidentified", u8"Unidentified", u8"U+0000",
+          : PlatformKeyboardEvent(Type::KeyDown, text, text, u8"Unidentified", u8"Unidentified",
                                   boo::vk::Process, false, false, false, {},
                                   boo::html::EventLoop::Current().Now())
       {
@@ -294,10 +264,8 @@ namespace krys::ui::input
 
   boo::PlatformKeyboardEvent TextInputEvent(const utf8_string &text) noexcept
   {
-    auto keyIdentifier = KeyIdentifierForText(text);
-    return boo::PlatformKeyboardEvent(boo::PlatformEvent::Type::Char, text, text, text, {},
-                                      krys::move(keyIdentifier), 0, false, false, false, {},
-                                      boo::html::EventLoop::Current().Now());
+    return boo::PlatformKeyboardEvent(boo::PlatformEvent::Type::Char, text, text, text, {}, 0, false, false,
+                                      false, {}, boo::html::EventLoop::Current().Now());
   }
 
   List<boo::CompositionUnderline> CompositionUnderlines(utf8_stringview text,

@@ -16,7 +16,7 @@ namespace krys::boo::css::tests
   TEST_CASE_METHOD(ValueFixture, "BorderImageSliceValue::Create", "[CSS][Values][BorderImageSliceValue]")
   {
     auto value = BorderImageSliceValue::Create(SideValues::Uniform(Num(10.0)), true);
-    CHECK(value->IsBorderImageSliceValue());
+    CHECK(Is<BorderImageSliceValue>(*value));
     CHECK(value->Fill());
     CHECK(CssText(*value->Slices().Top) == "10");
     CHECK(CssText(*value->Slices().Left) == "10");

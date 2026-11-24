@@ -1,27 +1,4 @@
-﻿/*
- * Copyright (C) 2001 Peter Kelly (pmk@post.com)
- * Copyright (C) 2001 Tobias Anton (anton@stud.fbi.fh-darmstadt.de)
- * Copyright (C) 2006 Samuel Weinig (sam.weinig@gmail.com)
- * Copyright (C) 2003-2024 Apple Inc. All rights reserved.
- * Copyright (C) 2017 Google Inc. All rights reserved.
- *
- * This library is free software; you can redistribute it and/or
- * modify it under the terms of the GNU Library General Public
- * License as published by the Free Software Foundation; either
- * version 2 of the License, or (at your option) any later version.
- *
- * This library is distributed in the hope that it will be useful,
- * but WITHOUT ANY WARRANTY; without even the implied warranty of
- * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU
- * Library General Public License for more details.
- *
- * You should have received a copy of the GNU Library General Public License
- * along with this library; see the file COPYING.LIB.  If not, write to
- * the Free Software Foundation, Inc., 51 Franklin Street, Fifth Floor,
- * Boston, MA 02110-1301, USA.
- */
-
-#include "Krystal.Booey/DOM/Events/MouseEvent.hpp"
+﻿#include "Krystal.Booey/DOM/Events/MouseEvent.hpp"
 #include "Krystal.Booey/DOM/Events/EventNames.hpp"
 #include "Krystal.Booey/DOM/Nodes/Document.hpp"
 #include "Krystal.Booey/DOM/Nodes/Element.hpp"
@@ -35,19 +12,17 @@ namespace krys::boo
 {
   namespace
   {
+    /// @brief A coordinate a page gave, with infinities and NaN as 0.
     KRYS_NODISCARD double FiniteOrZero(double value) noexcept
     {
       return std::isfinite(value) ? value : 0;
     }
 
-    KRYS_NODISCARD int16 ButtonOrLeft(MouseButton button) noexcept
+    /// @brief The `button` value of @p button. With no button involved, `button` reads as the left (0) and
+    /// only `ButtonDown()` tells the difference.
+    KRYS_NODISCARD int16 ButtonValue(int16 button) noexcept
     {
-      return static_cast<int16>(button == MouseButton::None ? MouseButton::Left : button);
-    }
-
-    KRYS_NODISCARD RefPtr<Node> AsNode(RefPtr<EventTarget> target) noexcept
-    {
-      return DynamicDowncast<Node>(krys::move(target));
+      return button == static_cast<int16>(MouseButton::None) ? static_cast<int16>(MouseButton::Left) : button;
     }
   }
 
@@ -62,10 +37,7 @@ namespace krys::boo
   }
 
   MouseEvent::MouseEvent(DOMStringAtom type, const MouseEventInit &initializer) noexcept
-      : MouseRelatedEvent(krys::move(type), initializer),
-        _button(initializer.Button == static_cast<int16>(MouseButton::None)
-                  ? static_cast<int16>(MouseButton::Left)
-                  : initializer.Button),
+      : MouseRelatedEvent(krys::move(type), initializer), _button(ButtonValue(initializer.Button)),
         _buttons(initializer.Buttons),
         _buttonDown(initializer.Button != static_cast<int16>(MouseButton::None)),
         _relatedTarget(initializer.RelatedTarget)
@@ -81,9 +53,10 @@ namespace krys::boo
                          const List<Ref<MouseEvent>> &predictedEvents, Simulated isSimulated) noexcept
       : MouseRelatedEvent(krys::move(type), eventInitDict, view, screenLocation, windowLocation, movementX,
                           movementY, modifiers, isSimulated),
-        _button(ButtonOrLeft(button)), _buttons(buttons), _syntheticClickType(syntheticClickType),
-        _buttonDown(button != MouseButton::None), _relatedTarget(ShareRefPtr(relatedTarget)), _force(force),
-        _coalescedEvents(coalescedEvents), _predictedEvents(predictedEvents)
+        _button(ButtonValue(static_cast<int16>(button))), _buttons(buttons),
+        _syntheticClickType(syntheticClickType), _buttonDown(button != MouseButton::None),
+        _relatedTarget(ShareRefPtr(relatedTarget)), _force(force), _coalescedEvents(coalescedEvents),
+        _predictedEvents(predictedEvents)
   {
     _isTrusted = true;
   }
@@ -94,12 +67,13 @@ namespace krys::boo
                                      const List<Ref<MouseEvent>> &predictedEvents, int32 detail,
                                      Node *relatedTarget) noexcept
   {
-    bool isMouseEnterOrLeave = eventType == event_names::MouseEnter || eventType == event_names::MouseLeave;
-
+    // mouseenter and mouseleave go only to the element entered or left; the other types bubble, can be
+    // canceled and leave shadow trees.
+    bool bubbles = eventType != event_names::MouseEnter && eventType != event_names::MouseLeave;
     UIEventInit init;
-    init.Bubbles = !isMouseEnterOrLeave;
-    init.Cancelable = !isMouseEnterOrLeave;
-    init.Composed = !isMouseEnterOrLeave;
+    init.Bubbles = bubbles;
+    init.Cancelable = bubbles;
+    init.Composed = bubbles;
     init.Detail = detail;
 
     Ref<MouseEvent> mouseEvent = AdoptRef(*new MouseEvent(
@@ -140,14 +114,11 @@ namespace krys::boo
     init.Cancelable = true;
     init.Composed = true;
 
+    // The modifiers are those of the key press or click it stands in for.
     EnumSet<Modifier> modifiers;
-    for (auto *event = underlyingEvent; event; event = event->UnderlyingEvent())
+    if (auto *eventWithKeyState = dom::FindEventWithKeyState(underlyingEvent))
     {
-      if (event->IsMouseEvent() || event->IsKeyboardEvent())
-      {
-        modifiers = static_cast<UIEventWithKeyState *>(event)->ModifierKeys();
-        break;
-      }
+      modifiers = eventWithKeyState->ModifierKeys();
     }
 
     auto *frame = target.NodeDocument().Frame();
@@ -185,23 +156,24 @@ namespace krys::boo
                                   double clientY, bool ctrlKey, bool altKey, bool shiftKey, bool metaKey,
                                   int16 button, EventTarget *relatedTarget) noexcept
   {
+    // As initUIEvent: nothing changes while the event is being dispatched.
     if (_dispatched)
     {
       return;
     }
 
     InitUIEvent(krys::move(type), canBubble, cancelable, view, detail);
+    // The coordinates are converted with the new view's frame view.
     UpdateFrameView();
 
     SetScreenLocation({FiniteOrZero(screenX), FiniteOrZero(screenY)});
     SetModifierKeys(ctrlKey, altKey, shiftKey, metaKey);
-    _button =
-      button == static_cast<int16>(MouseButton::None) ? static_cast<int16>(MouseButton::Left) : button;
+    _button = ButtonValue(button);
     _buttonDown = button != static_cast<int16>(MouseButton::None);
     _relatedTarget = ShareRefPtr(relatedTarget);
 
     InitCoordinates({FiniteOrZero(clientX), FiniteOrZero(clientY)});
-
+    // An event the page initialized has the coordinates it was given, even if it was simulated before.
     SetIsSimulated(false);
   }
 
@@ -211,39 +183,17 @@ namespace krys::boo
     {
       return false;
     }
-    auto *mouseEvent = event.IsMouseEvent() ? static_cast<const MouseEvent *>(&event) : nullptr;
+    auto *mouseEvent = DynamicDowncast<MouseEvent>(event);
     return !mouseEvent || mouseEvent->ButtonType() != MouseButton::Right;
   }
 
   uint32 MouseEvent::Which() const noexcept
   {
-    // For the DOM, the return values for left, middle and right mouse buttons are 0, 1, 2, respectively.
-    // For the Netscape "which" property, the return values for left, middle and right mouse buttons are 1, 2,
-    // 3, respectively. So we must add 1.
+    // button + 1, so the left button is 1; 0 when no button is involved.
     if (!_buttonDown)
     {
       return 0;
     }
     return static_cast<uint32>(_button + 1);
-  }
-
-  RefPtr<Node> MouseEvent::ToElement() const noexcept
-  {
-    // MSIE extension - "the object toward which the user is moving the mouse pointer"
-    if (Type() == event_names::MouseOut || Type() == event_names::MouseLeave)
-    {
-      return AsNode(RelatedTarget());
-    }
-    return AsNode(Target());
-  }
-
-  RefPtr<Node> MouseEvent::FromElement() const noexcept
-  {
-    // MSIE extension - "object from which activation or the mouse pointer is exiting during the event" (huh?)
-    if (Type() == event_names::MouseOut || Type() == event_names::MouseLeave)
-    {
-      return AsNode(Target());
-    }
-    return AsNode(RelatedTarget());
   }
 }

@@ -111,7 +111,7 @@ namespace krys::boo::css
 
     auto isEqual = [&](const ImmutableStyleProperties &existingValue)
     {
-      if (existingValue.PropertyCount() != properties.size())
+      if (existingValue.size() != properties.size())
       {
         return false;
       }

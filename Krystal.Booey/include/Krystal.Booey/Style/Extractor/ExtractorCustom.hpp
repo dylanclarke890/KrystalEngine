@@ -36,7 +36,6 @@
 #include "Krystal.Booey/CSS/Properties/PropertyShorthand.hpp"
 #include "Krystal.Booey/CSS/Properties/PropertyShorthandFunctions.hpp"
 #include "Krystal.Booey/CSS/Values/Aggregates.hpp"
-#include "Krystal.Booey/CSS/Values/FontValue.hpp"
 #include "Krystal.Booey/CSS/Values/GridAutoRepeatValue.hpp"
 #include "Krystal.Booey/CSS/Values/GridIntegerRepeatValue.hpp"
 #include "Krystal.Booey/CSS/Values/GridLineNamesValue.hpp"
@@ -2030,8 +2029,7 @@ namespace krys::boo::style
 
     auto layerItem = [&](const css::Value &value, size_t i) -> Ref<css::Value>
     {
-      const auto &item =
-        layerCount == 1 ? value : *Downcast<css::ValueList>(value).Item(static_cast<uint32>(i));
+      const auto &item = layerCount == 1 ? value : Downcast<css::ValueList>(value)[static_cast<uint32>(i)];
       return ShareRef(const_cast<css::Value &>(item));
     };
 
@@ -2045,12 +2043,12 @@ namespace krys::boo::style
       }
       for (size_t j = 0; j < propertiesBeforeSlashSeparator.Size(); j++)
       {
-        beforeList.push_back(layerItem(*before->Item(static_cast<uint32>(j)), i));
+        beforeList.push_back(layerItem((*before)[static_cast<uint32>(j)], i));
       }
       css::ValueListBuilder afterList;
       for (size_t j = 0; j < propertiesAfterSlashSeparator.Size(); j++)
       {
-        afterList.push_back(layerItem(*after->Item(static_cast<uint32>(j)), i));
+        afterList.push_back(layerItem((*after)[static_cast<uint32>(j)], i));
       }
       auto list =
         css::ValueList::CreateSlashSeparated(css::ValueList::CreateSpaceSeparated(krys::move(beforeList)),
@@ -2541,7 +2539,7 @@ namespace krys::boo::style
     Ref<css::ValueList> endValue = createRangeValue(range.End);
     bool endValueEqualsStart = startValue->Equals(*endValue);
 
-    if (startValue->Length())
+    if (startValue->size())
     {
       list.push_back(krys::move(startValue));
     }
@@ -2549,7 +2547,7 @@ namespace krys::boo::style
     bool isNormal = range.End.IsNormal();
     bool isDefaultAndSameNameAsStart =
       range.Start.GetName() == range.End.GetName() && range.End.HasDefaultOffset();
-    if (endValue->Length() && !endValueEqualsStart && !isNormal && !isDefaultAndSameNameAsStart)
+    if (endValue->size() && !endValueEqualsStart && !isNormal && !isDefaultAndSameNameAsStart)
     {
       list.push_back(krys::move(endValue));
     }
@@ -2895,43 +2893,45 @@ namespace krys::boo::style
              && description.VariationSettings().empty();
     };
 
-    auto computedFont = css::FontValue::Create();
-
+    // `[style] [variant] [weight] [width] size [/ line-height] family`, leaving out the parts that are
+    // `normal`; nothing at all if a longhand the shorthand resets has a value it can't express.
+    css::ValueListBuilder parts;
     if (!propertiesResetByShorthandAreExpressible())
     {
-      return computedFont;
+      return css::ValueList::CreateSpaceSeparated(krys::move(parts));
     }
 
-    auto size = CreateCSSValue(state.Pool, state.Style, Length<> {description.ComputedSize()});
-    computedFont->Size = DynamicDowncast<css::PrimitiveValue>(krys::move(size));
-
-    auto lineHeight = ExtractorGenerated::ExtractValue(state, css::PropertyId::LineHeight);
-    auto *computedLineHeight = DynamicDowncast<css::PrimitiveValue>(lineHeight.get());
-    if (computedLineHeight && !css::IsValueId(*computedLineHeight, css::ValueId::Normal))
+    if (*fontStyle != css::ValueId::Normal)
     {
-      computedFont->LineHeight = ShareRefPtr(computedLineHeight);
+      parts.push_back(css::PrimitiveValue::Create(*fontStyle));
     }
-
     if (description.VariantCaps() == FontVariantCaps::Small)
     {
-      computedFont->Variant = css::PrimitiveValue::Create(css::ValueId::SmallCaps);
+      parts.push_back(css::PrimitiveValue::Create(css::ValueId::SmallCaps));
     }
     if (float weight = description.Weight(); weight != 400)
     {
-      computedFont->Weight = css::PrimitiveValue::Create(weight);
+      parts.push_back(css::PrimitiveValue::Create(weight));
     }
     if (*fontWidth != css::ValueId::Normal)
     {
-      computedFont->Width = css::PrimitiveValue::Create(*fontWidth);
+      parts.push_back(css::PrimitiveValue::Create(*fontWidth));
     }
-    if (*fontStyle != css::ValueId::Normal)
+
+    auto size = CreateCSSValue(state.Pool, state.Style, Length<> {description.ComputedSize()});
+    auto lineHeight = ExtractorGenerated::ExtractValue(state, css::PropertyId::LineHeight);
+    auto *computedLineHeight = DynamicDowncast<css::PrimitiveValue>(lineHeight.get());
+    if (computedLineHeight && computedLineHeight->ValueId() != css::ValueId::Normal)
     {
-      computedFont->Style = css::PrimitiveValue::Create(*fontStyle);
+      parts.push_back(css::ValueList::CreateSlashSeparated(krys::move(size), ShareRef(*computedLineHeight)));
+    }
+    else
+    {
+      parts.push_back(krys::move(size));
     }
 
-    computedFont->Family = CreateCSSValue(state.Pool, state.Style, state.Style.FontFamily());
-
-    return computedFont;
+    parts.push_back(CreateCSSValue(state.Pool, state.Style, state.Style.FontFamily()));
+    return css::ValueList::CreateSpaceSeparated(krys::move(parts));
   }
 
   inline void
@@ -2949,7 +2949,7 @@ namespace krys::boo::style
     {
       auto value = ExtractorGenerated::ExtractValue(state, longhand);
       // We may not have a value if the longhand is disabled.
-      if (!value || css::IsValueId(value, css::ValueId::Normal))
+      if (!value || value->ValueId() == css::ValueId::Normal)
       {
         continue;
       }

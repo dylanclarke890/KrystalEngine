@@ -49,7 +49,6 @@
 #include "Krystal.Booey/CSS/Values/FontFeatureValue.hpp"
 #include "Krystal.Booey/CSS/Values/FontStyleRangeValue.hpp"
 #include "Krystal.Booey/CSS/Values/FontStyleWithAngleValue.hpp"
-#include "Krystal.Booey/CSS/Values/FontValue.hpp"
 #include "Krystal.Booey/CSS/Values/FontVariationValue.hpp"
 #include "Krystal.Booey/CSS/Values/FunctionValue.hpp"
 #include "Krystal.Booey/CSS/Values/GradientValue.hpp"
@@ -91,10 +90,13 @@
 
 namespace krys::boo::css
 {
+  // The reference count, the packed header and the static flag, with nothing else.
+  static_assert(sizeof(Value) == 8uz);
+
   template <typename Visitor>
   constexpr decltype(auto) Value::VisitDerived(Visitor &&visitor) noexcept
   {
-    switch (_type)
+    switch (_header.Type)
     {
       case ValueType::Attr:
       {
@@ -159,10 +161,6 @@ namespace krys::boo::css
       case ValueType::Filter:
       {
         return std::invoke(std::forward<Visitor>(visitor), Downcast<FilterValue>(*this));
-      }
-      case ValueType::Font:
-      {
-        return std::invoke(std::forward<Visitor>(visitor), Downcast<FontValue>(*this));
       }
       case ValueType::FontFaceSrcLocal:
       {
@@ -325,11 +323,6 @@ namespace krys::boo::css
     krys_unreachable();
   }
 
-  bool Value::CustomTraverseSubresources(const Func<bool(const CachedResource &)> &) noexcept
-  {
-    return false;
-  }
-
   template <typename Visitor>
   constexpr decltype(auto) Value::VisitDerived(Visitor &&visitor) const noexcept
   {
@@ -339,17 +332,50 @@ namespace krys::boo::css
 
   IterationStatus Value::VisitChildren(const Func<IterationStatus(Value &)> &func) const noexcept
   {
-    return VisitDerived([&](auto &value) { return value.CustomVisitChildren(func); });
+    return VisitDerived(
+      [&](auto &value)
+      {
+        if constexpr (requires { value.CustomVisitChildren(func); })
+        {
+          return value.CustomVisitChildren(func);
+        }
+        else
+        {
+          return IterationStatus::Continue;
+        }
+      });
   }
 
   bool Value::MayDependOnBaseUrl() const noexcept
   {
-    return VisitDerived([&](auto &value) { return value.CustomMayDependOnBaseUrl(); });
+    return VisitDerived(
+      [&](auto &value)
+      {
+        if constexpr (requires { value.CustomMayDependOnBaseUrl(); })
+        {
+          return value.CustomMayDependOnBaseUrl();
+        }
+        else
+        {
+          return false;
+        }
+      });
   }
 
   bool Value::TraverseSubresources(const Func<bool(const CachedResource &)> &handler) const noexcept
   {
-    return VisitDerived([&](auto &value) { return value.CustomTraverseSubresources(handler); });
+    return VisitDerived(
+      [&](auto &value)
+      {
+        if constexpr (requires { value.CustomTraverseSubresources(handler); })
+        {
+          return value.CustomTraverseSubresources(handler);
+        }
+        else
+        {
+          return false;
+        }
+      });
   }
 
   css::ComputedStyleDependencies Value::ComputedStyleDependencies() const noexcept
@@ -389,7 +415,7 @@ namespace krys::boo::css
 
   bool Value::Equals(const Value &other) const noexcept
   {
-    if (_type == other._type)
+    if (_header.Type == other._header.Type)
     {
       return VisitDerived(
         [&]<typename TValue>(TValue &typedThis)
@@ -417,33 +443,21 @@ namespace krys::boo::css
     // To match Equals() a single item list could have the same hash as the item.
     // FIXME: Some Style::Builder functions can only handle list values.
 
-    seed = CombineFastHashes(seed, _type);
+    seed = CombineFastHashes(seed, _header.Type);
 
-    return VisitDerived([&](auto &typedThis) { return typedThis.AddDerivedHash(seed); });
-  }
-
-  bool Value::AddDerivedHash(size_t &seed) const noexcept
-  {
-    seed = CombineFastHashes(seed, this);
-    return false;
-  }
-
-  bool Value::IsCSSLocalUrl(CSSOMStringView relativeUrl) noexcept
-  {
-    return relativeUrl.empty() || relativeUrl.starts_with(u8'#');
-  }
-
-  CSSOMStringView Value::SeparatorCSSText(ValueSeparator separator) noexcept
-  {
-    switch (separator)
-    {
-      case ValueSeparator::SpaceSeparator: return u8" ";
-      case ValueSeparator::CommaSeparator: return u8", ";
-      case ValueSeparator::SlashSeparator: return u8" / ";
-    }
-
-    krys_debug_assert(false);
-    return u8" ";
+    // A class hashes its contents with an `AddDerivedHash`; without one, its values aren't hashed.
+    return VisitDerived(
+      [&](auto &value)
+      {
+        if constexpr (requires { value.AddDerivedHash(seed); })
+        {
+          return value.AddDerivedHash(seed);
+        }
+        else
+        {
+          return false;
+        }
+      });
   }
 
   CSSOMString Value::CssText(const SerialisationContext &context) const noexcept

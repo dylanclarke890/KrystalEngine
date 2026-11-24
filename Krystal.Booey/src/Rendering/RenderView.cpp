@@ -88,24 +88,24 @@ namespace krys::boo
     return _frameView.Frame().PageZoomFactor();
   }
 
-  SizeF RenderView::SizeForCSSSmallViewportUnits() const noexcept
+  SizeF RenderView::SizeForCSSSmallViewportUnits(const RenderStyle *rootStyle) const noexcept
   {
-    return _frameView.SizeForCSSSmallViewportUnits();
+    return _frameView.SizeForCSSSmallViewportUnits(rootStyle);
   }
 
-  SizeF RenderView::SizeForCSSLargeViewportUnits() const noexcept
+  SizeF RenderView::SizeForCSSLargeViewportUnits(const RenderStyle *rootStyle) const noexcept
   {
-    return _frameView.SizeForCSSLargeViewportUnits();
+    return _frameView.SizeForCSSLargeViewportUnits(rootStyle);
   }
 
-  SizeF RenderView::SizeForCSSDynamicViewportUnits() const noexcept
+  SizeF RenderView::SizeForCSSDynamicViewportUnits(const RenderStyle *rootStyle) const noexcept
   {
-    return _frameView.SizeForCSSDynamicViewportUnits();
+    return _frameView.SizeForCSSDynamicViewportUnits(rootStyle);
   }
 
-  SizeF RenderView::SizeForCSSDefaultViewportUnits() const noexcept
+  SizeF RenderView::SizeForCSSDefaultViewportUnits(const RenderStyle *rootStyle) const noexcept
   {
-    return _frameView.SizeForCSSDefaultViewportUnits();
+    return _frameView.SizeForCSSDefaultViewportUnits(rootStyle);
   }
 
   void RenderView::UpdateQuirksMode() noexcept

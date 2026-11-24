@@ -34,7 +34,7 @@ namespace krys::boo::css
   UnevaluatedCalcBase UnevaluatedCalcBase::SimplifyBase(const ToLengthConversionData &conversionData,
                                                         const SymbolTable &symbolTable) const noexcept
   {
-    return UnevaluatedCalcBase {ProtectedCalc()->CopySimplified(conversionData, symbolTable)};
+    return UnevaluatedCalcBase {_calc->CopySimplified(conversionData, symbolTable)};
   }
 
   double UnevaluatedCalcBase::Evaluate(Category category, const style::BuilderState &state) const noexcept
@@ -58,8 +58,8 @@ namespace krys::boo::css
                                        const ToLengthConversionData &conversionData,
                                        const SymbolTable &symbolTable) const noexcept
   {
-    krys_debug_assert(ProtectedCalc()->GetCategory() == category);
-    return ProtectedCalc()->DoubleValue(conversionData, symbolTable);
+    krys_debug_assert(_calc->GetCategory() == category);
+    return _calc->DoubleValue(conversionData, symbolTable);
   }
 
   double UnevaluatedCalcBase::Evaluate(Category category, NoConversionDataRequiredTag tag) const noexcept
@@ -70,7 +70,7 @@ namespace krys::boo::css
   double UnevaluatedCalcBase::Evaluate(KRYS_MAYBE_UNUSED Category category, NoConversionDataRequiredTag tag,
                                        const SymbolTable &symbolTable) const noexcept
   {
-    krys_debug_assert(ProtectedCalc()->GetCategory() == category);
-    return ProtectedCalc()->DoubleValue(tag, symbolTable);
+    krys_debug_assert(_calc->GetCategory() == category);
+    return _calc->DoubleValue(tag, symbolTable);
   }
 }

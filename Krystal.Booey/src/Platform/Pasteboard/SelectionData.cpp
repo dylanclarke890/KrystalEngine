@@ -1,22 +1,4 @@
-﻿/*
- * Copyright (C) 2009, Martin Robinson
- *
- *  This library is free software; you can redistribute it and/or
- *  modify it under the terms of the GNU Lesser General Public
- *  License as published by the Free Software Foundation; either
- *  version 2 of the License, or (at your option) any later version.
- *
- *  This library is distributed in the hope that it will be useful,
- *  but WITHOUT ANY WARRANTY; without even the implied warranty of
- *  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU
- *  Lesser General Public License for more details.
- *
- *  You should have received a copy of the GNU Lesser General Public
- *  License along with this library; if not, write to the Free Software
- *  Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
- */
-
-#include "Krystal.Booey/Platform/Pasteboard/SelectionData.hpp"
+﻿#include "Krystal.Booey/Platform/Pasteboard/SelectionData.hpp"
 #include "Krystal.Core/Strings/ASCII.hpp"
 
 namespace krys::boo
@@ -78,33 +60,6 @@ namespace krys::boo
     }
   }
 
-  SelectionData::SelectionData(utf8_stringview text, utf8_stringview markup, const net::Url &url,
-                               utf8_stringview uriList, RefPtr<SharedBuffer> &&customData,
-                               bool canSmartReplace) noexcept
-  {
-    if (!text.empty())
-    {
-      SetText(text);
-    }
-    if (!markup.empty())
-    {
-      SetMarkup(markup);
-    }
-    if (!url.IsEmpty())
-    {
-      SetUrl(url, {});
-    }
-    if (!uriList.empty())
-    {
-      SetURIList(uriList);
-    }
-    if (customData)
-    {
-      _customData = krys::move(customData);
-    }
-    SetCanSmartReplace(canSmartReplace);
-  }
-
   void SelectionData::SetText(utf8_stringview text) noexcept
   {
     _text = ReplaceNonBreakingSpaceWithSpace(text);
@@ -114,14 +69,9 @@ namespace krys::boo
   {
     _uriList = utf8_string(uriListString);
 
-    // Line separator is \r\n per RFC 2483 - however, for compatibility
-    // reasons we also allow just \n here.
-
-    // Process the input and copy the first valid URL into the url member.
-    // In case no URLs can be found, subsequent calls to getData("URL")
-    // will get an empty string. This is in line with the HTML5 spec (see
-    // "The DragEvent and DataTransfer interfaces"). Also extract all filenames
-    // from the URI list.
+    // The URL is the list's first valid one, which getData("url") gives
+    // (https://html.spec.whatwg.org/#dom-datatransfer-getdata), and every file URL's path is a file name.
+    // Lines end in CRLF (RFC 2483), but a lone LF is accepted too; lines starting with `#` are comments.
     bool setUrl = HasUrl();
     utf8_stringview rest = uriListString;
     while (!rest.empty())

@@ -117,6 +117,26 @@ namespace krys::boo::tests
          "<note a=\"1\"><?app go?><to>T\xc3\xa9</to></note>");
   }
 
+  TEST_CASE("An XML document is UTF-8 whatever its declaration says", "[XML][XMLDocumentParser]")
+  {
+    for (auto encoding : {u8"ISO-8859-1", u8"windows-1252", u8"UTF-16", u8"Shift_JIS"})
+    {
+      CAPTURE(reinterpret_cast<const char *>(encoding));
+      LoadFixture fixture;
+      LoadDocument(fixture,
+                   u8"<?xml version=\"1.0\" encoding=\"" + utf8_string(encoding) + u8"\"?><note>Té 日</note>",
+                   u8"application/xml");
+
+      auto &document = fixture.Document();
+      // The declaration is kept as written.
+      CHECK(document.XMLEncoding() == encoding);
+      auto root = document.DocumentElement();
+      REQUIRE(root);
+      CHECK(root->LocalName() == u8"note");
+      CHECK(root->TextContent() == u8"Té 日");
+    }
+  }
+
   TEST_CASE("A malformed XML document shows its errors", "[XML][XMLDocumentParser]")
   {
     LoadFixture fixture;
@@ -212,6 +232,49 @@ namespace krys::boo::tests
     instruction.Remove();
     CHECK_FALSE(instruction.Sheet());
     CHECK(document.StyleSheets().Length() == 0);
+  }
+
+  TEST_CASE("xml-stylesheet processing instructions: where they load from, as in Chrome",
+            "[XML][XMLDocumentParser][cssom:requirements-on-user-agents-implementing-the-xml-stylesheet-"
+            "processing-instruction]")
+  {
+    LoadFixture fixture;
+    fixture.Strategy.AddText(u8"https://example.com/style.css", u8"rect { fill: green }");
+    auto instructionSheet = [&](const Node *node)
+    {
+      auto *instruction = DynamicDowncast<boo::ProcessingInstruction>(node);
+      return instruction ? instruction->Sheet() : nullptr;
+    };
+
+    SECTION("after the root element, outside the prolog, it still loads its sheet")
+    {
+      LoadDocument(fixture,
+                   u8"<svg xmlns=\"http://www.w3.org/2000/svg\"><rect/></svg>"
+                   u8"<?xml-stylesheet href=\"style.css\" type=\"text/css\"?>",
+                   u8"image/svg+xml");
+      CHECK(instructionSheet(fixture.Document().LastChild()));
+      CHECK(fixture.Document().StyleSheets().Length() == 1);
+    }
+
+    SECTION("without an href, it loads the document itself as its sheet")
+    {
+      LoadDocument(
+        fixture,
+        u8"<?xml-stylesheet type=\"text/css\"?><svg xmlns=\"http://www.w3.org/2000/svg\"><rect/></svg>",
+        u8"image/svg+xml");
+      CHECK(instructionSheet(fixture.Document().FirstChild()));
+      CHECK(fixture.Document().StyleSheets().Length() == 1);
+    }
+
+    SECTION("with a fragment href, it loads nothing")
+    {
+      LoadDocument(fixture,
+                   u8"<?xml-stylesheet href=\"#sheet\" type=\"text/css\"?>"
+                   u8"<svg xmlns=\"http://www.w3.org/2000/svg\"><rect/></svg>",
+                   u8"image/svg+xml");
+      CHECK_FALSE(instructionSheet(fixture.Document().FirstChild()));
+      CHECK(fixture.Document().StyleSheets().Length() == 0);
+    }
   }
 
   TEST_CASE("Markup inserted into an XML document is parsed as XML", "[XML][XMLDocumentParser]")

@@ -33,7 +33,7 @@ namespace krys::boo::css
     KRYS_NODISCARD constexpr static Maybe<FlexUnit> Validate(UnitType unitType, PropertyParserState &,
                                                              PropertyParserOptions) noexcept
     {
-      return UnitTraits<FlexUnit>::Validate(unitType);
+      return ToUnit<FlexUnit>(unitType);
     }
 
     template <auto R, typename V>

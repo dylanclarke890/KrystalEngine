@@ -27,6 +27,7 @@
 #include "Krystal.Booey/Animation/Timelines/ScrollAxis.hpp"
 #include "Krystal.Booey/CSS/Properties/Property.hpp"
 #include "Krystal.Booey/CSS/Properties/PropertyId.hpp"
+#include "Krystal.Booey/CSS/Properties/PropertyQueries.hpp"
 #include "Krystal.Booey/CSS/Values/Color/KeywordColor.hpp"
 #include "Krystal.Booey/CSS/Values/CustomPropertyValue.hpp"
 #include "Krystal.Booey/CSS/Values/ValuePool.hpp"
@@ -265,7 +266,7 @@ namespace krys::boo
       case css::PropertyId::BorderInlineEndColor:
       case css::PropertyId::BorderInlineStartColor:
         return UnresolvedColorForProperty(
-          css::Property::ResolveDirectionAwareProperty(colorProperty, GetWritingMode()));
+          css::ResolveDirectionAwareProperty(colorProperty, GetWritingMode()));
       case css::PropertyId::ColumnRuleColor:     return ColumnRuleColor();
       case css::PropertyId::TextEmphasisColor:   return TextEmphasisColor();
       case css::PropertyId::TextDecorationColor: return TextDecorationColor();

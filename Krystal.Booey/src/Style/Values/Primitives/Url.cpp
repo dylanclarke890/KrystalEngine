@@ -49,7 +49,7 @@ namespace krys::boo::style
   //      CSS:    [.specified = "foo/bar.png", .resolved = null-url]
   //      Style:  [.resolved = "foo/bar.png"]
 
-  Url ToStyleWithScriptExecutionContext(const css::CSSUrl &url, const Document &context) noexcept
+  Url ToStyleWithScriptExecutionContext(const css::Url &url, const Document &context) noexcept
   {
     if (url.Resolved.IsNull())
     {
@@ -65,7 +65,7 @@ namespace krys::boo::style
     };
   }
 
-  css::CSSUrl ToCSS<Url>::operator()(const Url &url, const RenderStyle &) noexcept
+  css::Url ToCSS<Url>::operator()(const Url &url, const RenderStyle &) noexcept
   {
     return {
       .Specified = url.Resolved.String(),
@@ -74,7 +74,7 @@ namespace krys::boo::style
     };
   }
 
-  Url ToStyle<css::CSSUrl>::operator()(const css::CSSUrl &url, const BuilderState &state) noexcept
+  Url ToStyle<css::Url>::operator()(const css::Url &url, const BuilderState &state) noexcept
   {
     return ToStyleWithScriptExecutionContext(url, state.GetDocument());
   }

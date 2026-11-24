@@ -1,99 +1,65 @@
-﻿/*
- * Copyright (C) 2010 Nokia Corporation and/or its subsidiary(-ies).
- * Copyright (C) 2006, 2015 Apple Inc. All rights reserved.
- *
- * This library is free software; you can redistribute it and/or
- * modify it under the terms of the GNU Library General Public
- * License as published by the Free Software Foundation; either
- * version 2 of the License, or (at your option) any later version.
- *
- * This library is distributed in the hope that it will be useful,
- * but WITHOUT ANY WARRANTY; without even the implied warranty of
- * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU
- * Library General Public License for more details.
- *
- * You should have received a copy of the GNU Library General Public License
- * along with this library; see the file COPYING.LIB.  If not, write to
- * the Free Software Foundation, Inc., 51 Franklin Street, Fifth Floor,
- * Boston, MA 02110-1301, USA.
- *
- */
-
-#pragma once
+﻿#pragma once
 
 #include "Krystal.Booey/Graphics/Geometry/LayoutUnit.hpp"
 #include "Krystal.Booey/Platform/Choosers/PopupMenuStyle.hpp"
-#include "Krystal.Core/Assert.hpp"
 #include "Krystal.Core/Strings/String.hpp"
 
 namespace krys::boo
 {
-  /// @brief What a popup menu shows and who it tells about the user's choice: a menu list.
+  /// @brief What a PopupMenu shows and tells about the user's choice: a menu list (`RenderMenuList`).
+  /// Items are counted by list index: options, group labels (`<optgroup>`) and separators (`<hr>`) in order.
   class PopupMenuClient
   {
   public:
     virtual ~PopupMenuClient() noexcept = default;
 
+    /// @brief Selects the option at @p listIndex as the user's choice, firing `input` and `change` if
+    /// @p fireEvents.
     virtual void ValueChanged(uint32 listIndex, bool fireEvents = true) noexcept = 0;
 
-    virtual void SelectionChanged(uint32 listIndex, bool fireEvents = true) noexcept = 0;
-
-    virtual void SelectionCleared() noexcept = 0;
-
+    /// @brief The text an item shows: an option's, or a group's label.
     KRYS_NODISCARD virtual utf8_string ItemText(uint32 listIndex) const noexcept = 0;
 
-    KRYS_NODISCARD virtual utf8_string ItemLabel(uint32 listIndex) const noexcept = 0;
-
-    KRYS_NODISCARD virtual utf8_string ItemIcon(uint32 listIndex) const noexcept = 0;
-
+    /// @brief An item's tooltip: its `title`.
     KRYS_NODISCARD virtual utf8_string ItemToolTip(uint32 listIndex) const noexcept = 0;
 
+    /// @brief An item's accessible name when its text isn't it: its `aria-label`, or empty.
     KRYS_NODISCARD virtual utf8_string ItemAccessibilityText(uint32 listIndex) const noexcept = 0;
 
+    /// @brief Whether an item can be chosen: an option that isn't disabled and isn't in a disabled group.
     KRYS_NODISCARD virtual bool ItemIsEnabled(uint32 listIndex) const noexcept = 0;
 
+    /// @brief How to draw an item: its colours, font, visibility and direction.
     KRYS_NODISCARD virtual PopupMenuStyle ItemStyle(uint32 listIndex) const noexcept = 0;
 
+    /// @brief How to draw the menu: the control's colours, font and direction, and the menu's size.
     KRYS_NODISCARD virtual PopupMenuStyle MenuStyle() const noexcept = 0;
 
-    KRYS_NODISCARD virtual int32 ClientInsetLeft() const noexcept = 0;
-
-    KRYS_NODISCARD virtual int32 ClientInsetRight() const noexcept = 0;
-
+    /// @brief The space to leave before and after the items' text, to line it up with the control's.
     KRYS_NODISCARD virtual LayoutUnit ClientPaddingLeft() const noexcept = 0;
 
     KRYS_NODISCARD virtual LayoutUnit ClientPaddingRight() const noexcept = 0;
 
+    /// @brief The number of items.
     KRYS_NODISCARD virtual int32 ListSize() const noexcept = 0;
 
+    /// @brief The list index of the selected option, or -1.
     KRYS_NODISCARD virtual int32 SelectedIndex() const noexcept = 0;
 
+    /// @brief Tells the menu list its menu has closed.
     virtual void PopupDidHide() noexcept = 0;
 
+    /// @brief Whether an item is a separator (`<hr>`).
     KRYS_NODISCARD virtual bool ItemIsSeparator(uint32 listIndex) const noexcept = 0;
 
+    /// @brief Whether an item is a group's label (`<optgroup>`).
     KRYS_NODISCARD virtual bool ItemIsLabel(uint32 listIndex) const noexcept = 0;
 
+    /// @brief Whether an item is the selected option.
     KRYS_NODISCARD virtual bool ItemIsSelected(uint32 listIndex) const noexcept = 0;
 
-    KRYS_NODISCARD virtual bool ShouldPopOver() const noexcept = 0;
-
+    /// @brief Shows an option's text in the control without selecting it, as a preview while the menu is
+    /// open.
     virtual void SetTextFromItem(uint32 listIndex) noexcept = 0;
-
-    virtual void ListBoxSelectItem(int32 listIndex, bool allowMultiplySelections, bool shift,
-                                   bool fireOnChangeNow = true) noexcept
-    {
-      (void)listIndex;
-      (void)allowMultiplySelections;
-      (void)shift;
-      (void)fireOnChangeNow;
-      krys_debug_assert_msg(false, "Not reached");
-    }
-
-    KRYS_NODISCARD virtual bool Multiple() const noexcept
-    {
-      krys_debug_assert_msg(false, "Not reached");
-      return false;
-    }
   };
 }

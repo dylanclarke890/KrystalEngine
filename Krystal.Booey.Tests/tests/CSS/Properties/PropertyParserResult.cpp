@@ -36,7 +36,7 @@ namespace krys::boo::css::tests
                          IsImportant::No);
       REQUIRE(properties.size() == 1uz);
       CHECK(properties[0].SetFromShorthand() == IsSetFromShorthand::Yes);
-      CHECK(properties[0].ShorthandIndex() == 1u);
+      CHECK(properties[0].Metadata().ShorthandIndex == 1u);
       CHECK(properties[0].ShorthandId() == PropertyId::Margin);
     }
 

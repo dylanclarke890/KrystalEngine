@@ -1,28 +1,4 @@
-﻿/*
- * Copyright (C) 2000 Lars Knoll (knoll@kde.org)
- *           (C) 2000 Antti Koivisto (koivisto@kde.org)
- *           (C) 2000 Dirk Mueller (mueller@kde.org)
- * Copyright (C) 2003, 2005, 2006, 2007, 2008 Apple Inc. All rights reserved.
- * Copyright (C) 2006 Graham Dennis (graham.dennis@gmail.com)
- *
- * This library is free software; you can redistribute it and/or
- * modify it under the terms of the GNU Library General Public
- * License as published by the Free Software Foundation; either
- * version 2 of the License, or (at your option) any later version.
- *
- * This library is distributed in the hope that it will be useful,
- * but WITHOUT ANY WARRANTY; without even the implied warranty of
- * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU
- * Library General Public License for more details.
- *
- * You should have received a copy of the GNU Library General Public License
- * along with this library; see the file COPYING.LIB.  If not, write to
- * the Free Software Foundation, Inc., 51 Franklin Street, Fifth Floor,
- * Boston, MA 02110-1301, USA.
- *
- */
-
-#pragma once
+﻿#pragma once
 
 #include "Krystal.Booey/Animation/Keyframes/KeyframeInterpolation.hpp"
 #include "Krystal.Booey/Rendering/Style/RenderStyle.hpp"
@@ -48,10 +24,13 @@ namespace krys::boo
   KRYS_NODISCARD Maybe<CompositeOperation>
     KeyframeRuleCompositeOperation(const css::KeyframeRule &keyframe) noexcept;
 
-  /// @brief A keyframe of an animation, with the style it gives the properties it sets.
+  /// @brief A keyframe of an animation: its offset, the computed style it gives the properties it sets, and
+  /// the timing function and composite operation it applies to them.
+  /// @see https://drafts.csswg.org/web-animations-1/#keyframe
   class BlendingKeyframe final : public KeyframeInterpolation::Keyframe
   {
   public:
+    /// @brief The offset as written: a fraction of the animation, or of a named timeline range.
     struct KeyframeOffset
     {
       style::SingleAnimationRangeName Name;
@@ -68,23 +47,30 @@ namespace krys::boo
 
   private:
     KeyframeOffset _specifiedOffset;
+    /// @brief The offset in the animation, or NaN until a range offset has been resolved.
     double _computedOffset {std::numeric_limits<double>::quiet_NaN()};
-    AnimatableCSSPropertySet _properties; // The properties specified in this keyframe.
+    /// @brief The properties the keyframe sets.
+    AnimatableCSSPropertySet _properties;
     UniquePtr<RenderStyle> _style;
+    /// @brief The timing function to the next keyframe, or null for the effect's.
     RefPtr<TimingFunction> _timingFunction;
+    /// @brief The composite operation, or none for the effect's.
     Maybe<krys::CompositeOperation> _compositeOperation;
     bool _containsDirectionAwareProperty {false};
 
   public:
+    /// @brief A keyframe at @p offset with @p style, which may be set later.
     BlendingKeyframe(KeyframeOffset &&offset, UniquePtr<RenderStyle> &&style) noexcept;
 
+    /// @brief A copy with its own copy of the style.
     BlendingKeyframe(const BlendingKeyframe &source) noexcept;
 
     BlendingKeyframe(BlendingKeyframe &&) noexcept = default;
 
     BlendingKeyframe &operator=(BlendingKeyframe &&) noexcept = default;
 
-    // KeyframeInterpolation::Keyframe
+#pragma region KeyframeInterpolation::Keyframe
+
     KRYS_NODISCARD double Offset() const noexcept final
     {
       return _computedOffset;
@@ -102,6 +88,9 @@ namespace krys::boo
       return true;
     }
 
+#pragma endregion
+
+    /// @brief Adds @p property to those the keyframe sets. Custom properties are added by name.
     void AddProperty(const AnimatableCSSProperty &property) noexcept;
 
     KRYS_NODISCARD const AnimatableCSSPropertySet &Properties() const noexcept
@@ -119,6 +108,8 @@ namespace krys::boo
       _computedOffset = offset;
     }
 
+    /// @brief Whether the offset is into a named timeline range (`cover 20%`), resolved once the
+    /// animation's timeline is known.
     KRYS_NODISCARD bool UsesRangeOffset() const noexcept;
 
     KRYS_NODISCARD bool HasResolvedOffset() const noexcept
@@ -151,6 +142,8 @@ namespace krys::boo
       _compositeOperation = operation;
     }
 
+    /// @brief Whether the keyframe sets a logical property, which resolves differently with the writing
+    /// mode or direction.
     KRYS_NODISCARD bool ContainsDirectionAwareProperty() const noexcept
     {
       return _containsDirectionAwareProperty;
@@ -165,19 +158,26 @@ namespace krys::boo
   /// @brief A `@keyframes` rule's name, or a number for keyframes that come from elsewhere.
   using KeyframesIdentifier = Variant<StringAtom, uint64>;
 
-  /// @brief An animation's keyframes, kept sorted by offset, with what they animate and depend on.
+  /// @brief An animation's keyframes, sorted by offset, with what they animate and what they depend on.
+  /// @note What they depend on is worked out as keyframes are inserted and their declarations read; it
+  /// tells the effect when to recompute the keyframes or lay out first, and whether it can be accelerated.
   class BlendingKeyframes
   {
   private:
     KeyframesIdentifier _identifier;
+    /// @brief AcceleratedAnimationName(), made when it's first asked for.
     mutable utf8_string _acceleratedAnimationName;
-    List<BlendingKeyframe> _keyframes;    // Kept sorted by key.
-    AnimatableCSSPropertySet _properties; // The properties being animated.
-    AnimatableCSSPropertySet
-      _explicitToProperties; // The properties with an explicit value for the 100% keyframe.
-    AnimatableCSSPropertySet
-      _explicitFromProperties; // The properties with an explicit value for the 0% keyframe.
+    /// @brief Sorted by offset, keyframes with the same offset in insertion order.
+    List<BlendingKeyframe> _keyframes;
+    /// @brief The properties any keyframe sets.
+    AnimatableCSSPropertySet _properties;
+    /// @brief The properties a 100% keyframe sets.
+    AnimatableCSSPropertySet _explicitToProperties;
+    /// @brief The properties a 0% keyframe sets.
+    AnimatableCSSPropertySet _explicitFromProperties;
+    /// @brief The properties a keyframe sets to `inherit`.
     AnimatableCSSPropertySet _propertiesSetToInherit;
+    /// @brief The properties a keyframe sets to `currentcolor`.
     AnimatableCSSPropertySet _propertiesSetToCurrentColor;
     bool _usesRelativeFontWeight {false};
     bool _containsCSSVariableReferences {false};
@@ -189,6 +189,7 @@ namespace krys::boo
     bool _hasKeyframeNotUsingRangeOffset {false};
 
   public:
+    /// @brief Keyframes with a new number as their identifier.
     BlendingKeyframes() noexcept : _identifier(NextAnonymousIdentifier())
     {
     }
@@ -203,33 +204,27 @@ namespace krys::boo
 
     BlendingKeyframes &operator=(BlendingKeyframes &&) noexcept = default;
 
-    KRYS_NODISCARD bool operator==(const BlendingKeyframes &other) const noexcept;
-
     KRYS_NODISCARD const KeyframesIdentifier &Identifier() const noexcept
     {
       return _identifier;
     }
 
+    /// @brief The `@keyframes` rule's name, or null if the keyframes don't come from one.
     KRYS_NODISCARD const StringAtom &KeyframesName() const noexcept KRYS_LIFETIME_BOUND;
 
     /// @brief The name the keyframes' animation has on a graphics layer.
     KRYS_NODISCARD const utf8_string &AcceleratedAnimationName() const noexcept;
 
+#pragma region Keyframes
+
+    /// @brief Inserts @p keyframe after those with the same or a smaller offset, and notes what it depends
+    /// on. A keyframe with an offset outside 0 to 1 that isn't a range offset is dropped.
     void Insert(BlendingKeyframe &&keyframe) noexcept;
 
-    void AddProperty(const AnimatableCSSProperty &property) noexcept;
+    /// @brief Inserts a copy of each of @p other's keyframes.
+    void CopyKeyframes(const BlendingKeyframes &other) noexcept;
 
-    KRYS_NODISCARD bool ContainsProperty(const AnimatableCSSProperty &property) const noexcept;
-
-    KRYS_NODISCARD const AnimatableCSSPropertySet &Properties() const noexcept
-    {
-      return _properties;
-    }
-
-    KRYS_NODISCARD bool ContainsAnimatableCSSProperty() const noexcept;
-
-    KRYS_NODISCARD bool ContainsDirectionAwareProperty() const noexcept;
-
+    /// @brief Removes the keyframes and everything noted about them; the identifier stays.
     void Clear() noexcept;
 
     KRYS_NODISCARD bool IsEmpty() const noexcept
@@ -247,15 +242,6 @@ namespace krys::boo
       return _keyframes[index];
     }
 
-    void CopyKeyframes(const BlendingKeyframes &other) noexcept;
-
-    KRYS_NODISCARD bool HasImplicitKeyframes() const noexcept;
-
-    KRYS_NODISCARD bool HasImplicitKeyframeForProperty(const AnimatableCSSProperty &property) const noexcept;
-
-    /// @brief Adds the 0% and 100% keyframes the properties without one there take from @p underlyingStyle.
-    void FillImplicitKeyframes(const KeyframeEffect &effect, const RenderStyle &underlyingStyle) noexcept;
-
     KRYS_NODISCARD auto begin() const noexcept KRYS_LIFETIME_BOUND
     {
       return _keyframes.begin();
@@ -266,54 +252,110 @@ namespace krys::boo
       return _keyframes.end();
     }
 
-    KRYS_NODISCARD bool UsesContainerUnits() const noexcept;
+    /// @brief Resolves each keyframe's offset with @p callback, then sorts the keyframes again.
+    void UpdatedComputedOffsets(
+      KRYS_NOESCAPE const Func<double(const BlendingKeyframe::KeyframeOffset &)> &callback) noexcept;
 
-    KRYS_NODISCARD bool UsesRelativeFontWeight() const noexcept;
+#pragma endregion
 
-    KRYS_NODISCARD bool HasCSSVariableReferences() const noexcept;
+#pragma region Properties
 
-    KRYS_NODISCARD bool HasColorSetToCurrentColor() const noexcept;
+    KRYS_NODISCARD bool ContainsProperty(const AnimatableCSSProperty &property) const noexcept;
 
-    KRYS_NODISCARD bool HasPropertySetToCurrentColor() const noexcept;
+    /// @brief The properties any keyframe sets.
+    KRYS_NODISCARD const AnimatableCSSPropertySet &Properties() const noexcept
+    {
+      return _properties;
+    }
 
-    KRYS_NODISCARD const AnimatableCSSPropertySet &PropertiesSetToInherit() const noexcept;
+    /// @brief Whether any of the properties can be interpolated, rather than only changing discretely.
+    KRYS_NODISCARD bool ContainsAnimatableCSSProperty() const noexcept;
 
+    /// @brief Whether any keyframe sets a logical property.
+    KRYS_NODISCARD bool ContainsDirectionAwareProperty() const noexcept;
+
+#pragma endregion
+
+#pragma region Implicit keyframes
+
+    /// @brief Whether the first keyframe isn't at 0% or the last isn't at 100%, so the underlying value fills
+    /// in there.
+    KRYS_NODISCARD bool HasImplicitKeyframes() const noexcept;
+
+    /// @brief Whether @p property takes its value at 0% or 100% from the underlying style.
+    KRYS_NODISCARD bool HasImplicitKeyframeForProperty(const AnimatableCSSProperty &property) const noexcept;
+
+    /// @brief Adds the 0% and 100% keyframes the properties without one there take from @p underlyingStyle.
+    /// @see https://drafts.csswg.org/web-animations-1/#the-effect-value-of-a-keyframe-animation-effect
+    void FillImplicitKeyframes(const KeyframeEffect &effect, const RenderStyle &underlyingStyle) noexcept;
+
+#pragma endregion
+
+#pragma region Dependencies
+
+    /// @brief Notes what @p properties, a keyframe's declarations, depend on: `inherit`, `currentcolor`,
+    /// relative font weights, custom property references and anchor functions.
     void UpdatePropertiesMetadata(const css::StyleProperties &properties) noexcept;
 
+    /// @brief Whether a keyframe's style uses container query units.
+    KRYS_NODISCARD bool UsesContainerUnits() const noexcept;
+
+    /// @brief Whether a keyframe sets `font-weight` to `bolder` or `lighter`.
+    KRYS_NODISCARD bool UsesRelativeFontWeight() const noexcept;
+
+    /// @brief Whether a keyframe's declarations reference custom properties.
+    KRYS_NODISCARD bool HasCSSVariableReferences() const noexcept;
+
+    /// @brief Whether a keyframe sets `color` to `currentcolor`.
+    KRYS_NODISCARD bool HasColorSetToCurrentColor() const noexcept;
+
+    /// @brief Whether a keyframe sets any property to `currentcolor`.
+    KRYS_NODISCARD bool HasPropertySetToCurrentColor() const noexcept;
+
+    /// @brief The properties a keyframe sets to `inherit`.
+    KRYS_NODISCARD const AnimatableCSSPropertySet &PropertiesSetToInherit() const noexcept;
+
+    /// @brief Whether a keyframe's transform or translate depends on the element's width.
     KRYS_NODISCARD bool HasWidthDependentTransform() const noexcept
     {
       return _hasWidthDependentTransform;
     }
 
+    /// @brief Whether a keyframe's transform or translate depends on the element's height.
     KRYS_NODISCARD bool HasHeightDependentTransform() const noexcept
     {
       return _hasHeightDependentTransform;
     }
 
+    /// @brief Whether a keyframe's transform has a matrix that can't be inverted, which keeps the animation
+    /// from being accelerated.
     KRYS_NODISCARD bool HasDiscreteTransformInterval() const noexcept
     {
       return _hasDiscreteTransformInterval;
     }
 
+    /// @brief Whether a keyframe's style has a property set to `inherit`.
     KRYS_NODISCARD bool HasExplicitlyInheritedKeyframeProperty() const noexcept
     {
       return _hasExplicitlyInheritedKeyframeProperty;
     }
 
+    /// @brief Whether a keyframe's declarations use `anchor()` or `anchor-size()`.
     KRYS_NODISCARD bool UsesAnchorFunctions() const noexcept
     {
       return _usesAnchorFunctions;
     }
 
+    /// @brief Whether a keyframe's offset is a plain fraction rather than a timeline range offset.
     KRYS_NODISCARD bool HasKeyframeNotUsingRangeOffset() const noexcept
     {
       return _hasKeyframeNotUsingRangeOffset;
     }
 
-    void UpdatedComputedOffsets(
-      KRYS_NOESCAPE const Func<double(const BlendingKeyframe::KeyframeOffset &)> &callback) noexcept;
+#pragma endregion
 
   private:
+    /// @brief Notes what @p keyframe's style depends on, and which properties it sets at 0% and 100%.
     void AnalyzeKeyframe(const BlendingKeyframe &keyframe) noexcept;
 
     KRYS_NODISCARD static uint64 NextAnonymousIdentifier() noexcept;

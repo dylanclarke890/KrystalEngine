@@ -344,40 +344,41 @@ namespace krys::boo::css::cq
 
         auto category = [](const PrimitiveValue &value)
         {
-          return value.IsNumberOrInteger() ? UnitCategory::Number
-                                           : UnitCategoryForType(value.PrimitiveType());
+          if (value.IsNumberOrInteger())
+          {
+            return Category::Number;
+          }
+          // A calc() mixing a percentage with a length has no unit, and compares with nothing.
+          return CategoryForUnitType(value.Unit()).value_or(Category::LengthPercentage);
         };
 
         // A unitless zero is a zero length when compared against lengths.
         bool hasLength = std::ranges::any_of(values, [](auto &value) { return value->IsLength(); });
 
-        Maybe<UnitCategory> commonCategory;
+        Maybe<Category> commonCategory;
         List<double> numbers;
         auto &conversionData = context.ConversionData;
         for (auto &value : values)
         {
           auto valueCategory = category(*value);
-          if (hasLength && valueCategory == UnitCategory::Number && !value->ResolveAsNumber(conversionData))
+          if (hasLength && valueCategory == Category::Number && !value->ResolveAsNumber(conversionData))
           {
             numbers.push_back(0.0);
-            valueCategory = UnitCategoryForType(UnitType::px);
+            valueCategory = Category::Length;
           }
           else
           {
             switch (valueCategory)
             {
-              case UnitCategory::Number: numbers.push_back(value->ResolveAsNumber(conversionData)); break;
-              case UnitCategory::Percent:
-                numbers.push_back(value->ResolveAsPercentage(conversionData));
-                break;
-              case UnitCategory::Angle: numbers.push_back(value->ResolveAsAngle(conversionData)); break;
-              case UnitCategory::Time:  numbers.push_back(value->ResolveAsTime(conversionData)); break;
-              case UnitCategory::Resolution:
-                numbers.push_back(value->ResolveAsResolution(conversionData));
-                break;
-              case UnitCategory::Frequency:
-                numbers.push_back(PrimitiveValue::ComputeFrequency<FrequencyUnit::Hz>(
-                  value->PrimitiveType(), value->Value<double>(conversionData)));
+              case Category::Number:     numbers.push_back(value->ResolveAsNumber(conversionData)); break;
+              case Category::Percentage: numbers.push_back(value->ResolveAsPercentage(conversionData)); break;
+              case Category::Angle:      numbers.push_back(value->ResolveAsAngle(conversionData)); break;
+              case Category::Time:       numbers.push_back(value->ResolveAsTime(conversionData)); break;
+              case Category::Resolution: numbers.push_back(value->ResolveAsResolution(conversionData)); break;
+              case Category::Frequency:
+                numbers.push_back(
+                  ConvertUnit(value->Resolve<double>(conversionData), value->Unit(), UnitType::hz)
+                    .value_or(0));
                 break;
               default:
                 if (!value->IsLength())
@@ -385,7 +386,7 @@ namespace krys::boo::css::cq
                   return mq::EvaluationResult::False;
                 }
                 numbers.push_back(value->ResolveAsLength<double>(conversionData));
-                valueCategory = UnitCategoryForType(UnitType::px);
+                valueCategory = Category::Length;
                 break;
             }
           }

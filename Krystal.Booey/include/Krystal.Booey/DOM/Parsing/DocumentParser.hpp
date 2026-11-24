@@ -1,27 +1,4 @@
-﻿/*
- * Copyright (C) 2000 Peter Kelly (pmk@post.com)
- * Copyright (C) 2005, 2006 Apple Inc. All rights reserved.
- * Copyright (C) 2007 Samuel Weinig (sam@webkit.org)
- * Copyright (C) 2010 Google, Inc.
- *
- * This library is free software; you can redistribute it and/or
- * modify it under the terms of the GNU Library General Public
- * License as published by the Free Software Foundation; either
- * version 2 of the License, or (at your option) any later version.
- *
- * This library is distributed in the hope that it will be useful,
- * but WITHOUT ANY WARRANTY; without even the implied warranty of
- * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU
- * Library General Public License for more details.
- *
- * You should have received a copy of the GNU Library General Public License
- * along with this library; see the file COPYING.LIB.  If not, write to
- * the Free Software Foundation, Inc., 51 Franklin Street, Fifth Floor,
- * Boston, MA 02110-1301, USA.
- *
- */
-
-#pragma once
+﻿#pragma once
 
 #include "Krystal.Booey/DOM/Nodes/Document.hpp"
 #include "Krystal.Core/Attributes.hpp"
@@ -31,7 +8,9 @@
 
 namespace krys::boo::dom
 {
-  /// @brief A parser that builds a document (or a fragment of one) from its source.
+  /// @brief A parser that builds a document (or a fragment of one) from its source: the XML parser.
+  /// @note It goes from parsing to stopping (the source has ended) to stopped, and is detached from its
+  /// document last, which it must be before it's destroyed.
   class DocumentParser : public RefCounted<DocumentParser>, public CanMakeWeakPtr<DocumentParser>
   {
     KRYS_NON_COPY_MOVABLE(DocumentParser);
@@ -46,59 +25,53 @@ namespace krys::boo::dom
     };
 
     ParserState _state {ParserState::Parsing};
-    // Every DocumentParser needs a pointer back to the document.
-    // _document will be null after the parser is detached.
+    /// @brief The document being built; null once the parser is detached.
     WeakPtr<Document> _document;
 
   public:
     virtual ~DocumentParser() noexcept;
 
+    /// @brief Parses @p source, the next part of the source.
     virtual void Append(DOMString source) noexcept = 0;
 
+    /// @brief Tells the parser there's no more source, so it finishes the document.
     virtual void Finish() noexcept = 0;
 
-    // Document() will return null after Detach() is called.
+    /// @brief The document being built; only while the parser is attached.
     KRYS_NODISCARD boo::Document *Document() const noexcept
     {
       krys_debug_assert(_document);
       return _document.get();
     }
 
+    /// @brief Whether the parser is still taking source.
     KRYS_NODISCARD bool IsParsing() const noexcept
     {
       return _state == ParserState::Parsing;
     }
 
-    KRYS_NODISCARD bool IsStopping() const noexcept
-    {
-      return _state == ParserState::Stopping;
-    }
-
+    /// @brief Whether the parser has stopped (or been detached), so it makes no more nodes.
     KRYS_NODISCARD bool IsStopped() const noexcept
     {
       return _state >= ParserState::Stopped;
     }
 
+    /// @brief Whether the parser has let go of its document.
     KRYS_NODISCARD bool IsDetached() const noexcept
     {
       return _state == ParserState::Detached;
     }
 
+    /// @brief Puts the parser back to parsing, as it starts.
     virtual void StartParsing() noexcept;
 
-    // PrepareToStopParsing() is used when the end of the input is reached and parsing is to be stopped
-    // normally.
+    /// @brief The source has ended: the parser stops once it has parsed what it has.
     virtual void PrepareToStopParsing() noexcept;
 
-    // StopParsing() is used when a load is canceled/stopped.
-    // StopParsing() is currently different from Detach(), but shouldn't be.
-    // It should NOT be ok to call any methods on DocumentParser after either Detach() or StopParsing() but
-    // right now only Detach() will assert.
+    /// @brief Stops parsing at once, as on a fatal error in the source; the parser keeps its document.
     virtual void StopParsing() noexcept;
 
-    // The parser is expected to be detached before the last reference to it goes.
-    // After detach, _document is cleared. The parser will unwind its callstacks, but not produce any more
-    // nodes.
+    /// @brief Lets go of the document. A parse in progress unwinds without making more nodes.
     virtual void Detach() noexcept;
 
   protected:

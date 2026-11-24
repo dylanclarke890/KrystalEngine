@@ -59,22 +59,22 @@ namespace krys::ui
     }
   }
 
-  void DataListSuggestionsOverlay::HandleKeydownWithIdentifier(utf8_stringview identifier) noexcept
+  void DataListSuggestionsOverlay::HandleKeyDown(utf8_stringview key) noexcept
   {
     auto count = static_cast<int32>(_suggestions.size());
     if (!_visible || !count)
     {
       return;
     }
-    if (identifier == u8"Down")
+    if (key == u8"ArrowDown")
     {
       Highlight(_highlightedIndex + 1 < count ? _highlightedIndex + 1 : 0);
     }
-    else if (identifier == u8"Up")
+    else if (key == u8"ArrowUp")
     {
       Highlight(_highlightedIndex > 0 ? _highlightedIndex - 1 : count - 1);
     }
-    else if (identifier == u8"Enter")
+    else if (key == u8"Enter")
     {
       if (_highlightedIndex >= 0)
       {
@@ -85,7 +85,7 @@ namespace krys::ui
         Hide();
       }
     }
-    else if (identifier == u8"U+001B")
+    else if (key == u8"Escape")
     {
       Hide();
     }

@@ -1,39 +1,11 @@
-﻿/*
- * Copyright (C) 2010 Nokia Corporation and/or its subsidiary(-ies)
- * Copyright (C) 2010 Apple Inc. All rights reserved.
- *
- * This library is free software; you can redistribute it and/or
- * modify it under the terms of the GNU Library General Public
- * License as published by the Free Software Foundation; either
- * version 2 of the License, or (at your option) any later version.
- *
- * This library is distributed in the hope that it will be useful,
- * but WITHOUT ANY WARRANTY; without even the implied warranty of
- * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU
- * Library General Public License for more details.
- *
- * You should have received a copy of the GNU Library General Public License
- * along with this library; see the file COPYING.LIB.  If not, write to
- * the Free Software Foundation, Inc., 51 Franklin Street, Fifth Floor,
- * Boston, MA 02110-1301, USA.
- */
-
-#pragma once
+﻿#pragma once
 
 #include "Krystal.Core/Attributes.hpp"
 #include "Krystal.Core/Numeric.hpp"
 
 namespace krys::boo
 {
-  /// @brief The platform whose editing conventions a document follows.
-  // There are multiple editing details that are different on Windows than Macintosh.
-  // We use a single switch for all of them. Some examples:
-  //
-  //    1) Clicking below the last line of an editable area puts the caret at the end
-  //       of the last line on Mac, but in the middle of the last line on Windows.
-  //    2) Pushing the down arrow key on the last line puts the caret at the end of the
-  //       last line on Mac, but does nothing on Windows. A similar case exists on the
-  //       top line.
+  /// @brief The platform whose editing conventions a document follows (`Settings::EditingBehaviorType`).
   enum class EditingBehaviorType : uint8
   {
     Mac,
@@ -42,7 +14,8 @@ namespace krys::boo
     iOS,
   };
 
-  /// @brief The editing conventions of a platform, one query for each place they differ.
+  /// @brief The editing conventions of a platform: one query for each place the platforms differ in how
+  /// carets move, selections extend and text is deleted.
   class EditingBehavior
   {
   private:
@@ -53,117 +26,82 @@ namespace krys::boo
     {
     }
 
-    // When extending a selection beyond the top or bottom boundary of an editable area,
-    // maintain the horizontal position on Windows but extend it to the boundary of the editable
-    // content on Mac.
+    /// @brief Whether a point above the first line or below the last one of an editable area puts the caret
+    /// at the start or end of the content, rather than at the same horizontal position on that line
+    /// (Windows).
     KRYS_NODISCARD constexpr bool ShouldMoveCaretToHorizontalBoundaryWhenPastTopOrBottom() const noexcept
     {
       return _type != EditingBehaviorType::Windows;
     }
 
-    // On Windows, selections should always be considered as directional, regardless if it is
-    // mouse-based or keyboard-based.
+    /// @brief Whether every selection has a direction, however it was made, rather than only those extended
+    /// from the keyboard (Mac and iOS).
     KRYS_NODISCARD constexpr bool ShouldConsiderSelectionAsDirectional() const noexcept
     {
       return _type != EditingBehaviorType::Mac && _type != EditingBehaviorType::iOS;
     }
 
-    // On Mac, when revealing a selection (for example as a result of a Find operation on the Browser),
-    // content should be scrolled such that the selection gets certer aligned.
+    /// @brief Whether revealing the selection scrolls it to the centre, rather than just into view.
     KRYS_NODISCARD constexpr bool ShouldCenterAlignWhenSelectionIsRevealed() const noexcept
     {
       return _type == EditingBehaviorType::Mac || _type == EditingBehaviorType::iOS;
     }
 
-    // On Mac, style is considered present when present at the beginning of selection. On other platforms,
-    // style has to be present throughout the selection.
-    KRYS_NODISCARD constexpr bool ShouldToggleStyleBasedOnStartOfSelection() const noexcept
-    {
-      return _type == EditingBehaviorType::Mac || _type == EditingBehaviorType::iOS;
-    }
-
-    // Standard Mac behavior when extending to a boundary is grow the selection rather than leaving the base
-    // in place and moving the extent. Matches NSTextView.
+    /// @brief Whether extending a range selection to a boundary (a line's or paragraph's end, say) grows it
+    /// at the end it's extended towards, rather than moving its extent.
     KRYS_NODISCARD constexpr bool ShouldAlwaysGrowSelectionWhenExtendingToBoundary() const noexcept
     {
       return _type == EditingBehaviorType::Mac || _type == EditingBehaviorType::iOS;
     }
 
-    // On Mac, when processing a contextual click, the object being clicked upon should be selected.
+    /// @brief Whether a context menu click selects what it's on.
     KRYS_NODISCARD constexpr bool ShouldSelectOnContextualMenuClick() const noexcept
     {
       return _type == EditingBehaviorType::Mac;
     }
 
-    // On Linux, should be able to get and insert spelling suggestions without selecting the misspelled word.
-    KRYS_NODISCARD constexpr bool ShouldAllowSpellingSuggestionsWithoutSelection() const noexcept
-    {
-      return _type == EditingBehaviorType::Unix;
-    }
-
-    // On Mac and Windows, pressing backspace (when it isn't handled otherwise) should navigate back.
-    KRYS_NODISCARD constexpr bool ShouldNavigateBackOnBackspace() const noexcept
-    {
-      return _type != EditingBehaviorType::Unix;
-    }
-
-    // On Mac, selecting backwards by word/line from the middle of a word/line, and then going
-    // forward leaves the caret back in the middle with no selection, instead of directly selecting
-    // to the other end of the line/word (Unix/Windows behavior).
+    /// @brief Whether extending a selection by word, line or paragraph can carry it straight across its base,
+    /// rather than stopping at a caret there first (Mac and iOS).
     KRYS_NODISCARD constexpr bool ShouldExtendSelectionByWordOrLineAcrossCaret() const noexcept
     {
       return _type != EditingBehaviorType::Mac && _type != EditingBehaviorType::iOS;
     }
 
-    // Based on native behavior, when using ctrl(alt)+arrow to move caret by word, ctrl(alt)+left arrow moves
-    // caret to immediately before the word in all platforms, for example, the word break positions are:
-    // "|abc |def |hij |opq". But ctrl+right arrow moves caret to "abc |def |hij |opq" on Windows and
-    // "abc| def| hij| opq|" on Mac and Linux.
+    /// @brief Whether moving right by a word goes to the start of the next word, past the spaces, rather than
+    /// to the end of the current one. (Moving left always goes to the start of a word.)
     KRYS_NODISCARD constexpr bool ShouldSkipSpaceWhenMovingRight() const noexcept
     {
       return _type == EditingBehaviorType::Windows;
     }
 
-    // On Windows, double-clicking a word selects the whitespace after it too.
+    /// @brief Whether double-clicking a word selects the whitespace after it too.
     KRYS_NODISCARD constexpr bool ShouldSelectTrailingWhitespaceOnDoubleClick() const noexcept
     {
       return _type == EditingBehaviorType::Windows;
     }
 
-    // On iOS the last entered character in a secure filed is shown momentarily, removing and adding back the
-    // space when deleting password cause space been showed insecurely.
-    KRYS_NODISCARD constexpr bool ShouldRebalanceWhiteSpacesInSecureField() const noexcept
-    {
-      return _type != EditingBehaviorType::iOS;
-    }
-
-    KRYS_NODISCARD constexpr bool ShouldSelectBasedOnDictionaryLookup() const noexcept
-    {
-      return _type == EditingBehaviorType::Mac || _type == EditingBehaviorType::iOS;
-    }
-
-    // Linux and Windows always extend selections from the extent endpoint.
+    /// @brief Whether moving from a range selection's start or end starts at its extent either way, rather
+    /// than at the start or end asked for.
     KRYS_NODISCARD constexpr bool ShouldAlwaysExtendSelectionFromExtentEndpoint() const noexcept
     {
       return _type != EditingBehaviorType::Mac && _type != EditingBehaviorType::iOS;
     }
 
-    // On iOS, we don't want to select all the text when focusing a field. Instead, match platform behavior by
-    // going to the end of the line.
+    /// @brief Whether focusing a text field puts the caret at its end, rather than selecting all of it.
     KRYS_NODISCARD constexpr bool ShouldMoveSelectionToEndWhenFocusingTextInput() const noexcept
     {
       return _type == EditingBehaviorType::iOS;
     }
 
-    // On iOS, when smart delete is on, it is always on, and should do not additional checks (i.e.
-    // TextGranularity::WordGranularity).
+    /// @brief Whether smart delete (with the host's smart insert and delete on) applies to every deletion,
+    /// not only to a word selection.
     KRYS_NODISCARD constexpr bool ShouldAlwaysSmartDelete() const noexcept
     {
       return _type == EditingBehaviorType::iOS;
     }
 
-    // On iOS, we should turn on smart insert and delete and newlines around paragraphs to match UIKit
-    // behaviour.
+    /// @brief Whether smart insert and delete also adjust the blank paragraphs around pasted or deleted
+    /// paragraphs.
     KRYS_NODISCARD constexpr bool ShouldSmartInsertDeleteParagraphs() const noexcept
     {
       return _type == EditingBehaviorType::iOS;

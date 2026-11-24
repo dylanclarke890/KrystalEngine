@@ -51,8 +51,8 @@ namespace krys::boo::tests
   inline bool PressKey(Frame &frame, utf8_string key) noexcept
   {
     return frame.GetEventHandler().KeyEvent(PlatformKeyboardEvent(PlatformEvent::Type::KeyDown, u8"", u8"",
-                                                                  krys::move(key), u8"", u8"", 0, false,
-                                                                  false, false, {}, MonotonicTime::Now()));
+                                                                  krys::move(key), u8"", 0, false, false,
+                                                                  false, {}, MonotonicTime::Now()));
   }
 
   /// @brief @p target's id, or its local name if it has none; "document" for another node, "null" for no

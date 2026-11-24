@@ -1,24 +1,4 @@
-﻿/*
- * Copyright (C) 2006 Rob Buis <buis@kde.org>
- * Copyright (C) 2008-2025 Apple Inc. All right reserved.
- *
- * This library is free software; you can redistribute it and/or
- * modify it under the terms of the GNU Library General Public
- * License as published by the Free Software Foundation; either
- * version 2 of the License, or (at your option) any later version.
- *
- * This library is distributed in the hope that it will be useful,
- * but WITHOUT ANY WARRANTY; without even the implied warranty of
- * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU
- * Library General Public License for more details.
- *
- * You should have received a copy of the GNU Library General Public License
- * along with this library; see the file COPYING.LIB.  If not, write to
- * the Free Software Foundation, Inc., 51 Franklin Street, Fifth Floor,
- * Boston, MA 02110-1301, USA.
- */
-
-#pragma once
+﻿#pragma once
 
 #include "Krystal.Booey/CSS/Values/Primitives/Url.hpp"
 #include "Krystal.Booey/CSS/Values/Value.hpp"
@@ -36,45 +16,52 @@ namespace krys::boo::style
 
 namespace krys::boo::css
 {
-  /// @brief One image of the `cursor` property, with an optional hot spot.
+  class ValuePair;
+
+  /// @brief One image of the `cursor` property: a `url()` or `image-set()`, and the optional `<x> <y>` of
+  /// its hot spot.
+  /// @see https://www.w3.org/TR/css-ui-4/#cursor
   class CursorImageValue final : public Value
   {
   private:
-    CSSUrl _originalUrl;
-    const Ref<Value> _imageValue;
-    const RefPtr<Value> _hotSpot;
-
-    CursorImageValue(Ref<Value> &&imageValue, RefPtr<Value> &&hotSpot, CSSUrl &&originalUrl) noexcept;
+    Ref<Value> _image;
+    /// @brief Two numbers, the x and y of the point in the image that is the pointer's position.
+    RefPtr<ValuePair> _hotSpot;
+    /// @brief The image's URL, kept for the style image; none for an `image-set()`.
+    css::Url _originalUrl;
 
   public:
-    KRYS_NODISCARD static Ref<CursorImageValue> Create(Ref<Value> &&imageValue,
-                                                       RefPtr<Value> &&hotSpot) noexcept;
+    ~CursorImageValue() noexcept;
 
-    KRYS_NODISCARD static Ref<CursorImageValue> Create(Ref<Value> &&imageValue, RefPtr<Value> &&hotSpot,
-                                                       CSSUrl &&originalUrl) noexcept;
+    /// @brief The cursor image @p image, whose URL is the original URL if it's a `url()`.
+    KRYS_NODISCARD static Ref<CursorImageValue> Create(Ref<Value> image, RefPtr<ValuePair> hotSpot) noexcept;
 
-    KRYS_NODISCARD const CSSUrl &OriginalUrl() const noexcept
-    {
-      return _originalUrl;
-    }
+    /// @brief The cursor image @p image with @p originalUrl, as a computed style gives back.
+    KRYS_NODISCARD static Ref<CursorImageValue> Create(Ref<Value> image, RefPtr<ValuePair> hotSpot,
+                                                       css::Url originalUrl) noexcept;
+
+    /// @brief The style image for this value, with its hot spot truncated to whole pixels.
+    /// @return Null if @p state can't make a style image of the image.
+    KRYS_NODISCARD RefPtr<StyleCursorImage> CreateStyleImage(const style::BuilderState &state) const noexcept;
+
+    // The Value operations.
 
     KRYS_NODISCARD CSSOMString CustomCSSText(const SerialisationContext &context) const noexcept;
 
+    /// @brief Whether both have equal images and hot spots; the original URLs aren't compared.
     KRYS_NODISCARD bool Equals(const CursorImageValue &other) const noexcept;
 
     KRYS_NODISCARD IterationStatus
-      CustomVisitChildren(KRYS_NOESCAPE const Func<IterationStatus(Value &)> &func) const noexcept
-    {
-      return func(*_imageValue);
-    }
+      CustomVisitChildren(KRYS_NOESCAPE const Func<IterationStatus(Value &)> &func) const noexcept;
 
-    KRYS_NODISCARD RefPtr<StyleCursorImage> CreateStyleImage(const style::BuilderState &state) const noexcept;
+  private:
+    CursorImageValue(Ref<Value> image, RefPtr<ValuePair> hotSpot, css::Url originalUrl) noexcept;
   };
 }
 
 KRYS_SPECIALIZE_TYPE_CAST_TRAITS_BEGIN(krys::boo::css::CursorImageValue)
   KRYS_NODISCARD static bool IsType(const krys::boo::css::Value &value) noexcept
   {
-    return value.IsCursorImageValue();
+    return value.Type() == krys::boo::css::ValueType::CursorImage;
   }
 KRYS_SPECIALIZE_TYPE_CAST_TRAITS_END()

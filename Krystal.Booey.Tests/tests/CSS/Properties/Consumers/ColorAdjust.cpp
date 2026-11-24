@@ -6,6 +6,7 @@
 #include "Krystal.Booey/CSS/Parser/Tokenizer.hpp"
 #include "Krystal.Booey/CSS/Properties/PropertyParserState.hpp"
 #include "Krystal.Booey/CSS/Values/ColorAdjust/ColorScheme.hpp"
+#include "Krystal.Booey/CSS/Values/ColorSchemeValue.hpp"
 #include "Krystal.Booey/CSS/Values/SerialisationContext.hpp"
 #include <string>
 
@@ -81,7 +82,7 @@ namespace krys::boo::css::tests
 
     auto value = consume(u8"only light dark");
     REQUIRE(value);
-    CHECK(value->IsColorSchemeValue());
+    CHECK(Is<ColorSchemeValue>(*value));
     CHECK(CssText(*value) == "light dark only");
 
     CHECK_FALSE(consume(u8"normal light"));

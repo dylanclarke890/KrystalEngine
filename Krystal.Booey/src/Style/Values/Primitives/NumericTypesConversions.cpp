@@ -46,7 +46,8 @@ namespace krys::boo::style
 
   float ClampLengthToAllowedLimits(double value) noexcept
   {
-    return ClampTo<float>(static_cast<float>(value), css::MinValueForCssLength, css::MaxValueForCssLength);
+    return ClampTo<float>(static_cast<float>(value), style::MinValueForCssLength,
+                          style::MaxValueForCssLength);
   }
 
   float CanonicalizeAndClampLength(double value, css::LengthUnit unit,

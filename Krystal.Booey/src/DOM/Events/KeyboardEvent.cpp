@@ -1,27 +1,4 @@
-﻿/*
- * Copyright (C) 2001 Peter Kelly (pmk@post.com)
- * Copyright (C) 2001 Tobias Anton (anton@stud.fbi.fh-darmstadt.de)
- * Copyright (C) 2006 Samuel Weinig (sam.weinig@gmail.com)
- * Copyright (C) 2003-2024 Apple Inc. All rights reserved.
- * Copyright (C) 2017 Google Inc. All rights reserved.
- *
- * This library is free software; you can redistribute it and/or
- * modify it under the terms of the GNU Library General Public
- * License as published by the Free Software Foundation; either
- * version 2 of the License, or (at your option) any later version.
- *
- * This library is distributed in the hope that it will be useful,
- * but WITHOUT ANY WARRANTY; without even the implied warranty of
- * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU
- * Library General Public License for more details.
- *
- * You should have received a copy of the GNU Library General Public License
- * along with this library; see the file COPYING.LIB.  If not, write to
- * the Free Software Foundation, Inc., 51 Franklin Street, Fifth Floor,
- * Boston, MA 02110-1301, USA.
- */
-
-#include "Krystal.Booey/DOM/Events/KeyboardEvent.hpp"
+﻿#include "Krystal.Booey/DOM/Events/KeyboardEvent.hpp"
 #include "Krystal.Booey/DOM/Events/EventNames.hpp"
 #include "Krystal.Booey/DOM/Nodes/Document.hpp"
 #include "Krystal.Booey/Editing/Editor.hpp"
@@ -34,6 +11,7 @@ namespace krys::boo
 {
   namespace
   {
+    /// @brief Whether @p view's editor is in the middle of an input method composition.
     KRYS_NODISCARD bool ViewIsCompositing(const Window *view) noexcept
     {
       if (!view)
@@ -44,6 +22,8 @@ namespace krys::boo
       return localFrame && localFrame->Document() && localFrame->Document()->GetEditor().HasComposition();
     }
 
+    /// @brief The DOM event type of a platform key event. A combined key down must have been split into its
+    /// raw key down and char first.
     KRYS_NODISCARD DOMStringAtom EventTypeForKeyboardEventType(PlatformEvent::Type type) noexcept
     {
       switch (type)
@@ -51,7 +31,6 @@ namespace krys::boo
         case PlatformEvent::Type::KeyUp:      return event_names::KeyUp;
         case PlatformEvent::Type::RawKeyDown: return event_names::KeyDown;
         case PlatformEvent::Type::Char:       return event_names::KeyPress;
-        // The caller should disambiguate the combined KeyDown event into RawKeyDown or Char events.
         case PlatformEvent::Type::KeyDown:
         default:                              break;
       }
@@ -59,9 +38,10 @@ namespace krys::boo
       return event_names::KeyDown;
     }
 
-    KRYS_NODISCARD int32 LegacyKeyCodeWithoutLocation(int32 keycode) noexcept
+    /// @brief @p keyCode with the side of a modifier key dropped: `keyCode` is 16 for either Shift key.
+    KRYS_NODISCARD int32 LegacyKeyCodeWithoutLocation(int32 keyCode) noexcept
     {
-      switch (keycode)
+      switch (keyCode)
       {
         case vk::LControl:
         case vk::RControl: return vk::Control;
@@ -69,10 +49,11 @@ namespace krys::boo
         case vk::RShift:   return vk::Shift;
         case vk::LMenu:
         case vk::RMenu:    return vk::Menu;
-        default:           return keycode;
+        default:           return keyCode;
       }
     }
 
+    /// @see https://w3c.github.io/uievents/#dom-keyboardevent-location
     KRYS_NODISCARD KeyboardEvent::KeyLocationCode
       LocationCodeForKey(const PlatformKeyboardEvent &key) noexcept
     {
@@ -85,24 +66,22 @@ namespace krys::boo
       {
         case vk::LControl:
         case vk::LShift:
-        case vk::LMenu: // Left Option/Alt
-        case vk::LWin:  // Left Command/Windows key (Natural keyboard)
+        case vk::LMenu: // Alt or Option
+        case vk::LWin:  // Windows or Command
           return KeyboardEvent::DOM_KEY_LOCATION_LEFT;
         case vk::RControl:
         case vk::RShift:
-        case vk::RMenu: // Right Option/Alt
-        case vk::RWin:  // Right Windows key (Natural keyboard)
-          return KeyboardEvent::DOM_KEY_LOCATION_RIGHT;
-        default: return KeyboardEvent::DOM_KEY_LOCATION_STANDARD;
+        case vk::RMenu:
+        case vk::RWin:     return KeyboardEvent::DOM_KEY_LOCATION_RIGHT;
+        default:           return KeyboardEvent::DOM_KEY_LOCATION_STANDARD;
       }
     }
   }
 
   KeyboardEvent::KeyboardEvent(DOMStringAtom type, const KeyboardEventInit &initializer) noexcept
       : UIEventWithKeyState(krys::move(type), initializer), _key(initializer.Key), _code(initializer.Code),
-        _keyIdentifier(initializer.KeyIdentifier), _location(initializer.Location),
-        _repeat(initializer.Repeat), _isComposing(initializer.IsComposing), _charCode(initializer.CharCode),
-        _keyCode(initializer.KeyCode), _which(initializer.Which)
+        _location(initializer.Location), _repeat(initializer.Repeat), _isComposing(initializer.IsComposing),
+        _charCode(initializer.CharCode), _keyCode(initializer.KeyCode), _which(initializer.Which)
   {
   }
 
@@ -110,8 +89,7 @@ namespace krys::boo
                                const PlatformKeyboardEvent &key) noexcept
       : UIEventWithKeyState(krys::move(type), eventInitDict, key.Modifiers()),
         _underlyingPlatformEvent(CreateUnique<PlatformKeyboardEvent>(key)), _key(key.Key()),
-        _code(key.Code()), _keyIdentifier(key.KeyIdentifier()), _location(LocationCodeForKey(key)),
-        _repeat(key.IsAutoRepeat())
+        _code(key.Code()), _location(LocationCodeForKey(key)), _repeat(key.IsAutoRepeat())
   {
     _isTrusted = true;
     _createTime = key.Timestamp();
@@ -130,9 +108,10 @@ namespace krys::boo
   }
 
   void KeyboardEvent::InitKeyboardEvent(DOMStringAtom type, bool canBubble, bool cancelable, Window *view,
-                                        DOMStringView keyIdentifier, uint32 location, bool ctrlKey,
-                                        bool altKey, bool shiftKey, bool metaKey) noexcept
+                                        DOMStringView key, uint32 location, bool ctrlKey, bool altKey,
+                                        bool shiftKey, bool metaKey) noexcept
   {
+    // As initUIEvent: nothing changes while the event is being dispatched.
     if (_dispatched)
     {
       return;
@@ -140,11 +119,12 @@ namespace krys::boo
 
     InitUIEvent(krys::move(type), canBubble, cancelable, view, 0);
 
-    _keyIdentifier = DOMString(keyIdentifier);
+    _key = DOMString(key);
     _location = location;
 
     SetModifierKeys(ctrlKey, altKey, shiftKey, metaKey);
 
+    // What the arguments don't give goes back to its default, and the event no longer comes from the host.
     _charCode = null;
     _isComposing = false;
     _keyCode = null;
@@ -152,7 +132,6 @@ namespace krys::boo
     _underlyingPlatformEvent = nullptr;
     _which = null;
     _code.clear();
-    _key.clear();
   }
 
   int32 KeyboardEvent::KeyCode() const noexcept
@@ -162,9 +141,8 @@ namespace krys::boo
       return static_cast<int32>(*_keyCode);
     }
 
-    // IE: virtual key code for keyup/keydown, character code for keypress
-    // Firefox: virtual key code for keyup/keydown, zero for keypress
-    // We match IE.
+    // keydown and keyup give the key's virtual key code. keypress gives its character, as in UI Events'
+    // conflated model: https://w3c.github.io/uievents/#legacy-key-models
     if (!_underlyingPlatformEvent)
     {
       return 0;
@@ -200,11 +178,7 @@ namespace krys::boo
       return static_cast<int32>(*_charCode);
     }
 
-    // IE: not supported
-    // Firefox: 0 for keydown/keyup events, character code for keypress
-    // We match Firefox.
-    // FIXME: The backward compatibility mode (needsKeyboardEventDisambiguationQuirks), where the character
-    // code is always returned, if it's ever needed.
+    // Only keypress has a character code: its text's first code point.
     if (!_underlyingPlatformEvent || Type() != event_names::KeyPress
         || _underlyingPlatformEvent->Text().empty())
     {
@@ -216,8 +190,7 @@ namespace krys::boo
 
   uint32 KeyboardEvent::Which() const noexcept
   {
-    // Netscape's "which" returns a virtual key code for keydown and keyup, and a character code for keypress.
-    // That's exactly what IE's "keyCode" returns. So they are the same for keyboard events.
+    // For a keyboard event, which is keyCode unless the dictionary gave it.
     if (_which)
     {
       return *_which;

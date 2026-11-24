@@ -86,13 +86,6 @@ namespace krys::boo::dom::tests
     REQUIRE(qn.LocalNameLower() == u8"div");
   }
 
-  TEST_CASE("QualifiedNameCache: LocalNameUpper is correctly computed", "[HTML][QualifiedNameCache]")
-  {
-    auto qn = QualifiedName(u8"http://www.w3.org/1999/xhtml", null, u8"div");
-
-    REQUIRE(qn.LocalNameUpper() == u8"DIV");
-  }
-
   TEST_CASE("QualifiedNameCache: null namespace and prefix", "[HTML][QualifiedNameCache]")
   {
     auto qn1 = QualifiedName(null, null, u8"localName");

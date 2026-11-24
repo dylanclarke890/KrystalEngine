@@ -606,13 +606,6 @@ namespace krys::boo::dom
     return reader.Types.contains(text::ToASCIILower(type));
   }
 
-  bool DataTransfer::HasStringOfType(Document &document, DOMStringView type) const noexcept
-  {
-    krys_debug_assert(CanReadTypes());
-
-    return Contains(Types(document), type);
-  }
-
   Ref<DataTransfer> DataTransfer::CreateForInputEvent(DOMStringView plainText,
                                                       DOMStringView htmlText) noexcept
   {
@@ -791,7 +784,7 @@ namespace krys::boo::dom
     return _dragImage || _dragImageElement;
   }
 
-  void DataTransfer::SetDragImage(Ref<Element> &&element, int32 x, int32 y) noexcept
+  void DataTransfer::SetDragImage(Ref<Element> element, int32 x, int32 y) noexcept
   {
     if (!ForDrag() || !CanWriteData())
     {

@@ -267,7 +267,7 @@ namespace krys::boo::style
     if (conversionData.EvaluationTimeZoomEnabled()
         && conversionData.RangeZoomOption() == css::RangeZoomOptions::Unzoomed)
     {
-      if (auto builderState = conversionData.ProtectedStyleBuilderState())
+      if (auto builderState = conversionData.StyleBuilderState())
       {
         auto textZoom = builderState->ZoomWithTextZoomFactor();
         return value * textZoom;
@@ -619,7 +619,7 @@ namespace krys::boo::style
     // We do not apply the zoom factor when we are computing the value of the font-size property. The zooming
     // for font sizes is much more complicated, since we have to worry about enforcing the minimum font size
     // preference as well as enforcing the implicit "smart minimum."
-    if (conversionData.ComputingFontSize() || css::IsFontOrRootFontRelativeLength(lengthUnit))
+    if (conversionData.ComputingFontSize() || css::IsFontRelativeLength(css::ToUnitType(lengthUnit)))
     {
       return value;
     }

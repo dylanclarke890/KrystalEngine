@@ -1,77 +1,38 @@
-﻿/*
- * Copyright (C) 2006 Rob Buis <buis@kde.org>
- *           (C) 2008 Nikolas Zimmermann <zimmermann@kde.org>
- * Copyright (C) 2008-2021 Apple Inc. All rights reserved.
- * Copyright (C) 2024 Samuel Weinig <sam@webkit.org>
- *
- * This library is free software; you can redistribute it and/or
- * modify it under the terms of the GNU Library General Public
- * License as published by the Free Software Foundation; either
- * version 2 of the License, or (at your option) any later version.
- *
- * This library is distributed in the hope that it will be useful,
- * but WITHOUT ANY WARRANTY; without even the implied warranty of
- * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU
- * Library General Public License for more details.
- *
- * You should have received a copy of the GNU Library General Public License
- * along with this library; see the file COPYING.LIB.  If not, write to
- * the Free Software Foundation, Inc., 51 Franklin Street, Fifth Floor,
- * Boston, MA 02110-1301, USA.
- */
-
-#include "Krystal.Booey/CSS/Values/CursorImageValue.hpp"
+﻿#include "Krystal.Booey/CSS/Values/CursorImageValue.hpp"
 #include "Krystal.Booey/CSS/Values/ImageValue.hpp"
 #include "Krystal.Booey/CSS/Values/PrimitiveValue.hpp"
 #include "Krystal.Booey/CSS/Values/ValuePair.hpp"
 #include "Krystal.Booey/Rendering/Style/StyleCursorImage.hpp"
 #include "Krystal.Booey/Style/Builder/BuilderState.hpp"
+#include "Krystal.Core/Memory/PointerComparison.hpp"
 
 namespace krys::boo::css
 {
-  Ref<CursorImageValue> CursorImageValue::Create(Ref<Value> &&value, RefPtr<Value> &&hotSpot) noexcept
-  {
-    auto *imageValue = DynamicDowncast<ImageValue>(value.get());
-    auto originalUrl = imageValue ? imageValue->Url() : CSSUrl::None();
-    return AdoptRef(*new CursorImageValue(krys::move(value), krys::move(hotSpot), krys::move(originalUrl)));
-  }
-
-  Ref<CursorImageValue> CursorImageValue::Create(Ref<Value> &&imageValue, RefPtr<Value> &&hotSpot,
-                                                 CSSUrl &&originalUrl) noexcept
-  {
-    return AdoptRef(
-      *new CursorImageValue(krys::move(imageValue), krys::move(hotSpot), krys::move(originalUrl)));
-  }
-
-  CursorImageValue::CursorImageValue(Ref<Value> &&imageValue, RefPtr<Value> &&hotSpot,
-                                     CSSUrl &&originalUrl) noexcept
-      : Value(ValueType::CursorImage), _originalUrl(krys::move(originalUrl)),
-        _imageValue(krys::move(imageValue)), _hotSpot(krys::move(hotSpot))
+  CursorImageValue::CursorImageValue(Ref<Value> image, RefPtr<ValuePair> hotSpot,
+                                     css::Url originalUrl) noexcept
+      : Value(ValueType::CursorImage), _image(krys::move(image)), _hotSpot(krys::move(hotSpot)),
+        _originalUrl(krys::move(originalUrl))
   {
   }
 
-  CSSOMString CursorImageValue::CustomCSSText(const SerialisationContext &context) const noexcept
+  CursorImageValue::~CursorImageValue() noexcept = default;
+
+  Ref<CursorImageValue> CursorImageValue::Create(Ref<Value> image, RefPtr<ValuePair> hotSpot) noexcept
   {
-    auto text = _imageValue->CssText(context);
-    if (!_hotSpot)
-    {
-      return text;
-    }
-    text.push_back(u8' ');
-    text.append(_hotSpot->First().CssText(context));
-    text.push_back(u8' ');
-    text.append(_hotSpot->Second().CssText(context));
-    return text;
+    auto *imageValue = DynamicDowncast<ImageValue>(*image);
+    auto originalUrl = imageValue ? imageValue->Url() : css::Url::None();
+    return Create(krys::move(image), krys::move(hotSpot), krys::move(originalUrl));
   }
 
-  bool CursorImageValue::Equals(const CursorImageValue &other) const noexcept
+  Ref<CursorImageValue> CursorImageValue::Create(Ref<Value> image, RefPtr<ValuePair> hotSpot,
+                                                 css::Url originalUrl) noexcept
   {
-    return CompareValue(_imageValue, other._imageValue) && CompareValuePtr(_hotSpot, other._hotSpot);
+    return AdoptRef(*new CursorImageValue(krys::move(image), krys::move(hotSpot), krys::move(originalUrl)));
   }
 
   RefPtr<StyleCursorImage> CursorImageValue::CreateStyleImage(const style::BuilderState &state) const noexcept
   {
-    auto styleImage = state.CreateStyleImage(*_imageValue);
+    auto styleImage = state.CreateStyleImage(*_image);
     if (!styleImage)
     {
       return nullptr;
@@ -80,14 +41,45 @@ namespace krys::boo::css
     Maybe<PointI> hotSpot;
     if (_hotSpot)
     {
-      // FIXME: Should we clamp or round instead of just casting from double to int?
-      hotSpot = PointI {
-        static_cast<int>(
-          Downcast<PrimitiveValue>(_hotSpot->First()).ResolveAsNumber(state.CssToLengthConversionData())),
-        static_cast<int>(
-          Downcast<PrimitiveValue>(_hotSpot->Second()).ResolveAsNumber(state.CssToLengthConversionData()))};
+      auto resolve = [&](const Value &coordinate)
+      {
+        // FIXME: The spec doesn't say how to make a pixel of a fractional or out-of-range coordinate;
+        // truncating may not match other engines.
+        return static_cast<int>(
+          Downcast<PrimitiveValue>(coordinate).ResolveAsNumber(state.CssToLengthConversionData()));
+      };
+      hotSpot = PointI {resolve(_hotSpot->First()), resolve(_hotSpot->Second())};
     }
     return StyleCursorImage::Create(krys::move(styleImage), hotSpot,
                                     style::ConvertToStyle(_originalUrl, state));
+  }
+
+  CSSOMString CursorImageValue::CustomCSSText(const SerialisationContext &context) const noexcept
+  {
+    auto text = _image->CssText(context);
+    if (_hotSpot)
+    {
+      // Both coordinates, even when they're equal.
+      text.push_back(u8' ');
+      text.append(_hotSpot->First().CssText(context));
+      text.push_back(u8' ');
+      text.append(_hotSpot->Second().CssText(context));
+    }
+    return text;
+  }
+
+  bool CursorImageValue::Equals(const CursorImageValue &other) const noexcept
+  {
+    return *_image == *other._image && ArePointingToEqualData(_hotSpot, other._hotSpot);
+  }
+
+  IterationStatus CursorImageValue::CustomVisitChildren(
+    KRYS_NOESCAPE const Func<IterationStatus(Value &)> &func) const noexcept
+  {
+    if (func(*_image) == IterationStatus::Done)
+    {
+      return IterationStatus::Done;
+    }
+    return _hotSpot ? func(*_hotSpot) : IterationStatus::Continue;
   }
 }

@@ -25,6 +25,7 @@
 
 #include "Krystal.Booey/CSS/Values/ReflectValue.hpp"
 #include "Krystal.Booey/CSS/Values/ValueId.hpp"
+#include "Krystal.Core/Memory/PointerComparison.hpp"
 
 namespace krys::boo::css
 {
@@ -54,7 +55,7 @@ namespace krys::boo::css
 
   bool ReflectValue::Equals(const ReflectValue &other) const noexcept
   {
-    return _direction == other._direction && CompareValue(_offset, other._offset)
-           && CompareValuePtr(_mask, other._mask);
+    return _direction == other._direction && *_offset == *other._offset
+           && ArePointingToEqualData(_mask, other._mask);
   }
 }

@@ -26,6 +26,7 @@
 #include "Krystal.Booey/CSS/Values/OffsetRotateValue.hpp"
 #include "Krystal.Booey/CSS/Values/ValueId.hpp"
 #include "Krystal.Core/Assert.hpp"
+#include "Krystal.Core/Memory/PointerComparison.hpp"
 
 namespace krys::boo::css
 {
@@ -82,6 +83,6 @@ namespace krys::boo::css
 
   bool OffsetRotateValue::Equals(const OffsetRotateValue &other) const noexcept
   {
-    return CompareValuePtr(_modifier, other._modifier) && CompareValuePtr(_angle, other._angle);
+    return ArePointingToEqualData(_modifier, other._modifier) && ArePointingToEqualData(_angle, other._angle);
   }
 }

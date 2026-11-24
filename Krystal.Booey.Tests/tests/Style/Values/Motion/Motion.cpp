@@ -72,6 +72,12 @@ namespace krys::boo::style::tests
 
       // A ray needs the containing block.
       CHECK_FALSE(TryPath(ray, TransformOperationData {RectF {0, 0, 20, 20}}));
+
+      // The computed value keeps the coordinate box, and converting it back keeps it again.
+      auto boxed = Convert<OffsetPath>(PropertyId::OffsetPath, u8"ray(90deg) padding-box");
+      CHECK(Serialised(boxed) == "ray(90deg) padding-box");
+      auto created = CreateCSSValue(css::ValuePool::MainThreadPool(), Style, boxed);
+      CHECK(Serialised(ConvertCSSValueToStyle<OffsetPath>(*State, *created)) == "ray(90deg) padding-box");
     }
 
     SECTION("basic shapes and boxes")

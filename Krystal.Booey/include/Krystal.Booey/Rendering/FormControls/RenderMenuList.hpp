@@ -128,19 +128,7 @@ namespace krys::boo
 
     void ValueChanged(uint32 listIndex, bool fireOnChange = true) noexcept override;
 
-    void SelectionChanged(uint32, bool) noexcept override
-    {
-    }
-
-    void SelectionCleared() noexcept override
-    {
-    }
-
     KRYS_NODISCARD utf8_string ItemText(uint32 listIndex) const noexcept override;
-
-    KRYS_NODISCARD utf8_string ItemLabel(uint32 listIndex) const noexcept override;
-
-    KRYS_NODISCARD utf8_string ItemIcon(uint32 listIndex) const noexcept override;
 
     KRYS_NODISCARD utf8_string ItemToolTip(uint32 listIndex) const noexcept override;
 
@@ -151,10 +139,6 @@ namespace krys::boo
     KRYS_NODISCARD PopupMenuStyle ItemStyle(uint32 listIndex) const noexcept override;
 
     KRYS_NODISCARD PopupMenuStyle MenuStyle() const noexcept override;
-
-    KRYS_NODISCARD int32 ClientInsetLeft() const noexcept override;
-
-    KRYS_NODISCARD int32 ClientInsetRight() const noexcept override;
 
     KRYS_NODISCARD LayoutUnit ClientPaddingLeft() const noexcept override;
 
@@ -172,17 +156,7 @@ namespace krys::boo
 
     KRYS_NODISCARD bool ItemIsSelected(uint32 listIndex) const noexcept override;
 
-    KRYS_NODISCARD bool ShouldPopOver() const noexcept override
-    {
-      return true;
-    }
-
     void SetTextFromItem(uint32 listIndex) noexcept override;
-
-    void ListBoxSelectItem(int32 listIndex, bool allowMultiplySelections, bool shift,
-                           bool fireOnChangeNow = true) noexcept override;
-
-    KRYS_NODISCARD bool Multiple() const noexcept override;
 
 #pragma endregion
 

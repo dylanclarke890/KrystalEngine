@@ -42,6 +42,6 @@ namespace krys::boo
 
   Ref<css::Value> StyleInvalidImage::ComputedStyleValue(const RenderStyle &) const noexcept
   {
-    return css::ImageValue::Create();
+    return css::ImageValue::CreateInvalid();
   }
 }

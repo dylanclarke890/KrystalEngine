@@ -319,9 +319,7 @@ namespace krys::boo::css::calc
     calc::Type Type;
     calc::Stage Stage;
 
-    // `RequiresConversionData` is used both to both indicate whether eager evaluation of the tree (at parse
-    // time) is possible or not and to trigger a warning in `css::calc::Value::DoubleValueDeprecated` that the
-    // evaluation results will be incorrect.
+    // Whether evaluating the tree needs conversion data, so it can't be evaluated eagerly while parsing.
     bool RequiresConversionData = false;
 
     bool operator==(const Tree &) const noexcept = default;

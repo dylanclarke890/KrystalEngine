@@ -70,11 +70,6 @@ namespace krys::boo::style
       return &Element == &other.Element && PseudoElementIdentifier == other.PseudoElementIdentifier;
     }
 
-    KRYS_NODISCARD Ref<boo::Element> ProtectedElement() const noexcept
-    {
-      return ShareRef(Element);
-    }
-
     /// @brief The renderer of the element or of its pseudo-element.
     KRYS_NODISCARD RenderElement *Renderer() const noexcept;
 

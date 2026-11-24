@@ -27,6 +27,7 @@
 #include "Krystal.Booey/CSS/Parser/ParserMode.hpp"
 #include "Krystal.Booey/CSS/Properties/Consumers/MetaConsumerDefinitions.hpp"
 #include "Krystal.Booey/CSS/Properties/Property.hpp"
+#include "Krystal.Booey/CSS/Properties/PropertyQueries.hpp"
 
 namespace krys::boo::css
 {
@@ -41,7 +42,7 @@ namespace krys::boo::css
         return null;
       }
 
-      return UnitTraits<LengthUnit>::Validate(unitType);
+      return ToUnit<LengthUnit>(unitType);
     }
 
     template <auto R, typename V>
@@ -65,7 +66,7 @@ namespace krys::boo::css
         return true;
       }
 
-      return mode == ParserMode::HTMLQuirks && Property::AcceptsQuirkyLength(state.CurrentProperty);
+      return mode == ParserMode::HTMLQuirks && AcceptsQuirkyLength(state.CurrentProperty);
     }
   };
 

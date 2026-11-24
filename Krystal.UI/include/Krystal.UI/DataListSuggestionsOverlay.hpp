@@ -43,7 +43,7 @@ namespace krys::ui
 
     /// @brief Up and Down move the highlight, Enter chooses the highlighted suggestion and Escape hides the
     /// list.
-    void HandleKeydownWithIdentifier(utf8_stringview identifier) noexcept override;
+    void HandleKeyDown(utf8_stringview key) noexcept override;
 
     void DisplayWithActivationType(boo::DataListSuggestionActivationType type) noexcept override;
 

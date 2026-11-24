@@ -62,7 +62,7 @@ namespace krys::boo::css::tests
   KRYS_NODISCARD inline Ref<StyleRule> CreateStyleRule(CSSOMStringView selectors,
                                                        utf8_stringview declarations)
   {
-    return StyleRule::Create(ImmutableDeclarations(declarations), false, ParseSelectors(selectors));
+    return StyleRule::Create(ImmutableDeclarations(declarations), ParseSelectors(selectors));
   }
 
   /// @brief The selector text of `list`, as a narrow string.

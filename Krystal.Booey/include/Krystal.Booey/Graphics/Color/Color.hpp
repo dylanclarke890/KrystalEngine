@@ -447,11 +447,6 @@ namespace krys::boo
       return DecodedOutOfLineComponents(_colorAndFlags);
     }
 
-    KRYS_NODISCARD Ref<OutOfLineComponents> ProtectedAsOutOfLine() const noexcept
-    {
-      return ShareRef(AsOutOfLine());
-    }
-
     KRYS_NODISCARD static uint64 EncodedFlags(ColorFlagsIncludingPrivate flags) noexcept
     {
       return static_cast<uint64>(flags.ToRaw()) << flagsShift;

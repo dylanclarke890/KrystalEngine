@@ -333,8 +333,6 @@ namespace krys::boo::css::tests
     CHECK(b->PrecedingCompoundSelectorComponent() == nullptr);
 
     CHECK(b->Relation() == SelectorRelation::Child);
-    CHECK(b->HasDescendantOrChildRelation());
-    CHECK(!b->HasDescendantRelation());
     CHECK(p->TagQualifiedName().LocalName() == u8"p");
     CHECK(p->TagLocalNameLower() == u8"p");
     CHECK(a->Value() == u8"a");
@@ -342,11 +340,8 @@ namespace krys::boo::css::tests
 
   TEST_CASE("Selector(queries)", "[CSS][Selectors][Selector]")
   {
-    auto sibling = B::List(B::Combine(B::Type(u8"a"), SelectorRelation::NextSibling, B::Type(u8"b")));
-    CHECK(sibling.FirstSelectorComponent()->IsSiblingSelector());
-    CHECK(
-      B::List(B::PseudoClass(SelectorPseudoClass::FirstChild)).FirstSelectorComponent()->IsSiblingSelector());
-    CHECK(!B::List(B::PseudoClass(SelectorPseudoClass::Root)).FirstSelectorComponent()->IsSiblingSelector());
+    CHECK(PseudoClassIsRelativeToSiblings(SelectorPseudoClass::FirstChild));
+    CHECK(!PseudoClassIsRelativeToSiblings(SelectorPseudoClass::Root));
     CHECK(IsTreeStructuralPseudoClass(SelectorPseudoClass::Root));
     CHECK(!IsTreeStructuralPseudoClass(SelectorPseudoClass::Hover));
     CHECK(IsLogicalCombinationPseudoClass(SelectorPseudoClass::Where));
@@ -474,7 +469,17 @@ namespace krys::boo::css::tests
       return B::List(B::PseudoClass(SelectorPseudoClass::Is, B::MutableList(B::Class(name))));
     };
     CHECK(withList(u8"p") == withList(u8"p"));
-    CHECK(!(withList(u8"p") == withList(u8"q")));
+    CHECK_FALSE(withList(u8"p") == withList(u8"q"));
     CHECK(FastHash<SelectorList> {}(withList(u8"p")) == FastHash<SelectorList> {}(withList(u8"p")));
+
+    // :heading()'s levels count.
+    auto heading = [](int32 level)
+    {
+      auto selector = B::PseudoClass(SelectorPseudoClass::Heading);
+      selector->SetIntegerList(FixedList<int32> {level});
+      return B::List(krys::move(selector));
+    };
+    CHECK(heading(1) == heading(1));
+    CHECK_FALSE(heading(1) == heading(2));
   }
 }

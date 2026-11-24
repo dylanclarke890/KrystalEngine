@@ -118,8 +118,8 @@ namespace krys::boo::dom::tests
   {
     boo::tests::PaintFixture fixture {
       u8"<!DOCTYPE html><style>body{margin:0}</style>"
-      u8"<div id=box style=margin-left:20px;margin-top:10px;width:50px;height:50px;"
-      u8"position:relative;border:5px solid></div>"};
+      u8"<div id=box style=\"margin-left:20px;margin-top:10px;width:50px;height:50px;"
+      u8"position:relative;border:5px solid\"></div>"};
     (void)fixture.Document->UpdateLayout();
     auto &box = fixture.ById(u8"box");
 
@@ -150,13 +150,14 @@ namespace krys::boo::dom::tests
         == 4);
     }
 
-    SECTION("offsets are relative to the target's border box, layer positions to its layer")
+    SECTION("offsets are relative to the target's padding edge, layer positions to its layer's border box")
     {
       Ref<OffsetRecorder> recorder = CreateRef<OffsetRecorder>();
       box.AddEventListener(u8"mousedown", recorder, false);
       (void)box.DispatchMouseEvent(platform, u8"mousedown", 1);
-      CHECK(recorder->OffsetX == 13);
-      CHECK(recorder->OffsetY == 17);
+      // Chrome: 8, 12 (the padding edge is inside the 5px border at 25, 15).
+      CHECK(recorder->OffsetX == 8);
+      CHECK(recorder->OffsetY == 12);
       CHECK(recorder->LayerX == 12);
       CHECK(recorder->LayerY == 17);
       CHECK(recorder->PageX == 32);
@@ -171,5 +172,25 @@ namespace krys::boo::dom::tests
       CHECK(down->PageX() == 16);
       CHECK(down->ClientX() == 16);
     }
+  }
+
+  TEST_CASE_METHOD(css::tests::ValueFixture, "MouseEvent: offsets follow the target's transforms",
+                   "[DOM][MouseEvent][cssom-view:dom-mouseevent-offsetx]")
+  {
+    boo::tests::PaintFixture fixture {
+      u8"<!DOCTYPE html><style>body{margin:0}"
+      u8"#p{position:absolute;left:100px;top:100px;transform:scale(2);transform-origin:0 0}"
+      u8"#box{width:50px;height:50px;border:5px solid}</style><div id=p><div id=box></div></div>"};
+    (void)fixture.Document->UpdateLayout();
+    auto &box = fixture.ById(u8"box");
+    Ref<OffsetRecorder> recorder = CreateRef<OffsetRecorder>();
+    box.AddEventListener(u8"mousedown", recorder, false);
+
+    PlatformMouseEvent platform(PointD(130, 140), PointD(130, 140), MouseButton::Left,
+                                PlatformEvent::Type::MousePressed, 1, {}, MonotonicTime::Now(), 1, PointD());
+    (void)box.DispatchMouseEvent(platform, u8"mousedown", 1);
+    // Chrome: 10, 15, the point in the scaled box's own coordinates; the specification ignores transforms.
+    CHECK(recorder->OffsetX == 10);
+    CHECK(recorder->OffsetY == 15);
   }
 }

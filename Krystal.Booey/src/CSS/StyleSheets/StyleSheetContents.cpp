@@ -1,24 +1,4 @@
-﻿/*
- * (C) 1999-2003 Lars Knoll (knoll@kde.org)
- * Copyright (C) 2004-2025 Apple Inc. All rights reserved.
- *
- * This library is free software; you can redistribute it and/or
- * modify it under the terms of the GNU Library General Public
- * License as published by the Free Software Foundation; either
- * version 2 of the License, or (at your option) any later version.
- *
- * This library is distributed in the hope that it will be useful,
- * but WITHOUT ANY WARRANTY; without even the implied warranty of
- * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU
- * Library General Public License for more details.
- *
- * You should have received a copy of the GNU Library General Public License
- * along with this library; see the file COPYING.LIB.  If not, write to
- * the Free Software Foundation, Inc., 51 Franklin Street, Fifth Floor,
- * Boston, MA 02110-1301, USA.
- */
-
-#include "Krystal.Booey/CSS/StyleSheets/StyleSheetContents.hpp"
+﻿#include "Krystal.Booey/CSS/StyleSheets/StyleSheetContents.hpp"
 #include "Krystal.Booey/CSS/CSSOM/CSSStyleSheet.hpp"
 #include "Krystal.Booey/CSS/Parser/Parser.hpp"
 #include "Krystal.Booey/CSS/Properties/StyleProperties.hpp"
@@ -36,9 +16,30 @@ namespace krys::boo::css
 {
   namespace
   {
-    // The selector list has to fit into RuleData.
+    /// @brief The most selector components a style rule can have; `style::RuleData` stores the index of one.
     constexpr uint32 MaximumSelectorComponentCount = style::RuleData::MaximumSelectorComponentCount;
 
+    /// @brief Whether @p rule is a nesting style rule whose selectors, as written, have more components than
+    /// `style::RuleData` holds.
+    KRYS_NODISCARD bool HasTooManyOriginalSelectorComponents(const Rule &rule) noexcept
+    {
+      const auto *styleRuleWithNesting = DynamicDowncast<StyleRuleWithNesting>(rule);
+      return styleRuleWithNesting
+             && styleRuleWithNesting->OriginalSelectorList().ComponentCount() > MaximumSelectorComponentCount;
+    }
+
+    /// @brief @p rule as a style rule, if it is one with more selector components than `style::RuleData`
+    /// holds.
+    KRYS_NODISCARD const StyleRule *StyleRuleWithTooManySelectorComponents(const Rule &rule) noexcept
+    {
+      const auto *styleRule = DynamicDowncast<StyleRule>(rule);
+      return styleRule && styleRule->GetSelectorList().ComponentCount() > MaximumSelectorComponentCount
+               ? styleRule
+               : nullptr;
+    }
+
+    /// @brief Calls @p handler with each of @p rules and the rules nested in them, depth first, until it
+    /// returns true.
     bool TraverseRulesInList(const List<Ref<Rule>> &rules,
                              KRYS_NOESCAPE const Func<bool(const Rule &)> &handler) noexcept
     {
@@ -48,19 +49,13 @@ namespace krys::boo::css
         {
           return true;
         }
-        if (auto *styleRuleWithNesting = DynamicDowncast<StyleRuleWithNesting>(rule.get()))
+        if (const auto *styleRuleWithNesting = DynamicDowncast<StyleRuleWithNesting>(rule.get());
+            styleRuleWithNesting && TraverseRulesInList(styleRuleWithNesting->NestedRules(), handler))
         {
-          if (TraverseRulesInList(styleRuleWithNesting->NestedRules(), handler))
-          {
-            return true;
-          }
+          return true;
         }
-        auto *groupRule = DynamicDowncast<GroupRule>(rule.get());
-        if (!groupRule)
-        {
-          continue;
-        }
-        if (TraverseRulesInList(groupRule->ChildRules(), handler))
+        if (const auto *groupRule = DynamicDowncast<GroupRule>(rule.get());
+            groupRule && TraverseRulesInList(groupRule->ChildRules(), handler))
         {
           return true;
         }
@@ -69,49 +64,28 @@ namespace krys::boo::css
     }
   }
 
-  uint32 StyleSheetContents::EstimatedSizeInBytes() const noexcept
-  {
-    // Note that this does not take into account size of the strings hanging from various objects.
-    // The assumption is that nearly all of of them are atoms that would exist anyway.
-    uint32 size = sizeof(*this);
-
-    // FIXME: This ignores the children of media and region rules.
-    // Most rules are StyleRules.
-    size += RuleCount() * StyleRule::AverageSizeInBytes();
-
-    for (const auto &importRule : _importRules)
-    {
-      if (auto *sheet = importRule->StyleSheet())
-      {
-        size += sheet->EstimatedSizeInBytes();
-      }
-    }
-    return size;
-  }
-
   StyleSheetContents::StyleSheetContents(ImportRule *ownerRule, CSSOMString originalUrl,
                                          ParserContext context) noexcept
-      : _ownerRule(ownerRule), _originalUrl(krys::move(originalUrl)), _defaultNamespace(dom::StarAtom()),
+      : _ownerRule(ownerRule), _originalUrl(krys::move(originalUrl)), _parserContext(krys::move(context)),
+        _defaultNamespace(dom::StarAtom()),
         _isUserStyleSheet(ownerRule && ownerRule->ParentStyleSheet()
-                          && ownerRule->ParentStyleSheet()->IsUserStyleSheet()),
-        _parserContext(krys::move(context))
+                          && ownerRule->ParentStyleSheet()->IsUserStyleSheet())
   {
   }
 
   // NOLINTNEXTLINE(bugprone-copy-constructor-init): a copy starts with its own reference and weak counts.
   StyleSheetContents::StyleSheetContents(const StyleSheetContents &other) noexcept
-      : _originalUrl(other._originalUrl), _encodingFromCharsetRule(other._encodingFromCharsetRule),
+      : _originalUrl(other._originalUrl), _parserContext(other._parserContext),
         _namespaces(other._namespaces), _defaultNamespace(other._defaultNamespace),
         _isUserStyleSheet(other._isUserStyleSheet), _loadCompleted(true),
         _hasSyntacticallyValidCSSHeader(other._hasSyntacticallyValidCSSHeader),
-        _hasNestingRulesCache(other._hasNestingRulesCache), _parserContext(other._parserContext)
+        _hasNestingRulesCache(other._hasNestingRulesCache)
   {
+    // Only cacheable sheets are copied, and those have no imports to copy.
     krys_debug_assert(other.IsCacheable());
-
-    // A sheet with import rules isn't cacheable, so isn't copied.
     krys_debug_assert(other._importRules.empty());
 
-    // Namespace rules are immutable, so the copy shares them (as their CSSOM wrappers keep theirs).
+    // Namespace rules can't change, so the copy shares them.
     _namespaceRules = other._namespaceRules;
 
     _layerRulesBeforeImportRules.reserve(other._layerRulesBeforeImportRules.size());
@@ -119,7 +93,6 @@ namespace krys::boo::css
     {
       _layerRulesBeforeImportRules.push_back(rule->Copy());
     }
-
     _childRules.reserve(other._childRules.size());
     for (const auto &rule : other._childRules)
     {
@@ -137,21 +110,20 @@ namespace krys::boo::css
     return Create(ParserContext(ParserMode::HTMLStandard));
   }
 
-  Ref<StyleSheetContents> StyleSheetContents::Create(const ParserContext &context) noexcept
+  Ref<StyleSheetContents> StyleSheetContents::Create(ParserContext context) noexcept
   {
-    return AdoptRef(*new StyleSheetContents(nullptr, CSSOMString(), context));
+    return AdoptRef(*new StyleSheetContents(nullptr, CSSOMString(), krys::move(context)));
   }
 
-  Ref<StyleSheetContents> StyleSheetContents::Create(const CSSOMString &originalUrl,
-                                                     const ParserContext &context) noexcept
+  Ref<StyleSheetContents> StyleSheetContents::Create(CSSOMString originalUrl, ParserContext context) noexcept
   {
-    return AdoptRef(*new StyleSheetContents(nullptr, originalUrl, context));
+    return AdoptRef(*new StyleSheetContents(nullptr, krys::move(originalUrl), krys::move(context)));
   }
 
-  Ref<StyleSheetContents> StyleSheetContents::Create(ImportRule *ownerRule, const CSSOMString &originalUrl,
-                                                     const ParserContext &context) noexcept
+  Ref<StyleSheetContents> StyleSheetContents::Create(ImportRule *ownerRule, CSSOMString originalUrl,
+                                                     ParserContext context) noexcept
   {
-    return AdoptRef(*new StyleSheetContents(ownerRule, originalUrl, context));
+    return AdoptRef(*new StyleSheetContents(ownerRule, krys::move(originalUrl), krys::move(context)));
   }
 
   Ref<StyleSheetContents> StyleSheetContents::Copy() const noexcept
@@ -159,105 +131,64 @@ namespace krys::boo::css
     return AdoptRef(*new StyleSheetContents(*this));
   }
 
-  bool StyleSheetContents::IsCacheable() const noexcept
+#pragma region Parsing
+
+  bool StyleSheetContents::ParseString(const CSSOMString &sheetText) noexcept
   {
-    // FIXME: Support copying import rules.
-    if (!_importRules.empty())
-    {
-      return false;
-    }
-    // FIXME: Support cached stylesheets in import rules.
-    if (_ownerRule)
-    {
-      return false;
-    }
-    // This would require dealing with multiple clients for load callbacks.
-    if (!_loadCompleted)
-    {
-      return false;
-    }
-    if (_didLoadErrorOccur)
-    {
-      return false;
-    }
-    // It is not the original sheet anymore.
-    if (_isMutable)
-    {
-      return false;
-    }
-    // A sheet whose header isn't valid isn't reused.
-    if (!_hasSyntacticallyValidCSSHeader)
-    {
-      return false;
-    }
-    if (HasNestingRules())
-    {
-      return false;
-    }
+    Parser::ParseStyleSheet(sheetText, GetParserContext(), *this);
     return true;
   }
 
-  bool StyleSheetContents::IsCacheableWithNoBaseUrlDependency() const noexcept
+  bool StyleSheetContents::ParseAuthorStyleSheet(const CachedCSSStyleSheet *cachedStyleSheet) noexcept
   {
-    if (!IsCacheable())
+    // The type is checked strictly in quirks mode too (see DIFFERENCES.md).
+    auto sheetText = cachedStyleSheet->SheetText();
+    if (!sheetText)
     {
       return false;
     }
-    if (MayDependOnBaseUrl())
-    {
-      return false;
-    }
+    Parser::ParseStyleSheet(*sheetText, GetParserContext(), *this);
     return true;
   }
 
-  void StyleSheetContents::ParserAppendRule(Ref<Rule> &&rule) noexcept
+  void StyleSheetContents::ParserAppendRule(Ref<Rule> rule) noexcept
   {
     krys_debug_assert(!rule->IsCharsetRule());
 
+    // Layer statements before any other rule may stay before the imports.
     if (auto *layerRule = DynamicDowncast<LayerRule>(rule.get());
-        layerRule && _importRules.empty() && _childRules.empty() && _namespaceRules.empty())
+        layerRule && layerRule->IsStatement() && _importRules.empty() && _namespaceRules.empty()
+        && _childRules.empty())
     {
-      if (layerRule->IsStatement())
-      {
-        _layerRulesBeforeImportRules.push_back(ShareRef(*layerRule));
-        return;
-      }
-    }
-
-    if (auto *importRule = DynamicDowncast<ImportRule>(rule.get()))
-    {
-      // Parser enforces that @import rules come before anything else except @charset.
-      krys_debug_assert(_childRules.empty());
-      _importRules.push_back(ShareRef(*importRule));
-      _importRules.back()->SetParentStyleSheet(this);
-      _importRules.back()->RequestStyleSheet();
+      _layerRulesBeforeImportRules.push_back(ShareRef(*layerRule));
       return;
     }
 
+    // The parser only accepts imports and namespaces before the other rules.
+    if (auto *importRule = DynamicDowncast<ImportRule>(rule.get()))
+    {
+      krys_debug_assert(_childRules.empty());
+      _importRules.push_back(ShareRef(*importRule));
+      importRule->SetParentStyleSheet(this);
+      importRule->RequestStyleSheet();
+      return;
+    }
     if (auto *namespaceRule = DynamicDowncast<NamespaceRule>(rule.get()))
     {
-      // Parser enforces that @namespace rules come before all rules other than
-      // import/charset rules
       krys_debug_assert(_childRules.empty());
       ParserAddNamespace(namespaceRule->Prefix(), namespaceRule->Uri());
       _namespaceRules.push_back(ShareRef(*namespaceRule));
       return;
     }
 
-    // NOTE: The selector list has to fit into RuleData.
-    // We don't support nested rules with too many selectors
-    if (auto *styleRuleWithNesting = DynamicDowncast<StyleRuleWithNesting>(rule.get()))
+    // A style rule with too many selector components is split into several, unless its nested rules' would
+    // be too; then it's dropped.
+    if (HasTooManyOriginalSelectorComponents(*rule))
     {
-      if (styleRuleWithNesting->OriginalSelectorList().ComponentCount() > MaximumSelectorComponentCount)
-      {
-        return;
-      }
+      return;
     }
-
-    if (auto *styleRule = DynamicDowncast<StyleRule>(rule.get());
-        styleRule && styleRule->GetSelectorList().ComponentCount() > MaximumSelectorComponentCount)
+    if (const auto *styleRule = StyleRuleWithTooManySelectorComponents(*rule))
     {
-      // If we're adding a rule with a huge number of selectors, split it up into multiple rules
       for (auto &splitRule :
            styleRule->SplitIntoMultipleRulesWithMaximumSelectorComponentCount(MaximumSelectorComponentCount))
       {
@@ -265,237 +196,7 @@ namespace krys::boo::css
       }
       return;
     }
-
     _childRules.push_back(krys::move(rule));
-  }
-
-  Rule *StyleSheetContents::RuleAt(uint32 index) const noexcept
-  {
-    krys_assert(index < RuleCount());
-
-    size_t childVectorIndex = index;
-    if (childVectorIndex < _layerRulesBeforeImportRules.size())
-    {
-      return _layerRulesBeforeImportRules[childVectorIndex].get();
-    }
-
-    childVectorIndex -= _layerRulesBeforeImportRules.size();
-
-    if (childVectorIndex < _importRules.size())
-    {
-      return _importRules[childVectorIndex].get();
-    }
-
-    childVectorIndex -= _importRules.size();
-
-    if (childVectorIndex < _namespaceRules.size())
-    {
-      return _namespaceRules[childVectorIndex].get();
-    }
-
-    childVectorIndex -= _namespaceRules.size();
-
-    return _childRules[childVectorIndex].get();
-  }
-
-  uint32 StyleSheetContents::RuleCount() const noexcept
-  {
-    size_t result = 0;
-    result += _layerRulesBeforeImportRules.size();
-    result += _importRules.size();
-    result += _namespaceRules.size();
-    result += _childRules.size();
-    return static_cast<uint32>(result);
-  }
-
-  void StyleSheetContents::ClearCharsetRule() noexcept
-  {
-    _encodingFromCharsetRule.clear();
-  }
-
-  void StyleSheetContents::ClearRules() noexcept
-  {
-    for (auto &importRule : _importRules)
-    {
-      krys_debug_assert(importRule->ParentStyleSheet() == this);
-      importRule->ClearParentStyleSheet();
-    }
-    _layerRulesBeforeImportRules.clear();
-    _importRules.clear();
-    _namespaceRules.clear();
-    _childRules.clear();
-    ClearCharsetRule();
-  }
-
-  void StyleSheetContents::ParserSetEncodingFromCharsetRule(const CSSOMString &encoding) noexcept
-  {
-    // Parser enforces that there is ever only one @charset.
-    krys_debug_assert(_encodingFromCharsetRule.empty());
-    _encodingFromCharsetRule = encoding;
-  }
-
-  bool StyleSheetContents::WrapperInsertRule(Ref<Rule> &&rule, uint32 index) noexcept
-  {
-    krys_debug_assert(_isMutable);
-    krys_assert(index <= RuleCount());
-    // Parser::parseRule doesn't currently allow @charset so we don't need to deal with it.
-    krys_debug_assert(!rule->IsCharsetRule());
-
-    // Maybe the insert will be legal if we treat early layer statement rules as normal child rules?
-    auto shouldMoveLayerRulesBeforeImportToNormalChildRules = [&]
-    {
-      if (index >= _layerRulesBeforeImportRules.size())
-      {
-        return false;
-      }
-      if (!_importRules.empty() || !_namespaceRules.empty())
-      {
-        return false;
-      }
-      auto *layerRule = DynamicDowncast<LayerRule>(rule.get());
-      bool isLayerStatement = layerRule && layerRule->IsStatement();
-      return !rule->IsImportRule() && !rule->IsNamespaceRule() && !isLayerStatement;
-    };
-
-    if (shouldMoveLayerRulesBeforeImportToNormalChildRules())
-    {
-      auto layerRules = std::exchange(_layerRulesBeforeImportRules, {});
-      _childRules.insert(_childRules.begin(), layerRules.begin(), layerRules.end());
-    }
-
-    size_t childVectorIndex = index;
-    if (childVectorIndex < _layerRulesBeforeImportRules.size()
-        || (childVectorIndex == _layerRulesBeforeImportRules.size() && Is<LayerRule>(*rule)))
-    {
-      auto *layerRule = DynamicDowncast<LayerRule>(rule.get());
-      if (!layerRule)
-      {
-        return false;
-      }
-      if (layerRule->IsStatement())
-      {
-        _layerRulesBeforeImportRules.insert(_layerRulesBeforeImportRules.begin() + childVectorIndex,
-                                            ShareRef(*layerRule));
-        return true;
-      }
-      if (childVectorIndex < _layerRulesBeforeImportRules.size())
-      {
-        return false;
-      }
-    }
-    childVectorIndex -= _layerRulesBeforeImportRules.size();
-
-    if (childVectorIndex < _importRules.size()
-        || (childVectorIndex == _importRules.size() && rule->IsImportRule()))
-    {
-      // Inserting non-import rule before @import is not allowed.
-      auto *importRule = DynamicDowncast<ImportRule>(rule.get());
-      if (!importRule)
-      {
-        return false;
-      }
-      _importRules.insert(_importRules.begin() + childVectorIndex, ShareRef(*importRule));
-      _importRules[childVectorIndex]->SetParentStyleSheet(this);
-      _importRules[childVectorIndex]->RequestStyleSheet();
-      // FIXME: Stylesheet doesn't actually change meaningfully before the imported sheets are loaded.
-      return true;
-    }
-    // Inserting @import rule after a non-import rule is not allowed.
-    if (Is<ImportRule>(*rule))
-    {
-      return false;
-    }
-    childVectorIndex -= _importRules.size();
-
-    if (childVectorIndex < _namespaceRules.size()
-        || (childVectorIndex == _namespaceRules.size() && rule->IsNamespaceRule()))
-    {
-      // Inserting non-namespace rules other than import and layer statement rules before @namespace is
-      // not allowed.
-      auto *namespaceRule = DynamicDowncast<NamespaceRule>(rule.get());
-      if (!namespaceRule)
-      {
-        return false;
-      }
-      // Inserting @namespace rule when rules other than import/namespace/charset
-      // are present is not allowed.
-      if (!_childRules.empty() || !_layerRulesBeforeImportRules.empty())
-      {
-        return false;
-      }
-
-      _namespaceRules.insert(_namespaceRules.begin() + childVectorIndex, ShareRef(*namespaceRule));
-
-      // For now to be compatible with IE and Firefox if a namespace rule with the same
-      // prefix is added, it overwrites previous ones.
-      // FIXME: The eventual correct behavior would be to ensure that the last value in
-      // the list wins.
-      ParserAddNamespace(namespaceRule->Prefix(), namespaceRule->Uri());
-      return true;
-    }
-    if (Is<NamespaceRule>(*rule))
-    {
-      return false;
-    }
-    childVectorIndex -= _namespaceRules.size();
-
-    // If the number of selectors would overflow RuleData, we drop the operation.
-    if (auto *styleRuleWithNesting = DynamicDowncast<StyleRuleWithNesting>(rule.get()))
-    {
-      if (styleRuleWithNesting->OriginalSelectorList().ComponentCount() > MaximumSelectorComponentCount)
-      {
-        return false;
-      }
-    }
-    if (auto *styleRule = DynamicDowncast<StyleRule>(rule.get()))
-    {
-      if (styleRule->GetSelectorList().ComponentCount() > MaximumSelectorComponentCount)
-      {
-        return false;
-      }
-    }
-
-    _childRules.insert(_childRules.begin() + childVectorIndex, krys::move(rule));
-    return true;
-  }
-
-  bool StyleSheetContents::WrapperDeleteRule(uint32 index) noexcept
-  {
-    krys_debug_assert(_isMutable);
-    krys_assert(index < RuleCount());
-
-    size_t childVectorIndex = index;
-    if (childVectorIndex < _layerRulesBeforeImportRules.size())
-    {
-      _layerRulesBeforeImportRules.erase(_layerRulesBeforeImportRules.begin() + childVectorIndex);
-      return true;
-    }
-    childVectorIndex -= _layerRulesBeforeImportRules.size();
-
-    if (childVectorIndex < _importRules.size())
-    {
-      _importRules[childVectorIndex]->CancelLoad();
-      _importRules[childVectorIndex]->ClearParentStyleSheet();
-      _importRules.erase(_importRules.begin() + childVectorIndex);
-      return true;
-    }
-    childVectorIndex -= _importRules.size();
-
-    if (childVectorIndex < _namespaceRules.size())
-    {
-      // Deleting @namespace rule when list contains anything other than @import or @namespace rules is not
-      // allowed.
-      if (!_childRules.empty())
-      {
-        return false;
-      }
-      _namespaceRules.erase(_namespaceRules.begin() + childVectorIndex);
-      return true;
-    }
-    childVectorIndex -= _namespaceRules.size();
-
-    _childRules.erase(_childRules.begin() + childVectorIndex);
-    return true;
   }
 
   void StyleSheetContents::ParserAddNamespace(const CSSOMStringAtom &prefix,
@@ -510,66 +211,345 @@ namespace krys::boo::css
     _namespaces.insert_or_assign(prefix, uri);
   }
 
+  void StyleSheetContents::ShrinkToFit() noexcept
+  {
+    _importRules.shrink_to_fit();
+    _childRules.shrink_to_fit();
+  }
+
+#pragma endregion
+
+#pragma region Rules
+
+  uint32 StyleSheetContents::RuleCount() const noexcept
+  {
+    return static_cast<uint32>(_layerRulesBeforeImportRules.size() + _importRules.size()
+                               + _namespaceRules.size() + _childRules.size());
+  }
+
+  Rule *StyleSheetContents::RuleAt(uint32 index) const noexcept
+  {
+    krys_assert(index < RuleCount());
+
+    size_t i = index;
+    if (i < _layerRulesBeforeImportRules.size())
+    {
+      return _layerRulesBeforeImportRules[i].get();
+    }
+    i -= _layerRulesBeforeImportRules.size();
+    if (i < _importRules.size())
+    {
+      return _importRules[i].get();
+    }
+    i -= _importRules.size();
+    if (i < _namespaceRules.size())
+    {
+      return _namespaceRules[i].get();
+    }
+    i -= _namespaceRules.size();
+    return _childRules[i].get();
+  }
+
+  void StyleSheetContents::ClearRules() noexcept
+  {
+    for (auto &importRule : _importRules)
+    {
+      krys_debug_assert(importRule->ParentStyleSheet() == this);
+      importRule->ClearParentStyleSheet();
+    }
+    _layerRulesBeforeImportRules.clear();
+    _importRules.clear();
+    _namespaceRules.clear();
+    _childRules.clear();
+    RebuildNamespaces();
+  }
+
+  bool StyleSheetContents::WrapperInsertRule(Ref<Rule> rule, uint32 index) noexcept
+  {
+    krys_debug_assert(_isMutable);
+    krys_assert(index <= RuleCount());
+    // The CSSOM parses inserted rules without allowing @charset.
+    krys_debug_assert(!rule->IsCharsetRule());
+
+    auto *layerRule = DynamicDowncast<LayerRule>(rule.get());
+    const bool isLayerStatement = layerRule && layerRule->IsStatement();
+
+    // Any other rule going among the early layer statements, while there are no imports or namespaces for
+    // them to precede, makes them ordinary rules.
+    if (index < _layerRulesBeforeImportRules.size() && _importRules.empty() && _namespaceRules.empty()
+        && !rule->IsImportRule() && !rule->IsNamespaceRule() && !isLayerStatement)
+    {
+      auto layerRules = std::exchange(_layerRulesBeforeImportRules, {});
+      _childRules.insert(_childRules.begin(), layerRules.begin(), layerRules.end());
+    }
+
+    size_t i = index;
+    if (i < _layerRulesBeforeImportRules.size() || (i == _layerRulesBeforeImportRules.size() && layerRule))
+    {
+      if (isLayerStatement)
+      {
+        _layerRulesBeforeImportRules.insert(_layerRulesBeforeImportRules.begin() + i, ShareRef(*layerRule));
+        return true;
+      }
+      // Only a layer statement can go among them; a layer block after them is an ordinary rule.
+      if (i < _layerRulesBeforeImportRules.size())
+      {
+        return false;
+      }
+    }
+    i -= _layerRulesBeforeImportRules.size();
+
+    // Imports go only among the imports, and only imports can go there.
+    if (i < _importRules.size() || (i == _importRules.size() && rule->IsImportRule()))
+    {
+      auto *importRule = DynamicDowncast<ImportRule>(rule.get());
+      if (!importRule)
+      {
+        return false;
+      }
+      _importRules.insert(_importRules.begin() + i, ShareRef(*importRule));
+      importRule->SetParentStyleSheet(this);
+      importRule->RequestStyleSheet();
+      // Reported as a change, though nothing applies until the import loads, which reports another.
+      return true;
+    }
+    if (rule->IsImportRule())
+    {
+      return false;
+    }
+    i -= _importRules.size();
+
+    // Likewise namespaces, which can only be added while there are no rules but imports and namespaces.
+    if (i < _namespaceRules.size() || (i == _namespaceRules.size() && rule->IsNamespaceRule()))
+    {
+      auto *namespaceRule = DynamicDowncast<NamespaceRule>(rule.get());
+      if (!namespaceRule || !_childRules.empty() || !_layerRulesBeforeImportRules.empty())
+      {
+        return false;
+      }
+      _namespaceRules.insert(_namespaceRules.begin() + i, ShareRef(*namespaceRule));
+      // The rule may go before another declaring the same prefix, which still wins.
+      RebuildNamespaces();
+      return true;
+    }
+    if (rule->IsNamespaceRule())
+    {
+      return false;
+    }
+    i -= _namespaceRules.size();
+
+    // Unlike a parsed one, an inserted rule with too many selector components isn't split.
+    if (HasTooManyOriginalSelectorComponents(*rule) || StyleRuleWithTooManySelectorComponents(*rule))
+    {
+      return false;
+    }
+    _childRules.insert(_childRules.begin() + i, krys::move(rule));
+    return true;
+  }
+
+  bool StyleSheetContents::WrapperDeleteRule(uint32 index) noexcept
+  {
+    krys_debug_assert(_isMutable);
+    krys_assert(index < RuleCount());
+
+    size_t i = index;
+    if (i < _layerRulesBeforeImportRules.size())
+    {
+      _layerRulesBeforeImportRules.erase(_layerRulesBeforeImportRules.begin() + i);
+      return true;
+    }
+    i -= _layerRulesBeforeImportRules.size();
+    if (i < _importRules.size())
+    {
+      _importRules[i]->CancelLoad();
+      _importRules[i]->ClearParentStyleSheet();
+      _importRules.erase(_importRules.begin() + i);
+      return true;
+    }
+    i -= _importRules.size();
+    if (i < _namespaceRules.size())
+    {
+      // A namespace can't be removed once rules that may use it follow.
+      if (!_childRules.empty())
+      {
+        return false;
+      }
+      _namespaceRules.erase(_namespaceRules.begin() + i);
+      RebuildNamespaces();
+      return true;
+    }
+    i -= _namespaceRules.size();
+    _childRules.erase(_childRules.begin() + i);
+    return true;
+  }
+
+  bool StyleSheetContents::TraverseRules(KRYS_NOESCAPE const Func<bool(const Rule &)> &handler) const noexcept
+  {
+    for (const auto &importRule : _importRules)
+    {
+      if (handler(*importRule))
+      {
+        return true;
+      }
+      if (auto importedStyleSheet = ShareRefPtr(importRule->StyleSheet());
+          importedStyleSheet && importedStyleSheet->TraverseRules(handler))
+      {
+        return true;
+      }
+    }
+    return TraverseRulesInList(_childRules, handler);
+  }
+
+  bool StyleSheetContents::HasNestingRules() const noexcept
+  {
+    if (!_hasNestingRulesCache)
+    {
+      _hasNestingRulesCache =
+        TraverseRulesInList(_childRules, [](const Rule &rule)
+                            { return rule.IsStyleRuleWithNesting() || rule.IsNestedDeclarationsRule(); });
+    }
+    return *_hasNestingRulesCache;
+  }
+
+  bool StyleSheetContents::MayDependOnBaseUrl() const noexcept
+  {
+    return TraverseRules(
+      [](const Rule &rule)
+      {
+        switch (rule.Type())
+        {
+          case RuleType::Style:
+          case RuleType::StyleWithNesting:
+          case RuleType::NestedDeclarations:
+            return Downcast<StyleRule>(rule).Properties().MayDependOnBaseUrl();
+          case RuleType::FontFace:               return Downcast<FontFaceRule>(rule).Properties().MayDependOnBaseUrl();
+          case RuleType::Import:
+          case RuleType::CounterStyle:
+          case RuleType::Media:
+          case RuleType::Keyframes:
+          case RuleType::Namespace:
+          case RuleType::Charset:
+          case RuleType::Keyframe:
+          case RuleType::Supports:
+          case RuleType::LayerBlock:
+          case RuleType::LayerStatement:
+          case RuleType::Container:
+          case RuleType::FontFeatureValues:
+          case RuleType::FontFeatureValuesBlock:
+          case RuleType::FontPaletteValues:
+          case RuleType::Margin:
+          case RuleType::Property:
+          case RuleType::Scope:
+          case RuleType::StartingStyle:
+          case RuleType::PositionTry:
+          case RuleType::Function:
+          case RuleType::FunctionDeclarations:   return false;
+        }
+        krys_debug_assert_msg(false, "Unknown rule type.");
+        return false;
+      });
+  }
+
+  bool StyleSheetContents::TraverseSubresources(
+    KRYS_NOESCAPE const Func<bool(const CachedResource &)> &handler) const noexcept
+  {
+    return TraverseRules(
+      [&](const Rule &rule)
+      {
+        switch (rule.Type())
+        {
+          case RuleType::Style:
+          case RuleType::StyleWithNesting:
+          case RuleType::NestedDeclarations:
+            return Downcast<StyleRule>(rule).Properties().TraverseSubresources(handler);
+          case RuleType::FontFace:
+            return Downcast<FontFaceRule>(rule).Properties().TraverseSubresources(handler);
+          case RuleType::Import:
+          {
+            const auto *cachedStyleSheet = Downcast<ImportRule>(rule).CachedStyleSheet();
+            return cachedStyleSheet && handler(*cachedStyleSheet);
+          }
+          // Its image symbols aren't traversed, so it stops the traversal: a sheet with one isn't reused.
+          case RuleType::CounterStyle:           return true;
+          case RuleType::Media:
+          case RuleType::Keyframes:
+          case RuleType::Namespace:
+          case RuleType::Charset:
+          case RuleType::Keyframe:
+          case RuleType::Supports:
+          case RuleType::LayerBlock:
+          case RuleType::LayerStatement:
+          case RuleType::Container:
+          case RuleType::FontFeatureValues:
+          case RuleType::FontFeatureValuesBlock:
+          case RuleType::FontPaletteValues:
+          case RuleType::Margin:
+          case RuleType::Property:
+          case RuleType::Scope:
+          case RuleType::StartingStyle:
+          case RuleType::PositionTry:
+          case RuleType::Function:
+          case RuleType::FunctionDeclarations:   return false;
+        }
+        krys_debug_assert_msg(false, "Unknown rule type.");
+        return false;
+      });
+  }
+
+#pragma endregion
+
+#pragma region Namespaces
+
   CSSOMStringAtom StyleSheetContents::NamespaceURIFromPrefix(const CSSOMStringAtom &prefix) const noexcept
   {
     auto it = _namespaces.find(prefix);
-    if (it == _namespaces.end())
+    return it != _namespaces.end() ? it->second : CSSOMStringAtom(null);
+  }
+
+  void StyleSheetContents::RebuildNamespaces() noexcept
+  {
+    _namespaces.clear();
+    _defaultNamespace = dom::StarAtom();
+    for (const auto &rule : _namespaceRules)
     {
-      return null;
+      ParserAddNamespace(rule->Prefix(), rule->Uri());
     }
-    return it->second;
   }
 
-  bool StyleSheetContents::ParseString(const CSSOMString &sheetText) noexcept
+#pragma endregion
+
+#pragma region Imports and loading
+
+  StyleSheetContents *StyleSheetContents::ParentStyleSheet() const noexcept
   {
-    Parser::ParseStyleSheet(sheetText, GetParserContext(), *this);
-    return true;
+    return _ownerRule ? _ownerRule->ParentStyleSheet() : nullptr;
   }
 
-  bool StyleSheetContents::ParseAuthorStyleSheet(const CachedCSSStyleSheet *cachedStyleSheet) noexcept
+  StyleSheetContents *StyleSheetContents::RootStyleSheet() const noexcept
   {
-    // Always strict about the sheet's type, in quirks mode too (see DIFFERENCES.md).
-    auto mimeTypeCheckHint = CachedCSSStyleSheet::MimeTypeCheckHint::Strict;
-    bool hasValidMimeType = true;
-    bool hasHttpStatusOK = true;
-    auto sheetText = cachedStyleSheet->SheetText(mimeTypeCheckHint, &hasValidMimeType, &hasHttpStatusOK);
-
-    if (!hasHttpStatusOK)
+    const auto *root = this;
+    while (const auto *parent = root->ParentStyleSheet())
     {
-      krys_debug_assert(!sheetText);
-      return false;
+      root = parent;
     }
-    if (!hasValidMimeType)
+    return const_cast<StyleSheetContents *>(root);
+  }
+
+  Node *StyleSheetContents::SingleOwnerNode() const noexcept
+  {
+    const auto *root = RootStyleSheet();
+    if (root->_clients.empty())
     {
-      krys_debug_assert(!sheetText);
-      return false;
+      return nullptr;
     }
-    if (!sheetText)
-    {
-      return false;
-    }
-
-    Parser::ParseStyleSheet(*sheetText, GetParserContext(), *this);
-    return true;
+    krys_debug_assert(root->_clients.size() == 1);
+    return root->_clients[0]->OwnerNode();
   }
 
-  void StyleSheetContents::NotifyLoadedSheet(const CachedCSSStyleSheet *sheet) noexcept
+  Document *StyleSheetContents::SingleOwnerDocument() const noexcept
   {
-    krys_debug_assert(sheet);
-    _didLoadErrorOccur |= sheet->ErrorOccurred();
-    _didLoadErrorOccur |= !sheet->MimeTypeAllowedByNosniff();
-  }
-
-  bool StyleSheetContents::SubresourcesAllowReuse() const noexcept
-  {
-    bool hasFailedOrExpiredResources =
-      TraverseSubresources([](const CachedResource &resource) { return resource.LoadFailedOrCanceled(); });
-    return !hasFailedOrExpiredResources;
-  }
-
-  bool StyleSheetContents::IsLoadingSubresources() const noexcept
-  {
-    return TraverseSubresources([](const CachedResource &resource) { return resource.IsLoading(); });
+    auto *ownerNode = SingleOwnerNode();
+    return ownerNode ? &ownerNode->NodeDocument() : nullptr;
   }
 
   bool StyleSheetContents::IsLoading() const noexcept
@@ -584,6 +564,7 @@ namespace krys::boo::css
       return;
     }
 
+    // The owner node may release the sheet when told it's loaded.
     auto protectedThis = ShareRef(*this);
     if (auto *parentSheet = ParentStyleSheet())
     {
@@ -606,189 +587,86 @@ namespace krys::boo::css
 
   void StyleSheetContents::StartLoadingDynamicSheet() noexcept
   {
-    if (auto *owner = SingleOwnerNode())
+    if (auto *ownerNode = SingleOwnerNode())
     {
-      owner->StartLoadingDynamicSheet();
+      ownerNode->StartLoadingDynamicSheet();
     }
   }
 
-  StyleSheetContents *StyleSheetContents::RootStyleSheet() const noexcept
+  void StyleSheetContents::NotifyLoadedSheet(const CachedCSSStyleSheet *sheet) noexcept
   {
-    const auto *root = this;
-    while (root->ParentStyleSheet())
+    krys_debug_assert(sheet);
+    _didLoadErrorOccur |= sheet->ErrorOccurred() || !sheet->MimeTypeAllowedByNosniff();
+  }
+
+#pragma endregion
+
+#pragma region Caching
+
+  bool StyleSheetContents::IsCacheable() const noexcept
+  {
+    // Sheets with imports, and imported sheets, aren't cached: copying one would mean copying its import
+    // rules' loads and clients.
+    // FIXME: Work out how to cache them.
+    if (!_importRules.empty() || _ownerRule)
     {
-      root = root->ParentStyleSheet();
+      return false;
     }
-    return const_cast<StyleSheetContents *>(root);
+    // A sheet still loading would have to tell every client sharing it when it's done; a modified one is
+    // no longer what was fetched.
+    return _loadCompleted && !_didLoadErrorOccur && !_isMutable && _hasSyntacticallyValidCSSHeader
+           && !HasNestingRules();
   }
 
-  Node *StyleSheetContents::SingleOwnerNode() const noexcept
+  bool StyleSheetContents::IsCacheableWithNoBaseUrlDependency() const noexcept
   {
-    auto *root = RootStyleSheet();
-    if (root->_clients.empty())
-    {
-      return nullptr;
-    }
-    krys_debug_assert(root->_clients.size() == 1);
-    return root->_clients[0]->OwnerNode();
+    return IsCacheable() && !MayDependOnBaseUrl();
   }
 
-  Document *StyleSheetContents::SingleOwnerDocument() const noexcept
+  bool StyleSheetContents::SubresourcesAllowReuse() const noexcept
   {
-    auto *ownerNode = SingleOwnerNode();
-    return ownerNode ? &ownerNode->NodeDocument() : nullptr;
+    return !TraverseSubresources([](const CachedResource &resource)
+                                 { return resource.LoadFailedOrCanceled(); });
   }
 
-  bool StyleSheetContents::TraverseRules(KRYS_NOESCAPE const Func<bool(const Rule &)> &handler) const noexcept
+  uint32 StyleSheetContents::EstimatedSizeInBytes() const noexcept
   {
+    // Strings are left out, as most are atoms shared with the rest of the document. Every rule is counted
+    // as a style rule, as most are, nested ones (in @media, say) included.
+    auto ruleCount = RuleCount() - static_cast<uint32>(_childRules.size());
+    std::ignore = TraverseRulesInList(_childRules,
+                                      [&](const Rule &)
+                                      {
+                                        ++ruleCount;
+                                        return false;
+                                      });
+    uint32 size = sizeof(*this) + ruleCount * StyleRule::AverageSizeInBytes();
     for (const auto &importRule : _importRules)
     {
-      if (handler(*importRule))
+      if (const auto *sheet = importRule->StyleSheet())
       {
-        return true;
-      }
-      auto importedStyleSheet = ShareRefPtr(importRule->StyleSheet());
-      if (importedStyleSheet && importedStyleSheet->TraverseRules(handler))
-      {
-        return true;
+        size += sheet->EstimatedSizeInBytes();
       }
     }
-    return TraverseRulesInList(_childRules, handler);
+    return size;
   }
 
-  bool StyleSheetContents::HasNestingRules() const noexcept
+  void StyleSheetContents::AddedToMemoryCache() noexcept
   {
-    if (_hasNestingRulesCache)
-    {
-      return *_hasNestingRulesCache;
-    }
-
-    _hasNestingRulesCache = TraverseRulesInList(_childRules,
-                                                [&](const Rule &rule)
-                                                {
-                                                  if (rule.IsStyleRuleWithNesting())
-                                                  {
-                                                    return true;
-                                                  }
-                                                  if (rule.IsNestedDeclarationsRule())
-                                                  {
-                                                    return true;
-                                                  }
-                                                  return false;
-                                                });
-
-    return *_hasNestingRulesCache;
+    krys_debug_assert(IsCacheable());
+    ++_inMemoryCacheCount;
   }
 
-  bool StyleSheetContents::TraverseSubresources(
-    KRYS_NOESCAPE const Func<bool(const CachedResource &)> &handler) const noexcept
+  void StyleSheetContents::RemovedFromMemoryCache() noexcept
   {
-    return TraverseRules(
-      [&](const Rule &rule)
-      {
-        switch (rule.Type())
-        {
-          case RuleType::Style:
-          case RuleType::StyleWithNesting:
-          case RuleType::NestedDeclarations:
-          {
-            return Downcast<StyleRule>(rule).Properties().TraverseSubresources(handler);
-          }
-          case RuleType::FontFace:
-          {
-            return Downcast<FontFaceRule>(rule).Properties().TraverseSubresources(handler);
-          }
-          case RuleType::Import:
-          {
-            if (auto *cachedResource = Downcast<ImportRule>(rule).CachedStyleSheet())
-            {
-              return handler(*cachedResource);
-            }
-            return false;
-          }
-          case RuleType::CounterStyle:
-          {
-            return true;
-          }
-          case RuleType::Media:
-          case RuleType::Keyframes:
-          case RuleType::Namespace:
-          case RuleType::Charset:
-          case RuleType::Keyframe:
-          case RuleType::Supports:
-          case RuleType::LayerBlock:
-          case RuleType::LayerStatement:
-          case RuleType::Container:
-          case RuleType::FontFeatureValues:
-          case RuleType::FontFeatureValuesBlock:
-          case RuleType::FontPaletteValues:
-          case RuleType::Margin:
-          case RuleType::Property:
-          case RuleType::Scope:
-          case RuleType::StartingStyle:
-          case RuleType::PositionTry:
-          case RuleType::Function:
-          case RuleType::FunctionDeclarations:
-          {
-            return false;
-          }
-        }
-        krys_debug_assert_msg(false, "Unknown rule type.");
-        return false;
-      });
+    krys_debug_assert(_inMemoryCacheCount);
+    krys_debug_assert(IsCacheable());
+    --_inMemoryCacheCount;
   }
 
-  bool StyleSheetContents::MayDependOnBaseUrl() const noexcept
-  {
-    return TraverseRules(
-      [&](const Rule &rule) -> bool
-      {
-        switch (rule.Type())
-        {
-          case RuleType::Style:
-          case RuleType::StyleWithNesting:
-          case RuleType::NestedDeclarations:
-          {
-            return Downcast<StyleRule>(rule).Properties().MayDependOnBaseUrl();
-          }
-          case RuleType::FontFace:
-          {
-            return Downcast<FontFaceRule>(rule).Properties().MayDependOnBaseUrl();
-          }
-          case RuleType::Import:
-          case RuleType::CounterStyle:
-          case RuleType::Media:
-          case RuleType::Keyframes:
-          case RuleType::Namespace:
-          case RuleType::Charset:
-          case RuleType::Keyframe:
-          case RuleType::Supports:
-          case RuleType::LayerBlock:
-          case RuleType::LayerStatement:
-          case RuleType::Container:
-          case RuleType::FontFeatureValues:
-          case RuleType::FontFeatureValuesBlock:
-          case RuleType::FontPaletteValues:
-          case RuleType::Margin:
-          case RuleType::Property:
-          case RuleType::Scope:
-          case RuleType::StartingStyle:
-          case RuleType::PositionTry:
-          case RuleType::Function:
-          case RuleType::FunctionDeclarations:
-          {
-            return false;
-          }
-        }
-        krys_debug_assert_msg(false, "Unknown rule type.");
-        return false;
-      });
-  }
+#pragma endregion
 
-  StyleSheetContents *StyleSheetContents::ParentStyleSheet() const noexcept
-  {
-    return _ownerRule ? _ownerRule->ParentStyleSheet() : nullptr;
-  }
+#pragma region Clients
 
   void StyleSheetContents::RegisterClient(CSSStyleSheet *sheet) noexcept
   {
@@ -806,22 +684,5 @@ namespace krys::boo::css
     }
   }
 
-  void StyleSheetContents::AddedToMemoryCache() noexcept
-  {
-    krys_debug_assert(IsCacheable());
-    ++_inMemoryCacheCount;
-  }
-
-  void StyleSheetContents::RemovedFromMemoryCache() noexcept
-  {
-    krys_debug_assert(_inMemoryCacheCount);
-    krys_debug_assert(IsCacheable());
-    --_inMemoryCacheCount;
-  }
-
-  void StyleSheetContents::ShrinkToFit() noexcept
-  {
-    _importRules.shrink_to_fit();
-    _childRules.shrink_to_fit();
-  }
+#pragma endregion
 }

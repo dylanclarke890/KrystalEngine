@@ -4,6 +4,7 @@
 #include "Krystal.Booey/CSS/Parser/InputStream.hpp"
 #include "Krystal.Booey/CSS/Parser/Tokenizer.hpp"
 #include "Krystal.Booey/CSS/Queries/ContainerQueryFeatures.hpp"
+#include "Krystal.Booey/CSS/Values/CustomPropertyValue.hpp"
 #include "Krystal.Core/Strings/StringBuilder.hpp"
 
 namespace krys::boo::css::tests
@@ -294,7 +295,7 @@ namespace krys::boo::css::tests
     CHECK(feature->Schema == &cq::features::Style());
     CHECK(feature->FunctionId == ValueId::Style);
     REQUIRE(feature->RightComparison);
-    CHECK(feature->RightComparison->Value->IsCustomPropertyValue());
+    CHECK(Is<CustomPropertyValue>(*feature->RightComparison->Value));
   }
 
   // Cases from WPT at-container-style-parsing.html.

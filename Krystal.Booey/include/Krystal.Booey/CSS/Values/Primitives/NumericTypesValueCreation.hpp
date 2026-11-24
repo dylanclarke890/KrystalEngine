@@ -45,7 +45,7 @@ namespace krys::boo::css
   {
     KRYS_NODISCARD Ref<Value> operator()(ValuePool &, const CSSType &calc) noexcept
     {
-      return PrimitiveValue::Create(calc.ProtectedCalc());
+      return PrimitiveValue::Create(ShareRef(calc.Calc()));
     }
   };
 }

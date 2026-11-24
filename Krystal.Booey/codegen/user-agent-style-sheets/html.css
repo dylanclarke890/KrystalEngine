@@ -1,46 +1,32 @@
 ﻿/*
- * The default style sheet used to render HTML.
- *
- * Copyright (C) 2000 Lars Knoll (knoll@kde.org)
- * Copyright (C) 2003-2025 Apple Inc. All rights reserved.
- *
- * This library is free software; you can redistribute it and/or
- * modify it under the terms of the GNU Library General Public
- * License as published by the Free Software Foundation; either
- * version 2 of the License, or (at your option) any later version.
- *
- * This library is distributed in the hope that it will be useful,
- * but WITHOUT ANY WARRANTY; without even the implied warranty of
- * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU
- * Library General Public License for more details.
- *
- * You should have received a copy of the GNU Library General Public License
- * along with this library; see the file COPYING.LIB.  If not, write to
- * the Free Software Foundation, Inc., 51 Franklin Street, Fifth Floor,
- * Boston, MA 02110-1301, USA.
- *
+ * The default style of HTML elements, after the HTML specification's rendering section
+ * (https://html.spec.whatwg.org/multipage/rendering.html), and the internal parts of the form controls.
  */
 
 @namespace "http://www.w3.org/1999/xhtml";
 
+/* https://html.spec.whatwg.org/#the-page: the text takes the colour scheme's colour. */
 html {
     display: block;
     color: CanvasText;
 }
 
-/* children of the <head> element all have display:none as below */
-area, base, basefont, datalist, head, link, meta, noembed, noframes,
-param, rp, script, style, template, title {
+/* https://html.spec.whatwg.org/#hidden-elements */
+area, base, basefont, datalist, head, link, meta, noembed,
+noframes, param, rp, script, style, template, title {
     display: none;
 }
 
-/* generic block-level elements */
-
+/* https://html.spec.whatwg.org/#the-page: the margins are 8px unless the body's attributes say otherwise. */
 body {
     display: block;
     margin: 8px;
 }
 
+/* https://html.spec.whatwg.org/#flow-content-3 */
+
+/* A paragraph's block margins are quirky: in quirks mode they collapse away at the top and bottom of a cell
+   or body (https://html.spec.whatwg.org/#margin-collapsing-quirks). */
 p {
     display: block;
     margin-block: 1__qem;
@@ -51,6 +37,7 @@ address, article, aside, div, footer, header, hgroup, main, nav, search, section
     display: block;
 }
 
+/* https://html.spec.whatwg.org/#the-marquee-element-2 */
 marquee {
     display: inline-block;
     text-align: initial;
@@ -73,6 +60,7 @@ figure {
     margin-inline: 40px;
 }
 
+/* https://html.spec.whatwg.org/#phrasing-content-3 */
 q {
     display: inline;
 }
@@ -85,12 +73,13 @@ q::after {
     content: close-quote;
 }
 
+/* Centres its text and its blocks (https://html.spec.whatwg.org/#align-descendants). */
 center {
     display: block;
-    /* special centering to be able to emulate the html4/netscape behaviour */
     text-align: -internal-center;
 }
 
+/* https://html.spec.whatwg.org/#the-hr-element-2 */
 hr {
     display: block;
     overflow: hidden;
@@ -101,24 +90,24 @@ hr {
     border-width: 1px;
 }
 
+/* https://html.spec.whatwg.org/#phrasing-content-3 */
 abbr[title], acronym[title] {
     text-decoration: dotted underline;
 }
 
-/* ::backdrop */
-
+/* https://drafts.csswg.org/css-position-4/#backdrop */
 ::backdrop {
     display: block;
     position: fixed;
     inset: 0;
 }
 
+/* https://html.spec.whatwg.org/#flow-content-3: a popover's backdrop doesn't take clicks. */
 :popover-open::backdrop {
     pointer-events: none !important;
 }
 
-/* dialog */
-
+/* https://html.spec.whatwg.org/#flow-content-3 */
 dialog {
     position: absolute;
     inset-inline: 0;
@@ -136,6 +125,7 @@ dialog[open] {
     display: block;
 }
 
+/* Not in the specification: visibility: visible. */
 dialog:modal {
     position: fixed;
     overflow: auto;
@@ -149,13 +139,15 @@ dialog::backdrop {
     background: rgba(0, 0, 0, 0.1);
 }
 
-/* media elements */
-
+/* https://html.spec.whatwg.org/#embedded-content-rendering-rules. Not in the specification: 'content' can't
+   replace a video. */
 video {
     object-fit: contain;
     content: normal !important;
 }
 
+/* An audio element with controls is a replaced element about one line high; without them it's never
+   rendered, whatever the author's style. */
 audio {
     width: 200px;
     height: 25px;
@@ -165,7 +157,8 @@ audio:not([controls]) {
     display: none !important;
 }
 
-/* heading elements */
+/* https://html.spec.whatwg.org/#sections-and-headings. Headings are styled by element, not by their computed
+   heading level with :heading() as in the specification (see DIFFERENCES.md). */
 
 h1 {
     display: block;
@@ -214,7 +207,7 @@ h6 {
     font-weight: bold;
 }
 
-/* tables */
+/* https://html.spec.whatwg.org/#tables-2 */
 
 table {
     display: table;
@@ -242,7 +235,7 @@ tfoot {
     border-color: inherit;
 }
 
-/* for tables without table section elements (can happen with XHTML or dynamically created tables) */
+/* A row straight in a table, with no section around it. */
 table > tr {
     vertical-align: middle;
 }
@@ -266,6 +259,7 @@ td, th {
     vertical-align: inherit;
 }
 
+/* A header cell is centred unless its parent's alignment isn't the initial one. */
 th {
     font-weight: bold;
     text-align: -internal-th-center;
@@ -276,12 +270,12 @@ caption {
     text-align: -internal-center;
 }
 
-/* for table elements with form inside following rules should apply */
+/* Only in HTML documents. */
 :is(table, thead, tbody, tfoot, tr) > form:-internal-html-document {
     display: none !important;
 }
 
-/* lists */
+/* https://html.spec.whatwg.org/#lists */
 
 ul, menu, dir {
     display: block;
@@ -328,9 +322,9 @@ dt {
     display: block;
 }
 
-/* FIXME: this should also match ::before::marker and ::after::marker but we don't support
-   this yet. When we do, we can remove the code specific to ::before and ::after in
-   RenderListItem::computeMarkerStyle(), see bugs.webkit.org/b/218897. */
+/* https://drafts.csswg.org/css-lists-3/#marker-properties, with text-indent, which it doesn't set.
+   FIXME: Match ::before::marker and ::after::marker too, as it does, once they're supported; until then
+   RenderListItem::ComputeMarkerStyle() gives those markers these properties itself. */
 ::marker {
     unicode-bidi: isolate;
     font-variant-numeric: tabular-nums;
@@ -339,7 +333,8 @@ dt {
     text-indent: 0px !important;
 }
 
-/* form elements */
+/* https://html.spec.whatwg.org/#form-controls. The controls follow Chrome's rules more closely than these
+   (see DIFFERENCES.md). */
 
 form {
     display: block;
@@ -350,6 +345,7 @@ label {
     cursor: default;
 }
 
+/* https://html.spec.whatwg.org/#the-fieldset-and-legend-elements */
 legend {
     padding-inline: 2px;
     border: none;
@@ -395,16 +391,11 @@ input {
     cursor: auto;
 }
 
-@media (prefers-dark-interface) {
-    input {
-        background-color: transparent;
-    }
-}
-
 input[type="search"] {
     box-sizing: border-box;
 }
 
+/* The box in a text field holding its text and its buttons. */
 input::-webkit-textfield-decoration-container {
     display: flex;
     align-items: center;
@@ -412,6 +403,7 @@ input::-webkit-textfield-decoration-container {
     writing-mode: inherit !important;
 }
 
+/* A search field's buttons. */
 input[type="search"]::-webkit-search-cancel-button,
 input[type="search"]::-webkit-search-decoration,
 input[type="search"]::-webkit-search-results-decoration {
@@ -429,18 +421,15 @@ input[type="search"]::-webkit-search-results-button {
     flex: none;
 }
 
+/* Date and time fields, edited a field at a time
+   (https://html.spec.whatwg.org/#the-input-element-as-domain-specific-widgets). */
 input:is([type="date"], [type="time"], [type="datetime-local"], [type="month"], [type="week"]) {
     align-items: center;
     display: inline-flex;
     overflow: hidden;
     outline: none;
     font-variant-numeric: tabular-nums;
-    /* FIXME: Font features should be defined in a @font-feature-values rule, so that the feature setting is only applied to the system font. */
-    /* "ss03" enables the raised colon separator on the system font. */
-    font-feature-settings: "ss03";
 }
-
-/* FIXME: Styling inner elements of the date control should be specific to input[type="date"]. */
 
 input::-webkit-datetime-edit {
     display: inline-block;
@@ -499,6 +488,7 @@ input::-webkit-datetime-edit-text {
     display: inline;
 }
 
+/* The button that shows a field's suggestions from its datalist. */
 input::-webkit-list-button {
     appearance: auto;
     display: block;
@@ -511,19 +501,18 @@ input::-webkit-list-button {
     block-size: 100%;
 }
 
+/* A number field's up and down buttons. */
 input::-webkit-inner-spin-button {
     appearance: auto;
     display: block;
     position: relative;
     cursor: default;
-    /* This height property is ignored for input type "number" and others which
-     * use RenderTextControlSingleLine as renderer which sets height of spin
-     * button in layout(). */
     height: 1.5em;
     flex: none;
     user-select: none;
 }
 
+/* https://html.spec.whatwg.org/#the-textarea-element-2 */
 textarea {
     appearance: auto;
     color: CanvasText;
@@ -569,6 +558,7 @@ input[type="image"] {
     cursor: pointer;
 }
 
+/* https://html.spec.whatwg.org/#the-input-element-as-a-file-upload-control */
 input[type="file"] {
     align-items: baseline;
     color: inherit;
@@ -579,6 +569,7 @@ input[type="file"] {
     field-sizing: fixed !important;
 }
 
+/* https://html.spec.whatwg.org/#the-input-element-as-a-checkbox-and-radio-button-widgets */
 input:is([type="radio"], [type="checkbox"]) {
     margin: 3px 2px;
     box-sizing: border-box;
@@ -587,6 +578,8 @@ input:is([type="radio"], [type="checkbox"]) {
     background-color: initial;
 }
 
+/* https://html.spec.whatwg.org/#the-input-element-as-a-button and
+   https://html.spec.whatwg.org/#the-button-element-2 */
 input:is([type="button"], [type="submit"], [type="reset"]) {
     white-space: pre;
 }
@@ -612,6 +605,7 @@ input:is([type="button"], [type="submit"], [type="reset"]):active, input[type="f
     color: ActiveButtonText;
 }
 
+/* https://html.spec.whatwg.org/#the-input-element-as-a-range-control */
 input[type="range"] {
     padding: initial;
     border: initial;
@@ -656,6 +650,7 @@ input[type="file"]:active:disabled::file-selector-button, button:active:disabled
     border-style: outset;
 }
 
+/* https://html.spec.whatwg.org/#the-input-element-as-a-colour-well */
 input[type="color"] {
     appearance: auto;
     box-sizing: border-box;
@@ -685,6 +680,8 @@ input[type="color"]::-webkit-color-swatch {
     flex: 1;
 }
 
+/* https://html.spec.whatwg.org/#the-select-element-2. -internal-auto-base() takes its second value when
+   the select has a base appearance, and its first otherwise. */
 select {
     box-sizing: border-box;
     appearance: auto;
@@ -830,9 +827,7 @@ output {
     display: inline;
 }
 
-/* form validation message bubble */
-
-/* meter */
+/* https://html.spec.whatwg.org/#the-meter-element-2 */
 
 meter {
     appearance: auto;
@@ -843,7 +838,7 @@ meter {
     vertical-align: -0.2em;
 }
 
-/* progress */
+/* https://html.spec.whatwg.org/#the-progress-element-2 */
 
 progress {
     appearance: auto;
@@ -870,11 +865,11 @@ progress::-webkit-progress-bar {
 progress::-webkit-progress-value {
     background-color: green;
     block-size: 100%;
-    inline-size: 50%; /* should be removed later */
+    inline-size: 50%; /* The element's own style replaces this with the progress made. */
     box-sizing: border-box;
 }
 
-/* inline elements */
+/* https://html.spec.whatwg.org/#phrasing-content-3 */
 
 u, ins {
     text-decoration: underline;
@@ -892,6 +887,7 @@ tt, code, kbd, samp {
     font-family: monospace;
 }
 
+/* https://html.spec.whatwg.org/#flow-content-3 */
 pre, xmp, plaintext, listing {
     display: block;
     font-family: monospace;
@@ -900,6 +896,7 @@ pre, xmp, plaintext, listing {
     margin-inline: 0;
 }
 
+/* The colours are the system's highlight for marked text (see DIFFERENCES.md). */
 mark {
     background-color: Mark;
     color: MarkText;
@@ -917,6 +914,7 @@ s, strike, del {
     text-decoration: line-through;
 }
 
+/* sub and sup keep the inherited line height (see DIFFERENCES.md). */
 sub {
     vertical-align: sub;
     font-size: smaller;
@@ -931,13 +929,14 @@ nobr {
     white-space: nowrap;
 }
 
-/* states */
+/* Focus rings and links (https://html.spec.whatwg.org/#phrasing-content-3). */
 
 :focus-visible {
     outline: auto 5px -webkit-focus-ring-color;
 }
 
-/* Read-only text fields do not show a focus ring but do still receive focus */
+/* No ring on the root, the body or embedded content, nor on a read-only text field, which still takes
+   focus. */
 html:focus-visible, body:focus-visible, input[readonly]:focus, embed:focus-visible, iframe:focus-visible, object:focus-visible {
     outline: none;
 }
@@ -965,8 +964,7 @@ area:any-link {
     cursor: pointer;
 }
 
-/* HTML5 ruby elements */
-/* Note that text-tracks.css contains a subset of this ruby styling for WebVTT elements. It should be kept in sync. */
+/* https://html.spec.whatwg.org/#phrasing-content-3 */
 ruby {
     display: ruby;
 }
@@ -987,7 +985,7 @@ ruby > rp {
     display: none;
 }
 
-/* Avoid wrapping children of implicit ruby bases. We don't support <rb> or <rbc>, avoid giving them any behaviors. */
+/* The text in a ruby's implicit bases doesn't wrap. rb and rbc are left alone. */
 ruby > :not(rb, rbc, ruby) {
     white-space: nowrap;
 }
@@ -1008,7 +1006,6 @@ details[open] > summary:first-of-type {
     list-style-type: disclosure-open;
 }
 
-/* other elements */
 
 frameset, frame {
     display: block;
@@ -1018,10 +1015,12 @@ frameset {
     border-color: inherit;
 }
 
+/* https://html.spec.whatwg.org/#embedded-content-rendering-rules */
 iframe {
     border: 2px inset;
 }
 
+/* https://html.spec.whatwg.org/#bidi-rendering */
 hr, bdi, output {
     unicode-bidi: isolate;
 }
@@ -1032,11 +1031,12 @@ bdo, bdo[dir] {
     unicode-bidi: isolate-override;
 }
 
+/* https://html.spec.whatwg.org/#flow-content-3 */
 slot {
     display: contents;
 }
 
-/* noscript support */
+/* Scripting is always on: the application plays the part of scripts. */
 
 @media (scripting) {
     noscript {
@@ -1044,10 +1044,10 @@ slot {
     }
 }
 
-/* Default support for "Smart Invert" where all content color except media is inverted. */
-/* https://drafts.csswg.org/mediaqueries-5/#inverted */
+/* https://drafts.csswg.org/mediaqueries-5/#inverted: when the host inverts the colours, images and
+   video are inverted back. */
 @media (inverted-colors) {
-    img:not(picture>img), picture, video { filter: invert(100%); } /* Images and videos double-inverted. */
+    img:not(picture>img), picture, video { filter: invert(100%); }
 }
 
 /* https://drafts.csswg.org/css-text-decor-4/#text-decoration-skipping */
@@ -1056,7 +1056,7 @@ ins, del {
 }
 
 /* https://drafts.csswg.org/css-text-decor-4/#default-stylesheet */
-/* set language-appropriate default emphasis mark position */
+/* The emphasis marks' and the underline's side for Chinese, Japanese, Korean and Mongolian text. */
 :root:lang(zh), [lang|=zh] {
     text-emphasis-position: under right;
 }
@@ -1064,7 +1064,6 @@ ins, del {
     text-emphasis-position: over right;
 }
 
-/* set language-appropriate default underline position */
 :root:lang(ja), [lang|=ja],
 :root:lang(mn), [lang|=mn],
 :root:lang(ko), [lang|=ko] {

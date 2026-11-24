@@ -78,12 +78,9 @@ namespace krys::boo::style
         }
         switch (valueList.Separator)
         {
-          case css::ValueSeparator::SpaceSeparator:
-            return css::ValueList::CreateSpaceSeparated(krys::move(builder));
-          case css::ValueSeparator::CommaSeparator:
-            return css::ValueList::CreateCommaSeparated(krys::move(builder));
-          case css::ValueSeparator::SlashSeparator:
-            return css::ValueList::CreateSlashSeparated(krys::move(builder));
+          case css::ValueSeparator::Space: return css::ValueList::CreateSpaceSeparated(krys::move(builder));
+          case css::ValueSeparator::Comma: return css::ValueList::CreateCommaSeparated(krys::move(builder));
+          case css::ValueSeparator::Slash: return css::ValueList::CreateSlashSeparated(krys::move(builder));
         }
         krys_unreachable();
       });
@@ -118,7 +115,7 @@ namespace krys::boo::style
       [&](const Value &value) { serialiseValue(value); },
       [&](const ValueList &valueList)
       {
-        auto separator = css::Value::SeparatorCSSText(valueList.Separator);
+        auto separator = css::ToCssText(valueList.Separator);
         for (size_t i = 0; i < valueList.Values.size(); ++i)
         {
           if (i)
@@ -169,7 +166,7 @@ namespace krys::boo::style
       [&](const Value &value) { serialiseValue(value); },
       [&](const ValueList &valueList)
       {
-        auto separator = css::Value::SeparatorCSSText(valueList.Separator);
+        auto separator = css::ToCssText(valueList.Separator);
         for (size_t i = 0; i < valueList.Values.size(); ++i)
         {
           if (i)

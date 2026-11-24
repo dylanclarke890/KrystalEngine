@@ -31,6 +31,7 @@
 #include "Krystal.Booey/CSS/Parser/KeywordLookup.hpp"
 #include "Krystal.Booey/CSS/Parser/ParserContext.hpp"
 #include "Krystal.Booey/CSS/Properties/Property.hpp"
+#include "Krystal.Booey/CSS/Properties/PropertyQueries.hpp"
 #include "Krystal.Booey/CSS/TypedOM/CSSStyleValueFactory.hpp"
 #include "Krystal.Booey/CSS/Values/ValueList.hpp"
 #include "Krystal.Booey/DOM/Nodes/Document.hpp"
@@ -66,7 +67,7 @@ namespace krys::boo
       return values;
     }
     const auto *list = DynamicDowncast<css::ValueList>(*value);
-    if (list && property && css::Property::IsListValuedProperty(*property))
+    if (list && property && css::IsListValuedProperty(*property))
     {
       for (const auto &item : *list)
       {

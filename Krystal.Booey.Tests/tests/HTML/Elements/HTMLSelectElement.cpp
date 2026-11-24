@@ -53,8 +53,8 @@ namespace krys::boo::tests
     {
       utf8_string text(1uz, c);
       return fixture.Frame->GetEventHandler().KeyEvent(
-        PlatformKeyboardEvent(PlatformEvent::Type::Char, text, text, text, u8"", u8"", static_cast<int32>(c),
-                              false, false, false, {}, {}));
+        PlatformKeyboardEvent(PlatformEvent::Type::Char, text, text, text, u8"", static_cast<int32>(c), false,
+                              false, false, {}, {}));
     }
 
     /// @brief Counts the events of a type fired at a target.
@@ -489,14 +489,14 @@ namespace krys::boo::tests
 
     SECTION("Arrow keys skip disabled options")
     {
-      CHECK(PressKey(fixture, u8"ArrowRight", u8"Right", vk::Right));
+      CHECK(PressKey(fixture, u8"ArrowRight", vk::Right));
       CHECK(select.SelectedIndex() == 2);
       CHECK(input->Count == 1);
       CHECK(change->Count == 1);
 
-      CHECK(PressKey(fixture, u8"End", u8"End", vk::End));
+      CHECK(PressKey(fixture, u8"End", vk::End));
       CHECK(select.SelectedIndex() == 3);
-      CHECK(PressKey(fixture, u8"Home", u8"Home", vk::Home));
+      CHECK(PressKey(fixture, u8"Home", vk::Home));
       CHECK(select.SelectedIndex() == 0);
       CHECK(change->Count == 3);
     }
@@ -728,26 +728,26 @@ namespace krys::boo::tests
     {
       select.Focus();
       REQUIRE(fixture.Document->FocusedElement() == &select);
-      CHECK(PressKey(fixture, u8"ArrowDown", u8"Down", 0x28));
+      CHECK(PressKey(fixture, u8"ArrowDown", 0x28));
       REQUIRE(select.IsPickerOpen());
       (void)fixture.Document->UpdateLayout();
       CHECK(fixture.Document->FocusedElement() == &a);
       CHECK(a.Matches(u8":focus-visible").ReleaseValue());
 
-      CHECK(PressKey(fixture, u8"ArrowDown", u8"Down", 0x28));
+      CHECK(PressKey(fixture, u8"ArrowDown", 0x28));
       CHECK(fixture.Document->FocusedElement() == &b);
       // Past the disabled option.
-      CHECK(PressKey(fixture, u8"ArrowDown", u8"Down", 0x28));
+      CHECK(PressKey(fixture, u8"ArrowDown", 0x28));
       CHECK(fixture.Document->FocusedElement() == &d);
-      CHECK(PressKey(fixture, u8"Home", u8"Home", 0x24));
+      CHECK(PressKey(fixture, u8"Home", 0x24));
       CHECK(fixture.Document->FocusedElement() == &a);
-      CHECK(PressKey(fixture, u8"End", u8"End", 0x23));
+      CHECK(PressKey(fixture, u8"End", 0x23));
       CHECK(fixture.Document->FocusedElement() == &d);
       CHECK(select.SelectedIndex() == 0);
 
       SECTION("enter picks")
       {
-        CHECK(PressKey(fixture, u8"Enter", u8"Enter", 0x0D));
+        CHECK(PressKey(fixture, u8"Enter", 0x0D));
         CHECK(select.SelectedIndex() == 3);
         CHECK_FALSE(select.IsPickerOpen());
         CHECK(fixture.Document->FocusedElement() == &select);
@@ -755,7 +755,7 @@ namespace krys::boo::tests
 
       SECTION("tab closes")
       {
-        (void)PressKey(fixture, u8"Tab", u8"U+0009", 0x09);
+        (void)PressKey(fixture, u8"Tab", 0x09);
         CHECK_FALSE(select.IsPickerOpen());
         CHECK(select.SelectedIndex() == 0);
       }

@@ -1,47 +1,4 @@
-﻿/*
- * Copyright (C) 2003, 2009, 2016 Apple Inc. All rights reserved.
- *
- * Portions are Copyright (C) 1998 Netscape Communications Corporation.
- *
- * Other contributors:
- *   Robert O'Callahan <roc+@cs.cmu.edu>
- *   David Baron <dbaron@fas.harvard.edu>
- *   Christian Biesinger <cbiesinger@web.de>
- *   Randall Jesup <rjesup@wgate.com>
- *   Roland Mainz <roland.mainz@informatik.med.uni-giessen.de>
- *   Josh Soref <timeless@mac.com>
- *   Boris Zbarsky <bzbarsky@mit.edu>
- *
- * This library is free software; you can redistribute it and/or
- * modify it under the terms of the GNU Lesser General Public
- * License as published by the Free Software Foundation; either
- * version 2.1 of the License, or (at your option) any later version.
- *
- * This library is distributed in the hope that it will be useful,
- * but WITHOUT ANY WARRANTY; without even the implied warranty of
- * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU
- * Lesser General Public License for more details.
- *
- * You should have received a copy of the GNU Lesser General Public
- * License along with this library; if not, write to the Free Software
- * Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
- *
- * Alternatively, the contents of this file may be used under the terms
- * of either the Mozilla Public License Version 1.1, found at
- * http://www.mozilla.org/MPL/ (the "MPL") or the GNU General Public
- * License Version 2.0, found at http://www.fsf.org/copyleft/gpl.html
- * (the "GPL"), in which case the provisions of the MPL or the GPL are
- * applicable instead of those above.  If you wish to allow use of your
- * version of this file only under the terms of one of those two
- * licenses (the MPL or the GPL) and not to allow others to use your
- * version of this file under the LGPL, indicate your decision by
- * deletingthe provisions above and replace them with the notice and
- * other provisions required by the MPL or the GPL, as the case may be.
- * If you do not delete the provisions above, a recipient may use your
- * version of this file under any of the LGPL, the MPL or the GPL.
- */
-
-#pragma once
+﻿#pragma once
 
 #include "Krystal.Booey/Graphics/Geometry/LayoutRect.hpp"
 #include "Krystal.Core/Attributes.hpp"
@@ -50,56 +7,50 @@
 
 namespace krys::boo
 {
-  /// @brief How to align a rect when scrolling it into view, depending on whether it's already visible,
-  /// partly visible or hidden.
+  /// @brief How to scroll a rect into view along one axis, depending on how much of it is already visible.
   struct ScrollAlignment
   {
+    /// @brief Where to put the rect along the axis.
     enum class Behavior : uint8
     {
+      /// @brief Leave the scroll position as it is.
       NoScroll,
       AlignCenter,
       AlignTop,
       AlignBottom,
       AlignLeft,
       AlignRight,
+      /// @brief Align the edge it's nearest to scroll to, as `nearest` does in `scrollIntoView()`
+      /// (https://drafts.csswg.org/cssom-view-1/#determine-the-scroll-into-view-position).
       AlignToClosestEdge,
     };
 
+    /// @brief The behaviour when the rect is all visible (or covers the visible area).
     Behavior RectVisible;
+    /// @brief The behaviour when none of it is visible.
     Behavior RectHidden;
+    /// @brief The behaviour when some of it is visible.
     Behavior RectPartial;
+    /// @brief Whether a rect with at least 32px visible horizontally counts as visible, so revealing it
+    /// needn't scroll sideways. `scrollIntoView()` turns this off; revealing the selection or focus keeps it.
     bool EnableLegacyHorizontalVisibilityThreshold {true};
-
-    KRYS_NODISCARD Behavior GetVisibleBehavior() const noexcept
-    {
-      return RectVisible;
-    }
-
-    KRYS_NODISCARD Behavior GetPartialBehavior() const noexcept
-    {
-      return RectPartial;
-    }
-
-    KRYS_NODISCARD Behavior GetHiddenBehavior() const noexcept
-    {
-      return RectHidden;
-    }
 
     void DisableLegacyHorizontalVisibilityThreshold() noexcept
     {
       EnableLegacyHorizontalVisibilityThreshold = false;
     }
 
-    KRYS_NODISCARD bool LegacyHorizontalVisibilityThresholdEnabled() const noexcept
-    {
-      return EnableLegacyHorizontalVisibilityThreshold;
-    }
-
+    /// @brief Never scroll.
     static const ScrollAlignment NoScroll;
+    /// @brief Centre a hidden rect; leave a visible or partly visible one.
     static const ScrollAlignment AlignCenterIfNotVisible;
+    /// @brief Align a hidden rect to the nearest edge; leave a visible or partly visible one.
     static const ScrollAlignment AlignToEdgeIfNotVisible;
+    /// @brief Centre a hidden rect and align a partly visible one to the nearest edge.
     static const ScrollAlignment AlignCenterIfNeeded;
+    /// @brief Align a hidden or partly visible rect to the nearest edge.
     static const ScrollAlignment AlignToEdgeIfNeeded;
+    /// @brief Always centre, even when the rect is visible; the next four always align to one edge.
     static const ScrollAlignment AlignCenterAlways;
     static const ScrollAlignment AlignTopAlways;
     static const ScrollAlignment AlignRightAlways;
@@ -109,6 +60,8 @@ namespace krys::boo
 
   /// @brief The part of a scroller's contents to make visible so @p exposeRect is aligned as asked, as a rect
   /// with the size of @p visibleBounds.
+  /// @param visibilityCheckRect The rect whose overlap with @p visibleBounds says whether @p exposeRect
+  /// counts as hidden; @p exposeRect itself if not given.
   KRYS_NODISCARD LayoutRect GetRectToExposeForScrollIntoView(
     const LayoutRect &visibleBounds, const LayoutRect &exposeRect, const ScrollAlignment &alignX,
     const ScrollAlignment &alignY, const Maybe<LayoutRect> visibilityCheckRect = null) noexcept;

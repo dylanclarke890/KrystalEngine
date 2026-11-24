@@ -289,7 +289,7 @@ namespace krys::boo::css
     {
     }
 
-    PrimitiveData(const Calc &calc) noexcept : _payload {calc.ProtectedCalc().release()}, _index {calc}
+    PrimitiveData(const Calc &calc) noexcept : _payload {ShareRef(calc.Calc()).release()}, _index {calc}
     {
     }
 

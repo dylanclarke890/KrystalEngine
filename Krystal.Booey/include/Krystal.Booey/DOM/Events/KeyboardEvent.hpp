@@ -1,28 +1,4 @@
-﻿/*
- * Copyright (C) 2001 Peter Kelly (pmk@post.com)
- * Copyright (C) 2001 Tobias Anton (anton@stud.fbi.fh-darmstadt.de)
- * Copyright (C) 2006 Samuel Weinig (sam.weinig@gmail.com)
- * Copyright (C) 2003-2024 Apple Inc. All rights reserved.
- * Copyright (C) 2017 Google Inc. All rights reserved.
- *
- * This library is free software; you can redistribute it and/or
- * modify it under the terms of the GNU Library General Public
- * License as published by the Free Software Foundation; either
- * version 2 of the License, or (at your option) any later version.
- *
- * This library is distributed in the hope that it will be useful,
- * but WITHOUT ANY WARRANTY; without even the implied warranty of
- * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU
- * Library General Public License for more details.
- *
- * You should have received a copy of the GNU Library General Public License
- * along with this library; see the file COPYING.LIB.  If not, write to
- * the Free Software Foundation, Inc., 51 Franklin Street, Fifth Floor,
- * Boston, MA 02110-1301, USA.
- *
- */
-
-#pragma once
+﻿#pragma once
 
 #include "Krystal.Booey/DOM/Events/UIEvent.hpp"
 #include "Krystal.Booey/DOM/Events/UIEventWithKeyState.hpp"
@@ -46,8 +22,6 @@ namespace krys::boo
     bool Repeat {false};
     bool IsComposing {false};
 
-    // Legacy.
-    DOMString KeyIdentifier;
     /// @see https://w3c.github.io/uievents/#dom-keyboardeventinit-charcode
     uint32 CharCode {0};
     /// @see https://w3c.github.io/uievents/#dom-keyboardeventinit-keycode
@@ -65,6 +39,7 @@ namespace krys::boo
     /// @brief The dictionary its constructor takes.
     using dictionary_type = KeyboardEventInit;
 
+    /// @see https://w3c.github.io/uievents/#dom-keyboardevent-dom_key_location_standard
     enum KeyLocationCode : uint32
     {
       DOM_KEY_LOCATION_STANDARD = 0x00,
@@ -77,7 +52,6 @@ namespace krys::boo
     UniquePtr<PlatformKeyboardEvent> _underlyingPlatformEvent;
     DOMString _key;
     DOMString _code;
-    DOMString _keyIdentifier;
     uint32 _location {DOM_KEY_LOCATION_STANDARD};
     bool _repeat {false};
     bool _isComposing {false};
@@ -97,8 +71,8 @@ namespace krys::boo
     /// @note Legacy.
     /// @see https://w3c.github.io/uievents/#dom-keyboardevent-initkeyboardevent
     void InitKeyboardEvent(DOMStringAtom type, bool canBubble, bool cancelable, Window *view,
-                           DOMStringView keyIdentifier, uint32 location, bool ctrlKey, bool altKey,
-                           bool shiftKey, bool metaKey) noexcept;
+                           DOMStringView key, uint32 location, bool ctrlKey, bool altKey, bool shiftKey,
+                           bool metaKey) noexcept;
 
     /// @see https://w3c.github.io/uievents/#dom-keyboardevent-key
     KRYS_NODISCARD const DOMString &Key() const noexcept
@@ -110,11 +84,6 @@ namespace krys::boo
     KRYS_NODISCARD const DOMString &Code() const noexcept
     {
       return _code;
-    }
-
-    KRYS_NODISCARD const DOMString &KeyIdentifier() const noexcept
-    {
-      return _keyIdentifier;
     }
 
     /// @see https://w3c.github.io/uievents/#dom-keyboardevent-location
@@ -135,6 +104,7 @@ namespace krys::boo
       return _isComposing;
     }
 
+    /// @brief The host's event a trusted event came from; null for one made by the page or the dictionary.
     KRYS_NODISCARD const PlatformKeyboardEvent *UnderlyingPlatformEvent() const noexcept
     {
       return _underlyingPlatformEvent.get();
@@ -145,7 +115,7 @@ namespace krys::boo
     /// @see https://w3c.github.io/uievents/#dom-keyboardevent-keycode
     KRYS_NODISCARD int32 KeyCode() const noexcept;
 
-    /// @brief The key code for the `keydown` that matches a `keypress`.
+    /// @brief For a `keypress`, the `keyCode` its `keydown` had: the key's code rather than its character.
     KRYS_NODISCARD int32 KeyCodeForKeyDown() const noexcept;
 
     /// @brief The character code for `keypress`, 0 for `keydown` and `keyup`.

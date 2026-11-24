@@ -53,58 +53,60 @@ namespace krys::boo::css::tests
       auto unitType = static_cast<UnitType>(i);
       INFO(i);
 
-      if (auto unit = ToLengthUnit(unitType))
+      if (auto unit = ToUnit<LengthUnit>(unitType))
       {
         CHECK(ToUnitType(*unit) == unitType);
-        CHECK(ToLengthPercentageUnit(unitType).has_value());
+        CHECK(ToUnit<LengthPercentageUnit>(unitType).has_value());
       }
-      if (auto unit = ToLengthPercentageUnit(unitType))
-      {
-        CHECK(ToUnitType(*unit) == unitType);
-      }
-      if (auto unit = ToAngleUnit(unitType))
+      if (auto unit = ToUnit<LengthPercentageUnit>(unitType))
       {
         CHECK(ToUnitType(*unit) == unitType);
       }
-      if (auto unit = ToAnglePercentageUnit(unitType))
+      if (auto unit = ToUnit<AngleUnit>(unitType))
       {
         CHECK(ToUnitType(*unit) == unitType);
       }
-      if (auto unit = ToTimeUnit(unitType))
+      if (auto unit = ToUnit<AnglePercentageUnit>(unitType))
       {
         CHECK(ToUnitType(*unit) == unitType);
       }
-      if (auto unit = ToFrequencyUnit(unitType))
+      if (auto unit = ToUnit<TimeUnit>(unitType))
       {
         CHECK(ToUnitType(*unit) == unitType);
       }
-      if (auto unit = ToResolutionUnit(unitType))
+      if (auto unit = ToUnit<FrequencyUnit>(unitType))
+      {
+        CHECK(ToUnitType(*unit) == unitType);
+      }
+      if (auto unit = ToUnit<ResolutionUnit>(unitType))
       {
         CHECK(ToUnitType(*unit) == unitType);
       }
     }
 
-    CHECK(ToLengthUnit(UnitType::QuirkyEm) == LengthUnit::QuirkyEm);
-    CHECK(ToLengthUnit(UnitType::Percentage) == null);
-    CHECK(ToLengthPercentageUnit(UnitType::Percentage) == LengthPercentageUnit::Percentage);
-    CHECK(ToAngleUnit(UnitType::px) == null);
-    CHECK(ToIntegerUnit(UnitType::Integer) == IntegerUnit::Integer);
-    CHECK(ToNumberUnit(UnitType::Integer) == null);
+    CHECK(ToUnit<LengthUnit>(UnitType::QuirkyEm) == LengthUnit::QuirkyEm);
+    CHECK(ToUnit<LengthUnit>(UnitType::Percentage) == null);
+    CHECK(ToUnit<LengthPercentageUnit>(UnitType::Percentage) == LengthPercentageUnit::Percentage);
+    CHECK(ToUnit<AngleUnit>(UnitType::px) == null);
+    CHECK(ToUnit<IntegerUnit>(UnitType::Integer) == IntegerUnit::Integer);
+    CHECK(ToUnit<NumberUnit>(UnitType::Integer) == null);
   }
 
   TEST_CASE("PrimitiveUnits(length predicates)", "[CSS][Primitives][Units]")
   {
-    STATIC_CHECK(IsFontRelativeLength(LengthUnit::Em));
+    // The predicates are Units.hpp's, through the unit's UnitType.
+    STATIC_CHECK(IsFontRelativeLength(ToUnitType(LengthUnit::Em)));
     // Regression: QuirkyEm was missing from LengthUnit.
-    STATIC_CHECK(IsFontRelativeLength(LengthUnit::QuirkyEm));
-    STATIC_CHECK_FALSE(IsFontRelativeLength(LengthUnit::Rem));
-    STATIC_CHECK(IsRootFontRelativeLength(LengthUnit::Rem));
-    STATIC_CHECK(IsFontOrRootFontRelativeLength(LengthUnit::Rem));
-    STATIC_CHECK(IsViewportPercentageLength(LengthUnit::Dvmax));
-    STATIC_CHECK(IsContainerPercentageLength(LengthUnit::Cqi));
-    STATIC_CHECK_FALSE(IsContainerPercentageLength(LengthUnit::Vi));
+    STATIC_CHECK(IsFontRelativeLength(ToUnitType(LengthUnit::QuirkyEm)));
+    STATIC_CHECK(IsFontRelativeLength(ToUnitType(LengthUnit::Rem)));
+    STATIC_CHECK(IsRootFontRelativeLength(ToUnitType(LengthUnit::Rem)));
+    STATIC_CHECK_FALSE(IsRootFontRelativeLength(ToUnitType(LengthUnit::Em)));
+    STATIC_CHECK(IsViewportPercentageLength(ToUnitType(LengthUnit::Dvmax)));
+    STATIC_CHECK(IsContainerPercentageLength(ToUnitType(LengthUnit::Cqi)));
+    STATIC_CHECK_FALSE(IsContainerPercentageLength(ToUnitType(LengthUnit::Vi)));
 
     STATIC_CHECK_FALSE(ConversionToCanonicalUnitRequiresConversionData(LengthUnit::Px));
+    // Absolute lengths have a fixed ratio to px.
     STATIC_CHECK_FALSE(ConversionToCanonicalUnitRequiresConversionData(LengthUnit::In));
     STATIC_CHECK(ConversionToCanonicalUnitRequiresConversionData(LengthUnit::Em));
     STATIC_CHECK(ConversionToCanonicalUnitRequiresConversionData(LengthUnit::QuirkyEm));
@@ -149,21 +151,22 @@ namespace krys::boo::css::tests
 
   TEST_CASE("PrimitiveUnits(conversions)", "[CSS][Primitives][Units]")
   {
-    CHECK(ConvertAngle<AngleUnit::Deg>(1.0, AngleUnit::Turn) == Approx(360.0));
-    CHECK(ConvertAngle<AngleUnit::Turn>(180.0, AngleUnit::Deg) == Approx(0.5));
-    CHECK(ConvertAngle<AngleUnit::Rad>(200.0, AngleUnit::Grad) == Approx(3.14159265358979));
-    CHECK(ConvertAngle<AngleUnit::Grad>(90.0, AngleUnit::Deg) == Approx(100.0));
-    CHECK(UnitTraits<AngleUnit>::Convert<AngleUnit::Deg>(1.0, AngleUnit::Deg) == 1.0);
+    CHECK(ConvertUnit<AngleUnit::Deg>(1.0, AngleUnit::Turn) == Approx(360.0));
+    CHECK(ConvertUnit<AngleUnit::Turn>(180.0, AngleUnit::Deg) == Approx(0.5));
+    CHECK(ConvertUnit<AngleUnit::Rad>(200.0, AngleUnit::Grad) == Approx(3.14159265358979));
+    CHECK(ConvertUnit<AngleUnit::Grad>(90.0, AngleUnit::Deg) == Approx(100.0));
+    CHECK(ConvertUnit<AngleUnit::Deg>(1.0, AngleUnit::Deg) == 1.0);
+    CHECK(ConvertUnit<LengthUnit::Px>(1.0f, LengthUnit::In) == Approx(96.0f));
 
-    CHECK(ConvertTime<TimeUnit::Ms>(2.0, TimeUnit::S) == Approx(2000.0));
-    CHECK(ConvertTime<TimeUnit::S>(250.0, TimeUnit::Ms) == Approx(0.25));
+    CHECK(ConvertUnit<TimeUnit::Ms>(2.0, TimeUnit::S) == Approx(2000.0));
+    CHECK(ConvertUnit<TimeUnit::S>(250.0, TimeUnit::Ms) == Approx(0.25));
 
-    CHECK(ConvertFrequency<FrequencyUnit::Hz>(1.5, FrequencyUnit::Khz) == Approx(1500.0));
-    CHECK(ConvertFrequency<FrequencyUnit::Khz>(500.0, FrequencyUnit::Hz) == Approx(0.5));
+    CHECK(ConvertUnit<FrequencyUnit::Hz>(1.5, FrequencyUnit::Khz) == Approx(1500.0));
+    CHECK(ConvertUnit<FrequencyUnit::Khz>(500.0, FrequencyUnit::Hz) == Approx(0.5));
 
-    CHECK(ConvertResolution<ResolutionUnit::Dpi>(1.0, ResolutionUnit::Dppx) == Approx(96.0));
-    CHECK(ConvertResolution<ResolutionUnit::Dppx>(2.0, ResolutionUnit::X) == Approx(2.0));
-    CHECK(ConvertResolution<ResolutionUnit::Dpcm>(96.0, ResolutionUnit::Dpi) == Approx(96.0 / 2.54));
+    CHECK(ConvertUnit<ResolutionUnit::Dpi>(1.0, ResolutionUnit::Dppx) == Approx(96.0));
+    CHECK(ConvertUnit<ResolutionUnit::Dppx>(2.0, ResolutionUnit::X) == Approx(2.0));
+    CHECK(ConvertUnit<ResolutionUnit::Dpcm>(96.0, ResolutionUnit::Dpi) == Approx(96.0 / 2.54));
   }
 
   TEST_CASE("PrimitiveUnits(unit strings)", "[CSS][Primitives][Units]")
@@ -171,7 +174,7 @@ namespace krys::boo::css::tests
     CHECK(UnitString(IntegerUnit::Integer).empty());
     CHECK(UnitString(PercentageUnit::Percentage) == u8"%");
     CHECK(UnitString(LengthUnit::Px) == u8"px");
-    CHECK(UnitString(LengthUnit::Q) == u8"Q");
+    CHECK(UnitString(LengthUnit::Q) == u8"q");
     CHECK(UnitString(LengthUnit::QuirkyEm) == u8"em");
     CHECK(UnitString(AngleUnit::Turn) == u8"turn");
     CHECK(UnitString(TimeUnit::Ms) == u8"ms");

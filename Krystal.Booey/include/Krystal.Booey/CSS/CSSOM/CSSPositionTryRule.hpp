@@ -64,8 +64,6 @@ namespace krys::boo
 
     void Reattach(css::Rule &rule) noexcept final;
 
-    KRYS_NODISCARD Ref<css::PositionTryRule> ProtectedPositionTryRule() const noexcept;
-
     KRYS_NODISCARD const CSSOMStringAtom &Name() const noexcept KRYS_LIFETIME_BOUND;
 
     KRYS_NODISCARD CSSPositionTryDescriptors &Style() noexcept;

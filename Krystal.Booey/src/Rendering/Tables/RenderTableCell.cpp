@@ -26,6 +26,7 @@
 
 #include "Krystal.Booey/Rendering/Tables/RenderTableCell.hpp"
 #include "Krystal.Booey/CSS/Properties/Property.hpp"
+#include "Krystal.Booey/CSS/Properties/PropertyQueries.hpp"
 #include "Krystal.Booey/DOM/Nodes/Document.hpp"
 #include "Krystal.Booey/HTML/Elements/HTMLElement.hpp"
 #include "Krystal.Booey/HTML/Elements/HTMLTableCellElement.hpp"
@@ -71,7 +72,7 @@ namespace krys::boo
                                                  WritingMode writingMode) noexcept
     {
       return includeColor == IncludeBorderColor::Yes
-               ? css::Property::ResolveDirectionAwareProperty(logicalProperty, writingMode)
+               ? css::ResolveDirectionAwareProperty(logicalProperty, writingMode)
                : css::PropertyId::Invalid;
     }
 

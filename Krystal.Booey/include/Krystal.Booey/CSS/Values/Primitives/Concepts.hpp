@@ -45,7 +45,7 @@ namespace krys::boo::css
     requires Integral<decltype(UnitTraits<T>::Count)>;
     requires SameType<decltype(UnitTraits<T>::Canonical), const T>;
     requires SameType<decltype(UnitTraits<T>::Category), const css::Category>;
-    { UnitTraits<T>::Validate(std::declval<UnitType>()) } -> SameType<Maybe<T>>;
+    { UnitTraits<T>::UnitTypes[0] } -> ConvertibleTo<UnitType>;
   };
 
   /// @brief Concept covering unit types where the enumeration contains only a single value.

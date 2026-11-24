@@ -35,6 +35,7 @@
 #include "Krystal.Booey/CSS/Values/GlobalKeyword.hpp"
 #include "Krystal.Booey/CSS/Values/PrimitiveValue.hpp"
 #include "Krystal.Booey/CSS/Values/SerialisationContext.hpp"
+#include "Krystal.Booey/CSS/Values/ToLengthConversionData.hpp"
 #include "Krystal.Booey/CSS/Values/ValueList.hpp"
 #include "Krystal.Booey/CSS/Values/ValuePool.hpp"
 #include "Krystal.Booey/DOM/Algorithms/TreeQueries.hpp"
@@ -190,7 +191,7 @@ namespace krys::boo
       if (auto *primitiveValue = DynamicDowncast<css::PrimitiveValue>(value.get()))
       {
         if (propertyID == PropertyId::FontWeight && primitiveValue->IsNumber()
-            && primitiveValue->template ResolveAsNumberDeprecated<float>()
+            && primitiveValue->template ResolveAsNumber<float>(css::ToLengthConversionData::WithoutElement())
                  >= static_cast<float>(BoldThreshold()))
         {
           return ValueId::Bold;
@@ -408,7 +409,8 @@ namespace krys::boo
       }
 
       krys_debug_assert(primitiveValue->IsNumber());
-      return primitiveValue->ResolveAsNumberDeprecated<float>() >= static_cast<float>(BoldThreshold());
+      return primitiveValue->ResolveAsNumber<float>(css::ToLengthConversionData::WithoutElement())
+             >= static_cast<float>(BoldThreshold());
     }
   }
 
@@ -1056,7 +1058,7 @@ namespace krys::boo
     {
       return TriState::True;
     }
-    if (difference->PropertyCount() == _mutableStyle->PropertyCount())
+    if (difference->size() == _mutableStyle->size())
     {
       return TriState::False;
     }
@@ -1747,7 +1749,7 @@ namespace krys::boo
       if (mode == CSSPropertyOverrideMode::OverrideValues
           || (mode == CSSPropertyOverrideMode::DoNotOverrideValues && !value))
       {
-        mutableStyle.SetProperty(property.Id(), property.ProtectedValue(),
+        mutableStyle.SetProperty(property.Id(), ShareRef(const_cast<css::Value &>(*property.Value())),
                                  css::IsImportant(property.IsImportant()));
       }
     }
@@ -1797,11 +1799,11 @@ namespace krys::boo
         return primitiveValue->StringValue();
       }
       auto *list = DynamicDowncast<css::ValueList>(value);
-      if (!list || list->Length() != 1)
+      if (!list || list->size() != 1)
       {
         return {};
       }
-      auto *item = DynamicDowncast<css::PrimitiveValue>(list->Item(0));
+      auto *item = DynamicDowncast<css::PrimitiveValue>(&(*list)[0]);
       return item ? item->StringValue() : DOMString();
     }
   }
@@ -2500,7 +2502,7 @@ namespace krys::boo
     void SetTextDecorationProperty(css::MutableStyleProperties &style,
                                    const css::ValueList &newTextDecoration, PropertyId propertyID) noexcept
     {
-      if (newTextDecoration.Length())
+      if (newTextDecoration.size())
       {
         auto isImportant = css::IsImportant(style.PropertyIsImportant(
           propertyID == PropertyId::TextDecoration ? PropertyId::TextDecorationLine : propertyID));
@@ -2611,9 +2613,9 @@ namespace krys::boo
         return;
       }
       auto newTextDecoration = textDecoration->CopyValues();
-      for (uint32 i = 0; i < refTextDecorationList->Length(); ++i)
+      for (uint32 i = 0; i < refTextDecorationList->size(); ++i)
       {
-        (void)RemoveAll(newTextDecoration, *refTextDecorationList->Item(i));
+        (void)RemoveAll(newTextDecoration, (*refTextDecorationList)[i]);
       }
       SetTextDecorationProperty(style, *css::ValueList::CreateSpaceSeparated(krys::move(newTextDecoration)),
                                 propertyID);
@@ -2685,7 +2687,7 @@ namespace krys::boo
     {
       if (IsCSSValueLength(value))
       {
-        int32 pixelFontSize = value->ResolveAsLengthDeprecated<int32>();
+        int32 pixelFontSize = value->ResolveAsLength<int32>(css::ToLengthConversionData::WithoutElement());
         int32 legacyFontSize =
           style::LegacyFontSizeForPixelSize(pixelFontSize, shouldUseFixedFontDefaultSize, document);
         // Use legacy font size only if pixel value matches exactly to that of legacy font size.

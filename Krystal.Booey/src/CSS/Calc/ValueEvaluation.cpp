@@ -136,13 +136,6 @@ namespace krys::boo::css::calc
     return ClampToPermittedRange(EvaluateDouble(_tree, options).value_or(0));
   }
 
-  double Value::DoubleValueDeprecated() const noexcept
-  {
-    // FIXME: upstream logs an error here when the tree requires conversion data, as the result is then
-    // likely incorrect.
-    return DoubleValue(NoConversionDataRequiredTag {});
-  }
-
   double Value::ComputeLengthPx(const ToLengthConversionData &conversionData) const noexcept
   {
     return ComputeLengthPx(conversionData, {});

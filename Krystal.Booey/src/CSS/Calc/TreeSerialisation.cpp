@@ -276,19 +276,8 @@ namespace krys::boo::css::calc
       case UnitType::x:          return 63;
 
       // Non-numeric types are not supported.
-      case UnitType::Attr:
-      case UnitType::Calc:
-      case UnitType::CalcPercentageWithAngle:
-      case UnitType::CalcPercentageWithLength:
-      case UnitType::Dimension:
-      case UnitType::FontFamily:
-      case UnitType::Ident:
-      case UnitType::PropertyId:
       case UnitType::QuirkyEm:
-      case UnitType::String:
       case UnitType::Unknown:
-      case UnitType::ValueId:
-      case UnitType::CustomIdent:
       {
         break;
       }
@@ -731,8 +720,7 @@ namespace krys::boo::css::calc
     // 2. If root is a numeric value, or a non-math function, serialize root per the normal rules for it and
     // return the result.
 
-    FormatCSSNumberValue(builder,
-                         SerialisableNumber {root.Value, PrimitiveValue::UnitTypeString(ToUnit(root))});
+    FormatCSSNumberValue(builder, SerialisableNumber {root.Value, UnitTypeString(ToUnit(root))});
   }
 
   void SerialiseCalculationTree(StringBuilder &builder, const Symbol &root, SerialisationState &) noexcept

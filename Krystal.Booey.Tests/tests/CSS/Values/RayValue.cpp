@@ -17,7 +17,7 @@ namespace krys::boo::css::tests
     SECTION("Without a coordinate box")
     {
       auto value = RayValue::Create(MakeRay(45_css_deg));
-      CHECK(value->IsRayValue());
+      CHECK(Is<RayValue>(*value));
       CHECK(value->GetRay() == MakeRay(45_css_deg));
       CHECK(value->CoordinateBox() == CSSBoxType::BoxMissing);
     }

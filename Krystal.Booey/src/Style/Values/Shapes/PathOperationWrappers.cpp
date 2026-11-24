@@ -86,7 +86,8 @@ namespace krys::boo::style
         state.SetCurrentPropertyInvalidAtComputedValueTime();
         return nullptr;
       }
-      return RayPathOperation::Create(ConvertToStyle(ray->GetRay(), state));
+      // Only a value made from a computed style holds the box; a parsed one has it as a separate item.
+      return RayPathOperation::Create(ConvertToStyle(ray->GetRay(), state), ray->CoordinateBox());
     }
 
     RefPtr<PathOperation> operation;

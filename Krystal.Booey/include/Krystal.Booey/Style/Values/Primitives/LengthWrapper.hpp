@@ -114,7 +114,7 @@ namespace krys::boo::style
     {
     }
 
-    LengthWrapperBase(const Calc &calc) noexcept : _value(IndexForCalc, calc.ProtectedCalculation())
+    LengthWrapperBase(const Calc &calc) noexcept : _value(IndexForCalc, ShareRef(calc.Calculation()))
     {
     }
 
@@ -319,7 +319,7 @@ namespace krys::boo::style
         specified,
         [](const Fixed &fixed) { return LengthWrapperData {IndexForFixed, fixed.UnresolvedValue()}; },
         [](const Percentage &percentage) { return LengthWrapperData {IndexForPercentage, percentage.Value}; },
-        [](const Calc &calc) { return LengthWrapperData {IndexForCalc, calc.ProtectedCalculation()}; });
+        [](const Calc &calc) { return LengthWrapperData {IndexForCalc, ShareRef(calc.Calculation())}; });
     }
 
     KRYS_NODISCARD LengthWrapperDataEvaluationKind EvaluationKind() const noexcept

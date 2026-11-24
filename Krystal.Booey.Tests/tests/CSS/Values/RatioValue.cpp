@@ -7,7 +7,7 @@ namespace krys::boo::css::tests
   TEST_CASE_METHOD(ValueFixture, "RatioValue::Create", "[CSS][Values][RatioValue]")
   {
     auto ratio = RatioValue::Create(Ratio {16_css_number, 9_css_number});
-    CHECK(ratio->IsRatioValue());
+    CHECK(Is<RatioValue>(*ratio));
     CHECK(ratio->GetRatio() == Ratio {16_css_number, 9_css_number});
     CHECK(CssText(*ratio) == "16 / 9");
   }

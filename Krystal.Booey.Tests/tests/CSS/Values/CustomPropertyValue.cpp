@@ -21,7 +21,7 @@ namespace krys::boo::css::tests
     SECTION("CreateEmpty")
     {
       auto value = CustomPropertyValue::CreateEmpty(Name());
-      CHECK(value->IsCustomPropertyValue());
+      CHECK(Is<CustomPropertyValue>(*value));
       CHECK(value->Name() == Name());
       CHECK(value->IsVariableData());
       CHECK_FALSE(value->IsVariableReference());

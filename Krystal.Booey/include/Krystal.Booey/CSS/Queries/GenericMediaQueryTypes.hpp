@@ -79,11 +79,6 @@ namespace krys::boo::css::mq
   {
     ComparisonOperator Op;
     RefPtr<css::Value> Value;
-
-    KRYS_NODISCARD RefPtr<css::Value> ProtectedValue() const noexcept
-    {
-      return Value;
-    }
   };
 
   /// @brief A media or container feature, in boolean, plain (`name: value`) or range syntax.

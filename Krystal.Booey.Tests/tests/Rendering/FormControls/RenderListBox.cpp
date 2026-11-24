@@ -99,9 +99,9 @@ layer at (0,0) size 400x37
       auto &settings = fixture.Document->GetSettings();
       settings.ScrollAnimatorEnabled = false;
       select.Focus();
-      CHECK(PressKey(fixture, u8"ArrowDown", u8"Down", vk::Down));
+      CHECK(PressKey(fixture, u8"ArrowDown", vk::Down));
       CHECK(select.SelectedIndex() == 0);
-      CHECK(PressKey(fixture, u8"End", u8"End", vk::End));
+      CHECK(PressKey(fixture, u8"End", vk::End));
       CHECK(select.SelectedIndex() == 4);
       CHECK(listBox.ListIndexIsVisible(5));
       CHECK_FALSE(listBox.ListIndexIsVisible(0));
@@ -193,7 +193,7 @@ layer at (0,0) size 400x37
     CHECK_FALSE(select.Item(1u)->Selected());
 
     // Shift and the arrow keys extend the selection from the anchor.
-    CHECK(PressKey(fixture, u8"ArrowDown", u8"Down", vk::Down, {PlatformEvent::Modifier::ShiftKey}));
+    CHECK(PressKey(fixture, u8"ArrowDown", vk::Down, {PlatformEvent::Modifier::ShiftKey}));
     CHECK(select.SelectedOptions()->Length() == 3uz);
   }
 

@@ -131,10 +131,10 @@ namespace krys::boo::css::tests
       CHECK(second.IsLastRuleInSplitRule());
 
       // Nested rules with too many components are dropped.
-      sheet->ParserAppendRule(StyleRuleWithNesting::Create(ImmutableDeclarations(u8"color: red"), false,
+      sheet->ParserAppendRule(StyleRuleWithNesting::Create(ImmutableDeclarations(u8"color: red"),
                                                            ParseSelectors(ManySelectors(8'193)), {}));
       CHECK(sheet->ChildRules().size() == 2);
-      sheet->ParserAppendRule(StyleRuleWithNesting::Create(ImmutableDeclarations(u8"color: red"), false,
+      sheet->ParserAppendRule(StyleRuleWithNesting::Create(ImmutableDeclarations(u8"color: red"),
                                                            ParseSelectors(ManySelectors(8'192)), {}));
       CHECK(sheet->ChildRules().size() == 3);
     }
@@ -143,13 +143,13 @@ namespace krys::boo::css::tests
     {
       auto import = Import(u8"a.css");
       sheet->ParserAppendRule(Ref<ImportRule>(import));
+      sheet->ParserAppendRule(Namespace(u8"a", u8"urn:a"));
       sheet->ParserAppendRule(CreateStyleRule(u8".a", u8"color: red"));
-      sheet->ParserSetEncodingFromCharsetRule(u8"utf-8");
-      CHECK(sheet->EncodingFromCharsetRule() == u8"utf-8");
+      REQUIRE(sheet->NamespaceURIFromPrefix(u8"a") == u8"urn:a");
       sheet->ClearRules();
       CHECK(sheet->IsEmpty());
-      CHECK(sheet->EncodingFromCharsetRule().empty());
       CHECK(import->ParentStyleSheet() == nullptr);
+      CHECK(sheet->NamespaceURIFromPrefix(u8"a") == null);
     }
   }
 
@@ -174,9 +174,25 @@ namespace krys::boo::css::tests
     {
       CHECK(sheet->WrapperInsertRule(Namespace(u8"a", u8"urn:a"), 0));
       CHECK(sheet->NamespaceURIFromPrefix(u8"a") == u8"urn:a");
-      // A later namespace rule with the same prefix replaces the URI.
-      CHECK(sheet->WrapperInsertRule(Namespace(u8"a", u8"urn:b"), 0));
+      // The last declaration of a prefix wins, wherever it was inserted.
+      CHECK(sheet->WrapperInsertRule(Namespace(u8"a", u8"urn:b"), 1));
       CHECK(sheet->NamespaceURIFromPrefix(u8"a") == u8"urn:b");
+      CHECK(sheet->WrapperInsertRule(Namespace(u8"a", u8"urn:c"), 0));
+      CHECK(sheet->NamespaceURIFromPrefix(u8"a") == u8"urn:b");
+      CHECK(sheet->WrapperInsertRule(Namespace({}, u8"urn:d"), 0));
+      CHECK(sheet->DefaultNamespace() == u8"urn:d");
+
+      // Deleting a declaration undeclares it, uncovering the one before it.
+      CHECK(sheet->WrapperDeleteRule(3));
+      CHECK(sheet->NamespaceURIFromPrefix(u8"a") == u8"urn:a");
+      CHECK(sheet->WrapperDeleteRule(0));
+      CHECK(sheet->DefaultNamespace() == dom::StarAtom());
+      CHECK(sheet->WrapperDeleteRule(1));
+      CHECK(sheet->WrapperDeleteRule(0));
+      CHECK(sheet->NamespaceURIFromPrefix(u8"a") == null);
+
+      CHECK(sheet->WrapperInsertRule(Namespace(u8"a", u8"urn:a"), 0));
+      CHECK(sheet->WrapperInsertRule(Namespace(u8"a", u8"urn:b"), 1));
       CHECK(sheet->WrapperInsertRule(CreateStyleRule(u8".a", u8"color: red"), 2));
       // Not once there are other rules.
       CHECK_FALSE(sheet->WrapperInsertRule(Namespace(u8"c", u8"urn:c"), 2));
@@ -224,7 +240,7 @@ namespace krys::boo::css::tests
     {
       CHECK_FALSE(sheet->WrapperInsertRule(CreateStyleRule(ManySelectors(8'193), u8"color: red"), 0));
       CHECK_FALSE(
-        sheet->WrapperInsertRule(StyleRuleWithNesting::Create(ImmutableDeclarations(u8"color: red"), false,
+        sheet->WrapperInsertRule(StyleRuleWithNesting::Create(ImmutableDeclarations(u8"color: red"),
                                                               ParseSelectors(ManySelectors(8'193)), {}),
                                  0));
       CHECK(sheet->IsEmpty());
@@ -255,36 +271,13 @@ namespace krys::boo::css::tests
   {
     auto sheet = StyleSheetContents::Create();
     auto nested =
-      StyleRuleWithNesting::Create(ImmutableDeclarations(u8"color: red"), false, ParseSelectors(u8".a"),
+      StyleRuleWithNesting::Create(ImmutableDeclarations(u8"color: red"), ParseSelectors(u8".a"),
                                    {NestedDeclarationsRule::Create(ImmutableDeclarations(u8"width: 1px"))});
     auto media = MediaRule::Create(mq::MediaQueryParser::Parse(u8"print", StrictParserContext()),
                                    {CreateStyleRule(u8".b", u8"background-image: url(a.png)")});
     sheet->ParserAppendRule(Import(u8"a.css"));
     sheet->ParserAppendRule(Ref<Rule>(media));
     sheet->ParserAppendRule(Ref<Rule>(nested));
-
-    SECTION("TraverseRules visits nested and group children")
-    {
-      List<RuleType> visited;
-      CHECK_FALSE(sheet->TraverseRules(
-        [&](const Rule &rule)
-        {
-          visited.push_back(rule.Type());
-          return false;
-        }));
-      CHECK(visited
-            == List<RuleType> {RuleType::Import, RuleType::Media, RuleType::Style, RuleType::StyleWithNesting,
-                               RuleType::NestedDeclarations});
-
-      uint32 count = 0;
-      CHECK(sheet->TraverseRules(
-        [&](const Rule &rule)
-        {
-          ++count;
-          return rule.IsMediaRule();
-        }));
-      CHECK(count == 2);
-    }
 
     SECTION("MayDependOnBaseURL")
     {
@@ -302,12 +295,12 @@ namespace krys::boo::css::tests
 
     SECTION("HasNestingRules and caching")
     {
-      CHECK(sheet->HasNestingRules());
+      // A nesting rule makes the sheet uncacheable.
+      sheet->CheckLoaded();
       CHECK_FALSE(sheet->IsCacheable());
 
       auto plain = StyleSheetContents::Create();
       plain->ParserAppendRule(CreateStyleRule(u8".a", u8"color: red"));
-      CHECK_FALSE(plain->HasNestingRules());
       // Not loaded yet.
       CHECK_FALSE(plain->IsCacheable());
       plain->CheckLoaded();
@@ -355,19 +348,29 @@ namespace krys::boo::css::tests
     CHECK(sheet->EstimatedSizeInBytes() >= sizeof(StyleSheetContents) + 3 * StyleRule::AverageSizeInBytes());
   }
 
+  TEST_CASE_METHOD(ValueFixture, "StyleSheetContents::EstimatedSizeInBytes counts nested rules",
+                   "[CSS][StyleSheetContents]")
+  {
+    auto empty = StyleSheetContents::Create();
+    empty->ParseString(u8"@media screen { }");
+    auto nested = StyleSheetContents::Create();
+    nested->ParseString(u8"@media screen { .a { color: red } .b { color: red } .c { .d & { color: red } } }");
+    // .a, .b, .c and the rule nested in .c.
+    CHECK(nested->EstimatedSizeInBytes()
+          == empty->EstimatedSizeInBytes() + 4 * StyleRule::AverageSizeInBytes());
+  }
+
   TEST_CASE_METHOD(ValueFixture, "StyleSheetContents::Copy", "[CSS][StyleSheetContents]")
   {
     auto sheet = StyleSheetContents::Create();
     sheet->ParserAppendRule(LayerStatement(u8"a"));
     auto rule = CreateStyleRule(u8".a", u8"color: red");
     sheet->ParserAppendRule(Ref<Rule>(rule));
-    sheet->ParserSetEncodingFromCharsetRule(u8"utf-8");
     sheet->CheckLoaded();
 
     auto copy = sheet->Copy();
     CHECK(copy->RuleCount() == 2);
     CHECK(copy->LoadCompleted());
-    CHECK(copy->EncodingFromCharsetRule() == u8"utf-8");
     CHECK(copy->ChildRules()[0].get() != rule.get());
     CHECK(copy->LayerRulesBeforeImportRules()[0].get() != sheet->LayerRulesBeforeImportRules()[0].get());
     CHECK(AsText(Downcast<StyleRule>(*copy->ChildRules()[0]).Properties()) == "color: red;");
@@ -386,9 +389,5 @@ namespace krys::boo::css::tests
     CHECK(sheet->Clients() == List<CSSStyleSheet *> {client});
     sheet->UnregisterClient(client);
     CHECK(sheet->Clients().empty());
-
-    CHECK_FALSE(sheet->HasResolvedNesting());
-    sheet->SetHasResolvedNesting(true);
-    CHECK(sheet->HasResolvedNesting());
   }
 }

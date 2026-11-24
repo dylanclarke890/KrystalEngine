@@ -83,7 +83,7 @@ namespace krys::boo::style
   {
     if (const auto *valueList = DynamicDowncast<css::ValueList>(value))
     {
-      if (valueList->Separator() != css::ValueSeparator::SpaceSeparator)
+      if (valueList->Separator() != css::ValueSeparator::Space)
       {
         state.SetCurrentPropertyInvalidAtComputedValueTime();
         return {};

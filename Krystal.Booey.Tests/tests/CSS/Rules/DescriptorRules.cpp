@@ -15,15 +15,14 @@ namespace krys::boo::css::tests
     CHECK(rule->IsPositionTryRule());
     CHECK(rule->Name() == u8"--flip");
     CHECK(AsText(rule->Properties()) == "top: 1px;");
-    CHECK(rule->ProtectedProperties().get() == &rule->Properties());
     CHECK_FALSE(rule->Properties().IsMutable());
 
     auto copy = rule->Copy();
     CHECK(&copy->Properties() != &rule->Properties());
     CHECK(copy->Properties().IsMutable());
 
-    auto mutableProperties = rule->ProtectedMutableProperties();
-    CHECK(mutableProperties.get() == &rule->MutableProperties());
+    auto &mutableProperties = rule->MutableProperties();
+    CHECK(&mutableProperties == &rule->MutableProperties());
     CHECK(rule->Properties().IsMutable());
   }
 

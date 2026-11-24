@@ -64,7 +64,7 @@ namespace krys::boo::style
   {
     // FIXME: This should use `ConvertCSSValueToStyle<TranslateTransformFunction::LengthPercentage>`, but
     // doing so breaks transforms/hittest-translated-content-off-to-infinity-and-back.html, due to it clamping
-    // between css::MinValueForCssLength/css::MaxValueForCssLength.
+    // between style::MinValueForCssLength/style::MaxValueForCssLength.
 
     auto &conversionData = state.CssToLengthConversionData();
     if (primitiveValue.IsLength())
@@ -77,10 +77,10 @@ namespace krys::boo::style
       return TranslateTransformFunction::LengthPercentage::Percentage {
         primitiveValue.ResolveAsPercentage<float>(conversionData)};
     }
-    if (primitiveValue.IsCalculated())
+    if (primitiveValue.IsCalc())
     {
       return TranslateTransformFunction::LengthPercentage::Calc {
-        primitiveValue.ProtectedCSSCalcValue()->CreateCalculationValue(conversionData, css::SymbolTable {})};
+        primitiveValue.CalcValue()->CreateCalculationValue(conversionData, css::SymbolTable {})};
     }
 
     state.SetCurrentPropertyInvalidAtComputedValueTime();
@@ -92,7 +92,7 @@ namespace krys::boo::style
   {
     // FIXME: This should use `ConvertCSSValueToStyle<TranslateTransformFunction::Length>`, but doing so
     // breaks transforms/hittest-translated-content-off-to-infinity-and-back.html, due to it clamping between
-    // css::MinValueForCssLength/css::MaxValueForCssLength.
+    // style::MinValueForCssLength/style::MaxValueForCssLength.
 
     auto &conversionData = state.CssToLengthConversionData();
     if (primitiveValue.IsLength())

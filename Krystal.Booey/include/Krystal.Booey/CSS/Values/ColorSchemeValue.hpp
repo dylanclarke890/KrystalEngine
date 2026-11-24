@@ -58,6 +58,6 @@ namespace krys::boo::css
 KRYS_SPECIALIZE_TYPE_CAST_TRAITS_BEGIN(krys::boo::css::ColorSchemeValue)
   KRYS_NODISCARD static bool IsType(const krys::boo::css::Value &value) noexcept
   {
-    return value.IsColorSchemeValue();
+    return value.Type() == krys::boo::css::ValueType::ColorScheme;
   }
 KRYS_SPECIALIZE_TYPE_CAST_TRAITS_END()

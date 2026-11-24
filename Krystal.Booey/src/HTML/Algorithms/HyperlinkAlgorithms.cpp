@@ -85,7 +85,7 @@ namespace krys::boo::html
       return false;
     }
     auto *keyboardEvent = DynamicDowncast<KeyboardEvent>(event);
-    return keyboardEvent && keyboardEvent->KeyIdentifier() == u8"Enter";
+    return keyboardEvent && keyboardEvent->Key() == u8"Enter";
   }
 
   bool HyperlinkAlgorithms::HasRel(const HTMLElement &element, DOMStringView relation) noexcept

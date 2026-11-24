@@ -31,24 +31,22 @@
 namespace krys::boo::css
 {
   FunctionValue::FunctionValue(css::ValueId name, ValueListBuilder arguments) noexcept
-      : ValueContainingList(ValueType::Function, ValueSeparator::CommaSeparator, krys::move(arguments)),
-        _name(name)
+      : ValueContainingList(ValueType::Function, ValueSeparator::Comma, krys::move(arguments)), _name(name)
   {
   }
 
   FunctionValue::FunctionValue(css::ValueId name) noexcept
-      : ValueContainingList(ValueType::Function, ValueSeparator::CommaSeparator), _name(name)
+      : ValueContainingList(ValueType::Function, ValueSeparator::Comma), _name(name)
   {
   }
 
   FunctionValue::FunctionValue(css::ValueId name, Ref<Value> argument) noexcept
-      : ValueContainingList(ValueType::Function, ValueSeparator::CommaSeparator, krys::move(argument)),
-        _name(name)
+      : ValueContainingList(ValueType::Function, ValueSeparator::Comma, krys::move(argument)), _name(name)
   {
   }
 
   FunctionValue::FunctionValue(css::ValueId name, Ref<Value> argument1, Ref<Value> argument2) noexcept
-      : ValueContainingList(ValueType::Function, ValueSeparator::CommaSeparator, krys::move(argument1),
+      : ValueContainingList(ValueType::Function, ValueSeparator::Comma, krys::move(argument1),
                             krys::move(argument2)),
         _name(name)
   {
@@ -56,7 +54,7 @@ namespace krys::boo::css
 
   FunctionValue::FunctionValue(css::ValueId name, Ref<Value> argument1, Ref<Value> argument2,
                                Ref<Value> argument3) noexcept
-      : ValueContainingList(ValueType::Function, ValueSeparator::CommaSeparator, krys::move(argument1),
+      : ValueContainingList(ValueType::Function, ValueSeparator::Comma, krys::move(argument1),
                             krys::move(argument2), krys::move(argument3)),
         _name(name)
   {
@@ -64,7 +62,7 @@ namespace krys::boo::css
 
   FunctionValue::FunctionValue(css::ValueId name, Ref<Value> argument1, Ref<Value> argument2,
                                Ref<Value> argument3, Ref<Value> argument4) noexcept
-      : ValueContainingList(ValueType::Function, ValueSeparator::CommaSeparator, krys::move(argument1),
+      : ValueContainingList(ValueType::Function, ValueSeparator::Comma, krys::move(argument1),
                             krys::move(argument2), krys::move(argument3), krys::move(argument4)),
         _name(name)
   {

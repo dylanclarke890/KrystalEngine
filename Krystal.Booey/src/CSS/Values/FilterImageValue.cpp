@@ -54,7 +54,7 @@ namespace krys::boo::css
 
   bool FilterImageValue::EqualInputImages(const FilterImageValue &other) const noexcept
   {
-    return CompareValue(_imageValueOrNone, other._imageValueOrNone);
+    return *_imageValueOrNone == *other._imageValueOrNone;
   }
 
   CSSOMString FilterImageValue::CustomCSSText(const SerialisationContext &context) const noexcept

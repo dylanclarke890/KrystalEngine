@@ -61,18 +61,18 @@ namespace krys::boo::style
   // MARK: Conversion
 
   /// @brief Special conversion function for use by filters and font-face code.
-  KRYS_NODISCARD Url ToStyleWithScriptExecutionContext(const css::CSSUrl &, const Document &) noexcept;
+  KRYS_NODISCARD Url ToStyleWithScriptExecutionContext(const css::Url &, const Document &) noexcept;
 
   template <>
   struct ToCSS<Url>
   {
-    KRYS_NODISCARD css::CSSUrl operator()(const Url &, const RenderStyle &) noexcept;
+    KRYS_NODISCARD css::Url operator()(const Url &, const RenderStyle &) noexcept;
   };
 
   template <>
-  struct ToStyle<css::CSSUrl>
+  struct ToStyle<css::Url>
   {
-    KRYS_NODISCARD Url operator()(const css::CSSUrl &, const BuilderState &) noexcept;
+    KRYS_NODISCARD Url operator()(const css::Url &, const BuilderState &) noexcept;
   };
 
   // `Url` is special-cased to return a `css::UrlValue`.

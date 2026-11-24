@@ -1,25 +1,4 @@
-﻿/*
- * (C) 1999-2003 Lars Knoll (knoll@kde.org)
- * (C) 2002-2003 Dirk Mueller (mueller@kde.org)
- * Copyright (C) 2002-2025 Apple Inc. All rights reserved.
- *
- * This library is free software; you can redistribute it and/or
- * modify it under the terms of the GNU Library General Public
- * License as published by the Free Software Foundation; either
- * version 2 of the License, or (at your option) any later version.
- *
- * This library is distributed in the hope that it will be useful,
- * but WITHOUT ANY WARRANTY; without even the implied warranty of
- * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU
- * Library General Public License for more details.
- *
- * You should have received a copy of the GNU Library General Public License
- * along with this library; see the file COPYING.LIB.  If not, write to
- * the Free Software Foundation, Inc., 51 Franklin Street, Fifth Floor,
- * Boston, MA 02110-1301, USA.
- */
-
-#include "Krystal.Booey/CSS/Rules/ImportRule.hpp"
+﻿#include "Krystal.Booey/CSS/Rules/ImportRule.hpp"
 #include "Krystal.Booey/CSS/Parser/ParserContext.hpp"
 #include "Krystal.Booey/CSS/StyleSheets/StyleSheetContents.hpp"
 #include "Krystal.Booey/DOM/Nodes/Document.hpp"
@@ -29,17 +8,9 @@
 
 namespace krys::boo::css
 {
-  Ref<ImportRule> ImportRule::Create(const CSSOMString &href, mq::MediaQueryList &&mediaQueries,
-                                     Maybe<CascadeLayerName> &&cascadeLayerName,
-                                     ImportRule::SupportsCondition &&supportsCondition) noexcept
-  {
-    return AdoptRef(*new ImportRule(href, krys::move(mediaQueries), krys::move(cascadeLayerName),
-                                    krys::move(supportsCondition)));
-  }
-
-  ImportRule::ImportRule(CSSOMString href, mq::MediaQueryList &&mediaQueries,
-                         Maybe<CascadeLayerName> &&cascadeLayerName,
-                         ImportRule::SupportsCondition &&supportsCondition) noexcept
+  ImportRule::ImportRule(CSSOMString href, mq::MediaQueryList mediaQueries,
+                         Maybe<CascadeLayerName> cascadeLayerName,
+                         SupportsCondition supportsCondition) noexcept
       : Rule(RuleType::Import), _styleSheetClient(*this), _href(krys::move(href)),
         _mediaQueries(krys::move(mediaQueries)), _cascadeLayerName(krys::move(cascadeLayerName)),
         _supportsCondition(krys::move(supportsCondition))
@@ -58,40 +29,12 @@ namespace krys::boo::css
     }
   }
 
-  void ImportRule::SetCSSStyleSheet(const utf8_string &href, const net::Url &baseUrl, utf8_stringview charset,
-                                    const CachedCSSStyleSheet *cachedStyleSheet) noexcept
+  Ref<ImportRule> ImportRule::Create(CSSOMString href, mq::MediaQueryList mediaQueries,
+                                     Maybe<CascadeLayerName> cascadeLayerName,
+                                     SupportsCondition supportsCondition) noexcept
   {
-    if (_styleSheet)
-    {
-      _styleSheet->ClearOwnerRule();
-    }
-
-    ParserContext context =
-      _parentStyleSheet ? _parentStyleSheet->GetParserContext() : ParserContext(ParserMode::HTMLStandard);
-    context.Charset = charset;
-    if (!baseUrl.IsNull())
-    {
-      context.BaseUrl = baseUrl;
-    }
-
-    _styleSheet = StyleSheetContents::Create(this, CSSOMString(href), context);
-
-    bool parseSucceeded = _styleSheet->ParseAuthorStyleSheet(cachedStyleSheet);
-
-    _loading = false;
-
-    if (_parentStyleSheet)
-    {
-      if (parseSucceeded)
-      {
-        _parentStyleSheet->NotifyLoadedSheet(cachedStyleSheet);
-      }
-      else
-      {
-        _parentStyleSheet->SetLoadErrorOccured();
-      }
-      _parentStyleSheet->CheckLoaded();
-    }
+    return AdoptRef(*new ImportRule(krys::move(href), krys::move(mediaQueries), krys::move(cascadeLayerName),
+                                    krys::move(supportsCondition)));
   }
 
   Ref<ImportRule> ImportRule::Copy() noexcept
@@ -105,7 +48,6 @@ namespace krys::boo::css
     {
       return;
     }
-
     _loading = false;
     if (_parentStyleSheet)
     {
@@ -125,42 +67,31 @@ namespace krys::boo::css
       return;
     }
     auto *document = _parentStyleSheet->SingleOwnerDocument();
-    if (!document)
-    {
-      return;
-    }
-    // A document without a frame loads nothing.
-    if (!document->Frame())
+    // A sheet that isn't a document's, or a document without a frame, loads nothing.
+    if (!document || !document->Frame())
     {
       return;
     }
 
-    net::Url absUrl;
-    if (!_parentStyleSheet->BaseUrl().IsNull())
-    {
-      // use parent styleheet's URL as the base URL
-      absUrl = net::Url(_parentStyleSheet->BaseUrl(), _href);
-    }
-    else
-    {
-      absUrl = document->CompleteUrl(_href);
-    }
+    // The URL is relative to the importing sheet's, or to the document's if the sheet has none.
+    auto url = _parentStyleSheet->BaseUrl().IsNull() ? document->CompleteUrl(_href)
+                                                     : net::Url(_parentStyleSheet->BaseUrl(), _href);
 
-    // Check for a cycle in our import chain. If we encounter a stylesheet
-    // in our parent chain with the same URL, then just bail.
+    // A sheet that imports one of the sheets importing it would load forever, so it's skipped, as browsers
+    // do. The walk also finds the root sheet, the one the document itself owns.
     StyleSheetContents *rootSheet = _parentStyleSheet;
     for (auto *sheet = _parentStyleSheet; sheet; sheet = sheet->ParentStyleSheet())
     {
-      if (net::EqualIgnoringFragmentIdentifier(absUrl, sheet->BaseUrl())
-          || net::EqualIgnoringFragmentIdentifier(absUrl, document->CompleteUrl(sheet->OriginalUrl())))
+      if (net::EqualIgnoringFragmentIdentifier(url, sheet->BaseUrl())
+          || net::EqualIgnoringFragmentIdentifier(url, document->CompleteUrl(sheet->OriginalUrl())))
       {
         return;
       }
       rootSheet = sheet;
     }
 
-    auto options = CachedResourceLoader::DefaultCachedResourceOptions();
-    CachedResourceRequest request(net::ResourceRequest(krys::move(absUrl)), options);
+    CachedResourceRequest request(net::ResourceRequest(krys::move(url)),
+                                  CachedResourceLoader::DefaultCachedResourceOptions());
     request.SetCharset(utf8_string(_parentStyleSheet->Charset()));
     request.SetInitiatorType(CachedResourceRequestInitiatorTypes::CSS);
     if (_cachedSheet)
@@ -170,22 +101,58 @@ namespace krys::boo::css
     // FIXME: User style sheets load with their own options (requestUserCSSStyleSheet), once there are any.
     auto requested = document->GetCachedResourceLoader().RequestCSSStyleSheet(krys::move(request));
     _cachedSheet = requested ? *requested : CachedResourceHandle<CachedCSSStyleSheet>();
-    if (_cachedSheet)
+    // Requesting can run code that removes the rule from its sheet.
+    if (!_cachedSheet)
     {
-      // if the import rule is issued dynamically, the sheet may be
-      // removed from the pending sheet count, so let the doc know
-      // the sheet being imported is pending.
-      if (_parentStyleSheet && _parentStyleSheet->LoadCompleted() && rootSheet == _parentStyleSheet)
+      if (_parentStyleSheet)
       {
-        _parentStyleSheet->StartLoadingDynamicSheet();
+        _parentStyleSheet->SetLoadErrorOccured();
+        _parentStyleSheet->CheckLoaded();
       }
-      _loading = true;
-      _cachedSheet->AddClient(_styleSheetClient);
+      return;
     }
-    else if (_parentStyleSheet)
+
+    // A rule inserted into a document's sheet after it finished loading makes it load again, which the
+    // document has to wait for.
+    if (_parentStyleSheet && _parentStyleSheet->LoadCompleted() && rootSheet == _parentStyleSheet)
+    {
+      _parentStyleSheet->StartLoadingDynamicSheet();
+    }
+    _loading = true;
+    _cachedSheet->AddClient(_styleSheetClient);
+  }
+
+  void ImportRule::SetCSSStyleSheet(const utf8_string &href, const net::Url &baseUrl, utf8_stringview charset,
+                                    const CachedCSSStyleSheet *cachedStyleSheet) noexcept
+  {
+    if (_styleSheet)
+    {
+      _styleSheet->ClearOwnerRule();
+    }
+
+    auto context =
+      _parentStyleSheet ? _parentStyleSheet->GetParserContext() : ParserContext(ParserMode::HTMLStandard);
+    context.Charset = charset;
+    if (!baseUrl.IsNull())
+    {
+      context.BaseUrl = baseUrl;
+    }
+    _styleSheet = StyleSheetContents::Create(this, CSSOMString(href), context);
+    bool parsed = _styleSheet->ParseAuthorStyleSheet(cachedStyleSheet);
+    _loading = false;
+
+    if (!_parentStyleSheet)
+    {
+      return;
+    }
+    if (parsed)
+    {
+      _parentStyleSheet->NotifyLoadedSheet(cachedStyleSheet);
+    }
+    else
     {
       _parentStyleSheet->SetLoadErrorOccured();
-      _parentStyleSheet->CheckLoaded();
     }
+    _parentStyleSheet->CheckLoaded();
   }
 }

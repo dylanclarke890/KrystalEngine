@@ -10,7 +10,7 @@ namespace krys::boo::css::tests
     SECTION("One value for all four sides")
     {
       auto quad = QuadValue::Create(Px(1.0));
-      CHECK(quad->IsQuadValue());
+      CHECK(Is<QuadValue>(*quad));
       CHECK(CssText(*quad->Sides().Top) == "1px");
       CHECK(CssText(*quad->Sides().Right) == "1px");
       CHECK(CssText(*quad->Sides().Bottom) == "1px");

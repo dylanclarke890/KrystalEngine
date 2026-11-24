@@ -1,40 +1,10 @@
-﻿/*
- * Copyright (C) 1999 Lars Knoll (knoll@kde.org)
- *           (C) 2004-2005 Allan Sandfeld Jensen (kde@carewolf.com)
- * Copyright (C) 2006, 2007 Nicholas Shanks (webkit@nickshanks.com)
- * Copyright (C) 2005, 2006, 2007, 2008, 2009, 2010, 2011 Apple Inc. All rights reserved.
- * Copyright (C) 2007 Alexey Proskuryakov <ap@webkit.org>
- * Copyright (C) 2007, 2008 Eric Seidel <eric@webkit.org>
- * Copyright (C) 2008, 2009 Torch Mobile Inc. All rights reserved. (http://www.torchmobile.com/)
- * Copyright (c) 2011, Code Aurora Forum. All rights reserved.
- * Copyright (C) Research In Motion Limited 2011. All rights reserved.
- * Copyright (C) 2012 Google Inc. All rights reserved.
- *
- * This library is free software; you can redistribute it and/or
- * modify it under the terms of the GNU Library General Public
- * License as published by the Free Software Foundation; either
- * version 2 of the License, or (at your option) any later version.
- *
- * This library is distributed in the hope that it will be useful,
- * but WITHOUT ANY WARRANTY; without even the implied warranty of
- * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU
- * Library General Public License for more details.
- *
- * You should have received a copy of the GNU Library General Public License
- * along with this library; see the file COPYING.LIB.  If not, write to
- * the Free Software Foundation, Inc., 51 Franklin Street, Fifth Floor,
- * Boston, MA 02110-1301, USA.
- */
+﻿#pragma once
 
-#pragma once
-
-#include "Krystal.Booey/CSS/Types/CSSOMString.hpp"
-#include "Krystal.Core/Attributes.hpp"
+#include "Krystal.Core/Base.hpp"
 #include "Krystal.Core/Containers/Array.hpp"
 #include "Krystal.Core/Containers/BloomFilter.hpp"
 #include "Krystal.Core/Containers/List.hpp"
 #include "Krystal.Core/Containers/SmallList.hpp"
-#include "Krystal.Core/Numeric.hpp"
 
 namespace krys::boo
 {
@@ -46,13 +16,16 @@ namespace krys::boo::css
 {
   class Selector;
 
-  /// @brief A bloom filter of the identifiers (tag names, IDs, classes and attribute names) of the ancestors
-  /// of the element being styled, for fast rejection of descendant and child selectors.
+  /// @brief A counting Bloom filter of the identifiers (tag names, IDs, classes and attribute names) on the
+  /// ancestors of the element being styled. A selector whose descendant and child combinators require an
+  /// identifier the filter doesn't have can't match, so it's rejected without walking the tree.
   class SelectorFilter
   {
   public:
+    /// @brief A selector's hashes for `FastRejectSelector`: up to four, ending at the first zero.
     using Hashes = Array<uint32, 4>;
 
+    /// @brief A selector's identifier hashes by kind.
     struct CollectedSelectorHashes
     {
       using HashVector = SmallList<uint32, 8>;
@@ -75,26 +48,27 @@ namespace krys::boo::css
       SmallList<uint32, 4> IdentifierHashes;
     };
 
+    /// @brief The ancestors, root first, with the hashes each added to the filter.
     List<ParentStackFrame> _parentStack;
-
-    // With 100 unique strings in the filter, 2^12 slot table has false positive rate of ~0.2%.
+    // 2^12 slots hold 100 distinct identifiers with about 0.2% false positives.
     constexpr static uint32 BloomFilterKeyBits = 12;
     CountingBloomFilter<BloomFilterKeyBits> _ancestorIdentifierFilter;
 
   public:
-    void PushParent(const boo::Element *parent) noexcept;
+    /// @brief Adds @p parent, whose parent must be the last element pushed (or which must be the root if the
+    /// stack is empty).
+    void PushParent(const boo::Element &parent) noexcept;
 
+    /// @brief Adds @p parent, first adding all its ancestors if the stack is empty.
     void PushParentInitializingIfNeeded(const boo::Element &parent) noexcept;
 
+    /// @brief Removes the last element pushed.
     void PopParent() noexcept;
 
+    /// @brief Removes elements until @p parent is the last, or all of them if @p parent is null or absent.
     void PopParentsUntil(const boo::Element *parent) noexcept;
 
-    KRYS_NODISCARD bool ParentStackIsEmpty() const noexcept
-    {
-      return _parentStack.empty();
-    }
-
+    /// @brief Whether the stack ends at @p parentNode, or is empty if @p parentNode isn't an element.
     KRYS_NODISCARD bool ParentStackIsConsistent(const ContainerNode *parentNode) const noexcept;
 
     void ParentStackReserveInitialCapacity(size_t initialCapacity) noexcept
@@ -102,13 +76,20 @@ namespace krys::boo::css
       _parentStack.reserve(initialCapacity);
     }
 
+    /// @brief Whether a selector with @p hashes certainly can't match an element whose ancestors are the
+    /// stack.
     KRYS_NODISCARD bool FastRejectSelector(const Hashes &hashes) const noexcept;
 
+    /// @brief The hashes of the identifiers @p selector requires of the element's ancestors, the most
+    /// selective first.
     KRYS_NODISCARD static Hashes CollectHashes(const Selector &selector) noexcept;
 
+    /// @brief Appends the hashes of @p element's identifiers to @p identifierHashes.
     static void CollectElementIdentifierHashes(const boo::Element &element,
                                                SmallList<uint32, 4> &identifierHashes) noexcept;
 
+    /// @brief Adds the hash of the identifier simple selector @p selector requires, if any, to
+    /// @p collectedHashes.
     static void CollectSimpleSelectorHash(CollectedSelectorHashes &collectedHashes,
                                           const Selector &selector) noexcept;
 

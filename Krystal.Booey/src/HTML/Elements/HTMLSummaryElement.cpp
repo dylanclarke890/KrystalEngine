@@ -111,7 +111,7 @@ namespace krys::boo
     {
       if (auto *keyboardEvent = DynamicDowncast<KeyboardEvent>(event))
       {
-        if (keyboardEvent->Type() == event_names::KeyDown && keyboardEvent->KeyIdentifier() == u8"U+0020")
+        if (keyboardEvent->Type() == event_names::KeyDown && keyboardEvent->Key() == u8" ")
         {
           SetActive(true);
           // No SetDefaultHandled(): a keypress follows.
@@ -132,7 +132,7 @@ namespace krys::boo
             default: break;
           }
         }
-        if (keyboardEvent->Type() == event_names::KeyUp && keyboardEvent->KeyIdentifier() == u8"U+0020")
+        if (keyboardEvent->Type() == event_names::KeyUp && keyboardEvent->Key() == u8" ")
         {
           if (Active())
           {

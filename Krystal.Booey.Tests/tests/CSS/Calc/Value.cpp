@@ -7,7 +7,7 @@
 #include "Krystal.Booey/CSS/Values/Primitives/NumericCategory.hpp"
 #include "Krystal.Booey/CSS/Values/SerialisationContext.hpp"
 #include "Krystal.Booey/CSS/Values/ToLengthConversionData.hpp"
-#include "Krystal.Booey/CSS/Values/UnitType.hpp"
+#include "Krystal.Booey/CSS/Values/Units.hpp"
 #include "Krystal.Booey/Style/Calc/Value.hpp"
 #include "Krystal.Booey/Style/Values/Viewport/ZoomPrimitives.hpp"
 
@@ -33,7 +33,6 @@ namespace krys::boo::css::calc::tests
              CreateChild(Add(Num(1.0, UnitType::in), Num(4.0, UnitType::px)), Type::CreateLength()),
              Type::CreateLength());
     CHECK(length->DoubleValue(NoConversionDataRequiredTag {}) == 100.0);
-    CHECK(length->DoubleValueDeprecated() == 100.0);
     CHECK(length->DoubleValue(ToLengthConversionData {}) == 100.0);
 
     // Results are clamped to the value's range, and failures evaluate to 0.

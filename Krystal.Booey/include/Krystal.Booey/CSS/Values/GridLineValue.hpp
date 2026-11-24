@@ -57,29 +57,14 @@ namespace krys::boo::css
       return _spanValue.get();
     }
 
-    KRYS_NODISCARD RefPtr<PrimitiveValue> ProtectedSpanValue() const noexcept
-    {
-      return _spanValue;
-    }
-
     KRYS_NODISCARD PrimitiveValue *NumericValue() const noexcept
     {
       return _numericValue.get();
     }
 
-    KRYS_NODISCARD RefPtr<PrimitiveValue> ProtectedNumericValue() const noexcept
-    {
-      return _numericValue;
-    }
-
     KRYS_NODISCARD PrimitiveValue *GridLineName() const noexcept
     {
       return _gridLineName.get();
-    }
-
-    KRYS_NODISCARD RefPtr<PrimitiveValue> ProtectedGridLineName() const noexcept
-    {
-      return _gridLineName;
     }
   };
 }
@@ -87,6 +72,6 @@ namespace krys::boo::css
 KRYS_SPECIALIZE_TYPE_CAST_TRAITS_BEGIN(krys::boo::css::GridLineValue)
   KRYS_NODISCARD static bool IsType(const krys::boo::css::Value &value) noexcept
   {
-    return value.IsGridLineValue();
+    return value.Type() == krys::boo::css::ValueType::GridLine;
   }
 KRYS_SPECIALIZE_TYPE_CAST_TRAITS_END()

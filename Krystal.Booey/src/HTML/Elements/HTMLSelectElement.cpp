@@ -326,7 +326,7 @@ namespace krys::boo
   }
 
   // https://html.spec.whatwg.org/#focus-another-option
-  void HTMLSelectElement::FocusOptionForKey(DOMStringView keyIdentifier) noexcept
+  void HTMLSelectElement::FocusOptionForKey(DOMStringView key) noexcept
   {
     List<HTMLOptionElement *> options;
     for (auto &item : ListItems())
@@ -356,23 +356,23 @@ namespace krys::boo
     }
 
     int32 next = current;
-    if (keyIdentifier == u8"Down")
+    if (key == u8"ArrowDown")
     {
       next = current + 1;
     }
-    else if (keyIdentifier == u8"Up")
+    else if (key == u8"ArrowUp")
     {
       next = current < 0 ? lastIndex : current - 1;
     }
-    else if (keyIdentifier == u8"Home")
+    else if (key == u8"Home")
     {
       next = 0;
     }
-    else if (keyIdentifier == u8"End")
+    else if (key == u8"End")
     {
       next = lastIndex;
     }
-    else if (keyIdentifier == u8"PageDown")
+    else if (key == u8"PageDown")
     {
       next = current + pageStep;
     }
@@ -413,15 +413,14 @@ namespace krys::boo
     {
       return;
     }
-    auto keyIdentifier = keyboardEvent->KeyIdentifier();
-    bool isActivationKey = keyIdentifier == u8"Enter" || keyboardEvent->Key() == u8" ";
-    bool isOptionKey = keyIdentifier == u8"Down" || keyIdentifier == u8"Up" || keyIdentifier == u8"Home"
-                       || keyIdentifier == u8"End" || keyIdentifier == u8"PageDown"
-                       || keyIdentifier == u8"PageUp";
+    auto key = keyboardEvent->Key();
+    bool isActivationKey = key == u8"Enter" || keyboardEvent->Key() == u8" ";
+    bool isOptionKey = key == u8"ArrowDown" || key == u8"ArrowUp" || key == u8"Home" || key == u8"End"
+                       || key == u8"PageDown" || key == u8"PageUp";
 
     if (!IsPickerOpen())
     {
-      if (isActivationKey || keyIdentifier == u8"Down" || keyIdentifier == u8"Up")
+      if (isActivationKey || key == u8"ArrowDown" || key == u8"ArrowUp")
       {
         OpenPicker(true);
         event.SetDefaultHandled();
@@ -431,7 +430,7 @@ namespace krys::boo
 
     if (isOptionKey)
     {
-      FocusOptionForKey(keyIdentifier);
+      FocusOptionForKey(key);
       event.SetDefaultHandled();
     }
     else if (isActivationKey)
@@ -442,7 +441,7 @@ namespace krys::boo
       }
       event.SetDefaultHandled();
     }
-    else if (keyIdentifier == u8"U+0009")
+    else if (key == u8"Tab")
     {
       // The focus moves on, with the picker closed behind it.
       ClosePicker();
@@ -1829,7 +1828,7 @@ namespace krys::boo
 
     if (!NodeDocument().GetSettings().SpatialNavigationEnabled)
     {
-      if (event.KeyIdentifier() == u8"Down" || event.KeyIdentifier() == u8"Up")
+      if (event.Key() == u8"ArrowDown" || event.Key() == u8"ArrowUp")
       {
         Focus();
         NodeDocument().UpdateStyleIfNeeded();
@@ -1878,7 +1877,7 @@ namespace krys::boo
         }
       }
 
-      auto keyIdentifier = keyboardEvent->KeyIdentifier();
+      auto key = keyboardEvent->Key();
       bool handled = true;
       auto &listItems = ListItems();
       int32 listIndex = OptionToListIndex(SelectedIndex());
@@ -1887,33 +1886,33 @@ namespace krys::boo
       // hits a left or right arrow key.
       if (NodeDocument().GetSettings().CaretBrowsingEnabled)
       {
-        if (keyIdentifier == u8"Left" || keyIdentifier == u8"Right")
+        if (key == u8"ArrowLeft" || key == u8"ArrowRight")
         {
           return;
         }
       }
 
-      if (keyIdentifier == u8"Down" || keyIdentifier == u8"Right")
+      if (key == u8"ArrowDown" || key == u8"ArrowRight")
       {
         listIndex = NextValidIndex(listIndex, SkipDirection::Forwards, 1);
       }
-      else if (keyIdentifier == u8"Up" || keyIdentifier == u8"Left")
+      else if (key == u8"ArrowUp" || key == u8"ArrowLeft")
       {
         listIndex = NextValidIndex(listIndex, SkipDirection::Backwards, 1);
       }
-      else if (keyIdentifier == u8"PageDown")
+      else if (key == u8"PageDown")
       {
         listIndex = NextValidIndex(listIndex, SkipDirection::Forwards, 3);
       }
-      else if (keyIdentifier == u8"PageUp")
+      else if (key == u8"PageUp")
       {
         listIndex = NextValidIndex(listIndex, SkipDirection::Backwards, 3);
       }
-      else if (keyIdentifier == u8"Home")
+      else if (key == u8"Home")
       {
         listIndex = NextValidIndex(-1, SkipDirection::Forwards, 1);
       }
-      else if (keyIdentifier == u8"End")
+      else if (key == u8"End")
       {
         listIndex = NextValidIndex(static_cast<int32>(listItems.size()), SkipDirection::Backwards, 1);
       }
@@ -2221,25 +2220,25 @@ namespace krys::boo
       bool isHorizontalWritingMode = renderer ? renderer->GetWritingMode().IsHorizontal() : true;
       bool isBlockFlipped = renderer ? renderer->GetWritingMode().IsBlockFlipped() : false;
 
-      DOMStringView nextKeyIdentifier = isHorizontalWritingMode ? u8"Down" : u8"Right";
-      DOMStringView previousKeyIdentifier = isHorizontalWritingMode ? u8"Up" : u8"Left";
+      DOMStringView nextKey = isHorizontalWritingMode ? u8"ArrowDown" : u8"ArrowRight";
+      DOMStringView previousKey = isHorizontalWritingMode ? u8"ArrowUp" : u8"ArrowLeft";
       if (isBlockFlipped)
       {
-        std::swap(nextKeyIdentifier, previousKeyIdentifier);
+        std::swap(nextKey, previousKey);
       }
 
-      auto keyIdentifier = keyboardEvent->KeyIdentifier();
+      auto key = keyboardEvent->Key();
 
       bool handled = false;
       int32 endIndex = 0;
       if (_activeSelectionEndIndex < 0)
       {
         // Initialize the end index
-        if (keyIdentifier == nextKeyIdentifier || keyIdentifier == u8"PageDown")
+        if (key == nextKey || key == u8"PageDown")
         {
           int32 startIndex = LastSelectedListIndex();
           handled = true;
-          if (keyIdentifier == nextKeyIdentifier)
+          if (key == nextKey)
           {
             endIndex = NextSelectableListIndex(startIndex);
           }
@@ -2248,11 +2247,11 @@ namespace krys::boo
             endIndex = NextSelectableListIndexPageAway(startIndex, SkipDirection::Forwards);
           }
         }
-        else if (keyIdentifier == previousKeyIdentifier || keyIdentifier == u8"PageUp")
+        else if (key == previousKey || key == u8"PageUp")
         {
           int32 startIndex = OptionToListIndex(SelectedIndex());
           handled = true;
-          if (keyIdentifier == previousKeyIdentifier)
+          if (key == previousKey)
           {
             endIndex = PreviousSelectableListIndex(startIndex);
           }
@@ -2265,33 +2264,33 @@ namespace krys::boo
       else
       {
         // Set the end index based on the current end index.
-        if (keyIdentifier == nextKeyIdentifier)
+        if (key == nextKey)
         {
           endIndex = NextSelectableListIndex(_activeSelectionEndIndex);
           handled = true;
         }
-        else if (keyIdentifier == previousKeyIdentifier)
+        else if (key == previousKey)
         {
           endIndex = PreviousSelectableListIndex(_activeSelectionEndIndex);
           handled = true;
         }
-        else if (keyIdentifier == u8"PageDown")
+        else if (key == u8"PageDown")
         {
           endIndex = NextSelectableListIndexPageAway(_activeSelectionEndIndex, SkipDirection::Forwards);
           handled = true;
         }
-        else if (keyIdentifier == u8"PageUp")
+        else if (key == u8"PageUp")
         {
           endIndex = NextSelectableListIndexPageAway(_activeSelectionEndIndex, SkipDirection::Backwards);
           handled = true;
         }
       }
-      if (keyIdentifier == u8"Home")
+      if (key == u8"Home")
       {
         endIndex = FirstSelectableListIndex();
         handled = true;
       }
-      else if (keyIdentifier == u8"End")
+      else if (key == u8"End")
       {
         endIndex = LastSelectableListIndex();
         handled = true;
@@ -2300,9 +2299,8 @@ namespace krys::boo
       if (NodeDocument().GetSettings().SpatialNavigationEnabled)
       {
         // Check if the selection moves to the boundary.
-        if (keyIdentifier == u8"Left" || keyIdentifier == u8"Right"
-            || ((keyIdentifier == u8"Down" || keyIdentifier == u8"Up")
-                && endIndex == _activeSelectionEndIndex))
+        if (key == u8"ArrowLeft" || key == u8"ArrowRight"
+            || ((key == u8"ArrowDown" || key == u8"ArrowUp") && endIndex == _activeSelectionEndIndex))
         {
           return;
         }

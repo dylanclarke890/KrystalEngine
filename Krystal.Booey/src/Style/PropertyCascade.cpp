@@ -25,6 +25,7 @@
 
 #include "Krystal.Booey/Style/PropertyCascade.hpp"
 #include "Krystal.Booey/CSS/Properties/Property.hpp"
+#include "Krystal.Booey/CSS/Properties/PropertyQueries.hpp"
 #include "Krystal.Booey/CSS/Properties/StylePropertiesInlines.hpp"
 #include "Krystal.Booey/CSS/Values/ComputedStyleDependencies.hpp"
 #include "Krystal.Booey/CSS/Values/CustomPropertyValue.hpp"
@@ -134,7 +135,7 @@ namespace krys::boo::style
   void PropertyCascade::Set(css::PropertyId id, const css::Value &cssValue,
                             const MatchedProperties &matchedProperties, Origin origin) noexcept
   {
-    krys_debug_assert(!css::Property::IsInLogicalPropertyGroup(id));
+    krys_debug_assert(!css::IsInLogicalPropertyGroup(id));
     krys_debug_assert(id < css::FirstLogicalGroupProperty);
 
     krys_debug_assert(ToUnderlying(id) < _propertyIsPresent.size());
@@ -206,15 +207,15 @@ namespace krys::boo::style
     PropertyCascade::LastPropertyResolvingLogicalPropertyPair(css::PropertyId propertyId,
                                                               WritingMode writingMode) const noexcept
   {
-    krys_debug_assert(css::Property::IsInLogicalPropertyGroup(propertyId));
+    krys_debug_assert(css::IsInLogicalPropertyGroup(propertyId));
 
     auto pairId = [&]
     {
-      if (css::Property::IsDirectionAwareProperty(propertyId))
+      if (css::IsLogicalPropertyGroupLogicalProperty(propertyId))
       {
-        return css::Property::ResolveDirectionAwareProperty(propertyId, writingMode);
+        return css::ResolveDirectionAwareProperty(propertyId, writingMode);
       }
-      return css::Property::UnresolvePhysicalProperty(propertyId, writingMode);
+      return css::UnresolvePhysicalProperty(propertyId, writingMode);
     }();
     krys_debug_assert(pairId != css::PropertyId::Invalid);
 
@@ -333,13 +334,13 @@ namespace krys::boo::style
           return false;
         }
 
-        bool currentIsInherited = css::Property::IsInheritedProperty(current.Id());
+        bool currentIsInherited = css::IsInheritedProperty(current.Id());
         if (_includedProperties.Types.contains(PropertyType::Inherited) && currentIsInherited)
         {
           return true;
         }
         if (_includedProperties.Types.contains(PropertyType::ExplicitlyInherited)
-            && css::IsValueId(*current.Value(), css::ValueId::Inherit))
+            && current.Value()->ValueId() == css::ValueId::Inherit)
         {
           return true;
         }

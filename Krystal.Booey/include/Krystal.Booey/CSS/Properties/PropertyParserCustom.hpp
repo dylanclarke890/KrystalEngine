@@ -600,7 +600,7 @@ namespace krys::boo::css
 
         for (auto &value : valueList)
         {
-          if (IsValueId(value, ValueId::None))
+          if (value->ValueId() == ValueId::None)
           {
             return false;
           }
@@ -1197,7 +1197,7 @@ namespace krys::boo::css
       }
       else
       {
-        if (IsCustomIdentValue(*startValue))
+        if (startValue->IsCustomIdent())
         {
           endValue = startValue;
         }
@@ -1550,7 +1550,7 @@ namespace krys::boo::css
         return false;
       }
 
-      bool rowStartIsCustomIdent = IsCustomIdentValue(*rowStartValue);
+      bool rowStartIsCustomIdent = rowStartValue->IsCustomIdent();
       if (!columnStartValue)
       {
         if (rowStartIsCustomIdent)
@@ -1577,7 +1577,7 @@ namespace krys::boo::css
 
       if (!columnEndValue)
       {
-        if (IsCustomIdentValue(*columnStartValue))
+        if (columnStartValue->IsCustomIdent())
         {
           columnEndValue = columnStartValue;
         }
@@ -2517,7 +2517,7 @@ namespace krys::boo::css
           {
             auto IsRangeOffset = [](auto &value)
             {
-              return value.IsLength() || value.IsPercentage() || value.IsCalculatedPercentageWithLength();
+              return value.IsLength() || value.IsPercentage() || value.IsCalcPercentageWithLength();
             };
 
             if (auto *primitiveValue = DynamicDowncast<PrimitiveValue>(value);

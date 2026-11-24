@@ -57,6 +57,37 @@ namespace krys::boo::css::tests
       CHECK(AsText(ParseDeclarations(u8"margin: var(--x) 1px")) == "margin: var(--x) 1px;");
     }
 
+    SECTION("Every shorthand that can be written is")
+    {
+      CHECK(AsText(ParseDeclarations(
+              u8"column-rule-width: 2px; column-rule-style: dotted; column-rule-color: blue"))
+            == "column-rule: 2px dotted blue;");
+      CHECK(AsText(ParseDeclarations(u8"columns: 2 100px")) == "columns: 100px 2;");
+      CHECK(AsText(ParseDeclarations(u8"container: a / size")) == "container: a / size;");
+      CHECK(AsText(ParseDeclarations(u8"font-synthesis: weight style")) == "font-synthesis: weight style;");
+      CHECK(AsText(ParseDeclarations(u8"grid-area: 1 / 2 / 3 / 4")) == "grid-area: 1 / 2 / 3 / 4;");
+      CHECK(AsText(ParseDeclarations(u8"grid-row: span 2 / a")) == "grid-row: span 2 / a;");
+      CHECK(AsText(ParseDeclarations(u8"offset: 10px 20px")) == "offset: 10px 20px;");
+      CHECK(AsText(ParseDeclarations(u8"text-emphasis: filled circle red"))
+            == "text-emphasis: filled circle red;");
+      CHECK(AsText(ParseDeclarations(u8"font-variant: small-caps")) == "font-variant: small-caps;");
+      CHECK(AsText(ParseDeclarations(u8"font: 12px Arial")) == "font: 12px Arial;");
+      CHECK(AsText(ParseDeclarations(u8"font: bold 12px/1.5 Arial; color: red"))
+            == "font: bold 12px / 1.5 Arial; color: red;");
+      CHECK(AsText(ParseDeclarations(u8"font-variant: none")) == "font-variant: none;");
+      CHECK(AsText(ParseDeclarations(u8"mask: url(a.png) luminance")) == "mask: url(\"a.png\") luminance;");
+      // mask-position's longhands are internal, so they mustn't be written out.
+      CHECK(AsText(ParseDeclarations(u8"mask-position: left top, right bottom"))
+            == "mask-position: left top, right bottom;");
+    }
+
+    SECTION("A shorthand that can't express its longhands isn't used")
+    {
+      // font-variant: none sets only the ligatures to none.
+      CHECK(AsText(ParseDeclarations(u8"font-variant: none; font-variant-caps: small-caps"))
+              .starts_with("font-variant-ligatures: none; font-variant-caps: small-caps;"));
+    }
+
     SECTION("Legacy shorthands aren't used")
     {
       CHECK(AsText(ParseDeclarations(u8"break-after: page")) == "break-after: page;");
@@ -89,6 +120,13 @@ namespace krys::boo::css::tests
       CHECK(ValueOf(pending, PropertyId::MarginTop).empty());
     }
 
+    SECTION("A shorthand's implicit internal longhands")
+    {
+      // mask leaves mask-position's internal longhands at their initial value.
+      auto mask = ParseDeclarations(u8"mask: url(a.png) luminance");
+      CHECK(ValueOf(mask, PropertyId::MaskPosition) == "0% 0%");
+    }
+
     SECTION("System fonts")
     {
       auto font = ParseDeclarations(u8"font: caption");
@@ -117,12 +155,15 @@ namespace krys::boo::css::tests
 
     SECTION("Shorthand and implicit flags")
     {
-      CHECK(ToNarrow(properties->GetPropertyShorthand(PropertyId::MarginTop)) == "margin");
-      CHECK(properties->GetPropertyShorthand(PropertyId::Color).empty());
-      CHECK(properties->GetPropertyShorthand(PropertyId::Width).empty());
-      CHECK_FALSE(properties->IsPropertyImplicit(PropertyId::MarginTop));
-      CHECK(properties->IsPropertyImplicit(PropertyId::BackgroundImage));
-      CHECK_FALSE(properties->IsPropertyImplicit(PropertyId::BackgroundColor));
+      auto declaration = [&](PropertyId id)
+      {
+        return properties->PropertyAt(*properties->FindPropertyIndex(id));
+      };
+      CHECK(declaration(PropertyId::MarginTop).ShorthandId() == PropertyId::Margin);
+      CHECK(declaration(PropertyId::Color).ShorthandId() == PropertyId::Invalid);
+      CHECK(declaration(PropertyId::MarginTop).ToProperty().Implicit() == IsImplicit::No);
+      CHECK(declaration(PropertyId::BackgroundImage).ToProperty().Implicit() == IsImplicit::Yes);
+      CHECK(declaration(PropertyId::BackgroundColor).ToProperty().Implicit() == IsImplicit::No);
     }
 
     SECTION("Values")
@@ -147,13 +188,10 @@ namespace krys::boo::css::tests
       REQUIRE(index);
       auto reference = properties->PropertyAt(*index);
       CHECK(ToNarrow(reference.CssName()) == "color");
-      CHECK(ToNarrow(reference.CssText(DefaultSerialisationContext())) == "color: red;");
       CHECK(reference.ToProperty().Id() == PropertyId::Color);
 
       auto custom = properties->FindCustomPropertyIndex(u8"--foo");
       REQUIRE(custom);
-      CHECK(ToNarrow(properties->PropertyAt(*custom).CssText(DefaultSerialisationContext()))
-            == "--foo: bar !important;");
       CHECK(ToNarrow(properties->PropertyAt(*custom).CssName()) == "--foo");
     }
 
@@ -166,8 +204,7 @@ namespace krys::boo::css::tests
         ++count;
       }
 
-      CHECK(count == properties->PropertyCount());
-      CHECK(properties->size() == properties->PropertyCount());
+      CHECK(count == properties->size());
       CHECK_FALSE(properties->empty());
     }
   }
@@ -177,11 +214,16 @@ namespace krys::boo::css::tests
   {
     auto properties = ParseDeclarations(u8"margin-block: 1px; padding-inline: 2px; "
                                         u8"overscroll-behavior: contain; contain-intrinsic-size: 10px");
-    CHECK_FALSE(properties->IsPropertyImplicit(PropertyId::MarginBlockStart));
-    CHECK(properties->IsPropertyImplicit(PropertyId::MarginBlockEnd));
-    CHECK(properties->IsPropertyImplicit(PropertyId::PaddingInlineEnd));
-    CHECK(properties->IsPropertyImplicit(PropertyId::OverscrollBehaviorY));
-    CHECK(properties->IsPropertyImplicit(PropertyId::ContainIntrinsicHeight));
+    auto isImplicit = [&](PropertyId id)
+    {
+      return properties->PropertyAt(*properties->FindPropertyIndex(id)).ToProperty().Implicit()
+             == IsImplicit::Yes;
+    };
+    CHECK_FALSE(isImplicit(PropertyId::MarginBlockStart));
+    CHECK(isImplicit(PropertyId::MarginBlockEnd));
+    CHECK(isImplicit(PropertyId::PaddingInlineEnd));
+    CHECK(isImplicit(PropertyId::OverscrollBehaviorY));
+    CHECK(isImplicit(PropertyId::ContainIntrinsicHeight));
   }
 
   TEST_CASE_METHOD(ValueFixture, "StyleProperties::MayDependOnBaseURL", "[CSS][Properties][StyleProperties]")
@@ -190,7 +232,6 @@ namespace krys::boo::css::tests
     CHECK(ParseDeclarations(u8"color: red; background: blue url(a.png)")->MayDependOnBaseUrl());
     CHECK_FALSE(ParseDeclarations(u8"background-image: url(#a)")->MayDependOnBaseUrl());
     CHECK_FALSE(ParseDeclarations(u8"color: red; width: 1px")->MayDependOnBaseUrl());
-    CHECK_FALSE(ParseDeclarations(u8"color: red")->HasCSSOMWrapper());
   }
 
   TEST_CASE_METHOD(ValueFixture, "MutableStyleProperties::SetProperty", "[CSS][Properties][StyleProperties]")
@@ -279,7 +320,7 @@ namespace krys::boo::css::tests
     {
       auto immutable = properties->ImmutableCopy();
       CHECK_FALSE(immutable->IsMutable());
-      CHECK(immutable->PropertyCount() == properties->PropertyCount());
+      CHECK(immutable->size() == properties->size());
       CHECK(AsText(immutable) == AsText(properties));
       CHECK(immutable->PropertyIsImportant(PropertyId::Color));
       CHECK(ToNarrow(immutable->GetCustomPropertyValue(u8"--foo")) == "bar");

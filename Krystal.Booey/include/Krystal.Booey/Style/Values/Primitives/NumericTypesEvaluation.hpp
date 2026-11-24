@@ -136,7 +136,7 @@ namespace krys::boo::style
                                      Rest &&...rest) noexcept
     requires(Calculation::Range.ZoomOptions == css::RangeZoomOptions::Default)
     {
-      return Evaluate<Result>(calculation.ProtectedCalculation(), referenceLength, token,
+      return Evaluate<Result>(ShareRef(calculation.Calculation()), referenceLength, token,
                               std::forward<Rest>(rest)...);
     }
 
@@ -145,7 +145,7 @@ namespace krys::boo::style
                                      ZoomFactor usedZoom, Rest &&...rest) noexcept
     requires(Calculation::Range.ZoomOptions == css::RangeZoomOptions::Unzoomed)
     {
-      return Evaluate<Result>(calculation.ProtectedCalculation(), referenceLength, usedZoom,
+      return Evaluate<Result>(ShareRef(calculation.Calculation()), referenceLength, usedZoom,
                               std::forward<Rest>(rest)...);
     }
   };

@@ -12,7 +12,7 @@ namespace krys::boo::css::tests
   TEST_CASE_METHOD(ValueFixture, "FontStyleWithAngleValue::Create", "[CSS][Values][FontStyleWithAngleValue]")
   {
     auto value = FontStyleWithAngleValue::Create(ObliqueAngle {14_css_deg});
-    CHECK(value->IsFontStyleWithAngleValue());
+    CHECK(Is<FontStyleWithAngleValue>(*value));
     CHECK(value->GetObliqueAngle() == ObliqueAngle {14_css_deg});
   }
 

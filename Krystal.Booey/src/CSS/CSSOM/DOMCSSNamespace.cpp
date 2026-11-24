@@ -64,6 +64,7 @@
 #include "Krystal.Booey/CSS/Parser/Tokenizer.hpp"
 #include "Krystal.Booey/CSS/Properties/MutableStyleProperties.hpp"
 #include "Krystal.Booey/CSS/Properties/Property.hpp"
+#include "Krystal.Booey/CSS/Properties/PropertyQueries.hpp"
 #include "Krystal.Booey/CSS/Properties/RegisteredCustomProperty.hpp"
 #include "Krystal.Booey/DOM/Nodes/Document.hpp"
 #include "Krystal.Booey/Style/CustomPropertyRegistry.hpp"
@@ -99,7 +100,7 @@ namespace krys::boo
     }
 
     if (propertyId == css::PropertyId::Invalid || !IsExposed(propertyId, context.PropertySettings)
-        || css::Property::IsDescriptorOnly(propertyId) || value.empty())
+        || css::IsDescriptorOnly(propertyId) || value.empty())
     {
       return false;
     }

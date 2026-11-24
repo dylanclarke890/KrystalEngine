@@ -30,7 +30,7 @@
 
 #include "Krystal.Booey/HTML/Shadow/ProgressShadowElement.hpp"
 #include "Krystal.Booey/CSS/Selectors/UserAgentParts.hpp"
-#include "Krystal.Booey/CSS/Values/UnitType.hpp"
+#include "Krystal.Booey/CSS/Values/Units.hpp"
 #include "Krystal.Booey/DOM/Algorithms/TreeQueries.hpp"
 #include "Krystal.Booey/HTML/Elements/HTMLProgressElement.hpp"
 #include "Krystal.Booey/Rendering/FormControls/RenderProgress.hpp"

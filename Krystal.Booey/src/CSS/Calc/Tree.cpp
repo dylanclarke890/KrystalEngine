@@ -133,19 +133,8 @@ namespace krys::boo::css::calc
         return CreateChild(NonCanonicalDimension {.Value = value, .Unit = unit});
       }
       // Non-numeric types are not supported.
-      case UnitType::Attr:
-      case UnitType::Calc:
-      case UnitType::CalcPercentageWithAngle:
-      case UnitType::CalcPercentageWithLength:
-      case UnitType::Dimension:
-      case UnitType::FontFamily:
-      case UnitType::Ident:
-      case UnitType::PropertyId:
       case UnitType::QuirkyEm:
-      case UnitType::String:
       case UnitType::Unknown:
-      case UnitType::ValueId:
-      case UnitType::CustomIdent:
       {
         break;
       }

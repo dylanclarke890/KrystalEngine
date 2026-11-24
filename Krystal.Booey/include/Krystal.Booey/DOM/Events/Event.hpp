@@ -1,27 +1,4 @@
-﻿/*
- * Copyright (C) 2001 Peter Kelly (pmk@post.com)
- * Copyright (C) 2001 Tobias Anton (anton@stud.fbi.fh-darmstadt.de)
- * Copyright (C) 2006 Samuel Weinig (sam.weinig@gmail.com)
- * Copyright (C) 2003-2017 Apple Inc. All rights reserved.
- *
- * This library is free software; you can redistribute it and/or
- * modify it under the terms of the GNU Library General Public
- * License as published by the Free Software Foundation; either
- * version 2 of the License, or (at your option) any later version.
- *
- * This library is distributed in the hope that it will be useful,
- * but WITHOUT ANY WARRANTY; without even the implied warranty of
- * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU
- * Library General Public License for more details.
- *
- * You should have received a copy of the GNU Library General Public License
- * along with this library; see the file COPYING.LIB.  If not, write to
- * the Free Software Foundation, Inc., 51 Franklin Street, Fifth Floor,
- * Boston, MA 02110-1301, USA.
- *
- */
-
-#pragma once
+﻿#pragma once
 
 #include "Krystal.Booey/DOM/Events/EventPathItem.hpp"
 #include "Krystal.Booey/DOM/Events/EventTarget.hpp"
@@ -85,16 +62,23 @@ namespace krys::boo
     Event() noexcept = default;
 
   protected:
+    /// @see https://dom.spec.whatwg.org/#dom-event-type
     DOMStringAtom _type;
     /// @see https://dom.spec.whatwg.org/#event-target
     RefPtr<EventTarget> _target {nullptr};
+    /// @see https://dom.spec.whatwg.org/#dom-event-currenttarget
     RefPtr<EventTarget> _currentTarget {nullptr};
+    /// @brief When the event was created, in the host's monotonic time; `TimeStampForBindings` makes it
+    /// relative to a window's time origin.
     MonotonicTime::duration _createTime {};
     /// @see https://dom.spec.whatwg.org/#event-path
     List<dom::EventPathItem> _path;
     dom::EventPhaseType _eventPhase : EnumBitWidth<dom::EventPhaseType> {dom::EventPhaseType::NONE};
+    /// @see https://dom.spec.whatwg.org/#dom-event-istrusted
     bool _isTrusted : 1 {false};
+    /// @see https://dom.spec.whatwg.org/#dom-event-bubbles
     bool _bubbles : 1 {false};
+    /// @see https://dom.spec.whatwg.org/#dom-event-cancelable
     bool _cancellable : 1 {false};
     /// @see https://dom.spec.whatwg.org/#stop-propagation-flag
     bool _stopPropagation : 1 {false};
@@ -110,8 +94,11 @@ namespace krys::boo
     bool _initialized : 1 {false};
     /// @see https://dom.spec.whatwg.org/#dispatch-flag
     bool _dispatched : 1 {false};
+    /// @brief Set once a default event handler has acted on the event.
     bool _defaultHandled : 1 {false};
+    /// @brief Set when no default event handler should act on the event at all.
     bool _isDefaultEventHandlerIgnored : 1 {false};
+    /// @brief See `UnderlyingEvent`.
     RefPtr<Event> _underlyingEvent;
     /// @brief The relatedTarget an event without its own (a mouse or focus event's) was fired with.
     /// @see https://dom.spec.whatwg.org/#event-relatedtarget
@@ -283,17 +270,15 @@ namespace krys::boo
       return _defaultHandled;
     }
 
+    /// @brief Marks the event handled, so the default event handlers of the nodes further along its path
+    /// leave it alone.
     void SetDefaultHandled() noexcept
     {
       _defaultHandled = true;
     }
 
-    /// @brief Whether no default event handler runs for the event (a key an input method handled).
-    KRYS_NODISCARD bool IsDefaultEventHandlerIgnored() const noexcept
-    {
-      return _isDefaultEventHandlerIgnored;
-    }
-
+    /// @brief Keeps every default event handler from running for the event, as for a key an input method
+    /// handled.
     void SetIsDefaultEventHandlerIgnored() noexcept
     {
       _isDefaultEventHandlerIgnored = true;
@@ -305,6 +290,8 @@ namespace krys::boo
       return _underlyingEvent.get();
     }
 
+    /// @brief Sets the event this one was made for; ignored if this event is already in @p underlyingEvent's
+    /// chain, which would make the chain a loop.
     void SetUnderlyingEvent(Event *underlyingEvent) noexcept;
 
 #pragma region Event - https://dom.spec.whatwg.org/#event

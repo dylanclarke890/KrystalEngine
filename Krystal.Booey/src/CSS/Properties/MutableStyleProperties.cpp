@@ -29,6 +29,7 @@
 #include "Krystal.Booey/CSS/Parser/ParserContext.hpp"
 #include "Krystal.Booey/CSS/Parser/ParserMode.hpp"
 #include "Krystal.Booey/CSS/Properties/ImmutableStyleProperties.hpp"
+#include "Krystal.Booey/CSS/Properties/PropertyQueries.hpp"
 #include "Krystal.Booey/CSS/Properties/PropertyShorthand.hpp"
 #include "Krystal.Booey/CSS/Properties/StylePropertiesInlines.hpp"
 #include "Krystal.Booey/CSS/Values/CustomPropertyValue.hpp"
@@ -258,13 +259,13 @@ namespace krys::boo::css
     // because afterwards there might be another property of the same group but different mapping logic.
     // In that case the latter might override the former, so setProperty would have no effect.
     auto id = property.Id();
-    if (Property::IsInLogicalPropertyGroup(id))
+    if (IsInLogicalPropertyGroup(id))
     {
       krys_debug_assert(toReplace >= _propertyVector.data());
       krys_debug_assert(toReplace < _propertyVector.data() + _propertyVector.size());
       for (auto *other = toReplace + 1; other != _propertyVector.data() + _propertyVector.size(); ++other)
       {
-        if (Property::AreInSameLogicalPropertyGroupWithDifferentMappingLogic(id, other->Id()))
+        if (AreInSameLogicalPropertyGroupWithDifferentMappingLogic(id, other->Id()))
         {
           return false;
         }
@@ -399,7 +400,7 @@ namespace krys::boo::css
 
   Maybe<uint32> MutableStyleProperties::FindPropertyIndex(PropertyId property) const noexcept
   {
-    for (auto n = PropertyCount(); n--;)
+    for (auto n = size(); n--;)
     {
       if (_propertyVector[n].Id() == property)
       {
@@ -412,7 +413,7 @@ namespace krys::boo::css
 
   Maybe<uint32> MutableStyleProperties::FindCustomPropertyIndex(CSSOMStringView propertyName) const noexcept
   {
-    for (auto n = PropertyCount(); n--;)
+    for (auto n = size(); n--;)
     {
       auto &property = _propertyVector[n];
       if (property.Id() == PropertyId::Custom)

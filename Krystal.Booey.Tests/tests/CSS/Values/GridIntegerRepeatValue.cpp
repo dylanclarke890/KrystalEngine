@@ -9,12 +9,12 @@ namespace krys::boo::css::tests
   TEST_CASE_METHOD(ValueFixture, "GridIntegerRepeatValue::Create", "[CSS][Values][GridIntegerRepeatValue]")
   {
     auto value = GridIntegerRepeatValue::Create(PrimitiveValue::CreateInteger(3.0), {Px(100.0), Px(200.0)});
-    CHECK(value->IsGridIntegerRepeatValue());
+    CHECK(Is<GridIntegerRepeatValue>(*value));
     CHECK(value->ContainsValueList());
     CHECK(CssText(value->Repetitions()) == "3");
-    REQUIRE(value->Length() == 2u);
-    CHECK(CssText(*value->Item(0u)) == "100px");
-    CHECK(CssText(*value->Item(1u)) == "200px");
+    REQUIRE(value->size() == 2u);
+    CHECK(CssText((*value)[0u]) == "100px");
+    CHECK(CssText((*value)[1u]) == "200px");
   }
 
   TEST_CASE_METHOD(ValueFixture, "GridIntegerRepeatValue serialisation",
@@ -51,8 +51,8 @@ namespace krys::boo::css::tests
       GridIntegerRepeatValue::Create(PrimitiveValue::CreateInteger(2.0), {LineNames({u8"a"}), Px(100.0)});
     auto children = Children(*value);
     REQUIRE(children.size() == 3uz);
-    CHECK(children[0uz] == value->Item(0u));
-    CHECK(children[1uz] == value->Item(1u));
+    CHECK(children[0uz] == &(*value)[0u]);
+    CHECK(children[1uz] == &(*value)[1u]);
     CHECK(children[2uz] == &value->Repetitions());
   }
 }

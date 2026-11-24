@@ -1,31 +1,4 @@
-﻿/*
- * Copyright (C) 1999 Lars Knoll (knoll@kde.org)
- *           (C) 1999 Antti Koivisto (koivisto@kde.org)
- *           (C) 2001 Dirk Mueller (mueller@kde.org)
- *           (C) 2006 Alexey Proskuryakov (ap@webkit.org)
- * Copyright (C) 2004-2025 Apple Inc. All rights reserved.
- * Copyright (C) 2008, 2009 Torch Mobile Inc. All rights reserved. (http://www.torchmobile.com/)
- * Copyright (C) 2010 Nokia Corporation and/or its subsidiary(-ies)
- * Copyright (C) 2011 Google Inc. All rights reserved.
- *
- * This library is free software; you can redistribute it and/or
- * modify it under the terms of the GNU Library General Public
- * License as published by the Free Software Foundation; either
- * version 2 of the License, or (at your option) any later version.
- *
- * This library is distributed in the hope that it will be useful,
- * but WITHOUT ANY WARRANTY; without even the implied warranty of
- * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU
- * Library General Public License for more details.
- *
- * You should have received a copy of the GNU Library General Public License
- * along with this library; see the file COPYING.LIB.  If not, write to
- * the Free Software Foundation, Inc., 51 Franklin Street, Fifth Floor,
- * Boston, MA 02110-1301, USA.
- *
- */
-
-#pragma once
+﻿#pragma once
 
 #include "Krystal.Booey/CSS/Types/CSSOMString.hpp"
 #include "Krystal.Booey/DOM/Collections/LiveCollection.hpp"
@@ -136,7 +109,6 @@ namespace krys::boo::dom
   class SelectorQuery;
   class TreeWalker;
   class UserActionElementSet;
-  class VisibilityChangeClient;
 
   enum class DidUpdateAnyContentRelevancy : bool;
   enum class FireEvents : bool;
@@ -403,8 +375,7 @@ namespace krys::boo
     // root the document is.
     List<WeakPtr<IntersectionObserver>> _intersectionObservers;
     UniquePtr<IntersectionObserverData> _intersectionObserverData;
-    // Collection of canvas contexts that need periodic work in "PrepareCanvasesForDisplayOrFlush" phase of
-    // the rendering update.
+    // The canvas contexts with work to do in the rendering update's canvas preparation step.
     List<WeakPtr<html::CanvasRenderingContext>> _canvasContextsToPrepare;
     UniquePtr<SVGDocumentExtensions> _svgExtensions;
     // The intersection observer that loads the lazily loaded images, made on first use.
@@ -441,7 +412,6 @@ namespace krys::boo
     bool _deferResizeEventForVisibilityChange {false};
     // Set as the document is unloaded: it's hidden from then on, whatever its page's visibility.
     bool _visibilityHiddenDueToDismissal {false};
-    List<WeakPtr<dom::VisibilityChangeClient>> _visibilityStateCallbackClients;
     /// @brief Whether the document's parser is running (a document a frame loads).
     bool _parsing {false};
     /// @see https://html.spec.whatwg.org/#page-showing
@@ -533,6 +503,7 @@ namespace krys::boo
 
     ~Document() noexcept override;
 
+    /// @brief A node started referring to the document, which keeps it alive.
     void IncrementReferencingNodeCount() noexcept
     {
       ++_referencingNodeCount;
@@ -692,17 +663,8 @@ namespace krys::boo
       _allowDeclarativeShadowRoots = allow;
     }
 
-    // FIXME: Check - do we need to implement these?
     // resource metadata management - https://html.spec.whatwg.org/#resource-metadata-management
-
-    /// @see https://html.spec.whatwg.org/#dom-document-domain
-    // attribute USVString domain;
-
-    /// @see https://html.spec.whatwg.org/#dom-document-referrer
-    // readonly attribute USVString referrer;
-
-    /// @see https://html.spec.whatwg.org/#dom-document-cookie
-    // attribute USVString cookie;
+    // (No domain, referrer or cookie: origins and HTTP semantics aren't planned; see OVERVIEW.md.)
 
     /// @brief When the document's source was last modified, in the user's local time zone, as
     /// `MM/DD/YYYY hh:mm:ss`.
@@ -898,16 +860,9 @@ namespace krys::boo
     /// @see https://html.spec.whatwg.org/#update-the-visibility-state
     void SetVisibilityHiddenDueToDismissal() noexcept;
 
-    /// @brief Fires `visibilitychange` in a task and tells the registered clients, as the page is shown or
-    /// hidden.
+    /// @brief Fires `visibilitychange` in a task, as the page is shown or hidden.
     /// @see https://html.spec.whatwg.org/#update-the-visibility-state
     void VisibilityStateChanged() noexcept;
-
-    /// @brief Tells @p client whenever the document's visibility state changes, until it's unregistered or
-    /// destroyed.
-    void RegisterForVisibilityStateChangedCallbacks(dom::VisibilityChangeClient &client) noexcept;
-
-    void UnregisterForVisibilityStateChangedCallbacks(dom::VisibilityChangeClient &client) noexcept;
 
     // special event handler IDL attributes that only apply to Document objects
     KRYS_DECLARE_EVENT_HANDLER(ReadyStateChange, u8"readystatechange")
@@ -1001,6 +956,8 @@ namespace krys::boo
     /// interface's, unless @p locale is given and `Settings::LangAttributeAwareFormControlUIEnabled` is on.
     KRYS_NODISCARD i18n::Locale &GetCachedLocale(utf8_stringview locale) const noexcept;
 
+    /// @brief Drops the cached CSS parser context, as something it was made from (the mode, the view)
+    /// changed.
     void InvalidateCachedCSSParserContext() noexcept;
 
     /// @brief The connected shadow roots among the document's shadow-including descendants.
@@ -1009,6 +966,8 @@ namespace krys::boo
       return _inDocumentShadowRoots;
     }
 
+    /// @brief Adds a shadow root to `InDocumentShadowRoots()` as it's connected, or removes it as it's
+    /// disconnected.
     void DidInsertInDocumentShadowRoot(ShadowRoot &shadowRoot) noexcept;
 
     void DidRemoveInDocumentShadowRoot(ShadowRoot &shadowRoot) noexcept;
@@ -1017,6 +976,7 @@ namespace krys::boo
 
 #pragma region User Action State
 
+    /// @brief The elements of the document with user action state: hovered, active or focused.
     KRYS_NODISCARD dom::UserActionElementSet &UserActionElements() const noexcept
     {
       return *_userActionElements;
@@ -1028,6 +988,7 @@ namespace krys::boo
       return *_selection;
     }
 
+    /// @brief The document's editor, which runs the editing commands.
     KRYS_NODISCARD boo::Editor &GetEditor() const noexcept
     {
       return *_editor;
@@ -1066,11 +1027,14 @@ namespace krys::boo
                                                                   const PointD &documentPoint,
                                                                   const PlatformMouseEvent &event) noexcept;
 
+    /// @brief Moves the hovered element to its nearest rendered ancestor as its renderer goes, and has the
+    /// hover state updated soon after.
     void HoveredElementDidDetach(Element &element) noexcept;
 
     /// @brief Moves the hovered element and the active chain out of @p node's subtree before it's removed.
     void NodeWillBeRemoved(Node &node) noexcept;
 
+    /// @brief Moves the active element to its nearest rendered ancestor as its renderer goes.
     void ElementInActiveChainDidDetach(Element &element) noexcept;
 
     /// @brief Whether the document's window has system focus: `:focus` and its relatives only match then.
@@ -1080,6 +1044,7 @@ namespace krys::boo
       return _isFocusedAndActive;
     }
 
+    /// @brief Sets whether the window has system focus, restyling what the focus pseudo-classes match.
     void SetFocusedAndActive(bool flag) noexcept;
 
 #pragma endregion
@@ -1103,6 +1068,8 @@ namespace krys::boo
     /// @see https://html.spec.whatwg.org/#update-the-rendering
     void UpdateResizeObservations(boo::Frame &page) noexcept;
 
+    /// @brief Tracks a resize observer that observes something in the document, or stops tracking it; and
+    /// whether any are tracked.
     void AddResizeObserver(ResizeObserver &observer) noexcept;
 
     void RemoveResizeObserver(ResizeObserver &observer) noexcept;
@@ -1113,8 +1080,11 @@ namespace krys::boo
     /// @return The depth of the shallowest one, or `ResizeObserver::MaxElementDepth()` if there's none.
     KRYS_NODISCARD size_t GatherResizeObservations(size_t deeperThan) noexcept;
 
+    /// @brief Calls the resize observers back with the observations gathered.
     void DeliverResizeObservations() noexcept;
 
+    /// @brief Whether observations deeper than the last delivered were skipped, so another rendering update
+    /// is needed for them.
     KRYS_NODISCARD bool HasSkippedResizeObservations() const noexcept;
 
     void SetHasSkippedResizeObservations(bool skipped) noexcept;
@@ -1125,12 +1095,15 @@ namespace krys::boo
     /// @brief Keeps @p element's last remembered size (`contain-intrinsic-size: auto`) up to date.
     void ObserveForContainIntrinsicSize(Element &element) noexcept;
 
+    /// @brief Stops keeping it up to date.
     void UnobserveForContainIntrinsicSize(Element &element) noexcept;
 
     /// @brief Has @p element's size reported again, so its last remembered size is updated (or cleared, if it
     /// was disconnected).
     void ResetObservationSizeForContainIntrinsicSize(Element &element) noexcept;
 
+    /// @brief Tracks an intersection observer that observes something in the document, or stops tracking it;
+    /// and how many are tracked.
     void AddIntersectionObserver(IntersectionObserver &observer) noexcept;
 
     void RemoveIntersectionObserver(IntersectionObserver &observer) noexcept;
@@ -1145,6 +1118,7 @@ namespace krys::boo
     /// @see https://html.spec.whatwg.org/#update-the-rendering
     void UpdateIntersectionObservations() noexcept;
 
+    /// @brief The same, for @p intersectionObservers.
     void UpdateIntersectionObservations(
       const List<WeakPtr<IntersectionObserver>> &intersectionObservers) noexcept;
 
@@ -1156,6 +1130,7 @@ namespace krys::boo
     /// schedules the update.
     void AddCanvasNeedingPreparationForDisplayOrFlush(html::CanvasRenderingContext &context) noexcept;
 
+    /// @brief Removes @p context from them.
     void RemoveCanvasNeedingPreparationForDisplayOrFlush(html::CanvasRenderingContext &context) noexcept;
 
     /// @brief Schedules the first observations of a newly observed target: in the next rendering update once
@@ -1165,6 +1140,7 @@ namespace krys::boo
     /// @brief The intersection observers whose root the document is.
     IntersectionObserverData &EnsureIntersectionObserverData() noexcept;
 
+    /// @brief The same, if the document is any observer's root.
     KRYS_NODISCARD IntersectionObserverData *IntersectionObserverDataIfExists() const noexcept
     {
       return _intersectionObserverData.get();
@@ -1176,6 +1152,7 @@ namespace krys::boo
       return _svgExtensions.get();
     }
 
+    /// @brief The same, made if there's none.
     KRYS_NODISCARD SVGDocumentExtensions &SVGExtensions() noexcept;
 
     /// @brief The observer that loads the document's lazily loaded images, made on first use.
@@ -1205,6 +1182,7 @@ namespace krys::boo
     /// it can be scrolled to.
     void UpdateContentRelevancyForScrollIfNeeded(const Element &scrollAnchor) noexcept;
 
+    /// @brief Whether any element has `content-visibility: auto`, so its relevancy is checked.
     KRYS_NODISCARD bool IsObservingContentVisibilityTargets() const noexcept;
 
     /// @brief The view's size or zoom changed: the next resize steps fire `resize` at the window.
@@ -1241,6 +1219,8 @@ namespace krys::boo
     /// @see https://html.spec.whatwg.org/#sequential-focus-navigation-starting-point
     void SetSequentialFocusNavigationStartingPoint(Node *node) noexcept;
 
+    /// @brief The sequential focus navigation starting point, if it's set.
+    /// @see https://html.spec.whatwg.org/#sequential-focus-navigation-starting-point
     KRYS_NODISCARD Node *SequentialFocusNavigationStartingPoint() const noexcept
     {
       return _sequentialFocusNavigationStartingPoint.get();
@@ -1307,6 +1287,7 @@ namespace krys::boo
       return _openDialogs;
     }
 
+    /// @brief Adds a dialog to the open dialogs as it opens, or removes it as it closes.
     void AddOpenDialog(HTMLDialogElement &dialog) noexcept;
 
     void RemoveOpenDialog(HTMLDialogElement &dialog) noexcept;
@@ -1351,6 +1332,7 @@ namespace krys::boo
     /// @see https://html.spec.whatwg.org/#hint-stack-parent
     KRYS_NODISCARD HTMLElement *HintStackParent() const noexcept;
 
+    /// @brief Sets it.
     void SetHintStackParent(HTMLElement *element) noexcept;
 
     /// @see https://html.spec.whatwg.org/#hiding-popover-nesting-count
@@ -1359,6 +1341,7 @@ namespace krys::boo
       return _hidingPopoverNestingCount;
     }
 
+    /// @brief Counts the popovers being hidden.
     void IncrementHidingPopoverNestingCount() noexcept
     {
       ++_hidingPopoverNestingCount;
@@ -1376,6 +1359,7 @@ namespace krys::boo
       return _isShowingPopover;
     }
 
+    /// @brief Sets it.
     void SetIsShowingPopover(bool value) noexcept
     {
       _isShowingPopover = value;
@@ -1384,12 +1368,7 @@ namespace krys::boo
     /// @brief Whether the style sheets that block rendering have loaded (or are being ignored).
     KRYS_NODISCARD bool HaveStylesheetsLoaded() const noexcept;
 
-    /// @brief Whether the fragment is scrolled to once the pending style sheets have loaded.
-    KRYS_NODISCARD bool GotoAnchorNeededAfterStylesheetsLoad() const noexcept
-    {
-      return _gotoAnchorNeededAfterStylesheetsLoad;
-    }
-
+    /// @brief Sets whether the fragment is scrolled to once the pending style sheets have loaded.
     void SetGotoAnchorNeededAfterStylesheetsLoad(bool value) noexcept
     {
       _gotoAnchorNeededAfterStylesheetsLoad = value;
@@ -1407,12 +1386,14 @@ namespace krys::boo
     /// @see https://drafts.csswg.org/css-highlight-api-1/#dom-css-highlights
     KRYS_NODISCARD dom::HighlightRegistry &GetHighlightRegistry() noexcept;
 
+    /// @brief The same, if it's been made.
     KRYS_NODISCARD dom::HighlightRegistry *HighlightRegistryIfExists() const noexcept;
 
     /// @brief The highlights of the target text, which `::target-text` styles: the host marks it, as there
     /// are no text directives.
     KRYS_NODISCARD dom::HighlightRegistry &FragmentHighlightRegistry() noexcept;
 
+    /// @brief The same, if it's been made.
     KRYS_NODISCARD dom::HighlightRegistry *FragmentHighlightRegistryIfExists() const noexcept;
 
     /// @brief Whether any highlight is registered, so text may need painting with highlights.
@@ -1456,26 +1437,32 @@ namespace krys::boo
     /// @return Whether style was resolved.
     bool UpdateStyleIfNeeded() noexcept;
 
-    bool UpdateStyleIfNeededIgnoringPendingStylesheets() noexcept;
-
     /// @brief Whether an element's style, or the style sheets, need updating.
     KRYS_NODISCARD bool NeedsStyleRecalc() const noexcept;
 
+    /// @brief Whether style needs updating, and isn't being updated now.
     KRYS_NODISCARD bool HasPendingStyleRecalc() const noexcept;
 
+    /// @brief Whether a full style rebuild is scheduled.
     KRYS_NODISCARD bool HasPendingFullStyleRebuild() const noexcept;
 
+    /// @brief Schedules a style update that resolves every element's style again.
     void ScheduleFullStyleRebuild() noexcept;
 
+    /// @brief Schedules a style update (on a timer with no delay), and a rendering update to paint it.
     void ScheduleStyleRecalc() noexcept;
 
+    /// @brief Cancels the scheduled style update, once nothing needs restyling.
     void UnscheduleStyleRecalc() noexcept;
 
+    /// @brief Whether style is being resolved.
     KRYS_NODISCARD bool InStyleRecalc() const noexcept
     {
       return _inStyleRecalc;
     }
 
+    /// @brief Records an element whose user agent shadow tree is to be updated before style is next resolved;
+    /// forgets it; or checks for it.
     void AddElementWithPendingUserAgentShadowTreeUpdate(Element &element) noexcept;
 
     void RemoveElementWithPendingUserAgentShadowTreeUpdate(Element &element) noexcept;
@@ -1488,11 +1475,13 @@ namespace krys::boo
       return _isInStyleInterleavedLayout;
     }
 
+    /// @brief Whether a style update is being applied to the render tree.
     KRYS_NODISCARD bool InRenderTreeUpdate() const noexcept
     {
       return _inRenderTreeUpdate;
     }
 
+    /// @brief Whether the style tree resolver is running; it sets this.
     KRYS_NODISCARD bool IsResolvingTreeStyle() const noexcept
     {
       return _isResolvingTreeStyle;
@@ -1503,11 +1492,14 @@ namespace krys::boo
       _isResolvingTreeStyle = value;
     }
 
+    /// @brief Whether style is resolved without waiting for the pending style sheets.
     KRYS_NODISCARD bool IsIgnoringPendingStylesheets() const noexcept
     {
       return _ignorePendingStylesheets;
     }
 
+    /// @brief Records that elements were left unstyled while a sheet was pending, so that ignoring the
+    /// pending sheets restyles the document.
     void SetHasNodesWithMissingStyle() noexcept
     {
       _hasNodesWithMissingStyle = true;
@@ -1557,17 +1549,20 @@ namespace krys::boo
       return _parsing;
     }
 
+    /// @brief Sets it, as the parser starts and stops.
     void SetParsing(bool parsing) noexcept
     {
       _parsing = parsing;
     }
 
-    /// @brief Whether something other than a load delays the document's load event.
+    /// @brief Whether something other than a load delays the document's load event: nothing does yet; media
+    /// elements will while they fetch (their delaying-the-load-event flag).
     KRYS_NODISCARD bool IsDelayingLoadEvent() const noexcept
     {
       return _loadEventDelayCount != 0;
     }
 
+    /// @brief Starts a delay of the load event.
     void IncrementLoadEventDelayCount() noexcept
     {
       ++_loadEventDelayCount;
@@ -1615,6 +1610,7 @@ namespace krys::boo
       return _contentLanguage;
     }
 
+    /// @brief Sets the document's language, restyling it.
     void SetContentLanguage(DOMString language) noexcept;
 
     /// @brief Whether an element with a `dir` attribute or a `<bdi>` has been made in the document.
@@ -1623,6 +1619,7 @@ namespace krys::boo
       return _isDirAttributeDirty;
     }
 
+    /// @brief Records it.
     void SetIsDirAttributeDirty() noexcept
     {
       _isDirAttributeDirty = true;
@@ -1640,6 +1637,7 @@ namespace krys::boo
       return _unloadCounter;
     }
 
+    /// @brief Counts an unload event's dispatch.
     void IncrementUnloadCounter() noexcept
     {
       ++_unloadCounter;
@@ -1669,6 +1667,7 @@ namespace krys::boo
     /// @brief Suspends the document's animation frame callbacks, as its page is hidden.
     void SuspendScriptedAnimationControllerCallbacks() noexcept;
 
+    /// @brief Resumes them.
     void ResumeScriptedAnimationControllerCallbacks() noexcept;
 
     /// @see https://html.spec.whatwg.org/#animationframeprovider-cancelanimationframe
@@ -1682,6 +1681,7 @@ namespace krys::boo
     /// it's leaving its frame.
     void StopActiveDOMObjects() noexcept;
 
+    /// @brief Whether they've been stopped.
     KRYS_NODISCARD bool ActiveDOMObjectsAreStopped() const noexcept
     {
       return _activeDOMObjectsAreStopped;
@@ -1691,12 +1691,14 @@ namespace krys::boo
     /// animation frame callbacks, animations and layout stop, until it's resumed for the same @p reason.
     void Suspend(dom::ReasonForSuspension reason) noexcept;
 
+    /// @brief Resumes the document; and whether it's suspended.
     void Resume(dom::ReasonForSuspension reason) noexcept;
 
     /// @brief Calls @p element's `PrepareForDocumentSuspension` and `ResumeFromDocumentSuspension` when the
     /// document is suspended and resumed.
     void RegisterForDocumentSuspensionCallbacks(Element &element) noexcept;
 
+    /// @brief Stops calling them.
     void UnregisterForDocumentSuspensionCallbacks(Element &element) noexcept;
 
     KRYS_NODISCARD bool IsSuspended() const noexcept
@@ -1707,6 +1709,7 @@ namespace krys::boo
     /// @brief Suspends the document's tasks, timers and animation frame callbacks.
     void SuspendScheduledTasks(dom::ReasonForSuspension reason) noexcept;
 
+    /// @brief Resumes them; and whether they're suspended.
     void ResumeScheduledTasks(dom::ReasonForSuspension reason) noexcept;
 
     KRYS_NODISCARD bool ScheduledTasksAreSuspended() const noexcept
@@ -1717,6 +1720,7 @@ namespace krys::boo
     /// @brief Suspends the document's timers.
     void SuspendActiveDOMObjects(dom::ReasonForSuspension reason) noexcept;
 
+    /// @brief Resumes them; and whether they're suspended, and why.
     void ResumeActiveDOMObjects(dom::ReasonForSuspension reason) noexcept;
 
     KRYS_NODISCARD bool ActiveDOMObjectsAreSuspended() const noexcept
@@ -1753,6 +1757,7 @@ namespace krys::boo
       return _autofocusProcessed;
     }
 
+    /// @brief Sets it.
     void SetAutofocusProcessed() noexcept
     {
       _autofocusProcessed = true;
@@ -1767,6 +1772,7 @@ namespace krys::boo
       return _renderView.get();
     }
 
+    /// @brief The same.
     KRYS_NODISCARD boo::RenderView *GetRenderView() noexcept
     {
       return _renderView.get();
@@ -1785,6 +1791,7 @@ namespace krys::boo
     /// @brief Destroys the accessibility cache (with the render tree it describes).
     void ClearAXObjectCache() noexcept;
 
+    /// @brief Whether the render tree is being destroyed; and whether there's one that isn't.
     KRYS_NODISCARD bool RenderTreeBeingDestroyed() const noexcept
     {
       return _renderTreeBeingDestroyed;
@@ -1798,6 +1805,7 @@ namespace krys::boo
     /// @brief Creates the document's render tree, for the view of its frame.
     void CreateRenderTree() noexcept;
 
+    /// @brief Destroys the document's render tree.
     void DestroyRenderTree() noexcept;
 
     /// @brief Schedules an update of @p text's renderer after @p lengthOfReplacedText bytes from
@@ -1833,8 +1841,11 @@ namespace krys::boo
       return CompositeOperator::SourceOver;
     }
 
+    /// @brief Whether layout can be scheduled yet: there's a document element and, for an HTML root, a body
+    /// with the style sheets before it loaded.
     KRYS_NODISCARD bool ShouldScheduleLayout() const noexcept;
 
+    /// @brief Whether the view has a layout scheduled.
     KRYS_NODISCARD bool IsLayoutPending() const noexcept;
 
     /// @brief Updates the styles that use viewport units after the view's size changed.
@@ -1858,6 +1869,7 @@ namespace krys::boo
     UpdateLayoutResult UpdateLayout(EnumSet<dom::LayoutOptions> layoutOptions = {},
                                     const Element *context = nullptr) noexcept;
 
+    /// @brief The same, without waiting for the pending style sheets.
     UpdateLayoutResult UpdateLayoutIgnorePendingStylesheets(EnumSet<dom::LayoutOptions> layoutOptions = {},
                                                             const Element *context = nullptr) noexcept;
 
@@ -1886,6 +1898,7 @@ namespace krys::boo
     /// @brief The document's font selector, which resolves the families its styles name.
     KRYS_NODISCARD css::CSSFontSelector &GetFontSelector() const noexcept;
 
+    /// @brief The same, if it's been made.
     KRYS_NODISCARD css::CSSFontSelector *FontSelectorIfExists() const noexcept;
 
     /// @brief The loader of the document's web fonts, made on first use.
@@ -1896,19 +1909,23 @@ namespace krys::boo
     KRYS_NODISCARD RefPtr<FontLoadRequest>
       GetFontLoadRequest(utf8_stringview url, bool isInitiatingElementInUserAgentShadowTree) noexcept;
 
+    /// @brief Has @p request's font file start loading soon.
     void BeginLoadingFontSoon(FontLoadRequest &request) noexcept;
 
+    /// @brief Suspends the document's font loads.
     void SuspendFontLoading() noexcept;
 
     /// @brief Restyles the document after the fonts its font selector provides changed.
     void FontsNeedUpdate(FontSelector &selector) noexcept override;
 
+    /// @brief Drops the matched declarations cache and resolves every style again.
     void InvalidateMatchedPropertiesCacheAndForceStyleRecalc() noexcept;
 
     /// @brief The document's default timeline, made on first use.
     /// @see https://drafts.csswg.org/web-animations-1/#dom-document-timeline
     KRYS_NODISCARD DocumentTimeline &Timeline() noexcept;
 
+    /// @brief The same, if it's been made.
     KRYS_NODISCARD DocumentTimeline *ExistingTimeline() const noexcept;
 
     /// @brief Notes a listener for @p type added to one of the document's nodes or to its window. A type the
@@ -1929,6 +1946,7 @@ namespace krys::boo
       return _hasPointerMoveListener;
     }
 
+    /// @brief Counts the document's live collections with cached items, by what invalidates them.
     void LiveCollectionCacheAdded(dom::LiveCollectionInvalidation invalidation) noexcept
     {
       ++_liveCollectionCacheCounts[static_cast<size_t>(invalidation)];
@@ -1939,6 +1957,7 @@ namespace krys::boo
       --_liveCollectionCacheCounts[static_cast<size_t>(invalidation)];
     }
 
+    /// @brief Tracks a live collection rooted at its owner's tree, or stops tracking it.
     void AddOwnerTreeLiveCollectionCache(dom::LiveCollection &collection) noexcept;
 
     void RemoveOwnerTreeLiveCollectionCache(dom::LiveCollection &collection) noexcept;
@@ -1981,6 +2000,8 @@ namespace krys::boo
     KRYS_NODISCARD List<RefPtr<WebAnimation>>
       MatchingAnimations(KRYS_NOESCAPE const Func<bool(Element &)> &function) noexcept;
 
+    /// @brief The document's animation timelines, and those its styles define (scroll and view timelines),
+    /// if made; the `Ensure` forms make them.
     KRYS_NODISCARD AnimationTimelinesController *TimelinesController() const noexcept
     {
       return _timelinesController.get();
@@ -2008,6 +2029,7 @@ namespace krys::boo
     /// @brief Recomputes the keyframes of the document's CSS animations of the `@keyframes` rule @p name.
     void KeyframesRuleDidChange(const CSSOMString &name) noexcept;
 
+    /// @brief Records that a style uses viewport units, so a change to the viewport restyles.
     void SetHasStyleWithViewportUnits() noexcept
     {
       _hasStyleWithViewportUnits = true;
@@ -2028,6 +2050,7 @@ namespace krys::boo
       return _textColor;
     }
 
+    /// @brief Sets it.
     void SetTextColor(const boo::Color &color) noexcept
     {
       _textColor = color;
@@ -2039,6 +2062,8 @@ namespace krys::boo
     /// @brief The colour of `-webkit-activelink`: the `<body alink>` colour, or the keyword's.
     KRYS_NODISCARD boo::Color ActiveLinkColor(const RenderStyle &style) const noexcept;
 
+    /// @brief Sets the colours of `<body link>` and `<body alink>`; the `Reset` forms go back to the
+    /// keywords'.
     void SetLinkColor(const boo::Color &color) noexcept
     {
       _linkColor = color;
@@ -2207,6 +2232,8 @@ namespace krys::boo
 
 #pragma region XML Declaration
 
+    /// @brief The XML declaration's encoding, version and standalone value (and whether it gave one), and
+    /// whether there was a declaration.
     KRYS_NODISCARD const DOMString &XMLEncoding() const noexcept
     {
       return _xmlEncoding;
@@ -2264,10 +2291,14 @@ namespace krys::boo
     /// @brief Removes the event listeners of the document, its window and its shadow-including descendants.
     void RemoveAllEventListeners() noexcept;
 
+    /// @brief Sets the document's mode, updating what depends on it.
     void SetQuirksMode(dom::QuirksMode mode) noexcept;
 
+    /// @brief Applies a style update to the render tree.
     void UpdateRenderTree(UniquePtr<style::Update> styleUpdate) noexcept;
 
+    /// @brief The render tree update the next rendering update applies, made if there's none; schedules that
+    /// update.
     KRYS_NODISCARD style::Update &EnsurePendingRenderTreeUpdate() noexcept;
 
     /// @brief Finds the first `base` elements with an `href` and with a `target` in the document tree, and
@@ -2283,6 +2314,7 @@ namespace krys::boo
     /// @see https://html.spec.whatwg.org/#the-document-object:get-the-parent
     KRYS_NODISCARD EventTarget *GetParent(Event &event) const noexcept override;
 
+    /// @see https://html.spec.whatwg.org/#concept-n-noscript
     KRYS_NODISCARD static bool IsScriptingDisabled() noexcept
     {
       // SPEC-VIOLATION(HTML, DOM): We don't have global objects or JavaScript so we'll always return true
@@ -2293,6 +2325,7 @@ namespace krys::boo
 
 #pragma region Type Checks
 
+    /// @brief Whether the document is of each kind `dom::DocumentFlag` describes.
     KRYS_NODISCARD bool IsHTMLDocument() const noexcept
     {
       return _documentFlags.contains(dom::DocumentFlag::IsHTMLDocument);
@@ -2324,11 +2357,13 @@ namespace krys::boo
 
 #pragma endregion
 
+    /// @brief The live ranges in the document, which mutations update.
     KRYS_NODISCARD List<dom::Range *> &LiveRanges() noexcept
     {
       return _liveRanges;
     }
 
+    /// @brief The node iterators over the document, which removals update.
     KRYS_NODISCARD List<dom::NodeIterator *> &NodeIterators() noexcept
     {
       return _nodeIterators;

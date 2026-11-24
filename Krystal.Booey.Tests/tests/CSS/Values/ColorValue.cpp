@@ -13,7 +13,7 @@ namespace krys::boo::css::tests
     SECTION("From a CSS colour")
     {
       auto value = ColorValue::Create(ColorKeyword(ValueId::Red));
-      CHECK(value->IsColorValue());
+      CHECK(Is<ColorValue>(*value));
       CHECK(value->GetColor() == ColorKeyword(ValueId::Red));
     }
 

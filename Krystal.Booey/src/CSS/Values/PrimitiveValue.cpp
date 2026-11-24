@@ -1,24 +1,4 @@
-﻿/*
- * (C) 1999-2003 Lars Knoll (knoll@kde.org)
- * Copyright (C) 2004-2023 Apple Inc. All rights reserved.
- *
- * This library is free software; you can redistribute it and/or
- * modify it under the terms of the GNU Library General Public
- * License as published by the Free Software Foundation; either
- * version 2 of the License, or (at your option) any later version.
- *
- * This library is distributed in the hope that it will be useful,
- * but WITHOUT ANY WARRANTY; without even the implied warranty of
- * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU
- * Library General Public License for more details.
- *
- * You should have received a copy of the GNU Library General Public License
- * along with this library; see the file COPYING.LIB.  If not, write to
- * the Free Software Foundation, Inc., 51 Franklin Street, Fifth Floor,
- * Boston, MA 02110-1301, USA.
- */
-
-#include "Krystal.Booey/CSS/Values/PrimitiveValue.hpp"
+﻿#include "Krystal.Booey/CSS/Values/PrimitiveValue.hpp"
 #include "Krystal.Booey/CSS/Calc/Value.hpp"
 #include "Krystal.Booey/CSS/CSSOM/Markup.hpp"
 #include "Krystal.Booey/CSS/Values/ComputedStyleDependencies.hpp"
@@ -27,98 +7,68 @@
 #include "Krystal.Booey/CSS/Values/SerialisationContext.hpp"
 #include "Krystal.Booey/CSS/Values/ToLengthConversionData.hpp"
 #include "Krystal.Booey/CSS/Values/ValuePool.hpp"
+#include "Krystal.Booey/Graphics/Geometry/LayoutUnit.hpp"
 #include "Krystal.Booey/Style/Values/Primitives/LengthResolution.hpp"
-#include "Krystal.Core/Containers/HashMap.hpp"
 #include "Krystal.Core/Hashing/FastHash.hpp"
 #include "Krystal.Core/Maths/Extras.hpp"
-#include "Krystal.Core/Memory/NeverDestroyed.hpp"
 #include "Krystal.Core/Strings/StringBuilder.hpp"
-#include <algorithm>
-#include <charconv>
+#include <cmath>
 
 namespace krys::boo::css
 {
   namespace
   {
-    KRYS_NODISCARD bool IsValidUnitTypeForDoubleConversion(UnitType unitType) noexcept
+    /// @brief The static pool's value for @p value, if it has one. A pool holds the whole numbers from 0 to
+    /// one less than its size; -0 isn't among them, as it serialises differently.
+    KRYS_NODISCARD PrimitiveValue *FindPooledPrimitiveValue(Span<AlignedStorage<PrimitiveValue>> pool,
+                                                            double value) noexcept
     {
-      switch (unitType)
-      {
-        case UnitType::Attr:
-        case UnitType::FontFamily:
-        case UnitType::CustomIdent:
-        case UnitType::PropertyId:
-        case UnitType::String:
-        case UnitType::Unknown:
-        case UnitType::ValueId:     return false;
-        case UnitType::Ident:       krys_debug_assert(false); return false;
-        default:                    return true;
-      }
-    }
-
-    KRYS_NODISCARD bool IsStringType(UnitType type) noexcept
-    {
-      return type == UnitType::String || type == UnitType::CustomIdent || type == UnitType::Attr
-             || type == UnitType::FontFamily;
-    }
-
-    KRYS_NODISCARD HashMap<const PrimitiveValue *, CSSOMString> &SerialisedPrimitiveValues() noexcept
-    {
-      static NeverDestroyed<HashMap<const PrimitiveValue *, CSSOMString>> map;
-      return *map;
-    }
-
-    KRYS_NODISCARD PrimitiveValue *ValueFromPool(Span<AlignedStorage<PrimitiveValue>> pool,
-                                                 double value) noexcept
-    {
-      // Only values that round-trip exactly through an index are pooled. Checking the range first avoids the
-      // undefined behaviour of casting an out-of-range double to an integer.
-      if (!(value >= 0.0 && value < static_cast<double>(pool.size())))
+      // Checked before the conversion below, which is undefined for a double out of the index's range. NaN
+      // fails it too.
+      if (!(value >= 0.0 && value < static_cast<double>(pool.size())) || std::signbit(value))
       {
         return nullptr;
       }
 
-      auto poolIndex = static_cast<size_t>(value);
-      double roundTripValue = static_cast<double>(poolIndex);
-      if (std::ranges::equal(
-            Span<const byte>(reinterpret_cast<const byte *>(&value), sizeof(double)),
-            Span<const byte>(reinterpret_cast<const byte *>(&roundTripValue), sizeof(double))))
-      {
-        return pool[poolIndex].get();
-      }
-
-      return nullptr;
+      auto index = static_cast<size_t>(value);
+      return static_cast<double>(index) == value ? pool[index].get() : nullptr;
     }
   }
 
-#pragma region Constructors
-
-  PrimitiveValue::PrimitiveValue(css::PropertyId property) noexcept : css::Value(ValueType::Primitive)
-  {
-    SetPrimitiveUnitType(UnitType::PropertyId);
-    _value.PropertyId = property;
-  }
+#pragma region Construction
 
   PrimitiveValue::PrimitiveValue(double value, UnitType unit) noexcept : css::Value(ValueType::Primitive)
   {
-    SetPrimitiveUnitType(unit);
-    _value.Number = value;
+    _header.Unit = unit;
+    _payload.Number = value;
   }
 
-  PrimitiveValue::PrimitiveValue(const CSSOMString &value, UnitType unit) noexcept
+  PrimitiveValue::PrimitiveValue(css::PropertyId property) noexcept : css::Value(ValueType::Primitive)
+  {
+    _header.PrimitiveKind = PrimitiveKind::PropertyId;
+    _payload.PropertyId = property;
+  }
+
+  PrimitiveValue::PrimitiveValue(CSSOMStringAtom value, PrimitiveKind kind) noexcept
       : css::Value(ValueType::Primitive)
   {
-    krys_debug_assert(IsStringType(unit));
-    SetPrimitiveUnitType(unit);
-    _value.String = CSSOMStringAtom(value).LeakStorage();
+    krys_debug_assert(kind == PrimitiveKind::String || kind == PrimitiveKind::CustomIdent
+                      || kind == PrimitiveKind::FontFamily);
+    _header.PrimitiveKind = kind;
+    _payload.String = krys::move(value).LeakStorage();
+  }
+
+  PrimitiveValue::PrimitiveValue(Ref<calc::Value> value) noexcept : css::Value(ValueType::Primitive)
+  {
+    _header.PrimitiveKind = PrimitiveKind::Calc;
+    _payload.Calc = value.release();
   }
 
   PrimitiveValue::PrimitiveValue(StaticValueTag, css::ValueId keyword) noexcept
       : css::Value(ValueType::Primitive)
   {
-    SetPrimitiveUnitType(UnitType::ValueId);
-    _value.ValueId = keyword;
-
+    _header.PrimitiveKind = PrimitiveKind::ValueId;
+    _payload.ValueId = keyword;
     MakeStatic();
   }
 
@@ -131,97 +81,44 @@ namespace krys::boo::css
   PrimitiveValue::PrimitiveValue(StaticValueTag, CreateImplicitInitialValueTag) noexcept
       : PrimitiveValue(StaticValue, css::ValueId::Initial)
   {
-    _isImplicitInitialValue = true;
-  }
-
-  PrimitiveValue::PrimitiveValue(Ref<calc::Value> value) noexcept : css::Value(ValueType::Primitive)
-  {
-    SetPrimitiveUnitType(UnitType::Calc);
-    _value.Calc = value.release();
-  }
-
-  PrimitiveValue::PrimitiveValue(Ref<AttrValue> attr) noexcept : css::Value(ValueType::Primitive)
-  {
-    SetPrimitiveUnitType(UnitType::Attr);
-    _value.Attr = attr.release();
+    _header.IsImplicitInitialValue = true;
   }
 
   PrimitiveValue::~PrimitiveValue() noexcept
   {
-    switch (PrimitiveUnitType())
+    switch (_header.PrimitiveKind)
     {
-      case UnitType::String:
-      case UnitType::CustomIdent:
-      case UnitType::FontFamily:               CSSOMStringAtom::DerefStorage(_value.String); break;
-      case UnitType::Attr:                     _value.Attr->SubRef(); break;
-      case UnitType::Calc:                     _value.Calc->SubRef(); break;
-      case UnitType::CalcPercentageWithAngle:
-      case UnitType::CalcPercentageWithLength: krys_debug_assert(false); break;
-      default:                                 break;
+      case PrimitiveKind::String:
+      case PrimitiveKind::CustomIdent:
+      case PrimitiveKind::FontFamily:  CSSOMStringAtom::DerefStorage(_payload.String); break;
+      case PrimitiveKind::Calc:        _payload.Calc->SubRef(); break;
+      case PrimitiveKind::Number:
+      case PrimitiveKind::PropertyId:
+      case PrimitiveKind::ValueId:     break;
     }
-
-    if (_hasCachedCSSText)
-    {
-      krys_debug_assert(SerialisedPrimitiveValues().contains(this));
-      SerialisedPrimitiveValues().erase(this);
-    }
-  }
-
-#pragma endregion
-
-#pragma region Static Creation
-
-  Ref<PrimitiveValue> PrimitiveValue::Create(css::PropertyId property) noexcept
-  {
-    return AdoptRef(*new PrimitiveValue(property));
-  }
-
-  Ref<PrimitiveValue> PrimitiveValue::Create(double value) noexcept
-  {
-    if (auto *result = ValueFromPool(CommonValuePool->_numberValues, value))
-    {
-      return ShareRef(*result);
-    }
-
-    return AdoptRef(*new PrimitiveValue(value, UnitType::Number));
   }
 
   Ref<PrimitiveValue> PrimitiveValue::Create(double value, UnitType unit) noexcept
   {
+    Span<AlignedStorage<PrimitiveValue>> pool;
     switch (unit)
     {
-      case UnitType::Number:
-        if (auto *result = ValueFromPool(CommonValuePool->_numberValues, value))
-        {
-          return ShareRef(*result);
-        }
-        break;
-      case UnitType::Percentage:
-        if (auto *result = ValueFromPool(CommonValuePool->_percentageValues, value))
-        {
-          return ShareRef(*result);
-        }
-        break;
-      case UnitType::px:
-        if (auto *result = ValueFromPool(CommonValuePool->_pixelValues, value))
-        {
-          return ShareRef(*result);
-        }
-        break;
-      default: break;
+      case UnitType::Number:     pool = CommonValuePool->_numberValues; break;
+      case UnitType::Percentage: pool = CommonValuePool->_percentageValues; break;
+      case UnitType::px:         pool = CommonValuePool->_pixelValues; break;
+      default:                   break;
     }
 
+    if (auto *pooled = FindPooledPrimitiveValue(pool, value))
+    {
+      return ShareRef(*pooled);
+    }
     return AdoptRef(*new PrimitiveValue(value, unit));
   }
 
-  Ref<PrimitiveValue> PrimitiveValue::Create(const CSSOMString &value) noexcept
+  Ref<PrimitiveValue> PrimitiveValue::CreateInteger(double value) noexcept
   {
-    return AdoptRef(*new PrimitiveValue(value, UnitType::String));
-  }
-
-  Ref<PrimitiveValue> PrimitiveValue::Create(const CSSOMStringAtom &value) noexcept
-  {
-    return AdoptRef(*new PrimitiveValue(value.ToString(), UnitType::String));
+    return Create(value, UnitType::Integer);
   }
 
   Ref<PrimitiveValue> PrimitiveValue::Create(Ref<calc::Value> value) noexcept
@@ -229,609 +126,288 @@ namespace krys::boo::css
     return AdoptRef(*new PrimitiveValue(krys::move(value)));
   }
 
-  Ref<PrimitiveValue> PrimitiveValue::Create(Ref<AttrValue> value) noexcept
+  Ref<PrimitiveValue> PrimitiveValue::Create(css::PropertyId property) noexcept
   {
-    return AdoptRef(*new PrimitiveValue(krys::move(value)));
+    return AdoptRef(*new PrimitiveValue(property));
+  }
+
+  Ref<PrimitiveValue> PrimitiveValue::Create(const CSSOMString &value) noexcept
+  {
+    return Create(CSSOMStringAtom(value));
+  }
+
+  Ref<PrimitiveValue> PrimitiveValue::Create(CSSOMStringAtom value) noexcept
+  {
+    return AdoptRef(*new PrimitiveValue(krys::move(value), PrimitiveKind::String));
   }
 
   Ref<PrimitiveValue> PrimitiveValue::CreateCustomIdent(const CSSOMString &value) noexcept
   {
-    return AdoptRef(*new PrimitiveValue(value, UnitType::CustomIdent));
+    return CreateCustomIdent(CSSOMStringAtom(value));
   }
 
-  Ref<PrimitiveValue> PrimitiveValue::CreateCustomIdent(const CSSOMStringAtom &value) noexcept
+  Ref<PrimitiveValue> PrimitiveValue::CreateCustomIdent(CSSOMStringAtom value) noexcept
   {
-    return AdoptRef(*new PrimitiveValue(value.ToString(), UnitType::CustomIdent));
+    return AdoptRef(*new PrimitiveValue(krys::move(value), PrimitiveKind::CustomIdent));
   }
 
   Ref<PrimitiveValue> PrimitiveValue::CreateFontFamily(const CSSOMString &value) noexcept
   {
-    return AdoptRef(*new PrimitiveValue(value, UnitType::FontFamily));
-  }
-
-  Ref<PrimitiveValue> PrimitiveValue::CreateInteger(double value) noexcept
-  {
-    return AdoptRef(*new PrimitiveValue(value, UnitType::Integer));
+    return AdoptRef(*new PrimitiveValue(CSSOMStringAtom(value), PrimitiveKind::FontFamily));
   }
 
 #pragma endregion
 
-  UnitType PrimitiveValue::PrimitiveType() const noexcept
-  {
-    auto type = PrimitiveUnitType();
-    switch (type)
-    {
-      case UnitType::PropertyId:
-      case UnitType::ValueId:
-      case UnitType::CustomIdent: return UnitType::Ident;
-      case UnitType::FontFamily:
-        // Web-exposed content expects font family values to have UnitType::String primitive type so we need
-        // to map our internal UnitType::FontFamily type here.
-        return UnitType::String;
-      default:
-        if (auto *calcValue = CSSCalcValue())
-        {
-          return calcValue->PrimitiveType();
-        }
+#pragma region What it holds
 
-        return type;
+  CSSOMString PrimitiveValue::StringValue() const noexcept
+  {
+    switch (_header.PrimitiveKind)
+    {
+      case PrimitiveKind::String:
+      case PrimitiveKind::CustomIdent:
+      case PrimitiveKind::FontFamily:  return CSSOMString(StringView());
+      case PrimitiveKind::ValueId:     return CSSOMString(ToString(_payload.ValueId));
+      case PrimitiveKind::PropertyId:  return CSSOMString(ToString(_payload.PropertyId));
+      case PrimitiveKind::Number:
+      case PrimitiveKind::Calc:        return {};
+    }
+    krys_unreachable();
+  }
+
+#pragma endregion
+
+#pragma region Its unit
+
+  UnitType PrimitiveValue::Unit() const noexcept
+  {
+    return IsCalc() ? _payload.Calc->PrimitiveType() : StoredUnit();
+  }
+
+  bool PrimitiveValue::IsCalcPercentageWithLength() const noexcept
+  {
+    return IsCalc() && _payload.Calc->IsPercentageWithLength();
+  }
+
+  bool PrimitiveValue::IsFontIndependentLength() const noexcept
+  {
+    if (!IsCalc())
+    {
+      return css::IsFontIndependentLength(StoredUnit());
+    }
+
+    auto dependencies = ComputedStyleDependencies();
+    return IsLength() && dependencies.Properties.empty() && dependencies.RootProperties.empty()
+           && !dependencies.ViewportDimensions && !dependencies.ContainerDimensions && !dependencies.Anchors;
+  }
+
+  bool PrimitiveValue::IsFontRelativeLength() const noexcept
+  {
+    if (!IsCalc())
+    {
+      return css::IsFontRelativeLength(StoredUnit());
+    }
+
+    // Only font-relative units add properties: font-size, and line-height for `lh` and `rlh`.
+    auto dependencies = ComputedStyleDependencies();
+    return !dependencies.Properties.empty() || !dependencies.RootProperties.empty();
+  }
+
+  bool PrimitiveValue::IsParentFontRelativeLength() const noexcept
+  {
+    if (!IsCalc())
+    {
+      return IsPercentage() || (IsFontRelativeLength() && !IsRootFontRelativeLength());
+    }
+
+    return IsPercentage() || IsCalcPercentageWithLength() || !ComputedStyleDependencies().Properties.empty();
+  }
+
+  bool PrimitiveValue::IsRootFontRelativeLength() const noexcept
+  {
+    if (!IsCalc())
+    {
+      return css::IsRootFontRelativeLength(StoredUnit());
+    }
+
+    return !ComputedStyleDependencies().RootProperties.empty();
+  }
+
+#pragma endregion
+
+#pragma region Resolving
+
+  template <typename T>
+  T PrimitiveValue::ResolveAsLength(const ToLengthConversionData &conversionData) const noexcept
+  {
+    double pixels = ResolveAsLengthDouble(conversionData);
+    if constexpr (SameType<T, double>)
+    {
+      return pixels;
+    }
+    else if constexpr (SameType<T, float>)
+    {
+      return NarrowPrecisionToFloat(pixels);
+    }
+    else if constexpr (SameType<T, LayoutUnit>)
+    {
+      return LayoutUnit(pixels);
+    }
+    else
+    {
+      return style::RoundForImpreciseConversion<T>(pixels);
     }
   }
 
-  RefPtr<const calc::Value> PrimitiveValue::ProtectedCSSCalcValue() const noexcept
-  {
-    return ShareRefPtr(CSSCalcValue());
-  }
-
-  bool PrimitiveValue::ConversionToCanonicalUnitRequiresConversionData() const noexcept
-  {
-    if (IsCalculated())
-    {
-      return _value.Calc->RequiresConversionData();
-    }
-
-    return css::ConversionToCanonicalUnitRequiresConversionData(PrimitiveType());
-  }
-
-#pragma region Length converting
-
-  template <>
-  int64 PrimitiveValue::ResolveAsLength(const ToLengthConversionData &conversionData) const noexcept
-  {
-    return RoundForImpreciseConversion<int64>(ResolveAsLengthDouble(conversionData));
-  }
-
-  template <>
-  uint64 PrimitiveValue::ResolveAsLength(const ToLengthConversionData &conversionData) const noexcept
-  {
-    return RoundForImpreciseConversion<uint64>(ResolveAsLengthDouble(conversionData));
-  }
-
-  template <>
-  int32 PrimitiveValue::ResolveAsLength(const ToLengthConversionData &conversionData) const noexcept
-  {
-    return RoundForImpreciseConversion<int32>(ResolveAsLengthDouble(conversionData));
-  }
-
-  template <>
-  uint32 PrimitiveValue::ResolveAsLength(const ToLengthConversionData &conversionData) const noexcept
-  {
-    return RoundForImpreciseConversion<uint32>(ResolveAsLengthDouble(conversionData));
-  }
-
-  template <>
-  int16 PrimitiveValue::ResolveAsLength(const ToLengthConversionData &conversionData) const noexcept
-  {
-    return RoundForImpreciseConversion<int16>(ResolveAsLengthDouble(conversionData));
-  }
-
-  template <>
-  uint16 PrimitiveValue::ResolveAsLength(const ToLengthConversionData &conversionData) const noexcept
-  {
-    return RoundForImpreciseConversion<uint16>(ResolveAsLengthDouble(conversionData));
-  }
-
-  template <>
-  float PrimitiveValue::ResolveAsLength(const ToLengthConversionData &conversionData) const noexcept
-  {
-    return NarrowPrecisionToFloat(ResolveAsLengthDouble(conversionData));
-  }
-
-  template <>
-  double PrimitiveValue::ResolveAsLength(const ToLengthConversionData &conversionData) const noexcept
-  {
-    return ResolveAsLengthDouble(conversionData);
-  }
-
-  template <>
-  LayoutUnit PrimitiveValue::ResolveAsLength(const ToLengthConversionData &conversionData) const noexcept
-  {
-    return LayoutUnit(ResolveAsLengthDouble(conversionData));
-  }
+  template int16 PrimitiveValue::ResolveAsLength(const ToLengthConversionData &) const noexcept;
+  template uint16 PrimitiveValue::ResolveAsLength(const ToLengthConversionData &) const noexcept;
+  template int32 PrimitiveValue::ResolveAsLength(const ToLengthConversionData &) const noexcept;
+  template uint32 PrimitiveValue::ResolveAsLength(const ToLengthConversionData &) const noexcept;
+  template int64 PrimitiveValue::ResolveAsLength(const ToLengthConversionData &) const noexcept;
+  template uint64 PrimitiveValue::ResolveAsLength(const ToLengthConversionData &) const noexcept;
+  template float PrimitiveValue::ResolveAsLength(const ToLengthConversionData &) const noexcept;
+  template double PrimitiveValue::ResolveAsLength(const ToLengthConversionData &) const noexcept;
+  template LayoutUnit PrimitiveValue::ResolveAsLength(const ToLengthConversionData &) const noexcept;
 
   double PrimitiveValue::ResolveAsLengthDouble(const ToLengthConversionData &conversionData) const noexcept
   {
-    if (auto *calcValue = CSSCalcValue())
+    if (IsCalc())
     {
-      // The multiplier and factor is applied to each value in the calc expression individually.
-      return calcValue->ComputeLengthPx(conversionData);
+      // A calc() applies the conversion to each of its lengths.
+      return _payload.Calc->ComputeLengthPx(conversionData);
     }
 
-    auto lengthUnit = ToLengthUnit(PrimitiveType());
+    auto lengthUnit = ToUnit<LengthUnit>(StoredUnit());
     if (!lengthUnit)
     {
       krys_debug_assert(false);
       return -1.0;
     }
-
-    return style::ComputeNonCalcLengthDouble(_value.Number, *lengthUnit, conversionData);
+    return style::ComputeNonCalcLengthDouble(_payload.Number, *lengthUnit, conversionData);
   }
 
-#pragma endregion
-
-  ExceptionOr<float> PrimitiveValue::FloatValueDeprecated(UnitType targetUnit) const noexcept
+  double PrimitiveValue::ResolveDouble(const ToLengthConversionData &conversionData) const noexcept
   {
-    auto result = DoubleValueInternalDeprecated(targetUnit);
-    if (!result)
+    return IsCalc() ? _payload.Calc->DoubleValue(conversionData) : _payload.Number;
+  }
+
+  double PrimitiveValue::ResolveDouble(UnitType targetUnit,
+                                       const ToLengthConversionData &conversionData) const noexcept
+  {
+    auto unit = Unit();
+    if (unit == UnitType::Unknown)
     {
-      return Exception(ExceptionCode::InvalidAccessError);
+      return 0.0;
     }
-
-    return ClampTo<float>(*result);
+    return ConvertUnitOrNumber(ResolveDouble(conversionData), unit, targetUnit).value_or(0.0);
   }
 
-#pragma region Arbitrarily converting
-
-  double PrimitiveValue::DoubleValue(UnitType targetUnit,
-                                     const ToLengthConversionData &conversionData) const noexcept
+  double PrimitiveValue::ResolveDoubleWithoutConversionData(UnitType targetUnit) const noexcept
   {
-    return DoubleValueInternal(targetUnit, conversionData).value_or(0);
+    krys_debug_assert(!IsCalc());
+    return ConvertUnitOrNumber(_payload.Number, StoredUnit(), targetUnit).value_or(0.0);
   }
 
-  double PrimitiveValue::DoubleValueNoConversionDataRequired(UnitType targetUnit) const noexcept
-  {
-    krys_debug_assert(!IsCalculated());
-    return DoubleValueInternalDeprecated(targetUnit).value_or(0);
-  }
-
-  double PrimitiveValue::DoubleValueDeprecated(UnitType targetUnit) const noexcept
-  {
-    return DoubleValueInternalDeprecated(targetUnit).value_or(0);
-  }
-
-#pragma endregion
-
-#pragma region Non-converting
-
-  double PrimitiveValue::DoubleValue(const ToLengthConversionData &conversionData) const noexcept
-  {
-    if (auto *calcValue = CSSCalcValue())
-    {
-      return calcValue->DoubleValue(conversionData);
-    }
-
-    return _value.Number;
-  }
-
-  double PrimitiveValue::DoubleValueDeprecated() const noexcept
-  {
-    if (auto *calcValue = CSSCalcValue())
-    {
-      return calcValue->DoubleValueDeprecated();
-    }
-
-    return _value.Number;
-  }
-
-  double PrimitiveValue::DoubleValueDividingBy100IfPercentage(
+  double PrimitiveValue::ResolveDoubleDividingBy100IfPercentage(
     const ToLengthConversionData &conversionData) const noexcept
   {
     krys_debug_assert(IsNumberOrInteger() || IsPercentage());
-
-    if (auto *calcValue = CSSCalcValue())
-    {
-      return calcValue->PrimitiveType() == UnitType::Percentage
-               ? calcValue->DoubleValue(conversionData) / 100.0
-               : calcValue->DoubleValue(conversionData);
-    }
-
-    if (IsPercentage())
-    {
-      return _value.Number / 100.0;
-    }
-
-    return _value.Number;
-  }
-
-  double PrimitiveValue::DoubleValueDividingBy100IfPercentageNoConversionDataRequired() const noexcept
-  {
-    krys_debug_assert(IsNumberOrInteger() || IsPercentage());
-    krys_debug_assert(!IsCalculated());
-
-    if (IsPercentage())
-    {
-      return _value.Number / 100.0;
-    }
-
-    return _value.Number;
-  }
-
-  double PrimitiveValue::DoubleValueDividingBy100IfPercentageDeprecated() const noexcept
-  {
-    krys_debug_assert(IsNumberOrInteger() || IsPercentage());
-
-    if (auto *calcValue = CSSCalcValue())
-    {
-      return calcValue->PrimitiveType() == UnitType::Percentage ? calcValue->DoubleValueDeprecated() / 100.0
-                                                                : calcValue->DoubleValueDeprecated();
-    }
-
-    if (IsPercentage())
-    {
-      return _value.Number / 100.0;
-    }
-
-    return _value.Number;
+    double value = ResolveDouble(conversionData);
+    return IsPercentage() ? value / 100.0 : value;
   }
 
 #pragma endregion
 
-  Maybe<bool> PrimitiveValue::IsZero() const noexcept
+#pragma region The Value operations
+
+  CSSOMString PrimitiveValue::SerialiseNumber() const noexcept
   {
-    if (IsCalculated())
+    double number = _payload.Number;
+    switch (StoredUnit())
     {
-      return null;
-    }
-
-    return !_value.Number;
-  }
-
-  Maybe<bool> PrimitiveValue::IsOne() const noexcept
-  {
-    if (IsCalculated())
-    {
-      return null;
-    }
-
-    return _value.Number == 1;
-  }
-
-  Maybe<bool> PrimitiveValue::IsPositive() const noexcept
-  {
-    if (IsCalculated())
-    {
-      return null;
-    }
-
-    return _value.Number > 0;
-  }
-
-  Maybe<bool> PrimitiveValue::IsNegative() const noexcept
-  {
-    if (IsCalculated())
-    {
-      return null;
-    }
-
-    return _value.Number < 0;
-  }
-
-  Maybe<double>
-    PrimitiveValue::DoubleValueInternal(UnitType targetUnit,
-                                        const ToLengthConversionData &conversionData) const noexcept
-  {
-    if (!IsValidUnitTypeForDoubleConversion(PrimitiveUnitType())
-        || !IsValidUnitTypeForDoubleConversion(targetUnit))
-    {
-      return null;
-    }
-
-    UnitType sourceUnitType = PrimitiveType();
-    if (targetUnit == sourceUnitType || targetUnit == UnitType::Dimension)
-    {
-      return DoubleValue(conversionData);
-    }
-
-    UnitCategory sourceCategory = UnitCategoryForType(sourceUnitType);
-    krys_debug_assert(sourceCategory != UnitCategory::Other);
-
-    UnitType targetUnitType = targetUnit;
-    UnitCategory targetCategory = UnitCategoryForType(targetUnitType);
-    krys_debug_assert(targetCategory != UnitCategory::Other);
-
-    // Cannot convert between unrelated unit categories if one of them is not UnitCategory::Number.
-    if (sourceCategory != targetCategory && sourceCategory != UnitCategory::Number
-        && targetCategory != UnitCategory::Number)
-    {
-      return null;
-    }
-
-    if (targetCategory == UnitCategory::Number)
-    {
-      // Cannot convert between numbers and percent.
-      if (sourceCategory == UnitCategory::Percent)
+      case UnitType::Unknown: return {};
+      case UnitType::Integer:
       {
-        return null;
-      }
-
-      // We interpret conversion to UnitType::Number as conversion to a canonical unit in this value's
-      // category.
-      targetUnitType = CanonicalUnitTypeForCategory(sourceCategory);
-      if (targetUnitType == UnitType::Unknown)
-      {
-        return null;
-      }
-    }
-
-    if (sourceUnitType == UnitType::Number || sourceUnitType == UnitType::Integer)
-    {
-      // Cannot convert between numbers and percent.
-      if (targetCategory == UnitCategory::Percent)
-      {
-        return null;
-      }
-
-      // We interpret conversion from UnitType::Number in the same way as Parser::ValidUnit() while using
-      // non-strict mode.
-      sourceUnitType = CanonicalUnitTypeForCategory(targetCategory);
-      if (sourceUnitType == UnitType::Unknown)
-      {
-        return null;
-      }
-    }
-
-    double convertedValue = DoubleValue(conversionData);
-
-    // If we don't need to scale it, don't worry about if we can scale it.
-    if (sourceUnitType == targetUnitType)
-    {
-      return convertedValue;
-    }
-
-    // First convert the value from PrimitiveUnitType() to canonical type.
-    auto sourceFactor = ConversionToCanonicalUnitsScaleFactor(sourceUnitType);
-    if (!sourceFactor.has_value())
-    {
-      return null;
-    }
-    convertedValue *= *sourceFactor;
-
-    // Now convert from canonical type to the target unitType.
-    auto targetFactor = ConversionToCanonicalUnitsScaleFactor(targetUnitType);
-    if (!targetFactor.has_value())
-    {
-      return null;
-    }
-    convertedValue /= *targetFactor;
-
-    return convertedValue;
-  }
-
-  Maybe<double> PrimitiveValue::DoubleValueInternalDeprecated(UnitType targetUnit) const noexcept
-  {
-    if (!IsValidUnitTypeForDoubleConversion(PrimitiveUnitType())
-        || !IsValidUnitTypeForDoubleConversion(targetUnit))
-    {
-      return null;
-    }
-
-    UnitType sourceUnitType = PrimitiveType();
-    if (targetUnit == sourceUnitType || targetUnit == UnitType::Dimension)
-    {
-      return DoubleValueDeprecated();
-    }
-
-    UnitCategory sourceCategory = UnitCategoryForType(sourceUnitType);
-    krys_debug_assert(sourceCategory != UnitCategory::Other);
-
-    UnitType targetUnitType = targetUnit;
-    UnitCategory targetCategory = UnitCategoryForType(targetUnitType);
-    krys_debug_assert(targetCategory != UnitCategory::Other);
-
-    // Cannot convert between unrelated unit categories if one of them is not UnitCategory::Number.
-    if (sourceCategory != targetCategory && sourceCategory != UnitCategory::Number
-        && targetCategory != UnitCategory::Number)
-    {
-      return null;
-    }
-
-    if (targetCategory == UnitCategory::Number)
-    {
-      // Cannot convert between numbers and percent.
-      if (sourceCategory == UnitCategory::Percent)
-      {
-        return null;
-      }
-
-      // We interpret conversion to UnitType::Number as conversion to a canonical unit in this value's
-      // category.
-      targetUnitType = CanonicalUnitTypeForCategory(sourceCategory);
-      if (targetUnitType == UnitType::Unknown)
-      {
-        return null;
-      }
-    }
-
-    if (sourceUnitType == UnitType::Number || sourceUnitType == UnitType::Integer)
-    {
-      // Cannot convert between numbers and percent.
-      if (targetCategory == UnitCategory::Percent)
-      {
-        return null;
-      }
-
-      // We interpret conversion from UnitType::Number in the same way as Parser::ValidUnit() while using
-      // non-strict mode.
-      sourceUnitType = CanonicalUnitTypeForCategory(targetCategory);
-      if (sourceUnitType == UnitType::Unknown)
-      {
-        return null;
-      }
-    }
-
-    double convertedValue = DoubleValueDeprecated();
-
-    // If we don't need to scale it, don't worry about if we can scale it.
-    if (sourceUnitType == targetUnitType)
-    {
-      return convertedValue;
-    }
-
-    // First convert the value from PrimitiveUnitType() to canonical type.
-    auto sourceFactor = ConversionToCanonicalUnitsScaleFactor(sourceUnitType);
-    if (!sourceFactor.has_value())
-    {
-      return null;
-    }
-    convertedValue *= *sourceFactor;
-
-    // Now convert from canonical type to the target unitType.
-    auto targetFactor = ConversionToCanonicalUnitsScaleFactor(targetUnitType);
-    if (!targetFactor.has_value())
-    {
-      return null;
-    }
-    convertedValue /= *targetFactor;
-
-    return convertedValue;
-  }
-
-  CSSOMString PrimitiveValue::StringValue() const noexcept
-  {
-    switch (PrimitiveUnitType())
-    {
-      case UnitType::String:
-      case UnitType::CustomIdent:
-      case UnitType::FontFamily:  return CSSOMString(_value.String->View());
-      case UnitType::ValueId:     return CSSOMString(ToString(_value.ValueId));
-      case UnitType::PropertyId:  return CSSOMString(ToString(_value.PropertyId));
-      case UnitType::Attr:        return ProtectedCSSAttrValue()->CssText(DefaultSerialisationContext());
-      default:                    return {};
-    }
-  }
-
-  CSSOMString PrimitiveValue::FormatNumberValue(CSSOMStringView suffix) const noexcept
-  {
-    return FormatCSSNumberValue(SerialisableNumber {.Value = _value.Number, .Suffix = suffix});
-  }
-
-  CSSOMString PrimitiveValue::FormatIntegerValue(CSSOMStringView suffix) const noexcept
-  {
-    if (!std::isfinite(_value.Number))
-    {
-      return FormatNonfiniteCSSNumberValue(SerialisableNumber {.Value = _value.Number, .Suffix = suffix});
-    }
-
-    StringBuilder builder;
-    builder.Append(_value.Number, suffix);
-    return krys::move(builder).ToString();
-  }
-
-  CSSOMString PrimitiveValue::SerialiseInternal(const SerialisationContext &context) const noexcept
-  {
-    auto type = PrimitiveUnitType();
-    switch (type)
-    {
-      case UnitType::Attr:       return ProtectedCSSAttrValue()->CssText(context);
-      case UnitType::Calc:       return ProtectedCSSCalcValue()->CssText(context);
-      // FIXME: This isn't correct.
-      case UnitType::Dimension:  return FormatNumberValue(u8"");
-      case UnitType::FontFamily: return SerialiseFontFamily(CSSOMString(_value.String->View()));
-      case UnitType::Integer:    return FormatIntegerValue(u8"");
-      case UnitType::QuirkyEm:   return FormatNumberValue(u8"em");
-      case UnitType::String:     return SerialiseString(CSSOMString(_value.String->View()));
-      case UnitType::CustomIdent:
-      {
-        StringBuilder builder;
-        SerialiseIdentifier(CSSOMString(_value.String->View()), builder);
-        return krys::move(builder).ToString();
-      }
-
-      case UnitType::CalcPercentageWithAngle:
-      case UnitType::CalcPercentageWithLength:
-      case UnitType::Ident:
-      case UnitType::PropertyId:
-      case UnitType::Unknown:
-      case UnitType::ValueId:                  krys_debug_assert(false); return {};
-
-      default:
-        // Every remaining unit is a number with a unit suffix (Number has an empty suffix).
-        return FormatNumberValue(UnitTypeString(type));
-    }
-  }
-
-  CSSOMString PrimitiveValue::CustomCSSText(const SerialisationContext &context) const noexcept
-  {
-    switch (PrimitiveUnitType())
-    {
-      case UnitType::Unknown:    return {};
-      case UnitType::ValueId:    return CSSOMString(ToLower(_value.ValueId));
-      case UnitType::PropertyId: return CSSOMString(ToString(_value.PropertyId));
-      default:
-      {
-        auto &map = SerialisedPrimitiveValues();
-        krys_debug_assert(map.contains(this) == _hasCachedCSSText);
-        if (_hasCachedCSSText)
+        // An integer is written without a fraction or exponent, unless it isn't finite.
+        if (!std::isfinite(number))
         {
-          return map.at(this);
+          return FormatNonfiniteCSSNumberValue(SerialisableNumber {.Value = number, .Suffix = u8""});
         }
 
-        CSSOMString serialisedValue = SerialiseInternal(context);
-        _hasCachedCSSText = true;
-        map.emplace(this, serialisedValue);
-        return serialisedValue;
+        StringBuilder builder;
+        builder.Append(number, u8"");
+        return krys::move(builder).ToString();
+      }
+      default:
+        return FormatCSSNumberValue(
+          SerialisableNumber {.Value = number, .Suffix = UnitTypeString(StoredUnit())});
+    }
+  }
+
+  /// @see https://www.w3.org/TR/cssom-1/#serialize-a-css-component-value
+  CSSOMString PrimitiveValue::CustomCSSText(const SerialisationContext &context) const noexcept
+  {
+    switch (_header.PrimitiveKind)
+    {
+      case PrimitiveKind::Number:     return SerialiseNumber();
+      case PrimitiveKind::ValueId:    return CSSOMString(ToLower(_payload.ValueId));
+      case PrimitiveKind::PropertyId: return CSSOMString(ToString(_payload.PropertyId));
+      case PrimitiveKind::String:     return SerialiseString(CSSOMString(StringView()));
+      case PrimitiveKind::FontFamily: return SerialiseFontFamily(CSSOMString(StringView()));
+      case PrimitiveKind::Calc:       return _payload.Calc->CssText(context);
+      case PrimitiveKind::CustomIdent:
+      {
+        StringBuilder builder;
+        SerialiseIdentifier(CSSOMString(StringView()), builder);
+        return krys::move(builder).ToString();
       }
     }
+    krys_unreachable();
   }
 
   bool PrimitiveValue::Equals(const PrimitiveValue &other) const noexcept
   {
-    if (PrimitiveUnitType() != other.PrimitiveUnitType())
+    if (_header.PrimitiveKind != other._header.PrimitiveKind || StoredUnit() != other.StoredUnit())
     {
       return false;
     }
 
-    switch (PrimitiveUnitType())
+    switch (_header.PrimitiveKind)
     {
-      case UnitType::Unknown:    return false;
-      case UnitType::PropertyId: return _value.PropertyId == other._value.PropertyId;
-      case UnitType::ValueId:    return _value.ValueId == other._value.ValueId;
-      case UnitType::String:
-      case UnitType::CustomIdent:
-      case UnitType::FontFamily:
-        return _value.String == other._value.String; // Interned, so equal iff same atom.
-      case UnitType::Attr: return ProtectedCSSAttrValue()->Equals(*other.ProtectedCSSAttrValue());
-      case UnitType::Calc: return ProtectedCSSCalcValue()->Equals(*other.ProtectedCSSCalcValue());
-      case UnitType::Ident:
-      case UnitType::CalcPercentageWithAngle:
-      case UnitType::CalcPercentageWithLength:
-        // FIXME: seems like these should be handled.
-        krys_debug_assert(false);
-        return false;
-      default: return _value.Number == other._value.Number;
+      case PrimitiveKind::Number:
+        // A number without a unit is no value, and equals nothing.
+        return StoredUnit() != UnitType::Unknown && _payload.Number == other._payload.Number;
+      case PrimitiveKind::ValueId:    return _payload.ValueId == other._payload.ValueId;
+      case PrimitiveKind::PropertyId: return _payload.PropertyId == other._payload.PropertyId;
+      case PrimitiveKind::String:
+      case PrimitiveKind::CustomIdent:
+      case PrimitiveKind::FontFamily:
+        // Atoms are interned, so equal text means the same storage.
+        return _payload.String == other._payload.String;
+      case PrimitiveKind::Calc: return _payload.Calc->Equals(*other._payload.Calc);
     }
+    krys_unreachable();
   }
 
   bool PrimitiveValue::AddDerivedHash(size_t &seed) const noexcept
   {
-    seed = CombineFastHashes(seed, PrimitiveUnitType());
-
-    switch (PrimitiveUnitType())
+    seed = CombineFastHashes(seed, _header.PrimitiveKind, StoredUnit());
+    switch (_header.PrimitiveKind)
     {
-      case UnitType::Unknown:                  break;
-      case UnitType::PropertyId:               seed = CombineFastHashes(seed, _value.PropertyId); break;
-      case UnitType::ValueId:                  seed = CombineFastHashes(seed, _value.ValueId); break;
-      case UnitType::String:
-      case UnitType::CustomIdent:
-      case UnitType::FontFamily:               seed = CombineFastHashes(seed, _value.String->Hash()); break;
-      case UnitType::Attr:                     seed = CombineFastHashes(seed, _value.Attr); break;
-      case UnitType::Calc:                     seed = CombineFastHashes(seed, _value.Calc); break;
-      case UnitType::Ident:
-      case UnitType::CalcPercentageWithAngle:
-      case UnitType::CalcPercentageWithLength: krys_debug_assert(false); return false;
-      default:                                 seed = CombineFastHashes(seed, _value.Number); break;
+      case PrimitiveKind::Number:
+        if (StoredUnit() != UnitType::Unknown)
+        {
+          seed = CombineFastHashes(seed, _payload.Number);
+        }
+        break;
+      case PrimitiveKind::ValueId:     seed = CombineFastHashes(seed, _payload.ValueId); break;
+      case PrimitiveKind::PropertyId:  seed = CombineFastHashes(seed, _payload.PropertyId); break;
+      case PrimitiveKind::String:
+      case PrimitiveKind::CustomIdent:
+      case PrimitiveKind::FontFamily:  seed = CombineFastHashes(seed, _payload.String->Hash()); break;
+      // By identity: equal calc()s may hash differently, which only costs a missed deduplication.
+      case PrimitiveKind::Calc:        seed = CombineFastHashes(seed, _payload.Calc); break;
     }
-
     return true;
   }
 
@@ -839,15 +415,15 @@ namespace krys::boo::css
   void PrimitiveValue::CollectComputedStyleDependencies(
     css::ComputedStyleDependencies &dependencies) const noexcept
   {
-    if (auto *calcValue = CSSCalcValue())
+    if (IsCalc())
     {
-      calcValue->CollectComputedStyleDependencies(dependencies);
-      return;
+      _payload.Calc->CollectComputedStyleDependencies(dependencies);
     }
-
-    if (auto lengthUnit = ToLengthUnit(PrimitiveUnitType()))
+    else if (auto lengthUnit = ToUnit<LengthUnit>(StoredUnit()))
     {
       css::CollectComputedStyleDependencies(dependencies, *lengthUnit);
     }
   }
+
+#pragma endregion
 }

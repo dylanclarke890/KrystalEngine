@@ -40,14 +40,14 @@ namespace krys::boo::css
   {
     KRYS_NODISCARD bool IsValueIdPair(const Value &value, ValueId valueId) noexcept
     {
-      return value.IsValuePairValue() && IsValueId(value.First(), valueId)
-             && IsValueId(value.Second(), valueId);
+      return Is<ValuePair>(value) && value.First().ValueId() == valueId
+             && value.Second().ValueId() == valueId;
     }
 
     KRYS_NODISCARD bool IsNumber(const PrimitiveValue &value, double number, UnitType type) noexcept
     {
-      return value.PrimitiveType() == type && !value.IsCalculated()
-             && value.ValueNoConversionDataRequired<double>() == number;
+      return value.Unit() == type && !value.IsCalc()
+             && value.ResolveWithoutConversionData<double>() == number;
     }
 
     KRYS_NODISCARD bool IsNumber(const PrimitiveValue *value, double number, UnitType type) noexcept
@@ -68,13 +68,13 @@ namespace krys::boo::css
 
     KRYS_NODISCARD bool IsValueId(const SideValues &quad, ValueId valueId) noexcept
     {
-      return css::IsValueId(*quad.Top, valueId) && css::IsValueId(*quad.Right, valueId)
-             && css::IsValueId(*quad.Bottom, valueId) && css::IsValueId(*quad.Left, valueId);
+      return quad.Top->ValueId() == valueId && quad.Right->ValueId() == valueId
+             && quad.Bottom->ValueId() == valueId && quad.Left->ValueId() == valueId;
     }
 
     KRYS_NODISCARD bool IsNumericQuad(const Value &value, double number, UnitType type) noexcept
     {
-      return value.IsQuadValue() && IsNumber(Downcast<QuadValue>(value).Sides(), number, type);
+      return Is<QuadValue>(value) && IsNumber(Downcast<QuadValue>(value).Sides(), number, type);
     }
   }
 
@@ -174,7 +174,7 @@ namespace krys::boo::css
 
     return SwitchOn(
       InitialValueForLonghand(longhand), [&](ValueId initialValue)
-      { return css::IsValueId(value, initialValue); }, [&](InitialNumericValue initialValue)
+      { return value.ValueId() == initialValue; }, [&](InitialNumericValue initialValue)
       { return IsNumber(value, initialValue.Number, initialValue.Type); });
   }
 

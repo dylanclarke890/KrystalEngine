@@ -61,8 +61,6 @@ namespace krys::boo
 
 #pragma endregion
 
-    KRYS_NODISCARD RefPtr<CSSStyleSheet> ProtectedStyleSheet() const noexcept;
-
   private:
     KRYS_NODISCARD css::RuleType StyleRuleType() const noexcept final
     {

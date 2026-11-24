@@ -136,15 +136,14 @@ namespace krys::boo::tests
                                                          {}, MonotonicTime::Now()));
     }
 
-    /// @brief A press of the key named @p key (with the legacy identifier @p keyIdentifier) that types @p
-    /// text.
-    KRYS_NODISCARD bool Key(EventHandler &handler, utf8_string key, utf8_string keyIdentifier, int32 keyCode,
+    /// @brief A press of the key named @p key that types @p text.
+    KRYS_NODISCARD bool Key(EventHandler &handler, utf8_string key, int32 keyCode,
                             const utf8_string &text = {},
                             EnumSet<PlatformEvent::Modifier> modifiers = {}) noexcept
     {
       return handler.KeyEvent(PlatformKeyboardEvent(PlatformEvent::Type::KeyDown, text, text, krys::move(key),
-                                                    u8"", krys::move(keyIdentifier), keyCode, false, false,
-                                                    false, modifiers, MonotonicTime::Now()));
+                                                    u8"", keyCode, false, false, false, modifiers,
+                                                    MonotonicTime::Now()));
     }
 
     /// @brief Cancels the events it handles, keeping the last one's vertical delta.
@@ -993,7 +992,7 @@ namespace krys::boo::tests
     ScrollAnimatorOff animatorOff {fixture.Document->GetSettings()};
     auto down = [&]
     {
-      return Key(handler, u8"ArrowDown", u8"Down", vk::Down);
+      return Key(handler, u8"ArrowDown", vk::Down);
     };
 
     SECTION("the view, by lines, pages and to its ends")
@@ -1001,37 +1000,36 @@ namespace krys::boo::tests
       // A line is 40 pixels.
       CHECK(down());
       CHECK(view.GetScrollPosition() == ScrollPosition(0, 40));
-      CHECK(Key(handler, u8"ArrowRight", u8"Right", vk::Right));
+      CHECK(Key(handler, u8"ArrowRight", vk::Right));
       CHECK(view.GetScrollPosition() == ScrollPosition(40, 40));
-      CHECK(Key(handler, u8"ArrowLeft", u8"Left", vk::Left));
-      CHECK(Key(handler, u8"ArrowUp", u8"Up", vk::Up));
+      CHECK(Key(handler, u8"ArrowLeft", vk::Left));
+      CHECK(Key(handler, u8"ArrowUp", vk::Up));
       CHECK(view.GetScrollPosition() == ScrollPosition());
 
       // A page is four fifths of the 79 pixels in view.
-      CHECK(Key(handler, u8"PageDown", u8"PageDown", vk::Next));
+      CHECK(Key(handler, u8"PageDown", vk::Next));
       CHECK(view.GetScrollPosition() == ScrollPosition(0, 63));
-      CHECK(Key(handler, u8"PageUp", u8"PageUp", vk::Prior));
+      CHECK(Key(handler, u8"PageUp", vk::Prior));
       CHECK(view.GetScrollPosition() == ScrollPosition());
 
-      CHECK(Key(handler, u8"End", u8"End", vk::End));
+      CHECK(Key(handler, u8"End", vk::End));
       CHECK(view.GetScrollPosition() == ScrollPosition(0, 521));
-      CHECK(Key(handler, u8"Home", u8"Home", vk::Home));
+      CHECK(Key(handler, u8"Home", vk::Home));
       CHECK(view.GetScrollPosition() == ScrollPosition());
 
       // At the top, Up does nothing.
-      CHECK_FALSE(Key(handler, u8"ArrowUp", u8"Up", vk::Up));
+      CHECK_FALSE(Key(handler, u8"ArrowUp", vk::Up));
 
       // With modifiers, the page keys do nothing.
-      CHECK_FALSE(
-        Key(handler, u8"PageDown", u8"PageDown", vk::Next, {}, {PlatformEvent::Modifier::ShiftKey}));
+      CHECK_FALSE(Key(handler, u8"PageDown", vk::Next, {}, {PlatformEvent::Modifier::ShiftKey}));
       CHECK(view.GetScrollPosition() == ScrollPosition());
     }
 
     SECTION("Space pages down, and Shift+Space up")
     {
-      CHECK(Key(handler, u8" ", u8"U+0020", vk::Space, u8" "));
+      CHECK(Key(handler, u8" ", vk::Space, u8" "));
       CHECK(view.GetScrollPosition() == ScrollPosition(0, 63));
-      CHECK(Key(handler, u8" ", u8"U+0020", vk::Space, u8" ", {PlatformEvent::Modifier::ShiftKey}));
+      CHECK(Key(handler, u8" ", vk::Space, u8" ", {PlatformEvent::Modifier::ShiftKey}));
       CHECK(view.GetScrollPosition() == ScrollPosition());
     }
 
@@ -1041,7 +1039,7 @@ namespace krys::boo::tests
       Downcast<HTMLElement>(box).Focus();
       CHECK(down());
       CHECK(box.ScrollTop() == 40);
-      CHECK(Key(handler, u8"End", u8"End", vk::End));
+      CHECK(Key(handler, u8"End", vk::End));
       CHECK(box.ScrollTop() == 150);
       CHECK(view.GetScrollPosition() == ScrollPosition());
       CHECK(down());

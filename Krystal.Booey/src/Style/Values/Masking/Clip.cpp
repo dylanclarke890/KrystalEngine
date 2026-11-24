@@ -40,7 +40,7 @@ namespace krys::boo::style
 
   Clip CSSValueConversion<Clip>::operator()(BuilderState &state, const css::Value &value) noexcept
   {
-    if (css::IsValueId(value, css::ValueId::Auto))
+    if (value.ValueId() == css::ValueId::Auto)
     {
       return css::keywords::Auto {};
     }
@@ -75,7 +75,7 @@ namespace krys::boo::style
 
     auto convertEdge = [&](const css::PrimitiveValue &primitiveValue) -> ClipEdge
     {
-      if (css::IsValueId(primitiveValue, css::ValueId::Auto))
+      if (primitiveValue.ValueId() == css::ValueId::Auto)
       {
         return css::keywords::Auto {};
       }

@@ -26,9 +26,9 @@ namespace krys::boo::css::tests
     SECTION("The resolution defaults to 1x")
     {
       auto option = ImageSetOptionValue::Create(Image(u8"a.png"));
-      CHECK(option->IsImageSetOptionValue());
+      CHECK(Is<ImageSetOptionValue>(*option));
       CHECK_FALSE(option->IsImage());
-      CHECK(option->Image().IsImageValue());
+      CHECK(Is<ImageValue>(option->Image()));
       CHECK(CssText(option->Resolution()) == "1x");
       CHECK_FALSE(option->Type());
       CHECK(CssText(*option) == "url(\"a.png\") 1x");
@@ -38,7 +38,6 @@ namespace krys::boo::css::tests
     {
       auto option = ImageSetOptionValue::Create(Image(u8"a.png"), X(2.0));
       CHECK(CssText(option->Resolution()) == "2x");
-      CHECK(option->ProtectedResolution().get() == &option->Resolution());
       CHECK_FALSE(option->Type());
       CHECK(CssText(*option) == "url(\"a.png\") 2x");
     }

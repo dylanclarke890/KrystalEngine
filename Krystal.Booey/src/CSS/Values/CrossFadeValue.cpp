@@ -46,13 +46,12 @@ namespace krys::boo::css
 
   bool CrossFadeValue::Equals(const CrossFadeValue &other) const noexcept
   {
-    return EqualInputImages(other) && CompareValue(_percentageValue, other._percentageValue);
+    return EqualInputImages(other) && *_percentageValue == *other._percentageValue;
   }
 
   bool CrossFadeValue::EqualInputImages(const CrossFadeValue &other) const noexcept
   {
-    return CompareValue(_fromValueOrNone, other._fromValueOrNone)
-           && CompareValue(_toValueOrNone, other._toValueOrNone);
+    return *_fromValueOrNone == *other._fromValueOrNone && *_toValueOrNone == *other._toValueOrNone;
   }
 
   CSSOMString CrossFadeValue::CustomCSSText(const SerialisationContext &context) const noexcept
@@ -69,9 +68,10 @@ namespace krys::boo::css
 
   RefPtr<StyleImage> CrossFadeValue::CreateStyleImage(const style::BuilderState &state) const noexcept
   {
-    return StyleCrossfadeImage::Create(
-      state.CreateStyleImage(*_fromValueOrNone), state.CreateStyleImage(*_toValueOrNone),
-      std::clamp(_percentageValue->ValueDividingBy100IfPercentage<double>(state.CssToLengthConversionData()),
-                 0.0, 1.0));
+    return StyleCrossfadeImage::Create(state.CreateStyleImage(*_fromValueOrNone),
+                                       state.CreateStyleImage(*_toValueOrNone),
+                                       std::clamp(_percentageValue->ResolveDividingBy100IfPercentage<double>(
+                                                    state.CssToLengthConversionData()),
+                                                  0.0, 1.0));
   }
 }

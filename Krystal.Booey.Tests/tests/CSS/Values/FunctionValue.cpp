@@ -11,7 +11,7 @@ namespace krys::boo::css::tests
     SECTION("No arguments")
     {
       auto function = FunctionValue::Create(ValueId::Rotate);
-      CHECK(function->IsFunctionValue());
+      CHECK(Is<FunctionValue>(*function));
       CHECK(function->Name() == ValueId::Rotate);
       CHECK(function->size() == 0u);
       CHECK(CssText(*function) == "rotate()");
@@ -37,7 +37,7 @@ namespace krys::boo::css::tests
                                                               PrimitiveValue::Create(1.0, UnitType::Number),
                                                               PrimitiveValue::Create(5.0, UnitType::Number)});
       CHECK(function->size() == 5u);
-      CHECK(function->Separator() == ValueSeparator::CommaSeparator);
+      CHECK(function->Separator() == ValueSeparator::Comma);
       CHECK(CssText(*function) == "matrix(1, 0, 0, 1, 5)");
     }
 

@@ -29,12 +29,17 @@
  */
 
 #include "Krystal.Booey/CSS/Values/ToLengthConversionData.hpp"
+#include "Krystal.Booey/CSS/Font/GenericFontFamilyNames.hpp"
 #include "Krystal.Booey/DOM/Nodes/Element.hpp"
+#include "Krystal.Booey/Graphics/Fonts/FontCache.hpp"
+#include "Krystal.Booey/Graphics/Fonts/FontCascade.hpp"
+#include "Krystal.Booey/Graphics/Fonts/FontCascadeFonts.hpp"
 #include "Krystal.Booey/Rendering/RenderView.hpp"
 #include "Krystal.Booey/Rendering/Style/RenderStyle+GettersInlines.hpp"
 #include "Krystal.Booey/Rendering/Style/RenderStyle+SettersInlines.hpp"
 #include "Krystal.Booey/Style/Builder/BuilderState.hpp"
 #include "Krystal.Core/Geometry/Size.hpp"
+#include "Krystal.Core/Memory/NeverDestroyed.hpp"
 
 namespace krys::boo::css
 {
@@ -68,6 +73,39 @@ namespace krys::boo::css
   }
 
   ToLengthConversionData::~ToLengthConversionData() noexcept = default;
+
+  namespace
+  {
+    /// @brief The initial style with the initial font resolved: the standard family at `medium`, 16px.
+    KRYS_NODISCARD RenderStyle CreateInitialStyleWithFont() noexcept
+    {
+      auto style = RenderStyle::Create();
+      FontCascadeDescription description;
+      description.SetOneFamily(generic_font_family_names::StandardFamily());
+      description.SetKeywordSizeFromIdentifier(ValueId::Medium);
+      description.SetSpecifiedSize(16.0f);
+      description.SetComputedSize(16.0f);
+      FontCascade fontCascade {krys::move(description), style.GetFontCascade()};
+      fontCascade.Update();
+      style.SetFontCascade(krys::move(fontCascade));
+      return style;
+    }
+  }
+
+  const ToLengthConversionData &ToLengthConversionData::WithoutElement() noexcept
+  {
+    static MainThreadNeverDestroyed<RenderStyle> initialStyle {CreateInitialStyleWithFont()};
+    static MainThreadNeverDestroyed<ToLengthConversionData> conversionData {
+      *initialStyle.get(), initialStyle.get(), nullptr, nullptr};
+    // Like a document's, the initial font's fonts are made again when the font cache changes.
+    const auto &fontCascade = initialStyle.get()->GetFontCascade();
+    if (auto *fonts = fontCascade.Fonts();
+        !fonts || fonts->Generation() != FontCache::Singleton().Generation())
+    {
+      fontCascade.Update();
+    }
+    return conversionData;
+  }
 
   const FontCascade &ToLengthConversionData::FontCascadeForFontUnits() const noexcept
   {
@@ -108,7 +146,7 @@ namespace krys::boo::css
       return {};
     }
 
-    return _renderView->SizeForCSSDefaultViewportUnits() / 100.0f;
+    return _renderView->SizeForCSSDefaultViewportUnits(_rootStyle) / 100.0f;
   }
 
   SizeF ToLengthConversionData::SmallViewportFactor() const noexcept
@@ -123,7 +161,7 @@ namespace krys::boo::css
       return {};
     }
 
-    return _renderView->SizeForCSSSmallViewportUnits() / 100.0f;
+    return _renderView->SizeForCSSSmallViewportUnits(_rootStyle) / 100.0f;
   }
 
   SizeF ToLengthConversionData::LargeViewportFactor() const noexcept
@@ -138,7 +176,7 @@ namespace krys::boo::css
       return {};
     }
 
-    return _renderView->SizeForCSSLargeViewportUnits() / 100.0f;
+    return _renderView->SizeForCSSLargeViewportUnits(_rootStyle) / 100.0f;
   }
 
   SizeF ToLengthConversionData::DynamicViewportFactor() const noexcept
@@ -153,7 +191,7 @@ namespace krys::boo::css
       return {};
     }
 
-    return _renderView->SizeForCSSDynamicViewportUnits() / 100.0f;
+    return _renderView->SizeForCSSDynamicViewportUnits(_rootStyle) / 100.0f;
   }
 
   void ToLengthConversionData::SetUsesContainerUnits() const noexcept
@@ -167,11 +205,6 @@ namespace krys::boo::css
   style::BuilderState *ToLengthConversionData::StyleBuilderState() const noexcept
   {
     return _styleBuilderState.get();
-  }
-
-  CheckedPtr<style::BuilderState> ToLengthConversionData::ProtectedStyleBuilderState() const noexcept
-  {
-    return _styleBuilderState;
   }
 
   bool ToLengthConversionData::EvaluationTimeZoomEnabled() const noexcept

@@ -30,6 +30,7 @@
 #include "Krystal.Booey/CSS/Parser/ParserContext.hpp"
 #include "Krystal.Booey/CSS/Properties/MutableStyleProperties.hpp"
 #include "Krystal.Booey/CSS/Properties/Property.hpp"
+#include "Krystal.Booey/CSS/Properties/PropertyQueries.hpp"
 #include "Krystal.Booey/CSS/StyleSheets/StyleSheetContents.hpp"
 #include "Krystal.Booey/CSS/Values/SerialisationContext.hpp"
 #include "Krystal.Booey/DOM/Nodes/Document.hpp"
@@ -263,7 +264,7 @@ namespace krys::boo
 
   CSSOMString PropertySetCSSStyleProperties::Item(uint32 i) const noexcept
   {
-    for (auto j = 0u; j <= i && j < _propertySet->PropertyCount(); j++)
+    for (auto j = 0u; j <= i && j < _propertySet->size(); j++)
     {
       if (!IsExposed(_propertySet->PropertyAt(j).Id()))
       {
@@ -271,7 +272,7 @@ namespace krys::boo
       }
     }
 
-    if (i >= _propertySet->PropertyCount())
+    if (i >= _propertySet->size())
     {
       return {};
     }
@@ -464,7 +465,7 @@ namespace krys::boo
     bool parsingDescriptor =
       parserContext.EnclosingRuleType && *parserContext.EnclosingRuleType != css::RuleType::Style;
     return css::IsExposed(property, &parserContext.PropertySettings)
-           && (!css::Property::IsDescriptorOnly(property) || parsingDescriptor);
+           && (!css::IsDescriptorOnly(property) || parsingDescriptor);
   }
 
   css::StyleSheetContents *PropertySetCSSStyleProperties::ContextStyleSheet() const noexcept

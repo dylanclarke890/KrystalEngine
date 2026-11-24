@@ -32,6 +32,7 @@
 #include "Krystal.Booey/Animation/Timelines/ViewTimeline.hpp"
 #include "Krystal.Booey/Animation/WebAnimationUtilities.hpp"
 #include "Krystal.Booey/CSS/Properties/Property.hpp"
+#include "Krystal.Booey/CSS/Properties/PropertyQueries.hpp"
 #include "Krystal.Booey/CSS/Properties/PropertyShorthand.hpp"
 #include "Krystal.Booey/DOM/Nodes/PseudoElement.hpp"
 #include "Krystal.Booey/HTML/EventLoop/EventLoop.hpp"
@@ -637,15 +638,14 @@ namespace krys::boo::style
                 return false;
               }
               auto resolvedPropertyId =
-                css::Property::ResolveDirectionAwareProperty(propertyId, style.GetWritingMode());
+                css::ResolveDirectionAwareProperty(propertyId, style.GetWritingMode());
               if (resolvedPropertyId == *propertyIdToMatch)
               {
                 return true;
               }
               for (auto longhand : css::ShorthandForProperty(resolvedPropertyId))
               {
-                auto resolvedLonghand =
-                  css::Property::ResolveDirectionAwareProperty(longhand, style.GetWritingMode());
+                auto resolvedLonghand = css::ResolveDirectionAwareProperty(longhand, style.GetWritingMode());
                 if (resolvedLonghand == *propertyIdToMatch)
                 {
                   return true;
@@ -693,7 +693,7 @@ namespace krys::boo::style
               [&](css::PropertyId propertyId)
               {
                 auto resolvedPropertyId =
-                  css::Property::ResolveDirectionAwareProperty(propertyId, style.GetWritingMode());
+                  css::ResolveDirectionAwareProperty(propertyId, style.GetWritingMode());
                 if (css::IsShorthand(resolvedPropertyId))
                 {
                   for (auto longhand : css::ShorthandForProperty(resolvedPropertyId))

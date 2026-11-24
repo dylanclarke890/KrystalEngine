@@ -346,6 +346,41 @@ namespace krys::ui::tests
     }
   }
 
+  TEST_CASE("View: accessibility of progress bars", "[UI][Accessibility]")
+  {
+    View view({400, 300});
+    view.LoadHTML(u8"<!DOCTYPE html><progress aria-label=Done value=3 max=4></progress>"
+                  u8"<progress aria-label=Waiting></progress>"
+                  u8"<div role=progressbar aria-label=Busy></div>");
+    WaitForLoad(view);
+    view.UpdateRendering();
+
+    AccessibilityWindow window;
+    view.AttachAccessibility(window, {0, 0});
+    auto &tree = *window.Tree;
+    auto root = tree.Root();
+
+    // A determinate progress bar has a range.
+    auto done = tree.Node(FindByName(tree, root, u8"Done"));
+    REQUIRE(done);
+    CHECK(done->Role == pal::AccessibilityRole::ProgressBar);
+    REQUIRE(done->Range);
+    CHECK(done->Range->Value == 3);
+    CHECK(done->Range->Minimum == 0);
+    CHECK(done->Range->Maximum == 4);
+
+    // An indeterminate one has none: no value, minimum or maximum
+    // (https://w3c.github.io/html-aam/#el-progress).
+    for (auto name : {u8"Waiting", u8"Busy"})
+    {
+      CAPTURE(reinterpret_cast<const char *>(name));
+      auto indeterminate = tree.Node(FindByName(tree, root, name));
+      REQUIRE(indeterminate);
+      CHECK(indeterminate->Role == pal::AccessibilityRole::ProgressBar);
+      CHECK_FALSE(indeterminate->Range);
+    }
+  }
+
   TEST_CASE("View: accessibility of text lines", "[UI][Accessibility]")
   {
     View view({400, 300});
@@ -557,6 +592,33 @@ namespace krys::ui::tests
     CHECK(tree.Children(root).size() == pageChildren);
     CHECK_FALSE(tree.Node(plum));
     CHECK_FALSE(tree.Node(popup));
+  }
+
+  TEST_CASE("View: a popup's items keep their options' accessible names", "[UI][Accessibility]")
+  {
+    View view({400, 300});
+    view.LoadHTML(u8"<!DOCTYPE html><style>body { margin: 0; font: 16px sans-serif }</style>"
+                  u8"<select id=menu aria-label=Fruit><option aria-label='Green apple'>Apple</option>"
+                  u8"<option>Plum</option></select>");
+    WaitForLoad(view);
+    view.UpdateRendering();
+
+    AccessibilityWindow window;
+    view.AttachAccessibility(window, {0, 0});
+    auto &tree = *window.Tree;
+    auto root = tree.Root();
+    auto menu = FindByName(tree, root, u8"Fruit");
+    REQUIRE(menu != 0);
+
+    REQUIRE(tree.PerformAction(menu, pal::AccessibilityAction::Press));
+    auto *overlay = view.ShownOverlay();
+    REQUIRE(overlay);
+    view.UpdateRendering();
+    auto popup = tree.Children(root).back();
+    // An option's aria-label names its item, as it names the option; one without keeps its text.
+    CHECK(FindByName(tree, popup, u8"Green apple") != 0);
+    CHECK(FindByName(tree, popup, u8"Plum") != 0);
+    overlay->Hide();
   }
 #ifdef _WIN32
   namespace

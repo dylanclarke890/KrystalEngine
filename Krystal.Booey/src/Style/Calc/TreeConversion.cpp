@@ -289,9 +289,8 @@ namespace krys::boo::style::calc
           krys_debug_assert(options.Evaluation.ConversionData->StyleBuilderState()->GetElement());
         }
 
-        auto baseValue =
-          options.Evaluation.ConversionData->ProtectedStyleBuilderState()->LookupCSSRandomBaseValue(
-            css::calc::RandomCachingKey {sharingOptions.Identifier}, sharingOptions.ElementShared);
+        auto baseValue = options.Evaluation.ConversionData->StyleBuilderState()->LookupCSSRandomBaseValue(
+          css::calc::RandomCachingKey {sharingOptions.Identifier}, sharingOptions.ElementShared);
 
         return Random::Fixed {baseValue};
       },
@@ -302,8 +301,8 @@ namespace krys::boo::style::calc
           { return Random::Fixed {raw.Value}; },
           [&](const css::Number<css::ClosedUnitRange>::Calc &calc) -> Random::Fixed
           {
-            return Random::Fixed {calc.Evaluate(
-              css::Category::Number, *options.Evaluation.ConversionData->ProtectedStyleBuilderState())};
+            return Random::Fixed {
+              calc.Evaluate(css::Category::Number, *options.Evaluation.ConversionData->StyleBuilderState())};
           });
       });
   }

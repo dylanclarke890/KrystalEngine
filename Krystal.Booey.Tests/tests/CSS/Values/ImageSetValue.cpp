@@ -22,11 +22,11 @@ namespace krys::boo::css::tests
   TEST_CASE_METHOD(ValueFixture, "ImageSetValue::Create", "[CSS][Values][ImageSetValue]")
   {
     auto set = ImageSetValue::Create({Option(u8"a.png", 1.0), Option(u8"b.png", 2.0)});
-    CHECK(set->IsImageSetValue());
+    CHECK(Is<ImageSetValue>(*set));
     CHECK(set->IsImage());
     CHECK_FALSE(set->IsImageGeneratorValue());
     CHECK(set->ContainsValueList());
-    CHECK(set->Length() == 2u);
+    CHECK(set->size() == 2u);
   }
 
   TEST_CASE_METHOD(ValueFixture, "ImageSetValue serialisation", "[CSS][Values][ImageSetValue]")
@@ -55,8 +55,8 @@ namespace krys::boo::css::tests
     auto set = ImageSetValue::Create({Option(u8"a.png", 1.0), Option(u8"b.png", 2.0)});
     auto children = Children(*set);
     REQUIRE(children.size() == 2uz);
-    CHECK(children[0uz] == set->Item(0u));
-    CHECK(children[1uz] == set->Item(1u));
+    CHECK(children[0uz] == &(*set)[0u]);
+    CHECK(children[1uz] == &(*set)[1u]);
 
     CHECK(set->ComputedStyleDependencies().IsComputationallyIndependent());
     // Only the values themselves are asked, not their children.

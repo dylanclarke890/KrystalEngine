@@ -1,28 +1,4 @@
-﻿/*
- * Copyright (C) 1999 Lars Knoll (knoll@kde.org)
- *           (C) 1999 Antti Koivisto (koivisto@kde.org)
- *           (C) 2001 Dirk Mueller (mueller@kde.org)
- * Copyright (C) 2004-2020 Apple Inc. All rights reserved.
- * Copyright (C) 2008, 2009 Torch Mobile Inc. All rights reserved. (http://www.torchmobile.com/)
- *
- * This library is free software; you can redistribute it and/or
- * modify it under the terms of the GNU Library General Public
- * License as published by the Free Software Foundation; either
- * version 2 of the License, or (at your option) any later version.
- *
- * This library is distributed in the hope that it will be useful,
- * but WITHOUT ANY WARRANTY; without even the implied warranty of
- * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU
- * Library General Public License for more details.
- *
- * You should have received a copy of the GNU Library General Public License
- * along with this library; see the file COPYING.LIB.  If not, write to
- * the Free Software Foundation, Inc., 51 Franklin Street, Fifth Floor,
- * Boston, MA 02110-1301, USA.
- *
- */
-
-#pragma once
+﻿#pragma once
 
 #include "Krystal.Booey/DOM/Events/EventTarget.hpp"
 #include "Krystal.Booey/DOM/Internals/NodeRareData.hpp"
@@ -184,8 +160,8 @@ namespace krys::boo::dom
     StyleIsAffectedByPreviousSibling,
     DescendantsAffectedByPreviousSibling,
     StyleAffectedByEmpty,
-    // We optimize for :first-child and :last-child. The other positional child selectors like nth-child or
-    // *-child-of-type, we will just give up and re-evaluate whenever children change at all.
+    // `:first-child` and `:last-child` are tracked above; the other positional pseudo-classes
+    // (`:nth-child()`, the `-of-type` ones) only record that any change to the children restyles them.
     ChildrenAffectedByForwardPositionalRules,
     DescendantsAffectedByForwardPositionalRules,
     ChildrenAffectedByBackwardPositionalRules,
@@ -562,6 +538,7 @@ namespace krys::boo
       _nodeStyleFlags.Add(dom::NodeStyleFlag::DescendantNeedsStyleResolution);
     }
 
+    /// @brief Marks that one of the node's own children needs its style resolved.
     void SetDirectChildNeedsStyleRecalc() noexcept
     {
       _nodeStyleFlags.Add(dom::NodeStyleFlag::DirectChildNeedsStyleResolution);
@@ -657,12 +634,15 @@ namespace krys::boo
 
 #pragma region Editing
 
+    /// @brief Whether `user-select: all` content counts as editable; it's selected as one unit, so editing
+    /// commands treat it as read-only.
     enum class UserSelectAllTreatment : bool
     {
       NotEditable,
       Editable,
     };
 
+    /// @brief How a node's contents can be edited.
     enum class Editability : uint8
     {
       ReadOnly,
@@ -670,6 +650,7 @@ namespace krys::boo
       CanEditRichly,
     };
 
+    /// @brief Whether out-of-date style is resolved before it's read.
     enum class ShouldUpdateStyle : bool
     {
       Update,
@@ -679,6 +660,7 @@ namespace krys::boo
     /// @brief Whether the node is editable, resolving style first if it's out of date.
     KRYS_NODISCARD bool IsContentEditable() const noexcept;
 
+    /// @brief Whether the node is editable as rich text, resolving style first if it's out of date.
     KRYS_NODISCARD bool IsContentRichlyEditable() const noexcept;
 
     /// @brief Whether the node is editable, by the style it has (`-internal-user-modify`, which
@@ -689,16 +671,19 @@ namespace krys::boo
       return ComputeEditability(treatment, ShouldUpdateStyle::DoNotUpdate) != Editability::ReadOnly;
     }
 
-    // FIXME: Replace every use of this function by helpers in Editing.h
+    /// @brief Whether the node's style lets its contents be edited as rich text, not only as plain text.
     KRYS_NODISCARD bool HasRichlyEditableStyle() const noexcept
     {
       return ComputeEditability(UserSelectAllTreatment::NotEditable, ShouldUpdateStyle::DoNotUpdate)
              == Editability::CanEditRichly;
     }
 
+    /// @brief How the node can be edited, by its style (or, in a shadow tree, its `contenteditable`
+    /// attributes).
     KRYS_NODISCARD Editability ComputeEditability(UserSelectAllTreatment treatment,
                                                   ShouldUpdateStyle shouldUpdateStyle) const noexcept;
 
+    /// @brief The same, reading @p incomingStyle when it's given rather than the node's own style.
     KRYS_NODISCARD Editability
       ComputeEditabilityWithStyle(const RenderStyle *incomingStyle, UserSelectAllTreatment treatment,
                                   ShouldUpdateStyle shouldUpdateStyle) const noexcept;
@@ -929,11 +914,6 @@ namespace krys::boo
       return _nodeFlags.contains(dom::NodeFlag::IsShadowRoot);
     }
 
-    KRYS_NODISCARD bool IsUnknownElement() const noexcept
-    {
-      return _nodeFlags.contains(dom::NodeFlag::IsUnknownElement);
-    }
-
     KRYS_NODISCARD bool IsHTMLElement() const noexcept
     {
       return _nodeFlags.contains(dom::NodeFlag::IsHTMLElement);
@@ -979,12 +959,6 @@ namespace krys::boo
              && _nodeFlags.contains(dom::NodeFlag::IsUnknownElement);
     }
 
-    KRYS_NODISCARD bool IsMathMLUnknownElement() const noexcept
-    {
-      return _nodeFlags.contains(dom::NodeFlag::IsMathMLElement)
-             && _nodeFlags.contains(dom::NodeFlag::IsUnknownElement);
-    }
-
 #pragma endregion
 
 #pragma region Relationships
@@ -1014,8 +988,12 @@ namespace krys::boo
     void InvalidateStyle(style::Validity validity,
                          style::InvalidationMode mode = style::InvalidationMode::Normal) noexcept;
 
+    /// @brief Marks the ancestors of a node whose style was invalidated, and schedules a style update if the
+    /// document element now has something to resolve.
     void UpdateAncestorsForStyleRecalc() noexcept;
 
+    /// @brief Marks each composed tree ancestor (and the shadow roots on the way) as having a descendant to
+    /// resolve, up to the first that already has one.
     void MarkAncestorsForInvalidatedStyle() noexcept;
 
 #pragma endregion
@@ -1025,6 +1003,8 @@ namespace krys::boo
 #pragma endregion
 
   private:
+    /// @brief Lowers the node's style validity to @p validity if it's worse, and records whether its layer
+    /// needs recompositing or its renderer rebuilding.
     void AdjustStyleValidity(style::Validity validity, style::InvalidationMode mode) noexcept;
   };
 }

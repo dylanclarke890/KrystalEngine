@@ -1,22 +1,4 @@
-﻿/*
- * Copyright (C) 2009, Martin Robinson
- *
- *  This library is free software; you can redistribute it and/or
- *  modify it under the terms of the GNU Lesser General Public
- *  License as published by the Free Software Foundation; either
- *  version 2 of the License, or (at your option) any later version.
- *
- *  This library is distributed in the hope that it will be useful,
- *  but WITHOUT ANY WARRANTY; without even the implied warranty of
- *  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU
- *  Lesser General Public License for more details.
- *
- *  You should have received a copy of the GNU Lesser General Public
- *  License along with this library; if not, write to the Free Software
- *  Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
- */
-
-#pragma once
+﻿#pragma once
 
 #include "Krystal.Core/Attributes.hpp"
 #include "Krystal.Core/Containers/HashMap.hpp"
@@ -28,8 +10,8 @@
 
 namespace krys::boo
 {
-  /// @brief The contents of a pasteboard: text, markup, a URL and a URI list (with the files it names),
-  /// buffers by type and a page's custom data.
+  /// @brief What's on a pasteboard, or being dragged, in the forms Booey reads and writes: plain text,
+  /// markup, a URL, a URI list (and the files it names), other data by type, and a page's own data.
   // FIXME: Images (setImage, image, hasImage, clearImage), with images on the pasteboard.
   class SelectionData
   {
@@ -45,9 +27,6 @@ namespace krys::boo
 
   public:
     SelectionData() noexcept = default;
-
-    SelectionData(utf8_stringview text, utf8_stringview markup, const net::Url &url, utf8_stringview uriList,
-                  RefPtr<SharedBuffer> &&customData, bool canSmartReplace) noexcept;
 
     /// @brief Sets the text, with no-break spaces made spaces.
     void SetText(utf8_stringview text) noexcept;
@@ -95,6 +74,7 @@ namespace krys::boo
       return _url;
     }
 
+    /// @brief What to show for the URL: the text if there is any, otherwise the URL itself.
     KRYS_NODISCARD const utf8_string &UrlLabel() const noexcept;
 
     KRYS_NODISCARD bool HasUrl() const noexcept
@@ -136,6 +116,8 @@ namespace krys::boo
       _uriList.clear();
     }
 
+    /// @brief Whether pasting it may adjust the spaces around it, as when it was copied from a word
+    /// selection.
     void SetCanSmartReplace(bool canSmartReplace) noexcept
     {
       _canSmartReplace = canSmartReplace;
@@ -146,6 +128,7 @@ namespace krys::boo
       return _canSmartReplace;
     }
 
+    /// @brief Adds data of MIME @p type, unless there's already some of that type.
     void AddBuffer(utf8_stringview type, const Ref<SharedBuffer> &buffer) noexcept
     {
       _buffers.try_emplace(utf8_string(type), buffer);
@@ -167,6 +150,8 @@ namespace krys::boo
       _buffers.clear();
     }
 
+    /// @brief Sets the data a page wrote in types of its own (PasteboardCustomData), serialised as one
+    /// buffer.
     void SetCustomData(Ref<SharedBuffer> &&buffer) noexcept
     {
       _customData = krys::move(buffer);
@@ -189,6 +174,7 @@ namespace krys::boo
 
     void ClearAll() noexcept;
 
+    /// @brief Clears everything but the file names, and turns smart replace off.
     void ClearAllExceptFilenames() noexcept;
   };
 }

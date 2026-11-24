@@ -33,6 +33,7 @@
 #include "Krystal.Booey/CSS/Values/ToLengthConversionData.hpp"
 #include "Krystal.Booey/Style/Builder/BuilderState.hpp"
 #include "Krystal.Booey/Style/Calc/Value.hpp"
+#include "Krystal.Booey/Style/Values/Primitives/LengthResolution.hpp"
 #include "Krystal.Booey/Style/Values/Primitives/NumericTypes.hpp"
 #include "Krystal.Core/Assert.hpp"
 #include "Krystal.Core/Attributes.hpp"
@@ -193,7 +194,7 @@ namespace krys::boo::style
   KRYS_NODISCARD constexpr Integer<R, V> Canonicalize(const css::IntegerRaw<R, V> &raw,
                                                       css::NoConversionDataRequiredTag, Rest &&...) noexcept
   {
-    return {css::RoundForImpreciseConversion<V>(raw.Value)};
+    return {style::RoundForImpreciseConversion<V>(raw.Value)};
   }
 
   template <auto R, typename V, typename... Rest>
@@ -414,8 +415,7 @@ namespace krys::boo::style
     KRYS_NODISCARD typename css::AnglePercentage<R, V>::Calc
       operator()(const UnevaluatedCalc<css::AnglePercentage<R, V>> &value, const RenderStyle &style) noexcept
     {
-      return typename css::AnglePercentage<R, V>::Calc {
-        css::calc::Value::Create(*value.ProtectedCalculation(), style)};
+      return typename css::AnglePercentage<R, V>::Calc {css::calc::Value::Create(value.Calculation(), style)};
     }
   };
 
@@ -425,8 +425,8 @@ namespace krys::boo::style
     KRYS_NODISCARD typename css::LengthPercentage<R, V>::Calc
       operator()(const UnevaluatedCalc<css::LengthPercentage<R, V>> &value, const RenderStyle &style) noexcept
     {
-      return typename css::LengthPercentage<R, V>::Calc {
-        css::calc::Value::Create(*value.ProtectedCalculation(), style)};
+      return
+        typename css::LengthPercentage<R, V>::Calc {css::calc::Value::Create(value.Calculation(), style)};
     }
   };
 
@@ -445,7 +445,7 @@ namespace krys::boo::style
         [&](const typename AnglePercentage<R, V>::Calc &calculation) -> css::AnglePercentage<R, V>
         {
           return typename css::AnglePercentage<R, V>::Calc {
-            css::calc::Value::Create(*calculation.ProtectedCalculation(), style)};
+            css::calc::Value::Create(calculation.Calculation(), style)};
         });
     }
   };
@@ -475,7 +475,7 @@ namespace krys::boo::style
         [&](const typename LengthPercentage<R, V>::Calc &calculation) -> css::LengthPercentage<R, V>
         {
           return typename css::LengthPercentage<R, V>::Calc {
-            css::calc::Value::Create(*calculation.ProtectedCalculation(), style)};
+            css::calc::Value::Create(calculation.Calculation(), style)};
         });
     }
   };
@@ -519,7 +519,7 @@ namespace krys::boo::style
       // NOTE: Simplification is needed here for the case of the user using the Typed CSSOM
       // to explicitly specify a CSSMath* value for a specified value.
 
-      Ref<css::calc::Value> simplifiedCalc = value.ProtectedCalc()->CopySimplified(rest...);
+      Ref<css::calc::Value> simplifiedCalc = value.Calc().CopySimplified(rest...);
 
       // FIXME: This ASSERT and the following extra cases for the dimension and Category::Percentage
       // should go away once the typed CSSOM learns to set the correct category when creating internal

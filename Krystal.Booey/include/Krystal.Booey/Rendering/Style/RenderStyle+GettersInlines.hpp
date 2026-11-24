@@ -25,9 +25,9 @@
 
 #pragma once
 
-#include "Krystal.Booey/CSS/Values/PrimitiveValue.hpp"
 #include "Krystal.Booey/Rendering/HitTesting/HitTestRequest.hpp"
 #include "Krystal.Booey/Rendering/Style/RenderStyle.hpp"
+#include "Krystal.Booey/Style/Values/Primitives/LengthResolution.hpp"
 
 #define KRYS_RENDER_STYLE_PROPERTIES_GETTERS_INLINES_INCLUDE_TRAP 1
 #include "Krystal.Booey/Rendering/Style/RenderStyleProperties+GettersInlines.hpp"
@@ -324,7 +324,7 @@ namespace krys::boo
       }
     }
 
-    return css::RoundForImpreciseConversion<int>(value / zoomFactor);
+    return style::RoundForImpreciseConversion<int>(value / zoomFactor);
   }
 
   KRYS_NODISCARD inline LayoutSize AdjustLayoutSizeForAbsoluteZoom(LayoutSize size,

@@ -44,11 +44,6 @@ namespace krys::boo
 
   PropertySetCSSDescriptors::~PropertySetCSSDescriptors() noexcept = default;
 
-  Ref<css::MutableStyleProperties> PropertySetCSSDescriptors::ProtectedPropertySet() const noexcept
-  {
-    return _propertySet;
-  }
-
   uint32 PropertySetCSSDescriptors::Length() const noexcept
   {
     auto exposed = 0u;
@@ -64,7 +59,7 @@ namespace krys::boo
 
   CSSOMString PropertySetCSSDescriptors::Item(uint32 i) const noexcept
   {
-    for (auto j = 0u; j <= i && j < _propertySet->PropertyCount(); j++)
+    for (auto j = 0u; j <= i && j < _propertySet->size(); j++)
     {
       if (!IsExposed(_propertySet->PropertyAt(j).Id()))
       {
@@ -72,7 +67,7 @@ namespace krys::boo
       }
     }
 
-    if (i >= _propertySet->PropertyCount())
+    if (i >= _propertySet->size())
     {
       return {};
     }
@@ -92,7 +87,7 @@ namespace krys::boo
       return {};
     }
 
-    bool changed = ProtectedPropertySet()->ParseDeclaration(text, CssParserContext());
+    bool changed = _propertySet->ParseDeclaration(text, CssParserContext());
     DidMutate(changed ? MutationType::PropertyChanged : MutationType::StyleAttributeChanged);
     return {};
   }
@@ -145,7 +140,7 @@ namespace krys::boo
     }
 
     bool changed =
-      ProtectedPropertySet()->SetProperty(property, value, CssParserContext(), css::IsImportant(important));
+      _propertySet->SetProperty(property, value, CssParserContext(), css::IsImportant(important));
 
     // CSS DOM requires raising SyntaxError of parsing failed, but this is too dangerous for compatibility,
     // see <http://bugs.webkit.org/show_bug.cgi?id=7296>.
@@ -167,7 +162,7 @@ namespace krys::boo
     }
 
     CSSOMString result;
-    bool changed = ProtectedPropertySet()->RemoveProperty(property, &result);
+    bool changed = _propertySet->RemoveProperty(property, &result);
 
     DidMutate(changed ? MutationType::PropertyChanged : MutationType::NoChanges);
     return result;
@@ -196,7 +191,7 @@ namespace krys::boo
       return {};
     }
 
-    if (ProtectedPropertySet()->SetProperty(property, value, CssParserContext(), important))
+    if (_propertySet->SetProperty(property, value, CssParserContext(), important))
     {
       DidMutate(MutationType::PropertyChanged);
     }

@@ -73,7 +73,7 @@ namespace krys::boo
 
   CSSOMStringView CSSUnitValue::UnitSerialisation() const noexcept
   {
-    return css::PrimitiveValue::UnitTypeString(_unit);
+    return css::UnitTypeString(_unit);
   }
 
   void CSSUnitValue::Serialise(StringBuilder &builder, EnumSet<SerialisationArguments>) const noexcept
@@ -107,14 +107,13 @@ namespace krys::boo
   RefPtr<CSSUnitValue> CSSUnitValue::ConvertTo(css::UnitType unit) const noexcept
   {
     // https://drafts.css-houdini.org/css-typed-om/#convert-a-cssunitvalue
-    if (css::UnitCategoryForType(UnitEnum()) != css::UnitCategoryForType(unit))
+    auto converted = css::ConvertUnit(_value, UnitEnum(), unit);
+    if (!converted)
     {
       return nullptr;
     }
 
-    return Create(_value * css::ConversionToCanonicalUnitsScaleFactor(UnitEnum())
-                    / css::ConversionToCanonicalUnitsScaleFactor(unit),
-                  unit);
+    return Create(*converted, unit);
   }
 
   auto CSSUnitValue::ToSumValue() const noexcept -> Maybe<SumValue>
@@ -126,8 +125,8 @@ namespace krys::boo
       canonicalUnit = _unit;
     }
 
-    auto convertedValue = _value * css::ConversionToCanonicalUnitsScaleFactor(UnitEnum())
-                          / css::ConversionToCanonicalUnitsScaleFactor(canonicalUnit);
+    auto convertedValue = _value * css::ConversionToCanonicalUnitsScaleFactor(UnitEnum()).value_or(1.0)
+                          / css::ConversionToCanonicalUnitsScaleFactor(canonicalUnit).value_or(1.0);
 
     if (_unit == css::UnitType::Number)
     {

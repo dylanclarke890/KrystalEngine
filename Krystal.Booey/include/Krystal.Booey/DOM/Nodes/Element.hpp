@@ -1,28 +1,4 @@
-﻿/*
- * Copyright (C) 1999 Lars Knoll (knoll@kde.org)
- *           (C) 1999 Antti Koivisto (koivisto@kde.org)
- *           (C) 2001 Peter Kelly (pmk@post.com)
- *           (C) 2001 Dirk Mueller (mueller@kde.org)
- * Copyright (C) 2003-2025 Apple Inc. All rights reserved.
- *
- * This library is free software; you can redistribute it and/or
- * modify it under the terms of the GNU Library General Public
- * License as published by the Free Software Foundation; either
- * version 2 of the License, or (at your option) any later version.
- *
- * This library is distributed in the hope that it will be useful,
- * but WITHOUT ANY WARRANTY; without even the implied warranty of
- * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU
- * Library General Public License for more details.
- *
- * You should have received a copy of the GNU Library General Public License
- * along with this library; see the file COPYING.LIB.  If not, write to
- * the Free Software Foundation, Inc., 51 Franklin Street, Fifth Floor,
- * Boston, MA 02110-1301, USA.
- *
- */
-
-#pragma once
+﻿#pragma once
 
 #include "Krystal.Booey/Animation/ElementAnimationRareData.hpp"
 #include "Krystal.Booey/Animation/GetAnimationsOptions.hpp"
@@ -399,6 +375,8 @@ namespace krys::boo
     /// agent style sheets select it by as a pseudo-element of its host; null if it isn't one.
     KRYS_NODISCARD DOMStringAtom UserAgentPart() const noexcept;
 
+    /// @brief Sets the `useragentpart` attribute, which names the part a user agent shadow tree element
+    /// plays.
     void SetUserAgentPart(const DOMStringAtom &part) noexcept;
 
     /// @see https://dom.spec.whatwg.org/#dom-element-customelementregistry
@@ -412,12 +390,6 @@ namespace krys::boo
 
     /// @see https://dom.spec.whatwg.org/#dom-element-matches
     KRYS_NODISCARD ExceptionOr<bool> Matches(DOMStringView selectors) const noexcept;
-
-    /// @see https://dom.spec.whatwg.org/#dom-element-webkitmatchesselector
-    KRYS_NODISCARD ExceptionOr<bool> WebkitMatchesSelector(DOMStringView selectors) const noexcept
-    {
-      return Matches(selectors);
-    }
 
     /// @see https://dom.spec.whatwg.org/#dom-element-getelementsbytagname
     KRYS_NODISCARD Ref<dom::HTMLCollection> GetElementsByTagName(DOMStringAtom qualifiedName) noexcept;
@@ -602,6 +574,7 @@ namespace krys::boo
     /// @brief The union of the element's boxes, in client coordinates.
     KRYS_NODISCARD Ref<dom::DOMRect> GetBoundingClientRect() noexcept;
 
+    /// @brief `GetBoundingClientRect()` as a rect, without making a `DOMRect`.
     KRYS_NODISCARD RectF BoundingClientRect() noexcept;
 
     /// @brief Where the element's renderer's bounding box is on the screen; empty without a renderer.
@@ -622,18 +595,26 @@ namespace krys::boo
     /// @p centerIfNotVisible, otherwise to their nearest edge.
     void ScrollIntoViewIfNotVisible(bool centerIfNotVisible = true) noexcept;
 
+    /// @brief Scrolls the element's contents to @p options' position (or to @p x, @p y).
+    /// @see https://drafts.csswg.org/cssom-view/#dom-element-scroll
     void Scroll(const ScrollToOptions &options = {}) noexcept;
 
     void Scroll(double x, double y) noexcept;
 
+    /// @see https://drafts.csswg.org/cssom-view/#dom-element-scrollto
     void ScrollTo(const ScrollToOptions &options = {}) noexcept;
 
     void ScrollTo(double x, double y) noexcept;
 
+    /// @brief Scrolls the element's contents by @p options' offsets (or by @p x, @p y).
+    /// @see https://drafts.csswg.org/cssom-view/#dom-element-scrollby
     void ScrollBy(const ScrollToOptions &options = {}) noexcept;
 
     void ScrollBy(double x, double y) noexcept;
 
+    /// @brief How far the contents are scrolled, from the top and left.
+    /// @see https://drafts.csswg.org/cssom-view/#dom-element-scrolltop
+    /// @see https://drafts.csswg.org/cssom-view/#dom-element-scrollleft
     KRYS_NODISCARD int32 ScrollTop() noexcept;
 
     void SetScrollTop(int32 newTop) noexcept;
@@ -642,14 +623,23 @@ namespace krys::boo
 
     void SetScrollLeft(int32 newLeft) noexcept;
 
+    /// @brief The size of the scrollable overflow.
+    /// @see https://drafts.csswg.org/cssom-view/#dom-element-scrollwidth
+    /// @see https://drafts.csswg.org/cssom-view/#dom-element-scrollheight
     KRYS_NODISCARD int32 ScrollWidth() noexcept;
 
     KRYS_NODISCARD int32 ScrollHeight() noexcept;
 
+    /// @brief The width of the top and left border (and of a left scrollbar).
+    /// @see https://drafts.csswg.org/cssom-view/#dom-element-clienttop
+    /// @see https://drafts.csswg.org/cssom-view/#dom-element-clientleft
     KRYS_NODISCARD int32 ClientTop() noexcept;
 
     KRYS_NODISCARD int32 ClientLeft() noexcept;
 
+    /// @brief The size of the padding box, without scrollbars; the viewport's for the root.
+    /// @see https://drafts.csswg.org/cssom-view/#dom-element-clientwidth
+    /// @see https://drafts.csswg.org/cssom-view/#dom-element-clientheight
     KRYS_NODISCARD int32 ClientWidth() noexcept;
 
     KRYS_NODISCARD int32 ClientHeight() noexcept;
@@ -662,6 +652,9 @@ namespace krys::boo
     /// @brief The offset parent, without retargeting it out of shadow trees.
     KRYS_NODISCARD Element *OffsetParentIgnoringShadowTrees() noexcept;
 
+    /// @brief The border box's position from the offset parent's padding edge, and its size, in the
+    /// element's own CSS pixels.
+    /// @see https://drafts.csswg.org/cssom-view/#dom-htmlelement-offsettop
     KRYS_NODISCARD int32 OffsetTop() noexcept;
 
     KRYS_NODISCARD int32 OffsetLeft() noexcept;
@@ -805,6 +798,7 @@ namespace krys::boo
       return !_nodeFlags.contains(dom::NodeFlag::IsParsingChildren);
     }
 
+    /// @brief The element's qualified name: its namespace, prefix and local name.
     KRYS_NODISCARD const QualifiedName &TagQualifiedName() const noexcept
     {
       return _qualifiedName;
@@ -861,6 +855,7 @@ namespace krys::boo
       return _customElementState == dom::CustomElementState::Undefined;
     }
 
+    /// @brief Whether the element is a custom element, or being constructed as one.
     KRYS_NODISCARD bool IsPrecustomizedOrDefinedCustomElement() const noexcept
     {
       return _customElementState == dom::CustomElementState::Precustomized
@@ -877,6 +872,11 @@ namespace krys::boo
     /// @see https://dom.spec.whatwg.org/#concept-element-custom-element-definition
     KRYS_NODISCARD html::CustomElementReactionQueue *ReactionQueue() const noexcept;
 
+    /// @brief The custom element state changes of creating and upgrading custom elements: defined (with the
+    /// definition's queue), failed, precustomized while being constructed, and undefined while it waits for
+    /// a definition. A failed element's reaction queue is cleared rather than dropped, as the upgrade that
+    /// failed may be running its reactions.
+    /// @see https://dom.spec.whatwg.org/#concept-element-custom-element-state
     void SetIsDefinedCustomElement(html::CustomElementInterface &elementInterface) noexcept;
 
     void SetIsFailedCustomElement() noexcept;
@@ -889,8 +889,11 @@ namespace krys::boo
 
     void SetIsCustomElementUpgradeCandidate() noexcept;
 
+    /// @brief Enqueues an upgrade of the element to @p elementInterface's definition.
+    /// @see https://html.spec.whatwg.org/#enqueue-a-custom-element-upgrade-reaction
     void EnqueueToUpgrade(html::CustomElementInterface &elementInterface) noexcept;
 
+    /// @brief Sets the behaviour the element's definition created for it, and the registry it uses.
     void SetCustomElement(UniquePtr<html::CustomElement> &&customElement) noexcept;
 
     void SetCustomElementRegistry(RefPtr<html::CustomElementRegistry> &&registry) noexcept;
@@ -928,6 +931,9 @@ namespace krys::boo
 
 #pragma region Form Controls
 
+    /// @brief Whether the element is a listed form-associated element, and whether it's one that can be
+    /// validated.
+    /// @see https://html.spec.whatwg.org/#category-listed
     KRYS_NODISCARD virtual bool IsFormListedElement() const noexcept
     {
       return false;
@@ -1019,6 +1025,7 @@ namespace krys::boo
     /// @brief Why the element is relevant to the user, once its relevancy has been determined.
     KRYS_NODISCARD Maybe<EnumSet<dom::ContentRelevancy>> GetContentRelevancy() const noexcept;
 
+    /// @brief Records why the element is relevant to the user, as content visibility determined.
     void SetContentRelevancy(EnumSet<dom::ContentRelevancy> contentRelevancy) noexcept;
 
     /// @brief The base value of a `random()` of the element (or of one of its pseudo-elements) that isn't
@@ -1027,10 +1034,13 @@ namespace krys::boo
       LookupCSSRandomBaseValue(const Maybe<style::PseudoElementIdentifier> &pseudoElementIdentifier,
                                const css::calc::RandomCachingKey &key) const noexcept;
 
+    /// @brief Whether the element or a pseudo-element has `random()` base values.
     KRYS_NODISCARD bool HasRandomCachingKeyMap() const noexcept;
 
 #pragma region Style
 
+    /// @brief What `ResolveComputedStyle` is for: any style, only that of rendered elements, or deciding
+    /// editability (which doesn't need container queries resolved).
     enum class ResolveComputedStyleMode : uint8
     {
       Normal,
@@ -1058,22 +1068,28 @@ namespace krys::boo
     /// @brief The style the element is rendered with, including with `display: contents`.
     KRYS_NODISCARD const RenderStyle *RenderOrDisplayContentsStyle() const noexcept;
 
+    /// @brief The same, for the element or one of its pseudo-elements.
     KRYS_NODISCARD const RenderStyle *RenderOrDisplayContentsStyle(
       const Maybe<style::PseudoElementIdentifier> &pseudoElementIdentifier) const noexcept;
 
     /// @brief Drops the computed styles of the element and its descendants.
     void ResetComputedStyle() noexcept;
 
+    /// @brief Forgets the relations selector matching recorded on the element (`:empty`, its child index),
+    /// on its children's behalf, and on its descendants' too.
     void ResetStyleRelations() noexcept;
 
     void ResetChildStyleRelations() noexcept;
 
     void ResetAllDescendantStyleRelations() noexcept;
 
+    /// @brief Whether the element's stored style (it has no renderer) is `display: contents` or `none`.
     KRYS_NODISCARD bool HasDisplayContents() const noexcept;
 
     KRYS_NODISCARD bool HasDisplayNone() const noexcept;
 
+    /// @brief Keeps the style of an element with `display: contents` or `none`, which no renderer holds;
+    /// clearing it as the element gets a renderer.
     void StoreDisplayContentsOrNoneStyle(UniquePtr<RenderStyle> style) noexcept;
 
     void ClearDisplayContentsOrNoneStyle() noexcept;
@@ -1222,6 +1238,7 @@ namespace krys::boo
     /// @brief The scroll position of the element's layer, kept while the element has no renderer.
     KRYS_NODISCARD PointI SavedLayerScrollPosition() const noexcept;
 
+    /// @brief Keeps the layer's scroll position while the element has no renderer.
     void SetSavedLayerScrollPosition(const PointI &position) noexcept;
 
     /// @brief The element's `::after` pseudo-element, or null if it has none.
@@ -1237,10 +1254,13 @@ namespace krys::boo
     KRYS_NODISCARD RefPtr<const PseudoElement>
       PseudoElementIfExists(const style::PseudoElementIdentifier &pseudoElementIdentifier) const noexcept;
 
+    /// @brief Destroys the element's `::before` or `::after` pseudo-element, if it has one.
     void ClearBeforePseudoElement() noexcept;
 
     void ClearAfterPseudoElement() noexcept;
 
+    /// @brief Marks the element's style (or its subtree's) out of date, with the siblings whose style
+    /// depends on it; also its layer's composition, or its renderers, as named.
     void InvalidateStyle() noexcept;
 
     void InvalidateStyleAndLayerComposition() noexcept;
@@ -1249,16 +1269,22 @@ namespace krys::boo
 
     void InvalidateStyleAndRenderersForSubtree() noexcept;
 
+    /// @brief Rebuilds the element's renderer, with its style as it is.
     void InvalidateRenderer() noexcept;
 
+    /// @brief Marks the element's style (or its subtree's) out of date, without its siblings.
     void InvalidateStyleInternal() noexcept;
 
     void InvalidateStyleForSubtreeInternal() noexcept;
 
+    /// @brief Restyles a size container's subtree when its size changes; and resumes the resolution that
+    /// waited for its layout.
     void InvalidateForQueryContainerSizeChange() noexcept;
 
     void InvalidateForResumingQueryContainerResolution() noexcept;
 
+    /// @brief Restyles an anchor-positioned element when its anchor moves; and resumes the resolution that
+    /// waited for the anchor's layout.
     void InvalidateForAnchorRectChange() noexcept;
 
     void InvalidateForResumingAnchorPositionedElementResolution() noexcept;
@@ -1270,6 +1296,7 @@ namespace krys::boo
     /// @brief The style resolver of the element's tree: its shadow root's, or its document's.
     KRYS_NODISCARD style::Resolver &StyleResolver() noexcept;
 
+    /// @brief Whether styles that depend on the element as a query container are to be updated.
     KRYS_NODISCARD bool NeedsUpdateQueryContainerDependentStyle() const noexcept
     {
       return _nodeFlags.contains(dom::NodeFlag::NeedsUpdateQueryContainerDependentStyle);
@@ -1280,6 +1307,9 @@ namespace krys::boo
       _nodeFlags.Remove(dom::NodeFlag::NeedsUpdateQueryContainerDependentStyle);
     }
 
+    /// @brief The relations selector matching recorded on the element, which say what a change to it or to
+    /// its children restyles: `:empty`, sibling combinators, and the positional pseudo-classes of its
+    /// children and descendants.
     KRYS_NODISCARD bool StyleAffectedByEmpty() const noexcept
     {
       return _nodeStyleFlags.contains(dom::NodeStyleFlag::StyleAffectedByEmpty);
@@ -1335,13 +1365,11 @@ namespace krys::boo
       return _nodeStyleFlags.contains(dom::NodeStyleFlag::AffectedByHasWithPositionalPseudoClass);
     }
 
-    /// @brief Whether selector matching set a flag on the element while matching its children.
-    KRYS_NODISCARD bool HasFlagsSetDuringStylingOfChildren() const noexcept;
-
     /// @brief The element's index among its parent's element children, plus one, as cached by selector
     /// matching; zero if it isn't known.
     KRYS_NODISCARD uint32 ChildIndex() const noexcept;
 
+    /// @brief Records the relations, as selector matching finds them.
     void SetStyleAffectedByEmpty() noexcept
     {
       _nodeStyleFlags.Add(dom::NodeStyleFlag::StyleAffectedByEmpty);
@@ -1397,6 +1425,7 @@ namespace krys::boo
       _nodeStyleFlags.Add(dom::NodeStyleFlag::AffectedByHasWithPositionalPseudoClass);
     }
 
+    /// @brief Caches the element's index among its parent's element children, plus one.
     void SetChildIndex(uint32 index) noexcept;
 
 #pragma endregion
@@ -1425,12 +1454,15 @@ namespace krys::boo
     /// @brief Whether the element, or one of its pseudo-elements, may have keyframe effects.
     KRYS_NODISCARD bool MayHaveKeyframeEffects() const noexcept;
 
+    /// @brief The animation state of the element (or a pseudo-element), if it has any; the `Ensure` form
+    /// creates it.
     KRYS_NODISCARD ElementAnimationRareData *
       AnimationRareData(const Maybe<style::PseudoElementIdentifier> &pseudoElementIdentifier) const noexcept;
 
     KRYS_NODISCARD ElementAnimationRareData &
       EnsureAnimationRareData(const Maybe<style::PseudoElementIdentifier> &pseudoElementIdentifier) noexcept;
 
+    /// @brief The keyframe effects targeting the element (or a pseudo-element), in composite order.
     KRYS_NODISCARD boo::KeyframeEffectStack *GetKeyframeEffectStack(
       const Maybe<style::PseudoElementIdentifier> &pseudoElementIdentifier) const noexcept;
 
@@ -1440,12 +1472,15 @@ namespace krys::boo
     KRYS_NODISCARD bool
       HasKeyframeEffects(const Maybe<style::PseudoElementIdentifier> &pseudoElementIdentifier) const noexcept;
 
+    /// @brief The animations whose effects target the element (or a pseudo-element).
     KRYS_NODISCARD const AnimationCollection *
       Animations(const Maybe<style::PseudoElementIdentifier> &pseudoElementIdentifier) const noexcept;
 
     KRYS_NODISCARD AnimationCollection &
       EnsureAnimations(const Maybe<style::PseudoElementIdentifier> &pseudoElementIdentifier) noexcept;
 
+    /// @brief The element's CSS transitions by property, completed and running.
+    /// @see https://drafts.csswg.org/css-transitions-1/#completed-transitions
     KRYS_NODISCARD bool
       HasCompletedTransitionForProperty(const Maybe<style::PseudoElementIdentifier> &pseudoElementIdentifier,
                                         const AnimatableCSSProperty &property) const noexcept;
@@ -1469,24 +1504,31 @@ namespace krys::boo
     KRYS_NODISCARD AnimatableCSSPropertyToTransitionMap &EnsureRunningTransitionsByProperty(
       const Maybe<style::PseudoElementIdentifier> &pseudoElementIdentifier) noexcept;
 
+    /// @brief The style at the element's last style change event, which transitions start from.
+    /// @see https://drafts.csswg.org/css-transitions-1/#style-change-event
     KRYS_NODISCARD const RenderStyle *LastStyleChangeEventStyle(
       const Maybe<style::PseudoElementIdentifier> &pseudoElementIdentifier) const noexcept;
 
     void SetLastStyleChangeEventStyle(const Maybe<style::PseudoElementIdentifier> &pseudoElementIdentifier,
                                       UniquePtr<const RenderStyle> &&style) noexcept;
 
+    /// @brief Whether the cascade overrode a property the element's animations set, so an animation-only
+    /// update resolves its style again rather than reusing the last style change event's.
     KRYS_NODISCARD bool HasPropertiesOverridenAfterAnimation(
       const Maybe<style::PseudoElementIdentifier> &pseudoElementIdentifier) const noexcept;
 
     void SetHasPropertiesOverridenAfterAnimation(
       const Maybe<style::PseudoElementIdentifier> &pseudoElementIdentifier, bool value) noexcept;
 
+    /// @brief The element's CSS animations, in `animation-name` order.
     KRYS_NODISCARD CSSAnimationCollection &AnimationsCreatedByMarkup(
       const Maybe<style::PseudoElementIdentifier> &pseudoElementIdentifier) noexcept;
 
     void SetAnimationsCreatedByMarkup(const Maybe<style::PseudoElementIdentifier> &pseudoElementIdentifier,
                                       CSSAnimationCollection &&animations) noexcept;
 
+    /// @brief Called when the element's CSS animations change, or a `@keyframes` rule they use; the latter
+    /// leaves a keyframes update pending until style next resolves.
     void
       CSSAnimationsDidUpdate(const Maybe<style::PseudoElementIdentifier> &pseudoElementIdentifier) noexcept;
 
@@ -1601,6 +1643,7 @@ namespace krys::boo
     /// @brief The element's popover state, if it has a `popover` attribute.
     KRYS_NODISCARD dom::PopoverData *GetPopoverData() const noexcept;
 
+    /// @brief Creates or drops the popover state, as the `popover` attribute comes or goes.
     dom::PopoverData &EnsurePopoverData() noexcept;
 
     void ClearPopoverData() noexcept;
@@ -1615,6 +1658,7 @@ namespace krys::boo
     /// @brief The popover the element (a button) showed and is still the popover trigger of, if any.
     KRYS_NODISCARD Element *InvokedPopover() const noexcept;
 
+    /// @brief Records the popover the element showed.
     void SetInvokedPopover(Element *element) noexcept;
 
     /// @brief The topmost showing auto or hint popover that's a flat tree ancestor of the element, or (if
@@ -1631,6 +1675,7 @@ namespace krys::boo
     /// @brief The intersection observers whose root the element is, and those observing it.
     IntersectionObserverData &EnsureIntersectionObserverData() noexcept;
 
+    /// @brief The same, if the element has any.
     KRYS_NODISCARD IntersectionObserverData *IntersectionObserverDataIfExists() const noexcept;
 
 #pragma endregion
@@ -1640,6 +1685,7 @@ namespace krys::boo
     /// @brief The resize observers observing the element.
     ResizeObserverData &EnsureResizeObserverData() noexcept;
 
+    /// @brief The same, if the element has any.
     KRYS_NODISCARD ResizeObserverData *ResizeObserverDataIfExists() const noexcept;
 
     /// @brief The element's last remembered size in each axis, for `contain-intrinsic-size: auto`.
@@ -1747,6 +1793,7 @@ namespace krys::boo
       return _nodeFlags.contains(dom::NodeFlag::IsUserActionElement);
     }
 
+    /// @brief Records whether the document has user action state for the element.
     void SetUserActionElement(bool flag) noexcept
     {
       flag ? _nodeFlags.Add(dom::NodeFlag::IsUserActionElement)
@@ -1760,6 +1807,8 @@ namespace krys::boo
       return IsUserActionElement() && IsUserActionElementInActiveChain();
     }
 
+    /// @brief The element's user action state: whether it's `:active`, `:hover`, `:focus`,
+    /// `:focus-visible` and `:focus-within`.
     KRYS_NODISCARD bool Active() const noexcept
     {
       return IsUserActionElement() && IsUserActionElementActive();
@@ -1785,6 +1834,7 @@ namespace krys::boo
       return IsUserActionElement() && IsUserActionElementHasFocusWithin();
     }
 
+    /// @brief Sets the element's user action state, restyling what depends on it.
     virtual void
       SetActive(bool value,
                 style::InvalidationScope invalidationScope = style::InvalidationScope::All) noexcept;
@@ -1801,9 +1851,6 @@ namespace krys::boo
 
     void SetHasFocusWithin(bool value) noexcept;
 
-    /// @brief Gives the element's composed tree ancestors focus within while its focusability is checked.
-    void SetHasTentativeFocus(bool value) noexcept;
-
     /// @brief Clears the element's hover and active state, moving the document's hovered element and active
     /// chain to its ancestors, before its renderer goes.
     void ClearHoverAndActiveStatusBeforeDetachingRenderer() noexcept;
@@ -1817,14 +1864,19 @@ namespace krys::boo
     /// @brief The element's rare data, if it has any.
     KRYS_NODISCARD dom::ElementRareData *GetElementRareData() const noexcept;
 
+    /// @brief The element's rare data, created if it has none.
     KRYS_NODISCARD dom::ElementRareData &EnsureElementRareData() noexcept;
 
+    /// @brief Sets the custom element state, restyling `:defined` and refreshing the listed elements of
+    /// forms.
     void SetCustomElementState(dom::CustomElementState state) noexcept;
 
+    /// @brief Stops the element being observed, or being an observer's root, as it's destroyed.
     void DisconnectFromIntersectionObservers() noexcept;
 
     void DisconnectFromResizeObservers() noexcept;
 
+    /// @brief The user action state the document holds for the element.
     KRYS_NODISCARD bool IsUserActionElementInActiveChain() const noexcept;
 
     KRYS_NODISCARD bool IsUserActionElementActive() const noexcept;
@@ -1837,6 +1889,8 @@ namespace krys::boo
 
     KRYS_NODISCARD bool IsUserActionElementHasFocusWithin() const noexcept;
 
+    /// @brief Resolves the style of a pseudo-element the element has no renderer for, caching it on the
+    /// element's style.
     KRYS_NODISCARD const RenderStyle &
       ResolvePseudoElementStyle(const style::PseudoElementIdentifier &pseudoElementIdentifier) noexcept;
 
@@ -1852,6 +1906,7 @@ namespace krys::boo
     /// @brief The inline style's property map (`attributeStyleMap`), once it's been asked for.
     KRYS_NODISCARD StylePropertyMap *ExistingAttributeStyleMap() const noexcept;
 
+    /// @brief Keeps the `attributeStyleMap` once it's made.
     void SetAttributeStyleMap(Ref<StylePropertyMap> map) noexcept;
 
 #pragma region Parser Hooks
@@ -1887,6 +1942,7 @@ namespace krys::boo
 #pragma endregion
 
   private:
+    /// @brief Writes the inline style, or the animated SVG attributes, back to the attribute list.
     void SynchronizeStyleAttribute() const noexcept;
 
     void SynchronizeAnimatedSVGAttributes() const noexcept;

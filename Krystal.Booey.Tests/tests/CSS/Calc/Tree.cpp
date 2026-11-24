@@ -10,7 +10,7 @@
 #include "Krystal.Booey/CSS/Values/ComputedStyleDependencies.hpp"
 #include "Krystal.Booey/CSS/Values/Primitives/NumericCategory.hpp"
 #include "Krystal.Booey/CSS/Values/SerialisationContext.hpp"
-#include "Krystal.Booey/CSS/Values/UnitType.hpp"
+#include "Krystal.Booey/CSS/Values/Units.hpp"
 #include "Krystal.Booey/Style/AnchorSizeDimension.hpp"
 
 namespace krys::boo::css::calc::tests
@@ -270,10 +270,10 @@ namespace krys::boo::css::calc::tests
     CHECK(
       calc::Value::Create(Category::LengthPercentage, All, CreateTree(Percent(5.0), hinted))->PrimitiveType()
       == UnitType::Percentage);
-    CHECK(calc::Value::Create(Category::LengthPercentage, All,
-                              CreateTree(CreateChild(Add(Px(1.0), Percent(5.0)), hinted), hinted))
-            ->PrimitiveType()
-          == UnitType::CalcPercentageWithLength);
+    auto mixed = calc::Value::Create(Category::LengthPercentage, All,
+                                     CreateTree(CreateChild(Add(Px(1.0), Percent(5.0)), hinted), hinted));
+    CHECK(mixed->PrimitiveType() == UnitType::Unknown);
+    CHECK(mixed->IsPercentageWithLength());
     CHECK(calc::Value::Create(Category::LengthPercentage, All, CreateTree(Px(1.0), Type::CreateLength()))
             ->PrimitiveType()
           == UnitType::px);

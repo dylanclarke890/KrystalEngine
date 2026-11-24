@@ -87,7 +87,9 @@ namespace krys::boo::css::tests
     auto sheet = ParseSheet(u8"a, b > c { color: red; margin: 0 }\n.x{color:blue!important;color:green}");
 
     REQUIRE(sheet->RuleCount() == 2);
-    CHECK(sheet->HasSyntacticallyValidCSSHeader());
+    // A sheet whose first rule is valid can be cached.
+    sheet->CheckLoaded();
+    CHECK(sheet->IsCacheable());
 
     auto &first = StyleAt(*sheet, 0);
     CHECK(first.Type() == RuleType::Style);
@@ -114,7 +116,9 @@ namespace krys::boo::css::tests
       auto sheet = ParseSheet(u8"a:unknown-pseudo { color: red } b { color: blue }");
       REQUIRE(sheet->RuleCount() == 1);
       CHECK(SelectorsText(StyleAt(*sheet, 0).GetSelectorList()) == "b");
-      CHECK_FALSE(sheet->HasSyntacticallyValidCSSHeader());
+      // A sheet whose first rule isn't valid may not be CSS at all, so it isn't cached.
+      sheet->CheckLoaded();
+      CHECK_FALSE(sheet->IsCacheable());
     }
 
     SECTION("Unknown at-rules are skipped")
@@ -156,7 +160,6 @@ namespace krys::boo::css::tests
     {
       auto sheet = ParseSheet(u8"@charset \"utf-8\"; @import \"a.css\";");
       CHECK(RuleTypes(*sheet) == List<RuleType> {RuleType::Import});
-      CHECK(sheet->HasSyntacticallyValidCSSHeader());
     }
 
     SECTION("@import and @namespace after a style rule are dropped")
@@ -340,7 +343,7 @@ namespace krys::boo::css::tests
       CHECK(AsText(Downcast<FontFaceRule>(*sheet->RuleAt(0)).Properties())
             == "font-family: Foo; font-weight: bold;");
       // !important isn't allowed in @font-face.
-      CHECK(Downcast<FontFaceRule>(*sheet->RuleAt(1)).Properties().PropertyCount() == 0);
+      CHECK(Downcast<FontFaceRule>(*sheet->RuleAt(1)).Properties().size() == 0);
     }
 
     SECTION("@page is an unknown at-rule")
@@ -472,7 +475,6 @@ namespace krys::boo::css::tests
       CHECK(SelectorsText(Downcast<StyleRuleWithNesting>(*rule.NestedRules()[1]).OriginalSelectorList())
             == "& b");
       CHECK(AsText(Downcast<NestedDeclarationsRule>(*rule.NestedRules()[2]).Properties()) == "margin: 0px;");
-      CHECK(sheet->HasNestingRules());
     }
 
     SECTION("A plain style rule isn't a nesting rule")
@@ -565,7 +567,7 @@ namespace krys::boo::css::tests
     // !important isn't allowed in a keyframe.
     auto important = Parser::ParseKeyframeRule(u8"from { opacity: 0 !important }", context);
     REQUIRE(important);
-    CHECK(important->Properties().PropertyCount() == 0);
+    CHECK(important->Properties().size() == 0);
   }
 
   TEST_CASE_METHOD(ValueFixture, "Parser::ParseNestedDeclarations", "[CSS][Parser]")
@@ -639,7 +641,7 @@ namespace krys::boo::css::tests
       CHECK(properties->SetCustomProperty(CSSOMString(u8"--x"), CSSOMString(u8" 1px 2px "), context));
       CHECK(ToNarrow(properties->GetCustomPropertyValue(u8"--x")) == "1px 2px");
       CHECK(properties->SetCustomProperty(CSSOMString(u8"--x"), CSSOMString(), context));
-      CHECK(properties->PropertyCount() == 0);
+      CHECK(properties->size() == 0);
     }
 
     SECTION("ParseDeclaration")
@@ -651,7 +653,7 @@ namespace krys::boo::css::tests
       CHECK_FALSE(properties->ParseDeclaration(
         CSSOMString(u8"color: red; color: blue !important; color: green; --a: 1; --a: 2"), context));
       CHECK(properties->ParseDeclaration(CSSOMString(u8""), context));
-      CHECK(properties->PropertyCount() == 0);
+      CHECK(properties->size() == 0);
     }
   }
 }

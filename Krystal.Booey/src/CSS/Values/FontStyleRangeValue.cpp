@@ -24,6 +24,7 @@
  */
 
 #include "Krystal.Booey/CSS/Values/FontStyleRangeValue.hpp"
+#include "Krystal.Core/Memory/PointerComparison.hpp"
 
 namespace krys::boo::css
 {
@@ -44,7 +45,7 @@ namespace krys::boo::css
 
   bool FontStyleRangeValue::Equals(const FontStyleRangeValue &other) const noexcept
   {
-    return CompareValue(FontStyleValue, other.FontStyleValue)
-           && CompareValuePtr(ObliqueValues, other.ObliqueValues);
+    return *FontStyleValue == *other.FontStyleValue
+           && ArePointingToEqualData(ObliqueValues, other.ObliqueValues);
   }
 }

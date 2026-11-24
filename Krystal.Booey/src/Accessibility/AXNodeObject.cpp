@@ -2334,7 +2334,6 @@ namespace krys::boo
       init.Key =
         vertical ? (increment ? u8"ArrowUp" : u8"ArrowDown") : (increment ? u8"ArrowRight" : u8"ArrowLeft");
       init.Code = init.Key;
-      init.KeyIdentifier = vertical ? (increment ? u8"Up" : u8"Down") : (increment ? u8"Right" : u8"Left");
       init.KeyCode = vertical ? (increment ? 38u : 40u) : (increment ? 39u : 37u);
       init.Which = init.KeyCode;
       init.View = document->Window();

@@ -64,6 +64,6 @@ namespace krys::boo::css
 KRYS_SPECIALIZE_TYPE_CAST_TRAITS_BEGIN(krys::boo::css::FontStyleWithAngleValue)
   KRYS_NODISCARD static bool IsType(const krys::boo::css::Value &value) noexcept
   {
-    return value.IsFontStyleWithAngleValue();
+    return value.Type() == krys::boo::css::ValueType::FontStyleWithAngle;
   }
 KRYS_SPECIALIZE_TYPE_CAST_TRAITS_END()

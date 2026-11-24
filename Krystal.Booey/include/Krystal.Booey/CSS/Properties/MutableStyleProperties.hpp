@@ -85,14 +85,14 @@ namespace krys::boo::css
 
     KRYS_NODISCARD CSSStyleProperties &EnsureInlineCSSStyleProperties(StyledElement &parentElement) noexcept;
 
-    KRYS_NODISCARD uint32 PropertyCount() const noexcept
+    KRYS_NODISCARD uint32 size() const noexcept
     {
       return static_cast<uint32>(_propertyVector.size());
     }
 
     KRYS_NODISCARD bool empty() const noexcept
     {
-      return !PropertyCount();
+      return !size();
     }
 
     KRYS_NODISCARD PropertyReference PropertyAt(uint32 index) const noexcept KRYS_LIFETIME_BOUND
@@ -103,17 +103,12 @@ namespace krys::boo::css
 
     KRYS_NODISCARD Iterator<MutableStyleProperties> begin() const noexcept KRYS_LIFETIME_BOUND
     {
-      return {*this};
+      return Iterator<MutableStyleProperties>(*this);
     }
 
     KRYS_NODISCARD constexpr static std::nullptr_t end() noexcept
     {
       return nullptr;
-    }
-
-    KRYS_NODISCARD uint32 size() const noexcept
-    {
-      return PropertyCount();
     }
 
     bool AddParsedProperties(const ParsedPropertyList &properties) noexcept;

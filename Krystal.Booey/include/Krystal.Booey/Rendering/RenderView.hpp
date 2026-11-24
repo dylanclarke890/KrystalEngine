@@ -229,13 +229,16 @@ namespace krys::boo
 
     KRYS_NODISCARD RenderCounterSet TakeCountersNeedingUpdate() noexcept;
 
-    KRYS_NODISCARD SizeF SizeForCSSSmallViewportUnits() const noexcept;
+    /// @brief The sizes the viewport units are percentages of (FrameView::SizeForCSSDefaultViewportUnits).
+    KRYS_NODISCARD SizeF SizeForCSSSmallViewportUnits(const RenderStyle *rootStyle = nullptr) const noexcept;
 
-    KRYS_NODISCARD SizeF SizeForCSSLargeViewportUnits() const noexcept;
+    KRYS_NODISCARD SizeF SizeForCSSLargeViewportUnits(const RenderStyle *rootStyle = nullptr) const noexcept;
 
-    KRYS_NODISCARD SizeF SizeForCSSDynamicViewportUnits() const noexcept;
+    KRYS_NODISCARD SizeF
+      SizeForCSSDynamicViewportUnits(const RenderStyle *rootStyle = nullptr) const noexcept;
 
-    KRYS_NODISCARD SizeF SizeForCSSDefaultViewportUnits() const noexcept;
+    KRYS_NODISCARD SizeF
+      SizeForCSSDefaultViewportUnits(const RenderStyle *rootStyle = nullptr) const noexcept;
 
     void RegisterBoxWithScrollSnapPositions(const RenderBox &box) noexcept
     {
