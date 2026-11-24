@@ -600,7 +600,9 @@ namespace krys::ui
       actions.Add(Action::SetValue);
     }
 
-    if (IsRangeControl(*object))
+    // An indeterminate progress bar has no value, minimum or maximum
+    // (https://w3c.github.io/html-aam/#el-progress).
+    if (IsRangeControl(*object) && !object->IsIndeterminate())
     {
       auto step = object->GetAttributeTrimmed(u8"step");
       auto parsedStep = boo::html::Numbers::ParseFloatingPoint(step);

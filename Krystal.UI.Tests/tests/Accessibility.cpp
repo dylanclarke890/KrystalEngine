@@ -346,6 +346,41 @@ namespace krys::ui::tests
     }
   }
 
+  TEST_CASE("View: accessibility of progress bars", "[UI][Accessibility]")
+  {
+    View view({400, 300});
+    view.LoadHTML(u8"<!DOCTYPE html><progress aria-label=Done value=3 max=4></progress>"
+                  u8"<progress aria-label=Waiting></progress>"
+                  u8"<div role=progressbar aria-label=Busy></div>");
+    WaitForLoad(view);
+    view.UpdateRendering();
+
+    AccessibilityWindow window;
+    view.AttachAccessibility(window, {0, 0});
+    auto &tree = *window.Tree;
+    auto root = tree.Root();
+
+    // A determinate progress bar has a range.
+    auto done = tree.Node(FindByName(tree, root, u8"Done"));
+    REQUIRE(done);
+    CHECK(done->Role == pal::AccessibilityRole::ProgressBar);
+    REQUIRE(done->Range);
+    CHECK(done->Range->Value == 3);
+    CHECK(done->Range->Minimum == 0);
+    CHECK(done->Range->Maximum == 4);
+
+    // An indeterminate one has none: no value, minimum or maximum
+    // (https://w3c.github.io/html-aam/#el-progress).
+    for (auto name : {u8"Waiting", u8"Busy"})
+    {
+      CAPTURE(reinterpret_cast<const char *>(name));
+      auto indeterminate = tree.Node(FindByName(tree, root, name));
+      REQUIRE(indeterminate);
+      CHECK(indeterminate->Role == pal::AccessibilityRole::ProgressBar);
+      CHECK_FALSE(indeterminate->Range);
+    }
+  }
+
   TEST_CASE("View: accessibility of text lines", "[UI][Accessibility]")
   {
     View view({400, 300});
