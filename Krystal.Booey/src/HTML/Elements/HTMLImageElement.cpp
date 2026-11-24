@@ -1,26 +1,4 @@
-﻿/*
- * Copyright (C) 1999 Lars Knoll (knoll@kde.org)
- *           (C) 1999 Antti Koivisto (koivisto@kde.org)
- * Copyright (C) 2004-2022 Apple Inc. All rights reserved.
- * Copyright (C) 2010-2015 Google Inc. All rights reserved.
- *
- * This library is free software; you can redistribute it and/or
- * modify it under the terms of the GNU Library General Public
- * License as published by the Free Software Foundation; either
- * version 2 of the License, or (at your option) any later version.
- *
- * This library is distributed in the hope that it will be useful,
- * but WITHOUT ANY WARRANTY; without even the implied warranty of
- * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU
- * Library General Public License for more details.
- *
- * You should have received a copy of the GNU Library General Public License
- * along with this library; see the file COPYING.LIB.  If not, write to
- * the Free Software Foundation, Inc., 51 Franklin Street, Fifth Floor,
- * Boston, MA 02110-1301, USA.
- */
-
-#include "Krystal.Booey/HTML/Elements/HTMLImageElement.hpp"
+﻿#include "Krystal.Booey/HTML/Elements/HTMLImageElement.hpp"
 #include "Krystal.Booey/CSS/Parser/SizesAttributeParser.hpp"
 #include "Krystal.Booey/CSS/Queries/MediaQueryEvaluator.hpp"
 #include "Krystal.Booey/DOM/Algorithms/TreeQueries.hpp"
@@ -259,7 +237,7 @@ namespace krys::boo
     {
       return true;
     }
-    // If the usemap attribute starts with '#', it refers to a map element in the document.
+    // A usemap of the form #name refers to a map in the document.
     if (usemap->starts_with(u8'#'))
     {
       return false;
@@ -290,13 +268,12 @@ namespace krys::boo
 
     if (!Renderer())
     {
-      // check the attribute first for an explicit pixel value
+      // Without a renderer, the width attribute, or else the image's own width.
       if (auto width = html::Numbers::ParseNonNegativeInteger(AttributeOrEmpty(u8"width")); width.Success())
       {
         return ClampedAttributeLength(width.Value);
       }
 
-      // if the image is available, use its width
       if (auto *image = _imageLoader->Image())
       {
         return image->ImageSizeForRenderer(nullptr, 1.0f).Width().ToUnsigned();
@@ -329,14 +306,13 @@ namespace krys::boo
 
     if (!Renderer())
     {
-      // check the attribute first for an explicit pixel value
+      // Without a renderer, the height attribute, or else the image's own height.
       if (auto height = html::Numbers::ParseNonNegativeInteger(AttributeOrEmpty(u8"height"));
           height.Success())
       {
         return ClampedAttributeLength(height.Value);
       }
 
-      // if the image is available, use its height
       if (auto *image = _imageLoader->Image())
       {
         return image->ImageSizeForRenderer(nullptr, 1.0f).Height().ToUnsigned();
@@ -547,14 +523,11 @@ namespace krys::boo
 
   Maybe<DOMString> HTMLImageElement::AltText() const noexcept
   {
-    // lets figure out the alt text.. magic stuff
-    // http://www.w3.org/TR/1998/REC-html40-19980424/appendix/notes.html#altgen
-    // also heavily discussed by Hixie on bugzilla
+    // The alt attribute, or else the title.
     if (auto alt = GetAttribute(u8"alt"))
     {
       return alt;
     }
-    // fall back to title attribute
     return GetAttribute(u8"title");
   }
 
@@ -678,8 +651,7 @@ namespace krys::boo
   html::ImageCandidate HTMLImageElement::BestFitSourceFromPictureElement() noexcept
   {
     // 3. If el is an img element whose parent node is a picture element, then replace the contents of
-    // elements
-    //    with el's parent node's child elements, retaining relative order.
+    //    elements with el's parent node's child elements, retaining relative order.
     auto *picture = PictureElement();
     if (!picture)
     {
@@ -765,7 +737,7 @@ namespace krys::boo
   void HTMLImageElement::SelectImageSource(RelevantMutation relevantMutation) noexcept
   {
     // 1. Update the source set for el.
-    // First look for the best fit source from our <picture> parent if we have one.
+    // (A picture parent's sources first.)
     html::ImageCandidate candidate = BestFitSourceFromPictureElement();
 
     // 5a. If child is el: (Updating the source set, from the img's own attributes.)
@@ -774,7 +746,7 @@ namespace krys::boo
       SetSourceElement(nullptr);
       auto srcAttribute = GetAttribute(u8"src");
       auto srcsetAttribute = GetAttribute(u8"srcset");
-      // This is extremely common case. We should not invoke SizesAttributeParser at all.
+      // Without srcset (the common case), src is the only candidate and sizes isn't parsed.
       if (!srcsetAttribute)
       {
         if (srcAttribute)
@@ -785,7 +757,6 @@ namespace krys::boo
       }
       else
       {
-        // If we don't have a <picture> or didn't find a source, then we use our own attributes.
         auto &document = NodeDocument();
         css::SizesAttributeParser sizesParser(AttributeOrEmpty(u8"sizes"), document);
         auto sourceSize = sizesParser.Length();
@@ -843,7 +814,7 @@ namespace krys::boo
     }
     else if (localName == u8"loading")
     {
-      // No action needed for eager to lazy transition.
+      // Becoming eager loads a deferred image; becoming lazy changes nothing.
       if (!HasLazyLoadableAttributeValue(value))
       {
         LoadDeferredImage();
@@ -872,8 +843,7 @@ namespace krys::boo
       return;
     }
 
-    // If we have been inserted from a renderer-less document,
-    // our loader may have not fetched the image, so do it now.
+    // The image may not have been fetched while the element was outside a document.
     if (IsConnected() && !_imageLoader->Image())
     {
       _imageLoader->UpdateFromElement();
@@ -949,8 +919,7 @@ namespace krys::boo
     }
     renderImageResource.SetCachedImage(CachedResourceHandle<CachedImage>(_imageLoader->Image()));
 
-    // If we have no image at all because we have no src attribute, set
-    // image height and width for the alt text instead.
+    // Without an image (no src), the renderer is sized for the alt text.
     if (!_imageLoader->Image() && !renderImageResource.GetCachedImage())
     {
       (void)renderImage->SetImageSizeForAltText();
@@ -1035,9 +1004,8 @@ namespace krys::boo
     }
     auto widthAttrFromSource = sourceElement->GetAttribute(u8"width");
     auto heightAttrFromSource = sourceElement->GetAttribute(u8"height");
-    // If both width and height attributes of <source> is undefined, the style's value should not
-    // be overwritten. Otherwise, <souce> will overwrite it. I.e., if <source> only has one attribute
-    // defined, the other one and aspect-ratio shouldn't be set to auto.
+    // A source with neither width nor height leaves the img's dimensions; with either, the source's replace
+    // them both, and the aspect ratio.
     if (!widthAttrFromSource && !heightAttrFromSource)
     {
       return;
