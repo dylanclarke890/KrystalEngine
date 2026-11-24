@@ -129,23 +129,23 @@ namespace krys::boo::html
       return;
     }
 
-    auto &key = keyboardEvent.KeyIdentifier();
+    auto &key = keyboardEvent.Key();
     auto &code = keyboardEvent.Code();
 
     bool isHorizontal = IsFieldOwnerHorizontal();
-    DOMStringView nextKeyIdentifier = isHorizontal ? u8"Right" : u8"Down";
-    DOMStringView previousKeyIdentifier = isHorizontal ? u8"Left" : u8"Up";
-    DOMStringView stepUpKeyIdentifier = isHorizontal ? u8"Up" : u8"Right";
-    DOMStringView stepDownKeyIdentifier = isHorizontal ? u8"Down" : u8"Left";
+    DOMStringView nextKey = isHorizontal ? u8"ArrowRight" : u8"ArrowDown";
+    DOMStringView previousKey = isHorizontal ? u8"ArrowLeft" : u8"ArrowUp";
+    DOMStringView stepUpKey = isHorizontal ? u8"ArrowUp" : u8"ArrowRight";
+    DOMStringView stepDownKey = isHorizontal ? u8"ArrowDown" : u8"ArrowLeft";
 
-    if (key == previousKeyIdentifier && _fieldOwner && _fieldOwner->FocusOnPreviousField(*this))
+    if (key == previousKey && _fieldOwner && _fieldOwner->FocusOnPreviousField(*this))
     {
       keyboardEvent.SetDefaultHandled();
       return;
     }
 
-    if ((key == nextKeyIdentifier || code == u8"Comma" || code == u8"Minus" || code == u8"Period"
-         || code == u8"Slash" || code == u8"Semicolon")
+    if ((key == nextKey || code == u8"Comma" || code == u8"Minus" || code == u8"Period" || code == u8"Slash"
+         || code == u8"Semicolon")
         && _fieldOwner && _fieldOwner->FocusOnNextField(*this))
     {
       keyboardEvent.SetDefaultHandled();
@@ -157,14 +157,14 @@ namespace krys::boo::html
       return;
     }
 
-    if (key == stepUpKeyIdentifier)
+    if (key == stepUpKey)
     {
       StepUp();
       keyboardEvent.SetDefaultHandled();
       return;
     }
 
-    if (key == stepDownKeyIdentifier)
+    if (key == stepDownKey)
     {
       StepDown();
       keyboardEvent.SetDefaultHandled();
@@ -172,7 +172,7 @@ namespace krys::boo::html
     }
 
     // Clear value when pressing backspace or delete.
-    if (key == u8"U+0008" || key == u8"U+007F")
+    if (key == u8"Backspace" || key == u8"Delete")
     {
       SetEmptyValue(EventBehavior::DispatchInputAndChangeEvents);
       keyboardEvent.SetDefaultHandled();

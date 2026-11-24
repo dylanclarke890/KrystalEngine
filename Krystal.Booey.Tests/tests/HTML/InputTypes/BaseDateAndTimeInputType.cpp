@@ -103,11 +103,11 @@ namespace krys::boo::tests
       }
 
       /// @brief Presses the key @p identifier (with the code @p code), as the host does.
-      bool Press(const utf8_string &identifier, utf8_string code = {}, int32 keyCode = 0) noexcept
+      bool Press(const utf8_string &key, utf8_string code = {}, int32 keyCode = 0) noexcept
       {
-        return Frame->GetEventHandler().KeyEvent(
-          PlatformKeyboardEvent(PlatformEvent::Type::RawKeyDown, u8"", u8"", identifier, krys::move(code),
-                                identifier, keyCode, false, false, false, {}, {}));
+        return Frame->GetEventHandler().KeyEvent(PlatformKeyboardEvent(PlatformEvent::Type::RawKeyDown, u8"",
+                                                                       u8"", key, krys::move(code), key,
+                                                                       keyCode, false, false, false, {}, {}));
       }
 
       /// @brief Types @p text, a character, as the host does after its key down, at @p seconds.
@@ -271,10 +271,10 @@ namespace krys::boo::tests
       CHECK(fixture.Type(u8"0", 0));
       CHECK(fixture.Type(u8"3", 0));
       // Right, or a separator, moves to the next field.
-      CHECK(fixture.Press(u8"Right"));
+      CHECK(fixture.Press(u8"ArrowRight"));
       CHECK(fixture.Document->FocusedElement() == &Field(input, 1));
       CHECK(fixture.Type(u8"7", 0));
-      CHECK(fixture.Press(u8"U+002F", u8"Slash"));
+      CHECK(fixture.Press(u8"/", u8"Slash"));
       CHECK(fixture.Document->FocusedElement() == &Field(input, 2));
       // A partly filled date is bad input, and has no value.
       CHECK(input.Value().empty());
@@ -292,7 +292,7 @@ namespace krys::boo::tests
       CHECK(changes->Count == 0);
 
       // Left goes back.
-      CHECK(fixture.Press(u8"Left"));
+      CHECK(fixture.Press(u8"ArrowLeft"));
       CHECK(fixture.Document->FocusedElement() == &Field(input, 1));
 
       // Leaving the fields fires change.
@@ -312,14 +312,14 @@ namespace krys::boo::tests
 
     SECTION("the arrow keys step a field, wrapping")
     {
-      CHECK(fixture.Press(u8"Up"));
+      CHECK(fixture.Press(u8"ArrowUp"));
       CHECK(Shown(input).starts_with(u8"01/"));
-      CHECK(fixture.Press(u8"Down"));
+      CHECK(fixture.Press(u8"ArrowDown"));
       CHECK(Shown(input).starts_with(u8"12/"));
-      CHECK(fixture.Press(u8"Down"));
+      CHECK(fixture.Press(u8"ArrowDown"));
       CHECK(Shown(input).starts_with(u8"11/"));
       // Backspace empties the field.
-      CHECK(fixture.Press(u8"U+0008"));
+      CHECK(fixture.Press(u8"Backspace"));
       CHECK_FALSE(input.Validity().BadInput());
     }
 
@@ -329,7 +329,7 @@ namespace krys::boo::tests
       CHECK_FALSE(fixture.Type(u8"4", 0));
       CHECK_FALSE(input.Validity().BadInput());
       // They can still be moved between.
-      CHECK(fixture.Press(u8"Right"));
+      CHECK(fixture.Press(u8"ArrowRight"));
       CHECK(fixture.Document->FocusedElement() == &Field(input, 1));
     }
   }
@@ -348,7 +348,7 @@ namespace krys::boo::tests
       // Typing the same letter again cycles through the names starting with it.
       CHECK(fixture.Type(u8"m", 0));
       CHECK(Shown(month).starts_with(u8"May "));
-      CHECK(fixture.Press(u8"Up"));
+      CHECK(fixture.Press(u8"ArrowUp"));
       CHECK(Shown(month).starts_with(u8"Jun "));
     }
 
@@ -356,11 +356,11 @@ namespace krys::boo::tests
     {
       auto &time = fixture.Input(u8"time", u8"en-US", {{u8"value", u8"09:15"}});
       time.Focus();
-      CHECK(fixture.Press(u8"Right"));
-      CHECK(fixture.Press(u8"Right"));
+      CHECK(fixture.Press(u8"ArrowRight"));
+      CHECK(fixture.Press(u8"ArrowRight"));
       CHECK(fixture.Type(u8"p", 0));
       CHECK(time.Value() == u8"21:15");
-      CHECK(fixture.Press(u8"Down"));
+      CHECK(fixture.Press(u8"ArrowDown"));
       CHECK(time.Value() == u8"09:15");
       // Typing quickly switches back and forth: what was typed before doesn't stick.
       CHECK(fixture.Type(u8"p", 0));
@@ -377,7 +377,7 @@ namespace krys::boo::tests
       time.Focus();
       CHECK(fixture.Type(u8"2", 0));
       CHECK(fixture.Type(u8"3", 0));
-      CHECK(fixture.Press(u8"Right"));
+      CHECK(fixture.Press(u8"ArrowRight"));
       CHECK(fixture.Type(u8"5", 0));
       CHECK(time.Value() == u8"23:05");
     }
@@ -387,7 +387,7 @@ namespace krys::boo::tests
       auto &week = fixture.Input(u8"week");
       week.Focus();
       CHECK(fixture.Type(u8"9", 0));
-      CHECK(fixture.Press(u8"Right"));
+      CHECK(fixture.Press(u8"ArrowRight"));
       CHECK(fixture.Type(u8"2", 0));
       CHECK(fixture.Type(u8"0", 0));
       CHECK(fixture.Type(u8"2", 0));
@@ -487,7 +487,7 @@ namespace krys::boo::tests
       CHECK(client->Chooser->Shows == 1);
       // Editing a field updates it.
       input.Focus();
-      CHECK(fixture.Press(u8"Up"));
+      CHECK(fixture.Press(u8"ArrowUp"));
       CHECK(client->Chooser->Shows == 2);
       CHECK(client->Chooser->Parameters->CurrentValue == u8"2026-04-07");
       input.Blur();
@@ -498,7 +498,7 @@ namespace krys::boo::tests
     SECTION("Space in a field shows it")
     {
       input.Focus();
-      CHECK(fixture.Press(u8"U+0020", u8"Space", vk::Space));
+      CHECK(fixture.Press(u8" ", u8"Space", vk::Space));
       REQUIRE(client->Chooser);
       CHECK(client->Chooser->Parameters->WasActivatedByKeyboard);
     }

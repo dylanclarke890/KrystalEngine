@@ -95,7 +95,7 @@ namespace krys::boo::html
       return TextFieldInputType::HandleKeydownEvent(event);
     }
 
-    if (event.KeyIdentifier() == u8"U+001B")
+    if (event.Key() == u8"Escape")
     {
       (void)element.SetValue({}, TextFieldEventBehavior::DispatchChangeEvent);
       event.SetDefaultHandled();

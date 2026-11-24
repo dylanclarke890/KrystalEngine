@@ -182,7 +182,7 @@ namespace krys::boo::html::tests
     KeyboardEventInit init;
     init.Bubbles = true;
     init.Cancelable = true;
-    init.KeyIdentifier = u8"Enter";
+    init.Key = u8"Enter";
     init.ShiftKey = true;
     (void)a.DispatchEvent(*CreateRef<KeyboardEvent>(u8"keydown", init));
 

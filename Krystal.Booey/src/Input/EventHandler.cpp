@@ -214,21 +214,21 @@ namespace krys::boo
       return shadowRoot && shadowRoot->Host() && Is<HTMLInputElement>(*shadowRoot->Host());
     }
 
-    KRYS_NODISCARD dom::FocusDirection FocusDirectionForKey(const DOMString &keyIdentifier) noexcept
+    KRYS_NODISCARD dom::FocusDirection FocusDirectionForKey(const DOMString &key) noexcept
     {
-      if (keyIdentifier == u8"Down")
+      if (key == u8"ArrowDown")
       {
         return dom::FocusDirection::Down;
       }
-      if (keyIdentifier == u8"Up")
+      if (key == u8"ArrowUp")
       {
         return dom::FocusDirection::Up;
       }
-      if (keyIdentifier == u8"Left")
+      if (key == u8"ArrowLeft")
       {
         return dom::FocusDirection::Left;
       }
-      if (keyIdentifier == u8"Right")
+      if (key == u8"ArrowRight")
       {
         return dom::FocusDirection::Right;
       }
@@ -1468,19 +1468,19 @@ namespace krys::boo
         return false;
       }
       // FIXME: Backspace (history navigation).
-      if (event.KeyIdentifier() == u8"U+0009")
+      if (event.Key() == u8"Tab")
       {
         return DefaultTabEventHandler(event);
       }
-      if (event.KeyIdentifier() == u8"PageDown" || event.KeyIdentifier() == u8"PageUp")
+      if (event.Key() == u8"PageDown" || event.Key() == u8"PageUp")
       {
         return DefaultPageUpDownEventHandler(event);
       }
-      if (event.KeyIdentifier() == u8"Home" || event.KeyIdentifier() == u8"End")
+      if (event.Key() == u8"Home" || event.Key() == u8"End")
       {
         return DefaultHomeEndEventHandler(event);
       }
-      dom::FocusDirection direction = FocusDirectionForKey(event.KeyIdentifier());
+      dom::FocusDirection direction = FocusDirectionForKey(event.Key());
       if (direction != dom::FocusDirection::None)
       {
         return DefaultArrowEventHandler(direction, event);
@@ -1516,7 +1516,7 @@ namespace krys::boo
       return false;
     }
 
-    ScrollLogicalDirection direction = event.KeyIdentifier() == u8"PageUp"
+    ScrollLogicalDirection direction = event.Key() == u8"PageUp"
                                          ? ScrollLogicalDirection::ScrollBlockDirectionBackward
                                          : ScrollLogicalDirection::ScrollBlockDirectionForward;
     return DefaultKeyboardScrollEventHandler(event, direction, ScrollGranularity::Page);
@@ -1531,7 +1531,7 @@ namespace krys::boo
       return false;
     }
 
-    ScrollLogicalDirection direction = event.KeyIdentifier() == u8"Home"
+    ScrollLogicalDirection direction = event.Key() == u8"Home"
                                          ? ScrollLogicalDirection::ScrollBlockDirectionBackward
                                          : ScrollLogicalDirection::ScrollBlockDirectionForward;
     return DefaultKeyboardScrollEventHandler(event, direction, ScrollGranularity::Document);
