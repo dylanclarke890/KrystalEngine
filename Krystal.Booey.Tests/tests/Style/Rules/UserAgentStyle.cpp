@@ -2,6 +2,7 @@
 #include "catch2/catch_test_macros.hpp"
 #include "Krystal.Booey.Tests/CSS/ValueTestUtils.hpp"
 #include "Krystal.Booey.Tests/Style/ResolverTestUtils.hpp"
+#include "Krystal.Booey/CSS/CSSOM/CSSComputedStyleDeclaration.hpp"
 #include "Krystal.Booey/CSS/Properties/StyleProperties.hpp"
 #include "Krystal.Booey/CSS/Properties/StylePropertiesInlines.hpp"
 #include "Krystal.Booey/CSS/Rules/KeyframesRule.hpp"
@@ -9,6 +10,7 @@
 #include "Krystal.Booey/CSS/UserAgentStyleSheets.hpp"
 #include "Krystal.Booey/DOM/Nodes/HTMLDocument.hpp"
 #include "Krystal.Booey/DOM/Nodes/XMLDocument.hpp"
+#include "Krystal.Booey/HTML/Window.hpp"
 #include "Krystal.Booey/Infra/Namespaces.hpp"
 #include "Krystal.Booey/Rendering/RenderTheme.hpp"
 #include "Krystal.Booey/Style/Resolver.hpp"
@@ -196,5 +198,57 @@ namespace krys::boo::style::tests
         .StyleForElement(*form, {.ParentStyle = tableStyle.get(), .DocumentElementStyle = tableStyle.get()})
         .Style;
     CHECK(formStyle->Display() == DisplayType::Block);
+  }
+
+  TEST_CASE("UserAgentStyle: the quirks mode rules",
+            "[Style][UserAgentStyle][html:flow-content-3][html:lists][html:tables-2][html:form-controls]["
+            "html:images-3]")
+  {
+    const utf8_string markup =
+      u8"<body style='font: italic bold 20px/30px serif; white-space: pre; text-align: center; color: "
+      u8"rgb(255, 0, 0)'>"
+      u8"<form id=form></form><li id=orphan><ul id=nested><li id=inner></li></ul></li><ul><li "
+      u8"id=listed></li></ul>"
+      u8"<div style='color: rgb(0, 0, 255)'><table id=table></table></div><input id=text><input id=image "
+      u8"type=IMAGE><textarea id=area></textarea>"
+      u8"<img id=left align=LEFT><img id=right align=right>";
+    ResolverFixture quirks {utf8_string(markup)};
+    ResolverFixture standards(u8"<!DOCTYPE html>" + markup);
+    REQUIRE(quirks.Document->InQuirksMode());
+    REQUIRE_FALSE(standards.Document->InQuirksMode());
+    auto computed = [](ResolverFixture &fixture, DOMStringView id, utf8_stringview property)
+    {
+      auto style = fixture.Document->Window()->GetComputedStyle(fixture.ById(id));
+      return ToNarrow(style->GetPropertyValue(CSSOMString(property)));
+    };
+
+    CHECK(computed(quirks, u8"form", u8"margin-block-end") == "20px");
+    CHECK(computed(standards, u8"form", u8"margin-block-end") == "0px");
+
+    CHECK(computed(quirks, u8"orphan", u8"list-style-position") == "inside");
+    CHECK(computed(quirks, u8"nested", u8"list-style-position") == "outside");
+    CHECK(computed(quirks, u8"inner", u8"list-style-position") == "outside");
+    CHECK(computed(quirks, u8"listed", u8"list-style-position") == "outside");
+    CHECK(computed(standards, u8"orphan", u8"list-style-position") == "outside");
+
+    for (utf8_stringview property : {u8"font-weight", u8"font-style", u8"font-size", u8"line-height",
+                                     u8"white-space", u8"text-align", u8"color"})
+    {
+      CAPTURE(ToNarrow(property));
+      CHECK(computed(quirks, u8"table", property) != computed(standards, u8"table", property));
+    }
+    CHECK(computed(quirks, u8"table", u8"font-size") == "16px");
+    CHECK(computed(quirks, u8"table", u8"text-align") == "start");
+    // Not in the specification: the table takes the body's colour.
+    CHECK(computed(quirks, u8"table", u8"color") == "rgb(255, 0, 0)");
+
+    CHECK(computed(quirks, u8"text", u8"box-sizing") == "border-box");
+    CHECK(computed(quirks, u8"area", u8"box-sizing") == "border-box");
+    CHECK(computed(quirks, u8"image", u8"box-sizing") == "content-box");
+    CHECK(computed(standards, u8"text", u8"box-sizing") == "content-box");
+
+    CHECK(computed(quirks, u8"left", u8"margin-right") == "3px");
+    CHECK(computed(quirks, u8"right", u8"margin-left") == "3px");
+    CHECK(computed(standards, u8"left", u8"margin-right") == "0px");
   }
 }
