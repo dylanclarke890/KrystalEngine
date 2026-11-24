@@ -351,7 +351,8 @@ dt {
     text-indent: 0px !important;
 }
 
-/* form elements */
+/* https://html.spec.whatwg.org/#form-controls. The controls follow Chrome's rules more closely than these
+   (see DIFFERENCES.md). */
 
 form {
     display: block;
@@ -362,6 +363,7 @@ label {
     cursor: default;
 }
 
+/* https://html.spec.whatwg.org/#the-fieldset-and-legend-elements */
 legend {
     padding-inline: 2px;
     border: none;
@@ -411,6 +413,7 @@ input[type="search"] {
     box-sizing: border-box;
 }
 
+/* The box in a text field holding its text and its buttons. */
 input::-webkit-textfield-decoration-container {
     display: flex;
     align-items: center;
@@ -418,6 +421,7 @@ input::-webkit-textfield-decoration-container {
     writing-mode: inherit !important;
 }
 
+/* A search field's buttons. */
 input[type="search"]::-webkit-search-cancel-button,
 input[type="search"]::-webkit-search-decoration,
 input[type="search"]::-webkit-search-results-decoration {
@@ -435,6 +439,8 @@ input[type="search"]::-webkit-search-results-button {
     flex: none;
 }
 
+/* Date and time fields, edited a field at a time
+   (https://html.spec.whatwg.org/#the-input-element-as-domain-specific-widgets). */
 input:is([type="date"], [type="time"], [type="datetime-local"], [type="month"], [type="week"]) {
     align-items: center;
     display: inline-flex;
@@ -500,6 +506,7 @@ input::-webkit-datetime-edit-text {
     display: inline;
 }
 
+/* The button that shows a field's suggestions from its datalist. */
 input::-webkit-list-button {
     appearance: auto;
     display: block;
@@ -512,19 +519,18 @@ input::-webkit-list-button {
     block-size: 100%;
 }
 
+/* A number field's up and down buttons. */
 input::-webkit-inner-spin-button {
     appearance: auto;
     display: block;
     position: relative;
     cursor: default;
-    /* This height property is ignored for input type "number" and others which
-     * use RenderTextControlSingleLine as renderer which sets height of spin
-     * button in layout(). */
     height: 1.5em;
     flex: none;
     user-select: none;
 }
 
+/* https://html.spec.whatwg.org/#the-textarea-element-2 */
 textarea {
     appearance: auto;
     color: CanvasText;
@@ -570,6 +576,7 @@ input[type="image"] {
     cursor: pointer;
 }
 
+/* https://html.spec.whatwg.org/#the-input-element-as-a-file-upload-control */
 input[type="file"] {
     align-items: baseline;
     color: inherit;
@@ -580,6 +587,7 @@ input[type="file"] {
     field-sizing: fixed !important;
 }
 
+/* https://html.spec.whatwg.org/#the-input-element-as-a-checkbox-and-radio-button-widgets */
 input:is([type="radio"], [type="checkbox"]) {
     margin: 3px 2px;
     box-sizing: border-box;
@@ -588,6 +596,8 @@ input:is([type="radio"], [type="checkbox"]) {
     background-color: initial;
 }
 
+/* https://html.spec.whatwg.org/#the-input-element-as-a-button and
+   https://html.spec.whatwg.org/#the-button-element-2 */
 input:is([type="button"], [type="submit"], [type="reset"]) {
     white-space: pre;
 }
@@ -613,6 +623,7 @@ input:is([type="button"], [type="submit"], [type="reset"]):active, input[type="f
     color: ActiveButtonText;
 }
 
+/* https://html.spec.whatwg.org/#the-input-element-as-a-range-control */
 input[type="range"] {
     padding: initial;
     border: initial;
@@ -657,6 +668,7 @@ input[type="file"]:active:disabled::file-selector-button, button:active:disabled
     border-style: outset;
 }
 
+/* https://html.spec.whatwg.org/#the-input-element-as-a-colour-well */
 input[type="color"] {
     appearance: auto;
     box-sizing: border-box;
@@ -686,6 +698,8 @@ input[type="color"]::-webkit-color-swatch {
     flex: 1;
 }
 
+/* https://html.spec.whatwg.org/#the-select-element-2. -internal-auto-base() takes its second value when the select has a base
+   appearance, and its first otherwise. */
 select {
     box-sizing: border-box;
     appearance: auto;
@@ -831,7 +845,7 @@ output {
     display: inline;
 }
 
-/* meter */
+/* https://html.spec.whatwg.org/#the-meter-element-2 */
 
 meter {
     appearance: auto;
@@ -842,7 +856,7 @@ meter {
     vertical-align: -0.2em;
 }
 
-/* progress */
+/* https://html.spec.whatwg.org/#the-progress-element-2 */
 
 progress {
     appearance: auto;
@@ -869,7 +883,7 @@ progress::-webkit-progress-bar {
 progress::-webkit-progress-value {
     background-color: green;
     block-size: 100%;
-    inline-size: 50%; /* should be removed later */
+    inline-size: 50%; /* The element's own style replaces this with the progress made. */
     box-sizing: border-box;
 }
 
