@@ -1,28 +1,4 @@
-﻿/*
- * Copyright (C) 2001 Peter Kelly (pmk@post.com)
- * Copyright (C) 2001 Tobias Anton (anton@stud.fbi.fh-darmstadt.de)
- * Copyright (C) 2006 Samuel Weinig (sam.weinig@gmail.com)
- * Copyright (C) 2003-2024 Apple Inc. All rights reserved.
- * Copyright (C) 2017 Google Inc. All rights reserved.
- *
- * This library is free software; you can redistribute it and/or
- * modify it under the terms of the GNU Library General Public
- * License as published by the Free Software Foundation; either
- * version 2 of the License, or (at your option) any later version.
- *
- * This library is distributed in the hope that it will be useful,
- * but WITHOUT ANY WARRANTY; without even the implied warranty of
- * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU
- * Library General Public License for more details.
- *
- * You should have received a copy of the GNU Library General Public License
- * along with this library; see the file COPYING.LIB.  If not, write to
- * the Free Software Foundation, Inc., 51 Franklin Street, Fifth Floor,
- * Boston, MA 02110-1301, USA.
- *
- */
-
-#pragma once
+﻿#pragma once
 
 #include "Krystal.Booey/DOM/Events/EventTarget.hpp"
 #include "Krystal.Booey/DOM/Events/MouseRelatedEvent.hpp"
@@ -121,6 +97,7 @@ namespace krys::boo
       return _button;
     }
 
+    /// @brief `Button()` as a `MouseButton`.
     KRYS_NODISCARD MouseButton ButtonType() const noexcept
     {
       return ButtonFromShort(_button);
@@ -132,11 +109,15 @@ namespace krys::boo
       return _buttons;
     }
 
+    /// @brief For a click the host made from a tap, whether it was a one or two finger tap; `NoTap`
+    /// otherwise.
     KRYS_NODISCARD SyntheticClickType GetSyntheticClickType() const noexcept
     {
       return _syntheticClickType;
     }
 
+    /// @brief Whether a button is involved: false for a move with no button pressed, whose `Button()` still
+    /// reads 0.
     KRYS_NODISCARD bool ButtonDown() const noexcept
     {
       return _buttonDown;
@@ -168,6 +149,9 @@ namespace krys::boo
     /// @note Legacy: the button, counted from one, or zero if none was pressed.
     KRYS_NODISCARD uint32 Which() const noexcept;
 
+    /// @brief The moves this event stands for, and those the host predicts after it, which a pointer event
+    /// made from it reports.
+    /// @see https://w3c.github.io/pointerevents/#dom-pointerevent-getcoalescedevents
     KRYS_NODISCARD const List<Ref<MouseEvent>> &CoalescedEvents() const noexcept
     {
       return _coalescedEvents;
@@ -192,6 +176,7 @@ namespace krys::boo
       _relatedTarget = ShareRefPtr(relatedTarget);
     }
 
+    /// @brief A trusted event; the `Create` functions and derived events build on it.
     MouseEvent(DOMStringAtom type, const UIEventInit &eventInitDict, boo::FrameView *view,
                const PointD &screenLocation, const PointD &windowLocation, double movementX, double movementY,
                EnumSet<Modifier> modifiers, MouseButton button, uint16 buttons, EventTarget *relatedTarget,
