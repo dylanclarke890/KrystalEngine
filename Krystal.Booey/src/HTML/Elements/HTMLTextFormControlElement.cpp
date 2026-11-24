@@ -219,7 +219,6 @@ namespace krys::boo
     }
 
     _lastChangeWasUserEdit = wasUserEdit;
-    _wasEverChangedByUserEdit |= wasUserEdit;
     SubtreeHasChanged();
   }
 
@@ -246,7 +245,7 @@ namespace krys::boo
   {
     // This function is used by the style resolver to match the :placeholder-shown pseudo class.
     // Since it is used for styling, it must not use any value depending on the style.
-    return SupportsPlaceholder() && IsEmptyValue() && !IsPlaceholderEmpty() && _canShowPlaceholder;
+    return SupportsPlaceholder() && IsEmptyValue() && !IsPlaceholderEmpty();
   }
 
   void HTMLTextFormControlElement::UpdatePlaceholderVisibility() noexcept
@@ -265,12 +264,6 @@ namespace krys::boo
     {
       placeholder->InvalidateStyle();
     }
-  }
-
-  void HTMLTextFormControlElement::SetCanShowPlaceholder(bool canShowPlaceholder) noexcept
-  {
-    _canShowPlaceholder = canShowPlaceholder;
-    UpdatePlaceholderVisibility();
   }
 
   // https://html.spec.whatwg.org/#dom-textarea/input-selectionstart
@@ -856,15 +849,6 @@ namespace krys::boo
       return false;
     }
     return _lastChangeWasUserEdit;
-  }
-
-  bool HTMLTextFormControlElement::WasEverChangedByUserEdit() const noexcept
-  {
-    if (!IsTextField())
-    {
-      return false;
-    }
-    return _wasEverChangedByUserEdit;
   }
 
   void HTMLTextFormControlElement::SetInnerTextValue(DOMString value) noexcept

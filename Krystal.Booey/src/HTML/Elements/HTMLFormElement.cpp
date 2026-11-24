@@ -329,13 +329,7 @@ namespace krys::boo
 
   void HTMLFormElement::Submit() noexcept
   {
-    Submit(nullptr, true, FormSubmissionTrigger::NotSubmittedByJavaScript);
-  }
-
-  void HTMLFormElement::SubmitFromJavaScript() noexcept
-  {
-    // FIXME: Whether a user gesture is being processed (UserGestureIndicator).
-    Submit(nullptr, false, FormSubmissionTrigger::SubmittedByJavaScript);
+    Submit(nullptr, FormSubmissionTrigger::NotSubmittedByJavaScript);
   }
 
   ExceptionOr<void> HTMLFormElement::RequestSubmit(HTMLElement *submitter) noexcept
@@ -602,25 +596,10 @@ namespace krys::boo
       plannedFormSubmission->Cancel();
     }
 
-    Submit(event, !submitter, trigger, submitter);
+    Submit(event, trigger, submitter);
   }
 
-  List<Pair<DOMString, DOMString>> HTMLFormElement::TextFieldValues() const noexcept
-  {
-    List<Pair<DOMString, DOMString>> values;
-    for (auto &element : CopyListedElementsVector())
-    {
-      auto *input = DynamicDowncast<HTMLInputElement>(*element);
-      if (!input || !input->IsTextField())
-      {
-        continue;
-      }
-      values.emplace_back(input->Name(), input->Value());
-    }
-    return values;
-  }
-
-  void HTMLFormElement::Submit(Event *event, bool processingUserGesture, FormSubmissionTrigger trigger,
+  void HTMLFormElement::Submit(Event *event, FormSubmissionTrigger trigger,
                                HTMLFormControlElement *submitter) noexcept
   {
     // SubmitIfPossible also checks this, but some paths bypass it.
@@ -647,7 +626,6 @@ namespace krys::boo
     }
 
     _isSubmittingOrPreparingForSubmission = true;
-    _wasUserSubmitted = processingUserGesture;
 
     if (event && !submitter)
     {
@@ -1008,11 +986,6 @@ namespace krys::boo
     }
 
     return MakeTargetBlankIfHasDanglingMarkup(NodeDocument().BaseTarget());
-  }
-
-  bool HTMLFormElement::WasUserSubmitted() const noexcept
-  {
-    return _wasUserSubmitted;
   }
 
   HTMLFormControlElement *HTMLFormElement::FindSubmitter(const Event *event) noexcept

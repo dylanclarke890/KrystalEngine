@@ -293,9 +293,6 @@ namespace krys::boo
 
     void ScrollToSelection() noexcept;
 
-    void ListBoxSelectItem(int32 listIndex, bool allowMultiplySelections, bool shift,
-                           bool fireOnChangeNow = true) noexcept;
-
     KRYS_NODISCARD bool CanSelectAll() const noexcept;
 
     void SelectAll() noexcept;

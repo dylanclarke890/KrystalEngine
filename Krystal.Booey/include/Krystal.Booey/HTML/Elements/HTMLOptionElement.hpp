@@ -140,9 +140,6 @@ namespace krys::boo
     /// @see https://html.spec.whatwg.org/#the-select-element-2
     KRYS_NODISCARD HTMLSlotElement *SlotForHostChild() const noexcept;
 
-    /// @brief The label shown for the option: its text, ignoring its `label` attribute, in quirks mode.
-    KRYS_NODISCARD DOMString DisplayLabel() const noexcept;
-
     /// @brief The label, indented when the option is in an optgroup.
     KRYS_NODISCARD DOMString TextIndentedToRespectGroupLabel() const noexcept;
 

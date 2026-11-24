@@ -324,17 +324,6 @@ namespace krys::boo
     return _ownerSelect.get();
   }
 
-  DOMString HTMLOptionElement::DisplayLabel() const noexcept
-  {
-    // Same as OptionLabel() but ignores the label content attribute in quirks mode for compatibility with
-    // other browsers.
-    if (NodeDocument().InQuirksMode())
-    {
-      return CollectOptionInnerTextCollapsingWhitespace();
-    }
-    return OptionLabel();
-  }
-
   DOMString HTMLOptionElement::TextIndentedToRespectGroupLabel() const noexcept
   {
     for (auto *ancestor = ParentElement(); ancestor; ancestor = ancestor->ParentElement())

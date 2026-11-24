@@ -474,11 +474,6 @@ namespace krys::boo
 
     KRYS_NODISCARD html::StepRange CreateStepRange(html::AnyStepHandling anyStepHandling) const noexcept;
 
-    KRYS_NODISCARD html::InputType &GetInputType() const noexcept
-    {
-      return *_inputType;
-    }
-
     /// @brief Whether the user can step the value up and down.
     /// @brief Focuses the input and clicks it, except that a date or time input is only focused and a hidden
     /// one does nothing, as in Chrome.

@@ -150,9 +150,6 @@ namespace krys::boo
 
     KRYS_NODISCARD bool IsSubmitButton() const noexcept final;
 
-    /// @brief Whether the button is a submit button because its `type` says so.
-    KRYS_NODISCARD bool IsExplicitlySetSubmitButton() const noexcept;
-
     /// @brief The element the button sends its command: its `commandfor` element.
     /// @see https://html.spec.whatwg.org/#attr-button-commandfor
     KRYS_NODISCARD RefPtr<boo::Element> CommandForElement() const noexcept;

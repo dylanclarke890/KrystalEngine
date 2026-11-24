@@ -84,8 +84,6 @@ namespace krys::boo
       html::TextFieldSelectionDirection::SelectionHasNoDirection};
     bool _lastChangeWasUserEdit : 1 {false};
     bool _isPlaceholderVisible : 1 {false};
-    bool _canShowPlaceholder : 1 {true};
-    bool _wasEverChangedByUserEdit : 1 {false};
     bool _hasCachedSelection : 1 {false};
     bool _hasScheduledSelectionChangeEvent : 1 {false};
     int32 _maxLength {-1};
@@ -129,13 +127,6 @@ namespace krys::boo
     void ForwardEvent(Event &event) noexcept;
 
     KRYS_NODISCARD virtual HTMLElement *PlaceholderElement() const noexcept = 0;
-
-    void SetCanShowPlaceholder(bool canShowPlaceholder) noexcept;
-
-    KRYS_NODISCARD bool CanShowPlaceholder() const noexcept
-    {
-      return _canShowPlaceholder;
-    }
 
     KRYS_NODISCARD int32 IndexForVisiblePosition(const VisiblePosition &position) const noexcept;
 
@@ -220,8 +211,6 @@ namespace krys::boo
     bool SelectionChanged(bool shouldFireSelectEvent) noexcept;
 
     KRYS_NODISCARD bool LastChangeWasUserEdit() const noexcept;
-
-    KRYS_NODISCARD bool WasEverChangedByUserEdit() const noexcept;
 
     /// @brief Replaces the inner text with @p value (with a `<br>` after a trailing line break).
     void SetInnerTextValue(DOMString value) noexcept;

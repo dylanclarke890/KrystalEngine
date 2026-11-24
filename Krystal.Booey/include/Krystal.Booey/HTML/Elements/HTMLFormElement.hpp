@@ -70,7 +70,6 @@ namespace krys::boo
     WeakPtr<FormSubmission> _plannedFormSubmission;
     uint32 _listedElementsBeforeIndex {0};
     uint32 _listedElementsAfterIndex {0};
-    bool _wasUserSubmitted {false};
     bool _isSubmittingOrPreparingForSubmission {false};
     bool _shouldSubmit {false};
     bool _isInResetFunction {false};
@@ -203,24 +202,14 @@ namespace krys::boo
       Event *event, HTMLFormControlElement *submitter = nullptr,
       FormSubmissionTrigger trigger = FormSubmissionTrigger::NotSubmittedByJavaScript) noexcept;
 
-    /// @brief Submits the form as script's `submit()` does.
-    void SubmitFromJavaScript() noexcept;
-
     /// @see https://html.spec.whatwg.org/#implicit-submission
     void SubmitImplicitly(Event &event, bool fromImplicitSubmissionTrigger) noexcept;
-
-    KRYS_NODISCARD bool IsMethodPost() const noexcept
-    {
-      return _attributes.GetMethod() == FormSubmission::Method::Post;
-    }
 
     /// @brief The browsing context name the form submits to: the submitter's `formtarget`, the form's
     /// `target`, or the document's base target, with `_blank` for a target with dangling markup.
     /// @see https://html.spec.whatwg.org/#get-an-element's-target
     KRYS_NODISCARD DOMString EffectiveTarget(const Event *event,
                                              HTMLFormControlElement *submitter) const noexcept;
-
-    KRYS_NODISCARD bool WasUserSubmitted() const noexcept;
 
     /// @brief The form control the event that submits the form was targeted at, if any.
     KRYS_NODISCARD static HTMLFormControlElement *FindSubmitter(const Event *event) noexcept;
@@ -238,9 +227,6 @@ namespace krys::boo
     KRYS_NODISCARD List<Ref<HTMLElement>> CopyListedElementsVector() const noexcept;
 
     KRYS_NODISCARD List<Ref<HTMLElement>> CopyValidatedListedElementsVector() const noexcept;
-
-    /// @brief The names and values of the form's text fields.
-    KRYS_NODISCARD List<Pair<DOMString, DOMString>> TextFieldValues() const noexcept;
 
     KRYS_NODISCARD static HTMLFormElement *FindClosestFormAncestor(const Element &element) noexcept;
 
@@ -284,7 +270,7 @@ namespace krys::boo
                             Maybe<DOMStringView> value, const DOMStringAtom &namespaceURI) noexcept override;
 
   private:
-    void Submit(Event *event, bool processingUserGesture, FormSubmissionTrigger trigger,
+    void Submit(Event *event, FormSubmissionTrigger trigger,
                 HTMLFormControlElement *submitter = nullptr) noexcept;
 
     void SubmitDialog(const Ref<FormSubmission> &formSubmission) noexcept;

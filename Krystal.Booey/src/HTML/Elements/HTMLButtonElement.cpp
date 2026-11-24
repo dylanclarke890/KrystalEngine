@@ -251,11 +251,6 @@ namespace krys::boo
     return _type == ButtonType::Submit;
   }
 
-  bool HTMLButtonElement::IsExplicitlySetSubmitButton() const noexcept
-  {
-    return IsSubmitButton() && HasAttribute(u8"type");
-  }
-
   void HTMLButtonElement::OnInsert() noexcept
   {
     HTMLFormControlElement::OnInsert();

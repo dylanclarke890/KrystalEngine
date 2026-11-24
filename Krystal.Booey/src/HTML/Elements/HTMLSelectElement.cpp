@@ -575,24 +575,6 @@ namespace krys::boo
     return firstSelectionIndex < 0 || (!firstSelectionIndex && HasPlaceholderLabelOption());
   }
 
-  void HTMLSelectElement::ListBoxSelectItem(int32 listIndex, bool allowMultiplySelections, bool shift,
-                                            bool fireOnChangeNow) noexcept
-  {
-    if (!Multiple())
-    {
-      OptionSelectedByUser(ListToOptionIndex(listIndex), fireOnChangeNow, false);
-    }
-    else
-    {
-      UpdateSelectedState(listIndex, allowMultiplySelections, shift);
-      UpdateValidity();
-      if (fireOnChangeNow)
-      {
-        ListBoxOnChange();
-      }
-    }
-  }
-
   bool HTMLSelectElement::UsesMenuList() const noexcept
   {
     if (RenderTheme::Singleton().DelegatesMenuListRendering())
