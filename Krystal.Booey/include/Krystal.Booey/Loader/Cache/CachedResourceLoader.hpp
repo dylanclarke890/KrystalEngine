@@ -1,29 +1,4 @@
-﻿/*
-    Copyright (C) 1998 Lars Knoll (knoll@mpi-hd.mpg.de)
-    Copyright (C) 2001 Dirk Mueller <mueller@kde.org>
-    Copyright (C) 2004, 2005, 2006, 2007, 2008, 2009, 2010, 2011 Apple Inc. All rights reserved.
-    Copyright (C) 2009 Torch Mobile Inc. http://www.torchmobile.com/
-
-    This library is free software; you can redistribute it and/or
-    modify it under the terms of the GNU Library General Public
-    License as published by the Free Software Foundation; either
-    version 2 of the License, or (at your option) any later version.
-
-    This library is distributed in the hope that it will be useful,
-    but WITHOUT ANY WARRANTY; without even the implied warranty of
-    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU
-    Library General Public License for more details.
-
-    You should have received a copy of the GNU Library General Public License
-    along with this library; see the file COPYING.LIB.  If not, write to
-    the Free Software Foundation, Inc., 51 Franklin Street, Fifth Floor,
-    Boston, MA 02110-1301, USA.
-
-    This class provides all functionality needed for loading images, style sheets and html
-    pages from the web. It has a memory cache for these objects.
-*/
-
-#pragma once
+﻿#pragma once
 
 #include "Krystal.Booey/Loader/Cache/CachedCSSStyleSheet.hpp"
 #include "Krystal.Booey/Loader/Cache/CachedFont.hpp"
@@ -57,11 +32,11 @@ namespace krys::boo
     DeferredUntilVisible,
   };
 
-  // The CachedResourceLoader provides a per-context interface to the MemoryCache
-  // and enforces a bunch of security checks and rules for resource revalidation.
+  /// @brief A document's way to its resources: it finds them in the memory cache or loads them, keeps the
+  /// ones the document uses, and counts the loads that delay its load event.
   /// @note One per document, which creates it; it loads through the document's frame.
-  // FIXME: The other resource types (not scripts: scripting isn't planned); preloads, request counting
-  // for the load event, resource timing, security checks and revalidation, once there are those.
+  // FIXME: The other resource types (not scripts: scripting isn't planned); preloads, resource timing,
+  // security checks and revalidation, once there are those.
   class CachedResourceLoader : public RefCounted<CachedResourceLoader>,
                                public CanMakeWeakPtr<CachedResourceLoader>
   {
@@ -86,6 +61,7 @@ namespace krys::boo
     Timer _garbageCollectDocumentResourcesTimer;
 
   public:
+    /// @brief A loader for @p document.
     KRYS_NODISCARD static Ref<CachedResourceLoader> Create(boo::Document *document) noexcept
     {
       return AdoptRef(*new CachedResourceLoader(document));
@@ -94,9 +70,12 @@ namespace krys::boo
     ~CachedResourceLoader() noexcept;
 
     ResourceErrorOr<CachedResourceHandle<CachedImage>>
+      /// @brief The image for the request, from the cache or loaded; a deferred one isn't loaded until it's
+      /// asked again.
       RequestImage(CachedResourceRequest &&, ImageLoading = ImageLoading::Immediate) noexcept;
 
     ResourceErrorOr<CachedResourceHandle<CachedCSSStyleSheet>>
+      /// @brief The style sheet, font or SVG document for the request, from the cache or loaded.
       RequestCSSStyleSheet(CachedResourceRequest &&) noexcept;
 
     ResourceErrorOr<CachedResourceHandle<CachedFont>> RequestFont(CachedResourceRequest &&) noexcept;
@@ -112,21 +91,26 @@ namespace krys::boo
     KRYS_NODISCARD CachedResourceHandle<CachedImage>
       CreateManuallyLoadedImage(CachedResourceRequest &&) noexcept;
 
+    /// @brief The document's resource for @p url (completed against the document's base URL), if it has one.
     KRYS_NODISCARD boo::CachedResource *GetCachedResource(utf8_stringview url) const noexcept;
 
     KRYS_NODISCARD boo::CachedResource *GetCachedResource(const net::Url &url) const noexcept;
 
+    /// @brief The resources the document uses, by URL.
     KRYS_NODISCARD const DocumentResourceMap &AllCachedResources() const noexcept
     {
       return _documentResources;
     }
 
-    KRYS_NODISCARD boo::Frame *Frame() const noexcept; // Can be null
+    /// @brief The document's frame and the document, if there are.
+    KRYS_NODISCARD boo::Frame *Frame() const noexcept;
 
-    KRYS_NODISCARD boo::Document *GetDocument() const noexcept; // Can be null
+    KRYS_NODISCARD boo::Document *GetDocument() const noexcept;
 
+    /// @brief Sets or clears the document.
     void SetDocument(boo::Document *) noexcept;
 
+    /// @brief Forgets the document's resources that nothing else holds and that aren't loading.
     void GarbageCollectDocumentResources() noexcept;
 
     /// @brief How many of the document's loads are in flight, which delay its load event.
@@ -135,6 +119,7 @@ namespace krys::boo
       return _requestCount;
     }
 
+    /// @brief Counts a load in or out of the ones that delay the load event (unless it's left out).
     void IncrementRequestCount(const CachedResource &resource) noexcept;
 
     void DecrementRequestCount(const CachedResource &resource) noexcept;
@@ -145,20 +130,27 @@ namespace krys::boo
     /// @brief The document's load event finished: URLs are validated again.
     void DocumentDidFinishLoadEvent() noexcept;
 
+    /// @brief The options of a subresource load: buffered, cached and policy-checked.
     KRYS_NODISCARD static const ResourceLoaderOptions &DefaultCachedResourceOptions() noexcept;
 
   private:
+    /// @brief A loader for the document.
     explicit CachedResourceLoader(boo::Document *) noexcept;
 
     ResourceErrorOr<CachedResourceHandle<boo::CachedResource>>
+      /// @brief Finds or loads a resource of @p type, as the revalidation policy says, and keeps it as the
+      /// document's.
       RequestResource(boo::CachedResource::Type, CachedResourceRequest &&,
                       ImageLoading = ImageLoading::Immediate) noexcept;
 
+    /// @brief Makes a resource of @p type for the request, and adds it to the memory cache.
     CachedResourceHandle<boo::CachedResource> LoadResource(boo::CachedResource::Type,
                                                            CachedResourceRequest &&) noexcept;
 
+    /// @brief The cache policy for a load: a reload's, else the host's.
     KRYS_NODISCARD CachePolicy GetCachePolicy(boo::CachedResource::Type type) const noexcept;
 
+    /// @brief Whether to use @p existingResource, replace it, or load a new resource.
     KRYS_NODISCARD RevalidationPolicy DetermineRevalidationPolicy(boo::CachedResource::Type,
                                                                   boo::CachedResource *existingResource,
                                                                   ImageLoading) const noexcept;

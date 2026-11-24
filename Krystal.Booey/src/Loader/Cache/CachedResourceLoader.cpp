@@ -1,30 +1,4 @@
-﻿/*
-    Copyright (C) 1998 Lars Knoll (knoll@mpi-hd.mpg.de)
-    Copyright (C) 2001 Dirk Mueller (mueller@kde.org)
-    Copyright (C) 2002 Waldo Bastian (bastian@kde.org)
-    Copyright (C) 2004-2025 Apple Inc. All rights reserved.
-    Copyright (C) 2009 Torch Mobile Inc. http://www.torchmobile.com/
-
-    This library is free software; you can redistribute it and/or
-    modify it under the terms of the GNU Library General Public
-    License as published by the Free Software Foundation; either
-    version 2 of the License, or (at your option) any later version.
-
-    This library is distributed in the hope that it will be useful,
-    but WITHOUT ANY WARRANTY; without even the implied warranty of
-    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU
-    Library General Public License for more details.
-
-    You should have received a copy of the GNU Library General Public License
-    along with this library; see the file COPYING.LIB.  If not, write to
-    the Free Software Foundation, Inc., 51 Franklin Street, Fifth Floor,
-    Boston, MA 02110-1301, USA.
-
-    This class provides all functionality needed for loading images, style sheets and html
-    pages from the web. It has a memory cache for these objects.
-*/
-
-#include "Krystal.Booey/Loader/Cache/CachedResourceLoader.hpp"
+﻿#include "Krystal.Booey/Loader/Cache/CachedResourceLoader.hpp"
 #include "Krystal.Booey/DOM/Nodes/Document.hpp"
 #include "Krystal.Booey/Loader/Cache/CachedCSSStyleSheet.hpp"
 #include "Krystal.Booey/Loader/Cache/MemoryCache.hpp"
@@ -198,7 +172,7 @@ namespace krys::boo
         net::ResourceError(utf8_string(ErrorDomainBooeyInternal), 0, url, u8"URL is invalid"));
     }
 
-    // SVG Images have unique security rules that prevent all subresource requests except for data urls.
+    // An SVG image's document may load nothing but data URLs.
     if (type != CachedResource::Type::MainResource)
     {
       if (auto *frame = Frame();
@@ -216,7 +190,6 @@ namespace krys::boo
       _documentResources.erase(url.String());
     }
 
-    // See if we can use an existing resource from the cache.
     CachedResourceHandle<CachedResource> resource;
     if (request.AllowsCaching())
     {
@@ -239,7 +212,7 @@ namespace krys::boo
     {
       resource->Load(*this);
 
-      // We don't support immediate loads, but we do support immediate failure.
+      // A load finishes later, but it can fail at once.
       if (resource->ErrorOccurred())
       {
         if (resource->AllowsCaching() && resource->InCache())
@@ -248,7 +221,7 @@ namespace krys::boo
         }
 
         auto resourceError = resource->GetResourceError();
-        // Synchronous cancellations are likely due to access control.
+        // A failure without an error, or a cancellation, is taken to be refused access.
         if (resourceError.IsNull() || resourceError.IsCancellation())
         {
           return Unexpected<net::ResourceError>(
@@ -336,21 +309,20 @@ namespace krys::boo
       return Load;
     }
 
-    // If the same URL has been loaded as a different type, we need to reload.
+    // A resource of another type for the same URL is replaced.
     if (existingResource->GetType() != type)
     {
       return Reload;
     }
 
-    // Do not load from cache if images are not enabled. The load for this image will be blocked in
-    // CachedImage::load.
+    // A deferred (lazy) image doesn't reuse the cached one: its own replaces it, and loads once the image
+    // is near the viewport.
     if (imageLoading == ImageLoading::DeferredUntilVisible)
     {
       return Reload;
     }
 
-    // Avoid loading the same resource multiple times for a single document, even if the cache policies would
-    // tell us to.
+    // A document doesn't load a URL twice, whatever the cache policy.
     if (_validatedUrls.contains(existingResource->Url().String()))
     {
       return Use;
@@ -358,13 +330,12 @@ namespace krys::boo
 
     auto cachePolicy = GetCachePolicy(type);
 
-    // CachePolicy::Reload always reloads
     if (cachePolicy == CachePolicy::Reload)
     {
       return Reload;
     }
 
-    // We'll try to reload the resource if it failed last time.
+    // A failed load is tried again.
     if (existingResource->ErrorOccurred())
     {
       return Reload;
@@ -372,13 +343,12 @@ namespace krys::boo
 
     if (existingResource->IsLoading())
     {
-      // Do not use cached main resources that are still loading because sharing
-      // loading CachedResources in this case causes issues with regards to cancellation.
+      // A main resource isn't shared while it loads, as canceling one load would cancel both.
       if (type == CachedResource::Type::MainResource)
       {
         return Reload;
       }
-      // For cached subresources that are still loading we ignore the cache policy.
+      // A subresource is, whatever the cache policy.
       return Use;
     }
     return Use;
@@ -399,12 +369,8 @@ namespace krys::boo
     return policy != CachePolicy::Use ? policy : frame->SubresourceCachePolicy();
   }
 
-  // Garbage collecting m_documentResources is a workaround for the
-  // CachedResourceHandles on the RHS being strong references. Ideally this
-  // would be a weak map, however CachedResourceHandles perform additional
-  // bookkeeping on CachedResources, so instead pseudo-GC them -- when the
-  // reference count reaches 1, m_documentResources is the only reference, so
-  // remove it from the map.
+  // The document's resources are held by handles, which keep them alive, so the ones nobody else holds are
+  // dropped here.
   void CachedResourceLoader::GarbageCollectDocumentResources() noexcept
   {
     List<utf8_string> resourcesToDelete;

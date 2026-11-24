@@ -1,26 +1,4 @@
-﻿/*
-    Copyright (C) 1998 Lars Knoll (knoll@mpi-hd.mpg.de)
-    Copyright (C) 2001 Dirk Mueller (mueller@kde.org)
-    Copyright (C) 2002 Waldo Bastian (bastian@kde.org)
-    Copyright (C) 2004-2025 Apple Inc. All rights reserved.
-
-    This library is free software; you can redistribute it and/or
-    modify it under the terms of the GNU Library General Public
-    License as published by the Free Software Foundation; either
-    version 2 of the License, or (at your option) any later version.
-
-    This library is distributed in the hope that it will be useful,
-    but WITHOUT ANY WARRANTY; without even the implied warranty of
-    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU
-    Library General Public License for more details.
-
-    You should have received a copy of the GNU Library General Public License
-    along with this library; see the file COPYING.LIB.  If not, write to
-    the Free Software Foundation, Inc., 51 Franklin Street, Fifth Floor,
-    Boston, MA 02110-1301, USA.
-*/
-
-#include "Krystal.Booey/Loader/Cache/MemoryCache.hpp"
+﻿#include "Krystal.Booey/Loader/Cache/MemoryCache.hpp"
 #include "Krystal.Booey/Graphics/Images/Image.hpp"
 #include "Krystal.Booey/HTML/EventLoop/EventLoop.hpp"
 #include "Krystal.Booey/Loader/Cache/CachedImage.hpp"
@@ -33,7 +11,7 @@ namespace krys::boo
   namespace
   {
     constexpr MonotonicTime::duration MinDelayBeforeLiveDecodedPrune = std::chrono::seconds(1);
-    // Percentage of capacity toward which we prune, to avoid immediately pruning again.
+    // Pruning goes a little under the capacity, so the cache isn't straight back over it.
     constexpr float TargetPrunePercentage = .95f;
 
     /// @brief The bytes the cache counts for @p resource: its data, encoded and decoded (not its overhead,
@@ -60,9 +38,8 @@ namespace krys::boo
     {
       return false;
     }
-    // Strip away fragment identifier from HTTP URLs.
-    // Data URLs must be unmodified. For file and custom URLs clients may expect resources
-    // to be unique even when they differ by the fragment identifier only.
+    // Only HTTP(S) URLs share a resource whatever their fragment: a data URL is taken as it is, and other
+    // schemes' fragments may name different resources.
     return originalUrl.ProtocolIsInHttpFamily();
   }
 
@@ -103,17 +80,14 @@ namespace krys::boo
 
   uint32 MemoryCache::DeadCapacity() const noexcept
   {
-    // Dead resource capacity is whatever space is not occupied by live resources, bounded by an independent
-    // minimum and maximum.
-    uint32 capacity = _capacity - std::min(_liveSize, _capacity); // Start with available capacity.
-    capacity = std::max(capacity, _minDeadCapacity);              // Make sure it's above the minimum.
-    capacity = std::min(capacity, _maxDeadCapacity);              // Make sure it's below the maximum.
+    uint32 capacity = _capacity - std::min(_liveSize, _capacity);
+    capacity = std::max(capacity, _minDeadCapacity);
+    capacity = std::min(capacity, _maxDeadCapacity);
     return capacity;
   }
 
   uint32 MemoryCache::LiveCapacity() const noexcept
   {
-    // Live resource capacity is whatever is left over after calculating dead resource capacity.
     return _capacity - DeadCapacity();
   }
 
@@ -125,7 +99,6 @@ namespace krys::boo
       return;
     }
 
-    // Cut by a percentage to avoid immediately pruning again.
     auto targetSize = static_cast<uint32>(static_cast<float>(capacity) * TargetPrunePercentage);
 
     PruneLiveResourcesToSize(targetSize, shouldDestroyDecodedDataForAllLiveResources);
@@ -143,8 +116,7 @@ namespace krys::boo
 
     auto currentTime = html::EventLoop::Current().Now();
 
-    // Destroy any decoded data in live objects that we can.
-    // Start from the head, since this is the least recently accessed of the objects.
+    // Least recently used first.
     for (auto *resource : List<CachedResource *>(_lruList))
     {
       CachedResourceHandle<CachedResource> current(resource);
@@ -153,14 +125,13 @@ namespace krys::boo
         continue;
       }
 
-      // Check to see if the remaining resources are too new to prune.
+      // The rest were used more recently still.
       auto elapsedTime = currentTime - current->_lastDecodedAccessTime;
       if (!shouldDestroyDecodedDataForAllLiveResources && elapsedTime < MinDelayBeforeLiveDecodedPrune)
       {
         return;
       }
 
-      // Destroy our decoded data.
       current->DestroyDecodedData();
 
       if (targetSize && _liveSize <= targetSize)
@@ -178,7 +149,6 @@ namespace krys::boo
       return;
     }
 
-    // Cut by a percentage to avoid immediately pruning again.
     auto targetSize = static_cast<uint32>(static_cast<float>(capacity) * TargetPrunePercentage);
     PruneDeadResourcesToSize(targetSize);
   }
@@ -197,7 +167,7 @@ namespace krys::boo
       return;
     }
 
-    // Make a copy of the list first (and ref the resources) as calling destroyDecodedData() can alter it.
+    // Dropping decoded data can change the list, so this goes through a copy that holds the resources.
     List<CachedResourceHandle<CachedResource>> lruList;
     lruList.reserve(_lruList.size());
     for (auto *resource : _lruList)
@@ -205,8 +175,7 @@ namespace krys::boo
       lruList.emplace_back(resource);
     }
 
-    // First flush all the decoded data in this queue.
-    // Remove from the head, since this is the least frequently accessed of the objects.
+    // Their decoded data goes first, least recently used first.
     for (auto &resource : lruList)
     {
       if (!resource->InCache())
@@ -225,8 +194,7 @@ namespace krys::boo
       }
     }
 
-    // Now evict objects from this list.
-    // Remove from the head, since this is the least frequently accessed of the objects.
+    // Then the resources themselves.
     for (auto &resource : lruList)
     {
       if (!resource->InCache())
@@ -259,18 +227,15 @@ namespace krys::boo
   {
     CachedResourceHandle<CachedResource> protectedResource(resource);
 
-    // The resource may have already been removed by someone other than our caller,
-    // who needed a fresh copy for a reload. See <http://bugs.webkit.org/show_bug.cgi?id=12479#c6>.
+    // A reload may have removed it already.
     if (!resource.InCache())
     {
       return;
     }
 
-    // Remove resource from the resource map.
     _resources.erase(resource.Url().String());
     resource.SetInCache(false);
 
-    // Remove from the LRU list.
     RemoveFromLRUList(resource);
     AdjustSize(resource.HasClients(), -static_cast<int64>(CountedSize(resource)));
   }
@@ -286,7 +251,6 @@ namespace krys::boo
 
     RemoveFromLRUList(resource);
 
-    // Now insert into the new queue.
     _lruList.push_back(&resource);
   }
 
@@ -354,7 +318,8 @@ namespace krys::boo
       return;
     }
 
-    PruneDeadResources(); // Prune dead first, in case it was "borrowing" capacity from live.
+    // Dead resources first, as they may be taking capacity that live ones need.
+    PruneDeadResources();
     PruneLiveResources();
   }
 
