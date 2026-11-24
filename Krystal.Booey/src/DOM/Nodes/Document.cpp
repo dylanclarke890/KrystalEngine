@@ -2563,7 +2563,8 @@ namespace krys::boo
       frameView->ServiceScrollAnimations(html::EventLoop::Current().Now());
     }
 
-    // FIXME: The order of dispatching is not specified: https://github.com/WICG/visual-viewport/issues/66.
+    // The order of the elements' and the visual viewport's events isn't specified
+    // (https://github.com/WICG/visual-viewport/issues/66).
     auto currentTargets = std::exchange(_pendingScrollEventTargets, {});
     for (auto &[target, type] : currentTargets)
     {
@@ -2611,7 +2612,8 @@ namespace krys::boo
       return;
     }
 
-    // FIXME: The order of dispatching is not specified: https://github.com/WICG/visual-viewport/issues/65.
+    // The order of the window's and the visual viewport's events isn't specified
+    // (https://github.com/WICG/visual-viewport/issues/65).
     if (_needsDOMWindowResizeEvent)
     {
       _needsDOMWindowResizeEvent = false;
@@ -3165,9 +3167,8 @@ namespace krys::boo
       {
         continue;
       }
-      // Quirks mode, ASCII case-insensitive comparison of names.
-      // FIXME: This behavior is not mentioned in the HTML specification. We should either remove this or get
-      // this into the specification.
+      // Not in the specification: in quirks mode, names match ASCII case-insensitively, as in Chrome (see
+      // DIFFERENCES.md).
       if (InQuirksMode() ? text::IsASCIICaselessEqual(DOMStringView(*anchorName), name) : *anchorName == name)
       {
         return anchor;
@@ -3995,7 +3996,7 @@ namespace krys::boo
     // The document may have been styled without a render view; the rebuild gives the new one its style.
     _initialContainingBlockStyle = nullptr;
 
-    // FIXME: It would be better if we could pass the resolved document style directly here.
+    // The view gets a blank style here; the rebuild below gives it the document's.
     _renderView = CreateRenderer<boo::RenderView>(*this, RenderStyle::Create());
     Node::SetRenderer(_renderView.get());
 
@@ -4050,10 +4051,10 @@ namespace krys::boo
       RenderTreeUpdater::TearDownRenderers(*documentElement);
     }
 
-    // FIXME: RenderObject::view() uses m_renderView and we can't null it before destruction is completed
+    // The view stays set while it's destroyed, as renderers find it through the document.
     {
       RenderTreeBuilder builder(*_renderView);
-      // FIXME: This is a workaround for leftover content (see webkit.org/b/182547).
+      // Anything the teardown missed goes with the view (none does in the tests).
       while (_renderView->FirstChild())
       {
         builder.Destroy(*_renderView->FirstChild());
@@ -4410,7 +4411,8 @@ namespace krys::boo
       if (!HaveStylesheetsLoaded())
       {
         _ignorePendingStylesheets = true;
-        // FIXME: This should just invalidate elements with missing styles.
+        // Elements left unstyled while a sheet was pending need styles now. Which ones isn't recorded, so
+        // the whole document is rebuilt.
         if (_hasNodesWithMissingStyle)
         {
           ScheduleFullStyleRebuild();
@@ -4493,8 +4495,6 @@ namespace krys::boo
         {
           for (auto &descendant : DescendantsOfType<RenderObject>(*rootForLayout))
           {
-            // FIXME: While 'c-v: auto' is used 'hidden' inside 'c-v: hidden' we could entirly skip hidden
-            // subtrees here.
             auto shouldLayoutSkippedContent =
               (layoutOptions.contains(dom::LayoutOptions::TreatContentVisibilityAutoAsVisible)
                && descendant.Style().UsedContentVisibility() == ContentVisibility::Auto)
@@ -4910,10 +4910,6 @@ namespace krys::boo
       return;
     }
 
-    // FIXME: We should update style on our ancestor chain before proceeding, however doing so at
-    // the time this comment was originally written caused several tests to crash.
-
-    // FIXME: Do this user agent shadow tree update per tree scope.
     auto pendingUserAgentShadowTreeUpdates = _elementsWithPendingUserAgentShadowTreeUpdates;
     for (auto &weakElement : pendingUserAgentShadowTreeUpdates)
     {
@@ -5436,7 +5432,7 @@ namespace krys::boo
 
   namespace
   {
-    // See https://www.w3.org/TR/cssom-view-1/#potentially-scrollable.
+    // https://drafts.csswg.org/cssom-view/#potentially-scrollable
     KRYS_NODISCARD bool IsBodyPotentiallyScrollable(Document &document, HTMLBodyElement &body) noexcept
     {
       // An element is potentially scrollable if all of the following conditions are true:
@@ -5445,8 +5441,8 @@ namespace krys::boo
       //   overflow-x or overflow-y properties is not visible.
       // - The element's used value of the overflow-x or overflow-y properties is not visible.
       //
-      // FIXME: We should use RenderObject::hasNonVisibleOverflow() instead of Element::computedStyle() but
-      // the used values are currently not correctly updated. See https://webkit.org/b/182292.
+      // The computed values serve: once the root's overflow isn't visible, the body's doesn't propagate to
+      // the viewport, so its computed value is its used one.
       auto documentElement = document.DocumentElement();
       if (!body.Renderer() || !documentElement)
       {

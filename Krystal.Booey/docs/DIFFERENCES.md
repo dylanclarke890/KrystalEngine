@@ -74,6 +74,7 @@ Record a difference here when you make one, and remove it when Booey comes back 
 
 ### From the specs
 
+- In quirks mode, a fragment finds an `<a>` whose `name` matches it ASCII case-insensitively (`#foo` scrolls to `name=FOO`), as in Chrome; the specification compares names exactly.
 - A file input's files come from the host: a user's click (on the input or its button) or `showPicker()` asks it with a `FileChooser` (`BooeyClient::RunOpenPanel`, which cancels without a host picker), and its answer fires `input` and `change`, or `cancel`, as it comes rather than in a queued task. There's no file icon, as in Chrome, and no directory uploads (`webkitdirectory` is non-standard). Files can also be dropped, or set from C++ (`FileInputType::SetFiles`).
 - A click opens a date, time or colour picker, or a text field's datalist suggestions, only while the window has transient activation, as in Chrome (`InputType::HasTransientActivation`), and doesn't consume it. So the host's input opens them, but `Click()` from C++ without user input doesn't; changes to a field's text or its datalist still update shown suggestions.
 - A text field's datalist suggestions are those whose value starts with the field's text, then those that contain it (or whose labels do, when labels are shown), ignoring ASCII case only, as WebKit matches them (`TextFieldInputType::Suggestions`). There's no find in page to match as it does, so other case differences and diacritics don't match.
