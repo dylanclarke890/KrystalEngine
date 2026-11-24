@@ -865,11 +865,6 @@ namespace krys::boo
     return _inputType->IsColorControl();
   }
 
-  bool HTMLInputElement::IsText() const noexcept
-  {
-    return _inputType->IsTextType();
-  }
-
   bool HTMLInputElement::IsTextType() const noexcept
   {
     return _inputType->IsTextType();

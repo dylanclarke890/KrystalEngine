@@ -503,8 +503,6 @@ namespace krys::boo
 
     KRYS_NODISCARD bool IsColorControl() const noexcept;
 
-    KRYS_NODISCARD bool IsText() const noexcept;
-
     KRYS_NODISCARD bool IsTextType() const noexcept;
 
     KRYS_NODISCARD bool IsEmailField() const noexcept;
