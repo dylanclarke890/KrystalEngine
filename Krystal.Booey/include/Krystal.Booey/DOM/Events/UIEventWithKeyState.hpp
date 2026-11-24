@@ -41,25 +41,25 @@ namespace krys::boo
     EnumSet<Modifier> _modifiers;
 
   public:
-    /// @see https://w3c.github.io/uievents/#dom-mouseevent-ctrlkey
+    /// @see https://w3c.github.io/pointerevents/#dom-mouseevent-ctrlkey
     KRYS_NODISCARD bool CtrlKey() const noexcept
     {
       return _modifiers.contains(Modifier::ControlKey);
     }
 
-    /// @see https://w3c.github.io/uievents/#dom-mouseevent-shiftkey
+    /// @see https://w3c.github.io/pointerevents/#dom-mouseevent-shiftkey
     KRYS_NODISCARD bool ShiftKey() const noexcept
     {
       return _modifiers.contains(Modifier::ShiftKey);
     }
 
-    /// @see https://w3c.github.io/uievents/#dom-mouseevent-altkey
+    /// @see https://w3c.github.io/pointerevents/#dom-mouseevent-altkey
     KRYS_NODISCARD bool AltKey() const noexcept
     {
       return _modifiers.contains(Modifier::AltKey);
     }
 
-    /// @see https://w3c.github.io/uievents/#dom-mouseevent-metakey
+    /// @see https://w3c.github.io/pointerevents/#dom-mouseevent-metakey
     KRYS_NODISCARD bool MetaKey() const noexcept
     {
       return _modifiers.contains(Modifier::MetaKey);
@@ -75,7 +75,7 @@ namespace krys::boo
       return _modifiers;
     }
 
-    /// @see https://w3c.github.io/uievents/#dom-mouseevent-getmodifierstate
+    /// @see https://w3c.github.io/pointerevents/#dom-mouseevent-getmodifierstate
     KRYS_NODISCARD bool GetModifierState(DOMStringView key) const noexcept
     {
       if (key == u8"Control")

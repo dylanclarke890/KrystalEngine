@@ -2790,7 +2790,7 @@ namespace krys::ui
 
   uint16 View::ButtonsBit(boo::MouseButton button) noexcept
   {
-    // The DOM's buttons: https://w3c.github.io/uievents/#dom-mouseevent-buttons
+    // The DOM's buttons: https://w3c.github.io/pointerevents/#dom-mouseevent-buttons
     switch (button)
     {
       case boo::MouseButton::Left:    return 1;

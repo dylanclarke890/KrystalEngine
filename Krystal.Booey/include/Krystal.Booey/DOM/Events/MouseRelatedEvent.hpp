@@ -63,10 +63,10 @@ namespace krys::boo
   public:
     ~MouseRelatedEvent() noexcept override;
 
-    /// @see https://w3c.github.io/uievents/#dom-mouseevent-screenx
+    /// @see https://w3c.github.io/pointerevents/#dom-mouseevent-screenx
     KRYS_NODISCARD virtual double ScreenX() const noexcept;
 
-    /// @see https://w3c.github.io/uievents/#dom-mouseevent-screeny
+    /// @see https://w3c.github.io/pointerevents/#dom-mouseevent-screeny
     KRYS_NODISCARD virtual double ScreenY() const noexcept;
 
     KRYS_NODISCARD const PointD &ScreenLocation() const noexcept
@@ -74,10 +74,10 @@ namespace krys::boo
       return _screenLocation;
     }
 
-    /// @see https://w3c.github.io/uievents/#dom-mouseevent-clientx
+    /// @see https://w3c.github.io/pointerevents/#dom-mouseevent-clientx
     KRYS_NODISCARD virtual double ClientX() const noexcept;
 
-    /// @see https://w3c.github.io/uievents/#dom-mouseevent-clienty
+    /// @see https://w3c.github.io/pointerevents/#dom-mouseevent-clienty
     KRYS_NODISCARD virtual double ClientY() const noexcept;
 
     KRYS_NODISCARD const PointD &ClientLocation() const noexcept

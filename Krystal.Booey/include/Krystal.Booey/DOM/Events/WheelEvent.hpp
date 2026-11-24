@@ -32,7 +32,7 @@
 
 namespace krys::boo
 {
-  /// @see https://w3c.github.io/uievents/#dictdef-wheeleventinit
+  /// @see https://w3c.github.io/pointerevents/#dom-wheeleventinit
   struct WheelEventInit : MouseEventInit
   {
     double DeltaX {0};
@@ -42,7 +42,7 @@ namespace krys::boo
   };
 
   /// @brief A turn of the mouse wheel or a similar device: `wheel`.
-  /// @see https://w3c.github.io/uievents/#interface-wheelevent
+  /// @see https://w3c.github.io/pointerevents/#interface-wheelevent
   class WheelEvent final : public MouseEvent
   {
   public:
@@ -55,11 +55,11 @@ namespace krys::boo
       Yes,
     };
 
-    /// @see https://w3c.github.io/uievents/#dom-wheelevent-dom_delta_pixel
+    /// @see https://w3c.github.io/pointerevents/#dom-wheelevent-dom_delta_pixel
     constexpr static uint32 DOM_DELTA_PIXEL = 0x00;
-    /// @see https://w3c.github.io/uievents/#dom-wheelevent-dom_delta_line
+    /// @see https://w3c.github.io/pointerevents/#dom-wheelevent-dom_delta_line
     constexpr static uint32 DOM_DELTA_LINE = 0x01;
-    /// @see https://w3c.github.io/uievents/#dom-wheelevent-dom_delta_page
+    /// @see https://w3c.github.io/pointerevents/#dom-wheelevent-dom_delta_page
     constexpr static uint32 DOM_DELTA_PAGE = 0x02;
 
   private:
@@ -70,7 +70,7 @@ namespace krys::boo
     Maybe<PlatformWheelEvent> _underlyingPlatformEvent;
 
   public:
-    /// @see https://w3c.github.io/uievents/#dom-wheelevent-wheelevent
+    /// @see https://w3c.github.io/pointerevents/#dom-wheelevent-constructor
     WheelEvent(DOMStringAtom type, const WheelEventInit &initializer = {}) noexcept;
 
     /// @brief A trusted `wheel` event from @p event, which happened in @p view.
@@ -83,26 +83,26 @@ namespace krys::boo
     }
 
     /// @brief Positive when scrolling right.
-    /// @see https://w3c.github.io/uievents/#dom-wheelevent-deltax
+    /// @see https://w3c.github.io/pointerevents/#dom-wheelevent-deltax
     KRYS_NODISCARD double DeltaX() const noexcept
     {
       return _deltaX;
     }
 
     /// @brief Positive when scrolling down.
-    /// @see https://w3c.github.io/uievents/#dom-wheelevent-deltay
+    /// @see https://w3c.github.io/pointerevents/#dom-wheelevent-deltay
     KRYS_NODISCARD double DeltaY() const noexcept
     {
       return _deltaY;
     }
 
-    /// @see https://w3c.github.io/uievents/#dom-wheelevent-deltaz
+    /// @see https://w3c.github.io/pointerevents/#dom-wheelevent-deltaz
     KRYS_NODISCARD double DeltaZ() const noexcept
     {
       return _deltaZ;
     }
 
-    /// @see https://w3c.github.io/uievents/#dom-wheelevent-deltamode
+    /// @see https://w3c.github.io/pointerevents/#dom-wheelevent-deltamode
     KRYS_NODISCARD uint32 DeltaMode() const noexcept
     {
       return _deltaMode;

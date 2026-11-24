@@ -47,7 +47,7 @@ namespace krys::boo
   class Node;
   class PlatformMouseEvent;
 
-  /// @see https://w3c.github.io/uievents/#dictdef-mouseeventinit
+  /// @see https://w3c.github.io/pointerevents/#dom-mouseeventinit
   struct MouseEventInit : EventModifierInit
   {
     double ScreenX {0};
@@ -65,7 +65,7 @@ namespace krys::boo
   /// @brief An event from a pointing device: `mousedown`, `mouseup`, `mousemove`, `mouseover`, `mouseout`,
   /// `mouseenter`, `mouseleave` and `dblclick`; `click`, `auxclick` and `contextmenu` are `PointerEvent`s,
   /// and `wheel` is a `WheelEvent`.
-  /// @see https://w3c.github.io/uievents/#interface-mouseevent
+  /// @see https://w3c.github.io/pointerevents/#idl-def-mouseevent
   class MouseEvent : public MouseRelatedEvent
   {
   private:
@@ -83,7 +83,7 @@ namespace krys::boo
     /// @brief The dictionary its constructor takes.
     using dictionary_type = MouseEventInit;
 
-    /// @see https://w3c.github.io/uievents/#dom-mouseevent-mouseevent
+    /// @see https://w3c.github.io/pointerevents/#dom-mouseevent-constructor
     MouseEvent(DOMStringAtom type, const MouseEventInit &initializer = {}) noexcept;
 
     /// @brief A trusted event of type @p eventType from @p event, which happened in @p view.
@@ -109,13 +109,13 @@ namespace krys::boo
                                                           Element &target, bool isTrusted) noexcept;
 
     /// @note Legacy.
-    /// @see https://w3c.github.io/uievents/#dom-mouseevent-initmouseevent
+    /// @see https://w3c.github.io/pointerevents/#dom-mouseevent-initmouseevent
     void InitMouseEvent(DOMStringAtom type, bool canBubble, bool cancelable, Window *view, int32 detail,
                         double screenX, double screenY, double clientX, double clientY, bool ctrlKey,
                         bool altKey, bool shiftKey, bool metaKey, int16 button,
                         EventTarget *relatedTarget) noexcept;
 
-    /// @see https://w3c.github.io/uievents/#dom-mouseevent-button
+    /// @see https://w3c.github.io/pointerevents/#dom-mouseevent-button
     KRYS_NODISCARD int16 Button() const noexcept
     {
       return _button;
@@ -126,7 +126,7 @@ namespace krys::boo
       return ButtonFromShort(_button);
     }
 
-    /// @see https://w3c.github.io/uievents/#dom-mouseevent-buttons
+    /// @see https://w3c.github.io/pointerevents/#dom-mouseevent-buttons
     KRYS_NODISCARD uint16 Buttons() const noexcept
     {
       return _buttons;
@@ -159,7 +159,7 @@ namespace krys::boo
       return _penOrientation;
     }
 
-    /// @see https://w3c.github.io/uievents/#dom-mouseevent-relatedtarget
+    /// @see https://w3c.github.io/pointerevents/#dom-mouseevent-relatedtarget
     KRYS_NODISCARD RefPtr<EventTarget> RelatedTarget() const noexcept override
     {
       return _relatedTarget;
