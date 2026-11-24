@@ -128,6 +128,7 @@ Record a difference here when you make one, and remove it when Booey comes back 
 
 ### From the specs
 
+- An `xml-stylesheet` processing instruction after the root element, outside the prolog, still loads its sheet, and one without an `href` loads the document itself as its sheet, as in Chrome; CSSOM loads neither (`ProcessingInstruction::CheckStyleSheet`).
 - Style `Number` leaves in calc are multiplied by the used zoom like dimensions (`style::calc` `Evaluate(const Number &)`).
 - A quoted generic family (`"serif"`) serialises unquoted (`SerialiseFontFamily` quotes only what isn't an identifier), so it reads back as the generic.
 - Some shorthand serialisations differ from other browsers': `background-size: 10px` is `10px auto`, `animation: none` serialises as `auto`, `outline: none` as `currentcolor`, `offset: none` as `normal`.

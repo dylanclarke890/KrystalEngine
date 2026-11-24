@@ -234,6 +234,49 @@ namespace krys::boo::tests
     CHECK(document.StyleSheets().Length() == 0);
   }
 
+  TEST_CASE("xml-stylesheet processing instructions: where they load from, as in Chrome",
+            "[XML][XMLDocumentParser][cssom:requirements-on-user-agents-implementing-the-xml-stylesheet-"
+            "processing-instruction]")
+  {
+    LoadFixture fixture;
+    fixture.Strategy.AddText(u8"https://example.com/style.css", u8"rect { fill: green }");
+    auto instructionSheet = [&](const Node *node)
+    {
+      auto *instruction = DynamicDowncast<boo::ProcessingInstruction>(node);
+      return instruction ? instruction->Sheet() : nullptr;
+    };
+
+    SECTION("after the root element, outside the prolog, it still loads its sheet")
+    {
+      LoadDocument(fixture,
+                   u8"<svg xmlns=\"http://www.w3.org/2000/svg\"><rect/></svg>"
+                   u8"<?xml-stylesheet href=\"style.css\" type=\"text/css\"?>",
+                   u8"image/svg+xml");
+      CHECK(instructionSheet(fixture.Document().LastChild()));
+      CHECK(fixture.Document().StyleSheets().Length() == 1);
+    }
+
+    SECTION("without an href, it loads the document itself as its sheet")
+    {
+      LoadDocument(
+        fixture,
+        u8"<?xml-stylesheet type=\"text/css\"?><svg xmlns=\"http://www.w3.org/2000/svg\"><rect/></svg>",
+        u8"image/svg+xml");
+      CHECK(instructionSheet(fixture.Document().FirstChild()));
+      CHECK(fixture.Document().StyleSheets().Length() == 1);
+    }
+
+    SECTION("with a fragment href, it loads nothing")
+    {
+      LoadDocument(fixture,
+                   u8"<?xml-stylesheet href=\"#sheet\" type=\"text/css\"?>"
+                   u8"<svg xmlns=\"http://www.w3.org/2000/svg\"><rect/></svg>",
+                   u8"image/svg+xml");
+      CHECK_FALSE(instructionSheet(fixture.Document().FirstChild()));
+      CHECK(fixture.Document().StyleSheets().Length() == 0);
+    }
+  }
+
   TEST_CASE("Markup inserted into an XML document is parsed as XML", "[XML][XMLDocumentParser]")
   {
     LoadFixture fixture;
