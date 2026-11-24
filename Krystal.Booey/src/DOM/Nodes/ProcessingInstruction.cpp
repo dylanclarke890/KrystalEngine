@@ -296,11 +296,12 @@ namespace krys::boo
         return;
       }
 
+      // A sheet in the document itself (`#id`) isn't loaded, as in Chrome.
       if (href.size() > 1 && href[0] == u8'#')
       {
-        _localHref = href.substr(1);
+        return;
       }
-      else
+
       {
         if (CachedResourceHandle cachedSheet = std::exchange(_cachedSheet, nullptr))
         {

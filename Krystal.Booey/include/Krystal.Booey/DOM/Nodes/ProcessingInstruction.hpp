@@ -57,7 +57,6 @@ namespace krys::boo
     /// @brief The pseudo-attributes, in order, kept in step with the data.
     /// @see https://dom.spec.whatwg.org/#concept-pi-attribute-map
     List<xml::PseudoAttribute> _attributeMap;
-    DOMString _localHref;
     DOMString _title;
     DOMString _media;
     CachedResourceHandle<CachedCSSStyleSheet> _cachedSheet;
@@ -137,11 +136,6 @@ namespace krys::boo
     void SetCreatedByParser(bool createdByParser) noexcept
     {
       _createdByParser = createdByParser;
-    }
-
-    KRYS_NODISCARD const DOMString &LocalHref() const noexcept
-    {
-      return _localHref;
     }
 
     /// @brief Whether this is an `xml-stylesheet` processing instruction for a CSS sheet.
