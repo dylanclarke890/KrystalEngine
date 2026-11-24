@@ -194,6 +194,30 @@ namespace krys::boo::tests
     }
   }
 
+  TEST_CASE_METHOD(css::tests::ValueFixture, "FrameView: viewport units and the root's scrollbars",
+                   "[Page][FrameView][css-values-4:viewport-relative-lengths]")
+  {
+    // The units leave out the scrollbar the root's overflow always shows (scroll), but not one that comes and
+    // goes with the content (auto), as in Chrome.
+    auto widthWith = [](utf8_stringview overflow)
+    {
+      FrameViewFixture fixture {u8"<!DOCTYPE html><style>html { overflow: " + utf8_string(overflow)
+                                + u8" } body { margin: 0; height: 2000px } #d { width: 100vw }</style>"
+                                  u8"<div id=d></div>"};
+      fixture.Document->UpdateLayout();
+      fixture.Document->UpdateStyleIfNeeded();
+      return Pair {fixture.Width(u8"d"), fixture.Document->DocumentElement()->ClientWidth()};
+    };
+
+    auto [scrollWidth, scrollClientWidth] = widthWith(u8"scroll");
+    REQUIRE(scrollClientWidth < 800);
+    CHECK(scrollWidth == std::to_string(scrollClientWidth) + "px");
+
+    auto [autoWidth, autoClientWidth] = widthWith(u8"auto");
+    REQUIRE(autoClientWidth < 800);
+    CHECK(autoWidth == "800px");
+  }
+
   TEST_CASE_METHOD(css::tests::ValueFixture, "FrameView: viewport units", "[Page][FrameView]")
   {
     SECTION("Viewport units are zero without a view")

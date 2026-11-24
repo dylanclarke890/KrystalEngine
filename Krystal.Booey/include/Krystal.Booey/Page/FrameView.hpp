@@ -848,7 +848,11 @@ namespace krys::boo
 
     void ClearSizeOverrideForCSSDefaultViewportUnits() noexcept;
 
-    KRYS_NODISCARD SizeF SizeForCSSDefaultViewportUnits() const noexcept;
+    /// @brief The size the default viewport units (`vw`, `vh`...) are percentages of.
+    /// @param rootStyle The root element's style, whose `overflow` and `scrollbar-gutter` decide whether a
+    /// scrollbar takes its space from the units; the root's renderer's when null.
+    KRYS_NODISCARD SizeF
+      SizeForCSSDefaultViewportUnits(const RenderStyle *rootStyle = nullptr) const noexcept;
 
     void SetOverrideSizeForCSSSmallViewportUnits(OverrideViewportSize size) noexcept;
 
@@ -856,7 +860,7 @@ namespace krys::boo
 
     void ClearSizeOverrideForCSSSmallViewportUnits() noexcept;
 
-    KRYS_NODISCARD SizeF SizeForCSSSmallViewportUnits() const noexcept;
+    KRYS_NODISCARD SizeF SizeForCSSSmallViewportUnits(const RenderStyle *rootStyle = nullptr) const noexcept;
 
     void SetOverrideSizeForCSSLargeViewportUnits(OverrideViewportSize size) noexcept;
 
@@ -864,9 +868,10 @@ namespace krys::boo
 
     void ClearSizeOverrideForCSSLargeViewportUnits() noexcept;
 
-    KRYS_NODISCARD SizeF SizeForCSSLargeViewportUnits() const noexcept;
+    KRYS_NODISCARD SizeF SizeForCSSLargeViewportUnits(const RenderStyle *rootStyle = nullptr) const noexcept;
 
-    KRYS_NODISCARD SizeF SizeForCSSDynamicViewportUnits() const noexcept;
+    KRYS_NODISCARD SizeF
+      SizeForCSSDynamicViewportUnits(const RenderStyle *rootStyle = nullptr) const noexcept;
 
     /// @brief Scrolls the layers that contain @p renderer so @p absoluteRect is visible as asked.
     /// @return Whether anything was asked to scroll.
@@ -1068,8 +1073,13 @@ namespace krys::boo
                                                            const ScrollAlignment &alignX,
                                                            const ScrollAlignment &alignY) const noexcept;
 
-    KRYS_NODISCARD SizeF
-      CalculateSizeForCSSViewportUnitsOverride(Maybe<OverrideViewportSize> override) const noexcept;
+    KRYS_NODISCARD SizeF CalculateSizeForCSSViewportUnitsOverride(
+      Maybe<OverrideViewportSize> override, const RenderStyle *rootStyle) const noexcept;
+
+    /// @brief The space the viewport units lose to scrollbars: a non-overlay scrollbar's thickness in each
+    /// axis the root (@p rootStyle, or its renderer's) always shows one, or reserves a gutter for.
+    /// @see https://drafts.csswg.org/css-values-4/#viewport-relative-lengths
+    KRYS_NODISCARD SizeF ScrollbarSpaceForCSSViewportUnits(const RenderStyle *rootStyle) const noexcept;
 
   private:
     constexpr static int32 PanScrollIconSize = 16;

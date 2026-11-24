@@ -146,7 +146,7 @@ namespace krys::boo::css
       return {};
     }
 
-    return _renderView->SizeForCSSDefaultViewportUnits() / 100.0f;
+    return _renderView->SizeForCSSDefaultViewportUnits(_rootStyle) / 100.0f;
   }
 
   SizeF ToLengthConversionData::SmallViewportFactor() const noexcept
@@ -161,7 +161,7 @@ namespace krys::boo::css
       return {};
     }
 
-    return _renderView->SizeForCSSSmallViewportUnits() / 100.0f;
+    return _renderView->SizeForCSSSmallViewportUnits(_rootStyle) / 100.0f;
   }
 
   SizeF ToLengthConversionData::LargeViewportFactor() const noexcept
@@ -176,7 +176,7 @@ namespace krys::boo::css
       return {};
     }
 
-    return _renderView->SizeForCSSLargeViewportUnits() / 100.0f;
+    return _renderView->SizeForCSSLargeViewportUnits(_rootStyle) / 100.0f;
   }
 
   SizeF ToLengthConversionData::DynamicViewportFactor() const noexcept
@@ -191,7 +191,7 @@ namespace krys::boo::css
       return {};
     }
 
-    return _renderView->SizeForCSSDynamicViewportUnits() / 100.0f;
+    return _renderView->SizeForCSSDynamicViewportUnits(_rootStyle) / 100.0f;
   }
 
   void ToLengthConversionData::SetUsesContainerUnits() const noexcept

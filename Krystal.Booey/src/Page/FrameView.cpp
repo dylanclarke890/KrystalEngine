@@ -1928,9 +1928,9 @@ namespace krys::boo
     }
   }
 
-  SizeF FrameView::SizeForCSSDefaultViewportUnits() const noexcept
+  SizeF FrameView::SizeForCSSDefaultViewportUnits(const RenderStyle *rootStyle) const noexcept
   {
-    return CalculateSizeForCSSViewportUnitsOverride(_defaultViewportSizeOverride);
+    return CalculateSizeForCSSViewportUnitsOverride(_defaultViewportSizeOverride, rootStyle);
   }
 
   void FrameView::ClearSizeOverrideForCSSSmallViewportUnits() noexcept
@@ -1967,9 +1967,9 @@ namespace krys::boo
     }
   }
 
-  SizeF FrameView::SizeForCSSSmallViewportUnits() const noexcept
+  SizeF FrameView::SizeForCSSSmallViewportUnits(const RenderStyle *rootStyle) const noexcept
   {
-    return CalculateSizeForCSSViewportUnitsOverride(_smallViewportSizeOverride);
+    return CalculateSizeForCSSViewportUnitsOverride(_smallViewportSizeOverride, rootStyle);
   }
 
   void FrameView::ClearSizeOverrideForCSSLargeViewportUnits() noexcept
@@ -2006,13 +2006,37 @@ namespace krys::boo
     }
   }
 
-  SizeF FrameView::SizeForCSSLargeViewportUnits() const noexcept
+  SizeF FrameView::SizeForCSSLargeViewportUnits(const RenderStyle *rootStyle) const noexcept
   {
-    return CalculateSizeForCSSViewportUnitsOverride(_largeViewportSizeOverride);
+    return CalculateSizeForCSSViewportUnitsOverride(_largeViewportSizeOverride, rootStyle);
   }
 
-  SizeF
-    FrameView::CalculateSizeForCSSViewportUnitsOverride(Maybe<OverrideViewportSize> override) const noexcept
+  SizeF FrameView::ScrollbarSpaceForCSSViewportUnits(const RenderStyle *rootStyle) const noexcept
+  {
+    if (!rootStyle)
+    {
+      auto *document = Frame().Document();
+      auto *documentElement = document ? dom::TreeQueries::DocumentElement(*document) : nullptr;
+      auto *rootRenderer = documentElement ? documentElement->Renderer() : nullptr;
+      rootStyle = rootRenderer ? &rootRenderer->Style() : nullptr;
+    }
+    auto &theme = ScrollbarTheme::Theme();
+    if (!rootStyle || theme.UsesOverlayScrollbars())
+    {
+      return {};
+    }
+
+    // A vertical scrollbar takes width, a horizontal one height. The body's overflow, which can give the
+    // viewport its scrollbars, doesn't count.
+    auto thickness = static_cast<float>(
+      theme.ScrollbarThickness(style::ToPlatform<style::ScrollbarWidth> {}(rootStyle->ScrollbarWidth())));
+    bool vertical = rootStyle->OverflowY() == Overflow::Scroll || !rootStyle->ScrollbarGutter().IsAuto();
+    bool horizontal = rootStyle->OverflowX() == Overflow::Scroll;
+    return {vertical ? thickness : 0.f, horizontal ? thickness : 0.f};
+  }
+
+  SizeF FrameView::CalculateSizeForCSSViewportUnitsOverride(Maybe<OverrideViewportSize> override,
+                                                            const RenderStyle *rootStyle) const noexcept
   {
     OverrideViewportSize viewportSize;
 
@@ -2035,17 +2059,16 @@ namespace krys::boo
       return {*viewportSize.Width, *viewportSize.Height};
     }
 
-    // FIXME: the value returned should take into account the value of the overflow
-    // property on the root element.
-    auto visibleContentSizeIncludingScrollbars = VisibleContentRect().Size();
-    viewportSize.Width =
-      viewportSize.Width.value_or(static_cast<float>(visibleContentSizeIncludingScrollbars.Width()));
-    viewportSize.Height =
-      viewportSize.Height.value_or(static_cast<float>(visibleContentSizeIncludingScrollbars.Height()));
+    // https://drafts.csswg.org/css-values-4/#viewport-relative-lengths
+    // The units assume there are no scrollbars, but for those the root always shows or keeps room for.
+    auto visibleContentSizeIncludingScrollbars =
+      SizeF(VisibleContentRectIncludingScrollbars().Size()) - ScrollbarSpaceForCSSViewportUnits(rootStyle);
+    viewportSize.Width = viewportSize.Width.value_or(visibleContentSizeIncludingScrollbars.Width());
+    viewportSize.Height = viewportSize.Height.value_or(visibleContentSizeIncludingScrollbars.Height());
     return {*viewportSize.Width, *viewportSize.Height};
   }
 
-  SizeF FrameView::SizeForCSSDynamicViewportUnits() const noexcept
+  SizeF FrameView::SizeForCSSDynamicViewportUnits(const RenderStyle *rootStyle) const noexcept
   {
     // FIXME: The layout viewport override rect comes first, once there's a layout viewport.
 
@@ -2054,7 +2077,8 @@ namespace krys::boo
       return SizeF(FixedLayoutSize());
     }
 
-    return SizeF(UnobscuredContentRect().Size());
+    return SizeF(VisibleContentRectIncludingScrollbars().Size())
+           - ScrollbarSpaceForCSSViewportUnits(rootStyle);
   }
 
   namespace
